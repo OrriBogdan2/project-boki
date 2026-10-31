@@ -247,6 +247,7 @@ func net_follow(dt: float) -> void:
 	vel = net_vel
 
 ## Called every rendered frame. alpha blends between the last two simulation steps.
+var lod_dt := 0.0       # frame time a far-away entity's visuals skipped (Match renders it less often)
 var _flash_set := -1.0
 var _flash_n := -1
 func render(delta: float, alpha: float) -> void:

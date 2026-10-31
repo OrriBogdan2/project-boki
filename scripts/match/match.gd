@@ -176,6 +176,11 @@ func warm_up() -> void:
 		[ground + Vector3(0, 22.0, 11.0), ground, 40.0, 160.0],
 		[ground + Vector3(0, 60.0, 30.0), ground, 40.0, 300.0],
 	]
+	# the sight-cone texture the toon shaders read once you've landed: set now, not on landing
+	if not _vis_tex_done:
+		_vis_tex_done = true
+		RenderingServer.global_shader_parameter_set("vis_blocks", world.vis_texture())
+		RenderingServer.global_shader_parameter_set("vis_size", Vector2(world.w, world.h))
 	var shown: Array = []
 	for i in 3:
 		var sm: MeshInstance3D = shot_pool[i]
@@ -191,14 +196,30 @@ func warm_up() -> void:
 		fx.flash(at + Vector3(0, 1, 0), Color.WHITE)
 		fx.slash(at + Vector3(0, 0.8, 0), 0.0, 2.0, 1.6, Color.WHITE)
 		var tg := fx.telegraph_circle(at, 1.5, Color(1, 0.3, 0.2))
+		# the muzzle flash light lights whatever stands near a shot: the lit variants compile now too
+		if muzzle_light:
+			muzzle_light.global_position = at + Vector3(0, 1.0, 0)
+			muzzle_light.light_energy = 0.05
 		for k in shown.size():
 			(shown[k] as MeshInstance3D).global_position = at + Vector3(k - 1.0, 1.0, 0)
+		# the ground views draw with the sight cone on, as play does after landing
+		RenderingServer.global_shader_parameter_set("vis_on", 0.0 if v == views[0] else 1.0)
+		RenderingServer.global_shader_parameter_set("vis_focus", at)
 		await get_tree().process_frame
 		await get_tree().process_frame
 		fx.end_telegraph(tg)
 		if not is_inside_tree():
 			return
 	for sm in shown: (sm as MeshInstance3D).visible = false
+	# things that start hidden (aim line and ring, gliders, auras, weapon effects, pickups) compile
+	# too: a tiny stand-in of each mesh and material just in front of the camera, for two frames
+	var proxies := _warm_proxies()
+	if not proxies.is_empty():
+		await get_tree().process_frame
+		await get_tree().process_frame
+		for px in proxies: px.queue_free()
+	if muzzle_light: muzzle_light.light_energy = 0.0
+	RenderingServer.global_shader_parameter_set("vis_on", 0.0)
 	cam.global_transform = keep[0]; cam.fov = keep[1]; cam.far = keep[2]
 	PerfLog.mark("build.warm_up")
 	# the benchmark: a few frames of the opening view
@@ -213,6 +234,83 @@ func warm_up() -> void:
 	if not times.is_empty():
 		Settings.note_benchmark(float(times[times.size() / 2]))
 	PerfLog.skip()
+
+## Stand-ins for every hidden mesh and material in the match, packed into a grid a few metres in
+## front of the camera (see warm_up). Returns them so they can be freed.
+func _warm_proxies() -> Array:
+	var seen := {}
+	var list: Array = []
+	var stack: Array = [self]
+	while not stack.is_empty():
+		var n: Node = stack.pop_back()
+		for ch in n.get_children(): stack.append(ch)
+		if not (n is MeshInstance3D) or (n as MeshInstance3D).mesh == null or (n as Node3D).is_visible_in_tree():
+			continue
+		var mi := n as MeshInstance3D
+		var mats: Array = [mi.material_override]
+		if mi.material_override == null:
+			for si in mi.mesh.get_surface_count(): mats.append(mi.get_active_material(si))
+		var key := [mi.mesh.get_surface_count(), (mi.mesh as ArrayMesh).surface_get_format(0) if mi.mesh is ArrayMesh and mi.mesh.get_surface_count() > 0 else -1, mats, mi.material_overlay]
+		if seen.has(key):
+			continue
+		seen[key] = true
+		list.append(mi)
+		if list.size() >= 400:
+			break
+	var out: Array = []
+	var basis := cam.global_transform.basis
+	var front := cam.global_position - basis.z * 6.0
+	var cols := int(ceil(sqrt(float(list.size()))))
+	for i in list.size():
+		var src: MeshInstance3D = list[i]
+		var px := MeshInstance3D.new()
+		px.mesh = src.mesh
+		px.material_override = src.material_override
+		px.material_overlay = src.material_overlay
+		for si in src.get_surface_override_material_count():
+			px.set_surface_override_material(si, src.get_surface_override_material(si))
+		px.cast_shadow = src.cast_shadow
+		add_child(px)
+		var gx := (float(i % cols) / maxf(1.0, cols - 1) - 0.5) * 2.4
+		var gy := (float(i / cols) / maxf(1.0, cols - 1) - 0.5) * 1.4
+		px.global_transform = Transform3D(basis.scaled(Vector3.ONE * 0.04), front + basis.x * gx + basis.y * gy)
+		out.append(px)
+	return out
+
+## Tooling (--perf-probe): microseconds per section of step(), summed while prof_on.
+static var prof_on := false
+static var prof := {}
+var _prof_t := 0
+func _prof(lbl: String) -> void:
+	if prof_on:
+		var now := Time.get_ticks_usec()
+		if _prof_t > 0 and lbl != "pre": prof[lbl] = int(prof.get(lbl, 0)) + now - _prof_t
+		_prof_t = now
+
+var _render_n := 0
+func _render_now(e: Ent, cf: Vector3, near2: float) -> bool:
+	if e.dead or e.lod_dt > 0.2:
+		return true
+	if Vector2(e.pos.x - cf.x, e.pos.z - cf.z).length_squared() < near2:
+		return true
+	return (_render_n + e.get_instance_id()) % 4 == 0
+
+## Monsters, kin, chests, crates, shrines and loot are each several meshes; from the skyship the
+## whole map is in view and they'd be thousands of draws, a few pixels each. Past a distance (more
+## for big pieces, Settings q("draw") scales it) they're skipped; the play and drop views never reach it.
+const RANGE_SMALL := 80.0
+const RANGE_BIG := 125.0
+static func _draw_range(root: Node) -> void:
+	var k := float(Settings.q("draw"))
+	var stack: Array = [root]
+	while not stack.is_empty():
+		var n: Node = stack.pop_back()
+		for ch in n.get_children(): stack.append(ch)
+		if n is GeometryInstance3D and not (n is Label3D) and (n as GeometryInstance3D).visibility_range_end <= 0.0:
+			var gi := n as GeometryInstance3D
+			var sz := gi.get_aabb().size * gi.global_transform.basis.get_scale().abs() if gi.is_inside_tree() else gi.get_aabb().size
+			gi.visibility_range_end = (RANGE_SMALL if maxf(sz.x, maxf(sz.y, sz.z)) < 0.35 else RANGE_BIG) * k
+			gi.visibility_range_end_margin = 6.0
 
 ## Small parts (eyes, buckles, gems, pebbles) stop casting shadows: every caster is drawn again in each
 ## shadow cascade, and at this camera height their shadows are a pixel or two.
@@ -336,6 +434,10 @@ func _start(o: Dictionary) -> void:
 		spawn_plan.spawn_all()
 	if lairs: lairs.ensure_live()
 	_trim_shadows(self)
+	for list in [mobs, kins, chests, breaks, shrines, wpicks]:
+		for it in list:
+			var nd = it if it is Node else (it as Dictionary).get("node")
+			if nd is Node: _draw_range(nd)
 	await _stage("build.spawns")
 	skydrop = DropSquad.new(self)
 	skydrop.setup()
@@ -829,6 +931,7 @@ func spawn_mob(kk: String, at: Vector3) -> Mob:
 	var mb := Mob.new()
 	mb.init_mob(self, next_id("m"), kk, at, float(T.get("mob", 1.0)) if not T.is_empty() else 1.0)
 	add_child(mb)
+	if time > 0.0: _draw_range(mb)
 	mobs.append(mb)
 	ents_by_id[mb.nid] = mb
 	return mb
@@ -1392,6 +1495,8 @@ func _update_rings(dt: float) -> void:
 				cam.punch(0.05)
 
 ## Breakables are solid: push bodies out, and dashing straight through one smashes it.
+var _break_grid := {}
+var _break_grid_n := -1
 func _collide_breaks() -> void:
 	if breaks.is_empty():
 		return
@@ -1400,8 +1505,24 @@ func _collide_breaks() -> void:
 		if h.hittable() and h.grap.is_empty(): bodies.append(h)
 	for mb in mobs:
 		if not mb.dead: bodies.append(mb)
-	for e in bodies:
+	# breakables never move: bucketed once into 4m cells, each body checks the 3x3 cells round it
+	if _break_grid_n != breaks.size():
+		_break_grid_n = breaks.size()
+		_break_grid.clear()
 		for b in breaks:
+			var key := Vector2i(floori(float(b["pos"].x) / SEP_CELL), floori(float(b["pos"].z) / SEP_CELL))
+			if _break_grid.has(key): (_break_grid[key] as Array).append(b)
+			else: _break_grid[key] = [b]
+	for e in bodies:
+		var ck := Vector2i(floori(e.pos.x / SEP_CELL), floori(e.pos.z / SEP_CELL))
+		var near: Array = []
+		for dz in range(-1, 2):
+			for dx in range(-1, 2):
+				var cell = _break_grid.get(ck + Vector2i(dx, dz))
+				if cell != null: near.append_array(cell)
+		if near.size() > 1:
+			near.sort_custom(func(x, y): return int(x["i"]) < int(y["i"]))
+		for b in near:
 			if b["dead"]:
 				continue
 			var bp: Vector3 = b["pos"]
@@ -2906,11 +3027,25 @@ func _process(delta: float) -> void:
 		var fp := player.model.global_position + Vector3(0, 0.8, 0) if player and player.model and not player.out else Vector3(0, -999, 0)
 		world.wall_mat.set_shader_parameter("focus", fp)
 	for e in hunters: e.render(delta, alpha)
+	# monsters and wild kin well away from the view animate at a quarter rate (each catches up with
+	# the time it skipped); near ones every frame
+	_render_n += 1
+	var cf := cam.focus
+	var near2 := pow(34.0 * maxf(1.0, cam.zoom), 2.0)
 	for e in kins:
-		e.render(delta, alpha)
+		if _render_now(e, cf, near2):
+			e.render(delta + e.lod_dt, alpha)
+			e.lod_dt = 0.0
+		else:
+			e.lod_dt += delta
 		if e.unseen or (e.owner_h and (e.owner_h as Hunter).unseen and e.state == "shoulder"):
 			e.visible = false
-	for e in mobs: e.render(delta, alpha)
+	for e in mobs:
+		if _render_now(e, cf, near2):
+			e.render(delta + e.lod_dt, alpha)
+			e.lod_dt = 0.0
+		else:
+			e.lod_dt += delta
 	if verbs: verbs.render(alpha)
 	for s in shots:
 		if s.has("deco"):
@@ -3367,16 +3502,20 @@ func step(dt: float) -> void:
 		if pending_input["throw"]:
 			pending_input["throw"] = false
 			_player_throw()
+	_prof("pre")
 	for h in hunters:
 		if h.ctrl == "bot" and not h.remote and not h.out and not h.extracted:
 			bot_brain.think(self, h, dt)
+	_prof("bots")
 	if skytrain: skytrain.tick(dt)
 	if opts.has("train_demo") and skytrain and player:
 		_train_demo()
 	if duel:
 		duel.after_think()
 		duel.tick(dt)
+	_prof("train")
 	for h in hunters: h.sim(dt)
+	_prof("hunters")
 	if opts.get("autoplay", false) and int(time * 60.0) % 15 == 0:
 		for h in hunters:
 			var hist: Array = h.get_meta("hist", [])
@@ -3384,19 +3523,26 @@ func step(dt: float) -> void:
 			if hist.size() > 10: hist.pop_front()
 			h.set_meta("hist", hist)
 	if skydrop: skydrop.tick(dt)
+	_prof("drop")
 	for k in kins: k.sim(dt)
+	_prof("kins")
 	for mb in mobs: mb.sim(dt)
+	_prof("mobs")
 	_separate()
 	_collide_breaks()
+	_prof("separate")
 	_update_rings(dt)
 	_update_shots(dt)
+	_prof("shots")
 	_update_pickups(dt)
 	_update_wpicks(dt)
 	_update_gear_fx(dt)
 	_update_pads(dt)
+	_prof("pickups")
 	if not ship.is_empty() and not ship.get("gone", false):
 		_update_ship(dt)
 	_update_interact(dt)
+	_prof("interact")
 	if opts.get("perk_demo", false) and player and time > 0.5 and time - dt <= 0.5:
 		# test: a couple of perks already taken and a choice open
 		player.add_perk("keen"); player.add_perk("keen"); player.add_perk("toughskin")
@@ -3409,14 +3555,18 @@ func step(dt: float) -> void:
 		Life.tick_beacons(self, dt)
 		_watch_death()
 	_update_dex(dt)
+	_prof("life")
 	if exits: exits.tick(dt)
+	_prof("exits")
 	if lairs:
 		lairs.bot_pickups()
 		lairs.tick(dt)
 		if opts.has("lair_demo") and player and not player.dropping:
 			lairs.demo(String(opts["lair_demo"]))
+	_prof("lairs")
 	if truce: truce.tick(dt)
 	if spawn_plan: spawn_plan.tick(dt)
+	_prof("truce_spawns")
 	_update_events()
 	_update_zones(dt)
 	fields.tick(dt)
@@ -3431,6 +3581,7 @@ func step(dt: float) -> void:
 	if opts.get("training", false) and duel == null:
 		_update_training(dt)
 	_update_rules(dt)
+	_prof("rest")
 	if net_on:
 		_net_rev_t -= dt
 		if _net_rev_t <= 0.0:
@@ -3456,6 +3607,7 @@ func _player_throw() -> void:
 	elif k.state == "fainted" and hud:
 		hud.toast("%s is resting" % k.rec.get("name", "Your kin"), Color("a2a8bb"))
 
+const SEP_CELL := 4.0
 func _separate() -> void:
 	var bodies: Array = []
 	for h in hunters:
@@ -3464,9 +3616,28 @@ func _separate() -> void:
 		if not mb.dead: bodies.append(mb)
 	for k in kins:
 		if k.state in ["active", "wild", "dazed", "returning"] and not k.dead: bodies.append(k)
+	# only bodies in the same or a neighbouring 4m cell can touch (radii are well under 2m): a grid
+	# instead of every pair, in the same pair order as before
+	var grid := {}
+	for i in bodies.size():
+		var e: Ent = bodies[i]
+		var key := Vector2i(floori(e.pos.x / SEP_CELL), floori(e.pos.z / SEP_CELL))
+		if grid.has(key): (grid[key] as Array).append(i)
+		else: grid[key] = [i]
 	for i in bodies.size():
 		var a: Ent = bodies[i]
-		for j in range(i + 1, bodies.size()):
+		var ck := Vector2i(floori(a.pos.x / SEP_CELL), floori(a.pos.z / SEP_CELL))
+		var near: Array = []
+		for dz in range(-1, 2):
+			for dx in range(-1, 2):
+				var cell = grid.get(ck + Vector2i(dx, dz))
+				if cell == null: continue
+				for j in cell:
+					if j > i: near.append(j)
+		if near.is_empty():
+			continue
+		near.sort()
+		for j in near:
 			var b: Ent = bodies[j]
 			if absf(a.pos.y - b.pos.y) > 1.0:
 				continue

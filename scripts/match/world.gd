@@ -1089,6 +1089,60 @@ func _walls_key() -> int:
 	for b in _isl_bio: bio_cols.append([b.get("top"), b.get("side"), b.get("leaf")])
 	return hash(["walls", 2, w, h, layout_id, visual_seed() if layout_id != "" else rng.seed, walls.keys(), level, island, bio_cols, Flora.v2()])
 
+## Static props that never move or break (camp supply piles) merged into one mesh per material per
+## 32-tile chunk, instead of a dozen meshes (and outline passes) each. The toon shader's painted part
+## gradient reads the part's height range from UV2 in its own space, so each part's range moves with
+## it; a part tipped off upright (its height would mix with x and z) stays a node of its own.
+func _merge_static(parent: Node3D, roots: Array, label: String) -> void:
+	var groups := {}     # [chunk, material key] -> {mat, st}
+	var loose: Array = []
+	for r in roots:
+		var root := r as Node3D
+		var stack: Array = [[root, root.transform]]
+		while not stack.is_empty():
+			var e: Array = stack.pop_back()
+			var n: Node3D = e[0]
+			var xf: Transform3D = e[1]
+			for ch in n.get_children():
+				if ch is Node3D: stack.append([ch, xf * (ch as Node3D).transform])
+			if not (n is MeshInstance3D) or (n as MeshInstance3D).mesh == null or (n as MeshInstance3D).material_override == null:
+				continue
+			var mi := n as MeshInstance3D
+			if absf(xf.basis.x.y) > 0.001 or absf(xf.basis.z.y) > 0.001 or not (mi.mesh is ArrayMesh):
+				loose.append([mi, xf])
+				continue
+			var key := [Vector2i(int(xf.origin.x) / 32, int(xf.origin.z) / 32), Models._mat_key(mi.material_override)]
+			if not groups.has(key):
+				var st := SurfaceTool.new(); st.begin(Mesh.PRIMITIVE_TRIANGLES)
+				groups[key] = {"mat": mi.material_override, "st": st}
+			var am := mi.mesh as ArrayMesh
+			var sy := xf.basis.y.y
+			for si in am.get_surface_count():
+				var arrs := am.surface_get_arrays(si)
+				var uv2 = arrs[Mesh.ARRAY_TEX_UV2]
+				if uv2 is PackedVector2Array:
+					var nu := PackedVector2Array(uv2)
+					for k in nu.size(): nu[k] = Vector2(nu[k].x * sy + xf.origin.y, nu[k].y * sy + xf.origin.y)
+					arrs[Mesh.ARRAY_TEX_UV2] = nu
+				var tmp := ArrayMesh.new()
+				tmp.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrs)
+				(groups[key]["st"] as SurfaceTool).append_from(tmp, 0, xf)
+	for key in groups:
+		var mi := MeshInstance3D.new()
+		mi.mesh = (groups[key]["st"] as SurfaceTool).commit()
+		mi.material_override = groups[key]["mat"]
+		mi.name = "%s_%d_%d" % [label, key[0].x, key[0].y]
+		parent.add_child(mi)
+	for e in loose:
+		var src: MeshInstance3D = e[0]
+		var mi := MeshInstance3D.new()
+		mi.mesh = src.mesh; mi.material_override = src.material_override
+		mi.transform = e[1]
+		mi.name = label + "Part"
+		parent.add_child(mi)
+	for r in roots:
+		(r as Node).free()
+
 ## How far from the camera (m) each kind of scatter draws, at High (Settings q("draw") scales it):
 ## grass, flowers, pebbles and undergrowth fade out of the high drop and skyship views, where they'd
 ## be a few pixels each; tall grass (cover you can hide in) reaches further; trees, boulders and
@@ -1148,6 +1202,9 @@ func _chunked(parent: Node3D, items: Array, mesh: Mesh, mat: Material, label: St
 		"big":
 			if draw_k < 0.999: vis_end = DRAW_BIG_LOW * draw_k
 			mesh = with_lods(mesh)
+			# trees and boulders come in many styles and shapes, each its own batch: bigger chunks
+			# mean far fewer draws (and shadow draws) for a few more off-screen instances
+			chunk = maxi(chunk, 32)
 	var by := {}
 	for it in items:
 		var o: Vector3 = (it[0] as Transform3D).origin
@@ -1279,6 +1336,9 @@ func _assign_regions() -> void:
 		islands[ii]["region"] = reg
 		_isl_bio.append(b)
 
+func _bio_of_island(ii: int) -> Dictionary:
+	return _isl_bio[ii] if ii >= 0 and ii < _isl_bio.size() else biome
+
 func _bio(i: int) -> Dictionary:
 	var ii := island[i] if i >= 0 and i < island.size() else -1
 	return _isl_bio[ii] if ii >= 0 and ii < _isl_bio.size() else biome
@@ -1337,6 +1397,7 @@ func _decorate() -> void:
 	var deco := Node3D.new(); deco.name = "Deco"; add_child(deco)
 	_deco = deco
 	var packed := {}      # imported models, batched: group key -> {mesh, mat, items}
+	var camps: Array = []     # camp supply piles: merged into a few meshes per chunk below
 	for z in h:
 		for x in w:
 			var i := idx(x, z)
@@ -1354,7 +1415,7 @@ func _decorate() -> void:
 				var cp := PropSculpt.camp(drng)
 				cp.position = Vector3(x + 0.5, y, z + 0.5)
 				cp.rotation.y = drng.randf() * TAU
-				deco.add_child(cp)
+				camps.append(cp)
 				continue
 			if _pack_prop(packed, what, i, Vector3(x + 0.5, y, z + 0.5), drng):
 				if what in ["tree", "rock"]:
@@ -1367,6 +1428,7 @@ func _decorate() -> void:
 				n = Models.rock(drng, drng.randf_range(0.9, 1.25))
 			n.position = Vector3(x + 0.5, y, z + 0.5)
 			deco.add_child(n)
+	_merge_static(deco, camps, "Camps")
 	if Flora.on():
 		_patches(packed, drng)
 	if Assets.on() or Flora.on():
