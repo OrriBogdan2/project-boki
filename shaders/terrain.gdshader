@@ -20,6 +20,7 @@ uniform sampler2D biome_tex : filter_nearest, repeat_disable;
 uniform sampler2D path_tex : filter_linear, repeat_disable;
 uniform bool use_biome = false;
 uniform float detail = 1.0;
+uniform float paint2 = 1.0;     // the second art pass's larger painted structure (0 = off, --art1)
 #include "res://shaders/noise.gdshaderinc"
 #include "res://shaders/vis.gdshaderinc"
 varying vec3 wpos;
@@ -46,7 +47,8 @@ float contact(vec3 p) {
 		float h2 = hgt(p.xz + d * 1.15);
 		occ += clamp((h1 - p.y - 0.05) * 1.6, 0.0, 1.0) * 0.6 + clamp((h2 - p.y - 0.05) * 1.1, 0.0, 1.0) * 0.4;
 	}
-	return clamp(occ / 3.2, 0.0, 1.0);
+	occ = occ / 3.2;
+	return clamp(occ, 0.0, 1.0);
 }
 
 vec3 ground(vec3 c) {
@@ -85,6 +87,22 @@ vec3 ground_rich(vec3 c, float n_in, out vec3 emit) {
 	float sw = fbm3(wpos.xz * 0.09 + 11.0);
 	c = mix(c, c * vec3(1.1, 1.08, 0.88), smoothstep(0.55, 0.8, sw) * 0.6);
 	c = mix(c, c * vec3(0.84, 0.9, 1.06), smoothstep(0.42, 0.15, sw) * 0.55);
+	if (paint2 > 0.0) {
+		// big painted value structure across an island: soft pools of warm light, broad shaded
+		// zones, and a gentle drift of hue (warmer one way, cooler the other) so no island reads
+		// as one flat colour from the match camera
+		float pool = fbm3(wpos.xz * 0.045 + 31.0);
+		float lit = smoothstep(0.52, 0.78, pool);
+		float dim = smoothstep(0.42, 0.18, pool);
+		c = mix(c, c * vec3(1.16, 1.12, 0.94) + vec3(0.025, 0.02, 0.0), lit * 0.55 * paint2);
+		c = mix(c, c * vec3(0.76, 0.8, 0.94), dim * 0.5 * paint2);
+		float hue = fbm3(wpos.xz * 0.03 - 17.0);
+		c = mix(c, c * vec3(1.06, 1.02, 0.9), smoothstep(0.55, 0.8, hue) * 0.5 * paint2);
+		c = mix(c, c * vec3(0.92, 1.0, 1.08), smoothstep(0.45, 0.2, hue) * 0.5 * paint2);
+		// dappled mid-size brush dabs
+		float dab = vnoise(wpos.xz * 0.55 + vec2(vnoise(wpos.xz * 0.2) * 2.0));
+		c *= 1.0 + (dab - 0.5) * 0.1 * paint2;
+	}
 	float pick;
 	if (b == 0) {
 		// meadow: clover dabs and the odd tiny flower
@@ -117,9 +135,9 @@ vec3 ground_rich(vec3 c, float n_in, out vec3 emit) {
 		c = mix(c, vec3(0.42, 0.38, 0.38), ash * 0.45);
 		float cn = vnoise(wpos.xz * 0.75 + vec2(vnoise(wpos.xz * 2.0) * 0.6));
 		float crack = 1.0 - smoothstep(0.0, 0.03, abs(cn - 0.5));
-		crack *= smoothstep(0.45, 0.7, fbm3(wpos.xz * 0.2 + 9.0)) * (1.0 - path);
-		c = mix(c, vec3(0.16, 0.08, 0.06), crack * 0.8);
-		emit = vec3(1.0, 0.42, 0.12) * crack * (0.75 + 0.25 * sin(TIME * 1.3 + wpos.x * 0.7 + wpos.z * 0.4));
+		crack *= smoothstep(0.45 + 0.1 * paint2, 0.7 + 0.08 * paint2, fbm3(wpos.xz * 0.2 + 9.0)) * (1.0 - path);
+		c = mix(c, vec3(0.16, 0.08, 0.06), crack * (0.8 - 0.25 * paint2));
+		emit = vec3(1.0, 0.42, 0.12) * crack * (0.75 + 0.25 * sin(TIME * 1.3 + wpos.x * 0.7 + wpos.z * 0.4)) * (1.0 - 0.4 * paint2);
 		float cin = cell_dot(wpos.xz, 4.0, 0.08, 4.0, pick) * step(0.82, pick);
 		c = mix(c, vec3(0.2, 0.14, 0.13), cin * near_k);
 	} else if (b == 4) {
@@ -140,7 +158,9 @@ vec3 ground_rich(vec3 c, float n_in, out vec3 emit) {
 		float seam = 1.0 - smoothstep(0.02, 0.07, f2 - f1);
 		float tone = h21(cell);
 		vec3 slate = mix(vec3(0.42, 0.44, 0.58), vec3(0.56, 0.58, 0.72), tone);
-		c = mix(c, slate * (1.0 - seam * 0.45), sl * 0.7 * (1.0 - path));
+		// (second pass: fewer, softer slabs, blended toward the grass so they don't buzz)
+		slate = mix(slate, c, 0.3 * paint2);
+		c = mix(c, slate * (1.0 - seam * (0.45 - 0.22 * paint2)), sl * (0.7 - 0.3 * paint2) * (1.0 - path));
 	} else if (b == 5) {
 		// gloom: faint veins of violet light under the dark ground
 		float vn = vnoise(wpos.xz * 0.6 + vec2(vnoise(wpos.xz * 1.7)) * 0.8);
@@ -165,7 +185,8 @@ vec3 ground_rich(vec3 c, float n_in, out vec3 emit) {
 		float a = float(i) * 1.5708;
 		drop = max(drop, clamp((wpos.y - hgt(wpos.xz + vec2(cos(a), sin(a)) * 0.42)) * 1.5, 0.0, 1.0));
 	}
-	c *= 1.0 + drop * 0.16;
+	c *= 1.0 + drop * (0.16 + 0.05 * paint2);
+	c = mix(c, c + vec3(0.04, 0.035, 0.015), drop * paint2);
 	return c;
 }
 
@@ -185,6 +206,17 @@ vec3 rock(vec3 c) {
 	c *= 0.86 + strata * 0.14;
 	float cr = vnoise(vec2(along * 3.4, wpos.y * 0.6));
 	c *= 1.0 - smoothstep(0.86, 0.96, cr) * 0.35;
+	if (paint2 > 0.0) {
+		// painted strata: alternating warm and cool bands, each lit on its upper edge, and the
+		// face darkening from the lit lip down to its foot
+		float lay = floor(y);
+		float warm = h21(vec2(lay, 11.0));
+		c *= mix(vec3(0.94, 0.96, 1.04), vec3(1.06, 1.02, 0.94), warm) ;
+		c *= 1.0 + smoothstep(0.78, 0.95, band) * 0.1 * paint2;
+		// (by height within the terrace step, not from the tile map, so curved cliffs stay smooth)
+		float depth = 1.0 - fract(wpos.y / 0.8 + 0.001);
+		c *= mix(1.06, 0.8, depth * paint2);
+	}
 	return c;
 }
 
@@ -238,12 +270,22 @@ void fragment() {
 		float ledge = smoothstep(0.0, 0.07, band) * (1.0 - smoothstep(0.8, 1.0, band));
 		c *= 0.8 + ledge * 0.2 + h21(vec2(floor(y), 7.0)) * 0.08;
 		c *= 0.92 + vnoise(wpos.xz * 1.3 + wpos.yy * 0.7) * 0.14;
+		if (paint2 > 0.0) {
+			// painted underside: each ledge lit on its upper lip, warm bounce light just under the
+			// rim, the cone cooling and darkening as it tapers away into the haze
+			c *= 1.0 + smoothstep(0.75, 0.95, band) * 0.14 * paint2;
+			float dn = clamp((hgt(wpos.xz) - wpos.y) / 9.0, 0.0, 1.0);
+			c = mix(c * vec3(1.1, 1.04, 0.96), c * vec3(0.7, 0.72, 0.9), dn * paint2);
+			c = mix(c, c * vec3(0.8, 0.92, 0.85), smoothstep(0.6, 0.8, vnoise(wpos.xz * 0.8 + wpos.yy * 0.4)) * 0.3 * paint2);
+		}
 	} else if (st == 5) {
 		// cliff caps: the grass or stone lip along a rim
 		c *= 0.94 + vnoise(vec2(along_of() * 4.0, wpos.y * 9.0)) * 0.12;
 	} else {
-		// carved stone (stairs)
-		c *= 0.93 + vnoise(wpos.xz * 5.0 + wpos.yy * 3.0) * 0.12;
+		// carved stone (stairs): broad value shifts, chisel strokes across the faces, fine grain
+		c *= 0.88 + fbm3(wpos.xz * 1.2 + wpos.yy * 0.8) * 0.22;
+		c *= 0.93 + vnoise(vec2(dot(wpos.xz, vec2(0.7, 0.7)) * 3.5, wpos.y * 7.0)) * 0.12;
+		c *= 0.96 + vnoise(wpos.xz * 9.0 + wpos.yy * 6.0) * 0.07;
 	}
 	float fog = vis_fog(wpos);
 	c = vis_apply(c, fog);

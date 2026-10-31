@@ -491,6 +491,9 @@ func _stairs(x: int, z: int, dir: Vector2i, y: float) -> void:
 		cheeks.append(not same)
 	var s0 := 0.13 if cheeks[0] else 0.0
 	var s1 := 0.87 if cheeks[1] else 1.0
+	if Flora.v2():
+		_stairs_cut(x, z, dir, y, to_world, upv, side_a, cheeks, s0, s1, bio)
+		return
 	for k in n:
 		var u0 := float(k) / n; var u1 := float(k + 1) / n
 		var hgt := LEVEL * float(k + 1) / n
@@ -527,6 +530,125 @@ func _stairs(x: int, z: int, dir: Vector2i, y: float) -> void:
 		_quad_n(outer[0], outer[1], outer[2], outer[3], outn, outn, outn, outn, cs.darkened(0.3), cs.darkened(0.3), cs, cs, S_STONE, outn)
 		_quad_n(inner[0], inner[1], inner[2], inner[3], -outn, -outn, -outn, -outn, cs.darkened(0.35), cs.darkened(0.35), cs.darkened(0.05), cs.darkened(0.05), S_STONE, -outn)
 		_quad_n(A0, B0, TB0, TA0, -upv, -upv, -upv, -upv, cs.darkened(0.3), cs.darkened(0.3), cs.darkened(0.1), cs.darkened(0.1), S_STONE, -upv)
+
+## The second art pass's flight: each step laid from two or three cut stones with chiselled, worn
+## edges and dark joints, set a little unevenly, moss creeping in at the sides (snow, ash or petals
+## by biome), and side walls built of chunky blocks with a bevelled coping.
+func _stairs_cut(x: int, z: int, dir: Vector2i, y: float, to_world: Callable, upv: Vector3, side_a: Vector3, cheeks: Array, s0: float, s1: float, bio: Dictionary) -> void:
+	var n := 4
+	var rr := RandomNumberGenerator.new(); rr.seed = hash(Vector2i(x, z))
+	var st := Flora.style_ok(W.style_at(z * w + x))
+	var stone := Color("a39a8a").lerp(Color(bio["side"]), 0.28).lerp(Color(bio["top"]), 0.06)
+	var moss := Color(bio["top"]).lerp(Color("4f8a3a"), 0.4)
+	match st:
+		"frost": stone = Color("98a0b0").lerp(Color(bio["side"]), 0.2); moss = Color("eef4ff")
+		"ember": stone = Color("857064").lerp(Color(bio["side"]), 0.2); moss = Color("4a3e3c")
+		"storm": stone = Color("868ea0").lerp(Color(bio["side"]), 0.25); moss = Color(bio["top"]).lerp(Color("3f7a6a"), 0.45)
+		"gloom": stone = Color("7e7590").lerp(Color(bio["side"]), 0.25); moss = Color(bio["top"]).lerp(Color("5a4a7a"), 0.35)
+		"bloom": moss = Color(bio["top"]).lerp(Color("5f9a48"), 0.4)
+	var joint := stone.darkened(0.6).lerp(Color("2a2430"), 0.3)
+	for k in n:
+		var u0 := float(k) / n; var u1 := float(k + 1) / n
+		var hgt := LEVEL * float(k + 1) / n
+		var nose := 0.04
+		# the dark bed the stones sit in (shows as the joints between them) and the riser below
+		_quad_n(to_world.call(u0 - 0.01, s0, hgt - 0.05), to_world.call(u1, s0, hgt - 0.05), to_world.call(u1, s1, hgt - 0.05), to_world.call(u0 - 0.01, s1, hgt - 0.05),
+			Vector3.UP, Vector3.UP, Vector3.UP, Vector3.UP, joint, joint, joint, joint, S_STONE, Vector3.UP)
+		var rc := stone.darkened(0.42)
+		_quad_n(to_world.call(u0, s0, hgt - LEVEL / n), to_world.call(u0, s1, hgt - LEVEL / n), to_world.call(u0, s1, hgt - 0.05), to_world.call(u0, s0, hgt - 0.05),
+			-upv, -upv, -upv, -upv, rc.darkened(0.15), rc.darkened(0.15), rc, rc, S_STONE, -upv)
+		# the stones of this step
+		var cuts: Array = [s0]
+		var at := s0 + rr.randf_range(0.25, 0.45)
+		while at < s1 - 0.2:
+			cuts.append(at); at += rr.randf_range(0.28, 0.5)
+		cuts.append(s1)
+		for q in cuts.size() - 1:
+			var a0: float = float(cuts[q]) + (0.012 if q > 0 else 0.0)
+			var a1: float = float(cuts[q + 1]) - (0.012 if q < cuts.size() - 2 else 0.0)
+			var top := hgt + rr.randf_range(-0.015, 0.02)
+			var c := stone.lightened(rr.randf_range(-0.05, 0.08))
+			if rr.randf() < 0.15: c = c.lerp(Color("c8a882"), 0.15)
+			var mo := [0.0, 0.0]     # moss on the stone's two ends (a0 side, a1 side)
+			if q == 0 and cheeks[0]: mo[0] = rr.randf_range(0.4, 0.85)
+			if q == cuts.size() - 2 and cheeks[1]: mo[1] = rr.randf_range(0.4, 0.85)
+			if rr.randf() < 0.25: mo[rr.randi_range(0, 1)] = maxf(mo[0], rr.randf_range(0.3, 0.6))
+			_step_stone(to_world, upv, u0 - nose + rr.randf_range(-0.01, 0.015), u1, a0, a1, hgt - 0.06, top, c, moss, mo, rr)
+	# side walls: a sloped parapet of two chunky blocks along each open end, with a coping on top
+	for q in 2:
+		if not cheeks[q]:
+			continue
+		var sa: float = 0.0 if q == 0 else 0.87
+		var sb: float = 0.13 if q == 0 else 1.0
+		var outn: Vector3 = -side_a if q == 0 else side_a
+		var cs := stone.darkened(0.06)
+		for part in 2:
+			var ua := -0.02 + part * 0.51
+			var ub := 0.49 + part * 0.51
+			var ta := lerpf(0.32, LEVEL + 0.12, (ua + 0.02) / 1.02)
+			var tb := lerpf(0.32, LEVEL + 0.12, (ub + 0.02) / 1.02)
+			var lo := -0.05
+			var A0: Vector3 = to_world.call(ua, sa, lo); var A1: Vector3 = to_world.call(ub, sa, lo)
+			var B0: Vector3 = to_world.call(ua, sb, lo); var B1: Vector3 = to_world.call(ub, sb, lo)
+			var TA0: Vector3 = to_world.call(ua, sa, ta); var TA1: Vector3 = to_world.call(ub, sa, tb)
+			var TB0: Vector3 = to_world.call(ua, sb, ta); var TB1: Vector3 = to_world.call(ub, sb, tb)
+			var bc := cs.lightened(rr.randf_range(-0.04, 0.05))
+			var outer := [A0, A1, TA1, TA0] if q == 0 else [B0, B1, TB1, TB0]
+			var inner := [B0, B1, TB1, TB0] if q == 0 else [A0, A1, TA1, TA0]
+			_quad_n(outer[0], outer[1], outer[2], outer[3], outn, outn, outn, outn, bc.darkened(0.42), bc.darkened(0.42), bc, bc, S_STONE, outn)
+			_quad_n(inner[0], inner[1], inner[2], inner[3], -outn, -outn, -outn, -outn, bc.darkened(0.45), bc.darkened(0.45), bc.darkened(0.08), bc.darkened(0.08), S_STONE, -outn)
+			_quad_n(A0, B0, TB0, TA0, -upv, -upv, -upv, -upv, bc.darkened(0.36), bc.darkened(0.36), bc.darkened(0.1), bc.darkened(0.1), S_STONE, -upv)
+			# the coping: a bevelled cap a touch wider than the wall, mossy on top
+			var e := 0.025
+			var CA0: Vector3 = to_world.call(ua + 0.01, sa - e, ta); var CA1: Vector3 = to_world.call(ub - 0.01, sa - e, tb)
+			var CB0: Vector3 = to_world.call(ua + 0.01, sb + e, ta); var CB1: Vector3 = to_world.call(ub - 0.01, sb + e, tb)
+			var lift := Vector3(0, 0.07, 0)
+			var bev := 0.03
+			var cap := bc.lightened(0.14)
+			var mtop: Color = cap.lerp(moss, rr.randf_range(0.35, 0.75)) if st != "ember" or rr.randf() < 0.5 else cap
+			var ramp := (CA1 - CA0).normalized().cross(outn).normalized()
+			if ramp.y < 0.0: ramp = -ramp
+			var inA0: Vector3 = to_world.call(ua + 0.01 + bev, sa - e + bev, ta) + lift; var inA1: Vector3 = to_world.call(ub - 0.01 - bev, sa - e + bev, tb) + lift
+			var inB0: Vector3 = to_world.call(ua + 0.01 + bev, sb + e - bev, ta) + lift; var inB1: Vector3 = to_world.call(ub - 0.01 - bev, sb + e - bev, tb) + lift
+			_quad_n(inA0, inA1, inB1, inB0, ramp, ramp, ramp, ramp, mtop, mtop, mtop, mtop, S_STONE, ramp)
+			var sideA := lift - Vector3(0, bev, 0)
+			for ed in [[CA0, CA1, inA1, inA0, -outn if q == 1 else outn], [CB0, CB1, inB1, inB0, outn if q == 1 else -outn]]:
+				var nn: Vector3 = ((ed[4] as Vector3) + ramp).normalized()
+				_quad_n(ed[0], ed[1], (ed[1] as Vector3) + sideA, (ed[0] as Vector3) + sideA, ed[4], ed[4], ed[4], ed[4], cap.darkened(0.12), cap.darkened(0.12), cap, cap, S_STONE, ed[4])
+				_quad_n((ed[0] as Vector3) + sideA, (ed[1] as Vector3) + sideA, ed[2], ed[3], nn, nn, nn, nn, cap.lightened(0.1), cap.lightened(0.1), cap.lightened(0.12), cap.lightened(0.12), S_STONE, nn)
+			var fr0: Vector3 = to_world.call(ua + 0.01, sa - e, ta); var fr1: Vector3 = to_world.call(ua + 0.01, sb + e, ta)
+			_quad_n(fr0, fr1, fr1 + sideA, fr0 + sideA, -upv, -upv, -upv, -upv, cap.darkened(0.2), cap.darkened(0.2), cap.darkened(0.08), cap.darkened(0.08), S_STONE, -upv)
+
+## One cut stone of a step, from u0 (its nosing) to u1 and a0 to a1 across the flight, its top at
+## `top` with chiselled edges (lighter bevels on the nosing and the ends), `mo` moss on each end.
+func _step_stone(to_world: Callable, upv: Vector3, u0: float, u1: float, a0: float, a1: float, bot: float, top: float, c: Color, moss: Color, mo: Array, rr: RandomNumberGenerator) -> void:
+	var b := 0.028
+	var tl := c.lightened(0.06)
+	var edge := c.lightened(0.16)
+	var t0 := tl.lerp(moss, float(mo[0])); var t1 := tl.lerp(moss, float(mo[1]))
+	var tilt := rr.randf_range(-0.012, 0.012)
+	var ya := top + tilt; var yb := top - tilt
+	# top, inset by the bevel on the nosing and both ends
+	_quad_n(to_world.call(u0 + b, a0 + b, ya), to_world.call(u1, a0 + b, ya), to_world.call(u1, a1 - b, yb), to_world.call(u0 + b, a1 - b, yb),
+		Vector3.UP, Vector3.UP, Vector3.UP, Vector3.UP, t0, t0, t1, t1, S_STONE, Vector3.UP)
+	# nosing bevel and the front face
+	var fn := (-upv + Vector3.UP).normalized()
+	var e0 := edge.lerp(moss, float(mo[0]) * 0.6); var e1 := edge.lerp(moss, float(mo[1]) * 0.6)
+	_quad_n(to_world.call(u0, a0 + b, ya - b), to_world.call(u0, a1 - b, yb - b), to_world.call(u0 + b, a1 - b, yb), to_world.call(u0 + b, a0 + b, ya),
+		fn, fn, fn, fn, e0, e1, e1, e0, S_STONE, fn)
+	_quad_n(to_world.call(u0, a0 + b * 0.5, bot), to_world.call(u0, a1 - b * 0.5, bot), to_world.call(u0, a1 - b, yb - b), to_world.call(u0, a0 + b, ya - b),
+		-upv, -upv, -upv, -upv, c.darkened(0.3), c.darkened(0.3), c.darkened(0.04), c.darkened(0.04), S_STONE, -upv)
+	# the two ends (seen in the joints) with their bevels
+	var sa := to_world.call(0.0, 0.0, 0.0) as Vector3
+	var sd: Vector3 = (to_world.call(0.0, 1.0, 0.0) as Vector3) - sa
+	sd.y = 0.0; sd = sd.normalized()
+	for en in [[a0, b, -sd, ya, e0], [a1, -b, sd, yb, e1]]:
+		var aa: float = en[0]; var bb: float = en[1]; var nn: Vector3 = en[2]; var yy: float = en[3]
+		_quad_n(to_world.call(u0, aa, bot), to_world.call(u1, aa, bot), to_world.call(u1, aa, yy - b), to_world.call(u0, aa, yy - b),
+			nn, nn, nn, nn, c.darkened(0.4), c.darkened(0.4), c.darkened(0.1), c.darkened(0.1), S_STONE, nn)
+		var bn := (nn + Vector3.UP).normalized()
+		_quad_n(to_world.call(u0 + b, aa, yy - b), to_world.call(u1, aa, yy - b), to_world.call(u1, aa + bb, yy), to_world.call(u0 + b, aa + bb, yy),
+			bn, bn, bn, bn, (en[4] as Color).darkened(0.05), (en[4] as Color).darkened(0.05), en[4], en[4], S_STONE, bn)
 
 # ------------------------------------------------------------------ emit
 ## One triangle; flips the winding so it faces along n (Godot's front faces are clockwise).
