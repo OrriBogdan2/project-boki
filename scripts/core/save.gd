@@ -105,7 +105,7 @@ func new_kin(species: String, kname := "") -> Dictionary:
 	var rec := {
 		"uid": "k%d%d" % [Time.get_ticks_usec() % 1000000, randi() % 1000],
 		"species": species,
-		"name": kname if kname != "" else Data.KIN_NAMES.pick_random(),
+		"name": kname if kname != "" else Data.default_kin_name(species),
 		"level": 1, "xp": 0,
 		"traits": tr,
 		"trust": 35.0,

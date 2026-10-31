@@ -4813,7 +4813,7 @@ func _hatch_incubator(id := "") -> void:
 ## A new kin out of an egg: into the roster, then the hatch in stages, the reveal and naming.
 func _hatch_play(baby: Dictionary, rare: bool, boss: String, at: Vector3, hide: Node3D) -> void:
 	# it's yours from the moment it hatches; the naming card only renames it
-	baby["name"] = Data.KIN_NAMES.pick_random()
+	baby["name"] = Data.default_kin_name(String(baby["species"]))
 	if rare:
 		Save.remember(baby, "born", "hatched from a Rare Egg you carried home from %s" % String(Data.MOBS.get(boss, {}).get("name", "a boss's lair")), 2.0)
 		Progress.add("rare_hatched")
@@ -4881,7 +4881,7 @@ func _name_baby(baby: Dictionary) -> void:
 		bl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		v.add_child(bl)
 	var row := UI.hbox(8)
-	var ne := LineEdit.new(); ne.text = Data.KIN_NAMES.pick_random(); ne.max_length = 14; ne.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var ne := LineEdit.new(); ne.text = String(baby["name"]); ne.max_length = 14; ne.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(ne)
 	v.add_child(row)
 	var picks := UI.hbox(6)
