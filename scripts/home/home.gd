@@ -785,8 +785,9 @@ var safe_at := Vector3(38.0, 0, 34.5)
 var glider_node: MeshInstance3D = null
 const HOME_ZOOM := 1.2         # the camera on arriving home: midway between close (0.8) and the widest the wheel goes (1.6)
 const MANTLE := 1.5            # ledges this far above your feet pop you up when you jump at them
-const MANTLE_ABYSS := 12.0     # falling past an island's cliff, you can still catch its edge from this far below
-const FALL_RESPAWN := -14.0
+const MANTLE_ABYSS := Hunter.MANTLE_REACH_ABYSS   # falling past an island's side, you catch its edge from this far below
+const FALL_RESPAWN := -40.0    # (a backstop: the abyss takes you a few metres under the island, World.abyss_floor)
+var climb := {}                # pulling yourself up over an island's rim from below: {from, to, lip, t, dur, split}
 
 ## Your class's dodge with the match's numbers: its charges and recharge (Hunter.max_dashes and
 ## dash_regen at rank 1), and the class's long dash (ex_dist, ex_time, ex_cd; Hunter.EX_DASH_CD).
@@ -861,6 +862,9 @@ func _ground_h(x: float, z: float) -> float:
 	return world.ground_at(x, z)
 
 func _move_player(d: float) -> void:
+	if not climb.is_empty():
+		_climb_step(d)
+		return
 	var mv := Vector2.ZERO
 	var can_act := panel_open == "" and not Overlay.is_open() and not chat_open and train.is_empty()
 	if can_act:
@@ -942,7 +946,7 @@ func _move_player(d: float) -> void:
 			pvy = 0.0
 			gliding = false
 			Sfx.step(null, -16.0)
-		elif py < FALL_RESPAWN:
+		elif py < FALL_RESPAWN or (gh <= World.VOID + 1.0 and py < world.abyss_floor(ppos.x, ppos.z) - (Hunter.ABYSS_GLIDE_ROOM if gliding else 0.0)):
 			_respawn_safe()
 	else:
 		py = gh
@@ -1150,28 +1154,75 @@ func _mantle(x: float, z: float, top: float, air: bool) -> bool:
 	var reach := MANTLE_ABYSS if py < -0.2 else MANTLE
 	if top - py > reach:
 		return false
+	# touching an island's rim with your side, from below: there's no ground under (x, z)
+	var side := not world.is_block(x, z) and _ground_h(x, z) <= World.VOID + 1.0
+	if world.is_sheer(int(floor(x)), int(floor(z))) and py < top - 0.6:
+		return false      # a smooth sheer rim has nothing to hold: you slide down it
 	# the spot on top: step on from where you were heading until the ground there is the ledge
 	var dv := Vector2(x - ppos.x, z - ppos.z)
 	if dv.length() < 0.0001:
 		return false
 	dv = dv.normalized()
-	for k in 9:
+	var to := Vector3.INF
+	for k in 17:
 		var q := Vector2(x, z) + dv * (0.1 * k)
 		var g := _ground_h(q.x, q.y)
 		if world.is_block(q.x, q.y) or g <= World.VOID + 1.0 or g < top - 0.05 or g - py > reach:
 			continue
 		if world.occupy(q.x, q.y, 0.38, g, false) != 0.0:
 			continue
-		ppos.x = q.x; ppos.z = q.y
-		py = g
+		to = Vector3(q.x, g, q.y)
+		break
+	if to == Vector3.INF:
+		return false
+	if to.y - py > 0.6 or side:
+		# a real pull-up (or caught from below): straight up the face, then over the lip, as in a match
+		var up_t := clampf((to.y - py) / Hunter.MANTLE_RISE, 0.16, 0.85)
+		climb = {"from": Vector3(ppos.x, py, ppos.z), "to": to, "lip": to.y + 0.14, "t": 0.0, "dur": up_t + 0.2, "split": up_t / (up_t + 0.2)}
 		pvy = 0.0
 		gliding = false
-		Sfx.play("land", null, -10.0)
-		return true
-	return false
+		dash_t = 0.0
+		Sfx.play("grab", null, -8.0, 0.1, 1.2)
+		if fx: fx.burst(ppos + Vector3(0, py + 0.6, 0), Color("cfeaff"), 6, 2.0, 0.3, 0.0)
+		return false
+	ppos.x = to.x; ppos.z = to.z
+	py = to.y
+	pvy = 0.0
+	gliding = false
+	Sfx.play("land", null, -10.0)
+	return true
+
+## The pull-up over a rim (the match's mantle): straight up the face, then forward over the lip.
+func _climb_step(d: float) -> void:
+	climb["t"] = float(climb["t"]) + d
+	var k := clampf(float(climb["t"]) / float(climb["dur"]), 0.0, 1.0)
+	var a: Vector3 = climb["from"]; var b: Vector3 = climb["to"]
+	var sp: float = climb["split"]; var lip: float = climb["lip"]
+	var p: Vector3
+	if k < sp:
+		var u := k / maxf(0.001, sp)
+		p = Vector3(a.x, lerpf(a.y, lip, 1.0 - (1.0 - u) * (1.0 - u)), a.z)
+	else:
+		var u2 := (k - sp) / maxf(0.001, 1.0 - sp)
+		var e2 := u2 * u2 * (3.0 - 2.0 * u2)
+		p = Vector3(lerpf(a.x, b.x, e2), lerpf(lip, b.y, e2) + 0.22 * sin(u2 * PI), lerpf(a.z, b.z, e2))
+	ppos = Vector3(p.x, 0, p.z)
+	py = p.y
+	pvel = Vector3.ZERO
+	player.position = ppos + Vector3(0, py, 0)
+	if p_anim == null or p_anim.model != player:
+		p_anim = HunterAnim.new(player)
+	p_anim.update(d, {"vel": Vector3.ZERO, "face": pface, "grounded": false, "gliding": false, "mantle": k, "fired": 99.0})
+	if k >= 1.0:
+		climb = {}
+		py = b.y
+		pvy = 0.0
+		Sfx.play("land", null, -12.0)
+		if fx: fx.dust(ppos, 3)
 
 ## Dropped into the sky: the wind carries you back to where you last stood. No harm done.
 func _respawn_safe() -> void:
+	climb = {}
 	ppos = safe_at
 	py = _ground_h(ppos.x, ppos.z)
 	if py <= World.VOID + 1.0: py = 0.0

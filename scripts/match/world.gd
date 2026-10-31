@@ -89,6 +89,56 @@ func island_of(x: float, z: float) -> int:
 		return -1
 	return island[idx(ix, iz)]
 
+## The abyss is short: a body over the void this far below the lowest island lip around it is lost
+## (it never visibly drops far below the islands). The islands' undersides and the updrafts start
+## about this deep too.
+const ABYSS_DEPTH := 6.0
+const ABYSS_NEAR := 9          # "around": island ground within this many tiles
+const WALL_MIN := 0.001        # occupy()'s height for a wall whose top is at 0 (0 itself means free)
+var _aref := PackedFloat32Array()
+var _low_top := INF
+
+## The lowest island ground within ABYSS_NEAR tiles of (x, z), or VOID when there's none.
+func abyss_ref(x: float, z: float) -> float:
+	if _aref.size() != w * h:
+		_aref.resize(w * h)
+		_aref.fill(NAN)
+	var ix := clampi(int(floor(x)), 0, w - 1); var iz := clampi(int(floor(z)), 0, h - 1)
+	var i := idx(ix, iz)
+	if not is_nan(_aref[i]):
+		return _aref[i]
+	var lo := INF
+	var rr := ABYSS_NEAR * ABYSS_NEAR
+	for dz in range(-ABYSS_NEAR, ABYSS_NEAR + 1):
+		var tz := iz + dz
+		if tz < 0 or tz >= h: continue
+		for dx in range(-ABYSS_NEAR, ABYSS_NEAR + 1):
+			var tx := ix + dx
+			if tx < 0 or tx >= w or dx * dx + dz * dz > rr: continue
+			var j := idx(tx, tz)
+			if kind[j] != T_VOID:
+				lo = minf(lo, level[j] * LEVEL)
+	_aref[i] = lo if lo < INF else VOID
+	return _aref[i]
+
+## The lowest island top on the whole map.
+func lowest_top() -> float:
+	if _low_top == INF:
+		for i in w * h:
+			if kind[i] != T_VOID: _low_top = minf(_low_top, level[i] * LEVEL)
+		if _low_top == INF: _low_top = 0.0
+	return _low_top
+
+## How low a body over the void at (x, z) can drop before the abyss takes it: a few metres under
+## the lowest island lip around it (and under `last`, the ground it last stood on, if given).
+func abyss_floor(x: float, z: float, last := INF) -> float:
+	var ref := abyss_ref(x, z)
+	if ref <= VOID + 1.0:
+		ref = last if last < INF else lowest_top()
+	elif last < INF:
+		ref = minf(ref, last)
+	return ref - ABYSS_DEPTH
+
 ## Can a body of radius r stand at (x,z) with feet at y?
 ## Returns 0 if free, the blocking height if a wall or rock is in the way, -1 if the edge guard stops it.
 func occupy(x: float, z: float, r: float, y: float, guard: bool) -> float:
@@ -106,12 +156,17 @@ func occupy(x: float, z: float, r: float, y: float, guard: bool) -> float:
 			var top := ground_at(px, pz) + BLOCK_H
 			if top > y + STEP:
 				return top
+	# an island is solid all the way down: below its top, its whole column is a wall. (A wall is
+	# never reported as 0, which means "free": a ground-level island, top 0, blocks from below too.
+	# It used to read as open air, so bodies under the lip slid in under ground-level islands.)
+	var hit := false
 	for o in [Vector2(0, 0), Vector2(r, 0), Vector2(-r, 0), Vector2(0, r), Vector2(0, -r), Vector2(r, r) * 0.7, Vector2(-r, r) * 0.7, Vector2(r, -r) * 0.7, Vector2(-r, -r) * 0.7]:
 		var g := ground_at(x + o.x, z + o.y)
 		if g > y + STEP:
 			worst = maxf(worst, g)
-	if worst > 0.0:
-		return worst
+			hit = true
+	if hit:
+		return maxf(worst, WALL_MIN)
 	if guard:
 		# don't let a walking hunter step off into the abyss; dashes and knockback ignore this
 		if ground_at(x, z) <= VOID + 1.0:

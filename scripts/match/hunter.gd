@@ -28,7 +28,9 @@ const ABYSS_LIFT_MAX := 16.0
 const ABYSS_BRAKE_DIST := 2.5    # ...that brakes near ground level (let go just before to keep the height)
 const ABYSS_BRAKE := 60.0
 const MANTLE_REACH := 1.5        # near a jump's apex, ledges this far above you pop you up
-const MANTLE_REACH_ABYSS := 12.0 # [footage] falling players spring back onto an island even from a second deep
+const MANTLE_REACH_ABYSS := 3.5  # below an island's lip over the abyss, its side catches you this far down
+                                 # (a bit past the normal ledge reach); deeper you slide down the face
+const ABYSS_GLIDE_ROOM := 1.5    # a glider with heat left (lifting you out) gets this much more room
 const MANTLE_RISE := 14.0        # [footage] a deep mantle returns to the top in ~0.8s
 const EX_DASH_CD := 12.5         # the long dash: in the air, or with the short one on cooldown
 const DASH_CARRY_GROUND := 0.15   # (was 0.35) out of a dash you stop almost dead: snappy, no slide
@@ -146,6 +148,7 @@ var gliding := false
 var glide_fuel := 1.0          # shown as glider heat: 1 = cool, 0 = overheated
 var shot_down := false         # knocked out of an overheated glide: stunned when you land
 var below_lip := false         # dropped below the nearest island's edge, over the abyss
+var wall_hit_v := Vector2.ZERO  # this step's speed into an island side that stopped you (for the ledge catch)
 var lip_y := 0.0               # that edge's height: where your balloon floats
 var heat_burn := 0.0
 var in_current := false        # riding a wind road or an updraft: the glider doesn't heat up
@@ -1679,6 +1682,7 @@ func _physics(dt: float) -> void:
 	# horizontal with walls; mantle onto ledges you run or fall into
 	var x0 := pos.x; var z0 := pos.z
 	var pre_v := Vector2(vel.x, vel.z)
+	wall_hit_v = Vector2.ZERO
 	var step_up := 0.0
 	var nx := pos.x + vel.x * dt
 	var b1: float = m.world.occupy(nx, pos.z, r, pos.y, guard)
@@ -1724,6 +1728,8 @@ func _physics(dt: float) -> void:
 		else:
 			wedged_t = 0.0
 	var blk := maxf(b1, b2)
+	if b1 > 0.0 or b2 > 0.0:
+		wall_hit_v = Vector2(pre_v.x if b1 > 0.0 else 0.0, pre_v.y if b2 > 0.0 else 0.0)
 	if (b1 > 0.0 or b2 > 0.0) and blk > pos.y + 0.6:
 		# against a wall: in the air you can kick off it; knocked into it hard, you're stunned
 		if not grounded:
@@ -1804,9 +1810,49 @@ func _physics(dt: float) -> void:
 			var w: World = m.world
 			if not (w.is_void(pos.x + 1.4, pos.z) or w.is_void(pos.x - 1.4, pos.z) or w.is_void(pos.x, pos.z + 1.4) or w.is_void(pos.x, pos.z - 1.4)):
 				safe_pos = pos
+	_unclip()
 	_try_ledge_grab(dt)
-	if pos.y < last_gy - 24.0 or pos.y < -40.0:
+	if _in_abyss():
 		fall_out()
+
+## Lost to the abyss: over the void a few metres below the lowest island lip around you (see
+## World.abyss_floor), so a fall is over quickly instead of dropping a long way under the islands.
+## A glider that still has heat gets a little more room to lift you back out.
+func _in_abyss() -> bool:
+	if pos.y < -40.0:
+		return true
+	if grounded or not over_void():
+		return false
+	var fl: float = m.world.abyss_floor(pos.x, pos.z, last_gy)
+	if gliding and glide_fuel > 0.001:
+		fl -= ABYSS_GLIDE_ROOM
+	return pos.y < fl
+
+## Islands are solid all the way down: if anything (a pull, a drag, a shove) has left you inside an
+## island's column below its top, you're put back beside it, or on top when the top is in reach.
+func _unclip() -> void:
+	if grounded or pad.size() > 0 or grap.size() > 0:
+		return
+	var w: World = m.world
+	var g: float = w.ground_at(pos.x, pos.z)
+	if g <= World.VOID + 1.0 or pos.y > g - 1.25 or ground() != g:
+		return
+	if g - pos.y <= MANTLE_REACH_ABYSS and not w.is_block(pos.x, pos.z):
+		pos.y = g
+		vel.y = 0.0
+		grounded = true
+		return
+	for rad in [0.5, 0.8, 1.2, 1.7, 2.4, 3.2, 4.5]:
+		for i in 16:
+			var a := TAU * i / 16.0
+			var x: float = pos.x + cos(a) * rad; var z: float = pos.z + sin(a) * rad
+			if w.is_void(x, z) and w.occupy(x, z, r, pos.y, false) == 0.0:
+				pos.x = x; pos.z = z
+				vel.x = 0.0; vel.z = 0.0
+				return
+	if safe_pos != Vector3.INF:
+		teleport(safe_pos)
+		vel = Vector3.ZERO
 
 ## The skydive ends: the glider snaps open and the fall slows right down.
 func _deploy() -> void:
@@ -1904,8 +1950,11 @@ func _try_ledge_grab(dt: float) -> void:
 		if vel.y > 2.0 or grap_cd > 0.0 or (m.time - kb_t < 0.3 and Vector2(vel.x, vel.z).length() > 8.0):
 			return
 		# no magnet: you have to be below the edge, right up against the cliff, and pushing into it
+		# (or, over the abyss, thrown into its side: the shove counts as the push)
 		if mv.length() < 0.3:
-			return
+			if not over_void() or wall_hit_v.length() < 2.0:
+				return
+			mv = wall_hit_v.normalized()
 		reach = r + 0.4
 	var void_here := over_void()
 	if not grounded and void_here and last_gy - pos.y > 0.3:
