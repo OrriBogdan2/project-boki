@@ -503,8 +503,10 @@ const HAIR_FROM_OLD := {
 ## The head styles a race can pick from (by race index).
 static func hair_styles(race: int) -> Array:
 	return HAIR_STYLES[String(RACES[clampi(race, 0, RACES.size() - 1)]["id"])]
-## Outfits: a coat colour and headwear. Purely cosmetic.
-const LOOK_OUTFITS := ["Hood", "Horned", "Goggles", "Wide hat", "Bandana", "Ember", "Helm", "Brawler", "Halo"]
+## Outfits: the colourway of the archetype's gear (coat, robe, trim, tabard). Purely cosmetic; the
+## archetype owns the silhouette (hood, hat, helm), so it reads the same whatever the outfit. The
+## keys stay as they were so saved looks keep their colours.
+const LOOK_OUTFITS := ["Lilac", "Nightshade", "Glacier", "Sage", "Saddle", "Ember", "Ivory", "Tusk", "Gilded"]
 const OUTFIT_KEYS := ["veil", "nyx", "kestrel", "sage", "marlow", "pyra", "bastion", "tusk", "halo"]
 const OUTFIT_COLS := [Color("c9bcff"), Color("b06ae0"), Color("6ad0e0"), Color("9ee2a0"), Color("e0b05a"), Color("ff7a5a"), Color("e6dbc4"), Color("c08a5a"), Color("f2d47a")]
 const LOOK_DETAILS := ["None", "Freckles", "Scar", "Face paint", "Stubble", "Beard", "Moustache", "Beauty mark"]
@@ -658,7 +660,7 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 	var m_fur := toon(Color("6a4a36").lerp(hero_col, 0.1))
 	var m_feather := toon(Color("f6f0e2"))
 	var m_cloak := toon(hero_col.lerp(Color("2f3a2c"), 0.45))
-	var m_hat := toon(Color("4a3426").lerp(hero_col, 0.25))
+	var m_hat := toon(Color("6e4a30").lerp(hero_col, 0.1))
 	for mm in [m_body, m_shirt, m_hair, m_acc, m_hero, m_trim, m_cloak, m_hat, m_feather]:
 		(mm as ShaderMaterial).set_shader_parameter("rim_amount", 0.75)
 	m_skin.set_shader_parameter("sss", 0.45)

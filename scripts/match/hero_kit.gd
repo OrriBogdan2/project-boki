@@ -222,8 +222,8 @@ static func sdir(u: float, v: float) -> Vector3:
 ## Head shapes: how the jaw narrows (and how square it stays at the front), the chin, cheek volume,
 ## brow ridge, a fuller skull behind, how boxy (Stoneborn), and the overall width.
 const HEADS := {
-	"human_m": {"jaw": 0.13, "jaw_sq": 0.75, "chin": 0.032, "chin_w": 0.5, "cheek": 0.05, "brow": 0.03, "skull": 0.05, "w": 1.03},
-	"human_f": {"jaw": 0.25, "jaw_sq": 0.15, "chin": 0.03, "chin_w": 0.3, "cheek": 0.07, "brow": 0.012, "skull": 0.05, "w": 0.98},
+	"human_m": {"jaw": 0.17, "jaw_sq": 0.85, "chin": 0.05, "chin_w": 0.42, "cheek": 0.075, "brow": 0.04, "skull": 0.06, "w": 1.04},
+	"human_f": {"jaw": 0.3, "jaw_sq": 0.15, "chin": 0.04, "chin_w": 0.26, "cheek": 0.09, "brow": 0.015, "skull": 0.06, "w": 0.98},
 	"vulpin": {"jaw": 0.2, "jaw_sq": 0.0, "chin": 0.0, "cheek": 0.16, "brow": 0.015, "skull": 0.04, "w": 1.04},
 	"stoneborn": {"jaw": -0.06, "jaw_sq": 1.0, "chin": 0.03, "chin_w": 0.6, "cheek": 0.02, "brow": 0.05, "skull": 0.0, "box": 3.2, "w": 1.06, "flat": 0.12},
 	"sprig": {"jaw": 0.3, "jaw_sq": 0.0, "chin": 0.02, "chin_w": 0.25, "cheek": 0.08, "brow": 0.0, "skull": 0.09, "w": 1.0},

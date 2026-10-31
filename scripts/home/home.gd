@@ -4665,12 +4665,13 @@ func _build_demo(which: String) -> void:
 			player.position = ppos
 			cam.zoom_to = 3.3 if which == "--overview-demo" else 1.5; cam.zoom = cam.zoom_to; cam.snap(ppos))
 	if which == "--tryon-demo":
-		# screenshots: your hunter at the Try-on rack with its panel open, the camera in close
+		# screenshots: your hunter at the Try-on rack, the camera in close
 		get_tree().create_timer(0.3).timeout.connect(func():
 			ppos = HomeTraining.RACK + Vector3(0, 0, 1.0); player.position = ppos
 			training.tick(0.05)
-			training.open_tryon()
-			cam.zoom_to = 0.55; cam.zoom = cam.zoom_to; cam.snap(ppos))
+			cam.zoom_to = 0.55; cam.zoom = cam.zoom_to; cam.snap(ppos)
+			for k in 8:
+				get_tree().create_timer(0.2 + k * 0.4).timeout.connect(func(): _close_panel()))
 	if which == "--training-demo":
 		get_tree().create_timer(0.3).timeout.connect(func():
 			ppos = Vector3(39.5, 0, 57.5); player.position = ppos; cam.snap(ppos)
