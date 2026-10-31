@@ -193,7 +193,8 @@ func body_vertical(dt: float) -> void:
 			squash = 0.2
 	else:
 		pos.y = g
-	if pos.y < -14.0:
+	# over the void the abyss takes you a few metres under the islands around (World.abyss_floor)
+	if pos.y < -40.0 or (not grounded and g <= World.VOID + 1.0 and pos.y < m.world.abyss_floor(pos.x, pos.z)):
 		fall_out()
 
 func fall_out() -> void:
