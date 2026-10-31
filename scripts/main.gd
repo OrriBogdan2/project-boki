@@ -297,6 +297,9 @@ func _ready() -> void:
 		set_meta("work_check", wkc)
 		wkc.run(self)
 		return
+	if "--iv-check" in args:
+		load("res://tools/iv_check.gd").new().run(self)      # kin IVs: rolls, backfill, breeding, Rare Eggs, caps
+		return
 	if "--economy-check" in args:
 		_economy_check()
 		return

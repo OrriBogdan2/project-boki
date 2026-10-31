@@ -525,7 +525,7 @@ func step(k: Dictionary, d: float) -> void:
 			if Vector2(aim.x - pos.x, aim.z - pos.z).length() < 0.55:
 				if J["phase"] == "go":
 					J["phase"] = "work"
-					J["left"] = float(J["t"]) / (Work.speed(int(J["lv"])) * _boost(J))
+					J["left"] = float(J["t"]) / (Work.speed(int(J["lv"])) * _boost(J) * Care.iv_mult(rec, "work"))    # Work IV: up to 10% faster
 					J["dur"] = J["left"]
 					_hold(k, String(J["kind"]))
 				else:

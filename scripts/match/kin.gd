@@ -92,6 +92,11 @@ func init_kin(match_node: Node, id: String, species_id: String, record: Dictiona
 		cd_mult *= float(cm["cd"])
 		power *= float(cm["skill"])
 		mood = float(cm["mood"])
+		# IVS (inborn stats, Care.iv_mult): at most +10% health / +10% damage / +5% speed at 31.
+		# The only match-side use besides Bond.add; re-point these three lines when kin stats move.
+		max_hp *= Care.iv_mult(rec, "hp"); hp = max_hp
+		dmg *= Care.iv_mult(rec, "atk")
+		speed *= Care.iv_mult(rec, "spd")
 	r = 0.36 * (1.0 + minf(rec.get("forms", []).size() * 0.08, 0.4))
 	state = "shoulder" if owner_h else "wild"
 	settle = 1.0
