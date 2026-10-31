@@ -129,13 +129,25 @@ func _build_minimap() -> void:
 	minimap = ImageTexture.create_from_image(img)
 
 # ------------------------------------------------------------------ drawing helpers
+## Panel styles are made once per look and reused (the HUD draws dozens of panels every frame).
+var _boxes := {}
+func _box(col: Color, rad: int, border: Color, bw: int, aa := false) -> StyleBoxFlat:
+	var key := [col, rad, border, bw, aa]
+	var sb: StyleBoxFlat = _boxes.get(key)
+	if sb == null:
+		if _boxes.size() > 512: _boxes.clear()
+		sb = StyleBoxFlat.new()
+		sb.bg_color = col
+		sb.set_corner_radius_all(rad)
+		if bw > 0:
+			sb.border_color = border
+			sb.set_border_width_all(bw)
+		sb.anti_aliasing = aa
+		_boxes[key] = sb
+	return sb
+
 func _panel(r: Rect2, col := PANEL, rad := 10) -> void:
-	var sb := StyleBoxFlat.new()
-	sb.bg_color = col
-	sb.set_corner_radius_all(rad)
-	sb.border_color = EDGE
-	sb.set_border_width_all(1)
-	c.draw_style_box(sb, r)
+	c.draw_style_box(_box(col, rad, EDGE, 1, true), r)
 
 func _bar(r: Rect2, frac: float, col: Color, back := Color(0, 0, 0, 0.45)) -> void:
 	c.draw_rect(r, back)
@@ -915,14 +927,7 @@ func toast_small(text: String, col: Color) -> void:
 	if small_toasts.size() > 3: small_toasts.pop_front()
 
 func _rounded(r: Rect2, col: Color, rad := 10, border := Color(0, 0, 0, 0), bw := 0) -> void:
-	var sb := StyleBoxFlat.new()
-	sb.bg_color = col
-	sb.set_corner_radius_all(rad)
-	if bw > 0:
-		sb.border_color = border
-		sb.set_border_width_all(bw)
-	sb.anti_aliasing = true
-	c.draw_style_box(sb, r)
+	c.draw_style_box(_box(col, rad, border, bw, true), r)
 
 ## A pie slice covering the part of a slot still on cooldown, sweeping clockwise from the top.
 func _sweep(center: Vector2, radius: float, frac: float, col: Color) -> void:

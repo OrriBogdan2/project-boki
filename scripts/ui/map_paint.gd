@@ -72,12 +72,15 @@ static func _data(w: World) -> Array:
 	var top_lv := 1
 	for i in n:
 		if w.kind[i] != World.T_VOID: top_lv = maxi(top_lv, w.level[i])
+	var tops: Array = []      # per island: its ground colour (the per-tile biome lookup is slow)
+	for ii in w.islands.size(): tops.append(Color(w._bio_of_island(ii)["top"]))
+	var top0 := Color(w.biome["top"])
 	for i in n:
 		var k := w.kind[i]
 		if k == World.T_VOID:
 			continue
-		var bio: Dictionary = w._bio(i)
-		var col := Color(bio["top"]).lightened(0.06 + 0.035 * mini(w.level[i], 6))
+		var isl: int = w.island[i]
+		var col: Color = (tops[isl] if isl >= 0 and isl < tops.size() else top0).lightened(0.06 + 0.035 * mini(w.level[i], 6))
 		if w.level[i] >= 8: col = col.lightened(0.18)       # a high perch: brighter
 		var o := i * 4
 		a[o] = int(col.r8); a[o + 1] = int(col.g8); a[o + 2] = int(col.b8); a[o + 3] = 255
