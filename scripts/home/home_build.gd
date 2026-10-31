@@ -172,7 +172,7 @@ func build_visuals() -> void:
 	if pending_toast != "":
 		var t := pending_toast
 		pending_toast = ""
-		h.get_tree().create_timer(0.6).timeout.connect(func(): if h.is_inside_tree(): h._toast(t))
+		h.get_tree().create_timer(0.6).timeout.connect(func(): if is_instance_valid(h) and h.is_inside_tree(): h._toast(t))
 
 func _reserve() -> void:
 	reserved.clear()
