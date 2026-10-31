@@ -382,8 +382,40 @@ func _place_compounds() -> void:
 				_wall_at(q, ii)
 
 ## Stairs: where one terrace steps up to the next, some edges get a flight of steps so you can
-## walk up instead of hopping, like the stone stairs between levels in Supervive.
+## walk up instead of hopping, like the stone stairs between levels in Supervive. A flight is never
+## a lone one-tile chute: it only goes where the terrace edge runs straight for at least
+## STAIR_MIN_W tiles, and spreads across up to STAIR_MAX_W of them (wider on authored maps).
 var stairs := {}          # tile index -> Vector2i pointing up the stairs
+const STAIR_MIN_W := 3
+const STAIR_MAX_W := 5
+
+## Can tile q carry a step of a flight rising toward d (ground here and behind, one terrace up ahead)?
+func _stair_ok(q: Vector2i, d: Vector2i) -> bool:
+	var up := q + d; var back := q - d
+	if not inb(q.x, q.y) or not inb(up.x, up.y) or not inb(back.x, back.y):
+		return false
+	var i := idx(q.x, q.y); var iu := idx(up.x, up.y); var ib := idx(back.x, back.y)
+	if kind[i] != T_GROUND or kind[iu] != T_GROUND or kind[ib] != T_GROUND or bridge.has(i) or stairs.has(i):
+		return false
+	# the landings above and below have to be clear too, so the flight isn't walled in
+	if bridge.has(iu) or bridge.has(ib) or stairs.has(iu) or stairs.has(ib):
+		return false
+	return level[iu] == level[i] + 1 and level[ib] == level[i]
+
+## The straight run of stair-able tiles along the terrace edge through c, in order across the flight.
+func _stair_run(c: Vector2i, d: Vector2i) -> Array:
+	var side := Vector2i(d.y, d.x)
+	var lo: Array = []; var hi: Array = []
+	for k in range(1, 12):
+		var q := c - side * k
+		if not _stair_ok(q, d): break
+		lo.push_front(q)
+	for k in range(1, 12):
+		var q := c + side * k
+		if not _stair_ok(q, d): break
+		hi.append(q)
+	return lo + [c] + hi
+
 func _place_stairs() -> void:
 	stairs.clear()
 	var srng := RandomNumberGenerator.new(); srng.seed = rng.seed + 41
@@ -398,41 +430,38 @@ func _place_stairs() -> void:
 			if kind[i] != T_GROUND or bridge.has(i):
 				continue
 			for d in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
-				var up := Vector2i(c.x + d.x, c.y + d.y)
-				var back := Vector2i(c.x - d.x, c.y - d.y)
-				if not inb(up.x, up.y) or not inb(back.x, back.y):
-					continue
-				var iu := idx(up.x, up.y); var ib := idx(back.x, back.y)
-				# exactly one terrace up ahead, the same level behind to walk in from
-				if kind[iu] != T_GROUND or kind[ib] != T_GROUND or level[iu] != level[i] + 1 or level[ib] != level[i]:
-					continue
-				cands.append([c, d])
+				if _stair_ok(c, d):
+					cands.append([c, d])
 		cands.shuffle()
-		var placed: Array = []
+		var placed: Array = []      # every tile of every flight placed on this island
+		var flights := 0
 		var want := clampi(cells.size() / 45, 1, 6) if layout_id == "" else clampi(cells.size() / 220, 2, 8)
+		var max_w := 3 if layout_id == "" else STAIR_MAX_W
 		for cd in cands:
-			if placed.size() >= want: break
+			if flights >= want: break
 			var c: Vector2i = cd[0]
+			var d: Vector2i = cd[1]
+			if not _stair_ok(c, d): continue
+			var run := _stair_run(c, d)
+			if run.size() < STAIR_MIN_W: continue
+			# a window of up to max_w tiles of the run, centred on c as far as the run allows
+			var wdt := mini(run.size(), max_w)
+			var ci := run.find(c)
+			var s0 := clampi(ci - wdt / 2, 0, run.size() - wdt)
+			var flight: Array = run.slice(s0, s0 + wdt)
 			var ok := true
-			for p in placed:
-				if (p as Vector2i).distance_to(c) < 6.0: ok = false
-			for sp in spots_all:
-				if Vector2((sp as Vector3).x - c.x - 0.5, (sp as Vector3).z - c.y - 0.5).length() < 2.0: ok = false
+			for q in flight:
+				for p in placed:
+					if (p as Vector2i).distance_to(q) < 4.0: ok = false; break
+				if not ok: break
+				for sp in spots_all:
+					if Vector2((sp as Vector3).x - q.x - 0.5, (sp as Vector3).z - q.y - 0.5).length() < 1.6: ok = false; break
+				if not ok: break
 			if not ok: continue
-			stairs[idx(c.x, c.y)] = cd[1]
-			placed.append(c)
-			if layout_id != "":
-				# authored maps get wide, readable ramps: the flight spreads sideways along the terrace edge
-				var dd: Vector2i = cd[1]
-				var side := Vector2i(dd.y, dd.x)
-				for k in [1, -1, 2, -2]:
-					var q: Vector2i = c + side * k
-					var up2 := q + dd; var back2 := q - dd
-					if not inb(q.x, q.y) or not inb(up2.x, up2.y) or not inb(back2.x, back2.y): continue
-					var iq := idx(q.x, q.y)
-					if kind[iq] == T_GROUND and kind[idx(up2.x, up2.y)] == T_GROUND and kind[idx(back2.x, back2.y)] == T_GROUND \
-							and level[idx(up2.x, up2.y)] == level[iq] + 1 and level[idx(back2.x, back2.y)] == level[iq] and not bridge.has(iq):
-						stairs[iq] = dd
+			for q in flight:
+				stairs[idx(q.x, q.y)] = d
+				placed.append(q)
+			flights += 1
 
 var wall_mat: ShaderMaterial = null   # walls fade where they hide the player
 var walls := {}           # tile index -> true: built stone walls (drawn as walls, not rocks)

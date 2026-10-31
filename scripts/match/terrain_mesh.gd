@@ -574,6 +574,29 @@ func _stairs_cut(x: int, z: int, dir: Vector2i, y: float, to_world: Callable, up
 			if q == cuts.size() - 2 and cheeks[1]: mo[1] = rr.randf_range(0.4, 0.85)
 			if rr.randf() < 0.25: mo[rr.randi_range(0, 1)] = maxf(mo[0], rr.randf_range(0.3, 0.6))
 			_step_stone(to_world, upv, u0 - nose + rr.randf_range(-0.01, 0.015), u1, a0, a1, hgt - 0.06, top, c, moss, mo, rr)
+	# landings: a strip of flagstones at the foot and the head of the flight, so it reads as a laid
+	# stairway set into the terrace rather than a chute cut into the cliff
+	for land in [[-0.46, -0.03, 0.0], [1.0, 1.42, LEVEL]]:
+		var la: float = land[0]; var lb: float = land[1]; var ly: float = land[2]
+		var cuts2: Array = [0.0]
+		var at2 := rr.randf_range(0.3, 0.55)
+		while at2 < 0.8:
+			cuts2.append(at2); at2 += rr.randf_range(0.35, 0.55)
+		cuts2.append(1.0)
+		for q in cuts2.size() - 1:
+			var a0: float = float(cuts2[q]) + 0.015
+			var a1: float = float(cuts2[q + 1]) - 0.015
+			var c2 := stone.lightened(rr.randf_range(-0.02, 0.1))
+			_step_stone(to_world, upv, la + rr.randf_range(0.0, 0.03), lb - rr.randf_range(0.0, 0.03), a0, a1, ly - 0.03, ly + 0.035 + rr.randf_range(-0.006, 0.006), c2, moss, [rr.randf_range(0.0, 0.4), rr.randf_range(0.0, 0.4)], rr)
+	# newel blocks: a chunky squared stone where each side wall meets the bottom landing
+	for q in 2:
+		if not cheeks[q]:
+			continue
+		var na: float = -0.02 if q == 0 else 0.84
+		var nb: float = 0.16 if q == 0 else 1.02
+		var cs2 := stone.darkened(0.1)
+		_block(to_world, upv, side_a, -0.3, 0.02, na, nb, -0.04, 0.56, cs2, rr)
+		_block(to_world, upv, side_a, -0.33, 0.05, na - 0.025, nb + 0.025, 0.56, 0.64, cs2.lightened(0.16), rr)
 	# side walls: a sloped parapet of two chunky blocks along each open end, with a coping on top
 	for q in 2:
 		if not cheeks[q]:
@@ -649,6 +672,18 @@ func _step_stone(to_world: Callable, upv: Vector3, u0: float, u1: float, a0: flo
 		var bn := (nn + Vector3.UP).normalized()
 		_quad_n(to_world.call(u0 + b, aa, yy - b), to_world.call(u1, aa, yy - b), to_world.call(u1, aa + bb, yy), to_world.call(u0 + b, aa + bb, yy),
 			bn, bn, bn, bn, (en[4] as Color).darkened(0.05), (en[4] as Color).darkened(0.05), en[4], en[4], S_STONE, bn)
+
+## A squared stone block in flight coordinates (u along the climb, s across it), from height y0 to y1:
+## four sides and a top with a light bevel tone, shaded darker toward the ground.
+func _block(to_world: Callable, upv: Vector3, side_a: Vector3, u0: float, u1: float, s0: float, s1: float, y0: float, y1: float, c: Color, rr: RandomNumberGenerator) -> void:
+	var cc := c.lightened(rr.randf_range(-0.03, 0.04))
+	var top := cc.lightened(0.12)
+	_quad_n(to_world.call(u0, s0, y1), to_world.call(u1, s0, y1), to_world.call(u1, s1, y1), to_world.call(u0, s1, y1),
+		Vector3.UP, Vector3.UP, Vector3.UP, Vector3.UP, top, top, top, top, S_STONE, Vector3.UP)
+	for f in [[u0, s0, u0, s1, -upv], [u1, s0, u1, s1, upv], [u0, s0, u1, s0, -side_a], [u0, s1, u1, s1, side_a]]:
+		var n: Vector3 = f[4]
+		_quad_n(to_world.call(f[0], f[1], y0), to_world.call(f[2], f[3], y0), to_world.call(f[2], f[3], y1), to_world.call(f[0], f[1], y1),
+			n, n, n, n, cc.darkened(0.4), cc.darkened(0.4), cc, cc, S_STONE, n)
 
 # ------------------------------------------------------------------ emit
 ## One triangle; flips the winding so it faces along n (Godot's front faces are clockwise).
