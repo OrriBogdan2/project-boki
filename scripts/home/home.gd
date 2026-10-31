@@ -840,12 +840,10 @@ func _move_player(d: float) -> void:
 	var ox := world.occupy(nx, ppos.z, 0.38, py, guard)
 	if ox == 0.0: ppos.x = nx
 	elif not _mantle(nx, ppos.z, ox, air): hv.x = 0.0
-	else: ppos.x = nx
 	var nz := ppos.z + hv.y * d
 	var oz := world.occupy(ppos.x, nz, 0.38, py, guard)
 	if oz == 0.0: ppos.z = nz
 	elif not _mantle(ppos.x, nz, oz, air): hv.y = 0.0
-	else: ppos.z = nz
 	pvel = Vector3(hv.x, 0, hv.y)
 	# caught on a corner: slip around it. Boxed in on every side: step out to open ground.
 	if not air and mv.length() > 0.3 and Vector2(ppos.x - p0.x, ppos.z - p0.z).length() < SPEED * d * 0.3:
@@ -1085,20 +1083,33 @@ func _move_kin(d: float) -> void:
 			lbl.position.y = 1.15 + (1.6 - k["emote_t"]) * 0.2
 
 ## Jumping at a ledge a little above you pops you up onto it (and from below, an island's rim).
+## (x, z) is where you were moving to; `top` is the height of the ledge your body bumped into.
+## You land on top of the ledge, just past its lip; the move is done here (ppos set) when it works.
 func _mantle(x: float, z: float, top: float, air: bool) -> bool:
-	if not air or top <= 0.0 or world.is_block(x, z):
-		return false
-	var g := _ground_h(x, z)
-	if g <= World.VOID + 1.0:
+	if not air or top <= 0.0:
 		return false
 	var reach := MANTLE_ABYSS if py < -0.2 else MANTLE
-	if g - py > reach:
+	if top - py > reach:
 		return false
-	py = g
-	pvy = 0.0
-	gliding = false
-	Sfx.play("land", null, -10.0)
-	return true
+	# the spot on top: step on from where you were heading until the ground there is the ledge
+	var dv := Vector2(x - ppos.x, z - ppos.z)
+	if dv.length() < 0.0001:
+		return false
+	dv = dv.normalized()
+	for k in 9:
+		var q := Vector2(x, z) + dv * (0.1 * k)
+		var g := _ground_h(q.x, q.y)
+		if world.is_block(q.x, q.y) or g <= World.VOID + 1.0 or g < top - 0.05 or g - py > reach:
+			continue
+		if world.occupy(q.x, q.y, 0.38, g, false) != 0.0:
+			continue
+		ppos.x = q.x; ppos.z = q.y
+		py = g
+		pvy = 0.0
+		gliding = false
+		Sfx.play("land", null, -10.0)
+		return true
+	return false
 
 ## Dropped into the sky: the wind carries you back to where you last stood. No harm done.
 func _respawn_safe() -> void:

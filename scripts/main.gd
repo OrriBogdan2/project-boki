@@ -2611,6 +2611,20 @@ func _home_build_check() -> void:
 	tr.set_my_class()
 	ok.call(String(Save.d["cls"]) == "heavy" and String(Save.d["weapon"]) == "greatsword", "Set as my class makes it your expedition class")
 	mv._close_panel()
+	# the climbing wall: walk up to it, jump, and you're stood on top
+	await get_tree().process_frame      # (a fresh frame: the glide test's Space press above still counts as "just pressed" in this one)
+	var wtop: float = mv._ground_h(34.5, 56.5)
+	var wbase: float = mv._ground_h(36.7, 56.9)
+	mv.ppos = Vector3(36.7, 0, 56.9); mv.py = wbase; mv.pvy = 0.0; mv.pvel = Vector3.ZERO; mv.gliding = false; mv.dash_t = 0.0
+	Input.action_press("left")
+	mv.pvy = 8.5        # a running jump at it (JUMP_V)
+	var on_top := false
+	for i in 90:
+		mv._move_player(1.0 / 60.0)
+		if mv.pvy == 0.0 and absf(mv.py - wtop) < 0.05 and absf(mv._ground_h(mv.ppos.x, mv.ppos.z) - wtop) < 0.05:
+			on_top = true; break
+	Input.action_release("left")
+	ok.call(wtop - wbase > 1.0 and on_top, "jumping at the climbing wall gets you on top of it (%.1fm up; at %.1f, %.1f, height %.2f)" % [wtop - wbase, mv.ppos.x, mv.ppos.z, mv.py])
 	home4.queue_free()
 	await get_tree().process_frame
 	# procedural homes: two seeds, two different islands, both usable; the first look round
