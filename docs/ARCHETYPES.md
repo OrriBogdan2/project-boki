@@ -768,8 +768,19 @@ but it doesn't affect the players abilities, rather the typing and maybe some ot
 - Plus the kin's throw, owner bonus, carry mode (shoulder / perch / mount), companion utility
   (ride, carry-flight, bounce/launch pads, throw-you, grapple, shield, scout) and the Bonded R merge.
 
-### Kin controls (owner, Oct 31): two keys, no hold
+### Kin controls (owner, Oct 31): two keys, no hold (G default for send/recall, owner: MMB only as alternate)
 - **C: kin ability.** Tap: the kin hops out, does its signature move at your aim, and hops back (own cooldown).
-- **Middle mouse (default; G as the alternate bind, rebindable): send / recall.** Throw the kin out to fight on its own
+- **G (default; middle mouse as the alternate bind, rebindable): send / recall.** Throw the kin out to fight on its own
   (chase, guard, hold a choke); press again to recall. While it's out you lose its owner bonus and carry-mode perk.
 - Mount and perch kin: C is still their ability; send/recall dismounts and remounts.
+
+### Weapons under archetypes (owner question, Oct 31)
+Weapons stay. Each archetype has its weapon family (Thief: twin blades or SMG; Gunslinger: rifles;
+Juggernaut: greatsword or minigun; Archer: longbow/sniper; Mage: spellstaff; Bulwark: shield & mace).
+- **The weapon defines LMB:** firing pattern, damage, range, magazine/reload, plus its loot roll:
+  rarity, element and perks (the existing Loot system). Finding a better one mid-raid still matters.
+- **The archetype defines RMB:** the same RMB on every weapon of the family, but it reads the weapon
+  (e.g. the Thief's knife payoff differs for blades vs SMG, per §6.1). So swapping weapons changes
+  your LMB and stats without breaking the kit.
+- You can only pick up your archetype's family (today's class lock, narrowed to the archetype);
+  other weapons can be stashed in the backpack to take home or trade.
