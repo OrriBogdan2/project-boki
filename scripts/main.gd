@@ -41,6 +41,7 @@ func _ready() -> void:
 		if a == "--autoplay": opts["autoplay"] = true
 		if a == "--glide-demo": opts["glide_demo"] = true
 		if a == "--ledge-demo": opts["ledge_demo"] = true
+		if a.begins_with("--abyss-demo="): opts["abyss_demo"] = a.substr(13); opts["no_drop"] = true
 		if a.begins_with("--mates-revive="): opts["mates_revive"] = float(a.substr(15))
 		if a == "--mates-demo": opts["mates_demo"] = true; opts["no_drop"] = true; opts["god"] = true; opts["squad"] = 4; opts["teams"] = 2
 		if a == "--life-demo": opts["life_demo"] = true; opts["no_drop"] = true; opts["squad"] = 3; opts["teams"] = 3
@@ -305,6 +306,10 @@ func _ready() -> void:
 		return
 	if "--mantle-check" in args:
 		_mantle_check()
+		return
+	if "--abyss-check" in args:
+		set_meta("abyss_check", load("res://tools/abyss_check.gd").new())
+		get_meta("abyss_check").run(self)
 		return
 	if Array(args).any(func(a): return String(a).begins_with("--weapon-check")):
 		_weapon_check()
@@ -596,13 +601,14 @@ func _mantle_check() -> void:
 			if at == Vector3.INF: continue
 			tried += 1
 			var top := w.ground_at(at.x, at.z)
-			# hanging in the air just off the edge, 3m below the lip, pushing back toward the island
+			# hanging in the air just off the edge, 2.5m below the lip, pushing back toward the island
+			# (the side of an island catches you up to Hunter.MANTLE_REACH_ABYSS below its lip; see --abyss-check)
 			var edge_x := at.x; var edge_z := at.z
 			while not w.is_void(edge_x + dir.x * 0.25, edge_z + dir.y * 0.25):
 				edge_x += dir.x * 0.25; edge_z += dir.y * 0.25
 			h.downed = downed_case
 			h.down_hp = 100.0
-			h.teleport(Vector3(edge_x + dir.x * (h.r + 0.6), top - 3.0, edge_z + dir.y * (h.r + 0.6)))
+			h.teleport(Vector3(edge_x + dir.x * (h.r + 0.6), top - 2.5, edge_z + dir.y * (h.r + 0.6)))
 			h.grounded = false; h.vel = Vector3(0, -2.0, 0); h.pad = {}; h.grap_cd = 0.0; h.last_gy = top
 			var t := 0.0; var mantled := false; var landed := false; var t_m := 0.0
 			while t < 3.0:

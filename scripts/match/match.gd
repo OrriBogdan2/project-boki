@@ -1828,6 +1828,39 @@ func on_fell(e: Ent) -> void:
 		e.dead = true
 
 
+## Test (--abyss-demo=fall|grab): run off a rim that faces the camera, then either let go and drop
+## beside the island ("fall") or hold back toward it and catch the ledge ("grab").
+func _abyss_demo(mode: String) -> void:
+	if not has_meta("abyss_demo"):
+		var at := Vector3.INF
+		var p0 := player.pos
+		for k in 4000:
+			var g := world.random_ground() if k > 0 else p0
+			if g.distance_to(p0) > 60.0 and k < 3000: continue
+			var ok := not world.is_void(g.x, g.z) and world.is_void(g.x, g.z + 1.0) and not world.sheer.has(world.idx(int(g.x), int(g.z)))
+			for s in [-1.5, -0.75, 0.0, 0.75, 1.5]:
+				if absf(world.ground_at(g.x + s, g.z) - world.ground_at(g.x, g.z)) > 0.05 or world.is_block(g.x + s, g.z - 0.5): ok = false
+				for dz in [1.0, 2.0, 3.0, 5.0, 8.0]:
+					if not world.is_void(g.x + s, g.z + dz): ok = false
+			if ok:
+				at = Vector3(floor(g.x) + 0.5, world.ground_at(g.x, g.z), floor(g.z) + 0.5); break
+		if at == Vector3.INF: at = p0
+		player.teleport(at - Vector3(0, 0, 2.0))
+		player.vel = Vector3.ZERO
+		set_meta("abyss_demo", {"t0": time})
+		for o in hunters:
+			if o != player: o.teleport(world.random_ground())
+		return
+	var t: float = time - float(get_meta("abyss_demo")["t0"])
+	player.inp["glide"] = false
+	if t < 0.3:
+		player.inp["move"] = Vector2.ZERO
+	elif t < 0.8:
+		player.inp["move"] = Vector2(0, 1)      # run toward the camera and jump off the edge
+		if t >= 0.55 and t < 0.55 + DT * 1.5: player.inp["jump"] = true
+	else:
+		player.inp["move"] = Vector2(0, -1) if mode == "grab" else Vector2.ZERO
+
 func S_dev_god() -> bool:
 	return bool(opts.get("god", false)) or bool(opts.get("tutorial", false)) or bool(opts.get("training", false)) or Game.god
 
@@ -3238,6 +3271,8 @@ func step(dt: float) -> void:
 			player.teleport(player.pos + Vector3(0, 6, 0)); player.grounded = false
 		player.inp["glide"] = true
 		player.inp["move"] = Vector2(1, 0.3).normalized()
+	if opts.has("abyss_demo") and player:
+		_abyss_demo(String(opts["abyss_demo"]))
 	if player and not player.out:
 		if pending_input["base"]:
 			pending_input["base"] = false
