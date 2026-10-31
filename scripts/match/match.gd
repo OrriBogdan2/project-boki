@@ -121,8 +121,119 @@ var _finish_now := false
 func _ready() -> void:
 	set_process(false)
 
+## Builds the whole match in one go (checks, tools, tests).
 func start(o: Dictionary) -> void:
+	_start(o)       # nothing waits without a stage callback, so this runs straight through
+
+## The same build spread over frames under the loading screen: progress(frac 0..1) after each step.
+func start_staged(o: Dictionary, progress: Callable) -> void:
+	_stage_cb = progress
+	await _start(o)
+	_stage_cb = Callable()
+	if world: world.stage_cb = Callable()
+
+var _stage_cb := Callable()
+## Roughly how long each step takes (ms, measured with --perf-probe), for the loading bar.
+const STAGE_MS := {"build.generate": 250, "world.terrain": 450, "world.roots": 40, "world.scatter_plan": 350, "world.scatter_batches": 250,
+	"world.walls": 650, "world.grass": 450, "world.sky": 60, "world.landmarks": 120, "world.air": 20, "build.systems": 40, "build.pads_exits": 80,
+	"build.hunters": 250, "build.mobs": 200, "build.chests": 60, "build.spawns": 200, "build.hud": 150, "build.finish": 30}
+var _stage_done_ms := 0.0
+
+## One build step finished: log it, and when building under the loading screen let a frame draw.
+func _stage(label: String) -> void:
+	PerfLog.mark(label)
+	if _stage_cb.is_valid() and is_inside_tree():
+		_progress(label)
+		await get_tree().process_frame
+		PerfLog.skip()
+
+## The world's own steps (World.build_meshes waits the frame itself).
+func _world_step(label: String) -> void:
+	_progress(label)
+
+func _progress(label: String) -> void:
+	_stage_done_ms += float(STAGE_MS.get(label, 50))
+	var tot := 0.0
+	for k in STAGE_MS: tot += float(STAGE_MS[k])
+	_stage_cb.call(clampf(_stage_done_ms / tot, 0.0, 1.0))
+
+## Under the loading screen: draws the world once from far above (every island, prop, wall, cloud
+## layer and landmark in view), once close to the ground (grass, flowers, undergrowth) and once from
+## where the match starts, with one of each effect in front of the camera, so the GPU compiles every
+## shader before play instead of when the drop first shows it. The last frames double as the
+## auto-quality benchmark (Settings.note_benchmark).
+func warm_up() -> void:
+	if DisplayServer.get_name() == "headless" or cam == null or world == null:
+		return
+	PerfLog.skip()
+	var keep := [cam.global_transform, cam.fov, cam.far]
+	var ctr := Vector3(world.w * 0.5, 0.0, world.h * 0.5)
+	var ground := ctr
+	if player and player.ai.has("land"): ground = player.ai["land"]
+	ground.y = world.ground_at(ground.x, ground.z) if not world.is_void(ground.x, ground.z) else 0.0
+	var views := [
+		[ctr + Vector3(0, maxf(world.w, world.h) * 1.05, maxf(world.w, world.h) * 0.4), ctr, 62.0, 900.0],
+		[ground + Vector3(0, 22.0, 11.0), ground, 40.0, 160.0],
+		[ground + Vector3(0, 60.0, 30.0), ground, 40.0, 300.0],
+	]
+	var shown: Array = []
+	for i in 3:
+		var sm: MeshInstance3D = shot_pool[i]
+		sm.visible = true
+		shown.append(sm)
+	for v in views:
+		var at: Vector3 = v[1]
+		cam.global_transform = Transform3D(Basis.looking_at(at - (v[0] as Vector3), Vector3.UP), v[0])
+		cam.fov = v[2]; cam.far = v[3]
+		# one of each effect where the camera looks
+		fx.burst(at + Vector3(0, 1, 0), Color.WHITE, 6)
+		fx.ring(at, 1.5, Color.WHITE)
+		fx.flash(at + Vector3(0, 1, 0), Color.WHITE)
+		fx.slash(at + Vector3(0, 0.8, 0), 0.0, 2.0, 1.6, Color.WHITE)
+		var tg := fx.telegraph_circle(at, 1.5, Color(1, 0.3, 0.2))
+		for k in shown.size():
+			(shown[k] as MeshInstance3D).global_position = at + Vector3(k - 1.0, 1.0, 0)
+		await get_tree().process_frame
+		await get_tree().process_frame
+		fx.end_telegraph(tg)
+		if not is_inside_tree():
+			return
+	for sm in shown: (sm as MeshInstance3D).visible = false
+	cam.global_transform = keep[0]; cam.fov = keep[1]; cam.far = keep[2]
+	PerfLog.mark("build.warm_up")
+	# the benchmark: a few frames of the opening view
+	var times: Array = []
+	var last := Time.get_ticks_usec()
+	for i in 8:
+		await get_tree().process_frame
+		var now := Time.get_ticks_usec()
+		if i >= 2: times.append((now - last) / 1000.0)
+		last = now
+	times.sort()
+	if not times.is_empty():
+		Settings.note_benchmark(float(times[times.size() / 2]))
+	PerfLog.skip()
+
+## Small parts (eyes, buckles, gems, pebbles) stop casting shadows: every caster is drawn again in each
+## shadow cascade, and at this camera height their shadows are a pixel or two.
+const SHADOW_MIN := 0.28
+static func _trim_shadows(root: Node) -> void:
+	var stack: Array = [root]
+	while not stack.is_empty():
+		var n: Node = stack.pop_back()
+		if n is MeshInstance3D:
+			var mi := n as MeshInstance3D
+			if mi.mesh and mi.cast_shadow != GeometryInstance3D.SHADOW_CASTING_SETTING_OFF:
+				var sz := mi.mesh.get_aabb().size * mi.scale.abs()
+				if maxf(sz.x, maxf(sz.y, sz.z)) < SHADOW_MIN:
+					mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		for ch in n.get_children():
+			if not (ch is MultiMeshInstance3D):
+				stack.append(ch)
+
+func _start(o: Dictionary) -> void:
 	PerfLog.reset()
+	_stage_done_ms = 0.0
 	opts = o
 	seed_val = int(o.get("seed", randi()))
 	rng.seed = seed_val
@@ -154,8 +265,10 @@ func start(o: Dictionary) -> void:
 		world.generate_authored(layout, seed_val)
 	else:
 		world.generate(seed_val, World.BIG_SIZE if big else 64, World.BIG_ISLANDS if big else 7)
-	PerfLog.mark("build.generate")
-	world.build_meshes()
+	await _stage("build.generate")
+	if _stage_cb.is_valid(): world.stage_cb = _world_step
+	await world.build_meshes()
+	world.stage_cb = Callable()
 	fx = Fx.new(); fx.name = "Fx"; add_child(fx)
 	fields = Fields.new(self)
 	verbs = Verbs.new(self)
@@ -180,17 +293,17 @@ func start(o: Dictionary) -> void:
 		net_on = true
 		is_host = Net.me == String(o["net"]["host"])
 		Net.begin_match("kf-" + String(o["net"]["mid"]), String(o["net"]["host"]), self)
-	PerfLog.mark("build.systems")
+	await _stage("build.systems")
 	_spawn_pads_and_exits()
-	PerfLog.mark("build.pads_exits")
+	await _stage("build.pads_exits")
 	_spawn_hunters()
-	PerfLog.mark("build.hunters")
+	await _stage("build.hunters")
 	if not opts.get("tutorial", false) and not opts.get("duel", false):
 		_spawn_mobs()        # the tutorial brings its own monsters, one step at a time
-	PerfLog.mark("build.mobs")
+	await _stage("build.mobs")
 	if not opts.get("duel", false):
 		_spawn_chests()
-	PerfLog.mark("build.chests")
+	await _stage("build.chests")
 	if not world.train_route.is_empty() and not opts.get("duel", false):
 		skytrain = SkyTrain.new()
 		skytrain.name = "SkyTrain"
@@ -222,7 +335,8 @@ func start(o: Dictionary) -> void:
 		spawn_plan.roll(seed_val)
 		spawn_plan.spawn_all()
 	if lairs: lairs.ensure_live()
-	PerfLog.mark("build.spawns")
+	_trim_shadows(self)
+	await _stage("build.spawns")
 	skydrop = DropSquad.new(self)
 	skydrop.setup()
 	var Hud = load("res://scripts/ui/hud.gd")
@@ -241,12 +355,12 @@ func start(o: Dictionary) -> void:
 		duel.setup(self)
 		duel.attach_keys()
 		hud.toast("Duel room  ·  B sets up the bot  ·  X resets", Color("f3eee2"))
-	PerfLog.mark("build.hud")
+	await _stage("build.hud")
 	_build_aim()
 	Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
-	set_process(true)
 	Bridge.kin_lines_for_match(self)
-	PerfLog.mark("build.finish")
+	await _stage("build.finish")
+	set_process(true)
 
 func next_id(prefix: String) -> String:
 	nid_n += 1

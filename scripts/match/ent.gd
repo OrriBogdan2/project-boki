@@ -247,10 +247,16 @@ func net_follow(dt: float) -> void:
 	vel = net_vel
 
 ## Called every rendered frame. alpha blends between the last two simulation steps.
+var _flash_set := -1.0
+var _flash_n := -1
 func render(delta: float, alpha: float) -> void:
 	if freeze_t <= 0.0:
 		position = prev.lerp(pos, alpha)
 	squash = maxf(0.0, squash - delta * 2.5)
 	var f := clampf(flash_t / 0.12, 0.0, 1.0)
-	for mt in mats:
-		mt.set_shader_parameter("flash", f)
+	# (only when it changes: most frames nothing is flashing, and every set is a render-server call)
+	if f != _flash_set or mats.size() != _flash_n:
+		_flash_set = f
+		_flash_n = mats.size()
+		for mt in mats:
+			mt.set_shader_parameter("flash", f)

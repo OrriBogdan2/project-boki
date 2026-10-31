@@ -108,7 +108,7 @@ func _process(delta: float) -> void:
 		fade = minf(1.0, fade + delta * 3.5)
 		if was < 1.0 and fade >= 1.0:
 			shown.emit()
-	prog = move_toward(prog, want, delta * 0.9)
+	prog = move_toward(prog, want, delta * maxf(0.9, (want - prog) * 6.0))
 	c.queue_redraw()
 
 ## Move the bar to a stage (0..1) and wait until it gets there.
