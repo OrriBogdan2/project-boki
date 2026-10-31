@@ -378,3 +378,78 @@ static func rare_egg(col: Color) -> Node3D:
 	p.position = Vector3(0, 0.6, 0)
 	root.add_child(p)
 	return root
+
+## The gate lever inside a lair, beside the gate: a carved stone plinth with an iron lever on a
+## pivot, its grip glowing in the boss's colour. Lairs swings "Arm" (rotation.x) when it's pulled and
+## lights "Lit" (the grip's glow and a ring on the floor) while it can be pulled.
+static func lever(col: Color) -> Node3D:
+	var root := Node3D.new()
+	var st: Array = []
+	for k in 3:
+		st.append(Models.toon(Color("8e8898").lightened(-0.06 + k * 0.06)))
+	var iron := Models.toon(Color("3a3640")); var trim := Models.toon(Color("6a6270"))
+	var rune := Models.toon(col, false, 1.2)
+	# the plinth: a wide footing, a chiselled block and a capstone with a slot for the lever
+	Models.part(root, PropSculpt.bx(1.05, 0.22, 0.85), st[0], Vector3(0, 0.11, 0))
+	Models.part(root, PropSculpt.bx(0.82, 0.62, 0.62), st[1], Vector3(0, 0.53, 0))
+	Models.part(root, PropSculpt.bx(0.94, 0.16, 0.72), st[2], Vector3(0, 0.92, 0))
+	Models.part(root, PropSculpt.bx(0.5, 0.18, 0.04), rune, Vector3(0, 0.55, 0.32))
+	# the pivot: two iron cheeks and an axle across the slot
+	for sx in [-1.0, 1.0]:
+		Models.part(root, PropSculpt.bx(0.08, 0.3, 0.32), iron, Vector3(sx * 0.16, 1.1, 0))
+	Models.part(root, Models.cyl(0.07, 0.07, 0.42, 10), trim, Vector3(0, 1.12, 0), Vector3.ONE, Vector3(0, 0, PI * 0.5))
+	var arm := Node3D.new(); arm.name = "Arm"; arm.position = Vector3(0, 1.12, 0); arm.rotation.x = -0.75
+	root.add_child(arm)
+	Models.part(arm, Models.cyl(0.05, 0.065, 1.0, 8), iron, Vector3(0, 0.5, 0))
+	Models.part(arm, Models.cyl(0.09, 0.09, 0.08, 10), trim, Vector3(0, 0.08, 0))
+	var grip := Models.part(arm, Models.sphere(0.13, 10), rune, Vector3(0, 1.04, 0), Vector3(1.0, 1.25, 1.0))
+	grip.name = "Grip"
+	var lit := Node3D.new(); lit.name = "Lit"; lit.visible = false; root.add_child(lit)
+	var ring := MeshInstance3D.new(); ring.mesh = Models.flat_quad(2.4)
+	ring.material_override = Models.ring_mat(Color(col, 0.85), 0.07); ring.position.y = 0.05
+	ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	lit.add_child(ring)
+	var halo := Models.part(lit, Models.sphere(0.3, 10), Models.glow_mat(Color(col.lightened(0.3), 0.55)), Vector3(0, 1.85, 0.62))
+	halo.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	halo.name = "Halo"
+	return root
+
+## The vent at the back of a lair the escape updraft rises from: a ring of carved stones round an iron
+## grate. "Air" holds the column of rising air (World.updraft_visual), shown while it blows.
+static func vent(col: Color, r: float, top: float) -> Node3D:
+	var root := Node3D.new()
+	if Flora.v2():
+		ExitModels._stone_ring(root, r + 0.35, 0.22, 9, Color("8e8898"), 0.78)
+	else:
+		Models.part(root, Models.cyl(r + 0.35, r + 0.45, 0.2, 18), Models.toon(Color("8e8898")), Vector3(0, 0.1, 0))
+	var iron := Models.toon(Color("3a3640"))
+	Models.part(root, Models.cyl(r * 0.92, r * 0.92, 0.06, 20), Models.toon(Color("1e1c24")), Vector3(0, 0.05, 0))
+	for i in 5:
+		var x := -r * 0.7 + r * 1.4 * i / 4.0
+		Models.part(root, PropSculpt.bx(0.08, 0.08, sqrt(maxf(0.05, r * r * 0.85 - x * x)) * 2.0), iron, Vector3(x, 0.12, 0))
+	var rn := MeshInstance3D.new(); rn.mesh = Models.flat_quad((r + 0.9) * 2.0)
+	rn.material_override = Models.ring_mat(Color(col, 0.8), 0.06); rn.position.y = 0.07; rn.name = "Ring"
+	rn.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	rn.visible = false
+	root.add_child(rn)
+	var air := World.updraft_visual(r, 0.0, top, Color(col.lightened(0.55), 1.0))
+	air.name = "Air"
+	air.visible = false
+	root.add_child(air)
+	return root
+
+## A lair fight is on: a shaft of light over the lair, seen from across the map, with a slow ring of
+## light round its foot. "Shaft" pulses; Lairs tints it gold once the boss falls.
+static func alert_beam(col: Color, half: float) -> Node3D:
+	var root := Node3D.new()
+	var sh := Models.part(root, Models.cyl(1.1, 1.8, 46.0, 18), Models.glow_mat(Color(col, 0.30)), Vector3(0, 23.0, 0))
+	sh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	sh.name = "Shaft"
+	var core := Models.part(root, Models.cyl(0.35, 0.55, 46.0, 10), Models.glow_mat(Color(col.lightened(0.5), 0.45)), Vector3(0, 23.0, 0))
+	core.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	core.name = "Core"
+	var ring := MeshInstance3D.new(); ring.mesh = Models.flat_quad(half * 2.0 + 4.0)
+	ring.material_override = Models.ring_mat(Color(col, 0.55), 0.03); ring.position.y = 0.08; ring.name = "Ring"
+	ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	root.add_child(ring)
+	return root
