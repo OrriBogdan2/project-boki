@@ -358,8 +358,8 @@ func pick_seed(r: RandomNumberGenerator = null) -> String:
 		if x <= 0.0: return k
 	return CROPS.keys()[0]
 
-const KIN_NAMES := ["Pip", "Mochi", "Bramble", "Sorrel", "Tumble", "Fig", "Juniper", "Biscuit", "Nettle", "Wren", "Sprout", "Ember", "Clove", "Pebble", "Marlo", "Quill", "Dusk", "Taffy", "Rune", "Kip"]
-const BOT_NAMES := ["Vexa", "Moss", "Tarn", "Juno", "Rook", "Kestrel", "Nim", "Sable", "Orin", "Lux", "Bryn", "Cato", "Ivy", "Rho", "Wick", "Zed", "Fen", "Mara"]
+const KIN_NAMES := Names.KIN      # ~2,200 names: see scripts/core/names.gd
+const BOT_NAMES := Names.BOT      # ~2,000 handles
 
 ## Expedition tiers: deeper islands are harder and richer, and in the Hollow your partner can be lost.
 const TIERS := [

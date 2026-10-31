@@ -3,7 +3,7 @@ extends Node
 
 const VERSION := 1
 const MAX_MEMORY := 40
-const SLOTS := 3
+const SLOTS := 6
 
 var d: Dictionary = {}
 var slot := 1                 # which save file is in play

@@ -483,7 +483,7 @@ func open_inventory() -> void:
 
 # ------------------------------------------------------------------ save files
 func open_saves() -> void:
-	var v := _page("saves", "Save files", 640)
+	var v := _page("saves", "Save files", 640, true)
 	UI.subtitle(v, "Each save has its own island, kin and gems. Settings are shared.")
 	var first: Button = null
 	for n in range(1, Save.SLOTS + 1):
