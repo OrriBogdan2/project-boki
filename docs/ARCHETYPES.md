@@ -767,3 +767,9 @@ but it doesn't affect the players abilities, rather the typing and maybe some ot
   These are the kin's current actives, kept (re-expressed in grammar parts), not archived.
 - Plus the kin's throw, owner bonus, carry mode (shoulder / perch / mount), companion utility
   (ride, carry-flight, bounce/launch pads, throw-you, grapple, shield, scout) and the Bonded R merge.
+
+### Kin controls (owner, Oct 31): two keys, no hold
+- **C: kin ability.** Tap: the kin hops out, does its signature move at your aim, and hops back (own cooldown).
+- **Middle mouse (default; G as the alternate bind, rebindable): send / recall.** Throw the kin out to fight on its own
+  (chase, guard, hold a choke); press again to recall. While it's out you lose its owner bonus and carry-mode perk.
+- Mount and perch kin: C is still their ability; send/recall dismounts and remounts.
