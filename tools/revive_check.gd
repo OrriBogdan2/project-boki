@@ -77,8 +77,9 @@ func _case(name: String, at: Vector3, from: Vector3, foe_at: Vector3, limit: flo
 	var reached := -1.0
 	while t < limit and p.downed:
 		m.step(Match.DT); t += Match.DT
-		if bot.vel.y > 4.0 and not was_air: hops += 1
-		was_air = bot.vel.y > 4.0
+		var jumped := bot.vel.y > Hunter.JUMP_V * 0.85 and bot.pad.is_empty()      # pressing jump, not a mantle
+		if jumped and not was_air: hops += 1
+		was_air = jumped
 		if reached < 0.0 and bot.flat_dist(p) < Life.R["revive_radius"]: reached = t
 	ok(not p.downed, "%s: revived in %.1fs (reached at %.1fs, %d hops, start %.1fm, rival %.1fm)%s" % [name, t, reached, hops, Vector2(from.x - at.x, from.z - at.z).length(), Vector2(foe_at.x - at.x, foe_at.z - at.z).length(), "" if not p.downed else " bot at %s, player at %s" % [bot.pos.snapped(Vector3(0.1, 0.1, 0.1)), p.pos.snapped(Vector3(0.1, 0.1, 0.1))]])
 	bot.ctrl = "idle"; bot.inp["move"] = Vector2.ZERO; bot.inp["fire"] = false
@@ -195,21 +196,27 @@ func run(mn: Node) -> void:
 		var blind := 0; var fired := 0; var frames := 0; var aimed := 0; var hops := 0; var was_air := false
 		var t := 0.0
 		while t < 8.0:
+			# (where they both were when the bot decided: it thinks at the start of the step)
+			var bp0 := bot.pos
+			var fp0 := foe.pos
 			m.step(Match.DT); t += Match.DT; frames += 1
-			if bot.vel.y > 4.0 and not was_air: hops += 1
-			was_air = bot.vel.y > 4.0
+			# a hop is the bot pressing jump (a jump starts at Hunter.JUMP_V); mantles (a ledge pull, on
+			# a pad) and stepping up a terrace aren't hopping at anything
+			var jumped := bot.vel.y > Hunter.JUMP_V * 0.85 and bot.pad.is_empty()
+			if jumped and not was_air: hops += 1
+			was_air = jumped
 			if bot.ai.get("tgt") == foe: aimed += 1
 			if bot.inp.get("fire", false) and bot.ai.get("tgt") == foe:
 				fired += 1
-				# (judged on the map itself: a rock on the line, or ground standing higher than the
-				# lower of the two of them by more than chest height)
-				var dl := Vector2(foe.pos.x - bot.pos.x, foe.pos.z - bot.pos.z)
-				var low := minf(bot.pos.y, foe.pos.y)
+				# (judged on the map itself: a rock on the line, or ground above the shot, which runs
+				# from the bot's eye to the rival's chest)
+				var dl := Vector2(fp0.x - bp0.x, fp0.z - bp0.z)
 				for k in 20:
-					var q := Vector2(bot.pos.x, bot.pos.z) + dl * (k + 0.5) / 20.0
-					if w.is_block(q.x, q.y) or w.ground_at(q.x, q.y) > low + 1.1:
+					var f := (k + 0.5) / 20.0
+					var q := Vector2(bp0.x, bp0.z) + dl * f
+					if w.is_block(q.x, q.y) or w.ground_at(q.x, q.y) > lerpf(bp0.y + 0.95, fp0.y + 0.9, f):
 						blind += 1
-						if blind <= 3: print("REVIVE  blind shot: bot %s foe %s grounded %s" % [bot.pos.snapped(Vector3(0.01, 0.01, 0.01)), foe.pos.snapped(Vector3(0.01, 0.01, 0.01)), bot.grounded])
+						if blind <= 3: print("REVIVE  blind shot: bot %s foe %s grounded %s" % [bp0.snapped(Vector3(0.01, 0.01, 0.01)), fp0.snapped(Vector3(0.01, 0.01, 0.01)), bot.grounded])
 						break
 		ok(aimed > 0 and blind == 0 and hops <= 3, "%s: no shots without a clear line, no hopping at it (after the rival %d of %d frames, %d firing, %d blind, %d hops)" % [variant, aimed, frames, fired, blind, hops])
 	print("REVIVE CHECK %s" % ("PASS" if bad == 0 else "FAIL (%d)" % bad))

@@ -1902,7 +1902,15 @@ func _boss_check() -> void:
 			god.call()
 			m.step(Match.DT); t += Match.DT
 	var spot := func(h: Hunter, at: Vector3): h.teleport(Vector3(at.x, m.world.ground_at(at.x, at.z), at.z)); h.vel = Vector3.ZERO
-	var park := func(h: Hunter): spot.call(h, m.world.spawns[0] if not m.world.spawns.is_empty() else m.world.random_ground())
+	var park := func(h: Hunter):
+		var at: Vector3 = m.world.spawns[0] if not m.world.spawns.is_empty() else m.world.random_ground()
+		spot.call(h, at)
+		# (a parked hunter just stands there: clear the monsters round it, or they shove it about until
+		# one knock sends it over the island's edge and out of the match)
+		for mb in m.mobs:
+			if not (mb is Boss) and not mb.dead and mb.flat_dist(at) < 18.0:
+				print("BOSS  park: cleared a %s %.1fm from the parking spot" % [mb.mkind, mb.flat_dist(at)])
+				mb.dead = true; mb.visible = false
 	# 1. the ward keeps you out while it's sealed
 	var F: Dictionary = by_boss["colossus"]
 	spot.call(P, F["c"] + Vector3(2, 0, 2))
