@@ -480,17 +480,11 @@ static func breed(a: Dictionary, b: Dictionary, rng: RandomNumberGenerator, sp :
 	ensure(baby)
 	return baby
 
-## Rare Eggs brought home from boss lairs wait in the hatchery (Save.d["rare_eggs"]) and settle into the
-## nest one at a time, whenever it's empty. Returns true if one just settled.
+## Rare Eggs no longer use the breeding nest: they hatch on the Incubator (scripts/core/incubator.gd).
+## Kept for older callers: puts shelf eggs into free incubator cradles. True if any went in.
 static func settle_rare_egg() -> bool:
-	if not Save.d.get("egg", {}).is_empty():
-		return false
-	var q: Array = Save.d.get("rare_eggs", [])
-	if q.is_empty():
-		return false
-	var e: Dictionary = q.pop_front()
-	Save.d["egg"] = {"sp": String(e.get("sp", "")), "rare": true, "boss": String(e.get("boss", "")), "m": int(Save.d.get("matches", 0)), "t": 0.0}
-	return true
+	Incubator.ensure()
+	return Incubator.settle() > 0
 
 ## What hatches from a Rare Egg: a kin of the rare species its boss guarded, a little grown already,
 ## glad to see you, now and then shimmering too.

@@ -667,7 +667,7 @@ func _targets(skip_b := "") -> Array:
 	var out: Array = []
 	for nm in ["portal", "pot", "stall", "rack", "ferry"]:
 		if h.spots.has(nm): out.append(h.spots[nm])
-	out.append(h.NEST_AT); out.append(h.YARD_AT); out.append(h.POND_EDGE)
+	out.append(h.NEST_AT); out.append(h.INCUB_AT); out.append(h.YARD_AT); out.append(h.POND_EDGE)
 	out.append(HomeEcon.GATE_AT)
 	for b in h.lots:
 		if b != skip_b: out.append(h.lots[b]["door"] if h.lots[b]["built"] else h.lots[b]["at"])

@@ -2069,6 +2069,90 @@ static func nest_egg(c: Color, spot: Color) -> Node3D:
 		part(shell, sphere(0.05, 8), toon(spot), Vector3(cos(a) * 0.22, y, sin(a) * 0.22), Vector3(1, 1, 0.5))
 	return root
 
+## The Incubator beside the Nesting Nook: a clay brazier with a copper hood on a round stone hearth,
+## and eight straw cradles in an arc in front of it ("C0".."C7", each with an "Egg" anchor, a ring
+## of six ember pebbles "P0".."P5" that light as its egg warms, and a "Lock" grate shown while that
+## cradle isn't bought yet). Beside it, a little shelf ("Shelf", slots "S0".."S5") for eggs waiting
+## for a free cradle. "Embers" glow in the brazier; "Glow" is its light.
+static func incubator() -> Node3D:
+	var root := Node3D.new()
+	var stone := toon(Color("b9b0a2")); var stone_d := toon(Color("8f877b"))
+	var clay := toon(Color("b4583a")); var clay_d := toon(Color("7e3a26"))
+	var iron := toon(Color("3a3236")); var copper := toon(Color("c8774a"), true, 0.1)
+	var wood := toon(Color("8a6a45")); var wood_d := toon(Color("6a4e32"))
+	var straw := toon(Color("d8b46a"))
+	var pebble := toon(Color("4a3a36"))
+	# the hearth: a low round of fitted stones
+	part(root, cyl(1.02, 1.08, 0.12, 22), stone_d, Vector3(0, 0.06, 0.05))
+	part(root, cyl(0.94, 0.98, 0.06, 22), stone, Vector3(0, 0.15, 0.05))
+	# the brazier at the back: a clay bowl on three stubby feet, glowing coals inside
+	var bz := Vector3(0, 0, -0.38)
+	for i in 3:
+		var a := TAU * i / 3.0 + 0.5
+		part(root, cyl(0.05, 0.07, 0.2, 8), clay_d, bz + Vector3(cos(a) * 0.24, 0.27, sin(a) * 0.24))
+	part(root, cyl(0.4, 0.24, 0.3, 16), clay, bz + Vector3(0, 0.48, 0))
+	var lip := TorusMesh.new(); lip.inner_radius = 0.35; lip.outer_radius = 0.44; lip.rings = 20; lip.ring_segments = 8
+	part(root, lip, clay_d, bz + Vector3(0, 0.63, 0), Vector3(1.0, 0.6, 1.0))
+	var embers := Node3D.new(); embers.name = "Embers"; embers.position = bz; root.add_child(embers)
+	var rng := RandomNumberGenerator.new(); rng.seed = 41
+	for i in 9:
+		var a := rng.randf() * TAU; var r := rng.randf_range(0.04, 0.28)
+		part(embers, sphere(rng.randf_range(0.06, 0.09), 8), toon(Color("ff8a3a").lerp(Color("ffd06a"), rng.randf()), false, 1.4), Vector3(cos(a) * r, 0.62, sin(a) * r), Vector3(1, 0.6, 1))
+	# the hood: three iron posts and a copper cap with a little chimney
+	for i in 3:
+		var a := TAU * i / 3.0 + PI * 0.5
+		part(root, cyl(0.025, 0.03, 1.35, 6), iron, bz + Vector3(cos(a) * 0.46, 0.85, sin(a) * 0.46), Vector3.ONE, Vector3(sin(a) * 0.08, 0, -cos(a) * 0.08))
+	part(root, cyl(0.1, 0.5, 0.28, 14), copper, bz + Vector3(0, 1.62, 0))
+	part(root, cyl(0.08, 0.1, 0.2, 10), copper, bz + Vector3(0, 1.84, 0))
+	part(root, cyl(0.13, 0.11, 0.05, 10), iron, bz + Vector3(0, 1.95, 0))
+	var glow := OmniLight3D.new(); glow.name = "Glow"
+	glow.light_color = Color("ffa04a"); glow.light_energy = 0.0; glow.omni_range = 2.6; glow.position = bz + Vector3(0, 0.9, 0.5)
+	root.add_child(glow)
+	# the cradles: an arc of eight round the front of the hearth, each with ember pebbles in front
+	for i in 8:
+		var a := PI * (0.04 + 0.92 * float(i) / 7.0)
+		var c := Node3D.new(); c.name = "C%d" % i
+		c.position = Vector3(-cos(a) * 0.74, 0.18, 0.02 + sin(a) * 0.62)
+		root.add_child(c)
+		part(c, cyl(0.14, 0.16, 0.1, 12), stone, Vector3(0, 0.05, 0))
+		var tr := TorusMesh.new(); tr.inner_radius = 0.06; tr.outer_radius = 0.14; tr.rings = 14; tr.ring_segments = 7
+		part(c, tr, straw, Vector3(0, 0.13, 0), Vector3(1.0, 0.6, 1.0), Vector3.ZERO, "Nest")
+		for j in 6:
+			var b := PI * (0.18 + 0.64 * float(j) / 5.0)
+			part(c, sphere(0.028, 6), pebble, Vector3(cos(b) * 0.17, 0.02, sin(b) * 0.17), Vector3(1.2, 0.7, 1.2), Vector3.ZERO, "P%d" % j)
+		var egg := Node3D.new(); egg.name = "Egg"; egg.position = Vector3(0, 0.08, 0); c.add_child(egg)
+		var lock := Node3D.new(); lock.name = "Lock"; c.add_child(lock)
+		for k in 3:
+			part(lock, box(0.24, 0.02, 0.025), iron, Vector3(0, 0.12, -0.07 + k * 0.07))
+		lock.visible = false
+	# the shelf for eggs waiting their turn, behind and to one side: two planks, three eggs a plank
+	var shelf := Node3D.new(); shelf.name = "Shelf"; shelf.position = Vector3(0.95, 0, -0.95); shelf.rotation.y = -0.35; root.add_child(shelf)
+	for sx in [-1.0, 1.0]:
+		part(shelf, box(0.06, 0.95, 0.06), wood_d, Vector3(sx * 0.36, 0.47, -0.1))
+		part(shelf, box(0.06, 0.95, 0.06), wood_d, Vector3(sx * 0.36, 0.47, 0.1))
+	for y in [0.3, 0.7]:
+		part(shelf, box(0.82, 0.05, 0.28), wood, Vector3(0, y, 0))
+		for j in 3:
+			var x := -0.24 + j * 0.24
+			var straw_ring := TorusMesh.new(); straw_ring.inner_radius = 0.045; straw_ring.outer_radius = 0.09; straw_ring.rings = 10; straw_ring.ring_segments = 6
+			part(shelf, straw_ring, straw, Vector3(x, y + 0.04, 0), Vector3(1.0, 0.6, 1.0))
+			var mk := Marker3D.new(); mk.name = "S%d" % ((0 if y < 0.5 else 3) + j); mk.position = Vector3(x, y + 0.03, 0)
+			shelf.add_child(mk)
+	return root
+
+## A small gold Rare Egg for the incubator's shelf and cradle, spotted in the colour of the kin inside.
+static func rare_egg_small(spot: Color, s := 1.0) -> Node3D:
+	var root := Node3D.new()
+	var shell := Node3D.new(); shell.name = "Shell"; root.add_child(shell)
+	var gold := toon(Color("ffd36a"), true, 0.35)
+	part(shell, sphere(0.26 * s, 16), gold, Vector3(0, 0.3 * s, 0), Vector3(0.9, 1.22, 0.9))
+	var rng := RandomNumberGenerator.new(); rng.seed = int(spot.r * 991 + spot.g * 113 + spot.b * 7)
+	var sm := toon(spot, false, 1.0)
+	for i in 7:
+		var a := rng.randf() * TAU; var y := rng.randf_range(0.16, 0.5)
+		part(shell, sphere(0.045 * s, 8), sm, Vector3(cos(a) * 0.215 * s, y * s, sin(a) * 0.215 * s), Vector3(1, 1, 0.5))
+	return root
+
 # ---------------------------------------------------------------- monsters
 static func mob(kind: String) -> Node3D:
 	var md: Dictionary = Data.MOBS[kind]
