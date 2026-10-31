@@ -1201,7 +1201,9 @@ func _chunked(parent: Node3D, items: Array, mesh: Mesh, mat: Material, label: St
 		"bush": vis_end = DRAW_BUSH * draw_k
 		"big":
 			if draw_k < 0.999: vis_end = DRAW_BIG_LOW * draw_k
-			mesh = with_lods(mesh)
+			# trees (rounded canopies simplify cleanly); rocks and pillars keep full detail: their
+			# crystal shards and thin ledges vanish in the simplified versions
+			if label.begins_with("tree"): mesh = with_lods(mesh)
 			# trees and boulders come in many styles and shapes, each its own batch: bigger chunks
 			# mean far fewer draws (and shadow draws) for a few more off-screen instances
 			chunk = maxi(chunk, 32)
