@@ -368,6 +368,7 @@ static func rare_egg(col: Color) -> Node3D:
 	var ring := MeshInstance3D.new(); ring.mesh = Models.flat_quad(2.2)
 	ring.material_override = Models.ring_mat(Color("ffd36a"), 0.1); ring.position.y = 0.05
 	root.add_child(ring)
+	root.add_child(Models.icon_badge("egg", 1.75))
 	var p := CPUParticles3D.new()
 	p.amount = 22; p.lifetime = 1.4
 	p.emission_shape = CPUParticles3D.EMISSION_SHAPE_SPHERE; p.emission_sphere_radius = 0.55

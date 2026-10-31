@@ -560,10 +560,12 @@ static func clean_look(lk: Dictionary) -> Dictionary:
 ## How each class reads at a glance from the match camera, whatever the race or outfit (purely
 ## visual): overall size on top of the class scale (about 0.88 / 1.0 / 1.18 in all), build, boots,
 ## weapon size, and the class emblem on the pack (light: a chevron, medium: a diamond, heavy: a shield).
+## Stylized like a hero brawler: big heads and hands, small tidy feet, tapered limbs, and a strong
+## shoulder line per class ("pad_l"/"pad_r": pauldron size each side, "hands": glove size).
 const CLASS_LOOK := {
-	"light": {"size": 0.95, "build": 0.88, "boots": 0.95, "weapon": 0.98},
-	"medium": {"size": 1.0, "build": 1.0, "boots": 1.06, "weapon": 1.15},
-	"heavy": {"size": 1.035, "build": 1.12, "boots": 1.32, "weapon": 1.42},
+	"light": {"size": 0.95, "build": 0.84, "boots": 0.84, "weapon": 0.98, "pad_l": 0.78, "pad_r": 0.78, "hands": 1.14},
+	"medium": {"size": 1.0, "build": 1.0, "boots": 0.92, "weapon": 1.15, "pad_l": 1.32, "pad_r": 0.86, "hands": 1.2},
+	"heavy": {"size": 1.035, "build": 1.14, "boots": 1.06, "weapon": 1.42, "pad_l": 1.85, "pad_r": 1.85, "hands": 1.5},
 }
 
 ## The class's own marks: its emblem on top of the pack in the class colour (seen from above), a
@@ -595,7 +597,8 @@ static func _class_marks(torso: Node3D, cls: String, bw: float, m_acc: Material,
 			# a long scarf trailing from the collar (on its own pivot, so it streams behind)
 			var scarf := _pivot(torso, "Scarf", Vector3(0, 0.6, 0.18 * bw))
 			for sx in [-1.0, 1.0]:
-				_blade(scarf, m_acc, Vector3(0.06 * sx, 0.0, 0.0), Vector3(0.12 * sx, -0.45, 1.0), 0.48 - (sx + 1.0) * 0.05, 0.1, PI * 0.5, 0.18)
+				_blade(scarf, m_acc, Vector3(0.06 * sx, 0.0, 0.0), Vector3(0.16 * sx, -0.5, 1.0), 0.78 - (sx + 1.0) * 0.1, 0.13, PI * 0.5, 0.16)
+				_blade(scarf, m_trim, Vector3(0.06 * sx, -0.02, 0.03), Vector3(0.16 * sx, -0.5, 1.0), 0.2, 0.135, PI * 0.5, 0.17)   # a stripe at the root
 		"medium":
 			part(torso, box(0.12, 0.12, 0.025), m_cls, at, Vector3.ONE, tilt + Vector3(0, 0, PI * 0.25))
 		"heavy":
@@ -629,9 +632,12 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 	var hero_col: Color = OUTFIT_COLS[oi]
 	var hc := hero_col
 	# outfit: a coat in the hero's colour, darker trousers and leather, team colour on the trim
-	var coat_col := hero_col.lerp(Color("3a3f52"), 0.42).lerp(team_col, 0.12)
-	var shirt_col := hero_col.lerp(Color("f3eee2"), 0.3).darkened(0.05)
-	var pants_col := Color("3a3448").lerp(coat_col, 0.2)
+	# strong colour blocking: a saturated coat, a pale shirt, dark trousers, team colour on the
+	# pauldrons, knee guards, scarf and sash, and gold on the edges
+	var coat_col := hero_col.lerp(Color("3a3f52"), 0.3).lerp(team_col, 0.1)
+	coat_col = Color.from_hsv(coat_col.h, minf(1.0, coat_col.s * 1.15), coat_col.v)
+	var shirt_col := hero_col.lerp(Color("f3eee2"), 0.45)
+	var pants_col := Color("2e2a3a").lerp(coat_col, 0.15)
 	var mats: Array = []
 	var m_body := toon(coat_col); mats.append(m_body)
 	var m_shirt := toon(shirt_col); mats.append(m_shirt)
@@ -656,6 +662,10 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 	painted(m_skin, 4, 0.0, 0.0, 0.16)     # no part gradient on skin: the jaw, nose and ears would show seams
 	painted(m_hair, 5, 0.26, 0.22, 0.22)
 	painted(m_gun, 3, 0.12, 0.1, 0.1); painted(m_gold, 3, 0.1, 0.0, 0.0)
+	if cls == "heavy":
+		painted(m_trim, 3, 0.16, 0.12, 0.14)      # the heavy's trim is plate: painted metal with a sheen
+		m_trim.set_shader_parameter("gloss", 0.45)
+	m_acc.set_shader_parameter("gloss", 0.2)
 	var rig := Node3D.new(); rig.name = "Rig"; root.add_child(rig)
 	var legs := Node3D.new(); legs.name = "Legs"; rig.add_child(legs)
 	var bw: float = [0.88, 1.0, 1.15][clampi(int(lk["body"]), 0, 2)]
@@ -668,13 +678,13 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 		var leg := Node3D.new(); leg.name = "LegL" if sx < 0.0 else "LegR"
 		leg.position = Vector3(0.11 * sx * bw, 0.44, 0)
 		legs.add_child(leg)
-		part(leg, limb(0.095 * bw, 0.07 * bw, 0.32, 0.1), m_pants, Vector3(0, -0.12, 0))
-		part(leg, sphere(0.045, 8), m_acc, Vector3(0, -0.2, -0.07), Vector3(1.0, 1.0, 0.6))
+		part(leg, limb(0.104 * bw, 0.062 * bw, 0.32, 0.16), m_pants, Vector3(0, -0.12, 0))
+		part(leg, sphere(0.062, 10), m_acc, Vector3(0, -0.2, -0.062), Vector3(1.0, 1.1, 0.62))     # knee guard
 		# the shin and boot hang from the knee, so legs can bend
 		var knee := Node3D.new(); knee.name = "Knee"; knee.position = Vector3(0, -0.2, 0)
 		leg.add_child(knee)
-		part(knee, limb(0.074, 0.066, 0.24, 0.06), m_leather, Vector3(0, -0.11, 0))
-		part(knee, cyl(0.092, 0.092, 0.05, 12), m_trim, Vector3(0, -0.01, 0))
+		part(knee, limb(0.07, 0.05, 0.24, 0.14), m_leather, Vector3(0, -0.11, 0))
+		part(knee, cyl(0.08, 0.086, 0.05, 12), m_trim, Vector3(0, -0.02, 0))
 		part(knee, sphere(0.085, 16), m_leather, Vector3(0, -0.205, -0.055), Vector3(0.95, 0.6, 1.5) * boot_k)
 		part(knee, sphere(0.07, 14), m_leather, Vector3(0, -0.19, 0.0), Vector3(1.0, 0.75, 1.0) * boot_k)   # heel
 		part(knee, box(0.135 * boot_k, 0.034, 0.24 * boot_k), m_dark, Vector3(0, -0.24, -0.05 * boot_k))
@@ -683,7 +693,7 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 	var torso := Node3D.new(); torso.name = "Torso"; torso.position = Vector3(0, 0.42, 0); rig.add_child(torso)
 	var fem := gender == 0
 	# women: narrower shoulders and waist, wider hips, a bust; men: broader through the chest
-	var chest_w := bw * (0.88 if fem else 1.07)
+	var chest_w := bw * (0.9 if fem else 1.12)
 	# hips and a coat that flares a little below the belt
 	part(torso, cyl(0.21 * bw, (0.22 if fem else 0.2) * bw, 0.14, 16), m_pants, Vector3(0, 0.02, 0))
 	# the class shapes the clothes: light hunters wear a fitted jacket and a short cape, medium ones
@@ -718,20 +728,52 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 	part(torso, cyl(0.07 if fem else 0.085, 0.08 if fem else 0.1, 0.1, 10), m_skin, Vector3(0, 0.66, 0))   # neck
 	# belt with a buckle and pouches, and a strap across the chest
 	part(torso, cyl(0.245 * bw, 0.245 * bw, 0.07, 18), m_leather, Vector3(0, 0.1, 0))
-	part(torso, box(0.08, 0.07, 0.03), m_gold, Vector3(0, 0.1, -0.245 * bw))
+	part(torso, box(0.11, 0.09, 0.035), m_gold, Vector3(0, 0.1, -0.248 * bw))
 	for sx in [-1.0, 1.0]:
 		part(torso, box(0.1, 0.11, 0.08), m_leather, Vector3(0.19 * sx * bw, 0.06, -0.1), Vector3.ONE, Vector3(0, 0.5 * sx, 0))
 	part(torso, box(0.06, 0.62, 0.04), m_leather, Vector3(0.02, 0.36, -0.215 * bw), Vector3.ONE, Vector3(-0.1, 0, 0.62))
-	# shoulder pads in team colour (big pauldrons on heavies)
-	var pad_k := 1.45 if cls == "heavy" else (0.8 if cls == "light" else 1.0)
+	# pauldrons in team colour: a domed plate over a second lame in the trim colour, a gold rim and
+	# rivets; heavies wear huge ones with a ridge, mediums one big one on the left (an asymmetric,
+	# hero-ish shoulder line), lights small leather caps
+	var CL: Dictionary = CLASS_LOOK.get(cls, {})
 	for sx in [-1.0, 1.0]:
-		var hm := SphereMesh.new(); hm.radius = 0.13 * pad_k; hm.height = 0.13 * pad_k; hm.is_hemisphere = true; hm.radial_segments = 30; hm.rings = 10
-		part(torso, hm, m_acc, Vector3((0.24 + (pad_k - 1.0) * 0.06) * sx * chest_w, 0.52 + (pad_k - 1.0) * 0.04, 0.0), Vector3(1.0, 0.9, 1.1), Vector3(0, 0, -0.45 * sx))
-		part(torso, cyl(0.135, 0.135, 0.025, 14), m_trim, Vector3(0.245 * sx * chest_w, 0.5, 0.0), Vector3.ONE, Vector3(0, 0, -0.45 * sx))
+		var pk := float(CL.get("pad_l" if sx < 0.0 else "pad_r", 1.0))
+		var pr := 0.13 * pk
+		var pc := Vector3((0.235 + (pk - 1.0) * 0.07) * sx * chest_w, 0.52 + (pk - 1.0) * 0.015, 0.0)
+		var prot := Vector3(0, 0, -0.45 * sx)
+		var hm := SphereMesh.new(); hm.radius = pr; hm.height = pr; hm.is_hemisphere = true; hm.radial_segments = 30; hm.rings = 10
+		var m_pad: Material = m_leather if cls == "light" else m_acc
+		part(torso, hm, m_pad, pc, Vector3(1.0, 0.85, 1.15), prot)
+		if cls != "light":
+			var hm2 := SphereMesh.new(); hm2.radius = pr * 0.9; hm2.height = pr * 0.9; hm2.is_hemisphere = true; hm2.radial_segments = 28; hm2.rings = 8
+			part(torso, hm2, m_trim, pc + Vector3(0.035 * pk * sx, -0.07 * pk, 0.0), Vector3(1.0, 0.75, 1.1), Vector3(0, 0, -0.75 * sx))
+			part(torso, cyl(pr + 0.012, pr + 0.012, 0.026, 24), m_gold, pc, Vector3(1.0, 1.0, 1.15), prot)     # gold rim
+			for k in 3:
+				var ra := -0.6 + k * 0.6
+				part(torso, sphere(0.018 * minf(pk, 1.5), 6), m_gold, pc + Vector3(sin(0.45 * sx) * pr * 0.25, pr * 0.62, pr * 0.95 * sin(ra)) + Vector3(0.0, 0.0, 0.0), Vector3.ONE)
+		else:
+			part(torso, cyl(pr + 0.008, pr + 0.008, 0.02, 20), m_trim, pc, Vector3(1.0, 1.0, 1.15), prot)
 		# the class badge on top of each shoulder, seen from the match camera whichever way they face
-		var top := Vector3((0.24 + (pad_k - 1.0) * 0.06) * sx * chest_w, 0.52 + (pad_k - 1.0) * 0.04, 0.0) + Vector3(0.13 * pad_k * 0.9 * sin(0.45 * sx) , 0.13 * pad_k * 0.9 * cos(0.45), 0)
+		var top := pc + Vector3(pr * 0.9 * sin(0.45 * sx), pr * 0.85 * cos(0.45), 0)
 		var badge: Vector3 = {"light": Vector3(0.05, 0.02, 0.17), "medium": Vector3(0.1, 0.02, 0.1), "heavy": Vector3(0.17, 0.024, 0.15)}.get(cls, Vector3(0.1, 0.02, 0.1))
 		part(torso, box(badge.x, badge.y, badge.z), class_mat(cls), top, Vector3.ONE, Vector3(0, PI * 0.25 if cls == "medium" else 0.0, -0.45 * sx))
+	match cls:
+		"light":
+			# a hood worn down, bunched behind the neck
+			part(torso, sphere(0.2, 16), m_acc, Vector3(0, 0.64, 0.15 * bw), Vector3(1.05, 0.62, 0.78))
+			part(torso, sphere(0.15, 14), m_acc, Vector3(0, 0.6, 0.2 * bw), Vector3(1.0, 0.8, 0.7))
+		"medium":
+			# a satchel on the right hip with a buckled flap, and a bandolier of pouches
+			part(torso, box(0.17, 0.16, 0.09), m_leather, Vector3(0.26 * bw, 0.02, 0.0), Vector3.ONE, Vector3(0, -0.35, 0.08))
+			part(torso, box(0.18, 0.08, 0.1), m_trim, Vector3(0.262 * bw, 0.09, -0.004), Vector3.ONE, Vector3(-0.1, -0.35, 0.08))
+			part(torso, box(0.04, 0.04, 0.02), m_gold, Vector3(0.24 * bw, 0.07, -0.06), Vector3.ONE, Vector3(0, -0.35, 0.08))
+			for k in 3:
+				var t := 0.15 - k * 0.15
+				part(torso, box(0.065, 0.075, 0.05), m_leather, Vector3(0.02 - 0.58 * t, 0.36 + 0.81 * t, -0.24 * bw), Vector3.ONE, Vector3(-0.1, 0, 0.62))
+		"heavy":
+			# a plated chest piece with a gold rim and a big buckled belt
+			part(torso, box(0.42 * bw, 0.06, 0.06), m_gold, Vector3(0, 0.52, -0.26 * bw), Vector3.ONE, Vector3(0.08, 0, 0))
+			part(torso, box(0.18, 0.14, 0.04), m_gold, Vector3(0, 0.1, -0.27 * bw))
 	_class_marks(torso, cls, bw, m_acc, m_trim)
 	# the glider pack: a rolled wing on a back plate
 	part(torso, box(0.3, 0.34, 0.1), m_leather, Vector3(0, 0.36, 0.24 * bw))
@@ -833,15 +875,21 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 		var sd := "L" if sx < 0.0 else "R"
 		var piv := Node3D.new(); piv.name = "Arm%sPivot" % sd; piv.position = Vector3(0.215 * sx * chest_w, 0.5, 0.0)
 		torso.add_child(piv)
-		part(piv, limb(0.086, 0.072, 0.25, 0.1), m_body, Vector3(0, -0.1, 0))
+		# tapered: full at the shoulder, slim at the wrist, then a big flared glove (gauntlets on heavies)
+		var hk2 := float(CLASS_LOOK.get(cls, {}).get("hands", 1.0))
+		part(piv, limb(0.09, 0.062, 0.25, 0.16), m_body, Vector3(0, -0.1, 0))
 		var elbow := Node3D.new(); elbow.name = "Elbow"; elbow.position = Vector3(0, -0.21, 0); piv.add_child(elbow)
-		part(elbow, limb(0.075, 0.062, 0.22, 0.12), m_body, Vector3(0, -0.09, 0), Vector3.ONE, Vector3.ZERO, "Arm" + sd)
-		part(elbow, cyl(0.074, 0.08, 0.06, 12), m_trim, Vector3(0, -0.15, 0))
+		part(elbow, limb(0.07, 0.05, 0.22, 0.14), m_body, Vector3(0, -0.09, 0), Vector3.ONE, Vector3.ZERO, "Arm" + sd)
+		part(elbow, cyl(0.062 * hk2, 0.07 * hk2, 0.07, 14), m_trim, Vector3(0, -0.15, 0))     # bracer
+		if cls == "heavy":
+			part(elbow, cyl(0.075 * hk2, 0.09 * hk2, 0.1, 16), m_trim, Vector3(0, -0.175, 0))
+			part(elbow, cyl(0.093 * hk2, 0.093 * hk2, 0.02, 16), m_gold, Vector3(0, -0.13, 0))
 		# a gloved hand: a rounded palm and a thumb
 		var hand := Node3D.new(); hand.name = "Hand"; hand.position = Vector3(0, -0.235, 0); elbow.add_child(hand)
-		part(hand, sphere(0.084, 16), m_leather, Vector3.ZERO, Vector3(0.95, 1.3, 0.88))
-		part(hand, sphere(0.038, 12), m_leather, Vector3(0.0, 0.04, -0.065), Vector3(1.0, 1.4, 1.0))
-		part(hand, cyl(0.07, 0.082, 0.05, 16), m_leather, Vector3(0, 0.07, 0))      # a glove cuff
+		var m_glove: Material = m_trim if cls == "heavy" else m_leather
+		part(hand, sphere(0.084 * hk2, 16), m_glove, Vector3.ZERO, Vector3(0.95, 1.25, 0.88))
+		part(hand, sphere(0.038 * hk2, 12), m_glove, Vector3(0.0, 0.03, -0.065 * hk2), Vector3(1.0, 1.4, 1.0))
+		part(hand, cyl(0.07 * hk2, 0.084 * hk2, 0.05, 16), m_leather, Vector3(0, 0.07, 0))      # a glove cuff
 		merge_static(piv); merge_static(elbow); merge_static(hand)
 	gun_parts(gun, weapon, m_gun, m_dark, m_acc)
 	gun.scale = Vector3.ONE * float(CLASS_LOOK.get(cls, {}).get("weapon", 1.0))     # heavies carry big guns
@@ -888,10 +936,10 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 		merge_static(legs.get_node(nm))
 		merge_static(legs.get_node(nm + "/Knee"))
 	# the race's proportions: head size, how broad the body is, overall height
-	var hk := float(race["head"]) * 1.06     # a touch big-headed, for a chunkier stylized read
+	var hk := float(race["head"]) * 1.2     # big-headed like a hero brawler: faces read from the match camera
 	var bk := float(race["bulk"])
 	head.scale = Vector3.ONE * hk
-	head.position.y += (hk - 1.0) * 0.08
+	head.position.y += (hk - 1.0) * 0.05
 	if bk != 1.0:
 		for ch in torso.get_children():
 			if ch is MeshInstance3D and not String(ch.name).begins_with("Tail") and ch.name != "Wings":
@@ -1148,16 +1196,16 @@ static func _race_parts(torso: Node3D, rid: String, m_skin: Material, m_hair: Ma
 		"vulpin":
 			var inner := toon(Color("ffb6bf"))
 			for sx in [-1.0, 1.0]:
-				part(torso, cyl(0.0, 0.13, 0.38, 4), m_hair, Vector3(0.16 * sx, 1.13, 0.01), Vector3(1.0, 1.0, 0.55), Vector3(0, 0.785, -0.36 * sx))
-				part(torso, cyl(0.0, 0.075, 0.24, 4), inner, Vector3(0.155 * sx, 1.1, -0.03), Vector3(1.0, 1.0, 0.3), Vector3(0, 0.785, -0.36 * sx))
+				part(torso, cyl(0.0, 0.16, 0.46, 4), m_hair, Vector3(0.17 * sx, 1.16, 0.01), Vector3(1.0, 1.0, 0.55), Vector3(0, 0.785, -0.4 * sx))
+				part(torso, cyl(0.0, 0.095, 0.3, 4), inner, Vector3(0.165 * sx, 1.13, -0.035), Vector3(1.0, 1.0, 0.3), Vector3(0, 0.785, -0.4 * sx))
 			part(torso, sphere(0.1, 12), toon(skin_c.lightened(0.35)), Vector3(0, 0.79, -0.19), Vector3(1.15, 0.75, 0.9))   # muzzle
 			part(torso, sphere(0.035, 8), m_dark, Vector3(0, 0.81, -0.285))   # nose
 			# the tail: a big brush that sweeps up behind, with a white tip
 			var tail := Node3D.new(); tail.name = "Tail"; tail.position = Vector3(0, 0.02, 0.26); torso.add_child(tail)
-			var pts := [[Vector3(0, -0.02, 0.08), 0.1], [Vector3(0.06, 0.06, 0.26), 0.16], [Vector3(0.16, 0.18, 0.42), 0.19], [Vector3(0.26, 0.34, 0.5), 0.16]]
+			var pts := [[Vector3(0, -0.02, 0.08), 0.11], [Vector3(0.07, 0.07, 0.28), 0.19], [Vector3(0.19, 0.21, 0.46), 0.23], [Vector3(0.31, 0.4, 0.55), 0.19]]
 			for p in pts:
 				part(tail, sphere(float(p[1]), 12), m_hair, p[0])
-			part(tail, sphere(0.12, 10), toon(Color("fbf6ee")), Vector3(0.33, 0.47, 0.52))
+			part(tail, sphere(0.15, 10), toon(Color("fbf6ee")), Vector3(0.39, 0.56, 0.57))
 		"stoneborn":
 			var rock := toon(skin_c.darkened(0.28))
 			var glow := toon(hero_col.lightened(0.2), false, 0.9)
@@ -1340,21 +1388,22 @@ static func _face(torso: Node3D, face: int, gender: int, m_dark: Material, m_ski
 	var white := toon(Color("fbf8f2"), false, 0.1)
 	var iris := toon([Color("4a3a6a"), Color("3a5a8a"), Color("2a6a4a"), Color("6a3a2a"), Color("7a2a4a")][face % 5], false)
 	iris.set_shader_parameter("gloss", 0.85); iris.set_shader_parameter("sss", 0.0)
-	var y := 0.865
-	var es := 1.14 if fem else 0.9          # bigger, rounder eyes for her; smaller, narrower for him
+	var y := 0.868
+	var es := 1.3 if fem else 1.1           # big readable eyes; rounder for her, narrower for him
 	var m_hairf := toon(hair_c.darkened(0.15), false)
 	for sx in [-1.0, 1.0]:
-		var ex: float = (0.086 if fem else 0.09) * sx
+		var ex: float = (0.093 if fem else 0.095) * sx
 		var kind := face
 		if face == 5:
 			kind = 3 if sx > 0.0 else 0        # wink: one eye shut
 		var open := kind in [0, 1, 4, 6, 7, 8]
 		match kind:
 			0, 4, 6, 7:   # bright eyes, fierce, starry, determined: white, iris, pupil and a shine
-				part(torso, sphere(0.05 * es, 12), white, Vector3(ex, y, -0.2), Vector3(0.85, 1.15 if kind in [0, 6] else 0.9, 0.45))
-				part(torso, sphere(0.036 * es, 10), iris, Vector3(ex + 0.004 * sx, y - 0.004, -0.218), Vector3(0.9, 1.1, 0.4))
-				part(torso, sphere(0.019 * es, 8), m_dark, Vector3(ex + 0.004 * sx, y - 0.004, -0.226), Vector3(1.0, 1.1, 0.4))
-				part(torso, sphere(0.012 * es, 6), shine, Vector3(ex + 0.016, y + 0.022, -0.232))
+				part(torso, sphere(0.05 * es, 12), white, Vector3(ex, y, -0.2), Vector3(0.85, 1.12 if kind in [0, 6] else 0.88, 0.45))
+				part(torso, sphere(0.036 * es, 10), iris, Vector3(ex + 0.004 * sx, y - 0.006, -0.219), Vector3(0.9, 1.12, 0.4))
+				part(torso, sphere(0.018 * es, 8), m_dark, Vector3(ex + 0.004 * sx, y - 0.008, -0.229), Vector3(1.0, 1.15, 0.4))
+				part(torso, sphere(0.014 * es, 6), shine, Vector3(ex + 0.016, y + 0.018, -0.237))
+				part(torso, sphere(0.007 * es, 6), shine, Vector3(ex - 0.012, y - 0.022, -0.236))
 				if kind == 6:
 					part(torso, sphere(0.02 * es, 6), shine, Vector3(ex - 0.01, y + 0.012, -0.233), Vector3(1.0, 1.0, 0.4))
 					part(torso, sphere(0.008, 6), shine, Vector3(ex - 0.014, y - 0.022, -0.233))
@@ -1376,33 +1425,40 @@ static func _face(torso: Node3D, face: int, gender: int, m_dark: Material, m_ski
 		# brows: thin and arched for her, thick and straight for him; angled in when fierce
 		var tilt: float = (-0.4 if kind == 4 else (-0.2 if kind == 7 else 0.15)) * sx
 		if fem:
-			part(torso, box(0.058, 0.011, 0.012), m_hairf, Vector3(ex + 0.006 * sx, y + 0.07, -0.21), Vector3.ONE, Vector3(0, 0, tilt + 0.18 * sx))
+			part(torso, box(0.066, 0.016, 0.016), m_hairf, Vector3(ex + 0.006 * sx, y + 0.08, -0.208), Vector3.ONE, Vector3(0, 0, tilt + 0.18 * sx))
 		else:
-			part(torso, box(0.078, 0.024, 0.018), m_hairf, Vector3(ex, y + 0.062, -0.212), Vector3.ONE, Vector3(0, 0, tilt * 0.8))
+			part(torso, box(0.088, 0.03, 0.022), m_hairf, Vector3(ex, y + 0.072, -0.208), Vector3.ONE, Vector3(0, 0, tilt * 0.9))
 		# lashes on her open eyes: two flicks at the outer corner
 		if fem and open:
-			part(torso, box(0.03, 0.011, 0.012), m_dark, Vector3(ex + 0.048 * sx, y + 0.032, -0.208), Vector3.ONE, Vector3(0, 0, 0.55 * sx))
-			part(torso, box(0.022, 0.009, 0.012), m_dark, Vector3(ex + 0.05 * sx, y + 0.012, -0.208), Vector3.ONE, Vector3(0, 0, 0.15 * sx))
-			part(torso, box(0.07 * es, 0.012, 0.012), m_dark, Vector3(ex, y + 0.046 * es, -0.222), Vector3.ONE, Vector3(0, 0, -0.08 * sx))
+			part(torso, box(0.036, 0.013, 0.012), m_dark, Vector3(ex + 0.056 * sx, y + 0.036, -0.206), Vector3.ONE, Vector3(0, 0, 0.55 * sx))
+			part(torso, box(0.026, 0.01, 0.012), m_dark, Vector3(ex + 0.058 * sx, y + 0.014, -0.206), Vector3.ONE, Vector3(0, 0, 0.15 * sx))
+			part(torso, box(0.075 * es, 0.015, 0.012), m_dark, Vector3(ex, y + 0.05 * es, -0.222), Vector3.ONE, Vector3(0, 0, -0.08 * sx))
 	# his jaw: wider and squarer at the bottom of the face, with a hint of a chin
 	if not fem:
 		var jaw := cyl(0.205, 0.13, 0.17, 2)   # a soft tapered jaw, a little wider than it is deep
 		part(torso, jaw, m_skin, Vector3(0, 0.745, -0.035), Vector3(1.04, 1.0, 0.92))
 		part(torso, box(0.1, 0.05, 0.05), m_skin, Vector3(0, 0.672, -0.115), Vector3.ONE, Vector3(-0.35, 0, 0))
-	part(torso, sphere(0.016 if fem else 0.021, 6), m_skin, Vector3(0, 0.83, -0.236), Vector3(1.0, 0.8, 0.8))   # nose
+	part(torso, sphere(0.016 if fem else 0.021, 6), m_skin, Vector3(0, 0.815, -0.232), Vector3(1.0, 0.8, 0.8))   # nose
 	# mouth: rosy lips for her, a plain line or grin for him
 	var mz := -0.236
 	var smile := face in [0, 3, 5, 6]
 	var lip_m: Material = toon(skin.lerp(Color("d0405a"), 0.55), false) if fem else m_dark
 	if face == 8:
-		part(torso, box(0.05, 0.012, 0.012), lip_m, Vector3(0.012, 0.79, mz), Vector3.ONE, Vector3(0, 0, 0.3))    # smirk
+		part(torso, box(0.06, 0.015, 0.012), lip_m, Vector3(0.012, 0.778, mz), Vector3.ONE, Vector3(0, 0, 0.3))    # smirk
 	elif smile:
-		var sm := TorusMesh.new(); sm.inner_radius = 0.022; sm.outer_radius = 0.032 if fem else 0.03; sm.rings = 28; sm.ring_segments = 10
-		part(torso, sm, lip_m, Vector3(0, 0.79, mz + 0.004), Vector3(1.0, 1.0, 0.4), Vector3(PI / 2, 0, PI))
+		# a smile: a curved stroke (a run of overlapping dots along the bottom of a circle), upturned
+		# at the corners, and an open grin on the cheerful faces
+		var sr := 0.036 if fem else 0.034
+		var cy := 0.796
+		for k in 11:
+			var a := lerpf(PI * 1.16, PI * 1.84, k / 10.0)
+			part(torso, sphere(0.0115 if fem else 0.0105, 6), lip_m, Vector3(cos(a) * sr, cy + sin(a) * sr * 0.75, mz + 0.002 + absf(cos(a)) * 0.01), Vector3(1.0, 0.8, 0.5))
+		if face in [3, 6]:
+			part(torso, sphere(0.022, 8), m_dark, Vector3(0, cy - sr * 0.62, mz + 0.004), Vector3(1.2, 0.55, 0.35))
 	elif fem:
-		part(torso, sphere(0.022, 8), lip_m, Vector3(0, 0.788, mz), Vector3(1.3, 0.55, 0.4))
+		part(torso, sphere(0.025, 8), lip_m, Vector3(0, 0.776, mz), Vector3(1.35, 0.6, 0.4))
 	else:
-		part(torso, box(0.05, 0.013, 0.012), m_dark, Vector3(0, 0.788, mz))
+		part(torso, box(0.058, 0.016, 0.012), m_dark, Vector3(0, 0.776, mz))
 	if fem or face == 3:
 		var blush := toon(Color("ff9a9a"), false)
 		for sx in [-1.0, 1.0]:
@@ -1602,7 +1658,8 @@ static func weapon_drop(weapon: String, rar: int) -> Node3D:
 	var beam := part(root, cyl(0.14, 0.26, 5.0, 10), glow_mat(Color(col, 0.34)), Vector3(0, 2.5, 0))
 	beam.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var ring := MeshInstance3D.new(); ring.mesh = flat_quad(1.3)
-	ring.material_override = ring_mat(col, 0.12); ring.position.y = 0.05
+	var rm := ring_mat(col, 0.12); rm.set_shader_parameter("fill", 0.12)
+	ring.material_override = rm; ring.position.y = 0.05
 	root.add_child(ring)
 	return root
 
@@ -2402,6 +2459,9 @@ static func chest_prim(tier := 0) -> Node3D:
 ## A dead hunter's deathbox: a squat crate with a glow in its value colour.
 static func deathbox(col: Color) -> Node3D:
 	var root := PropSculpt.chest(0) if Flora.v2() else chest_prim(0)
+	var own := root.get_node_or_null("Beacon")
+	if own:
+		root.remove_child(own); own.free()      # a deathbox glows in its value colour, not a chest's
 	var g := Node3D.new(); g.name = "Glow"; root.add_child(g)
 	var beam := part(g, cyl(0.12, 0.24, 5.0, 10), glow_mat(Color(col, 0.3)), Vector3(0, 2.5, 0))
 	beam.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -2416,6 +2476,89 @@ static func deathbox(col: Color) -> Node3D:
 	((root.get_meta("mats") as Array)[0] as ShaderMaterial).set_shader_parameter("albedo", Color("5a5560"))
 	((root.get_meta("mats") as Array)[1] as ShaderMaterial).set_shader_parameter("albedo", col.darkened(0.2))
 	return root
+
+# ------------------------------------------------------------------ world legend: interactable icons
+## Everything you can use out in the world (not loot, not breakables) wears a small floating badge
+## with a symbol, in one colour per kind, so it reads at a glance from the match camera:
+## shrines (blessing, teal), exits (hatches violet, uplinks cyan), rift keys (violet, like the
+## hatch they open), eggs (warm gold), revive beacons (mint). Loot is gold / rarity coloured with
+## a pillar and a ground pool; breakables are matte with no glow; decor stays low-contrast.
+const ICON_COLS := {"bless": Color("5fd0b0"), "hatch": Color("b98aff"), "uplink": Color("4ac8f0"), "key": Color("b98aff"),
+	"egg": Color("ffc04a"), "revive": Color("6ae8a0"), "dock": Color("ffb84a")}
+static var _icon_tex := {}
+
+## Is the point (x, y) (-1..1, y up) inside the white symbol for this kind?
+static func _icon_sym(kind: String, x: float, y: float) -> bool:
+	match kind:
+		"bless":     # a four-point sparkle
+			return pow(absf(x), 0.5) + pow(absf(y + 0.02), 0.5) < 0.86
+		"hatch", "uplink", "dock":   # an arrow up and out
+			if y >= -0.02 and y <= 0.56 and absf(x) < 0.48 * (0.56 - y) / 0.58: return true
+			return absf(x) < 0.15 and y > -0.56 and y < 0.0
+		"key":
+			var d := Vector2(x, y - 0.24).length()
+			if d < 0.27 and d > 0.12: return true
+			if absf(x) < 0.075 and y < 0.0 and y > -0.6: return true
+			if x > 0.0 and x < 0.26 and ((y > -0.58 and y < -0.47) or (y > -0.38 and y < -0.28)): return true
+			return false
+		"egg":
+			var ry := 0.5 if y > -0.08 else 0.4
+			var rx := 0.36 - 0.1 * clampf((y + 0.08) / 0.5, 0.0, 1.0)
+			return pow(x / rx, 2.0) + pow((y + 0.08) / ry, 2.0) < 1.0
+		"revive":   # a plus
+			return (absf(x) < 0.15 and absf(y) < 0.48) or (absf(y) < 0.15 and absf(x) < 0.48)
+	return false
+
+static func icon_texture(kind: String) -> ImageTexture:
+	if _icon_tex.has(kind):
+		return _icon_tex[kind]
+	var N := 96
+	var img := Image.create(N, N, false, Image.FORMAT_RGBA8)
+	var col: Color = ICON_COLS.get(kind, Color.WHITE)
+	var dark := col.darkened(0.7).lerp(Color("1a1626"), 0.4)
+	for py in N:
+		for px in N:
+			var acc := Color(0, 0, 0, 0)
+			for sy in 2:
+				for sx in 2:
+					var x := ((px + 0.25 + sx * 0.5) / N) * 2.0 - 1.0
+					var y := 1.0 - ((py + 0.25 + sy * 0.5) / N) * 2.0
+					# a diamond-ish rounded badge: a dark rim, the colour inside lighter at the top
+					var r := pow(pow(absf(x), 1.6) + pow(absf(y), 1.6), 1.0 / 1.6)
+					var c := Color(0, 0, 0, 0)
+					if r < 0.97:
+						c = dark
+					if r < 0.84:
+						c = col.lerp(col.lightened(0.35), clampf(y * 0.5 + 0.5, 0.0, 1.0))
+						var sym := _icon_sym(kind, x / 0.78, y / 0.78)
+						# a dark edge round the symbol so it pops on the colour
+						var edge := false
+						if not sym:
+							for o in [Vector2(0.06, 0), Vector2(-0.06, 0), Vector2(0, 0.06), Vector2(0, -0.06)]:
+								if _icon_sym(kind, (x + o.x) / 0.78, (y + o.y) / 0.78): edge = true; break
+						if sym: c = Color("fffdf6")
+						elif edge: c = dark.lerp(col, 0.25)
+					acc += c * 0.25
+			img.set_pixel(px, py, acc)
+	var tex := ImageTexture.create_from_image(img)
+	_icon_tex[kind] = tex
+	return tex
+
+## A floating badge for an interactable: a billboard that bobs gently above it. Named "Icon".
+static func icon_badge(kind: String, height: float, size := 0.8) -> Node3D:
+	var holder := Node3D.new(); holder.name = "Icon"; holder.position = Vector3(0, height, 0)
+	var sp := Sprite3D.new()
+	sp.texture = icon_texture(kind)
+	sp.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	sp.shaded = false
+	sp.double_sided = true
+	sp.alpha_cut = SpriteBase3D.ALPHA_CUT_DISABLED
+	sp.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	sp.pixel_size = size / 96.0
+	sp.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	holder.add_child(sp)
+	PropAnim.on(holder, 0.0, 0.07, 2.2)
+	return holder
 
 ## A revive beacon: a stone pylon with a green crystal. Stand on it with a dead teammate waiting
 ## and it brings them back.
@@ -2441,6 +2584,7 @@ static func revive_beacon() -> Node3D:
 	var ring := MeshInstance3D.new(); ring.name = "Ring"; ring.mesh = flat_quad(4.6)
 	ring.material_override = ring_mat(glow, 0.05); ring.position.y = 0.3
 	g.add_child(ring)
+	g.add_child(icon_badge("revive", 2.75))
 	return root
 
 static func shrine() -> Node3D:
@@ -2487,6 +2631,7 @@ static func shrine() -> Node3D:
 			var a2 := TAU * i / 3.0
 			part(cr, pm, cm, Vector3(cos(a2) * 0.42, -0.1, sin(a2) * 0.42), Vector3.ONE * 0.3)
 	PropAnim.on(cr, 0.9, 0.08)
+	cr.add_child(icon_badge("bless", 1.05))     # hidden with the crystal once the shrine is used
 	var base := MeshInstance3D.new(); base.name = "Ring"; base.mesh = flat_quad(3.0)
 	base.material_override = ring_mat(glow, 0.06); base.position.y = 0.04
 	root.add_child(base)

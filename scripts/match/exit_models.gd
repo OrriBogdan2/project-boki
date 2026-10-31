@@ -84,6 +84,7 @@ static func dock(beacon_off: Vector3) -> Node3D:
 	b.add_child(ring)
 	root.add_child(_sparks(DOCK, 30, 1.8, 2.0, "Sparks"))
 	Flora.paint_set_piece(root)
+	root.add_child(Models.icon_badge("dock", 2.2))
 	return root
 
 ## The sky-skiff: a small hull with outrigger fins, a striped lift-bag and a stern propeller.
@@ -190,6 +191,7 @@ static func hatch() -> Node3D:
 	hole.name = "Keyhole"
 	root.add_child(_sparks(HATCH, 26, 0.7, 3.0, "Sparks"))
 	Flora.paint_set_piece(root)
+	root.add_child(Models.icon_badge("hatch", 1.5))
 	return root
 
 ## The outpost's uplink: a stone plinth with a brass console and a tall mast topped with a crystal.
@@ -249,6 +251,7 @@ static func uplink() -> Node3D:
 	root.add_child(col)
 	root.add_child(_sparks(UPLINK, 40, 1.5, 3.0, "Sparks"))
 	Flora.paint_set_piece(root)
+	root.add_child(Models.icon_badge("uplink", 2.5))
 	return root
 
 ## Corner posts with pennants for an outpost on a map without authored walls.
@@ -277,6 +280,7 @@ static func rift_key() -> Node3D:
 	var halo := MeshInstance3D.new(); halo.mesh = Models.flat_quad(0.9)
 	halo.material_override = Models.ring_mat(Color(HATCH, 0.7), 0.12); halo.position.y = -0.2
 	root.add_child(halo)
+	root.add_child(Models.icon_badge("key", 0.95, 0.5))
 	return root
 
 # ------------------------------------------------------------------ second art pass helpers

@@ -3,6 +3,20 @@ extends RefCounted
 ## Tooling (--art-stats): vertices, triangles and draw calls per hunter (each race) and per kin, and
 ## how long a build takes, cold (meshes made for the first time) and warm (from the caches).
 static func stats() -> void:
+	if "--art-stats-detail" in OS.get_cmdline_user_args():
+		# draw calls per node of one hunter of each class (where the surfaces come from)
+		for cls in ["light", "medium", "heavy"]:
+			var hd := Models.hunter(cls, Data.TEAM_COLORS[0], "rifle", "", {"race": 0, "hair": 1})
+			var per := {}
+			var st: Array = [hd]
+			while not st.is_empty():
+				var c: Node = st.pop_back()
+				if c is MeshInstance3D and (c as MeshInstance3D).mesh and (c as MeshInstance3D).visible:
+					var k := String(hd.get_path_to(c.get_parent()))
+					per[k] = int(per.get(k, 0)) + (c as MeshInstance3D).mesh.get_surface_count()
+				for ch in c.get_children(): st.append(ch)
+			print("ART detail %s %s" % [cls, str(per)])
+			hd.free()
 	for r in Models.RACES.size():
 		var t0 := Time.get_ticks_usec()
 		var h := Models.hunter("medium", Data.TEAM_COLORS[0], "rifle", "", {"race": r, "hair": 1})
