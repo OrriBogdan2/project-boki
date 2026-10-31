@@ -255,7 +255,7 @@ func run(m: Node) -> void:
 	ok(seen > 0, "real matches spawn wild kin with the mutation roll (%d wild, %d mutated)" % [seen, mutd])
 	# ---------------------------------------------------------------- 7. perks and looks
 	var g := _kin(sps[0], "Big"); g["mutations"] = ["giant"]
-	var em := Evo.mods(g)
+	var em := Mutations.mods(g)      # (rare mutations keep their small perks; forms are budget-neutral now)
 	ok(is_equal_approx(em["hp"], 1.12) and is_equal_approx(em["speed"], 0.93), "Giant: +12%% health, -7%% speed (%s)" % str(em))
 	var c := _kin(sps[0], "Gem"); c["mutations"] = ["crystal", "glowing"]
 	ok(Mutations.owner_stat(c, "armor") == 6.0 and is_equal_approx(Mutations.owner_stat(c, "sight"), 0.08), "Crystal gives its hunter +6 armor, Glowing +8% sight")
