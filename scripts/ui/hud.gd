@@ -11,6 +11,16 @@ var hit_crit := false
 var hurt_t := 0.0
 var toasts: Array = []
 var minimap: ImageTexture
+var map_paint: Texture2D = null   # the painted map (MapPaint), when it's ready
+
+## The map picture to draw, and its pixels per tile (for regions given in tiles).
+func map_tex() -> Texture2D:
+	return map_paint if map_paint else minimap
+
+func map_region(tiles: Rect2) -> Rect2:
+	var t := map_tex()
+	var k := Vector2(float(t.get_width()) / m.world.w, float(t.get_height()) / m.world.h)
+	return Rect2(tiles.position * k, tiles.size * k)
 var kit_t0 := 0.0
 var bar_lerp := 1.0
 
@@ -31,6 +41,9 @@ func setup(match_node: Match) -> void:
 	add_child(c)
 	c.draw.connect(_draw_all)
 	_build_minimap()
+	# the painted map (smooth coasts, shading, paths) replaces the tile texture once it's baked
+	c.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	MapPaint.request(self, m.world, func(t: Texture2D): map_paint = t)
 	full_map = FullMap.new(self, m)
 
 # ------------------------------------------------------------------ the full map (M)
@@ -592,17 +605,17 @@ func _draw_minimap(sz: Vector2) -> void:
 	if mm_circ.z > 0.0:
 		# the map texture drawn into a disc: a fan of points round the rim, each with its map UV
 		var pts := PackedVector2Array(); var uvs := PackedVector2Array()
-		var tsz := Vector2(minimap.get_width(), minimap.get_height())
+		var tsz := Vector2(w.w, w.h)
 		var ctr := Vector2(mm_circ.x, mm_circ.y)
 		for i in 56:
 			var a := TAU * i / 56.0
 			var sp := ctr + Vector2(cos(a), sin(a)) * mm_circ.z
 			pts.append(sp)
 			uvs.append((view.position + (sp - inner.position) / k) / tsz)
-		c.draw_polygon(pts, PackedColorArray([Color.WHITE]), uvs, minimap)
+		c.draw_polygon(pts, PackedColorArray([Color.WHITE]), uvs, map_tex())
 	elif tex_view.size.x > 0.0 and tex_view.size.y > 0.0:
 		var dest := Rect2(inner.position + (tex_view.position - view.position) * k, tex_view.size * k)
-		c.draw_texture_rect_region(minimap, dest, tex_view)
+		c.draw_texture_rect_region(map_tex(), dest, map_region(tex_view))
 	_draw_map_labels(w, inner, view, k, riding)
 	if m.skytrain:
 		_draw_map_train(inner, view, k)
