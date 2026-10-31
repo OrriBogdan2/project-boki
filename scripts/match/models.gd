@@ -1602,7 +1602,8 @@ static func weapon_drop(weapon: String, rar: int) -> Node3D:
 	var beam := part(root, cyl(0.14, 0.26, 5.0, 10), glow_mat(Color(col, 0.34)), Vector3(0, 2.5, 0))
 	beam.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var ring := MeshInstance3D.new(); ring.mesh = flat_quad(1.3)
-	ring.material_override = ring_mat(col, 0.12); ring.position.y = 0.05
+	var rm := ring_mat(col, 0.12); rm.set_shader_parameter("fill", 0.12)
+	ring.material_override = rm; ring.position.y = 0.05
 	root.add_child(ring)
 	return root
 
@@ -2402,6 +2403,9 @@ static func chest_prim(tier := 0) -> Node3D:
 ## A dead hunter's deathbox: a squat crate with a glow in its value colour.
 static func deathbox(col: Color) -> Node3D:
 	var root := PropSculpt.chest(0) if Flora.v2() else chest_prim(0)
+	var own := root.get_node_or_null("Beacon")
+	if own:
+		root.remove_child(own); own.free()      # a deathbox glows in its value colour, not a chest's
 	var g := Node3D.new(); g.name = "Glow"; root.add_child(g)
 	var beam := part(g, cyl(0.12, 0.24, 5.0, 10), glow_mat(Color(col, 0.3)), Vector3(0, 2.5, 0))
 	beam.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -2416,6 +2420,89 @@ static func deathbox(col: Color) -> Node3D:
 	((root.get_meta("mats") as Array)[0] as ShaderMaterial).set_shader_parameter("albedo", Color("5a5560"))
 	((root.get_meta("mats") as Array)[1] as ShaderMaterial).set_shader_parameter("albedo", col.darkened(0.2))
 	return root
+
+# ------------------------------------------------------------------ world legend: interactable icons
+## Everything you can use out in the world (not loot, not breakables) wears a small floating badge
+## with a symbol, in one colour per kind, so it reads at a glance from the match camera:
+## shrines (blessing, teal), exits (hatches violet, uplinks cyan), rift keys (violet, like the
+## hatch they open), eggs (warm gold), revive beacons (mint). Loot is gold / rarity coloured with
+## a pillar and a ground pool; breakables are matte with no glow; decor stays low-contrast.
+const ICON_COLS := {"bless": Color("5fd0b0"), "hatch": Color("b98aff"), "uplink": Color("4ac8f0"), "key": Color("b98aff"),
+	"egg": Color("ffc04a"), "revive": Color("6ae8a0"), "dock": Color("ffb84a")}
+static var _icon_tex := {}
+
+## Is the point (x, y) (-1..1, y up) inside the white symbol for this kind?
+static func _icon_sym(kind: String, x: float, y: float) -> bool:
+	match kind:
+		"bless":     # a four-point sparkle
+			return pow(absf(x), 0.5) + pow(absf(y + 0.02), 0.5) < 0.86
+		"hatch", "uplink", "dock":   # an arrow up and out
+			if y >= -0.02 and y <= 0.56 and absf(x) < 0.48 * (0.56 - y) / 0.58: return true
+			return absf(x) < 0.15 and y > -0.56 and y < 0.0
+		"key":
+			var d := Vector2(x, y - 0.24).length()
+			if d < 0.27 and d > 0.12: return true
+			if absf(x) < 0.075 and y < 0.0 and y > -0.6: return true
+			if x > 0.0 and x < 0.26 and ((y > -0.58 and y < -0.47) or (y > -0.38 and y < -0.28)): return true
+			return false
+		"egg":
+			var ry := 0.5 if y > -0.08 else 0.4
+			var rx := 0.36 - 0.1 * clampf((y + 0.08) / 0.5, 0.0, 1.0)
+			return pow(x / rx, 2.0) + pow((y + 0.08) / ry, 2.0) < 1.0
+		"revive":   # a plus
+			return (absf(x) < 0.15 and absf(y) < 0.48) or (absf(y) < 0.15 and absf(x) < 0.48)
+	return false
+
+static func icon_texture(kind: String) -> ImageTexture:
+	if _icon_tex.has(kind):
+		return _icon_tex[kind]
+	var N := 96
+	var img := Image.create(N, N, false, Image.FORMAT_RGBA8)
+	var col: Color = ICON_COLS.get(kind, Color.WHITE)
+	var dark := col.darkened(0.7).lerp(Color("1a1626"), 0.4)
+	for py in N:
+		for px in N:
+			var acc := Color(0, 0, 0, 0)
+			for sy in 2:
+				for sx in 2:
+					var x := ((px + 0.25 + sx * 0.5) / N) * 2.0 - 1.0
+					var y := 1.0 - ((py + 0.25 + sy * 0.5) / N) * 2.0
+					# a diamond-ish rounded badge: a dark rim, the colour inside lighter at the top
+					var r := pow(pow(absf(x), 1.6) + pow(absf(y), 1.6), 1.0 / 1.6)
+					var c := Color(0, 0, 0, 0)
+					if r < 0.97:
+						c = dark
+					if r < 0.84:
+						c = col.lerp(col.lightened(0.35), clampf(y * 0.5 + 0.5, 0.0, 1.0))
+						var sym := _icon_sym(kind, x / 0.78, y / 0.78)
+						# a dark edge round the symbol so it pops on the colour
+						var edge := false
+						if not sym:
+							for o in [Vector2(0.06, 0), Vector2(-0.06, 0), Vector2(0, 0.06), Vector2(0, -0.06)]:
+								if _icon_sym(kind, (x + o.x) / 0.78, (y + o.y) / 0.78): edge = true; break
+						if sym: c = Color("fffdf6")
+						elif edge: c = dark.lerp(col, 0.25)
+					acc += c * 0.25
+			img.set_pixel(px, py, acc)
+	var tex := ImageTexture.create_from_image(img)
+	_icon_tex[kind] = tex
+	return tex
+
+## A floating badge for an interactable: a billboard that bobs gently above it. Named "Icon".
+static func icon_badge(kind: String, height: float, size := 0.8) -> Node3D:
+	var holder := Node3D.new(); holder.name = "Icon"; holder.position = Vector3(0, height, 0)
+	var sp := Sprite3D.new()
+	sp.texture = icon_texture(kind)
+	sp.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	sp.shaded = false
+	sp.double_sided = true
+	sp.alpha_cut = SpriteBase3D.ALPHA_CUT_DISABLED
+	sp.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	sp.pixel_size = size / 96.0
+	sp.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	holder.add_child(sp)
+	PropAnim.on(holder, 0.0, 0.07, 2.2)
+	return holder
 
 ## A revive beacon: a stone pylon with a green crystal. Stand on it with a dead teammate waiting
 ## and it brings them back.
@@ -2441,6 +2528,7 @@ static func revive_beacon() -> Node3D:
 	var ring := MeshInstance3D.new(); ring.name = "Ring"; ring.mesh = flat_quad(4.6)
 	ring.material_override = ring_mat(glow, 0.05); ring.position.y = 0.3
 	g.add_child(ring)
+	g.add_child(icon_badge("revive", 2.75))
 	return root
 
 static func shrine() -> Node3D:
@@ -2487,6 +2575,7 @@ static func shrine() -> Node3D:
 			var a2 := TAU * i / 3.0
 			part(cr, pm, cm, Vector3(cos(a2) * 0.42, -0.1, sin(a2) * 0.42), Vector3.ONE * 0.3)
 	PropAnim.on(cr, 0.9, 0.08)
+	cr.add_child(icon_badge("bless", 1.05))     # hidden with the crystal once the shrine is used
 	var base := MeshInstance3D.new(); base.name = "Ring"; base.mesh = flat_quad(3.0)
 	base.material_override = ring_mat(glow, 0.06); base.position.y = 0.04
 	root.add_child(base)

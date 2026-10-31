@@ -25,6 +25,9 @@ func _ready() -> void:
 	var items: Array
 	var gap := 2.0
 	var cam_at := Vector3(0, 6.5, 9.5)
+	if "--prop-legend" in args:
+		_legend(args)
+		return
 	if "--prop-sets" in args:
 		var gate := BossModels.gate(3.0, Color("ffd36a")); Flora.paint_set_piece(gate)
 		var dial := BossModels.dial_stone(Color("ffd36a")); Flora.paint_set_piece(dial)
@@ -54,4 +57,41 @@ func _ready() -> void:
 	cam.fov = 40
 	add_child(cam)
 	cam.look_at(Vector3(0, 0.5, 0))
+	cam.make_current()
+
+
+## The world legend (--prop-legend): one row per category, so the visual language reads side by side.
+## LOOT (chests by rarity, a found weapon, gear, a valuable) glows gold or in its rarity colour with a
+## pillar and a pool; BREAKABLES are matte and cracked with no glow; INTERACTABLES wear a floating
+## badge in their own colour; DECOR stays low-contrast. --prop-legend-top views it from the match camera.
+func _legend(args: PackedStringArray) -> void:
+	var rng := RandomNumberGenerator.new(); rng.seed = 7
+	var rows := [
+		["LOOT", [Models.chest(0), Models.chest(1), Models.chest(2), Models.weapon_drop("rifle", 3), Models.gear_drop(Color("ffd36a"), 2), Models.deathbox(Color("6ad8ff"))], 2.3],
+		["BREAKABLES", [Models.breakable("crate"), Models.breakable("pot"), Models.breakable("barrel"), Models.breakable("crate"), Models.breakable("pot")], 2.0],
+		["INTERACTABLES", [Models.shrine(), ExitModels.hatch(), ExitModels.uplink(), ExitModels.rift_key(), BossModels.rare_egg(Color("ff8ac8")), Models.revive_beacon()], 3.6],
+		["DECOR", [Models.rock(rng, 0.9), PropSculpt.camp(rng), Models.rock(rng, 0.6), Models.nest()], 2.6],
+	]
+	for ri in rows.size():
+		var z := (ri - 1.5) * 5.4
+		var its: Array = rows[ri][1]
+		var gp: float = rows[ri][2]
+		for i in its.size():
+			var n: Node3D = its[i]
+			n.position = Vector3((i - (its.size() - 1) * 0.5) * gp, 0, z)
+			add_child(n)
+		var l := Label3D.new()
+		l.text = String(rows[ri][0])
+		l.font = UI.big; l.font_size = 64; l.pixel_size = 0.01; l.outline_size = 14
+		l.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		l.position = Vector3(-12.6, 0.4, z)
+		add_child(l)
+	var cam := Camera3D.new()
+	cam.fov = 44
+	if "--prop-legend-top" in args:
+		cam.position = Vector3(0, 22.0, 12.0)
+	else:
+		cam.position = Vector3(0, 15.0, 21.0)
+	add_child(cam)
+	cam.look_at(Vector3(0, 0.0, 0.5))
 	cam.make_current()

@@ -57,6 +57,16 @@ func _focus(id: String) -> Vector3:
 		if spots.size() > 0:
 			print("LANDMARK %s %s at %s" % [id, spots[k]["kind"], str(spots[k]["pos"])])
 			return (spots[k]["pos"] as Vector3) + Vector3(0, 2.0, 6.0)
+	if id.begins_with("stair"):
+		# a flight of stairs (stair0, stair1, ...), framed from the camera's side so its steps show
+		var fl := _flights()
+		if fl.size() > 0:
+			var f: Array = fl[clampi(int(id.substr(5)), 0, fl.size() - 1)]
+			var c := Vector3.ZERO
+			for i in f: c += Vector3(int(i) % w.w + 0.5, 0, int(i) / w.w + 0.5)
+			c /= f.size()
+			c.y = w.ground_at(c.x, c.z)
+			return c
 	for ii in w.islands.size():
 		if String(w.islands[ii].get("id", "")) == id:
 			focus = w._poi(ii) + Vector3(3.0, 0, 4.5)
@@ -131,3 +141,29 @@ func _scatter_stats() -> void:
 				tris += nt * mm.instance_count
 		for ch in c.get_children(): stack.append(ch)
 	print("PERF scatter batches %d instances %d tris %d" % [batches, inst, tris])
+
+
+## The map's flights of stairs: runs of side-by-side stair tiles rising the same way (largest first).
+func _flights() -> Array:
+	var seen := {}
+	var out_f: Array = []
+	var keys: Array = w.stairs.keys()
+	keys.sort()
+	for k in keys:
+		if seen.has(k): continue
+		var d: Vector2i = w.stairs[k]
+		var f: Array = []
+		var st: Array = [k]
+		seen[k] = true
+		while not st.is_empty():
+			var i: int = st.pop_back()
+			f.append(i)
+			for o in [Vector2i(d.y, d.x), -Vector2i(d.y, d.x)]:
+				var j: int = i + o.x + o.y * w.w
+				if w.stairs.has(j) and not seen.has(j) and w.stairs[j] == d:
+					seen[j] = true; st.append(j)
+		out_f.append(f)
+	var ws: Array = out_f.map(func(a): return a.size())
+	print("STAIRS flights %d widths %s" % [out_f.size(), str(ws)])
+	out_f.sort_custom(func(a, b): return a.size() > b.size())
+	return out_f
