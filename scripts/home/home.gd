@@ -84,6 +84,14 @@ func _ready() -> void:
 	Sfx.play_ambience("home")
 	Sfx.new_track.connect(_on_new_track)
 	var dbg := OS.get_cmdline_user_args()
+	for a in dbg:
+		if a.begins_with("--home-weapon="):
+			# test: wear a given weapon at home (and the class that carries it)
+			var wk := a.substr(14)
+			for ck in Data.CLASSES:
+				if (Data.CLASSES[ck]["weapons"] as Array).has(wk): Save.d["cls"] = ck
+			Save.d["weapon"] = wk
+			Save.d.erase("loadout")
 	if "--evo-test" in dbg:
 		var ek := Save.active_kin()
 		ek["level"] = 7
