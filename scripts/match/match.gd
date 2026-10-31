@@ -1344,15 +1344,16 @@ func _mouse_aim() -> Vector3:
 	for e in foes_of(player.team):
 		if e.dead or not e.visible:
 			continue
-		if absf(e.pos.y - player.pos.y) > World.LEVEL * 3.0:
+		if absf(e.hit_y() - player.pos.y) > World.LEVEL * 3.0:
 			continue
-		var sp := cam.unproject_position(e.pos + Vector3(0, 0.8, 0))
+		# (below an island's lip that's their balloon, at ground level: it's what shots hit)
+		var sp := cam.unproject_position(Vector3(e.pos.x, e.hit_y() + 0.8, e.pos.z))
 		var d := sp.distance_to(mp)
 		if d < bd:
 			bd = d; best = e
 	if best:
-		var q := cam.mouse_on_plane(best.pos.y + 0.95)
-		aim_y = best.pos.y
+		var q := cam.mouse_on_plane(best.hit_y() + 0.95)
+		aim_y = best.hit_y()
 		return Vector3(q.x, base_y, q.z)
 	aim_y = player.pos.y
 	var p := cam.mouse_on_plane(base_y)
@@ -2506,7 +2507,7 @@ func _update_shots(dt: float) -> void:
 				_shot_end(s, p, null)
 				hit = true; break
 			for e in _shot_targets(s):
-				if Vector2(e.pos.x - p.x, e.pos.z - p.z).length() < e.r + s["r"] + 0.08 and shot_height_ok(e, p.y):
+				if Vector2(e.pos.x - p.x, e.pos.z - p.z).length() < e.r + s["r"] + HIT_SLACK and shot_height_ok(e, p.y):
 					if sx.has("hitset"):
 						# piercing / boomerang shots hit each thing once per pass and fly on
 						var key: int = e.get_instance_id()
@@ -2549,13 +2550,29 @@ func _update_shots(dt: float) -> void:
 ## Shots fly level, so a target one terrace above or below still gets hit. Two terraces up and the
 ## shot goes under them into the cliff; two down and it sails over their head.
 func shot_height_ok(e: Ent, y: float) -> bool:
-	var top: float = 1.5 if e is Hunter else maxf(0.9, e.r * 2.2)
+	var b := shot_band(e)
+	return y > b.x and y < b.y
+
+## A shot's centre this close to the edge of a body's hit circle (radius `r`) still connects, so a
+## bullet touching the circle of radius r + HIT_SLACK hits. That circle is what hit markers draw.
+const HIT_SLACK := 0.08
+## Someone this far or less above their terrace (a hop) is still standing on it, as far as shots go.
+const HOP_STAND := 1.2
+
+## The height a body is shot as if standing at: its feet; ground level below an island's lip (the
+## balloon); its terrace while it hops; and HOP_STAND under its feet once it's higher in the air.
+func shot_stance_y(e: Ent) -> float:
 	var fy := e.hit_y()
-	# someone hopping is still standing on their terrace, as far as shots are concerned
 	var g := e.ground()
 	if g > World.VOID + 1.0 and fy > g:
-		fy = maxf(g, fy - 1.2)
-	return y > fy - 0.45 and y < fy + top + 0.9
+		fy = maxf(g, fy - HOP_STAND)
+	return fy
+
+## Shots flying between these heights (x..y) hit this body.
+func shot_band(e: Ent) -> Vector2:
+	var top: float = 1.5 if e is Hunter else maxf(0.9, e.r * 2.2)
+	var fy := shot_stance_y(e)
+	return Vector2(fy - 0.45, fy + top + 0.9)
 
 func _shot_break(s: Dictionary, p: Vector3) -> Dictionary:
 	for b in breaks:
@@ -2626,6 +2643,8 @@ func _shot_hit(s: Dictionary, at: Vector3, e: Ent) -> void:
 
 func _shot_apply(s: Dictionary, at: Vector3, e: Ent) -> void:
 	var x: Dictionary = s["x"]
+	if e is Hunter:
+		(e as Hunter).marker_hit()      # hit through the balloon / ring: it flashes, so the rule is learned
 	if x.get("cos", false):
 		if x.get("boom", 0.0) > 0.0:
 			fx.ring(at, x["boom"], Color("ffb070"), 0.3)
@@ -3296,6 +3315,8 @@ func step(dt: float) -> void:
 	if skytrain: skytrain.tick(dt)
 	if opts.has("train_demo") and skytrain and player:
 		_train_demo()
+	if opts.has("balloon_demo") and player:
+		_balloon_demo()
 	if duel:
 		duel.after_think()
 		duel.tick(dt)
@@ -4162,6 +4183,91 @@ func _tut_drive() -> void:
 						p.inp["fire"] = true
 				"extract":
 					goto.call(c)
+
+## Test hook (--balloon-demo=lip|glide|hop|self): hit markers. "lip" hangs a foe and a squadmate
+## below an island's lip (balloons) and you shoot the foe's; "glide" holds them high over land
+## (rings) and you shoot the low one through its ring; "hop" holds them mid-hop (no marker: the
+## body is the target); "self" hangs you below the lip (your own faint balloon).
+var _bdemo := {}
+func _balloon_demo() -> void:
+	var mode := String(opts["balloon_demo"])
+	var foe: Hunter = null; var mate: Hunter = null
+	for h in hunters:
+		if h == player: continue
+		if h.team != player.team and foe == null: foe = h
+		elif h.team == player.team and mate == null: mate = h
+	if _bdemo.is_empty():
+		for mb in mobs: mb.queue_free()
+		mobs.clear()
+		for h in hunters:
+			if h != player: h.ctrl = "idle"
+		cam.zoom_to = 0.8
+		# an island edge with open air beyond it, and a flat stretch of ground behind it
+		for k in 4000:
+			var g := world.random_ground()
+			for d in [Vector2(1, 0), Vector2(-1, 0), Vector2(0, 1), Vector2(0, -1)]:
+				var ok := not world.is_void(g.x, g.z)
+				for dd in [1.6, 2.4, 3.2, 4.0]:
+					for sd in [-2.0, 0.0, 2.0]:
+						if not world.is_void(g.x + d.x * dd + d.y * sd, g.z + d.y * dd + d.x * sd): ok = false
+				for dd in [0.0, -1.5, -3.0, -4.5]:
+					for sd in [-3.0, 0.0, 3.0]:
+						var x: float = g.x + d.x * dd + d.y * sd; var z: float = g.z + d.y * dd + d.x * sd
+						if world.is_void(x, z) or world.is_block(x, z) or absf(world.ground_at(x, z) - g.y) > 0.05: ok = false
+				if ok:
+					var ex := g.x; var ez := g.z
+					while not world.is_void(ex + d.x * 0.25, ez + d.y * 0.25):
+						ex += d.x * 0.25; ez += d.y * 0.25
+					_bdemo = {"edge": Vector3(ex, g.y, ez), "dir": d}
+					break
+			if not _bdemo.is_empty(): break
+		if _bdemo.is_empty():
+			push_warning("balloon demo: no edge found"); _bdemo = {"edge": player.pos, "dir": Vector2(1, 0)}
+		for h in hunters:
+			if h != player and h != foe and h != mate: h.teleport(world.random_ground())
+	var e: Vector3 = _bdemo["edge"]; var d: Vector2 = _bdemo["dir"]
+	var side := Vector2(-d.y, d.x)
+	var hold := func(h: Hunter, p: Vector3, glide: bool) -> void:
+		if h == null: return
+		h.teleport(p); h.vel = Vector3.ZERO; h.grounded = false; h.pad = {}
+		h.gliding = glide; h.inp["glide"] = glide; h.glide_fuel = 1.0; h.glide_cd = 0.0
+		h.hp = h.max_hp; h.stun_t = 0.0; h.knock_t = 0.0; h.shot_down = false
+	var stand := func(h: Hunter, p: Vector3) -> void:
+		if h == null: return
+		h.teleport(p); h.vel = Vector3.ZERO; h.grounded = true
+		h.hp = h.max_hp
+	var on := func(back: float, sd: float) -> Vector3:
+		var x := e.x - d.x * back + side.x * sd; var z := e.z - d.y * back + side.y * sd
+		return Vector3(x, world.ground_at(x, z), z)
+	var shoot := false
+	match mode:
+		"lip":
+			stand.call(player, on.call(2.2, 0.0))
+			hold.call(foe, Vector3(e.x + d.x * 1.3 + side.x * 1.4, e.y - 2.6, e.z + d.y * 1.3 + side.y * 1.4), true)
+			hold.call(mate, Vector3(e.x + d.x * 1.5 - side.x * 2.0, e.y - 2.0, e.z + d.y * 1.5 - side.y * 2.0), true)
+			shoot = true
+		"glide":
+			stand.call(player, on.call(4.0, 0.0))
+			hold.call(foe, on.call(1.6, 1.6) + Vector3(0, 2.3, 0), true)
+			hold.call(mate, on.call(2.6, -2.4) + Vector3(0, 4.0, 0), true)
+			shoot = true
+		"hop":
+			stand.call(player, on.call(4.0, 0.0))
+			hold.call(foe, on.call(1.6, 1.6) + Vector3(0, 0.9, 0), false)
+			hold.call(mate, on.call(2.6, -2.4) + Vector3(0, 1.1, 0), false)
+			shoot = true
+		"self":
+			hold.call(player, Vector3(e.x + d.x * 1.3, e.y - 2.4, e.z + d.y * 1.3), true)
+			stand.call(mate, on.call(1.5, 1.5))
+			stand.call(foe, on.call(3.5, -2.0))
+	if shoot and foe:
+		# fire level along the island at the foe's marker (or body, mid-hop)
+		var fy: float = shot_stance_y(foe)
+		player.inp["aim"] = Vector3(foe.pos.x, fy + 0.95, foe.pos.z)
+		player.inp["aim_y"] = player.pos.y
+		player.inp["fire"] = fmod(time, 0.9) < 0.12
+		player.inp["move"] = Vector2.ZERO
+		player.ammo = maxi(player.ammo, 3)
 
 ## Test hook (--train-demo): ride the sky train from a stop; "--train-demo=track" stands you on the
 ## track ahead of the engine instead, "--train-demo=view" watches it from a pier.

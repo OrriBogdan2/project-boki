@@ -119,8 +119,8 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 			a["aim_goal"] = Vector2(randf_range(-1, 1), randf_range(-1, 1)) * (1.15 - a["skill"]) * 1.6
 		a["aim_err"] = (a["aim_err"] as Vector2).lerp(a.get("aim_goal", Vector2.ZERO), 1.0 - exp(-3.0 * dt))
 		var aim: Vector2 = Vector2(tgt.pos.x, tgt.pos.z) + lead + a["aim_err"]
-		inp["aim"] = Vector3(aim.x, tgt.pos.y + 0.9, aim.y)
-		inp["aim_y"] = tgt.pos.y
+		inp["aim"] = Vector3(aim.x, tgt.hit_y() + 0.9, aim.y)
+		inp["aim_y"] = tgt.hit_y()      # someone below a lip: their balloon, not their body
 		var los := can_hit(m, h, tgt)
 		# fast guns fire in bursts with a beat between them (to reposition); slow ones on cooldown
 		a["burst"] = float(a.get("burst", 0.0)) - dt
