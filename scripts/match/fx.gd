@@ -17,6 +17,7 @@ var particle_mat: StandardMaterial3D
 var rng := RandomNumberGenerator.new()
 
 func _ready() -> void:
+	particles = PARTICLES * float(Settings.q("fx"))
 	particle_mat = StandardMaterial3D.new()
 	particle_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	particle_mat.vertex_color_use_as_albedo = true
@@ -66,12 +67,14 @@ func _ready() -> void:
 ## Readability: every particle burst is thinned out, so effects mark what happened without
 ## burying the fight under confetti.
 const PARTICLES := 0.6
+var particles := PARTICLES     # times the quality preset's particle amount (Settings q("fx"))
 
 func burst(at: Vector3, col: Color, amount := 14, speed := 4.0, life := 0.5, grav := 12.0, size := 1.0, dir := Vector3.UP, spread := 180.0) -> void:
 	var p := bursts[bi]
 	bi = (bi + 1) % bursts.size()
 	p.global_position = at
-	p.amount = maxi(3, int(round(amount * PARTICLES)))
+	var na := maxi(3, int(round(amount * particles)))
+	if p.amount != na: p.amount = na      # (resizing reallocates its buffers: only when it changes)
 	p.color = col
 	p.lifetime = life
 	p.initial_velocity_min = speed * 0.5

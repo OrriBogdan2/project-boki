@@ -41,7 +41,11 @@ func build(parent: Node3D, deep: Color, light: Color, rng: RandomNumberGenerator
 		mi.position = ctr + Vector3(0, float(L["y"]), 0)
 		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		mi.name = "CloudLayer%d" % k
-		parent.add_child(mi)
+		# the quality preset keeps the lower layers first (Low: just the cloud sea)
+		if k < int(Settings.q("clouds")):
+			parent.add_child(mi)
+		else:
+			mi.free()
 	_shafts(parent, rng)
 	_far_rocks(parent, rng)
 
@@ -79,7 +83,10 @@ func _shafts(parent: Node3D, rng: RandomNumberGenerator) -> void:
 		var z_axis := x_axis.cross(y_axis).normalized()
 		mi.transform = Transform3D(Basis(x_axis, y_axis, z_axis), at + Vector3(0, -6.0, 0))
 		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		parent.add_child(mi)
+		if Settings.q("shafts"):
+			parent.add_child(mi)
+		else:
+			mi.free()
 
 ## A ring of far-off floating rocks and islets around the map, below and level with the islands,
 ## fading into the haze: some bare boulders tumbling slowly, some islets with a tree or two.
