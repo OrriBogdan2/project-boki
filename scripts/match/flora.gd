@@ -776,6 +776,9 @@ static func _pillar(b: MB, style: String, variant: int, r: RandomNumberGenerator
 
 ## An axis-aligned bevel-free box, lighter on top (plinths, capitals).
 static func _box(b: MB, c: Vector3, e: Vector3, c0: Color, c1: Color, ht: float) -> void:
+	if v2():
+		_cbox(b, c, e, c0, c1, minf(minf(e.x, e.z), e.y) * 0.45)
+		return
 	var faces := [[Vector3.UP, Vector3.RIGHT, Vector3.BACK], [Vector3.DOWN, Vector3.RIGHT, Vector3.FORWARD], [Vector3.RIGHT, Vector3.UP, Vector3.FORWARD],
 		[Vector3.LEFT, Vector3.UP, Vector3.BACK], [Vector3.BACK, Vector3.UP, Vector3.RIGHT], [Vector3.FORWARD, Vector3.UP, Vector3.LEFT]]
 	for f in faces:
@@ -791,6 +794,36 @@ static func _box(b: MB, c: Vector3, e: Vector3, c0: Color, c1: Color, ht: float)
 			b.tri(i0, i2, i1); b.tri(i0, i3, i2)
 		else:
 			b.tri(i0, i1, i2); b.tri(i0, i2, i3)
+
+## A box with its top edges chiselled by bev (a lighter bevel catching the light), darker at its foot.
+static func _cbox(b: MB, c: Vector3, e: Vector3, c0: Color, c1: Color, bev: float) -> void:
+	var y0 := c.y - e.y; var y1 := c.y + e.y; var ys := y1 - bev
+	var lo := c0.darkened(0.22)
+	var corners := [Vector2(-1, -1), Vector2(1, -1), Vector2(1, 1), Vector2(-1, 1)]
+	var outer: Array = []; var inner: Array = []
+	for q in corners:
+		outer.append(Vector2(c.x + q.x * e.x, c.z + q.y * e.z))
+		inner.append(Vector2(c.x + q.x * (e.x - bev), c.z + q.y * (e.z - bev)))
+	var quad := func(p: Array, n: Vector3, cols: Array) -> void:
+		var ids: Array = []
+		for k in 4: ids.append(b.add(p[k], n, cols[k], 2.0, 0.0, 0.0))
+		var fn := ((p[1] as Vector3) - (p[0] as Vector3)).cross((p[2] as Vector3) - (p[0] as Vector3))
+		if fn.dot(n) > 0.0:
+			b.tri(ids[0], ids[2], ids[1]); b.tri(ids[0], ids[3], ids[2])
+		else:
+			b.tri(ids[0], ids[1], ids[2]); b.tri(ids[0], ids[2], ids[3])
+	var tp: Array = []
+	for q in inner: tp.append(Vector3(q.x, y1, q.y))
+	quad.call(tp, Vector3.UP, [c1, c1, c1, c1])
+	for k in 4:
+		var a: Vector2 = outer[k]; var bb: Vector2 = outer[(k + 1) % 4]
+		var ia: Vector2 = inner[k]; var ib: Vector2 = inner[(k + 1) % 4]
+		var mid := (a + bb) * 0.5 - Vector2(c.x, c.z)
+		var n := Vector3(mid.x, 0, mid.y).normalized()
+		quad.call([Vector3(a.x, y0, a.y), Vector3(bb.x, y0, bb.y), Vector3(bb.x, ys, bb.y), Vector3(a.x, ys, a.y)], n, [lo, lo, c0, c0])
+		var bn := (n + Vector3.UP).normalized()
+		var hc := c1.lightened(0.12)
+		quad.call([Vector3(a.x, ys, a.y), Vector3(bb.x, ys, bb.y), Vector3(ib.x, y1, ib.y), Vector3(ia.x, y1, ia.y)], bn, [hc, hc, hc, hc])
 
 # ------------------------------------------------------------------ set pieces
 ## Gives a set piece built from primitives (docks, hatches, outposts, shrines, the train, lairs) the

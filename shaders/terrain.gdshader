@@ -94,14 +94,14 @@ vec3 ground_rich(vec3 c, float n_in, out vec3 emit) {
 		float pool = fbm3(wpos.xz * 0.045 + 31.0);
 		float lit = smoothstep(0.52, 0.78, pool);
 		float dim = smoothstep(0.42, 0.18, pool);
-		c = mix(c, c * vec3(1.16, 1.12, 0.94) + vec3(0.025, 0.02, 0.0), lit * 0.55 * paint2);
-		c = mix(c, c * vec3(0.76, 0.8, 0.94), dim * 0.5 * paint2);
+		c = mix(c, c * vec3(1.16, 1.12, 0.94) + vec3(0.025, 0.02, 0.0), lit * 0.75 * paint2);
+		c = mix(c, c * vec3(0.76, 0.8, 0.94), dim * 0.65 * paint2);
 		float hue = fbm3(wpos.xz * 0.03 - 17.0);
 		c = mix(c, c * vec3(1.06, 1.02, 0.9), smoothstep(0.55, 0.8, hue) * 0.5 * paint2);
 		c = mix(c, c * vec3(0.92, 1.0, 1.08), smoothstep(0.45, 0.2, hue) * 0.5 * paint2);
 		// dappled mid-size brush dabs
 		float dab = vnoise(wpos.xz * 0.55 + vec2(vnoise(wpos.xz * 0.2) * 2.0));
-		c *= 1.0 + (dab - 0.5) * 0.1 * paint2;
+		c *= 1.0 + (dab - 0.5) * 0.14 * paint2;
 	}
 	float pick;
 	if (b == 0) {
@@ -248,7 +248,7 @@ void fragment() {
 		if (use_biome) { c = ground_rich(c, n0, gemit); }
 		if (use_ao) {
 			float o = contact(wpos);
-			c = mix(c, c * ao_color.rgb * 2.2, o * ao_strength);
+			c = mix(c, c * ao_color.rgb * 2.2, clamp(o * ao_strength * (1.0 + 0.3 * paint2), 0.0, 0.9));
 		}
 	} else if (st == 2) {
 		c = rock(c);

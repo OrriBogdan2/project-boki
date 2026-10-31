@@ -141,8 +141,9 @@ func _make(kind: String, style: String, at: Vector3) -> Node3D:
 			_sparks(root, Color(0.9, 0.95, 1.0), Vector3(0, 6.0, 0), 3.0, "snow")
 	return root
 
-## The rune ring over the Heart's vault: high enough to frame the chest from the match camera
-## without hiding anyone, nearly level, turning slowly, with motes drifting down through it.
+## The rune ring at the Heart's vault: set into the ground round the chest (inside its four
+## pillars) like a carved stone circle, only its glowing top showing, so it marks the vault from the
+## match camera without hiding anyone; it turns very slowly, with motes rising off it.
 func _heart_ring(at: Vector3) -> Node3D:
 	var root := Node3D.new()
 	root.name = "Landmark_ring"
@@ -151,13 +152,12 @@ func _heart_ring(at: Vector3) -> Node3D:
 	ring.mesh = _ring_mesh()
 	ring.material_override = Flora.material("crystal", true)
 	ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	var piv := Node3D.new(); piv.position = Vector3(0, 5.6, 0)
-	piv.rotation = Vector3(0.08, 0, 0.05)
-	piv.scale = Vector3.ONE * 1.05
+	var piv := Node3D.new(); piv.position = Vector3(0, 0.02, 0)
+	piv.scale = Vector3(0.8, 0.22, 0.8)
 	root.add_child(piv)
 	piv.add_child(ring)
-	PropAnim.on(piv, 0.12, 0.18, 0.7)
-	_sparks(root, Color("c8a0ff"), Vector3(0, 3.5, 0), 3.8, "motes")
+	PropAnim.on(piv, 0.05)
+	_sparks(root, Color("c8a0ff"), Vector3(0, 0.6, 0), 3.4, "motes")
 	return root
 
 func _sparks(root: Node3D, col: Color, at: Vector3, r: float, kind: String) -> void:

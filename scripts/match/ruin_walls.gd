@@ -149,7 +149,7 @@ func _palette(bio: Dictionary) -> Array:
 			cover = Color("f2f6ff")
 		"ember":
 			stone = Color("8a7466").lerp(Color(bio["side"]), 0.2)
-			cover = Color("5a4c48")
+			cover = Color("8a7e78")     # pale ash
 		"storm":
 			stone = Color("8a92a0").lerp(Color(bio["side"]), 0.25)
 			cover = Color(bio["top"]).lerp(Color("3f7a6a"), 0.45)
