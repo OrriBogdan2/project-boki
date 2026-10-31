@@ -71,6 +71,8 @@ const DAY_LEN := 300.0          # seconds for a full day at home
 var env_res: Environment
 var sun_l: DirectionalLight3D
 var p_anim: HunterAnim = null
+var p_fired := 99.0             # seconds since you last attacked (the Training Grounds), for the animation
+var p_swing_n := 0              # melee swings so far, so each one plays its arc
 var lamps: Array = []           # OmniLight3D
 var day_t := 0.3                # 0..1, 0.25 is morning, 0.5 noon, 0.75 dusk
 var rain: CPUParticles3D
@@ -92,6 +94,11 @@ func _ready() -> void:
 				if (Data.CLASSES[ck]["weapons"] as Array).has(wk): Save.d["cls"] = ck
 			Save.d["weapon"] = wk
 			Save.d.erase("loadout")
+			Save.no_write = true
+			# and nobody starving, so no popup covers the view
+			for rec in Save.d["roster"]:
+				Care.ensure(rec)
+				rec["starve"] = 0.0; rec["needs"]["food"] = 100.0; rec["needs_t"] = Time.get_unix_time_from_system()
 	if "--evo-test" in dbg:
 		var ek := Save.active_kin()
 		ek["level"] = 7
@@ -264,6 +271,22 @@ func _ready() -> void:
 	for a in dbg:
 		if a.begins_with("--home-zoom="):
 			cam.zoom_to = float(a.substr(12)); cam.zoom = cam.zoom_to
+		if a.begins_with("--home-at="):
+			# test: start standing here (x,z)
+			var hp := a.substr(10).split(",")
+			ppos = Vector3(float(hp[0]), 0, float(hp[1])); py = _ground_h(ppos.x, ppos.z)
+			player.position = ppos + Vector3(0, py, 0); cam.snap(ppos)
+		if a == "--home-act=run":
+			# test: run to the right (for animation shots)
+			get_tree().create_timer(1.0).timeout.connect(func(): Input.action_press("right"))
+		if a == "--home-act=swing":
+			# test: attack over and over at the Training Grounds
+			get_tree().create_timer(0.3).timeout.connect(func():
+				ppos = HomeTraining.STILL + Vector3(1.6, 0, 0.4); py = _ground_h(ppos.x, ppos.z); cam.snap(ppos))
+			for k in 12:
+				get_tree().create_timer(1.0 + k * 0.45).timeout.connect(func():
+					if training:
+						training.cds.clear(); training.cast("fire"))
 		if a.begins_with("--home-build="):
 			var bk := a.substr(13)
 			Save.d["bridges"].append(bk)
@@ -898,7 +921,9 @@ func _move_player(d: float) -> void:
 	player.rotation.y = pface
 	if p_anim == null or p_anim.model != player:
 		p_anim = HunterAnim.new(player)
-	var ps := {"vel": Vector3(hv.x, pvy if air else 0.0, hv.y), "face": pface, "grounded": not air, "gliding": gliding, "rolling": dash_t > 0.0, "dash_dir": dash_v, "fired": 99.0}
+	p_fired += d
+	var ps := {"vel": Vector3(hv.x, pvy if air else 0.0, hv.y), "face": pface, "grounded": not air, "gliding": gliding, "rolling": dash_t > 0.0, "dash_dir": dash_v, "fired": p_fired,
+		"swing_n": p_swing_n, "combo": maxi(0, p_swing_n - 1) % 3}
 	if air and not gliding and gh > World.VOID + 1.0:
 		ps["air_h"] = clampf(py - gh, 0.0, 30.0)
 	p_anim.update(d, ps)

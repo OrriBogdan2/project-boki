@@ -182,7 +182,7 @@ func _hunter(cls: String, wpn: String, i: int, at: Vector3, mode: String, face :
 func _row(modes: Array) -> void:
 	for i in modes.size():
 		var cls: String = CLS[i % 3]
-		_hunter(cls, GUN[cls], i, Vector3((i - (modes.size() - 1) * 0.5) * 1.6, 0, 0), modes[i])
+		_hunter(cls, _arg("--lab-weapon", GUN[cls]), i, Vector3((i - (modes.size() - 1) * 0.5) * 1.6, 0, 0), modes[i])
 
 func _idle() -> void:
 	var n := 18 if lab == "crowd" else 6

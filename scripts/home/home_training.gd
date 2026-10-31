@@ -317,6 +317,8 @@ func cast(slot: String) -> bool:
 	var dir := Vector3(aim.x - me.x, 0, aim.z - me.z)
 	dir = dir.normalized() if dir.length() > 0.1 else Vector3(-sin(h.pface), 0, -cos(h.pface))
 	if slot == "fire":
+		h.p_fired = 0.0
+		if k["melee"]: h.p_swing_n += 1
 		if k["melee"]:
 			for dm in dummies:
 				var to := Vector3(dm["pos"].x - me.x, 0, dm["pos"].z - me.z)

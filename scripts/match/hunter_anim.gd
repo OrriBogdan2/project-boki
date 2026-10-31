@@ -45,6 +45,7 @@ const BODY_C := Vector3(0, 0.62, 0)      # whole-body turns (flips, rolls) go ab
 const G_UP := 30.0                        # Hunter.H_GRAV, for guessing how long a jump stays up
 const FLIP_MIN := 0.8                     # total airtime that earns a trick
 const AIM_Y := 0.5                        # Aim sits this high on the torso
+const GROUND_CLEAR := 0.05                # no part of a weapon ever goes nearer the ground than this (m)
 
 ## How each class stands and moves.
 const STANCE := {
@@ -120,6 +121,12 @@ var wings: Node3D
 var flask: Node3D
 var flag: Node3D
 var gun_scl := 1.0
+var gun_pts := PackedVector3Array()      # the weapon's bounds (mesh box corners) in its own space
+var off_pts := PackedVector3Array()      # the same for the twin blades' offhand dagger
+var floor_y := 0.0                       # the ground under the feet, in the model's space (this frame)
+var floor_ok := true                     # false while airborne with no idea where the ground is
+var clear_min := INF                     # the lowest a weapon point got above the ground (checks read it)
+var clear_raw := INF                     # the same before the safeguard stepped in
 var cls := "medium"
 var race := "human"
 var wid := ""
@@ -333,6 +340,89 @@ func _setup_weapon(w: String) -> void:
 				offhand.add_child(mi)
 				mi.transform = Transform3D(Basis.IDENTITY, Vector3(0.1, 0.06, 0.08)) * xf     # the hilt at the offhand's origin
 		offhand.scale = Vector3.ONE * gun_scl
+	gun_pts = _mesh_pts(gun)
+	off_pts = _mesh_pts(offhand) if offhand else PackedVector3Array()
+
+## The corners of every mesh's box under n, in n's own space (what has to stay above the ground).
+static func _mesh_pts(n: Node3D) -> PackedVector3Array:
+	var out := PackedVector3Array()
+	_collect_pts(n, Transform3D.IDENTITY, out)
+	return out
+
+static func _collect_pts(n: Node, xf: Transform3D, out: PackedVector3Array) -> void:
+	for ch in n.get_children():
+		if not (ch is Node3D) or ch.is_queued_for_deletion():
+			continue
+		var cx := xf * (ch as Node3D).transform
+		if ch is MeshInstance3D and (ch as MeshInstance3D).mesh:
+			var bb := (ch as MeshInstance3D).mesh.get_aabb()
+			for i in 8:
+				out.append(cx * bb.get_endpoint(i))
+		_collect_pts(ch, cx, out)
+
+## n's transform in the model's own space (the model's feet are at y 0 there).
+func _to_model(n: Node) -> Transform3D:
+	var x := Transform3D.IDENTITY
+	while n != null and n != model:
+		x = (n as Node3D).transform * x
+		n = n.get_parent()
+	return x
+
+## Keeps every point of a held weapon above the ground: a blade that would dip into it is tipped up
+## about the grip (the hand stays where it is), and only if the grip itself is down there does the
+## whole thing lift. Works in the model's space, so flips, squashes, leans and crouches all count.
+func _keep_above_ground(node: Node3D, pts: PackedVector3Array) -> void:
+	if node == null or pts.is_empty() or not node.visible or not floor_ok:
+		return
+	var par := _to_model(node.get_parent())
+	var g := par * node.transform
+	var fy := floor_y + GROUND_CLEAR / maxf(0.01, absf(model.scale.y))
+	var moved := false
+	for it in 5:
+		var low := INF
+		var lp := Vector3.ZERO
+		for p in pts:
+			var q := g * p
+			if q.y < low:
+				low = q.y; lp = q
+		if it == 0:
+			clear_raw = minf(clear_raw, (low - floor_y) * absf(model.scale.y))
+		if low >= fy - 0.002:
+			clear_min = minf(clear_min, (low - floor_y) * absf(model.scale.y))
+			break
+		moved = true
+		var o := g.origin
+		if o.y < fy + 0.03:
+			# the grip's down at the ground: lift the weapon
+			g.origin.y += fy - low + 0.004
+			continue
+		var v := lp - o
+		var ax := v.cross(Vector3.UP)
+		if ax.length_squared() < 1e-8:
+			ax = g.basis.x
+		ax = ax.normalized()
+		if v.rotated(ax, 0.3).y < v.y:
+			ax = -ax
+		var want := fy + 0.004 - o.y
+		var lo := 0.0
+		var hi := PI * 0.5
+		for k in 12:
+			var mid := (lo + hi) * 0.5
+			if v.rotated(ax, mid).y >= want: hi = mid
+			else: lo = mid
+		g = Transform3D(Basis(ax, hi) * g.basis, o)
+	if moved:
+		# tipping it couldn't do it alone (both ends down, say, mid-roll): lift what's left
+		var lo2 := INF
+		for p in pts:
+			lo2 = minf(lo2, (g * p).y)
+		if lo2 < fy:
+			g.origin.y += fy - lo2 + 0.002
+		node.transform = par.affine_inverse() * g
+		var fl := INF
+		for p in pts:
+			fl = minf(fl, (g * p).y)
+		clear_min = minf(clear_min, (fl - floor_y) * absf(model.scale.y))
 
 func _check_weapon(s: Dictionary) -> void:
 	var w := String(s.get("wid", wid))
@@ -382,6 +472,9 @@ func update(dt: float, s: Dictionary) -> void:
 	var fired: float = s.get("fired", 99.0)
 	var hv := Vector2(vel.x, vel.z)
 	var spd := hv.length()
+	# where the ground is, for keeping the weapon out of it (unknown in the air without air_h)
+	floor_ok = grounded or s.has("air_h") or downed
+	floor_y = 0.0 if grounded or not s.has("air_h") else -float(s["air_h"]) / maxf(0.01, absf(model.scale.y))
 	var fwd := Vector2(-sin(face), -cos(face))
 	var right := Vector2(cos(face), -sin(face))
 	var mf := hv.dot(fwd)
@@ -966,7 +1059,7 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 		var chg := minf(1.0, float(s.get("charge", 0.0)) * 3.0)
 		match hold:
 			"sword":
-				guard = Vector3(lerpf(-0.35, -0.15, carry_k), lerpf(-0.75, -1.25, carry_k), 0.0).lerp(Vector3(-0.3, -0.35, 0.0), aim_k)
+				guard = Vector3(lerpf(-0.4, -0.25, carry_k), lerpf(-0.4, -0.45, carry_k), 0.0).lerp(Vector3(-0.3, -0.35, 0.0), aim_k)
 				guard = guard.lerp(Vector3(-0.6, 0.1, 0.0), chg)
 				rad = lerpf(rad, 0.22, chg)
 				free_l = 1.0
@@ -975,8 +1068,8 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 				rad = 0.36
 				guard = Vector3(-0.2, 0.25, 0.0).lerp(Vector3(-0.1, 2.7, 0.0), chg)
 			"twin":
-				guard = Vector3(-0.5, -1.0, 0.0).lerp(Vector3(-0.4, -0.2, 0.0), aim_k).lerp(Vector3(-1.2, -0.3, 0.0), chg)
-				o_guard = Vector3(0.5, -1.0, 0.0).lerp(Vector3(0.45, -0.3, 0.0), aim_k).lerp(Vector3(1.2, -0.3, 0.0), chg)
+				guard = Vector3(-0.5, -0.8, 0.0).lerp(Vector3(-0.4, -0.2, 0.0), aim_k).lerp(Vector3(-1.2, -0.3, 0.0), chg)
+				o_guard = Vector3(0.5, -0.8, 0.0).lerp(Vector3(0.45, -0.3, 0.0), aim_k).lerp(Vector3(1.2, -0.3, 0.0), chg)
 		var a := guard
 		var oa := o_guard
 		if sw_w > 0.0:
@@ -1041,9 +1134,11 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 	if gun:
 		gun.transform = Transform3D(gbas * Basis.from_scale(Vector3.ONE * maxf(gvs, 0.001)), gpos)
 		gun.visible = gun_vis > 0.02
+		_keep_above_ground(gun, gun_pts)
 	if offhand:
 		offhand.transform = Transform3D(obas * Basis.from_scale(Vector3.ONE * maxf(gvs, 0.001)), opos)
 		offhand.visible = gun_vis > 0.02
+		_keep_above_ground(offhand, off_pts)
 	if arm_l == null or arm_r == null:
 		return
 	# ---------------------------------------------------------------- hand targets

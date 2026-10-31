@@ -292,6 +292,11 @@ func _ready() -> void:
 		set_meta("kinbox_check", kbc)      # kept alive while it waits on frames
 		kbc.run(self)
 		return
+	if "--weapon-clip-check" in args:
+		var wcc = load("res://tools/weapon_clip_check.gd").new()      # no held weapon ever dips into the ground
+		set_meta("weapon_clip_check", wcc)
+		wcc.run(self)
+		return
 	if "--work-check" in args:
 		var wkc = load("res://tools/work_check.gd").new()      # kin at work: jobs, stations, priorities, shimmer odds
 		set_meta("work_check", wkc)
