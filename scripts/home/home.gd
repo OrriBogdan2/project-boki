@@ -193,7 +193,7 @@ func _ready() -> void:
 	world.build_meshes()
 	fx = Fx.new(); add_child(fx)
 	cam = CamRig.new(); add_child(cam)
-	cam.zoom_to = 0.8; cam.zoom = 0.8; cam.lead = 0.2
+	cam.zoom_to = HOME_ZOOM; cam.zoom = HOME_ZOOM; cam.lead = 0.2
 	if "--home-wide" in OS.get_cmdline_user_args():
 		cam.zoom_to = 2.6; cam.zoom = 2.6     # test: the whole farm in one shot
 	var house := Models.house(); house.position = spots["house"]; add_child(house)
@@ -781,6 +781,7 @@ var dash_v := Vector2.ZERO
 var dash_charges := 2.0
 var safe_at := Vector3(38.0, 0, 34.5)
 var glider_node: MeshInstance3D = null
+const HOME_ZOOM := 1.2         # the camera on arriving home: midway between close (0.8) and the widest the wheel goes (1.6)
 const MANTLE := 1.5            # ledges this far above your feet pop you up when you jump at them
 const MANTLE_ABYSS := 12.0     # falling past an island's cliff, you can still catch its edge from this far below
 const FALL_RESPAWN := -14.0
@@ -3338,7 +3339,7 @@ func _play_evolutions() -> void:
 		Sfx.play("kin_happy")
 		_emote(k, "★")
 		building_now = false
-		cam.zoom_to = 0.8
+		cam.zoom_to = HOME_ZOOM
 		var v := _new_panel(("%s evolved" if big else "%s is changing") % rec["name"], 520)
 		for e in evs:
 			v.add_child(UI.label(String(e.get("text", Evo.describe(e, rec))), 16, Evo.AFF[e["aff"]]["tint"]))
