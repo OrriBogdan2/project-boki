@@ -1186,32 +1186,32 @@ func _draw_abilities(sz: Vector2, p: Hunter) -> void:
 	# E: your kin's ability
 	var er := Rect2(Vector2(x, y), Vector2(s, s))
 	if k:
-		var kd: AbilityDef = k.runner.def_of("k1")
+		var kd: AbilitySpec = k.runner.def_of("k1")
 		if kd:
-			var rdy: bool = k.runner.is_ready("k1") and k.ready_to_fight() and k.state != "fused"
-			_skill_slot("kin", "k1", er, kd.icon, Settings.key_cap("signature"), kd.color, k.runner.cd_frac("k1"), k.runner.cd_left("k1") if not k.runner.is_ready("k1") else 0.0, rdy)
+			var rdy: bool = k.runner.is_ready("k1") and k.ready_to_fight()
+			_skill_slot("kin", "k1", er, KinText.icon(kd), Settings.key_cap("signature"), KinText.color(kd), k.runner.cd_frac("k1"), k.runner.cd_left("k1") if not k.runner.is_ready("k1") else 0.0, rdy)
 			if not k.ready_to_fight() and int(p.slot_lv["kin"]) > 0:
 				_rounded(er, Color(0, 0, 0, 0.45), 10)
 	x += s + gap
 	# R: the bond ultimate, a little bigger, with its charge ring
 	var us := 58.0
-	var ud := Ultimate.def_for(k) if k else null
+	var ud := KinMerge.def_for(k) if k else null
 	var ur := Rect2(Vector2(x, y - (us - s)), Vector2(us, us))
-	var ucol: Color = ud.color if ud else GOLD
-	_skill_slot("ult", "r", ur, ud.id if ud else "bond", Settings.key_cap("ultimate"), ucol, 0.0, 0.0, Ultimate.can_cast(p))
-	if int(p.slot_lv["ult"]) > 0:
-		if p.ult < 1.0:
+	var ucol: Color = GOLD
+	_skill_slot("ult", "r", ur, "bond", Settings.key_cap("ultimate"), ucol, p.merge_cd / KinParts.MERGE_SPENT_TIME if p.merge_cd > 0.0 else 0.0, p.merge_cd, KinMerge.can_cast(p))
+	if int(p.slot_lv["ult"]) > 0 and ud:
+		if KinMerge.active(p):
+			var ml: Dictionary = p.merge_st
+			c.draw_arc(ur.get_center(), us * 0.5 + 3.0, -PI / 2, -PI / 2 + TAU * clampf(float(ml["t"]) / maxf(0.1, float(ml["T"])), 0.0, 1.0), 48, Color("fff4c0"), 4.0, true)
+			_ctext(ur.get_center() + Vector2(0, us * 0.5 - 10), "%ds" % int(ceil(float(ml["t"]))), 11, Color("fff4c0"), big)
+		elif p.ult < 1.0:
 			c.draw_arc(ur.get_center(), us * 0.5 + 3.0, -PI / 2, -PI / 2 + TAU * p.ult, 48, ucol, 3.0, true)
 			_ctext(ur.get_center() + Vector2(0, us * 0.5 - 10), "%d%%" % int(p.ult * 100.0), 11, Color(ucol, 0.9), big)
 		else:
 			var pulse := 0.5 + 0.5 * sin(m.time * 6.0)
 			_rounded(ur.grow(3.0 + pulse * 3.0), Color(0, 0, 0, 0), 13, Color(ucol, 0.35 + pulse * 0.4), 2)
-	if not p.fuse.is_empty():
-		var fd: UltimateDef = p.fuse["def"]
-		_bar(Rect2(Vector2(ur.position.x, ur.end.y + 14), Vector2(us, 4)), clampf(float(p.fuse["t"]) / fd.time, 0.0, 1.0), fd.color)
-	elif k and not k.giant.is_empty():
-		var gdu: UltimateDef = k.giant["def"]
-		_bar(Rect2(Vector2(ur.position.x, ur.end.y + 14), Vector2(us, 4)), clampf(float(k.giant["t"]) / gdu.time, 0.0, 1.0), gdu.color)
+	if KinMerge.active(p):
+		_bar(Rect2(Vector2(ur.position.x, ur.end.y + 14), Vector2(us, 4)), clampf(float(p.merge_st["t"]) / maxf(0.1, float(p.merge_st["T"])), 0.0, 1.0), Color("fff4c0"))
 	x += us + gap + 4.0
 	# the passive glove and B (base to a teammate) as small badges at the end of the row
 	if not g1.is_empty() and Gear.ALL.has(String(g1["id"])):
@@ -1287,14 +1287,17 @@ func _draw_kin_card(sz: Vector2, p: Hunter) -> void:
 	hover_spots.append([Rect2(pc - Vector2(rr, rr), Vector2(rr, rr) * 2.0), "kin"])
 	var st := ""
 	match k.state:
-		"shoulder": st = "on shoulder" if k.settle >= 1.0 else "settling"
+		"shoulder":
+			st = {"mount": "riding", "perch": "perched"}.get(k.carry_style(), "on shoulder") if k.settle >= 1.0 else "settling"
+			if not k.giant.is_empty(): st = "GIANT"
+			elif k.carry_style() == "mount" and p.gliding: st = "curled up"
 		"flying", "flying_home": st = "in the air"
-		"active": st = ("GIANT" if not k.giant.is_empty() else ("fighting" if k.target else "out"))
+		"active": st = "fighting" if k.target else "out"
 		"returning": st = "coming back"
 		"fainted": st = "resting"
 		"reviving": st = "reviving you!"
-		"fused": st = "fused"
-	if k.state in ["active", "fainted", "reviving", "fused", "returning"]:
+		"fused": st = "merged"
+	if k.state in ["active", "fainted", "reviving", "fused", "returning"] or not k.giant.is_empty():
 		var tw := big.get_string_size(st.to_upper(), HORIZONTAL_ALIGNMENT_LEFT, -1, 9).x
 		var sr := Rect2(pc + Vector2(-tw * 0.5 - 5, rr + 3), Vector2(tw + 10, 14))
 		_rounded(sr, Color(0.03, 0.03, 0.05, 0.9), 6)
@@ -1853,11 +1856,11 @@ func _draw_kit(sz: Vector2, p: Hunter) -> void:
 	if p.kin:
 		var k: Kin = p.kin
 		var kcol: Color = Data.KIN[k.species]["color"]
-		var kd1: AbilityDef = k.runner.def_of("k1")
-		if kd1: lines.append([Settings.key_cap("signature"), kd1.display_name, kd1.desc, kd1.color])
-		var ud := Ultimate.def_for(k)
-		if ud: lines.append([Settings.key_cap("ultimate"), ud.display_name + " (bond ultimate)", ud.desc + " Fill the bond meter by fighting together.", ud.color])
-		lines.append([Settings.key_cap("throw"), "Throw / recall " + String(k.rec.get("name", "your kin")), "Stuns what it hits; then your shots deal a combo. Press again to call it back.", kcol])
+		var kd1: AbilitySpec = k.runner.def_of("k1")
+		if kd1: lines.append([Settings.key_cap("signature"), kd1.display_name, KinText.ability(k.effective("k1")), KinText.color(kd1)])
+		var ud := KinMerge.def_for(k)
+		if ud: lines.append([Settings.key_cap("ultimate"), ud.display_name + " (merge)", " ".join(KinText.merge(ud, k.carry_style() == "mount")) + " Unlocks at level %d with a full bond meter." % int(Hunter.ULT_AT[0]), GOLD])
+		lines.append([Settings.key_cap("throw"), ("Throw (a dive) / recall " if k.carry_style() == "perch" else "Throw / recall ") + String(k.rec.get("name", "your kin")), "Stuns what it hits; then your shots deal a combo. Press again to call it back.", kcol])
 	var dsi := p.slot_info("dash")
 	lines.append([Settings.key_cap("dash"), String(dsi["name"]) + ((" + " + String(dsi["rider"])) if String(dsi.get("rider", "")) != "" else ""), String(dsi["desc"]), dsi["col"]])
 	var g0: Dictionary = p.gear[0]
@@ -2211,22 +2214,27 @@ func _tip_lines(id: String, p: Hunter) -> Array:
 		"k1", "k2":
 			var k: Kin = p.kin
 			if k == null: return []
-			var kd: AbilityDef = k.runner.def_of(id)
+			var kd: AbilitySpec = k.runner.def_of(id)
 			if kd == null: return []
-			out.append([kd.display_name, kd.color])
-			out.append(["%s's ability  ·  %s" % [k.rec.get("name", "Kin"), Settings.key_cap("signature" if id == "k1" else "kin_skill")], MUTED, 12])
-			out.append([kd.desc, INK, 14])
-			var where := "Your kin casts it; from your shoulder it's thrown out first." if kd.from == "kin" else "Works on you wherever your kin is."
+			out.append([kd.display_name, KinText.color(kd)])
+			out.append(["%s's ability  ·  %s" % [k.rec.get("name", "Kin"), Settings.key_cap("signature") if id == "k1" else "its own"], MUTED, 12])
+			out.append([KinText.ability(k.effective(id)), INK, 14])
+			var where := "Your kin casts it; while it rides with you, you do." if kd.from == "kin" else "Works on you wherever your kin is."
 			out.append(["Cooldown %s%s. %s" % [_secs(kd.cooldown / maxf(0.1, k.runner.rate)), ("  ·  ready in %s" % _secs(k.runner.cd_left(id))) if not k.runner.is_ready(id) else "  ·  ready", where], MUTED, 13])
-			if not kd.auto.is_empty():
-				out.append(["Your kin also uses it on its own when it sees the chance (turn this off in Settings).", Color(kd.color, 0.85), 12])
+			if id == "k1" and kd.cue != null:
+				out.append(["Your kin can also use it on its own (turn that on in Settings).", Color(KinText.color(kd), 0.85), 12])
+			var ka: AbilitySpec = k.runner.def_of("k2")
+			if id == "k1" and ka:
+				out.append(["%s: %s. %s" % [ka.display_name, KinText.when(ka), KinText.ability(k.effective("k2"))], KinText.color(ka), 12])
 		"r":
-			var ud := Ultimate.def_for(p.kin) if p.kin else null
+			var ud := KinMerge.def_for(p.kin) if p.kin else null
 			if ud == null: return []
-			out.append([ud.display_name, ud.color])
-			out.append(["Bond ultimate  ·  %s  ·  %s" % [Settings.key_cap("ultimate"), "fuses onto you" if ud.form == "armor" else "giant form"], MUTED, 12])
-			out.append([ud.desc, INK, 14])
-			out.append(["Bond %d%%. Fills as you and your kin land hits together, faster with combos." % int(p.ult * 100.0), GOLD, 13])
+			var giant: bool = (p.kin as Kin).carry_style() == "mount"
+			out.append([ud.display_name, GOLD])
+			out.append(["Merge (bond ultimate)  ·  %s  ·  %s" % [Settings.key_cap("ultimate"), "your mount grows giant" if giant else "fuses onto you"], MUTED, 12])
+			for ln in KinText.merge(ud, giant):
+				out.append([String(ln), INK, 13])
+			out.append(["Unlocks at level %d with a full meter. After that the bond fills as you and your kin land hits together. Throwing your kin ends it early; then %ss before it can go again." % [int(Hunter.ULT_AT[0]), KinText.n(KinParts.MERGE_SPENT_TIME)], GOLD, 12])
 		"swap":
 			var b: Kin = p.kin2
 			if b == null: return []
@@ -2234,9 +2242,9 @@ func _tip_lines(id: String, p: Hunter) -> Array:
 			out.append(["Second kin  ·  %s" % Settings.key_cap("swap_kin"), MUTED, 12])
 			var names := []
 			for sl in ["k1", "k2"]:
-				var bd: AbilityDef = b.runner.def_of(sl)
+				var bd: AbilitySpec = b.runner.def_of(sl)
 				if bd: names.append(bd.display_name)
-			var bu := Ultimate.def_for(b)
+			var bu := KinMerge.def_for(b)
 			out.append(["Brings out %s: %s, and %s as its bond ultimate. The kin you swap out rests and heals." % [Data.KIN[b.species]["name"], " and ".join(names), bu.display_name if bu else "its ultimate"], INK, 14])
 		"kin":
 			var k: Kin = p.kin
@@ -2250,6 +2258,11 @@ func _tip_lines(id: String, p: Hunter) -> Array:
 			if ai.caution > 0.55: traits.append("cautious: backs off when hurt")
 			if traits.is_empty(): traits.append("steady: a bit of everything")
 			out.append(["In a fight it's " + "; ".join(traits) + ".", INK, 14])
+			if k.ks:
+				out.append([KinText.carry(k.ks), KinRules.cat_color("sustain"), 13])
+				var ob := KinText.owner_bonus(p.kin_bonus)
+				if ob != "":
+					out.append(["Owner bonus for the run: " + ob, GOLD, 13])
 		"gear0", "gear1":
 			var g: Dictionary = p.gear[int(id.substr(4))]
 			if g.is_empty(): return []
@@ -2262,11 +2275,16 @@ func _tip_lines(id: String, p: Hunter) -> Array:
 			var k: Kin = p.kin
 			if k == null: return []
 			var sp: Dictionary = Data.KIN[k.species]
-			var sh: Dictionary = Data.SHOULDER[sp["shoulder"]]
 			out.append(["Throw %s" % k.rec.get("name", "your kin"), sp["color"]])
 			out.append(["Kin  ·  %s" % Settings.key_cap("throw"), MUTED, 12])
-			out.append(["Throws your kin at the cursor. Whatever it hits is stunned, and your shots crit stunned foes. Press again to call it back.", INK, 14])
-			out.append(["On your shoulder: %s. %s" % [sh["name"], sh["desc"]], Color(sp["color"], 0.95), 13])
+			out.append([("Your kin dives on the cursor from above." if k.carry_style() == "perch" else "Throws your kin at the cursor.") + " Whatever it hits is stunned, and your shots crit stunned foes. Press again to call it back.", INK, 14])
+			if k.ks and not k.ks.throw_effects.is_empty():
+				out.append(["Its throw also: " + KinText.effects(k.ks.throw_effects), KinRules.effects_color(k.ks.throw_effects), 13])
+			if k.ks:
+				out.append([KinText.carry(k.ks), KinRules.cat_color("sustain"), 13])
+				var ob := KinText.owner_bonus(p.kin_bonus)
+				if ob != "":
+					out.append(["Owner bonus for the run: " + ob, GOLD, 13])
 		"dash":
 			var dd: AbilityDef = p.dodge_def
 			out.append([dd.display_name if dd else "Dash", dd.color if dd else Color("bfe6ff")])
@@ -2320,20 +2338,33 @@ func _tip_lines(id: String, p: Hunter) -> Array:
 ## Point the cursor at a monster, a kin or another hunter to see what it is.
 ## A rival kin's kit in one or two lines: its ability names and what each does, so you learn the
 ## counters by looking (the kin's species always means the same kit).
+## Read from its parts (KinText), coloured by effect category: damage, control, sustain, utility.
 func _kit_lines(lines: Array, k: Kin) -> void:
 	if k == null or k.runner == null:
 		return
 	for slot in ["k1", "k2"]:
-		var d: AbilityDef = k.runner.def_of(slot)
+		var d: AbilitySpec = k.runner.def_of(slot)
 		if d == null: continue
 		var tag := "E" if slot == "k1" else "auto"
-		var desc := String(d.desc)
-		if desc.length() > 70: desc = desc.substr(0, 68) + "…"
-		lines.append(["%s  %s: %s" % [tag, d.display_name, desc], Color(d.color).lightened(0.25)])
+		lines.append(["%s  %s: %s" % [tag, d.display_name, KinText.ability(k.effective(slot))], KinText.color(d).lightened(0.2)])
+	var ms := KinMerge.def_for(k)
+	if ms:
+		var ml: Array = KinText.merge(ms, k.carry_style() == "mount")
+		lines.append(["R  %s: %s" % [ms.display_name, String(ml[0]) if not ml.is_empty() else ""], Color(GOLD, 0.95)])
+	if k.ks:
+		lines.append([KinText.carry(k.ks), Color(KinRules.cat_color("sustain"), 0.9)])
 
 func _draw_world_hover(sz: Vector2, p: Hunter) -> void:
 	var mp := c.get_local_mouse_position()
 	var cam := m.cam
+	if "--hover-rival" in OS.get_cmdline_user_args():
+		# test hook: point at the nearest rival hunter (or their kin, with --hover-rival-kin)
+		var nb: Ent = null; var nd := 1e9
+		for e0 in (m.kins if "--hover-rival-kin" in OS.get_cmdline_user_args() else m.hunters):
+			if e0 != p and e0.team != p.team and not e0.dead and e0.visible and p.flat_dist(e0) < nd and not (e0 is Kin and (e0 as Kin).state == "shoulder"):
+				nd = p.flat_dist(e0); nb = e0
+		if nb and not cam.is_position_behind((nb as Node3D).position):
+			mp = cam.unproject_position((nb as Node3D).position + Vector3(0, 0.7, 0))
 	var best: Ent = null; var bd := 46.0
 	var cands: Array = []
 	for mb in m.mobs:
@@ -2380,7 +2411,7 @@ func _draw_world_hover(sz: Vector2, p: Hunter) -> void:
 			if k.lost_from != "":
 				lines.append(["Left behind by %s. Whoever collects it keeps it." % ("you" if k.lost_from == "you" else k.lost_from), GOLD if k.lost_from == "you" else MUTED])
 		elif k.owner_h == p:
-			var a1: AbilityDef = k.runner.def_of("k1")
+			var a1: AbilitySpec = k.runner.def_of("k1")
 			lines.append(["Yours. %s throws it, %s uses %s." % [Settings.key_cap("throw"), Settings.key_cap("signature"), a1.display_name if a1 else "its ability"], INK])
 		elif k.lost_from == "you" and k.lost_uid != "":
 			lines.append(["Your lost kin! Held by %s. Take it back." % (k.owner_h.pname if k.owner_h else "a rival"), GOLD])

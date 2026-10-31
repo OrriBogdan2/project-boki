@@ -1,56 +1,6 @@
 {
 	"id": "cindle",
-	"name": "Vespyx",
-	"type": "venom",
-	"color": "#4a2f5c",
-	"belly": "#d8c6e8",
-	"glow": "#a6ff3a",
-	"stats": {
-		"hp": 80,
-		"dmg": 9,
-		"speed": 6.8,
-		"range": 1.3
-	},
-	"look": {
-		"ears": "none",
-		"body": "vespyx",
-		"tail": "none",
-		"feet": "none",
-		"aura": "drips"
-	},
-	"traits": {
-		"bravery": 0.75,
-		"loyalty": 0.5,
-		"temper": 0.7,
-		"curiosity": 0.5
-	},
-	"voice": "sly and eager, talks in quick little hisses",
-	"shoulder": "kindle",
-	"abilities": [
-		"stinger_hook",
-		"flare_dash"
-	],
-	"ultimate": "blaze_mantle",
-	"ai": {
-		"aggression": 0.8,
-		"loyalty": 0.4,
-		"caution": 0.25,
-		"style": "brawler"
-	},
-	"throw_hit": {
-		"burn": 5
-	},
-	"animals": [
-		"Fox",
-		"Scorpion"
-	],
-	"desc": "A sly fox with a scorpion's curled tail. Its sting drips venom that keeps eating at foes after the hit.",
-	"egg": {
-		"name": "Venom Egg",
-		"temper": "Bold",
-		"desc": "A dark plum shell beaded with green droplets. It hisses when you lean close. Something bold is in here.",
-		"play": "Darts in, stings hard and poisons. Brave, but quick to anger."
-	},
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/cindle.json.",
 	"work": {
 		"ember": 3,
 		"forage": 1,

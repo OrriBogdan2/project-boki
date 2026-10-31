@@ -1,5 +1,6 @@
 class_name Content
-## Loads combat content (weapons, abilities, class dodges, later kin) from JSON under res://content.
+## Loads combat content (weapons, abilities, class dodges) from JSON under res://content. Kin,
+## their abilities and merges are the kin grammar's (content/*_v2, see KinLib).
 ## Anyone can add a new one by dropping a JSON file in the right folder: no code changes.
 
 static var _cache := {}
@@ -31,14 +32,6 @@ static func weapon(id: String) -> WeaponDef:
 static func class_dodge(cls: String) -> AbilityDef:
 	var d := _load("classes", cls)
 	return ability(String(d.get("dodge", "dash")))
-
-static func kin(id: String) -> KinDef:
-	var d := _load("kin", id)
-	return KinDef.from_dict(d) if not d.is_empty() else null
-
-static func ultimate(id: String) -> UltimateDef:
-	var d := _load("ultimates", id)
-	return UltimateDef.from_dict(d) if not d.is_empty() else null
 
 ## Tuning tables under content/rules (bond meter, kin AI).
 static func rules(id: String) -> Dictionary:

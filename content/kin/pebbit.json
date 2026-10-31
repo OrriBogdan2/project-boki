@@ -1,56 +1,6 @@
 {
 	"id": "pebbit",
-	"name": "Gravadillo",
-	"type": "gravity",
-	"color": "#3c4058",
-	"belly": "#8e8aa8",
-	"glow": "#b48cff",
-	"stats": {
-		"hp": 120,
-		"dmg": 11,
-		"speed": 5.4,
-		"range": 1.4
-	},
-	"look": {
-		"ears": "none",
-		"body": "gravadillo",
-		"tail": "none",
-		"feet": "none",
-		"aura": "pebbles"
-	},
-	"traits": {
-		"bravery": 0.9,
-		"loyalty": 0.7,
-		"temper": 0.3,
-		"curiosity": 0.2
-	},
-	"voice": "slow, steady, few words, deeply loyal once trust is earned",
-	"shoulder": "bedrock",
-	"abilities": [
-		"slam",
-		"rock_guard"
-	],
-	"ultimate": "titan",
-	"ai": {
-		"aggression": 0.55,
-		"loyalty": 0.75,
-		"caution": 0.15,
-		"style": "tank"
-	},
-	"throw_hit": {
-		"kb": 7
-	},
-	"animals": [
-		"Armadillo",
-		"Rhino beetle"
-	],
-	"desc": "An armadillo with a rhino beetle's horn. It rolls up in heavy plates and bends gravity to slam foes down.",
-	"egg": {
-		"name": "Gravity Egg",
-		"temper": "Steady",
-		"desc": "Far heavier than it looks. Loose pebbles roll toward it. Something steady is in here.",
-		"play": "Slow and tough. Pulls foes in and slams them down."
-	},
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/pebbit.json.",
 	"work": {
 		"stone": 3,
 		"timber": 2,

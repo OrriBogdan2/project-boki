@@ -112,23 +112,8 @@ static func simulate(rec: Dictionary, rng: RandomNumberGenerator) -> void:
 		on_level(rec, rng)
 	rec["level"] = target
 
-## Stat multipliers from forms and mutations: {"hp", "dmg", "speed", "cd"}.
-static func mods(rec: Dictionary) -> Dictionary:
-	ensure(rec)
-	var out := {"hp": 1.0, "dmg": 1.0, "speed": 1.0, "cd": 1.0}
-	for f in rec["forms"]:
-		var s: String = AFF[f]["stat"]
-		out[s] = _apply(out[s], s, float(AFF[f]["amt"]) * 2.0)
-	for m in rec["muts"]:
-		var s: String = AFF[m["aff"]]["stat"]
-		out[s] = _apply(out[s], s, float(AFF[m["aff"]]["amt"]) * int(m["lv"]))
-	# rare mutations (Giant, Crystal...) add their small perks
-	var rm := Mutations.mods(rec)
-	for k in out: out[k] = float(out[k]) * float(rm[k])
-	return out
-
-static func _apply(v: float, s: String, amt: float) -> float:
-	return v * (1.0 - amt) if s == "cd" else v * (1.0 + amt)
+## (Forms no longer grow stats by a percentage: a form takes the next node on its affinity's
+## evolution path, budget-neutral, see KinLib.nodes_for and docs/KIN_GRAMMAR.md.)
 
 ## What a match taught it: called from Game.apply_result with the kin's match stats.
 static func learn(rec: Dictionary, st: Dictionary) -> void:
@@ -149,13 +134,9 @@ static func describe(ev: Dictionary, rec: Dictionary) -> String:
 			return "%s's %s grew bigger. (%s)" % [kname, PART_NAMES.get(ev["part"], ev["part"]), _perk(ev["aff"])]
 	return ""
 
-static func _perk(aff: String) -> String:
-	match aff:
-		"fierce": return "+5% damage"
-		"steadfast": return "+8% health"
-		"curious": return "skill recharges 6% faster"
-		"swift": return "+5% speed"
-	return ""
+## Body-part mutations are cosmetic (docs/KIN_GRAMMAR.md); forms take budget-neutral evolution nodes.
+static func _perk(_aff: String) -> String:
+	return "just for looks"
 
 ## Adds evolved parts, size and colour to a kin model built by Models.kin.
 static func dress(root: Node3D, rec: Dictionary) -> void:

@@ -1,0 +1,117 @@
+{
+	"grammar": 1,
+	"id": "hivara",
+	"name": "Hivara",
+	"animals": [
+		"Honeybee",
+		"Praying mantis"
+	],
+	"theme": "swarm",
+	"flavor": "A honeybee with a praying mantis's folded blades, wearing a crown of wax. A swarm of tiny bees follows it everywhere. Hatched from the Brood Mother's egg.",
+	"colors": {
+		"body": "#d9a42a",
+		"belly": "#3b2a1c",
+		"glow": "#ffe680",
+		"wing": "#f4efd2"
+	},
+	"look": {
+		"ears": "none",
+		"body": "hivara",
+		"tail": "none",
+		"feet": "none",
+		"aura": "spores"
+	},
+	"body": {
+		"size": "small",
+		"reach": 1.4,
+		"mass": 0.8,
+		"gait": {
+			"hop_rate": 10.0,
+			"hop_height": 0.12,
+			"pace": 1.05
+		}
+	},
+	"stats": {
+		"kin_hp": 6,
+		"kin_damage": 4,
+		"kin_speed": 10
+	},
+	"personality": {
+		"bravery": 0.7,
+		"loyalty": 0.75,
+		"temper": 0.55,
+		"curiosity": 0.6
+	},
+	"ai": {
+		"aggression": 0.65,
+		"loyalty": 0.7,
+		"caution": 0.3,
+		"role": "bruiser"
+	},
+	"carry": {
+		"style": "shoulder",
+		"name": "Sting",
+		"on_shot": {
+			"effects": [
+				{
+					"type": "damage",
+					"preset": "poison",
+					"amount": 12
+				}
+			]
+		}
+	},
+	"throw": {
+		"effects": [
+			{
+				"type": "slow",
+				"duration": 1.2
+			}
+		]
+	},
+	"active": "hive_swarm",
+	"auto": "thorn_patch",
+	"merge": "hive_crown",
+	"evolution": {
+		"root": "Hiv",
+		"paths": [
+			{
+				"affinity": "fierce",
+				"nodes": [
+					"fierce_form"
+				]
+			},
+			{
+				"affinity": "steadfast",
+				"nodes": [
+					"steadfast_form"
+				]
+			},
+			{
+				"affinity": "curious",
+				"nodes": [
+					"curious_form"
+				]
+			},
+			{
+				"affinity": "swift",
+				"nodes": [
+					"swift_form"
+				]
+			}
+		]
+	},
+	"voice": {
+		"line": "busy and bossy, always organising, hums when it's happy",
+		"syllables": [
+			"Hi",
+			"vara"
+		]
+	},
+	"egg": {
+		"name": "Hive Egg",
+		"temper": "Busy",
+		"desc": "Waxy and golden, and it hums. Something inside is drumming to get out. The Brood Mother guarded it.",
+		"play": "Stings in swarms. Poisons, slows and never stops buzzing."
+	}
+}
