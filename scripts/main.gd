@@ -300,6 +300,9 @@ func _ready() -> void:
 	if "--economy-check" in args:
 		_economy_check()
 		return
+	if "--pickup-check" in args:
+		load("res://tools/pickup_check.gd").new().run(self)      # picked-up weapons come ready to fire
+		return
 	if "--pack-ui-check" in args:
 		var puc = load("res://tools/pack_ui_check.gd").new()      # the backpack windows take real mouse clicks
 		set_meta("pack_ui_check", puc)

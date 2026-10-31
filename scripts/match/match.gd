@@ -1087,15 +1087,20 @@ func _take_weapon(h: Hunter, wp: Dictionary, from_net := false, keep_old := fals
 	if net_on:
 		net_event(["wtake", wp["id"], h.nid, wp["wid"], wp["rar"]])
 	var old_it := Loot.of_hand(h)
-	var old_ammo := h.ammo if h.reload_t <= 0.0 else 0
-	Loot.equip(h, Pack.ground_item(wp), int(wp.get("ammo", -1)))
+	var old_ammo := h.ammo      # a reload under way is dropped with the gun: it keeps what was in it
+	# a picked-up gun comes full and ready (no reload), unless it was put down under 2s ago (Loot.REPICK_T)
+	var am := -1
+	if wp.has("left_at") and time - float(wp["left_at"]) < Loot.REPICK_T:
+		am = int(wp.get("ammo", -1))
+	Loot.equip(h, Pack.ground_item(wp), am)
 	if not keep_old:
 		# the old one is put down where you stand (with the backpack, the player's goes in it instead)
 		var ba := randf() * TAU
 		var back := Vector3(cos(ba), 0, sin(ba)) * 0.9
-		spawn_weapon(String(old_it["wid"]), int(old_it["rar"]), Vector3(h.pos.x + back.x, h.ground(), h.pos.z + back.z), "", true, old_ammo, old_it if Loot.keepable(old_it) else {})
+		spawn_weapon(String(old_it["wid"]), int(old_it["rar"]), Vector3(h.pos.x + back.x, h.ground(), h.pos.z + back.z), "", true, old_ammo, Loot.clean(old_it) if Loot.keepable(old_it) else {})
+		wpicks[wpicks.size() - 1]["left_at"] = time
 	var col: Color = Data.RARITY[int(wp["rar"])]["color"]
-	sfx("reload", h.pos, 0.0, 0.8)
+	sfx("pickup", h.pos, 0.0, 0.8)
 	fx.ring(h.pos, 1.4, col, 0.35)
 	fx.burst(h.pos + Vector3(0, 0.9, 0), col, 14, 3.0, 0.5)
 	if h == player:

@@ -70,7 +70,7 @@ static func take_ground(m, h, wp: Dictionary) -> void:
 				return
 			if Loot.value(it) > Loot.value(Loot.of_hand(h)) or not wants(h, it):
 				# better than what you hold (or the pack's no use): it goes in your hands
-				var old := Loot.of_hand(h)
+				var old := Loot.leave(h, Loot.of_hand(h))
 				m._take_weapon(h, wp, false, true)
 				if Loot.keepable(old):
 					_stash_new(m, h, old)
@@ -149,11 +149,11 @@ static func use_from_pack(m, h, i: int) -> void:
 	h.pack.remove_at(i)
 	match String(it.get("t", "")):
 		"weapon":
-			var old := Loot.of_hand(h)
+			var old := Loot.leave(h, Loot.of_hand(h))
 			Loot.equip(h, it)
 			if Loot.keepable(old): h.pack.insert(mini(i, h.pack.size()), old)
 			if h == m.player and m.hud: m.hud.toast(Loot.name_of(it), Loot.col_of(it))
-			m.sfx("reload", h.pos, 0.0, 0.8)
+			m.sfx("pickup", h.pos, 0.0, 0.8)
 		"glove":
 			var old_g := _wear(m, h, it)
 			if not old_g.is_empty(): h.pack.insert(mini(i, h.pack.size()), old_g)
@@ -177,12 +177,12 @@ static func haul(h) -> Array:
 	var out: Array = []
 	var w := Loot.of_hand(h)
 	if Loot.keepable(w):
-		out.append(w.duplicate())
+		out.append(Loot.clean(w))
 	for g in h.gear:
 		if not (g as Dictionary).is_empty():
 			out.append(Loot.glove(String(g["id"]), int(g["rar"])))
 	for it in h.pack:
-		out.append((it as Dictionary).duplicate())
+		out.append(Loot.clean(it))
 	return out
 
 # ------------------------------------------------------------------ deathboxes
@@ -288,7 +288,7 @@ static func _box_to_hand(m, h, b: Dictionary, c: Dictionary) -> void:
 	var it: Dictionary = c["it"]
 	_box_remove(b, c)
 	if String(it["t"]) == "weapon":
-		var old := Loot.of_hand(h)
+		var old := Loot.leave(h, Loot.of_hand(h))
 		Loot.equip(h, it)
 		if Loot.keepable(old): _box_put(b, old)
 	else:
