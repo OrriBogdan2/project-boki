@@ -392,12 +392,6 @@ func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
 	if ctrl == "local" and m.opts.get("tutorial", false):
 		d *= 0.35
 	d *= 1.0 - owner_stat("damage_reduction")
-	if kin_shield > 0.0 and d > 0.0 and opts.get("src", "") not in ["fall", "heat"]:
-		var ks0 := minf(kin_shield, d)
-		kin_shield -= ks0; d -= ks0
-		if d <= 0.0:
-			flash_t = 0.06
-			return 0.0
 	if downed:
 		# a wisp can't be shot: it's lost to stomps, an execute, or bleeding out
 		return 0.0
@@ -427,6 +421,12 @@ func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
 		if src is Hunter and src.team != team:
 			extract_prog = 0.0
 			if is_local() and m.hud: m.hud.toast("Extraction interrupted", Color("ff9a8a"))
+	if kin_shield > 0.0 and d > 0.0 and opts.get("src", "") not in ["fall", "heat"]:
+		# your kin's owner shield soaks last; a fully soaked hit still counts as a hit (truces, interrupts)
+		var ks0 := minf(kin_shield, d)
+		kin_shield -= ks0
+		d = maxf(0.01, d - ks0)
+		opts["soaked"] = ks0
 	return d
 
 func hit_y() -> float:
@@ -2216,8 +2216,12 @@ func _bot_spend() -> void:
 		if can_level("ult"):
 			level_slot("ult"); continue
 		var done := false
+		# follow the order as a list of ranks (sec 1, dash 1, kin 1, gear 1, sec 2, ...), so every slot
+		# opens early: the kin's abilities are locked until its slot has a point (KinRules slot locks)
+		var want := {}
 		for s in order:
-			if int(slot_lv[s]) < int(SLOT_MAX[s]) and can_level(s) and (int(slot_lv[s]) == 0 or order.find(s) >= 0):
+			want[s] = int(want.get(s, 0)) + 1
+			if int(slot_lv[s]) < int(want[s]) and int(slot_lv[s]) < int(SLOT_MAX[s]) and can_level(s):
 				level_slot(s); done = true; break
 		if not done: break
 

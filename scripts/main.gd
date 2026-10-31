@@ -1740,7 +1740,7 @@ func _grammar_runtime_check() -> void:
 	_grt("owner bonus: Prismander shield + regen", is_equal_approx(P.kin_shield, 16.0) and absf(P.kin_pt("owner_regen") - 0.75) < 0.01 and is_equal_approx(P.max_hp, base_hp), "shield %.0f regen %.2f" % [P.kin_shield, P.kin_pt("owner_regen")])
 	var hp0 := P.hp
 	P.hurt(10.0, T, {})
-	_grt("owner shield soaks first", P.hp >= hp0 - 0.01 and P.kin_shield < 16.0, "hp %.0f -> %.0f, shield %.0f" % [hp0, P.hp, P.kin_shield])
+	_grt("owner shield soaks the hit", P.hp >= hp0 - 0.05 and P.kin_shield < 16.0, "hp %.0f -> %.0f, shield %.0f" % [hp0, P.hp, P.kin_shield])
 	# ---- 8. the merge: unlocks at level 6 with a free full meter, runs out, then a cooldown
 	k = _grt_kin(m, P, "cindle")
 	P.slot_lv["ult"] = 0; P.ult = 0.0; P.merge_free = true; P.skill_pts = 1; P.lvl = 5
