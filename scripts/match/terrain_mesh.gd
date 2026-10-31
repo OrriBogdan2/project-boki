@@ -55,24 +55,63 @@ func v(x: int, z: int) -> int:
 
 ## Builds the whole terrain mesh.
 func build() -> ArrayMesh:
+	_emit(0)
+	return _mesh(V, N, C, UV)
+
+## The same terrain split into square chunks of `chunk` tiles, so the camera (and each shadow
+## cascade) only draws the ground it can see: [[Vector2i chunk, ArrayMesh], ...]. Cells are traced
+## row by row, so each chunk is a run of slices of the one big set of arrays.
+func build_chunked(chunk: int) -> Array:
+	_emit(chunk)
+	var by := {}
+	for r in _ranges:
+		var key: Vector2i = r[0]
+		if int(r[2]) <= int(r[1]):
+			continue
+		if not by.has(key): by[key] = [PackedVector3Array(), PackedVector3Array(), PackedColorArray(), PackedVector2Array()]
+		var a: Array = by[key]
+		a[0].append_array(V.slice(r[1], r[2])); a[1].append_array(N.slice(r[1], r[2]))
+		a[2].append_array(C.slice(r[1], r[2])); a[3].append_array(UV.slice(r[1], r[2]))
+	var out: Array = []
+	for key in by:
+		var a: Array = by[key]
+		out.append([key, _mesh(a[0], a[1], a[2], a[3])])
+	return out
+
+var _ranges: Array = []     # [chunk, first vertex, end vertex] in the order they were traced
+
+func _emit(chunk: int) -> void:
 	_fill_grid()
 	_fill_colors()
 	_fill_under()
+	_ranges.clear()
 	for cz in range(-1, h):
+		var cur := Vector2i(-99, -99)
+		var start := V.size()
 		for cx in range(-1, w):
+			if chunk > 0:
+				var key := Vector2i(clampi(cx, 0, w - 1) / chunk, clampi(cz, 0, h - 1) / chunk)
+				if key != cur:
+					if cur.x != -99: _ranges.append([cur, start, V.size()])
+					cur = key; start = V.size()
 			_cell(cx, cz)
+		if chunk > 0 and cur.x != -99: _ranges.append([cur, start, V.size()])
 	for si in W.stairs:
 		var i: int = si
 		if W.kind[i] != W.T_VOID:
+			var s0 := V.size()
 			_stairs(i % w, i / w, W.stairs[i], W.level[i] * LEVEL)
+			if chunk > 0: _ranges.append([Vector2i((i % w) / chunk, (i / w) / chunk), s0, V.size()])
+
+func _mesh(vv: PackedVector3Array, nn: PackedVector3Array, cc: PackedColorArray, uu: PackedVector2Array) -> ArrayMesh:
 	var arr := []
 	arr.resize(Mesh.ARRAY_MAX)
-	arr[Mesh.ARRAY_VERTEX] = V
-	arr[Mesh.ARRAY_NORMAL] = N
-	arr[Mesh.ARRAY_COLOR] = C
-	arr[Mesh.ARRAY_TEX_UV] = UV
+	arr[Mesh.ARRAY_VERTEX] = vv
+	arr[Mesh.ARRAY_NORMAL] = nn
+	arr[Mesh.ARRAY_COLOR] = cc
+	arr[Mesh.ARRAY_TEX_UV] = uu
 	var m := ArrayMesh.new()
-	if V.size() > 0:
+	if vv.size() > 0:
 		m.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
 	return m
 

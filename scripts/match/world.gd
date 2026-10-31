@@ -1046,20 +1046,45 @@ var _deco: Node3D = null
 var _rims: Array = []               # grassy rim spots from the terrain mesher, for the grass fringe
 var under := PackedFloat32Array()   # per tile: the height of the island's rocky underside (visual only)
 
+## While a match builds under the loading screen: called after each step, then a frame draws.
+var stage_cb := Callable()
+func _stage(label: String) -> void:
+	PerfLog.mark(label)
+	if stage_cb.is_valid() and is_inside_tree():
+		stage_cb.call(label)
+		await get_tree().process_frame
+		PerfLog.skip()
+
 func build_meshes() -> void:
 	for c in get_children():
 		c.queue_free()
 	_assign_regions()
 	# the ground, cliffs, stairs and undersides: traced as clean contours, see terrain_mesh.gd
-	var tm := TerrainMesh.new(self)
-	var mesh := tm.build()
-	under = tm.under
-	_rims = tm.rims
+	# big maps: the ground in 32-tile chunks, so only what's on screen (and in each shadow cascade)
+	# draws. A map's ground looks the same every match, so a later match reuses it (_mesh_cache).
+	var tkey := _terrain_key()
+	var parts: Array
+	var tm = null
+	if _mesh_cache.has(tkey):
+		var hit: Array = _mesh_cache[tkey]
+		parts = hit[0]; under = (hit[1] as PackedFloat32Array).duplicate(); _rims = (hit[2] as Array).duplicate()
+	else:
+		var keep := _visual_seed_begin()
+		tm = TerrainMesh.new(self)
+		parts = tm.build_chunked(32) if w > 96 else [[Vector2i.ZERO, tm.build()]]
+		_visual_seed_end(keep)
+		under = tm.under
+		_rims = tm.rims
+		_cache_put(tkey, [parts, under.duplicate(), _rims.duplicate()])
+	await _stage("world.terrain")
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	_island_roots(st)
 	var roots := st.commit()
 	var mat: ShaderMaterial = terrain_material().duplicate()
+	if tm == null:
+		tm = TerrainMesh.new(self)
+		tm._fill_grid()
 	mat.set_shader_parameter("height_tex", tm.height_texture())
 	mat.set_shader_parameter("map_size", Vector2(w, h))
 	mat.set_shader_parameter("use_ao", true)
@@ -1069,22 +1094,26 @@ func build_meshes() -> void:
 		mat.set_shader_parameter("biome_tex", bt[0])
 		mat.set_shader_parameter("path_tex", bt[1])
 		mat.set_shader_parameter("use_biome", true)
-	var mi := MeshInstance3D.new()
-	mi.mesh = mesh
-	mi.material_override = mat
-	mi.name = "Ground"
-	add_child(mi)
+	for part in parts:
+		var mi := MeshInstance3D.new()
+		mi.mesh = part[1]
+		mi.material_override = mat
+		mi.name = "Ground" if parts.size() == 1 else "Ground_%d_%d" % [part[0].x, part[0].y]
+		add_child(mi)
 	var ri := MeshInstance3D.new()
 	ri.mesh = roots
 	ri.material_override = mat
 	ri.name = "Roots"
 	ri.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(ri)
-	_decorate()
+	await _stage("world.roots")
+	await _decorate()
 	if Flora.on() and islands.size() > 1 and not "--no-landmarks" in OS.get_cmdline_user_args():
 		landmarks = Landmarks.new(self)
 		landmarks.build(_deco)
+	await _stage("world.landmarks")
 	_build_air()
+	await _stage("world.air")
 
 ## Per tile, for the terrain shader's painted ground: the biome style (R, nearest) and the painted
 ## paths and soil (G, smoothed).
@@ -1103,8 +1132,165 @@ func _biome_textures() -> Array:
 				pi.set_pixel(x, z, Color(0, 1, 0))
 	return [ImageTexture.create_from_image(bi), ImageTexture.create_from_image(pi)]
 
+# ------------------------------------------------------------------ caches across matches
+## Ground and wall meshes by what they're built from. Authored maps trace them with a seed of their
+## own (not the match's), so the same map gives the same meshes and the second match onward skips
+## building them. A few maps' worth at most.
+static var _mesh_cache := {}
+static var _cache_order: Array = []
+
+func _cache_put(key: int, val) -> void:
+	_mesh_cache[key] = val
+	_cache_order.append(key)
+	while _cache_order.size() > (2 if OS.has_feature("web") else 4):
+		_mesh_cache.erase(_cache_order.pop_front())
+
+## The seed the purely visual builders use: the layout's own on authored maps.
+func visual_seed() -> int:
+	return (hash(layout_id) & 0x3fffffff) if layout_id != "" else int(rng.seed)
+
+## The terrain and wall builders read the world's rng seed; for a moment it's the visual seed
+## (the rng's own state is put back exactly afterwards).
+func _visual_seed_begin() -> Array:
+	var keep := [rng.seed, rng.state]
+	if layout_id != "": rng.seed = visual_seed()
+	return keep
+
+func _visual_seed_end(keep: Array) -> void:
+	rng.seed = keep[0]
+	rng.state = keep[1]
+
+func _terrain_key() -> int:
+	var solid := PackedByteArray(); solid.resize(w * h)
+	for i in w * h:
+		solid[i] = 0 if kind[i] == T_VOID or bridge.has(i) else 1 + level[i]
+	var bio_cols: Array = []
+	for b in _isl_bio: bio_cols.append([b.get("top"), b.get("top2"), b.get("side"), b.get("deep")])
+	return hash(["terrain", 3, w, h, layout_id, visual_seed() if layout_id != "" else rng.seed, solid, island, paint, sheer.keys(), lip.keys(), stairs, bio_cols, Flora.v2()])
+
+func _walls_key() -> int:
+	var bio_cols: Array = []
+	for b in _isl_bio: bio_cols.append([b.get("top"), b.get("side"), b.get("leaf")])
+	return hash(["walls", 2, w, h, layout_id, visual_seed() if layout_id != "" else rng.seed, walls.keys(), level, island, bio_cols, Flora.v2()])
+
+## Static props that never move or break (camp supply piles) merged into one mesh per material per
+## 32-tile chunk, instead of a dozen meshes (and outline passes) each. The toon shader's painted part
+## gradient reads the part's height range from UV2 in its own space, so each part's range moves with
+## it; a part tipped off upright (its height would mix with x and z) stays a node of its own.
+func _merge_static(parent: Node3D, roots: Array, label: String) -> void:
+	var groups := {}     # [chunk, material key] -> {mat, st}
+	var loose: Array = []
+	for r in roots:
+		var root := r as Node3D
+		var stack: Array = [[root, root.transform]]
+		while not stack.is_empty():
+			var e: Array = stack.pop_back()
+			var n: Node3D = e[0]
+			var xf: Transform3D = e[1]
+			for ch in n.get_children():
+				if ch is Node3D: stack.append([ch, xf * (ch as Node3D).transform])
+			if not (n is MeshInstance3D) or (n as MeshInstance3D).mesh == null or (n as MeshInstance3D).material_override == null:
+				continue
+			var mi := n as MeshInstance3D
+			if absf(xf.basis.x.y) > 0.001 or absf(xf.basis.z.y) > 0.001 or not (mi.mesh is ArrayMesh):
+				loose.append([mi, xf])
+				continue
+			var key := [Vector2i(int(xf.origin.x) / 32, int(xf.origin.z) / 32), Models._mat_key(mi.material_override)]
+			if not groups.has(key):
+				var st := SurfaceTool.new(); st.begin(Mesh.PRIMITIVE_TRIANGLES)
+				groups[key] = {"mat": mi.material_override, "st": st}
+			var am := mi.mesh as ArrayMesh
+			var sy := xf.basis.y.y
+			for si in am.get_surface_count():
+				var arrs := am.surface_get_arrays(si)
+				var uv2 = arrs[Mesh.ARRAY_TEX_UV2]
+				if uv2 is PackedVector2Array:
+					var nu := PackedVector2Array(uv2)
+					for k in nu.size(): nu[k] = Vector2(nu[k].x * sy + xf.origin.y, nu[k].y * sy + xf.origin.y)
+					arrs[Mesh.ARRAY_TEX_UV2] = nu
+				var tmp := ArrayMesh.new()
+				tmp.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrs)
+				(groups[key]["st"] as SurfaceTool).append_from(tmp, 0, xf)
+	for key in groups:
+		var mi := MeshInstance3D.new()
+		mi.mesh = (groups[key]["st"] as SurfaceTool).commit()
+		mi.material_override = groups[key]["mat"]
+		mi.name = "%s_%d_%d" % [label, key[0].x, key[0].y]
+		parent.add_child(mi)
+	for e in loose:
+		var src: MeshInstance3D = e[0]
+		var mi := MeshInstance3D.new()
+		mi.mesh = src.mesh; mi.material_override = src.material_override
+		mi.transform = e[1]
+		mi.name = label + "Part"
+		parent.add_child(mi)
+	for r in roots:
+		(r as Node).free()
+
+## How far from the camera (m) each kind of scatter draws, at High (Settings q("draw") scales it):
+## grass, flowers, pebbles and undergrowth fade out of the high drop and skyship views, where they'd
+## be a few pixels each; tall grass (cover you can hide in) reaches further; trees, boulders and
+## pillars always draw (their far versions are cheaper level-of-detail meshes instead).
+const DRAW_SMALL := 130.0
+const DRAW_BUSH := 160.0
+const DRAW_BIG_LOW := 230.0     # Low and Medium only: trees and boulders past this are dropped
+
+func _scatter_class(label: String, chunk: int) -> String:
+	if label.begins_with("Bushes"):
+		return "bush"
+	if label.begins_with("Grass") or label.begins_with("Flowers") or label.begins_with("Pebbles") or chunk >= 32:
+		return "small"
+	return "big"
+
+## Big scatter meshes get level-of-detail versions (fewer triangles far away), made once per mesh.
+static var _lod_cache := {}
+static func with_lods(m: Mesh) -> Mesh:
+	if not (m is ArrayMesh) or "--no-lod" in OS.get_cmdline_user_args():
+		return m
+	if _lod_cache.has(m):
+		return _lod_cache[m]
+	var am := m as ArrayMesh
+	var out: Mesh = m
+	var tris := 0
+	for si in am.get_surface_count():
+		tris += am.surface_get_array_index_len(si) / 3
+	if tris >= 240 and am.get_blend_shape_count() == 0:
+		var im := ImporterMesh.new()
+		for si in am.get_surface_count():
+			im.add_surface(am.surface_get_primitive_type(si), am.surface_get_arrays(si), [], {}, am.surface_get_material(si), am.surface_get_name(si))
+		if im.get_method_argument_count("generate_lods") >= 3:
+			im.call("generate_lods", 25.0, 60.0, [])
+		else:
+			im.call("generate_lods", 25.0, [])
+		out = im.get_mesh()
+	_lod_cache[m] = out
+	return out
+
+## Every other grass tuft or flower kept (or fewer), by the quality preset, with a fixed pattern.
+static func _thin(items: Array, keep: float, seed_i: int) -> Array:
+	if keep >= 0.999:
+		return items
+	var r := RandomNumberGenerator.new(); r.seed = seed_i
+	return items.filter(func(_it): return r.randf() < keep)
+
 ## Scatter batches split into 16x16-tile chunks, so the camera only draws the ones it can see.
 func _chunked(parent: Node3D, items: Array, mesh: Mesh, mat: Material, label: String, shadows := false, chunk := 16) -> void:
+	var cls := _scatter_class(label, chunk)
+	var draw_k := float(Settings.q("draw"))
+	var vis_end := 0.0
+	match cls:
+		"small":
+			vis_end = DRAW_SMALL * draw_k
+			items = _thin(items, float(Settings.q("grass")), hash(label) + rng.seed)
+		"bush": vis_end = DRAW_BUSH * draw_k
+		"big":
+			if draw_k < 0.999: vis_end = DRAW_BIG_LOW * draw_k
+			# trees (rounded canopies simplify cleanly); rocks and pillars keep full detail: their
+			# crystal shards and thin ledges vanish in the simplified versions
+			if label.begins_with("tree"): mesh = with_lods(mesh)
+			# trees and boulders come in many styles and shapes, each its own batch: bigger chunks
+			# mean far fewer draws (and shadow draws) for a few more off-screen instances
+			chunk = maxi(chunk, 32)
 	var by := {}
 	for it in items:
 		var o: Vector3 = (it[0] as Transform3D).origin
@@ -1121,6 +1307,9 @@ func _chunked(parent: Node3D, items: Array, mesh: Mesh, mat: Material, label: St
 		var mi := MultiMeshInstance3D.new(); mi.multimesh = mm
 		mi.material_override = mat
 		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if shadows else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		if vis_end > 0.0:
+			mi.visibility_range_end = vis_end
+			mi.visibility_range_end_margin = 8.0
 		mi.name = "%s_%d_%d" % [label, key.x, key.y]
 		parent.add_child(mi)
 
@@ -1233,6 +1422,9 @@ func _assign_regions() -> void:
 		islands[ii]["region"] = reg
 		_isl_bio.append(b)
 
+func _bio_of_island(ii: int) -> Dictionary:
+	return _isl_bio[ii] if ii >= 0 and ii < _isl_bio.size() else biome
+
 func _bio(i: int) -> Dictionary:
 	var ii := island[i] if i >= 0 and i < island.size() else -1
 	return _isl_bio[ii] if ii >= 0 and ii < _isl_bio.size() else biome
@@ -1291,6 +1483,7 @@ func _decorate() -> void:
 	var deco := Node3D.new(); deco.name = "Deco"; add_child(deco)
 	_deco = deco
 	var packed := {}      # imported models, batched: group key -> {mesh, mat, items}
+	var camps: Array = []     # camp supply piles: merged into a few meshes per chunk below
 	for z in h:
 		for x in w:
 			var i := idx(x, z)
@@ -1308,7 +1501,7 @@ func _decorate() -> void:
 				var cp := PropSculpt.camp(drng)
 				cp.position = Vector3(x + 0.5, y, z + 0.5)
 				cp.rotation.y = drng.randf() * TAU
-				deco.add_child(cp)
+				camps.append(cp)
 				continue
 			if _pack_prop(packed, what, i, Vector3(x + 0.5, y, z + 0.5), drng):
 				if what in ["tree", "rock"]:
@@ -1321,24 +1514,42 @@ func _decorate() -> void:
 				n = Models.rock(drng, drng.randf_range(0.9, 1.25))
 			n.position = Vector3(x + 0.5, y, z + 0.5)
 			deco.add_child(n)
+	_merge_static(deco, camps, "Camps")
 	if Flora.on():
 		_patches(packed, drng)
 	if Assets.on() or Flora.on():
 		_cliff_rocks(packed, drng)
+	await _stage("world.scatter_plan")
 	for key in packed:
 		var g: Dictionary = packed[key]
 		_chunked(deco, g["items"], g["mesh"], g["mat"], String(g["label"]), bool(g["shadows"]), int(g.get("chunk", 16)))
+	await _stage("world.scatter_batches")
 	# stone walls: coursed ruin masonry following each run (see ruin_walls.gd)
 	if not walls.is_empty():
 		wall_mat = ShaderMaterial.new()
 		wall_mat.shader = load("res://shaders/wall.gdshader" if Flora.v2() else "res://shaders/wall_v1.gdshader")
 		var wt0 := Time.get_ticks_usec()
 		var wtris := 0
-		for wmi in (RuinWalls.new(self) if Flora.v2() else RuinWallsV1.new(self)).build(wall_mat):
+		var wkey := _walls_key()
+		var wlist: Array = []     # [name, mesh]
+		if _mesh_cache.has(wkey):
+			wlist = _mesh_cache[wkey]
+		else:
+			var keep := _visual_seed_begin()
+			var rw = RuinWalls.new(self) if Flora.v2() else RuinWallsV1.new(self)
+			_visual_seed_end(keep)
+			for wmi in rw.build(wall_mat):
+				wlist.append([String(wmi.name), (wmi as MeshInstance3D).mesh])
+				wmi.free()
+			_cache_put(wkey, wlist)
+		for wl in wlist:
+			var wmi := MeshInstance3D.new()
+			wmi.name = wl[0]; wmi.mesh = wl[1]; wmi.material_override = wall_mat
 			deco.add_child(wmi)
 			wtris += ((wmi as MeshInstance3D).mesh as ArrayMesh).surface_get_array_len(0) / 3
 		if "--art-stats" in OS.get_cmdline_user_args() or Array(OS.get_cmdline_user_args()).any(func(a): return String(a).begins_with("--art-view")):
 			print("PERF walls %d tris in %.0f ms" % [wtris, (Time.get_ticks_usec() - wt0) / 1000.0])
+	await _stage("world.walls")
 	# tall grass to hide in: dense clumps of long blades that sway
 	var tall: Array = []
 	for bi in bush:
@@ -1415,6 +1626,7 @@ func _decorate() -> void:
 		pmi.material_override = Models.vtoon()
 		pmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		deco.add_child(pmi)
+	await _stage("world.grass")
 	var sea := MeshInstance3D.new()
 	var pm := PlaneMesh.new(); pm.size = Vector2(maxi(w, h) * 14, maxi(w, h) * 14)
 	sea.mesh = pm
@@ -1431,6 +1643,7 @@ func _decorate() -> void:
 		var cdeep: Color = clouds[0] if clouds.size() == 2 else Color(0.06, 0.07, 0.13)
 		var clight: Color = clouds[1] if clouds.size() == 2 else Color(0.22, 0.24, 0.38)
 		SkyDeco.new(self).build(deco, cdeep, clight, drng)
+	await _stage("world.sky")
 	# far below and around: little drifting islets and loose rocks, for depth
 	var top_c: Color = biome.get("top", Color("5f8d45"))
 	var side_c: Color = biome.get("side", Color("8b6d52"))

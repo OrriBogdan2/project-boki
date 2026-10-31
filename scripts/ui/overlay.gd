@@ -232,6 +232,10 @@ func _show_settings() -> void:
 				_toggle(v, "V-sync", "vsync")
 			_choice(v, "Frame rate limit", "max_fps", [[0, "None"], [30, "30"], [60, "60"], [120, "120"], [144, "144"]])
 			_group(v, "Quality")
+			var qopts := [["auto", "Auto (%s)" % String(Settings.QUALITY[Settings.quality() if String(Settings.get_v("quality")) == "auto" else Settings.detect_quality()]["name"])]]
+			for qk in Settings.QUALITY_ORDER: qopts.append([qk, String(Settings.QUALITY[qk]["name"])])
+			_choice(v, "Graphics quality", "quality", qopts, func(): _refresh_settings.call_deferred())
+			_note(v, "Grass, draw distance, cloud layers and particles change from your next expedition.")
 			_choice(v, "Anti-aliasing", "msaa", [[0, "Off"], [2, "2x"], [4, "4x"]])
 			_toggle(v, "Shadows", "shadows")
 			_toggle(v, "Show frame rate", "show_fps")
@@ -359,7 +363,19 @@ func _toggle(v: VBoxContainer, label_txt: String, key: String, hint := "") -> vo
 	cb.toggled.connect(func(on): Settings.set_v(key, on))
 	r.add_child(cb)
 
-func _choice(v: VBoxContainer, label_txt: String, key: String, opts: Array) -> void:
+func _refresh_settings() -> void:
+	UI._page_of.erase("Settings")
+	_show_settings()
+
+func _note(v: VBoxContainer, txt: String) -> void:
+	var l := Label.new()
+	l.text = txt
+	l.add_theme_font_size_override("font_size", 13)
+	l.modulate = Color(1, 1, 1, 0.6)
+	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	v.add_child(l)
+
+func _choice(v: VBoxContainer, label_txt: String, key: String, opts: Array, then := Callable()) -> void:
 	var r := _row(v, label_txt)
 	var ob := OptionButton.new()
 	ob.custom_minimum_size.x = 280
@@ -368,7 +384,9 @@ func _choice(v: VBoxContainer, label_txt: String, key: String, opts: Array) -> v
 	for i in opts.size():
 		ob.add_item(String(opts[i][1]), i)
 		if opts[i][0] == cur: ob.select(i)
-	ob.item_selected.connect(func(i): Settings.set_v(key, opts[i][0]))
+	ob.item_selected.connect(func(i):
+		Settings.set_v(key, opts[i][0])
+		if then.is_valid(): then.call())
 	r.add_child(ob)
 
 func _finish_rebind(ev: InputEvent) -> void:

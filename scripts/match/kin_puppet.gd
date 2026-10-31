@@ -89,9 +89,26 @@ func _ready() -> void:
 	plan = String(BODY.get(species, "blob"))
 	flex_base = flex.position
 
+var _acc := 0.0
+var _n := 0
 func _process(dt: float) -> void:
 	if dt <= 0.0 or not is_instance_valid(flex):
 		return
+	# hidden or off screen: posed a few times a second instead of every frame (the springs sub-step,
+	# so the bigger step lands the same)
+	_acc += dt
+	_n += 1
+	var every := 1
+	if not root.is_visible_in_tree():
+		every = 8
+	else:
+		var cam := get_viewport().get_camera_3d()
+		if cam and not cam.is_position_in_frustum(root.global_position):
+			every = 4
+	if _n % every != 0:
+		return
+	dt = _acc
+	_acc = 0.0
 	t += dt
 	var dazed: bool = root.get_meta("dazed", false)
 	var happy: bool = root.get_meta("happy", false)

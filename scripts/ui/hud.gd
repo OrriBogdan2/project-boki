@@ -12,6 +12,16 @@ var hit_crit := false
 var hurt_t := 0.0
 var toasts: Array = []
 var minimap: ImageTexture
+var map_paint: Texture2D = null   # the painted map (MapPaint), when it's ready
+
+## The map picture to draw, and its pixels per tile (for regions given in tiles).
+func map_tex() -> Texture2D:
+	return map_paint if map_paint else minimap
+
+func map_region(tiles: Rect2) -> Rect2:
+	var t := map_tex()
+	var k := Vector2(float(t.get_width()) / m.world.w, float(t.get_height()) / m.world.h)
+	return Rect2(tiles.position * k, tiles.size * k)
 var kit_t0 := 0.0
 var bar_lerp := 1.0
 
@@ -40,6 +50,9 @@ func setup(match_node: Match) -> void:
 	add_child(cursor)
 	cursor.draw.connect(_draw_pointer)
 	_build_minimap()
+	# the painted map (smooth coasts, shading, paths) replaces the tile texture once it's baked
+	c.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	MapPaint.request(self, m.world, func(t: Texture2D): map_paint = t)
 	full_map = FullMap.new(self, m)
 
 # ------------------------------------------------------------------ the full map (M)
@@ -126,13 +139,25 @@ func _build_minimap() -> void:
 	minimap = ImageTexture.create_from_image(img)
 
 # ------------------------------------------------------------------ drawing helpers
+## Panel styles are made once per look and reused (the HUD draws dozens of panels every frame).
+var _boxes := {}
+func _box(col: Color, rad: int, border: Color, bw: int, aa := false) -> StyleBoxFlat:
+	var key := [col, rad, border, bw, aa]
+	var sb: StyleBoxFlat = _boxes.get(key)
+	if sb == null:
+		if _boxes.size() > 512: _boxes.clear()
+		sb = StyleBoxFlat.new()
+		sb.bg_color = col
+		sb.set_corner_radius_all(rad)
+		if bw > 0:
+			sb.border_color = border
+			sb.set_border_width_all(bw)
+		sb.anti_aliasing = aa
+		_boxes[key] = sb
+	return sb
+
 func _panel(r: Rect2, col := PANEL, rad := 10) -> void:
-	var sb := StyleBoxFlat.new()
-	sb.bg_color = col
-	sb.set_corner_radius_all(rad)
-	sb.border_color = EDGE
-	sb.set_border_width_all(1)
-	c.draw_style_box(sb, r)
+	c.draw_style_box(_box(col, rad, EDGE, 1, true), r)
 
 func _bar(r: Rect2, frac: float, col: Color, back := Color(0, 0, 0, 0.45)) -> void:
 	c.draw_rect(r, back)
@@ -602,17 +627,17 @@ func _draw_minimap(sz: Vector2) -> void:
 	if mm_circ.z > 0.0:
 		# the map texture drawn into a disc: a fan of points round the rim, each with its map UV
 		var pts := PackedVector2Array(); var uvs := PackedVector2Array()
-		var tsz := Vector2(minimap.get_width(), minimap.get_height())
+		var tsz := Vector2(w.w, w.h)
 		var ctr := Vector2(mm_circ.x, mm_circ.y)
 		for i in 56:
 			var a := TAU * i / 56.0
 			var sp := ctr + Vector2(cos(a), sin(a)) * mm_circ.z
 			pts.append(sp)
 			uvs.append((view.position + (sp - inner.position) / k) / tsz)
-		c.draw_polygon(pts, PackedColorArray([Color.WHITE]), uvs, minimap)
+		c.draw_polygon(pts, PackedColorArray([Color.WHITE]), uvs, map_tex())
 	elif tex_view.size.x > 0.0 and tex_view.size.y > 0.0:
 		var dest := Rect2(inner.position + (tex_view.position - view.position) * k, tex_view.size * k)
-		c.draw_texture_rect_region(minimap, dest, tex_view)
+		c.draw_texture_rect_region(map_tex(), dest, map_region(tex_view))
 	_draw_map_labels(w, inner, view, k, riding)
 	if m.skytrain:
 		_draw_map_train(inner, view, k)
@@ -915,14 +940,7 @@ func toast_small(text: String, col: Color) -> void:
 	if small_toasts.size() > 3: small_toasts.pop_front()
 
 func _rounded(r: Rect2, col: Color, rad := 10, border := Color(0, 0, 0, 0), bw := 0) -> void:
-	var sb := StyleBoxFlat.new()
-	sb.bg_color = col
-	sb.set_corner_radius_all(rad)
-	if bw > 0:
-		sb.border_color = border
-		sb.set_border_width_all(bw)
-	sb.anti_aliasing = true
-	c.draw_style_box(sb, r)
+	c.draw_style_box(_box(col, rad, border, bw, true), r)
 
 ## A pie slice covering the part of a slot still on cooldown, sweeping clockwise from the top.
 func _sweep(center: Vector2, radius: float, frac: float, col: Color) -> void:

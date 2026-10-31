@@ -2375,6 +2375,8 @@ func _on_kin_thrown(_k: Node, owner: Node) -> void:
 
 ## The state HunterAnim poses the model from (one dictionary, refilled every frame).
 var anim_s := {}
+var _anim_dt := 0.0
+var _anim_n := 0
 const DODGE_ANIM := {"light": "phase", "medium": "roll", "heavy": "charge"}
 func _anim_state(stretch: float) -> void:
 	var s := anim_s
@@ -2460,11 +2462,22 @@ func render(delta: float, alpha: float) -> void:
 		stretch = 0.25 if anim.dash_kind != "roll" else 0.0
 	elif not gliding and not grounded and pad.is_empty():
 		stretch = clampf(vel.y / 30.0, -0.1, 0.18)
-	_anim_state(stretch)
-	anim.update(delta, anim_s)
-	if anim.stepped and not downed and not crouch:
+	# hunters you can't see right now (hidden by sight or off screen) pose less often; the animation
+	# catches up in one bigger step (its springs sub-step) when they show again
+	_anim_dt += delta
+	_anim_n += 1
+	var every := 1
+	if not is_local() and m.cam:
+		if unseen or not visible: every = 6
+		elif not m.cam.on_screen(position): every = 3
+	var posed := _anim_n % every == 0
+	if posed:
+		_anim_state(stretch)
+		anim.update(_anim_dt, anim_s)
+		_anim_dt = 0.0
+	if posed and anim.stepped and not downed and not crouch:
 		Sfx.step(pos, -14.0 if is_local() else -20.0)
-	if anim.slammed and not downed:
+	if posed and anim.slammed and not downed:
 		# a heavy coming down hard: a ring of dust where they land
 		m.fx.dust(pos, 12)
 		if is_local(): m.shake(0.18, pos)

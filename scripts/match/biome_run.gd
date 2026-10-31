@@ -572,7 +572,8 @@ func decorate() -> void:
 		var c: Vector2 = w.islands[ii]["c"]
 		var r := float(w.islands[ii]["r"]) * 1.1
 		var p := CPUParticles3D.new()
-		p.amount = int(clampf(r * 4.0, 20, 70)); p.lifetime = 5.0; p.preprocess = 5.0
+		p.amount = maxi(6, int(clampf(r * 4.0, 20, 70) * float(Settings.q("fx")))); p.lifetime = 5.0; p.preprocess = 5.0
+		p.visibility_range_end = 110.0 * float(Settings.q("draw"))
 		p.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX; p.emission_box_extents = Vector3(r, 2.5, r)
 		p.mesh = Models.sphere(0.06, 4)
 		var col := Color(String(B.get("tint", "ffffff")))

@@ -362,6 +362,28 @@ func _ready() -> void:
 	if "--home-build-check" in args:
 		_home_build_check()
 		return
+	for a in args:
+		if a.begins_with("--map-bake="):
+			# tooling: bake the painted map of an authored layout (no world meshes) and save it as a PNG
+			var bw := World.new()
+			var tier_i := 0
+			for a2 in args:
+				if a2.begins_with("--tier="): tier_i = int(a2.substr(7))
+			bw.biome = Data.TIERS[tier_i]["biome"].duplicate()
+			bw.clouds = Data.TIERS[tier_i]["clouds"]
+			bw.generate_authored(World.load_layout(World.layout_for_tier(tier_i)), 9)
+			bw._assign_regions()
+			var outp := a.substr(11)
+			var t0 := Time.get_ticks_msec()
+			MapPaint.request(self, bw, func(t: Texture2D):
+				t.get_image().save_png(outp)
+				print("MAPBAKE %s in %d ms" % [outp, Time.get_ticks_msec() - t0])
+				get_tree().quit())
+			return
+	if "--perf-probe" in args:
+		# tooling: a scripted expedition with per-phase frame costs and hitches (tests/perf_probe.gd)
+		add_child(load("res://tests/perf_probe.gd").new())
+		return
 	if OS.has_feature("web"):
 		_expose_test_hooks()
 		var hash := str(JavaScriptBridge.eval("location.hash", true))
@@ -518,7 +540,7 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 		"match":
 			# a loading screen covers building the world; tests that screenshot by frame count skip it
 			var ld = null
-			if not opts.get("autoplay", false) and (not _has_arg("--shot=") or _has_arg("--show-loading")):
+			if (not opts.get("autoplay", false) or opts.get("probe", false)) and (not _has_arg("--shot=") or _has_arg("--show-loading")):
 				ld = load("res://scripts/ui/loading.gd").new()
 				ld.setup(opts)
 				add_child(ld)
@@ -531,12 +553,19 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 			m.name = "Match"
 			add_child(m)
 			current = m
-			m.start(opts)
 			if ld:
-				# hold the match still while the bar finishes, except online where everyone runs together
+				# build a step per frame so the loading screen keeps moving, then draw everything once
+				# behind it so no shader compiles mid-drop (see Match.warm_up)
+				await m.start_staged(opts, func(f: float): ld.want = maxf(ld.want, 0.2 + 0.72 * f))
+				if not is_instance_valid(m) or not m.is_inside_tree():
+					return
 				if not opts.has("net"): m.set_process(false)
+				await m.warm_up()
+				# hold the match still while the bar finishes, except online where everyone runs together
 				await ld.finish()
 				if is_instance_valid(m) and m.is_inside_tree(): m.set_process(true)
+			else:
+				m.start(opts)
 		"results":
 			var R = load("res://scripts/ui/results.gd")
 			var scr = R.new()

@@ -35,12 +35,14 @@ func open(by_plan := false) -> void:
 	is_open = true
 	auto = by_plan
 	zoom = 1.0
+	zoom_to = 1.0
 	center = Vector2(m.world.w, m.world.h) * 0.5
 
 func close() -> void:
 	is_open = false
 	auto = false
 	_press = Vector2.INF
+
 
 # ------------------------------------------------------------------ coordinates
 func _layout(sz: Vector2) -> void:
@@ -68,12 +70,27 @@ func to_world(sp: Vector2) -> Vector3:
 	var q := v.position + (sp - rect.position) / (rect.size.x / v.size.x)
 	return Vector3(q.x, 0, q.y)
 
+## The wheel sets where the zoom is heading; draw() eases toward it, keeping the point under the
+## cursor in place, so zooming glides instead of jumping.
+var zoom_to := 1.0
+var _zoom_sp := Vector2.ZERO
+var _zoom_wp := Vector3.ZERO
+var _last_us := 0
 func _zoom_at(sp: Vector2, f: float) -> void:
-	var before := to_world(sp)
-	zoom = clampf(zoom * f, 1.0, 4.0)
+	zoom_to = clampf(zoom_to * f, 1.0, 4.0)
+	_zoom_sp = sp
+	_zoom_wp = to_world(sp)
+
+func _ease_zoom() -> void:
+	var now := Time.get_ticks_usec()
+	var dt := clampf((now - _last_us) / 1e6, 0.0, 0.1)
+	_last_us = now
+	if absf(zoom - zoom_to) < 0.0005:
+		return
+	zoom = lerpf(zoom, zoom_to, 1.0 - exp(-16.0 * dt)) if absf(zoom - zoom_to) > 0.002 else zoom_to
 	view()
-	var after := to_world(sp)
-	center += Vector2(before.x - after.x, before.z - after.z)
+	var after := to_world(_zoom_sp)
+	center += Vector2(_zoom_wp.x - after.x, _zoom_wp.z - after.z)
 
 # ------------------------------------------------------------------ input
 ## Mouse on the map: returns true when the map used the event.
@@ -124,6 +141,7 @@ func ping_at(p: Vector3) -> void:
 func draw(sz: Vector2) -> void:
 	var c: Control = hud.c
 	_layout(sz)
+	_ease_zoom()
 	var w := m.world
 	var v := view()
 	var kk := rect.size.x / v.size.x
@@ -140,14 +158,15 @@ func draw(sz: Vector2) -> void:
 	else:
 		hud._ctext(Vector2(sz.x * 0.5, 44), _map_title(), 28, INK, hud.big)
 		hud._ctext(Vector2(sz.x * 0.5, 66), "Click to ping  ·  right click takes your ping down  ·  wheel zooms  ·  %s closes" % Settings.key_cap("map"), 13, MUTED)
-	# the map itself
-	c.draw_rect(rect.grow(6.0), Color(0, 0, 0, 0.5))
+	# the map itself: the painted map (MapPaint), framed
+	hud._rounded(rect.grow(9.0), Color(0, 0, 0, 0.45), 10)
 	c.draw_rect(rect, SEA)
-	_grid(c, v, kk)
 	var tex_view := v.intersection(Rect2(Vector2.ZERO, Vector2(w.w, w.h)))
 	if tex_view.size.x > 0.0:
-		c.draw_texture_rect_region(hud.minimap, Rect2(rect.position + (tex_view.position - v.position) * kk, tex_view.size * kk), tex_view)
+		c.draw_texture_rect_region(hud.map_tex(), Rect2(rect.position + (tex_view.position - v.position) * kk, tex_view.size * kk), hud.map_region(tex_view))
+	_grid(c, v, kk)
 	c.draw_rect(rect, Color(0.85, 0.8, 1.0, 0.35), false, 2.0)
+	_shrines(c, kk)
 	var saved: Vector3 = hud.mm_circ
 	hud.mm_circ = Vector3.ZERO          # the shared map helpers clip to a rectangle here
 	_labels(c, kk)
@@ -171,6 +190,22 @@ func draw(sz: Vector2) -> void:
 	_legend(c, sz, team)
 	_side(c, sz)
 	_cursor(c)
+
+## Shrines: a small pale-green obelisk, dimmed once someone has used it.
+func _shrines(c: Control, kk: float) -> void:
+	var s := clampf(4.0 + kk * 0.5, 5.0, 9.0)
+	for sh in m.shrines:
+		var pv := to_screen(sh["pos"])
+		if rect.grow(-4.0).has_point(pv):
+			shrine_glyph(c, pv, s, bool(sh.get("used", false)))
+
+func shrine_glyph(c: Control, pv: Vector2, s: float, used := false) -> void:
+	var col := Color("9ff0c4") if not used else Color(0.6, 0.66, 0.64, 0.6)
+	var pts := PackedVector2Array([pv + Vector2(0, -s * 1.3), pv + Vector2(s * 0.55, -s * 0.2), pv + Vector2(s * 0.45, s * 0.8), pv + Vector2(-s * 0.45, s * 0.8), pv + Vector2(-s * 0.55, -s * 0.2)])
+	var back := PackedVector2Array()
+	for q in pts: back.append(pv + (q - pv) * 1.35)
+	c.draw_colored_polygon(back, Color(0, 0, 0, 0.6))
+	c.draw_colored_polygon(pts, col)
 
 func _map_title() -> String:
 	if m.world.layout_id == "skyreach": return "SKYREACH"
@@ -204,41 +239,71 @@ func _grid(c: Control, v: Rect2, kk: float) -> void:
 			hud._text(Vector2(rect.position.x + 5, cy + 4), str(i + 1), 11, Color(1, 1, 1, 0.3), hud.big)
 
 ## Region and place names (authored maps); on generated maps each island's role.
+## Region names always, big; place names, perches, chokepoints and rail stops as icons, with their
+## names once you zoom in or where they don't run into a name already drawn (so the overview reads
+## at a glance instead of as a pile of overlapping labels).
 func _labels(c: Control, kk: float) -> void:
 	var w := m.world
 	var big_k := clampf(kk / (rect.size.x / w.w), 1.0, 2.0)
+	var zoomed := big_k >= 1.45
+	var taken: Array = []      # Rect2s of names already drawn
+	var regions := {}
+	for isl in w.islands: regions[String(isl.get("name", ""))] = true
+	var later: Array = []
 	for lb in w.labels:
 		var pv := to_screen(lb["pos"])
 		if not rect.grow(-8.0).has_point(pv):
 			continue
 		var nm := String(lb["name"])
+		var kind := String(lb["kind"])
+		if not kind in ["perch", "rail", "choke"] and regions.has(nm):
+			var col := Color("ffd2f0") if String(lb.get("role", "")) == "heart" else INK
+			var sz := int(17 * big_k)
+			_name(nm.to_upper(), pv + Vector2(0, 5), sz, col, taken, true)
+		else:
+			later.append([lb, pv])
+	for e in later:
+		var lb: Dictionary = e[0]
+		var pv: Vector2 = e[1]
+		var nm := String(lb["name"])
 		match String(lb["kind"]):
 			"perch":
 				c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -9), pv + Vector2(7, 4), pv + Vector2(-7, 4)]), Color(0, 0, 0, 0.6))
 				c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -7), pv + Vector2(5, 2.5), pv + Vector2(-5, 2.5)]), Color("9af0ff"))
-				hud._ctext(pv + Vector2(0, 17), "%s  %dm" % [nm, int(round(float(lb.get("height", 0.0))))], 10, Color("c8f6ff"))
+				var hm := "%dm" % int(round(float(lb.get("height", 0.0))))
+				if not _name("%s  %s" % [nm, hm] if zoomed else hm, pv + Vector2(0, 17), 10, Color("c8f6ff"), taken, zoomed) and zoomed:
+					_name(hm, pv + Vector2(0, 17), 10, Color("c8f6ff"), taken, true)
 			"rail":
 				c.draw_rect(Rect2(pv - Vector2(4, 4), Vector2(8, 8)), Color(0, 0, 0, 0.6))
 				c.draw_rect(Rect2(pv - Vector2(3, 3), Vector2(6, 6)), Color("ffcf7a"))
-				if kk > rect.size.x / w.w * 1.4:
-					hud._ctext(pv + Vector2(0, 15), nm, 10, Color("ffe2b0"))
+				if zoomed:
+					_name(nm, pv + Vector2(0, 15), 10, Color("ffe2b0"), taken)
 			"choke":
 				c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -5), pv + Vector2(5, 0), pv + Vector2(0, 5), pv + Vector2(-5, 0)]), Color(0, 0, 0, 0.55))
 				c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -3.5), pv + Vector2(3.5, 0), pv + Vector2(0, 3.5), pv + Vector2(-3.5, 0)]), Color("ffb36a"))
-				hud._ctext(pv + Vector2(0, 15), nm, 10, Color(1.0, 0.82, 0.63, 0.85))
+				if zoomed:
+					_name(nm, pv + Vector2(0, 15), 10, Color(1.0, 0.82, 0.63, 0.9), taken)
 			_:
-				# a region (an island's own name) big, a place inside it smaller
-				var region := false
-				for isl in w.islands:
-					if String(isl.get("name", "")) == nm: region = true; break
-				var col := Color("ffd2f0") if String(lb.get("role", "")) == "heart" else INK
-				hud._ctext(pv + Vector2(0, 5), nm.to_upper() if region else nm, int((17 if region else 11) * big_k), col if region else Color(INK, 0.8), hud.big)
+				_name(nm, pv + Vector2(0, 21), int(11 * big_k), Color(INK, 0.85), taken, zoomed)
 	if w.labels.is_empty():
 		for isl in w.islands:
 			var cc: Vector2 = isl["c"]
 			var pv2 := to_screen(Vector3(cc.x, 0, cc.y))
 			if rect.has_point(pv2):
 				hud._ctext(pv2, String(isl["role"]).capitalize(), 11, Color(INK, 0.6), hud.big)
+
+## Draws a centred name unless it would overlap one already drawn (force draws it anyway).
+## Returns whether it drew.
+func _name(txt: String, at: Vector2, size: int, col: Color, taken: Array, force := false) -> bool:
+	var tw: float = hud.big.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x
+	var r := Rect2(at + Vector2(-tw * 0.5 - 3.0, -size * 0.95), Vector2(tw + 6.0, size * 1.25))
+	if not force:
+		for q in taken:
+			if (q as Rect2).intersects(r):
+				return false
+	taken.append(r)
+	hud._ctext(at, txt, size, col, hud.big)
+	return true
 
 func _spawns(c: Control, team: int, kk: float) -> void:
 	_hover = {}
@@ -472,7 +537,7 @@ func _legend(c: Control, sz: Vector2, team: int) -> void:
 	hud._text(Vector2(r.position.x + 14, y + 6), "Vaults and lairs are known to all.", 11, MUTED)
 	hud._text(Vector2(r.position.x + 14, y + 20), "The rest show up once your squad sees them.", 11, MUTED)
 	# exits, under the spawns
-	var r2 := Rect2(Vector2(x0, r.end.y + 10), Vector2(wv, 104))
+	var r2 := Rect2(Vector2(x0, r.end.y + 10), Vector2(wv, 104 + (22 if not m.shrines.is_empty() else 0)))
 	if r2.end.y < sz.y - 10 and m.exits:
 		hud._rounded(r2, Color(0.04, 0.05, 0.08, 0.88), 12)
 		hud._text(r2.position + Vector2(14, 22), "WAYS OUT", 14, Color("8fe3c8"), hud.big)
@@ -482,6 +547,9 @@ func _legend(c: Control, sz: Vector2, team: int) -> void:
 			var col := Exits.color_of(fake)
 			_exit_glyph(c, String(ex[i][0]), Vector2(r2.position.x + 26, r2.position.y + 42 + i * 22), col)
 			hud._text(Vector2(r2.position.x + 48, r2.position.y + 47 + i * 22), String(ex[i][1]), 12, INK)
+		if not m.shrines.is_empty():
+			shrine_glyph(c, Vector2(r2.position.x + 26, r2.position.y + 42 + 3 * 22), 5.5)
+			hud._text(Vector2(r2.position.x + 48, r2.position.y + 47 + 3 * 22), "Shrine (hold F: a power-up)", 12, INK)
 
 func _exit_glyph(c: Control, kind: String, pv: Vector2, col: Color) -> void:
 	match kind:

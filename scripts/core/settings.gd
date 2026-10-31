@@ -10,6 +10,7 @@ const DEFAULTS := {
 	"master": 0.8, "music": 0.7, "sfx": 1.0, "ambience": 0.8, "mute_unfocused": false,
 	# video
 	"fullscreen": false, "vsync": true, "max_fps": 0, "msaa": 4, "video_v": 2, "shadows": true, "ui_scale": 1.0, "show_fps": false,
+	"quality": "auto", "quality_found": "",
 	# gameplay
 	"shake": 1.0, "cam_lead": 1.0, "cam_style": "supervive", "cam_follow": "supervive", "dash_hold": false, "damage_numbers": true, "tips": true, "cast_on_press": true, "crouch_toggle": false, "mod_mode": false, "kin_auto": false, "bot_diff": "auto",
 	# accessibility
@@ -17,6 +18,70 @@ const DEFAULTS := {
 	# controls: action -> list of "key:<physical keycode>" / "mouse:<button>"
 	"keys": {}, "keys_v": 2,
 }
+## Graphics presets (Video → Quality). High is the game's full look; Low and Medium trade detail for
+## speed, Ultra pushes draw distance, shadows and level of detail further. A preset sets the plain
+## settings (msaa, shadows) and these knobs, which the renderer and the world builder read through q():
+##   scale: 3D render scale  ·  lod: mesh LOD threshold (pixels of error allowed)  ·  grass: share of grass
+##   tufts and flowers kept  ·  draw: how far small scatter, undergrowth and motes are drawn (x)  ·
+##   shadow_k: shadow distance (x)  ·  splits: shadow cascades  ·  soft: soft-shadow filter quality  ·
+##   ssao, glow: the desktop renderer's ambient occlusion and bloom  ·  clouds: drifting cloud layers
+##   over the sea  ·  shafts: light shafts into the void  ·  fx: particle amounts (x)
+const QUALITY := {
+	"low": {"name": "Low", "msaa": 0, "shadows": false, "scale": 0.8, "lod": 4.0, "grass": 0.4, "draw": 0.6, "shadow_k": 0.7, "splits": 1, "soft": 0,
+		"ssao": false, "glow": false, "clouds": 0, "shafts": false, "fx": 0.45},
+	"medium": {"name": "Medium", "msaa": 2, "shadows": true, "scale": 1.0, "lod": 2.0, "grass": 0.7, "draw": 0.8, "shadow_k": 0.8, "splits": 2, "soft": 1,
+		"ssao": false, "glow": true, "clouds": 1, "shafts": true, "fx": 0.7},
+	"high": {"name": "High", "msaa": 4, "shadows": true, "scale": 1.0, "lod": 1.0, "grass": 1.0, "draw": 1.0, "shadow_k": 1.0, "splits": 4, "soft": 3,
+		"ssao": true, "glow": true, "clouds": 2, "shafts": true, "fx": 1.0},
+	"ultra": {"name": "Ultra", "msaa": 4, "shadows": true, "scale": 1.0, "lod": 0.5, "grass": 1.0, "draw": 1.6, "shadow_k": 1.35, "splits": 4, "soft": 4,
+		"ssao": true, "glow": true, "clouds": 2, "shafts": true, "fx": 1.0},
+}
+const QUALITY_ORDER := ["low", "medium", "high", "ultra"]
+
+## The preset in effect: the player's pick, or what auto-detect found for this machine.
+func quality() -> String:
+	var qv := String(v.get("quality", "auto"))
+	if QUALITY.has(qv):
+		return qv
+	var found := String(v.get("quality_found", ""))
+	return found if QUALITY.has(found) else detect_quality()
+
+## A knob of the preset in effect (see QUALITY).
+func q(key: String):
+	return QUALITY[quality()].get(key, QUALITY["high"][key])
+
+## A first guess from the graphics adapter: software renderers get Low, integrated GPUs and browsers
+## Medium, discrete GPUs High. The first expedition's loading screen then measures real frames and
+## steps it down if they come in slow (see note_benchmark).
+func detect_quality() -> String:
+	if OS.has_feature("web"):
+		return "medium"
+	if DisplayServer.get_name() == "headless":
+		return "high"
+	match RenderingServer.get_video_adapter_type():
+		RenderingDevice.DEVICE_TYPE_DISCRETE_GPU: return "high"
+		RenderingDevice.DEVICE_TYPE_INTEGRATED_GPU, RenderingDevice.DEVICE_TYPE_VIRTUAL_GPU: return "medium"
+		RenderingDevice.DEVICE_TYPE_CPU: return "low"
+	var nm := RenderingServer.get_video_adapter_name().to_lower()
+	if nm.contains("llvmpipe") or nm.contains("swiftshader") or nm.contains("software"): return "low"
+	if nm.contains("intel") or nm.contains("integrated") or nm.contains("vega") and nm.contains("graphics"): return "medium"
+	return "high"
+
+## Auto quality only: frame times measured while the first expedition loads (ms, the world on screen
+## from the skyship). Too slow for 60 fps steps the preset down once and remembers it.
+func note_benchmark(ms: float) -> void:
+	if String(v.get("quality", "auto")) != "auto" or String(v.get("quality_found", "")) != "":
+		return
+	var cur := quality()
+	var i := QUALITY_ORDER.find(cur)
+	if ms > 20.0 and i > 0:
+		cur = QUALITY_ORDER[i - 1]
+		if ms > 34.0 and i > 1: cur = QUALITY_ORDER[i - 2]
+	v["quality_found"] = cur
+	apply("quality")
+	save()
+	print("Quality: auto picked %s (load benchmark %.1f ms a frame)" % [cur, ms])
+
 ## Bumped when the default kit changes enough that old custom bindings would be nonsense.
 const KEYS_V := 2
 
@@ -35,6 +100,7 @@ var v: Dictionary = {}
 var _defaults_keys := {}
 var _dirty := false
 var _started := false       # the bindings the game ships with, for "reset"
+var _quality_basics := false
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -58,6 +124,11 @@ func _ready() -> void:
 		# crisper by default: 4x MSAA on desktop (the browser build stays on 2x)
 		if int(v.get("msaa", 2)) == 2 or not cf.has_section_key("s", "msaa"): v["msaa"] = 2 if OS.has_feature("web") else 4
 		v["video_v"] = 2
+	# a first run (or the first since presets came in) takes the preset's anti-aliasing and shadows
+	_quality_basics = not cf.has_section_key("s", "quality")
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--quality="):
+			v["quality"] = a.substr(10); _quality_basics = true      # tooling: try a preset without saving it
 	if not cf.has_section_key("s", "crouch_toggle") and OS.has_feature("web"):
 		v["crouch_toggle"] = true      # browsers close the tab on Ctrl+W, so don't make people hold Ctrl
 	get_tree().node_added.connect(_on_node_added)
@@ -127,7 +198,9 @@ func apply(k: String) -> void:
 			get_tree().root.msaa_3d = Viewport.MSAA_4X if m >= 4 else (Viewport.MSAA_2X if m >= 2 else Viewport.MSAA_DISABLED)
 		"shadows":
 			for n in get_tree().root.find_children("*", "DirectionalLight3D", true, false):
-				(n as DirectionalLight3D).shadow_enabled = bool(v[k])
+				(n as DirectionalLight3D).shadow_enabled = bool(v[k]) and _casts(n as DirectionalLight3D)
+		"quality", "quality_found":
+			_apply_quality()
 		"ui_scale": _apply_ui_scale()
 		"keys":
 			# kin throw moved off right click when heroes got secondaries
@@ -154,8 +227,60 @@ func _apply_ui_scale() -> void:
 
 ## Lights made later (every screen builds its own) follow the shadow setting too.
 func _on_node_added(n: Node) -> void:
-	if n is DirectionalLight3D and not bool(v.get("shadows", true)):
-		(n as DirectionalLight3D).shadow_enabled = false
+	if n is DirectionalLight3D:
+		var dl := n as DirectionalLight3D
+		_casts(dl)
+		if not bool(v.get("shadows", true)):
+			dl.shadow_enabled = false
+		elif dl.shadow_enabled:
+			_shadow_quality(dl)
+	elif n is WorldEnvironment and (n as WorldEnvironment).environment:
+		_env_quality((n as WorldEnvironment).environment)
+
+func _casts(dl: DirectionalLight3D) -> bool:
+	if not dl.has_meta("casts"):
+		dl.set_meta("casts", dl.shadow_enabled)
+	return bool(dl.get_meta("casts"))
+
+## The preset's shadow distance and cascades on a light that casts shadows (its own distance is
+## the High one).
+func _shadow_quality(dl: DirectionalLight3D) -> void:
+	if not dl.has_meta("dist0"):
+		dl.set_meta("dist0", dl.directional_shadow_max_distance)
+		dl.set_meta("mode0", dl.directional_shadow_mode)
+	dl.directional_shadow_max_distance = float(dl.get_meta("dist0")) * float(q("shadow_k"))
+	var splits := int(q("splits"))
+	var mode0 := int(dl.get_meta("mode0"))
+	if mode0 == DirectionalLight3D.SHADOW_ORTHOGONAL or splits <= 1:
+		dl.directional_shadow_mode = DirectionalLight3D.SHADOW_ORTHOGONAL if splits <= 1 else mode0
+	else:
+		dl.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS if splits == 2 else mode0
+
+func _env_quality(e: Environment) -> void:
+	if not e.has_meta("ssao0"):
+		e.set_meta("ssao0", e.ssao_enabled)
+		e.set_meta("glow0", e.glow_enabled)
+	e.ssao_enabled = bool(e.get_meta("ssao0")) and bool(q("ssao"))
+	e.glow_enabled = bool(e.get_meta("glow0")) and bool(q("glow"))
+
+## Applies the preset in effect: its anti-aliasing and shadows (as if picked by hand), render scale,
+## level of detail, shadow filtering, and the lights and environments already in the scene. The
+## world's own detail (grass, draw distance, cloud layers, particles) follows from the next expedition.
+func _apply_quality() -> void:
+	var Q: Dictionary = QUALITY[quality()]
+	if _started or _quality_basics:
+		_quality_basics = false
+		v["msaa"] = int(Q["msaa"]) if not OS.has_feature("web") else mini(int(Q["msaa"]), 2)
+		v["shadows"] = bool(Q["shadows"])
+		apply("msaa"); apply("shadows")
+	var root := get_tree().root
+	root.scaling_3d_scale = float(Q["scale"])
+	root.mesh_lod_threshold = float(Q["lod"])
+	RenderingServer.directional_soft_shadow_filter_set_quality(int(Q["soft"]))
+	for n in root.find_children("*", "DirectionalLight3D", true, false):
+		if (n as DirectionalLight3D).shadow_enabled: _shadow_quality(n as DirectionalLight3D)
+	for n in root.find_children("*", "WorldEnvironment", true, false):
+		if (n as WorldEnvironment).environment: _env_quality((n as WorldEnvironment).environment)
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_APPLICATION_FOCUS_OUT and bool(v.get("mute_unfocused", false)):
