@@ -23,6 +23,12 @@ func build(parent: Node3D) -> void:
 		var style := Flora.style_ok(String(I.get("biome", "")) if String(I.get("biome", "")) != "" else W.style_at(W.idx(int(I["c"].x), int(I["c"].y))))
 		var kind: String = KINDS.get(style, "giant_tree")
 		if role == "grove": kind = "giant_tree"
+		if role == "heart" and kind == "ring" and Flora.v2() and W.heart_spot != Vector3.INF:
+			# the Heart's rune ring hangs over the vault itself, turning slowly round it
+			var hn := _heart_ring(W.heart_spot)
+			parent.add_child(hn)
+			spots.append({"pos": W.heart_spot, "kind": kind, "island": ii})
+			continue
 		var at := _spot(ii)
 		if at == Vector3.INF:
 			continue
@@ -133,6 +139,25 @@ func _make(kind: String, style: String, at: Vector3) -> Node3D:
 			root.add_child(lamp)
 		"statue":
 			_sparks(root, Color(0.9, 0.95, 1.0), Vector3(0, 6.0, 0), 3.0, "snow")
+	return root
+
+## The rune ring at the Heart's vault: set into the ground round the chest (inside its four
+## pillars) like a carved stone circle, only its glowing top showing, so it marks the vault from the
+## match camera without hiding anyone; it turns very slowly, with motes rising off it.
+func _heart_ring(at: Vector3) -> Node3D:
+	var root := Node3D.new()
+	root.name = "Landmark_ring"
+	root.position = at
+	var ring := MeshInstance3D.new()
+	ring.mesh = _ring_mesh()
+	ring.material_override = Flora.material("crystal", true)
+	ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	var piv := Node3D.new(); piv.position = Vector3(0, 0.02, 0)
+	piv.scale = Vector3(0.8, 0.22, 0.8)
+	root.add_child(piv)
+	piv.add_child(ring)
+	PropAnim.on(piv, 0.05)
+	_sparks(root, Color("c8a0ff"), Vector3(0, 0.6, 0), 3.4, "motes")
 	return root
 
 func _sparks(root: Node3D, col: Color, at: Vector3, r: float, kind: String) -> void:

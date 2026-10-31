@@ -258,6 +258,12 @@ func _ready() -> void:
 	if "--pack-gallery" in args:
 		add_child(load("res://tests/pack_gallery.gd").new())
 		return
+	if "--prop-gallery" in args:
+		add_child(load("res://tests/prop_gallery.gd").new())
+		return
+	if "--mob-gallery" in args:
+		add_child(load("res://tests/mob_gallery.gd").new())
+		return
 	if "--flora-gallery" in args:
 		add_child(load("res://tests/flora_gallery.gd").new())
 		return

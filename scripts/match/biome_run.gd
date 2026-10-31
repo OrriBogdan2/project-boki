@@ -173,6 +173,14 @@ static func recolor_mats(mats: Array, mkind: String, col: Color) -> void:
 	for mat in mats:
 		var sm := mat as ShaderMaterial
 		if sm == null: continue
+		if sm.has_meta("mob_part"):
+			# a sculpted monster (MobModels): each tagged part follows the region's colour
+			match String(sm.get_meta("mob_part")):
+				"body": sm.set_shader_parameter("albedo", col.darkened(0.18))     # a shade under the ground it stands on
+				"dark": sm.set_shader_parameter("albedo", MobModels._dark(col))
+				"belly": sm.set_shader_parameter("albedo", MobModels._belly(col))
+				"glow": sm.set_shader_parameter("albedo", col.lightened(0.25))
+			continue
 		if sm.has_meta("pack_part"):
 			# a pack model: its cloth takes the region's colour, its bones a hint of it
 			if sm.get_meta("pack_part") == "cloth": sm.set_shader_parameter("recolor_to", col)

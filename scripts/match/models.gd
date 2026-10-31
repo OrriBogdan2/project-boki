@@ -1651,6 +1651,8 @@ static func gear_smoke() -> Node3D:
 
 ## Things that break when shot or dashed through.
 static func breakable(kind_s: String) -> Node3D:
+	if Flora.v2():
+		return PropSculpt.breakable(kind_s)
 	if kind_s == "crate":
 		var pc := Assets.prop("dungeon/box_small", 0.78, false, {"bright": 1.1})
 		if pc: return pc
@@ -2072,6 +2074,8 @@ static func mob(kind: String) -> Node3D:
 	var md: Dictionary = Data.MOBS[kind]
 	if md.get("boss", false) or md.get("ward", false):
 		return BossModels.build(kind)
+	if Flora.v2():
+		return MobModels.build(kind)
 	var pk := Assets.mob(kind, md["color"]) if Assets.on() else null
 	if pk:
 		if kind == "warden":
@@ -2321,6 +2325,8 @@ const CHEST_COLS := [[Color("8a5a35"), Color("f2c84a")], [Color("3f6fb0"), Color
 
 ## A chest: the imported model (its lid on a hinge), coloured by tier, or the primitive one.
 static func chest(tier := 0) -> Node3D:
+	if Flora.v2():
+		return PropSculpt.chest(tier)
 	var pk := _pack_chest(tier)
 	return pk if pk else chest_prim(tier)
 
@@ -2395,7 +2401,7 @@ static func chest_prim(tier := 0) -> Node3D:
 
 ## A dead hunter's deathbox: a squat crate with a glow in its value colour.
 static func deathbox(col: Color) -> Node3D:
-	var root := chest_prim(0)
+	var root := PropSculpt.chest(0) if Flora.v2() else chest_prim(0)
 	var g := Node3D.new(); g.name = "Glow"; root.add_child(g)
 	var beam := part(g, cyl(0.12, 0.24, 5.0, 10), glow_mat(Color(col, 0.3)), Vector3(0, 2.5, 0))
 	beam.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -2444,10 +2450,17 @@ static func shrine() -> Node3D:
 	var moss := toon(Color("7fa65a"), false)
 	var glow := Color("8fe3c8")
 	# a two-step hexagonal dais with a carved, glowing inlay
-	part(root, cyl(1.05, 1.15, 0.18, 6), stone, Vector3(0, 0.09, 0))
-	part(root, cyl(0.78, 0.86, 0.18, 6), stone_l, Vector3(0, 0.27, 0))
-	part(root, cyl(0.5, 0.5, 0.02, 6), toon(glow, false, 0.8), Vector3(0, 0.37, 0))
-	part(root, cyl(0.35, 0.42, 0.22, 6), stone, Vector3(0, 0.47, 0))
+	if Flora.v2():
+		# (cut stones laid in two rings, a glowing inlay, a carved round altar)
+		ExitModels._stone_ring(root, 1.15, 0.2, 9, Color("a39d92"), 0.62)
+		ExitModels._stone_ring(root, 0.84, 0.36, 7, Color("bdb6a8"), 0.0)
+		part(root, cyl(0.52, 0.52, 0.025, 24), toon(glow, false, 0.8), Vector3(0, 0.37, 0))
+		part(root, lathe(smooth_curve(PackedVector2Array([Vector2(0, 0), Vector2(0.42, 0), Vector2(0.4, 0.06), Vector2(0.33, 0.1), Vector2(0.31, 0.2), Vector2(0.38, 0.25), Vector2(0.36, 0.29), Vector2(0, 0.29)]), 2), 22, "shrine_altar"), stone, Vector3(0, 0.36, 0))
+	else:
+		part(root, cyl(1.05, 1.15, 0.18, 6), stone, Vector3(0, 0.09, 0))
+		part(root, cyl(0.78, 0.86, 0.18, 6), stone_l, Vector3(0, 0.27, 0))
+		part(root, cyl(0.5, 0.5, 0.02, 6), toon(glow, false, 0.8), Vector3(0, 0.37, 0))
+		part(root, cyl(0.35, 0.42, 0.22, 6), stone, Vector3(0, 0.47, 0))
 	# three leaning standing stones with moss on top
 	for i in 3:
 		var a := TAU * i / 3.0 + 0.5
@@ -2460,11 +2473,19 @@ static func shrine() -> Node3D:
 	var cr := Node3D.new(); cr.name = "Crystal"; cr.position = Vector3(0, 1.45, 0); root.add_child(cr)
 	var pm := PrismMesh.new(); pm.size = Vector3(0.42, 0.62, 0.42)
 	var cm := toon(glow.darkened(0.15), true, 0.55)
-	part(cr, pm, cm, Vector3(0, 0.31, 0))
-	part(cr, pm, cm, Vector3(0, -0.31, 0), Vector3.ONE, Vector3(PI, 0, 0))
-	for i in 3:
-		var a2 := TAU * i / 3.0
-		part(cr, pm, cm, Vector3(cos(a2) * 0.42, -0.1, sin(a2) * 0.42), Vector3.ONE * 0.3)
+	if Flora.v2():
+		cm.set_shader_parameter("gloss", 0.7)
+		part(cr, crystal(0.22, 0.8, 6), cm, Vector3(0, 0.12, 0))
+		part(cr, crystal(0.22, 0.36, 6), cm, Vector3(0, -0.36, 0), Vector3.ONE, Vector3(PI, 0, 0))
+		for i in 3:
+			var a2 := TAU * i / 3.0
+			part(cr, crystal(0.07, 0.24, 5), cm, Vector3(cos(a2) * 0.45, -0.1, sin(a2) * 0.45), Vector3.ONE, Vector3(0.3, a2, 0.25))
+	else:
+		part(cr, pm, cm, Vector3(0, 0.31, 0))
+		part(cr, pm, cm, Vector3(0, -0.31, 0), Vector3.ONE, Vector3(PI, 0, 0))
+		for i in 3:
+			var a2 := TAU * i / 3.0
+			part(cr, pm, cm, Vector3(cos(a2) * 0.42, -0.1, sin(a2) * 0.42), Vector3.ONE * 0.3)
 	PropAnim.on(cr, 0.9, 0.08)
 	var base := MeshInstance3D.new(); base.name = "Ring"; base.mesh = flat_quad(3.0)
 	base.material_override = ring_mat(glow, 0.06); base.position.y = 0.04

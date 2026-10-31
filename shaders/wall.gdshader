@@ -17,10 +17,26 @@ void vertex() {
 
 void fragment() {
 	vec3 c = COLOR.rgb;
-	// the stones are real geometry now: just a little weathering across each face, and the top
-	// edges of each block catch a touch more light
-	c *= 0.92 + vnoise(wp.xz * 3.0 + wp.yy * 2.0) * 0.14;
-	c *= 0.96 + vnoise(wp.xz * 11.0 + wp.yy * 9.0) * 0.07;
+	float kind = COLOR.a;     // 1 stone, 0.5 cover (moss, snow, ash), 0 mortar
+	float up = clamp(wn.y, 0.0, 1.0);
+	if (kind > 0.75) {
+		// hand-cut stone: broad value shifts along a run, chisel brushwork across each face, a
+		// lighter wash on faces turned to the sky and a little grime settling in toward the foot
+		float big = fbm3(wp.xz * 0.28 + wp.yy * 0.2);
+		float n1 = vnoise(vec2(dot(wp.xz, vec2(0.7, 0.7)) * 3.2, wp.y * 6.5));
+		float n2 = vnoise(wp.xz * 10.0 + wp.yy * 8.0);
+		c *= 0.86 + big * 0.24;
+		c *= 0.92 + n1 * 0.14;
+		c *= 0.95 + n2 * 0.08;
+		c = mix(c, c * vec3(1.08, 1.05, 1.0) + 0.03, up * 0.6);
+	} else if (kind > 0.25) {
+		// cover: soft clumps, brighter where it faces up, darker where it hangs down a face
+		float cl = fbm3(wp.xz * 7.0 + wp.yy * 3.0);
+		c *= 0.86 + cl * 0.22;
+		c *= mix(0.8, 1.06, up);
+	} else {
+		c *= 0.85 + vnoise(wp.xz * 5.0 + wp.yy * 5.0) * 0.12;
+	}
 	float cut = 0.0;
 	vec4 fv = VIEW_MATRIX * vec4(focus, 1.0);
 	if (fv.z < 0.0 && VERTEX.z > fv.z + 0.4) {

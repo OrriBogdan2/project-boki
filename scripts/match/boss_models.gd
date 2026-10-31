@@ -227,6 +227,9 @@ static func gate(width: float, col: Color) -> Node3D:
 	# the posts either side and a lintel over the top, carved stone
 	var stone := Models.toon(Color("8a8494"))
 	var posts := Node3D.new(); posts.name = "Posts"; root.add_child(posts)
+	if Flora.v2():
+		_gate_posts(posts, width, rune)
+		return root
 	for sx in [-1.0, 1.0]:
 		var pl := Assets.prop("dungeon/pillar", 3.4, true, {"bright": 1.3}) if Assets.on() else null
 		if pl:
@@ -242,6 +245,37 @@ static func gate(width: float, col: Color) -> Node3D:
 	Models.part(posts, Models.box(width + 1.9, 0.5, 0.9), stone, Vector3(0, 3.45, 0))
 	Models.part(posts, Models.box(0.6, 0.35, 0.05), rune, Vector3(0, 3.45, 0.46))
 	return root
+
+## The second art pass's gate posts: stacked, chiselled blocks (quoins alternating long and short), a
+## lintel of three stones and a keystone carrying the rune, iron sconces with a flame each side.
+static func _gate_posts(posts: Node3D, width: float, rune: Material) -> void:
+	var rr := RandomNumberGenerator.new(); rr.seed = 7
+	var st: Array = []
+	for k in 3:
+		st.append(Models.toon(Color("8e8898").lightened(-0.06 + k * 0.06)))
+	var dark := Models.toon(Color("3a3640"))
+	var flame := Models.toon(Color("ffb050"), false, 1.4)
+	for sx in [-1.0, 1.0]:
+		var x: float = sx * (width * 0.5 + 0.45)
+		Models.part(posts, PropSculpt.bx(1.0, 0.3, 1.0), st[0], Vector3(x, 0.15, 0))
+		var y := 0.3
+		var k := 0
+		while y < 3.15:
+			var hh := minf(rr.randf_range(0.5, 0.75), 3.2 - y)
+			var wa := 0.82 if k % 2 == 0 else 0.72
+			var wb := 0.72 if k % 2 == 0 else 0.82
+			Models.part(posts, PropSculpt.bx(wa, hh - 0.04, wb), st[rr.randi_range(0, 2)], Vector3(x + rr.randf_range(-0.02, 0.02), y + hh * 0.5, rr.randf_range(-0.02, 0.02)), Vector3.ONE, Vector3(0, rr.randf_range(-0.04, 0.04), 0))
+			y += hh; k += 1
+		# an iron sconce and its flame on the outer face
+		Models.part(posts, PropSculpt.bx(0.08, 0.3, 0.2), dark, Vector3(x, 2.4, 0.46))
+		Models.part(posts, Models.cyl(0.12, 0.07, 0.16, 10), dark, Vector3(x, 2.6, 0.52))
+		Models.part(posts, Models.sphere(0.12, 8), flame, Vector3(x, 2.75, 0.52), Vector3(1.0, 1.4, 1.0))
+	# the lintel: two long stones and a raised keystone with the rune
+	var lw := (width + 1.9) * 0.5
+	for sx in [-1.0, 1.0]:
+		Models.part(posts, PropSculpt.bx(lw - 0.3, 0.48, 0.92), st[1 if sx < 0 else 2], Vector3(sx * (lw * 0.5 + 0.15), 3.45, 0))
+	Models.part(posts, PropSculpt.bx(0.62, 0.66, 1.0), st[0], Vector3(0, 3.5, 0))
+	Models.part(posts, PropSculpt.bx(0.4, 0.3, 0.05), rune, Vector3(0, 3.5, 0.5))
 
 ## The seal over a closed lair: a faint dome of light with a glowing rim on the ground.
 static func dome(half: float, col: Color) -> Node3D:
@@ -272,8 +306,12 @@ static func dome(half: float, col: Color) -> Node3D:
 static func dial_stone(col: Color) -> Node3D:
 	var root := Node3D.new()
 	var stone := Models.toon(Color("a29c90")); var dark := Models.toon(Color("4a4652")); var rune := Models.toon(col, false, 1.1)
-	Models.part(root, Models.cyl(0.62, 0.72, 0.22, 8), stone, Vector3(0, 0.11, 0))
-	Models.part(root, Models.cyl(0.32, 0.42, 0.9, 8), stone, Vector3(0, 0.65, 0))
+	if Flora.v2():
+		ExitModels._stone_ring(root, 0.74, 0.24, 7, Color("a29c90"), 0.0)
+		Models.part(root, Models.lathe(Models.smooth_curve(PackedVector2Array([Vector2(0.44, 0), Vector2(0.4, 0.08), Vector2(0.33, 0.14), Vector2(0.3, 0.5), Vector2(0.34, 0.74), Vector2(0.44, 0.86), Vector2(0.4, 0.92), Vector2(0, 0.92)]), 2), 20, "dial_column"), stone, Vector3(0, 0.22, 0))
+	else:
+		Models.part(root, Models.cyl(0.62, 0.72, 0.22, 8), stone, Vector3(0, 0.11, 0))
+		Models.part(root, Models.cyl(0.32, 0.42, 0.9, 8), stone, Vector3(0, 0.65, 0))
 	var face := Node3D.new(); face.name = "Face"; face.position = Vector3(0, 1.25, 0); face.rotation.x = -0.9; root.add_child(face)
 	Models.part(face, Models.cyl(0.62, 0.62, 0.12, 28), dark, Vector3.ZERO)
 	var tm := TorusMesh.new(); tm.inner_radius = 0.48; tm.outer_radius = 0.6; tm.rings = 28
@@ -291,7 +329,10 @@ static func dial_stone(col: Color) -> Node3D:
 static func rune_pylon(col: Color) -> Node3D:
 	var root := Node3D.new()
 	var stone := Models.toon(Color("8d8a9a")); var dim := Models.toon(Color("4a4f60"), false, 0.2)
-	Models.part(root, Models.cyl(0.55, 0.65, 0.2, 6), stone, Vector3(0, 0.1, 0))
+	if Flora.v2():
+		ExitModels._stone_ring(root, 0.66, 0.22, 6, Color("8d8a9a"), 0.0)
+	else:
+		Models.part(root, Models.cyl(0.55, 0.65, 0.2, 6), stone, Vector3(0, 0.1, 0))
 	Models.part(root, Models.box(0.6, 1.9, 0.45), stone, Vector3(0, 1.1, 0), Vector3.ONE, Vector3(0, 0.3, 0.04))
 	var rn := Models.part(root, Models.box(0.26, 0.6, 0.06), dim, Vector3(0, 1.25, -0.24), Vector3.ONE, Vector3(0, 0.3, 0.04))
 	rn.name = "Rune"

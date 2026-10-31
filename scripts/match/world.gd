@@ -954,6 +954,7 @@ func a0_of(isl: int) -> float:
 # ------------------------------------------------------------------ meshes
 const TerrainMesh := preload("res://scripts/match/terrain_mesh.gd")
 const RuinWalls := preload("res://scripts/match/ruin_walls.gd")
+const RuinWallsV1 := preload("res://scripts/match/ruin_walls_v1.gd")     # the first art pass (--art1)
 const SkyDeco := preload("res://scripts/match/sky_deco.gd")
 const Landmarks := preload("res://scripts/match/landmarks.gd")
 var landmarks = null
@@ -978,6 +979,7 @@ func build_meshes() -> void:
 	mat.set_shader_parameter("height_tex", tm.height_texture())
 	mat.set_shader_parameter("map_size", Vector2(w, h))
 	mat.set_shader_parameter("use_ao", true)
+	mat.set_shader_parameter("paint2", 1.0 if Flora.v2() else 0.0)
 	if Flora.on():
 		var bt := _biome_textures()
 		mat.set_shader_parameter("biome_tex", bt[0])
@@ -1218,6 +1220,12 @@ func _decorate() -> void:
 			var what: String = props.get(i, "")
 			if what == "":
 				what = "tree" if drng.randf() < 0.5 and not by_shrine else "rock"
+			if what == "camp" and Flora.v2():
+				var cp := PropSculpt.camp(drng)
+				cp.position = Vector3(x + 0.5, y, z + 0.5)
+				cp.rotation.y = drng.randf() * TAU
+				deco.add_child(cp)
+				continue
 			if _pack_prop(packed, what, i, Vector3(x + 0.5, y, z + 0.5), drng):
 				if what in ["tree", "rock"]:
 					_undergrowth(packed, x, z, drng)
@@ -1239,9 +1247,14 @@ func _decorate() -> void:
 	# stone walls: coursed ruin masonry following each run (see ruin_walls.gd)
 	if not walls.is_empty():
 		wall_mat = ShaderMaterial.new()
-		wall_mat.shader = load("res://shaders/wall.gdshader")
-		for wmi in RuinWalls.new(self).build(wall_mat):
+		wall_mat.shader = load("res://shaders/wall.gdshader" if Flora.v2() else "res://shaders/wall_v1.gdshader")
+		var wt0 := Time.get_ticks_usec()
+		var wtris := 0
+		for wmi in (RuinWalls.new(self) if Flora.v2() else RuinWallsV1.new(self)).build(wall_mat):
 			deco.add_child(wmi)
+			wtris += ((wmi as MeshInstance3D).mesh as ArrayMesh).surface_get_array_len(0) / 3
+		if "--art-stats" in OS.get_cmdline_user_args() or Array(OS.get_cmdline_user_args()).any(func(a): return String(a).begins_with("--art-view")):
+			print("PERF walls %d tris in %.0f ms" % [wtris, (Time.get_ticks_usec() - wt0) / 1000.0])
 	# tall grass to hide in: dense clumps of long blades that sway
 	var tall: Array = []
 	for bi in bush:
