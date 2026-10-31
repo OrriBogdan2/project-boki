@@ -37,26 +37,12 @@ func open(by_plan := false) -> void:
 	zoom = 1.0
 	zoom_to = 1.0
 	center = Vector2(m.world.w, m.world.h) * 0.5
-	_dim_world(true)
 
 func close() -> void:
 	is_open = false
 	auto = false
 	_press = Vector2.INF
-	_dim_world(false)
 
-## The map covers most of the screen, so the world behind it draws at half resolution meanwhile.
-var _prev_scale := -1.0
-func _dim_world(on: bool) -> void:
-	if not m.is_inside_tree():
-		return
-	var vp := m.get_viewport()
-	if on and _prev_scale < 0.0:
-		_prev_scale = vp.scaling_3d_scale
-		vp.scaling_3d_scale = minf(_prev_scale, 0.5)
-	elif not on and _prev_scale >= 0.0:
-		vp.scaling_3d_scale = _prev_scale
-		_prev_scale = -1.0
 
 # ------------------------------------------------------------------ coordinates
 func _layout(sz: Vector2) -> void:
@@ -253,41 +239,71 @@ func _grid(c: Control, v: Rect2, kk: float) -> void:
 			hud._text(Vector2(rect.position.x + 5, cy + 4), str(i + 1), 11, Color(1, 1, 1, 0.3), hud.big)
 
 ## Region and place names (authored maps); on generated maps each island's role.
+## Region names always, big; place names, perches, chokepoints and rail stops as icons, with their
+## names once you zoom in or where they don't run into a name already drawn (so the overview reads
+## at a glance instead of as a pile of overlapping labels).
 func _labels(c: Control, kk: float) -> void:
 	var w := m.world
 	var big_k := clampf(kk / (rect.size.x / w.w), 1.0, 2.0)
+	var zoomed := big_k >= 1.45
+	var taken: Array = []      # Rect2s of names already drawn
+	var regions := {}
+	for isl in w.islands: regions[String(isl.get("name", ""))] = true
+	var later: Array = []
 	for lb in w.labels:
 		var pv := to_screen(lb["pos"])
 		if not rect.grow(-8.0).has_point(pv):
 			continue
 		var nm := String(lb["name"])
+		var kind := String(lb["kind"])
+		if not kind in ["perch", "rail", "choke"] and regions.has(nm):
+			var col := Color("ffd2f0") if String(lb.get("role", "")) == "heart" else INK
+			var sz := int(17 * big_k)
+			_name(nm.to_upper(), pv + Vector2(0, 5), sz, col, taken, true)
+		else:
+			later.append([lb, pv])
+	for e in later:
+		var lb: Dictionary = e[0]
+		var pv: Vector2 = e[1]
+		var nm := String(lb["name"])
 		match String(lb["kind"]):
 			"perch":
 				c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -9), pv + Vector2(7, 4), pv + Vector2(-7, 4)]), Color(0, 0, 0, 0.6))
 				c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -7), pv + Vector2(5, 2.5), pv + Vector2(-5, 2.5)]), Color("9af0ff"))
-				hud._ctext(pv + Vector2(0, 17), "%s  %dm" % [nm, int(round(float(lb.get("height", 0.0))))], 10, Color("c8f6ff"))
+				var hm := "%dm" % int(round(float(lb.get("height", 0.0))))
+				if not _name("%s  %s" % [nm, hm] if zoomed else hm, pv + Vector2(0, 17), 10, Color("c8f6ff"), taken, zoomed) and zoomed:
+					_name(hm, pv + Vector2(0, 17), 10, Color("c8f6ff"), taken, true)
 			"rail":
 				c.draw_rect(Rect2(pv - Vector2(4, 4), Vector2(8, 8)), Color(0, 0, 0, 0.6))
 				c.draw_rect(Rect2(pv - Vector2(3, 3), Vector2(6, 6)), Color("ffcf7a"))
-				if kk > rect.size.x / w.w * 1.4:
-					hud._ctext(pv + Vector2(0, 15), nm, 10, Color("ffe2b0"))
+				if zoomed:
+					_name(nm, pv + Vector2(0, 15), 10, Color("ffe2b0"), taken)
 			"choke":
 				c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -5), pv + Vector2(5, 0), pv + Vector2(0, 5), pv + Vector2(-5, 0)]), Color(0, 0, 0, 0.55))
 				c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -3.5), pv + Vector2(3.5, 0), pv + Vector2(0, 3.5), pv + Vector2(-3.5, 0)]), Color("ffb36a"))
-				hud._ctext(pv + Vector2(0, 15), nm, 10, Color(1.0, 0.82, 0.63, 0.85))
+				if zoomed:
+					_name(nm, pv + Vector2(0, 15), 10, Color(1.0, 0.82, 0.63, 0.9), taken)
 			_:
-				# a region (an island's own name) big, a place inside it smaller
-				var region := false
-				for isl in w.islands:
-					if String(isl.get("name", "")) == nm: region = true; break
-				var col := Color("ffd2f0") if String(lb.get("role", "")) == "heart" else INK
-				hud._ctext(pv + Vector2(0, 5), nm.to_upper() if region else nm, int((17 if region else 11) * big_k), col if region else Color(INK, 0.8), hud.big)
+				_name(nm, pv + Vector2(0, 21), int(11 * big_k), Color(INK, 0.85), taken, zoomed)
 	if w.labels.is_empty():
 		for isl in w.islands:
 			var cc: Vector2 = isl["c"]
 			var pv2 := to_screen(Vector3(cc.x, 0, cc.y))
 			if rect.has_point(pv2):
 				hud._ctext(pv2, String(isl["role"]).capitalize(), 11, Color(INK, 0.6), hud.big)
+
+## Draws a centred name unless it would overlap one already drawn (force draws it anyway).
+## Returns whether it drew.
+func _name(txt: String, at: Vector2, size: int, col: Color, taken: Array, force := false) -> bool:
+	var tw: float = hud.big.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x
+	var r := Rect2(at + Vector2(-tw * 0.5 - 3.0, -size * 0.95), Vector2(tw + 6.0, size * 1.25))
+	if not force:
+		for q in taken:
+			if (q as Rect2).intersects(r):
+				return false
+	taken.append(r)
+	hud._ctext(at, txt, size, col, hud.big)
+	return true
 
 func _spawns(c: Control, team: int, kk: float) -> void:
 	_hover = {}
