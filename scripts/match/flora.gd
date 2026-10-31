@@ -43,6 +43,11 @@ static var LOD_FINE := false
 static func on() -> bool:
 	return not ("--prim-art" in OS.get_cmdline_user_args() or "--pack-flora" in OS.get_cmdline_user_args())
 
+## The second world art pass (sculpted walls, monsters, chests, set pieces, painted ground). Off with
+## --art1, for before/after comparisons.
+static func v2() -> bool:
+	return on() and not ("--art1" in OS.get_cmdline_user_args())
+
 static func style_ok(style: String) -> String:
 	return style if PAL.has(style) else "meadow"
 

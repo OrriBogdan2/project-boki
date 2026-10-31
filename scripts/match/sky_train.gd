@@ -263,6 +263,18 @@ func _build_cars() -> void:
 			Models.part(n, Models.box(HALF_W * 2.0, 1.9, 1.6), paint, Vector3(0, 0.95, CAR_LEN * 0.5 - 0.8))
 			Models.part(n, Models.box(HALF_W * 2.2, 0.18, 1.8), brass, Vector3(0, 1.95, CAR_LEN * 0.5 - 0.8))
 			Models.part(n, Models.cyl(0.22, 0.3, 0.9, 10), dark, Vector3(0, 1.85, -1.3))
+			if Flora.v2():
+				# brass bands round the boiler, a steam dome, a flared funnel crown, a curved cab
+				# roof and rivet rows
+				for zz in [-1.9, -0.9, 0.1]:
+					Models.part(n, Models.cyl(0.88, 0.88, 0.1, 20), brass, Vector3(0, 0.75, zz), Vector3.ONE, Vector3(PI * 0.5, 0, 0))
+				Models.part(n, Models.sphere(0.32, 14), brass, Vector3(0, 1.55, -0.4), Vector3(1.0, 0.8, 1.0))
+				Models.part(n, Models.lathe(Models.smooth_curve(PackedVector2Array([Vector2(0.26, 0), Vector2(0.3, 0.1), Vector2(0.42, 0.28), Vector2(0.44, 0.34), Vector2(0.3, 0.36), Vector2(0.0, 0.36)]), 2), 18, "train_funnel"), dark, Vector3(0, 2.25, -1.3))
+				Models.part(n, Models.cyl(1.25, 1.25, 1.9, 20), paint, Vector3(0, 1.75, CAR_LEN * 0.5 - 0.8), Vector3(1.0, 0.22, 1.0), Vector3(0, 0, PI * 0.5))
+				var rv := Models.toon(Color("e8c070"), false, 0.1)
+				for zz in range(6):
+					for xx in [-0.86, 0.86]:
+						Models.part(n, Models.sphere(0.035, 6), rv, Vector3(xx * 0.98, 0.75, -2.3 + zz * 0.5))
 			Models.part(n, Models.box(HALF_W * 2.0, 0.5, 0.5), red, Vector3(0, -0.05, -CAR_LEN * 0.5 - 0.15), Vector3.ONE, Vector3(-0.5, 0, 0))
 			for xx in [-0.75, 0.75]:
 				Models.part(n, Models.box(0.12, 0.7, 0.12), red, Vector3(xx, 0.2, -CAR_LEN * 0.5 + 0.05))
@@ -278,7 +290,13 @@ func _build_cars() -> void:
 			n.add_child(light)
 		else:
 			# a flat car: plank deck, low brass rails along the sides (open at the ends)
-			Models.part(n, Models.box(HALF_W * 2.0, 0.22, CAR_LEN), wood, Vector3(0, -0.11, 0))
+			if Flora.v2():
+				# a deck of real planks over a dark frame
+				Models.part(n, Models.box(HALF_W * 2.0 - 0.1, 0.18, CAR_LEN - 0.1), dark, Vector3(0, -0.15, 0))
+				var dk := Node3D.new(); dk.position = Vector3(0, -0.12, 0); n.add_child(dk)
+				ExitModels._deck(dk, HALF_W * 2.0, CAR_LEN, Color("8a6040"))
+			else:
+				Models.part(n, Models.box(HALF_W * 2.0, 0.22, CAR_LEN), wood, Vector3(0, -0.11, 0))
 			for xx in [-HALF_W + 0.06, HALF_W - 0.06]:
 				Models.part(n, Models.box(0.08, 0.08, CAR_LEN - 0.8), brass, Vector3(xx, 0.42, 0))
 				for zz in [-CAR_LEN * 0.36, 0.0, CAR_LEN * 0.36]:

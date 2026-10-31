@@ -38,8 +38,12 @@ static func dock(beacon_off: Vector3) -> Node3D:
 	var wood := Models.toon(Color("8a6040")); var dark := Models.toon(Color("5a3c28")); var rope := Models.toon(Color("d8c49a"))
 	var brass := Models.toon(Color("e0b84a"), true, 0.25)
 	# the pier deck: planks across, two stringers along
-	for i in 9:
-		Models.part(root, Models.box(3.0, 0.1, 0.52), wood if i % 2 == 0 else Models.toon(Color("9a6c48")), Vector3(0, 0.05, -2.2 + i * 0.56))
+	if Flora.v2():
+		_deck(root, 3.0, 5.2, Color("8a6040"))
+		_stone_footing(root, Vector3(0, 0, 2.55), 3.4, 0.9)
+	else:
+		for i in 9:
+			Models.part(root, Models.box(3.0, 0.1, 0.52), wood if i % 2 == 0 else Models.toon(Color("9a6c48")), Vector3(0, 0.05, -2.2 + i * 0.56))
 	for sx in [-1.35, 1.35]:
 		Models.part(root, Models.box(0.16, 0.16, 5.2), dark, Vector3(sx, 0.12, 0))
 	# mooring posts at the corners, roped together, with a lantern on the outer pair
@@ -47,6 +51,11 @@ static func dock(beacon_off: Vector3) -> Node3D:
 		for sz in [-2.4, 2.2]:
 			Models.part(root, Models.cyl(0.13, 0.15, 1.1, 8), dark, Vector3(sx, 0.55, sz))
 			Models.part(root, Models.cyl(0.17, 0.17, 0.1, 8), brass, Vector3(sx, 1.1, sz))
+			if Flora.v2():
+				# rope lashed round the post, and a rounded cap
+				for k in 3:
+					Models.part(root, Models.cyl(0.165, 0.165, 0.045, 12), rope, Vector3(sx, 0.7 + k * 0.055, sz))
+				Models.part(root, Models.sphere(0.15, 10), brass, Vector3(sx, 1.17, sz), Vector3(1.0, 0.55, 1.0))
 		Models.part(root, Models.cyl(0.035, 0.035, 4.6, 6), rope, Vector3(sx, 0.85, -0.1), Vector3.ONE, Vector3(PI / 2, 0, 0))
 		var lamp := Models.part(root, Models.sphere(0.16, 10), Models.toon(DOCK, false, 1.2), Vector3(sx, 1.32, -2.4))
 		lamp.name = "Lantern%s" % ("L" if sx < 0 else "R")
@@ -57,7 +66,10 @@ static func dock(beacon_off: Vector3) -> Node3D:
 	# the horn beacon: a stone foot, a tall post, a brass horn and a signal lamp on top
 	var b := Node3D.new(); b.name = "Beacon"; b.position = beacon_off; root.add_child(b)
 	var stone := Models.toon(Color("7d7f8a"))
-	Models.part(b, Models.cyl(0.55, 0.65, 0.3, 8), stone, Vector3(0, 0.15, 0))
+	if Flora.v2():
+		_stone_ring(b, 0.62, 0.32, 7, Color("8a8478"))
+	else:
+		Models.part(b, Models.cyl(0.55, 0.65, 0.3, 8), stone, Vector3(0, 0.15, 0))
 	Models.part(b, Models.cyl(0.12, 0.15, 2.4, 8), dark, Vector3(0, 1.45, 0))
 	Models.part(b, Models.cyl(0.1, 0.36, 0.7, 12), brass, Vector3(0, 2.1, -0.35), Vector3.ONE, Vector3(PI / 2 + 0.3, 0, 0))
 	Models.part(b, Models.box(0.5, 0.36, 0.3), Models.toon(Color("4a4e5c")), Vector3(0, 0.95, 0.18))
@@ -87,9 +99,16 @@ static func skiff() -> Node3D:
 		Models.part(hull, Models.box(0.14, 0.4, 4.4), dark, Vector3(sx, 0.18, 0))
 	Models.part(hull, Models.box(2.5, 0.4, 0.14), dark, Vector3(0, 0.18, 2.25))
 	# the keel below, tapering to a bow
-	Models.part(hull, Models.box(2.3, 0.7, 4.2), wood, Vector3(0, -0.45, 0.1))
-	var bow := PrismMesh.new(); bow.size = Vector3(2.3, 1.1, 0.7)
-	Models.part(hull, bow, wood, Vector3(0, -0.3, -2.45), Vector3.ONE, Vector3(-PI / 2, 0, 0))
+	if Flora.v2():
+		# a smooth carvel hull: a rounded belly under the deck, a darker strake and a keel line
+		var bowl := SphereMesh.new(); bowl.radius = 1.0; bowl.height = 1.0; bowl.is_hemisphere = true; bowl.radial_segments = 28; bowl.rings = 10
+		Models.part(hull, bowl, wood, Vector3(0, -0.06, 0.0), Vector3(1.3, 0.95, 2.5), Vector3(PI, 0, 0))
+		Models.part(hull, bowl, dark, Vector3(0, -0.04, 0.0), Vector3(1.33, 0.22, 2.53), Vector3(PI, 0, 0))
+		Models.part(hull, Models.box(0.14, 0.3, 4.2), dark, Vector3(0, -0.9, 0.0))
+	else:
+		Models.part(hull, Models.box(2.3, 0.7, 4.2), wood, Vector3(0, -0.45, 0.1))
+		var bow := PrismMesh.new(); bow.size = Vector3(2.3, 1.1, 0.7)
+		Models.part(hull, bow, wood, Vector3(0, -0.3, -2.45), Vector3.ONE, Vector3(-PI / 2, 0, 0))
 	# outrigger fins, like a glider's wings
 	for sx in [-1.0, 1.0]:
 		Models.part(hull, Models.box(1.6, 0.08, 1.4), cloth, Vector3(sx * 2.0, 0.05, 0.4), Vector3.ONE, Vector3(0, 0, sx * -0.18))
@@ -131,8 +150,12 @@ static func skiff() -> Node3D:
 static func hatch() -> Node3D:
 	var root := Node3D.new()
 	var stone := Models.toon(Color("6f6a7c")); var iron := Models.toon(Color("4a4858")); var rim := Models.toon(Color("8c86a0"))
-	Models.part(root, Models.cyl(1.05, 1.15, 0.2, 10), stone, Vector3(0, 0.1, 0))
-	Models.part(root, Models.cyl(0.98, 0.98, 0.06, 10), rim, Vector3(0, 0.21, 0))
+	if Flora.v2():
+		# a collar of wedge-cut stones, each chiselled and set a little unevenly
+		_stone_ring(root, 1.1, 0.24, 10, Color("7a7488"))
+	else:
+		Models.part(root, Models.cyl(1.05, 1.15, 0.2, 10), stone, Vector3(0, 0.1, 0))
+		Models.part(root, Models.cyl(0.98, 0.98, 0.06, 10), rim, Vector3(0, 0.21, 0))
 	var runes := Node3D.new(); runes.name = "Runes"; root.add_child(runes)
 	for i in 6:
 		var a := TAU * i / 6.0
@@ -152,6 +175,17 @@ static func hatch() -> Node3D:
 	Models.part(lid, Models.cyl(0.8, 0.84, 0.12, 14), iron, Vector3(0, 0.27, 0))
 	for k in [-0.35, 0.35]:
 		Models.part(lid, Models.box(1.5, 0.05, 0.14), Models.toon(Color("6a6878")), Vector3(0, 0.34, k))
+	if Flora.v2():
+		# a domed boss, rivets round the rim and on the straps
+		var rv := Models.toon(Color("8a8898"))
+		rv.set_shader_parameter("gloss", 0.4)
+		Models.part(lid, Models.sphere(0.5, 16), iron, Vector3(0, 0.3, 0), Vector3(1.0, 0.16, 1.0))
+		for i in 14:
+			var a := TAU * i / 14.0
+			Models.part(lid, Models.sphere(0.04, 6), rv, Vector3(cos(a) * 0.72, 0.34, sin(a) * 0.72))
+		for k in [-0.35, 0.35]:
+			for x in [-0.55, -0.25, 0.25, 0.55]:
+				Models.part(lid, Models.sphere(0.03, 6), rv, Vector3(x, 0.37, k))
 	var hole := Models.part(lid, Models.box(0.14, 0.05, 0.26), Models.toon(HATCH, false, 0.9), Vector3(0, 0.35, 0))
 	hole.name = "Keyhole"
 	root.add_child(_sparks(HATCH, 26, 0.7, 3.0, "Sparks"))
@@ -165,7 +199,11 @@ static func hatch() -> Node3D:
 static func uplink() -> Node3D:
 	var root := Node3D.new()
 	var stone := Models.toon(Color("8a8f9c")); var dark := Models.toon(Color("4a4e5c")); var brass := Models.toon(Color("e0b84a"), true, 0.25)
-	Models.part(root, Models.cyl(0.8, 0.95, 0.36, 8), stone, Vector3(0, 0.18, 0))
+	if Flora.v2():
+		_stone_ring(root, 0.92, 0.38, 8, Color("8e8a84"), 0.0)
+		Models.part(root, Models.cyl(0.62, 0.66, 0.1, 16), Models.toon(Color("a49e94")), Vector3(0, 0.4, 0))
+	else:
+		Models.part(root, Models.cyl(0.8, 0.95, 0.36, 8), stone, Vector3(0, 0.18, 0))
 	Models.part(root, Models.box(0.8, 0.7, 0.5), dark, Vector3(0, 0.7, 0.25))
 	var screen := Models.part(root, Models.box(0.6, 0.36, 0.05), Models.toon(UPLINK, false, 0.6), Vector3(0, 0.82, 0.52), Vector3.ONE, Vector3(-0.35, 0, 0))
 	screen.name = "Screen"
@@ -176,13 +214,21 @@ static func uplink() -> Node3D:
 	var cr := Node3D.new(); cr.name = "Crystal"; cr.position = Vector3(0, 3.9, -0.15); mast.add_child(cr)
 	var pm := PrismMesh.new(); pm.size = Vector3(0.5, 0.7, 0.5)
 	var cm := Models.toon(UPLINK.darkened(0.15), true, 0.4)
-	Models.part(cr, pm, cm, Vector3(0, 0.35, 0))
-	Models.part(cr, pm, cm, Vector3(0, -0.35, 0), Vector3.ONE, Vector3(PI, 0, 0))
+	if Flora.v2():
+		cm.set_shader_parameter("gloss", 0.7)
+		Models.part(cr, Models.crystal(0.26, 0.95, 6), cm, Vector3(0, 0.12, 0))
+		Models.part(cr, Models.crystal(0.26, 0.45, 6), cm, Vector3(0, -0.45, 0), Vector3.ONE, Vector3(PI, 0, 0))
+	else:
+		Models.part(cr, pm, cm, Vector3(0, 0.35, 0))
+		Models.part(cr, pm, cm, Vector3(0, -0.35, 0), Vector3.ONE, Vector3(PI, 0, 0))
 	PropAnim.on(cr, 0.6, 0.08)
 	# the lift: four pylons round the plinth, and the light that opens between them
 	for i in 4:
 		var a := TAU * i / 4.0 + PI / 4.0
 		Models.part(root, Models.box(0.3, 1.2, 0.3), stone, Vector3(cos(a) * 1.9, 0.6, sin(a) * 1.9))
+		if Flora.v2():
+			Models.part(root, Models.box(0.42, 0.14, 0.42), Models.toon(Color("a49e94")), Vector3(cos(a) * 1.9, 1.24, sin(a) * 1.9), Vector3.ONE, Vector3(0, -a, 0))
+			Models.part(root, Models.box(0.44, 0.16, 0.44), Models.toon(Color("6e6a66")), Vector3(cos(a) * 1.9, 0.08, sin(a) * 1.9), Vector3.ONE, Vector3(0, -a, 0))
 		Models.part(root, Models.box(0.1, 0.6, 0.32), Models.toon(UPLINK, false, 0.7), Vector3(cos(a) * 1.9, 0.9, sin(a) * 1.9), Vector3.ONE, Vector3(0, -a, 0))
 	var charge := MeshInstance3D.new(); charge.name = "Charge"; charge.mesh = Models.flat_quad(5.2)
 	var chm := Models.ring_mat(Color(UPLINK.lightened(0.3), 0.95), 0.08)
@@ -232,3 +278,56 @@ static func rift_key() -> Node3D:
 	halo.material_override = Models.ring_mat(Color(HATCH, 0.7), 0.12); halo.position.y = -0.2
 	root.add_child(halo)
 	return root
+
+# ------------------------------------------------------------------ second art pass helpers
+## A plank deck w wide (x) and d long (z), its top at y = 0.1: planks of slightly uneven width and
+## length, a shade apart, nailed down, with dark gaps between them.
+static func _deck(root: Node3D, w: float, d: float, base: Color) -> void:
+	var rr := RandomNumberGenerator.new(); rr.seed = 9177
+	var gap := Models.toon(base.darkened(0.6))
+	Models.part(root, PropSculpt.bx(w - 0.1, 0.06, d - 0.05), gap, Vector3(0, 0.03, 0))
+	var mats: Array = []
+	for k in 3:
+		mats.append(Models.toon(base.lightened(-0.06 + k * 0.07)))
+	var nail := Models.toon(Color("3a3440"))
+	var z := -d * 0.5
+	while z < d * 0.5 - 0.15:
+		var pw := rr.randf_range(0.36, 0.5)
+		var plen := w + rr.randf_range(-0.12, 0.08)
+		var off := rr.randf_range(-0.06, 0.06)
+		Models.part(root, PropSculpt.bx(plen, 0.09, pw - 0.04), mats[rr.randi_range(0, 2)], Vector3(off, 0.07 + rr.randf_range(-0.008, 0.01), z + pw * 0.5), Vector3.ONE, Vector3(0, rr.randf_range(-0.012, 0.012), 0))
+		for sx in [-w * 0.45, w * 0.45]:
+			Models.part(root, Models.sphere(0.022, 6), nail, Vector3(sx, 0.12, z + pw * 0.5))
+		z += pw
+
+## A ring of chunky wedge-cut stones (a collar, a plinth): n stones around a circle of radius r, h
+## tall, each chiselled (rounded box), a little uneven, with dark joints and a lighter top.
+static func _stone_ring(root: Node3D, r: float, h: float, n: int, c: Color, inner := 0.55) -> void:
+	var rr := RandomNumberGenerator.new(); rr.seed = n * 31 + int(r * 100.0)
+	Models.part(root, Models.cyl(r * 0.96, r * 0.98, h * 0.9, 16), Models.toon(c.darkened(0.55)), Vector3(0, h * 0.45, 0))
+	var ms: Array = []
+	for k in 3:
+		ms.append(Models.toon(c.lightened(-0.05 + k * 0.06)))
+	var rin := r * inner
+	for i in n:
+		var a := TAU * (i + 0.5) / n
+		var arc := TAU * r / n
+		var depth := r - rin if inner > 0.0 else r * 0.5
+		var mid := (r + rin) * 0.5 if inner > 0.0 else r * 0.72
+		var hh := h + rr.randf_range(-0.03, 0.04)
+		Models.part(root, PropSculpt.bx(arc * 0.94, hh, depth), ms[rr.randi_range(0, 2)], Vector3(cos(a) * mid, hh * 0.5, sin(a) * mid), Vector3.ONE, Vector3(rr.randf_range(-0.03, 0.03), PI * 0.5 - a, rr.randf_range(-0.03, 0.03)))
+	if inner <= 0.0:
+		# a solid plinth: a cap stone over the middle
+		Models.part(root, Models.cyl(r * 0.5, r * 0.52, h + 0.02, 16), ms[1], Vector3(0, (h + 0.02) * 0.5, 0))
+
+## Stone footing blocks where a pier meets the land.
+static func _stone_footing(root: Node3D, at: Vector3, w: float, d: float) -> void:
+	var rr := RandomNumberGenerator.new(); rr.seed = 4401
+	var c := Color("8a8478")
+	var x := -w * 0.5
+	while x < w * 0.5 - 0.1:
+		var bw := rr.randf_range(0.5, 0.85)
+		bw = minf(bw, w * 0.5 - x)
+		var hh := rr.randf_range(0.18, 0.28)
+		Models.part(root, PropSculpt.bx(bw - 0.04, hh, d * rr.randf_range(0.8, 1.0)), Models.toon(c.lightened(rr.randf_range(-0.06, 0.08))), at + Vector3(x + bw * 0.5, hh * 0.5 - 0.06, rr.randf_range(-0.05, 0.05)))
+		x += bw

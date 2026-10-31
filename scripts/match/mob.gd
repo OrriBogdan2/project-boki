@@ -42,6 +42,12 @@ func init_mob(match_node: Node, id: String, k: String, at: Vector3, tier := 1.0)
 	camp = at
 	cd = randf_range(0.5, 1.5)
 	set_model(Models.mob(k))
+	if model.has_meta("sculpted") and m.get("world"):
+		# a little of the island grows on its back
+		var wx := int(floor(at.x)); var wz := int(floor(at.z))
+		if m.world.inb(wx, wz):
+			MobModels.dress(model, Flora.style_ok(m.world.style_at(m.world.idx(wx, wz))))
+			mats = model.get_meta("mats", [])
 	teleport(at)
 	if md.get("stag", false):
 		stag_next = randf_range(3.0, 7.0)
@@ -381,7 +387,7 @@ func render(delta: float, alpha: float) -> void:
 		return
 	match mkind:
 		"skitter":
-			body.position.y = absf(sin(anim)) * 0.05 * float(moving) - gather * 0.3
+			body.position.y = absf(sin(anim)) * 0.05 * float(moving) - gather * 0.3 + (0.0 if moving else sin(m.time * 3.0) * 0.012)
 			for i in 3:
 				for sx in [-1, 1]:
 					var lg := body.get_node_or_null("Leg%d%d" % [i, sx]) as Node3D
@@ -400,17 +406,33 @@ func render(delta: float, alpha: float) -> void:
 			bulb.scale = Vector3(1.0 - wind * 0.15, 0.9 + wind * 0.4, 1.0 - wind * 0.15) * (1.0 + sin(anim) * 0.03)
 			bulb.rotation.x = -wind * 0.5 + (0.5 if st == "recover" else 0.0) * 0.5
 			body.rotation.y = sin(m.time * 1.3) * 0.05
+			for i in 4:
+				var lf := body.get_node_or_null("Leaf%d" % i) as Node3D
+				if lf: lf.rotation.z = sin(m.time * 1.7 + i * 1.3) * 0.08 + wind * 0.45 + hurt_k * 0.3
 		"bomber":
 			var sw := 1.0 + wind * 0.45 + sin(anim * (1.0 + wind * 6.0)) * 0.04 * (1.0 + wind * 3.0)
 			body.get_node("Puff").scale = Vector3.ONE * sw
 			body.position.y = absf(sin(anim)) * 0.1
+			var puff := body.get_node("Puff")
+			for fn in ["FinL", "FinR"]:
+				var fin := puff.get_node_or_null(fn) as Node3D
+				if fin: fin.rotation.z = sin(anim * 2.6) * (0.5 + wind * 0.5) * (1.0 if fn == "FinL" else -1.0)
+			var spk := puff.get_node_or_null("Spark") as Node3D
+			if spk: spk.scale = Vector3.ONE * (0.85 + absf(sin(m.time * 23.0)) * 0.35 + wind * 0.9)
 		"glimmer":
 			body.position.y = absf(sin(anim * 1.3)) * 0.16
-			body.rotation.y += delta * 2.0
+			if model.has_meta("sculpted"):
+				for en in ["EarL", "EarR"]:
+					var ear := body.get_node_or_null(en) as Node3D
+					if ear: ear.rotation.x = 0.25 + sin(anim * 1.3 + 0.6) * 0.25
+			else:
+				body.rotation.y += delta * 2.0
 		"sentinel":
 			var cr: Node3D = body.get_node("Crystal")
 			cr.rotation.y += delta * (1.5 + wind * 10.0)
 			cr.position.y = 1.25 + sin(anim * 0.6) * 0.08 + wind * 0.25
+			var shd := cr.get_node_or_null("Shards") as Node3D
+			if shd: shd.rotation.y -= delta * (2.5 + wind * 12.0)
 		"brute", "warden":
 			var tor := body.get_node_or_null("Torso") as Node3D
 			var ll := body.get_node_or_null("LegL") as Node3D
@@ -433,6 +455,15 @@ func render(delta: float, alpha: float) -> void:
 			if tor:
 				tor.rotation.y = sin(ph2) * 0.12 * mv
 				tor.rotation.x = -0.12 * mv + wind * 0.15
+				# heavy breathing while it stands about
+				var br := sin(m.time * 2.2) * 0.025 * (1.0 - mv)
+				tor.scale = Vector3(1.0 + br, 1.0 + br * 0.6, 1.0 + br)
+				var hd := tor.get_node_or_null("Head") as Node3D
+				if hd and model.has_meta("sculpted"): hd.rotation.y = sin(m.time * 0.7) * 0.25 * (1.0 - mv)
+	if model.has_meta("pulse"):
+		# glowing parts (a maw, a fuse, runes) flare as an attack winds up
+		for pm in model.get_meta("pulse"):
+			(pm as ShaderMaterial).set_shader_parameter("glow", float((pm as ShaderMaterial).get_meta("glow0", 1.0)) * (1.0 + wind * 1.5) + sin(m.time * 4.0) * 0.08)
 	var sq := squash
 	body.scale = Vector3(1.0 + sq * 0.3 + gather, 1.0 - sq * 0.35 - gather, 1.0 + sq * 0.3 + gather)
 
