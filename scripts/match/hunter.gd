@@ -386,6 +386,7 @@ func update_lip() -> void:
 const MARKER_BALL_Y := 0.95       # balloon centre above the stance: where a level shot flies
 const MARKER_FLASH := 0.3
 const MARKER_FOE := Color("ff4a3a")
+const MARKER_ALLY := Color("4fd8ff")   # always cool blue, so an ally never reads like a foe (team 0 is orange)
 var balloon: Node3D               # the hit marker: Ring, Ball, Knot, Aura, String
 var _mk_ring: MeshInstance3D
 var _mk_ball: MeshInstance3D
@@ -446,7 +447,9 @@ func _marker_col() -> Color:
 		return Color(tc.lerp(Color.WHITE, 0.45), 0.45)       # your own: faint
 	if lp and lp.team != team:
 		return MARKER_FOE                                    # an enemy
-	return tc                                                # an ally (or watching)
+	if lp:
+		return MARKER_ALLY                                   # an ally
+	return tc                                            # watching: team colours
 
 func _build_marker() -> void:
 	if _mk_quad == null:
