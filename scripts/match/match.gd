@@ -122,6 +122,7 @@ func _ready() -> void:
 	set_process(false)
 
 func start(o: Dictionary) -> void:
+	PerfLog.reset()
 	opts = o
 	seed_val = int(o.get("seed", randi()))
 	rng.seed = seed_val
@@ -153,6 +154,7 @@ func start(o: Dictionary) -> void:
 		world.generate_authored(layout, seed_val)
 	else:
 		world.generate(seed_val, World.BIG_SIZE if big else 64, World.BIG_ISLANDS if big else 7)
+	PerfLog.mark("build.generate")
 	world.build_meshes()
 	fx = Fx.new(); fx.name = "Fx"; add_child(fx)
 	fields = Fields.new(self)
@@ -178,12 +180,17 @@ func start(o: Dictionary) -> void:
 		net_on = true
 		is_host = Net.me == String(o["net"]["host"])
 		Net.begin_match("kf-" + String(o["net"]["mid"]), String(o["net"]["host"]), self)
+	PerfLog.mark("build.systems")
 	_spawn_pads_and_exits()
+	PerfLog.mark("build.pads_exits")
 	_spawn_hunters()
+	PerfLog.mark("build.hunters")
 	if not opts.get("tutorial", false) and not opts.get("duel", false):
 		_spawn_mobs()        # the tutorial brings its own monsters, one step at a time
+	PerfLog.mark("build.mobs")
 	if not opts.get("duel", false):
 		_spawn_chests()
+	PerfLog.mark("build.chests")
 	if not world.train_route.is_empty() and not opts.get("duel", false):
 		skytrain = SkyTrain.new()
 		skytrain.name = "SkyTrain"
@@ -215,6 +222,7 @@ func start(o: Dictionary) -> void:
 		spawn_plan.roll(seed_val)
 		spawn_plan.spawn_all()
 	if lairs: lairs.ensure_live()
+	PerfLog.mark("build.spawns")
 	skydrop = DropSquad.new(self)
 	skydrop.setup()
 	var Hud = load("res://scripts/ui/hud.gd")
@@ -233,10 +241,12 @@ func start(o: Dictionary) -> void:
 		duel.setup(self)
 		duel.attach_keys()
 		hud.toast("Duel room  ·  B sets up the bot  ·  X resets", Color("f3eee2"))
+	PerfLog.mark("build.hud")
 	_build_aim()
 	Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
 	set_process(true)
 	Bridge.kin_lines_for_match(self)
+	PerfLog.mark("build.finish")
 
 func next_id(prefix: String) -> String:
 	nid_n += 1

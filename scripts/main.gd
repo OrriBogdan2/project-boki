@@ -335,6 +335,10 @@ func _ready() -> void:
 	if "--home-build-check" in args:
 		_home_build_check()
 		return
+	if "--perf-probe" in args:
+		# tooling: a scripted expedition with per-phase frame costs and hitches (tests/perf_probe.gd)
+		add_child(load("res://tests/perf_probe.gd").new())
+		return
 	if OS.has_feature("web"):
 		_expose_test_hooks()
 		var hash := str(JavaScriptBridge.eval("location.hash", true))
@@ -491,7 +495,7 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 		"match":
 			# a loading screen covers building the world; tests that screenshot by frame count skip it
 			var ld = null
-			if not opts.get("autoplay", false) and (not _has_arg("--shot=") or _has_arg("--show-loading")):
+			if (not opts.get("autoplay", false) or opts.get("probe", false)) and (not _has_arg("--shot=") or _has_arg("--show-loading")):
 				ld = load("res://scripts/ui/loading.gd").new()
 				ld.setup(opts)
 				add_child(ld)

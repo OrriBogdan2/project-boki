@@ -971,6 +971,7 @@ func build_meshes() -> void:
 	var mesh := tm.build()
 	under = tm.under
 	_rims = tm.rims
+	PerfLog.mark("world.terrain")
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	_island_roots(st)
@@ -996,11 +997,14 @@ func build_meshes() -> void:
 	ri.name = "Roots"
 	ri.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(ri)
+	PerfLog.mark("world.roots")
 	_decorate()
 	if Flora.on() and islands.size() > 1 and not "--no-landmarks" in OS.get_cmdline_user_args():
 		landmarks = Landmarks.new(self)
 		landmarks.build(_deco)
+	PerfLog.mark("world.landmarks")
 	_build_air()
+	PerfLog.mark("world.air")
 
 ## Per tile, for the terrain shader's painted ground: the biome style (R, nearest) and the painted
 ## paths and soil (G, smoothed).
@@ -1241,9 +1245,11 @@ func _decorate() -> void:
 		_patches(packed, drng)
 	if Assets.on() or Flora.on():
 		_cliff_rocks(packed, drng)
+	PerfLog.mark("world.scatter_plan")
 	for key in packed:
 		var g: Dictionary = packed[key]
 		_chunked(deco, g["items"], g["mesh"], g["mat"], String(g["label"]), bool(g["shadows"]), int(g.get("chunk", 16)))
+	PerfLog.mark("world.scatter_batches")
 	# stone walls: coursed ruin masonry following each run (see ruin_walls.gd)
 	if not walls.is_empty():
 		wall_mat = ShaderMaterial.new()
@@ -1255,6 +1261,7 @@ func _decorate() -> void:
 			wtris += ((wmi as MeshInstance3D).mesh as ArrayMesh).surface_get_array_len(0) / 3
 		if "--art-stats" in OS.get_cmdline_user_args() or Array(OS.get_cmdline_user_args()).any(func(a): return String(a).begins_with("--art-view")):
 			print("PERF walls %d tris in %.0f ms" % [wtris, (Time.get_ticks_usec() - wt0) / 1000.0])
+	PerfLog.mark("world.walls")
 	# tall grass to hide in: dense clumps of long blades that sway
 	var tall: Array = []
 	for bi in bush:
@@ -1331,6 +1338,7 @@ func _decorate() -> void:
 		pmi.material_override = Models.vtoon()
 		pmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		deco.add_child(pmi)
+	PerfLog.mark("world.grass")
 	var sea := MeshInstance3D.new()
 	var pm := PlaneMesh.new(); pm.size = Vector2(maxi(w, h) * 14, maxi(w, h) * 14)
 	sea.mesh = pm
@@ -1347,6 +1355,7 @@ func _decorate() -> void:
 		var cdeep: Color = clouds[0] if clouds.size() == 2 else Color(0.06, 0.07, 0.13)
 		var clight: Color = clouds[1] if clouds.size() == 2 else Color(0.22, 0.24, 0.38)
 		SkyDeco.new(self).build(deco, cdeep, clight, drng)
+	PerfLog.mark("world.sky")
 	# far below and around: little drifting islets and loose rocks, for depth
 	var top_c: Color = biome.get("top", Color("5f8d45"))
 	var side_c: Color = biome.get("side", Color("8b6d52"))
