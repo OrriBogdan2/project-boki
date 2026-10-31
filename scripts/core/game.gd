@@ -142,7 +142,7 @@ func apply_result(r: Dictionary) -> Dictionary:
 			var from := String(rec.get("lost_from", ""))
 			nk["uid"] = "k%d%d" % [Time.get_ticks_usec() % 1000000, randi() % 1000]
 			if from == "" or from == "you":
-				nk["name"] = Data.KIN_NAMES.pick_random()
+				nk["name"] = Data.default_kin_name(String(nk["species"]))
 				nk["memory"] = []
 				nk.erase("lost_from")
 				Save.remember(nk, "caught", "was caught by you in the islands and brought home")

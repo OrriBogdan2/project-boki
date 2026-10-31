@@ -361,6 +361,10 @@ func pick_seed(r: RandomNumberGenerator = null) -> String:
 const KIN_NAMES := Names.KIN      # ~2,200 names: see scripts/core/names.gd
 const BOT_NAMES := Names.BOT      # ~2,000 handles
 
+## A kin's name until you give it one: its species' name, as in a field guide.
+func default_kin_name(species: String) -> String:
+	return String(KIN[species]["name"]) if KIN.has(species) else "Kin"
+
 ## Expedition tiers: deeper islands are harder and richer, and in the Hollow your partner can be lost.
 const TIERS := [
 	{"name": "The Meadow", "desc": "Gentle islands. Your kin are always safe here: lose your loot, never your kin.",

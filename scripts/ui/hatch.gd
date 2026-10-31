@@ -704,7 +704,7 @@ func _show_name() -> void:
 	var name_row := UI.hbox(8)
 	var nl := UI.label("Its name", 15, UI.MUTED); nl.custom_minimum_size.x = 120
 	name_row.add_child(nl)
-	var ne := LineEdit.new(); ne.text = Data.KIN_NAMES.pick_random(); ne.max_length = 14; ne.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var ne := LineEdit.new(); ne.text = Data.default_kin_name(sp_id); ne.max_length = 14; ne.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	name_row.add_child(ne)
 	v.add_child(name_row)
 	# a few ideas, and a button for a fresh handful
@@ -745,7 +745,7 @@ func _show_name() -> void:
 	ne.select_all()
 
 func _finish(sp_id: String, kname: String, you: String, tutorial: bool) -> void:
-	var rec := Save.new_kin(sp_id, kname.strip_edges() if kname.strip_edges() != "" else Data.KIN_NAMES.pick_random())
+	var rec := Save.new_kin(sp_id, kname.strip_edges() if kname.strip_edges() != "" else Data.default_kin_name(sp_id))
 	rec["trust"] = 55.0
 	Save.remember(rec, "hatched", "hatched from an egg you chose")
 	rec["starter"] = true          # your first kin: it always stays on the farm with you
