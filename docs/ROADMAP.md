@@ -30,6 +30,29 @@ pipeline, boss lair exits, character art), into one order that can be scheduled.
 
 ---
 
+## 0.5 Owner priority (Oct 31): a small closed playtest first
+
+Owner: "the main thing is getting the game to work with a small amount of people - we don't need to build it
+for thousands of people off the bat. I want to trial it with ex-SUPERVIVE players first."
+
+This overrides the scale-first parts of the order below. The first online target is the **Playtest MVP**:
+- **Size:** one match at a time, 6-12 real players (2-4 squads), bots fill the rest. One map (Skyreach).
+- **Hosting:** a single dedicated Godot server (headless build of the same project) on one small VM, or a
+  player-hosted listen server for friends; invite code / direct connect from a simple lobby screen.
+  No matchmaking, no regions, no scaling.
+- **Authority:** server-authoritative simulation (so results are consistent), but light anti-cheat:
+  testers are invited. Client prediction for your own movement and lag compensation for shots, because
+  ex-SUPERVIVE players will feel input lag immediately.
+- **Saves:** a separate "playtest profile" that the server hands out at start (fixed kits/Boki per tester or a
+  quick draft), so nothing touches the future economy. No accounts or cloud saves yet: a tester name + code.
+- **Feedback:** opt-in telemetry + crash reports from day one, an in-game "report" key that captures a clip
+  of the last seconds and match state, and a short post-match survey. Discord for voice and community.
+- **Distribution:** a private build (itch.io restricted page or Steam Playtest later), auto-update optional.
+- **Deferred until after the playtest proves the fun:** accounts, cloud saves, matchmaking, multiple regions,
+  marketplace/trading, editions, season track, anti-cheat hardening.
+Order: in-flight branches -> archetypes (the combat identity testers will judge) -> Playtest MVP netcode ->
+first closed playtest -> iterate on feedback -> then the rest of this roadmap.
+
 ## 0. Where the code is today
 
 What this plan builds on. Paths are on `main` unless a branch is named.
