@@ -33,6 +33,7 @@ func _ready() -> void:
 		if a.begins_with("--probe-out="): out_path = a.substr(12)
 		if a == "--probe-quick": quick = true
 	vp_rid = get_viewport().get_viewport_rid()
+	Match.prof_on = true
 	# a software rasterizer spends most of a frame filling pixels: a small window and no MSAA keep
 	# the probe quick, and change none of the counts (draws, objects, primitives) or the CPU times
 	if not "--probe-full" in OS.get_cmdline_user_args():
@@ -71,23 +72,37 @@ func _process(_delta: float) -> void:
 		return
 	# the counts are for the frame that just drew
 	var rec := {"phase": phase, "wall": wall, "draws": _rinfo(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME),
+		"d3d": RenderingServer.viewport_get_render_info(vp_rid, RenderingServer.VIEWPORT_RENDER_INFO_TYPE_VISIBLE, RenderingServer.VIEWPORT_RENDER_INFO_DRAW_CALLS_IN_FRAME),
+		"dsh": RenderingServer.viewport_get_render_info(vp_rid, RenderingServer.VIEWPORT_RENDER_INFO_TYPE_SHADOW, RenderingServer.VIEWPORT_RENDER_INFO_DRAW_CALLS_IN_FRAME),
+		"dcv": RenderingServer.viewport_get_render_info(vp_rid, RenderingServer.VIEWPORT_RENDER_INFO_TYPE_CANVAS, RenderingServer.VIEWPORT_RENDER_INFO_DRAW_CALLS_IN_FRAME),
 		"objs": _rinfo(RenderingServer.RENDERING_INFO_TOTAL_OBJECTS_IN_FRAME), "prims": _rinfo(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME),
 		"rcpu": RenderingServer.viewport_get_measured_render_time_cpu(vp_rid) + RenderingServer.get_frame_setup_time_cpu(),
 		"hud": hud_us / 1000.0, "marks": marks, "t": m.time}
 	if not frames.is_empty():
-		frames[-1].merge({"draws": rec["draws"], "objs": rec["objs"], "prims": rec["prims"], "rcpu": rec["rcpu"]}, true)
+		frames[-1].merge({"draws": rec["draws"], "objs": rec["objs"], "prims": rec["prims"], "rcpu": rec["rcpu"], "d3d": rec["d3d"], "dsh": rec["dsh"], "dcv": rec["dcv"]}, true)
 	# advance the match: quiet stretches run several steps per drawn frame so the probe stays short
 	var k := 1
 	match phase:
 		"planning", "ride": k = 6
 		"drop": k = 3
 	var t0 := Time.get_ticks_usec()
-	m._process(DT * k)
+	if k == 1:
+		# the simulation step and the per-frame visuals (interpolation, animation, camera) apart
+		m.step(DT)
+		var t1 := Time.get_ticks_usec()
+		m._process(0.0)
+		rec["sim"] = (t1 - t0) / 1000.0
+		rec["vis"] = (Time.get_ticks_usec() - t1) / 1000.0
+	else:
+		m._process(DT * k)
 	var proc := (Time.get_ticks_usec() - t0) / 1000.0
 	rec["proc"] = proc / k
 	rec["steps"] = k
 	frames.append(rec)
 	phase_t += DT * k
+	var nf: int = frames.filter(func(f): return f["phase"] == phase).size()
+	if nf == 12 and phase in ["planning", "drop", "land", "fight"]:
+		_breakdown()
 	_next_phase()
 
 func _set_phase(p: String) -> void:
@@ -123,6 +138,69 @@ func _next_phase() -> void:
 	if m.time > 200.0 and phase != "fight":
 		print("PROBE stuck in phase ", phase)
 		_finish()
+
+## What's on screen right now, grouped by node name (chunk numbers stripped): instances in view,
+## draws they make (outline passes and shadows counted), triangles. Approximate: frustum test on the
+## bounding box, visibility ranges honoured.
+func _breakdown() -> void:
+	var cam := get_viewport().get_camera_3d()
+	if cam == null:
+		return
+	var planes := cam.get_frustum()
+	var cpos := cam.global_position
+	var groups := {}
+	var stack: Array = [get_tree().root]
+	while not stack.is_empty():
+		var n: Node = stack.pop_back()
+		for ch in n.get_children(): stack.append(ch)
+		if not (n is GeometryInstance3D) or not (n as Node3D).is_visible_in_tree():
+			continue
+		var gi := n as GeometryInstance3D
+		var mesh: Mesh = null
+		var inst := 1
+		if gi is MeshInstance3D: mesh = (gi as MeshInstance3D).mesh
+		elif gi is MultiMeshInstance3D and (gi as MultiMeshInstance3D).multimesh:
+			mesh = (gi as MultiMeshInstance3D).multimesh.mesh
+			inst = (gi as MultiMeshInstance3D).multimesh.instance_count
+		elif gi is CPUParticles3D: mesh = (gi as CPUParticles3D).mesh; inst = (gi as CPUParticles3D).amount
+		if mesh == null:
+			continue
+		var ab := gi.global_transform * gi.get_aabb()
+		var inside := true
+		for pl in planes:
+			# the frustum's planes face out: the box is outside if even its corner furthest inward is over one
+			var nv := ab.position + Vector3(ab.size.x if pl.normal.x < 0.0 else 0.0, ab.size.y if pl.normal.y < 0.0 else 0.0, ab.size.z if pl.normal.z < 0.0 else 0.0)
+			if pl.distance_to(nv) > 0.0:
+				inside = false; break
+		if not inside:
+			continue
+		if gi.visibility_range_end > 0.0 and cpos.distance_to(ab.get_center()) > gi.visibility_range_end:
+			continue
+		var tris := 0
+		for si in mesh.get_surface_count():
+			var il := 0
+			if mesh is ArrayMesh: il = (mesh as ArrayMesh).surface_get_array_index_len(si)
+			tris += (il if il > 0 else ((mesh as ArrayMesh).surface_get_array_len(si) if mesh is ArrayMesh else 300)) / 3
+		var mat: Material = gi.material_override
+		var passes := mesh.get_surface_count() * (2 if mat and mat.next_pass else 1)
+		var nm := String(n.name)
+		var parts := nm.split("_")
+		if parts.size() >= 3 and parts[-1].is_valid_int() and parts[-2].is_valid_int(): nm = "_".join(parts.slice(0, -2))
+		nm = nm.rstrip("0123456789@")
+		if nm == "" or nm.begins_with("@"): nm = gi.get_class() + ":" + String(n.get_parent().name).rstrip("0123456789@")
+		var g: Array = groups.get(nm, [0, 0, 0, 0])
+		g[0] += 1; g[1] += passes; g[2] += tris * inst
+		if gi.cast_shadow != GeometryInstance3D.SHADOW_CASTING_SETTING_OFF: g[3] += 1
+		groups[nm] = g
+	var keys := groups.keys()
+	keys.sort_custom(func(a, b): return groups[a][1] > groups[b][1])
+	var tot := [0, 0, 0, 0]
+	for k in keys:
+		for i in 4: tot[i] += groups[k][i]
+	print("PROBE breakdown %s: %d nodes, %d draws, %dk tris, %d shadow casters (top groups: name nodes draws tris_k casters)" % [phase, tot[0], tot[1], tot[2] / 1000, tot[3]])
+	for k in keys.slice(0, 22):
+		var g: Array = groups[k]
+		print("PROBE   %-28s %5d %5d %7.1f %5d" % [k, g[0], g[1], g[2] / 1000.0, g[3]])
 
 func _spawn_fight() -> void:
 	var P: Hunter = m.player
@@ -163,7 +241,17 @@ func _print_phase(ph: String) -> void:
 	var fl: Array = frames.filter(func(f): return f["phase"] == ph)
 	if fl.is_empty(): return
 	var w := _stats(fl, "wall"); var pr := _stats(fl, "proc"); var dr := _stats(fl, "draws"); var pm := _stats(fl, "prims")
-	print("PROBE phase %s: %d frames, wall avg %.1f max %.1f ms, script %.2f ms, draws %.0f (max %.0f), prims %.0fk" % [ph, fl.size(), w[0], w[3], pr[0], dr[0], dr[3], pm[0] / 1000.0])
+	var si := _stats(fl, "sim"); var vi := _stats(fl, "vis"); var hd := _stats(fl, "hud")
+	print("PROBE phase %s draws by pass: 3D %.0f, shadows %.0f, canvas (HUD) %.0f" % [ph, _stats(fl, "d3d")[0], _stats(fl, "dsh")[0], _stats(fl, "dcv")[0]])
+	if ph in ["land", "fight"] and not Match.prof.is_empty():
+		var tot := 0
+		for k in Match.prof: tot += int(Match.prof[k])
+		var ks := Match.prof.keys()
+		ks.sort_custom(func(a, b): return Match.prof[a] > Match.prof[b])
+		var nsteps := maxi(1, fl.size())
+		print("PROBE step sections %s (ms per step): %s" % [ph, ", ".join(ks.map(func(k): return "%s %.2f" % [k, Match.prof[k] / 1000.0 / nsteps]))])
+	Match.prof.clear()
+	print("PROBE phase %s: %d frames, wall avg %.1f max %.1f ms, script %.2f ms (sim %.2f, visuals %.2f, hud draw %.2f), draws %.0f (max %.0f), prims %.0fk" % [ph, fl.size(), w[0], w[3], pr[0], si[0], vi[0], hd[0], dr[0], dr[3], pm[0] / 1000.0])
 
 func _finish() -> void:
 	_print_phase(phase)
@@ -194,9 +282,9 @@ func _finish() -> void:
 	# hitches: the slowest frames after loading, against the median of their phase
 	var after := frames.duplicate()
 	after.sort_custom(func(a, b): return a["wall"] > b["wall"])
-	lines.append("PROBE worst frames (wall ms, script ms, phase, sim t, build steps inside):")
+	lines.append("PROBE worst frames (wall ms, script ms, render cpu ms, phase, sim t, build steps inside):")
 	for f in after.slice(0, 8):
-		lines.append("PROBE   %7.1f %7.2f %-9s t=%5.1f %s" % [f["wall"], f.get("proc", 0.0), f["phase"], f.get("t", 0.0), ", ".join((f["marks"] as Array).map(func(mk): return "%s %.0f" % [mk[1], mk[2]]))])
+		lines.append("PROBE   %7.1f %7.2f %7.1f hud %5.1f %-9s t=%5.1f %s" % [f["wall"], f.get("proc", 0.0), f.get("rcpu", 0.0), f.get("hud", 0.0), f["phase"], f.get("t", 0.0), ", ".join((f["marks"] as Array).map(func(mk): return "%s %.0f" % [mk[1], mk[2]]))])
 	lines.append("PROBE memory: textures %.1f MB, buffers %.1f MB, video %.1f MB, static %.1f MB, objects %d, nodes %d" % [
 		Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED) / 1048576.0, Performance.get_monitor(Performance.RENDER_BUFFER_MEM_USED) / 1048576.0,
 		Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0, Performance.get_monitor(Performance.MEMORY_STATIC) / 1048576.0,
