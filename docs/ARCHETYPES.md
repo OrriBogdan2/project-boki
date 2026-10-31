@@ -753,3 +753,17 @@ front. Break the Banner (60 HP). Melee inside Bastion.
 - Readability references: [Riot, "Clarity in League"](https://riotgames.com/en/news/dev-clarity-in-league)
   (silhouette primary feature, clarity parity) and
   [80.lv Battlerite interview](https://80.lv/articles/battlerite-interiew) (read a character at a glance).
+
+## Owner decision (Oct 31): kin keep their own abilities
+
+Resolves the open question on kin E actives. Owner: "kins should have their own abilities as well,
+but it doesn't affect the players abilities, rather the typing and maybe some other stuff".
+
+- The archetype owns the player's kit (dash, passive, LMB/RMB, E, R). Kin never replace or restructure it.
+- A kin's **typing** (its theme/effect family) infuses the archetype's sockets: it changes the
+  *effect* riders on the player's abilities (burn, slow, chain, pull, shield...), within socket budgets.
+- Each kin keeps **its own active ability**, cast by the kin on the kin key (C), with its own cooldown:
+  e.g. Mycroll plants puffcap mines, Lunowl raises an updraft, Gravadillo slams, Prismander raises a prism wall.
+  These are the kin's current actives, kept (re-expressed in grammar parts), not archived.
+- Plus the kin's throw, owner bonus, carry mode (shoulder / perch / mount), companion utility
+  (ride, carry-flight, bounce/launch pads, throw-you, grapple, shield, scout) and the Bonded R merge.
