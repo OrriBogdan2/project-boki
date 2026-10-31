@@ -347,6 +347,9 @@ func _ready() -> void:
 		return
 	if "--boss-check" in args:
 		_boss_check()
+	if "--boss-ttk" in args:
+		_boss_ttk()
+		return
 	if "--drop-check" in args:
 		_drop_check()
 		return
@@ -2023,6 +2026,8 @@ func _boss_check() -> void:
 	walk.call(P, -outv, 0.4)
 	ok.call(F["state"] == "awake" and F.get("locked", false) and (F["sealed_in"] as Array).has(P) and gate_shut.call(F) and m.lairs.sealed_lair(P) == F,
 		"walk in: %s wakes and the gate seals behind you (locked %s, gate shut %s)" % [fb.md["name"], F.get("locked", false), gate_shut.call(F)])
+	ok.call(Lairs.LOCK_T == 90.0 and m.lairs.lock_left(F) > 88.5 and m.lairs.lock_left(F) <= 90.0 and float(fb.md["enrage"]) < Lairs.LOCK_T,
+		"the seal holds for at most %ds (%s left on the clock); %s enrages at %ds, inside it" % [int(Lairs.LOCK_T), Lairs.clock(m.lairs.lock_left(F)), fb.md["name"], int(fb.md["enrage"])])
 	var dome: Node3D = F["nodes"]["dome"]
 	run.call(0.6)
 	ok.call(dome.visible and float(F["gate_k"]) < 0.05 and ((F["nodes"]["gate"] as Node3D).get_node("Bars") as Node3D).visible, "the bars are back down and the ward glows over the walls")
@@ -2084,15 +2089,18 @@ func _boss_check() -> void:
 		var track := func(): if b.atk != "": atks[b.atk] = true
 		run.call(6.0, track)
 		if b.buried: b._clear_attack()      # (a burrowed Brood Mother can't be hit: bring her up for the scripted hits)
+		b.stagger_t = 0.0; b.stag_open = 0.0     # (nor staggered: a kin's ability can stagger it, and a staggered boss takes 2.5x)
 		b.hurt(b.max_hp * 0.36, P, {"src": "shot"})
 		run.call(0.1, track)
 		var p1 := b.phase
 		var hp_a := b.hp
 		if b.buried: b._clear_attack()
+		b.stagger_t = 0.0; b.stag_open = 0.0
 		b.hurt(100.0, P, {"src": "shot"})
 		var invul_ok := hp_a - b.hp < 30.0
 		run.call(8.0, track)
 		if b.buried: b._clear_attack()
+		b.stagger_t = 0.0; b.stag_open = 0.0
 		b.hurt(b.max_hp * 0.4, P, {"src": "shot"})
 		run.call(0.1, track)
 		var p2 := b.phase
@@ -2101,6 +2109,8 @@ func _boss_check() -> void:
 		run.call(0.2, track)
 		var enr := b.enraged
 		ok.call(p1 == 1 and p2 == 2 and invul_ok and enr, "%s: phase 2 at 66%%, phase 3 at 33%% (shrugs off hits while it roars), enraged after %ds" % [b.md["name"], int(b.md["enrage"])])
+		if not (p1 == 1 and p2 == 2 and invul_ok and enr):
+			print("BOSS  (phases %d %d, invul %s, enraged %s, hp %d/%d, dead %s, damage by team %s, feed %s)" % [p1, p2, invul_ok, enr, int(b.hp), int(b.max_hp), b.dead, str(b.damage_by), str(m.feed_all.slice(-8))])
 		ok.call(atks.size() >= 3, "%s used %d attacks: %s" % [b.md["name"], atks.size(), str(atks.keys())])
 		var w0 := m.wpicks.size()
 		spot.call(P, L["c"] + Vector3(L["out"].x, 0, L["out"].y) * 3.0)     # (a shove may have sent you out of the lair)
@@ -2111,9 +2121,21 @@ func _boss_check() -> void:
 		b.hurt(5.0, P, {"src": "shot"})
 		run.call(0.2)
 		var ew = L.get("egg_wp")
+		var egg_shown: bool = m.lairs.egg_pings.size() > 0
 		var egg_ok: bool = ew != null and m.wpicks.has(ew) and Loot.is_rare_egg(Pack.ground_item(ew)) and Data.is_rare(String(Pack.ground_item(ew)["sp"]))
 		var strong: bool = m.wpicks.slice(w0).any(func(wp): return not wp.has("val") and not wp.has("gear") and int(wp["rar"]) >= 3)
-		ok.call(not L.get("locked", false) and gate_free.call(L), "%s falls: the seal lifts and the gate opens" % b.md["name"])
+		var kill_t := m.time - 0.2
+		for a in L["adds"]: if is_instance_valid(a) and not a.dead: a.dead = true; a.visible = false     # (the brood scatters; here it'd only shove the test hunters about)
+		var lvn: Node3D = L["nodes"]["lever"]
+		var vent: Node3D = L["nodes"]["vent"]
+		ok.call(L.get("locked", false) and L.get("victory", false) and gate_shut.call(L) and L.get("up_on", false) and (lvn.get_node("Lit") as Node3D).visible and (vent.get_node("Air") as Node3D).visible
+			and m.lairs.victory_left(L) > Lairs.VICTORY_T - 0.5 and m.lairs.sealed_lair(P) == L,
+			"%s falls: the gate stays shut (opens in %s), the lever lit, the updraft blowing" % [b.md["name"], Lairs.clock(m.lairs.victory_left(L))])
+		# no walking out yet
+		spot.call(P, L["c"] + Vector3(L["out"].x, 0, L["out"].y) * (float(L["half"]) - 2.0))
+		walk.call(P, Vector2(L["out"].x, L["out"].y), 1.2)
+		ok.call(m.lairs.inside(L, P.pos, 0.0) and gate_shut.call(L), "after the kill: walking at the shut gate keeps you in")
+		spot.call(P, L["c"] + Vector3(L["out"].x, 0, L["out"].y) * 3.0)
 		# a small pile, all of it good, and the egg on its own spot a few steps away
 		var pile: Array = m.wpicks.slice(w0).filter(func(wp): return not wp.get("egg", false))
 		var usable: bool = pile.any(func(wp): return not wp.has("val") and not wp.has("gear") and Loot.usable(P, Pack.ground_item(wp)) and int(wp["rar"]) >= 3)
@@ -2123,14 +2145,87 @@ func _boss_check() -> void:
 			for wp in pile: apart = minf(apart, Vector2(wp["pos"].x - ew["pos"].x, wp["pos"].z - ew["pos"].z).length())
 		ok.call(pile.size() <= 4 and usable and good and apart >= 2.0 and m.lairs.inside(L, ew["pos"], 0.0),
 			"%s's loot: %d things, all good (%s), an Epic+ %s weapon, the egg %.1fm from the pile" % [b.md["name"], pile.size(), str(pile.map(func(wp): return "%s %d" % [Loot.name_of(Pack.ground_item(wp)), Loot.value(Pack.ground_item(wp))])), P.cls, apart])
+		var outL := Vector3(L["out"].x, 0, L["out"].y)
+		var vic: bool = L.get("victory", false)
+		if L == F:
+			# the lever: a press away from it does nothing; at it, the gate opens
+			P.inp["interact"] = true; run.call(Match.DT); P.inp["interact"] = false; run.call(Match.DT)
+			var held: bool = L.get("locked", false)
+			spot.call(P, L["lever"] - outL * 0.8)
+			var it: Dictionary = m.lairs.interact_for(P)
+			run.call(0.1)
+			P.inp["interact"] = true; run.call(Match.DT); P.inp["interact"] = false; run.call(0.3)
+			ok.call(vic and held and String(it.get("what", "")) == "lever" and String(it.get("label", "")) == "%s: Open the gate" % Settings.key_cap("interact")
+				and not L.get("locked", false) and gate_free.call(L) and not L.get("up_on", false) and String(L.get("opened_by_lever", "")) == P.pname,
+				"the lever: '%s'; pulled %.1fs after the kill, the gate opens and the updraft dies down" % [it.get("label", "?"), m.time - kill_t])
+		elif L == E:
+			# the updraft: anyone who wasn't sealed in gets no lift from it
+			var up: Vector3 = L["up"]
+			Q.ctrl = "local"
+			Q.teleport(up + Vector3(0, 6.0, 0)); Q.vel = Vector3.ZERO; Q.grounded = false
+			var qy0 := Q.pos.y
+			var qy := qy0
+			var tq2 := 0.0
+			while tq2 < 0.5:
+				m.step(Match.DT); tq2 += Match.DT; god.call()
+				qy = maxf(qy, Q.pos.y)
+			var refused: bool = not (L["flown"] as Array).has(Q) and qy <= qy0 + 0.05 and not Q.auto_glide
+			spot.call(Q, up)
+			run.call(0.2)
+			refused = refused and not (L["flown"] as Array).has(Q) and Q.pos.y < float(L["c"].y) + 1.0 and not m.lairs.inside(L, Q.pos, 0.0)
+			ok.call(refused, "the updraft refuses outsiders: no lift over it (%.2fm), shoved off and out (%.1fm from the middle)" % [qy - qy0, Q.flat_dist(L["c"])])
+			Q.ctrl = "idle"; park.call(Q)
+			# a hunter who fought rides it: up over the wall and away from the back, the gate still shut
+			spot.call(P, up)
+			var top := P.pos.y
+			var shut_when_out := false
+			var tf := 0.0
+			while tf < 12.0:
+				m.step(Match.DT); tf += Match.DT; god.call()
+				top = maxf(top, P.pos.y)
+				if not m.lairs.inside(L, P.pos, 0.3) and not shut_when_out: shut_when_out = gate_shut.call(L) and L.get("locked", false)
+				if P.grounded and not m.lairs.inside(L, P.pos, 0.5): break
+			var rel: Vector3 = P.pos - L["c"]
+			var back: float = -rel.dot(outL)
+			ok.call((L["flown"] as Array).has(P) and top > float(L["c"].y) + 6.0 and not m.lairs.inside(L, P.pos, 0.5) and shut_when_out and P.grounded and rel.dot(outL) < float(L["half"]) * 0.5 and not P.out and m.lairs.sealed_lair(P).is_empty(),
+				"the updraft: lifts you %.1fm over the floor, over the wall and away (%.1fm behind the lair's middle, landed %s) while the gate stays shut" % [top - float(L["c"].y), back, P.grounded])
+			# nobody pulls the lever: it opens by itself after VICTORY_T
+			var ta := m.time
+			while L.get("locked", false) and m.time - ta < Lairs.VICTORY_T + 2.0: run.call(Match.DT)
+			ok.call(not L.get("locked", false) and gate_free.call(L) and not L.get("up_on", false) and absf(m.time - kill_t - Lairs.VICTORY_T) < 0.25 and String(L.get("opened_by_lever", "?")) == "",
+				"nobody at the lever: the gate opens by itself %.1fs after the kill, the updraft dies down" % (m.time - kill_t))
+		else:
+			# a bot sealed in after the kill: the lever with nobody outside, the updraft with rivals at the gate
+			C.ai["egg_" + String(L["id"])] = false      # (this bot leaves the egg to you)
+			var g0: Array = m.lairs.bot_goal(C, false)
+			spot.call(Q, m.lairs.camp_spot(L, Q))
+			var g1: Array = m.lairs.bot_goal(C, false)
+			ok.call(not g0.is_empty() and String(g0[1]) == "lair_lever" and not g1.is_empty() and String(g1[1]) == "lair_updraft" and m.lairs.campers(L, C.team) >= 1,
+				"bots after the kill: no one at the gate, pull the lever (%s); rivals camping it, the updraft (%s)" % [str(g0.slice(1)), str(g1.slice(1))])
+			# and it does: walks into the updraft and glides out over the wall
+			L["victory_at"] = m.time      # (a fresh clock: this part is about the bot, not the timer)
+			C.ctrl = "bot"
+			var tb2 := 0.0
+			while tb2 < 11.0 and (m.lairs.inside(L, C.pos, 0.5) or not C.grounded):
+				m.step(Match.DT); tb2 += Match.DT; god.call()
+				Q.hp = Q.max_hp
+			ok.call((L["flown"] as Array).has(C) and not m.lairs.inside(L, C.pos, 0.5) and not C.out and L.get("locked", false),
+				"a bot rides the updraft out with rivals at the gate (%.1fs, %.1fm from the gate, the gate still shut)" % [tb2, C.flat_dist(L["gate_c"])])
+			C.ctrl = "idle"; C.inp["move"] = Vector2.ZERO
+			Q.ctrl = "idle"; park.call(Q)
+			spot.call(P, L["lever"] - outL * 0.8)
+			run.call(0.1)
+			P.inp["interact"] = true; run.call(Match.DT); P.inp["interact"] = false; run.call(0.3)
+			park.call(C)
 		# the way out is clear
+		if m.lairs.inside(L, P.pos, 0.0): spot.call(P, L["c"] + outL * 3.0)
 		var tw := 0.0
 		while m.lairs.inside(L, P.pos, 1.0) and tw < 8.0:
 			P.inp["move"] = Vector2(L["out"].x, L["out"].y) if absf(P.pos.x - L["gate_c"].x) + absf(P.pos.z - L["gate_c"].z) < 2.0 or m.lairs.inside(L, P.pos, -2.0) == false else Vector2(L["gate_c"].x - P.pos.x, L["gate_c"].z - P.pos.z).normalized()
 			god.call(); m.step(Match.DT); tw += Match.DT
 		P.inp["move"] = Vector2.ZERO
 		ok.call(not m.lairs.inside(L, P.pos, 1.0), "after the kill you walk out through the gate (%.1fs)" % tw)
-		ok.call(L["state"] == "cleared" and egg_ok and strong and P.xp > xp0 + 100.0 and m.lairs.egg_pings.size() > 0,
+		ok.call(L["state"] == "cleared" and egg_ok and strong and P.xp > xp0 + 100.0 and egg_shown,
 			"%s falls: a Rare %s on the ground (on everyone's map), an Epic+ weapon, +%d XP" % [b.md["name"], Data.egg_name(String(Pack.ground_item(ew)["sp"])) if ew != null else "?", int(P.xp - xp0)])
 		if ew != null: egg_items.append(ew)
 	# 6. the egg takes a pack slot: a full pack asks what to leave
@@ -2197,6 +2292,121 @@ func _boss_check() -> void:
 		m2.step(Match.DT)
 	ok.call(L2["state"] != "sealed", "a bot walked up and opened %s in %.0fs (%d misses)" % [L2["name"], m2.time - tb, int(L2["fails"])])
 	m2.queue_free()
+	# 10b. the fight is loud: everyone outside within ALERT_R hears it start (a roar, a ping with the
+	# boss's icon, a shaft of light over the lair, the seal's clock over the gate) and its boss fall;
+	# bots that hear it may camp the gate, the stronger squads more often; bots sealed in get out by
+	# the lever, or by the updraft when rivals wait at the gate
+	var m4 := Match.new()
+	add_child(m4)
+	m4.start({"teams": 3, "squad": 2, "tier": 0, "length": 1e9, "seed": 21, "no_drop": true})
+	m4.set_process(false)
+	var P4: Hunter = m4.player
+	for h in m4.hunters:
+		h.ctrl = "idle" if h != P4 else "local"
+		h.inp["move"] = Vector2.ZERO
+	var A: Dictionary = m4.lairs.list.filter(func(x): return x["boss"] == "colossus")[0]
+	m4.lairs.activate(A)
+	for g in A["guards"]: if is_instance_valid(g): g.dead = true; g.visible = false
+	m4.lairs.open(A, null, "dial")
+	var spot4 := func(h: Hunter, at: Vector3): h.teleport(Vector3(at.x, m4.world.ground_at(at.x, at.z), at.z)); h.vel = Vector3.ZERO
+	var run4 := func(sec: float):
+		var t := 0.0
+		while t < sec:
+			for h in m4.hunters:
+				if not h.out: h.hp = h.max_hp
+			m4.step(Match.DT); t += Match.DT
+	var teams4 := {}
+	for h in m4.hunters:
+		if h.team != P4.team: teams4[h.team] = teams4.get(h.team, []) + [h]
+	var tk: Array = teams4.keys()
+	var R1: Hunter = teams4[tk[0]][0]; var R2: Hunter = teams4[tk[0]][1]
+	var S1: Hunter = teams4[tk[1]][0]; var S2: Hunter = teams4[tk[1]][1]
+	var C4: Hunter = m4.hunters.filter(func(x): return x.team == P4.team and x != P4)[0]
+	var outA := Vector3(A["out"].x, 0, A["out"].y)
+	var sideA := Vector3(-A["out"].y, 0, A["out"].x)
+	# where everyone is when it starts: you and your mate by the gate, one rival a way off, one far away
+	spot4.call(P4, A["dial"] + outA * 4.0)
+	spot4.call(C4, A["dial"] + outA * 4.0 + sideA * 2.0)
+	var mid_at := Vector3.INF; var far_at := Vector3.INF
+	for i in 500:
+		var gp: Vector3 = m4.world.random_ground()
+		if m4.lairs.lair_of(gp, 2.0).size() > 0: continue
+		var gd := Vector2(gp.x - A["c"].x, gp.z - A["c"].z).length()
+		if gd > 50.0 and gd < 120.0 and mid_at == Vector3.INF: mid_at = gp
+		if far_at == Vector3.INF or gd > Vector2(far_at.x - A["c"].x, far_at.z - A["c"].z).length(): far_at = gp
+	spot4.call(S1, mid_at)
+	spot4.call(S2, far_at)
+	var far_real := S2.flat_dist(A["c"])
+	if far_real <= Lairs.ALERT_R:
+		S2.pos = A["c"] + (S2.pos - A["c"]).normalized() * (Lairs.ALERT_R + 10.0); S2.prev = S2.pos     # (the map isn't that big: put it out of earshot for the moment)
+	var pings4 := m4.pings.size()
+	var feed4 := m4.feed_all.size()
+	# a rival squad walks in and the fight starts
+	spot4.call(R1, A["c"] + outA * 1.5 + sideA * 1.5)
+	spot4.call(R2, A["c"] + outA * 1.5 - sideA * 1.5)
+	var tl4 := 0.0
+	while not A.get("locked", false) and tl4 < 1.0:
+		m4.step(Match.DT); tl4 += Match.DT
+	var s2_far := S2.flat_dist(A["c"])
+	spot4.call(S2, far_at)
+	var heard_f: Array = m4.lairs.alert_log.filter(func(e): return e["lair"] == A["id"] and e["kind"] == "fight").map(func(e): return e["nid"])
+	var lbl4: Label3D = A["nodes"]["label"]
+	var beam4: Node3D = A["nodes"]["beam"]
+	ok.call(A.get("locked", false) and (A["sealed_in"] as Array).has(R1) and (A["sealed_in"] as Array).has(R2) and not (A["sealed_in"] as Array).has(P4),
+		"a rival squad walks into %s: sealed in with %s, you outside" % [A["name"], A["boss_mob"].md["name"]])
+	ok.call(heard_f.has(P4.nid) and heard_f.has(C4.nid) and heard_f.has(S1.nid) and not heard_f.has(S2.nid) and not heard_f.has(R1.nid),
+		"the fight is heard by everyone outside within %dm (you, your mate, a rival %.0fm off) but not %.0fm away, nor by those inside" % [int(Lairs.ALERT_R), S1.flat_dist(A["c"]), s2_far])
+	var pinged: bool = m4.pings.slice(pings4).any(func(pg): return Vector2(pg["pos"].x - A["c"].x, pg["pos"].z - A["c"].z).length() < 1.0)
+	var fed: bool = m4.feed_all.slice(feed4).any(func(f): return String(f).contains("fight at %s" % A["name"]))
+	ok.call(pinged and fed and m4.lairs.alerted(A, P4) and beam4.visible and lbl4.text.contains("FIGHT") and lbl4.text.contains(Lairs.clock(m4.lairs.lock_left(A))),
+		"outside: a ping on the lair (boss icon on the map), '%s', the beam over the lair, the seal's clock over the gate ('%s')" % [String(A.get("alert_text", "")), lbl4.text.replace("\n", " / ")])
+	# bots outside that heard it: camp it, the stronger squads more often, never when leaving
+	S1.ctrl = "bot"
+	var odds_full: float = m4.lairs.camp_odds(S1)
+	S1.hp = S1.max_hp * 0.3; S2.hp = S2.max_hp * 0.3
+	var odds_hurt: float = m4.lairs.camp_odds(S1)
+	S1.hp = S1.max_hp; S2.hp = S2.max_hp
+	S1.ai["camp_" + String(A["id"])] = true
+	var cg: Array = m4.lairs.bot_goal(S1, false)
+	var cg_leave: Array = m4.lairs.bot_goal(S1, true)
+	S2.ai["camp_" + String(A["id"])] = true
+	var cg_deaf: Array = m4.lairs.bot_goal(S2, false)
+	ok.call(odds_full > odds_hurt and not cg.is_empty() and String(cg[1]) == "lair_camp" and not m4.lairs.inside(A, cg[0], 0.5) and (cg[0] as Vector3).distance_to(A["gate_c"]) < 9.0
+		and (cg_leave.is_empty() or String(cg_leave[1]) != "lair_camp") and (cg_deaf.is_empty() or String(cg_deaf[1]) != "lair_camp"),
+		"bots that heard it may camp the gate (odds %.2f with the squad up, %.2f hurt; %s); not when leaving, nor if they never heard it" % [odds_full, odds_hurt, str(cg.slice(1))])
+	S1.ctrl = "idle"
+	spot4.call(S1, cg[0])
+	# the boss falls: a different cry, the ping turns to "fallen", the gate's clock over the gate
+	var feed4b := m4.feed_all.size()
+	var bA: Boss = A["boss_mob"]
+	bA.hurt(bA.max_hp * 3.0, R1, {"src": "shot"})
+	run4.call(0.1)
+	for a in A["adds"]: if is_instance_valid(a) and not a.dead: a.dead = true; a.visible = false
+	var heard_v: Array = m4.lairs.alert_log.filter(func(e): return e["lair"] == A["id"] and e["kind"] == "fallen").map(func(e): return e["nid"])
+	ok.call(A.get("victory", false) and heard_v.has(P4.nid) and heard_v.has(S1.nid) and String(A.get("alert", "")) == "fallen" and m4.feed_all.slice(feed4b).any(func(f): return String(f).contains("has fallen"))
+		and lbl4.text.contains("has fallen") and lbl4.text.contains("gate opens") and beam4.visible,
+		"the boss falls: everyone near hears it ('%s'), the clock over the gate: '%s'" % [String(A.get("alert_text", "")), lbl4.text.replace("\n", " / ")])
+	# sealed-in bots: S1 waits at the gate, so R1 takes the updraft; with nobody there R2 takes the lever
+	spot4.call(P4, A["dial"] + outA * 30.0 if not m4.world.is_void((A["dial"] + outA * 30.0).x, (A["dial"] + outA * 30.0).z) else far_at)
+	spot4.call(C4, P4.pos + sideA * 1.5)
+	R1.ai["egg_" + String(A["id"])] = false; R2.ai["egg_" + String(A["id"])] = false     # (straight out: the egg is another test)
+	var gR1: Array = m4.lairs.bot_goal(R1, false)
+	R1.ctrl = "bot"
+	var tr1 := 0.0
+	while tr1 < 11.0 and (m4.lairs.inside(A, R1.pos, 0.5) or not R1.grounded):
+		run4.call(Match.DT); tr1 += Match.DT
+	var r1_out: bool = (A["flown"] as Array).has(R1) and not m4.lairs.inside(A, R1.pos, 0.5) and A.get("locked", false)
+	R1.ctrl = "idle"; R1.inp["move"] = Vector2.ZERO
+	spot4.call(S1, far_at)
+	A["victory_at"] = m4.time       # (a fresh clock for R2)
+	var gR2: Array = m4.lairs.bot_goal(R2, false)
+	R2.ctrl = "bot"
+	var tr2 := 0.0
+	while tr2 < 10.0 and A.get("locked", false):
+		run4.call(Match.DT); tr2 += Match.DT
+	ok.call(String(gR1[1]) == "lair_updraft" and r1_out and String(gR2[1]) == "lair_lever" and not A.get("locked", false) and String(A.get("opened_by_lever", "")) == R2.pname,
+		"bots sealed in: with a rival camping the gate one rides the updraft out (%.1fs); with nobody there the other pulls the lever (%.1fs)" % [tr1, tr2])
+	m4.queue_free()
 	# 11. a generated map rolls at least one live lair too
 	var m3 := Match.new()
 	add_child(m3)
@@ -2206,6 +2416,58 @@ func _boss_check() -> void:
 	ok.call(m3.lairs.list.size() >= 1 and live3 >= 1, "a generated map: %d lair(s), %d live (%s)" % [m3.lairs.list.size(), live3, str(m3.lairs.list.map(func(L): return L["boss"]))])
 	print("BOSSCHECK done, failures: %d" % bad[0])
 	get_tree().quit(1 if bad[0] > 0 else 0)
+## Balance probe for the 90 s seal: a squad of three bots (skill 0.6) walks into each boss's lair and
+## fights it for real; prints how long the kill takes (or that the seal would have failed).
+func _boss_ttk() -> void:
+	Save.no_write = true
+	Save.d = Save.fresh()
+	Econ.ensure()
+	var tiers := [0]
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--ttk-tier="): tiers = [int(a.substr(11))]
+	for tier in tiers:
+		for boss in ["colossus", "serpent", "brood"]:
+			for sd in [11, 12, 13]:
+				var m := Match.new()
+				add_child(m)
+				m.start({"teams": 2, "squad": 3, "tier": tier, "length": 1e9, "seed": sd, "no_drop": true, "autoplay": true})
+				m.set_process(false)
+				var L: Dictionary = {}
+				for x in m.lairs.list:
+					if String(x["boss"]) == boss: L = x
+				if L.is_empty():
+					m.queue_free(); continue
+				m.lairs.activate(L)
+				for g in L["guards"]: if is_instance_valid(g): g.dead = true; g.visible = false
+				m.lairs.open(L, null, "dial")
+				var P: Hunter = m.player
+				var squad: Array = m.hunters.filter(func(x): return x.team == P.team)
+				for h in m.hunters:
+					if h.team != P.team:
+						h.ctrl = "idle"
+						h.teleport(m.world.spawns[0] if not m.world.spawns.is_empty() else h.pos)
+				var outv := Vector3(L["out"].x, 0, L["out"].y)
+				var side := Vector3(-L["out"].y, 0, L["out"].x)
+				for i in squad.size():
+					var h: Hunter = squad[i]
+					h.ai["skill"] = 0.6
+					var at: Vector3 = L["c"] + outv * (float(L["half"]) - 2.0) + side * (i - 1) * 1.5
+					h.teleport(Vector3(at.x, m.world.ground_at(at.x, at.z), at.z))
+				var b: Boss = L["boss_mob"]
+				var t0 := m.time
+				var downs := 0
+				var was := {}
+				while m.time - t0 < 100.0 and not b.dead:
+					m.step(Match.DT)
+					for h in squad:
+						if h.downed and not was.get(h.nid, false): downs += 1
+						was[h.nid] = h.downed
+				var woke := float(L.get("lock_at", t0))
+				print("TTK tier %d %-9s seed %d: %s at %.1fs after the seal (hp %d/%d left, %d downs, state %s)" % [tier, boss, sd, "KILLED" if b.dead else "ALIVE", m.time - woke, int(b.hp), int(b.max_hp), downs, L["state"]])
+				m.queue_free()
+				await get_tree().process_frame
+	get_tree().quit()
+
 ## The drop: the planning phase, map pings, the squad following its leader in formation, passing the
 ## lead, separating, and the randomised spawns (different between seeds, rare kin only where rolled).
 func _drop_check() -> void:
