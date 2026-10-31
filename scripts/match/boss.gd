@@ -3,8 +3,8 @@ extends Mob
 ## A lair boss (see Lairs). Sleeps until someone walks into its opened lair, then fights everyone
 ## inside: rival squads, kin, whoever crashes in. Every attack is telegraphed on the ground first.
 ## Three phases (the second at 66% health, the third at 33%) each add or sharpen an attack, and after
-## its enrage timer it hits harder and faster. It never leaves its lair; if the lair empties it goes
-## back to sleep and heals.
+## its enrage timer (75 s, a quarter-minute before the 90 s seal fails) it hits harder and faster. It
+## never leaves its lair; if the lair empties it goes back to sleep and heals.
 ##
 ##   Stone Colossus  slams that send out shockwave rings (jump them), thrown boulders, ground fissures;
 ##                   rockfall on each phase change
@@ -205,7 +205,7 @@ func sim(dt: float) -> void:
 	var want := 0 if hp > max_hp * 0.66 else (1 if hp > max_hp * 0.33 else 2)
 	if want > phase:
 		_phase_up(want)
-	if not enraged and awake_t >= float(md.get("enrage", 150.0)):
+	if not enraged and awake_t >= float(md.get("enrage", 75.0)):
 		enraged = true
 		m.lairs.on_enrage(self)
 	# nobody left inside: back to sleep after a while
