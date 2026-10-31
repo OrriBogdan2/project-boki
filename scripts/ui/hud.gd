@@ -816,7 +816,7 @@ func _draw_exit_icon(pv: Vector2, x: Dictionary, k := 1.0) -> void:
 			c.draw_circle(pv, 2.2 * k, col)
 			if st == "charging":
 				_arc(pv, 9.0 * k, float(x["prog"]), col, 2.0)
-	if st in ["called", "boarding", "charging", "open"]:
+	if st in ["called", "boarding", "charging", "open", "unlocking"]:
 		var ph := fmod(m.time * 1.2, 1.0)
 		c.draw_arc(pv, (8.0 + ph * 8.0) * k, 0, TAU, 24, Color(col, 0.8 * (1.0 - ph)), 2.0, true)
 
@@ -843,7 +843,10 @@ func _draw_exit_labels() -> void:
 					"closed": line = "Closed"
 					_: line = "Call skiff" if m.exits.callable(x) else ("Opens %s" % _fmt(float(x["open_at"]) - m.time) if m.time < float(x["open_at"]) else "")
 			"hatch":
-				line = "Open" if st == "open" else ("Sealed  ·  you have a key" if p.rift_keys > 0 else "Sealed")
+				match st:
+					"unlocking": line = "OPENING  %ds" % int(ceil(float(x["t"])))
+					"open": line = "OPEN  ·  %d/%d left" % [int(x["uses"]), Exits.HATCH_USES]
+					_: line = "Sealed  ·  you have a key" if p.rift_keys > 0 else "Sealed  ·  needs a Rift Key"
 			"outpost":
 				match st:
 					"charging": line = "Uplink %d%%%s" % [int(x["prog"] * 100.0), "  ·  contested" if x["contested"] else ""]
@@ -851,16 +854,16 @@ func _draw_exit_labels() -> void:
 					"spent": line = "Cooling down"
 					_: line = "Start uplink" if m.exits.startable(x) else ("Online in %s" % _fmt(float(x["open_at"]) - m.time))
 		var reach := 26.0 if x["kind"] == "hatch" else 44.0
-		if st in ["boarding", "open"]: reach = 70.0
+		if st in ["boarding", "open", "unlocking"]: reach = 70.0
 		var prompted: bool = not m.interact.is_empty() and is_same(m.interact.get("x"), x)     # the prompt already says it
 		if d < reach and not cam.is_position_behind(at) and not prompted:
 			var lp := cam.unproject_position(at + Vector3(0, 3.4 if x["kind"] != "hatch" else 1.6, 0))
 			_ctext(lp, String(x["name"]), 13, col, big)
 			if line != "":
-				_ctext(lp + Vector2(0, 17), line, 12 if st not in ["boarding", "open"] else 16, INK if st not in ["boarding", "open"] else col, big)
+				_ctext(lp + Vector2(0, 17), line, 12 if st not in ["boarding", "open", "unlocking"] else 16, INK if st not in ["boarding", "open", "unlocking"] else col, big)
 		if is_same(x, mine) and d > 7.0 and not m.opts.get("tutorial", false):
 			var tgt: Vector3 = x.get("berth", at)
-			_draw_waypoint(tgt, "Skiff" if x["kind"] == "dock" else ("Lift" if st == "open" else "Uplink"), col)
+			_draw_waypoint(tgt, "Skiff" if x["kind"] == "dock" else ("Hatch" if x["kind"] == "hatch" else ("Lift" if st == "open" else "Uplink")), col)
 
 ## A small arrow on the minimap's edge pointing at something off the map.
 func _edge_arrow(inner: Rect2, from: Vector2, to: Vector2, col: Color) -> void:

@@ -4989,7 +4989,7 @@ func _tips() -> void:
 	if exits and not interact.is_empty() and interact["kind"] == "exit":
 		match String(interact["x"]["kind"]):
 			"dock": _tip("exit_dock", "Skiff docks: call the skiff at the horn beacon, survive the monsters it draws until it ties up, then stand on its deck before it leaves.")
-			"hatch": _tip("exit_hatch", "Rift hatches open instantly and quietly with a Rift Key. Keys are rare loot (vaults, bosses, elites) and drop in your deathbox if you go down.")
+			"hatch": _tip("exit_hatch", "Press %s at a rift hatch with a Rift Key: it opens 10s later, and three can drop through. Keys are rare loot (vaults, bosses, elites) and drop in your deathbox if you go down." % Settings.key_cap("interact"))
 			"outpost": _tip("exit_uplink", "Outposts: start the uplink and hold the yard while it charges. A rival standing in it stalls the charge. When it's done, step into the lift.")
 	if player.downed:
 		_tip("down", "You're down. Your kin will try to pick you up if it trusts you enough.")

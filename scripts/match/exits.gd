@@ -7,9 +7,10 @@ extends RefCounted
 ##    and the skiff arrives after about 45 s. It holds at the pier for a short boarding window and
 ##    leaves with whoever is standing on its deck: your squad, a rival who fought their way on, or a
 ##    downed hunter who crawled aboard. Docks close one by one late in the match (one never does).
-##  - Rift hatches (keyed, quiet). Sealed hatches all over the islands. A Rift Key (rare loot,
-##    carried, lost to your deathbox if you die) opens one instantly and silently any time; you drop
-##    straight through and it stays open a few seconds for anyone close enough to follow.
+##  - Rift hatches (keyed). Sealed hatches all over the islands. Walk up with a Rift Key (rare loot,
+##    carried, lost to your deathbox if you die) and press interact: the key is spent and the hatch
+##    starts grinding open, a 10 s countdown anyone close by can see and hear (a risky wait). Then it's
+##    open for anyone (your squad, or a rival) to drop through, three people in all, and it seals.
 ##  - Outpost uplinks (hold a mini base). A walled outpost with an uplink mast. Starting it brings
 ##    monsters; it charges while your squad holds the yard and stalls while a rival stands in it
 ##    (hold it alone long enough and it's theirs). When it's done, a lift of light opens in the
@@ -26,7 +27,8 @@ const DECK_R := 2.2           # stand this close to the berth to be aboard
 const APPROACH_T := 9.0       # the last seconds of the call: the skiff is in sight, coming in
 const HATCH_R := 1.5          # reach to open a hatch
 const HATCH_IN := 1.05        # step this close to an open hatch to drop in
-const HATCH_OPEN_T := 5.0
+const HATCH_UNLOCK_T := 10.0  # from the key turning to the hatch being open
+const HATCH_USES := 3         # people who can drop through an opened hatch before it seals
 const UPLINK_T := 40.0        # holding the yard to charge the uplink
 const TUT_UPLINK_T := 14.0
 const OUTPOST_R := 3.6        # the yard
@@ -143,7 +145,7 @@ func _add_hatch(d: Dictionary) -> void:
 	var n := ExitModels.hatch()
 	n.rotation.y = m.rng.randf() * TAU
 	_place(n, at)
-	list.append({"kind": "hatch", "pos": at, "node": n, "name": "Rift Hatch", "state": "sealed", "t": 0.0, "hold": {}})
+	list.append({"kind": "hatch", "pos": at, "node": n, "name": "Rift Hatch", "state": "sealed", "t": 0.0, "hold": {}, "uses": 0, "team": -1})
 
 func _add_outpost(d: Dictionary, tut: bool) -> void:
 	var p: Vector3 = d["pos"]
@@ -196,7 +198,7 @@ func _live(h: Hunter) -> bool:
 ## The exit this hunter's squad has going (called skiff, charging uplink, open lift), or {}.
 func active_for(team: int) -> Dictionary:
 	for x in list:
-		if int(x.get("team", -1)) == team and String(x["state"]) in ["called", "boarding", "charging", "open"]:
+		if int(x.get("team", -1)) == team and String(x["state"]) in ["called", "boarding", "charging", "open", "unlocking"]:
 			return x
 	return {}
 
@@ -235,12 +237,18 @@ func interact_for(h: Hunter) -> Dictionary:
 					"closed": best = {"label": "This dock has closed"}
 			"hatch":
 				var hp: Vector3 = x["pos"]
-				if h.flat_dist(hp) > HATCH_R or absf(h.pos.y - hp.y) > 1.2 or x["state"] != "sealed":
+				if h.flat_dist(hp) > HATCH_R or absf(h.pos.y - hp.y) > 1.2:
 					continue
-				if h.rift_keys > 0:
-					best = {"act": "open", "need": KEY_HOLD, "label": "Press %s to unlock the rift hatch and drop through  ·  uses a Rift Key (you have %d)" % [key, h.rift_keys]}
-				else:
-					best = {"label": "A sealed rift hatch  ·  needs a Rift Key (vaults, bosses, elite monsters, the market)"}
+				match String(x["state"]):
+					"sealed":
+						if h.rift_keys > 0:
+							best = {"act": "open", "need": KEY_HOLD, "label": "%s: Unlock with Rift Key  ·  opens in %ds, 3 can drop through (you have %d key%s)" % [key, int(HATCH_UNLOCK_T), h.rift_keys, "" if h.rift_keys == 1 else "s"]}
+						else:
+							best = {"label": "Needs a Rift Key  ·  vaults, bosses, elite monsters, the market"}
+					"unlocking":
+						best = {"label": "The hatch is opening  ·  %ds  ·  hold out" % int(ceil(float(x["t"])))}
+					"open":
+						best = {"act": "enter", "need": KEY_HOLD, "label": "%s: Drop through  ·  %d of %d left" % [key, int(x["uses"]), HATCH_USES]}
 			"outpost":
 				var cp: Vector3 = x["pos"]
 				if h.flat_dist(cp) > 1.9 or absf(h.pos.y - cp.y) > 1.5:
@@ -283,9 +291,13 @@ func act(x: Dictionary, what: String, h: Hunter, from_net := false) -> void:
 				return
 			_call(x, h)
 		"open":
-			if x["state"] != "sealed":
+			if x["state"] != "sealed" or h == null or h.rift_keys <= 0:
 				return
 			_open_hatch(x, h)
+		"enter":
+			if x["state"] != "open" or h == null:
+				return
+			_enter_hatch(x, h)
 		"start":
 			if x["state"] != "idle":
 				return
@@ -444,39 +456,75 @@ func _close_dock(x: Dictionary) -> void:
 		m.hud.toast_small("%s closed  ·  %d dock%s left" % [x["name"], open_n, "" if open_n == 1 else "s"], Color("ffcf8a"))
 
 # ------------------------------------------------------------------ rift hatches
+## The key turns: it's spent, and the hatch grinds open over HATCH_UNLOCK_T. No map ping, but anyone
+## near enough sees the countdown over it and hears it working.
 func _open_hatch(x: Dictionary, h: Hunter) -> void:
 	h.rift_keys = maxi(0, h.rift_keys - 1)
-	x["state"] = "open"
-	x["t"] = HATCH_OPEN_T
+	x["state"] = "unlocking"
+	x["t"] = HATCH_UNLOCK_T
+	x["team"] = h.team
+	x["by"] = h.pname
+	x["tick"] = 0
+	m.sfx("unlock", x["pos"], -2.0, 0.8)
+	m.fx.ring(x["pos"] + Vector3(0, 0.1, 0), 2.2, ExitModels.HATCH, 0.6)
+	m.fx.burst(x["pos"] + Vector3(0, 0.3, 0), ExitModels.HATCH, 12, 2.5, 0.5, -3.0)
+	if m.player and not m.player.out and m.hud and m.player.flat_dist(x["pos"]) < 30.0:
+		if h == m.player:
+			m.hud.toast("RIFT KEY TURNED  ·  THE HATCH OPENS IN %dS" % int(HATCH_UNLOCK_T), ExitModels.HATCH)
+		elif h.team != m.player.team:
+			m.hud.toast_small("%s is opening a rift hatch nearby" % h.pname, ExitModels.HATCH)
+
+func _set_hatch_open(x: Dictionary, open: bool) -> void:
 	var n: Node3D = x["node"]
 	var lid := n.get_node("Lid") as Node3D
 	var tw := m.create_tween()
-	tw.tween_property(lid, "position", Vector3(1.25, -0.05, 0.2), 0.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	n.get_node("Rift").visible = true
-	(n.get_node("Sparks") as CPUParticles3D).emitting = true
-	# quiet: only people close by hear it, and nobody gets a ping
-	m.sfx("unlock", x["pos"], -6.0, 0.8)
-	m.sfx("portal", x["pos"], -8.0, 0.7)
-	m.fx.burst(x["pos"] + Vector3(0, 0.3, 0), ExitModels.HATCH, 18, 3.0, 0.5, -3.0)
+	if open:
+		tw.tween_property(lid, "position", Vector3(1.25, -0.05, 0.2), 0.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	else:
+		tw.tween_property(lid, "position", Vector3.ZERO, 0.3)
+	n.get_node("Rift").visible = open
+	(n.get_node("Sparks") as CPUParticles3D).emitting = open
+
+## Someone drops through an open hatch: one of its uses. The last one seals it.
+func _enter_hatch(x: Dictionary, h: Hunter) -> void:
+	if x["state"] != "open" or int(x["uses"]) <= 0 or not _live(h):
+		return
+	x["uses"] = int(x["uses"]) - 1
+	m.fx.burst(x["pos"] + Vector3(0, 0.3, 0), ExitModels.HATCH, 14, 3.0, 0.5, -3.0)
 	if not h.remote:
 		m._extract(h, "hatch", x["name"])
+	if int(x["uses"]) <= 0:
+		x["state"] = "sealed"
+		x["team"] = -1
+		_set_hatch_open(x, false)
+		m.sfx("thump", x["pos"], -6.0, 1.2)
 
 func _tick_hatch(x: Dictionary, dt: float) -> void:
+	var p: Vector3 = x["pos"]
+	if x["state"] == "unlocking":
+		x["t"] = float(x["t"]) - dt
+		# a tick a second and a ring on the ground: loud enough for anyone close
+		var sec := int(ceil(float(x["t"])))
+		if sec != int(x.get("tick", 0)):
+			x["tick"] = sec
+			m.sfx("click", p, -2.0, 0.7 + 0.03 * (HATCH_UNLOCK_T - sec))
+			m.fx.ring(p + Vector3(0, 0.1, 0), 1.2 + 0.12 * (HATCH_UNLOCK_T - sec), ExitModels.HATCH, 0.5)
+		if float(x["t"]) <= 0.0:
+			x["state"] = "open"
+			x["uses"] = HATCH_USES
+			x["t"] = 0.0
+			_set_hatch_open(x, true)
+			m.sfx("portal", p, 0.0, 0.7)
+			m.fx.burst(p + Vector3(0, 0.3, 0), ExitModels.HATCH, 24, 3.5, 0.6, -3.0)
+		return
 	if x["state"] != "open":
 		return
-	x["t"] = float(x["t"]) - dt
-	var p: Vector3 = x["pos"]
+	# walking into it drops you through too
 	for h in m.hunters:
+		if x["state"] != "open":
+			break
 		if _live(h) and not h.remote and h.flat_dist(p) < HATCH_IN and absf(h.pos.y - p.y) < 1.2:
-			m._extract(h, "hatch", x["name"])
-	if float(x["t"]) <= 0.0:
-		x["state"] = "sealed"
-		var n: Node3D = x["node"]
-		var lid := n.get_node("Lid") as Node3D
-		m.create_tween().tween_property(lid, "position", Vector3.ZERO, 0.3)
-		n.get_node("Rift").visible = false
-		(n.get_node("Sparks") as CPUParticles3D).emitting = false
-		m.sfx("thump", p, -10.0, 1.2)
+			_enter_hatch(x, h)
 
 # ------------------------------------------------------------------ outposts
 func _start(x: Dictionary, h: Hunter) -> void:
@@ -725,6 +773,12 @@ func status_for(p: Hunter) -> Dictionary:
 					return {"text": "Aboard  ·  casting off in %ds" % int(ceil(x["t"])), "prog": 1.0 - float(x["t"]) / BOARD_T, "col": ExitModels.DOCK}
 				if x["state"] == "called" and int(x["team"]) == p.team and p.flat_dist(x["berth"]) < 16.0:
 					return {"text": "Skiff inbound  ·  %s" % _cap(x["t"]), "prog": 1.0 - float(x["t"]) / CALL_T, "col": ExitModels.DOCK}
+			"hatch":
+				if x["state"] == "unlocking" and p.flat_dist(x["pos"]) < 16.0:
+					var mine_h := int(x.get("team", -1)) == p.team
+					return {"text": ("Rift hatch opening  ·  %ds" if mine_h else "A rival's rift hatch opening  ·  %ds") % int(ceil(float(x["t"]))), "prog": 1.0 - float(x["t"]) / HATCH_UNLOCK_T, "col": ExitModels.HATCH}
+				if x["state"] == "open" and p.flat_dist(x["pos"]) < 12.0:
+					return {"text": "Rift hatch open  ·  drop through  ·  %d of %d left" % [int(x["uses"]), HATCH_USES], "prog": float(x["uses"]) / HATCH_USES, "col": ExitModels.HATCH}
 			"outpost":
 				if x["state"] == "charging" and in_yard(x, p):
 					var mine: bool = int(x["team"]) == p.team
@@ -751,6 +805,7 @@ func bot_goal(h: Hunter, leaving: bool) -> Array:
 		match String(mine["state"]):
 			"called", "boarding": return [mine["berth"], "board"]
 			"charging": return [mine["pos"] + Vector3(0.0, 0, 1.6), "yard"]
+			"unlocking": return [mine["pos"] + Vector3(1.6, 0, 0.0), "yard"]      # wait by the hatch, guarding it
 			"open": return [mine["pos"], "lift"]
 	var best := []; var bs := 1e9
 	for x in list:
@@ -770,8 +825,8 @@ func bot_goal(h: Hunter, leaving: bool) -> Array:
 			"hatch":
 				if x["state"] == "sealed" and h.rift_keys > 0 and leaving:
 					s = d * 0.6; if s < bs: bs = s; best = [x["pos"], "hatch"]
-				elif x["state"] == "open" and d < float(x["t"]) * 5.0:
-					s = d * 0.3; if s < bs: bs = s; best = [x["pos"], "hatch"]
+				elif x["state"] == "open" and int(x["uses"]) > 0 and d < 40.0 and leaving:
+					s = d * 0.3; if s < bs: bs = s; best = [x["pos"], "lift"]
 			"outpost":
 				if x["state"] == "open" and d < float(x["t"]) * 5.0:
 					s = d * 0.4; if s < bs: bs = s; best = [x["pos"], "lift"]
