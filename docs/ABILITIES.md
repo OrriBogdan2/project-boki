@@ -1,6 +1,6 @@
 # Kinfall abilities
 
-Every ability in an expedition, by slot. All of them are data: `content/abilities/*.json` (class dashes, weapon RMBs, kin abilities), `content/gloves/*.json` (Q gloves), `content/rules/dash_riders.json` (the kin element riders on Shift) and `content/ultimates/*.json` (R). They are built from the effect verbs in `scripts/combat/effects.gd` and the world verbs in `scripts/combat/verbs.gd` (walls, mirrors, tethers, traps, bridges, yanks, decoys), so a new ability is a new JSON file.
+Every ability in an expedition, by slot. All of them are data. Hunter abilities: `content/abilities/*.json` (class dashes, weapon RMBs) and `content/gloves/*.json` (Q gloves), built from the effect verbs in `scripts/combat/effects.gd` and the world verbs in `scripts/combat/verbs.gd` (walls, mirrors, tethers, traps, bridges, yanks, decoys). Kin abilities, dodge riders and merges (E, its auto active, the Shift rider and R) are the kin grammar: `content/kin_v2`, `content/abilities_v2`, `content/merges_v2`, run by `scripts/kin/kin_exec.gd` (see docs/KIN_GRAMMAR.md). A new ability is a new JSON file either way.
 
 This file is generated from the JSON by a script; the descriptions are the one-liners players see in the kit panel (K) and on hover.
 
@@ -9,9 +9,10 @@ This file is generated from the JSON by a script; the descriptions are the one-l
 Every run starts with abilities locked (see `Hunter.slot_lv`). A skill point unlocks a slot at rank 1 and further points raise it (RMB, Q, Shift, E: ranks 1-3; R: ranks 1-2). Per rank past the first:
 
 - damage +15% (`Effects.level_k`)
-- cooldown 10% shorter (RMB, Q, E via `AbilityRunner`/`Hunter.rank_cd_k`); Shift dashes recharge 15% faster
+- cooldown 10% shorter (RMB, Q via `AbilityRunner`/`Hunter.rank_cd_k`, E via `KinRunner`); Shift dashes recharge 15% faster
 - each verb grows the numbers that define it (`Effects.RANK_GROW`): walls +20% health, +15% time, +10% length; mirrors +20% time; tethers +15% time, +20% snap stun; traps +15% time and root; zones +15% time, +10% radius; fissures +10% length; shots +10% range and +15% stun/root/slow; pulls +15% strength; chains +1 hop per rank; yanks and swaps +25% stun; bridges +20% time; cloaks/decoys/reveals +20-25% time; shields and heals +15%; blinks +10% distance; blink-strike crit window +25%
-- the bond ultimate (R) at rank 2 lasts 30% longer and its cast effects hit 15% harder
+- kin abilities grow through the core rank table `KinRules.RANK_GROW` (never through data), clamped to each part's bounds
+- the merge (R) at rank 2 lasts 30% longer and its effects hit 15% harder
 - dash and charge distances never grow: dashes stay short
 
 An ability JSON can override any of these with `"per_level": {"key": flat amount per rank}`.
@@ -26,18 +27,18 @@ Each class has its own dodge verb. Grounded with a charge, Shift does the class 
 | Medium | **Combat Roll** (3.4m) | 1 / 9.0s | Medium: a quick roll that slips a third of a magazine in on the way. Roll through a hit as it lands for a perfect dodge: your next shots crit. |
 | Heavy | **Shoulder Charge** (3.1m) | 2 / 12.0s | Heavy: a short charge nothing can knock back (2 charges). Anyone you run into is bowled aside, and slammed into a wall they're stunned 1.2s. |
 
-### Kin element riders on every dash
+### Kin dodge riders
 
-The kin you brought adds a rider to every dash (`content/rules/dash_riders.json`).
+The kin you brought adds a rider to every class dodge (`dodge_rider` in `content/kin_v2/<id>.json`).
 
-| Element (kin) | Rider | What it does |
+| Kin | Rider | What it adds |
 |---|---|---|
-| venom (Vespyx) | **Venom Trail** | anything you dash through is poisoned and blighted (healing halved). |
-| spore (Mycroll) | **Spore Puff** | you leave a spore puff where you started that slows and stings foes for 2s. |
-| echo (Echolop) | **Echo Step** | a beat after the dash, it echoes: a second, shorter dash the same way. |
-| gravity (Gravadillo) | **Gravity Wake** | where you stop, gravity tugs every foe within 3m a step toward you. |
-| lunar (Lunowl) | **Moon Blink** | on the ground you don't travel, you blink: there in an instant, through anything in the way. |
-| prism (Prismander) | **Prism Decoy** | you leave a crystal copy of yourself behind for 1.8s that draws bots' fire. |
+| Mycroll | **Spore Puff** | where you start: zone 1.5m: 2 damage, slow |
+| Vespyx | **Venom Trail** | what you pass through: 3 damage, 12 damage over 3s, blight 3s |
+| Gravadillo | **Gravity Wake** | where you stop: burst 3.5m: pull |
+| Prismander | **Prism Decoy** | where you start: burst 0m: decoy |
+| Lunowl | **Moon Blink** | the dodge is an instant blink |
+| Echolop | **Echo Step** | a second, shorter dodge a beat later |
 
 ## RMB: weapon signature abilities
 
@@ -81,57 +82,78 @@ Gloves drop in runs. Rarer gloves keep the same verb with bigger numbers: damage
 
 Passive gloves (no Q, stats only): **Glider Glove** (Glide 20% faster and longer.); **Swift Glove** (10% faster on foot.); **Focus Glove** (Abilities recharge 18% faster.); **Cooling Glove** (Your glider holds 45% more heat.); **Power Glove** (12% more damage.); **Plated Glove** (25 more armor.)
 
-## E, the kin's own ability, and R, the bond ultimate
+## E, the kin's own ability, and R, the merge
 
-Each kin has one E verb fitting its element, a second ability it uses by itself, a throw (C) status, a dash rider and an ultimate. The E ability is cast from the shoulder or by the kin where it stands, aimed at the cursor.
+Each kin has one E ability (`active`), an auto active it uses by itself (`auto`), a throw (C), a dodge rider and a merge (R, unlocked at run level 6 with a full bond meter). Its abilities are built from grammar parts; the lines below are the creators' flavour text. In a match the HUD and hover panels read the parts themselves (`KinText`). E is cast from your shoulder (you perform it) or by the kin where it stands, aimed at the cursor.
 
-### Vespyx (venom)
-
-- **E: Stinger Hook** (hook, 8s): Vespyx lashes its tail 8m: the first foe it stings is dragged back to it, poisoned, blighted (healing halved) and stunned 0.3s.
-- **Auto: Stinger Dash** (rush, 9s): On its own, Vespyx lunges 7m tail first, poisoning everything it passes through.
-- **Throw (C)**: stuns what it hits and applies burn 5.
-- **Shift rider: Venom Trail**: anything you dash through is poisoned and blighted (healing halved).
-- **R: Venom Mantle** (armor, 7s): Vespyx fuses onto you as venomous armor for 7s: 30% more damage, and your shots poison and burst.
-
-### Prismander (prism)
-
-- **E: Prism Wall** (reflect wall, 10s): Prismander raises a 4m crystal wall at the spot: enemy shots that hit it bounce back at them. Lasts 4.5s or 140 damage.
-- **Auto: Refraction** (reflect, 12s): When you're hurt, Prismander wraps you in a 1s mirror shell: shots that reach you fly back at the shooter, and you get a 20 shield.
-- **Throw (C)**: stuns what it hits and applies slow 1.5.
-- **Shift rider: Prism Decoy**: you leave a crystal copy of yourself behind for 1.8s that draws bots' fire.
-- **R: Prism Shell** (armor, 7s): Prismander wraps around you as a shell of living crystal for 7s: an 80 point shield, steady healing, and shots that slow.
-
-### Mycroll (spore)
+### Mycroll (Hedgehog + Toadstool, shoulder)
 
 - **E: Puffcap Mines** (trap, 10s): Mycroll plants three puffcaps in a triangle. Step on one and it bursts: rooted 1.4s inside a lingering spore cloud.
 - **Auto: Spore Patch** (zone, 11s): On its own, when foes bunch up, Mycroll puffs a 4s spore cloud on them: slowed and taking damage while inside.
-- **Throw (C)**: stuns what it hits and applies root 0.9.
-- **Shift rider: Spore Puff**: you leave a spore puff where you started that slows and stings foes for 2s.
-- **R: Sporewake** (giant, 8s): Mycroll grows into a giant toadstool beast for 8s. Its stomps root everything around it.
+- **Throw (C)**: stuns what it hits; also root.
+- **Shift rider: Spore Puff**
+- **R: Sporewake** (8s): Mycroll grows into a giant toadstool beast for 8s. Its stomps root everything around it.
 
-### Echolop (echo)
+### Cairnback (Tortoise + Ibex, mount)
 
-- **E: Echo Chain** (bounce + echo, 7s): A sound pulse leaps between up to 3 foes, stunning each 0.4s, then echoes 0.9s later and does it all again at half strength.
-- **Auto: Echolocate** (reveal, 14s): On its own in a fight, Echolop pings: every rival within 18m is revealed through grass and walls for 3s, and your next shots for 1.5s crit.
-- **Throw (C)**: stuns what it hits and applies stun 0.9.
-- **Shift rider: Echo Step**: a beat after the dash, it echoes: a second, shorter dash the same way.
-- **R: Resonance** (armor, 6s): Echolop hums over you for 6s: 30% faster, every dash back, and each shot echoes to a second foe.
+- **E: Boulder Heave** (projectile, 9s): Cairnback heaves a rune-lit boulder 8m. Where it lands everyone within 2.6m is thrown up and stunned; anyone already airborne is spiked.
+- **Auto: Mass Guard** (wall, 12s): When you're under fire, Gravadillo curls into a heavy plate in front of you for 3s that stops enemy shots (120 HP).
+- **Throw (C)**: stuns what it hits; also push.
+- **R: Cairn Colossus** (8s): Cairnback rises into a rune-carved colossus under you for 8s: towering armor, and every stomp quakes the ground and stuns.
 
-### Gravadillo (gravity)
+### Vespyx (Fox + Scorpion, shoulder)
 
-- **E: Gravity Slam** (leap slam, 9s): Gravadillo drops onto the spot like a meteor: everything within 3.5m is sucked into the crater and flung up; anyone already airborne is spiked.
-- **Auto: Mass Guard** (shield wall, 12s): When you're under fire, Gravadillo curls into a heavy plate in front of you for 3s that stops enemy shots (120 HP).
-- **Throw (C)**: stuns what it hits and applies kb 7.
-- **Shift rider: Gravity Wake**: where you stop, gravity tugs every foe within 3m a step toward you.
-- **R: Heavy Star** (giant, 8s): Gravadillo collapses into a towering heavy star for 8s. Huge health, and every stomp launches foes away.
+- **E: Stinger Hook** (projectile, 8s): Vespyx lashes its tail 8m: the first foe it stings is dragged back to it, poisoned, blighted (healing halved) and stunned 0.3s.
+- **Auto: Stinger Dash** (dash, 9s): On its own, Vespyx lunges 7m tail first, poisoning everything it passes through.
+- **Throw (C)**: stuns what it hits; also 15 damage over 3s.
+- **Shift rider: Venom Trail**
+- **R: Venom Mantle** (7s): Vespyx fuses onto you as venomous armor for 7s: 30% more damage, and your shots poison and burst.
 
-### Lunowl (lunar)
+### Hivara (Honeybee + Praying mantis, shoulder)
 
-- **E: Moon Swap** (swap, 10s): Lunowl throws a moon mark 9m. The first foe it touches trades places with YOU (stunned 0.4s): pull a rival off a ledge, or step behind them.
-- **Auto: Moonlift** (rescue, 14s): On its own, when you fall into the abyss, Lunowl throws up a column of moonlight that lifts you high and cools your glider.
-- **Throw (C)**: stuns what it hits and applies kb 8.
-- **Shift rider: Moon Blink**: on the ground you don't travel, you blink: there in an instant, through anything in the way.
-- **R: Eclipse** (giant, 7s): Lunowl swells into a living eclipse for 7s that drags foes in and flings them skyward.
+- **E: Hive Swarm** (cone, 9s): Hivara looses a buzzing swarm in a 5m cone: stung, poisoned and slowed. The swarm then hangs over the spot for 3s, stinging anyone inside.
+- **Auto: Spore Patch** (zone, 11s): On its own, when foes bunch up, Mycroll puffs a 4s spore cloud on them: slowed and taking damage while inside.
+- **Throw (C)**: stuns what it hits; also slow.
+- **R: Hive Crown** (7s): Hivara crowns you with its hive for 7s: 30% more damage, and every shot stings, poisons and slows.
+
+### Gravadillo (Armadillo + Rhino beetle, mount)
+
+- **E: Gravity Slam** (leap, 9s): Gravadillo drops onto the spot like a meteor: everything within 3.5m is sucked into the crater and flung up; anyone already airborne is spiked.
+- **Auto: Mass Guard** (wall, 12s): When you're under fire, Gravadillo curls into a heavy plate in front of you for 3s that stops enemy shots (120 HP).
+- **Throw (C)**: stuns what it hits; also push.
+- **Shift rider: Gravity Wake**
+- **R: Heavy Star** (8s): Gravadillo collapses into a towering heavy star for 8s. Huge health, and every stomp launches foes away.
+
+### Prismander (Axolotl, shoulder)
+
+- **E: Prism Wall** (wall, 10s): Prismander raises a 4m crystal wall at the spot: enemy shots that hit it bounce back at them. Lasts 4.5s or 140 damage.
+- **Auto: Refraction** (burst, 12s): When you're hurt, Prismander wraps you in a 1s mirror shell: shots that reach you fly back at the shooter, and you get a 20 shield.
+- **Throw (C)**: stuns what it hits; also slow.
+- **Shift rider: Prism Decoy**
+- **R: Prism Shell** (7s): Prismander wraps around you as a shell of living crystal for 7s: an 80 point shield, steady healing, and shots that slow.
+
+### Lunowl (Owl + Luna moth, perch)
+
+- **E: Moon Swap** (projectile, 10s): Lunowl throws a moon mark 9m. The first foe it touches trades places with YOU (stunned 0.4s): pull a rival off a ledge, or step behind them.
+- **Auto: Moonlift** (burst, 14s): On its own, when you fall into the abyss, Lunowl throws up a column of moonlight that lifts you high and cools your glider.
+- **Throw (C)**: stuns what it hits; also push.
+- **Shift rider: Moon Blink**
+- **R: Eclipse** (7s): Lunowl swells into a living eclipse for 7s that drags foes in and flings them skyward.
+
+### Echolop (Hare + Bat, shoulder)
+
+- **E: Echo Chain** (beam, 7s): A sound pulse leaps between up to 3 foes, stunning each 0.4s, then echoes 0.9s later and does it all again at half strength.
+- **Auto: Echolocate** (burst, 14s): On its own in a fight, Echolop pings: every rival within 18m is revealed through grass and walls for 3s, and your next shots for 1.5s crit.
+- **Throw (C)**: stuns what it hits; also stun.
+- **Shift rider: Echo Step**
+- **R: Resonance** (6s): Echolop hums over you for 6s: 30% faster, every dash back, and each shot echoes to a second foe.
+
+### Zephyrak (Moray eel + Swift, shoulder)
+
+- **E: Gale Lance** (dash, 8s): Zephyrak spears 8m through the air, shocking everything it passes, then bursts in a ring of wind that throws foes back and arcs lightning to two more.
+- **Auto: Storm Arc** (beam, 10s): On its own, Zephyrak crackles a bolt at the nearest foe that jumps to two more.
+- **Throw (C)**: stuns what it hits; also stun.
+- **R: Stormwing** (7s): Zephyrak coils round you as living storm for 7s: 35% faster, every dodge back, and each shot arcs to a second foe.
 
 ## Element variants of shared verbs
 
@@ -146,9 +168,9 @@ Several verbs appear in more than one element, tuned to fit it:
 
 ## Readability
 
-- Holding RMB, Q, E or R shows the cast's shape before you let go: a lane for shots and rushes (with a tick at the far end), a range ring plus landing circle for lobs and leaps, the wall's footprint across your aim, a cone, or a ring round you (`Match._update_indicators`, shape from `AbilityDef.aim_spec`).
+- Holding RMB, Q, E or R shows the cast's shape before you let go: a lane for shots and rushes (with a tick at the far end), a range ring plus landing circle for lobs and leaps, the wall's footprint across your aim, a cone, or a ring round you (`Match._update_indicators`, shape from `AbilityDef.aim_spec` and, for kin, `KinText.aim`).
 - Enemy area casts get a 0.32s filling ground marker before they land; leaps show their landing circle to everyone; fissures show their lane filling.
-- Each verb has its own shape in the world (wall slabs, a mirror shell, a rope for tethers, a disc, a hook, an orb, trap pads, ice tiles, ghost decoys) in its element colour, plus HOOKED / SPIKED / PARRIED / SNAP / TRAP words when they go off.
+- Each verb has its own shape in the world (wall slabs, a mirror shell, a rope for tethers, a disc, a hook, an orb, trap pads, ice tiles, ghost decoys) in its colour (kin abilities: effect category colour, `KinRules.CAT_COLORS`), plus HOOKED / SPIKED / PARRIED / SNAP / TRAP words when they go off.
 
 ## Bots
 

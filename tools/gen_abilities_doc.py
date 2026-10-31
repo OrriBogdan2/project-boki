@@ -5,14 +5,15 @@ def ab(i): return j(f"content/abilities/{i}.json")
 out = []
 w = out.append
 w("# Kinfall abilities\n")
-w("Every ability in an expedition, by slot. All of them are data: `content/abilities/*.json` (class dashes, weapon RMBs, kin abilities), `content/gloves/*.json` (Q gloves), `content/rules/dash_riders.json` (the kin element riders on Shift) and `content/ultimates/*.json` (R). They are built from the effect verbs in `scripts/combat/effects.gd` and the world verbs in `scripts/combat/verbs.gd` (walls, mirrors, tethers, traps, bridges, yanks, decoys), so a new ability is a new JSON file.\n")
+w("Every ability in an expedition, by slot. All of them are data. Hunter abilities: `content/abilities/*.json` (class dashes, weapon RMBs) and `content/gloves/*.json` (Q gloves), built from the effect verbs in `scripts/combat/effects.gd` and the world verbs in `scripts/combat/verbs.gd` (walls, mirrors, tethers, traps, bridges, yanks, decoys). Kin abilities, dodge riders and merges (E, its auto active, the Shift rider and R) are the kin grammar: `content/kin_v2`, `content/abilities_v2`, `content/merges_v2`, run by `scripts/kin/kin_exec.gd` (see docs/KIN_GRAMMAR.md). A new ability is a new JSON file either way.\n")
 w("This file is generated from the JSON by a script; the descriptions are the one-liners players see in the kit panel (K) and on hover.\n")
 w("## Ranks\n")
 w("Every run starts with abilities locked (see `Hunter.slot_lv`). A skill point unlocks a slot at rank 1 and further points raise it (RMB, Q, Shift, E: ranks 1-3; R: ranks 1-2). Per rank past the first:\n")
 w("- damage +15% (`Effects.level_k`)")
-w("- cooldown 10% shorter (RMB, Q, E via `AbilityRunner`/`Hunter.rank_cd_k`); Shift dashes recharge 15% faster")
+w("- cooldown 10% shorter (RMB, Q via `AbilityRunner`/`Hunter.rank_cd_k`, E via `KinRunner`); Shift dashes recharge 15% faster")
 w("- each verb grows the numbers that define it (`Effects.RANK_GROW`): walls +20% health, +15% time, +10% length; mirrors +20% time; tethers +15% time, +20% snap stun; traps +15% time and root; zones +15% time, +10% radius; fissures +10% length; shots +10% range and +15% stun/root/slow; pulls +15% strength; chains +1 hop per rank; yanks and swaps +25% stun; bridges +20% time; cloaks/decoys/reveals +20-25% time; shields and heals +15%; blinks +10% distance; blink-strike crit window +25%")
-w("- the bond ultimate (R) at rank 2 lasts 30% longer and its cast effects hit 15% harder")
+w("- kin abilities grow through the core rank table `KinRules.RANK_GROW` (never through data), clamped to each part's bounds")
+w("- the merge (R) at rank 2 lasts 30% longer and its effects hit 15% harder")
 w("- dash and charge distances never grow: dashes stay short\n")
 w("An ability JSON can override any of these with `\"per_level\": {\"key\": flat amount per rank}`.\n")
 w("## Shift: class dashes\n")
@@ -22,15 +23,35 @@ for c in ["light", "medium", "heavy"]:
     a = ab(j(f"content/classes/{c}.json")["dodge"])
     e = a["effects"][0]
     w(f"| {c.capitalize()} | **{a['name']}** ({e['speed']*e['time']:.1f}m) | {a.get('charges',1)} / {a['cooldown']}s | {a['desc']} |")
-w("\n### Kin element riders on every dash\n")
-w("The kin you brought adds a rider to every dash (`content/rules/dash_riders.json`).\n")
-w("| Element (kin) | Rider | What it does |\n|---|---|---|")
-dr = j("content/rules/dash_riders.json")
-kin = {}
-for f in sorted(os.listdir(os.path.join(R, "content/kin"))):
-    k = j("content/kin/" + f); kin[k["type"]] = k
-for el, d in dr.items():
-    w(f"| {el} ({kin.get(el,{}).get('name','?')}) | **{d['name']}** | {d['desc'].split(': ',1)[-1]} |")
+w("\n### Kin dodge riders\n")
+w("The kin you brought adds a rider to every class dodge (`dodge_rider` in `content/kin_v2/<id>.json`).\n")
+w("| Kin | Rider | What it adds |\n|---|---|---|")
+KV = {}
+for f in sorted(os.listdir(os.path.join(R, "content/kin_v2"))):
+    k = j("content/kin_v2/" + f); KV[k["id"]] = k
+def parts(effs):
+    out = []
+    for e in effs:
+        t = e["type"]
+        if t == "damage": out.append(("%s damage over %ss" % (e["amount"], e.get("over", 3))) if e.get("preset") == "poison" or e.get("over") else "%s damage" % e["amount"])
+        elif t == "mark": out.append("%s %ss" % (e.get("mode", e.get("preset", "mark")), e.get("duration", 3)))
+        elif t == "signature": out.append(e["id"])
+        else: out.append(t)
+    return ", ".join(out)
+def stage(st):
+    d = st["delivery"]
+    t = d["type"] + (" %sm" % d["radius"] if "radius" in d else "")
+    return t + ((": " + parts(st.get("effects", []))) if st.get("effects") else "")
+for kid, k in KV.items():
+    rd = k.get("dodge_rider")
+    if not rd: continue
+    bits = []
+    if rd.get("as") == "blink": bits.append("the dodge is an instant blink")
+    if rd.get("on_pass"): bits.append("what you pass through: " + parts(rd["on_pass"]))
+    for st in rd.get("on_start", []): bits.append("where you start: " + stage(st))
+    for st in rd.get("on_end", []): bits.append("where you stop: " + stage(st))
+    for md in rd.get("modifiers", []): bits.append("a second, shorter dodge a beat later")
+    w(f"| {k['name']} | **{rd['name']}** | {'; '.join(bits)} |")
 w("\n## RMB: weapon signature abilities\n")
 w("Right click is your weapon's own verb. Hold RMB to see its telegraph (lane, landing circle, wall footprint or arc); release to cast. Rail Charge charges while held instead.\n")
 w("| Weapon | Class | Ability | Verb | Cooldown | What it does |\n|---|---|---|---|---|---|")
@@ -49,19 +70,18 @@ for f in sorted(os.listdir(os.path.join(R, "content/gloves"))):
     else:
         pas.append(g)
 w("\nPassive gloves (no Q, stats only): " + "; ".join(f"**{g['name']}** ({g['desc']})" for g in pas) + "\n")
-w("## E, the kin's own ability, and R, the bond ultimate\n")
-w("Each kin has one E verb fitting its element, a second ability it uses by itself, a throw (C) status, a dash rider and an ultimate. The E ability is cast from the shoulder or by the kin where it stands, aimed at the cursor.\n")
-for el in ["venom", "prism", "spore", "echo", "gravity", "lunar"]:
-    k = kin[el]
-    w(f"### {k['name']} ({el})\n")
-    e1 = ab(k["abilities"][0]); e2 = ab(k["abilities"][1]) if len(k["abilities"]) > 1 else None
-    u = j(f"content/ultimates/{k['ultimate']}.json")
-    w(f"- **E: {e1['name']}** ({e1.get('verb','')}, {e1['cooldown']}s): {e1['desc']}")
-    if e2: w(f"- **Auto: {e2['name']}** ({e2.get('verb','')}, {e2['cooldown']}s): {e2['desc']}")
-    th = ", ".join(f"{a} {b}" for a, b in k.get("throw_hit", {}).items())
-    w(f"- **Throw (C)**: stuns what it hits and applies {th}.")
-    w(f"- **Shift rider: {dr[el]['name']}**: {dr[el]['desc'].split(': ',1)[-1]}")
-    w(f"- **R: {u['name']}** ({u.get('form','')}, {u.get('time','')}s): {u['desc']}\n")
+w("## E, the kin's own ability, and R, the merge\n")
+w("Each kin has one E ability (`active`), an auto active it uses by itself (`auto`), a throw (C), a dodge rider and a merge (R, unlocked at run level 6 with a full bond meter). Its abilities are built from grammar parts; the lines below are the creators' flavour text. In a match the HUD and hover panels read the parts themselves (`KinText`). E is cast from your shoulder (you perform it) or by the kin where it stands, aimed at the cursor.\n")
+def a2(i): return j(f"content/abilities_v2/{i}.json")
+for kid, k in KV.items():
+    w(f"### {k['name']} ({' + '.join(k['animals'])}, {k['carry']['style']})\n")
+    e1 = a2(k["active"]); e2 = a2(k["auto"]) if k.get("auto") else None
+    u = j(f"content/merges_v2/{k['merge']}.json")
+    w(f"- **E: {e1['name']}** ({e1['stages'][0]['delivery']['type']}, {e1.get('cooldown', 8)}s): {e1.get('flavor', '')}")
+    if e2: w(f"- **Auto: {e2['name']}** ({e2['stages'][0]['delivery']['type']}, {e2.get('cooldown', 8)}s): {e2.get('flavor', '')}")
+    if k.get("throw"): w(f"- **Throw (C)**: stuns what it hits; also {parts(k['throw']['effects'])}.")
+    if k.get("dodge_rider"): w(f"- **Shift rider: {k['dodge_rider']['name']}**")
+    w(f"- **R: {u['name']}** ({u['duration']}s): {u.get('flavor', '')}\n")
 w("## Element variants of shared verbs\n")
 w("Several verbs appear in more than one element, tuned to fit it:\n")
 w("- **Hook / yank**: Hook Glove (neutral, drags to your feet or zips you to terrain), Stinger Hook (venom: poisons and blights), Leash Bolt (tether that snaps back).")
@@ -71,9 +91,9 @@ w("- **Slam / knock-up**: Earthshatter (hunter leap), Gravity Slam (kin meteor t
 w("- **Blink**: Blink Glove (blink-strike), Shadow Step (appear behind who your knife hits), Moon Swap (lunar: trade places), Lunar dash rider.")
 w("- **Trap / zone**: Tripwire Mine (root + reveal), Puffcap Mines (spore triangle), Spore Patch (spore cloud), Spore dash rider.\n")
 w("## Readability\n")
-w("- Holding RMB, Q, E or R shows the cast's shape before you let go: a lane for shots and rushes (with a tick at the far end), a range ring plus landing circle for lobs and leaps, the wall's footprint across your aim, a cone, or a ring round you (`Match._update_indicators`, shape from `AbilityDef.aim_spec`).")
+w("- Holding RMB, Q, E or R shows the cast's shape before you let go: a lane for shots and rushes (with a tick at the far end), a range ring plus landing circle for lobs and leaps, the wall's footprint across your aim, a cone, or a ring round you (`Match._update_indicators`, shape from `AbilityDef.aim_spec` and, for kin, `KinText.aim`).")
 w("- Enemy area casts get a 0.32s filling ground marker before they land; leaps show their landing circle to everyone; fissures show their lane filling.")
-w("- Each verb has its own shape in the world (wall slabs, a mirror shell, a rope for tethers, a disc, a hook, an orb, trap pads, ice tiles, ghost decoys) in its element colour, plus HOOKED / SPIKED / PARRIED / SNAP / TRAP words when they go off.\n")
+w("- Each verb has its own shape in the world (wall slabs, a mirror shell, a rope for tethers, a disc, a hook, an orb, trap pads, ice tiles, ghost decoys) in its colour (kin abilities: effect category colour, `KinRules.CAT_COLORS`), plus HOOKED / SPIKED / PARRIED / SNAP / TRAP words when they go off.\n")
 w("## Bots\n")
 w("Each ability carries a `bot` hint (`when`: in_range, under_fire, clumped, hurt, gap, always; `min`/`max`), read by `Bot.ability_aim`: walls and mirrors go up when a bot is being shot, hooks and slams when the target is in reach and in sight, vortex and fissure when foes bunch, Rail Charge is held to full. Bots shoot decoys while the real hunter is cloaked. Bot points are spent automatically (`Hunter._bot_spend`).\n")
 open(os.path.join(R, "docs/ABILITIES.md"), "w").write("\n".join(out) + "\n")
