@@ -67,6 +67,10 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 			return
 		else:
 			a["cross_go"] = false
+	# a downed squadmate comes first: go and pick them up unless a rival is right on top of us
+	var rv := _revive_plan(m, h)
+	if not rv.is_empty() and rv.has("danger"):
+		a["tgt"] = rv["danger"]
 	var tgt: Ent = a["tgt"]
 	var move := Vector2.ZERO
 	var df: Dictionary = a.get("diff", {})
@@ -117,7 +121,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		var aim: Vector2 = Vector2(tgt.pos.x, tgt.pos.z) + lead + a["aim_err"]
 		inp["aim"] = Vector3(aim.x, tgt.pos.y + 0.9, aim.y)
 		inp["aim_y"] = tgt.pos.y
-		var los: bool = m.world.los(h.pos, tgt.pos, h.pos.y + 0.95)
+		var los := can_hit(m, h, tgt)
 		# fast guns fire in bursts with a beat between them (to reposition); slow ones on cooldown
 		a["burst"] = float(a.get("burst", 0.0)) - dt
 		# fast guns fire in bursts; on easier bots the pauses between them are longer
@@ -127,8 +131,16 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		var trig_ok: bool = float(a["react_t"]) <= 0.0 and (a["burst"] > 0.0 or ((float(h.wpn["rate"]) > 0.4 or h.wpn.has("spin_up")) and randf() < duty * dt * 8.0 + (0.0 if duty < 0.99 else 1.0)))
 		if los and d < float(h.wpn["range"]) + 0.5 and trig_ok:
 			inp["fire"] = true
+			a["nolos_t"] = 0.0
 		elif not los:
-			move = to
+			# no clear shot: work round to one (a path, not straight into the wall), and give up on it
+			# after a while rather than hopping at a ledge shooting the rock
+			move = _path_dir(m, h, tgt.pos)
+			a["nolos_t"] = float(a.get("nolos_t", 0.0)) + dt
+			if float(a["nolos_t"]) > 2.5:
+				a["nolos_t"] = 0.0
+				a["ignore"] = {"e": tgt, "until": m.time + 4.0}
+				a["tgt"] = null
 		# kin
 		var k: Kin = h.kin
 		var abil := float(df.get("abil", 0.7))
@@ -196,6 +208,20 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		# swap a fainted kin out for the other one
 		if h.kin and (h.kin as Kin).state == "fainted" and h.kin2 and (h.kin2 as Kin).hp > 0.0:
 			inp["swap"] = true
+	# ---- reviving: walk to the downed squadmate and stand on them until they're up (shooting back
+	# from there if there's a clear shot). A rival right on top of us is fought, but from beside them
+	# (no backing off to our usual range), unless we're still a way off.
+	if not rv.is_empty() and (not rv.has("danger") or h.flat_dist(rv["o"]) < 4.0):
+		move = _revive_move(m, h, rv, dt)
+		a.erase("dash_dir")
+		if h.base_t > 0.0: h.base_t = 0.0
+		if inp.get("interact", false) and not (tgt is Hunter and (tgt as Hunter).downed): inp["interact"] = false
+		if move == Vector2.ZERO and tgt == null:
+			var o: Hunter = rv["o"]
+			inp["aim"] = Vector3(o.pos.x, o.pos.y + 0.5, o.pos.z)
+			inp["aim_y"] = o.pos.y
+	else:
+		a.erase("rv")
 	# ---- don't walk off edges (except onto the jump pad we're heading for), and keep off other pads
 	var to_pad: bool = (a.has("pad_at") and h.flat_dist(a["pad_at"]) < 2.5) or (a.has("cross") and h.flat_dist(a["cross"]["take"]) < 2.5)
 	for pd in m.world.pads:
@@ -205,9 +231,11 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		if dp < 1.8 and move.length() > 0.1:
 			move += -h.dir_to(pd["pos"]) * (1.8 - dp) * 1.5
 	a.erase("pad_at")
+	# (heading for a downed squadmate near an edge, only look as far as them)
+	var look := 1.2 if rv.is_empty() else clampf(h.flat_dist(rv["o"]) - 0.2, 0.4, 1.2)
 	if move.length() > 0.01:
 		move = move.normalized()
-		if not to_pad and not _safe(m, h, move, 1.2):
+		if not to_pad and not _safe(m, h, move, look):
 			var alt := Vector2(-move.y, move.x)
 			if _safe(m, h, alt, 1.2): move = alt
 			elif _safe(m, h, -alt, 1.2): move = -alt
@@ -245,7 +273,9 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 				h.teleport(Vector3(q.x, m.world.ground_at(q.x, q.z), q.z))
 				h.vel = Vector3.ZERO
 		if a["stuck"] > 0.6:
-			if _safe(m, h, move, 2.0) and randf() < 0.5:
+			a["hops"] = int(a.get("hops", 0)) + 1
+			h.ai.erase("wp")        # find a new way round next time
+			if _safe(m, h, move, 2.0) and randf() < 0.5 and int(a["hops"]) <= 2:
 				inp["jump"] = true
 			else:
 				a["detour_t"] = randf_range(0.5, 1.1)
@@ -253,8 +283,113 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 			a["stuck"] = 0.0
 	else:
 		a["stuck"] = 0.0
-		if Vector2(h.pos.x - a["last_pos"].x, h.pos.z - a["last_pos"].z).length() > 0.05: a["frozen"] = 0.0
+		if Vector2(h.pos.x - a["last_pos"].x, h.pos.z - a["last_pos"].z).length() > 0.05:
+			a["frozen"] = 0.0
+			if Vector2(h.pos.x - a["last_pos"].x, h.pos.z - a["last_pos"].z).length() > 0.08: a["hops"] = 0
 	a["last_pos"] = h.pos
+
+## A clear shot from where we stand: from our feet's eye height (not the top of a hop), at the lower
+## of the two heights, so a ledge or a rock between us stops us firing into it.
+func can_hit(m: Match, h: Hunter, tgt: Ent) -> bool:
+	var base_y := h.pos.y
+	if not h.grounded:
+		var gy := m.world.ground_at(h.pos.x, h.pos.z)
+		if gy > World.VOID + 1.0: base_y = minf(h.pos.y, gy)
+	var y := minf(base_y, tgt.pos.y) + 0.9
+	if tgt.pos.y - base_y > 2.4:
+		return false
+	# the shot has some width: the line and both its edges have to be clear (no grazing a corner)
+	var side := Vector2(tgt.pos.z - h.pos.z, h.pos.x - tgt.pos.x).normalized() * 0.22
+	for k in [0.0, 1.0, -1.0]:
+		var o := Vector3(side.x * k, 0, side.y * k)
+		if not m.world.los(Vector3(h.pos.x, base_y, h.pos.z) + o, tgt.pos + o, y):
+			return false
+	return true
+
+const RV_RANGE := 70.0        # how far a bot will go for a downed squadmate
+const RV_DANGER := 3.2        # a rival this close gets fought before the revive
+const RV_ON := 1.1            # stand this close (the revive ring is Life.R["revive_radius"])
+
+## The downed squadmate to go and pick up ({} for none), with "danger" set to a rival we have to
+## deal with first (right on top of us, or standing on the wisp).
+func _revive_plan(m: Match, h: Hunter) -> Dictionary:
+	var best: Hunter = null; var bs := 1e9
+	for o in m.hunters:
+		if o == h or o.team != h.team or not o.downed or o.out or o.extracted:
+			continue
+		var d := h.flat_dist(o)
+		if d > RV_RANGE or m.world.is_void(o.pos.x, o.pos.z):
+			continue
+		var sc := d - (8.0 if o == m.player else 0.0)
+		if sc < bs: bs = sc; best = o
+	if best == null:
+		return {}
+	var plan := {"o": best}
+	# who's a threat: a rival on the wisp (blocks the revive), or anything hostile right next to us
+	var dz: Ent = null; var dd := 1e9
+	for st in best.get_meta("stompers", []):
+		if is_instance_valid(st) and not (st as Hunter).dead and not (st as Hunter).downed:
+			dz = st; dd = 0.0
+	if dz == null:
+		for o in m.hunters:
+			if o.team == h.team or o.downed or o.out or not o.targetable() or (m.truce and m.truce.holds(h, o)):
+				continue
+			var d := h.flat_dist(o)
+			if d < RV_DANGER and d < dd and absf(o.pos.y - h.pos.y) < 2.0:
+				dz = o; dd = d
+		for mb in m.mobs:
+			if mb.dead or (mb is Boss and (mb as Boss).dormant):
+				continue
+			var d := h.flat_dist(mb)
+			if d < RV_DANGER * 0.8 and d < dd and absf(mb.pos.y - h.pos.y) < 2.0 and mb.tgt == h:
+				dz = mb; dd = d
+	if dz:
+		plan["danger"] = dz
+	return plan
+
+## Where to walk for the revive: onto them, by a path; if we stop getting closer, try another side
+## of them (a reachable spot next to them), and stand still once we're on the ring.
+func _revive_move(m: Match, h: Hunter, rv: Dictionary, dt: float) -> Vector2:
+	var a := h.ai
+	var o: Hunter = rv["o"]
+	var st: Dictionary = a.get("rv", {})
+	if st.get("o") != o:
+		st = {"o": o, "best": 1e9, "t": 0.0, "side": -1, "spot": o.pos}
+		a["rv"] = st
+	var d := h.flat_dist(o)
+	if d < RV_ON and absf(h.pos.y - o.pos.y) < 1.4:
+		st["t"] = 0.0; st["best"] = d
+		return Vector2.ZERO
+	var spot: Vector3 = o.pos if int(st["side"]) < 0 else st["spot"]
+	if int(st["side"]) >= 0 and spot.distance_to(o.pos) > 1.6:
+		st["side"] = -1; spot = o.pos         # they crawled off: back to heading straight for them
+	var ds := h.flat_dist(spot)
+	if ds < float(st["best"]) - 0.25:
+		st["best"] = ds; st["t"] = 0.0
+	else:
+		st["t"] = float(st["t"]) + dt
+	if float(st["t"]) > 1.8:
+		# no progress: pick the next reachable spot round them (on their level, open ground)
+		st["t"] = 0.0; st["best"] = 1e9
+		h.ai.erase("wp")
+		for k in 8:
+			var sd := (int(st["side"]) + 1 + k) % 8
+			var ang := TAU * sd / 8.0 + 0.3
+			for r in [0.8, 1.2]:
+				var q: Vector3 = o.pos + Vector3(cos(ang), 0, sin(ang)) * r
+				if m.world.is_void(q.x, q.z) or m.world.is_block(q.x, q.z):
+					continue
+				var gy := m.world.ground_at(q.x, q.z)
+				if absf(gy - o.pos.y) > 1.0:
+					continue
+				st["side"] = sd; st["spot"] = Vector3(q.x, gy, q.z)
+				break
+			if int(st["side"]) == sd:
+				break
+		spot = st["spot"]
+	if h.flat_dist(spot) < 0.35:
+		return Vector2.ZERO
+	return _path_dir(m, h, spot)
 
 func _nearest_ground(m: Match, h: Hunter) -> Vector2:
 	var best := Vector2.ZERO; var bd := 1e9
@@ -398,8 +533,10 @@ func _choose(m: Match, h: Hunter) -> void:
 	var a := h.ai
 	# fight: nearest rival hunter in sight, else monsters close by
 	var best: Ent = null; var bs := -1e9
+	var ign: Dictionary = a.get("ignore", {})
+	var ign_e = ign.get("e") if m.time < float(ign.get("until", 0.0)) else null
 	for o in m.hunters:
-		if o.team == h.team or not o.targetable():
+		if o.team == h.team or not o.targetable() or o == ign_e:
 			continue
 		if m.truce and m.truce.holds(h, o):
 			continue
@@ -418,7 +555,7 @@ func _choose(m: Match, h: Hunter) -> void:
 		if s > bs: bs = s; best = o
 	if best == null:
 		for mb in m.mobs:
-			if mb.dead: continue
+			if mb.dead or mb == ign_e: continue
 			# a sleeping boss can't be hurt; an awake one is worth walking up to
 			if mb is Boss and (mb as Boss).dormant: continue
 			var d := h.flat_dist(mb)

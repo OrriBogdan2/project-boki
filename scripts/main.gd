@@ -292,6 +292,11 @@ func _ready() -> void:
 		set_meta("kinbox_check", kbc)      # kept alive while it waits on frames
 		kbc.run(self)
 		return
+	if "--revive-check" in args:
+		var rvc = load("res://tools/revive_check.gd").new()      # bot squadmates pick you up first
+		set_meta("revive_check", rvc)
+		rvc.run(self)
+		return
 	if "--weapon-clip-check" in args:
 		var wcc = load("res://tools/weapon_clip_check.gd").new()      # no held weapon ever dips into the ground
 		set_meta("weapon_clip_check", wcc)
