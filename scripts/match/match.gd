@@ -1798,6 +1798,11 @@ func on_fell(e: Ent) -> void:
 		if e.out:
 			return
 		sfx("fall", e.pos, 0.0)
+		# swallowed by the cloud sea a few metres under the islands: a whoosh, a puff, a quick fade
+		sfx("whoosh", e.pos, -3.0, 0.7)
+		fx.burst(e.pos + Vector3(0, 0.8, 0), Color(0.92, 0.94, 1.0, 0.8), 18, 4.0, 0.6, -1.0, 1.2)
+		if e == player and hud:
+			hud.flash(Color(0.05, 0.04, 0.12), 0.6)
 		if duel and e == duel.bot:
 			# knocked off the island in the duel room: that's a knock, then a fresh round
 			duel.stats["knocks"] = int(duel.stats["knocks"]) + 1
@@ -1815,6 +1820,7 @@ func on_fell(e: Ent) -> void:
 		var by: Ent = e.last_hit_by if time - e.kb_t < 4.0 else null
 		eliminate(e, by, "abyss")
 	elif e is Mob:
+		fx.burst(e.pos + Vector3(0, 0.6, 0), Color(0.92, 0.94, 1.0, 0.8), 10, 3.0, 0.5, -1.0, 1.0)
 		e.dead = true
 		e._cancel_tele()
 		on_mob_dead(e, e.last_hit_by, {"src": "fall"})
