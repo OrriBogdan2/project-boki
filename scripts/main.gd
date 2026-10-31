@@ -1931,6 +1931,84 @@ func _boss_check() -> void:
 		wd.hurt(9999.0, P, {"src": "shot"})
 		run.call(0.1)
 	ok.call(wards.size() == 3 and H["state"] == "open" and m.lairs._guards_alive(H) > 0, "wards: %d broken (guards came out: %d), the Thornhive is %s" % [wards.filter(func(x): return x.dead).size(), m.lairs._guards_alive(H), H["state"]])
+	# 4b. sealed in like a raid: free to come and go before the fight; step in and the gate shuts
+	# behind you until the boss dies, you all go down, or the seal times out
+	for g in F["guards"]: if is_instance_valid(g) and not g.dead: g.dead = true; g.visible = false
+	park.call(C); park.call(Q)
+	var outv := Vector2(F["out"].x, F["out"].y)
+	var walk := func(h: Hunter, dir: Vector2, sec: float, until := Callable()) -> void:
+		var t := 0.0
+		while t < sec:
+			h.inp["move"] = dir
+			m.step(Match.DT); t += Match.DT
+			if until.is_valid() and until.call(): break
+		h.inp["move"] = Vector2.ZERO
+		m.step(Match.DT)
+	var gate_shut := func(L: Dictionary) -> bool:
+		return (L["gate_tiles"] as Array).all(func(q): return m.world.kind[m.world.idx(q.x, q.y)] == World.T_BLOCK)
+	var gate_free := func(L: Dictionary) -> bool:
+		return (L["gate_tiles"] as Array).all(func(q): return m.world.kind[m.world.idx(q.x, q.y)] == World.T_GROUND)
+	var fb: Boss = F["boss_mob"]
+	# before the fight: walk up into the gateway and back out again, the boss sleeping
+	spot.call(P, F["dial"])
+	walk.call(P, -outv, 6.0, func(): return m.lairs.inside(F, P.pos, 0.3))
+	var in_gateway: bool = m.lairs.inside(F, P.pos, 0.3) and F["state"] == "open"
+	walk.call(P, outv, 3.0)
+	ok.call(in_gateway and F["state"] == "open" and fb.dormant and not F.get("locked", false) and not m.lairs.inside(F, P.pos, 0.5) and gate_free.call(F),
+		"before the fight: into the gateway and back out, the boss still asleep (%.1fm out)" % P.flat_dist(F["c"]))
+	# step in: it wakes and the gate seals behind you, the ward lit
+	walk.call(P, -outv, 6.0, func(): return F["state"] == "awake")
+	walk.call(P, -outv, 0.4)
+	ok.call(F["state"] == "awake" and F.get("locked", false) and (F["sealed_in"] as Array).has(P) and gate_shut.call(F) and m.lairs.sealed_lair(P) == F,
+		"walk in: %s wakes and the gate seals behind you (locked %s, gate shut %s)" % [fb.md["name"], F.get("locked", false), gate_shut.call(F)])
+	var dome: Node3D = F["nodes"]["dome"]
+	run.call(0.6)
+	ok.call(dome.visible and float(F["gate_k"]) < 0.05 and ((F["nodes"]["gate"] as Node3D).get_node("Bars") as Node3D).visible, "the bars are back down and the ward glows over the walls")
+	# no way out while it's sealed: walking, or being flung over the wall
+	walk.call(P, outv, 4.0)
+	var walked_in := m.lairs.inside(F, P.pos, 0.0)
+	P.pos = F["c"] + Vector3(outv.x, 0, outv.y) * (float(F["half"]) + 1.5); P.prev = P.pos
+	run.call(0.1)
+	ok.call(walked_in and m.lairs.inside(F, P.pos, 0.0) and F.get("locked", false), "sealed: walking at the gate or being flung over the wall keeps you inside")
+	# nobody crashes in
+	spot.call(Q, F["dial"])
+	Q.ctrl = "local"
+	walk.call(Q, -outv, 4.0)
+	ok.call(not m.lairs.inside(F, Q.pos, 0.25), "sealed: a rival can't get in (%.1fm from the middle)" % Q.flat_dist(F["c"]))
+	Q.ctrl = "idle"; park.call(Q)
+	# bots: sealed in, they fight; outside, a sealed lair isn't a goal
+	var bg: Array = m.lairs.bot_goal(P, true)
+	Q.ai["boss_hunt"] = true
+	var qg: Array = m.lairs.bot_goal(Q, false)
+	ok.call(not bg.is_empty() and String(bg[1]) == "lair_fight" and (qg.is_empty() or (qg[0] as Vector3).distance_to(F["c"]) > 1.0),
+		"bots: sealed in they fight it (%s); a sealed lair isn't a goal from outside (%s)" % [str(bg.slice(1)), str(qg.slice(1))])
+	# everyone inside goes down: the seal breaks and the boss heals and goes back to sleep
+	fb.hurt(fb.max_hp * 0.2, P, {"src": "shot"})
+	var hp_hurt := fb.hp
+	P.lives = 3
+	m.knock(P, null, {})
+	m.step(Match.DT); m.step(Match.DT)
+	ok.call(P.downed and hp_hurt < fb.max_hp and not F.get("locked", false) and F["state"] == "open" and fb.dormant and fb.hp >= fb.max_hp and gate_free.call(F),
+		"wiped: the seal breaks, %s heals (%d -> %d) and sleeps" % [fb.md["name"], int(hp_hurt), int(fb.hp)])
+	m.revive_hunter(P, P)
+	god.call()
+	# the seal times out: it drops and the boss resets
+	spot.call(P, F["c"] + Vector3(outv.x, 0, outv.y) * 2.0)
+	var tl := m.time
+	while not F.get("locked", false) and m.time - tl < 10.0: run.call(Match.DT)      # (it lets you be a moment after a reset)
+	var relocked: bool = F.get("locked", false)
+	fb.hurt(fb.max_hp * 0.1, P, {"src": "shot"})
+	F["lock_at"] = m.time - Lairs.LOCK_T + 0.2
+	run.call(0.5)
+	ok.call(relocked and not F.get("locked", false) and fb.dormant and fb.hp >= fb.max_hp and F["state"] == "open", "the seal times out after %ds: it drops and the boss resets" % int(Lairs.LOCK_T))
+	# unsealed: the way out through the gate is clear
+	spot.call(P, F["c"])
+	run.call(0.1)
+	if F.get("locked", false):
+		F["lock_at"] = m.time - Lairs.LOCK_T; run.call(0.2)
+	walk.call(P, outv, 6.0, func(): return not m.lairs.inside(F, P.pos, 1.5))
+	ok.call(not m.lairs.inside(F, P.pos, 1.0) and not F.get("locked", false), "unsealed: you walk out through the gate (%.1fm from the middle)" % P.flat_dist(F["c"]))
+	run.call(13.0)      # (the boss settles back to sleep with nobody inside)
 	# 5. each boss: wakes when you walk in, phases at 66% and 33%, attacks, enrages, drops its egg
 	var egg_items: Array = []
 	for L in [F, E, H]:
@@ -1939,7 +2017,7 @@ func _boss_check() -> void:
 		spot.call(P, L["c"] + Vector3(L["out"].x, 0, L["out"].y) * 3.0)
 		spot.call(C, L["c"] + Vector3(-L["out"].y, 0, L["out"].x) * 3.0)
 		run.call(0.3)
-		ok.call(L["state"] == "awake" and not b.dormant, "%s wakes when you walk in" % b.md["name"])
+		ok.call(L["state"] == "awake" and not b.dormant and L.get("locked", false) and (L["sealed_in"] as Array).has(P) and (L["sealed_in"] as Array).has(C), "%s wakes when you walk in and seals you both in" % b.md["name"])
 		var atks := {}
 		var track := func(): if b.atk != "": atks[b.atk] = true
 		run.call(6.0, track)
@@ -1973,6 +2051,23 @@ func _boss_check() -> void:
 		var ew = L.get("egg_wp")
 		var egg_ok: bool = ew != null and m.wpicks.has(ew) and Loot.is_rare_egg(Pack.ground_item(ew)) and Data.is_rare(String(Pack.ground_item(ew)["sp"]))
 		var strong: bool = m.wpicks.slice(w0).any(func(wp): return not wp.has("val") and not wp.has("gear") and int(wp["rar"]) >= 3)
+		ok.call(not L.get("locked", false) and gate_free.call(L), "%s falls: the seal lifts and the gate opens" % b.md["name"])
+		# a small pile, all of it good, and the egg on its own spot a few steps away
+		var pile: Array = m.wpicks.slice(w0).filter(func(wp): return not wp.get("egg", false))
+		var usable: bool = pile.any(func(wp): return not wp.has("val") and not wp.has("gear") and Loot.usable(P, Pack.ground_item(wp)) and int(wp["rar"]) >= 3)
+		var good: bool = pile.all(func(wp): return int(wp["rar"]) >= 3 if not wp.has("val") else Loot.value(Pack.ground_item(wp)) >= 40)
+		var apart := 99.0
+		if ew != null:
+			for wp in pile: apart = minf(apart, Vector2(wp["pos"].x - ew["pos"].x, wp["pos"].z - ew["pos"].z).length())
+		ok.call(pile.size() <= 4 and usable and good and apart >= 2.0 and m.lairs.inside(L, ew["pos"], 0.0),
+			"%s's loot: %d things, all good (%s), an Epic+ %s weapon, the egg %.1fm from the pile" % [b.md["name"], pile.size(), str(pile.map(func(wp): return "%s %d" % [Loot.name_of(Pack.ground_item(wp)), Loot.value(Pack.ground_item(wp))])), P.cls, apart])
+		# the way out is clear
+		var tw := 0.0
+		while m.lairs.inside(L, P.pos, 1.0) and tw < 8.0:
+			P.inp["move"] = Vector2(L["out"].x, L["out"].y) if absf(P.pos.x - L["gate_c"].x) + absf(P.pos.z - L["gate_c"].z) < 2.0 or m.lairs.inside(L, P.pos, -2.0) == false else Vector2(L["gate_c"].x - P.pos.x, L["gate_c"].z - P.pos.z).normalized()
+			god.call(); m.step(Match.DT); tw += Match.DT
+		P.inp["move"] = Vector2.ZERO
+		ok.call(not m.lairs.inside(L, P.pos, 1.0), "after the kill you walk out through the gate (%.1fs)" % tw)
 		ok.call(L["state"] == "cleared" and egg_ok and strong and P.xp > xp0 + 100.0 and m.lairs.egg_pings.size() > 0,
 			"%s falls: a Rare %s on the ground (on everyone's map), an Epic+ weapon, +%d XP" % [b.md["name"], Data.egg_name(String(Pack.ground_item(ew)["sp"])) if ew != null else "?", int(P.xp - xp0)])
 		if ew != null: egg_items.append(ew)
@@ -2048,6 +2143,7 @@ func _boss_check() -> void:
 	var live3: int = m3.lairs.list.filter(func(L): return L["active"]).size()
 	ok.call(m3.lairs.list.size() >= 1 and live3 >= 1, "a generated map: %d lair(s), %d live (%s)" % [m3.lairs.list.size(), live3, str(m3.lairs.list.map(func(L): return L["boss"]))])
 	print("BOSSCHECK done, failures: %d" % bad[0])
+	get_tree().quit(1 if bad[0] > 0 else 0)
 ## The drop: the planning phase, map pings, the squad following its leader in formation, passing the
 ## lead, separating, and the randomised spawns (different between seeds, rare kin only where rolled).
 func _drop_check() -> void:

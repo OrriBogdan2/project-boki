@@ -3250,6 +3250,10 @@ func _draw_boss_bar(sz: Vector2, p: Hunter) -> void:
 	var left := float(b.md.get("enrage", 150.0)) - b.awake_t
 	var et := "ENRAGED" if b.enraged else "ENRAGE IN %s" % _fmt(maxf(0.0, left))
 	_ctext(Vector2(sz.x * 0.5, r.end.y + 20), et, 12, BAD if b.enraged or left < 20.0 else MUTED, big)
+	var lk: Dictionary = m.lairs.sealed_lair(p)
+	if not lk.is_empty():
+		# sealed in with it: what it takes to get out, and when the seal gives up on its own
+		_ctext(Vector2(sz.x * 0.5, r.end.y + 40), "SEALED IN  ·  DEFEAT %s  ·  %s" % [String(b.md["name"]).to_upper(), _fmt(m.lairs.lock_left(lk))], 15, col, big)
 	if b.invul_t > 0.0:
-		_ctext(Vector2(sz.x * 0.5, r.end.y + 44), "PHASE %d" % (b.phase + 1), 22, col, big)
-	feed_top = maxf(feed_top, r.end.y + 34.0)
+		_ctext(Vector2(sz.x * 0.5, r.end.y + (64 if not lk.is_empty() else 44)), "PHASE %d" % (b.phase + 1), 22, col, big)
+	feed_top = maxf(feed_top, r.end.y + (54.0 if not lk.is_empty() else 34.0))
