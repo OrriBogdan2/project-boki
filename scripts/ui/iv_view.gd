@@ -52,7 +52,7 @@ class Radar extends Control:
 		return p
 	func _draw() -> void:
 		var c := size * 0.5 + Vector2(0, 4)
-		var r := minf(size.x, size.y) * 0.5 - 24.0
+		var r := minf(size.x, size.y) * 0.5 - 30.0
 		var n := Care.IV_KEYS.size()
 		# rings at a third, two thirds and full, and the spokes
 		for f in [1.0 / 3.0, 2.0 / 3.0, 1.0]:
@@ -145,6 +145,27 @@ static func rows(rec: Dictionary, words := true, name_w := 62.0, bar_w := 110.0)
 		v.add_child(r)
 	return v
 
+## The judge's word for each stat, no bars: a compact list to sit beside the chart.
+static func word_list(rec: Dictionary) -> VBoxContainer:
+	var v := UI.vbox(3)
+	var vals := Care.ivs(rec)
+	for k in Care.IV_KEYS:
+		var iv := int(vals[k])
+		var r := UI.hbox(6)
+		r.mouse_filter = Control.MOUSE_FILTER_PASS
+		r.tooltip_text = tip(k, iv)
+		var nl := UI.label(String(Care.IVS[k]["name"]), UI.T_SMALL, Color(Care.IVS[k]["col"]).lerp(UI.INK, 0.35))
+		nl.custom_minimum_size.x = 52
+		nl.mouse_filter = Control.MOUSE_FILTER_PASS
+		r.add_child(nl)
+		var nv := UI.label(str(iv), UI.T_SMALL, word_col(iv), UI.semi)
+		nv.custom_minimum_size.x = 22
+		nv.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		r.add_child(nv)
+		r.add_child(UI.label(Care.iv_word(iv), UI.T_SMALL, word_col(iv)))
+		v.add_child(r)
+	return v
+
 ## The total and the overall grade on one line.
 static func grade_line(rec: Dictionary, size := UI.T_SMALL) -> HBoxContainer:
 	var h := UI.hbox(8)
@@ -172,13 +193,16 @@ static func first_view_line(parent: Control) -> void:
 	_shown_now = true
 	if Save.d.has("tutorial"): Save.d["tutorial"]["ivs_seen"] = true
 
-## The kin card's block: heading, rows with words, the grade.
+## The kin card's block: heading with the grade, rows with words (the explainer is the heading's tooltip).
 static func block(rec: Dictionary, parent: Control) -> void:
-	parent.add_child(heading())
-	first_view_line(parent)
-	parent.add_child(rows(rec, true, 56.0, 90.0))
-	var gl := grade_line(rec)
-	parent.add_child(gl)
+	var hr := UI.hbox(8)
+	hr.add_child(heading())
+	hr.add_child(UI.fill())
+	hr.add_child(grade_line(rec))
+	parent.add_child(hr)
+	var rw := rows(rec, true, 56.0, 90.0)
+	rw.add_theme_constant_override("separation", 3)
+	parent.add_child(rw)
 
 ## Five little upright bars and the total, for a tight spot (the Kin Burrow's side panel, tiles).
 static func mini(rec: Dictionary, h := 20.0, show_total := true) -> HBoxContainer:
@@ -272,7 +296,7 @@ static func pass_on(a: Dictionary, b: Dictionary) -> VBoxContainer:
 		if m >= 26: best.append("%s %d" % [Care.IVS[k]["name"], m])
 		if m > top_v: top_v = m; top_k = k
 	var pct := int(round(100.0 * Care.IV_INHERIT / Care.IV_KEYS.size()))
-	v.add_child(UI.para("An egg takes %d of these 5 from a parent (any 3, either parent), and rolls the other %d fresh. So each stat has a %d%% chance to come from them, %d%% from the better one." % [Care.IV_INHERIT, Care.IV_KEYS.size() - Care.IV_INHERIT, pct, pct / 2], 12, UI.MUTED))
+	v.add_child(UI.para("An egg takes %d of these 5 from its parents (each from either one) and rolls %d fresh: every stat has a %d%% chance to come from them." % [Care.IV_INHERIT, Care.IV_KEYS.size() - Care.IV_INHERIT, pct], 12, UI.MUTED))
 	if not best.is_empty():
 		v.add_child(UI.para("Could pass on: %s." % ", ".join(best), 12, UI.GOOD))
 	else:

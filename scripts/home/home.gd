@@ -2629,8 +2629,6 @@ func _open_kin(rec: Dictionary) -> void:
 			for st in Care.STATS:
 				row.call(c1, Care.STATS[st]["name"], float(rec["stats"][st]) / float(Care.stat_cap(rec)), Care.STATS[st]["col"], str(int(rec["stats"][st])))
 			c1.add_child(UI.para("Train at the yard to raise them. Higher bonds raise the cap.", 12, UI.FAINT))
-			c1.add_child(UI.spacer(4))
-			IvView.block(rec, c1)        # what it was born with (Care.IVS)
 			var sh: Dictionary = Data.SHOULDER[sp["shoulder"]]
 			c2.add_child(UI.section("In a match", UI.FAINT.lightened(0.2)))
 			var abl: Array = sp.get("abilities", [])
@@ -2661,6 +2659,8 @@ func _open_kin(rec: Dictionary) -> void:
 			c1.add_child(UI.label(String(Evo.AFF[lead]["name"]), UI.T_HEAD, Evo.AFF[lead]["tint"], UI.big))
 			c1.add_child(UI.label("New form at level %d  ·  mutation at %d" % [next_form, next_mut], UI.T_SMALL, UI.MUTED))
 			c1.add_child(UI.para("What you feed it and how you raise it decides which way it grows.", 12, UI.FAINT))
+			c1.add_child(UI.spacer(4))
+			IvView.block(rec, c1)        # what it was born with (Care.IVS), next to how it's growing
 			var tot := 0.0
 			for af in Evo.AFF: tot += maxf(0.0, float(rec["aff"][af]))
 			c2.add_child(UI.section("Affinities", UI.FAINT.lightened(0.2)))
@@ -4329,7 +4329,7 @@ func _open_nook() -> void:
 	# the kin, as pictures
 	var sc := ScrollContainer.new()
 	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	sc.custom_minimum_size = Vector2(NOOK_COLS * (NOOK_TILE.x + 8) + 14, 470)
+	sc.custom_minimum_size = Vector2(NOOK_COLS * (NOOK_TILE.x + 8) + 14, 420)
 	sc.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	var grid := GridContainer.new()
 	grid.columns = NOOK_COLS
@@ -4399,8 +4399,7 @@ func _nook_tile(o: Dictionary, egg_in: bool) -> Control:
 		n.position = Vector2(0, 52)
 		pic_box.add_child(n)
 	tv.add_child(pic_box)
-	var col: Color = Shiny.body(o)
-	var nm := UI.label(String(o["name"]), UI.T_SMALL, col.lerp(UI.INK, 0.45), UI.semi)
+	var nm := UI.label(String(o["name"]), UI.T_SMALL, UI.INK if why == "" or picked else UI.MUTED, UI.semi)
 	nm.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	nm.clip_text = true
 	tv.add_child(nm)
@@ -4451,12 +4450,16 @@ func _nook_detail(rec: Dictionary, dv: VBoxContainer, egg_in: bool) -> void:
 	dv.add_child(top)
 	dv.add_child(IvView.heading())
 	IvView.first_view_line(dv)
-	var mid := UI.hbox(12)
-	mid.add_child(IvView.radar(rec, 176.0, col.lerp(UI.ACCENT, 0.35)))
-	var jv := UI.vbox(6)
-	jv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	jv.alignment = BoxContainer.ALIGNMENT_CENTER
-	jv.add_child(IvView.grade_line(rec))
+	var mid := UI.hbox(10)
+	mid.add_child(IvView.radar(rec, 168.0, col.lerp(UI.ACCENT, 0.35)))
+	var wv := UI.vbox(8)
+	wv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	wv.alignment = BoxContainer.ALIGNMENT_CENTER
+	wv.add_child(IvView.grade_line(rec))
+	wv.add_child(IvView.word_list(rec))
+	mid.add_child(wv)
+	dv.add_child(mid)
+	var jv := UI.vbox(2)
 	jv.add_child(UI.para(Care.iv_judge(rec), 13, UI.INK))
 	var from: Dictionary = rec.get("iv_from", {})
 	if rec.has("parents") and not from.is_empty():
@@ -4468,9 +4471,7 @@ func _nook_detail(rec: Dictionary, dv: VBoxContainer, egg_in: bool) -> void:
 		jv.add_child(UI.para("; ".join(bits) + ".", 12, UI.MUTED))
 	elif rec.get("rare", false):
 		jv.add_child(UI.para("From a Rare Egg: three of its IVs are 26 or better.", 12, UI.MUTED))
-	mid.add_child(jv)
-	dv.add_child(mid)
-	dv.add_child(IvView.rows(rec, true, 56.0, 100.0))
+	dv.add_child(jv)
 	var br := UI.hbox(8)
 	if not egg_in:
 		if nook_pick.has(uid):
@@ -4510,15 +4511,8 @@ func _nook_pair(a: Dictionary, b: Dictionary, dv: VBoxContainer) -> void:
 			top.add_child(h)
 	dv.add_child(top)
 	dv.add_child(IvView.heading())
-	IvView.first_view_line(dv)
 	dv.add_child(IvView.compare(a, b, 100.0))
-	var ov := UI.hbox(10)
-	ov.alignment = BoxContainer.ALIGNMENT_CENTER
-	ov.add_child(IvView.radar(a, 132.0, Shiny.body(a).lerp(UI.INK, 0.3), b, Shiny.body(b).lerp(UI.INK, 0.3)))
-	var pv2 := IvView.pass_on(a, b)
-	pv2.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	ov.add_child(pv2)
-	dv.add_child(ov)
+	dv.add_child(IvView.pass_on(a, b))
 	var sp_line := UI.para("The egg will be a %s or a %s, with a blend of their personalities." % [Data.KIN[a["species"]]["name"], Data.KIN[b["species"]]["name"]] if a["species"] != b["species"] else "The egg will be a %s, with a blend of their personalities." % Data.KIN[a["species"]]["name"], 12, UI.MUTED)
 	dv.add_child(sp_line)
 	var br := UI.hbox(8)
@@ -4617,7 +4611,7 @@ func _nest_demo(which: String) -> void:
 		"kin": nook_view = String(kid["uid"]); _open_nook()
 		"rare": nook_view = String(rare["uid"]); _open_nook()
 		"pair": nook_pick = [String(pa["uid"]), String(pb["uid"])]; _open_nook()
-		"card": kin_tab = "Training"; _open_kin(kid)
+		"card": kin_tab = "Growth"; _open_kin(kid)
 		"box": KinBoxView.sel = String(kid["uid"]); KinBoxView.page = KinBox.page_of(kid) if KinBox.is_boxed(kid) else 0; _open_burrow()
 		_: _open_nook()
 
