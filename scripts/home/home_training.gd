@@ -52,7 +52,10 @@ static func reserved() -> Array:
 		[BRIDGE[0] - 1, BRIDGE[1] - 1, BRIDGE[2] + 1, BRIDGE[3]]]
 
 static func is_zone(world: World, p: Vector3) -> bool:
-	return String(world.island_id(p.x, p.z)).begins_with("training")
+	if String(world.island_id(p.x, p.z)).begins_with("training"):
+		return true
+	# the open air over the glide gap (between the isle and the islet) is part of the course too
+	return world.is_void(p.x, p.z) and p.x > C.x and p.x < GAP_C.x + GAP_R.x + 1.0 and absf(p.z - GAP_C.y) < maxf(R.y, GAP_R.y) + 1.5
 
 ## Before the meshes: the bridge's planks become ground, and the climbing wall rises.
 func prepare() -> void:
@@ -189,7 +192,11 @@ func _glove() -> String:
 func tick(d: float) -> void:
 	now += d
 	var was := in_zone
-	in_zone = is_zone(h.world, h.ppos) and h.visit.is_empty()
+	# in the air (a jump, a glide across the gap) you're still where you took off from: the zone
+	# only changes once you're standing somewhere
+	var standing: bool = h.pvy == 0.0 and not h.gliding
+	if standing or not h.visit.is_empty():
+		in_zone = is_zone(h.world, h.ppos) and h.visit.is_empty()
 	if in_zone != was:
 		if in_zone:
 			load_kit()

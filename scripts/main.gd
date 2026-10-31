@@ -2591,9 +2591,10 @@ func _home_build_check() -> void:
 	for i in 60: mv._move_player(0.05)
 	ok.call(mv.ppos.distance_to(safe) < 0.01 and mv.py >= -0.01, "falling off the island puts you back where you last stood")
 	var tr: HomeTraining = mv.training
-	mv.ppos = Vector3(38.0, 0, 34.5); tr.tick(0.05)
+	# (the zone only changes while you're standing, so stand them on the ground each time)
+	mv.ppos = Vector3(38.0, 0, 34.5); mv.py = mv._ground_h(38.0, 34.5); mv.pvy = 0.0; mv.gliding = false; tr.tick(0.05)
 	ok.call(not tr.in_zone and not tr.cast("fire"), "outside the Training Grounds attacks are off")
-	mv.ppos = Vector3(HomeTraining.STILL.x + 1.5, 0, HomeTraining.STILL.z); tr.tick(0.05)
+	mv.ppos = Vector3(HomeTraining.STILL.x + 1.5, 0, HomeTraining.STILL.z); mv.py = mv._ground_h(mv.ppos.x, mv.ppos.z); tr.tick(0.05)
 	ok.call(tr.in_zone and tr.kit.has("fire"), "inside them your kit is on: %s" % str(tr.kit.keys()))
 	var dm: Dictionary = tr.dummies[0]
 	tr.hit(dm, 12.0)
@@ -2625,6 +2626,29 @@ func _home_build_check() -> void:
 			on_top = true; break
 	Input.action_release("left")
 	ok.call(wtop - wbase > 1.0 and on_top, "jumping at the climbing wall gets you on top of it (%.1fm up; at %.1f, %.1f, height %.2f)" % [wtop - wbase, mv.ppos.x, mv.ppos.z, mv.py])
+	# gliding the gap to the islet: you never leave the Training Grounds on the way
+	var gs := Vector3(46.8, 0, 56.3)
+	for gz in [56.3, 55.8, 56.8, 55.3]:
+		if mv.world.occupy(46.8, gz, 0.38, mv._ground_h(46.8, gz), true) == 0.0:
+			gs = Vector3(46.8, 0, gz); break
+	mv.ppos = gs; mv.py = mv._ground_h(gs.x, gs.z); mv.pvy = 0.0; mv.pvel = Vector3.ZERO; mv.gliding = false
+	tr.tick(0.05)
+	var left_zone := false
+	var over_gap := false
+	Input.action_press("right")
+	for i in 12:
+		mv._move_player(1.0 / 60.0); tr.tick(1.0 / 60.0)
+	mv.pvy = 8.5
+	Input.action_press("jump")
+	for i in 300:
+		mv._move_player(1.0 / 60.0); tr.tick(1.0 / 60.0)
+		if not tr.in_zone: left_zone = true
+		if mv.world.is_void(mv.ppos.x, mv.ppos.z): over_gap = true
+		if over_gap and mv.world.island_id(mv.ppos.x, mv.ppos.z) == "training_gap":
+			Input.action_release("jump"); Input.action_release("right")     # over the islet: fold the glider and drop on it
+		if mv.world.island_id(mv.ppos.x, mv.ppos.z) == "training_gap" and mv.pvy == 0.0 and not mv.gliding: break
+	Input.action_release("jump"); Input.action_release("right")
+	ok.call(over_gap and mv.world.island_id(mv.ppos.x, mv.ppos.z) == "training_gap" and not left_zone, "gliding the gap lands you on the islet without leaving the Training Grounds (crossed: %s, left: %s, at %.1f, %.1f)" % [over_gap, left_zone, mv.ppos.x, mv.ppos.z])
 	home4.queue_free()
 	await get_tree().process_frame
 	# procedural homes: two seeds, two different islands, both usable; the first look round
