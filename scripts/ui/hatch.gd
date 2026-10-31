@@ -494,6 +494,7 @@ func _step_look(key: String, d: int, n: int) -> void:
 	_show_create()
 
 var preview_yaw := PI
+var preview_anim: HunterAnim
 func _rebuild_preview() -> void:
 	if preview:
 		preview_yaw = preview.rotation.y
@@ -502,6 +503,7 @@ func _rebuild_preview() -> void:
 	preview.position = Vector3(0.8, 0, 1.6)
 	preview.rotation.y = preview_yaw
 	add_child(preview)
+	preview_anim = HunterAnim.new(preview)
 
 func _show_pick() -> void:
 	_clear_bottom()
@@ -639,7 +641,10 @@ func _process(delta: float) -> void:
 		cam.look_at(look_at_t)
 		if preview and not (get_viewport().gui_get_focus_owner() is LineEdit):
 			preview.rotation.y += (Input.get_axis("left", "right")) * delta * 2.5
-		pass   # the preview stands still; drag it to turn it (see _unhandled_input)
+		# the preview stands at ease (breathing, shifting its weight, glancing round); drag it to turn
+		# it (see _unhandled_input)
+		if preview and preview_anim:
+			preview_anim.update(delta, {"fired": 99.0, "face": preview.rotation.y})
 	else:
 		cam.look_at(Vector3(0, (0.25 if stage != "pick" else 0.55) if stage != "name" else -0.55, 0.5))
 	if stage == "pick":

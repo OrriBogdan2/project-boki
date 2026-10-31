@@ -5,8 +5,9 @@ extends RefCounted
 static func stats() -> void:
 	if "--art-stats-detail" in OS.get_cmdline_user_args():
 		# draw calls per node of one hunter of each class (where the surfaces come from)
-		for cls in ["light", "medium", "heavy"]:
-			var hd := Models.hunter(cls, Data.TEAM_COLORS[0], "rifle", "", {"race": 0, "hair": 1})
+		for arch in HeroKit.ARCH_ORDER:
+			var cls := String(HeroKit.ARCHES[arch]["cls"])
+			var hd := Models.hunter(cls, Data.TEAM_COLORS[0], "rifle", "", {"race": 0, "hair": 1}, arch)
 			var per := {}
 			var st: Array = [hd]
 			while not st.is_empty():
@@ -14,8 +15,10 @@ static func stats() -> void:
 				if c is MeshInstance3D and (c as MeshInstance3D).mesh and (c as MeshInstance3D).visible:
 					var k := String(hd.get_path_to(c.get_parent()))
 					per[k] = int(per.get(k, 0)) + (c as MeshInstance3D).mesh.get_surface_count()
+					var tk := "tris " + k
+					per[tk] = int(per.get(tk, 0)) + int(_count(c)[1])
 				for ch in c.get_children(): st.append(ch)
-			print("ART detail %s %s" % [cls, str(per)])
+			print("ART detail %s %s tris %d draws %d" % [arch, str(per), _count(hd)[1], _count(hd)[2]])
 			hd.free()
 	for r in Models.RACES.size():
 		var t0 := Time.get_ticks_usec()
