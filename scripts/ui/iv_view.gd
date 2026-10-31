@@ -145,6 +145,32 @@ static func rows(rec: Dictionary, words := true, name_w := 62.0, bar_w := 110.0)
 		v.add_child(r)
 	return v
 
+## A cell a stat side by side: its name, the number with a little bar under it, the judge's word.
+## Compact enough for the kin card.
+static func cells(rec: Dictionary) -> HBoxContainer:
+	var h := UI.hbox(6)
+	var vals := Care.ivs(rec)
+	for k in Care.IV_KEYS:
+		var iv := int(vals[k])
+		var c := UI.vbox(1)
+		c.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		c.mouse_filter = Control.MOUSE_FILTER_PASS
+		c.tooltip_text = tip(k, iv)
+		var nl := UI.label(String(Care.IVS[k]["name"]), 12, Color(Care.IVS[k]["col"]).lerp(UI.INK, 0.35))
+		nl.mouse_filter = Control.MOUSE_FILTER_PASS
+		c.add_child(nl)
+		var nv := UI.label(str(iv), UI.T_HEAD, word_col(iv), UI.big)
+		nv.mouse_filter = Control.MOUSE_FILTER_PASS
+		c.add_child(nv)
+		var b := iv_bar(iv, Care.IVS[k]["col"], 56, 5)
+		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		c.add_child(b)
+		var wl := UI.label(Care.iv_word(iv), 11, word_col(iv))
+		wl.mouse_filter = Control.MOUSE_FILTER_PASS
+		c.add_child(wl)
+		h.add_child(c)
+	return h
+
 ## The judge's word for each stat, no bars: a compact list to sit beside the chart.
 static func word_list(rec: Dictionary) -> VBoxContainer:
 	var v := UI.vbox(3)
@@ -193,16 +219,14 @@ static func first_view_line(parent: Control) -> void:
 	_shown_now = true
 	if Save.d.has("tutorial"): Save.d["tutorial"]["ivs_seen"] = true
 
-## The kin card's block: heading with the grade, rows with words (the explainer is the heading's tooltip).
+## The kin card's block: heading with the grade, then a cell a stat (the explainer is the heading's tooltip).
 static func block(rec: Dictionary, parent: Control) -> void:
 	var hr := UI.hbox(8)
 	hr.add_child(heading())
 	hr.add_child(UI.fill())
 	hr.add_child(grade_line(rec))
 	parent.add_child(hr)
-	var rw := rows(rec, true, 56.0, 90.0)
-	rw.add_theme_constant_override("separation", 3)
-	parent.add_child(rw)
+	parent.add_child(cells(rec))
 
 ## Five little upright bars and the total, for a tight spot (the Kin Burrow's side panel, tiles).
 static func mini(rec: Dictionary, h := 20.0, show_total := true) -> HBoxContainer:

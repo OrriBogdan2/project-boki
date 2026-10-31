@@ -2659,13 +2659,13 @@ func _open_kin(rec: Dictionary) -> void:
 			c1.add_child(UI.label(String(Evo.AFF[lead]["name"]), UI.T_HEAD, Evo.AFF[lead]["tint"], UI.big))
 			c1.add_child(UI.label("New form at level %d  ·  mutation at %d" % [next_form, next_mut], UI.T_SMALL, UI.MUTED))
 			c1.add_child(UI.para("What you feed it and how you raise it decides which way it grows.", 12, UI.FAINT))
-			c1.add_child(UI.spacer(4))
-			IvView.block(rec, c1)        # what it was born with (Care.IVS), next to how it's growing
 			var tot := 0.0
 			for af in Evo.AFF: tot += maxf(0.0, float(rec["aff"][af]))
 			c2.add_child(UI.section("Affinities", UI.FAINT.lightened(0.2)))
 			for af in Evo.AFF:
 				row.call(c2, Evo.AFF[af]["name"], float(rec["aff"][af]) / maxf(tot, 1.0), Evo.AFF[af]["tint"], "%d%%" % int(round(100.0 * maxf(0.0, float(rec["aff"][af])) / maxf(tot, 1.0))))
+			c2.add_child(UI.spacer(4))
+			IvView.block(rec, c2)        # what it was born with (Care.IVS), under how it's growing
 			if rec.has("parents"):
 				c1.add_child(UI.spacer(4))
 				c1.add_child(UI.kv("Parents", "%s and %s" % [rec["parents"][0], rec["parents"][1]]))
@@ -4612,6 +4612,8 @@ func _nest_demo(which: String) -> void:
 		"rare": nook_view = String(rare["uid"]); _open_nook()
 		"pair": nook_pick = [String(pa["uid"]), String(pb["uid"])]; _open_nook()
 		"card": kin_tab = "Growth"; _open_kin(kid)
+		"card-care": kin_tab = "Care"; _open_kin(kid)
+		"card-train": kin_tab = "Training"; _open_kin(kid)
 		"box": KinBoxView.sel = String(kid["uid"]); KinBoxView.page = KinBox.page_of(kid) if KinBox.is_boxed(kid) else 0; _open_burrow()
 		_: _open_nook()
 
