@@ -372,36 +372,147 @@ func update_lip() -> void:
 	lip_y = ref
 	below_lip = pos.y < ref - 0.5
 
-## Below the lip of an island, a balloon on a string floats at ground level above you: that's
-## what everyone aims at. It glows purple once your glider is overheated, when the next hit
-## knocks you out of the sky.
-var balloon: Node3D
-func _render_balloon() -> void:
-	var show := below_lip and not out and not extracted and visible
-	if not show:
+## Where shots hit you, drawn so everyone can track it in a top-down view. Your body is the target
+## while you stand or hop (a hop still counts as standing on your terrace). Below an island's lip
+## a balloon on a string floats at ground level above you: that's what everyone aims at. High in
+## the air over land, a ring on a faint string hangs under you at the height shots catch you. The
+## ring is always your real hit circle (radius r + Match.HIT_SLACK) on the plane you're hit as if
+## standing on (Match.shot_stance_y), and the balloon is that circle's size too, at shot height.
+## Enemies' markers are red, allies' their team colour, yours faint. A hit through a marker flashes
+## it. The balloon glows purple once your glider is overheated, when the next hit spikes you.
+const MARKER_BALL_Y := 0.95       # balloon centre above the stance: where a level shot flies
+const MARKER_FLASH := 0.3
+const MARKER_FOE := Color("ff4a3a")
+var balloon: Node3D               # the hit marker: Ring, Ball, Knot, Aura, String
+var _mk_ring: MeshInstance3D
+var _mk_ball: MeshInstance3D
+var _mk_knot: MeshInstance3D
+var _mk_aura_n: MeshInstance3D
+var _mk_str: MeshInstance3D
+var _mk_kind := ""
+var _mk_col := Color(0, 0, 0, 0)
+var _mk_flash := 0.0
+var _mk_flashing := false
+static var _mk_quad: PlaneMesh
+static var _mk_mats := {}         # shared materials, by colour: {"ring", "ball", "knot"}
+static var _mk_aura: ShaderMaterial
+static var _mk_string: ShaderMaterial
+
+## The radius of the circle shots hit you in (a bullet touching it connects).
+func hit_radius() -> float:
+	return r + Match.HIT_SLACK
+
+## Which marker shows where shots hit you: "balloon" (below a lip), "ring" (high over land), or ""
+## when your body itself is the target.
+func hit_marker() -> String:
+	if not hittable():
+		return ""
+	if below_lip:
+		return "balloon"
+	if not grounded or remote:      # (a remote hunter's grounded flag isn't sent; its height is)
+		var g := ground()
+		if g > World.VOID + 1.0 and pos.y - g > Match.HOP_STAND:
+			return "ring"
+	return ""
+
+## A shot connected: if it hit you through your marker, the marker flashes.
+func marker_hit() -> void:
+	if hit_marker() != "":
+		_mk_flash = MARKER_FLASH
+
+static func _marker_mats(c: Color) -> Dictionary:
+	if _mk_mats.has(c):
+		return _mk_mats[c]
+	var d := {}
+	if c == Color.WHITE:      # the flash
+		d["ring"] = Models.ring_mat(Color(1, 1, 1, 1), 0.3)
+		d["ball"] = Models.toon(Color(1.0, 0.97, 0.9), true, 1.0)
+		d["knot"] = d["ball"]
+	else:
+		d["ring"] = Models.ring_mat(c, 0.2)
+		d["ball"] = Models.toon(Color(c, 1.0), c.a > 0.75, 0.35 if c.a > 0.75 else 0.1)
+		d["knot"] = Models.toon(Color(c, 1.0).darkened(0.3), false)
+	_mk_mats[c] = d
+	return d
+
+## The marker's colour as the local player sees it.
+func _marker_col() -> Color:
+	var lp: Ent = m.local_player()
+	var tc: Color = Data.TEAM_COLORS[team % Data.TEAM_COLORS.size()]
+	if lp == self:
+		return Color(tc.lerp(Color.WHITE, 0.45), 0.45)       # your own: faint
+	if lp and lp.team != team:
+		return MARKER_FOE                                    # an enemy
+	return tc                                                # an ally (or watching)
+
+func _build_marker() -> void:
+	if _mk_quad == null:
+		_mk_quad = Models.flat_quad(2.0)       # unit-radius ring, scaled to the hit radius
+		_mk_aura = Models.glow_mat(Color(0.75, 0.35, 1.0, 0.4))
+		_mk_string = Models.toon(Color(0.95, 0.95, 0.95), false)
+	balloon = Node3D.new()
+	balloon.top_level = true
+	add_child(balloon)
+	_mk_ring = Models.part(balloon, _mk_quad, null, Vector3.ZERO, Vector3.ONE, Vector3.ZERO, "Ring")
+	_mk_ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_mk_ball = Models.part(balloon, Models.sphere(1.0), null, Vector3.ZERO, Vector3.ONE, Vector3.ZERO, "Ball")
+	_mk_knot = Models.part(balloon, Models.cyl(0.03, 0.06, 0.1), null, Vector3.ZERO, Vector3.ONE, Vector3.ZERO, "Knot")
+	_mk_aura_n = Models.part(balloon, Models.sphere(1.0), _mk_aura, Vector3.ZERO, Vector3.ONE, Vector3.ZERO, "Aura")
+	_mk_aura_n.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_mk_str = Models.part(balloon, Models.cyl(0.012, 0.012, 1.0, 4), _mk_string, Vector3.ZERO, Vector3.ONE, Vector3.ZERO, "String")
+	_mk_str.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+
+func _render_balloon(delta: float) -> void:
+	_mk_flash = maxf(0.0, _mk_flash - delta)
+	var kind := hit_marker() if visible and model and model.visible else ""
+	if kind == "":
 		if balloon: balloon.visible = false
+		_mk_kind = ""
 		return
 	if balloon == null:
-		balloon = Node3D.new()
-		balloon.top_level = true
-		add_child(balloon)
-		Models.part(balloon, Models.sphere(0.34), Models.toon(Color("ff3a4a"), true, 0.35), Vector3(0, 0.36, 0), Vector3(1.0, 1.15, 1.0), Vector3.ZERO, "Ball")
-		Models.part(balloon, Models.cyl(0.03, 0.06, 0.1), Models.toon(Color("c02030")), Vector3(0, -0.02, 0))
-		var aura := Models.part(balloon, Models.sphere(0.5), Models.glow_mat(Color(0.75, 0.35, 1.0, 0.4)), Vector3(0, 0.36, 0), Vector3.ONE, Vector3.ZERO, "Aura")
-		aura.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		var string := Models.part(balloon, Models.cyl(0.012, 0.012, 1.0, 4), Models.toon(Color(0.95, 0.95, 0.95), false), Vector3.ZERO, Vector3.ONE, Vector3.ZERO, "String")
-		string.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		_build_marker()
 	balloon.visible = true
-	var top := Vector3(position.x, lip_y + 1.0, position.z)
-	balloon.global_position = top + Vector3(0, sin(m.time * 3.0) * 0.06, 0)
-	var aura: Node3D = balloon.get_node("Aura")
-	aura.visible = gliding and glide_fuel <= 0.001
-	aura.scale = Vector3.ONE * (1.0 + 0.08 * sin(m.time * 9.0))
-	var string: Node3D = balloon.get_node("String")
-	var from_y := position.y + 1.6
-	var len := maxf(0.1, balloon.global_position.y - from_y)
-	string.position = Vector3(0, -len * 0.5, 0)
-	string.scale = Vector3(1, len, 1)
+	var ring := _mk_ring; var ball := _mk_ball; var knot := _mk_knot; var aura := _mk_aura_n; var string := _mk_str
+	var hot := gliding and glide_fuel <= 0.001
+	var col := _marker_col()
+	if kind == "ring" and hot:
+		col = Color(0.75, 0.35, 1.0, col.a)      # overheated: one more hit spikes you
+	var flashing := _mk_flash > 0.0
+	if col != _mk_col or flashing != _mk_flashing or kind != _mk_kind:
+		var mats := _marker_mats(Color.WHITE if flashing else col)
+		ring.material_override = mats["ring"]
+		ball.material_override = mats["ball"]
+		knot.material_override = mats["knot"]
+		_mk_col = col; _mk_flashing = flashing; _mk_kind = kind
+	var hr := hit_radius()
+	var pop := 1.0 + 0.3 * (_mk_flash / MARKER_FLASH)
+	# the stance follows the drawn body (sim heights, offset onto the interpolated position)
+	var stance: float = m.shot_stance_y(self)
+	var at := Vector3(position.x, stance if kind == "balloon" else position.y - (pos.y - stance), position.z)
+	balloon.global_position = at
+	ring.position = Vector3(0, 0.04, 0)
+	ring.scale = Vector3.ONE * hr * pop
+	ball.visible = kind == "balloon"
+	knot.visible = ball.visible
+	aura.visible = ball.visible and hot
+	if kind == "balloon":
+		var bob := sin(m.time * 3.0) * 0.06
+		var c := Vector3(0, MARKER_BALL_Y + bob, 0)
+		ball.position = c
+		ball.scale = Vector3(hr, hr * 1.15, hr) * pop
+		knot.position = c - Vector3(0, hr * 1.15 + 0.03, 0)
+		aura.position = c
+		aura.scale = Vector3.ONE * hr * 1.45 * (1.0 + 0.08 * sin(m.time * 9.0))
+		# the string runs down from the knot to the hunter hanging below
+		var bot_y := knot.position.y - 0.05
+		var len := maxf(0.1, at.y + bot_y - (position.y + 1.6))
+		string.position = Vector3(0, bot_y - len * 0.5, 0)
+		string.scale = Vector3(1, len, 1)
+	else:
+		# a faint tether from the feet down to the ring
+		var len := maxf(0.05, position.y + 0.1 - at.y)
+		string.position = Vector3(0, len * 0.5, 0)
+		string.scale = Vector3(1, len, 1)
 
 func _shot_down() -> void:
 	gliding = false
@@ -2284,7 +2395,6 @@ func render(delta: float, alpha: float) -> void:
 	model.rotation.y = face
 	if remote:
 		update_lip()
-	_render_balloon()
 	_render_weapon_fx(delta)
 	var rig: Node3D = model.get_node("Rig")
 	var torso: Node3D = rig.get_node("Torso")
@@ -2356,3 +2466,4 @@ func render(delta: float, alpha: float) -> void:
 	model.visible = see
 	var ring := model.get_node("TeamRing") as MeshInstance3D
 	ring.visible = not downed
+	_render_balloon(delta)

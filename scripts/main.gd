@@ -49,6 +49,7 @@ func _ready() -> void:
 		if a == "--train-demo": opts["train_demo"] = true; opts["no_drop"] = true
 		if a.begins_with("--train-demo="): opts["train_demo"] = a.substr(13); opts["no_drop"] = true
 		if a.begins_with("--aim-demo="): opts["aim_demo"] = a.substr(11); opts["no_drop"] = true
+		if a.begins_with("--balloon-demo="): opts["balloon_demo"] = a.substr(15); opts["no_drop"] = true; opts["god"] = true; opts["squad"] = 2; opts["teams"] = 2
 		if a == "--loot-demo": opts["loot_demo"] = true
 		if a == "--pack-demo": opts["pack_demo"] = true; opts["no_drop"] = true
 		if a == "--bag-demo": opts["bag_demo"] = true; opts["no_drop"] = true
@@ -323,6 +324,9 @@ func _ready() -> void:
 		return
 	if "--mantle-check" in args:
 		_mantle_check()
+		return
+	if "--balloon-check" in args:
+		load("res://tools/balloon_check.gd").new().run(self)      # the hit marker is the hitbox
 		return
 	if Array(args).any(func(a): return String(a).begins_with("--weapon-check")):
 		_weapon_check()
