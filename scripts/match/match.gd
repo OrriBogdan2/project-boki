@@ -1087,15 +1087,20 @@ func _take_weapon(h: Hunter, wp: Dictionary, from_net := false, keep_old := fals
 	if net_on:
 		net_event(["wtake", wp["id"], h.nid, wp["wid"], wp["rar"]])
 	var old_it := Loot.of_hand(h)
-	var old_ammo := h.ammo if h.reload_t <= 0.0 else 0
-	Loot.equip(h, Pack.ground_item(wp), int(wp.get("ammo", -1)))
+	var old_ammo := h.ammo      # a reload under way is dropped with the gun: it keeps what was in it
+	# a picked-up gun comes full and ready (no reload), unless it was put down under 2s ago (Loot.REPICK_T)
+	var am := -1
+	if wp.has("left_at") and time - float(wp["left_at"]) < Loot.REPICK_T:
+		am = int(wp.get("ammo", -1))
+	Loot.equip(h, Pack.ground_item(wp), am)
 	if not keep_old:
 		# the old one is put down where you stand (with the backpack, the player's goes in it instead)
 		var ba := randf() * TAU
 		var back := Vector3(cos(ba), 0, sin(ba)) * 0.9
-		spawn_weapon(String(old_it["wid"]), int(old_it["rar"]), Vector3(h.pos.x + back.x, h.ground(), h.pos.z + back.z), "", true, old_ammo, old_it if Loot.keepable(old_it) else {})
+		spawn_weapon(String(old_it["wid"]), int(old_it["rar"]), Vector3(h.pos.x + back.x, h.ground(), h.pos.z + back.z), "", true, old_ammo, Loot.clean(old_it) if Loot.keepable(old_it) else {})
+		wpicks[wpicks.size() - 1]["left_at"] = time
 	var col: Color = Data.RARITY[int(wp["rar"])]["color"]
-	sfx("reload", h.pos, 0.0, 0.8)
+	sfx("pickup", h.pos, 0.0, 0.8)
 	fx.ring(h.pos, 1.4, col, 0.35)
 	fx.burst(h.pos + Vector3(0, 0.9, 0), col, 14, 3.0, 0.5)
 	if h == player:
@@ -2895,6 +2900,7 @@ func _gather_input() -> void:
 	player.inp["aim_y"] = aim_y      # the height of whatever you're pointing at (shots climb or dip to it)
 	player.inp["fire"] = Input.is_action_pressed("fire") and not paused and not (hud and hud.mouse_on_ui())
 	var map_up: bool = hud != null and hud.map_open()      # the map takes the mouse buttons
+	var on_panel: bool = hud != null and hud.mouse_on_panel()      # ... and so do the item windows under the cursor
 	if paused:
 		player.inp["move"] = Vector2.ZERO
 	player.inp["interact"] = Input.is_action_pressed("interact")
@@ -2906,7 +2912,7 @@ func _gather_input() -> void:
 	player.inp["glide"] = (Input.is_action_pressed("jump") or Input.is_action_pressed("glide")) and not paused
 	player.inp["dash_hold"] = Input.is_action_pressed("dash") and bool(Settings.get_v("dash_hold"))
 	var quick: bool = Settings.get_v("cast_on_press")
-	player.inp["sec_hold"] = Input.is_action_pressed("secondary") and not paused
+	player.inp["sec_hold"] = Input.is_action_pressed("secondary") and not paused and not on_panel
 	# crouch: hold by default, or tap to toggle (the web version defaults to toggle, so you never
 	# hold Ctrl while pressing W, which closes the browser tab)
 	if Settings.get_v("crouch_toggle"):
@@ -2932,8 +2938,8 @@ func _gather_input() -> void:
 	for a in [["dash", "dash"], ["jump", "jump"], ["signature", "sig"], ["reload", "reload"], ["tonic", "tonic"], ["throw", "throw"], ["ultimate", "ult"], ["secondary", "sec"], ["gear1", "gear1"]]:
 		if a[0] == "tonic" and (not perk_offer.is_empty() or not _perk_keys_down.is_empty()):
 			continue       # 1, 2 and 3 pick a perk while a choice is open
-		if map_up and a[0] in ["secondary", "throw"]:
-			continue       # right click takes your ping down while the map is up
+		if (map_up or on_panel) and a[0] in ["secondary", "throw"]:
+			continue       # right click takes your ping down while the map is up (and casts nothing over a window)
 		if a[0] == "secondary" and aim_hold != "" and aim_hold != "secondary" and Input.is_action_just_pressed("secondary"):
 			aim_hold = ""          # right click while aiming something else cancels the cast
 			continue
@@ -4983,7 +4989,7 @@ func _tips() -> void:
 	if exits and not interact.is_empty() and interact["kind"] == "exit":
 		match String(interact["x"]["kind"]):
 			"dock": _tip("exit_dock", "Skiff docks: call the skiff at the horn beacon, survive the monsters it draws until it ties up, then stand on its deck before it leaves.")
-			"hatch": _tip("exit_hatch", "Rift hatches open instantly and quietly with a Rift Key. Keys are rare loot (vaults, bosses, elites) and drop in your deathbox if you go down.")
+			"hatch": _tip("exit_hatch", "Press %s at a rift hatch with a Rift Key: it opens 10s later, and three can drop through. Keys are rare loot (vaults, bosses, elites) and drop in your deathbox if you go down." % Settings.key_cap("interact"))
 			"outpost": _tip("exit_uplink", "Outposts: start the uplink and hold the yard while it charges. A rival standing in it stalls the charge. When it's done, step into the lift.")
 	if player.downed:
 		_tip("down", "You're down. Your kin will try to pick you up if it trusts you enough.")

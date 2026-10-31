@@ -315,9 +315,9 @@ static func take_item(m: Match, h: Hunter, b: Dictionary, it: Dictionary) -> voi
 					(b["gear"] as Array).append(old)
 		"weapon":
 			var w: Dictionary = Pack.box_weapon_item(b)
-			var old_w := Loot.of_hand(h)
+			var old_w := Loot.leave(h, Loot.of_hand(h))
 			Loot.equip(h, w)
-			b["weapon"] = old_w.duplicate() if Loot.keepable(old_w) else {}
+			b["weapon"] = old_w if Loot.keepable(old_w) else {}
 		"pack":
 			# into your backpack; a full one swaps out its least valuable thing (that goes in the box)
 			var pi := int(it["i"])

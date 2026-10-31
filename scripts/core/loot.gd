@@ -103,10 +103,40 @@ static func keepable(it: Dictionary) -> bool:
 		"val": return VALUABLES.has(String(it.get("id", "")))
 	return false
 
-## Puts a weapon item in a hunter's hands: rarity, element and unique perk.
+## A weapon put down (on the ground, in the pack or a deathbox) is ready to fire again, full, the next
+## time anyone picks it up, unless that's within this long: then it has the bullets it was put down
+## with (so dropping a gun and grabbing it straight back isn't a free reload).
+const REPICK_T := 2.0
+
+## The weapon leaving a hunter's hands, as an item marked with the bullets it had and when it left.
+## Whatever reload it was in the middle of is simply dropped with it.
+static func leave(h, it: Dictionary) -> Dictionary:
+	var o := it.duplicate()
+	if String(o.get("t", "weapon")) == "weapon":
+		o["ammo_left"] = int(h.ammo)
+		o["left_at"] = float(h.m.time) if h.m else 0.0
+	return o
+
+## The bullets a weapon item comes back with: a full magazine (-1), or what it had if it was put down
+## under REPICK_T ago.
+static func ammo_back(it: Dictionary, now: float) -> int:
+	if it.has("left_at") and now - float(it["left_at"]) < REPICK_T:
+		return int(it.get("ammo_left", -1))
+	return -1
+
+## A copy without the put-down marks (for what goes home).
+static func clean(it: Dictionary) -> Dictionary:
+	var o := it.duplicate()
+	o.erase("ammo_left"); o.erase("left_at")
+	return o
+
+## Puts a weapon item in a hunter's hands: rarity, element and unique perk. It arrives with a full
+## magazine and no reload going (unless it was put down a moment ago, see ammo_back).
 static func equip(h, it: Dictionary, ammo := -1) -> void:
+	if ammo < 0 and h.m:
+		ammo = ammo_back(it, float(h.m.time))
 	h.equip(String(it.get("wid", h.wid)), int(it.get("rar", 0)), ammo)
-	h.winst = it.duplicate() if keepable(it) else {}
+	h.winst = clean(it) if keepable(it) else {}
 	h.welem = String(it.get("el", ""))
 	h.wuniq = String(it.get("uq", ""))
 	h.wpn["name"] = name_of(it)
