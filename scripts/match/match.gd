@@ -2895,6 +2895,7 @@ func _gather_input() -> void:
 	player.inp["aim_y"] = aim_y      # the height of whatever you're pointing at (shots climb or dip to it)
 	player.inp["fire"] = Input.is_action_pressed("fire") and not paused and not (hud and hud.mouse_on_ui())
 	var map_up: bool = hud != null and hud.map_open()      # the map takes the mouse buttons
+	var on_panel: bool = hud != null and hud.mouse_on_panel()      # ... and so do the item windows under the cursor
 	if paused:
 		player.inp["move"] = Vector2.ZERO
 	player.inp["interact"] = Input.is_action_pressed("interact")
@@ -2906,7 +2907,7 @@ func _gather_input() -> void:
 	player.inp["glide"] = (Input.is_action_pressed("jump") or Input.is_action_pressed("glide")) and not paused
 	player.inp["dash_hold"] = Input.is_action_pressed("dash") and bool(Settings.get_v("dash_hold"))
 	var quick: bool = Settings.get_v("cast_on_press")
-	player.inp["sec_hold"] = Input.is_action_pressed("secondary") and not paused
+	player.inp["sec_hold"] = Input.is_action_pressed("secondary") and not paused and not on_panel
 	# crouch: hold by default, or tap to toggle (the web version defaults to toggle, so you never
 	# hold Ctrl while pressing W, which closes the browser tab)
 	if Settings.get_v("crouch_toggle"):
@@ -2932,8 +2933,8 @@ func _gather_input() -> void:
 	for a in [["dash", "dash"], ["jump", "jump"], ["signature", "sig"], ["reload", "reload"], ["tonic", "tonic"], ["throw", "throw"], ["ultimate", "ult"], ["secondary", "sec"], ["gear1", "gear1"]]:
 		if a[0] == "tonic" and (not perk_offer.is_empty() or not _perk_keys_down.is_empty()):
 			continue       # 1, 2 and 3 pick a perk while a choice is open
-		if map_up and a[0] in ["secondary", "throw"]:
-			continue       # right click takes your ping down while the map is up
+		if (map_up or on_panel) and a[0] in ["secondary", "throw"]:
+			continue       # right click takes your ping down while the map is up (and casts nothing over a window)
 		if a[0] == "secondary" and aim_hold != "" and aim_hold != "secondary" and Input.is_action_just_pressed("secondary"):
 			aim_hold = ""          # right click while aiming something else cancels the cast
 			continue

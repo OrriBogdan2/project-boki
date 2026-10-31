@@ -300,6 +300,11 @@ func _ready() -> void:
 	if "--economy-check" in args:
 		_economy_check()
 		return
+	if "--pack-ui-check" in args:
+		var puc = load("res://tools/pack_ui_check.gd").new()      # the backpack windows take real mouse clicks
+		set_meta("pack_ui_check", puc)
+		puc.run(self)
+		return
 	if "--life-check" in args:
 		_life_check()
 		return

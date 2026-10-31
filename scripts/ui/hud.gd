@@ -4,6 +4,7 @@ extends CanvasLayer
 
 var m: Match
 var c: Control
+var cursor: Control
 var big: Font = preload("res://fonts/LilitaOne-Regular.ttf")
 var body: Font = preload("res://fonts/Rubik.ttf")
 var hit_t := 0.0
@@ -30,6 +31,14 @@ func setup(match_node: Match) -> void:
 	c.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(c)
 	c.draw.connect(_draw_all)
+	# the pointer over the item windows: drawn above them (the crosshair lives under them on `c`,
+	# and the system cursor stays hidden in a match, so without this you can't see where you click)
+	cursor = Control.new()
+	cursor.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	cursor.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	cursor.z_index = 100
+	add_child(cursor)
+	cursor.draw.connect(_draw_pointer)
 	_build_minimap()
 	full_map = FullMap.new(self, m)
 
@@ -70,6 +79,7 @@ func _process(delta: float) -> void:
 		tips[0]["t"] += delta
 		if tips[0]["t"] > 7.0: tips.pop_front()
 	c.queue_redraw()
+	cursor.queue_redraw()
 
 var hit_armor := false
 
@@ -236,7 +246,7 @@ func _draw_all() -> void:
 			_draw_prompt(sz, p)
 			if m.lairs and not p.out and not map_open():
 				_draw_lair_dial(sz, p)
-			if not map_open(): _draw_crosshair(p)
+			if not map_open() and not mouse_on_panel(): _draw_crosshair(p)
 		if p.downed:
 			_draw_downed(sz, p)
 		elif p.out and not p.gone and not m.result.get("ending", false):
@@ -2502,12 +2512,40 @@ func loot_is(b: Dictionary) -> bool:
 	return loot_open != null and is_same(loot_open, b)
 
 func mouse_on_ui() -> bool:
-	if wheel_open or map_open():
-		return true
+	return wheel_open or map_open() or mouse_on_panel()
+
+## The cursor is over one of the item windows (deathbox loot, swap, backpack).
+func mouse_on_panel() -> bool:
 	for pn in [loot_panel, swap_panel, pack_panel]:
-		if pn != null and is_instance_valid(pn) and pn.visible and pn.get_global_rect().grow(6.0).has_point(pn.get_global_mouse_position()):
+		if pn != null and is_instance_valid(pn) and pn.visible and not pn.is_queued_for_deletion() and pn.get_global_rect().grow(6.0).has_point(pn.get_global_mouse_position()):
 			return true
 	return false
+
+## Over an item window the crosshair gives way to a pointer, drawn on top of the window.
+func _draw_pointer() -> void:
+	if map_open() or not mouse_on_panel():
+		return
+	var mp := cursor.get_local_mouse_position()
+	var pts := PackedVector2Array()
+	for q in [Vector2(0, 0), Vector2(0, 19), Vector2(4.6, 14.6), Vector2(8.2, 22.0), Vector2(11.2, 20.6), Vector2(7.8, 13.4), Vector2(13.6, 13.4)]:
+		pts.append(mp + q * 1.3)
+	var sh := PackedVector2Array()
+	for q in pts: sh.append(q + Vector2(1.5, 2.0))
+	cursor.draw_colored_polygon(sh, Color(0, 0, 0, 0.45))
+	cursor.draw_colored_polygon(pts, INK)
+	var ring := pts.duplicate(); ring.append(pts[0])
+	cursor.draw_polyline(ring, Color(0.06, 0.065, 0.1), 1.6, true)
+
+## Makes a whole item row clickable (as well as its buttons): hovering lights it up.
+func _row_click(rp: Control, cb: Callable) -> void:
+	rp.mouse_filter = Control.MOUSE_FILTER_STOP
+	rp.mouse_entered.connect(func(): rp.modulate = Color(1.12, 1.12, 1.12))
+	rp.mouse_exited.connect(func(): rp.modulate = Color.WHITE)
+	rp.gui_input.connect(func(ev: InputEvent):
+		if ev is InputEventMouseButton and (ev as InputEventMouseButton).button_index == MOUSE_BUTTON_LEFT and not (ev as InputEventMouseButton).pressed:
+			rp.accept_event()
+			Sfx.play("click")
+			cb.call())
 
 func open_loot(b: Dictionary) -> void:
 	loot_open = b
@@ -2612,11 +2650,14 @@ func _build_loot() -> void:
 		var verb := "Take"
 		if it["key"] in ["gear", "weapon"]: verb = "Swap"
 		elif it["key"] == "pack" and it.get("full", false): verb = "Swap" if it["upgrade"] else "Full"
-		var take := UI.button(verb, func():
+		var take_it := func():
 			if loot_open != null and m.player:
 				Life.take_item(m, m.player, loot_open, itc)
 				if (loot_open as Dictionary).get("empty", false): close_loot()
-				else: _build_loot(), 76)
+				else: _build_loot()
+		var take := UI.button(verb, take_it, 76)
+		if verb != "Full":
+			_row_click(rp, take_it)
 		take.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		if verb == "Full":
 			take.disabled = true
@@ -2789,10 +2830,13 @@ func _build_swap() -> void:
 		var idx := i
 		var it: Dictionary = p.pack[i]
 		var worse := Loot.value(it) < Loot.value(incoming)
-		sl[1].add_child(_item_row(it, [["Drop", func():
+		var drop_it := func():
 			if swap_wp != null and m.player:
 				Pack.swap(m, m.player, idx, swap_wp)
-			close_swap(), worse]], "least valuable" if i == low else ""))
+			close_swap()
+		var srow := _item_row(it, [["Drop", drop_it, worse]], "least valuable" if i == low else "")
+		_row_click(srow, drop_it)
+		sl[1].add_child(srow)
 	var foot := UI.hbox(8); v.add_child(foot)
 	foot.add_child(UI.button("Leave it  (Esc)", func(): close_swap(), 150))
 	var hint := UI.label("What you drop stays on the ground", 12, MUTED)
