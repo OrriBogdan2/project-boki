@@ -33,6 +33,12 @@ func _ready() -> void:
 		if a.begins_with("--probe-out="): out_path = a.substr(12)
 		if a == "--probe-quick": quick = true
 	vp_rid = get_viewport().get_viewport_rid()
+	# a software rasterizer spends most of a frame filling pixels: a small window and no MSAA keep
+	# the probe quick, and change none of the counts (draws, objects, primitives) or the CPU times
+	if not "--probe-full" in OS.get_cmdline_user_args():
+		get_window().size = Vector2i(640, 360)
+		get_viewport().msaa_3d = Viewport.MSAA_DISABLED
+		Settings.v["msaa"] = 0
 	RenderingServer.viewport_set_measure_render_time(vp_rid, true)
 	process_priority = -100
 	Save.d["tutorial"]["home"] = true
@@ -73,8 +79,8 @@ func _process(_delta: float) -> void:
 	# advance the match: quiet stretches run several steps per drawn frame so the probe stays short
 	var k := 1
 	match phase:
-		"planning", "ride": k = 4
-		"drop": k = 2
+		"planning", "ride": k = 6
+		"drop": k = 3
 	var t0 := Time.get_ticks_usec()
 	m._process(DT * k)
 	var proc := (Time.get_ticks_usec() - t0) / 1000.0
@@ -85,6 +91,7 @@ func _process(_delta: float) -> void:
 	_next_phase()
 
 func _set_phase(p: String) -> void:
+	_print_phase(phase)
 	phase = p
 	phase_t = 0.0
 
@@ -102,16 +109,16 @@ func _next_phase() -> void:
 				_set_phase("land")
 				landed_at = m.time
 		"land":
-			if phase_t >= (2.0 if quick else 4.0):
+			if phase_t >= (1.5 if quick else 2.5):
 				m.hud.open_map()
 				_set_phase("map")
 		"map":
-			if phase_t >= 1.5:
+			if phase_t >= 1.0:
 				m.hud.close_map()
 				_spawn_fight()
 				_set_phase("fight")
 		"fight":
-			if phase_t >= (4.0 if quick else 8.0):
+			if phase_t >= (3.0 if quick else 5.0):
 				_finish()
 	if m.time > 200.0 and phase != "fight":
 		print("PROBE stuck in phase ", phase)
@@ -149,7 +156,17 @@ func _stats(list: Array, key: String) -> Array:
 	for x in v: s += x
 	return [s / v.size(), v[v.size() / 2], v[int((v.size() - 1) * 0.95)], v[-1]]
 
+## A phase's line as soon as it ends (so a probe cut short still says something).
+func _print_phase(ph: String) -> void:
+	if ph == "first" and load_frames.size() > 0:
+		print("PROBE loaded in %.0f ms" % load_ms)
+	var fl: Array = frames.filter(func(f): return f["phase"] == ph)
+	if fl.is_empty(): return
+	var w := _stats(fl, "wall"); var pr := _stats(fl, "proc"); var dr := _stats(fl, "draws"); var pm := _stats(fl, "prims")
+	print("PROBE phase %s: %d frames, wall avg %.1f max %.1f ms, script %.2f ms, draws %.0f (max %.0f), prims %.0fk" % [ph, fl.size(), w[0], w[3], pr[0], dr[0], dr[3], pm[0] / 1000.0])
+
 func _finish() -> void:
+	_print_phase(phase)
 	_end = true
 	var lines: Array = []
 	lines.append("PROBE renderer=%s size=%s msaa=%d shadows=%s quality=%s" % [RenderingServer.get_current_rendering_method(), str(get_viewport().get_visible_rect().size),
