@@ -75,9 +75,8 @@ static func find(uid: String) -> Dictionary:
 
 static func _store(it: Dictionary) -> void:
 	if Loot.is_rare_egg(it):
-		# a boss's egg goes to the hatchery: it settles into the nest as soon as the nest is free
-		if not Save.d.has("rare_eggs"): Save.d["rare_eggs"] = []
-		(Save.d["rare_eggs"] as Array).append({"sp": String(it.get("sp", "")), "boss": String(it.get("boss", "")), "rare": true})
+		# a boss's egg goes onto the Incubator's shelf by the Nesting Nook (and into its cradle if that's empty)
+		Incubator.add(String(it.get("sp", "")), String(it.get("boss", "")))
 		return
 	if String(it.get("t", "")) == "val":
 		var vd: Dictionary = Save.d["valuables"]

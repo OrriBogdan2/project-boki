@@ -309,6 +309,14 @@ func _ready() -> void:
 		set_meta("work_check", wkc)
 		wkc.run(self)
 		return
+	if "--iv-check" in args:
+		load("res://tools/iv_check.gd").new().run(self)      # kin IVs: rolls, backfill, breeding, Rare Eggs, caps
+		return
+	if "--incubator-check" in args:
+		var icc = load("res://tools/incubator_check.gd").new()      # Rare Eggs on the Incubator by the Nook
+		set_meta("incubator_check", icc)
+		icc.run(self)
+		return
 	if "--economy-check" in args:
 		_economy_check()
 		return
@@ -1884,7 +1892,7 @@ func _truce_check() -> void:
 ## a miss resets the lock, chimes and calls guards; runes and ward stones open theirs; the ward keeps
 ## people out until then; each boss wakes, changes phase at 66% and 33%, enrages, and drops a Rare Egg;
 ## the egg takes a backpack slot (a full pack asks to swap), stays in your deathbox, comes home on
-## extract into the hatchery, settles in the nest and hatches a rare kin. Bots can work a dial too.
+## extract onto the Incubator by the Nook and hatches a rare kin. Bots can work a dial too.
 func _boss_check() -> void:
 	Save.no_write = true
 	Save.d = Save.fresh()
@@ -2196,17 +2204,19 @@ func _boss_check() -> void:
 	C.pack_cap = 3
 	Life.smart_loot(m, C, bx)
 	ok.call(C.pack.any(func(it): return Loot.is_rare_egg(it)), "smart loot takes the egg first, even from a full pack")
-	# 8. extract: the egg goes to the hatchery, the nest takes it, it hatches a rare kin
+	# 8. extract: the egg goes to the Incubator (not the breeding nest), it hatches a rare kin
 	Save.d["roster"] = [Save.new_kin("cindle", "Pip")]
 	Save.d["active"] = Save.d["roster"][0]["uid"]
+	Save.d["incubator"] = {}; Save.d["rare_eggs"] = []; Save.d["egg"] = {}
 	var out := Game.apply_result({"extracted": true, "haul": Pack.haul(C), "tier": 0, "gems": 0, "kin_runs": []})
-	var q: Array = Save.d.get("rare_eggs", [])
+	var q: Array = [Incubator.eggs()[0]] if not Incubator.eggs().is_empty() else []
 	ok.call(q.size() == 1 and Data.is_rare(String(q[0]["sp"])) and (out.get("haul", []) as Array).any(func(it): return Loot.is_rare_egg(it)),
-		"extract: a %s waits in the hatchery %s" % [Data.egg_name(String(q[0]["sp"])) if not q.is_empty() else "?", str(q)])
-	ok.call(Care.settle_rare_egg() and Save.d["egg"].get("rare", false) and Save.d.get("rare_eggs", []).is_empty(), "home: it settles into the empty nest as a rare egg")
+		"extract: a %s goes to the Incubator %s" % [Data.egg_name(String(q[0]["sp"])) if not q.is_empty() else "?", str(q)])
+	ok.call(not Incubator.eggs().is_empty() and Save.d.get("egg", {}).is_empty() and Save.d.get("rare_eggs", []).is_empty(), "home: it goes straight into the Incubator's cradle (the breeding nest stays free)")
 	var rr := RandomNumberGenerator.new(); rr.seed = 3
-	var baby := Care.hatch_rare(Save.d["egg"], rr)
-	ok.call(Data.is_rare(String(baby["species"])) and baby.get("rare", false) and String(baby["species"]) == String(Data.MOBS[String(Save.d["egg"]["boss"])]["egg"]),
+	var inc_egg: Dictionary = Incubator.eggs()[0].duplicate()
+	var baby := Care.hatch_rare(inc_egg, rr)
+	ok.call(Data.is_rare(String(baby["species"])) and baby.get("rare", false) and String(baby["species"]) == String(Data.MOBS[String(inc_egg["boss"])]["egg"]),
 		"hatch: a rare %s (%s)" % [Data.KIN[baby["species"]]["name"], baby["species"]])
 	# 9. rare kin never turn up wild, on rivals or as a starter
 	var any_rare := false

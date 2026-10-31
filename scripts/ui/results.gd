@@ -111,7 +111,7 @@ func show_result(r: Dictionary) -> void:
 	var haul: Array = s.get("haul", []).filter(func(it): return not Loot.is_rare_egg(it))
 	var eggs_home: int = s.get("haul", []).filter(func(it): return Loot.is_rare_egg(it)).size()
 	if won and eggs_home > 0:
-		v.add_child(_note("Brought home a Rare Egg! It's waiting in your nest to hatch into a rare kin." if eggs_home == 1 else "Brought home %d Rare Eggs! They'll hatch in your nest one at a time." % eggs_home, UI.GOLD))
+		v.add_child(_note("Brought home a Rare Egg! It went to the Incubator by the Nesting Nook, to hatch into a rare kin." if eggs_home == 1 else "Brought home %d Rare Eggs! They went to the Incubator by the Nesting Nook and hatch one at a time." % eggs_home, UI.GOLD))
 	if won and not haul.is_empty():
 		v.add_child(UI.section("Into your armory" if Save.has_building("armory") else "Into your armory (build it on the farm to use them)"))
 		var hf := HFlowContainer.new()

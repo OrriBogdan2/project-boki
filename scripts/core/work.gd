@@ -20,7 +20,7 @@ class_name Work
 ##   Save.d["mats"]    {wood, stone}: building materials, spent in build mode and on expansions
 
 const ELEMENTS := {
-	"ember": {"name": "Ember", "col": Color("ff7a3a"), "job": "Kindling", "desc": "Keeps the Hearth Oven going: firewood becomes kin kibble."},
+	"ember": {"name": "Ember", "col": Color("ff7a3a"), "job": "Kindling", "desc": "Keeps the Hearth Oven going (firewood becomes kin kibble), and warms the Incubator's Rare Egg twice as fast."},
 	"tide": {"name": "Tide", "col": Color("4ab0ff"), "job": "Watering", "desc": "Waters the crops so they grow."},
 	"bloom": {"name": "Bloom", "col": Color("6fd86a"), "job": "Planting", "desc": "Sows seeds in empty plots and tends growing crops along."},
 	"spark": {"name": "Spark", "col": Color("ffe04a"), "job": "Powering", "desc": "Cranks the Spark Mill: a powered farm works half again as fast."},

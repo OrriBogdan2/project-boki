@@ -33,6 +33,33 @@ const STATS := {
 	"focus": {"name": "Focus", "col": Color("b9a6f5"), "desc": "Skill recharges 0.3% faster a point", "drill": "Still pond"},
 }
 
+# ------------------------------------------------------------------ inborn gifts (IVs)
+## Like a Pokemon's IVs: what a kin is born with, 0 to 31 in each of five stats, set when it hatches
+## or is caught and never trained. Bred kin take IV_INHERIT of them from their parents. The effect
+## is small and capped (IV_BONUS at 31, linear from 0), so a flawless kin is only a little ahead of
+## a plain one: everything that reads them goes through iv_mult().
+const IV_MAX := 31
+const IV_KEYS := ["hp", "atk", "spd", "work", "bond"]
+const IVS := {
+	"hp": {"name": "Health", "col": Color("8fe39a"), "desc": "health in a match"},
+	"atk": {"name": "Power", "col": Color("ff7a5a"), "desc": "damage in a match"},
+	"spd": {"name": "Speed", "col": Color("6ad8ff"), "desc": "running speed in a match"},
+	"work": {"name": "Work", "col": Color("f2c84a"), "desc": "how fast it does farm jobs"},
+	"bond": {"name": "Bond", "col": Color("ffb3c6"), "desc": "how fast it fills your bond meter"},
+}
+## The most a stat can gain, at 31 (0 adds nothing). Speed is held lower: a step ahead in a chase
+## matters more than a little extra health.
+const IV_BONUS := {"hp": 0.10, "atk": 0.10, "spd": 0.05, "work": 0.10, "bond": 0.10}
+## Stats a bred kin takes from a parent (each from a random one of the two); the rest are fresh.
+## IV_INHERIT_MAX is the ceiling for a future nest upgrade or rare item (Care.breed's inherit_n):
+## nothing in the game raises it yet.
+const IV_INHERIT := 3
+const IV_INHERIT_MAX := 5
+## Rare Eggs from boss lairs: this many stats are always at least IV_RARE_FLOOR.
+const IV_RARE_HIGH := 3
+const IV_RARE_FLOOR := 26
+const IV_EXPLAIN := "IVs are what a kin is born with: 0 to 31 a stat, fixed for life, passed down when kin breed. 31 is up to 10% better than 0."
+
 const BONDS := [
 	[0.0, "Wary", "Might refuse a risky throw."],
 	[25.0, "Friendly", "Follows you around the farm."],
@@ -78,6 +105,8 @@ static func ensure(rec: Dictionary) -> void:
 		rec["likes"] = {"food": love, "hates": hate, "play": PLAYS[r.randi() % PLAYS.size()]}
 	if not rec.has("known"):
 		rec["known"] = []          # which of food / hates / play you've found out
+	if not rec.has("ivs") or typeof(rec["ivs"]) != TYPE_DICTIONARY:
+		rec["ivs"] = ivs_from_uid(String(rec.get("uid", "x")))     # old saves: fixed by the kin's id
 
 static func need(rec: Dictionary, n: String) -> float:
 	ensure(rec)
@@ -323,10 +352,113 @@ static func feed(rec: Dictionary, f: String) -> Dictionary:
 	out["hungry"] = was < 35.0
 	return out
 
+# ------------------------------------------------------------------ IVs
+## A fresh set of IVs, each 0 to 31.
+static func roll_ivs(rng: RandomNumberGenerator) -> Dictionary:
+	var out := {}
+	for k in IV_KEYS: out[k] = rng.randi_range(0, IV_MAX)
+	return out
+
+## The IVs a kin with this id is born with: the same every time, so old saves get stable ones (and
+## a new kin's random id gives it random ones).
+static func ivs_from_uid(uid: String) -> Dictionary:
+	var r := RandomNumberGenerator.new(); r.seed = hash(uid + "|ivs")
+	return roll_ivs(r)
+
+## A kin's IVs as whole numbers, all five there. Doesn't change the record (a record from another
+## player that has none reads the same ones its id would give).
+static func ivs(rec: Dictionary) -> Dictionary:
+	var src = rec.get("ivs", null)
+	if typeof(src) != TYPE_DICTIONARY:
+		src = ivs_from_uid(String(rec.get("uid", "x")))
+	var out := {}
+	for k in IV_KEYS: out[k] = clampi(int(src.get(k, 0)), 0, IV_MAX)
+	return out
+
+static func iv(rec: Dictionary, stat: String) -> int:
+	return int(ivs(rec).get(stat, 0))
+
+## THE one place IVs turn into numbers: 1.0 at 0, up to 1.0 + IV_BONUS[stat] at 31, linear.
+## stat: hp, atk, spd (match), work (farm jobs), bond (bond meter). Anything else is 1.0.
+static func iv_mult(rec: Dictionary, stat: String) -> float:
+	if rec.is_empty() or not IV_BONUS.has(stat):
+		return 1.0
+	return 1.0 + float(IV_BONUS[stat]) * float(iv(rec, stat)) / float(IV_MAX)
+
+static func iv_total(rec: Dictionary) -> int:
+	var t := 0
+	var v := ivs(rec)
+	for k in IV_KEYS: t += int(v[k])
+	return t
+
+## One stat in words, like the Pokemon judge.
+static func iv_word(v: int) -> String:
+	if v >= 31: return "Best"
+	if v >= 30: return "Fantastic"
+	if v >= 26: return "Very good"
+	if v >= 16: return "Pretty good"
+	if v >= 1: return "Decent"
+	return "Faint"
+
+## The whole set in words, from the total out of 155: [short, line].
+static func iv_grade(rec: Dictionary) -> Array:
+	var t := iv_total(rec)
+	if t >= 126: return ["Remarkable", "Born remarkable: one in a great many."]
+	if t >= 101: return ["Fine stock", "Comes from fine stock, well above most."]
+	if t >= 76: return ["Good stock", "Comes from good stock, a cut above average."]
+	return ["Ordinary stock", "Ordinary stock: much like any other kin."]
+
+## Its best stats (all those tied for the top).
+static func iv_best(rec: Dictionary) -> Array:
+	var v := ivs(rec)
+	var top := -1
+	for k in IV_KEYS: top = maxi(top, int(v[k]))
+	return IV_KEYS.filter(func(k): return int(v[k]) == top)
+
+## The judge's line: overall, then what stands out.
+static func iv_judge(rec: Dictionary) -> String:
+	var best := iv_best(rec)
+	var nm: Array = best.map(func(k): return String(IVS[k]["name"]))
+	var top := iv(rec, String(best[0]))
+	var names: String = nm[0] if nm.size() == 1 else (" and ".join(nm) if nm.size() == 2 else ", ".join(nm.slice(0, -1)) + " and " + nm[-1])
+	var what := ""
+	if top >= IV_MAX: what = "Its %s can't get any better." % names
+	else: what = "Its best %s %s (%s)." % ["is" if nm.size() == 1 else "are", names, iv_word(top).to_lower()]
+	return "%s %s" % [String(iv_grade(rec)[1]), what]
+
+## A bred kin's IVs: n stats (IV_INHERIT, at most IV_INHERIT_MAX) each from a random parent, the rest
+## rolled fresh. Returns {"ivs": {...}, "from": {stat: 0 or 1}} (which parent each came from).
+static func inherit_ivs(a: Dictionary, b: Dictionary, rng: RandomNumberGenerator, n := IV_INHERIT) -> Dictionary:
+	var out := roll_ivs(rng)
+	var keys: Array = IV_KEYS.duplicate()
+	# shuffle with the given rng so a seeded breed is repeatable
+	for i in range(keys.size() - 1, 0, -1):
+		var j := rng.randi_range(0, i)
+		var tmp = keys[i]; keys[i] = keys[j]; keys[j] = tmp
+	var from := {}
+	var va := ivs(a); var vb := ivs(b)
+	for k in keys.slice(0, clampi(n, 0, IV_INHERIT_MAX)):
+		var side := rng.randi_range(0, 1)
+		out[k] = int(va[k]) if side == 0 else int(vb[k])
+		from[k] = side
+	return {"ivs": out, "from": from}
+
+## A Rare Egg's IVs: IV_RARE_HIGH stats are IV_RARE_FLOOR or better, the rest anything.
+static func rare_ivs(rng: RandomNumberGenerator) -> Dictionary:
+	var out := roll_ivs(rng)
+	var keys: Array = IV_KEYS.duplicate()
+	for i in range(keys.size() - 1, 0, -1):
+		var j := rng.randi_range(0, i)
+		var tmp = keys[i]; keys[i] = keys[j]; keys[j] = tmp
+	for k in keys.slice(0, IV_RARE_HIGH):
+		out[k] = rng.randi_range(IV_RARE_FLOOR, IV_MAX)
+	return out
+
 ## Kin from an egg: mostly one parent's species, a blend of both personalities, a head start
 ## along a parent's way of growing, and a very small chance to shimmer (Shiny.egg_chance: 1 in
 ## 4096; a shimmering parent only nudges it, to 1 in 2048, or about 1 in 1365 with two).
-static func breed(a: Dictionary, b: Dictionary, rng: RandomNumberGenerator, sp := "") -> Dictionary:
+## IVs: IV_INHERIT stats from the parents (inherit_n, up to 5, for a future nest upgrade), the rest fresh.
+static func breed(a: Dictionary, b: Dictionary, rng: RandomNumberGenerator, sp := "", inherit_n := IV_INHERIT) -> Dictionary:
 	if sp == "" or not Data.KIN.has(sp):
 		sp = a["species"] if rng.randf() < 0.5 else b["species"]
 	var baby := Save.new_kin(sp)
@@ -342,20 +474,17 @@ static func breed(a: Dictionary, b: Dictionary, rng: RandomNumberGenerator, sp :
 	if not muts.is_empty(): baby["mutations"] = muts
 	baby["trust"] = 55.0
 	baby["parents"] = [String(a["name"]), String(b["name"])]
+	var inh := inherit_ivs(a, b, rng, inherit_n)
+	baby["ivs"] = inh["ivs"]
+	baby["iv_from"] = inh["from"]       # stat -> which parent (index into "parents") it came from
 	ensure(baby)
 	return baby
 
-## Rare Eggs brought home from boss lairs wait in the hatchery (Save.d["rare_eggs"]) and settle into the
-## nest one at a time, whenever it's empty. Returns true if one just settled.
+## Rare Eggs no longer use the breeding nest: they hatch on the Incubator (scripts/core/incubator.gd).
+## Kept for older callers: puts shelf eggs into free incubator cradles. True if any went in.
 static func settle_rare_egg() -> bool:
-	if not Save.d.get("egg", {}).is_empty():
-		return false
-	var q: Array = Save.d.get("rare_eggs", [])
-	if q.is_empty():
-		return false
-	var e: Dictionary = q.pop_front()
-	Save.d["egg"] = {"sp": String(e.get("sp", "")), "rare": true, "boss": String(e.get("boss", "")), "m": int(Save.d.get("matches", 0)), "t": 0.0}
-	return true
+	Incubator.ensure()
+	return Incubator.settle() > 0
 
 ## What hatches from a Rare Egg: a kin of the rare species its boss guarded, a little grown already,
 ## glad to see you, now and then shimmering too.
@@ -369,6 +498,7 @@ static func hatch_rare(egg: Dictionary, rng: RandomNumberGenerator) -> Dictionar
 	baby["trust"] = 50.0
 	baby["shimmer"] = rng.randf() < Shiny.EGG[0]      # as rare as any egg
 	baby["from_boss"] = String(egg.get("boss", ""))
+	baby["ivs"] = rare_ivs(rng)        # three stats 26 or better (shimmer doesn't touch IVs)
 	Evo.ensure(baby)
 	ensure(baby)
 	return baby

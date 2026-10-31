@@ -53,6 +53,7 @@ var hecon: HomeEcon = null       # the armory, feeders, starving, graveyard and 
 var hb: HomeBuild = null         # build mode and the island's layout (home_build.gd, home_layout.gd)
 var training: HomeTraining = null  # the Training Grounds isle, where your combat kit works (home_training.gd)
 var hw: HomeWork = null            # kin at work: jobs, stations and the Job Board (home_work.gd, Work)
+var hinc: HomeIncubator = null     # the Incubator by the Nesting Nook, where Rare Eggs hatch (home_incubator.gd, Incubator)
 
 ## The island being shown: yours, or the one you're visiting.
 func _d() -> Dictionary:
@@ -397,6 +398,12 @@ func _ready() -> void:
 			KinBoxView.demo_roster()
 			var kw := a.substr(14) if a.length() > 14 else "box"
 			get_tree().create_timer(0.4).timeout.connect(func(): KinBoxView.demo_show(self, kw))
+		if a.begins_with("--nest-demo"):
+			# test: a full roster, then the Nesting Nook (=grid, =kin, =rare, =pair), a kin card's IVs (=card)
+			# or the Kin Burrow's side panel (=box). Never written to the save.
+			KinBoxView.demo_roster()
+			var nw := a.substr(12) if a.length() > 12 else "grid"
+			get_tree().create_timer(0.4).timeout.connect(func(): _nest_demo(nw))
 		if a.begins_with("--home-at="):
 			var xy := a.substr(10).split(",")
 			ppos = Vector3(float(xy[0]), 0, float(xy[1])); player.position = ppos; cam.snap(ppos)
@@ -758,6 +765,7 @@ func _process(delta: float) -> void:
 	_train_process(d)
 	if hb: hb.tick(d)
 	if hw: hw.tick(d)
+	if hinc: hinc.tick(d)
 	if training: training.tick(d)
 	cam.follow(ppos, d, panel_open == "" and train.is_empty())
 	_find_interact()
@@ -1601,6 +1609,8 @@ func _find_interact() -> void:
 		if bdd < 1.7 and bdd < bd + 0.4: bd = bdd; best = {"kind": "burrow"}
 	if p2.distance_to(Vector2(NEST_AT.x, NEST_AT.z)) < 1.8 and visit.is_empty():
 		best = {"kind": "egg"} if is_instance_valid(nest) else {"kind": "nook"}
+	if hinc and p2.distance_to(Vector2(INCUB_AT.x, INCUB_AT.z)) < 1.6 and visit.is_empty():
+		best = {"kind": "incubator"}
 	if p2.distance_to(Vector2(YARD_AT.x, YARD_AT.z)) < 1.6 and best.is_empty():
 		best = {"kind": "yard"}
 	if training and visit.is_empty() and training.near_rack(ppos):
@@ -1746,6 +1756,7 @@ func _label_for(it: Dictionary) -> String:
 		"yard": return "Train your partner"
 		"tryon": return "Try on a class, weapon, glove or kin"
 		"nook": return "Pair two kin for an egg"
+		"incubator": return hinc.prompt()
 		"burrow": return "Open the Kin Burrow (%d asleep inside)" % KinBox.boxed().size()
 		"feeder", "grave", "graveyard", "place": return hecon.label(it)
 		"station": return "Job Board" if it["id"] == "job_board" else "%s: open the Job Board" % HomeLayout.CATALOG[it["id"]]["name"]
@@ -1777,6 +1788,9 @@ func _use(it: Dictionary) -> void:
 			var ak := Save.active_kin()
 			if not ak.is_empty(): _open_train(ak)
 		"nook": _open_nook()
+		"incubator":
+			if Incubator.any_ready(): _hatch_incubator(String(hinc.nearest_ready(ppos).get("id", "")))
+			else: nook_tab = "Incubator"; _open_nook()
 		"tryon": training.open_tryon()
 		"burrow": _open_burrow()
 		"feeder", "grave", "graveyard", "place": hecon.use(it)
@@ -2371,6 +2385,13 @@ func _open_shop() -> void:
 					Save.d["furniture"][fk] = int(Save.d["furniture"].get(fk, 0)) + 1, "have %d" % int(Save.d.get("furniture", {}).get(f, 0))])
 		"Farm":
 			goods += hecon.shop_goods()
+			# the Incubator by the Nook: coals to warm Rare Eggs faster, and more cradles
+			goods.append(["coals", "Ember Coals", "Stoke them into the Incubator's brazier: every Rare Egg warms twice as fast for %d minutes." % int(Incubator.COAL_SECS / 60.0), Incubator.COAL_PRICE, Color("ff9a4a"), func(): Save.add_item("coals", 1), "have %d" % int(Save.d["items"].get("coals", 0))])
+			var icost := Incubator.slot_cost()
+			goods.append(["incub_slot", "Incubator cradle", "One more cradle by the Nesting Nook: warm another Rare Egg at the same time (up to %d)." % Incubator.MAX_SLOTS, icost, Color("ffd36a"), func():
+				Save.d["gems"] = int(Save.d["gems"]) + maxi(0, icost)      # Incubator.expand charges it
+				Incubator.expand()
+				if hinc: hinc.refresh(), "%d cradles" % Incubator.slots()])
 			if int(Save.d["plot_cap"]) < 8:
 				goods.append(["plots", "Two more plots", "Grow more at once.", 120 + 80 * (int(Save.d["plot_cap"]) - 4), Color("9c7a52"), func():
 					Save.d["plot_cap"] = int(Save.d["plot_cap"]) + 2
@@ -2407,7 +2428,7 @@ func _shop_card(g: Array) -> Control:
 	var sw := PanelContainer.new()
 	var sb := UI._box(Color(col, 0.2) if open else Color(1, 1, 1, 0.05), 10); UI._pad(sb, 7, 7)
 	sw.add_theme_stylebox_override("panel", sb)
-	var icon: String = {"seed": "seed", "food": "heart", "tonic": "tonic", "rift_key": "portal", "acc": "paw", "furn": "home", "plots": "seed"}.get(key.split(":")[0], "gem")
+	var icon: String = {"seed": "seed", "food": "heart", "tonic": "tonic", "rift_key": "portal", "acc": "paw", "furn": "home", "plots": "seed", "coals": "dash", "incub_slot": "egg"}.get(key.split(":")[0], "gem")
 	sw.add_child(UI.IconDot.new("lock" if not open else icon, col if open else UI.FAINT, 20.0))
 	sw.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	hr.add_child(sw)
@@ -2797,6 +2818,8 @@ func _open_kin(rec: Dictionary) -> void:
 			c2.add_child(UI.section("Affinities", UI.FAINT.lightened(0.2)))
 			for af in Evo.AFF:
 				row.call(c2, Evo.AFF[af]["name"], float(rec["aff"][af]) / maxf(tot, 1.0), Evo.AFF[af]["tint"], "%d%%" % int(round(100.0 * maxf(0.0, float(rec["aff"][af])) / maxf(tot, 1.0))))
+			c2.add_child(UI.spacer(4))
+			IvView.block(rec, c2)        # what it was born with (Care.IVS), under how it's growing
 			if rec.has("parents"):
 				c1.add_child(UI.spacer(4))
 				c1.add_child(UI.kv("Parents", "%s and %s" % [rec["parents"][0], rec["parents"][1]]))
@@ -3822,6 +3845,7 @@ func _open_settings() -> void:
 const YARD_AT := Vector3(40.9, 0, 32.7)
 const YARD_KIN := Vector3(40.6, 0, 32.9)
 const NEST_AT := Vector3(34.4, 0, 33.7)    # the Nesting Nook, between the market stall and the pond
+const INCUB_AT := NEST_AT + Vector3(-2.45, 0, 0.45)    # the Incubator, beside the Nook: Rare Eggs hatch here
 ## The Kin Burrow, where the kin who aren't out on the farm sleep (KinBox, KinBoxView)
 const BURROW_AT := Vector3(30.6, 0, 38.8)    # south of the market stall, between the cottage lot and the pond
 const BURROW_RECT := [29, 38, 31, 39]
@@ -3878,6 +3902,9 @@ func _setup_care() -> void:
 	nl.modulate = Color("ffc0d0"); nl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	nl.position = NEST_AT + Vector3(0, 2.95, -0.7)
 	add_child(nl)
+	if visit.is_empty():
+		hinc = HomeIncubator.new(self)
+		hinc.build()
 	if not visit.is_empty():
 		return
 	# the time you were away: needs drift, kin eat from the feeders, and hungry ones may starve
@@ -3891,9 +3918,16 @@ func _refresh_nest() -> void:
 	if is_instance_valid(nest):
 		nest.queue_free()
 	nest = null
-	if visit.is_empty() and Care.settle_rare_egg():
-		Save.save_game()
-		_toast("A Rare Egg settles into the nest. It's ready to hatch")
+	if visit.is_empty():
+		Incubator.ensure()
+		if Incubator.migrate():
+			# an older save's Rare Egg was sitting in the breeding nest: it moves to the Incubator
+			Save.save_game()
+			if hinc: hinc.refresh()
+			_toast("The Rare Egg moved to the Incubator beside the Nook")
+		elif Incubator.settle() > 0:
+			Save.save_game()
+			if hinc: hinc.refresh()
 	var egg: Dictionary = Save.d.get("egg", {})
 	if egg.is_empty() or not visit.is_empty():
 		return
@@ -4403,40 +4437,260 @@ func _can_pair(rec: Dictionary) -> String:
 	if not Save.d.get("egg", {}).is_empty(): return "There's already an egg in the nest"
 	return ""
 
-## The Nesting Nook: choose two kin who are ready, and they leave an egg in the nest.
+## The Nesting Nook: every kin as a picture, ready ones first. Click one to see its IVs (what it was
+## born with); pick two who are ready and they leave an egg in the nest. With two picked, the side
+## panel lays their IVs side by side with what an egg could take from them.
 var nook_pick: Array = []
+var nook_view := ""          # the kin whose IVs the side panel shows ("" = the pair, or the intro)
+var nook_scroll := 0.0
+var nook_tab := "Pairs"      # Pairs (breeding) or Incubator (Rare Eggs)
+const NOOK_COLS := 4
+const NOOK_TILE := Vector2(128, 0)
+
+## A short word for why a kin can't pair yet ("" if it can), for the tiles.
+func _pair_short(why: String) -> String:
+	if why == "": return ""
+	if why.contains("level"): return "Lv 5 needed"
+	if why.contains("bond"): return "Not close yet"
+	if why.contains("rest"): return "Resting"
+	if why.contains("egg"): return "Egg in nest"
+	if why.contains("full"): return "No room"
+	return why
+
 func _open_nook() -> void:
-	var v := _new_panel("Nesting Nook", 600)
-	v.add_child(UI.label("Pick two kin who are close. They curl up in the nest together and leave an egg; it mixes their personalities and may take after either parent. It hatches after your next expedition, or in about ten minutes at home.", 14, UI.MUTED))
-	if not Save.d.get("egg", {}).is_empty():
-		v.add_child(UI.label("There's already a %s in the nest." % _egg_label(), 16, UI.GOLD))
+	var egg_in: bool = not Save.d.get("egg", {}).is_empty()
+	var v := _new_panel("Nesting Nook", 1010, true)
+	Incubator.ensure()
+	UI.shell_tabs(v, ["Pairs", "Incubator"], nook_tab, func(t): nook_tab = t; _open_nook(), {"Incubator": Incubator.count()} if Incubator.count() > 0 else {})
+	if nook_tab == "Incubator":
+		IncubatorView.build(self, v, _open_nook, _hatch_incubator)
 		return
 	nook_pick = nook_pick.filter(func(u): return not Save.kin(String(u)).is_empty() and _can_pair(Save.kin(String(u))) == "")
-	for o in Save.d["roster"]:
-		var why := _can_pair(o)
-		var row := UI.hbox(10)
-		var picked: bool = nook_pick.has(o["uid"])
-		var l := UI.label("%s  ·  Lv %d %s" % [o["name"], int(o["level"]), Evo.form_name(o)], 16, Data.KIN[o["species"]]["color"] if why == "" else UI.MUTED)
-		l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		row.add_child(l)
-		if why != "":
-			var wl := UI.label(why, 13, UI.MUTED); wl.autowrap_mode = TextServer.AUTOWRAP_OFF
-			row.add_child(wl)
-		else:
-			var uid: String = o["uid"]
-			var cb := func():
-				if nook_pick.has(uid): nook_pick.erase(uid)
-				elif nook_pick.size() < 2: nook_pick.append(uid)
-				_close_panel(); _open_nook()
-			row.add_child(UI.primary("Picked", cb, 110) if picked else UI.button("Pick", cb, 110))
-		v.add_child(row)
-	if nook_pick.size() == 2:
-		var a := Save.kin(String(nook_pick[0])); var b := Save.kin(String(nook_pick[1]))
-		v.add_child(UI.primary("Pair %s and %s" % [a["name"], b["name"]], func():
-			nook_pick = []
-			_make_egg(a, b), 320))
+	if nook_view != "" and Save.kin(nook_view).is_empty(): nook_view = ""
+	var roster: Array = (Save.d["roster"] as Array).duplicate()
+	var ready_n := roster.filter(func(o): return _can_pair(o) == "").size()
+	UI.subtitle(v, ("There's a %s in the nest. It hatches after your next expedition, or in about ten minutes at home." % _egg_label()) if egg_in
+		else "Pick two kin who are close. They leave an egg that mixes their personalities and takes some of their IVs.")
+	UI.head_extra(v).add_child(UI.chip("egg", "%d ready" % ready_n, UI.GOOD if ready_n >= 2 else UI.MUTED, "Kin who can pair now: level 5, a Close bond, rested"))
+	# picked first, then the ready ones, then the rest; higher levels first
+	var rank := func(o) -> int: return 0 if nook_pick.has(o["uid"]) else (1 if _can_pair(o) == "" else 2)
+	roster.sort_custom(func(x, y):
+		var rx: int = rank.call(x); var ry: int = rank.call(y)
+		if rx != ry: return rx < ry
+		return int(x["level"]) > int(y["level"]))
+	var cols := UI.hbox(16)
+	v.add_child(cols)
+	# the kin, as pictures
+	var sc := ScrollContainer.new()
+	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	sc.custom_minimum_size = Vector2(NOOK_COLS * (NOOK_TILE.x + 8) + 14, 420)
+	sc.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	var grid := GridContainer.new()
+	grid.columns = NOOK_COLS
+	grid.add_theme_constant_override("h_separation", 8); grid.add_theme_constant_override("v_separation", 8)
+	sc.add_child(grid)
+	cols.add_child(sc)
+	for o in roster:
+		grid.add_child(_nook_tile(o, egg_in))
+	sc.scroll_vertical = int(nook_scroll)
+	sc.get_v_scroll_bar().value_changed.connect(func(x): nook_scroll = x)
+	(func(): if is_instance_valid(sc): sc.scroll_vertical = int(nook_scroll)).call_deferred()
+	# the side: one kin's IVs, the pair, or what this is
+	var dc := UI.card(UI.CARD, 14, 14)
+	dc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var dv := UI.vbox(8)
+	dc.add_child(dv)
+	cols.add_child(dc)
+	var viewing := Save.kin(nook_view)
+	if not viewing.is_empty():
+		_nook_detail(viewing, dv, egg_in)
+	elif nook_pick.size() == 2:
+		_nook_pair(Save.kin(String(nook_pick[0])), Save.kin(String(nook_pick[1])), dv)
 	else:
-		v.add_child(UI.label("Pick %d more." % (2 - nook_pick.size()), 14, UI.MUTED))
+		_nook_intro(dv, egg_in)
+	UI.footer_left(v).add_child(UI.label("Click a kin to see its IVs", UI.T_SMALL, UI.FAINT))
+	if not egg_in:
+		var pr := UI.footer_primary(v, "Pair them" if nook_pick.size() < 2 else "Pair %s and %s" % [Save.kin(String(nook_pick[0]))["name"], Save.kin(String(nook_pick[1]))["name"]], func():
+			if nook_pick.size() < 2: return
+			var a := Save.kin(String(nook_pick[0])); var b := Save.kin(String(nook_pick[1]))
+			nook_pick = []; nook_view = ""
+			_make_egg(a, b), 200, "egg")
+		pr.disabled = nook_pick.size() < 2
+		pr.tooltip_text = "" if nook_pick.size() == 2 else "Pick %d more" % (2 - nook_pick.size())
+
+## One kin in the Nook: its picture, name, kind and level, rare marks, whether it's ready, its IVs.
+func _nook_tile(o: Dictionary, egg_in: bool) -> Control:
+	var uid := String(o["uid"])
+	var why := _can_pair(o)
+	var picked: bool = nook_pick.has(uid)
+	var viewed := uid == nook_view
+	var t := UI.tile_card(picked or viewed, func(): nook_view = uid; _open_nook(), 8, UI.ACCENT if picked else UI.TEAL)
+	t.custom_minimum_size = NOOK_TILE
+	var tv := UI.vbox(2)
+	tv.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	t.add_child(tv)
+	# the picture, with its level, rare marks and pick number over it
+	var pic_box := Control.new()
+	pic_box.custom_minimum_size = Vector2(NOOK_TILE.x - 16, 74)
+	pic_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var pic := KinPortrait.view(o, get_tree(), 74.0)
+	pic.position = Vector2((NOOK_TILE.x - 16 - 74) * 0.5, 0)
+	pic.size = Vector2(74, 74)
+	if why != "" and not picked: pic.modulate = Color(1, 1, 1, 0.55)
+	pic_box.add_child(pic)
+	var lv := UI.label("Lv %d" % int(o.get("level", 1)), 11, UI.INK, UI.semi)
+	lv.add_theme_constant_override("outline_size", 4)
+	lv.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
+	lv.position = Vector2(0, -2)
+	pic_box.add_child(lv)
+	var marks := Mutations.badges(o, 14.0)      # shimmer and mutations, up to three
+	marks.add_theme_constant_override("separation", 2)
+	while marks.get_child_count() > 3: marks.get_child(marks.get_child_count() - 1).free()
+	marks.position = Vector2(NOOK_TILE.x - 16 - 16 * marks.get_child_count(), -1)
+	pic_box.add_child(marks)
+	if picked:
+		var n := UI.tag(str(nook_pick.find(uid) + 1), UI.ACCENT)
+		n.position = Vector2(0, 52)
+		pic_box.add_child(n)
+	tv.add_child(pic_box)
+	var nm := UI.label(String(o["name"]), UI.T_SMALL, UI.INK if why == "" or picked else UI.MUTED, UI.semi)
+	nm.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	nm.clip_text = true
+	tv.add_child(nm)
+	var spl := UI.label(Evo.form_name(o), 11, UI.MUTED)
+	spl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	spl.clip_text = true
+	tv.add_child(spl)
+	var st := UI.hbox(6)
+	st.alignment = BoxContainer.ALIGNMENT_CENTER
+	st.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	if picked: st.add_child(UI.tag("Picked", UI.ACCENT))
+	elif why == "": st.add_child(UI.tag("Ready", UI.GOOD))
+	else: st.add_child(UI.tag(_pair_short(why), UI.MUTED))
+	var mi := IvView.mini(o, 14.0, false)
+	mi.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	st.add_child(mi)
+	tv.add_child(st)
+	var tags := Mutations.tags(o)
+	t.tooltip_text = "%s the %s%s  ·  Lv %d\n%s\nIVs %d/155 (%s)" % [o["name"], (" ".join(tags) + " ") if not tags.is_empty() else "", Evo.form_name(o), int(o.get("level", 1)),
+		"Ready to pair" if why == "" else why, Care.iv_total(o), Care.iv_grade(o)[0]]
+	return t
+
+## The side panel for one kin: who it is, then its IVs as a chart, rows and the judge's word.
+func _nook_detail(rec: Dictionary, dv: VBoxContainer, egg_in: bool) -> void:
+	var uid := String(rec["uid"])
+	var sp: Dictionary = Data.KIN[rec["species"]]
+	var col: Color = Shiny.body(rec)
+	var top := UI.hbox(12)
+	top.add_child(KinPortrait.view(rec, get_tree(), 72.0))
+	var tv := UI.vbox(2)
+	tv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var nl := UI.title(String(rec["name"]), UI.T_HEAD + 3, col.lerp(UI.INK, 0.35))
+	nl.clip_text = true
+	tv.add_child(nl)
+	tv.add_child(UI.label("Level %d %s  ·  %s kin" % [int(rec["level"]), Evo.form_name(rec), String(sp["type"]).capitalize()], UI.T_SMALL, UI.INK))
+	var why := _can_pair(rec)
+	tv.add_child(UI.label("Ready to pair" if why == "" else why, 12, UI.GOOD if why == "" else UI.MUTED))
+	var mk := UI.hbox(4)
+	if rec.get("shimmer", false): mk.add_child(UI.tag("Shimmering", Color("fff0a0")))
+	for mid in Mutations.of(rec):
+		var mt := UI.tag(Mutations.name_of(mid), Mutations.col_of(mid))
+		mt.tooltip_text = Mutations.perk_text(mid)
+		mt.mouse_filter = Control.MOUSE_FILTER_PASS
+		mk.add_child(mt)
+	if rec.get("rare", false): mk.add_child(UI.tag("Rare Egg", UI.GOLD))
+	if mk.get_child_count() > 0: tv.add_child(mk)
+	top.add_child(tv)
+	dv.add_child(top)
+	dv.add_child(IvView.heading())
+	IvView.first_view_line(dv)
+	var mid := UI.hbox(10)
+	mid.add_child(IvView.radar(rec, 168.0, col.lerp(UI.ACCENT, 0.35)))
+	var wv := UI.vbox(8)
+	wv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	wv.alignment = BoxContainer.ALIGNMENT_CENTER
+	wv.add_child(IvView.grade_line(rec))
+	wv.add_child(IvView.word_list(rec))
+	mid.add_child(wv)
+	dv.add_child(mid)
+	var jv := UI.vbox(2)
+	jv.add_child(UI.para(Care.iv_judge(rec), 13, UI.INK))
+	var from: Dictionary = rec.get("iv_from", {})
+	if rec.has("parents") and not from.is_empty():
+		var bits: Array = []
+		for side in [0, 1]:
+			var ks: Array = Care.IV_KEYS.filter(func(k): return from.has(k) and int(from[k]) == side)
+			if not ks.is_empty():
+				bits.append("%s from %s" % [", ".join(ks.map(func(k): return String(Care.IVS[k]["name"]))), rec["parents"][side]])
+		jv.add_child(UI.para("; ".join(bits) + ".", 12, UI.MUTED))
+	elif rec.get("rare", false):
+		jv.add_child(UI.para("From a Rare Egg: three of its IVs are 26 or better.", 12, UI.MUTED))
+	dv.add_child(jv)
+	var br := UI.hbox(8)
+	if not egg_in:
+		if nook_pick.has(uid):
+			br.add_child(UI.button("Unpick", func(): nook_pick.erase(uid); _open_nook(), 0, "close"))
+		elif why == "":
+			var pk := UI.button("Pick for an egg", func():
+				if nook_pick.size() >= 2: nook_pick.pop_front()
+				nook_pick.append(uid)
+				if nook_pick.size() == 2: nook_view = ""     # show the pair
+				_open_nook(), 0, "egg")
+			br.add_child(pk)
+	if nook_pick.size() == 2 and not nook_pick.has(uid):
+		br.add_child(UI.ghost("Back to the pair", func(): nook_view = ""; _open_nook()))
+	elif nook_pick.size() == 2:
+		br.add_child(UI.ghost("Compare the pair", func(): nook_view = ""; _open_nook()))
+	br.add_child(UI.fill())
+	br.add_child(UI.ghost("Details", func(): _open_kin(rec)))
+	dv.add_child(br)
+
+## The side panel with two picked: both, their IVs side by side, what an egg could take.
+func _nook_pair(a: Dictionary, b: Dictionary, dv: VBoxContainer) -> void:
+	var top := UI.hbox(10)
+	top.alignment = BoxContainer.ALIGNMENT_CENTER
+	for i in 2:
+		var r: Dictionary = a if i == 0 else b
+		var pv := UI.vbox(0)
+		var pic := KinPortrait.view(r, get_tree(), 64.0)
+		pic.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		pv.add_child(pic)
+		var l := UI.label("Lv %d %s" % [int(r["level"]), Evo.form_name(r)], 11, UI.MUTED)
+		l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		pv.add_child(l)
+		top.add_child(pv)
+		if i == 0:
+			var h := Icons.Glyph.new("heart", Color("ff8fb0"), 22.0)
+			h.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+			top.add_child(h)
+	dv.add_child(top)
+	dv.add_child(IvView.heading())
+	dv.add_child(IvView.compare(a, b, 100.0))
+	dv.add_child(IvView.pass_on(a, b))
+	var sp_line := UI.para("The egg will be a %s or a %s, with a blend of their personalities." % [Data.KIN[a["species"]]["name"], Data.KIN[b["species"]]["name"]] if a["species"] != b["species"] else "The egg will be a %s, with a blend of their personalities." % Data.KIN[a["species"]]["name"], 12, UI.MUTED)
+	dv.add_child(sp_line)
+	var br := UI.hbox(8)
+	br.add_child(UI.ghost("Clear picks", func(): nook_pick = []; _open_nook()))
+	dv.add_child(br)
+
+## The side panel before you've picked: what the Nook is for, and what IVs are.
+func _nook_intro(dv: VBoxContainer, egg_in: bool) -> void:
+	dv.add_child(UI.section("How it works", UI.FAINT.lightened(0.2)))
+	if egg_in:
+		dv.add_child(UI.para("The nest is taken until this egg hatches. You can still look through your kin's IVs.", UI.T_SMALL, UI.INK))
+	else:
+		dv.add_child(UI.para("Pick two kin who are ready: level 5, a Close bond, and rested from their last egg. The egg hatches after your next expedition, or in about ten minutes at home.", UI.T_SMALL, UI.INK))
+	dv.add_child(UI.spacer(4))
+	dv.add_child(IvView.heading())
+	dv.add_child(UI.para(Care.IV_EXPLAIN, UI.T_SMALL, UI.MUTED))
+	dv.add_child(UI.para("An egg takes 3 of its 5 IVs from its parents (each from one of them at random) and rolls the other 2 fresh. Rare Eggs from boss lairs always have 3 high ones.", UI.T_SMALL, UI.MUTED))
+	if nook_pick.size() == 1:
+		var r := Save.kin(String(nook_pick[0]))
+		dv.add_child(UI.spacer(4))
+		dv.add_child(UI.label("%s is picked. Pick one more." % r["name"], UI.T_SMALL, UI.ACCENT_HI))
+	elif not egg_in:
+		dv.add_child(UI.spacer(4))
+		dv.add_child(UI.label("Click a kin to see its IVs, then pick two.", UI.T_SMALL, UI.ACCENT_HI))
 
 func _make_egg(rec: Dictionary, ok: Dictionary) -> void:
 	# which parent it takes after is settled now, so the egg can wear that element's name and colour
@@ -4452,23 +4706,78 @@ func _make_egg(rec: Dictionary, ok: Dictionary) -> void:
 	Sfx.play("unlock")
 	_toast("A %s appeared in the Nesting Nook" % Data.egg_name(esp))
 
+## Tooling for --nest-demo: a bred kin and a Rare Egg kin join the demo roster, then a view opens.
+func _nest_demo(which: String) -> void:
+	Save.no_write = true
+	_close_panel()
+	for r in Save.d["roster"]:
+		Care.ensure(r); r.erase("starve")
+		for n in Care.NEEDS: r["needs"][n] = 90.0
+	Save.d["egg"] = {}
+	Save.d["tutorial"].erase("ivs_seen")
+	var rng := RandomNumberGenerator.new(); rng.seed = 5
+	var ready: Array = []
+	for r in Save.d["roster"]:
+		if _can_pair(r) == "" and not r.get("starter", false): ready.append(r)
+	ready.sort_custom(func(x, y): return Care.iv_total(x) > Care.iv_total(y))
+	var pa: Dictionary = ready[0]
+	var pb: Dictionary = {}
+	for r in ready:
+		if r["species"] != pa["species"]: pb = r; break
+	var kid := Care.breed(pa, pb, rng)
+	kid["name"] = "Sprig"; kid["level"] = 6; kid["trust"] = 62.0
+	Save.d["roster"].append(kid); KinBox.route_new(kid)
+	var rare := Care.hatch_rare({"sp": "cairnback" if Data.KIN.has("cairnback") else String(Data.common_kin()[0]), "boss": ""}, rng)
+	rare["name"] = "Tor"
+	Save.d["roster"].append(rare); KinBox.route_new(rare)
+	nook_pick = []; nook_view = ""; nook_scroll = 0.0; nook_tab = "Pairs"
+	if which.begins_with("incub"):
+		# five Rare Eggs in the cradles (warming, one ready), two waiting on the shelf, an Ember kin at the brazier
+		Save.d["incubator"] = {}; Save.d["rare_eggs"] = []
+		Incubator.ensure()
+		var bosses: Array = Data.MOBS.keys().filter(func(b): return Data.MOBS[b].has("egg"))
+		for i in 7:
+			var bk: String = bosses[i % bosses.size()] if not bosses.is_empty() else ""
+			Incubator.add(String(Data.MOBS[bk]["egg"]) if bk != "" else String(Data.common_kin()[0]), bk)
+		var heats := [1.0, 0.7, 0.5, 0.3, 0.1]
+		for e in Incubator.eggs(): e["heat"] = Incubator.HEAT_NEED * float(heats[int(e["slot"]) % heats.size()])
+		Save.d["incubator"]["coal"] = 120.0
+		Save.d["items"]["coals"] = 2
+		if hinc:
+			for e in Incubator.ready_eggs(): hinc.ready_ids[String(e["id"])] = true
+			hinc.refresh()
+		var ember: Dictionary = {}
+		for k in kins:
+			if Work.level(k["rec"], "ember") > 0: ember = k; break
+		if not ember.is_empty() and hw:
+			for n in Care.NEEDS: ember["rec"]["needs"][n] = 100.0
+			ember["pos"] = hinc.warm_spot(); (ember["node"] as Node3D).position = ember["pos"]
+			hw.scan()
+			for j in hw.jobs:
+				if String(j["kind"]) == "warm": hw.take(ember, j)
+		ppos = INCUB_AT + Vector3(1.9, 0, 1.3) if which != "incub-wide" else INCUB_AT + Vector3(1.6, 0, 2.6); player.position = ppos; cam.snap(ppos)
+		cam.zoom_to = 1.1 if which == "incub-wide" else 0.42; cam.zoom = cam.zoom_to
+		if which == "incub-panel":
+			nook_tab = "Incubator"
+			get_tree().create_timer(1.2).timeout.connect(_open_nook)
+		return
+	match which:
+		"kin": nook_view = String(kid["uid"]); _open_nook()
+		"rare": nook_view = String(rare["uid"]); _open_nook()
+		"pair": nook_pick = [String(pa["uid"]), String(pb["uid"])]; _open_nook()
+		"card": kin_tab = "Growth"; _open_kin(kid)
+		"card-care": kin_tab = "Care"; _open_kin(kid)
+		"card-train": kin_tab = "Training"; _open_kin(kid)
+		"box": KinBoxView.sel = String(kid["uid"]); KinBoxView.page = KinBox.page_of(kid) if KinBox.is_boxed(kid) else 0; _open_burrow()
+		_: _open_nook()
+
+## From a kin's card: the Nesting Nook with this kin already picked.
 func _open_pair(rec: Dictionary) -> void:
-	var v := _new_panel("Pair %s" % rec["name"], 560)
-	v.add_child(UI.label("Two kin who are close leave an egg in the Nesting Nook. It hatches after your next expedition (or about ten minutes at home).", 14, UI.MUTED))
-	var any := false
-	for o in Save.d["roster"]:
-		if o == rec or _can_pair(o) != "":
-			continue
-		any = true
-		var row := UI.hbox(10)
-		var l := UI.label("%s  ·  Lv %d %s" % [o["name"], int(o["level"]), Evo.form_name(o)], 16, Data.KIN[o["species"]]["color"])
-		l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		row.add_child(l)
-		var ok: Dictionary = o
-		row.add_child(UI.primary("Pair them", func(): _make_egg(rec, ok), 150))
-		v.add_child(row)
-	if not any:
-		v.add_child(UI.label("No other kin is ready yet. Partners need level 5, a Close bond and a few expeditions' rest.", 15))
+	nook_tab = "Pairs"
+	nook_pick = [String(rec["uid"])] if _can_pair(rec) == "" else []
+	nook_view = String(rec["uid"])
+	nook_scroll = 0.0
+	_open_nook()
 
 func _hatch_nest_egg() -> void:
 	var egg: Dictionary = Save.d.get("egg", {})
@@ -4482,10 +4791,31 @@ func _hatch_nest_egg() -> void:
 	var rng := RandomNumberGenerator.new(); rng.randomize()
 	var baby := Care.hatch_rare(egg, rng) if rare else Care.breed(a, b, rng, _egg_species())
 	Save.d["egg"] = {}
+	_hatch_play(baby, rare, String(egg.get("boss", "")), NEST_AT, nest.get_node("Shell") if is_instance_valid(nest) else null)
+
+## A ready Rare Egg in the Incubator hatches (Incubator.hatch: a rare kin with three high IVs), in
+## its own cradle. id: which egg ("" for the first one ready).
+func _hatch_incubator(id := "") -> void:
+	if not Incubator.any_ready():
+		return
+	_close_panel()
+	var e: Dictionary = Incubator.find(id) if id != "" else {}
+	if e.is_empty() or not Incubator.egg_ready(e): e = Incubator.ready_eggs()[0]
+	var boss := String(e.get("boss", ""))
+	var at: Vector3 = hinc.slot_pos(int(e.get("slot", 0))) if hinc else INCUB_AT
+	var shell: Node3D = hinc.egg_nodes.get(String(e["id"]), null) if hinc else null
+	var rng := RandomNumberGenerator.new(); rng.randomize()
+	var baby := Incubator.hatch(rng, String(e["id"]))
+	if baby.is_empty():
+		return
+	_hatch_play(baby, true, boss, at, shell)
+
+## A new kin out of an egg: into the roster, then the hatch in stages, the reveal and naming.
+func _hatch_play(baby: Dictionary, rare: bool, boss: String, at: Vector3, hide: Node3D) -> void:
 	# it's yours from the moment it hatches; the naming card only renames it
 	baby["name"] = Data.KIN_NAMES.pick_random()
 	if rare:
-		Save.remember(baby, "born", "hatched from a Rare Egg you carried home from %s" % String(Data.MOBS.get(String(egg.get("boss", "")), {}).get("name", "a boss's lair")), 2.0)
+		Save.remember(baby, "born", "hatched from a Rare Egg you carried home from %s" % String(Data.MOBS.get(boss, {}).get("name", "a boss's lair")), 2.0)
 		Progress.add("rare_hatched")
 	else:
 		Save.remember(baby, "born", "hatched in the nest on your farm", 0.0)
@@ -4497,23 +4827,24 @@ func _hatch_nest_egg() -> void:
 	building_now = true
 	# the egg hatches in stages: wiggles, cracks, a peek, then the kin pops out
 	var shell_c: Color = Color("ffd36a") if rare else Color(Data.KIN[baby["species"]]["color"]).lightened(0.15)
-	if is_instance_valid(nest):
-		nest.get_node("Shell").visible = false
+	if is_instance_valid(hide):
+		hide.visible = false
 	var eh := EggHatch.new(baby["species"], fx, 0.26, 0.36, 1.0, baby)
 	eh.shell_col = shell_c
 	eh.spot_col = Color("fff6c0")
-	eh.position = NEST_AT
+	eh.position = at
 	eh.scale = Vector3.ONE * 1.2
 	add_child(eh)
 	eh.start()
 	var zoom0: float = cam.zoom_to
 	cam.zoom_to = 0.5
 	eh.done.connect(func():
-		var land: Vector3 = eh.kin_node.global_position if is_instance_valid(eh.kin_node) else NEST_AT + Vector3(0.8, 0, 0.6)
+		var land: Vector3 = eh.kin_node.global_position if is_instance_valid(eh.kin_node) else Vector3(at.x, 0, at.z) + Vector3(0.8, 0, 0.6)
 		land.y = 0.0
 		if is_instance_valid(eh.kin_node): eh.kin_node.queue_free()
 		eh.queue_free()
 		_refresh_nest()
+		if hinc: hinc.refresh()
 		building_now = false
 		cam.zoom_to = zoom0
 		_spawn_kin()

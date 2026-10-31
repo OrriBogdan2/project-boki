@@ -36,16 +36,16 @@ const TOPUP_AT := 60.0
 
 ## Base seconds for each kind of job at level 1 (a level 4 kin takes under half).
 const TIME := {"water": 3.0, "plant": 4.0, "tend": 4.5, "harvest": 3.5, "chop": 9.0, "break": 9.0, "log": 6.5, "ore": 7.0,
-	"bake": 7.0, "craft": 11.0, "power": 5.0, "chill": 5.0, "carry": 1.2, "stock": 1.5, "mend": 3.5, "brew": 14.0, "ranch": 22.0}
+	"bake": 7.0, "craft": 11.0, "power": 5.0, "chill": 5.0, "carry": 1.2, "stock": 1.5, "mend": 3.5, "brew": 14.0, "ranch": 22.0, "warm": 30.0}
 ## What each job is called on the hover card and the Job Board.
 const VERB := {"water": "Watering the %s", "plant": "Sowing a plot", "tend": "Tending the %s", "harvest": "Picking the %s",
 	"chop": "Felling a tree", "break": "Breaking a boulder", "log": "Splitting logs", "ore": "Mining rock", "bake": "Baking kibble",
 	"craft": "Crafting scrap", "power": "Cranking the Spark Mill", "chill": "Chilling the Cold Store", "carry": "Hauling %s to the chest",
-	"stock": "Filling a feeder", "mend": "Looking after %s", "brew": "Brewing a tonic", "ranch": "Ranching"}
+	"stock": "Filling a feeder", "mend": "Looking after %s", "brew": "Brewing a tonic", "ranch": "Ranching", "warm": "Warming the incubator"}
 ## The animation each job plays.
 const ANIM := {"water": "dip", "plant": "dip", "tend": "dip", "harvest": "dip", "chop": "hammer", "break": "hammer", "log": "hammer",
 	"ore": "hammer", "bake": "shimmy", "craft": "hammer", "power": "crank", "chill": "shimmy", "carry": "lift", "stock": "lift",
-	"mend": "sway", "brew": "sway", "ranch": "lounge"}
+	"mend": "sway", "brew": "sway", "ranch": "lounge", "warm": "sway"}
 
 func _init(home) -> void:
 	h = home
@@ -84,6 +84,7 @@ func scan() -> void:
 	_station_jobs()
 	_haul_jobs()
 	_mend_jobs()
+	_warm_jobs()
 	# forget claims nobody is working on any more
 	var live := {}
 	for k in h.kins:
@@ -386,6 +387,13 @@ func _mend_jobs() -> void:
 		if Care.need(r, "joy") < 35.0 or Care.need(r, "energy") < 25.0 or Care.starve_stage(r) != "":
 			_job("mend:%s" % String(r["uid"]), "mend", "mend", o["pos"], o["pos"], {"who": String(r["uid"]), "what": String(r["name"])})
 
+## The Incubator by the Nook: an Ember kin sits by the brazier while Rare Eggs warm (they all warm
+## twice as fast while one's at it; Incubator.rate, HomeIncubator.warmed).
+func _warm_jobs() -> void:
+	if h.hinc == null or not Incubator.any_warming():
+		return
+	_job("warm:incubator", "ember", "warm", h.hinc.warm_spot(), h.hinc.at() + Vector3(0, 0.6, -0.38))
+
 # ------------------------------------------------------------------ choosing a job
 func _night() -> bool:
 	return sin((h.day_t - 0.25) * TAU) < -0.2
@@ -466,6 +474,8 @@ func _valid(J: Dictionary) -> bool:
 			return not h.hecon._feeder(String(J["fid"])).is_empty()
 		"mend":
 			return not h._kin_entry(Save.kin(String(J["who"]))).is_empty()
+		"warm":
+			return h.hinc != null and Incubator.any_warming()
 	if J.has("u"):
 		for s in HomeLayout.stations(h._d()):
 			if int(s["e"]["u"]) == int(J["u"]): return true
@@ -525,7 +535,7 @@ func step(k: Dictionary, d: float) -> void:
 			if Vector2(aim.x - pos.x, aim.z - pos.z).length() < 0.55:
 				if J["phase"] == "go":
 					J["phase"] = "work"
-					J["left"] = float(J["t"]) / (Work.speed(int(J["lv"])) * _boost(J))
+					J["left"] = float(J["t"]) / (Work.speed(int(J["lv"])) * _boost(J) * Care.iv_mult(rec, "work"))    # Work IV: up to 10% faster
 					J["dur"] = J["left"]
 					_hold(k, String(J["kind"]))
 				else:
@@ -727,6 +737,9 @@ func _finish(k: Dictionary, J: Dictionary) -> bool:
 				pk["joy_t"] = 0.8
 			produced(at, "%s looked after %s" % [nm, pr["name"]], "mend", "")
 			Work.count("mended", 1)
+		"warm":
+			h.fx.burst(at, Color("ff9a3a"), 10, 1.6)
+			produced(at, "%s kept the Rare Eggs warm" % nm, "ember", "")
 		"ranch":
 			var r: Array = Work.RANCH.get(String(rec["species"]), Work.RANCH_DEFAULT)
 			var cnt := int(r[2]) + (1 if lv >= 4 else 0)

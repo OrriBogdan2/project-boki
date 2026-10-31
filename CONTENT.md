@@ -43,6 +43,8 @@ Those files are checked with `--grammar-check` but not used by the game yet; the
 - `work`: its work elements, the farm jobs it does on its own, each at a level 1-4, e.g. `{"bloom": 3, "forage": 2, "ranch": 1}`. Elements: ember, tide, bloom, spark, craft, forage, timber, stone, frost, haul, mend, ranch (see `scripts/core/work.gd`). Two or three per kin.
 - `shiny`: its hand-picked shimmer palette, `{"color", "belly", "glow"}` (and `"wing"` for winged kin). Shimmers are 1 in 4096 (see `scripts/core/shiny.gd`).
 
+IVs aren't set per species: every kin is born with its own (Health, Power, Speed, Work, Bond, 0-31 each; `Care.IVS` in `scripts/core/care.gd`), worth at most +10% (+5% Speed) at 31 through `Care.iv_mult`. Bred kin take 3 from their parents; Rare Eggs (which hatch on the Incubator by the Nesting Nook, `scripts/core/incubator.gd`) always have 3 at 26 or better. `--iv-check` and `--incubator-check` test them.
+
 Open `tests/kin_gallery.tscn` and press F6 to see it next to the others.
 
 ## A new ability: `content/abilities/<id>.json`
