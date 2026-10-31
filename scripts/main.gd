@@ -2649,6 +2649,37 @@ func _home_build_check() -> void:
 		if mv.world.island_id(mv.ppos.x, mv.ppos.z) == "training_gap" and mv.pvy == 0.0 and not mv.gliding: break
 	Input.action_release("jump"); Input.action_release("right")
 	ok.call(over_gap and mv.world.island_id(mv.ppos.x, mv.ppos.z) == "training_gap" and not left_zone, "gliding the gap lands you on the islet without leaving the Training Grounds (crossed: %s, left: %s, at %.1f, %.1f)" % [over_gap, left_zone, mv.ppos.x, mv.ppos.z])
+	# dashing at home: the match's charges and recharge for each class, then the long dash
+	var cls0 := String(Save.d.get("cls", "medium"))
+	tr.try = {}
+	mv.ppos = Vector3(38.0, 0, 34.5); mv.py = mv._ground_h(38.0, 34.5); mv.pvy = 0.0; mv.gliding = false
+	tr.tick(0.01)
+	for ck in ["light", "medium", "heavy"]:
+		Save.d["cls"] = ck
+		var dg: Dictionary = mv._dodge()
+		var want := int(Content.class_dodge(ck).charges) if Content.class_dodge(ck) else int(Data.CLASSES[ck]["dashes"])
+		mv.ppos = Vector3(38.0, 0, 34.5); mv.py = mv._ground_h(38.0, 34.5); mv.pvy = 0.0; mv.dash_t = 0.0; mv.ex_cd = 0.0
+		mv.dash_charges = 9.0; mv._move_player(0.0001)     # topped up to the class's count
+		var shorts := 0
+		var longs := 0
+		for k in want + 2:
+			mv.dash_t = 0.0; mv.ppos = Vector3(38.0, 0, 34.5); mv.py = mv._ground_h(38.0, 34.5); mv.pvy = 0.0
+			var had: float = mv.dash_charges
+			if mv.try_dash(Vector2(1, 0), false):
+				if had >= 1.0: shorts += 1
+				else: longs += 1
+		var regen := float(dg["cd"])
+		mv.dash_t = 0.0
+		var waited := 0.0
+		while mv.dash_charges < 1.0 and waited < 40.0:
+			mv.ppos = Vector3(38.0, 0, 34.5); mv.py = mv._ground_h(38.0, 34.5); mv.pvy = 0.0; mv.dash_t = 0.0
+			mv._move_player(0.05); waited += 0.05
+		mv.dash_t = 0.0
+		var again: bool = mv.try_dash(Vector2(1, 0), false)
+		ok.call(shorts == want and longs == 1 and absf(waited - regen) < 0.2 and again and absf(float(dg["ex_cd"]) - float(Data.CLASSES[ck]["ex_cd"])) < 0.01,
+			"%s dashes at home as in a match: %d short (%d), then the long one (%d), %.1fs to recharge (dodge cooldown %.1fs), then again (%s)" % [ck, shorts, want, longs, waited, regen, again])
+	Save.d["cls"] = cls0
+	mv.dash_t = 0.0
 	home4.queue_free()
 	await get_tree().process_frame
 	# procedural homes: two seeds, two different islands, both usable; the first look round

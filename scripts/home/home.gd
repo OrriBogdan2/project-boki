@@ -779,6 +779,8 @@ var glide_hold := 0.0
 var dash_t := 0.0
 var dash_v := Vector2.ZERO
 var dash_charges := 2.0
+var ex_cd := 0.0               # the long dash (Shift in the air, or with the short ones spent), as in a match
+var dash_pips: Control = null  # the stamina pips over your head, as in a match
 var safe_at := Vector3(38.0, 0, 34.5)
 var glider_node: MeshInstance3D = null
 const HOME_ZOOM := 1.2         # the camera on arriving home: midway between close (0.8) and the widest the wheel goes (1.6)
@@ -786,9 +788,14 @@ const MANTLE := 1.5            # ledges this far above your feet pop you up when
 const MANTLE_ABYSS := 12.0     # falling past an island's cliff, you can still catch its edge from this far below
 const FALL_RESPAWN := -14.0
 
+## Your class's dodge with the match's numbers: its charges and recharge (Hunter.max_dashes and
+## dash_regen at rank 1), and the class's long dash (ex_dist, ex_time, ex_cd; Hunter.EX_DASH_CD).
 func _dodge() -> Dictionary:
-	var dd := Content.class_dodge(training._cls() if training and training.in_zone else Data.class_of_save())
-	var out := {"charges": 2, "cd": Hunter.DASH_REGEN, "speed": Hunter.DASH_SPEED, "time": Hunter.DASH_TIME}
+	var ck := training._cls() if training and training.in_zone else Data.class_of_save()
+	var dd := Content.class_dodge(ck)
+	var cdat: Dictionary = Data.CLASSES.get(ck, {})
+	var out := {"charges": float(cdat.get("dashes", 2)), "cd": Hunter.DASH_REGEN, "speed": Hunter.DASH_SPEED, "time": Hunter.DASH_TIME,
+		"ex_cd": float(cdat.get("ex_cd", Hunter.EX_DASH_CD)), "ex_time": float(cdat.get("ex_time", Hunter.DASH_TIME * 1.45)), "ex_dist": float(cdat.get("ex_dist", 5.0))}
 	if dd:
 		out["charges"] = dd.charges; out["cd"] = dd.cooldown
 		for e in dd.effects:
@@ -799,6 +806,46 @@ func _dodge() -> Dictionary:
 
 func dashing() -> bool:
 	return dash_t > 0.0
+
+## Shift, by the match's rules (Hunter.do_dash): the short dash while you have a charge and are on
+## the ground; in the air or with the charges spent, the long dash if it's off cooldown.
+func try_dash(mv: Vector2, air: bool) -> bool:
+	var dg := _dodge()
+	var dir := mv if mv.length() > 0.1 else Vector2(-sin(pface), -cos(pface))
+	if not air and dash_charges >= 1.0:
+		dash_charges -= 1.0
+		start_dash(dir, float(dg["speed"]), float(dg["time"]))
+		return true
+	if ex_cd > 0.0:
+		return false
+	ex_cd = float(dg["ex_cd"])
+	var et := float(dg["ex_time"])
+	start_dash(dir, float(dg["ex_dist"]) / maxf(0.01, et), et)
+	pvy = maxf(pvy, 0.0)
+	return true
+
+## The stamina pips over your head: one per dash charge (the next filling as it recharges), and the
+## long dash last, like the match HUD's.
+func _draw_dash_pips() -> void:
+	if dash_pips == null or player == null or cam == null or panel_open != "":
+		return
+	var at := player.position + Vector3(0, 2.3, 0)
+	if cam.is_position_behind(at):
+		return
+	var sp := cam.unproject_position(at)
+	if not sp.is_finite():
+		return
+	var dg := _dodge()
+	var n := int(dg["charges"]) + 1
+	var col := Color("ffd66a")
+	for i in n:
+		var cpt := sp + Vector2(-(n - 1) * 6.5 + i * 13, 0)
+		var fill := clampf(dash_charges - i, 0.0, 1.0) if i < n - 1 else 1.0 - ex_cd / maxf(0.1, float(dg["ex_cd"]))
+		dash_pips.draw_colored_polygon(PackedVector2Array([cpt + Vector2(0, -5), cpt + Vector2(5, 0), cpt + Vector2(0, 5), cpt + Vector2(-5, 0)]), Color(0.04, 0.04, 0.06, 0.8))
+		if fill >= 1.0:
+			dash_pips.draw_colored_polygon(PackedVector2Array([cpt + Vector2(0, -3.5), cpt + Vector2(3.5, 0), cpt + Vector2(0, 3.5), cpt + Vector2(-3.5, 0)]), col)
+		elif fill > 0.0:
+			dash_pips.draw_arc(cpt, 3.0, -PI * 0.5, -PI * 0.5 + TAU * fill, 10, Color(col, 0.6), 2.0)
 
 func start_dash(dir: Vector2, speed: float, time: float) -> void:
 	if dir.length() < 0.1:
@@ -821,11 +868,11 @@ func _move_player(d: float) -> void:
 		if mv.length() > 1.0: mv = mv.normalized()
 	var dg := _dodge()
 	dash_charges = minf(float(dg["charges"]), dash_charges + d / maxf(0.1, float(dg["cd"])))
+	ex_cd = maxf(0.0, ex_cd - d)
 	var gh := _ground_h(ppos.x, ppos.z)
 	var air := py > gh + 0.001 or pvy > 0.0
-	if can_act and Input.is_action_just_pressed("dash") and dash_charges >= 1.0 and dash_t <= 0.0:
-		dash_charges -= 1.0
-		start_dash(mv if mv.length() > 0.1 else Vector2(-sin(pface), -cos(pface)), float(dg["speed"]), float(dg["time"]))
+	if can_act and Input.is_action_just_pressed("dash") and dash_t <= 0.0:
+		try_dash(mv, air)
 	var hv := Vector2(pvel.x, pvel.z)
 	if dash_t > 0.0:
 		dash_t -= d
@@ -926,6 +973,17 @@ func _move_player(d: float) -> void:
 	if air and not gliding and gh > World.VOID + 1.0:
 		ps["air_h"] = clampf(py - gh, 0.0, 30.0)
 	p_anim.update(d, ps)
+	if (dash_pips == null or not is_instance_valid(dash_pips)) and ui:
+		dash_pips = Control.new(); dash_pips.name = "DashPips"
+		dash_pips.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		dash_pips.set_anchors_preset(Control.PRESET_FULL_RECT)
+		dash_pips.draw.connect(_draw_dash_pips)
+		ui.add_child(dash_pips)
+		ui.move_child(dash_pips, 0)
+	if is_instance_valid(dash_pips):
+		var dg0 := _dodge()
+		dash_pips.visible = dash_charges < float(dg0["charges"]) or ex_cd > 0.0
+		if dash_pips.visible: dash_pips.queue_redraw()
 	if p_anim.stepped:
 		Sfx.step(null, -20.0)
 
