@@ -1147,8 +1147,8 @@ func _merge_static(parent: Node3D, roots: Array, label: String) -> void:
 ## grass, flowers, pebbles and undergrowth fade out of the high drop and skyship views, where they'd
 ## be a few pixels each; tall grass (cover you can hide in) reaches further; trees, boulders and
 ## pillars always draw (their far versions are cheaper level-of-detail meshes instead).
-const DRAW_SMALL := 95.0
-const DRAW_BUSH := 130.0
+const DRAW_SMALL := 130.0
+const DRAW_BUSH := 160.0
 const DRAW_BIG_LOW := 230.0     # Low and Medium only: trees and boulders past this are dropped
 
 func _scatter_class(label: String, chunk: int) -> String:
