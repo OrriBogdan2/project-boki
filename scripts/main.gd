@@ -14,6 +14,14 @@ func _fades_on() -> bool:
 	return not (_has_arg("--shot=") or _has_arg("--autoplay") or _has_arg("--simtest"))
 
 func _ready() -> void:
+	if "--relay" in OS.get_cmdline_user_args():
+		# dedicated relay server for desktop online play (scripts/server/relay.gd): no screens, no audio
+		var relay := RelayServer.new()
+		relay.name = "Relay"
+		add_child(relay)
+		if relay.start(OS.get_cmdline_user_args()) != OK:
+			get_tree().quit(1)
+		return
 	Game.main = self
 	fade = ScreenFade.new()
 	add_child(fade)

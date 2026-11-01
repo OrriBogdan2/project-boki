@@ -401,7 +401,7 @@ func _build_ui() -> void:
 	var items: Array = []
 	if has:
 		items.append(["The story so far", func(): Game.goto("prologue", {"then": "title"}), "egg"])
-	if Bridge.net_available():
+	if Net.available():
 		items.append(["Play with friends", func(): Game.goto("lobby", {}), "bond"])
 	items.append(["Save files", func(): Overlay.ctx = "title"; Overlay.open_saves(), "satchel"])
 	items.append(["Settings", func(): Overlay.ctx = "title"; Overlay.open_settings(), "gear"])
