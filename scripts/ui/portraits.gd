@@ -7,7 +7,7 @@ extends RefCounted
 const SIZE := 96
 
 ## A viewport holding a portrait of this look. Add it to the tree; its texture fills in next frame.
-static func make(cls: String, team_col: Color, wid: String, look: Dictionary) -> SubViewport:
+static func make(cls: String, team_col: Color, wid: String, look: Dictionary, arch := "") -> SubViewport:
 	var vp := SubViewport.new()
 	vp.size = Vector2i(SIZE, SIZE)
 	vp.own_world_3d = true
@@ -32,7 +32,7 @@ static func make(cls: String, team_col: Color, wid: String, look: Dictionary) ->
 	rim.light_color = team_col.lerp(Color.WHITE, 0.4)
 	rim.light_energy = 0.6
 	vp.add_child(rim)
-	var mdl := Models.hunter(cls, team_col, wid, "", look)
+	var mdl := Models.hunter(cls, team_col, wid, "", look, arch)
 	var ring := mdl.get_node_or_null("TeamRing")
 	if ring:
 		(ring as Node3D).visible = false
