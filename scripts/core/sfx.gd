@@ -10,7 +10,7 @@ const NAMES := ["smg", "rifle", "thump", "boom", "hit", "crit", "kill", "knock",
 	"swipe", "cleave", "charge", "k_venom", "k_spore", "k_gravity", "k_prism", "k_lunar", "k_echo",
 	"shotgun", "sniper", "hit_heavy", "slash_hit", "armor_hit", "armor_break", "knock_confirm", "extract_ok",
 	"ab_throw", "ab_rail", "ab_charge", "ab_blast", "ab_leap", "ab_slam", "ab_wall", "ab_shield_hit", "ab_guard", "ab_parry",
-	"ab_plant", "ab_tether", "ab_blink", "ab_whirr", "ab_stun", "ab_slow", "ab_hit", "ab_ready"]
+	"ab_plant", "ab_tether", "ab_blink", "ab_whirr", "ab_stun", "ab_slow", "ab_hit", "ab_ready", "level_up"]
 const POOL := 24
 ## Sounds that only exist as several takes (monster voices, little pops); one is picked at random.
 const VOICES := ["v_skitter", "v_spitter", "v_brute", "v_bomber", "v_sentinel", "v_glimmer", "v_warden", "die_small", "die_big",

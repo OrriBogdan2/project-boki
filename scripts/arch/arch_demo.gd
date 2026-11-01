@@ -2,7 +2,8 @@ class_name ArchDemo
 extends RefCounted
 ## Screenshot tooling: --arch-demo=<archetype>:<what> puts the player as that archetype in a training
 ## match with two rival dummies ahead and fires one part of the kit a few rendered frames before the
-## shot (--frames=N): dash, rmb (tap), hold, air, e, r, bonded, level (the level HUD with a level-up).
+## shot (--frames=N): dash, rmb (tap), hold, air, e, r, bonded, level (the level HUD with a level-up),
+## locked (level 3, R still locked until 6).
 
 static func frame(m: Match) -> void:
 	var spec := String(m.opts.get("arch_demo", "")).split(":")
@@ -110,6 +111,10 @@ static func _setup(m: Match, P: Hunter, what: String) -> void:
 	if what == "level":
 		P.lvl = 5; P.xp = float(Hunter.XP_TO[5]) - 8.0; P.slot_lv["ult"] = 0; P.skill_pts = 1
 		P.slot_lv["sec"] = 2; P.slot_lv["kin"] = 1
+	if what == "locked":
+		# early in a run: level 3, two thirds of the way to 4, R still locked until 6
+		P.lvl = 3; P.xp = lerpf(float(Hunter.XP_TO[2]), float(Hunter.XP_TO[3]), 0.66); P.slot_lv["ult"] = 0; P.skill_pts = 0
+		P.slot_lv["gear"] = 0; P.slot_lv["kin"] = 0
 	P.ult = 0.4
 	if P.ak:
 		P.ak.res = P.ak.res_max() * 0.6

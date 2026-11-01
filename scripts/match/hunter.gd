@@ -2943,6 +2943,7 @@ const ULT_AT := [6, 9]
 var lvl := 1
 var xp := 0.0
 var skill_pts := 1
+var level_ups := 0          # how many times this run the local level-up moment played (tests)
 var slot_lv := {"sec": 0, "gear": 0, "dash": 0, "kin": 0, "ult": 0}
 
 func gain_xp(x: float) -> void:
@@ -2959,10 +2960,9 @@ func gain_xp(x: float) -> void:
 		if is_local() and m and m.hud:
 			m.hud.toast("LEVEL %d  ·  +1 SKILL POINT%s" % [lvl, "  ·  ULTIMATE READY TO UNLOCK" if lvl == int(ULT_AT[0]) else ""], Color("ffd27a"))
 			if m.hud.has_method("level_up"): m.hud.level_up(lvl)
-			# the level-up chime: its own two-note rise (distinct from the unlock click)
-			m.sfx("unlock", null, -5.0, 1.45)
-			m.later(0.09, func(): if is_instance_valid(self): m.sfx("pickup", null, -6.0, 1.7))
-			m.later(0.18, func(): if is_instance_valid(self): m.sfx("bond", null, -10.0, 1.6))
+			# the level-up chime: its own rising bell run over a warm swell (tools/gen_level_sfx.py)
+			m.sfx("level_up", null, -2.0, 1.0)
+			level_ups += 1
 	if not is_local():
 		_bot_spend()
 

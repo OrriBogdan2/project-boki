@@ -1179,6 +1179,7 @@ var lvl_seen := -1
 ## A level just went up (Hunter.gain_xp): the badge pops and the portrait bursts gold.
 func level_up(_lv: int) -> void:
 	lvl_pop = 0.35
+	flash(Color("ffd27a"), 0.16)      # a soft gold wash over the whole screen
 
 func _level_badge(pr: Rect2, p: Hunter) -> void:
 	var gold := Color("ffd27a")
@@ -1444,6 +1445,17 @@ func _draw_arch_abilities(sz: Vector2, p: Hunter) -> void:
 		var brr := Rect2(Vector2(x, y + s - 34.0), Vector2(34, 34))
 		_ab_slot("base", brr, "swap", Settings.key_cap("base"), Color("8fe3c8"), p.base_cd / Hunter.BASE_CD if p.base_cd > 0.0 else 0.0, p.base_cd, p.base_cd <= 0.0 and p.base_t <= 0.0)
 
+## What the R slot says about its lock: "LV 6" until then, "UNLOCK" with a point to spend on it,
+## "" once it's unlocked.
+func r_lock_text(p: Hunter) -> String:
+	if int(p.slot_lv.get("ult", 0)) > 0:
+		return ""
+	if p.can_level("ult"):
+		return "UNLOCK"
+	if p.lvl >= int(Hunter.ULT_AT[0]):
+		return "NEXT POINT"
+	return "LV %d" % int(Hunter.ULT_AT[0])
+
 ## One ability in the row, aware of run levels: locked, unlockable, or ranked with pips above.
 func _skill_slot(slot: String, id: String, r: Rect2, icon: String, key: String, col: Color, cdf: float, cds: float, ready: bool, ch := -1, mx := 0) -> void:
 	var p := m.player
@@ -1466,8 +1478,13 @@ func _skill_slot(slot: String, id: String, r: Rect2, icon: String, key: String, 
 		_rounded(Rect2(lc + Vector2(-7, -6), Vector2(14, 11)), lcol, 3)
 		if can:
 			_ctext(Vector2(r.get_center().x, r.position.y - 7), "UNLOCK", 10, Color("ffd27a"), big)
-		elif slot == "ult" and p.ak == null:
-			_ctext(Vector2(r.get_center().x, r.position.y - 7), "LV %d" % int(Hunter.ULT_AT[0]), 10, Color(MUTED, 0.9), big)
+		elif slot == "ult":
+			# R: a tag over the slot saying when it opens, so it never reads as just on cooldown
+			var lt := r_lock_text(p)
+			var tw := big.get_string_size(lt, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x + 12.0
+			var tr := Rect2(Vector2(r.get_center().x - tw * 0.5, r.position.y - 17), Vector2(tw, 14))
+			_rounded(tr, Color(0.03, 0.03, 0.05, 0.95), 5, Color(MUTED, 0.7), 1)
+			_ctext(Vector2(r.get_center().x, tr.end.y - 3), lt, 10, Color(INK, 0.9), big)
 		_keycap(Vector2(r.get_center().x, r.end.y), key, lcol if can else Color(MUTED, 0.6))
 		return
 	_ab_slot(id, r, icon, key, col, cdf, cds, ready, ch, mx)
@@ -3646,11 +3663,20 @@ func _draw_lair_victory(sz: Vector2, p: Hunter) -> void:
 		return
 	var col: Color = Lairs.color_of(L)
 	var w := minf(620.0, sz.x * 0.52)
-	var r := Rect2(Vector2(sz.x * 0.5 - w * 0.5, 22), Vector2(w, 46))
+	var r := Rect2(Vector2(sz.x * 0.5 - w * 0.5, 22), Vector2(w, 54))
 	_rounded(r, Color(0.04, 0.04, 0.07, 0.85), 10, Color(col, 0.6), 2)
-	_ctext(Vector2(sz.x * 0.5, r.position.y + 20), "VICTORY  ·  gate opens in %s  ·  pull the lever, or ride the updraft" % Lairs.clock(m.lairs.victory_left(L)), 15, col, big)
+	# a padlock: you're locked in with the loot until the clock runs out (or you open it early)
+	var lc := r.position + Vector2(24, 26)
+	c.draw_arc(lc + Vector2(0, -5), 6.0, PI, TAU, 12, col, 2.5, true)
+	_rounded(Rect2(lc + Vector2(-8, -5), Vector2(16, 13)), col, 3)
+	_ctext(Vector2(sz.x * 0.5 + 8, r.position.y + 20), "VICTORY  ·  LOCKED IN  ·  gate opens in %s" % Lairs.clock(m.lairs.victory_left(L)), 15, col, big)
 	var k := Settings.key_cap("interact")
-	_ctext(Vector2(sz.x * 0.5, r.position.y + 38), "%s at the lever by the gate  ·  the updraft at the back carries only those who fought" % k, 11, MUTED)
+	_ctext(Vector2(sz.x * 0.5 + 8, r.position.y + 37), "%s at the lever by the gate opens it now  ·  the updraft at the back carries only those who fought" % k, 11, MUTED)
+	# the lock's clock draining
+	var bw := r.size.x - 64.0
+	var f := clampf(m.lairs.victory_left(L) / Lairs.VICTORY_T, 0.0, 1.0)
+	_rounded(Rect2(Vector2(r.position.x + 48, r.end.y - 10), Vector2(bw, 4)), Color(1, 1, 1, 0.12), 2)
+	_rounded(Rect2(Vector2(r.position.x + 48, r.end.y - 10), Vector2(bw * f, 4)), col, 2)
 	feed_top = maxf(feed_top, r.end.y + 8.0)
 
 ## At the top of the screen while you're in a lair with its boss awake: name, phase, health with
