@@ -672,6 +672,10 @@ func _boss_dead(L: Dictionary, b: Boss, credit: Ent) -> void:
 	var killer: Hunter = (credit as Kin).owner_h if credit is Kin and (credit as Kin).owner_h else (credit as Hunter if credit is Hunter else null)
 	L["state"] = "cleared"
 	L["cleared_by"] = killer.pname if killer else ""
+	# everyone's Boki who fought it cheers (and remembers it)
+	for hh in m.hunters:
+		if hh.kin and hh.kin.comp and not hh.out and (hh == killer or hh.flat_dist(b) < 22.0) and hh.kin.state != "fainted":
+			hh.kin.comp.on_boss_kill(String(b.md.get("name", "the boss")), b.pos)
 	(L["nodes"]["label"] as Label3D).text = "%s\nCleared" % L["name"]
 	if L.get("locked", false):
 		_victory(L, b)      # the gate stays shut a moment: the lever, the updraft, or wait it out
@@ -985,6 +989,15 @@ func _tick_show(L: Dictionary) -> void:
 			lbl.text = "%s\n%s has fallen  ·  gate opens %s" % [L["name"], bn, clock(victory_left(L))]
 		else:
 			lbl.text = "%s\n%s FIGHT  ·  %s" % [L["name"], bn.to_upper(), clock(lock_left(L))]
+		# (it's for those outside, like the beam: inside, the top banner says the same and the gate's copy
+		# only lands on top of your HUD)
+		var in_l: bool = m.player != null and inside(L, m.player.pos, 1.0)
+		if in_l != lbl.has_meta("hid_in"):
+			if in_l: lbl.set_meta("hid_in", lbl.visible); lbl.visible = false
+			else: lbl.visible = bool(lbl.get_meta("hid_in")); lbl.remove_meta("hid_in")
+	elif nodes.has("label") and is_instance_valid(nodes["label"]) and (nodes["label"] as Node).has_meta("hid_in"):
+		var l2: Label3D = nodes["label"]
+		l2.visible = bool(l2.get_meta("hid_in")); l2.remove_meta("hid_in")
 	var beam: Node3D = nodes.get("beam")
 	if is_instance_valid(beam) and (beam.visible or (alert_on(L) and beam.has_meta("hid"))):
 		# (it's for those outside: hidden for whoever is in the lair, where it would only glare)

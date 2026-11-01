@@ -366,7 +366,7 @@ func _build_ui() -> void:
 	hint.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.7))
 	hint.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	hint.position.y = 10
+	hint.position.y = 10 if layout == "arena" else 70     # (the training area's banner sits at the top)
 	hint.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	root.add_child(hint)
 	meter = UI.label("", 15, UI.INK, UI.big)

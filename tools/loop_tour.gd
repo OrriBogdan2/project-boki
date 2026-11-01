@@ -686,10 +686,10 @@ func _extract(m) -> void:
 	if best["state"] != "charging": note_bad("the uplink didn't start (%s, '%s')" % [best["state"], String(m.interact.get("label", ""))])
 	var i := 0
 	var w0 := Time.get_ticks_msec()
-	while best["state"] in ["charging", "fizzling"] and Time.get_ticks_msec() - w0 < 600000:
+	while is_instance_valid(m) and best["state"] in ["charging", "fizzling"] and Time.get_ticks_msec() - w0 < 600000:
 		# (rivals parked in the yard contest it and it never charges: send them elsewhere)
 		for o in m.hunters:
-			if o != P and not o.out and o.team != P.team and o.flat_dist(cp) < 12.0:
+			if is_instance_valid(o) and o != P and not o.out and o.team != P.team and o.flat_dist(cp) < 12.0:
 				o.teleport(m.world.spawns[(m.hunters.find(o) * 3) % m.world.spawns.size()])
 		await mwait(8.0)
 		i += 1
