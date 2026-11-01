@@ -11,7 +11,7 @@ func _fades_on() -> bool:
 		return false
 	if _has_arg("--show-fade"):
 		return true
-	return not (_has_arg("--shot=") or _has_arg("--autoplay") or _has_arg("--simtest"))
+	return not (_has_arg("--shot=") or _has_arg("--rolling-shot=") or _has_arg("--autoplay") or _has_arg("--simtest"))
 
 func _ready() -> void:
 	if "--relay" in OS.get_cmdline_user_args():
@@ -29,7 +29,7 @@ func _ready() -> void:
 		fade.boot()     # carry on from the boot splash: covered, logo showing, until the first screen is up
 	var args := OS.get_cmdline_user_args()
 	# tooling never touches the real save file: checks, screenshots and --no-save runs play on a copy
-	if "--no-save" in args or "--archetype-check" in args or "--arena-check" in args or Array(args).any(func(x): return String(x).begins_with("--shot=") or String(x).begins_with("--arena-shot=")):
+	if "--no-save" in args or "--archetype-check" in args or "--arena-check" in args or Array(args).any(func(x): return String(x).begins_with("--shot=") or String(x).begins_with("--arena-shot=") or String(x).begins_with("--rolling-shot=")):
 		Save.no_write = true
 	var opts := {}
 	for a in args:
@@ -59,7 +59,7 @@ func _ready() -> void:
 		if a.begins_with("--join-wave="): opts["rolling"] = true; opts["join_wave"] = int(a.substr(12))
 		if a.begins_with("--join-at="): opts["rolling"] = true; opts["join_at"] = float(a.substr(10))
 		if a.begins_with("--rolling-pop="): opts["rolling_pop"] = a.substr(14)     # what the 24-40 hunters count: at_once (default) or total (Rolling.POP_MODE)
-		if a.begins_with("--rolling-demo="): opts["rolling"] = true; opts["rolling_demo"] = a.substr(15); opts["plan_t"] = 0.4    # screenshots (Rolling.demo)
+		if a.begins_with("--rolling-demo="): opts["rolling"] = true; opts["rolling_demo"] = a.substr(15); opts["plan_t"] = 0.4; opts["raid"] = "clear"    # screenshots (Rolling.demo)
 		if a == "--record": Record.set_level(1)            # start in recording mode (F10 cycles it)
 		if a.begins_with("--record="): Record.set_level(int(a.substr(9)))    # --record=2: with the HUD hidden
 		if a.begins_with("--arena="): Record.arena_pick = a.substr(8)    # straight into the arena, this archetype picked

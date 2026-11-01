@@ -376,7 +376,8 @@ func tick(dt: float) -> void:
 	for w in waves:
 		if String(w["state"]) == "flying":
 			var s: Dictionary = w["ship"]
-			if not s.is_empty() and m.time > float(s.get("t0", 0.0)) + float(s["ride"]) + 1.0:
+			# incoming until the ship has passed and its squads are all down (the HUD's WAVE INCOMING)
+			if not s.is_empty() and m.time > float(s.get("t0", 0.0)) + float(s["ride"]) + 1.0 and not _wave_in_air(w):
 				w["state"] = "done"
 	_med_t -= dt
 	if _med_t <= 0.0:
@@ -388,6 +389,13 @@ func tick(dt: float) -> void:
 	if _camp_t <= 0.0:
 		_camp_t = 5.0
 		_camp_respawns()
+
+func _wave_in_air(w: Dictionary) -> bool:
+	var teams: Array = w["teams"]
+	for h in m.hunters:
+		if (h.riding or h.dropping) and not h.out and teams.has(h.team):
+			return true
+	return false
 
 func _launch(w: Dictionary) -> void:
 	var pop := alive_count()
@@ -681,8 +689,10 @@ func demo(mode: String) -> void:
 	if mode == "wave" and _demo.has("lead"):
 		var ld: Hunter = _demo["lead"]
 		var gy := m.world.ground_at(ld.pos.x, ld.pos.z) if not m.world.is_void(ld.pos.x, ld.pos.z) else ld.pos.y - 20.0
-		if ld.dropping and ld.pos.y - gy < 11.0: _shoot()
-		elif not ld.riding and not ld.dropping: _shoot()
+		# (armed while they're still well up, so they're mid-descent when the frames have drawn)
+		if (ld.dropping and ld.pos.y - gy < 22.0) or (not ld.riding and not ld.dropping): _demo["armed"] = true
+	if _demo.has("armed"):
+		_shoot()
 	if mode == "map" and _demo.has("wave") and _demo.has("bounty"):
 		if not _demo.has("open") and m.hud:
 			_demo["open"] = true
