@@ -54,6 +54,7 @@ func _ready() -> void:
 					Overlay.open_dex(which[1] if which.size() > 1 else "cindle"))
 		if a.begins_with("--seed="): opts["seed"] = int(a.substr(7))
 		if a == "--god": opts["god"] = true
+		if a.begins_with("--cam-style="): Settings.set_v("cam_style", a.substr(12), false)    # tooling: a camera style for one run (camcal)
 		if a == "--autoplay": opts["autoplay"] = true
 		if a == "--record": Record.set_level(1)            # start in recording mode (F10 cycles it)
 		if a.begins_with("--record="): Record.set_level(int(a.substr(9)))    # --record=2: with the HUD hidden
