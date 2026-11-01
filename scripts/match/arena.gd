@@ -147,7 +147,9 @@ func after_think() -> void:
 		var D: Hunter = dm["h"]
 		if not is_instance_valid(D):
 			continue
-		D.inp["aim"] = P.pos + Vector3(0, 0.9, 0)
+		# the still and heavy dummies face your start (so you can get behind them: Thief Marks); the
+		# strafer watches you
+		D.inp["aim"] = (P.pos if dm["kind"] == "strafe" else home) + Vector3(0, 0.9, 0)
 		var mv := Vector2.ZERO
 		var at: Vector3 = dm["at"]
 		if dm["kind"] == "strafe":

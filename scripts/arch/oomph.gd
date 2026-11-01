@@ -85,19 +85,10 @@ static func react(m: Node, target: Ent, by: Ent, d: float, o: Dictionary) -> voi
 	elif target is Mob:
 		target.squash = maxf(target.squash, clampf(0.12 + frac * 0.6, 0.12, 0.35))
 
-## The hit shake while a hunter is frozen (Sakurai: the victim shakes along the hit, big then small),
-## and the bigger flinch on big hits. Called at the end of Hunter.render.
+## Called at the end of Hunter.render. The hit shove and the shiver during a freeze are Juice's
+## (Ent.flinch, the pop branch); this only runs the stagger clock and the anim flinch scale.
 static func render_hit(h: Hunter, delta: float) -> void:
-	if h.model == null:
-		return
-	if h.hit_shake > 0.001:
-		var k := h.hit_shake
-		var j := sin(h.m.time * 90.0) * k
-		h.model.position.x = h.hit_from.x * j
-		h.model.position.z = h.hit_from.y * j
-		h.hit_shake = maxf(0.0, h.hit_shake - delta * 1.4)
-		if h.hit_shake <= 0.001:
-			h.model.position.x = 0.0; h.model.position.z = 0.0
+	h.hit_shake = maxf(0.0, h.hit_shake - delta * 1.4)
 	h.stagger_t = maxf(0.0, h.stagger_t - delta)
 
 # ------------------------------------------------------------------ how a shot looks

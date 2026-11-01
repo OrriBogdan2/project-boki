@@ -3496,6 +3496,7 @@ func _process(delta: float) -> void:
 			# sneaking (Ctrl) pulls the camera well back for a wide look around [Supervive]
 			cam.zoom_to = 1.25 if player.gliding else (1.45 if player.crouch and player.grounded else 1.0)
 			if train.has("_sizes"): cam.zoom_to = 0.5     # (--size-demo screenshots)
+			if has_meta("zoom_hold"): cam.zoom_to = float(get_meta("zoom_hold"))     # (--arena-demo screenshots)
 			# high up, the camera pulls back with your altitude so you can still read the ground
 			var alt := player_altitude()
 			if alt > 4.0:

@@ -35,7 +35,9 @@ static func tick(A: Arena, dt: float) -> void:
 	var legacy := "--legacy-shots" in OS.get_cmdline_user_args()
 	Oomph.legacy = legacy
 	if m.hud: m.hud.guide_hidden = true
-	if m.cam and not w.begins_with("card") and w != "menu": m.cam.zoom_to = 0.58      # close enough to read the hits
+	if m.cam and not w.begins_with("card") and w != "menu" and not m.has_meta("zoom_hold"):
+		m.set_meta("zoom_hold", 0.6)      # close enough to read the hits
+		m.cam.zoom = 0.6
 	P.hp = P.max_hp
 	match w:
 		"thief", "cashin":
@@ -46,7 +48,9 @@ static func tick(A: Arena, dt: float) -> void:
 				A.home = P.pos
 			_aim(P, D)
 			if _at(t, dt, 0.25): P.inp["sec_hold"] = false; P.ak.press_rmb()        # the knife
-			if _at(t, dt, 0.6): P.ak.press_rmb()                                      # Shadow Step behind
+			if _at(t, dt, 0.6):
+				if (P.ak as ThiefKit).recast.is_empty(): (P.ak as ThiefKit)._shadow_step(D, false)   # (if the knife's recast didn't open)
+				else: P.ak.press_rmb()                                    # Shadow Step behind
 			if t > 0.75 and t < 1.6: P.inp["fire"] = true
 			if w == "thief":
 				if _at(t, dt, 1.3) and (P.ak as ThiefKit).marks_on(D) < 3: (P.ak as ThiefKit).add_mark(D, 3 - (P.ak as ThiefKit).marks_on(D), true)

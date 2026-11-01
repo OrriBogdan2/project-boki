@@ -204,7 +204,6 @@ func _pin(a: Vector3) -> void:
 	var dir := Vector2(a.x - h.pos.x, a.z - h.pos.z).normalized()
 	run(stg, cx("rmb", "pinning_shot", a, {"on_foe": func(f: Ent, _c: Dictionary):
 		# pushed into terrain within 3m: pinned (exploit near_wall)
-		if "--ak-debug" in OS.get_cmdline_user_args(): print("PIN on_foe at %s dir %s wall %s" % [str(f.pos), str(dir), str(_wall_behind(f, dir, float(pd["wall"])))])
 		if _wall_behind(f, dir, float(pd["wall"])):
 			m.later(0.12, func():
 				if is_instance_valid(f) and not f.dead:

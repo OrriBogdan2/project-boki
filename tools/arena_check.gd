@@ -148,7 +148,8 @@ func _training() -> void:
 	P.ak.use_e()
 	ok("training: E casts", float(P.ak.cd["e"]) > 0.0)
 	P.ak.ch_rmb = 1.0; P.inp["sec_hold"] = false; P.ak.press_rmb()
-	ok("training: RMB casts", P.ak.last_variant != "")
+	step(m, 0.1)        # a tap fires on release
+	ok("training: RMB casts", P.ak.last_variant != "", P.ak.last_variant)
 	var dsh := P.dashes
 	P.do_dash()
 	ok("training: dash", P.dashes < dsh or P.roll_t > 0.0)
