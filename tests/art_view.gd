@@ -34,7 +34,7 @@ func _ready() -> void:
 	w.biome = T["biome"].duplicate()
 	w.clouds = T["clouds"]
 	add_child(w)
-	w.generate_authored(World.load_layout("skyreach"), 9)
+	w.generate_authored(World.load_layout(World.layout_for_tier(0)), 9)
 	var t0 := Time.get_ticks_usec()
 	w.build_meshes()
 	print("PERF build_meshes %.0f ms" % ((Time.get_ticks_usec() - t0) / 1000.0))
