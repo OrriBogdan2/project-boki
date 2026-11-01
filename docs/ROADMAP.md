@@ -325,6 +325,20 @@ Total: **21-26 dev-weeks**.
 
 ## 2. Meta loop and economy
 
+### Owner decisions (Oct 31 2026, late)
+- **Tamed Boki follow you.** A Boki tamed during a run walks with you (not in the bag): one at a time
+  besides your main Boki; it doesn't fight (maybe scouts). Knocked out while you're alive or downed, it
+  lies dazed and only you can pick it up. It only becomes takeable once you're out of the match
+  (eliminated, no revive left): Easy tier it goes home with you regardless; Hard tier others get 10 s to
+  tame it, else it goes home to you; Hardest tier 30 s, and your main Boki is at risk too. Taming a
+  stolen one is slower and interruptible (Ransom House / request-back still apply). Extracting brings
+  it home automatically.
+- **Nobody can be locked out.** A player must never reach zero Boki and zero money with no way to
+  play. Floors: the free-kit queue (no Boki at risk, ARC-style), a stray common Boki that turns up at
+  the farm if you have none, cheap common Boki on the market priced within what one free-kit run earns,
+  and the starter flow. Scarce and limited-edition Boki stay scarce; the floor is about commons.
+
+
 ### Goals
 
 - **One ladder** a player can name: their **Hunter Rank** (account level). Everything else feeds it.
