@@ -13,6 +13,26 @@ func new_mind(rng: RandomNumberGenerator, skill: float, diff := {}) -> Dictionar
 const ARRIVE_R := 1.5          # bots ease off and stop turning this close to where they're going
 const GOAL_KEEP := 4.0         # metres of extra reach for a goal we're already heading to
 const GOAL_STICK := 5.0        # seconds a bot sticks to a goal before it may flip back to the last one
+const LAND_SPREAD := 16.0      # metres: another squad landing this close counts as a crowded spot
+const FRESH_T := 20.0          # seconds after landing a hunter is left alone unless they start it
+
+## How many hunters of other squads are coming down (or standing) within r of p: where they mean to
+## land while riding or gliding in, where they are once down. The local player counts double.
+static func crowd_at(m: Match, h: Hunter, p: Vector3, r: float) -> int:
+	var n := 0
+	for o in m.hunters:
+		if o == h or o.team == h.team or o.out:
+			continue
+		var q: Vector3 = o.ai.get("land", o.pos) if (o.riding or o.dropping) and o.ai.has("land") else o.pos
+		if Vector2(q.x - p.x, q.z - p.z).length() < r:
+			n += 2 if o == m.player and o.ctrl == "local" else 1
+	return n
+
+## Just landed and hasn't started anything: bots leave them be for FRESH_T (no third-partying
+## someone the moment they touch down); whoever they hit can still hit back (provoked, in _choose).
+static func fresh(m: Match, o: Ent) -> bool:
+	return o is Hunter and ((o as Hunter).dropping or m.time - float(o.get_meta("landed_t", -99.0)) < FRESH_T)
+
 const URGENT_GOALS := ["revive", "box", "beacon", "hum", "yard", "board", "lift", "lair_fight", "lair_escape", "lair_lever", "lair_updraft"]
 
 func think(m: Match, h: Hunter, dt: float) -> void:
@@ -39,7 +59,9 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 			var best := land; var bd := 1e9
 			for sp in m.world.spawns + m.world.portal_spots:
 				var d := Vector2(sp.x - h.pos.x, sp.z - h.pos.z).length()
-				var score := d if d < reach * 0.8 else d + 1000.0
+				# (and away from where other squads are coming down: everyone falling short used to
+				# pick the same nearest spot and the opening was a pile-up)
+				var score := (d if d < reach * 0.8 else d + 1000.0) + crowd_at(m, h, sp, LAND_SPREAD) * 30.0
 				if score < bd: bd = score; best = sp
 			a["land"] = best
 			land = best
@@ -619,6 +641,8 @@ func _choose(m: Match, h: Hunter) -> void:
 		var d := h.flat_dist(o)
 		# early on bots farm monsters and only fight hunters who come close or shoot them
 		var provoked: bool = h.last_hit_by == o or (o is Hunter and h.last_hit_by == o.kin)
+		if not provoked and fresh(m, o):
+			continue
 		var reach := (13.0 if m.time > 100.0 or provoked else 8.0) * float((a.get("diff", {}) as Dictionary).get("aggro", 1.0))
 		if provoked: reach = maxf(reach, 10.0)
 		if d > reach or absf(o.pos.y - h.pos.y) > 3.0:

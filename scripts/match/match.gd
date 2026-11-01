@@ -1050,6 +1050,7 @@ func _update_ship(dt: float) -> void:
 
 func on_drop_landed(h: Hunter) -> void:
 	h.inv_t = maxf(h.inv_t, 2.0)     # a moment to get your bearings after landing
+	h.set_meta("landed_t", time)     # bots leave a fresh lander be for a while (Bot.fresh)
 	if world.is_block(h.pos.x, h.pos.z):
 		var best := h.pos; var bd := 1e9
 		for dz in range(-2, 3):
