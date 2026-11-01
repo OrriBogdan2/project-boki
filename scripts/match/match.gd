@@ -4083,6 +4083,10 @@ func step(dt: float) -> void:
 	_prof("life")
 	if exits: exits.tick(dt)
 	_prof("exits")
+	if opts.get("hold_demo", false) and player:
+		_hold_demo()
+	if opts.get("plate_demo", false) and player:
+		_plate_demo()
 	if lairs:
 		lairs.bot_pickups()
 		lairs.tick(dt)
@@ -4182,6 +4186,63 @@ func _separate() -> void:
 					a.pos.x += pa.x; a.pos.z += pa.y
 				if world.occupy(b.pos.x + pb.x, b.pos.z + pb.y, b.r, b.pos.y, b.grounded) == 0.0:
 					b.pos.x += pb.x; b.pos.z += pb.y
+
+## --hold-demo (screenshots): every hunter in a row by you, each holding interact for something
+## different, named after it.
+## --plate-demo (screenshots): your squad beside you and rivals near and far, a few of them hurt,
+## to see the overhead nameplates.
+func _plate_demo() -> void:
+	if has_meta("plate_demo_done"):
+		for h in hunters:
+			if h != player: h.inp["move"] = Vector2.ZERO
+		return
+	if time < 0.3:
+		return
+	set_meta("plate_demo_done", true)
+	for mb in mobs: mb.dead = true; mb.visible = false
+	var base: Vector3 = player.pos
+	var mates := hunters.filter(func(x): return x != player and x.team == player.team)
+	var foes := hunters.filter(func(x): return x.team != player.team)
+	var spots := [Vector3(-2.6, 0, 0.6), Vector3(2.6, 0, 0.8)]
+	var fspots := [Vector3(-3.5, 0, -4.5), Vector3(3.0, 0, -5.0), Vector3(-6.5, 0, -8.5), Vector3(5.5, 0, -10.5), Vector3(0.5, 0, -12.0), Vector3(8.0, 0, -6.0)]
+	var place := func(h: Hunter, off: Vector3) -> void:
+		var at := world.free_spot_near(base + off, [], 0.6, 0.5, 4.0)
+		h.teleport(Vector3(at.x, world.ground_at(at.x, at.z), at.z))
+		h.ctrl = "idle"; h.vel = Vector3.ZERO
+	for i in mates.size():
+		if i < spots.size(): place.call(mates[i], spots[i])
+	for i in foes.size():
+		if i < fspots.size(): place.call(foes[i], fspots[i])
+		else: foes[i].teleport(world.random_ground())
+	for i in hunters.size():
+		var h: Hunter = hunters[i]
+		if h != player and i % 3 == 1: h.hp = h.max_hp * 0.45
+		if h != player and i % 3 == 2: h.armor = h.max_armor * 0.5
+
+func _hold_demo() -> void:
+	var ks: Array = Hunter.HOLD_KINDS
+	if not has_meta("hold_demo_done"):
+		set_meta("hold_demo_done", true)
+		var base: Vector3 = player.pos
+		var i := 0
+		for h in hunters:
+			h.ctrl = "idle"; h.inp["move"] = Vector2.ZERO
+			var col := i % 4; var row := i / 4
+			var at := base + Vector3((col - 1.5) * 2.4, 0, row * 2.6)
+			at = world.free_spot_near(at, [], 0.6, 0.5, 3.0)
+			h.teleport(Vector3(at.x, world.ground_at(at.x, at.z), at.z))
+			h.face = 0.0
+			i += 1
+		for mb in mobs: mb.dead = true; mb.visible = false
+		cam.zoom_to = 0.62; cam.zoom = 0.62
+	var j := 0
+	for h in hunters:
+		if j < ks.size():
+			h.set_hold(String(ks[j]))
+			h.pname = String(ks[j])
+			h.inp["aim"] = h.pos + Vector3(0, 0.9, 3.0)
+		j += 1
+	cam.zoom_to = 0.62
 
 func _update_pads(dt: float) -> void:
 	for pd in world.pads:
@@ -4413,6 +4474,7 @@ func _update_interact(dt: float) -> void:
 			"finish":
 				# a short hold commits you to the stomp (Life.start_stomp): no cancelling after that
 				var o: Hunter = best["ent"]
+				h.set_hold("windup")
 				h.finish_t += dt
 				if h.finish_t >= Life.R["stomp_commit"]:
 					Life.start_stomp(self, h, o)
@@ -4429,6 +4491,7 @@ func _update_interact(dt: float) -> void:
 						hud.open_loot(b0)
 			"boxrev", "loot":
 				var b: Dictionary = best["box"]
+				h.set_hold("revive" if best["kind"] == "boxrev" else "loot")
 				var rev: bool = best["kind"] == "boxrev"
 				# taking a hit breaks the channel (a revive has to be let go and started again)
 				if time - h.hurt_at < 0.1:
@@ -4459,23 +4522,30 @@ func _update_interact(dt: float) -> void:
 						else: Life.loot_box(self, h, b)
 			"catch":
 				var k: Kin = best["ent"]
+				h.set_hold("tame")
 				# capturing someone's lost kin takes longer than catching a wild one
 				k.catch_prog += dt / (float(T.get("capture_time", 3.0)) if k.lost_from != "" else 1.3)
 				if k.catch_prog >= 1.0:
 					_catch(h, k)
 			"chest":
 				var c: Dictionary = best["chest"]
+				h.set_hold("chest")
 				c["prog"] += dt / (0.7 + 0.4 * int(c.get("tier", 0)))
 				if c["prog"] >= 1.0:
 					_open_chest(h, c)
 			"shrine":
 				var sh: Dictionary = best["shrine"]
+				h.set_hold("shrine")
 				sh["prog"] += dt / 1.2
 				if sh["prog"] >= 1.0:
 					_use_shrine(h, sh)
 			"exit":
+				var xa := String(best.get("act", ""))
+				if xa in ["call", "start"]: h.set_hold("console")
+				elif xa in ["open", "enter"]: h.set_hold("key")
 				exits.hold(h, best, dt)
 			"lair":
+				if String(best.get("what", "")) == "rune": h.set_hold("rune")
 				lairs.hold(h, best, dt)
 
 func _catch(h: Hunter, k: Kin) -> void:
@@ -5630,6 +5700,9 @@ func _flags(h: Hunter) -> int:
 	if h.reveal_t > 0.0: f |= 4096
 	if h.crouch: f |= 8192
 	if h.diving: f |= 16384
+	# holding interact (an animation each): bit 2048, and which kind in bits 15-18
+	var hk := Hunter.HOLD_KINDS.find(h.holding())
+	if hk >= 0: f |= 2048 | ((hk + 1) << 15)
 	return f
 
 const KIN_STATES := ["shoulder", "flying", "flying_home", "active", "returning", "fainted", "reviving", "wild", "dazed"]
@@ -5760,6 +5833,9 @@ func _net_apply(e: Ent, it: Array) -> void:
 			h.diving = f & 16384 != 0
 			if f & 4096 != 0: h.reveal_t = maxf(h.reveal_t, 0.3)
 			h.crouch = f & 8192 != 0
+			if f & 2048 != 0:
+				var hk := ((f >> 15) & 15) - 1
+				if hk >= 0 and hk < Hunter.HOLD_KINDS.size(): h.set_hold(String(Hunter.HOLD_KINDS[hk]), 0.3)
 			h.down_hp = it[12]; h.revive = maxf(h.revive if h.revive > float(it[13]) and _rev_out.has(h.nid) else 0.0, float(it[13]))
 			h.shield = it[17]; h.extract_prog = it[18]
 			h.kills = int(it[19]); h.knocks = int(it[20]); h.dmg_done = float(it[21])
@@ -6051,7 +6127,7 @@ func _tip(key: String, text: String) -> void:
 	hud.tip(text)
 
 func _tips() -> void:
-	if player == null or player.out or player.riding or opts.get("autoplay", false) or not Settings.get_v("tips"):
+	if player == null or player.out or player.riding or opts.get("autoplay", false) or not Settings.get_v("tips") or Record.clean():
 		return
 	_tip_t += get_process_delta_time()
 	if _tip_t < 1.0:

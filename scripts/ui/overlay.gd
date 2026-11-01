@@ -40,7 +40,8 @@ func _ready() -> void:
 	root.add_child(fps_lbl)
 
 func _process(_d: float) -> void:
-	fps_lbl.visible = bool(Settings.get_v("show_fps"))
+	Record.tick(get_tree(), _d)
+	fps_lbl.visible = bool(Settings.get_v("show_fps")) and not Record.clean()
 	if fps_lbl.visible:
 		fps_lbl.text = "%d fps" % Engine.get_frames_per_second()
 
@@ -68,6 +69,17 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
 		var k := (event as InputEventKey).physical_keycode
 		var typing := get_viewport().gui_get_focus_owner() is LineEdit
+		# recording mode (Record): F10 cycles off / clean HUD / no HUD, Shift+F10 straight to no HUD,
+		# F9 the slow camera orbit with the HUD hidden. Anywhere, menus open or not.
+		if not typing and event.is_action_pressed("record"):
+			if (event as InputEventKey).shift_pressed: Record.toggle_cinema()
+			else: Record.cycle()
+			get_viewport().set_input_as_handled()
+			return
+		if not typing and event.is_action_pressed("record_orbit") and Record.cinema():
+			Record.toggle_orbit()
+			get_viewport().set_input_as_handled()
+			return
 		if not typing and event.is_action_pressed("inventory") and ctx_now() in ["home", "town", "interior"]:
 			if page == "inventory": close()
 			elif page == "": open_inventory()
@@ -278,6 +290,13 @@ func _show_settings() -> void:
 			_toggle(v, "Tap to crouch", "crouch_toggle", "Instead of holding the crouch key")
 			_toggle(v, "Damage numbers", "damage_numbers")
 			_toggle(v, "Tips during matches", "tips")
+			_group(v, "Recording")
+			var rec_row := _row(v, "Recording mode", "%s cycles it, Shift+%s hides the HUD, %s orbits the camera with the HUD hidden" % [Settings.key_cap("record"), Settings.key_cap("record"), Settings.key_cap("record_orbit")])
+			var rec_ob := OptionButton.new()
+			for i in Record.NAMES.size(): rec_ob.add_item(String(Record.NAMES[i]), i)
+			rec_ob.selected = Record.level
+			rec_ob.item_selected.connect(func(i): Record.set_level(i))
+			rec_row.add_child(rec_ob)
 			_group(v, "Kin")
 			_toggle(v, "Boki also use your E ability on their own", "kin_auto", "They can spend cooldowns you wanted (their own auto ability is always on)")
 			if admin_allowed():

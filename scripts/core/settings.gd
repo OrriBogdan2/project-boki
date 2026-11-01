@@ -94,6 +94,7 @@ const ACTIONS := [
 	["map", "Full map (click to ping)"], ["pass_lead", "Pass the drop lead"], ["separate", "Separate from the drop"],
 	["play", "Play fetch with a Boki"], ["talk", "Talk to a Boki"], ["details", "A Boki's details"], ["inventory", "Inventory"],
 	["build", "Build mode at home / decorate indoors"], ["rotate", "Turn a piece (build mode)"],
+	["record", "Recording mode (again: hide the HUD)"], ["record_orbit", "Recording: slow camera orbit"],
 ]
 
 var v: Dictionary = {}

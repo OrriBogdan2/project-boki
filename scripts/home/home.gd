@@ -73,6 +73,9 @@ var env_res: Environment
 var sun_l: DirectionalLight3D
 var p_anim: HunterAnim = null
 var p_fired := 99.0             # seconds since you last attacked (the Training Grounds), for the animation
+var crouch_on := false          # crouching (the match's crouch key and its tap-to-toggle setting)
+var p_crouch_k := 0.0           # the crouched pose, eased in and out
+const CROUCH_SPEED := 0.55      # walking speed crouched (the same as in a match)
 var p_swing_n := 0              # melee swings so far, so each one plays its arc
 var lamps: Array = []           # OmniLight3D
 var day_t := 0.3                # 0..1, 0.25 is morning, 0.5 noon, 0.75 dusk
@@ -237,6 +240,39 @@ func _ready() -> void:
 	cam.snap(ppos)
 	if "--expedition-test" in dbg:
 		get_tree().create_timer(0.5).timeout.connect(_open_expedition)
+	if "--home-crouch-test" in dbg:
+		# test: walk right crouched for a second, then standing: crouched is slower, and posed low
+		# (--crouch-still: stay crouched and still, for a screenshot)
+		set_meta("crouch_test", true)
+		if not "--crouch-still" in dbg:
+			get_tree().create_timer(0.6).timeout.connect(func():
+				Input.action_press("right")
+				var x0 := ppos.x
+				get_tree().create_timer(1.0).timeout.connect(func():
+					var v_crouch := ppos.x - x0
+					var ck := p_crouch_k
+					remove_meta("crouch_test")
+					var x1 := ppos.x
+					get_tree().create_timer(1.0).timeout.connect(func():
+						Input.action_release("right")
+						print("HOMECROUCH crouched %.2f m/s (pose %.2f), standing %.2f m/s, pose now %.2f" % [v_crouch, ck, ppos.x - x1, p_crouch_k]))))
+	if "--expedition-scroll-test" in dbg:
+		# test: open the expedition panel, scroll down, press a match-mode tab (which rebuilds the
+		# panel): it should stay where it was scrolled (--no-keep-scroll shows the old jump to the top)
+		get_tree().create_timer(0.5).timeout.connect(func():
+			_open_expedition()
+			get_tree().create_timer(0.6).timeout.connect(func():
+				var sc := _panel_scroll()
+				if sc == null: print("SCROLLTEST no scroll"); return
+				sc.scroll_vertical = int(sc.get_v_scroll_bar().max_value)
+				get_tree().create_timer(0.3).timeout.connect(func():
+					var before := sc.scroll_vertical
+					if "--no-keep-scroll" in dbg: set_meta("no_keep_scroll", true)
+					exp_mode = "duo" if exp_mode != "duo" else "trio"
+					_open_expedition()
+					get_tree().create_timer(0.5).timeout.connect(func():
+						var sc2 := _panel_scroll()
+						print("SCROLLTEST before=%d after=%d max=%d" % [before, sc2.scroll_vertical if sc2 else -1, int(sc2.get_v_scroll_bar().max_value) if sc2 else -1])))))
 	for a in dbg:
 		if a.begins_with("--rack-test"):
 			# test: open the glider rack (optionally on a skin: --rack-test=ember)
@@ -888,6 +924,17 @@ func _move_player(d: float) -> void:
 	ex_cd = maxf(0.0, ex_cd - d)
 	var gh := _ground_h(ppos.x, ppos.z)
 	var air := py > gh + 0.001 or pvy > 0.0
+	# crouch: held by default, or tapped to toggle (Settings crouch_toggle), as in a match
+	if Settings.get_v("crouch_toggle"):
+		if can_act and Input.is_action_just_pressed("crouch"):
+			crouch_on = not crouch_on
+		if Input.is_action_just_pressed("jump") or Input.is_action_just_pressed("dash"):
+			crouch_on = false
+	else:
+		crouch_on = can_act and Input.is_action_pressed("crouch")
+	if has_meta("crouch_test"): crouch_on = true
+	var crouching := crouch_on and not air and dash_t <= 0.0 and not gliding
+	p_crouch_k = move_toward(p_crouch_k, 1.0 if crouching else 0.0, d * 8.0)
 	if can_act and Input.is_action_just_pressed("dash") and dash_t <= 0.0:
 		try_dash(mv, air)
 	var hv := Vector2(pvel.x, pvel.z)
@@ -896,7 +943,7 @@ func _move_player(d: float) -> void:
 		hv = dash_v
 		if dash_t <= 0.0: hv = dash_v * (Hunter.DASH_CARRY_AIR if air else Hunter.DASH_CARRY_GROUND)
 	else:
-		var spd := Hunter.GLIDE_SPEED * 1.15 if gliding else SPEED
+		var spd := Hunter.GLIDE_SPEED * 1.15 if gliding else SPEED * (CROUCH_SPEED if crouching else 1.0)
 		hv += (mv * spd - hv) * (1.0 - exp(-(14.0 if not air else (4.0 if gliding else 6.0)) * d))
 	# on the ground the island's edge stops you; in the air (a jump, a glide) you can sail out past it
 	var guard := not air
@@ -986,7 +1033,7 @@ func _move_player(d: float) -> void:
 		p_anim = HunterAnim.new(player)
 	p_fired += d
 	var ps := {"vel": Vector3(hv.x, pvy if air else 0.0, hv.y), "face": pface, "grounded": not air, "gliding": gliding, "rolling": dash_t > 0.0, "dash_dir": dash_v, "fired": p_fired,
-		"swing_n": p_swing_n, "combo": maxi(0, p_swing_n - 1) % 3}
+		"swing_n": p_swing_n, "combo": maxi(0, p_swing_n - 1) % 3, "crouch": p_crouch_k}
 	if air and not gliding and gh > World.VOID + 1.0:
 		ps["air_h"] = clampf(py - gh, 0.0, 30.0)
 	p_anim.update(d, ps)
@@ -1902,6 +1949,8 @@ func _build_ui() -> void:
 	keys.add_child(hint)
 	root_ui.add_child(hint_box)
 	hint_box.name = "Hints"
+	Record.hide_in_clean(hint_box)      # recording mode: no key hints
+	Record.hide_in_cinema(ui)           # ... and with the HUD hidden, none of this
 	hint_box.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM, Control.PRESET_MODE_MINSIZE, 12)
 	hint_box.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	hint_box.grow_vertical = Control.GROW_DIRECTION_BEGIN
@@ -2045,6 +2094,12 @@ func _treat_name(t: String) -> String:
 
 func _new_panel(title_txt: String, width := 520.0, scroll := false) -> VBoxContainer:
 	var prev := panel_open
+	# the same panel rebuilt (a button on it changed something, as the expedition loadout's do):
+	# keep it scrolled where it was instead of jumping back to the top
+	var keep_scroll := -1
+	if prev == title_txt:
+		var old_sc := _panel_scroll()
+		if old_sc: keep_scroll = old_sc.scroll_vertical
 	_close_panel()
 	var pb := UI.scroll_panel(title_txt, width, _close_panel, "Close", scroll)
 	var p: PanelContainer = pb[0]
@@ -2059,7 +2114,33 @@ func _new_panel(title_txt: String, width := 520.0, scroll := false) -> VBoxConta
 	if prev != title_txt:
 		UI.pop_in(p)
 		Sfx.play("whoosh", null, -10.0)
+	if keep_scroll > 0 and not has_meta("no_keep_scroll"):
+		_restore_scroll(p, keep_scroll, 4)
 	return v
+
+## The scroll of the open panel (the newest one in the host), or null.
+func _panel_scroll() -> ScrollContainer:
+	var kids := panel_host.get_children().filter(func(ch): return not ch.is_queued_for_deletion())
+	if kids.is_empty():
+		return null
+	var found := (kids[-1] as Node).find_children("*", "ScrollContainer", true, false)
+	return found[0] as ScrollContainer if not found.is_empty() else null
+
+## Put a rebuilt panel back where it was scrolled to, once its content has been laid out (the panel
+## sizes its scroll a frame or two after it's built, so this tries for a few frames).
+func _restore_scroll(p: Control, val: int, tries: int) -> void:
+	if not is_instance_valid(p) or not p.is_inside_tree():
+		return
+	var found := p.find_children("*", "ScrollContainer", true, false)
+	if found.is_empty():
+		return
+	var sc: ScrollContainer = found[0]
+	sc.scroll_vertical = val
+	if tries > 0 and sc.scroll_vertical != val:
+		get_tree().process_frame.connect(func(): _restore_scroll(p, val, tries - 1), CONNECT_ONE_SHOT)
+	elif tries > 0:
+		# (set again next frame too: a late resize can clamp it back toward the top)
+		get_tree().process_frame.connect(func(): if is_instance_valid(sc) and sc.scroll_vertical != val: _restore_scroll(p, val, tries - 1), CONNECT_ONE_SHOT)
 
 func _close_panel() -> void:
 	var was := panel_open

@@ -174,6 +174,9 @@ var down_k := 0.0
 var ledge_k := 0.0
 var stomp_k := 0.0
 var revive_k := 0.0
+var act_k := 0.0            # holding interact: the pose for what's being worked (see _act_legs)
+var act_kind := ""
+var act_t := 0.0
 var base_k := 0.0
 var stun_k := 0.0
 var aim_k := 0.0               # 1 aiming (just fired), 0 relaxed carry
@@ -524,6 +527,7 @@ func update(dt: float, s: Dictionary) -> void:
 	var st_ph := float(s.get("stomp", -1.0))
 	stomp_k = _ease(stomp_k, 1.0 if st_ph >= 0.0 else 0.0, 16.0, dt)
 	revive_k = _ease(revive_k, 1.0 if s.get("reviving", false) and grounded and spd < 1.5 else 0.0, 8.0, dt)
+	_act_tick(dt, s, grounded, spd)
 	var base_p := float(s.get("base", -1.0))
 	base_k = _ease(base_k, 1.0 if base_p >= 0.0 else 0.0, 6.0, dt)
 	stun_k = _ease(stun_k, 1.0 if stun and not downed else 0.0, 8.0, dt)
@@ -773,6 +777,11 @@ func update(dt: float, s: Dictionary) -> void:
 	if revive_k > 0.01:
 		hl = lerpf(hl, 1.35, revive_k); kl = lerpf(kl, -1.45, revive_k)
 		hr = lerpf(hr, -0.15, revive_k); kr = lerpf(kr, -1.9, revive_k)
+	# holding interact: kneel, squat, brace or stand to it (see _act_legs)
+	if act_k > 0.01:
+		var al := _act_legs()
+		hl = lerpf(hl, al.x, act_k); kl = lerpf(kl, al.y, act_k)
+		hr = lerpf(hr, al.z, act_k); kr = lerpf(kr, al.w, act_k)
 	# downed: lying face down; crawling kicks the legs, otherwise they lie limp
 	if down_k > 0.01:
 		var crawl := clampf(spd / 2.0, 0.0, 1.0)
@@ -795,6 +804,7 @@ func update(dt: float, s: Dictionary) -> void:
 	var pitch := -float(st["lean"]) * (1.0 - down_k) - lean_f - r1 * 0.06 - crouch_k * 0.3 - land_k * 0.32 - slam_k * 0.35
 	pitch += rising * 0.1 * ak - glide_k * 0.18 - ledge_k * lerpf(0.4, 0.15, ledge_up) - stomp_k * 0.12 - revive_k * 0.35
 	pitch -= tuck * (0.7 if trick != "spin" else 0.3) + roll_k * 0.6
+	pitch -= act_k * _act_pitch()
 	var yaw := -sin(ph) * 0.16 * r1 * back          # the shoulders swing against the hips
 	var roll := -lean_s * (1.0 + glide_k * 0.6) - bank * 0.8 + wk * 0.05
 	var dz := 0.0
@@ -1317,6 +1327,14 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 	if revive_k > 0.01:
 		fl = fl.lerp(sh_l + Vector3(0.05, -0.32, -0.3), revive_k)
 		free_l = maxf(free_l, revive_k)
+	# holding interact: the hands on what's being worked (see _act_hands)
+	if act_k > 0.01:
+		var ah := _act_hands(sh_l, sh_r)
+		fl = fl.lerp(ah[0], act_k)
+		free_l = maxf(free_l, act_k)
+		if float(ah[2]) > 0.0:
+			fr = fr.lerp(ah[1], act_k)
+			free_r = maxf(free_r, act_k * float(ah[2]))
 	# base: a hand at the ear, calling it in
 	if base_k > 0.01:
 		fl = fl.lerp(sh_l + Vector3(0.08, 0.3, -0.08), base_k)
@@ -1401,6 +1419,108 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 	if flask:
 		flask.visible = drink_k > 0.05
 		flask.rotation.x = -drink_k * 2.0
+
+# ---------------------------------------------------------------- interact holds
+## Holding interact (Hunter.holding(), synced in the snapshot flags): a pose for each thing, looping
+## for the whole hold, and easing off cleanly when the hold stops or is interrupted.
+##   tame     down on one knee, a calming hand out low, slowly patting the air
+##   revive   on one knee, both hands on them, pressing
+##   chest    squatting, both hands under the lid, heaving it up
+##   dial     standing at the lectern, both hands on the dial, turning it
+##   console  working the console's levers, one hand then the other
+##   lever    a two-handed pull, leaning back into it
+##   windup   the stomp's wind-up: weight back, the foot coming up, arms out
+##   shrine   head bowed, hands together
+##   beacon   a hand raised to the light
+##   key      crouched at the hatch, turning a key
+##   loot     crouched over a deathbox, rummaging
+##   rune     both palms on the stone
+const ACT_KNEEL := ["tame", "revive", "key", "loot"]
+func _act_tick(dt: float, s: Dictionary, grounded: bool, spd: float) -> void:
+	var want := String(s.get("act", ""))
+	if not grounded or spd > 2.2 or s.get("downed", false) or float(s.get("stomp", -1.0)) >= 0.0:
+		want = ""
+	if want != "" and want != act_kind:
+		act_kind = want
+		act_t = 0.0
+	act_t += dt
+	act_k = _ease(act_k, 1.0 if want != "" else 0.0, 9.0 if want != "" else 12.0, dt)
+	if act_k < 0.01 and want == "":
+		act_kind = ""
+
+## Leg angles for the hold: Vector4(hip_l, knee_l, hip_r, knee_r).
+func _act_legs() -> Vector4:
+	var w := sin(act_t * 3.0)
+	match act_kind:
+		"tame", "revive", "key", "loot":
+			return Vector4(1.35, -1.45, -0.15, -1.9)
+		"chest":
+			var heave := 0.5 + 0.5 * sin(act_t * 3.4)
+			return Vector4(1.0 - heave * 0.35, -1.4 + heave * 0.5, 0.95 - heave * 0.35, -1.35 + heave * 0.5)
+		"lever":
+			var p := 0.5 - 0.5 * cos(act_t * 2.6)
+			return Vector4(0.5 + p * 0.2, -0.45 - p * 0.2, -0.25 - p * 0.15, -0.2)
+		"windup":
+			var up := smoothstep(0.0, 0.6, act_t)
+			return Vector4(0.15, -0.35, 1.25 * up, -1.5 * up - 0.1)
+		"shrine":
+			return Vector4(0.25, -0.35, 0.25, -0.35)
+	return Vector4(0.12 + w * 0.02, -0.22, 0.12 - w * 0.02, -0.22)
+
+## How far forward the body leans into the hold (negative leans back).
+func _act_pitch() -> float:
+	match act_kind:
+		"tame": return 0.25 + 0.04 * sin(act_t * 1.6)
+		"revive": return 0.4 + 0.06 * maxf(0.0, sin(act_t * 6.0))
+		"key", "loot": return 0.35
+		"chest": return 0.5 - 0.25 * (0.5 + 0.5 * sin(act_t * 3.4))
+		"dial": return 0.18
+		"console": return 0.22
+		"rune": return 0.15
+		"shrine": return 0.4
+		"lever": return -0.15 - 0.15 * (0.5 - 0.5 * cos(act_t * 2.6))
+		"windup": return -0.15 * smoothstep(0.0, 0.6, act_t)
+		"beacon": return -0.12
+	return 0.0
+
+## Where the hands go: [left hand, right hand, how much the right hand lets go of the weapon].
+func _act_hands(sh_l: Vector3, sh_r: Vector3) -> Array:
+	var t := act_t
+	match act_kind:
+		"tame":
+			var pat := sin(t * 1.8) * 0.05
+			return [sh_l + Vector3(0.1, -0.22 + pat, -0.44), sh_r, 0.0]
+		"revive":
+			var press := maxf(0.0, sin(t * 6.0)) * 0.05
+			return [sh_l + Vector3(0.1, -0.42 - press, -0.32), sh_r + Vector3(-0.1, -0.42 - press, -0.32), 1.0]
+		"chest":
+			var heave := 0.5 + 0.5 * sin(t * 3.4)
+			return [sh_l + Vector3(0.05, -0.45 + heave * 0.22, -0.34), sh_r + Vector3(-0.05, -0.45 + heave * 0.22, -0.34), 1.0]
+		"dial":
+			var a := t * 2.6
+			return [sh_l + Vector3(0.12 + cos(a) * 0.05, -0.12 + sin(a) * 0.05, -0.4), sh_r + Vector3(-0.12 + cos(a + PI) * 0.05, -0.12 + sin(a + PI) * 0.05, -0.4), 1.0]
+		"console":
+			var c1 := maxf(0.0, sin(t * 4.5)) * 0.07
+			var c2 := maxf(0.0, -sin(t * 4.5)) * 0.07
+			return [sh_l + Vector3(0.06, -0.2 - c1, -0.38), sh_r + Vector3(-0.06, -0.2 - c2, -0.38), 1.0]
+		"lever":
+			var p := 0.5 - 0.5 * cos(t * 2.6)
+			return [sh_l + Vector3(0.14, 0.05 - p * 0.28, -0.45 + p * 0.22), sh_r + Vector3(-0.14, 0.05 - p * 0.28, -0.45 + p * 0.22), 1.0]
+		"windup":
+			return [sh_l + Vector3(-0.32, -0.12, -0.05), sh_r + Vector3(0.3, -0.1, -0.05), 0.6]
+		"shrine":
+			return [sh_l + Vector3(0.13, -0.16, -0.24), sh_r + Vector3(-0.13, -0.16, -0.24), 1.0]
+		"beacon":
+			return [sh_l + Vector3(0.05, 0.42 + sin(t * 2.0) * 0.03, -0.14), sh_r, 0.0]
+		"key":
+			var tw := sin(t * 5.0) * 0.04
+			return [sh_l + Vector3(0.04, -0.4, -0.18), sh_r + Vector3(-0.04 + tw, -0.36, -0.36), 1.0]
+		"loot":
+			var r1 := sin(t * 4.0) * 0.08
+			return [sh_l + Vector3(0.08, -0.46 + maxf(0.0, r1), -0.34), sh_r + Vector3(-0.08, -0.46 + maxf(0.0, -r1), -0.34), 1.0]
+		"rune":
+			return [sh_l + Vector3(0.12, -0.06, -0.42), sh_r + Vector3(-0.12, -0.06, -0.42), 1.0]
+	return [sh_l, sh_r, 0.0]
 
 ## A support hand that can't reach its grip slides back along the weapon toward the trigger hand.
 static func _reachable(sh: Vector3, want: Vector3, back_to: Vector3, reach: float) -> Vector3:

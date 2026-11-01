@@ -113,6 +113,19 @@ var box_rev_at := -9.0         # last time we were channelling a deathbox revive
 var hurt_at := -9.0            # last time a hit landed (channels like a box revive break on it)
 var extracted := false
 var extract_prog := 0.0
+## What this hunter is holding interact for right now (an animation each, see HunterAnim._act_*):
+## "" or one of HOLD_KINDS. Set every tick by whatever the hold works on; it lapses when not refreshed.
+const HOLD_KINDS := ["tame", "revive", "chest", "dial", "console", "lever", "windup", "shrine", "beacon", "key", "loot", "rune"]
+var hold_kind := ""
+var hold_until := 0.0
+
+## Keep the hold animation going for a moment (the systems that run a hold call this every tick).
+func set_hold(kind: String, dur := 0.15) -> void:
+	hold_until = maxf(hold_until, m.time + dur) if kind == hold_kind else m.time + dur
+	hold_kind = kind
+
+func holding() -> String:
+	return hold_kind if m.time < hold_until else ""
 var rift_keys := 0               # Rift Keys carried: each opens a rift hatch once (see Exits); they go in your deathbox
 var kin: Ent = null             # the active kin: its abilities are on Q and V, its ultimate on R
 var kin2: Ent = null            # the benched kin, swapped in with X
@@ -505,7 +518,9 @@ func update_lip() -> void:
 const MARKER_BALL_Y := 0.95       # balloon centre above the stance: where a level shot flies
 const MARKER_FLASH := 0.3
 const MARKER_FOE := Color("ff4a3a")
-const MARKER_ALLY := Color("4fd8ff")   # always cool blue, so an ally never reads like a foe (team 0 is orange)
+# always cool blue, so an ally never reads like a foe (team 0 is orange); half see-through, since you
+# never shoot at it (at full strength it lit a bright blue hoop under every squadmate's hop)
+const MARKER_ALLY := Color(0.31, 0.85, 1.0, 0.5)
 var balloon: Node3D               # the hit marker: Ring, Ball, Knot, Aura, String
 var _mk_ring: MeshInstance3D
 var _mk_ball: MeshInstance3D
@@ -2830,6 +2845,7 @@ func _anim_state(stretch: float) -> void:
 				rv = true
 				break
 	s["reviving"] = rv or box_reviving()
+	s["act"] = holding()
 	# an emote bubble over us
 	var em := ""
 	var et := 99.0

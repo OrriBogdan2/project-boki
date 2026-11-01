@@ -493,6 +493,7 @@ func _tick_dial(L: Dictionary, dt: float) -> void:
 		if h.out or h.downed or h.extracted or not is_instance_valid(h) or h.flat_dist(L["dial"]) > DIAL_R + 1.3:
 			_stop_dial(L)
 			return
+		h.set_hold("dial")
 		L["needle"] = wrapf(float(L["needle"]) + float(L["dir"]) * speed_of(L) * dt, -PI, PI)
 		L["jam"] = maxf(0.0, float(L["jam"]) - dt)
 		L["grace"] = maxf(0.0, float(L["grace"]) - dt)
@@ -793,6 +794,7 @@ func _victory_open(L: Dictionary, by: Hunter) -> void:
 		tw.tween_property(arm, "rotation:x", 0.75, 0.25).set_trans(Tween.TRANS_BACK)
 	_set_updraft(L, false)
 	if by:
+		by.set_hold("lever", 0.9)
 		m.sfx("click", L["lever"], 4.0, 0.6)
 		m.sfx("unlock", L["lever"], 2.0, 0.8)
 		m.fx.burst(L["lever"] + Vector3(0, 1.6, 0), color_of(L), 18, 3.5, 0.5, -2.0)
@@ -1268,10 +1270,14 @@ func bot_goal(h: Hunter, leaving: bool) -> Array:
 		if L["state"] in ["cleared", "dormant"] or L.get("locked", false): continue
 		# a sealed gate bots can't work (runes, wards) isn't a goal: try the next lair instead of giving up
 		if L["state"] == "sealed" and not (L["entry"] as Array).has("dial"): continue
-		var d := h.flat_dist(L["c"])
+		# (the lair we picked last time reaches a little further: at the edge of the range a bot
+		# walking about flipped between it and a roam goal every think, turning round each time)
+		var d := h.flat_dist(L["c"]) - (15.0 if a.get("lair_pick", "") == String(L["id"]) else 0.0)
 		if d < bd: bd = d; best = L
 	if best.is_empty():
+		a.erase("lair_pick")
 		return []
+	a["lair_pick"] = String(best["id"])
 	if best["state"] == "sealed":
 		if not (best["entry"] as Array).has("dial"):
 			return []

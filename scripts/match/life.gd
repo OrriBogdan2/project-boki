@@ -79,6 +79,7 @@ static func tick_wisps(m: Match, dt: float) -> void:
 			if h.team == o.team:
 				allies += 1
 				revivers.append(h)
+				h.set_hold("revive")
 			else:
 				foes += 1
 				stompers.append(h)
@@ -577,6 +578,7 @@ static func tick_beacons(m: Match, dt: float) -> void:
 				continue
 			if h.flat_dist(bc["pos"]) < R["beacon_radius"] and absf(h.pos.y - float(bc["pos"].y)) < 1.8:
 				teams[h.team] = true
+				if not beacon_targets(m, h.team).is_empty(): h.set_hold("beacon")
 		bc["contested"] = teams.size() > 1
 		if teams.size() == 1:
 			var t: int = teams.keys()[0]
