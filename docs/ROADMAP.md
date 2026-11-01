@@ -56,8 +56,41 @@ This overrides the scale-first parts of the order below. The first online target
 - **Distribution:** a private build (itch.io restricted page or Steam Playtest later), auto-update optional.
 - **Deferred until after the playtest proves the fun:** accounts, cloud saves, matchmaking, multiple regions,
   marketplace/trading, editions, season track, anti-cheat hardening.
+- **Sessions (owner decision, Oct 31 11:12pm): rolling 30-minute sessions with join-in-progress.** See
+  "0.6 Sessions" below. The netcode must support joining a running match from the first build: late-join
+  snapshot of the world, loot and lair state, and a server that keeps a session alive for its full length.
 Order: in-flight branches -> archetypes (the combat identity testers will judge) -> Playtest MVP netcode ->
 first closed playtest -> iterate on feedback -> then the rest of this roadmap.
+
+## 0.6 Sessions: rolling 30-minute raids (owner decision, Oct 31)
+
+Replaces the 6-minute "islands fall" match. Inspired by ARC Raiders' join-in-progress raids; read with
+docs/TONE_AND_THREATS.md and docs/POSITIONING.md.
+
+- **Length:** a session runs 30 minutes. Anyone still on the map when it ends is lost (gear and Boki at
+  risk follow the tier's rules). The final minutes escalate (more Blight, exits start closing).
+- **Join-in-progress:** squads are placed into a running session at whatever point it's at; the player
+  doesn't choose. No new squads in the last ~8 minutes, so every arrival has time to play and extract.
+- **Drop waves:** a skyship pass every 2-3 minutes carries the next 2-4 squads, who drop together (the drop
+  stays: choice of landing, air play, potting mid-drop). Its route varies per pass. Below the cloud line
+  trails vanish, so nobody knows exactly who landed near them.
+- **Population:** target 24-40 players on the map at any moment, topped up as people extract or die;
+  bots fill gaps in the playtest. With ~100 testers online that's 2-3 sessions running at once, and anyone
+  can jump in without waiting for a full lobby.
+- **Late arrivals are worth it:** the map is picked over, but there are more deathboxes to scavenge, the
+  Blight is awake, exits are open, and the Walker may be weakened. Fresh loot keeps arriving through events
+  (meteor showers, supply drops, the Walker's death), so minute 20 is never empty.
+- **Map:** roughly 2-3x the current Skyreach area, split into regions with their own look and danger
+  (safer outer islands, a dangerous core, the Walker's route, dark zones). Density target: you meet
+  another squad every few minutes, not every few seconds. Bosses, vaults and caches roll per session; a
+  few re-roll mid-session as events.
+- **Scoring:** no last squad standing. A run is measured by what you extract (value, Boki, kills,
+  bosses), which feeds progression and any leaderboards.
+- **Offline/bots:** the single-player version runs the same session model with bot squads arriving in
+  waves, so it can be built and tuned before the netcode lands.
+
+Build order for this: session model offline (timer, waves, join-in-progress for bot squads, end-of-session
+loss, event loot) -> bigger region-based map -> netcode with late-join snapshots (Playtest MVP).
 
 ## 0. Where the code is today
 
