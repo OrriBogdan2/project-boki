@@ -58,7 +58,10 @@ var budget_ms := -1.0
 var seed_v := 4101
 var squad := 3
 var load_only := false     # --load-check: stop at the reveal and judge the loading screen
+var home_only := false     # --load-check=home: the title-to-home swap instead (see _home_check)
 var trace := false
+var shots_dir := ""        # --load-shots=dir: a screenshot of the loading screen every half second (skews timings)
+var _shot_t := 0.0
 
 func _ready() -> void:
 	for a in OS.get_cmdline_user_args():
@@ -66,8 +69,10 @@ func _ready() -> void:
 		if a.begins_with("--hitch-budget="): budget_ms = float(a.substr(15))
 		if a.begins_with("--hitch-seed="): seed_v = int(a.substr(13))
 		if a.begins_with("--hitch-squad="): squad = int(a.substr(14))
-		if a == "--hitch-trace": trace = true
+		if a == "--hitch-trace": trace = true; PerfLog.trace_slices = true
+		if a.begins_with("--load-shots="): shots_dir = a.substr(13)
 		if a == "--load-check": load_only = true
+		if a == "--load-check=home": load_only = true; home_only = true
 	headless = DisplayServer.get_name() == "headless"
 	var adapter := RenderingServer.get_video_adapter_name().to_lower()
 	software = not headless and (adapter.contains("llvmpipe") or adapter.contains("softpipe") or adapter.contains("swiftshader") or adapter.contains("swrast"))
@@ -97,16 +102,20 @@ func _ready() -> void:
 	started_us = Time.get_ticks_usec()
 	last_us = started_us
 	print("HITCH renderer=%s adapter=%s software=%s headless=%s seed=%d squad=%d" % [RenderingServer.get_current_rendering_method(), RenderingServer.get_video_adapter_name(), software, headless, seed_v, squad])
+	if home_only:
+		_home_check()
+		return
 	# "probe" keeps the loading screen and the warm-up, as a real expedition has them
 	Game.main.show_screen("match", {"teams": 6, "squad": squad, "tier": 0, "seed": seed_v, "autoplay": true, "probe": true, "god": true, "plan_t": 3.0})
 
 func _process(_delta: float) -> void:
-	if _end:
+	if _end or home_only:
 		return
 	var now := Time.get_ticks_usec()
 	var wall := (now - last_us - _walk_us) / 1000.0
 	_walk_us = 0
 	var marks := PerfLog.between(last_us, now)
+	var last_us_prev := last_us
 	last_us = now
 	var c0 := Time.get_ticks_usec()
 	var new_c := _cache_count()
@@ -115,7 +124,15 @@ func _process(_delta: float) -> void:
 	if m == null:
 		load_compiles += new_c
 		var ld := _loading_node()
+		if shots_dir != "" and ld:
+			_shot_t += wall / 1000.0
+			if _shot_t >= 0.5:
+				_shot_t = 0.0
+				var img := get_viewport().get_texture().get_image()
+				if img: img.save_png("%s/load_%03d.png" % [shots_dir, load_frames.size()])
 		load_frames.append({"wall": wall, "marks": marks, "render": _render_us / 1000.0, "compiles": new_c,
+			"slice": _slices_between(last_us_prev, now),
+			"proc": Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0, "phys": Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0,
 			"spin": int(ld.get("spin_draws")) if ld and ld.get("spin_draws") != null else -1, "stage": String(ld.get("stage_label")) if ld and ld.get("stage_label") != null else ""})
 		var cur = Game.main.current
 		if cur is Match and (cur as Match).is_processing() and (cur as Match).hud != null:
@@ -296,6 +313,14 @@ func _trace_lights() -> void:
 		if not now.has(k): print("HITCH-LIGHT gone ", _lights[k])
 	_lights = now
 
+## The build's slices that ended inside (t0, t1]: "  [slice 34 ms at where]".
+func _slices_between(t0: int, t1: int) -> String:
+	var out := ""
+	for sl in PerfLog.slices:
+		if int(sl[0]) > t0 and int(sl[0]) <= t1:
+			out += "  [slice %.0f ms%s]" % [float(sl[1]), (" at " + String(sl[2])) if String(sl[2]) != "" else ""]
+	return out
+
 func _loading_node() -> Node:
 	for ch in Game.main.get_children():
 		var sc = ch.get_script()
@@ -344,10 +369,10 @@ func _finish_load() -> void:
 	lines.append("LOAD spinner drew on %d of %d loading-screen frames" % [drawn, up])
 	var ranked := fl.duplicate()
 	ranked.sort_custom(func(a, b): return float(a["cpu" if cpu_only else "wall"]) > float(b["cpu" if cpu_only else "wall"]))
-	lines.append("LOAD longest frames (wall, outside drawing, render, shader compiles, stage shown, build steps inside):")
+	lines.append("LOAD longest frames (wall, outside drawing, render, process, physics of the frame before, shader compiles, stage shown, build steps inside):")
 	for f in ranked.slice(0, 12):
-		lines.append("LOAD   %7.0f %7.0f %7.0f  c%-3d %-22s %s" % [float(f["wall"]), float(f["cpu"]), float(f["render"]), int(f["compiles"]), String(f["stage"]),
-			", ".join((f["marks"] as Array).map(func(mk): return "%s %.0f" % [mk[1], mk[2]]))])
+		lines.append("LOAD   %7.0f %7.0f %7.0f %6.0f %5.0f  c%-3d %-22s %s%s" % [float(f["wall"]), float(f["cpu"]), float(f["render"]), float(f["proc"]), float(f["phys"]), int(f["compiles"]), String(f["stage"]),
+			", ".join((f["marks"] as Array).map(func(mk): return "%s %.0f" % [mk[1], mk[2]])), String(f["slice"])])
 	var steps := {}
 	for mk in PerfLog.marks:
 		steps[mk[1]] = float(steps.get(mk[1], 0.0)) + float(mk[2])
@@ -357,6 +382,71 @@ func _finish_load() -> void:
 	var spin_ok := up == 0 or drawn >= up - 1
 	var ok := over == 0 and spin_ok and up > 0
 	lines.append("LOAD %s" % ("PASS" if ok else "FAIL (%d slow frames%s%s)" % [over, "" if spin_ok else ", spinner skipped frames", "" if up > 0 else ", no loading screen seen"]))
+	var txt := "\n".join(lines)
+	print(txt)
+	if out_path != "":
+		var fa := FileAccess.open(out_path, FileAccess.WRITE)
+		if fa: fa.store_string(txt + "\n")
+	get_tree().quit(0 if ok else 1)
+
+## --load-check=home: the title screen, then the click to the farm (ink wipe, the farm building
+## behind it, the reveal), timing every frame until the farm has been on screen for a second.
+## Judged like the loading screen: no frame over the budget (outside drawing on a software
+## rasterizer), and the spinner on the ink keeps turning once it shows.
+func _home_check() -> void:
+	Game.main.show_screen("title", {})
+	var t := 0.0
+	while t < 2.5:
+		await get_tree().process_frame
+		t += get_process_delta_time()
+	var fl: Array = []
+	var t0 := Time.get_ticks_usec()
+	var last := t0
+	var built_ms := -1.0
+	var shown_ms := -1.0
+	var fd: ScreenFade = Game.main.fade
+	PerfLog.reset()
+	Game.main.show_screen("home", {})
+	while true:
+		await get_tree().process_frame
+		var now := Time.get_ticks_usec()
+		fl.append({"wall": (now - last) / 1000.0, "render": _render_us / 1000.0, "spin": int(fd.get("spin_draws")) if fd.get("spin_draws") != null else 0, "covered": fd.covered, "marks": PerfLog.between(last, now)})
+		last = now
+		var cur = Game.main.current
+		if built_ms < 0.0 and cur != null and cur.get_script() != null and String(cur.get_script().resource_path).ends_with("home.gd") and cur.is_node_ready() and cur.get("player") != null:
+			built_ms = (now - t0) / 1000.0
+		if built_ms >= 0.0 and shown_ms < 0.0 and not fd.covered:
+			shown_ms = (now - t0) / 1000.0
+		if shown_ms >= 0.0 and (now - t0) / 1000.0 > shown_ms + 1000.0:
+			break
+		if (now - t0) > 60 * 1000000:
+			break
+	_end = true
+	var lines: Array = []
+	var cpu_only := software or headless
+	var budget := budget_ms if budget_ms > 0.0 else (150.0 if cpu_only else 100.0)
+	var worst := 0.0; var worst_cpu := 0.0; var over := 0
+	for f in fl:
+		f["cpu"] = float(f["wall"]) - float(f["render"])
+		worst = maxf(worst, float(f["wall"])); worst_cpu = maxf(worst_cpu, float(f["cpu"]))
+		if float(f["cpu"] if cpu_only else f["wall"]) > budget: over += 1
+	lines.append("LOAD home: built %.0f ms, revealed %.0f ms after the click; longest frame %.0f ms (%.0f ms outside drawing); %d frames over %.0f ms%s" % [built_ms, shown_ms, worst, worst_cpu, over, budget, " (judged outside drawing)" if cpu_only else ""])
+	# the ink's spinner: once it has drawn, it should draw every frame while the ink stays up
+	var up := 0; var drawn := 0; var prev := -1
+	for f in fl:
+		var sp := int(f["spin"])
+		if prev > 0 and bool(f["covered"]):
+			up += 1
+			if sp > prev: drawn += 1
+		prev = sp
+	lines.append("LOAD spinner on the ink drew on %d of %d frames after it showed" % [drawn, up])
+	var ranked := fl.duplicate()
+	ranked.sort_custom(func(a, b): return float(a["cpu" if cpu_only else "wall"]) > float(b["cpu" if cpu_only else "wall"]))
+	lines.append("LOAD longest frames (wall, outside drawing, render, build steps inside):")
+	for f in ranked.slice(0, 8):
+		lines.append("LOAD   %7.0f %7.0f %7.0f  %s" % [float(f["wall"]), float(f["cpu"]), float(f["render"]), ", ".join((f["marks"] as Array).map(func(mk): return "%s %.0f" % [mk[1], mk[2]]))])
+	var ok := over == 0 and built_ms >= 0.0 and drawn >= up - 1
+	lines.append("LOAD %s" % ("PASS" if ok else "FAIL"))
 	var txt := "\n".join(lines)
 	print(txt)
 	if out_path != "":
