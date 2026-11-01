@@ -52,8 +52,9 @@ static func between(t0: int, t1: int) -> Array:
 
 # ------------------------------------------------------------------ slicing long build steps
 ## A build step under the loading screen that runs longer than this lets a frame draw (so the
-## spinner keeps turning and the window never looks hung). Well inside a 100 ms frame on a real GPU.
-const SLICE_MS := 30.0
+## spinner keeps turning and the window never looks hung). Well inside a 100 ms frame on a real GPU;
+## shorter only adds frames (each one draws the loading screen) to the load.
+const SLICE_MS := 45.0
 static var _frame_us := 0
 static var _wait_us := 0
 ## The work each slice did before letting a frame draw: [usec, ms, where] (where: the slice point

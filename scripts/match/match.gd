@@ -298,7 +298,7 @@ func warm_up(progress := Callable()) -> void:
 ## Stand-ins drawn in the first batch of warm_up; later batches grow while a batch's frames stay
 ## cheap and shrink when one costs more than WARM_FRAME_MS over a plain frame (a first draw is
 ## where a GPU compiles a shader). Only how many frames the warm-up takes depends on it.
-const WARM_BATCH := 24
+const WARM_BATCH := 8
 const WARM_FRAME_MS := 45.0
 
 ## The stand-ins of warm_up, a batch a frame, each batch drawn once under each light setup.
@@ -352,8 +352,8 @@ func _warm_batches(progress: Callable, seen: Dictionary) -> bool:
 			px.global_transform = Transform3D(basis.scaled(Vector3.ONE * 0.04), front + basis.x * gx + basis.y * gy)
 			pxs.append(px)
 		var worst := 0.0
-		# two frames under each light setup, as when they were all drawn at once: a stand-in added
-		# this frame isn't reliably drawn until the next
+		# two frames under each light setup (with one, a variant or two still slips through to the
+		# ride: --hitch-check from a cold shader cache)
 		for setup in [[false, false], [true, false], [false, true], [true, true]]:
 			wl[0].visible = setup[0]; wl[1].visible = setup[1]
 			for _f in 2:
