@@ -84,7 +84,7 @@ func show_result(r: Dictionary) -> void:
 			chips.append(["seed", "%d %s seeds" % [s["seeds"][sd], Data.CROPS[sd]["name"]], Data.CROPS[sd]["color"]])
 		for k in s["caught"]:
 			var rare := " ".join(Mutations.tags(k))
-			chips.append(["egg", "%s the %s%s" % [k["name"], (rare + " ") if rare != "" else "", Data.KIN[k["species"]]["name"]], Data.KIN[k["species"]]["color"], k])
+			chips.append(["egg", ("%s the %s %s" % [k["name"], rare, Data.KIN[k["species"]]["name"]]) if rare != "" else Data.kin_title(String(k["name"]), String(Data.KIN[k["species"]]["name"])), Data.KIN[k["species"]]["color"], k])
 		# a boss's Rare Egg: the best thing you can carry home
 		for it in s.get("haul", []):
 			if Loot.is_rare_egg(it):
