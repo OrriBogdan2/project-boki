@@ -528,7 +528,7 @@ func open_tryon() -> void:
 		if kd:
 			var sd := KinLib.ability(kd.active)
 			if sd: _line(cv, Settings.key_cap("signature"), "%s (%s)" % [sd.display_name, kd.display_name], KinText.ability(sd))
-	if kit.has("ultimate"): _line(cv, Settings.key_cap("ultimate"), String(kit["ultimate"]["name"]), "the bond ultimate (on a 20s timer here)")
+	if kit.has("ultimate"): _line(cv, Settings.key_caps("ultimate"), String(kit["ultimate"]["name"]), "the bond ultimate (on a 20s timer here)")
 	v.add_child(card)
 	v.add_child(UI.section("Weapon"))
 	var wr := UI.hbox(8)

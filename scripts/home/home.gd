@@ -3185,7 +3185,7 @@ func _kin_match_rows(rec: Dictionary, c2: Control, compact: bool) -> void:
 		ab_row.call(Settings.key_cap("signature") if ai == 0 else "auto", ad.display_name, (KinText.ability(eff) if ai == 0 else KinText.when(ad) + ": " + KinText.ability(eff)), KinText.color(ad).lerp(UI.INK, 0.3))
 	var ud := KinLib.merge(String(sp.get("ultimate", "")))
 	if ud:
-		ab_row.call(Settings.key_cap("ultimate"), "Merge: " + ud.display_name, " ".join(KinText.merge(ud, kspec != null and kspec.carry_style == "mount")), Color("ffd84a").lerp(UI.INK, 0.3))
+		ab_row.call(Settings.key_caps("ultimate"), "Merge: " + ud.display_name, " ".join(KinText.merge(ud, kspec != null and kspec.carry_style == "mount")), Color("ffd84a").lerp(UI.INK, 0.3))
 	if kspec == null:
 		return
 	var lines: Array = [[KinText.carry(kspec), KinRules.cat_color("sustain").lerp(UI.INK, 0.35)]]

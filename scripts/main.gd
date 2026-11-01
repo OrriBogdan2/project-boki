@@ -409,6 +409,10 @@ func _ready() -> void:
 	if "--life-check" in args:
 		_life_check()
 		return
+	if "--keybind-check" in args:
+		set_meta("keybind_check", load("res://tools/keybind_check.gd").new())     # two keys per action, the ult on R and X, clashes
+		get_meta("keybind_check").run(self)
+		return
 	if "--mantle-check" in args:
 		load("res://tools/mantle_check.gd").new().run(self)    # ledges you mean to climb, you climb; the rest never grab you
 		return

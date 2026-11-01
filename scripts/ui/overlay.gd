@@ -14,6 +14,7 @@ var ctx := ""                   # title | home | town | match
 var stack: Array = []           # pages to go back to with Esc
 var tab := "Audio"
 var listening := ""             # an action waiting for its new key
+var listening_slot := 0         # ...in which slot (0 primary, 1 secondary)
 var listen_lbl: Label = null
 var delete_armed := -1
 
@@ -253,7 +254,7 @@ func _show_settings() -> void:
 			_toggle(v, "Shadows", "shadows")
 			_toggle(v, "Show frame rate", "show_fps")
 		"Controls":
-			UI.subtitle(v, "Click a key, then press the new one. Esc cancels.")
+			UI.subtitle(v, "Two keys per action: click one, then press the new key or mouse button (Esc cancels, x clears it).")
 			var groups := [["Moving", ["up", "down", "left", "right", "jump", "glide", "dash", "crouch"]],
 				["Fighting", ["fire", "secondary", "gear1", "signature", "throw", "ultimate", "tonic", "armor_kit", "base"]],
 				["Squad and map", ["map", "scores", "emote", "pass_lead", "separate"]],
@@ -353,17 +354,28 @@ func _row(v: VBoxContainer, label_txt: String, hint := "") -> HBoxContainer:
 func _bind_row(v: VBoxContainer, an: String, what: String) -> void:
 	var r := _row(v, what)
 	r.custom_minimum_size.y = 34
-	var keys := UI.hbox(4)
-	keys.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	var txt := Settings.binding_text(an)
-	var b := UI.button(txt if txt != "" else "Not set", Callable(), 180)
-	b.tooltip_text = "Click, then press a key or mouse button"
-	b.pressed.connect(func():
-		listening = an
-		b.text = "Press a key..."
-		b.theme_type_variation = "Chosen"
-		listen_lbl = null)
-	r.add_child(b)
+	var sl := Settings.slots(an)
+	for slot in 2:
+		var cell := UI.hbox(2)
+		cell.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		var code: String = sl[slot]
+		var b := UI.button(Settings.code_text(code) if code != "" else ("Not set" if slot == 0 else "+ second key"), Callable(), 132)
+		b.tooltip_text = ("Main key" if slot == 0 else "Second key") + ": click, then press a key or mouse button"
+		if code == "" and slot == 1: b.modulate = Color(1, 1, 1, 0.55)
+		b.pressed.connect(func():
+			listening = an
+			listening_slot = slot
+			b.text = "Press a key..."
+			b.theme_type_variation = "Chosen"
+			listen_lbl = null)
+		cell.add_child(b)
+		var x := UI.ghost("x", func(): Settings.clear_bind(an, slot); _show_settings())
+		x.custom_minimum_size.x = 26
+		x.tooltip_text = "Clear this key"
+		x.disabled = code == ""
+		x.modulate.a = 1.0 if code != "" else 0.25
+		cell.add_child(x)
+		r.add_child(cell)
 
 func _slider(v: VBoxContainer, label_txt: String, key: String, lo: float, hi: float, step := 0.05) -> void:
 	var r := _row(v, label_txt)
@@ -422,10 +434,34 @@ func _choice(v: VBoxContainer, label_txt: String, key: String, opts: Array, then
 	r.add_child(ob)
 
 func _finish_rebind(ev: InputEvent) -> void:
-	Settings.rebind(listening, ev)
+	var an := listening; var slot := listening_slot
 	listening = ""
 	Sfx.play("click")
+	var cf: Array = Settings.conflicts(ev, an)
+	if cf.is_empty():
+		Settings.rebind(an, ev, slot)
+		_show_settings()
+		return
+	# already someone else's key: say whose, and offer to swap (they get what this slot had)
+	var named := {}
+	for a in Settings.ACTIONS: named[String(a[0])] = String(a[1])
+	var other: String = cf[0][0]; var oslot: int = cf[0][1]
+	var mine: String = Settings.slots(an)[slot]
+	var key_txt := Settings.code_text(Settings.ev_code(ev))
+	var oname := "\"%s\"" % named.get(other, other)
+	var txt := "%s is already the key for %s.\nSwap them (%s gets %s), or use it for both?" % [key_txt, oname, oname, Settings.code_text(mine) if mine != "" else "no key"]
 	_show_settings()
+	var layer := UI.confirm(root, "Key already in use", txt, "Swap", func():
+		Settings.swap_bind(an, slot, ev, other, oslot)
+		_show_settings(), false)
+	set_meta("bind_conflict", layer)
+	var row: Node = layer.find_children("*", "HBoxContainer", true, false).back()
+	var both := UI.ghost("Use for both", func():
+		layer.queue_free()
+		Settings.rebind(an, ev, slot)
+		_show_settings())
+	row.add_child(both)
+	row.move_child(both, 1)
 
 # ------------------------------------------------------------------ inventory
 var inv_tab := "Items"

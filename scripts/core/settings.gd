@@ -18,7 +18,7 @@ const DEFAULTS := {
 	# demo / recording (Settings > Demo): for filming a match, offline only (online matches use the host's rules)
 	"demo_weather": "random", "demo_blight": true, "demo_fresh": "normal", "rec_level": 0,
 	# controls: action -> list of "key:<physical keycode>" / "mouse:<button>"
-	"keys": {}, "keys_v": 2,
+	"keys": {}, "keys_v": 2, "keys2_v": 0,
 }
 ## Graphics presets (Video → Quality). High is the game's full look; Low and Medium trade detail for
 ## speed, Ultra pushes draw distance, shadows and level of detail further. A preset sets the plain
@@ -123,6 +123,7 @@ func _ready() -> void:
 	if int(v.get("keys_v", 1)) < KEYS_V or not cf.has_section_key("s", "keys_v"):
 		v["keys"] = {}          # the kit changed (archetypes: E utility, C kin ability, G send/recall): start from the new defaults
 		v["keys_v"] = KEYS_V
+	_migrate_keys2()
 	if int(v.get("video_v", 1)) < 2 or not cf.has_section_key("s", "video_v"):
 		# crisper by default: 4x MSAA on desktop (the browser build stays on 2x)
 		if int(v.get("msaa", 2)) == 2 or not cf.has_section_key("s", "msaa"): v["msaa"] = 2 if OS.has_feature("web") else 4
@@ -136,6 +137,25 @@ func _ready() -> void:
 		v["crouch_toggle"] = true      # browsers close the tab on Ctrl+W, so don't make people hold Ctrl
 	get_tree().node_added.connect(_on_node_added)
 	get_tree().root.size_changed.connect(_apply_ui_scale)
+
+## (feelfix) Secondary bindings came in: X is the ultimate's second key for everyone, custom bindings
+## included (added only where that slot is empty and X isn't taken), and "separate from the drop"
+## leaves X for Z. Once (keys2_v).
+func _migrate_keys2() -> void:
+	if int(v.get("keys2_v", 0)) >= 1:
+		return
+	var ks: Dictionary = v["keys"]
+	var x_used := false
+	for a in ks:
+		if a != "ultimate" and a != "separate" and (ks[a] as Array).has("key:%d" % KEY_X): x_used = true
+	if ks.has("separate") and (ks["separate"] as Array).has("key:%d" % KEY_X):
+		ks["separate"] = ["key:%d" % KEY_Z]
+	if ks.has("ultimate") and not x_used:
+		var ul: Array = ks["ultimate"]
+		if ul.size() < 2 and not ul.has("key:%d" % KEY_X):
+			if ul.is_empty(): ul.append("key:%d" % KEY_R)
+			ul.append("key:%d" % KEY_X)
+	v["keys2_v"] = 1
 
 ## Called by Game once the input actions exist, so saved key bindings can replace them.
 func apply_all() -> void:
@@ -341,31 +361,98 @@ func _bind(action: String, list: Array) -> void:
 			var m := InputEventMouseButton.new(); m.button_index = int(parts[1])
 			InputMap.action_add_event(action, m)
 
-## Replaces an action's main binding with this key or mouse button.
-func rebind(action: String, ev: InputEvent) -> void:
+## The saved form of a key or mouse button ("key:69", "mouse:2"), or "" for anything else.
+func ev_code(ev: InputEvent) -> String:
+	if ev is InputEventKey: return "key:%d" % (ev as InputEventKey).physical_keycode
+	if ev is InputEventMouseButton: return "mouse:%d" % (ev as InputEventMouseButton).button_index
+	return ""
+
+## An action's two binding slots, [primary, secondary] ("" when a slot is empty).
+func slots(action: String) -> Array:
 	var list := _events_to_list(InputMap.action_get_events(action))
-	var s := ""
-	if ev is InputEventKey: s = "key:%d" % (ev as InputEventKey).physical_keycode
-	elif ev is InputEventMouseButton: s = "mouse:%d" % (ev as InputEventMouseButton).button_index
-	if s == "":
-		return
-	# keep any second binding (the arrow keys for moving), replace the first
-	if list.size() > 0: list[0] = s
-	else: list.append(s)
+	var saved: Array = v["keys"].get(action, [])
+	# (an empty primary is kept in the save as "", which InputMap can't hold)
+	if saved.size() >= 2 and String(saved[0]) == "": list.push_front("")
+	while list.size() < 2: list.append("")
+	return [String(list[0]), String(list[1])]
+
+func _set_slots(action: String, sl: Array) -> void:
+	var list: Array = [String(sl[0]), String(sl[1])]
+	if list[1] == "": list.resize(1)
+	if list.size() == 1 and list[0] == "": list = []
 	_bind(action, list)
 	var keys: Dictionary = v["keys"]
 	keys[action] = list
 	save()
 	changed.emit("keys")
 
+## Sets one binding slot of an action (0 primary, 1 secondary) to this key or mouse button.
+func rebind(action: String, ev: InputEvent, slot := 0) -> void:
+	var s := ev_code(ev)
+	if s == "":
+		return
+	var sl := slots(action)
+	sl[slot] = s
+	if sl[1 - slot] == s: sl[1 - slot] = ""
+	_set_slots(action, sl)
+
+## Empties one binding slot.
+func clear_bind(action: String, slot: int) -> void:
+	var sl := slots(action)
+	sl[slot] = ""
+	_set_slots(action, sl)
+
+## Other rebindable actions already using this key or button: [[action, slot], ...].
+func conflicts(ev: InputEvent, except := "") -> Array:
+	var s := ev_code(ev)
+	var out: Array = []
+	if s == "":
+		return out
+	for a in ACTIONS:
+		if a[0] == except: continue
+		var sl := slots(a[0])
+		for i in 2:
+			if sl[i] == s and not _shared_ok(a[0], except): out.append([a[0], i])
+	return out
+
+## Pairs of actions that share keys on purpose (they never apply in the same place: at home vs in a match).
+const SHARED_OK := [["talk", "emote"], ["details", "kin_ability"], ["build", "base"], ["rotate", "ultimate"]]
+func _shared_ok(a: String, b: String) -> bool:
+	for p in SHARED_OK:
+		if (p[0] == a and p[1] == b) or (p[0] == b and p[1] == a): return true
+	return false
+
+## Gives `action` this key in `slot`, and the action that had it (other, other_slot) gets what
+## `action` had there.
+func swap_bind(action: String, slot: int, ev: InputEvent, other: String, other_slot: int) -> void:
+	var mine := slots(action)
+	var theirs := slots(other)
+	theirs[other_slot] = mine[slot]
+	mine[slot] = ev_code(ev)
+	_set_slots(other, theirs)
+	_set_slots(action, mine)
+
+func code_text(s: String) -> String:
+	var parts := s.split(":")
+	if parts.size() != 2: return ""
+	if parts[0] == "key": return OS.get_keycode_string(int(parts[1]))
+	return {1: "LMB", 2: "RMB", 3: "MMB", 4: "Wheel up", 5: "Wheel down", 8: "Mouse 4", 9: "Mouse 5"}.get(int(parts[1]), "Mouse %s" % parts[1])
+
 func binding_text(action: String) -> String:
 	var names: Array = []
-	for e in InputMap.action_get_events(action):
-		if e is InputEventKey:
-			names.append(OS.get_keycode_string((e as InputEventKey).physical_keycode))
-		elif e is InputEventMouseButton:
-			names.append({1: "LMB", 2: "RMB", 3: "MMB", 4: "Wheel up", 5: "Wheel down", 8: "Mouse 4", 9: "Mouse 5"}.get((e as InputEventMouseButton).button_index, "Mouse %d" % (e as InputEventMouseButton).button_index))
+	for c in slots(action):
+		if c != "": names.append(code_text(c))
 	return " / ".join(names) if names.size() > 0 else "unbound"
+
+## Both bindings, short ("R / X"), where a prompt has room for them.
+func key_caps(action: String) -> String:
+	var out: Array = []
+	for c in slots(action):
+		if c == "": continue
+		var t := code_text(c)
+		t = {"Mouse 4": "M4", "Mouse 5": "M5"}.get(t, t)
+		out.append(t.to_upper() if c.begins_with("key:") else t)
+	return " / ".join(out) if out.size() > 0 else "?"
 
 ## The first binding of an action, short, for HUD key caps ("E", "LMB").
 func key_cap(action: String) -> String:

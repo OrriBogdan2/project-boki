@@ -10,7 +10,7 @@ extends RefCounted
 ## jump; the rest of the squad jumps with them and glides down in formation behind the leader (their
 ## gliders track the leader's with a fixed offset, so they keep control of nothing but "separate").
 ## The leader can pass the lead to a squadmate (P, or click a name on the map). Anyone who isn't the
-## leader can separate (X) to jump or steer on their own. Bots follow the leader by default and some
+## leader can separate (Z) to jump or steer on their own. Bots follow the leader by default and some
 ## break off near the ground to land a little apart.
 
 const PLAN_T := 8.0

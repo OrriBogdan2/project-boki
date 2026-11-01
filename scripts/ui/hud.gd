@@ -2193,7 +2193,7 @@ func _draw_kit(sz: Vector2, p: Hunter) -> void:
 		if rv.has("hold"): rdesc += "  Hold: %s" % String(rv["hold"])
 		lines.append([Settings.key_cap("secondary"), String(ak.rmb_def().get("name", "Right click")), rdesc, ak.col_of(ak.rmb_def())])
 		lines.append([Settings.key_cap("signature"), String(ak.e_def().get("name", "E")), String(ak.e_def().get("desc", "")), ak.col_of(ak.e_def())])
-		lines.append([Settings.key_cap("ultimate"), String(ak.r_def().get("name", "R")) + ("" if p.lvl >= int(Hunter.ULT_AT[0]) else "  (level %d)" % int(Hunter.ULT_AT[0])), String(ak.r_def().get("desc", "")), ak.col_of(ak.r_def())])
+		lines.append([Settings.key_caps("ultimate"), String(ak.r_def().get("name", "R")) + ("" if p.lvl >= int(Hunter.ULT_AT[0]) else "  (level %d)" % int(Hunter.ULT_AT[0])), String(ak.r_def().get("desc", "")), ak.col_of(ak.r_def())])
 	if p.kin and p.ak:
 		var k: Kin = p.kin
 		var kcol: Color = Data.KIN[k.species]["color"]
@@ -2206,7 +2206,7 @@ func _draw_kit(sz: Vector2, p: Hunter) -> void:
 		var kd1: AbilitySpec = k.runner.def_of("k1")
 		if kd1: lines.append([Settings.key_cap("signature"), kd1.display_name, KinText.ability(k.effective("k1")), KinText.color(kd1)])
 		var ud := KinMerge.def_for(k)
-		if ud: lines.append([Settings.key_cap("ultimate"), ud.display_name + " (merge)", " ".join(KinText.merge(ud, k.carry_style() == "mount")) + " Unlocks at level %d with a full bond meter." % int(Hunter.ULT_AT[0]), GOLD])
+		if ud: lines.append([Settings.key_caps("ultimate"), ud.display_name + " (merge)", " ".join(KinText.merge(ud, k.carry_style() == "mount")) + " Unlocks at level %d with a full bond meter." % int(Hunter.ULT_AT[0]), GOLD])
 		lines.append([Settings.key_cap("throw"), ("Throw (a dive) / recall " if k.carry_style() == "perch" else "Throw / recall ") + String(k.rec.get("name", "your Boki")), "Stuns what it hits; then your shots deal a combo. Press again to call it back.", kcol])
 	var dsi := p.slot_info("dash")
 	lines.append([Settings.key_cap("dash"), String(dsi["name"]) + ((" + " + String(dsi["rider"])) if String(dsi.get("rider", "")) != "" else ""), String(dsi["desc"]), dsi["col"]])
@@ -2695,7 +2695,7 @@ func _tip_lines(id: String, p: Hunter) -> Array:
 			if ud == null: return []
 			var giant: bool = (p.kin as Kin).carry_style() == "mount"
 			out.append([ud.display_name, GOLD])
-			out.append(["Merge (bond ultimate)  ·  %s  ·  %s" % [Settings.key_cap("ultimate"), "your mount grows giant" if giant else "fuses onto you"], MUTED, 12])
+			out.append(["Merge (bond ultimate)  ·  %s  ·  %s" % [Settings.key_caps("ultimate"), "your mount grows giant" if giant else "fuses onto you"], MUTED, 12])
 			for ln in KinText.merge(ud, giant):
 				out.append([String(ln), INK, 13])
 			out.append(["Unlocks at level %d with a full meter. After that the bond fills as you and your Boki land hits together. Throwing your Boki ends it early; then %ss before it can go again." % [int(Hunter.ULT_AT[0]), KinText.n(KinParts.MERGE_SPENT_TIME)], GOLD, 12])
