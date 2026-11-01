@@ -1531,16 +1531,26 @@ static func gun_parts(gun: Node3D, weapon: String, m_gun: Material, m_dark: Mate
 			grip.call(-0.02, 0.15)
 			stock.call(0.07, 0.2, 0.08, 0.05)
 		"rifle":
-			part(gun, box(0.1, 0.13, 0.46), m_gun, Vector3(0, 0, -0.16))
-			part(gun, box(0.12, 0.11, 0.24), m_acc, Vector3(0, -0.005, -0.44))
+			# a lever-action: walnut stock and forend, a dark receiver with a brass side plate, a long
+			# barrel bound in brass, a loop lever; the accent (team or rarity) on the forend cap
+			var walnut := toon(Color("7a4a2e")); painted(walnut, 2, 0.24, 0.2, 0.2); walnut.set_shader_parameter("gloss", 0.35)
+			var brass := shiny(Color("d6a447"), 0.7)
+			part(gun, HeroKit.loft("lever_rcv", [Vector3(0, 0.0, 0.06), Vector3(0, 0.01, -0.08), Vector3(0, 0.0, -0.2)], [Vector2(0.05, 0.065), Vector2(0.052, 0.07), Vector2(0.045, 0.058)], 10, Vector3.UP, 0.9), m_gun, Vector3(0, 0, -0.04))
+			for sx in [-1.0, 1.0]:
+				part(gun, box(0.006, 0.07, 0.18), brass, Vector3(0.05 * sx, 0.0, -0.12))
+			part(gun, HeroKit.loft("lever_fore", [Vector3(0, -0.02, -0.25), Vector3(0, -0.02, -0.4), Vector3(0, -0.015, -0.54)], [Vector2(0.045, 0.045), Vector2(0.046, 0.044), Vector2(0.04, 0.04)], 10, Vector3.UP, 0.9), walnut)
+			part(gun, cyl(0.046, 0.046, 0.04, 12), m_acc, Vector3(0, -0.018, -0.565), Vector3.ONE, Vector3(PI / 2, 0, 0))
+			part(gun, cyl(0.022, 0.026, 0.62, 10), m_dark, Vector3(0, 0.03, -0.53), Vector3.ONE, Vector3(PI / 2, 0, 0))
+			part(gun, cyl(0.018, 0.018, 0.44, 8), m_dark, Vector3(0, -0.012, -0.44), Vector3.ONE, Vector3(PI / 2, 0, 0))
 			for k in 3:
-				part(gun, box(0.125, 0.02, 0.03), m_dark, Vector3(0, 0.03, -0.37 - k * 0.06))
-			part(gun, cyl(0.03, 0.034, 0.26, 12), m_dark, Vector3(0, 0.02, -0.66), Vector3.ONE, Vector3(PI / 2, 0, 0))
-			part(gun, cyl(0.048, 0.042, 0.06, 12), m_gun, Vector3(0, 0.02, -0.77), Vector3.ONE, Vector3(PI / 2, 0, 0))
-			part(gun, cyl(0.04, 0.04, 0.16, 12), m_dark, Vector3(0, 0.11, -0.14), Vector3.ONE, Vector3(PI / 2, 0, 0))
-			part(gun, cyl(0.03, 0.03, 0.02, 12), glow.call(Color("9af0ff")), Vector3(0, 0.11, -0.225), Vector3.ONE, Vector3(PI / 2, 0, 0))
+				part(gun, cyl(0.032, 0.032, 0.02, 10), brass, Vector3(0, 0.02, -0.38 - k * 0.16), Vector3.ONE, Vector3(PI / 2, 0, 0))
+			part(gun, box(0.012, 0.03, 0.02), brass, Vector3(0, 0.065, -0.8))
+			var loop := TorusMesh.new(); loop.inner_radius = 0.03; loop.outer_radius = 0.042; loop.rings = 14; loop.ring_segments = 5
+			part(gun, loop, brass, Vector3(0, -0.085, 0.0), Vector3(1.0, 1.0, 1.3), Vector3(0, 0, PI / 2))
+			part(gun, box(0.016, 0.022, 0.16), glow.call(Color("ffc46a")), Vector3(0.052, 0.04, -0.12))
 			grip.call(0.0, 0.16)
-			stock.call(0.08, 0.26, 0.12, 0.06)
+			part(gun, HeroKit.loft("lever_stock", [Vector3(0, 0.0, 0.08), Vector3(0, -0.03, 0.18), Vector3(0, -0.07, 0.3)], [Vector2(0.03, 0.05), Vector2(0.034, 0.06), Vector2(0.036, 0.085)], 10, Vector3.UP, 0.85), walnut)
+			part(gun, box(0.07, 0.09, 0.02), m_dark, Vector3(0, -0.07, 0.31), Vector3.ONE, Vector3(0.25, 0, 0))
 		"sniper":
 			part(gun, box(0.09, 0.12, 0.5), m_gun, Vector3(0, 0, -0.16))
 			part(gun, cyl(0.028, 0.03, 0.56, 12), m_dark, Vector3(0, 0.02, -0.66), Vector3.ONE, Vector3(PI / 2, 0, 0))

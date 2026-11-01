@@ -134,7 +134,9 @@ var frozen := false
 func _showcase() -> void:
 	var args := OS.get_cmdline_user_args()
 	var only := _arg("--showcase-arch=", "")
-	var arches := ["thief", "juggernaut"] if only == "" else [only]
+	# --showcase-arch=archer or a list (mage,bulwark); --showcase-six: all six, one look each
+	var six := "--showcase-six" in args
+	var arches: Array = (["thief", "juggernaut"] if only == "" else Array(only.split(","))) if not six else HeroKit.ARCH_ORDER.duplicate()
 	var looks := {
 		"thief": [{"race": 0, "gender": 0, "hair": 1, "hair_col": 0, "skin": 2, "face": 4, "outfit": 1},
 			{"race": 1, "gender": 1, "hair": 0, "hair_col": 5, "skin": 2, "face": 7, "outfit": 3},
@@ -142,6 +144,18 @@ func _showcase() -> void:
 		"juggernaut": [{"race": 0, "gender": 1, "hair": 0, "hair_col": 1, "skin": 4, "face": 7, "outfit": 7, "detail": 5},
 			{"race": 2, "gender": 1, "hair": 0, "hair_col": 10, "skin": 19, "face": 4, "outfit": 5},
 			{"race": 4, "gender": 0, "hair": 1, "hair_col": 6, "skin": 12, "face": 0, "outfit": 8}],
+		"archer": [{"race": 0, "gender": 0, "hair": 2, "hair_col": 5, "skin": 1, "face": 7, "outfit": 3},
+			{"race": 5, "gender": 1, "hair": 1, "hair_col": 4, "skin": 2, "face": 0, "outfit": 2},
+			{"race": 1, "gender": 0, "hair": 3, "hair_col": 13, "skin": 2, "face": 4, "outfit": 4}],
+		"mage": [{"race": 0, "gender": 1, "hair": 4, "hair_col": 4, "skin": 3, "face": 1, "outfit": 1, "detail": 5},
+			{"race": 3, "gender": 0, "hair": 1, "hair_col": 7, "skin": 11, "face": 6, "outfit": 0},
+			{"race": 5, "gender": 1, "hair": 2, "hair_col": 11, "skin": 2, "face": 8, "outfit": 2}],
+		"gunslinger": [{"race": 0, "gender": 1, "hair": 0, "hair_col": 1, "skin": 2, "face": 8, "outfit": 4, "detail": 4},
+			{"race": 1, "gender": 0, "hair": 6, "hair_col": 5, "skin": 2, "face": 5, "outfit": 5},
+			{"race": 4, "gender": 1, "hair": 2, "hair_col": 3, "skin": 12, "face": 7, "outfit": 7}],
+		"bulwark": [{"race": 0, "gender": 0, "hair": 1, "hair_col": 3, "skin": 4, "face": 7, "outfit": 6},
+			{"race": 2, "gender": 1, "hair": 1, "hair_col": 10, "skin": 19, "face": 1, "outfit": 0},
+			{"race": 5, "gender": 0, "hair": 0, "hair_col": 8, "skin": 2, "face": 0, "outfit": 2}],
 	}
 	var oo := int(_arg("--showcase-outfit=", "-1"))
 	var cam := Camera3D.new()
@@ -166,12 +180,12 @@ func _showcase() -> void:
 		return
 	var i := 0
 	for arch in arches:
-		for lk0 in looks[arch]:
+		for lk0 in ((looks[arch] as Array).slice(0, 1) if six else looks[arch]):
 			var lk: Dictionary = (lk0 as Dictionary).duplicate()
 			lk["hair_v"] = 2; lk["body"] = 1
 			if oo >= 0: lk["outfit"] = oo
 			var h := _hunter(arch, lk, i % 2)
-			var n := arches.size() * 3
+			var n := arches.size() * (1 if six else 3)
 			h.position = Vector3((i - (n - 1) * 0.5) * 1.55, 0, 0)
 			h.rotation.y = PI * 0.86
 			i += 1
@@ -181,7 +195,8 @@ func _showcase() -> void:
 		cam.position = Vector3(0, sin(p) * 25.0, cos(p) * 25.0); cam.rotation = Vector3(-p, 0, 0)
 		cam.fov = 17.5 if "--showcase-zoom" in args else 35.0
 	else:
-		cam.position = Vector3(0, 1.55, 5.6 + 0.6 * (arches.size() - 1)); cam.rotation = Vector3(-0.1, 0, 0); cam.fov = 46 if arches.size() > 1 else 40
+		var nn := arches.size() * (1 if six else 3)
+		cam.position = Vector3(0, 1.55, 3.8 + 0.6 * nn); cam.rotation = Vector3(-0.1, 0, 0); cam.fov = 40 if nn <= 3 else 46
 	cam.make_current()
 
 ## Runs the animation into a pose and holds it there (a few hundred small steps).
