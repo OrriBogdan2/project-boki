@@ -43,6 +43,7 @@ const CAM_AT := Vector3(-0.9, 1.9, -0.9)
 const CAM_LOOK := Vector3(1.25, 1.95, -9.4)
 const WIND := Vector3(2.2, 0.15, 0.35)            # the storm blows left to right
 ## Each archetype's weapon on the title (the arch_gallery set).
+const DISCORD := "https://discord.gg/nbeBaU7xt"        # the playtest server (never expires)
 const WEAPONS := {"thief": "twin_blades", "archer": "sniper", "mage": "longsword", "gunslinger": "rifle", "juggernaut": "greatsword", "bulwark": "minigun"}
 
 func _ready() -> void:
@@ -112,7 +113,7 @@ func _hero_isle() -> void:
 	# windswept grass, dull olive, thinner on Low
 	_grass(isl, rr, int((900 if not low else 320) * float(Settings.q("grass"))), ISLE_R * 0.86)
 	# rocks along the broken edge, and a fallen pillar of the old world
-	var rocks := [[Vector3(-3.6, 0, -4.0), 1.5], [Vector3(4.6, 0, -2.4), 1.2], [Vector3(-5.2, 0, 0.6), 1.0], [Vector3(2.35, -0.15, -4.0), 0.85],
+	var rocks := [[Vector3(-3.6, 0, -4.0), 1.5], [Vector3(4.6, 0, -2.4), 1.2], [Vector3(-5.2, 0, 0.6), 1.0], [Vector3(1.3, -0.15, -5.1), 0.85],
 		[Vector3(5.6, 0, 1.8), 1.4], [Vector3(-1.2, 0, 4.6), 0.8], [Vector3(3.4, 0, 4.4), 1.1]]
 	for i in rocks.size():
 		var rk := Flora.node("rock", "storm", i % 3, float(rocks[i][1]))
@@ -173,13 +174,16 @@ func _squad() -> void:
 	# [x, z, yaw, pose, y]
 	# laid out in screen terms: you and your Boki in front with open sky behind you, the others
 	# spread to either side and back toward the edge, so nobody hides anybody
+	# (placed from where they land on screen, about a fifth of the screen apart, nearer ones lower:
+	# you front and centre, a light one at mid depth, the big heavies further back so they don't
+	# wall the shot off, the archer up on a rock at the back)
 	var slots: Array = [
-		[1.45, -7.5, 0.0, "lead", 0.0],                                       # turned to its Boki (set in _boki)
-		[5.15, -9.15, out_yaw + 0.3, "watch", 0.0],                           # back to us, facing the storm
-		[4.75, -10.8, out_yaw - 0.15, "point", 0.5],                          # up on a rock, pointing at it
-		[1.65, -11.1, out_yaw - 0.6, "watch", 0.0],
-		[6.6, -9.35, to_cam.call(Vector3(6.6, 0, -9.35), -0.55), "ready", 0.0],
-		[0.4, -9.3, to_cam.call(Vector3(0.4, 0, -9.3), 0.8), "crouch", 0.0],
+		[0.9, -7.25, 0.0, "lead", 0.0],                                       # turned to its Boki (set in _boki)
+		[5.0, -12.2, out_yaw + 0.3, "watch", 0.0],                            # back to us, facing the storm
+		[3.7, -11.9, out_yaw - 0.15, "point", 0.5],                           # up on a rock, pointing at it
+		[0.54, -11.68, out_yaw - 0.6, "watch", 0.0],
+		[6.2, -11.0, to_cam.call(Vector3(6.2, 0, -11.0), -0.55), "ready", 0.0],
+		[2.51, -8.91, to_cam.call(Vector3(2.51, 0, -8.91), 0.8), "crouch", 0.0],
 	]
 	var looks: Array = [
 		{"race": 3, "hair": 0, "hair_v": 2, "hair_col": 0, "skin": 2, "gender": 0, "face": 4, "body": 1, "outfit": 1},
@@ -234,8 +238,11 @@ func _boki() -> void:
 				# them, and they've turned to look down at it
 				var cr := Vector3(CAM_LOOK.z - CAM_AT.z, 0, CAM_AT.x - CAM_LOOK.x).normalized() * -1.0
 				var tc := Vector3(CAM_AT.x - at.x, 0, CAM_AT.z - at.z).normalized()
-				at += cr * 0.95 + tc * 0.35
-				k.look_at_from_position(at, Vector3(h.position.x, at.y, h.position.z), Vector3.UP)
+				at += cr * 0.85 - tc * 0.25
+				# three-quarters to us, half turned to its hunter: its face reads, and it's plainly
+				# looking at them (side-on, a long low Boki seen from above read as lying down)
+				var mid := Vector3(h.position.x, at.y, h.position.z).lerp(Vector3(CAM_AT.x, at.y, CAM_AT.z), 0.55)
+				k.look_at_from_position(at, mid, Vector3.UP)
 				var to_k := at - h.position
 				h.rotation.y = atan2(-to_k.x, -to_k.z) - 0.35
 				squad[0]["st"]["face"] = h.rotation.y
@@ -342,13 +349,13 @@ func _cloud_banks() -> void:
 func _wyrm() -> void:
 	wyrm = Wyrm.new()
 	add_child(wyrm)
-	wyrm.set_size(4.2)
+	wyrm.set_size(3.4)
 	wyrm.flap_rate = 0.45
 	wyrm.teleport(_wyrm_at(t), _wyrm_at(t + 0.5) - _wyrm_at(t))
 
 func _wyrm_at(tt: float) -> Vector3:
 	var a := tt * 0.045
-	return Vector3(40.0 + cos(a) * 34.0, 24.0 + sin(a * 2.0) * 4.0, -170.0 + sin(a) * 20.0)
+	return Vector3(46.0 + cos(a) * 40.0, 22.0 + sin(a * 2.0) * 3.0, -235.0 + sin(a) * 22.0)     # far off: a silhouette in the haze
 
 ## Embers and ash on the wind, around the squad and in front of the camera.
 func _weather() -> void:
@@ -501,6 +508,25 @@ func _build_ui() -> void:
 	ver.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
 	ver.offset_left = 28; ver.offset_top = -40; ver.offset_bottom = -18
 	root.add_child(ver)
+	# like a game client's login screen: a small news card in the corner, the playtest and how to join
+	var news := UI.glass(12, 12)
+	news.name = "News"
+	news.mouse_filter = Control.MOUSE_FILTER_STOP
+	news.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)       # up in the open sky, clear of the squad
+	news.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	news.offset_right = -28; news.offset_top = 28
+	var nv := UI.vbox(4); news.add_child(nv)
+	nv.add_child(UI.label("PLAYTEST  ·  BUILD %s" % Net.VERSION, 11, Color("e9b48a"), UI.caps))
+	nv.add_child(UI.label("Six archetypes, one Boki each", UI.T_HEAD, UI.INK, UI.big))
+	var nl := UI.label("Bring your Boki on a run, bring it home. Tell us what broke.", 13, UI.MUTED)
+	nl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART; nl.custom_minimum_size.x = 280
+	nv.add_child(nl)
+	var nb := UI.ghost("Join the playtest Discord", func(): OS.shell_open(DISCORD), 0, "bond")
+	nb.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	nb.focus_mode = Control.FOCUS_NONE
+	nv.add_child(nb)
+	root.add_child(news)
+	UI.pop_in(news, 1.4)
 	var keys := UI.key_hints([["W S", "choose"], ["Enter", "select"], ["Esc", "back"]], 13)
 	keys.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
 	keys.grow_horizontal = Control.GROW_DIRECTION_BEGIN
@@ -635,8 +661,8 @@ func _process(delta: float) -> void:
 		if body == null: continue
 		if i == 0:
 			# your Boki, looking up at you: nose raised, a slow tilt of the head now and then
-			body.rotation.x = 0.38 + sin(t * 0.6) * 0.04
-			body.rotation.z = sin(t * 0.37) * 0.12
+			body.rotation.x = 0.14 + sin(t * 0.6) * 0.03       # (more than this tips a long body over)
+			body.rotation.z = sin(t * 0.37) * 0.06
 		elif String(b["kind"]) in ["flyer", "serpent"]:
 			k.position.y = float(b["base_y"]) + sin(t * 1.3 + i) * 0.12
 	# the glider: off for a few seconds, then across the sky

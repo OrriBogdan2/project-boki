@@ -116,9 +116,9 @@ func _build() -> void:
 	cam.fov = 32.0
 	# aimed to the kin's right, so the kin sits left of centre and the card fits on the right; a
 	# little low, at the height of someone kneeling to meet it
-	cam.position = Vector3(0.5, 0.7, 3.2)
+	cam.position = Vector3(0.62, 0.82, 3.9)
 	vp.add_child(cam)
-	cam.look_at(Vector3(0.5, 0.4, 0))
+	cam.look_at(Vector3(0.62, 0.36, 0))
 	turn = Node3D.new()
 	vp.add_child(turn)
 	# it sits in the straw of a nest, not on a stage
@@ -126,7 +126,7 @@ func _build() -> void:
 	for ch in nest.get_children():
 		if ch is MeshInstance3D and (ch as MeshInstance3D).mesh is SphereMesh:
 			ch.visible = false
-	nest.scale = Vector3.ONE * 0.85
+	nest.scale = Vector3.ONE * 0.62        # a nest it fits in, not a stage it sits on
 	turn.add_child(nest)
 	kin = Models.kin(species, rec)
 	kin.rotation.y = PI + 0.9      # glancing off to one side, until it notices you
@@ -231,18 +231,22 @@ func _info_card() -> PanelContainer:
 		v.add_child(dl)
 	if rec.has("parents"):
 		v.add_child(UI.label("Child of %s and %s" % [rec["parents"][0], rec["parents"][1]], 14, UI.MUTED))
+	# who it is, before what it can do: its sex, its nature, the habit you'll see first (no stat
+	# bars on first meeting; those live on its card)
+	var who := UI.vbox(6)
+	who.add_child(UI.section("Who it is"))
+	var sxr := UI.hbox(8)
+	if Unique.sex(rec) != "":
+		sxr.add_child(UI.sex_icon(rec, 15.0))
+		sxr.add_child(UI.label(Unique.sex_name(rec), 15, UI.SEX_COL[Unique.sex(rec)], UI.semi))
 	if rec.has("traits"):
-		v.add_child(UI.label("%s nature" % Care.nature(rec), 14, UI.MUTED))
-	v.add_child(UI.spacer(2))
-	v.add_child(UI.section("Base stats"))
-	var top_hp := 1.0; var top_dmg := 1.0; var top_spd := 1.0
-	for k in Data.KIN:
-		top_hp = maxf(top_hp, float(Data.KIN[k].get("hp", 1.0)))
-		top_dmg = maxf(top_dmg, float(Data.KIN[k].get("dmg", 1.0)))
-		top_spd = maxf(top_spd, float(Data.KIN[k].get("speed", 1.0)))
-	v.add_child(_stat("Health", float(sp.get("hp", 0.0)), top_hp))
-	v.add_child(_stat("Power", float(sp.get("dmg", 0.0)), top_dmg))
-	v.add_child(_stat("Speed", float(sp.get("speed", 0.0)), top_spd))
+		sxr.add_child(UI.label("·  %s nature" % Care.nature(rec), 15, UI.INK))
+	if sxr.get_child_count() > 0: who.add_child(sxr)
+	if not Unique.of(rec).is_empty():
+		who.add_child(_note("%s. %s." % [AboutView.HABIT_SHORT.get(String(Unique.of(rec).get("quirk", "")), Unique.quirk_name(rec)), AboutView.voice_note(rec)]))
+	if who.get_child_count() > 1:
+		v.add_child(UI.spacer(2))
+		v.add_child(who)
 	var abil: Array = []
 	for id in sp.get("abilities", []):
 		var ad := KinLib.ability(String(id))

@@ -506,7 +506,7 @@ func _ready() -> void:
 			# test: the hatch reveal on its own (--reveal-test=<species>)
 			var spr := a.substr(14) if a.length() > 14 else "cindle"
 			var holder := Node3D.new(); add_child(holder); current = holder
-			var rv := KinReveal.new(spr, {})
+			var rv := KinReveal.new(spr, Save.new_kin(spr, "", 4242))     # a new Boki, as a real hatch passes
 			holder.add_child(rv)
 			rv.proceed.connect(func(): print("REVEAL proceed"))
 			return
