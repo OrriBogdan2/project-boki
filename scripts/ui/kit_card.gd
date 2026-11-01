@@ -21,6 +21,8 @@ const PREVIEW := {
 	"gunslinger": {"dash": "dash", "passive": "pips", "rmb": "projectile", "e": "buff", "r": "lines"},
 	"juggernaut": {"dash": "dash2", "passive": "meter", "rmb": "charge", "e": "grapple", "r": "leap"},
 	"bulwark": {"dash": "charge", "passive": "meter", "rmb": "shield", "e": "zone", "r": "fissure"},
+	"dredge": {"dash": "dash2", "passive": "meter", "rmb": "grapple", "e": "charge"},
+	"ashwick": {"dash": "dash", "passive": "meter", "rmb": "projectile", "e": "zone"},
 }
 
 var arch := ""
@@ -88,7 +90,7 @@ func _show_grid() -> void:
 	grid.add_theme_constant_override("h_separation", 12)
 	grid.add_theme_constant_override("v_separation", 12)
 	body.add_child(grid)
-	for s in SLOTS:
+	for s in slots_of(arch):
 		grid.add_child(_tile(s))
 
 ## One ability: icon and key, name and a short tag, one line, a looping preview. Click: details.
@@ -229,6 +231,10 @@ func _kin_strip() -> Control:
 
 # ------------------------------------------------------------------ data → text
 ## Name, icon, colour, a short tag, the one line, and the detail page's paragraphs for one slot.
+## The slots an archetype has (no Ultimate tile for the heroes whose R is the Boki Merge).
+static func slots_of(a: String) -> Array:
+	return SLOTS.filter(func(s): return s != "r" or Arch.def(a).has("r"))
+
 static func slot_text(a: String, slot: String) -> Dictionary:
 	var d := Arch.def(a)
 	var cd: Dictionary = d.get("card", {})
@@ -348,7 +354,7 @@ static func strip(a: String, open_cb: Callable) -> Control:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 6)
 	v.add_child(row)
-	for s in SLOTS:
+	for s in slots_of(a):
 		var info := slot_text(a, s)
 		var b := Button.new()
 		b.custom_minimum_size = Vector2(64, 70)

@@ -43,6 +43,8 @@ static func make(hunter: Hunter, arch_id: String) -> ArchKit:
 		"gunslinger": k = GunslingerKit.new()
 		"juggernaut": k = JuggernautKit.new()
 		"bulwark": k = BulwarkKit.new()
+		"dredge": k = DredgeKit.new()
+		"ashwick": k = AshwickKit.new()
 		_: return null
 	k.h = hunter
 	k.m = hunter.m
