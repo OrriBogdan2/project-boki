@@ -418,6 +418,25 @@ func _show_create() -> void:
 	card.custom_minimum_size = Vector2(500, 0)
 	create_box = card
 	var v := UI.vbox(8); card.add_child(v)
+	# the archetype: who you are in a match (its silhouette, gear and weapon family always read true)
+	var cur_a := Arch.of_save()
+	var ar := UI.hbox(8)
+	var al := UI.label("Archetype", UI.T_BODY, UI.MUTED); al.custom_minimum_size.x = 120
+	al.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	ar.add_child(al)
+	ar.add_child(UI.icon_button("back", func(): _step_arch(-1), "Previous", 12.0))
+	var av := UI.label(Arch.name_of(cur_a), UI.T_BODY, Arch.color(cur_a), UI.semi); av.custom_minimum_size.x = 170
+	av.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	av.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	ar.add_child(av)
+	ar.add_child(UI.icon_button("next", func(): _step_arch(1), "Next", 12.0))
+	v.add_child(ar)
+	var ad := Arch.def(cur_a)
+	var adl := UI.label("%s  ·  %s\n%s" % [String(Data.CLASSES[Arch.weight(cur_a)]["name"]), " / ".join(Arch.weapons(cur_a).map(func(w): return String(Data.weapon_stats(w)["name"]))), String(ad.get("fantasy", ""))], UI.T_SMALL, UI.ACCENT_HI)
+	adl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	adl.custom_minimum_size.x = 380
+	var am := MarginContainer.new(); am.add_theme_constant_override("margin_left", 128); am.add_child(adl)
+	v.add_child(am)
 	for row in LOOK_ROWS:
 		var key: String = row[0]
 		var opts: Array = row[2]
@@ -483,6 +502,17 @@ func _show_create() -> void:
 	card.set_anchors_and_offsets_preset(Control.PRESET_CENTER_LEFT, Control.PRESET_MODE_MINSIZE, 48)
 	card.offset_top += 46; card.offset_bottom += 46       # clear of the title
 
+## Steps through the six archetypes; the class (weight) and weapon follow it.
+func _step_arch(d: int) -> void:
+	var ids := Arch.ids()
+	var i := posmod(ids.find(Arch.of_save()) + d, ids.size())
+	var a := String(ids[i])
+	Save.d["arch"] = a
+	Save.d["cls"] = Arch.weight(a)
+	Save.d["weapon"] = Arch.default_weapon(a)
+	Sfx.play("hover", null, -6.0)
+	_show_create()
+
 func _step_look(key: String, d: int, n: int) -> void:
 	look[key] = posmod(int(look[key]) + d, n)
 	Sfx.play("hover", null, -6.0)
@@ -499,7 +529,9 @@ func _rebuild_preview() -> void:
 	if preview:
 		preview_yaw = preview.rotation.y
 		preview.queue_free()
-	preview = Models.hunter(Data.class_of_save(), Data.TEAM_COLORS[0], Data.weapon_for(Data.class_of_save(), String(Save.d.get("weapon", ""))), "", look)
+	var pa := Arch.of_save()
+	look.erase("arch")      # the archetype's gear is never part of the look
+	preview = Models.hunter(Data.class_of_save(), Data.TEAM_COLORS[0], Arch.weapon_for(pa, Data.class_of_save(), String(Save.d.get("weapon", ""))), "", look, pa)
 	preview.position = Vector3(0.8, 0, 1.6)
 	preview.rotation.y = preview_yaw
 	add_child(preview)

@@ -54,6 +54,9 @@ static func run_stage(st: StageSpec, cx: Dictionary) -> void:
 			wait = float(dl.params["time"])
 		elif _enemy_area(st, cx):
 			wait = Effects.ENEMY_WINDUP       # an area a rival lands on you gets a short wind-up
+		# the global telegraph floor (DASHES §5.3): hard CC is never faster than a human can react
+		if not cx.get("no_floor", false) and int(cx.get("depth", 1)) <= 1 and Feel.floors_apply(m, int(cx["team"])):
+			wait = maxf(wait, (float(dl.params["time"]) if dl else 0.0) + Feel.missing_windup(st))
 		if wait > 0.0:
 			var c2 := cx.duplicate()
 			c2["_delayed"] = true
@@ -225,7 +228,8 @@ static func _projectile(st: StageSpec, cx: Dictionary) -> void:
 		var lead := 0.6 if unit else 0.2
 		var start := Vector3(from.x + dv.x * lead, y, from.z + dv.y * lead)
 		_shoot(st, cx, start, dv, spd, rng, size, col, {"hits": 0, "bounce": int(bounce.params["count"]) if bounce else 0, "seen": {}}, hits)
-	m.sfx("throw", from, -3.0, 1.15)
+	if not cx.get("silent", false):
+		m.sfx("throw", from, -3.0, 1.15)
 
 static func _shoot(st: StageSpec, cx: Dictionary, start: Vector3, dv: Vector2, spd: float, rng: float, size: float, col: Color, state: Dictionary, hits: Dictionary) -> void:
 	var m: Node = cx["m"]
@@ -236,6 +240,10 @@ static func _shoot(st: StageSpec, cx: Dictionary, start: Vector3, dv: Vector2, s
 		extra["hitset"] = {}
 		extra["pierce"] = st.has_modifier("pierce")
 		extra["return"] = st.has_modifier("return")
+	if int(cx.get("wall_bounce", 0)) > 0:
+		extra["bounce"] = int(cx["wall_bounce"])      # ricochets off walls (an archetype's trick shot)
+	if cx.has("shot_crit"):
+		extra["crit"] = true
 	if bool(p.get("rope", false)):
 		extra["rope"] = true
 		extra["deco"] = "hook"
@@ -262,6 +270,9 @@ static func _shot_event(st: StageSpec, cx: Dictionary, s: Dictionary, at: Vector
 		if pc and int(state["hits"]) >= limit:
 			s["life"] = 0.0           # it has gone through as many as it can
 	if why != "pass":
+		var ecb = cx.get("on_shot_end")
+		if ecb is Callable and (ecb as Callable).is_valid():
+			(ecb as Callable).call(at, why, e)
 		_then(st, "on_end", cx, at, dir)
 		_linger(st, cx, at)
 
@@ -756,6 +767,10 @@ static func apply_foe(effs: Array, f: Ent, cx: Dictionary, center: Vector3, st: 
 			_post(e, f, cx, center, k)
 	var col := KinRules.cat_color("control") if cats.has("control") else (KinRules.cat_color("damage") if cats.has("damage") else KinRules.cat_color("utility"))
 	m.fx.burst(f.pos + Vector3(0, 0.8, 0), col, 6, 2.5, 0.3)
+	# an archetype ability's own follow-up on what it hit (Marks, Shadow Step windows, wall pins)
+	var cb = cx.get("on_foe")
+	if cb is Callable and (cb as Callable).is_valid() and is_instance_valid(f):
+		(cb as Callable).call(f, cx)
 
 ## A point an effect works from or toward: the delivery's centre, the kin, or its hunter.
 static func _point(which: String, cx: Dictionary, center: Vector3) -> Vector3:

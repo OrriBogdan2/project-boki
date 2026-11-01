@@ -156,7 +156,8 @@ func ability_power() -> float:
 
 ## Is this slot unlocked this run? (Its abilities are locked until a skill point opens the kin slot.)
 func slot_open(_slot: String) -> bool:
-	return owner_h == null or int(owner_h.slot_lv.get("kin", 0)) > 0
+	# with an archetype the E slot is the archetype's; the kin's own ability (C) has only its cooldown
+	return owner_h == null or owner_h.ak != null or int(owner_h.slot_lv.get("kin", 0)) > 0
 
 ## Can its abilities and ultimate be used right now?
 func ready_to_fight() -> bool:
@@ -480,6 +481,13 @@ func sim(dt: float) -> void:
 		elif hesitate_t <= 0.0 and state == "active" and hesitate_to == Vector3.INF:
 			recall()
 	think_t -= dt
+	# a hop-out cast (C with an archetype): once its move is done the kin hops straight back
+	if has_meta("hop_back") and m.time >= float(get_meta("hop_back")):
+		if state == "active" and owner_h and not owner_h.out:
+			remove_meta("hop_back")
+			recall()
+		elif state not in ["flying", "active"]:
+			remove_meta("hop_back")
 	match state:
 		"shoulder": _sim_shoulder(dt)
 		"flying": _sim_fly(dt)
