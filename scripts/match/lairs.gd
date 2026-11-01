@@ -816,6 +816,27 @@ func _set_updraft(L: Dictionary, on: bool) -> void:
 		m.sfx("glide", L["up"], 4.0, 0.6)
 		m.fx.burst(L["up"] + Vector3(0, 0.6, 0), Color(1, 1, 1), 26, 6.0, 0.6, 6.0, 1.0, Vector3.UP, 20.0)
 
+## The column of light is 12 m tall and stands at the back of the lair, right where the camera looks
+## over it at anyone who has just landed beyond the back wall: it washed the whole view out in a white
+## haze. Hidden from your view while you're outside the lair on its far side (the side the updraft
+## throws you to), shown again as soon as you're back in or round the front. Purely visual.
+func _updraft_view(L: Dictionary) -> void:
+	var vn: Node3D = L["nodes"].get("vent")
+	if not is_instance_valid(vn) or m.player == null or m.cam == null:
+		return
+	var air: Node3D = vn.get_node("Air")
+	var p: Hunter = m.player
+	var u: Vector3 = L["up"]
+	var behind := false
+	if not inside(L, p.pos, 0.0) and not (p.auto_glide and (L["flown"] as Array).has(p)):
+		# from the camera, the column sits between you and the lens: you're further from the camera
+		# than the column is (along the camera's look on the ground) and not far off to its side
+		var fwd := -m.cam.global_basis.z
+		var f2 := Vector2(fwd.x, fwd.z).normalized()
+		var rel := Vector2(p.pos.x - u.x, p.pos.z - u.z)
+		behind = rel.dot(f2) > 0.0 and absf(rel.cross(f2)) < float(L["half"]) + 4.0 and rel.length() < float(L["half"]) * 2.0 + 10.0
+	air.visible = not behind
+
 ## Out of the column the updraft's glide carries you on to the landing spot beyond the wall and sets
 ## you down there; steer (or take the glide key) and you fly yourself instead.
 func _tick_flyers(L: Dictionary) -> void:
@@ -857,6 +878,7 @@ func _tick_updraft(L: Dictionary, dt: float) -> void:
 	var u: Vector3 = L["up"]
 	var land: Vector3 = L["up_land"]
 	var top := u.y + UP_TOP
+	_updraft_view(L)
 	for h in m.hunters:
 		if h.out or h.extracted or h.remote or h.riding or h.dropping or h.downed:
 			continue
@@ -1383,9 +1405,10 @@ func bot_pickups() -> void:
 				break
 
 # ------------------------------------------------------------------ test hooks
-## --lair-demo=puzzle|fight|egg|sealed|victory|outside: a scene set up for a screenshot ("sealed": just
+## --lair-demo=puzzle|fight|egg|sealed|victory|updraft|outside: a scene set up for a screenshot ("sealed": just
 ## inside the gate after it has shut behind you; "victory": the boss just fallen, the gate still shut,
-## you by the lever with the updraft blowing at the back; "outside": a rival squad sealed in with the
+## you by the lever with the updraft blowing at the back; "updraft": the same, then you step into the
+## updraft and ride it out over the back wall (LAIRDEMO lines time the ride); "outside": a rival squad sealed in with the
 ## boss and you outside its gate, the alert's beam over the lair and the seal's clock over the gate;
 ## "outside_map": the same with the full map open on the alert).
 func demo(mode: String) -> void:
@@ -1410,14 +1433,24 @@ func demo(mode: String) -> void:
 					P.teleport(Vector3(back.x, m.world.ground_at(back.x, back.z), back.z))
 				for o in m.hunters:
 					if o != P and o.team == P.team: o.hp = o.max_hp
-		if mode == "victory":
+		if mode in ["victory", "updraft"]:
 			var b: Boss = boss_of(L)
 			if b and not b.dead and L.get("locked", false):
 				b.hurt(b.max_hp * 3.0, null, {"src": "test"})      # (no killer: no perk choice over the shot)
-			m.cam.zoom = 1.9; m.cam.zoom_to = 1.9      # (the match eases the camera back to 1 every frame)
+			if mode == "victory":
+				m.cam.zoom = 1.9; m.cam.zoom_to = 1.9      # (the match eases the camera back to 1 every frame)
 			if L.get("victory", false):
 				L["victory_at"] = m.time - 2.2      # (hold the clock for the shot)
 				P.hp = P.max_hp
+				if mode == "updraft" and L.get("up_on", false) and not m.has_meta("updraft_demo"):
+					# step into the escape updraft and ride it out (--shot-times= for the whole ride)
+					m.set_meta("updraft_demo", m.time)
+					var u: Vector3 = L["up"]
+					P.teleport(Vector3(u.x, m.world.ground_at(u.x, u.z), u.z))
+					print("LAIRDEMO into the updraft at %.1f" % m.time)
+				if mode == "updraft" and m.has_meta("updraft_demo") and P.grounded and not inside(L, P.pos, 0.0) and not m.has_meta("updraft_landed"):
+					m.set_meta("updraft_landed", m.time)
+					print("LAIRDEMO landed outside at %.1f (%.1f s after stepping in)" % [m.time, m.time - float(m.get_meta("updraft_demo"))])
 		if mode in ["outside", "outside_map"]:
 			if mode == "outside_map" and m.hud and not m.hud.map_open() and L.get("locked", false) and m.time - float(L.get("alert_at", m.time)) > 0.8:
 				m.hud.open_map()
@@ -1463,7 +1496,7 @@ func demo(mode: String) -> void:
 			var b: Boss = boss_of(L)
 			if mode == "egg" and b:
 				b.hurt(b.max_hp * 2.0, P, {"src": "test"})
-		"victory":
+		"victory", "updraft":
 			open(L, P, "dial")
 			L["gate_k"] = 0.999
 			var out: Vector3 = Vector3(L["out"].x, 0, L["out"].y)
@@ -1475,7 +1508,8 @@ func demo(mode: String) -> void:
 					var q: Vector3 = L["up"] + out * 2.2 + side * 1.2
 					o.teleport(Vector3(q.x, m.world.ground_at(q.x, q.z), q.z))
 					o.ctrl = "idle"
-			m.cam.zoom_to = 2.0; m.cam.zoom = 2.0
+			if mode == "victory":
+				m.cam.zoom_to = 2.0; m.cam.zoom = 2.0
 			m.cam.snap(P.pos)
 			wake(L, P)
 		"outside", "outside_map":
