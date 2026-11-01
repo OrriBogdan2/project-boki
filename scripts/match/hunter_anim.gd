@@ -65,6 +65,8 @@ const ARCH_STANCE := {
 	"gunslinger": {"lean": 0.03, "width": 0.13, "knee": 0.2, "breath": 2.0},
 	"juggernaut": {"lean": 0.1, "width": 0.25, "knee": 0.34, "breath": 1.35, "arm": 0.7},
 	"bulwark": {"lean": 0.0, "width": 0.24, "knee": 0.3, "breath": 1.5, "arm": 0.7},
+	"tender": {"lean": 0.04, "knee": 0.14, "width": 0.08, "breath": 2.2, "arm": 0.9},
+	"rimewright": {"knee": 0.3, "lean": 0.12, "width": 0.07, "bounce": 1.3, "breath": 2.8, "arm": 1.15},
 }
 ## How far the shoulder pieces turn with the arm (the rest is left behind, so a raised arm slides
 ## under the plate instead of through it).
@@ -870,6 +872,9 @@ func update(dt: float, s: Dictionary) -> void:
 		cast_k = smoothstep(0.0, 0.07, cast_t) * (1.0 - smoothstep(0.32, 0.6, cast_t))
 		pitch -= cast_k * 0.18
 		yaw += cast_k * 0.25
+		var cm := CareMoves.pose(arch, cast_slot, cast_t)          # (the support pair: per-ability poses)
+		if not cm.is_empty():
+			pitch += float(cm["p"]); yaw += float(cm["y"]); roll += float(cm["r"])
 		# the archetypes' signature casts
 		match arch:
 			"thief":
@@ -1367,6 +1372,8 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 			ct = sh_l + Vector3(0.22, 0.0, -0.22).lerp(Vector3(0.3, -0.02, -0.08), smoothstep(0.05, 0.3, cast_now))
 		elif arch == "bulwark":
 			ct = sh_l + Vector3(0.12, 0.05, -0.4)           # a braced forearm, out in front
+		elif CareMoves.has(arch):
+			ct = sh_l + CareMoves.hand(arch, cast_slot, cast_now)
 		fl = fl.lerp(ct, cast_k)
 	# drink: flask to the mouth
 	if drink_k > 0.0:

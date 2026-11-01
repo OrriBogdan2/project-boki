@@ -44,7 +44,7 @@ const CAM_LOOK := Vector3(1.25, 1.95, -9.4)
 const WIND := Vector3(2.2, 0.15, 0.35)            # the storm blows left to right
 ## Each archetype's weapon on the title (the arch_gallery set).
 const DISCORD := "https://discord.gg/nbeBaU7xt"        # the playtest server (never expires)
-const WEAPONS := {"thief": "twin_blades", "archer": "sniper", "mage": "longsword", "gunslinger": "rifle", "juggernaut": "greatsword", "bulwark": "minigun"}
+const WEAPONS := {"thief": "twin_blades", "archer": "sniper", "mage": "longsword", "gunslinger": "rifle", "juggernaut": "greatsword", "bulwark": "minigun", "tender": "lantern_crook", "rimewright": "hoar_fan"}
 
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE

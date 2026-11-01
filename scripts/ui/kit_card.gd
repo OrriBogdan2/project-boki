@@ -21,7 +21,13 @@ const PREVIEW := {
 	"gunslinger": {"dash": "dash", "passive": "pips", "rmb": "projectile", "e": "buff", "r": "lines"},
 	"juggernaut": {"dash": "charge", "passive": "meter", "rmb": "leap", "e": "buff", "r": "burst"},
 	"bulwark": {"dash": "charge", "passive": "meter", "rmb": "shield", "e": "zone", "r": "fissure"},
+	"tender": {"dash": "dash", "passive": "marks", "rmb": "projectile", "e": "zone"},
+	"rimewright": {"dash": "charge", "passive": "marks", "rmb": "projectile", "e": "shield"},
 }
+
+## The slots a card shows: every archetype's, minus R for the heroes that have none.
+static func slots_of(a: String) -> Array:
+	return SLOTS.filter(func(x): return x != "r" or Arch.def(a).has("r"))
 
 var arch := ""
 var kin_sp := ""
@@ -88,7 +94,7 @@ func _show_grid() -> void:
 	grid.add_theme_constant_override("h_separation", 12)
 	grid.add_theme_constant_override("v_separation", 12)
 	body.add_child(grid)
-	for s in SLOTS:
+	for s in slots_of(arch):
 		grid.add_child(_tile(s))
 
 ## One ability: icon and key, name and a short tag, one line, a looping preview. Click: details.
@@ -348,7 +354,7 @@ static func strip(a: String, open_cb: Callable) -> Control:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 6)
 	v.add_child(row)
-	for s in SLOTS:
+	for s in slots_of(a):
 		var info := slot_text(a, s)
 		var b := Button.new()
 		b.custom_minimum_size = Vector2(64, 70)
