@@ -2824,6 +2824,15 @@ func _draw_map_train(inner: Rect2, view: Rect2, k: float) -> void:
 		c.draw_circle(pv, 4.0 if ci == 0 else 3.2, Color(0, 0, 0, 0.6))
 		c.draw_circle(pv, 3.0 if ci == 0 else 2.3, Color("ff5a3a") if ci == 0 else Color("ffcf7a"))
 
+var _regions_of: World = null
+var _regions := {}
+func _region_names(w: World) -> Dictionary:
+	if _regions_of != w:
+		_regions_of = w
+		_regions = {}
+		for isl in w.islands: _regions[String(isl.get("name", ""))] = true
+	return _regions
+
 ## Place names on the minimap (authored maps). Riding in or dropping you see the whole map with every
 ## point of interest and chokepoint named; on the ground, the names of places near you.
 func _draw_map_labels(w: World, inner: Rect2, view: Rect2, k: float, overview: bool) -> void:
@@ -2856,6 +2865,8 @@ func _draw_map_labels(w: World, inner: Rect2, view: Rect2, k: float, overview: b
 			c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -5), pv + Vector2(5, 0), pv + Vector2(0, 5), pv + Vector2(-5, 0)]), Color(0, 0, 0, 0.55))
 			c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -3.5), pv + Vector2(3.5, 0), pv + Vector2(0, 3.5), pv + Vector2(-3.5, 0)]), Color("ffb36a"))
 		else:
+			if overview and not _region_names(w).has(nm):
+				continue      # (the whole map at this size: region names only, as the full map does)
 			var col := Color("ffd2f0") if String(lb.get("role", "")) == "heart" else INK
 			_ctext(pv + Vector2(0, 4), nm, 13 if overview else 11, col, big)
 
