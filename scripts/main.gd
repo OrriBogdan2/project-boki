@@ -71,6 +71,7 @@ func _ready() -> void:
 			for c in Data.CLASSES:
 				if (Data.CLASSES[c]["weapons"] as Array).has(a.substr(9)): Save.d["cls"] = c
 		if a == "--ability-demo": opts["ability_demo"] = true
+		if a == "--normalize-size": Unique.normalize = true      # kin size changes no stats or hitboxes (Unique)
 		if a == "--fresh": Save.d = Save.fresh()
 		if a in ["--work-demo", "--work-board", "--work-board=Kin", "--work-card", "--work-box", "--work-hover", "--work-close", "--work-build", "--shiny-lineup"]:
 			Save.no_write = true; Save.d = HomeWork.demo_save()     # a made-up farm at work (screenshots)
@@ -313,6 +314,9 @@ func _ready() -> void:
 		var wkc = load("res://tools/work_check.gd").new()      # kin at work: jobs, stations, priorities, shimmer odds
 		set_meta("work_check", wkc)
 		wkc.run(self)
+		return
+	if "--unique-check" in args:
+		load("res://tools/unique_check.gd").new().run(self)      # every kin its own: rolls, inheritance, ids, migration, size
 		return
 	if "--iv-check" in args:
 		load("res://tools/iv_check.gd").new().run(self)      # kin IVs: rolls, backfill, breeding, Rare Eggs, caps

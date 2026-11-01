@@ -3571,6 +3571,18 @@ func step(dt: float) -> void:
 			w.set_meta("lineup", true)
 			i += 1
 		cam.zoom_to = 0.55
+	if "--size-demo" in OS.get_cmdline_user_args() and player and not train.has("_sizes"):
+		# test: an extra small and an extra large Vespyx side by side (their rings show the hitbox)
+		train["_sizes"] = true
+		for si in 2:
+			var srec := Save.new_kin("cindle", "", kin_seed("demo"))
+			srec["dna"]["size"] = -2.8 if si == 0 else 2.8
+			srec["level"] = 6
+			var sq := player.pos + Vector3(-1.1 + si * 2.2, 0, -1.8)
+			var sw := spawn_wild(srec, sq)
+			sw.home = sq
+			sw.set_meta("lineup", true)
+		cam.zoom_to = 0.42
 	if opts.get("kin_demo", false) and player:
 		# test hook: throw the kin at the nearest dummy, use Q, then V, then the bond ultimate, then swap
 		var tgt: Ent = null; var bd := 1e9

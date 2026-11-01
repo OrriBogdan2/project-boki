@@ -568,6 +568,34 @@ static func demo_show(h: Node, which: String) -> void:
 			h.cam.zoom_to = 0.62; h.cam.zoom = 0.62
 			h.cam.snap(base + Vector3(5.0, 0, 1.4))
 			h.ppos = base + Vector3(5.0, 0, 4.6)
+		"unique":
+			# eight Echolop, each its own: sizes spread over the bell curve (XS to XL), every coat
+			# pattern, and whatever eyes, shapes and colours their seeds rolled
+			var base2: Vector3 = h.ppos + Vector3(-5.0, 0, -1.4)
+			var zs := [-2.5, -1.4, -0.7, -0.2, 0.3, 0.9, 1.5, 2.6]
+			var mk := ["freckles", "spots", "plain", "stripes", "patches", "spots", "stripes", "patches"]
+			for i in 8:
+				var r := Save.new_kin("zapple", "Demo", 9100 + i * 37)
+				r["level"] = 6
+				r["dna"]["size"] = zs[i]
+				r["dna"]["mark"] = mk[i]
+				var n := Models.kin("zapple", r)
+				n.position = base2 + Vector3(i * 1.45, 0, 0)
+				n.rotation.y = PI - 0.45
+				n.scale *= 1.5
+				h.add_child(n)
+				var si := Unique.size_info(r)
+				var lb := Label3D.new()
+				lb.text = "%s  %d cm\n%s" % [si["tag"], int(round(float(si["cm"]))), Unique.MARK_INFO[mk[i]]["name"]]
+				lb.font = UI.big; lb.font_size = 34; lb.pixel_size = 0.006; lb.outline_size = 10
+				lb.billboard = BaseMaterial3D.BILLBOARD_ENABLED; lb.no_depth_test = true
+				lb.position = n.position + Vector3(0, 1.75, 0.3)
+				h.add_child(lb)
+			h.ppos = base2 + Vector3(5.1, 0, -1.0)
+			h.player.position = h.ppos
+			h.player.visible = false
+			h.cam.zoom_to = 0.47; h.cam.zoom = 0.47
+			h.cam.snap(h.ppos)
 		"card":
 			var pick: Dictionary = {}
 			for r in Save.d["roster"]:

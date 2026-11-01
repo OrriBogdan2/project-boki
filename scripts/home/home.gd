@@ -4784,6 +4784,7 @@ func _nest_demo(which: String) -> void:
 		"card": kin_tab = "Growth"; _open_kin(kid)
 		"card-care": kin_tab = "Care"; _open_kin(kid)
 		"card-train": kin_tab = "Training"; _open_kin(kid)
+		"card-about": kin_tab = "About"; _open_kin(kid)
 		"box": KinBoxView.sel = String(kid["uid"]); KinBoxView.page = KinBox.page_of(kid) if KinBox.is_boxed(kid) else 0; _open_burrow()
 		_: _open_nook()
 
