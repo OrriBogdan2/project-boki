@@ -379,6 +379,7 @@ func _finish_load() -> void:
 	var sk := steps.keys()
 	sk.sort_custom(func(a, b): return steps[a] > steps[b])
 	lines.append("LOAD build steps (total ms): " + ", ".join(sk.slice(0, 16).map(func(k): return "%s %.0f" % [k, steps[k]])))
+	for nt in PerfLog.notes: lines.append("LOAD note: " + String(nt))
 	var spin_ok := up == 0 or drawn >= up - 1
 	var ok := over == 0 and spin_ok and up > 0
 	lines.append("LOAD %s" % ("PASS" if ok else "FAIL (%d slow frames%s%s)" % [over, "" if spin_ok else ", spinner skipped frames", "" if up > 0 else ", no loading screen seen"]))
