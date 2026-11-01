@@ -183,6 +183,7 @@ func draw(sz: Vector2) -> void:
 					hud._ctext(pv + Vector2(0, 17.0 * ek), st, 10, Exits.color_of(x) if m.exits.live(x) else MUTED, hud.big)
 	hud.mm_circ = saved
 	_spawns(c, team, kk)
+	_lair_alerts(c)
 	_ship(c)
 	_pings(c, team)
 	_enemies(c, team)
@@ -402,6 +403,33 @@ func _ship(c: Control) -> void:
 	c.draw_colored_polygon(PackedVector2Array([sp + fw * 13.0, sp - fw * 8.0 + sd * 8.0, sp - fw * 4.0, sp - fw * 8.0 - sd * 8.0]), Color(0, 0, 0, 0.6))
 	c.draw_colored_polygon(PackedVector2Array([sp + fw * 11.0, sp - fw * 6.0 + sd * 6.5, sp - fw * 3.0, sp - fw * 6.0 - sd * 6.5]), GOLD)
 	hud._ctext(sp + Vector2(0, -14), "SKYSHIP", 10, GOLD, hud.big)
+
+## A lair fight you heard: the boss's icon at the lair, a pulsing ring and what's going on there
+## (the fight and its seal's clock, or that the boss has fallen and the gate's clock).
+func _lair_alerts(c: Control) -> void:
+	if m.lairs == null or m.player == null:
+		return
+	for L in m.lairs.list:
+		if not m.lairs.alerted(L, m.player):
+			continue
+		var pv := to_screen(L["c"])
+		if not rect.grow(-6.0).has_point(pv):
+			continue
+		var fight := String(L.get("alert", "")) == "fight"
+		var col: Color = Lairs.color_of(L) if fight else Color("ffd36a")
+		var ph := fmod(Time.get_ticks_msec() / 1000.0 * 1.2, 1.0)
+		c.draw_arc(pv, 14.0 + ph * 22.0, 0, TAU, 32, Color(col, 1.0 - ph), 3.0, true)
+		c.draw_circle(pv, 15.0, Color(0, 0, 0, 0.55))
+		c.draw_arc(pv, 15.0, 0, TAU, 28, col, 2.0, true)
+		hud._lair_icon(pv, L, 1.5)
+		var t := ""
+		if not L.get("locked", false):
+			t = "GATE OPEN"
+		elif L.get("victory", false):
+			t = "FALLEN  ·  GATE %s" % Lairs.clock(m.lairs.victory_left(L))
+		else:
+			t = "FIGHT  ·  %s" % Lairs.clock(m.lairs.lock_left(L))
+		hud._ctext(pv + Vector2(0, 30), t, 11, col, hud.big)
 
 func _pings(c: Control, team: int) -> void:
 	for pg in m.pings:

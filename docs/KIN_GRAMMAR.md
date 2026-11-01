@@ -152,6 +152,7 @@ has two damage effects, so presets live on parts.)
 | `evolution` | | `root` (start of evolved names, "Cind" + "fang") and `paths`: `[{"affinity": "fierce", "nodes": [ids]}]` |
 | `voice` | | `line` (how it talks) and `syllables` (its two name syllables) |
 | `egg` | | `name`, `temper`, `desc`, `play` |
+| `infusion` | | optional: what the kin lends archetype sockets (docs/ARCHETYPES.md §4.2): `hit` (a damage-over-time or blight part), `ctrl` (a control part), `guard` (shield, heal, reflect), `util` (mark, buff), `mod` (modifiers in order of preference), `move` (`blink`). Each must sit in its socket's category. Left out, it's derived from the kin's active, dodge rider and throw (`Arch.infusion`) |
 
 The stat profile is a fixed budget: each kin spends exactly 20 points. Kin stats are
 `base + points x per_point`; owner stats are bonuses the hunter gets while this is their kin.
@@ -315,6 +316,17 @@ abilities are on, all scaled by `1 + grow_strength x g`. A mount kin grows giant
 approved "giant merge only for mount kin"); any other kin fuses onto you as armor. It ends when
 time runs out, early if you're knocked or you throw the kin (throwing still works and ends it),
 then 3 s (`MERGE_SPENT_TIME`) before it can go again, and the meter starts from empty.
+
+**With archetypes (docs/ARCHETYPES.md §5, option C, built):** R is the archetype's ultimate. When the
+bond meter is full the next R is *Bonded*: the ult casts with its own tell, its kin sockets run at
+the bonded budget (x1.3, `KinParts.MERGED_SCALE`), and 0.2 s later `KinMerge.cast` starts the merge
+as above (one T5 hitstop for the caster, a column tell and BONDED on the R slot while the bond is
+full). The bond is spent and the ult goes on its own cooldown. While merged, every archetype socket
+the kin fills runs at x1.3 (`ArchKit.budget_k`) and the merge's shot riders, passives and pulses run
+as before; the `merged` patch on `active` now applies to the kin's own ability on C (the kin still
+casts it), and `rmb`/`e`/`dash` patch keys are not read yet (the socket budget covers them). A hunter
+with no archetype keeps the old R = merge. C (kin ability) is no longer gated by the E slot's skill
+point when the hunter has an archetype (the E slot is the archetype's); it has only its cooldown.
 
 ### Owner bonuses
 

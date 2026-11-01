@@ -61,7 +61,9 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 			inp["move"] = tol.normalized()
 			# over the landing: fold the glider and drop onto it
 			inp["glide"] = tol.length() > 1.6 or m.world.is_void(h.pos.x, h.pos.z)
-			if not h.gliding and h.vel.y < 1.0 and h.can_glide():
+			# (only to open the glider: a press near the ground buffers a jump, and over the landing
+			# that bounced the bot on the spot every time it touched down, never counting as landed)
+			if inp["glide"] and not h.gliding and h.vel.y < 1.0 and h.can_glide():
 				inp["jump"] = true
 			return
 		elif h.grounded and h.flat_dist(L["take"]) < 0.9 and h.glide_fuel > 0.6:
@@ -156,7 +158,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 				a["throw_cd"] = randf_range(4, 8)
 			elif k.state == "active" and k.runner.is_ready("k1") and k.flat_dist(tgt) < 6.0 and randf() < 0.5:
 				h.inp["aim"] = Vector3(tgt.pos.x, tgt.pos.y, tgt.pos.z)
-				h.inp["sig"] = true
+				h.inp["kin_ab" if h.ak else "sig"] = true
 				a["throw_cd"] = randf_range(1, 3)
 			elif k.state == "active" and (k.hp < k.max_hp * 0.3 or k.flat_dist(h) > 11.0):
 				k.recall()
@@ -173,8 +175,13 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		a["abil_t"] = float(a.get("abil_t", 0.0)) - dt
 		if a["abil_t"] <= 0.0 and a["react_t"] <= 0.0:
 			a["abil_t"] = randf_range(0.4, 1.0) * (1.0 + (1.0 - abil) * 4.0)
-			_use_sig(m, h, tgt)
-			_use_sec(m, h, tgt)
+			if h.ak:
+				# the archetype's kit: dash, RMB variants, E and R (each kit knows its own moments)
+				h.ak.bot_use(tgt, d, los)
+				_use_kin_ab(m, h, tgt)
+			else:
+				_use_sig(m, h, tgt)
+				_use_sec(m, h, tgt)
 			# the active glove (Q) when its moment comes (hook in range, wall when shot at...)
 			if h.gear_cd[0] <= 0.0 and not (h.gear[0] as Dictionary).is_empty() and Gear.active(String(h.gear[0]["id"])) and randf() < 0.3 + abil * 0.6:
 				var gdf := Gear.def_of(String(h.gear[0]["id"]))
@@ -191,10 +198,10 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 			move = _path_dir(m, h, goal)
 			inp["aim"] = Vector3(h.pos.x + move.x * 3.0, h.pos.y + 0.9, h.pos.z + move.y * 3.0)
 			inp["aim_y"] = h.pos.y
-			if h.flat_dist(goal) < 1.2 and a["goal_kind"] in ["chest", "catch", "revive", "box", "dock", "uplink", "hatch", "lair_dial"]:
+			if h.flat_dist(goal) < 1.2 and a["goal_kind"] in ["chest", "catch", "revive", "box", "dock", "uplink", "hatch", "lair_dial", "lair_lever"]:
 				inp["interact"] = true
 				move = Vector2.ZERO
-			elif h.flat_dist(goal) < 1.0 and a["goal_kind"] in ["beacon", "board", "yard"]:
+			elif h.flat_dist(goal) < 1.0 and a["goal_kind"] in ["beacon", "board", "yard", "lair_camp"]:
 				move = Vector2.ZERO
 		if h.kin and h.kin.state == "active" and h.kin.flat_dist(h) > 6.0:
 			h.kin.recall()
@@ -430,6 +437,17 @@ func _crawl(m: Match, h: Hunter) -> void:
 	if mv.length() > 0 and not _safe(m, h, mv, 1.0):
 		mv = Vector2.ZERO
 	h.inp["move"] = mv
+
+## C with an archetype: the kin's own ability (it hops out, casts and hops back) when it fits.
+func _use_kin_ab(_m: Match, h: Hunter, tgt: Ent) -> void:
+	var k: Kin = h.kin
+	if k == null or not k.ready_to_fight() or tgt == null or not k.runner.is_ready("k1"):
+		return
+	var def := k.runner.def_of("k1")
+	var reach := def.cast_range if def.cast_range > 0.0 else 7.0
+	if h.flat_dist(tgt) < reach + 1.0 and randf() < 0.35:
+		h.inp["aim"] = Vector3(tgt.pos.x, tgt.pos.y, tgt.pos.z)
+		h.inp["kin_ab"] = true
 
 ## Right click: the weapon's utility, used when a target is in reach.
 func _use_sec(m: Match, h: Hunter, tgt: Ent) -> void:
@@ -669,6 +687,8 @@ func _choose(m: Match, h: Hunter) -> void:
 		for p in m.pickups:
 			if m.world.is_void(p["pos"].x, p["pos"].z):
 				continue
+			if m.lairs and m.lairs.walled_off(h, p["pos"]):
+				continue      # (behind a sealed lair's gate: no way in from here)
 			var d := h.flat_dist(p["pos"])
 			if d < bd: bd = d; goal = p["pos"]; gk = "loot"
 	if goal == Vector3.INF:
@@ -694,7 +714,7 @@ func _choose(m: Match, h: Hunter) -> void:
 		a["goal_since"] = m.time
 	elif goal != Vector3.INF:
 		var d := h.flat_dist(goal)
-		if d < 2.0 and String(a.get("goal_kind", "")) in ["board", "yard", "beacon", "lair_dial"]:
+		if d < 2.0 and String(a.get("goal_kind", "")) in ["board", "yard", "beacon", "lair_dial", "lair_lever", "lair_camp"]:
 			a["goal_since"] = m.time      # there and waiting (holding a dock, charging an uplink) is fine
 		if d < float(a.get("goal_best", 1e9)) - 0.5:
 			a["goal_best"] = d
@@ -777,6 +797,10 @@ func _clear_line(m: Match, a: Vector2, b: Vector2) -> bool:
 	for k in range(1, n + 1):
 		var p := a + d * (float(k) / n)
 		if m.world.is_block(p.x, p.y) or m.world.is_block(p.x + side.x, p.y + side.y) or m.world.is_block(p.x - side.x, p.y - side.y):
+			return false
+		# the abyss blocks a walk too: straight at a goal across a bay in the island, the edge guard
+		# turned the bot aside every frame and it shuffled on the spot instead of taking the way round
+		if m.world.is_void(p.x, p.y):
 			return false
 	return true
 

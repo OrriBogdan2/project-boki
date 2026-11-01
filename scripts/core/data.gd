@@ -12,19 +12,19 @@ const CLASSES := {
 	"light": {
 		"name": "Light", "color": Color("c9bcff"), "hp": 124, "speed": 5.2, "dashes": 1, "mass": 0.85, "scale": 0.9, "hit_r": 0.35,
 		"ex_dist": 5.0, "ex_time": 0.2, "ex_cd": 12.0, "glide_cap": 1.2,
-		"weapon": "smg", "weapons": ["smg", "sniper", "twin_blades"],
+		"weapon": "smg", "weapons": ["smg", "sniper", "twin_blades", "longbow"],
 		"desc": "Fast and fragile. The fastest dash, the longest glide, and hits throw you furthest.",
 	},
 	"medium": {
 		"name": "Medium", "color": Color("9ee2a0"), "hp": 145, "speed": 5.0, "dashes": 1, "mass": 1.0, "scale": 1.0, "hit_r": 0.40,
 		"ex_dist": 4.6, "ex_time": 0.2, "ex_cd": 13.0, "glide_cap": 1.0,
-		"weapon": "rifle", "weapons": ["rifle", "burst_rifle", "longsword"],
+		"weapon": "rifle", "weapons": ["rifle", "burst_rifle", "longsword", "spellstaff"],
 		"desc": "The all-rounder: middle health, speed, dash and glide.",
 	},
 	"heavy": {
 		"name": "Heavy", "color": Color("e6dbc4"), "hp": 193, "speed": 4.73, "dashes": 2, "mass": 1.35, "scale": 1.14, "hit_r": 0.50,
 		"ex_dist": 4.2, "ex_time": 0.21, "ex_cd": 15.0, "glide_cap": 0.85,
-		"weapon": "shotgun", "weapons": ["shotgun", "minigun", "greatsword"],
+		"weapon": "shotgun", "weapons": ["shotgun", "minigun", "greatsword", "tower_shield"],
 		"desc": "Slow and tough. Two short dashes, the most health, and very hard to push off a ledge.",
 	},
 }
@@ -235,13 +235,13 @@ const MOBS := {
 	# lair bosses (scripts/match/boss.gd runs them; Lairs wakes them): each drops a Rare Egg of its own kin
 	"colossus": {"name": "The Stone Colossus", "hp": 1500.0, "speed": 2.5, "dmg": 26.0, "range": 3.2, "windup": 1.1, "cd": 1.9,
 		"r": 1.6, "gems": 40, "color": Color("7d7468"), "attack": "boss", "slam_r": 3.8, "stag": true, "stag_k": 0.04, "boss": true,
-		"egg": "cairnback", "enrage": 150.0},
+		"egg": "cairnback", "enrage": 75.0},
 	"serpent": {"name": "Stormcoil, the Sky Serpent", "hp": 1250.0, "speed": 5.2, "dmg": 22.0, "range": 10.0, "windup": 0.95, "cd": 1.5,
 		"r": 1.15, "gems": 40, "color": Color("3f86b8"), "attack": "boss", "stag": true, "stag_k": 0.04, "boss": true,
-		"egg": "zephyrak", "enrage": 150.0},
+		"egg": "zephyrak", "enrage": 75.0},
 	"brood": {"name": "The Brood Mother", "hp": 1350.0, "speed": 2.3, "dmg": 18.0, "range": 9.0, "windup": 1.0, "cd": 1.7,
 		"r": 1.55, "gems": 40, "color": Color("8a9a3a"), "attack": "boss", "stag": true, "stag_k": 0.04, "boss": true,
-		"egg": "hivara", "enrage": 150.0},
+		"egg": "hivara", "enrage": 75.0},
 	# a lair's ward stones: break all three (guards come out as you do) and its seal fails
 	"ward": {"name": "Ward Stone", "hp": 150.0, "speed": 0.0, "dmg": 0.0, "range": 0.0, "windup": 1.0, "cd": 999.0,
 		"r": 0.7, "gems": 3, "color": Color("8fd8ff"), "attack": "none", "ward": true},

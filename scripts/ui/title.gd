@@ -162,7 +162,7 @@ func _grass(isl: MeshInstance3D, rr: RandomNumberGenerator, n: int, reach: float
 # ---------------------------------------------------------------- the squad and their Boki
 ## The six archetypes, the player's own in front. Slots: [pos on the island, facing, pose].
 func _squad() -> void:
-	var my_arch := HeroKit.arch_for(Data.class_of_save(), "", Save.d.get("look", {}))
+	var my_arch := Arch.of_save()         # your archetype (main: Arch), whatever your look says
 	var order: Array = [my_arch]
 	for a in ["juggernaut", "archer", "mage", "bulwark", "thief", "gunslinger"]:
 		if not order.has(a): order.append(a)

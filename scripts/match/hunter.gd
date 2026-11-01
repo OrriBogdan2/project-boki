@@ -165,6 +165,9 @@ var in_current := false        # riding a wind road or an updraft: the glider do
 var glide_max := GLIDE_TIME
 var glide_cd := 0.0
 var glide_k := 0.0             # how far the glider is unfolded, for the model
+var _auto_glide_held := true   # (glide held last frame: auto_glide ends on a fresh press, not a held key)
+var auto_glide := false        # carried by a lair's escape updraft: the glider opens and stays open
+                               # by itself until you land (hold glide yourself to take it back)
 var wind_t := 0.0
 var perk := ""                  # (old single home perk; perks are now found in the run, see perks)
 var perks: Array = []           # perks picked up this expedition, one entry per stack
@@ -194,6 +197,11 @@ var swap_hold := false
 var dash_at := -9.0           # when the last dash started, for perfect dodges
 var dodged := false        # F has to be let go between weapon swaps
 var lives := 1                # comes back this many times minus one before it's really out
+var arch := ""                # the archetype (docs/ARCHETYPES.md); "" = the old class kit (weapon RMB, class dodge)
+var ak: ArchKit = null        # the archetype's kit at run time
+var shot_range_k := 1.0       # the next shot's range (a full Focus: +20%)
+var draw_t := -1.0            # a bow being drawn: how long (-1: not drawing)
+var nth_n := 0                # shots since the weapon's "every Nth" bonus
 
 
 func init_hunter(match_node: Node, id: String, team_id: int, class_id: String, name_txt: String, control: String, kit := {}) -> void:
@@ -202,7 +210,18 @@ func init_hunter(match_node: Node, id: String, team_id: int, class_id: String, n
 	team = team_id
 	cls = class_id if Data.CLASSES.has(class_id) else "medium"
 	cdat = Data.CLASSES[cls]
-	wid = Data.weapon_for(cls, String(kit.get("weapon", "")))
+	# the archetype: asked for by the kit, else your saved one (you) or a random one of the class (bots)
+	var ka := String(kit.get("arch", ""))
+	if ka == "" and control == "local": ka = String(Save.d.get("arch", ""))
+	if ka == "" and control == "remote":
+		# a remote player's archetype comes with them; failing that, the one their weapon belongs to
+		# (never a random pick, so nobody ever looks like an archetype they aren't)
+		var wa := Arch.archetypes_of(String(kit.get("weapon", ""))).filter(func(x): return Arch.weight(x) == cls)
+		ka = String(wa[0]) if not wa.is_empty() else Arch.default_for(cls)
+	if ka == "" and control == "bot": ka = "?"
+	if ka == "?": ka = Arch.pick_for(cls, "%s|%s" % [id, str(match_node.get("seed_val"))])
+	arch = "" if ka == "none" else Arch.fix(ka, cls)
+	wid = Arch.weapon_for(arch, cls, String(kit.get("weapon", ""))) if arch != "" else Data.weapon_for(cls, String(kit.get("weapon", "")))
 	wpn = Data.weapon_stats(wid, 0)
 	perk = ""
 	pname = name_txt
@@ -214,6 +233,7 @@ func init_hunter(match_node: Node, id: String, team_id: int, class_id: String, n
 	glide_max = GLIDE_TIME * float(cdat.get("glide_cap", 1.0))
 	base_speed = cdat["speed"]
 	runner = AbilityRunner.new(self)
+	ak = ArchKit.make(self, arch) if arch != "" else null
 	if not CombatBus.ability_used.is_connected(_on_ability_used):
 		CombatBus.ability_used.connect(_on_ability_used)
 		CombatBus.kin_thrown.connect(_on_kin_thrown)
@@ -222,7 +242,16 @@ func init_hunter(match_node: Node, id: String, team_id: int, class_id: String, n
 	dashes = max_dashes()
 	ammo = wpn["mag"]
 	r = float(cdat.get("hit_r", 0.38 * float(cdat["scale"])))
-	set_model(Models.hunter(cls, Data.TEAM_COLORS[team % Data.TEAM_COLORS.size()], wid, "", Save.d.get("look", {}) if ctrl == "local" else bot_look))
+	set_model(Models.hunter(cls, Data.TEAM_COLORS[team % Data.TEAM_COLORS.size()], wid, "", Save.d.get("look", {}) if ctrl == "local" else bot_look, arch))
+
+## Switches the archetype mid-match (tests, practice). "" puts back the old class kit: the weapon's
+## right click and the class dodge.
+func set_arch(a: String) -> void:
+	arch = "" if a == "" or a == "none" else Arch.fix(a, cls)
+	ak = ArchKit.make(self, arch) if arch != "" else null
+	if arch != "" and not Arch.weapon_ok(arch, wid):
+		equip(Arch.default_weapon(arch), wrar)
+	_kit_from_weapon()
 
 ## Swap to a found weapon for the rest of the expedition.
 func equip(w: String, rar: int, with_ammo := -1) -> void:
@@ -244,6 +273,9 @@ func equip(w: String, rar: int, with_ammo := -1) -> void:
 ## Chasing down whoever took your kin: 18% faster heading their way. Carrying a stolen kin: 8% slower.
 func _chase_mod(mv: Vector2) -> float:
 	var k := 0.92 if stolen_carry else 1.0
+	# the archetype kit's own pace (a Lance charging, Avalanche, a raised tower shield) and short
+	# move-speed boosts (a Sigil): kept here so the movement code itself stays untouched
+	k *= (ak.move_k() if ak else 1.0) * (1.0 + buff("move_speed"))
 	if chase and not chase.out and not chase.extracted and mv.length() > 0.1 and mv.normalized().dot(dir_to(chase)) > 0.5:
 		k *= 1.18
 	return k
@@ -258,13 +290,17 @@ func max_dashes() -> float:
 
 func dash_regen() -> float:
 	# each rank past the first recharges dashes faster; a kin's dodge_regen too (1 = instantly)
-	return (dodge_def.cooldown if dodge_def else DASH_REGEN) * (1.0 - 0.15 * float(maxi(0, int(slot_lv.get("dash", 1)) - 1))) * (1.0 - minf(0.9, owner_stat("dodge_regen")))
+	var base := float(ak.dash_def().get("cd", 9.0)) if ak else (dodge_def.cooldown if dodge_def else DASH_REGEN)
+	return base * (1.0 - 0.15 * float(maxi(0, int(slot_lv.get("dash", 1)) - 1))) * (1.0 - minf(0.9, owner_stat("dodge_regen")))
 
 ## Right click is always your weapon's ability, as left click is its attack.
 func _kit_from_weapon() -> void:
 	if runner == null:
 		return
 	var wd := Content.weapon(wid)
+	if ak:
+		runner.set_slot("utility", null)      # right click is the archetype's
+		return
 	runner.set_slot("utility", Content.ability(wd.utility) if wd and wd.utility != "" else null)
 
 # ------------------------------------------------------------------ your kin's stats on you
@@ -357,7 +393,7 @@ func aim_dir() -> Vector2:
 func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
 	if (inv_t > 0.0 or dropping) and opts.get("src", "") != "fall":
 		# dashing through an attack right as it lands: a perfect dodge
-		if not dropping and not dodged and m.time - dash_at < 0.22 and by != null and by.team != team and dmg >= 4.0:
+		if not dropping and not dodged and m.time - dash_at < 0.22 * (ak.pd_k() if ak and ak.has_method("pd_k") else 1.0) and by != null and by.team != team and dmg >= 4.0:
 			dodged = true
 			dashes = minf(max_dashes(), dashes + 0.6)
 			crit_t = maxf(crit_t, 1.5)
@@ -866,6 +902,10 @@ func do_dash() -> void:
 	if not grounded and dashes >= 1.0 and not air_dashed and int(owner_stat("air_dashes")) > 0:
 		use_ex = false           # a merge's dodge in the air: a normal dodge, once per airtime
 		air_dashed = true
+	if ak:
+		# the archetype's dash shape: it spends its own charge (or the long air dash) itself
+		ak.on_dash(use_ex)
+		return
 	if use_ex:
 		if ex_cd > 0.0:
 			_ab_feedback("dash", "deny")
@@ -997,6 +1037,8 @@ func dash_with(e: Dictionary) -> void:
 	var d: Vector2 = inp["move"]
 	if d.length() < 0.1:
 		d = aim_dir()
+	if e.has("dir") and (e["dir"] as Vector2).length() > 0.01:
+		d = e["dir"]
 	roll_dir = d.normalized()
 	roll_speed = float(e.get("speed", DASH_SPEED))
 	roll_t = float(e.get("time", DASH_TIME))
@@ -1070,6 +1112,10 @@ func _shove_along() -> void:
 		m.shake(0.25, f.pos)
 
 func can_fire() -> bool:
+	if ak and not ak.fire_ok():
+		return false
+	if ak and roll_t > 0.0 and ak.fires_in_dash() and not (drink_t > 0.0 or reload_t > 0.0 or downed or stun_t > 0.0):
+		return true          # shooting from a held slide
 	return not (drink_t > 0.0 or reload_t > 0.0 or roll_t > 0.0 or downed or out or stun_t > 0.0 or grap.size() > 0 or gliding or charge.size() > 0)
 
 const SWAY := [0.0, 0.6, -0.4, 1.0, -0.8, 0.3, -1.0, 0.5]
@@ -1121,6 +1167,22 @@ func trigger(dt: float) -> void:
 				else: fire()
 			mel_hold = 0.0
 		return
+	if wpn.has("draw"):
+		# a bow: hold to draw, let go to loose (a full Focus draws it at once)
+		if held and can_fire() and fire_cd <= 0.0 and ammo > 0:
+			if draw_t < 0.0:
+				draw_t = 0.0
+				m.sfx("charge", pos, -12.0 if is_local() else -16.0, 1.6)
+			draw_t += dt
+			if ak and ak.has_method("take_focus_shot") and draw_t < 0.85 and ak.take_focus_shot():
+				draw_t = 9.0; shot_range_k = 1.2
+				_loose()
+			elif ctrl != "local" and draw_t >= 0.95:
+				_loose()
+		elif draw_t >= 0.0:
+			_loose()
+		if held and ammo <= 0: start_reload()
+		return
 	if wpn.has("spin_up"):
 		if held and can_fire() and ammo > 0:
 			spin = minf(1.0, spin + dt / float(wpn["spin_up"]))
@@ -1135,12 +1197,34 @@ func trigger(dt: float) -> void:
 	if held:
 		fire()
 
+## Looses a drawn arrow: the draw stage reached sets damage, range and speed.
+func _loose() -> void:
+	var t := draw_t
+	draw_t = -1.0
+	if not can_fire() or ammo <= 0:
+		return
+	var stages: Array = wpn.get("draw", [])
+	var dmg := float(wpn.get("draw_early", 15.0)); var rng := float(wpn["range"]); var spd := float(wpn["speed"])
+	for stg in stages:
+		if t >= float(stg[0]):
+			dmg = float(stg[1]); rng = float(stg[2]); spd = float(stg[3])
+	var keep := wpn
+	wpn = wpn.duplicate()
+	var rk: float = float(Data.RARITY[clampi(wrar, 0, Data.RARITY.size() - 1)]["dmg"])
+	wpn["dmg"] = dmg * rk; wpn["range"] = rng; wpn["speed"] = spd
+	_release()
+	wpn = keep
+	if t >= float((stages[-1] as Array)[0]) if not stages.is_empty() else false:
+		m.fx.flash(pos + Vector3(aim_dir().x * 0.7, 1.0, aim_dir().y * 0.7), keep["color"], 0.5, 0.06)
+
 func charge_k() -> float:
 	if not wpn.get("melee", false) or not wpn.has("charge_time") or mel_hold <= 0.12:
 		return 0.0
 	return clampf(mel_hold / float(wpn["charge_time"]), 0.0, 1.0)
 
 func _fire_slow() -> float:
+	if draw_t >= 0.0:
+		return float(wpn.get("draw_slow", 0.7))
 	var firing: bool = fire_cd > 0.0 or warm_t > 0.0 or (spin > 0.0 and inp["fire"]) or charge_k() > 0.0
 	if not firing:
 		return 1.0
@@ -1160,6 +1244,10 @@ func fire() -> void:
 		m.sfx("cloak", pos, -8.0)
 	idle_fire = 0.0
 	reveal_t = maxf(reveal_t, 1.2)
+	if float(wpn.get("warmup", 0.0)) > 0.0 and ak and ak.has_method("take_focus_shot") and ak.take_focus_shot():
+		shot_range_k = 1.2          # a full Focus: aimed at once, further
+		_release()
+		return
 	if float(wpn.get("warmup", 0.0)) > 0.0:
 		# the sniper winds up with its laser showing, then fires
 		warm_t = float(wpn["warmup"])
@@ -1335,9 +1423,16 @@ func _emit_shot() -> void:
 	var shot_y := pos.y + 0.95 * float(cdat["scale"])
 	var start := Vector3(pos.x + cos(a) * 0.6, shot_y, pos.z + sin(a) * 0.6)
 	var spd: float = wpn["speed"]
-	var rng: float = float(wpn["range"]) + rng_add
+	if has_meta("zero_spread_t") and m.time < float(get_meta("zero_spread_t")):
+		spread = 0.0            # a Thief's SMG right after a Shadow Step
+		a = atan2(dir.y, dir.x)
+	var rng: float = (float(wpn["range"]) + rng_add) * shot_range_k
+	shot_range_k = 1.0
 	var life: float = rng / spd
 	var dmg: float = float(wpn["dmg"]) * m.dmg_mult(self)
+	if wpn.has("nth"):
+		nth_n += 1
+		if nth_n % int(wpn["nth"][0]) == 0: dmg *= 1.0 + float(wpn["nth"][1])
 	if wpn.has("sustain_loss"):
 		dmg *= 1.0 - float(wpn["sustain_loss"]) * minf(1.0, float(sus_n) / float(wpn.get("sustain_rounds", 10)))
 	sus_n += 1
@@ -1447,6 +1542,8 @@ func rank_cd_k(slot: String) -> float:
 ## What the HUD needs to draw one ability slot: name, short name, icon, colour, one-line desc,
 ## cooldown left and total, charges. slot: "sec" | "dash" | "gear" | "k1" | "r".
 func slot_info(slot: String) -> Dictionary:
+	if ak and slot in ["sec", "utility", "k1", "e", "kin", "r", "ult", "dash", "dodge"]:
+		return ak.slot_info(slot)
 	var out := {"name": "", "short": "", "icon": "", "col": Color.WHITE, "desc": "", "cd": 0.0, "cd_max": 0.0, "charges": 0, "max_charges": 0, "verb": "", "ready": false, "level": ability_level(slot)}
 	match slot:
 		"sec", "utility":
@@ -1503,6 +1600,37 @@ func use_kin_ability(slot: String) -> void:
 			m.fx.ring(k.pos, 1.3, kc, 0.3)
 	else:
 		_ab_feedback(slot, "deny")
+
+## C (with an archetype): the kin's own ability. Riding with you, it hops out, does its move at
+## your aim and hops back; already out (sent with G), it casts where it is. A mount stays under you
+## and lends you the move.
+func use_kin_hop() -> void:
+	var k: Kin = kin
+	if k == null or downed or dropping or riding:
+		return
+	if not k.ready_to_fight() or not k.runner or not k.runner.is_ready("k1"):
+		_ab_feedback("k1", "deny")
+		return
+	var at := _ground_aim()
+	if k.state == "shoulder" and k.carry_style() != "mount" and k.state != "fused":
+		var def := k.runner.def_of("k1")
+		if def and def.from == "kin":
+			# hop out beside you, toward the aim
+			var d := aim_dir()
+			var spot := pos + Vector3(d.x, 0, d.y) * 1.1
+			if m.world.is_void(spot.x, spot.z) or m.world.is_block(spot.x, spot.z): spot = pos
+			k.teleport(Vector3(spot.x, m.world.ground_at(spot.x, spot.z) if not m.world.is_void(spot.x, spot.z) else pos.y, spot.z))
+			k.state = "active"
+			k.settle = 0.0
+			k.fly = {}
+			k.set_meta("hop_back", m.time + 0.75)
+			m.fx.burst(k.pos + Vector3(0, 0.5, 0), KinText.color(def), 10, 2.5, 0.3)
+	if k.use_ability("k1", at) or k.pend_slot == "k1":
+		used["kin_ab"] = int(used.get("kin_ab", 0)) + 1
+		m.fx.ring(k.pos, 1.3, KinText.color(k.runner.def_of("k1")), 0.3)
+		if is_local() and m.sfx: m.sfx("skill", null, -10.0, 1.3)
+	else:
+		_ab_feedback("k1", "deny")
 
 ## R: the bond ultimate (the merge), once fighting together has filled the meter.
 func use_ultimate() -> void:
@@ -1749,12 +1877,12 @@ func sim(dt: float) -> void:
 	# bringing a teammate back at their deathbox: kneeling over it, locked in place (let go of
 	# interact to stop)
 	if box_reviving():
-		for kk in ["dash", "jump", "sig", "skill", "sec", "ult", "swap", "reload", "tonic", "kit", "gear1", "gear2", "fire", "throw"]:
+		for kk in ["dash", "jump", "sig", "skill", "sec", "ult", "swap", "reload", "tonic", "kit", "gear1", "gear2", "fire", "throw", "kin_ab"]:
 			inp[kk] = false
 		inp["move"] = Vector2.ZERO
 	# mid-stomp you're committed: none of your own buttons do anything until it ends
 	if not stomp.is_empty():
-		for kk in ["dash", "jump", "sig", "skill", "sec", "ult", "swap", "reload", "tonic", "kit", "gear1", "gear2", "fire", "throw"]:
+		for kk in ["dash", "jump", "sig", "skill", "sec", "ult", "swap", "reload", "tonic", "kit", "gear1", "gear2", "fire", "throw", "kin_ab"]:
 			inp[kk] = false
 		inp["move"] = Vector2.ZERO
 	# inputs
@@ -1788,9 +1916,17 @@ func sim(dt: float) -> void:
 				_ab_feedback("gear%d" % gi, "deny")
 			else:
 				m.use_gear(self, gi)
-	if inp["sig"]: use_kin_ability("k1")
+	if ak:
+		# the archetype's kit: E utility, right click with its variants, R ultimate; the kin's own
+		# ability is on its own key (C: it hops out, casts, hops back)
+		ak.tick(dt)
+		if inp["sig"]: ak.use_e()
+		if inp["sec"]: ak.press_rmb()
+		if inp.get("kin_ab", false): use_kin_hop()
+	elif inp["sig"]: use_kin_ability("k1")
+	if inp.get("kin_ab", false) and ak == null: use_kin_ability("k1")
 	# (a kin's second ability and mid-fight kin swaps are retired from the kit; bots don't press them)
-	if inp["sec"] and runner and runner.has_slot("utility"):
+	if inp["sec"] and runner and runner.has_slot("utility") and ak == null:
 		var ud: AbilityDef = runner.def_of("utility")
 		if not ud.charge.is_empty() and runner.is_ready("utility") and abil_charge.is_empty():
 			abil_charge = {"t": 0.0}       # a charge-up: it fires when you let go
@@ -1810,8 +1946,11 @@ func sim(dt: float) -> void:
 	_tick_burst(dt)
 	_tick_weapon(dt)
 	swing_t = maxf(0.0, swing_t - dt)
-	if inp["ult"]: use_ultimate()
+	if inp["ult"]:
+		if ak: ak.use_r()
+		else: use_ultimate()
 	trigger(dt)
+	inp["kin_ab"] = false
 	inp["dash"] = false; inp["jump"] = false; inp["sig"] = false; inp["reload"] = false; inp["tonic"] = false; inp["kit"] = false; inp["ult"] = false; inp["sec"] = false; inp["gear1"] = false; inp["gear2"] = false
 	inp["skill"] = false; inp["swap"] = false
 	_physics(dt)
@@ -2229,6 +2368,12 @@ func _update_glide(dt: float) -> void:
 		glide_fuel = minf(1.0, glide_fuel + dt / 1.2)
 	if grounded:
 		shot_down = false
+	# a player takes the glider back with a fresh press of glide; a bot's own glide input (it holds
+	# glide over the void to recover) must not fold the glider it's being carried on
+	var glide_press: bool = inp.get("glide", false) and not _auto_glide_held and ctrl != "bot"
+	_auto_glide_held = inp.get("glide", false)
+	if auto_glide and (glide_press or downed or out or (grounded and air_t <= 0.0 and vel.y <= 0.0)):
+		auto_glide = false
 	# an overheated glider scorches you while it stays open
 	if gliding and not dropping and glide_fuel <= 0.001 and not downed:
 		heat_burn += dt * 4.0
@@ -2238,7 +2383,7 @@ func _update_glide(dt: float) -> void:
 	# an overheated glider stays open (slow and sinking) until you land or get hit again
 	var can: bool = not grounded and roll_t <= 0.0 and fly_t <= 0.0 and glide_cd <= 0.0 and not downed and stun_t <= 0.0 \
 		and m.time - kb_t > 0.4 and (glide_fuel > 0.0 or gliding) and pad.is_empty() and not shot_down
-	var want: bool = inp.get("glide", false)
+	var want: bool = inp.get("glide", false) or auto_glide
 	if gliding:
 		if not want or not can:
 			gliding = false
@@ -2419,10 +2564,17 @@ func gain_xp(x: float) -> void:
 	while lvl < XP_TO.size() and xp >= float(XP_TO[lvl]):
 		lvl += 1
 		skill_pts += 1
-		if is_local() and m and m.hud:
-			m.hud.toast("Level %d  ·  skill point ready" % lvl, Color("ffd27a"))
-			m.sfx("unlock", null, -6.0)
+		# a gold ring pulse on the hunter that everyone nearby sees
+		if m and m.fx and visible and not unseen:
 			m.fx.ring(pos, 2.0, Color("ffd27a"), 0.4)
+			m.fx.burst(pos + Vector3(0, 1.2, 0), Color("ffd27a"), 12, 2.5, 0.5, -2.0)
+		if is_local() and m and m.hud:
+			m.hud.toast("LEVEL %d  ·  +1 SKILL POINT%s" % [lvl, "  ·  ULTIMATE READY TO UNLOCK" if lvl == int(ULT_AT[0]) else ""], Color("ffd27a"))
+			if m.hud.has_method("level_up"): m.hud.level_up(lvl)
+			# the level-up chime: its own two-note rise (distinct from the unlock click)
+			m.sfx("unlock", null, -5.0, 1.45)
+			m.later(0.09, func(): if is_instance_valid(self): m.sfx("pickup", null, -6.0, 1.7))
+			m.later(0.18, func(): if is_instance_valid(self): m.sfx("bond", null, -10.0, 1.6))
 	if not is_local():
 		_bot_spend()
 
@@ -2457,6 +2609,9 @@ func level_slot(slot: String) -> bool:
 ## Bots (and anyone skipping the choice) spend points in a sensible order.
 func _bot_spend() -> void:
 	var order := ["sec", "dash", "kin", "gear", "sec", "kin", "dash", "gear", "sec", "kin", "dash", "gear"]
+	if ak:
+		# the archetype's recommended order (ARCHETYPES §6), which skips the R until it opens
+		order = (ak.d.get("order", []) as Array).filter(func(x): return x != "ult") + ["gear", "gear", "kin", "dash", "sec"]
 	while skill_pts > 0:
 		if can_level("ult"):
 			level_slot("ult"); continue

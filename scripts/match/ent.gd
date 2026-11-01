@@ -117,6 +117,17 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 		dmg *= 1.0 - guard_k
 	if vuln_t > 0.0:
 		dmg *= 1.0 + minf(vuln_k, KinRules.VULN_MAX)
+	# archetype passives: what the attacker's kit adds (a Thief's Marks), what ours takes off
+	# (Iron Hide, an Interpose guard, an unstoppable Avalanche)
+	var bk = by.get("ak") if by and is_instance_valid(by) else null
+	if bk:
+		dmg = bk.outgoing(self, dmg, opts)
+	var mk = get("ak")
+	if mk:
+		var io: Array = mk.incoming(by, dmg, opts)
+		dmg = float(io[0]); opts = io[1]
+		if dmg <= 0.0:
+			return 0.0
 	var d := _mitigate(dmg, by, opts)
 	if d <= 0.0:
 		return 0.0
