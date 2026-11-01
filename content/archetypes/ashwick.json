@@ -21,8 +21,8 @@
 		"desc": "A 4.5m wave of heat: 9 damage, 16 Char and Anti-Heal for 3s, and foes in sight are dragged toward you (walls stop them). Hit anyone and you wear a 3s shield of 6.4% health plus 5.1% per foe. A knock resets it.",
 		"sockets": {"hit": "add", "ctrl": "add", "ctrl_cap": "soft", "guard": "add", "mod": "add"}},
 	"order": ["rmb", "dash", "kin", "rmb", "dash", "kin", "rmb", "dash", "kin", "gear"],
-	"rank3": {"dash": "stokes the foe: upgrades their burn at once, and leaves a 3s fire trail", "rmb": "hitting refunds 25% of the cooldown and +60% damage", "kin": "+50% damage and shield; stoking refunds 25% of the cooldown"},
-	"rank2": {"rmb": "Rank 2: cooldown 7s -> 5.8s, damage +25%.", "dash": "Rank 2: recharge 9s -> 8.4s per charge.", "kin": "Rank 2: cooldown 10.5s -> 8.5s, damage and shield +25%."},
-	"rank_next": {"rmb": "Rank 3: cooldown 7s -> 4.6s, damage +50%; refunds 25% of the cooldown when it stokes.", "dash": "Rank 3: recharge 9s -> 7.8s; stokes the foe at once and leaves a 3s fire trail.", "kin": "Rank 3: cooldown 10.5s -> 6.5s, damage and shield +50%; refunds 25% of the cooldown when it stokes."},
+	"rank3": {"dash": "stokes the foe: upgrades their burn at once, and leaves a 3s fire trail", "sec": "hitting refunds 25% of the cooldown and +60% damage", "kin": "+50% damage and shield; stoking refunds 25% of the cooldown"},
+	"rank2": {"sec": "Rank 2: cooldown 7s -> 5.8s, damage +25%.", "dash": "Rank 2: recharge 9s -> 8.4s per charge.", "kin": "Rank 2: cooldown 10.5s -> 8.5s, damage and shield +25%."},
+	"rank_next": {"sec": "Rank 3: cooldown 7s -> 4.6s, damage +50%; refunds 25% of the cooldown when it stokes.", "dash": "Rank 3: recharge 9s -> 7.8s; stokes the foe at once and leaves a 3s fire trail.", "kin": "Rank 3: cooldown 10.5s -> 6.5s, damage and shield +50%; refunds 25% of the cooldown when it stokes."},
 	"tells": {"half": "embers drift off the hat from half Char on the nearest foe", "full": "a foe at full Char glows white-hot", "dash_spent": "dash pips dark"}
 }

@@ -56,6 +56,8 @@ your class in the Expedition menu, and you can try every class against dummies i
 | [Gunslinger](Class-Gunslinger.md) | Medium | Rifle, Burst Rifle | Six Chambers | Slide Reload | Trick Shot | Quickdraw | Last Round |
 | [Juggernaut](Class-Juggernaut.md) | Heavy | Greatsword, Shotgun, Minigun | Rage | Rampage | Smash | Warchain | Doomfall |
 | [Bulwark](Class-Bulwark.md) | Heavy | Tower Shield & Mace, Minigun | Guard | Whirl | Shield | Mending Ground | Fissure |
+| [Dredge](Class-Dredge.md) | Heavy | Shotgun | Salvage | Barge | Grapnel | Anchor Drop | (Merge) |
+| [Ashwick](Class-Ashwick.md) | Heavy | Torch Lance | Flashover | Spark Leap | Cinder Shot | Furnace Cloak | (Merge) |
 
 ### Weight classes
 
@@ -65,7 +67,7 @@ The weight class sets health, speed, mass and dash charges; the class kit sits o
 |---|---|---|---|---|---|---|---|
 | Light | 124 | 5.2 | 1 | 0.85 | 1.2 | Thief, Archer | Fast and fragile. The fastest dash, the longest glide, and hits throw you furthest. |
 | Medium | 145 | 5 | 1 | 1 | 1 | Mage, Gunslinger | The all-rounder: middle health, speed, dash and glide. |
-| Heavy | 193 | 4.73 | 2 | 1.35 | 0.85 | Juggernaut, Bulwark | Slow and tough. Two short dashes, the most health, and very hard to push off a ledge. |
+| Heavy | 193 | 4.73 | 2 | 1.35 | 0.85 | Juggernaut, Bulwark, Dredge, Ashwick | Slow and tough. Two short dashes, the most health, and very hard to push off a ledge. |
 
 ### Run levels
 

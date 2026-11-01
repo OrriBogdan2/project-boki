@@ -20,8 +20,8 @@
 		"desc": "A 0.22s wind-up, then the anchor smashes down in a 3m cone: 25 damage, stun 0.45s, slammed to the ground and Grounded. You are driven downward after it, unless you are over the abyss.",
 		"sockets": {"hit": "add", "ctrl": "add", "ctrl_cap": "hard", "mod": "add"}},
 	"order": ["rmb", "e", "dash", "rmb", "e", "dash", "rmb", "e", "dash", "gear"],
-	"rank3": {"dash": "pellet hits trim 0.25s off the barge recharge", "rmb": "hitting a foe refunds 33% of the cooldown", "kin": "cast in the air, up to +75% damage by height"},
-	"rank2": {"rmb": "Rank 2: cooldown 14s -> 11.5s.", "dash": "Rank 2: recharge 12s -> 10.2s per charge.", "kin": "Rank 2: cooldown 10s -> 8.5s, damage +15%, stun +0.1s."},
-	"rank_next": {"rmb": "Rank 3: cooldown 14s -> 9s; hitting a foe refunds 33% of it.", "dash": "Rank 3: recharge 12s -> 8.4s; pellet hits trim 0.25s off the recharge.", "kin": "Rank 3: cooldown 10s -> 7s, damage +30%; cast in the air, up to +75% damage by height."},
+	"rank3": {"dash": "pellet hits trim 0.25s off the barge recharge", "sec": "hitting a foe refunds 33% of the cooldown", "kin": "cast in the air, up to +75% damage by height"},
+	"rank2": {"sec": "Rank 2: cooldown 14s -> 11.5s.", "dash": "Rank 2: recharge 12s -> 10.2s per charge.", "kin": "Rank 2: cooldown 10s -> 8.5s, damage +15%, stun +0.1s."},
+	"rank_next": {"sec": "Rank 3: cooldown 14s -> 9s; hitting a foe refunds 33% of it.", "dash": "Rank 3: recharge 12s -> 8.4s; pellet hits trim 0.25s off the recharge.", "kin": "Rank 3: cooldown 10s -> 7s, damage +30%; cast in the air, up to +75% damage by height."},
 	"tells": {"half": "brass glints along the shoulder drum from 5 stacks", "full": "10 stacks: a brass halo ring at the feet and a bell within 20m", "dash_spent": "dash pips dark"}
 }

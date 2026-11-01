@@ -95,10 +95,10 @@ func _ignite(f: Ent, lvl: int, was: int) -> void:
 		net_ring(f.pos, 1.2, col)
 
 func _refund(slot: String) -> void:
-	var k := {"rmb": "rmb", "e": "e"}.get(slot, "")
-	if k == "" or rank("sec" if slot == "rmb" else "kin") < 3:
+	if rank("sec" if slot == "rmb" else "kin") < 3:
 		return
-	cd[k] = float(cd[k]) * (1.0 - float(rmb_def().get("refund", 0.25) if slot == "rmb" else e_def().get("refund", 0.25)))
+	var sd: Dictionary = rmb_def() if slot == "rmb" else e_def()
+	cd[slot] = float(cd[slot]) * (1.0 - float(sd.get("refund", 0.25)))
 	refunds += 1
 
 func on_knock(t: Hunter, mine: bool) -> void:

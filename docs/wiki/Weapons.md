@@ -10,12 +10,13 @@ Numbers are per shot or swing at Common rarity. Class kits that run their own we
 | Weapon | Carried by | Weight | Damage | Fire interval | Magazine | Reload | Range | Notes |
 |---|---|---|---|---|---|---|---|---|
 | Burst Rifle | Gunslinger | medium | 7 | 0.45s | 27 | 1.5s | 10.5m | Three rounds per pull. Accurate at range. |
+| Torch Lance | Ashwick | heavy | 2.7 | 0.1s | 999 | 1s | 6m | Hold to roar out a cone of fire 6m long. It builds Char; at full Char the foe ignites. |
 | Greatsword | Juggernaut | heavy | 11 | 0.5s | 1 | 0.1s | 3.4m | A slow, huge 3-hit combo, strongest on the tip. Hold 1s for a slam that stuns and throws people far. |
 | Longbow | Archer | light | 30 | 0.35s | 1 | 0.25s | 12m | Hold to draw, let go to loose. 0.4s: 30 damage, 12m. 0.9s: 60 damage, 15m. Let go early for 15. You walk slower while drawing. |
 | Longsword | Mage | medium | 8.2 | 0.36s | 1 | 0.1s | 2.7m | A wide 3-hit combo, stronger on the tip of the blade. Hold 0.8s for a long-reaching thrust. |
 | Minigun | Juggernaut, Bulwark | heavy | 3.8 | 0.1s | 90 | 3s | 10m | Spins up for 0.7s, then fires a stream that tightens the longer you hold it. Slows you while firing. |
 | Rifle | Gunslinger | medium | 6 | 0.13s | 20 | 1.8s | 9.5m | Steady and accurate. Long strings of fire lose some damage, so fire in bursts. |
-| Shotgun | Juggernaut | heavy | 4 | 1s | 6 | 1.8s | 5m | Seven slugs that slow and stop at 5m. One slug landing still hurts. Spread grows with each shot; dashing resets it. |
+| Shotgun | Juggernaut, Dredge | heavy | 4 | 1s | 6 | 1.8s | 5m | Seven slugs that slow and stop at 5m. One slug landing still hurts. Spread grows with each shot; dashing resets it. |
 | SMG | Thief | light | 4.6 | 0.12s | 22 | 1.4s | 7m | Fast and loose. Spread grows the longer you hold it, and damage drops off at the far end. |
 | Sniper | Archer | light | 36 | 1.5s | 5 | 2.2s | 16m | Winds up for 0.6s with a laser showing, then hits hard. Weak point-blank, full damage from half range. |
 | Spellstaff | Mage | medium | 9.5 | 0.55s | 12 | 1.4s | 10m | An orb bolt every 0.45s, 10m. Every 4th bolt hits 50% harder. |
