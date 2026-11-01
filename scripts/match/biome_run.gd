@@ -350,6 +350,18 @@ func place_hazards() -> void:
 	for p in w.portal_spots: taken.append(p)
 	for c in w.chest_spots: taken.append(c["pos"])
 	for c in w.camp_spots: taken.append(c["pos"])
+	if w.hand:
+		# a hand-made map lists its trap spots (World.trap_spots); which trap goes there is the
+		# region's own (its biome's hazards, in turn)
+		var nth := {}
+		for ts in w.trap_spots:
+			var ii := int(ts["island"])
+			var hz: Array = (defs.get(String(w.islands[ii].get("biome", "")), {}) as Dictionary).get("hazards", [])
+			if hz.is_empty():
+				continue
+			_add_hazard(String(hz[int(nth.get(ii, 0)) % hz.size()]["kind"]), ts["pos"])
+			nth[ii] = int(nth.get(ii, 0)) + 1
+		return
 	for ii in w.islands.size():
 		if w.islands[ii].get("perch", false):
 			continue      # the perches' danger is the drop, not traps

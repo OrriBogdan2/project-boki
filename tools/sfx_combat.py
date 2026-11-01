@@ -540,6 +540,30 @@ def build():
                    crack(d, 300, 3000, 0.05) * 2.8, at(clang * 1.3, 0.004), reflections(tail(1.0, 1200, 0.25) * 1.2))
     takes('pay_slam', pay_slam, 1, rms_db=-14)
 
+    # Thief Cash In (kits2): a blade snap, then a spill of coins that rings out bright and quick
+    def pay_cashin(i):
+        d = 1.0
+        coins = np.zeros(N(0.7))
+        for k in range(12):
+            f = 2600 + 380 * ((k * 7) % 11)
+            c = ring((f, f * 1.51, f * 2.03), 0.18, (0.05, 0.035, 0.02), (0.5, 0.3, 0.15))
+            s0 = N(0.012 + 0.045 * k + 0.002 * k * k)
+            if s0 + len(c) < len(coins): coins[s0:s0 + len(c)] += c * (1.0 - k / 16.0)
+        snap = mix(click(0.002, 4000, 14000) * 3.0, crack(d, 2500, 12000, 0.012) * 2.6)
+        return mix(snap, kick(260, 70, d, 0.008, 0.05, 3.0) * 0.7, sub(90, 45, d, 0.08) * 0.3,
+                   at(coins * 1.5, 0.02), reflections(tail(0.6, 2600, 0.1) * 0.8))
+    takes('pay_cashin', pay_cashin, 1, rms_db=-14)
+
+    # Juggernaut Rage Smash (kits2): a roaring fire-gust into a deep crunching slam with embers after it
+    def pay_rage(i):
+        d = 1.4
+        roar = sat(bpf(noise(0.32), 180, 1400) * np.linspace(0.3, 1.0, N(0.32)) ** 1.5, 2.6) * 1.2
+        slam = mix(kick(140, 34, d, 0.02, 0.2, 4.0) * 1.0, sub(50, 28, d, 0.35) * 0.7, crack(d, 150, 2200, 0.09) * 3.0)
+        embers = grains(0.9, 220, 1800, 7000, 0.001, 0.005, fall=0.25) * 0.9
+        return mix(roar, at(click(0.004, 1200, 8000) * 2.4, 0.3), at(slam, 0.3), at(embers, 0.34),
+                   at(reflections(tail(1.0, 1100, 0.3) * 1.2), 0.31))
+    takes('pay_rage', pay_rage, 1, rms_db=-14)
+
 
 if __name__ == '__main__':
     build()

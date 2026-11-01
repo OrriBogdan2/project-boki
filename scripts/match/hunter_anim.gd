@@ -493,6 +493,8 @@ func update(dt: float, s: Dictionary) -> void:
 	stepped = false
 	slammed = false
 	_check_weapon(s)
+	km_id = String(s.get("kmove", ""))
+	km = km_sample(km_id, float(s.get("kmove_t", 99.0))) if km_id != "" else {}
 	var vel: Vector3 = s.get("vel", Vector3.ZERO)
 	var face: float = s.get("face", model.rotation.y)
 	var grounded: bool = s.get("grounded", true)
@@ -763,6 +765,12 @@ func update(dt: float, s: Dictionary) -> void:
 				dhl = 1.05; dkl = -0.8; dhr = -0.6; dkr = -0.25
 		hl = lerpf(hl, dhl, dash_k); kl = lerpf(kl, dkl, dash_k)
 		hr = lerpf(hr, dhr, dash_k); kr = lerpf(kr, dkr, dash_k)
+	# a kit move's legs
+	if not km.is_empty() and km.has("legs") and float(km["lw"]) > 0.0:
+		var kl4: Array = km["legs"]
+		var lw := clampf(float(km["lw"]), 0.0, 1.0)
+		hl = lerpf(hl, kl4[0], lw); kl = lerpf(kl, kl4[1], lw)
+		hr = lerpf(hr, kl4[2], lw); kr = lerpf(kr, kl4[3], lw)
 	# pulling up a ledge or vaulting: one knee comes up onto it
 	var mk := clampf(mant, 0.0, 1.0)
 	var ledge_up := 1.0 if mant < 0.0 else clampf(mk * 1.6, 0.0, 1.0)
@@ -855,6 +863,9 @@ func update(dt: float, s: Dictionary) -> void:
 	_swing_pose()
 	yaw += sw_tw
 	pitch -= sw_k * 0.15
+	# a kit move's body
+	if not km.is_empty():
+		pitch += float(km["p"]); yaw += float(km["y"]); roll += float(km["r"])
 	# casting: a lean into it
 	var cast_t := float(s.get("cast", 99.0))
 	if cast_t < cast_prev - 0.02 or (cast_t < 0.05 and cast_prev > 0.3):
@@ -866,7 +877,7 @@ func update(dt: float, s: Dictionary) -> void:
 	cast_prev = cast_t
 	var cast_k := 0.0
 	cast_now = cast_t
-	if cast_t < 0.6:
+	if cast_t < 0.6 and km.is_empty():      # (a kit move is the cast's whole pose)
 		cast_k = smoothstep(0.0, 0.07, cast_t) * (1.0 - smoothstep(0.32, 0.6, cast_t))
 		pitch -= cast_k * 0.18
 		yaw += cast_k * 0.25
@@ -942,7 +953,11 @@ func update(dt: float, s: Dictionary) -> void:
 	# twin blades' charged attack: a full spin
 	if swing_t < swing_dur and swing_step == -1 and hold == "twin":
 		rb = Basis(Vector3.UP, -TAU * _spin_e(swing_t / swing_dur)) * rb
-	var sq := float(s.get("squash", 0.0)) + land_k * 0.12 + slam_k * 0.1
+	if not km.is_empty():
+		if absf(float(km["fx"])) > 0.001: rb = Basis(Vector3.RIGHT, float(km["fx"])) * rb
+		if absf(float(km["fz"])) > 0.001: rb = Basis(Vector3.BACK, float(km["fz"])) * rb
+		if absf(float(km["fy"])) > 0.001: rb = Basis(Vector3.UP, float(km["fy"])) * rb
+	var sq := float(s.get("squash", 0.0)) + land_k * 0.12 + slam_k * 0.1 + (float(km["sq"]) * 0.35 if not km.is_empty() else 0.0)
 	var stretch := float(s.get("stretch", 0.0))
 	var scl := Vector3(1.0 + sq * 0.35 - stretch * 0.3, 1.0 - sq * 0.4 + stretch * 0.15, 1.0 + sq * 0.35 + stretch * 0.5)
 	# feet on the ground: drop the hips by however much the standing leg is bent
@@ -960,6 +975,8 @@ func update(dt: float, s: Dictionary) -> void:
 		off.y += still * (0.012 + sin(t * 1.4 + seed_ph) * 0.008)       # light on its feet, half floating
 	off.y += down_k * 0.15 + base_k * (0.04 + sin(t * 2.0) * 0.015) * smoothstep(0.0, 0.3, base_p)
 	off.y -= revive_k * 0.02
+	if not km.is_empty():
+		off.y += float(km["lift"])
 	if roll_t >= 0.0:
 		off.y -= 0.12 * roll_k
 	if dash_k > 0.01 and dash_kind != "charge":
@@ -1003,6 +1020,194 @@ func update(dt: float, s: Dictionary) -> void:
 		focus.rotation.y = t * 1.3
 	# ================================================================ CLOTH
 	_cloth(dt, vel, spd, mf, ms, yaw, r1)
+
+
+# ==================================================================== kit moves (kits2)
+## Keyed full-body moves the archetype kits play for their abilities (state keys "kmove", the move's
+## id, and "kmove_t", seconds since it started). Each is anticipation -> a key pose on the hit ->
+## follow-through and recovery, keyed to the kit's own hit timing. Channels (all optional, eased
+## between keys): p y r (torso pitch, yaw, roll, added), lift (the body up, m), fx fz fy (whole-body
+## turns about the hips: forward flip, side flip, spin), sq (squash; negative stretches), legs
+## [hl kl hr kr] with lw (their weight), fl / fr (a free hand's place from its shoulder) with hw / rw,
+## blade (the greatsword's yaw, pitch, roll, like SWINGS) with bw, rad (the blade's reach), gp (a
+## gun's extra pitch). A move with "hold": true stays on its last key until another replaces it.
+const KMOVES := {
+	# ---------------------------------------------------------------- Juggernaut
+	# the Searing Wave let go: the raised blade carves down and forward, a long low lunge after it
+	"jug_wave": {"keys": [
+		[0.0, {"blade": Vector3(0.0, 2.6, 0.0), "bw": 1.0, "p": 0.2}],
+		[0.1, {"blade": Vector3(0.0, -0.9, 0.0), "bw": 1.0, "rad": 0.6, "p": -0.5, "lw": 1.0, "legs": [1.0, -1.0, -0.6, -0.3], "sq": 0.2}],
+		[0.32, {"blade": Vector3(0.0, -0.8, 0.0), "bw": 0.8, "p": -0.35, "lw": 0.8, "legs": [0.8, -0.9, -0.5, -0.3]}],
+		[0.6, {}]]},
+	# Execution Slam: 0.5s of wind-up (rearing back, rising, the blade high behind the head), the
+	# crash at 0.5 (the hit), then a heavy recovery
+	"jug_slam": {"keys": [
+		[0.0, {}],
+		[0.3, {"blade": Vector3(0.0, 2.9, 0.0), "bw": 1.0, "p": 0.35, "lift": 0.12, "lw": 1.0, "legs": [-0.2, -0.3, 0.35, -0.5], "fl": Vector3(-0.3, 0.2, 0.0), "hw": 0.6}],
+		[0.46, {"blade": Vector3(0.0, 3.0, 0.0), "bw": 1.0, "p": 0.42, "lift": 0.22, "sq": -0.25, "lw": 1.0, "legs": [0.4, -0.5, 0.2, -0.4]}],
+		[0.52, {"blade": Vector3(0.0, -1.3, 0.0), "bw": 1.0, "rad": 0.55, "p": -0.7, "lift": -0.18, "sq": 0.45, "lw": 1.0, "legs": [1.1, -1.5, -0.4, -0.9]}],
+		[0.75, {"blade": Vector3(0.0, -1.2, 0.0), "bw": 0.9, "p": -0.55, "lift": -0.12, "sq": 0.2, "lw": 1.0, "legs": [1.0, -1.4, -0.35, -0.8]}],
+		[1.05, {}]]},
+	# the Lunge, held: crouched, the blade drawn back low at the hip (it holds while you charge)
+	"jug_lunge_wind": {"hold": true, "keys": [
+		[0.0, {}],
+		[0.25, {"blade": Vector3(-0.6, -0.25, 1.3), "bw": 1.0, "rad": 0.25, "p": -0.25, "y": 0.6, "lw": 1.0, "legs": [0.7, -1.2, -0.45, -0.6], "lift": -0.08}]]},
+	# ... let go: driving forward, the blade thrust out at full reach, then the follow-through
+	"jug_lunge": {"keys": [
+		[0.0, {"blade": Vector3(-0.6, -0.25, 1.3), "bw": 1.0, "rad": 0.25, "p": -0.25, "y": 0.6, "lw": 1.0, "legs": [0.7, -1.2, -0.45, -0.6]}],
+		[0.08, {"blade": Vector3(0.0, -0.05, 0.0), "bw": 1.0, "rad": 0.75, "p": -0.55, "y": -0.35, "lw": 1.0, "legs": [1.15, -0.7, -0.75, -0.2], "sq": -0.2}],
+		[0.3, {"blade": Vector3(0.0, -0.1, 0.0), "bw": 1.0, "rad": 0.7, "p": -0.45, "y": -0.3, "lw": 1.0, "legs": [1.0, -0.8, -0.6, -0.3]}],
+		[0.6, {}]]},
+	# Meteor Drop: the blade swung up overhead as you tip forward, then driven down into the ground
+	"jug_meteor": {"keys": [
+		[0.0, {"blade": Vector3(0.0, 2.8, 0.0), "bw": 1.0, "p": 0.3, "lw": 1.0, "legs": [1.3, -1.8, 1.2, -1.7]}],
+		[0.12, {"blade": Vector3(0.0, -1.35, 0.0), "bw": 1.0, "rad": 0.5, "p": -0.6, "fx": -0.35, "lw": 1.0, "legs": [1.2, -1.6, 0.4, -0.9]}],
+		[0.2, {"blade": Vector3(0.0, -1.35, 0.0), "bw": 1.0, "rad": 0.5, "p": -0.7, "sq": 0.5, "lift": -0.15, "lw": 1.0, "legs": [1.2, -1.7, -0.5, -1.2]}],
+		[0.55, {}]]},
+	# Rampage: a shoulder-down drive with the blade levelled ahead, the tip thrust out at the end
+	"jug_dash": {"keys": [
+		[0.0, {"blade": Vector3(0.0, -0.1, 0.0), "bw": 1.0, "rad": 0.3, "p": -0.35, "y": 0.45, "lw": 1.0, "legs": [0.6, -1.0, -0.5, -0.4]}],
+		[0.16, {"blade": Vector3(0.0, -0.05, 0.0), "bw": 1.0, "rad": 0.35, "p": -0.5, "y": 0.4, "lw": 1.0, "legs": [1.0, -0.6, -0.8, -0.2]}],
+		[0.22, {"blade": Vector3(0.0, 0.0, 0.0), "bw": 1.0, "rad": 0.85, "p": -0.6, "y": -0.3, "lw": 1.0, "legs": [1.15, -0.6, -0.8, -0.15], "sq": -0.25}],
+		[0.42, {"blade": Vector3(0.0, -0.1, 0.0), "bw": 0.8, "rad": 0.6, "p": -0.3, "lw": 0.6, "legs": [0.8, -0.8, -0.4, -0.3]}],
+		[0.65, {}]]},
+	# Warchain: the chain hand cocked back, then flung out ahead; the body twists into it
+	"jug_chain": {"keys": [
+		[0.0, {}],
+		[0.08, {"fl": Vector3(-0.15, 0.25, 0.25), "hw": 1.0, "y": -0.5, "p": 0.1}],
+		[0.16, {"fl": Vector3(0.12, 0.12, -0.5), "hw": 1.0, "y": 0.45, "p": -0.25, "lw": 0.6, "legs": [0.7, -0.8, -0.4, -0.3]}],
+		[0.45, {"fl": Vector3(0.08, 0.05, -0.42), "hw": 0.7, "y": 0.2}],
+		[0.7, {}]]},
+	# ... pulled along it: leaning hard into the chain, the hand out ahead, the feet trailing
+	"jug_reel": {"keys": [
+		[0.0, {"fl": Vector3(0.1, 0.12, -0.5), "hw": 1.0, "p": -0.2}],
+		[0.08, {"fl": Vector3(0.12, 0.15, -0.52), "hw": 1.0, "p": -0.55, "lift": 0.08, "lw": 1.0, "legs": [-0.2, -0.6, -0.7, -0.3], "sq": -0.2}],
+		[0.4, {"fl": Vector3(0.12, 0.15, -0.5), "hw": 1.0, "p": -0.5, "lift": 0.05, "lw": 1.0, "legs": [-0.1, -0.7, -0.6, -0.4]}],
+		[0.65, {}]]},
+	# Scorching Spin: blade out wide, the whole body turns twice
+	"jug_spin": {"keys": [
+		[0.0, {"blade": Vector3(-1.5, 0.0, 1.5), "bw": 1.0, "rad": 0.55, "lw": 1.0, "legs": [0.6, -1.0, 0.5, -0.9], "lift": -0.06}],
+		[0.36, {"blade": Vector3(-1.5, 0.0, 1.5), "bw": 1.0, "rad": 0.55, "fy": -12.566, "lw": 1.0, "legs": [0.6, -1.0, 0.5, -0.9], "lift": -0.06}],
+		[0.55, {"fy": -12.566}]]},
+	# the Chain Lunge: the chain hand hauls back as the body hurls along the chain, blade levelled
+	"jug_chainlunge": {"keys": [
+		[0.0, {"fl": Vector3(0.1, 0.12, -0.5), "hw": 1.0, "blade": Vector3(-0.5, -0.2, 1.2), "bw": 1.0, "rad": 0.3, "p": -0.3, "y": 0.5, "lw": 1.0, "legs": [0.8, -1.1, -0.5, -0.5]}],
+		[0.07, {"fl": Vector3(-0.1, 0.0, 0.2), "hw": 1.0, "blade": Vector3(0.0, -0.05, 0.0), "bw": 1.0, "rad": 0.85, "p": -0.65, "y": -0.4, "lift": 0.1, "sq": -0.3, "lw": 1.0, "legs": [1.1, -0.5, -0.9, -0.1]}],
+		[0.3, {"fl": Vector3(-0.15, -0.05, 0.15), "hw": 0.8, "blade": Vector3(0.0, -0.1, 0.0), "bw": 1.0, "rad": 0.75, "p": -0.5, "y": -0.3, "lw": 1.0, "legs": [1.0, -0.7, -0.6, -0.3]}],
+		[0.6, {}]]},
+	# a Haul Slam armed: pulled along with the blade cocked high behind the head (held till arrival)
+	"jug_haul_wind": {"hold": true, "keys": [
+		[0.0, {"fl": Vector3(0.1, 0.12, -0.5), "hw": 1.0, "p": -0.2}],
+		[0.15, {"fl": Vector3(0.12, 0.15, -0.5), "hw": 1.0, "blade": Vector3(0.0, 2.9, 0.0), "bw": 1.0, "p": 0.25, "lift": 0.12, "lw": 1.0, "legs": [0.9, -1.5, 0.7, -1.3], "sq": -0.2}]]},
+	# ... arriving: the whole weight comes down through the blade
+	"jug_haulslam": {"keys": [
+		[0.0, {"blade": Vector3(0.0, 2.9, 0.0), "bw": 1.0, "p": 0.25, "lift": 0.12, "lw": 1.0, "legs": [0.9, -1.5, 0.7, -1.3]}],
+		[0.06, {"blade": Vector3(0.0, -1.4, 0.0), "bw": 1.0, "rad": 0.6, "p": -0.8, "lift": -0.2, "sq": 0.55, "lw": 1.0, "legs": [1.25, -1.8, -0.45, -1.2]}],
+		[0.35, {"blade": Vector3(0.0, -1.3, 0.0), "bw": 0.9, "rad": 0.55, "p": -0.6, "lift": -0.14, "sq": 0.25, "lw": 1.0, "legs": [1.1, -1.6, -0.4, -1.0]}],
+		[0.7, {}]]},
+	# Doomfall: braced and rising, the blade held high in both hands (the invulnerable wind-up, 0.6s),
+	# then the crash at 0.6 and a slow, heavy rise
+	"jug_doom": {"keys": [
+		[0.0, {}],
+		[0.2, {"blade": Vector3(0.0, 2.2, 0.0), "bw": 1.0, "p": 0.1, "lift": -0.06, "lw": 1.0, "legs": [0.8, -1.3, 0.6, -1.2], "sq": 0.25}],
+		[0.55, {"blade": Vector3(0.0, 3.05, 0.0), "bw": 1.0, "p": 0.45, "lift": 0.35, "sq": -0.3, "lw": 1.0, "legs": [0.3, -0.8, 0.1, -0.6]}],
+		[0.62, {"blade": Vector3(0.0, -1.4, 0.0), "bw": 1.0, "rad": 0.6, "p": -0.8, "lift": -0.22, "sq": 0.55, "lw": 1.0, "legs": [1.2, -1.7, -0.5, -1.3]}],
+		[0.95, {"blade": Vector3(0.0, -1.3, 0.0), "bw": 1.0, "rad": 0.55, "p": -0.7, "lift": -0.18, "sq": 0.3, "lw": 1.0, "legs": [1.1, -1.6, -0.45, -1.2]}],
+		[1.3, {}]]},
+	# ---------------------------------------------------------------- Thief
+	# Vault: a real flip, tucked, over the dash (forward, back, or a side flip by its direction)
+	"thf_vault_f": {"keys": [[0.0, {"sq": 0.2, "lw": 0.6, "legs": [0.6, -1.0, 0.5, -0.9]}], [0.04, {"lift": 0.2, "lw": 1.0, "legs": [1.6, -2.1, 1.5, -2.0], "fl": Vector3(-0.1, -0.3, -0.28), "hw": 1.0}],
+		[0.3, {"fx": -6.283, "lift": 0.3, "lw": 1.0, "legs": [1.6, -2.1, 1.5, -2.0], "fl": Vector3(-0.1, -0.3, -0.28), "hw": 1.0}], [0.38, {"fx": -6.283, "sq": 0.3, "lw": 0.8, "legs": [0.7, -1.1, 0.4, -0.9]}], [0.55, {"fx": -6.283}]]},
+	"thf_vault_b": {"keys": [[0.0, {"sq": 0.2, "lw": 0.6, "legs": [0.6, -1.0, 0.5, -0.9]}], [0.04, {"lift": 0.2, "lw": 1.0, "legs": [1.6, -2.1, 1.5, -2.0], "fl": Vector3(-0.1, -0.3, -0.28), "hw": 1.0}],
+		[0.3, {"fx": 6.283, "lift": 0.3, "lw": 1.0, "legs": [1.6, -2.1, 1.5, -2.0], "fl": Vector3(-0.1, -0.3, -0.28), "hw": 1.0}], [0.38, {"fx": 6.283, "sq": 0.3, "lw": 0.8, "legs": [0.7, -1.1, 0.4, -0.9]}], [0.55, {"fx": 6.283}]]},
+	"thf_vault_l": {"keys": [[0.0, {"sq": 0.2, "lw": 0.6, "legs": [0.6, -1.0, 0.5, -0.9]}], [0.04, {"lift": 0.2, "lw": 1.0, "legs": [1.5, -2.0, 1.4, -1.9], "fl": Vector3(-0.35, 0.1, 0.0), "hw": 1.0}],
+		[0.3, {"fz": 6.283, "lift": 0.3, "lw": 1.0, "legs": [1.5, -2.0, 1.4, -1.9], "fl": Vector3(-0.35, 0.1, 0.0), "hw": 1.0}], [0.38, {"fz": 6.283, "sq": 0.3, "lw": 0.8, "legs": [0.7, -1.1, 0.4, -0.9]}], [0.55, {"fz": 6.283}]]},
+	"thf_vault_r": {"keys": [[0.0, {"sq": 0.2, "lw": 0.6, "legs": [0.6, -1.0, 0.5, -0.9]}], [0.04, {"lift": 0.2, "lw": 1.0, "legs": [1.5, -2.0, 1.4, -1.9], "fl": Vector3(-0.35, 0.1, 0.0), "hw": 1.0}],
+		[0.3, {"fz": -6.283, "lift": 0.3, "lw": 1.0, "legs": [1.5, -2.0, 1.4, -1.9], "fl": Vector3(-0.35, 0.1, 0.0), "hw": 1.0}], [0.38, {"fz": -6.283, "sq": 0.3, "lw": 0.8, "legs": [0.7, -1.1, 0.4, -0.9]}], [0.55, {"fz": -6.283}]]},
+	# the Primed hit: snapped forward into it, the weapon arm thrust out, then a hard recoil
+	"thf_primed": {"keys": [
+		[0.0, {"p": -0.3, "y": -0.3, "gp": -0.1, "lw": 0.7, "legs": [0.8, -0.8, -0.4, -0.2]}],
+		[0.05, {"p": 0.3, "y": 0.25, "gp": 0.7, "sq": -0.15, "lw": 0.7, "legs": [0.4, -0.6, -0.2, -0.3]}],
+		[0.3, {}]]},
+	# the Bola: whirled once overhead in the free hand (0.12s), then slung out ahead
+	"thf_bola": {"keys": [
+		[0.0, {}],
+		[0.06, {"fl": Vector3(-0.2, 0.45, 0.1), "hw": 1.0, "y": -0.35, "p": 0.1}],
+		[0.12, {"fl": Vector3(0.05, 0.42, -0.2), "hw": 1.0, "y": -0.2, "p": 0.15}],
+		[0.18, {"fl": Vector3(0.12, 0.1, -0.52), "hw": 1.0, "y": 0.5, "p": -0.25, "lw": 0.7, "legs": [0.7, -0.8, -0.35, -0.25]}],
+		[0.45, {}]]},
+	# the Shadow Knife: cocked back by the ear, whipped out flat
+	"thf_knife": {"keys": [
+		[0.0, {}],
+		[0.08, {"fl": Vector3(-0.1, 0.28, 0.16), "hw": 1.0, "y": -0.55, "p": 0.05}],
+		[0.14, {"fl": Vector3(0.12, 0.1, -0.52), "hw": 1.0, "y": 0.5, "p": -0.25, "lw": 0.6, "legs": [0.7, -0.8, -0.35, -0.25]}],
+		[0.4, {}]]},
+	# ... arriving where it stuck: dropped in low out of the step, blades out, then rising
+	"thf_arrive": {"keys": [
+		[0.0, {"lift": 0.25, "sq": -0.3, "lw": 1.0, "legs": [0.6, -0.9, 0.4, -0.8], "fl": Vector3(-0.38, 0.05, -0.05), "hw": 1.0}],
+		[0.07, {"lift": -0.14, "p": -0.45, "sq": 0.45, "lw": 1.0, "legs": [1.25, -2.0, -0.2, -1.6], "fl": Vector3(-0.4, -0.25, 0.0), "hw": 1.0}],
+		[0.3, {"lift": -0.1, "p": -0.35, "sq": 0.2, "lw": 1.0, "legs": [1.15, -1.8, -0.15, -1.4], "fl": Vector3(-0.38, -0.2, 0.0), "hw": 1.0}],
+		[0.6, {}]]},
+	# Jackpot: the fuse gathers the knives (crouched, arms crossed over the chest) ...
+	"thf_volley_wind": {"keys": [
+		[0.0, {}],
+		[0.3, {"p": -0.35, "lift": -0.08, "lw": 1.0, "legs": [0.9, -1.4, 0.8, -1.3], "fl": Vector3(0.3, 0.0, -0.18), "hw": 1.0, "sq": 0.2}],
+		[0.45, {"p": -0.4, "lift": -0.1, "lw": 1.0, "legs": [0.95, -1.5, 0.85, -1.4], "fl": Vector3(0.32, -0.02, -0.16), "hw": 1.0, "sq": 0.25}]]},
+	# ... then 2s of flinging: the free hand slings knives out, the body snapping round side to side
+	"thf_volley": {"keys": [
+		[0.0, {"p": 0.15, "lift": 0.08, "sq": -0.25, "fl": Vector3(-0.38, 0.12, -0.1), "hw": 1.0}],
+		[0.2, {"y": 0.6, "fl": Vector3(0.1, 0.15, -0.5), "hw": 1.0, "lw": 0.6, "legs": [0.6, -0.8, -0.3, -0.3]}],
+		[0.4, {"y": -0.6, "fl": Vector3(-0.42, 0.1, -0.1), "hw": 1.0, "lw": 0.6, "legs": [-0.3, -0.3, 0.6, -0.8]}],
+		[0.6, {"y": 0.6, "fl": Vector3(0.1, 0.15, -0.5), "hw": 1.0, "lw": 0.6, "legs": [0.6, -0.8, -0.3, -0.3]}],
+		[0.8, {"y": -0.6, "fl": Vector3(-0.42, 0.1, -0.1), "hw": 1.0, "lw": 0.6, "legs": [-0.3, -0.3, 0.6, -0.8]}],
+		[1.0, {"y": 0.6, "fl": Vector3(0.1, 0.15, -0.5), "hw": 1.0, "lw": 0.6, "legs": [0.6, -0.8, -0.3, -0.3]}],
+		[1.2, {"y": -0.6, "fl": Vector3(-0.42, 0.1, -0.1), "hw": 1.0, "lw": 0.6, "legs": [-0.3, -0.3, 0.6, -0.8]}],
+		[1.4, {"y": 0.6, "fl": Vector3(0.1, 0.15, -0.5), "hw": 1.0, "lw": 0.6, "legs": [0.6, -0.8, -0.3, -0.3]}],
+		[1.6, {"y": -0.6, "fl": Vector3(-0.42, 0.1, -0.1), "hw": 1.0, "lw": 0.6, "legs": [-0.3, -0.3, 0.6, -0.8]}],
+		[1.8, {"y": 0.5, "fl": Vector3(0.1, 0.15, -0.5), "hw": 1.0, "lw": 0.5, "legs": [0.5, -0.7, -0.3, -0.3]}],
+		[2.2, {}]]},
+}
+const KM_CH := ["p", "y", "r", "lift", "fx", "fz", "fy", "sq", "lw", "hw", "rw", "bw", "rad", "gp"]
+var km := {}                   # the kit move's channels this frame (empty: none)
+var km_id := ""
+var km_prev_t := 99.0
+
+## Samples the kit move at time `tt`: each channel eased between the keys around it.
+static func km_sample(id: String, tt: float) -> Dictionary:
+	var mv: Dictionary = KMOVES.get(id, {})
+	if mv.is_empty():
+		return {}
+	var keys: Array = mv["keys"]
+	var last: Array = keys[-1]
+	if tt >= float(last[0]):
+		if not mv.get("hold", false):
+			return {}
+		tt = float(last[0])
+	var i := 0
+	while i < keys.size() - 2 and tt >= float(keys[i + 1][0]):
+		i += 1
+	var a: Array = keys[i]; var b: Array = keys[mini(i + 1, keys.size() - 1)]
+	var span := maxf(0.001, float(b[0]) - float(a[0]))
+	var u := clampf((tt - float(a[0])) / span, 0.0, 1.0)
+	u = u * u * (3.0 - 2.0 * u)
+	var pa: Dictionary = a[1]; var pb: Dictionary = b[1]
+	var out := {}
+	for c in KM_CH:
+		var va := float(pa.get(c, 0.0)); var vb := float(pb.get(c, 0.0))
+		# a weight that isn't keyed on one side falls off with the other side's pose
+		out[c] = lerpf(va, vb, u)
+	for c in ["legs"]:
+		var la: Array = pa.get(c, []); var lb: Array = pb.get(c, [])
+		if la.is_empty() and lb.is_empty(): continue
+		if la.is_empty(): la = lb
+		if lb.is_empty(): lb = la
+		out[c] = [lerpf(la[0], lb[0], u), lerpf(la[1], lb[1], u), lerpf(la[2], lb[2], u), lerpf(la[3], lb[3], u)]
+	for c in ["fl", "fr", "blade"]:
+		var has_a := pa.has(c); var has_b := pb.has(c)
+		if not has_a and not has_b: continue
+		var va2: Vector3 = pa.get(c, pb.get(c)); var vb2: Vector3 = pb.get(c, pa.get(c))
+		out[c] = va2.lerp(vb2, u)
+	return out
 
 # ==================================================================== melee helpers
 ## How far into the current swing's strike we are, 0..1 then back to 0 (for leaning into it).
@@ -1113,6 +1318,7 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 		free_l = carry_k
 		# recoil: the muzzle kicks up and the gun pushes back
 		ap += kick
+		if not km.is_empty(): ap += float(km["gp"])
 		gpos.z += kick / maxf(0.01, float(hd.get("kick", 0.15))) * float(hd.get("push", 0.05)) * 0.6
 		if shake_t > 0.0 or (hold == "minigun" and fired < 0.15):
 			var sh := float(hd.get("shake", 0.2)) * 0.012
@@ -1186,12 +1392,17 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 				oa = o_guard.lerp(Vector3(-sw_a.x, sw_a.y, -sw_a.z) if sw_b2 == Vector3.INF else sw_b2, sw_w)
 			if sw_rad > 0.0:
 				rad = lerpf(rad, sw_rad, sw_w)
+		if not km.is_empty() and km.has("blade") and float(km["bw"]) > 0.0:
+			var bw := clampf(float(km["bw"]), 0.0, 1.0)
+			a = a.lerp(km["blade"], bw)
+			if float(km["rad"]) > 0.0: rad = lerpf(rad, float(km["rad"]), bw)
+			if hold == "twin": oa = oa.lerp(Vector3(-(km["blade"] as Vector3).x, (km["blade"] as Vector3).y, -(km["blade"] as Vector3).z), bw)
 		var rot := Basis.from_euler(Vector3(a.y, a.x, 0.0))
 		gbas = rot * Basis(Vector3.BACK, a.z)
 		gpos = c + rot * Vector3(0, 0, -rad) - Vector3(0, sw_drop * 0.3, 0)
 		if hold == "great":
 			# at rest the greatsword lies back over the right shoulder, the hands in front of the chest
-			var rest := 1.0 - maxf(aim_k * 0.8, maxf(sw_w, chg))
+			var rest := 1.0 - maxf(aim_k * 0.8, maxf(maxf(sw_w, chg), float(km.get("bw", 0.0))))
 			if rest > 0.0:
 				var rb2 := Basis.from_euler(Vector3(2.35, -0.25, 0.0)) * Basis(Vector3.BACK, 0.3)
 				gbas = gbas.slerp(rb2, rest)
@@ -1368,6 +1579,16 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 		elif arch == "bulwark":
 			ct = sh_l + Vector3(0.12, 0.05, -0.4)           # a braced forearm, out in front
 		fl = fl.lerp(ct, cast_k)
+	# a kit move's free hands
+	if not km.is_empty():
+		if km.has("fl") and float(km["hw"]) > 0.0:
+			var hw := clampf(float(km["hw"]), 0.0, 1.0)
+			fl = fl.lerp(sh_l + (km["fl"] as Vector3), hw)
+			free_l = maxf(free_l, hw)
+		if km.has("fr") and float(km["rw"]) > 0.0:
+			var rw := clampf(float(km["rw"]), 0.0, 1.0)
+			fr = fr.lerp(sh_r + (km["fr"] as Vector3), rw)
+			free_r = maxf(free_r, rw)
 	# drink: flask to the mouth
 	if drink_k > 0.0:
 		fl = fl.lerp(sh_l + Vector3(0.16, 0.2, -0.17), drink_k)
