@@ -182,6 +182,13 @@ static func _then(st: StageSpec, ev: String, cx: Dictionary, at: Vector3, dir: V
 
 # ------------------------------------------------------------------ deliveries
 static func _deliver(st: StageSpec, cx: Dictionary) -> void:
+	if int(cx.get("depth", 1)) <= 1 and not cx.has("_echo"):
+		# the shared cast language (AbilityFx): a Boki's or an archetype's cast reads like a weapon's
+		var from := _origin(st, cx)
+		var dl := st.delivery.type
+		if dl == "projectile" and float(st.delivery.params.get("speed", 0.0)) >= 60.0: dl = "rail"
+		AbilityFx.cast(cx["m"], cx["caster"], dl, from, _dir(st, cx, from), _color(st),
+			{"range": float(st.delivery.params.get("range", 10.0)), "radius": float(st.delivery.params.get("radius", 1.5)), "grammar": true})
 	match st.delivery.type:
 		"projectile": _projectile(st, cx)
 		"cone": _cone(st, cx)

@@ -140,7 +140,7 @@ func spark(at: Vector3, dir: Vector3, col: Color, amount := 8, speed := 9.0, spr
 func muzzle(at: Vector3, dir2: Vector2, col: Color, power := 1.0) -> void:
 	var d := Vector3(dir2.x, 0.05, dir2.y).normalized()
 	var hot := Color(1.0, 0.86, 0.55).lerp(col, 0.25)
-	flash(at + d * 0.12, hot, 0.16 + 0.07 * power, 0.05 + 0.012 * power)
+	flash(at + d * 0.12, hot, 0.22 + 0.09 * power, 0.05 + 0.012 * power)
 	spark(at, d, hot, int(3 + 2 * power), 7.0 + 3.0 * power, 16.0 + 6.0 * power, 0.09 + 0.02 * power, 0.0, 0.8 + 0.15 * power)
 	if power >= 1.8:
 		burst(at + d * 0.35, Color(0.78, 0.76, 0.74, 0.35), int(3 * power), 1.2, 0.5, -0.6, 1.6, d, 30.0)
@@ -152,7 +152,7 @@ func impact(at: Vector3, dir: Vector3, col: Color, power := 1.0, crit := false, 
 	var fcol := col
 	if crit: fcol = Color("ffd23f")
 	elif armor: fcol = Color("8fd4ff")
-	var sz := (0.26 + 0.14 * power) * (1.45 if crit else 1.0)
+	var sz := (0.34 + 0.17 * power) * (1.45 if crit else 1.0)
 	flash(at, fcol, sz, 0.07 + 0.02 * power + (0.04 if crit else 0.0))
 	var dd := dir.normalized() if dir.length() > 0.01 else Vector3.UP
 	dd = (dd + Vector3(0, 0.35, 0)).normalized()

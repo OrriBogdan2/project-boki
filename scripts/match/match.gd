@@ -3886,7 +3886,8 @@ func step(dt: float) -> void:
 		if hud: hud.guide_hidden = true
 		if not train.has("_jt"):
 			Settings.v["tips"] = false
-			var q := world.free_spot_near(player.pos + Vector3(4.0, 0, -1.0), [player.pos], 1.0, 0.45, 6.0)
+			if "--demo-slow" in OS.get_cmdline_user_args(): Engine.time_scale = 0.2   # (software-rendered screenshots catch the short flashes)
+			var q := demo_clear_spot(4.0)
 			var jt := make_hunter("jtarget", 7, "medium", "Rook", "idle", {}, Vector3(q.x, world.ground_at(q.x, q.z), q.z), bot_kit())
 			jt.lives = 1
 			train["_jt"] = jt
@@ -3901,7 +3902,8 @@ func step(dt: float) -> void:
 		if hud: hud.guide_hidden = true
 		if not train.has("_rt"):
 			Settings.v["tips"] = false
-			var q := world.free_spot_near(player.pos + Vector3(5.0, 0, -1.2), [player.pos], 1.0, 0.45, 6.0)
+			if "--demo-slow" in OS.get_cmdline_user_args(): Engine.time_scale = 0.2   # (software-rendered screenshots catch the short flashes)
+			var q := demo_clear_spot(5.0)
 			var rt := make_hunter("rtarget", 7, "medium", "Rook", "idle", {}, Vector3(q.x, world.ground_at(q.x, q.z), q.z), bot_kit())
 			rt.lives = 1
 			train["_rt"] = rt
@@ -5971,6 +5973,51 @@ func _process_net_revives() -> void:
 
 # ------------------------------------------------------------------ first-time tips
 var _tip_t := 0.0
+
+## Screenshot demos: moves the player (once) to the nearest open, level stretch of ground at least
+## 6m from the start's clutter (the duel pad and its post, the glove stands) and returns a spot
+## `dist` metres east of them with a clear line of fire.
+func demo_clear_spot(dist: float) -> Vector3:
+	var best := Vector3.INF
+	for pass_i in 2:
+		best = _demo_open(dist, pass_i == 0)
+		if best != Vector3.INF:
+			break
+	if best == Vector3.INF:
+		print("DEMO no open ground")
+		return world.free_spot_near(player.pos + Vector3(dist, 0, 0), [player.pos], 1.0, 0.45, 6.0)
+	# monsters nearby would join in: send them to the far side of the map for the demo
+	for mb in mobs:
+		if Vector2(mb.pos.x - best.x, mb.pos.z - best.z).length() < 14.0:
+			var far := world.free_spot_near(Vector3(world.w - best.x, 0, world.h - best.z), [], 1.0, 0.45, 30.0)
+			mb.pos = far; mb.prev = far
+	player.teleport(best)
+	player.vel = Vector3.ZERO
+	return best + Vector3(dist, 0, 0)
+
+func _demo_open(dist: float, avoid_mobs: bool) -> Vector3:
+	var best := Vector3.INF; var bd := 1e9
+	var c0 := player.pos
+	for iz in range(2, world.h - 2):
+		for ix in range(2, world.w - 2):
+			var q := Vector3(ix + 0.5, 0, iz + 0.5)
+			var dd := Vector2(q.x - c0.x, q.z - c0.z).length()
+			if dd < 6.0 or dd >= bd or world.is_void(q.x, q.z) or world.is_block(q.x, q.z):
+				continue
+			if avoid_mobs and mobs.any(func(mb): return Vector2(mb.pos.x - q.x, mb.pos.z - q.z).length() < 9.0):
+				continue
+			var gy := world.ground_at(q.x, q.z)
+			var ok := true
+			for dx in range(-2, int(dist) + 3):
+				for dz in range(-2, 3):
+					var x := q.x + dx; var z := q.z + dz
+					var inner := absi(dz) <= 1 and dx >= -1 and dx <= int(dist) + 1
+					if world.is_block(x, z) or (inner and (world.is_void(x, z) or absf(world.ground_at(x, z) - gy) > 0.8)):
+						ok = false; break
+				if not ok: break
+			if ok:
+				bd = dd; best = Vector3(q.x, gy, q.z)
+	return best
 
 func _tip(key: String, text: String) -> void:
 	var seen: Dictionary = Save.d["tutorial"]

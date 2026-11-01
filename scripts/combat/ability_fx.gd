@@ -40,6 +40,16 @@ static func tell_row(delivery: String) -> Array:
 static func impact_row(cat: String) -> Array:
 	return IMPACT.get(cat, IMPACT["damage"])
 
+## The same rows in the archetype Feel module's [sound, pitch] shape (Feel.DELIVERY_TELL and
+## Feel.CATEGORY_IMPACT can read these, so archetype kits sound like the weapon kits).
+static func feel_tell(delivery: String) -> Array:
+	var r := tell_row(delivery)
+	return [r[0], r[2]]
+
+static func feel_impact(cat: String) -> Array:
+	var r := impact_row(cat)
+	return [r[0], r[2]]
+
 static func cat_color(cat: String) -> Color:
 	return CAT.get(cat, Color("e8f4ff"))
 
@@ -85,7 +95,10 @@ static func cast(m: Node, caster: Node, delivery: String, at: Vector3, dir2: Vec
 	var fx: Fx = m.fx
 	var mine := _mine(m, caster)
 	var row := tell_row(delivery)
-	m.sfx(String(row[0]), at, float(row[1]) + _vol(m, caster, at), float(row[2]))
+	# grammar casts (Boki, archetype kits): when the Feel module is in it plays their tell, pointed
+	# at these rows (feel_tell); a Boki's auto cast sits a little under its partner's own casts
+	if not (o.get("grammar", false) and feel_owns()):
+		m.sfx(String(row[0]), at, float(row[1]) + _vol(m, caster, at) - (4.0 if caster is Kin else 0.0), float(row[2]))
 	var d3 := Vector3(dir2.x, 0, dir2.y)
 	var hand: Vector3 = at + Vector3(0, 1.0, 0) + d3 * 0.6
 	var hot := col.lerp(Color.WHITE, 0.35)
