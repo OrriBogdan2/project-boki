@@ -29,10 +29,14 @@ static func tick(A: Arena, P: Hunter, D: Hunter, t: float, dt: float, w: String)
 		A.set_kin("puddlet")
 		P.teleport(D.pos + Vector3(-4.2 if who == "mage" else -4.4, 0, -1.2))
 		A.home = P.pos
-		D.max_hp = 100000.0; D.hp = D.max_hp
+		D.max_hp = 600.0; D.hp = D.max_hp
+		var zk := 0.34 if arg("--hero-frames") != "" else 0.5
+		A.m.set_meta("zoom_hold", zk)
+		if A.m.cam: A.m.cam.zoom = zk
 	ArenaDemo._aim(P, D)
 	P.inp["move"] = Vector2.ZERO
 	P.hp = P.max_hp
+	D.hp = D.max_hp
 	var K = P.ak
 	if who == "mage":
 		match mv:
@@ -41,7 +45,7 @@ static func tick(A: Arena, P: Hunter, D: Hunter, t: float, dt: float, w: String)
 				at_t = 0.8
 			"wire":
 				if ArenaDemo._at(t, dt, GO): P.dashes = P.max_dashes(); P.inp["dash_down"] = true; P.do_dash()
-				if t > GO: P.inp["dash_down"] = t < 1.4
+				if t > GO: P.inp["dash_down"] = t < GO + 0.45
 				at_t = GO + 0.5
 			"blowout":
 				if ArenaDemo._at(t, dt, 0.2): K.add_spark(D, 4)
@@ -80,7 +84,7 @@ static func tick(A: Arena, P: Hunter, D: Hunter, t: float, dt: float, w: String)
 			"needle", "skewer":
 				if mv == "skewer" and ArenaDemo._at(t, dt, 0.1): KitStatus.apply(D, "rattled", 4.0)
 				if ArenaDemo._at(t, dt, GO): K.cd["e"] = 0.0; K.use_e()
-				if mv == "needle": at_t = GO + 0.55
+				if mv == "needle": at_t = GO + 0.9
 				else:
 					if int(K.skewers) > 0 and not A.has_meta("sk_at"): A.set_meta("sk_at", t)
 					at_t = float(A.get_meta("sk_at", 99.0)) + 0.08
