@@ -235,6 +235,7 @@ static func release(rec: Dictionary) -> String:
 	if not egg.is_empty() and (String(egg.get("a", "")) == String(rec["uid"]) or String(egg.get("b", "")) == String(rec["uid"])):
 		return "Its egg is still in the Nesting Nook: wait for it to hatch"
 	Save.d["roster"].erase(rec)
+	Save.log_event("released", rec)
 	if str(Save.d.get("active2", "")) == String(rec.get("uid", "")): Save.d["active2"] = ""
 	if not Save.d.has("released"): Save.d["released"] = []
 	Save.d["released"].append({"name": String(rec.get("name", "")), "species": String(rec.get("species", "")), "m": int(Save.d.get("matches", 0))})

@@ -466,6 +466,7 @@ static func kin_for_buyer(c: Dictionary, seller_name: String) -> Dictionary:
 	for a in c["aff"]: rec["aff"][a] = c["aff"][a]
 	if c.has("acc"): rec["acc"] = c["acc"]
 	rec["trust"] = 25.0           # it doesn't know you yet
+	rec["origin"] = {"how": "market", "where": {"place": "market"}, "from": seller_name}
 	Save.remember(rec, "market", "was bought from %s at the market" % seller_name, 0.0)
 	return rec
 
