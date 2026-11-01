@@ -75,6 +75,7 @@ var hitstop := 0.0
 var aim_line: MeshInstance3D
 var aim_ring: MeshInstance3D
 var muzzle_light: OmniLight3D
+var raid := "dusk"                 # the raid condition the match is lit under (RaidLook)
 var music_dir: MusicDir = null     # the layered score's levels (scripts/match/music_dir.gd)
 var collapse_warned := false
 var rng := RandomNumberGenerator.new()
@@ -371,6 +372,7 @@ func _start(o: Dictionary) -> void:
 	await _stage("build.generate")
 	if _stage_cb.is_valid(): world.stage_cb = _world_step
 	await world.build_meshes()
+	RaidLook.tune_world(world, raid)
 	world.stage_cb = Callable()
 	fx = Fx.new(); fx.name = "Fx"; add_child(fx)
 	fields = Fields.new(self)
@@ -484,6 +486,9 @@ func _build_env() -> void:
 	add_child(env)
 	var sun := Look.lights(self, T["sun"], 1.0, Vector3(-55, -35, 0), 60.0)
 	sun.shadow_opacity = 0.8
+	# the raid condition: moody dusk by default (scripts/match/raid_look.gd)
+	raid = RaidLook.pick(opts)
+	RaidLook.apply(env.environment, sun, get_node_or_null("Fill") as DirectionalLight3D, T, raid)
 
 func _build_shot_pool() -> void:
 	var mesh := Models.sphere(0.5, 10)
@@ -1763,7 +1768,7 @@ func kin_bark(k: Kin, txt: String, cat: String) -> void:
 		var s := "kin_happy"
 		if cat in ["refuse", "hesitate", "scared", "revive_low", "ignore"]: s = "kin_unsure"
 		elif cat in ["callout", "wild"]: s = "kin_alert"
-		sfx(s, null, -6.0, Unique.voice(k.rec))     # in its own voice
+		sfx(s, null, -3.0, Unique.voice(k.rec))     # in its own voice, above the louder combat layer
 
 var feed_all: Array = []
 
