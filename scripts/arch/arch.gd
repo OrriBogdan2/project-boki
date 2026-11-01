@@ -48,6 +48,13 @@ static func fix(id: String, cls: String) -> String:
 static func of_save() -> String:
 	return fix(String(Save.d.get("arch", "")), Data.class_of_save())
 
+## A bot's archetype from a key (its id and the match seed): its own random stream, so picking one
+## never shifts the match's (seeded maps, loot and tests stay as they were).
+static func pick_for(cls: String, key: String) -> String:
+	var r := RandomNumberGenerator.new()
+	r.seed = hash(key)
+	return pick(cls, r)
+
 ## A random archetype of a class (bots).
 static func pick(cls: String, rng: RandomNumberGenerator) -> String:
 	var opts := of_class(cls)

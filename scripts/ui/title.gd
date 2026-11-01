@@ -207,7 +207,7 @@ func _build_ship() -> void:
 
 ## You at the bow, your kin around you.
 func _crew() -> void:
-	hunter_node = Models.hunter(Data.class_of_save(), Data.TEAM_COLORS[0], Data.weapon_for(Data.class_of_save(), String(Save.d.get("weapon", ""))), "", Save.d.get("look", {}))
+	hunter_node = Models.hunter(Data.class_of_save(), Data.TEAM_COLORS[0], Data.weapon_for(Data.class_of_save(), String(Save.d.get("weapon", ""))), "", Save.d.get("look", {}), Arch.of_save())
 	hunter_node.position = Vector3(0.15, DECK_Y, -4.7)
 	hunter_node.rotation.y = -0.35
 	hunter_node.scale *= 1.1

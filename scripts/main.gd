@@ -74,6 +74,12 @@ func _ready() -> void:
 			for c in Data.CLASSES:
 				if (Data.CLASSES[c]["weapons"] as Array).has(a.substr(9)): Save.d["cls"] = c
 		if a == "--ability-demo": opts["ability_demo"] = true
+		if a.begins_with("--arch-demo="):
+			# screenshots: an archetype mid-ability (scripts/arch/arch_demo.gd)
+			var ad := a.substr(12).split(":")
+			opts["arch_demo"] = a.substr(12); opts["no_drop"] = true; opts["training"] = true; opts["unlocked"] = true
+			opts["arch"] = ad[0]; opts["cls"] = Arch.weight(ad[0]); opts["weapon"] = Arch.default_weapon(ad[0])
+			if ad.size() > 2: opts["weapon"] = ad[2]
 		if a == "--fresh": Save.d = Save.fresh()
 		if a in ["--work-demo", "--work-board", "--work-board=Kin", "--work-card", "--work-box", "--work-hover", "--work-close", "--work-build", "--shiny-lineup"]:
 			Save.no_write = true; Save.d = HomeWork.demo_save()     # a made-up farm at work (screenshots)
@@ -1175,6 +1181,7 @@ func _ac_setup(dist: float, extra_t := false) -> Array:
 	m.start({"training": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true, "weapon": "rifle", "cls": "medium"})
 	m.set_process(false)
 	var P: Hunter = m.player
+	P.set_arch("")         # these are the old weapon RMBs and class dodges (the verbs stay; archetypes: --archetype-check)
 	for mb in m.mobs: mb.queue_free()
 	m.mobs.clear()
 	# a flat, open strip of ground for the test: the training map is small and busy, so the logical

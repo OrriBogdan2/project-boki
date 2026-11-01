@@ -364,6 +364,7 @@ func stage(slot: String, sd: Dictionary, sockets_override = null) -> StageSpec:
 				break
 	s["effects"] = effs
 	if not mods.is_empty(): s["modifiers"] = mods
+	_clamp_parts(s)
 	var rep := GrammarReport.new()
 	rep.file = "%s.%s" % [id, slot]
 	var depth := 2 if String((s["delivery"] as Dictionary).get("origin", "")) == "here" else 1
@@ -372,8 +373,26 @@ func stage(slot: String, sd: Dictionary, sockets_override = null) -> StageSpec:
 		# never let a kin's parts break the archetype: fall back to the plain stage
 		push_warning("ArchKit: %s" % "; ".join(rep.errors))
 		var rep2 := GrammarReport.new()
-		out = StageSpec.parse(sd, "", rep2, depth)
+		var sd2 := sd.duplicate(true)
+		_clamp_parts(sd2)
+		out = StageSpec.parse(sd2, "", rep2, depth)
 	return out
+
+## Every number pulled inside its part's bounds before parsing (a Called Shot's bonus can't push a
+## part past the grammar's caps; the parser would reject it).
+static func _clamp_parts(sd: Dictionary) -> void:
+	var dl: Dictionary = sd.get("delivery", {})
+	for k in dl:
+		if typeof(dl[k]) in [TYPE_FLOAT, TYPE_INT]: dl[k] = KinRules.clamp_param("delivery", String(dl["type"]), k, float(dl[k]))
+	for e in sd.get("effects", []):
+		for k in e:
+			if typeof(e[k]) in [TYPE_FLOAT, TYPE_INT]: e[k] = KinRules.clamp_param("effect", String(e["type"]), k, float(e[k]))
+	for md in sd.get("modifiers", []):
+		for k in md:
+			if typeof(md[k]) in [TYPE_FLOAT, TYPE_INT]: md[k] = KinRules.clamp_param("modifier", String(md["type"]), k, float(md[k]))
+	for ev in sd.get("then", {}):
+		for sub in sd["then"][ev]:
+			_clamp_parts(sub)
 
 ## A cast context with this hunter as caster and owner, the kin as the kin.
 func cx(slot: String, ability: String, aim: Vector3, extra := {}) -> Dictionary:

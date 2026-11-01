@@ -541,7 +541,7 @@ func make_hunter(id: String, team: int, cls: String, pname: String, ctrl: String
 		kit = kit.duplicate()
 		# bots get an archetype of their class, and a weapon from its family
 		if ctrl != "local" and String(kit.get("arch", "")) in ["", "?"]:
-			kit["arch"] = Arch.pick(cls, rng)
+			kit["arch"] = Arch.pick_for(cls, "%s|%s" % [id, str(seed_val)])
 		var pool: Array = Data.CLASSES[cls]["weapons"]
 		if Arch.exists(String(kit.get("arch", ""))) and Arch.weight(String(kit["arch"])) == cls:
 			pool = Arch.weapons(String(kit["arch"]))
@@ -3168,6 +3168,8 @@ func _process(delta: float) -> void:
 		steps += 1
 		step(DT)
 	var alpha := acc / DT
+	if opts.has("arch_demo"):
+		ArchDemo.frame(self)       # screenshot tooling: one part of an archetype kit, timed to the shot
 	_update_vision()
 	if world.wall_mat:
 		var fp := player.model.global_position + Vector3(0, 0.8, 0) if player and player.model and not player.out else Vector3(0, -999, 0)

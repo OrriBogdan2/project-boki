@@ -216,7 +216,7 @@ func init_hunter(match_node: Node, id: String, team_id: int, class_id: String, n
 		var wa := Arch.archetypes_of(String(kit.get("weapon", ""))).filter(func(x): return Arch.weight(x) == cls)
 		ka = String(wa[0]) if not wa.is_empty() else Arch.default_for(cls)
 	if ka == "" and control == "bot": ka = "?"
-	if ka == "?": ka = Arch.pick(cls, match_node.rng) if "rng" in match_node else Arch.default_for(cls)
+	if ka == "?": ka = Arch.pick_for(cls, "%s|%s" % [id, str(match_node.get("seed_val"))])
 	arch = "" if ka == "none" else Arch.fix(ka, cls)
 	wid = Arch.weapon_for(arch, cls, String(kit.get("weapon", ""))) if arch != "" else Data.weapon_for(cls, String(kit.get("weapon", "")))
 	wpn = Data.weapon_stats(wid, 0)
@@ -2503,10 +2503,17 @@ func gain_xp(x: float) -> void:
 	while lvl < XP_TO.size() and xp >= float(XP_TO[lvl]):
 		lvl += 1
 		skill_pts += 1
-		if is_local() and m and m.hud:
-			m.hud.toast("Level %d  ·  skill point ready" % lvl, Color("ffd27a"))
-			m.sfx("unlock", null, -6.0)
+		# a gold ring pulse on the hunter that everyone nearby sees
+		if m and m.fx and visible and not unseen:
 			m.fx.ring(pos, 2.0, Color("ffd27a"), 0.4)
+			m.fx.burst(pos + Vector3(0, 1.2, 0), Color("ffd27a"), 12, 2.5, 0.5, -2.0)
+		if is_local() and m and m.hud:
+			m.hud.toast("LEVEL %d  ·  +1 SKILL POINT%s" % [lvl, "  ·  ULTIMATE READY TO UNLOCK" if lvl == int(ULT_AT[0]) else ""], Color("ffd27a"))
+			if m.hud.has_method("level_up"): m.hud.level_up(lvl)
+			# the level-up chime: its own two-note rise (distinct from the unlock click)
+			m.sfx("unlock", null, -5.0, 1.45)
+			m.later(0.09, func(): if is_instance_valid(self): m.sfx("pickup", null, -6.0, 1.7))
+			m.later(0.18, func(): if is_instance_valid(self): m.sfx("bond", null, -10.0, 1.6))
 	if not is_local():
 		_bot_spend()
 
