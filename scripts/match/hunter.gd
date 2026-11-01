@@ -1760,8 +1760,10 @@ func use_heal() -> void:
 		return
 	_ab_feedback("tonic", "cast")
 
-## Repairing armor with a kit: the same kind of short channel as a tonic.
-var armor_kits := 1
+## Repairing armor with a kit (2): the same kind of short channel as a tonic, with the same
+## vulnerability. Every hunter sets out with a small stack (KIT_START).
+const KIT_START := 2
+var armor_kits := KIT_START
 var finish_t := 0.0             # holding interact over a downed enemy (until the stomp commits)
 var stomp: Dictionary = {}      # committed stomp on an enemy wisp: {o, t, hits} (see Life)
 var kit_t := 0.0
@@ -1957,7 +1959,15 @@ func sim(dt: float) -> void:
 		_tick_charge(dt)
 	if inp["reload"]: start_reload()
 	if inp["tonic"]: use_heal()
-	if inp.get("kit", false): use_kit()
+	if inp.get("kit", false):
+		# 2: the anvil. Nothing to repair (or no kit) buzzes, like the heal key
+		if kit_t > 0.0 or drink_t > 0.0:
+			pass
+		elif armor_kits > 0 and armor < max_armor - 0.5 and not downed:
+			use_kit()
+			_ab_feedback("kit", "cast")
+		else:
+			_ab_feedback("kit", "deny")
 	_tick_drink(dt)
 	_tick_kit(dt)
 	_tick_burst(dt)

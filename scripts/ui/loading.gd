@@ -19,7 +19,7 @@ const TIPS := [
 	"Jump at a wall in the air to kick off it. Light hunters get two kicks.",
 	"Crates and barrels break when you shoot or dash through them. Some hide a better weapon.",
 	"Weapons you find out here are stronger than your own, but only for this expedition.",
-	"Health and armor don't come back on their own. 1 heals: a tonic when you're hurt, an armor kit when your health is full. You take more damage while you do either.",
+	"Health and armor don't come back on their own. 1 drinks a tonic, 2 repairs your armor with a kit. You take more damage while you do either.",
 	"Fight alongside your Boki to fill the bond meter, then R calls its bond ultimate.",
 	"E is your Boki's ability, and every Boki has a different one. Q fires the active glove you found out here.",
 	"Your Boki stuns or roots a foe? Shoot it right away for a combo.",

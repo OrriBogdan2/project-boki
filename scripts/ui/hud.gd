@@ -1536,7 +1536,7 @@ func _draw_weapon(sz: Vector2, p: Hunter) -> void:
 	var y := r.position.y - s - 22.0
 	var x := r.end.x - s
 	var k: Kin = p.kin
-	# 1: heal (a tonic for health; an armor kit once health is full)
+	# 1: heal (a tonic for health; an armor kit once health is full), 2: the armor kit (anvil)
 	var hurt := p.hp < p.max_hp - 0.5
 	var heal_ready := (p.tonics > 0 and hurt) or (p.armor_kits > 0 and p.armor < p.max_armor - 0.5)
 	var hr := Rect2(Vector2(x, y), Vector2(s, s))
@@ -1544,7 +1544,7 @@ func _draw_weapon(sz: Vector2, p: Hunter) -> void:
 	_ctext(Vector2(hr.get_center().x, hr.position.y - 5), "%d" % p.tonics, 12, Color(GOOD, 0.95), big)
 	x -= s + gap
 	var kr := Rect2(Vector2(x, y), Vector2(s, s))
-	_ab_slot("kit", kr, "fortify", "", ARMOR_COL, 0.0, 0.0, p.armor_kits > 0 and p.armor < p.max_armor - 0.5 and not hurt)
+	_ab_slot("kit", kr, "anvil", Settings.key_cap("armor_kit"), ARMOR_COL, 0.0, 0.0, p.armor_kits > 0 and p.armor < p.max_armor - 0.5)
 	_ctext(Vector2(kr.get_center().x, kr.position.y - 5), "%d" % p.armor_kits, 12, Color(ARMOR_COL, 0.95), big)
 	x -= s + gap
 	# C: throw / recall your kin
@@ -2600,8 +2600,8 @@ func _tip_lines(id: String, p: Hunter) -> Array:
 			out.append(["%d of %d charges. One comes back every %s." % [int(floor(p.dashes)), int(p.max_dashes()), _secs(p.dash_regen())], MUTED, 13])
 		"kit":
 			out.append(["Armor kit", ARMOR_COL])
-			out.append(["Item  ·  %s (when your health is full)" % Settings.key_cap("tonic"), MUTED, 12])
-			out.append(["Repairs your armor to full. Armor takes 20%% off every hit while it lasts, and doesn't come back on its own. You're carrying %d." % p.armor_kits, INK, 14])
+			out.append(["Item  ·  %s  (or %s when your health is full)" % [Settings.key_cap("armor_kit"), Settings.key_cap("tonic")], MUTED, 12])
+			out.append(["Repairs your armor to full. Armor takes 20%% off every hit while it lasts, and doesn't come back on its own. You're open while you repair, like drinking. You're carrying %d." % p.armor_kits, INK, 14])
 		"base":
 			out.append(["Base to a teammate", Color("8fe3c8")])
 			out.append(["Squads  ·  %s" % Settings.key_cap("base"), MUTED, 12])

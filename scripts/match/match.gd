@@ -3581,13 +3581,13 @@ func _gather_input() -> void:
 			elif not perk_offer.is_empty() and not _perk_keys_down.has(pi):
 				_perk_keys_down[pi] = true
 				choose_perk(pi)
-	# the kit: Q glove, E kin ability, C throw kin, R bond, 1 heal (the second kin ability, kin swap
-	# and the separate armor-kit key are retired)
+	# the kit: Q glove, E kin ability, C throw kin, R bond, 1 heal, 2 armor kit (the second kin
+	# ability and kin swap are retired)
 	if Input.is_action_just_pressed("base") and not paused and duel == null:
 		pending_input["base"] = true
 	var slot_of := {"dash": "dash", "secondary": "sec", "gear1": "gear", "signature": "kin", "ultimate": "ult"}
-	for a in [["dash", "dash"], ["jump", "jump"], ["signature", "sig"], ["reload", "reload"], ["tonic", "tonic"], ["throw", "throw"], ["ultimate", "ult"], ["secondary", "sec"], ["gear1", "gear1"], ["kin_ability", "kin_ab"]]:
-		if a[0] == "tonic" and (not perk_offer.is_empty() or not _perk_keys_down.is_empty()):
+	for a in [["dash", "dash"], ["jump", "jump"], ["signature", "sig"], ["reload", "reload"], ["tonic", "tonic"], ["armor_kit", "kit"], ["throw", "throw"], ["ultimate", "ult"], ["secondary", "sec"], ["gear1", "gear1"], ["kin_ability", "kin_ab"]]:
+		if a[0] in ["tonic", "armor_kit"] and (not perk_offer.is_empty() or not _perk_keys_down.is_empty()):
 			continue       # 1, 2 and 3 pick a perk while a choice is open
 		if (map_up or on_panel) and a[0] in ["secondary", "throw"]:
 			continue       # right click takes your ping down while the map is up (and casts nothing over a window)

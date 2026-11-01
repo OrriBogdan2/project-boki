@@ -255,7 +255,7 @@ func _show_settings() -> void:
 		"Controls":
 			UI.subtitle(v, "Click a key, then press the new one. Esc cancels.")
 			var groups := [["Moving", ["up", "down", "left", "right", "jump", "glide", "dash", "crouch"]],
-				["Fighting", ["fire", "secondary", "gear1", "signature", "throw", "ultimate", "tonic", "base"]],
+				["Fighting", ["fire", "secondary", "gear1", "signature", "throw", "ultimate", "tonic", "armor_kit", "base"]],
 				["Squad and map", ["map", "scores", "emote", "pass_lead", "separate"]],
 				["At home", ["interact", "play", "talk", "details", "inventory"]]]
 			var named := {}
