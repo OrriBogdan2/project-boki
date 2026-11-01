@@ -6,7 +6,7 @@ const CHALLENGES := [
 	["first_out", "First Way Home", "Make it out of an expedition.", "extracts", 1, 40],
 	["mobs25", "Pest Control", "Defeat 25 monsters.", "mobs", 25, 60],
 	["harvest20", "Green Thumb", "Harvest 20 crops.", "harvested", 20, 50],
-	["catch3", "Collector", "Bring 3 wild Boki home.", "caught", 3, 80],
+	["catch3", "New Friends", "Tame 3 wild Boki and bring them home.", "caught", 3, 80],
 	["rings20", "Ring Runner", "Fly through 20 air rings.", "rings", 20, 60],
 	["glide", "Sky Legs", "Spend 3 minutes gliding.", "glide_s", 180, 60],
 	["feather", "Featherweight", "Feather back up from below an island's edge 5 times.", "feathers", 5, 80],

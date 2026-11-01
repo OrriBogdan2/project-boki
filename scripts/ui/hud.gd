@@ -36,6 +36,7 @@ const GOLD := Color("f2c84a")
 func setup(match_node: Match) -> void:
 	m = match_node
 	layer = 5
+	Record.hide_in_cinema(self)      # recording mode with the HUD hidden
 	c = Control.new()
 	c.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	c.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -285,7 +286,7 @@ func _draw_all() -> void:
 		var t: Dictionary = toasts[i]
 		var a := clampf(1.8 - t["t"], 0.0, 1.0)
 		_ctext(Vector2(sz.x * 0.5, sz.y * 0.3 + i * 26 - t["t"] * 10.0), t["text"], 20, Color(t["col"], a), big)
-	if tips.size() > 0:
+	if tips.size() > 0 and not Record.clean():
 		_draw_tip(sz, tips[0])
 	if Input.is_action_pressed("scores"):
 		_draw_scores(sz)
@@ -428,7 +429,7 @@ func _draw_world_labels() -> void:
 		var sp := cam.unproject_position(k.position + Vector3(0, 1.05, 0))
 		if k.is_wild():
 			if k.state == "dazed":
-				_ctext(sp + Vector2(0, -8), "Dazed!  %s to catch" % Settings.key_cap("interact"), 17, GOLD, big)
+				_ctext(sp + Vector2(0, -8), "Dazed!  %s to tame" % Settings.key_cap("interact"), 17, GOLD, big)
 				if k.catch_prog > 0.0:
 					_arc(sp + Vector2(0, 10), 9, k.catch_prog, GOLD, 3.0)
 			else:
@@ -492,7 +493,11 @@ func _draw_top(sz: Vector2) -> void:
 	if m.duel:
 		_draw_duel(sz)
 		return
+	if m.opts.get("arena", false):
+		return        # the Arena draws its own key line and meter (scripts/match/arena.gd)
 	if m.opts.get("training", false):
+		if Record.clean():
+			return      # (recording: no training banner or checklist)
 		var rr := Rect2(Vector2(sz.x * 0.5 - 220, 12), Vector2(440, 54))
 		_panel(rr, Color(0.06, 0.07, 0.1, 0.88), 12)
 		_ctext(Vector2(sz.x * 0.5, 34), "TRAINING AREA", 12, Color("8fe3c8"))
@@ -556,7 +561,7 @@ func _draw_duel(sz: Vector2) -> void:
 	_panel(rr, Color(0.06, 0.07, 0.1, 0.88), 12)
 	_ctext(Vector2(sz.x * 0.5, 32), "DUEL ROOM  ·  ROUND %d" % d.round_n, 12, Color("ff9a8a"))
 	_ctext(Vector2(sz.x * 0.5, 56), "%s bot  ·  %s class  ·  %s  ·  %s  ·  %s" % [d.pick_text("diff"), d.pick_text("cls"), d.pick_text("weapon"), d.pick_text("glove") if d.glove != "" else "no glove", d.pick_text("mode")], 15, INK)
-	if guide_hidden:
+	if guide_hidden or Record.clean():
 		return
 	var st: Dictionary = d.stats
 	var shots := maxi(1, int(st["shots"]))
@@ -878,7 +883,8 @@ func _draw_exit_labels() -> void:
 					_: line = "Sealed  ·  you have a key" if p.rift_keys > 0 else "Sealed  ·  needs a Rift Key"
 			"outpost":
 				match st:
-					"charging": line = "Uplink %d%%%s" % [int(x["prog"] * 100.0), "  ·  contested" if x["contested"] else ""]
+					"charging": line = "Uplink %d%%%s" % [int(x["prog"] * 100.0), "  ·  contested" if x["contested"] else ("  ·  draining %s" % _fmt(m.exits.drain_left(x)) if x.get("draining", false) else "")]
+					"fizzling": line = "Shutting off"
 					"open": line = "LIFT OPEN  %ds" % int(ceil(x["t"]))
 					"spent": line = "Cooling down"
 					_: line = "Start uplink" if m.exits.startable(x) else ("Online in %s" % _fmt(float(x["open_at"]) - m.time))
@@ -984,8 +990,8 @@ func _vitals(sp: Vector2, w: float, h: Hunter, hp_col: Color, trail: float, numb
 	if numbers:
 		_text(Vector2(hr.end.x + 5, sp.y + 9), str(int(ceil(h.hp))), 12, Color(1, 1, 1, 0.9), big)
 
-func _seg_bar(r: Rect2, val: float, maxv: float, trail: float, col: Color, step: float) -> void:
-	_rounded(r.grow(2.0), Color(0.03, 0.03, 0.05, 0.82), 4)
+func _seg_bar(r: Rect2, val: float, maxv: float, trail: float, col: Color, step: float, edge := 2.0) -> void:
+	_rounded(r.grow(edge), Color(0.03, 0.03, 0.05, 0.82), 4)
 	var f := clampf(val / maxf(1.0, maxv), 0.0, 1.0)
 	if trail > f:
 		c.draw_rect(Rect2(r.position, Vector2(r.size.x * trail, r.size.y)), Color(1.0, 0.92, 0.82, 0.85))
@@ -1832,32 +1838,51 @@ func _chip_of(e: Ent, frac: float) -> float:
 	chip[e.nid] = t
 	return t
 
+## Nameplate size and visibility (SUPERVIVE keeps these small: a thin bar, a small badge, the name
+## only for allies or a rival you point at or are close to).
+const NP_W := 54.0              # bar width
+const NP_HP_H := 5.0            # health bar height
+const NP_AR_H := 2.0            # armor strip height
+const NP_BADGE_R := 6.0
+const NP_NAME_FS := 11
+const NP_NAME_NEAR := 9.0       # a rival this close shows their name
+const NP_HOVER_PX := 46.0       # ... or the mouse within this of their plate
+
+## Does this hunter's plate show their name? Allies always; rivals when hovered or close, or down.
+func _np_show_name(sp: Vector2, h: Hunter) -> bool:
+	if m.player == null or h.team == m.player.team or h.downed:
+		return true
+	if m.player.flat_dist(h) < NP_NAME_NEAR:
+		return true
+	return c.get_local_mouse_position().distance_to(sp) < NP_HOVER_PX
+
 func _nameplate(sp: Vector2, h: Hunter) -> void:
 	if not sp.is_finite():
 		return
 	var col := _unit_col(h)
-	var w := 70.0
+	var w := NP_W
 	var x0 := sp.x - w * 0.5
-	# badge + name
+	# badge (+ the name, when it shows)
 	var cc: Color = Data.CLASSES.get(h.cls, {}).get("color", INK)
-	var bc := Vector2(x0 - 10, sp.y - 16)
+	var bc := Vector2(x0 - NP_BADGE_R - 2.0, sp.y + 1.0)
 	var foe: bool = m.player != null and h.team != m.player.team
 	if foe:
 		# an enemy's run level, with a gold rim once their ultimate is open (level 6+)
 		var ult_open := h.lvl >= int(Hunter.ULT_AT[0])
-		c.draw_circle(bc, 9.0, Color(0.03, 0.03, 0.05, 0.92))
-		c.draw_arc(bc, 9.0, 0, TAU, 20, Color("ffd27a") if ult_open else col, 2.4 if ult_open else 1.6, true)
-		_ctext(bc + Vector2(0, 4.5), str(h.lvl), 12, Color("ffd27a") if ult_open else INK, big)
+		c.draw_circle(bc, NP_BADGE_R + 1.0, Color(0.03, 0.03, 0.05, 0.88))
+		c.draw_arc(bc, NP_BADGE_R + 1.0, 0, TAU, 18, Color("ffd27a") if ult_open else Color(col, 0.9), 1.8 if ult_open else 1.2, true)
+		_ctext(bc + Vector2(0, 3.5), str(h.lvl), 10, Color("ffd27a") if ult_open else INK, big)
 	else:
-		c.draw_circle(bc, 7.5, Color(0.03, 0.03, 0.05, 0.9))
-		c.draw_arc(bc, 7.5, 0, TAU, 18, col, 1.6, true)
-		_ctext(bc + Vector2(0, 4), String(h.cls).substr(0, 1).to_upper(), 10, cc, big)
-	_text(Vector2(x0 + 2, sp.y - 11), h.pname.substr(0, 14), 13, col.lerp(Color.WHITE, 0.25), big)
+		c.draw_circle(bc, NP_BADGE_R, Color(0.03, 0.03, 0.05, 0.85))
+		c.draw_arc(bc, NP_BADGE_R, 0, TAU, 16, Color(col, 0.9), 1.2, true)
+		_ctext(bc + Vector2(0, 3.5), String(h.cls).substr(0, 1).to_upper(), 9, cc, big)
+	if _np_show_name(sp, h):
+		_ctext(Vector2(sp.x, sp.y - 6), h.pname.substr(0, 14), NP_NAME_FS, Color(col.lerp(Color.WHITE, 0.3), 0.9), big)
 	if h.downed:
 		var stomped: bool = h.get_meta("stomped", false)
 		var pulse := 0.5 + 0.5 * sin(m.time * 14.0)
 		var bcol := Color("ff3a2a").lerp(Color.WHITE, 0.3 * pulse) if stomped else Color("ffb36a")
-		_seg_bar(Rect2(Vector2(x0, sp.y - 2), Vector2(w, 6)), h.down_hp, Data.MATCH["down_hp"], 0.0, bcol, 25.0)
+		_seg_bar(Rect2(Vector2(x0, sp.y - 1), Vector2(w, NP_HP_H)), h.down_hp, Data.MATCH["down_hp"], 0.0, bcol, 25.0)
 		var revs: Array = h.get_meta("revivers", [])
 		if stomped:
 			var sts: Array = h.get_meta("stompers", [])
@@ -1868,24 +1893,24 @@ func _nameplate(sp: Vector2, h: Hunter) -> void:
 			_ctext(sp + Vector2(0, 16), "DOWN", 11, Color("ffb36a"), big)
 		return
 	if h.max_armor > 0.5:
-		_seg_bar(Rect2(Vector2(x0, sp.y - 4), Vector2(w, 3)), h.armor, h.max_armor, 0.0, h.armor_col(), 25.0)
+		_seg_bar(Rect2(Vector2(x0, sp.y - 2), Vector2(w, NP_AR_H)), h.armor, h.max_armor, 0.0, h.armor_col(), 25.0, 1.5)
 	var frac := clampf(h.hp / h.max_hp, 0.0, 1.0)
-	_seg_bar(Rect2(Vector2(x0, sp.y + 2), Vector2(w, 7)), h.hp, h.max_hp, _chip_of(h, frac), col if frac > 0.35 else col.lerp(Color.WHITE, 0.2 + 0.2 * sin(m.time * 9.0)), 25.0)
+	_seg_bar(Rect2(Vector2(x0, sp.y + 2), Vector2(w, NP_HP_H)), h.hp, h.max_hp, _chip_of(h, frac), col if frac > 0.35 else col.lerp(Color.WHITE, 0.2 + 0.2 * sin(m.time * 9.0)), 25.0, 1.5)
 	if h.shield > 0.0:
-		c.draw_rect(Rect2(Vector2(x0, sp.y + 2), Vector2(w * clampf(h.shield / 120.0, 0.0, 1.0), 7)), Color(0.85, 0.93, 1.0, 0.5))
+		c.draw_rect(Rect2(Vector2(x0, sp.y + 2), Vector2(w * clampf(h.shield / 120.0, 0.0, 1.0), NP_HP_H)), Color(0.85, 0.93, 1.0, 0.5))
 	# dash pips under the bar within 14m: "they used it, now go" (DASHES §3.3)
 	if m.player and h != m.player and h.flat_dist(m.player) < 14.0:
 		var dm := int(h.max_dashes())
 		for i in dm:
-			var pc := Vector2(x0 + 4.0 + i * 9.0, sp.y + 13)
-			c.draw_rect(Rect2(pc, Vector2(7, 2.5)), STAMINA_COL if float(i) < floor(h.dashes) else Color(1, 1, 1, 0.18))
+			var pc := Vector2(x0 + 2.0 + i * 7.0, sp.y + 2.0 + NP_HP_H + 2.0)
+			c.draw_rect(Rect2(pc, Vector2(5, 2)), STAMINA_COL if float(i) < floor(h.dashes) else Color(1, 1, 1, 0.18))
 	# an archetype's resource tell, readable from the other side (glow at half, bright at full)
 	if h.ak and h.ak.tell != "" and h != m.player:
 		var rc: Color = h.ak.res_col()
 		var tk := 0.5 + 0.5 * sin(m.time * (8.0 if h.ak.tell == "full" else 3.0))
-		c.draw_circle(Vector2(x0 + w + 9.0, sp.y + 5), 4.0 + (2.0 * tk if h.ak.tell == "full" else 0.0), Color(rc, 0.5 + 0.4 * tk if h.ak.tell == "full" else 0.45))
-	_draw_marks(Vector2(sp.x, sp.y - 30), h)
-	_status_row(Vector2(sp.x, sp.y + 19), h)
+		c.draw_circle(Vector2(x0 + w + 6.0, sp.y + 3), 3.0 + (1.5 * tk if h.ak.tell == "full" else 0.0), Color(rc, 0.5 + 0.4 * tk if h.ak.tell == "full" else 0.45))
+	_draw_marks(Vector2(sp.x, sp.y - 24), h)
+	_status_row(Vector2(sp.x, sp.y + 15), h)
 
 ## A Thief's Marks over their target's head: pips, and a pulsing purse at 3 (both sides see them).
 func _draw_marks(at: Vector2, e: Ent) -> void:
@@ -2072,7 +2097,7 @@ func _draw_squad_pings(p: Hunter) -> void:
 
 ## For the first seconds of every match: what each of your buttons does.
 func _draw_kit(sz: Vector2, p: Hunter) -> void:
-	if not Settings.get_v("tips") or m.opts.get("tutorial", false) or p.out or guide_hidden or not m.perk_offer.is_empty():
+	if not Settings.get_v("tips") or Record.clean() or m.opts.get("tutorial", false) or p.out or guide_hidden or not m.perk_offer.is_empty():
 		return
 	var show_t := 14.0 if not m.opts.get("training", false) else 1e9
 	var t := m.time - kit_t0
@@ -2257,9 +2282,14 @@ func _draw_crosshair(p: Hunter) -> void:
 	if hit_t > 0.0:
 		var hc := Color("ffd23f") if hit_crit else Color.WHITE
 		if hit_armor: hc = ARMOR_COL if not hit_crit else Color("cfefff")
-		var s := 10.0 + (1.0 - hit_t / 0.14) * 4.0
+		# a sharp X that snaps out and settles: bigger and bolder on crits, dark-edged so it reads
+		# over bright effects
+		var k := hit_t / 0.14
+		var s := (11.0 if not hit_crit else 15.0) + (1.0 - k) * 3.0 + k * k * 4.0
+		var w := 3.0 if not hit_crit else 4.0
 		for d in [Vector2(1, 1), Vector2(-1, 1), Vector2(1, -1), Vector2(-1, -1)]:
-			c.draw_line(mp + d * 5.0, mp + d * s, hc, 2.5)
+			c.draw_line(mp + d * 5.0, mp + d * s, Color(0.05, 0.03, 0.08, 0.65 * minf(1.0, k * 2.0)), w + 2.0)
+			c.draw_line(mp + d * 5.0, mp + d * s, Color(hc, minf(1.0, k * 2.5)), w)
 
 func _draw_downed(sz: Vector2, p: Hunter) -> void:
 	c.draw_rect(Rect2(Vector2.ZERO, sz), Color(0.3, 0.02, 0.02, 0.18))
@@ -2340,7 +2370,7 @@ func _draw_overhead(p: Hunter) -> void:
 	var vr: Rect2 = cam.get_viewport().get_visible_rect().grow(200.0)
 	if not sp.is_finite() or not vr.has_point(sp):
 		return      # off screen, or a degenerate camera (headless, mid-teleport): huge/NaN coords can't triangulate
-	var w := 84.0
+	var w := 66.0
 	var frac := clampf(p.hp / p.max_hp, 0.0, 1.0)
 	head_hp = maxf(frac, lerpf(head_hp, frac, 0.06))
 	_vitals(sp, w, p, p_team_col().lerp(Color.WHITE, 0.15) if frac > 0.35 else BAD, head_hp, true)
@@ -2667,7 +2697,7 @@ func _draw_world_hover(sz: Vector2, p: Hunter) -> void:
 		lines.append([String(md["name"]), Color(md["color"]).lightened(0.35)])
 		lines.append(["Monster  ·  %d / %d health" % [int(ceil(mb.hp)), int(mb.max_hp)], MUTED])
 		var how := {"lunge": "Lunges at whoever is closest.", "spit": "Spits from range: keep moving.", "slam": "Winds up a ground slam: step out of the circle.",
-			"fuse": "Rolls in and blows up. Shoot it before it reaches you.", "volley": "Fires a spread of bolts down a line.", "none": "Runs from you. Catch it before it escapes."}
+			"fuse": "Rolls in and blows up. Shoot it before it reaches you.", "volley": "Fires a spread of bolts down a line.", "none": "Runs from you. Tame it before it escapes."}
 		lines.append([String(how.get(String(md["attack"]), "Dangerous up close.")), INK])
 		if md.get("stag", false):
 			lines.append(["Staggerable: hit it with an ability while the purple ring shows.", Color(0.85, 0.6, 1.0)])
@@ -2680,15 +2710,15 @@ func _draw_world_hover(sz: Vector2, p: Hunter) -> void:
 		lines.append(["%s type  ·  level %d  ·  %d / %d health" % [String(sp["type"]).capitalize(), int(k.rec.get("level", 1)), int(ceil(k.hp)), int(k.max_hp)], MUTED])
 		if k.is_wild():
 			if k.state == "dazed":
-				lines.append(["Dazed. Hold %s next to it to catch it." % Settings.key_cap("interact"), GOLD])
+				lines.append(["Dazed. Hold %s next to it to win it over." % Settings.key_cap("interact"), GOLD])
 			else:
-				lines.append(["Knock its health down to daze it, then hold %s to catch it." % Settings.key_cap("interact"), INK])
+				lines.append(["Knock its health down to daze it, then hold %s to tame it." % Settings.key_cap("interact"), INK])
 			if k.rec.get("shimmer", false):
-				lines.append(["A shimmering one. Rare.", Color("ffd6ff")])
+				lines.append(["A shimmering one. Rare.", INK])
 			for mid in Mutations.of(k.rec):
-				lines.append(["%s: %s (%s)" % [Mutations.name_of(mid), String(Mutations.info(mid).get("desc", "")), Mutations.perk_text(mid)], Mutations.col_of(mid)])
+				lines.append(["%s: %s (%s)" % [Mutations.name_of(mid), String(Mutations.info(mid).get("desc", "")), Mutations.perk_text(mid)], INK])
 			if k.lost_from != "":
-				lines.append(["Left behind by %s. Whoever collects it keeps it." % ("you" if k.lost_from == "you" else k.lost_from), GOLD if k.lost_from == "you" else MUTED])
+				lines.append(["Left behind by %s. Whoever takes it home keeps it." % ("you" if k.lost_from == "you" else k.lost_from), GOLD if k.lost_from == "you" else MUTED])
 		elif k.owner_h == p:
 			var a1: AbilitySpec = k.runner.def_of("k1")
 			lines.append(["Yours. %s throws it, %s uses %s." % [Settings.key_cap("throw"), Settings.key_cap("signature"), a1.display_name if a1 else "its ability"], INK])

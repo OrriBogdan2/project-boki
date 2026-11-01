@@ -66,6 +66,37 @@ static func environment(p: Dictionary) -> Environment:
 	if "--noadj" in OS.get_cmdline_user_args(): e.adjustment_enabled = false
 	return e
 
+## Home's grade: warm and soft. A little more bloom so lamps and sunlit edges glow, a light honey
+## haze for depth, gentle contrast, colour kept rich (the opposite of the expedition's look).
+static func cozy(e: Environment) -> void:
+	e.glow_intensity = 0.7 if full_renderer() else 0.6
+	e.glow_bloom = 0.12
+	e.glow_hdr_threshold = 0.85
+	e.adjustment_contrast = 1.02
+	e.fog_light_color = Color("c8a890")
+	e.fog_density = 0.0022
+	e.fog_sun_scatter = 0.35
+	if full_renderer():
+		e.adjustment_color_correction = _warm_curve()
+
+static var _warm_tex: GradientTexture1D
+## The desktop tone curve (see _tone_curve) with a warm lift: reds a touch up in the mids and
+## highlights, blues a touch down, so whites read as sunlight rather than paper.
+static func _warm_curve() -> GradientTexture1D:
+	if _warm_tex == null:
+		var g := Gradient.new()
+		var offs := PackedFloat32Array(); var cols := PackedColorArray()
+		for i in 33:
+			var x := float(i) / 32.0
+			var y := pow(x, 1.45)
+			var warm := sin(PI * minf(1.0, x * 1.2)) * 0.035
+			offs.append(x); cols.append(Color(clampf(y + warm, 0, 1), y + warm * 0.25, clampf(y - warm * 0.8, 0, 1)))
+		g.offsets = offs; g.colors = cols
+		_warm_tex = GradientTexture1D.new()
+		_warm_tex.gradient = g
+		_warm_tex.width = 256
+	return _warm_tex
+
 static var _curve_tex: GradientTexture1D
 static func _tone_curve() -> GradientTexture1D:
 	if _curve_tex == null:

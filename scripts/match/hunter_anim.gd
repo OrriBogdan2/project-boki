@@ -54,15 +54,17 @@ const STANCE := {
 	"heavy": {"knee": 0.24, "width": 0.17, "lean": 0.03, "bounce": 0.0, "breath": 1.7, "arm": 0.8, "elbow": 1.0},
 }
 ## Each archetype's own stance on top of its class (Models.hunter's "arch" meta): the thief hunched
-## low and forward, the archer tall and upright, the juggernaut leaning in over planted feet, the
-## bulwark wide and square.
+## low and forward, springing on the balls of its feet, the archer tall and upright, the mage chest
+## up with a slow breath (its robe and orb do the moving), the gunslinger loose with a cocked hip,
+## the juggernaut low and wide over planted feet with a slow heavy breath, the bulwark wide and
+## square like a wall.
 const ARCH_STANCE := {
-	"thief": {"knee": 0.36, "lean": 0.2, "width": 0.08},
-	"archer": {"knee": 0.2, "lean": 0.01},
-	"mage": {"lean": 0.03},
-	"gunslinger": {"lean": 0.06, "width": 0.11},
-	"juggernaut": {"lean": 0.14, "width": 0.19, "knee": 0.28},
-	"bulwark": {"lean": 0.02, "width": 0.21, "knee": 0.26},
+	"thief": {"knee": 0.38, "lean": 0.22, "width": 0.085, "bounce": 1.7, "breath": 3.1, "arm": 1.35},
+	"archer": {"knee": 0.16, "lean": 0.0, "width": 0.1, "breath": 2.3},
+	"mage": {"lean": -0.03, "knee": 0.12, "width": 0.07, "breath": 1.8, "arm": 0.8},
+	"gunslinger": {"lean": 0.03, "width": 0.13, "knee": 0.2, "breath": 2.0},
+	"juggernaut": {"lean": 0.1, "width": 0.25, "knee": 0.34, "breath": 1.35, "arm": 0.7},
+	"bulwark": {"lean": 0.0, "width": 0.24, "knee": 0.3, "breath": 1.5, "arm": 0.7},
 }
 ## How far the shoulder pieces turn with the arm (the rest is left behind, so a raised arm slides
 ## under the plate instead of through it).
@@ -172,6 +174,9 @@ var down_k := 0.0
 var ledge_k := 0.0
 var stomp_k := 0.0
 var revive_k := 0.0
+var act_k := 0.0            # holding interact: the pose for what's being worked (see _act_legs)
+var act_kind := ""
+var act_t := 0.0
 var base_k := 0.0
 var stun_k := 0.0
 var aim_k := 0.0               # 1 aiming (just fired), 0 relaxed carry
@@ -246,6 +251,7 @@ var flinch := Vector2.ZERO
 var flinch_v := Vector2.ZERO
 var cast_prev := 99.0
 var cast_slot := ""
+var cast_now := 99.0           # seconds since the last cast (for the arms)
 var emote_id := ""
 var emote_prev := 99.0
 var down_t := 0.0
@@ -521,6 +527,7 @@ func update(dt: float, s: Dictionary) -> void:
 	var st_ph := float(s.get("stomp", -1.0))
 	stomp_k = _ease(stomp_k, 1.0 if st_ph >= 0.0 else 0.0, 16.0, dt)
 	revive_k = _ease(revive_k, 1.0 if s.get("reviving", false) and grounded and spd < 1.5 else 0.0, 8.0, dt)
+	_act_tick(dt, s, grounded, spd)
 	var base_p := float(s.get("base", -1.0))
 	base_k = _ease(base_k, 1.0 if base_p >= 0.0 else 0.0, 6.0, dt)
 	stun_k = _ease(stun_k, 1.0 if stun and not downed else 0.0, 8.0, dt)
@@ -770,6 +777,11 @@ func update(dt: float, s: Dictionary) -> void:
 	if revive_k > 0.01:
 		hl = lerpf(hl, 1.35, revive_k); kl = lerpf(kl, -1.45, revive_k)
 		hr = lerpf(hr, -0.15, revive_k); kr = lerpf(kr, -1.9, revive_k)
+	# holding interact: kneel, squat, brace or stand to it (see _act_legs)
+	if act_k > 0.01:
+		var al := _act_legs()
+		hl = lerpf(hl, al.x, act_k); kl = lerpf(kl, al.y, act_k)
+		hr = lerpf(hr, al.z, act_k); kr = lerpf(kr, al.w, act_k)
 	# downed: lying face down; crawling kicks the legs, otherwise they lie limp
 	if down_k > 0.01:
 		var crawl := clampf(spd / 2.0, 0.0, 1.0)
@@ -792,9 +804,22 @@ func update(dt: float, s: Dictionary) -> void:
 	var pitch := -float(st["lean"]) * (1.0 - down_k) - lean_f - r1 * 0.06 - crouch_k * 0.3 - land_k * 0.32 - slam_k * 0.35
 	pitch += rising * 0.1 * ak - glide_k * 0.18 - ledge_k * lerpf(0.4, 0.15, ledge_up) - stomp_k * 0.12 - revive_k * 0.35
 	pitch -= tuck * (0.7 if trick != "spin" else 0.3) + roll_k * 0.6
+	pitch -= act_k * _act_pitch()
 	var yaw := -sin(ph) * 0.16 * r1 * back          # the shoulders swing against the hips
 	var roll := -lean_s * (1.0 + glide_k * 0.6) - bank * 0.8 + wk * 0.05
 	var dz := 0.0
+	if arch == "thief":
+		pitch -= r1 * 0.12           # runs low, chest over the lead foot
+	elif arch == "juggernaut":
+		roll += sin(ph) * 0.06 * r1  # the shoulders roll over each heavy step
+	elif arch == "archer":
+		pitch += r1 * 0.04           # runs tall, eyes up
+	elif arch == "mage":
+		pitch += r1 * 0.05 + still * sin(t * 0.9 + seed_ph) * 0.02    # glides upright; a slow sway standing
+	elif arch == "gunslinger":
+		roll += still * 0.05         # a cocked hip at rest
+	elif arch == "bulwark":
+		yaw *= 0.5                   # the shoulders stay square, a moving wall
 	# dodge poses
 	if dash_k > 0.01:
 		match dash_kind:
@@ -819,13 +844,13 @@ func update(dt: float, s: Dictionary) -> void:
 		if hd2.length() < 0.01: hd2 = -fwd
 		hd2 = hd2.normalized()
 		var lx := hd2.dot(right); var lz := -hd2.dot(fwd)
-		flinch_v += Vector2(lz, -lx) * 9.0       # pitched back when hit from the front, tipped sideways from the side
+		flinch_v += Vector2(lz, -lx) * 9.0 * float(s.get("hit_k", 1.0))       # pitched back when hit from the front, tipped sideways from the side (harder hits, bigger jerk: Oomph)
 	hit_prev = hit_t
 	var fx := _spring(flinch.x, flinch_v.x, 0.0, 260.0, 16.0, dt)
 	var fy := _spring(flinch.y, flinch_v.y, 0.0, 260.0, 16.0, dt)
 	flinch = Vector2(fx.x, fy.x); flinch_v = Vector2(fx.y, fy.y)
-	pitch += flinch.x * 0.12
-	roll += flinch.y * 0.12
+	pitch += flinch.x * 0.16
+	roll += flinch.y * 0.16
 	# melee: the body turns through the swing
 	_swing_pose()
 	yaw += sw_tw
@@ -834,12 +859,49 @@ func update(dt: float, s: Dictionary) -> void:
 	var cast_t := float(s.get("cast", 99.0))
 	if cast_t < cast_prev - 0.02 or (cast_t < 0.05 and cast_prev > 0.3):
 		cast_slot = String(s.get("cast_slot", ""))
+		# some casts are swings of the weapon: the juggernaut's Earthshatter is the overhead slam, the
+		# thief's mark-out a spin with both blades out
+		if (arch == "juggernaut" and cast_slot == "utility" and hold == "great") or (arch == "thief" and cast_slot == "ult" and hold == "twin"):
+			swing_t = 0.0; swing_step = -1; swing_dur = 0.55
 	cast_prev = cast_t
 	var cast_k := 0.0
+	cast_now = cast_t
 	if cast_t < 0.6:
 		cast_k = smoothstep(0.0, 0.07, cast_t) * (1.0 - smoothstep(0.32, 0.6, cast_t))
 		pitch -= cast_k * 0.18
 		yaw += cast_k * 0.25
+		# the archetypes' signature casts
+		match arch:
+			"thief":
+				if cast_slot == "utility":
+					# the knife throw: wind up turned away, then whip round into the throw
+					yaw += cast_k * lerpf(0.6, -0.35, smoothstep(0.06, 0.18, cast_t))
+					pitch -= cast_k * 0.15
+				elif cast_slot == "ult":
+					# the mark-out: drop low, arms spread with both blades out
+					pitch -= cast_k * 0.35
+			"archer":
+				if cast_slot == "utility" or cast_slot == "ult":
+					# side-on to the shot, drawing: the shoulders open, the chest up
+					yaw += cast_k * 0.55
+					pitch += cast_k * (0.25 if cast_slot == "ult" else 0.05)
+			"mage":
+				# the cast leans back as the power goes out; the ultimate lifts the whole body
+				pitch += cast_k * (0.3 if cast_slot == "ult" else 0.12)
+			"gunslinger":
+				if cast_slot == "ult":
+					yaw -= cast_k * 0.3         # squared up for the deadeye
+				else:
+					yaw += cast_k * 0.35; pitch -= cast_k * 0.1
+			"bulwark":
+				# braced behind it: low, chest forward, the weight on the front foot
+				pitch -= cast_k * 0.22
+			"juggernaut":
+				if cast_slot == "ult":
+					# the roar: chest up and back, the shoulders thrown wide
+					pitch += cast_k * 0.55
+				elif cast_slot == "utility":
+					pitch -= cast_k * 0.2
 	# emotes
 	var em := String(s.get("emote", ""))
 	var em_t := float(s.get("emote_t", 99.0))
@@ -888,6 +950,14 @@ func update(dt: float, s: Dictionary) -> void:
 	var dr2 := (THIGH * cos(hr) + SHIN * cos(hr + kr)) * cos(wr)
 	var drop := (LEG - maxf(dl2, dr2)) * (1.0 - air_k) * (1.0 - glide_k) * (1.0 - down_k) * (1.0 - dive_k) * (1.0 if roll_t < 0.0 else 0.0)
 	var off := Vector3(wk * 0.028 * still, -drop + bounce * 0.008, 0.0)
+	if arch == "juggernaut":
+		off.y -= absf(cos(ph)) * 0.035 * r1        # each footfall lands with weight
+	elif arch == "thief":
+		off.y += absf(sin(ph)) * 0.025 * r1 + maxf(0.0, bounce) * 0.006   # springy, up on the toes
+	elif arch == "bulwark":
+		off.y -= absf(cos(ph)) * 0.025 * r1        # heavy, even steps
+	elif arch == "mage":
+		off.y += still * (0.012 + sin(t * 1.4 + seed_ph) * 0.008)       # light on its feet, half floating
 	off.y += down_k * 0.15 + base_k * (0.04 + sin(t * 2.0) * 0.015) * smoothstep(0.0, 0.3, base_p)
 	off.y -= revive_k * 0.02
 	if roll_t >= 0.0:
@@ -1125,7 +1195,13 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 			if rest > 0.0:
 				var rb2 := Basis.from_euler(Vector3(2.35, -0.25, 0.0)) * Basis(Vector3.BACK, 0.3)
 				gbas = gbas.slerp(rb2, rest)
-				gpos = gpos.lerp(Vector3(0.1, -0.14, -0.24), rest)
+				if arch == "juggernaut":
+					# the juggernaut carries it in one fist, propped on the shoulder, the other gauntlet
+					# hanging free: the shape of a brute, not a fencer
+					gpos = gpos.lerp(Vector3(0.2, 0.02, -0.12), rest)
+					free_l = maxf(free_l, rest)
+				else:
+					gpos = gpos.lerp(Vector3(0.1, -0.14, -0.24), rest)
 		if hold == "twin":
 			var oc := Vector3(-0.17, -0.06, 0.0)
 			var orot := Basis.from_euler(Vector3(oa.y, oa.x, 0.0))
@@ -1251,6 +1327,14 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 	if revive_k > 0.01:
 		fl = fl.lerp(sh_l + Vector3(0.05, -0.32, -0.3), revive_k)
 		free_l = maxf(free_l, revive_k)
+	# holding interact: the hands on what's being worked (see _act_hands)
+	if act_k > 0.01:
+		var ah := _act_hands(sh_l, sh_r)
+		fl = fl.lerp(ah[0], act_k)
+		free_l = maxf(free_l, act_k)
+		if float(ah[2]) > 0.0:
+			fr = fr.lerp(ah[1], act_k)
+			free_r = maxf(free_r, act_k * float(ah[2]))
 	# base: a hand at the ear, calling it in
 	if base_k > 0.01:
 		fl = fl.lerp(sh_l + Vector3(0.08, 0.3, -0.08), base_k)
@@ -1267,6 +1351,22 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 	if cast_k > 0.0:
 		var ct := sh_l + Vector3(0.06, 0.02, -0.4)
 		if cast_slot == "ult": ct = sh_l + Vector3(0.0, 0.42, -0.12)
+		if arch == "thief" and cast_slot == "utility":
+			# the knife leaves the off hand: cocked back by the ear, flung out ahead
+			ct = sh_l + Vector3(-0.08, 0.26, 0.14).lerp(Vector3(0.1, 0.1, -0.5), smoothstep(0.06, 0.18, cast_now))
+		elif arch == "juggernaut" and cast_slot == "ult":
+			ct = sh_l + Vector3(-0.32, 0.3, -0.12)          # the free fist thrown out wide and up
+		elif arch == "archer":
+			# the bow hand straight out ahead; for the volley, high to the sky
+			ct = sh_l + (Vector3(0.0, 0.5, -0.2) if cast_slot == "ult" else Vector3(0.05, 0.08, -0.45))
+		elif arch == "mage":
+			# both palms out (the orb swings ahead with the left), or raised high for the ultimate
+			ct = sh_l + (Vector3(0.05, 0.45, -0.18) if cast_slot == "ult" else Vector3(0.1, 0.12, -0.42))
+		elif arch == "gunslinger" and cast_slot != "ult":
+			# fanning the hammer: the left palm sweeps back over the gun
+			ct = sh_l + Vector3(0.22, 0.0, -0.22).lerp(Vector3(0.3, -0.02, -0.08), smoothstep(0.05, 0.3, cast_now))
+		elif arch == "bulwark":
+			ct = sh_l + Vector3(0.12, 0.05, -0.4)           # a braced forearm, out in front
 		fl = fl.lerp(ct, cast_k)
 	# drink: flask to the mouth
 	if drink_k > 0.0:
@@ -1319,6 +1419,108 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 	if flask:
 		flask.visible = drink_k > 0.05
 		flask.rotation.x = -drink_k * 2.0
+
+# ---------------------------------------------------------------- interact holds
+## Holding interact (Hunter.holding(), synced in the snapshot flags): a pose for each thing, looping
+## for the whole hold, and easing off cleanly when the hold stops or is interrupted.
+##   tame     down on one knee, a calming hand out low, slowly patting the air
+##   revive   on one knee, both hands on them, pressing
+##   chest    squatting, both hands under the lid, heaving it up
+##   dial     standing at the lectern, both hands on the dial, turning it
+##   console  working the console's levers, one hand then the other
+##   lever    a two-handed pull, leaning back into it
+##   windup   the stomp's wind-up: weight back, the foot coming up, arms out
+##   shrine   head bowed, hands together
+##   beacon   a hand raised to the light
+##   key      crouched at the hatch, turning a key
+##   loot     crouched over a deathbox, rummaging
+##   rune     both palms on the stone
+const ACT_KNEEL := ["tame", "revive", "key", "loot"]
+func _act_tick(dt: float, s: Dictionary, grounded: bool, spd: float) -> void:
+	var want := String(s.get("act", ""))
+	if not grounded or spd > 2.2 or s.get("downed", false) or float(s.get("stomp", -1.0)) >= 0.0:
+		want = ""
+	if want != "" and want != act_kind:
+		act_kind = want
+		act_t = 0.0
+	act_t += dt
+	act_k = _ease(act_k, 1.0 if want != "" else 0.0, 9.0 if want != "" else 12.0, dt)
+	if act_k < 0.01 and want == "":
+		act_kind = ""
+
+## Leg angles for the hold: Vector4(hip_l, knee_l, hip_r, knee_r).
+func _act_legs() -> Vector4:
+	var w := sin(act_t * 3.0)
+	match act_kind:
+		"tame", "revive", "key", "loot":
+			return Vector4(1.35, -1.45, -0.15, -1.9)
+		"chest":
+			var heave := 0.5 + 0.5 * sin(act_t * 3.4)
+			return Vector4(1.0 - heave * 0.35, -1.4 + heave * 0.5, 0.95 - heave * 0.35, -1.35 + heave * 0.5)
+		"lever":
+			var p := 0.5 - 0.5 * cos(act_t * 2.6)
+			return Vector4(0.5 + p * 0.2, -0.45 - p * 0.2, -0.25 - p * 0.15, -0.2)
+		"windup":
+			var up := smoothstep(0.0, 0.6, act_t)
+			return Vector4(0.15, -0.35, 1.25 * up, -1.5 * up - 0.1)
+		"shrine":
+			return Vector4(0.25, -0.35, 0.25, -0.35)
+	return Vector4(0.12 + w * 0.02, -0.22, 0.12 - w * 0.02, -0.22)
+
+## How far forward the body leans into the hold (negative leans back).
+func _act_pitch() -> float:
+	match act_kind:
+		"tame": return 0.25 + 0.04 * sin(act_t * 1.6)
+		"revive": return 0.4 + 0.06 * maxf(0.0, sin(act_t * 6.0))
+		"key", "loot": return 0.35
+		"chest": return 0.5 - 0.25 * (0.5 + 0.5 * sin(act_t * 3.4))
+		"dial": return 0.18
+		"console": return 0.22
+		"rune": return 0.15
+		"shrine": return 0.4
+		"lever": return -0.15 - 0.15 * (0.5 - 0.5 * cos(act_t * 2.6))
+		"windup": return -0.15 * smoothstep(0.0, 0.6, act_t)
+		"beacon": return -0.12
+	return 0.0
+
+## Where the hands go: [left hand, right hand, how much the right hand lets go of the weapon].
+func _act_hands(sh_l: Vector3, sh_r: Vector3) -> Array:
+	var t := act_t
+	match act_kind:
+		"tame":
+			var pat := sin(t * 1.8) * 0.05
+			return [sh_l + Vector3(0.1, -0.22 + pat, -0.44), sh_r, 0.0]
+		"revive":
+			var press := maxf(0.0, sin(t * 6.0)) * 0.05
+			return [sh_l + Vector3(0.1, -0.42 - press, -0.32), sh_r + Vector3(-0.1, -0.42 - press, -0.32), 1.0]
+		"chest":
+			var heave := 0.5 + 0.5 * sin(t * 3.4)
+			return [sh_l + Vector3(0.05, -0.45 + heave * 0.22, -0.34), sh_r + Vector3(-0.05, -0.45 + heave * 0.22, -0.34), 1.0]
+		"dial":
+			var a := t * 2.6
+			return [sh_l + Vector3(0.12 + cos(a) * 0.05, -0.12 + sin(a) * 0.05, -0.4), sh_r + Vector3(-0.12 + cos(a + PI) * 0.05, -0.12 + sin(a + PI) * 0.05, -0.4), 1.0]
+		"console":
+			var c1 := maxf(0.0, sin(t * 4.5)) * 0.07
+			var c2 := maxf(0.0, -sin(t * 4.5)) * 0.07
+			return [sh_l + Vector3(0.06, -0.2 - c1, -0.38), sh_r + Vector3(-0.06, -0.2 - c2, -0.38), 1.0]
+		"lever":
+			var p := 0.5 - 0.5 * cos(t * 2.6)
+			return [sh_l + Vector3(0.14, 0.05 - p * 0.28, -0.45 + p * 0.22), sh_r + Vector3(-0.14, 0.05 - p * 0.28, -0.45 + p * 0.22), 1.0]
+		"windup":
+			return [sh_l + Vector3(-0.32, -0.12, -0.05), sh_r + Vector3(0.3, -0.1, -0.05), 0.6]
+		"shrine":
+			return [sh_l + Vector3(0.13, -0.16, -0.24), sh_r + Vector3(-0.13, -0.16, -0.24), 1.0]
+		"beacon":
+			return [sh_l + Vector3(0.05, 0.42 + sin(t * 2.0) * 0.03, -0.14), sh_r, 0.0]
+		"key":
+			var tw := sin(t * 5.0) * 0.04
+			return [sh_l + Vector3(0.04, -0.4, -0.18), sh_r + Vector3(-0.04 + tw, -0.36, -0.36), 1.0]
+		"loot":
+			var r1 := sin(t * 4.0) * 0.08
+			return [sh_l + Vector3(0.08, -0.46 + maxf(0.0, r1), -0.34), sh_r + Vector3(-0.08, -0.46 + maxf(0.0, -r1), -0.34), 1.0]
+		"rune":
+			return [sh_l + Vector3(0.12, -0.06, -0.42), sh_r + Vector3(-0.12, -0.06, -0.42), 1.0]
+	return [sh_l, sh_r, 0.0]
 
 ## A support hand that can't reach its grip slides back along the weapon toward the trigger hand.
 static func _reachable(sh: Vector3, want: Vector3, back_to: Vector3, reach: float) -> Vector3:

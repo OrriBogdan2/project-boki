@@ -6,6 +6,7 @@ static var TOON: Shader = preload("res://shaders/toon.gdshader")
 static var OUTLINE: Shader = preload("res://shaders/outline.gdshader")
 static var RING: Shader = preload("res://shaders/ring.gdshader")
 static var GLOW: Shader = preload("res://shaders/glowball.gdshader")
+static var HERO: Shader = preload("res://shaders/hero_toon.gdshader")
 static var _outline_mat: ShaderMaterial
 
 static func toon(c: Color, outline := true, glow := 0.0) -> ShaderMaterial:
@@ -630,25 +631,27 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 	var hero_col: Color = OUTFIT_COLS[oi]
 	# the outfit is the gear's colourway: a saturated coat, a pale shirt, dark trousers, team colour
 	# on the strongest shapes (hood, cape, crest, pauldron tops, shield), gold on the edges
-	var coat_col := hero_col.lerp(Color("3a3f52"), 0.3).lerp(team_col, 0.1)
-	coat_col = Color.from_hsv(coat_col.h, minf(1.0, coat_col.s * 1.15), coat_col.v)
-	var shirt_col := hero_col.lerp(Color("f3eee2"), 0.45)
-	var pants_col := Color("2e2a3a").lerp(coat_col, 0.15)
+	# a clean value structure (dark trousers and leather, a mid-dark coat, light shirt and trim), each
+	# colour set in HSV from the outfit's hue so nothing goes muddy; the team colour is kept off the
+	# cloth and only marks the key shapes
+	var coat_col := Color.from_hsv(hero_col.h, clampf(hero_col.s * 1.1, 0.06, 0.7), clampf(hero_col.v * 0.6, 0.36, 0.6))
+	var shirt_col := Color.from_hsv(hero_col.h, clampf(hero_col.s * 0.45, 0.04, 0.3), 0.9)
+	var pants_col := Color.from_hsv(fposmod(coat_col.h + 0.02, 1.0), 0.28, 0.2)
 	var m_body := toon(coat_col)
 	var m_shirt := toon(shirt_col)
 	var m_pants := toon(pants_col)
-	var m_leather := toon(Color("5a3e2e").lerp(hero_col, 0.08))
+	var m_leather := toon(Color("6b4330").lerp(hero_col, 0.06))
 	var skin_c: Color = LOOK_SKIN[clampi(int(lk["skin"]), 0, LOOK_SKIN.size() - 1)]
 	var hair_c: Color = LOOK_HAIR[clampi(int(lk["hair_col"]), 0, LOOK_HAIR.size() - 1)]
 	var m_skin := toon(skin_c)
 	var m_hair := toon(hair_c)
 	var m_dark := toon(Color("2b2a33"))
-	var m_acc := toon(team_col)
-	var m_gold := shiny(Color("f2c84a"), 0.7); m_gold.set_shader_parameter("glow", 0.15)
+	var m_acc := toon(Color.from_hsv(team_col.h, minf(1.0, team_col.s * 1.08), team_col.v * 0.94))
+	var m_gold := shiny(Color("dcaa48"), 0.65); m_gold.set_shader_parameter("glow", 0.08)
 	var m_gun := shiny(Color("4a4d5c"), 0.5)
-	var m_hero := toon(hero_col.lerp(Color("3a3f52"), 0.12))
-	var m_trim := toon(hero_col.darkened(0.15))
-	var m_steel := shiny(Color("c9cfdc").lerp(hero_col, 0.1), 0.5)
+	var m_hero := toon(Color.from_hsv(hero_col.h, clampf(hero_col.s * 1.05, 0.06, 0.8), clampf(hero_col.v * 0.85, 0.45, 0.85)))
+	var m_trim := toon(Color.from_hsv(hero_col.h, clampf(hero_col.s * 0.9, 0.05, 0.75), clampf(hero_col.v * 0.95, 0.55, 0.95)))
+	var m_steel := shiny(Color("b0b2b8").lerp(hero_col, 0.06), 0.6)      # dark gunmetal: the highlights and the fresnel do the work
 	var m_glow := toon(hero_col.lerp(Color.WHITE, 0.35), false, 1.4)
 	var m_glow_soft := StandardMaterial3D.new()
 	m_glow_soft.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
@@ -657,9 +660,9 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 	m_glow_soft.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
 	var m_bone := toon(Color("efe3c8"))
 	var m_wood := toon(Color("7a5236"))
-	var m_fur := toon(Color("6a4a36").lerp(hero_col, 0.1))
+	var m_fur := toon(Color("4a3428").lerp(hero_col, 0.08))
 	var m_feather := toon(Color("f6f0e2"))
-	var m_cloak := toon(hero_col.lerp(Color("2f3a2c"), 0.45))
+	var m_cloak := toon(Color.from_hsv(hero_col.h, clampf(hero_col.s * 0.9, 0.06, 0.6), clampf(hero_col.v * 0.5, 0.3, 0.5)))
 	var m_hat := toon(Color("6e4a30").lerp(hero_col, 0.1))
 	for mm in [m_body, m_shirt, m_hair, m_acc, m_hero, m_trim, m_cloak, m_hat, m_feather]:
 		(mm as ShaderMaterial).set_shader_parameter("rim_amount", 0.75)
@@ -674,7 +677,7 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 	painted(m_hair, 5, 0.3, 0.24, 0.24); painted(m_fur, 5, 0.3, 0.3, 0.3)
 	painted(m_gun, 3, 0.12, 0.1, 0.1); painted(m_gold, 3, 0.1, 0.0, 0.0); painted(m_steel, 3, 0.14, 0.12, 0.14); m_steel.set_shader_parameter("sky_ao", 0.12)
 	painted(m_bone, 0, 0.3, 0.2, 0.2); painted(m_wood, 2, 0.2, 0.2, 0.2)
-	m_acc.set_shader_parameter("gloss", 0.2)
+	m_acc.set_shader_parameter("gloss", 0.12)
 	var rig := Node3D.new(); rig.name = "Rig"; root.add_child(rig)
 	var legs := Node3D.new(); legs.name = "Legs"; rig.add_child(legs)
 	var bw: float = [0.88, 1.0, 1.15][clampi(int(lk["body"]), 0, 2)]
@@ -741,7 +744,7 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 	# can put the hands on the weapon's grips (solving the elbows) or let them swing free.
 	# ArmXPivot (shoulder) > sleeve, Elbow > forearm "ArmX" and a cuff, Hand > a mitten glove.
 	# Rounded joints overlap at the shoulder and elbow so a bent arm never shows a gap.
-	var hk2 := float(CLASS_LOOK.get(cls, {}).get("hands", 1.0)) * (1.12 if arch == "juggernaut" else 1.0)
+	var hk2 := float(CLASS_LOOK.get(cls, {}).get("hands", 1.0)) * (1.3 if arch == "juggernaut" else 1.0)
 	var m_glove: Material = m_steel if heavy_gear else (m_dark if arch == "thief" else m_leather)
 	var arms := {}
 	for sx in [-1.0, 1.0]:
@@ -829,7 +832,7 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 	if weapon != "twin_blades":
 		merge_static(gun)      # (the twin blades' second dagger is handed to the left hand by HunterAnim)
 	# the race's proportions: head size, how broad the body is, overall height
-	var hkk := float(race["head"]) * 1.2     # big-headed like a hero brawler: faces read from the match camera
+	var hkk := float(race["head"]) * (1.06 if arch == "thief" else 1.12)    # big-headed like a hero brawler (faces read from the match camera), heroic not chibi; the thief leaner
 	var bk := float(race["bulk"])
 	head.scale = Vector3.ONE * hkk
 	head.position.y += (hkk - 1.0) * 0.05
@@ -864,8 +867,9 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 		# occlusion in each piece's vertex colour (folds, roots of locks, under brims and plates)
 		sm.set_shader_parameter("vertex_ao", true)
 		sm.set_shader_parameter("shade", 0.37)
-		sm.set_shader_parameter("shadow_tint", Color(0.6, 0.57, 0.95))
+		sm.set_shader_parameter("shadow_tint", Color(0.6, 0.6, 0.86))
 		sm.set_shader_parameter("light_tint", Color(1.08, 1.0, 0.9))
+		hero_look(sm)
 	root.set_meta("race", rid)
 	root.set_meta("cls", cls)
 	root.set_meta("arch", arch)
@@ -876,6 +880,32 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 	root.scale = Vector3.ONE * float(Data.CLASSES[cls]["scale"]) * rs * ck
 	ring.scale = Vector3.ONE / (rs * ck)       # the ring under your feet shows the real hitbox, whatever your size
 	return root
+
+## Moves a hunter's toon material onto the hero shader (hero_toon.gdshader) with the same settings,
+## plus the hero tuning: a crisper light/shadow split, shadows that keep their colour, a coloured
+## fresnel rim (cool on metal, the surface's own colour elsewhere) and a little top light.
+static func hero_look(sm: ShaderMaterial) -> void:
+	if sm.shader != TOON:
+		return
+	var keep := {}
+	for u in TOON.get_shader_uniform_list():
+		var nm := String(u["name"])
+		var v = sm.get_shader_parameter(nm)
+		if v != null: keep[nm] = v
+	sm.shader = HERO
+	for nm in keep:
+		sm.set_shader_parameter(nm, keep[nm])
+	var surf := int(keep.get("surface", 0))
+	var metal := surf == 3
+	sm.set_shader_parameter("ramp", 0.5)
+	sm.set_shader_parameter("shadow_sat", 0.4)
+	sm.set_shader_parameter("fres", 0.75 if surf == 4 else (1.15 if metal else 1.0))
+	sm.set_shader_parameter("fres_tint", 0.55 if metal else 0.7)
+	if metal:
+		sm.set_shader_parameter("shadow_tint", Color(0.66, 0.66, 0.8))     # metal shadows a cool grey, not violet
+	sm.set_shader_parameter("top_light", 1.0)
+	if metal:
+		sm.set_shader_parameter("gloss", maxf(float(keep.get("gloss", 0.0)), 0.7))
 
 ## A cone of radius r and length h growing from `at` along `dir` (spikes, fur tufts, horns).
 static func _spike(n: Node3D, m: Material, at: Vector3, dir: Vector3, r: float, h: float, flat := 1.0) -> MeshInstance3D:
@@ -1501,16 +1531,26 @@ static func gun_parts(gun: Node3D, weapon: String, m_gun: Material, m_dark: Mate
 			grip.call(-0.02, 0.15)
 			stock.call(0.07, 0.2, 0.08, 0.05)
 		"rifle":
-			part(gun, box(0.1, 0.13, 0.46), m_gun, Vector3(0, 0, -0.16))
-			part(gun, box(0.12, 0.11, 0.24), m_acc, Vector3(0, -0.005, -0.44))
+			# a lever-action: walnut stock and forend, a dark receiver with a brass side plate, a long
+			# barrel bound in brass, a loop lever; the accent (team or rarity) on the forend cap
+			var walnut := toon(Color("7a4a2e")); painted(walnut, 2, 0.24, 0.2, 0.2); walnut.set_shader_parameter("gloss", 0.35)
+			var brass := shiny(Color("d6a447"), 0.7)
+			part(gun, HeroKit.loft("lever_rcv", [Vector3(0, 0.0, 0.06), Vector3(0, 0.01, -0.08), Vector3(0, 0.0, -0.2)], [Vector2(0.05, 0.065), Vector2(0.052, 0.07), Vector2(0.045, 0.058)], 10, Vector3.UP, 0.9), m_gun, Vector3(0, 0, -0.04))
+			for sx in [-1.0, 1.0]:
+				part(gun, box(0.006, 0.07, 0.18), brass, Vector3(0.05 * sx, 0.0, -0.12))
+			part(gun, HeroKit.loft("lever_fore", [Vector3(0, -0.02, -0.25), Vector3(0, -0.02, -0.4), Vector3(0, -0.015, -0.54)], [Vector2(0.045, 0.045), Vector2(0.046, 0.044), Vector2(0.04, 0.04)], 10, Vector3.UP, 0.9), walnut)
+			part(gun, cyl(0.046, 0.046, 0.04, 12), m_acc, Vector3(0, -0.018, -0.565), Vector3.ONE, Vector3(PI / 2, 0, 0))
+			part(gun, cyl(0.022, 0.026, 0.62, 10), m_dark, Vector3(0, 0.03, -0.53), Vector3.ONE, Vector3(PI / 2, 0, 0))
+			part(gun, cyl(0.018, 0.018, 0.44, 8), m_dark, Vector3(0, -0.012, -0.44), Vector3.ONE, Vector3(PI / 2, 0, 0))
 			for k in 3:
-				part(gun, box(0.125, 0.02, 0.03), m_dark, Vector3(0, 0.03, -0.37 - k * 0.06))
-			part(gun, cyl(0.03, 0.034, 0.26, 12), m_dark, Vector3(0, 0.02, -0.66), Vector3.ONE, Vector3(PI / 2, 0, 0))
-			part(gun, cyl(0.048, 0.042, 0.06, 12), m_gun, Vector3(0, 0.02, -0.77), Vector3.ONE, Vector3(PI / 2, 0, 0))
-			part(gun, cyl(0.04, 0.04, 0.16, 12), m_dark, Vector3(0, 0.11, -0.14), Vector3.ONE, Vector3(PI / 2, 0, 0))
-			part(gun, cyl(0.03, 0.03, 0.02, 12), glow.call(Color("9af0ff")), Vector3(0, 0.11, -0.225), Vector3.ONE, Vector3(PI / 2, 0, 0))
+				part(gun, cyl(0.032, 0.032, 0.02, 10), brass, Vector3(0, 0.02, -0.38 - k * 0.16), Vector3.ONE, Vector3(PI / 2, 0, 0))
+			part(gun, box(0.012, 0.03, 0.02), brass, Vector3(0, 0.065, -0.8))
+			var loop := TorusMesh.new(); loop.inner_radius = 0.03; loop.outer_radius = 0.042; loop.rings = 14; loop.ring_segments = 5
+			part(gun, loop, brass, Vector3(0, -0.085, 0.0), Vector3(1.0, 1.0, 1.3), Vector3(0, 0, PI / 2))
+			part(gun, box(0.016, 0.022, 0.16), glow.call(Color("ffc46a")), Vector3(0.052, 0.04, -0.12))
 			grip.call(0.0, 0.16)
-			stock.call(0.08, 0.26, 0.12, 0.06)
+			part(gun, HeroKit.loft("lever_stock", [Vector3(0, 0.0, 0.08), Vector3(0, -0.03, 0.18), Vector3(0, -0.07, 0.3)], [Vector2(0.03, 0.05), Vector2(0.034, 0.06), Vector2(0.036, 0.085)], 10, Vector3.UP, 0.85), walnut)
+			part(gun, box(0.07, 0.09, 0.02), m_dark, Vector3(0, -0.07, 0.31), Vector3.ONE, Vector3(0.25, 0, 0))
 		"sniper":
 			part(gun, box(0.09, 0.12, 0.5), m_gun, Vector3(0, 0, -0.16))
 			part(gun, cyl(0.028, 0.03, 0.56, 12), m_dark, Vector3(0, 0.02, -0.66), Vector3.ONE, Vector3(PI / 2, 0, 0))
@@ -1557,17 +1597,19 @@ static func gun_parts(gun: Node3D, weapon: String, m_gun: Material, m_dark: Mate
 			part(gun, cyl(0.15, 0.15, 0.1, 14), m_acc, Vector3(0, 0, -0.64), Vector3.ONE, Vector3(PI / 2, 0, 0))
 			grip.call(-0.02, 0.18)
 		"twin_blades":
-			# two curved daggers with glowing edges, one held forward and one reversed
-			var bl := toon(Color("c8f0ff"), true, 0.35)
-			var edge: ShaderMaterial = glow.call(Color("9af0ff"))
+			# two long curved fighting knives (a forward grip and a reversed one), dark steel with a
+			# glowing cutting edge and a team-coloured wrap on the hilt
+			var bl := shiny(Color("5c6170"), 0.75)
+			var edge: ShaderMaterial = glow.call(Color("aef4ff"))
 			for k in 2:
 				var x := 0.06 if k == 0 else -0.12
-				var pts := [Vector3(0, 0, 0), Vector3(0, 0.02, -0.16), Vector3(0, 0.0, -0.32), Vector3(0, -0.05, -0.44)] if k == 0 else [Vector3(0, 0, 0), Vector3(0, 0.02, 0.12), Vector3(0, -0.01, 0.26), Vector3(0, -0.06, 0.36)]
+				var pts := [Vector3(0, 0, 0), Vector3(0, 0.03, -0.2), Vector3(0, 0.01, -0.4), Vector3(0, -0.07, -0.56)] if k == 0 else [Vector3(0, 0, 0), Vector3(0, 0.03, 0.15), Vector3(0, -0.01, 0.32), Vector3(0, -0.08, 0.45)]
 				var at := Vector3(x, 0, -0.08) if k == 0 else Vector3(x, -0.06, -0.02)
-				part(gun, HeroKit.loft("dagger%d" % k, pts, [Vector2(0.012, 0.045), Vector2(0.014, 0.055), Vector2(0.01, 0.04), Vector2(0.002, 0.004)], 8, Vector3.UP, 1.0), bl, at, Vector3.ONE, Vector3(0, 0.12 if k == 0 else -0.3, 0))
-				part(gun, HeroKit.loft("dagedge%d" % k, pts, [Vector2(0.004, 0.012), Vector2(0.004, 0.014), Vector2(0.003, 0.01), Vector2(0.001, 0.002)], 6, Vector3.UP, 1.0), edge, at + Vector3(0, 0.05, 0), Vector3.ONE, Vector3(0, 0.12 if k == 0 else -0.3, 0))
-				part(gun, box(0.05, 0.06, 0.12), m_dark, Vector3(x, 0 if k == 0 else -0.06, 0.0 if k == 0 else -0.1))
-				part(gun, box(0.11, 0.025, 0.035), m_acc, Vector3(x, 0 if k == 0 else -0.06, -0.06 if k == 0 else -0.04))
+				var yr := Vector3(0, 0.12 if k == 0 else -0.3, 0)
+				part(gun, HeroKit.loft("dagger2_%d" % k, pts, [Vector2(0.014, 0.06), Vector2(0.016, 0.07), Vector2(0.012, 0.05), Vector2(0.002, 0.004)], 8, Vector3.UP, 1.0), bl, at, Vector3.ONE, yr)
+				part(gun, HeroKit.loft("dagedge2_%d" % k, pts, [Vector2(0.006, 0.016), Vector2(0.006, 0.018), Vector2(0.005, 0.014), Vector2(0.001, 0.002)], 6, Vector3.UP, 1.0), edge, at + Vector3(0, 0.062, 0), Vector3.ONE, yr)
+				part(gun, HeroKit.loft("daggrip%d" % k, [Vector3(0, 0, 0.0), Vector3(0, 0, 0.06 if k == 0 else -0.06), Vector3(0, 0, 0.12 if k == 0 else -0.12)], [Vector2(0.024, 0.03), Vector2(0.026, 0.032), Vector2(0.03, 0.036)], 8, Vector3.UP, 0.9), m_dark, Vector3(x, 0 if k == 0 else -0.06, 0.0 if k == 0 else -0.04))
+				part(gun, HeroKit.loft("dagguard%d" % k, [Vector3(-0.07, 0.03, 0), Vector3(0, 0, 0), Vector3(0.07, -0.03, 0)], [Vector2(0.018, 0.018), Vector2(0.022, 0.022), Vector2(0.016, 0.016)], 8, Vector3.FORWARD, 0.9), m_acc, Vector3(x, 0 if k == 0 else -0.06, -0.06 if k == 0 else -0.04))
 		"longsword":
 			var steel := toon(Color("e9e4d4"), true, 0.2)
 			part(gun, HeroKit.loft("lsword", [Vector3(0, 0.02, -0.1), Vector3(0, 0.02, -0.5), Vector3(0, 0.02, -0.9), Vector3(0, 0.02, -1.06)], [Vector2(0.018, 0.065), Vector2(0.016, 0.06), Vector2(0.012, 0.045), Vector2(0.002, 0.004)], 8, Vector3.UP, 1.0), steel)
@@ -1576,13 +1618,23 @@ static func gun_parts(gun: Node3D, weapon: String, m_gun: Material, m_dark: Mate
 			part(gun, cyl(0.026, 0.03, 0.18, 10), m_dark, Vector3(0, 0, 0.05), Vector3.ONE, Vector3(PI / 2, 0, 0))
 			part(gun, sphere(0.04, 12), m_acc, Vector3(0, 0, 0.16))
 		"greatsword":
-			# a broad two-handed blade, longer than the hunter's arm span, with a glowing rune channel
-			var steel := shiny(Color("9aa6b8"), 0.5)
-			part(gun, HeroKit.loft("gsword", [Vector3(0, 0.02, -0.14), Vector3(0, 0.02, -0.6), Vector3(0, 0.03, -1.02), Vector3(0, 0.02, -1.2)], [Vector2(0.03, 0.11), Vector2(0.028, 0.12), Vector2(0.022, 0.1), Vector2(0.003, 0.006)], 8, Vector3.UP, 1.0), steel)
-			part(gun, box(0.065, 0.035, 0.82), glow.call(Color("ffb070")), Vector3(0, 0.02, -0.6))
-			part(gun, HeroKit.loft("gguard", [Vector3(-0.24, 0.08, 0.02), Vector3(-0.12, 0.0, 0), Vector3(0, -0.01, 0), Vector3(0.12, 0.0, 0), Vector3(0.24, 0.08, 0.02)], [Vector2(0.04, 0.04), Vector2(0.05, 0.05), Vector2(0.055, 0.055), Vector2(0.05, 0.05), Vector2(0.03, 0.03)], 10, Vector3.FORWARD, 0.9), m_acc, Vector3(0, 0, -0.12))
-			part(gun, cyl(0.032, 0.036, 0.3, 10), m_dark, Vector3(0, 0, 0.06), Vector3.ONE, Vector3(PI / 2, 0, 0))
-			part(gun, sphere(0.05, 12), m_acc, Vector3(0, 0, 0.23))
+			# a slab of a blade, wider than the juggernaut's helm, with a notched spine, a burning rune
+			# channel, a heavy crossguard and a long wrapped grip
+			var steel := shiny(Color("8d929c"), 0.6)
+			var dark := shiny(Color("3d4049"), 0.5)
+			var run_m: ShaderMaterial = glow.call(Color("ffb648"))
+			var blade := [Vector3(0, 0.02, -0.14), Vector3(0, 0.02, -0.55), Vector3(0, 0.03, -1.0), Vector3(0, 0.03, -1.22), Vector3(0, 0.02, -1.36)]
+			part(gun, HeroKit.loft("gsword2", blade, [Vector2(0.034, 0.15), Vector2(0.032, 0.165), Vector2(0.028, 0.15), Vector2(0.02, 0.1), Vector2(0.003, 0.006)], 8, Vector3.UP, 1.0), steel)
+			part(gun, HeroKit.loft("gsword2b", blade.slice(0, 4), [Vector2(0.042, 0.05), Vector2(0.04, 0.06), Vector2(0.036, 0.05), Vector2(0.02, 0.02)], 8, Vector3.UP, 1.0), dark, Vector3(0, 0.0, 0.0))
+			for k in 3:
+				part(gun, box(0.05, 0.05, 0.05), dark, Vector3(0, 0.13 + 0.01 * k, -0.42 - k * 0.2), Vector3.ONE, Vector3(0, 0, PI * 0.25))
+			part(gun, box(0.074, 0.03, 0.78), run_m, Vector3(0, 0.025, -0.62))
+			part(gun, HeroKit.loft("gguard2", [Vector3(-0.3, 0.12, 0.04), Vector3(-0.16, 0.02, 0), Vector3(0, -0.01, 0), Vector3(0.16, 0.02, 0), Vector3(0.3, 0.12, 0.04)], [Vector2(0.045, 0.045), Vector2(0.06, 0.06), Vector2(0.07, 0.07), Vector2(0.06, 0.06), Vector2(0.035, 0.035)], 10, Vector3.FORWARD, 0.9), dark, Vector3(0, 0, -0.12))
+			part(gun, box(0.09, 0.09, 0.05), m_acc, Vector3(0, 0, -0.13), Vector3.ONE, Vector3(0, 0, PI * 0.25))
+			part(gun, cyl(0.034, 0.038, 0.34, 10), m_dark, Vector3(0, 0, 0.08), Vector3.ONE, Vector3(PI / 2, 0, 0))
+			for k in 3:
+				part(gun, cyl(0.041, 0.041, 0.02, 10), m_acc, Vector3(0, 0, 0.0 + k * 0.08), Vector3.ONE, Vector3(PI / 2, 0, 0))
+			part(gun, sphere(0.06, 12), dark, Vector3(0, 0, 0.27))
 		"minigun":
 			# a spinning bundle of six barrels on a chunky drum
 			part(gun, box(0.22, 0.22, 0.36), m_gun, Vector3(0, 0, -0.06))

@@ -116,18 +116,21 @@ static func food_text(rec: Dictionary) -> String:
 	if not (rec.get("known", []) as Array).has("food"): return "Not found out yet: try a few foods"
 	return "Loves %s" % Care.food_name(String(likes.get("food", ""))).to_lower()
 
-## A row: muted label left, the value right (wrapping), with an optional chip or swatch after it.
-static func _row(parent: Control, k: String, val: String, col := UI.INK, extra: Control = null) -> void:
+## A row: a small icon, a short muted label, the value (one line where it can), an optional extra.
+static func _row(parent: Control, k: String, val: String, col := UI.INK, extra: Control = null, icon := "") -> void:
 	var r := UI.hbox(8)
+	var ic: Control = UI.IconDot.new(icon, UI.MUTED, 14.0) if icon != "" else Control.new()
+	ic.custom_minimum_size = Vector2(14, 14)
+	r.add_child(ic)
 	var kl := UI.label(k, UI.T_SMALL, UI.MUTED)
-	kl.custom_minimum_size.x = 112
+	kl.custom_minimum_size.x = 74
 	r.add_child(kl)
 	var vl := UI.label(val, UI.T_SMALL, col, UI.semi)
-	vl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	vl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	vl.custom_minimum_size.x = 120
+	vl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART if extra == null else TextServer.AUTOWRAP_OFF
+	vl.size_flags_horizontal = Control.SIZE_EXPAND_FILL if extra == null else Control.SIZE_SHRINK_BEGIN
+	vl.custom_minimum_size.x = 120 if extra == null else 0
 	r.add_child(vl)
-	if extra: r.add_child(extra)
+	if extra: r.add_child(extra)       # (right after the value: an eye colour swatch)
 	parent.add_child(r)
 
 class Swatch extends Control:
@@ -141,54 +144,119 @@ class Swatch extends Control:
 		draw_circle(size * 0.5, 5.5, col)
 		draw_circle(size * 0.5 + Vector2(-1.8, -1.8), 1.6, Color(1, 1, 1, 0.8))
 
-## Its looks and habits (Unique), as field notes.
+## Short values for the rows (the long sentences above stay for places that read as prose).
+const HABIT_SHORT := {"tail_chase": "Chases its tail", "head_tilt": "Tilts its head", "hop": "Bouncy", "sway": "Sways",
+	"sneeze": "Sneezy", "stretch": "Big stretcher", "ear_flick": "Flicks its ears", "look_around": "Watchful"}
+const SIZE_SHORT := {"XS": "very small (rare)", "S": "small", "M": "average", "L": "large", "XL": "very large (rare)"}
+
+static func size_short(rec: Dictionary) -> String:
+	var si := Unique.size_info(rec)
+	var b := String(si["build"])
+	return "%d cm  ·  %.1f kg  ·  %s%s" % [int(round(float(si["cm"]))), float(si["kg"]), SIZE_SHORT.get(String(si["tag"]), "average"), (", " + b) if b != "" else ""]
+
+static func coat_short(rec: Dictionary) -> String:
+	var d := Unique.of(rec)
+	var c := String(Unique.MARK_COL_NAMES.get(String(d.get("mark_col", "dark")), "dark"))
+	match String(d.get("mark", "plain")):
+		"spots": return "%s spots" % _cap(c)
+		"stripes": return "%s stripes" % _cap(c)
+		"patches": return "%s patches" % _cap(c)
+		"freckles": return "%s freckles" % _cap(c)
+	return "Plain"
+
+static func build_short(rec: Dictionary) -> String:
+	var bits: Array = []
+	for t in [Unique.shape_text(rec), Unique.prop_text(rec)]:
+		if t != "":
+			for x in String(t).split(", "): bits.append(String(x).to_lower())
+	if bits.is_empty(): return "Typical"
+	return _cap(", ".join(bits.slice(0, 2)))
+
+static func voice_short(rec: Dictionary) -> String:
+	return {"Deep voice": "Deep", "High voice": "High"}.get(Unique.voice_word(rec), "Ordinary")
+
+static func birth_short(rec: Dictionary) -> String:
+	var b = Unique.of(rec).get("birth", [])
+	if typeof(b) != TYPE_ARRAY or (b as Array).size() < 2: return ""
+	return "%s on its %s" % [_cap(String(b[0])), String(b[1])]
+
+static func food_short(rec: Dictionary) -> String:
+	var likes: Dictionary = rec.get("likes", {}) if typeof(rec.get("likes", null)) == TYPE_DICTIONARY else {}
+	if likes.is_empty() or not (rec.get("known", []) as Array).has("food"): return "Not found yet"
+	return "Loves %s" % Care.food_name(String(likes.get("food", ""))).to_lower()
+
+static func origin_short(rec: Dictionary) -> String:
+	var o: Dictionary = rec.get("origin", {}) if typeof(rec.get("origin", null)) == TYPE_DICTIONARY else {}
+	var w: Dictionary = o.get("where", {}) if typeof(o.get("where", null)) == TYPE_DICTIONARY else {}
+	var place := String(w.get("island", w.get("map", "")))
+	match String(o.get("how", "unknown")):
+		"wild": return "Tamed" + ((" at " + place) if place != "" else " in the wild")
+		"taken": return "Taken from %s" % String(o.get("from", "a rival"))
+		"egg": return "Hatched at home"
+		"boss_egg": return "Hatched from a Rare Egg"
+		"starter": return "Your first partner"
+		"market": return "From the market"
+		"event": return "Met at an event"
+	return "Before records"
+
+## Its looks and habits (Unique), one short line each.
 static func looks(rec: Dictionary, parent: Control) -> void:
-	_row(parent, "Size", size_note(rec))
+	var sx := Unique.sex(rec)
+	if sx != "":
+		var r := UI.hbox(8)
+		r.add_child(UI.sex_icon(rec, 14.0))
+		var kl := UI.label("Sex", UI.T_SMALL, UI.MUTED); kl.custom_minimum_size.x = 74
+		r.add_child(kl)
+		r.add_child(UI.label(Unique.sex_name(rec), UI.T_SMALL, UI.SEX_COL[sx], UI.semi))
+		parent.add_child(r)
+	_row(parent, "Size", size_short(rec), UI.INK, null, "ruler")
 	var ms := Mutations.of(rec).filter(func(m): return String(Mutations.info(m).get("group", "")) == "size")
 	if not ms.is_empty():
-		_row(parent, "", "%s, too: a size all of its own." % Mutations.name_of(String(ms[0])))
-	_row(parent, "Coat", coat_note(rec))
-	_row(parent, "Eyes", eye_note(rec), UI.INK, Swatch.new(Unique.eye_col(rec)))
-	_row(parent, "Build", build_note(rec))
-	_row(parent, "Habit", Unique.quirk_name(rec))
-	_row(parent, "Voice", voice_note(rec))
-	var bm := Unique.birthmark_text(rec)
-	if bm != "": _row(parent, "Birthmark", _cap(bm))
-	_row(parent, "Food", food_text(rec))
+		_row(parent, "", "%s: a size all its own" % Mutations.name_of(String(ms[0])))
+	_row(parent, "Coat", coat_short(rec), UI.INK, null, "paw")
+	_row(parent, "Eyes", Unique.eye_name(rec), UI.INK, Swatch.new(Unique.eye_col(rec)), "eye")
+	_row(parent, "Build", build_short(rec), UI.INK, null, "jump")
+	_row(parent, "Habit", String(HABIT_SHORT.get(String(Unique.of(rec).get("quirk", "")), Unique.quirk_name(rec))), UI.INK, null, "dance")
+	_row(parent, "Voice", voice_short(rec), UI.INK, null, "pulse")
+	var bm := birth_short(rec)
+	if bm != "": _row(parent, "Birthmark", bm, UI.INK, null, "burst")
+	_row(parent, "Food", food_short(rec), UI.INK, null, "tonic")
 
-## Where it came from (Save.register).
+## Where it came from (Save.register), one short line each.
 static func history(rec: Dictionary, parent: Control) -> void:
-	_row(parent, "Origin", origin_text(rec))
+	_row(parent, "Origin", origin_short(rec), UI.INK, null, "pin")
 	var o: Dictionary = rec.get("origin", {}) if typeof(rec.get("origin", null)) == TYPE_DICTIONARY else {}
-	_row(parent, "Date", _date(int(float(o.get("t", rec.get("born", 0))))))
-	_row(parent, "First raised by", trainer_text(rec))
+	_row(parent, "Date", _date(int(float(o.get("t", rec.get("born", 0))))), UI.INK, null, "clock")
+	_row(parent, "Raised by", trainer_text(rec), UI.INK, null, "home")
 	var pt := parents_text(rec)
-	if pt != "": _row(parent, "Parents", pt)
-	var st := Save.serial_text(rec)
-	if st != "": _row(parent, "Number", st)
+	if pt != "": _row(parent, "Parents", pt, UI.INK, null, "egg")
+	if rec.has("serial"): _row(parent, "Number", "#%04d" % int(rec["serial"]), UI.INK, null, "info")
 	var ed = rec.get("edition", null)
 	if typeof(ed) == TYPE_DICTIONARY:
-		_row(parent, "Edition", "%s, #%d of %d" % [String(ed.get("kind", "")).capitalize(), int(ed.get("serial", 0)), int(ed.get("cap", 0))])
+		_row(parent, "Edition", "%s, #%d of %d" % [String(ed.get("kind", "")).capitalize(), int(ed.get("serial", 0)), int(ed.get("cap", 0))], UI.INK, null, "gem")
 
 ## The whole About section. compact: just the headline notes (for side panels).
 static func block(rec: Dictionary, parent: Control, compact := false) -> void:
 	if rec.is_empty(): return
 	if compact:
-		var sl := UI.label("%s  ·  %s" % [size_line(rec), size_word(rec).split(":")[0]], UI.T_SMALL, UI.INK, UI.semi)
+		var top := UI.hbox(6)
+		top.add_child(UI.sex_icon(rec, 13.0))
+		var sl := UI.label(size_short(rec), UI.T_SMALL, UI.INK, UI.semi)
 		sl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		sl.custom_minimum_size.x = 260
-		parent.add_child(sl)
-		var l := UI.label("%s  ·  %s  ·  %s" % [coat_note(rec), eye_note(rec), Unique.quirk_name(rec)], 12, UI.MUTED)
+		sl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		sl.custom_minimum_size.x = 240
+		top.add_child(sl)
+		parent.add_child(top)
+		var l := UI.label("%s  ·  %s eyes  ·  %s" % [coat_short(rec), Unique.eye_name(rec), String(HABIT_SHORT.get(String(Unique.of(rec).get("quirk", "")), Unique.quirk_name(rec)))], 12, UI.MUTED)
 		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		l.custom_minimum_size.x = 260
 		parent.add_child(l)
-		var st := Save.serial_text(rec)
-		var ol := UI.label(origin_text(rec) + (("  ·  " + st) if st != "" else ""), 12, UI.MUTED)
+		var ol := UI.label(origin_short(rec) + (("  ·  #%04d" % int(rec["serial"])) if rec.has("serial") else ""), 12, UI.MUTED)
 		ol.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		ol.custom_minimum_size.x = 260
 		parent.add_child(ol)
 		return
-	parent.add_child(UI.section("Field notes", UI.FAINT.lightened(0.2)))
+	parent.add_child(UI.section("Who it is", UI.FAINT.lightened(0.2)))
 	looks(rec, parent)
 	parent.add_child(UI.spacer(4))
 	parent.add_child(UI.section("Where it's from", UI.FAINT.lightened(0.2)))

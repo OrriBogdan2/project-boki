@@ -195,6 +195,17 @@ func cast_e() -> bool:
 func move_k() -> float:
 	return 1.0 - float(r_def()["self_slow"]) if not lock.is_empty() else 1.0
 
+## Last Round needs someone in reach to lock (checked before the fuse).
+func r_can_cast() -> bool:
+	var reach := float(r_def()["reach"]) + (2.0 if rank("ult") >= 2 else 0.0)
+	if not rival_hunters_in(reach).is_empty():
+		return true
+	for f in foes_in(h.pos, reach):
+		if f is Mob and sees(f): return true
+	return false
+
+func r_no_target_text() -> String: return "No one in reach to lock"
+
 func cast_r() -> bool:
 	var rd := r_def()
 	var reach := float(rd["reach"]) + (2.0 if rank("ult") >= 2 else 0.0)

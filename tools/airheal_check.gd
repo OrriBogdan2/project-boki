@@ -67,7 +67,10 @@ func run(main: Node) -> void:
 	_steps(m, 1)
 	ok(not P.dropping, "an ability press mid-drop breaks out of it too")
 	# ---- 3. gliding normally: a heal folds the glider and keeps drinking
+	for k in ["sec", "sig", "ult", "tonic", "kit", "gear1", "gear2", "glide", "jump", "dash", "fire"]:
+		P.inp[k] = false
 	P.teleport(g0 + Vector3(0, 30, 0))
+	P.fly_t = 0.0; P.roll_t = 0.0; P.knock_t = 0.0; P.vel = Vector3.ZERO
 	P.dropping = false
 	P.grounded = false
 	P.gliding = true

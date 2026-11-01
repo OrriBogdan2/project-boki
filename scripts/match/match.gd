@@ -60,6 +60,7 @@ var bubbles: Array = []     # {ent, text, t, cat}
 var interact := {}          # what F would do right now for the local player
 var paused := false
 var duel: Duel = null
+var arena: Arena = null   # the Arena (opts "arena") or the training area's practice tools
 var shot_n := 0          # the duel room: you and one sparring bot (opts "duel")
 var slowmo := 0.0
 var slow_k := 0.35
@@ -75,6 +76,8 @@ var hitstop := 0.0
 var aim_line: MeshInstance3D
 var aim_ring: MeshInstance3D
 var muzzle_light: OmniLight3D
+var raid := "dusk"                 # the raid condition the match is lit under (RaidLook)
+var music_dir: MusicDir = null     # the layered score's levels (scripts/match/music_dir.gd)
 var collapse_warned := false
 var rng := RandomNumberGenerator.new()
 var pending_input := {"base": false, "dash": false, "jump": false, "sig": false, "reload": false, "tonic": false, "kit": false, "throw": false, "skill": false, "ult": false, "sec": false, "gear1": false, "gear2": false, "swap": false, "kin_ab": false}
@@ -251,7 +254,9 @@ func warm_up(progress := Callable()) -> void:
 		fx.burst(at + Vector3(0, 1, 0), Color.WHITE, 6)
 		fx.ring(at, 1.5, Color.WHITE)
 		fx.flash(at + Vector3(0, 1, 0), Color.WHITE)
+		fx.spark(at + Vector3(0, 1, 0), Vector3.UP, Color.WHITE, 4)
 		fx.slash(at + Vector3(0, 0.8, 0), 0.0, 2.0, 1.6, Color.WHITE)
+		fx.beam(at + Vector3(0, 1, 0), at + Vector3(2, 1, 0), Color.WHITE)
 		var tg := fx.telegraph_circle(at, 1.5, Color(1, 0.3, 0.2))
 		# the muzzle flash light lights whatever stands near a shot: the lit variants compile now too
 		if muzzle_light:
@@ -643,7 +648,8 @@ func _start(o: Dictionary) -> void:
 		bot_diff = Data.auto_bot_diff(tier, int(Save.d.get("extracts", 0)), o.get("tutorial", false) or o.get("training", false))
 	bot_cfg = Data.BOT_DIFF[bot_diff]
 	_build_env()
-	Sfx.play_music("hollow" if tier >= 2 else "match")
+	music_dir = MusicDir.new()
+	music_dir.start(self)
 	Sfx.play_ambience("match")
 	world = World.new()
 	world.name = "World"
@@ -656,6 +662,8 @@ func _start(o: Dictionary) -> void:
 		layout = World.load_layout(String(o.get("map", World.layout_for_tier(tier))))
 	elif o.get("tutorial", false):
 		layout = World.load_layout("tutorial")
+	elif o.get("arena", false):
+		layout = World.load_layout("arena")     # the practice arena (scripts/match/arena.gd)
 	map_name = String(layout.get("name", ""))
 	if _stage_cb.is_valid(): world.stage_cb = _world_step
 	if not layout.is_empty():
@@ -664,6 +672,7 @@ func _start(o: Dictionary) -> void:
 		world.generate(seed_val, World.BIG_SIZE if big else 64, World.BIG_ISLANDS if big else 7)
 	await _stage("build.generate")
 	await world.build_meshes()
+	RaidLook.tune_world(world, raid)
 	world.stage_cb = Callable()
 	fx = Fx.new(); fx.name = "Fx"; add_child(fx)
 	fields = Fields.new(self)
@@ -694,13 +703,13 @@ func _start(o: Dictionary) -> void:
 	await _stage("build.pads_exits")
 	await _spawn_hunters()
 	await _stage("build.hunters")
-	if not opts.get("tutorial", false) and not opts.get("duel", false):
+	if not opts.get("tutorial", false) and not opts.get("duel", false) and not opts.get("arena", false):
 		await _spawn_mobs()        # the tutorial brings its own monsters, one step at a time
 	await _stage("build.mobs")
-	if not opts.get("duel", false):
+	if not opts.get("duel", false) and not opts.get("arena", false):
 		await _spawn_chests()
 	await _stage("build.chests")
-	if not world.train_route.is_empty() and not opts.get("duel", false):
+	if not world.train_route.is_empty() and not opts.get("duel", false) and not opts.get("arena", false):
 		skytrain = SkyTrain.new()
 		skytrain.name = "SkyTrain"
 		add_child(skytrain)
@@ -708,7 +717,8 @@ func _start(o: Dictionary) -> void:
 	await _slice()
 	Life.place_beacons(self)
 	await _slice()
-	await _spawn_breakables()
+	if not opts.get("arena", false):
+		await _spawn_breakables()
 	await _slice()
 	for rg in world.rings:
 		var rn := Models.air_ring()
@@ -724,7 +734,7 @@ func _start(o: Dictionary) -> void:
 		player.teleport(b0 + Vector3(2.2, 0, 0.6))
 		spawn_weapon("sniper", 3, b0 + Vector3(1.6, 0, 1.8), "", false)
 		spawn_weapon("smg", 4, b0 + Vector3(3.0, 0, 1.6), "", false)
-	if not opts.get("duel", false):
+	if not opts.get("duel", false) and not opts.get("arena", false):
 		await _spawn_wild()
 	await _slice()
 	if not (opts.get("duel", false) or opts.get("tutorial", false) or opts.get("training", false)):
@@ -768,6 +778,10 @@ func _start(o: Dictionary) -> void:
 		duel.setup(self)
 		duel.attach_keys()
 		hud.toast("Duel room  ·  B sets up the bot  ·  X resets", Color("f3eee2"))
+	if player and duel == null and not opts.get("tutorial", false) and (opts.get("arena", false) or opts.get("practice", false)):
+		# the Arena, and the same practice tools on the training island (dummies, swaps, kit card)
+		arena = Arena.new()
+		arena.setup(self, "arena" if opts.get("arena", false) else "practice")
 	await _stage("build.hud")
 	_build_aim()
 	Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
@@ -790,6 +804,9 @@ func _build_env() -> void:
 	add_child(env)
 	var sun := Look.lights(self, T["sun"], 1.0, Vector3(-55, -35, 0), 60.0)
 	sun.shadow_opacity = 0.8
+	# the raid condition: moody dusk by default (scripts/match/raid_look.gd)
+	raid = RaidLook.pick(opts)
+	RaidLook.apply(env.environment, sun, get_node_or_null("Fill") as DirectionalLight3D, T, raid)
 
 func _build_shot_pool() -> void:
 	var mesh := Models.sphere(0.5, 10)
@@ -799,6 +816,14 @@ func _build_shot_pool() -> void:
 		mi.material_override = Models.glow_mat(Color.WHITE)
 		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		mi.visible = false
+		# a soft halo round every bolt, so shots glow instead of reading as specks (Oomph.shot_look)
+		var halo := MeshInstance3D.new()
+		halo.name = "Halo"
+		halo.mesh = mesh
+		halo.material_override = Models.glow_mat(Color(1, 1, 1, 0.3))
+		halo.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		halo.scale = Vector3(2.3, 2.3, 1.5)
+		mi.add_child(halo)
 		add_child(mi)
 		shot_pool.append(mi)
 
@@ -2083,7 +2108,7 @@ func kin_bark(k: Kin, txt: String, cat: String) -> void:
 		var s := "kin_happy"
 		if cat in ["refuse", "hesitate", "scared", "revive_low", "ignore"]: s = "kin_unsure"
 		elif cat in ["callout", "wild"]: s = "kin_alert"
-		sfx(s, null, -6.0, Unique.voice(k.rec))     # in its own voice
+		sfx(s, null, -3.0, Unique.voice(k.rec))     # in its own voice, above the louder combat layer
 
 var feed_all: Array = []
 
@@ -2104,6 +2129,7 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 	CombatBus.hit_landed.emit(by, target, d, tags)
 	var crit: bool = o.get("crit", false)
 	var src: String = o.get("src", "")
+	Oomph.react(self, target, by, d, o)     # flinch, stagger, hit-shake (the gameplay side of oomph)
 	var credit: Ent = by
 	if by is Kin and by.owner_h:
 		credit = by.owner_h
@@ -2150,7 +2176,7 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 		sfx("hurt", null, -4.0)
 		cam.add_trauma(clampf(d / 40.0, 0.12, 0.45))
 		if hud: hud.hurt_flash(d)
-	fx.burst(target.pos + Vector3(0, 0.8, 0), Color("fff2d0") if not crit else Color("ffd23f"), 6 if d < 10 else 12, 3.5, 0.3, 8.0, 0.7)
+	Juice.hit(self, target, by, d, o, crit, armor_hit)
 
 ## Cancels anything a hunter had going: a sword charge, a sniper wind-up.
 func cancel_abilities(h: Hunter) -> void:
@@ -2202,6 +2228,7 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 		add_feed("%s went down" % h.pname)
 	sfx("knock", h.pos, 0.0)
 	fx.burst(h.pos + Vector3(0, 0.8, 0), Data.TEAM_COLORS[h.team % Data.TEAM_COLORS.size()], 24, 5.0, 0.6)
+	Juice.knock(self, h, credit)
 	if net_on and not h.remote:
 		net_event(["knock", h.nid, credit.nid if credit else ""])
 	if h == player:
@@ -2310,6 +2337,7 @@ func eliminate(h: Hunter, by: Ent, why: String, final := false) -> void:
 	if credit is Hunter and credit != h and credit.team != h.team:
 		credit.kills += 1
 	add_feed(out_text(h.pname, why))
+	if why != "abyss": Juice.kill(self, h, credit)
 	h.set_meta("died_why", why)
 	h.set_meta("died_at", time)
 	var waiting := false
@@ -2552,6 +2580,7 @@ func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
 	sfx("die_big" if big_mob else "die_small", mb.pos, -5.0, randf_range(0.9, 1.15))
 	if credit == player: sfx("kill", null, -12.0, 1.4)
 	fx.burst(mb.pos + Vector3(0, 0.6, 0), mb.md["color"], 22, 5.0, 0.6)
+	Juice.mob_dead(self, mb, credit, big_mob)
 	if not world.is_void(mb.pos.x, mb.pos.z) and not _o.get("self", false):
 		for i in int(mb.md["gems"]):
 			drop("gem", mb.pos + Vector3(0, 0.6, 0), int(round(3 * float(T["loot"]))))
@@ -2720,7 +2749,7 @@ func _leave_one_kin(h: Hunter, k: Kin) -> void:
 					player_lost.append({"uid": w.lost_uid, "kin": w, "holder": null, "rec": rec})
 					add_feed("%s was left behind" % rec.get("name", "Your Boki"))
 				elif k.lost_from == "you" and player and not player.out:
-					add_feed("%s dropped %s! Catch it and extract to bring it home." % [h.pname, rec.get("name", "your Boki")])
+					add_feed("%s dropped %s! Get to it and extract to bring it home." % [h.pname, rec.get("name", "your Boki")])
 					ping(w.pos, Color("ffd23f"))
 		k.dead = true
 		k.visible = false
@@ -2823,7 +2852,7 @@ func _resolve_lost() -> Array:
 
 func on_wild_dazed(k: Kin) -> void:
 	if player and k.flat_dist(player) < 10.0:
-		add_feed("The wild %s is dazed. Hold %s to catch it!" % [Data.KIN[k.species]["name"], Settings.key_cap("interact")])
+		add_feed("The wild %s is dazed. Hold %s to tame it!" % [Data.KIN[k.species]["name"], Settings.key_cap("interact")])
 
 ## A monster's stagger window opened.
 func on_stag_open(mb: Mob) -> void:
@@ -2866,8 +2895,8 @@ func _stagger_reward(mb: Mob, hunter: Hunter, ab: String) -> void:
 func on_armor_break(h: Hunter, by: Ent) -> void:
 	fx.burst(h.pos + Vector3(0, 1.0, 0), Color("7ac8ff"), 22, 5.0, 0.5, 6.0, 1.0)
 	fx.ring(h.pos, 1.4, Color("7ac8ff"), 0.3)
-	sfx("shield", h.pos, 0.0, 1.6)
 	var credit: Ent = by.owner_h if by is Kin and by.owner_h else by
+	Juice.armor_break(self, h, credit)
 	if credit == player and hud:
 		hud.toast_small("ARMOR BROKEN", Color("7ac8ff"))
 		hud.hitmarker(true, true)
@@ -2927,7 +2956,7 @@ const TONIC_CARRY := 5        # tonics you can bring into a run (two free + up t
 var _vis_tex_done := false
 func _update_vision() -> void:
 	# the dimming outside your view cone, drawn by the toon shaders
-	var looking := player != null and not player.out and not player.extracted and not player.dropping and not player.riding
+	var looking: bool = player != null and not player.out and not player.extracted and not player.dropping and not player.riding and not opts.get("arena", false)
 	if looking and not _vis_tex_done:
 		_vis_tex_done = true
 		RenderingServer.global_shader_parameter_set("vis_blocks", world.vis_texture())
@@ -2965,6 +2994,8 @@ func _exit_tree() -> void:
 	if biomes: biomes.free_up()
 	if duel:
 		duel.teardown()
+	if arena:
+		arena.teardown()
 	if _bond_cb.is_valid() and CombatBus.hit_landed.is_connected(_bond_cb):
 		CombatBus.hit_landed.disconnect(_bond_cb)
 	if _combo_cb.is_valid() and CombatBus.status_applied.is_connected(_combo_cb):
@@ -3072,6 +3103,7 @@ func _collect(h: Hunter, p: Dictionary) -> void:
 # ------------------------------------------------------------------ shots
 func spawn_shot(by: Ent, at: Vector3, v2: Vector2, dmg: float, life: float, size: float, col: Color, extra := {}) -> void:
 	var mi: MeshInstance3D = null
+	var vr := size          # the drawn radius (Oomph.shot_look), kept for the tracer stretch
 	for s in shot_pool:
 		if not s.visible:
 			mi = s; break
@@ -3081,17 +3113,18 @@ func spawn_shot(by: Ent, at: Vector3, v2: Vector2, dmg: float, life: float, size
 		mi.visible = true
 		# readability: what can hurt you is the brightest, hottest thing on screen; your own and your
 		# team's shots are smaller and dimmer so they never hide an incoming one
-		var vis_col := col
-		var vis_size := size * 2.0
-		if player and by.team != player.team:
-			vis_col = col.lerp(Color("ff5a3a"), 0.35)
-			vis_col.a = 1.0
-			vis_size *= 1.3
-		elif player:
-			vis_col = Color(col, 0.5)
-			vis_size *= 0.85
+		var look: Array = Oomph.shot_look(self, by, col, size)
+		var vis_col: Color = look[0]
+		var vis_size: float = look[1]
+		if player and by.team == player.team and String(extra.get("src", "")) == "abil":
+			vis_col = vis_col.lerp(Color.WHITE, 0.25)      # your right click reads clearly over your own gunfire (pop)
+			vis_size *= 1.2
 		mi.material_override.set_shader_parameter("color", vis_col)
+		var halo := mi.get_node_or_null("Halo") as MeshInstance3D
+		if halo:
+			halo.material_override.set_shader_parameter("color", Color(vis_col.lightened(0.2), float(look[2])))
 		mi.scale = Vector3.ONE * vis_size
+		if not Oomph.legacy: vr = vis_size * 0.5
 		mi.global_position = at
 	if not extra.has("dy") and not extra.get("mob", false) and not extra.get("cos", false) and not extra.get("melee", false):
 		var src: Hunter = by as Hunter if by is Hunter else ((by as Kin).owner_h as Hunter if by is Kin and (by as Kin).owner_h else null)
@@ -3108,7 +3141,7 @@ func spawn_shot(by: Ent, at: Vector3, v2: Vector2, dmg: float, life: float, size
 	if duel and not extra.get("cos", false):
 		duel.note_shot(by)
 	shot_n += 1
-	var sd := {"sid": shot_n, "pos": at, "vel": v2, "dmg": dmg, "team": team, "by": by, "life": life, "life0": life, "r": size, "col": col, "x": extra, "node": mi, "prev": at, "start": at}
+	var sd := {"vr": vr, "sid": shot_n, "pos": at, "vel": v2, "dmg": dmg, "team": team, "by": by, "life": life, "life0": life, "r": size, "col": col, "x": extra, "node": mi, "prev": at, "start": at}
 	if extra.has("deco") or extra.get("rope", false):
 		sd["deco"] = _make_deco(String(extra.get("deco", "")), col, size, extra.get("rope", false))
 	shots.append(sd)
@@ -3223,6 +3256,7 @@ func _update_shots(dt: float) -> void:
 				sx["hitset"] = {}
 				s["life"] = float(s["life0"]) * 1.6
 				sfx("whoosh", p, -6.0, 1.5)
+				if String(sx.get("src", "")) == "abil": sfx("ab_whirr", p, -8.0, 1.15)     # (on its way back)
 				continue
 		if s["life"] <= 0.0:
 			_shot_end(s, p, null, "expire")
@@ -3310,6 +3344,10 @@ func _shot_end(s: Dictionary, at: Vector3, e: Ent, why := "") -> void:
 			Effects.run(fxx["fx_end"], s["by"], c2)
 	if s["node"]:
 		s["node"].visible = false
+	if why == "caught" and String(fxx.get("src", "")) == "abil":
+		AbilityFx.caught(self, s["by"], s["col"])
+	elif e == null and String(fxx.get("src", "")) == "abil" and not fxx.get("cos", false):
+		AbilityFx.fizzle(self, at, s["col"])      # a right click that missed still ends visibly
 	if fxx.has("hitset"):
 		if e == null: fx.burst(at, s["col"], 5, 2.0, 0.25, 6.0, 0.6)
 		return        # piercing shots already dealt their hits on the way
@@ -3520,6 +3558,7 @@ func _process(delta: float) -> void:
 	if paused and not net_on:
 		return
 	_tips()
+	if music_dir: music_dir.tick(self, delta)
 	if hitstop > 0.0 and not net_on:
 		hitstop -= delta
 		_gather_input()
@@ -3570,14 +3609,16 @@ func _process(delta: float) -> void:
 	for s in shots:
 		if s.has("deco"):
 			_render_deco(s, alpha)
+		if String((s["x"] as Dictionary).get("src", "")) == "abil":
+			AbilityFx.trail(self, s, (s["prev"] as Vector3).lerp(s["pos"], alpha))
 		if s["node"]:
 			var mi: MeshInstance3D = s["node"]
 			mi.global_position = (s["prev"] as Vector3).lerp(s["pos"], alpha)
 			var v: Vector2 = s["vel"]
 			if v.length() > 1.0:
 				mi.look_at(mi.global_position + Vector3(v.x, 0, v.y), Vector3.UP)
-				var r: float = s["r"]
-				mi.scale = Vector3(r * 2.0, r * 2.0, r * 2.0 + v.length() * 0.025)
+				var r: float = s.get("vr", s["r"])
+				mi.scale = Vector3(r * 2.0, r * 2.0, Oomph.tracer_len(r, v.length(), float((s["x"] as Dictionary).get("tracer", 1.0))))
 	_vprof("verbs_shots")
 	cam.follow_mode = String(Settings.get_v("cam_follow"))
 	var sty := String(Settings.get_v("cam_style"))
@@ -3612,6 +3653,7 @@ func _process(delta: float) -> void:
 			# sneaking (Ctrl) pulls the camera well back for a wide look around [Supervive]
 			cam.zoom_to = 1.25 if player.gliding else (1.45 if player.crouch and player.grounded else 1.0)
 			if train.has("_sizes"): cam.zoom_to = 0.5     # (--size-demo screenshots)
+			if has_meta("zoom_hold"): cam.zoom_to = float(get_meta("zoom_hold"))     # (--arena-demo screenshots)
 			# high up, the camera pulls back with your altitude so you can still read the ground
 			var alt := player_altitude()
 			if alt > 4.0:
@@ -3715,7 +3757,7 @@ func _gather_input() -> void:
 				choose_perk(pi)
 	# the kit: Q glove, E kin ability, C throw kin, R bond, 1 heal (the second kin ability, kin swap
 	# and the separate armor-kit key are retired)
-	if Input.is_action_just_pressed("base") and not paused and duel == null:
+	if Input.is_action_just_pressed("base") and not paused and duel == null and not opts.get("arena", false):
 		pending_input["base"] = true
 	var slot_of := {"dash": "dash", "secondary": "sec", "gear1": "gear", "signature": "kin", "ultimate": "ult"}
 	for a in [["dash", "dash"], ["jump", "jump"], ["signature", "sig"], ["reload", "reload"], ["tonic", "tonic"], ["throw", "throw"], ["ultimate", "ult"], ["secondary", "sec"], ["gear1", "gear1"], ["kin_ability", "kin_ab"]]:
@@ -4029,6 +4071,43 @@ func step(dt: float) -> void:
 		if "--debug-rival" in OS.get_cmdline_user_args() and int(time * 60.0) % 60 == 0:
 			for h in hunters:
 				if h != player: print("RIVAL ", h.pname, " ", h.pos, " vis ", h.visible, " unseen ", h.unseen, " out ", h.out, " team ", h.team)
+	if "--juice-demo" in OS.get_cmdline_user_args() and player and not player.dropping:
+		# screenshots of hits (Juice): a rival steps up 4m away, holds still, and takes fire
+		if hud: hud.guide_hidden = true
+		if not train.has("_jt"):
+			Settings.v["tips"] = false
+			if "--demo-slow" in OS.get_cmdline_user_args(): Engine.time_scale = 0.2   # (software-rendered screenshots catch the short flashes)
+			var q := demo_clear_spot(4.0)
+			var jt := make_hunter("jtarget", 7, "medium", "Rook", "idle", {}, Vector3(q.x, world.ground_at(q.x, q.z), q.z), bot_kit())
+			jt.lives = 1
+			train["_jt"] = jt
+		var jt2: Hunter = train["_jt"]
+		if is_instance_valid(jt2) and not jt2.out:
+			player.inp["aim"] = jt2.pos + Vector3(0, 0.95, 0)
+			player.inp["move"] = Vector2.ZERO
+			player.inp["fire"] = time > 0.6
+	if "--rmb-demo" in OS.get_cmdline_user_args() and player and not player.dropping:
+		# screenshots of a weapon's right click: a rival 5m away takes two shots, then the RMB at
+		# 1.2s (held 1s if it charges); a trap is laid at the rival's feet and they step back onto it
+		if hud: hud.guide_hidden = true
+		if not train.has("_rt"):
+			Settings.v["tips"] = false
+			if "--demo-slow" in OS.get_cmdline_user_args(): Engine.time_scale = 0.2   # (software-rendered screenshots catch the short flashes)
+			var q := demo_clear_spot(5.0)
+			var rt := make_hunter("rtarget", 7, "medium", "Rook", "idle", {}, Vector3(q.x, world.ground_at(q.x, q.z), q.z), bot_kit())
+			rt.lives = 1
+			train["_rt"] = rt
+		var rt2: Hunter = train["_rt"]
+		if is_instance_valid(rt2) and not rt2.out:
+			player.inp["aim"] = rt2.pos + Vector3(0, 0.95, 0)
+			player.inp["move"] = Vector2.ZERO
+			player.inp["fire"] = time > 0.5 and time < 0.75
+			if time >= 1.2 and not train.has("_rt_sec"):
+				train["_rt_sec"] = rt2.pos
+				player.inp["sec"] = true
+			player.inp["sec_hold"] = time >= 1.2 and time < 2.2
+			if time >= 2.6 and time < 2.7 and train.has("_rt_sec"):
+				rt2.teleport(train["_rt_sec"])
 	if opts.get("cone_demo", false) and player:
 		player.inp["aim"] = player.pos + Vector3(4.0, 0.95, -5.0)
 		player.inp["crouch"] = opts.get("crouch_demo", false)
@@ -4132,6 +4211,9 @@ func step(dt: float) -> void:
 	if duel:
 		duel.after_think()
 		duel.tick(dt)
+	if arena:
+		arena.after_think()
+		arena.tick(dt)
 	_prof("train")
 	for h in hunters: h.sim(dt)
 	_prof("hunters")
@@ -4178,6 +4260,10 @@ func step(dt: float) -> void:
 	_prof("life")
 	if exits: exits.tick(dt)
 	_prof("exits")
+	if opts.get("hold_demo", false) and player:
+		_hold_demo()
+	if opts.get("plate_demo", false) and player:
+		_plate_demo()
 	if lairs:
 		lairs.bot_pickups()
 		lairs.tick(dt)
@@ -4277,6 +4363,63 @@ func _separate() -> void:
 					a.pos.x += pa.x; a.pos.z += pa.y
 				if world.occupy(b.pos.x + pb.x, b.pos.z + pb.y, b.r, b.pos.y, b.grounded) == 0.0:
 					b.pos.x += pb.x; b.pos.z += pb.y
+
+## --hold-demo (screenshots): every hunter in a row by you, each holding interact for something
+## different, named after it.
+## --plate-demo (screenshots): your squad beside you and rivals near and far, a few of them hurt,
+## to see the overhead nameplates.
+func _plate_demo() -> void:
+	if has_meta("plate_demo_done"):
+		for h in hunters:
+			if h != player: h.inp["move"] = Vector2.ZERO
+		return
+	if time < 0.3:
+		return
+	set_meta("plate_demo_done", true)
+	for mb in mobs: mb.dead = true; mb.visible = false
+	var base: Vector3 = player.pos
+	var mates := hunters.filter(func(x): return x != player and x.team == player.team)
+	var foes := hunters.filter(func(x): return x.team != player.team)
+	var spots := [Vector3(-2.6, 0, 0.6), Vector3(2.6, 0, 0.8)]
+	var fspots := [Vector3(-3.5, 0, -4.5), Vector3(3.0, 0, -5.0), Vector3(-6.5, 0, -8.5), Vector3(5.5, 0, -10.5), Vector3(0.5, 0, -12.0), Vector3(8.0, 0, -6.0)]
+	var place := func(h: Hunter, off: Vector3) -> void:
+		var at := world.free_spot_near(base + off, [], 0.6, 0.5, 4.0)
+		h.teleport(Vector3(at.x, world.ground_at(at.x, at.z), at.z))
+		h.ctrl = "idle"; h.vel = Vector3.ZERO
+	for i in mates.size():
+		if i < spots.size(): place.call(mates[i], spots[i])
+	for i in foes.size():
+		if i < fspots.size(): place.call(foes[i], fspots[i])
+		else: foes[i].teleport(world.random_ground())
+	for i in hunters.size():
+		var h: Hunter = hunters[i]
+		if h != player and i % 3 == 1: h.hp = h.max_hp * 0.45
+		if h != player and i % 3 == 2: h.armor = h.max_armor * 0.5
+
+func _hold_demo() -> void:
+	var ks: Array = Hunter.HOLD_KINDS
+	if not has_meta("hold_demo_done"):
+		set_meta("hold_demo_done", true)
+		var base: Vector3 = player.pos
+		var i := 0
+		for h in hunters:
+			h.ctrl = "idle"; h.inp["move"] = Vector2.ZERO
+			var col := i % 4; var row := i / 4
+			var at := base + Vector3((col - 1.5) * 2.4, 0, row * 2.6)
+			at = world.free_spot_near(at, [], 0.6, 0.5, 3.0)
+			h.teleport(Vector3(at.x, world.ground_at(at.x, at.z), at.z))
+			h.face = 0.0
+			i += 1
+		for mb in mobs: mb.dead = true; mb.visible = false
+		cam.zoom_to = 0.62; cam.zoom = 0.62
+	var j := 0
+	for h in hunters:
+		if j < ks.size():
+			h.set_hold(String(ks[j]))
+			h.pname = String(ks[j])
+			h.inp["aim"] = h.pos + Vector3(0, 0.9, 3.0)
+		j += 1
+	cam.zoom_to = 0.62
 
 func _update_pads(dt: float) -> void:
 	for pd in world.pads:
@@ -4445,7 +4588,7 @@ func _update_interact(dt: float) -> void:
 		if best.is_empty() and not opts.get("training", false):
 			for k in kins:
 				if k.state == "dazed" and not k.dead and h.flat_dist(k) < 1.9:
-					best = {"kind": "catch", "ent": k, "label": ("Hold %s to capture %s" % [Settings.key_cap("interact"), k.rec.get("name", "the Boki")]) if k.lost_from != "" else ("Hold " + Settings.key_cap("interact") + " to catch the %s" % Data.KIN[k.species]["name"])}
+					best = {"kind": "catch", "ent": k, "label": ("Hold %s to take %s with you" % [Settings.key_cap("interact"), k.rec.get("name", "the Boki")]) if k.lost_from != "" else ("Hold " + Settings.key_cap("interact") + " to tame the %s" % Data.KIN[k.species]["name"])}
 					break
 		# 3. swap to a weapon on the ground
 		if best.is_empty():
@@ -4508,6 +4651,7 @@ func _update_interact(dt: float) -> void:
 			"finish":
 				# a short hold commits you to the stomp (Life.start_stomp): no cancelling after that
 				var o: Hunter = best["ent"]
+				h.set_hold("windup")
 				h.finish_t += dt
 				if h.finish_t >= Life.R["stomp_commit"]:
 					Life.start_stomp(self, h, o)
@@ -4524,6 +4668,7 @@ func _update_interact(dt: float) -> void:
 						hud.open_loot(b0)
 			"boxrev", "loot":
 				var b: Dictionary = best["box"]
+				h.set_hold("revive" if best["kind"] == "boxrev" else "loot")
 				var rev: bool = best["kind"] == "boxrev"
 				# taking a hit breaks the channel (a revive has to be let go and started again)
 				if time - h.hurt_at < 0.1:
@@ -4554,23 +4699,30 @@ func _update_interact(dt: float) -> void:
 						else: Life.loot_box(self, h, b)
 			"catch":
 				var k: Kin = best["ent"]
+				h.set_hold("tame")
 				# capturing someone's lost kin takes longer than catching a wild one
 				k.catch_prog += dt / (float(T.get("capture_time", 3.0)) if k.lost_from != "" else 1.3)
 				if k.catch_prog >= 1.0:
 					_catch(h, k)
 			"chest":
 				var c: Dictionary = best["chest"]
+				h.set_hold("chest")
 				c["prog"] += dt / (0.7 + 0.4 * int(c.get("tier", 0)))
 				if c["prog"] >= 1.0:
 					_open_chest(h, c)
 			"shrine":
 				var sh: Dictionary = best["shrine"]
+				h.set_hold("shrine")
 				sh["prog"] += dt / 1.2
 				if sh["prog"] >= 1.0:
 					_use_shrine(h, sh)
 			"exit":
+				var xa := String(best.get("act", ""))
+				if xa in ["call", "start"]: h.set_hold("console")
+				elif xa in ["open", "enter"]: h.set_hold("key")
 				exits.hold(h, best, dt)
 			"lair":
+				if String(best.get("what", "")) == "rune": h.set_hold("rune")
 				lairs.hold(h, best, dt)
 
 func _catch(h: Hunter, k: Kin) -> void:
@@ -4607,7 +4759,7 @@ func _catch(h: Hunter, k: Kin) -> void:
 	fx.burst(k.pos + Vector3(0, 0.5, 0), Data.KIN[k.species]["color"], 26, 4.0, 0.7)
 	fx.ring(k.pos, 1.5, Color("fff2a0"), 0.4)
 	if h == player:
-		add_feed("You caught a %s! Extract to keep it." % Data.KIN[k.species]["name"])
+		add_feed("The %s trusts you now. Extract to bring it home." % Data.KIN[k.species]["name"])
 		if player.kin and player.kin.state != "fainted":
 			player.kin.bark("caught")
 
@@ -4764,8 +4916,8 @@ var tut_used0 := {}
 # ---- training area
 ## [id, what to do, the action whose key it uses ("" for none)]
 const TRAIN := [["move", "Walk around", "up"], ["dash", "Dash", "dash"], ["glide", "Jump, then hold Mouse 5 or Space in the air to glide", "jump"],
-	["shoot", "Shoot a target dummy", "fire"], ["ability", "Use your Boki's ability", "signature"], ["ult", "Fill the bond meter and use your bond ultimate", "ultimate"],
-	["secondary", "Use your weapon ability (right click)", "secondary"], ["glove", "Use your glove (pick one up from the rack first)", "gear1"],
+	["shoot", "Shoot a target dummy", "fire"], ["ability", "Use your E ability", "signature"], ["ult", "Use your ultimate (R: open from the start here)", "ultimate"],
+	["secondary", "Use your right click (tap it, then hold it)", "secondary"], ["glove", "Use your glove (pick one up from the rack first)", "gear1"],
 	["crouch", "Sneak: slower, steadier aim, harder to spot", "crouch"],
 	["throw", "Throw your Boki at a dummy", "throw"], ["combo", "Land a combo: shoot a foe your Boki just stunned or rooted", "fire"], ["tonic", "Heal (tonic, or armor kit when health is full)", "tonic"],
 	["stagger", "Stagger a big dummy: hit it with an ability while it has a purple ring", "signature"],
@@ -4775,6 +4927,13 @@ var train := {}
 var train_t := 0.0
 
 var duel_pad := Vector3.INF
+
+## The Arena: a compact practice map with dummies, a sparring bot and the kit card (scripts/match/arena.gd).
+static func arena_opts(arch_id := "") -> Dictionary:
+	var o := {"arena": true, "training": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 6262, "no_drop": true}
+	if Arch.exists(arch_id):
+		o["arch"] = arch_id; o["cls"] = Arch.weight(arch_id); o["weapon"] = Arch.default_weapon(arch_id)
+	return o
 
 ## The training pad that takes you to the duel room.
 static func duel_opts() -> Dictionary:
@@ -4790,6 +4949,8 @@ func _update_training(dt: float) -> void:
 	train_t += dt
 	if player.downed and train_t > 2.0:
 		revive_hunter(player, null)
+	if opts.get("arena", false):
+		return        # the Arena runs its own (scripts/match/arena.gd)
 	var was_ult: bool = train.get("_ult_full", false)
 	# everything recharges quickly here
 	player.ult = minf(1.0, player.ult + dt / 6.0)
@@ -4806,12 +4967,12 @@ func _update_training(dt: float) -> void:
 		"dash": player.roll_t > 0.0,
 		"glide": player.gliding and not player.dropping,
 		"shoot": player.dmg_done > 0.0,
-		"ability": player.kin != null and (player.kin as Kin).runner.has_slot("k1") and not (player.kin as Kin).runner.is_ready("k1"),
+		"ability": (player.ak != null and float(player.ak.cd["e"]) > 0.0) or (player.ak == null and player.kin != null and (player.kin as Kin).runner.has_slot("k1") and not (player.kin as Kin).runner.is_ready("k1")),
 		"glove": float(player.gear_cd[0]) > 0.0,
 		"combo": int(player.stats.get("combos", 0)) > 0,
 		"crouch": player.crouch,
-		"secondary": player.runner != null and player.runner.has_slot("utility") and not player.runner.is_ready("utility"),
-		"ult": was_ult and player.ult < 0.5,
+		"secondary": (player.ak != null and player.ak.last_variant != "") or (player.runner != null and player.runner.has_slot("utility") and not player.runner.is_ready("utility")),
+		"ult": (player.ak != null and float(player.ak.cd["r"]) > 0.0) or (was_ult and player.ult < 0.5),
 		"throw": player.kin != null and player.kin.st_throws > 0,
 		"tonic": player.tonics < int(train.get("_tonics", player.tonics)),
 		"ledge": player.grap.size() > 0 or player.mantle_k() > 0.0,
@@ -4838,7 +4999,7 @@ func _update_training(dt: float) -> void:
 
 ## The checklist for this hero: the secondary step only shows for heroes that have one.
 func train_rows() -> Array:
-	return TRAIN.filter(func(t): return t[0] != "secondary" or (player != null and player.runner != null and player.runner.has_slot("utility")))
+	return TRAIN.filter(func(t): return t[0] != "secondary" or (player != null and (player.ak != null or (player.runner != null and player.runner.has_slot("utility")))))
 
 func _train_label(k: String) -> String:
 	for t in TRAIN:
@@ -5500,6 +5661,7 @@ func _extract(h: Hunter, how := "", where := "") -> void:
 	var col: Color = {"skiff": ExitModels.DOCK, "hatch": ExitModels.HATCH, "uplink": ExitModels.UPLINK}.get(how, Color("8fe3c8"))
 	sfx("portal", h.pos, -4.0 if how == "hatch" else 0.0, 1.3)
 	fx.burst(h.pos + Vector3(0, 1.0, 0), col, 30, 5.0, 0.8, -4.0)
+	Juice.extract(self, h, col)
 	add_feed("%s extracted" % h.pname)
 	if h.kin:
 		h.kin.visible = false
@@ -5724,6 +5886,9 @@ func _flags(h: Hunter) -> int:
 	if h.reveal_t > 0.0: f |= 4096
 	if h.crouch: f |= 8192
 	if h.diving: f |= 16384
+	# holding interact (an animation each): bit 2048, and which kind in bits 15-18
+	var hk := Hunter.HOLD_KINDS.find(h.holding())
+	if hk >= 0: f |= 2048 | ((hk + 1) << 15)
 	return f
 
 const KIN_STATES := ["shoulder", "flying", "flying_home", "active", "returning", "fainted", "reviving", "wild", "dazed"]
@@ -5854,6 +6019,9 @@ func _net_apply(e: Ent, it: Array) -> void:
 			h.diving = f & 16384 != 0
 			if f & 4096 != 0: h.reveal_t = maxf(h.reveal_t, 0.3)
 			h.crouch = f & 8192 != 0
+			if f & 2048 != 0:
+				var hk := ((f >> 15) & 15) - 1
+				if hk >= 0 and hk < Hunter.HOLD_KINDS.size(): h.set_hold(String(Hunter.HOLD_KINDS[hk]), 0.3)
 			h.down_hp = it[12]; h.revive = maxf(h.revive if h.revive > float(it[13]) and _rev_out.has(h.nid) else 0.0, float(it[13]))
 			h.shield = it[17]; h.extract_prog = it[18]
 			h.kills = int(it[19]); h.knocks = int(it[20]); h.dmg_done = float(it[21])
@@ -6079,7 +6247,7 @@ func _net_ev(x, from: String) -> void:
 				var rec: Dictionary = x[3]
 				player.caught.append(rec)
 				sfx("catch", player.pos, 0.0)
-				add_feed("You caught a %s! Extract to keep it." % Data.KIN.get(String(rec.get("species", "cindle")), Data.KIN["cindle"])["name"])
+				add_feed("The %s trusts you now. Extract to bring it home." % Data.KIN.get(String(rec.get("species", "cindle")), Data.KIN["cindle"])["name"])
 
 func _process_net_revives() -> void:
 	if _rev_out.is_empty():
@@ -6092,6 +6260,51 @@ func _process_net_revives() -> void:
 # ------------------------------------------------------------------ first-time tips
 var _tip_t := 0.0
 
+## Screenshot demos: moves the player (once) to the nearest open, level stretch of ground at least
+## 6m from the start's clutter (the duel pad and its post, the glove stands) and returns a spot
+## `dist` metres east of them with a clear line of fire.
+func demo_clear_spot(dist: float) -> Vector3:
+	var best := Vector3.INF
+	for pass_i in 2:
+		best = _demo_open(dist, pass_i == 0)
+		if best != Vector3.INF:
+			break
+	if best == Vector3.INF:
+		print("DEMO no open ground")
+		return world.free_spot_near(player.pos + Vector3(dist, 0, 0), [player.pos], 1.0, 0.45, 6.0)
+	# monsters nearby would join in: send them to the far side of the map for the demo
+	for mb in mobs:
+		if Vector2(mb.pos.x - best.x, mb.pos.z - best.z).length() < 14.0:
+			var far := world.free_spot_near(Vector3(world.w - best.x, 0, world.h - best.z), [], 1.0, 0.45, 30.0)
+			mb.pos = far; mb.prev = far
+	player.teleport(best)
+	player.vel = Vector3.ZERO
+	return best + Vector3(dist, 0, 0)
+
+func _demo_open(dist: float, avoid_mobs: bool) -> Vector3:
+	var best := Vector3.INF; var bd := 1e9
+	var c0 := player.pos
+	for iz in range(2, world.h - 2):
+		for ix in range(2, world.w - 2):
+			var q := Vector3(ix + 0.5, 0, iz + 0.5)
+			var dd := Vector2(q.x - c0.x, q.z - c0.z).length()
+			if dd < 6.0 or dd >= bd or world.is_void(q.x, q.z) or world.is_block(q.x, q.z):
+				continue
+			if avoid_mobs and mobs.any(func(mb): return Vector2(mb.pos.x - q.x, mb.pos.z - q.z).length() < 9.0):
+				continue
+			var gy := world.ground_at(q.x, q.z)
+			var ok := true
+			for dx in range(-2, int(dist) + 3):
+				for dz in range(-2, 3):
+					var x := q.x + dx; var z := q.z + dz
+					var inner := absi(dz) <= 1 and dx >= -1 and dx <= int(dist) + 1
+					if world.is_block(x, z) or (inner and (world.is_void(x, z) or absf(world.ground_at(x, z) - gy) > 0.8)):
+						ok = false; break
+				if not ok: break
+			if ok:
+				bd = dd; best = Vector3(q.x, gy, q.z)
+	return best
+
 func _tip(key: String, text: String) -> void:
 	var seen: Dictionary = Save.d["tutorial"]
 	if seen.get(key, false) or hud == null:
@@ -6100,12 +6313,12 @@ func _tip(key: String, text: String) -> void:
 	hud.tip(text)
 
 func _tips() -> void:
-	if player == null or player.out or player.riding or opts.get("autoplay", false) or not Settings.get_v("tips"):
+	if player == null or player.out or player.riding or opts.get("autoplay", false) or not Settings.get_v("tips") or Record.clean():
 		return
 	_tip_t += get_process_delta_time()
 	if _tip_t < 1.0:
 		return
-	if player.dropping or opts.get("tutorial", false):
+	if player.dropping or opts.get("tutorial", false) or opts.get("arena", false):
 		return
 	_tip("move", "WASD to move, aim with the mouse, hold left click to shoot. Shift dashes, Space jumps. Hold Space in the air to glide.")
 	if _tip_t > 14.0:
@@ -6128,7 +6341,7 @@ func _tips() -> void:
 		var a2 := k.runner.def_of("k2")
 		_tip("skill", "%s uses %s's %s. Stun or root a foe with your Boki, then shoot it for a combo. %s throws it, and again calls it back to your shoulder." % [Settings.key_cap("signature"), k.rec.get("name", "your Boki"), a1.display_name if a1 else "ability", Settings.key_cap("throw")])
 	if not interact.is_empty() and interact["kind"] == "catch":
-		_tip("catch", "Hold " + Settings.key_cap("interact") + " to catch it. Caught Boki only come home if you extract.")
+		_tip("catch", "Hold " + Settings.key_cap("interact") + " to tame it. A Boki you tame only comes home if you extract.")
 	if exits and not interact.is_empty() and interact["kind"] == "exit":
 		match String(interact["x"]["kind"]):
 			"dock": _tip("exit_dock", "Skiff docks: call the skiff at the horn beacon, survive the monsters it draws until it ties up, then stand on its deck before it leaves.")

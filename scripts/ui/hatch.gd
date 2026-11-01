@@ -587,13 +587,11 @@ func _pick(i: int) -> void:
 		return
 	chosen = i
 	Sfx.play("click")
-	var e: Dictionary = eggs[i]
-	fx.burst(e["holder"].position + Vector3(0, 0.6, 0), Data.KIN[e["data"]["species"]]["color"], 10, 2.0, 0.5, 2.0)
 	_show_pick()
 
-## Hatching by knocks: each tap hits harder than the last. The egg jumps higher and twists further,
-## the camera punches in, the sound climbs in pitch, sparks fly, a new crack opens, and the last
-## few knocks flash the screen before it bursts.
+## Hatching by knocks: each tap is a gentle knock on the shell, and something knocks back. The
+## egg rocks a little more each time, a new crack opens, the camera leans in, and the knocks from
+## inside get stronger. No flashes or bursts: it's a small, close moment (docs/POSITIONING.md).
 const TAPS := 7
 var taps := 0
 var cam_shake := 0.0
@@ -604,45 +602,37 @@ func _tap_egg() -> void:
 	var k := float(taps) / TAPS
 	var wegg: EggHatch = eggs[chosen]["egg"]
 	var holder: Node3D = eggs[chosen]["holder"]
-	var col: Color = Color("ffd36a").lerp(Color(Data.KIN[egg_defs[chosen]["species"]]["color"]), k)
-	# a jump and a twist that grow with every knock
+	# a rock and a little hop that grow with every knock
 	var hop := create_tween()
-	var up := 0.12 + 0.1 + 0.32 * k
-	hop.tween_property(wegg, "position:y", up, 0.09 + 0.05 * k).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	hop.tween_property(wegg, "position:y", 0.12, 0.12 + 0.06 * k).set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
-	wegg.rotation.z = (0.12 + 0.45 * k) * (1.0 if taps % 2 == 0 else -1.0)
+	var up := 0.12 + 0.04 + 0.12 * k
+	hop.tween_property(wegg, "position:y", up, 0.1 + 0.04 * k).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	hop.tween_property(wegg, "position:y", 0.12, 0.14 + 0.05 * k).set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
+	wegg.rotation.z = (0.08 + 0.22 * k) * (1.0 if taps % 2 == 0 else -1.0)
 	var sq := create_tween()
-	wegg.scale = Vector3(1.0 + 0.12 + 0.2 * k, 1.0 - 0.1 - 0.15 * k, 1.0 + 0.12 + 0.2 * k)
-	sq.tween_property(wegg, "scale", Vector3.ONE, 0.25 + 0.1 * k).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
-	# a new crack each time
+	wegg.scale = Vector3(1.04 + 0.06 * k, 0.96 - 0.05 * k, 1.04 + 0.06 * k)
+	sq.tween_property(wegg, "scale", Vector3.ONE, 0.3).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	# a new crack each time, and a few flakes of shell
 	var base := 8 + taps * 3
 	wegg._crack(base, base + 2 + int(k * 2.0))
-	# sparks, sound and camera
-	fx.burst(holder.position + Vector3(0, 0.5, 0), col, int(4 + 26 * k), 1.5 + 4.0 * k, 0.4 + 0.3 * k, -2.0)
-	if taps >= TAPS - 2:
-		fx.ring(holder.position + Vector3(0, 0.05, 0), 0.8 + 1.4 * k, col, 0.35)
-	Sfx.play("hit", null, -10.0 + 10.0 * k, 0.02, 0.8 + 0.7 * k)
-	if taps >= 4: Sfx.play("thump", null, -12.0 + 8.0 * k, 0.02, 1.2 - 0.3 * k)
-	cam_shake = 0.02 + 0.16 * k * k
-	cam_to = Vector3(0, 2.5, 5.4).lerp(Vector3(0, 1.8, 3.9), k)
-	if taps >= TAPS - 1:
-		var fl := ColorRect.new(); fl.color = Color(1, 0.95, 0.85, 0.25 + 0.35 * k)
-		fl.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT); fl.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		root_ui.add_child(fl)
-		create_tween().tween_property(fl, "color:a", 0.0, 0.35).finished.connect(fl.queue_free)
+	fx.burst(holder.position + Vector3(0, 0.5, 0), wegg.col.lightened(0.2), int(2 + 4 * k), 1.2, 0.35, 6.0, 0.5)
+	# your knock, then its knock back from inside
+	Sfx.play("thump", null, -16.0 + 4.0 * k, 0.04, 1.3)
+	get_tree().create_timer(0.22).timeout.connect(func(): Sfx.play("thump", null, -20.0 + 8.0 * k, 0.05, 1.6 - 0.2 * k))
+	cam_shake = 0.004 + 0.02 * k
+	cam_to = Vector3(0, 2.5, 5.4).lerp(Vector3(0, 1.9, 4.2), k)
 	if title:
-		title.text = ["Help it hatch", "Something stirs...", "It knocks back!", "Again!", "Harder!", "It's cracking!", "One more!", "Here it comes!"][mini(taps, 7)]
+		title.text = ["Knock on the shell", "Something stirs...", "It knocks back.", "Again, gently.", "It's pushing.", "It's cracking.", "Nearly.", "Here it comes."][mini(taps, 7)]
 
 func _start_hatch() -> void:
 	stage = "warm"
 	hatch_t = 0.0
 	_clear_bottom()
-	title.text = "Help it hatch"
+	title.text = "Knock on the shell"
 	taps = 0
 	var card := UI.card(UI.CARD, 14, 16)
 	card.custom_minimum_size = Vector2(460, 0)
 	var v := UI.vbox(10); card.add_child(v)
-	var l := UI.label("Tap the egg: click (or press Space) again and again. Every knock wakes it a little more.", 15)
+	var l := UI.label("Knock on the egg: click (or press Space). Every knock wakes it a little more, and it knocks back.", 15)
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	v.add_child(l)
 	warm_bar = Control.new()
@@ -718,11 +708,11 @@ func _process(delta: float) -> void:
 			wegg.position.y = 0.12
 			wegg.popped.connect(func(k: Node3D):
 				kin_node = k
-				title.text = "It's a %s!" % Data.KIN[egg_defs[chosen]["species"]]["name"])
+				title.text = "It's looking at you.")
 			wegg.done.connect(func():
 				stage = "reveal"
 				cam_to = Vector3(0, 2.2, 5.6)
-				# the big reveal (flash, fanfare, turntable and info), then naming
+				# a closer look (its card, and turning it round), then naming
 				var rv := KinReveal.new(egg_defs[chosen]["species"])
 				add_child(rv)
 				rv.proceed.connect(func():

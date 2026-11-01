@@ -28,13 +28,13 @@ const DEFAULTS := {
 ##   over the sea  ·  shafts: light shafts into the void  ·  fx: particle amounts (x)
 const QUALITY := {
 	"low": {"name": "Low", "msaa": 0, "shadows": false, "scale": 0.8, "lod": 4.0, "grass": 0.4, "draw": 0.6, "shadow_k": 0.7, "splits": 1, "soft": 0,
-		"ssao": false, "glow": false, "clouds": 0, "shafts": false, "fx": 0.45},
+		"ssao": false, "glow": false, "clouds": 0, "shafts": false, "fx": 0.45, "volfog": false},
 	"medium": {"name": "Medium", "msaa": 2, "shadows": true, "scale": 1.0, "lod": 2.0, "grass": 0.7, "draw": 0.8, "shadow_k": 0.8, "splits": 2, "soft": 1,
-		"ssao": false, "glow": true, "clouds": 1, "shafts": true, "fx": 0.7},
+		"ssao": false, "glow": true, "clouds": 1, "shafts": true, "fx": 0.7, "volfog": false},
 	"high": {"name": "High", "msaa": 4, "shadows": true, "scale": 1.0, "lod": 1.0, "grass": 1.0, "draw": 1.0, "shadow_k": 1.0, "splits": 4, "soft": 3,
-		"ssao": true, "glow": true, "clouds": 2, "shafts": true, "fx": 1.0},
+		"ssao": true, "glow": true, "clouds": 2, "shafts": true, "fx": 1.0, "volfog": true},
 	"ultra": {"name": "Ultra", "msaa": 4, "shadows": true, "scale": 1.0, "lod": 0.5, "grass": 1.0, "draw": 1.6, "shadow_k": 1.35, "splits": 4, "soft": 4,
-		"ssao": true, "glow": true, "clouds": 2, "shafts": true, "fx": 1.0},
+		"ssao": true, "glow": true, "clouds": 2, "shafts": true, "fx": 1.0, "volfog": true},
 }
 const QUALITY_ORDER := ["low", "medium", "high", "ultra"]
 
@@ -90,10 +90,11 @@ const ACTIONS := [
 	["up", "Move up"], ["down", "Move down"], ["left", "Move left"], ["right", "Move right"],
 	["fire", "Weapon attack"], ["secondary", "Archetype ability (right click)"], ["dash", "Archetype dash"], ["jump", "Jump (hold to glide)"], ["glide", "Glide (hold in the air)"], ["crouch", "Sneak"],
 	["gear1", "Glove active"], ["signature", "Archetype utility (E)"], ["kin_ability", "Boki ability (hops out, casts, hops back)"], ["throw", "Send / recall Boki"], ["ultimate", "Archetype ultimate (bonded when bond is full)"], ["base", "Base to a teammate (squads)"],
-	["interact", "Use, catch, revive, pet"], ["tonic", "Heal (tonic, or armor kit when health is full)"], ["scores", "Scoreboard"], ["emote", "Emote wheel (hold, in a match)"],
+	["interact", "Use, tame, revive, pet"], ["tonic", "Heal (tonic, or armor kit when health is full)"], ["scores", "Scoreboard"], ["emote", "Emote wheel (hold, in a match)"],
 	["map", "Full map (click to ping)"], ["pass_lead", "Pass the drop lead"], ["separate", "Separate from the drop"],
 	["play", "Play fetch with a Boki"], ["talk", "Talk to a Boki"], ["details", "A Boki's details"], ["inventory", "Inventory"],
 	["build", "Build mode at home / decorate indoors"], ["rotate", "Turn a piece (build mode)"],
+	["record", "Recording mode (again: hide the HUD)"], ["record_orbit", "Recording: slow camera orbit"],
 ]
 
 var v: Dictionary = {}
@@ -262,6 +263,10 @@ func _env_quality(e: Environment) -> void:
 		e.set_meta("glow0", e.glow_enabled)
 	e.ssao_enabled = bool(e.get_meta("ssao0")) and bool(q("ssao"))
 	e.glow_enabled = bool(e.get_meta("glow0")) and bool(q("glow"))
+	if e.volumetric_fog_enabled or e.has_meta("vfog0"):
+		# volumetric light in the haze (the expedition's dusk) only on the presets that can afford it
+		if not e.has_meta("vfog0"): e.set_meta("vfog0", e.volumetric_fog_enabled)
+		e.volumetric_fog_enabled = bool(e.get_meta("vfog0")) and bool(q("volfog"))
 
 ## Applies the preset in effect: its anti-aliasing and shadows (as if picked by hand), render scale,
 ## level of detail, shadow filtering, and the lights and environments already in the scene. The

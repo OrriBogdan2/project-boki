@@ -32,6 +32,7 @@ static func frame(m: Match) -> void:
 	if P.arch == "archer" and what == "r": lead = 30
 	if P.arch == "thief" and what == "r": lead = 22
 	if P.arch == "gunslinger" and what == "r": lead = 14
+	if what in ["r", "bonded"] and P.ak: lead += int(P.ak.fuse_time() * 60.0)     # the fuse winds up first
 	var go := shot_at - lead
 	var hold_t := float(P.ak.rmb_def().get("hold", 0.3)) + 0.25 if P.ak else 0.5
 	if what == "hold" and f == go - 20:

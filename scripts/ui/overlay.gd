@@ -40,7 +40,8 @@ func _ready() -> void:
 	root.add_child(fps_lbl)
 
 func _process(_d: float) -> void:
-	fps_lbl.visible = bool(Settings.get_v("show_fps"))
+	Record.tick(get_tree(), _d)
+	fps_lbl.visible = bool(Settings.get_v("show_fps")) and not Record.clean()
 	if fps_lbl.visible:
 		fps_lbl.text = "%d fps" % Engine.get_frames_per_second()
 
@@ -68,6 +69,17 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
 		var k := (event as InputEventKey).physical_keycode
 		var typing := get_viewport().gui_get_focus_owner() is LineEdit
+		# recording mode (Record): F10 cycles off / clean HUD / no HUD, Shift+F10 straight to no HUD,
+		# F9 the slow camera orbit with the HUD hidden. Anywhere, menus open or not.
+		if not typing and event.is_action_pressed("record"):
+			if (event as InputEventKey).shift_pressed: Record.toggle_cinema()
+			else: Record.cycle()
+			get_viewport().set_input_as_handled()
+			return
+		if not typing and event.is_action_pressed("record_orbit") and Record.cinema():
+			Record.toggle_orbit()
+			get_viewport().set_input_as_handled()
+			return
 		if not typing and event.is_action_pressed("inventory") and ctx_now() in ["home", "town", "interior"]:
 			if page == "inventory": close()
 			elif page == "": open_inventory()
@@ -123,6 +135,7 @@ func back() -> void:
 			"settings": open_settings()
 			"saves": open_saves()
 			"inventory": open_inventory()
+			"dex": open_dex(dex_open)
 			_: close()
 	else:
 		close()
@@ -278,6 +291,13 @@ func _show_settings() -> void:
 			_toggle(v, "Tap to crouch", "crouch_toggle", "Instead of holding the crouch key")
 			_toggle(v, "Damage numbers", "damage_numbers")
 			_toggle(v, "Tips during matches", "tips")
+			_group(v, "Recording")
+			var rec_row := _row(v, "Recording mode", "%s cycles it, Shift+%s hides the HUD, %s orbits the camera with the HUD hidden" % [Settings.key_cap("record"), Settings.key_cap("record"), Settings.key_cap("record_orbit")])
+			var rec_ob := OptionButton.new()
+			for i in Record.NAMES.size(): rec_ob.add_item(String(Record.NAMES[i]), i)
+			rec_ob.selected = Record.level
+			rec_ob.item_selected.connect(func(i): Record.set_level(i))
+			rec_row.add_child(rec_ob)
 			_group(v, "Kin")
 			_toggle(v, "Boki also use your E ability on their own", "kin_auto", "They can spend cooldowns you wanted (their own auto ability is always on)")
 			if admin_allowed():
@@ -397,12 +417,23 @@ func _finish_rebind(ev: InputEvent) -> void:
 
 # ------------------------------------------------------------------ inventory
 var inv_tab := "Items"
+const INV_H := 404.0          # the inventory's body height on every tab (fits a 720p window)
+var dex_open := ""            # the species whose Bokidex page is open
+
+## A Boki's page in the Bokidex (a sub-page of the inventory: Esc or Back returns to the grid).
+func open_dex(spk: String) -> void:
+	dex_open = spk
+	var v := _page("dex", "Bokidex", 760)
+	UI.hold(v, INV_H + 58.0)        # the inventory's height (a sub-page has no tab row, so its body is taller)
+	DexView.detail(v, spk, get_tree())
 
 func open_inventory() -> void:
 	if Progress.day1_mark("inventory") != "":
 		Sfx.play("unlock", null, -8.0)
 	var v := _page("inventory", "Inventory", 760)
-	UI.head_extra(v).add_child(UI.chip("gem", str(int(Save.d["gems"])), UI.GOLD, "Gems"))
+	UI.hold(v, INV_H)          # every tab the same size: switching tabs never resizes the panel
+	if inv_tab == "Items":      # one currency, and only where it matters
+		UI.head_extra(v).add_child(UI.chip("gem", str(int(Save.d["gems"])), UI.GOLD, "Gems"))
 	var icon_of := {"Items": "tonic", "Seeds": "seed", "Crops": "seed", "Furniture": "home", "Kin": "paw", "Kindex": "egg"}
 	UI.shell_tabs(v, ["Items", "Seeds", "Crops", "Furniture", "Kin", "Kindex"], inv_tab, func(t):
 		inv_tab = t; UI._page_of.erase("Inventory"); open_inventory())
@@ -475,29 +506,33 @@ func open_inventory() -> void:
 		"Kin":
 			for rec in Save.d["roster"]:
 				empty = false
-				var sp: Dictionary = Data.KIN[rec["species"]]
-				cell.call(String(rec["name"]), "Lv %d" % int(rec["level"]), "%s%s%s · %s bond · %s%s" % ["in the Boki Burrow · " if KinBox.is_boxed(rec) else "", (" ".join(Mutations.tags(rec)) + " ") if Mutations.special(rec) else "", Evo.form_name(rec), Care.bond(rec)[1], Care.condition_name(rec).to_lower(), "  · partner" if rec["uid"] == Save.d.get("active", "") else ""], Shiny.body(rec))
+				grid.add_child(_boki_card(rec))
 		"Kindex":
+			# the Bokidex: numbered tiles, each opening its own page (DexView)
 			empty = false
-			Care.dex_sync()
-			var dx: Dictionary = Save.d.get("dex", {})
-			for spk in Data.KIN:
-				var e: Dictionary = dx.get(spk, {})
-				var sp: Dictionary = Data.KIN[spk]
-				if e.is_empty() or not e.get("seen", false):
-					cell.call("???", "", "Not seen yet. Look for it on expeditions.", Color(0.3, 0.32, 0.4))
-					continue
-				var forms: Array = e.get("forms", [])
-				var desc := "%s type. %s." % [String(sp["type"]).capitalize(), "Caught" if e.get("caught", false) else "Seen, not caught"]
-				if forms.size() > 0: desc += " Forms: " + ", ".join(forms.slice(0, 3)) + ("..." if forms.size() > 3 else "")
-				if e.get("shimmer", false): desc += " Shimmer found!"
-				var dm: Array = e.get("mutations", [])
-				if not dm.is_empty(): desc += " Rare: " + ", ".join(dm.map(func(x): return Mutations.name_of(String(x)))) + "."
-				cell.call(String(sp["name"]), "★" if e.get("shimmer", false) else ("✓" if e.get("caught", false) else ""), desc, sp["color"])
+			grid.queue_free()
+			DexView.grid(v, get_tree(), func(spk: String): open_dex(spk))
 	if empty:
 		var es: Array = {"Seeds": ["No seeds", "Find them on expeditions or buy them at the stall."], "Crops": ["No crops yet", "Harvest your plots."],
 			"Furniture": ["Nothing stored", "Furniture you buy or put away lands here."], "Kin": ["No Boki yet", "Hatch an egg to get your first."]}.get(inv_tab, ["Nothing here", ""])
 		v.add_child(UI.empty_state(String(icon_of.get(inv_tab, "gem")), es[0], es[1]))
+
+## A Boki in the inventory's Boki tab: its portrait, name with its sex, level, form and bond.
+func _boki_card(rec: Dictionary) -> Control:
+	var c := UI.card(UI.CARD, 10, 12)
+	c.custom_minimum_size = Vector2(222, 0)
+	var h := UI.hbox(10); c.add_child(h)
+	h.add_child(KinPortrait.view(rec, get_tree(), 56.0))
+	var tv := UI.vbox(2); tv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var nm := UI.name_with_sex(rec, String(rec["name"]), UI.T_BODY, UI.INK, UI.semi, 13.0)
+	tv.add_child(nm)
+	tv.add_child(UI.label("Lv %d  ·  %s" % [int(rec["level"]), Evo.form_name(rec)], UI.T_SMALL, UI.MUTED))
+	var bits: Array = ["%s bond" % Care.bond(rec)[1]]
+	if rec["uid"] == Save.d.get("active", ""): bits.push_front("Partner")
+	elif KinBox.is_boxed(rec): bits.push_front("In the Burrow")
+	tv.add_child(UI.label("  ·  ".join(bits), 12, UI.MUTED))
+	h.add_child(tv)
+	return c
 
 # ------------------------------------------------------------------ save files
 func open_saves() -> void:

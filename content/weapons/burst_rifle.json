@@ -5,20 +5,22 @@
 		"medium"
 	],
 	"primary": {
-		"dmg": 5.52,
-		"rate": 0.34,
+		"dmg": 7.0,
+		"rate": 0.45,
 		"burst": 3,
-		"burst_gap": 0.07,
-		"speed": 60,
+		"burst_gap": 0.09,
+		"speed": 64,
 		"mag": 27,
 		"reload": 1.5,
-		"kb": 1.0,
+		"kb": 1.4,
 		"spread": 0.026,
 		"range": 10.5,
-		"size": 0.13,
+		"size": 0.15,
 		"color": "#80ccff",
 		"sfx": "rifle",
-		"desc": "Three rounds per pull. Accurate at range."
+		"desc": "Three rounds per pull. Accurate at range.",
+		"kick": 0.07,
+		"tracer": 1.2
 	},
 	"utility": "leash_bolt"
 }

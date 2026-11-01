@@ -537,6 +537,27 @@ static func draw_icon(c: CanvasItem, id: String, at: Vector2, s: float, col: Col
 		"hammer":
 			c.draw_line(at + Vector2(-0.6, 0.75) * s, at + Vector2(0.25, -0.15) * s, col, w * 1.4, true)
 			c.draw_colored_polygon(PackedVector2Array([at + Vector2(-0.05, -0.75) * s, at + Vector2(0.75, 0.05) * s, at + Vector2(0.45, 0.35) * s, at + Vector2(-0.35, -0.45) * s]), col)
+		"eye":
+			c.draw_arc(at + Vector2(0, 0.55) * s, 0.95 * s, -PI * 0.78, -PI * 0.22, 14, col, w, true)
+			c.draw_arc(at + Vector2(0, -0.55) * s, 0.95 * s, PI * 0.22, PI * 0.78, 14, col, w, true)
+			c.draw_circle(at, 0.28 * s, col)
+		"ruler":
+			c.draw_line(at + Vector2(-0.85, 0.45) * s, at + Vector2(0.45, -0.85) * s, col, w * 2.2, true)
+			for k in 4:
+				var p0 := at + Vector2(-0.6 + k * 0.3, 0.2 - k * 0.3) * s
+				c.draw_line(p0, p0 + Vector2(0.18, 0.18) * s, Color(0, 0, 0, 0.5), maxf(1.0, w * 0.6), true)
+		"pin":
+			c.draw_circle(at + Vector2(0, -0.3) * s, 0.5 * s, col)
+			c.draw_colored_polygon(PackedVector2Array([at + Vector2(-0.42, -0.05) * s, at + Vector2(0.42, -0.05) * s, at + Vector2(0, 0.9) * s]), col)
+			c.draw_circle(at + Vector2(0, -0.3) * s, 0.2 * s, Color(0, 0, 0, 0.45))
+		"female":      # ♀: a ring over a cross
+			c.draw_arc(at + Vector2(0, -0.28) * s, 0.46 * s, 0, TAU, 20, col, w, true)
+			c.draw_line(at + Vector2(0, 0.18) * s, at + Vector2(0, 0.95) * s, col, w, true)
+			c.draw_line(at + Vector2(-0.32, 0.6) * s, at + Vector2(0.32, 0.6) * s, col, w, true)
+		"male":        # ♂: a ring with an arrow up and right
+			c.draw_arc(at + Vector2(-0.22, 0.22) * s, 0.46 * s, 0, TAU, 20, col, w, true)
+			c.draw_line(at + Vector2(0.11, -0.11) * s, at + Vector2(0.78, -0.78) * s, col, w, true)
+			c.draw_polyline(PackedVector2Array([at + Vector2(0.28, -0.8) * s, at + Vector2(0.8, -0.8) * s, at + Vector2(0.8, -0.28) * s]), col, w, true)
 		"info":
 			c.draw_arc(at, 0.85 * s, 0, TAU, 24, col, w, true)
 			c.draw_circle(at + Vector2(0, -0.42) * s, 0.12 * s, col)
@@ -844,28 +865,35 @@ static func show_backdrop(r: ColorRect, on: bool) -> void:
 		tw.tween_callback(func(): r.visible = false)
 		r.set_meta("tw", tw)
 
-## Wraps content in a scroll box that grows with it up to the window height minus `margin`.
-## Nothing in the game scrolls. When a menu has more than fits on screen, it splits into pages
-## with a small "Page 1 of 2" control, and it remembers which page you were on when it's rebuilt,
-## so clicking a button never jumps you somewhere else.
-static var _page_of := {}       # menu key -> page shown
+## Panel bodies. The rules (every menu): content fits on one page, with no "Page 1 of 2" pagers;
+## anything with more to show opens a sub-page when clicked; a panel never changes size while it's
+## open, whatever tab or item you switch to; and it only scrolls when there's truly no other way
+## (a window too small for the content), which this wrapper handles as a last resort.
+static var _page_of := {}       # (kept for callers that reset it; nothing pages any more)
 static var _tall := {}          # menu key -> tallest the menu has been, so it never jumps around
 static var _live := {}          # menu key -> how many of it are open
+static var _hold := {}          # menu key -> a fixed body height asked for with hold()
 
-## Wraps a VBox of content so it pages instead of overflowing. margin: room left for the rest of
-## the screen. Returns the wrapper to add where the content would have gone.
+## Fixes a menu's body height (its tallest tab or item), so switching tabs or items never resizes
+## the panel. Call it each time the menu is built, with the same height.
+static func hold(body: Control, h: float) -> void:
+	var p := _shell_of(body)
+	var key := String(p.get_meta("key", "")) if p else ""
+	if key != "":
+		_hold[key] = h
+
+## Wraps a VBox of content: it sits at a steady height (the menu's held height, or the tallest it
+## has been while open) and, only if the window is too small for it, scrolls. margin: room left for
+## the rest of the screen. Returns the wrapper to add where the content would have gone.
 static func paged(content: VBoxContainer, margin: float, key: String, head: Control = null, width_hint := 600.0, foot: Control = null) -> VBoxContainer:
 	var wrap := vbox(8)
 	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	wrap.add_child(content)
-	var pager := hbox(10)
-	pager.alignment = BoxContainer.ALIGNMENT_CENTER
-	pager.visible = false
-	var prev := ghost("Back", Callable(), 100, "back")
-	var lbl := label("", T_SMALL, MUTED)
-	var next := ghost("Next", Callable(), 100, "next")
-	pager.add_child(prev); pager.add_child(lbl); pager.add_child(next)
-	wrap.add_child(pager)
+	var sc := ScrollContainer.new()
+	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	sc.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	sc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	sc.add_child(content)
+	wrap.add_child(sc)
 	var state := {"busy": false, "t0": 0}
 	var fit := func() -> void:
 		if state["busy"] or not is_instance_valid(content) or not content.is_inside_tree():
@@ -873,20 +901,20 @@ static func paged(content: VBoxContainer, margin: float, key: String, head: Cont
 		state["busy"] = true
 		var vp := content.get_viewport_rect().size
 		var maxh := maxf(160.0, vp.y - margin - (head.get_combined_minimum_size().y if head else 0.0) - (foot.get_combined_minimum_size().y + float(GAP_BIG) if foot and foot.visible else 0.0))
-		var w := content.size.x if content.size.x > 60.0 else width_hint
-		_paginate(content, maxh - pager.get_combined_minimum_size().y - 8.0, key, pager, lbl, prev, next, w)
+		var h := content.get_combined_minimum_size().y
 		# never shrink while it's open, so the menu doesn't hop as its contents change. Sizes are
 		# only trusted once the layout has settled (wrapped text measures tall at first).
-		content.custom_minimum_size.y = 0.0
-		var h := content.get_combined_minimum_size().y
-		if Time.get_ticks_msec() - int(state["t0"]) > 300:
-			_tall[key] = maxf(float(_tall.get(key, 0.0)), h)
-		content.custom_minimum_size.y = minf(float(_tall.get(key, 0.0)), maxh)
+		if _hold.has(key):
+			# a held menu is exactly its held height on every tab and item (it scrolls only if
+			# something truly can't fit)
+			sc.custom_minimum_size.y = minf(float(_hold[key]), maxh)
+		else:
+			if Time.get_ticks_msec() - int(state["t0"]) > 300:
+				_tall[key] = maxf(float(_tall.get(key, 0.0)), h)
+			sc.custom_minimum_size.y = minf(maxf(h, float(_tall.get(key, 0.0))), maxh)
 		state["busy"] = false
 	var refit := func() -> void:
 		if not state["busy"]: fit.call_deferred()
-	prev.pressed.connect(func(): _page_of[key] = maxi(0, int(_page_of.get(key, 0)) - 1); Sfx.play("click"); fit.call())
-	next.pressed.connect(func(): _page_of[key] = int(_page_of.get(key, 0)) + 1; Sfx.play("click"); fit.call())
 	content.minimum_size_changed.connect(refit)
 	content.child_entered_tree.connect(func(_c): refit.call())
 	if foot: foot.visibility_changed.connect(refit)
@@ -899,79 +927,14 @@ static func paged(content: VBoxContainer, margin: float, key: String, head: Cont
 		if vpt and not vpt.size_changed.is_connected(refit): vpt.size_changed.connect(refit))
 	wrap.tree_exiting.connect(func():
 		_live[key] = int(_live.get(key, 1)) - 1
-		# closed for good (not just rebuilt this frame): forget its size and page
+		# closed for good (not just rebuilt this frame): forget its size
 		var ml := Engine.get_main_loop() as SceneTree
 		if ml: ml.process_frame.connect(func():
 			if int(_live.get(key, 0)) <= 0:
-				_tall.erase(key); _page_of.erase(key), CONNECT_ONE_SHOT)
+				_tall.erase(key); _page_of.erase(key); _hold.erase(key), CONNECT_ONE_SHOT)
 		var vpt := wrap.get_viewport()
 		if vpt and vpt.size_changed.is_connected(refit): vpt.size_changed.disconnect(refit))
 	return wrap
-
-## Splits a VBox's children (and the rows of any grid among them) into pages that fit maxh.
-static func _paginate(content: VBoxContainer, maxh: float, key: String, pager: Control, lbl: Label, prev: Button, next: Button, w := 600.0) -> void:
-	var units: Array = []          # each: {nodes: [...], h}
-	for c in content.get_children():
-		if not (c is Control):
-			continue
-		if c.has_meta("pg_off"):
-			c.visible = true; c.remove_meta("pg_off")
-		if c is GridContainer:
-			var g := c as GridContainer
-			var cols := maxi(1, g.columns)
-			var items: Array = []
-			for gc in g.get_children():
-				if gc is Control:
-					if gc.has_meta("pg_off"): gc.visible = true; gc.remove_meta("pg_off")
-					if gc.visible: items.append(gc)
-			var vs := float(g.get_theme_constant("v_separation"))
-			for i in range(0, items.size(), cols):
-				var row: Array = items.slice(i, i + cols)
-				var rh := 0.0
-				for it in row: rh = maxf(rh, est_h(it as Control, (w - (cols - 1) * float(g.get_theme_constant("h_separation"))) / cols))
-				units.append({"nodes": row, "h": rh + (vs if i > 0 else 0.0), "grid": g})
-			continue
-		if not c.visible:
-			continue
-		if c.has_meta("pg_keep"):
-			# headers and tab rows stay on every page
-			maxh -= est_h(c as Control, w) + float(content.get_theme_constant("separation"))
-			continue
-		units.append({"nodes": [c], "h": est_h(c as Control, w)})
-	var sep := float(content.get_theme_constant("separation"))
-	var total := 0.0
-	for u in units: total += float(u["h"]) + sep
-	if total - sep <= maxh or units.size() <= 1:
-		pager.visible = false
-		return
-	# fill pages greedily
-	var pages: Array = [[]]
-	var used := 0.0
-	for u in units:
-		var h := float(u["h"]) + sep
-		if used + h > maxh and not (pages[-1] as Array).is_empty():
-			pages.append([])
-			used = 0.0
-		pages[-1].append(u)
-		used += h
-	# a heading never sits alone at the bottom of a page: it moves over with what it introduces
-	for i in range(pages.size() - 1):
-		var pgi: Array = pages[i]
-		while pgi.size() > 1 and (pgi[-1]["nodes"][0] as Control).has_meta("pg_head"):
-			pages[i + 1].push_front(pgi.pop_back())
-	var pg := clampi(int(_page_of.get(key, 0)), 0, pages.size() - 1)
-	_page_of[key] = pg
-	for i in pages.size():
-		if i == pg:
-			continue
-		for u in pages[i]:
-			for n in u["nodes"]:
-				(n as Control).visible = false
-				(n as Control).set_meta("pg_off", true)
-	pager.visible = true
-	lbl.text = "Page %d of %d" % [pg + 1, pages.size()]
-	prev.disabled = pg == 0
-	next.disabled = pg >= pages.size() - 1
 
 ## How tall a control will be at a given width, worked out from the text itself so wrapped labels
 ## measure right before the layout has run (they report huge heights until then).
@@ -1131,6 +1094,7 @@ static func scroll_panel(title_txt: String, width: float, on_close: Callable, cl
 		outer.add_child(paged(body, 110.0, title_txt, top, width - PAD * 2.0, foot))
 	outer.add_child(foot)
 	body.set_meta("shell", p)
+	p.set_meta("key", title_txt)
 	p.set_meta("title", t); p.set_meta("sub", sub); p.set_meta("extra", extra)
 	p.set_meta("tabs", tabs_slot); p.set_meta("foot", foot); p.set_meta("foot_left", foot_left); p.set_meta("foot_right", foot_right)
 	var fitw := func():
@@ -1162,6 +1126,27 @@ static func subtitle(body: Control, txt: String) -> void:
 static func set_title(body: Control, txt: String) -> void:
 	var p := _shell_of(body)
 	if p: (p.get_meta("title") as Label).text = txt
+
+## Puts a small control (a Boki's sex icon) right after the panel's title.
+static func title_icon(body: Control, c: Control) -> void:
+	var p := _shell_of(body)
+	if p == null: return
+	var t: Label = p.get_meta("title")
+	var row: HBoxContainer = p.get_meta("title_row") if p.has_meta("title_row") else null
+	if row == null:
+		row = hbox(10)
+		var par := t.get_parent()
+		var at := t.get_index()
+		par.remove_child(t)
+		row.add_child(t)
+		par.add_child(row)
+		par.move_child(row, at)
+		t.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+		t.clip_text = false          # (a clipped or trimmed label in a row collapses to nothing)
+		t.text_overrun_behavior = TextServer.OVERRUN_NO_TRIMMING
+		p.set_meta("title_row", row)
+	c.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	row.add_child(c)
 
 ## A row next to the close X for chips and small things (gems, stored count).
 static func head_extra(body: Control) -> HBoxContainer:
@@ -1272,6 +1257,26 @@ class IconDot extends Control:
 		size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	func _draw() -> void:
 		UI.draw_icon(self, id, size * 0.5, minf(size.x, size.y) * 0.5, col)
+
+## A Boki's sex as a small ♀ / ♂ icon in its colour (nothing for a record without rolls).
+static func sex_icon(rec: Dictionary, px := 14.0) -> Control:
+	var sx := Unique.sex(rec)
+	if sx == "":
+		return Control.new()
+	var ic := IconDot.new("female" if sx == "f" else "male", SEX_COL[sx], px)
+	ic.tooltip_text = Unique.sex_name(rec)
+	ic.mouse_filter = Control.MOUSE_FILTER_PASS
+	return ic
+const SEX_COL := {"f": Color("ff8fbf"), "m": Color("7cc4ff")}
+
+## A name label with the Boki's sex icon right after it.
+static func name_with_sex(rec: Dictionary, txt: String, size := T_BODY, col := INK, font: Font = null, px := 14.0) -> HBoxContainer:
+	var h := hbox(6)
+	var l := label(txt, size, col, font if font else semi)
+	l.autowrap_mode = TextServer.AUTOWRAP_OFF
+	h.add_child(l)
+	h.add_child(sex_icon(rec, px))
+	return h
 
 ## The old rule under a menu title (a gilded line with a diamond). The shell doesn't use it any more;
 ## kept for anything that still wants an ornament.

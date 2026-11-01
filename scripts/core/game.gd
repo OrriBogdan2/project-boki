@@ -96,6 +96,8 @@ func _setup_input() -> void:
 	_key("emote", [KEY_T])                    # in a match: hold for the emote wheel (truce, deal, no...); T talks to kin at home
 	_key("map", [KEY_M])                      # in a match: the full map (ping it with the mouse)
 	_key("pass_lead", [KEY_P])                # riding in / dropping: pass the drop lead to a squadmate
+	_key("record", [KEY_F10])                 # recording mode (Record): clean HUD, then no HUD
+	_key("record_orbit", [KEY_F9])            # recording mode, HUD hidden: slow camera orbit
 	_key("separate", [KEY_X])                 # riding in / dropping behind the leader: break away and drop solo
 
 func goto(screen: String, opts := {}) -> void:
@@ -156,7 +158,7 @@ func apply_result(r: Dictionary) -> Dictionary:
 				nk["name"] = Data.default_kin_name(String(nk["species"]))
 				nk["memory"] = []
 				nk.erase("lost_from")
-				Save.remember(nk, "caught", "was caught by you in the islands and brought home")
+				Save.remember(nk, "caught", "was tamed by you out in the islands and brought home")
 			else:
 				# a rival's kin you took home: it still misses them. One that loved its old hunter
 				# (trust 80+) pines for a good while and is very slow to bond with you

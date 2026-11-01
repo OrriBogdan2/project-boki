@@ -404,3 +404,14 @@ for kind, fn, db, lp_hz in [('skitter', skitter, -23, 2000), ('spitter', spitter
     for i in range(1, 4):
         save('v_%s_%d' % (kind, i), fn(i), rms_db=db, lp=lp_hz)
 print('sounds written')
+
+# ================================================================== the combat layer
+# Guns, hits, crits, armor, knocks, kills, explosions and blades are rebuilt with weight (a transient,
+# a saturated body, a sub and a tail) by tools/sfx_combat.py, which overwrites the soft versions
+# above. It has its own random stream, so the sounds above come out the same either way.
+import sys
+sys.dont_write_bytecode = True
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import sfx_combat
+sfx_combat.build()
+print('combat sounds written')

@@ -8,12 +8,12 @@ extends Node
 ## lineage, edition). A small append-only event log (d["log"], LOG_CAP) keeps what happened to whom.
 ## See docs/BOKI_IDENTITY.md.
 
-const VERSION := 2
+const VERSION := 3
 const MAX_MEMORY := 40
 const SLOTS := 6
 const LOG_CAP := 200
 ## Upgrades, oldest first: MIGRATIONS[n] turns a version-n save into version n + 1.
-const MIGRATIONS := {1: "_migrate_1_to_2"}
+const MIGRATIONS := {1: "_migrate_1_to_2", 2: "_migrate_2_to_3"}
 
 var d: Dictionary = {}
 var slot := 1                 # which save file is in play
@@ -263,6 +263,16 @@ func migrate(data: Dictionary) -> bool:
 		v += 1
 		data["v"] = v
 	return true
+
+## v2 -> v3: every Boki's sex, written into its rolls (from its own seed, so it's what it always
+## would have been).
+func _migrate_2_to_3(data: Dictionary) -> void:
+	for r in data.get("roster", []):
+		if typeof(r) == TYPE_DICTIONARY: Unique.ensure_sex(r)
+	for L in data.get("lost_kin", []):
+		if typeof(L) == TYPE_DICTIONARY and typeof(L.get("rec", null)) == TYPE_DICTIONARY: Unique.ensure_sex(L["rec"])
+	for g in data.get("graves", []):
+		if typeof(g) == TYPE_DICTIONARY and typeof(g.get("rec", null)) == TYPE_DICTIONARY: Unique.ensure_sex(g["rec"])
 
 ## v1 -> v2: lasting ids, inborn rolls and provenance for every kin. Each kin's tastes and IVs
 ## (which older saves worked out from the old id) are written down first, so changing the id
