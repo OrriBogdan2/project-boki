@@ -1398,7 +1398,11 @@ func _move_kin(d: float) -> void:
 			var night := sin((day_t - 0.25) * TAU) < -0.2
 			var friends: Array = kins.filter(func(o): return o != k and not o.get("busy", false) and not o.has("job") and world.island_of(o["pos"].x, o["pos"].z) == here)
 			k.erase("stare")
-			if _care_goal(k):
+			if rec.has("recall") and world.island_of(ppos.x, ppos.z) == here:
+				# back from an expedition with something to tell you: it comes over (see below)
+				k["goal"] = _seat(k, ppos, 1.3)
+				k["t"] = 1.5
+			elif _care_goal(k):
 				pass
 			elif hw and hw.pick(k):
 				pass      # off to a job it's suited to
@@ -3668,7 +3672,7 @@ func _open_expedition() -> void:
 	right.add_child(UI.label({"solo": "20 hunters, every one for themselves", "duo": "10 squads of two", "trio": "7 squads of three"}[exp_mode], UI.T_SMALL, UI.MUTED))
 	# the raid condition this drop will have (rolled with the match's seed: RaidLook)
 	if exp_seed == 0: exp_seed = randi() | 1
-	var rc := RaidLook.pick({}, exp_seed)
+	var rc := RaidLook.pick(Settings.demo_opts({}), exp_seed)
 	right.add_child(UI.spacer(2))
 	right.add_child(UI.section("Conditions"))
 	right.add_child(UI.chip("clock", String(RaidLook.NAMES.get(rc, rc)), RaidLook.COLORS.get(rc, UI.INK), String(RaidLook.BLURBS.get(rc, ""))))
@@ -4568,6 +4572,17 @@ func _update_bubbles(d: float) -> void:
 			fx.dust(k["pos"], 3)
 		# saying hello when you walk up to it
 		k["hi_cd"] = float(k.get("hi_cd", 0.0)) - d
+		# the big moment of its last expedition: it brings it up when you're close (KinSpeak.recall_line)
+		if rec.has("recall") and visit.is_empty() and panel_open == "" and not chat_open and not k.get("busy", false) \
+				and float(k.get("nap_t", 0.0)) <= 0.0 and Vector2(ppos.x - k["pos"].x, ppos.z - k["pos"].z).length() < 3.2:
+			var rl := KinSpeak.recall_line(rec)
+			rec.erase("recall")
+			k["hi_cd"] = 25.0
+			if rl != "":
+				_say(k, rl, 7.0)
+				_emote(k, "♥" if float(rec["trust"]) > 55.0 else "!")
+				Sfx.play("kin_happy", k["pos"], -8.0, 0.15, Unique.voice(rec))
+				Save.save_game()
 		if visit.is_empty() and float(k["hi_cd"]) <= 0.0 and panel_open == "" and not chat_open and train.is_empty() and not k.get("busy", false):
 			if Vector2(ppos.x - k["pos"].x, ppos.z - k["pos"].z).length() < 2.0:
 				k["hi_cd"] = randf_range(18.0, 30.0)
