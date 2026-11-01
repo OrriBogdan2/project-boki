@@ -47,6 +47,9 @@ func _ready() -> void:
 		if a.begins_with("--seed="): opts["seed"] = int(a.substr(7))
 		if a == "--god": opts["god"] = true
 		if a == "--autoplay": opts["autoplay"] = true
+		if a == "--record": Record.set_level(1)            # start in recording mode (F10 cycles it)
+		if a.begins_with("--record="): Record.set_level(int(a.substr(9)))    # --record=2: with the HUD hidden
+		if a.begins_with("--arena="): Record.arena_pick = a.substr(8)    # straight into the arena, this archetype picked
 		if a == "--glide-demo": opts["glide_demo"] = true
 		if a == "--ledge-demo": opts["ledge_demo"] = true
 		if a.begins_with("--abyss-demo="): opts["abyss_demo"] = a.substr(13); opts["no_drop"] = true
@@ -378,6 +381,9 @@ func _ready() -> void:
 	if "--grammar-runtime-check" in args:
 		_grammar_runtime_check()
 		return
+	if "--record-check" in args:
+		_record_check()
+		return
 	if "--bot-sanity-check" in args:
 		_bot_sanity()
 		return
@@ -540,6 +546,8 @@ func _ready() -> void:
 		show_screen("match", opts)
 	elif "--duel" in args:
 		show_screen("match", Match.duel_opts())
+	elif Record.arena_pick != "":
+		_open_arena(Record.arena_pick)
 	elif "--training" in args:
 		show_screen("match", {"training": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": "--no-drop" in args, "perk_demo": "--perk-demo" in args})
 	elif "--tutorial" in args:
@@ -550,6 +558,18 @@ func _ready() -> void:
 		show_screen("hatch", {})
 	else:
 		show_screen("home", {})
+
+## --arena=<archetype> (with --record for filming): straight into the arena with that archetype
+## picked. The arena provides `static func arena_opts(pick: String) -> Dictionary` on Match; until it
+## does, this opens the training area instead and says so.
+func _open_arena(pick: String) -> void:
+	Save.d["tutorial"]["home"] = true
+	var ms: Script = load("res://scripts/match/match.gd")
+	if ms.get_script_method_list().any(func(md): return String(md["name"]) == "arena_opts"):
+		show_screen("match", ms.call("arena_opts", pick))
+		return
+	push_warning("--arena=%s: no arena in this build (Match.arena_opts); opening the training area" % pick)
+	show_screen("match", {"training": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
 
 ## Menu screens sit on their own layer so they fill the window.
 func _layer(scr: Control) -> CanvasLayer:
@@ -2997,6 +3017,64 @@ func _boss_check() -> void:
 	ok.call(m3.lairs.list.size() >= 1 and live3 >= 1, "a generated map: %d lair(s), %d live (%s)" % [m3.lairs.list.size(), live3, str(m3.lairs.list.map(func(L): return L["boss"]))])
 	print("BOSSCHECK done, failures: %d" % bad[0])
 	get_tree().quit(1 if bad[0] > 0 else 0)
+## Recording mode: F10 cycles off / clean / no HUD, Shift+F10 goes straight to no HUD; the debug and
+## hint nodes hide in clean mode, the HUDs in no-HUD mode, the fps counter goes, tips stop, the camera
+## softens and orbits only with the HUD hidden; turning it off puts everything back as it was.
+func _record_check() -> void:
+	Save.no_write = true
+	Save.d = Save.fresh()
+	Econ.ensure()
+	var bad := [0]
+	var ok := func(cond: bool, what: String) -> void:
+		print("RECCHECK %s %s" % ["ok  " if cond else "FAIL", what])
+		if not cond: bad[0] += 1
+	var press := func(shift: bool) -> void:
+		var e := InputEventKey.new()
+		e.physical_keycode = KEY_F10; e.keycode = KEY_F10; e.pressed = true; e.shift_pressed = shift
+		Overlay._input(e)
+	Settings.set_v("show_fps", true, false)
+	var m := Match.new()
+	add_child(m)
+	m.start({"training": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
+	for i in 5: await get_tree().process_frame
+	var dbg := Label.new(); dbg.text = "debug"; add_child(dbg); Record.hide_in_clean(dbg)
+	var hint_hidden := Label.new(); hint_hidden.visible = false; add_child(hint_hidden); Record.hide_in_clean(hint_hidden)
+	await get_tree().process_frame
+	ok.call(Record.level == 0 and dbg.visible and m.hud.visible and Overlay.fps_lbl.visible, "off: debug label, HUD and fps shown")
+	var cam_off: Array = Record.cam_rates()
+	press.call(false)
+	await get_tree().process_frame
+	await get_tree().process_frame
+	ok.call(Record.level == 1, "F10: clean (level %d)" % Record.level)
+	ok.call(not dbg.visible and m.hud.visible and not Overlay.fps_lbl.visible, "clean: debug label and fps hidden, the HUD stays")
+	ok.call(float(Record.cam_rates()[0]) < float(cam_off[0]) and float(Record.cam_rates()[4]) < 1.0, "clean: the camera follows softer, less shake")
+	m.hud.tip("a tip"); m._tip_t = 99.0
+	var tips_before: int = m.hud.tips.size()
+	m._tips()
+	ok.call(m.hud.tips.size() == tips_before, "clean: no new tips queued")
+	press.call(false)
+	await get_tree().process_frame
+	ok.call(Record.level == 2 and not m.hud.visible, "F10 again: no HUD (level %d, hud visible %s)" % [Record.level, m.hud.visible])
+	var y0 := Record.orbit_yaw
+	var e9 := InputEventKey.new(); e9.physical_keycode = KEY_F9; e9.keycode = KEY_F9; e9.pressed = true
+	Overlay._input(e9)
+	for i in 10: await get_tree().process_frame
+	ok.call(Record.orbit and absf(Record.orbit_yaw - y0) > 0.0001, "F9: the camera orbits (%.3f rad)" % Record.orbit_yaw)
+	press.call(false)
+	for i in 3: await get_tree().process_frame
+	ok.call(Record.level == 0 and dbg.visible and not hint_hidden.visible and m.hud.visible and Overlay.fps_lbl.visible and not Record.orbit, "F10 a third time: off, all back as it was (a hidden one stays hidden)")
+	press.call(true)
+	await get_tree().process_frame
+	ok.call(Record.level == 2 and not m.hud.visible and not dbg.visible, "Shift+F10: straight to no HUD")
+	press.call(true)
+	await get_tree().process_frame
+	ok.call(Record.level == 1 and m.hud.visible, "Shift+F10 again: back to the clean HUD")
+	Record.set_level(0)
+	await get_tree().process_frame
+	ok.call(InputMap.has_action("record") and Settings.ACTIONS.any(func(a): return a[0] == "record"), "F10 is a rebindable action (%s)" % Settings.key_cap("record"))
+	print("RECCHECK done, failures: %d" % bad[0])
+	get_tree().quit(1 if bad[0] > 0 else 0)
+
 ## Bots shouldn't look broken: over a few seeded matches, every bot is watched for spinning (its
 ## facing swinging back and forth), jump and dash spam, and hanging in the air (which shows its hit ring
 ## under it: blue on an ally). Any 5 s window over the limits is flagged, with what the bot was doing.

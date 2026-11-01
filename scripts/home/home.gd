@@ -1914,6 +1914,8 @@ func _build_ui() -> void:
 	keys.add_child(hint)
 	root_ui.add_child(hint_box)
 	hint_box.name = "Hints"
+	Record.hide_in_clean(hint_box)      # recording mode: no key hints
+	Record.hide_in_cinema(ui)           # ... and with the HUD hidden, none of this
 	hint_box.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM, Control.PRESET_MODE_MINSIZE, 12)
 	hint_box.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	hint_box.grow_vertical = Control.GROW_DIRECTION_BEGIN

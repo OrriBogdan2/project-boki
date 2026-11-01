@@ -5924,7 +5924,7 @@ func _tip(key: String, text: String) -> void:
 	hud.tip(text)
 
 func _tips() -> void:
-	if player == null or player.out or player.riding or opts.get("autoplay", false) or not Settings.get_v("tips"):
+	if player == null or player.out or player.riding or opts.get("autoplay", false) or not Settings.get_v("tips") or Record.clean():
 		return
 	_tip_t += get_process_delta_time()
 	if _tip_t < 1.0:

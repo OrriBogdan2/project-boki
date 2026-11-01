@@ -36,6 +36,7 @@ const GOLD := Color("f2c84a")
 func setup(match_node: Match) -> void:
 	m = match_node
 	layer = 5
+	Record.hide_in_cinema(self)      # recording mode with the HUD hidden
 	c = Control.new()
 	c.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	c.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -282,7 +283,7 @@ func _draw_all() -> void:
 		var t: Dictionary = toasts[i]
 		var a := clampf(1.8 - t["t"], 0.0, 1.0)
 		_ctext(Vector2(sz.x * 0.5, sz.y * 0.3 + i * 26 - t["t"] * 10.0), t["text"], 20, Color(t["col"], a), big)
-	if tips.size() > 0:
+	if tips.size() > 0 and not Record.clean():
 		_draw_tip(sz, tips[0])
 	if Input.is_action_pressed("scores"):
 		_draw_scores(sz)
@@ -490,6 +491,8 @@ func _draw_top(sz: Vector2) -> void:
 		_draw_duel(sz)
 		return
 	if m.opts.get("training", false):
+		if Record.clean():
+			return      # (recording: no training banner or checklist)
 		var rr := Rect2(Vector2(sz.x * 0.5 - 220, 12), Vector2(440, 54))
 		_panel(rr, Color(0.06, 0.07, 0.1, 0.88), 12)
 		_ctext(Vector2(sz.x * 0.5, 34), "TRAINING AREA", 12, Color("8fe3c8"))
@@ -553,7 +556,7 @@ func _draw_duel(sz: Vector2) -> void:
 	_panel(rr, Color(0.06, 0.07, 0.1, 0.88), 12)
 	_ctext(Vector2(sz.x * 0.5, 32), "DUEL ROOM  ·  ROUND %d" % d.round_n, 12, Color("ff9a8a"))
 	_ctext(Vector2(sz.x * 0.5, 56), "%s bot  ·  %s class  ·  %s  ·  %s  ·  %s" % [d.pick_text("diff"), d.pick_text("cls"), d.pick_text("weapon"), d.pick_text("glove") if d.glove != "" else "no glove", d.pick_text("mode")], 15, INK)
-	if guide_hidden:
+	if guide_hidden or Record.clean():
 		return
 	var st: Dictionary = d.stats
 	var shots := maxi(1, int(st["shots"]))
@@ -1871,7 +1874,7 @@ func _draw_squad_pings(p: Hunter) -> void:
 
 ## For the first seconds of every match: what each of your buttons does.
 func _draw_kit(sz: Vector2, p: Hunter) -> void:
-	if not Settings.get_v("tips") or m.opts.get("tutorial", false) or p.out or guide_hidden or not m.perk_offer.is_empty():
+	if not Settings.get_v("tips") or Record.clean() or m.opts.get("tutorial", false) or p.out or guide_hidden or not m.perk_offer.is_empty():
 		return
 	var show_t := 14.0 if not m.opts.get("training", false) else 1e9
 	var t := m.time - kit_t0
