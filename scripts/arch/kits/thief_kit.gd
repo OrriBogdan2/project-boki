@@ -9,6 +9,7 @@ var recast := {}               # Shadow Step: {target, t}
 var mark_gap := {}             # target id -> time of its last Mark from us (one per 0.3s)
 var heist := {}                # the running Heist: {targets, i, t}
 var smoke: Dictionary = {}     # our live smoke cloud (in m.smokes)
+var pips := {}                 # target instance id -> {node, t: Ent}: the Mark pips over their head
 
 func _setup() -> void:
 	res = 0.0
@@ -31,17 +32,88 @@ func add_mark(t: Ent, n := 1, force := false) -> void:
 	var mk: Dictionary = t.get_meta("marks", {})
 	var e: Array = mk.get(h.nid, [0, 0.0])
 	var c := mini(int(res_def().get("max", 3)), (int(e[0]) if float(e[1]) > 0.0 else 0) + n)
+	var had := int(e[0]) if float(e[1]) > 0.0 else 0
 	mk[h.nid] = [c, float(res_def().get("dur", 6.0))]
 	t.set_meta("marks", mk)
 	t.set_meta("marks_t", now)
-	if c >= 3:
-		m.sfx("pickup", t.pos, -4.0, 1.9)       # the victim hears a coin jingle
-		m.fx.word(t.pos + Vector3(0, 2.3, 0), "MARKED", res_col(), false)
+	_pip_pop(t, c)
+	if c >= 3 and had < 3:
+		m.sfx("pickup", t.pos, -2.0, 1.9)       # the victim hears a coin jingle
+		m.sfx("unlock", t.pos, -6.0, 1.7)
+		m.fx.word(t.pos + Vector3(0, 2.5, 0), "MARKED", res_col(), true)
+		m.fx.ring(t.pos, 1.3, res_col(), 0.3)
+		# the purse is full: the Knife comes back right now, so the cash-in is always one click away
+		if ch_rmb < 1.0:
+			ch_rmb = 1.0
+			h._ab_feedback("sec", "ready")
+			m.fx.word(h.pos + Vector3(0, 2.3, 0), "KNIFE READY", res_col(), false)
 
 func clear_marks(t: Ent) -> void:
 	var mk: Dictionary = t.get_meta("marks", {})
 	mk.erase(h.nid)
 	t.set_meta("marks", mk)
+
+# ---- Marks you can read from across the fight: gold diamonds orbiting over the target's head that
+# light up one by one, and a big spinning coin at 3 (everyone sees them, the victim included) ----
+func _pip_node(t: Ent) -> Dictionary:
+	var key := t.get_instance_id()
+	if pips.has(key) and is_instance_valid(pips[key]["node"]):
+		return pips[key]
+	var n := Node3D.new()
+	n.top_level = true
+	var gold := res_col()
+	var ds: Array = []
+	for i in 3:
+		var d := MeshInstance3D.new()
+		d.mesh = Models.box(0.2, 0.2, 0.2)
+		d.material_override = Models.glow_mat(Color(gold, 0.95))
+		d.rotation = Vector3(0.0, 0.0, PI * 0.25)
+		d.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		n.add_child(d)
+		ds.append(d)
+	var coin := MeshInstance3D.new()
+	coin.mesh = Models.cyl(0.34, 0.34, 0.07, 18)
+	coin.material_override = Models.glow_mat(Color(gold.lightened(0.2), 1.0))
+	coin.rotation.x = PI * 0.5
+	coin.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	coin.visible = false
+	n.add_child(coin)
+	m.add_child(n)
+	pips[key] = {"node": n, "t": t, "d": ds, "coin": coin, "pop": 0.0}
+	return pips[key]
+
+func _pip_pop(t: Ent, _c: int) -> void:
+	var p := _pip_node(t)
+	p["pop"] = 1.0
+
+func _tick_pips(dt: float) -> void:
+	for key in pips.keys():
+		var p: Dictionary = pips[key]
+		var t: Ent = p["t"]
+		var n: Node3D = p["node"]
+		var c := marks_on(t) if is_instance_valid(t) and not t.dead else 0
+		if c <= 0 or not is_instance_valid(n):
+			if is_instance_valid(n): n.queue_free()
+			pips.erase(key)
+			continue
+		var top := 2.35 if t is Hunter else 1.7
+		n.global_position = t.position + Vector3(0, top, 0)
+		p["pop"] = maxf(0.0, float(p["pop"]) - dt * 4.0)
+		var a: float = m.time * 2.2
+		var ds: Array = p["d"]
+		for i in 3:
+			var d: MeshInstance3D = ds[i]
+			var ang := a + TAU * i / 3.0
+			d.position = Vector3(cos(ang) * 0.42, 0.0, sin(ang) * 0.42)
+			var lit := i < c
+			d.scale = Vector3.ONE * ((1.0 + float(p["pop"]) * 0.8) if lit else 0.55)
+			d.material_override.set_shader_parameter("color", Color(res_col(), 1.0) if lit else Color(1, 1, 1, 0.22))
+			d.visible = c < 3
+		var coin: MeshInstance3D = p["coin"]
+		coin.visible = c >= 3
+		if coin.visible:
+			coin.rotation.y = m.time * 6.0
+			coin.scale = Vector3.ONE * (1.0 + 0.15 * sin(m.time * 9.0) + float(p["pop"]) * 0.6)
 
 ## Highest mark count on any foe (the RMB slot's gold dot, the resource readout).
 func best_marks() -> int:
@@ -61,6 +133,7 @@ func full_ready() -> bool:
 
 func _tick(dt: float) -> void:
 	ambush_t = maxf(0.0, ambush_t - dt)
+	_tick_pips(dt)
 	# marks fade on every target we've touched
 	for f in m.foes_of(h.team):
 		var mk: Dictionary = f.get_meta("marks", {}) if f.has_meta("marks") else {}
@@ -151,18 +224,12 @@ func fire_rmb(c: Dictionary) -> void:
 func _knife(c: Dictionary) -> void:
 	var kd: Dictionary = rmb_def()["knife"]
 	var silent: bool = c.get("e", false) and _in_my_smoke(h.pos)
-	var stg := stage("rmb", {"delivery": {"type": "projectile", "speed": float(kd["speed"]), "range": float(kd["range"]), "size": 0.14}, "effects": [{"type": "damage", "amount": float(kd["dmg"])}]})
+	var stg := stage("rmb", {"delivery": {"type": "projectile", "speed": float(kd["speed"]), "range": float(kd["range"]), "size": 0.2}, "effects": [{"type": "damage", "amount": float(kd["dmg"])}]})
 	var cc := cx("rmb", "knife", aim(), {"on_foe": func(f: Ent, _c: Dictionary):
 		if f is Hunter or f is Mob or f is Kin:
 			var cash := marks_on(f) >= 3
 			if cash:
-				# Cash In: the Marks pay out for +50% and your dash comes back
-				var bonus := float(kd["dmg"]) * float(res_def().get("cash_bonus", 0.5)) * power("sec")
-				f.hurt(bonus, h, {"src": "abil", "ab": "utility", "tags": ["utility", "cash_in"], "payoff": true, "crit": true})
-				clear_marks(f)
-				h.dashes = minf(h.max_dashes(), h.dashes + 1.0)
-				m.fx.word(f.pos + Vector3(0, 2.4, 0), "CASH IN", res_col(), true)
-				m.sfx("pickup", f.pos, -1.0, 1.5)
+				_cash_in(f)
 			else:
 				add_mark(f, 1, true)
 			recast = {"target": f, "t": float(rmb_def().get("recast", 1.5)) + (0.5 if rank("sec") >= 3 else 0.0)}})
@@ -171,6 +238,28 @@ func _knife(c: Dictionary) -> void:
 	run(stg, cc)
 	if not silent:
 		Feel.cast_sound(m, "projectile", "damage", h.pos, h, "")
+
+## Cash In: the three Marks pay out in one big gold hit (a payoff: hitstop, shake, a coin burst),
+## your dash comes back, and the Knife recast to Shadow Step stays open.
+func _cash_in(f: Ent) -> void:
+	var bonus := float(res_def().get("cash_dmg", 26.0)) * power("sec")
+	clear_marks(f)
+	f.hurt(bonus, h, {"src": "abil", "ab": "utility", "tags": ["utility", "cash_in"], "payoff": true, "crit": true, "melee": true, "kb": h.dir_to(f) * 6.0, "stun": 0.25})
+	h.dashes = minf(h.max_dashes(), h.dashes + 1.0)
+	var gold := res_col()
+	m.fx.word(f.pos + Vector3(0, 2.6, 0), "CASH IN", gold, true)
+	m.fx.ring(f.pos, 2.2, gold, 0.35)
+	m.fx.ring(f.pos, 1.0, Color(1, 1, 1, 0.9), 0.2)
+	m.fx.burst(f.pos + Vector3(0, 1.2, 0), gold, 40, 7.5, 0.7, 10.0, 1.3)
+	m.fx.flash(f.pos + Vector3(0, 1.0, 0), gold.lightened(0.4), 1.2, 0.1)
+	m.sfx("pickup", f.pos, 0.0, 1.3)
+	m.sfx("crit", f.pos, -2.0, 0.8)
+	m.sfx("kill", f.pos, -8.0, 1.6)
+	Feel.shake(m, "t4", h, f.pos, f)
+	if h.is_local():
+		Oomph.punch_dir(m, h.dir_to(f), 0.35)
+		if m.hud: m.hud.flash(gold, 0.12)
+	CombatBus.ability_used.emit(h, "cash_in", "secondary")
 
 func _fan(c: Dictionary) -> void:
 	var fd: Dictionary = rmb_def()["fan"]
@@ -243,6 +332,19 @@ func cast_e() -> bool:
 	return true
 
 # ------------------------------------------------------------------ R: Heist
+func _heist_targets() -> Array:
+	var reach := float(r_def()["reach"])
+	var tg: Array = rival_hunters_in(reach)
+	if tg.is_empty():
+		for f in foes_in(h.pos, reach):
+			if f is Mob and sees(f): tg.append(f)
+	return tg
+
+func r_can_cast() -> bool:
+	return not _heist_targets().is_empty()
+
+func r_no_target_text() -> String: return "No one within 9m to rob"
+
 func cast_r() -> bool:
 	var rd := r_def()
 	var reach := float(rd["reach"])

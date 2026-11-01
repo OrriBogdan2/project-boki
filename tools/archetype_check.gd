@@ -80,6 +80,12 @@ func dmg(T: Hunter) -> float:
 	return T.max_hp - T.hp
 
 ## Taps RMB (press, released next frame).
+## Presses R and runs its fuse (the wind-up before the ult goes off), so timings after it read as before.
+func ult(m: Match, P: Hunter) -> void:
+	P.ak.use_r()
+	ok("%s R: fuse winds up first" % P.arch, P.ak.fusing() or P.ak.fuse_time() <= 0.0 or float(P.ak.cd["r"]) > 0.0)
+	step(m, P.ak.fuse_time() + DT)
+
 func tap(m: Match, P: Hunter) -> void:
 	P.inp["sec_hold"] = false
 	P.ak.press_rmb()
@@ -219,7 +225,7 @@ func _thief() -> void:
 	ok("thief RMB in smoke: during_e variant", K.last_variant == "during_e", K.last_variant)
 	# R: Heist marks out, then blink strikes with 3 Marks
 	fresh(T); P.teleport(p0); K.recast = {}
-	P.ak.use_r()
+	ult(m, P)
 	step(m, 0.9)
 	ok("thief R: Heist strikes + 3 Marks", dmg(T) >= 13.0 and K.marks_on(T) == 3, "took %.0f marks %d" % [dmg(T), K.marks_on(T)])
 	await done(m)
@@ -297,7 +303,7 @@ func _archer() -> void:
 	# R: Skyfall Volley: 0.8s tell, waves, the last roots
 	fresh(T)
 	P.inp["aim"] = T.pos
-	P.ak.use_r()
+	ult(m, P)
 	step(m, 0.6)
 	var early := dmg(T)
 	step(m, 2.3)
@@ -353,7 +359,7 @@ func _mage() -> void:
 	# R: Meteor: a 1.0s tell, then the impact spikes an airborne target
 	P.teleport(home); fresh(T); T.teleport(home + Vector3(6, 0, 0))
 	P.inp["aim"] = T.pos
-	P.ak.use_r()
+	ult(m, P)
 	step(m, 0.85)
 	var pre := dmg(T)
 	T.vel.y = 7.0; T.grounded = false
@@ -421,7 +427,7 @@ func _gunslinger() -> void:
 	# R: Last Round locks and fires after the channel
 	fresh(T); step(m, 3.2)
 	fresh(T)
-	P.ak.use_r()
+	ult(m, P)
 	step(m, 0.5)
 	var early := dmg(T)
 	step(m, 1.2)
@@ -491,7 +497,7 @@ func _juggernaut() -> void:
 	ok("juggernaut RMB in Iron Hide: pulls in", K.last_variant == "during_e" and P.flat_dist(T) < dpull - 0.3, "%.1f -> %.1f" % [dpull, P.flat_dist(T)])
 	# R: Avalanche: stun doesn't land, stomps hurt
 	fresh(T); T.teleport(home + Vector3(1.5, 0, 0)); P.teleport(home)
-	P.ak.use_r()
+	ult(m, P)
 	step(m, 0.5)
 	P.hurt(1.0, T, {"stun": 1.0, "src": "abil"})
 	var st := P.stun_t
@@ -556,7 +562,7 @@ func _bulwark() -> void:
 	# R: Bastion: foes inside pushed out, shots from outside stop, Guard adds time
 	K.res = 100.0
 	T.teleport(home + Vector3(2.0, 0, 0)); fresh(T)
-	P.ak.use_r()
+	ult(m, P)
 	step(m, 0.6)
 	var pushed := T.flat_dist(home)
 	php = P.hp
@@ -588,13 +594,13 @@ func _levels_and_bond() -> void:
 	ok("Bonded R: ready glow", P.ak.slot_info("r").get("bonded", false) or true)
 	P.ak.use_r()
 	var during := KinMerge.active(P)
-	step(m, 0.3)
+	step(m, P.ak.fuse_time() + 0.1)
 	ok("Bonded R: ult then merge (0.2s)", P.ak.bonded and not during and KinMerge.active(P) and P.ult < 0.5 and float(P.ak.cd["r"]) > 0.0, "merged %s" % KinMerge.active(P))
 	ok("Bonded R: merged budget x1.3", is_equal_approx(P.ak.budget_k("rmb"), 1.3))
 	# without a full bond, R is just the ult
 	step(m, 12.0)
 	P.ult = 0.2; P.ak.cd["r"] = 0.0
-	P.ak.use_r()
+	ult(m, P)
 	step(m, 0.3)
 	ok("R without bond: no merge", not P.ak.bonded and not KinMerge.active(P))
 	await done(m)
@@ -674,10 +680,12 @@ func _feel() -> void:
 	# archetype tells meet the floors
 	ok("feel: Meteor tell >= hard floor", float(Arch.def("mage")["r"]["tell"]) >= Feel.floor_for("hard_cc", "instant"))
 	ok("feel: Volley tell >= soft floor", float(Arch.def("archer")["r"]["tell"]) >= Feel.floor_for("soft_cc", "instant"))
-	ok("feel: Heist mark-out >= self floor", float(Arch.def("thief")["r"]["tell"]) >= Feel.floor_for("hard_cc", "self"))
+	ok("feel: Heist fuse + mark-out >= self floor", float(Arch.def("thief")["r"]["tell"]) + float(Arch.def("thief")["r"]["fuse"]) >= Feel.floor_for("hard_cc", "self"))
 	ok("feel: Sigil detonation >= soft floor", float(Arch.def("mage")["e"]["det_t"]) >= Feel.floor_for("soft_cc", "instant"))
 	ok("feel: Rampage windup visible >= 0.30", float(Arch.def("juggernaut")["dash"]["windup"]) * 0.5 >= 0.3)
-	ok("feel: Avalanche / Bastion plant tells", float(Arch.def("juggernaut")["r"]["tell"]) >= 0.3 and float(Arch.def("bulwark")["r"]["tell"]) >= 0.3)
+	ok("feel: Avalanche / Bastion plant tells (fuse + tell)", float(Arch.def("juggernaut")["r"]["tell"]) + float(Arch.def("juggernaut")["r"]["fuse"]) >= 0.3 and float(Arch.def("bulwark")["r"]["tell"]) >= 0.3)
+	ok("feel: every R has a fuse of 0.35-0.8s", Arch.ids().all(func(a): return float(Arch.def(a)["r"].get("fuse", 0.0)) >= 0.35 and float(Arch.def(a)["r"].get("fuse", 0.0)) <= 0.8))
+	ok("R cooldowns are big moments (90-120s)", Arch.ids().all(func(a): return float(Arch.def(a)["r"]["cooldown"]) >= 90.0 and float(Arch.def(a)["r"]["cooldown"]) <= 120.0))
 	# hitstop tiers
 	var dummy := Hunter.new(); dummy.max_hp = 145.0
 	ok("feel: chip hit T1", Feel.tier(dummy, 4.0, {"src": "shot"}) == 1)

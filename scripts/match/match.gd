@@ -662,6 +662,14 @@ func _build_shot_pool() -> void:
 		mi.material_override = Models.glow_mat(Color.WHITE)
 		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		mi.visible = false
+		# a soft halo round every bolt, so shots glow instead of reading as specks (Oomph.shot_look)
+		var halo := MeshInstance3D.new()
+		halo.name = "Halo"
+		halo.mesh = mesh
+		halo.material_override = Models.glow_mat(Color(1, 1, 1, 0.3))
+		halo.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		halo.scale = Vector3(2.3, 2.3, 1.5)
+		mi.add_child(halo)
 		add_child(mi)
 		shot_pool.append(mi)
 
@@ -1958,6 +1966,7 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 	CombatBus.hit_landed.emit(by, target, d, tags)
 	var crit: bool = o.get("crit", false)
 	var src: String = o.get("src", "")
+	Oomph.react(self, target, by, d, o)     # flinch, stagger, hit-shake (the gameplay side of oomph)
 	var credit: Ent = by
 	if by is Kin and by.owner_h:
 		credit = by.owner_h
@@ -2938,19 +2947,13 @@ func spawn_shot(by: Ent, at: Vector3, v2: Vector2, dmg: float, life: float, size
 		mi.visible = true
 		# readability: what can hurt you is the brightest, hottest thing on screen; your own and your
 		# team's shots are smaller and dimmer so they never hide an incoming one
-		var vis_col := col
-		var vis_size := size * 2.0
-		if player and by.team != player.team:
-			vis_col = col.lerp(Color("ff5a3a"), 0.35)
-			vis_col.a = 1.0
-			vis_size *= 1.3
-		elif player and String(extra.get("src", "")) == "abil":
-			vis_col = col.lerp(Color.WHITE, 0.25)      # your right click reads clearly over your own gunfire
-			vis_size *= 1.25
-		elif player:
-			vis_col = Color(col, 0.5)
-			vis_size *= 0.85
+		var look: Array = Oomph.shot_look(self, by, col, size)
+		var vis_col: Color = look[0]
+		var vis_size: float = look[1]
 		mi.material_override.set_shader_parameter("color", vis_col)
+		var halo := mi.get_node_or_null("Halo") as MeshInstance3D
+		if halo:
+			halo.material_override.set_shader_parameter("color", Color(vis_col.lightened(0.2), float(look[2])))
 		mi.scale = Vector3.ONE * vis_size
 		mi.global_position = at
 	if not extra.has("dy") and not extra.get("mob", false) and not extra.get("cos", false) and not extra.get("melee", false):
@@ -3442,7 +3445,7 @@ func _process(delta: float) -> void:
 			if v.length() > 1.0:
 				mi.look_at(mi.global_position + Vector3(v.x, 0, v.y), Vector3.UP)
 				var r: float = s["r"]
-				mi.scale = Vector3(r * 2.0, r * 2.0, r * 2.0 + v.length() * 0.025)
+				mi.scale = Vector3(r * 2.0, r * 2.0, Oomph.tracer_len(r, v.length(), float((s["x"] as Dictionary).get("tracer", 1.0))))
 	_vprof("verbs_shots")
 	cam.follow_mode = String(Settings.get_v("cam_follow"))
 	var sty := String(Settings.get_v("cam_style"))

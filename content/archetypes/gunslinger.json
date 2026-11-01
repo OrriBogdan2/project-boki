@@ -19,7 +19,7 @@
 	"e": {"delivery": "burst", "name": "Quickdraw", "short": "Quick", "icon": "haymaker", "col": "#ffb36a", "cooldown": 16.0, "time": 3.0, "fire_rate": 0.25, "pd_k": 2.0,
 		"desc": "For 3s: fire 25% faster, an instant reload, a dash charge back, and your next Slide Reload's perfect-dodge window is twice as long.",
 		"sockets": {"guard": "add", "util": "add"}},
-	"r": {"delivery": "projectile", "name": "Last Round", "short": "Last", "icon": "skypierce", "col": "#ffd23f", "cooldown": 70.0, "reach": 12.0, "channel": 1.2, "self_slow": 0.6, "base": 16.0, "per_s": 12.0, "stun": 0.5,
+	"r": {"delivery": "projectile", "name": "Last Round", "short": "Last", "icon": "skypierce", "col": "#ffd23f", "cooldown": 100.0, "fuse": 0.45, "fuse_guard": "none", "reach": 12.0, "channel": 1.2, "self_slow": 0.6, "base": 16.0, "per_s": 12.0, "stun": 0.5,
 		"desc": "Channel up to 1.2s (slowed): gold lock lines draw to every rival hunter within 12m in sight. Press R again (or wait) to fire one round per lock: 16 + 12 per second locked; a full lock stuns 0.5. Breaking line of sight drops the lock.",
 		"sockets": {"hit": "add", "ctrl": "add", "ctrl_cap": "soft", "guard": "add"}},
 	"order": ["sec", "dash", "kin", "sec", "dash", "ult", "sec", "kin", "ult", "gear"],

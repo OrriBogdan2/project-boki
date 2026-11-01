@@ -19,7 +19,7 @@
 	"e": {"delivery": "zone", "name": "Flare Arrow", "short": "Flare", "icon": "scanner", "col": "#5fd8ff", "cooldown": 16.0, "reach": 14.0, "flight": 0.4, "radius": 7.0, "time": 4.0,
 		"desc": "Lob a flare up to 14m: it reveals everyone within 7m for 4s, and the zone keeps revealing anyone who walks in. Shows traps, stealth and smoke.",
 		"sockets": {"util": "add", "ctrl": "add", "ctrl_cap": "soft", "guard": "add"}},
-	"r": {"delivery": "burst", "name": "Skyfall Volley", "short": "Volley", "icon": "barrage", "col": "#ffb070", "cooldown": 75.0, "reach": 16.0, "radius": 5.0, "tell": 0.8, "waves": 5, "every": 0.4, "dmg": 6.0, "slow": 0.3, "inner": 2.0, "root": 1.0,
+	"r": {"delivery": "burst", "name": "Skyfall Volley", "short": "Volley", "icon": "barrage", "col": "#ffb070", "cooldown": 110.0, "fuse": 0.5, "fuse_guard": "none", "reach": 16.0, "radius": 5.0, "tell": 0.8, "waves": 5, "every": 0.4, "dmg": 6.0, "slow": 0.3, "inner": 2.0, "root": 1.0,
 		"desc": "Aim a 5m circle up to 16m: 0.8s of arrows arcing up, then 5 waves 0.4s apart (6 damage, slow). The last roots 1.0 in the inner 2m.",
 		"sockets": {"hit": "add", "ctrl": "add", "ctrl_cap": "soft", "guard": "add", "mod": "add"}},
 	"order": ["sec", "dash", "kin", "sec", "kin", "ult", "sec", "dash", "ult", "kin"],
