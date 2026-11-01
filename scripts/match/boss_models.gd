@@ -434,6 +434,9 @@ static func vent(col: Color, r: float, top: float) -> Node3D:
 	root.add_child(rn)
 	var air := World.updraft_visual(r, 0.0, top, Color(col.lightened(0.55), 1.0))
 	air.name = "Air"
+	# a soft body of light inside the streaks, so the column reads from the usual camera angle
+	var body := Models.part(air, Models.cyl(r * 0.85, r * 0.95, top, 18), Models.glow_mat(Color(col.lightened(0.6), 0.16)), Vector3(0, top * 0.5, 0))
+	body.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	air.visible = false
 	root.add_child(air)
 	return root
@@ -442,14 +445,18 @@ static func vent(col: Color, r: float, top: float) -> Node3D:
 ## light round its foot. "Shaft" pulses; Lairs tints it gold once the boss falls.
 static func alert_beam(col: Color, half: float) -> Node3D:
 	var root := Node3D.new()
-	var sh := Models.part(root, Models.cyl(1.1, 1.8, 46.0, 18), Models.glow_mat(Color(col, 0.30)), Vector3(0, 23.0, 0))
+	# (it starts over the walls and stops below where the camera sits, so from the usual angle it reads
+	# as a shaft standing over the lair rather than a glare across the screen)
+	var sh := Models.part(root, Models.cyl(0.8, 1.15, 18.0, 16), Models.glow_mat(Color(col, 0.3)), Vector3(0, 13.0, 0))
 	sh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	sh.name = "Shaft"
-	var core := Models.part(root, Models.cyl(0.35, 0.55, 46.0, 10), Models.glow_mat(Color(col.lightened(0.5), 0.45)), Vector3(0, 23.0, 0))
+	var core := Models.part(root, Models.cyl(0.22, 0.32, 18.0, 10), Models.glow_mat(Color(col.lightened(0.5), 0.55)), Vector3(0, 13.0, 0))
 	core.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	core.name = "Core"
+	var cap := Models.part(root, Models.sphere(0.9, 12), Models.glow_mat(Color(col.lightened(0.4), 0.35)), Vector3(0, 22.2, 0))
+	cap.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var ring := MeshInstance3D.new(); ring.mesh = Models.flat_quad(half * 2.0 + 4.0)
-	ring.material_override = Models.ring_mat(Color(col, 0.55), 0.03); ring.position.y = 0.08; ring.name = "Ring"
+	ring.material_override = Models.ring_mat(Color(col, 0.32), 0.02); ring.position.y = 0.08; ring.name = "Ring"
 	ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	root.add_child(ring)
 	return root

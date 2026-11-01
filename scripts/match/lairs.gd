@@ -121,6 +121,7 @@ func _add(D: Dictionary) -> void:
 	var lvn := BossModels.lever(col)
 	Flora.paint_set_piece(lvn)
 	lvn.position = lv_at
+	lvn.scale = Vector3.ONE * 1.2
 	lvn.rotation.y = atan2(-out.x, -out.y)
 	m.add_child(lvn)
 	var up_at := c - Vector3(out.x, 0, out.y) * (float(hf) - 2.3)
@@ -766,7 +767,7 @@ func _alert(L: Dictionary, kind: String, text: String) -> void:
 		for nm in ["Shaft", "Core"]:
 			var mi: MeshInstance3D = beam.get_node(nm)
 			var base: Color = Color("ffd36a") if gold else color_of(L)
-			(mi.material_override as ShaderMaterial).set_shader_parameter("color", Color(base.lightened(0.5 if nm == "Core" else 0.0), 0.45 if nm == "Core" else 0.30))
+			(mi.material_override as ShaderMaterial).set_shader_parameter("color", Color(base.lightened(0.5 if nm == "Core" else 0.0), 0.55 if nm == "Core" else 0.3))
 
 ## Did this hunter hear the lair's fight (or its boss fall) and is it still news?
 func alerted(L: Dictionary, h: Hunter) -> bool:
@@ -965,10 +966,14 @@ func _tick_show(L: Dictionary) -> void:
 		else:
 			lbl.text = "%s\n%s FIGHT  ·  %s" % [L["name"], bn.to_upper(), clock(lock_left(L))]
 	var beam: Node3D = nodes.get("beam")
-	if is_instance_valid(beam) and beam.visible:
-		if not alert_on(L):
+	if is_instance_valid(beam) and (beam.visible or (alert_on(L) and beam.has_meta("hid"))):
+		# (it's for those outside: hidden for whoever is in the lair, where it would only glare)
+		var in_it: bool = m.player != null and inside(L, m.player.pos, 1.0)
+		beam.set_meta("hid", in_it)
+		if not alert_on(L) or in_it:
 			beam.visible = false
 		else:
+			beam.visible = true
 			var k := 1.0 + 0.1 * sin(m.time * 3.2)
 			(beam.get_node("Shaft") as Node3D).scale = Vector3(k, 1.0, k)
 			(beam.get_node("Ring") as Node3D).rotation.y = m.time * 0.4
@@ -1380,7 +1385,8 @@ func demo(mode: String) -> void:
 		if mode == "victory":
 			var b: Boss = boss_of(L)
 			if b and not b.dead and L.get("locked", false):
-				b.hurt(b.max_hp * 3.0, P, {"src": "test"})
+				b.hurt(b.max_hp * 3.0, null, {"src": "test"})      # (no killer: no perk choice over the shot)
+			m.cam.zoom = 1.9; m.cam.zoom_to = 1.9      # (the match eases the camera back to 1 every frame)
 			if L.get("victory", false):
 				L["victory_at"] = m.time - 2.2      # (hold the clock for the shot)
 				P.hp = P.max_hp
@@ -1389,6 +1395,7 @@ func demo(mode: String) -> void:
 				m.hud.open_map()
 			L["lock_at"] = m.time - 18.6
 			P.hp = P.max_hp
+			m.cam.zoom = 2.2; m.cam.zoom_to = 2.2
 			for o in L.get("sealed_in", []):
 				o.hp = o.max_hp
 		return
@@ -1433,15 +1440,15 @@ func demo(mode: String) -> void:
 			L["gate_k"] = 0.999
 			var out: Vector3 = Vector3(L["out"].x, 0, L["out"].y)
 			var side := Vector3(-L["out"].y, 0, L["out"].x)
-			var at: Vector3 = L["lever"] - out * 0.9 - side * 0.9
+			var at: Vector3 = L["lever"] - out * 1.0 + side * 0.8
 			P.teleport(Vector3(at.x, m.world.ground_at(at.x, at.z), at.z))
 			for o in m.hunters:
 				if o != P and o.team == P.team:
 					var q: Vector3 = L["up"] + out * 2.2 + side * 1.2
 					o.teleport(Vector3(q.x, m.world.ground_at(q.x, q.z), q.z))
 					o.ctrl = "idle"
-			m.cam.zoom_to = 1.55; m.cam.zoom = 1.55
-			m.cam.snap(L["c"] + out * 1.0)
+			m.cam.zoom_to = 2.0; m.cam.zoom = 2.0
+			m.cam.snap(P.pos)
 			wake(L, P)
 		"outside", "outside_map":
 			open(L, P, "dial")
@@ -1456,13 +1463,13 @@ func demo(mode: String) -> void:
 					o.teleport(Vector3(q.x, m.world.ground_at(q.x, q.z), q.z))
 					o.ctrl = "idle"
 					n += 1
-			var at: Vector3 = L["dial"] + out * 3.2 + side * 1.6
+			var at: Vector3 = L["dial"] + out * 1.4 + side * 1.6
 			P.teleport(Vector3(at.x, m.world.ground_at(at.x, at.z), at.z))
 			for o in m.hunters:
 				if o != P and o.team == P.team:
 					o.teleport(P.pos + side * -2.2)
 					o.ctrl = "idle"
-			m.cam.zoom_to = 1.9; m.cam.zoom = 1.9
-			m.cam.snap(P.pos - out * 3.0)
+			m.cam.zoom_to = 2.3; m.cam.zoom = 2.3
+			m.cam.snap(P.pos)
 			var b: Boss = boss_of(L)
 			if b: wake(L, b.tgt if b.tgt else P)

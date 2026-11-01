@@ -1197,7 +1197,7 @@ static func updraft_visual(r: float, y0: float, y1: float, tint := Color(1.0, 0.
 	var mat := ShaderMaterial.new(); mat.shader = load("res://shaders/updraft.gdshader")
 	mat.set_shader_parameter("tiles", hgt / 4.0)
 	if tint != Color(1.0, 0.95, 0.75, 0.35):
-		mat.set_shader_parameter("color", Color(tint, 0.55))
+		mat.set_shader_parameter("color", Color(tint, 0.85))
 		mat.set_shader_parameter("speed", 1.1)
 	col.material_override = mat
 	col.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
