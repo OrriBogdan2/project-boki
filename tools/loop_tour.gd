@@ -498,6 +498,18 @@ func _level_up(m) -> void:
 	print("TOUR slots after spending: %s, points left %d" % [str(P.slot_lv), P.skill_pts])
 	await shot("skills_spent")
 
+## A flat direction from the hunter that has solid ground for the next 14 m (most open one of eight).
+func _safe_dir(m, P) -> Vector3:
+	var best := Vector3(1, 0, 0); var best_n := -1
+	for i in 8:
+		var d := Vector3(cos(i * TAU / 8.0), 0, sin(i * TAU / 8.0))
+		var n := 0
+		for r in [3.0, 6.0, 9.0, 12.0, 14.0]:
+			var q: Vector3 = P.pos + d * r
+			if not m.world.is_void(q.x, q.z) and absf(m.world.ground_at(q.x, q.z) - P.pos.y) < 1.5: n += 1
+		if n > best_n: best_n = n; best = d
+	return best
+
 ## E, R, the RMB variants (tap, hold, in the air), dash, the Boki's C and G, each with a shot.
 func _cast_round(m, tag: String, wait_cd: bool) -> void:
 	var P: Hunter = m.player
@@ -505,14 +517,22 @@ func _cast_round(m, tag: String, wait_cd: bool) -> void:
 		P.unlock_all()
 		P.lvl = 6; P.skill_pts = 1; P.level_slot("ult")
 	var mb := _nearest_mob(m, 25.0)
-	var tgt = mb if mb else P.pos + Vector3(4, 0, 0)
+	var tgt = mb if mb else P.pos + _safe_dir(m, P) * 4.0
 	aim_at = tgt
+	var home: Vector3 = P.pos
 	var casts := [["secondary", "rmb_tap", 0.1], ["secondary", "rmb_hold", 1.2], ["signature", "e", 0.12], ["dash", "dash", 0.1],
 		["kin_ability", "boki_c", 0.12], ["throw", "boki_g", 0.12], ["ultimate", "r", 0.12]]
 	for c in casts:
 		if wait_cd:
 			await mwait(1.5)
 		var a: String = c[0]
+		if not is_instance_valid(m) or m.over: return
+		# (a dash or the Boki's pull carries the hunter 6-10 m: start each cast from the same solid spot
+		# and, with no monster to aim at, toward ground, so one cast can't walk the tour off the island)
+		if (P.pos - home).length() > 1.0:
+			P.teleport(home)
+		if not mb:
+			aim_at = P.pos + _safe_dir(m, P) * 4.0
 		P.ult = 1.0 if a == "ultimate" else P.ult
 		Input.action_press(a)
 		await frames(2)
