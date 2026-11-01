@@ -778,6 +778,7 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 			"gold": m_gold, "gun": m_gun, "hero": m_hero, "trim": m_trim, "steel": m_steel, "glow": m_glow, "glow_soft": m_glow_soft, "bone": m_bone,
 			"wood": m_wood, "fur": m_fur, "feather": m_feather, "cloak": m_cloak, "hat": m_hat}}
 	HeroGear.dress(arch, ctx)
+	gun.set_meta("arch", arch)           # (an archer's long gun is a bow: gun_parts reads this, in matches too)
 	gun_parts(gun, weapon, m_gun, m_dark, m_acc)
 	gun.scale = Vector3.ONE * float(CLASS_LOOK.get(cls, {}).get("weapon", 1.0))     # heavies carry big guns
 	if not gun.has_node("Mag"):
@@ -1551,6 +1552,8 @@ static func gun_parts(gun: Node3D, weapon: String, m_gun: Material, m_dark: Mate
 			grip.call(0.0, 0.16)
 			part(gun, HeroKit.loft("lever_stock", [Vector3(0, 0.0, 0.08), Vector3(0, -0.03, 0.18), Vector3(0, -0.07, 0.3)], [Vector2(0.03, 0.05), Vector2(0.034, 0.06), Vector2(0.036, 0.085)], 10, Vector3.UP, 0.85), walnut)
 			part(gun, box(0.07, 0.09, 0.02), m_dark, Vector3(0, -0.07, 0.31), Vector3.ONE, Vector3(0.25, 0, 0))
+		"sniper" when String(gun.get_meta("arch", "")) == "archer":
+			_bow_parts(gun, m_gun, m_dark, m_acc, glow.call(Color("bff6ff")))
 		"sniper":
 			part(gun, box(0.09, 0.12, 0.5), m_gun, Vector3(0, 0, -0.16))
 			part(gun, cyl(0.028, 0.03, 0.56, 12), m_dark, Vector3(0, 0.02, -0.66), Vector3.ONE, Vector3(PI / 2, 0, 0))
@@ -1687,6 +1690,43 @@ static func gun_parts(gun: Node3D, weapon: String, m_gun: Material, m_dark: Mate
 			part(gun, cyl(0.12, 0.12, 0.62, 14), m_gun, Vector3(0, 0, -0.2), Vector3.ONE, Vector3(PI / 2, 0, 0))
 			part(gun, cyl(0.15, 0.14, 0.1, 14), m_acc, Vector3(0, 0, -0.52), Vector3.ONE, Vector3(PI / 2, 0, 0))
 			grip.call(-0.02, 0.18)
+
+## The archer's long gun is a great recurve bow, held in the left hand with the string drawn back
+## to the right (the long gun's two grips): canted a little, its limbs curving toward the archer and
+## the tips flicking forward, the limbs in the accent colour, a glowing string and a nocked arrow.
+static func _bow_parts(gun: Node3D, m_gun: Material, m_dark: Material, m_acc: Material, m_glow: Material) -> void:
+	var riser := Vector3(0, -0.05, -0.24)
+	var nock := Vector3(0, -0.05, 0.05)
+	var cant := Basis(Vector3.BACK, 1.05)         # canted well over, so from the high match camera it reads as an arc, not a line
+	var pts := []
+	var wid := []
+	for k in 15:
+		var sg := float(k) / 14.0 * 2.0 - 1.0
+		var a := absf(sg)
+		pts.append(riser + cant * Vector3(0, sg * 0.64, 0) + Vector3(0, 0, 0.17 * sg * sg - 0.1 * pow(a, 6.0)))
+		var th := lerpf(0.042, 0.014, a)
+		wid.append(Vector2(th * 0.8, th * 1.7))
+	part(gun, HeroKit.loft("held_bow", pts, wid, 8, Vector3.RIGHT, 1.0, 2), m_acc)
+	# the riser: a wrapped grip with a brass-capped shelf for the arrow
+	part(gun, cyl(0.034, 0.034, 0.16, 10), m_dark, riser, Vector3.ONE, Vector3(0, 0, -1.05))
+	part(gun, box(0.05, 0.05, 0.06), m_gun, riser + cant * Vector3(0, 0.07, 0), Vector3.ONE, Vector3(0, 0, -1.05))
+	# the string, drawn to the nock, and the arrow on it
+	var tips: Array = [pts[0], pts[pts.size() - 1]]
+	for tp in tips:
+		_rod(gun, tp as Vector3, nock, 0.0045, m_glow)
+	_rod(gun, nock, Vector3(0, -0.05, -0.66), 0.008, m_gun)
+	part(gun, cyl(0.0, 0.026, 0.07, 6), m_glow, Vector3(0, -0.05, -0.69), Vector3.ONE, Vector3(-PI / 2, 0, 0))
+	for k in 3:
+		var fl := HeroKit.lock_mesh("held_fletch", [Vector3(0, 0, 0), Vector3(0, 0.0, -0.04), Vector3(0, 0.0, -0.08)], 0.045, 0.12, Vector3.UP, 1.0, 0.6)
+		part(gun, fl, m_acc, nock + Vector3(0, 0, -0.02), Vector3.ONE, Vector3(0, 0, k * TAU / 3.0))
+	var muzzle := Node3D.new(); muzzle.name = "Muzzle"; muzzle.position = Vector3(0, -0.05, -0.72); gun.add_child(muzzle)
+
+## A thin rod from a to b (bow strings, arrows).
+static func _rod(n: Node3D, a: Vector3, b: Vector3, r: float, m: Material) -> void:
+	var d := b - a
+	var mi := part(n, cyl(r, r, d.length(), 5), m, (a + b) * 0.5)
+	var dn := d.normalized()
+	mi.basis = Basis(Quaternion(Vector3.UP, dn)) if absf(dn.dot(Vector3.UP)) < 0.9999 else Basis.IDENTITY
 
 ## A found weapon floating over the ground, with a light pillar in its rarity's colour.
 static func weapon_drop(weapon: String, rar: int) -> Node3D:
