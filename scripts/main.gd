@@ -409,6 +409,10 @@ func _ready() -> void:
 	if "--life-check" in args:
 		_life_check()
 		return
+	if "--hero-check" in args:
+		set_meta("hero_check", load("res://tools/hero_check.gd").new())     # change hero on the farm
+		get_meta("hero_check").run(self)
+		return
 	if "--keybind-check" in args:
 		set_meta("keybind_check", load("res://tools/keybind_check.gd").new())     # two keys per action, the ult on R and X, clashes
 		get_meta("keybind_check").run(self)

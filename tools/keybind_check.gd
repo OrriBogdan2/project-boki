@@ -2,7 +2,7 @@ extends RefCounted
 ## --keybind-check: two keys per action (Settings > Controls). The ultimate ships on R and X; a
 ## second key can be set, cleared and saved; a key already in use is caught and can be swapped;
 ## old custom bindings get X as the ultimate's second key; nothing else is on X in a match (the
-## arena/duel reset is Backspace, separating from the drop is Z). With --shot=<dir>, screenshots of
+## arena/duel reset is Backspace, separating from the drop is Z). With --shots-dir=<dir>, screenshots of
 ## the Controls page and of the clash warning.
 
 var bad := 0
@@ -58,7 +58,7 @@ func run(main: Node) -> void:
 	# the Controls page, and the clash warning
 	var shot := ""
 	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--shot="): shot = a.substr(7)
+		if a.begins_with("--shots-dir="): shot = a.substr(12)
 	Overlay.tab = "Controls"
 	Overlay.open_settings()
 	for i in 20: await tree.process_frame

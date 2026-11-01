@@ -258,7 +258,7 @@ func _show_settings() -> void:
 			var groups := [["Moving", ["up", "down", "left", "right", "jump", "glide", "dash", "crouch"]],
 				["Fighting", ["fire", "secondary", "gear1", "signature", "throw", "ultimate", "tonic", "armor_kit", "base"]],
 				["Squad and map", ["map", "scores", "emote", "pass_lead", "separate"]],
-				["At home", ["interact", "play", "talk", "details", "inventory"]]]
+				["At home", ["interact", "play", "talk", "details", "inventory", "hero"]]]
 			var named := {}
 			for a in Settings.ACTIONS: named[String(a[0])] = String(a[1])
 			var shown := {}
