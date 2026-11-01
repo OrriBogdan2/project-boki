@@ -159,6 +159,9 @@ func _arena() -> void:
 	step(m, 0.5)
 	ok("bot: fights as a thief", A.bot != null and A.bot.arch == "thief")
 	# kits2: the sparring bot really uses the Thief's and the Juggernaut's kits on you
+	# (R is the Merge now; the class ultimates stay reachable behind boki_system.json class_ults, and this
+	# check turns that flag on to keep the kits' R honest until the hero-port work folds them in)
+	KinCommand.rules()["class_ults"] = true
 	for ba in ["thief", "juggernaut"]:
 		A.set_bot_arch(ba)
 		var B: Hunter = A.bot
@@ -166,7 +169,8 @@ func _arena() -> void:
 		P.teleport(A.home); B.teleport(A.home + Vector3(5.0, 0, 0))
 		var seen := {"dash": false}
 		var tb := 0.0
-		while tb < 40.0:          # (18s used to do; the bot's dice vary with what ran before, so give it up to 40s to show all three)
+		# up to 40s, stopping once it has used all of them (the dash is a dice roll in a short window)
+		while tb < 40.0:
 			P.hp = P.max_hp
 			B.hp = B.max_hp
 			m.step(DT); tb += DT
@@ -176,6 +180,7 @@ func _arena() -> void:
 		var u: Dictionary = B.used
 		ok("bot uses the %s kit (RMB, E or R, dash)" % ba, int(u.get("utility", 0)) > 0 and int(u.get("k1", 0)) + int(u.get("r", 0)) > 0 and bool(seen["dash"]),
 			"rmb %d e %d r %d dash %s" % [int(u.get("utility", 0)), int(u.get("k1", 0)), int(u.get("r", 0)), seen["dash"]])
+	KinCommand.rules()["class_ults"] = false
 	A.bot_mode = "off"; A._spawn_bot()
 	ok("bot: off", A.bot == null)
 	# the panels build

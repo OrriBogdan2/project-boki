@@ -32,8 +32,9 @@ own when you send it out (G), and adds a little of its type to your kit: each cl
 their strength (35% on RMB, 30% on E and the dash, 50% on R). Hard control from a socket is capped. An
 empty socket gives +10% to that ability's main number instead.
 
-When your **bond meter** is full, your ultimate becomes a **bonded ultimate**: your Boki merges with
-you as it fires (its merge form, see [Boki species](Boki-Species.md)). That happens once per run.
+**R is the Merge** for every class. When your **bond meter** is full, press it and you and your Boki
+become one for a while: you wear its look, and your abilities change by its type and power (its merge
+form, see [Boki species](Boki-Species.md)). The class's own ultimate is held back for now.
 
 ## Choosing
 

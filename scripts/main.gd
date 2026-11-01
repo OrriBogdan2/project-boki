@@ -101,6 +101,12 @@ func _ready() -> void:
 			opts["arch_demo"] = a.substr(12); opts["no_drop"] = true; opts["training"] = true; opts["unlocked"] = true
 			opts["arch"] = ad[0]; opts["cls"] = Arch.weight(ad[0]); opts["weapon"] = Arch.default_weapon(ad[0])
 			if ad.size() > 2: opts["weapon"] = ad[2]
+		if a.begins_with("--boki-demo="):
+			# screenshots: the Boki commands and the Merge (scripts/match/boki_demo.gd), --boki-demo=throw|recall|downed|merge[:species]
+			var bd := a.substr(12).split(":")
+			opts["boki_demo"] = a.substr(12); opts["arch_demo"] = "gunslinger:rmb"; opts["no_drop"] = true; opts["training"] = true; opts["unlocked"] = true
+			opts["arch"] = "gunslinger"; opts["cls"] = Arch.weight("gunslinger"); opts["weapon"] = Arch.default_weapon("gunslinger")
+			if bd.size() > 1: opts["demo_kin"] = bd[1]
 		if a == "--normalize-size": Unique.normalize = true      # kin size changes no stats or hitboxes (Unique)
 		if a == "--fresh": Save.d = Save.fresh()
 		if a in ["--work-demo", "--work-board", "--work-board=Kin", "--work-card", "--work-box", "--work-hover", "--work-close", "--work-build", "--shiny-lineup"]:
@@ -373,6 +379,9 @@ func _ready() -> void:
 		var wkc = load("res://tools/work_check.gd").new()      # kin at work: jobs, stations, priorities, shimmer odds
 		set_meta("work_check", wkc)
 		wkc.run(self)
+		return
+	if "--boki-system-check" in args:
+		load("res://tools/boki_system_check.gd").new().run(self)      # Boki commands (throw, recall, hold/follow, C), the downed Boki, the Merge
 		return
 	if "--teammate-check" in args:
 		load("res://tools/teammate_check.gd").new().run(self)      # Boki as teammates: following, callouts, caring, the tutorial guide
@@ -1976,7 +1985,7 @@ func _grammar_runtime_check() -> void:
 	_ac_run(m, KinParts.MERGE_SPENT_TIME + 0.1)
 	_grt("merge again after the cooldown", blocked and KinMerge.can_cast(P), "")
 	KinMerge.cast(P)
-	m._player_throw()
+	KinCommand.tap(P)
 	_ac_run(m, 0.05)
 	_grt("throwing ends the merge (throw still works)", not KinMerge.active(P) and k.state in ["flying", "active"], "Boki %s" % k.state)
 	_ac_run(m, 1.0)

@@ -64,17 +64,17 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | Left click | Weapon attack | `fire` | yes |
 | Right click | Archetype ability (right click) | `secondary` | yes |
 | E | Archetype utility (E) | `signature` | yes |
-| C | Boki ability (hops out, casts, hops back) | `kin_ability` | yes |
+| C | Boki ability (cast from where your Boki is) | `kin_ability` | yes |
 | F | Use, tame, revive, pet | `interact` | yes |
 | 2 | Repair armor (armor kit) | `armor_kit` | yes |
 | Q | Glove active | `gear1` | yes |
 | Ctrl | Sneak | `crouch` | yes |
-| G / Middle mouse | Send / recall Boki | `throw` | yes |
+| G / Middle mouse | Throw / recall Boki (hold: hold the spot or follow) | `throw` | yes |
 | B | Base to a teammate (squads) | `base` | yes |
 | Shift | Archetype dash | `dash` | yes |
 | Space | Jump (hold to glide) | `jump` | yes |
 | Mouse 5 / Mouse 4 | Glide (hold in the air) | `glide` | yes |
-| R | Archetype ultimate (bonded when bond is full) | `ultimate` | yes |
+| R | Merge with your Boki (needs a full bond meter) | `ultimate` | yes |
 | 1 | Heal (tonic, or armor kit when health is full) | `tonic` | yes |
 | Tab | Scoreboard | `scores` | yes |
 | Esc | Menu | `menu` | no |

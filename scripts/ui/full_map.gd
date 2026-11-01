@@ -496,6 +496,10 @@ func _squad(c: Control, team: int) -> void:
 			hud._ctext(pv + Vector2(0, -9), h.pname.substr(0, 1), 12, col, hud.big)
 		if m.skydrop and m.skydrop.is_lead(h) and (h.riding or h.dropping):
 			crown(c, pv + Vector2(0, -20 if not h.riding else -24), col if h != m.player else GOLD)
+	for dk in BokiHud.squad_downed(m):
+		var dv := to_screen(dk.position)
+		if rect.has_point(dv):
+			BokiHud.map_dot(c, dv, dk, 7.0, m.time)
 
 func crown(c: Control, p: Vector2, col: Color) -> void:
 	var pts := PackedVector2Array([p + Vector2(-7, 4), p + Vector2(-7, -3), p + Vector2(-3.5, 0), p + Vector2(0, -5), p + Vector2(3.5, 0), p + Vector2(7, -3), p + Vector2(7, 4)])

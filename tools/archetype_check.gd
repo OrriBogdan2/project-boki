@@ -983,15 +983,13 @@ func _kin_ability() -> void:
 	aim_at(P, P.pos + Vector3(3.0, 0, 0))
 	P.inp["kin_ab"] = true
 	m.step(DT)
-	var hopped := k.state != "shoulder"
 	var spent := not k.runner.is_ready("k1")
-	ok("C: hops out and casts its own active", hopped and spent, "state %s" % k.state)
-	step(m, 2.5)
-	ok("C: hops back to the shoulder", k.state == "shoulder", "state %s" % k.state)
+	ok("C: casts its own active, through you (the Boki stays on the shoulder)", k.state == "shoulder" and spent, "state %s" % k.state)
+	step(m, 0.5)
 	ok("C: doesn't touch the archetype E", float(P.ak.cd["e"]) <= 0.0)
 	# G: send / recall (the old throw) still works
 	k.throw_cd = 0.0; k.settle = 1.0
-	m._player_throw()
+	KinCommand.tap(P)
 	step(m, 0.6)
 	ok("G: sends the kin out", k.state in ["active", "flying"], k.state)
 	await done(m)
