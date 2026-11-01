@@ -18,6 +18,9 @@ class_name Work
 ##   rec["overworked"] true while it's been worked without a break (cleared by a proper rest)
 ##   Save.d["work"]    {prio: {el: 0..3}, st: {deco uid: station state}, piles: [...], made: {what: n}}
 ##   Save.d["mats"]    {wood, stone}: building materials, spent in build mode and on expansions
+##   rec["work_at"]    a station's deco uid: the kin is assigned there (ASSIGN). It only works that
+##                     station, and keeps working it while you're away (catch_up, on the way home)
+##   Save.d["work"]["seen"]  the last time the farm was looked at (unix seconds), for catch_up
 
 const ELEMENTS := {
 	"ember": {"name": "Ember", "col": Color("ff7a3a"), "job": "Kindling", "desc": "Keeps the Hearth Oven going (firewood becomes Boki kibble), and warms the Incubator's Rare Egg twice as fast."},
@@ -244,3 +247,109 @@ static func fresh() -> bool:
 	return false
 
 const FRESH_MULT := 1.15
+
+# ------------------------------------------------------------------ assigning a kin to a station
+## Stations a kin can be assigned to, Palworld-style: how many kin each takes, and what each makes
+## while you're away (per kin, per `secs` at work level 1: speed() makes higher levels faster),
+## capped at `cap` per return. "need": an assigned kin is the only one that works it.
+const ASSIGN := {
+	"lumber_camp": {"slots": 2, "out": "wood", "secs": 45.0, "cap": 24},
+	"quarry": {"slots": 2, "out": "stone", "secs": 55.0, "cap": 20},
+	"seed_garden": {"slots": 1, "out": "seed", "secs": 240.0, "cap": 4, "need": true},
+	"kiln": {"slots": 1, "out": "coals", "secs": 150.0, "cap": 4, "wood": 3, "need": true},
+}
+## Away longer than this and the farm only counts this long (two hours).
+const AWAY_MAX := 7200.0
+## Under this, coming home isn't "away" (a building door, a quick menu).
+const AWAY_MIN := 30.0
+
+static func assigned(rec: Dictionary) -> int:
+	return int(rec.get("work_at", -1))
+
+static func assign(rec: Dictionary, u: int) -> void:
+	if u < 0: rec.erase("work_at")
+	else:
+		rec["work_at"] = u
+		rec.erase("work_rest")
+		rec.erase("work_pin")
+
+## The kin assigned to a station (deco uid), from the roster.
+static func crew(u: int) -> Array:
+	var out: Array = []
+	for r in Save.d.get("roster", []):
+		if typeof(r) == TYPE_DICTIONARY and assigned(r) == u: out.append(r)
+	return out
+
+## Why this kin can't be assigned to a station of this id ("" if it can).
+static func assign_why(rec: Dictionary, id: String) -> String:
+	var el := String(HomeLayout.CATALOG.get(id, {}).get("work", ""))
+	if level(rec, el) <= 0:
+		return "No %s knack" % name_of(el)
+	return ""
+
+## Marks the farm as looked at now (HomeWork.tick, every second at home).
+static func seen_now() -> void:
+	ensure()["seen"] = Time.get_unix_time_from_system()
+
+## What the assigned kin made while you were away (since "seen"), capped: wood, stone, seeds and
+## Ember Coals into your stores. Only stations on the save's layout and kin that could work (not
+## asleep in the Burrow, not starving). Returns lines for a "While you were away" note ([] if none).
+static func catch_up(now := -1.0) -> Array:
+	var w := ensure()
+	if now < 0.0: now = Time.get_unix_time_from_system()
+	var seen := float(w.get("seen", 0.0))
+	w["seen"] = now
+	if seen <= 0.0 or now - seen < AWAY_MIN:
+		return []
+	var away := minf(now - seen, AWAY_MAX)
+	var lines: Array = []
+	for s in HomeLayout.stations(Save.d):
+		var id := String(s["id"])
+		if not ASSIGN.has(id): continue
+		var cfg: Dictionary = ASSIGN[id]
+		var u := int(s["e"]["u"])
+		var rate := 0.0
+		var who: Array = []
+		for r in crew(u):
+			if not can_work(r): continue
+			var lv := level(r, String(s["el"]))
+			if lv <= 0: continue
+			rate += speed(lv) * Care.iv_mult(r, "work")
+			who.append(String(r["name"]))
+		if rate <= 0.0: continue
+		var st := station(u)
+		var acc := float(st.get("acc", 0.0)) + away * rate / float(cfg["secs"])
+		var n := mini(int(floor(acc)), int(cfg["cap"]))
+		st["acc"] = acc - floor(acc) if n < int(cfg["cap"]) else 0.0
+		if cfg.has("wood"):
+			n = mini(n, mat("wood") / int(cfg["wood"]))
+		if n <= 0: continue
+		var what := ""
+		match String(cfg["out"]):
+			"wood", "stone":
+				add_mat(String(cfg["out"]), n)
+				what = "%d %s" % [n, cfg["out"]]
+			"seed":
+				var got := {}
+				for i in n:
+					var sd := common_seed(int(now) + i * 7 + u)
+					Save.add_seed(sd, 1)
+					got[sd] = int(got.get(sd, 0)) + 1
+				var parts: Array = []
+				for sd in got: parts.append("%d %s seed%s" % [got[sd], Data.CROPS[sd]["name"], "" if int(got[sd]) == 1 else "s"])
+				what = ", ".join(parts)
+			"coals":
+				add_mat("wood", -n * int(cfg["wood"]))
+				Save.add_item("coals", n)
+				what = "%d Ember Coal%s (from %d wood)" % [n, "" if n == 1 else "s", n * int(cfg["wood"])]
+		count(String(cfg["out"]), n)
+		lines.append("%s at the %s: %s" % [" and ".join(who), HomeLayout.CATALOG[id]["name"], what])
+	return lines
+
+## A common seed (never the rare ones), picked from k.
+static func common_seed(k: int) -> String:
+	var pool: Array = []
+	for c in Data.CROPS:
+		if float(Data.CROPS[c].get("weight", 1.0)) >= 1.0: pool.append(c)
+	if pool.is_empty(): pool = Data.CROPS.keys()
+	return String(pool[absi(k) % pool.size()])
