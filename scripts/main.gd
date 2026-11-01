@@ -374,6 +374,8 @@ func _ready() -> void:
 		set_meta("work_check", wkc)
 		wkc.run(self)
 		return
+	if "--boki-system-check" in args:
+		load("res://tools/boki_system_check.gd").new().run(self)      # Boki commands (throw, recall, hold/follow, C), the downed Boki, the Merge
 	if "--teammate-check" in args:
 		load("res://tools/teammate_check.gd").new().run(self)      # Boki as teammates: following, callouts, caring, the tutorial guide
 		return
@@ -1973,7 +1975,7 @@ func _grammar_runtime_check() -> void:
 	_ac_run(m, KinParts.MERGE_SPENT_TIME + 0.1)
 	_grt("merge again after the cooldown", blocked and KinMerge.can_cast(P), "")
 	KinMerge.cast(P)
-	m._player_throw()
+	KinCommand.tap(P)
 	_ac_run(m, 0.05)
 	_grt("throwing ends the merge (throw still works)", not KinMerge.active(P) and k.state in ["flying", "active"], "Boki %s" % k.state)
 	_ac_run(m, 1.0)

@@ -401,6 +401,7 @@ func _refresh_kin_stats() -> void:
 			var v := float(ps["amount"])
 			if String(KinParts.OWNER_STATS[ps["stat"]][1]) == "float": v *= float(merge_st["k"])
 			out[ps["stat"]] = float(out.get(ps["stat"], 0.0)) + v
+		out["cooldown"] = float((merge_st.get("form", {}) as Dictionary).get("haste", 0.0))      # the form's faster ability cooldowns (MergeForm)
 	for st in out:
 		var row: Array = KinParts.OWNER_STATS[st]
 		out[st] = clampf(float(out[st]), 0.0, float(row[3] if not merge_st.is_empty() else row[2]))
@@ -1110,6 +1111,7 @@ func do_dash() -> void:
 	var effs: Array = dodge_def.effects if dodge_def else [{"type": "dash", "speed": DASH_SPEED, "time": DASH_TIME, "invuln": 0.14}]
 	Effects.run(effs, self, {"slot": "dodge", "ability": dodge_def.id if dodge_def else "dash", "level": ability_level("dash")})
 	_dash_rider(use_ex)
+	MergeForm.on_dash(self)
 	CombatBus.ability_used.emit(self, dodge_def.id if dodge_def else "dash", "dodge")
 
 ## The theme of the kin you brought ("venom", "lunar"...). Cosmetic only: it tints, never rules.
@@ -1748,7 +1750,7 @@ func rank_cd_k(slot: String) -> float:
 ## What the HUD needs to draw one ability slot: name, short name, icon, colour, one-line desc,
 ## cooldown left and total, charges. slot: "sec" | "dash" | "gear" | "k1" | "r".
 func slot_info(slot: String) -> Dictionary:
-	if ak and slot in ["sec", "utility", "k1", "e", "kin", "r", "ult", "dash", "dodge"]:
+	if ak and (slot in ["sec", "utility", "k1", "e", "kin", "dash", "dodge"] or KinCommand.class_ults()):
 		return ak.slot_info(slot)
 	var out := {"name": "", "short": "", "icon": "", "col": Color.WHITE, "desc": "", "cd": 0.0, "cd_max": 0.0, "charges": 0, "max_charges": 0, "verb": "", "ready": false, "level": ability_level(slot)}
 	match slot:
@@ -1779,10 +1781,13 @@ func slot_info(slot: String) -> Dictionary:
 			out.merge({"name": d.display_name, "short": d.short, "icon": KinText.icon(d), "col": KinText.color(d), "desc": KinText.ability(k.effective("k1")), "cd": k.runner.cd_left("k1"), "cd_max": k.runner.cd_max("k1"),
 				"charges": k.runner.charges("k1"), "max_charges": d.charges, "verb": d.stages[0].delivery.type, "element": d.theme, "ready": k.runner.is_ready("k1") and k.ready_to_fight()}, true)
 		"r", "ult":
-			var u := KinMerge.def_for(kin) if kin else null
-			if u == null: return out
-			out.merge({"name": u.display_name, "short": u.display_name, "icon": "bond", "col": KinRules.cat_color("utility"), "desc": " ".join(KinText.merge(u, (kin as Kin).carry_style() == "mount")),
-				"cd": merge_cd, "cd_max": KinParts.MERGE_SPENT_TIME, "charges": 1 if ult >= 1.0 else 0, "max_charges": 1, "ready": KinMerge.can_cast(self)}, true)
+			var k := kin as Kin
+			var u := KinMerge.def_for(k) if k and KinMerge.boki_with_you(self) else null
+			var f := MergeForm.for_boki(k) if u else MergeForm.surge_form()
+			var txt: String = " ".join(KinText.merge(u, k.carry_style() == "mount")) if u else String(MergeForm.data()["surge"]["flavor"])
+			out.merge({"name": u.display_name if u else "Surge", "short": u.display_name if u else "Surge", "icon": "bond", "col": f["glow"], "desc": txt, "form": f, "bond": ult,
+				"plan": KinMerge.plan(self), "cd": merge_cd, "cd_max": KinParts.MERGE_SPENT_TIME, "charges": 1 if ult >= 1.0 else 0, "max_charges": 1,
+				"ready": KinMerge.plan(self) in ["merge", "leap", "surge"]}, true)
 	return out
 
 ## Q and V: your active kin's abilities, aimed at the cursor.
@@ -1807,45 +1812,26 @@ func use_kin_ability(slot: String) -> void:
 	else:
 		_ab_feedback(slot, "deny")
 
-## C (with an archetype): the kin's own ability. Riding with you, it hops out, does its move at
-## your aim and hops back; already out (sent with G), it casts where it is. A mount stays under you
-## and lends you the move.
-func use_kin_hop() -> void:
-	var k: Kin = kin
-	if k == null or downed or dropping or riding:
-		return
-	if not k.ready_to_fight() or not k.runner or not k.runner.is_ready("k1"):
-		_ab_feedback("k1", "deny")
-		return
-	var at := _ground_aim()
-	if k.state == "shoulder" and k.carry_style() != "mount" and k.state != "fused":
-		var def := k.runner.def_of("k1")
-		if def and def.from == "kin":
-			# hop out beside you, toward the aim
-			var d := aim_dir()
-			var spot := pos + Vector3(d.x, 0, d.y) * 1.1
-			if m.world.is_void(spot.x, spot.z) or m.world.is_block(spot.x, spot.z): spot = pos
-			k.teleport(Vector3(spot.x, m.world.ground_at(spot.x, spot.z) if not m.world.is_void(spot.x, spot.z) else pos.y, spot.z))
-			k.state = "active"
-			k.settle = 0.0
-			k.fly = {}
-			k.set_meta("hop_back", m.time + 0.75)
-			m.fx.burst(k.pos + Vector3(0, 0.5, 0), KinText.color(def), 10, 2.5, 0.3)
-	if k.use_ability("k1", at) or k.pend_slot == "k1":
-		used["kin_ab"] = int(used.get("kin_ab", 0)) + 1
-		m.fx.ring(k.pos, 1.3, KinText.color(k.runner.def_of("k1")), 0.3)
+## C (with an archetype): your Boki's own ability, cast from wherever the Boki is (KinCommand.cast_c).
+## On your shoulder it is cast through you; out in the field it casts where it stands.
+func use_boki_c() -> void:
+	if KinCommand.cast_c(self):
 		if is_local() and m.sfx: m.sfx("skill", null, -10.0, 1.3)
-	else:
-		_ab_feedback("k1", "deny")
+		return
+	_ab_feedback("k1", "deny")
+	var why := KinCommand.c_deny_text(self)
+	if why != "" and is_local() and m.hud: m.hud.toast_small(why, Color("ffb0a0"))
 
-## R: the bond ultimate (the merge), once fighting together has filled the meter.
+## R: the Merge (KinMerge.press): a full bond meter merges you with your Boki, with the Boki out it
+## leaps back and merges, with none able to fight it is a weak surge.
 func use_ultimate() -> void:
-	if KinMerge.cast(self):
+	if KinMerge.press(self):
 		_ab_feedback("r", "cast")
 		return
 	_ab_feedback("r", "deny")
-	if is_local() and m.hud and ult >= 1.0 and kin and not (kin as Kin).ready_to_fight():
-		m.hud.toast("Your Boki has to be with you", Color("a2a8bb"))
+	var why := KinMerge.deny_text(self)
+	if why != "" and is_local() and m.hud:
+		m.hud.toast_small(why, Color("a2a8bb"))
 
 ## Tells the HUD a button press landed ("cast": the slot pops) or didn't ("deny": it shakes red
 ## with a soft buzz), so a press on cooldown never just silently does nothing.
@@ -2088,7 +2074,7 @@ func sim(dt: float) -> void:
 		start_reload()
 	if downed:
 		# your other kin comes out of the satchel to pick you up if the active one can't
-		if kin and (kin as Kin).state == "fainted" and kin2 and (kin2 as Kin).hp > 0.0:
+		if kin and (kin as Kin).state == "downed" and kin2 and (kin2 as Kin).hp > 0.0:
 			swap_kin(true)
 		# a wisp doesn't bleed out: it's lost to enemy stomps, a finish, or more damage
 		if down_hp <= 0.0:
@@ -2144,7 +2130,7 @@ func sim(dt: float) -> void:
 		ak.tick(dt)
 		if inp["sig"]: ak.use_e()
 		if inp["sec"]: ak.press_rmb()
-		if inp.get("kin_ab", false) and not Hex.active(self): use_kin_hop()
+		if inp.get("kin_ab", false) and not Hex.active(self): use_boki_c()
 	elif inp["sig"]: use_kin_ability("k1")
 	if inp.get("kin_ab", false) and ak == null: use_kin_ability("k1")
 	# (a kin's second ability and mid-fight kin swaps are retired from the kit; bots don't press them)
@@ -2178,7 +2164,7 @@ func sim(dt: float) -> void:
 	_tick_weapon(dt)
 	swing_t = maxf(0.0, swing_t - dt)
 	if inp["ult"]:
-		if ak: ak.use_r()
+		if ak and KinCommand.class_ults(): ak.use_r()
 		else: use_ultimate()
 	trigger(dt)
 	inp["kin_ab"] = false
@@ -3109,6 +3095,7 @@ func gear_stat(k: String) -> float:
 		"speed": t += owner_stat("move_speed") + kin_pt("owner_move_speed") + buff("move_speed")
 		"dmg": t += owner_stat("damage") + buff("damage")
 		"heat", "glide_speed": t += owner_stat("glide")
+		"cdr": t += owner_stat("cooldown")
 	return t
 
 ## Ground speed while you ride your mount (its carry.mount speed).

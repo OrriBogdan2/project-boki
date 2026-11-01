@@ -248,7 +248,7 @@ func strength(team: int) -> float:
 			s += 0.3
 			continue
 		s += 1.0 + 1.5 * (h.hp + h.armor) / maxf(1.0, h.max_hp + h.max_armor) + 0.2 * h.armor_tier
-		if h.kin and not h.kin.dead and (h.kin as Kin).state != "fainted": s += 0.3
+		if h.kin and not h.kin.dead and (h.kin as Kin).state != "downed": s += 0.3
 	return s
 
 ## The other squads close by that this squad can see.
