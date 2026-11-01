@@ -77,7 +77,7 @@ func _case(name: String, at: Vector3, from: Vector3, foe_at: Vector3, limit: flo
 	var reached := -1.0
 	while t < limit and p.downed:
 		m.step(Match.DT); t += Match.DT
-		var jumped := bot.vel.y > Hunter.JUMP_V * 0.85 and bot.pad.is_empty()      # pressing jump, not a mantle
+		var jumped := bot.vel.y > Hunter.JUMP_V * 0.85 and bot.pad.is_empty() and not bot.mantling()      # pressing jump, not a ledge rise
 		if jumped and not was_air: hops += 1
 		was_air = jumped
 		if reached < 0.0 and bot.flat_dist(p) < Life.R["revive_radius"]: reached = t
@@ -202,7 +202,7 @@ func run(mn: Node) -> void:
 			m.step(Match.DT); t += Match.DT; frames += 1
 			# a hop is the bot pressing jump (a jump starts at Hunter.JUMP_V); mantles (a ledge pull, on
 			# a pad) and stepping up a terrace aren't hopping at anything
-			var jumped := bot.vel.y > Hunter.JUMP_V * 0.85 and bot.pad.is_empty()
+			var jumped := bot.vel.y > Hunter.JUMP_V * 0.85 and bot.pad.is_empty() and not bot.mantling()
 			if jumped and not was_air: hops += 1
 			was_air = jumped
 			if bot.ai.get("tgt") == foe: aimed += 1

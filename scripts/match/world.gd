@@ -148,14 +148,12 @@ func occupy(x: float, z: float, r: float, y: float, guard: bool) -> float:
 		if wb > 0.0:
 			return wb
 	# rocks, trees and walls use a slimmer body than the terrain does, so you slide past their
-	# corners and fit through one-tile gaps instead of snagging
-	var rb := r * 0.7
-	for o in [Vector2(0, 0), Vector2(rb, 0), Vector2(-rb, 0), Vector2(0, rb), Vector2(0, -rb), Vector2(rb, rb) * 0.7, Vector2(-rb, rb) * 0.7, Vector2(rb, -rb) * 0.7, Vector2(-rb, -rb) * 0.7]:
-		var px: float = x + o.x; var pz: float = z + o.y
-		if is_block(px, pz):
-			var top := ground_at(px, pz) + BLOCK_H
-			if top > y + STEP:
-				return top
+	# corners and fit through one-tile gaps instead of snagging. The body is a true circle against each
+	# blocker tile's square (it used to be 9 sample points: a tile's corner could poke in between them,
+	# and then walking along the face or away from it caught on the corner: "stuck, like a magnet")
+	var bt := _block_hit(x, z, r * BLOCK_BODY - BLOCK_SKIN, y)
+	if bt > 0.0:
+		return bt
 	# an island is solid all the way down: below its top, its whole column is a wall. (A wall is
 	# never reported as 0, which means "free": a ground-level island, top 0, blocks from below too.
 	# It used to read as open air, so bodies under the lip slid in under ground-level islands.)
@@ -172,6 +170,58 @@ func occupy(x: float, z: float, r: float, y: float, guard: bool) -> float:
 		if ground_at(x, z) <= VOID + 1.0:
 			return -1.0
 	return 0.0
+
+const BLOCK_BODY := 0.7      # a body's radius against rocks, trees and walls, as a share of its radius
+const BLOCK_SKIN := 0.004    # push_out_blocks leaves this much room, so the spot it gives is free
+
+## The top of the first blocker tile (rock, tree, wall) a circle of radius rb at (x, z) overlaps that
+## stands above y + STEP, or 0.
+func _block_hit(x: float, z: float, rb: float, y: float) -> float:
+	for tz in range(int(floor(z - rb)), int(floor(z + rb)) + 1):
+		for tx in range(int(floor(x - rb)), int(floor(x + rb)) + 1):
+			if not inb(tx, tz) or kind[idx(tx, tz)] != T_BLOCK:
+				continue
+			var cx := clampf(x, tx, tx + 1.0); var cz := clampf(z, tz, tz + 1.0)
+			if (cx - x) * (cx - x) + (cz - z) * (cz - z) < rb * rb:
+				var top := level[idx(tx, tz)] * LEVEL + BLOCK_H
+				if top > y + STEP:
+					return top
+	return 0.0
+
+## Where a body of radius r (its rock-and-tree radius is r * BLOCK_BODY) wanting to be at (x, z) ends
+## up once it's pushed straight out of every blocker tile it overlaps: always away from the rock,
+## never toward it, so walking into a tree or along a rock slides you round it. Terrain walls and the
+## edge guard are still occupy()'s job.
+func push_out_blocks(x: float, z: float, r: float, y: float) -> Vector2:
+	var rb := r * BLOCK_BODY
+	var p := Vector2(x, z)
+	for it in 3:
+		var moved := false
+		for tz in range(int(floor(p.y - rb)), int(floor(p.y + rb)) + 1):
+			for tx in range(int(floor(p.x - rb)), int(floor(p.x + rb)) + 1):
+				if not inb(tx, tz) or kind[idx(tx, tz)] != T_BLOCK:
+					continue
+				if level[idx(tx, tz)] * LEVEL + BLOCK_H <= y + STEP:
+					continue
+				var c := Vector2(clampf(p.x, tx, tx + 1.0), clampf(p.y, tz, tz + 1.0))
+				var d := p - c
+				var l := d.length()
+				if l >= rb:
+					continue
+				if l < 0.0001:
+					# the centre is inside the tile: out through the nearest side
+					var ex := [p.x - tx, tx + 1.0 - p.x, p.y - tz, tz + 1.0 - p.y]
+					var k := 0
+					for j in 4:
+						if ex[j] < ex[k]: k = j
+					d = [Vector2(-1, 0), Vector2(1, 0), Vector2(0, -1), Vector2(0, 1)][k]
+					p += d * (float(ex[k]) + rb)
+				else:
+					p += d / l * (rb - l)
+				moved = true
+		if not moved:
+			break
+	return p
 
 ## Line of sight at height y between two points (rocks and higher ground block it).
 func los(a: Vector3, b: Vector3, y: float) -> bool:

@@ -378,11 +378,20 @@ func _ready() -> void:
 		_life_check()
 		return
 	if "--mantle-check" in args:
-		_mantle_check()
+		load("res://tools/mantle_check.gd").new().run(self)    # ledges you mean to climb, you climb; the rest never grab you
 		return
 	if "--abyss-check" in args:
 		set_meta("abyss_check", load("res://tools/abyss_check.gd").new())
 		get_meta("abyss_check").run(self)
+		return
+	if "--move-feel-check" in args:
+		load("res://tools/move_feel_check.gd").new().run(self)    # movement, jump, glide, drop and camera timings vs docs/MOVEMENT_FEEL.md
+		return
+	if "--wallhug-check" in args:
+		load("res://tools/wallhug_check.gd").new().run(self)    # pressed against an island side from the abyss: caught, not sunk
+		return
+	if "--obstacle-check" in args:
+		load("res://tools/obstacle_slide_check.gd").new().run(self)    # walking past and around trees and rocks: no sticking, no pull
 		return
 	if "--airheal-check" in args:
 		load("res://tools/airheal_check.gd").new().run(self)    # heals and abilities in the air, drinking is a risk
@@ -510,6 +519,7 @@ func _ready() -> void:
 			if a == "--rival-demo": so["rival_demo"] = true
 			if a.begins_with("--rival-kin="): so["rival_kin"] = a.substr(12)
 			if a == "--glide-demo": so["glide_demo"] = true
+			if a == "--dashglide-demo": so["dashglide_demo"] = true
 			if a.begins_with("--kin-demo="):
 				# test: bring this species (and the next one) and run its whole kit on the dummies
 				so["demo_kin"] = a.substr(11)
@@ -728,97 +738,6 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 ## Test: the down / death / revive rules, step by step, with idle hunters placed by hand.
 ## Headless: drops a hunter (and a wisp) just off island edges, holds toward the cliff, and checks
 ## every mantle: it happens, it ends on top, and the body never sinks into the cliff on the way.
-func _mantle_check() -> void:
-	var m := Match.new()
-	add_child(m)
-	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true, "autoplay": true})
-	m.set_process(false)
-	for mb in m.mobs: mb.queue_free()
-	m.mobs.clear()
-	var h: Hunter = m.hunters[0]
-	for o in m.hunters:
-		o.ctrl = "idle"
-		if o != h: o.teleport(m.world.random_ground())
-	h.ctrl = "local"      # players mantle on a jump/fall, not by walking into walls
-	# the kin sits this one out: a kin fainting off a cliff mid-trial would wipe the downed hunter's squad
-	for kk in [h.kin, h.kin2]:
-		if kk: m.kins.erase(kk); kk.queue_free()
-	h.kin = null; h.kin2 = null
-	var w: World = m.world
-	var tried := 0; var ok := 0; var clip := 0; var worst := 0.0; var durs: Array = []
-	for downed_case in [false, true]:
-		for trial in 12:
-			# find an edge: a ground tile next to the void
-			var at := Vector3.INF; var dir := Vector2.ZERO
-			for k in 400:
-				var g := w.random_ground()
-				for d in [Vector2(1, 0), Vector2(-1, 0), Vector2(0, 1), Vector2(0, -1)]:
-					# on an authored map only rims with a lip can be grabbed; sheer ones are checked below
-					var rim_ok := w.lip.is_empty() or w.lip.has(w.idx(int(floor(g.x + d.x * 0.9)), int(floor(g.z + d.y * 0.9)))) or w.lip.has(w.idx(int(floor(g.x)), int(floor(g.z))))
-					# (and open air where the hunter hangs: not under a bridge running past the rim)
-					var open_below := true
-					for dd in [1.1, 1.6, 2.2, 2.8, 3.4]:
-						if not w.is_void(g.x + d.x * dd + d.y * 0.4, g.z + d.y * dd + d.x * 0.4) or not w.is_void(g.x + d.x * dd - d.y * 0.4, g.z + d.y * dd - d.x * 0.4): open_below = false
-					if w.is_void(g.x + d.x * 1.6, g.z + d.y * 1.6) and not w.is_void(g.x, g.z) and k % 12 == trial and rim_ok and open_below:
-						at = g; dir = d; break
-				if at != Vector3.INF: break
-			if at == Vector3.INF: continue
-			tried += 1
-			var top := w.ground_at(at.x, at.z)
-			# hanging in the air just off the edge, 2.5m below the lip, pushing back toward the island
-			# (the side of an island catches you up to Hunter.MANTLE_REACH_ABYSS below its lip; see --abyss-check)
-			var edge_x := at.x; var edge_z := at.z
-			while not w.is_void(edge_x + dir.x * 0.25, edge_z + dir.y * 0.25):
-				edge_x += dir.x * 0.25; edge_z += dir.y * 0.25
-			h.downed = downed_case
-			h.down_hp = 100.0
-			h.teleport(Vector3(edge_x + dir.x * (h.r + 0.6), top - 2.5, edge_z + dir.y * (h.r + 0.6)))
-			h.grounded = false; h.vel = Vector3(0, -2.0, 0); h.pad = {}; h.grap_cd = 0.0; h.last_gy = top
-			var t := 0.0; var mantled := false; var landed := false; var t_m := 0.0
-			while t < 3.0:
-				h.inp["move"] = -dir
-				m.step(Match.DT); t += Match.DT
-				if not h.pad.is_empty() and h.pad.has("face"):
-					if not mantled: t_m = t
-					mantled = true
-					# inside the cliff: standing below solid ground that's under you
-					var gh := w.ground_at(h.pos.x, h.pos.z)
-					if not w.is_void(h.pos.x, h.pos.z) and gh > h.pos.y + 0.06:
-						clip += 1; worst = maxf(worst, gh - h.pos.y)
-				if mantled and h.pad.is_empty() and h.grounded:
-					landed = absf(h.pos.y - top) < 0.6
-					durs.append(snappedf(t - t_m, 0.01))
-					break
-			if mantled and landed: ok += 1
-	print("MCHECK mantles ok %d of %d, clipping frames %d (worst %.2fm), climb times %s" % [ok, tried, clip, worst, str(durs)])
-	# sheer cliffs: falling past one while pushing into it must never catch you
-	if not w.sheer.is_empty():
-		var s_tried := 0; var s_caught := 0
-		var sheer_keys: Array = w.sheer.keys()
-		for trial in 12:
-			var i: int = sheer_keys[(trial * 37) % sheer_keys.size()]
-			var gx := float(i % w.w) + 0.5; var gz := float(i / w.w) + 0.5
-			var dir := Vector2.ZERO
-			for d in [Vector2(1, 0), Vector2(-1, 0), Vector2(0, 1), Vector2(0, -1)]:
-				if w.is_void(gx + d.x, gz + d.y): dir = d; break
-			if dir == Vector2.ZERO: continue
-			s_tried += 1
-			var top := w.ground_at(gx, gz)
-			h.downed = false
-			h.teleport(Vector3(gx + dir.x * (0.5 + h.r + 0.6), top - 3.0, gz + dir.y * (0.5 + h.r + 0.6)))
-			h.grounded = false; h.vel = Vector3(0, -2.0, 0); h.pad = {}; h.grap_cd = 0.0; h.last_gy = top
-			var t := 0.0
-			while t < 1.5:
-				h.inp["move"] = -dir
-				m.step(Match.DT); t += Match.DT
-				if not h.pad.is_empty() and h.pad.has("face"):
-					# caught: fine only if it was a neighbouring lip tile, not the sheer one
-					var lx := int(floor((h.pad["to"] as Vector3).x)); var lz := int(floor((h.pad["to"] as Vector3).z))
-					if w.sheer.has(w.idx(lx, lz)) or Vector2(lx + 0.5 - gx, lz + 0.5 - gz).length() < 1.2: s_caught += 1
-					break
-		print("MCHECK sheer cliffs caught %d of %d (should be 0)" % [s_caught, s_tried])
-	get_tree().quit()
-
 func _life_check() -> void:
 	var m := Match.new()
 	add_child(m)

@@ -76,6 +76,10 @@ func run(main: Node) -> void:
 	P.gliding = true
 	P.glide_fuel = 1.0
 	P.glide_cd = 0.0
+	# (a clean glide: section 2's ability may still be carrying you, e.g. an archetype's leap sets
+	# fly_t, and nothing opens or holds a glider mid-launch)
+	P.fly_t = 0.0; P.roll_t = 0.0; P.knock_t = 0.0; P.vel = Vector3.ZERO
+	for k in ["sec", "sec_hold", "sig", "dash", "jump"]: P.inp[k] = false
 	P.inp["glide"] = true
 	P.hp = P.max_hp * 0.5
 	P.drink_t = 0.0
