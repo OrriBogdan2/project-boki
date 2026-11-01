@@ -358,6 +358,9 @@ func _ready() -> void:
 	if "--move-feel-check" in args:
 		load("res://tools/move_feel_check.gd").new().run(self)    # movement, jump, glide, drop and camera timings vs docs/MOVEMENT_FEEL.md
 		return
+	if "--wallhug-check" in args:
+		load("res://tools/wallhug_check.gd").new().run(self)    # pressed against an island side from the abyss: caught, not sunk
+		return
 	if "--airheal-check" in args:
 		load("res://tools/airheal_check.gd").new().run(self)    # heals and abilities in the air, drinking is a risk
 	if "--train-check" in args:

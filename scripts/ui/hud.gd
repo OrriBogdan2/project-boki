@@ -41,6 +41,8 @@ func setup(match_node: Match) -> void:
 	c.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(c)
 	c.draw.connect(_draw_all)
+	abyss_fx = ABYSS_FX.new()      # (movefeel) the abyss closing in: under the HUD, local player only
+	add_child(abyss_fx)
 	# the pointer over the item windows: drawn above them (the crosshair lives under them on `c`,
 	# and the system cursor stays hidden in a match, so without this you can't see where you click)
 	cursor = Control.new()
@@ -201,17 +203,17 @@ func _draw_all() -> void:
 	# abyss danger [footage]: sinking below island level darkens the screen from the edges with a cold
 	# tint, more the closer you get to the kill depth and the emptier your glider; near the bottom it
 	# pulses red with a quickening heartbeat. It fades away as you climb back up or catch an updraft.
-	var want_a := 0.0
-	if p and not p.out and not p.grounded and p.over_void():
-		var depth := p.last_gy - p.pos.y
-		if depth > 0.0:
-			var to_kill := maxf(1.0, p.last_gy + 14.0)
-			want_a = clampf(depth / to_kill, 0.0, 1.0)
-			want_a = clampf(want_a * (1.0 + 0.7 * (1.0 - p.glide_fuel)) + (0.12 if p.glide_fuel <= 0.001 else 0.0), 0.0, 1.0)
-	abyss_a = lerpf(abyss_a, want_a, 1.0 - exp(-6.0 * get_process_delta_time()))
+	# (movefeel) measured against the real point of no return (Hunter.abyss_kill_y, via AbyssFx.danger)
+	# instead of a guess 14m down, and much stronger: the screen shader drains, darkens and reddens the
+	# picture and closes a vignette in; here the rings, the heartbeat, a low rumble and a pulsing
+	# warning near the end
+	var want_a: float = ABYSS_FX.danger(p) if p == m.player else 0.0
+	abyss_a = lerpf(abyss_a, want_a, 1.0 - exp(-10.0 * get_process_delta_time()))
+	if abyss_fx:
+		abyss_fx.show_danger(abyss_a, pow(0.5 + 0.5 * sin(abyss_pulse * TAU), 3.0) if abyss_a > 0.005 else 0.0)
 	if abyss_a > 0.005:
-		var red := clampf((abyss_a - 0.5) * 2.0, 0.0, 1.0)
-		var rate := 2.0 + red * 5.0
+		var red := clampf((abyss_a - 0.35) / 0.65, 0.0, 1.0)
+		var rate := 1.6 + red * 3.4
 		abyss_pulse += get_process_delta_time() * rate
 		var pulse := pow(0.5 + 0.5 * sin(abyss_pulse * TAU), 3.0)
 		# a soft cold wash over everything, then a heavy vignette that closes in from the edges
@@ -223,11 +225,18 @@ func _draw_all() -> void:
 			if a <= 0.0: break
 			var col := Color(0.04, 0.02, 0.1).lerp(Color(0.35, 0.02, 0.04), red * pulse)
 			c.draw_rect(Rect2(Vector2(inset, inset), sz - Vector2(inset, inset) * 2.0), Color(col, a), false, minf(sz.x, sz.y) * 0.04)
-		if red > 0.0 and p == m.player:
+		if abyss_a > 0.15 and p == m.player:
 			var beat := int(floor(abyss_pulse))
 			if beat != abyss_beat:
 				abyss_beat = beat
-				Sfx.play("thump", null, -14.0 + red * 8.0, 0.0, 0.7 + red * 0.15)
+				Sfx.play("thump", null, -16.0 + abyss_a * 12.0, 0.0, 0.7 + red * 0.15)
+				if red > 0.3 and beat % 2 == 0:
+					Sfx.play("boom", null, -24.0 + red * 10.0, 0.0, 0.35)     # a low rumble under the heartbeat
+		if abyss_a > 0.6 and p == m.player:
+			# the point of no return is close: say so, pulsing, in the middle of the screen
+			var wk := clampf((abyss_a - 0.6) / 0.3, 0.0, 1.0)
+			var txt := "HOLD GLIDE TO LIFT" if p.glide_fuel > 0.001 and not p.gliding else ("CLIMB OUT" if p.glide_fuel > 0.001 else "NO GLIDER HEAT")
+			_ctext(Vector2(sz.x * 0.5, sz.y * 0.36), txt, 26, Color(1.0, 0.25 + 0.35 * pulse, 0.2, 0.55 + 0.45 * wk * (0.5 + 0.5 * pulse)), big)
 	if p and not p.downed and not p.out and p.hp < p.max_hp * 0.35:
 		var pulse := 0.5 + 0.5 * sin(m.time * 6.0)
 		for i in 5:
@@ -2119,6 +2128,8 @@ func _draw_tip(sz: Vector2, t: Dictionary) -> void:
 
 var head_hp := 1.0
 var abyss_a := 0.0
+const ABYSS_FX := preload("res://scripts/match/abyss_fx.gd")
+var abyss_fx: CanvasLayer = null
 
 ## Health and stamina (dash charges) right above your hunter, where your eyes already are.
 func _draw_overhead(p: Hunter) -> void:

@@ -8,7 +8,9 @@ const LEAD_X := 4.2
 const LEAD_Z := 5.4
 ## Expedition camera presets (Settings "cam_style"): pitch in degrees, distance, field of view.
 const STYLES := {
-	"supervive": {"pitch": 65.0, "dist": 25.0, "fov": 35.0, "name": "Supervive"},     # measured from footage
+	# pitch and FOV measured from footage; distance pulled in from the footage estimate of 25m (about 28m
+	# of ground across a 16:9 screen) to 21.5m (~24m across) at the owner's call (movefeel): heroes read bigger
+	"supervive": {"pitch": 65.0, "dist": 21.5, "fov": 35.0, "name": "Supervive"},
 	"high": {"pitch": 70.0, "dist": 27.0, "fov": 36.0, "name": "Top-down"},
 	"classic": {"pitch": 57.0, "dist": 32.2, "fov": 28.0, "name": "Classic (flat, far)"},
 	"low": {"pitch": 50.0, "dist": 23.0, "fov": 42.0, "name": "Low (more horizon)"},
@@ -21,6 +23,7 @@ var zoom := 1.0
 var zoom_to := 1.0
 var lead := 1.0
 var kick := 0.0               # a quick zoom-in punch on big moments
+var pull := 0.0               # (movefeel) a quick pull-back (a dash into a glide), the opposite of kick
 var top := 0.0                # 0 = the usual angle, 1 = looking straight down (the opening drop)
 var top_to := 0.0
 var pitch := deg_to_rad(57.0)  # how steeply the camera looks down
@@ -76,6 +79,10 @@ func snap(p: Vector3) -> void:
 
 func punch(a: float) -> void:
 	kick = maxf(kick, a)
+
+## A brief pull-back that eases in fast and settles over ~0.6s (speed bursts).
+func pull_back(a: float) -> void:
+	pull = maxf(pull, a)
 
 func add_trauma(a: float) -> void:
 	trauma = minf(1.0, trauma + a * float(Settings.get_v("shake")))
@@ -134,7 +141,8 @@ func follow(p: Vector3, delta: float, mouse_lead := true) -> void:
 
 func _apply(shake: Vector3) -> void:
 	kick = maxf(0.0, kick - get_process_delta_time() * 0.5)
-	var z := zoom * (1.0 - kick)
+	pull = maxf(0.0, pull - get_process_delta_time() * 0.2)
+	var z := zoom * (1.0 - kick) * (1.0 + pull)
 	far = (120.0 * maxf(1.0, z) + 30.0) * (1.0 + 1.5 * chase)
 	var k := top * top * (3.0 - 2.0 * top)
 	var c := chase * chase * (3.0 - 2.0 * chase)

@@ -34,17 +34,22 @@ const T := {
 	"glide_open_hold_s":       ["<=", 0.12, "s", "tap/hold split for Space; a tap is ~0.1s"],
 	"glide_open_button_frames": ["<=", 1.0, "frames", "dedicated glide button: no tap/hold ambiguity"],
 	"glide_catch_t":           ["<=", 0.20, "s", "glider opens 'instantly' on input; brakes a terminal fall to sink rate"],
-	"glide_speed":             ["~", [4.8, 5.4], "m/s", "[footage] ~5 m/s, about run speed (Tom Kick)"],
-	"glide_sink":              ["~", [2.0, 2.6], "m/s", "[spec] 2-4 m/s, FeelConfig 2.2"],
+	"glide_speed":             ["~", [6.2, 6.8], "m/s", "between [footage] ~5-5.5 and [spec] 7-10, leaning stronger (owner)"],
+	"glide_sink":              ["~", [1.2, 1.6], "m/s", "floatier than [spec] 2-4 eyeball / [est] 2.2 (owner: sank too fast)"],
 	"glide_turn90_t":          ["<=", 0.30, "s", "responsive steering [est]"],
 	"glide_reverse_t":         ["<=", 0.45, "s", "brake by steering against heading [est]"],
 	"glide_brake_ratio":       ["<=", 0.80, "x", "steering against heading brakes momentum (speed vs letting go)"],
-	"dashglide_open_speed":    [">=", 9.0, "m/s", "[wiki] gliding right after a lateral impulse keeps momentum and increases glide speed"],
-	"dashglide_1s_speed":      [">=", 7.5, "m/s", "[wiki] momentum preserved while gliding"],
-	"dashglide_2s_speed":      [">=", 6.0, "m/s", "[wiki] momentum preserved while gliding"],
+	"dashglide_open_speed":    [">=", 12.0, "m/s", "[wiki] gliding right after a lateral impulse keeps momentum and increases glide speed"],
+	"dashglide_1s_speed":      [">=", 10.5, "m/s", "[wiki] momentum preserved while gliding"],
+	"dashglide_2s_speed":      [">=", 9.0, "m/s", "[wiki] momentum preserved while gliding"],
 	"dashglide_reopen_frames": ["<=", 1.0, "frames", "glider is back the step the dash ends while glide is held"],
 	"reglide_frames":          ["<=", 1.0, "frames", "glide-cancel then re-hold reopens at once"],
 	"abyss_lift_t":            ["<=", 1.0, "s", "[footage] back at island level (balloon line, 0.5m under the lip) ~1s after opening 4m deep"],
+	"abyss_kill_depth":        [">=", 12.0, "m", "[footage] ~1.5s of free fall before it's fatal (FeelConfig abyss_death_depth note); owner: 'needs to be a bit lower'"],
+	"abyss_recover_depth":     [">=", 11.0, "m", "deepest a terminal fall can open the glider and still lift back to the lip"],
+	"abyss_tint_lip":          ["<=", 0.02, "", "no tint gliding at island level"],
+	"abyss_tint_half":         [">=", 0.6, "", "[footage] tint deepens as you sink; owner: unmistakable early"],
+	"abyss_tint_end":          [">=", 0.95, "", "full dark/red right before the point of no return"],
 	"updraft_rise_t":          ["<=", 0.30, "s", "[est] updrafts feel powerful: 8 m/s climb within 0.3s"],
 	"drop_dive_vy_t":          ["<=", 0.40, "s", "[est] punchy skydive: 90% of dive speed"],
 	"drop_dive_steer_t":       ["<=", 0.30, "s", "[est] responsive steering in the dive: 90% of commanded speed"],
@@ -60,6 +65,8 @@ const T := {
 	"cam_lag_m":               ["<=", 0.40, "m", "[footage] hunter stays roughly centred; [spec] follow 0.08-0.15s"],
 	"cam_settle_t":            ["<=", 0.35, "s", "camera settles on you after a stop"],
 	"cam_glide_lead_m":        [">=", 0.4, "m", "slight lead in glide direction"],
+	"view_across_m":           ["~", [22.0, 25.0], "m", "ground across a 16:9 screen at the focus (owner: tighter than the 28m footage estimate)"],
+	"hunter_screen_pct":       [">=", 6.0, "%", "medium hunter's height as a share of screen height (owner: heroes read bigger)"],
 }
 
 var results := {}
@@ -152,6 +159,7 @@ func run(main: Node) -> void:
 	_drop()
 	_landing()
 	_camera()
+	_screen_scale()
 	_e2e()
 	print("MOVE FEEL CHECK DONE, failures: ", bad)
 	main.get_tree().quit()
@@ -300,7 +308,7 @@ func _glide() -> void:
 	_steps(60)
 	P.inp["jump"] = true
 	var tc := -1.0
-	var sink := 2.2
+	var sink: float = Hunter.GLIDE_SINK
 	for i in 90:
 		P.inp["glide"] = true
 		m.step(DT)
@@ -423,6 +431,7 @@ func _abyss_updraft() -> void:
 			if tl < 0.0 and P.pos.y >= lip - 0.6: tl = (i + 1) * DT
 			if P.out: break
 		rec("abyss_lift_t", tl if tl > 0.0 else 9.0)
+		_abyss_depths(g, d)
 	if w.updrafts.is_empty():
 		print("MFEEL (no updrafts on this map, skipped)")
 		return
@@ -439,6 +448,51 @@ func _abyss_updraft() -> void:
 		m.step(DT)
 		if tu < 0.0 and P.vel.y >= 8.0: tu = (i + 1) * DT
 	rec("updraft_rise_t", tu if tu > 0.0 else 9.0)
+
+## The point of no return, how deep you can still glide out from, and the screen's danger tint.
+func _kill_y() -> float:
+	if P.has_method("abyss_kill_y"): return P.call("abyss_kill_y")
+	var fl: float = w.abyss_floor(P.pos.x, P.pos.z, P.last_gy)
+	return fl - (Hunter.ABYSS_GLIDE_ROOM if P.gliding and P.glide_fuel > 0.001 else 0.0)
+
+func _abyss_depths(g: Vector3, d: Vector2) -> void:
+	var out := Vector3(g.x + d.x * 4.0, g.y, g.z + d.y * 4.0)
+	_reset(out, false); P.last_gy = g.y
+	var lip: float = w.abyss_floor(out.x, out.z, g.y) + World.ABYSS_DEPTH
+	rec("abyss_kill_depth", lip - _kill_y())
+	# deepest recoverable: falling at terminal, open the glider (full heat), get back to the balloon line
+	var best := 0.0
+	var dd := 3.0
+	while dd <= 20.0:
+		_reset(Vector3(out.x, lip - dd, out.z), false); P.last_gy = g.y
+		P.vel.y = -Hunter.TERMINAL
+		P.inp["jump"] = true
+		var okk := false
+		var y0 := P.pos.y
+		for i in 300:
+			P.inp["glide"] = true
+			var yb := P.pos.y
+			m.step(DT)
+			if P.out or P.pos.y - yb > 2.0: break         # lost (god mode puts you back on land)
+			if P.pos.y >= lip - 0.6: okk = true; break
+		if not okk: break
+		best = dd
+		dd += 0.5
+	rec("abyss_recover_depth", best)
+	var fx_path := "res://scripts/match/abyss_fx.gd"
+	if not ResourceLoader.exists(fx_path):
+		print("MFEEL (no AbyssFx on this build: danger tint not measured)")
+		return
+	var FX = load(fx_path)
+	_reset(Vector3(out.x, lip - 0.47, out.z), false); P.last_gy = g.y
+	P.gliding = true
+	rec("abyss_tint_lip", FX.danger(P))
+	P.gliding = false
+	var kill := _kill_y()
+	P.pos.y = lerpf(lip - 0.5, kill, 0.5)
+	rec("abyss_tint_half", FX.danger(P))
+	P.pos.y = kill + 0.5
+	rec("abyss_tint_end", FX.danger(P))
 
 # ---------------------------------------------------------------- the opening drop
 func _drop() -> void:
@@ -545,6 +599,48 @@ func _camera() -> void:
 		if m.has_method("cam_lead_vel"): cam.set("lead_vel", m.call("cam_lead_vel"))
 		cam.follow(P.position, DT, false)
 	rec("cam_glide_lead_m", cam.focus.x - P.pos.x)
+
+# ---------------------------------------------------------------- framing: how big you are on screen
+func _screen_scale() -> void:
+	var cam: CamRig = m.cam
+	if cam == null or P.model == null:
+		return
+	cam.use_style("supervive")
+	cam.zoom = 1.0; cam.zoom_to = 1.0; cam.top = 0.0; cam.top_to = 0.0; cam.chase = 0.0; cam.chase_to = 0.0
+	cam.yaw = 0.0; cam.yaw_to = 0.0; cam.kick = 0.0
+	if "lead_vel" in cam: cam.set("lead_vel", Vector3.ZERO)
+	if "pull" in cam: cam.set("pull", 0.0)
+	_reset(flat)
+	P.glide_k = 0.0
+	for i in 3:
+		m.step(DT)
+		P.render(DT, 1.0)
+	cam.snap(P.pos)
+	for i in 120:
+		cam.follow(P.position, DT, false)
+	var lo := 1e9; var hi := -1e9
+	var stack: Array = [P.model]
+	while not stack.is_empty():
+		var n: Node = stack.pop_back()
+		if n.name == "Glider":
+			continue
+		for c in n.get_children(): stack.append(c)
+		if n is MeshInstance3D and (n as MeshInstance3D).is_visible_in_tree() and n.name != "TeamRing":
+			var mi := n as MeshInstance3D
+			var ab := mi.get_aabb()
+			if OS.has_environment("MFEEL_DEBUG"):
+				print("MFEEL   mesh %s size %s" % [str(P.model.get_path_to(mi)), str((mi.global_transform.basis * ab.size).abs().snapped(Vector3(0.01, 0.01, 0.01)))])
+			for k in 8:
+				var wp: Vector3 = mi.global_transform * ab.get_endpoint(k)
+				var sp := cam.unproject_position(wp)
+				lo = minf(lo, sp.y); hi = maxf(hi, sp.y)
+	var vh := cam.get_viewport().get_visible_rect().size.y
+	var vw := cam.get_viewport().get_visible_rect().size.x
+	var aspect := 16.0 / 9.0
+	var hfov := 2.0 * atan(tan(deg_to_rad(cam.fov) * 0.5) * aspect)
+	print("MFEEL framing: style supervive pitch %.0f dist %.1f fov %.0f, viewport %dx%d, model scale %.2f" % [rad_to_deg(cam.pitch), cam.dist, cam.fov, int(vw), int(vh), P.model.scale.y])
+	rec("view_across_m", 2.0 * cam.dist * tan(hfov * 0.5))
+	rec("hunter_screen_pct", (hi - lo) / vh * 100.0)
 
 # ---------------------------------------------------------------- end to end: key -> sim -> screen
 func _e2e() -> void:
