@@ -339,6 +339,7 @@ func _setup_weapon(w: String) -> void:
 		"longsword": hold = "sword"
 		"greatsword": hold = "great"
 		"twin_blades": hold = "twin"
+		"tower_shield": hold = "sword"
 		_: hold = w if HOLDS.has(w) else "_gun"
 	hd = HOLDS[hold]
 	mag = null

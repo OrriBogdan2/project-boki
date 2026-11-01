@@ -7,6 +7,28 @@ w = out.append
 w("# Project Boki abilities\n")
 w("Every ability in an expedition, by slot. All of them are data. Hunter abilities: `content/abilities/*.json` (class dashes, weapon RMBs) and `content/gloves/*.json` (Q gloves), built from the effect verbs in `scripts/combat/effects.gd` and the world verbs in `scripts/combat/verbs.gd` (walls, mirrors, tethers, traps, bridges, yanks, decoys). Kin abilities, dodge riders and merges (E, its auto active, the Shift rider and R) are the kin grammar: `content/kin_v2`, `content/abilities_v2`, `content/merges_v2`, run by `scripts/kin/kin_exec.gd` (see docs/KIN_GRAMMAR.md). A new ability is a new JSON file either way.\n")
 w("This file is generated from the JSON by a script; the descriptions are the one-liners players see in the kit panel (K) and on hover.\n")
+w("## Archetypes (the kit you play)\n")
+w("Every hunter plays one of six archetypes (`content/archetypes/*.json`, run by `scripts/arch/arch_kit.gd` and `scripts/arch/kits/*`; design in docs/ARCHETYPES.md). The archetype owns RMB (with contextual variants), Shift (its dash shape), E (utility), R (ultimate, run level 6, rank 2 at 9) and a passive with its resource; the weapon owns LMB; Q is the glove; C is the kin's own ability (it hops out, casts, hops back) and G or middle mouse sends / recalls the kin. With a full bond meter, R is Bonded: the kin merges 0.2s after the ult. The kin's typing fills each ability's sockets (docs/ARCHETYPES.md §4).\n")
+w("| Archetype | Weight | Weapons | Dash | Passive | RMB | E | R |\n|---|---|---|---|---|---|---|---|")
+for a in ["thief", "archer", "mage", "gunslinger", "juggernaut", "bulwark"]:
+    d = j(f"content/archetypes/{a}.json")
+    wn = " / ".join(j(f"content/weapons/{x}.json")["name"] for x in d["weapons"])
+    w(f"| **{d['name']}** | {d['weight']} | {wn} | {d['dash']['name']} | {d['passive']['name']} | {d['rmb']['name']} | {d['e']['name']} ({d['e']['cooldown']:g}s) | {d['r']['name']} ({d['r']['cooldown']:g}s) |")
+for a in ["thief", "archer", "mage", "gunslinger", "juggernaut", "bulwark"]:
+    d = j(f"content/archetypes/{a}.json")
+    w(f"\n### {d['name']} ({d['weight']})\n")
+    w(f"_{d['fantasy']}_\n")
+    w(f"- **Passive: {d['passive']['name']}.** {d['passive']['desc']}")
+    w(f"- **Shift: {d['dash']['name']}** ({d['dash']['cd']:g}s a charge). {d['dash']['desc']}")
+    r = d["rmb"]
+    w(f"- **RMB: {r['name']}** ({r['cooldown']:g}s" + (f", {r['charges']} charges" if r.get("charges", 1) > 1 else "") + "):")
+    for v, lab in [("tap", "tap"), ("hold", "hold"), ("air", "in the air"), ("during_e", "with E"), ("full", "resource full")]:
+        if v in r["variants"]: w(f"  - {lab}: {r['variants'][v]}")
+    w(f"- **E: {d['e']['name']}** ({d['e']['cooldown']:g}s). {d['e']['desc']}")
+    w(f"- **R: {d['r']['name']}** ({d['r']['cooldown']:g}s, level 6). {d['r']['desc']}")
+    w("- Level-up order (bots too): " + ", ".join({"sec": "RMB", "dash": "Dash", "kin": "E", "ult": "R", "gear": "Q"}[x] for x in d["order"]))
+w("")
+w("The old class dashes and weapon RMBs below are kept as data (the verbs return as gloves and other content); a hunter with no archetype still uses them.\n")
 w("## Ranks\n")
 w("Every run starts with abilities locked (see `Hunter.slot_lv`). A skill point unlocks a slot at rank 1 and further points raise it (RMB, Q, Shift, E: ranks 1-3; R: ranks 1-2). Per rank past the first:\n")
 w("- damage +15% (`Effects.level_k`)")
@@ -52,11 +74,13 @@ for kid, k in KV.items():
     for st in rd.get("on_end", []): bits.append("where you stop: " + stage(st))
     for md in rd.get("modifiers", []): bits.append("a second, shorter dodge a beat later")
     w(f"| {k['name']} | **{rd['name']}** | {'; '.join(bits)} |")
-w("\n## RMB: weapon signature abilities\n")
+w("\n## RMB: weapon signature abilities (no archetype)\n")
 w("Right click is your weapon's own verb. Hold RMB to see its telegraph (lane, landing circle, wall footprint or arc); release to cast. Rail Charge charges while held instead.\n")
 w("| Weapon | Class | Ability | Verb | Cooldown | What it does |\n|---|---|---|---|---|---|")
 for f in sorted(os.listdir(os.path.join(R, "content/weapons"))):
     wp = j("content/weapons/" + f)
+    if not wp.get("utility"):
+        continue      # the archetype weapons (Longbow, Spellstaff, Tower Shield & Mace) have no RMB of their own
     a = ab(wp["utility"])
     w(f"| {wp['name']} | {', '.join(wp['classes'])} | **{a['name']}** | {a.get('verb','')} | {a['cooldown']}s | {a['desc']} |")
 w("\n## Q: active gloves\n")

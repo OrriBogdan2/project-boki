@@ -501,7 +501,7 @@ func _draw_top(sz: Vector2) -> void:
 		if guide_hidden:
 			var pill := Rect2(Vector2(sz.x - 196, 16), Vector2(180, 30))
 			_panel(pill, Color(0.06, 0.07, 0.1, 0.8), 10)
-			_text(pill.position + Vector2(12, 20), "Guide %d/%d  ·  G to show" % [n_done, all_rows.size()], 13, MUTED)
+			_text(pill.position + Vector2(12, 20), "Guide %d/%d  ·  H to show" % [n_done, all_rows.size()], 13, MUTED)
 			return
 		var shown: Array = left.slice(0, 6)
 		var box := Rect2(Vector2(sz.x - 346, 16), Vector2(330, 58 + maxi(1, shown.size()) * 24))
@@ -515,7 +515,7 @@ func _draw_top(sz: Vector2) -> void:
 			var key := ("[%s]  " % Settings.key_cap(t[2])) if t[2] != "" else ""
 			if t[0] == "move": key = "[%s%s%s%s]  " % [Settings.key_cap("up"), Settings.key_cap("left"), Settings.key_cap("down"), Settings.key_cap("right")]
 			_text(box.position + Vector2(14, 50 + i * 24), ("→  " if i == 0 else "○  ") + key + String(t[1]), 13, GOLD if i == 0 else INK)
-		_text(box.position + Vector2(14, box.size.y - 10), "G hides the guide and your kit", 11, Color(MUTED, 0.8))
+		_text(box.position + Vector2(14, box.size.y - 10), "H hides the guide and your kit", 11, Color(MUTED, 0.8))
 		return
 	if m.opts.get("tutorial", false):
 		var txt: String = m.tut_text
@@ -1060,8 +1060,8 @@ func _hud_tick(delta: float) -> void:
 	_track_mates(m.player, delta)
 	_loot_tick(delta)
 	glider_hit_t = maxf(0.0, glider_hit_t - delta)
-	# G folds the training guide and the kit panel away (and back)
-	var hd := Input.is_physical_key_pressed(KEY_G)
+	# H folds the training guide (G is send / recall your kin) and the kit panel away (and back)
+	var hd := Input.is_physical_key_pressed(KEY_H)
 	if hd and not _h_down and (m.opts.get("training", false) or m.opts.get("duel", false)):
 		guide_hidden = not guide_hidden
 	_h_down = hd
@@ -1096,17 +1096,9 @@ func _draw_vitals(sz: Vector2, p: Hunter) -> void:
 	c.draw_rect(Rect2(pr.position + Vector2(0, pr.size.y - 30), Vector2(pr.size.x, 30)), Color(0, 0, 0, 0.35))
 	_text(pr.position + Vector2(40, pr.size.y - 9), String(p.cdat["name"]).to_upper(), 12, Color(hc, 0.95), big)
 	hover_spots.append([pr, "vitals"])
-	# run level: a badge in the corner, ringed by progress to the next level
-	var bc := pr.position + Vector2(4, pr.size.y - 4)
-	c.draw_circle(bc, 19, Color(0.03, 0.03, 0.05, 0.96))
-	c.draw_arc(bc, 17, 0, TAU, 40, Color(1, 1, 1, 0.12), 3.0, true)
-	c.draw_arc(bc, 17, -PI / 2, -PI / 2 + TAU * p.xp_frac(), 40, Color("ffd27a"), 3.0, true)
-	_ctext(bc + Vector2(0, 7), str(p.lvl), 19, INK, big)
-	if p.skill_pts > 0:
-		var pulse := 0.5 + 0.5 * sin(m.time * 5.0)
-		var sp := bc + Vector2(16, -16)
-		c.draw_circle(sp, 9.0 + pulse, Color("ffd27a"))
-		_ctext(sp + Vector2(0, 4.5), "+%d" % p.skill_pts if p.skill_pts > 1 else "+", 12, Color(0.1, 0.07, 0.02), big)
+	# run level (SUPERVIVE-style): a big number in a badge over the portrait's corner, ringed by
+	# progress to the next level with a bright head dot; a level-up pops it and bursts a gold ring
+	_level_badge(pr, p)
 	if p.lives < 50 and p.lives > 1:
 		for i in p.lives:
 			c.draw_circle(pr.position + Vector2(pr.size.x - 10 - i * 11.0, 10), 4.0, Color("ff7a8a"))
@@ -1139,6 +1131,8 @@ func _draw_vitals(sz: Vector2, p: Hunter) -> void:
 	_seg_bar(Rect2(Vector2(x0, y0 + 17), Vector2(w, 13)), p.hp, p.max_hp, bar_lerp, hcol, 25.0)
 	if p.shield > 0.0:
 		c.draw_rect(Rect2(Vector2(x0, y0 + 17), Vector2(w * clampf(p.shield / 120.0, 0.0, 1.0), 13)), Color(0.85, 0.93, 1.0, 0.45))
+	if p.ak:
+		_draw_res_bar(x0, y0 + 32, w, p)
 	# hidden in the grass
 	var grass := m.world.in_bush(p.pos.x, p.pos.z)
 	if grass or p.crouch:
@@ -1149,6 +1143,68 @@ func _draw_vitals(sz: Vector2, p: Hunter) -> void:
 		var hr := Rect2(Vector2(sz.x * 0.5 - tw * 0.5 - 12, sz.y - 104), Vector2(tw + 24, 20))
 		_rounded(hr, (Color(0.05, 0.12, 0.06, 0.85) if grass else Color(0.08, 0.09, 0.12, 0.85)) if hid else Color(0.25, 0.06, 0.05, 0.85), 10)
 		_text(hr.position + Vector2(12, 15), txt, 13, fg, big)
+
+var lvl_pop := 0.0
+var lvl_seen := -1
+## A level just went up (Hunter.gain_xp): the badge pops and the portrait bursts gold.
+func level_up(_lv: int) -> void:
+	lvl_pop = 0.35
+
+func _level_badge(pr: Rect2, p: Hunter) -> void:
+	var gold := Color("ffd27a")
+	if lvl_seen >= 0 and p.lvl > lvl_seen and lvl_pop <= 0.0:
+		lvl_pop = 0.35
+	lvl_seen = p.lvl
+	lvl_pop = maxf(0.0, lvl_pop - get_process_delta_time())
+	var k := 1.0 - lvl_pop / 0.35
+	var sc := 1.0 + 0.35 * sin(k * PI) if lvl_pop > 0.0 else 1.0
+	if lvl_pop > 0.0:
+		_rounded(pr.grow(6.0 + k * 22.0), Color(0, 0, 0, 0), 16, Color(gold, 1.0 - k), 4)
+		_rounded(pr.grow(2.0 + k * 10.0), Color(gold, 0.18 * (1.0 - k)), 14)
+	var bc := pr.position + Vector2(6, pr.size.y - 6)
+	var r := 26.0 * sc
+	c.draw_circle(bc, r, Color(0.03, 0.03, 0.05, 0.97))
+	c.draw_arc(bc, r - 3.0, 0, TAU, 48, Color(1, 1, 1, 0.12), 4.0, true)
+	var xf := p.xp_frac()
+	c.draw_arc(bc, r - 3.0, -PI / 2, -PI / 2 + TAU * xf, 48, gold, 4.0, true)
+	if xf > 0.01 and xf < 0.999:
+		var ha := -PI / 2 + TAU * xf
+		c.draw_circle(bc + Vector2(cos(ha), sin(ha)) * (r - 3.0), 3.6, Color(1.0, 0.97, 0.85))
+	_ctext(bc + Vector2(0, 9.0 * sc), str(p.lvl), int(26.0 * sc), INK if lvl_pop <= 0.0 else INK.lerp(gold, 1.0 - k), big)
+	if p.skill_pts > 0:
+		var pulse := 0.5 + 0.5 * sin(m.time * 5.0)
+		var sp := bc + Vector2(22, -22)
+		c.draw_circle(sp, 10.0 + pulse, gold)
+		_ctext(sp + Vector2(0, 5), "+%d" % p.skill_pts if p.skill_pts > 1 else "+", 13, Color(0.1, 0.07, 0.02), big)
+	# the archetype's name under the portrait instead of just the class
+	if p.ak:
+		_text(pr.position + Vector2(36, pr.size.y + 14), Arch.name_of(p.arch).to_upper() + "  ·  " + String(p.cdat["name"]).to_upper(), 10, Color(Arch.color(p.arch), 0.9), big)
+
+## The archetype resource under the health bar, with its name and tells (ARCHETYPES §3.2).
+func _draw_res_bar(x0: float, y: float, w: float, p: Hunter) -> void:
+	var k: ArchKit = p.ak
+	var rc := k.res_col()
+	var f := k.res_frac()
+	var rd := k.res_def()
+	_text(Vector2(x0, y + 9), String(rd.get("name", "")).to_upper(), 10, Color(rc, 0.9), big)
+	var bx := x0 + 78.0
+	var bw := w - 78.0 - 40.0
+	if String(rd.get("kind", "")) in ["count", "on_targets"]:
+		var n := int(rd.get("max", 3))
+		var have := int(round(f * n))
+		for i in n:
+			var cr := Rect2(Vector2(bx + i * (bw / n), y + 2), Vector2(bw / n - 3.0, 7))
+			_rounded(cr, rc if i < have else Color(1, 1, 1, 0.12), 3)
+	else:
+		_bar(Rect2(Vector2(bx, y + 2), Vector2(bw, 7)), f, rc)
+		if String(rd.get("id", "")) == "heat":
+			var ov := float(rd.get("over", 70.0)) / float(rd.get("max", 100.0))
+			c.draw_rect(Rect2(Vector2(bx + bw * ov, y), Vector2(2, 11)), Color(1, 1, 1, 0.6))
+	var txt := k.res_text()
+	_text(Vector2(bx + bw + 6, y + 10), txt, 11, rc if k.tell == "full" else INK, big)
+	if k.tell == "full":
+		var pulse := 0.5 + 0.5 * sin(m.time * 8.0)
+		_rounded(Rect2(Vector2(bx - 2, y), Vector2(bw + 4, 11)), Color(0, 0, 0, 0), 4, Color(rc, 0.4 + 0.5 * pulse), 2)
 
 ## Glider heat as a ring floating beside the glider, as in Supervive: it fills as you glide (faster
 ## when you're hit or lifting out of the abyss), drains on the ground, and pulses red when
@@ -1186,6 +1242,9 @@ func _draw_glider_heat(p: Hunter) -> void:
 ## one starts the run locked; rank pips sit above each, a gold border means a point can unlock it
 ## (just press its key), and a gold + means Alt + its key will rank it up.
 func _draw_abilities(sz: Vector2, p: Hunter) -> void:
+	if p.ak:
+		_draw_arch_abilities(sz, p)
+		return
 	var o := _hud_origin(sz)
 	var s := 50.0
 	var gap := 10.0
@@ -1257,6 +1316,102 @@ func _draw_abilities(sz: Vector2, p: Hunter) -> void:
 		var brr := Rect2(Vector2(x, y + s - 34.0), Vector2(34, 34))
 		_ab_slot("base", brr, "swap", Settings.key_cap("base"), Color("8fe3c8"), p.base_cd / Hunter.BASE_CD if p.base_cd > 0.0 else 0.0, p.base_cd, p.base_cd <= 0.0 and p.base_t <= 0.0)
 
+## The archetype row: RMB, Q glove, Shift dash, E utility, R ultimate (a big "6" until level 6,
+## filling at level 5, "UNLOCK" at 6, BONDED in the kin's colour when the bond is full), then the
+## kin's own ability (C) and send/recall (G) as small badges.
+func _draw_arch_abilities(sz: Vector2, p: Hunter) -> void:
+	var o := _hud_origin(sz)
+	var s := 50.0
+	var gap := 10.0
+	var x := o.x + HUD_PORTRAIT.x + 16.0
+	var y := o.y + 74.0
+	var k: Kin = p.kin
+	var g0: Dictionary = p.gear[0]
+	var g1: Dictionary = p.gear[1]
+	var info := p.slot_info("sec")
+	var sr := Rect2(Vector2(x, y), Vector2(s, s))
+	_skill_slot("sec", "sec", sr, String(info["icon"]), Settings.key_cap("secondary"), info["col"], float(info["cd"]) / maxf(0.01, float(info["cd_max"])) if float(info["cd"]) > 0.0 else 0.0, float(info["cd"]), bool(info["ready"]), int(info["charges"]) if int(info["max_charges"]) > 1 else -1, int(info["max_charges"]) if int(info["max_charges"]) > 1 else 0)
+	if info.get("full", false) and int(p.slot_lv["sec"]) > 0:
+		# the resource-full variant is ready (Cash In, Called Shot, Shield Slam...): a gold dot
+		c.draw_circle(sr.position + Vector2(s - 6, 6), 5.0 + sin(m.time * 8.0), Color("ffd23f"))
+	if p.ak.rmb_down and p.ak.rmb_t > 0.05:
+		var hk := clampf(p.ak.rmb_t / maxf(0.05, float(p.ak.rmb_def().get("hold", 0.3))), 0.0, 1.0)
+		c.draw_arc(sr.get_center(), s * 0.5 + 4.0, -PI / 2, -PI / 2 + TAU * hk, 32, Color(info["col"], 0.9), 3.0, true)
+	x += s + gap
+	var qr := Rect2(Vector2(x, y), Vector2(s, s))
+	if not g0.is_empty() and Gear.ALL.has(String(g0["id"])):
+		var gd: Dictionary = Gear.ALL[String(g0["id"])]
+		var gcd := float(p.gear_cd[0])
+		_skill_slot("gear", "gear0", qr, Gear.icon_of(String(g0["id"])), Settings.key_cap("gear1"), gd["col"], gcd / float(gd["cd"]) if gcd > 0.0 else 0.0, gcd, gcd <= 0.0)
+	else:
+		_skill_slot("gear", "gear0", qr, "glove", Settings.key_cap("gear1"), Color(MUTED, 0.8), 0.0, 0.0, false)
+		if int(p.slot_lv["gear"]) > 0: _ctext(qr.get_center() + Vector2(0, 16), "no glove", 9, Color(MUTED, 0.7))
+	x += s + gap
+	var di := p.slot_info("dash")
+	var dmax := int(di["max_charges"])
+	_skill_slot("dash", "dash", Rect2(Vector2(x, y), Vector2(s, s)), String(di["icon"]), Settings.key_cap("dash"), di["col"], float(di["cd"]) / maxf(0.01, float(di["cd_max"])) if float(di["cd"]) > 0.0 else 0.0, float(di["cd"]), bool(di["ready"]), int(di["charges"]), dmax)
+	x += s + gap
+	var ei := p.slot_info("k1")
+	var er := Rect2(Vector2(x, y), Vector2(s, s))
+	_skill_slot("kin", "k1", er, String(ei["icon"]), Settings.key_cap("signature"), ei["col"], float(ei["cd"]) / maxf(0.01, float(ei["cd_max"])) if float(ei["cd"]) > 0.0 and float(ei.get("up", 0.0)) <= 0.0 else 0.0, float(ei["cd"]) if float(ei.get("up", 0.0)) <= 0.0 else 0.0, bool(ei["ready"]))
+	if float(ei.get("up", 0.0)) > 0.0:
+		c.draw_arc(er.get_center(), s * 0.5 + 4.0, -PI / 2, -PI / 2 + TAU * clampf(float(ei["up"]) / maxf(0.1, float(p.ak.e_def().get("time", 5.0))), 0.0, 1.0), 32, Color(ei["col"], 0.9), 3.0, true)
+	x += s + gap
+	# R: bigger; locked shows a big "6"
+	var us := 58.0
+	var ur := Rect2(Vector2(x, y - (us - s)), Vector2(us, us))
+	var ri := p.slot_info("r")
+	_skill_slot("ult", "r", ur, String(ri["icon"]), Settings.key_cap("ultimate"), ri["col"], float(ri["cd"]) / maxf(0.01, float(ri["cd_max"])) if float(ri["cd"]) > 0.0 else 0.0, float(ri["cd"]), bool(ri["ready"]))
+	var ulv := int(p.slot_lv["ult"])
+	var ult_at := int(Hunter.ULT_AT[0])
+	if ulv <= 0:
+		if p.lvl < ult_at:
+			if p.lvl == ult_at - 1:
+				# level 5: the slot fills toward 6
+				var fh := ur.size.y * p.xp_frac()
+				_rounded(Rect2(Vector2(ur.position.x, ur.end.y - fh), Vector2(ur.size.x, fh)), Color(1.0, 0.82, 0.48, 0.28), 10)
+			_ctext(ur.get_center() + Vector2(0, 14), str(ult_at), 34, Color(INK, 0.85), big)
+		elif p.can_level("ult"):
+			var pulse := 0.5 + 0.5 * sin(m.time * 9.0)
+			_rounded(ur.grow(3.0 + pulse * 4.0), Color(1.0, 0.82, 0.48, 0.15 * pulse), 14, Color("ffd27a"), 3)
+	else:
+		if ulv < Hunter.SLOT_MAX["ult"]:
+			# the next rank's level in a small corner tag
+			var tr := Rect2(ur.end - Vector2(18, 18), Vector2(16, 16))
+			_rounded(tr, Color(0.03, 0.03, 0.05, 0.9), 5, Color(MUTED, 0.6), 1)
+			_ctext(tr.get_center() + Vector2(0, 4.5), str(int(Hunter.ULT_AT[1])), 11, MUTED, big)
+		if ri.get("bonded", false) and k:
+			var kc: Color = Data.KIN[k.species]["color"]
+			var pulse2 := 0.5 + 0.5 * sin(m.time * 6.0)
+			_rounded(ur.grow(3.0 + pulse2 * 3.0), Color(0, 0, 0, 0), 14, Color(kc, 0.55 + 0.4 * pulse2), 3)
+			var btr := Rect2(Vector2(ur.position.x + 4, ur.position.y - 7), Vector2(ur.size.x - 8, 13))
+			_rounded(btr, Color(0.03, 0.03, 0.05, 0.95), 5, Color(kc, 0.9), 1)
+			_ctext(btr.get_center() + Vector2(0, 4), "BONDED", 9, kc, big)
+		if float(ri.get("up", 0.0)) > 0.0:
+			c.draw_arc(ur.get_center(), us * 0.5 + 4.0, -PI / 2, -PI / 2 + TAU * clampf(float(ri["up"]) / 6.0, 0.0, 1.0), 40, Color("fff4c0"), 3.0, true)
+	if KinMerge.active(p):
+		_bar(Rect2(Vector2(ur.position.x, ur.end.y + 14), Vector2(us, 4)), clampf(float(p.merge_st["t"]) / maxf(0.1, float(p.merge_st["T"])), 0.0, 1.0), Color("fff4c0"))
+	x += us + gap + 4.0
+	# C: the kin's own ability, G: send / recall
+	if k and k.runner and k.runner.def_of("k1"):
+		var kd: AbilitySpec = k.runner.def_of("k1")
+		var cr := Rect2(Vector2(x, y + s - 38.0), Vector2(38, 38))
+		_ab_slot("kin_ab", cr, KinText.icon(kd), Settings.key_cap("kin_ability"), KinText.color(kd), k.runner.cd_frac("k1"), k.runner.cd_left("k1") if not k.runner.is_ready("k1") else 0.0, k.runner.is_ready("k1") and k.ready_to_fight())
+		x += 46.0
+		var gr := Rect2(Vector2(x, y + s - 30.0), Vector2(30, 30))
+		_ab_slot("throw", gr, "throw" if k.state == "shoulder" else "recall", Settings.key_cap("throw"), Color("cfe8ff"), 0.0, 0.0, k.ready_to_fight())
+		x += 38.0
+	if not g1.is_empty() and Gear.ALL.has(String(g1["id"])):
+		var pg: Dictionary = Gear.ALL[String(g1["id"])]
+		var pr := Rect2(Vector2(x, y + s - 34.0), Vector2(34, 34))
+		_rounded(pr, Color(0.05, 0.06, 0.09, 0.85), 9, Color(pg["col"], 0.75), 1)
+		Icons.draw(c, Gear.icon_of(String(g1["id"])), pr.get_center(), 10.0, pg["col"])
+		hover_spots.append([pr, "gear1"])
+		x += 42.0
+	if m.hunters.any(func(oh): return oh != p and oh.team == p.team):
+		var brr := Rect2(Vector2(x, y + s - 34.0), Vector2(34, 34))
+		_ab_slot("base", brr, "swap", Settings.key_cap("base"), Color("8fe3c8"), p.base_cd / Hunter.BASE_CD if p.base_cd > 0.0 else 0.0, p.base_cd, p.base_cd <= 0.0 and p.base_t <= 0.0)
+
 ## One ability in the row, aware of run levels: locked, unlockable, or ranked with pips above.
 func _skill_slot(slot: String, id: String, r: Rect2, icon: String, key: String, col: Color, cdf: float, cds: float, ready: bool, ch := -1, mx := 0) -> void:
 	var p := m.player
@@ -1279,7 +1434,7 @@ func _skill_slot(slot: String, id: String, r: Rect2, icon: String, key: String, 
 		_rounded(Rect2(lc + Vector2(-7, -6), Vector2(14, 11)), lcol, 3)
 		if can:
 			_ctext(Vector2(r.get_center().x, r.position.y - 7), "UNLOCK", 10, Color("ffd27a"), big)
-		elif slot == "ult":
+		elif slot == "ult" and p.ak == null:
 			_ctext(Vector2(r.get_center().x, r.position.y - 7), "LV %d" % int(Hunter.ULT_AT[0]), 10, Color(MUTED, 0.9), big)
 		_keycap(Vector2(r.get_center().x, r.end.y), key, lcol if can else Color(MUTED, 0.6))
 		return
@@ -1292,6 +1447,10 @@ func _skill_slot(slot: String, id: String, r: Rect2, icon: String, key: String, 
 		c.draw_rect(Rect2(Vector2(px + i * (pw + pg), r.position.y - 7), Vector2(pw, 3)), Color(col, 0.95) if i < lv else Color(1, 1, 1, 0.16))
 	if can:
 		var pulse := 0.5 + 0.5 * sin(m.time * 5.0)
+		# the frame glows gold while a point can go in; hovering shows the Alt+key to spend it
+		_rounded(r.grow(2.0 + pulse * 2.0), Color(0, 0, 0, 0), 13, Color(1.0, 0.82, 0.48, 0.3 + 0.45 * pulse), 2)
+		if hover_id == id:
+			_ctext(Vector2(r.get_center().x, r.position.y - 18), "ALT+" + key, 11, Color("ffd27a"), big)
 		var cp := Vector2(r.end.x - 2, r.position.y + 2)
 		c.draw_circle(cp, 8.0 + pulse, Color("ffd27a"))
 		_ctext(cp + Vector2(0, 4.5), "+", 13, Color(0.1, 0.07, 0.02), big)
@@ -1679,9 +1838,17 @@ func _nameplate(sp: Vector2, h: Hunter) -> void:
 	# badge + name
 	var cc: Color = Data.CLASSES.get(h.cls, {}).get("color", INK)
 	var bc := Vector2(x0 - 10, sp.y - 16)
-	c.draw_circle(bc, 7.5, Color(0.03, 0.03, 0.05, 0.9))
-	c.draw_arc(bc, 7.5, 0, TAU, 18, col, 1.6, true)
-	_ctext(bc + Vector2(0, 4), String(h.cls).substr(0, 1).to_upper(), 10, cc, big)
+	var foe: bool = m.player != null and h.team != m.player.team
+	if foe:
+		# an enemy's run level, with a gold rim once their ultimate is open (level 6+)
+		var ult_open := h.lvl >= int(Hunter.ULT_AT[0])
+		c.draw_circle(bc, 9.0, Color(0.03, 0.03, 0.05, 0.92))
+		c.draw_arc(bc, 9.0, 0, TAU, 20, Color("ffd27a") if ult_open else col, 2.4 if ult_open else 1.6, true)
+		_ctext(bc + Vector2(0, 4.5), str(h.lvl), 12, Color("ffd27a") if ult_open else INK, big)
+	else:
+		c.draw_circle(bc, 7.5, Color(0.03, 0.03, 0.05, 0.9))
+		c.draw_arc(bc, 7.5, 0, TAU, 18, col, 1.6, true)
+		_ctext(bc + Vector2(0, 4), String(h.cls).substr(0, 1).to_upper(), 10, cc, big)
 	_text(Vector2(x0 + 2, sp.y - 11), h.pname.substr(0, 14), 13, col.lerp(Color.WHITE, 0.25), big)
 	if h.downed:
 		var stomped: bool = h.get_meta("stomped", false)
@@ -1703,7 +1870,39 @@ func _nameplate(sp: Vector2, h: Hunter) -> void:
 	_seg_bar(Rect2(Vector2(x0, sp.y + 2), Vector2(w, 7)), h.hp, h.max_hp, _chip_of(h, frac), col if frac > 0.35 else col.lerp(Color.WHITE, 0.2 + 0.2 * sin(m.time * 9.0)), 25.0)
 	if h.shield > 0.0:
 		c.draw_rect(Rect2(Vector2(x0, sp.y + 2), Vector2(w * clampf(h.shield / 120.0, 0.0, 1.0), 7)), Color(0.85, 0.93, 1.0, 0.5))
+	# dash pips under the bar within 14m: "they used it, now go" (DASHES §3.3)
+	if m.player and h != m.player and h.flat_dist(m.player) < 14.0:
+		var dm := int(h.max_dashes())
+		for i in dm:
+			var pc := Vector2(x0 + 4.0 + i * 9.0, sp.y + 13)
+			c.draw_rect(Rect2(pc, Vector2(7, 2.5)), STAMINA_COL if float(i) < floor(h.dashes) else Color(1, 1, 1, 0.18))
+	# an archetype's resource tell, readable from the other side (glow at half, bright at full)
+	if h.ak and h.ak.tell != "" and h != m.player:
+		var rc: Color = h.ak.res_col()
+		var tk := 0.5 + 0.5 * sin(m.time * (8.0 if h.ak.tell == "full" else 3.0))
+		c.draw_circle(Vector2(x0 + w + 9.0, sp.y + 5), 4.0 + (2.0 * tk if h.ak.tell == "full" else 0.0), Color(rc, 0.5 + 0.4 * tk if h.ak.tell == "full" else 0.45))
+	_draw_marks(Vector2(sp.x, sp.y - 30), h)
 	_status_row(Vector2(sp.x, sp.y + 19), h)
+
+## A Thief's Marks over their target's head: pips, and a pulsing purse at 3 (both sides see them).
+func _draw_marks(at: Vector2, e: Ent) -> void:
+	if not e.has_meta("marks"):
+		return
+	var best := 0
+	for k in (e.get_meta("marks") as Dictionary):
+		var mk: Array = e.get_meta("marks")[k]
+		if float(mk[1]) > 0.0: best = maxi(best, int(mk[0]))
+	if best <= 0:
+		return
+	var gold := Color("ffd23f")
+	for i in 3:
+		var pc := at + Vector2((i - 1) * 11.0, 0)
+		c.draw_circle(pc, 4.6, Color(0, 0, 0, 0.6))
+		c.draw_circle(pc, 3.6, gold if i < best else Color(1, 1, 1, 0.2))
+	if best >= 3:
+		var pulse := 0.5 + 0.5 * sin(m.time * 9.0)
+		c.draw_circle(at + Vector2(0, -12), 7.0 + pulse * 2.0, Color(gold, 0.85))
+		_ctext(at + Vector2(0, -8), "$", 11, Color(0.15, 0.1, 0.0), big)
 
 ## Little icons for what's happening to someone: stunned, rooted, slowed, burning, shielded, braced.
 func _status_row(at: Vector2, e: Ent) -> void:
@@ -2021,6 +2220,13 @@ func _draw_crosshair(p: Hunter) -> void:
 		c.draw_line(mp + d * gap, mp + d * (gap + 7.0), Color(0, 0, 0, 0.6), 4.0)
 		c.draw_line(mp + d * gap, mp + d * (gap + 7.0), col, 2.0)
 	c.draw_circle(mp, 1.6, col)
+	if p.ak:
+		# the archetype resource as an arc hugging the crosshair
+		var rf := p.ak.res_frac()
+		var rc := p.ak.res_col()
+		c.draw_arc(mp, 30, PI * 1.62, PI * 1.62 + PI * 0.76, 24, Color(0, 0, 0, 0.35), 3.0, true)
+		if rf > 0.0:
+			c.draw_arc(mp, 30, PI * 1.62, PI * 1.62 + PI * 0.76 * rf, 24, Color(rc, 0.95 if p.ak.tell == "full" else 0.7), 3.0 if p.ak.tell == "full" else 2.0, true)
 	# aiming at a truce partner: a reminder before you break it
 	if m.truce and not m.truce.pacts.is_empty():
 		var ph: Hunter = m.truce.partner_at(p.inp["aim"], p.team)
@@ -2225,6 +2431,42 @@ func _wrapped_h(txt: String, w: float, fs: int) -> float:
 func _secs(x: float) -> String:
 	return ("%ds" % int(x)) if absf(x - round(x)) < 0.05 else ("%.1fs" % x)
 
+## Hover text for an archetype's slots (and the kin's own ability on C, send/recall on G).
+func _arch_tip(id: String, p: Hunter) -> Array:
+	var out: Array = []
+	var k: Kin = p.kin
+	match id:
+		"kin_ab":
+			if k == null or k.runner.def_of("k1") == null: return []
+			var kd: AbilitySpec = k.runner.def_of("k1")
+			out.append([kd.display_name, KinText.color(kd)])
+			out.append(["%s's own ability  ·  %s  ·  it hops out, casts, hops back" % [k.rec.get("name", "Boki"), Settings.key_cap("kin_ability")], MUTED, 12])
+			out.append([KinText.ability(k.effective("k1")), INK, 14])
+			out.append(["Cooldown %s%s" % [_secs(kd.cooldown), ("  ·  ready in %s" % _secs(k.runner.cd_left("k1"))) if not k.runner.is_ready("k1") else "  ·  ready"], MUTED, 13])
+			return out
+		"throw":
+			if k == null: return []
+			out.append(["Send / recall", Color("cfe8ff")])
+			out.append(["%s  ·  send %s out to fight on its own; press again to call it back. While it's out you lose its carry perk." % [Settings.key_cap("throw"), k.rec.get("name", "your Boki")], INK, 13])
+			return out
+	var si := p.slot_info(id)
+	var slot_name: String = {"sec": "Right click", "k1": "Utility (E)", "r": "Ultimate (R)", "dash": "Dash"}[id]
+	var key: String = {"sec": "secondary", "k1": "signature", "r": "ultimate", "dash": "dash"}[id]
+	out.append([String(si["name"]), si["col"]])
+	out.append(["%s %s  ·  %s  ·  %s" % [Arch.name_of(p.arch), slot_name, Settings.key_cap(key), p.rank_text({"sec": "sec", "k1": "k1", "r": "r", "dash": "dash"}[id])], MUTED, 12])
+	out.append([String(si["desc"]), INK, 13])
+	var r3: Dictionary = p.ak.d.get("rank3", {})
+	var sk: String = {"sec": "sec", "k1": "kin", "r": "ult", "dash": "dash"}[id]
+	if r3.has(sk):
+		out.append(["%s: %s" % ["Rank 2" if sk == "ult" else "Rank 3", String(r3[sk])], Color(si["col"], 0.85), 12])
+	if id == "r":
+		out.append(["Unlocks at level %d, rank 2 at %d. With a full bond meter it's Bonded: your Boki merges as it fires." % [int(Hunter.ULT_AT[0]), int(Hunter.ULT_AT[1])], MUTED, 12])
+	if id == "sec":
+		var rd := p.ak.res_def()
+		out.append(["Passive: %s" % String(p.ak.d["passive"]["desc"]), Color(Color(String(rd.get("col", "#ffffff"))), 0.9), 12])
+	out.append(["Cooldown %s%s" % [_secs(float(si["cd_max"])), ("  ·  ready in %s" % _secs(float(si["cd"]))) if float(si["cd"]) > 0.0 else "  ·  ready"], MUTED, 13])
+	return out
+
 func _tip_lines(id: String, p: Hunter) -> Array:
 	var hc: Color = p.accent()
 	var out: Array = []
@@ -2236,6 +2478,8 @@ func _tip_lines(id: String, p: Hunter) -> Array:
 			out.append([String(pd["desc"]), INK])
 			out.append(["Found this expedition. Gone when it ends.", MUTED])
 		return out
+	if p.ak and id in ["sec", "k1", "r", "dash", "kin_ab", "throw"]:
+		return _arch_tip(id, p)
 	match id:
 		"sec" when p.runner and p.runner.def_of("utility") != null:
 			var u: AbilityDef = p.runner.def_of("utility")

@@ -340,6 +340,10 @@ func _take_shot(s: Dictionary, v: Vector2, by, team: int, k: float) -> void:
 		(s["node"] as MeshInstance3D).material_override.set_shader_parameter("color", Color("ffffff").lerp(s["col"], 0.4))
 
 func _hit_wall(w: Dictionary, dmg: float, _col: Color) -> void:
+	# a Bulwark's shield (or any wall an archetype raised) turns what it blocks into Guard
+	var by = w.get("by")
+	if by != null and is_instance_valid(by) and by is Hunter and (by as Hunter).ak:
+		(by as Hunter).ak.on_block(minf(dmg, float(w["hp"])), null)
 	w["hp"] = float(w["hp"]) - dmg
 	w["hit_t"] = 0.12
 	if float(w["hp"]) <= 0.0:
