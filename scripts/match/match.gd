@@ -1083,6 +1083,7 @@ func _update_ship(dt: float) -> void:
 
 func on_drop_landed(h: Hunter) -> void:
 	h.inv_t = maxf(h.inv_t, 2.0)     # a moment to get your bearings after landing
+	h.set_meta("landed_t", time)     # bots leave a fresh lander be for a while (Bot.fresh)
 	if world.is_block(h.pos.x, h.pos.z):
 		var best := h.pos; var bd := 1e9
 		for dz in range(-2, 3):
@@ -3517,6 +3518,7 @@ func _process(delta: float) -> void:
 	if sty != cam_style:
 		cam_style = sty
 		cam.use_style(sty)
+	cam.lead_vel = Vector3.ZERO      # (movefeel) only a live glide leans the view (set below)
 	if player and player.riding:
 		# aboard the skyship: a low view from just behind and above it, looking ahead along its
 		# course over the islands, like riding the bus in a battle royale
@@ -3551,7 +3553,8 @@ func _process(delta: float) -> void:
 			if alt > 4.0:
 				cam.zoom_to *= 1.0 + clampf((alt - 4.0) / 24.0, 0.0, 0.7)
 			cam.top_to = 0.0
-		cam.follow(player.prev.lerp(player.pos, alpha), delta, not player.dropping)
+		cam.lead_vel = cam_lead_vel()
+		cam.follow(player.render_pos(alpha), delta, not player.dropping)
 	elif player and (player.downed or player.out):
 		# death camera: frame you and whoever got you
 		var foc := player.prev.lerp(player.pos, alpha)
@@ -3589,6 +3592,12 @@ func _process(delta: float) -> void:
 		f["t"] += delta
 		if f["t"] > 6.0: feed.erase(f)
 
+## (movefeel) The camera leans a little ahead of a glide so you see where you're going (CamRig.lead_vel).
+func cam_lead_vel() -> Vector3:
+	if player == null or not player.gliding or player.dropping or player.out:
+		return Vector3.ZERO
+	return Vector3(player.vel.x, 0.0, player.vel.z)
+
 func _gather_input() -> void:
 	if player == null or player.out or opts.get("tut_test", false):
 		return       # (the tutorial test drives the player itself)
@@ -3622,6 +3631,7 @@ func _gather_input() -> void:
 		player.inp["fire"] = false
 	# hold Space or Mouse 5 (Mouse 4 works too) in the air to glide; the mouse buttons never jump
 	player.inp["glide"] = (Input.is_action_pressed("jump") or Input.is_action_pressed("glide")) and not paused
+	player.inp["glide_btn"] = Input.is_action_pressed("glide") and not paused     # (movefeel) opens the glider with no tap/hold wait
 	player.inp["dash_hold"] = Input.is_action_pressed("dash") and bool(Settings.get_v("dash_hold")) and player.ak == null
 	player.inp["dash_down"] = Input.is_action_pressed("dash") and not paused     # hold-shaped dashes (Slide, Rampage)
 	var quick: bool = Settings.get_v("cast_on_press")
@@ -4089,6 +4099,14 @@ func step(dt: float) -> void:
 			player.teleport(player.pos + Vector3(0, 6, 0)); player.grounded = false
 		player.inp["glide"] = true
 		player.inp["move"] = Vector2(1, 0.3).normalized()
+	if opts.get("dashglide_demo", false) and player:
+		# test (movefeel): glide along, Shift at 0.7s, keep holding glide: the glider keeps the dash
+		if time < 0.05:
+			player.teleport(player.pos + Vector3(0, 7, 0)); player.grounded = false
+			player.unlock_all()
+		player.inp["glide"] = true
+		player.inp["move"] = Vector2(1, 0.3).normalized()
+		if time > 0.7 and time - DT <= 0.7: pending_input["dash"] = true
 	if opts.has("abyss_demo") and player:
 		_abyss_demo(String(opts["abyss_demo"]))
 	if player and not player.out:
@@ -6255,10 +6273,15 @@ func _tips() -> void:
 		return
 	_tip("move", "WASD to move, aim with the mouse, hold left click to shoot. Shift dashes, Space jumps. Hold Space in the air to glide.")
 	if _tip_t > 14.0:
-		_tip("ability", "%s is your Boki's ability. Fighting together fills the bond meter, and %s calls your Boki's bond ultimate." % [Settings.key_cap("signature"), Settings.key_cap("ultimate")])
+		if player.ak:
+			_tip("ability", "%s is your Boki's ability: it hops out, casts and hops back. %s and %s are your archetype's; fighting together fills the bond meter, and a full one makes your %s bonded." % [Settings.key_cap("kin_ability"), Settings.key_cap("signature"), Settings.key_cap("ultimate"), Settings.key_cap("ultimate")])
+		else:
+			_tip("ability", "%s is your Boki's ability. Fighting together fills the bond meter, and %s calls your Boki's bond ultimate." % [Settings.key_cap("signature"), Settings.key_cap("ultimate")])
 	if player.ult >= 1.0 and player.kin:
 		var ud := KinMerge.def_for(player.kin)
-		if ud: _tip("ult", "Your bond is full. %s merges you with your Boki: %s." % [Settings.key_cap("ultimate"), ud.display_name])
+		if ud and player.ak == null: _tip("ult", "Your bond is full. %s merges you with your Boki: %s." % [Settings.key_cap("ultimate"), ud.display_name])
+		elif ud and int(player.slot_lv.get("ult", 0)) > 0:
+			_tip("ult", "Your bond is full: your next %s is bonded, and merges you with your Boki (%s) as it goes off." % [Settings.key_cap("ultimate"), ud.display_name])
 	var k: Kin = player.kin
 	if k == null:
 		return
@@ -6272,7 +6295,7 @@ func _tips() -> void:
 	if k.state == "active":
 		var a1 := k.runner.def_of("k1")
 		var a2 := k.runner.def_of("k2")
-		_tip("skill", "%s uses %s's %s. Stun or root a foe with your Boki, then shoot it for a combo. %s throws it, and again calls it back to your shoulder." % [Settings.key_cap("signature"), k.rec.get("name", "your Boki"), a1.display_name if a1 else "ability", Settings.key_cap("throw")])
+		_tip("skill", "%s uses %s's %s. Stun or root a foe with your Boki, then shoot it for a combo. %s throws it, and again calls it back to your shoulder." % [Settings.key_cap("kin_ability" if player.ak else "signature"), k.rec.get("name", "your Boki"), a1.display_name if a1 else "ability", Settings.key_cap("throw")])
 	if not interact.is_empty() and interact["kind"] == "catch":
 		_tip("catch", "Hold " + Settings.key_cap("interact") + " to tame it. A Boki you tame only comes home if you extract.")
 	if exits and not interact.is_empty() and interact["kind"] == "exit":

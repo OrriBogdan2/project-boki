@@ -14,6 +14,7 @@ extends RefCounted
 ## break off near the ground to land a little apart.
 
 const PLAN_T := 8.0
+const FOLLOW_GAIN := 5.0      # 1/s: how hard a follower closes the gap to its slot
 ## Formation slots behind the leader: (to the side, behind), in metres, turned with the leader's heading.
 const SLOTS := [Vector2(-2.6, 2.2), Vector2(2.6, 2.2), Vector2(0.0, 4.6), Vector2(-5.0, 4.4), Vector2(5.0, 4.4)]
 
@@ -106,6 +107,8 @@ func _bot_plan_ping(h: Hunter) -> void:
 			var bd := 60.0
 			for c in m.spawn_plan.active_of("vault"):
 				var d := Vector2((c["pos"] as Vector3).x - at.x, (c["pos"] as Vector3).z - at.z).length()
+				if Bot.crowd_at(m, h, c["pos"], 25.0) > 0:
+					continue      # (another squad is already going there: no pile-up on the vault)
 				if d < bd: bd = d; at = c["pos"]
 	else:
 		var lp := _ping_of(leader(h.team))
@@ -272,7 +275,8 @@ func target_of(f: Hunter) -> Vector2:
 func follow_hv(f: Hunter, gs: float) -> Vector2:
 	var l: Hunter = f.drop_follow
 	var err := target_of(f) - Vector2(f.pos.x, f.pos.z)
-	return (Vector2(l.vel.x, l.vel.z) + err * 3.0).limit_length(gs * 1.6 + 3.0)
+	# (movefeel) the leader now steers ~3x snappier, so followers close the gap harder (was 3.0)
+	return (Vector2(l.vel.x, l.vel.z) + err * FOLLOW_GAIN).limit_length(gs * 1.6 + 3.0)
 
 func follow_vy(f: Hunter) -> float:
 	var l: Hunter = f.drop_follow

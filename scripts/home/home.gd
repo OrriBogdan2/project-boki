@@ -198,6 +198,7 @@ func _ready() -> void:
 	fx = Fx.new(); add_child(fx)
 	cam = CamRig.new(); add_child(cam)
 	cam.zoom_to = HOME_ZOOM; cam.zoom = HOME_ZOOM; cam.lead = 0.2
+	_apply_cam_settings(0.0)
 	if "--home-wide" in OS.get_cmdline_user_args():
 		cam.zoom_to = 2.6; cam.zoom = 2.6     # test: the whole farm in one shot
 	var house := Models.house(); house.position = spots["house"]; add_child(house)
@@ -801,6 +802,11 @@ func _process(delta: float) -> void:
 		_farm_tick()
 	_update_sky(d)
 	_update_hover()
+	_hub_room_t -= delta
+	if _hub_room_t <= 0.0:
+		_hub_room_t = 0.2
+		_keep_off_hub(root_ui.get_node_or_null("Hints") if root_ui else null)
+		if training: _keep_off_hub(training.hud)
 	_move_player(d)
 	_move_kin(d)
 	_care_tick(d)
@@ -811,6 +817,7 @@ func _process(delta: float) -> void:
 	if hw: hw.tick(d)
 	if hinc: hinc.tick(d)
 	if training: training.tick(d)
+	_apply_cam_settings(d)
 	cam.follow(ppos, d, panel_open == "" and train.is_empty())
 	_find_interact()
 	if hb and hb.active:
@@ -837,12 +844,62 @@ var safe_at := Vector3(38.0, 0, 34.5)
 var glider_node: MeshInstance3D = null
 const HOME_ZOOM := 1.2         # the camera on arriving home: midway between close (0.8) and the widest the wheel goes (1.6)
 const MANTLE := 1.5            # ledges this far above your feet pop you up when you jump at them
-const MANTLE_ABYSS := Hunter.MANTLE_REACH_ABYSS   # falling past an island's side, you catch its edge from this far below
+const MANTLE_ABYSS := 3.5   # falling past an island's side, you catch its edge from this far below (pinned: the expedition reach grew to 4.5 in movefeel)
 const FALL_RESPAWN := -40.0    # (a backstop: the abyss takes you a few metres under the island, World.abyss_floor)
-var climb := {}                # pulling yourself up over an island's rim from below: {from, to, lip, t, dur, split}
+## (movefeel) The Settings camera at home too, so you can try it here: the style's angle and lens and
+## your follow mode everywhere. The farm keeps its own wider framing (the same ground across as the
+## old home camera, whatever the style, so every zoom and panel shot here still frames the same);
+## on the Training Grounds isle the view eases to exactly the expedition's framing and your hunter
+## to its expedition size (Hunter.VIS_SCALE), so movement and combat there look as they will out there.
+const HOME_ACROSS_REF := "classic"   # the style the home's zooms were framed with
+var cam_zone_k := 0.0                # 0 on the farm, 1 on the Training Grounds (eased)
+var cam_home_zoom := HOME_ZOOM       # your farm zoom, kept while you're on the Training Grounds
+var cam_in_train := false
+func _apply_cam_settings(d: float) -> void:
+	cam.apply_settings()
+	var in_train: bool = training != null and training.in_zone
+	if in_train != cam_in_train:
+		cam_in_train = in_train
+		if in_train:
+			cam_home_zoom = cam.zoom_to
+			cam.zoom_to = 1.0
+		else:
+			cam.zoom_to = cam_home_zoom
+	var k_to := 1.0 if in_train else 0.0
+	cam_zone_k = k_to if d <= 0.0 else move_toward(cam_zone_k, k_to, d * 2.5)
+	var home_mul := CamRig.style_across(HOME_ACROSS_REF) / CamRig.style_across(cam.style_id)
+	var e := cam_zone_k * cam_zone_k * (3.0 - 2.0 * cam_zone_k)
+	cam.dist_mul = lerpf(home_mul, 1.0, e)
+	if player and is_instance_valid(player):
+		if not player.has_meta("base_scale"):
+			player.set_meta("base_scale", player.scale)
+		player.scale = (player.get_meta("base_scale") as Vector3) * lerpf(1.0, Hunter.VIS_SCALE, e)
+
+var climb := {}                # (unused since the ledge float; kept for anything that clears it)
+## Floating up a ledge, as in a match (Hunter._ledge_float): {lip, n (into the wall), t, at, g0}.
+## You keep steering the whole way; steering away, a dash or the glider lets go.
+var lfl := {}
+var _mv := Vector2.ZERO
 
 ## Your class's dodge with the match's numbers: its charges and recharge (Hunter.max_dashes and
 ## dash_regen at rank 1), and the class's long dash (ex_dist, ex_time, ex_cd; Hunter.EX_DASH_CD).
+## The key hints and the Training Grounds bar sit centred at the bottom, and on a 1280-wide window
+## they ran under the hub's buttons (Settings covered the start of each): slide one right of the hub
+## when it would overlap, centred in the room that's left.
+var _hub_room_t := 0.0
+func _keep_off_hub(c) -> void:
+	if not (c is Control) or not is_instance_valid(c) or hub == null or not is_instance_valid(hub) or not hub.is_visible_in_tree():
+		return
+	var cc := c as Control
+	var hr := hub.get_global_rect()
+	var cr := cc.get_global_rect()
+	var vw := get_viewport().get_visible_rect().size.x
+	var room_l := hr.end.x + 12.0
+	var centred := (vw - cr.size.x) * 0.5
+	var want := centred if centred >= room_l else room_l + maxf(0.0, (vw - room_l - cr.size.x) * 0.5)
+	if absf(cr.position.x - want) > 1.0 and cr.end.y > hr.position.y - 4.0:
+		cc.global_position.x = want
+
 func _dodge() -> Dictionary:
 	var ck := training._cls() if training and training.in_zone else Data.class_of_save()
 	var dd := Content.class_dodge(ck)
@@ -940,6 +997,7 @@ func _move_player(d: float) -> void:
 	p_crouch_k = move_toward(p_crouch_k, 1.0 if crouching else 0.0, d * 8.0)
 	if can_act and Input.is_action_just_pressed("dash") and dash_t <= 0.0:
 		try_dash(mv, air)
+	_mv = mv
 	var hv := Vector2(pvel.x, pvel.z)
 	if dash_t > 0.0:
 		dash_t -= d
@@ -991,18 +1049,21 @@ func _move_player(d: float) -> void:
 	elif air and can_act:
 		var holding := Input.is_action_pressed("jump") or Input.is_action_pressed("glide")
 		glide_hold = glide_hold + d if holding else 0.0
-		if not gliding and dash_t <= 0.0 and (jump_now or Input.is_action_just_pressed("glide") or (holding and glide_hold > Hunter.GLIDE_ENGAGE and pvy < 2.0)):
+		if not gliding and dash_t <= 0.0 and ((jump_now and lfl.is_empty()) or Input.is_action_just_pressed("glide") or (lfl.is_empty() and holding and glide_hold > Hunter.GLIDE_ENGAGE and pvy < 2.0)):
 			gliding = true
 			Sfx.play("whoosh", null, -10.0, 0.1, 0.8)
 		elif gliding and not holding:
 			gliding = false
 	if air:
-		if gliding and pvy <= 0.0:
+		if not lfl.is_empty() and _ledge_float(d, mv):
+			pass
+		elif gliding and pvy <= 0.0:
 			pvy = move_toward(pvy, -Hunter.GLIDE_SINK, Hunter.GLIDE_CATCH * d)
 		else:
 			pvy -= GRAV * d
 		py += pvy * d
 		if gh > World.VOID + 1.0 and py <= gh:
+			lfl = {}
 			if py < gh - 0.6:
 				Sfx.play("land", null, -8.0)     # caught the edge from below and climbed up
 			py = gh
@@ -1238,21 +1299,54 @@ func _mantle(x: float, z: float, top: float, air: bool) -> bool:
 		break
 	if to == Vector3.INF:
 		return false
+	# (ledge float) only when your keys push into it; no snap, no fixed climb: you float up the
+	# face and keep steering (see _ledge_float)
+	var n := Vector2(signf(x - ppos.x), 0.0) if absf(x - ppos.x) > absf(z - ppos.z) else Vector2(0.0, signf(z - ppos.z))
+	if _mv.length() < 0.3 or _mv.normalized().dot(n) < Hunter.LRISE_PUSH or not lfl.is_empty():
+		return false
+	lfl = {"lip": to.y, "n": n, "t": 0.0, "at": Vector2(ppos.x, ppos.z), "g0": Input.is_action_pressed("jump") or Input.is_action_pressed("glide")}
+	gliding = false
+	dash_t = 0.0
 	if to.y - py > 0.6 or side:
-		# a real pull-up (or caught from below): straight up the face, then over the lip, as in a match
-		var up_t := clampf((to.y - py) / Hunter.MANTLE_RISE, 0.16, 0.85)
-		climb = {"from": Vector3(ppos.x, py, ppos.z), "to": to, "lip": to.y + 0.14, "t": 0.0, "dur": up_t + 0.2, "split": up_t / (up_t + 0.2)}
-		pvy = 0.0
-		gliding = false
-		dash_t = 0.0
 		Sfx.play("grab", null, -8.0, 0.1, 1.2)
 		if fx: fx.burst(ppos + Vector3(0, py + 0.6, 0), Color("cfeaff"), 6, 2.0, 0.3, 0.0)
+	return false
+
+## One step of rising up a ledge (the match's Hunter._ledge_rise): sets pvy while it lasts and
+## returns true; false once it's over (moved off the face, dashed, glided, or timed out). A jump
+## near the top (Hunter.LRISE_WINDOW) flings you higher and faster toward your keys.
+func _ledge_float(d: float, mv: Vector2) -> bool:
+	lfl["t"] = float(lfl["t"]) + d
+	var n: Vector2 = lfl["n"]
+	var glide_now := Input.is_action_pressed("glide")
+	var off := (Vector2(ppos.x, ppos.z) - (lfl["at"] as Vector2)).dot(-n) > Hunter.LRISE_OFF
+	if off or gliding or dash_t > 0.0 or float(lfl["t"]) > 1.2 or Vector2(ppos.x, ppos.z).distance_to(lfl["at"]) > 2.0 			or (glide_now and Input.is_action_just_pressed("glide")):
+		lfl = {}
 		return false
-	ppos.x = to.x; ppos.z = to.z
-	py = to.y
-	pvy = 0.0
-	gliding = false
-	Sfx.play("land", null, -10.0)
+	var left: float = float(lfl["lip"]) + 0.12 - py
+	var dir: Vector2 = mv.normalized() if mv.length() > 0.3 else n
+	if Input.is_action_just_pressed("jump") and panel_open == "":
+		# the fling: strong in the window near the top, weaker before it
+		var timed := left <= Hunter.LRISE_WINDOW
+		lfl = {}
+		var hv := Vector2(pvel.x, pvel.z)
+		var spd := Hunter.FLING_SPEED if timed else SPEED
+		if hv.dot(dir) < spd: hv += dir * (spd - hv.dot(dir))
+		pvel = Vector3(hv.x, 0, hv.y)
+		pvy = sqrt(2.0 * GRAV * (maxf(0.0, left) + (Hunter.FLING_HEIGHT if timed else Hunter.FLING_EARLY_HEIGHT)))
+		glide_hold = 0.0
+		Sfx.play("whoosh" if timed else "jump", null, -8.0, 0.1, 1.3)
+		return true
+	if left <= 0.0:
+		lfl = {}
+		pvy = Hunter.LRISE_POP
+		if mv.length() > 0.3:
+			var hv := Vector2(pvel.x, pvel.z)
+			if hv.dot(dir) < SPEED * 0.9: hv += dir * (SPEED * 0.9 - hv.dot(dir))
+			if mv.normalized().dot(n) > 0.15 and hv.dot(n) < SPEED * 0.6: hv += n * (SPEED * 0.6 - hv.dot(n))
+			pvel = Vector3(hv.x, 0, hv.y)
+	else:
+		pvy = clampf(left * 14.0, Hunter.LRISE_MIN, Hunter.LRISE_SPEED)
 	return true
 
 ## The pull-up over a rim (the match's mantle): straight up the face, then forward over the lip.
@@ -1286,6 +1380,7 @@ func _climb_step(d: float) -> void:
 ## Dropped into the sky: the wind carries you back to where you last stood. No harm done.
 func _respawn_safe() -> void:
 	climb = {}
+	lfl = {}
 	ppos = safe_at
 	py = _ground_h(ppos.x, ppos.z)
 	if py <= World.VOID + 1.0: py = 0.0
@@ -1711,7 +1806,11 @@ func _find_interact() -> void:
 		create_tween().tween_property(prompt_box, "modulate:a", 1.0, 0.12)
 	prompt_box.reset_size()
 	var vp := get_viewport().get_visible_rect().size
-	prompt_box.position = Vector2((vp.x - prompt_box.size.x) * 0.5, vp.y - 110.0)
+	var py_at := vp.y - 110.0
+	if training and is_instance_valid(training.hud) and training.hud.is_visible_in_tree():
+		py_at = minf(py_at, training.hud.global_position.y - prompt_box.size.y - 6.0)     # (it sat on the Training Grounds bar)
+	prompt_box.position = Vector2((vp.x - prompt_box.size.x) * 0.5, py_at)
+	_keep_off_hub(prompt_box)
 
 ## Point at a kin to see who it is, how it's doing and what you can do with it.
 var hover_k: Dictionary = {}
@@ -2864,7 +2963,8 @@ func _open_kin(rec: Dictionary) -> void:
 	var col: Color = Shiny.body(rec)
 	var partner: bool = rec["uid"] == Save.d.get("active", "")
 	var rare_pre := Mutations.prefix(rec)
-	var v := _new_panel("%s the %s%s%s" % [rec["name"], "shimmering " if rec.get("shimmer", false) else "", (rare_pre + " ") if rare_pre != "" else "", Evo.form_name(rec)], 820)
+	var kpre := ("shimmering " if rec.get("shimmer", false) else "") + ((rare_pre + " ") if rare_pre != "" else "")
+	var v := _new_panel(("%s the %s%s" % [rec["name"], kpre, Evo.form_name(rec)]) if kpre != "" else Data.kin_title(String(rec["name"]), Evo.form_name(rec)), 820)
 	UI.hold(v, KIN_CARD_H)
 	UI.title_icon(v, UI.sex_icon(rec, 22.0))
 	UI.subtitle(v, "Level %d  ·  %s Boki  ·  %s  ·  %s nature" % [int(rec["level"]), String(sp["type"]).capitalize(), Care.stage_name(rec), Care.nature(rec)])
@@ -3250,19 +3350,11 @@ func _open_expedition() -> void:
 			Save.save_game()
 			_refresh_player_model()
 			_open_expedition(), 128, wk)
-		var wu := Content.weapon(w)
-		var un: String = Content.ability(wu.utility).display_name if wu and wu.utility != "" and Content.ability(wu.utility) else ""
 		var stat_s := ("Melee: %s damage per hit, reach %.1f" % [str(snappedf(float(wd["dmg"]), 0.1)), float(wd["range"])]) if wd.get("melee", false) else ("%s damage%s, %d per mag, range %d" % [str(snappedf(float(wd["dmg"]), 0.1)), (" x%d" % int(wd["pellets"])) if wd.has("pellets") else "", int(wd["mag"]), int(wd["range"])])
-		wb.tooltip_text = (String(wd.get("desc", "")) + "\n" if wd.has("desc") else "") + stat_s + ("\nRight click: " + un if un != "" else "")
+		# (no "Right click:" line: with an archetype, right click is the archetype's ability, shown above)
+		wb.tooltip_text = (String(wd.get("desc", "")) + "\n" if wd.has("desc") else "") + stat_s
 		wr.add_child(wb)
 	left.add_child(wr)
-	var wdef := Content.weapon(cur_w)
-	var ud: AbilityDef = Content.ability(wdef.utility) if wdef and wdef.utility != "" else null
-	if ud:
-		var ul := UI.label("Right click: %s" % ud.display_name, UI.T_SMALL, UI.MUTED)
-		ul.tooltip_text = ud.desc
-		ul.mouse_filter = Control.MOUSE_FILTER_PASS
-		left.add_child(ul)
 	var ak := Save.active_kin()
 	if not ak.is_empty():
 		left.add_child(UI.spacer(2))
@@ -3376,7 +3468,7 @@ func _kin_pick_row(label_t: String, rec: Dictionary, key: String) -> Control:
 		info.add_child(UI.label("Bring only your partner. Nothing else at risk.", 12, UI.MUTED))
 	else:
 		var sp: Dictionary = Data.KIN[rec["species"]]
-		var nl := UI.label("%s the %s" % [rec["name"], sp["name"]], 17, UI.INK, UI.big)
+		var nl := UI.label(Data.kin_title(String(rec["name"]), String(sp["name"])), 17, UI.INK, UI.big)
 		nl.autowrap_mode = TextServer.AUTOWRAP_OFF
 		nl.clip_text = true
 		info.add_child(nl)
@@ -3388,7 +3480,8 @@ func _kin_pick_row(label_t: String, rec: Dictionary, key: String) -> Control:
 			var ad := KinLib.ability(String(aid))
 			if ad: names.append(ad.display_name)
 		var ud := KinLib.merge(String(sp.get("ultimate", "")))
-		var keys := ("%s / %s" % [Settings.key_cap("signature"), Settings.key_cap("ultimate")]) if key == "active" else ("swap in with %s" % Settings.key_cap("swap_kin"))
+		# (its ability is on C now: E and R are your archetype's)
+		var keys := Settings.key_cap("kin_ability") if key == "active" else ("swap in with %s" % Settings.key_cap("swap_kin"))
 		var al := UI.label("%s  ·  %s  ·  bond: %s" % [keys, ", ".join(names), ud.display_name if ud else "-"], 12, UI.MUTED)
 		al.autowrap_mode = TextServer.AUTOWRAP_OFF
 		al.clip_text = true
@@ -3466,7 +3559,7 @@ func _ransom_card(L: Dictionary) -> Control:
 	UI.set_card_border(card, sp["color"])
 	var v := UI.vbox(6); card.add_child(v)
 	var top := UI.hbox(10)
-	var nm := UI.label("%s the %s  ·  level %d" % [rec["name"], sp["name"], int(rec.get("level", 1))], 18, sp["color"], UI.big)
+	var nm := UI.label("%s  ·  level %d" % [Data.kin_title(String(rec["name"]), String(sp["name"])), int(rec.get("level", 1))], 18, sp["color"], UI.big)
 	nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top.add_child(nm)
 	top.add_child(UI.label("Asking %d" % int(L["ask"]), 16, UI.GOLD, UI.big))
@@ -3995,7 +4088,7 @@ func _open_house() -> void:
 		var sp: Dictionary = Data.KIN[rec["species"]]
 		var dot := ColorRect.new(); dot.color = sp["color"]; dot.custom_minimum_size = Vector2(14, 14)
 		h.add_child(dot)
-		var info := UI.label("%s the %s  ·  level %d  ·  trust %d" % [rec["name"], Evo.form_name(rec), int(rec["level"]), int(rec["trust"])], 15)
+		var info := UI.label("%s  ·  level %d  ·  trust %d" % [Data.kin_title(String(rec["name"]), Evo.form_name(rec)), int(rec["level"]), int(rec["trust"])], 15)
 		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		h.add_child(info)
 		var r: Dictionary = rec

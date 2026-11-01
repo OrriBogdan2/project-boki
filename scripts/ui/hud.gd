@@ -42,6 +42,8 @@ func setup(match_node: Match) -> void:
 	c.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(c)
 	c.draw.connect(_draw_all)
+	abyss_fx = ABYSS_FX.new()      # (movefeel) the abyss closing in: under the HUD, local player only
+	add_child(abyss_fx)
 	# the pointer over the item windows: drawn above them (the crosshair lives under them on `c`,
 	# and the system cursor stays hidden in a match, so without this you can't see where you click)
 	cursor = Control.new()
@@ -202,17 +204,17 @@ func _draw_all() -> void:
 	# abyss danger [footage]: sinking below island level darkens the screen from the edges with a cold
 	# tint, more the closer you get to the kill depth and the emptier your glider; near the bottom it
 	# pulses red with a quickening heartbeat. It fades away as you climb back up or catch an updraft.
-	var want_a := 0.0
-	if p and not p.out and not p.grounded and p.over_void():
-		var depth := p.last_gy - p.pos.y
-		if depth > 0.0:
-			var to_kill := maxf(1.0, p.last_gy + 14.0)
-			want_a = clampf(depth / to_kill, 0.0, 1.0)
-			want_a = clampf(want_a * (1.0 + 0.7 * (1.0 - p.glide_fuel)) + (0.12 if p.glide_fuel <= 0.001 else 0.0), 0.0, 1.0)
-	abyss_a = lerpf(abyss_a, want_a, 1.0 - exp(-6.0 * get_process_delta_time()))
+	# (movefeel) measured against the real point of no return (Hunter.abyss_kill_y, via AbyssFx.danger)
+	# instead of a guess 14m down, and much stronger: the screen shader drains, darkens and reddens the
+	# picture and closes a vignette in; here the rings, the heartbeat, a low rumble and a pulsing
+	# warning near the end
+	var want_a: float = ABYSS_FX.danger(p) if p == m.player else 0.0
+	abyss_a = lerpf(abyss_a, want_a, 1.0 - exp(-10.0 * get_process_delta_time()))
+	if abyss_fx:
+		abyss_fx.show_danger(abyss_a, pow(0.5 + 0.5 * sin(abyss_pulse * TAU), 3.0) if abyss_a > 0.005 else 0.0)
 	if abyss_a > 0.005:
-		var red := clampf((abyss_a - 0.5) * 2.0, 0.0, 1.0)
-		var rate := 2.0 + red * 5.0
+		var red := clampf((abyss_a - 0.35) / 0.65, 0.0, 1.0)
+		var rate := 1.6 + red * 3.4
 		abyss_pulse += get_process_delta_time() * rate
 		var pulse := pow(0.5 + 0.5 * sin(abyss_pulse * TAU), 3.0)
 		# a soft cold wash over everything, then a heavy vignette that closes in from the edges
@@ -224,11 +226,18 @@ func _draw_all() -> void:
 			if a <= 0.0: break
 			var col := Color(0.04, 0.02, 0.1).lerp(Color(0.35, 0.02, 0.04), red * pulse)
 			c.draw_rect(Rect2(Vector2(inset, inset), sz - Vector2(inset, inset) * 2.0), Color(col, a), false, minf(sz.x, sz.y) * 0.04)
-		if red > 0.0 and p == m.player:
+		if abyss_a > 0.15 and p == m.player:
 			var beat := int(floor(abyss_pulse))
 			if beat != abyss_beat:
 				abyss_beat = beat
-				Sfx.play("thump", null, -14.0 + red * 8.0, 0.0, 0.7 + red * 0.15)
+				Sfx.play("thump", null, -16.0 + abyss_a * 12.0, 0.0, 0.7 + red * 0.15)
+				if red > 0.3 and beat % 2 == 0:
+					Sfx.play("boom", null, -24.0 + red * 10.0, 0.0, 0.35)     # a low rumble under the heartbeat
+		if abyss_a > 0.6 and p == m.player:
+			# the point of no return is close: say so, pulsing, in the middle of the screen
+			var wk := clampf((abyss_a - 0.6) / 0.3, 0.0, 1.0)
+			var txt := "HOLD GLIDE TO LIFT" if p.glide_fuel > 0.001 and not p.gliding else ("CLIMB OUT" if p.glide_fuel > 0.001 else "NO GLIDER HEAT")
+			_ctext(Vector2(sz.x * 0.5, sz.y * 0.36), txt, 26, Color(1.0, 0.25 + 0.35 * pulse, 0.2, 0.55 + 0.45 * wk * (0.5 + 0.5 * pulse)), big)
 	if p and not p.downed and not p.out and p.hp < p.max_hp * 0.35:
 		var pulse := 0.5 + 0.5 * sin(m.time * 6.0)
 		for i in 5:
@@ -450,7 +459,9 @@ func _draw_bubbles() -> void:
 		if cam.is_position_behind(at):
 			continue
 		var sp := cam.unproject_position(at)
-		if not (is_finite(sp.x) and is_finite(sp.y)) or absf(sp.x) > 1e5 or absf(sp.y) > 1e5:
+		# (off screen: skip. Far-off points project to tens of thousands of pixels, where the tail's small
+		# triangle loses its area to float rounding and errors "triangulation failed" every frame)
+		if not (is_finite(sp.x) and is_finite(sp.y)) or not c.get_viewport_rect().grow(240.0).has_point(sp):
 			continue
 		var a := clampf((2.6 - b["t"]) * 3.0, 0.0, 1.0) * clampf(b["t"] * 8.0, 0.0, 1.0)
 		var s: String = b["text"]
@@ -1219,7 +1230,9 @@ func _draw_res_bar(x0: float, y: float, w: float, p: Hunter) -> void:
 			var ov := float(rd.get("over", 70.0)) / float(rd.get("max", 100.0))
 			c.draw_rect(Rect2(Vector2(bx + bw * ov, y), Vector2(2, 11)), Color(1, 1, 1, 0.6))
 	var txt := k.res_text()
-	_text(Vector2(bx + bw + 6, y + 10), txt, 11, rc if k.tell == "full" else INK, big)
+	# right-aligned to the health bar's end: just after the bar it ran into the R slot's "UNLOCK" at level 6
+	var tw := big.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x
+	_text(Vector2(maxf(bx + bw + 6, x0 + w - tw), y + 10), txt, 11, rc if k.tell == "full" else INK, big)
 	if k.tell == "full":
 		var pulse := 0.5 + 0.5 * sin(m.time * 8.0)
 		_rounded(Rect2(Vector2(bx - 2, y), Vector2(bw + 4, 11)), Color(0, 0, 0, 0), 4, Color(rc, 0.4 + 0.5 * pulse), 2)
@@ -2118,10 +2131,26 @@ func _draw_kit(sz: Vector2, p: Hunter) -> void:
 		return
 	var a := clampf(show_t - t, 0.0, 1.0)
 	var lines: Array = []
-	var util: AbilityDef = p.runner.def_of("utility") if p.runner else null
+	var util: AbilityDef = p.runner.def_of("utility") if p.runner and p.ak == null else null
 	if util:
 		lines.append([Settings.key_cap("secondary"), util.display_name, util.desc, util.color])
-	if p.kin:
+	if p.ak:
+		# the archetype's kit (right click, E, R) and the Boki's own ability on C; before, this listed
+		# the old kin kit (E as the Boki's ability, R as the merge) for every hunter
+		var ak: ArchKit = p.ak
+		var rv: Dictionary = ak.rmb_def().get("variants", {})
+		var rdesc := "Tap: %s" % String(rv.get("tap", "")) if rv.has("tap") else ""
+		if rv.has("hold"): rdesc += "  Hold: %s" % String(rv["hold"])
+		lines.append([Settings.key_cap("secondary"), String(ak.rmb_def().get("name", "Right click")), rdesc, ak.col_of(ak.rmb_def())])
+		lines.append([Settings.key_cap("signature"), String(ak.e_def().get("name", "E")), String(ak.e_def().get("desc", "")), ak.col_of(ak.e_def())])
+		lines.append([Settings.key_cap("ultimate"), String(ak.r_def().get("name", "R")) + ("" if p.lvl >= int(Hunter.ULT_AT[0]) else "  (level %d)" % int(Hunter.ULT_AT[0])), String(ak.r_def().get("desc", "")), ak.col_of(ak.r_def())])
+	if p.kin and p.ak:
+		var k: Kin = p.kin
+		var kcol: Color = Data.KIN[k.species]["color"]
+		var kd1: AbilitySpec = k.runner.def_of("k1")
+		if kd1: lines.append([Settings.key_cap("kin_ability"), kd1.display_name + " (" + String(k.rec.get("name", "your Boki")) + ")", KinText.ability(k.effective("k1")), KinText.color(kd1)])
+		lines.append([Settings.key_cap("throw"), ("Throw (a dive) / recall " if k.carry_style() == "perch" else "Throw / recall ") + String(k.rec.get("name", "your Boki")), "Stuns what it hits; then your shots deal a combo. Press again to call it back.", kcol])
+	elif p.kin:
 		var k: Kin = p.kin
 		var kcol: Color = Data.KIN[k.species]["color"]
 		var kd1: AbilitySpec = k.runner.def_of("k1")
@@ -2146,8 +2175,14 @@ func _draw_kit(sz: Vector2, p: Hunter) -> void:
 		hs.append(26.0 + dh + 8.0)
 		total += 26.0 + dh + 8.0
 	var bottom := sz.y - 176.0
-	var box := Rect2(Vector2(sz.x - w - 16, bottom - total), Vector2(w, total))
 	var compact := false
+	if not m.opts.get("training", false) and total > bottom - 230.0:
+		# too tall to sit under the kill feed: names only
+		compact = true
+		hs = []
+		for l in lines: hs.append(28.0)
+		total = 34.0 + 28.0 * lines.size() + 4.0
+	var box := Rect2(Vector2(sz.x - w - 16, bottom - total), Vector2(w, total))
 	if m.opts.get("training", false):
 		# in training it stays up, so it lives on the left under the minimap, clear of the checklist;
 		# on a short screen it drops the descriptions rather than run into your kin card
@@ -2223,6 +2258,8 @@ func _draw_perk_offer(sz: Vector2) -> void:
 func _draw_prompt(sz: Vector2, p: Hunter) -> void:
 	var it := m.interact
 	var y := sz.y - 222.0
+	if not m.perk_offer.is_empty():
+		y = sz.y - 186.0     # under a perk choice's cards (they sit where the prompt goes), above your bars
 	if not it.is_empty():
 		var prog := 0.0
 		match it["kind"]:
@@ -2368,6 +2405,8 @@ func _draw_tip(sz: Vector2, t: Dictionary) -> void:
 
 var head_hp := 1.0
 var abyss_a := 0.0
+const ABYSS_FX := preload("res://scripts/match/abyss_fx.gd")
+var abyss_fx: CanvasLayer = null
 
 ## Health and stamina (dash charges) right above your hunter, where your eyes already are.
 func _draw_overhead(p: Hunter) -> void:
@@ -2568,7 +2607,7 @@ func _tip_lines(id: String, p: Hunter) -> Array:
 			var k: Kin = p.kin
 			if k == null: return []
 			var ai := k.brain
-			out.append(["%s the %s" % [k.rec.get("name", "Boki"), Data.KIN[k.species]["name"]], Data.KIN[k.species]["color"]])
+			out.append([Data.kin_title(String(k.rec.get("name", "")), String(Data.KIN[k.species]["name"])), Data.KIN[k.species]["color"]])
 			out.append(["Level %d  ·  %d / %d health  ·  trust %d" % [int(k.rec.get("level", 1)), int(ceil(k.hp)), int(k.max_hp), int(k.trust)], MUTED, 12])
 			var traits := []
 			if ai.aggression > 0.6: traits.append("aggressive: chases foes far")
@@ -2672,9 +2711,20 @@ func _kit_lines(lines: Array, k: Kin) -> void:
 	if k.ks:
 		lines.append([KinText.carry(k.ks), Color(KinRules.cat_color("sustain"), 0.9)])
 
+var _wh_mp := Vector2.ZERO
+var _wh_still := 0.0
 func _draw_world_hover(sz: Vector2, p: Hunter) -> void:
 	var mp := c.get_local_mouse_position()
 	var cam := m.cam
+	# only once the cursor rests a moment and you aren't fighting: in a fight you aim at things all the
+	# time and a card popped up over every target (and never while recording)
+	if mp.distance_to(_wh_mp) > 6.0 or Input.is_action_pressed("fire") or Input.is_action_pressed("secondary"):
+		_wh_still = 0.0
+	_wh_mp = mp
+	_wh_still += get_process_delta_time()
+	var testing := "--hover-rival" in OS.get_cmdline_user_args() or "--hover" in OS.get_cmdline_user_args()
+	if (Record.clean() or _wh_still < 0.4) and not testing:
+		return
 	if "--hover-rival" in OS.get_cmdline_user_args():
 		# test hook: point at the nearest rival hunter (or their kin, with --hover-rival-kin)
 		var nb: Ent = null; var nd := 1e9
@@ -2755,7 +2805,7 @@ func _draw_world_hover(sz: Vector2, p: Hunter) -> void:
 			if not (h.gear[0] as Dictionary).is_empty() and Gear.ALL.has(String(h.gear[0]["id"])):
 				lines.append(["Glove: %s" % String(Gear.ALL[String(h.gear[0]["id"])]["name"]), Gear.ALL[String(h.gear[0]["id"])]["col"]])
 			if h.kin and not (h.kin as Kin).dead:
-				lines.append(["Boki: %s the %s" % [(h.kin as Kin).rec.get("name", "Boki"), Data.KIN[(h.kin as Kin).species]["name"]], Data.KIN[(h.kin as Kin).species]["color"]])
+				lines.append(["Boki: " + Data.kin_title(String((h.kin as Kin).rec.get("name", "")), String(Data.KIN[(h.kin as Kin).species]["name"])), Data.KIN[(h.kin as Kin).species]["color"]])
 				_kit_lines(lines, h.kin)
 		if h.downed:
 			lines.append(["Down. %s" % ("Hold %s next to them to revive." % Settings.key_cap("interact") if ally else "Finish them before they're revived."), BAD if not ally else GOOD])
@@ -2804,6 +2854,15 @@ func _draw_map_train(inner: Rect2, view: Rect2, k: float) -> void:
 		c.draw_circle(pv, 4.0 if ci == 0 else 3.2, Color(0, 0, 0, 0.6))
 		c.draw_circle(pv, 3.0 if ci == 0 else 2.3, Color("ff5a3a") if ci == 0 else Color("ffcf7a"))
 
+var _regions_of: World = null
+var _regions := {}
+func _region_names(w: World) -> Dictionary:
+	if _regions_of != w:
+		_regions_of = w
+		_regions = {}
+		for isl in w.islands: _regions[String(isl.get("name", ""))] = true
+	return _regions
+
 ## Place names on the minimap (authored maps). Riding in or dropping you see the whole map with every
 ## point of interest and chokepoint named; on the ground, the names of places near you.
 func _draw_map_labels(w: World, inner: Rect2, view: Rect2, k: float, overview: bool) -> void:
@@ -2820,7 +2879,7 @@ func _draw_map_labels(w: World, inner: Rect2, view: Rect2, k: float, overview: b
 			c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -8), pv + Vector2(6, 3), pv + Vector2(-6, 3)]), Color(0, 0, 0, 0.6))
 			c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -6), pv + Vector2(4.5, 2), pv + Vector2(-4.5, 2)]), Color("9af0ff"))
 			if overview:
-				_ctext(pv + Vector2(0, 15), "%s  %dm" % [nm, int(round(float(lb.get("height", 0.0))))], 10, Color("c8f6ff"))
+				_ctext(pv + Vector2(0, 15), "%dm" % int(round(float(lb.get("height", 0.0)))), 10, Color("c8f6ff"))
 			continue
 		if String(lb["kind"]) == "lair":
 			if overview:
@@ -2830,16 +2889,14 @@ func _draw_map_labels(w: World, inner: Rect2, view: Rect2, k: float, overview: b
 			# a train stop: a small amber square, named in the overview
 			c.draw_rect(Rect2(pv - Vector2(4, 4), Vector2(8, 8)), Color(0, 0, 0, 0.6))
 			c.draw_rect(Rect2(pv - Vector2(3, 3), Vector2(6, 6)), Color("ffcf7a"))
-			if overview:
-				_ctext(pv + Vector2(0, 14), nm, 10, Color("ffe2b0"))
-			continue
+			continue      # (unnamed here: stop, road and perch names piled on top of each other at this size; the full map names them)
 		if String(lb["kind"]) == "choke":
 			# a chokepoint: a small orange diamond, named in the overview
 			c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -5), pv + Vector2(5, 0), pv + Vector2(0, 5), pv + Vector2(-5, 0)]), Color(0, 0, 0, 0.55))
 			c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -3.5), pv + Vector2(3.5, 0), pv + Vector2(0, 3.5), pv + Vector2(-3.5, 0)]), Color("ffb36a"))
-			if overview:
-				_ctext(pv + Vector2(0, 14), nm, 10, Color("ffd2a0"))
 		else:
+			if overview and not _region_names(w).has(nm):
+				continue      # (the whole map at this size: region names only, as the full map does)
 			var col := Color("ffd2f0") if String(lb.get("role", "")) == "heart" else INK
 			_ctext(pv + Vector2(0, 4), nm, 13 if overview else 11, col, big)
 
@@ -3417,6 +3474,8 @@ func _draw_truce_marks() -> void:
 		var e := Truce.emote_def(String(s["id"]))
 		var a := clampf((Truce.BUBBLE_T - float(s["t"])) * 2.0, 0.0, 1.0) * clampf(float(s["t"]) * 8.0, 0.0, 1.0)
 		var sp := cam.unproject_position(h.position + Vector3(0, 3.3, 0)) + Vector2(0, -6.0 * minf(1.0, float(s["t"]) * 4.0))
+		if not c.get_viewport_rect().grow(240.0).has_point(sp):
+			continue     # (far off screen, e.g. someone falling away into the abyss: the bubble's triangles degenerate and spam "triangulation failed")
 		var label := String(e["name"])
 		var w := big.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, 15).x + (40.0 if e["id"] == "truce" else 22.0)
 		var r := Rect2(sp - Vector2(w * 0.5, 15), Vector2(w, 28))
@@ -3433,8 +3492,10 @@ func _draw_truce_marks() -> void:
 		if h.team == me.team or h.out or h.extracted or h.unseen or not h.visible or cam.is_position_behind(h.position):
 			continue
 		var tp := cam.unproject_position(h.position + Vector3(0, 2.55, 0))
+		if not c.get_viewport_rect().grow(240.0).has_point(tp):
+			continue
 		if m.truce.is_marked(h):
-			_ctext(tp + Vector2(0, -2), "BROKE THE TRUCE", 12, BAD, big)
+			_ctext(tp + Vector2(0, -16), "BROKE THE TRUCE", 12, BAD, big)     # (above the name, not over it)
 		elif m.truce.allied(me.team, h.team):
 			# a white flag beside their name plate
 			_flag(tp + Vector2(-66, -12), 0.7, Color("f4f1e6"))

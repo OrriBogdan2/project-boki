@@ -252,7 +252,7 @@ static func box_items(m: Match, h: Hunter, b: Dictionary) -> Array:
 	for i in (b["caught"] as Array).size():
 		var rec: Dictionary = b["caught"][i]
 		var sp: Dictionary = Data.KIN.get(String(rec.get("species", "")), {})
-		out.append({"key": "caught", "i": i, "name": "%s the %s" % [rec.get("name", "Boki"), sp.get("name", "Boki")], "sub": "Kin", "icon": "paw", "col": sp.get("color", Color("ffb0d0")), "upgrade": true})
+		out.append({"key": "caught", "i": i, "name": Data.kin_title(String(rec.get("name", "")), String(sp.get("name", "Boki"))), "sub": "Kin", "icon": "paw", "col": sp.get("color", Color("ffb0d0")), "upgrade": true})
 	if int(b["tonics"]) > 0:
 		out.append({"key": "tonics", "name": "%d tonic%s" % [int(b["tonics"]), "" if int(b["tonics"]) == 1 else "s"], "sub": "Heals", "icon": "tonic", "col": Color("ff8a9a"), "upgrade": true})
 	if int(b.get("keys", 0)) > 0:

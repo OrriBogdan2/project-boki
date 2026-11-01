@@ -329,6 +329,10 @@ const BOT_NAMES := Names.BOT      # ~2,000 handles
 func default_kin_name(species: String) -> String:
 	return String(KIN[species]["name"]) if KIN.has(species) else "Kin"
 
+## "Pip the Vespyx", or just "Vespyx" for a Boki still called by its species' name (not "Vespyx the Vespyx").
+func kin_title(kname: String, species_name: String) -> String:
+	return species_name if kname == "" or kname == species_name else "%s the %s" % [kname, species_name]
+
 ## Expedition tiers: deeper islands are harder and richer, and in the Hollow your partner can be lost.
 const TIERS := [
 	{"name": "The Meadow", "desc": "Gentle islands. Your Boki are always safe here: lose your loot, never your Boki.",

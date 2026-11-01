@@ -12,6 +12,9 @@ extends RefCounted
 ## Prints "ACHECK ok|FAIL ..." lines and "ACHECK DONE, failures: N".
 
 var bad := 0
+## How far under the lowest lip around a hunter is lost (movefeel: the hunter's abyss is deeper than the
+## monsters' World.ABYSS_DEPTH; it was 6m, the old checks' "< 7m")
+const KILL_DEPTH := World.ABYSS_DEPTH + Hunter.ABYSS_EXTRA
 var m: Match
 var w: World
 var h: Hunter
@@ -55,7 +58,7 @@ func _edges(n: int, sheer := false) -> Array:
 func _reset(at: Vector3, v: Vector3) -> void:
 	h.out = false; h.gone = false; h.downed = false; h.down_hp = 100.0
 	h.teleport(at)
-	h.grounded = false; h.vel = v; h.pad = {}; h.grap = {}; h.grap_cd = 0.0; h.roll_t = 0.0
+	h.grounded = false; h.vel = v; h.pad = {}; h.lfloat = {}; h.grap = {}; h.grap_cd = 0.0; h.roll_t = 0.0
 	h.gliding = false; h.glide_fuel = 1.0; h.glide_cd = 0.0; h.knock_t = 0.0; h.fly_t = 0.0
 	h.stun_t = 0.0; h.kb_t = -9.0; h.mantle_cd = 0.0; h.shot_down = false; h.air_t = 0.0
 	h.inp["move"] = Vector2.ZERO; h.inp["glide"] = false; h.inp["jump"] = false; h.inp["dash"] = false
@@ -86,15 +89,15 @@ func _run(sec: float, drive: Callable) -> Dictionary:
 			break
 		r["low"] = minf(float(r["low"]), h.pos.y)
 		r["inside"] = maxf(float(r["inside"]), _inside(h))
-		if not h.pad.is_empty() and h.pad.has("face"):
+		if h.mantling():
 			r["mantled"] = true
 			r["clip"] = maxf(float(r["clip"]), _inside(h))
-		elif not h.grounded and h.pad.is_empty():
+		elif not h.grounded and h.pad.is_empty() and not h.mantling():
 			# hanging in the air without moving: snagged on the face
 			still = still + 1 if absf(h.pos.y - last_y) < 0.002 and not h.gliding else 0
 			r["stuck"] = maxi(int(r["stuck"]), still)
 		last_y = h.pos.y
-		if r["mantled"] and h.pad.is_empty() and h.grounded:
+		if r["mantled"] and not h.mantling() and h.pad.is_empty() and h.grounded:
 			r["landed"] = true; r["t"] = t
 			break
 		if not h.grounded: r["air"] = true
@@ -153,7 +156,7 @@ func run(main: Node) -> void:
 	var dn := 0; var dgood := 0; var worst_drop := 0.0; var worst_t := 0.0; var stuck := 0; var grabbed := 0
 	for e in edges:
 		var dir: Vector2 = e["dir"]; var top: float = e["top"]
-		_reset(Vector3(e["ex"] + dir.x * (h.r + 0.6), top - 3.6, e["ez"] + dir.y * (h.r + 0.6)), Vector3(0, -4.0, 0))
+		_reset(Vector3(e["ex"] + dir.x * (h.r + 0.6), top - (Hunter.MANTLE_REACH_ABYSS + 0.1), e["ez"] + dir.y * (h.r + 0.6)), Vector3(0, -4.0, 0))
 		h.last_gy = top
 		var r := _run(6.0, func(_t): h.inp["move"] = -dir)
 		dn += 1
@@ -162,8 +165,8 @@ func run(main: Node) -> void:
 		worst_drop = maxf(worst_drop, _ref(Vector3(e["ex"], top, e["ez"])) - float(r["low"]))
 		worst_t = maxf(worst_t, float(r["t"]))
 		stuck = maxi(stuck, int(r["stuck"]))
-	ok(grabbed == 0, "3.6m below the lip: no ledge grab (%d grabbed)" % grabbed)
-	ok(dgood == dn and worst_drop < 7.0 and worst_t < 1.5, "below the grab reach the abyss takes you: %d of %d, deepest %.1fm below the lowest lip around, within %.2fs" % [dgood, dn, worst_drop, worst_t])
+	ok(grabbed == 0, "%.1fm below the lip: no ledge grab (%d grabbed)" % [Hunter.MANTLE_REACH_ABYSS + 0.1, grabbed])
+	ok(dgood == dn and worst_drop < KILL_DEPTH + 1.0 and worst_t < 2.4, "below the grab reach the abyss takes you: %d of %d, deepest %.1fm below the lowest lip around, within %.2fs" % [dgood, dn, worst_drop, worst_t])
 	ok(stuck < 6, "sliding down the face never snags (longest hang %d frames)" % stuck)
 	# a plain walk off the edge: how far below the lip before the abyss
 	var e0: Dictionary = edges[0]
@@ -174,7 +177,7 @@ func run(main: Node) -> void:
 	var r0 := _run(8.0, func(t):
 		h.inp["move"] = d0 if t < 0.3 else Vector2.ZERO
 		h.inp["dash"] = t < Match.DT * 1.5)
-	ok(r0["fell"] and _ref(Vector3(e0["ex"], e0["top"], e0["ez"])) - float(r0["low"]) < 7.0, "dashing off an edge: lost %.1fm below the lip (%.1fm below the lowest lip around) after %.2fs" % [float(e0["top"]) - float(r0["low"]), _ref(Vector3(e0["ex"], e0["top"], e0["ez"])) - float(r0["low"]), r0["t"]])
+	ok(r0["fell"] and _ref(Vector3(e0["ex"], e0["top"], e0["ez"])) - float(r0["low"]) < KILL_DEPTH + 1.0, "dashing off an edge: lost %.1fm below the lip (%.1fm below the lowest lip around) after %.2fs" % [float(e0["top"]) - float(r0["low"]), _ref(Vector3(e0["ex"], e0["top"], e0["ez"])) - float(r0["low"]), r0["t"]])
 	# ---------------------------------------------------------------- 4. dash, glide, knockback from below
 	var ins := 0.0; var cases := 0
 	for e in edges:
@@ -237,13 +240,13 @@ func run(main: Node) -> void:
 		var dir: Vector2 = e["dir"]; var top: float = e["top"]
 		b.out = false; b.gone = false; b.downed = false; b.hp = b.max_hp
 		b.teleport(Vector3(e["ex"] + dir.x * 0.9, top - 0.4, e["ez"] + dir.y * 0.9))
-		b.grounded = false; b.vel = Vector3(dir.x * 3.0, -2.0, dir.y * 3.0); b.pad = {}; b.grap_cd = 0.0
+		b.grounded = false; b.vel = Vector3(dir.x * 3.0, -2.0, dir.y * 3.0); b.pad = {}; b.lfloat = {}; b.grap_cd = 0.0
 		b.last_gy = top; b.kb_t = m.time - 0.35; b.gliding = false
 		var t := 0.0; var deep := 0.0
 		while t < 3.0 and not b.out:
 			m.step(Match.DT); t += Match.DT
 			deep = maxf(deep, _inside(b))
-			if b.grounded and b.pad.is_empty() and absf(b.pos.y - top) < 0.7 and t > 0.1: break
+			if b.grounded and b.pad.is_empty() and not b.mantling() and absf(b.pos.y - top) < 0.7 and t > 0.1: break
 		bn += 1
 		if not b.out and b.grounded and deep < 0.05: bgood += 1
 	ok(bgood == bn, "bots knocked off beside a ledge climb back: %d of %d" % [bgood, bn])
@@ -311,13 +314,13 @@ func _home(main: Node) -> void:
 					_press(-dir)
 					var before: Vector3 = hm.ppos
 					hm._move_player(DT)
-					if not hm.climb.is_empty(): did_climb = true
+					if not hm.climb.is_empty() or not hm.lfl.is_empty(): did_climb = true
 					if hm.ppos.distance_to(hm.safe_at) < 0.01 and before.distance_to(hm.safe_at) > 0.5:
 						back = true; break
 					low = minf(low, hm.py)
-					if not hm.world.is_void(hm.ppos.x, hm.ppos.z) and hm.world.ground_at(hm.ppos.x, hm.ppos.z) > hm.py + 0.3 and hm.climb.is_empty():
+					if not hm.world.is_void(hm.ppos.x, hm.ppos.z) and hm.world.ground_at(hm.ppos.x, hm.ppos.z) > hm.py + 0.3 and hm.climb.is_empty() and hm.lfl.is_empty():
 						inside = maxf(inside, hm.world.ground_at(hm.ppos.x, hm.ppos.z) - hm.py)
-					if did_climb and hm.climb.is_empty(): break
+					if did_climb and hm.climb.is_empty() and hm.lfl.is_empty() and hm.pvy == 0.0 and absf(hm.py - top) < 0.05: break
 				_press(Vector2.ZERO)
 				if depth < 3.6:
 					if did_climb and absf(hm.py - top) < 0.05 and not hm.world.is_void(hm.ppos.x, hm.ppos.z): climbed += 1
