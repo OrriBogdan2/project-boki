@@ -3073,6 +3073,7 @@ func _update_shots(dt: float) -> void:
 				sx["hitset"] = {}
 				s["life"] = float(s["life0"]) * 1.6
 				sfx("whoosh", p, -6.0, 1.5)
+				if String(sx.get("src", "")) == "abil": sfx("ab_whirr", p, -8.0, 1.15)     # (on its way back)
 				continue
 		if s["life"] <= 0.0:
 			_shot_end(s, p, null, "expire")
@@ -3160,7 +3161,9 @@ func _shot_end(s: Dictionary, at: Vector3, e: Ent, why := "") -> void:
 			Effects.run(fxx["fx_end"], s["by"], c2)
 	if s["node"]:
 		s["node"].visible = false
-	if e == null and String(fxx.get("src", "")) == "abil" and not fxx.get("cos", false):
+	if why == "caught" and String(fxx.get("src", "")) == "abil":
+		AbilityFx.caught(self, s["by"], s["col"])
+	elif e == null and String(fxx.get("src", "")) == "abil" and not fxx.get("cos", false):
 		AbilityFx.fizzle(self, at, s["col"])      # a right click that missed still ends visibly
 	if fxx.has("hitset"):
 		if e == null: fx.burst(at, s["col"], 5, 2.0, 0.25, 6.0, 0.6)

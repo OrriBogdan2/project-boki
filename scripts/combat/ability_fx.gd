@@ -248,3 +248,12 @@ static func fizzle(m: Match, at: Vector3, col: Color) -> void:
 	m.fx.flash(at, col.lerp(Color.WHITE, 0.4), 0.45, 0.08)
 	m.fx.spark(at, Vector3.UP, col.lerp(Color.WHITE, 0.3), 6, 4.0, 160.0, 0.18, 6.0, 0.8)
 	m.sfx("ab_shield_hit", at, -14.0, 0.7)
+
+## A boomerang caught back in the hand: a bright snap and a little ring.
+static func caught(m: Match, by: Node, col: Color) -> void:
+	if m == null or m.fx == null or not (by is Ent) or _far(m, (by as Ent).pos):
+		return
+	var at := (by as Ent).pos + Vector3(0, 1.0, 0)
+	m.fx.flash(at, col.lerp(Color.WHITE, 0.5), 0.5, 0.08)
+	m.fx.ring((by as Ent).pos, 1.0, Color(col, 0.85), 0.18)
+	m.sfx("ab_guard", at, -10.0 if by == m.player else -16.0, 1.3)

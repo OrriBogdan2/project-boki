@@ -52,7 +52,9 @@ game also falls back to them for any model that fails to load.
 ## Audio
 
 Every sound effect is synthesized from scratch by `tools/gen_sfx.py` and `tools/gen_train_sfx.py`
-(written to `audio/*.wav`), and glider skins and the home whistle are made in code by
+(written to `audio/*.wav`; the combat layer, ability casts and impacts, and footsteps come from
+`tools/sfx_combat.py`, which `gen_sfx.py` runs last), and glider skins and the home whistle are made in code by
 `scripts/core/synth.gd`. Music and ambience are composed procedurally by `tools/gen_music.py` /
-`tools/compose.py`. No recorded or downloaded audio is used. `tools/sfx_stats.py` measures the
+`tools/compose.py` (the expedition's layered stems) and `tools/gen_ambience.py` (wind over the
+abyss, ruins). No recorded or downloaded audio is used. `tools/sfx_stats.py` measures the
 sound effects (peak, loudness, attack, onset, spectral centroid).
