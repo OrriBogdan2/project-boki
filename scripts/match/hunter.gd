@@ -290,6 +290,7 @@ func init_hunter(match_node: Node, id: String, team_id: int, class_id: String, n
 ## right click and the class dodge.
 func set_arch(a: String) -> void:
 	arch = "" if a == "" or a == "none" else Arch.fix(a, cls)
+	if ak: ak.teardown()
 	ak = ArchKit.make(self, arch) if arch != "" else null
 	if arch != "" and not Arch.weapon_ok(arch, wid):
 		equip(Arch.default_weapon(arch), wrar)
@@ -309,6 +310,7 @@ func reclass(c: String, a: String, w := "") -> void:
 	dodge_def = Content.class_dodge(cls)
 	r = float(cdat.get("hit_r", 0.38 * float(cdat["scale"])))
 	arch = Arch.fix(a, cls)
+	if ak: ak.teardown()
 	ak = ArchKit.make(self, arch)
 	wid = Arch.weapon_for(arch, cls, w)
 	set_model(Models.hunter(cls, Data.TEAM_COLORS[team % Data.TEAM_COLORS.size()], wid, "", Save.d.get("look", {}) if ctrl == "local" else bot_look, arch))
@@ -340,6 +342,7 @@ func _chase_mod(mv: Vector2) -> float:
 	# the archetype kit's own pace (a Lance charging, Avalanche, a raised tower shield) and short
 	# move-speed boosts (a Sigil): kept here so the movement code itself stays untouched
 	k *= (ak.pace() if ak else 1.0) * (1.0 + buff("move_speed"))
+	if Hex.active(self): k *= Hex.SPEED_K      # a hexed critter scurries
 	if chase and not chase.out and not chase.extracted and mv.length() > 0.1 and mv.normalized().dot(dir_to(chase)) > 0.5:
 		k *= 1.18
 	return k
@@ -1073,7 +1076,7 @@ const DASH_BUFFER := 0.18
 const DASH_JUMP_CARRY := 0.55
 
 func do_dash() -> void:
-	if downed or stun_t > 0.0 or root_t > 0.0 or out:
+	if downed or stun_t > 0.0 or root_t > 0.0 or out or Hex.active(self):
 		return
 	if roll_t > 0.0 and move_kind == "rush":
 		roll_t = 0.0            # a glove/ability rush cancels straight into the dash
@@ -1298,6 +1301,8 @@ func _shove_along() -> void:
 		m.shake(0.25, f.pos)
 
 func can_fire() -> bool:
+	if Hex.active(self):
+		return false
 	if ak and not ak.can_shoot():
 		return false
 	if ak and roll_t > 0.0 and ak.fires_in_dash() and not (drink_t > 0.0 or reload_t > 0.0 or downed or stun_t > 0.0):
@@ -1325,6 +1330,8 @@ var strike_at_end := {}        # a charged lunge's hit, which lands where the lu
 ## Called every frame with the attack key's state; decides what that means for this weapon.
 func trigger(dt: float) -> void:
 	var held: bool = inp["fire"]
+	if ak and ak.lmb_override(held, dt):
+		return          # the archetype runs this weapon's attack itself (the Bulwark's mace: throw / smash)
 	if wpn.get("melee", false):
 		swing_buf = maxf(0.0, swing_buf - dt)
 		if swing_buf > 0.0 and fire_cd <= 0.0 and can_fire():
@@ -1394,6 +1401,8 @@ func _loose() -> void:
 	for stg in stages:
 		if t >= float(stg[0]):
 			dmg = float(stg[1]); rng = float(stg[2]); spd = float(stg[3])
+	if ak and ak.has_method("draw_bonus") and t < 5.0:
+		dmg *= float(ak.draw_bonus(t))       # let go right at full draw (the perfect window)
 	var keep := wpn
 	wpn = wpn.duplicate()
 	var rk: float = float(Data.RARITY[clampi(wrar, 0, Data.RARITY.size() - 1)]["dmg"])
@@ -1723,6 +1732,10 @@ func rank_text(slot: String) -> String:
 	var per := "+30% duration, +15% damage" if s == "ult" else ("15% faster recharge" if s == "dash" else "+15% damage, 10% shorter cooldown, longer/bigger effects")
 	if lv <= 0:
 		return "Locked  ·  a skill point unlocks it"
+	if ak and lv < mx:
+		# an archetype slot: the next rank's concrete change (rank 2 when you're rank 1)
+		var nr := Arch.next_ranks(arch, s, lv)
+		if not nr.is_empty(): per = String(nr[0][1])
 	return "Rank %d / %d%s" % [lv, mx, ("  ·  next rank: " + per) if lv < mx else "  ·  max rank"]
 
 ## Cooldown multiplier for a slot's rank: 10% shorter per rank past the first.
@@ -2005,6 +2018,7 @@ func launch_to(target: Vector3, t: float) -> void:
 
 # ------------------------------------------------------------------ simulation
 func sim(dt: float) -> void:
+	Hex.tick(self, dt)
 	prev = pos
 	if out or extracted:
 		return
@@ -2115,7 +2129,9 @@ func sim(dt: float) -> void:
 	for gi in 2:
 		gear_cd[gi] = maxf(0.0, float(gear_cd[gi]) - dt)
 		if inp.get("gear%d" % (gi + 1), false):
-			if (gear[gi] as Dictionary).is_empty() or float(gear_cd[gi]) > 0.0 or not Gear.active(String(gear[gi].get("id", ""))):
+			if Hex.active(self):
+				_ab_feedback("gear%d" % gi, "deny")
+			elif (gear[gi] as Dictionary).is_empty() or float(gear_cd[gi]) > 0.0 or not Gear.active(String(gear[gi].get("id", ""))):
 				_ab_feedback("gear%d" % gi, "deny")
 			else:
 				m.use_gear(self, gi)
@@ -2125,7 +2141,7 @@ func sim(dt: float) -> void:
 		ak.tick(dt)
 		if inp["sig"]: ak.use_e()
 		if inp["sec"]: ak.press_rmb()
-		if inp.get("kin_ab", false): use_kin_hop()
+		if inp.get("kin_ab", false) and not Hex.active(self): use_kin_hop()
 	elif inp["sig"]: use_kin_ability("k1")
 	if inp.get("kin_ab", false) and ak == null: use_kin_ability("k1")
 	# (a kin's second ability and mid-fight kin swaps are retired from the kit; bots don't press them)
@@ -3373,11 +3389,12 @@ func render(delta: float, alpha: float) -> void:
 			see = lp.flat_dist(self) < 2.2 and int(m.time * 10.0) % 3 == 0
 		else:
 			see = int(m.time * 14.0) % 3 != 0
-	model.visible = see
+	model.visible = see and not Hex.active(self)       # hexed: the critter stands in for the model
 	var ring := model.get_node("TeamRing") as MeshInstance3D
 	ring.visible = not downed
 	_render_balloon(delta)
 	Oomph.render_hit(self, delta)
+	Hex.tick(self, delta)
 	if (drink_t > 0.0 or kit_t > 0.0) and visible and see:
 		vuln_fx_t -= delta
 		if vuln_fx_t <= 0.0:

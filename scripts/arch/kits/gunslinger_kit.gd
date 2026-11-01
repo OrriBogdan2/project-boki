@@ -2,18 +2,30 @@ class_name GunslingerKit
 extends ArchKit
 ## Gunslinger (medium): Slide Reload, Six Chambers, Trick Shot (Rail Charge, Recoil Shot, doubled in
 ## Quickdraw, Called Shot at 6), Quickdraw, Last Round. docs/ARCHETYPES.md §6.4.
+##
+## The loop (kits4): weapon hits and tap rolls load six Chambers (a gold cylinder over the hat fills
+## pip by pip) -> at 6 the gun glows gold, the cylinder spins and clicks: Called Shot armed -> the next
+## Trick Shot (or Rail) is a Called Shot: a stunning crit with T4 hitstop and its own sound, and the
+## cylinder spins a fresh magazine in, so the stun is followed by a full string of fire.
 
 var load_at := -9.0            # last chamber loaded (one per 0.25s)
 var slide := {}                # {t, held, refund} while a Slide Reload runs
 var pd_t := 0.0                # Quickdraw: the next slide's perfect-dodge window is doubled
 var rail_tele: Node3D = null
 var lock := {}                 # Last Round: {t, locks: {id: [ent, time]}}
+var gun_glow: Node3D = null    # the gold glow at the gun while a Called Shot is armed
+var called_shots := 0          # Called Shots that landed (tests, demo)
+var called_cast := -1          # the cast id whose first hit pays out (one payoff per Called Shot)
+var cast_n := 0
 
 func full_ready() -> bool:
 	return res >= res_max() - 0.01
 
 func res_text() -> String:
 	return "%d/6" % int(res)
+
+func ready_label() -> String:
+	return "CALLED SHOT READY" if full_ready() else ""
 
 func load_chambers(n: int, force := false) -> void:
 	if not force and m.time - load_at < float(res_def().get("gap", 0.25)):
@@ -25,6 +37,7 @@ func load_chambers(n: int, force := false) -> void:
 	if res >= res_max() and was < res_max():
 		m.sfx("reload", h.pos, -2.0, 1.9)      # the cylinder-spin click
 		m.fx.ring(h.pos, 1.2, res_col(), 0.3)
+		armed_fx("CALLED SHOT READY", "sec")
 
 ## Perfect-dodge window multiplier (Hunter._mitigate reads it).
 func pd_k() -> float:
@@ -46,6 +59,34 @@ func _tick(dt: float) -> void:
 		m.fx.telegraph_progress(rail_tele, k)
 	if not lock.is_empty():
 		_tick_lock(dt)
+	self_pips(6, int(floor(res + 0.01)), full_ready(), dt)
+	_tick_gun_glow()
+	net_pulse(dt, full_ready())
+
+## The gun glows gold while a Called Shot is armed: a hot point and a light at the muzzle.
+func _tick_gun_glow() -> void:
+	if gun_glow == null or not is_instance_valid(gun_glow):
+		gun_glow = own_node()
+		var b := MeshInstance3D.new()
+		b.name = "Ball"
+		b.mesh = Models.sphere(0.17, 10)
+		b.material_override = Models.glow_mat(Color(res_col(), 1.0))
+		b.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		gun_glow.add_child(b)
+		var lt := OmniLight3D.new()
+		lt.name = "Light"
+		lt.light_color = res_col()
+		lt.omni_range = 2.8
+		gun_glow.add_child(lt)
+	var on := full_ready() and tells_visible()
+	gun_glow.visible = on
+	if not on:
+		return
+	var d := h.aim_dir()
+	gun_glow.global_position = h.position + Vector3(d.x * 0.75, 1.1 * float(h.cdat.get("scale", 1.0)), d.y * 0.75)
+	var pk := 0.5 + 0.5 * sin(m.time * 11.0)
+	(gun_glow.get_node("Ball") as MeshInstance3D).scale = Vector3.ONE * (1.0 + 0.4 * pk)
+	(gun_glow.get_node("Light") as OmniLight3D).light_energy = 1.4 + pk
 
 func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 	if t == null or t.team == h.team:
@@ -114,6 +155,10 @@ func rmb_hold_tick(t: float) -> void:
 		rail_tele = tele_lane(h.pos, h.aim_dir(), float(rmb_def()["rail"]["range"][1]), 0.35, Color("ffd23f"), 0.0)
 		m.sfx("rail", h.pos, -14.0, 0.6)
 
+## The Rail is the charge: full at the hold threshold plus its 1s.
+func rmb_charge_full() -> float:
+	return float(rmb_def()["hold"]) + float(rmb_def()["rail"]["time"])
+
 func rmb_auto_t() -> float:
 	return float(rmb_def()["rail"]["time"]) + float(rmb_def()["hold"]) + 0.4
 
@@ -124,17 +169,23 @@ func fire_rmb(c: Dictionary) -> void:
 	if not spend_rmb(): return
 	var sd := rmb_def()
 	var called: bool = c.get("full", false)
+	cast_n += 1
 	if called:
 		res = 0.0
-		m.fx.word(h.pos + Vector3(0, 2.3, 0), "CALLED SHOT", res_col(), true)
-		m.sfx("crit", h.pos, -2.0, 0.8)
-	var ck := (1.0 + float(res_def()["called_k"])) * 1.5 if called else 1.0
+		called_cast = cast_n
+		# the call: a gold muzzle flare and the hammer's crack (the payoff lands on the hit)
+		var d0 := h.aim_dir()
+		m.fx.flash(h.pos + Vector3(d0.x * 0.8, 1.1, d0.y * 0.8), res_col(), 1.0, 0.08)
+		m.fx.burst(h.pos + Vector3(d0.x * 0.8, 1.1, d0.y * 0.8), res_col(), 14, 8.0, 0.3, 0.0, 1.0, Vector3(d0.x, 0.1, d0.y), 30.0)
+		m.sfx("crit", h.pos, -4.0, 0.7)
+		if h.is_local(): Oomph.punch_dir(m, -d0, 0.2)
+	var ck := 1.0 + float(res_def()["called_k"]) if called else 1.0
 	if c.get("air", false):
 		var rc: Dictionary = sd["recoil"]
 		var d := h.aim_dir()
 		var stg := stage("rmb", {"delivery": {"type": "projectile", "speed": 50.0, "range": 6.0, "size": 0.16},
 			"effects": [{"type": "damage", "amount": float(rc["dmg"]) * ck}, {"type": "push", "strength": float(rc["push"]), "from": "caster"}]})
-		run(stg, cx("rmb", "recoil_shot", aim()))
+		run(stg, cx("rmb", "recoil_shot", aim(), _called_cx(called)))
 		h.gliding = false
 		h.vel = Vector3(-d.x * float(rc["kick"]), float(rc["lift"]), -d.y * float(rc["kick"]))
 		h.fly_t = 0.3
@@ -143,12 +194,14 @@ func fire_rmb(c: Dictionary) -> void:
 	if c.get("hold", false):
 		var rl: Dictionary = sd["rail"]
 		var k := clampf((float(c["t"]) - float(sd["hold"])) / float(rl["time"]), 0.15, 1.0)
-		var effs: Array = [{"type": "damage", "amount": lerpf(float(rl["dmg"][0]), float(rl["dmg"][1]), k) * ck}]
+		# the Rail takes half the Called bonus (it's already the big, telegraphed shot)
+		var rk := 1.0 + float(res_def()["called_k"]) * 0.5 if called else 1.0
+		var effs: Array = [{"type": "damage", "amount": lerpf(float(rl["dmg"][0]), float(rl["dmg"][1]), k) * rk}]
 		if k >= 0.99: effs.append({"type": "stun", "duration": float(rl["stun"])})
 		elif called: effs.append({"type": "stun", "duration": float(res_def()["called_stun"])})
 		var stg := stage("rmb", {"delivery": {"type": "projectile", "speed": 80.0, "range": lerpf(float(rl["range"][0]), float(rl["range"][1]), k), "size": 0.16},
 			"effects": effs, "modifiers": [{"type": "pierce", "count": 3}]})
-		run(stg, cx("rmb", "rail_charge", aim()))
+		run(stg, cx("rmb", "rail_charge", aim(), _called_cx(called)))
 		if k >= 0.99: m.fx.flash(h.pos + Vector3(0, 1.0, 0), Color("ffd23f"), 0.6, 0.08)
 		m.sfx("rail", h.pos, -2.0, 0.9)
 		return
@@ -165,13 +218,41 @@ func _trick(k: float, called: bool, _vis: float) -> void:
 	var stg := stage("rmb", {"delivery": {"type": "projectile", "speed": float(td["speed"]), "range": float(td["range"]), "size": 0.14},
 		"effects": effs, "modifiers": [{"type": "bounce", "count": 1, "range": float(td["foe_jump"]), "falloff": 0.0}]})
 	var walls := int(td["walls"]) + (1 if rank("sec") >= 3 else 0)
+	var ex := _called_cx(called)
 	if burst:
 		# the Burst Rifle's tap: 3 small ricochets
+		var e1 := ex.duplicate(); e1["wall_bounce"] = 1
 		for i in 3:
-			m.later(0.07 * i, func(): if is_instance_valid(h) and not h.downed: run(stg, cx("rmb", "trick_shot", aim(), {"wall_bounce": 1})))
+			m.later(0.07 * i, func(): if is_instance_valid(h) and not h.downed: run(stg, cx("rmb", "trick_shot", aim(), e1)))
 	else:
-		run(stg, cx("rmb", "trick_shot", aim(), {"wall_bounce": walls}))
+		ex["wall_bounce"] = walls
+		run(stg, cx("rmb", "trick_shot", aim(), ex))
+	# a revolver's crack, the hammer's click and the ricochet's whine: unlike any bow or bolt
 	m.sfx("rifle", h.pos, -2.0, 1.25)
+	m.sfx("click", h.pos, -6.0, 2.3)
+	m.later(0.09, func(): if is_instance_valid(h): m.sfx("ab_whirr", h.pos, -9.0, 2.4))
+
+## A Called Shot's hits carry the payoff (T4 hitstop, a crit); the first one also pays out the moment.
+func _called_cx(called: bool) -> Dictionary:
+	if not called:
+		return {}
+	var id_ := cast_n
+	return {"hit_extra": {"payoff": true, "crit": true}, "on_foe": func(f: Ent, _c: Dictionary): _called_hit(f, id_)}
+
+## The Called Shot lands: "CALLED SHOT", the round's line in gold, pay_called, T4 shake, and the
+## cylinder spins a full magazine in (the stun is your window to unload).
+func _called_hit(f: Ent, id_: int) -> void:
+	if id_ != called_cast or not is_instance_valid(f):
+		return
+	called_cast = -1
+	called_shots += 1
+	var gold := res_col()
+	m.fx.bolt(h.pos + Vector3(0, 1.1, 0), f.pos + Vector3(0, 1.0, 0), gold)
+	payoff_fx(f.pos, "CALLED SHOT", gold, "pay_called", h.dir_to(f), f)
+	net_bolt(h.pos + Vector3(0, 1.1, 0), f.pos + Vector3(0, 1.0, 0), gold)
+	if not h.downed and h.wpn.has("mag"):
+		h.ammo = int(h.wpn["mag"]); h.reload_t = 0.0
+		m.later(0.3, func(): if is_instance_valid(h): m.sfx("reload", h.pos, -6.0, 1.5))
 
 # ------------------------------------------------------------------ E: Quickdraw
 func in_e() -> bool:
@@ -276,7 +357,12 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 		h.inp["ult"] = true; return
 	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and dist < 9.0 and randf() < 0.3:
 		h.inp["sig"] = true; return
-	if int(h.slot_lv["sec"]) > 0 and rmb_ready() and los and dist < 15.0:
+	if int(h.slot_lv["sec"]) > 0 and rmb_ready() and los and full_ready() and dist < 9.0:
+		# a Called Shot: a quick tap while they're in reach
+		h.inp["aim"] = tgt.pos + Vector3(0, 0.9, 0)
+		h.inp["sec"] = true
+		return
+	if int(h.slot_lv["sec"]) > 0 and rmb_ready() and los and dist < 15.0 and (res < 4.0 or dist > 9.0):
 		h.inp["aim"] = tgt.pos + Vector3(0, 0.9, 0)
 		h.inp["sec"] = true
 		if dist > 8.0 or randf() < 0.25: bot_hold["rmb"] = float(rmb_def()["hold"]) + float(rmb_def()["rail"]["time"])
