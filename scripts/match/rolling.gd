@@ -702,6 +702,16 @@ func demo(mode: String) -> void:
 			# stand just under where they are now, so the camera has them gliding in overhead
 			var under := Vector3(ld.pos.x, 0, ld.pos.z)
 			P.teleport(m.world.free_spot_near(under + Vector3(2.5, 0, 3.5), [under], 1.5, 0.45, 12.0))
+			# a calm frame: your squad up and beside you, nobody else's fight on screen
+			for h in m.hunters:
+				if h != P and h.team == P.team:
+					h.downed = false; h.hp = h.max_hp
+					h.teleport(m.world.free_spot_near(P.pos + Vector3(-1.5, 0, 1.0), [P.pos], 0.8, 0.45, 6.0))
+					h.ctrl = "idle"
+				elif not h.riding and not h.dropping and not h.out and h.flat_dist(P) < 26.0:
+					h.teleport(m.world.free_spot_near(h.pos + (h.pos - P.pos).normalized() * 30.0, [], 1.0, 0.45, 20.0))
+			if m.hud:
+				m.hud.toasts.clear()
 	if _demo.has("armed"):
 		_shoot()
 	if mode == "map" and _demo.has("wave") and _demo.has("bounty"):
