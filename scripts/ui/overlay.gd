@@ -227,7 +227,7 @@ func open_settings() -> void:
 
 func _show_settings() -> void:
 	var v := _page("settings", "Settings", 720, true)
-	UI.shell_tabs(v, ["Audio", "Video", "Controls", "Gameplay", "Accessibility"], tab, func(t):
+	UI.shell_tabs(v, ["Audio", "Video", "Controls", "Gameplay", "Accessibility", "Demo"], tab, func(t):
 		tab = t; UI._page_of.erase("Settings"); _show_settings())
 	match tab:
 		"Audio":
@@ -291,15 +291,9 @@ func _show_settings() -> void:
 			_toggle(v, "Tap to crouch", "crouch_toggle", "Instead of holding the crouch key")
 			_toggle(v, "Damage numbers", "damage_numbers")
 			_toggle(v, "Tips during matches", "tips")
-			_group(v, "Recording")
-			var rec_row := _row(v, "Recording mode", "%s cycles it, Shift+%s hides the HUD, %s orbits the camera with the HUD hidden" % [Settings.key_cap("record"), Settings.key_cap("record"), Settings.key_cap("record_orbit")])
-			var rec_ob := OptionButton.new()
-			for i in Record.NAMES.size(): rec_ob.add_item(String(Record.NAMES[i]), i)
-			rec_ob.selected = Record.level
-			rec_ob.item_selected.connect(func(i): Record.set_level(i))
-			rec_row.add_child(rec_ob)
 			_group(v, "Kin")
 			_toggle(v, "Boki also use your E ability on their own", "kin_auto", "They can spend cooldowns you wanted (their own auto ability is always on)")
+			_choice(v, "Boki chattiness", "kin_chatter", [["quiet", "Quiet (only danger and your health)"], ["normal", "Normal"], ["chatty", "Chatty (points out everything)"]])
 			if admin_allowed():
 				_group(v, "Admin")
 				_choice(v, "Bot difficulty", "bot_diff", [["auto", "Auto (by tier)"]] + Data.BOT_ORDER.map(func(k): return [k, Data.BOT_DIFF[k]["name"]]))
@@ -310,6 +304,24 @@ func _show_settings() -> void:
 			_group(v, "Comfort")
 			_slider(v, "Screen shake", "shake", 0.0, 1.5)
 			_toggle(v, "Fewer flashes", "reduce_flashes")
+		"Demo":
+			# for filming: kept between launches, applied when the next match starts (offline matches)
+			_group(v, "Recording")
+			var rec_row := _row(v, "Recording mode", "Clean HUD hides tips and debug text and smooths the camera. %s cycles it in a match, %s orbits the camera with No HUD" % [Settings.key_cap("record"), Settings.key_cap("record_orbit")])
+			var rec_ob := OptionButton.new()
+			rec_ob.custom_minimum_size.x = 280
+			rec_ob.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+			for i in Record.NAMES.size(): rec_ob.add_item(String(Record.NAMES[i]), i)
+			rec_ob.selected = Record.level
+			rec_ob.item_selected.connect(func(i):
+				Record.set_level(i)
+				Settings.set_v("rec_level", i))
+			rec_row.add_child(rec_ob)
+			_group(v, "Next match")
+			_choice(v, "Weather", "demo_weather", [["random", "Random"], ["clear", "Always clear"]])
+			_choice(v, "Blight", "demo_blight", [[true, "On"], [false, "Off"]])
+			_choice(v, "Bots leave you be after landing", "demo_fresh", [["normal", "Normal (%d s)" % int(Bot.FRESH_T)], ["long", "Longer (%d s)" % int(Settings.DEMO_FRESH_T)]])
+			_note(v, "These apply from the next match you start, offline only. Online matches play the host's rules.")
 	UI.footer_left(v).add_child(UI.ghost("Reset to defaults", func():
 		UI.confirm(root, "Reset every setting?", "Volume, video, gameplay and every key binding go back to how the game ships.", "Reset", func():
 			Settings.reset_all()

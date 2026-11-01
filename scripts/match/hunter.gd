@@ -353,7 +353,7 @@ func accent() -> Color:
 
 func max_dashes() -> float:
 	var base := float(dodge_def.charges) if dodge_def else float(cdat["dashes"])
-	return base + float(int(owner_stat("dodge_charges"))) + float(perk_n("secondwind"))
+	return base + float(int(owner_stat("dodge_charges"))) + float(perk_n("secondwind")) + (ak.extra_dashes() if ak else 0.0)
 
 func dash_regen() -> float:
 	# each rank past the first recharges dashes faster; a kin's dodge_regen too (1 = instantly)
@@ -755,7 +755,7 @@ func _on_zero(by: Ent, opts: Dictionary) -> void:
 
 # ------------------------------------------------------------------ actions
 func do_jump() -> void:
-	if downed or stun_t > 0.0 or grap.size() > 0 or out:
+	if downed or stun_t > 0.0 or grap.size() > 0 or out or KitStatus.grounded(self):
 		return
 	if not lfloat.is_empty():
 		_ledge_fling()
@@ -892,7 +892,7 @@ static func abyss_lift_vy(vy: float, depth: float, dt: float) -> float:
 
 func can_glide() -> bool:
 	return not grounded and roll_t <= 0.0 and fly_t <= 0.0 and glide_cd <= 0.0 and not downed and stun_t <= 0.0 \
-		and m.time - kb_t > 0.4 and glide_fuel > FEATHER_MIN and not dropping and charge.is_empty()
+		and m.time - kb_t > 0.4 and glide_fuel > FEATHER_MIN and not dropping and charge.is_empty() and not KitStatus.grounded(self)
 
 func _open_glider() -> void:
 	gliding = true
@@ -1077,6 +1077,9 @@ const DASH_JUMP_CARRY := 0.55
 
 func do_dash() -> void:
 	if downed or stun_t > 0.0 or root_t > 0.0 or out or Hex.active(self):
+		return
+	if KitStatus.grounded(self):
+		_ab_feedback("dash", "deny")      # Grounded (a Thief's Bola): no dash, jump or glide
 		return
 	if roll_t > 0.0 and move_kind == "rush":
 		roll_t = 0.0            # a glove/ability rush cancels straight into the dash
@@ -3218,6 +3221,9 @@ func _anim_state(stretch: float) -> void:
 	s["charge"] = clampf((mel_hold - 0.15) / maxf(0.1, float(wpn.get("charge_time", 1.0))), 0.0, 1.0) if mel_hold > 0.15 else 0.0
 	s["cast"] = m.time - cast_at
 	s["cast_slot"] = cast_slot
+	if ak and ak.anim_id != "":
+		s["kmove"] = ak.anim_id                # the kit's own full-body move (HunterAnim.KMOVES)
+		s["kmove_t"] = m.time - ak.anim_at
 	s["hit_t"] = m.time - hurt_at
 	s["hit_k"] = hit_k
 	if last_hit_by and is_instance_valid(last_hit_by):

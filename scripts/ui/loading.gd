@@ -90,7 +90,8 @@ func setup(opts: Dictionary) -> void:
 		if opts.has("net"): mode_line = "Online  •  " + mode_line
 		if opts.get("rolling", false): mode_line = "%s  •  rolling 30-minute session  •  join in progress" % ["Solo", "Duos", "Trios"][clampi(squad - 1, 0, 2)]
 		raid = RaidLook.pick(opts, int(opts.get("seed", 0)))
-	tip = TIPS[randi() % TIPS.size()]
+	var tips: Array = TIPS if opts.get("blight", true) else Array(TIPS).filter(func(x): return not String(x).contains("Blight"))
+	tip = tips[randi() % tips.size()]
 	var r := RandomNumberGenerator.new(); r.seed = hash(title) + tier
 	for i in 9:
 		islands.append([float(i) / 9.0 + r.randf_range(-0.04, 0.04), r.randf_range(0.14, 0.62), r.randf_range(0.7, 1.3), r.randf_range(0.2, 1.0), r.randi()])

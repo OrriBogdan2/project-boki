@@ -212,6 +212,10 @@ func _draw_all() -> void:
 	# picture and closes a vignette in; here the rings, the heartbeat, a low rumble and a pulsing
 	# warning near the end
 	var want_a: float = ABYSS_FX.danger(p) if p == m.player else 0.0
+	if want_a <= 0.02:
+		abyss_cued = false
+	if want_a <= 0.5:
+		abyss_warned = false
 	abyss_a = lerpf(abyss_a, want_a, 1.0 - exp(-10.0 * get_process_delta_time()))
 	if abyss_fx:
 		abyss_fx.show_danger(abyss_a, pow(0.5 + 0.5 * sin(abyss_pulse * TAU), 3.0) if abyss_a > 0.005 else 0.0)
@@ -227,11 +231,18 @@ func _draw_all() -> void:
 			var a := ek * (0.22 - float(i) * 0.035) * (0.6 + 0.4 * pulse)
 			if a <= 0.0: break
 			c.draw_rect(Rect2(Vector2(inset, inset), sz - Vector2(inset, inset) * 2.0), Color(0.45, 0.02, 0.18, a), false, minf(sz.x, sz.y) * 0.035)
-		if abyss_a > 0.15 and p == m.player:
+		# (owner) an audio cue: a falling whoosh as the tint starts, a warning when it turns deep red
+		if p == m.player and abyss_a > 0.08 and not abyss_cued:
+			abyss_cued = true
+			Sfx.play("whoosh", null, -6.0, 0.0, 0.55)
+		if p == m.player and abyss_a > 0.75 and not abyss_warned:
+			abyss_warned = true
+			Sfx.play("warn", null, -4.0, 0.0, 0.8)
+		if abyss_a > 0.1 and p == m.player:
 			var beat := int(floor(abyss_pulse))
 			if beat != abyss_beat:
 				abyss_beat = beat
-				Sfx.play("thump", null, -16.0 + abyss_a * 12.0, 0.0, 0.7 + red * 0.15)
+				Sfx.play("thump", null, -12.0 + abyss_a * 14.0, 0.0, 0.7 + red * 0.15)
 				if red > 0.3 and beat % 2 == 0:
 					Sfx.play("boom", null, -24.0 + red * 10.0, 0.0, 0.35)     # a low rumble under the heartbeat
 		if abyss_a > 0.6 and p == m.player:
@@ -321,6 +332,14 @@ func _draw_world_labels() -> void:
 		var ally: bool = m.player != null and o.team == m.player.team
 		if soul and ally and o != m.player:
 			_ctext(bp, "%s  ·  %ds" % [o.pname, int(ceil(float(b["soul_until"]) - m.time))], 13, Color("9ee2a0"), big)
+		elif not (b.get("kin", []) as Array).is_empty() and m.player and m.player.flat_dist(b["pos"]) < 32.0:
+			# a Boki in a deathbox: whoever loots the box takes it home (the hook: readable from afar)
+			var kn := String((b["kin"][0] as Dictionary).get("name", "Boki"))
+			if o == m.player:
+				_ctext(bp + Vector2(0, -16), "Your box  ·  %s is inside" % kn, 15, GOLD, big)
+			else:
+				_ctext(bp + Vector2(0, -16), "A Boki in %s's box" % o.pname, 16, Color("ffb36a"), big)
+				_ctext(bp + Vector2(0, 2), "loot it and %s is yours" % kn, 12, Color(INK, 0.9), big)
 		elif not b["empty"] and m.player and m.player.flat_dist(b["pos"]) < 14.0:
 			_ctext(bp, "%s's box" % o.pname if o != m.player else "Your box", 12, Life.box_color(b), big)
 	# whoever has your kin: marked over their head, or an arrow at the screen edge
@@ -340,8 +359,8 @@ func _draw_world_labels() -> void:
 			c.draw_colored_polygon(PackedVector2Array([edge + d * 18.0, edge - d * 6.0 + perp * 11.0, edge - d * 6.0 - perp * 11.0]), GOLD)
 			_ctext(edge - d * 26.0, "%dm" % int(m.player.flat_dist(th)), 13, GOLD, big)
 	# the tutorial's marker: a pin over what to go to, or an arrow at the screen edge, with the distance
-	if m.opts.get("tutorial", false) and m.tut_target != Vector3.INF and m.player and not m.player.out:
-		_draw_waypoint(m.tut_target, m.tut_label, Color("8fe3c8"))
+	if m.opts.get("tutorial", false) and m.tut_target != Vector3.INF and m.player and not m.player.out and not m.tut_kin_leading():
+		_draw_waypoint(m.tut_target, m.tut_label, Color("8fe3c8"))     # (your Boki leading the way replaces it)
 	_draw_exit_labels()
 	_draw_lair_labels()
 	_draw_truce_marks()
@@ -436,7 +455,17 @@ func _draw_world_labels() -> void:
 			continue
 		var sp := cam.unproject_position(k.position + Vector3(0, 1.05, 0))
 		if k.is_wild():
-			if k.state == "dazed":
+			if k.state == "dazed" and k.lost_from != "":
+				# a Boki left behind by a hunter who went out: the hook of the game, so it reads from afar
+				var mine: bool = k.lost_from == "you"
+				var lc: Color = GOLD if mine else Color("ffb36a")
+				var bob := sin(m.time * 3.0) * 2.0
+				_ctext(sp + Vector2(0, -30 + bob), ("Your %s was left here" % String(k.rec.get("name", "Boki"))) if mine else "A lost Boki: tame it", 18, lc, big)
+				_ctext(sp + Vector2(0, -12 + bob), ("Hold %s to take it back" % Settings.key_cap("interact")) if mine else ("Hold %s  ·  slower to tame: it was %s's" % [Settings.key_cap("interact"), k.lost_from]), 12, Color(INK, 0.9), big)
+				c.draw_colored_polygon(PackedVector2Array([sp + Vector2(-7, -2 + bob), sp + Vector2(7, -2 + bob), sp + Vector2(0, 8 + bob)]), lc)
+				if k.catch_prog > 0.0:
+					_bar(Rect2(sp + Vector2(-40, 14), Vector2(80, 7)), k.catch_prog, lc)
+			elif k.state == "dazed":
 				_ctext(sp + Vector2(0, -8), "Dazed!  %s to tame" % Settings.key_cap("interact"), 17, GOLD, big)
 				if k.catch_prog > 0.0:
 					_arc(sp + Vector2(0, 10), 9, k.catch_prog, GOLD, 3.0)
@@ -454,9 +483,7 @@ func _draw_bubbles() -> void:
 		var k: Kin = b["ent"]
 		if k.dead:
 			continue
-		var at := k.position + Vector3(0, 1.2, 0)
-		if k.state == "shoulder" and k.owner_h:
-			at = k.owner_h.position + Vector3(0, 2.3, 0)
+		var at := k.bubble_at()
 		if cam.is_position_behind(at):
 			continue
 		var sp := cam.unproject_position(at)
@@ -464,7 +491,7 @@ func _draw_bubbles() -> void:
 		# triangle loses its area to float rounding and errors "triangulation failed" every frame)
 		if not (is_finite(sp.x) and is_finite(sp.y)) or not c.get_viewport_rect().grow(240.0).has_point(sp):
 			continue
-		var a := clampf((2.6 - b["t"]) * 3.0, 0.0, 1.0) * clampf(b["t"] * 8.0, 0.0, 1.0)
+		var a := clampf((float(b.get("life", 2.6)) - b["t"]) * 3.0, 0.0, 1.0) * clampf(b["t"] * 8.0, 0.0, 1.0)
 		var s: String = b["text"]
 		var tw := body.get_string_size(s, HORIZONTAL_ALIGNMENT_LEFT, -1, 15).x
 		var r := Rect2(sp + Vector2(-tw * 0.5 - 12, -44), Vector2(tw + 24, 30))
@@ -478,8 +505,8 @@ func _draw_bubbles() -> void:
 func _draw_pings(sz: Vector2) -> void:
 	var cam := m.cam
 	for p in m.pings:
-		if p.has("by"):
-			continue        # squad pings get a waypoint instead (see _draw_squad_pings)
+		if p.has("by") or p.has("kin"):
+			continue        # squad pings and Boki callouts get a waypoint instead (see _draw_squad_pings)
 		var a := clampf(4.0 - p["t"], 0.0, 1.0)
 		var col := Color(p["col"], a)
 		var at: Vector3 = p["pos"] + Vector3(0, 1.0, 0)
@@ -722,7 +749,7 @@ func _draw_minimap(sz: Vector2) -> void:
 			continue        # another squad's ping
 		var pv: Vector2 = to_map.call(pg["pos"])
 		if on_map.call(pv):
-			if pg.has("by"):
+			if pg.has("by") or pg.has("kin"):
 				# a squad ping: a little pin in the pinger's colour
 				c.draw_colored_polygon(PackedVector2Array([pv, pv + Vector2(-4, -7), pv + Vector2(4, -7)]), pg["col"])
 				c.draw_circle(pv + Vector2(0, -9), 5.0, Color(0, 0, 0, 0.6))
@@ -1437,7 +1464,8 @@ func _draw_arch_abilities(sz: Vector2, p: Hunter) -> void:
 		# the resource-full variant is ready (Cash In, Called Shot, Shield Slam...): a gold dot
 		c.draw_circle(sr.position + Vector2(s - 6, 6), 5.0 + sin(m.time * 8.0), Color("ffd23f"))
 	if p.ak.rmb_down and p.ak.rmb_t > 0.05:
-		var hk := clampf(p.ak.rmb_t / maxf(0.05, float(p.ak.rmb_def().get("hold", 0.3))), 0.0, 1.0)
+		var hfull: float = p.ak.rmb_charge_full() if p.ak.rmb_charge_full() > float(p.ak.rmb_def().get("hold", 0.3)) else float(p.ak.rmb_def().get("hold", 0.3))
+		var hk := clampf(p.ak.rmb_t / maxf(0.05, hfull), 0.0, 1.0)
 		c.draw_arc(sr.get_center(), s * 0.5 + 4.0, -PI / 2, -PI / 2 + TAU * hk, 32, Color(info["col"], 0.9), 3.0, true)
 	x += s + gap
 	var qr := Rect2(Vector2(x, y), Vector2(s, s))
@@ -1452,6 +1480,9 @@ func _draw_arch_abilities(sz: Vector2, p: Hunter) -> void:
 	var di := p.slot_info("dash")
 	var dmax := int(di["max_charges"])
 	_skill_slot("dash", "dash", Rect2(Vector2(x, y), Vector2(s, s)), String(di["icon"]), Settings.key_cap("dash"), di["col"], float(di["cd"]) / maxf(0.01, float(di["cd_max"])) if float(di["cd"]) > 0.0 else 0.0, float(di["cd"]), bool(di["ready"]), int(di["charges"]), dmax)
+	if di.get("full", false):
+		# the payoff lives on the dash (the Thief's Primed shot into 3 Marks): the same gold dot
+		c.draw_circle(Vector2(x, y) + Vector2(s - 6, 6), 5.0 + sin(m.time * 8.0), Color("ffd23f"))
 	x += s + gap
 	var ei := p.slot_info("k1")
 	var er := Rect2(Vector2(x, y), Vector2(s, s))
@@ -1696,9 +1727,15 @@ var portraits := {}       # nid -> SubViewport
 var portraits_grey := {}  # nid -> ImageTexture
 
 func portrait(h: Hunter) -> Texture2D:
+	var pkey := "%s|%s|%s" % [h.arch, h.cls, h.wid]
+	if portraits.has(h.nid) and String((portraits[h.nid] as Node).get_meta("pkey", pkey)) != pkey:
+		# a new archetype or weapon (the Arena's 2-7 swap): the portrait follows
+		(portraits[h.nid] as Node).queue_free()
+		portraits.erase(h.nid); portraits_grey.erase(h.nid)
 	if not portraits.has(h.nid):
 		var look: Dictionary = Save.d.get("look", {}) if h.ctrl == "local" else h.bot_look
-		var vp := Portraits.make(h.cls, Data.TEAM_COLORS[h.team % Data.TEAM_COLORS.size()], h.wid, look)
+		var vp := Portraits.make(h.cls, Data.TEAM_COLORS[h.team % Data.TEAM_COLORS.size()], h.wid, look, h.arch)
+		vp.set_meta("pkey", pkey)
 		add_child(vp)
 		portraits[h.nid] = vp
 	return (portraits[h.nid] as SubViewport).get_texture()
@@ -2194,6 +2231,15 @@ func _draw_squad_pings(p: Hunter) -> void:
 		var a := clampf(float(pg.get("life", 4.0)) - float(pg["t"]), 0.0, 1.0)
 		var lbl: String = "Your ping" if by == p else (by.pname if is_instance_valid(by) else "Ping")
 		_draw_waypoint(pg["pos"], lbl, Color(pg["col"], a))
+	# a Boki's callout: a marker with what it spotted, fading after a few seconds
+	for pg in m.pings:
+		if not pg.has("kin") or int(pg.get("team", -1)) != p.team:
+			continue
+		var kk: Kin = pg["kin"] if is_instance_valid(pg["kin"]) else null
+		var a2 := clampf(float(pg.get("life", 5.0)) - float(pg["t"]), 0.0, 1.0) * clampf(float(pg["t"]) * 6.0, 0.0, 1.0)
+		var who := String(kk.rec.get("name", "Boki")) if kk and kk.owner_h != p else ""
+		var lbl2 := String(pg.get("label", ""))
+		_draw_waypoint(pg["pos"], ("%s: %s" % [who, lbl2]) if who != "" else lbl2, Color(pg["col"], a2))
 
 ## For the first seconds of every match: what each of your buttons does.
 func _draw_kit(sz: Vector2, p: Hunter) -> void:
@@ -2444,10 +2490,21 @@ func _draw_downed(sz: Vector2, p: Hunter) -> void:
 func _draw_dead(sz: Vector2, p: Hunter) -> void:
 	c.draw_rect(Rect2(Vector2.ZERO, sz), Color(0.05, 0.03, 0.08, 0.25))
 	var y0 := sz.y * 0.62
-	_panel(Rect2(Vector2(sz.x * 0.5 - 300, y0 - 44), Vector2(600, 150)))
-	_ctext(Vector2(sz.x * 0.5, y0), "You're dead", 30, BAD, big)
 	var b := Life.box_of(m, p)
 	var lines: Array = []
+	# your Boki left on the map, still there for anyone to tame (the game's hook: say it plainly)
+	var left_line := ""
+	for L in m.player_lost:
+		var lk = L.get("kin")
+		var lb: Dictionary = L.get("box", {})
+		var kn := String((L.get("rec", {}) as Dictionary).get("name", "Your Boki"))
+		if lk != null and is_instance_valid(lk) and not (lk as Kin).dead and (lk as Kin).is_wild():
+			left_line = "%s was left behind: rivals can tame it" % kn
+		elif not lb.is_empty() and (lb.get("kin", []) as Array).any(func(r): return String(r.get("uid", "")) == String(L.get("uid", ""))):
+			left_line = "%s is in your deathbox: a rival who loots it takes it" % kn
+	if left_line != "":
+		y0 = sz.y * 0.58
+		_ctext(Vector2(sz.x * 0.5, y0 - 64), left_line, 20, GOLD, big)
 	if not b.is_empty() and Life.soul_here(m, b):
 		lines.append("A teammate can bring you back at your deathbox: %ds left." % int(ceil(float(b["soul_until"]) - m.time)))
 	lines.append("Or at any revive beacon (the green pillars), with nothing you carried." if m.beacons.any(func(x): return not x["used"]) else "No revive beacons left.")
@@ -2455,6 +2512,8 @@ func _draw_dead(sz: Vector2, p: Hunter) -> void:
 	if mate:
 		lines.append("Watching %s." % mate.pname)
 	lines.append("%s to open the menu and leave." % Settings.key_cap("menu"))
+	_panel(Rect2(Vector2(sz.x * 0.5 - 300, y0 - 44), Vector2(600, 62 + lines.size() * 22)))
+	_ctext(Vector2(sz.x * 0.5, y0), "You're dead", 30, BAD, big)
 	for i in lines.size():
 		_ctext(Vector2(sz.x * 0.5, y0 + 28 + i * 22), lines[i], 16, INK if i < 2 else MUTED)
 
@@ -2482,11 +2541,13 @@ func _draw_tip(sz: Vector2, t: Dictionary) -> void:
 	var text: String = t["text"]
 	var w := minf(560.0, body.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x + 40.0)
 	var lines := body.get_multiline_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, w - 40.0, 16)
-	var r := Rect2(Vector2(sz.x * 0.5 - w * 0.5, 84 + alerts_h), Vector2(w, lines.y + 34))
+	var r := Rect2(Vector2(sz.x * 0.5 - w * 0.5, 84 + alerts_h + (22.0 if m.arena and not m.opts.get("arena", false) else 0.0)), Vector2(w, lines.y + 34))
 	_panel(r, Color(0.98, 0.95, 0.88, 0.94 * a), 12)
 	c.draw_multiline_string(body, r.position + Vector2(20, 28), text, HORIZONTAL_ALIGNMENT_LEFT, w - 40.0, 16, -1, Color(0.1, 0.09, 0.12, a))
 
 var head_hp := 1.0
+var abyss_cued := false
+var abyss_warned := false
 var abyss_a := 0.0
 const ABYSS_FX := preload("res://scripts/match/abyss_fx.gd")
 var abyss_fx: CanvasLayer = null

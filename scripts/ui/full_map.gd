@@ -212,6 +212,7 @@ func shrine_glyph(c: Control, pv: Vector2, s: float, used := false) -> void:
 
 func _map_title() -> String:
 	if m.world.layout_id == "skyreach": return "SKYREACH"
+	if m.world.layout_id == "hollowcrown": return "THE HOLLOW CROWN"
 	return "THE ISLANDS"
 
 func _exit_word(x: Dictionary) -> String:

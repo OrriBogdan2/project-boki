@@ -29,7 +29,7 @@ func _ready() -> void:
 		fade.boot()     # carry on from the boot splash: covered, logo showing, until the first screen is up
 	var args := OS.get_cmdline_user_args()
 	# tooling never touches the real save file: checks, screenshots and --no-save runs play on a copy
-	if "--no-save" in args or "--archetype-check" in args or "--arena-check" in args or Array(args).any(func(x): return String(x).begins_with("--shot=") or String(x).begins_with("--arena-shot=") or String(x).begins_with("--rolling-shot=")):
+	if "--no-save" in args or "--archetype-check" in args or "--kit-combo-check" in args or "--arena-check" in args or Array(args).any(func(x): return String(x).begins_with("--shot=") or String(x).begins_with("--arena-shot=") or String(x).begins_with("--rolling-shot=")):
 		Save.no_write = true
 	var opts := {}
 	for a in args:
@@ -73,6 +73,10 @@ func _ready() -> void:
 		if a == "--boxrev-demo": opts["life_demo"] = true; opts["boxrev_demo"] = true; opts["no_drop"] = true; opts["squad"] = 3; opts["teams"] = 3
 		if a.begins_with("--length="): opts["length"] = float(a.substr(9))
 		if a == "--no-drop": opts["no_drop"] = true
+		if a.begins_with("--map="): opts["map"] = a.substr(6)            # an expedition on another authored map (e.g. skyreach)
+		if a.begins_with("--at="): opts["at_xz"] = a.substr(5)          # tooling: start standing at x,z (map screenshots)
+		if a.begins_with("--zoom="): opts["zoom_hold"] = float(a.substr(7))   # tooling: hold the camera zoom
+		if a.begins_with("--lost-demo"): opts["lost_demo"] = a.substr(12) if a.length() > 12 else "rival"; opts["no_drop"] = true    # a Boki left behind (hud labels)
 		if a == "--train-demo": opts["train_demo"] = true; opts["no_drop"] = true
 		if a.begins_with("--train-demo="): opts["train_demo"] = a.substr(13); opts["no_drop"] = true
 		if a.begins_with("--aim-demo="): opts["aim_demo"] = a.substr(11); opts["no_drop"] = true
@@ -131,6 +135,18 @@ func _ready() -> void:
 		if a == "--perk-demo": opts["perk_demo"] = true
 		if a.begins_with("--exit-demo="): opts["exit_demo"] = a.substr(12); opts["no_drop"] = true
 		if a == "--truce-demo": opts["truce_demo"] = true; opts["no_drop"] = true
+		if a.begins_with("--teammate-demo="): opts["teammate_demo"] = a.substr(16); opts["no_drop"] = true
+		if a.begins_with("--demo-kin="): opts["demo_kin"] = a.substr(11)      # test: bring this species (level/trust via --demo-kin-lv=)
+		if a.begins_with("--demo-kin-lv="): opts["demo_kin_lv"] = a.substr(14)
+		if a == "--no-tips": Settings.set_v("tips", false, false)     # test: no kit panel or tip banners (screenshots)
+		if a.begins_with("--set-kin=") and not Save.d["roster"].is_empty():
+			# test: your first Boki's level and trust, "level:trust" (how well it talks)
+			var sk := a.substr(10).split(":")
+			Save.d["roster"][0]["level"] = int(sk[0])
+			if sk.size() > 1: Save.d["roster"][0]["trust"] = float(sk[1])
+		if a == "--recall-demo" and not Save.d["roster"].is_empty():
+			# test: your partner just got back from an expedition with something to tell you
+			Save.d["roster"][0]["recall"] = {"kind": "carried_out", "text": "was carried out of the Ember Quarry by you", "place": "the Ember Quarry", "boss": "", "m": 1}
 		if a.begins_with("--lair-demo="): opts["lair_demo"] = a.substr(12); opts["no_drop"] = true
 		if a.begins_with("--lair-boss="): opts["demo_boss"] = a.substr(12)
 		if a == "--plate-demo": opts["plate_demo"] = true; opts["no_drop"] = true; opts["teams"] = 3; opts["squad"] = 3
@@ -325,7 +341,7 @@ func _ready() -> void:
 		add_child(load("res://tests/map_overview.gd").new())
 		return
 	if "--mapcheck-authored" in args:
-		load("res://tools/mapcheck.gd").new().run_authored("skyreach", range(1, 21))
+		load("res://tools/mapcheck.gd").new().run_authored(World.layout_for_tier(0), range(1, 21))
 		get_tree().quit()
 		return
 	if "--mapcheck" in args:
@@ -362,6 +378,9 @@ func _ready() -> void:
 		var wkc = load("res://tools/work_check.gd").new()      # kin at work: jobs, stations, priorities, shimmer odds
 		set_meta("work_check", wkc)
 		wkc.run(self)
+		return
+	if "--teammate-check" in args:
+		load("res://tools/teammate_check.gd").new().run(self)      # Boki as teammates: following, callouts, caring, the tutorial guide
 		return
 	if "--unique-check" in args:
 		load("res://tools/unique_check.gd").new().run(self)      # every kin its own: rolls, inheritance, ids, migration, size
@@ -401,6 +420,9 @@ func _ready() -> void:
 	if "--mantle-check" in args:
 		load("res://tools/mantle_check.gd").new().run(self)    # ledges you mean to climb, you climb; the rest never grab you
 		return
+	if "--glide-reach" in args:
+		load("res://tools/glide_reach.gd").new().run(self)    # how far a glide carries over open void (sizes map gaps)
+		return
 	if "--abyss-check" in args:
 		set_meta("abyss_check", load("res://tools/abyss_check.gd").new())
 		get_meta("abyss_check").run(self)
@@ -436,7 +458,7 @@ func _ready() -> void:
 		set_meta("arena_check", arc)        # (kept alive across its awaits)
 		arc.run(self)
 		return
-	if "--archetype-check" in args:
+	if "--archetype-check" in args or "--kit-combo-check" in args:
 		var akc = load("res://tools/archetype_check.gd").new()      # every archetype kit, controls, locks, infusion, feel
 		set_meta("archetype_check", akc)
 		akc.run(self)
@@ -638,6 +660,11 @@ func _ready() -> void:
 		show_screen("prologue", {"then": "title"})    # test: the opening story
 	elif "--creator" in args:
 		show_screen("hatch", {"create": true})    # test: the hunter creator
+	elif "--demo-match" in args:
+		# the title screen's Demo match (tooling: screenshots of it); other match flags still apply
+		var dm := Match.demo_opts()
+		dm.merge(opts, true)
+		show_screen("match", dm)
 	elif "--match" in args or opts.has("raid_demo") or opts.has("blight_demo") or opts.get("rolling", false):
 		show_screen("match", opts)
 	elif "--duel" in args:
@@ -716,6 +743,8 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 		fade.reveal_after(3, 0.55, func() -> bool: return gen == _gen and is_instance_valid(current) and current.get("building") == true)
 	match screen:
 		"match":
+			# Settings > Demo (clear weather, no Blight, ...) on offline matches; online ones play the host's rules
+			if not opts.has("net"): Settings.demo_opts(opts)
 			# the seed is fixed here, so the loading screen can show the raid condition it rolls
 			if not opts.has("seed"): opts["seed"] = randi()
 			# a loading screen covers building the world; tests that screenshot by frame count skip it
@@ -2601,7 +2630,14 @@ func _boss_check() -> void:
 	Q.ctrl = "local"
 	spot.call(Q, E["dial"])
 	spot.call(P, E["dial"] + Vector3(E["out"].x, 0, E["out"].y) * 6.0)
-	Q.inp["interact"] = true; run.call(Match.DT); Q.inp["interact"] = false; run.call(0.4)
+	# the gate's guards go for whoever works the dial: a bomber's blast or a spitter's hit could knock Q
+	# off the lectern (the dial stops) or down, depending only on how the frames fall. Keep Q on it and
+	# standing: this part tests the dial's miss, not surviving the guards
+	var pin := func():
+		Q.hp = Q.max_hp; Q.armor = Q.max_armor
+		if Q.downed: m.revive_hunter(Q, Q)
+		if Q.flat_dist(E["dial"]) > 0.25: spot.call(Q, E["dial"])
+	Q.inp["interact"] = true; run.call(Match.DT, pin); Q.inp["interact"] = false; run.call(0.4, pin)
 	var hit_one := false
 	var tq := m.time
 	while not hit_one and m.time - tq < 8.0:
@@ -2610,15 +2646,15 @@ func _boss_check() -> void:
 		for t in E["targets"]:
 			if absf(wrapf(nxt - float(t["a"]), -PI, PI)) <= float(t["w"]) * 0.5 - 0.03: on = true
 		Q.inp["interact"] = on and not Q.inp["interact"]
-		run.call(Match.DT)
+		run.call(Match.DT, pin)
 		hit_one = (E["targets"] as Array).any(func(t): return t["hit"])
-	Q.inp["interact"] = false; run.call(Match.DT)
+	Q.inp["interact"] = false; run.call(Match.DT, pin)
 	var guards0: int = m.lairs._guards_alive(E)
 	var pings0 := m.pings.size()
 	var feed0 := m.feed_all.size()
 	while m.lairs.target_under(E) >= 0:
-		run.call(Match.DT)
-	Q.inp["interact"] = true; run.call(Match.DT); Q.inp["interact"] = false
+		run.call(Match.DT, pin)
+	Q.inp["interact"] = true; run.call(Match.DT, pin); Q.inp["interact"] = false
 	var any_hit: bool = (E["targets"] as Array).any(func(t): return t["hit"])
 	ok.call(hit_one and int(E["fails"]) == 1 and not any_hit and int(E["lock"]) == 0 and float(E["jam"]) > 0.0, "miss: the lock resets (fails %d, arcs lit again, jammed %.1fs)" % [int(E["fails"]), float(E["jam"])])
 	ok.call(m.lairs._guards_alive(E) > guards0 and m.pings.size() > pings0 and m.feed_all.slice(feed0).any(func(f): return String(f).contains("chime")) and Q.reveal_t > 2.0,
@@ -3182,6 +3218,16 @@ func _record_check() -> void:
 	Record.set_level(0)
 	await get_tree().process_frame
 	ok.call(InputMap.has_action("record") and Settings.ACTIONS.any(func(a): return a[0] == "record"), "F10 is a rebindable action (%s)" % Settings.key_cap("record"))
+	# Settings > Demo: clear weather, no Blight, bots hold off fresh landers longer (offline matches)
+	var o0 := Settings.demo_opts({})
+	ok.call(not o0.has("raid") and not o0.has("blight") and not o0.has("fresh_t") and RaidLook.rolls({"big": true}), "demo settings at their defaults change nothing")
+	Settings.set_v("demo_weather", "clear", false); Settings.set_v("demo_blight", false, false); Settings.set_v("demo_fresh", "long", false)
+	var o1 := Settings.demo_opts({"teams": 10})
+	ok.call(RaidLook.pick(o1, 12345) == "clear" and not BlightDir.enabled(o1) and float(o1.get("fresh_t", 0.0)) == Settings.DEMO_FRESH_T, "demo settings: clear weather, no Blight, %ds for fresh landers" % int(Settings.DEMO_FRESH_T))
+	var seen := {}
+	for sd in 40: seen[RaidLook.pick(Settings.demo_opts({}), sd + 1)] = true
+	ok.call(seen.keys() == ["clear"], "always clear over 40 seeds (%s)" % ", ".join(seen.keys()))
+	Settings.set_v("demo_weather", "random", false); Settings.set_v("demo_blight", true, false); Settings.set_v("demo_fresh", "normal", false)
 	print("RECCHECK done, failures: %d" % bad[0])
 	get_tree().quit(1 if bad[0] > 0 else 0)
 
@@ -3371,8 +3417,11 @@ func _drop_check() -> void:
 	for f in fol: f.ai["sep_h"] = -1.0       # (bots that break off low down: checked below, not here)
 	# the leader steers; the squad follows in its slots
 	var worst := 0.0; var t := 0.0
+	# (the turn is relative to the ship's heading, so every map and ship route tests the same turn:
+	# veer 17 degrees right of the flight line, then swing a further 85 degrees right)
+	var sdir := Vector2((m.ship["dir"] as Vector3).x, (m.ship["dir"] as Vector3).z).normalized() if m.ship.has("dir") else Vector2(1, 0)
 	while t < 1.3 and P.dropping:
-		P.inp["move"] = Vector2(1, 0.3).normalized() if t < 0.7 else Vector2(-0.2, 1).normalized()
+		P.inp["move"] = sdir.rotated(0.29) if t < 0.7 else sdir.rotated(1.77)
 		m.step(Match.DT); t += Match.DT
 		if t > 0.5:
 			for f in fol:
@@ -3443,12 +3492,12 @@ func _drop_check() -> void:
 		if String(bot.ai.get("goal_kind", "")) == "ping": went = true
 		closest = minf(closest, bot.flat_dist(spot))
 	var replies: Array = D.events.slice(ev0).filter(func(e): return String(e).begins_with("reply"))
-	print("DCHECK ground ping: %s headed there=%s, %.1fm -> got within %.1fm; replies %s" % [bot.pname, went, d0, closest, str(replies)])
+	print("DCHECK ground ping: %s headed there=%s, %.1fm -> got within %.1fm; replies %s (from %s to %s)" % [bot.pname, went, d0, closest, str(replies), str(bot.pos.snapped(Vector3(0.1, 0.1, 0.1))), str(spot.snapped(Vector3(0.1, 0.1, 0.1)))])
 	if not went or closest > 4.0 or not replies.any(func(r): return String(r).ends_with("omw")): ok = false; print("DCHECK FAIL squad bots ignore pings")
 	m.unping(P)
 	if not m.my_ping().is_empty() or bot.ai.has("ping_goal"): ok = false; print("DCHECK FAIL right click didn't take the ping down")
 	# the spawns: the same candidates every match, a different live subset per seed
-	var layout := World.load_layout("skyreach")
+	var layout := World.load_layout(World.layout_for_tier(0))
 	var subsets := {}
 	for sd in [4101, 4102, 4103]:
 		var plan := SpawnPlan.new(m)
@@ -3569,7 +3618,7 @@ func _simtest(opts: Dictionary) -> void:
 		# the Blight: how many it brought out, and what it did (knocks / eliminations / damage on hunters)
 		print("SIMBLIGHT spawned %d alive %d wardens %d shrieks %d knocks %d outs %d dmg %d" % [m.blight.spawned, m.blight.alive().size(), m.blight.wardens.size(), m.blight.shrieks, int(m.kstat.get("bl_knock", 0)), int(m.kstat.get("bl_out", 0)), int(m.kstat.get("bl_dmg", 0.0))])
 	for h in m.hunters:
-		print("  %s team %d %s knocks %d kills %d dmg %d gems %d %s" % [h.pname, h.team, h.cls, h.knocks, h.kills, h.dmg_done, h.gems, "OUT" if h.out else ("EXTRACTED" if h.extracted else "alive")])
+		print("  %s team %d %s %s knocks %d kills %d dmg %d gems %d %s" % [h.pname, h.team, h.cls, h.arch, h.knocks, h.kills, h.dmg_done, h.gems, "OUT" if h.out else ("EXTRACTED" if h.extracted else "alive")])
 	get_tree().quit()
 
 # ------------------------------------------------------------------ browser test hooks

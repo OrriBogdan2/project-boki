@@ -63,6 +63,8 @@ func pick_target() -> Ent:
 			continue
 		if not f.hittable():
 			continue
+		if float(k.ignore_until.get(f, -1.0)) > k.m.time:
+			continue      # it gave up on this one a moment ago (couldn't reach it)
 		var d := k.flat_dist(f)
 		if d > reach:
 			continue
