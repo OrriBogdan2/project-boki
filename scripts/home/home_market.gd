@@ -84,9 +84,10 @@ func open_pens() -> void:
 	v.add_child(UI.section("Sell one of yours"))
 	var sell_row := UI.hbox(8)
 	var choices: Array = (Save.d["roster"] as Array).filter(func(r): return KinBox.pinned(r) == "" and not r.get("loaner", false))
-	if choices.is_empty() or (Save.d["roster"] as Array).size() <= 1:
-		sell_row.add_child(UI.para("Your partner, your first Boki and your only Boki stay with you. Others can be listed here (a 5% listing fee, and 5% of the sale).", 12, UI.FAINT))
-	else:
+	var rules := UI.para("Your partner, your first Boki and your only Boki stay with you. Others can be listed here at a fair price (a 5% listing fee, and 5% of the sale).", 12, UI.FAINT)
+	rules.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	v.add_child(rules)
+	if not (choices.is_empty() or (Save.d["roster"] as Array).size() <= 1):
 		for r in choices.slice(0, 4):
 			var rr: Dictionary = r
 			var ask := Ransom.value(rr)
@@ -104,6 +105,7 @@ func open_pens() -> void:
 func _banner(t: String, col: Color) -> Control:
 	var c := UI.card(Color(col, 0.12), 12, 10)
 	var l := UI.para(t, 13, col)
+	l.custom_minimum_size = Vector2(780, 0)
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	c.add_child(l)
 	return c

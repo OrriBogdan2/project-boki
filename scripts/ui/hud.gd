@@ -451,8 +451,9 @@ func _draw_world_labels() -> void:
 				_ctext(sp + Vector2(0, -8), ("Knocked out  ·  %s to pick up" % Settings.key_cap("interact")) if k.owner_h == m.player else "Knocked out", 15, GOLD if k.owner_h == m.player else MUTED, big)
 				if k.catch_prog > 0.0: _arc(sp + Vector2(0, 10), 9, k.catch_prog, GOOD, 3.0)
 			elif k.owner_h == m.player:
-				_ctext(sp + Vector2(0, -8), "%s  ·  following" % k.rec.get("name", "Boki"), 13, Color(INK, 0.8))
-				if k.hp < k.max_hp: _bar(Rect2(sp + Vector2(-22, 0), Vector2(44, 5)), k.hp / k.max_hp, GOOD)
+				var lp := cam.unproject_position(k.position + Vector3(0, -0.15, 0))
+				_ctext(lp + Vector2(0, 22), "%s  ·  following" % k.rec.get("name", "Boki"), 13, Color(INK, 0.85))
+				if k.hp < k.max_hp: _bar(Rect2(lp + Vector2(-22, 28), Vector2(44, 5)), k.hp / k.max_hp, GOOD)
 			continue
 		if k.is_wild():
 			if k.state == "dazed":
@@ -2812,7 +2813,14 @@ func _draw_world_hover(sz: Vector2, p: Hunter) -> void:
 		var nm := String(k.rec.get("name", sp["name"]))
 		lines.append([("%s (lost)" % nm if k.lost_from != "" else "Wild %s" % sp["name"]) if k.is_wild() else nm, sp["color"]])
 		lines.append(["%s type  ·  level %d  ·  %d / %d health" % [String(sp["type"]).capitalize(), int(k.rec.get("level", 1)), int(ceil(k.hp)), int(k.max_hp)], MUTED])
-		if k.is_wild():
+		if k.role == "follow":
+			if k.owner_h == p:
+				lines.append(["Follows you. It scouts but doesn't fight; nobody else can tame it while you're in the map. Extract with it close to bring it home.", INK])
+			else:
+				lines.append(["Follows %s. Nobody can tame it while they're in the map." % (k.owner_h.pname if k.owner_h else "a rival"), MUTED])
+		elif k.role == "stray":
+			lines.append([("Left on its own: rivals have %d s to tame it, then it goes home to you." if k.steal_owner == p else "%s left it behind. Tame it in %%d s and it's yours." % k.steal_from) % int(ceil(k.steal_t)), GOLD])
+		elif k.is_wild():
 			if k.state == "dazed":
 				lines.append(["Dazed. Hold %s next to it to win it over." % Settings.key_cap("interact"), GOLD])
 			else:

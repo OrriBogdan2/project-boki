@@ -3637,18 +3637,6 @@ func _open_expedition() -> void:
 			left.add_child(_kin_pick_row("Second", Save.second_kin(), "active2"))
 		if float(ak["trust"]) < 30.0:
 			left.add_child(UI.para("%s doesn't trust you much yet and may refuse risky throws." % ak["name"], UI.T_SMALL, UI.BAD))
-	if Loaner.available():
-		# the free-kit queue: a loaner Boki and the basic kit, nothing of yours at risk (Loaner)
-		var fkc := UI.card(Color(UI.GOLD, 0.08), 12, 10)
-		var fkr := UI.hbox(10); fkc.add_child(fkr)
-		fkr.add_child(UI.IconDot.new("egg", UI.GOLD, 20.0))
-		var fkv := UI.vbox(1); fkv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		fkv.add_child(UI.label("Or a free-kit run: nothing at risk", 15, UI.GOLD, UI.semi))
-		var fkl := UI.para("A loaner Boki (a fresh starter, lent for one run), your class's plain weapon and two tonics. Your Boki, armory and stash stay home. Keep whatever you extract with; an extract pays at least %d gems." % Loaner.MIN_PAY, 12, UI.MUTED)
-		fkl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		fkv.add_child(fkl)
-		fkr.add_child(fkv)
-		left.add_child(fkc)
 	if Save.d.get("treat", "") != "":
 		left.add_child(UI.chip("heart", "Treat: " + _treat_name(Save.d["treat"]), Color("ffb0d0")))
 	hecon.loadout_rows(left, _open_expedition)
@@ -3680,6 +3668,18 @@ func _open_expedition() -> void:
 		elif exp_tier == i:
 			tv.add_child(UI.para(String(td["desc"]), UI.T_SMALL, Color("ffb3a8") if td["risk_kin"] else UI.MUTED))
 		right.add_child(tc)
+	if Loaner.available():
+		# the free-kit queue: a loaner Boki and the basic kit, nothing of yours at risk (Loaner)
+		var fkc := UI.card(Color(UI.GOLD, 0.08), 12, 10)
+		var fkr := UI.hbox(10); fkc.add_child(fkr)
+		fkr.add_child(UI.IconDot.new("egg", UI.GOLD, 20.0))
+		var fkv := UI.vbox(1); fkv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		fkv.add_child(UI.label("Or a free-kit run: nothing at risk", 15, UI.GOLD, UI.semi))
+		var fkl := UI.para("A loaner Boki (a fresh starter, lent for one run), your class's plain weapon and two tonics. Your Boki, armory and stash stay home. Keep whatever you extract with; an extract pays at least %d gems." % Loaner.MIN_PAY, 12, UI.MUTED)
+		fkl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		fkv.add_child(fkl)
+		fkr.add_child(fkv)
+		right.add_child(fkc)
 	right.add_child(UI.spacer(2))
 	right.add_child(UI.section("Match"))
 	var mode_names := {"solo": "Solo", "duo": "Duos", "trio": "Trios"}
