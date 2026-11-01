@@ -1141,44 +1141,6 @@ func _spawn_hunters() -> void:
 			if rng.randf() < 0.2: h.rift_keys = 1     # now and then a rival brings a key (and knows where the hatches are)
 			_start_drop(h, at)
 
-## Screenshots of follower Boki (--follow-demo=walk|ko|steal|watch). walk: you just tamed one and
-## it trots after you; ko: it's knocked out beside you; steal: a rival hunter left one behind and its
-## steal window is running in front of you; watch: you went out and your own is on its own.
-func _follow_demo(_dt: float) -> void:
-	var what := String(opts["follow_demo"])
-	if not has_meta("fdemo"):
-		set_meta("fdemo", true)
-		Settings.v["tips"] = false          # (screenshots: no tutorial cards)
-		var at := demo_clear_spot(4.0)
-		var rec := Save.new_kin(String(opts.get("follow_kin", "puddlet")), "", kin_seed("fdemo"))
-		if what == "steal":
-			var R: Hunter = null
-			for h in hunters:
-				if h.team != player.team: R = h; break
-			R.ctrl = "idle"
-			R.teleport(world.free_spot_near(player.pos + Vector3(30, 0, 0), [], 1.0, 0.4, 20.0))
-			rec["name"] = Data.KIN[rec["species"]]["name"]
-			Follow.spawn(self, R, rec, at)
-			R.lives = 1
-			eliminate(R, null, "knocked out", true)
-			Life.make_gone(self, R)
-			player.face = atan2(-(at.x - player.pos.x), -(at.z - player.pos.z))
-			return
-		rec["name"] = "Drip"
-		var f := Follow.spawn(self, player, rec, at)
-		if what == "ko":
-			f.hurt(9999.0, null, {})
-		if what == "watch":
-			player.lives = 1
-			player.teleport(world.free_spot_near(player.pos + Vector3(30, 0, 0), [], 1.0, 0.4, 20.0))
-			eliminate(player, null, "knocked out", true)
-			Life.make_gone(self, player)
-		return
-	if what == "walk" and time > 0.6 and time < 2.4:
-		player.inp["move"] = Vector2(0.8, 0.4).normalized()
-	elif what == "walk":
-		player.inp["move"] = Vector2.ZERO
-
 ## Every match starts in the sky. Hunters glide down from above their squad's side of the map
 ## and steer to wherever they want to land.
 func _start_drop(h: Hunter, at: Vector3) -> void:
@@ -4067,7 +4029,7 @@ func step(dt: float) -> void:
 		if time > 4.0 and int(time * 60.0) % 240 == 0:
 			player.ult = 1.0; player.inp["ult"] = true
 	if opts.has("follow_demo") and player and not player.dropping:
-		_follow_demo(dt)
+		FollowDemo.run(self, dt)
 	if opts.get("life_demo", false) and player and time < 0.05 and not beacons.is_empty():
 		# test: stand by a revive beacon with a teammate's deathbox next to it
 		var bc: Vector3 = beacons[0]["pos"]
@@ -6034,17 +5996,7 @@ func _end_soon(after: float) -> void:
 	if result.get("ending", false):
 		return
 	result["ending"] = true
-	get_tree().create_timer(after).timeout.connect(_finish_after_stray)
-
-## Your follower's steal window keeps the match going for you (watching it) until it's settled.
-func _finish_after_stray() -> void:
-	if over:
-		return
-	var w: Kin = Follow.watch(self)
-	if w and not _finish_now and is_inside_tree() and time < length + 2.0:
-		get_tree().create_timer(0.25).timeout.connect(_finish_after_stray)
-		return
-	_finish()
+	get_tree().create_timer(after).timeout.connect(Follow.finish_later.bind(self))
 
 func _finish() -> void:
 	if over:

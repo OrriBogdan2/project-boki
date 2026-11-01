@@ -313,3 +313,13 @@ static func bot_steal(m, h: Hunter) -> Array:
 		if d < bd and d / 5.0 + float(m.T.get("capture_time", 3.0)) < k.steal_t + 1.0:
 			bd = d; best = k
 	return [best.pos, "catch"] if best else []
+
+## Your follower's steal window keeps the match going for you (watching it) until it's settled.
+static func finish_later(m: Match) -> void:
+	if m.over:
+		return
+	var w: Kin = watch(m)
+	if w and not m._finish_now and m.is_inside_tree() and m.time < m.length + 2.0:
+		m.get_tree().create_timer(0.25).timeout.connect(finish_later.bind(m))
+		return
+	m._finish()

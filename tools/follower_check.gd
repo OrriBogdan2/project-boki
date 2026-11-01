@@ -312,7 +312,7 @@ func _bots_steal() -> void:
 	ok(String(Follow.result(m).get("fate", "")) == "stolen", "the owner's results say stolen")
 
 func _net() -> void:
-	ok(Net.VERSION == "0.6.6", "Net.VERSION bumped for the follower sync (%s)" % Net.VERSION)
+	ok(Net.VERSION == "0.8.2", "Net.VERSION bumped for the follower sync (%s)" % Net.VERSION)
 	var me0 := Net.me
 	var host0 := Net.host
 	Net.me = "abc"; Net.host = "hst"

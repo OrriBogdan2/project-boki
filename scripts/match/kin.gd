@@ -867,9 +867,6 @@ func _sim_fainted(dt: float) -> void:
 		m.fx.burst(owner_h.pos + Vector3(0, 1.5, 0), sp["color"], 10, 2.0)
 
 func faint(fell := false) -> void:
-	if role == "follow":
-		Follow.knock_out(self, fell)
-		return
 	_end_merge("fainted")
 	state = "fainted"
 	faint_t = 8.0
@@ -892,6 +889,7 @@ func _on_zero(_by: Ent, _opts: Dictionary) -> void:
 		hp = 1.0
 		_daze()
 		return
+	if role == "follow": Follow.knock_out(self, false); return      # a follower is knocked out, not fainted (Follow)
 	faint()
 
 func fall_out() -> void:
@@ -899,6 +897,7 @@ func fall_out() -> void:
 		dead = true
 		m.on_fell(self)
 		return
+	if role == "follow": Follow.knock_out(self, true); return
 	faint(true)
 
 func _consider_revive(dt: float) -> void:
