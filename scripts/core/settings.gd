@@ -28,13 +28,13 @@ const DEFAULTS := {
 ##   over the sea  ·  shafts: light shafts into the void  ·  fx: particle amounts (x)
 const QUALITY := {
 	"low": {"name": "Low", "msaa": 0, "shadows": false, "scale": 0.8, "lod": 4.0, "grass": 0.4, "draw": 0.6, "shadow_k": 0.7, "splits": 1, "soft": 0,
-		"ssao": false, "glow": false, "clouds": 0, "shafts": false, "fx": 0.45},
+		"ssao": false, "glow": false, "clouds": 0, "shafts": false, "fx": 0.45, "volfog": false},
 	"medium": {"name": "Medium", "msaa": 2, "shadows": true, "scale": 1.0, "lod": 2.0, "grass": 0.7, "draw": 0.8, "shadow_k": 0.8, "splits": 2, "soft": 1,
-		"ssao": false, "glow": true, "clouds": 1, "shafts": true, "fx": 0.7},
+		"ssao": false, "glow": true, "clouds": 1, "shafts": true, "fx": 0.7, "volfog": false},
 	"high": {"name": "High", "msaa": 4, "shadows": true, "scale": 1.0, "lod": 1.0, "grass": 1.0, "draw": 1.0, "shadow_k": 1.0, "splits": 4, "soft": 3,
-		"ssao": true, "glow": true, "clouds": 2, "shafts": true, "fx": 1.0},
+		"ssao": true, "glow": true, "clouds": 2, "shafts": true, "fx": 1.0, "volfog": true},
 	"ultra": {"name": "Ultra", "msaa": 4, "shadows": true, "scale": 1.0, "lod": 0.5, "grass": 1.0, "draw": 1.6, "shadow_k": 1.35, "splits": 4, "soft": 4,
-		"ssao": true, "glow": true, "clouds": 2, "shafts": true, "fx": 1.0},
+		"ssao": true, "glow": true, "clouds": 2, "shafts": true, "fx": 1.0, "volfog": true},
 }
 const QUALITY_ORDER := ["low", "medium", "high", "ultra"]
 
@@ -262,6 +262,10 @@ func _env_quality(e: Environment) -> void:
 		e.set_meta("glow0", e.glow_enabled)
 	e.ssao_enabled = bool(e.get_meta("ssao0")) and bool(q("ssao"))
 	e.glow_enabled = bool(e.get_meta("glow0")) and bool(q("glow"))
+	if e.volumetric_fog_enabled or e.has_meta("vfog0"):
+		# volumetric light in the haze (the expedition's dusk) only on the presets that can afford it
+		if not e.has_meta("vfog0"): e.set_meta("vfog0", e.volumetric_fog_enabled)
+		e.volumetric_fog_enabled = bool(e.get_meta("vfog0")) and bool(q("volfog"))
 
 ## Applies the preset in effect: its anti-aliasing and shadows (as if picked by hand), render scale,
 ## level of detail, shadow filtering, and the lights and environments already in the scene. The

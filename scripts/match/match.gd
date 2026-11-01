@@ -75,6 +75,8 @@ var hitstop := 0.0
 var aim_line: MeshInstance3D
 var aim_ring: MeshInstance3D
 var muzzle_light: OmniLight3D
+var raid := "dusk"                 # the raid condition the match is lit under (RaidLook)
+var music_dir: MusicDir = null     # the layered score's levels (scripts/match/music_dir.gd)
 var collapse_warned := false
 var rng := RandomNumberGenerator.new()
 var pending_input := {"base": false, "dash": false, "jump": false, "sig": false, "reload": false, "tonic": false, "kit": false, "throw": false, "skill": false, "ult": false, "sec": false, "gear1": false, "gear2": false, "swap": false, "kin_ab": false}
@@ -195,7 +197,9 @@ func warm_up() -> void:
 		fx.burst(at + Vector3(0, 1, 0), Color.WHITE, 6)
 		fx.ring(at, 1.5, Color.WHITE)
 		fx.flash(at + Vector3(0, 1, 0), Color.WHITE)
+		fx.spark(at + Vector3(0, 1, 0), Vector3.UP, Color.WHITE, 4)
 		fx.slash(at + Vector3(0, 0.8, 0), 0.0, 2.0, 1.6, Color.WHITE)
+		fx.beam(at + Vector3(0, 1, 0), at + Vector3(2, 1, 0), Color.WHITE)
 		var tg := fx.telegraph_circle(at, 1.5, Color(1, 0.3, 0.2))
 		# the muzzle flash light lights whatever stands near a shot: the lit variants compile now too
 		if muzzle_light:
@@ -510,7 +514,8 @@ func _start(o: Dictionary) -> void:
 		bot_diff = Data.auto_bot_diff(tier, int(Save.d.get("extracts", 0)), o.get("tutorial", false) or o.get("training", false))
 	bot_cfg = Data.BOT_DIFF[bot_diff]
 	_build_env()
-	Sfx.play_music("hollow" if tier >= 2 else "match")
+	music_dir = MusicDir.new()
+	music_dir.start(self)
 	Sfx.play_ambience("match")
 	world = World.new()
 	world.name = "World"
@@ -531,6 +536,7 @@ func _start(o: Dictionary) -> void:
 	await _stage("build.generate")
 	if _stage_cb.is_valid(): world.stage_cb = _world_step
 	await world.build_meshes()
+	RaidLook.tune_world(world, raid)
 	world.stage_cb = Callable()
 	fx = Fx.new(); fx.name = "Fx"; add_child(fx)
 	fields = Fields.new(self)
@@ -644,6 +650,9 @@ func _build_env() -> void:
 	add_child(env)
 	var sun := Look.lights(self, T["sun"], 1.0, Vector3(-55, -35, 0), 60.0)
 	sun.shadow_opacity = 0.8
+	# the raid condition: moody dusk by default (scripts/match/raid_look.gd)
+	raid = RaidLook.pick(opts)
+	RaidLook.apply(env.environment, sun, get_node_or_null("Fill") as DirectionalLight3D, T, raid)
 
 func _build_shot_pool() -> void:
 	var mesh := Models.sphere(0.5, 10)
@@ -1928,7 +1937,7 @@ func kin_bark(k: Kin, txt: String, cat: String) -> void:
 		var s := "kin_happy"
 		if cat in ["refuse", "hesitate", "scared", "revive_low", "ignore"]: s = "kin_unsure"
 		elif cat in ["callout", "wild"]: s = "kin_alert"
-		sfx(s, null, -6.0, Unique.voice(k.rec))     # in its own voice
+		sfx(s, null, -3.0, Unique.voice(k.rec))     # in its own voice, above the louder combat layer
 
 var feed_all: Array = []
 
@@ -1995,7 +2004,7 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 		sfx("hurt", null, -4.0)
 		cam.add_trauma(clampf(d / 40.0, 0.12, 0.45))
 		if hud: hud.hurt_flash(d)
-	fx.burst(target.pos + Vector3(0, 0.8, 0), Color("fff2d0") if not crit else Color("ffd23f"), 6 if d < 10 else 12, 3.5, 0.3, 8.0, 0.7)
+	Juice.hit(self, target, by, d, o, crit, armor_hit)
 
 ## Cancels anything a hunter had going: a sword charge, a sniper wind-up.
 func cancel_abilities(h: Hunter) -> void:
@@ -2047,6 +2056,7 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 		add_feed("%s went down" % h.pname)
 	sfx("knock", h.pos, 0.0)
 	fx.burst(h.pos + Vector3(0, 0.8, 0), Data.TEAM_COLORS[h.team % Data.TEAM_COLORS.size()], 24, 5.0, 0.6)
+	Juice.knock(self, h, credit)
 	if net_on and not h.remote:
 		net_event(["knock", h.nid, credit.nid if credit else ""])
 	if h == player:
@@ -2155,6 +2165,7 @@ func eliminate(h: Hunter, by: Ent, why: String, final := false) -> void:
 	if credit is Hunter and credit != h and credit.team != h.team:
 		credit.kills += 1
 	add_feed(out_text(h.pname, why))
+	if why != "abyss": Juice.kill(self, h, credit)
 	h.set_meta("died_why", why)
 	h.set_meta("died_at", time)
 	var waiting := false
@@ -2397,6 +2408,7 @@ func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
 	sfx("die_big" if big_mob else "die_small", mb.pos, -5.0, randf_range(0.9, 1.15))
 	if credit == player: sfx("kill", null, -12.0, 1.4)
 	fx.burst(mb.pos + Vector3(0, 0.6, 0), mb.md["color"], 22, 5.0, 0.6)
+	Juice.mob_dead(self, mb, credit, big_mob)
 	if not world.is_void(mb.pos.x, mb.pos.z) and not _o.get("self", false):
 		for i in int(mb.md["gems"]):
 			drop("gem", mb.pos + Vector3(0, 0.6, 0), int(round(3 * float(T["loot"]))))
@@ -2711,8 +2723,8 @@ func _stagger_reward(mb: Mob, hunter: Hunter, ab: String) -> void:
 func on_armor_break(h: Hunter, by: Ent) -> void:
 	fx.burst(h.pos + Vector3(0, 1.0, 0), Color("7ac8ff"), 22, 5.0, 0.5, 6.0, 1.0)
 	fx.ring(h.pos, 1.4, Color("7ac8ff"), 0.3)
-	sfx("shield", h.pos, 0.0, 1.6)
 	var credit: Ent = by.owner_h if by is Kin and by.owner_h else by
+	Juice.armor_break(self, h, credit)
 	if credit == player and hud:
 		hud.toast_small("ARMOR BROKEN", Color("7ac8ff"))
 		hud.hitmarker(true, true)
@@ -2932,6 +2944,9 @@ func spawn_shot(by: Ent, at: Vector3, v2: Vector2, dmg: float, life: float, size
 			vis_col = col.lerp(Color("ff5a3a"), 0.35)
 			vis_col.a = 1.0
 			vis_size *= 1.3
+		elif player and String(extra.get("src", "")) == "abil":
+			vis_col = col.lerp(Color.WHITE, 0.25)      # your right click reads clearly over your own gunfire
+			vis_size *= 1.25
 		elif player:
 			vis_col = Color(col, 0.5)
 			vis_size *= 0.85
@@ -3068,6 +3083,7 @@ func _update_shots(dt: float) -> void:
 				sx["hitset"] = {}
 				s["life"] = float(s["life0"]) * 1.6
 				sfx("whoosh", p, -6.0, 1.5)
+				if String(sx.get("src", "")) == "abil": sfx("ab_whirr", p, -8.0, 1.15)     # (on its way back)
 				continue
 		if s["life"] <= 0.0:
 			_shot_end(s, p, null, "expire")
@@ -3155,6 +3171,10 @@ func _shot_end(s: Dictionary, at: Vector3, e: Ent, why := "") -> void:
 			Effects.run(fxx["fx_end"], s["by"], c2)
 	if s["node"]:
 		s["node"].visible = false
+	if why == "caught" and String(fxx.get("src", "")) == "abil":
+		AbilityFx.caught(self, s["by"], s["col"])
+	elif e == null and String(fxx.get("src", "")) == "abil" and not fxx.get("cos", false):
+		AbilityFx.fizzle(self, at, s["col"])      # a right click that missed still ends visibly
 	if fxx.has("hitset"):
 		if e == null: fx.burst(at, s["col"], 5, 2.0, 0.25, 6.0, 0.6)
 		return        # piercing shots already dealt their hits on the way
@@ -3365,6 +3385,7 @@ func _process(delta: float) -> void:
 	if paused and not net_on:
 		return
 	_tips()
+	if music_dir: music_dir.tick(self, delta)
 	if hitstop > 0.0 and not net_on:
 		hitstop -= delta
 		_gather_input()
@@ -3415,6 +3436,8 @@ func _process(delta: float) -> void:
 	for s in shots:
 		if s.has("deco"):
 			_render_deco(s, alpha)
+		if String((s["x"] as Dictionary).get("src", "")) == "abil":
+			AbilityFx.trail(self, s, (s["prev"] as Vector3).lerp(s["pos"], alpha))
 		if s["node"]:
 			var mi: MeshInstance3D = s["node"]
 			mi.global_position = (s["prev"] as Vector3).lerp(s["pos"], alpha)
@@ -3874,6 +3897,43 @@ func step(dt: float) -> void:
 		if "--debug-rival" in OS.get_cmdline_user_args() and int(time * 60.0) % 60 == 0:
 			for h in hunters:
 				if h != player: print("RIVAL ", h.pname, " ", h.pos, " vis ", h.visible, " unseen ", h.unseen, " out ", h.out, " team ", h.team)
+	if "--juice-demo" in OS.get_cmdline_user_args() and player and not player.dropping:
+		# screenshots of hits (Juice): a rival steps up 4m away, holds still, and takes fire
+		if hud: hud.guide_hidden = true
+		if not train.has("_jt"):
+			Settings.v["tips"] = false
+			if "--demo-slow" in OS.get_cmdline_user_args(): Engine.time_scale = 0.2   # (software-rendered screenshots catch the short flashes)
+			var q := demo_clear_spot(4.0)
+			var jt := make_hunter("jtarget", 7, "medium", "Rook", "idle", {}, Vector3(q.x, world.ground_at(q.x, q.z), q.z), bot_kit())
+			jt.lives = 1
+			train["_jt"] = jt
+		var jt2: Hunter = train["_jt"]
+		if is_instance_valid(jt2) and not jt2.out:
+			player.inp["aim"] = jt2.pos + Vector3(0, 0.95, 0)
+			player.inp["move"] = Vector2.ZERO
+			player.inp["fire"] = time > 0.6
+	if "--rmb-demo" in OS.get_cmdline_user_args() and player and not player.dropping:
+		# screenshots of a weapon's right click: a rival 5m away takes two shots, then the RMB at
+		# 1.2s (held 1s if it charges); a trap is laid at the rival's feet and they step back onto it
+		if hud: hud.guide_hidden = true
+		if not train.has("_rt"):
+			Settings.v["tips"] = false
+			if "--demo-slow" in OS.get_cmdline_user_args(): Engine.time_scale = 0.2   # (software-rendered screenshots catch the short flashes)
+			var q := demo_clear_spot(5.0)
+			var rt := make_hunter("rtarget", 7, "medium", "Rook", "idle", {}, Vector3(q.x, world.ground_at(q.x, q.z), q.z), bot_kit())
+			rt.lives = 1
+			train["_rt"] = rt
+		var rt2: Hunter = train["_rt"]
+		if is_instance_valid(rt2) and not rt2.out:
+			player.inp["aim"] = rt2.pos + Vector3(0, 0.95, 0)
+			player.inp["move"] = Vector2.ZERO
+			player.inp["fire"] = time > 0.5 and time < 0.75
+			if time >= 1.2 and not train.has("_rt_sec"):
+				train["_rt_sec"] = rt2.pos
+				player.inp["sec"] = true
+			player.inp["sec_hold"] = time >= 1.2 and time < 2.2
+			if time >= 2.6 and time < 2.7 and train.has("_rt_sec"):
+				rt2.teleport(train["_rt_sec"])
 	if opts.get("cone_demo", false) and player:
 		player.inp["aim"] = player.pos + Vector3(4.0, 0.95, -5.0)
 		player.inp["crouch"] = opts.get("crouch_demo", false)
@@ -5345,6 +5405,7 @@ func _extract(h: Hunter, how := "", where := "") -> void:
 	var col: Color = {"skiff": ExitModels.DOCK, "hatch": ExitModels.HATCH, "uplink": ExitModels.UPLINK}.get(how, Color("8fe3c8"))
 	sfx("portal", h.pos, -4.0 if how == "hatch" else 0.0, 1.3)
 	fx.burst(h.pos + Vector3(0, 1.0, 0), col, 30, 5.0, 0.8, -4.0)
+	Juice.extract(self, h, col)
 	add_feed("%s extracted" % h.pname)
 	if h.kin:
 		h.kin.visible = false
@@ -5936,6 +5997,51 @@ func _process_net_revives() -> void:
 
 # ------------------------------------------------------------------ first-time tips
 var _tip_t := 0.0
+
+## Screenshot demos: moves the player (once) to the nearest open, level stretch of ground at least
+## 6m from the start's clutter (the duel pad and its post, the glove stands) and returns a spot
+## `dist` metres east of them with a clear line of fire.
+func demo_clear_spot(dist: float) -> Vector3:
+	var best := Vector3.INF
+	for pass_i in 2:
+		best = _demo_open(dist, pass_i == 0)
+		if best != Vector3.INF:
+			break
+	if best == Vector3.INF:
+		print("DEMO no open ground")
+		return world.free_spot_near(player.pos + Vector3(dist, 0, 0), [player.pos], 1.0, 0.45, 6.0)
+	# monsters nearby would join in: send them to the far side of the map for the demo
+	for mb in mobs:
+		if Vector2(mb.pos.x - best.x, mb.pos.z - best.z).length() < 14.0:
+			var far := world.free_spot_near(Vector3(world.w - best.x, 0, world.h - best.z), [], 1.0, 0.45, 30.0)
+			mb.pos = far; mb.prev = far
+	player.teleport(best)
+	player.vel = Vector3.ZERO
+	return best + Vector3(dist, 0, 0)
+
+func _demo_open(dist: float, avoid_mobs: bool) -> Vector3:
+	var best := Vector3.INF; var bd := 1e9
+	var c0 := player.pos
+	for iz in range(2, world.h - 2):
+		for ix in range(2, world.w - 2):
+			var q := Vector3(ix + 0.5, 0, iz + 0.5)
+			var dd := Vector2(q.x - c0.x, q.z - c0.z).length()
+			if dd < 6.0 or dd >= bd or world.is_void(q.x, q.z) or world.is_block(q.x, q.z):
+				continue
+			if avoid_mobs and mobs.any(func(mb): return Vector2(mb.pos.x - q.x, mb.pos.z - q.z).length() < 9.0):
+				continue
+			var gy := world.ground_at(q.x, q.z)
+			var ok := true
+			for dx in range(-2, int(dist) + 3):
+				for dz in range(-2, 3):
+					var x := q.x + dx; var z := q.z + dz
+					var inner := absi(dz) <= 1 and dx >= -1 and dx <= int(dist) + 1
+					if world.is_block(x, z) or (inner and (world.is_void(x, z) or absf(world.ground_at(x, z) - gy) > 0.8)):
+						ok = false; break
+				if not ok: break
+			if ok:
+				bd = dd; best = Vector3(q.x, gy, q.z)
+	return best
 
 func _tip(key: String, text: String) -> void:
 	var seen: Dictionary = Save.d["tutorial"]

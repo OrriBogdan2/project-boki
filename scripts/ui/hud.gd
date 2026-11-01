@@ -2254,9 +2254,14 @@ func _draw_crosshair(p: Hunter) -> void:
 	if hit_t > 0.0:
 		var hc := Color("ffd23f") if hit_crit else Color.WHITE
 		if hit_armor: hc = ARMOR_COL if not hit_crit else Color("cfefff")
-		var s := 10.0 + (1.0 - hit_t / 0.14) * 4.0
+		# a sharp X that snaps out and settles: bigger and bolder on crits, dark-edged so it reads
+		# over bright effects
+		var k := hit_t / 0.14
+		var s := (11.0 if not hit_crit else 15.0) + (1.0 - k) * 3.0 + k * k * 4.0
+		var w := 3.0 if not hit_crit else 4.0
 		for d in [Vector2(1, 1), Vector2(-1, 1), Vector2(1, -1), Vector2(-1, -1)]:
-			c.draw_line(mp + d * 5.0, mp + d * s, hc, 2.5)
+			c.draw_line(mp + d * 5.0, mp + d * s, Color(0.05, 0.03, 0.08, 0.65 * minf(1.0, k * 2.0)), w + 2.0)
+			c.draw_line(mp + d * 5.0, mp + d * s, Color(hc, minf(1.0, k * 2.5)), w)
 
 func _draw_downed(sz: Vector2, p: Hunter) -> void:
 	c.draw_rect(Rect2(Vector2.ZERO, sz), Color(0.3, 0.02, 0.02, 0.18))

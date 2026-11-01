@@ -1,7 +1,7 @@
 shader_type spatial;
 // A hit flash: a camera-facing star of sharp rays round a white-hot core, inside a soft glow,
 // fading out as `life` runs from 0 to 1.
-render_mode unshaded, shadows_disabled, depth_draw_never, blend_add, cull_disabled, fog_disabled;
+render_mode unshaded, shadows_disabled, depth_draw_never, depth_test_disabled, blend_add, cull_disabled, fog_disabled;
 uniform vec4 color : source_color = vec4(1.0, 0.8, 0.4, 1.0);
 uniform float life = 0.0;
 uniform float seed = 0.0;
