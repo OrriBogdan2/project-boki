@@ -26,7 +26,7 @@ const SIGHT := {"clear": 1.0, "day": 1.0, "dusk": 0.85, "night": 0.6, "ash": 0.7
 ## How much bolder and more numerous the Blight is (BlightDir).
 const BLIGHT := {"clear": 1.0, "day": 1.0, "dusk": 1.12, "night": 1.4, "ash": 1.25, "fog": 1.2}
 ## Outside-of-sight darkening (the vis shader's "dark" multiplier; 0.42 is the usual).
-const VIS_DARK := {"clear": 0.42, "day": 0.42, "dusk": 0.38, "night": 0.26, "ash": 0.36, "fog": 0.34}
+const VIS_DARK := {"clear": 0.42, "day": 0.42, "dusk": 0.38, "night": 0.29, "ash": 0.36, "fog": 0.34}
 const NAMES := {"clear": "Clear evening", "day": "Overcast day", "dusk": "Dusk", "night": "Night", "ash": "Ash storm", "fog": "Fog"}
 const BLURBS := {
 	"clear": "Good light. You see far, and so does everything else.",
@@ -267,7 +267,7 @@ static func storm_fx(cond: String) -> Node3D:
 	root.name = "RaidFx"
 	var lite := Settings.quality() == "low"
 	if cond == "ash":
-		root.add_child(_streak(Color(0.62, 0.56, 0.52, 0.55), 260 if not lite else 120, 0.05, 1.6, false))
+		root.add_child(_streak(Color(0.66, 0.6, 0.55, 0.6), 340 if not lite else 140, 0.085, 1.6, false))
 		root.add_child(_streak(Color(1.0, 0.55, 0.22, 0.9), 26 if not lite else 12, 0.035, 2.2, true))
 	else:
 		root.add_child(_puffs(Color(0.72, 0.75, 0.8, 0.12), 34 if not lite else 16))

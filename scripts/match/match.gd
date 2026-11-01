@@ -4053,6 +4053,16 @@ func step(dt: float) -> void:
 		truce.demo()
 	if opts.has("exit_demo") and exits and player and not player.dropping:
 		exits.demo(String(opts["exit_demo"]))
+	if opts.get("raid_demo", false) and hud and not hud.guide_hidden:
+		Settings.v["tips"] = false          # (screenshots of a raid condition: no tutorial cards)
+		hud.guide_hidden = true
+	if "--kit-demo" in OS.get_cmdline_user_args() and player and time > 0.3 and not train.has("_kitdemo"):
+		# screenshots: hurt and with cracked armor, so the tonic (1) and armor kit (2) slots are both lit
+		train["_kitdemo"] = true
+		player.hp = player.max_hp * 0.6
+		player.armor = player.max_armor * 0.25
+	if opts.has("blight_demo") and blight and player and not player.dropping and time > 0.2:
+		blight.demo(String(opts["blight_demo"]))
 	if opts.get("glide_demo", false) and player:
 		if time < 0.05:
 			player.teleport(player.pos + Vector3(0, 6, 0)); player.grounded = false
