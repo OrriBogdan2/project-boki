@@ -12,8 +12,11 @@ extends RefCounted
 ##    starts grinding open, a 10 s countdown anyone close by can see and hear (a risky wait). Then it's
 ##    open for anyone (your squad, or a rival) to drop through, three people in all, and it seals.
 ##  - Outpost uplinks (hold a mini base). A walled outpost with an uplink mast. Starting it brings
-##    monsters; it charges while your squad holds the yard and stalls while a rival stands in it
-##    (hold it alone long enough and it's theirs). When it's done, a lift of light opens in the
+##    monsters; it charges while your squad holds the yard (one of you is enough; two charge it half
+##    again as fast, three nearly twice as fast: UPLINK_CREW) and stalls while a rival stands in it
+##    (hold it alone long enough and it's theirs). Leave the yard empty and the charge drains away
+##    (UPLINK_DECAY_T from full); at nothing the uplink flickers and shuts off, and it has to be
+##    started again once it has cooled down (FIZZLE_CD). When it's done, a lift of light opens in the
 ##    middle for a little while, for anyone who gets in.
 
 const CALL_HOLD := 1.5        # seconds holding interact at a dock's beacon to call the skiff
@@ -29,7 +32,12 @@ const HATCH_R := 1.5          # reach to open a hatch
 const HATCH_IN := 1.05        # step this close to an open hatch to drop in
 const HATCH_UNLOCK_T := 10.0  # from the key turning to the hatch being open
 const HATCH_USES := 3         # people who can drop through an opened hatch before it seals
-const UPLINK_T := 40.0        # holding the yard to charge the uplink
+const UPLINK_T := 40.0        # holding the yard to charge the uplink (one hunter in it)
+const UPLINK_CREW := [0.0, 1.0, 1.5, 1.8, 2.0]   # charge rate by how many of the squad hold the yard
+const UPLINK_DECAY_T := 18.0  # an empty yard drains a full charge in this long
+const UPLINK_GRACE := 3.0     # a just-started uplink isn't shut off for an empty yard this soon
+const FIZZLE_T := 1.8         # the uplink flickering before it shuts off
+const FIZZLE_CD := 8.0        # then it can be started again after this
 const TUT_UPLINK_T := 14.0
 const OUTPOST_R := 3.6        # the yard
 const LIFT_R := 1.7
@@ -184,6 +192,18 @@ func uplink_time(x: Dictionary) -> float:
 		return TUT_UPLINK_T
 	return UPLINK_T * (0.4 if rush else 1.0)
 
+## Seconds until a draining uplink runs dry and shuts off.
+func drain_left(x: Dictionary) -> float:
+	return float(x["prog"]) * UPLINK_DECAY_T
+
+## How fast an uplink charges with this many of the squad in its yard (1 = the base rate).
+static func crew_rate(n: int) -> float:
+	return float(UPLINK_CREW[clampi(n, 0, UPLINK_CREW.size() - 1)])
+
+## "x1.5" style text for the yard's crew, or "" for one hunter (the base rate needs no note).
+static func crew_text(n: int) -> String:
+	return "" if n <= 1 else "  ·  %d holding: x%s" % [n, String.num(crew_rate(n), 1)]
+
 func on_deck(x: Dictionary, h: Hunter) -> bool:
 	var b: Vector3 = x["berth"]
 	return h.flat_dist(b) < DECK_R and absf(h.pos.y - b.y) < 1.3
@@ -259,7 +279,8 @@ func interact_for(h: Hunter) -> Dictionary:
 							best = {"label": "The uplink comes online in %s" % _cap(float(x["open_at"]) - m.time)}
 						else:
 							best = {"act": "start", "need": START_HOLD, "label": "Hold %s to start the uplink  ·  monsters will attack the outpost" % key}
-					"charging": best = {"label": "Uplink %d%%  ·  hold the yard%s" % [int(x["prog"] * 100.0), "  ·  CONTESTED" if x["contested"] else ""]}
+					"charging": best = {"label": "Uplink %d%%  ·  hold the yard (more of you charge it faster)%s" % [int(x["prog"] * 100.0), "  ·  CONTESTED" if x["contested"] else crew_text(int(x.get("crew", 0)))]}
+					"fizzling": best = {"label": "The uplink lost its charge and is shutting off"}
 					"open": best = {"label": "The lift is open! Step into the light"}
 					"spent": best = {"label": "The uplink is cooling down: %ds" % int(ceil(x["t"]))}
 		if not best.is_empty():
@@ -534,6 +555,8 @@ func _start(x: Dictionary, h: Hunter) -> void:
 	x["waves"] = 0
 	x["wave_t"] = 1.5
 	x["steal"] = 0.0
+	x["started_at"] = m.time
+	x["draining"] = false
 	var n: Node3D = x["node"]
 	n.get_node("Beam").visible = true
 	(n.get_node("Sparks") as CPUParticles3D).emitting = true
@@ -561,8 +584,17 @@ func _tick_outpost(x: Dictionary, dt: float) -> void:
 				if h.team == team or (m.truce and m.truce.allied(team, h.team)): squad += 1
 				else: foes[h.team] = int(foes.get(h.team, 0)) + 1
 			x["contested"] = not foes.is_empty()
+			x["crew"] = squad
+			# nobody in the yard at all: the charge drains away, and at nothing the uplink shuts off. (A
+			# rival standing in it alone is the old contest instead: it stalls, then it's theirs.)
+			x["draining"] = squad == 0 and foes.is_empty()
+			if x["draining"]:
+				x["prog"] = maxf(0.0, float(x["prog"]) - dt / UPLINK_DECAY_T)
+				if float(x["prog"]) <= 0.0 and m.time - float(x.get("started_at", -99.0)) > UPLINK_GRACE:
+					_fizzle(x)
+					return
 			if squad > 0 and foes.is_empty():
-				x["prog"] = minf(1.0, float(x["prog"]) + dt / uplink_time(x))
+				x["prog"] = minf(1.0, float(x["prog"]) + dt * crew_rate(squad) / uplink_time(x))
 				x["steal"] = 0.0
 			elif squad == 0 and foes.size() == 1:
 				# a rival squad holding the yard alone takes the uplink over (progress and all)
@@ -583,6 +615,11 @@ func _tick_outpost(x: Dictionary, dt: float) -> void:
 			(ch.material_override as ShaderMaterial).set_shader_parameter("arc", float(x["prog"]))
 			var cr := n.get_node("Mast/Crystal") as Node3D
 			cr.rotation.y += dt * (1.0 + 6.0 * float(x["prog"]))
+			# the mast's crystal burns with the charge, and pulses dim while it drains
+			var glow := 0.25 + 1.1 * float(x["prog"])
+			if x["draining"]: glow *= 0.45 + 0.35 * sin(m.time * 7.0)
+			_crystal_glow(n, glow)
+			(n.get_node("Beam") as Node3D).visible = not x["draining"] or sin(m.time * 7.0) > -0.3
 			var zm := (n.get_node("Zone") as MeshInstance3D).material_override as ShaderMaterial
 			zm.set_shader_parameter("color", Color(Color("ff7a5a") if x["contested"] else ExitModels.UPLINK, 0.35 + 0.15 * sin(m.time * 6.0)))
 			if float(x["prog"]) >= 1.0:
@@ -601,6 +638,24 @@ func _tick_outpost(x: Dictionary, dt: float) -> void:
 				(n.get_node("Sparks") as CPUParticles3D).emitting = false
 				((n.get_node("Charge") as MeshInstance3D).material_override as ShaderMaterial).set_shader_parameter("arc", 0.0)
 				m.sfx("thump", p, -6.0, 0.8)
+		"fizzling":
+			# a few hard flickers, a sputter each, then dark
+			x["t"] = float(x["t"]) - dt
+			var k := FIZZLE_T - float(x["t"])
+			var on := fmod(k, 0.45) < 0.2
+			(n.get_node("Beam") as Node3D).visible = on
+			_crystal_glow(n, 1.6 if on else 0.05)
+			if int(k / 0.45) != int((k - dt) / 0.45):
+				m.sfx("zap", x["pos"], -3.0, 0.6 + 0.1 * int(k / 0.45))
+				m.fx.ring(x["pos"], OUTPOST_R, ExitModels.UPLINK, 0.3)
+			if float(x["t"]) <= 0.0:
+				x["state"] = "spent"
+				x["t"] = FIZZLE_CD
+				x["team"] = -1
+				n.get_node("Beam").visible = false
+				(n.get_node("Sparks") as CPUParticles3D).emitting = false
+				_crystal_glow(n, 0.25)
+				m.sfx("thump", x["pos"], -4.0, 0.6)
 		"spent":
 			x["t"] = float(x["t"]) - dt
 			if float(x["t"]) <= 0.0:
@@ -608,6 +663,31 @@ func _tick_outpost(x: Dictionary, dt: float) -> void:
 	var zr := (n.get_node("Zone") as MeshInstance3D)
 	if x["state"] != "charging":
 		(zr.material_override as ShaderMaterial).set_shader_parameter("color", Color(ExitModels.UPLINK, 0.35 if x["state"] in ["idle", "open"] else 0.12))
+
+## The yard stood empty until the charge ran out: the uplink flickers and shuts off.
+func _fizzle(x: Dictionary) -> void:
+	var was := int(x["team"])
+	x["state"] = "fizzling"
+	x["t"] = FIZZLE_T
+	x["prog"] = 0.0
+	x["contested"] = false
+	x["draining"] = false
+	var n: Node3D = x["node"]
+	((n.get_node("Charge") as MeshInstance3D).material_override as ShaderMaterial).set_shader_parameter("arc", 0.0)
+	m.sfx("warn", x["pos"], -2.0, 0.6)
+	if m.player and not m.player.out and m.player.flat_dist(x["pos"]) < 70.0:
+		m.add_feed("The uplink at %s lost its charge and shut off" % x["name"])
+		if m.hud and was == m.player.team:
+			m.hud.toast("The uplink shut off: nobody held the yard. Start it again to charge it", ExitModels.UPLINK)
+
+func _crystal_glow(n: Node3D, g: float) -> void:
+	var cr := n.get_node_or_null("Mast/Crystal")
+	if cr == null:
+		return
+	for ch in cr.get_children():
+		if ch is MeshInstance3D and (ch as MeshInstance3D).material_override is ShaderMaterial:
+			((ch as MeshInstance3D).material_override as ShaderMaterial).set_shader_parameter("glow", g)
+			return      # (the crystal's parts share one material)
 
 func _open_lift(x: Dictionary) -> void:
 	x["state"] = "open"
@@ -745,7 +825,10 @@ func clock_line() -> Array:
 		match String(mine["state"]):
 			"called": return ["SKIFF CALLED %s" % _cap(mine["t"]), ExitModels.DOCK]
 			"boarding": return ["SKIFF BOARDING %s" % _cap(mine["t"]), ExitModels.DOCK]
-			"charging": return [("UPLINK %d%%%s" % [int(mine["prog"] * 100.0), "  CONTESTED" if mine["contested"] else ""]), Color("ff8a6a") if mine["contested"] else ExitModels.UPLINK]
+			"charging":
+				if mine.get("draining", false):
+					return ["UPLINK %d%%  DRAINING %s" % [int(mine["prog"] * 100.0), _cap(drain_left(mine))], ExitModels.UPLINK.lerp(Color.WHITE, 0.25 + 0.25 * sin(m.time * 7.0))]
+				return [("UPLINK %d%%%s" % [int(mine["prog"] * 100.0), "  CONTESTED" if mine["contested"] else ("  x%s" % String.num(crew_rate(int(mine.get("crew", 0))), 1) if int(mine.get("crew", 0)) > 1 else "")]), Color("ff8a6a") if mine["contested"] else ExitModels.UPLINK]
 			"open": return ["LIFT OPEN %s" % _cap(mine["t"]), ExitModels.UPLINK]
 	var docks := of_kind("dock")
 	var first := 1e9
@@ -785,7 +868,13 @@ func status_for(p: Hunter) -> Dictionary:
 					var t := "Uplink %d%%" % int(x["prog"] * 100.0)
 					if x["contested"]: t += "  ·  CONTESTED: clear the yard"
 					elif not mine: t += "  ·  a rival's uplink: hold the yard to take it"
+					elif int(x.get("crew", 0)) > 1: t += crew_text(int(x["crew"]))
+					else: t += "  ·  bring your squad: more of you charge it faster"
 					return {"text": t, "prog": float(x["prog"]), "col": Color("ff8a6a") if x["contested"] or not mine else ExitModels.UPLINK}
+				if x["state"] == "charging" and int(x["team"]) == p.team and x.get("draining", false) and p.flat_dist(x["pos"]) < 80.0:
+					# our uplink with nobody in its yard: the charge running out, and how long it has
+					return {"text": "Uplink draining  ·  %d%%  ·  back to the yard: %s" % [int(x["prog"] * 100.0), _cap(drain_left(x))], "prog": float(x["prog"]),
+						"col": ExitModels.UPLINK.lerp(Color.WHITE, 0.2 + 0.2 * sin(m.time * 7.0))}
 	return {}
 
 # ------------------------------------------------------------------ for bots
@@ -804,7 +893,7 @@ func bot_goal(h: Hunter, leaving: bool) -> Array:
 	if not mine.is_empty():
 		match String(mine["state"]):
 			"called", "boarding": return [mine["berth"], "board"]
-			"charging": return [mine["pos"] + Vector3(0.0, 0, 1.6), "yard"]
+			"charging": return [yard_spot(mine, h), "yard"]
 			"unlocking": return [mine["pos"] + Vector3(1.6, 0, 0.0), "yard"]      # wait by the hatch, guarding it
 			"open": return [mine["pos"], "lift"]
 	var best := []; var bs := 1e9
@@ -833,6 +922,15 @@ func bot_goal(h: Hunter, leaving: bool) -> Array:
 				elif startable(x) and leaving and m.length - m.time > 70.0:
 					s = d * 1.1; if s < bs: bs = s; best = [x["pos"], "uplink"]
 	return best
+
+## Where a bot holds an uplink's yard: its own spot round the mast (each squadmate in the yard adds
+## to the charge rate, so they spread out instead of shoving each other off one spot).
+func yard_spot(x: Dictionary, h: Hunter) -> Vector3:
+	var a := float(hash(h.nid) % 6) / 6.0 * TAU
+	var p: Vector3 = x["pos"] + Vector3(cos(a), 0, sin(a)) * 1.7
+	if m.world.is_void(p.x, p.z) or m.world.is_block(p.x, p.z):
+		p = x["pos"] + Vector3(0.0, 0, 1.6)
+	return p
 
 ## A rival's loud exit close by, worth crashing (bots that like a fight go and contest it).
 func bot_contest(h: Hunter, reach: float) -> Array:

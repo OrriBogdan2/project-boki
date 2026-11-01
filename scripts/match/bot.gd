@@ -163,6 +163,9 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 			elif k.state == "active" and (k.hp < k.max_hp * 0.3 or k.flat_dist(h) > 11.0):
 				k.recall()
 				a["throw_cd"] = 2.0
+		# holding our uplink's yard: fight from in it, don't chase the waves out (an empty yard drains)
+		if String(a.get("goal_kind", "")) == "yard" and a["goal"] != Vector3.INF and h.flat_dist(a["goal"]) > 2.4:
+			move = (_path_dir(m, h, a["goal"]) + move * 0.3).normalized()
 		# defensive moves
 		if h.hp < a["hurt_hp"] - 12.0 and a["dash_cd"] <= 0.0 and randf() < 0.35 + abil * 0.65:
 			a["dash_cd"] = randf_range(1.2, 3.0) / (0.5 + a["skill"])
@@ -604,6 +607,15 @@ func _choose(m: Match, h: Hunter) -> void:
 			if bc["used"]: continue
 			var d := h.flat_dist(bc["pos"])
 			if d < bd: bd = d; goal = bc["pos"]; gk = "beacon"
+	# our squad's uplink is charging: every hunter in its yard charges it faster (and an empty yard
+	# drains it), so go and hold it rather than wander off after boxes, pings or lairs (unless we're
+	# sealed in a lair already)
+	var holding_yard: bool = m.exits != null and String(m.exits.active_for(h.team).get("state", "")) == "charging" \
+		and (m.lairs == null or m.lairs.sealed_lair(h).is_empty())
+	if goal == Vector3.INF and holding_yard:
+		var yg: Array = m.exits.bot_goal(h, true)
+		if not yg.is_empty() and String(yg[1]) == "yard":
+			goal = yg[0]; gk = "yard"
 	# a rival's deathbox revive humming within earshot: go and stop it
 	if goal == Vector3.INF:
 		for b in m.box_hums.values():
@@ -631,7 +643,7 @@ func _choose(m: Match, h: Hunter) -> void:
 		else:
 			a.erase("ping_goal")
 	# boss lairs: a dropped Rare Egg, or (bolder bots) a lair to open and its boss to fight
-	if goal == Vector3.INF and m.lairs and not m.lairs.list.is_empty():
+	if goal == Vector3.INF and m.lairs and not m.lairs.list.is_empty() and not holding_yard:
 		# heading home, as far as lairs go: late in the match, carrying a Rare Egg, or a bot that has
 		# decided to leave once the match is far enough along. (The random "leave" roll below can
 		# fire in the first minute; it used to cancel every lair plan right away, though the exits
