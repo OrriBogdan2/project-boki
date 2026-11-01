@@ -216,6 +216,7 @@ func populate_before(names: Array) -> void:
 			var h := m.make_bot(team, at, _names)
 			h.set_meta("landed_t", land_local)
 			h.set_meta("wave", int(q["wave"]))
+			h.set_meta("rolled_in", true)      # (already down before you joined: no landing floor to apply)
 			h.ai["land"] = at
 			set_level(h, floor_at(float(q["t_land"])))
 			grant_xp_quiet(h, XP_PER_MIN * mins_out * rng.randf_range(0.6, 1.3))
@@ -379,6 +380,11 @@ func tick(dt: float) -> void:
 			# incoming until the ship has passed and its squads are all down (the HUD's WAVE INCOMING)
 			if not s.is_empty() and m.time > float(s.get("t0", 0.0)) + float(s["ride"]) + 1.0 and not _wave_in_air(w):
 				w["state"] = "done"
+	# a drop that ended early (an ability mid-air, a fall below the islands) never reaches
+	# Match.on_drop_landed: the floor still applies the moment they're down on the ground
+	for h in m.hunters:
+		if h.grounded and not h.riding and not h.dropping and not h.out and not h.has_meta("rolled_in") and m.time > 0.0:
+			on_landed(h)
 	_med_t -= dt
 	if _med_t <= 0.0:
 		_med_t = 1.0

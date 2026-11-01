@@ -172,7 +172,7 @@ func _session(main: Node) -> void:
 	mean_all /= maxf(1.0, m.world.spawns.size())
 	ok(mean_w <= mean_all + 0.01, "the wave heads for the quieter side (%.2f hunters within 30 m of its spots vs %.2f on average)" % [mean_w, mean_all])
 	var land_t := 0.0
-	while newc.any(func(h): return h.riding or h.dropping) and land_t < 75.0:
+	while newc.any(func(h): return h.riding or h.dropping or (not h.grounded and not h.out)) and land_t < 75.0:
 		m.step(Match.DT); land_t += Match.DT
 	var landed: Array = newc.filter(func(h): return not h.riding and not h.dropping and not h.out)
 	ok(landed.size() >= newc.size() - 1, "the wave lands (%d of %d down in %.0f s)" % [landed.size(), newc.size(), land_t])
@@ -212,6 +212,7 @@ func _session(main: Node) -> void:
 		var x0 := P.xp
 		var gap := R.bounty_of(rival)
 		rival.inv_t = 0.0
+		P.downed = false; P.hp = P.max_hp     # (the knock reward needs a knocker on their feet; autopilot may have been down)
 		m.knock(rival, P, {})
 		var want_min := 90.0 + Rolling.GAP_KNOCK_XP * float(rival.lvl - P.lvl) + Rolling.BOUNTY_XP + Rolling.BOUNTY_XP_GAP * gap
 		ok(int(R.stats["bounties_claimed"]) == claimed0 + 1 and not rival.has_meta("bounty"), "knocking them claims the bounty")

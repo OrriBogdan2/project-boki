@@ -105,6 +105,12 @@ func run(main: Node, opts: Dictionary) -> void:
 	var mins := range(0, 31)
 	print("ROLLSIM extracts by minute: %s" % " ".join(mins.map(func(i): return str(ext_by.get(i, 0)))))
 	print("ROLLSIM deaths by minute:   %s" % " ".join(mins.map(func(i): return str(out_by.get(i, 0)))))
+	var why := {}
+	for h in m.hunters:
+		if h.out and not h.extracted and h.has_meta("left_sess"):
+			var k := String(h.get_meta("died_why", "?"))
+			why[k] = int(why.get(k, 0)) + 1
+	print("ROLLSIM how they went out: %s" % str(why))
 	# ---- levels and XP
 	var xp_rates: Array = []
 	var land_lv: Dictionary = {}
