@@ -2743,6 +2743,17 @@ func _boss_check() -> void:
 		if h != B: h.ctrl = "idle"; h.teleport(m2.world.spawns[0])
 	var L2: Dictionary = m2.lairs.list[0]
 	m2.lairs.activate(L2)
+	# the only lair it can go for: bots don't plan lairs in a match's first 25 s and roam instead,
+	# then take the nearest live one, so with the other rolled-live lairs about, where that roam ended
+	# (which drifts with the RNG stream the earlier sections leave) decided which gate it worked
+	for x in m2.lairs.list:
+		if x != L2 and x["state"] == "sealed":
+			x["state"] = "dormant"; m2.lairs._tint_dormant(x, true)
+	# ... and it has to find its way back across the islands: every route a bot takes lands on the
+	# island it leads to (a bridge route that landed on the island it left looped the bot round it)
+	var W2 := m2.world
+	var bad_links: Array = W2.links.filter(func(lk): return W2.island_of(lk["land"].x, lk["land"].z) != int(lk["to"]))
+	ok.call(bad_links.is_empty(), "every glide, wind and bridge route lands on the island it leads to (%d of %d don't: %s)" % [bad_links.size(), W2.links.size(), str(bad_links.slice(0, 3).map(func(lk): return "%d>%d land %s" % [lk["from"], lk["to"], str(lk["land"])]))])
 	for g in L2["guards"]: g.dead = true
 	B.ai["skill"] = 0.9
 	B.ai["boss_hunt"] = true

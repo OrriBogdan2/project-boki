@@ -61,7 +61,9 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 			inp["move"] = tol.normalized()
 			# over the landing: fold the glider and drop onto it
 			inp["glide"] = tol.length() > 1.6 or m.world.is_void(h.pos.x, h.pos.z)
-			if not h.gliding and h.vel.y < 1.0 and h.can_glide():
+			# (only to open the glider: a press near the ground buffers a jump, and over the landing
+			# that bounced the bot on the spot every time it touched down, never counting as landed)
+			if inp["glide"] and not h.gliding and h.vel.y < 1.0 and h.can_glide():
 				inp["jump"] = true
 			return
 		elif h.grounded and h.flat_dist(L["take"]) < 0.9 and h.glide_fuel > 0.6:

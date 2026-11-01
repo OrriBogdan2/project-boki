@@ -2184,7 +2184,16 @@ func generate_authored(L: Dictionary, seed_val: int) -> void:
 		var P0 := Vector3(p0.x, 0, p0.y); var P1 := Vector3(p1.x, 0, p1.y)
 		var on_b := _inward(b, P1, P0)
 		on_b.y = ground_at(on_b.x, on_b.z)
+		# a spot on the bridge itself (island a), a little way back from island b. The bridge only
+		# claims the void it spans, so where its end runs into b's ground that ground is still b's: a
+		# spot 2.5 m back could be on b, and a bot sent there "landed" on b again and went round
 		var on_bridge := Vector3(floor(p1.x - dirn.x * 2.5) + 0.5, 0, floor(p1.y - dirn.y * 2.5) + 0.5)
+		for k in range(5, int(p0.distance_to(p1) * 2.0) - 2):
+			var q := p1 - dirn * (k * 0.5)
+			var qx := int(floor(q.x)); var qz := int(floor(q.y))
+			if inb(qx, qz) and kind[idx(qx, qz)] != T_VOID and island[idx(qx, qz)] == a:
+				on_bridge = Vector3(qx + 0.5, 0, qz + 0.5)
+				break
 		on_bridge.y = ground_at(on_bridge.x, on_bridge.z) if not is_void(on_bridge.x, on_bridge.z) else on_b.y
 		links.append({"from": a, "to": b, "take": on_bridge, "land": on_b, "bridge": true})
 		links.append({"from": b, "to": a, "take": on_b, "land": on_bridge, "bridge": true})
