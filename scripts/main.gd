@@ -45,6 +45,7 @@ func _ready() -> void:
 		if a.begins_with("--mates-revive="): opts["mates_revive"] = float(a.substr(15))
 		if a == "--mates-demo": opts["mates_demo"] = true; opts["no_drop"] = true; opts["god"] = true; opts["squad"] = 4; opts["teams"] = 2
 		if a == "--life-demo": opts["life_demo"] = true; opts["no_drop"] = true; opts["squad"] = 3; opts["teams"] = 3
+		if a == "--boxrev-demo": opts["life_demo"] = true; opts["boxrev_demo"] = true; opts["no_drop"] = true; opts["squad"] = 3; opts["teams"] = 3
 		if a.begins_with("--length="): opts["length"] = float(a.substr(9))
 		if a == "--no-drop": opts["no_drop"] = true
 		if a == "--train-demo": opts["train_demo"] = true; opts["no_drop"] = true
@@ -329,6 +330,9 @@ func _ready() -> void:
 	if "--abyss-check" in args:
 		set_meta("abyss_check", load("res://tools/abyss_check.gd").new())
 		get_meta("abyss_check").run(self)
+		return
+	if "--train-check" in args:
+		load("res://tools/train_check.gd").new().run(self)      # riding the sky train, and being hit by it
 		return
 	if "--balloon-check" in args:
 		load("res://tools/balloon_check.gd").new().run(self)      # the hit marker is the hitbox
@@ -733,12 +737,42 @@ func _life_check() -> void:
 		if int((m.time - t0) * 60.0) % 120 == 0: print("LCHECK   t=%.1f downed=%s down_hp=%.1f revive=%.2f out=%s" % [m.time - t0, B.downed, B.down_hp, B.revive, B.out])
 	var bx := Life.box_of(m, B)
 	print("LCHECK bleed: dead=%s after %.1fs box=%s gems in box=%d" % [B.out, m.time - t0, not bx.is_empty(), int(bx.get("gems", -1))])
-	# 3. box revive
+	# 3. box revive: slow (Life.R["box_revive_time"], 8s) and loud: a looping hum from the box while
+	# it's channelled (stops when it breaks or completes), the reviver kneeling, locked in place
+	var need: float = Life.R["box_revive_time"]
 	spot.call(C, bx["pos"]); C.inp["interact"] = true
-	t0 = m.time
-	while B.out and m.time - t0 < 10.0: run.call(Match.DT)
+	# a hit breaks it: the hum stops, and it has to be started again
+	run.call(1.5)
+	var hum_key := String(bx.get("hum_key", ""))
+	var hum_early: bool = hum_key != "" and m.box_hums.has(hum_key) and Sfx.loop_on(hum_key)
+	C.hurt(4.0, foe, {"src": "shot"})
+	run.call(0.3)
+	var hum_broken: bool = not m.box_hums.has(hum_key) and not Sfx.loop_on(hum_key) and C.box_t == 0.0 and B.out
 	C.inp["interact"] = false
-	print("LCHECK box revive: back=%s after %.1fs hp %.0f%% gems %d" % [not B.out, m.time - t0, B.hp / B.max_hp * 100.0, B.gems])
+	run.call(Match.DT * 2.0)
+	C.inp["interact"] = true
+	t0 = m.time
+	var hum_mid := false
+	var lock_mid := false
+	var ray_mid := false
+	var c_at: Vector3 = C.pos
+	while B.out and m.time - t0 < need + 4.0:
+		C.inp["move"] = Vector2(1, 0)          # trying to walk away doesn't move a kneeling reviver
+		run.call(Match.DT)
+		if m.time - t0 < Match.DT * 1.5: c_at = C.pos      # (from the first step of the channel on)
+		if m.time - t0 > need * 0.5 and m.time - t0 < need * 0.5 + Match.DT * 1.5:
+			hum_mid = m.box_hums.has(hum_key) and Sfx.loop_on(hum_key)
+			C._anim_state(0.0)
+			lock_mid = C.box_reviving() and bool(C.anim_s.get("reviving", false))
+			ray_mid = bx.get("ray_node") != null and is_instance_valid(bx.get("ray_node"))
+	C.inp["interact"] = false
+	C.inp["move"] = Vector2.ZERO
+	var took := m.time - t0
+	var hum_after: bool = m.box_hums.has(hum_key) or Sfx.loop_on(hum_key)
+	print("LCHECK box revive: back=%s after %.1fs hp %.0f%% gems %d" % [not B.out, took, B.hp / B.max_hp * 100.0, B.gems])
+	print("LCHECK box revive %s: takes %.1fs (want %.1fs = 8s)" % ["ok  " if not B.out and absf(took - need) < 0.25 and absf(need - 8.0) < 0.01 else "FAIL", took, need])
+	print("LCHECK box revive %s: hum starts=%s, a hit breaks it and the hum stops=%s" % ["ok  " if hum_early and hum_broken else "FAIL", hum_early, hum_broken])
+	print("LCHECK box revive %s: hum on mid-channel=%s, off after=%s, light ray=%s, reviver kneeling and locked=%s (moved %.2fm)" % ["ok  " if hum_mid and not hum_after and ray_mid and lock_mid and C.pos.distance_to(c_at) < 0.05 else "FAIL", hum_mid, not hum_after, ray_mid, lock_mid, C.pos.distance_to(c_at)])
 	# 4. stomp drain
 	for kk in [B.kin, B.kin2]:
 		if kk: kk.dead = true

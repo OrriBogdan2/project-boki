@@ -325,5 +325,6 @@ func _process(dt: float) -> void:
 func _lost_title(why: String) -> String:
 	match why:
 		"abyss": return "You fell"
+		"train": return "Hit by the Sky Train"
 		"left": return "You left the match"
 	return "Knocked out"

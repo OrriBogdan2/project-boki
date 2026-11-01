@@ -331,6 +331,7 @@ func _evolve(k: Dictionary, out: Dictionary) -> void:
 func _why(w: String) -> String:
 	match w:
 		"abyss": return "fell into the abyss"
+		"train": return "was hit by the Sky Train"
 		"team wiped", "finished": return "got knocked out"
 		"bled out": return "bled out"
 		"left": return "left early"

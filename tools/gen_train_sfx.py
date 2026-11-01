@@ -41,3 +41,41 @@ for at in (0.0, .12, .5, .62):
     clack[i:i + seg] += bpf(rng.uniform(-1, 1, seg), 200, 1100) * e
 save('rail', rum * .7 + clack, -21)
 print('train sounds written')
+
+# train_hit: hit by the sky train. A heavy low thump, an iron clang and a crunch: the loudest thing on
+# the map, so nobody wonders what happened
+d = 1.3; n = int(SR * d); tt = t(d)
+thump = np.sin(2 * np.pi * np.cumsum(40 + 90 * np.exp(-tt / 0.08)) / SR) * np.exp(-tt / 0.35)
+clang = sum(np.sin(2 * np.pi * f * tt + p) * a * np.exp(-tt / dk) for f, a, dk, p in
+            ((311, 1.0, .5, 0), (467, .7, .4, 1), (733, .5, .3, 2), (1187, .35, .22, 3), (1663, .2, .15, 4)))
+crunch = bpf(rng.uniform(-1, 1, n), 300, 3200) * np.exp(-tt / 0.09)
+hit = thump * 1.6 + lpf(clang, 2600) * .55 + crunch * .9
+hit[:int(SR * .004)] *= np.linspace(0, 1, int(SR * .004))
+save('train_hit', hit, -13)
+
+# revive_hum: a deathbox revive being channelled. A seamless two-second loop (every partial a whole
+# number of cycles long, no fades) of a low warm hum and a shimmer of chimes; the game raises its
+# pitch as the channel fills
+d = 2.0; n = int(SR * d); tt = np.arange(n) / SR
+hum = sum(np.sin(2 * np.pi * f * tt) * a for f, a in ((110, 1.0), (110.5, .6), (165, .45), (220, .35), (330, .12)))
+trem = 0.8 + 0.2 * np.sin(2 * np.pi * 3.0 * tt)
+chime = np.zeros(n)
+for i, (f, at) in enumerate(((880, 0.0), (1108.5, .5), (1318.5, 1.0), (1760, 1.5))):
+    ph = (tt - at) % d
+    chime += np.sin(2 * np.pi * f * tt) * np.exp(-ph / 0.35) * .35
+loop = hum * trem * .55 + chime
+loop = loop / np.max(np.abs(loop)) * 0.5
+loop *= 10 ** (-17 / 20) / np.sqrt(np.mean(loop ** 2))
+with wave.open(os.path.join(OUT, 'revive_hum.wav'), 'wb') as w:
+    w.setnchannels(1); w.setsampwidth(2); w.setframerate(SR); w.writeframes((np.clip(loop, -.95, .95) * 32767).astype(np.int16).tobytes())
+
+# revive_done: the revive completes. A bright rising arpeggio of bells over a soft swell
+d = 1.6; n = int(SR * d); tt = t(d)
+done = np.zeros(n)
+for i, f in enumerate((523.25, 659.25, 783.99, 1046.5)):
+    i0 = int(i * .07 * SR); seg = n - i0; t2 = np.arange(seg) / SR
+    bell = (np.sin(2 * np.pi * f * t2) + .4 * np.sin(2 * np.pi * f * 2.76 * t2) * np.exp(-t2 / .15)) * np.exp(-t2 / .5)
+    done[i0:] += bell * (1 - .12 * i)
+swell = sum(np.sin(2 * np.pi * f * tt) for f in (261.6, 392.0)) * np.sin(np.pi * np.minimum(tt / d, 1)) * .25
+save('revive_done', done + swell, -15)
+print('train hit and revive sounds written')

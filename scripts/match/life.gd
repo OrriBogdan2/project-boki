@@ -21,7 +21,7 @@ const R := {
 	"stomp_time": 2.4,          # [footage] ...then you're locked in for this long, three stomps and done
 	"stomp_cycle": 0.7,         # one foot-lift-and-slam
 	"kin_revive_time": 8.0,     # [design] your kin pulling you up (as long as Supervive's Guardian Angel self-revive)
-	"box_revive_time": 5.0,     # [est] teammate holds interact at your deathbox
+	"box_revive_time": 8.0,     # [design] teammate holds interact at your deathbox: slow and loud, a real risk
 	"box_revive_hp": 0.25,      # [design] same as a wisp revive
 	"soul_time": 90.0,          # [design] box revive window
 	"loot_time": 1.0,           # [design] bots: hold interact to take everything from a box (you get a loot window)
@@ -183,6 +183,11 @@ static func tick_stomps(m: Match, dt: float) -> void:
 ## Where a box goes: where you fell, or the last solid ground before the abyss.
 static func box_spot(m: Match, h: Hunter, why: String) -> Vector3:
 	var at := h.pos
+	if why == "train" and m.world.is_void(at.x, at.z):
+		# hit by the sky train over the abyss: the box lands on the nearest ground to where they were hit
+		var near: Vector3 = m.world.free_spot_near(at, [], 1.0, 0.4, 14.0)
+		if not m.world.is_void(near.x, near.z):
+			at = near
 	if why == "abyss" or m.world.is_void(at.x, at.z) or at.y < m.world.ground_at(at.x, at.z) - 1.0:
 		at = h.safe_pos if h.safe_pos != Vector3.INF else at
 		if m.world.is_void(at.x, at.z):
