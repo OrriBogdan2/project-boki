@@ -351,6 +351,12 @@ func _ready() -> void:
 		set_meta("kinbox_check", kbc)      # kept alive while it waits on frames
 		kbc.run(self)
 		return
+	for sc in [["--support-check", "all"], ["--tender-combo-check", "tender"], ["--rimewright-combo-check", "rimewright"]]:
+		if sc[0] in args:
+			var spc = load("res://tools/support_check.gd").new()      # the support pair: ally heals, carries, revives, combos
+			set_meta("support_check", spc)
+			spc.run(self, sc[1])
+			return
 	if "--revive-check" in args:
 		var rvc = load("res://tools/revive_check.gd").new()      # bot squadmates pick you up first
 		set_meta("revive_check", rvc)

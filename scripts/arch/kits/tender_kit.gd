@@ -156,6 +156,7 @@ func drop_all(broken: bool) -> void:
 		o.vel = Vector3.ZERO
 	h.shield = 0.0
 	h.shield_t = 0.0
+	lock_t = maxf(lock_t, 1.5)          # set down: not picked straight back up
 	if broken:
 		var pd: Dictionary = d["passive"]
 		h.stun_t = maxf(h.stun_t, float(pd.get("drop_stun", 0.6)))

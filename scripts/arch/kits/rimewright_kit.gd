@@ -123,7 +123,7 @@ func _throw_shard() -> void:
 	var spd := float(wd["speed"]) * (1.35 if heavy else 1.0)
 	var rng := float(wd["range"]) * (1.4 if heavy else 1.0) * h.shot_range_k
 	h.shot_range_k = 1.0
-	var col := Color(String(wd["color"]))
+	var col: Color = wd["color"]
 	var extra := {"src": "shot", "ab": "fan", "kb": float(wd["kb"]) * (2.0 if heavy else 1.0), "tracer": 1.0}
 	m.spawn_shot(h, start, dir * spd, dmg, rng / spd, float(wd["size"]) * (1.6 if heavy else 1.0), col, extra)
 	if not m.shots.is_empty():
