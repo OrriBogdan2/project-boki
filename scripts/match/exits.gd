@@ -60,6 +60,7 @@ func setup(match_node: Match) -> void:
 	var tut: bool = m.opts.get("tutorial", false)
 	var defs: Array = m.world.exit_defs if not m.world.exit_defs.is_empty() else _default_defs()
 	for d in defs:
+		await m._slice()       # under the loading screen: a frame now and then
 		match String(d["kind"]):
 			"dock": _add_dock(d)
 			"hatch": _add_hatch(d)

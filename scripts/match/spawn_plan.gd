@@ -190,6 +190,7 @@ func spawn_all() -> void:
 	for c in cands:
 		if not c["active"]:
 			continue
+		await m._slice()       # under the loading screen, a frame now and then
 		var p: Vector3 = c["pos"]
 		match String(c["cat"]):
 			"vault":

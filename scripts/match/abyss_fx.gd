@@ -1,9 +1,9 @@
 extends CanvasLayer
-## (movefeel) The abyss closing in, for the local player only. SUPERVIVE tints the screen as you sink
-## below island level and darkens it the deeper you go [footage, SUPERVIVE_FEEL.md]; ours escalates
-## hard so it's unmistakable before it's too late: the colour drains, the picture darkens and goes
-## crimson, and a vignette closes in from the edges, beating with a heartbeat. The HUD adds the
-## heartbeat/rumble sounds and a pulsing warning near the point of no return (see Hud).
+## (movefeel) The abyss, for the local player only. As in the owner's reference footage, the moment
+## you're below island level the whole view goes a saturated magenta/rose, deepening toward
+## crimson-magenta the lower you go; only right at the point of no return does it darken and close
+## in at the edges with a heartbeat. It snaps back as you come up. The HUD adds the heartbeat sounds
+## and a pulsing warning near the end (see Hud); the home uses it too (Home._abyss_tint).
 ## Sits just under the HUD layer, so the HUD stays readable. (No class_name: load it by path, so a
 ## fresh checkout needs no class-cache rescan.)
 
@@ -15,21 +15,20 @@ uniform float pulse = 0.0;   // heartbeat 0..1
 void fragment() {
 	vec3 c = texture(screen_tex, SCREEN_UV).rgb;
 	float l = dot(c, vec3(0.299, 0.587, 0.114));
-	// drain the colour
-	vec3 g = mix(c, vec3(l), clamp(k * 1.25, 0.0, 0.92));
-	// deep crimson monochrome taking over past the halfway mark
-	vec3 red = vec3(l * 1.2 + 0.06, l * 0.16, l * 0.14);
-	float rk = smoothstep(0.3, 1.0, k);
-	g = mix(g, red, rk * (0.7 + 0.3 * pulse));
-	// darker the deeper
-	g *= 1.0 - 0.5 * k;
-	// the vignette closes in, and breathes with the heartbeat
+	// [reference footage] under island level the whole view goes a saturated magenta / rose at once,
+	// deepening toward crimson-magenta lower down; the picture keeps its shapes (shading, clouds)
+	vec3 rose = vec3(0.98, 0.30, 0.66);
+	vec3 deep = vec3(0.70, 0.05, 0.30);
+	vec3 tint = mix(rose, deep, smoothstep(0.35, 1.0, k));
+	float s = clamp(0.5 + 0.35 * k, 0.0, 0.88);
+	vec3 g = mix(c, tint * (0.3 + 1.05 * l), s);
+	// right at the end: darker, and the edges close in with the heartbeat
+	float e = smoothstep(0.7, 1.0, k);
+	g *= 1.0 - 0.3 * e;
 	float aspect = SCREEN_PIXEL_SIZE.y / SCREEN_PIXEL_SIZE.x;
-	vec2 d = (SCREEN_UV - 0.5) * vec2(aspect, 1.0);
-	float r = length(d);
-	float edge = mix(0.95, 0.2, k) - pulse * 0.05 * k;
-	float v = smoothstep(edge, edge + 0.32, r);
-	g = mix(g, vec3(0.1, 0.0, 0.01) * (0.6 + 0.4 * pulse), v * clamp(k * 1.5, 0.0, 0.97));
+	float r = length((SCREEN_UV - 0.5) * vec2(aspect, 1.0));
+	float v = smoothstep(0.75 - pulse * 0.05, 1.05, r);
+	g = mix(g, vec3(0.16, 0.0, 0.06), v * e * 0.8);
 	COLOR = vec4(g, 1.0);
 }
 """
@@ -67,13 +66,14 @@ static func danger(p: Hunter) -> float:
 		return 0.0
 	# the lip it's measured from: the lowest island ground around (or where you left), as the kill line is
 	var top: float = p.m.world.abyss_floor(p.pos.x, p.pos.z, p.last_gy) + World.ABYSS_DEPTH - 0.5
-	var kill := p.abyss_kill_y()
-	var span := maxf(1.0, top - kill)
-	var depth := top - p.pos.y
+	return danger_depth(top - p.pos.y, top - p.abyss_kill_y(), p.glide_fuel <= 0.001)
+
+## The same from a depth under the balloon line and the span down to the point of no return.
+static func danger_depth(depth: float, span: float, no_heat := false) -> float:
 	if depth <= 0.0:
 		return 0.0
-	var x := clampf(depth / span, 0.0, 1.0)
+	var x := clampf(depth / maxf(1.0, span), 0.0, 1.0)
 	x = 1.0 - pow(1.0 - x, 1.6)      # rises fast at first: it's obvious early
-	if p.glide_fuel <= 0.001:
+	if no_heat:
 		x = minf(1.0, x * 1.25 + 0.1)
-	return x
+	return maxf(x, 0.05)

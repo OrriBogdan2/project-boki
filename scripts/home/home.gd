@@ -5,6 +5,9 @@ extends Node3D
 const SPEED := 5.0
 
 var world: World
+## Under the ink wipe the farm builds in slices (see _ready): true until it's whole; Main holds the
+## reveal until then.
+var building := false
 var cam: CamRig
 var fx: Fx
 var ui: CanvasLayer
@@ -54,6 +57,18 @@ var hb: HomeBuild = null         # build mode and the island's layout (home_buil
 var training: HomeTraining = null  # the Training Grounds isle, where your combat kit works (home_training.gd)
 var hw: HomeWork = null            # kin at work: jobs, stations and the Job Board (home_work.gd, Work)
 var hinc: HomeIncubator = null     # the Incubator by the Nesting Nook, where Rare Eggs hatch (home_incubator.gd, Incubator)
+## A farm-start island (HomeLayout.fs): the house, crop patches, pot, stall, Nook, Burrow, training
+## post and graveyard are things you place in build mode, so where they are comes from the layout
+## (_sync_fixtures); one you haven't placed is FAR away (nothing finds it, nothing walks to it).
+var fs := false
+const FAR := Vector3(-400, 0, -400)
+var house_r := 0                   # which way the house faces (quarter turns)
+var grave_c := Vector3(50.0, 0, 32.0)
+var grave_r := 0
+var burrow_r := 0
+var _fx_sig := ""
+var away_work: Array = []          # lines: what assigned Boki made while you were away
+var hg: HomeGather = null           # chopping wild trees and mining boulders with your tools (home_gather.gd)
 
 ## The island being shown: yours, or the one you're visiting.
 func _d() -> Dictionary:
@@ -117,8 +132,17 @@ func _ready() -> void:
 	# so does Old Pell's Ransom House
 	if visit.is_empty() and not Save.d.get("buildings", []).has("ransom"):
 		Save.d["buildings"].append("ransom")
+	# in real play the farm builds under the ink wipe in slices (no 3D drawn meanwhile), so the wipe's
+	# spinner keeps turning and the window never hangs; tools and checks (no wipe) build it in one go
+	building = Game.main != null and Game.main.fade != null and Game.main.fade.covered and is_inside_tree()
+	if building:
+		set_process(false)
+		set_process_unhandled_input(false)
+		get_viewport().disable_3d = true
+		PerfLog.frame_drawn()
 	hecon = HomeEcon.new(self)
 	if visit.is_empty():
+		HomeLayout.ensure(Save.d)     # first: a brand new farm-start island keeps its first trough in storage
 		Econ.ensure()
 		KinBox.ensure()        # the Kin Burrow; an old crowded farm gets its overflow boxed once
 		_econ_tests(dbg)
@@ -128,16 +152,34 @@ func _ready() -> void:
 	_build_env()
 	world = World.new(); add_child(world)
 	var lay := HomeLayout.ensure(_d())
-	HomeLayout.make_world(world, int(lay["grow"]), int(lay.get("seed", 0)))
+	await _slice()
+	fs = HomeLayout.fs(_d())
+	HomeLayout.make_world(world, int(lay["grow"]), int(lay.get("seed", 0)), float(lay.get("sk", 1.0)) if fs else 0.0)
+	await _slice()
 	hb = HomeBuild.new(self)
+	hg = HomeGather.new(self)
 	training = HomeTraining.new(self)
 	hw = HomeWork.new(self)
 	if visit.is_empty(): Work.ensure()
 	var path_col := Color("9c7a52")
-	# your house up north, a path from its door down to the portal, branches to the market, the farm and the bridges
+	spots["portal"] = Vector3(38.0, 0, 39.0)
+	if fs:
+		# a farm-start island: just the portal, its rack and the ferry; you put everything else down
+		for nm in ["house", "pot", "stall"]: spots[nm] = FAR
+		NEST_AT = FAR; INCUB_AT = FAR; YARD_AT = FAR; YARD_KIN = FAR; BURROW_AT = FAR; POND_EDGE = FAR; grave_c = FAR
+		world.paint_path(Vector2i(37, 36), Vector2i(37, 38), path_col)
+	_classic_layout(path_col)
+	spots["rack"] = Vector3(34.5, 0, 40.5)      # the glider rack, beside the portal
+	world.set_block_rect(34, 40, 34, 40)
+	_ready_rest()
+
+## The classic island's fixed farm: the house up north, a path from its door down to the portal,
+## branches to the market, the farm and the bridges; the pot, the stall, the farm's soil and the pond.
+func _classic_layout(path_col: Color) -> void:
+	if fs:
+		return
 	spots["house"] = Vector3(38.0, 0, 26.5)
 	world.set_block_rect(36, 25, 40, 27)
-	spots["portal"] = Vector3(38.0, 0, 39.0)
 	world.paint_path(Vector2i(37, 28), Vector2i(37, 38), path_col)
 	world.paint_path(Vector2i(39, 31), Vector2i(42, 31), path_col, false)
 	world.paint_path(Vector2i(24, 30), Vector2i(36, 30), path_col, false)
@@ -152,12 +194,127 @@ func _ready() -> void:
 	world.set_block_rect(29, 32, 31, 33)
 	spots["pot"] = Vector3(42.5, 0, 27.5)
 	world.set_block_rect(42, 27, 42, 27)
-	spots["rack"] = Vector3(34.5, 0, 40.5)      # the glider rack, beside the portal
-	world.set_block_rect(34, 40, 34, 40)
 	for z in range(30, 38):
 		for x in range(43, 48):
 			world.paint_tile(x, z, Color("6b4a33"))
 	world.set_block_rect(32, 36, 34, 38)   # pond
+
+# ------------------------------------------------------------------ a farm-start island's fixtures
+func _fx1(fx: String) -> Dictionary:
+	var a := HomeLayout.fixtures(_d(), fx)
+	return a[0] if not a.is_empty() else {}
+
+static func _turn(v: Vector3, r: int) -> Vector3:
+	return v.rotated(Vector3.UP, r * PI * 0.5)
+
+## Where the placed fixtures put the house, pot, stall, Nook, Incubator, Burrow, training post and
+## graveyard (FAR for any not placed). Data only: _sync_fixtures moves the nodes too.
+func _fixture_spots() -> void:
+	if not fs:
+		return
+	var e := _fx1("house")
+	spots["house"] = HomeLayout.deco_center(e) if not e.is_empty() else FAR
+	house_r = int(e.get("r", 0)) if not e.is_empty() else 0
+	e = _fx1("pot")
+	spots["pot"] = HomeLayout.deco_center(e) if not e.is_empty() else FAR
+	e = _fx1("stall")
+	spots["stall"] = HomeLayout.deco_center(e) if not e.is_empty() else FAR
+	e = _fx1("nook")
+	if e.is_empty():
+		NEST_AT = FAR; INCUB_AT = FAR
+	else:
+		var c := HomeLayout.deco_center(e); var r := int(e.get("r", 0))
+		NEST_AT = c + _turn(Vector3(0.9, 0, 0), r)
+		INCUB_AT = c + _turn(Vector3(-1.15, 0, 0.1), r)
+	e = _fx1("burrow")
+	BURROW_AT = HomeLayout.deco_center(e) if not e.is_empty() else FAR
+	burrow_r = int(e.get("r", 0)) if not e.is_empty() else 0
+	e = _fx1("yard")
+	if e.is_empty():
+		YARD_AT = FAR; YARD_KIN = FAR
+	else:
+		var c2 := HomeLayout.deco_center(e); var r2 := int(e.get("r", 0))
+		YARD_AT = c2 + _turn(Vector3(0.3, 0, -0.2), r2)
+		YARD_KIN = YARD_AT + _turn(Vector3(-0.3, 0, 0.2), r2)
+	e = _fx1("graves")
+	grave_c = HomeLayout.deco_center(e) if not e.is_empty() else FAR
+	grave_r = int(e.get("r", 0)) if not e.is_empty() else 0
+	# the pond's edge, for kin that like to sit by the water: the first wild pond tile
+	POND_EDGE = FAR
+	if hb:
+		for k in HomeLayout.of(_d()).get("water", {}):
+			var t := HomeLayout.unkey(k)
+			POND_EDGE = Vector3(t.x + 0.5, 0, t.y + 1.6)
+			break
+
+## After the layout changed: fixture spots, and the nodes that follow them (plots on the crop
+## patches, the Incubator, the graveyard's gate and graves, the house and the Burrow's models).
+func _sync_fixtures() -> void:
+	if not fs:
+		return
+	_fixture_spots()
+	if visit.is_empty() and Progress.day1_active():
+		# the first day's farm-start steps tick off as they go down
+		var r1 := Progress.day1_mark("house") if spots["house"].x > -100.0 else ""
+		var r2 := Progress.day1_mark("patch") if not HomeLayout.fixtures(_d(), "farm").is_empty() else ""
+		if (r1 != "" or r2 != "") and is_instance_valid(top_chips):
+			_refresh_day1.call_deferred()
+			_refresh_top.call_deferred()
+	var e := _fx1("house")
+	house_node = (hb.nodes.get(int(e["u"])) as Node3D) if hb and not e.is_empty() else null
+	e = _fx1("burrow")
+	var bn: Node3D = (hb.nodes.get(int(e["u"])) as Node3D) if hb and not e.is_empty() else null
+	burrow_node = bn.get_node_or_null("Burrow") as Node3D if is_instance_valid(bn) else null
+	e = _fx1("yard")
+	var yn: Node3D = (hb.nodes.get(int(e["u"])) as Node3D) if hb and not e.is_empty() else null
+	yard = yn.get_child(0) as Node3D if is_instance_valid(yn) and yn.get_child_count() > 0 else null
+	if hinc and hinc.node:
+		hinc.node.position = INCUB_AT
+		hinc.node.rotation.y = int(_fx1("nook").get("r", 0)) * PI * 0.5
+		hinc.node.visible = INCUB_AT.x > -100.0
+		if hinc.label:
+			hinc.label.position = INCUB_AT + Vector3(0, 2.4, -0.4)
+			hinc.label.visible = hinc.node.visible
+		hinc.refresh()
+	if hecon and visit.is_empty():
+		hecon.move_graveyard()
+	if is_instance_valid(nest): nest.position = NEST_AT
+	var cap: int = int(Save.d["plot_cap"]) if visit.is_empty() else (_d()["plots"] as Array).size()
+	if str(_plot_spots(cap)) != _fx_sig:
+		_build_plots()
+
+## A farm-start island after your first expedition: Old Pell sets up the Ransom House and the
+## Challenge House goes up, each on open ground near the portal (move them wherever you like).
+## Returns true if any went up.
+func _fs_arrivals() -> bool:
+	if int(Save.d.get("matches", 0)) < 1:
+		return false
+	var any := false
+	var w: World = world
+	for b in ["board", "ransom"]:
+		if HomeLayout.placed(b, _d()) or not _has_b(b):
+			continue
+		var item := {"kind": "b", "id": b, "r": 0, "from": 0}
+		var best := Vector2i(-1, -1); var bd := 1e9
+		for z in range(20, 50):
+			for x in range(20, 64):
+				var dd := Vector2(x - HomeLayout.LANDING.x, z - HomeLayout.LANDING.z).length()
+				if dd < 5.0 or dd > 16.0 or dd >= bd: continue
+				if not w.inb(x, z) or w.island[w.idx(x, z)] != 0: continue
+				if hb.fits(item, HomeLayout.cells_of(HomeLayout.rect_at(b, x, z, 0))): best = Vector2i(x, z); bd = dd
+		if best.x >= 0:
+			HomeLayout.of(_d())["b"][b] = {"x": best.x, "z": best.y, "r": 0}
+			hb._apply_blockers()
+			hb._reach_cache.clear()
+			any = true
+	if any:
+		HomeBuild.pending_toast = "Old Pell set up the Ransom House and the Challenge House near the portal (move them in build mode)"
+	return any
+
+## The rest of setting the island up (after the classic farm's fixed parts, or none on a farm-start island).
+func _ready_rest() -> void:
+	var dbg := OS.get_cmdline_user_args()
+	_fixture_spots()
 	# a few trees around the rim of every island, kept away from paths, lots and bridges
 	world.add_trees_on_rim(54)
 	var keep_clear: Array = [[36, 34, 40, 44], [42, 28, 50, 40], [41, 20, 47, 26], [22, 28, 28, 32], [46, 26, 62, 30], [27, 23, 31, 30], [32, 41, 36, 47]]
@@ -184,7 +341,9 @@ func _ready() -> void:
 		HomeLayout.rescue_feeders(world)
 	# the layout's buildings, decorations, paths, ponds and colour theme
 	hb.prepare_world()
-	if visit.is_empty():
+	if fs and visit.is_empty() and _fs_arrivals():
+		hb._apply_blockers()
+	if visit.is_empty() and not fs:
 		world.set_block_rect(BURROW_RECT[0], BURROW_RECT[1], BURROW_RECT[2], BURROW_RECT[3])
 	if "--print-home" in OS.get_cmdline_user_args():
 		for z in range(0, world.h):
@@ -194,17 +353,21 @@ func _ready() -> void:
 				line += "." if world.kind[i] == World.T_VOID else ("#" if world.kind[i] == World.T_BLOCK else ("o" if world.paint.has(i) else "g"))
 			print(line)
 		get_tree().quit()
-	world.build_meshes()
+	await _slice()
+	if building: world.stage_cb = func(_l: String) -> void: pass
+	await world.build_meshes()
+	world.stage_cb = Callable()
 	fx = Fx.new(); add_child(fx)
 	cam = CamRig.new(); add_child(cam)
 	cam.zoom_to = HOME_ZOOM; cam.zoom = HOME_ZOOM; cam.lead = 0.2
 	_apply_cam_settings(0.0)
 	if "--home-wide" in OS.get_cmdline_user_args():
 		cam.zoom_to = 2.6; cam.zoom = 2.6     # test: the whole farm in one shot
-	var house := Models.house(); house.position = spots["house"]; add_child(house)
-	house_node = house
-	var pot := Models.cauldron(); pot.position = spots["pot"]; add_child(pot)
-	var stall := Models.stall(); stall.position = spots["stall"]; stall.rotation.y = PI * 0.5; add_child(stall)
+	if not fs:
+		var house := Models.house(); house.position = spots["house"]; add_child(house)
+		house_node = house
+		var pot := Models.cauldron(); pot.position = spots["pot"]; add_child(pot)
+		var stall := Models.stall(); stall.position = spots["stall"]; stall.rotation.y = PI * 0.5; add_child(stall)
 	var portal := Models.portal(UI.TEAL); portal.position = spots["portal"]; add_child(portal)
 	if visit.is_empty():
 		rack_node = _glider_rack()
@@ -212,29 +375,32 @@ func _ready() -> void:
 		add_child(rack_node)
 	portal.get_node("Disc").visible = true
 	(portal.get_node("Beam") as CPUParticles3D).emitting = true
-	var drng := RandomNumberGenerator.new(); drng.seed = 77
-	var pond := Models.pond(1.9, 1.5); pond.position = Vector3(33.5, 0, 37.5); add_child(pond)
-	for fp in [[Vector3(45.4, 0, 29.4), 0.0, 5.0], [Vector3(45.4, 0, 37.6), 0.0, 5.0], [Vector3(47.8, 0, 33.5), PI / 2, 8.0], [Vector3(42.4, 0, 35.6), PI / 2, 4.0]]:
-		var f := Models.fence(fp[2]); f.position = fp[0]; f.rotation.y = fp[1]; add_child(f)
+	if not fs:
+		var pond := Models.pond(1.9, 1.5); pond.position = Vector3(33.5, 0, 37.5); add_child(pond)
+		for fp in [[Vector3(45.4, 0, 29.4), 0.0, 5.0], [Vector3(45.4, 0, 37.6), 0.0, 5.0], [Vector3(47.8, 0, 33.5), PI / 2, 8.0], [Vector3(42.4, 0, 35.6), PI / 2, 4.0]]:
+			var f := Models.fence(fp[2]); f.position = fp[0]; f.rotation.y = fp[1]; add_child(f)
 	# (the farm's lamps and flower beds are decorations now: see HomeLayout.STOCK)
 	spots["ferry"] = Vector3(42.2, 0, 40.6)
 	var fpost := Models.ferry_post(); fpost.position = spots["ferry"]; fpost.rotation.y = -0.4; add_child(fpost)
 	var sign_post := Models.signpost(["Expeditions"]); sign_post.position = Vector3(39.8, 0, 38.2); sign_post.rotation.y = -0.3; add_child(sign_post)
-	var roster: Array = _farm_kin()
+	var roster: Array = _farm_kin() if not fs else []
 	for i in mini(roster.size(), 6):
 		var bed := Models.kin_bed(Data.KIN[roster[i]["species"]]["color"])
 		bed.position = Vector3(33.4 + (i % 3) * 1.1, 0, 27.6 + (i / 3) * 1.1)
 		add_child(bed)
+	await _slice()
 	_build_lots()
-	if visit.is_empty():
+	if visit.is_empty() and not fs:
 		_build_burrow()
+	await _slice()
 	_build_bridges()
 	_build_plots()
+	await _slice()
 	player = Models.hunter(Data.class_of_save(), Data.TEAM_COLORS[0], _weapon(), "", Save.d.get("look", {}), Arch.of_save())
 	add_child(player)
-	ppos = Vector3(38.0, 0, 34.5)
+	ppos = Vector3(38.0, 0, 34.5) if not fs else HomeLayout.LANDING
 	if spawn == "house":
-		ppos = spots["house"] + Vector3(0, 0, 2.6)
+		ppos = _house_door() + HomeLayout.facing(house_r) * 0.5
 	elif lots.has(spawn):
 		ppos = lots[spawn]["door"]
 	player.position = ppos
@@ -433,6 +599,10 @@ func _ready() -> void:
 			Save.no_write = true
 			var wd: String = a
 			get_tree().create_timer(0.3).timeout.connect(func(): hw.demo(wd))
+		if a.begins_with("--farm-demo"):
+			Save.no_write = true
+			var fw := a.substr(12) if a.length() > 12 else "empty"
+			get_tree().create_timer(0.6).timeout.connect(func(): hg.demo(fw))
 		if a.begins_with("--kinbox-demo"):
 			# test: a full farm and three pages in the Kin Burrow, then the box, a mutation lineup or a details card
 			KinBoxView.demo_roster()
@@ -447,12 +617,18 @@ func _ready() -> void:
 		if a.begins_with("--home-at="):
 			var xy := a.substr(10).split(",")
 			ppos = Vector3(float(xy[0]), 0, float(xy[1])); player.position = ppos; cam.snap(ppos)
+	await _slice()
 	_spawn_kin()
+	await _slice()
 	_setup_care()
 	if visit.is_empty():
 		hecon.build()
+	await _slice()
 	training.build()
+	await _slice()
 	hb.build_visuals()
+	_sync_fixtures()
+	await _slice()
 	hb.assign_beds()
 	if "--kin-lineup" in dbg:
 		var lr := RandomNumberGenerator.new(); lr.seed = 11
@@ -466,9 +642,15 @@ func _ready() -> void:
 			kn.rotation.y = PI * 0.1
 			kn.scale *= 1.3
 			add_child(kn)
+	await _slice()
 	_build_ui()
 	_refresh_top()
 	_refresh_day1()
+	if building:
+		building = false
+		set_process(true)
+		set_process_unhandled_input(true)
+		get_viewport().disable_3d = false
 	if visit.is_empty() and int(Save.d.get("box_notice", 0)) > 0:
 		# an old save, first time home since the Kin Burrow: say where everyone went
 		var nb := int(Save.d["box_notice"])
@@ -499,6 +681,13 @@ func _ready() -> void:
 	var ak := Save.active_kin()
 	if visit.is_empty() and Bridge.ai_ok and not ak.is_empty() and int(ak.get("matches", 0)) % 3 == 0:
 		Bridge.refresh_lines(ak)
+
+## While building under the ink wipe: lets a frame draw once the build has had the CPU for a while.
+func _slice() -> void:
+	if building and is_inside_tree() and PerfLog.slice_due():
+		PerfLog.wait_begin()
+		await get_tree().process_frame
+		PerfLog.wait_end()
 
 func _rect_center(rc: Array) -> Vector3:
 	return Vector3((rc[0] + rc[2] + 1) * 0.5, 0, (rc[1] + rc[3] + 1) * 0.5)
@@ -531,6 +720,10 @@ func _build_lots() -> void:
 			n = Models.lot(sz.x, sz.y, bd["name"], "%d gems" % int(bd["cost"]))
 		holder.add_child(n)
 		lots[b] = {"node": holder, "built": built, "at": at, "door": HomeLayout.door_at(b, int(pl["x"]), int(pl["z"]), int(pl["r"]))}
+		if not HomeLayout.placed(b, _d()):
+			# a farm-start lot you haven't marked out yet (build mode, Buildings)
+			holder.visible = false
+			lots[b]["at"] = FAR; lots[b]["door"] = FAR
 
 func _build_bridges() -> void:
 	for k in Data.ISLES:
@@ -675,9 +868,11 @@ func _build_plots() -> void:
 	var cap: int = int(Save.d["plot_cap"]) if visit.is_empty() else (_d()["plots"] as Array).size()
 	while _d()["plots"].size() < cap:
 		_d()["plots"].append({"crop": "", "stage": 0})
-	for i in cap:
+	var where := _plot_spots(cap)
+	_fx_sig = str(where)
+	for i in where.size():
 		var p := Models.plot()
-		p.position = Vector3(44.2 + (i % 2) * 2.2, 0, 30.8 + (i / 2) * 2.0)
+		p.position = where[i]
 		add_child(p)
 		plots.append(p)
 		_refresh_plot("plots", i)
@@ -689,6 +884,20 @@ func _build_plots() -> void:
 			add_child(p)
 			gh_plots.append(p)
 			_refresh_plot("gh_plots", i)
+
+## Where each plot is: the classic farm's two columns, or on a farm-start island four to each crop
+## patch you've put down (plots without a patch yet aren't out).
+func _plot_spots(cap: int) -> Array:
+	var out: Array = []
+	if not fs:
+		for i in cap: out.append(Vector3(44.2 + (i % 2) * 2.2, 0, 30.8 + (i / 2) * 2.0))
+		return out
+	for e in HomeLayout.fixtures(_d(), "farm"):
+		var c := HomeLayout.deco_center(e)
+		for j in 4:
+			if out.size() >= cap: break
+			out.append(c + Vector3(-1.1 + (j % 2) * 2.2, 0, -1.0 + (j / 2) * 2.0).rotated(Vector3.UP, int(e.get("r", 0)) * PI * 0.5))
+	return out
 
 func _plot_node(arr: String, i: int) -> Node3D:
 	return plots[i] if arr == "plots" else gh_plots[i]
@@ -814,11 +1023,13 @@ func _process(delta: float) -> void:
 	_update_bubbles(d)
 	_train_process(d)
 	if hb: hb.tick(d)
+	if hg: hg.tick(d)
 	if hw: hw.tick(d)
 	if hinc: hinc.tick(d)
 	if training: training.tick(d)
 	_apply_cam_settings(d)
-	cam.follow(ppos, d, panel_open == "" and train.is_empty())
+	cam.follow(Vector3(ppos.x, minf(py, 0.0), ppos.z), d, panel_open == "" and train.is_empty())
+	_abyss_tint(d)
 	_find_interact()
 	if hb and hb.active:
 		return
@@ -1057,6 +1268,10 @@ func _move_player(d: float) -> void:
 	if air:
 		if not lfl.is_empty() and _ledge_float(d, mv):
 			pass
+		elif gliding and gh <= World.VOID + 1.0 and py < _abyss_lip() - 0.5:
+			# below an island's lip over the abyss the glider pulls you up, harder the deeper you are
+			# (the match's lift: Hunter.abyss_lift_vy). The farm never had it: you only sank
+			pvy = Hunter.abyss_lift_vy(pvy, _abyss_lip() - py, d)
 		elif gliding and pvy <= 0.0:
 			pvy = move_toward(pvy, -Hunter.GLIDE_SINK, Hunter.GLIDE_CATCH * d)
 		else:
@@ -1070,7 +1285,7 @@ func _move_player(d: float) -> void:
 			pvy = 0.0
 			gliding = false
 			Sfx.step(null, -16.0)
-		elif py < FALL_RESPAWN or (gh <= World.VOID + 1.0 and py < world.abyss_floor(ppos.x, ppos.z) - (Hunter.ABYSS_GLIDE_ROOM if gliding else 0.0)):
+		elif py < FALL_RESPAWN or (gh <= World.VOID + 1.0 and py < world.abyss_floor(ppos.x, ppos.z) - Hunter.ABYSS_EXTRA - (Hunter.ABYSS_GLIDE_ROOM if gliding else 0.0)):
 			_respawn_safe()
 	else:
 		py = gh
@@ -1091,6 +1306,7 @@ func _move_player(d: float) -> void:
 		if ad.length() > 0.4: want = atan2(-ad.x, -ad.y)
 	elif hv.length() > 0.3:
 		want = atan2(-hv.x, -hv.y)
+	if hg and hg.busy(): want = hg.face()      # chopping: face the tree
 	pface = lerp_angle(pface, want, minf(1.0, d * 14.0))
 	player.rotation.y = pface
 	if p_anim == null or p_anim.model != player:
@@ -1377,6 +1593,33 @@ func _climb_step(d: float) -> void:
 		Sfx.play("land", null, -12.0)
 		if fx: fx.dust(ppos, 3)
 
+## Under island level over the abyss the view goes magenta, as in a match (AbyssFx), deeper toward
+## the point of no return.
+const ABYSS_FX := preload("res://scripts/match/abyss_fx.gd")
+var abyss_fx: CanvasLayer = null
+var abyss_k := 0.0
+func _abyss_tint(d: float) -> void:
+	var want := 0.0
+	if world.is_void(ppos.x, ppos.z) and climb.is_empty():
+		var top := _abyss_lip() - 0.5
+		var kill: float = world.abyss_floor(ppos.x, ppos.z) - Hunter.ABYSS_EXTRA - (Hunter.ABYSS_GLIDE_ROOM if gliding else 0.0)
+		want = ABYSS_FX.danger_depth(top - py, top - kill)
+	abyss_k = want if want < abyss_k else lerpf(abyss_k, want, 1.0 - exp(-12.0 * d))     # snaps back as you come up
+	if abyss_fx == null and abyss_k > 0.004:
+		abyss_fx = ABYSS_FX.new()
+		add_child(abyss_fx)
+	if abyss_fx:
+		abyss_fx.show_danger(abyss_k, 0.0)
+
+## The island lip you're under over the abyss: the lowest ground close by (World.abyss_ref), else
+## where you last stood.
+func _abyss_lip() -> float:
+	var a: float = world.abyss_ref(ppos.x, ppos.z)
+	if a > World.VOID + 1.0:
+		return a
+	var s: float = _ground_h(safe_at.x, safe_at.z)
+	return s if s > World.VOID + 1.0 else 0.0
+
 ## Dropped into the sky: the wind carries you back to where you last stood. No harm done.
 func _respawn_safe() -> void:
 	climb = {}
@@ -1532,7 +1775,9 @@ func _rack_equip(id: String) -> void:
 
 # ---- the whistle: press H at home and your kin come running, even from inside the house
 func _house_door() -> Vector3:
-	return spots["house"] + Vector3(0, 0, 2.1)
+	if fs and (not spots.has("house") or spots["house"].x < -100.0):
+		return HomeLayout.LANDING      # no house yet: the way in is the landing by the portal
+	return spots["house"] + HomeLayout.facing(house_r) * 2.1
 
 func _whistle() -> void:
 	if whistle_cd > 0.0:
@@ -1735,8 +1980,10 @@ func _find_interact() -> void:
 	for nm in ["pot", "stall", "portal", "house", "ferry", "rack"]:
 		if not spots.has(nm) or (nm == "rack" and not visit.is_empty()): continue
 		var sp: Vector3 = spots[nm]
+		if sp.x < -100.0: continue      # a farm-start fixture not put down yet
 		var reach := 2.6 if nm in ["house", "portal"] else 1.9
-		var d := p2.distance_to(Vector2(sp.x, sp.z + (2.0 if nm == "house" else 0.0)))
+		if nm == "house": sp = _house_door() - HomeLayout.facing(house_r) * 0.1
+		var d := p2.distance_to(Vector2(sp.x, sp.z))
 		if d < reach and d < bd + 0.6: bd = d; best = {"kind": nm}
 	for b in lots:
 		var l: Dictionary = lots[b]
@@ -1754,7 +2001,7 @@ func _find_interact() -> void:
 		var d := p2.distance_to(Vector2(k["pos"].x, k["pos"].z))
 		if d < bd: bd = d; best = {"kind": "kin", "k": k}
 	if visit.is_empty() and is_instance_valid(burrow_node):
-		var bdoor := BURROW_AT + Vector3(0, 0, 1.55)
+		var bdoor := BURROW_AT + _turn(Vector3(0, 0, 1.55), burrow_r)
 		var bdd := p2.distance_to(Vector2(bdoor.x, bdoor.z))
 		if bdd < 1.7 and bdd < bd + 0.4: bd = bdd; best = {"kind": "burrow"}
 	if p2.distance_to(Vector2(NEST_AT.x, NEST_AT.z)) < 1.8 and visit.is_empty():
@@ -1768,6 +2015,10 @@ func _find_interact() -> void:
 	if hecon:
 		var hb: Dictionary = hecon.find(p2, bd if not best.is_empty() else 9.0)
 		if not hb.is_empty(): best = hb
+	if hg and visit.is_empty() and (best.is_empty() or bd > 1.2):
+		# a wild tree or boulder in reach: chop or mine it (with the right tool)
+		var wt := hg.find(p2)
+		if not wt.is_empty() and (best.is_empty() or float(wt["d"]) < bd): bd = float(wt["d"]); best = wt
 	if hw and visit.is_empty():
 		# work stations: any of them opens the Job Board
 		for s in HomeLayout.stations(_d()):
@@ -1913,7 +2164,8 @@ func _label_for(it: Dictionary) -> String:
 		"incubator": return hinc.prompt()
 		"burrow": return "Open the Boki Burrow (%d asleep inside)" % KinBox.boxed().size()
 		"feeder", "grave", "graveyard", "place": return hecon.label(it)
-		"station": return "Job Board" if it["id"] == "job_board" else "%s: open the Job Board" % HomeLayout.CATALOG[it["id"]]["name"]
+		"station": return "Job Board" if it["id"] == "job_board" else "%s: assign a Boki" % HomeLayout.CATALOG[it["id"]]["name"]
+		"wild": return hg.label(it)
 	return ""
 
 func _use(it: Dictionary) -> void:
@@ -1948,7 +2200,10 @@ func _use(it: Dictionary) -> void:
 		"tryon": training.open_tryon()
 		"burrow": _open_burrow()
 		"feeder", "grave", "graveyard", "place": hecon.use(it)
-		"station": open_job_board()
+		"station":
+			if it["id"] == "job_board" or not hw: open_job_board()
+			else: hw.open_station(it["e"])
+		"wild": hg.use(it)
 
 ## The Job Board: job priorities, who's doing what, pinning kin (scripts/ui/work_view.gd).
 func open_job_board(tab := "") -> void:
@@ -2182,6 +2437,8 @@ func _refresh_top() -> void:
 	top_chips.add_child(_top_chip("gem", str(int(Save.d["gems"])), UI.GOLD, "Gems: spend them on buildings, seeds and treats"))
 	top_chips.add_child(_top_chip("tonic", str(int(Save.d["items"].get("tonic", 0))), Color("ff8a9a"), "Tonics: drink one (1) on an expedition to heal"))
 	top_chips.add_child(_top_chip("seed", str(crops), UI.GOOD, "Crops you've harvested"))
+	if fs or Work.mat("wood") > 0 or Work.mat("stone") > 0:
+		top_chips.add_child(_top_chip("dash", "%d wood · %d stone" % [Work.mat("wood"), Work.mat("stone")], Color("d8b07a"), "Wood and stone: chop and mine the wild (an axe and a pickaxe from the market), or have Boki work a Lumber Camp and a Quarry. They pay for buildings and stations."))
 	if treat != "":
 		top_chips.add_child(_top_chip("heart", "Treat: " + _treat_name(treat), Color("ffb0d0"), "A treat is ready to give to a Boki"))
 
@@ -2298,6 +2555,8 @@ func _open_welcome() -> void:
 	var kn: String = Save.active_kin().get("name", "your Boki")
 	var v := _new_panel("Welcome home", 580)
 	UI.subtitle(v, "This little island is yours.")
+	if fs:
+		v.add_child(UI.para("It's wild sky-meadow for now: just the portal and whatever grows here. Open Build (%s) and put your house down wherever you like, then a crop patch and a cooking pot. You have %d gems, enough for those and a little more." % [Settings.key_cap("build"), int(Save.d["gems"])], UI.T_BODY + 1, UI.INK))
 	v.add_child(UI.para("%s lives here with you now, and it remembers everything you do together." % kn, UI.T_BODY + 1, UI.INK))
 	v.add_child(UI.para("Between expeditions you grow crops, build up your island and look after your Boki. When you're ready, the portal takes you out to the wild isles to hunt for treasure, seeds and new Boki.", UI.T_BODY, UI.MUTED))
 	v.add_child(UI.para("Just remember: what you find out there is only yours once you make it back.", UI.T_BODY, UI.ACCENT_HI))
@@ -2327,7 +2586,7 @@ func _farm_tick() -> void:
 	# steps done elsewhere (inside the house, the inventory) show up here
 	if _day1_active() and typeof(Save.d["tutorial"].get("day1")) == TYPE_DICTIONARY:
 		var dd: Dictionary = Save.d["tutorial"]["day1"]
-		if dd.size() >= DAY1.size():
+		if dd.size() >= Progress.day1_list().size():
 			Save.d["tutorial"]["day1_done"] = true
 			Save.d["gems"] = int(Save.d["gems"]) + 30
 			_toast("First day done! +30 gems")
@@ -2577,6 +2836,7 @@ func _open_shop() -> void:
 					if not Save.d.has("furniture"): Save.d["furniture"] = {}
 					Save.d["furniture"][fk] = int(Save.d["furniture"].get(fk, 0)) + 1, "have %d" % int(Save.d.get("furniture", {}).get(f, 0))])
 		"Farm":
+			goods += HomeGather.shop_goods()
 			goods += hecon.shop_goods()
 			# the Incubator by the Nook: coals to warm Rare Eggs faster, and more cradles
 			goods.append(["coals", "Ember Coals", "Stoke them into the Incubator's brazier: every Rare Egg warms twice as fast for %d minutes." % int(Incubator.COAL_SECS / 60.0), Incubator.COAL_PRICE, Color("ff9a4a"), func(): Save.add_item("coals", 1), "have %d" % int(Save.d["items"].get("coals", 0))])
@@ -2588,7 +2848,9 @@ func _open_shop() -> void:
 			if int(Save.d["plot_cap"]) < 8:
 				goods.append(["plots", "Two more plots", "Grow more at once.", 120 + 80 * (int(Save.d["plot_cap"]) - 4), Color("9c7a52"), func():
 					Save.d["plot_cap"] = int(Save.d["plot_cap"]) + 2
-					_build_plots(), "%d plots" % int(Save.d["plot_cap"])])
+					_build_plots()
+					if fs and plots.size() < int(Save.d["plot_cap"]):
+						_toast("Put down another crop patch for them (Build, Buildings)"), "%d plots" % int(Save.d["plot_cap"])])
 	# open goods first, then the ones still locked
 	goods.sort_custom(func(a, b): return int(Progress.unlocked(a[0])) > int(Progress.unlocked(b[0])))
 	# every good on one page: two columns of one-line rows (the full description on hover)
@@ -2614,7 +2876,7 @@ func _shop_card(g: Array) -> Control:
 	var sw := PanelContainer.new()
 	var sb := UI._box(Color(col, 0.2) if open else Color(1, 1, 1, 0.05), 10); UI._pad(sb, 6, 6)
 	sw.add_theme_stylebox_override("panel", sb)
-	var icon: String = {"seed": "seed", "food": "heart", "tonic": "tonic", "rift_key": "portal", "acc": "paw", "furn": "home", "plots": "seed", "coals": "dash", "incub_slot": "egg"}.get(key.split(":")[0], "gem")
+	var icon: String = {"seed": "seed", "food": "heart", "tonic": "tonic", "rift_key": "portal", "acc": "paw", "furn": "home", "plots": "seed", "coals": "dash", "incub_slot": "egg", "tool": "hammer"}.get(key.split(":")[0], "gem")
 	sw.add_child(UI.IconDot.new("lock" if not open else icon, col if open else UI.FAINT, 18.0))
 	sw.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	hr.add_child(sw)
@@ -4123,12 +4385,13 @@ func _open_settings() -> void:
 	Overlay.open_settings()
 
 # ------------------------------------------------------------------ raising: needs, care, training, eggs
-const YARD_AT := Vector3(40.9, 0, 32.7)
-const YARD_KIN := Vector3(40.6, 0, 32.9)
-const NEST_AT := Vector3(34.4, 0, 33.7)    # the Nesting Nook, between the market stall and the pond
-const INCUB_AT := NEST_AT + Vector3(-2.45, 0, 0.45)    # the Incubator, beside the Nook: Rare Eggs hatch here
+# (where these stand on a classic island; a farm-start island moves them with its placed fixtures)
+var YARD_AT := Vector3(40.9, 0, 32.7)
+var YARD_KIN := Vector3(40.6, 0, 32.9)
+var NEST_AT := Vector3(34.4, 0, 33.7)    # the Nesting Nook, between the market stall and the pond
+var INCUB_AT := NEST_AT + Vector3(-2.45, 0, 0.45)    # the Incubator, beside the Nook: Rare Eggs hatch here
 ## The Kin Burrow, where the kin who aren't out on the farm sleep (KinBox, KinBoxView)
-const BURROW_AT := Vector3(30.6, 0, 38.8)    # south of the market stall, between the cottage lot and the pond
+var BURROW_AT := Vector3(30.6, 0, 38.8)    # south of the market stall, between the cottage lot and the pond
 const BURROW_RECT := [29, 38, 31, 39]
 var burrow_node: Node3D = null
 var kinbox_view: KinBoxView = null
@@ -4159,7 +4422,7 @@ func open_kin_box() -> void:
 func _open_burrow() -> void:
 	kinbox_view = KinBoxView.open(self)
 	_refresh_burrow()
-const POND_EDGE := Vector3(35.7, 0, 37.4)
+var POND_EDGE := Vector3(35.7, 0, 37.4)
 var care_acc := 0.0
 var care_save := 0.0
 var yard: Node3D = null
@@ -4171,18 +4434,19 @@ var train_draw: Control = null
 
 ## Builds the yard and the nest, and catches every kin up on the time you were away.
 func _setup_care() -> void:
-	yard = Models.training_yard()
-	yard.position = YARD_AT
-	add_child(yard)
-	# the Nesting Nook: where two close kin leave an egg
-	var nook := Models.nesting_nook()
-	nook.position = NEST_AT
-	add_child(nook)
-	var nl := Label3D.new()
-	nl.text = "Nesting Nook"; nl.font = UI.big; nl.font_size = 40; nl.pixel_size = 0.008; nl.outline_size = 10
-	nl.modulate = Color("ffc0d0"); nl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	nl.position = NEST_AT + Vector3(0, 2.95, -0.7)
-	add_child(nl)
+	if not fs:
+		yard = Models.training_yard()
+		yard.position = YARD_AT
+		add_child(yard)
+		# the Nesting Nook: where two close kin leave an egg
+		var nook := Models.nesting_nook()
+		nook.position = NEST_AT
+		add_child(nook)
+		var nl := Label3D.new()
+		nl.text = "Nesting Nook"; nl.font = UI.big; nl.font_size = 40; nl.pixel_size = 0.008; nl.outline_size = 10
+		nl.modulate = Color("ffc0d0"); nl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		nl.position = NEST_AT + Vector3(0, 2.95, -0.7)
+		add_child(nl)
 	if visit.is_empty():
 		hinc = HomeIncubator.new(self)
 		hinc.build()
@@ -4192,6 +4456,13 @@ func _setup_care() -> void:
 	hecon.away = Econ.catch_up_all()
 	if hecon.away.any(func(e): return e["kind"] == "died"):
 		_spawn_kin()
+	# what Boki assigned to stations made while you were away (Work.catch_up)
+	away_work = Work.catch_up()
+	if not away_work.is_empty():
+		get_tree().create_timer(1.2).timeout.connect(func():
+			if is_instance_valid(self) and is_inside_tree():
+				_show_when_free(away_work)
+				_refresh_top())
 	Care.dex_sync()
 	_refresh_nest()
 
@@ -4328,7 +4599,7 @@ func _care_goal(k: Dictionary) -> bool:
 		return true
 	if hecon and hecon.feed_goal(k):
 		return true      # off to a feeder
-	if Care.need(rec, "food") < 30.0 and randf() < 0.4:
+	if Care.need(rec, "food") < 30.0 and randf() < 0.4 and spots["pot"].x > -100.0:
 		k["goal"] = _seat(k, spots["pot"], 1.4)
 		k["stare"] = spots["pot"]
 		return true

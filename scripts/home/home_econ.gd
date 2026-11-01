@@ -23,6 +23,26 @@ const SEAT_R := 1.05
 const QUEUE_R := 2.2
 const GATE_AT := Vector3(49.6, 0, 29.6)
 const GRAVE_SPOTS := [Vector3(48.9, 0, 31.3), Vector3(50.4, 0, 31.3), Vector3(48.9, 0, 32.7), Vector3(50.4, 0, 32.7), Vector3(48.9, 0, 34.1), Vector3(50.4, 0, 34.1)]
+## The classic graveyard's middle: on a farm-start island the gate and graves keep the same places
+## round wherever you put the Graveyard (h.grave_c, turned h.grave_r).
+const GRAVE_C := Vector3(50.0, 0, 32.0)
+
+## Where a classic graveyard spot is on this island (moved with a farm-start island's Graveyard).
+func _g(p: Vector3) -> Vector3:
+	if not h.fs:
+		return p
+	return h.grave_c + (p - GRAVE_C).rotated(Vector3.UP, int(h.grave_r) * PI * 0.5)
+
+func gate_pos() -> Vector3:
+	return _g(GATE_AT)
+
+## Puts the gate and graves where the Graveyard is now (a farm-start island's moved).
+func move_graveyard() -> void:
+	if is_instance_valid(gate):
+		gate.position = gate_pos()
+		gate.rotation.y = int(h.grave_r) * PI * 0.5 if h.fs else 0.0
+		gate.visible = gate.position.x > -100.0
+	build_graves()
 
 func _init(home) -> void:
 	h = home
@@ -32,7 +52,8 @@ func build() -> void:
 	for f in Econ.feeders():
 		_spawn_feeder(f)
 	gate = EconModels.gate()
-	gate.position = GATE_AT
+	gate.position = gate_pos()
+	gate.visible = gate.position.x > -100.0
 	h.add_child(gate)
 	build_graves()
 
@@ -49,6 +70,8 @@ func _fpos(f: Dictionary) -> Vector3:
 	return Vector3(float(f.get("x", 40.0)), 0, float(f.get("z", 29.0)))
 
 func _block(p: Vector3, on: bool) -> void:
+	if not h.world.inb(int(floor(p.x)), int(floor(p.z))):
+		return
 	var i: int = h.world.idx(int(floor(p.x)), int(floor(p.z)))
 	if on:
 		if h.world.kind[i] == World.T_GROUND: h.world.kind[i] = World.T_BLOCK
@@ -64,7 +87,8 @@ func build_graves() -> void:
 	var shown: Array = gs.slice(maxi(0, gs.size() - GRAVE_SPOTS.size()))
 	for i in shown.size():
 		var n := EconModels.grave(shown[i], i)
-		n.position = GRAVE_SPOTS[i]
+		n.position = _g(GRAVE_SPOTS[i])
+		n.visible = n.position.x > -100.0
 		n.set_meta("grave", shown[i])
 		h.add_child(n)
 		gnodes.append(n)
@@ -140,7 +164,8 @@ func find(p2: Vector2, bd: float) -> Dictionary:
 		var gp: Vector3 = (g as Node3D).position
 		var dd := p2.distance_to(Vector2(gp.x, gp.z + 0.6))
 		if dd < 1.1 and dd < bd: bd = dd; best = {"kind": "grave", "g": g.get_meta("grave")}
-	var gd := p2.distance_to(Vector2(GATE_AT.x, GATE_AT.z))
+	var gp0 := gate_pos()
+	var gd := p2.distance_to(Vector2(gp0.x, gp0.z))
 	if gd < 1.3 and gd < bd: best = {"kind": "graveyard"}
 	return best
 

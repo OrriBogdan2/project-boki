@@ -48,6 +48,13 @@ const SHOP_REQ := {
 const DAY1 := [["pet", "Pet a Boki"], ["fetch", "Play fetch with a Boki"], ["plant", "Plant a seed in your farm"], ["water", "Water it"],
 	["inside", "Go inside your house"], ["inventory", "Open your inventory"], ["portal", "Visit the portal"]]
 const DAY1_KEYS := {"pet": "interact", "fetch": "play", "water": "interact", "inventory": "inventory"}
+## On a farm-start island (HomeLayout.fs) the first day starts with building your house and a crop patch.
+const DAY1_FS := [["house", "Build your house (B)"], ["patch", "Put down a crop patch"]]
+
+static func day1_list() -> Array:
+	if typeof(Save.d.get("layout")) == TYPE_DICTIONARY and HomeLayout.fs(Save.d):
+		return DAY1_FS + DAY1
+	return DAY1
 
 static func day1_active() -> bool:
 	return not Save.d["tutorial"].get("day1_done", false) and not Save.d["roster"].is_empty()
@@ -68,7 +75,7 @@ static func day1_mark(step: String) -> String:
 	dd[step] = true
 	Save.d["gems"] = int(Save.d["gems"]) + 5
 	var out := "step"
-	if dd.size() >= DAY1.size():
+	if dd.size() >= day1_list().size():
 		Save.d["tutorial"]["day1_done"] = true
 		Save.d["gems"] = int(Save.d["gems"]) + 30
 		out = "all"
@@ -89,12 +96,12 @@ static func day1_box() -> PanelContainer:
 	var t := UI.section("Your first day")
 	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(t)
-	head.add_child(UI.label("%d / %d" % [dd.size(), DAY1.size()], 12, UI.MUTED, UI.caps))
-	v.add_child(UI.bar(float(dd.size()) / maxf(1.0, DAY1.size()), UI.GOOD, 270.0, 5.0))
+	head.add_child(UI.label("%d / %d" % [dd.size(), day1_list().size()], 12, UI.MUTED, UI.caps))
+	v.add_child(UI.bar(float(dd.size()) / maxf(1.0, day1_list().size()), UI.GOOD, 270.0, 5.0))
 	v.add_child(UI.spacer(2))
 	var kname: String = Save.active_kin().get("name", "your Boki")
 	var next_found := false
-	for st in DAY1:
+	for st in day1_list():
 		var done: bool = dd.has(st[0])
 		var is_next := not done and not next_found
 		if is_next: next_found = true

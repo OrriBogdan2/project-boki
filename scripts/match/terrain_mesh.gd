@@ -55,15 +55,16 @@ func v(x: int, z: int) -> int:
 
 ## Builds the whole terrain mesh.
 func build() -> ArrayMesh:
-	_emit(0)
+	await _emit(0)
 	return _mesh(V, N, C, UV)
 
 ## The same terrain split into square chunks of `chunk` tiles, so the camera (and each shadow
 ## cascade) only draws the ground it can see: [[Vector2i chunk, ArrayMesh], ...]. Cells are traced
 ## row by row, so each chunk is a run of slices of the one big set of arrays.
 func build_chunked(chunk: int) -> Array:
-	_emit(chunk)
+	await _emit(chunk)
 	var by := {}
+	await W._slice()
 	for r in _ranges:
 		var key: Vector2i = r[0]
 		if int(r[2]) <= int(r[1]):
@@ -74,6 +75,7 @@ func build_chunked(chunk: int) -> Array:
 		a[2].append_array(C.slice(r[1], r[2])); a[3].append_array(UV.slice(r[1], r[2]))
 	var out: Array = []
 	for key in by:
+		await W._slice()
 		var a: Array = by[key]
 		out.append([key, _mesh(a[0], a[1], a[2], a[3])])
 	return out
@@ -82,10 +84,13 @@ var _ranges: Array = []     # [chunk, first vertex, end vertex] in the order the
 
 func _emit(chunk: int) -> void:
 	_fill_grid()
+	await W._slice()
 	_fill_colors()
+	await W._slice()
 	_fill_under()
 	_ranges.clear()
 	for cz in range(-1, h):
+		await W._slice()       # under the loading screen: a frame now and then (never waits in one-go builds)
 		var cur := Vector2i(-99, -99)
 		var start := V.size()
 		for cx in range(-1, w):
@@ -96,7 +101,9 @@ func _emit(chunk: int) -> void:
 					cur = key; start = V.size()
 			_cell(cx, cz)
 		if chunk > 0 and cur.x != -99: _ranges.append([cur, start, V.size()])
+	await W._slice()
 	for si in W.stairs:
+		await W._slice()
 		var i: int = si
 		if W.kind[i] != W.T_VOID:
 			var s0 := V.size()

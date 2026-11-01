@@ -145,6 +145,8 @@ func follow(p: Vector3, delta: float, mouse_lead := true) -> void:
 	# the focus sits a little below you (so the ground reads), but never more than 4m below, so even
 	# far up in the sky you stay on screen
 	var want := Vector3(p.x, maxf(p.y * 0.6, p.y - 4.0), p.z)
+	if p.y < 0.0:
+		want.y = p.y      # below island level: the view goes down with you, so you stay centred and the same size [reference footage]
 	# across follows briskly; up and down follows softer, so falls and glides don't jolt the view
 	# normal play: movefeel's tight follow; recording mode: its own slower, smoother rates
 	var kxz := 1.0 - exp(-(float(rr[0]) if Record.clean() else FOLLOW_XZ) * delta)

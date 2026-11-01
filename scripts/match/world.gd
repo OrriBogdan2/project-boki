@@ -1098,6 +1098,14 @@ var under := PackedFloat32Array()   # per tile: the height of the island's rocky
 
 ## While a match builds under the loading screen: called after each step, then a frame draws.
 var stage_cb := Callable()
+## Inside a long step under the loading screen: lets a frame draw once the step has had the CPU for
+## PerfLog.SLICE_MS. Built in one go (checks, tools, a client's map bake) it never waits.
+func _slice() -> void:
+	if stage_cb.is_valid() and is_inside_tree() and PerfLog.slice_due():
+		PerfLog.wait_begin()
+		await get_tree().process_frame
+		PerfLog.wait_end()
+
 func _stage(label: String) -> void:
 	PerfLog.mark(label)
 	if stage_cb.is_valid() and is_inside_tree():
@@ -1121,7 +1129,7 @@ func build_meshes() -> void:
 	else:
 		var keep := _visual_seed_begin()
 		tm = TerrainMesh.new(self)
-		parts = tm.build_chunked(32) if w > 96 else [[Vector2i.ZERO, tm.build()]]
+		parts = (await tm.build_chunked(32)) if w > 96 else [[Vector2i.ZERO, await tm.build()]]
 		_visual_seed_end(keep)
 		under = tm.under
 		_rims = tm.rims
@@ -1231,6 +1239,7 @@ func _merge_static(parent: Node3D, roots: Array, label: String) -> void:
 	var groups := {}     # [chunk, material key] -> {mat, st}
 	var loose: Array = []
 	for r in roots:
+		await _slice()
 		var root := r as Node3D
 		var stack: Array = [[root, root.transform]]
 		while not stack.is_empty():
@@ -1262,6 +1271,7 @@ func _merge_static(parent: Node3D, roots: Array, label: String) -> void:
 				tmp.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrs)
 				(groups[key]["st"] as SurfaceTool).append_from(tmp, 0, xf)
 	for key in groups:
+		await _slice()
 		var mi := MeshInstance3D.new()
 		mi.mesh = (groups[key]["st"] as SurfaceTool).commit()
 		mi.material_override = groups[key]["mat"]
@@ -1348,6 +1358,7 @@ func _chunked(parent: Node3D, items: Array, mesh: Mesh, mat: Material, label: St
 		if not by.has(key): by[key] = []
 		by[key].append(it)
 	for key in by:
+		await _slice()       # under the loading screen: a frame now and then
 		var list: Array = by[key]
 		var mm := MultiMesh.new(); mm.transform_format = MultiMesh.TRANSFORM_3D; mm.use_colors = true; mm.mesh = mesh
 		mm.instance_count = list.size()
@@ -1548,6 +1559,7 @@ func _decorate() -> void:
 	var packed := {}      # imported models, batched: group key -> {mesh, mat, items}
 	var camps: Array = []     # camp supply piles: merged into a few meshes per chunk below
 	for z in h:
+		await _slice()
 		for x in w:
 			var i := idx(x, z)
 			if kind[i] != T_BLOCK or no_deco.has(i) or walls.has(i):
@@ -1577,15 +1589,17 @@ func _decorate() -> void:
 				n = Models.rock(drng, drng.randf_range(0.9, 1.25))
 			n.position = Vector3(x + 0.5, y, z + 0.5)
 			deco.add_child(n)
-	_merge_static(deco, camps, "Camps")
+	await _slice()
+	await _merge_static(deco, camps, "Camps")
+	await _slice()
 	if Flora.on():
-		_patches(packed, drng)
+		await _patches(packed, drng)
 	if Assets.on() or Flora.on():
-		_cliff_rocks(packed, drng)
+		await _cliff_rocks(packed, drng)
 	await _stage("world.scatter_plan")
 	for key in packed:
 		var g: Dictionary = packed[key]
-		_chunked(deco, g["items"], g["mesh"], g["mat"], String(g["label"]), bool(g["shadows"]), int(g.get("chunk", 16)))
+		await _chunked(deco, g["items"], g["mesh"], g["mat"], String(g["label"]), bool(g["shadows"]), int(g.get("chunk", 16)))
 	await _stage("world.scatter_batches")
 	# stone walls: coursed ruin masonry following each run (see ruin_walls.gd)
 	if not walls.is_empty():
@@ -1601,7 +1615,7 @@ func _decorate() -> void:
 			var keep := _visual_seed_begin()
 			var rw = RuinWalls.new(self) if Flora.v2() else RuinWallsV1.new(self)
 			_visual_seed_end(keep)
-			for wmi in rw.build(wall_mat):
+			for wmi in await rw.build(wall_mat):
 				wlist.append([String(wmi.name), (wmi as MeshInstance3D).mesh])
 				wmi.free()
 			_cache_put(wkey, wlist)
@@ -1623,13 +1637,14 @@ func _decorate() -> void:
 				var sc := drng.randf_range(0.85, 1.2)
 				tall.append([Transform3D(Basis(Vector3.UP, drng.randf() * TAU).scaled(Vector3(sc, sc * drng.randf_range(0.9, 1.25), sc)), p),
 					Color(_bio(bi)["leaf"]).lerp(Color(_bio(bi)["top"]), 0.35).darkened(drng.randf_range(0.0, 0.18))])
-	_chunked(deco, tall, Models.grass_mesh(true), Models.grass_material(0.16), "Bushes")
+	await _chunked(deco, tall, Models.grass_mesh(true), Models.grass_material(0.16), "Bushes")
 	# short grass, flowers and pebbles over open ground, batched in chunks so off-screen ones are skipped
 	var xs: Array = []
 	var fl: Array = []
 	var pb: Array = []
 	var fcols := [Color("fff3a8"), Color("ff9ac8"), Color("ffffff"), Color("b8a6ff"), Color("ffb070"), Color("8fd8ff")]
 	for z in h:
+		await _slice()
 		for x in w:
 			var i := idx(x, z)
 			if kind[i] != T_GROUND or bridge.has(i) or bush.has(i):
@@ -1664,8 +1679,8 @@ func _decorate() -> void:
 		var tilt := Basis(rn.cross(Vector3.UP).normalized(), -0.45) if rn.length() > 0.1 else Basis()
 		xs.append([Transform3D(tilt * Basis(Vector3.UP, drng.randf() * TAU).scaled(Vector3(sc2, sc2 * 0.9, sc2)), rp + rn * 0.04 - Vector3(0, 0.03, 0)),
 			Color(tb2["top"]).lerp(Color(tb2["top2"]), drng.randf()).lightened(0.08)])
-	_chunked(deco, xs, Models.grass_mesh(false), Models.grass_material(0.08), "Grass")
-	_chunked(deco, fl, Models.flower_mesh(), Models.grass_material(0.05, true), "Flowers")
+	await _chunked(deco, xs, Models.grass_mesh(false), Models.grass_material(0.08), "Grass")
+	await _chunked(deco, fl, Models.flower_mesh(), Models.grass_material(0.05, true), "Flowers")
 	var pebbled := false
 	if pb.size() > 0 and (Assets.on() or Flora.on()):
 		var peb := {}
@@ -1674,7 +1689,7 @@ func _decorate() -> void:
 				peb.clear(); break
 		for key in peb:
 			var g: Dictionary = peb[key]
-			_chunked(deco, g["items"], g["mesh"], g["mat"], "Pebbles", false, int(g.get("chunk", 16)))
+			await _chunked(deco, g["items"], g["mesh"], g["mat"], "Pebbles", false, int(g.get("chunk", 16)))
 		pebbled = not peb.is_empty()
 	if pb.size() > 0 and not pebbled:
 		var pm2 := MultiMesh.new(); pm2.transform_format = MultiMesh.TRANSFORM_3D; pm2.use_colors = true
@@ -1744,6 +1759,7 @@ func _decorate() -> void:
 func _patches(groups: Dictionary, r: RandomNumberGenerator) -> void:
 	var fn := FastNoiseLite.new(); fn.seed = rng.seed + 41; fn.frequency = 0.07
 	for z in h:
+		await _slice()
 		for x in w:
 			var i := idx(x, z)
 			if kind[i] != T_GROUND or bush.has(i) or paint.has(i) or stairs.has(i) or bridge.has(i) or no_deco.has(i):
@@ -1783,6 +1799,7 @@ func _cliff_rocks(groups: Dictionary, r: RandomNumberGenerator) -> void:
 	if not train_route.is_empty():
 		tc = train_route["center"]; tr = float(train_route["r"])
 	for z in h:
+		await _slice()
 		for x in w:
 			var i := idx(x, z)
 			if kind[i] == T_VOID or bridge.has(i) or stairs.has(i) or edge_dist(x, z, 1) != 1 or r.randf() > 0.16:
@@ -2247,6 +2264,7 @@ func generate_authored(L: Dictionary, seed_val: int) -> void:
 	for ii in defs.size():
 		ids[String(defs[ii]["id"])] = ii
 	for ii in defs.size():
+		await _slice()
 		var D: Dictionary = defs[ii]
 		var shapes: Array = D.get("shapes", [])
 		if shapes.is_empty():
@@ -2297,11 +2315,14 @@ func generate_authored(L: Dictionary, seed_val: int) -> void:
 			for S in shapes: top_lv = maxi(top_lv, int(S.get("lv", 0)))
 			labels.append({"name": String(D["name"]), "pos": Vector3(poi.x, 0, poi.y), "kind": "perch" if D.get("perch", false) else "poi",
 				"role": String(D.get("role", "")), "height": top_lv * LEVEL})
-	_tidy_ground()
+	await _slice()
+	await _tidy_ground()
 	# land bridges: narrow, sheer-sided necks of ground between two islands. The whole bridge
 	# belongs to the first island, so walking along it never changes which island you're on.
 	var neck := {}
+	await _slice()
 	for B in L.get("bridges", []):
+		await _slice()
 		var a: int = ids.get(String(B["a"]), -1); var b: int = ids.get(String(B["b"]), -1)
 		if a < 0 or b < 0:
 			continue
@@ -2350,14 +2371,19 @@ func generate_authored(L: Dictionary, seed_val: int) -> void:
 		links.append({"from": b, "to": a, "take": on_b, "land": on_bridge, "bridge": true})
 	if L.has("train"):
 		_build_train(L["train"], neck)
+	await _slice()
 	_authored_blockers(defs, neck)
 	lair_defs.clear()
+	await _slice()
 	for LD in L.get("lairs", []):
+		await _slice()
 		var li: int = ids.get(String(LD.get("island", "")), -1)
 		if li >= 0:
 			_stamp_lair(LD, li)
 	# which rims can be caught: bridges and the authored arcs are sheer, the rest have a stone lip
+	await _slice()
 	for ii in islands.size():
+		await _slice()
 		var arcs: Array = islands[ii].get("sheer_arcs", [])
 		var cen2: Vector2 = islands[ii]["c"]
 		for cell in islands[ii]["cells"]:
@@ -2384,13 +2410,17 @@ func generate_authored(L: Dictionary, seed_val: int) -> void:
 				paint[i] = Color("dccb9c")
 	# wind roads, jump pads and updrafts, all where the layout puts them
 	var edges_of := {}
+	await _slice()
 	for ii in islands.size():
+		await _slice()
 		var e: Array = []
 		for cell in islands[ii]["cells"]:
 			if kind[idx(cell.x, cell.y)] != T_VOID and edge_dist(cell.x, cell.y, 1) == 1 and not neck.has(idx(cell.x, cell.y)):
 				e.append(cell)
 		edges_of[ii] = e
+	await _slice()
 	for W in L.get("winds", []):
+		await _slice()
 		var a: int = ids.get(String(W[0]), -1); var b: int = ids.get(String(W[1]), -1)
 		if a < 0 or b < 0:
 			continue
@@ -2400,7 +2430,9 @@ func generate_authored(L: Dictionary, seed_val: int) -> void:
 			var ga: Vector2i = g[1]; var gb: Vector2i = g[2]
 			labels.append({"name": String(W[2]), "pos": Vector3((ga.x + gb.x) * 0.5 + 0.5, 0, (ga.y + gb.y) * 0.5 + 0.5), "kind": "choke"})
 	var used: Array = []
+	await _slice()
 	for P in L.get("pads", []):
+		await _slice()
 		var a: int = ids.get(String(P[0]), -1); var b: int = ids.get(String(P[1]), -1)
 		if a < 0 or b < 0:
 			continue
@@ -2412,7 +2444,9 @@ func generate_authored(L: Dictionary, seed_val: int) -> void:
 			if c_from.x < 0: continue
 			used.append(Vector2(c_from.x + 0.5, c_from.y + 0.5))
 			pads.append({"pos": Vector3(c_from.x + 0.5, level[idx(c_from.x, c_from.y)] * LEVEL, c_from.y + 0.5), "land": Vector3.INF, "from": from, "to": to, "cd": 0.0})
+	await _slice()
 	for pd in pads:
+		await _slice()
 		var to: int = pd["to"]
 		var src := Vector2(pd["pos"].x, pd["pos"].z)
 		var best := Vector3.INF; var bs := -1e9
@@ -2430,11 +2464,15 @@ func generate_authored(L: Dictionary, seed_val: int) -> void:
 			if score > bs: bs = score; best = Vector3(cp.x, level[i] * LEVEL, cp.y)
 		pd["land"] = best
 	pads = pads.filter(func(pd): return pd["land"] != Vector3.INF)
+	await _slice()
 	for U in L.get("updrafts", []):
+		await _slice()
 		var at := _v2(U["at"])
 		updrafts.append({"pos": Vector3(at.x, 0.0, at.y), "r": 1.7, "top": float(U.get("top", 2)) * LEVEL + 1.6})
 	# glide routes down from the perches (one way: you can't glide up to them)
+	await _slice()
 	for G in L.get("glides", []):
+		await _slice()
 		var a: int = ids.get(String(G[0]), -1); var b: int = ids.get(String(G[1]), -1)
 		if a < 0 or b < 0:
 			continue
@@ -2443,21 +2481,31 @@ func generate_authored(L: Dictionary, seed_val: int) -> void:
 		var pa := Vector3(ca.x + 0.5, level[idx(ca.x, ca.y)] * LEVEL, ca.y + 0.5)
 		var pb := Vector3(cb.x + 0.5, level[idx(cb.x, cb.y)] * LEVEL, cb.y + 0.5)
 		links.append({"from": a, "to": b, "take": pa, "land": _inward(b, pb, pa), "glide": true})
+	await _slice()
 	for ap in L.get("portals", []):
+		await _slice()
 		authored_portals.append(_v2(ap))
 	exit_defs.clear()
+	await _slice()
 	for ek in [["docks", "dock"], ["outposts", "outpost"], ["hatches", "hatch"]]:
+		await _slice()
 		for ap in L.get(ek[0], []):
 			authored_portals.append(_v2(ap))
 			exit_defs.append({"kind": ek[1], "at": _v2(ap), "out": Vector2(float(ap[2]), float(ap[3])) if (ap as Array).size() >= 4 else Vector2.ZERO,
 				"walled": (ap as Array).size() >= 3 and ek[1] == "outpost" and bool(ap[2])})
+	await _slice()
 	_place_spots()
+	await _slice()
 	_clear_lair_spots()
+	await _slice()
 	for ed in exit_defs:
+		await _slice()
 		var ea: Vector2 = ed["at"]
 		ed["pos"] = Vector3(floor(ea.x) + 0.5, ground_at(ea.x, ea.y), floor(ea.y) + 0.5)
 	# loot placed by hand: the perches' chests and weapons
+	await _slice()
 	for ii in defs.size():
+		await _slice()
 		var D2: Dictionary = defs[ii]
 		for ch in D2.get("chests", []):
 			var cx := int(ch[0]); var cz := int(ch[1])
@@ -2468,6 +2516,7 @@ func generate_authored(L: Dictionary, seed_val: int) -> void:
 			var wx := int(D2["weapon"][0]); var wz := int(D2["weapon"][1])
 			if inb(wx, wz) and kind[idx(wx, wz)] == T_GROUND:
 				weapon_spots.append(Vector3(wx + 0.5, level[idx(wx, wz)] * LEVEL, wz + 0.5))
+	await _slice()
 	_place_stairs()
 
 ## The sky train's loop: a ring round the middle of the map. At each stop a short stone pier runs
@@ -2622,6 +2671,7 @@ func _authored_blockers(defs: Array, neck: Dictionary) -> void:
 func _tidy_ground() -> void:
 	for _pass in 2:
 		for z in range(1, h - 1):
+			await _slice()
 			for x in range(1, w - 1):
 				var i := idx(x, z)
 				var n_ground := 0

@@ -127,8 +127,24 @@ func set_bus(bus_name: String, v: float) -> void:
 	if i >= 0:
 		AudioServer.set_bus_volume_db(i, linear_to_db(maxf(v, 0.0001)))
 
+## Starts loading tracks on a worker thread ("music_match", "amb_match"), e.g. while a loading
+## screen comes up, so starting them later doesn't read and parse the file on the main thread.
+var _prefetched := {}
+func prefetch(names: Array) -> void:
+	for n in names:
+		var path := "res://audio/%s.ogg" % n
+		if _prefetched.has(path) or ResourceLoader.has_cached(path) or not ResourceLoader.exists(path):
+			continue
+		if ResourceLoader.load_threaded_request(path, "", false) == OK:
+			_prefetched[path] = true
+
 func _loop_stream(path: String) -> AudioStream:
-	var st = load(path)
+	var st = null
+	if _prefetched.has(path):
+		_prefetched.erase(path)
+		st = ResourceLoader.load_threaded_get(path)     # waits only if the worker isn't done yet
+	if st == null:
+		st = load(path)
 	if st is AudioStreamOggVorbis:
 		st.loop = true
 	return st

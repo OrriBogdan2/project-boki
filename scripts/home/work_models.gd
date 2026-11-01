@@ -138,6 +138,34 @@ static func station(id: String, e: Dictionary, rng: RandomNumberGenerator) -> No
 				Models.part(n, Models.sphere(0.07, 6), Models.toon([Color("8fe0a0"), Color("ff8ab4"), Color("8fd0ff")][i], false, 0.4), Vector3(0.42 + i * 0.13, 0.78, 0.0))
 			Models.part(n, Models.box(0.22, 0.06, 0.02), Models.toon(Color("e0405e"), false), Vector3(0.55, 0.45, 0.06))
 			Models.part(n, Models.box(0.06, 0.22, 0.02), Models.toon(Color("e0405e"), false), Vector3(0.55, 0.45, 0.06))
+		"seed_garden":
+			# a raised planter of seedlings under a little lean-to, with a watering can
+			var soil := Models.toon(Color("6b4a33"))
+			Models.part(n, Models.box(1.7, 0.3, 1.5), wood, Vector3(0, 0.15, 0))
+			Models.part(n, Models.box(1.55, 0.06, 1.35), soil, Vector3(0, 0.31, 0))
+			var sprout := Node3D.new(); sprout.name = "Sprouts"; n.add_child(sprout)
+			for i in 9:
+				var sp := Vector3(-0.5 + (i % 3) * 0.5, 0.36, -0.45 + (i / 3) * 0.45)
+				Models.part(sprout, Models.cyl(0.02, 0.025, 0.16, 5), Models.toon(Color("5aa04a")), sp + Vector3(0, 0.08, 0))
+				Models.part(sprout, Models.sphere(0.07, 6), Models.toon(Color("8fd16a")), sp + Vector3(0, 0.18, 0), Vector3(1.3, 0.6, 1.0))
+			for x in [-0.8, 0.8]:
+				Models.part(n, Models.box(0.07, 1.2, 0.07), dark, Vector3(x, 0.6, -0.7))
+			Models.part(n, Models.box(1.8, 0.05, 0.6), Models.toon(Color("e8d8b0")), Vector3(0, 1.18, -0.5), Vector3.ONE, Vector3(-0.35, 0, 0))
+			Models.part(n, Models.cyl(0.1, 0.11, 0.18, 10), Models.toon(Color("5a8ac8")), Vector3(0.95, 0.09, 0.55))
+		"kiln":
+			# a squat brick kiln with a glowing mouth and a stack of logs to burn
+			var brick := Models.toon(Color("a8583e"))
+			Models.part(n, Models.cyl(0.4, 0.46, 0.7, 10), brick, Vector3(0, 0.35, 0))
+			Models.part(n, Models.cyl(0.18, 0.3, 0.35, 10), brick, Vector3(0, 0.87, 0))
+			Models.part(n, Models.cyl(0.12, 0.12, 0.3, 8), stone, Vector3(0, 1.17, 0))
+			Models.part(n, Models.box(0.3, 0.26, 0.12), Models.toon(Color("2a1a14"), false), Vector3(0, 0.25, 0.38))
+			var kf := Node3D.new(); kf.name = "Fire"; n.add_child(kf)
+			Models.part(kf, Models.sphere(0.1, 8), Models.toon(Color("ffb04a"), false, 1.8), Vector3(0, 0.24, 0.38), Vector3(1.3, 0.8, 0.6))
+			var kl := OmniLight3D.new(); kl.light_color = Color("ff8a3a"); kl.light_energy = 0.8; kl.omni_range = 2.4; kl.position = Vector3(0, 0.4, 0.7)
+			kf.add_child(kl)
+			kf.visible = false
+			for i in 3:
+				Models.part(n, Models.cyl(0.07, 0.07, 0.42, 8), Models.toon(Color("9a6a40")), Vector3(0.36, 0.08 + (i / 2) * 0.13, -0.2 + (i % 2) * 0.16 + (i / 2) * 0.08), Vector3.ONE, Vector3(PI / 2, 0, 0))
 	var tag := Label3D.new()
 	tag.name = "Tag"
 	tag.font = UI.big; tag.font_size = 40; tag.pixel_size = 0.0085; tag.outline_size = 10
@@ -177,4 +205,60 @@ static func held(kind: String, el: String) -> Node3D:
 			Models.part(n, Models.cyl(0.05, 0.07, 0.14, 8), Models.toon(Color("8ff0a0"), false, 0.6), Vector3.ZERO)
 		_:
 			Models.part(n, Models.sphere(0.07, 6), Models.toon(c, false, 0.8), Vector3.ZERO)
+	return n
+
+## A farm-start island's own things, placed in build mode (HomeLayout.CATALOG "fixture"). home.gd
+## finds them by their catalog id and works out where the house door, the plots, the Nook and the
+## rest are from where they stand.
+static func fixture(id: String, e: Dictionary, rng: RandomNumberGenerator) -> Node3D:
+	var n := Node3D.new()
+	var wood := Models.toon(Color("8a5a35"))
+	var dark := Models.toon(Color("5a3a24"))
+	match id:
+		"house":
+			n.add_child(Models.house())
+		"crop_patch":
+			# tilled ground with a low rail round it; the plots themselves sit on top (home.gd)
+			Models.part(n, Models.box(4.8, 0.06, 3.8), Models.toon(Color("6b4a33"), false), Vector3(0, 0.03, 0))
+			for side in [[Vector3(0, 0, -1.95), 4.9, 0.0], [Vector3(0, 0, 1.95), 4.9, 0.0], [Vector3(-2.45, 0, 0), 3.9, PI / 2], [Vector3(2.45, 0, 0), 3.9, PI / 2]]:
+				var f := Node3D.new(); f.position = side[0]; f.rotation.y = side[2]; n.add_child(f)
+				var ln: float = side[1]
+				Models.part(f, Models.box(ln, 0.06, 0.06), wood, Vector3(0, 0.3, 0))
+				for k in 3:
+					Models.part(f, Models.box(0.08, 0.36, 0.08), dark, Vector3(-ln * 0.5 + k * ln * 0.5, 0.18, 0))
+		"cook_pot":
+			n.add_child(Models.cauldron())
+		"market_stall":
+			n.add_child(Models.stall())
+		"nesting_nook":
+			var nook := Models.nesting_nook()
+			nook.position = Vector3(0.9, 0, 0)
+			n.add_child(nook)
+			var nl := Label3D.new()
+			nl.text = "Nesting Nook"; nl.font = UI.big; nl.font_size = 40; nl.pixel_size = 0.008; nl.outline_size = 10
+			nl.modulate = Color("ffc0d0"); nl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+			nl.position = Vector3(0.9, 2.95, -0.7)
+			n.add_child(nl)
+		"boki_burrow":
+			var b := KinBurrow.model(KinBox.boxed().size() if not Save.d.is_empty() else 0)
+			b.scale = Vector3.ONE * 0.8
+			b.name = "Burrow"
+			n.add_child(b)
+			var bl := Label3D.new()
+			bl.text = "Boki Burrow"; bl.font = UI.big; bl.font_size = 40; bl.pixel_size = 0.008; bl.outline_size = 10
+			bl.modulate = Color("d9c8ff"); bl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+			bl.position = Vector3(0, 1.85, 0.3)
+			n.add_child(bl)
+		"training_post":
+			var y := Models.training_yard()
+			y.position = Vector3(0.3, 0, -0.2)
+			n.add_child(y)
+		"graveyard":
+			# mown grass edged with old stones; the gate and the graves are HomeEcon's
+			Models.part(n, Models.box(3.8, 0.03, 5.8), Models.toon(Color("4f7a42"), false), Vector3(0, 0.015, 0))
+			var st := Models.toon(Color("9a948c"))
+			for i in 14:
+				var a := float(i) / 14.0 * TAU
+				var p := Vector3(cos(a) * 1.85, 0.08, sin(a) * 2.85)
+				Models.part(n, Models.sphere(0.13, 6), st, p, Vector3(1.2, 0.6, 1.0) * rng.randf_range(0.8, 1.2))
 	return n
