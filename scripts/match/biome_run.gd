@@ -150,7 +150,11 @@ func dress(mb: Mob) -> void:
 	var parts: Array = []
 	if String(R["name"]) != "": parts.append(String(R["name"]))
 	for k in muts: parts.append(String(MUTATIONS[k]["name"]))
-	parts.append(String(md["name"]))
+	# a mutation replaces the biome's word ("Frozen Skitter", not "Frozen Frost Skitter" or "Void Void Sentinel")
+	var base_nm := String(md["name"])
+	if not muts.is_empty() and base_nm.contains(" "):
+		base_nm = base_nm.substr(base_nm.find(" ") + 1)
+	parts.append(base_nm)
 	md["name"] = " ".join(parts)
 	mb.md = md
 	mb.set_meta("rarity", ri)
