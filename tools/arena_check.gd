@@ -223,12 +223,12 @@ func _cards() -> void:
 		var c := KitCard.make(a, "cindle")
 		host.add_child(c)
 		await main.get_tree().process_frame
-		ok("kit card builds: %s" % a, c.grid != null and c.grid.get_child_count() == 6 and c.size.x <= KitCard.SIZE.x + 1.0, "size %s" % str(c.size))
+		ok("kit card builds: %s" % a, c.grid != null and c.grid.get_child_count() == KitCard.slots_of(a).size() and c.size.x <= KitCard.SIZE.x + 1.0, "size %s" % str(c.size))
 		var s0 := c.size
 		c._show_detail("rmb")
 		await main.get_tree().process_frame
 		ok("kit card sub-page keeps its size: %s" % a, c.page == "rmb" and c.size.is_equal_approx(s0), "%s -> %s" % [str(s0), str(c.size)])
-		for s in KitCard.SLOTS:
+		for s in KitCard.slots_of(a):
 			var info := KitCard.slot_text(a, s)
 			if String(info["line"]) == "" or String(info["name"]) == "":
 				ok("kit card text %s.%s" % [a, s], false)

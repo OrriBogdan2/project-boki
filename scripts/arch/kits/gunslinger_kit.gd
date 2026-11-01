@@ -308,7 +308,7 @@ func _tick_needle(dt: float) -> void:
 		m.fx.telegraph_progress(tele, k)
 	if int(float(needle["t"]) * 14.0) != int((float(needle["t"]) - dt) * 14.0):
 		m.sfx("click", h.pos, lerpf(-14.0, -6.0, k), lerpf(1.0, 2.2, k))
-	if k >= 1.0:
+	if float(needle["t"]) >= float(ed["charge"]) + 0.03:          # (a beat at full so the full tick plays)
 		_end_needle()
 		_fire_needle()
 

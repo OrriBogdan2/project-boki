@@ -741,7 +741,7 @@ func _bulwark() -> void:
 
 # ------------------------------------------------------------------ levels and the Bonded R
 func _levels_and_bond() -> void:
-	var r := setup("gunslinger", 6.0, "cindle")
+	var r := setup("thief", 6.0, "cindle")      # (a kit with an R: Vireo and Marlowe have none)
 	var m: Match = r[0]; var P: Hunter = r[1]; var T: Hunter = r[2]
 	# a fresh run: R locked until level 6
 	P.lvl = 1; P.xp = 0.0; P.skill_pts = 1
@@ -954,7 +954,7 @@ func _infusion() -> void:
 	var poison: bool = (f["effects"] as Array).any(func(e): return String(e["type"]) == "damage" and float(e.get("over", 0.0)) > 0.0)
 	ok("infusion: Vespyx poisons the Thief's Bola", poison, "; ".join(f["notes"]))
 	var fm := Arch.fill(Arch.def("mage")["rmb"]["sockets"], Arch.infusion(KinLib.kin("pebbit")), "rmb", "projectile")
-	ok("infusion: Gravadillo swaps the Mage bolt's control", fm["swap"] and (fm["effects"] as Array).any(func(e): return KinParts.category(String(e["type"])) == "control"), "; ".join(fm["notes"]))
+	ok("infusion: Gravadillo adds a control to Vireo's Coilshot", (fm["effects"] as Array).any(func(e): return KinParts.category(String(e["type"])) == "control"), "; ".join(fm["notes"]))
 	var fj := Arch.fill(Arch.def("juggernaut")["rmb"]["sockets"], Arch.infusion(KinLib.kin("pebbit")), "rmb", "cone")
 	ok("infusion: Gravadillo lifts on a cone", (fj["effects"] as Array).any(func(e): return String(e["type"]) == "lift"), "; ".join(fj["notes"]))
 	var fz := Arch.fill(Arch.def("gunslinger")["rmb"]["sockets"], Arch.infusion(KinLib.kin("zapple")), "rmb", "projectile")
@@ -964,6 +964,7 @@ func _infusion() -> void:
 		var inf := Arch.infusion(KinLib.kin(kid))
 		for a in Arch.ids():
 			for slot in ["rmb", "e", "r"]:
+				if not Arch.def(a).has(slot): continue
 				var sd: Dictionary = Arch.def(a)[slot]
 				var ff := Arch.fill(sd.get("sockets", {}), inf, slot, String(sd.get("delivery", "burst")))
 				for e in ff["effects"]:
