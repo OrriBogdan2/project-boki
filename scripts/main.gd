@@ -1558,6 +1558,7 @@ func _ability_check() -> void:
 ## modes, the merge's unlock, timer and cooldown, and owner bonuses. Prints GRT PASS/FAIL lines.
 var _grt_fail := 0
 func _grt(name: String, ok: bool, info := "") -> void:
+	if has_meta("grt_T") and is_instance_valid(get_meta("grt_T")) and OS.get_cmdline_user_args().has("--grt-debug"): print("   T at %s" % str((get_meta("grt_T") as Hunter).pos))
 	print("GRT %-34s %s  %s" % [name, "PASS" if ok else "FAIL", info])
 	if not ok: _grt_fail += 1
 
@@ -1609,6 +1610,7 @@ func _grammar_runtime_check() -> void:
 	var m: Match; var P: Hunter; var T: Hunter
 	var acc := {}
 	r = _ac_setup(6.0); m = r[0]; P = r[1]; T = r[2]
+	set_meta("grt_T", T)
 	var home := P.pos
 	# ---- 1. each of the six kin: its E and its auto active, run from their parts
 	var k := _grt_kin(m, P, "cindle")
@@ -1710,6 +1712,8 @@ func _grammar_runtime_check() -> void:
 		_grt_reset(T)
 	_grt("rare kin abilities cast", rare_ok, "%s; %s; %s" % [acc["cairnback"], acc["hivara"], acc["zephyrak"]])
 	P.teleport(home); T.teleport(home + Vector3(6, 0, 0)); _ac_run(m, 3.5); _grt_reset(T)
+	# (a zephyrak gust can leave the dummy flying: put it back on its mark, at rest)
+	T.teleport(home + Vector3(6, 0, 0)); T.vel = Vector3.ZERO; T.knock_t = 0.0; T.grounded = true; _ac_run(m, 0.2)
 	# ---- 2. diminishing returns and stun immunity
 	T.hurt(0.1, P, {"stun": 1.0, "dr": true})
 	var s1 := T.stun_t
@@ -2344,6 +2348,9 @@ func _boss_check() -> void:
 	m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 21, "no_drop": true})
 	m.set_process(false)
 	var P: Hunter = m.player
+	# boss loot is picked from the killer's class weapons (lairs.gd); with an archetype only its family
+	# can be held, so this check plays the classic class kit (see docs/ARCHETYPES.md, gaps)
+	P.set_arch("")
 	var C: Hunter = m.hunters.filter(func(x): return x.team == P.team and x != P)[0]
 	var Q: Hunter = m.hunters.filter(func(x): return x.team != P.team)[0]
 	for h in m.hunters:
@@ -2668,7 +2675,10 @@ func _boss_check() -> void:
 	B.ai["boss_hunt"] = true
 	B.teleport(L2["dial"] + Vector3(L2["out"].x, 0, L2["out"].y) * 4.0)
 	var tb := m2.time
+	if "--boss-only-dial" in OS.get_cmdline_user_args(): print("  dial bot: %s %s %s" % [B.cls, B.arch, B.wid])
 	while L2["state"] == "sealed" and m2.time - tb < 150.0:
+		if "--boss-only-dial" in OS.get_cmdline_user_args() and int(m2.time * 60.0) % 300 == 0:
+			print("  t=%.0f pos=%s dial=%.1f goal=%s kind=%s tgt=%s user=%s inter=%s" % [m2.time - tb, B.pos.snapped(Vector3(0.1,0.1,0.1)), B.flat_dist(L2["dial"]), str(B.ai.get("goal")), B.ai.get("goal_kind"), str(B.ai.get("tgt")), str(L2["user"]), B.inp.get("interact")])
 		B.hp = B.max_hp
 		for g in L2["guards"]: if is_instance_valid(g): g.dead = true
 		m2.step(Match.DT)

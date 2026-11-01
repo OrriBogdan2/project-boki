@@ -2428,6 +2428,42 @@ func _wrapped_h(txt: String, w: float, fs: int) -> float:
 func _secs(x: float) -> String:
 	return ("%ds" % int(x)) if absf(x - round(x)) < 0.05 else ("%.1fs" % x)
 
+## Hover text for an archetype's slots (and the kin's own ability on C, send/recall on G).
+func _arch_tip(id: String, p: Hunter) -> Array:
+	var out: Array = []
+	var k: Kin = p.kin
+	match id:
+		"kin_ab":
+			if k == null or k.runner.def_of("k1") == null: return []
+			var kd: AbilitySpec = k.runner.def_of("k1")
+			out.append([kd.display_name, KinText.color(kd)])
+			out.append(["%s's own ability  ·  %s  ·  it hops out, casts, hops back" % [k.rec.get("name", "Kin"), Settings.key_cap("kin_ability")], MUTED, 12])
+			out.append([KinText.ability(k.effective("k1")), INK, 14])
+			out.append(["Cooldown %s%s" % [_secs(kd.cooldown), ("  ·  ready in %s" % _secs(k.runner.cd_left("k1"))) if not k.runner.is_ready("k1") else "  ·  ready"], MUTED, 13])
+			return out
+		"throw":
+			if k == null: return []
+			out.append(["Send / recall", Color("cfe8ff")])
+			out.append(["%s  ·  send %s out to fight on its own; press again to call it back. While it's out you lose its carry perk." % [Settings.key_cap("throw"), k.rec.get("name", "your kin")], INK, 13])
+			return out
+	var si := p.slot_info(id)
+	var slot_name: String = {"sec": "Right click", "k1": "Utility (E)", "r": "Ultimate (R)", "dash": "Dash"}[id]
+	var key: String = {"sec": "secondary", "k1": "signature", "r": "ultimate", "dash": "dash"}[id]
+	out.append([String(si["name"]), si["col"]])
+	out.append(["%s %s  ·  %s  ·  %s" % [Arch.name_of(p.arch), slot_name, Settings.key_cap(key), p.rank_text({"sec": "sec", "k1": "k1", "r": "r", "dash": "dash"}[id])], MUTED, 12])
+	out.append([String(si["desc"]), INK, 13])
+	var r3: Dictionary = p.ak.d.get("rank3", {})
+	var sk: String = {"sec": "sec", "k1": "kin", "r": "ult", "dash": "dash"}[id]
+	if r3.has(sk):
+		out.append(["%s: %s" % ["Rank 2" if sk == "ult" else "Rank 3", String(r3[sk])], Color(si["col"], 0.85), 12])
+	if id == "r":
+		out.append(["Unlocks at level %d, rank 2 at %d. With a full bond meter it's Bonded: your kin merges as it fires." % [int(Hunter.ULT_AT[0]), int(Hunter.ULT_AT[1])], MUTED, 12])
+	if id == "sec":
+		var rd := p.ak.res_def()
+		out.append(["Passive: %s" % String(p.ak.d["passive"]["desc"]), Color(Color(String(rd.get("col", "#ffffff"))), 0.9), 12])
+	out.append(["Cooldown %s%s" % [_secs(float(si["cd_max"])), ("  ·  ready in %s" % _secs(float(si["cd"]))) if float(si["cd"]) > 0.0 else "  ·  ready"], MUTED, 13])
+	return out
+
 func _tip_lines(id: String, p: Hunter) -> Array:
 	var hc: Color = p.accent()
 	var out: Array = []
@@ -2439,6 +2475,8 @@ func _tip_lines(id: String, p: Hunter) -> Array:
 			out.append([String(pd["desc"]), INK])
 			out.append(["Found this expedition. Gone when it ends.", MUTED])
 		return out
+	if p.ak and id in ["sec", "k1", "r", "dash", "kin_ab", "throw"]:
+		return _arch_tip(id, p)
 	match id:
 		"sec" when p.runner and p.runner.def_of("utility") != null:
 			var u: AbilityDef = p.runner.def_of("utility")
