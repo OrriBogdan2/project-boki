@@ -206,7 +206,9 @@ func on_damage(target: Ent, by: Ent, d: float) -> void:
 		if h.ctrl == "bot":
 			h.ai["tgt"] = traitor
 			h.last_hit_by = traitor
-	if m.hud and m.player and not m.player.out:
+	# the big toast only for a truce you were in, or a betrayal right by you (the feed has the rest):
+	# bots across the map making and breaking truces stacked red toasts over your fight
+	if m.hud and m.player and not m.player.out and (_mine(credit.team) or _mine(tt) or traitor.flat_dist(m.player) < 30.0):
 		m.hud.toast("%s broke the truce!" % traitor.pname, Color("ff6a5a"))
 
 func is_marked(h: Hunter) -> bool:
