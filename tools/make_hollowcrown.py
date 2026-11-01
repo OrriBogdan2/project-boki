@@ -96,7 +96,7 @@ islands = [
          rocks=rocks((147, 81, 148, 81)), bush=[],
          chests=[[164, 79, 1]], camps=[], breakables=[[150, 78, "pot"], [151, 79, "pot"]],
          wardens=[[160, 81]], traps=[]),
-    dict(id="gaol_sw", name="Ashen Gaol", role="camp", region=0, biome="ember", danger=2, poi=[71, 150], noise=0.05,
+    dict(id="gaol_sw", name="Ashen Gaol", role="camp", region=0, biome="ember", danger=2, poi=[56, 162], noise=0.05,
          shapes=[poly([(48, 138), (62, 133), (74, 139), (77, 156), (68, 166), (52, 164), (44, 152)], 4)],
          sheer=[[20, 80]],
          rocks=rocks((72, 158, 72, 159)), bush=[],
