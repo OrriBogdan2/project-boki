@@ -30,6 +30,20 @@ The Wyrm's corruption, left behind by the Sundering. Not cute critters: things t
 - **Threat to everyone:** the Blight attacks every squad, so it creates truces, betrayals and
   "do we fight them or the thing coming?" moments (the truce system already exists).
 
+### 1b. Pacing: the Blight starts weak (owner, Nov 1)
+Players drop at level 1 with one ability and level up fast by farming camps (SUPERVIVE-style), so the
+Blight must not punish the opening minutes:
+- **Early (first minutes after you land, and the safer outer islands):** only light Blight: lone
+  Skitters and a few Wardens whose shriek is a warning, not a death sentence. The normal monster camps
+  stay the main way to level.
+- **Ramps with time and depth:** the Blight's strength and numbers scale with how long you've been in
+  (per squad, so late joiners in rolling sessions also get a soft start), the region (dangerous core vs
+  outer islands), the raid condition (night/storm = more) and noise. Husks and Fliers come later;
+  the Walker appears mid-session.
+- **Smarter, not tankier, early on:** early Blight hunt by noise and light, but die fast and hit softly;
+  later ones get the real health and damage.
+- Tuned so a level-1 hunter can always fight or flee a Blight they meet in the first minutes.
+
 ### 2. A scarier environment
 - **Raid conditions** rolled per match and shown before you drop: clear day, dusk, night, ash storm,
   fog. Night and fog shrink sight (the sight system already exists), make light sources matter
