@@ -671,6 +671,8 @@ func _choose(m: Match, h: Hunter) -> void:
 		for p in m.pickups:
 			if m.world.is_void(p["pos"].x, p["pos"].z):
 				continue
+			if m.lairs and m.lairs.walled_off(h, p["pos"]):
+				continue      # (behind a sealed lair's gate: no way in from here)
 			var d := h.flat_dist(p["pos"])
 			if d < bd: bd = d; goal = p["pos"]; gk = "loot"
 	if goal == Vector3.INF:

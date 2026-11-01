@@ -837,6 +837,9 @@ func victory_left(L: Dictionary) -> float:
 
 ## Is this hunter allowed on the lair's escape updraft (sealed in for the fight, or already on it)?
 func may_fly(L: Dictionary, h: Hunter) -> bool:
+	# (once over the wall and out, it's one ride: drop back into the column and it won't lift you again)
+	if (L.get("escaped", []) as Array).has(h):
+		return false
 	return (L.get("sealed_in", []) as Array).has(h) or (L.get("flown", []) as Array).has(h)
 
 ## The escape updraft: those who fought step into it and it lifts them high over the lair, then
@@ -888,6 +891,8 @@ func _tick_updraft(L: Dictionary, dt: float) -> void:
 	for h in (L["flown"] as Array):
 		if is_instance_valid(h) and ins.has(h) and not inside(L, h.pos, 0.3):
 			ins.erase(h)
+			if not L.has("escaped"): L["escaped"] = []
+			(L["escaped"] as Array).append(h)
 			m.add_feed("%s rode the updraft out of %s" % [h.pname, L["name"]])
 
 ## A clear spot on a lair's floor near `p`, at least `margin` in from the walls.
@@ -1049,6 +1054,7 @@ func lock_in(L: Dictionary) -> void:
 	L["sealed_in"] = ins
 	L["heard"] = {}
 	L["flown"] = []
+	L["escaped"] = []
 	# whoever is in the gateway itself steps in, clear of the gate's stones
 	var c: Vector3 = L["c"]
 	var keep := float(L["half"]) - 0.95
@@ -1092,6 +1098,11 @@ func unlock(L: Dictionary) -> void:
 	(L["nodes"]["label"] as Label3D).text = "%s\n%s" % [L["name"], "Cleared" if L["state"] == "cleared" else "Open"]
 	m.sfx("unlock", L["gate_c"], 3.0, 0.8)
 	m.fx.burst(L["gate_c"] + Vector3(0, 1.5, 0), color_of(L), 24, 5.0, 0.6, 3.0, 1.0)
+
+## Is this spot inside a sealed lair this hunter isn't sealed in (so it can't get there)?
+func walled_off(h: Hunter, p: Vector3) -> bool:
+	var L := lair_of(p, 0.0)
+	return not L.is_empty() and L.get("locked", false) and not (L.get("sealed_in", []) as Array).has(h)
 
 ## Is this hunter sealed in a lair right now? (Returns the lair, or {}.)
 func sealed_lair(h: Hunter) -> Dictionary:

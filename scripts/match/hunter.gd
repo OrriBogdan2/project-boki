@@ -165,6 +165,7 @@ var in_current := false        # riding a wind road or an updraft: the glider do
 var glide_max := GLIDE_TIME
 var glide_cd := 0.0
 var glide_k := 0.0             # how far the glider is unfolded, for the model
+var _auto_glide_held := true   # (glide held last frame: auto_glide ends on a fresh press, not a held key)
 var auto_glide := false        # carried by a lair's escape updraft: the glider opens and stays open
                                # by itself until you land (hold glide yourself to take it back)
 var wind_t := 0.0
@@ -2231,7 +2232,11 @@ func _update_glide(dt: float) -> void:
 		glide_fuel = minf(1.0, glide_fuel + dt / 1.2)
 	if grounded:
 		shot_down = false
-	if auto_glide and (inp.get("glide", false) or downed or out or (grounded and air_t <= 0.0 and vel.y <= 0.0)):
+	# a player takes the glider back with a fresh press of glide; a bot's own glide input (it holds
+	# glide over the void to recover) must not fold the glider it's being carried on
+	var glide_press: bool = inp.get("glide", false) and not _auto_glide_held and ctrl != "bot"
+	_auto_glide_held = inp.get("glide", false)
+	if auto_glide and (glide_press or downed or out or (grounded and air_t <= 0.0 and vel.y <= 0.0)):
 		auto_glide = false
 	# an overheated glider scorches you while it stays open
 	if gliding and not dropping and glide_fuel <= 0.001 and not downed:
