@@ -98,7 +98,7 @@ jobs:
         with:
           tag_name: ${{ steps.ver.outputs.tag }}
           name: Project Boki ${{ steps.ver.outputs.tag }}
-          prerelease: true
+          prerelease: false
           files: dist/*
           body: |
             Playtest build. Get the **launcher** for your computer below (it keeps the game up to date):

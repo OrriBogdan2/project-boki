@@ -147,9 +147,12 @@ func _button(t: String, cb: Callable, quiet := false) -> Button:
 
 func _refresh() -> void:
 	var li := _logged_in()
-	who_l.text = ("Logged in as %s" % session.get("name", "")) if li else "Closed playtest · Discord login required"
+	if not _login_required():
+		who_l.text = "Playtest"
+	else:
+		who_l.text = ("Logged in as %s" % session.get("name", "")) if li else "Closed playtest · Discord login required"
 	login_b.visible = not li
-	logout_b.visible = li
+	logout_b.visible = li and _login_required()
 	play_b.visible = li
 	var ready := installed.has("version") and FileAccess.file_exists(_exe_path())
 	play_b.disabled = busy or not ready
@@ -161,7 +164,12 @@ func _set_status(t: String) -> void:
 	status_l.text = t
 
 # ------------------------------------------------------------------ Discord login
+func _login_required() -> bool:
+	return String(cfg["discord_client_id"]) != ""
+
 func _logged_in() -> bool:
+	if not _login_required():
+		return true
 	return session.has("token") and float(session.get("expires", 0)) > Time.get_unix_time_from_system() + 60
 
 func _login() -> void:
@@ -366,7 +374,10 @@ func _play() -> void:
 		session = {}
 		_refresh()
 		return
-	var pid := OS.create_process(_exe_path(), ["--", "--server=" + String(cfg["server"]), "--token=" + String(session["token"])])
+	var args := ["--", "--server=" + String(cfg["server"])]
+	if session.has("token"):
+		args.append("--token=" + String(session["token"]))
+	var pid := OS.create_process(_exe_path(), args)
 	if pid <= 0:
 		_set_status("Couldn't start the game.")
 		return
