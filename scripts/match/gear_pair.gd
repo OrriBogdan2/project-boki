@@ -31,11 +31,15 @@ static func dolm(c: Dictionary) -> void:
 			_p(g, Models.box(0.05, 0.1 + 0.02 * (k % 2), 0.05), pale, HC + Vector3(-0.1 + 0.05 * k, 0.22, -0.08), Vector3.ONE, Vector3(0, 0, 0.12 * (k - 2)))
 	# the right shoulder: a heap of stone plates, strapped on
 	var pr: Node3D = c["pr"]
-	_p(pr, Models.box(0.34, 0.2, 0.3), stone, Vector3(0.04, 0.1, 0), Vector3.ONE, Vector3(0, 0, -0.2))
-	_p(pr, Models.box(0.22, 0.18, 0.22), pale, Vector3(0.1, 0.24, -0.02), Vector3.ONE, Vector3(0.15, 0.3, -0.35))
-	_p(pr, Models.box(0.16, 0.14, 0.16), stone, Vector3(0.0, 0.3, 0.06), Vector3.ONE, Vector3(-0.2, 0.6, 0.3))
+	_p(pr, Models.box(0.5, 0.3, 0.46), stone, Vector3(0.1, 0.12, 0), Vector3.ONE, Vector3(0, 0, -0.2))
+	_p(pr, Models.box(0.34, 0.28, 0.34), pale, Vector3(0.16, 0.34, -0.02), Vector3.ONE, Vector3(0.15, 0.3, -0.35))
+	_p(pr, Models.box(0.24, 0.22, 0.24), stone, Vector3(0.02, 0.46, 0.06), Vector3.ONE, Vector3(-0.2, 0.6, 0.3))
 	var pl: Node3D = c["pl"]
-	_p(pl, Models.box(0.2, 0.1, 0.2), stone, Vector3(-0.02, 0.06, 0), Vector3.ONE, Vector3(0, 0, 0.2))
+	_p(pl, Models.box(0.3, 0.16, 0.3), stone, Vector3(-0.06, 0.08, 0), Vector3.ONE, Vector3(0, 0, 0.2))
+	_p(pl, Models.box(0.16, 0.14, 0.16), pale, Vector3(-0.08, 0.2, 0.02), Vector3.ONE, Vector3(0.2, 0.4, 0.3))
+	# a slab of stone strapped across the chest
+	_p(t, Models.box(0.34 * cw, 0.26, 0.08), stone, Vector3(0, 0.46, -0.235 * bw), Vector3.ONE, Vector3(0.05, 0, 0))
+	_p(t, Models.box(0.1, 0.3, 0.09), pale, Vector3(0.0, 0.46, -0.245 * bw), Vector3.ONE, Vector3(0.05, 0, 0.0))
 	# a collar of rubble and a leather apron with a team-coloured sash
 	_p(t, HeroKit.band("dolm_collar", 0.2 * cw, 0.26 * cw, 0.07, 0.03), stone, Vector3(0, 0.66, 0.0))
 	_p(t, Models.box(0.36 * cw, 0.5, 0.05), m["leather"], Vector3(0, 0.2, -0.235 * bw), Vector3.ONE, Vector3(0.03, 0, 0))
@@ -60,9 +64,11 @@ static func ostra(c: Dictionary) -> void:
 		# a wrapped headcloth rising to a soft point, with a long tail down the back
 		var wrap := func(u: float, v: float) -> Vector3:
 			var th := u * TAU
-			var r := 0.215 * (1.0 - 0.45 * v * v)
-			return Vector3(cos(th) * r, v * 0.34, sin(th) * r * 1.05)
-		_p(g, HeroKit.surf("ostra_wrap", wrap, 28, 10, Callable()), pearl, HC + Vector3(0, 0.1, 0.0))
+			var w := 1.0 - v            # v runs down from the peak, as the crown of a hat does
+			var r := 0.215 * (1.0 - 0.45 * w * w)
+			return Vector3(cos(th) * r, w * 0.34, sin(th) * r * 1.05)
+		var wrap_ao := func(u: float, v: float) -> float: return lerpf(1.0, 0.8, v * v)
+		_p(g, HeroKit.surf("ostra_wrap", wrap, 28, 10, wrap_ao), pearl, HC + Vector3(0, 0.1, 0.0))
 		_p(g, HeroKit.band("ostra_wrapband", 0.215, 0.235, 0.05, 0.015), team, HC + Vector3(0, 0.12, 0.0))
 		_p(g, HeroKit.lock_mesh("ostra_tail", [HC + Vector3(0, 0.3, 0.1), HC + Vector3(0, 0.26, 0.3), HC + Vector3(0, 0.0, 0.42), HC + Vector3(0, -0.34, 0.46)], 0.09, 0.24, Vector3.RIGHT, 0.8, 0.3), pearl)
 	# the hem: long, open at the front

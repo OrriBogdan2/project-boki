@@ -161,6 +161,7 @@ func _data() -> void:
 	var rk_ok := true
 	for a in Arch.ids():
 		for sl in ["sec", "dash", "kin", "ult"]:
+			if sl == "ult" and not Arch.def(a).has("r"): continue      # no R: the Boki Merge owns it
 			var r2 := String(Arch.def(a).get("rank2", {}).get(sl, ""))
 			if not (r2.contains("->") and r2.length() > 20): rk_ok = false
 	ok("ranks: every ability has a concrete rank 2", rk_ok)
@@ -168,14 +169,14 @@ func _data() -> void:
 	ok("ranks: next rank first (2 at 1, 3 at 2, none at max)", n1.size() == 2 and n1[0][0] == "Rank 2" and n1[1][0] == "Rank 3" and n2.size() == 1 and n2[0][0] == "Rank 3" and n3.is_empty(), str(n1))
 	ok("ranks: R previews rank 2", Arch.next_ranks("mage", "ult", 1).size() == 1 and Arch.next_ranks("mage", "ult", 2).is_empty())
 	var ids := Arch.ids()
-	ok("data: six archetypes", ids.size() == 6, str(ids))
+	ok("data: every listed archetype has data", ids.size() == Arch.ORDER.size(), str(ids))
 	for w in ["light", "medium", "heavy"]:
-		ok("data: two %s archetypes" % w, Arch.of_class(w).size() == 2, str(Arch.of_class(w)))
+		ok("data: at least two %s archetypes" % w, Arch.of_class(w).size() >= 2, str(Arch.of_class(w)))
 	var bad: Array = []
 	for a in ids:
 		for wid in Arch.weapons(a):
 			if Content.weapon(String(wid)) == null: bad.append("%s:%s" % [a, wid])
-		for k in ["dash", "rmb", "e", "r", "resource", "order"]:
+		for k in ["dash", "rmb", "e", "resource", "order"]:
 			if not Arch.def(a).has(k): bad.append("%s missing %s" % [a, k])
 	ok("data: every kit complete, weapons exist", bad.is_empty(), str(bad))
 	ok("weapons: Thief can't hold a sniper", not Loot.usable(_fake("thief"), {"t": "weapon", "wid": "sniper"}))
@@ -1012,6 +1013,7 @@ func _infusion() -> void:
 		var inf := Arch.infusion(KinLib.kin(kid))
 		for a in Arch.ids():
 			for slot in ["rmb", "e", "r"]:
+				if not Arch.def(a).has(slot): continue
 				var sd: Dictionary = Arch.def(a)[slot]
 				var ff := Arch.fill(sd.get("sockets", {}), inf, slot, String(sd.get("delivery", "burst")))
 				for e in ff["effects"]:
@@ -1051,8 +1053,8 @@ func _feel() -> void:
 	ok("feel: the Bola and Warchain are projectiles (dodgeable)", String(Arch.def("thief")["rmb"]["delivery"]) == "projectile" and float(Arch.def("thief")["rmb"]["bola"]["speed"]) <= 34.0 and String(Arch.def("juggernaut")["e"]["delivery"]) == "projectile")
 	ok("feel: Blink windup shows the landing", float(Arch.def("mage")["dash"]["windup"]) >= 0.1)
 	ok("feel: Doomfall / Fissure plant tells (fuse + tell)", float(Arch.def("juggernaut")["r"]["tell"]) + float(Arch.def("juggernaut")["r"]["fuse"]) >= 0.3 and float(Arch.def("bulwark")["r"]["tell"]) >= 0.3)
-	ok("feel: every R has a fuse of 0.35-0.8s", Arch.ids().all(func(a): return float(Arch.def(a)["r"].get("fuse", 0.0)) >= 0.35 and float(Arch.def(a)["r"].get("fuse", 0.0)) <= 0.8))
-	ok("R cooldowns are big moments (90-120s)", Arch.ids().all(func(a): return float(Arch.def(a)["r"]["cooldown"]) >= 90.0 and float(Arch.def(a)["r"]["cooldown"]) <= 120.0))
+	ok("feel: every R has a fuse of 0.35-0.8s", Arch.ids().filter(func(a): return Arch.def(a).has("r")).all(func(a): return float(Arch.def(a)["r"].get("fuse", 0.0)) >= 0.35 and float(Arch.def(a)["r"].get("fuse", 0.0)) <= 0.8))
+	ok("R cooldowns are big moments (90-120s)", Arch.ids().filter(func(a): return Arch.def(a).has("r")).all(func(a): return float(Arch.def(a)["r"]["cooldown"]) >= 90.0 and float(Arch.def(a)["r"]["cooldown"]) <= 120.0))
 	# hitstop tiers
 	var dummy := Hunter.new(); dummy.max_hp = 145.0
 	ok("feel: chip hit T1", Feel.tier(dummy, 4.0, {"src": "shot"}) == 1)

@@ -175,7 +175,9 @@ func lmb_override(held: bool, dt: float) -> bool:
 				return true
 			lmb_t = 0.0
 		lmb_t += dt
-		if lmb_t > float(ld["tap"]): h.mel_hold = punch_k()
+		if lmb_t > float(ld["tap"]):
+			h.mel_hold = punch_k()
+			if anim_id != "dolm_wind" or m.time - anim_at > 3.0: play("dolm_wind")
 		if lmb_t >= float(ld["full"]) + 0.5: _punch(punch_k())
 	elif lmb_t >= 0.0:
 		if lmb_t < float(ld["tap"]): _boulder()
@@ -285,12 +287,15 @@ func rmb_charge_full() -> float:
 func rmb_auto_t() -> float:
 	return rmb_charge_full() + 0.5
 
-func rmb_hold_tick(_t: float) -> void:
-	pass
+func rmb_hold_tick(t: float) -> void:
+	if t > float(rmb_def()["hold"]) and anim_id != "dolm_rmb_wind":
+		play("dolm_rmb_wind")
 
 func fire_rmb(c: Dictionary) -> void:
 	last_variant = String(c["variant"])
-	if not spend_rmb(): return
+	if not spend_rmb():
+		anim_id = ""      # (the held pose ends)
+		return
 	if c.get("air", false):
 		dive = true
 		play("dolm_rmb")
