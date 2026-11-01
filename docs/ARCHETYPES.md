@@ -1172,3 +1172,12 @@ for the SMG's rate), Primed +10, Bola 6 (+13 tangled), Jackpot 4.5 (+3 rim). Bra
 Doomfall 48. A medium (145) falls to the Thief in about 4s of steady fire with two Primed hits, to the
 Juggernaut in about 4s with a sweet-spot slam; Doomfall's 48 sits under the Archer's Great Arrows (100
 if all three land).
+
+## Hero rebuild: Vireo (mage) and Marlowe (gunslinger), Nov 1
+
+The Mage (medium, Hex/Runes) and the Gunslinger (Chambers/Called Shot) kits are replaced by two new
+heroes under the same ids: **Vireo** (id `mage`, now Light: Sparks, Wirerun, Coilshot, Skycall) and **Marlowe**
+(id `gunslinger`, Medium: Fever, Slipstep, Burr Charge, Longneedle). Neither has an R (the Boki Merge owns it).
+The old Mage and Gunslinger sections above are history. Per-slot tables, research notes and combinations:
+`docs/heroes/mage.md` and `docs/heroes/gunslinger.md`; combos are checked by `--mage-combo-check` and
+`--gunslinger-combo-check`. `Hex` (scripts/arch/hex.gd) is no longer used by a kit.
