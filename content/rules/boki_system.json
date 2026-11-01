@@ -1,0 +1,20 @@
+{
+	"desc": "The Boki command system (docs/decisions/0001): G throw / recall / hold-follow, the downed Boki, the leashes. Distances in metres, times in seconds, hp as a share of max health.",
+	"class_ults": false,
+	"class_ults_doc": "false: R is the Merge for every class. true: R runs the class's own ultimate again (ArchKit.use_r), kept for the hero-port work to fold into kits.",
+	"g_hold_s": 0.35,
+	"throw_range": 9.0,
+	"throw_range_dive": 11.0,
+	"recall_range": 24.0,
+	"merge_leap_range": 32.0,
+	"land_stagger": {"radius": 1.7, "stun": 0.7, "kb": 3.0, "dmg_k": 0.8},
+	"recall_hit": {"width": 0.9, "dmg_k": 1.0, "stun": 0.35, "kb": 5.0},
+	"down": {
+		"recover_s_trusting": 15.0,
+		"recover_s_wary": 20.0,
+		"recover_hp": 0.2,
+		"rescue_hp": 0.6,
+		"rescue_s": 0.5,
+		"rescue_r": 1.5
+	}
+}
