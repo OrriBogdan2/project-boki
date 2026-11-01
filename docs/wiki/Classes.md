@@ -56,6 +56,8 @@ your class in the Expedition menu, and you can try every class against dummies i
 | [Gunslinger](Class-Gunslinger.md) | Medium | Rifle, Burst Rifle | Six Chambers | Slide Reload | Trick Shot | Quickdraw | Last Round |
 | [Juggernaut](Class-Juggernaut.md) | Heavy | Greatsword, Shotgun, Minigun | Rage | Rampage | Smash | Warchain | Doomfall |
 | [Bulwark](Class-Bulwark.md) | Heavy | Tower Shield & Mace, Minigun | Guard | Whirl | Shield | Mending Ground | Fissure |
+| [Dolm](Class-Dolm.md) | Medium | Rubble Fists | Stonesight | Landslide | Quakefall | Rockwave | none (Boki Merge) |
+| [Ostra](Class-Ostra.md) | Medium | Tether Lantern | Swell | Swap | Rift Snap | Brimseed | none (Boki Merge) |
 
 ### Weight classes
 
@@ -64,7 +66,7 @@ The weight class sets health, speed, mass and dash charges; the class kit sits o
 | Weight | Health | Speed (m/s) | Dash charges | Mass | Glide cap | Classes | In short |
 |---|---|---|---|---|---|---|---|
 | Light | 124 | 5.2 | 1 | 0.85 | 1.2 | Thief, Archer | Fast and fragile. The fastest dash, the longest glide, and hits throw you furthest. |
-| Medium | 145 | 5 | 1 | 1 | 1 | Mage, Gunslinger | The all-rounder: middle health, speed, dash and glide. |
+| Medium | 145 | 5 | 1 | 1 | 1 | Mage, Gunslinger, Dolm, Ostra | The all-rounder: middle health, speed, dash and glide. |
 | Heavy | 193 | 4.73 | 2 | 1.35 | 0.85 | Juggernaut, Bulwark | Slow and tough. Two short dashes, the most health, and very hard to push off a ledge. |
 
 ### Run levels
