@@ -5,6 +5,7 @@ shader_type spatial;
 // catches the key and fill lights, and an optional glossy highlight. Plus the hit flash.
 uniform vec4 albedo : source_color = vec4(1.0);
 uniform bool use_vertex_color = false;
+uniform bool vertex_ao = false;    // characters: the vertex colour holds baked ambient occlusion (HeroKit)
 uniform float flash : hint_range(0.0, 1.0) = 0.0;
 uniform vec4 flash_color : source_color = vec4(1.0, 1.0, 1.0, 1.0);
 uniform float rim_amount = 0.35;
@@ -82,6 +83,7 @@ void fragment() {
 		c *= mix(t, painted, band * recolor);
 		if (use_vertex_color) { c *= mix(vec3(1.0), COLOR.rgb, color_tint * (1.0 - band * recolor)); }
 	} else if (use_vertex_color) { c *= COLOR.rgb; }
+	else if (vertex_ao) { c *= COLOR.rgb; }
 	// hand-painted variation: soft blotches of slightly lighter and darker paint
 	float n = vnoise(lpos.xz * 7.0 + lpos.y * 4.0) * 0.6 + vnoise(lpos.xy * 15.0 + 3.1) * 0.4;
 	c *= 1.0 + (n - 0.5) * 2.0 * paint;

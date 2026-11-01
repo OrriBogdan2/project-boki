@@ -332,7 +332,7 @@ func _ready() -> void:
 		if a.begins_with("--drill="):
 			var dstat := a.substr(8)
 			get_tree().create_timer(0.4).timeout.connect(func(): _start_drill(Save.active_kin(), dstat))
-		if a in ["--build-demo", "--decor-demo", "--training-demo", "--overview-demo"]:
+		if a in ["--build-demo", "--decor-demo", "--training-demo", "--overview-demo", "--tryon-demo"]:
 			Save.no_write = true
 			var which: String = a
 			get_tree().create_timer(0.05).timeout.connect(func(): _build_demo(which))
@@ -5158,6 +5158,14 @@ func _build_demo(which: String) -> void:
 			ppos = Vector3(46.0, 0, 37.0) if which == "--overview-demo" else Vector3(55.0, 0, 39.0)
 			player.position = ppos
 			cam.zoom_to = 3.3 if which == "--overview-demo" else 1.5; cam.zoom = cam.zoom_to; cam.snap(ppos))
+	if which == "--tryon-demo":
+		# screenshots: your hunter at the Try-on rack, the camera in close
+		get_tree().create_timer(0.3).timeout.connect(func():
+			ppos = HomeTraining.RACK + Vector3(0, 0, 1.0); player.position = ppos
+			training.tick(0.05)
+			cam.zoom_to = 0.55; cam.zoom = cam.zoom_to; cam.snap(ppos)
+			for k in 8:
+				get_tree().create_timer(0.2 + k * 0.4).timeout.connect(func(): _close_panel()))
 	if which == "--training-demo":
 		get_tree().create_timer(0.3).timeout.connect(func():
 			ppos = Vector3(39.5, 0, 57.5); player.position = ppos; cam.snap(ppos)

@@ -53,6 +53,20 @@ const STANCE := {
 	"medium": {"knee": 0.17, "width": 0.09, "lean": 0.05, "bounce": 0.0, "breath": 2.2, "arm": 1.0, "elbow": 0.75},
 	"heavy": {"knee": 0.24, "width": 0.17, "lean": 0.03, "bounce": 0.0, "breath": 1.7, "arm": 0.8, "elbow": 1.0},
 }
+## Each archetype's own stance on top of its class (Models.hunter's "arch" meta): the thief hunched
+## low and forward, the archer tall and upright, the juggernaut leaning in over planted feet, the
+## bulwark wide and square.
+const ARCH_STANCE := {
+	"thief": {"knee": 0.36, "lean": 0.2, "width": 0.08},
+	"archer": {"knee": 0.2, "lean": 0.01},
+	"mage": {"lean": 0.03},
+	"gunslinger": {"lean": 0.06, "width": 0.11},
+	"juggernaut": {"lean": 0.14, "width": 0.19, "knee": 0.28},
+	"bulwark": {"lean": 0.02, "width": 0.21, "knee": 0.26},
+}
+## How far the shoulder pieces turn with the arm (the rest is left behind, so a raised arm slides
+## under the plate instead of through it).
+const PAD_FOLLOW := 0.55
 
 ## Where each kind of weapon sits under Aim while aimed (pos), the relaxed carry (low: pitch, yaw),
 ## and where the hands go on it (gr: the trigger hand, gl: the support hand; Vector3.INF = free).
@@ -118,6 +132,11 @@ var cape: Node3D
 var scarf: Node3D
 var tail: Node3D
 var wings: Node3D
+var pad_l: Node3D              # shoulder pieces (Models.hunter: PauldronL / PauldronR)
+var pad_r: Node3D
+var focus: Node3D              # the mage's floating orb
+var focus_base := Vector3.ZERO
+var arch := ""
 var flask: Node3D
 var flag: Node3D
 var gun_scl := 1.0
@@ -274,9 +293,15 @@ func _init(m: Node3D) -> void:
 	scarf = torso.get_node_or_null("Scarf")
 	tail = torso.get_node_or_null("Tail")
 	wings = torso.get_node_or_null("Wings")
+	pad_l = torso.get_node_or_null("PauldronL")
+	pad_r = torso.get_node_or_null("PauldronR")
+	focus = torso.get_node_or_null("Focus")
+	if focus: focus_base = focus.position
 	cls = String(m.get_meta("cls", "medium"))
 	race = String(m.get_meta("race", "human"))
-	st = STANCE.get(cls, STANCE["medium"])
+	arch = String(m.get_meta("arch", ""))
+	st = (STANCE.get(cls, STANCE["medium"]) as Dictionary).duplicate()
+	st.merge(ARCH_STANCE.get(arch, {}), true)
 	rng = int(m.get_meta("anim_seed", m.get_instance_id())) & 0x7fffffff
 	seed_ph = _rand() * TAU
 	weight = 1.0 if _rand() < 0.5 else -1.0
@@ -896,6 +921,15 @@ func update(dt: float, s: Dictionary) -> void:
 		head.rotation.y = head_look + fh.y + eh.y - yaw * lock - legs_yaw * 0.0
 		head.rotation.x = -pitch * 0.55 * (1.0 - tuck) + sin(ph * 2.0 + 0.6) * 0.03 * r1 + down_k * 0.25 - drink_k * 0.35 + fh.x + eh.x - tuck * 0.4 + flinch.x * 0.1
 		head.rotation.z = -roll * 0.5 + sin(t * 0.9 + seed_ph) * 0.03 * still + fh.z + eh.z + stun_k * sin(t * 3.1 + 1.2) * 0.2
+	# ================================================================ SHOULDER PIECES
+	if pad_l and arm_l:
+		pad_l.quaternion = Quaternion.IDENTITY.slerp(arm_l.basis.get_rotation_quaternion(), PAD_FOLLOW)
+	if pad_r and arm_r:
+		pad_r.quaternion = Quaternion.IDENTITY.slerp(arm_r.basis.get_rotation_quaternion(), PAD_FOLLOW)
+	if focus:
+		# the mage's orb hovers by the casting hand, bobbing and turning
+		focus.position = focus_base + Vector3(0, sin(t * 2.2 + seed_ph) * 0.03, 0)
+		focus.rotation.y = t * 1.3
 	# ================================================================ CLOTH
 	_cloth(dt, vel, spd, mf, ms, yaw, r1)
 
