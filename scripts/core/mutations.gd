@@ -148,7 +148,7 @@ static func roll_wild(rec: Dictionary, rng: RandomNumberGenerator, tier := 0, ra
 	else: rec["mutations"] = got
 
 # ------------------------------------------------------------------ perks
-## The kin's own stat multipliers from its mutations: {"hp", "dmg", "speed", "cd"} (Evo.mods folds them in).
+## The kin's own stat multipliers from its mutations: {"hp", "dmg", "speed", "cd"} (Kin.init_kin applies them).
 static func mods(rec: Dictionary) -> Dictionary:
 	var out := {"hp": 1.0, "dmg": 1.0, "speed": 1.0, "cd": 1.0}
 	for id in of(rec):

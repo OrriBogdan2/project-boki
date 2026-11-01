@@ -31,6 +31,13 @@ var stun_t := 0.0
 var guard_t := 0.0          # taking less damage for a moment (Rock Guard)
 var blight_t := 0.0         # venom's anti-heal: healing on this body is cut to 40% for a while
 var guard_k := 0.0
+var slow_k := 0.0           # how much speed the current slow takes away (0 = the body's usual slow)
+var blight_k := 0.6         # how much healing the current blight cuts
+var vuln_t := 0.0           # a vulnerable mark: takes vuln_k more damage (never above KinRules.VULN_MAX)
+var vuln_k := 0.0
+var dr := {}                # diminishing returns on crowd control: kind -> [applications, last time]
+var dr_stun := false        # the running stun counts toward the immunity that follows it
+var cc_immune_t := 0.0      # just came out of a stun: stuns and roots don't land (KinRules.STUN_IMMUNE)
 var marks := {}             # combo setups on this body: status -> {by, owner, until}
 var squash := 0.0           # landing / hit squash for the model
 var remote := false         # driven by another player's game
@@ -108,6 +115,8 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 		dmg = Combos.payoff(self, by, dmg, opts)
 	if guard_t > 0.0:
 		dmg *= 1.0 - guard_k
+	if vuln_t > 0.0:
+		dmg *= 1.0 + minf(vuln_k, KinRules.VULN_MAX)
 	var d := _mitigate(dmg, by, opts)
 	if d <= 0.0:
 		return 0.0
@@ -128,9 +137,18 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 		opts = opts.duplicate()
 		for st0 in ["slow", "root", "stun"]:
 			if opts.has(st0): opts[st0] = float(opts[st0]) * cc_k
+	# crowd control from abilities ("dr" in opts) has diminishing returns per target (KinRules)
+	var use_dr := bool(opts.get("dr", false))
+	if use_dr:
+		opts = opts.duplicate()
+		for st1 in ["stun", "root", "slow"]:
+			if float(opts.get(st1, 0.0)) > 0.0:
+				opts[st1] = cc_dr(st1, float(opts[st1]))
 	if opts.get("burn", 0.0) > 0.0:
-		burn_t = maxf(burn_t, 3.0); burn_dps = maxf(burn_dps, float(opts["burn"])); burn_by = by
+		burn_t = maxf(burn_t, float(opts.get("burn_for", 3.0))); burn_dps = maxf(burn_dps, float(opts["burn"])); burn_by = by
 	if opts.get("slow", 0.0) > 0.0:
+		var sk := float(opts.get("slow_k", 0.0))
+		slow_k = maxf(slow_k, sk) if slow_t > 0.0 else sk
 		slow_t = maxf(slow_t, float(opts["slow"]))
 	if opts.get("root", 0.0) > 0.0:
 		root_t = maxf(root_t, float(opts["root"]))
@@ -138,6 +156,7 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 		blight_t = maxf(blight_t, float(opts["blight"]))
 	if opts.get("stun", 0.0) > 0.0:
 		stun_t = maxf(stun_t, float(opts["stun"]))
+		if use_dr: dr_stun = true
 	for st in ["stun", "root", "slow", "burn"]:
 		if float(opts.get(st, 0.0)) > 0.0:
 			CombatBus.status_applied.emit(self, st, by, float(opts[st]))
@@ -154,6 +173,34 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 
 func _mitigate(dmg: float, _by: Ent, _opts: Dictionary) -> float:
 	return dmg
+
+## Diminishing returns (KinRules.DR_STEPS): how long a stun, root or slow of `dur` really lasts on
+## this body, counting it. A stun or root right after a stun doesn't land at all (cc_immune_t).
+## Topping up a slow that's still running doesn't count as a new one.
+func cc_dr(kind: String, dur: float) -> float:
+	if dur <= 0.0:
+		return 0.0
+	if kind in ["stun", "root"] and cc_immune_t > 0.0:
+		return 0.0
+	var now: float = float(m.time) if m else 0.0
+	var st: Array = dr.get(kind, [0, -1e9])
+	if now - float(st[1]) > KinRules.DR_WINDOW:
+		st = [0, -1e9]
+	var steps: Array = KinRules.DR_STEPS[kind]
+	var n := int(st[0])
+	if kind == "slow" and slow_t > 0.0 and n > 0:
+		n -= 1                 # a refresh of the same slow
+	else:
+		st[0] = n + 1
+	st[1] = now
+	dr[kind] = st
+	return dur * float(steps[mini(n, steps.size() - 1)])
+
+## Speed multiplier from a slow: its own strength if it has one, else this body's usual slow.
+func slow_mult(usual: float) -> float:
+	if slow_t <= 0.0:
+		return 1.0
+	return 1.0 - slow_k if slow_k > 0.0 else usual
 
 func _on_zero(_by: Ent, _opts: Dictionary) -> void:
 	die()
@@ -220,9 +267,18 @@ func slide(dt: float, guard := false) -> bool:
 func tick_status(dt: float) -> void:
 	if flash_t > 0.0: flash_t -= dt
 	if freeze_t > 0.0: freeze_t -= dt
-	if slow_t > 0.0: slow_t -= dt
+	if slow_t > 0.0:
+		slow_t -= dt
+		if slow_t <= 0.0: slow_k = 0.0
 	if root_t > 0.0: root_t -= dt
-	if stun_t > 0.0: stun_t -= dt
+	if cc_immune_t > 0.0: cc_immune_t -= dt
+	if vuln_t > 0.0: vuln_t -= dt
+	if stun_t > 0.0:
+		stun_t -= dt
+		if stun_t <= 0.0 and dr_stun:
+			# coming out of an ability's stun: a moment where nothing can stun or root you again
+			dr_stun = false
+			cc_immune_t = KinRules.STUN_IMMUNE
 	if guard_t > 0.0: guard_t -= dt
 	if blight_t > 0.0: blight_t -= dt
 	if burn_t > 0.0 and not dead:

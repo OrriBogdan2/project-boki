@@ -116,7 +116,16 @@ var rift_keys := 0               # Rift Keys carried: each opens a rift hatch on
 var kin: Ent = null             # the active kin: its abilities are on Q and V, its ultimate on R
 var kin2: Ent = null            # the benched kin, swapped in with X
 var swap_cd := 0.0
-var fuse: Dictionary = {}       # a kin fused onto you as armor (bond ultimate): {def, t}
+var merge_st: Dictionary = {}   # the merge (bond ultimate) while it runs: {def, t, T, k, giant, pulse} (KinMerge)
+var merge_cd := 0.0             # the spent window after a merge ends
+var merge_free := true          # the first time the ult slot opens this run, the bond meter fills
+var kin_bonus: Dictionary = {}  # owner bonuses from your kin's stat points (KinLib.owner_bonus), applied for the run
+var kin_hp_added := 0.0
+var kin_shield := 0.0           # the small shield a kin's owner_shield points give: refills out of a fight
+var kbuffs: Dictionary = {}     # short boosts from kin abilities: stat -> [amount, time left]
+var air_jumps := 0              # extra jumps used since you left the ground (merge passives)
+var air_dashed := false         # the merge's dodge in the air, used this airtime
+var _kst: Dictionary = {}       # owner stats from your kin this step (carry passives + merge), see owner_stat
 var gems := 0
 var lost_gems := 0
 var free_tonics := 0          # the guild forge's tonic: used first, never taken home
@@ -244,11 +253,11 @@ func accent() -> Color:
 
 func max_dashes() -> float:
 	var base := float(dodge_def.charges) if dodge_def else float(cdat["dashes"])
-	return base + (1.0 if shoulder() == "updraft" else 0.0) + float(perk_n("secondwind"))
+	return base + float(int(owner_stat("dodge_charges"))) + float(perk_n("secondwind"))
 
 func dash_regen() -> float:
-	# each rank past the first recharges dashes faster
-	return (dodge_def.cooldown if dodge_def else DASH_REGEN) * (1.0 - 0.15 * float(maxi(0, int(slot_lv.get("dash", 1)) - 1)))
+	# each rank past the first recharges dashes faster; a kin's dodge_regen too (1 = instantly)
+	return (dodge_def.cooldown if dodge_def else DASH_REGEN) * (1.0 - 0.15 * float(maxi(0, int(slot_lv.get("dash", 1)) - 1))) * (1.0 - minf(0.9, owner_stat("dodge_regen")))
 
 ## Right click is always your weapon's ability, as left click is its attack.
 func _kit_from_weapon() -> void:
@@ -257,14 +266,78 @@ func _kit_from_weapon() -> void:
 	var wd := Content.weapon(wid)
 	runner.set_slot("utility", Content.ability(wd.utility) if wd and wd.utility != "" else null)
 
-## The shoulder passive is active once the kin has settled on your shoulder.
-func shoulder() -> String:
-	if kin and not kin.dead and kin.state == "shoulder" and kin.settle >= 1.0:
-		return Data.KIN[kin.species]["shoulder"]
-	return ""
+# ------------------------------------------------------------------ your kin's stats on you
+## Your kin riding with you, settled in: its carry passives are on. A mount curls up on your back
+## while you glide (you can't glide riding it), and its passives are off for that time.
+func kin_carry_on() -> bool:
+	if kin == null or not (kin as Kin).carried():
+		return false
+	return not ((kin as Kin).carry_style() == "mount" and gliding)
+
+## Riding your mount right now (on the ground or jumping, not gliding).
+func mounted() -> bool:
+	return kin_carry_on() and (kin as Kin).carry_style() == "mount"
+
+## An owner stat (KinParts.OWNER_STATS) from your kin: its carry passives while it rides with you,
+## plus the merge's passives (times the merge's strength) while merged, capped at the carry or merge
+## maximum. Refreshed every step (_refresh_kin_stats).
+func owner_stat(stat: String) -> float:
+	return float(_kst.get(stat, 0.0))
+
+func _refresh_kin_stats() -> void:
+	var out := {}
+	var k: Kin = kin
+	if k and k.ks:
+		if kin_carry_on():
+			for ps in k.ks.carry_passives:
+				out[ps["stat"]] = float(out.get(ps["stat"], 0.0)) + float(ps["amount"])
+	if not merge_st.is_empty():
+		var ms: MergeSpec = merge_st["def"]
+		for ps in ms.passives:
+			var v := float(ps["amount"])
+			if String(KinParts.OWNER_STATS[ps["stat"]][1]) == "float": v *= float(merge_st["k"])
+			out[ps["stat"]] = float(out.get(ps["stat"], 0.0)) + v
+	for st in out:
+		var row: Array = KinParts.OWNER_STATS[st]
+		out[st] = clampf(float(out[st]), 0.0, float(row[3] if not merge_st.is_empty() else row[2]))
+	_kst = out
+
+## Owner bonuses from your kin's stat points, for the whole run (KinParts.STATS owner_*): max
+## health now; armor, shield, regen and move speed are read where they act. Call when your kin changes.
+func apply_kin_bonus() -> void:
+	max_hp -= kin_hp_added
+	hp = minf(hp, max_hp)
+	kin_hp_added = 0.0
+	var k: Kin = kin
+	kin_bonus = KinLib.owner_bonus(k.ks, k.rec) if k and k.ks else {}
+	kin_hp_added = float(kin_bonus.get("owner_max_hp", 0.0))
+	max_hp += kin_hp_added
+	hp = minf(max_hp, hp + kin_hp_added)
+	kin_shield = float(kin_bonus.get("owner_shield", 0.0))
+
+func kin_pt(key: String) -> float:
+	return float(kin_bonus.get(key, 0.0))
+
+## A short boost from a kin ability (KinParts.BUFF_STATS).
+func add_buff(stat: String, amount: float, dur: float) -> void:
+	match stat:
+		"crit": crit_t = maxf(crit_t, dur)
+		"dash_refill": dashes = max_dashes()
+		"glider_cool":
+			glide_fuel = minf(1.0, glide_fuel + amount)
+			shot_down = false
+		"guard":
+			guard_t = maxf(guard_t, dur); guard_k = amount
+		_:
+			var cur: Array = kbuffs.get(stat, [0.0, 0.0])
+			kbuffs[stat] = [maxf(float(cur[0]), amount), maxf(float(cur[1]), dur)]
+
+func buff(stat: String) -> float:
+	var b: Array = kbuffs.get(stat, [0.0, 0.0])
+	return float(b[0]) if float(b[1]) > 0.0 else 0.0
 
 func mass() -> float:
-	return float(cdat.get("mass", 1.0)) * (2.0 if shoulder() == "bedrock" else 1.0)
+	return float(cdat.get("mass", 1.0))
 
 func hittable() -> bool:
 	return not dead and not out and not extracted and not riding
@@ -321,8 +394,7 @@ func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
 	var d := dmg
 	if ctrl == "local" and m.opts.get("tutorial", false):
 		d *= 0.35
-	if shoulder() == "bedrock":
-		d *= 0.85
+	d *= 1.0 - owner_stat("damage_reduction")
 	if downed:
 		# a wisp can't be shot: it's lost to stomps, an execute, or bleeding out
 		return 0.0
@@ -339,7 +411,8 @@ func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
 		d *= CONSUME_VULN
 	if armor > 0.0 and opts.get("src", "") not in ["fall", "burn", "heat"]:
 		d *= 1.0 - ARMOR_DR
-		armor = maxf(0.0, armor - d)
+		# your kin's armor stats make it wear more slowly
+		armor = maxf(0.0, armor - d * (1.0 - minf(0.6, owner_stat("armor") + kin_pt("owner_armor"))))
 		if armor <= 0.0:
 			m.on_armor_break(self, by)
 	if gliding and d > 0.0:
@@ -351,6 +424,12 @@ func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
 		if src is Hunter and src.team != team:
 			extract_prog = 0.0
 			if is_local() and m.hud: m.hud.toast("Extraction interrupted", Color("ff9a8a"))
+	if kin_shield > 0.0 and d > 0.0 and opts.get("src", "") not in ["fall", "heat"]:
+		# your kin's owner shield soaks last; a fully soaked hit still counts as a hit (truces, interrupts)
+		var ks0 := minf(kin_shield, d)
+		kin_shield -= ks0
+		d = maxf(0.01, d - ks0)
+		opts["soaked"] = ks0
 	return d
 
 func hit_y() -> float:
@@ -539,7 +618,7 @@ var knock_steer := 0.3         # how much WASD bends a knockback (the attack dec
 func impulse(kbv: Vector2, lift := -1.0) -> void:
 	if fortify_t > 0.0:
 		return
-	var k := kbv * (0.5 if shoulder() == "bedrock" else 1.0)
+	var k := kbv * (1.0 - owner_stat("knockback_resist"))
 	var s := k.length() / mass()
 	if s < 0.05:
 		if lift >= 0.0:
@@ -585,10 +664,17 @@ func do_jump() -> void:
 		roll_t = 0.0
 		vel.x = keep.x; vel.z = keep.y
 	if grounded or coyote > 0.0:
-		vel.y = JUMP_V
+		vel.y = JUMP_V * (float((kin as Kin).ks.mount.get("jump", 1.0)) if mounted() else 1.0)
 		grounded = false
 		coyote = 0.0
 		m.sfx("jump", pos, -6.0)
+		return
+	if air_jumps < int(owner_stat("extra_jumps")) and not gliding:
+		# a merge's double jump
+		air_jumps += 1
+		vel.y = JUMP_V
+		m.fx.burst(pos + Vector3(0, 0.2, 0), Color("f3eee2"), 10, 3.0, 0.3, 0.0)
+		m.sfx("jump", pos, -4.0, 1.2)
 		return
 	# against a wall in the air: kick off it
 	var mvk: Vector2 = inp.get("move", Vector2.ZERO)
@@ -773,6 +859,9 @@ func do_dash() -> void:
 		dash_buf = DASH_BUFFER  # pressed a hair early: fire it as soon as this movement ends
 		return
 	var use_ex := not grounded or dashes < 1.0
+	if not grounded and dashes >= 1.0 and not air_dashed and int(owner_stat("air_dashes")) > 0:
+		use_ex = false           # a merge's dodge in the air: a normal dodge, once per airtime
+		air_dashed = true
 	if use_ex:
 		if ex_cd > 0.0:
 			_ab_feedback("dash", "deny")
@@ -787,57 +876,84 @@ func do_dash() -> void:
 	_dash_rider(use_ex)
 	CombatBus.ability_used.emit(self, dodge_def.id if dodge_def else "dash", "dodge")
 
-## The element of the kin you brought ("venom", "lunar"...), which flavours your dash.
+## The theme of the kin you brought ("venom", "lunar"...). Cosmetic only: it tints, never rules.
 func kin_element() -> String:
 	if kin == null or (kin as Kin).dead:
 		return ""
 	return String(Data.KIN.get((kin as Kin).species, {}).get("type", ""))
 
-## Your kin's element adds a rider to every dash (content/rules/dash_riders.json): venom poisons
-## what you pass through, lunar blinks instead of travelling, gravity tugs foes in at the end,
-## spore leaves a cloud, prism leaves a decoy, echo dashes a second time.
+## Your kin's dodge rider for the HUD: {name, desc, color} ({} when it has none).
 func dash_rider() -> Dictionary:
-	var el := kin_element()
-	return Content.rules("dash_riders").get(el, {}) if el != "" else {}
+	var k: Kin = kin
+	if k == null or k.dead or k.ks == null or k.ks.dodge_rider.is_empty():
+		return {}
+	return {"name": String(k.ks.dodge_rider.get("name", "")), "desc": KinText.rider(k.ks), "color": _rider_color(k.ks).to_html(false)}
 
+static func _rider_color(ks: KinSpec) -> Color:
+	var r: Dictionary = ks.dodge_rider
+	if not (r.get("on_pass", []) as Array).is_empty(): return KinRules.effects_color(r["on_pass"])
+	for key in ["on_start", "on_end"]:
+		for st in r.get(key, []):
+			if not (st as StageSpec).effects.is_empty(): return KinRules.effects_color((st as StageSpec).effects)
+	return KinRules.cat_color("utility")
+
+## The kin adds a rider to every class dodge (KinSpec dodge_rider, run by KinExec): effects on what
+## you dodge through, stages where you start and where you stop, an echo, or a blink.
 func _dash_rider(ex: bool) -> void:
 	dash_pass = {}
-	var rd := dash_rider()
-	if rd.is_empty():
+	var k: Kin = kin
+	if k == null or k.dead or k.ks == null or k.ks.dodge_rider.is_empty():
 		return
-	var col := Color(String(rd.get("color", "#ffffff")))
-	var ctx := {"slot": "dodge", "ability": "dash_" + kin_element(), "level": ability_level("dash"), "at_fixed": pos, "dir": roll_dir}
-	if rd.get("blink", false) and not ex and grounded:
-		# lunar: no travel at all, you're simply there
+	var rd: Dictionary = k.ks.dodge_rider
+	var col := _rider_color(k.ks)
+	var cx := KinExec.make_cx(m, self, k, self, inp.get("aim", pos), m.dmg_mult(self) * Effects.level_k({"level": ability_level("dash")}), "dodge", "rider_" + k.species)
+	if String(rd.get("as", "dash")) == "blink" and not ex and grounded:
+		# no travel at all, you're simply there
 		var dist := roll_speed * roll_t
 		roll_t = 0.0
-		Effects.run([{"type": "blink", "distance": dist + 0.4, "color": col.to_html(false)}], self, {"dir": roll_dir})
+		var best := pos
+		var kk := dist + 0.4
+		while kk > 0.5:
+			var q := pos + Vector3(roll_dir.x, 0, roll_dir.y) * kk
+			if not m.world.is_void(q.x, q.z) and not m.world.is_block(q.x, q.z):
+				best = Vector3(q.x, m.world.ground_at(q.x, q.z), q.z); break
+			kk -= 0.5
+		m.fx.burst(pos + Vector3(0, 0.8, 0), col, 14, 3.0, 0.3)
+		teleport(best)
+		m.fx.burst(best + Vector3(0, 0.8, 0), col, 14, 3.0, 0.3)
 		vel.x = roll_dir.x * 3.0; vel.z = roll_dir.y * 3.0
 		phase_t = maxf(phase_t, 0.15)
-	if rd.has("start"):
-		Effects.run(rd["start"], self, ctx)
-	if rd.has("pass"):
-		dash_pass = {"hit": {}, "opts": rd["pass"]}
-	if rd.has("end"):
+	if not (rd.get("on_start", []) as Array).is_empty():
+		var c1 := cx.duplicate(); c1["at"] = pos; c1["dir"] = roll_dir
+		KinExec.run_stages(rd["on_start"], c1)
+	if not (rd.get("on_pass", []) as Array).is_empty():
+		var on_pass: Array = rd["on_pass"]
+		dash_pass = {"hit": {}, "kx": func(f: Ent) -> void: KinExec.apply_foe(on_pass, f, cx, pos)}
+	if not (rd.get("on_end", []) as Array).is_empty():
 		var tt := maxf(0.02, roll_t)
+		var on_end: Array = rd["on_end"]
 		m.later(tt, func():
 			if is_instance_valid(self) and not dead and not out:
-				Effects.run(rd["end"], self, {"slot": "dodge", "ability": "dash_" + kin_element(), "level": ability_level("dash")}))
-	if rd.has("repeat") and not ex:
-		var rp: Dictionary = rd["repeat"]
+				var c2 := cx.duplicate(); c2["at"] = pos; c2["dir"] = roll_dir
+				KinExec.run_stages(on_end, c2))
+	for md in rd.get("modifiers", []):
+		if (md as PartSpec).type != "repeat" or ex:
+			continue
 		var d0 := roll_dir
 		var spd0 := roll_speed
 		var t0 := roll_t
-		m.later(t0 + float(rp.get("delay", 0.25)), func():
-			if is_instance_valid(self) and not dead and not out and not downed and stun_t <= 0.0 and roll_t <= 0.0:
-				roll_dir = d0
-				roll_speed = spd0
-				roll_t = t0 * float(rp.get("k", 0.6))
-				move_kind = "dash"
-				inv_t = maxf(inv_t, roll_t)
-				m.fx.ring(pos, 0.9, col, 0.25)
-				m.fx.dash_trail(self)
-				m.sfx("dash", pos, -6.0, 1.4))
+		var pr: Dictionary = (md as PartSpec).params
+		for i in int(pr["count"]):
+			m.later(t0 + float(pr["delay"]) * float(i + 1) + t0 * float(i), func():
+				if is_instance_valid(self) and not dead and not out and not downed and stun_t <= 0.0 and roll_t <= 0.0:
+					roll_dir = d0
+					roll_speed = spd0
+					roll_t = t0 * float(pr["falloff"])
+					move_kind = "dash"
+					inv_t = maxf(inv_t, roll_t)
+					m.fx.ring(pos, 0.9, col, 0.25)
+					m.fx.dash_trail(self)
+					m.sfx("dash", pos, -6.0, 1.4))
 
 var roll_speed := DASH_SPEED
 var wedged_t := 0.0
@@ -897,13 +1013,16 @@ func dash_with(e: Dictionary) -> void:
 	m.sfx("dash", pos, -4.0, 0.8 if not shove.is_empty() else 1.0)
 	m.fx.dash_trail(self)
 
-## A kin rider: foes you dash through get its status (venom's poison).
+## A kin rider (or a grammar dash you perform): what you dash through gets its effects.
 func _pass_along() -> void:
 	for f in m.foes_of(team):
 		if dash_pass.is_empty(): return
-		if dash_pass["hit"].has(f.get_instance_id()) or flat_dist(f) > r + f.r + 0.4 or absf(f.pos.y - pos.y) > 1.4:
+		if dash_pass["hit"].has(f.get_instance_id()) or flat_dist(f) > r + f.r + float(dash_pass.get("w", 0.8)) * 0.5 or absf(f.pos.y - pos.y) > 1.4:
 			continue
 		dash_pass["hit"][f.get_instance_id()] = true
+		if dash_pass.get("kx") is Callable:
+			(dash_pass["kx"] as Callable).call(f)
+			continue
 		var o := {"src": "abil", "ab": "dodge", "tags": ["dodge"]}
 		var po: Dictionary = dash_pass["opts"]
 		for k in ["burn", "slow", "blight", "stun", "root"]:
@@ -1025,7 +1144,7 @@ func fire() -> void:
 
 ## The round actually leaving the gun (straight away, or once a wind-up ends).
 func _release() -> void:
-	var rate: float = wpn["rate"] * (0.8 if shoulder() == "charge" else 1.0)
+	var rate: float = wpn["rate"] * (1.0 - minf(0.5, owner_stat("fire_rate") + buff("fire_rate")))
 	fire_cd = rate
 	idle_fire = 0.0
 	ammo -= 1
@@ -1161,9 +1280,7 @@ func _strike(dmg: float, reach: float, arc_deg: float, kb: float, o := {}) -> vo
 		extra["tip"] = [reach * 0.7, float(wpn["tip_bonus"])]
 	if float(o.get("stun", 0.0)) > 0.0: extra["stun"] = float(o["stun"])
 	if crit_t > 0.0: extra["crit"] = true
-	var sp := shoulder()
-	if sp == "kindle": extra["burn"] = 4.0
-	if sp == "briar": extra["slow"] = 0.7
+	_kin_riders(extra)
 	Loot.rider(self, extra, dmg * m.dmg_mult(self))
 	# the swing is a fan of very short, invisible strikes, so walls and terraces block it like shots
 	var rays := 9 if arc_deg > 130.0 else 7
@@ -1213,22 +1330,10 @@ func _emit_shot() -> void:
 		var dist := clampf(Vector2(aim.x - pos.x, aim.z - pos.z).length(), 1.5, rng)
 		life = dist / spd
 		extra["boom"] = wpn["boom"]; extra["boom_kb"] = wpn["boom_kb"]
-	var sp := shoulder()
 	if crit_t > 0.0:
 		extra["crit"] = true
-	if sp == "kindle": extra["burn"] = 4.0
-	if sp == "briar": extra["slow"] = 0.7
 	Loot.rider(self, extra, dmg)
-	if not fuse.is_empty():
-		# a fused kin changes every shot: burning, slowing, bursting or arcing to another foe
-		var fs: Dictionary = (fuse["def"] as UltimateDef).shots
-		if fs.has("burn"): extra["burn"] = maxf(float(extra.get("burn", 0.0)), float(fs["burn"]))
-		if fs.has("slow"): extra["slow"] = maxf(float(extra.get("slow", 0.0)), float(fs["slow"]))
-		if fs.has("boom") and not extra.has("boom"):
-			extra["boom"] = float(fs["boom"]); extra["boom_kb"] = 4.0; extra["boom_small"] = true
-		if int(fs.get("chain", 0)) > 0:
-			extra["fx_hit"] = [{"type": "chain", "count": int(fs["chain"]), "first": 5.0, "dmg": float(wpn["dmg"]) * 0.5, "color": "#fff27a", "skip_here": true}]
-			extra["fx_ctx"] = {"slot": "ult", "ability": "fuse"}
+	_kin_riders(extra)
 	if pel > 1:
 		# a shotgun throws the same fixed fan every time, wider with each shot in a row. However
 		# few slugs land, the first one on a target still does a good share of the whole volley
@@ -1248,7 +1353,7 @@ func _emit_shot() -> void:
 func start_reload() -> void:
 	if reload_t > 0.0 or ammo >= int(wpn["mag"]) or downed or wpn.get("melee", false):
 		return
-	reload_t = float(wpn["reload"]) * (0.8 if shoulder() == "charge" else 1.0) * (0.7 if perk_n("quickhands") > 0 else 1.0)
+	reload_t = float(wpn["reload"]) * (1.0 - owner_stat("reload")) * (0.7 if perk_n("quickhands") > 0 else 1.0)
 	m.sfx("reload", pos, -8.0)
 
 func use_signature() -> void:
@@ -1340,14 +1445,15 @@ func slot_info(slot: String) -> Dictionary:
 		"k1", "e":
 			var k: Kin = kin
 			if k == null or k.runner == null: return out
-			var d: AbilityDef = k.runner.def_of("k1")
+			var d: AbilitySpec = k.runner.def_of("k1")
 			if d == null: return out
-			out.merge({"name": d.display_name, "short": d.short, "icon": d.icon, "col": d.color, "desc": d.desc, "cd": k.runner.cd_left("k1"), "cd_max": k.runner.cd_max("k1"),
-				"charges": k.runner.charges("k1"), "max_charges": d.charges, "verb": d.verb, "element": d.element, "ready": k.runner.is_ready("k1") and k.ready_to_fight() and k.state != "fused"}, true)
+			out.merge({"name": d.display_name, "short": d.short, "icon": KinText.icon(d), "col": KinText.color(d), "desc": KinText.ability(k.effective("k1")), "cd": k.runner.cd_left("k1"), "cd_max": k.runner.cd_max("k1"),
+				"charges": k.runner.charges("k1"), "max_charges": d.charges, "verb": d.stages[0].delivery.type, "element": d.theme, "ready": k.runner.is_ready("k1") and k.ready_to_fight()}, true)
 		"r", "ult":
-			var u := Ultimate.def_for(kin) if kin else null
+			var u := KinMerge.def_for(kin) if kin else null
 			if u == null: return out
-			out.merge({"name": u.display_name, "short": u.display_name, "icon": u.id, "col": u.color, "desc": u.desc, "cd": 0.0, "cd_max": 0.0, "charges": 1 if ult >= 1.0 else 0, "max_charges": 1, "ready": Ultimate.can_cast(self)}, true)
+			out.merge({"name": u.display_name, "short": u.display_name, "icon": "bond", "col": KinRules.cat_color("utility"), "desc": " ".join(KinText.merge(u, (kin as Kin).carry_style() == "mount")),
+				"cd": merge_cd, "cd_max": KinParts.MERGE_SPENT_TIME, "charges": 1 if ult >= 1.0 else 0, "max_charges": 1, "ready": KinMerge.can_cast(self)}, true)
 	return out
 
 ## Q and V: your active kin's abilities, aimed at the cursor.
@@ -1365,15 +1471,16 @@ func use_kin_ability(slot: String) -> void:
 		_ab_feedback(slot, "cast")
 		if is_local():
 			# tie the button to what happened: a flash line from you to the kin doing it, if it's away
+			var kc := KinText.color(k.runner.def_of(slot))
 			if k.flat_dist(self) > 2.5 and k.state != "shoulder":
-				m.fx.bolt(pos + Vector3(0, 1.2, 0), k.pos + Vector3(0, 0.6, 0), Color(k.runner.def_of(slot).color, 0.8))
-			m.fx.ring(k.pos, 1.3, k.runner.def_of(slot).color, 0.3)
+				m.fx.bolt(pos + Vector3(0, 1.2, 0), k.pos + Vector3(0, 0.6, 0), Color(kc, 0.8))
+			m.fx.ring(k.pos, 1.3, kc, 0.3)
 	else:
 		_ab_feedback(slot, "deny")
 
-## R: the bond ultimate, once fighting together has filled the meter.
+## R: the bond ultimate (the merge), once fighting together has filled the meter.
 func use_ultimate() -> void:
-	if Ultimate.cast(self):
+	if KinMerge.cast(self):
 		_ab_feedback("r", "cast")
 		return
 	_ab_feedback("r", "deny")
@@ -1406,11 +1513,41 @@ func swap_kin(force := false) -> void:
 	swap_cd = float(Content.rules("kin_ai").get("swap_cooldown", 3.0))
 	m.on_kin_swap(self, b, a)
 
-## A bonus from a kin fused onto you (armor ultimate): dmg, speed.
-func fuse_mod(k: String) -> float:
-	if fuse.is_empty():
-		return 1.0
-	return float((fuse["def"] as UltimateDef).owner_mods.get(k, 1.0))
+## Riders your kin puts on every shot or swing (KinSpec carry.on_shot while it rides with you, the
+## merge's on_shot while merged): damage over time, slow, push, marks, splash and arcs. Never stun or root.
+func _kin_riders(extra: Dictionary) -> void:
+	var lists: Array = []
+	var k: Kin = kin
+	if k and k.ks and kin_carry_on() and not k.ks.carry_on_shot.is_empty():
+		lists.append([k.ks.carry_on_shot, 1.0])
+	var mo := KinMerge.on_shot(self)
+	if not mo.is_empty():
+		lists.append([mo, float(mo["k"])])
+	for pair in lists:
+		var os: Dictionary = pair[0]
+		var kk: float = pair[1]
+		for e in os.get("effects", []):
+			var pr: Dictionary = (e as PartSpec).params
+			match (e as PartSpec).type:
+				"damage":
+					if float(pr["over"]) > 0.0:
+						extra["burn"] = maxf(float(extra.get("burn", 0.0)), float(pr["amount"]) * kk / float(pr["over"]))
+						extra["burn_for"] = float(pr["over"])
+					else:
+						extra["ride_dmg"] = maxf(float(extra.get("ride_dmg", 0.0)), float(pr["amount"]) * kk)
+				"slow":
+					extra["slow"] = maxf(float(extra.get("slow", 0.0)), float(pr["duration"]))
+					extra["slow_k"] = maxf(float(extra.get("slow_k", 0.0)), float(pr["strength"]))
+					extra["dr"] = true
+				"push":
+					extra["kb"] = float(extra.get("kb", 0.0)) + float(pr["strength"]) * kk * 0.25
+				"mark":
+					extra["mark"] = [String(pr["mode"]), float(pr["duration"]), float(pr["amount"])]
+		if float(os.get("splash", 0.0)) > 0.0 and not extra.has("boom"):
+			extra["boom"] = float(os["splash"]); extra["boom_kb"] = 4.0; extra["boom_small"] = true
+		if int(os.get("chain", 0)) > 0 and not extra.has("kx"):
+			extra["fx_hit"] = [{"type": "chain", "count": int(os["chain"]), "first": 5.0, "dmg": float(wpn["dmg"]) * 0.5, "color": KinRules.cat_color("damage").to_html(false), "skip_here": true}]
+			extra["fx_ctx"] = {"slot": "ult", "ability": "merge"}
 
 func heal(n: float) -> void:
 	if downed or out:
@@ -1419,7 +1556,7 @@ func heal(n: float) -> void:
 		m.net_event(["heal", nid, n])
 		return
 	if blight_t > 0.0:
-		n *= 0.4          # blighted by venom: healing barely takes
+		n *= 1.0 - blight_k   # blighted: healing barely takes
 	var before := hp
 	hp = minf(max_hp, hp + n)
 	if hp - before > 1.0:
@@ -1530,8 +1667,20 @@ func sim(dt: float) -> void:
 			ammo = wpn["mag"]
 	if dashes < max_dashes():
 		dashes = minf(max_dashes(), dashes + dt / dash_regen())
-	if shoulder() == "spring" and not downed:
-		hp = minf(max_hp, hp + 3.0 * dt)
+	_refresh_kin_stats()
+	var regen := owner_stat("regen") + kin_pt("owner_regen")
+	if regen > 0.0 and not downed and hp < max_hp:
+		hp = minf(max_hp, hp + regen * dt * (1.0 - blight_k if blight_t > 0.0 else 1.0))
+	if kin_pt("owner_shield") > 0.0 and regen_wait <= 0.0 and kin_shield < kin_pt("owner_shield"):
+		kin_shield = minf(kin_pt("owner_shield"), kin_shield + kin_pt("owner_shield") * 0.5 * dt)
+	if owner_stat("dodge_regen") >= 0.99:
+		dashes = max_dashes()
+	for bk in kbuffs.keys():
+		kbuffs[bk][1] = float(kbuffs[bk][1]) - dt
+		if float(kbuffs[bk][1]) <= 0.0: kbuffs.erase(bk)
+	if grounded:
+		air_jumps = 0
+		air_dashed = false
 	armor_wait = maxf(0.0, armor_wait - dt)
 	# shots spread more while you move, jump or have just dashed, and settle when you stand still
 	if not remote:
@@ -1547,8 +1696,7 @@ func sim(dt: float) -> void:
 	if not downed and not dropping:
 		Bond.passive(self, dt)
 	swap_cd = maxf(0.0, swap_cd - dt)
-	if not fuse.is_empty():
-		fuse["t"] = float(fuse["t"]) - dt
+	KinMerge.tick(self, dt)
 	# reload by itself once you stop shooting for a moment
 	idle_fire += dt
 	if idle_fire > 1.3 and ammo < int(wpn["mag"]) and reload_t <= 0.0 and not inp["fire"]:
@@ -1689,7 +1837,7 @@ func _physics(dt: float) -> void:
 		_grapple(dt)
 		return
 	var mv: Vector2 = inp["move"] if stun_t <= 0.0 and root_t <= 0.0 else Vector2.ZERO
-	var spd := base_speed * (1.35 if haste_t > 0.0 else 1.0) * (0.4 * (Life.R["stomp_slow"] if get_meta("stomped", false) else 1.0) if downed else 1.0) * (0.65 if slow_t > 0.0 else 1.0) * (0.88 if reload_t > 0.0 else 1.0) * _fire_slow() * (0.45 if drink_t > 0.0 or kit_t > 0.0 else 1.0) * (0.55 if crouch else 1.0) * (1.0 + gear_stat("speed")) * fuse_mod("speed") * _chase_mod(mv)
+	var spd := base_speed * (1.35 if haste_t > 0.0 else 1.0) * (0.4 * (Life.R["stomp_slow"] if get_meta("stomped", false) else 1.0) if downed else 1.0) * slow_mult(0.65) * (0.88 if reload_t > 0.0 else 1.0) * _fire_slow() * (0.45 if drink_t > 0.0 or kit_t > 0.0 else 1.0) * (0.55 if crouch else 1.0) * (1.0 + gear_stat("speed")) * (_mount_speed() if mounted() and grounded else 1.0) * _chase_mod(mv)
 	var hv := Vector2(vel.x, vel.z)
 	var cur := hv.length()
 	if roll_t > 0.0:
@@ -2214,6 +2362,11 @@ func level_slot(slot: String) -> bool:
 		return false
 	slot_lv[slot] = int(slot_lv[slot]) + 1
 	skill_pts -= 1
+	if slot == "ult" and merge_free and kin != null:
+		# the merge unlocks with a full bond meter, once a run
+		merge_free = false
+		ult = 1.0
+		if m and m.has_method("on_bond_ready"): m.on_bond_ready(self)
 	if is_local() and m and m.hud:
 		m.hud.ability_feedback({"sec": "sec", "gear": "gear0", "dash": "dash", "kin": "k1", "ult": "r"}[slot], "cast")
 		m.sfx("unlock", null, -8.0, 1.0 + 0.1 * float(slot_lv[slot]))
@@ -2226,8 +2379,12 @@ func _bot_spend() -> void:
 		if can_level("ult"):
 			level_slot("ult"); continue
 		var done := false
+		# follow the order as a list of ranks (sec 1, dash 1, kin 1, gear 1, sec 2, ...), so every slot
+		# opens early: the kin's abilities are locked until its slot has a point (KinRules slot locks)
+		var want := {}
 		for s in order:
-			if int(slot_lv[s]) < int(SLOT_MAX[s]) and can_level(s) and (int(slot_lv[s]) == 0 or order.find(s) >= 0):
+			want[s] = int(want.get(s, 0)) + 1
+			if int(slot_lv[s]) < int(want[s]) and int(slot_lv[s]) < int(SLOT_MAX[s]) and can_level(s):
 				level_slot(s); done = true; break
 		if not done: break
 
@@ -2303,7 +2460,17 @@ func gear_stat(k: String) -> float:
 		t += float((Data.PERKS.get(pk, {}).get("stats", {}) as Dictionary).get(k, 0.0))
 	if kin != null and is_instance_valid(kin) and (k == "armor" or k == "sight"):
 		t += Mutations.owner_stat((kin as Kin).rec, k)      # a Crystal or Glowing kin helps its hunter
+	# your kin: its owner bonus points, carry passives, the merge and short ability buffs
+	match k:
+		"speed": t += owner_stat("move_speed") + kin_pt("owner_move_speed") + buff("move_speed")
+		"dmg": t += owner_stat("damage") + buff("damage")
+		"heat", "glide_speed": t += owner_stat("glide")
 	return t
+
+## Ground speed while you ride your mount (its carry.mount speed).
+func _mount_speed() -> float:
+	var k: Kin = kin
+	return float(k.ks.mount.get("speed", 1.0)) if k and k.ks else 1.0
 
 ## How many stacks of a perk you've picked up this run.
 func perk_n(id: String) -> int:
@@ -2447,6 +2614,9 @@ func render(delta: float, alpha: float) -> void:
 	if not model:
 		return
 	model.rotation.y = face
+	# riding a mount: you sit up on its back
+	var ride := (kin as Kin).ride_height() if mounted() and not downed else 0.0
+	model.position.y = lerpf(model.position.y, ride, minf(1.0, delta * 12.0))
 	if remote:
 		update_lip()
 	_render_weapon_fx(delta)

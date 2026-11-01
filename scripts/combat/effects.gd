@@ -232,7 +232,8 @@ static func _power(caster: Node, ctx: Dictionary) -> float:
 
 static func _hit_opts(e: Dictionary, ctx: Dictionary, kb: Vector2, caster: Node) -> Dictionary:
 	var slot := String(ctx.get("slot", ""))
-	var o := {"src": "kin" if caster is Kin else "abil", "ab": slot if slot != "" else "abil", "tags": [slot, String(ctx.get("ability", ""))]}
+	# "dr": ability crowd control has diminishing returns per target (KinRules)
+	var o := {"src": "kin" if caster is Kin else "abil", "ab": slot if slot != "" else "abil", "tags": [slot, String(ctx.get("ability", ""))], "dr": true}
 	if caster is Kin: o["tags"].append("kin")
 	if kb.length() > 0.01: o["kb"] = kb
 	for k in ["lift", "stun", "slow", "root", "burn", "blight", "wallstun"]:
@@ -640,7 +641,7 @@ static func _yank(e: Dictionary, caster: Node, ctx: Dictionary, m: Node) -> void
 		m.verbs.yank(v, dest, tt, 0.8)
 		m.fx.bolt(anchor.pos + Vector3(0, 1.0, 0), v.pos + Vector3(0, 0.9, 0), col)
 		if float(e.get("stun", 0.0)) > 0.0 or float(e.get("dmg", 0.0)) > 0.0 or e.has("burn") or e.has("slow"):
-			var o := {"src": "kin" if caster is Kin else "abil", "ab": String(ctx.get("slot", "abil")), "tags": [String(ctx.get("slot", "")), String(ctx.get("ability", ""))]}
+			var o := {"src": "kin" if caster is Kin else "abil", "ab": String(ctx.get("slot", "abil")), "tags": [String(ctx.get("slot", "")), String(ctx.get("ability", ""))], "dr": true}
 			for kk in ["stun", "slow", "burn", "root"]:
 				if e.has(kk): o[kk] = float(e[kk])
 			v.hurt(maxf(0.1, float(e.get("dmg", 0.0)) * _power(caster, ctx)), caster, o)

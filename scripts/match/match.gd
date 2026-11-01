@@ -66,6 +66,7 @@ var slow_k := 0.35
 var killcam_text := ""
 var cam_style := ""
 var swing_hits := {}
+var ride_procs := {}       # kin damage riders on shots: "shooter>target" -> last proc time
 var aim_y := 0.0
 ## Shots and ability projectiles bend up or down to the height of what you aimed at, so you can
 ## hit someone a terrace or two above or below. Further than this and the cliff takes it.
@@ -556,6 +557,7 @@ func make_hunter(id: String, team: int, cls: String, pname: String, ctrl: String
 		kins.append(k)
 		ents_by_id[k.nid] = k
 		h.kin = k
+		h.apply_kin_bonus()        # its owner bonus points (max health, armor, shield, regen, speed)
 		if Mutations.owner_stat(kin_rec, "armor") > 0.0:
 			h.refresh_gear(); h.armor = h.max_armor      # a Crystal kin hardens its hunter's armor
 	if TWO_KIN and not kin_rec2.is_empty() and not kin_rec.is_empty():
@@ -1633,7 +1635,7 @@ func foes_of(team: int) -> Array:
 func dmg_mult(h: Hunter) -> float:
 	if h == null: return 1.0
 	var bot_k := float((h.ai.get("diff", {}) as Dictionary).get("dmg", 1.0)) if h.ctrl == "bot" and h != player else 1.0
-	return bot_k * (0.5 if h.weak_t > 0.0 else 1.0) * (1.25 if h.bless_t > 0.0 else 1.0) * (1.0 + h.gear_stat("dmg")) * h.fuse_mod("dmg") * (Life.R["sickness_dmg"] if h.sick_t > 0.0 else 1.0)
+	return bot_k * (0.5 if h.weak_t > 0.0 else 1.0) * (1.25 if h.bless_t > 0.0 else 1.0) * (1.0 + h.gear_stat("dmg")) * (Life.R["sickness_dmg"] if h.sick_t > 0.0 else 1.0)
 
 func sfx(n: String, p = null, vol := 0.0, pitch := 1.0) -> void:
 	Sfx.play(n, p, vol, 0.07, pitch)
@@ -1722,7 +1724,8 @@ func add_feed(t: String) -> void:
 
 # ------------------------------------------------------------------ events
 func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
-	if truce: truce.on_damage(target, by, d)
+	# (damage a kin's owner shield soaked still counts as an attack)
+	if truce: truce.on_damage(target, by, d + float(o.get("soaked", 0.0)))
 	var tags: Array = o.get("tags", [])
 	if tags.is_empty():
 		tags = [String(o.get("src", "primary")) if o.get("src", "") != "" else "primary"]
@@ -1740,7 +1743,7 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 		if o.has("leech") and target.team != credit.team and not credit.remote:
 			credit.heal(d * float(o["leech"]))     # a Void weapon drains what it deals
 		if not credit.remote and target.team != credit.team and src != "burn":
-			credit.ult = minf(1.0, credit.ult + d / 320.0 * (1.3 if credit.perk_n("overcharge") > 0 else 1.0))
+			Bond.add(credit, d / 320.0)        # (the merge meter: overcharge and the Bond IV apply there)
 		if not credit.remote and target.team != credit.team and not (target is Hunter and (target as Hunter).downed):
 			credit.gain_xp(d * (0.6 if target is Hunter else 0.35))
 			var lv: int = credit.armor_gain(d * (1.0 if target is Hunter else 0.33))
@@ -2174,13 +2177,13 @@ func on_kin_faint(k: Kin) -> void:
 
 # ------------------------------------------------------------------ kin combat events
 ## A kin used an ability: its name pops up over it so you can read the fight.
-func on_kin_ability(k: Kin, def: AbilityDef, auto: bool) -> void:
+func on_kin_ability(k: Kin, def: AbilitySpec, auto: bool) -> void:
 	kstat["kin_ab"] += 1
 	if auto: kstat["auto"] += 1
 	if k.owner_h == null or k.unseen:
 		return
 	if player and k.flat_dist(player) < 20.0:
-		fx.word(k.pos + Vector3(0, 1.3 + k.r, 0), def.display_name, def.color.lerp(Color.WHITE, 0.25), false)
+		fx.word(k.pos + Vector3(0, 1.3 + k.r, 0), def.display_name, KinText.color(def).lerp(Color.WHITE, 0.25), false)
 	if k.owner_h == player:
 		player.add_stat("kin_abilities")
 		if auto and hud and not train.has("_auto_told"):
@@ -2196,27 +2199,35 @@ func on_kin_swap(h: Hunter, now_k: Kin, _was: Kin) -> void:
 		if hud: hud.toast("%s is out" % now_k.rec.get("name", Data.KIN[now_k.species]["name"]), now_k.sp["color"])
 
 func on_bond_ready(h: Hunter) -> void:
+	if h.kin and is_instance_valid(h.kin) and not h.kin.dead:
+		(h.kin as Kin).fire_trigger("on_bond_full", {"at": h.pos})
 	if h != player:
 		return
 	sfx("bond", null, -3.0)
 	fx.word(h.pos + Vector3(0, 2.3, 0), "BOND READY", Color("ffd23f"), true)
-	var ud := Ultimate.def_for(h.kin) if h.kin else null
+	var ud := KinMerge.def_for(h.kin) if h.kin else null
 	if hud and ud:
 		hud.toast("Bond full!  %s: %s" % [Settings.key_cap("ultimate"), ud.display_name], Color("ffd23f"))
 
-func on_ult(h: Hunter, k: Kin, u: UltimateDef) -> void:
+func on_merge(h: Hunter, k: Kin, u: MergeSpec) -> void:
 	kstat["ult"] += 1
+	var col := KinRules.cat_color("utility")
 	sfx("ult", h.pos, 0.0)
 	shake(0.55, h.pos)
-	fx.word((k.pos if u.form == "giant" else h.pos) + Vector3(0, 2.4, 0), u.display_name.to_upper(), u.color, true)
+	fx.word(h.pos + Vector3(0, 2.6, 0), u.display_name.to_upper(), col, true)
+	fx.ring(h.pos, 3.0, col, 0.5)
 	if h.team != (player.team if player else -1) and player and h.flat_dist(player) < 22.0:
-		add_feed("%s's %s used %s" % [h.pname, k.rec.get("name", "kin"), u.display_name])
+		add_feed("%s merged with %s: %s" % [h.pname, k.rec.get("name", "their kin"), u.display_name])
 	if h == player:
 		player.add_stat("ults")
 		_slow(0.35, 0.4)
 		cam.punch(0.14)
 		if hud:
-			hud.flash(u.color, 0.25)
+			hud.flash(col, 0.25)
+
+func on_merge_end(h: Hunter, why: String) -> void:
+	if h == player and hud and why in ["time", "throw"]:
+		hud.toast_small("MERGE ENDED", Color("ffd84a"))
 
 func on_combo(target: Ent, own: Node, c: Dictionary) -> void:
 	kstat["combo"] += 1
@@ -2296,8 +2307,7 @@ func _leave_one_kin(h: Hunter, k: Kin) -> void:
 		k.visible = false
 
 func giant_free(k: Kin) -> bool:
-	if not k.giant.is_empty(): k._shrink()
-	if k.state == "fused": k._unfuse()
+	k._end_merge("left")
 	return true
 
 ## Gives a hunter one of their kin back (out of a deathbox, or caught back up): it hops on your
@@ -2311,6 +2321,7 @@ func give_kin(h: Hunter, rec: Dictionary) -> Kin:
 	ents_by_id[k.nid] = k
 	if h.kin == null or (h.kin as Kin).dead:
 		h.kin = k
+		h.apply_kin_bonus()
 	else:
 		h.kin2 = k
 		k.bench()
@@ -2858,7 +2869,10 @@ func _shot_end(s: Dictionary, at: Vector3, e: Ent, why := "") -> void:
 	# data-driven abilities: effects that go off where the shot ends, on what it hit, or on the wall
 	# that stopped it
 	var fxx: Dictionary = s["x"]
-	if not fxx.get("cos", false) and is_instance_valid(s["by"]) and not s["by"].dead:
+	if fxx.get("kx") is Callable and not fxx.get("cos", false):
+		# a kin grammar shot (KinExec): it applies its own effects and followups
+		(fxx["kx"] as Callable).call(s, at, e, why if not (e != null and fxx.has("hitset")) else "end")
+	elif not fxx.get("cos", false) and is_instance_valid(s["by"]) and not s["by"].dead:
 		var c2: Dictionary = (fxx.get("fx_ctx", {}) as Dictionary).duplicate()
 		c2["at"] = at
 		c2["end"] = why
@@ -2880,7 +2894,9 @@ func _shot_end(s: Dictionary, at: Vector3, e: Ent, why := "") -> void:
 ## A piercing or boomerang shot passing through something: its on-hit effects and damage, then on.
 func _shot_hit(s: Dictionary, at: Vector3, e: Ent) -> void:
 	var fxx: Dictionary = s["x"]
-	if not fxx.get("cos", false) and is_instance_valid(s["by"]) and fxx.has("fx_hit"):
+	if fxx.get("kx") is Callable and not fxx.get("cos", false):
+		(fxx["kx"] as Callable).call(s, at, e, "pass")
+	elif not fxx.get("cos", false) and is_instance_valid(s["by"]) and fxx.has("fx_hit"):
 		var c2: Dictionary = (fxx.get("fx_ctx", {}) as Dictionary).duplicate()
 		c2["at"] = at; c2["target"] = e; c2["end"] = "hit"
 		Effects.run(fxx["fx_hit"], s["by"], c2)
@@ -2959,6 +2975,15 @@ func _shot_apply(s: Dictionary, at: Vector3, e: Ent) -> void:
 	if x.has("blight"): o["blight"] = x["blight"]
 	if x.has("wallstun"): o["wallstun"] = x["wallstun"]
 	if x.has("ab"): o["ab"] = x["ab"]
+	for kk in ["burn_for", "slow_k", "dr"]:
+		if x.has(kk): o[kk] = x[kk]
+	if x.has("ride_dmg") and by:
+		# a kin's damage rider on your shots procs at most once a second on each target
+		var pk := "%s>%s" % [by.nid, e.nid]
+		if float(ride_procs.get(pk, -9.0)) < time - 1.0:
+			ride_procs[pk] = time
+			dmg += float(x["ride_dmg"])
+		if ride_procs.size() > 400: ride_procs.clear()
 	if x.get("hook", false) and by:
 		# drag it back toward whoever threw the hook
 		var back := Vector2(by.pos.x - e.pos.x, by.pos.z - e.pos.z)
@@ -2976,6 +3001,8 @@ func _shot_apply(s: Dictionary, at: Vector3, e: Ent) -> void:
 				fx.bolt(e.pos + Vector3(0, 0.8, 0), f.pos + Vector3(0, 0.8, 0), Color("d8c9b0"))
 				break
 	e.hurt(dmg, by, o)
+	if x.has("mark"):
+		KinRules.mark(e, String(x["mark"][0]), float(x["mark"][1]), float(x["mark"][2]))
 	if x.get("blinkto", false) and by is Hunter and not by.remote and not by.downed:
 		# Shadow Knife: appear behind whoever it hit
 		var back := Vector2(e.pos.x - by.pos.x, e.pos.z - by.pos.z).normalized()
@@ -3478,6 +3505,65 @@ func step(dt: float) -> void:
 		if tick.call(5.2): player.ult = 1.0; pending_input["ult"] = true
 		if tick.call(11.0): pending_input["swap"] = true
 		if time > 1.0: player.inp["fire"] = true
+	if opts.get("carry_demo", false) and cam:
+		cam.zoom_to = 0.4          # (screenshots: close and low enough to see the kin on you)
+		cam.pitch = deg_to_rad(42.0)
+	if opts.get("carry_demo", false) and player and time < 0.05 and not opts.get("glide_demo", false) and not train.has("_open"):
+		# (screenshots: step out onto open ground, away from the racks and crates)
+		train["_open"] = true
+		var best := player.pos; var bs := -1
+		for ring_r in [6.0, 9.0, 12.0]:
+			for i in 16:
+				var q: Vector3 = player.pos + Vector3(cos(TAU * i / 16.0), 0, sin(TAU * i / 16.0)) * float(ring_r)
+				var score := 0
+				for dx in range(-3, 4):
+					for dz in range(-3, 4):
+						if not world.is_void(q.x + dx, q.z + dz) and not world.is_block(q.x + dx, q.z + dz) and not world.in_bush(q.x + dx, q.z + dz): score += 1
+				if score > bs: bs = score; best = Vector3(q.x, world.ground_at(q.x, q.z), q.z)
+		player.teleport(best)
+	if opts.get("carry_demo", false) and player and not player.dropping and not opts.get("glide_demo", false) and not opts.get("rival_demo", false):
+		# test hook: walk a slow circle with your kin riding along (mount, perch or shoulder)
+		player.inp["move"] = Vector2(cos(time * 0.6), sin(time * 0.6)) * 0.6 if time > 0.4 else Vector2.ZERO
+		player.inp["aim"] = player.pos + Vector3(cos(time * 0.6), 0.9, sin(time * 0.6)) * 4.0
+	if opts.get("merge_demo", false) and player and time > 0.8 and not train.has("_merge"):
+		train["_merge"] = true
+		player.slot_lv["ult"] = maxi(1, int(player.slot_lv["ult"]))
+		player.ult = 1.0
+		player.merge_cd = 0.0
+		if KinMerge.cast(player):
+			player.merge_st["t"] = 60.0          # held for the screenshot
+			player.merge_st["T"] = 60.0
+	if opts.get("rival_demo", false) and player and not train.has("_rival") and time > 0.3:
+		# test hook: the nearest rival hunter steps up 5m in front of you (for the hover panel)
+		train["_rival"] = true
+		var rv: Hunter = null
+		for h in hunters:
+			if h.team != player.team:
+				rv = h; break
+		if rv == null:
+			# (the sandbox has no rivals: one steps in, with a kin)
+			var rk := Save.new_kin(String(opts.get("rival_kin", "zapple")))
+			rk["name"] = "Fizz"
+			rv = make_hunter("rival", 7, "light", "Rook", "idle", rk, player.pos + Vector3(4.5, 0, -1.5), bot_kit())
+		var spot := player.pos; var bs := -1
+		for ring_r in [4.0, 5.0, 3.0]:
+			for i in 12:
+				var q: Vector3 = player.pos + Vector3(cos(TAU * i / 12.0), 0, sin(TAU * i / 12.0)) * float(ring_r)
+				if world.is_void(q.x, q.z) or world.is_block(q.x, q.z) or world.in_bush(q.x, q.z) or absf(world.ground_at(q.x, q.z) - player.pos.y) > 0.3:
+					continue
+				var score := 0
+				for dx in range(-1, 2):
+					for dz in range(-1, 2):
+						if not world.is_void(q.x + dx, q.z + dz) and not world.is_block(q.x + dx, q.z + dz) and not world.in_bush(q.x + dx, q.z + dz): score += 1
+				if score > bs: bs = score; spot = Vector3(q.x, world.ground_at(q.x, q.z), q.z)
+		rv.teleport(spot)
+		rv.vel = Vector3.ZERO
+		rv.ctrl = "idle"
+	if opts.get("rival_demo", false) and player and train.has("_rival"):
+		player.inp["move"] = Vector2.ZERO
+		if "--debug-rival" in OS.get_cmdline_user_args() and int(time * 60.0) % 60 == 0:
+			for h in hunters:
+				if h != player: print("RIVAL ", h.pname, " ", h.pos, " vis ", h.visible, " unseen ", h.unseen, " out ", h.out, " team ", h.team)
 	if opts.get("cone_demo", false) and player:
 		player.inp["aim"] = player.pos + Vector3(4.0, 0.95, -5.0)
 		player.inp["crouch"] = opts.get("crouch_demo", false)
@@ -3666,6 +3752,8 @@ func _player_throw() -> void:
 	var k: Kin = player.kin
 	if k == null or player.downed or player.dropping or player.riding:
 		return
+	if KinMerge.active(player):
+		KinMerge.end(player, "throw")        # throwing your kin ends the merge, and it goes
 	if k.state == "shoulder":
 		if k.throw_cd > 0.0:
 			return
@@ -5410,8 +5498,8 @@ func _tips() -> void:
 	if _tip_t > 14.0:
 		_tip("ability", "%s is your kin's ability. Fighting together fills the bond meter, and %s calls your kin's bond ultimate." % [Settings.key_cap("signature"), Settings.key_cap("ultimate")])
 	if player.ult >= 1.0 and player.kin:
-		var ud := Ultimate.def_for(player.kin)
-		if ud: _tip("ult", "Your bond is full. %s calls %s." % [Settings.key_cap("ultimate"), ud.display_name])
+		var ud := KinMerge.def_for(player.kin)
+		if ud: _tip("ult", "Your bond is full. %s merges you with your kin: %s." % [Settings.key_cap("ultimate"), ud.display_name])
 	var k: Kin = player.kin
 	if k == null:
 		return
@@ -5516,14 +5604,14 @@ func _update_indicators(alpha: float) -> void:
 			spec = gdf.aim_spec(); col = gdf.color
 		"signature", "kin_skill":
 			if p.kin == null: return
-			var kd: AbilityDef = (p.kin as Kin).runner.def_of("k1" if aim_hold == "signature" else "k2")
+			var kd: AbilitySpec = (p.kin as Kin).runner.def_of("k1" if aim_hold == "signature" else "k2")
 			if kd == null: return
-			spec = kd.aim_spec(); col = kd.color
+			spec = KinText.aim((p.kin as Kin).effective("k1" if aim_hold == "signature" else "k2")); col = KinText.color(kd)
 			from_kin = kd.from == "kin" and (p.kin as Kin).state == "active"
 		"ultimate":
-			var ud := Ultimate.def_for(p.kin) if p.kin else null
+			var ud := KinMerge.def_for(p.kin) if p.kin else null
 			if ud == null: return
-			col = ud.color
+			col = KinRules.cat_color("utility")
 			spec = ["self", 0.0, 3.5]
 	if spec.is_empty():
 		return
@@ -5657,9 +5745,9 @@ func _update_aim(alpha: float) -> void:
 	elif k and k.state == "active" and k.runner.is_ready("k1") and k.ready_to_fight():
 		# your kin's ability lands at the cursor, as far as it can reach from the kin: a faint ring
 		# shows where it would go (clamped to its reach) so cursor distance reads as range
-		var kd: AbilityDef = k.runner.def_of("k1")
+		var kd: AbilitySpec = k.runner.def_of("k1")
 		if kd:
-			var spec: Array = kd.aim_spec()
+			var spec: Array = KinText.aim(k.effective("k1"))
 			if String(spec[0]) == "area":
 				var from_p: Vector3 = k.pos if kd.from == "kin" else at
 				var t2 := Vector2(aim.x - from_p.x, aim.z - from_p.z)

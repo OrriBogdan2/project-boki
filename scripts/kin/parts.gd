@@ -286,7 +286,7 @@ const PRESETS := {
 }
 
 ## Cosmetic themes: tint and particle flavour only. Never a rule.
-const THEMES := ["venom", "spore", "gravity", "prism", "lunar", "echo", "ember", "frost", "storm", "stone", "bloom", "shadow", "none"]
+const THEMES := ["venom", "spore", "gravity", "prism", "lunar", "echo", "ember", "frost", "storm", "stone", "bloom", "shadow", "titan", "swarm", "tempest", "none"]
 
 # ---- the kin: body, stats, carry ----
 const ROLES := ["bruiser", "tank", "skirmisher", "controller", "support", "trickster"]
@@ -295,7 +295,7 @@ const AI_KEYS := ["aggression", "loyalty", "caution"]
 
 ## Body ids are model builders in the core (KinModels); a new kin uses the generic parts.
 const LOOK := {
-	"body": ["round", "drop", "burr", "pear", "boulder", "cloud", "vespyx", "mycroll", "gravadillo", "prismander", "lunowl", "echolop"],
+	"body": ["round", "drop", "burr", "pear", "boulder", "cloud", "vespyx", "mycroll", "gravadillo", "prismander", "lunowl", "echolop", "cairnback", "hivara", "zephyrak"],
 	"ears": ["none", "flame", "fin", "leaf", "bolt", "horn", "wisp"],
 	"tail": ["none", "flame", "fish", "sprout", "zig", "stub", "wisp"],
 	"feet": ["none", "paws", "stumps"],

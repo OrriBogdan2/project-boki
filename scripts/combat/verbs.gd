@@ -32,7 +32,8 @@ func add_wall(by: Node, at: Vector3, d: Vector2, e: Dictionary, pw: float) -> Di
 		"max_hp": float(e.get("hp", 120.0)) * pw, "t": float(e.get("time", 4.0)), "team": int(by.team), "by": by,
 		"block": String(e.get("block", "enemy")), "move": bool(e.get("move", false)), "reflect": bool(e.get("reflect", false)),
 		"col": col, "touch": e.get("touch", {}), "follow": bool(e.get("follow", false)), "dist": float(e.get("dist", 1.4)),
-		"len": length, "th": WALL_TH, "touched": {}, "hit_t": 0.0, "nid": by.get("nid") if by else ""}
+		"len": length, "th": WALL_TH, "touched": {}, "hit_t": 0.0, "nid": by.get("nid") if by else "",
+		"rk": clampf(float(e.get("rk", 1.0)), 0.0, KinRules.REFLECT_MAX), "kx_end": e.get("kx_end", null)}
 	# don't seal anyone inside it: a movement-blocking wall skips the bits that would trap someone
 	w["node"] = _wall_node(w)
 	walls.append(w)
@@ -74,6 +75,8 @@ func _place_wall(w: Dictionary, n: Node3D) -> void:
 
 func _break_wall(w: Dictionary) -> void:
 	walls.erase(w)
+	if w.get("kx_end") is Callable:
+		(w["kx_end"] as Callable).call(w)       # a grammar wall's on_end followups
 	var a: Vector2 = w["a"]; var b: Vector2 = w["b"]
 	for i in 4:
 		var p := a.lerp(b, (i + 0.5) / 4.0)
@@ -115,7 +118,7 @@ func add_mirror(ent: Node, e: Dictionary) -> void:
 	rg.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	m.add_child(n)
 	mirrors.append({"ent": ent, "t": float(e.get("time", 0.6)), "t0": float(e.get("time", 0.6)), "r": r, "arc": arc, "team": int(ent.team),
-		"k": float(e.get("dmg_k", 1.25)), "riposte": float(e.get("riposte", 0.0)), "node": n, "col": col, "caught": 0})
+		"k": minf(float(e.get("dmg_k", 1.25)), KinRules.REFLECT_MAX), "riposte": float(e.get("riposte", 0.0)), "node": n, "col": col, "caught": 0})
 	m.sfx("shield", ent.pos, -3.0, 1.4)
 
 func _mirror_dir(mr: Dictionary) -> Vector2:
@@ -145,7 +148,8 @@ func add_tether(a: Ent, b: Ent, e: Dictionary, pw: float) -> void:
 	ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	m.add_child(ring)
 	tethers.append({"a": a, "b": b, "max": float(e.get("max", 6.0)), "t": float(e.get("time", 3.0)), "dmg": float(e.get("dmg", 18.0)) * pw,
-		"stun": float(e.get("stun", 1.0)), "col": col, "node": n, "ring": ring, "yank": bool(e.get("yank", true))})
+		"stun": float(e.get("stun", 1.0)), "col": col, "node": n, "ring": ring, "yank": bool(e.get("yank", true)),
+		"kx_snap": e.get("kx_snap", null), "kx_end": e.get("kx_end", null)})
 	m.sfx("zap", b.pos, -4.0, 1.3)
 
 # ------------------------------------------------------------------ traps
@@ -165,7 +169,8 @@ func add_trap(caster: Node, at: Vector3, e: Dictionary, ctx: Dictionary) -> void
 	m.add_child(n)
 	n.global_position = at
 	traps.append({"at": at, "r": r, "team": int(caster.team), "arm": float(e.get("arm", 0.6)), "t": float(e.get("time", 20.0)),
-		"effects": e.get("on_trigger", []), "caster": caster, "ctx": ctx, "node": n, "col": col, "reveal": float(e.get("reveal", 0.0))})
+		"effects": e.get("on_trigger", []), "caster": caster, "ctx": ctx, "node": n, "col": col, "reveal": float(e.get("reveal", 0.0)),
+		"kx": e.get("kx", null), "kx_end": e.get("kx_end", null)})
 	m.fx.burst(at + Vector3(0, 0.2, 0), col, 8, 2.0, 0.3)
 	m.sfx("click", at, -4.0, 0.9)
 
@@ -266,12 +271,12 @@ func shot_check(s: Dictionary, p: Vector3) -> String:
 		var c := Geometry2D.get_closest_point_to_segment(p2, w["a"], w["b"])
 		if p2.distance_to(c) > float(w["th"]) + float(s["r"]):
 			continue
-		if w["reflect"] and not x.get("melee", false):
+		if w["reflect"] and not x.get("melee", false) and not x.get("reflected", false):
 			var ab: Vector2 = (w["b"] as Vector2) - (w["a"] as Vector2)
 			var nrm := Vector2(-ab.y, ab.x).normalized()
 			var v: Vector2 = s["vel"]
 			if v.dot(nrm) > 0.0: nrm = -nrm
-			_take_shot(s, v - 2.0 * v.dot(nrm) * nrm, w["by"] if is_instance_valid(w["by"]) else null, int(w["team"]), 1.0)
+			_take_shot(s, v - 2.0 * v.dot(nrm) * nrm, w["by"] if is_instance_valid(w["by"]) else null, int(w["team"]), float(w.get("rk", 1.0)))
 			s["pos"] = Vector3(c.x, p.y, c.y) + Vector3(nrm.x, 0, nrm.y) * (float(w["th"]) + float(s["r"]) + 0.12)
 			_hit_wall(w, float(s["dmg"]) * 0.5, s["col"])
 			return "bounce"
@@ -281,6 +286,8 @@ func shot_check(s: Dictionary, p: Vector3) -> String:
 	for mr in mirrors:
 		if int(mr["team"]) == int(s["team"]) or s["by"] == mr["ent"]:
 			continue
+		if x.get("reflected", false) and not x.get("melee", false):
+			continue          # a reflected shot can't be reflected again (KinRules)
 		var ent = mr["ent"]
 		if not is_instance_valid(ent):
 			continue
@@ -313,14 +320,19 @@ func shot_check(s: Dictionary, p: Vector3) -> String:
 	return ""
 
 func _take_shot(s: Dictionary, v: Vector2, by, team: int, k: float) -> void:
+	k = minf(k, KinRules.REFLECT_MAX)
 	s["vel"] = v
 	s["team"] = team
 	if by: s["by"] = by
+	var x0: Dictionary = s["x"]
+	if x0.has("kx"):
+		# a kin ability's shot that's sent back: it flies home as plain damage, never as the ability
+		s["dmg"] = float(x0.get("kx_dmg", 0.0))
 	s["dmg"] = float(s["dmg"]) * k
 	s["life"] = maxf(float(s["life"]), 0.7)
 	s["start"] = s["pos"]
 	var x: Dictionary = (s["x"] as Dictionary).duplicate()
-	for kk in ["dy", "dyd", "y0", "gmax", "mob", "near", "farf", "pg"]:
+	for kk in ["dy", "dyd", "y0", "gmax", "mob", "near", "farf", "pg", "kx", "kx_dmg", "rope", "pierce", "return", "hitset"]:
 		x.erase(kk)
 	x["reflected"] = true
 	s["x"] = x
@@ -356,9 +368,12 @@ func tick(dt: float) -> void:
 					if float(w["touched"].get(key, -9.0)) > m.time - 0.6:
 						continue
 					w["touched"][key] = m.time
-					var o := {"src": "abil", "ab": "wall"}
-					for kk in ["slow", "burn", "root", "stun"]:
+					var o := {"src": "abil", "ab": "wall", "dr": true}
+					for kk in ["slow", "burn", "root", "stun", "slow_k"]:
 						if touch.has(kk): o[kk] = float(touch[kk])
+					if float(touch.get("kb", 0.0)) > 0.0:
+						var away := Vector2(f.pos.x - c2.x, f.pos.z - c2.y)
+						o["kb"] = (away.normalized() if away.length() > 0.05 else Vector2(1, 0)) * float(touch["kb"])
 					f.hurt(maxf(0.1, float(touch.get("dmg", 0.0))), w["by"] if is_instance_valid(w["by"]) else null, o)
 		if float(w["t"]) <= 0.0:
 			_break_wall(w)
@@ -373,7 +388,14 @@ func tick(dt: float) -> void:
 			_drop_tether(t); continue
 		t["t"] = float(t["t"]) - dt
 		var d: float = a.flat_dist(b)
-		if d > float(t["max"]):
+		if d > float(t["max"]) and t.get("kx_snap") is Callable:
+			# a grammar tether: its on_snap followups do whatever the snap does
+			(t["kx_snap"] as Callable).call(a, b)
+			t["kx_end"] = null
+			m.fx.bolt(a.pos + Vector3(0, 1.0, 0), b.pos + Vector3(0, 1.0, 0), t["col"])
+			m.fx.word(b.pos + Vector3(0, 2.0, 0), "SNAP", t["col"], true)
+			_drop_tether(t)
+		elif d > float(t["max"]):
 			# stretched too far: it snaps, and the snap hurts
 			b.hurt(float(t["dmg"]), a, {"stun": float(t["stun"]), "src": "abil", "ab": "tether", "kb": b.dir_to(a) * 7.0, "lift": 2.0})
 			m.fx.bolt(a.pos + Vector3(0, 1.0, 0), b.pos + Vector3(0, 1.0, 0), t["col"])
@@ -389,6 +411,8 @@ func tick(dt: float) -> void:
 		tr["arm"] = float(tr["arm"]) - dt
 		var caster = tr["caster"]
 		if float(tr["t"]) <= 0.0 or not is_instance_valid(caster):
+			if float(tr["t"]) <= 0.0 and tr.get("kx_end") is Callable:
+				(tr["kx_end"] as Callable).call(tr["at"])      # waited out untriggered: on_end
 			_drop_trap(tr); continue
 		if float(tr["arm"]) > 0.0:
 			continue
@@ -403,7 +427,10 @@ func tick(dt: float) -> void:
 				m.fx.word(at + Vector3(0, 1.6, 0), "TRAP", tr["col"], false)
 				if caster.dead:
 					_drop_trap(tr); break
-				Effects.run(tr["effects"], caster, c3)
+				if tr.get("kx") is Callable:
+					(tr["kx"] as Callable).call(at, f)        # a grammar trap: its effects and on_trigger followups
+				else:
+					Effects.run(tr["effects"], caster, c3)
 				_drop_trap(tr)
 				break
 	for tz in terrain.duplicate():
@@ -443,6 +470,10 @@ func dragging(ent: Ent) -> bool:
 
 func _drop_tether(t: Dictionary) -> void:
 	tethers.erase(t)
+	if t.get("kx_end") is Callable:
+		var ke: Callable = t["kx_end"]
+		t["kx_end"] = null
+		ke.call(t["a"], t["b"])
 	if is_instance_valid(t["node"]): t["node"].queue_free()
 	if is_instance_valid(t["ring"]): t["ring"].queue_free()
 

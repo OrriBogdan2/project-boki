@@ -3,59 +3,36 @@
 Everything here is plain JSON under `content/`. The game reads it when it starts; no code changes.
 Colours are hex strings, times are seconds, distances are tiles.
 
-Kin are moving to a compositional ability grammar (`content/*_v2/`, see `docs/KIN_GRAMMAR.md`).
-Those files are checked with `--grammar-check` but not used by the game yet; the formats below are still live.
+## A new kin: the kin grammar (`content/kin_v2`, `content/abilities_v2`, `content/merges_v2`)
 
-## A new kin: `content/kin/<id>.json`
+Kin are built from a compositional grammar: a kin file (`content/kin_v2/<id>.json`) names its body,
+looks, a 20-point stat profile, how it's carried (shoulder, perch or mount), its throw and dodge
+rider, its E ability, an auto ability and its merge (R); abilities and merges are built from
+deliveries, effects, modifiers and triggers. The full format, the vocabulary and the runtime rules
+are in `docs/KIN_GRAMMAR.md`. Check your files with `--grammar-check`; the game skips any file with
+errors. Kin files are data only: nothing in them is ever loaded or run.
 
-```json
-{
-	"id": "mosslet",
-	"name": "Mosslet",
-	"type": "thorn",
-	"color": "#5a9a4f", "belly": "#d8f0b0", "glow": "#b8f07a",
-	"stats": {"hp": 90, "dmg": 8, "speed": 6.4, "range": 1.3},
-	"look": {"body": "burr", "ears": "leaf", "tail": "sprout", "feet": "paws", "aura": "leaves"},
-	"traits": {"bravery": 0.5, "loyalty": 0.7, "temper": 0.3, "curiosity": 0.6},
-	"voice": "sleepy and kind, speaks slowly",
-	"shoulder": "briar",
-	"abilities": ["snare", "thorn_patch"],
-	"ultimate": "thornwake",
-	"ai": {"aggression": 0.4, "loyalty": 0.7, "caution": 0.5, "style": "trapper"},
-	"throw_hit": {"root": 0.8}
-}
-```
+`content/kin/<id>.json` now only holds a species' home and economy data:
 
-- `look`: `body` is round, drop, burr, pear, boulder or cloud; `ears` is flame, fin, leaf, bolt, horn or wisp;
-  `tail` is flame, fish, sprout, zig, stub or wisp; `feet` is paws, stumps or none; `aura` is embers, bubbles,
-  leaves, sparks, pebbles, wind, drips, prism, spores, rings or moondust. The six built-in species have
-  hand-built animal bodies instead (scripts/match/kin_models.gd); a new species uses these parts unless it
-  gets a builder there too. `wing` (optional) colours wing membranes.
-- `abilities`: one or two ability ids. The first is the kin's ability on E. The second is kept for later (the current kit has one kin ability) and is only cast by the kin itself when auto-cast is on.
-- `ultimate`: an ultimate id (R).
-- `ai`: the species' fighting temperament, mixed 50/50 with each kin's own traits. Aggression chases further and
-  uses attacks more; loyalty stays close and goes after whoever hurts its hunter; caution backs off when hurt.
-- `shoulder`: the passive while it rides on your shoulder (kindle, spring, briar, charge, bedrock, updraft).
-- `throw_hit`: extra status when it's thrown into a foe (burn, slow, root, stun, kb).
-- `animals`: the one or two real animals it's based on (shown on the hatch reveal card).
-- `desc`: a line about it for the hatch reveal card.
-- `egg`: how its egg is shown: `name` (e.g. "Venom Egg"), `temper`, `desc` and `play` (used on the first-egg picker and the Nesting Nook).
 - `work`: its work elements, the farm jobs it does on its own, each at a level 1-4, e.g. `{"bloom": 3, "forage": 2, "ranch": 1}`. Elements: ember, tide, bloom, spark, craft, forage, timber, stone, frost, haul, mend, ranch (see `scripts/core/work.gd`). Two or three per kin.
 - `shiny`: its hand-picked shimmer palette, `{"color", "belly", "glow"}` (and `"wing"` for winged kin). Shimmers are 1 in 4096 (see `scripts/core/shiny.gd`).
+- `rare` and `boss`: a rare kin only hatches from that lair boss's Rare Egg.
+
+A kin with no `content/kin` file is fine: it's not rare, and its work elements are guessed from its theme.
 
 IVs aren't set per species: every kin is born with its own (Health, Power, Speed, Work, Bond, 0-31 each; `Care.IVS` in `scripts/core/care.gd`), worth at most +10% (+5% Speed) at 31 through `Care.iv_mult`. Bred kin take 3 from their parents; Rare Eggs (which hatch on the Incubator by the Nesting Nook, `scripts/core/incubator.gd`) always have 3 at 26 or better. `--iv-check` and `--incubator-check` test them.
 
 Open `tests/kin_gallery.tscn` and press F6 to see it next to the others.
 
-## A new ability: `content/abilities/<id>.json`
+## A new hunter ability: `content/abilities/<id>.json`
+
+Weapon utilities (RMB) and class dodges. (Kin abilities are the grammar's, above.)
 
 ```json
 {
 	"id": "fireball", "name": "Fireball", "icon": "fireball", "color": "#ff7a3d",
-	"desc": "Your kin spits a fireball that explodes and sets everything nearby burning.",
+	"desc": "A fireball that explodes and sets everything nearby burning.",
 	"cooldown": 6, "charges": 1,
-	"from": "kin", "range": 9,
-	"auto": {"when": "foe_in_range", "range": 9},
 	"effects": [
 		{"type": "projectile", "dmg": 18, "speed": 13, "range": 9, "size": 0.32, "color": "#ff7a3d", "burn": 5,
 			"on_end": [{"type": "area", "at": "here", "radius": 1.9, "dmg": 8, "kb": 6, "burn": 5}]}
@@ -63,20 +40,11 @@ Open `tests/kin_gallery.tscn` and press F6 to see it next to the others.
 }
 ```
 
-- `from`: `kin` (the kin casts it; from your shoulder it's thrown out first) or `owner` (works on you wherever the kin is).
-- `auto`: when the kin uses it by itself: `foe_in_range` (range), `foes_clumped` (count, radius), `owner_hurt` (below),
-  `owner_falling`, `owner_fighting` (chance). Leave it out for player-only abilities.
 - `effects`: steps run in order. Types (see `scripts/combat/effects.gd` for every field):
   projectile, area, cone, chain, pull, zone, telegraph, rush, leap, dash, blink, launch, heal, shield, haste,
   guard, cleanse, refill_dash, cool_glider, crit, burst. Any effect can have a `delay`. Buffs take a `target`
   (self, owner, both, allies); areas take an `at` (self, owner, aim, here).
-
-## A new bond ultimate: `content/ultimates/<id>.json`
-
-- `form`: `armor` (fuses onto the hunter) or `giant` (the kin grows huge). `time` in seconds.
-- Armor: `owner` (dmg, speed multipliers; shield, regen, refill_dash) and `shots` (burn, slow, boom, chain).
-- Giant: `giant` (scale, hp, dmg, range, speed, and `stomp` effects on every attack).
-- `on_start`, `on_end` and `aura` (`{"every": 0.6, "effects": [...]}`) are effect lists.
+- Crowd control from abilities has diminishing returns per target (`KinRules`, docs/KIN_GRAMMAR.md).
 
 ## Combos: `content/combos/<id>.json`
 

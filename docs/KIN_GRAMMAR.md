@@ -5,12 +5,16 @@ Every kin ability is built from a small, fixed set of parts that players learn o
 behaves) and a **trigger** (when it fires). Anyone can add kin and abilities as data, and a player
 who has never seen a kin can still read what it does from the parts.
 
-Status: **Phase 1, data model.** The grammar files under `content/*_v2/` are parsed and checked but
-not used by the game yet. The live game still reads `content/kin`, `content/abilities` and
-`content/ultimates`. Phase 2 adds the runtime executor and switches over.
+Status: **Phase 2, runtime.** The live game runs kin from the grammar: every kin, ability, merge and
+evolution node under `content/*_v2/` that passes the checker is loaded by `KinLib` and run by the
+executor `KinExec`. The old per-kin code paths and content (`content/ultimates`, the kin abilities
+in `content/abilities`, `content/rules/dash_riders.json`, `KinDef`, `UltimateDef`, `Ultimate`) are
+gone. Phase 3 (budget validator), Phase 4 (generated rules text and looks) and later are not started.
 
 Code: `scripts/kin/` (registry `parts.gd`, specs `ability_spec.gd`, `stage_spec.gd`, `part_spec.gd`,
-`merge_spec.gd`, `kin_spec.gd`, `evolution_node.gd`, loader/checker `grammar.gd`, errors `grammar_report.gd`).
+`merge_spec.gd`, `kin_spec.gd`, `evolution_node.gd`, loader/checker `grammar.gd`, errors `grammar_report.gd`;
+Phase 2: library `kin_lib.gd`, executor `kin_exec.gd`, runtime rules `kin_rules.gd`, cooldowns
+`kin_runner.gd`, the merge `kin_merge.gd`, readable lines `kin_text.gd`).
 
 ## Why JSON, not `.tres`
 
@@ -216,16 +220,135 @@ exist and stay within bounds.
 | a vulnerable mark adds at most +35% damage taken | |
 | merge and sidegrade scales must land inside the part's bounds | |
 
-Phase 2 adds the runtime rules: diminishing returns on repeated slow, root and stun per target, with
-brief immunity after a full stun (zones and pulses included), no ability triggering itself, the same
-caps enforced at runtime, and auto-cast respecting slot locks.
+## Runtime (Phase 2)
+
+### How a kin runs in a match
+
+- **Library.** `KinLib` loads `res://content` through the checker once. A file with errors is skipped
+  (with a warning), and so is a kin whose ability or merge was skipped: the live game only runs
+  content that passed. `Data.KIN` is built from `kin_v2` (`KinLib.species`); `content/kin/<id>.json`
+  now holds only home and economy data (rare/boss egg, work elements, shiny palette).
+- **Stats.** Kin health, damage and speed are `base + points x per_point` after evolution's
+  budget-neutral stat shifts (`KinLib.points`). Levels add `KinRules.LEVEL_GROWTH` (3%) per level to
+  kin health, damage and ability power, capped by the expedition tier (`LEVEL_CAP`: 15% in the
+  Meadow, 25% in the Dusk Isles, 35% in the Hollow). Home training (`Care`) and rare mutations keep
+  their own small multipliers. The old "+5% per form" growth is gone.
+- **Slots.** `KinRunner` holds `k1` (the active, E) and `k2` (the auto active). Both are locked until
+  a skill point opens the kin slot; ranks shorten the cooldown 10% a rank and grow numbers through
+  the core table `KinRules.RANK_GROW` (damage through power, +15% a rank). Dash, leap and blink
+  distances never grow.
+- **Effective ability.** On every cast `KinLib.effective` copies the spec and applies, in order: the
+  kin's evolution grants for that slot (`add_modifier`, `sidegrade`), the merge's patch while merged,
+  the rank table. Every number is then clamped to its part's bounds. Results are cached.
+- **Who performs it.** Out on the field the kin casts it (aimed within `range`). Carried (shoulder,
+  perch or mount) or merged, it lends you the ability and you perform it (85% power carried, full
+  power merged). `from: owner` always happens on its hunter. A carried kin never acts on its own.
+- **Who decides.** `KinTactics.cue_aim` reads an ability's `cue`. The auto active is the kin's own and
+  it uses it whenever its cue fits (for every hunter). The E is auto-cast only for bots, or for you if
+  you turn on "kin_auto" in Settings. Bots press E from the cue too (`Bot._use_sig`). Event triggers
+  fire from the match: `on_hit` (every n-th melee hit), `on_throw`, `on_recall`, `on_bond_full`,
+  `on_low_hp` (once per dip).
+
+### The executor (`KinExec`)
+
+A cast context (`make_cx`) carries the match, the caster, the kin, its owner, the team, the aim, the
+power, the slot, the ability id and the `chain` of ability ids that led here. `run_stage` handles a
+stage's `delay` (with a telegraph ring) and `repeat` (echoes at the same spot, weaker), then the
+delivery:
+
+| delivery | runs as |
+|---|---|
+| projectile | a match shot with a callback (`spawn_shot` extra `kx`): effects on hit, `on_hit`/`on_end` followups; split, pierce, bounce, chain, return; `rope` draws a hook |
+| cone, burst, beam | instant; beam `seek` locks on, `duration` channels in 0.25 s ticks (the total spread over it); `pierce` and `chain` on beams |
+| zone, aura, summon, linger | `Fields.add_kx`: ticks every `every` s, aura and sprite follow their unit, `on_end` when they expire |
+| trap | `Verbs.add_trap` with callbacks: effects on the foe who steps on it, `on_trigger`/`on_end` |
+| wall | `Verbs.add_wall`: reflect (power capped), touch damage/slow/push, `follow` for held shields, `on_end` when it breaks or fades |
+| tether | `Verbs.add_tether` with `on_snap`/`on_end` callbacks |
+| dash, leap, blink | the kin moves (`Kin.start_rush`/`start_leap` callbacks) or its hunter does (`dash_with`/`launch_to`) |
+
+Effects are applied by `apply_foe` (harmful, as one hit so diminishing returns, combos, the bond
+meter and kin stats all see it; pull, marks and signatures follow the hit) and `apply_friends`
+(owner, self, allies once per delivery event). A delivery touches at most `MAX_HITS` (12) units.
+Throws (`throw.effects` ride on the core throw hit), dodge riders (`on_pass`, `on_start`, `on_end`,
+`repeat`, `as: blink`) and merge stages use the same functions.
+
+### Runtime rules (`KinRules`, enforced in `Ent.hurt` and `Verbs`)
+
+| rule | how |
+|---|---|
+| diminishing returns | ability crowd control carries `"dr"` (the grammar always; hunter abilities and gloves too). Per target and kind, within 5 s of the last one: stun and root x1, x0.6, x0.35, then nothing; slow x1, x0.75, x0.5, x0.35. Topping up a slow that's still running doesn't count |
+| immunity after a stun | when an ability's stun ends the target can't be stunned or rooted for 0.8 s. Zones, auras and merge pulses go through the same path, so a stun zone can't lock anyone (`--grammar-runtime-check`: under 2.2 s stunned of 4 s in a zone that tries every 0.25 s) |
+| no self-trigger | every hit carries its `chain`; `Kin.fire_trigger` refuses an ability that is already in the chain, and ability hits never count as the kin's own melee hits |
+| reflect caps | a reflected shot never reflects again (walls block it, mirrors let it through); reflect power is capped at 1.5 for mirrors, walls and gloves alike; a reflected kin shot flies back as plain damage, never as the ability |
+| vulnerable cap | a vulnerable mark adds at most +35% damage taken |
+| scale caps | merge scales x1.0 to x1.3, sidegrades inside their ranges, and every result clamped to its part's bounds; ranks too |
+| slot locks | locked slots never cast, whether the player, a bot, the kin's AI or a trigger asks |
+
+Settled defaults: diminishing returns cover hunter-ability and glove crowd control too, not just
+kin; you can merge with a mount while gliding (it curls up on your back until you land);
+`kin_auto` is off by default, so your kin only casts its auto ability on its own.
+
+IVs (`Care.iv_mult`) multiply a kin's final hp, damage and speed after its budget points, level
+growth, mutation and care (`Kin.init_kin`), and the Bond IV speeds every fill of the merge meter
+(`Bond.add`, which the damage fill in `Match` goes through too).
+
+### Carry modes
+
+| style | what it does |
+|---|---|
+| shoulder | as before: rides your shoulder, its carry passives and shot riders work once it has settled |
+| perch | sits on your pack; same passive rules. Its throw is a **dive**: it rises off your pack and comes straight down on the spot (11 m reach, strikes only as it lands, a little wider). Lunowl's perch also gives +20% glide |
+| mount | you ride it: the hunter sits up on its back (`Kin.ride_height`), ground speed and jump from `carry.mount`, -15% damage taken and half knockback (Gravadillo). You can't glide while mounted: when you open the glider it curls up into a ball on your back and its passives pause until you land |
+
+Carry passives and merge passives feed one place, `Hunter.owner_stat`, capped at the carry or
+merge maximum: move speed, jumps, air dodges, glide, dodge charges and regen, armor (wears slower),
+damage reduction, knockback resist, shield, regen, damage, fire rate, reload, reveal radius.
+Shot riders (`on_shot`) go on every shot and swing: damage over time, slow, push, marks, splash,
+arcs; instant damage riders proc at most once a second per target.
+
+### The merge (`KinMerge`)
+
+The bond ultimate. The ult slot opens at run level 6 (`Hunter.ULT_AT`); the first time it opens, the
+bond meter fills, once a run. R starts it: for `duration + grow_duration x g` seconds (g from kin
+level and trust, 0..1; +30% at rank 2) the merge's passives, shot riders, pulses and merged
+abilities are on, all scaled by `1 + grow_strength x g`. A mount kin grows giant under you (the
+approved "giant merge only for mount kin"); any other kin fuses onto you as armor. It ends when
+time runs out, early if you're knocked or you throw the kin (throwing still works and ends it),
+then 3 s (`MERGE_SPENT_TIME`) before it can go again, and the meter starts from empty.
+
+### Owner bonuses
+
+`KinLib.owner_bonus` turns the owner points into numbers: `owner_max_hp` (health, added to max
+health for the run), `owner_armor` (armor wears that much slower), `owner_shield` (a small shield
+that refills 5 s out of a fight, soaking first), `owner_regen` (health per second), and
+`owner_move_speed`. They count while it's your kin for the run, carried or not.
+
+### Readability
+
+`KinText` writes short lines from the parts ("hook 8m → 8 damage, 18 damage over 3s, blight 4s,
+yank to the kin, stun 0.3s"). The E slot hover, the kit panel, the kin card at home, the training
+yard and the rival hover (`Hud._kit_lines`: E, auto, merge and carry) all read it, coloured by effect
+category. The E aim indicator comes from the parts too (`KinText.aim`). These are placeholders for
+Phase 4's generated rules text.
+
+### Checking it
+
+```
+godot --headless --path . -- --grammar-runtime-check
+```
+
+runs each of the six kin's E and auto abilities (and the rare kin's), diminishing returns and
+stun immunity (zones included), no self-trigger, the caps, slot locks and auto-cast, the three carry
+modes, the merge's unlock at level 6, timer, cooldown and throw-to-end, the giant mount merge and
+owner bonuses, printing `GRT ... PASS/FAIL` lines.
 
 ## Presets and themes (what used to be elements)
 
 Elements are no longer a rule. A kin is based on 1-2 animals, and its old element type is now a
 cosmetic `theme`. What an element used to mean is a named **preset**: "poison" is damage over 3 s,
 "frost" a strong slow, "hook" a projectile with a rope plus a yank. Colour will mean effect category
-in Phase 4 (damage, control, sustain, utility), never theme.
+by category (damage, control, sustain, utility), never theme. Phase 2 already colours deliveries,
+hits, HUD slots and hover lines this way (`KinRules.CAT_COLORS`); Phase 4 does the full look.
 
 ## How existing content maps onto the grammar
 
@@ -307,16 +430,19 @@ with the nearest passives and pulses. The merged ability patches are placeholder
 ### The six kin
 
 Kin stats are unchanged (hp, damage, speed come out the same from the points). The points left over go
-to new owner bonuses that lean into each kin's role. Phase 2 makes them real.
+to owner bonuses that lean into each kin's role, real since Phase 2 (`Hunter.apply_kin_bonus`): they
+last the whole run while it's your kin, carried or not, and show on the kin card and the HUD's kin
+and throw hovers. Gravadillo is a mount and Lunowl perches (both approved); Lunowl's carry also
+gives +20% glide.
 
 | kin | animals | role | carry | kin hp/dmg/speed (points) | owner bonus points | dodge rider |
 |---|---|---|---|---|---|---|
 | Vespyx (cindle) | Fox, Scorpion | bruiser | shoulder: shots poison | 80/9/6.8 (4/3/9) | max hp 2, move speed 2 | on_pass poison + blight |
-| Gravadillo (pebbit) | Armadillo, Rhino beetle | tank | **mount** (proposed): -15% damage taken, half knockback | 120/11/5.4 (12/5/2) | armor 1 | on_end pull |
+| Gravadillo (pebbit) | Armadillo, Rhino beetle | tank | **mount**: -15% damage taken, half knockback | 120/11/5.4 (12/5/2) | armor 1 | on_end pull |
 | Prismander (puddlet) | Axolotl | support | shoulder: regen 3 | 95/7/6.0 (7/1/5) | shield 4, regen 3 | on_start decoy (signature) |
 | Mycroll (burrlet) | Hedgehog, Toadstool | controller | shoulder: shots slow | 90/8/6.2 (6/2/6) | max hp 3, shield 3 | on_start spore zone |
 | Echolop (zapple) | Hare, Bat | skirmisher | shoulder: +20% fire rate and reload | 70/8/7.6 (2/2/13) | move speed 3 | repeat (echo step) |
-| Lunowl (wisplet) | Owl, Luna moth | trickster | **perch** (proposed): +1 dodge charge | 70/7/8.0 (2/1/15) | move speed 2 | as blink |
+| Lunowl (wisplet) | Owl, Luna moth | trickster | **perch**: +1 dodge charge, +20% glide; throw is a dive | 70/7/8.0 (2/1/15) | move speed 2 | as blink |
 
 ## Vocabulary
 

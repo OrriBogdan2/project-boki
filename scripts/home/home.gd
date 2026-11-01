@@ -2783,9 +2783,9 @@ func _open_kin(rec: Dictionary) -> void:
 			for st in Care.STATS:
 				row.call(c1, Care.STATS[st]["name"], float(rec["stats"][st]) / float(Care.stat_cap(rec)), Care.STATS[st]["col"], str(int(rec["stats"][st])))
 			c1.add_child(UI.para("Train at the yard to raise them. Higher bonds raise the cap.", 12, UI.FAINT))
-			var sh: Dictionary = Data.SHOULDER[sp["shoulder"]]
 			c2.add_child(UI.section("In a match", UI.FAINT.lightened(0.2)))
 			var abl: Array = sp.get("abilities", [])
+			var kspec := KinLib.kin(String(rec["species"]))
 			var ab_row := func(key: String, nm: String, desc: String, c: Color) -> void:
 				var r := UI.hbox(10)
 				var kc := UI.keycap(key, 12); kc.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
@@ -2795,14 +2795,23 @@ func _open_kin(rec: Dictionary) -> void:
 				tv.add_child(UI.para(desc, 12, UI.MUTED))
 				r.add_child(tv)
 				c2.add_child(r)
+			# read from its parts (the kin grammar): what it does, coloured by effect category
 			for ai in abl.size():
-				var ad := Content.ability(String(abl[ai]))
+				var ad := KinLib.ability(String(abl[ai]))
 				if ad == null: continue
-				ab_row.call(Settings.key_cap("signature" if ai == 0 else "kin_skill"), ad.display_name, ad.desc, ad.color.lerp(UI.INK, 0.4))
-			var ud := Content.ultimate(String(sp.get("ultimate", "")))
+				var eff := KinLib.effective(ad, "k1" if ai == 0 else "k2", kspec, rec)
+				ab_row.call(Settings.key_cap("signature") if ai == 0 else "auto", ad.display_name, (KinText.ability(eff) if ai == 0 else KinText.when(ad) + ": " + KinText.ability(eff)), KinText.color(ad).lerp(UI.INK, 0.3))
+			var ud := KinLib.merge(String(sp.get("ultimate", "")))
 			if ud:
-				ab_row.call(Settings.key_cap("ultimate"), "Bond ultimate: " + ud.display_name, ud.desc, ud.color.lerp(UI.INK, 0.4))
-			c2.add_child(UI.para("On your shoulder, %s: %s" % [sh["name"], sh["desc"]], 12, UI.MUTED))
+				ab_row.call(Settings.key_cap("ultimate"), "Merge: " + ud.display_name, " ".join(KinText.merge(ud, kspec != null and kspec.carry_style == "mount")), Color("ffd84a").lerp(UI.INK, 0.3))
+			if kspec:
+				c2.add_child(UI.para(KinText.carry(kspec), 12, KinRules.cat_color("sustain").lerp(UI.INK, 0.35)))
+				var ob := KinText.owner_bonus(KinLib.owner_bonus(kspec, rec))
+				if ob != "":
+					c2.add_child(UI.para("Owner bonus while it's your kin: " + ob, 12, Color("ffd84a").lerp(UI.INK, 0.35)))
+				var rdt := KinText.rider(kspec)
+				if rdt != "":
+					c2.add_child(UI.para("%s (your dodge): %s" % [String(kspec.dodge_rider.get("name", "")), rdt], 12, UI.MUTED))
 		"Growth":
 			var lead := Evo.leading(rec)
 			var lv := int(rec["level"])
@@ -3209,9 +3218,9 @@ func _kin_pick_row(label_t: String, rec: Dictionary, key: String) -> Control:
 		info.add_child(sl)
 		var names: Array = []
 		for aid in sp.get("abilities", []):
-			var ad := Content.ability(String(aid))
+			var ad := KinLib.ability(String(aid))
 			if ad: names.append(ad.display_name)
-		var ud := Content.ultimate(String(sp.get("ultimate", "")))
+		var ud := KinLib.merge(String(sp.get("ultimate", "")))
 		var keys := ("%s / %s" % [Settings.key_cap("signature"), Settings.key_cap("ultimate")]) if key == "active" else ("swap in with %s" % Settings.key_cap("swap_kin"))
 		var al := UI.label("%s  ·  %s  ·  bond: %s" % [keys, ", ".join(names), ud.display_name if ud else "-"], 12, UI.MUTED)
 		al.autowrap_mode = TextServer.AUTOWRAP_OFF

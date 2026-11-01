@@ -157,41 +157,11 @@ const SIGS := {
 	"fortify": {"name": "Fortify", "cd": 16.0, "desc": "A 60 point shield for 5s. Nothing can knock you back."},
 }
 
-## Kin species. These are the built-in defaults; every content/kin/*.json file is merged over them
-## (or adds a new species) when the game starts, so new kin need no code.
-## skill: what Q does while the kin is out. shoulder: what you get while it rides on you.
-var KIN := {
-	"cindle": {"name": "Vespyx", "type": "venom", "color": Color("4a2f5c"), "belly": Color("d8c6e8"),
-		"hp": 80.0, "dmg": 9.0, "speed": 6.8, "range": 1.3, "ears": "flame",
-		"skill": "fireball", "shoulder": "kindle",
-		"traits": {"bravery": 0.75, "loyalty": 0.5, "temper": 0.7, "curiosity": 0.5},
-		"voice": "hot-headed, eager, talks in short bursts"},
-	"puddlet": {"name": "Prismander", "type": "prism", "color": Color("f0a6d6"), "belly": Color("ffe2f1"),
-		"hp": 95.0, "dmg": 7.0, "speed": 6.0, "range": 1.3, "ears": "fin",
-		"skill": "wave", "shoulder": "spring",
-		"traits": {"bravery": 0.45, "loyalty": 0.85, "temper": 0.2, "curiosity": 0.6},
-		"voice": "gentle, worried about you, a little formal"},
-	"burrlet": {"name": "Mycroll", "type": "spore", "color": Color("6b4a3c"), "belly": Color("e9d6bd"),
-		"hp": 90.0, "dmg": 8.0, "speed": 6.2, "range": 1.3, "ears": "leaf",
-		"skill": "snare", "shoulder": "briar",
-		"traits": {"bravery": 0.55, "loyalty": 0.6, "temper": 0.4, "curiosity": 0.8},
-		"voice": "curious and odd, notices small things"},
-	"zapple": {"name": "Echolop", "type": "echo", "color": Color("4a5aa8"), "belly": Color("c9d2ff"),
-		"hp": 70.0, "dmg": 8.0, "speed": 7.6, "range": 1.3, "ears": "bolt",
-		"skill": "chain", "shoulder": "charge",
-		"traits": {"bravery": 0.65, "loyalty": 0.4, "temper": 0.6, "curiosity": 0.9},
-		"voice": "hyper, easily distracted, loves winning"},
-	"pebbit": {"name": "Gravadillo", "type": "gravity", "color": Color("3c4058"), "belly": Color("8e8aa8"),
-		"hp": 120.0, "dmg": 11.0, "speed": 5.4, "range": 1.4, "ears": "horn",
-		"skill": "slam", "shoulder": "bedrock",
-		"traits": {"bravery": 0.9, "loyalty": 0.7, "temper": 0.3, "curiosity": 0.2},
-		"voice": "slow, steady, few words, deeply loyal once trust is earned"},
-	"wisplet": {"name": "Lunowl", "type": "lunar", "color": Color("d9d4f2"), "belly": Color("fff8e6"),
-		"hp": 70.0, "dmg": 7.0, "speed": 8.0, "range": 1.3, "ears": "wisp",
-		"skill": "gust", "shoulder": "updraft",
-		"traits": {"bravery": 0.35, "loyalty": 0.55, "temper": 0.5, "curiosity": 0.7},
-		"voice": "airy, teasing, dramatic"},
-}
+## Kin species, built from the kin grammar (content/kin_v2, see KinLib.species): name, colours,
+## stats from its points, abilities, merge, carry style. content/kin/<id>.json now only holds
+## home and economy data for a species (rare/boss egg, work elements, shiny palette); a new kin
+## needs only its kin_v2 file.
+var KIN := {}
 
 ## Things a kin can wear. Bought at the stall, put on from the kin's card, worn into matches too.
 const ACCS := {
@@ -208,15 +178,21 @@ const ACCS := {
 func _init() -> void:
 	load_kin_content()
 
-## Reads content/kin/*.json into KIN. A file with a new id adds a new species.
+## Reads every kin that passed the grammar checker (KinLib) into KIN, plus its home data
+## (content/kin/<id>.json: rare, boss).
 func load_kin_content() -> void:
-	for id in Content.ids("kin"):
-		var kd := Content.kin(id)
-		if kd == null:
-			continue
-		var sp: Dictionary = kd.to_species()
-		var base: Dictionary = KIN.get(id, {})
-		sp["voice"] = String(Content._load("kin", id).get("voice", base.get("voice", "friendly")))
+	KIN.clear()
+	var ids: Array = []
+	for first in ["cindle", "puddlet", "burrlet", "zapple", "pebbit", "wisplet"]:     # the original order (starters)
+		if KinLib.kin(first): ids.append(first)
+	for id in KinLib.kin_ids():
+		if not ids.has(id): ids.append(id)
+	for id in ids:
+		var sp: Dictionary = KinLib.species(id)
+		var home: Dictionary = Content._load("kin", id)
+		if bool(home.get("rare", false)):
+			sp["rare"] = true
+			sp["boss"] = String(home.get("boss", ""))
 		KIN[id] = sp
 
 ## Species anyone can meet in the wild, pick as a starter or see on a rival: everything but the rare
@@ -240,25 +216,6 @@ func egg_info(sp_id: String) -> Dictionary:
 	var e: Dictionary = sp.get("egg", {}).duplicate()
 	e["name"] = egg_name(sp_id)
 	return e
-
-## Old single skills, kept for older saves and tips. Kin now use content/abilities.
-const KIN_SKILLS := {
-	"fireball": {"name": "Fireball", "cd": 6.0, "desc": "A fireball that explodes and sets foes burning."},
-	"wave": {"name": "Tidal Wave", "cd": 7.0, "desc": "A wave that shoves and slows everything in front of it."},
-	"snare": {"name": "Bramble Snare", "cd": 8.0, "desc": "Roots every foe in an area for 1.6s."},
-	"chain": {"name": "Chain Bolt", "cd": 6.0, "desc": "Lightning that jumps between three foes."},
-	"slam": {"name": "Boulder Slam", "cd": 8.0, "desc": "Leaps onto the spot and blasts foes away. Great near edges."},
-	"gust": {"name": "Gust", "cd": 6.0, "desc": "A burst of wind that hurls nearby foes outward."},
-}
-
-const SHOULDER := {
-	"kindle": {"name": "Toxin", "desc": "Your shots poison targets."},
-	"spring": {"name": "Glimmer", "desc": "You heal 3 HP per second."},
-	"briar": {"name": "Mycelium", "desc": "Your shots slow targets."},
-	"charge": {"name": "Tempo", "desc": "You fire and reload 20% faster."},
-	"bedrock": {"name": "Anchor", "desc": "You take 15% less damage and half the knockback."},
-	"updraft": {"name": "Moonstep", "desc": "One extra dash charge."},
-}
 
 const MOBS := {
 	"skitter": {"name": "Skitter", "hp": 34.0, "speed": 5.2, "dmg": 9.0, "range": 1.2, "windup": 0.55, "cd": 1.3,

@@ -175,7 +175,7 @@ func sim(dt: float) -> void:
 		if calm_t > 30.0:
 			m.on_mob_escaped(self)
 			return
-	var spd: float = md["speed"] * (0.55 if slow_t > 0.0 else 1.0)
+	var spd: float = md["speed"] * slow_mult(0.55)
 	if root_t > 0.0 or stun_t > 0.0:
 		spd = 0.0
 		if stun_t > 0.0 and st == "windup":

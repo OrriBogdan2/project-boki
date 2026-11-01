@@ -227,7 +227,7 @@ func _info_card() -> PanelContainer:
 	v.add_child(_stat("Speed", float(sp.get("speed", 0.0)), top_spd))
 	var abil: Array = []
 	for id in sp.get("abilities", []):
-		var ad := Content.ability(String(id))
+		var ad := KinLib.ability(String(id))
 		abil.append(ad.display_name if ad else String(id).capitalize())
 	var ult := String(sp.get("ultimate", ""))
 	if not abil.is_empty() or ult != "":
@@ -236,7 +236,7 @@ func _info_card() -> PanelContainer:
 		if not abil.is_empty():
 			v.add_child(UI.label(", ".join(abil), 15, UI.INK))
 		if ult != "":
-			var ud := Content.ultimate(ult)
+			var ud := KinLib.merge(ult)
 			v.add_child(UI.label("Bond move: %s" % (ud.display_name if ud else ult.capitalize()), 14, UI.GOLD))
 	v.add_child(UI.spacer(6))
 	name_btn = UI.primary("Name it", _go, 360)

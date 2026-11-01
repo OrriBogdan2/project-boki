@@ -1,7 +1,7 @@
 class_name KinTactics
 extends RefCounted
 ## How a kin fights on its own (its tactics; the chat side of its mind is KinBrain in home). Separate from the kin's body (kin.gd) and from its abilities
-## (AbilityRunner): the body asks the brain what to chase, where to stand and when to use an
+## (KinRunner, run by KinExec): the body asks the brain what to chase, where to stand and when to use an
 ## ability, and the brain reads the kin's personality to answer.
 ##
 ## Three combat traits, 0..1, mixed from the species' "ai" block and this kin's own traits:
@@ -79,8 +79,12 @@ func pick_target() -> Ent:
 			bs = s; best = f
 	return best
 
-## Called a few times a second while the kin is out (or on your shoulder, for abilities that work
-## on you). Uses abilities by itself when their "auto" condition is met.
+## Called a few times a second while the kin is out (or riding with you, for abilities that work
+## on you). Uses abilities by itself when their cue (KinParts.CUES) fits:
+##   k2, the auto active, is the kin's own: it always uses it when it sees the chance
+##   k1, the active on E, only for bots, or for you if you turned on "kin_auto" in Settings
+## Locked slots (run levels) are never cast. Event triggers (on_hit, on_throw...) fire elsewhere;
+## on_low_hp is watched here.
 func think_abilities(dt: float) -> void:
 	think_t -= dt
 	if think_t > 0.0:
@@ -88,40 +92,56 @@ func think_abilities(dt: float) -> void:
 	think_t = 0.35 + randf() * 0.25
 	if k.runner == null or k.owner_h == null or k.owner_h.out or k.owner_h.downed:
 		return
-	if k.owner_h.is_local() and not Settings.get_v("kin_auto"):
-		return
-	for slot in ["k1", "k2"]:
-		if not k.runner.is_ready(slot):
+	_low_hp()
+	for slot in ["k2", "k1"]:
+		if not k.runner.is_ready(slot) or not k.slot_open(slot):
 			continue
 		var def := k.runner.def_of(slot)
-		var auto: Dictionary = def.auto
-		if auto.is_empty():
+		if def.cue == null:
 			continue
-		var on_shoulder := k.state == "shoulder"
-		if on_shoulder and def.from == "kin":
+		if slot == "k1" and k.owner_h.is_local() and not Settings.get_v("kin_auto"):
+			continue     # your E stays yours unless you asked the kin to use it
+		if slot == "k2" and (def.trigger == null or def.trigger.type != "auto"):
+			continue
+		if k.state in ["shoulder", "fused"] and def.from == "kin":
 			continue     # kin-cast abilities wait until it's out in the fight
-		var aim := _auto_aim(def, auto)
+		var aim := cue_aim(def.cue)
 		if aim == Vector3.INF:
 			continue
-		k.use_ability(slot, aim, true)
-		return
+		if k.use_ability(slot, aim, true):
+			return
 
-func _auto_aim(def: AbilityDef, auto: Dictionary) -> Vector3:
+## on_low_hp triggers: once each time the owner (or the kin) dips below the line.
+func _low_hp() -> void:
+	for slot in ["k2", "k1"]:
+		var def := k.runner.def_of(slot)
+		if def == null or def.trigger == null or def.trigger.type != "on_low_hp":
+			continue
+		var who: Ent = k.owner_h if String(def.trigger.params.get("who", "owner")) == "owner" else k
+		var low := who.hp < who.max_hp * float(def.trigger.params.get("below", 0.35))
+		if not low:
+			k.low_fired.erase(slot)
+		elif not k.low_fired.has(slot) and k.fire_trigger("on_low_hp", {"at": who.pos}):
+			k.low_fired[slot] = true
+
+## Where the cue says to aim, or Vector3.INF if the moment isn't right.
+func cue_aim(cue: PartSpec) -> Vector3:
 	var own := k.owner_h
+	var p := cue.params
 	var offensive_rate := _r("auto_rate_base", 0.35) + aggression * _r("auto_rate_per_aggression", 0.6)
-	match String(auto.get("when", "")):
+	match cue.type:
 		"foe_in_range":
-			if k.target and k.target.hittable() and k.flat_dist(k.target) < float(auto.get("range", 6.0)) and randf() < offensive_rate:
+			if k.target and k.target.hittable() and k.flat_dist(k.target) < float(p["range"]) and randf() < offensive_rate:
 				return k.target.pos
 		"foes_clumped":
-			if k.target and k.flat_dist(k.target) < float(auto.get("range", 7.0)):
+			if k.target and k.flat_dist(k.target) < float(p["range"]):
 				var n := 0
 				for f in k.m.foes_of(k.team):
-					if f.flat_dist(k.target) < float(auto.get("radius", 3.0)): n += 1
-				if n >= int(auto.get("count", 2)) and randf() < offensive_rate:
+					if f.flat_dist(k.target) < float(p["radius"]): n += 1
+				if n >= int(p["count"]) and randf() < offensive_rate:
 					return k.target.pos
 		"owner_hurt":
-			if own.hp < own.max_hp * float(auto.get("below", 0.5)) and own.regen_wait > 0.0 and randf() < 0.4 + loyalty * 0.6:
+			if own.hp < own.max_hp * float(p["below"]) and own.regen_wait > 0.0 and randf() < 0.4 + loyalty * 0.6:
 				return own.pos
 		"owner_under_fire":
 			# a rival is shooting you: put something between you and them
@@ -135,6 +155,6 @@ func _auto_aim(def: AbilityDef, auto: Dictionary) -> Vector3:
 			if (own.below_lip or (own.over_void() and own.vel.y < -4.0 and not own.grounded)) and randf() < 0.35 + loyalty * 0.65:
 				return own.pos
 		"owner_fighting":
-			if own.idle_fire < 1.5 and k.m.foes_of(k.team).any(func(f): return f.flat_dist(own) < 10.0) and randf() < float(auto.get("chance", 0.3)) * (0.5 + aggression):
+			if own.idle_fire < 1.5 and k.m.foes_of(k.team).any(func(f): return f.flat_dist(own) < 10.0) and randf() < float(p["chance"]) * (0.5 + aggression):
 				return own.inp.get("aim", own.pos)
 	return Vector3.INF

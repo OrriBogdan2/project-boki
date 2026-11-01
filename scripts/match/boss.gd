@@ -221,7 +221,7 @@ func sim(dt: float) -> void:
 		tgt = _pick_target()
 	cd -= dt
 	next_cd -= dt
-	var spd: float = float(md["speed"]) * (1.25 if enraged else 1.0) * (0.55 if slow_t > 0.0 else 1.0)
+	var spd: float = float(md["speed"]) * (1.25 if enraged else 1.0) * slow_mult(0.55)
 	var wish := Vector2.ZERO
 	if stun_t > 0.0 or stagger_t > 0.0:
 		if atk != "" and stagger_t > 0.0: _clear_attack()

@@ -7,8 +7,8 @@ extends RefCounted
 ## wall to mantle, a gap to glide across to a little islet, and a pad that resets your cooldowns.
 ## Everywhere else at home you only move (walk, jump, dash, glide).
 ##
-## The numbers and names come from the match's content (WeaponDef, AbilityDef, Gear, KinDef,
-## UltimateDef); the casting here is a small stand-alone version, because the match's runner needs a
+## The numbers and names come from the match's content (WeaponDef, AbilityDef, Gear, and the kin
+## grammar through KinLib); the casting here is a small stand-alone version, because the match's runner needs a
 ## whole Match (hunters, mobs, projectiles, HUD) to run in.
 
 const C := Vector2(40, 56)          # the isle
@@ -164,15 +164,32 @@ func load_kit() -> void:
 		kit["gear1"] = {"name": String(Gear.ALL.get(glove, {}).get("name", glove.capitalize())), "cd": Gear.cd_of(glove, 1), "color": Color("ffd36a"), "effects": Gear.effects_of(glove, 1)}
 	var ak: Dictionary = Save.active_kin()
 	var ksp := String(try.get("kin", ak.get("species", "")))
-	var kd: KinDef = Content.kin(ksp) if ksp != "" else null
-	if kd and not kd.abilities.is_empty():
-		var sd := Content.ability(String(kd.abilities[0]))
+	var kd: KinSpec = KinLib.kin(ksp) if ksp != "" else null
+	if kd:
+		var sd := KinLib.ability(kd.active)
 		if sd:
-			kit["signature"] = _from_ability(sd)
+			kit["signature"] = _from_spec(sd)
 			kit["signature"]["kin"] = true
-	if kd and kd.ultimate != "":
-		var ud := Content.ultimate(kd.ultimate)
+	if kd and kd.merge != "":
+		var ud := KinLib.merge(kd.merge)
 		kit["ultimate"] = {"name": ud.display_name if ud else "Ultimate", "cd": 20.0, "color": Color("ff9ac8"), "effects": [{"type": "area", "dmg": 40.0, "r": 4.0}]}
+
+## A kin ability for the yard: its name, cooldown, category colour, and rough shots or areas with
+## the damage its parts add up to (the yard's dummies only count damage).
+func _from_spec(ab: AbilitySpec) -> Dictionary:
+	var effs: Array = []
+	for st in ab.all_stages():
+		var dmg := 0.0
+		for e in st.effects:
+			if (e as PartSpec).type == "damage": dmg += float(e.params["amount"])
+		if dmg <= 0.0:
+			continue
+		var d := st.delivery
+		if d.type == "projectile":
+			effs.append({"type": "projectile", "dmg": dmg, "speed": float(d.params["speed"]), "range": float(d.params["range"])})
+		else:
+			effs.append({"type": "area", "dmg": dmg, "radius": float(d.params.get("radius", d.params.get("length", 2.5)))})
+	return {"name": ab.short if ab.short != "" else ab.display_name, "cd": ab.cooldown, "color": KinText.color(ab), "effects": effs}
 
 func _from_ability(ad: AbilityDef) -> Dictionary:
 	return {"name": ad.short if ad.short != "" else ad.display_name, "cd": ad.cooldown, "color": ad.color, "effects": ad.effects}
@@ -482,10 +499,10 @@ func open_tryon() -> void:
 	if gl != "": _line(cv, Settings.key_cap("gear1"), String(Gear.ALL.get(gl, {}).get("name", gl)), Gear.desc_of(gl, 1))
 	if kit.has("signature"):
 		var ksp := String(try.get("kin", Save.active_kin().get("species", "")))
-		var kd := Content.kin(ksp)
-		if kd and not kd.abilities.is_empty():
-			var sd := Content.ability(String(kd.abilities[0]))
-			if sd: _line(cv, Settings.key_cap("signature"), "%s (%s)" % [sd.display_name, kd.display_name], sd.desc)
+		var kd := KinLib.kin(ksp)
+		if kd:
+			var sd := KinLib.ability(kd.active)
+			if sd: _line(cv, Settings.key_cap("signature"), "%s (%s)" % [sd.display_name, kd.display_name], KinText.ability(sd))
 	if kit.has("ultimate"): _line(cv, Settings.key_cap("ultimate"), String(kit["ultimate"]["name"]), "the bond ultimate (on a 20s timer here)")
 	v.add_child(card)
 	v.add_child(UI.section("Weapon"))
@@ -516,10 +533,10 @@ func open_tryon() -> void:
 	var cur := String(try.get("kin", Save.active_kin().get("species", "")))
 	for sp in sps:
 		var ss: String = sp
-		var kd := Content.kin(sp)
-		var tag := String(kd.type).capitalize() if kd else ""
+		var kd := KinLib.kin(sp)
+		var tag := String(kd.theme).capitalize() if kd else ""
 		var b := UI.choice("%s  ·  %s" % [Data.KIN[sp]["name"], tag], cur == sp, func(): try["cls"] = cls; try["kin"] = ss; apply_try(); open_tryon(), 170)
-		if kd: b.tooltip_text = kd.desc
+		if kd: b.tooltip_text = kd.flavor
 		kf.add_child(b)
 	v.add_child(kf)
 	var bot := UI.hbox(10)

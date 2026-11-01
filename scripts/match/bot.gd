@@ -492,23 +492,23 @@ func ability_aim(m: Match, h: Hunter, def: AbilityDef, tgt: Ent) -> Vector3:
 			return tp
 	return Vector3.INF
 
-## Kin abilities (Q, V) when they fit the moment, and the bond ultimate (R) once it's full.
-## (The kin also uses its abilities on its own; this is the hunter asking for them.)
+## The kin's E when it fits the moment (read from the ability's cue), and the bond ultimate (R,
+## the merge) once it's full. (The kin uses its auto active on its own; this is the hunter asking.)
 func _use_sig(m: Match, h: Hunter, tgt: Ent) -> void:
 	var k: Kin = h.kin
 	if k == null or not k.ready_to_fight() or tgt == null:
 		return
 	var d := h.flat_dist(tgt)
 	var kd := k.flat_dist(tgt)
-	for slot in ["k1", "k2"]:
-		if not k.runner.is_ready(slot):
+	for slot in ["k1"]:
+		if not k.runner.is_ready(slot) or not k.slot_open(slot):
 			continue
 		var def := k.runner.def_of(slot)
 		var go := false
 		if def.from == "owner":
-			var auto: Dictionary = def.auto
-			match String(auto.get("when", "")):
-				"owner_hurt": go = h.hp < h.max_hp * float(auto.get("below", 0.5))
+			var cue := def.cue.type if def.cue else ""
+			match cue:
+				"owner_hurt": go = h.hp < h.max_hp * float(def.cue.params.get("below", 0.5))
 				"owner_falling": go = h.below_lip
 				_: go = d < 9.0 and randf() < 0.3
 		else:
@@ -520,8 +520,8 @@ func _use_sig(m: Match, h: Hunter, tgt: Ent) -> void:
 			h.inp["aim"] = Vector3(tgt.pos.x, tgt.pos.y, tgt.pos.z)
 			h.inp["sig" if slot == "k1" else "skill"] = true
 			break
-	if Ultimate.can_cast(h):
-		var u := Ultimate.def_for(k)
+	if KinMerge.can_cast(h):
+		var u := KinMerge.def_for(k)
 		var go_r := false
 		if u:
 			go_r = (d < 7.0 and tgt is Hunter) or (d < 5.0 and tgt is Mob and (tgt as Mob).max_hp > 150.0) or (h.hp < h.max_hp * 0.4 and d < 9.0)
