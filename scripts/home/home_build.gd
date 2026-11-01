@@ -341,7 +341,7 @@ func _apply_blockers() -> void:
 		for c in HomeLayout.deco_cells(e):
 			mark.call(c, "d:%d" % int(e["u"]), HomeLayout.blocks(String(e["id"])))
 	for k in lay["water"]:
-		mark.call(HomeLayout.unkey(k), "w", true)
+		mark.call(HomeLayout.unkey(k), "w", false)      # (feelfix) ponds are water you can wade and swim in, not walls
 	_evict_feeders()
 	if h.visit.is_empty():
 		for f in Econ.feeders():
@@ -583,6 +583,18 @@ func _fence_piece(n: Node3D, id: String, links: Array, alone: bool) -> void:
 	if alone and id != "hedge" and id != "stone_wall":
 		n.scale = Vector3(1.0, 1.0, 1.0)
 
+static var _water_m: ShaderMaterial = null
+static var _foam_m: ShaderMaterial = null
+## (feelfix) The ponds' animated water and the foam along their banks (shaders/pond_water, pond_foam).
+static func water_mat() -> ShaderMaterial:
+	if _water_m == null:
+		_water_m = ShaderMaterial.new(); _water_m.shader = load("res://shaders/pond_water.gdshader")
+	return _water_m
+static func foam_mat() -> ShaderMaterial:
+	if _foam_m == null:
+		_foam_m = ShaderMaterial.new(); _foam_m.shader = load("res://shaders/pond_foam.gdshader")
+	return _foam_m
+
 func _sync_water() -> void:
 	var wt: Dictionary = L()["water"]
 	var sig := str(wt.keys())
@@ -593,9 +605,11 @@ func _sync_water() -> void:
 		c.queue_free()
 	if wt.is_empty():
 		return
-	var wm := Models.toon(Color("3d78a8"), false, 0.12)
+	var wm := HomeBuild.water_mat()
+	var fm := HomeBuild.foam_mat()
 	var rim := Models.toon(Color("8d8a86"))
-	var plane := PlaneMesh.new(); plane.size = Vector2(1.02, 1.02)
+	var plane := PlaneMesh.new(); plane.size = Vector2(1.02, 1.02); plane.subdivide_width = 3; plane.subdivide_depth = 3
+	var strip := PlaneMesh.new(); strip.size = Vector2(1.0, 0.26)
 	var stone := Models.sphere(0.13, 6)
 	for k in wt:
 		var c := HomeLayout.unkey(k)
@@ -605,6 +619,12 @@ func _sync_water() -> void:
 		water_root.add_child(mi)
 		for dv in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
 			if wt.has(HomeLayout.key(c.x + dv.x, c.y + dv.y)): continue
+			# foam along the bank (the strip's UV.y runs from the bank out onto the water)
+			var fo := MeshInstance3D.new(); fo.mesh = strip; fo.material_override = fm
+			fo.position = Vector3(c.x + 0.5 + dv.x * 0.37, 0.065, c.y + 0.5 + dv.y * 0.37)
+			fo.rotation.y = atan2(-float(dv.x), -float(dv.y))
+			fo.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			water_root.add_child(fo)
 			for t in [-0.3, 0.05, 0.38]:
 				var side: Vector3 = Vector3(-dv.y, 0, dv.x) * t
 				var s := MeshInstance3D.new(); s.mesh = stone; s.material_override = rim

@@ -409,6 +409,10 @@ func _ready() -> void:
 	if "--life-check" in args:
 		_life_check()
 		return
+	if "--swim-check" in args:
+		set_meta("swim_check", load("res://tools/swim_check.gd").new())     # wading and swimming in the farm's pond
+		get_meta("swim_check").run(self)
+		return
 	if "--hero-check" in args:
 		set_meta("hero_check", load("res://tools/hero_check.gd").new())     # change hero on the farm
 		get_meta("hero_check").run(self)
