@@ -827,8 +827,11 @@ func clock_line() -> Array:
 			"boarding": return ["SKIFF BOARDING %s" % _cap(mine["t"]), ExitModels.DOCK]
 			"charging":
 				if mine.get("draining", false):
-					return ["UPLINK %d%%  DRAINING %s" % [int(mine["prog"] * 100.0), _cap(drain_left(mine))], ExitModels.UPLINK.lerp(Color.WHITE, 0.25 + 0.25 * sin(m.time * 7.0))]
-				return [("UPLINK %d%%%s" % [int(mine["prog"] * 100.0), "  CONTESTED" if mine["contested"] else ("  x%s" % String.num(crew_rate(int(mine.get("crew", 0))), 1) if int(mine.get("crew", 0)) > 1 else "")]), Color("ff8a6a") if mine["contested"] else ExitModels.UPLINK]
+					# (short: it sits between the clock and your level under the minimap)
+					return ["DRAINING %s" % _cap(drain_left(mine)), ExitModels.UPLINK.lerp(Color.WHITE, 0.25 + 0.25 * sin(m.time * 7.0))]
+				if mine["contested"]:
+					return ["CONTESTED %d%%" % int(mine["prog"] * 100.0), Color("ff8a6a")]
+				return [("UPLINK %d%%%s" % [int(mine["prog"] * 100.0), (" x%s" % String.num(crew_rate(int(mine.get("crew", 0))), 1)) if int(mine.get("crew", 0)) > 1 else ""]), ExitModels.UPLINK]
 			"open": return ["LIFT OPEN %s" % _cap(mine["t"]), ExitModels.UPLINK]
 	var docks := of_kind("dock")
 	var first := 1e9
@@ -1037,6 +1040,18 @@ func demo(mode: String) -> void:
 				R.teleport(o["pos"] + Vector3(-2.0, 0, -1.4))
 			elif R:
 				R.teleport(m.world.random_ground())
+			m.cam.zoom_to = 0.85
+		"drain":
+			# your uplink charging with nobody in its yard: the charge draining (HUD, mast, clock)
+			var o: Dictionary = of_kind("outpost")[0]
+			m.time = float(o["open_at"]) + 1.0
+			act(o, "start", p)
+			o["wave_t"] = 99.0
+			o["prog"] = 0.6
+			m.set_meta("xdemo_hold", [o, "charging", "prog", 0.6])
+			var off := Vector3(OUTPOST_R + 1.6, 0, 1.0)
+			p.teleport(m.world.free_spot_near(o["pos"] + off, [], 0.6, 0.5, 3.0))
+			if R: R.teleport(m.world.random_ground())
 			m.cam.zoom_to = 0.85
 	p.set_meta("pin", p.pos)
 	if R: R.set_meta("pin", R.pos)
