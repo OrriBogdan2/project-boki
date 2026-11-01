@@ -386,7 +386,7 @@ static func _gunslinger(c: Dictionary) -> void:
 		var g: Node3D = c["gear"]
 		var hb := HC + Vector3(0, 0.155, 0.01)
 		var hr := Vector3(-0.1, 0, 0.05)
-		_p(g, brim("gun2", 0.19, 0.5, 0.13, 0.04, 0.0, 1.1), m["hat"], hb, Vector3.ONE, hr)
+		_p(g, brim("gun3", 0.19, 0.39, 0.12, 0.035, 0.0, 1.1), m["hat"], hb, Vector3.ONE, hr)
 		var crown := func(u: float, v: float) -> Vector3:
 			var th := u * TAU
 			var r := 0.205 * (0.88 + 0.12 * v) * sin(minf(v / 0.28, 1.0) * PI * 0.5)
@@ -401,7 +401,7 @@ static func _gunslinger(c: Dictionary) -> void:
 		for k in 49:
 			var th := TAU * k / 48.0
 			var y := 0.13 * pow(cos(th), 2.0) - 0.04 * maxf(-sin(th), 0.0)
-			edge.append(Vector3(cos(th) * 0.5, y, sin(th) * 0.5 * 1.1))
+			edge.append(Vector3(cos(th) * 0.39, y * 0.92, sin(th) * 0.39 * 1.1))
 		_p(g, HeroKit.loft("gun_brimedge", edge, [Vector2(0.02, 0.012), Vector2(0.02, 0.012)], 6, Vector3.UP, 1.0, 1), team, hb, Vector3.ONE, hr)
 		for k in 5:
 			var a := PI * 0.5 + (k - 2) * 0.32
@@ -470,7 +470,13 @@ static func _gunslinger(c: Dictionary) -> void:
 	for k in 4:
 		var a := TAU * k / 4.0 + 0.4
 		_p(el_l, Models.sphere(0.009, 6), m["gold"], Vector3(cos(a) * 0.066, -0.07, sin(a) * 0.066))
-	_p(arm_l[0], HeroKit.dome_plate("gun_mechpad", 0.1, 0.5, 0.8, 0.2, 0.016), m["steel"], Vector3(-0.02, 0.0, 0), Vector3(1.0, 1.0, 1.1), Vector3(0, 0, 0.5))
+	# a big brass-rimmed steel pauldron with a glowing vent on top: the one piece of the arm that
+	# shows past the hat brim from the match camera, so the Gunslinger reads lopsided from above
+	var sh: Node3D = arm_l[0]
+	_p(sh, HeroKit.dome_plate("gun_mechpad2", 0.15, 0.55, 0.85, 0.25, 0.02), m["steel"], Vector3(-0.03, 0.02, 0), Vector3(1.0, 1.0, 1.15), Vector3(0, 0, 0.5))
+	_p(sh, HeroKit.band("gun_mechpadrim", 0.152, 0.172, 0.03, 0.012), m["gold"], Vector3(-0.03, -0.035, 0), Vector3.ONE, Vector3(0, 0, 0.5))
+	for k in 3:
+		_p(sh, Models.box(0.022, 0.02, 0.15 - k * 0.03), m["glow"], Vector3(-0.07 - k * 0.035, 0.1 - k * 0.025, 0), Vector3.ONE, Vector3(0, 0, 0.5))
 	var e2r: Node3D = (c["arms"]["R"] as Array)[1]
 	_p(e2r, HeroKit.cuff(0.062, 0.09, 0.09), m["body"], Vector3(0, -0.165, 0))
 	_p(e2r, HeroKit.cuff(0.088, 0.092, 0.02), m["trim"], Vector3(0, -0.2, 0))
