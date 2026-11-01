@@ -68,12 +68,8 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 func shatter(at: Vector3, dmg: float, r: float, skip: Ent = null) -> void:
 	shatter_log += 1
 	var col := res_col()
+	CareUtil.payoff(m, h, at, "SHATTER", col, "rime_shatter")
 	m.fx.ring(at, r, Color.WHITE, 0.4)
-	m.fx.ring(at, r * 0.6, col, 0.3)
-	m.fx.burst(at + Vector3(0, 0.8, 0), col.lightened(0.4), 34, 7.0, 0.6, 6.0, 1.3)
-	m.fx.word(at + Vector3(0, 2.2, 0), "SHATTER", col, true)
-	m.sfx("rime_shatter", at, 0.0, 1.0)
-	m.shake(0.4, at)
 	for f in foes_in(at, r):
 		if f == skip and f.hp <= 0.0:
 			continue

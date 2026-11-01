@@ -48,6 +48,9 @@ static func tick(A: Arena, dt: float) -> void:
 	if m.cam and not w.begins_with("card") and w != "menu" and not m.has_meta("zoom_hold"):
 		m.set_meta("zoom_hold", 0.6)      # close enough to read the hits
 		m.cam.zoom = 0.6
+	if w.begins_with("care_"):
+		CareDemo.tick(A, dt, w)          # the support pair (care_demo.gd)
+		return
 	P.hp = P.max_hp
 	match w:
 		"thief", "cashin":

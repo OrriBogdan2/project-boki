@@ -383,9 +383,7 @@ func _hearth_end(flare: bool, word: String) -> void:
 	if flare:
 		var amt := float(ed["burst"]) * heal_k()
 		var col := col_of(ed)
-		m.fx.ring(c, float(ed["radius"]) * 1.2, col, 0.5)
-		m.fx.burst(c + Vector3(0, 0.6, 0), col, 30, 5.0, 0.6, -2.0, 1.3)
-		m.sfx("tend_flare", c, -1.0, 1.0)
+		CareUtil.payoff(m, h, c, "HEARTH", col, "tend_flare")
 		for o in m.hunters:
 			if o.team != h.team or o.out or o.extracted:
 				continue
@@ -394,7 +392,7 @@ func _hearth_end(flare: bool, word: String) -> void:
 			if o.downed:
 				if rank("kin") >= 3:
 					if CareUtil.revive(m, o, h):
-						m.fx.word(o.pos + Vector3(0, 2.3, 0), "UP", col, true)
+						CareUtil.payoff(m, h, o.pos, "UP", col, "revive")
 				else:
 					CareUtil.heal(m, o, amt, float(ed.get("wisp_k", 5.0)))
 			else:
