@@ -338,7 +338,7 @@ func _fire_needle() -> void:
 	Feel.shake(m, "t3", h, h.pos)
 	if h.is_local(): Oomph.punch_dir(m, -d, 0.22)
 	var hits := 0
-	var dmg0 := float(ed["dmg"]) * power("kin") * m.dmg_mult(h)
+	var dmg0: float = float(ed["dmg"]) * power("kin") * m.dmg_mult(h)
 	for f in m.foes_of(h.team):
 		if not f.hittable(): continue
 		var v := Vector2(f.pos.x - h.pos.x, f.pos.z - h.pos.z)
@@ -347,7 +347,7 @@ func _fire_needle() -> void:
 		if absf(v.cross(d)) > float(ed["width"]) + f.r: continue
 		if absf(f.pos.y - h.pos.y) > 2.6: continue
 		var rat := KitStatus.active(f, "rattled")
-		var dmg := dmg0 * (1.0 + float(ed["rattle_k"]) if rat else 1.0)
+		var dmg: float = dmg0 * ((1.0 + float(ed["rattle_k"])) if rat else 1.0)
 		var o := {"src": "abil", "ab": "k1", "tags": ["k1", "needle"]}
 		if rat and f is Hunter: o["payoff"] = true
 		f.hurt(dmg, h, o)

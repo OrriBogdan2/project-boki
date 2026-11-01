@@ -64,7 +64,7 @@ static func tick(h: Hunter, dt: float, look := false) -> void:
 		var on := active(h, kind)
 		if not look:
 			continue
-		var node_name := "Kst_" + kind
+		var node_name: String = "Kst_" + kind
 		var n: Node3D = h.get_node_or_null(node_name)
 		if not on or h.downed or h.out:
 			if n:
