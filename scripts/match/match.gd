@@ -1232,22 +1232,36 @@ func _spawn_breakables() -> void:
 		_add_break(String(b["kind"]), b["pos"])
 	if opts.get("training", false) and player:
 		# something to smash and something to pick up right where you start
-		for t in [[Vector3(-2.0, 0, 1.2), "crate"], [Vector3(-2.6, 0, 2.2), "pot"], [Vector3(2.2, 0, 1.0), "weapon"]]:
+		for t in [[Vector3(-2.0, 0, 1.2), "crate"], [Vector3(-2.6, 0, 2.2), "pot"], [Vector3(1.4, 0, 1.6), "weapon"]]:
 			var q: Vector3 = player.pos + t[0]
 			if world.is_void(q.x, q.z) or world.is_block(q.x, q.z):
 				continue
 			q.y = world.ground_at(q.x, q.z)
 			if t[1] == "weapon": spawn_weapon("sniper", 2, q, "", false)
 			else: _add_break(t[1], q)
-		# a glove rack: a row of gloves to try (actives go in your Q slot, passives in the other)
-		var gi := 0
+		# a glove rack: gloves to try (actives go in your Q slot, passives in the other), in two
+		# staggered rows 2.6 m apart so their name tags don't run into each other (one row 1.8 m apart
+		# printed "Fissure GlMirror GloHook GIce Bridge Glove"); spots off the island are skipped for
+		# the next free one, so all six make it onto the ground
+		var spots: Array = []
+		for row in [[-2.4, 0.0], [-4.6, 1.3], [0.0, 1.3], [2.4, 0.0], [4.6, 1.3]]:
+			# across the row from the middle out: 0, 2.6, -2.6, 5.2 ... (or 1.3, -1.3, 3.9 ... staggered)
+			for k in 6:
+				var x := (float(row[1]) + float((k + (1 if row[1] == 0.0 else 0)) / 2) * 2.6) * (1.0 if k % 2 == 0 else -1.0)
+				if Vector2(x, float(row[0])).length() <= 6.2:
+					spots.append(Vector3(x, 0, float(row[0])))
+		var used: Array = [Vector3(-2.0, 0, 1.2), Vector3(-2.6, 0, 2.2), Vector3(1.4, 0, 1.6), Vector3(3.6, 0, 2.6), Vector3(-3.6, 0, 2.6), Vector3(0, 0, 4.0)]
 		for gid in ["blink", "quake", "bubble", "grapple", "frost", "power_core"]:
-			var q2: Vector3 = player.pos + Vector3(-4.5 + gi * 1.8, 0, -2.6)
-			gi += 1
-			if world.is_void(q2.x, q2.z) or world.is_block(q2.x, q2.z):
-				continue
-			q2.y = world.ground_at(q2.x, q2.z)
-			spawn_gear(gid, 2, q2)
+			for off in spots:
+				var q2: Vector3 = player.pos + off
+				if used.any(func(u): return (u as Vector3).distance_to(off) < 2.3):
+					continue
+				if world.is_void(q2.x, q2.z) or world.is_block(q2.x, q2.z) or absf(world.ground_at(q2.x, q2.z) - player.pos.y) > 1.7:
+					continue
+				used.append(off)
+				q2.y = world.ground_at(q2.x, q2.z)
+				spawn_gear(gid, 2, q2)
+				break
 		# the way into the duel room: a glowing pad next to where you start
 		if not opts.get("duel", false):
 			for off in [Vector3(3.6, 0, 2.6), Vector3(-3.6, 0, 2.6), Vector3(3.6, 0, -1.0), Vector3(0, 0, 4.0)]:
@@ -1263,7 +1277,9 @@ func _spawn_breakables() -> void:
 				lbl.text = "DUEL ROOM\n%s to enter" % Settings.key_cap("interact")
 				lbl.font = UI.big; lbl.font_size = 40; lbl.pixel_size = 0.01; lbl.outline_size = 12
 				lbl.modulate = Color("ffb0a0"); lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED; lbl.no_depth_test = true
-				lbl.position = dq + Vector3(0, 2.0, 0)
+				# drawn after every other see-through thing (pad glow, pickup beams), so nothing covers it
+				lbl.render_priority = 100; lbl.outline_render_priority = 99
+				lbl.position = dq + Vector3(0, 2.7, 0)
 				add_child(lbl)
 				break
 	# the weapons lying in the open are the same for everyone in an online match

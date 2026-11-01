@@ -414,21 +414,37 @@ func _draw_world_labels() -> void:
 			if ct > bfrac:
 				c.draw_rect(Rect2(br.position + Vector2(bw * bfrac, 0), Vector2(bw * (ct - bfrac), 6)), Color(1.0, 0.95, 0.88, 0.8))
 			_status_row(sp + Vector2(0, 16), mb)
-	# found weapons: name and rarity when you're close enough to care
+	# found weapons: name and rarity when you're close enough to care. Tags that would overlap one
+	# already drawn this frame step up above it, so a few drops side by side stay readable.
 	var pp: Vector3 = m.player.pos if m.player else cam.focus
+	var tags: Array = []
 	for wp in m.wpicks:
 		var wpos: Vector3 = wp["pos"]
 		if Vector2(wpos.x - pp.x, wpos.z - pp.z).length() > 7.0 or cam.is_position_behind(wpos):
 			continue
 		var r: Dictionary = Data.RARITY[int(wp["rar"])]
 		var sp := cam.unproject_position(wpos + Vector3(0, 1.45, 0))
-		if wp.has("gear") and Gear.ALL.has(String(wp["gear"])):
+		var glove: bool = wp.has("gear") and Gear.ALL.has(String(wp["gear"]))
+		var nm := String(Gear.ALL[String(wp["gear"])]["name"]) if glove else String(Data.weapon_stats(String(wp["wid"]), int(wp["rar"]))["name"])
+		var tw := big.get_string_size(nm, HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x + 10.0
+		var tag := Rect2(sp + Vector2(-tw * 0.5, -16.0), Vector2(tw, 32.0 if glove else 20.0))
+		for tries in 4:
+			var bumped := false
+			for o in tags:
+				if (o as Rect2).intersects(tag):
+					bumped = true
+					tag.position.y = (o as Rect2).position.y - tag.size.y - 2.0
+			if not bumped:
+				break
+		sp.y += tag.position.y - (sp.y - 16.0)
+		tags.append(tag)
+		if glove:
 			# a glove: its name, and which slot it goes in
 			var gd: Dictionary = Gear.ALL[String(wp["gear"])]
-			_ctext(sp, String(gd["name"]), 15, gd["col"], big)
+			_ctext(sp, nm, 15, gd["col"], big)
 			_ctext(sp + Vector2(0, 14), ("active  ·  " + Settings.key_cap("gear1")) if Gear.active(String(wp["gear"])) else "passive", 11, Color(INK, 0.75))
 		else:
-			_ctext(sp, String(Data.weapon_stats(String(wp["wid"]), int(wp["rar"]))["name"]), 16, r["color"], big)
+			_ctext(sp, nm, 16, r["color"], big)
 	for k in m.kins:
 		if k.dead or not k.visible or k.state == "shoulder" or cam.is_position_behind(k.position):
 			continue
