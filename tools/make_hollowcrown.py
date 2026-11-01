@@ -87,7 +87,7 @@ islands = [
          chests=[[108, 108, 2], [84, 108, 1], [132, 108, 1]],
          camps=[[94, 88, "heavy"], [122, 128, "heavy"]],
          breakables=[[126, 88, "barrel"], [127, 88, "crate"], [89, 128, "pot"], [90, 128, "crate"]],
-         wardens=[[118, 92], [98, 124], [108, 110]],
+         wardens=[[114, 94], [98, 124], [108, 110]],
          traps=[[96, 96], [120, 120]]),
     # ---- The Gaols: two lair rocks bridged to the Crown, the best (and most fought-over) bosses.
     dict(id="gaol_ne", name="Stormcrown Gaol", role="camp", region=0, biome="storm", danger=2, poi=[157, 79], noise=0.05,
@@ -119,7 +119,7 @@ islands = [
          camps=[[92, 44, "light"], [131, 44, "normal"]],
          breakables=[[106, 26, "crate"], [107, 26, "barrel"], [122, 62, "pot"]],
          weapons=[[104, 56]],
-         wardens=[[100, 42], [126, 52]],
+         wardens=[[104, 48], [126, 52]],
          traps=[[90, 54]],
          areas=[[128, 42, "Frostgate Keep"], [84, 54, "Rimefield"]]),
     # ---- CINDER STEPS (west): the Kilns (lv 6) on the north half overlook the Crown's west face; one
@@ -138,16 +138,16 @@ islands = [
          camps=[[46, 76, "normal"], [42, 100, "light"]],
          breakables=[[60, 68, "barrel"], [33, 90, "crate"], [34, 90, "crate"], [52, 124, "pot"]],
          weapons=[[38, 108]],
-         wardens=[[50, 96], [40, 66]],
+         wardens=[[56, 92], [40, 66]],
          traps=[[48, 110]],
          areas=[[46, 70, "The Kilns"], [40, 114, "Forge Yard"]]),
     # ---- STORMBREAK (east): a storm-lashed tableland. The Shrine Table (lv 6) rises in the middle, up
-    # the West Ramp (a long flight with landings). The Moor Steps run south to Duskmoor.
+    # the South Ramp (a long flight with landings). The Moor Steps run south to Duskmoor.
     dict(id="storm", name="Stormbreak", role="shrine", region=3, biome="storm", danger=1, poi=[176, 115], noise=0.06,
          shapes=[poly([(156, 96), (172, 90), (188, 96), (195, 114), (190, 134), (178, 146), (162, 142), (154, 124)], 2),
                  poly([(168, 102), (182, 102), (186, 114), (180, 128), (168, 128), (164, 118), (164, 110)], 6)],
          sheer=[[340, 20]],
-         ramps=[ramp(156, 114, "e", 5, 2, 6, run=2)],
+         ramps=[ramp(174, 135, "n", 5, 2, 6, run=2)],
          rocks=rocks((160, 100, 161, 101), (186, 130, 187, 131), (168, 136, 170, 136)),
          trees=[[176, 94], [190, 104], [158, 132]],
          bush=[[164, 138, 1.6], [188, 120, 1.4]],
@@ -156,7 +156,7 @@ islands = [
          camps=[[180, 112, "normal"], [162, 104, "light"]],
          breakables=[[170, 96, "crate"], [171, 96, "pot"], [158, 128, "barrel"]],
          weapons=[[190, 126]],
-         wardens=[[172, 132], [178, 106]],
+         wardens=[[172, 132], [170, 122]],
          traps=[[166, 120]],
          shrine=[174, 118]),
     # ---- THORNWOOD (south): a low bramble wood full of tall grass and blossom trees, the Boki nest in
@@ -185,7 +185,7 @@ islands = [
          landings=[[34, 30], [46, 36], [20, 38]],
          chests=[[26, 24, 1], [42, 28, 0]],
          camps=[], breakables=[[30, 40, "crate"], [31, 40, "barrel"]],
-         wardens=[[40, 40]],
+         wardens=[[36, 21]],
          areas=[[26, 22, "Lark Stones"]]),
     dict(id="highwatch", name="Highwatch", role="landing", region=6, biome="frost", danger=0, poi=[184, 22], noise=0.08,
          shapes=[poly([(170, 12), (192, 10), (204, 22), (202, 40), (186, 46), (172, 38), (166, 24)], 0)],
@@ -195,7 +195,7 @@ islands = [
          landings=[[180, 36], [196, 28], [174, 20]],
          chests=[[198, 24, 0]],
          camps=[], breakables=[[184, 40, "crate"], [185, 40, "pot"]],
-         wardens=[[178, 30]]),
+         wardens=[[184, 16]]),
     dict(id="duskmoor", name="Duskmoor", role="landing", region=7, biome="storm", danger=0, poi=[186, 184], noise=0.08,
          shapes=[poly([(176, 168), (196, 164), (206, 178), (202, 198), (184, 206), (170, 196), (168, 180)], 0)],
          sheer=[[150, 210]],
@@ -205,7 +205,7 @@ islands = [
          landings=[[180, 182], [196, 188], [186, 200]],
          chests=[[192, 172, 0]],
          camps=[[178, 194, "light"]], breakables=[[200, 184, "barrel"], [200, 185, "crate"]],
-         wardens=[[186, 190]]),
+         wardens=[[188, 176]]),
     dict(id="saltmere", name="Saltmere", role="landing", region=8, biome="bloom", danger=0, poi=[24, 184], noise=0.08,
          shapes=[poly([(14, 170), (30, 164), (44, 172), (46, 190), (34, 204), (16, 202), (8, 186)], 0)],
          sheer=[[150, 210]],
@@ -214,7 +214,7 @@ islands = [
          landings=[[16, 190], [34, 176], [28, 198]],
          chests=[[38, 186, 0]],
          camps=[], breakables=[[18, 176, "pot"], [19, 176, "pot"]],
-         wardens=[[30, 190]]),
+         wardens=[[40, 192]]),
     # ---- Shardfall: a high shard of rock over the south-east gap (lv 10). A one-way launch pad from
     # Stormbreak or the updraft beside it takes you up; from there you glide down onto the Crown,
     # Thornwood or Stormbreak. A rich chest and the best view of the Thornhive and the Crown's south.
@@ -373,6 +373,9 @@ def rasterize():
                     lv[q] = l
                     if stair: stairs[q] = (dx, dz)
                     else: stairs.pop(q, None)
+            for back in (1, 2, 3):      # room to walk onto the bottom step: 3 tiles of ground at its foot
+                foot = (R["at"][0] - dx * back, R["at"][1] - dz * back)
+                assert lv.get(foot) == R["from"], ("ramp foot not on open ground", d["id"], R, foot, lv.get(foot))
             top = (R["at"][0] + dx * n, R["at"][1] + dz * n)
             assert lv.get(top) == R["to"], ("ramp doesn't land on its plateau", d["id"], R, lv.get(top))
     for B in bridges:
@@ -403,6 +406,15 @@ def check(lv, owner, stairs):
                 if (x, z) not in lv: probs.append("lair %s over the void at %s" % (L["id"], (x, z))); break
                 lvs.add(lv[(x, z)]); own.add(owner[(x, z)])
         if len(own) > 1: probs.append("lair %s spans islands %s" % (L["id"], own))
+    # Warden posts keep clear of camps and exits (9 m) and landings (8 m), as the Blight wants
+    camps = [c for d in islands for c in d.get("camps", [])]
+    lands = [c for d in islands for c in d.get("landings", [])]
+    exits = [e[:2] for e in docks + outposts + hatches]
+    for d in islands:
+        for wp in d.get("wardens", []):
+            for lst, r, what in ((camps, 9, "camp"), (exits, 9, "exit"), (lands, 8, "landing")):
+                for q in lst:
+                    if math.hypot(wp[0] - q[0], wp[1] - q[1]) < r: probs.append("warden %s too close to %s %s" % (wp, what, q[:2]))
     for B in bridges:
         assert owner.get((int(B["from"][0]), int(B["from"][1]))) == B["a"], B
     return probs

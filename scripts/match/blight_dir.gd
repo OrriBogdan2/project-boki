@@ -136,6 +136,10 @@ func _warden_spot(ii: int) -> Vector3:
 				continue
 			if m.lairs and not m.lairs.lair_of(q, 6.0).is_empty():
 				continue
+			if _near_any(q, w.camp_spots.map(func(c): return c["pos"]), 9.0) or _near_any(q, w.spawns, 8.0):
+				continue
+			if m.exits and _near_any(q, m.exits.list.map(func(x): return x["pos"]), 9.0):
+				continue
 			return q
 		return Vector3.INF
 	for _t in 24:
