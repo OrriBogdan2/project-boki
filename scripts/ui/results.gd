@@ -149,6 +149,25 @@ func show_result(r: Dictionary) -> void:
 		v.add_child(lc)
 	for nw in s.get("ransom_news", []):
 		v.add_child(_note(String(nw), Color("ffd58a")))
+	# the Boki that followed you this run (Follow)
+	var fol: Dictionary = s.get("follower", {})
+	if not fol.is_empty():
+		var fr: Dictionary = fol.get("rec", {})
+		var fname := Data.kin_title(String(fr.get("name", "")), String(Data.KIN.get(String(fr.get("species", "cindle")), Data.KIN["cindle"])["name"]))
+		match String(fol.get("fate", "")):
+			"home": v.add_child(_note("%s %s. It's on your farm now." % [fname, String(fol.get("why", "came home"))], UI.GOOD))
+			"stolen": v.add_child(_note("%s tamed %s before it could get home." % [String(fol.get("holder", "A rival")), fname], UI.BAD))
+	if s.get("loaner", false):
+		v.add_child(_note("Free-kit run: the loaner Boki went back to %s. Nothing of yours was at risk." % BokiPens.MERCHANT, Color("bfe9ff")))
+	if int(s.get("stipend", 0)) > 0:
+		v.add_child(_note("%s topped up your take by %d gems for making it out." % [BokiPens.MERCHANT, int(s["stipend"])], UI.GOLD))
+	for ps in s.get("pens_sold", []):
+		v.add_child(_note("%s sold at the Drift Pens: +%d gems." % [String(ps["rec"].get("name", "A Boki")), int(ps["paid"])], UI.GOLD))
+	if not (s.get("exchange_fills", []) as Array).is_empty():
+		v.add_child(_note("%d of your Exchange offers filled while you were out." % (s["exchange_fills"] as Array).size(), UI.GOLD))
+	for fe in s.get("floor", []):
+		if String(fe.get("kind", "")) == "stray":
+			v.add_child(_note("A stray %s is waiting on your farm. It's yours." % Data.KIN[String(fe["rec"]["species"])]["name"], UI.GOOD))
 	if s.get("kin_stranded", false):
 		v.add_child(_note("With no Boki left at home, %s let one of yours go on credit. It waited a long time and trusts you less now." % Ransom.BROKER, UI.BAD))
 	if int(s.get("vault_gems", 0)) > 0:

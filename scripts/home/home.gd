@@ -57,6 +57,7 @@ var hb: HomeBuild = null         # build mode and the island's layout (home_buil
 var training: HomeTraining = null  # the Training Grounds isle, where your combat kit works (home_training.gd)
 var hw: HomeWork = null            # kin at work: jobs, stations and the Job Board (home_work.gd, Work)
 var hinc: HomeIncubator = null     # the Incubator by the Nesting Nook, where Rare Eggs hatch (home_incubator.gd, Incubator)
+var hmk: HomeMarket = null         # the Drift Pens (Boki market) and the Tradewind Exchange (home_market.gd)
 ## A farm-start island (HomeLayout.fs): the house, crop patches, pot, stall, Nook, Burrow, training
 ## post and graveyard are things you place in build mode, so where they are comes from the layout
 ## (_sync_fixtures); one you haven't placed is FAR away (nothing finds it, nothing walks to it).
@@ -141,6 +142,7 @@ func _ready() -> void:
 		get_viewport().disable_3d = true
 		PerfLog.frame_drawn()
 	hecon = HomeEcon.new(self)
+	hmk = HomeMarket.new(self)
 	if visit.is_empty():
 		HomeLayout.ensure(Save.d)     # first: a brand new farm-start island keeps its first trough in storage
 		Econ.ensure()
@@ -579,6 +581,10 @@ func _ready_rest() -> void:
 					_open_kin(Save.active_kin())
 				elif which == "burrow" or which == "kinbox": _open_burrow()
 				elif which == "shop": _open_shop()
+				elif which == "pens": hmk.open_pens()
+				elif which.begins_with("exchange"):
+					if ":" in which: hmk.item = which.split(":")[1]
+					hmk.open_exchange()
 				elif which == "challenges": _open_challenges()
 				elif which.begins_with("ransom"):
 					if ":" in which: ransom_tab = which.split(":")[1]
@@ -2799,7 +2805,9 @@ func _open_shop() -> void:
 	UI.hold(v, SHOP_H)          # every tab the same size
 	UI.subtitle(v, "Seeds, food, things to wear and things for the farm")
 	UI.head_extra(v).add_child(UI.chip("gem", str(int(Save.d["gems"])), UI.GOLD, "Your gems"))
-	UI.shell_tabs(v, ["Seeds", "Kin food", "Wear", "Home", "Farm", "Sell"], shop_tab, func(t):
+	UI.shell_tabs(v, ["Seeds", "Kin food", "Wear", "Home", "Farm", "Sell", "Boki", "Exchange"], shop_tab, func(t):
+		if t == "Boki": hmk.open_pens(); return
+		if t == "Exchange": hmk.open_exchange(); return
 		shop_tab = t; shop_page = 0; UI._page_of.erase("Market stall"); _open_shop())
 	if shop_tab == "Sell":
 		_shop_sell(v)
@@ -3626,6 +3634,18 @@ func _open_expedition() -> void:
 			left.add_child(_kin_pick_row("Second", Save.second_kin(), "active2"))
 		if float(ak["trust"]) < 30.0:
 			left.add_child(UI.para("%s doesn't trust you much yet and may refuse risky throws." % ak["name"], UI.T_SMALL, UI.BAD))
+	if Loaner.available():
+		# the free-kit queue: a loaner Boki and the basic kit, nothing of yours at risk (Loaner)
+		var fkc := UI.card(Color(UI.GOLD, 0.08), 12, 10)
+		var fkr := UI.hbox(10); fkc.add_child(fkr)
+		fkr.add_child(UI.IconDot.new("egg", UI.GOLD, 20.0))
+		var fkv := UI.vbox(1); fkv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		fkv.add_child(UI.label("Or a free-kit run: nothing at risk", 15, UI.GOLD, UI.semi))
+		var fkl := UI.para("A loaner Boki (a fresh starter, lent for one run), your class's plain weapon and two tonics. Your Boki, armory and stash stay home. Keep whatever you extract with; an extract pays at least %d gems." % Loaner.MIN_PAY, 12, UI.MUTED)
+		fkl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		fkv.add_child(fkl)
+		fkr.add_child(fkv)
+		left.add_child(fkc)
 	if Save.d.get("treat", "") != "":
 		left.add_child(UI.chip("heart", "Treat: " + _treat_name(Save.d["treat"]), Color("ffb0d0")))
 	hecon.loadout_rows(left, _open_expedition)
@@ -3682,6 +3702,14 @@ func _open_expedition() -> void:
 	fl.add_child(UI.ghost("Duel room", _start_duel, 0, "knock"))
 	if Net.available():
 		fl.add_child(UI.ghost("Play online", func(): Game.goto("lobby", {"cls": Data.class_of_save(), "tier": exp_tier}), 0, "bond"))
+	if Loaner.available():
+		var fk := UI.ghost("Free-kit run", _start_free_kit, 0, "egg")
+		fk.tooltip_text = "A basic loadout and a loaner Boki (a fresh starter). Nothing of yours is at risk; whatever you bring out is yours. An extract pays at least %d gems." % Loaner.MIN_PAY
+		fl.add_child(fk)
+	if ak.is_empty():
+		var fb := UI.footer_primary(v, "Free-kit run", _start_free_kit, 250, "egg")
+		fb.grab_focus.call_deferred()
+		return
 	var start_b := UI.footer_primary(v, "Start expedition", _confirm_start, 250, "portal")
 	start_b.grab_focus.call_deferred()
 
@@ -3921,6 +3949,20 @@ func _confirm_start() -> void:
 	row.add_child(UI.primary("I understand, go", _start_match, 220))
 	row.add_child(UI.button("Back", _open_expedition, 140))
 	v.add_child(row)
+
+## A free-kit run (Loaner): a basic loadout and a loaner Boki, nothing of yours at risk.
+func _start_free_kit() -> void:
+	Save.d["cls"] = Data.class_of_save()
+	Save.save_game()
+	var o := {"teams": Data.MATCH_PLAYERS, "squad": 1}
+	match exp_mode:
+		"duo": o = {"teams": Data.MATCH_PLAYERS / 2, "squad": 2}
+		"trio": o = {"teams": int(ceil(Data.MATCH_PLAYERS / 3.0)), "squad": 3}
+	o["total"] = Data.MATCH_PLAYERS
+	o["tier"] = exp_tier
+	if exp_seed != 0: o["seed"] = exp_seed
+	exp_seed = 0
+	Game.start_match(Loaner.opts(o))
 
 func _start_match() -> void:
 	# kin picked from the Kin Burrow come out to go with you
@@ -4444,8 +4486,17 @@ func _setup_care() -> void:
 		return
 	# the time you were away: needs drift, kin eat from the feeders, and hungry ones may starve
 	hecon.away = Econ.catch_up_all()
-	if hecon.away.any(func(e): return e["kind"] == "died"):
+	# nobody is left with no Boki: a stray turns up (Lifeline)
+	var floor_ev := Lifeline.check()
+	if hecon.away.any(func(e): return e["kind"] == "died") or not floor_ev.is_empty():
 		_spawn_kin()
+	for fe in floor_ev:
+		if String(fe["kind"]) == "stray":
+			var srec: Dictionary = fe["rec"]
+			get_tree().create_timer(1.0).timeout.connect(func():
+				if is_instance_valid(self) and is_inside_tree():
+					_show_when_free(["A stray %s wandered onto the farm. With no Boki of your own, it's decided to stay with you." % Data.KIN[String(srec["species"])]["name"],
+						"You can always take a free-kit run (a loaner Boki, nothing at risk) or buy a Boki at %s's Drift Pens." % BokiPens.MERCHANT]))
 	# what Boki assigned to stations made while you were away (Work.catch_up)
 	away_work = Work.catch_up()
 	if not away_work.is_empty():

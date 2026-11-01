@@ -462,6 +462,8 @@ static func bring_back(m: Match, o: Hunter, at: Vector3, hp_frac: float, sick: b
 
 ## Someone died for good: no box revive any more, and no beacon either.
 static func make_gone(m: Match, h: Hunter) -> void:
+	# a follower is on its own now: rivals get the tier's window to tame it (Follow; once only)
+	Follow.owner_left(m, h, "gone")
 	if h.gone:
 		return
 	h.gone = true
@@ -479,7 +481,11 @@ static func kin_on_death(m: Match, h: Hunter, b: Dictionary) -> void:
 		if kk == null or (kk as Kin).dead:
 			continue
 		var k: Kin = kk
+		if k.role != "": continue
 		m.giant_free(k)
+		if Loaner.is_loaner(k.rec):
+			k.state = "away"      # a loaner is never at risk: it keeps out of sight, then goes home to Wenna
+			continue
 		var on_you: bool = k.state in ["shoulder", "bench", "away"]
 		if not training and on_you and bool(m.T.get("kin_drop", false)):
 			var rec: Dictionary = k.rec.duplicate(true)

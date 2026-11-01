@@ -288,6 +288,8 @@ func _draw_all() -> void:
 			_draw_downed(sz, p)
 		elif p.out and not p.gone and not m.result.get("ending", false):
 			_draw_dead(sz, p)
+		elif (p.out or p.extracted) and Follow.watch(m):
+			_draw_stray_watch(sz, Follow.watch(m))
 	_draw_small_toasts(sz)
 	for i in toasts.size():
 		var t: Dictionary = toasts[i]
@@ -435,6 +437,23 @@ func _draw_world_labels() -> void:
 		if k.dead or not k.visible or k.state == "shoulder" or cam.is_position_behind(k.position):
 			continue
 		var sp := cam.unproject_position(k.position + Vector3(0, 1.05, 0))
+		if k.role == "stray":
+			# a Boki left behind by a hunter who's gone: its steal window
+			var mine: bool = k.steal_owner == m.player
+			_ctext(sp + Vector2(0, -26), ("%s  ·  rivals can tame it" % k.rec.get("name", "Your Boki")) if mine else "%s's %s" % [k.steal_from, Data.KIN[k.species]["name"]], 15, Color("ffd23f") if mine else Color("bfe9ff"), big)
+			_ctext(sp + Vector2(0, -8), ("Goes home in %d s" if mine else "Tame it: %d s") % int(ceil(k.steal_t)), 18, GOLD, big)
+			_bar(Rect2(sp + Vector2(-30, 2), Vector2(60, 5)), clampf(k.steal_t / maxf(1.0, Follow.steal_secs(m)), 0.0, 1.0), Color("ffd23f"))
+			if k.catch_prog > 0.0:
+				_arc(sp + Vector2(0, 18), 9, k.catch_prog, Color("ff8a6a"), 3.0)
+			continue
+		if k.role == "follow":
+			if k.state == "ko":
+				_ctext(sp + Vector2(0, -8), ("Knocked out  ·  %s to pick up" % Settings.key_cap("interact")) if k.owner_h == m.player else "Knocked out", 15, GOLD if k.owner_h == m.player else MUTED, big)
+				if k.catch_prog > 0.0: _arc(sp + Vector2(0, 10), 9, k.catch_prog, GOOD, 3.0)
+			elif k.owner_h == m.player:
+				_ctext(sp + Vector2(0, -8), "%s  ·  following" % k.rec.get("name", "Boki"), 13, Color(INK, 0.8))
+				if k.hp < k.max_hp: _bar(Rect2(sp + Vector2(-22, 0), Vector2(44, 5)), k.hp / k.max_hp, GOOD)
+			continue
 		if k.is_wild():
 			if k.state == "dazed":
 				_ctext(sp + Vector2(0, -8), "Dazed!  %s to tame" % Settings.key_cap("interact"), 17, GOLD, big)
@@ -2269,7 +2288,7 @@ func _draw_prompt(sz: Vector2, p: Hunter) -> void:
 			"stomping": prog = float(p.stomp.get("t", 0.0)) / Life.R["stomp_time"]
 			"boxrev": prog = p.box_t / Life.R["box_revive_time"]
 			"loot": prog = p.box_t / Life.R["loot_time"]
-			"catch": prog = it["ent"].catch_prog
+			"catch", "fpick": prog = it["ent"].catch_prog
 			"chest": prog = it["chest"]["prog"]
 			"exit": prog = float(it["x"]["hold"].get(p.nid, 0.0)) / float(it["need"]) if it.has("need") else 0.0
 			"lair": prog = float(it["rune"]["prog"]) if it.has("rune") else 0.0
@@ -2358,6 +2377,14 @@ func _draw_downed(sz: Vector2, p: Hunter) -> void:
 		if not revs.is_empty():
 			_ctext(Vector2(sz.x * 0.5, sz.y * 0.32 + 84), "%s is reviving you  %d%%" % [(revs[0] as Hunter).pname, int(p.revive * 100.0)], 15, GOOD, big)
 
+## You've left the map but your follower hasn't: its steal window, before the results.
+func _draw_stray_watch(sz: Vector2, k: Kin) -> void:
+	var y0 := sz.y * 0.7
+	_panel(Rect2(Vector2(sz.x * 0.5 - 280, y0 - 40), Vector2(560, 92)))
+	_ctext(Vector2(sz.x * 0.5, y0), "%s is on its own" % k.rec.get("name", "Your follower"), 24, GOLD, big)
+	_ctext(Vector2(sz.x * 0.5, y0 + 26), "Rivals have %d s to tame it. If nobody does, it goes home to you." % int(ceil(k.steal_t)), 15, INK)
+	_bar(Rect2(Vector2(sz.x * 0.5 - 160, y0 + 38), Vector2(320, 6)), clampf(k.steal_t / maxf(1.0, Follow.steal_secs(m)), 0.0, 1.0), Color("ffd23f"))
+
 ## Dead, but your team's still in it.
 func _draw_dead(sz: Vector2, p: Hunter) -> void:
 	c.draw_rect(Rect2(Vector2.ZERO, sz), Color(0.05, 0.03, 0.08, 0.25))
@@ -2372,6 +2399,9 @@ func _draw_dead(sz: Vector2, p: Hunter) -> void:
 	var mate := m.spectating()
 	if mate:
 		lines.append("Watching %s." % mate.pname)
+	var fw: Kin = Follow.watch(m)
+	if fw:
+		lines.append("%s is on its own: rivals have %d s to tame it, then it goes home." % [fw.rec.get("name", "Your follower"), int(ceil(fw.steal_t))])
 	lines.append("%s to open the menu and leave." % Settings.key_cap("menu"))
 	for i in lines.size():
 		_ctext(Vector2(sz.x * 0.5, y0 + 28 + i * 22), lines[i], 16, INK if i < 2 else MUTED)

@@ -158,6 +158,7 @@ func holding() -> String:
 var rift_keys := 0               # Rift Keys carried: each opens a rift hatch once (see Exits); they go in your deathbox
 var kin: Ent = null             # the active kin: its abilities are on Q and V, its ultimate on R
 var kin2: Ent = null            # the benched kin, swapped in with X
+var follower: Ent = null        # a Boki tamed this run that walks with you (Follow)
 var swap_cd := 0.0
 var merge_st: Dictionary = {}   # the merge (bond ultimate) while it runs: {def, t, T, k, giant, pulse} (KinMerge)
 var merge_cd := 0.0             # the spent window after a merge ends

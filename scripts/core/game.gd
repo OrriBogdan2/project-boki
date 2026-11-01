@@ -122,6 +122,11 @@ func apply_result(r: Dictionary) -> Dictionary:
 	var d := Save.d
 	var out := {"gems": 0, "seeds": {}, "caught": [], "kin_lines": [], "levelup": false, "crops_ready": 0}
 	d["matches"] = int(d["matches"]) + 1
+	# a free-kit run (Loaner): the stipend on an extract; the loaner itself never touches the save
+	out["stipend"] = Loaner.settle(r)
+	if r.get("loaner", false):
+		out["loaner"] = true
+		r["kin_runs"] = []; r.erase("kin_events"); r.erase("kin_trust"); r.erase("lost_kin")
 	var won: bool = r.get("extracted", false)
 	# lifetime counts for challenges
 	var ms: Dictionary = r.get("stats", {})
@@ -142,40 +147,21 @@ func apply_result(r: Dictionary) -> Dictionary:
 		for rec in r.get("caught", []):
 			if not Ransom.find(String(rec.get("uid", ""))).is_empty():
 				continue     # one of yours, back from a rival: handled below
-			var nk: Dictionary = rec.duplicate(true)
-			var from := String(rec.get("lost_from", ""))
-			randi()      # (the old fresh id used a global roll here: kept so the stream doesn't shift)
-			# it keeps the lasting id it was born with, unless that would clash with one of yours
-			if String(nk.get("uid", "")) == "" or not Save.kin(String(nk["uid"])).is_empty() or not String(nk["uid"]).begins_with("b"):
-				nk["uid"] = Save.new_id()
-			Unique.ensure(nk)
-			nk.erase("serial"); nk.erase("ot")
-			nk["origin"] = {"how": "wild" if (from == "" or from == "you") else "taken", "where": rec.get("caught_at", {}),
-				"t": int(Time.get_unix_time_from_system())}
-			if from != "" and from != "you": nk["origin"]["from"] = from
-			nk.erase("caught_at")
-			if from == "" or from == "you":
-				nk["name"] = Data.default_kin_name(String(nk["species"]))
-				nk["memory"] = []
-				nk.erase("lost_from")
-				Save.remember(nk, "caught", "was tamed by you out in the islands and brought home")
-			else:
-				# a rival's kin you took home: it still misses them. One that loved its old hunter
-				# (trust 80+) pines for a good while and is very slow to bond with you
-				nk["memory"] = []
-				nk["trust"] = 15.0
-				if float(rec.get("prev_trust", 0.0)) >= 80.0:
-					nk["trust"] = 5.0
-					nk["pining"] = 6
-					Save.remember(nk, "pining", "loved %s and won't warm to anyone else easily" % from, -5.0)
-				Save.remember(nk, "taken", "belonged to %s until you took it home" % from)
-			Care.ensure(nk)
-			nk["needs"] = {"food": 45.0, "energy": 40.0, "joy": 45.0, "clean": 30.0}
-			d["roster"].append(nk)
-			Save.register(nk)         # serial, original trainer, the event log
-			KinBox.route_new(nk)      # the farm if there's room; a repeat species goes to the Kin Burrow
-			Care.dex_got(nk)
-			out["caught"].append(nk)
+			out["caught"].append(_bring_home(rec))
+	# the Boki that followed you this run: home with you, home on its own, or tamed by a rival (Follow)
+	var fol: Dictionary = r.get("follower", {})
+	if not fol.is_empty() and typeof(fol.get("rec", null)) == TYPE_DICTIONARY:
+		out["follower"] = {"fate": String(fol.get("fate", "home")), "holder": String(fol.get("holder", "")), "why": String(fol.get("why", ""))}
+		if String(fol.get("fate", "home")) == "home" and not r.get("tutorial", false):
+			var frec: Dictionary = (fol["rec"] as Dictionary).duplicate(true)
+			frec.erase("lost_from"); frec.erase("prev_trust")
+			var fk := _bring_home(frec)
+			if not won: Save.remember(fk, "found_home", "followed you on an expedition and %s" % String(fol.get("why", "found its way home")), 2.0)
+			out["caught"].append(fk)
+			out["follower"]["rec"] = fk
+			if won: Progress.add("caught", 1)
+		else:
+			out["follower"]["rec"] = fol["rec"]
 	d["items"]["tonic"] = int(r.get("tonics", d["items"].get("tonic", 0)))
 	if r.has("rift_keys"):
 		d["items"]["rift_key"] = int(r["rift_keys"])     # carried keys come home with you, or stay in your deathbox
@@ -183,7 +169,7 @@ func apply_result(r: Dictionary) -> Dictionary:
 	d["treat"] = ""
 	# every kin you brought remembers the match
 	var runs: Array = r.get("kin_runs", [])
-	if runs.is_empty() and not Save.active_kin().is_empty():
+	if runs.is_empty() and not Save.active_kin().is_empty() and not r.get("loaner", false):
 		runs = [{"uid": Save.active_kin()["uid"], "events": r.get("kin_events", []), "trust": r.get("kin_trust", Save.active_kin()["trust"]), "stats": r.get("kin_stats", {})}]
 	var k := Save.active_kin()
 	var brought: Array = []
@@ -205,6 +191,9 @@ func apply_result(r: Dictionary) -> Dictionary:
 			out["caught"].erase(back)
 	# time passes for kin already lost: prices drift, unclaimed ones get sold, rivals ask for theirs back
 	out["ransom_news"] = Ransom.tick(r.get("rivals", []))
+	# Boki you listed at the Drift Pens may have sold, and Exchange offers fill (offline turnover)
+	out["pens_sold"] = BokiPens.tick()
+	out["exchange_fills"] = Exchange.tick()
 	# going down leaves your kin behind; where they end up was settled in the match
 	var lost_news: Array = []
 	if not won and r.get("why", "") != "left":
@@ -281,8 +270,50 @@ func apply_result(r: Dictionary) -> Dictionary:
 				p["wet"] = 0
 			if int(p["stage"]) == grow:
 				out["crops_ready"] += 1
+	# the floor: nobody is left with no Boki and no way to play (Lifeline)
+	out["floor"] = Lifeline.check()
 	Save.save_game()
 	return out
+
+
+## A Boki you tamed on a run joins your collection: its provenance, a name, a fresh start with you
+## (or, one you took from someone, missing them). Returns its new save record.
+func _bring_home(rec: Dictionary) -> Dictionary:
+	var d := Save.d
+	var nk: Dictionary = rec.duplicate(true)
+	var from := String(rec.get("lost_from", ""))
+	randi()      # (the old fresh id used a global roll here: kept so the stream doesn't shift)
+	# it keeps the lasting id it was born with, unless that would clash with one of yours
+	if String(nk.get("uid", "")) == "" or not Save.kin(String(nk["uid"])).is_empty() or not String(nk["uid"]).begins_with("b"):
+		nk["uid"] = Save.new_id()
+	Unique.ensure(nk)
+	nk.erase("serial"); nk.erase("ot")
+	nk["origin"] = {"how": "wild" if (from == "" or from == "you") else "taken", "where": rec.get("caught_at", {}),
+		"t": int(Time.get_unix_time_from_system())}
+	if from != "" and from != "you": nk["origin"]["from"] = from
+	nk.erase("caught_at")
+	if from == "" or from == "you":
+		nk["name"] = Data.default_kin_name(String(nk["species"]))
+		nk["memory"] = []
+		nk.erase("lost_from")
+		Save.remember(nk, "caught", "was tamed by you out in the islands and brought home")
+	else:
+		# a rival's kin you took home: it still misses them. One that loved its old hunter
+		# (trust 80+) pines for a good while and is very slow to bond with you
+		nk["memory"] = []
+		nk["trust"] = 15.0
+		if float(rec.get("prev_trust", 0.0)) >= 80.0:
+			nk["trust"] = 5.0
+			nk["pining"] = 6
+			Save.remember(nk, "pining", "loved %s and won't warm to anyone else easily" % from, -5.0)
+		Save.remember(nk, "taken", "belonged to %s until you took it home" % from)
+	Care.ensure(nk)
+	nk["needs"] = {"food": 45.0, "energy": 40.0, "joy": 45.0, "clean": 30.0}
+	d["roster"].append(nk)
+	Save.register(nk)         # serial, original trainer, the event log
+	KinBox.route_new(nk)      # the farm if there's room; a repeat species goes to the Kin Burrow
+	Care.dex_got(nk)
+	return nk
 
 ## What one kin you brought takes from a match: memories, trust, growth, hunger and XP.
 func _kin_after(k: Dictionary, run: Dictionary, won: bool, r: Dictionary, treat: String, out: Dictionary, lead: bool) -> void:

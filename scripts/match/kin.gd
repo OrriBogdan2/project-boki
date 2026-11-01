@@ -14,7 +14,7 @@ var sp: Dictionary = {}
 var rec: Dictionary = {}          # the saved record (player kin) or a generated one (bots, wild)
 var owner_h: Hunter = null
 var unseen := false             # a rival's kin out of the local player's sight
-var state := "shoulder"           # shoulder | flying | active | returning | flying_home | fainted | reviving | wild | dazed | bench | fused
+var state := "shoulder"           # shoulder | flying | active | returning | flying_home | fainted | reviving | wild | dazed | bench | fused | follow | ko
 var settle := 1.0                 # 0..1 while settling onto the shoulder
 var traits := {}
 var trust := 50.0
@@ -62,6 +62,14 @@ var giant: Dictionary = {}        # a mount merged giant under its rider: {scale
 var lost_from := ""               # a kin left behind by a hunter who went down (name), for tracking
 var lost_uid := ""
 var lost_owner: Ent = null         # the hunter it was lost from (they get it back if revived first)
+# a follower (Follow): a Boki tamed this run that walks with its hunter as a second Boki
+var role := ""                    # "" a hunter's own kin or a wild one, "follow" a follower, "stray" a follower whose hunter left
+var tucked := false               # a follower riding in its hunter's satchel (gliding, dropping, over the abyss)
+var steal_t := 0.0                # a stray: seconds left for a rival to tame it before it goes home
+var steal_from := ""              # a stray: its hunter's name
+var steal_owner: Ent = null       # a stray: its hunter (null online when that hunter is on another game)
+var steal_owner_nid := ""
+var steal_team := -9
 var ring: MeshInstance3D = null   # the team-coloured ring under it
 var shell_fx: Node3D = null       # the glow around its hunter while fused
 static var XRAY: Shader = preload("res://shaders/kin_aura_xray.gdshader")
@@ -136,6 +144,8 @@ func is_wild() -> bool:
 	return owner_h == null
 
 func hittable() -> bool:
+	if state == "follow":
+		return not dead and not tucked
 	return not dead and state in ["active", "flying", "returning", "reviving", "wild"] and not (state == "flying" and fly.get("leap", false))
 
 func mass() -> float:
@@ -499,6 +509,8 @@ func sim(dt: float) -> void:
 		"wild": _sim_wild(dt)
 		"dazed": _sim_dazed(dt)
 		"fused": _sim_fused(dt)
+		"follow": Follow.sim_follow(self, dt)
+		"ko": Follow.sim_ko(self, dt)
 		"bench":
 			if owner_h:
 				pos = owner_h.pos; prev = pos
@@ -721,6 +733,9 @@ func _sim_fainted(dt: float) -> void:
 		m.fx.burst(owner_h.pos + Vector3(0, 1.5, 0), sp["color"], 10, 2.0)
 
 func faint(fell := false) -> void:
+	if role == "follow":
+		Follow.knock_out(self, fell)
+		return
 	_end_merge("fainted")
 	state = "fainted"
 	faint_t = 8.0
@@ -736,7 +751,7 @@ func faint(fell := false) -> void:
 	m.on_kin_faint(self)
 
 func _on_zero(_by: Ent, _opts: Dictionary) -> void:
-	if state in ["dazed", "fainted"]:
+	if state in ["dazed", "fainted", "ko"]:
 		hp = maxf(hp, 1.0)
 		return
 	if is_wild():
@@ -839,6 +854,9 @@ func _daze() -> void:
 	m.on_wild_dazed(self)
 
 func _sim_dazed(dt: float) -> void:
+	if role == "stray":
+		_ground_move(Vector2.ZERO, dt)
+		return
 	dazed_t -= dt
 	_ground_move(Vector2.ZERO, dt)
 	hp = minf(max_hp * 0.25, hp + dt * 0.5)
@@ -848,7 +866,7 @@ func _sim_dazed(dt: float) -> void:
 		catch_prog = 0.0
 
 func hurt(d: float, by: Ent, opts := {}) -> float:
-	if state in ["dazed", "bench", "fused"]:
+	if state in ["dazed", "bench", "fused", "ko"] or tucked:
 		return 0.0
 	if is_wild() and by and by is Hunter:
 		angry_at = by
@@ -894,13 +912,17 @@ func _callouts() -> void:
 # ------------------------------------------------------------------ visuals
 func render(delta: float, alpha: float) -> void:
 	super.render(delta, alpha)
-	visible = not dead and state != "bench" and state != "away" and not (owner_h and (owner_h.out or owner_h.extracted or owner_h.riding))
+	if role == "follow":
+		# a follower stays where it lies while its hunter waits on a revive (only they can pick it up)
+		visible = not dead and not tucked and not (owner_h and (owner_h.extracted or owner_h.riding))
+	else:
+		visible = not dead and state != "bench" and state != "away" and not (owner_h and (owner_h.out or owner_h.extracted or owner_h.riding))
 	if not model:
 		return
 	var body: Node3D = model.get_node("Body")
 	var shell: Node3D = model.get_node_or_null("Body/Shell")
 	hop_ph += delta * (9.0 if Vector2(vel.x, vel.z).length() > 0.5 else 3.0)
-	var out_now := state in ["active", "flying", "returning", "reviving", "flying_home"]
+	var out_now := state in ["active", "flying", "returning", "reviving", "flying_home", "follow"]
 	if ring:
 		ring.visible = visible and (out_now or has_meta("lineup")) and not unseen
 		if ring.visible:
@@ -966,9 +988,9 @@ func render(delta: float, alpha: float) -> void:
 	body.position.y = absf(sin(hop_ph)) * (0.14 if moving else 0.03) + (0.12 if lunge_t > 0.0 else 0.0)
 	var sq := squash
 	body.scale = Vector3(1.0 + sq * 0.4, 1.0 - sq * 0.45, 1.0 + sq * 0.4)
-	model.set_meta("dazed", state in ["fainted", "dazed"] or stun_t > 0.0)
-	if state in ["fainted", "dazed"]:
-		body.rotation.z = lerpf(body.rotation.z, 1.4 if state == "fainted" else 0.0, delta * 6.0)
+	model.set_meta("dazed", state in ["fainted", "dazed", "ko"] or stun_t > 0.0)
+	if state in ["fainted", "dazed", "ko"]:
+		body.rotation.z = lerpf(body.rotation.z, 1.4 if state in ["fainted", "ko"] else 0.0, delta * 6.0)
 		body.rotation.y += delta * (4.0 if state == "dazed" else 0.0)
 	else:
 		body.rotation.z = lerpf(body.rotation.z, 0.0, delta * 8.0)

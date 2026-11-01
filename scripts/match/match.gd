@@ -1068,6 +1068,10 @@ func _spawn_hunters() -> void:
 			if t == 0 and s == 0 and not opts.get("spectate", false):
 				var rec: Dictionary = Save.active_kin()
 				var rec2: Dictionary = Save.second_kin()
+				if opts.get("loaner", false):
+					# a free-kit run: a loaner Boki, nothing of yours comes (Loaner)
+					rec = opts["loaner_rec"] if typeof(opts.get("loaner_rec", null)) == TYPE_DICTIONARY else Loaner.roll(kin_seed("loaner"))
+					rec2 = {}
 				if opts.has("demo_kin"):
 					var ids: Array = Data.common_kin()
 					var sp0 := String(opts["demo_kin"])
@@ -1086,11 +1090,14 @@ func _spawn_hunters() -> void:
 					at.y = world.ground_at(at.x, at.z)
 				player.teleport(at)
 				player.tonics = mini(TONIC_CARRY, int(Save.d["items"].get("tonic", 0)) + 2); player.free_tonics = 2; tonic_stash_left = maxi(0, int(Save.d["items"].get("tonic", 0)) - (player.tonics - 2))     # everyone sets out with a couple, at most TONIC_CARRY in all; the rest stays home
-				if not opts.get("tutorial", false) and not opts.get("training", false):
+				if opts.get("loaner", false):
+					# the free kit: two free tonics, no keys, no treat; your stash stays home untouched
+					player.tonics = 2; player.free_tonics = 2; tonic_stash_left = int(Save.d["items"].get("tonic", 0))
+				elif not opts.get("tutorial", false) and not opts.get("training", false):
 					player.rift_keys = int(Save.d["items"].get("rift_key", 0))     # your Rift Keys come with you (and go in your box if you die)
 				_apply_home_perks(player)
 				_apply_armory_kit(player)
-				if player.kin:
+				if player.kin and not opts.get("loaner", false):
 					_apply_treat(player.kin)
 				_start_drop(player, at)
 				continue
@@ -1114,6 +1121,45 @@ func _spawn_hunters() -> void:
 				h.pack.append(Loot.valuable(Loot.roll_valuable(rng, mini(tier, 2))))
 			if rng.randf() < 0.2: h.rift_keys = 1     # now and then a rival brings a key (and knows where the hatches are)
 			_start_drop(h, at)
+
+## Screenshots of follower Boki (--follow-demo=walk|ko|steal|watch). walk: you just tamed one and
+## it trots after you; ko: it's knocked out beside you; steal: a rival hunter left one behind and its
+## steal window is running in front of you; watch: you went out and your own is on its own.
+func _follow_demo(_dt: float) -> void:
+	var what := String(opts["follow_demo"])
+	if not has_meta("fdemo"):
+		set_meta("fdemo", true)
+		for mb in mobs:
+			if mb.flat_dist(player) < 25.0: mb.dead = true; mb.visible = false
+		var at := demo_clear_spot(4.0)
+		var rec := Save.new_kin(String(opts.get("follow_kin", "puddlet")), "", kin_seed("fdemo"))
+		if what == "steal":
+			var R: Hunter = null
+			for h in hunters:
+				if h.team != player.team: R = h; break
+			R.ctrl = "idle"
+			R.teleport(world.free_spot_near(player.pos + Vector3(30, 0, 0), [], 1.0, 0.4, 20.0))
+			rec["name"] = Data.KIN[rec["species"]]["name"]
+			Follow.spawn(self, R, rec, at)
+			R.lives = 1
+			eliminate(R, null, "knocked out", true)
+			Life.make_gone(self, R)
+			player.face = atan2(-(at.x - player.pos.x), -(at.z - player.pos.z))
+			return
+		rec["name"] = "Drip"
+		var f := Follow.spawn(self, player, rec, at)
+		if what == "ko":
+			f.hurt(9999.0, null, {})
+		if what == "watch":
+			player.lives = 1
+			player.teleport(world.free_spot_near(player.pos + Vector3(30, 0, 0), [], 1.0, 0.4, 20.0))
+			eliminate(player, null, "knocked out", true)
+			Life.make_gone(self, player)
+		return
+	if what == "walk" and time > 0.6 and time < 2.4:
+		player.inp["move"] = Vector2(0.8, 0.4).normalized()
+	elif what == "walk":
+		player.inp["move"] = Vector2.ZERO
 
 ## Every match starts in the sky. Hunters glide down from above their squad's side of the map
 ## and steer to wherever they want to land.
@@ -2416,6 +2462,7 @@ func eliminate(h: Hunter, by: Ent, why: String, final := false) -> void:
 		h.gems = 0; h.seeds = {}; h.caught = []
 		# the kin they brought are left behind, dazed, for anyone to collect
 		_leave_kin(h)
+		Follow.owner_left(self, h, "gone")
 		h.gone = true
 	if h == player:
 		if not waiting:
@@ -2773,7 +2820,7 @@ func _update_tracking(dt: float) -> void:
 ## Kin left behind where a hunter went down. They wait, dazed, for someone to collect them.
 func _leave_kin(h: Hunter) -> void:
 	for kk in [h.kin, h.kin2]:
-		if kk == null:
+		if kk == null or Loaner.is_loaner((kk as Kin).rec):
 			continue
 		_leave_one_kin(h, kk)
 
@@ -3734,7 +3781,16 @@ func _process(delta: float) -> void:
 		if mate:
 			foc = mate.prev.lerp(mate.pos, alpha)
 			cam.zoom_to = 1.0
+		var fw: Kin = Follow.watch(self)
+		if fw and (player.gone or mate == null):
+			foc = fw.prev.lerp(fw.pos, alpha)
+			cam.zoom_to = 0.9
 		cam.follow(foc, delta, false)
+	elif player and Follow.watch(self):
+		# extracted without your follower: watch its steal window before the results
+		var fw2: Kin = Follow.watch(self)
+		cam.zoom_to = 0.9
+		cam.follow(fw2.prev.lerp(fw2.pos, alpha), delta, false)
 	elif player:
 		cam.follow(cam.focus, delta, false)
 	_vprof("camera")
@@ -3935,6 +3991,8 @@ func step(dt: float) -> void:
 		if int(time * 60.0) % 90 == 0: player.inp["sig"] = true
 		if time > 4.0 and int(time * 60.0) % 240 == 0:
 			player.ult = 1.0; player.inp["ult"] = true
+	if opts.has("follow_demo") and player and not player.dropping:
+		_follow_demo(dt)
 	if opts.get("life_demo", false) and player and time < 0.05 and not beacons.is_empty():
 		# test: stand by a revive beacon with a teammate's deathbox next to it
 		var bc: Vector3 = beacons[0]["pos"]
@@ -4312,6 +4370,7 @@ func step(dt: float) -> void:
 	if skydrop: skydrop.tick(dt)
 	_prof("drop")
 	for k in kins: k.sim(dt)
+	Follow.tick(self, dt)
 	_prof("kins")
 	for mb in mobs: mb.sim(dt)
 	if blight: blight.tick(dt)
@@ -4671,10 +4730,17 @@ func _update_interact(dt: float) -> void:
 		if not want:
 			h.set_meta("loot_hold", false)
 			h.set_meta("box_broke", false)
+		# 2a. your own follower, knocked out: pick it back up
+		var fko: Kin = Follow.of(h)
+		if best.is_empty() and fko and fko.state == "ko" and h.flat_dist(fko) < Follow.PICK_R:
+			best = {"kind": "fpick", "ent": fko, "label": "Hold %s to pick up %s" % [Settings.key_cap("interact"), fko.rec.get("name", "your Boki")], "col": Color("9ee2a0")}
 		# 2. catch a dazed wild kin (not in training: practice kin go home with nobody)
 		if best.is_empty() and not opts.get("training", false):
 			for k in kins:
-				if k.state == "dazed" and not k.dead and h.flat_dist(k) < 1.9:
+				if k.state == "dazed" and not k.dead and h.flat_dist(k) < 1.9 and Follow.can_steal(h, k):
+					if k.role == "stray":
+						best = {"kind": "catch", "ent": k, "label": "Hold %s to tame %s's %s  (%d s left)" % [Settings.key_cap("interact"), k.steal_from, Data.KIN[k.species]["name"], int(ceil(k.steal_t))], "col": Color("ffd23f")}
+						break
 					best = {"kind": "catch", "ent": k, "label": ("Hold %s to take %s with you" % [Settings.key_cap("interact"), k.rec.get("name", "the Boki")]) if k.lost_from != "" else ("Hold " + Settings.key_cap("interact") + " to tame the %s" % Data.KIN[k.species]["name"])}
 					break
 		# 3. swap to a weapon on the ground
@@ -4787,10 +4853,20 @@ func _update_interact(dt: float) -> void:
 			"catch":
 				var k: Kin = best["ent"]
 				h.set_hold("tame")
-				# capturing someone's lost kin takes longer than catching a wild one
-				k.catch_prog += dt / (float(T.get("capture_time", 3.0)) if k.lost_from != "" else 1.3)
+				# capturing someone's lost kin takes longer than catching a wild one; a stray's
+				# tame also starts over if the tamer is hit (Follow)
+				if k.role == "stray":
+					Follow.steal_progress(self, h, k, dt)
+				else:
+					k.catch_prog += dt / (float(T.get("capture_time", 3.0)) if k.lost_from != "" else 1.3)
 				if k.catch_prog >= 1.0:
 					_catch(h, k)
+			"fpick":
+				var fk: Kin = best["ent"]
+				h.set_hold("revive")
+				fk.catch_prog += dt / Follow.PICK_TIME
+				if fk.catch_prog >= 1.0:
+					Follow.pick_up(self, h, fk)
 			"chest":
 				var c: Dictionary = best["chest"]
 				h.set_hold("chest")
@@ -4815,7 +4891,7 @@ func _update_interact(dt: float) -> void:
 func _catch(h: Hunter, k: Kin) -> void:
 	if opts.get("training", false):
 		return
-	if net_on and not is_host:
+	if net_on and not Net.owns(k.nid) and (not is_host or k.role != ""):
 		if k.catch_prog < 5.0:
 			k.catch_prog = 5.0
 			net_event(["catch", k.nid, h.nid])
@@ -4826,6 +4902,8 @@ func _catch(h: Hunter, k: Kin) -> void:
 	k.visible = false
 	var rec: Dictionary = k.rec.duplicate(true)
 	rec["caught_at"] = where_at(k.pos)       # provenance: where it was caught (Save.register)
+	if k.role == "stray":
+		Follow.stolen(self, k, h)
 	if k.lost_from != "":
 		# someone's lost kin: it keeps who it is, and we remember who has it now
 		rec["lost_from"] = k.lost_from
@@ -4841,12 +4919,14 @@ func _catch(h: Hunter, k: Kin) -> void:
 	else:
 		rec["trust"] = 20.0
 		rec["memory"] = []
-	h.caught.append(rec)
+	var fol: Kin = Follow.take(self, h, rec, k.pos) if k.role != "stray" else null
+	if fol == null and not h.caught.has(rec):
+		h.caught.append(rec)
 	sfx("catch", k.pos, 0.0)
 	fx.burst(k.pos + Vector3(0, 0.5, 0), Data.KIN[k.species]["color"], 26, 4.0, 0.7)
 	fx.ring(k.pos, 1.5, Color("fff2a0"), 0.4)
 	if h == player:
-		add_feed("The %s trusts you now. Extract to bring it home." % Data.KIN[k.species]["name"])
+		if fol == null: add_feed("The %s trusts you now. Extract to bring it home." % Data.KIN[k.species]["name"])
 		if player.kin and player.kin.state != "fainted":
 			player.kin.bark("caught")
 
@@ -5753,6 +5833,7 @@ func _extract(h: Hunter, how := "", where := "") -> void:
 	add_feed("%s extracted" % h.pname)
 	if h.kin:
 		h.kin.visible = false
+	Follow.owner_left(self, h, "extract")
 	if h == player:
 		if h.kin and h.kin.state != "fainted":
 			h.kin.bark("extract")
@@ -5819,7 +5900,17 @@ func _end_soon(after: float) -> void:
 	if result.get("ending", false):
 		return
 	result["ending"] = true
-	get_tree().create_timer(after).timeout.connect(_finish)
+	get_tree().create_timer(after).timeout.connect(_finish_after_stray)
+
+## Your follower's steal window keeps the match going for you (watching it) until it's settled.
+func _finish_after_stray() -> void:
+	if over:
+		return
+	var w: Kin = Follow.watch(self)
+	if w and not _finish_now and is_inside_tree() and time < length + 2.0:
+		get_tree().create_timer(0.25).timeout.connect(_finish_after_stray)
+		return
+	_finish()
 
 func _finish() -> void:
 	if over:
@@ -5836,6 +5927,7 @@ func _finish() -> void:
 	var r := result.duplicate()
 	r["time"] = time
 	r["tier"] = tier
+	if opts.get("loaner", false): r["loaner"] = true
 	if opts.get("tutorial", false):
 		Save.d["tutorial"]["match"] = true
 		r["tutorial"] = true
@@ -5853,8 +5945,10 @@ func _finish() -> void:
 		r["revives"] = player.revives
 		r["armor_tier"] = player.armor_tier
 		r["tonics"] = maxi(0, player.tonics - player.free_tonics) + tonic_stash_left
-		if not opts.get("tutorial", false):
+		if not opts.get("tutorial", false) and not opts.get("loaner", false):
 			r["rift_keys"] = player.rift_keys if result.get("extracted", false) else 0
+		if opts.get("loaner", false):
+			r["tonics"] = int(Save.d["items"].get("tonic", 0))      # the free kit's tonics were never yours
 		r["stats"] = player.stats.duplicate()
 		# weapons, gloves and treasure: home to the armory if you made it out, else what stayed behind
 		if result.get("extracted", false):
@@ -5865,18 +5959,21 @@ func _finish() -> void:
 		# what each kin you brought did, for its memories and growth
 		r["kin_runs"] = []
 		for kk in [player.kin, player.kin2]:
-			if kk == null: continue
+			if kk == null or Loaner.is_loaner((kk as Kin).rec): continue
 			var k: Kin = kk
 			r["kin_runs"].append({"uid": String(k.rec.get("uid", "")), "events": k.events.duplicate(true), "trust": k.trust,
 				"stats": {"hits": k.st_hits, "kos": k.st_kos, "throws": k.st_throws, "skills": k.st_skills,
 				"revives": k.events.filter(func(e): return e["kind"] == "revived").size(), "caught": player.caught.size(),
 				"won": 1 if result.get("extracted", false) else 0}})
-		if player.kin:
+		if player.kin and not Loaner.is_loaner((player.kin as Kin).rec):
 			var k0: Kin = player.kin
 			r["kin_events"] = k0.events.duplicate(true)
 			r["kin_trust"] = k0.trust
 		if not player_lost.is_empty() and not result.get("extracted", false):
-			r["lost_kin"] = _resolve_lost()
+			r["lost_kin"] = (_resolve_lost() as Array).filter(func(L): return not Loaner.is_loaner(L.get("rec", {})))
+		var ff := Follow.result(self)
+		if not ff.is_empty():
+			r["follower"] = ff
 		r["rivals"] = hunters.filter(func(x): return x.ctrl == "bot" and x.team != player.team).map(func(x): return x.pname)
 	var placed := 1
 	for h in hunters:
@@ -5979,7 +6076,8 @@ func _flags(h: Hunter) -> int:
 	if hk >= 0: f |= 2048 | ((hk + 1) << 15)
 	return f
 
-const KIN_STATES := ["shoulder", "flying", "flying_home", "active", "returning", "fainted", "reviving", "wild", "dazed"]
+const KIN_STATES := ["shoulder", "flying", "flying_home", "active", "returning", "fainted", "reviving", "wild", "dazed", "follow", "ko"]
+const KIN_ROLES := ["", "follow", "stray"]
 const MOB_STATES := ["idle", "chase", "windup", "lunge", "recover"]
 
 func _ser(e: Ent) -> Array:
@@ -5991,7 +6089,8 @@ func _ser(e: Ent) -> Array:
 		var k: Kin = e
 		return ["k", k.nid, _r(k.pos.x), _r(k.pos.y), _r(k.pos.z), _r(k.face), _r(k.hp), _r(k.max_hp), KIN_STATES.find(k.state), k.species,
 			k.owner_h.nid if k.owner_h else "", int(k.rec.get("level", 1)), String(k.rec.get("name", "")), _r(k.catch_prog), _r(k.vel.x), _r(k.vel.z),
-			1 if k.rec.get("shimmer", false) else 0, String(k.rec.get("acc", "")), ",".join(Mutations.of(k.rec))]
+			1 if k.rec.get("shimmer", false) else 0, String(k.rec.get("acc", "")), ",".join(Mutations.of(k.rec)),
+			KIN_ROLES.find(k.role), 1 if k.tucked else 0, _r(k.steal_t), k.steal_owner_nid, k.steal_from, k.steal_team]
 	var mb: Mob = e
 	var ms := ["m", mb.nid, _r(mb.pos.x), _r(mb.pos.y), _r(mb.pos.z), _r(mb.face), _r(mb.hp), _r(mb.max_hp), MOB_STATES.find(mb.st), mb.mkind,
 		_r(mb.atk_dir.x), _r(mb.atk_dir.y), _r(mb.st_t), _r(mb.vel.x), _r(mb.vel.z), _r(mb.stag_open), _r(mb.stagger_t)]
@@ -6009,13 +6108,17 @@ func net_snapshot(mine: bool) -> Array:
 			out.append(_ser(player))
 			if player.kin and not player.kin.dead:
 				out.append(_ser(player.kin))
+		for k in kins:
+			# your follower (and your stray while its window runs): yours to send
+			if not k.dead and k.role != "" and k.nid.begins_with("P") and Net.owns(k.nid): out.append(_ser(k))
 		return out
 	for h in hunters:
 		if not h.remote and h != player:
 			out.append(_ser(h))
 			if h.kin and not h.kin.dead: out.append(_ser(h.kin))
 	for k in kins:
-		if k.is_wild() and not k.dead: out.append(_ser(k))
+		if k.is_wild() and not k.dead and k.role == "": out.append(_ser(k))
+		elif not k.dead and k.role != "" and not k.remote and not k.nid.begins_with("P") and Net.owns(k.nid): out.append(_ser(k))
 	for mb in mobs:
 		if not mb.dead: out.append(_ser(mb))
 	return out
@@ -6074,7 +6177,12 @@ func _net_make(it: Array) -> Ent:
 				k.state = "wild"
 			kins.append(k)
 			ents_by_id[nid] = k
-			if owner and owner.kin == null:
+			var role_i := int(it[19]) if it.size() > 19 else 0
+			if role_i == 1 and owner:
+				# someone's follower walks beside them, it isn't their own kin
+				k.role = "follow"
+				owner.follower = k
+			elif owner and owner.kin == null:
 				owner.kin = k
 			_net_seen_rec[nid] = rec
 			return k
@@ -6138,6 +6246,15 @@ func _net_apply(e: Ent, it: Array) -> void:
 			k.catch_prog = maxf(k.catch_prog, float(it[13])) if k.catch_prog >= 5.0 else float(it[13])
 			k.net_vel = Vector3(it[14], 0, it[15])
 			k.dead = false
+			if it.size() > 24:
+				var ri := int(it[19])
+				k.role = String(KIN_ROLES[ri]) if ri >= 0 and ri < KIN_ROLES.size() else ""
+				k.tucked = int(it[20]) == 1
+				k.steal_t = float(it[21]); k.steal_owner_nid = String(it[22]); k.steal_from = String(it[23]); k.steal_team = int(it[24])
+				if k.role == "stray" and k.owner_h:
+					k.owner_h.follower = null
+					k.owner_h = null
+					k.team = -1
 		"m":
 			var mb: Mob = e
 			mb.face = it[5]; mb.hp = it[6]; mb.max_hp = it[7]
@@ -6348,11 +6465,17 @@ func _net_ev(x, from: String) -> void:
 					for rec in x[6]:
 						spawn_wild(rec, at, true)
 		"catch":
-			if is_host:
-				var k: Kin = ents_by_id.get(String(x[1]), null)
+			var ck: Kin = ents_by_id.get(String(x[1]), null)
+			if ck and Net.owns(ck.nid) or (is_host and ck and ck.role == ""):
 				var h: Hunter = ents_by_id.get(String(x[2]), null)
-				if k and h and not k.dead and k.state == "dazed":
-					_catch(h, k)
+				if ck and h and not ck.dead and ck.state == "dazed" and Follow.can_steal(h, ck):
+					_catch(h, ck)
+		"fgone":
+			var gk: Kin = ents_by_id.get(String(x[1]), null)
+			if gk and gk.remote:
+				gk.dead = true
+				gk.visible = false
+				if gk.owner_h and gk.owner_h.follower == gk: gk.owner_h.follower = null
 		"caught":
 			var k: Kin = ents_by_id.get(String(x[1]), null)
 			if k:
@@ -6360,9 +6483,10 @@ func _net_ev(x, from: String) -> void:
 				k.visible = false
 			if player and String(x[2]) == player.nid and typeof(x[3]) == TYPE_DICTIONARY:
 				var rec: Dictionary = x[3]
-				player.caught.append(rec)
+				var fat: Vector3 = k.pos if k else player.pos
+				if Follow.take(self, player, rec, fat) == null:
+					add_feed("The %s trusts you now. Extract to bring it home." % Data.KIN.get(String(rec.get("species", "cindle")), Data.KIN["cindle"])["name"])
 				sfx("catch", player.pos, 0.0)
-				add_feed("The %s trusts you now. Extract to bring it home." % Data.KIN.get(String(rec.get("species", "cindle")), Data.KIN["cindle"])["name"])
 
 func _process_net_revives() -> void:
 	if _rev_out.is_empty():

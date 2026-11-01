@@ -67,6 +67,7 @@ func _ready() -> void:
 		if a == "--boxrev-demo": opts["life_demo"] = true; opts["boxrev_demo"] = true; opts["no_drop"] = true; opts["squad"] = 3; opts["teams"] = 3
 		if a.begins_with("--length="): opts["length"] = float(a.substr(9))
 		if a == "--no-drop": opts["no_drop"] = true
+		if a.begins_with("--follow-demo="): opts["follow_demo"] = a.substr(14); opts["no_drop"] = true
 		if a == "--train-demo": opts["train_demo"] = true; opts["no_drop"] = true
 		if a.begins_with("--train-demo="): opts["train_demo"] = a.substr(13); opts["no_drop"] = true
 		if a.begins_with("--aim-demo="): opts["aim_demo"] = a.substr(11); opts["no_drop"] = true
@@ -377,6 +378,16 @@ func _ready() -> void:
 		var htc = load("res://tools/hatch_check.gd").new()      # the hatch: a quiet, personal moment
 		set_meta("hatch_check", htc)
 		htc.run(self)
+		return
+	if "--economy-floor-check" in args:
+		var efc = load("res://tools/economy_floor_check.gd").new()      # never stuck: strays, the pens, free-kit runs, the Exchange, saves
+		set_meta("economy_floor_check", efc)
+		efc.run(self)
+		return
+	if "--follower-check" in args:
+		var flc = load("res://tools/follower_check.gd").new()      # tamed Boki follow you: knockouts, steal windows, bots, sync
+		set_meta("follower_check", flc)
+		flc.run(self)
 		return
 	if "--economy-check" in args:
 		_economy_check()

@@ -247,7 +247,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 				var ah: Vector2 = a["aim_hold"]
 				inp["aim"] = Vector3(h.pos.x + ah.x * 3.0, h.pos.y + 0.9, h.pos.z + ah.y * 3.0)
 			inp["aim_y"] = h.pos.y
-			if h.flat_dist(goal) < 1.2 and a["goal_kind"] in ["chest", "catch", "revive", "box", "dock", "uplink", "hatch", "lair_dial", "lair_lever"]:
+			if h.flat_dist(goal) < 1.2 and a["goal_kind"] in ["chest", "catch", "fpick", "revive", "box", "dock", "uplink", "hatch", "lair_dial", "lair_lever"]:
 				inp["interact"] = true
 				move = Vector2.ZERO
 			elif h.flat_dist(goal) < 1.0 and a["goal_kind"] in ["beacon", "board", "yard", "lair_camp"]:
@@ -720,6 +720,10 @@ func _choose(m: Match, h: Hunter) -> void:
 		var yg: Array = m.exits.bot_goal(h, true)
 		if not yg.is_empty() and String(yg[1]) == "yard":
 			goal = yg[0]; gk = "yard"
+	# follower Boki (Follow): pick ours up when it's knocked out, or tame a rival's stray in its window
+	if goal == Vector3.INF:
+		var fg := Follow.bot_goals(m, h)
+		if not fg.is_empty(): goal = fg[0]; gk = String(fg[1])
 	# a rival's deathbox revive humming within earshot: go and stop it
 	if goal == Vector3.INF:
 		for b in m.box_hums.values():
@@ -778,7 +782,7 @@ func _choose(m: Match, h: Hunter) -> void:
 			goal = g[0]; gk = String(g[1])
 	if goal == Vector3.INF:
 		for k in m.kins:
-			if k.state == "dazed" and not k.dead and h.flat_dist(k) < 14.0 + (GOAL_KEEP if k.pos.distance_to(cur) < 2.0 else 0.0):
+			if k.state == "dazed" and not k.dead and Follow.can_steal(h, k) and h.flat_dist(k) < 14.0 + (GOAL_KEEP if k.pos.distance_to(cur) < 2.0 else 0.0):
 				goal = k.pos; gk = "catch"; break
 	if goal == Vector3.INF:
 		var bd := 18.0
