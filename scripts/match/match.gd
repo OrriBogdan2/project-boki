@@ -4352,6 +4352,11 @@ func step(dt: float) -> void:
 		player.inp["glide"] = true
 		player.inp["move"] = Vector2(1, 0.3).normalized()
 		if time > 0.7 and time - DT <= 0.7: pending_input["dash"] = true
+	if opts.get("dashpip_demo", false) and player:
+		# test (HUD): on foot, spend the short dashes and then the long one, then stand still and refill
+		player.inp["move"] = Vector2(1, 0.2).normalized() if time < 1.6 else Vector2.ZERO
+		for t in [0.4, 0.9, 1.4]:
+			if time > t and time - DT <= t: pending_input["dash"] = true
 	if opts.has("abyss_demo") and player:
 		_abyss_demo(String(opts["abyss_demo"]))
 	if player and not player.out:

@@ -2478,6 +2478,48 @@ var abyss_a := 0.0
 const ABYSS_FX := preload("res://scripts/match/abyss_fx.gd")
 var abyss_fx: CanvasLayer = null
 
+var dash_seen: Array = []      # per segment of the dash strip: was it full last frame (for the flash)
+var dash_flash: Array = []     # per segment: seconds left on its "it's back" flash
+
+## Dash charges as one slim segmented strip tucked under the health bar: a segment per short dash,
+## then a shorter pale-blue one for the long dash. The one recharging fills smoothly left to right;
+## a segment that comes back flashes white for a moment.
+func _dash_strip(r: Rect2, p: Hunter) -> void:
+	var nshort := int(p.max_dashes())
+	var n := nshort + 1
+	var gap := 3.0
+	var long_w := 12.0
+	var seg_w := (r.size.x - long_w - gap * float(n - 1)) / float(maxi(1, nshort))
+	if dash_seen.size() != n:
+		dash_seen.resize(n); dash_seen.fill(true)
+		dash_flash.resize(n); dash_flash.fill(0.0)
+	var dt := get_process_delta_time()
+	var x := r.position.x
+	for i in n:
+		var is_long := i == n - 1
+		var sw := long_w if is_long else seg_w
+		var sr := Rect2(Vector2(x, r.position.y), Vector2(sw, r.size.y))
+		var fill := clampf(1.0 - p.ex_cd / maxf(0.01, Hunter.EX_DASH_CD), 0.0, 1.0) if is_long else clampf(p.dashes - float(i), 0.0, 1.0)
+		var col: Color = Color("bfe6ff") if is_long else STAMINA_COL
+		var full := fill >= 0.999
+		if full and not bool(dash_seen[i]):
+			dash_flash[i] = 0.28
+		dash_seen[i] = full
+		dash_flash[i] = maxf(0.0, float(dash_flash[i]) - dt)
+		c.draw_rect(sr.grow(1.5), Color(0.03, 0.03, 0.05, 0.82))
+		if full:
+			c.draw_rect(sr, col)
+			c.draw_rect(Rect2(sr.position, Vector2(sw, 1.0)), Color(1, 1, 1, 0.35))
+		else:
+			c.draw_rect(sr, Color(col, 0.16))
+			if fill > 0.0:
+				c.draw_rect(Rect2(sr.position, Vector2(sw * fill, r.size.y)), Color(col, 0.6))
+				c.draw_rect(Rect2(Vector2(sr.position.x + sw * fill - 1.0, sr.position.y), Vector2(1.0, r.size.y)), Color(1, 1, 1, 0.7))
+		var fl := float(dash_flash[i]) / 0.28
+		if fl > 0.0:
+			c.draw_rect(sr.grow(1.0 * fl), Color(1, 1, 1, 0.85 * fl))
+		x += sw + gap
+
 ## Health and stamina (dash charges) right above your hunter, where your eyes already are.
 func _draw_overhead(p: Hunter) -> void:
 	var cam := m.cam
@@ -2488,23 +2530,12 @@ func _draw_overhead(p: Hunter) -> void:
 	var vr: Rect2 = cam.get_viewport().get_visible_rect().grow(200.0)
 	if not sp.is_finite() or not vr.has_point(sp):
 		return      # off screen, or a degenerate camera (headless, mid-teleport): huge/NaN coords can't triangulate
+	sp = sp.round()     # whole pixels: the bars and pips don't shimmer as the camera glides
 	var w := 66.0
 	var frac := clampf(p.hp / p.max_hp, 0.0, 1.0)
 	head_hp = maxf(frac, lerpf(head_hp, frac, 0.06))
 	_vitals(sp, w, p, p_team_col().lerp(Color.WHITE, 0.15) if frac > 0.35 else BAD, head_hp, true)
-	# stamina: one yellow pip per dash under the bars, the next one filling as it recharges
-	var n := int(p.max_dashes()) + 1
-	for i in n:
-		var cpt := sp + Vector2(-w * 0.5 + 6 + i * 13, 17)
-		# the last pip is the long dash (Shift in the air, or when the short ones are spent)
-		var fill := clampf(p.dashes - i, 0.0, 1.0) if i < n - 1 else 1.0 - p.ex_cd / Hunter.EX_DASH_CD
-		var dia := PackedVector2Array([cpt + Vector2(0, -5), cpt + Vector2(5, 0), cpt + Vector2(0, 5), cpt + Vector2(-5, 0)])
-		c.draw_colored_polygon(dia, Color(0.04, 0.04, 0.06, 0.8))
-		if fill >= 1.0:
-			var inner := PackedVector2Array([cpt + Vector2(0, -3.5), cpt + Vector2(3.5, 0), cpt + Vector2(0, 3.5), cpt + Vector2(-3.5, 0)])
-			c.draw_colored_polygon(inner, STAMINA_COL)
-		elif fill > 0.0:
-			c.draw_arc(cpt, 3.0, -PI * 0.5, -PI * 0.5 + TAU * fill, 10, Color(STAMINA_COL, 0.6), 2.0)
+	_dash_strip(Rect2(Vector2(sp.x - w * 0.5, sp.y + 14), Vector2(w, 4)), p)
 	_status_row(sp + Vector2(0, 30), p)
 	# high up: a small readout of how far above the ground you are
 	var alt := m.player_altitude() if p == m.player else 0.0

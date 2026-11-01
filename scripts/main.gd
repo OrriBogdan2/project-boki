@@ -568,6 +568,7 @@ func _ready() -> void:
 			if a.begins_with("--rival-kin="): so["rival_kin"] = a.substr(12)
 			if a == "--glide-demo": so["glide_demo"] = true
 			if a == "--dashglide-demo": so["dashglide_demo"] = true
+			if a == "--dashpip-demo": so["dashpip_demo"] = true     # test: spend every dash, then watch the strip refill
 			if a.begins_with("--kin-demo="):
 				# test: bring this species (and the next one) and run its whole kit on the dummies
 				so["demo_kin"] = a.substr(11)
