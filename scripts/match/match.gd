@@ -2948,6 +2948,7 @@ func _collect(h: Hunter, p: Dictionary) -> void:
 # ------------------------------------------------------------------ shots
 func spawn_shot(by: Ent, at: Vector3, v2: Vector2, dmg: float, life: float, size: float, col: Color, extra := {}) -> void:
 	var mi: MeshInstance3D = null
+	var vr := size          # the drawn radius (Oomph.shot_look), kept for the tracer stretch
 	for s in shot_pool:
 		if not s.visible:
 			mi = s; break
@@ -2968,6 +2969,7 @@ func spawn_shot(by: Ent, at: Vector3, v2: Vector2, dmg: float, life: float, size
 		if halo:
 			halo.material_override.set_shader_parameter("color", Color(vis_col.lightened(0.2), float(look[2])))
 		mi.scale = Vector3.ONE * vis_size
+		if not Oomph.legacy: vr = vis_size * 0.5
 		mi.global_position = at
 	if not extra.has("dy") and not extra.get("mob", false) and not extra.get("cos", false) and not extra.get("melee", false):
 		var src: Hunter = by as Hunter if by is Hunter else ((by as Kin).owner_h as Hunter if by is Kin and (by as Kin).owner_h else null)
@@ -2984,7 +2986,7 @@ func spawn_shot(by: Ent, at: Vector3, v2: Vector2, dmg: float, life: float, size
 	if duel and not extra.get("cos", false):
 		duel.note_shot(by)
 	shot_n += 1
-	var sd := {"sid": shot_n, "pos": at, "vel": v2, "dmg": dmg, "team": team, "by": by, "life": life, "life0": life, "r": size, "col": col, "x": extra, "node": mi, "prev": at, "start": at}
+	var sd := {"vr": vr, "sid": shot_n, "pos": at, "vel": v2, "dmg": dmg, "team": team, "by": by, "life": life, "life0": life, "r": size, "col": col, "x": extra, "node": mi, "prev": at, "start": at}
 	if extra.has("deco") or extra.get("rope", false):
 		sd["deco"] = _make_deco(String(extra.get("deco", "")), col, size, extra.get("rope", false))
 	shots.append(sd)
@@ -3460,7 +3462,7 @@ func _process(delta: float) -> void:
 			var v: Vector2 = s["vel"]
 			if v.length() > 1.0:
 				mi.look_at(mi.global_position + Vector3(v.x, 0, v.y), Vector3.UP)
-				var r: float = s["r"]
+				var r: float = s.get("vr", s["r"])
 				mi.scale = Vector3(r * 2.0, r * 2.0, Oomph.tracer_len(r, v.length(), float((s["x"] as Dictionary).get("tracer", 1.0))))
 	_vprof("verbs_shots")
 	cam.follow_mode = String(Settings.get_v("cam_follow"))

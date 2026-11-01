@@ -101,7 +101,8 @@ static func tick(A: Arena, dt: float) -> void:
 				_shot_later(A, 0.7)
 			at_t = 99.0
 		"smg":
-			if t < 0.05:
+			if not A.has_meta("demo_set"):
+				A.set_meta("demo_set", true)
 				A.set_arch("thief", "smg")
 				P.teleport(D.pos + Vector3(-4.0, 0, 2.5))
 				A.home = P.pos

@@ -110,7 +110,7 @@ static func shot_look(m: Node, by: Ent, col: Color, size: float) -> Array:
 		halo = 0.4
 	elif p:
 		vis_col = Color(col.lightened(0.15), 0.95)
-		vis_size *= 1.05
+		vis_size *= 1.45
 		if by != p:
 			vis_col.a = 0.7          # teammates' shots: a touch softer than yours
 			halo = 0.18
@@ -120,4 +120,4 @@ static func shot_look(m: Node, by: Ent, col: Color, size: float) -> Array:
 static func tracer_len(r: float, speed: float, k := 1.0) -> float:
 	if legacy:
 		return r * 2.0 + speed * 0.025
-	return r * 2.0 + minf(3.2, speed * 0.05 * k)
+	return r * 2.0 + minf(3.2, speed * 0.04 * k)
