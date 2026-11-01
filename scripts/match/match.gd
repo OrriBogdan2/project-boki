@@ -128,19 +128,9 @@ var rolling: Rolling = null     # a rolling 30-minute session (opts "rolling"): 
 var sess_t0 := 0.0              # session time when this match's clock started (rolling: when your wave set off; else 0)
 var ships: Array = []           # the other drop waves' skyships (rolling sessions); `ship` is your own
 var _bot_names: Array = []
-
-## The session clock: seconds since the session began (the match clock, unless you joined a rolling
-## session part-way through).
-func sess_time() -> float:
-	return sess_t0 + time
-
-## How long the whole session runs (a rolling session: Rolling.SESSION; else the match).
-func sess_len() -> float:
-	return Rolling.SESSION if rolling else length
-
-## The match time at a share of the session (exits open and close, events): before you joined is negative.
-func at_sess(k: float) -> float:
-	return k * sess_len() - sess_t0
+func sess_time() -> float: return sess_t0 + time     # the session clock: seconds since the session began (the match clock unless you joined a rolling session part-way)
+func sess_len() -> float: return Rolling.SESSION if rolling else length     # the whole session (a rolling session: Rolling.SESSION)
+func at_sess(k: float) -> float: return k * sess_len() - sess_t0     # match time at a share of the session (negative if before you joined)
 
 func _ready() -> void:
 	set_process(false)
