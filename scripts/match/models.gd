@@ -1738,7 +1738,7 @@ static func kin(species: String, rec := {}) -> Node3D:
 	m_eye.set_shader_parameter("gloss", 0.9)
 	m_eye.set_shader_parameter("sss", 0.0)
 	m_eye.set_shader_parameter("rim_amount", 0.25)
-	m_eye.set_meta("iris", glow_c.lerp(sp["color"], 0.35).darkened(0.08))
+	m_eye.set_meta("iris", Unique.iris(rec, glow_c.lerp(sp["color"], 0.35).darkened(0.08)))     # its own eye colour (Unique)
 	var m_white := toon(Color.WHITE, false, 0.6)
 	var m_blush := toon(Color("ff9aa8"), false, 0.2)
 	# Body moves the kin around (hops, lunges, tumbles); Flex inside it squashes and stretches (KinPuppet)
@@ -1935,6 +1935,7 @@ static func kin(species: String, rec := {}) -> Node3D:
 		# hatchlings are small
 		root.set_meta("evo_scale", 0.82)
 		root.scale = Vector3.ONE * 0.82
+	Unique.dress(root, rec)          # this kin's own: size, palette shift, coat marks, proportions, shapes
 	Mutations.dress(root, rec)       # rare mutations: size, palette, extra parts
 	return root
 
