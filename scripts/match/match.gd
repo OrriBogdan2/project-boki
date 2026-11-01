@@ -192,8 +192,9 @@ func _progress(label: String) -> void:
 ## Under the loading screen: draws every material in the match once on tiny stand-ins (a batch a
 ## frame, see _warm_batches), then the world once from far above (every island, prop, wall, cloud
 ## layer and landmark in view), once close to the ground (grass, flowers, undergrowth) and once from
-## where the match starts, with one of each effect in front of the camera, so the GPU compiles every
-## shader before play instead of when the drop first shows it. The last frames double as the
+## where the match starts, with one of each effect in front of the camera, then stand-ins for what
+## those views added (the effects), so the GPU compiles every shader before play instead of when the
+## drop first shows it. The last frames double as the
 ## auto-quality benchmark (Settings.note_benchmark). progress(frac 0..1) as it goes.
 func warm_up(progress := Callable()) -> void:
 	if DisplayServer.get_name() == "headless" or cam == null or world == null:
@@ -222,9 +223,18 @@ func warm_up(progress := Callable()) -> void:
 	# on everything round you) and the sky train's headlight sweeping an island no longer stall.
 	# Done first and a batch at a time, so the views below find their shaders already built and no
 	# single frame takes every compile at once.
+	# a Boki makes its daze stars the first time it's dazed: one makes them now (hidden until then),
+	# so their material is among the stand-ins
+	for k in kins:
+		for pn in (k as Node).find_children("*", "Node", true, false):
+			if pn is KinPuppet and pn.get("stars") == null and pn.get("body") != null:
+				pn.call("_make_stars")
+				break
+		break
+	var seen := {}
 	var batch_cb := func(f: float) -> void:
-		if progress.is_valid(): progress.call(0.8 * f)
-	var batched: bool = await _warm_batches(batch_cb)
+		if progress.is_valid(): progress.call(0.7 * f)
+	var batched: bool = await _warm_batches(batch_cb, seen)
 	if not batched:
 		return
 	var shown: Array = []
@@ -257,7 +267,16 @@ func warm_up(progress := Callable()) -> void:
 		fx.end_telegraph(tg)
 		if not is_inside_tree():
 			return
-		if progress.is_valid(): progress.call(0.8 + 0.2 * (vi + 1) / views.size())
+		if progress.is_valid(): progress.call(0.7 + 0.2 * (vi + 1) / views.size())
+	# and the materials that only exist now (the effects just shown, the shots), the same way: a
+	# telegraph is held up for it (the views' own are gone by now)
+	var late_cb := func(f: float) -> void:
+		if progress.is_valid(): progress.call(0.9 + 0.1 * f)
+	var tg_late := fx.telegraph_circle(cam.global_position - cam.global_transform.basis.z * 6.0, 1.5, Color(1, 0.3, 0.2))
+	batched = await _warm_batches(late_cb, seen)
+	if not batched:
+		return
+	fx.end_telegraph(tg_late)
 	for sm in shown: (sm as MeshInstance3D).visible = false
 	if muzzle_light: muzzle_light.light_energy = 0.0
 	RenderingServer.global_shader_parameter_set("vis_on", 0.0)
@@ -284,8 +303,8 @@ const WARM_FRAME_MS := 45.0
 
 ## The stand-ins of warm_up, a batch a frame, each batch drawn once under each light setup.
 ## False if the match went away meanwhile.
-func _warm_batches(progress: Callable) -> bool:
-	var list: Array = await _warm_sources()
+func _warm_batches(progress: Callable, seen: Dictionary) -> bool:
+	var list: Array = await _warm_sources(seen)
 	if not is_inside_tree():
 		return false
 	if list.is_empty():
@@ -298,6 +317,13 @@ func _warm_batches(progress: Callable) -> bool:
 	# draws the whole map again
 	var keep_mask := cam.cull_mask
 	cam.cull_mask = WARM_LAYER
+	# (a camera culls lights by their layers too: every light joins the stand-ins' layer meanwhile,
+	# or they'd all draw unlit)
+	var lights := find_children("*", "Light3D", true, false)
+	var keep_layers: Array = []
+	for l in lights:
+		keep_layers.append((l as Light3D).layers)
+		(l as Light3D).layers |= WARM_LAYER
 	# what a frame costs with nothing new in it, to tell a batch's own cost from plain drawing
 	await get_tree().process_frame
 	var t0 := Time.get_ticks_usec()
@@ -307,6 +333,7 @@ func _warm_batches(progress: Callable) -> bool:
 		return false
 	var n := WARM_BATCH
 	var i := 0
+	var batches := 0
 	while i < list.size():
 		var batch: Array = list.slice(i, mini(i + n, list.size()))
 		t0 = Time.get_ticks_usec()
@@ -325,14 +352,18 @@ func _warm_batches(progress: Callable) -> bool:
 			px.global_transform = Transform3D(basis.scaled(Vector3.ONE * 0.04), front + basis.x * gx + basis.y * gy)
 			pxs.append(px)
 		var worst := 0.0
+		# two frames under each light setup, as when they were all drawn at once: a stand-in added
+		# this frame isn't reliably drawn until the next
 		for setup in [[false, false], [true, false], [false, true], [true, true]]:
 			wl[0].visible = setup[0]; wl[1].visible = setup[1]
-			await get_tree().process_frame
-			if not is_inside_tree():
-				return false
-			var now := Time.get_ticks_usec()
-			worst = maxf(worst, (now - t0) / 1000.0)
-			t0 = now
+			for _f in 2:
+				await get_tree().process_frame
+				if not is_inside_tree():
+					return false
+				var now := Time.get_ticks_usec()
+				worst = maxf(worst, (now - t0) / 1000.0)
+				t0 = now
+		batches += 1
 		for px in pxs: (px as Node).queue_free()
 		i += batch.size()
 		progress.call(float(i) / list.size())
@@ -342,8 +373,11 @@ func _warm_batches(progress: Callable) -> bool:
 		elif extra < WARM_FRAME_MS * 0.4:
 			n = mini(n * 2, 512)
 	await get_tree().process_frame
+	for li in lights.size():
+		if is_instance_valid(lights[li]): (lights[li] as Light3D).layers = keep_layers[li]
 	for l in wl: (l as Node).queue_free()
 	cam.cull_mask = keep_mask
+	PerfLog.note("warm-up: %d stand-ins in %d batches" % [list.size(), batches])
 	return is_inside_tree()
 
 ## The render layer warm_up's stand-ins draw on (nothing else in the game uses it).
@@ -352,10 +386,10 @@ func _warm_layer(px: Node) -> void:
 	if px is VisualInstance3D: (px as VisualInstance3D).layers = WARM_LAYER
 	for ch in px.get_children(): _warm_layer(ch)
 
-## One instance of each material and kind of geometry in the match (see _warm_key), for warm_up's
-## stand-ins. Walks the tree a slice at a time so the loading screen keeps moving.
-func _warm_sources() -> Array:
-	var seen := {}
+## One instance of each material and kind of geometry in the match (see _warm_key) not in seen yet,
+## for warm_up's stand-ins (adds them to seen). Walks the tree a slice at a time so the loading
+## screen keeps moving.
+func _warm_sources(seen: Dictionary) -> Array:
 	var list: Array = []
 	var stack: Array = [self]
 	var t0 := Time.get_ticks_usec()

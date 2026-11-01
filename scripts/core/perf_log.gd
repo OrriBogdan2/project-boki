@@ -27,6 +27,16 @@ static func mark(label: String) -> void:
 	if _verbose == 1:
 		print("PERF step %-28s %7.1f ms" % [label, ms])
 
+## A line for --perf-log (and the --load-check report), not a timed step.
+static var notes: Array = []
+static func note(s: String) -> void:
+	notes.append(s)
+	if notes.size() > 50: notes = notes.slice(-25)
+	if _verbose < 0:
+		_verbose = 1 if "--perf-log" in OS.get_cmdline_user_args() else 0
+	if _verbose == 1:
+		print("PERF note " + s)
+
 ## Restarts the clock without logging (after a wait that isn't work, e.g. a frame of the loading screen).
 static func skip() -> void:
 	_t = Time.get_ticks_usec()
