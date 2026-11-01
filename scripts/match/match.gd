@@ -2834,6 +2834,7 @@ func _update_vision() -> void:
 
 func _exit_tree() -> void:
 	RenderingServer.global_shader_parameter_set("vis_on", 0.0)
+	SeeThrough.off()
 	for key in box_hums.keys():
 		Sfx.loop_stop(String(key))
 	box_hums.clear()
@@ -3425,6 +3426,7 @@ func _process(delta: float) -> void:
 	if opts.has("arch_demo"):
 		ArchDemo.frame(self)       # screenshot tooling: one part of an archetype kit, timed to the shot
 	_update_vision()
+	SeeThrough.for_match(self)     # trees and pillars over your hunter or Boki thin out
 	_vprof("vision")
 	if world.wall_mat:
 		var fp := player.model.global_position + Vector3(0, 0.8, 0) if player and player.model and not player.out else Vector3(0, -999, 0)
@@ -4033,6 +4035,9 @@ func step(dt: float) -> void:
 			player.inp["move"] = Vector2(0.8, -0.6).normalized() if fmod(time, 6.0) < 3.0 else Vector2(0.3, 1.0).normalized()
 	if opts.get("truce_demo", false) and truce:
 		truce.demo()
+	if opts.has("see_demo") and player and not player.dropping and not has_meta("see_demo_done"):
+		set_meta("see_demo_done", true)
+		SeeThrough.demo(self, String(opts["see_demo"]))
 	if opts.has("exit_demo") and exits and player and not player.dropping:
 		exits.demo(String(opts["exit_demo"]))
 	if opts.get("glide_demo", false) and player:

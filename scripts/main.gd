@@ -123,6 +123,7 @@ func _ready() -> void:
 		if a == "--plate-demo": opts["plate_demo"] = true; opts["no_drop"] = true; opts["teams"] = 3; opts["squad"] = 3
 		if a == "--hold-demo": opts["hold_demo"] = true; opts["no_drop"] = true; opts["teams"] = 4; opts["squad"] = 3
 		if a == "--no-plan": opts["no_plan"] = true
+		if a.begins_with("--see-demo"): opts["see_demo"] = a.substr(11) if a.begins_with("--see-demo=") else "bloom"; opts["no_drop"] = true     # your hunter just behind a big tree
 		if a.begins_with("--plan-t="): opts["plan_t"] = float(a.substr(9))
 		if a == "--map-demo": opts["map_demo"] = "plan"          # the planning map, with pings
 		if a == "--map-mid-demo": opts["map_demo"] = "mid"; opts["no_drop"] = true    # the map mid-match, some spawns scouted

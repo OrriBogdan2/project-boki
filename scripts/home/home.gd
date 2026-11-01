@@ -819,6 +819,7 @@ func _process(delta: float) -> void:
 	if training: training.tick(d)
 	_apply_cam_settings(d)
 	cam.follow(ppos, d, panel_open == "" and train.is_empty())
+	_see_through()
 	_find_interact()
 	if hb and hb.active:
 		return
@@ -874,6 +875,22 @@ func _apply_cam_settings(d: float) -> void:
 		if not player.has_meta("base_scale"):
 			player.set_meta("base_scale", player.scale)
 		player.scale = (player.get_meta("base_scale") as Vector3) * lerpf(1.0, Hunter.VIS_SCALE, e)
+
+## Trees between the camera and you (or your active Boki) thin out, as in a match (SeeThrough).
+func _see_through() -> void:
+	if player == null or not is_instance_valid(player) or not player.visible:
+		SeeThrough.off()
+		return
+	var b = null
+	var act := String(_d().get("active", ""))
+	for k in kins:
+		var n = k.get("node")
+		if String(k["rec"].get("uid", "")) == act and n is Node3D and is_instance_valid(n) and (n as Node3D).visible and (n as Node3D).is_inside_tree():
+			b = (n as Node3D).global_position
+	SeeThrough.update(cam, player.global_position, b)
+
+func _exit_tree() -> void:
+	SeeThrough.off()
 
 var climb := {}                # (unused since the ledge float; kept for anything that clears it)
 ## Floating up a ledge, as in a match (Hunter._ledge_float): {lip, n (into the wall), t, at, g0}.

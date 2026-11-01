@@ -47,10 +47,13 @@ float vis_fog(vec3 wp) {
 	return 1.0 - lit;
 }
 
-// Outside sight: much darker, cooler and greyer. Inside: a touch brighter, so the lit space pops.
+// Outside sight: darker, cooler and greyer, but still readable (the scene has to read on camera:
+// was 42% brightness and 60% grey, now 70% and 40%, which turned everything outside the cone near black). Inside: a
+// touch brighter, so the lit space pops. What's hidden stays hidden either way: rival hunters and
+// Boki out of sight aren't drawn at all (Match._update_vision), this only shades the world.
 vec3 vis_apply(vec3 c, float fog) {
 	if (vis_on < 0.5) { return c; }
-	vec3 grey = vec3(dot(c, vec3(0.3, 0.59, 0.11))) * vec3(0.62, 0.7, 0.98);
-	vec3 dark = mix(c, grey, 0.6) * 0.42;
-	return mix(c * 1.06, dark, fog);
+	vec3 grey = vec3(dot(c, vec3(0.3, 0.59, 0.11))) * vec3(0.7, 0.76, 0.98);
+	vec3 dark = mix(c, grey, 0.4) * 0.7;
+	return mix(c * 1.05, dark, fog);
 }
