@@ -1918,7 +1918,10 @@ func _grammar_runtime_check() -> void:
 	_ac_run(m, 1.6, func(): T.teleport(home + Vector3(2.0, 0, 0)); T.vel = Vector3.ZERO)
 	_grt("merge pulses stomp around you", T.hp < ph, "took %.0f" % (ph - T.hp))
 	KinMerge.end(P, "test")
-	# IVs ride on top of the budget: final hp/damage/speed and the merge meter's fill
+	# IVs ride on top of the budget: final hp/damage/speed and the merge meter's fill (sizes are
+	# normalized here, since two random Boki differ in size and size nudges hp and speed too)
+	var was_norm := Unique.normalize
+	Unique.normalize = true
 	var lo := _grt_kin(m, P, "cindle", {"ivs": {"hp": 0, "atk": 0, "spd": 0, "work": 0, "bond": 0}})
 	var lo_st := [lo.max_hp, lo.dmg, lo.speed]
 	P.ult = 0.0; Bond.add(P, 0.1)
@@ -1928,6 +1931,7 @@ func _grammar_runtime_check() -> void:
 	var hi_b := P.ult
 	_grt("IVs: +10% hp/dmg, +5% speed at 31", absf(hi.max_hp / lo_st[0] - 1.1) < 0.005 and absf(hi.dmg / lo_st[1] - 1.1) < 0.005 and absf(hi.speed / lo_st[2] - 1.05) < 0.005,
 		"hp %.0f/%.0f dmg %.1f/%.1f speed %.2f/%.2f" % [hi.max_hp, lo_st[0], hi.dmg, lo_st[1], hi.speed, lo_st[2]])
+	Unique.normalize = was_norm
 	_grt("IVs: Bond fills the merge meter 10% faster", absf(hi_b / lo_b - 1.1) < 0.005, "%.3f vs %.3f" % [hi_b, lo_b])
 	m.queue_free(); await get_tree().process_frame
 	print("GRT DONE, failures: ", _grt_fail)
