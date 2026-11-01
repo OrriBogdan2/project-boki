@@ -5099,14 +5099,14 @@ var train_t := 0.0
 var duel_pad := Vector3.INF
 
 ## The Demo match (title screen): a real Duos expedition set up for filming. A fixed map roll, clear
-## weather, no Blight, normal rivals, on the Dusk Isles (the first tier where a Boki can be lost: one in
+## weather, no Blight, normal rivals (who leave you be for a minute after you land), on the Dusk Isles (the first tier where a Boki can be lost: one in
 ## a deathbox goes to whoever loots it); your bot squadmate leads the drop to land you between a live boss
 ## lair and an outpost uplink (_demo_drop). It plays on your save like any expedition (what you bring
 ## can be lost, what you extract is kept).
 const DEMO_SEED := 5
 static func demo_opts() -> Dictionary:
 	return {"teams": Data.MATCH_PLAYERS / 2, "squad": 2, "total": Data.MATCH_PLAYERS, "tier": 1, "seed": DEMO_SEED,
-		"raid": "clear", "blight": false, "demo_match": true}
+		"raid": "clear", "blight": false, "fresh_t": Settings.DEMO_FRESH_T, "demo_match": true}
 
 ## The Arena: a compact practice map with dummies, a sparring bot and the kit card (scripts/match/arena.gd).
 static func arena_opts(arch_id := "") -> Dictionary:

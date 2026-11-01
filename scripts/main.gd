@@ -2609,7 +2609,14 @@ func _boss_check() -> void:
 	Q.ctrl = "local"
 	spot.call(Q, E["dial"])
 	spot.call(P, E["dial"] + Vector3(E["out"].x, 0, E["out"].y) * 6.0)
-	Q.inp["interact"] = true; run.call(Match.DT); Q.inp["interact"] = false; run.call(0.4)
+	# the gate's guards go for whoever works the dial: a bomber's blast or a spitter's hit could knock Q
+	# off the lectern (the dial stops) or down, depending only on how the frames fall. Keep Q on it and
+	# standing: this part tests the dial's miss, not surviving the guards
+	var pin := func():
+		Q.hp = Q.max_hp; Q.armor = Q.max_armor
+		if Q.downed: m.revive_hunter(Q, Q)
+		if Q.flat_dist(E["dial"]) > 0.25: spot.call(Q, E["dial"])
+	Q.inp["interact"] = true; run.call(Match.DT, pin); Q.inp["interact"] = false; run.call(0.4, pin)
 	var hit_one := false
 	var tq := m.time
 	while not hit_one and m.time - tq < 8.0:
@@ -2618,15 +2625,15 @@ func _boss_check() -> void:
 		for t in E["targets"]:
 			if absf(wrapf(nxt - float(t["a"]), -PI, PI)) <= float(t["w"]) * 0.5 - 0.03: on = true
 		Q.inp["interact"] = on and not Q.inp["interact"]
-		run.call(Match.DT)
+		run.call(Match.DT, pin)
 		hit_one = (E["targets"] as Array).any(func(t): return t["hit"])
-	Q.inp["interact"] = false; run.call(Match.DT)
+	Q.inp["interact"] = false; run.call(Match.DT, pin)
 	var guards0: int = m.lairs._guards_alive(E)
 	var pings0 := m.pings.size()
 	var feed0 := m.feed_all.size()
 	while m.lairs.target_under(E) >= 0:
-		run.call(Match.DT)
-	Q.inp["interact"] = true; run.call(Match.DT); Q.inp["interact"] = false
+		run.call(Match.DT, pin)
+	Q.inp["interact"] = true; run.call(Match.DT, pin); Q.inp["interact"] = false
 	var any_hit: bool = (E["targets"] as Array).any(func(t): return t["hit"])
 	ok.call(hit_one and int(E["fails"]) == 1 and not any_hit and int(E["lock"]) == 0 and float(E["jam"]) > 0.0, "miss: the lock resets (fails %d, arcs lit again, jammed %.1fs)" % [int(E["fails"]), float(E["jam"])])
 	ok.call(m.lairs._guards_alive(E) > guards0 and m.pings.size() > pings0 and m.feed_all.slice(feed0).any(func(f): return String(f).contains("chime")) and Q.reveal_t > 2.0,
