@@ -905,23 +905,32 @@ stunned, or within 0.8s of it), a gold second hit lands: +18 damage, a crit, T4.
   fire them through.
 - Retired: Flare Arrow (E), Skyfall Volley (R).
 
-### Mage: Heat -> Overcharged -> Flashpoint
+### Mage: Rune -> detonate (Runeburst / Flashpoint), Hex, Blink and snap back
 
-Bolts (20 Heat, a Lance 35) and the Sigil (25) build Heat. From 70 the Mage is **Overcharged**
-(+25%, bolts pierce) and the **Flashpoint is armed**: recast E and the Sigil detonates with all the
-Heat: 24 damage (a plain detonation is 10), 30% wider, a harder lift (8.5) that a Meteor spikes,
-T4 on each foe it catches. Heat drops to 0 with no Vent, and the Bolt comes straight back for a
-Lance on whoever's in the air. Overshoot to 100 and you Vent (the risk stays).
+Owner direction (Nov 1): the Mage felt too close to the Archer; make it a tricky, mobile spell
+duelist (LeBlanc-style combos; a Sinclair-style steerable RMB). Ideas only; our names and numbers.
+The §6.3 design above (Bolt/Lance, Sigil, Meteor) is superseded by this:
 
-- Tells: a rune mote per 20 Heat orbits the Mage's waist; Overcharged they burn white-hot, spin
-  faster and light the ground. A primed Sigil's rings turn white-gold and throb, so everyone reads
-  that the detonation will be big. "OVERCHARGED" pops (at most every 2s); the crosshair reads
-  "FLASHPOINT READY · E" with a Sigil down, and the E slot gets the gold dot.
-- Payoff: the same 0.3s detonation tell (soft-CC floor), but a white-gold collapse inward and the
-  rush of `pay_flashpoint`, then the boom: "FLASHPOINT", T4 hitstop and shake, a column of sparks.
-- Numbers: a plain detonation 10 (was 12.5 when Overcharged); Flashpoint 24 on a 14s E.
-- Bots: Flashpoint when Overcharged and the target stands in the Sigil (90%); otherwise detonate
-  now and then or as the Sigil fades.
+| Slot | What it does |
+|---|---|
+| RMB | **Guided Bolt**: fires on the press (15 m/s, 2.2s); keep holding and it bends toward your cursor (6 rad/s), round cover onto a target. 10 damage, up to 22 after 1.6s in flight, a light slow; it **Runes** what it hits. A rising hum while it flies (remote players see its path as Net fx bolts). In the air: Starfall |
+| Passive | **Runes and Heat**: your next spell on a Runed foe (a Bolt, a Hex, an echo) **detonates** it: a **Runeburst**, 16 + root 0.5, T4. Casting builds Heat (Bolt 15, Hex 25); Overcharged (70+) a detonation is a **Flashpoint**: 30 + 14 to everyone within 2.6m, root 0.8, all the Heat spent with no Vent, the Bolt back. 100 Vents (the risk stays) |
+| E | **Hex**: a dodgeable bolt (20 m/s, 11m; a projectile, so it can be sidestepped or blocked) that turns a hunter into a harmless critter for 1.3s: half speed, no attacks, casts, dashes, gloves or glides; the model swaps for a hopping critter with a rune over it. Monsters are stunned 1s. On a Runed foe it detonates the Rune too (no root on top of the Hex) |
+| Dash | **Blink**: a 0.12s windup (the landing sigil shows), up to 5.5m through walls; the sigil left behind slows foes 0.6s later and for 3s a second dash **snaps you back** to it (free) |
+| R | **Encore** (0.55s fuse): two mirror images at your sides recast your last spell at full power, then echo every Bolt and Hex for 4s at 60% (their bolts steer with yours) |
+
+- Loop: Guided Bolt round a pillar (Rune) -> Hex them (detonates: Runeburst, then they're a critter)
+  -> Blink in, Bolt again; Overcharged, the detonation is a Flashpoint -> snap back out.
+- Tells: rune motes orbit the Mage (one per 20 Heat), white-hot when Overcharged; a rune ring over
+  every Runed foe (it throbs when the next detonation would be a Flashpoint); the crosshair reads
+  "RUNED · hit it again" / "OVERCHARGED: FLASHPOINT". Payoffs: "RUNEBURST" / "FLASHPOINT", T4,
+  `pay_flashpoint`.
+- Hex online: `Hex.apply` sends a Net event `["hex", nid, seconds]`; every game shows the critter,
+  the body's own game runs the rules. **Net.VERSION 0.4.0 -> 0.5.0** (a new event kind).
+- Bots: Guided Bolts steered onto the target (their aim follows it while they hold), Hex rival
+  hunters (always on a Runed one), Encore in range, Blink away when hurt and snap back once safe;
+  a hexed bot scurries away from its target.
+- Retired: Lance, Sigil (and the Sigil-based Flashpoint), Meteor.
 
 ### Gunslinger: Chambers -> Called Shot
 

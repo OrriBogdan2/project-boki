@@ -161,7 +161,7 @@ func _e_end() -> void: pass
 func _r_end() -> void: pass
 
 func busy() -> bool:
-	return h.downed or h.out or h.dropping or h.riding or h.stun_t > 0.0
+	return h.downed or h.out or h.dropping or h.riding or h.stun_t > 0.0 or Hex.active(h)
 
 # ------------------------------------------------------------------ RMB router
 ## The RMB press. Priority when several apply (§3.3): resource full > during R > during E >

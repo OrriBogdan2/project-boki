@@ -5936,6 +5936,10 @@ func _net_ev(x, from: String) -> void:
 		return
 	var who: Ent = null
 	match String(x[0]):
+		"hex":
+			# a Mage's Hex landed: the body's own game runs the rules, every game shows the critter
+			who = ents_by_id.get(String(x[1]), null)
+			if who is Hunter: Hex.apply(who as Hunter, float(x[2]), false)
 		"s":
 			var col := Color.html(String(x[8]))
 			var ex := {"cos": true}

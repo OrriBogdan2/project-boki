@@ -362,67 +362,69 @@ func _mage() -> void:
 	var home: Vector3 = r[4]
 	var K: MageKit = P.ak
 	ok("mage: Spellstaff in hand", P.wid == "spellstaff")
-	# Bolt tap: hit, slow, +20 Heat
+	# Guided Bolt: fires on the press, Runes what it hits, +15 Heat
 	tap(m, P)
-	step(m, 0.4)
-	ok("mage RMB tap: bolt slows, +20 Heat", dmg(T) >= 13.0 and T.slow_t > 0.0 and K.res >= 15.0, "took %.0f heat %.0f" % [dmg(T), K.res])
-	# Lance: a hold pierces both
-	fresh(T); fresh(T2); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0
-	hold(m, P, 0.7)
+	step(m, 0.8)
+	ok("mage RMB: Guided Bolt hits + Runes", dmg(T) >= 9.0 and K.runed(T) and K.res >= 10.0, "took %.0f heat %.0f" % [dmg(T), K.res])
+	# a second spell on the Runed foe detonates it: a Runeburst (root)
+	var d0 := dmg(T); var det0 := K.detonations
+	K.res = 0.0; K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; T.root_t = 0.0
+	tap(m, P)
+	step(m, 0.8)
+	ok("mage passive: second spell detonates the Rune", K.detonations == det0 + 1 and dmg(T) - d0 >= 24.0 and T.root_t > 0.0 and not K.runed(T), "dealt %.0f root %.2f" % [dmg(T) - d0, T.root_t])
+	# held: the bolt bends toward the cursor (round a corner onto a target off to the side)
+	fresh(T); T.teleport(home + Vector3(6.0, 0, 2.5)); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; K.res = 0.0
+	P.inp["aim"] = home + Vector3(7.0, 0.9, -1.5)
+	P.inp["sec_hold"] = true
+	P.ak.press_rmb()
+	step(m, 0.2, func(): P.inp["sec_hold"] = true; P.inp["aim"] = home + Vector3(7.0, 0.9, -1.5))
+	step(m, 1.4, func(): P.inp["sec_hold"] = true; P.inp["aim"] = T.pos + Vector3(0, 0.9, 0))
+	P.inp["sec_hold"] = false
 	step(m, 0.2)
-	ok("mage RMB hold: Lance pierces", K.last_variant == "hold" and dmg(T) >= 20.0 and dmg(T2) >= 20.0, "%.0f / %.0f" % [dmg(T), dmg(T2)])
-	# Sigil, then a bolt through it splits; recast E detonates (lift)
-	fresh(T); fresh(T2); K.res = 0.0; K.ch_rmb = 1.0; K.cd["rmb"] = 0.0
-	P.inp["aim"] = home + Vector3(3.0, 0, 0)
+	ok("mage RMB hold: the bolt steers onto them", dmg(T) >= 12.0, "took %.0f (longer flight hits harder)" % dmg(T))
+	T.teleport(home + Vector3(7.0, 0, 0)); fresh(T); aim_at(P, T.pos)
+	for key in K.runes.keys(): K._clear_rune(key)
+	step(m, 0.3)
+	# Overcharged: a detonation is a Flashpoint (all the Heat, splash, the Bolt back)
+	K.ch_rmb = 1.0; K.cd["rmb"] = 0.0
+	tap(m, P); step(m, 0.8)
+	K.res = 72.0; K.ch_rmb = 1.0; K.cd["rmb"] = 0.0
+	ok("mage resource full: Overcharged + Runed", K.full_ready() and K.ready_label().contains("FLASHPOINT"))
+	var f0 := K.flashpoints; d0 = dmg(T); var t2d := dmg(T2)
+	tap(m, P); step(m, 0.8)
+	ok("mage Flashpoint: all the Heat, a burst", K.flashpoints == f0 + 1 and dmg(T) - d0 >= 35.0 and dmg(T2) > t2d and K.res < 25.0 and K.vent.is_empty(), "dealt %.0f splash %.0f heat %.0f" % [dmg(T) - d0, dmg(T2) - t2d, K.res])
+	# E: Hex turns a hunter into a critter: no attacks, half speed
+	fresh(T); aim_at(P, T.pos); K.res = 0.0
 	P.ak.use_e()
-	ok("mage E: Sigil drawn, +25 Heat", not K.sigil.is_empty() and K.res >= 24.0)
-	aim_at(P, T.pos)
-	tap(m, P)
 	step(m, 0.6)
-	ok("mage RMB through Sigil: splits", K.last_variant == "during_e" and dmg(T) > 0.0, "took %.0f" % dmg(T))
-	T.teleport(home + Vector3(3.0, 0, 0)); fresh(T)
-	var top := {"y": 0.0}
-	var g := T.pos.y
-	P.ak.use_e()
-	step(m, 0.9, func(): top["y"] = maxf(float(top["y"]), T.pos.y - g))
-	ok("mage E recast: detonation lifts", top["y"] > 0.3 and dmg(T) >= 9.0, "rose %.2f took %.0f" % [top["y"], dmg(T)])
-	# Overcharged: the detonation is a Flashpoint (all the Heat, no Vent, the Bolt back)
-	step(m, 0.5)
-	K.cd["e"] = 0.0; K.res = 0.0
-	P.inp["aim"] = home + Vector3(3.0, 0, 0)
-	P.ak.use_e()
-	K.res = 85.0; K.ch_rmb = 0.0; K.cd["rmb"] = 2.0
-	fresh(T); T.teleport(home + Vector3(3.0, 0, 0))
-	ok("mage resource full: Flashpoint armed", K.e_payoff_ready() and K.ready_label().begins_with("FLASHPOINT"))
-	var f0 := K.flashpoints
-	top["y"] = 0.0
-	P.ak.use_e()
-	step(m, 0.9, func(): top["y"] = maxf(float(top["y"]), T.pos.y - g))
-	ok("mage E recast Overcharged: Flashpoint", K.flashpoints == f0 + 1 and K.last_e == "Flashpoint" and dmg(T) >= 22.0 and top["y"] > 0.3 and K.res < 10.0 and K.vent.is_empty() and K.ch_rmb >= 1.0, "took %.0f heat %.0f bolt %.0f" % [dmg(T), K.res, K.ch_rmb])
-	# Overcharged at 70+; the Vent at 100
+	ok("mage E: Hex lands", Hex.active(T) and K.hexes >= 1 and not T.can_fire() and T.get_node_or_null("HexCritter") != null, "hexed %s" % str(Hex.active(T)))
+	step(m, 1.2)
+	ok("mage E: Hex wears off", not Hex.active(T) and T.model.visible and T.get_node_or_null("HexCritter") == null)
+	# Overcharged at 70; the Vent at 100
 	K.res = 75.0
 	ok("mage resource: Overcharged at 70", K.full_ready())
-	K.res = 90.0; K.ch_rmb = 1.0; K.cd["rmb"] = 0.0
+	K.res = 92.0; K.ch_rmb = 1.0; K.cd["rmb"] = 0.0
 	tap(m, P)
 	step(m, 0.6)
 	ok("mage passive: Vent at 100 resets + locks", K.res < 1.0 and K.lock_t > 0.0, "heat %.0f lock %.2f" % [K.res, K.lock_t])
 	step(m, 1.2)
-	# Blink: a 0.12s windup, then up to 5.5m
+	# Blink: a 0.12s windup, then up to 5.5m; dash again to snap back
 	P.teleport(home); P.dashes = P.max_dashes()
 	P.inp["aim"] = home + Vector3(0, 0, 8.0)
 	P.do_dash()
 	var mid := P.flat_dist(home)
 	step(m, 0.2)
 	ok("mage dash: Blink after its windup", mid < 0.3 and P.flat_dist(home) > 4.5 and P.flat_dist(home) < 6.0, "at windup %.1f, then %.1fm" % [mid, P.flat_dist(home)])
-	# R: Meteor: a 1.0s tell, then the impact spikes an airborne target
-	P.teleport(home); fresh(T); T.teleport(home + Vector3(6, 0, 0))
-	P.inp["aim"] = T.pos
+	var dl := P.dashes
+	P.do_dash()
+	step(m, 0.1)
+	ok("mage dash again: snap back to the sigil", P.flat_dist(home) < 1.0 and K.st.get("last_dash") == "back" and P.dashes >= dl - 0.01, "%.1fm from start" % P.flat_dist(home))
+	# R: Encore: mirrors recast the last spell (a Bolt) at once, then echo
+	P.teleport(home); fresh(T); fresh(T2); T.teleport(home + Vector3(7, 0, 0)); aim_at(P, T.pos); K.last_spell = "bolt"
+	for key in K.runes.keys(): K._clear_rune(key)
 	ult(m, P)
-	step(m, 0.85)
-	var pre := dmg(T)
-	T.vel.y = 7.0; T.grounded = false
-	step(m, 0.4)
-	ok("mage R: Meteor tell then spike", pre < 0.5 and dmg(T) >= 30.0 and T.stun_t > 0.3, "pre %.0f took %.0f stun %.2f" % [pre, dmg(T), T.stun_t])
+	step(m, 1.2)
+	ok("mage R: Encore mirrors recast", not K.encore.is_empty() and dmg(T) >= 10.0, "took %.0f" % dmg(T))
 	await done(m)
 
 # ------------------------------------------------------------------ Gunslinger
@@ -784,10 +786,10 @@ func _feel() -> void:
 	var st3 := StageSpec.parse({"delivery": {"type": "leap", "range": 7, "time": 0.5}}, "", GrammarReport.new())
 	ok("feel: leap flight counts", Feel.missing_windup(st3) <= 0.0)
 	# archetype tells meet the floors
-	ok("feel: Meteor tell >= hard floor", float(Arch.def("mage")["r"]["tell"]) >= Feel.floor_for("hard_cc", "instant"))
+	ok("feel: Hex is a projectile (dodgeable)", String(Arch.def("mage")["e"]["delivery"]) == "projectile" and float(Arch.def("mage")["e"]["speed"]) <= 24.0)
 	ok("feel: Arrow Rain tell >= soft floor", float(Arch.def("archer")["e"]["tell"]) >= Feel.floor_for("soft_cc", "instant"))
 	ok("feel: Heist fuse + mark-out >= self floor", float(Arch.def("thief")["r"]["tell"]) + float(Arch.def("thief")["r"]["fuse"]) >= Feel.floor_for("hard_cc", "self"))
-	ok("feel: Sigil detonation >= soft floor", float(Arch.def("mage")["e"]["det_t"]) >= Feel.floor_for("soft_cc", "instant"))
+	ok("feel: Blink windup shows the landing", float(Arch.def("mage")["dash"]["windup"]) >= 0.1)
 	ok("feel: Rampage windup visible >= 0.30", float(Arch.def("juggernaut")["dash"]["windup"]) * 0.5 >= 0.3)
 	ok("feel: Avalanche / Bastion plant tells (fuse + tell)", float(Arch.def("juggernaut")["r"]["tell"]) + float(Arch.def("juggernaut")["r"]["fuse"]) >= 0.3 and float(Arch.def("bulwark")["r"]["tell"]) >= 0.3)
 	ok("feel: every R has a fuse of 0.35-0.8s", Arch.ids().all(func(a): return float(Arch.def(a)["r"].get("fuse", 0.0)) >= 0.35 and float(Arch.def(a)["r"].get("fuse", 0.0)) <= 0.8))

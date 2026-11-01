@@ -1,24 +1,34 @@
 class_name MageKit
 extends ArchKit
-## Mage (medium): Blink, Overload (Heat and the Vent), Bolt (Lance, Starfall, split through the
-## Sigil, Overcharged), Sigil (recast to detonate), Meteor. docs/ARCHETYPES.md §6.3.
+## Mage (medium): a tricky, mobile spell duelist (kits4: LeBlanc-style combos, a Sinclair-style
+## steerable RMB; ideas only, our names and numbers). docs/ARCHETYPES.md "Kit loops".
 ##
-## The loop (kits4): bolts and the Sigil build Heat -> Overcharged at 70 (runes orbit the Mage
-## white-hot, the Sigil glows primed) -> recast E for a Flashpoint: the Sigil detonates with all the
-## Heat (bigger, harder, a payoff hit that lifts), Heat drops to 0 with no Vent and the Bolt is back
-## for the follow-up (or a Meteor spikes the lifted). Overshoot to 100 and you Vent instead.
+## - RMB, Guided Bolt: fire on the press; keep holding and it bends toward your cursor (round cover
+##   onto a target); it hits harder the longer it flies (10 -> 22 over 1.6s). A hit Runes the target.
+## - Passive, Runes and Heat: a second spell on a Runed foe detonates the Rune: a Runeburst (16, root
+##   0.5, T4). Casting builds Heat; Overcharged (70+) a detonation is a Flashpoint instead (30, a burst
+##   on everyone near, root 0.8, Heat spent with no Vent, the Bolt back). At 100 you Vent.
+## - E, Hex: a dodgeable bolt that turns a hunter into a harmless critter for 1.3s (half speed, no
+##   attacks, casts, dashes or glides); on a Runed foe it detonates the Rune too.
+## - Dash, Blink: 0.12s windup, up to 5.5m (through walls); a sigil stays where you left; dash again
+##   within 3s to snap back to it.
+## - R, Encore: two mirror images at your sides recast your last spell at once, then echo every Bolt
+##   and Hex you cast for 4s (60%).
 
-var sigil := {}                # {pos, r, t, node}
 var vent := {}                 # a Vent winding up: {t}
 var lock_t := 0.0              # RMB locked after a Vent
-var lance_tele: Node3D = null
 var blink := {}                # Blink's windup: {t, to, from, ex}
-var blink_back := {}           # Moon Return / echo recast window: {t, to, k}
-var meteor := {}
-var runes: Node3D = null       # the Heat tell: rune motes orbiting the Mage, white-hot when Overcharged
+var blink_back := {}           # the snap-back window: {t, to, k, node}
+var bolts: Array = []          # live Guided Bolts: {pos, dir, t, node, k, steer, hum, seg}
+var runes := {}                # foe id -> {e, t, node}: Runes on targets
+var orbit: Node3D = null       # the Heat tell: rune motes orbiting the Mage
 var was_over := false
 var armed_at := -9.0
-var flashpoints := 0           # Flashpoints set off (tests, demo)
+var encore := {}               # R: {t, nodes, fx}
+var last_spell := "bolt"
+var detonations := 0           # Runebursts + Flashpoints (tests)
+var flashpoints := 0
+var hexes := 0                 # Hexes that landed (tests)
 
 func over() -> bool:
 	return res >= float(res_def().get("over", 70.0))
@@ -30,18 +40,29 @@ func res_text() -> String:
 	return "%d HOT" % int(res) if over() else "%d" % int(res)
 
 func ready_label() -> String:
-	if over() and not sigil.is_empty(): return "FLASHPOINT READY  ·  E"
+	var any := false
+	for key in runes:
+		if is_instance_valid(runes[key]["e"]): any = true
+	if any and over(): return "RUNED  ·  OVERCHARGED: FLASHPOINT"
+	if any: return "RUNED  ·  hit it again"
 	if over(): return "OVERCHARGED"
 	return ""
-
-func e_payoff_ready() -> bool:
-	return over() and not sigil.is_empty()
 
 func add_heat(v: float) -> void:
 	add_res(v)
 	touch_res(float(res_def().get("wait", 1.2)))
 	if res >= res_max() - 0.01 and vent.is_empty():
 		_start_vent()
+
+func move_k() -> float:
+	return 1.0
+
+func fire_ok_rmb() -> bool:
+	return lock_t <= 0.0
+
+## The steer is a hold, not a charge (the bolt's hum is its feedback).
+func rmb_charge_full() -> float:
+	return 0.0
 
 func _tick(dt: float) -> void:
 	var rd := res_def()
@@ -52,105 +73,32 @@ func _tick(dt: float) -> void:
 		vent["t"] = float(vent["t"]) - dt
 		if float(vent["t"]) <= 0.0:
 			_vent()
-	if not sigil.is_empty():
-		sigil["t"] = float(sigil["t"]) - dt
-		if int(m.time * 4.0) != int((m.time - dt) * 4.0):
-			for o in m.hunters:
-				if o.team == h.team and not o.out and o.flat_dist(sigil["pos"]) < float(sigil["r"]):
-					o.add_buff("move_speed", float(e_def().get("haste", 0.15)), 0.4)
-		if float(sigil["t"]) <= 0.0:
-			_drop_sigil()
-	if lance_tele and is_instance_valid(lance_tele) and rmb_down:
-		m.fx.aim_telegraph(lance_tele, h.pos, h.aim_dir())
 	if not blink.is_empty():
 		blink["t"] = float(blink["t"]) - dt
 		if float(blink["t"]) <= 0.0:
 			_do_blink()
 	if not blink_back.is_empty():
 		blink_back["t"] = float(blink_back["t"]) - dt
-		if float(blink_back["t"]) <= 0.0: blink_back = {}
+		if float(blink_back["t"]) <= 0.0: _end_back()
+	_tick_bolts(dt)
+	_tick_runes_on(dt)
+	if not encore.is_empty(): _tick_encore(dt)
 	var ov := over() and vent.is_empty()
 	if ov and not was_over and m.time - armed_at > 2.0:
 		armed_at = m.time
-		armed_fx("OVERCHARGED", "k1" if not sigil.is_empty() else "")
+		armed_fx("OVERCHARGED", "")
 	was_over = ov
-	_tick_runes(dt)
-	_tick_sigil_look()
+	_tick_orbit()
 	net_pulse(dt, ov)
-	if not meteor.is_empty():
-		meteor["t"] = float(meteor["t"]) - dt
-		var mt: Node3D = meteor.get("rock")
-		if mt and is_instance_valid(mt):
-			var k := 1.0 - clampf(float(meteor["t"]) / float(meteor["T"]), 0.0, 1.0)
-			mt.position = (meteor["at"] as Vector3) + Vector3(-3.0, 9.0, 2.0) * (1.0 - k)
-		if float(meteor["t"]) <= 0.0:
-			_meteor_hit()
-
-## The Heat tell on the Mage (everyone sees it): a rune mote per 20 Heat orbiting the waist, blue
-## and calm below 70, white-hot, faster and lit from 70 (Overcharged).
-func _tick_runes(_dt: float) -> void:
-	if runes == null or not is_instance_valid(runes):
-		runes = own_node()
-		for i in 5:
-			var d := MeshInstance3D.new()
-			d.mesh = Models.box(0.16, 0.16, 0.16)
-			d.material_override = Models.glow_mat(Color(col_of(e_def()), 0.95))
-			d.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-			runes.add_child(d)
-		var lt := OmniLight3D.new()
-		lt.name = "Light"
-		lt.light_color = res_col()
-		lt.omni_range = 3.0
-		runes.add_child(lt)
-	var n := int(ceil(res / 20.0 - 0.01))
-	runes.visible = tells_visible() and n > 0
-	if not runes.visible:
-		return
-	var sc := float(h.cdat.get("scale", 1.0))
-	runes.global_position = h.position + Vector3(0, 1.05 * sc, 0)
-	var ov := over()
-	var hot := res_col().lerp(Color("ffb070"), 0.35)
-	var a: float = m.time * (5.5 if ov else 2.0)
-	for i in 5:
-		var d := runes.get_child(i) as MeshInstance3D
-		d.visible = i < n
-		var ang := a + TAU * i / 5.0
-		var rad := (0.85 if ov else 0.7) * sc
-		d.position = Vector3(cos(ang) * rad, 0.15 * sin(m.time * 3.0 + i), sin(ang) * rad)
-		d.rotation = Vector3(m.time * 2.0, m.time * 3.0 + i, 0.0)
-		d.scale = Vector3.ONE * ((1.4 + 0.25 * sin(m.time * 14.0 + i)) if ov else 1.0)
-		d.material_override.set_shader_parameter("color", Color(hot, 1.0) if ov else Color(col_of(e_def()), 0.9))
-	(runes.get_node("Light") as OmniLight3D).light_energy = (1.6 + 0.6 * sin(m.time * 12.0)) if ov else 0.0
-
-## A primed Sigil (the Mage is Overcharged): its rings burn white-gold and throb, so everyone can read
-## that the detonation will be a Flashpoint.
-func _tick_sigil_look() -> void:
-	if sigil.is_empty() or not is_instance_valid(sigil.get("node")):
-		return
-	var n: Node3D = sigil["node"]
-	var ov := over()
-	var c := res_col().lerp(Color.WHITE, 0.3) if ov else col_of(e_def())
-	for ch in n.get_children():
-		if ch is MeshInstance3D and (ch as MeshInstance3D).material_override:
-			(ch as MeshInstance3D).material_override.set_shader_parameter("color", Color(c, 0.95 if ov else 0.8))
-	n.scale = Vector3.ONE * ((1.0 + 0.05 * sin(m.time * 12.0)) if ov else 1.0)
-	n.rotation.y += 0.02 if ov else 0.004
-
-func move_k() -> float:
-	if rmb_down and rmb_t > 0.15 and not rmb_ctx.get("air", false):
-		return 1.0 - float(rmb_def()["lance"]["self_slow"])     # slowed while the Lance charges
-	return 1.0
-
-func fire_ok_rmb() -> bool:
-	return lock_t <= 0.0
 
 # ---- the Vent: a 0.4s ring collapsing onto you (everyone sees it), then the nova ----
 func _start_vent() -> void:
 	var rd := res_def()
 	vent = {"t": float(rd.get("vent_t", 0.4))}
-	var ring := tele_circle(h.pos, float(rd.get("vent_r", 3.0)), res_col(), float(rd.get("vent_t", 0.4)))
+	tele_circle(h.pos, float(rd.get("vent_r", 3.0)), res_col(), float(rd.get("vent_t", 0.4)))
 	m.sfx("warn", h.pos, -2.0, 1.5)
 	m.fx.burst(h.pos + Vector3(0, 1.4, 0), Color(1, 1, 1, 0.7), 16, 2.5, 0.4, -3.0)
+	net_ring(h.pos, float(rd.get("vent_r", 3.0)), res_col())
 
 func _vent() -> void:
 	var rd := res_def()
@@ -163,19 +111,141 @@ func _vent() -> void:
 	m.fx.word(h.pos + Vector3(0, 2.3, 0), "VENT", res_col(), true)
 	Feel.shake(m, "t3", h, h.pos)
 
-# ------------------------------------------------------------------ dash: Blink
+## The Heat tell on the Mage (everyone sees it): a rune mote per 20 Heat orbiting the waist, calm
+## below 70, burning, faster and lit from 70 (Overcharged).
+func _tick_orbit() -> void:
+	if orbit == null or not is_instance_valid(orbit):
+		orbit = own_node()
+		for i in 5:
+			var d := MeshInstance3D.new()
+			d.mesh = Models.box(0.16, 0.16, 0.16)
+			d.material_override = Models.glow_mat(Color(Arch.color(id), 0.95))
+			d.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			orbit.add_child(d)
+		var lt := OmniLight3D.new()
+		lt.name = "Light"
+		lt.light_color = res_col()
+		lt.omni_range = 3.0
+		orbit.add_child(lt)
+	var n := int(ceil(res / 20.0 - 0.01))
+	orbit.visible = tells_visible() and n > 0
+	if not orbit.visible:
+		return
+	var sc := float(h.cdat.get("scale", 1.0))
+	orbit.global_position = h.position + Vector3(0, 1.05 * sc, 0)
+	var ov := over()
+	var hot := res_col().lerp(Color("ffb070"), 0.35)
+	var a: float = m.time * (5.5 if ov else 2.0)
+	for i in 5:
+		var d := orbit.get_child(i) as MeshInstance3D
+		d.visible = i < n
+		var ang := a + TAU * i / 5.0
+		var rad := (0.85 if ov else 0.7) * sc
+		d.position = Vector3(cos(ang) * rad, 0.15 * sin(m.time * 3.0 + i), sin(ang) * rad)
+		d.rotation = Vector3(m.time * 2.0, m.time * 3.0 + i, 0.0)
+		d.scale = Vector3.ONE * ((1.4 + 0.25 * sin(m.time * 14.0 + i)) if ov else 1.0)
+		d.material_override.set_shader_parameter("color", Color(hot, 1.0) if ov else Color(Arch.color(id), 0.9))
+	(orbit.get_node("Light") as OmniLight3D).light_energy = (1.6 + 0.6 * sin(m.time * 12.0)) if ov else 0.0
+
+# ------------------------------------------------------------------ Runes (marks on targets) and detonation
+func runed(f: Ent) -> bool:
+	return f != null and runes.has(f.get_instance_id()) and is_instance_valid(runes[f.get_instance_id()]["e"])
+
+func _add_rune(f: Ent) -> void:
+	var key := f.get_instance_id()
+	if runes.has(key):
+		runes[key]["t"] = float(res_def().get("rune_t", 4.0))
+		return
+	var n := Node3D.new()
+	n.top_level = true
+	var ring := MeshInstance3D.new()
+	ring.mesh = Models.flat_quad(1.2)
+	ring.material_override = Models.ring_mat(Color(Arch.color(id), 0.95), 0.12)
+	n.add_child(ring)
+	var gem := MeshInstance3D.new()
+	gem.mesh = Models.box(0.22, 0.22, 0.22)
+	gem.material_override = solid_mat(Arch.color(id).lightened(0.3))
+	gem.rotation = Vector3(PI * 0.25, 0, PI * 0.25)
+	n.add_child(gem)
+	m.add_child(n)
+	runes[key] = {"e": f, "t": float(res_def().get("rune_t", 4.0)), "node": n}
+	m.fx.word(f.pos + Vector3(0, 2.3, 0), "RUNED", Arch.color(id), false)
+	m.sfx("zap", f.pos, -6.0, 1.6)
+	net_ring(f.pos, 1.0, Arch.color(id))
+
+func _clear_rune(key: int) -> void:
+	if not runes.has(key): return
+	var n: Node3D = runes[key]["node"]
+	if is_instance_valid(n): n.queue_free()
+	runes.erase(key)
+
+func _tick_runes_on(dt: float) -> void:
+	for key in runes.keys():
+		var r: Dictionary = runes[key]
+		var f: Ent = r["e"]
+		r["t"] = float(r["t"]) - dt
+		if float(r["t"]) <= 0.0 or not is_instance_valid(f) or f.dead:
+			_clear_rune(key)
+			continue
+		var n: Node3D = r["node"]
+		if is_instance_valid(n):
+			n.global_position = f.position + Vector3(0, 2.75 if f is Hunter else 1.9, 0)
+			n.rotation.y = m.time * 3.0
+			n.scale = Vector3.ONE * ((1.15 + 0.15 * sin(m.time * 12.0)) if over() else 1.0)
+
+func teardown() -> void:
+	for key in runes.keys(): _clear_rune(key)
+	for b in bolts:
+		if is_instance_valid(b["node"]): (b["node"] as Node3D).queue_free()
+	bolts.clear()
+	super.teardown()
+
+## A spell landed on `f`: a Runed foe detonates; a Bolt Runes a fresh one.
+func spell_hit(f: Ent, spell: String) -> void:
+	if f == null or not is_instance_valid(f) or f.dead or f.team == h.team:
+		return
+	if runed(f):
+		_clear_rune(f.get_instance_id())
+		var tgt := f
+		m.later(0.02, func(): if is_instance_valid(h) and is_instance_valid(tgt) and not tgt.dead: _detonate(tgt, spell != "hex"))
+	elif spell == "bolt":
+		_add_rune(f)
+
+## The payoff: a Runeburst, or Overcharged a Flashpoint (all the Heat, a burst on everyone near).
+func _detonate(f: Ent, root: bool) -> void:
+	var rd := res_def()
+	detonations += 1
+	var dir := h.dir_to(f)
+	if over() and vent.is_empty():
+		flashpoints += 1
+		res = 0.0; vent = {}; was_over = false
+		var hot := res_col().lerp(Color.WHITE, 0.35)
+		f.hurt(float(rd["flash_dmg"]) * power("sec"), h, {"src": "abil", "ab": "utility", "tags": ["utility", "flashpoint"], "payoff": true, "crit": true, "root": float(rd["flash_root"]) if root else 0.0, "dr": true})
+		for o in foes_in(f.pos, float(rd["flash_r"])):
+			if o != f: o.hurt(float(rd["flash_splash"]) * power("sec"), h, {"src": "abil", "ab": "utility", "tags": ["utility", "flashpoint"], "root": float(rd["flash_root"]) * 0.5, "dr": true, "kb": Vector2(o.pos.x - f.pos.x, o.pos.z - f.pos.z).normalized() * 4.0})
+		m.sfx("pay_flashpoint", f.pos, 0.0, 1.0)
+		payoff_fx(f.pos, "FLASHPOINT", hot, "", dir, f)
+		m.fx.ring(f.pos, float(rd["flash_r"]), Color(res_col(), 0.9), 0.45)
+		m.fx.burst(f.pos + Vector3(0, 0.6, 0), Color("ff9a4a"), 30, 9.0, 0.6, 3.0, 1.5)
+		ch_rmb = float(rmb_charges()); cd["rmb"] = 0.0; lock_t = 0.0
+		h._ab_feedback("sec", "ready")
+	else:
+		f.hurt(float(rd["burst_dmg"]) * power("sec"), h, {"src": "abil", "ab": "utility", "tags": ["utility", "runeburst"], "payoff": true, "crit": true, "root": float(rd["burst_root"]) if root else 0.0, "dr": true})
+		m.sfx("pay_flashpoint", f.pos, -3.0, 1.45)
+		payoff_fx(f.pos, "RUNEBURST", Arch.color(id).lightened(0.2), "", dir, f)
+	CombatBus.ability_used.emit(h, "runeburst", "secondary")
+
+# ------------------------------------------------------------------ dash: Blink (snap back within 3s)
 func on_dash(use_ex: bool) -> bool:
 	var dd := dash_def()
 	if not blink_back.is_empty():
-		# Moon Return (a Lunowl) or the echo's free recast
+		# snap back to the sigil you left
 		var to: Vector3 = blink_back["to"]
-		var k := float(blink_back.get("k", 1.0))
-		blink_back = {}
-		if k < 1.0:
-			var dv := Vector2(aim().x - h.pos.x, aim().z - h.pos.z)
-			if dv.length() > 0.1: dv = dv.normalized() * minf(dv.length(), float(dd["dist"]) * k)
-			to = _safe_spot(h.pos + Vector3(dv.x, 0, dv.y))
-		_land_blink(h.pos, to, false)
+		var from := h.pos
+		_end_back()
+		_land_blink(from, to, false)
+		m.fx.word(h.pos + Vector3(0, 2.3, 0), "SNAP BACK", col_of(dd), false)
+		st["last_dash"] = "back"
 		return true
 	if not blink.is_empty():
 		return true
@@ -193,11 +263,11 @@ func on_dash(use_ex: bool) -> bool:
 	tele_circle(ground(to), 0.6, col_of(dd), float(dd["windup"]))
 	m.sfx("portal", h.pos, -6.0, 1.9)
 	blink = {"t": float(dd["windup"]), "to": to, "air": air, "vel": h.vel}
+	st["last_dash"] = "blink"
 	CombatBus.ability_used.emit(h, "blink", "dodge")
 	return true
 
-## Never into the abyss: an over-the-abyss destination comes back toward you onto ground (or, in
-## the air, you arrive gliding).
+## Never into the abyss: an over-the-abyss destination comes back toward you onto ground.
 func _safe_spot(p: Vector3) -> Vector3:
 	var from := h.pos
 	var k := 1.0
@@ -211,7 +281,7 @@ func _safe_spot(p: Vector3) -> Vector3:
 func _do_blink() -> void:
 	var b := blink
 	blink = {}
-	if h.downed or h.stun_t > 0.0:
+	if h.downed or h.stun_t > 0.0 or Hex.active(h):
 		return
 	_land_blink(h.pos, b["to"], true, bool(b.get("air", false)), b.get("vel", Vector3.ZERO))
 
@@ -223,9 +293,10 @@ func _land_blink(from: Vector3, to: Vector3, first: bool, air := false, keep_vel
 	h.phase_t = maxf(h.phase_t, 0.1)
 	m.fx.burst(to + Vector3(0, 0.9, 0), col_of(dd), 16, 3.0, 0.3)
 	Feel.dash_sound(m, id, to, h)
+	net_bolt(from + Vector3(0, 0.9, 0), to + Vector3(0, 0.9, 0), col_of(dd))
 	if not first:
 		return
-	# the residue rune at the departure point bursts 0.6s later: a slow (the kin rider changes it)
+	# the sigil you leave: it slows foes on it 0.6s later, and for 3s you can snap back to it
 	var rp := rider_points(from, to)
 	var dbl := 2.0 if rank("dash") >= 3 else 1.0
 	var rune := ground(from)
@@ -235,252 +306,256 @@ func _land_blink(from: Vector3, to: Vector3, first: bool, air := false, keep_vel
 		var stg := StageSpec.parse({"delivery": {"type": "burst", "origin": "here", "radius": float(dd["rune_r"])},
 			"effects": [{"type": "slow", "duration": minf(4.0, float(dd["rune_slow_t"]) * dbl), "strength": minf(0.6, float(dd["rune_slow"]) * dbl)}]}, "", GrammarReport.new())
 		run(stg, cx("dash", "blink_rune", rune, {"at": rune, "no_floor": true})))
-	if String(rp.get("as", "")) == "blink":
-		blink_back = {"t": 1.5, "to": from, "k": 1.0}          # Moon Return
-	elif rp.get("repeat") != null:
-		blink_back = {"t": 1.0, "to": to, "k": float((rp["repeat"] as PartSpec).params.get("falloff", 0.55))}
+	var n := own_node()
+	var ring := MeshInstance3D.new()
+	ring.mesh = Models.flat_quad(1.6)
+	ring.material_override = Models.ring_mat(Color(col_of(dd), 0.9), 0.1)
+	n.add_child(ring)
+	n.global_position = rune + Vector3(0, 0.1, 0)
+	blink_back = {"t": float(dd.get("back_t", 3.0)), "to": rune, "node": n}
+	if rp.get("repeat") != null:
+		blink_back["t"] = float(blink_back["t"]) + 1.0
 
-# ------------------------------------------------------------------ RMB: Bolt
-func rmb_hold_tick(t: float) -> void:
-	if t > 0.15 and lance_tele == null:
-		lance_tele = tele_lane(h.pos, h.aim_dir(), float(rmb_def()["lance"]["range"]), float(rmb_def()["lance"]["width"]), Feel.cat_color("damage"), 0.0)
+func _end_back() -> void:
+	var n: Node3D = blink_back.get("node")
+	if n and is_instance_valid(n):
+		self_nodes.erase(n)
+		n.queue_free()
+	blink_back = {}
 
-func rmb_auto_t() -> float:
-	return 1.2
-
+# ------------------------------------------------------------------ RMB: Guided Bolt
+## Fires on the press; while you keep holding, the bolt bends toward your cursor.
 func press_rmb() -> void:
-	if lock_t > 0.0 or not vent.is_empty():
+	if busy() or lock_t > 0.0 or not vent.is_empty():
 		h._ab_feedback("sec", "deny")
 		return
-	super.press_rmb()
-
-func fire_rmb(c: Dictionary) -> void:
-	if lance_tele and is_instance_valid(lance_tele): m.fx.end_telegraph(lance_tele)
-	lance_tele = null
-	last_variant = String(c["variant"])
+	if rmb_down:
+		return
+	var air := not h.grounded or h.gliding
 	if not spend_rmb(): return
-	var sd := rmb_def()
-	var ov := over()
-	var k := 1.0 + (float(sd.get("over_k", 0.25)) if ov else 0.0)
-	if c.get("air", false):
-		var sf: Dictionary = sd["starfall"]
-		var stg := stage("rmb", {"delivery": {"type": "burst", "origin": "caster", "radius": float(sf["radius"]) * k},
-			"effects": [{"type": "damage", "amount": float(sf["dmg"]) * k}, {"type": "push", "strength": float(sf["push"])}]})
-		run(stg, cx("rmb", "starfall", h.pos))
-		h.vel.y = maxf(h.vel.y, float(sf["lift"]))
-		h.gliding = false; h.grounded = false
-		h.glide_fuel = minf(1.0, h.glide_fuel + float(sf["cool"]))
-		add_heat(float(res_def()["tap"]))
+	rmb_down = true
+	rmb_t = 0.0
+	rmb_ctx = {"air": air, "e": false, "r": not encore.is_empty(), "full": over()}
+	if air:
+		_starfall()
+		rmb_down = false
+		last_variant = "air"
 		return
-	var through := _through_sigil()
-	if c.get("hold", false):
-		var ld: Dictionary = sd["lance"]
-		var mods: Array = [{"type": "pierce", "count": 5 if rank("sec") >= 3 else 3}]
-		if through >= 0.0: mods.append({"type": "chain", "count": 2, "range": 4.5})
-		var stg := stage("rmb", {"delivery": {"type": "beam", "range": float(ld["range"]), "width": float(ld["width"])},
-			"effects": [{"type": "damage", "amount": float(ld["dmg"]) * k}], "modifiers": mods})
-		run(stg, cx("rmb", "lance", aim(), {"no_floor": true}))
-		if through >= 0.0: last_variant = "during_e"
-		add_heat(float(res_def()["hold"]))
-		Feel.cast_sound(m, "beam", "damage", h.pos, h)
-		return
-	var bd: Dictionary = sd["bolt"]
-	var effs := [{"type": "damage", "amount": float(bd["dmg"]) * k}, {"type": "slow", "duration": float(bd["slow_t"]), "strength": float(bd["slow"])}]
-	var base := {"delivery": {"type": "projectile", "speed": float(bd["speed"]), "range": float(bd["range"]), "size": 0.2}, "effects": effs}
-	if ov: base["modifiers"] = [{"type": "pierce", "count": 1}]
-	var c2 := cx("rmb", "bolt", aim())
-	if through >= 0.0 and through < float(bd["range"]):
-		# a bolt through the Sigil splits into 3 at the rune
-		var first := base.duplicate(true)
-		first["delivery"]["range"] = maxf(2.0, through)
-		var rest := maxf(2.0, float(bd["range"]) - through + 2.0)
-		var stg1 := stage("rmb", first)
-		c2["on_shot_end"] = func(at: Vector3, why: String, e):
-			if why == "expire" and e == null and is_instance_valid(h):
-				var sp := base.duplicate(true)
-				sp["delivery"]["range"] = rest
-				sp["delivery"]["origin"] = "here"
-				var md: Array = sp.get("modifiers", [])
-				md.append({"type": "split", "count": int(sd["split"]["count"]), "angle": float(sd["split"]["angle"])})
-				sp["modifiers"] = md
-				var st2 := stage("rmb", sp)
-				var c3 := cx("rmb", "bolt_split", at + Vector3(h.aim_dir().x, 0, h.aim_dir().y) * 3.0, {"at": at, "dir": h.aim_dir()})
-				run(st2, c3)
-				m.fx.ring(at, 1.0, col_of(e_def()), 0.25)
-		run(stg1, c2)
-		last_variant = "during_e"
-	else:
-		run(stage("rmb", base), c2)
+	last_variant = "full" if over() else ("during_r" if not encore.is_empty() else "tap")
+	last_spell = "bolt"
+	_spawn_bolt(h.pos + Vector3(h.aim_dir().x * 0.6, 1.05, h.aim_dir().y * 0.6), h.aim_dir(), 1.0, true)
 	add_heat(float(res_def()["tap"]))
-	Feel.cast_sound(m, "projectile", "control", h.pos, h)
+	if not encore.is_empty(): _echo("bolt")
 
-## How far along the aim line the Sigil is (-1 if the line misses it).
-func _through_sigil() -> float:
-	if sigil.is_empty():
-		return -1.0
-	var a := Vector2(h.pos.x, h.pos.z)
-	var dir := h.aim_dir()
-	var c := Vector2(sigil["pos"].x, sigil["pos"].z)
-	var t := (c - a).dot(dir)
-	if t < 0.0 or t > 14.0:
-		return -1.0
-	if (a + dir * t).distance_to(c) > float(sigil["r"]):
-		return -1.0
-	return t
+func fire_rmb(_c: Dictionary) -> void:
+	pass         # (the bolt went on the press; letting go just stops the steering)
 
-# ------------------------------------------------------------------ E: Sigil
-func in_e() -> bool:
-	return not sigil.is_empty()
+func rmb_auto_t() -> float:
+	return float(rmb_def()["bolt"]["life"]) + 0.2
 
-func e_recastable() -> bool:
-	return not sigil.is_empty()
+func _spawn_bolt(at: Vector3, dir: Vector2, k: float, steer: bool) -> void:
+	var n := own_node()
+	var core := MeshInstance3D.new()
+	core.mesh = Models.sphere(0.22, 12)
+	core.material_override = Models.glow_mat(Color(col_of(rmb_def()), 1.0))
+	core.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	n.add_child(core)
+	var lt := OmniLight3D.new()
+	lt.light_color = col_of(rmb_def())
+	lt.light_energy = 1.2
+	lt.omni_range = 2.2
+	n.add_child(lt)
+	n.global_position = at
+	bolts.append({"pos": at, "dir": dir.normalized(), "t": 0.0, "node": n, "k": k, "steer": steer, "hum": 0.0, "seg": 0.0, "last": at})
+	m.sfx("zap", h.pos, -3.0, 0.8)
+	m.sfx("ab_throw", h.pos, -6.0, 1.5)
+	m.fx.flash(at, col_of(rmb_def()), 0.5, 0.06)
 
-func e_recast() -> bool:
-	if sigil.is_empty():
-		return false
-	var ed := e_def()
-	var at: Vector3 = sigil["pos"]
-	var r: float = sigil["r"]
-	_drop_sigil()
-	e_t = 0.0
-	if over() and vent.is_empty():
-		_flashpoint(at, r)
-		return true
-	tele_circle(at, r, Feel.cat_color("control"), float(ed["det_t"]))
-	m.fx.flash(at + Vector3(0, 0.3, 0), col_of(ed), 1.2, float(ed["det_t"]))
-	m.later(float(ed["det_t"]), func():
-		if not is_instance_valid(h): return
-		var stg := stage("e", {"delivery": {"type": "burst", "origin": "aim", "radius": r},
-			"effects": [{"type": "damage", "amount": float(ed["det_dmg"])}, {"type": "lift", "strength": float(ed["det_lift"])}]})
-		run(stg, cx("e", "sigil_detonate", at, {"no_floor": true}))
-		Feel.shake(m, "t3", h, at))
-	h._ab_feedback("k1", "cast")
-	last_e = "Detonate"
-	return true
+func _tick_bolts(dt: float) -> void:
+	if bolts.is_empty():
+		return
+	var bd: Dictionary = rmb_def()["bolt"]
+	var steering := rmb_down and held("rmb")
+	var a := aim()
+	for b in bolts.duplicate():
+		var n: Node3D = b["node"]
+		b["t"] = float(b["t"]) + dt
+		var p: Vector3 = b["pos"]
+		var dir: Vector2 = b["dir"]
+		if steering and bool(b["steer"]):
+			# bend toward the cursor
+			var want := Vector2(a.x - p.x, a.z - p.z)
+			if want.length() > 0.3:
+				var ang := dir.angle_to(want.normalized())
+				var turn := float(bd["turn"]) * (1.3 if rank("sec") >= 3 else 1.0) * dt
+				dir = dir.rotated(clampf(ang, -turn, turn))
+				b["dir"] = dir
+		var q := p + Vector3(dir.x, 0, dir.y) * float(bd["speed"]) * dt
+		var gq: float = m.world.ground_at(q.x, q.z)
+		var fk := clampf(float(b["t"]) / float(bd["ramp"]), 0.0, 1.0)
+		var done: bool = float(b["t"]) >= float(bd["life"]) or m.world.is_block(q.x, q.z) or gq > p.y - 0.3
+		if not done:
+			p = q
+			for f in foes_in(p - Vector3(0, 1.0, 0), 0.75, 2.0):
+				_bolt_hit(f, b, fk)
+				done = true
+				break
+		b["pos"] = p
+		if is_instance_valid(n):
+			n.global_position = p
+			n.scale = Vector3.ONE * (0.8 + 0.9 * fk)
+		# the hum climbs as it flies; a trail of sparks
+		b["hum"] = float(b["hum"]) - dt
+		if float(b["hum"]) <= 0.0:
+			b["hum"] = 0.12
+			m.sfx("ab_whirr", p, lerpf(-14.0, -7.0, fk), lerpf(1.0, 1.9, fk))
+		m.fx.burst(p, col_of(rmb_def()), 1, 0.6, 0.25, 0.0, 0.6 + 0.6 * fk)
+		b["seg"] = float(b["seg"]) - dt
+		if float(b["seg"]) <= 0.0:
+			b["seg"] = 0.1
+			net_bolt(b["last"], p, col_of(rmb_def()))        # remote players see the path
+			b["last"] = p
+		if done:
+			if is_instance_valid(n):
+				m.fx.burst(p, col_of(rmb_def()), 10, 3.0, 0.3)
+				self_nodes.erase(n)
+				n.queue_free()
+			bolts.erase(b)
 
-## Flashpoint: an Overcharged detonation spends all the Heat. The rune collapses inward for the same
-## 0.3s (a bigger, white-gold ring everyone sees), then a payoff burst: more damage and radius, a
-## harder lift (a Meteor spikes it), T4 on each foe it catches; Heat drops to 0 with no Vent and the
-## Bolt comes straight back.
-func _flashpoint(at: Vector3, r0: float) -> void:
-	var ed := e_def()
-	var fd: Dictionary = ed.get("flash", {})
-	res = 0.0
-	vent = {}
-	was_over = false
-	var r := r0 * float(fd.get("r_k", 1.3))
-	var hot := res_col().lerp(Color.WHITE, 0.35)
-	var dt_ := float(ed["det_t"])
-	tele_circle(at, r, hot, dt_)
-	m.fx.ring(at, r, Color(hot, 0.9), dt_)
-	m.fx.flash(at + Vector3(0, 0.4, 0), hot, 1.8, dt_)
-	for i in 10:
-		var a := TAU * i / 10.0
-		var p := at + Vector3(cos(a) * r, 0.3, sin(a) * r)
-		m.fx.burst(p, hot, 3, 9.0, 0.25, 0.0, 1.1, (at + Vector3(0, 0.6, 0) - p).normalized(), 8.0)
-	m.sfx("pay_flashpoint", at, 0.0, 1.0)        # the rush in, then the boom on the detonation
-	net_ring(at, r, hot)
-	h._ab_feedback("k1", "cast")
-	last_e = "Flashpoint"
-	flashpoints += 1
-	m.later(dt_, func():
-		if not is_instance_valid(h): return
-		var stg := stage("e", {"delivery": {"type": "burst", "origin": "aim", "radius": r},
-			"effects": [{"type": "damage", "amount": float(fd.get("dmg", 24.0))}, {"type": "lift", "strength": float(fd.get("lift", 8.5))}]})
-		run(stg, cx("e", "flashpoint", at, {"no_floor": true, "hit_extra": {"payoff": true}}))
-		var dir := Vector2(at.x - h.pos.x, at.z - h.pos.z)
-		payoff_fx(at, "FLASHPOINT", hot, "", dir)
-		m.fx.ring(at, r * 1.15, Color(res_col(), 0.9), 0.45)
-		m.fx.burst(at + Vector3(0, 0.6, 0), Color("ff9a4a"), 30, 9.0, 0.6, 3.0, 1.5)
-		for i in 6:
-			m.later(0.05 * i, func(): if is_instance_valid(h): m.fx.burst(at + Vector3(0, 0.4 + 0.7 * i, 0), hot, 8, 2.2, 0.35, -2.0, 1.2))
-		# the Bolt is straight back: Lance (or Meteor) the lifted
-		ch_rmb = float(rmb_charges()); cd["rmb"] = 0.0; lock_t = 0.0
-		h._ab_feedback("sec", "ready"))
-	CombatBus.ability_used.emit(h, "flashpoint", "kin")
+func _bolt_hit(f: Ent, b: Dictionary, fk: float) -> void:
+	var bd: Dictionary = rmb_def()["bolt"]
+	var ok := 1.0 + (float(rmb_def().get("over_k", 0.25)) if over() else 0.0)
+	var dmg := lerpf(float(bd["dmg"][0]), float(bd["dmg"][1]), fk) * float(b["k"]) * ok
+	var stg := stage("rmb", {"delivery": {"type": "burst", "origin": "here", "radius": 0.0},
+		"effects": [{"type": "damage", "amount": dmg}, {"type": "slow", "duration": float(bd["slow_t"]), "strength": float(bd["slow"])}]})
+	KinExec.apply_foe(stg.effects, f, cx("rmb", "guided_bolt", f.pos, {"at": f.pos, "dir": b["dir"]}), f.pos, stg)
+	m.fx.ring(f.pos, 0.8 + 0.6 * fk, col_of(rmb_def()), 0.2)
+	m.sfx("ab_hit", f.pos, -4.0, lerpf(1.3, 0.9, fk))
+	spell_hit(f, "bolt")
 
+## Starfall (in the air): a bolt into the ground under you, a lift and a cooler glider.
+func _starfall() -> void:
+	var sf: Dictionary = rmb_def()["starfall"]
+	var stg := stage("rmb", {"delivery": {"type": "burst", "origin": "caster", "radius": float(sf["radius"])},
+		"effects": [{"type": "damage", "amount": float(sf["dmg"])}, {"type": "push", "strength": float(sf["push"])}]})
+	run(stg, cx("rmb", "starfall", h.pos))
+	h.vel.y = maxf(h.vel.y, float(sf["lift"]))
+	h.gliding = false; h.grounded = false
+	h.glide_fuel = minf(1.0, h.glide_fuel + float(sf["cool"]))
+	add_heat(float(res_def()["tap"]))
+
+# ------------------------------------------------------------------ E: Hex
 func cast_e() -> bool:
-	var ed := e_def()
-	var at := aim_at(float(ed["reach"]))
-	var r := float(ed["radius"]) * (1.25 if over() else 1.0)
-	_drop_sigil()
-	var n := Node3D.new()
-	m.add_child(n)
-	n.position = at + Vector3(0, 0.08, 0)
-	var ring := MeshInstance3D.new(); ring.mesh = Models.flat_quad(r * 2.0)
-	ring.material_override = Models.ring_mat(Color(col_of(ed), 0.9), 0.08)
-	n.add_child(ring)
-	var inner := MeshInstance3D.new(); inner.mesh = Models.flat_quad(r * 1.3)
-	inner.material_override = Models.ring_mat(Color(col_of(ed), 0.6), 0.04)
-	n.add_child(inner)
-	sigil = {"pos": at, "r": r, "t": float(ed["time"]), "node": n}
-	e_t = float(ed["time"])
+	last_spell = "hex"
+	_hex_bolt(h.pos + Vector3(0, 1.0, 0), aim(), 1.0)
 	add_heat(float(res_def()["e"]))
-	m.fx.burst(at + Vector3(0, 0.3, 0), col_of(ed), 20, 3.0, 0.4, 0.0)
-	Feel.cast_sound(m, "zone", "utility", at, h)
-	# the kin's typing rides the rune (a reveal, a shield...): a light zone with only its parts
-	var fill := Arch.fill(ed.get("sockets", {}), infusion(), "e", "zone", [], budget_k("e"))
-	var effs: Array = (fill["effects"] as Array).filter(func(e): return String(e["type"]) in ["mark", "shield", "slow"])
-	if not effs.is_empty():
-		var z := StageSpec.parse({"delivery": {"type": "zone", "origin": "aim", "radius": r, "duration": float(ed["time"]), "every": 1.0}, "effects": effs}, "", GrammarReport.new())
-		if z: run(z, cx("e", "sigil", at, {"no_floor": true}))
+	if not encore.is_empty(): _echo("hex")
 	return true
 
-func _drop_sigil() -> void:
-	if not sigil.is_empty() and is_instance_valid(sigil["node"]):
-		(sigil["node"] as Node3D).queue_free()
-	sigil = {}
+func _hex_bolt(_from: Vector3, at: Vector3, k: float) -> void:
+	var ed := e_def()
+	var stg := stage("e", {"delivery": {"type": "projectile", "speed": float(ed["speed"]), "range": float(ed["range"]), "size": 0.26},
+		"effects": [{"type": "damage", "amount": float(ed["dmg"]) * k}]})
+	run(stg, cx("e", "hex", at, {"on_foe": func(f: Ent, _c: Dictionary): _hex_hit(f, k)}))
+	m.sfx("portal", h.pos, -3.0, 1.4)
+	m.fx.flash(h.pos + Vector3(h.aim_dir().x * 0.6, 1.1, h.aim_dir().y * 0.6), Color("e2b8ff"), 0.6, 0.08)
 
-# ------------------------------------------------------------------ R: Meteor
+func _hex_hit(f: Ent, k: float) -> void:
+	var ed := e_def()
+	spell_hit(f, "hex")
+	if f is Hunter:
+		hexes += 1
+		Hex.apply(f as Hunter, float(ed["time"]) * k + (0.3 if rank("kin") >= 3 else 0.0))
+	elif is_instance_valid(f) and not f.dead:
+		f.hurt(0.1, h, {"stun": float(ed["mob_stun"]) * k, "src": "abil", "ab": "k1", "tags": ["k1", "hex"]})
+
+# ------------------------------------------------------------------ R: Encore
 func cast_r() -> bool:
 	var rd := r_def()
-	var at := aim_at(float(rd["reach"]))
-	var tell := float(rd["tell"])
-	tele_circle(at, float(rd["radius"]), Feel.cat_color("control"), tell)
-	var rock := Node3D.new()
-	m.add_child(rock)
-	var mi := MeshInstance3D.new(); mi.mesh = Models.sphere(0.7, 12)
-	mi.material_override = Models.glow_mat(Color("ff7a3d"))
-	rock.add_child(mi)
-	rock.position = at + Vector3(-3.0, 9.0, 2.0)
-	m.sfx("charge", at, 0.0, 0.5)       # the ground rumbles
-	meteor = {"at": at, "t": tell, "T": tell, "rock": rock, "over": over()}
-	if over():
-		res = 0.0                        # Overcharged cast: Heat resets, no Vent
-		vent = {}
-	r_t = tell + 0.5
+	var t := float(rd["time"]) * r_dur_k()
+	var nodes: Array = []
+	for i in 2:
+		var n := own_node()
+		var orb := MeshInstance3D.new()
+		orb.mesh = Models.sphere(0.3, 12)
+		orb.material_override = Models.glow_mat(Color(col_of(rd), 0.9))
+		n.add_child(orb)
+		nodes.append(n)
+	encore = {"t": t, "nodes": nodes, "fx": 0.0}
+	r_t = t
+	_place_mirrors()
+	for n in nodes:
+		m.fx.burst((n as Node3D).global_position, col_of(rd), 20, 4.0, 0.4, -1.0, 1.2)
+		net_ring((n as Node3D).global_position, 1.2, col_of(rd))
+	m.sfx("bond", h.pos, -3.0, 1.4)
+	m.sfx("portal", h.pos, -2.0, 0.8)
+	m.fx.word(h.pos + Vector3(0, 2.6, 0), "ENCORE", col_of(rd), true)
+	# the mirrors recast your last spell straight away, at full power
+	_echo(last_spell, 1.0)
 	return true
 
-func _meteor_hit() -> void:
-	var rd := r_def()
-	var at: Vector3 = meteor["at"]
-	if is_instance_valid(meteor.get("rock")): (meteor["rock"] as Node3D).queue_free()
-	meteor = {}
-	var mods: Array = [{"type": "spike", "bonus": float(rd["spike"]), "stun": float(rd["spike_stun"])}]
-	if rank("ult") >= 2: mods.append({"type": "repeat", "count": 1, "delay": 0.5, "falloff": 0.5})
-	var stg := stage("r", {"delivery": {"type": "burst", "origin": "aim", "radius": float(rd["radius"])},
-		"effects": [{"type": "damage", "amount": float(rd["dmg"]) * r_k()}, {"type": "lift", "strength": float(rd["lift"])}], "modifiers": mods})
-	run(stg, cx("r", "meteor", at, {"no_floor": true}))
-	var burn := StageSpec.parse({"delivery": {"type": "zone", "origin": "aim", "radius": float(rd["radius"]) * 0.8, "duration": float(rd["burn_t"]), "every": 0.5},
-		"effects": [{"type": "damage", "amount": float(rd["burn"])}]}, "", GrammarReport.new())
-	run(burn, cx("r", "meteor_burn", at, {"no_floor": true}))
-	m.fx.burst(at + Vector3(0, 0.5, 0), Color("ff7a3d"), 40, 7.0, 0.7, 6.0, 1.5)
-	Feel.shake(m, "leap", h, at)
-	m.sfx("boom", at, 2.0, 0.6)
+func _mirror_spots() -> Array:
+	var d := h.aim_dir()
+	var side := Vector2(-d.y, d.x)
+	var off := float(r_def()["offset"])
+	return [h.pos + Vector3(side.x, 0, side.y) * off + Vector3(0, 1.0, 0), h.pos - Vector3(side.x, 0, side.y) * off + Vector3(0, 1.0, 0)]
+
+func _place_mirrors() -> void:
+	var sp := _mirror_spots()
+	var nodes: Array = encore.get("nodes", [])
+	for i in nodes.size():
+		if is_instance_valid(nodes[i]): (nodes[i] as Node3D).global_position = sp[i]
+
+func _tick_encore(dt: float) -> void:
+	encore["t"] = float(encore["t"]) - dt
+	_place_mirrors()
+	encore["fx"] = float(encore["fx"]) - dt
+	if float(encore["fx"]) <= 0.0 and tells_visible():
+		encore["fx"] = 0.12
+		for p in _mirror_spots():
+			m.fx.ghost(Vector3(p.x, h.position.y, p.z), h.face, Color(col_of(r_def()), 0.8), float(h.cdat["scale"]))
+	if float(encore["t"]) <= 0.0:
+		for n in encore.get("nodes", []):
+			if is_instance_valid(n):
+				m.fx.burst((n as Node3D).global_position, col_of(r_def()), 12, 3.0, 0.3)
+				self_nodes.erase(n)
+				(n as Node3D).queue_free()
+		encore = {}
+
+## The mirrors recast a spell from their spots, 0.2s later (at `k`, 60% by default).
+func _echo(spell: String, k := -1.0) -> void:
+	var kk := float(r_def()["echo_k"]) if k < 0.0 else k
+	m.later(0.2, func():
+		if not is_instance_valid(h) or h.downed: return
+		for p in _mirror_spots():
+			var dir := Vector2(aim().x - p.x, aim().z - p.z).normalized()
+			if spell == "hex":
+				var stg := stage("e", {"delivery": {"type": "projectile", "origin": "here", "speed": float(e_def()["speed"]), "range": float(e_def()["range"]), "size": 0.22},
+					"effects": [{"type": "damage", "amount": float(e_def()["dmg"]) * kk}]})
+				run(stg, cx("e", "hex_echo", aim(), {"at": p, "dir": dir, "on_foe": func(f: Ent, _c: Dictionary): _hex_hit(f, kk)}))
+			else:
+				_spawn_bolt(p, dir, kk, true)
+			m.fx.flash(p, col_of(r_def()), 0.5, 0.06))
 
 # ------------------------------------------------------------------ bots
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null:
 		return
-	if int(h.slot_lv["ult"]) > 0 and float(cd["r"]) <= 0.0 and dist < float(r_def()["reach"]) and randf() < 0.35:
+	if int(h.slot_lv["ult"]) > 0 and float(cd["r"]) <= 0.0 and tgt is Hunter and los and dist < 10.0 and randf() < 0.35:
 		h.inp["aim"] = tgt.pos; h.inp["ult"] = true; return
-	# a primed Sigil with them in it: Flashpoint. Not Overcharged: detonate now and then (or as it fades)
-	if not sigil.is_empty() and tgt.flat_dist(sigil["pos"]) < float(sigil["r"]) + 0.5 and (over() and randf() < 0.9 or randf() < 0.25 or float(sigil["t"]) < 1.5):
-		h.inp["sig"] = true; return
-	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and dist < 9.0 and randf() < 0.35:
-		h.inp["aim"] = tgt.pos; h.inp["sig"] = true; return
-	# ride the heat: don't fire into a Vent unless they're close (a Vent is a peel)
-	if int(h.slot_lv["sec"]) > 0 and rmb_ready() and lock_t <= 0.0 and los and dist < 13.0 and (res < 75.0 or dist < 3.0):
+	# Hex a rival hunter (always worth it on a Runed one: it detonates)
+	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and tgt is Hunter and los and dist < float(e_def()["range"]) - 1.0 and (runed(tgt) or randf() < 0.3):
+		h.inp["aim"] = tgt.pos + Vector3(0, 0.9, 0); h.inp["sig"] = true; return
+	# a Guided Bolt, steered onto them (the bot's aim follows the target while it holds)
+	if int(h.slot_lv["sec"]) > 0 and rmb_ready() and lock_t <= 0.0 and dist < 16.0 and (res < 75.0 or dist < 3.0):
 		h.inp["aim"] = tgt.pos + Vector3(0, 0.9, 0)
 		h.inp["sec"] = true
-		if dist > 9.0: bot_hold["rmb"] = float(rmb_def()["hold"]) + 0.1
+		bot_hold["rmb"] = clampf(dist / float(rmb_def()["bolt"]["speed"]) + 0.3, 0.4, 1.6)
+	# Blink out when it's going badly; snap back once it's safe
+	if int(h.slot_lv["dash"]) > 0:
+		if blink_back.is_empty() and h.dashes >= 1.0 and dist < 4.0 and h.hp < h.max_hp * 0.5 and randf() < 0.5:
+			var away := -h.dir_to(tgt)
+			h.inp["aim"] = h.pos + Vector3(away.x, 0, away.y) * 5.0
+			h.inp["dash"] = true
+		elif not blink_back.is_empty() and h.hp > h.max_hp * 0.55 and float(blink_back["t"]) < 1.5 and randf() < 0.4:
+			h.inp["dash"] = true
