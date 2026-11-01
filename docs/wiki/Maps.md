@@ -3,11 +3,12 @@
 
 _Generated from `content/maps`, `content/biomes`, `scripts/match/world.gd`._
 
-Maps are JSON layouts in `content/maps/`. The expedition map in use is the one `World.layout_for_tier` returns: **Skyreach**. Everything on a layout is fixed; each match only rolls which spawn points, lairs and caches are live, plus loot, the Blight and the weather.
+Maps are JSON layouts in `content/maps/`. The expedition map in use is the one `World.layout_for_tier` returns: **?**. Everything on a layout is fixed; each match only rolls which spawn points, lairs and caches are live, plus loot, the Blight and the weather.
 
 | Map | File | Size | Islands | What it's for |
 |---|---|---|---|---|
 | The Arena | `content/maps/arena.json` | 52 x 52 | 2 | The practice arena. |
+| The Hollow Crown | `content/maps/hollowcrown.json` | 216 x 216 | 12 | Hand-made expedition map (tools/make_hollowcrown.py; the format is described there). |
 | Skyreach | `content/maps/skyreach.json` | 216 x 216 | 17 | Hand-made expedition map. |
 | First Flight | `content/maps/tutorial.json` | 80 x 80 | 3 | The tutorial island group. |
 
@@ -24,6 +25,63 @@ The practice arena: one round floor ringed by low ruin walls with four gates, fo
 
 **Getting around:** 1 bridges.
 
+
+
+## The Hollow Crown
+
+Hand-made expedition map (tools/make_hollowcrown.py; the format is described there). A raised core (the Crown, its Throne and two boss Gaols), a ring of four regions each with one plateau reached by stairs, and four quiet outer isles with the exits. Nothing is placed by dice except what the match rolls: which spawn points, lairs and camps are live, loot, the Blight, weather.
+
+### Regions
+
+| Region | Biome | Purpose |
+|---|---|---|
+| The Crown | Gloom | Contested core: the vault on the Throne, two boss Gaols, the richest loot and the most Blight. Every route in is a bridge or a glide over open air. |
+| Frostgate | Frost | Northern ridge and Keep: high ground over the Gate Span, a camp to level on, Rimefield cover. |
+| Cinder Steps | Ember | Western forge country: the Kilns overlook the Crown's west face; the Ash Bridge to the Ashen Gaol. |
+| Stormbreak | Storm | Eastern tableland with the shrine on the Shrine Table; launch pad up to Shardfall. |
+| Thornwood | Bloom | Southern wood: tall grass ambushes, the Boki nest, the Thornhive lair and its uplink. |
+| Larkhollow | Meadow | Quiet NW landing with a skiff dock. |
+| Highwatch | Frost | Quiet NE landing with an uplink outpost. |
+| Duskmoor | Storm | Quiet SE landing with a skiff dock. |
+| Saltmere | Bloom | Quiet SW landing with an uplink outpost. |
+
+### Islands
+
+| Island | Role | Biome | Danger | Named spots |
+|---|---|---|---|---|
+| The Crown | heart | Gloom | dangerous |  |
+| Stormcrown Gaol | camp | Storm | dangerous |  |
+| Ashen Gaol | camp | Ember | dangerous |  |
+| Frostgate | camp | Frost | contested | Frostgate Keep, Rimefield |
+| Cinder Steps | camp | Ember | contested | The Kilns, Forge Yard |
+| Stormbreak | shrine | Storm | contested |  |
+| Thornwood | nest | Bloom | contested |  |
+| Larkhollow | landing | Meadow | quiet | Lark Stones |
+| Highwatch | landing | Frost | quiet |  |
+| Duskmoor | landing | Storm | quiet |  |
+| Saltmere | landing | Bloom | quiet |  |
+| Shardfall | perch | Gloom | dangerous |  |
+
+### Boss lairs
+
+| Lair | Boss | Island | Ways in |
+|---|---|---|---|
+| Stormcrown Eyrie | Stormcoil | Stormcrown Gaol | lock dial, three rune pylons |
+| The Sunken Forge | Stone Colossus | Ashen Gaol | lock dial |
+| The Thornhive | Brood Mother | Thornwood | lock dial, three ward stones |
+
+**Exits:** 2 skiff docks, 3 uplink outposts, 5 rift hatches.
+
+**Getting around:** 9 bridges, 17 glide routes, 1 jump pads, 1 updrafts.
+
+### Rolled each match
+
+| What | Live per match | Candidate spots |
+|---|---|---|
+| Rare Boki | 3 | Larkhollow, Highwatch, Duskmoor, Saltmere, Nest Glade, Rimefield, Forge Yard, Stormbreak |
+| Vaults | 2 | Frostgate Keep, The Kilns, Shrine Table, Thornwood, The Crown |
+| Item caches | 4 | Larkhollow, Highwatch, Duskmoor, Saltmere, Frostgate, Cinder Steps, Stormbreak, Thornwood, The Crown, Stormcrown Gaol |
+| Live boss lairs | 2 | Stormcrown Eyrie, The Sunken Forge, The Thornhive |
 
 
 ## Skyreach
