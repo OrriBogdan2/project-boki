@@ -409,7 +409,7 @@ static func torso_patch(key: String, fem: bool, u0: float, u1: float, v0: float,
 ## A skirt, coat tail or robe: a flared shell from angle a0 to a1 round (front is -Z, at u = 0.75),
 ## from the waist (radius r0) down h to the hem (r1), with folds deepening toward the hem, a wavy
 ## hem, and a darker inside. a0 = 0, a1 = 1 wraps right round.
-static func drape(key: String, r0: float, r1: float, h: float, a0 := 0.0, a1 := 1.0, folds := 9.0, amp := 0.06, wave := 0.0, back_long := 0.0, thick := 0.016) -> ArrayMesh:
+static func drape(key: String, r0: float, r1: float, h: float, a0 := 0.0, a1 := 1.0, folds := 9.0, amp := 0.06, wave := 0.0, back_long := 0.0, thick := 0.016, rows := 10) -> ArrayMesh:
 	var closed := a0 <= 0.0 and a1 >= 1.0
 	var fn := func(u: float, v: float) -> Vector3:
 		var th := lerpf(a0, a1, u) * TAU
@@ -421,7 +421,7 @@ static func drape(key: String, r0: float, r1: float, h: float, a0 := 0.0, a1 := 
 		var th := lerpf(a0, a1, u) * TAU
 		var fold := sin(folds * th + 0.6 * sin(th * 3.0))
 		return lerpf(0.72, 1.0, smoothstep(0.0, 0.25, v)) * (1.0 + 0.16 * fold * smoothstep(0.1, 0.8, v))
-	return shell("drape|" + key, fn, int(56 * (a1 - a0)) + 6, 10, thick, ao, closed)
+	return shell("drape|" + key, fn, int(56 * (a1 - a0)) + 6, rows, thick, ao, closed)
 
 ## A trim band along the hem of a drape (same parameters), standing a little proud of it.
 static func drape_hem(key: String, r0: float, r1: float, h: float, a0 := 0.0, a1 := 1.0, folds := 9.0, amp := 0.06, wave := 0.0, back_long := 0.0, depth := 0.08) -> ArrayMesh:

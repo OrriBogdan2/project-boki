@@ -416,7 +416,7 @@ static func _tassets(c: Dictionary, sk: Node3D, r0: float, rows: int, per: int, 
 			if row == rows - 1 and absf(mid - 0.75) < 0.6 / per:
 				continue
 			var key := "tasset%.3f|%.3f|%d" % [rr, a0, per]
-			_p(sk, HeroKit.drape(key, rr, rr * 1.16, 0.12, a0, a1, 0.0, 0.0, 0.0, 0.0, 0.018), m_plate, Vector3(0, y, 0))
+			_p(sk, HeroKit.drape(key, rr, rr * 1.16, 0.12, a0, a1, 0.0, 0.0, 0.0, 0.0, 0.018, 3), m_plate, Vector3(0, y, 0))
 			_p(sk, HeroKit.drape_hem(key, rr, rr * 1.16, 0.12, a0, a1, 0.0, 0.0, 0.0, 0.0, 0.18), m_rim, Vector3(0, y, 0))
 
 ## Plate over the shins and knee cops.

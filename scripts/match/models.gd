@@ -694,12 +694,12 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 		var knee := Node3D.new(); knee.name = "Knee"; knee.position = Vector3(0, -0.2, 0)
 		leg.add_child(knee)
 		knees["L" if sx < 0.0 else "R"] = knee
-		part(knee, sphere(0.068, 14), m_pants, Vector3(0, 0.0, 0.0))
 		if not heavy_gear:
+			part(knee, sphere(0.068, 14), m_pants, Vector3(0, 0.0, 0.0))      # (plate knee cops cover it on heavies)
 			part(knee, HeroKit.dome_plate("kneepad", 0.065, 0.45, 0.8, 0.2, 0.012), m_leather if arch != "thief" else m_dark, Vector3(0, 0.0, -0.045), Vector3.ONE, Vector3(-PI * 0.5 + 0.1, 0, 0))
 		part(knee, HeroKit.boot(boot_k), m_leather, Vector3.ZERO)
 		part(knee, HeroKit.sole(boot_k), m_dark, Vector3.ZERO)
-		part(knee, HeroKit.cuff(0.074, 0.088, 0.06), m_trim if arch != "thief" else m_leather, Vector3(0, -0.06, 0.005))
+		part(knee, HeroKit.cuff(0.074, 0.088, 0.06), m_steel if heavy_gear else (m_trim if arch != "thief" else m_leather), Vector3(0, -0.06, 0.005))
 	var torso := Node3D.new(); torso.name = "Torso"; torso.position = Vector3(0, 0.42, 0); rig.add_child(torso)
 	var chest_w := bw * (0.92 if fem else 1.12)
 	# hips, then the sculpted torso (waist, ribcage, chest or bust, shoulder blades), then the neck
