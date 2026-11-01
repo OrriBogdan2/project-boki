@@ -74,7 +74,7 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | Shift | Archetype dash | `dash` | yes |
 | Space | Jump (hold to glide) | `jump` | yes |
 | Mouse 5 / Mouse 4 | Glide (hold in the air) | `glide` | yes |
-| R | Archetype ultimate (bonded when bond is full) | `ultimate` | yes |
+| R / X | Archetype ultimate (bonded when bond is full) | `ultimate` | yes |
 | 1 | Heal (tonic, or armor kit when health is full) | `tonic` | yes |
 | Tab | Scoreboard | `scores` | yes |
 | Esc | Menu | `menu` | no |
@@ -82,6 +82,7 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | T | Talk to a Boki | `talk` | yes |
 | C | A Boki's details | `details` | yes |
 | H | Whistle | `whistle` | no |
+| J | Change hero (at home) | `hero` | yes |
 | I | Inventory | `inventory` | yes |
 | B | Build mode at home / decorate indoors | `build` | yes |
 | R | Turn a piece (build mode) | `rotate` | yes |
@@ -90,6 +91,6 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | P | Pass the drop lead | `pass_lead` | yes |
 | F10 | Recording mode (again: hide the HUD) | `record` | yes |
 | F9 | Recording: slow camera orbit | `record_orbit` | yes |
-| X | Separate from the drop | `separate` | yes |
+| Z | Separate from the drop | `separate` | yes |
 
 <!-- /gen:keys -->
