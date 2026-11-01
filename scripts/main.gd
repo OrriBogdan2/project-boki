@@ -355,6 +355,9 @@ func _ready() -> void:
 		set_meta("abyss_check", load("res://tools/abyss_check.gd").new())
 		get_meta("abyss_check").run(self)
 		return
+	if "--move-feel-check" in args:
+		load("res://tools/move_feel_check.gd").new().run(self)    # movement, jump, glide, drop and camera timings vs docs/MOVEMENT_FEEL.md
+		return
 	if "--airheal-check" in args:
 		load("res://tools/airheal_check.gd").new().run(self)    # heals and abilities in the air, drinking is a risk
 	if "--train-check" in args:
@@ -455,6 +458,7 @@ func _ready() -> void:
 			if a == "--rival-demo": so["rival_demo"] = true
 			if a.begins_with("--rival-kin="): so["rival_kin"] = a.substr(12)
 			if a == "--glide-demo": so["glide_demo"] = true
+			if a == "--dashglide-demo": so["dashglide_demo"] = true
 			if a.begins_with("--kin-demo="):
 				# test: bring this species (and the next one) and run its whole kit on the dummies
 				so["demo_kin"] = a.substr(11)
