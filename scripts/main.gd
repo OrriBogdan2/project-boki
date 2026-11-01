@@ -334,6 +334,11 @@ func _ready() -> void:
 		set_meta("incubator_check", icc)
 		icc.run(self)
 		return
+	if "--title-check" in args:
+		var ttc = load("res://tools/title_check.gd").new()      # the title: menu, key art, frame budget
+		set_meta("title_check", ttc)
+		ttc.run(self)
+		return
 	if "--economy-check" in args:
 		_economy_check()
 		return
