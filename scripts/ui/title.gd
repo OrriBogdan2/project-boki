@@ -80,7 +80,7 @@ func _sky() -> void:
 	# that swallows everything far away (saturation down; colour stays in the embers and the Boki)
 	env.environment = Look.environment({"top": Color("16171f"), "mid": Color("3c3540"), "horizon": Color("c9714a"), "below": Color("231e26"),
 		"sun_dir": SUN.normalized(), "sun_col": Color("ffb27a"), "ambient": Color("a6a0b4"), "ambient_energy": 0.55,
-		"fog": Color("5e4c52"), "fog_density": 0.0075 if not low else 0.0095, "fog_height": -14.0, "fog_height_density": 0.05,
+		"fog": Color("4f4046"), "fog_density": 0.0075 if not low else 0.0095, "fog_height": -14.0, "fog_height_density": 0.05,
 		"stars": 0.08, "saturation": 0.86, "contrast": 1.1, "exposure": 1.0})
 	var e := env.environment
 	e.fog_sun_scatter = 0.08
@@ -112,7 +112,7 @@ func _hero_isle() -> void:
 	# windswept grass, dull olive, thinner on Low
 	_grass(isl, rr, int((900 if not low else 320) * float(Settings.q("grass"))), ISLE_R * 0.86)
 	# rocks along the broken edge, and a fallen pillar of the old world
-	var rocks := [[Vector3(-3.6, 0, -4.0), 1.5], [Vector3(4.6, 0, -2.4), 1.2], [Vector3(-5.2, 0, 0.6), 1.0], [Vector3(0.8, -0.15, -4.2), 0.85],
+	var rocks := [[Vector3(-3.6, 0, -4.0), 1.5], [Vector3(4.6, 0, -2.4), 1.2], [Vector3(-5.2, 0, 0.6), 1.0], [Vector3(2.35, -0.15, -4.0), 0.85],
 		[Vector3(5.6, 0, 1.8), 1.4], [Vector3(-1.2, 0, 4.6), 0.8], [Vector3(3.4, 0, 4.4), 1.1]]
 	for i in rocks.size():
 		var rk := Flora.node("rock", "storm", i % 3, float(rocks[i][1]))
@@ -128,9 +128,9 @@ func _hero_isle() -> void:
 	pil2.rotation = Vector3(1.35, 1.9, 0.0)          # fallen over
 	add_child(pil2)
 	# a torn banner on a pole, whipping in the wind
-	var pole := Models.part(self, Models.cyl(0.05, 0.07, 3.6, 8), Models.toon(Color("3e3330")), Vector3(6.4, 1.8, -10.9))
+	var pole := Models.part(self, Models.cyl(0.05, 0.07, 3.6, 8), Models.toon(Color("3e3330")), Vector3(5.6, 1.8, -11.6))
 	pole.rotation.z = 0.08
-	flag = Node3D.new(); flag.position = Vector3(6.48, 3.45, -10.9); add_child(flag)
+	flag = Node3D.new(); flag.position = Vector3(5.68, 3.45, -11.6); add_child(flag)
 	var cloth := Models.toon(Color("8a3b2e"))
 	for k in 4:
 		var seg := Models.part(flag, Models.box(0.42, 0.95 - k * 0.12, 0.03), cloth, Vector3(0.21 + k * 0.4, -0.45 + k * 0.03, 0))
@@ -171,13 +171,15 @@ func _squad() -> void:
 		return atan2(-d.x, -d.z) + off
 	var out_yaw := atan2(-SUN.x, -SUN.z)        # looking out toward the light (and the Wyrm)
 	# [x, z, yaw, pose, y]
+	# laid out in screen terms: you and your Boki in front with open sky behind you, the others
+	# spread to either side and back toward the edge, so nobody hides anybody
 	var slots: Array = [
-		[2.3, -8.0, 0.0, "lead", 0.0],                                        # turned to its Boki (set in _boki)
-		[4.6, -10.8, out_yaw + 0.3, "watch", 0.0],                            # back to us, facing the storm
-		[3.2, -11.0, out_yaw - 0.15, "point", 0.5],                           # up on a rock, pointing at it
-		[1.8, -11.2, out_yaw - 0.6, "watch", 0.0],
-		[5.0, -9.0, to_cam.call(Vector3(5.0, 0, -9.0), -0.55), "ready", 0.0],
-		[0.4, -8.6, to_cam.call(Vector3(0.4, 0, -8.6), 0.8), "crouch", 0.0],
+		[1.45, -7.5, 0.0, "lead", 0.0],                                       # turned to its Boki (set in _boki)
+		[5.15, -9.15, out_yaw + 0.3, "watch", 0.0],                           # back to us, facing the storm
+		[4.75, -10.8, out_yaw - 0.15, "point", 0.5],                          # up on a rock, pointing at it
+		[1.65, -11.1, out_yaw - 0.6, "watch", 0.0],
+		[6.6, -9.35, to_cam.call(Vector3(6.6, 0, -9.35), -0.55), "ready", 0.0],
+		[0.4, -9.3, to_cam.call(Vector3(0.4, 0, -9.3), 0.8), "crouch", 0.0],
 	]
 	var looks: Array = [
 		{"race": 3, "hair": 0, "hair_v": 2, "hair_col": 0, "skin": 2, "gender": 0, "face": 4, "body": 1, "outfit": 1},
@@ -346,7 +348,7 @@ func _wyrm() -> void:
 
 func _wyrm_at(tt: float) -> Vector3:
 	var a := tt * 0.045
-	return Vector3(40.0 + cos(a) * 34.0, 40.0 + sin(a * 2.0) * 5.0, -170.0 + sin(a) * 20.0)
+	return Vector3(40.0 + cos(a) * 34.0, 24.0 + sin(a * 2.0) * 4.0, -170.0 + sin(a) * 20.0)
 
 ## Embers and ash on the wind, around the squad and in front of the camera.
 func _weather() -> void:
