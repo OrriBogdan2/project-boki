@@ -436,7 +436,17 @@ func _draw_world_labels() -> void:
 			continue
 		var sp := cam.unproject_position(k.position + Vector3(0, 1.05, 0))
 		if k.is_wild():
-			if k.state == "dazed":
+			if k.state == "dazed" and k.lost_from != "":
+				# a Boki left behind by a hunter who went out: the hook of the game, so it reads from afar
+				var mine := k.lost_from == "you"
+				var lc: Color = GOLD if mine else Color("ffb36a")
+				var bob := sin(m.time * 3.0) * 2.0
+				_ctext(sp + Vector2(0, -30 + bob), ("Your %s was left here" % String(k.rec.get("name", "Boki"))) if mine else "A lost Boki: tame it", 18, lc, big)
+				_ctext(sp + Vector2(0, -12 + bob), ("Hold %s to take it back" % Settings.key_cap("interact")) if mine else ("Hold %s  ·  slower to tame: it was %s's" % [Settings.key_cap("interact"), k.lost_from]), 12, Color(INK, 0.9), big)
+				c.draw_colored_polygon(PackedVector2Array([sp + Vector2(-7, -2 + bob), sp + Vector2(7, -2 + bob), sp + Vector2(0, 8 + bob)]), lc)
+				if k.catch_prog > 0.0:
+					_bar(Rect2(sp + Vector2(-40, 14), Vector2(80, 7)), k.catch_prog, lc)
+			elif k.state == "dazed":
 				_ctext(sp + Vector2(0, -8), "Dazed!  %s to tame" % Settings.key_cap("interact"), 17, GOLD, big)
 				if k.catch_prog > 0.0:
 					_arc(sp + Vector2(0, 10), 9, k.catch_prog, GOLD, 3.0)
@@ -2377,10 +2387,17 @@ func _draw_downed(sz: Vector2, p: Hunter) -> void:
 func _draw_dead(sz: Vector2, p: Hunter) -> void:
 	c.draw_rect(Rect2(Vector2.ZERO, sz), Color(0.05, 0.03, 0.08, 0.25))
 	var y0 := sz.y * 0.62
-	_panel(Rect2(Vector2(sz.x * 0.5 - 300, y0 - 44), Vector2(600, 150)))
-	_ctext(Vector2(sz.x * 0.5, y0), "You're dead", 30, BAD, big)
 	var b := Life.box_of(m, p)
 	var lines: Array = []
+	# your Boki left on the map, still there for anyone to tame (the game's hook: say it plainly)
+	var left_kin: Kin = null
+	for L in m.player_lost:
+		var lk = L.get("kin")
+		if lk != null and is_instance_valid(lk) and not (lk as Kin).dead and (lk as Kin).is_wild():
+			left_kin = lk
+	if left_kin:
+		y0 = sz.y * 0.58
+		_ctext(Vector2(sz.x * 0.5, y0 - 64), "%s was left behind: rivals can tame it" % String(left_kin.rec.get("name", "Your Boki")), 20, GOLD, big)
 	if not b.is_empty() and Life.soul_here(m, b):
 		lines.append("A teammate can bring you back at your deathbox: %ds left." % int(ceil(float(b["soul_until"]) - m.time)))
 	lines.append("Or at any revive beacon (the green pillars), with nothing you carried." if m.beacons.any(func(x): return not x["used"]) else "No revive beacons left.")
@@ -2388,6 +2405,8 @@ func _draw_dead(sz: Vector2, p: Hunter) -> void:
 	if mate:
 		lines.append("Watching %s." % mate.pname)
 	lines.append("%s to open the menu and leave." % Settings.key_cap("menu"))
+	_panel(Rect2(Vector2(sz.x * 0.5 - 300, y0 - 44), Vector2(600, 62 + lines.size() * 22)))
+	_ctext(Vector2(sz.x * 0.5, y0), "You're dead", 30, BAD, big)
 	for i in lines.size():
 		_ctext(Vector2(sz.x * 0.5, y0 + 28 + i * 22), lines[i], 16, INK if i < 2 else MUTED)
 
@@ -2415,7 +2434,7 @@ func _draw_tip(sz: Vector2, t: Dictionary) -> void:
 	var text: String = t["text"]
 	var w := minf(560.0, body.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x + 40.0)
 	var lines := body.get_multiline_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, w - 40.0, 16)
-	var r := Rect2(Vector2(sz.x * 0.5 - w * 0.5, 84 + alerts_h), Vector2(w, lines.y + 34))
+	var r := Rect2(Vector2(sz.x * 0.5 - w * 0.5, 84 + alerts_h + (22.0 if m.arena and not m.opts.get("arena", false) else 0.0)), Vector2(w, lines.y + 34))
 	_panel(r, Color(0.98, 0.95, 0.88, 0.94 * a), 12)
 	c.draw_multiline_string(body, r.position + Vector2(20, 28), text, HORIZONTAL_ALIGNMENT_LEFT, w - 40.0, 16, -1, Color(0.1, 0.09, 0.12, a))
 

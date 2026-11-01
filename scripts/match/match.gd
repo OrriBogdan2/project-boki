@@ -770,6 +770,7 @@ func _start(o: Dictionary) -> void:
 	await _stage("build.spawns")
 	skydrop = DropSquad.new(self)
 	skydrop.setup()
+	if opts.get("demo_match", false): _demo_drop()
 	await _slice()
 	var Hud = take_prefetched(HUD_SCRIPT)
 	hud = Hud.new()
@@ -2832,8 +2833,41 @@ func _leave_one_kin(h: Hunter, k: Kin) -> void:
 				elif k.lost_from == "you" and player and not player.out:
 					add_feed("%s dropped %s! Get to it and extract to bring it home." % [h.pname, rec.get("name", "your Boki")])
 					ping(w.pos, Color("ffd23f"))
+				elif player and not player.out and player.flat_dist(w.pos) < 40.0:
+					# a rival's Boki left near you: the chance the game is built round, so call it out
+					add_feed("%s's %s was left behind. Tame it before someone else does." % [h.pname, rec.get("name", "Boki")])
+					ping(w.pos, Color("ffb36a"))
 		k.dead = true
 		k.visible = false
+
+## The Demo match (title screen): your bot squadmate leads the drop and picks the spot between a
+## live boss lair and the nearest outpost uplink, so you glide down in formation and land right by both.
+func _demo_drop() -> void:
+	if player == null or skydrop == null or not skydrop.planning or lairs == null or exits == null:
+		return
+	var mates: Array = hunters.filter(func(x): return x != player and x.team == player.team and x.ctrl == "bot")
+	var ups: Array = exits.of_kind("outpost")
+	if mates.is_empty() or ups.is_empty():
+		return
+	var best := Vector3.INF
+	var bd := 1e9
+	for L in lairs.list:
+		if not L["active"]:
+			continue
+		for x in ups:
+			var d := Vector2((L["c"] as Vector3).x - (x["pos"] as Vector3).x, (L["c"] as Vector3).z - (x["pos"] as Vector3).z).length()
+			if d < bd:
+				bd = d
+				# a third of the way from the uplink to the lair: both in sight once you're down
+				best = (x["pos"] as Vector3).lerp(L["c"], 0.35)
+	if best == Vector3.INF:
+		return
+	best = world.free_spot_near(best, [], 1.0, 0.6, 14.0)
+	var lead: Hunter = mates[0]
+	skydrop.leads[player.team] = lead
+	lead.ai["land"] = best
+	skydrop._bot_ping[lead.nid] = maxf(0.3, skydrop.plan_len - 1.5)
+	print("DEMO drop: %s leads to %s (lair to uplink %.0fm)" % [lead.pname, best.snapped(Vector3(0.1, 0.1, 0.1)), bd])
 
 func giant_free(k: Kin) -> bool:
 	k._end_merge("left")
@@ -5046,6 +5080,15 @@ var train := {}
 var train_t := 0.0
 
 var duel_pad := Vector3.INF
+
+## The Demo match (title screen): a real Duos expedition set up for filming. A fixed map roll, clear
+## weather, no Blight, normal rivals; your bot squadmate leads the drop to land you between a live boss
+## lair and an outpost uplink (_demo_drop). It plays on your save like any expedition (what you bring
+## can be lost, what you extract is kept).
+const DEMO_SEED := 5
+static func demo_opts() -> Dictionary:
+	return {"teams": Data.MATCH_PLAYERS / 2, "squad": 2, "total": Data.MATCH_PLAYERS, "tier": 0, "seed": DEMO_SEED,
+		"raid": "clear", "blight": false, "demo_match": true}
 
 ## The Arena: a compact practice map with dummies, a sparring bot and the kit card (scripts/match/arena.gd).
 static func arena_opts(arch_id := "") -> Dictionary:
