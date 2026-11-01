@@ -2253,7 +2253,7 @@ func generate_authored(L: Dictionary, seed_val: int) -> void:
 	await _tidy_ground()
 	for ii in defs.size():
 		for R in (defs[ii] as Dictionary).get("ramps", []):
-			_stamp_ramp(R, ii)
+			HandLayout.stamp_ramp(self, R, ii)
 	# land bridges: narrow, sheer-sided necks of ground between two islands. The whole bridge
 	# belongs to the first island, so walking along it never changes which island you're on.
 	var neck := {}
@@ -2458,7 +2458,7 @@ func generate_authored(L: Dictionary, seed_val: int) -> void:
 				"walled": (ap as Array).size() >= 3 and ek[1] == "outpost" and bool(ap[2])})
 	await _slice()
 	if hand:
-		_place_hand_spots(defs)
+		HandLayout.place_spots(self, defs)
 	else:
 		_place_spots()
 	await _slice()
@@ -2518,11 +2518,11 @@ func _authored_blockers(defs: Array, neck: Dictionary) -> void:
 		for rk in D.get("rocks", []):
 			for z in range(int(rk[1]), int(rk[3]) + 1):
 				for x in range(int(rk[0]), int(rk[2]) + 1):
-					_hand_block(x, z, ii, "rock", neck)
+					HandLayout.block(self, x, z, ii, "rock", neck)
 		for tr in D.get("trees", []):
-			_hand_block(int(tr[0]), int(tr[1]), ii, "tree", neck)
+			HandLayout.block(self, int(tr[0]), int(tr[1]), ii, "tree", neck)
 		for cr in D.get("crates", []):
-			_hand_block(int(cr[0]), int(cr[1]), ii, "camp", neck)
+			HandLayout.block(self, int(cr[0]), int(cr[1]), ii, "camp", neck)
 		# cover: a few deliberate rock formations (a 2x2 boulder, an L, a short ridge) spaced well
 		# apart on open, flat ground, never single random blocks scattered everywhere
 		var poi := _v2(D.get("poi", [0, 0]))
@@ -2560,86 +2560,6 @@ func _authored_blockers(defs: Array, neck: Dictionary) -> void:
 			for o in shape:
 				kind[idx(c.x + o.x, c.y + o.y)] = T_BLOCK
 			placed.append(cp)
-
-func _hand_block(x: int, z: int, ii: int, what: String, neck: Dictionary) -> void:
-	if inb(x, z) and kind[idx(x, z)] == T_GROUND and island[idx(x, z)] == ii and not neck.has(idx(x, z)) and not authored_stairs.has(idx(x, z)):
-		kind[idx(x, z)] = T_BLOCK
-		props[idx(x, z)] = what
-
-## A flight of stairs the layout placed: {at: [x, z] (the bottom row's middle), dir: n|s|e|w, w,
-## from, to, run}. Row k climbs one terrace (run 1), or every other row does with a landing between
-## (run 2). The rows replace whatever ground was there; the top row meets the plateau at `to`.
-func _stamp_ramp(R: Dictionary, ii: int) -> void:
-	var d: Vector2i = {"n": Vector2i(0, -1), "s": Vector2i(0, 1), "e": Vector2i(1, 0), "w": Vector2i(-1, 0)}[String(R.get("dir", "n"))]
-	var side := Vector2i(-d.y, d.x)
-	var wd := int(R.get("w", 4)); var run := maxi(1, int(R.get("run", 1)))
-	var lv0 := int(R.get("from", 0)); var lv1 := int(R.get("to", lv0 + 1))
-	var at := Vector2i(int(R["at"][0]), int(R["at"][1]))
-	for k in (lv1 - lv0) * run:
-		var stair := k % run == 0
-		var lv := lv0 + k / run + (0 if stair else 1)
-		for s in range(-(wd / 2), wd - wd / 2):
-			var q := at + d * k + side * s
-			if not inb(q.x, q.y) or kind[idx(q.x, q.y)] == T_VOID:
-				continue
-			var i := idx(q.x, q.y)
-			level[i] = lv
-			kind[i] = T_GROUND
-			island[i] = ii if island[i] < 0 else island[i]
-			if stair: authored_stairs[i] = d
-			else: authored_stairs.erase(i)
-
-## A hand-made layout's places, exactly where it lists them (World.hand): landings, chests, camps,
-## wild Boki, breakables, weapons, the shrine, Warden posts and trap spots. Nothing is rolled here.
-func _place_hand_spots(defs: Array) -> void:
-	shrine_spots.clear(); break_spots.clear(); weapon_spots.clear()
-	heart_spot = Vector3.INF
-	var at := func(p) -> Vector3:
-		var x := int(p[0]); var z := int(p[1])
-		if not inb(x, z) or kind[idx(x, z)] == T_VOID:
-			return Vector3.INF
-		if kind[idx(x, z)] == T_BLOCK and not walls.has(idx(x, z)):
-			kind[idx(x, z)] = T_GROUND; props.erase(idx(x, z))
-		return Vector3(x + 0.5, ground_at(x + 0.5, z + 0.5), z + 0.5)
-	for ii in mini(defs.size(), islands.size()):
-		var D: Dictionary = defs[ii]
-		var poi := _poi(ii)
-		if String(D.get("role", "")) == "heart" and poi != Vector3.INF:
-			heart_spot = poi
-		if String(D.get("role", "")) == "nest" and poi != Vector3.INF:
-			islands[ii]["nest"] = poi
-		for p in D.get("landings", []):
-			var q: Vector3 = at.call(p)
-			if q != Vector3.INF: spawns.append(q)
-		for c in D.get("camps", []):
-			var q: Vector3 = at.call(c)
-			if q != Vector3.INF: camp_spots.append({"pos": q, "island": ii, "kind": String(c[2]) if (c as Array).size() > 2 else "light"})
-		for p in D.get("wild", []):
-			var q: Vector3 = at.call(p)
-			if q != Vector3.INF: wild_spots.append(q)
-		for b in D.get("breakables", []):
-			var q: Vector3 = at.call(b)
-			if q != Vector3.INF: break_spots.append({"pos": q, "kind": String(b[2]) if (b as Array).size() > 2 else "crate"})
-		for p in D.get("weapons", []):
-			var q: Vector3 = at.call(p)
-			if q != Vector3.INF: weapon_spots.append(q)
-		if D.has("shrine"):
-			var q: Vector3 = at.call(D["shrine"])
-			if q != Vector3.INF: shrine_spots.append(q)
-		for p in D.get("wardens", []):
-			var q: Vector3 = at.call(p)
-			if q != Vector3.INF: warden_posts.append({"pos": q, "island": ii})
-		for p in D.get("traps", []):
-			var q: Vector3 = at.call(p)
-			if q != Vector3.INF: trap_spots.append({"pos": q, "island": ii})
-		for a in D.get("areas", []):
-			var q: Vector3 = at.call(a)
-			if q != Vector3.INF:
-				labels.append({"name": String(a[2]), "pos": q, "kind": "poi", "role": String(D.get("role", "")), "height": q.y})
-	# the exits stand exactly where the layout puts them, in the order they open
-	for ap in authored_portals:
-		var q: Vector3 = at.call([(ap as Vector2).x, (ap as Vector2).y])
-		if q != Vector3.INF: portal_spots.append(q)
 
 ## Cleans an authored island's ground so it's easy to walk: removes one-tile specks and spurs of
 ## ground, fills one-tile holes, and evens out terrace levels so no lone tile sits a step above or
