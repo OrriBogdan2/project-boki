@@ -134,7 +134,9 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		var duty := float(df.get("fire", 0.8))
 		if a["burst"] < -randf_range(0.35, 0.6) / maxf(0.25, duty) * (1.0 if duty >= 0.99 else 1.4):
 			a["burst"] = randf_range(0.7, 1.3) * (0.6 + 0.4 * duty)
-		var trig_ok: bool = float(a["react_t"]) <= 0.0 and (a["burst"] > 0.0 or ((float(h.wpn["rate"]) > 0.4 or h.wpn.has("spin_up")) and randf() < duty * dt * 8.0 + (0.0 if duty < 0.99 else 1.0)))
+		# (0.5: after the Oct 31 weapon retune a burst rifle or greatsword still counts as a fast weapon
+		# and keeps its pauses, so bots don't hit harder than before)
+		var trig_ok: bool = float(a["react_t"]) <= 0.0 and (a["burst"] > 0.0 or ((float(h.wpn["rate"]) > 0.5 or h.wpn.has("spin_up")) and randf() < duty * dt * 8.0 + (0.0 if duty < 0.99 else 1.0)))
 		if los and d < float(h.wpn["range"]) + 0.5 and trig_ok:
 			inp["fire"] = true
 			a["nolos_t"] = 0.0

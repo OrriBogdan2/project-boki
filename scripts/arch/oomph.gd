@@ -78,7 +78,9 @@ static func react(m: Node, target: Ent, by: Ent, d: float, o: Dictionary) -> voi
 		h.hit_shake = maxf(h.hit_shake, clampf(frac * 1.6, 0.06, 0.22))
 		if by and is_instance_valid(by):
 			h.hit_from = Vector2(h.pos.x - by.pos.x, h.pos.z - by.pos.z).normalized()
-		if big and not h.remote and not h.downed and h.fortify_t <= 0.0:
+		# (hunters and their Boki stagger you; monsters' hits never do, so PvE lethality is unchanged)
+		var pvp: bool = by != null and is_instance_valid(by) and not (by is Mob) and String(o.get("src", "")) != "mob"
+		if big and pvp and not h.remote and not h.downed and h.fortify_t <= 0.0:
 			# a stagger: a short slow, so a big hit actually interrupts the dance (unstoppable
 			# states, fortify_t, shrug it off)
 			h.slow_k = maxf(h.slow_k, STAGGER_SLOW) if h.slow_t > 0.0 else STAGGER_SLOW
