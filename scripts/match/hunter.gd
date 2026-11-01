@@ -1375,6 +1375,7 @@ func _emit_shot() -> void:
 	if wpn.has("bloom_deg"):
 		wbloom = minf(float(wpn.get("bloom_max_deg", 6.0)), wbloom + float(wpn["bloom_deg"]))
 	m.sfx(wpn["sfx"], pos, -2.0 if is_local() else -6.0)
+	Juice.shot(self, start, Vector2(cos(a), sin(a)))
 
 func start_reload() -> void:
 	if reload_t > 0.0 or ammo >= int(wpn["mag"]) or downed or wpn.get("melee", false):
@@ -2770,6 +2771,7 @@ func render(delta: float, alpha: float) -> void:
 		if step_t <= 0.0:
 			step_t = 0.32
 			m.fx.dust(pos, 2)
+			Juice.footstep(self)
 	# (the rig's squash, the skydive and lying downed are posed by HunterAnim)
 	glide_k = move_toward(glide_k, 1.0 if gliding and not diving else 0.0, delta * (7.0 if gliding else 9.0))
 	var gl: Node3D = torso.get_node("Glider")

@@ -75,6 +75,7 @@ var hitstop := 0.0
 var aim_line: MeshInstance3D
 var aim_ring: MeshInstance3D
 var muzzle_light: OmniLight3D
+var music_dir: MusicDir = null     # the layered score's levels (scripts/match/music_dir.gd)
 var collapse_warned := false
 var rng := RandomNumberGenerator.new()
 var pending_input := {"base": false, "dash": false, "jump": false, "sig": false, "reload": false, "tonic": false, "kit": false, "throw": false, "skill": false, "ult": false, "sec": false, "gear1": false, "gear2": false, "swap": false}
@@ -195,6 +196,7 @@ func warm_up() -> void:
 		fx.burst(at + Vector3(0, 1, 0), Color.WHITE, 6)
 		fx.ring(at, 1.5, Color.WHITE)
 		fx.flash(at + Vector3(0, 1, 0), Color.WHITE)
+		fx.spark(at + Vector3(0, 1, 0), Vector3.UP, Color.WHITE, 4)
 		fx.slash(at + Vector3(0, 0.8, 0), 0.0, 2.0, 1.6, Color.WHITE)
 		var tg := fx.telegraph_circle(at, 1.5, Color(1, 0.3, 0.2))
 		# the muzzle flash light lights whatever stands near a shot: the lit variants compile now too
@@ -347,7 +349,8 @@ func _start(o: Dictionary) -> void:
 		bot_diff = Data.auto_bot_diff(tier, int(Save.d.get("extracts", 0)), o.get("tutorial", false) or o.get("training", false))
 	bot_cfg = Data.BOT_DIFF[bot_diff]
 	_build_env()
-	Sfx.play_music("hollow" if tier >= 2 else "match")
+	music_dir = MusicDir.new()
+	music_dir.start(self)
 	Sfx.play_ambience("match")
 	world = World.new()
 	world.name = "World"
@@ -1822,7 +1825,7 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 		sfx("hurt", null, -4.0)
 		cam.add_trauma(clampf(d / 40.0, 0.12, 0.45))
 		if hud: hud.hurt_flash(d)
-	fx.burst(target.pos + Vector3(0, 0.8, 0), Color("fff2d0") if not crit else Color("ffd23f"), 6 if d < 10 else 12, 3.5, 0.3, 8.0, 0.7)
+	Juice.hit(self, target, by, d, o, crit, armor_hit)
 
 ## Cancels anything a hunter had going: a sword charge, a sniper wind-up.
 func cancel_abilities(h: Hunter) -> void:
@@ -1874,6 +1877,7 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 		add_feed("%s went down" % h.pname)
 	sfx("knock", h.pos, 0.0)
 	fx.burst(h.pos + Vector3(0, 0.8, 0), Data.TEAM_COLORS[h.team % Data.TEAM_COLORS.size()], 24, 5.0, 0.6)
+	Juice.knock(self, h, credit)
 	if net_on and not h.remote:
 		net_event(["knock", h.nid, credit.nid if credit else ""])
 	if h == player:
@@ -1982,6 +1986,7 @@ func eliminate(h: Hunter, by: Ent, why: String, final := false) -> void:
 	if credit is Hunter and credit != h and credit.team != h.team:
 		credit.kills += 1
 	add_feed(out_text(h.pname, why))
+	if why != "abyss": Juice.kill(self, h, credit)
 	h.set_meta("died_why", why)
 	h.set_meta("died_at", time)
 	var waiting := false
@@ -2224,6 +2229,7 @@ func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
 	sfx("die_big" if big_mob else "die_small", mb.pos, -5.0, randf_range(0.9, 1.15))
 	if credit == player: sfx("kill", null, -12.0, 1.4)
 	fx.burst(mb.pos + Vector3(0, 0.6, 0), mb.md["color"], 22, 5.0, 0.6)
+	Juice.mob_dead(self, mb, credit, big_mob)
 	if not world.is_void(mb.pos.x, mb.pos.z) and not _o.get("self", false):
 		for i in int(mb.md["gems"]):
 			drop("gem", mb.pos + Vector3(0, 0.6, 0), int(round(3 * float(T["loot"]))))
@@ -2538,8 +2544,8 @@ func _stagger_reward(mb: Mob, hunter: Hunter, ab: String) -> void:
 func on_armor_break(h: Hunter, by: Ent) -> void:
 	fx.burst(h.pos + Vector3(0, 1.0, 0), Color("7ac8ff"), 22, 5.0, 0.5, 6.0, 1.0)
 	fx.ring(h.pos, 1.4, Color("7ac8ff"), 0.3)
-	sfx("shield", h.pos, 0.0, 1.6)
 	var credit: Ent = by.owner_h if by is Kin and by.owner_h else by
+	Juice.armor_break(self, h, credit)
 	if credit == player and hud:
 		hud.toast_small("ARMOR BROKEN", Color("7ac8ff"))
 		hud.hitmarker(true, true)
@@ -3190,6 +3196,7 @@ func _process(delta: float) -> void:
 	if paused and not net_on:
 		return
 	_tips()
+	if music_dir: music_dir.tick(self, delta)
 	if hitstop > 0.0 and not net_on:
 		hitstop -= delta
 		_gather_input()
@@ -3685,6 +3692,19 @@ func step(dt: float) -> void:
 		if "--debug-rival" in OS.get_cmdline_user_args() and int(time * 60.0) % 60 == 0:
 			for h in hunters:
 				if h != player: print("RIVAL ", h.pname, " ", h.pos, " vis ", h.visible, " unseen ", h.unseen, " out ", h.out, " team ", h.team)
+	if "--juice-demo" in OS.get_cmdline_user_args() and player and not player.dropping:
+		# screenshots of hits (Juice): a rival steps up 4m away, holds still, and takes fire
+		if hud: hud.guide_hidden = true
+		if not train.has("_jt"):
+			var q := player.pos + Vector3(4.0, 0, -1.0)
+			var jt := make_hunter("jtarget", 7, "medium", "Rook", "idle", {}, Vector3(q.x, world.ground_at(q.x, q.z), q.z), bot_kit())
+			jt.lives = 1
+			train["_jt"] = jt
+		var jt2: Hunter = train["_jt"]
+		if is_instance_valid(jt2) and not jt2.out:
+			player.inp["aim"] = jt2.pos + Vector3(0, 0.95, 0)
+			player.inp["move"] = Vector2.ZERO
+			player.inp["fire"] = time > 0.6
 	if opts.get("cone_demo", false) and player:
 		player.inp["aim"] = player.pos + Vector3(4.0, 0.95, -5.0)
 		player.inp["crouch"] = opts.get("crouch_demo", false)
@@ -5150,6 +5170,7 @@ func _extract(h: Hunter, how := "", where := "") -> void:
 	var col: Color = {"skiff": ExitModels.DOCK, "hatch": ExitModels.HATCH, "uplink": ExitModels.UPLINK}.get(how, Color("8fe3c8"))
 	sfx("portal", h.pos, -4.0 if how == "hatch" else 0.0, 1.3)
 	fx.burst(h.pos + Vector3(0, 1.0, 0), col, 30, 5.0, 0.8, -4.0)
+	Juice.extract(self, h, col)
 	add_feed("%s extracted" % h.pname)
 	if h.kin:
 		h.kin.visible = false
