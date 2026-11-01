@@ -5108,6 +5108,13 @@ var train_t := 0.0
 
 var duel_pad := Vector3.INF
 
+## The Demo match's landing grace: for the first fresh_t seconds after you land (Bot.fresh), until you
+## hurt something yourself, nothing targets you (bots, even ones your Boki picked a fight with, and
+## camp monsters) and stray hits from others' fights do no harm. Only in the Demo match.
+var player_engaged := false
+func demo_shielded(e: Ent) -> bool:
+	return e != null and e == player and bool(opts.get("demo_match", false)) and not player_engaged and Bot.fresh(self, e)
+
 ## The Demo match (title screen): a real Duos expedition set up for filming. A fixed map roll, clear
 ## weather, no Blight, normal rivals (who leave you be for a minute after you land), on the Dusk Isles (the first tier where a Boki can be lost: one in
 ## a deathbox goes to whoever loots it); your bot squadmate leads the drop to land you between a live boss

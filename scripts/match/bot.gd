@@ -659,7 +659,7 @@ func _choose(m: Match, h: Hunter) -> void:
 		var d := h.flat_dist(o)
 		# early on bots farm monsters and only fight hunters who come close or shoot them
 		var provoked: bool = h.last_hit_by == o or (o is Hunter and h.last_hit_by == o.kin)
-		if not provoked and fresh(m, o):
+		if (not provoked and fresh(m, o)) or m.demo_shielded(o):
 			continue
 		var reach := (13.0 if m.time > 100.0 or provoked else 8.0) * float((a.get("diff", {}) as Dictionary).get("aggro", 1.0))
 		if provoked: reach = maxf(reach, 10.0)
