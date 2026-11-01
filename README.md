@@ -147,6 +147,12 @@ godot --headless --path . -- --mapcheck              # 200 maps: every island re
 godot --headless --path . -- --unique-check          # every kin its own: rolls, inheritance, ids, save migration, size
 ```
 
+Frame hitches need a renderer: `--hitch-check` plays a seeded expedition through the loading screen, the drop and the landing, prints the worst frames with what each spent its time on, and fails on a stalled frame or on a shader compiled after the loading screen (thresholds in `tools/hitch_check.gd`). Use a fresh user data dir so the shader cache starts cold:
+
+```
+XDG_DATA_HOME=/tmp/cold xvfb-run -a godot --path . --rendering-driver opengl3 -- --hitch-check
+```
+
 ## Web build
 
 `tools/build_web.sh` exports the Web preset (no threads) and wraps it for publishing. The engine is gzipped so every file stays under 15MB, and `tools/shell.html` inflates it in the browser.
