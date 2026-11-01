@@ -19,7 +19,7 @@
 	"e": {"delivery": "zone", "name": "Rally Banner", "short": "Banner", "icon": "dome", "col": "#8fe3c8", "cooldown": 18.0, "reach": 7.0, "time": 6.0, "hp": 60.0, "radius": 4.0, "shield": 6.0, "max": 24.0, "slow": 0.2,
 		"desc": "Plant a banner up to 7m away for 6s (60 HP, 4m): allies inside gain 6 shield a second (up to 24), foes inside are slowed.",
 		"sockets": {"guard": "add", "ctrl": "swap", "ctrl_cap": "soft", "util": "add", "hit": "add"}},
-	"r": {"delivery": "burst", "name": "Bastion", "short": "Bastion", "icon": "dome", "col": "#fff1b8", "cooldown": 80.0, "tell": 0.35, "radius": 4.5, "time": 4.0, "push": 12.0, "regen": 8.0, "per_50": 1.0,
+	"r": {"delivery": "burst", "name": "Bastion", "short": "Bastion", "icon": "dome", "col": "#fff1b8", "cooldown": 120.0, "fuse": 0.5, "fuse_guard": "unstoppable", "tell": 0.35, "radius": 4.5, "time": 4.0, "push": 12.0, "regen": 8.0, "per_50": 1.0,
 		"desc": "A 0.35s plant, then a 4.5m dome for 4s: rival shots from outside stop at it, foes inside are pushed out, allies inside regenerate 8/s. Spends all your Guard for +1s per 50.",
 		"sockets": {"guard": "add", "ctrl": "add", "ctrl_cap": "soft", "util": "add", "hit": "add"}},
 	"order": ["sec", "dash", "kin", "sec", "kin", "ult", "sec", "dash", "ult", "gear"],

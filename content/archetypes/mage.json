@@ -19,7 +19,7 @@
 	"e": {"delivery": "burst", "name": "Sigil", "short": "Sigil", "icon": "pulse", "col": "#c4a8ff", "cooldown": 14.0, "reach": 9.0, "radius": 3.0, "time": 6.0, "haste": 0.15, "det_t": 0.3, "det_dmg": 10.0, "det_lift": 7.0,
 		"desc": "Draw a 3m rune up to 9m away for 6s: allies inside move 15% faster and your bolts split through it. Press E again to detonate: a 0.3s flash, then 10 damage and a lift.",
 		"sockets": {"hit": "add", "ctrl": "swap", "ctrl_cap": "soft", "util": "add", "guard": "add"}},
-	"r": {"delivery": "burst", "name": "Meteor", "short": "Meteor", "icon": "fireball", "col": "#ff7a3d", "cooldown": 70.0, "reach": 14.0, "radius": 4.0, "tell": 1.0, "dmg": 30.0, "lift": 8.0, "spike": 0.5, "spike_stun": 0.8, "burn_t": 2.0, "burn": 3.0,
+	"r": {"delivery": "burst", "name": "Meteor", "short": "Meteor", "icon": "fireball", "col": "#ff7a3d", "cooldown": 105.0, "fuse": 0.55, "fuse_guard": "none", "reach": 14.0, "radius": 4.0, "tell": 1.0, "dmg": 30.0, "lift": 8.0, "spike": 0.5, "spike_stun": 0.8, "burn_t": 2.0, "burn": 3.0,
 		"desc": "Aim a 4m circle up to 14m: 1.0s of a burning rock coming down, then 30 damage and a lift; anyone already in the air is spiked (+50%, stun 0.8). Burning ground for 2s. Cast Overcharged and your Heat resets without a Vent.",
 		"sockets": {"hit": "add", "ctrl": "add", "ctrl_cap": "hard", "guard": "add", "mod": "add"}},
 	"order": ["sec", "kin", "dash", "sec", "kin", "ult", "sec", "kin", "ult", "dash"],

@@ -819,13 +819,13 @@ func update(dt: float, s: Dictionary) -> void:
 		if hd2.length() < 0.01: hd2 = -fwd
 		hd2 = hd2.normalized()
 		var lx := hd2.dot(right); var lz := -hd2.dot(fwd)
-		flinch_v += Vector2(lz, -lx) * 9.0       # pitched back when hit from the front, tipped sideways from the side
+		flinch_v += Vector2(lz, -lx) * 9.0 * float(s.get("hit_k", 1.0))       # pitched back when hit from the front, tipped sideways from the side (harder hits, bigger jerk: Oomph)
 	hit_prev = hit_t
 	var fx := _spring(flinch.x, flinch_v.x, 0.0, 260.0, 16.0, dt)
 	var fy := _spring(flinch.y, flinch_v.y, 0.0, 260.0, 16.0, dt)
 	flinch = Vector2(fx.x, fy.x); flinch_v = Vector2(fx.y, fy.y)
-	pitch += flinch.x * 0.12
-	roll += flinch.y * 0.12
+	pitch += flinch.x * 0.16
+	roll += flinch.y * 0.16
 	# melee: the body turns through the swing
 	_swing_pose()
 	yaw += sw_tw

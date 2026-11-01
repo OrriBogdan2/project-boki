@@ -190,9 +190,12 @@ static func hitstop(m: Node, by: Ent, target: Ent, d: float, o: Dictionary) -> i
 	var mine: bool = p != null and (by == p or target == p or (by is Kin and (by as Kin).owner_h == p))
 	if not bool(m.get("net_on")) and mine:
 		var want := tt if target == p else (ta if melee else 0.0)
-		if t >= 4 and by == p: want = maxf(want, ta)
+		# a payoff you land (Cash In, a wall slam, a spike) freezes you too, even from range
+		if t >= 4 and by == p: want = maxf(want, float(HITSTOP[t][0]) * k)
 		want = _spend(p, want, now)
 		if want > 0.0: m.freeze_frame(want)
+		# your ranged hits never freeze you (Capcom), but the body you hit still holds for its tier
+		if by == p and target: target.freeze_t = maxf(target.freeze_t, tt)
 	else:
 		if target: target.freeze_t = maxf(target.freeze_t, tt)
 		if by and melee: by.freeze_t = maxf(by.freeze_t, ta)

@@ -111,6 +111,10 @@ var chase: Hunter = null       # whoever has your kin: you run faster toward the
 var box_t := 0.0               # holding interact at a deathbox
 var box_rev_at := -9.0         # last time we were channelling a deathbox revive (kneeling, locked in place)
 var hurt_at := -9.0            # last time a hit landed (channels like a box revive break on it)
+var hit_k := 1.0               # how hard the last hit was (Oomph): scales the flinch
+var hit_shake := 0.0           # the model's hit-shake left (Oomph.render_hit)
+var hit_from := Vector2.ZERO   # which way the last hit pushed
+var stagger_t := 0.0           # staggered by a big hit (Oomph)
 var extracted := false
 var extract_prog := 0.0
 var rift_keys := 0               # Rift Keys carried: each opens a rift hatch once (see Exits); they go in your deathbox
@@ -275,7 +279,7 @@ func _chase_mod(mv: Vector2) -> float:
 	var k := 0.92 if stolen_carry else 1.0
 	# the archetype kit's own pace (a Lance charging, Avalanche, a raised tower shield) and short
 	# move-speed boosts (a Sigil): kept here so the movement code itself stays untouched
-	k *= (ak.move_k() if ak else 1.0) * (1.0 + buff("move_speed"))
+	k *= (ak.pace() if ak else 1.0) * (1.0 + buff("move_speed"))
 	if chase and not chase.out and not chase.extracted and mv.length() > 0.1 and mv.normalized().dot(dir_to(chase)) > 0.5:
 		k *= 1.18
 	return k
@@ -1112,7 +1116,7 @@ func _shove_along() -> void:
 		m.shake(0.25, f.pos)
 
 func can_fire() -> bool:
-	if ak and not ak.fire_ok():
+	if ak and not ak.can_shoot():
 		return false
 	if ak and roll_t > 0.0 and ak.fires_in_dash() and not (drink_t > 0.0 or reload_t > 0.0 or downed or stun_t > 0.0):
 		return true          # shooting from a held slide
@@ -1267,6 +1271,7 @@ func _release() -> void:
 	burst_left = int(wpn.get("burst", 1)) - 1
 	burst_t = float(wpn.get("burst_gap", 0.07))
 	_emit_shot()
+	Oomph.on_fire(self)
 	if ammo <= 0 and burst_left <= 0:
 		start_reload()
 
@@ -1311,6 +1316,7 @@ func _tick_burst(dt: float) -> void:
 	recoil = 1.0
 	muzzle_t = 0.05
 	_emit_shot()
+	Oomph.on_fire(self)
 	if ammo <= 0 and burst_left <= 0:
 		start_reload()
 
@@ -1403,6 +1409,7 @@ func _strike(dmg: float, reach: float, arc_deg: float, kb: float, o := {}) -> vo
 		var st := Vector3(pos.x + cos(aa) * 0.25, y, pos.z + sin(aa) * 0.25)
 		m.spawn_shot(self, st, Vector2(cos(aa), sin(aa)) * 40.0, dmg * m.dmg_mult(self), maxf(0.02, (reach - 0.25) / 40.0), 0.22, wpn["color"], extra)
 	m.fx.slash(Vector3(pos.x, y - 0.15, pos.z), a0, arc, reach, wpn["color"], heavy)
+	Oomph.on_fire(self, true)
 	m.sfx(wpn["sfx"], pos, -4.0 if not o.get("charged", false) else 0.0, (0.8 if heavy else 1.15) + randf() * 0.1)
 
 func _emit_shot() -> void:
@@ -1436,7 +1443,7 @@ func _emit_shot() -> void:
 	if wpn.has("sustain_loss"):
 		dmg *= 1.0 - float(wpn["sustain_loss"]) * minf(1.0, float(sus_n) / float(wpn.get("sustain_rounds", 10)))
 	sus_n += 1
-	var extra := {"kb": wpn["kb"]}
+	var extra := {"kb": wpn["kb"], "tracer": float(wpn.get("tracer", 1.0))}
 	if wpn.has("decel"):
 		# slugs slow down and stop at the weapon's range: v^2 = 2 a d
 		extra["decel"] = float(wpn["decel"])
@@ -2813,6 +2820,7 @@ func _anim_state(stretch: float) -> void:
 	s["cast"] = m.time - cast_at
 	s["cast_slot"] = cast_slot
 	s["hit_t"] = m.time - hurt_at
+	s["hit_k"] = hit_k
 	if last_hit_by and is_instance_valid(last_hit_by):
 		s["hit_dir"] = Vector2(pos.x - last_hit_by.pos.x, pos.z - last_hit_by.pos.z)
 	s["stun"] = stun_t > 0.0
@@ -2951,6 +2959,7 @@ func render(delta: float, alpha: float) -> void:
 	var ring := model.get_node("TeamRing") as MeshInstance3D
 	ring.visible = not downed
 	_render_balloon(delta)
+	Oomph.render_hit(self, delta)
 	if (drink_t > 0.0 or kit_t > 0.0) and visible and see:
 		vuln_fx_t -= delta
 		if vuln_fx_t <= 0.0:
