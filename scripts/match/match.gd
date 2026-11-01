@@ -1494,9 +1494,13 @@ func spawn_weapon(w: String, rar: int, at: Vector3, id := "", send := true, ammo
 		wp["item"] = item
 		if String(item.get("el", "")) != "":
 			_element_motes(n, Loot.ELEMENTS[String(item["el"])]["col"], String(item.get("uq", "")) != "")
+	if item.has("left_at"):
+		wp["left_at"] = float(item["left_at"])      # put down from someone's hands: the 2 s re-pick rule (Loot.REPICK_T)
 	wpicks.append(wp)
 	if net_on and send:
-		net_event(["wdrop", id, w, rar, _r(at.x), _r(at.y), _r(at.z), ammo, String(item.get("el", "")), String(item.get("uq", ""))])
+		# (the last field, how long ago it left someone's hands, -1 for fresh loot: Net 0.5.1)
+		net_event(["wdrop", id, w, rar, _r(at.x), _r(at.y), _r(at.z), ammo, String(item.get("el", "")), String(item.get("uq", "")),
+			snappedf(time - float(wp["left_at"]), 0.01) if wp.has("left_at") else -1.0])
 
 ## A found weapon with an element (or a named one) glows its colour, so you can spot it from afar.
 func _element_motes(n: Node3D, col: Color, unique: bool) -> void:
@@ -1748,8 +1752,9 @@ func _take_weapon(h: Hunter, wp: Dictionary, from_net := false, keep_old := fals
 		# the old one is put down where you stand (with the backpack, the player's goes in it instead)
 		var ba := randf() * TAU
 		var back := Vector3(cos(ba), 0, sin(ba)) * 0.9
-		spawn_weapon(String(old_it["wid"]), int(old_it["rar"]), Vector3(h.pos.x + back.x, h.ground(), h.pos.z + back.z), "", true, old_ammo, Loot.clean(old_it) if Loot.keepable(old_it) else {})
-		wpicks[wpicks.size() - 1]["left_at"] = time
+		var left_it: Dictionary = Loot.clean(old_it) if Loot.keepable(old_it) else Loot.weapon(String(old_it["wid"]), int(old_it["rar"]))
+		left_it["left_at"] = time; left_it["ammo_left"] = old_ammo
+		spawn_weapon(String(old_it["wid"]), int(old_it["rar"]), Vector3(h.pos.x + back.x, h.ground(), h.pos.z + back.z), "", true, old_ammo, left_it)
 	var col: Color = Data.RARITY[int(wp["rar"])]["color"]
 	sfx("pickup", h.pos, 0.0, 0.8)
 	fx.ring(h.pos, 1.4, col, 0.35)
@@ -6315,6 +6320,8 @@ func _net_ev(x, from: String) -> void:
 				if x.size() > 9 and (String(x[8]) != "" or String(x[9]) != ""):
 					nit = Loot.weapon(String(x[2]), int(x[3]), String(x[8]), String(x[9]))
 				spawn_weapon(String(x[2]), int(x[3]), Vector3(x[4], x[5], x[6]), String(x[1]), false, int(x[7]) if x.size() > 7 else -1, nit)
+				if x.size() > 10 and float(x[10]) >= 0.0:
+					wpicks[wpicks.size() - 1]["left_at"] = time - float(x[10])      # just put down: grabbed within 2 s it keeps its bullets
 		"wtake":
 			for wp in wpicks:
 				if wp["id"] == String(x[1]):
