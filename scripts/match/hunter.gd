@@ -2750,7 +2750,9 @@ func _ledge_rise(dt: float, mv: Vector2) -> bool:
 	if not glide_now:
 		lf["g0"] = false
 	var off := (Vector2(pos.x, pos.z) - (lf["at"] as Vector2)).dot(-n) > LRISE_OFF
-	var drift := Vector2(pos.x, pos.z).distance_to(lf["at"]) > 2.0     # (a teleport, or far along the face)
+	# (a teleport; or you've slid along past the end of the face, so there's nothing beside you to rise up)
+	var drift := Vector2(pos.x, pos.z).distance_to(lf.get("last", Vector2(pos.x, pos.z))) > 1.5 or not _face_near(float(lf["lip"]))
+	lf["last"] = Vector2(pos.x, pos.z)
 	if off or drift or gliding or downed != bool(lf["downed"]) or out or roll_t > 0.0 or stun_t > 0.0 or kb_t > float(lf.get("kb0", kb_t)) \
 			or fly_t > 0.0 or grounded or dropping or float(lf["t"]) > float(lf["max_t"]) or (glide_now and not bool(lf["g0"])):
 		lfloat = {}
@@ -2784,6 +2786,21 @@ func _ledge_rise(dt: float, mv: Vector2) -> bool:
 			m.fx.ring(pos + Vector3(0, 0.1, 0), 0.9, Color(1, 1, 1, 0.8), 0.18)
 	vel.y = clampf(left * 14.0, LRISE_MIN, LRISE_SPEED) * (0.75 if downed else 1.0)
 	return true
+
+## Is there ground at the ledge's height within reach of your side (the face you're rising up)?
+func _face_near(lip: float) -> bool:
+	var w: World = m.world
+	var rr := r + WALL_CATCH_REACH + 0.2
+	for z in range(int(floor(pos.z - rr)), int(floor(pos.z + rr)) + 1):
+		for x in range(int(floor(pos.x - rr)), int(floor(pos.x + rr)) + 1):
+			if not w.inb(x, z) or w.kind[w.idx(x, z)] != World.T_GROUND:
+				continue
+			if absf(w.level[w.idx(x, z)] * World.LEVEL - lip) > 0.05:
+				continue
+			var ex := clampf(pos.x, x, x + 1.0); var ez := clampf(pos.z, z, z + 1.0)
+			if Vector2(ex - pos.x, ez - pos.z).length() <= rr:
+				return true
+	return false
 
 ## A jump during a ledge rise: in the window near the top, a strong fling (higher, faster, a whoosh);
 ## earlier, a weaker one. Either way toward the keys you hold (or up and onto the ledge with none).
