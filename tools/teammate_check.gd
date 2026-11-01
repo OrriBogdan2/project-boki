@@ -116,6 +116,13 @@ func _follow() -> void:
 	ok(int(st["steady"]) > 0 and float(st["heel"]) / float(st["steady"]) > 0.55, "at your heel most of the time you're on your feet (%d of %d steps)" % [int(st["heel"]), int(st["steady"])])
 	ok(int(st["glide"]) == 0 or float(st["glide_up"]) / float(st["glide"]) > 0.8, "rides your shoulder while you glide (%d of %d steps)" % [int(st["glide_up"]), int(st["glide"])])
 	# out on the field with nothing to fight: it comes back to your side and keeps pace
+	# (training dummies and anything else nearby are cleared: with an archetype the kin's C is open, so it would fight them)
+	for mb in m.mobs: mb.dead = true; mb.visible = false
+	for h in m.hunters:
+		if h != P: h.teleport(m.world.random_ground())
+	for kk in m.kins:
+		if kk != k and kk.team != k.team: kk.dead = true; kk.visible = false
+	k.target = null
 	k.throw_to(P.pos + Vector3(5, 0, 0))
 	for i in 60: m.step(Match.DT)
 	var was := k.state
