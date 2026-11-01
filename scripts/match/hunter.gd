@@ -39,6 +39,7 @@ const ABYSS_BRAKE_GAIN := 3.5    # (movefeel) rise speed per metre left in the b
 const MANTLE_REACH := 1.5        # near a jump's apex, ledges this far above you pop you up
 const MANTLE_REACH_ABYSS := 4.5  # below an island's lip over the abyss, its side catches you this far down (movefeel: was 3.5)
                                  # (a bit past the normal ledge reach); deeper you slide down the face
+const WALL_CATCH_REACH := 0.75   # (movefeel) over the abyss below a lip, a wall this far from your side catches you (elsewhere 0.4)
 const ABYSS_GLIDE_ROOM := 1.5    # a glider with heat left (lifting you out) gets this much more room
 const MANTLE_RISE := 14.0        # [footage] a deep mantle returns to the top in ~0.8s
 const EX_DASH_CD := 12.5         # the long dash: in the air, or with the short one on cooldown
@@ -2445,6 +2446,9 @@ func _try_ledge_grab(dt: float) -> void:
 	var void_here := over_void()
 	if not grounded and void_here and last_gy - pos.y > 0.3:
 		max_rise = MANTLE_REACH_ABYSS      # deep in the abyss, any island wall you touch springs you back up
+		# (movefeel) and a wall a short step away catches you too: falling at full speed just off a
+		# face while steering along it used to slip past (wall-hug check: 15 of 40 at 3m down)
+		reach = r + WALL_CATCH_REACH
 	var best := {}; var bd := 1e9
 	for z in range(int(floor(pos.z - reach)), int(floor(pos.z + reach)) + 1):
 		for x in range(int(floor(pos.x - reach)), int(floor(pos.x + reach)) + 1):

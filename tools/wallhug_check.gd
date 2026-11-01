@@ -73,34 +73,37 @@ func run(main: Node) -> void:
 		var d: Vector2 = e["dir"]
 		var side := Vector2(-d.y, d.x)
 		var top: float = e["top"]
-		for dy in [0.8, -0.3, -1.0, -2.0, -3.0]:
-			for ang in [0.0, 45.0, 65.0]:
-				for glide in [false, true]:
-					var into := (-d).rotated(deg_to_rad(ang))
-					var at := Vector3(float(e["ex"]) + d.x * (P.r + 0.08), top + dy, float(e["ez"]) + d.y * (P.r + 0.08))
-					_reset(at, Vector3(side.x * 1.5 * signf(into.dot(side) + 0.001), -4.0 if dy > 0.0 else -6.0, side.y * 1.5 * signf(into.dot(side) + 0.001)), top)
-					var res := "fell"
-					for i in 150:
-						P.inp["move"] = into
-						P.inp["glide"] = glide
-						m.step(DT)
-						if P.pad.size() > 0 and P.pad.get("ledge", false):
-							res = "caught"; break
-						if P.grounded and P.pos.y > top - 0.2:
-							res = "caught"; break
-						if P.out or P.pos.y < top - Hunter.MANTLE_REACH_ABYSS - 1.5:
-							break
-						if glide and P.gliding and i > 90 and P.pos.y > top - 1.0:
-							res = "held"; break     # the glider holds you at the lip: not under the island
-					if res == "fell" and OS.has_environment("WALLHUG_DEBUG"):
-						print("WALLHUG   fell: rim (%.1f,%.1f) d%s top %.1f dy %.1f a%d glide %s -> end %s moved %.2f void %s below_lip %s" % [float(e["ex"]), float(e["ez"]), str(d), top, dy, int(ang), glide, str(P.pos.snapped(Vector3(0.01, 0.01, 0.01))), Vector2(P.pos.x - at.x, P.pos.z - at.z).length(), P.over_void(), P.below_lip])
-					tot += 1
-					var key := "dy%.1f a%d %s" % [dy, int(ang), "glide" if glide else "fall"]
-					if not by.has(key): by[key] = [0, 0]
-					by[key][1] += 1
-					if res != "fell":
-						caught += 1
-						by[key][0] += 1
+		# against the wall at a moderate fall, or a step out from it falling at full speed
+		for gap in [0.08, 0.6]:
+			for dy in ([0.8, -0.3, -1.0, -2.0, -3.0, -4.0] if gap < 0.3 else [0.8, -1.0, -2.0, -3.0]):
+				for ang in [0.0, 45.0, 65.0]:
+					for glide in [false, true]:
+						var into := (-d).rotated(deg_to_rad(ang))
+						var at := Vector3(float(e["ex"]) + d.x * (P.r + gap), top + dy, float(e["ez"]) + d.y * (P.r + gap))
+						var vy := (-4.0 if dy > 0.0 else -6.0) if gap < 0.3 else -Hunter.TERMINAL
+						_reset(at, Vector3(side.x * 1.5 * signf(into.dot(side) + 0.001), vy, side.y * 1.5 * signf(into.dot(side) + 0.001)), top)
+						var res := "fell"
+						for i in 150:
+							P.inp["move"] = into
+							P.inp["glide"] = glide
+							m.step(DT)
+							if P.pad.size() > 0 and P.pad.get("ledge", false):
+								res = "caught"; break
+							if P.grounded and P.pos.y > top - 0.2:
+								res = "caught"; break
+							if P.out or P.pos.y < top - Hunter.MANTLE_REACH_ABYSS - 1.5:
+								break
+							if glide and P.gliding and i > 90 and P.pos.y > top - 1.0:
+								res = "held"; break     # the glider holds you at the lip: not under the island
+						if res == "fell" and OS.has_environment("WALLHUG_DEBUG"):
+							print("WALLHUG   fell: rim (%.1f,%.1f) d%s top %.1f dy %.1f a%d glide %s -> end %s moved %.2f void %s below_lip %s" % [float(e["ex"]), float(e["ez"]), str(d), top, dy, int(ang), glide, str(P.pos.snapped(Vector3(0.01, 0.01, 0.01))), Vector2(P.pos.x - at.x, P.pos.z - at.z).length(), P.over_void(), P.below_lip])
+						tot += 1
+						var key := "gap%.1f dy%.1f a%d %s" % [gap, dy, int(ang), "glide" if glide else "fall"]
+						if not by.has(key): by[key] = [0, 0]
+						by[key][1] += 1
+						if res != "fell":
+							caught += 1
+							by[key][0] += 1
 	for k in by.keys():
 		if by[k][0] < by[k][1]:
 			print("WALLHUG   %-22s caught %d of %d" % [k, by[k][0], by[k][1]])
