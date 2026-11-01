@@ -64,6 +64,7 @@ func build() -> ArrayMesh:
 func build_chunked(chunk: int) -> Array:
 	await _emit(chunk)
 	var by := {}
+	await W._slice()
 	for r in _ranges:
 		var key: Vector2i = r[0]
 		if int(r[2]) <= int(r[1]):
@@ -74,6 +75,7 @@ func build_chunked(chunk: int) -> Array:
 		a[2].append_array(C.slice(r[1], r[2])); a[3].append_array(UV.slice(r[1], r[2]))
 	var out: Array = []
 	for key in by:
+		await W._slice()
 		var a: Array = by[key]
 		out.append([key, _mesh(a[0], a[1], a[2], a[3])])
 	return out
@@ -82,7 +84,9 @@ var _ranges: Array = []     # [chunk, first vertex, end vertex] in the order the
 
 func _emit(chunk: int) -> void:
 	_fill_grid()
+	await W._slice()
 	_fill_colors()
+	await W._slice()
 	_fill_under()
 	_ranges.clear()
 	for cz in range(-1, h):
@@ -97,7 +101,9 @@ func _emit(chunk: int) -> void:
 					cur = key; start = V.size()
 			_cell(cx, cz)
 		if chunk > 0 and cur.x != -99: _ranges.append([cur, start, V.size()])
+	await W._slice()
 	for si in W.stairs:
+		await W._slice()
 		var i: int = si
 		if W.kind[i] != W.T_VOID:
 			var s0 := V.size()

@@ -11,6 +11,7 @@ static var _verbose := -1
 ## Starts timing a new run of steps (a match build).
 static func reset() -> void:
 	marks.clear()
+	slices.clear()
 	_t = Time.get_ticks_usec()
 
 ## The step that just finished: how long it took since the previous mark.
@@ -45,6 +46,10 @@ static func between(t0: int, t1: int) -> Array:
 const SLICE_MS := 30.0
 static var _frame_us := 0
 static var _wait_us := 0
+## The work each slice did before letting a frame draw: [usec, ms, where] (where: the slice point
+## that ended it, only with trace_slices on, e.g. --load-check --hitch-trace).
+static var slices: Array = []
+static var trace_slices := false
 
 ## True when the step running now has had the CPU for SLICE_MS since the last frame drew.
 static func slice_due() -> bool:
@@ -53,6 +58,13 @@ static func slice_due() -> bool:
 ## Around a frame waited inside a step: the wait isn't the step's work, so its time comes off the mark.
 static func wait_begin() -> void:
 	_wait_us = Time.get_ticks_usec()
+	var where := ""
+	if trace_slices:
+		var st := get_stack()
+		if st.size() > 2: where = "%s:%d" % [String(st[2]["function"]), int(st[2]["line"])]
+	slices.append([_wait_us, (_wait_us - _frame_us) / 1000.0, where])
+	if slices.size() > 2000:
+		slices = slices.slice(-1000)
 
 static func wait_end() -> void:
 	var now := Time.get_ticks_usec()

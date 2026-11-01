@@ -583,9 +583,16 @@ func _has_arg(prefix: String) -> bool:
 
 var _gen := 0
 
+var _ld: Node = null       # the loading screen of a match still on its way
+
 func show_screen(screen: String, opts: Dictionary) -> void:
 	_gen += 1
 	var gen := _gen
+	# a match left while it was still loading: its loading screen goes, and 3D draws again
+	get_viewport().disable_3d = false
+	if is_instance_valid(_ld) and not _ld.is_queued_for_deletion() and not _ld.get("leaving"):
+		_ld.queue_free()
+	_ld = null
 	var fx := _fades_on()
 	if fx and current:
 		await fade.cover()
@@ -605,12 +612,20 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 			# a loading screen covers building the world; tests that screenshot by frame count skip it
 			var ld = null
 			if (not opts.get("autoplay", false) or opts.get("probe", false)) and (not _has_arg("--shot=") or _has_arg("--show-loading")):
+				var tier_i := clampi(int(opts.get("tier", 0)), 0, Data.TIERS.size() - 1)
+				Sfx.prefetch(["music_hollow" if tier_i >= 2 else "music_match", "amb_match"])
+				Match.prefetch([Match.HUD_SCRIPT])
 				ld = load("res://scripts/ui/loading.gd").new()
 				ld.setup(opts)
 				add_child(ld)
+				_ld = ld
+				# nothing in 3D shows behind the loading screen while the match builds: drawing the
+				# half-built world every frame only slows the build (see Match.warm_up for the drawing)
+				get_viewport().disable_3d = true
 				await ld.shown
-				await ld.step(0.2)
+				ld.want = 0.04
 				if gen != _gen:
+					get_viewport().disable_3d = false
 					ld.queue_free()
 					return
 			var m := Match.new()
@@ -618,13 +633,19 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 			add_child(m)
 			current = m
 			if ld:
-				# build a step per frame so the loading screen keeps moving, then draw everything once
-				# behind it so no shader compiles mid-drop (see Match.warm_up)
-				await m.start_staged(opts, func(f: float): ld.want = maxf(ld.want, 0.2 + 0.72 * f))
+				# build in short slices so the loading screen keeps moving, then draw everything once
+				# behind it, a batch a frame, so no shader compiles mid-drop (see Match.warm_up)
+				await m.start_staged(opts, func(f: float, stage: String):
+					ld.want = maxf(ld.want, 0.04 + 0.66 * f)
+					ld.set_stage(stage))
+				get_viewport().disable_3d = false
 				if not is_instance_valid(m) or not m.is_inside_tree():
+					ld.queue_free()
 					return
 				if not opts.has("net"): m.set_process(false)
-				await m.warm_up()
+				ld.set_stage("graphics")
+				await m.warm_up(func(f: float): ld.want = maxf(ld.want, 0.7 + 0.28 * f))
+				ld.set_stage("ready")
 				# hold the match still while the bar finishes, except online where everyone runs together
 				await ld.finish()
 				if is_instance_valid(m) and m.is_inside_tree(): m.set_process(true)
