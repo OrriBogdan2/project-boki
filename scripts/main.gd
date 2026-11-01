@@ -83,6 +83,7 @@ func _ready() -> void:
 		if a == "--wall-behind": opts["wall_behind"] = true; opts["no_drop"] = true
 		if a == "--meteor-test": opts["meteor_test"] = true; opts["no_drop"] = true
 		if a == "--break-demo": opts["break_demo"] = true; opts["no_drop"] = true
+		if a == "--chest-demo": opts["chest_demo"] = true; opts["no_drop"] = true     # a chest next to breakables (screenshots)
 		if a == "--watch-heart": opts["watch_heart"] = true
 		if a.begins_with("--class="): Save.d["cls"] = a.substr(8); Save.d["weapon"] = ""
 		if a.begins_with("--weapon="):

@@ -6,8 +6,11 @@ class_name PropSculpt
 ## Same named nodes as the primitive versions: chest > Body > Lid (hinged, opens on rotation.x),
 ## Beacon; keg > Fuse. meta "mats" = [wood, metal, ...] (the deathbox repaints the first two).
 
-const WOOD := [Color("9a6236"), Color("3f6fb0"), Color("6a3fa8")]
-const TRIM := [Color("d8a84a"), Color("dfe8f2"), Color("f2c84a")]
+## Chest bodies are lacquered, never plain wood, so even a common chest can't pass for a crate:
+## common wine red, rare blue, epic purple, all with bright gold-toned trim. (The common chest was
+## brown wood, the same family as the crates; the owner asked for chests in their own colour.)
+const WOOD := [Color("8e2a34"), Color("3f6fb0"), Color("6a3fa8")]
+const TRIM := [Color("f0bf4a"), Color("dfe8f2"), Color("f2c84a")]
 const SEAM := [Color("ffd890"), Color("8fd8ff"), Color("ffb84a")]
 ## Loot reads as loot: every chest wears gold-ish trim and stands in a pool of its rarity colour
 ## (common gold, rare blue, epic purple) with a light pillar; breakables never glow.
@@ -53,19 +56,30 @@ static func _finish(root: Node3D) -> void:
 	Models.bake_part_y(root)
 
 # ------------------------------------------------------------------ chests
-## A treasure chest: wide and chunky with a tall domed lid, thick gold-toned bands, big corner
-## brackets and a jewelled lock plate, light leaking from under the lid, and (in "Beacon", hidden
-## once it's opened) a light pillar and a glowing ring on the ground in its rarity colour.
+## A treasure chest: wide and chunky (about twice a crate's footprint) on four gold claw feet, with
+## a tall domed lid, thick glowing gold-toned bands, big corner brackets, a crest along the lid and a
+## jewelled lock plate, light leaking from under the lid, and (in "Beacon", hidden once it's opened)
+## a soft halo, a few rising sparks, a light pillar and a glowing ring in its rarity colour.
+## Breakables are the opposite on every count: small, boxy or round, matte, dusty, never glowing.
 static func chest(tier := 0) -> Node3D:
 	tier = clampi(tier, 0, 2)
 	var root := Node3D.new()
-	var mw := _mat(WOOD[tier], 2)
+	var mw := _mat(WOOD[tier], 2, 0.45)
+	mw.set_shader_parameter("rim_amount", 0.7)
+	mw.set_shader_parameter("rim_color", Color(TRIM[tier]).lightened(0.3))
 	var mwd := _mat(Color(WOOD[tier]).darkened(0.45), 2)
-	var mg := _mat(TRIM[tier], 3, 0.6, 0.06 + 0.1 * tier)
+	var mg := _mat(TRIM[tier], 3, 0.75, 0.32 + 0.08 * tier)
 	var mgd := _mat(Color(TRIM[tier]).darkened(0.3), 3, 0.4)
-	mg.set_shader_parameter("rim_amount", 0.8)
+	mg.set_shader_parameter("rim_amount", 0.9)
 	var body := Node3D.new(); body.name = "Body"; root.add_child(body)
-	var W := 1.0; var H := 0.46; var D := 0.68
+	var W := 1.16; var H := 0.56; var D := 0.8
+	# claw feet: the chest stands up off the ground, which no crate does
+	var foot := 0.08
+	body.position.y = foot
+	for x in [-1.0, 1.0]:
+		for z in [-1.0, 1.0]:
+			Models.part(body, Models.sphere(0.075, 8), mg, Vector3(x * (W * 0.5 - 0.06), -foot * 0.45, z * (D * 0.5 - 0.06)), Vector3(1.0, 0.9, 1.0))
+			Models.part(body, bx(0.12, foot, 0.12), mgd, Vector3(x * (W * 0.5 - 0.06), -foot * 0.5 + 0.02, z * (D * 0.5 - 0.06)))
 	# the box: a dark inner core and three rounded planks a side, a little uneven, so the seams read
 	Models.part(body, bx(W - 0.04, H - 0.02, D - 0.04), mwd, Vector3(0, H * 0.5, 0))
 	for k in 3:
@@ -76,27 +90,27 @@ static func chest(tier := 0) -> Node3D:
 	# a thick plinth rail, a rim band round the top, two straps and chunky corner brackets
 	Models.part(body, bx(W + 0.08, 0.09, D + 0.08), mgd, Vector3(0, 0.045, 0))
 	Models.part(body, bx(W + 0.05, 0.065, D + 0.05), mg, Vector3(0, H - 0.03, 0))
-	for x in [-0.3, 0.3]:
-		Models.part(body, bx(0.1, H + 0.01, D + 0.045), mg, Vector3(x, H * 0.5, 0))
+	for x in [-0.33, 0.33]:
+		Models.part(body, bx(0.13, H + 0.01, D + 0.05), mg, Vector3(x, H * 0.5, 0))
 		for z in [-1.0, 1.0]:
-			for y in [0.16, 0.32]:
-				Models.part(body, Models.sphere(0.022, 6), mgd, Vector3(x, y, z * (D * 0.5 + 0.03)))
+			for y in [0.18, 0.38]:
+				Models.part(body, Models.sphere(0.026, 6), mgd, Vector3(x, y, z * (D * 0.5 + 0.03)))
 	for x in [-1.0, 1.0]:
 		for z in [-1.0, 1.0]:
-			Models.part(body, bx(0.14, H + 0.04, 0.14), mg, Vector3(x * (W * 0.5 - 0.03), H * 0.5 + 0.01, z * (D * 0.5 - 0.03)))
+			Models.part(body, bx(0.18, H + 0.05, 0.18), mg, Vector3(x * (W * 0.5 - 0.03), H * 0.5 + 0.01, z * (D * 0.5 - 0.03)))
 			Models.part(body, Models.sphere(0.03, 6), mgd, Vector3(x * (W * 0.5 + 0.04), H * 0.62, z * (D * 0.5 - 0.03)))
 	# the lid hinges at the back (+z here; Body turns round so the lock faces the camera)
 	var lid := Node3D.new(); lid.name = "Lid"; lid.position = Vector3(0, H, D * 0.5); body.add_child(lid)
 	lid.set_meta("hinged", true)
 	var lc := Vector3(0, 0.0, -D * 0.5)
-	var dome := 0.86     # a tall rounded lid: half a barrel, squashed a little less than a plank lid
+	var dome := 1.0      # a tall rounded lid: a full half barrel, so the chest's outline is a loaf, not a box
 	Models.part(lid, Models.cyl(D * 0.5, D * 0.5, W - 0.03, 22), mw, lc, Vector3(1.0, 1.0, dome), Vector3(0, 0, PI / 2))
 	for k in 4:
 		# plank seams across the curve
 		var a := PI * (0.2 + 0.2 * k)
 		Models.part(lid, bx(W - 0.02, 0.014, 0.014), mwd, lc + Vector3(0, sin(a) * D * 0.5 * dome, cos(a) * D * 0.5), Vector3.ONE, Vector3(-(a - PI / 2), 0, 0))
-	for x in [-0.3, 0.3]:
-		Models.part(lid, Models.cyl(D * 0.5 + 0.022, D * 0.5 + 0.022, 0.1, 22), mg, lc + Vector3(x, 0, 0), Vector3(1.0, 1.0, dome + 0.02), Vector3(0, 0, PI / 2))
+	for x in [-0.33, 0.33]:
+		Models.part(lid, Models.cyl(D * 0.5 + 0.026, D * 0.5 + 0.026, 0.13, 22), mg, lc + Vector3(x, 0, 0), Vector3(1.0, 1.0, dome + 0.02), Vector3(0, 0, PI / 2))
 	for x in [-1.0, 1.0]:
 		Models.part(lid, Models.cyl(D * 0.5 + 0.018, D * 0.5 + 0.018, 0.06, 22), mg, lc + Vector3(x * (W * 0.5 - 0.02), 0, 0), Vector3(1.0, 1.0, dome + 0.02), Vector3(0, 0, PI / 2))
 	# a front lip on the lid and the lock: a big plate with a jewel and a hasp coming down
@@ -111,16 +125,19 @@ static func chest(tier := 0) -> Node3D:
 	# light leaking out round the lid (a warm crack on a common chest, brighter on rare ones)
 	var seam := Models.glow_mat(Color(SEAM[tier], 0.55 + 0.2 * tier))
 	Models.part(body, bx(W - 0.08, 0.035, D - 0.08), seam, Vector3(0, H + 0.004, 0))
+	# every chest: a gold crest along the top of the lid with a knob at each end
+	Models.part(lid, bx(0.09, 0.07, D * 0.82), mg, lc + Vector3(0, D * 0.5 * dome + 0.005, 0))
+	for z in [-1.0, 1.0]:
+		Models.part(lid, Models.sphere(0.06, 8), mg, lc + Vector3(0, D * 0.5 * dome * 0.86, z * D * 0.38))
 	if tier >= 1:
 		# gem studs on the corners and finials on the lid
 		for x in [-1.0, 1.0]:
-			Models.part(lid, Models.sphere(0.055, 8), mg, lc + Vector3(x * 0.3, D * 0.5 * dome + 0.03, 0))
+			Models.part(lid, Models.sphere(0.065, 8), mg, lc + Vector3(x * 0.33, D * 0.5 * dome + 0.03, 0))
 			for z in [-1.0, 1.0]:
-				Models.part(body, Models.crystal(0.035, 0.07, 5), gem, Vector3(x * (W * 0.5 - 0.03), H + 0.03, z * (D * 0.5 - 0.03)))
+				Models.part(body, Models.crystal(0.04, 0.08, 5), gem, Vector3(x * (W * 0.5 - 0.03), H + 0.04, z * (D * 0.5 - 0.03)))
 		if tier == 2:
-			# a crest on the lid: a gold ridge with a big jewel
-			Models.part(lid, bx(0.08, 0.06, D * 0.8), mg, lc + Vector3(0, D * 0.5 * dome + 0.01, 0))
-			Models.part(lid, Models.crystal(0.08, 0.18, 6), gem, lc + Vector3(0, D * 0.5 * dome + 0.08, -0.05))
+			# a big jewel on the crest
+			Models.part(lid, Models.crystal(0.09, 0.2, 6), gem, lc + Vector3(0, D * 0.5 * dome + 0.09, -0.05))
 	body.scale = Vector3.ONE * (1.0 + tier * 0.1)
 	body.rotation.y = PI   # lock facing the camera
 	# the rarity marks: a light pillar you can see from other islands and a glowing pool round it
@@ -129,9 +146,26 @@ static func chest(tier := 0) -> Node3D:
 	var bh: float = [3.2, 9.0, 11.0][tier]
 	var beam := Models.part(bcn, Models.cyl(0.14 + 0.03 * tier, 0.3 + 0.05 * tier, bh, 10), Models.glow_mat(Color(rc, [0.13, 0.22, 0.28][tier])), Vector3(0, bh * 0.5, 0))
 	beam.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	var ring := MeshInstance3D.new(); ring.name = "Ring"; ring.mesh = Models.flat_quad(2.0 + 0.3 * tier)
-	var rm := Models.ring_mat(Color(rc, 0.9), 0.1)
-	rm.set_shader_parameter("fill", 0.16 + 0.05 * tier)
+	# the glow: a soft halo round the chest and a few sparks drifting up off the lid
+	var halo := Models.part(bcn, Models.sphere(1.0, 14), Models.glow_mat(Color(rc, 0.16 + 0.04 * tier)), Vector3(0, 0.45, 0), Vector3(1.05, 0.62, 0.85) * (1.0 + tier * 0.1), Vector3.ZERO, "Halo")
+	halo.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	var sp := CPUParticles3D.new(); sp.name = "Sparks"
+	sp.amount = 6 + 2 * tier; sp.lifetime = 1.6
+	sp.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX
+	sp.emission_box_extents = Vector3(W * 0.45, 0.05, D * 0.4)
+	sp.direction = Vector3.UP; sp.spread = 12.0
+	sp.initial_velocity_min = 0.35; sp.initial_velocity_max = 0.7
+	sp.gravity = Vector3.ZERO
+	sp.scale_amount_min = 0.04; sp.scale_amount_max = 0.08
+	var sm := SphereMesh.new(); sm.radius = 0.5; sm.height = 1.0; sm.radial_segments = 6; sm.rings = 3
+	sp.mesh = sm
+	sp.material_override = Models.glow_mat(Color(Color(rc).lightened(0.3), 0.85))
+	sp.position = Vector3(0, H + 0.35, 0)
+	sp.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	bcn.add_child(sp)
+	var ring := MeshInstance3D.new(); ring.name = "Ring"; ring.mesh = Models.flat_quad(2.3 + 0.3 * tier)
+	var rm := Models.ring_mat(Color(rc, 0.95), 0.1)
+	rm.set_shader_parameter("fill", 0.2 + 0.05 * tier)
 	ring.material_override = rm; ring.position.y = 0.03
 	ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	bcn.add_child(ring)

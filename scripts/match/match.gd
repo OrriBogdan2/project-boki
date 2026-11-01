@@ -746,6 +746,36 @@ func _start(o: Dictionary) -> void:
 		player.teleport(b0 + Vector3(2.2, 0, 0.6))
 		spawn_weapon("sniper", 3, b0 + Vector3(1.6, 0, 1.8), "", false)
 		spawn_weapon("smg", 4, b0 + Vector3(3.0, 0, 1.6), "", false)
+	if o.get("chest_demo", false) and player and not breaks.is_empty():
+		# test (--chest-demo): a chest set down next to a breakable crate, a pot and a keg, you just
+		# below them, so the two kinds of prop can be told apart in one frame
+		var bc: Vector3 = breaks[0]["pos"]
+		for b in breaks:
+			if b["kind"] == "crate": bc = b["pos"]; break
+		var spots := []
+		for off in [Vector3(1.6, 0, 0.0), Vector3(-1.6, 0, 0.0), Vector3(0.0, 0, -1.6), Vector3(1.4, 0, 1.4), Vector3(-1.4, 0, 1.4), Vector3(0.0, 0, 1.7), Vector3(3.0, 0, 0.4), Vector3(-3.0, 0, 0.4)]:
+			var q: Vector3 = bc + off
+			if world.is_void(q.x, q.z) or world.is_block(q.x, q.z) or absf(world.ground_at(q.x, q.z) - bc.y) > 0.3:
+				continue
+			q.y = world.ground_at(q.x, q.z)
+			spots.append(q)
+		var want := ["chest", "pot", "barrel", "chest1"]
+		for k in mini(spots.size(), want.size()):
+			match String(want[k]):
+				"chest": add_chest(spots[k], 0)
+				"chest1": add_chest(spots[k], 1)
+				_: _add_break(String(want[k]), spots[k])
+		var stand: Vector3 = bc + Vector3(0.6, 0, 2.2)
+		for off in [Vector3(0.6, 0, 3.0), Vector3(0.6, 0, 2.2), Vector3(2.2, 0, 1.8), Vector3(-2.2, 0, 1.8)]:
+			var q2: Vector3 = bc + off
+			if not world.is_void(q2.x, q2.z) and not world.is_block(q2.x, q2.z) and absf(world.ground_at(q2.x, q2.z) - bc.y) < 0.3:
+				stand = q2; break
+		player.teleport(stand)
+	if player and (has_meta("stairs_demo") or o.get("chest_demo", false)):
+		# screenshots: no monsters standing over what's being shown
+		for mb in mobs.duplicate():
+			if (mb as Mob).pos.distance_to(player.pos) < 9.0:
+				mobs.erase(mb); mb.queue_free()
 	if not opts.get("duel", false) and not opts.get("arena", false):
 		await _spawn_wild()
 	await _slice()
@@ -1078,12 +1108,25 @@ func _spawn_hunters() -> void:
 				player = make_hunter("p0", 0, String(opts.get("cls", Data.class_of_save())), Save.d.get("name", "Hunter"), "bot" if opts.get("autoplay", false) else "local", rec, at, my_kit(), rec2)
 				if opts.get("autoplay", false):
 					player.ai = bot_brain.new_mind(rng, 0.7)
-				if "--at-stairs" in OS.get_cmdline_user_args() and not world.stairs.is_empty():
-					# test: start beside a flight of stairs
-					var si: int = world.stairs.keys()[0]
-					var sd: Vector2i = world.stairs[si]
-					at = Vector3(si % world.w + 0.5 - sd.x * 1.5, 0, si / world.w + 0.5 - sd.y * 1.5)
+				var at_st := Array(OS.get_cmdline_user_args()).filter(func(a): return String(a) == "--at-stairs" or String(a).begins_with("--at-stairs="))
+				if not at_st.is_empty() and not world.stairs.is_empty():
+					# test: start at the foot of a flight of stairs, in line with its middle step
+					# (--at-stairs=N: the Nth flight, widest first; prints every flight's width)
+					var fl := world.stair_flights()
+					var pick_s := String(at_st[0]).substr(12) if String(at_st[0]).length() > 12 else "0"
+					var pick_n := int(pick_s)
+					if pick_s in ["E", "W", "S", "N"]:
+						# --at-stairs=E: the widest flight climbing that way (E = +x, S = +z, toward the camera)
+						for fi in fl.size():
+							if {Vector2i(1, 0): "E", Vector2i(-1, 0): "W", Vector2i(0, 1): "S", Vector2i(0, -1): "N"}.get(fl[fi]["dir"], "") == pick_s:
+								pick_n = fi; break
+					var F: Dictionary = fl[clampi(pick_n, 0, fl.size() - 1)]
+					print("STAIRS flights=%d widths=%s picked=%d (width %d)" % [fl.size(), str(fl.map(func(f): return "%d%s" % [f["tiles"].size(), {Vector2i(1, 0): "E", Vector2i(-1, 0): "W", Vector2i(0, 1): "S", Vector2i(0, -1): "N"}.get(f["dir"], "?")])), clampi(pick_n, 0, fl.size() - 1), F["tiles"].size()])
+					var mid: Vector2i = F["tiles"][F["tiles"].size() / 2]
+					var sd: Vector2i = F["dir"]
+					at = Vector3(mid.x + 0.5 - sd.x * 2.5, 0, mid.y + 0.5 - sd.y * 2.5)
 					at.y = world.ground_at(at.x, at.z)
+					set_meta("stairs_demo", Vector3(mid.x + 0.5, at.y, mid.y + 0.5))
 				player.teleport(at)
 				player.tonics = mini(TONIC_CARRY, int(Save.d["items"].get("tonic", 0)) + 2); player.free_tonics = 2; tonic_stash_left = maxi(0, int(Save.d["items"].get("tonic", 0)) - (player.tonics - 2))     # everyone sets out with a couple, at most TONIC_CARRY in all; the rest stays home
 				if not opts.get("tutorial", false) and not opts.get("training", false):
@@ -4295,7 +4338,7 @@ func step(dt: float) -> void:
 		SeeThrough.demo(self, String(opts["see_demo"]))
 	if opts.has("exit_demo") and exits and player and not player.dropping:
 		exits.demo(String(opts["exit_demo"]))
-	if opts.get("raid_demo", false) and hud and not hud.guide_hidden:
+	if (opts.get("raid_demo", false) or opts.get("chest_demo", false) or has_meta("stairs_demo")) and hud and not hud.guide_hidden:
 		Settings.v["tips"] = false          # (screenshots of a raid condition: no tutorial cards)
 		hud.guide_hidden = true
 	if "--kit-demo" in OS.get_cmdline_user_args() and player and time > 0.3 and not train.has("_kitdemo"):
