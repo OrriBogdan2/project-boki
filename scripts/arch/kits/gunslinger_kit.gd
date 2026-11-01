@@ -65,7 +65,7 @@ func add_fever(n := 1) -> void:
 ## Rattled foes take more from the rifle.
 func outgoing(t: Ent, dmg: float, o: Dictionary) -> float:
 	if t is Hunter or t is Mob:
-		if String(o.get("src", "")) == "shot" and not o.has("ab") and KitStatus.active(t, "rattled"):
+		if String(o.get("src", "")) == "shot" and not o.has("ab") and KitStatus.rattled(t):
 			return dmg * (1.0 + float(res_def()["rattle_k"]))
 	return dmg
 
@@ -243,7 +243,7 @@ func _detonate(b: Dictionary) -> void:
 	var stg := stage("rmb", {"delivery": {"type": "burst", "origin": "here", "radius": r}, "effects": [{"type": "damage", "amount": float(bd["dmg"])}]})
 	run(stg, cx("rmb", "burr_charge", at, {"at": at}))
 	for f in foes_in(at, r):
-		if f is Hunter: KitStatus.apply(f as Hunter, "rattled", float(bd["rattle"]))
+		if f is Hunter: KitStatus.apply(f, "rat", float(bd["rattle"]))
 		else: f.stun_t = maxf(f.stun_t, 0.3)
 
 ## Stuck in the wall: a cone back out of it, knocking everything away and Rattling it for longer; a
@@ -264,7 +264,7 @@ func _cone(at: Vector3, dir: Vector2, bd: Dictionary) -> void:
 		var o := {"src": "abil", "ab": "utility", "tags": ["utility", "burr"], "kb": away * float(bd["push"]), "lift": 2.0}
 		f.hurt(float(bd["cone_dmg"]) * power("sec") * m.dmg_mult(h), h, o)
 		if f is Hunter:
-			KitStatus.apply(f as Hunter, "rattled", float(bd["cone_rattle"]))
+			KitStatus.apply(f, "rat", float(bd["cone_rattle"]))
 			if terrain_behind(f, away, 2.4):
 				wall_slams += 1
 				f.hurt(0.1, h, {"src": "abil", "ab": "utility", "tags": ["utility", "burr"], "stun": float(bd["wall_stun"]), "dr": true})
@@ -346,7 +346,7 @@ func _fire_needle() -> void:
 		if along < 0.0 or along > L + f.r: continue
 		if absf(v.cross(d)) > float(ed["width"]) + f.r: continue
 		if absf(f.pos.y - h.pos.y) > 2.6: continue
-		var rat := KitStatus.active(f, "rattled")
+		var rat := KitStatus.rattled(f)
 		var dmg: float = dmg0 * ((1.0 + float(ed["rattle_k"])) if rat else 1.0)
 		var o := {"src": "abil", "ab": "k1", "tags": ["k1", "needle"]}
 		if rat and f is Hunter: o["payoff"] = true
@@ -373,7 +373,7 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if not needle.is_empty():
 		h.inp["aim"] = aimp
 		return
-	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and los and dist > 4.0 and dist < 13.0 and (KitStatus.active(tgt, "rattled") or randf() < 0.15):
+	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and los and dist > 4.0 and dist < 13.0 and (KitStatus.rattled(tgt) or randf() < 0.15):
 		h.inp["aim"] = aimp
 		h.inp["sig"] = true
 		return

@@ -94,19 +94,19 @@ func _mage() -> void:
 	P.ak.use_e()
 	ac.step(m, 0.9)
 	ok("Skycall steals a rival's mote", K.motes.size() >= 1 and K.motes[0]["owner"] == P)
-	ok("Skycall: Spark + Grounded + flung", K.spark_n(T) >= 1 and KitStatus.active(T, "grounded") and T.pos.x > home.x + 5.5, "x %.1f" % (T.pos.x - home.x))
+	ok("Skycall: Spark + Grounded + flung", K.spark_n(T) >= 1 and KitStatus.grounded(T) and T.pos.x > home.x + 5.5, "x %.1f" % (T.pos.x - home.x))
 	# 6. Skycall as the 4th Spark, then Wirerun: the chain
 	ac.fresh(T); K.sparks.clear(); P.teleport(home); T.teleport(home + Vector3(5, 0, 0)); ac.step(m, 0.1); K.add_spark(T, 3); K.cd["e"] = 0.0; ac.aim_at(P, T.pos)
 	P.ak.use_e()
 	ac.step(m, 0.8)
 	ok("Skycall as the 4th Spark makes a Live foe", K.live(T))
 	# 7. a Grounded Vireo can't start a Wirerun
-	KitStatus.apply(P, "grounded", 1.0, false); P.dashes = P.max_dashes(); P.teleport(home)
+	KitStatus.apply(P, "gnd", 1.0, 0.0, false); P.dashes = P.max_dashes(); P.teleport(home)
 	var w0 := K.blowouts
 	P.inp["dash_down"] = true; P.do_dash()
 	ok("Grounded: no Wirerun", K.wire.is_empty())
 	P.inp["dash_down"] = false
-	KitStatus.clear(P, "grounded", false)
+	P.set_meta("gnd_until", 0.0)
 	await ac.done(m)
 	fails += ac.fails
 
@@ -121,15 +121,15 @@ func _gunslinger() -> void:
 	ac.tap(m, P)
 	ac.step(m, 1.4)
 	ok("Burr: sticks and pops, 2 Fever stacks", K.rattles >= 1 and K.res >= 2.0, "fever %.0f" % K.res)
-	ok("Burr: target Rattled", KitStatus.active(T, "rattled") and T.slow_t > 0.0)
+	ok("Burr: target Rattled", KitStatus.rattled(T) and T.slow_t > 0.0)
 	ok("Rattled foe takes 28% more from the rifle", is_equal_approx(K.outgoing(T, 10.0, {"src": "shot"}), 12.8))
 	ok("Rattled does not boost abilities via outgoing", is_equal_approx(K.outgoing(T, 10.0, {"src": "abil", "ab": "k1"}), 10.0))
 	# 2. Longneedle on a Rattled vs. a clean target: +20%, Skewered payoff, cooldown shaved
 	ac.fresh(T); ac.fresh(T2)
-	KitStatus.clear(T, "rattled", false); K.cd["e"] = 0.0; ac.aim_at(P, T.pos)
+	KitStatus.clear_rattled(T); K.cd["e"] = 0.0; ac.aim_at(P, T.pos)
 	P.ak.use_e(); ac.step(m, 1.1)
 	var clean: float = ac.dmg(T)
-	ac.fresh(T); KitStatus.apply(T, "rattled", 4.0, false); K.cd["e"] = 0.0; ac.aim_at(P, T.pos)
+	ac.fresh(T); KitStatus.apply(T, "rat", 4.0); K.cd["e"] = 0.0; ac.aim_at(P, T.pos)
 	var sk0 := K.skewers
 	P.ak.use_e(); ac.step(m, 1.1)
 	var rat: float = ac.dmg(T)
@@ -137,7 +137,7 @@ func _gunslinger() -> void:
 	ok("Longneedle on a Rattled hunter: Skewered payoff", K.skewers == sk0 + 1)
 	ok("Longneedle hit takes 30% off its cooldown", float(K.cd["e"]) <= 12.0 * 0.72, "cd %.1f" % float(K.cd["e"]))
 	# 3. Longneedle ignores cover
-	ac.fresh(T); KitStatus.clear(T, "rattled", false)
+	ac.fresh(T); KitStatus.clear_rattled(T)
 	_wall(m, home + Vector3(2.5, 0, 0)); _wall(m, home + Vector3(2.5, 0, 1)); _wall(m, home + Vector3(2.5, 0, -1))
 	K.cd["e"] = 0.0; ac.aim_at(P, T.pos)
 	P.ak.use_e(); ac.step(m, 1.1)
@@ -160,7 +160,7 @@ func _gunslinger() -> void:
 	var ws0 := K.wall_slams
 	ac.tap(m, P)
 	ac.step(m, 1.2)
-	ok("Burr in a wall: cone hits and Rattles for longer", ac.dmg(T) >= 9.0 and KitStatus.left(T, "rattled") > 1.0, "took %.0f rattled %.1f" % [ac.dmg(T), KitStatus.left(T, "rattled")])
+	ok("Burr in a wall: cone hits and Rattles for longer", ac.dmg(T) >= 9.0 and KitStatus.rattled_left(T) > 1.0, "took %.0f rattled %.1f" % [ac.dmg(T), KitStatus.rattled_left(T)])
 	ok("Burr cone: shoved into terrain = stun + cooldown shave", K.wall_slams == ws0 + 1 and float(K.cd["rmb"]) < 9.0 * 0.7, "slams %d cd %.1f" % [K.wall_slams, float(K.cd["rmb"])])
 	# 6. Knock: heal, Slipstep refreshed, rank 3 resets the Burr
 	P.slot_lv["sec"] = 3

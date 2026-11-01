@@ -82,7 +82,7 @@ static func tick(A: Arena, P: Hunter, D: Hunter, t: float, dt: float, w: String)
 				if t > GO and t < GO + 1.3: P.inp["aim"] = D.pos + Vector3(3.5, 0.9, 1.0)
 				at_t = GO + 1.18
 			"needle", "skewer":
-				if mv == "skewer" and ArenaDemo._at(t, dt, 0.1): KitStatus.apply(D, "rattled", 4.0)
+				if mv == "skewer" and ArenaDemo._at(t, dt, 0.1): KitStatus.apply(D, "rat", 4.0)
 				if ArenaDemo._at(t, dt, GO): K.cd["e"] = 0.0; K.use_e()
 				if mv == "needle": at_t = GO + 0.9
 				else:

@@ -195,7 +195,7 @@ func _tick_wire(dt: float) -> void:
 	var dd := dash_def()
 	wire["t"] = float(wire["t"]) + dt
 	var t := float(wire["t"])
-	if h.downed or h.stun_t > 0.0 or h.root_t > 0.0 or KitStatus.active(h, "grounded"):
+	if h.downed or h.stun_t > 0.0 or h.root_t > 0.0 or KitStatus.grounded(h):
 		_end_wire()
 		return
 	var d := h.aim_dir()
@@ -414,7 +414,7 @@ func _strike(s: Dictionary) -> void:
 		# flung along the aim, pinned to the ground for a moment
 		f.impulse(dir * float(ed["push"]), float(ed["lift"]))
 		if f is Hunter:
-			KitStatus.apply(f as Hunter, "grounded", float(ed["grounded"]))
+			KitStatus.apply(f, "gnd", float(ed["grounded"]))
 	# lightning flings a charge mote it catches; a rival's becomes mine
 	for mt in motes:
 		if (mt["pos"] as Vector3).distance_to(at) < float(ed["radius"]) + 0.6:

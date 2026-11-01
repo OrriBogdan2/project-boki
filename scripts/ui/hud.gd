@@ -212,6 +212,10 @@ func _draw_all() -> void:
 	# picture and closes a vignette in; here the rings, the heartbeat, a low rumble and a pulsing
 	# warning near the end
 	var want_a: float = ABYSS_FX.danger(p) if p == m.player else 0.0
+	if want_a <= 0.02:
+		abyss_cued = false
+	if want_a <= 0.5:
+		abyss_warned = false
 	abyss_a = lerpf(abyss_a, want_a, 1.0 - exp(-10.0 * get_process_delta_time()))
 	if abyss_fx:
 		abyss_fx.show_danger(abyss_a, pow(0.5 + 0.5 * sin(abyss_pulse * TAU), 3.0) if abyss_a > 0.005 else 0.0)
@@ -227,11 +231,18 @@ func _draw_all() -> void:
 			var a := ek * (0.22 - float(i) * 0.035) * (0.6 + 0.4 * pulse)
 			if a <= 0.0: break
 			c.draw_rect(Rect2(Vector2(inset, inset), sz - Vector2(inset, inset) * 2.0), Color(0.45, 0.02, 0.18, a), false, minf(sz.x, sz.y) * 0.035)
-		if abyss_a > 0.15 and p == m.player:
+		# (owner) an audio cue: a falling whoosh as the tint starts, a warning when it turns deep red
+		if p == m.player and abyss_a > 0.08 and not abyss_cued:
+			abyss_cued = true
+			Sfx.play("whoosh", null, -6.0, 0.0, 0.55)
+		if p == m.player and abyss_a > 0.75 and not abyss_warned:
+			abyss_warned = true
+			Sfx.play("warn", null, -4.0, 0.0, 0.8)
+		if abyss_a > 0.1 and p == m.player:
 			var beat := int(floor(abyss_pulse))
 			if beat != abyss_beat:
 				abyss_beat = beat
-				Sfx.play("thump", null, -16.0 + abyss_a * 12.0, 0.0, 0.7 + red * 0.15)
+				Sfx.play("thump", null, -12.0 + abyss_a * 14.0, 0.0, 0.7 + red * 0.15)
 				if red > 0.3 and beat % 2 == 0:
 					Sfx.play("boom", null, -24.0 + red * 10.0, 0.0, 0.35)     # a low rumble under the heartbeat
 		if abyss_a > 0.6 and p == m.player:
@@ -1383,7 +1394,8 @@ func _draw_arch_abilities(sz: Vector2, p: Hunter) -> void:
 		# the resource-full variant is ready (Cash In, Called Shot, Shield Slam...): a gold dot
 		c.draw_circle(sr.position + Vector2(s - 6, 6), 5.0 + sin(m.time * 8.0), Color("ffd23f"))
 	if p.ak.rmb_down and p.ak.rmb_t > 0.05:
-		var hk := clampf(p.ak.rmb_t / maxf(0.05, float(p.ak.rmb_def().get("hold", 0.3))), 0.0, 1.0)
+		var hfull: float = p.ak.rmb_charge_full() if p.ak.rmb_charge_full() > float(p.ak.rmb_def().get("hold", 0.3)) else float(p.ak.rmb_def().get("hold", 0.3))
+		var hk := clampf(p.ak.rmb_t / maxf(0.05, hfull), 0.0, 1.0)
 		c.draw_arc(sr.get_center(), s * 0.5 + 4.0, -PI / 2, -PI / 2 + TAU * hk, 32, Color(info["col"], 0.9), 3.0, true)
 	x += s + gap
 	var qr := Rect2(Vector2(x, y), Vector2(s, s))
@@ -1398,6 +1410,9 @@ func _draw_arch_abilities(sz: Vector2, p: Hunter) -> void:
 	var di := p.slot_info("dash")
 	var dmax := int(di["max_charges"])
 	_skill_slot("dash", "dash", Rect2(Vector2(x, y), Vector2(s, s)), String(di["icon"]), Settings.key_cap("dash"), di["col"], float(di["cd"]) / maxf(0.01, float(di["cd_max"])) if float(di["cd"]) > 0.0 else 0.0, float(di["cd"]), bool(di["ready"]), int(di["charges"]), dmax)
+	if di.get("full", false):
+		# the payoff lives on the dash (the Thief's Primed shot into 3 Marks): the same gold dot
+		c.draw_circle(Vector2(x, y) + Vector2(s - 6, 6), 5.0 + sin(m.time * 8.0), Color("ffd23f"))
 	x += s + gap
 	var ei := p.slot_info("k1")
 	var er := Rect2(Vector2(x, y), Vector2(s, s))
@@ -2457,6 +2472,8 @@ func _draw_tip(sz: Vector2, t: Dictionary) -> void:
 	c.draw_multiline_string(body, r.position + Vector2(20, 28), text, HORIZONTAL_ALIGNMENT_LEFT, w - 40.0, 16, -1, Color(0.1, 0.09, 0.12, a))
 
 var head_hp := 1.0
+var abyss_cued := false
+var abyss_warned := false
 var abyss_a := 0.0
 const ABYSS_FX := preload("res://scripts/match/abyss_fx.gd")
 var abyss_fx: CanvasLayer = null
