@@ -670,7 +670,8 @@ func _start(o: Dictionary) -> void:
 	add_child(world)
 	# real expeditions are on a hand-made map, and so is the tutorial (a small calm one); training keeps a generated one
 	var layout := {}
-	if big and not o.get("procedural", false):
+	# --procgen (or opts.procedural): the old island generator instead, as a fallback
+	if big and not o.get("procedural", false) and not "--procgen" in OS.get_cmdline_user_args():
 		layout = World.load_layout(String(o.get("map", World.layout_for_tier(tier))))
 	elif o.get("tutorial", false):
 		layout = World.load_layout("tutorial")
@@ -825,7 +826,7 @@ func _build_env() -> void:
 	raid = RaidLook.pick(opts, seed_val)
 	RaidLook.apply(env.environment, sun, get_node_or_null("Fill") as DirectionalLight3D, T, raid)
 	sight_k = float(RaidLook.SIGHT.get(raid, 1.0))
-	RenderingServer.global_shader_parameter_set("vis_dark", float(RaidLook.VIS_DARK.get(raid, 0.42)))
+	RenderingServer.global_shader_parameter_set("vis_dark", 1.0 if "--shot-bright" in OS.get_cmdline_user_args() else float(RaidLook.VIS_DARK.get(raid, 0.42)))     # (--shot-bright: map screenshots without the sight shading)
 	RenderingServer.global_shader_parameter_set("vis_ally_range", VIEW_RANGE * sight_k)
 	raid_fx = RaidLook.storm_fx(raid)
 	if raid_fx:
@@ -1089,6 +1090,12 @@ func _spawn_hunters() -> void:
 					var sd: Vector2i = world.stairs[si]
 					at = Vector3(si % world.w + 0.5 - sd.x * 1.5, 0, si / world.w + 0.5 - sd.y * 1.5)
 					at.y = world.ground_at(at.x, at.z)
+				if opts.has("at_xz"):
+					# test: start at a given spot (map screenshots, --at=x,z)
+					var axz := String(opts["at_xz"]).split(",")
+					at = Vector3(float(axz[0]), 0, float(axz[1]))
+					at.y = world.ground_at(at.x, at.z)
+				if opts.has("zoom_hold"): set_meta("zoom_hold", float(opts["zoom_hold"]))
 				player.teleport(at)
 				player.tonics = mini(TONIC_CARRY, int(Save.d["items"].get("tonic", 0)) + 2); player.free_tonics = 2; tonic_stash_left = maxi(0, int(Save.d["items"].get("tonic", 0)) - (player.tonics - 2))     # everyone sets out with a couple, at most TONIC_CARRY in all; the rest stays home
 				if not opts.get("tutorial", false) and not opts.get("training", false):

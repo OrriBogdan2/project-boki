@@ -124,6 +124,20 @@ func setup() -> void:
 
 func _warden_spot(ii: int) -> Vector3:
 	var w := m.world
+	if w.hand:
+		# a hand-made map says where Wardens may stand (World.warden_posts): the dice only pick which
+		var posts: Array = w.warden_posts.filter(func(wp): return int(wp["island"]) == ii)
+		for k in range(posts.size() - 1, 0, -1):
+			var j := rng.randi_range(0, k)
+			var tmp = posts[k]; posts[k] = posts[j]; posts[j] = tmp
+		for wp in posts:
+			var q: Vector3 = wp["pos"]
+			if _near_any(q, wardens.map(func(b): return b.pos), 6.0):
+				continue
+			if m.lairs and not m.lairs.lair_of(q, 6.0).is_empty():
+				continue
+			return q
+		return Vector3.INF
 	for _t in 24:
 		var p := _rand_ground(ii)
 		if p == Vector3.INF or w.is_void(p.x, p.z) or w.is_block(p.x, p.z):
