@@ -214,6 +214,8 @@ func run(main: Node) -> void:
 		gl_n += 1
 		if not r["fell"] and h.grounded and absf(h.pos.y - top) < 0.6: gl_ok += 1
 	ok(gl_ok == gl_n, "gliding up out of the abyss from 3.4m below the lip: back on top %d of %d" % [gl_ok, gl_n])
+	# the glider's lift grows with how deep you are: gentle just under the lip, a surge deep down
+	_lift_by_depth(edges[0])
 	# ---------------------------------------------------------------- 5. sheer cliffs
 	var sh := _edges(8, true)
 	if not sh.is_empty():
@@ -272,6 +274,66 @@ func run(main: Node) -> void:
 	await _home(main)
 	print("ACHECK DONE, failures: ", bad)
 	main.get_tree().quit()
+
+## Depths below the lip the lift is measured at (the point of no return is ~13m: Hunter.abyss_kill_y).
+const LIFT_DEPTHS := [1.0, 2.0, 4.0, 7.0, 10.0, 12.0]
+
+## Opens the glider (full heat) 4m out over the void, `depth` under the lip, falling at 4 m/s, keys
+## off. Per depth: the fastest climb in the first 0.5s and the time back up to the balloon line
+## (0.5m under the lip), or -1 if it never gets there in 4s.
+func _lift_by_depth(e: Dictionary) -> void:
+	var dir: Vector2 = e["dir"]; var top: float = e["top"]
+	var rows: Array = []
+	for dp in LIFT_DEPTHS:
+		_reset(Vector3(e["ex"] + dir.x * 4.0, top - dp, e["ez"] + dir.y * 4.0), Vector3(0, -4.0, 0))
+		h.last_gy = top; h.air_t = 1.0; h.gliding = true
+		var peak := -99.0; var t_up := -1.0; var t := 0.0
+		while t < 4.0:
+			h.inp["glide"] = true
+			m.step(Match.DT); t += Match.DT
+			if h.pos.distance_to(marker) < 0.01: break
+			if t <= 0.5: peak = maxf(peak, h.vel.y)
+			if t_up < 0.0 and h.pos.y >= top - 0.5: t_up = t; break
+		rows.append([dp, peak, t_up])
+	h.inp["glide"] = false
+	_lift_report("expedition", rows)
+
+func _lift_report(where: String, rows: Array) -> void:
+	var txt := ""
+	var grows := true
+	var all_up := true
+	for i in rows.size():
+		txt += "%s%.0fm: climb %.1f m/s, up in %s" % ["" if i == 0 else "; ", rows[i][0], rows[i][1], ("%.2fs" % rows[i][2]) if rows[i][2] > 0.0 else "never"]
+		if rows[i][2] <= 0.0: all_up = false
+		if i > 0 and float(rows[i][1]) < float(rows[i - 1][1]) + 0.5: grows = false
+	print("ACHECK lift (%s): %s" % [where, txt])
+	ok(all_up, "%s: the glider lifts you back to the lip from every depth down to %.0fm" % [where, float(rows[-1][0])])
+	ok(grows, "%s: the deeper you are, the harder it pulls you up (fastest climb rises with depth)" % where)
+	ok(float(rows[0][1]) <= 6.5, "%s: just under the lip the lift is gentle (%.1f m/s at %.0fm)" % [where, float(rows[0][1]), float(rows[0][0])])
+
+## The same at home (the farm's rims, and the Training Grounds use the same movement).
+func _home_lift(hm, e: Dictionary) -> void:
+	var dir: Vector2 = e["dir"]; var top: float = e["top"]
+	var DT := 1.0 / 60.0
+	var rows: Array = []
+	for dp in LIFT_DEPTHS:
+		hm.climb = {}; if "lfl" in hm: hm.lfl = {}
+		hm.ppos = Vector3(e["ex"] + dir.x * 4.0, 0, e["ez"] + dir.y * 4.0)
+		hm.py = top - dp; hm.pvy = -4.0; hm.pvel = Vector3.ZERO; hm.dash_t = 0.0
+		hm.safe_at = Vector3(e["at"].x, 0, e["at"].z) - Vector3(dir.x, 0, dir.y) * 3.0
+		hm.gliding = true
+		_press(Vector2.ZERO)
+		Input.action_press("glide")
+		var peak := -99.0; var t_up := -1.0; var t := 0.0
+		while t < 4.0:
+			var before: Vector3 = hm.ppos
+			hm._move_player(DT); t += DT
+			if hm.ppos.distance_to(hm.safe_at) < 0.01 and before.distance_to(hm.safe_at) > 0.5: break     # lost: set back
+			if t <= 0.5: peak = maxf(peak, hm.pvy)
+			if t_up < 0.0 and hm.py >= top - 0.5: t_up = t; break
+		Input.action_release("glide")
+		rows.append([dp, peak, t_up])
+	_lift_report("home", rows)
 
 # ---------------------------------------------------------------- 8. at home
 func _press(dir: Vector2) -> void:
@@ -334,6 +396,7 @@ func _home(main: Node) -> void:
 					lost_low = maxf(lost_low, top - low)
 	var near_n := n * 2 / 3
 	ok(climbed == near_n, "home: caught the island's side from below and pulled up %d of %d" % [climbed, near_n])
-	ok(grabbed_deep == 0 and lost == n - near_n and lost_low < 8.0, "home: deeper, you slide off and the wind sets you back after a short drop: %d of %d, deepest %.1fm" % [lost, n - near_n, lost_low])
+	ok(grabbed_deep == 0 and lost == n - near_n and lost_low < World.ABYSS_DEPTH + Hunter.ABYSS_EXTRA + 2.0, "home: deeper, you slide off and the wind sets you back at the same point of no return as out there: %d of %d, deepest %.1fm" % [lost, n - near_n, lost_low])
 	ok(inside < 0.05, "home: never inside or under the island (deepest %.2fm)" % inside)
+	_home_lift(hm, edges[0])
 	hm.queue_free()

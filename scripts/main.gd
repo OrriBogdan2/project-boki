@@ -100,6 +100,13 @@ func _ready() -> void:
 		if a == "--fresh": Save.d = Save.fresh()
 		if a in ["--work-demo", "--work-board", "--work-board=Kin", "--work-card", "--work-box", "--work-hover", "--work-close", "--work-build", "--shiny-lineup"]:
 			Save.no_write = true; Save.d = HomeWork.demo_save()     # a made-up farm at work (screenshots)
+		if a.begins_with("--farm-demo"):
+			# screenshots: a new farm-start island (--farm-demo=empty|ghost|chop|station|panel, --farm-seed=N)
+			var fseed := 7
+			for a2 in args:
+				if String(a2).begins_with("--farm-seed="): fseed = int(String(a2).substr(12))
+			Save.no_write = true
+			Save.d = HomeGather.demo_save(a.substr(12) if a.length() > 12 else "empty", fseed)
 		if a.begins_with("--test-kin="):
 			# test: a save with one kin "species:level:trust", ready to play at home
 			var tk := a.substr(11).split(":")
@@ -129,6 +136,9 @@ func _ready() -> void:
 		if a == "--map-mid-demo": opts["map_demo"] = "mid"; opts["no_drop"] = true    # the map mid-match, some spawns scouted
 		if a == "--drop-demo": opts["drop_demo"] = "lead"; opts["plan_t"] = 0.6        # the squad gliding in formation behind you
 		if a == "--drop-follow-demo": opts["drop_demo"] = "follow"; opts["plan_t"] = 0.6   # ... behind a squadmate
+		if a.begins_with("--raid-demo="): opts["raid"] = a.substr(12); opts["raid_demo"] = true; opts["no_drop"] = true    # a raid condition's look (RaidLook)
+		if a == "--blight-demo": opts["blight_demo"] = "all"; opts["no_drop"] = true      # a Warden's light and a Skitter pack (BlightDir.demo)
+		if a.begins_with("--blight-demo="): opts["blight_demo"] = a.substr(14); opts["no_drop"] = true
 	if "--check" in args:
 		var CheckT = load("res://tools/check.gd")
 		var bad := 0
@@ -338,6 +348,11 @@ func _ready() -> void:
 		set_meta("weapon_clip_check", wcc)
 		wcc.run(self)
 		return
+	if "--farm-start-check" in args:
+		var fsc = load("res://tools/farm_start_check.gd").new()      # a new farm: empty island, placing, chopping, stations, old saves
+		set_meta("farm_start_check", fsc)
+		fsc.run(self)
+		return
 	if "--work-check" in args:
 		var wkc = load("res://tools/work_check.gd").new()      # kin at work: jobs, stations, priorities, shimmer odds
 		set_meta("work_check", wkc)
@@ -433,6 +448,12 @@ func _ready() -> void:
 	if "--record-check" in args:
 		_record_check()
 		return
+	if "--blight-check" in args:
+		load("res://tools/blight_check.gd").new().run(self)      # the Blight: spawns, scaling, noise, early weakness
+		return
+	if "--raid-check" in args:
+		load("res://tools/raid_check.gd").new().run(self)        # raid conditions, sight, the armor kit key
+		return
 	if "--bot-sanity-check" in args:
 		_bot_sanity()
 		return
@@ -487,8 +508,9 @@ func _ready() -> void:
 		# tooling: a scripted expedition with per-phase frame costs and hitches (tests/perf_probe.gd)
 		add_child(load("res://tests/perf_probe.gd").new())
 		return
-	if "--hitch-check" in args:
-		# a seeded expedition through the drop and landing; fails on a stalled frame (tools/hitch_check.gd)
+	if "--hitch-check" in args or _has_arg("--load-check"):
+		# a seeded expedition through the drop and landing; fails on a stalled frame (tools/hitch_check.gd);
+		# --load-check stops at the reveal and judges the loading screen
 		add_child(load("res://tools/hitch_check.gd").new())
 		return
 	if OS.has_feature("web"):
@@ -601,7 +623,7 @@ func _ready() -> void:
 		show_screen("prologue", {"then": "title"})    # test: the opening story
 	elif "--creator" in args:
 		show_screen("hatch", {"create": true})    # test: the hunter creator
-	elif "--match" in args:
+	elif "--match" in args or opts.has("raid_demo") or opts.has("blight_demo"):
 		show_screen("match", opts)
 	elif "--duel" in args:
 		show_screen("match", Match.duel_opts())
@@ -652,9 +674,17 @@ func _has_arg(prefix: String) -> bool:
 
 var _gen := 0
 
+var _ld: Node = null       # the loading screen of a match still on its way
+const HOME_SCRIPT := "res://scripts/home/home.gd"
+
 func show_screen(screen: String, opts: Dictionary) -> void:
 	_gen += 1
 	var gen := _gen
+	# a match left while it was still loading: its loading screen goes, and 3D draws again
+	get_viewport().disable_3d = false
+	if is_instance_valid(_ld) and not _ld.is_queued_for_deletion() and not _ld.get("leaving"):
+		_ld.queue_free()
+	_ld = null
 	var fx := _fades_on()
 	if fx and current:
 		await fade.cover()
@@ -668,18 +698,28 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 		return    # another screen was asked for while this one was still on its way
 	if fx:
 		# the next screen builds this frame (often a heavy one); reveal once it has actually drawn
-		fade.reveal_after(3, 0.55)
+		fade.reveal_after(3, 0.55, func() -> bool: return gen == _gen and is_instance_valid(current) and current.get("building") == true)
 	match screen:
 		"match":
+			# the seed is fixed here, so the loading screen can show the raid condition it rolls
+			if not opts.has("seed"): opts["seed"] = randi()
 			# a loading screen covers building the world; tests that screenshot by frame count skip it
 			var ld = null
 			if (not opts.get("autoplay", false) or opts.get("probe", false)) and (not _has_arg("--shot=") or _has_arg("--show-loading")):
+				var tier_i := clampi(int(opts.get("tier", 0)), 0, Data.TIERS.size() - 1)
+				Sfx.prefetch(["music_hollow" if tier_i >= 2 else "music_match", "amb_match"])
+				Match.prefetch([Match.HUD_SCRIPT])
 				ld = load("res://scripts/ui/loading.gd").new()
 				ld.setup(opts)
 				add_child(ld)
+				_ld = ld
+				# nothing in 3D shows behind the loading screen while the match builds: drawing the
+				# half-built world every frame only slows the build (see Match.warm_up for the drawing)
+				get_viewport().disable_3d = true
 				await ld.shown
-				await ld.step(0.2)
+				ld.want = 0.04
 				if gen != _gen:
+					get_viewport().disable_3d = false
 					ld.queue_free()
 					return
 			var m := Match.new()
@@ -687,13 +727,19 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 			add_child(m)
 			current = m
 			if ld:
-				# build a step per frame so the loading screen keeps moving, then draw everything once
-				# behind it so no shader compiles mid-drop (see Match.warm_up)
-				await m.start_staged(opts, func(f: float): ld.want = maxf(ld.want, 0.2 + 0.72 * f))
+				# build in short slices so the loading screen keeps moving, then draw everything once
+				# behind it, a batch a frame, so no shader compiles mid-drop (see Match.warm_up)
+				await m.start_staged(opts, func(f: float, stage: String):
+					ld.want = maxf(ld.want, 0.04 + 0.66 * f)
+					ld.set_stage(stage))
+				get_viewport().disable_3d = false
 				if not is_instance_valid(m) or not m.is_inside_tree():
+					ld.queue_free()
 					return
 				if not opts.has("net"): m.set_process(false)
-				await m.warm_up()
+				ld.set_stage("graphics")
+				await m.warm_up(func(f: float): ld.want = maxf(ld.want, 0.7 + 0.28 * f))
+				ld.set_stage("ready")
 				# hold the match still while the bar finishes, except online where everyone runs together
 				await ld.finish()
 				if is_instance_valid(m) and m.is_inside_tree(): m.set_process(true)
@@ -704,6 +750,7 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 			var scr = R.new()
 			current = _layer(scr)
 			scr.show_result(opts)
+			Match.prefetch([HOME_SCRIPT])     # where you're most likely going next
 		"lobby":
 			var L = load("res://scripts/ui/lobby.gd")
 			var scr = L.new()
@@ -713,6 +760,7 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 			var Tt = load("res://scripts/ui/title.gd")
 			current = Tt.new()
 			add_child(current)
+			Match.prefetch([HOME_SCRIPT])     # compiled on a worker thread while the title shows
 		"prologue":
 			var Pr = load("res://scripts/ui/prologue.gd")
 			current = Pr.new()
@@ -724,7 +772,7 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 			current.set("edit_only", bool(opts.get("create", false)))
 			add_child(current)
 		"home":
-			var H = load("res://scripts/home/home.gd")
+			var H = Match.take_prefetched(HOME_SCRIPT)
 			current = H.new()
 			current.set("visit", opts.get("visit", {}))
 			current.set("visit_id", String(opts.get("visit_id", "")))
@@ -3435,7 +3483,7 @@ func _simtest(opts: Dictionary) -> void:
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--kill-at="): kill_at = float(a.substr(10))
 		if a.begins_with("--sim-until="): until = float(a.substr(12))
-	print("SIMTEST seed ", m.seed_val)
+	print("SIMTEST seed ", m.seed_val, " raid ", m.raid, " blight ", m.blight != null)
 	while not m.over and m.time < m.length + 5.0 and m.time < until:
 		m.step(Match.DT)
 		if kill_at > 0.0 and m.time >= kill_at and m.player and not m.player.out:
@@ -3489,6 +3537,9 @@ func _simtest(opts: Dictionary) -> void:
 	print("SIMSTAT breaks %d/%d weapons left %d rarities %s staggers %d rings %d pads %d" % [nb, m.breaks.size(), m.wpicks.size(), str(wr), m.stag_n, m.ring_n, m.world.pads.size()])
 	print("SIMTEST done in %dms, sim time %d, result %s" % [Time.get_ticks_msec() - t0, m.time, str(m.result)])
 	print("SIMKIN %s lost=%s" % [str(m.kstat), str(m._resolve_lost().map(func(L): return [L["fate"], L["holder"]]))])
+	if m.blight:
+		# the Blight: how many it brought out, and what it did (knocks / eliminations / damage on hunters)
+		print("SIMBLIGHT spawned %d alive %d wardens %d shrieks %d knocks %d outs %d dmg %d" % [m.blight.spawned, m.blight.alive().size(), m.blight.wardens.size(), m.blight.shrieks, int(m.kstat.get("bl_knock", 0)), int(m.kstat.get("bl_out", 0)), int(m.kstat.get("bl_dmg", 0.0))])
 	for h in m.hunters:
 		print("  %s team %d %s knocks %d kills %d dmg %d gems %d %s" % [h.pname, h.team, h.cls, h.knocks, h.kills, h.dmg_done, h.gems, "OUT" if h.out else ("EXTRACTED" if h.extracted else "alive")])
 	get_tree().quit()
@@ -3790,7 +3841,14 @@ func _home_build_check() -> void:
 	mv.gliding = false
 	var safe: Vector3 = mv.safe_at
 	mv.ppos = Vector3(2.0, 0, 2.0); mv.py = -0.5; mv.pvy = -5.0
-	for i in 60: mv._move_player(0.05)
+	# (no glider: the jump pressed above still reads as pressed in a headless run, which opens one, and
+	# an open glider now lifts you back to the lip over the abyss instead of sinking. A panel open
+	# means no keys)
+	mv.panel_open = "test"
+	for i in 60:
+		mv.gliding = false
+		mv._move_player(0.05)
+	mv.panel_open = ""
 	ok.call(mv.ppos.distance_to(safe) < 0.01 and mv.py >= -0.01, "falling off the island puts you back where you last stood")
 	var tr: HomeTraining = mv.training
 	# (the zone only changes while you're standing, so stand them on the ground each time)

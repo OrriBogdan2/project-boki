@@ -11,6 +11,10 @@ var rect: ColorRect
 var logo: TextureRect
 var _tw: Tween
 var covered := false
+var spin: Control         # a small spinner over the ink while a screen takes a moment to build
+var spin_draws := 0       # frames the spinner has drawn (--load-check=home)
+var _held := 0.0          # how long the ink has fully covered the window
+var _spin_t := 0.0
 
 func _init() -> void:
 	layer = 120
@@ -33,10 +37,20 @@ func _ready() -> void:
 	logo.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	logo.modulate.a = 0.0
 	add_child(logo)
+	spin = Control.new()
+	spin.set_anchors_preset(Control.PRESET_FULL_RECT)
+	spin.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	spin.draw.connect(_draw_spin)
+	add_child(spin)
 
 ## Keeps the logo exactly where and how big the boot splash drew it (native size, shrunk only to
 ## fit the window), whatever the interface scale is, so the hand-off is seamless.
-func _process(_d: float) -> void:
+func _process(d: float) -> void:
+	# the spinner turns once the ink has covered the window for a moment (a quick swap never shows it)
+	_held = _held + d if covered and rect.color.a >= 0.99 else 0.0
+	_spin_t += d
+	if _held > 0.2 or spin_draws > 0:
+		spin.queue_redraw()
 	if logo.modulate.a <= 0.0:
 		return
 	var win := Vector2(get_tree().root.size)
@@ -78,8 +92,24 @@ func reveal(dur := 0.5) -> void:
 	_tw.tween_callback(func(): rect.mouse_filter = Control.MOUSE_FILTER_IGNORE)
 	await _tw.finished
 
-## Waits a few rendered frames (so a screen that just built has actually drawn), then reveals.
-func reveal_after(frames := 3, dur := 0.5) -> void:
+## Waits a few rendered frames (so a screen that just built has actually drawn), and for as long as
+## hold() says the screen is still building, then reveals.
+func reveal_after(frames := 3, dur := 0.5, hold := Callable()) -> void:
 	for i in frames:
 		await get_tree().process_frame
+	while hold.is_valid() and hold.call():
+		await get_tree().process_frame
 	await reveal(dur)
+
+func _draw_spin() -> void:
+	var a := clampf((_held - 0.2) * 4.0, 0.0, 1.0)
+	if a <= 0.0:
+		return
+	spin_draws += 1
+	var sz := spin.size
+	var p := Vector2(sz.x - 44.0, sz.y - 44.0)
+	var r := 11.0
+	spin.draw_arc(p, r, 0.0, TAU, 32, Color(1, 1, 1, a * 0.12), 3.0, true)
+	var head := _spin_t * TAU * 1.15
+	var span := lerpf(0.5, 3.6, 0.5 + 0.5 * sin(_spin_t * 2.6))
+	spin.draw_arc(p, r, head - span, head, 28, Color(UI.ACCENT, a), 3.0, true)

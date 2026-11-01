@@ -52,10 +52,12 @@ func setup(match_node: Match) -> void:
 	cursor.z_index = 100
 	add_child(cursor)
 	cursor.draw.connect(_draw_pointer)
-	_build_minimap()
+	await _build_minimap()
 	# the painted map (smooth coasts, shading, paths) replaces the tile texture once it's baked
 	c.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	await m._slice()      # under the loading screen: a frame now and then (never waits otherwise)
 	MapPaint.request(self, m.world, func(t: Texture2D): map_paint = t)
+	await m._slice()
 	full_map = FullMap.new(self, m)
 
 # ------------------------------------------------------------------ the full map (M)
@@ -153,6 +155,7 @@ func _build_minimap() -> void:
 	var w := m.world
 	var img := Image.create(w.w, w.h, false, Image.FORMAT_RGBA8)
 	for z in w.h:
+		await m._slice()
 		for x in w.w:
 			var i := w.idx(x, z)
 			var col := Color(0, 0, 0, 0)
@@ -243,15 +246,13 @@ func _draw_all() -> void:
 		var rate := 1.6 + red * 3.4
 		abyss_pulse += get_process_delta_time() * rate
 		var pulse := pow(0.5 + 0.5 * sin(abyss_pulse * TAU), 3.0)
-		# a soft cold wash over everything, then a heavy vignette that closes in from the edges
-		c.draw_rect(Rect2(Vector2.ZERO, sz), Color(0.08, 0.04, 0.16, abyss_a * 0.28))
-		var rings := 9
-		for i in rings:
-			var inset := i * minf(sz.x, sz.y) * 0.035 * (0.6 + abyss_a)
-			var a := abyss_a * (0.34 - float(i) * 0.034)
+		# (the magenta wash itself is AbyssFx's shader) near the end, crimson edges beat with the heart
+		var ek := clampf((abyss_a - 0.6) / 0.4, 0.0, 1.0)
+		for i in 6:
+			var inset := i * minf(sz.x, sz.y) * 0.03
+			var a := ek * (0.22 - float(i) * 0.035) * (0.6 + 0.4 * pulse)
 			if a <= 0.0: break
-			var col := Color(0.04, 0.02, 0.1).lerp(Color(0.35, 0.02, 0.04), red * pulse)
-			c.draw_rect(Rect2(Vector2(inset, inset), sz - Vector2(inset, inset) * 2.0), Color(col, a), false, minf(sz.x, sz.y) * 0.04)
+			c.draw_rect(Rect2(Vector2(inset, inset), sz - Vector2(inset, inset) * 2.0), Color(0.45, 0.02, 0.18, a), false, minf(sz.x, sz.y) * 0.035)
 		if abyss_a > 0.15 and p == m.player:
 			var beat := int(floor(abyss_pulse))
 			if beat != abyss_beat:
@@ -402,9 +403,10 @@ func _draw_world_labels() -> void:
 			_ctext(tsp, "%s incoming" % h.pname.substr(0, 10), 12, Color("8fe3c8"), big)
 			c.draw_arc(cam.unproject_position(to.position + Vector3(0, 0.1, 0)), 22.0, 0, TAU, 32, Color(0.56, 0.89, 0.78, 0.4 + 0.3 * sin(m.time * 8.0)), 2.0, true)
 	for mb in m.mobs:
-		if mb.dead or cam.is_position_behind(mb.position):
+		if mb.dead or not mb.visible or cam.is_position_behind(mb.position):
 			continue
 		var hy := 1.4
+		if mb is Blight: hy = 3.0 if mb.mkind == "bl_warden" else 1.1
 		if mb is Boss: hy = 4.8 if mb.mkind == "colossus" else 3.4
 		elif mb.mkind == "ward": hy = 3.0
 		elif mb.mkind == "brute": hy = 2.4
@@ -708,7 +710,7 @@ func _draw_minimap(sz: Vector2) -> void:
 		var pts := PackedVector2Array([pp])
 		for i in 13:
 			var a := a0 - 0.93 + 1.86 * i / 12.0
-			var e := pp + Vector2(cos(a), sin(a)) * Match.VIEW_RANGE * k
+			var e := pp + Vector2(cos(a), sin(a)) * m.view_range() * k
 			pts.append(Vector2(clampf(e.x, inner.position.x, inner.end.x), clampf(e.y, inner.position.y, inner.end.y)))
 		c.draw_colored_polygon(pts, Color(1, 1, 1, 0.07))
 	if m.exits:
@@ -757,8 +759,9 @@ func _draw_minimap(sz: Vector2) -> void:
 		var age := m.time - float(sp["t"])
 		if age > 1.6: continue
 		var pv: Vector2 = to_map.call(sp["pos"])
-		var boom: bool = sp["kind"] == "boom"
+		var boom: bool = sp["kind"] == "boom" or sp["kind"] == "shriek"
 		var col := Color("ff9a5a") if boom else Color("ff5a5a")
+		if sp["kind"] in ["blight", "shriek"]: col = Color("ff6a2a")      # the Blight: ember
 		var a := clampf(1.0 - age / 1.6, 0.0, 1.0)
 		if on_map.call(pv):
 			c.draw_arc(pv, 3.0 + age * (12.0 if boom else 8.0), 0, TAU, 20, Color(col, a), 2.0, true)
@@ -829,6 +832,16 @@ func _draw_clock_bar(sz: Vector2, mm: Rect2) -> void:
 	var prog := clampf(m.time / maxf(1.0, m.length), 0.0, 1.0)
 	c.draw_rect(Rect2(Vector2(r.position.x + 6, r.end.y - 5), Vector2(r.size.x - 12, 2)), Color(1, 1, 1, 0.12))
 	c.draw_rect(Rect2(Vector2(r.position.x + 6, r.end.y - 5), Vector2((r.size.x - 12) * prog, 2)), BAD if left < 30.0 else Color("b9a6ff"))
+	# the raid condition (RaidLook), and how far you see under it
+	var rr := Rect2(Vector2(r.position.x, r.end.y + 4), Vector2(r.size.x, 20))
+	mm_bottom = rr.end.y
+	var rcol: Color = RaidLook.COLORS.get(m.raid, INK)
+	_rounded(rr, Color(0.04, 0.05, 0.08, 0.7), 6)
+	c.draw_circle(rr.position + Vector2(11, 10), 4.0, rcol)
+	_text(rr.position + Vector2(21, 14), String(RaidLook.NAMES.get(m.raid, m.raid)).to_upper(), 10, rcol, big)
+	if m.sight_k < 0.99:
+		var st := "SIGHT %d%%" % int(round(m.sight_k * 100.0))
+		_text(Vector2(rr.end.x - 8 - big.get_string_size(st, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x, rr.position.y + 14), st, 10, MUTED, big)
 
 var mm_circ := Vector3.ZERO    # the round minimap: centre x, y and radius (0 while it's the square overview)
 func _mm_has(inner: Rect2, v: Vector2, pad := 0.0) -> bool:
@@ -1593,7 +1606,7 @@ func _draw_weapon(sz: Vector2, p: Hunter) -> void:
 	var y := r.position.y - s - 22.0
 	var x := r.end.x - s
 	var k: Kin = p.kin
-	# 1: heal (a tonic for health; an armor kit once health is full)
+	# 1: heal (a tonic for health; an armor kit once health is full), 2: the armor kit (anvil)
 	var hurt := p.hp < p.max_hp - 0.5
 	var heal_ready := (p.tonics > 0 and hurt) or (p.armor_kits > 0 and p.armor < p.max_armor - 0.5)
 	var hr := Rect2(Vector2(x, y), Vector2(s, s))
@@ -1601,7 +1614,7 @@ func _draw_weapon(sz: Vector2, p: Hunter) -> void:
 	_ctext(Vector2(hr.get_center().x, hr.position.y - 5), "%d" % p.tonics, 12, Color(GOOD, 0.95), big)
 	x -= s + gap
 	var kr := Rect2(Vector2(x, y), Vector2(s, s))
-	_ab_slot("kit", kr, "fortify", "", ARMOR_COL, 0.0, 0.0, p.armor_kits > 0 and p.armor < p.max_armor - 0.5 and not hurt)
+	_ab_slot("kit", kr, "anvil", Settings.key_cap("armor_kit"), ARMOR_COL, 0.0, 0.0, p.armor_kits > 0 and p.armor < p.max_armor - 0.5)
 	_ctext(Vector2(kr.get_center().x, kr.position.y - 5), "%d" % p.armor_kits, 12, Color(ARMOR_COL, 0.95), big)
 	x -= s + gap
 	# C: throw / recall your kin
@@ -2683,8 +2696,8 @@ func _tip_lines(id: String, p: Hunter) -> Array:
 			out.append(["%d of %d charges. One comes back every %s." % [int(floor(p.dashes)), int(p.max_dashes()), _secs(p.dash_regen())], MUTED, 13])
 		"kit":
 			out.append(["Armor kit", ARMOR_COL])
-			out.append(["Item  ·  %s (when your health is full)" % Settings.key_cap("tonic"), MUTED, 12])
-			out.append(["Repairs your armor to full. Armor takes 20%% off every hit while it lasts, and doesn't come back on its own. You're carrying %d." % p.armor_kits, INK, 14])
+			out.append(["Item  ·  %s  (or %s when your health is full)" % [Settings.key_cap("armor_kit"), Settings.key_cap("tonic")], MUTED, 12])
+			out.append(["Repairs your armor to full. Armor takes 20%% off every hit while it lasts, and doesn't come back on its own. You're open while you repair, like drinking. You're carrying %d." % p.armor_kits, INK, 14])
 		"base":
 			out.append(["Base to a teammate", Color("8fe3c8")])
 			out.append(["Squads  ·  %s" % Settings.key_cap("base"), MUTED, 12])
@@ -2766,7 +2779,7 @@ func _draw_world_hover(sz: Vector2, p: Hunter) -> void:
 	var best: Ent = null; var bd := 46.0
 	var cands: Array = []
 	for mb in m.mobs:
-		if not mb.dead: cands.append(mb)
+		if not mb.dead and mb.visible: cands.append(mb)
 	for k in m.kins:
 		if not k.dead and k.visible and k.state != "shoulder": cands.append(k)
 	for h in m.hunters:
@@ -2787,10 +2800,15 @@ func _draw_world_hover(sz: Vector2, p: Hunter) -> void:
 		lines.append(["Monster  ·  %d / %d health" % [int(ceil(mb.hp)), int(mb.max_hp)], MUTED])
 		var how := {"lunge": "Lunges at whoever is closest.", "spit": "Spits from range: keep moving.", "slam": "Winds up a ground slam: step out of the circle.",
 			"fuse": "Rolls in and blows up. Shoot it before it reaches you.", "volley": "Fires a spread of bolts down a line.", "none": "Runs from you. Tame it before it escapes."}
+		if mb is Blight:
+			# the Blight: what it does, and how strong it is right now
+			var bl: Blight = mb
+			lines[1] = ["The Blight  ·  %d / %d health  ·  %s" % [int(ceil(mb.hp)), int(round(mb.max_hp)), "stirring" if bl.lvl < 0.35 else ("hunting" if bl.lvl < 0.8 else "ravenous")], MUTED]
+			how = {"lunge": "Hunts by noise and light. Fast, fragile, comes in packs later on.", "spit": "Sweeps a light. Stay in it and it shrieks, and the Blight nearby comes."}
 		lines.append([String(how.get(String(md["attack"]), "Dangerous up close.")), INK])
 		if md.get("stag", false):
 			lines.append(["Staggerable: hit it with an ability while the purple ring shows.", Color(0.85, 0.6, 1.0)])
-		lines.append(["Drops %d gems." % int(md["gems"]), GOLD])
+		lines.append(["Drops %d gem%s." % [int(md["gems"]), "" if int(md["gems"]) == 1 else "s"], GOLD])
 	elif best is Kin:
 		var k: Kin = best
 		var sp: Dictionary = Data.KIN[k.species]

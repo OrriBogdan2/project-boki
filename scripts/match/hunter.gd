@@ -31,8 +31,14 @@ const GLIDE_BRAKE_DEG := 115.0
 const GLIDE_GRAV := 14.0
 const GLIDE_ENGAGE := 0.1        # hold Space this long in the air before the glider opens (a tap is a jump); was 0.15
                                  # (the dedicated glide button, Mouse 5, opens it at once)
-const ABYSS_LIFT := 45.0         # opening the glider below ground level: strong lift...
-const ABYSS_LIFT_MAX := 16.0
+## The abyss lift [wiki: "a rapid upward impulse to ground level, then a rapid deceleration"], scaled
+## by how deep you are (owner: "pull you up faster based on how low in the abyss you are"): a gentle
+## lift just under the lip, a hard surge from deep down. See abyss_lift_vy (the match and home both use it).
+const ABYSS_LIFT := 22.0         # [est] upward pull (m/s^2) just under the lip...
+const ABYSS_LIFT_PER_M := 7.0    # [est] ...plus this per metre deeper (10m down: 92 m/s^2)
+const ABYSS_LIFT_MAX := 5.0      # [est] fastest climb just under the lip...
+const ABYSS_LIFT_MAX_PER_M := 1.7  # [est] ...plus this per metre deeper (12m down: ~25 m/s)
+const ABYSS_LIFT_CAP := 26.0
 const ABYSS_BRAKE_DIST := 2.5    # ...that brakes near ground level (let go just before to keep the height)
 const ABYSS_BRAKE := 60.0
 const ABYSS_BRAKE_GAIN := 3.5    # (movefeel) rise speed per metre left in the brake zone (was 2: the last metre crawled)
@@ -867,6 +873,20 @@ const FEATHER_TAP_HEAT := 1.0  # [est] ...heating like a level glide; held past 
 var glide_off_t := 9.0         # seconds since the glider closed in the air (9 = long ago / on the ground)
 var lift_t := 0.0              # seconds of the current abyss lift (feathering taps stay in the cheap part)
 
+## The glider's vertical speed this step below an island's lip over the abyss, `depth` metres under
+## it: it pulls you up harder and faster the deeper you are (ABYSS_LIFT*), then brakes into the last
+## ABYSS_BRAKE_DIST so you arrive at ground level (let go just before to carry the climb up as height).
+## Shared by Hunter (matches, the --training ground) and Home (the farm and the Training Grounds).
+static func abyss_lift_vy(vy: float, depth: float, dt: float) -> float:
+	if depth > ABYSS_BRAKE_DIST:
+		var acc := ABYSS_LIFT + ABYSS_LIFT_PER_M * depth
+		var top := minf(ABYSS_LIFT_MAX + ABYSS_LIFT_MAX_PER_M * depth, ABYSS_LIFT_CAP)
+		# a fall is caught at once (the canopy bites), then the climb builds
+		if vy < 0.0:
+			vy = move_toward(vy, 0.0, (acc + GLIDE_CATCH) * dt)
+		return minf(vy + acc * dt, maxf(top, vy))
+	return move_toward(vy, maxf(depth * ABYSS_BRAKE_GAIN, 1.5), ABYSS_BRAKE * dt)
+
 func can_glide() -> bool:
 	return not grounded and roll_t <= 0.0 and fly_t <= 0.0 and glide_cd <= 0.0 and not downed and stun_t <= 0.0 \
 		and m.time - kb_t > 0.4 and glide_fuel > FEATHER_MIN and not dropping and charge.is_empty()
@@ -1066,6 +1086,8 @@ func do_dash() -> void:
 	if not grounded and dashes >= 1.0 and not air_dashed and int(owner_stat("air_dashes")) > 0:
 		use_ex = false           # a merge's dodge in the air: a normal dodge, once per airtime
 		air_dashed = true
+	if m.blight:
+		m.blight.noise(pos, "dash", self)     # a dash is loud enough for the Blight nearby
 	if ak:
 		# the archetype's dash shape: it spends its own charge (or the long air dash) itself
 		ak.on_dash(use_ex)
@@ -1912,8 +1934,10 @@ func use_heal() -> void:
 		return
 	_ab_feedback("tonic", "cast")
 
-## Repairing armor with a kit: the same kind of short channel as a tonic.
-var armor_kits := 1
+## Repairing armor with a kit (2): the same kind of short channel as a tonic, with the same
+## vulnerability. Every hunter sets out with a small stack (KIT_START).
+const KIT_START := 2
+var armor_kits := KIT_START
 var finish_t := 0.0             # holding interact over a downed enemy (until the stomp commits)
 var stomp: Dictionary = {}      # committed stomp on an enemy wisp: {o, t, hits} (see Life)
 var kit_t := 0.0
@@ -2120,7 +2144,15 @@ func sim(dt: float) -> void:
 		_tick_charge(dt)
 	if inp["reload"]: start_reload()
 	if inp["tonic"]: use_heal()
-	if inp.get("kit", false): use_kit()
+	if inp.get("kit", false):
+		# 2: the anvil. Nothing to repair (or no kit) buzzes, like the heal key
+		if kit_t > 0.0 or drink_t > 0.0:
+			pass
+		elif armor_kits > 0 and armor < max_armor - 0.5 and not downed:
+			use_kit()
+			_ab_feedback("kit", "cast")
+		else:
+			_ab_feedback("kit", "deny")
 	_tick_drink(dt)
 	_tick_kit(dt)
 	_tick_burst(dt)
@@ -2293,11 +2325,7 @@ func _physics(dt: float) -> void:
 	elif gliding and not dropping and below_lip and glide_fuel > 0.001:
 		# below ground level over the abyss the glider lifts you hard, then brakes near the top.
 		# Let go just before ground level to carry the lift up as height (feathering)
-		var depth := lip_y - pos.y
-		if depth > ABYSS_BRAKE_DIST:
-			vel.y = minf(vel.y + ABYSS_LIFT * dt, ABYSS_LIFT_MAX)
-		else:
-			vel.y = move_toward(vel.y, maxf(depth * ABYSS_BRAKE_GAIN, 1.5), ABYSS_BRAKE * dt)
+		vel.y = abyss_lift_vy(vel.y, lip_y - pos.y, dt)
 	elif gliding:
 		var sink := (DIVE_FALL if diving else DROP_FALL) if dropping else (3.0 if glide_fuel <= 0.001 else glide_fall(Vector2(vel.x, vel.z).length()))
 		if dropping:

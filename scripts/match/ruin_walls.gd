@@ -84,6 +84,7 @@ func build(mat: Material) -> Array:
 			nxt[i] = p
 		pos = nxt
 	for i in pos:
+		await W._slice()       # under the loading screen: a frame now and then
 		var bio: Dictionary = W._bio(i)
 		style = Flora.style_ok(W.style_at(i)) if W.has_method("style_at") else "meadow"
 		var pal := _palette(bio)

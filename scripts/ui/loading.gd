@@ -1,6 +1,8 @@
 extends CanvasLayer
 ## The screen between home and an expedition: the tier's sky with islands drifting past and the
-## skyship crossing, the tier name, what you're heading into, a tip and a progress bar.
+## skyship crossing, the tier name, what you're heading into, a tip, and a spinner with the stage
+## being worked on over a progress bar. The match builds in short slices between frames (see
+## Match._slice and World._slice), so the spinner keeps turning the whole way.
 
 signal shown
 
@@ -19,7 +21,7 @@ const TIPS := [
 	"Jump at a wall in the air to kick off it. Light hunters get two kicks.",
 	"Crates and barrels break when you shoot or dash through them. Some hide a better weapon.",
 	"Weapons you find out here are stronger than your own, but only for this expedition.",
-	"Health and armor don't come back on their own. 1 heals: a tonic when you're hurt, an armor kit when your health is full. You take more damage while you do either.",
+	"Health and armor don't come back on their own. 1 drinks a tonic, 2 repairs your armor with a kit. You take more damage while you do either.",
 	"Fight alongside your Boki to fill the bond meter, then R calls its bond ultimate.",
 	"E is your Boki's ability, and every Boki has a different one. Q fires the active glove you found out here.",
 	"Your Boki stuns or roots a foe? Shoot it right away for a combo.",
@@ -33,8 +35,12 @@ const TIPS := [
 	"A teammate is down? Stand on their wisp to bring them back. Stand on an enemy's to stomp it, or hold F to finish them.",
 	"Dash through a shot at the last moment and you take nothing.",
 	"Shrines on the islands give a short power-up. Stand by one and hold F.",
+	"The Blight hunts by noise and light. Gunfire, blasts, opened chests and dashing draw it in; sneaking doesn't.",
+	"A Warden's light sweeps the ground. Stay in it and it shrieks, and the Blight nearby comes running. Crouch to stay out of its reach.",
+	"The Blight starts weak and grows the longer your squad is out, the deeper you go, and at night.",
 ]
-const STAGES := ["Raising the islands", "Waking the monsters", "Hiding the loot", "Fueling the skyship", "Ready"]
+## What's being worked on, set by whoever builds the match (Main.show_screen, Match): shown by the spinner.
+const STAGES := {"map": "Building the map", "spawn": "Spawning", "graphics": "Preparing graphics", "ready": "Ready"}
 
 var c: Control
 var t := 0.0
@@ -47,12 +53,15 @@ var T: Dictionary
 var title := ""
 var sub := ""
 var mode_line := ""
+var raid := ""           # the raid condition this expedition rolled ("" when it doesn't roll one)
 var tip := ""
 var islands: Array = []  # [x (0..1), y (0..1), size, depth, seed]
 var stars: Array = []
 var sky_tex: GradientTexture2D
 var shade_tex: GradientTexture2D
 var puff: GradientTexture2D
+var stage_label := "Building the map"
+var spin_draws := 0      # frames the spinner has drawn (--load-check: one per frame means it never stalled)
 
 func _grad(cols: Array, offs: Array, radial := false) -> GradientTexture2D:
 	var g := Gradient.new()
@@ -81,6 +90,7 @@ func setup(opts: Dictionary) -> void:
 		var count := ("%d hunters" % teams) if squad <= 1 else ("%d squads" % teams)
 		mode_line = "%s  •  %s  •  skyship drop" % [["Solo", "Duos", "Trios"][clampi(squad - 1, 0, 2)], count]
 		if opts.has("net"): mode_line = "Online  •  " + mode_line
+		raid = RaidLook.pick(opts, int(opts.get("seed", 0)))
 	tip = TIPS[randi() % TIPS.size()]
 	var r := RandomNumberGenerator.new(); r.seed = hash(title) + tier
 	for i in 9:
@@ -135,8 +145,9 @@ func finish() -> void:
 		return
 	leaving = true
 
-func _stage() -> String:
-	return STAGES[clampi(int(prog * (STAGES.size() - 1) + 0.02), 0, STAGES.size() - 1)]
+## Names the stage under the spinner (a key of STAGES).
+func set_stage(key: String) -> void:
+	stage_label = String(STAGES.get(key, key))
 
 func _draw() -> void:
 	var sz := c.size
@@ -178,6 +189,11 @@ func _draw() -> void:
 	_wrap(Vector2(cx, base + 96), sub, 17, minf(620.0, sz.x - 60.0), Color(UI.MUTED, a))
 	if mode_line != "":
 		_text(Vector2(cx, base + 176), mode_line, UI.semi, 15, Color(UI.TEAL, a))
+	if raid != "":
+		# the raid condition, shown before you drop
+		var rc: Color = RaidLook.COLORS.get(raid, UI.INK)
+		_text(Vector2(cx, base + 204), "CONDITIONS  ·  " + String(RaidLook.NAMES.get(raid, raid)).to_upper(), UI.caps, 13, Color(rc, a), 2)
+		_wrap(Vector2(cx, base + 210), String(RaidLook.BLURBS.get(raid, "")), 14, minf(560.0, sz.x - 60.0), Color(UI.MUTED, a * 0.9))
 	# progress
 	var tw_ := minf(660.0, sz.x - 60.0)
 	var lines := UI.body.get_multiline_string_size(tip, HORIZONTAL_ALIGNMENT_CENTER, tw_ - 40.0, 15, 3).y
@@ -190,7 +206,8 @@ func _draw() -> void:
 		var fill := StyleBoxFlat.new(); fill.bg_color = Color(UI.ACCENT, a); fill.set_corner_radius_all(3)
 		fill.shadow_color = Color(UI.ACCENT, a * 0.45); fill.shadow_size = 6
 		c.draw_style_box(fill, Rect2(br.position, Vector2(maxf(6.0, bw * prog), br.size.y)))
-	_text(Vector2(br.position.x, br.position.y - 10), _stage() + "…", UI.semi, 13, Color(UI.INK, a * 0.8), 0, HORIZONTAL_ALIGNMENT_LEFT)
+	_spinner(Vector2(br.position.x + 7.0, br.position.y - 15.0), a)
+	_text(Vector2(br.position.x + 22.0, br.position.y - 10), stage_label + "…", UI.semi, 13, Color(UI.INK, a * 0.8), 0, HORIZONTAL_ALIGNMENT_LEFT)
 	_text(Vector2(br.end.x, br.position.y - 10), "%d%%" % int(prog * 100.0), UI.semi, 13, Color(UI.INK, a * 0.55), 0, HORIZONTAL_ALIGNMENT_RIGHT)
 	# the tip, on a glass card with a small accent tag
 	var glass := StyleBoxFlat.new(); glass.bg_color = Color(0.04, 0.045, 0.08, a * 0.72); glass.set_corner_radius_all(14)
@@ -198,6 +215,16 @@ func _draw() -> void:
 	c.draw_style_box(glass, card)
 	_text(Vector2(cx, card.position.y + 22), "TIP", UI.caps, 11, Color(UI.ACCENT, a), 2)
 	_wrap(Vector2(cx, card.position.y + 26), tip, 15, tw_ - 40.0, Color(UI.INK, a * 0.85))
+
+## A ring with a turning arc that grows and shrinks as it goes round: moves every frame, so a
+## stalled frame shows at once.
+func _spinner(p: Vector2, a: float) -> void:
+	spin_draws += 1
+	var r := 7.0
+	c.draw_arc(p, r, 0.0, TAU, 28, Color(1, 1, 1, a * 0.14), 2.5, true)
+	var head := t * TAU * 1.15
+	var span := lerpf(0.5, 3.6, 0.5 + 0.5 * sin(t * 2.6))
+	c.draw_arc(p, r, head - span, head, 24, Color(UI.ACCENT, a), 2.5, true)
 
 func _island(p: Vector2, w: float, d: float, biome: Dictionary, a: float, sd: int) -> void:
 	var r := RandomNumberGenerator.new(); r.seed = sd
