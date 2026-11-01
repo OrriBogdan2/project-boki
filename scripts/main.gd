@@ -444,6 +444,15 @@ func _ready() -> void:
 				print("MAPBAKE %s in %d ms" % [outp, Time.get_ticks_msec() - t0])
 				get_tree().quit())
 			return
+	if _has_arg("--loop-tour"):
+		# demo QA: the core loop end to end through the real screens, a screenshot per step (tools/loop_tour.gd)
+		var lt: GDScript = load("res://tools/loop_tour.gd")
+		if lt == null or not lt.can_instantiate():
+			print("TOUR DONE the tour script failed to load")
+			get_tree().quit(1)
+			return
+		add_child(lt.new())
+		return
 	if "--perf-probe" in args:
 		# tooling: a scripted expedition with per-phase frame costs and hitches (tests/perf_probe.gd)
 		add_child(load("res://tests/perf_probe.gd").new())
