@@ -310,6 +310,102 @@ def lullaby():
     melody(s, 0, [(4, 2), (2, 1), (3, 2), (1, 1), (2, 1), (4, 1), (5, 1), (4, 3), (4, 2), (5, 1), (7, 2), (5, 1), (4, 1), (2, 1), (1, 1), (0, 3)], 0, 80)
     return s
 
+# ------------------------------------------------------------------ the expedition's layered score
+# Four stems of one piece (A minor, 132 bpm, 16 bars), all the same length so they loop in step and
+# the game fades them in and out by what's happening (Sfx.play_layers / MusicDir):
+#   calm     exploring: tremolo strings, low cello, sparse pizzicato, a distant horn, a held choir
+#   drive    a fight nearby: cello ostinato, taiko, kit drums and toms, the fiddle's tune
+#   boss     a boss arena: brass stabs, trombone line, timpani, a full choir, crashes
+#   extract  getting out / the islands falling: a clock of woodblocks and rising tremolo strings
+LAYER_PROG = [0, 0, 5, 5, 3, 3, 4, 4, 0, 0, 5, 5, 3, 4, 0, 0]
+
+def _layer_song(name, seed):
+    return Song(name, 132, 16, beats=4, root=69, mode='minor', seed=seed)
+
+def match_calm():
+    s = _layer_song('match_calm', 41)
+    s.inst(2, 'tremolo', 58); s.inst(3, 'cello', 80); s.inst(1, 'pizz', 70); s.inst(5, 'horn', 66); s.inst(6, 'oohs', 44)
+    pad(s, 2, LAYER_PROG, vel=50, octave=-1)
+    for bar, d in enumerate(LAYER_PROG):
+        s.note(3, bar * 4, s.deg(d, -2), 3.8, 74)
+        for i in (0, 1.5, 3):
+            s.note(1, bar * 4 + i, s.chord(d, 0)[int(i) % 3], 0.4, 54)
+        if bar % 4 == 0:
+            s.note(6, bar * 4, s.deg(d + 4, -1), 15.5, 46)
+    melody(s, 5, [(4, 6), (3, 2), (2, 8), (0, 6), (-1, 2), (0, 8), (4, 6), (5, 2), (4, 8), (2, 4), (1, 4), (0, 8)], 0, 62, octave=-1)
+    return s
+
+def match_drive():
+    s = _layer_song('match_drive', 17)
+    s.inst(0, 'fiddle', 92); s.inst(3, 'cello', 96); s.inst(4, 'taiko', 112)
+    for bar, d in enumerate(LAYER_PROG):
+        for i in range(8):
+            s.note(3, bar * 4 + i * 0.5, s.deg(d, -2) + (12 if i in (3, 7) else 0), 0.4, 94 - (12 if i % 2 else 0))
+        s.note(4, bar * 4, 48, 1, 108); s.note(4, bar * 4 + 2.5, 48, 1, 88)
+        if bar % 2 == 1: s.note(4, bar * 4 + 3.5, 48, 0.5, 80)
+    drums(s, [(0, 'kick', 1.0), (1, 'snare', 0.65), (2, 'kick', 0.85), (2.5, 'kick', 0.6), (3, 'snare', 0.75),
+              (0.5, 'hat', 0.4), (1.5, 'hat', 0.45), (2.5, 'hat', 0.4), (3.5, 'hat', 0.5)], vel=88)
+    for bar in (3, 7, 11, 15):
+        for i in range(4): s.note(9, bar * 4 + 3 + i * 0.25, D['tom_hi'] - i * 2, 0.5, 76 + i * 8)
+    rh = [[0.5, 0.5, 1, 0.5, 0.5, 1], [1.5, 0.5, 2], [0.5, 0.5, 0.5, 0.5, 1, 1], [3, -1]]
+    ph = phrase_gen(s, LAYER_PROG[:8], rh, start_deg=4, leap=0.3)
+    melody(s, 0, ph, 8, 98)
+    return s
+
+def match_boss():
+    s = _layer_song('match_boss', 43)
+    s.inst(7, 'brass', 104); s.inst(8, 'trombone', 96); s.inst(10, 'timpani', 112); s.inst(11, 'choir', 74)
+    for bar, d in enumerate(LAYER_PROG):
+        for k in s.chord(d, -1):
+            s.note(7, bar * 4, k, 0.6, 110); s.note(7, bar * 4 + 1.5, k, 0.4, 92); s.note(7, bar * 4 + 3.5, k, 0.4, 100)
+        s.note(8, bar * 4, s.deg(d, -2), 1.5, 100); s.note(8, bar * 4 + 2, s.deg(d + 1, -2), 1.0, 90); s.note(8, bar * 4 + 3, s.deg(d + 2, -2), 1.0, 94)
+        s.note(10, bar * 4, s.deg(0, -2), 1.0, 112)
+        if bar % 4 == 3:
+            for i in range(8): s.note(10, bar * 4 + i * 0.5, s.deg(0, -2), 0.5, 80 + i * 5)
+        if bar % 2 == 0:
+            for k in s.chord(d, 0): s.note(11, bar * 4, k, 7.8, 70)
+        if bar % 4 == 0:
+            s.note(9, bar * 4, D['crash'], 2.0, 96)
+    return s
+
+def match_extract():
+    s = _layer_song('match_extract', 47)
+    s.inst(12, 'tremolo', 84); s.inst(13, 'strings', 70)
+    for bar in range(16):
+        for i in range(8):
+            s.note(9, bar * 4 + i * 0.5, D['wood_hi'] if i % 2 == 0 else D['wood_lo'], 0.3, 86 if i % 2 == 0 else 60)
+        # a tremolo line climbing a step each bar, starting again every 4 bars
+        d = LAYER_PROG[bar]
+        s.note(12, bar * 4, s.deg(d + (bar % 4), 1), 4.0, 66 + (bar % 4) * 10)
+        if bar % 4 == 3:
+            for i in range(8): s.note(13, bar * 4 + i * 0.5, s.deg(i, 0), 0.5, 60 + i * 6)
+    return s
+
+LAYERS = {'match': [match_calm, match_drive, match_boss, match_extract]}
+
+def write_layers(group):
+    """Renders a group's stems with one shared gain so their balance is kept."""
+    stems = [(f.__name__, render(f())) for f in LAYERS[group]]
+    # each stem to its own loudness (the calm bed carries on its own, the others sit on top), then
+    # one shared trim so all four together never clip
+    want = {'calm': -18.0, 'drive': -20.0, 'boss': -20.0, 'extract': -22.0}
+    lv = []
+    for name, x in stems:
+        r = np.sqrt(np.mean(x ** 2)) or 1.0
+        lv.append(x * (10 ** (want.get(name.split('_')[-1], -20.0) / 20) / r))
+    n = min(len(x) for x in lv)
+    g = min(1.0, 0.95 / (np.max(np.abs(sum(x[:n] for x in lv))) or 1))
+    for (name, _), x in zip(stems, lv):
+        x = x * g
+        tmp = tempfile.NamedTemporaryFile(suffix='.wav', delete=False).name
+        with wave.open(tmp, 'wb') as w:
+            w.setnchannels(2); w.setsampwidth(2); w.setframerate(SR)
+            w.writeframes((np.clip(x, -1, 1) * 32767).astype(np.int16).tobytes())
+        out = os.path.join(OUT, 'music_%s.ogg' % name)
+        subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', '-i', tmp, '-c:a', 'libvorbis', '-q:a', '2', out], check=True)
+        os.unlink(tmp)
+        print('%-14s %5.1fs %4d KB' % (name, len(x) / SR, os.path.getsize(out) // 1024))
+
 TRACKS = {f.__name__: f for f in [home_day, home_night, orchard, meadow, summit, match, hollow, title, hub, guild, lullaby]}
 
 
@@ -380,6 +476,7 @@ def write(name, x):
 
 if __name__ == '__main__':
     ensure_bank()
-    names = sys.argv[1:] or list(TRACKS)
+    names = sys.argv[1:] or list(TRACKS) + list(LAYERS)
     for n in names:
-        write(n, render(TRACKS[n]()))
+        if n in LAYERS: write_layers(n)
+        else: write(n, render(TRACKS[n]()))

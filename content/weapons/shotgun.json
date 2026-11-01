@@ -18,7 +18,7 @@
 		"range": 5.0,
 		"size": 0.15,
 		"color": "#ffd9f2",
-		"sfx": "thump",
+		"sfx": "shotgun",
 		"pellet_floor": 0.457,
 		"bloom_deg": 8.0,
 		"bloom_max_deg": 24.0,

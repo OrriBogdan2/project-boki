@@ -7,12 +7,16 @@ extends Node
 const NAMES := ["smg", "rifle", "thump", "boom", "hit", "crit", "kill", "knock", "hurt", "dash", "jump", "land", "grab",
 	"throw", "kinhit", "skill", "kin_happy", "kin_unsure", "kin_alert", "recall", "pickup", "catch", "warn", "portal",
 	"revive", "click", "reload", "shield", "cloak", "heal", "fall", "plant", "harvest", "ping", "glide", "build", "unlock", "whoosh", "step0", "step1", "step2", "hover", "zap", "bond", "ult", "combo", "swap", "horn", "rail", "train_hit", "revive_hum", "revive_done",
-	"swipe", "cleave", "charge", "k_venom", "k_spore", "k_gravity", "k_prism", "k_lunar", "k_echo"]
+	"swipe", "cleave", "charge", "k_venom", "k_spore", "k_gravity", "k_prism", "k_lunar", "k_echo",
+	"shotgun", "sniper", "hit_heavy", "slash_hit", "armor_hit", "armor_break", "knock_confirm", "extract_ok",
+	"ab_throw", "ab_rail", "ab_charge", "ab_blast", "ab_leap", "ab_slam", "ab_wall", "ab_shield_hit", "ab_guard", "ab_parry",
+	"ab_plant", "ab_tether", "ab_blink", "ab_whirr", "ab_stun", "ab_slow", "ab_hit", "ab_ready"]
 const POOL := 24
 ## Sounds that only exist as several takes (monster voices, little pops); one is picked at random.
-const VOICES := ["v_skitter", "v_spitter", "v_brute", "v_bomber", "v_sentinel", "v_glimmer", "v_warden", "die_small", "die_big"]
+const VOICES := ["v_skitter", "v_spitter", "v_brute", "v_bomber", "v_sentinel", "v_glimmer", "v_warden", "die_small", "die_big",
+	"step_grass", "step_stone", "step_snow", "step_wood"]
 ## The shortest gap before the same sound can play again, so a crowd doesn't machine-gun it.
-const MIN_GAP := {"hit": 45, "crit": 60, "hurt": 120, "kinhit": 60, "die_small": 90, "die_big": 150, "land": 80, "step0": 60, "step1": 60, "step2": 60}
+const MIN_GAP := {"ab_hit": 60, "ab_shield_hit": 70, "ab_stun": 150, "ab_slow": 120, "hit": 45, "crit": 60, "hit_heavy": 70, "slash_hit": 60, "armor_hit": 70, "armor_break": 200, "hurt": 120, "kinhit": 60, "die_small": 90, "die_big": 150, "land": 80, "step0": 60, "step1": 60, "step2": 60}
 ## On top of that, at most STACK_MAX of one sound start within STACK_MS, each extra one a little quieter.
 const STACK_MAX := 3
 const STACK_MS := 90
@@ -38,6 +42,8 @@ var music_name := ""
 var amb: AudioStreamPlayer
 var amb_name := ""
 var music_bus := 0
+var _duck_fx: AudioEffectAmplify     # the Music bus's ducking stage (see duck)
+var _duck_tw: Tween
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -100,6 +106,21 @@ func _setup_mix() -> void:
 	var mlim := AudioEffectHardLimiter.new()
 	mlim.ceiling_db = -0.5
 	AudioServer.add_bus_effect(0, mlim)
+	# the music gives way a little whenever the action is loud (keyed off the SFX bus), so gunfire
+	# and hits stay on top of a full fight score without the score having to be quiet
+	var side := AudioEffectCompressor.new()
+	side.sidechain = &"SFX"
+	side.threshold = -26.0
+	side.ratio = 2.5
+	side.attack_us = 15000.0
+	side.release_ms = 350.0
+	AudioServer.add_bus_effect(music_bus, side)
+	# the music ducks under big moments on its own bus, so it works for one track or for layers
+	_duck_fx = AudioEffectAmplify.new()
+	AudioServer.add_bus_effect(music_bus, _duck_fx)
+	var mlim2 := AudioEffectHardLimiter.new()
+	mlim2.ceiling_db = -1.5
+	AudioServer.add_bus_effect(music_bus, mlim2)
 
 func set_bus(bus_name: String, v: float) -> void:
 	var i := AudioServer.get_bus_index(bus_name)
@@ -119,6 +140,8 @@ var _music_tw: Tween      # a track picked in the music list plays until cleared
 func play_music(name: String, fade := 1.5) -> void:
 	if name == music_name:
 		return
+	if not layers.is_empty():
+		_stop_layers(fade)
 	music_name = name
 	if name != "" and not Save.d.get("music", []).has(name):
 		# first time hearing this one: it joins the music list
@@ -145,6 +168,8 @@ func play_music(name: String, fade := 1.5) -> void:
 func play_ambience(name: String) -> void:
 	if name == amb_name:
 		return
+	if name != "match":
+		clear_amb_layers()
 	amb_name = name
 	if name == "":
 		create_tween().tween_property(amb, "volume_db", -80.0, 1.0)
@@ -155,12 +180,101 @@ func play_ambience(name: String) -> void:
 	create_tween().tween_property(amb, "volume_db", -14.0, 2.0)
 
 ## Softens the music for a moment, e.g. under a big slow-motion beat (eased, never a sudden drop).
-func duck(seconds: float) -> void:
-	var p := music[music_i]
+func duck(seconds: float, depth_db := -8.0) -> void:
+	if _duck_fx == null:
+		return
+	if _duck_tw and _duck_tw.is_valid():
+		_duck_tw.kill()
 	var tw := create_tween()
-	tw.tween_property(p, "volume_db", -17.0, 0.18).set_trans(Tween.TRANS_SINE)
+	_duck_tw = tw
+	tw.tween_property(_duck_fx, "volume_db", minf(depth_db, _duck_fx.volume_db), 0.18).set_trans(Tween.TRANS_SINE)
 	tw.tween_interval(seconds)
-	tw.tween_property(p, "volume_db", -9.0, 0.8).set_trans(Tween.TRANS_SINE)
+	tw.tween_property(_duck_fx, "volume_db", 0.0, 0.8).set_trans(Tween.TRANS_SINE)
+
+# ------------------------------------------------------------------ layered music
+## The expedition's score is four stems of one piece (tools/compose.py LAYERS), all playing in step;
+## what's happening decides how loud each is (scripts/match/music_dir.gd sets the levels).
+var layers := {}          # stem -> AudioStreamPlayer
+var layer_want := {}      # stem -> 0..1
+const LAYER_DB := -9.0    # a stem at full, the same level a single track plays at
+const LAYER_IN := 1.2     # seconds to fade a stem in, and out
+const LAYER_OUT := 3.0
+
+## Starts a group's stems together (music_<group>_<stem>.ogg); `want` gives each stem's starting
+## level. Crossfades out whatever was playing.
+func play_layers(group: String, want: Dictionary, fade := 1.5) -> void:
+	if music_name == group and not layers.is_empty():
+		set_layers(want)
+		return
+	play_music("", fade)
+	music_name = group
+	for st in want:
+		var path := "res://audio/music_%s_%s.ogg" % [group, st]
+		if not ResourceLoader.exists(path):
+			continue
+		var p := AudioStreamPlayer.new()
+		p.bus = "Music"
+		p.stream = _loop_stream(path)
+		p.volume_db = -60.0
+		add_child(p)
+		layers[st] = p
+	for st in layers:
+		(layers[st] as AudioStreamPlayer).play()
+	set_layers(want)
+
+func set_layers(want: Dictionary) -> void:
+	for st in want:
+		layer_want[st] = clampf(float(want[st]), 0.0, 1.0)
+
+func _stop_layers(fade: float) -> void:
+	for st in layers:
+		var p: AudioStreamPlayer = layers[st]
+		var tw := create_tween()
+		tw.tween_property(p, "volume_db", -60.0, fade).set_trans(Tween.TRANS_SINE)
+		tw.tween_callback(p.queue_free)
+	layers = {}
+	layer_want = {}
+
+## Extra ambience beds on top of the main one (wind over the abyss, ruins), each faded to a level
+## by where you are; created on first use, stopped by clear_amb_layers.
+var amb_layers := {}      # name -> {p, want}
+
+func amb_layer(name: String, level: float) -> void:
+	if not amb_layers.has(name):
+		if level <= 0.001 or not ResourceLoader.exists("res://audio/amb_%s.ogg" % name):
+			return
+		var p := AudioStreamPlayer.new()
+		p.bus = "Ambience"
+		p.stream = _loop_stream("res://audio/amb_%s.ogg" % name)
+		p.volume_db = -60.0
+		add_child(p)
+		p.play()
+		amb_layers[name] = {"p": p, "want": 0.0}
+	amb_layers[name]["want"] = clampf(level, 0.0, 1.0)
+
+func clear_amb_layers() -> void:
+	for n in amb_layers:
+		var p: AudioStreamPlayer = amb_layers[n]["p"]
+		var tw := create_tween()
+		tw.tween_property(p, "volume_db", -60.0, 1.0)
+		tw.tween_callback(p.queue_free)
+	amb_layers = {}
+
+func _process(delta: float) -> void:
+	for n in amb_layers:
+		var ap: AudioStreamPlayer = amb_layers[n]["p"]
+		var full := db_to_linear(-12.0)
+		var ac := move_toward(db_to_linear(ap.volume_db), float(amb_layers[n]["want"]) * full, full * delta / 2.5)
+		ap.volume_db = linear_to_db(maxf(ac, 0.0001))
+	if layers.is_empty():
+		return
+	for st in layers:
+		var p: AudioStreamPlayer = layers[st]
+		var cur := db_to_linear(p.volume_db)
+		var tgt := float(layer_want.get(st, 0.0)) * db_to_linear(LAYER_DB)
+		var rate := db_to_linear(LAYER_DB) * delta / (LAYER_IN if tgt > cur else LAYER_OUT)
+		cur = move_toward(cur, tgt, rate)
+		p.volume_db = linear_to_db(maxf(cur, 0.0001))
 
 var _step_i := 0
 func step(pos = null, vol := -16.0) -> void:
@@ -206,6 +320,7 @@ func play(sname: String, pos = null, vol_db := 0.0, pitch_var := 0.07, pitch := 
 		return
 	var now := Time.get_ticks_msec()
 	var gap: int = 260 if sname.begins_with("v_") else int(MIN_GAP.get(sname, 30))
+	if sname.begins_with("step_"): gap = 25      # footsteps: several people can walk at once
 	if now - int(last_played.get(sname, -1000)) < gap:
 		return
 	var v := vol_db + _distance_db(pos)

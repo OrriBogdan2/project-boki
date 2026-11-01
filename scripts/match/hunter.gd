@@ -1499,6 +1499,7 @@ func _emit_shot() -> void:
 	if wpn.has("bloom_deg"):
 		wbloom = minf(float(wpn.get("bloom_max_deg", 6.0)), wbloom + float(wpn["bloom_deg"]))
 	m.sfx(wpn["sfx"], pos, -2.0 if is_local() else -6.0)
+	Juice.shot(self, start, Vector2(cos(a), sin(a)))
 
 func start_reload() -> void:
 	if reload_t > 0.0 or ammo >= int(wpn["mag"]) or downed or wpn.get("melee", false):
@@ -1527,8 +1528,8 @@ func _tick_charge(dt: float) -> void:
 	abil_charge["t"] = float(abil_charge["t"]) + dt
 	var full := float(ud.charge.get("time", 1.0))
 	var k := clampf(float(abil_charge["t"]) / full, 0.0, 1.0)
-	if int(abil_charge["t"] * 10.0) != int((float(abil_charge["t"]) - dt) * 10.0) and k < 1.0:
-		m.fx.burst(pos + Vector3(aim_dir().x * 0.7, 1.0, aim_dir().y * 0.7), ud.color, 3, 1.5, 0.2, 0.0, 0.6)
+	if not unseen:
+		AbilityFx.charging(m, self, k, ud.color, clampf((float(abil_charge["t"]) - dt) / full, 0.0, 1.0))
 	if not inp.get("sec_hold", false) or float(abil_charge["t"]) >= full + 0.6:
 		abil_charge = {}
 		if runner.use("utility", {"level": ability_level("sec"), "charge": maxf(k, float(ud.charge.get("min", 0.0)))}):
@@ -1960,6 +1961,7 @@ func sim(dt: float) -> void:
 		if not ud.charge.is_empty() and runner.is_ready("utility") and abil_charge.is_empty():
 			abil_charge = {"t": 0.0}       # a charge-up: it fires when you let go
 			m.sfx("rail", pos, -14.0, 0.6)
+			m.sfx("ab_charge", pos, -6.0 if is_local() else -13.0)
 		elif ud.charge.is_empty() and runner.use("utility", {"level": ability_level("sec")}):
 			used["utility"] = int(used.get("utility", 0)) + 1
 			_ab_feedback("sec", "cast")
@@ -2955,6 +2957,7 @@ func render(delta: float, alpha: float) -> void:
 		if step_t <= 0.0:
 			step_t = 0.32
 			m.fx.dust(pos, 2)
+			Juice.footstep(self)
 	# (the rig's squash, the skydive and lying downed are posed by HunterAnim)
 	glide_k = move_toward(glide_k, 1.0 if gliding and not diving else 0.0, delta * (7.0 if gliding else 9.0))
 	var gl: Node3D = torso.get_node("Glider")
