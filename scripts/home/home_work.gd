@@ -33,17 +33,19 @@ const TONIC_KEEP := 6
 const CHARGE_DRAIN := 0.4               # Spark Mill charge per second
 const CHILL_DRAIN := 0.25
 const TOPUP_AT := 60.0
+const GARDEN_T := 150.0                 # seconds between seedlings at the Seed Garden (at home)
+const KILN_T := 70.0                    # seconds between firings at the Kiln (at home)
 
 ## Base seconds for each kind of job at level 1 (a level 4 kin takes under half).
-const TIME := {"water": 3.0, "plant": 4.0, "tend": 4.5, "harvest": 3.5, "chop": 9.0, "break": 9.0, "log": 6.5, "ore": 7.0,
+const TIME := {"grow": 8.0, "fire": 9.0, "water": 3.0, "plant": 4.0, "tend": 4.5, "harvest": 3.5, "chop": 9.0, "break": 9.0, "log": 6.5, "ore": 7.0,
 	"bake": 7.0, "craft": 11.0, "power": 5.0, "chill": 5.0, "carry": 1.2, "stock": 1.5, "mend": 3.5, "brew": 14.0, "ranch": 22.0, "warm": 30.0}
 ## What each job is called on the hover card and the Job Board.
-const VERB := {"water": "Watering the %s", "plant": "Sowing a plot", "tend": "Tending the %s", "harvest": "Picking the %s",
+const VERB := {"grow": "Raising seedlings", "fire": "Firing the kiln", "water": "Watering the %s", "plant": "Sowing a plot", "tend": "Tending the %s", "harvest": "Picking the %s",
 	"chop": "Felling a tree", "break": "Breaking a boulder", "log": "Splitting logs", "ore": "Mining rock", "bake": "Baking kibble",
 	"craft": "Crafting scrap", "power": "Cranking the Spark Mill", "chill": "Chilling the Cold Store", "carry": "Hauling %s to the chest",
 	"stock": "Filling a feeder", "mend": "Looking after %s", "brew": "Brewing a tonic", "ranch": "Ranching", "warm": "Warming the incubator"}
 ## The animation each job plays.
-const ANIM := {"water": "dip", "plant": "dip", "tend": "dip", "harvest": "dip", "chop": "hammer", "break": "hammer", "log": "hammer",
+const ANIM := {"grow": "dip", "fire": "shimmy", "water": "dip", "plant": "dip", "tend": "dip", "harvest": "dip", "chop": "hammer", "break": "hammer", "log": "hammer",
 	"ore": "hammer", "bake": "shimmy", "craft": "hammer", "power": "crank", "chill": "shimmy", "carry": "lift", "stock": "lift",
 	"mend": "sway", "brew": "sway", "ranch": "lounge", "warm": "sway"}
 
@@ -71,6 +73,7 @@ func tick(d: float) -> void:
 	scan_t -= d
 	if scan_t <= 0.0:
 		scan_t = 1.0
+		Work.seen_now()      # the farm is being looked at: away time starts from here
 		scan()
 	_feed_tick(d)
 
@@ -79,6 +82,11 @@ func scan() -> void:
 	jobs.clear()
 	if not on() or h.world == null:
 		return
+	# a kin assigned to a station that's gone (put away) is free again
+	var live_u := {}
+	for st in HomeLayout.stations(h._d()): live_u[int(st["e"]["u"])] = true
+	for r in Save.d["roster"]:
+		if Work.assigned(r) >= 0 and not live_u.has(Work.assigned(r)): Work.assign(r, -1)
 	_plot_jobs()
 	_wild_jobs()
 	_station_jobs()
@@ -160,7 +168,7 @@ func _wild_jobs() -> void:
 				if n >= 3: break
 				var stand := _beside(Vector2i(int(it[1]) % w.w, int(it[1]) / w.w), c)
 				if stand == Vector3.INF: continue
-				_job("%s:%d" % [pair[3], int(it[1])], String(pair[2]), String(pair[3]), stand, it[2], {"tile": int(it[1])})
+				_job("%s:%d" % [pair[3], int(it[1])], String(pair[2]), String(pair[3]), stand, it[2], {"tile": int(it[1]), "u": int(s["e"]["u"])})
 				n += 1
 
 ## An open tile next to a wild one, the side nearest `toward`.
@@ -242,6 +250,11 @@ func _station_jobs() -> void:
 				if float(st.get("chill", 0.0)) < TOPUP_AT: _job("chill:%d" % u, "frost", "chill", stand(e), c, ex)
 			"infirmary":
 				if int(Save.d["items"].get("tonic", 0)) < TONIC_KEEP: _job("brew:%d" % u, "mend", "brew", stand(e), c, ex)
+			"seed_garden":
+				if now >= float(st.get("ready", 0.0)): _job("grow:%d" % u, "bloom", "grow", stand(e), c, {"u": u, "need": true})
+			"kiln":
+				if Work.mat("wood") >= int(Work.ASSIGN["kiln"]["wood"]) and now >= float(st.get("ready", 0.0)):
+					_job("fire:%d" % u, "ember", "fire", stand(e), c, {"u": u, "need": true})
 			"ranch_pen":
 				for slot in 2:
 					var ex2 := {"u": u, "slot": slot}
@@ -276,9 +289,14 @@ func _stations_tick(d: float) -> void:
 			"cold_store":
 				var fr := n.get_node_or_null("Frost") as Node3D
 				if fr: fr.visible = float(st.get("chill", 0.0)) > 0.0
-			"hearth_oven":
+			"hearth_oven", "kiln":
 				var fi := n.get_node_or_null("Fire") as Node3D
 				if fi: fi.visible = _worked(u)
+			"seed_garden":
+				var sp := n.get_node_or_null("Sprouts") as Node3D
+				if sp:
+					var left := float(st.get("ready", 0.0)) - now
+					sp.scale = Vector3.ONE * (1.0 if left <= 0.0 else clampf(1.0 - left / GARDEN_T, 0.25, 1.0))
 		var tag := n.get_node_or_null("Tag") as Label3D
 		if tag: _tag(tag, s, st, now)
 	# drop the state of stations that were put away
@@ -313,6 +331,13 @@ func _tag(tag: Label3D, s: Dictionary, st: Dictionary, now: float) -> void:
 			var tn := int(Save.d["items"].get("tonic", 0))
 			line = "%d tonic%s" % [tn, "" if tn == 1 else "s"]
 		"job_board": line = "%s set jobs" % Settings.key_cap("interact")
+		"seed_garden":
+			var left := float(st.get("ready", 0.0)) - now
+			line = "seedlings ready" if left <= 0.0 else "seedlings in %ds" % int(ceil(left))
+		"kiln": line = "%d coals" % int(Save.d["items"].get("coals", 0)) if Work.mat("wood") >= 3 else "needs 3 wood"
+	if Work.ASSIGN.has(String(s["id"])):
+		var cr := Work.crew(int(s["e"]["u"]))
+		line += ("\n" if line != "" else "") + ("%s assigned" % ", ".join(cr.map(func(r): return String(r["name"]))) if not cr.is_empty() else "%s assign a Boki" % Settings.key_cap("interact"))
 	var who := ""
 	for k in h.kins:
 		if k.has("job") and int(k["job"].get("u", -1)) == int(s["e"]["u"]): who = String(k["rec"]["name"]); break
@@ -328,6 +353,8 @@ func _haul_jobs() -> void:
 			_job("carry:%d" % int(p["id"]), "haul", "carry", pp + Vector3(0.3, 0, 0.2), pp, {"pile": int(p["id"]), "to": to, "what": String(p["mat"])})
 	if h.hecon == null:
 		return
+	if to == Vector3.INF and h.spots["pot"].x < -100.0:
+		return      # no chest and no pot (a farm-start island early on): nowhere to take food from
 	var pick: Vector3 = to if to != Vector3.INF else h._seat({"rec": {"uid": "pantry"}}, h.spots["pot"], 1.3)
 	for f in Econ.feeders():
 		if Econ.fill(f) > int(Econ.fdef(f)["cap"]) / 2 or Econ._auto_food() == "":
@@ -420,16 +447,27 @@ func best_job(k: Dictionary) -> Dictionary:
 	var rec: Dictionary = k["rec"]
 	var here := _isle(k["pos"])
 	var best := {}; var bs := 0.0
+	var mine := Work.assigned(rec)
 	for j in jobs:
 		if taken.has(j["key"]) and taken[j["key"]] != String(rec["uid"]): continue
 		if String(j.get("who", "")) == String(rec["uid"]): continue       # nobody nurses itself
 		var el := String(j["el"])
-		if not Work.takes(rec, el): continue
+		if not takes_job(rec, j): continue
 		var at: Vector3 = j["at"]
-		if _isle(at) != here: continue
-		var sc := Work.score(Work.level(rec, el), Work.prio(el), Vector2(at.x - k["pos"].x, at.z - k["pos"].z).length())
+		if _isle(at) != here and mine < 0: continue      # (an assigned kin goes over to its station)
+		var sc := Work.score(Work.level(rec, el), maxi(Work.prio(el), 2) if mine >= 0 else Work.prio(el), Vector2(at.x - k["pos"].x, at.z - k["pos"].z).length())
 		if sc > bs: bs = sc; best = j
 	return best
+
+## Would this kin take this job? One assigned to a station only works that station (whatever the
+## Job Board says); the rest take any job they're suited to, but not the ones only assigned kin do.
+func takes_job(rec: Dictionary, j: Dictionary) -> bool:
+	var mine := Work.assigned(rec)
+	if mine >= 0:
+		return int(j.get("u", -1)) == mine and Work.can_work(rec) and Work.level(rec, String(j["el"])) > 0
+	if j.get("need", false):
+		return false
+	return Work.takes(rec, String(j["el"]))
 
 func take(k: Dictionary, j: Dictionary) -> void:
 	var J := j.duplicate()
@@ -499,7 +537,7 @@ func step(k: Dictionary, d: float) -> void:
 	var J: Dictionary = k["job"]
 	var rec: Dictionary = k["rec"]
 	if k.has("called_t") or k.get("busy", false) or k.has("fetch") or k.has("bath") or k.has("eat") or float(k.get("nap_t", 0.0)) > 0.0 \
-			or k.has("indoors") or k.has("leap") or k.get("nap_go", false) or not Work.takes(rec, String(J["el"])):
+			or k.has("indoors") or k.has("leap") or k.get("nap_go", false) or not takes_job(rec, J):
 		drop(k)
 		return
 	if Care.need(rec, "food") < Work.STOP["food"] or Care.need(rec, "energy") < Work.STOP["energy"]:
@@ -526,6 +564,9 @@ func step(k: Dictionary, d: float) -> void:
 					aim = pk["pos"] + Vector3(0.7, 0, 0.2)
 					J["look"] = pk["pos"]
 					pk["hold_t"] = maxf(float(pk.get("hold_t", 0.0)), 0.5) if Vector2(aim.x - pos.x, aim.z - pos.z).length() < 2.0 else float(pk.get("hold_t", 0.0))
+			if _isle(aim) != _isle(pos) and not k.has("leap") and h.has_method("_start_leap"):
+				h._start_leap(k, aim)      # its station is on another island: a bound across
+				return
 			k["goal"] = aim
 			J["go_t"] = float(J["go_t"]) + d
 			if float(J["go_t"]) > 35.0:
@@ -721,6 +762,22 @@ func _finish(k: Dictionary, J: Dictionary) -> bool:
 			st["chill"] = minf(100.0, float(st.get("chill", 0.0)) + 20.0 + 15.0 * lv)
 			h.fx.burst(at + Vector3(0, 0.8, 0), Color("cfefff"), 14, 1.6)
 			produced(at, "Cold Store chilled to %d%% · %s" % [int(st["chill"]), nm], "frost", "")
+		"grow":
+			Work.station(int(J["u"]))["ready"] = Time.get_unix_time_from_system() + GARDEN_T
+			var sd := Work.common_seed(randi())
+			Save.add_seed(sd, 1)
+			Work.count("seed", 1)
+			h.fx.burst(at + Vector3(0, 0.5, 0), Color("8fd16a"), 10, 1.6)
+			produced(at, "+1 %s seed · %s at the Seed Garden" % [Data.CROPS[sd]["name"], nm], "bloom", "")
+		"fire":
+			var wn := int(Work.ASSIGN["kiln"]["wood"])
+			if Work.mat("wood") < wn: return false
+			Work.add_mat("wood", -wn)
+			Save.add_item("coals", 1)
+			Work.count("coals", 1)
+			Work.station(int(J["u"]))["ready"] = Time.get_unix_time_from_system() + KILN_T
+			h.fx.burst(at + Vector3(0, 0.8, 0), Color("ff9a3a"), 14, 2.0)
+			produced(at, "+1 Ember Coal · %s at the Kiln" % nm, "ember", "")
 		"brew":
 			Save.add_item("tonic", 1)
 			Work.count("tonics", 1)
@@ -878,6 +935,69 @@ func workers() -> Array:
 			else: t = "Free: nothing it's suited to needs doing"
 		out.append({"k": k, "text": t, "el": String(k["job"]["el"]) if k.has("job") else ""})
 	return out
+
+# ------------------------------------------------------------------ a station's panel: who's assigned
+## Walking up to a work station (not the Job Board): what it does, how it's doing, and the Boki
+## assigned to it. Assigned Boki work only here and keep at it while you're away on expeditions
+## (Work.catch_up). Any Boki with the station's knack can be assigned; the list is best first.
+func open_station(e: Dictionary) -> void:
+	var id := String(e["id"])
+	var u := int(e["u"])
+	var c: Dictionary = HomeLayout.CATALOG[id]
+	var el := String(c["work"])
+	var v: VBoxContainer = h._new_panel(String(c["name"]), 560)
+	UI.subtitle(v, "%s station  ·  %s" % [Work.name_of(el), Work.ELEMENTS[el]["job"]])
+	v.add_child(UI.para(String(c.get("desc", "")), UI.T_BODY, UI.INK))
+	if not Work.ASSIGN.has(id):
+		v.add_child(UI.para("Boki with the %s knack work it on their own; set how much it matters on the Job Board." % Work.name_of(el), UI.T_SMALL, UI.MUTED))
+		UI.footer_primary(v, "Job Board", func(): h._close_panel(); h.open_job_board(), 160)
+		return
+	var cfg: Dictionary = Work.ASSIGN[id]
+	var crew := Work.crew(u)
+	var made := {"wood": "wood", "stone": "stone", "seed": "common seeds", "coals": "Ember Coals"}
+	v.add_child(UI.para("Assigned Boki work only here, and keep making %s while you're out on an expedition (up to %d per trip home)." % [made.get(String(cfg["out"]), "things"), int(cfg["cap"])], UI.T_SMALL, UI.MUTED))
+	v.add_child(UI.section("Assigned  %d / %d" % [crew.size(), int(cfg["slots"])]))
+	if crew.is_empty():
+		v.add_child(UI.label("Nobody yet." if not cfg.get("need", false) else "Nobody yet: it only runs with a Boki assigned.", UI.T_BODY, UI.MUTED))
+	for r in crew:
+		var rr: Dictionary = r
+		var row := UI.hbox(10)
+		var l := UI.label("%s  ·  %s %d%s" % [r["name"], Work.name_of(el), Work.level(r, el), "" if Work.can_work(r) else "  (%s)" % Work.why_not(r)], UI.T_BODY, Data.KIN.get(String(r["species"]), {}).get("color", UI.INK))
+		l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(l)
+		row.add_child(UI.button("Unassign", func(): Work.assign(rr, -1); _reassign(rr); open_station(e), 120))
+		v.add_child(row)
+	var cands: Array = []
+	for r in Save.d["roster"]:
+		if Work.assigned(r) == u: continue
+		if Work.assign_why(r, id) == "": cands.append(r)
+	cands.sort_custom(func(a, b): return Work.level(a, el) > Work.level(b, el))
+	if crew.size() < int(cfg["slots"]):
+		v.add_child(UI.section("Assign a Boki"))
+		if cands.is_empty():
+			v.add_child(UI.label(("No other Boki of yours has the %s knack." if not crew.is_empty() else "None of your Boki has the %s knack.") % Work.name_of(el), UI.T_BODY, UI.MUTED))
+		for r in cands.slice(0, 5):
+			var rr: Dictionary = r
+			var row := UI.hbox(10)
+			var other := Work.assigned(r)
+			var note := ""
+			if other >= 0:
+				for st in HomeLayout.stations(h._d()):
+					if int(st["e"]["u"]) == other: note = "  (at the %s)" % HomeLayout.CATALOG[st["id"]]["name"]
+			elif KinBox.is_boxed(r): note = "  (asleep in the Burrow)"
+			var l := UI.label("%s  ·  %s %d%s" % [r["name"], Work.name_of(el), Work.level(r, el), note], UI.T_BODY, UI.INK)
+			l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			row.add_child(l)
+			row.add_child(UI.primary("Assign", func(): Work.assign(rr, u); _reassign(rr); Save.save_game(); open_station(e), 120))
+			v.add_child(row)
+
+## A kin's assignment changed: it drops whatever it was doing and picks again.
+func _reassign(rec: Dictionary) -> void:
+	var k: Dictionary = h._kin_entry(rec)
+	if not k.is_empty():
+		drop(k)
+		k["t"] = 0.0
+	scan()
 
 # ------------------------------------------------------------------ tooling: --work-demo, --shiny-lineup
 ## A made-up farm for screenshots: six kin, every station east of the farm, some wood and stone.

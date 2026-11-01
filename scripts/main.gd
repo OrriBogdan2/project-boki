@@ -100,6 +100,13 @@ func _ready() -> void:
 		if a == "--fresh": Save.d = Save.fresh()
 		if a in ["--work-demo", "--work-board", "--work-board=Kin", "--work-card", "--work-box", "--work-hover", "--work-close", "--work-build", "--shiny-lineup"]:
 			Save.no_write = true; Save.d = HomeWork.demo_save()     # a made-up farm at work (screenshots)
+		if a.begins_with("--farm-demo"):
+			# screenshots: a new farm-start island (--farm-demo=empty|ghost|chop|station|panel, --farm-seed=N)
+			var fseed := 7
+			for a2 in args:
+				if String(a2).begins_with("--farm-seed="): fseed = int(String(a2).substr(12))
+			Save.no_write = true
+			Save.d = HomeGather.demo_save(a.substr(12) if a.length() > 12 else "empty", fseed)
 		if a.begins_with("--test-kin="):
 			# test: a save with one kin "species:level:trust", ready to play at home
 			var tk := a.substr(11).split(":")
@@ -339,6 +346,11 @@ func _ready() -> void:
 		var wcc = load("res://tools/weapon_clip_check.gd").new()      # no held weapon ever dips into the ground
 		set_meta("weapon_clip_check", wcc)
 		wcc.run(self)
+		return
+	if "--farm-start-check" in args:
+		var fsc = load("res://tools/farm_start_check.gd").new()      # a new farm: empty island, placing, chopping, stations, old saves
+		set_meta("farm_start_check", fsc)
+		fsc.run(self)
 		return
 	if "--work-check" in args:
 		var wkc = load("res://tools/work_check.gd").new()      # kin at work: jobs, stations, priorities, shimmer odds
