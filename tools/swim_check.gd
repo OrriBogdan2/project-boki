@@ -1,5 +1,5 @@
 extends RefCounted
-## --swim-check: the farm's pond is water (Home.water_depth). Walk in: the edge is shallow (you wade,
+## --swim-check: the farm's pond is water (HomeWater.depth). Walk in: the edge is shallow (you wade,
 ## slower, a splash going in), the middle is deep (you swim: lower in the water, slower still, no
 ## dash, no jump, no tools); walk out the far side: back on dry ground (a drip). The water is never
 ## void (the abyss rules leave it alone) and a Boki can paddle in it. --shots-dir=<dir>: a screenshot
@@ -34,7 +34,7 @@ func run(main: Node) -> void:
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--shots-dir="): shot = a.substr(12)
 	var w: World = hm.world
-	ok(not hm.fs and hm.water_depth(33.5, 37.5) == 2 and hm.water_depth(32.5, 36.5) == 1 and hm.water_depth(33.5, 34.5) == 0, "the classic farm's pond: deep in the middle, shallow round the edge")
+	ok(not hm.fs and hm.water.depth(33.5, 37.5) == 2 and hm.water.depth(32.5, 36.5) == 1 and hm.water.depth(33.5, 34.5) == 0, "the classic farm's pond: deep in the middle, shallow round the edge")
 	ok(not w.is_void(33.5, 37.5) and w.occupy(33.5, 37.5, 0.38, 0.0, true) == 0.0 and w.occupy(32.5, 36.5, 0.3, 0.0, true) == 0.0, "the water is walkable ground to the world: not void (no abyss), not a wall")
 	var DT := 1.0 / 60.0
 	hm.ppos = Vector3(33.5, 0, 34.6); hm.py = 0.0; hm.pvy = 0.0; hm.pvel = Vector3.ZERO; hm.dash_t = 0.0
@@ -47,13 +47,13 @@ func run(main: Node) -> void:
 		var z0: float = hm.ppos.z
 		hm._move_player(DT)
 		var sp: float = (hm.ppos.z - z0) / DT
-		var wd: int = hm.water_depth(hm.ppos.x, hm.ppos.z)
+		var wd: int = hm.water.depth(hm.ppos.x, hm.ppos.z)
 		if wd == 0 and not waded: dry_speed = maxf(dry_speed, sp)
 		if wd == 1 and not swam: waded = true; wade_speed = sp      # (its speed as it reaches the deep water: settled to the wade)
-		if hm.swimming:
+		if hm.water.swimming:
 			swam = true; swim_speed = maxf(swim_speed, sp)
-			sank = maxf(sank, hm.water_k)
-			if hm.water_k > 0.9 and phase == 0:
+			sank = maxf(sank, hm.water.k)
+			if hm.water.k > 0.9 and phase == 0:
 				phase = 1
 				# Shift and Space do nothing while swimming
 				Input.action_press("dash"); Input.action_press("jump")
@@ -72,7 +72,7 @@ func run(main: Node) -> void:
 	ok(waded and wade_speed < dry_speed * 0.8, "walking in, the edge is shallow and slows you (%.1f m/s wading vs %.1f dry)" % [wade_speed, dry_speed])
 	ok(swam and swim_speed < wade_speed and sank > 0.9, "the middle is deep: you swim, slower again (%.1f m/s), sunk in to the shoulders" % swim_speed)
 	ok(not dash_in_water and not jump_in_water, "no dash and no jump while swimming")
-	ok(out_dry and not hm.swimming and absf(hm.py) < 0.01, "and you climb out the far side onto dry ground (%s)" % str(hm.ppos))
+	ok(out_dry and not hm.water.swimming and absf(hm.py) < 0.01, "and you climb out the far side onto dry ground (%s)" % str(hm.ppos))
 	# a Boki paddling: its body sits low in the water
 	var kin_ok := false
 	for kd in hm.kins:

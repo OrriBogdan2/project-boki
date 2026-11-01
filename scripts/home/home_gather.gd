@@ -84,7 +84,7 @@ func label(it: Dictionary) -> String:
 	return "Chop the tree" if it["what"] == "tree" else "Mine the boulder"
 
 func use(it: Dictionary) -> void:
-	if h.swimming:
+	if h.water.swimming:
 		h._toast("Not while you're swimming")
 		return
 	if it.is_empty() or not it.has("what"):

@@ -3820,7 +3820,7 @@ func _home_build_check() -> void:
 	var wt: Vector2i = spot.call({"kind": "deco", "id": "bush", "from": -1})
 	hb.drag = {"from": wt, "tiles": {wt: true}, "last": wt}
 	hb.cells = [wt]; hb._check_cells()
-	ok.call(hb.place_held() and home.water_depth(wt.x + 0.5, wt.y + 0.5) > 0 and not home.world.is_block(wt.x + 0.5, wt.y + 0.5), "a pond tile goes down (water you can wade into, but nothing can be built on it)")
+	ok.call(hb.place_held() and home.water.depth(wt.x + 0.5, wt.y + 0.5) > 0 and not home.world.is_block(wt.x + 0.5, wt.y + 0.5), "a pond tile goes down (water you can wade into, but nothing can be built on it)")
 	# kin walk round a fence
 	var fx := 56; var fz := 41
 	var line: Array = []
@@ -3869,7 +3869,7 @@ func _home_build_check() -> void:
 	Save.d = JSON.parse_string(js)
 	var home2 = await _hb_home()
 	ok.call(home2.lots["workshop"]["at"].distance_to(ws_at) < 0.01 and (HomeLayout.of(Save.d)["deco"] as Array).size() == deco_n and home2.hb.nodes.size() > 0 and home2.world.is_block(fx + 0.5, fz + 0.5), "after a save and reload the Workshop, %d decorations and the fence are where they were" % deco_n)
-	ok.call(home2.water_depth(wt.x + 0.5, wt.y + 0.5) > 0 and home2.world.paint.has(home2.world.idx(pt.x, pt.y)), "the pond tile and the path come back too")
+	ok.call(home2.water.depth(wt.x + 0.5, wt.y + 0.5) > 0 and home2.world.paint.has(home2.world.idx(pt.x, pt.y)), "the pond tile and the path come back too")
 	# expanding
 	var gl := int(HomeLayout.of(Save.d)["grow"])
 	ok.call(home2.hb.expand() and int(HomeLayout.of(Save.d)["grow"]) == gl + 1, "Expand pays and grows the island a step (now %d)" % (gl + 1))

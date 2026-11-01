@@ -52,6 +52,7 @@ var visit: Dictionary = {}     # when visiting someone: their island snapshot (s
 var visit_id := ""
 var petted := {}
 var hecon: HomeEcon = null       # the armory, feeders, starving, graveyard and Soul Shrine (home_econ.gd)
+var water := HomeWater.new(self)      # the ponds you wade and swim in (home_water.gd)
 var hb: HomeBuild = null         # build mode and the island's layout (home_build.gd, home_layout.gd)
 var training: HomeTraining = null  # the Training Grounds isle, where your combat kit works (home_training.gd)
 var hw: HomeWork = null            # kin at work: jobs, stations and the Job Board (home_work.gd, Work)
@@ -196,7 +197,7 @@ func _classic_layout(path_col: Color) -> void:
 	for z in range(30, 38):
 		for x in range(43, 48):
 			world.paint_tile(x, z, Color("6b4a33"))
-	# the pond: water you can wade into and swim in (water_depth), nothing grows in it
+	# the pond: water you can wade into and swim in (HomeWater), nothing grows in it
 	for z in range(36, 39):
 		for x in range(32, 35):
 			world.no_deco[world.idx(x, z)] = true
@@ -1208,12 +1209,11 @@ func _move_player(d: float) -> void:
 	else:
 		crouch_on = can_act and Input.is_action_pressed("crouch")
 	if has_meta("crouch_test"): crouch_on = true
-	var wdep := water_depth(ppos.x, ppos.z) if py < 0.4 else 0
-	swimming = wdep == 2 and not air
-	_water_step(wdep, d, mv)
+	var wdep := water.depth(ppos.x, ppos.z) if py < 0.4 else 0
+	water.step(wdep, d, mv, air)
 	var crouching := crouch_on and not air and dash_t <= 0.0 and not gliding and wdep == 0
 	p_crouch_k = move_toward(p_crouch_k, 1.0 if crouching else 0.0, d * 8.0)
-	if can_act and Input.is_action_just_pressed("dash") and dash_t <= 0.0 and not swimming:
+	if can_act and Input.is_action_just_pressed("dash") and dash_t <= 0.0 and not water.swimming:
 		try_dash(mv, air)
 	_mv = mv
 	var hv := Vector2(pvel.x, pvel.z)
@@ -1222,7 +1222,7 @@ func _move_player(d: float) -> void:
 		hv = dash_v
 		if dash_t <= 0.0: hv = dash_v * (Hunter.DASH_CARRY_AIR if air else Hunter.DASH_CARRY_GROUND)
 	else:
-		var spd := Hunter.GLIDE_SPEED * 1.15 if gliding else SPEED * (CROUCH_SPEED if crouching else 1.0) * (SWIM_SPEED if swimming else (WADE_SPEED if wdep == 1 and not air else 1.0))
+		var spd := Hunter.GLIDE_SPEED * 1.15 if gliding else SPEED * (CROUCH_SPEED if crouching else 1.0) * water.speed_mul(wdep, air)
 		hv += (mv * spd - hv) * (1.0 - exp(-(14.0 if not air else (4.0 if gliding else 6.0)) * d))
 	# the island's edge doesn't hold you: walk off it and you fall (glide back, or the abyss returns you)
 	var guard := false
@@ -1259,7 +1259,7 @@ func _move_player(d: float) -> void:
 	air = py > gh + 0.001 or pvy > 0.0
 	# jump; in the air, a second press (or holding Space, or the glide key) opens the glider
 	var jump_now := can_act and Input.is_action_just_pressed("jump")
-	if jump_now and not air and not swimming:
+	if jump_now and not air and not water.swimming:
 		pvy = JUMP_V
 		air = true
 		glide_hold = 0.0
@@ -1301,7 +1301,7 @@ func _move_player(d: float) -> void:
 		if gh > World.VOID + 1.0 and world.kind[world.idx(int(floor(ppos.x)), int(floor(ppos.z)))] == World.T_GROUND:
 			safe_at = ppos
 	_glider_look()
-	player.position = ppos + Vector3(0, py - water_k * 0.62 - wade_k * 0.14 + (sin(swim_ph) * 0.04 if water_k > 0.05 else 0.0), 0)
+	player.position = ppos + Vector3(0, py - water.drop_y(), 0)
 	# face the mouse; with the mouse outside the window, face where you're walking
 	var vp := get_viewport()
 	var mp := vp.get_mouse_position()
@@ -1316,13 +1316,11 @@ func _move_player(d: float) -> void:
 	if hg and hg.busy(): want = hg.face()      # chopping: face the tree
 	pface = lerp_angle(pface, want, minf(1.0, d * 14.0))
 	player.basis = cam.char_basis(pface, player.scale)     # leaned toward the camera, as in a match
-	if water_k > 0.01:
-		# swimming: tipped forward into a stroke while you move, upright treading water when you stop
-		player.basis = player.basis * Basis(Vector3.RIGHT, -0.75 * water_k * clampf(hv.length() / maxf(0.1, SPEED * SWIM_SPEED), 0.0, 1.0))
+	player.basis = water.tilt(player.basis, hv.length())      # swimming: tipped into a stroke
 	if p_anim == null or p_anim.model != player:
 		p_anim = HunterAnim.new(player)
 	p_fired += d
-	var ps := {"vel": Vector3(hv.x, pvy if air else 0.0, hv.y), "face": pface, "grounded": not air, "gliding": gliding or water_k > 0.5, "rolling": dash_t > 0.0, "dash_dir": dash_v, "fired": p_fired,
+	var ps := {"vel": Vector3(hv.x, pvy if air else 0.0, hv.y), "face": pface, "grounded": not air, "gliding": gliding or water.k > 0.5, "rolling": dash_t > 0.0, "dash_dir": dash_v, "fired": p_fired,
 		"swing_n": p_swing_n, "combo": maxi(0, p_swing_n - 1) % 3, "crouch": p_crouch_k}
 	if air and not gliding and gh > World.VOID + 1.0:
 		ps["air_h"] = clampf(py - gh, 0.0, 30.0)
@@ -1469,19 +1467,7 @@ func _move_kin(d: float) -> void:
 		k["pos"] = pos
 		var n: Node3D = k["node"]
 		n.position = pos
-		var kw := water_depth(pos.x, pos.z)
-		if kw > 0:
-			# paddling: low in the water, bobbing, a ripple now and then
-			n.position.y -= (0.12 if kw == 1 else 0.3) - sin(float(k["hop"]) * 0.7) * 0.03
-			k["swim_t"] = float(k.get("swim_t", 0.0)) - d
-			if float(k["swim_t"]) <= 0.0 and fx:
-				k["swim_t"] = 0.9
-				fx.ring(pos + Vector3(0, 0.08, 0), 0.4, Color(0.85, 0.95, 1.0, 0.45), 0.5)
-		if kw > 0 and not k.get("wet", false):
-			k["wet"] = true
-			Sfx.play("splash", pos, -18.0, 0.1, 1.4)
-		elif kw == 0 and k.get("wet", false):
-			k.erase("wet")
+		water.paddle(k, pos, n, d)
 		if k.get("going_in", false) and Vector2(pos.x - _house_door().x, pos.z - _house_door().z).length() < 0.6:
 			k.erase("going_in")
 			var night_now := sin((day_t - 0.25) * TAU) < -0.2
@@ -1619,63 +1605,6 @@ func _climb_step(d: float) -> void:
 		pvy = 0.0
 		Sfx.play("land", null, -12.0)
 		if fx: fx.dust(ppos, 3)
-
-# ---- water (feelfix): the farm's ponds are water you can wade into and swim in
-const WADE_SPEED := 0.68     # walking through a pond's shallow edge
-const SWIM_SPEED := 0.5      # swimming in its deep middle (no dash, no jump, no tools)
-var swimming := false
-var water_k := 0.0           # eased 0 dry .. 1 swimming (how far you've sunk in)
-var wade_k := 0.0            # eased 0 .. 1 wading
-var swim_ph := 0.0           # the stroke's bob
-var _water_was := 0
-var _stroke_t := 0.0
-
-## Pond water under (x, z): 0 none, 1 shallow (a tile on the pond's edge: wade), 2 deep (swim).
-func water_depth(x: float, z: float) -> int:
-	var ix := int(floor(x)); var iz := int(floor(z))
-	if not is_water(ix, iz):
-		return 0
-	for dz in [-1, 0, 1]:
-		for dx in [-1, 0, 1]:
-			if not is_water(ix + dx, iz + dz): return 1
-	return 2
-
-func is_water(ix: int, iz: int) -> bool:
-	if not fs and ix >= 32 and ix <= 34 and iz >= 36 and iz <= 38:
-		return true          # the classic farm's pond
-	return hb != null and (hb.L()["water"] as Dictionary).has(HomeLayout.key(ix, iz))
-
-## Splashes, strokes and sounds as you go in, swim about and climb out.
-func _water_step(wdep: int, d: float, mv: Vector2) -> void:
-	water_k = move_toward(water_k, 1.0 if wdep == 2 else 0.0, d * 2.6)
-	wade_k = move_toward(wade_k, 1.0 if wdep >= 1 else 0.0, d * 4.0)
-	var at := ppos + Vector3(0, 0.08, 0)
-	if wdep > 0 and _water_was == 0:
-		# in you go: a splash, louder from a jump or a fall
-		var hard := clampf(-pvy / 8.0, 0.0, 1.0)
-		Sfx.play("splash", ppos, -8.0 + hard * 6.0, 0.08, 1.05 - hard * 0.1)
-		if fx:
-			fx.burst(at + Vector3(0, 0.2, 0), Color("dff3ff"), 14 + int(hard * 14), 3.0 + hard * 2.0, 0.5, 14.0, 1.0, Vector3.UP, 50.0)
-			fx.ring(at, 0.9 + hard * 0.6, Color(0.85, 0.95, 1.0, 0.8), 0.5)
-	elif wdep == 0 and _water_was > 0:
-		Sfx.play("drip", ppos, -10.0)
-		if fx: fx.burst(at + Vector3(0, 0.4, 0), Color("cfeaff"), 6, 1.4, 0.4)
-	elif wdep == 2 and _water_was == 1:
-		Sfx.play("splash", ppos, -14.0, 0.1, 1.25)       # in over your head
-	_water_was = wdep
-	if wdep == 0:
-		_stroke_t = 0.0
-		return
-	var moving := mv.length() > 0.2
-	swim_ph += d * (6.5 if moving and wdep == 2 else 2.4)
-	_stroke_t -= d
-	if _stroke_t <= 0.0 and (moving or wdep == 2):
-		_stroke_t = 0.75 if wdep == 2 else 0.45
-		if wdep == 2 or moving:
-			Sfx.play("swim" if wdep == 2 else "step_grass", ppos, -15.0 if wdep == 2 else -20.0, 0.12)
-		if fx:
-			fx.ring(at, 0.55 if moving else 0.4, Color(0.85, 0.95, 1.0, 0.55), 0.6)
-			if moving: fx.burst(at + Vector3(0, 0.1, 0), Color("e8f7ff"), 4, 1.6, 0.35)
 
 ## Under island level over the abyss the view goes magenta, as in a match (AbyssFx), deeper toward
 ## the point of no return.
