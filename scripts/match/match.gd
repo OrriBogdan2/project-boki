@@ -4008,6 +4008,23 @@ func step(dt: float) -> void:
 				if opts.get("boxrev_demo", false): x.lives = 1
 				eliminate(x, null, "knocked out")
 				break
+	if opts.has("lost_demo") and player and time > 0.3 and not has_meta("lost_demo_done"):
+		# test: a Boki left behind. "rival": a rival with a Boki goes out next to you; "you": you go out
+		# (Duos, your squadmate carries on) and your Boki is left where you fell
+		set_meta("lost_demo_done", true)
+		if String(opts["lost_demo"]) == "you":
+			for x in hunters:
+				if x.team == player.team and x != player: x.ctrl = "idle"
+			player.lives = 1
+			eliminate(player, null, "knocked out")
+		else:
+			for x in hunters:
+				if x.team != player.team and x.kin and not x.out:
+					x.teleport(world.free_spot_near(player.pos + Vector3(3.0, 0, 1.5), [player.pos], 1.0, 0.4, 8.0))
+					if x.kin.state != "shoulder": x.kin.teleport(x.pos + Vector3(0.8, 0, 0))
+					x.lives = 1
+					eliminate(x, null, "knocked out")
+					break
 	if opts.get("boxrev_demo", false) and player and time > 0.3:
 		# test: bring the teammate back at their deathbox (the channel's light, the kneel, the hum)
 		for b in boxes:
@@ -5082,12 +5099,13 @@ var train_t := 0.0
 var duel_pad := Vector3.INF
 
 ## The Demo match (title screen): a real Duos expedition set up for filming. A fixed map roll, clear
-## weather, no Blight, normal rivals; your bot squadmate leads the drop to land you between a live boss
+## weather, no Blight, normal rivals, on the Dusk Isles (the first tier where a Boki can be lost: one in
+## a deathbox goes to whoever loots it); your bot squadmate leads the drop to land you between a live boss
 ## lair and an outpost uplink (_demo_drop). It plays on your save like any expedition (what you bring
 ## can be lost, what you extract is kept).
 const DEMO_SEED := 5
 static func demo_opts() -> Dictionary:
-	return {"teams": Data.MATCH_PLAYERS / 2, "squad": 2, "total": Data.MATCH_PLAYERS, "tier": 0, "seed": DEMO_SEED,
+	return {"teams": Data.MATCH_PLAYERS / 2, "squad": 2, "total": Data.MATCH_PLAYERS, "tier": 1, "seed": DEMO_SEED,
 		"raid": "clear", "blight": false, "demo_match": true}
 
 ## The Arena: a compact practice map with dummies, a sparring bot and the kit card (scripts/match/arena.gd).

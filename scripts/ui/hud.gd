@@ -321,6 +321,14 @@ func _draw_world_labels() -> void:
 		var ally: bool = m.player != null and o.team == m.player.team
 		if soul and ally and o != m.player:
 			_ctext(bp, "%s  ·  %ds" % [o.pname, int(ceil(float(b["soul_until"]) - m.time))], 13, Color("9ee2a0"), big)
+		elif not (b.get("kin", []) as Array).is_empty() and m.player and m.player.flat_dist(b["pos"]) < 32.0:
+			# a Boki in a deathbox: whoever loots the box takes it home (the hook: readable from afar)
+			var kn := String((b["kin"][0] as Dictionary).get("name", "Boki"))
+			if o == m.player:
+				_ctext(bp + Vector2(0, -16), "Your box  ·  %s is inside" % kn, 15, GOLD, big)
+			else:
+				_ctext(bp + Vector2(0, -16), "A Boki in %s's box" % o.pname, 16, Color("ffb36a"), big)
+				_ctext(bp + Vector2(0, 2), "loot it and %s is yours" % kn, 12, Color(INK, 0.9), big)
 		elif not b["empty"] and m.player and m.player.flat_dist(b["pos"]) < 14.0:
 			_ctext(bp, "%s's box" % o.pname if o != m.player else "Your box", 12, Life.box_color(b), big)
 	# whoever has your kin: marked over their head, or an arrow at the screen edge
@@ -2390,14 +2398,18 @@ func _draw_dead(sz: Vector2, p: Hunter) -> void:
 	var b := Life.box_of(m, p)
 	var lines: Array = []
 	# your Boki left on the map, still there for anyone to tame (the game's hook: say it plainly)
-	var left_kin: Kin = null
+	var left_line := ""
 	for L in m.player_lost:
 		var lk = L.get("kin")
+		var lb: Dictionary = L.get("box", {})
+		var kn := String((L.get("rec", {}) as Dictionary).get("name", "Your Boki"))
 		if lk != null and is_instance_valid(lk) and not (lk as Kin).dead and (lk as Kin).is_wild():
-			left_kin = lk
-	if left_kin:
+			left_line = "%s was left behind: rivals can tame it" % kn
+		elif not lb.is_empty() and (lb.get("kin", []) as Array).any(func(r): return String(r.get("uid", "")) == String(L.get("uid", ""))):
+			left_line = "%s is in your deathbox: a rival who loots it takes it" % kn
+	if left_line != "":
 		y0 = sz.y * 0.58
-		_ctext(Vector2(sz.x * 0.5, y0 - 64), "%s was left behind: rivals can tame it" % String(left_kin.rec.get("name", "Your Boki")), 20, GOLD, big)
+		_ctext(Vector2(sz.x * 0.5, y0 - 64), left_line, 20, GOLD, big)
 	if not b.is_empty() and Life.soul_here(m, b):
 		lines.append("A teammate can bring you back at your deathbox: %ds left." % int(ceil(float(b["soul_until"]) - m.time)))
 	lines.append("Or at any revive beacon (the green pillars), with nothing you carried." if m.beacons.any(func(x): return not x["used"]) else "No revive beacons left.")
