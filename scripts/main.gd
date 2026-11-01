@@ -2251,7 +2251,16 @@ func _extract_check() -> void:
 	YB.ctrl = "idle"; YB.inp["move"] = Vector2.ZERO
 	# ---- 3c. nobody in the yard: the charge drains (shown on the HUD and over the yard); at nothing
 	# the uplink flickers, shuts off, and after a cooldown can be started again
-	YB.teleport(m.world.random_ground()); YB.set_meta("pin", YB.pos)
+	# (everyone else idle and well clear of the yard: a squadmate or rival anywhere near it would keep
+	# it from draining)
+	for h in m.hunters:
+		if h == P: continue
+		h.ctrl = "idle"; h.inp["move"] = Vector2.ZERO
+		var far := m.world.random_ground()
+		for k in 200:
+			if far.distance_to(o["pos"]) > 25.0: break
+			far = m.world.random_ground()
+		h.remove_meta("pin"); h.teleport(far); h.set_meta("pin", far)
 	P.remove_meta("pin"); P.teleport(o["pos"] + Vector3(6.0, 0, 0) if not m.world.is_void(o["pos"].x + 6.0, o["pos"].z) else o["pos"] + Vector3(0, 0, 6.0)); P.set_meta("pin", P.pos)
 	o["prog"] = 0.5
 	run.call(m, 0.2, calm.bind(m))
@@ -2274,7 +2283,7 @@ func _extract_check() -> void:
 	while tf < Exits.UPLINK_DECAY_T + Exits.FIZZLE_T + 2.0 and String(o["state"]) != "spent":
 		run.call(m, 0.25, calm.bind(m)); tf += 0.25
 		if String(o["state"]) == "fizzling": seen_fizz = true
-	print("EXCHECK uplink decay: ran dry after %.1fs: flickered %s, now %s (team %d), %s" % [tf, seen_fizz, o["state"], int(o["team"]), String(m.exits.interact_for(P).get("label", "")) if m.exits.has_method("interact_for") else ""])
+	print("EXCHECK uplink decay: ran dry after %.1fs: flickered %s, now %s (team %d, prog %.2f, crew %d, contested %s, draining %s, match over %s)" % [tf, seen_fizz, o["state"], int(o["team"]), float(o["prog"]), int(o.get("crew", 0)), o.get("contested", false), o.get("draining", false), m.over])
 	if not seen_fizz or String(o["state"]) != "spent" or int(o["team"]) != -1: ok = false; print("EXCHECK FAIL uplink fizzle")
 	run.call(m, Exits.FIZZLE_CD + 0.5, calm.bind(m))
 	print("EXCHECK uplink decay: after the cooldown it's %s, startable %s" % [o["state"], m.exits.startable(o)])
