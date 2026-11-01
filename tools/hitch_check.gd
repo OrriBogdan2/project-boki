@@ -53,6 +53,7 @@ var headless := false
 var budget_ms := -1.0
 var seed_v := 4101
 var squad := 3
+var trace := false
 
 func _ready() -> void:
 	for a in OS.get_cmdline_user_args():
@@ -60,6 +61,7 @@ func _ready() -> void:
 		if a.begins_with("--hitch-budget="): budget_ms = float(a.substr(15))
 		if a.begins_with("--hitch-seed="): seed_v = int(a.substr(13))
 		if a.begins_with("--hitch-squad="): squad = int(a.substr(14))
+		if a == "--hitch-trace": trace = true
 	headless = DisplayServer.get_name() == "headless"
 	var adapter := RenderingServer.get_video_adapter_name().to_lower()
 	software = not headless and (adapter.contains("llvmpipe") or adapter.contains("softpipe") or adapter.contains("swiftshader") or adapter.contains("swrast"))
@@ -146,6 +148,10 @@ func _process(_delta: float) -> void:
 		rec["new"] = _new_in_view()
 		rec["walk"] = (_walk_us - w0) / 1000.0
 	frames.append(rec)
+	if trace:
+		_trace_lights()
+		# for lining frames up with an outside sampler (gdb stacks): wall clock, phase, sim time
+		print("HITCH-TRACE %.3f %s t=%.2f prev_wall=%.0f" % [Time.get_unix_time_from_system(), phase, m.time, float(frames[-2]["wall"]) if frames.size() > 1 else 0.0])
 	phase_t += DT * k
 	_next_phase()
 
@@ -257,6 +263,20 @@ func _node_path(n: Node) -> String:
 		parts.push_front(String(x.name))
 		x = x.get_parent()
 	return "/".join(parts)
+
+## Trace: the lights in the match whose state changed since the last frame (which lights touch
+## an object decides which shader variant it compiles in the Compatibility renderer).
+var _lights := {}
+func _trace_lights() -> void:
+	var now := {}
+	for n in m.find_children("*", "Light3D", true, false):
+		var l := n as Light3D
+		now[l.get_instance_id()] = "%s vis=%s e=%.2f at=%s sh=%s" % [_node_path(l), l.is_visible_in_tree(), l.light_energy, str(l.global_position.snapped(Vector3.ONE * 2.0)), l.shadow_enabled]
+	for k in now:
+		if _lights.get(k, "") != now[k]: print("HITCH-LIGHT ", now[k])
+	for k in _lights:
+		if not now.has(k): print("HITCH-LIGHT gone ", _lights[k])
+	_lights = now
 
 ## Runs after every other _process in the frame: marks where the scripts ended.
 class Tail extends Node:
