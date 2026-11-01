@@ -275,6 +275,8 @@ def gen_classes():
             b.append("- *%s:* %s" % (names.get(k, k), t))
         b.append("")
         for slot, label in (("e", "E"), ("r", "R")):
+            if slot not in d:
+                continue
             x = d[slot]
             b.append("**%s (%s, %s cooldown).** %s\n" % (x["name"], label, secs(x.get("cooldown")), x.get("desc", "")))
         b.append("### Ranks\n\nRank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the special.\n")
