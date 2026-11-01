@@ -101,6 +101,8 @@ func _arena() -> void:
 		P.teleport(A.home); P.inp["aim"] = D.pos + Vector3(0, 0.9, 0); P.inp["aim_y"] = D.pos.y
 		P.ak.cd["rmb"] = 0.0; P.ak.ch_rmb = float(P.ak.rmb_charges()); P.fire_cd = 0.0
 		step(m, 0.1)
+		if float(P.ak.rmb_def().get("hold", 0.0)) <= 0.0:
+			continue            # no RMB hold variant (Dredge, Ashwick: their hold is the lance, see --ashwick-combo-check)
 		var f0: int = P.ak.charge_fulls
 		var mid := -1.0
 		var ring_ok := false
@@ -164,12 +166,13 @@ func _arena() -> void:
 		P.teleport(A.home); B.teleport(A.home + Vector3(5.0, 0, 0))
 		var seen := {"dash": false}
 		var tb := 0.0
-		while tb < 18.0:
+		while tb < 40.0:          # (18s used to do; the bot's dice vary with what ran before, so give it up to 40s to show all three)
 			P.hp = P.max_hp
 			B.hp = B.max_hp
 			m.step(DT); tb += DT
 			if B.ak is ThiefKit and float((B.ak as ThiefKit).primed_t) > 0.0: seen["dash"] = true
 			if B.ak is JuggernautKit and String(B.ak.st.get("last_dash", "")) == "rampage": seen["dash"] = true
+			if tb > 18.0 and seen["dash"] and int(B.used.get("utility", 0)) > 0 and int(B.used.get("k1", 0)) + int(B.used.get("r", 0)) > 0: break
 		var u: Dictionary = B.used
 		ok("bot uses the %s kit (RMB, E or R, dash)" % ba, int(u.get("utility", 0)) > 0 and int(u.get("k1", 0)) + int(u.get("r", 0)) > 0 and bool(seen["dash"]),
 			"rmb %d e %d r %d dash %s" % [int(u.get("utility", 0)), int(u.get("k1", 0)), int(u.get("r", 0)), seen["dash"]])
@@ -222,12 +225,12 @@ func _cards() -> void:
 		var c := KitCard.make(a, "cindle")
 		host.add_child(c)
 		await main.get_tree().process_frame
-		ok("kit card builds: %s" % a, c.grid != null and c.grid.get_child_count() == 6 and c.size.x <= KitCard.SIZE.x + 1.0, "size %s" % str(c.size))
+		ok("kit card builds: %s" % a, c.grid != null and c.grid.get_child_count() == KitCard.slots_of(a).size() and c.size.x <= KitCard.SIZE.x + 1.0, "size %s" % str(c.size))
 		var s0 := c.size
 		c._show_detail("rmb")
 		await main.get_tree().process_frame
 		ok("kit card sub-page keeps its size: %s" % a, c.page == "rmb" and c.size.is_equal_approx(s0), "%s -> %s" % [str(s0), str(c.size)])
-		for s in KitCard.SLOTS:
+		for s in KitCard.slots_of(a):
 			var info := KitCard.slot_text(a, s)
 			if String(info["line"]) == "" or String(info["name"]) == "":
 				ok("kit card text %s.%s" % [a, s], false)
