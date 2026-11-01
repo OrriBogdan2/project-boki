@@ -377,7 +377,7 @@ func _draw_world_labels() -> void:
 	for h in m.hunters:
 		if h == m.player or h.out or h.extracted or not h.model or not h.model.visible or h.unseen:
 			continue
-		var sp := cam.unproject_position(h.position + Vector3(0, 2.35, 0))
+		var sp := cam.unproject_position(_head(h, 2.35))
 		if cam.is_position_behind(h.position):
 			continue
 		_nameplate(sp, h)
@@ -1274,7 +1274,7 @@ func _draw_glider_heat(p: Hunter) -> void:
 	var heat := 1.0 - p.glide_fuel
 	if not p.gliding and heat < 0.01:
 		return
-	var at := p.position + Vector3(0, 2.25 * float(p.cdat["scale"]), 0)
+	var at := _head(p, 2.25 * float(p.cdat["scale"]))
 	if m.cam.is_position_behind(at):
 		return
 	var cpt := m.cam.unproject_position(at) + Vector2(58, -6)
@@ -2520,10 +2520,15 @@ func _dash_strip(r: Rect2, p: Hunter) -> void:
 			c.draw_rect(sr.grow(1.0 * fl), Color(1, 1, 1, 0.85 * fl))
 		x += sw + gap
 
+## A point `up` metres above a hunter's feet, following the body's lean toward the camera
+## (CamRig.char_lean), so bars and names stay just over the head.
+func _head(h: Node3D, up: float) -> Vector3:
+	return h.position + (m.cam.char_lean() * Vector3(0, up, 0) if m.cam else Vector3(0, up, 0))
+
 ## Health and stamina (dash charges) right above your hunter, where your eyes already are.
 func _draw_overhead(p: Hunter) -> void:
 	var cam := m.cam
-	var at := p.position + Vector3(0, 2.7 * float(p.cdat["scale"]), 0)
+	var at := _head(p, 2.7 * float(p.cdat["scale"]))
 	if cam.is_position_behind(at) or p.downed or p.riding:
 		return
 	var sp := cam.unproject_position(at)
@@ -3575,7 +3580,7 @@ func _draw_truce_marks() -> void:
 			continue
 		var e := Truce.emote_def(String(s["id"]))
 		var a := clampf((Truce.BUBBLE_T - float(s["t"])) * 2.0, 0.0, 1.0) * clampf(float(s["t"]) * 8.0, 0.0, 1.0)
-		var sp := cam.unproject_position(h.position + Vector3(0, 3.3, 0)) + Vector2(0, -6.0 * minf(1.0, float(s["t"]) * 4.0))
+		var sp := cam.unproject_position(_head(h, 3.3)) + Vector2(0, -6.0 * minf(1.0, float(s["t"]) * 4.0))
 		if not c.get_viewport_rect().grow(240.0).has_point(sp):
 			continue     # (far off screen, e.g. someone falling away into the abyss: the bubble's triangles degenerate and spam "triangulation failed")
 		var label := String(e["name"])
@@ -3593,7 +3598,7 @@ func _draw_truce_marks() -> void:
 	for h in m.hunters:
 		if h.team == me.team or h.out or h.extracted or h.unseen or not h.visible or cam.is_position_behind(h.position):
 			continue
-		var tp := cam.unproject_position(h.position + Vector3(0, 2.55, 0))
+		var tp := cam.unproject_position(_head(h, 2.55))
 		if not c.get_viewport_rect().grow(240.0).has_point(tp):
 			continue
 		if m.truce.is_marked(h):

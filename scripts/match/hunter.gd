@@ -3290,7 +3290,8 @@ func render(delta: float, alpha: float) -> void:
 	visible = not out and not extracted and not riding and not unseen
 	if not model:
 		return
-	model.rotation.y = face
+	if m.cam: model.basis = m.cam.char_basis(face, model.scale)     # leaned toward the camera (CamRig.char_lean)
+	else: model.rotation.y = face
 	if out and has_meta("fling"):
 		# hit by the sky train: the body is flung tumbling through the air for a moment, then gone
 		var fl: Dictionary = get_meta("fling")
@@ -3303,6 +3304,7 @@ func render(delta: float, alpha: float) -> void:
 			return
 		remove_meta("fling")
 		model.rotation = Vector3(0, face, 0)
+		if m.cam: model.basis = m.cam.char_basis(face, model.scale)
 	# riding a mount: you sit up on its back
 	var ride := (kin as Kin).ride_height() if mounted() and not downed else 0.0
 	model.position.y = lerpf(model.position.y, ride, minf(1.0, delta * 12.0))

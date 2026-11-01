@@ -1307,7 +1307,7 @@ func _move_player(d: float) -> void:
 		want = atan2(-hv.x, -hv.y)
 	if hg and hg.busy(): want = hg.face()      # chopping: face the tree
 	pface = lerp_angle(pface, want, minf(1.0, d * 14.0))
-	player.rotation.y = pface
+	player.basis = cam.char_basis(pface, player.scale)     # leaned toward the camera, as in a match
 	if p_anim == null or p_anim.model != player:
 		p_anim = HunterAnim.new(player)
 	p_fired += d
