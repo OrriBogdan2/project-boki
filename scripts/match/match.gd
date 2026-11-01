@@ -3715,7 +3715,9 @@ func _process(delta: float) -> void:
 		step(DT)
 	var alpha := acc / DT
 	_vprof("pre")
-	if opts.has("arch_demo"):
+	if opts.has("boki_demo"):
+		BokiDemo.frame(self)
+	elif opts.has("arch_demo"):
 		ArchDemo.frame(self)       # screenshot tooling: one part of an archetype kit, timed to the shot
 	_update_vision()
 	_vprof("vision")
