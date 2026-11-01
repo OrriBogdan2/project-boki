@@ -746,31 +746,46 @@ func _start(o: Dictionary) -> void:
 		player.teleport(b0 + Vector3(2.2, 0, 0.6))
 		spawn_weapon("sniper", 3, b0 + Vector3(1.6, 0, 1.8), "", false)
 		spawn_weapon("smg", 4, b0 + Vector3(3.0, 0, 1.6), "", false)
-	if o.get("chest_demo", false) and player and not breaks.is_empty():
-		# test (--chest-demo): a chest set down next to a breakable crate, a pot and a keg, you just
-		# below them, so the two kinds of prop can be told apart in one frame
-		var bc: Vector3 = breaks[0]["pos"]
-		for b in breaks:
-			if b["kind"] == "crate": bc = b["pos"]; break
-		var spots := []
-		for off in [Vector3(1.6, 0, 0.0), Vector3(-1.6, 0, 0.0), Vector3(0.0, 0, -1.6), Vector3(1.4, 0, 1.4), Vector3(-1.4, 0, 1.4), Vector3(0.0, 0, 1.7), Vector3(3.0, 0, 0.4), Vector3(-3.0, 0, 0.4)]:
-			var q: Vector3 = bc + off
-			if world.is_void(q.x, q.z) or world.is_block(q.x, q.z) or absf(world.ground_at(q.x, q.z) - bc.y) > 0.3:
-				continue
-			q.y = world.ground_at(q.x, q.z)
-			spots.append(q)
-		var want := ["chest", "pot", "barrel", "chest1"]
-		for k in mini(spots.size(), want.size()):
-			match String(want[k]):
-				"chest": add_chest(spots[k], 0)
-				"chest1": add_chest(spots[k], 1)
-				_: _add_break(String(want[k]), spots[k])
-		var stand: Vector3 = bc + Vector3(0.6, 0, 2.2)
-		for off in [Vector3(0.6, 0, 3.0), Vector3(0.6, 0, 2.2), Vector3(2.2, 0, 1.8), Vector3(-2.2, 0, 1.8)]:
-			var q2: Vector3 = bc + off
-			if not world.is_void(q2.x, q2.z) and not world.is_block(q2.x, q2.z) and absf(world.ground_at(q2.x, q2.z) - bc.y) < 0.3:
-				stand = q2; break
-		player.teleport(stand)
+	if o.get("chest_demo", false) and player:
+		# test (--chest-demo): on a flat open patch near where you start, a row of crate, chest, pot,
+		# rare chest and powder keg 1.7 m apart, you just below it, so the two kinds of prop can be
+		# told apart in one frame
+		var base: Vector3 = player.pos
+		var busy: Array = []      # exits, portals, pads, chests and breakables already there
+		for ed in world.exit_defs: if ed.has("pos"): busy.append(ed["pos"])
+		for ps in world.portal_spots: busy.append(ps)
+		for pd in world.pads: busy.append(pd["pos"])
+		for c0 in chests: busy.append(c0["pos"])
+		for b0 in breaks: busy.append(b0["pos"])
+		var flat := func(c: Vector3) -> bool:
+			for bp in busy:
+				if Vector2((bp as Vector3).x - c.x, (bp as Vector3).z - c.z).length() < 6.5:
+					return false
+			for dz in [-1.0, 0.0, 1.0, 2.0, 3.0]:
+				for dx in [-4.0, -2.0, 0.0, 2.0, 4.0]:
+					var q: Vector3 = c + Vector3(dx, 0, dz)
+					if world.is_void(q.x, q.z) or world.is_block(q.x, q.z) or absf(world.ground_at(q.x, q.z) - c.y) > 0.05 or world.stairs.has(world.idx(int(floor(q.x)), int(floor(q.z)))):
+						return false
+			return true
+		var found := false
+		for r in range(0, 60):
+			for k in maxi(1, r * 6):
+				var ang := TAU * float(k) / float(maxi(1, r * 6))
+				var c: Vector3 = base + Vector3(cos(ang), 0, sin(ang)) * float(r)
+				c = Vector3(floor(c.x) + 0.5, 0, floor(c.z) + 0.5)
+				if world.is_void(c.x, c.z): continue
+				c.y = world.ground_at(c.x, c.z)
+				if flat.call(c):
+					base = c; found = true; break
+			if found: break
+		var row := ["crate", "chest", "pot", "chest1", "barrel"]
+		for k in row.size():
+			var q: Vector3 = base + Vector3((k - 2) * 1.7, 0, 0)
+			match String(row[k]):
+				"chest": add_chest(q, 0)
+				"chest1": add_chest(q, 1)
+				_: _add_break(String(row[k]), q)
+		player.teleport(base + Vector3(0, 0, 2.6))
 	if player and (has_meta("stairs_demo") or o.get("chest_demo", false)):
 		# screenshots: no monsters standing over what's being shown
 		for mb in mobs.duplicate():
