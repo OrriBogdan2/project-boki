@@ -22,7 +22,7 @@ var _busy := {}                     # operations in flight, so a double click ca
 const PROJECTS := {
 	"hall": {"name": "Guild Hall", "goal": 600, "perk": "+10% gems from every expedition you make it out of."},
 	"forge": {"name": "Forge", "goal": 500, "perk": "Start every expedition with one extra tonic."},
-	"shrine": {"name": "Kin Shrine", "goal": 500, "perk": "Your partner gains 1 extra trust after every expedition."},
+	"shrine": {"name": "Boki Shrine", "goal": 500, "perk": "Your partner gains 1 extra trust after every expedition."},
 	"lighthouse": {"name": "Lighthouse", "goal": 800, "perk": "Glide 25% longer."},
 }
 const STRANDED_DAYS := 3.0          # a listing that vanished without a sale is handed back after this

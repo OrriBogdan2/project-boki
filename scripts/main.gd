@@ -351,6 +351,8 @@ func _ready() -> void:
 		set_meta("abyss_check", load("res://tools/abyss_check.gd").new())
 		get_meta("abyss_check").run(self)
 		return
+	if "--airheal-check" in args:
+		load("res://tools/airheal_check.gd").new().run(self)    # heals and abilities in the air, drinking is a risk
 	if "--train-check" in args:
 		load("res://tools/train_check.gd").new().run(self)      # riding the sky train, and being hit by it
 		return
@@ -1701,7 +1703,7 @@ func _grammar_runtime_check() -> void:
 		rare_ok = rare_ok and a1 and a2
 		acc[sp] = "%s E %s auto %s, took %.0f" % [sp, a1, a2, T.max_hp - T.hp]
 		_grt_reset(T)
-	_grt("rare kin abilities cast", rare_ok, "%s; %s; %s" % [acc["cairnback"], acc["hivara"], acc["zephyrak"]])
+	_grt("rare Boki abilities cast", rare_ok, "%s; %s; %s" % [acc["cairnback"], acc["hivara"], acc["zephyrak"]])
 	P.teleport(home); T.teleport(home + Vector3(6, 0, 0)); _ac_run(m, 3.5); _grt_reset(T)
 	# ---- 2. diminishing returns and stun immunity
 	T.hurt(0.1, P, {"stun": 1.0, "dr": true})
@@ -1799,7 +1801,7 @@ func _grammar_runtime_check() -> void:
 	_grt_out(k, home + Vector3(1.0, 0, 0))
 	var locked := not k.use_ability("k1", T.pos) and not k.use_ability("k2", T.pos)
 	P.slot_lv["kin"] = 1
-	_grt("locked kin slot never casts", locked, "")
+	_grt("locked Boki slot never casts", locked, "")
 	Settings.set_v("kin_auto", false, false)
 	k.target = T
 	k.runner.reset()
@@ -1874,7 +1876,7 @@ func _grammar_runtime_check() -> void:
 	KinMerge.cast(P)
 	m._player_throw()
 	_ac_run(m, 0.05)
-	_grt("throwing ends the merge (throw still works)", not KinMerge.active(P) and k.state in ["flying", "active"], "kin %s" % k.state)
+	_grt("throwing ends the merge (throw still works)", not KinMerge.active(P) and k.state in ["flying", "active"], "Boki %s" % k.state)
 	_ac_run(m, 1.0)
 	k = _grt_kin(m, P, "pebbit")
 	P.teleport(home); T.teleport(home + Vector3(2.0, 0, 0)); _grt_reset(T)
@@ -2770,6 +2772,10 @@ func _drop_check() -> void:
 	# ground half of the test on solid ground so it tests pings and scouting, not the glide line
 	var base_spot := m.world.free_spot_near(m.world.spawns[0], [], 1.0, 0.5, 8.0)
 	for x in [P, bot]:
+		# (a scripted glide that ends over the abyss loses that hunter: bring them back first, so the
+		# rest tests pings and scouting with everyone alive, not whatever a revive beacon does later)
+		if x.out or x.downed:
+			Life.bring_back(m, x, base_spot + (Vector3(2.0, 0, 0) if x == bot else Vector3.ZERO), 1.0, false)
 		if m.world.is_void(x.pos.x, x.pos.z) or x.pos.y < m.world.ground_at(x.pos.x, x.pos.z) - 1.0:
 			x.teleport(base_spot + (Vector3(2.0, 0, 0) if x == bot else Vector3.ZERO))
 	for mb in m.mobs: mb.queue_free()

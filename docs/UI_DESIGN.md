@@ -1,4 +1,4 @@
-# Kinfall menu design
+# Project Boki menu design
 
 How Kinfall's menus look and behave, and the helpers in `scripts/ui/ui.gd` that build them. The
 in-match HUD (`scripts/ui/hud.gd`) has its own Supervive-style layout and isn't covered here; it

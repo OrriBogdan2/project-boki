@@ -1,4 +1,4 @@
-# Kinfall classes and weapons (v1 numbers)
+# Project Boki classes and weapons (v1 numbers)
 
 These are Kinfall's own numbers, set inside the ranges Supervive's roster used (docs/SUPERVIVE_DATA.md §6). They're data files you can retune without touching code:
 

@@ -42,7 +42,7 @@ func _tree() -> SceneTree:
 	return home.get_tree() if home and home.is_inside_tree() else null
 
 func _build() -> void:
-	v = home._new_panel("Kin Burrow", 1090, true)
+	v = home._new_panel("Boki Burrow", 1090, true)
 	v.add_theme_constant_override("separation", 8)
 	var cols := UI.hbox(14)
 	v.add_child(cols)
@@ -86,7 +86,7 @@ func _build() -> void:
 	rc.add_child(search)
 	var fr := UI.hbox(6)
 	var fo := OptionButton.new()
-	var fopts: Array = [["all", "All kin"], ["special", "Any rare"], ["shimmer", "Shimmering"], ["mutated", "Any mutation"]]
+	var fopts: Array = [["all", "All Boki"], ["special", "Any rare"], ["shimmer", "Shimmering"], ["mutated", "Any mutation"]]
 	for mid in Mutations.ids(): fopts.append([mid, Mutations.name_of(mid)])
 	for el in Work.ORDER: fopts.append(["el:" + el, "Works: %s" % Work.name_of(el)])
 	for spk in Data.KIN:
@@ -97,7 +97,7 @@ func _build() -> void:
 		fo.set_item_metadata(i, fopts[i][0])
 		if String(fopts[i][0]) == filter: fo.select(i)
 	fo.item_selected.connect(func(i: int): filter = String(fo.get_item_metadata(i)); refresh())
-	fo.tooltip_text = "Show only some kin (the rest dim; page tabs count the matches)"
+	fo.tooltip_text = "Show only some Boki (the rest dim; page tabs count the matches)"
 	fo.fit_to_longest_item = false
 	fo.clip_text = true
 	fo.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -121,14 +121,14 @@ func _build() -> void:
 	var sb := UI.button("Sort this box", func():
 		KinBox.sort_page(page, sort_key)
 		_done("Sorted %s by %s" % [KinBox.page_name(page), _sort_name()]))
-	sb.tooltip_text = "Lay out this page's kin in that order"
+	sb.tooltip_text = "Lay out this page's Boki in that order"
 	sb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	sr.add_child(sb)
 	var sa := UI.button("Sort every box", func():
 		KinBox.sort_all(sort_key)
 		page = 0
 		_done("Every box sorted by %s, from the first page" % _sort_name()))
-	sa.tooltip_text = "Lay out every boxed kin in that order, filling pages from the first"
+	sa.tooltip_text = "Lay out every boxed Boki in that order, filling pages from the first"
 	sa.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	sr.add_child(sa)
 	rc.add_child(sr)
@@ -210,9 +210,9 @@ func _build_farm(fk: Array) -> void:
 			if why != "": _fail(why)
 			else:
 				Sfx.play("unlock")
-				_done("The Kin Cottages grew: room for %d kin on the farm" % KinBox.farm_cap())
+				_done("The Boki Cottages grew: room for %d Boki on the farm" % KinBox.farm_cap())
 				if home and home.has_method("_refresh_top"): home._refresh_top(), FARM_COLS * CELL.x + 6)
-		eb.tooltip_text = "A Kin Cottage expansion: +2 kin out on the farm"
+		eb.tooltip_text = "A Boki Cottage expansion: +2 Boki out on the farm"
 		eb.disabled = int(Save.d["gems"]) < cost and not Game.modding()
 		farm_box.add_child(eb)
 	else:
@@ -230,7 +230,7 @@ func _build_tabs(bk: Array) -> void:
 		var b := UI.choice(t, p == page, func(): page = pp; renaming = false; refresh())
 		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		b.custom_minimum_size.x = 0
-		b.tooltip_text = "%s: %d kin%s" % [KinBox.page_name(p), n, (", %d match" % hits) if hits > 0 else ""]
+		b.tooltip_text = "%s: %d Boki%s" % [KinBox.page_name(p), n, (", %d match" % hits) if hits > 0 else ""]
 		if hits > 0: b.add_theme_color_override("font_color", UI.GOLD)
 		elif n == 0: b.modulate = Color(1, 1, 1, 0.6)
 		var target: int = p
@@ -262,7 +262,7 @@ func _build_name() -> void:
 		name_row.add_child(t)
 		var n := KinBox.page_kin(page).size()
 		var cl := UI.label("%d/%d  ·  %d asleep" % [n, KinBox.PAGE, KinBox.boxed().size()], 12, UI.MUTED)
-		cl.tooltip_text = "Kin on this page, and in the whole burrow (room for %d)" % KinBox.capacity()
+		cl.tooltip_text = "Boki on this page, and in the whole burrow (room for %d)" % KinBox.capacity()
 		cl.mouse_filter = Control.MOUSE_FILTER_PASS
 		name_row.add_child(cl)
 		var rb := UI.button("Rename", func(): renaming = true; refresh(), 76)
@@ -299,7 +299,7 @@ func _cell(rec: Dictionary, where: String, slot: int) -> Control:
 			var l := UI.label("free", 12, Color(UI.GOOD, 0.5))
 			l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER; l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 			c.add_child(l)
-		c.tooltip_text = "Room on the farm" if where == "farm" else "Empty: drop a kin here"
+		c.tooltip_text = "Room on the farm" if where == "farm" else "Empty: drop a Boki here"
 		return c
 	var sp: Dictionary = Data.KIN[rec["species"]]
 	var stack := Control.new()
@@ -403,11 +403,11 @@ func _build_detail() -> void:
 	for ch in detail.get_children(): ch.queue_free()
 	var rec := Save.kin(sel)
 	if rec.is_empty():
-		detail.add_child(UI.section("The Kin Burrow"))
-		for t in ["Your farm has room for %d kin. Everyone else sleeps here, safe and warm: kin in the burrow don't get hungry, don't need looking after and don't wander." % KinBox.farm_cap(),
-				"Click a kin to see it. Drag it to the farm, into a box, or onto another kin to swap them. Right click sends it straight across.",
-				"New kin go to the farm when there's room. Repeats of a kind you already have out go to the burrow, unless they shimmer or carry a rare mutation.",
-				"Your partner and your first kin always stay out. Pick a sleeping kin for an expedition and it comes out to go with you."]:
+		detail.add_child(UI.section("The Boki Burrow"))
+		for t in ["Your farm has room for %d Boki. Everyone else sleeps here, safe and warm: Boki in the burrow don't get hungry, don't need looking after and don't wander." % KinBox.farm_cap(),
+				"Click a Boki to see it. Drag it to the farm, into a box, or onto another Boki to swap them. Right click sends it straight across.",
+				"New Boki go to the farm when there's room. Repeats of a kind you already have out go to the burrow, unless they shimmer or carry a rare mutation.",
+				"Your partner and your first Boki always stay out. Pick a sleeping Boki for an expedition and it comes out to go with you."]:
 			var l := UI.label(t, 13, UI.MUTED); l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 			l.custom_minimum_size.x = 270
 			detail.add_child(l)
@@ -492,7 +492,7 @@ func _build_detail() -> void:
 		return
 	var rel := UI.button("Release", func(): confirm = String(r["uid"]); refresh(), 90)
 	var rwhy := KinBox.pinned(rec)
-	if rwhy == "" and (Save.d["roster"] as Array).size() <= 1: rwhy = "It's your only kin"
+	if rwhy == "" and (Save.d["roster"] as Array).size() <= 1: rwhy = "It's your only Boki"
 	rel.disabled = rwhy != ""
 	rel.tooltip_text = rwhy if rwhy != "" else "Let it go back to the wild"
 	btns.add_child(rel)

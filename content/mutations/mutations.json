@@ -37,7 +37,7 @@
 			"perk": {"speed": 0.97},
 			"owner": {"armor": 6}},
 		{"id": "starmarked", "name": "Starmarked", "rarity": 400, "group": "", "col": "#fff2a8", "badge": "star4",
-			"desc": "Speckled with tiny stars. A lucky kin: a little better at everything.",
+			"desc": "Speckled with tiny stars. A lucky Boki: a little better at everything.",
 			"visual": {"part": "stars", "tint": "#fff2a8"},
 			"perk": {"hp": 1.03, "dmg": 1.03, "speed": 1.03, "cd": 0.97}}
 	]

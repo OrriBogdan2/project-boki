@@ -150,7 +150,7 @@ static func free_slot(also_taken := {}, from := 0) -> int:
 ## Why this kin has to stay on the farm, or "".
 static func pinned(rec: Dictionary) -> String:
 	if String(rec.get("uid", "")) == str(Save.d.get("active", "")): return "%s is your partner: partners stay on the farm" % rec.get("name", "It")
-	if rec.get("starter", false): return "%s was your first kin: it stays on the farm with you" % rec.get("name", "It")
+	if rec.get("starter", false): return "%s was your first Boki: it stays on the farm with you" % rec.get("name", "It")
 	return ""
 
 static func _box(rec: Dictionary, slot: int) -> void:
@@ -186,7 +186,7 @@ static func to_box(rec: Dictionary, slot := -1) -> String:
 		if slot >= 0: rec["box_slot"] = slot
 		return ""
 	if slot < 0: slot = free_slot()
-	if slot < 0: return "The Kin Burrow is full"
+	if slot < 0: return "The Boki Burrow is full"
 	_box(rec, slot)       # still your second, if it was: it comes out again when you set off
 	return ""
 
@@ -203,7 +203,7 @@ static func to_farm(rec: Dictionary) -> String:
 static func swap(farm_rec: Dictionary, box_rec: Dictionary) -> String:
 	if is_boxed(farm_rec) and not is_boxed(box_rec):
 		var t := farm_rec; farm_rec = box_rec; box_rec = t
-	if is_boxed(farm_rec) or not is_boxed(box_rec): return "Pick one kin on the farm and one in the box"
+	if is_boxed(farm_rec) or not is_boxed(box_rec): return "Pick one Boki on the farm and one in the box"
 	var why := pinned(farm_rec)
 	if why != "": return why
 	var s := int(box_rec["box_slot"])
@@ -230,7 +230,7 @@ static func bring_out(rec: Dictionary) -> Dictionary:
 static func release(rec: Dictionary) -> String:
 	var why := pinned(rec)
 	if why != "": return why
-	if (Save.d["roster"] as Array).size() <= 1: return "It's your only kin"
+	if (Save.d["roster"] as Array).size() <= 1: return "It's your only Boki"
 	var egg: Dictionary = Save.d.get("egg", {})
 	if not egg.is_empty() and (String(egg.get("a", "")) == String(rec["uid"]) or String(egg.get("b", "")) == String(rec["uid"])):
 		return "Its egg is still in the Nesting Nook: wait for it to hatch"
@@ -295,7 +295,7 @@ static func route_back(rec: Dictionary) -> String:
 ## Where it went, for the results / hatch screens.
 static func went_text(rec: Dictionary) -> String:
 	if is_boxed(rec):
-		return "Sent to the Kin Burrow (%s)" % page_name(page_of(rec))
+		return "Sent to the Boki Burrow (%s)" % page_name(page_of(rec))
 	return "On the farm"
 
 # ------------------------------------------------------------------ sorting

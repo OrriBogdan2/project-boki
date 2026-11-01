@@ -523,7 +523,7 @@ func open_tryon() -> void:
 		b.tooltip_text = Gear.desc_of(g, 1)
 		gf.add_child(b)
 	v.add_child(gf)
-	v.add_child(UI.section("Kin (yours, or a loaner of any kind you've met)"))
+	v.add_child(UI.section("Boki (yours, or a loaner of any kind you've met)"))
 	var kf := HFlowContainer.new(); kf.add_theme_constant_override("h_separation", 6); kf.add_theme_constant_override("v_separation", 6)
 	var sps: Array = []
 	for r in Save.d["roster"]:

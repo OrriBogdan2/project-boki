@@ -82,7 +82,7 @@ static func reply(rec: Dictionary, text: String) -> String:
 			var sp: Dictionary = Data.KIN[rec["species"]]
 			lines = ["I'm %s! A %s-type %s, level %d." % [rec["name"], sp["type"], sp["name"], int(rec["level"])]]
 		"friends":
-			lines = ["Other kin are nice, but you're my hunter.", "Can we go visit someone? I want to show off."]
+			lines = ["Other Boki are nice, but you're my hunter.", "Can we go visit someone? I want to show off."]
 		"play":
 			lines = ["Tag! You're it!", "Chase me around the pond!"] if mood != "cold" else ["Not really in the mood."]
 		"question":

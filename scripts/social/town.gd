@@ -430,7 +430,7 @@ func _build_ui() -> void:
 	var top := UI.card(Color(0.06, 0.07, 0.1, 0.78), 12, 12)
 	top.position = Vector2(16, 14)
 	var th := UI.hbox(14); top.add_child(th)
-	th.add_child(UI.title("Kinfall", 26, UI.ACCENT))
+	th.add_child(UI.title("Project Boki", 26, UI.ACCENT))
 	topbar = UI.label("", 15, UI.INK)
 	topbar.autowrap_mode = TextServer.AUTOWRAP_OFF
 	th.add_child(topbar)
@@ -550,14 +550,14 @@ func _open_visits() -> void:
 			list.add_child(UI.label("No other islands yet.", 14, UI.MUTED))
 		for r in rows.slice(0, 14):
 			var d: Dictionary = r["d"]
-			var row := _row(list, "%s  ·  %d kin  ·  %d buildings" % [d["name"], d["roster"].size(), d["buildings"].size()])
+			var row := _row(list, "%s  ·  %d Boki  ·  %d buildings" % [d["name"], d["roster"].size(), d["buildings"].size()])
 			var rid: String = r["id"]
 			row.add_child(UI.button("Visit", func(): Game.goto("home", {"visit": d, "visit_id": rid}), 100)))
 
 # ---- market
 func _open_market() -> void:
 	var v := _new_panel("Market", 600)
-	v.add_child(UI.label("Players sell seeds, crops and kin here. You have %d gems." % int(Save.d["gems"]), 14, UI.MUTED))
+	v.add_child(UI.label("Players sell seeds, crops and Boki here. You have %d gems." % int(Save.d["gems"]), 14, UI.MUTED))
 	var list := _loading(v)
 	Social.list_market(func(rows: Array):
 		if not _clear(list): return
@@ -614,10 +614,10 @@ func _open_market() -> void:
 	if not any:
 		v.add_child(UI.label("You have no seeds or crops to sell yet.", 14, UI.MUTED))
 	# kin: one at a time leaves your farm and waits at the market until someone buys it
-	v.add_child(UI.section("Sell a kin"))
+	v.add_child(UI.section("Sell a Boki"))
 	var roster: Array = Save.d["roster"]
 	if roster.size() <= 1:
-		v.add_child(UI.label("You need at least two kin to sell one.", 14, UI.MUTED))
+		v.add_child(UI.label("You need at least two Boki to sell one.", 14, UI.MUTED))
 	else:
 		for rec in roster:
 			var price := Social.kin_price(int(rec["level"]))
