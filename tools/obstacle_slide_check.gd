@@ -65,6 +65,7 @@ func _map(main: Node, label: String, opts: Dictionary) -> void:
 	for h in m.hunters:
 		if h != P: h.teleport(Vector3(-500, 50, -500)); h.out = true
 	for b in m.breaks: b["dead"] = true       # (pots and crates push you about: not what this measures)
+	m.biomes = null                            # (nor do the biomes' hazards: gusts, vents, lightning)
 	for k in m.kins.duplicate():               # (nor do wild Boki or your own: bodies push each other)
 		k.dead = true; m.kins.erase(k); k.queue_free()
 	P.kin = null; P.kin2 = null
@@ -75,12 +76,13 @@ func _map(main: Node, label: String, opts: Dictionary) -> void:
 	var n_pass := 0; var worst_pull := 0.0; var worst_pull_at := ""
 	for c in clusters:
 		var cen: Vector2 = c["c"]; var rad: float = c["r"]
-		# 1. a lap around it, hugging it
-		n_lap += 1
-		var res := _lap(c)
-		if res["done"] and int(res["run"]) <= STUCK_RUN: lap_ok += 1
+		# 1. a lap around it, hugging it (when there's open level ground all round)
+		var res := _lap(c) if bool(c["ring"]) else {}
+		if not res.is_empty(): n_lap += 1
+		if res.is_empty(): pass
+		elif res["done"] and int(res["run"]) <= STUCK_RUN: lap_ok += 1
 		elif debug: print("OBST   lap stuck at %s (cluster %s, %d tiles): run %d, swept %.0f deg" % [str(res["at"]), str(cen), (c["tiles"] as Array).size(), res["run"], res["swept"]])
-		if int(res["run"]) > worst_run:
+		if not res.is_empty() and int(res["run"]) > worst_run:
 			worst_run = int(res["run"]); worst_lap = "%s near %s" % [label, str(res["at"])]
 		# 2. touching each side, walk away
 		for t in c["tiles"]:
@@ -134,7 +136,9 @@ func _map(main: Node, label: String, opts: Dictionary) -> void:
 					var pull := (a - b).dot(to_c) - maxf(0.0, d.dot(to_c)) * P.base_speed * 1.3 * DT
 					if pull > worst_pull:
 						worst_pull = pull; worst_pull_at = "%s at %s" % [label, str(b.snapped(Vector2(0.01, 0.01)))]
-	print("OBST %s: %d tree/rock clusters checked (%d blocker tiles on the map)" % [label, clusters.size(), _count_blocks()])
+					if debug and pull > PULL_EPS:
+						print("OBST   pull %.3f at %s -> %s keys %s cluster %s r %.2f vel %s gr %s y %.2f pad %s fly %.2f knock %.2f roll %.2f ground %.2f" % [pull, str(b), str(a), str(d), str(cen), rad, str(P.vel.snapped(Vector3(0.01, 0.01, 0.01))), P.grounded, P.pos.y, str(P.pad.keys()), P.fly_t, P.knock_t, P.roll_t, w.ground_at(a.x, a.y)])
+	print("OBST %s: %d tree/rock clusters checked, %d with open ground all round for a lap (%d blocker tiles on the map)" % [label, clusters.size(), n_lap, _count_blocks()])
 	ok(clusters.size() > 0, "%s: found clusters to walk around" % label)
 	ok(lap_ok == n_lap, "%s: laps around clusters with no stuck run over %d steps: %d of %d (longest run %d steps%s)" % [label, STUCK_RUN, lap_ok, n_lap, worst_run, (", " + worst_lap) if worst_lap != "" else ""])
 	ok(esc_ok == n_esc, "%s: walking away from a cluster you're touching: %d of %d leave at once (least %.2fm in 0.1s%s)" % [label, esc_ok, n_esc, worst_esc if n_esc > 0 else 0.0, (", " + worst_esc_at) if worst_esc_at != "" else ""])
@@ -177,11 +181,13 @@ func _open_ground(p: Vector2, lv: int) -> bool:
 		if not _open(Vector2i(int(floor(p.x + o.x)), int(floor(p.y + o.y))), lv): return false
 	return true
 
-## The walk-past line stays on open level ground, away from every other blocker.
+## The walk-past line stays on open level ground, away from every other blocker and jump pad.
 func _line_clear(s: Vector2, d: Vector2, len: float, lv: int, c: Dictionary) -> bool:
 	var t := 0.0
 	while t <= len:
 		var p := s + d * t
+		for pd in w.pads:
+			if Vector2((pd["pos"] as Vector3).x, (pd["pos"] as Vector3).z).distance_to(p) < 1.5: return false
 		for o in [Vector2.ZERO, Vector2(-d.y, d.x) * 0.7, Vector2(d.y, -d.x) * 0.7]:
 			var q: Vector2 = p + o
 			var ti := Vector2i(int(floor(q.x)), int(floor(q.y)))
@@ -194,8 +200,8 @@ func _line_clear(s: Vector2, d: Vector2, len: float, lv: int, c: Dictionary) -> 
 		t += 0.25
 	return true
 
-## Connected blocker tiles (trees, rocks; not built walls), with level ground all round, nearest the
-## spawn first (at most 30 per map).
+## Connected blocker tiles (trees, rocks; not built walls), nearest the spawn first: up to 40 with
+## open level ground all round ("ring", needed for a lap) and the 30 nearest others.
 func _clusters(near: Vector3) -> Array:
 	var seen := {}
 	var out: Array = []
@@ -234,10 +240,14 @@ func _clusters(near: Vector3) -> Array:
 					if not _open(ti, lv): clear = false
 					# (ice in a frost region: you skid by design, slow to start and stop)
 					if m.ground_grip(Vector3(p.x, lv * World.LEVEL, p.y)) < 0.9: clear = false
-			if not clear: continue
-			out.append({"tiles": tiles, "set": st, "c": cen, "r": rad, "lv": lv})
+			# (no open ring round it: no lap, but the walk-away and walk-past tests still run where
+			# their own paths are clear)
+			out.append({"tiles": tiles, "set": st, "c": cen, "r": rad, "lv": lv, "ring": clear})
 	out.sort_custom(func(a, b): return (a["c"] as Vector2).distance_to(Vector2(near.x, near.z)) < (b["c"] as Vector2).distance_to(Vector2(near.x, near.z)))
-	return out.slice(0, 30)
+	# every lap-able cluster (up to 40) and the 30 nearest others
+	var ring: Array = out.filter(func(c): return bool(c["ring"]))
+	var rest: Array = out.filter(func(c): return not bool(c["ring"]))
+	return ring.slice(0, 40) + rest.slice(0, 30)
 
 ## The way straight out from the cluster's nearest tile at p (unit), or ZERO when p is inside one.
 func _away(c: Dictionary, p: Vector2) -> Vector2:
