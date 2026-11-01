@@ -44,6 +44,8 @@ var _pre_us := 0
 var _render_us := 0
 var _proc_end_us := 0      # when the last _process of the frame finished (the Tail node below)
 var _walk_us := 0
+var _compiles := 0         # shader variants in user://shader_cache so far (a new file = a compile)
+var load_compiles := 0
 var _seen := {}            # material/shader key -> true once it has been in view
 var _seen_ready := false
 var software := false
@@ -98,7 +100,12 @@ func _process(_delta: float) -> void:
 	_walk_us = 0
 	var marks := PerfLog.between(last_us, now)
 	last_us = now
+	var c0 := Time.get_ticks_usec()
+	var new_c := _cache_count()
+	_compiles += new_c
+	_walk_us += Time.get_ticks_usec() - c0
 	if m == null:
+		load_compiles += new_c
 		load_frames.append({"wall": wall, "marks": marks})
 		var cur = Game.main.current
 		if cur is Match and (cur as Match).is_processing() and (cur as Match).hud != null:
@@ -116,6 +123,7 @@ func _process(_delta: float) -> void:
 		lf["wall"] = wall
 		lf["draws"] = RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME)
 		lf["marks"] = marks
+		lf["compiles"] = new_c
 	var k := 1
 	match phase:
 		"planning", "ride": k = 6
@@ -133,7 +141,7 @@ func _process(_delta: float) -> void:
 	var t3 := Time.get_ticks_usec()
 	var rec := {"phase": phase, "t": m.time, "k": k, "sim": (t1 - t0) / 1000.0, "sim_extra": (t2 - t1) / 1000.0,
 		"vis": (t3 - t2) / 1000.0, "proc_total": (t3 - t0) / 1000.0, "wall": 0.0, "new": [], "marks": [], "t_end": t3}
-	if not headless and phase != "first":
+	if not headless:
 		var w0 := _walk_us
 		rec["new"] = _new_in_view()
 		rec["walk"] = (_walk_us - w0) / 1000.0
@@ -150,7 +158,6 @@ func _next_phase() -> void:
 	match phase:
 		"first":
 			if phase_t >= 0.25:
-				_seen_ready = false
 				_set_phase("planning" if m.skydrop and m.skydrop.planning else "ride")
 		"planning":
 			if not (m.skydrop and m.skydrop.planning): _set_phase("ride")
@@ -283,9 +290,30 @@ func _median(list: Array, key: String) -> float:
 	v.sort()
 	return v[v.size() / 2]
 
+## Shader variants the engine has compiled and cached (user://shader_cache: one file per variant).
+## Counted every frame, a jump means that frame compiled shaders. Only a cold cache shows them:
+## with a warm one a variant loads from disk instead (cheaper, still not free).
+## A file is a shader version and grows as variants of it compile, so files and sizes both count.
+var _sizes := {}
+func _cache_count() -> int:
+	var n := 0
+	var stack: Array = ["user://shader_cache"]
+	while not stack.is_empty():
+		var d: String = stack.pop_back()
+		var da := DirAccess.open(d)
+		if da == null: continue
+		for f in da.get_files():
+			var pth: String = d + "/" + f
+			var sz := FileAccess.get_size(pth) if FileAccess.file_exists(pth) else 0
+			if int(_sizes.get(pth, -1)) != sz:
+				_sizes[pth] = sz
+				n += 1
+		for sub in da.get_directories(): stack.append(d + "/" + sub)
+	return n
+
 func _line(f: Dictionary) -> String:
-	var s := "%7.0f ms  %-8s t=%5.2f  sim %.1f (+%.1f x%d)  vis %.1f  other %.1f  render %.1f  rest %.1f  draws %d" % [float(f["wall"]), f["phase"], float(f["t"]),
-		float(f["sim"]), float(f["sim_extra"]), int(f["k"]), float(f["vis"]), float(f.get("other", 0.0)), float(f.get("render", 0.0)), float(f.get("rest", 0.0)), int(f.get("draws", 0))]
+	var s := "%7.0f ms  %-8s t=%5.2f  sim %.1f (+%.1f x%d)  vis %.1f  other %.1f  render %.1f  rest %.1f  draws %d  shader compiles %d" % [float(f["wall"]), f["phase"], float(f["t"]),
+		float(f["sim"]), float(f["sim_extra"]), int(f["k"]), float(f["vis"]), float(f.get("other", 0.0)), float(f.get("render", 0.0)), float(f.get("rest", 0.0)), int(f.get("draws", 0)), int(f.get("compiles", 0))]
 	if not (f["marks"] as Array).is_empty():
 		s += "  steps: " + ", ".join((f["marks"] as Array).map(func(mk): return "%s %.0f" % [mk[1], mk[2]]))
 	return s
@@ -304,7 +332,7 @@ func _finish() -> void:
 		steps[mk[1]] = float(steps.get(mk[1], 0.0)) + float(mk[2])
 	var sk := steps.keys()
 	sk.sort_custom(func(a, b): return steps[a] > steps[b])
-	lines.append("HITCH loading screen %.0f ms over %d frames, worst %.0f ms; build steps: %s" % [load_ms, load_frames.size(), lw[-1] if lw.size() > 0 else 0.0,
+	lines.append("HITCH loading screen %.0f ms over %d frames, worst %.0f ms, %d shader compiles; build steps: %s" % [load_ms, load_frames.size(), lw[-1] if lw.size() > 0 else 0.0, load_compiles,
 		", ".join(sk.slice(0, 10).map(func(k): return "%s %.0f" % [k, steps[k]]))])
 	var meds := {}
 	for ph in ["first", "planning", "ride", "drop", "land"]:
@@ -314,7 +342,9 @@ func _finish() -> void:
 		var worst: Dictionary = fl[0]
 		for f in fl:
 			if float(f["wall"]) > float(worst["wall"]): worst = f
-		lines.append("HITCH phase %-8s %4d frames  median %6.0f ms  worst %6.0f ms" % [ph, fl.size(), meds[ph], float(worst["wall"])])
+		var nc := 0
+		for f in fl: nc += int(f.get("compiles", 0))
+		lines.append("HITCH phase %-8s %4d frames  median %6.0f ms  worst %6.0f ms  shader compiles %d" % [ph, fl.size(), meds[ph], float(worst["wall"]), nc])
 	if landed_at >= 0.0:
 		var after: Array = frames.filter(func(f): return f["phase"] == "land" and float(f["t"]) <= landed_at + 1.5)
 		var stall := 0.0
