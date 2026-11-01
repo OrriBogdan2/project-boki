@@ -1,6 +1,6 @@
 # Contributing to Project Boki
 
-Kinfall is open source and built in the open. Anyone can fork it, mod it, and send changes back.
+Project Boki is open source and built in the open. Anyone can fork it, mod it, and send changes back.
 
 ## Getting set up
 
@@ -39,4 +39,8 @@ Not sure where to start? Look for issues labelled `good first issue`, or ask in 
 
 ## License
 
-Kinfall is licensed under the [GNU GPL v3](LICENSE). By sending a pull request you agree your contribution is released under the same license. Forks are welcome, and forks you share have to stay open source under the GPL too. Third-party assets in `art/vendor/` and `fonts/` keep their own licenses (CC0 and OFL).
+Project Boki's **code and game data are licensed under the [GNU GPL v3](LICENSE)**. Forks are welcome, and forks you share have to stay open source under the GPL too.
+
+**Art, audio, music and branding are under the [Project Boki Asset License](LICENSE-ASSETS)** for versions published from Nov 1, 2026: they can be used in official builds and fan content, but a distributed fork must ship its own art, audio and name. [NOTICE](NOTICE) lists exactly which files fall under which license. Third-party assets in `art/vendor/` (CC0) and `fonts/` (OFL) keep their own licenses.
+
+**Contributor License Agreement.** Before your first pull request is merged, please agree to the [CLA](CLA.md) (add "I agree to the Project Boki CLA" to the pull request). It lets the project keep this code/asset split. Without it we can only accept code under the GPL v3, and can't accept art or audio.
