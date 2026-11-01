@@ -270,13 +270,18 @@ func _archer() -> void:
 	# Pinning Shot: pushed into a wall within 3m, pinned
 	fresh(T); K.ch_rmb = 2.0; K.cd["rmb"] = 0.0
 	if "--ak-debug" in OS.get_cmdline_user_args(): print("PIN build: T at %s P at %s vel %s" % [str(T.pos), str(P.pos), str(T.vel)])
-	var W = m.world
+	var W: World = m.world
+	# (packed arrays are copied on write: edit a copy and put it back, so the wall really stands)
+	var wk: PackedByteArray = W.kind; var wl: PackedByteArray = W.level
 	for dz in range(-3, 4):
-		var i: int = W.idx(int(T.pos.x) + 2, int(T.pos.z) + dz)
-		W.level[i] = lv + 3
+		for dx in range(0, 3):
+			var i: int = W.idx(int(T.pos.x) + dx, int(T.pos.z) + dz)
+			wk[i] = World.T_GROUND
+			wl[i] = lv if dx < 2 else lv + 3
+	W.kind = wk; W.level = wl
 	aim_at(P, T.pos)
 	hold(m, P, 0.6)
-	if "--ak-debug" in OS.get_cmdline_user_args(): print("PIN after hold: T at %s P at %s" % [str(T.pos), str(P.pos)])
+	if "--ak-debug" in OS.get_cmdline_user_args(): print("PIN after hold: T at %s P at %s ground ahead %s %s %s lvl %s" % [str(T.pos), str(P.pos), W.ground_at(T.pos.x + 1.0, T.pos.z), W.ground_at(T.pos.x + 1.6, T.pos.z), W.ground_at(T.pos.x + 2.2, T.pos.z), W.level[W.idx(int(T.pos.x) + 2, int(T.pos.z))]])
 	step(m, 0.5)
 	if "--ak-debug" in OS.get_cmdline_user_args(): print("PIN T at %s vx %.2f stun %.2f immune %.2f dr %s" % [str(T.pos), T.vel.x, T.stun_t, T.cc_immune_t, str(T.dr)])
 	ok("archer RMB hold: Pinning Shot pins", K.last_variant == "hold" and dmg(T) >= 14.0 and T.root_t > 0.0, "took %.0f root %.2f" % [dmg(T), T.root_t])

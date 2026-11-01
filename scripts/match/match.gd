@@ -2789,7 +2789,7 @@ const TONIC_CARRY := 5        # tonics you can bring into a run (two free + up t
 var _vis_tex_done := false
 func _update_vision() -> void:
 	# the dimming outside your view cone, drawn by the toon shaders
-	var looking := player != null and not player.out and not player.extracted and not player.dropping and not player.riding
+	var looking: bool = player != null and not player.out and not player.extracted and not player.dropping and not player.riding and not opts.get("arena", false)
 	if looking and not _vis_tex_done:
 		_vis_tex_done = true
 		RenderingServer.global_shader_parameter_set("vis_blocks", world.vis_texture())
@@ -5978,7 +5978,7 @@ func _tips() -> void:
 	_tip_t += get_process_delta_time()
 	if _tip_t < 1.0:
 		return
-	if player.dropping or opts.get("tutorial", false):
+	if player.dropping or opts.get("tutorial", false) or opts.get("arena", false):
 		return
 	_tip("move", "WASD to move, aim with the mouse, hold left click to shoot. Shift dashes, Space jumps. Hold Space in the air to glide.")
 	if _tip_t > 14.0:

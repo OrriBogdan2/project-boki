@@ -336,7 +336,7 @@ static func strip(a: String, open_cb: Callable) -> Control:
 	for s in SLOTS:
 		var info := slot_text(a, s)
 		var b := Button.new()
-		b.custom_minimum_size = Vector2(70, 74)
+		b.custom_minimum_size = Vector2(64, 70)
 		b.focus_mode = Control.FOCUS_NONE
 		b.tooltip_text = "%s: %s" % [String(info["name"]), String(info["line"])]
 		b.add_theme_stylebox_override("normal", _box(Color(1, 1, 1, 0.05), 10, Color(info["col"], 0.35), 1, 4, 4))

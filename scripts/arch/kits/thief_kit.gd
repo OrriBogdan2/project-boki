@@ -65,14 +65,14 @@ func _pip_node(t: Ent) -> Dictionary:
 	var ds: Array = []
 	for i in 3:
 		var d := MeshInstance3D.new()
-		d.mesh = Models.box(0.2, 0.2, 0.2)
+		d.mesh = Models.box(0.3, 0.3, 0.3)
 		d.material_override = Models.glow_mat(Color(gold, 0.95))
 		d.rotation = Vector3(0.0, 0.0, PI * 0.25)
 		d.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		n.add_child(d)
 		ds.append(d)
 	var coin := MeshInstance3D.new()
-	coin.mesh = Models.cyl(0.34, 0.34, 0.07, 18)
+	coin.mesh = Models.cyl(0.48, 0.48, 0.09, 20)
 	coin.material_override = Models.glow_mat(Color(gold.lightened(0.2), 1.0))
 	coin.rotation.x = PI * 0.5
 	coin.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -96,7 +96,7 @@ func _tick_pips(dt: float) -> void:
 			if is_instance_valid(n): n.queue_free()
 			pips.erase(key)
 			continue
-		var top := 2.35 if t is Hunter else 1.7
+		var top := 2.7 if t is Hunter else 1.9
 		n.global_position = t.position + Vector3(0, top, 0)
 		p["pop"] = maxf(0.0, float(p["pop"]) - dt * 4.0)
 		var a: float = m.time * 2.2
@@ -104,7 +104,7 @@ func _tick_pips(dt: float) -> void:
 		for i in 3:
 			var d: MeshInstance3D = ds[i]
 			var ang := a + TAU * i / 3.0
-			d.position = Vector3(cos(ang) * 0.42, 0.0, sin(ang) * 0.42)
+			d.position = Vector3(cos(ang) * 0.6, 0.0, sin(ang) * 0.6)
 			var lit := i < c
 			d.scale = Vector3.ONE * ((1.0 + float(p["pop"]) * 0.8) if lit else 0.55)
 			d.material_override.set_shader_parameter("color", Color(res_col(), 1.0) if lit else Color(1, 1, 1, 0.22))

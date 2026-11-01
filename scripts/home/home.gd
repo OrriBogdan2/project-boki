@@ -370,6 +370,7 @@ func _ready() -> void:
 			get_tree().create_timer(0.2).timeout.connect(func():
 				if which == "loadout": _open_loadout()
 				elif which == "expedition": _open_expedition()
+				elif which == "kitcard": _open_kit_card()
 				elif which == "kin": _open_kin(Save.active_kin())
 				elif which == "burrow" or which == "kinbox": _open_burrow()
 				elif which == "shop": _open_shop()

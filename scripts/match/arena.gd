@@ -102,12 +102,12 @@ func _spawn_dummies() -> void:
 		lb.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 		lb.no_depth_test = true
 		lb.fixed_size = true
-		lb.pixel_size = 0.0009
-		lb.font_size = 30
+		lb.pixel_size = 0.0008
+		lb.font_size = 22
 		lb.outline_size = 10
 		lb.modulate = Color("fff4d6")
 		lb.font = UI.big
-		lb.position = Vector3(0, 3.1, 0)
+		lb.position = Vector3(0, 3.4, 0)
 		D.add_child(lb)
 		dummies.append({"h": D, "kind": sp[0], "at": at, "label": lb, "hits": [], "total": 0.0, "last": 0.0, "quiet": 0.0})
 
@@ -355,6 +355,7 @@ func _build_ui() -> void:
 	root.theme = UI.theme()
 	layer.add_child(root)
 	hint = UI.label(KEYS_HINT, 13, Color(1, 1, 1, 0.8), UI.big)
+	hint.autowrap_mode = TextServer.AUTOWRAP_OFF
 	hint.add_theme_constant_override("outline_size", 6)
 	hint.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.7))
 	hint.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
@@ -363,6 +364,7 @@ func _build_ui() -> void:
 	hint.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	root.add_child(hint)
 	meter = UI.label("", 15, UI.INK, UI.big)
+	meter.autowrap_mode = TextServer.AUTOWRAP_OFF
 	meter.add_theme_constant_override("outline_size", 6)
 	meter.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.7))
 	meter.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)

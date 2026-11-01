@@ -11,7 +11,7 @@ const DT := 1.0 / 60.0
 
 func ok(name: String, cond: bool, info := "") -> void:
 	n += 1
-	print("ARENACHECK %-40s %s  %s" % [name, "PASS" if cond else "FAIL", info])
+	printerr("ARENACHECK %-40s %s  %s" % [name, "PASS" if cond else "FAIL", info])
 	if not cond: fails += 1
 
 func step(m: Match, secs: float) -> void:
@@ -24,7 +24,7 @@ func run(main_node: Node) -> void:
 	await _arena()
 	await _cards()
 	await _loadout()
-	print("ARENACHECK (training match next)")
+	printerr("ARENACHECK (training match next)")
 	await _training()
 	print("ARENACHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit()
@@ -125,16 +125,19 @@ func _arena() -> void:
 	ok("kit card opens in the arena", A.card_layer != null)
 	A.toggle_card()
 	ok("kit card closes", A.card_layer == null and not m.paused)
+	A.teardown()
 	m.queue_free()
+	printerr("ARENACHECK (arena match freed)")
 	await main.get_tree().process_frame
+	printerr("ARENACHECK (next frame)")
 
 func _training() -> void:
 	var m := Match.new()
 	main.add_child(m)
-	print("ARENACHECK starting the training match")
+	printerr("ARENACHECK starting the training match")
 	await m.start({"training": true, "practice": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
 	m.set_process(false)
-	print("ARENACHECK training match up")
+	printerr("ARENACHECK training match up")
 	var P: Hunter = m.player
 	ok("training gets the practice tools", m.arena != null and m.arena.layout == "practice" and m.arena.dummies.size() == 3)
 	ok("training: ult open from the start", int(P.slot_lv["ult"]) >= 1)
@@ -153,6 +156,7 @@ func _training() -> void:
 	await main.get_tree().process_frame
 
 func _cards() -> void:
+	printerr("ARENACHECK (kit cards)")
 	var host := Control.new()
 	main.add_child(host)
 	for a in Arch.ids():

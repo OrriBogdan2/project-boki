@@ -489,6 +489,8 @@ func _draw_top(sz: Vector2) -> void:
 	if m.duel:
 		_draw_duel(sz)
 		return
+	if m.opts.get("arena", false):
+		return        # the Arena draws its own key line and meter (scripts/match/arena.gd)
 	if m.opts.get("training", false):
 		var rr := Rect2(Vector2(sz.x * 0.5 - 220, 12), Vector2(440, 54))
 		_panel(rr, Color(0.06, 0.07, 0.1, 0.88), 12)

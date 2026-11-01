@@ -35,6 +35,7 @@ static func tick(A: Arena, dt: float) -> void:
 	var legacy := "--legacy-shots" in OS.get_cmdline_user_args()
 	Oomph.legacy = legacy
 	if m.hud: m.hud.guide_hidden = true
+	if m.cam and not w.begins_with("card") and w != "menu": m.cam.zoom_to = 0.58      # close enough to read the hits
 	P.hp = P.max_hp
 	match w:
 		"thief", "cashin":
@@ -68,8 +69,8 @@ static func tick(A: Arena, dt: float) -> void:
 			if _at(t, dt, 1.15):
 				P.inp["fire"] = false
 				if (P.ak as JuggernautKit).enraged_t <= 0.0: (P.ak as JuggernautKit).gain_rage(100.0)
-			if _at(t, dt, 1.75): P.ak.ch_rmb = 1.0; P.inp["sec_hold"] = false; P.ak.press_rmb()
-			at_t = 1.86
+			if _at(t, dt, 1.55): P.ak.ch_rmb = 1.0; P.inp["sec_hold"] = false; P.ak.press_rmb()
+			at_t = 1.5 if "--before-smash" in OS.get_cmdline_user_args() else 1.62
 		"ult":
 			if t < 0.05:
 				if P.arch != "juggernaut": A.set_arch("juggernaut")

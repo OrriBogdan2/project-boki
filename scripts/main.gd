@@ -382,7 +382,9 @@ func _ready() -> void:
 		_duel_check()
 		return
 	if "--arena-check" in args:
-		load("res://tools/arena_check.gd").new().run(self)      # the Arena, training's practice tools, the kit card
+		var arc = load("res://tools/arena_check.gd").new()      # the Arena, training's practice tools, the kit card
+		set_meta("arena_check", arc)        # (kept alive across its awaits)
+		arc.run(self)
 		return
 	if "--archetype-check" in args:
 		var akc = load("res://tools/archetype_check.gd").new()      # every archetype kit, controls, locks, infusion, feel
