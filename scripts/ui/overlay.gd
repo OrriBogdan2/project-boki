@@ -432,7 +432,8 @@ func open_inventory() -> void:
 		Sfx.play("unlock", null, -8.0)
 	var v := _page("inventory", "Inventory", 760)
 	UI.hold(v, INV_H)          # every tab the same size: switching tabs never resizes the panel
-	UI.head_extra(v).add_child(UI.chip("gem", str(int(Save.d["gems"])), UI.GOLD, "Gems"))
+	if inv_tab == "Items":      # one currency, and only where it matters
+		UI.head_extra(v).add_child(UI.chip("gem", str(int(Save.d["gems"])), UI.GOLD, "Gems"))
 	var icon_of := {"Items": "tonic", "Seeds": "seed", "Crops": "seed", "Furniture": "home", "Kin": "paw", "Kindex": "egg"}
 	UI.shell_tabs(v, ["Items", "Seeds", "Crops", "Furniture", "Kin", "Kindex"], inv_tab, func(t):
 		inv_tab = t; UI._page_of.erase("Inventory"); open_inventory())

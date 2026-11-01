@@ -284,10 +284,9 @@ func _cell(rec: Dictionary, where: String, slot: int) -> Control:
 	sbx.bg_color = bg
 	sbx.set_corner_radius_all(10)
 	sbx.content_margin_left = 4; sbx.content_margin_right = 4; sbx.content_margin_top = 3; sbx.content_margin_bottom = 3
-	# no rarity frames (docs/POSITIONING.md): a rare Boki's cell looks like any other, its rarity
-	# shows on the Boki itself. Only the one you've picked is outlined, in the plain selection colour.
+	# no rarity frames: a rare Boki looks rare in its own picture (docs/POSITIONING.md)
 	if picked:
-		sbx.border_color = UI.INK; sbx.set_border_width_all(2)
+		sbx.border_color = UI.ACCENT; sbx.set_border_width_all(2)
 	else:
 		sbx.border_color = Color(1, 1, 1, 0.05 if empty else 0.08); sbx.set_border_width_all(1)
 	c.add_theme_stylebox_override("panel", sbx)
@@ -312,11 +311,6 @@ func _cell(rec: Dictionary, where: String, slot: int) -> Control:
 	lv.add_theme_constant_override("outline_size", 4)
 	lv.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
 	stack.add_child(lv)
-	var bdg := Mutations.badges(rec, 13.0)
-	bdg.add_theme_constant_override("separation", 1)
-	bdg.position = Vector2(CELL.x - 8 - 14 * mini(3, bdg.get_child_count()), -1)
-	while bdg.get_child_count() > 3: bdg.get_child(bdg.get_child_count() - 1).free()
-	stack.add_child(bdg)
 	var wic := WorkView.icons(rec, 12.0, 3)       # its work elements, best first
 	wic.position = Vector2(CELL.x - 20, 14)
 	stack.add_child(wic)
@@ -431,9 +425,9 @@ func _build_detail() -> void:
 	top.add_child(tv)
 	detail.add_child(top)
 	if rec.get("shimmer", false):
-		detail.add_child(_rare_row("shimmer", "Shimmering", "its own rare colours", Color("fff0a0")))
+		detail.add_child(_rare_row("shimmer", "Shimmering", "its own rare colours", UI.INK))
 	for mid in Mutations.of(rec):
-		detail.add_child(_rare_row(mid, Mutations.name_of(mid), Mutations.perk_text(mid), Mutations.col_of(mid)))
+		detail.add_child(_rare_row(mid, Mutations.name_of(mid), Mutations.perk_text(mid), UI.INK))
 	var bd: Array = Care.bond(rec)
 	var joined := ""
 	if float(rec.get("got_t", 0.0)) > 0.0:
@@ -504,7 +498,6 @@ func _build_detail() -> void:
 
 func _rare_row(id: String, nm: String, txt: String, col: Color) -> Control:
 	var h := UI.hbox(6)
-	h.add_child(Mutations.Badge.new(id, 18.0))
 	var l := UI.label(nm, 14, col, UI.semi)
 	l.autowrap_mode = TextServer.AUTOWRAP_OFF
 	h.add_child(l)
@@ -565,7 +558,7 @@ static func demo_show(h: Node, which: String) -> void:
 				var lb := Label3D.new()
 				lb.text = "plain" if i == 0 else ("Shimmer" if i == 1 else Mutations.name_of(String(list[i][0])))
 				lb.font = UI.big; lb.font_size = 44; lb.pixel_size = 0.007; lb.outline_size = 12
-				lb.modulate = Color("fff0a0") if i == 1 else (Mutations.col_of(String(list[i][0])) if i > 1 else Color.WHITE)
+				lb.modulate = Color.WHITE
 				lb.billboard = BaseMaterial3D.BILLBOARD_ENABLED; lb.no_depth_test = true
 				lb.position = n.position + Vector3(0, 1.75, 0.3)
 				h.add_child(lb)

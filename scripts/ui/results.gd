@@ -96,10 +96,9 @@ func show_result(r: Dictionary) -> void:
 			for i in chips.size():
 				var ch := _chip(chips[i][0], chips[i][1], chips[i][2], 0.75 + i * 0.14)
 				if chips[i].size() > 3:
-					# a caught kin: its rare badges, and where it went
+					# a Boki you brought home: where it went
 					var krec: Dictionary = chips[i][3]
 					var hb: HBoxContainer = ch.get_child(0)
-					if Mutations.special(krec): hb.add_child(Mutations.badges(krec, 16.0))
 					hb.add_child(UI.label("·  " + ("Boki Burrow" if KinBox.is_boxed(krec) else "farm"), 13, Color("bfa6ff") if KinBox.is_boxed(krec) else UI.GOOD))
 				flow.add_child(ch)
 			v.add_child(flow)
@@ -143,8 +142,8 @@ func show_result(r: Dictionary) -> void:
 			match String(ln["fate"]):
 				"squad": txt = "%s was carried home by your squadmate %s." % [kk["name"], ln["holder"]]; col = UI.GOOD
 				"home": txt = "%s found its own way home. It trusts you that much." % kk["name"]; col = UI.GOOD
-				"rival": txt = "%s was taken by %s. Make them an offer at the Ransom House, or find them out there and take it back." % [kk["name"], ln["holder"]]
-				_: txt = "Nobody claimed %s. It's waiting at the Ransom House on your farm." % kk["name"]; col = Color("ffd58a")
+				"rival": txt = "%s was taken home by %s. Make them an offer at the Ransom House, or find them out there and take it back." % [kk["name"], ln["holder"]]
+				_: txt = "Nobody came for %s. It's waiting at the Ransom House on your farm." % kk["name"]; col = Color("ffd58a")
 			var l := UI.label(txt, 15, col); l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 			lv.add_child(l)
 		v.add_child(lc)

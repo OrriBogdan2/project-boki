@@ -1,392 +1,482 @@
 extends Node3D
-## Title screen: the moment before the drop. Your hunter stands at the bow of the skyship with
-## their kin, high over the islands at sunset. Other hunters are already gliding down toward the
-## light pillars below, clouds slide past the hull and the ship rolls gently under you.
+## Title screen: key art you can stand in. A squad of six hunters, one of each archetype, waits on
+## the broken edge of a floating island at dusk while an ash storm blows through the Skylands. Their
+## Boki are with them; the lead hunter's looks up at them. Far off, behind the fog and the light
+## shafts, the Wyrm turns slowly through the clouds. Embers and ash ride the wind, a glider streaks
+## past now and then, and the whole scene shifts a little with the mouse (parallax).
+##
+## Everything is built in code from the game's own models. Detail follows the quality preset
+## (Settings.q): Low drops the light shafts, most cloud banks, the far islands and most particles.
+##
+## Tooling: --title-cam=x,y,z,lx,ly,lz tries a framing, --title-t=<seconds> starts the animation
+## part-way through (screenshots of later moments), --title-check runs tools/title_check.gd.
 
 var cam: Camera3D
 var t := 0.0
-var ship: Node3D                 # the deck you stand on; the camera rides it
-var hunter_node: Node3D
-var h_anim: HunterAnim
-var kin_nodes: Array = []
-var gliders: Array = []          # {node, anim, vel, t, life}
-var clouds: Array = []           # {node, speed}
-var birds: Node3D
-var flag: Node3D
-var islands: Array = []          # [node, base y, bob phase]
-var logo: Control
 var rng := RandomNumberGenerator.new()
-
-const DECK_Y := 0.0
+var low := false                 # the Low preset: the cheapest version of the scene
+var fx_k := 1.0                  # particle amounts (Settings "fx")
+var squad: Array = []            # {node, anim, face, st}  (st: the HunterAnim state to hold)
+var boki: Array = []             # {node, base_y, kind}
+var lead: Node3D
+var lead_boki: Node3D
+var glider: Dictionary = {}      # {node, anim, t, dur, a, b}
+var glide_wait := 2.5
+var wyrm: Wyrm
+var shafts: Array = []           # [mesh, material, base intensity, phase]
+var clouds: Array = []           # {node, speed}
+var isles: Array = []            # [node, base y, phase]
+var flag: Node3D
+var embers: CPUParticles3D
+var ash: CPUParticles3D
+var mouse_k := Vector2.ZERO      # smoothed mouse position, -1..1 on both axes (parallax)
 var cam_override: Array = []     # tooling: --title-cam=x,y,z,lx,ly,lz to try framings
-const SUN := Vector3(0.42, 0.1, -0.9)
+var logo: TitleLogo
+var menu_col: VBoxContainer
+var stung := false
+
+const LANDMARKS := preload("res://scripts/match/landmarks.gd")
+const SUN := Vector3(0.78, 0.17, -0.6)            # toward the low sun: behind the squad, off to the right
+const ISLE := Vector3(2.4, 0.0, -6.8)              # the island the squad stands on
+const ISLE_R := 7.4
+const CAM_AT := Vector3(-0.9, 1.9, -0.9)
+const CAM_LOOK := Vector3(1.25, 1.95, -9.4)
+const WIND := Vector3(2.2, 0.15, 0.35)            # the storm blows left to right
+## Each archetype's weapon on the title (the arch_gallery set).
+const DISCORD := "https://discord.gg/nbeBaU7xt"        # the playtest server (never expires)
+const WEAPONS := {"thief": "twin_blades", "archer": "sniper", "mage": "longsword", "gunslinger": "rifle", "juggernaut": "greatsword", "bulwark": "minigun"}
 
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	Sfx.play_music("title")
-	Sfx.play_ambience("home")
+	Sfx.play_ambience("match")          # the wind
 	rng.seed = 2026
-	var env := WorldEnvironment.new()
-	env.environment = Look.environment({"top": Color("1a1c4a"), "mid": Color("6a4f9e"), "horizon": Color("ffae6e"), "below": Color("4a3a72"),
-		"sun_dir": SUN.normalized(), "sun_col": Color("ffd2a0"), "ambient": Color("d0bce6"), "ambient_energy": 0.6,
-		"fog": Color("9a72b0"), "fog_density": 0.0011, "fog_height": -50.0, "fog_height_density": 0.015, "stars": 0.6, "saturation": 1.0, "exposure": 1.0})
-	add_child(env)
-	# the low sun ahead and to the right: rims everything in gold
-	var sun := Look.lights(self, Color("ffe6cc"), 1.05, Vector3(-30, 150, 0), 70.0)
-	sun.shadow_opacity = 0.55
-	var fill: DirectionalLight3D = get_node("Fill")
-	fill.light_energy = 0.6
-	fill.light_color = Color("b9a8ff")
-	# the sea of clouds, far below
-	var sea := MeshInstance3D.new()
-	var pm := PlaneMesh.new(); pm.size = Vector2(6000, 6000)
-	sea.mesh = pm
-	var cm := ShaderMaterial.new(); cm.shader = load("res://shaders/clouds.gdshader")
-	cm.set_shader_parameter("deep", Color("2e2858")); cm.set_shader_parameter("light", Color("b08ad8"))
-	cm.set_shader_parameter("glow", Color("ffb070")); cm.set_shader_parameter("glow_amount", 0.85)
-	cm.set_shader_parameter("sun_xz", Vector2(SUN.x, SUN.z)); cm.set_shader_parameter("scale", 0.012)
-	sea.material_override = cm
-	sea.position = Vector3(0, -78.0, 0)
-	add_child(sea)
-	_archipelago()
-	_build_ship()
-	_crew()
-	_build_clouds()
-	_build_shafts()
-	_build_birds()
-	for i in 4:
-		_spawn_glider(i * 2.6)
-	_build_ui()
+	low = Settings.quality() == "low"
+	fx_k = float(Settings.q("fx"))
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--title-cam="):
 			cam_override = Array(a.substr(12).split(",")).map(func(x): return float(x))
+		elif a.begins_with("--title-t="):
+			t = float(a.substr(10))
+	_sky()
+	_hero_isle()
+	_squad()
+	_skylands()
+	if not low:
+		_shafts()
+	_cloud_banks()
+	_wyrm()
+	_weather()
+	_glider()
+	cam = Camera3D.new(); cam.fov = 36.0; cam.far = 1600.0
+	add_child(cam)
+	cam.make_current()
+	_place_cam(0.0)
+	_build_ui()
 
-# ---------------------------------------------------------------- the skyship
-## Half the deck's width at a point along it: a pointed bow ahead (-z), a squared stern behind.
-static func _half_w(z: float) -> float:
-	const BOW := -7.0
-	const MID := -1.6
-	if z < MID:
-		return 2.35 * pow(clampf((z - BOW) / (MID - BOW), 0.0, 1.0), 0.62)
-	return 2.35 - maxf(0.0, z - 2.6) * 0.3
+# ---------------------------------------------------------------- light, sky and haze
+func _sky() -> void:
+	var env := WorldEnvironment.new()
+	# dusk through an ash storm: a bruised sky with an ember-orange band low down, a dusty mauve haze
+	# that swallows everything far away (saturation down; colour stays in the embers and the Boki)
+	env.environment = Look.environment({"top": Color("16171f"), "mid": Color("3c3540"), "horizon": Color("c9714a"), "below": Color("231e26"),
+		"sun_dir": SUN.normalized(), "sun_col": Color("ffb27a"), "ambient": Color("a6a0b4"), "ambient_energy": 0.55,
+		"fog": Color("4f4046"), "fog_density": 0.0075 if not low else 0.0095, "fog_height": -14.0, "fog_height_density": 0.05,
+		"stars": 0.08, "saturation": 0.86, "contrast": 1.1, "exposure": 1.0})
+	var e := env.environment
+	e.fog_sun_scatter = 0.08
+	add_child(env)
+	# the low sun behind them rims the squad; a cool fill from the front keeps faces readable
+	var sun := Look.lights(self, Color("ffc79a"), 1.15, Vector3(-20, 128, 0), 40.0)
+	sun.shadow_opacity = 0.6
+	var fill: DirectionalLight3D = get_node("Fill")
+	fill.light_energy = 0.42
+	fill.light_color = Color("8f9cc8")
+	# the sea of cloud far below, dull and storm-dark
+	var sea := MeshInstance3D.new()
+	var pm := PlaneMesh.new(); pm.size = Vector2(3000, 3000)
+	sea.mesh = pm
+	var cm := ShaderMaterial.new(); cm.shader = load("res://shaders/clouds.gdshader")
+	cm.set_shader_parameter("deep", Color("1c1820")); cm.set_shader_parameter("light", Color("5a4a50"))
+	cm.set_shader_parameter("glow", Color("e08050")); cm.set_shader_parameter("glow_amount", 0.5)
+	cm.set_shader_parameter("sun_xz", Vector2(SUN.x, SUN.z)); cm.set_shader_parameter("scale", 0.01)
+	sea.material_override = cm
+	sea.position = Vector3(0, -70.0, 0)
+	add_child(sea)
 
-static func _outline() -> Array:
-	var right: Array = []
-	var n := 26
-	for i in n + 1:
-		var z := lerpf(-7.0, 4.6, float(i) / n)
-		right.append(Vector2(_half_w(z), z))
-	var out: Array = right.duplicate()
-	for i in range(n, 0, -1):
-		var p: Vector2 = right[i]
-		out.append(Vector2(-p.x, p.y))
-	# the bow tip appears once; the list runs from the tip down the right side and back up the left
-	return out
+# ---------------------------------------------------------------- the island they stand on
+func _hero_isle() -> void:
+	var rr := RandomNumberGenerator.new(); rr.seed = 7
+	var isl := Models.float_island(rr, ISLE_R, 18.0, Color("5b6346"), Color("6a5a4e"), Color("231e28"))
+	isl.position = ISLE
+	add_child(isl)
+	# windswept grass, dull olive, thinner on Low
+	_grass(isl, rr, int((900 if not low else 320) * float(Settings.q("grass"))), ISLE_R * 0.86)
+	# rocks along the broken edge, and a fallen pillar of the old world
+	var rocks := [[Vector3(-3.6, 0, -4.0), 1.5], [Vector3(4.6, 0, -2.4), 1.2], [Vector3(-5.2, 0, 0.6), 1.0], [Vector3(1.3, -0.15, -5.1), 0.85],
+		[Vector3(5.6, 0, 1.8), 1.4], [Vector3(-1.2, 0, 4.6), 0.8], [Vector3(3.4, 0, 4.4), 1.1]]
+	for i in rocks.size():
+		var rk := Flora.node("rock", "storm", i % 3, float(rocks[i][1]))
+		rk.position = ISLE + (rocks[i][0] as Vector3)
+		rk.rotation.y = rr.randf() * TAU
+		add_child(rk)
+	var pil := Flora.node("pillar", "storm", 1, 1.25)
+	pil.position = ISLE + Vector3(-4.6, -0.2, -2.0)
+	pil.rotation = Vector3(0.0, 0.6, 0.2)
+	add_child(pil)
+	var pil2 := Flora.node("pillar", "storm", 2, 1.0)
+	pil2.position = ISLE + Vector3(5.2, -0.3, -1.0)
+	pil2.rotation = Vector3(1.35, 1.9, 0.0)          # fallen over
+	add_child(pil2)
+	# a torn banner on a pole, whipping in the wind
+	var pole := Models.part(self, Models.cyl(0.05, 0.07, 3.6, 8), Models.toon(Color("3e3330")), Vector3(5.6, 1.8, -11.6))
+	pole.rotation.z = 0.08
+	flag = Node3D.new(); flag.position = Vector3(5.68, 3.45, -11.6); add_child(flag)
+	var cloth := Models.toon(Color("8a3b2e"))
+	for k in 4:
+		var seg := Models.part(flag, Models.box(0.42, 0.95 - k * 0.12, 0.03), cloth, Vector3(0.21 + k * 0.4, -0.45 + k * 0.03, 0))
+		seg.name = "Seg%d" % k
 
-func _build_ship() -> void:
-	ship = Node3D.new(); ship.name = "Ship"
-	add_child(ship)
-	var wood := Models.toon(Color("7a5236")); var dark := Models.toon(Color("4e3424")); var deck_c := Color("8a6a4e")
-	var stripe := Models.toon(Color("d9604a")); var brass := Models.toon(Color("e0b84a"), true, 0.3)
-	var ol := _outline()
-	var n := ol.size()
-	# deck: a fan from the middle, with plank seams painted in as stripes of vertex colour
-	var st := SurfaceTool.new(); st.begin(Mesh.PRIMITIVE_TRIANGLES)
-	var cen := Vector3(0, DECK_Y, -1.0)
-	for i in n:
-		var a2: Vector2 = ol[i]; var b2: Vector2 = ol[(i + 1) % n]
-		for v in [cen, Vector3(a2.x, DECK_Y, a2.y), Vector3(b2.x, DECK_Y, b2.y)]:
-			st.set_normal(Vector3.UP)
-			st.set_color(deck_c)
-			st.add_vertex(v)
-	var deck := MeshInstance3D.new(); deck.mesh = st.commit()
-	deck.material_override = Models.toon(Color("8c7764"), false)
-	ship.add_child(deck)
-	for k in 13:
-		var x := -2.2 + k * 0.36
-		var z0 := -7.0
-		while z0 < 4.6 and _half_w(z0) < absf(x) + 0.05:
-			z0 += 0.05
-		if z0 >= 4.5: continue
-		var len := 4.55 - z0
-		Models.part(ship, Models.box(0.025, 0.01, len), Models.toon(Color("7a5236"), false), Vector3(x, DECK_Y + 0.006, z0 + len * 0.5))
-	# hull: smooth sides that bulge out under the rail and sweep down and in to a keel, with a red
-	# stripe under the rail. Normals follow the curve, so the hull shades as one polished shape.
-	var prof := [[1.0, 0.0], [1.025, -0.12], [1.04, -0.3], [1.03, -0.5], [0.98, -0.8], [0.9, -1.15], [0.78, -1.5], [0.62, -1.85], [0.44, -2.15], [0.24, -2.38], [0.06, -2.48]]
-	var band_cols := [Color("d9604a"), Color("7a4e34"), Color("6e4a32"), Color("62412c"), Color("5a3b28"), Color("543725"), Color("4e3322"), Color("48301f"), Color("422c1d"), Color("3c281b")]
-	var grid: Array = []
-	for r in prof.size():
-		var row: Array = []
-		var sc: float = prof[r][0]
-		for i in n:
-			var p: Vector2 = ol[i]
-			row.append(Vector3(p.x * sc, DECK_Y + float(prof[r][1]), p.y * sc + (1.0 - sc) * 0.9))
-		grid.append(row)
-	var gn: Array = []
-	for r in prof.size():
-		var row: Array = []
-		for i in n:
-			var a: Vector3 = grid[r][(i + 1) % n] - grid[r][(i - 1 + n) % n]
-			var d: Vector3 = grid[mini(r + 1, prof.size() - 1)][i] - grid[maxi(r - 1, 0)][i]
-			var nrm := a.cross(d).normalized()
-			var c0: Vector3 = grid[r][i]
-			if nrm.dot(Vector3(c0.x, 0.0, c0.z + 1.0)) < 0.0: nrm = -nrm
-			row.append(nrm)
-		gn.append(row)
-	var hs := SurfaceTool.new(); hs.begin(Mesh.PRIMITIVE_TRIANGLES)
-	for r in prof.size() - 1:
-		for i in n:
-			var j := (i + 1) % n
-			var quad := [[r, i], [r, j], [r + 1, j], [r + 1, i]]
-			var pa: Vector3 = grid[r][i]; var pb: Vector3 = grid[r][j]; var pc: Vector3 = grid[r + 1][j]
-			var flip: bool = (pb - pa).cross(pc - pa).dot(gn[r][i]) > 0.0
-			var order := [0, 2, 1, 0, 3, 2] if flip else [0, 1, 2, 0, 2, 3]
-			for k in order:
-				var q: Array = quad[k]
-				hs.set_color(band_cols[r])
-				hs.set_normal(gn[q[0]][q[1]])
-				hs.add_vertex(grid[q[0]][q[1]])
-	var hull := MeshInstance3D.new(); hull.mesh = hs.commit()
-	var hm := Models.vtoon_outlined()
-	hm.set_shader_parameter("albedo", Color(0.82, 0.8, 0.82))
-	hm.set_shader_parameter("gloss", 0.2)
-	hull.material_override = hm
-	ship.add_child(hull)
-	# a brass trim line along the top of the stripe
-	for i in n:
-		var p0: Vector2 = ol[i] * 1.028; var p1: Vector2 = ol[(i + 1) % n] * 1.028
-		var a := Vector3(p0.x, DECK_Y - 0.125, p0.y); var b := Vector3(p1.x, DECK_Y - 0.125, p1.y)
-		if a.distance_to(b) < 0.01: continue
-		var tr := Models.part(ship, Models.box(0.05, 0.05, a.distance_to(b) + 0.04), brass, (a + b) * 0.5)
-		tr.look_at_from_position((a + b) * 0.5, b, Vector3.UP)
-	# gunwale: posts and a rail all the way round
-	for i in n:
-		var p0: Vector2 = ol[i] * 0.97; var p1: Vector2 = ol[(i + 1) % n] * 0.97
-		var a := Vector3(p0.x, DECK_Y + 0.7, p0.y); var b := Vector3(p1.x, DECK_Y + 0.7, p1.y)
-		if a.distance_to(b) < 0.01: continue
-		var r := Models.part(ship, Models.box(0.1, 0.08, a.distance_to(b) + 0.06), wood, (a + b) * 0.5)
-		r.look_at_from_position((a + b) * 0.5, b, Vector3.UP)
-		if i % 2 == 0:
-			Models.part(ship, Models.box(0.08, 0.7, 0.08), dark, Vector3(p0.x, DECK_Y + 0.35, p0.y))
-	# the bowsprit, with a pennant at its tip
-	var spr := Models.part(ship, Models.cyl(0.05, 0.1, 3.4, 8), wood, Vector3(0, DECK_Y + 0.9, -8.2), Vector3.ONE, Vector3(-PI / 2 + 0.35, 0, 0))
-	spr.name = "Bowsprit"
-	Models.part(ship, Models.sphere(0.1, 8), brass, Vector3(0, DECK_Y + 1.45, -9.75))
-	flag = Node3D.new(); flag.position = Vector3(0, DECK_Y + 1.5, -9.8); ship.add_child(flag)
-	var pen := Models.part(flag, Models.cyl(0.0, 0.22, 1.1, 3), Models.toon(UI.ACCENT), Vector3(0, 0, 0.55), Vector3(1.0, 1.0, 0.18), Vector3(PI / 2, 0, PI / 2))
-	pen.name = "Pennant"
-	# a lantern on a post by the bow, glowing warm
-	Models.part(ship, Models.cyl(0.05, 0.06, 1.6, 8), dark, Vector3(1.3, DECK_Y + 0.8, -3.2))
-	Models.part(ship, Models.box(0.5, 0.05, 0.05), dark, Vector3(1.15, DECK_Y + 1.58, -3.2))
-	Models.part(ship, Models.box(0.2, 0.26, 0.2), Models.toon(Color("ffd890"), true, 0.7), Vector3(0.95, DECK_Y + 1.38, -3.2))
-	var lamp := OmniLight3D.new(); lamp.light_color = Color("ffc070"); lamp.light_energy = 0.8; lamp.omni_range = 4.0
-	lamp.position = Vector3(0.95, DECK_Y + 1.3, -3.2); ship.add_child(lamp)
-	# cargo: crates, a barrel, a coil of rope, a ship's bell
-	var crate := Models.breakable("crate"); crate.position = Vector3(1.55, DECK_Y, -1.2); crate.rotation.y = 0.3; ship.add_child(crate)
-	var crate2 := Models.breakable("crate"); crate2.position = Vector3(1.5, DECK_Y + 0.6, -1.15); crate2.rotation.y = -0.2; crate2.scale = Vector3.ONE * 0.8; ship.add_child(crate2)
-	var crate3 := Models.breakable("crate"); crate3.position = Vector3(1.0, DECK_Y, -0.3); crate3.rotation.y = 0.9; ship.add_child(crate3)
-	var coil := TorusMesh.new(); coil.inner_radius = 0.16; coil.outer_radius = 0.32
-	Models.part(ship, coil, Models.toon(Color("e8d8b0")), Vector3(1.4, DECK_Y + 0.06, -1.6), Vector3(1.0, 0.6, 1.0))
-	Models.part(ship, coil, Models.toon(Color("e8d8b0")), Vector3(1.4, DECK_Y + 0.14, -1.6), Vector3(0.8, 0.6, 0.8))
-	# the balloon overhead, and the ropes that hold it
-	var cloth := Models.toon(Color("f2e6cf"))
-	Models.part(ship, Models.sphere(4.6, 26), cloth, Vector3(0, DECK_Y + 9.2, 0.6), Vector3(1.0, 0.72, 1.75))
-	for i in 3:
-		Models.part(ship, Models.cyl(3.7 * (1.0 - absf(i - 1) * 0.16), 3.7 * (1.0 - absf(i - 1) * 0.16), 0.5, 26), stripe, Vector3(0, DECK_Y + 9.2, -3.4 + i * 4.0), Vector3(1.0, 1.0, 0.74), Vector3(PI / 2, 0, 0))
-	var rope := Models.toon(Color("5a4636"), false)
-	for sx in [-1.0, 1.0]:
-		for z in ([-4.6, -2.2] if sx < 0.0 else [-4.6, -2.2, 0.4, 2.8]):
-			var a := Vector3(_half_w(z) * 0.97 * sx, DECK_Y + 0.7, z)
-			var b := Vector3(2.6 * sx, DECK_Y + 6.4, z * 0.8 + 0.4)
-			var rr := Models.part(ship, Models.cyl(0.02, 0.02, a.distance_to(b), 4), rope, (a + b) * 0.5)
-			rr.look_at_from_position((a + b) * 0.5, b, Vector3.FORWARD if absf((b - a).normalized().y) > 0.99 else Vector3.UP)
-			rr.rotate_object_local(Vector3.RIGHT, PI / 2)
-	# the camera rides along, a few steps behind you on the deck
-	cam = Camera3D.new(); cam.fov = 50.0; cam.far = 4000.0
-	ship.add_child(cam)
+func _grass(isl: MeshInstance3D, rr: RandomNumberGenerator, n: int, reach: float) -> void:
+	var rim: Array = isl.get_meta("rim")
+	var rmin := 1e9
+	for p in rim: rmin = minf(rmin, (p as Vector2).length())
+	var mm := MultiMesh.new(); mm.transform_format = MultiMesh.TRANSFORM_3D; mm.use_colors = true; mm.mesh = Models.grass_mesh(false)
+	mm.instance_count = n
+	for k in n:
+		var a := rr.randf() * TAU
+		var d := sqrt(rr.randf()) * minf(rmin * 0.95, reach)
+		var at := ISLE + Vector3(cos(a) * d, 0.0, sin(a) * d)
+		if Vector2(at.x - CAM_AT.x, at.z - CAM_AT.z).length() < 3.2:
+			continue          # nothing right in front of the lens
+		var sc := rr.randf_range(0.8, 1.5)
+		# blades lean downwind
+		var b := Basis(Vector3.UP, rr.randf() * TAU).scaled(Vector3.ONE * sc)
+		b = Basis(Vector3.FORWARD, -0.25) * b
+		mm.set_instance_transform(k, Transform3D(b, at))
+		mm.set_instance_color(k, Color("6e7448").lerp(Color("44482e"), rr.randf()))
+	var mi := MultiMeshInstance3D.new(); mi.multimesh = mm
+	mi.material_override = Models.grass_material(0.35)
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(mi)
 
-## You at the bow, your kin around you.
-func _crew() -> void:
-	hunter_node = Models.hunter(Data.class_of_save(), Data.TEAM_COLORS[0], Data.weapon_for(Data.class_of_save(), String(Save.d.get("weapon", ""))), "", Save.d.get("look", {}), Arch.of_save())
-	hunter_node.position = Vector3(0.15, DECK_Y, -4.7)
-	hunter_node.rotation.y = -0.35
-	hunter_node.scale *= 1.1
-	(hunter_node.get_node("TeamRing") as Node3D).visible = false
-	ship.add_child(hunter_node)
-	h_anim = HunterAnim.new(hunter_node)
+# ---------------------------------------------------------------- the squad and their Boki
+## The six archetypes, the player's own in front. Slots: [pos on the island, facing, pose].
+func _squad() -> void:
+	var my_arch := Arch.of_save()         # your archetype (main: Arch), whatever your look says
+	var order: Array = [my_arch]
+	for a in ["juggernaut", "archer", "mage", "bulwark", "thief", "gunslinger"]:
+		if not order.has(a): order.append(a)
+	var to_cam := func(p: Vector3, off := 0.0) -> float:
+		var d := CAM_AT - p
+		return atan2(-d.x, -d.z) + off
+	var out_yaw := atan2(-SUN.x, -SUN.z)        # looking out toward the light (and the Wyrm)
+	# [x, z, yaw, pose, y]
+	# laid out in screen terms: you and your Boki in front with open sky behind you, the others
+	# spread to either side and back toward the edge, so nobody hides anybody
+	# (placed from where they land on screen, about a fifth of the screen apart, nearer ones lower:
+	# you front and centre, a light one at mid depth, the big heavies further back so they don't
+	# wall the shot off, the archer up on a rock at the back)
+	var slots: Array = [
+		[0.9, -7.25, 0.0, "lead", 0.0],                                       # turned to its Boki (set in _boki)
+		[5.0, -12.2, out_yaw + 0.3, "watch", 0.0],                            # back to us, facing the storm
+		[3.7, -11.9, out_yaw - 0.15, "point", 0.5],                           # up on a rock, pointing at it
+		[0.54, -11.68, out_yaw - 0.6, "watch", 0.0],
+		[6.2, -11.0, to_cam.call(Vector3(6.2, 0, -11.0), -0.55), "ready", 0.0],
+		[2.51, -8.91, to_cam.call(Vector3(2.51, 0, -8.91), 0.8), "crouch", 0.0],
+	]
+	var looks: Array = [
+		{"race": 3, "hair": 0, "hair_v": 2, "hair_col": 0, "skin": 2, "gender": 0, "face": 4, "body": 1, "outfit": 1},
+		{"race": 0, "hair": 1, "hair_v": 2, "hair_col": 5, "skin": 1, "gender": 1, "face": 0, "body": 2, "outfit": 2},
+		{"race": 5, "hair": 2, "hair_v": 2, "hair_col": 3, "skin": 3, "gender": 0, "face": 6, "body": 1, "outfit": 3},
+		{"race": 1, "hair": 3, "hair_v": 2, "hair_col": 6, "skin": 2, "gender": 1, "face": 8, "body": 1, "outfit": 4},
+		{"race": 2, "hair": 0, "hair_v": 2, "hair_col": 10, "skin": 0, "gender": 0, "face": 7, "body": 2, "outfit": 7},
+		{"race": 4, "hair": 1, "hair_v": 2, "hair_col": 7, "skin": 4, "gender": 1, "face": 3, "body": 0, "outfit": 6},
+	]
+	for i in order.size():
+		var arch: String = order[i]
+		var cls := String(HeroKit.ARCHES[arch]["cls"])
+		var lk: Dictionary = looks[i]
+		var weapon := String(WEAPONS[arch])
+		if i == 0 and Save.d.has("look"):
+			lk = Save.d["look"]          # you lead the squad, as you look
+			weapon = Data.weapon_for(Data.class_of_save(), String(Save.d.get("weapon", "")))
+			cls = Data.class_of_save()
+		var h := Models.hunter(cls, Data.TEAM_COLORS[0], weapon, "", lk, arch)
+		var sl: Array = slots[i]
+		var ring := h.get_node_or_null("TeamRing") as Node3D
+		if ring: ring.visible = false
+		h.position = ISLE + Vector3(float(sl[0]) - ISLE.x, float(sl[4]), float(sl[1]) - ISLE.z)
+		h.rotation.y = float(sl[2])
+		add_child(h)
+		var st := {"face": h.rotation.y, "fired": 99.0, "grounded": true}
+		match String(sl[3]):
+			"point": st["emote"] = "here"; st["emote_t"] = 1.0
+			"crouch": st["crouch"] = 1.0
+		squad.append({"node": h, "anim": HunterAnim.new(h), "st": st})
+		if i == 0: lead = h
+	_boki()
+
+## Each hunter's Boki: the lead's own (your partner, if you have one) at their feet looking up at
+## them, the rest close to their hunters.
+func _boki() -> void:
 	var recs: Array = []
 	var ak := Save.active_kin()
-	if not ak.is_empty(): recs.append(ak)
-	for r in KinBox.farm():
-		if recs.size() >= 3: break
-		if not recs.has(r): recs.append(r)
-	var fallback := ["cindle", "puddlet", "zapple"]
-	while recs.size() < 3:
-		recs.append({"species": fallback[recs.size()], "level": 5})
-	# the first rides your shoulder, one perches on the rail beside you, one bounces on a crate
-	var spots := [null, Vector3(-0.85, DECK_Y + 0.74, -5.2), Vector3(0.95, DECK_Y, -3.7)]
-	for i in recs.size():
-		var k := Models.kin(String(recs[i]["species"]), recs[i])
+	recs.append(ak if not ak.is_empty() else {"species": "cindle", "level": 5})
+	for sp in ["pebbit", "hivara", "zephyrak", "puddlet", "burrlet"]:
+		recs.append({"species": sp, "level": 5})
+	for i in mini(recs.size(), squad.size()):
+		var spid := String(recs[i]["species"])
+		if not Data.KIN.has(spid): continue
+		var k := Models.kin(spid, recs[i])
+		var h: Node3D = squad[i]["node"]
+		var at := h.position
+		var kind := String(KinPuppet.BODY.get(spid, "blob"))
+		match i:
+			0:
+				# beside its hunter, seen side-on, turned to them with its nose up: it's looking at
+				# them, and they've turned to look down at it
+				var cr := Vector3(CAM_LOOK.z - CAM_AT.z, 0, CAM_AT.x - CAM_LOOK.x).normalized() * -1.0
+				var tc := Vector3(CAM_AT.x - at.x, 0, CAM_AT.z - at.z).normalized()
+				at += cr * 0.85 - tc * 0.25
+				# three-quarters to us, half turned to its hunter: its face reads, and it's plainly
+				# looking at them (side-on, a long low Boki seen from above read as lying down)
+				var mid := Vector3(h.position.x, at.y, h.position.z).lerp(Vector3(CAM_AT.x, at.y, CAM_AT.z), 0.55)
+				k.look_at_from_position(at, mid, Vector3.UP)
+				var to_k := at - h.position
+				h.rotation.y = atan2(-to_k.x, -to_k.z) - 0.35
+				squad[0]["st"]["face"] = h.rotation.y
+				lead_boki = k
+			2:
+				at += Vector3(0.8, 1.7, 0.4)       # the flyer hovers by the one on the rock
+				k.rotation.y = h.rotation.y
+			3:
+				at += Vector3(-0.7, 1.3, 0.6)      # the sky serpent coils in the air beside the mage
+				k.rotation.y = h.rotation.y + 0.8
+			_:
+				var side := Vector3(cos(h.rotation.y), 0, -sin(h.rotation.y))
+				at += side * (0.75 if i % 2 == 0 else -0.75) + Vector3(0, 0, 0.25)
+				k.rotation.y = h.rotation.y + (0.4 if i % 2 == 0 else -0.4)
+		k.position = at
 		if i == 0:
-			var sh: Node3D = hunter_node.get_node("Rig/Torso/Shoulder")
-			sh.add_child(k)
-			k.scale = Vector3.ONE * 0.62
-			k.rotation.y = 0.2
-		else:
-			k.position = spots[i]
-			k.rotation.y = 0.4 if i == 1 else -0.9
-			k.scale *= 0.95
-			ship.add_child(k)
+			k.scale *= 1.1
+		add_child(k)
 		var aura: CPUParticles3D = k.get_node_or_null("Aura")
-		if aura: aura.emitting = true
-		kin_nodes.append(k)
+		if aura: aura.emitting = not low
+		boki.append({"node": k, "base_y": at.y, "kind": kind})
 
-# ---------------------------------------------------------------- the islands below
-func _archipelago() -> void:
-	var spots := [[Vector3(72, -34, -78), 14.0, "heart"], [Vector3(22, -34, -50), 6.0, ""], [Vector3(-44, -32, -56), 7.5, "beacon"],
-		[Vector3(36, -27, -108), 9.0, "beacon"], [Vector3(-36, -40, -124), 10.0, ""], [Vector3(6, -44, -160), 13.0, "beacon"],
-		[Vector3(64, -36, -168), 11.0, ""], [Vector3(110, -40, -120), 12.0, "beacon"], [Vector3(46, -26, -44), 5.0, ""], [Vector3(-72, -30, -140), 8.5, "beacon"], [Vector3(-30, -38, -76), 8.0, ""],
-		[Vector3(-24, -46, -34), 4.5, ""], [Vector3(14, -22, -30), 3.2, ""], [Vector3(-90, -38, -210), 14.0, ""], [Vector3(90, -46, -240), 16.0, ""]]
-	var beacon_cols := [Color("8ae8ff"), Color("c9a0ff"), Color("ffd25a"), Color("8ae8ff")]
-	var bi := 0
+# ---------------------------------------------------------------- the broken Skylands beyond
+func _skylands() -> void:
+	var rr := RandomNumberGenerator.new(); rr.seed = 31
+	# [position, radius, ruin]: near ones still green under the ash, far ones only silhouettes
+	var spots: Array = [[Vector3(-26, -9, -46), 7.0, "arch"], [Vector3(30, -14, -58), 9.0, ""], [Vector3(-8, -20, -80), 6.0, ""],
+		[Vector3(58, -6, -96), 12.0, "statue"], [Vector3(-60, -4, -110), 14.0, ""], [Vector3(14, -26, -130), 8.0, ""],
+		[Vector3(-30, -16, -170), 16.0, "spire"], [Vector3(96, -18, -190), 18.0, ""], [Vector3(40, -30, -240), 22.0, ""],
+		[Vector3(-110, -24, -230), 20.0, ""], [Vector3(150, -10, -150), 12.0, ""]]
+	if low:
+		spots = spots.slice(0, 6)
 	for sp in spots:
 		var r: float = sp[1]
-		var isl := Scenery.island(rng, r, true, r > 5.0 and rng.randf() < 0.6)
-		isl.position = sp[0]
-		isl.rotation.y = rng.randf() * TAU
-		add_child(isl)
-		islands.append([isl, float((sp[0] as Vector3).y), rng.randf() * TAU])
-		match String(sp[2]):
-			"heart": Scenery.heart(isl, r)
-			"beacon":
-				_beacon(isl, beacon_cols[bi % beacon_cols.size()], r)
-				bi += 1
+		var isl := Models.float_island(rr, r, r * rr.randf_range(1.6, 2.4), Color("4e5640"), Color("5a4c46"), Color("1e1a22"))
+		var root := Node3D.new()
+		root.position = sp[0]
+		root.rotation.y = rr.randf() * TAU
+		root.add_child(isl)
+		add_child(root)
+		# shards that broke away in the Sundering drift underneath
+		for k in (3 if not low else 1):
+			var sh := Flora.node("rock", "storm", k % 3, r * rr.randf_range(0.18, 0.32))
+			sh.position = Vector3(rr.randf_range(-r, r), -r * rr.randf_range(0.8, 1.8), rr.randf_range(-r, r))
+			sh.rotation = Vector3(PI, rr.randf() * TAU, rr.randf_range(-0.4, 0.4))
+			root.add_child(sh)
+		var ruin := String(sp[2])
+		if ruin != "":
+			var mi := MeshInstance3D.new()
+			mi.mesh = LANDMARKS.mesh(ruin, "storm")
+			mi.material_override = Flora.material("rock", true)
+			mi.scale = Vector3.ONE * r * 0.13
+			root.add_child(mi)
+		elif r < 13.0:
+			for k in rr.randi_range(1, 3):
+				var tr := Flora.node("pine", "storm", k % 3, rr.randf_range(1.0, 1.6))
+				var a := rr.randf() * TAU
+				tr.position = Vector3(cos(a), 0, sin(a)) * r * rr.randf_range(0.1, 0.6)
+				root.add_child(tr)
+		isles.append([root, float((sp[0] as Vector3).y), rr.randf() * TAU])
 
-func _beacon(isl: Node3D, c: Color, r: float) -> void:
-	var a := rng.randf() * TAU
-	var at := Vector3(cos(a), 0, sin(a)) * r * 0.35
-	var ch := Models.chest(2 if c.b < 0.6 else 1)
-	ch.position = at; ch.scale = Vector3.ONE * 1.6
-	isl.add_child(ch)
-	var beam := Models.part(isl, Models.cyl(0.7, 1.1, 70.0, 10), Models.glow_mat(Color(c, 0.3)), at + Vector3(0, 35.0, 0))
-	beam.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-
-# ---------------------------------------------------------------- life in the sky
-## Another hunter jumps off the ship and glides down toward the islands.
-func _spawn_glider(age := 0.0) -> void:
-	var cl: String = ["light", "medium", "heavy"][rng.randi_range(0, 2)]
-	var team := rng.randi_range(1, Data.TEAM_COLORS.size() - 1)
-	var lk := Models.random_look(rng)
-	var cw: Array = Data.CLASSES[cl]["weapons"]
-	var h := Models.hunter(cl, Data.TEAM_COLORS[team], cw[rng.randi_range(0, cw.size() - 1)], "", lk)
-	(h.get_node("TeamRing") as Node3D).visible = false
-	var gl: Node3D = h.get_node("Rig/Torso/Glider")
-	gl.visible = true
-	gl.rotation.x = 0.25
-	h.scale *= 1.25
-	add_child(h)
-	# they jump off the starboard side, out in the open part of the view
-	var start := Vector3(rng.randf_range(4.0, 11.0), rng.randf_range(-1.0, 2.5), rng.randf_range(-24.0, -14.0))
-	var vel := Vector3(rng.randf_range(0.3, 1.6), -1.3, -rng.randf_range(3.5, 5.0))
-	var g := {"node": h, "anim": HunterAnim.new(h), "vel": vel, "t": age, "life": 22.0, "start": start}
-	h.position = start + vel * age
-	h.rotation.y = atan2(-vel.x, -vel.z)
-	gliders.append(g)
-
-func _build_clouds() -> void:
-	var sh: Shader = load("res://shaders/cloud_puff.gdshader")
-	for i in 22:
-		var mi := MeshInstance3D.new()
-		var q := QuadMesh.new(); var s := rng.randf_range(8.0, 22.0); q.size = Vector2(s * 1.6, s)
-		mi.mesh = q
-		var m := ShaderMaterial.new(); m.shader = sh
-		m.set_shader_parameter("seed", rng.randf() * 10.0)
-		m.set_shader_parameter("alpha", rng.randf_range(0.55, 0.9))
-		mi.material_override = m
-		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		mi.position = Vector3(rng.randf_range(-70, 70), rng.randf_range(-26, 6), rng.randf_range(-200, 30))
-		if absf(mi.position.x) < 9.0 and mi.position.y > -8.0: mi.position.x += 14.0 * signf(mi.position.x + 0.01)
-		add_child(mi)
-		clouds.append({"node": mi, "speed": rng.randf_range(3.5, 6.5)})
-
-## Long soft shafts of the low sun slanting across the sky behind the ship (they converge toward
-## the point opposite the sun, as real ones do), drifting slowly.
-var shafts: Array = []
-func _build_shafts() -> void:
+## Long soft shafts of the low sun slanting through the storm.
+func _shafts() -> void:
 	var sh: Shader = load("res://shaders/light_shaft.gdshader")
-	var axis := -SUN.normalized()      # away from the sun, into the view
-	for i in 7:
+	var axis := -SUN.normalized()
+	for i in 6:
 		var mi := MeshInstance3D.new()
 		var q := QuadMesh.new(); q.size = Vector2(1, 1); q.center_offset = Vector3(0, 0.5, 0)
 		mi.mesh = q
 		var m := ShaderMaterial.new(); m.shader = sh
 		m.set_shader_parameter("seed", rng.randf() * 10.0)
-		m.set_shader_parameter("intensity", rng.randf_range(0.45, 0.7))
-		m.set_shader_parameter("color", Color("ffd2a0").lerp(Color("ffb0c8"), rng.randf() * 0.5))
+		m.set_shader_parameter("intensity", rng.randf_range(0.28, 0.5))
+		m.set_shader_parameter("color", Color("ffb98a").lerp(Color("ffd8b0"), rng.randf()))
 		mi.material_override = m
 		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		var at := Vector3(rng.randf_range(-70.0, 0.0), rng.randf_range(-22.0, 4.0), rng.randf_range(20.0, 70.0))
-		mi.basis = Basis(Quaternion(Vector3.UP, axis)) * Basis.from_scale(Vector3(rng.randf_range(5.0, 14.0), rng.randf_range(120.0, 200.0), 1.0))
+		var at := Vector3(rng.randf_range(20.0, 120.0), rng.randf_range(10.0, 50.0), rng.randf_range(-260.0, -140.0))
+		mi.basis = Basis(Quaternion(Vector3.UP, axis)) * Basis.from_scale(Vector3(rng.randf_range(8.0, 20.0), rng.randf_range(160.0, 260.0), 1.0))
 		mi.position = at
-		mi.extra_cull_margin = 200.0
+		mi.extra_cull_margin = 300.0
 		add_child(mi)
 		shafts.append([mi, m, float(m.get_shader_parameter("intensity")), rng.randf() * TAU])
 
-func _build_birds() -> void:
-	birds = Node3D.new(); birds.position = Vector3(-14, 6.0, -40); add_child(birds)
-	var m := Models.toon(Color("3a2f48"), false)
-	for i in 7:
-		var b := Node3D.new()
-		var row := (i + 1) / 2
-		b.position = Vector3((1 if i % 2 == 0 else -1) * row * 0.9, 0, row * 0.8)
-		birds.add_child(b)
-		for sx in [-1.0, 1.0]:
-			var wing := Node3D.new(); wing.name = "W%d" % int(sx); b.add_child(wing)
-			Models.part(wing, Models.box(0.55, 0.03, 0.18), m, Vector3(0.28 * sx, 0, 0))
-		Models.part(b, Models.sphere(0.09, 6), m, Vector3.ZERO, Vector3(0.8, 0.8, 1.6))
+## Banks of storm cloud drifting through the gaps between the islands.
+func _cloud_banks() -> void:
+	var sh: Shader = load("res://shaders/cloud_puff.gdshader")
+	var n: int = [5, 10, 16][clampi(int(Settings.q("clouds")), 0, 2)]
+	for i in n:
+		var mi := MeshInstance3D.new()
+		var q := QuadMesh.new(); var s := rng.randf_range(18.0, 46.0); q.size = Vector2(s * 1.8, s)
+		mi.mesh = q
+		var m := ShaderMaterial.new(); m.shader = sh
+		m.set_shader_parameter("seed", rng.randf() * 10.0)
+		m.set_shader_parameter("alpha", rng.randf_range(0.35, 0.65))
+		m.set_shader_parameter("lit", Color("d49a7c"))
+		m.set_shader_parameter("shade", Color("3e3440"))
+		m.set_shader_parameter("sun_side", Vector2(0.8, 0.3))
+		mi.material_override = m
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		mi.position = Vector3(rng.randf_range(-160, 200), rng.randf_range(-40, 12), rng.randf_range(-260, -40))
+		add_child(mi)
+		clouds.append({"node": mi, "speed": rng.randf_range(1.5, 3.5)})
 
+## The Wyrm, far off: a dark shape turning slowly through the haze, wings beating, eyes like coals.
+func _wyrm() -> void:
+	wyrm = Wyrm.new()
+	add_child(wyrm)
+	wyrm.set_size(3.4)
+	wyrm.flap_rate = 0.45
+	wyrm.teleport(_wyrm_at(t), _wyrm_at(t + 0.5) - _wyrm_at(t))
+
+func _wyrm_at(tt: float) -> Vector3:
+	var a := tt * 0.045
+	return Vector3(46.0 + cos(a) * 40.0, 22.0 + sin(a * 2.0) * 3.0, -235.0 + sin(a) * 22.0)     # far off: a silhouette in the haze
+
+## Embers and ash on the wind, around the squad and in front of the camera.
+func _weather() -> void:
+	embers = _particles(int(140 * fx_k), Color("ffa24a"), Color("ff5a1e"), 0.035, 0.07, 6.0, Vector3(9, 4, 7), Vector3(0.3, 0.9, 0.2))
+	ash = _particles(int(220 * fx_k), Color(0.75, 0.72, 0.72, 0.55), Color(0.55, 0.52, 0.55, 0.35), 0.03, 0.07, 7.0, Vector3(11, 5, 8), Vector3(0, -0.25, 0))
+
+func _particles(n: int, c0: Color, c1: Color, s0: float, s1: float, life: float, box: Vector3, lift: Vector3) -> CPUParticles3D:
+	var p := CPUParticles3D.new()
+	p.amount = maxi(n, 8)
+	p.lifetime = life
+	p.preprocess = life
+	p.local_coords = false
+	p.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX
+	p.emission_box_extents = box
+	p.position = Vector3(1.0, 2.2, -7.0)
+	p.direction = (WIND + lift).normalized()
+	p.spread = 25.0
+	p.initial_velocity_min = WIND.length() * 0.7
+	p.initial_velocity_max = WIND.length() * 1.3
+	p.gravity = lift
+	p.scale_amount_min = s0 / 0.05
+	p.scale_amount_max = s1 / 0.05
+	var q := QuadMesh.new(); q.size = Vector2(0.05, 0.05)
+	p.mesh = q
+	var m := StandardMaterial3D.new()
+	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	m.vertex_color_use_as_albedo = true
+	m.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
+	if c0.r > 0.9:
+		m.blend_mode = BaseMaterial3D.BLEND_MODE_ADD        # embers glow
+		m.disable_fog = true
+	p.material_override = m
+	var g := Gradient.new()
+	g.set_color(0, Color(c0, 0.0)); g.set_color(1, Color(c1, 0.0))
+	g.add_point(0.15, c0); g.add_point(0.7, c1)
+	p.color_ramp = g
+	p.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(p)
+	return p
+
+## A hunter glides past on the wind every few seconds (one, re-launched: no hitches).
+func _glider() -> void:
+	var lk := Models.random_look(rng)
+	var h := Models.hunter("light", Data.TEAM_COLORS[2], "smg", "", lk, "archer")
+	var ring := h.get_node_or_null("TeamRing") as Node3D
+	if ring: ring.visible = false
+	var gl := h.get_node_or_null("Rig/Torso/Glider") as Node3D
+	if gl:
+		gl.visible = true
+		gl.rotation.x = 0.25
+	h.visible = false
+	add_child(h)
+	glider = {"node": h, "anim": HunterAnim.new(h), "t": -1.0, "dur": 6.5, "a": Vector3.ZERO, "b": Vector3.ZERO}
+
+func _launch_glider() -> void:
+	# across the sky behind the squad, from the left, riding the storm; near or far each time
+	var near := rng.randf() < 0.5
+	var z := rng.randf_range(-24.0, -18.0) if near else rng.randf_range(-48.0, -34.0)
+	var y := rng.randf_range(4.0, 7.5) if near else rng.randf_range(8.0, 14.0)
+	# out of the haze behind the squad, coming toward us and passing over to the left, so the wing
+	# shows its full span
+	glider["a"] = Vector3(rng.randf_range(20.0, 34.0), y + 6.0, z - 40.0)
+	glider["b"] = Vector3(rng.randf_range(-16.0, -8.0), y - rng.randf_range(1.0, 3.0), z + 14.0)
+	glider["dur"] = rng.randf_range(5.0, 7.0) if near else rng.randf_range(8.0, 10.0)
+	glider["t"] = 0.0
+	var h: Node3D = glider["node"]
+	h.visible = true
+	var d: Vector3 = (glider["b"] as Vector3) - (glider["a"] as Vector3)
+	h.rotation.y = atan2(-d.x, -d.z)
+	h.scale = Vector3.ONE * 1.3
+	if near: Sfx.play("whoosh", null, -16.0, 0.05, 0.8)
+
+# ---------------------------------------------------------------- the menu
 func _build_ui() -> void:
 	var ui := CanvasLayer.new(); add_child(ui)
 	var root := Control.new(); root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT); root.theme = UI.theme()
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.name = "TitleUI"
 	ui.add_child(root)
-	# a soft shade on the left so the menu reads over the scene, and a gentle vignette
+	# a dark wash on the left so the menu reads over the scene, and a vignette with a little
+	# letterbox weight top and bottom
 	var shade := TextureRect.new()
 	var gt := GradientTexture2D.new()
 	var gr := Gradient.new()
-	gr.set_color(0, Color(0.04, 0.03, 0.1, 0.78)); gr.set_color(1, Color(0.04, 0.03, 0.1, 0.0))
-	gr.set_offset(0, 0.3); gr.set_offset(1, 1.0)
+	gr.set_color(0, Color(0.03, 0.03, 0.05, 0.86)); gr.set_color(1, Color(0.03, 0.03, 0.05, 0.0))
+	gr.set_offset(0, 0.25); gr.set_offset(1, 1.0)
 	gt.gradient = gr; gt.fill_from = Vector2(0, 0); gt.fill_to = Vector2(1, 0); gt.width = 256; gt.height = 4
 	shade.texture = gt
 	shade.stretch_mode = TextureRect.STRETCH_SCALE
 	shade.set_anchors_and_offsets_preset(Control.PRESET_LEFT_WIDE)
-	shade.offset_right = 820
+	shade.offset_right = 760
 	shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(shade)
 	var vig := TextureRect.new()
 	var vt := GradientTexture2D.new(); var vg := Gradient.new()
-	vg.set_color(0, Color(0, 0, 0, 0.0)); vg.set_color(1, Color(0.02, 0.01, 0.06, 0.55)); vg.set_offset(0, 0.55); vg.set_offset(1, 1.0)
-	vt.gradient = vg; vt.fill = GradientTexture2D.FILL_RADIAL; vt.fill_from = Vector2(0.5, 0.5); vt.fill_to = Vector2(1.05, 1.05); vt.width = 128; vt.height = 128
+	vg.set_color(0, Color(0, 0, 0, 0.0)); vg.set_color(1, Color(0.02, 0.015, 0.03, 0.62)); vg.set_offset(0, 0.5); vg.set_offset(1, 1.0)
+	vt.gradient = vg; vt.fill = GradientTexture2D.FILL_RADIAL; vt.fill_from = Vector2(0.55, 0.45); vt.fill_to = Vector2(1.1, 1.1); vt.width = 128; vt.height = 128
 	vig.texture = vt; vig.stretch_mode = TextureRect.STRETCH_SCALE
 	vig.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	vig.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(vig)
 	# the menu column stays vertically centred and fits any window height
 	var col := VBoxContainer.new()
+	col.name = "Menu"
 	col.set_anchors_and_offsets_preset(Control.PRESET_LEFT_WIDE)
-	col.offset_left = 76; col.offset_right = 560; col.offset_top = 24; col.offset_bottom = -60
+	col.offset_left = 76; col.offset_right = 600; col.offset_top = 24; col.offset_bottom = -60
 	col.alignment = BoxContainer.ALIGNMENT_CENTER
 	col.add_theme_constant_override("separation", 4)
 	root.add_child(col)
+	menu_col = col
 	logo = TitleLogo.new()
-	logo.custom_minimum_size = Vector2(440, 190)
+	logo.name = "Logo"
 	col.add_child(logo)
-	var tag := UI.label("RAISE THEM.   RISK THEM.   BRING THEM HOME.", 14, Color("ffe2bf"), _spaced())
+	var tag := UI.label("Raise them.  Risk them.  Bring them home.", 17, Color("e9dccb"), _spaced())
+	tag.name = "Tagline"
 	tag.autowrap_mode = TextServer.AUTOWRAP_OFF
 	tag.add_theme_constant_override("outline_size", 5)
-	tag.add_theme_color_override("font_outline_color", Color(0.06, 0.04, 0.12, 0.7))
+	tag.add_theme_color_override("font_outline_color", Color(0.04, 0.03, 0.05, 0.7))
 	col.add_child(tag)
-	col.add_child(UI.spacer(26))
+	col.add_child(UI.spacer(30))
 	var has: bool = not Save.d["roster"].is_empty()
 	# the one big button: carry on where you left off, or start a new story
 	var b1 := _menu_main(("Continue" if has else "New game"), func(): Game.goto("home" if has else "prologue"))
@@ -394,7 +484,7 @@ func _build_ui() -> void:
 	var who := UI.label(_resume_line() if has else "A short story first, then your very first egg.", 14, Color(1, 0.93, 0.84, 0.72))
 	who.autowrap_mode = TextServer.AUTOWRAP_OFF
 	who.add_theme_constant_override("outline_size", 5)
-	who.add_theme_color_override("font_outline_color", Color(0.06, 0.04, 0.12, 0.7))
+	who.add_theme_color_override("font_outline_color", Color(0.04, 0.03, 0.05, 0.7))
 	var wm := MarginContainer.new(); wm.add_theme_constant_override("margin_left", 6); wm.add_child(who)
 	col.add_child(wm)
 	col.add_child(UI.spacer(18))
@@ -409,20 +499,49 @@ func _build_ui() -> void:
 		col.add_child(_menu_item(String(it[0]), it[1], String(it[2])))
 	var i := 0
 	for ch in col.get_children():
-		UI.pop_in(ch, 0.25 + i * 0.06)
+		if ch == logo: continue
+		UI.pop_in(ch, 0.9 + i * 0.07)
 		i += 1
 	# bottom corners: what this is, and how to drive the menu without a mouse
-	var ver := UI.label("Project Boki  ·  early build  ·  open source", 13, Color(1, 1, 1, 0.5))
+	var ver := UI.label("Project Boki  ·  early build  ·  open source", 13, Color(1, 1, 1, 0.45))
 	ver.autowrap_mode = TextServer.AUTOWRAP_OFF
 	ver.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
 	ver.offset_left = 28; ver.offset_top = -40; ver.offset_bottom = -18
 	root.add_child(ver)
+	# like a game client's login screen: a small news card in the corner, the playtest and how to join
+	var news := UI.glass(12, 12)
+	news.name = "News"
+	news.mouse_filter = Control.MOUSE_FILTER_STOP
+	news.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)       # up in the open sky, clear of the squad
+	news.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	news.offset_right = -28; news.offset_top = 28
+	var nv := UI.vbox(4); news.add_child(nv)
+	nv.add_child(UI.label("PLAYTEST  ·  BUILD %s" % Net.VERSION, 11, Color("e9b48a"), UI.caps))
+	nv.add_child(UI.label("Six archetypes, one Boki each", UI.T_HEAD, UI.INK, UI.big))
+	var nl := UI.label("Bring your Boki on a run, bring it home. Tell us what broke.", 13, UI.MUTED)
+	nl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART; nl.custom_minimum_size.x = 280
+	nv.add_child(nl)
+	var nb := UI.ghost("Join the playtest Discord", func(): OS.shell_open(DISCORD), 0, "bond")
+	nb.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	nb.focus_mode = Control.FOCUS_NONE
+	nv.add_child(nb)
+	root.add_child(news)
+	UI.pop_in(news, 1.4)
 	var keys := UI.key_hints([["W S", "choose"], ["Enter", "select"], ["Esc", "back"]], 13)
 	keys.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
 	keys.grow_horizontal = Control.GROW_DIRECTION_BEGIN
 	keys.offset_right = -28; keys.offset_top = -44; keys.offset_bottom = -16
 	root.add_child(keys)
 	b1.grab_focus()
+
+## The menu's item labels in order (the main button first): read by --title-check.
+func menu_labels() -> Array:
+	var out: Array = []
+	if menu_col == null:
+		return out
+	for ch in menu_col.get_children():
+		if ch is Button: out.append(String((ch as Button).text))
+	return out
 
 ## W and S move through the menu as well as the arrow keys and a gamepad's d-pad.
 func _unhandled_input(event: InputEvent) -> void:
@@ -442,8 +561,8 @@ func _unhandled_input(event: InputEvent) -> void:
 func _spaced() -> FontVariation:
 	var f := FontVariation.new()
 	f.base_font = UI.body
-	f.variation_opentype = {"wght": 700}
-	f.spacing_glyph = 3
+	f.variation_opentype = {"wght": 600}
+	f.spacing_glyph = 2
 	return f
 
 ## "Pip · level 4 · 12 expeditions" under Continue, so you know which save this is.
@@ -487,117 +606,166 @@ func _menu_item(text: String, cb: Callable, icon := "") -> Button:
 		b.queue_redraw())
 	return b
 
-func _process(delta: float) -> void:
-	t += delta
-	# the ship rolls and pitches a little; the camera rides with it and drifts slowly
-	ship.rotation = Vector3(sin(t * 0.37) * 0.008, sin(t * 0.11) * 0.01, sin(t * 0.53) * 0.012)
-	ship.position.y = sin(t * 0.61) * 0.18
-	var sway := sin(t * 0.07)
+# ---------------------------------------------------------------- per frame
+func _place_cam(delta: float) -> void:
 	if cam_override.size() == 6:
 		cam.position = Vector3(cam_override[0], cam_override[1], cam_override[2])
-		cam.look_at(ship.to_global(Vector3(cam_override[3], cam_override[4], cam_override[5])), Vector3.UP)
-	else:
-		# out past the bow, looking back at you: the sunset behind you, the menu over the open sky
-		cam.position = Vector3(4.2 + sway * 0.3, DECK_Y + 1.9 + sin(t * 0.23) * 0.06, -7.2 + sway * 0.2)
-		cam.look_at(ship.to_global(Vector3(1.4 + sway * 0.15, DECK_Y + 1.1, -3.2)), Vector3.UP)
+		cam.look_at(Vector3(cam_override[3], cam_override[4], cam_override[5]), Vector3.UP)
+		return
+	# the mouse: smoothed, so the scene glides rather than jitters
+	var vs := get_viewport().get_visible_rect().size
+	var mp := get_viewport().get_mouse_position()
+	var m := Vector2.ZERO
+	if vs.x > 1.0 and vs.y > 1.0 and Rect2(Vector2.ZERO, vs).has_point(mp):
+		m = Vector2(mp.x / vs.x - 0.5, mp.y / vs.y - 0.5) * 2.0
+	mouse_k = mouse_k.lerp(m, 1.0 - exp(-2.2 * delta)) if delta > 0.0 else m
+	# a slow drift along the cliff, and the mouse shifts the eye a little: near things move more
+	# than far ones, so the layers slide past each other
+	var drift := Vector3(sin(t * 0.05) * 0.35, sin(t * 0.083) * 0.08, cos(t * 0.05) * 0.2)
+	var right := Vector3(0.95, 0, 0.3).normalized()
+	cam.position = CAM_AT + drift + right * (-mouse_k.x * 0.28) + Vector3(0, mouse_k.y * 0.12, 0)
+	cam.look_at(CAM_LOOK + right * (mouse_k.x * 0.35) + Vector3(0, -mouse_k.y * 0.2, 0) + drift * 0.4, Vector3.UP)
+
+func _process(delta: float) -> void:
+	t += delta
+	_place_cam(delta)
+	if not stung and t > 0.7:
+		# the logo lands with a low horn under the music
+		stung = true
+		Sfx.play("horn", null, -15.0, 0.0, 0.62)
+	# the banner whips in the wind, each strip a beat behind the one before
 	if flag:
-		flag.rotation = Vector3(sin(t * 7.0) * 0.12, PI / 2 + sin(t * 4.3) * 0.25, 0)
-	for isl in islands:
+		for k in 4:
+			var s := flag.get_node_or_null("Seg%d" % k) as Node3D
+			if s:
+				s.rotation = Vector3(sin(t * 6.0 - k * 0.9) * 0.15, sin(t * 4.5 - k * 0.8) * (0.25 + k * 0.12), 0)
+	for isl in isles:
 		var n: Node3D = isl[0]
-		n.position.y = float(isl[1]) + sin(t * 0.35 + float(isl[2])) * 0.6
-	# clouds slide past as the ship sails on
+		n.position.y = float(isl[1]) + sin(t * 0.25 + float(isl[2])) * 0.8
 	for c in clouds:
 		var n: Node3D = c["node"]
-		n.position.z += float(c["speed"]) * delta
-		if n.position.z > 40.0:
-			n.position.z = rng.randf_range(-220.0, -180.0)
-			n.position.x = rng.randf_range(-70, 70)
-			if absf(n.position.x) < 9.0: n.position.x += 14.0 * signf(n.position.x + 0.01)
-	# gliders drift down and away; when one is gone another jumps
-	for g in gliders.duplicate():
-		g["t"] = float(g["t"]) + delta
-		var h: Node3D = g["node"]
-		var v: Vector3 = g["vel"]
-		h.position = (g["start"] as Vector3) + v * float(g["t"]) + Vector3(sin(float(g["t"]) * 0.7) * 1.2, 0, 0)
-		var grow := clampf(float(g["t"]) / 0.8, 0.0, 1.0) * clampf((float(g["life"]) - float(g["t"])) / 1.5, 0.0, 1.0)
-		h.scale = Vector3.ONE * 1.25 * grow
-		(g["anim"] as HunterAnim).update(delta, {"gliding": true, "grounded": false, "vel": v, "face": h.rotation.y})
-		if float(g["t"]) > float(g["life"]):
-			h.queue_free()
-			gliders.erase(g)
-			_spawn_glider()
-	# the sun shafts breathe slowly
+		n.position.x += float(c["speed"]) * delta
+		if n.position.x > 220.0:
+			n.position.x = -180.0
 	for shf in shafts:
-		(shf[1] as ShaderMaterial).set_shader_parameter("intensity", float(shf[2]) * (0.75 + 0.25 * sin(t * 0.3 + float(shf[3]))))
-	# birds wheel in the distance
-	if birds:
-		birds.position = Vector3(-14 + sin(t * 0.05) * 30.0, 6.0 + sin(t * 0.2) * 1.5, -40 + cos(t * 0.05) * 10.0)
-		birds.rotation.y = atan2(-cos(t * 0.05) * 1.5, sin(t * 0.05) * 0.5) * 0.0 + PI * 0.5 + sin(t * 0.05) * 0.6
-		for i in birds.get_child_count():
-			var b := birds.get_child(i)
-			for sx in [-1, 1]:
-				var w := b.get_node_or_null("W%d" % sx) as Node3D
-				if w: w.rotation.z = sin(t * 9.0 + i * 0.7) * 0.6 * sx
-	# you, looking out over the islands, and your kin
-	if h_anim:
-		h_anim.update(delta, {"face": hunter_node.rotation.y, "fired": 99.0})
-	for i in kin_nodes.size():
-		var k: Node3D = kin_nodes[i]
-		if i == 2:
-			# hopping excitedly beside you
-			k.get_node("Body").position.y = absf(sin(t * 4.2)) * 0.3
-			k.set_meta("happy", true)
-		elif i == 1:
-			k.get_node("Body").position.y = absf(sin(t * 1.3)) * 0.04
+		(shf[1] as ShaderMaterial).set_shader_parameter("intensity", float(shf[2]) * (0.7 + 0.3 * sin(t * 0.25 + float(shf[3]))))
+	if wyrm:
+		wyrm.position = _wyrm_at(t)
+	# the squad: breathing, shifting weight, hair and cloth in the wind
+	for s in squad:
+		(s["anim"] as HunterAnim).update(delta, s["st"])
+	for i in boki.size():
+		var b: Dictionary = boki[i]
+		var k: Node3D = b["node"]
+		var body := k.get_node_or_null("Body") as Node3D
+		if body == null: continue
+		if i == 0:
+			# your Boki, looking up at you: nose raised, a slow tilt of the head now and then
+			body.rotation.x = 0.14 + sin(t * 0.6) * 0.03       # (more than this tips a long body over)
+			body.rotation.z = sin(t * 0.37) * 0.06
+		elif String(b["kind"]) in ["flyer", "serpent"]:
+			k.position.y = float(b["base_y"]) + sin(t * 1.3 + i) * 0.12
+	# the glider: off for a few seconds, then across the sky
+	var h: Node3D = glider.get("node", null)
+	if h:
+		if float(glider["t"]) < 0.0:
+			glide_wait -= delta
+			if glide_wait <= 0.0:
+				_launch_glider()
+		else:
+			glider["t"] = float(glider["t"]) + delta
+			var k2: float = float(glider["t"]) / float(glider["dur"])
+			var a: Vector3 = glider["a"]; var bb: Vector3 = glider["b"]
+			h.position = a.lerp(bb, k2) + Vector3(0, sin(k2 * PI * 2.0) * 0.8, 0)
+			(glider["anim"] as HunterAnim).update(delta, {"gliding": true, "grounded": false, "vel": (bb - a) / float(glider["dur"]), "face": h.rotation.y})
+			if k2 >= 1.0:
+				glider["t"] = -1.0
+				h.visible = false
+				glide_wait = rng.randf_range(4.0, 8.0)
 
-## The game's name, drawn big: a chunky extruded word with a warm glow and a little paraglider
-## sailing over it.
+## The game's name: "PROJECT" set small and wide over a big carved "BOKI" in pale bone, its lower half
+## warmed like metal near a fire, a faint ember glow that breathes underneath, a slow sheen that
+## crosses the letters every few seconds and a few embers lifting off it. It settles in on open.
 class TitleLogo extends Control:
 	var tt := 0.0
+	const WORD := "BOKI"
+	const PRE := "PROJECT"
+	const FS := 146
+	var bands: Array = []         # clipped strips, each a shade warmer: a vertical gradient on the face
+	var sheen: Control
+	var motes: Array = []
+	func _init() -> void:
+		custom_minimum_size = Vector2(500, 196)
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
+		# the face warms toward the bottom, like bone lit by a fire below: strips of the word, each
+		# clipped to its own band and a shade warmer than the one above
+		for i in 8:
+			var bd := _Clip.new(); bd.clip_contents = true; bd.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			var c := Color("efe5d4").lerp(Color("c99a6c"), pow(float(i + 1) / 8.0, 1.3))
+			bd.draw.connect(func(): _word(bd, c, -bd.position))
+			add_child(bd)
+			bands.append(bd)
+		sheen = _Clip.new(); sheen.clip_contents = true; sheen.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		sheen.draw.connect(func(): _word(sheen, Color(1.0, 0.97, 0.9, 0.55), -sheen.position))
+		add_child(sheen)
+		for i in 7:
+			motes.append(Vector3(randf(), randf(), randf_range(0.6, 1.4)))
+	func base() -> Vector2:
+		return Vector2(2, size.y - 30)
+	func _word(on: CanvasItem, c: Color, off: Vector2) -> void:
+		on.draw_string(UI.big, base() + off, WORD, HORIZONTAL_ALIGNMENT_LEFT, -1, FS, c)
 	func _process(delta: float) -> void:
 		tt += delta
+		var w := UI.big.get_string_size(WORD, HORIZONTAL_ALIGNMENT_LEFT, -1, FS).x
+		var b := base()
+		var top := b.y - FS * 0.42
+		var step := FS * 0.6 / bands.size()
+		for i in bands.size():
+			var bd: Control = bands[i]
+			bd.position = Vector2(0, top + i * step)
+			bd.size = Vector2(w + 8, step + (FS * 0.3 if i == bands.size() - 1 else 0.5))
+			bd.queue_redraw()
+		# the sheen: a narrow band that sweeps across every 7 seconds
+		var cyc := fmod(tt, 7.0) / 1.6
+		sheen.visible = cyc < 1.0
+		sheen.position = Vector2(lerpf(-60.0, w + 20.0, clampf(cyc, 0.0, 1.0)), b.y - FS * 0.85)
+		sheen.size = Vector2(26, FS)
+		sheen.queue_redraw()
+		for i in motes.size():
+			var m: Vector3 = motes[i]
+			m.y -= delta * 0.12 * m.z
+			if m.y < 0.0:
+				m = Vector3(randf(), 1.0, randf_range(0.6, 1.4))
+			motes[i] = m
 		queue_redraw()
 	func _draw() -> void:
 		var f: Font = UI.big
-		var txt := "PROJECT BOKI"
-		var fs := 108
-		var w := f.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
-		var base := Vector2(4, size.y - 34)
-		# warm glow behind
-		draw_string_outline(f, base, txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, 46, Color(1.0, 0.55, 0.25, 0.12))
-		draw_string_outline(f, base, txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, 26, Color(1.0, 0.6, 0.3, 0.16))
-		# extrusion: stacked copies going down, dark plum
-		for i in range(9, 0, -1):
-			var c := Color("3a1f3e").lerp(Color("7a3a3a"), 1.0 - float(i) / 9.0)
-			draw_string_outline(f, base + Vector2(0, i * 1.4), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, 14, c)
-			draw_string(f, base + Vector2(0, i * 1.4), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, c)
-		# ink outline, the face, then a light bevel on top
-		draw_string_outline(f, base, txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, 14, Color("2a1530"))
-		draw_string(f, base, txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color("f7a03c"))
-		draw_string(f, base + Vector2(0, -3), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color(1.0, 0.86, 0.5, 0.55))
-		draw_string(f, base + Vector2(0, -6), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color(1.0, 0.95, 0.75, 0.18))
-		# a paraglider sailing over the word, bobbing a little
-		var gx := 4 + w * 0.62 + sin(tt * 0.8) * 6.0
-		var gy := base.y - fs * 0.92 + sin(tt * 1.3) * 4.0
-		var span := 74.0
-		var pts := PackedVector2Array()
-		var pts2 := PackedVector2Array()
-		for k in 21:
-			var u := float(k) / 20.0 * 2.0 - 1.0
-			pts.append(Vector2(gx + u * span, gy + u * u * 18.0))
-			pts2.append(Vector2(gx + u * span * 0.94, gy + u * u * 18.0 + 11.0 * (1.0 - absf(u) * 0.6)))
-		var poly := PackedVector2Array(pts)
-		for k in range(pts2.size() - 1, -1, -1): poly.append(pts2[k])
-		draw_colored_polygon(poly, Color("f3eee2"))
-		for k in [5, 10, 15]:
-			var st := PackedVector2Array([pts[k], pts[k + 2], pts2[k + 2], pts2[k]])
-			draw_colored_polygon(st, Color("f2a24a"))
-		draw_polyline(pts, Color("2a1530"), 3.0, true)
-		draw_polyline(pts2, Color("2a1530"), 3.0, true)
-		# lines down to a tiny rider with a kin on their shoulder
-		var rider := Vector2(gx, gy + 52)
-		for k in [2, 8, 12, 18]:
-			draw_line(pts2[k], rider, Color(0.16, 0.08, 0.2, 0.8), 1.5, true)
-		draw_circle(rider, 7.0, Color("2a1530"))
-		draw_circle(rider + Vector2(0, 1), 5.0, Color("5ab0f0"))
-		draw_circle(rider + Vector2(8, -4), 4.0, Color("ff7a3d"))
+		var intro := clampf(tt / 1.1, 0.0, 1.0)
+		var e := 1.0 - pow(1.0 - intro, 3.0)
+		modulate.a = e
+		var b := base() + Vector2(0, (1.0 - e) * 10.0)
+		var w := f.get_string_size(WORD, HORIZONTAL_ALIGNMENT_LEFT, -1, FS).x
+		# "PROJECT", small and spaced, with a hairline either side
+		var pf := FontVariation.new(); pf.base_font = UI.body; pf.variation_opentype = {"wght": 700}; pf.spacing_glyph = int(lerpf(18.0, 12.0, e))
+		var pw := pf.get_string_size(PRE, HORIZONTAL_ALIGNMENT_LEFT, -1, 20).x
+		var py := b.y - FS * 0.78
+		var px := 4.0 + (w - pw) * 0.5
+		draw_string(pf, Vector2(px, py), PRE, HORIZONTAL_ALIGNMENT_LEFT, -1, 20, Color("d8c8b2"))
+		draw_line(Vector2(6, py - 7), Vector2(px - 14, py - 7), Color(0.85, 0.78, 0.7, 0.4), 1.5, true)
+		draw_line(Vector2(px + pw + 4, py - 7), Vector2(w, py - 7), Color(0.85, 0.78, 0.7, 0.4), 1.5, true)
+		# the ember glow underneath, breathing
+		var br := 0.75 + 0.25 * sin(tt * 1.3)
+		draw_string_outline(f, b, WORD, HORIZONTAL_ALIGNMENT_LEFT, -1, FS, 44, Color(1.0, 0.42, 0.15, 0.07 * br))
+		draw_string_outline(f, b, WORD, HORIZONTAL_ALIGNMENT_LEFT, -1, FS, 22, Color(1.0, 0.5, 0.2, 0.12 * br))
+		# a carved edge: a deep shadow below, the ink outline, then the pale face
+		for i in range(5, 0, -1):
+			draw_string_outline(f, b + Vector2(0, i * 1.3), WORD, HORIZONTAL_ALIGNMENT_LEFT, -1, FS, 12, Color("1a1214"))
+		draw_string_outline(f, b, WORD, HORIZONTAL_ALIGNMENT_LEFT, -1, FS, 10, Color("150f12"))
+		draw_string(f, b, WORD, HORIZONTAL_ALIGNMENT_LEFT, -1, FS, Color("efe5d4"))
+		# embers lifting off the letters
+		for m in motes:
+			var mp := Vector2(8.0 + m.x * w, b.y - FS * 0.2 - (1.0 - m.y) * FS * 0.9)
+			var a := sin(m.y * PI) * 0.8
+			draw_circle(mp, 1.6 * m.z, Color(1.0, 0.6, 0.25, a))
+	class _Clip extends Control:
+		pass

@@ -300,7 +300,7 @@ static func went_text(rec: Dictionary) -> String:
 	return "On the farm"
 
 # ------------------------------------------------------------------ sorting
-const SORTS := [["slot", "Box order"], ["species", "Species"], ["level", "Level"], ["rarity", "Rarity"], ["got", "Date caught"], ["name", "Name"], ["trust", "Trust"]]
+const SORTS := [["slot", "Box order"], ["species", "Species"], ["level", "Level"], ["rarity", "Rarity"], ["got", "Date joined"], ["name", "Name"], ["trust", "Trust"]]
 
 static func sort_key(r: Dictionary, key: String):
 	match key:

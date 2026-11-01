@@ -36,7 +36,7 @@ const BASE := {
 	},
 	"revive_low": {"_": ["...I'll think about it.", "You keep throwing me around. Hmm.", "Do I have to?"]},
 	"callout": {"_": ["Hunter %s!", "Someone's coming %s!", "Movement %s!", "Rival %s, careful!"]},
-	"wild": {"_": ["A wild %s! Can we catch it?", "I smell a %s nearby!", "Look, a %s!"]},
+	"wild": {"_": ["A wild %s! Can we make friends?", "I smell a %s nearby!", "Look, a %s!"]},
 	"kill": {"_": ["Got one!", "Down they go!", "Too easy!", "Nice!"]},
 	"owner_down": {"_": ["NO!", "Hang on!", "Get up!"]},
 	"caught": {"_": ["A new friend!", "Welcome to the team!", "Another one for the farm!"]},
