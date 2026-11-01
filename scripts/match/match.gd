@@ -2229,6 +2229,7 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 		fx.number(target.pos + Vector3(0, 1.5 if target is Hunter else 1.0, 0), d, col, crit)
 	# archetype passives feed on what happens (Marks, Chambers, Rage, Focus...)
 	if credit is Hunter and (credit as Hunter).ak and target != credit and not credit.remote:
+		(credit as Hunter).ak.note_hit(target)
 		(credit as Hunter).ak.on_deal(target, d, o)
 	if target is Hunter and (target as Hunter).ak and not target.remote:
 		(target as Hunter).ak.on_take(by, d, o)
@@ -6303,6 +6304,9 @@ func _net_ev(x, from: String) -> void:
 		return
 	var who: Ent = null
 	match String(x[0]):
+		"kst":
+			# a kit status (Grounded, Blight, Shred) landed on a body: its own game runs the rule
+			KitStatus.from_net(self, x)
 		"hex":
 			# a Mage's Hex landed: the body's own game runs the rules, every game shows the critter
 			who = ents_by_id.get(String(x[1]), null)
