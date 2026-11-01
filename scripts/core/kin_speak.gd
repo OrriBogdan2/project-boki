@@ -39,7 +39,7 @@ const ACTS := {
 	"play": ["(darts off and looks back at you)", "(crouches low, tail going)"],
 	"bye": ["(watches you go)", "(waves a paw)", "(follows you a few steps)"],
 	"home": ["(rolls around in the grass)", "(sniffs a flower)"],
-	"friends": ["(looks over at the other kin)", "(calls out to someone across the farm)"],
+	"friends": ["(looks over at the other Boki)", "(calls out to someone across the farm)"],
 	"listen": ["(listens with its ears up)", "(nods along)", "(sits right in front of you)"],
 }
 
@@ -67,7 +67,7 @@ const SIMPLE := {
 	"play": ["Play! Chase {A}!", "Ball! Throw ball! {A}!"],
 	"bye": ["Bye... come back soon. {A}.", "Bye bye! {A}!"],
 	"home": ["Home nice. {A} like.", "Farm good! {A} help!"],
-	"friends": ["Friends! Other kin nice.", "{A} want visit!"],
+	"friends": ["Friends! Other Boki nice.", "{A} want visit!"],
 	"remember": ["{A} remember... {M}.", "Remember! {M}. {A}!"],
 	"question": ["Hmm... {A} not know.", "{A}? Good question."],
 	"chat": ["{A} listen!", "Mm! {A} like talk."],
@@ -75,7 +75,7 @@ const SIMPLE := {
 
 static func _parts(species: String) -> Dictionary:
 	var s: Array = SYL.get(species, ["Kin", "kin"])
-	var full: String = Data.KIN.get(species, {}).get("name", "Kin")
+	var full: String = Data.KIN.get(species, {}).get("name", "Boki")
 	return {"A": s[0], "a": String(s[0]).to_lower(), "b": String(s[1]).to_lower(), "F": full, "f": full.to_lower(), "U": full.to_upper()}
 
 static func fill(species: String, pattern: String, rec := {}) -> String:

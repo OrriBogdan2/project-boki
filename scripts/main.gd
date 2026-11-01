@@ -1695,7 +1695,7 @@ func _grammar_runtime_check() -> void:
 		rare_ok = rare_ok and a1 and a2
 		acc[sp] = "%s E %s auto %s, took %.0f" % [sp, a1, a2, T.max_hp - T.hp]
 		_grt_reset(T)
-	_grt("rare kin abilities cast", rare_ok, "%s; %s; %s" % [acc["cairnback"], acc["hivara"], acc["zephyrak"]])
+	_grt("rare Boki abilities cast", rare_ok, "%s; %s; %s" % [acc["cairnback"], acc["hivara"], acc["zephyrak"]])
 	P.teleport(home); T.teleport(home + Vector3(6, 0, 0)); _ac_run(m, 3.5); _grt_reset(T)
 	# ---- 2. diminishing returns and stun immunity
 	T.hurt(0.1, P, {"stun": 1.0, "dr": true})
@@ -1793,7 +1793,7 @@ func _grammar_runtime_check() -> void:
 	_grt_out(k, home + Vector3(1.0, 0, 0))
 	var locked := not k.use_ability("k1", T.pos) and not k.use_ability("k2", T.pos)
 	P.slot_lv["kin"] = 1
-	_grt("locked kin slot never casts", locked, "")
+	_grt("locked Boki slot never casts", locked, "")
 	Settings.set_v("kin_auto", false, false)
 	k.target = T
 	k.runner.reset()
@@ -1868,7 +1868,7 @@ func _grammar_runtime_check() -> void:
 	KinMerge.cast(P)
 	m._player_throw()
 	_ac_run(m, 0.05)
-	_grt("throwing ends the merge (throw still works)", not KinMerge.active(P) and k.state in ["flying", "active"], "kin %s" % k.state)
+	_grt("throwing ends the merge (throw still works)", not KinMerge.active(P) and k.state in ["flying", "active"], "Boki %s" % k.state)
 	_ac_run(m, 1.0)
 	k = _grt_kin(m, P, "pebbit")
 	P.teleport(home); T.teleport(home + Vector3(2.0, 0, 0)); _grt_reset(T)

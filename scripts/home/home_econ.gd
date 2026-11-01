@@ -122,7 +122,7 @@ func _kin_died(rec: Dictionary, g: Dictionary) -> void:
 	build_graves()
 	Save.save_game()
 	_notice("%s has died" % g["name"], ["%s starved. It had nothing to eat for days." % g["name"],
-		"Its grave is in the graveyard, east of the farm.", "Keep a feeder filled so it never happens again." + (" A Soul Shrine can bring a kin back." if not Save.has_building("shrine") else "")])
+		"Its grave is in the graveyard, east of the farm.", "Keep a feeder filled so it never happens again." + (" A Soul Shrine can bring a Boki back." if not Save.has_building("shrine") else "")])
 
 # ------------------------------------------------------------------ what you can walk up to
 ## The nearest feeder, grave or the graveyard gate if it's closer than bd, as an interact entry.
@@ -477,7 +477,7 @@ func open_feeder(f: Dictionary) -> void:
 			r.add_child(b)
 		v.add_child(r)
 	if not any:
-		v.add_child(UI.para("Your pantry's empty. Buy kin kibble at the market stall, or harvest crops.", UI.T_SMALL, UI.MUTED))
+		v.add_child(UI.para("Your pantry's empty. Buy Boki kibble at the market stall, or harvest crops.", UI.T_SMALL, UI.MUTED))
 	# moving it, and the ones in storage
 	v.add_child(UI.section("Feeders"))
 	var mv := UI.hbox(8)
@@ -530,10 +530,10 @@ func show_away() -> void:
 	for g in died:
 		_notice("%s has died" % g["name"], ["%s starved while you were away. It had nothing to eat for days." % g["name"],
 			"Its grave is in the graveyard, east of the farm. You can visit it there.",
-			"A filled feeder keeps your kin fed while you're gone." + (" A Soul Shrine can bring a kin back, a little changed." if not Save.has_building("shrine") else "")])
+			"A filled feeder keeps your Boki fed while you're gone." + (" A Soul Shrine can bring a Boki back, a little changed." if not Save.has_building("shrine") else "")])
 	if not lines.is_empty():
 		lines.append("Fill a feeder (by the cooking pot), or feed them from their card.")
-		_notice("Your kin are starving", lines)
+		_notice("Your Boki are starving", lines)
 
 func _notice(title: String, lines: Array) -> void:
 	if not h.is_inside_tree():
@@ -560,9 +560,9 @@ func refuse_reason() -> String:
 func open_graveyard() -> void:
 	var v: VBoxContainer = h._new_panel("Graveyard", 620, true)
 	var gs: Array = Econ.graves()
-	UI.subtitle(v, "Kin who didn't make it rest here")
+	UI.subtitle(v, "Boki who didn't make it rest here")
 	if gs.is_empty():
-		v.add_child(UI.empty_state("heart", "Nobody rests here", "Keep your kin fed and it stays that way."))
+		v.add_child(UI.empty_state("heart", "Nobody rests here", "Keep your Boki fed and it stays that way."))
 		return
 	for i in range(gs.size() - 1, -1, -1):
 		var g: Dictionary = gs[i]
@@ -632,7 +632,7 @@ func _soul_row(v: VBoxContainer, g: Dictionary) -> void:
 		if why2 != "":
 			r.add_child(UI.label(why2, 12, Color("ffb0a0")))
 	v.add_child(r)
-	var note := UI.label("A kin brought back is still itself, but not quite: its personality shifts, it loses a couple of levels and some trust, it keeps only a few memories, its tastes change, and it has a ghostly shimmer and a new title.", 12, UI.MUTED)
+	var note := UI.label("A Boki brought back is still itself, but not quite: its personality shifts, it loses a couple of levels and some trust, it keeps only a few memories, its tastes change, and it has a ghostly shimmer and a new title.", 12, UI.MUTED)
 	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	v.add_child(note)
 
@@ -659,7 +659,7 @@ func _revive(g: Dictionary) -> void:
 # ------------------------------------------------------------------ the Soul Shrine
 func open_shrine() -> void:
 	var v: VBoxContainer = h._new_panel("Soul Shrine", 640, true)
-	UI.subtitle(v, "Keeps the souls of kin buried here. An ember and some gems bring one back, changed.")
+	UI.subtitle(v, "Keeps the souls of Boki buried here. An ember and some gems bring one back, changed.")
 	var hx := UI.head_extra(v)
 	hx.add_child(UI.chip("bond", str(Econ.embers()), Color("9ff0e0"), "Soul Embers"))
 	hx.add_child(UI.chip("heart", "%d/%d" % [Econ.souls_kept(), Econ.SHRINE_SLOTS], Color("bff8ec"), "Souls kept"))

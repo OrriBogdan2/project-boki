@@ -194,7 +194,7 @@ func open_pause(where: String) -> void:
 			item.call("Leave the training area" if m.opts.get("training", false) else "Skip the tutorial", "back", leave)
 		else:
 			var lb: Button = item.call("Leave match", "back", func():
-				UI.confirm(root, "Leave the match?", "You lose everything you carry, and any kin you brought is left behind.", "Leave", leave), "", "Danger")
+				UI.confirm(root, "Leave the match?", "You lose everything you carry, and any Boki you brought is left behind.", "Leave", leave), "", "Danger")
 			lb.tooltip_text = "You lose what you carry"
 	else:
 		item.call("Save and go to the main menu", "home", func():
@@ -279,11 +279,11 @@ func _show_settings() -> void:
 			_toggle(v, "Damage numbers", "damage_numbers")
 			_toggle(v, "Tips during matches", "tips")
 			_group(v, "Kin")
-			_toggle(v, "Kin also use your E ability on their own", "kin_auto", "They can spend cooldowns you wanted (their own auto ability is always on)")
+			_toggle(v, "Boki also use your E ability on their own", "kin_auto", "They can spend cooldowns you wanted (their own auto ability is always on)")
 			if admin_allowed():
 				_group(v, "Admin")
 				_choice(v, "Bot difficulty", "bot_diff", [["auto", "Auto (by tier)"]] + Data.BOT_ORDER.map(func(k): return [k, Data.BOT_DIFF[k]["name"]]))
-				_toggle(v, "Mod mode", "mod_mode", "Everything unlocked, free building and bridges, god mode, spawn kin (F1)")
+				_toggle(v, "Mod mode", "mod_mode", "Everything unlocked, free building and bridges, god mode, spawn Boki (F1)")
 		"Accessibility":
 			_group(v, "Readability")
 			_slider(v, "Interface size", "ui_scale", 0.75, 1.5, 0.05)
@@ -440,7 +440,7 @@ func open_inventory() -> void:
 			cell.call("Tonics", "×%d" % int(Save.d["items"].get("tonic", 0)), "Heal 45 in a match (key %s)." % Settings.key_cap("tonic"), Color("8ff0a0"), "", Callable(), "tonic")
 			for f in Care.FOODS:
 				var fn := int(Save.d["items"].get(f, 0))
-				if fn > 0: cell.call(Care.FOODS[f]["name"], "×%d" % fn, Care.FOODS[f]["desc"] + " Feed it from a kin's card.", Care.FOODS[f]["col"])
+				if fn > 0: cell.call(Care.FOODS[f]["name"], "×%d" % fn, Care.FOODS[f]["desc"] + " Feed it from a Boki's card.", Care.FOODS[f]["col"])
 			var tr: String = Save.d.get("treat", "")
 			if tr != "":
 				cell.call("Treat ready", "", "Your partner eats it before the next expedition.", Color("f2c84a"))
@@ -476,7 +476,7 @@ func open_inventory() -> void:
 			for rec in Save.d["roster"]:
 				empty = false
 				var sp: Dictionary = Data.KIN[rec["species"]]
-				cell.call(String(rec["name"]), "Lv %d" % int(rec["level"]), "%s%s%s · %s bond · %s%s" % ["in the Kin Burrow · " if KinBox.is_boxed(rec) else "", (" ".join(Mutations.tags(rec)) + " ") if Mutations.special(rec) else "", Evo.form_name(rec), Care.bond(rec)[1], Care.condition_name(rec).to_lower(), "  · partner" if rec["uid"] == Save.d.get("active", "") else ""], Shiny.body(rec))
+				cell.call(String(rec["name"]), "Lv %d" % int(rec["level"]), "%s%s%s · %s bond · %s%s" % ["in the Boki Burrow · " if KinBox.is_boxed(rec) else "", (" ".join(Mutations.tags(rec)) + " ") if Mutations.special(rec) else "", Evo.form_name(rec), Care.bond(rec)[1], Care.condition_name(rec).to_lower(), "  · partner" if rec["uid"] == Save.d.get("active", "") else ""], Shiny.body(rec))
 		"Kindex":
 			empty = false
 			Care.dex_sync()
@@ -496,13 +496,13 @@ func open_inventory() -> void:
 				cell.call(String(sp["name"]), "★" if e.get("shimmer", false) else ("✓" if e.get("caught", false) else ""), desc, sp["color"])
 	if empty:
 		var es: Array = {"Seeds": ["No seeds", "Find them on expeditions or buy them at the stall."], "Crops": ["No crops yet", "Harvest your plots."],
-			"Furniture": ["Nothing stored", "Furniture you buy or put away lands here."], "Kin": ["No kin yet", "Hatch an egg to get your first."]}.get(inv_tab, ["Nothing here", ""])
+			"Furniture": ["Nothing stored", "Furniture you buy or put away lands here."], "Kin": ["No Boki yet", "Hatch an egg to get your first."]}.get(inv_tab, ["Nothing here", ""])
 		v.add_child(UI.empty_state(String(icon_of.get(inv_tab, "gem")), es[0], es[1]))
 
 # ------------------------------------------------------------------ save files
 func open_saves() -> void:
 	var v := _page("saves", "Save files", 640, true)
-	UI.subtitle(v, "Each save has its own island, kin and gems. Settings are shared.")
+	UI.subtitle(v, "Each save has its own island, Boki and gems. Settings are shared.")
 	var first: Button = null
 	for n in range(1, Save.SLOTS + 1):
 		var info := Save.slot_info(n)
@@ -522,14 +522,14 @@ func open_saves() -> void:
 			tr.add_child(UI.label(String(info["name"]), UI.T_HEAD, UI.INK, UI.big))
 			if playing: tr.add_child(UI.tag("Playing", UI.ACCENT))
 			col.add_child(tr)
-			col.add_child(UI.label("%d kin  ·  %d gems  ·  %d expeditions  ·  %s" % [info["kin"], info["gems"], info["matches"], info["when"]], UI.T_SMALL, UI.MUTED))
+			col.add_child(UI.label("%d Boki  ·  %d gems  ·  %d expeditions  ·  %s" % [info["kin"], info["gems"], info["matches"], info["when"]], UI.T_SMALL, UI.MUTED))
 			if not playing:
 				var pb := UI.primary("Play", func(): _play_slot(sn), 96)
 				pb.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 				h.add_child(pb)
 				if first == null: first = pb
 			var del := UI.icon_button("close", func():
-				UI.confirm(root, "Delete save %d?" % sn, ("This is the save you're playing: deleting it takes you back to the title. " if playing else "") + "Its island, kin and gems are gone for good.", "Delete", func():
+				UI.confirm(root, "Delete save %d?" % sn, ("This is the save you're playing: deleting it takes you back to the title. " if playing else "") + "Its island, Boki and gems are gone for good.", "Delete", func():
 					Save.delete_slot(sn)
 					if playing:
 						# that was the save in play: start over from the title, on this now-empty slot
@@ -625,7 +625,7 @@ func open_admin() -> void:
 		if c == "home": _reload_home())
 	add.call("Unlock every expedition tier", func(): Save.d["extracts"] = maxi(int(Save.d.get("extracts", 0)), 10))
 	add.call("Replay the tutorials", func(): Save.d["tutorial"] = {})
-	var spawn := UI.button("Spawn a kin…", open_spawn_kin, 290)
+	var spawn := UI.button("Spawn a Boki…", open_spawn_kin, 290)
 	grid.add_child(spawn)
 	if c == "home":
 		var h = Game.main.screen_node()
@@ -660,8 +660,8 @@ var admin_shimmer := false
 func open_spawn_kin() -> void:
 	if page != "spawn" and page != "":
 		stack.append(page)
-	var v := _page("spawn", "Spawn a kin", 640)
-	v.add_child(UI.label("Adds a level 8 kin with a Close bond to your farm (or the Kin Burrow, if it's a repeat or the farm is full).", 13, UI.MUTED))
+	var v := _page("spawn", "Spawn a Boki", 640)
+	v.add_child(UI.label("Adds a level 8 Boki with a Close bond to your farm (or the Boki Burrow, if it's a repeat or the farm is full).", 13, UI.MUTED))
 	var mrow := HFlowContainer.new()
 	mrow.add_theme_constant_override("h_separation", 6); mrow.add_theme_constant_override("v_separation", 6)
 	mrow.add_child(UI.label("Mutation:", 13, UI.MUTED))

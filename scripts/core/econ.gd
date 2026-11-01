@@ -15,7 +15,7 @@ const PACK_UPGRADE := [[120, 4], [260, 10], [450, 20]]
 
 const FEEDERS := {
 	"trough": {"name": "Wooden trough", "cap": 6, "mult": 1.0, "seats": 3, "auto": false, "joy": 0.0, "price": 40, "col": Color("a07850"),
-		"desc": "Holds 6 meals. Hungry kin come and help themselves."},
+		"desc": "Holds 6 meals. Hungry Boki come and help themselves."},
 	"basket": {"name": "Woven feeder", "cap": 10, "mult": 1.15, "seats": 4, "auto": false, "joy": 2.0, "price": 90, "col": Color("d8b878"),
 		"desc": "Holds 10 meals, and food from it fills 15% more."},
 	"hopper": {"name": "Auto hopper", "cap": 14, "mult": 1.25, "seats": 5, "auto": true, "joy": 3.0, "price": 200, "col": Color("8fb8d8"),
@@ -351,7 +351,7 @@ static func souls_kept() -> int:
 static func epitaph(g: Dictionary) -> String:
 	var sp: Dictionary = Data.KIN.get(String(g.get("species", "")), {})
 	var why := "Starved while you were away" if String(g.get("cause", "")) == "starved" else "Lost"
-	return "%s, a level %d %s. %s." % [g["name"], int(g["level"]), sp.get("name", "kin"), why]
+	return "%s, a level %d %s. %s." % [g["name"], int(g["level"]), sp.get("name", "Boki"), why]
 
 ## What bringing a kin back costs: one Soul Ember, and gems by its level.
 static func revive_cost(g: Dictionary) -> int:
