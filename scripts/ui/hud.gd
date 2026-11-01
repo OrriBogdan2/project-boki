@@ -438,7 +438,7 @@ func _draw_world_labels() -> void:
 		if k.is_wild():
 			if k.state == "dazed" and k.lost_from != "":
 				# a Boki left behind by a hunter who went out: the hook of the game, so it reads from afar
-				var mine := k.lost_from == "you"
+				var mine: bool = k.lost_from == "you"
 				var lc: Color = GOLD if mine else Color("ffb36a")
 				var bob := sin(m.time * 3.0) * 2.0
 				_ctext(sp + Vector2(0, -30 + bob), ("Your %s was left here" % String(k.rec.get("name", "Boki"))) if mine else "A lost Boki: tame it", 18, lc, big)
