@@ -205,9 +205,12 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 				h.start_base(mate)
 		if h.base_t > 0.0:
 			move = Vector2.ZERO
-		if h.hp < h.max_hp * 0.45 and h.tonics > 0:
+		# (heals fold the glider now, so a bot only drinks with ground under it, never over the void
+		# or mid-drop)
+		var heal_ok: bool = h.grounded or (not h.gliding and not h.dropping and not h.over_void())
+		if heal_ok and h.hp < h.max_hp * 0.45 and h.tonics > 0:
 			inp["tonic"] = true
-		elif h.armor < h.max_armor * 0.3 and h.armor_kits > 0:
+		elif heal_ok and h.armor < h.max_armor * 0.3 and h.armor_kits > 0:
 			inp["kit"] = true
 		# swap a fainted kin out for the other one
 		if h.kin and (h.kin as Kin).state == "fainted" and h.kin2 and (h.kin2 as Kin).hp > 0.0:
