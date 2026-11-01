@@ -240,6 +240,7 @@ func _draw_all() -> void:
 	_draw_top(sz)
 	if p and m.lairs:
 		_draw_boss_bar(sz, p)
+		_draw_lair_victory(sz, p)
 	if p and not m.duel:
 		_draw_alerts(sz, p)
 	else:
@@ -3184,8 +3185,17 @@ func _lair_icon(pv: Vector2, L: Dictionary, k := 1.0) -> void:
 func _draw_map_lairs(inner: Rect2, to_map: Callable, on_map: Callable, overview: bool) -> void:
 	for L in m.lairs.list:
 		var pv: Vector2 = to_map.call(L["c"])
+		# a fight you heard (or its boss falling): a big pulsing ring round the boss's icon
+		var al: bool = m.player != null and m.lairs.alerted(L, m.player)
+		var acol: Color = Lairs.color_of(L) if String(L.get("alert", "")) == "fight" else GOLD
 		if on_map.call(pv, 6.0):
-			_lair_icon(pv, L, 1.0 if not overview else 0.9)
+			if al:
+				var ph := fmod(m.time * 1.2, 1.0)
+				c.draw_arc(pv, 9.0 + ph * 16.0, 0, TAU, 28, Color(acol, 1.0 - ph), 3.0, true)
+				c.draw_arc(pv, 10.0, 0, TAU, 24, Color(acol, 0.9), 2.0, true)
+			_lair_icon(pv, L, (1.0 if not overview else 0.9) * (1.3 if al else 1.0))
+		elif al:
+			_edge_arrow(inner, inner.get_center(), pv, acol)
 		elif L["state"] == "awake":
 			_edge_arrow(inner, inner.get_center(), pv, BAD)
 	# a dropped Rare Egg (and whoever just picked it up) shows to everyone for a few seconds
@@ -3276,6 +3286,20 @@ func _draw_lair_dial(sz: Vector2, p: Hunter) -> void:
 	var lit: int = (L["targets"] as Array).filter(func(t): return t["hit"]).size()
 	_ctext(ctr + Vector2(0, rad + 68), "%d of %d arcs  ·  a miss rings the chime" % [lit, (L["targets"] as Array).size()], 12, MUTED)
 
+## After the kill, still sealed in: the gate's clock, and the two ways out sooner.
+func _draw_lair_victory(sz: Vector2, p: Hunter) -> void:
+	var L: Dictionary = m.lairs.sealed_lair(p)
+	if L.is_empty() or not L.get("victory", false):
+		return
+	var col: Color = Lairs.color_of(L)
+	var w := minf(620.0, sz.x * 0.52)
+	var r := Rect2(Vector2(sz.x * 0.5 - w * 0.5, 22), Vector2(w, 46))
+	_rounded(r, Color(0.04, 0.04, 0.07, 0.85), 10, Color(col, 0.6), 2)
+	_ctext(Vector2(sz.x * 0.5, r.position.y + 20), "VICTORY  ·  gate opens in %s  ·  pull the lever, or ride the updraft" % Lairs.clock(m.lairs.victory_left(L)), 15, col, big)
+	var k := Settings.key_cap("interact")
+	_ctext(Vector2(sz.x * 0.5, r.position.y + 38), "%s at the lever by the gate  ·  the updraft at the back carries only those who fought" % k, 11, MUTED)
+	feed_top = maxf(feed_top, r.end.y + 8.0)
+
 ## At the top of the screen while you're in a lair with its boss awake: name, phase, health with
 ## marks at the phase lines, and the enrage clock.
 func _draw_boss_bar(sz: Vector2, p: Hunter) -> void:
@@ -3299,13 +3323,13 @@ func _draw_boss_bar(sz: Vector2, p: Hunter) -> void:
 	for mk in [0.66, 0.33]:
 		c.draw_line(r.position + Vector2(w * mk, -3), r.position + Vector2(w * mk, r.size.y + 3), Color(1, 1, 1, 0.8), 2.0)
 	_ctext(r.get_center() + Vector2(0, 5), "%d / %d" % [int(ceil(b.hp)), int(b.max_hp)], 12, INK, big)
-	var left := float(b.md.get("enrage", 150.0)) - b.awake_t
+	var left := float(b.md.get("enrage", 75.0)) - b.awake_t
 	var et := "ENRAGED" if b.enraged else "ENRAGE IN %s" % _fmt(maxf(0.0, left))
 	_ctext(Vector2(sz.x * 0.5, r.end.y + 20), et, 12, BAD if b.enraged or left < 20.0 else MUTED, big)
 	var lk: Dictionary = m.lairs.sealed_lair(p)
 	if not lk.is_empty():
 		# sealed in with it: what it takes to get out, and when the seal gives up on its own
-		_ctext(Vector2(sz.x * 0.5, r.end.y + 40), "SEALED IN  ·  DEFEAT %s  ·  %s" % [String(b.md["name"]).to_upper(), _fmt(m.lairs.lock_left(lk))], 15, col, big)
+		_ctext(Vector2(sz.x * 0.5, r.end.y + 40), "SEALED IN  ·  DEFEAT %s  ·  %s" % [String(b.md["name"]).to_upper(), Lairs.clock(m.lairs.lock_left(lk))], 15, col, big)
 	if b.invul_t > 0.0:
 		_ctext(Vector2(sz.x * 0.5, r.end.y + (64 if not lk.is_empty() else 44)), "PHASE %d" % (b.phase + 1), 22, col, big)
 	feed_top = maxf(feed_top, r.end.y + (54.0 if not lk.is_empty() else 34.0))

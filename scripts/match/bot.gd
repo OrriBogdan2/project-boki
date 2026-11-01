@@ -191,10 +191,10 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 			move = _path_dir(m, h, goal)
 			inp["aim"] = Vector3(h.pos.x + move.x * 3.0, h.pos.y + 0.9, h.pos.z + move.y * 3.0)
 			inp["aim_y"] = h.pos.y
-			if h.flat_dist(goal) < 1.2 and a["goal_kind"] in ["chest", "catch", "revive", "box", "dock", "uplink", "hatch", "lair_dial"]:
+			if h.flat_dist(goal) < 1.2 and a["goal_kind"] in ["chest", "catch", "revive", "box", "dock", "uplink", "hatch", "lair_dial", "lair_lever"]:
 				inp["interact"] = true
 				move = Vector2.ZERO
-			elif h.flat_dist(goal) < 1.0 and a["goal_kind"] in ["beacon", "board", "yard"]:
+			elif h.flat_dist(goal) < 1.0 and a["goal_kind"] in ["beacon", "board", "yard", "lair_camp"]:
 				move = Vector2.ZERO
 		if h.kin and h.kin.state == "active" and h.kin.flat_dist(h) > 6.0:
 			h.kin.recall()
@@ -691,7 +691,7 @@ func _choose(m: Match, h: Hunter) -> void:
 		a["goal_since"] = m.time
 	elif goal != Vector3.INF:
 		var d := h.flat_dist(goal)
-		if d < 2.0 and String(a.get("goal_kind", "")) in ["board", "yard", "beacon", "lair_dial"]:
+		if d < 2.0 and String(a.get("goal_kind", "")) in ["board", "yard", "beacon", "lair_dial", "lair_lever", "lair_camp"]:
 			a["goal_since"] = m.time      # there and waiting (holding a dock, charging an uplink) is fine
 		if d < float(a.get("goal_best", 1e9)) - 0.5:
 			a["goal_best"] = d

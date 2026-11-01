@@ -1457,26 +1457,39 @@ func _build_air() -> void:
 			mi.position = (a + b) * 0.5 + Vector3(0, -0.2 + k * 0.25, 0)
 	for u in updrafts:
 		var c: Vector3 = u["pos"]
-		var hgt: float = float(u["top"]) - c.y + 6.0
-		var col := MeshInstance3D.new()
-		var cm := Models.plain_cyl(float(u["r"]), float(u["r"]) * 1.15, hgt, 18)
-		cm.cap_top = false; cm.cap_bottom = false
-		col.mesh = cm
-		var mat := ShaderMaterial.new(); mat.shader = load("res://shaders/updraft.gdshader")
-		mat.set_shader_parameter("tiles", hgt / 4.0)
-		col.material_override = mat
-		col.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		col.position = Vector3(c.x, c.y - 6.0 + hgt * 0.5, c.z)
-		add_child(col)
-		var p := CPUParticles3D.new()
-		p.amount = 18; p.lifetime = 1.6; p.preprocess = 1.6
-		p.emission_shape = CPUParticles3D.EMISSION_SHAPE_SPHERE; p.emission_sphere_radius = float(u["r"]) * 0.8
-		p.direction = Vector3.UP; p.spread = 8.0; p.initial_velocity_min = 5.0; p.initial_velocity_max = 8.0
-		p.gravity = Vector3.ZERO
-		p.mesh = Models.sphere(0.06, 4)
-		p.material_override = Models.glow_mat(Color(1.0, 0.96, 0.8, 0.8))
-		p.position = Vector3(c.x, c.y - 3.0, c.z)
-		add_child(p)
+		var air := updraft_visual(float(u["r"]), c.y - 6.0, float(u["top"]))
+		air.position = Vector3(c.x, 0.0, c.z)
+		add_child(air)
+
+## A column of rising air (the updraft shader, plus motes climbing it), from y0 up to y1 in the node's
+## own space. Island-edge updrafts and a lair's escape updraft both use it.
+static func updraft_visual(r: float, y0: float, y1: float, tint := Color(1.0, 0.95, 0.75, 0.35)) -> Node3D:
+	var root := Node3D.new()
+	var hgt: float = y1 - y0
+	var col := MeshInstance3D.new()
+	var cm := Models.plain_cyl(r, r * 1.15, hgt, 18)
+	cm.cap_top = false; cm.cap_bottom = false
+	col.mesh = cm
+	var mat := ShaderMaterial.new(); mat.shader = load("res://shaders/updraft.gdshader")
+	mat.set_shader_parameter("tiles", hgt / 4.0)
+	if tint != Color(1.0, 0.95, 0.75, 0.35):
+		mat.set_shader_parameter("color", Color(tint, 0.85))
+		mat.set_shader_parameter("speed", 1.1)
+	col.material_override = mat
+	col.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	col.position = Vector3(0, y0 + hgt * 0.5, 0)
+	col.name = "Column"
+	root.add_child(col)
+	var p := CPUParticles3D.new()
+	p.amount = 18; p.lifetime = 1.6; p.preprocess = 1.6
+	p.emission_shape = CPUParticles3D.EMISSION_SHAPE_SPHERE; p.emission_sphere_radius = r * 0.8
+	p.direction = Vector3.UP; p.spread = 8.0; p.initial_velocity_min = 5.0; p.initial_velocity_max = 8.0
+	p.gravity = Vector3.ZERO
+	p.mesh = Models.sphere(0.06, 4)
+	p.material_override = Models.glow_mat(Color(1.0, 0.96, 0.8, 0.8) if tint == Color(1.0, 0.95, 0.75, 0.35) else Color(tint, 0.85))
+	p.position = Vector3(0, y0 + 3.0, 0)
+	root.add_child(p)
+	return root
 
 func _decorate() -> void:
 	var drng := RandomNumberGenerator.new(); drng.seed = rng.seed + 11
