@@ -693,7 +693,7 @@ func _start(o: Dictionary) -> void:
 	var layout := {}
 	# --procgen (or opts.procedural): the old island generator instead, as a fallback
 	if big and not o.get("procedural", false) and not "--procgen" in OS.get_cmdline_user_args():
-		layout = WideLayout.pick(o, rolling, tier)     # a rolling session gets the wide Skyreach; otherwise the expedition map
+		layout = WideLayout.pick(o, rolling != null, tier)     # a rolling session gets the wide Skyreach; otherwise the expedition map
 	elif o.get("tutorial", false):
 		layout = World.load_layout("tutorial")
 	elif o.get("arena", false):

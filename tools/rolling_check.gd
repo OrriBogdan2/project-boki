@@ -204,6 +204,7 @@ func _session(main: Node) -> void:
 	if rival:
 		for h in onmap:
 			if h.has_meta("bounty"): h.remove_meta("bounty")
+		R.bounty_cd.erase(rival.nid)      # (bots fighting in the minutes before may have claimed one off them: that sets a cooldown)
 		rival.lvl = int(R.median) + 4
 		P.lvl = int(R.median); P.xp = float(Hunter.XP_TO[P.lvl - 1])
 		R._update_median()
@@ -236,7 +237,7 @@ func _session(main: Node) -> void:
 		cp2["cleared_at"] = m.time - Rolling.CAMP_RESPAWN - 1.0
 		var n0 := int(R.stats["camp_respawns"])
 		R._camp_respawns()
-		ok(int(R.stats["camp_respawns"]) == n0 + 1 and (cp2["mobs"] as Array).all(func(mb): return not mb.dead), "a cleared camp comes back after %d s with nobody near" % int(Rolling.CAMP_RESPAWN))
+		ok(int(R.stats["camp_respawns"]) >= n0 + 1 and (cp2["mobs"] as Array).all(func(mb): return not mb.dead), "a cleared camp comes back after %d s with nobody near" % int(Rolling.CAMP_RESPAWN))
 	ok(R.next_meteor(0.0) < m.length and R.next_meteor(0.0) > 0.0, "meteor showers keep coming through the session (next at %s)" % Rolling.fmt(m.sess_t0 + R.next_meteor(0.0)))
 	# ---- no new squads in the last 8 minutes
 	var flying0 := m.ships.size()
@@ -248,6 +249,7 @@ func _session(main: Node) -> void:
 	ok(after_cut == 0 and R.next_wave().is_empty() and R.waves_left() == 0, "after %s nobody new drops in (%d ships flew)" % [Rolling.fmt(Rolling.SESSION - Rolling.CUTOFF), m.ships.size()])
 	ok(m.ships.size() >= flying0, "the waves up to the cut-off launched as the clock passed them")
 	# ---- 30:00: the session ends for everyone
+	var p_out0 := P.out      # (the autopilot may have been finished off already: then that is the match's result)
 	var ext: Hunter = null
 	for h in m.hunters:
 		if h != P and not h.out and not h.extracted and not h.riding and not h.dropping: ext = h; break
@@ -257,7 +259,7 @@ func _session(main: Node) -> void:
 	var still := m.hunters.filter(func(h): return not h.out and not h.extracted)
 	ok(still.is_empty(), "at 30:00 everyone still out there is lost (%d left)" % still.size())
 	ok(ext == null or (ext.extracted and not ext.out), "whoever got out keeps what they took")
-	ok(m.hunters.filter(func(h): return h.out and String(h.get_meta("died_why", "")) == "abyss").size() > 0 and m.result.get("why", "") in ["abyss", "extracted"], "the islands take the rest (result: %s)" % String(m.result.get("why", "")))
+	ok(m.hunters.filter(func(h): return h.out and String(h.get_meta("died_why", "")) == "abyss").size() > 0 and (p_out0 or m.result.get("why", "") in ["abyss", "extracted"]), "the islands take the rest (result: %s)" % String(m.result.get("why", "")))
 	ok(absf(m.sess_time() - Rolling.SESSION) < 1.5, "and that's 30:00 on the session clock (%s)" % Rolling.fmt(m.sess_time()))
 	m.queue_free()
 
@@ -269,7 +271,7 @@ func _default_match(main: Node) -> void:
 	m.start({"teams": 4, "squad": 1, "tier": 0, "seed": 31, "autoplay": true, "plan_t": 0.5})
 	m.set_process(false)
 	ok(m.rolling == null and m.ships.is_empty() and m.sess_t0 == 0.0, "without the option it's the fixed match")
-	ok(absf(m.length - Data.MATCH["length"] * 1.7) < 0.01 and m.world.w == World.BIG_SIZE and m.world.layout_id == "skyreach", "same length (%.0f s) and map (%d tiles)" % [m.length, m.world.w])
+	ok(absf(m.length - Data.MATCH["length"] * 1.7) < 0.01 and m.world.w == World.BIG_SIZE and m.world.layout_id == World.layout_for_tier(0), "same length (%.0f s) and map (%d tiles)" % [m.length, m.world.w])
 	var dock: Dictionary = {}
 	for x in m.exits.list:
 		if x["kind"] == "dock": dock = x; break

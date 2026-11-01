@@ -9,7 +9,7 @@ const MAP := "skyreach"        # the authored map the wide layout is made from
 ## The layout a match loads. Rolling sessions use the wide Skyreach unless a map was asked for with
 ## opts.map / --map= (that one is used as it is). opts.narrow keeps plain Skyreach.
 static func pick(o: Dictionary, rolling: bool, tier: int) -> Dictionary:
-	var explicit := o.has("map") or OS.get_cmdline_user_args().any(func(x): return String(x).begins_with("--map="))
+	var explicit := o.has("map") or Array(OS.get_cmdline_user_args()).any(func(x): return String(x).begins_with("--map="))
 	if not rolling or explicit:
 		return World.load_layout(String(o.get("map", World.layout_for_tier(tier))))
 	var L := World.load_layout(MAP)
