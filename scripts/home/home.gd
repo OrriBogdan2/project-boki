@@ -2726,7 +2726,7 @@ func _open_kin(rec: Dictionary) -> void:
 	if rec.get("farmhand", false): hx.add_child(UI.tag("Farmhand", UI.GOOD))
 	if KinBox.is_boxed(rec): hx.add_child(UI.tag("In the Boki Burrow", Color("cdb8ff")))
 	for mid in Mutations.of(rec):
-		var mt := UI.tag(Mutations.name_of(mid), Mutations.col_of(mid))
+		var mt := UI.tag(Mutations.name_of(mid), UI.MUTED)      # plain: rarity shows on the Boki itself
 		mt.tooltip_text = Mutations.perk_text(mid)
 		hx.add_child(mt)
 	UI.shell_tabs(v, ["Care", "Training", "Growth", "About"], kin_tab, func(t): kin_tab = t; _open_kin(rec))
@@ -4558,11 +4558,6 @@ func _nook_tile(o: Dictionary, egg_in: bool) -> Control:
 	lv.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
 	lv.position = Vector2(0, -2)
 	pic_box.add_child(lv)
-	var marks := Mutations.badges(o, 14.0)      # shimmer and mutations, up to three
-	marks.add_theme_constant_override("separation", 2)
-	while marks.get_child_count() > 3: marks.get_child(marks.get_child_count() - 1).free()
-	marks.position = Vector2(NOOK_TILE.x - 16 - 16 * marks.get_child_count(), -1)
-	pic_box.add_child(marks)
 	if picked:
 		var n := UI.tag(str(nook_pick.find(uid) + 1), UI.ACCENT)
 		n.position = Vector2(0, 52)
@@ -4607,13 +4602,13 @@ func _nook_detail(rec: Dictionary, dv: VBoxContainer, egg_in: bool) -> void:
 	var why := _can_pair(rec)
 	tv.add_child(UI.label("Ready to pair" if why == "" else why, 12, UI.GOOD if why == "" else UI.MUTED))
 	var mk := UI.hbox(4)
-	if rec.get("shimmer", false): mk.add_child(UI.tag("Shimmering", Color("fff0a0")))
+	if rec.get("shimmer", false): mk.add_child(UI.tag("Shimmering", UI.MUTED))
 	for mid in Mutations.of(rec):
-		var mt := UI.tag(Mutations.name_of(mid), Mutations.col_of(mid))
+		var mt := UI.tag(Mutations.name_of(mid), UI.MUTED)
 		mt.tooltip_text = Mutations.perk_text(mid)
 		mt.mouse_filter = Control.MOUSE_FILTER_PASS
 		mk.add_child(mt)
-	if rec.get("rare", false): mk.add_child(UI.tag("Rare Egg", UI.GOLD))
+	if rec.get("rare", false): mk.add_child(UI.tag("Rare Egg", UI.MUTED))
 	if mk.get_child_count() > 0: tv.add_child(mk)
 	top.add_child(tv)
 	dv.add_child(top)
@@ -4871,7 +4866,7 @@ func _hatch_play(baby: Dictionary, rare: bool, boss: String, at: Vector3, hide: 
 		if not ke.is_empty():
 			ke["pos"] = Vector3(land.x, ke["pos"].y, land.z)
 			(ke["node"] as Node3D).position = ke["pos"]
-		# the big reveal (flash, fanfare, turntable and info), then naming
+		# a closer look (its card, and turning it round), then naming
 		var rv := KinReveal.new(baby["species"], baby)
 		add_child(rv)
 		panel_open = "reveal"; building_now = true      # hold the hunter still while you turn it round
@@ -4885,13 +4880,12 @@ func _name_baby(baby: Dictionary) -> void:
 	v.add_child(UI.label("\"%s\"" % KinSpeak.babble(baby["species"], "happy"), 24, Shiny.body(baby)))
 	var rare_pre := Mutations.prefix(baby)
 	if baby.get("rare", false) or not baby.has("parents"):
-		v.add_child(UI.label("A rare %s%s%s, hatched from the egg %s guarded. %s nature." % ["shimmering " if baby.get("shimmer", false) else "", (rare_pre + " ") if rare_pre != "" else "", sp["name"], String(Data.MOBS.get(String(baby.get("from_boss", "")), {}).get("name", "a boss")), Care.nature(baby)], 15, UI.GOLD))
+		v.add_child(UI.label("A rare %s%s%s, hatched from the egg %s guarded. %s nature." % ["shimmering " if baby.get("shimmer", false) else "", (rare_pre + " ") if rare_pre != "" else "", sp["name"], String(Data.MOBS.get(String(baby.get("from_boss", "")), {}).get("name", "a boss")), Care.nature(baby)], 15))
 	else:
 		v.add_child(UI.label("A %s%s%s, child of %s and %s. %s nature." % ["shimmering " if baby.get("shimmer", false) else "", (rare_pre + " ") if rare_pre != "" else "", sp["name"], baby["parents"][0], baby["parents"][1], Care.nature(baby)], 15))
 	for mid in Mutations.of(baby):
 		var mr := UI.hbox(8)
-		mr.add_child(Mutations.Badge.new(mid, 20.0))
-		var mtl := UI.label("%s: %s" % [Mutations.name_of(mid), Mutations.perk_text(mid)], 14, Mutations.col_of(mid))
+		var mtl := UI.label("%s: %s" % [Mutations.name_of(mid), Mutations.perk_text(mid)], 14, UI.INK)
 		mtl.autowrap_mode = TextServer.AUTOWRAP_OFF
 		mr.add_child(mtl)
 		v.add_child(mr)
@@ -5269,7 +5263,7 @@ func _econ_tests(dbg) -> void:
 		for i in 4:
 			var rec := Save.new_kin(Data.common_kin()[(i + 2) % Data.common_kin().size()], ["Biscuit", "Wren", "Clove", "Sorrel"][i])
 			rec["level"] = 3 + i * 2
-			Save.remember(rec, "caught", "was caught by you in the islands and brought home")
+			Save.remember(rec, "caught", "was tamed by you out in the islands and brought home")
 			Save.remember(rec, "extracted", "made it out of the islands with you")
 			Save.remember(rec, "fed", "was fed emberberry by you")
 			Save.remember(rec, "love", "loved playing fetch with you")
