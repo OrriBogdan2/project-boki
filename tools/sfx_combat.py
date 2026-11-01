@@ -315,6 +315,143 @@ def build():
         save('die_big_%d' % i, die(i, True), rms_db=-16)
 
 
+    # ============================================================== weapon abilities (right click) and other casts
+    # One sound per way an ability is delivered (Juice.ab_cast) and one per what it does on a hit
+    # (Juice.ab_hit), so any ability (a gun's right click, an archetype kit, a Boki) can use them.
+    def sweep(d, f0, f1, q=4.0):
+        """Noise through a band-pass whose centre glides f0 -> f1 (state-variable filter)."""
+        n = N(d); u = np.arange(n) / n
+        f = f0 * (f1 / f0) ** u
+        x = noise(d); out = np.empty(n); low = band = 0.0; damp = 1.0 / q
+        for k in range(n):
+            g = 2.0 * np.sin(np.pi * min(f[k], SR / 6.5) / SR)
+            low += g * band
+            high = x[k] - low - damp * band
+            band += g * high
+            out[k] = band
+        return out
+
+    def tone_glide(f0, f1, d, harm=(1.0, 0.3, 0.12)):
+        n = N(d); f = f0 * (f1 / f0) ** (np.arange(n) / n)
+        ph = 2 * np.pi * np.cumsum(f) / SR
+        return sum(a * np.sin(ph * (k + 1)) for k, a in enumerate(harm))
+
+    # thrown or fired (a disc, a knife, a bolt): a sharp tearing whoosh off a hard release
+    def ab_throw(i):
+        d = 0.32; n = N(d)
+        return mix(click(0.003, 2500, 9000) * 1.5, kick(260 + 20 * i, 110, d, 0.008, 0.025, 2.2) * 0.45,
+                   sweep(d, 900 + 100 * i, 4200, 3.0) * np.sin(np.pi * np.clip(np.arange(n) / n * 1.3, 0, 1)) ** 1.5 * 2.2)
+    takes('ab_throw', ab_throw, 2, rms_db=-17)
+
+    # a charged rail going off: a split-the-air crack, an electric sweep down and a deep sub
+    def ab_rail(i):
+        d = 1.3; n = N(d)
+        zapl = sat(tone_glide(1800, 160, 0.5, (1.0, 0.5, 0.3, 0.2)) * env(N(0.5), 0.001, 0.14), 2.5) * 0.5
+        return mix(click(0.003, 3500, 14000) * 3.0, crack(d, 1500, 10000, 0.012) * 3.2, crack(d, 300, 1500, 0.05) * 2.4,
+                   zapl, kick(240, 45, d, 0.012, 0.1, 3.2) * 0.8, sub(60, 34, d, 0.18) * 0.5,
+                   reflections(tail(1.1, 1500, 0.26) * 1.4, ((0.08, 0.4, 1200), (0.19, 0.28, 900), (0.33, 0.18, 700))))
+    takes('ab_rail', ab_rail, 1, rms_db=-15)
+
+    # holding a charge: a whine that climbs and a crackle that thickens (about 1s)
+    d = 1.1; n = N(d); u = np.arange(n) / n
+    save('ab_charge', mix(sat(tone_glide(220, 880, d, (1.0, 0.4, 0.2)) * (0.2 + 0.8 * u) * env(n, 0.05, 5.0), 1.6) * 0.5,
+                          grains(d, 160, 2500, 8000, 0.001, 0.003) * u * 1.2, lpf(noise(d), 300) * u * 0.4), rms_db=-21)
+
+    # a blast at close range (a shotgun's breach, a cone): a huge chest-hit and the air shoved away
+    def ab_blast(i):
+        d = 1.0; n = N(d)
+        return mix(click(0.005, 2000, 10000) * 2.2, kick(170 + 10 * i, 45, d, 0.022, 0.08, 3.4) * 0.8,
+                   crack(d, 250, 5000, 0.05) * 3.4, sub(62, 36, d, 0.16) * 0.55,
+                   sweep(0.6, 3000, 300, 1.4) * env(N(0.6), 0.003, 0.18) * 1.6,
+                   reflections(tail(0.8, 1500, 0.16) * 1.2))
+    takes('ab_blast', ab_blast, 1, rms_db=-15)
+
+    # leaping into the air: a heavy push-off and the rush of air
+    def ab_leap(i):
+        d = 0.6; n = N(d)
+        return mix(kick(150, 60, d, 0.02, 0.06, 2.6) * 0.6, crack(d, 200, 1500, 0.03) * 1.6,
+                   sweep(d, 400, 2400, 2.0) * np.sin(np.pi * np.arange(n) / n) ** 1.2 * 1.8)
+    takes('ab_leap', ab_leap, 1, rms_db=-18)
+
+    # an ability landing on an area (a slam, a mine going off): the ground cracks, rubble flies
+    def ab_slam(i):
+        d = 1.4; n = N(d)
+        return mix(click(0.006, 1500, 9000) * 2.0, kick(130 + 8 * i, 34, d, 0.04, 0.14, 3.6) * 0.85,
+                   crack(d, 150, 3000, 0.07) * 3.0, sub(55, 30, d, 0.3) * 0.6,
+                   grains(d, 140, 900, 6000, fall=0.25) * 1.4, lpf(noise(d), 600) * env(n, 0.01, 0.35) * 1.4)
+    takes('ab_slam', ab_slam, 1, rms_db=-14)
+
+    # a barrier going up: a hard set-down and a rising energy shimmer
+    def ab_wall(i):
+        d = 0.9; n = N(d); u = np.arange(n) / n
+        shimmer = sum(np.sin(2 * np.pi * f * T(d) + 3 * np.sin(2 * np.pi * 6 * T(d))) for f in (440, 660, 990)) * np.sin(np.pi * np.clip(u * 1.2, 0, 1)) * 0.12
+        return mix(click(0.004, 1500, 8000) * 1.6, kick(180, 55, d, 0.015, 0.06, 2.8) * 0.7, crack(d, 300, 2500, 0.03) * 2.2,
+                   shimmer, sweep(d, 300, 2000, 2.5) * env(n, 0.05, 0.3) * 0.8)
+    takes('ab_wall', ab_wall, 1, rms_db=-17)
+
+    # a shot stopped by a barrier: a bright energy ping
+    def ab_shield_hit(i):
+        d = 0.35
+        return mix(click(0.002, 3000, 10000) * 1.2, ring((1320 + 60 * i, 1980, 2970), d, (0.07, 0.05, 0.03), (0.5, 0.3, 0.15)),
+                   crack(d, 1000, 5000, 0.01) * 0.8)
+    takes('ab_shield_hit', ab_shield_hit, 2, rms_db=-20)
+
+    # a blade raised to parry: a quick metallic shing
+    def ab_guard(i):
+        d = 0.6
+        return mix(sweep(0.25, 2000, 7000, 6.0) * env(N(0.25), 0.01, 0.08) * 1.5,
+                   at(ring((2637, 3951, 5274, 6900), d - 0.03, (0.25, 0.15, 0.1, 0.05), (0.4, 0.25, 0.15, 0.06)), 0.03))
+    takes('ab_guard', ab_guard, 1, rms_db=-19)
+
+    # a parry or a reflect landing: a big ringing clang with a punch under it
+    def ab_parry(i):
+        d = 1.0
+        return mix(click(0.003, 2500, 12000) * 2.0, kick(240, 80, d, 0.01, 0.04, 2.8) * 0.6, crack(d, 1500, 7000, 0.02) * 1.8,
+                   ring((1046, 1568, 2489, 3520, 4650), d, (0.4, 0.3, 0.2, 0.12, 0.08), (0.5, 0.35, 0.25, 0.15, 0.08)))
+    takes('ab_parry', ab_parry, 1, rms_db=-15)
+
+    # a trap planted: a heavy thunk into the ground and two arming beeps
+    def ab_plant(i):
+        d = 0.7
+        beep = lambda f: ring((f, f * 2), 0.08, (0.03, 0.02), (0.5, 0.15))
+        return mix(click(0.004, 1500, 7000) * 1.4, kick(200, 70, d, 0.012, 0.05, 2.6) * 0.7, crack(d, 300, 2000, 0.025) * 2.0,
+                   at(beep(1760), 0.32) * 1.2, at(beep(2349), 0.46) * 1.2)
+    takes('ab_plant', ab_plant, 1, rms_db=-18)
+
+    # a tether hooking on: an electric twang that bends down
+    def ab_tether(i):
+        d = 0.7; n = N(d)
+        tw = sat(tone_glide(620, 300, d, (1.0, 0.6, 0.4, 0.25)) * env(n, 0.002, 0.18), 2.4)
+        return mix(click(0.003, 2500, 9000) * 1.4, tw * 0.6, grains(0.4, 300, 2500, 7000, fall=0.1) * 0.8,
+                   kick(220, 90, d, 0.01, 0.03, 2.2) * 0.4)
+    takes('ab_tether', ab_tether, 1, rms_db=-17)
+
+    # vanishing and reappearing: air sucked in backwards, then a sharp snap
+    def ab_blink(i):
+        d = 0.45; n = N(d); u = np.arange(n) / n
+        suck = sweep(d, 4000, 500, 2.5) * (u ** 2) * 1.8
+        return mix(suck, at(mix(click(0.003, 2500, 10000) * 2.0, crack(0.2, 600, 4000, 0.015) * 1.8, kick(260, 100, 0.2, 0.008, 0.02, 2.2) * 0.4), d - 0.08))
+    takes('ab_blink', ab_blink, 1, rms_db=-17)
+
+    # a spinning blade in flight: a fast whirring buzz that rises and falls past you
+    d = 0.7; n = N(d); u = np.arange(n) / n
+    am = 0.5 + 0.5 * np.sin(2 * np.pi * 34 * T(d))
+    save('ab_whirr', mix(sweep(d, 1200, 2600, 5.0) * am * np.sin(np.pi * u) * 1.6, tone_glide(380, 420, d, (1.0, 0.3)) * am * np.sin(np.pi * u) * 0.15), rms_db=-21)
+
+    # what a hit DOES, by category (Juice.ab_hit): control is a hard hit then a held, dazed ring;
+    # a slow is a cold crackle
+    def ab_stun(i):
+        d = 0.9; n = N(d)
+        daze = ring((880, 1245, 1760), d, (0.4, 0.35, 0.3), (0.3, 0.22, 0.12)) * (0.7 + 0.3 * np.sin(2 * np.pi * 7 * T(d)))
+        return mix(click(0.004, 2000, 10000) * 1.8, kick(200, 60, d, 0.012, 0.05, 3.0) * 0.7, crack(d, 400, 3500, 0.03) * 2.4, at(daze, 0.03))
+    takes('ab_stun', ab_stun, 1, rms_db=-16)
+
+    def ab_slow(i):
+        d = 0.5
+        return mix(grains(d, 500, 2500, 9000, 0.001, 0.004, fall=0.15) * 1.6, ring((2093, 3136), d, (0.12, 0.08), (0.2, 0.1)),
+                   crack(d, 600, 3000, 0.02) * 1.0)
+    takes('ab_slow', ab_slow, 1, rms_db=-19)
+
     # ============================================================== interface
     # crisp and tactile: a woody tick for a press, a faint glassy tick for a hover
     save('click', mix(click(0.002, 2500, 9000) * 0.8, ring((1180, 2410, 3560), 0.06, (0.012, 0.008, 0.005), (0.6, 0.25, 0.1)),
