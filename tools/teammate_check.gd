@@ -126,9 +126,12 @@ func _follow() -> void:
 	k.throw_to(P.pos + Vector3(5, 0, 0))
 	for i in 60: m.step(Match.DT)
 	var was := k.state
-	var far := 0.0
-	_walk(P, Vector2(0, -1), 3.0, func(): far = maxf(far, k.flat_dist(P)) if k.state == "active" else far)
-	ok(was == "active" and (k.state == "active" and k.flat_dist(P) < 2.6 or k.state == "shoulder"), "out on the field it walks back to your side (%s, %.1fm, max %.1fm)" % [k.state, k.flat_dist(P), far])
+	var far := [0.0]      # (an Array: a lambda captures plain locals by value)
+	_walk(P, Vector2(0, -1), 3.0, func():
+		# (the training area keeps spawning practice dummies round you: keep them away for this part)
+		for mb in m.mobs: mb.dead = true; mb.visible = false
+		if k.state == "active": far[0] = maxf(far[0], k.flat_dist(P)))
+	ok(was == "active" and (k.state == "active" and k.flat_dist(P) < 2.6 or k.state == "shoulder"), "out on the field it walks back to your side (%s, %.1fm, max %.1fm)" % [k.state, k.flat_dist(P), far[0]])
 	# a threat close by: it stands between you and it
 	var T: Hunter = m.make_hunter("T", 5, "medium", "Rival", "idle", {}, P.pos + Vector3(6, 0, 0))
 	T.max_hp = 1e5; T.hp = 1e5

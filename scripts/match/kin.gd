@@ -24,6 +24,8 @@ var speed := 6.5
 var atk_cd := 0.0
 var lunge_t := 0.0
 var target: Ent = null
+var chase_stall := 0.0          # seconds spent chasing a target without getting any closer (a ledge, a wall in the way)
+var ignore_until := {}          # Ent -> m.time: targets it gave up on, left alone for a few seconds
 var fly: Dictionary = {}          # thrown, leaping or rushing
 var pend_skill := Vector3.INF     # ability to cast when it lands
 var pend_slot := ""
@@ -735,6 +737,14 @@ func _sim_active(dt: float) -> void:
 		var reach: float = sp["range"] + target.r
 		if d > reach * 0.8:
 			wish = to.normalized() * spd
+			# chasing something it can't get to (up a ledge, round a wall): give up on it for a while
+			# and come back to you, instead of standing there pressing into the wall
+			chase_stall = chase_stall + dt if Vector2(vel.x, vel.z).length() < spd * 0.35 and spd > 0.0 else 0.0
+			if chase_stall > 0.8:
+				chase_stall = 0.0
+				ignore_until[target] = m.time + 5.0
+				target = null
+				wish = Vector2.ZERO
 		if d < reach and atk_cd <= 0.0 and absf(target.pos.y - pos.y) < 1.5:
 			atk_cd = 0.95
 			lunge_t = 0.15
@@ -753,24 +763,35 @@ func _sim_active(dt: float) -> void:
 			return
 		var spot: Vector3 = comp.heel_spot() if comp else Vector3.INF
 		if spot != Vector3.INF and to.length() < 8.0:
+			# keep pace like a teammate: move with you (your velocity) plus a pull toward the heel spot.
+			# Chasing the spot at its own run speed alone left it trailing ~3.5m behind a hunter who
+			# runs faster than it does (archetype paces, hastes, dash carry)
 			var ts := Vector2(spot.x - pos.x, spot.z - pos.z)
-			if ts.length() > 0.5:
-				wish = ts.normalized() * minf(spd * (1.45 if ts.length() > 2.5 else 1.0), ts.length() * 4.0)
+			var ov := Vector2(owner_h.vel.x, owner_h.vel.z)
+			if ts.length() > 0.5 or ov.length() > 0.3:
+				wish = (ov + ts * HEEL_PULL).limit_length(maxf(spd * 1.45, ov.length() * 1.3))
+				if root_t > 0.0 or stun_t > 0.0: wish = Vector2.ZERO
 		elif to.length() > brain.idle_radius() + 1.0:
 			wish = to.normalized() * spd
 		if to.length() > 6.0 and not walkable_to(owner_h.pos):
 			state = "returning"
+		elif to.length() > 8.0:
+			state = "returning"      # well off (after a fight): run back hard, or leap, rather than amble
 	_ground_move(wish, dt)
+
+const HEEL_PULL := 4.0     # 1/s: how hard an out-of-place kin closes on its heel spot, on top of your pace
 
 func _ground_move(wish: Vector2, dt: float) -> void:
 	var hv := Vector2(vel.x, vel.z)
 	var k := 12.0 if grounded else 2.0
-	if hv.length() > speed * 1.3:
+	# speed above a run (a knock, a lunge) eases off slowly; keeping pace with a fast hunter isn't that
+	var run_cap := maxf(speed * 1.3, wish.length() * 1.05)
+	if hv.length() > run_cap:
 		k = 3.0 if grounded else 0.6
 	hv += (wish - hv) * (1.0 - exp(-k * dt))
 	# don't walk off edges on purpose
 	var ahead := Vector2(pos.x, pos.z) + hv.normalized() * (r + 0.25)
-	if grounded and hv.length() <= speed * 1.3 and wish.length() > 0.1 and m.world.is_void(ahead.x, ahead.y):
+	if grounded and hv.length() <= run_cap and wish.length() > 0.1 and m.world.is_void(ahead.x, ahead.y):
 		hv = Vector2.ZERO
 	vel.x = hv.x; vel.z = hv.y
 	slide(dt)
