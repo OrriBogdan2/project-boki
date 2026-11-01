@@ -13,8 +13,8 @@ static var _cache := {}
 const ARCHES := {
 	"thief": {"name": "Thief", "cls": "light"},
 	"archer": {"name": "Archer", "cls": "light"},
-	"mage": {"name": "Mage", "cls": "medium"},
-	"gunslinger": {"name": "Gunslinger", "cls": "medium"},
+	"mage": {"name": "Vireo", "cls": "light"},
+	"gunslinger": {"name": "Marlowe", "cls": "medium"},
 	"juggernaut": {"name": "Juggernaut", "cls": "heavy"},
 	"bulwark": {"name": "Bulwark", "cls": "heavy"},
 }

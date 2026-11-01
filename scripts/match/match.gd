@@ -6307,6 +6307,10 @@ func _net_ev(x, from: String) -> void:
 			# a Mage's Hex landed: the body's own game runs the rules, every game shows the critter
 			who = ents_by_id.get(String(x[1]), null)
 			if who is Hunter: Hex.apply(who as Hunter, float(x[2]), false)
+		"kst":
+			# a kit status landed (Grounded, Rattled): the body's own game runs the rules, all show the look
+			who = ents_by_id.get(String(x[1]), null)
+			if who is Hunter: KitStatus.apply(who as Hunter, String(x[2]), float(x[3]), false)
 		"s":
 			var col := Color.html(String(x[8]))
 			var ex := {"cos": true}

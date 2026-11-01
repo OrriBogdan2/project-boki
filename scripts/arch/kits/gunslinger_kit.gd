@@ -1,115 +1,121 @@
 class_name GunslingerKit
 extends ArchKit
-## Gunslinger (medium): Slide Reload, Six Chambers, Trick Shot (Rail Charge, Recoil Shot, doubled in
-## Quickdraw, Called Shot at 6), Quickdraw, Last Round. docs/ARCHETYPES.md §6.4.
+## Marlowe (archetype id "gunslinger", medium): the burr-and-needle marksman. docs/heroes/gunslinger.md
+## has the per-slot table and the research notes.
 ##
-## The loop (kits4): weapon hits and tap rolls load six Chambers (a gold cylinder over the hat fills
-## pip by pip) -> at 6 the gun glows gold, the cylinder spins and clicks: Called Shot armed -> the next
-## Trick Shot (or Rail) is a Called Shot: a stunning crit with T4 hitstop and its own sound, and the
-## cylinder spins a fresh magazine in, so the stun is followed by a full string of fire.
+## Loop: Burr Charge sticks to a foe (or the wall behind them) and goes off, leaving them Rattled:
+## slowed, and the Quill Rifle and Longneedle hit them harder. Every ability that lands also builds
+## Fever, a stack of lifesteal that your rifle then feeds on. Longneedle is the big pierce shot; a
+## hunter hit shortens its cooldown. A knock heals you and refreshes Slipstep.
 
-var load_at := -9.0            # last chamber loaded (one per 0.25s)
-var slide := {}                # {t, held, refund} while a Slide Reload runs
-var pd_t := 0.0                # Quickdraw: the next slide's perfect-dodge window is doubled
-var rail_tele: Node3D = null
-var lock := {}                 # Last Round: {t, locks: {id: [ent, time]}}
-var gun_glow: Node3D = null    # the gold glow at the gun while a Called Shot is armed
-var called_shots := 0          # Called Shots that landed (tests, demo)
-var called_cast := -1          # the cast id whose first hit pays out (one payoff per Called Shot)
-var cast_n := 0
+var slide := {}                # {t, held, dir} while a Slipstep runs
+var burrs: Array = []          # Burr Charges in flight or stuck: {pos, dir, t, node, stuck, wall, fuse}
+var needle := {}               # Longneedle's charge: {t, tele}
+var knocked := {}
+var rattles := 0               # Burr Charges that detonated (tests)
+var skewers := 0               # Longneedle payoffs
+var needle_hits := 0
+var wall_slams := 0
+var last_dash_kind := ""
 
 func full_ready() -> bool:
-	return res >= res_max() - 0.01
+	return false
 
 func res_text() -> String:
-	return "%d/6" % int(res)
+	return "%d" % int(res)
+
+func fever_k() -> float:
+	return float(res_def()["vamp"]) * floorf(res)
 
 func ready_label() -> String:
-	return "CALLED SHOT READY" if full_ready() else ""
+	return ""
 
-func load_chambers(n: int, force := false) -> void:
-	if not force and m.time - load_at < float(res_def().get("gap", 0.25)):
-		return
-	load_at = m.time
-	var was := res
-	add_res(float(n))
-	touch_res(float(res_def().get("wait", 4.0)))
-	if res >= res_max() and was < res_max():
-		m.sfx("reload", h.pos, -2.0, 1.9)      # the cylinder-spin click
-		m.fx.ring(h.pos, 1.2, res_col(), 0.3)
-		armed_fx("CALLED SHOT READY", "sec")
+# ------------------------------------------------------------------ passive: Fever
+func _tick(dt: float) -> void:
+	if res_wait <= 0.0 and res > 0.0:
+		res = 0.0
+	if not slide.is_empty():
+		_tick_slide(dt)
+	if not burrs.is_empty():
+		_tick_burrs(dt)
+	if not needle.is_empty():
+		_tick_needle(dt)
+	self_pips(int(res_def()["max"]), int(floor(res + 0.01)), false, dt)
 
-## Perfect-dodge window multiplier (Hunter._mitigate reads it).
-func pd_k() -> float:
-	return float(e_def().get("pd_k", 2.0)) if pd_t > 0.0 else 1.0
+func teardown() -> void:
+	super.teardown()
+	for b in burrs:
+		if b["node"] != null and is_instance_valid(b["node"]): (b["node"] as Node).queue_free()
+	burrs.clear()
+	_end_needle()
 
-## Shooting from the held slide.
 func fires_in_dash() -> bool:
 	return not slide.is_empty() and bool(slide.get("held", false))
 
-func _tick(dt: float) -> void:
-	pd_t = maxf(0.0, pd_t - dt)
-	if res_wait <= 0.0:
-		add_res(-float(res_def().get("drain", 1.0)) * dt)
-	if not slide.is_empty():
-		_tick_slide(dt)
-	if rail_tele and is_instance_valid(rail_tele) and rmb_down:
-		m.fx.aim_telegraph(rail_tele, h.pos, h.aim_dir())
-		var k := clampf(rmb_t / float(rmb_def()["rail"]["time"]), 0.0, 1.0)
-		m.fx.telegraph_progress(rail_tele, k)
-	if not lock.is_empty():
-		_tick_lock(dt)
-	self_pips(6, int(floor(res + 0.01)), full_ready(), dt)
-	_tick_gun_glow()
-	net_pulse(dt, full_ready())
+func move_k() -> float:
+	return 1.0 - float(e_def()["self_slow"]) if not needle.is_empty() else 1.0
 
-## The gun glows gold while a Called Shot is armed: a hot point and a light at the muzzle.
-func _tick_gun_glow() -> void:
-	if gun_glow == null or not is_instance_valid(gun_glow):
-		gun_glow = own_node()
-		var b := MeshInstance3D.new()
-		b.name = "Ball"
-		b.mesh = Models.sphere(0.17, 10)
-		b.material_override = Models.glow_mat(Color(res_col(), 1.0))
-		b.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		gun_glow.add_child(b)
-		var lt := OmniLight3D.new()
-		lt.name = "Light"
-		lt.light_color = res_col()
-		lt.omni_range = 2.8
-		gun_glow.add_child(lt)
-	var on := full_ready() and tells_visible()
-	gun_glow.visible = on
-	if not on:
+func fire_ok() -> bool:
+	return true
+
+func add_fever(n := 1) -> void:
+	res = minf(res_max(), res + float(n))
+	touch_res(float(res_def()["wait"]))
+
+## Rattled foes take more from the rifle.
+func outgoing(t: Ent, dmg: float, o: Dictionary) -> float:
+	if t is Hunter or t is Mob:
+		if String(o.get("src", "")) == "shot" and not o.has("ab") and KitStatus.active(t, "rattled"):
+			return dmg * (1.0 + float(res_def()["rattle_k"]))
+	return dmg
+
+func on_deal(t: Ent, dmg: float, o: Dictionary) -> void:
+	if t == null or t.team == h.team or String(o.get("src", "")) == "burn":
 		return
-	var d := h.aim_dir()
-	gun_glow.global_position = h.position + Vector3(d.x * 0.75, 1.1 * float(h.cdat.get("scale", 1.0)), d.y * 0.75)
-	var pk := 0.5 + 0.5 * sin(m.time * 11.0)
-	(gun_glow.get_node("Ball") as MeshInstance3D).scale = Vector3.ONE * (1.0 + 0.4 * pk)
-	(gun_glow.get_node("Light") as OmniLight3D).light_energy = 1.4 + pk
+	if res > 0.0:
+		h.heal(dmg * fever_k())
+	if o.has("ab") and String(o.get("ab")) != "dodge":
+		add_fever(1)
+	if t is Hunter and ((t as Hunter).downed or t.hp <= 0.0) and not knocked.has(t.get_instance_id()):
+		_on_knock(t)
 
-func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
-	if t == null or t.team == h.team:
-		return
-	if String(o.get("src", "")) == "shot" and not o.has("ab"):
-		load_chambers(1)
+func _on_knock(t: Ent) -> void:
+	knocked[t.get_instance_id()] = true
+	h.heal(h.max_hp * float(res_def()["knock_heal"]))
+	h.dashes = h.max_dashes()
+	if rank("sec") >= 3:
+		ch_rmb = float(rmb_charges()); cd["rmb"] = 0.0
+	m.fx.ring(h.pos, 1.3, Color("8ff0a0"), 0.3)
+	m.fx.word(h.pos + Vector3(0, 2.4, 0), "+KNOCK", Color("8ff0a0"), false)
+	if h.is_local(): h._ab_feedback("dash", "ready")
 
-# ------------------------------------------------------------------ dash: Slide Reload
-## The roll starts on the press; still holding Shift past 0.18s it becomes the long slide.
+# ------------------------------------------------------------------ dash: Slipstep
 func on_dash(use_ex: bool) -> bool:
 	var dd := dash_def()
 	if use_ex:
 		if not spend_dash(true): return true
-		travel(float(h.cdat.get("ex_dist", 4.6)), float(h.cdat.get("ex_time", 0.2)), {"invuln": 0.1, "trail": "roll", "reload": float(dd["reload"])}, true)
+		travel(float(h.cdat.get("ex_dist", 4.6)) * 0.9, float(h.cdat.get("ex_time", 0.2)), {"invuln": 0.08, "trail": "roll"}, true)
+		last_dash_kind = "air"
 		return true
 	if not spend_dash(false):
 		return true
-	travel(float(dd["roll"]), float(dd["roll_t"]), {"invuln": float(dd["invuln"]), "reload": float(dd["reload"]), "trail": "roll"})
+	travel(float(dd["roll"]), float(dd["roll_t"]), {"invuln": float(dd["invuln"]), "trail": "roll"})
 	slide = {"t": 0.0, "held": false, "dir": h.roll_dir}
-	if pd_t > 0.0:
-		h.dash_at = m.time        # the doubled perfect-dodge window counts from here
-	m.later(0.08, func(): if is_instance_valid(h): m.sfx("click", h.pos, -8.0, 1.8))     # shell casings
+	move("gunslinger_dash")
+	m.later(0.08, func(): if is_instance_valid(h): m.sfx("click", h.pos, -8.0, 1.8))
 	return true
+
+func _slide_end(early: bool) -> void:
+	var dd := dash_def()
+	h.roll_t = 0.0
+	if early:
+		h.dashes = minf(h.max_dashes(), h.dashes + float(dd["refund"]))
+	elif rank("dash") >= 3:
+		h.add_buff("move_speed", 0.25, 2.0)
+		m.fx.ring(h.pos, 1.0, col_of(dd), 0.25)
+	st["last_dash"] = "slide" if bool(slide.get("held", false)) else "step"
+	last_dash_kind = String(st["last_dash"])
+	slide = {}
 
 func _tick_slide(dt: float) -> void:
 	var dd := dash_def()
@@ -117,256 +123,264 @@ func _tick_slide(dt: float) -> void:
 	var t := float(slide["t"])
 	if not bool(slide["held"]):
 		if t >= float(dd["tap_t"]) and held("dash") and not h.downed and h.stun_t <= 0.0 and h.root_t <= 0.0 and h.grounded:
-			# the held slide: up to 6m over 0.5s, slowing as it goes; you can fire
 			slide["held"] = true
 			slide["t0"] = t
 			h.roll_dir = slide["dir"]
 			h.move_kind = "dash"
 			m.fx.dust(h.pos, 8)
 		elif not held("dash") or t >= float(dd["tap_t"]):
-			# a tap roll: it loads 2 chambers
-			load_chambers(int(res_def().get("roll", 2)), true)
-			slide = {}
-			st["last_dash"] = "roll"
+			_slide_end(false)
 		return
 	var st_t := t - float(slide["t0"])
 	var dur := float(dd["slide_t"])
 	if not held("dash") or st_t >= dur or h.stun_t > 0.0 or h.root_t > 0.0:
-		var early := st_t < dur * 0.9 and h.stun_t <= 0.0 and h.root_t <= 0.0
-		h.roll_t = 0.0
-		if early:
-			h.dashes = minf(h.max_dashes(), h.dashes + float(dd["refund"]))
-		else:
-			h.ammo = int(h.wpn["mag"]); h.reload_t = 0.0
-			m.sfx("reload", h.pos, -5.0, 1.3)
-		st["last_dash"] = "slide"
-		slide = {}
+		_slide_end(st_t < dur * 0.9 and h.stun_t <= 0.0 and h.root_t <= 0.0)
 		return
-	# keep sliding, slowing down (6m over the slide)
 	var k := 1.0 - st_t / dur
 	h.roll_t = maxf(h.roll_t, dt * 1.5)
 	h.roll_speed = float(dd["slide"]) / dur * (0.5 + k)
 	h.inv_t = 0.0
 	if int(st_t * 20.0) % 2 == 0: m.fx.dust(h.pos, 2)
 
-# ------------------------------------------------------------------ RMB: Trick Shot
-func rmb_hold_tick(t: float) -> void:
-	if t > float(rmb_def()["hold"]) and rail_tele == null:
-		rail_tele = tele_lane(h.pos, h.aim_dir(), float(rmb_def()["rail"]["range"][1]), 0.35, Color("ffd23f"), 0.0)
-		m.sfx("rail", h.pos, -14.0, 0.6)
-
-## The Rail is the charge: full at the hold threshold plus its 1s.
-func rmb_charge_full() -> float:
-	return float(rmb_def()["hold"]) + float(rmb_def()["rail"]["time"])
-
-func rmb_auto_t() -> float:
-	return float(rmb_def()["rail"]["time"]) + float(rmb_def()["hold"]) + 0.4
-
+# ------------------------------------------------------------------ RMB: Burr Charge
 func fire_rmb(c: Dictionary) -> void:
-	if rail_tele and is_instance_valid(rail_tele): m.fx.end_telegraph(rail_tele)
-	rail_tele = null
 	last_variant = String(c["variant"])
 	if not spend_rmb(): return
-	var sd := rmb_def()
-	var called: bool = c.get("full", false)
-	cast_n += 1
-	if called:
-		res = 0.0
-		called_cast = cast_n
-		# the call: a gold muzzle flare and the hammer's crack (the payoff lands on the hit)
-		var d0 := h.aim_dir()
-		m.fx.flash(h.pos + Vector3(d0.x * 0.8, 1.1, d0.y * 0.8), res_col(), 1.0, 0.08)
-		m.fx.burst(h.pos + Vector3(d0.x * 0.8, 1.1, d0.y * 0.8), res_col(), 14, 8.0, 0.3, 0.0, 1.0, Vector3(d0.x, 0.1, d0.y), 30.0)
-		m.sfx("crit", h.pos, -4.0, 0.7)
-		if h.is_local(): Oomph.punch_dir(m, -d0, 0.2)
-	var ck := 1.0 + float(res_def()["called_k"]) if called else 1.0
-	if c.get("air", false):
-		var rc: Dictionary = sd["recoil"]
-		var d := h.aim_dir()
-		var stg := stage("rmb", {"delivery": {"type": "projectile", "speed": 50.0, "range": 6.0, "size": 0.16},
-			"effects": [{"type": "damage", "amount": float(rc["dmg"]) * ck}, {"type": "push", "strength": float(rc["push"]), "from": "caster"}]})
-		run(stg, cx("rmb", "recoil_shot", aim(), _called_cx(called)))
-		h.gliding = false
-		h.vel = Vector3(-d.x * float(rc["kick"]), float(rc["lift"]), -d.y * float(rc["kick"]))
-		h.fly_t = 0.3
-		m.sfx("rifle", h.pos, -1.0, 0.8)
-		return
-	if c.get("hold", false):
-		var rl: Dictionary = sd["rail"]
-		var k := clampf((float(c["t"]) - float(sd["hold"])) / float(rl["time"]), 0.15, 1.0)
-		# the Rail takes half the Called bonus (it's already the big, telegraphed shot)
-		var rk := 1.0 + float(res_def()["called_k"]) * 0.5 if called else 1.0
-		var effs: Array = [{"type": "damage", "amount": lerpf(float(rl["dmg"][0]), float(rl["dmg"][1]), k) * rk}]
-		if k >= 0.99: effs.append({"type": "stun", "duration": float(rl["stun"])})
-		elif called: effs.append({"type": "stun", "duration": float(res_def()["called_stun"])})
-		var stg := stage("rmb", {"delivery": {"type": "projectile", "speed": 80.0, "range": lerpf(float(rl["range"][0]), float(rl["range"][1]), k), "size": 0.16},
-			"effects": effs, "modifiers": [{"type": "pierce", "count": 3}]})
-		run(stg, cx("rmb", "rail_charge", aim(), _called_cx(called)))
-		if k >= 0.99: m.fx.flash(h.pos + Vector3(0, 1.0, 0), Color("ffd23f"), 0.6, 0.08)
-		m.sfx("rail", h.pos, -2.0, 0.9)
-		return
-	_trick(ck, called, 1.0)
-	if c.get("e", false):
-		var dk := float(sd["double"]["k"])
-		m.later(float(sd["double"]["gap"]), func(): if is_instance_valid(h) and not h.downed: _trick(dk, false, dk))
+	var bd := rmb_def()["burr"] as Dictionary
+	var d := h.aim_dir()
+	var n := own_node()
+	var core := MeshInstance3D.new()
+	core.mesh = Models.sphere(0.16, 10)
+	core.material_override = Models.glow_mat(Color(col_of(rmb_def()), 1.0))
+	core.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	n.add_child(core)
+	for sa in 6:
+		var sp := MeshInstance3D.new()
+		sp.mesh = Models.crystal(0.03, 0.12, 4)
+		sp.material_override = Models.glow_mat(Color("fff2c8"))
+		sp.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		sp.position = Vector3(cos(sa * 1.047), sin(sa * 2.1) * 0.5, sin(sa * 1.047)) * 0.2
+		sp.look_at_from_position(sp.position, sp.position * 2.0, Vector3.UP)
+		n.add_child(sp)
+	var at := h.pos + Vector3(d.x * 0.8, 1.0, d.y * 0.8)
+	n.global_position = at
+	burrs.append({"pos": at, "dir": d, "t": 0.0, "node": n, "stuck": null, "wall": false, "fuse": -1.0, "range": float(bd["range"])})
+	move("gunslinger_rmb")
+	m.sfx("ab_throw", h.pos, -2.0, 0.8)
+	m.sfx("click", h.pos, -5.0, 0.8)
+	if h.is_local(): Oomph.punch_dir(m, -d, 0.08)
 
-func _trick(k: float, called: bool, _vis: float) -> void:
-	var td: Dictionary = rmb_def()["trick"]
-	var burst := h.wid == "burst_rifle"
-	var effs: Array = [{"type": "damage", "amount": (6.0 if burst else float(td["dmg"])) * k}]
-	if called: effs.append({"type": "stun", "duration": float(res_def()["called_stun"])})
-	var stg := stage("rmb", {"delivery": {"type": "projectile", "speed": float(td["speed"]), "range": float(td["range"]), "size": 0.14},
-		"effects": effs, "modifiers": [{"type": "bounce", "count": 1, "range": float(td["foe_jump"]), "falloff": 0.0}]})
-	var walls := int(td["walls"]) + (1 if rank("sec") >= 3 else 0)
-	var ex := _called_cx(called)
-	if burst:
-		# the Burst Rifle's tap: 3 small ricochets
-		var e1 := ex.duplicate(); e1["wall_bounce"] = 1
-		for i in 3:
-			m.later(0.07 * i, func(): if is_instance_valid(h) and not h.downed: run(stg, cx("rmb", "trick_shot", aim(), e1)))
-	else:
-		ex["wall_bounce"] = walls
-		run(stg, cx("rmb", "trick_shot", aim(), ex))
-	# a revolver's crack, the hammer's click and the ricochet's whine: unlike any bow or bolt
-	m.sfx("rifle", h.pos, -2.0, 1.25)
-	m.sfx("click", h.pos, -6.0, 2.3)
-	m.later(0.09, func(): if is_instance_valid(h): m.sfx("ab_whirr", h.pos, -9.0, 2.4))
-
-## A Called Shot's hits carry the payoff (T4 hitstop, a crit); the first one also pays out the moment.
-func _called_cx(called: bool) -> Dictionary:
-	if not called:
-		return {}
-	var id_ := cast_n
-	return {"hit_extra": {"payoff": true, "crit": true}, "on_foe": func(f: Ent, _c: Dictionary): _called_hit(f, id_)}
-
-## The Called Shot lands: "CALLED SHOT", the round's line in gold, pay_called, T4 shake, and the
-## cylinder spins a full magazine in (the stun is your window to unload).
-func _called_hit(f: Ent, id_: int) -> void:
-	if id_ != called_cast or not is_instance_valid(f):
-		return
-	called_cast = -1
-	called_shots += 1
-	var gold := res_col()
-	m.fx.bolt(h.pos + Vector3(0, 1.1, 0), f.pos + Vector3(0, 1.0, 0), gold)
-	payoff_fx(f.pos, "CALLED SHOT", gold, "pay_called", h.dir_to(f), f)
-	net_bolt(h.pos + Vector3(0, 1.1, 0), f.pos + Vector3(0, 1.0, 0), gold)
-	if not h.downed and h.wpn.has("mag"):
-		h.ammo = int(h.wpn["mag"]); h.reload_t = 0.0
-		m.later(0.3, func(): if is_instance_valid(h): m.sfx("reload", h.pos, -6.0, 1.5))
-
-# ------------------------------------------------------------------ E: Quickdraw
-func in_e() -> bool:
-	return e_t > 0.0
-
-func cast_e() -> bool:
-	var ed := e_def()
-	var t := float(ed["time"]) + (1.0 if rank("kin") >= 3 else 0.0)
-	h.add_buff("fire_rate", float(ed["fire_rate"]), t)
-	h.ammo = int(h.wpn["mag"]); h.reload_t = 0.0
-	h.dashes = minf(h.max_dashes(), h.dashes + 1.0)
-	pd_t = t + 2.0
-	e_t = t
-	m.fx.ring(h.pos, 1.6, col_of(ed), 0.3)
-	m.sfx("reload", h.pos, -2.0, 1.6)
-	var stg := stage("e", {"delivery": {"type": "burst", "origin": "caster", "radius": 0.0}, "effects": [{"type": "buff", "stat": "fire_rate", "amount": float(ed["fire_rate"]), "duration": t, "target": "owner"}]})
-	run(stg, cx("e", "quickdraw", h.pos, {"no_floor": true}))
-	return true
-
-# ------------------------------------------------------------------ R: Last Round
-func move_k() -> float:
-	return 1.0 - float(r_def()["self_slow"]) if not lock.is_empty() else 1.0
-
-## Last Round needs someone in reach to lock (checked before the fuse).
-func r_can_cast() -> bool:
-	var reach := float(r_def()["reach"]) + (2.0 if rank("ult") >= 2 else 0.0)
-	if not rival_hunters_in(reach).is_empty():
-		return true
-	for f in foes_in(h.pos, reach):
-		if f is Mob and sees(f): return true
-	return false
-
-func r_no_target_text() -> String: return "No one in reach to lock"
-
-func cast_r() -> bool:
-	var rd := r_def()
-	var reach := float(rd["reach"]) + (2.0 if rank("ult") >= 2 else 0.0)
-	var tg: Array = rival_hunters_in(reach)
-	if tg.is_empty():
-		for f in foes_in(h.pos, reach):
-			if f is Mob and sees(f): tg.append(f)
-	if tg.is_empty():
-		return false
-	var locks := {}
-	for t in tg:
-		locks[t.get_instance_id()] = [t, 0.0]
-		m.fx.word(t.pos + Vector3(0, 2.4, 0), "LOCKED", res_col(), true)
-		if t == m.player and m.hud: m.hud.toast_small("LOCKED  ·  break line of sight", res_col())
-	lock = {"t": 0.0, "locks": locks, "reach": reach}
-	r_t = float(rd["channel"]) + 0.2
-	m.sfx("charge", h.pos, -2.0, 0.9)
-	return true
-
-func r_recast() -> bool:
-	if lock.is_empty():
-		return false
-	_fire_lock()
-	return true
-
-func _tick_lock(dt: float) -> void:
-	lock["t"] = float(lock["t"]) + dt
-	var draw := int(lock["t"] * 10.0) != int((float(lock["t"]) - dt) * 10.0)
-	for key in (lock["locks"] as Dictionary).keys():
-		var e: Array = lock["locks"][key]
-		var t: Ent = e[0]
-		if not is_instance_valid(t) or t.dead or h.flat_dist(t) > float(lock["reach"]) + 1.0 or not sees(t):
-			(lock["locks"] as Dictionary).erase(key)      # broke line of sight: lock dropped
+func _tick_burrs(dt: float) -> void:
+	var bd := rmb_def()["burr"] as Dictionary
+	for b in burrs.duplicate():
+		var n: Node3D = b["node"]
+		if float(b["fuse"]) >= 0.0:
+			# stuck: blinks faster as it goes
+			b["fuse"] = float(b["fuse"]) - dt
+			var stuck = b["stuck"]
+			if stuck != null and is_instance_valid(stuck) and not bool(b["wall"]):
+				b["pos"] = (stuck as Ent).position + Vector3(0, 1.0, 0)
+			if is_instance_valid(n):
+				n.global_position = b["pos"]
+				n.scale = Vector3.ONE * (1.0 + 0.35 * sin(m.time * lerpf(10.0, 40.0, 1.0 - float(b["fuse"]) / float(bd["fuse"]))))
+			if float(b["fuse"]) <= 0.0:
+				burrs.erase(b)
+				_detonate(b)
 			continue
-		e[1] = float(e[1]) + dt
-		if draw:
-			m.fx.bolt(h.pos + Vector3(0, 1.0, 0), t.pos + Vector3(0, 1.0, 0), Color(res_col(), clampf(0.3 + float(e[1]), 0.3, 1.0)))
-	if float(lock["t"]) >= float(r_def()["channel"]) or h.downed or h.stun_t > 0.0:
-		_fire_lock()
+		var p: Vector3 = b["pos"]
+		var dir: Vector2 = b["dir"]
+		b["t"] = float(b["t"]) + dt
+		var q := p + Vector3(dir.x, 0, dir.y) * float(bd["speed"]) * dt
+		var walled: bool = m.world.is_block(q.x, q.z) or m.world.ground_at(q.x, q.z) > p.y - 0.4
+		var hit: Ent = null
+		if not walled:
+			for f in foes_in(q - Vector3(0, 1.0, 0), 0.7, 2.0):
+				hit = f
+				break
+		var dist: float = float(b["t"]) * float(bd["speed"])
+		if hit != null:
+			b["stuck"] = hit; b["fuse"] = float(bd["fuse"]); b["pos"] = hit.position + Vector3(0, 1.0, 0)
+			_attach(b, hit)
+		elif walled:
+			b["wall"] = true; b["fuse"] = float(bd["fuse"]) * 0.85
+			m.sfx("click", p, -4.0, 1.4)
+		elif dist >= float(b["range"]):
+			b["wall"] = false; b["fuse"] = float(bd["fuse"]) * 0.6        # lands on the floor and pops (a miss)
+			b["pos"] = ground(q) + Vector3(0, 0.2, 0)
+		else:
+			b["pos"] = q
+		if is_instance_valid(n):
+			n.global_position = b["pos"]
+			n.rotation.y += dt * 14.0
 
-func _fire_lock() -> void:
-	var rd := r_def()
-	var locks: Dictionary = lock.get("locks", {})
-	lock = {}
-	r_t = 0.0
-	if h.downed:
+func _attach(b: Dictionary, f: Ent) -> void:
+	var bd := rmb_def()["burr"] as Dictionary
+	f.hurt(float(bd["attach_dmg"]) * power("sec"), h, {"src": "abil", "ab": "utility", "tags": ["utility", "burr"]})
+	m.fx.ring(f.pos, 0.9, col_of(rmb_def()), 0.2)
+	m.sfx("armor_hit", f.pos, -3.0, 1.6)
+	m.fx.word(f.pos + Vector3(0, 2.2, 0), "STUCK", col_of(rmb_def()), false)
+
+func _detonate(b: Dictionary) -> void:
+	var bd := rmb_def()["burr"] as Dictionary
+	var n: Node3D = b["node"]
+	if is_instance_valid(n):
+		self_nodes.erase(n)
+		n.queue_free()
+	var at: Vector3 = b["pos"]
+	var col := col_of(rmb_def())
+	rattles += 1
+	m.fx.burst(at, col, 30, 7.0, 0.5, 4.0, 1.3)
+	m.fx.flash(at, Color("fff2c8"), 1.5, 0.1)
+	m.sfx("boom", at, -1.0, 1.35)
+	m.sfx("hit_heavy", at, -3.0, 1.2)
+	Feel.shake(m, "t3", h, at)
+	if bool(b["wall"]):
+		_cone(at, b["dir"] as Vector2, bd)
 		return
-	for key in locks:
-		var t: Ent = locks[key][0]
-		var lt: float = float(locks[key][1])
-		if not is_instance_valid(t) or t.dead: continue
-		var effs: Array = [{"type": "damage", "amount": minf(60.0, (float(rd["base"]) + float(rd["per_s"]) * lt) * r_k())}]
-		if lt >= float(rd["channel"]) - 0.05: effs.append({"type": "stun", "duration": float(rd["stun"])})
-		var stg := stage("r", {"delivery": {"type": "projectile", "speed": 70.0, "range": float(rd["reach"]) + 3.0, "size": 0.18}, "effects": effs})
-		var c := cx("r", "last_round", t.pos + Vector3(0, 0.9, 0), {"no_floor": true})
-		run(stg, c)
-	m.sfx("rifle", h.pos, 2.0, 0.6)
+	var r := float(bd["radius"])
+	m.fx.ring(at, r + 0.4, col, 0.3)
+	net_ring(at, r + 0.4, col)
+	var stg := stage("rmb", {"delivery": {"type": "burst", "origin": "here", "radius": r}, "effects": [{"type": "damage", "amount": float(bd["dmg"])}]})
+	run(stg, cx("rmb", "burr_charge", at, {"at": at}))
+	for f in foes_in(at, r):
+		if f is Hunter: KitStatus.apply(f as Hunter, "rattled", float(bd["rattle"]))
+		else: f.stun_t = maxf(f.stun_t, 0.3)
+
+## Stuck in the wall: a cone back out of it, knocking everything away and Rattling it for longer; a
+## foe thrown into more terrain is stunned, and a hunter blasted off the wall shaves the cooldown.
+func _cone(at: Vector3, dir: Vector2, bd: Dictionary) -> void:
+	var out := -dir
+	var col := col_of(rmb_def())
+	m.fx.cone(at, out, float(bd["cone_len"]), col)
+	net_ring(at, 1.6, col)
+	var half := deg_to_rad(float(bd["cone_deg"]) * 0.5)
+	var shaved := false
+	for f in m.foes_of(h.team):
+		if not f.hittable(): continue
+		var to := Vector2(f.pos.x - at.x, f.pos.z - at.z)
+		if to.length() > float(bd["cone_len"]) + f.r or absf(f.pos.y - at.y) > 2.6: continue
+		if to.length() > 0.2 and absf(out.angle_to(to.normalized())) > half: continue
+		var away := to.normalized() if to.length() > 0.2 else out
+		var o := {"src": "abil", "ab": "utility", "tags": ["utility", "burr"], "kb": away * float(bd["push"]), "lift": 2.0}
+		f.hurt(float(bd["cone_dmg"]) * power("sec") * m.dmg_mult(h), h, o)
+		if f is Hunter:
+			KitStatus.apply(f as Hunter, "rattled", float(bd["cone_rattle"]))
+			if terrain_behind(f, away, 2.4):
+				wall_slams += 1
+				f.hurt(0.1, h, {"src": "abil", "ab": "utility", "tags": ["utility", "burr"], "stun": float(bd["wall_stun"]), "dr": true})
+				m.fx.word(f.pos + Vector3(0, 2.2, 0), "WALLED", col, false)
+				shaved = true
+	if shaved:
+		cd["rmb"] = float(cd["rmb"]) * (1.0 - float(bd["shave"]))
+
+# ------------------------------------------------------------------ E: Longneedle
+func cast_e() -> bool:
+	if not needle.is_empty(): return false
+	var ed := e_def()
+	var tele := tele_lane(h.pos, h.aim_dir(), float(ed["range"]), float(ed["width"]) + 0.2, col_of(ed), 0.0)
+	needle = {"t": 0.0, "tele": tele}
+	e_t = float(ed["charge"]) + 0.1
+	m.sfx("charge", h.pos, -3.0, 1.1)
+	net_ring(h.pos, 1.2, col_of(ed))
+	move("gunslinger_e")
+	return true
+
+func rmb_hold_tick(_t: float) -> void:
+	pass
+
+func _end_needle() -> void:
+	if needle.is_empty(): return
+	var tele = needle.get("tele")
+	if tele != null and is_instance_valid(tele): m.fx.end_telegraph(tele)
+	needle = {}
+	e_t = 0.0
+
+func _tick_needle(dt: float) -> void:
+	var ed := e_def()
+	needle["t"] = float(needle["t"]) + dt
+	if h.downed or h.stun_t > 0.0 or Hex.active(h):
+		_end_needle()
+		return
+	var tele: Node3D = needle["tele"]
+	var k := clampf(float(needle["t"]) / float(ed["charge"]), 0.0, 1.0)
+	if is_instance_valid(tele):
+		m.fx.aim_telegraph(tele, h.pos, h.aim_dir())
+		m.fx.telegraph_progress(tele, k)
+	if int(float(needle["t"]) * 14.0) != int((float(needle["t"]) - dt) * 14.0):
+		m.sfx("click", h.pos, lerpf(-14.0, -6.0, k), lerpf(1.0, 2.2, k))
+	if k >= 1.0:
+		_end_needle()
+		_fire_needle()
+
+func dash_charge() -> float:
+	return -1.0
+
+func rmb_charge_full() -> float:
+	return 0.0
+
+func charge_now() -> Array:
+	if not needle.is_empty():
+		return ["needle", clampf(float(needle["t"]) / float(e_def()["charge"]), 0.0, 1.0)]
+	return super.charge_now()
+
+func _fire_needle() -> void:
+	var ed := e_def()
+	var d := h.aim_dir()
+	var a := h.pos + Vector3(d.x * 0.7, 1.1, d.y * 0.7)
+	var L := float(ed["range"])
+	var b := a + Vector3(d.x, 0, d.y) * L
+	var col := col_of(ed)
+	m.fx.beam(a, b, col, 0.7, 0.35)
+	m.fx.flash(a, Color("ffffff"), 1.1, 0.08)
+	net_bolt(a, b, col)
+	m.sfx("rail", h.pos, 1.0, 0.8)
+	m.sfx("sniper", h.pos, -3.0, 1.3)
 	Feel.shake(m, "t3", h, h.pos)
+	if h.is_local(): Oomph.punch_dir(m, -d, 0.22)
+	var hits := 0
+	var dmg0 := float(ed["dmg"]) * power("kin") * m.dmg_mult(h)
+	for f in m.foes_of(h.team):
+		if not f.hittable(): continue
+		var v := Vector2(f.pos.x - h.pos.x, f.pos.z - h.pos.z)
+		var along := v.dot(d)
+		if along < 0.0 or along > L + f.r: continue
+		if absf(v.cross(d)) > float(ed["width"]) + f.r: continue
+		if absf(f.pos.y - h.pos.y) > 2.6: continue
+		var rat := KitStatus.active(f, "rattled")
+		var dmg := dmg0 * (1.0 + float(ed["rattle_k"]) if rat else 1.0)
+		var o := {"src": "abil", "ab": "k1", "tags": ["k1", "needle"]}
+		if rat and f is Hunter: o["payoff"] = true
+		f.hurt(dmg, h, o)
+		needle_hits += 1
+		m.fx.burst(f.pos + Vector3(0, 1.0, 0), col, 14, 5.0, 0.3)
+		if f is Hunter:
+			hits += 1
+			if rat:
+				skewers += 1
+				payoff_fx(f.pos, "SKEWERED", col, "", h.dir_to(f), f)
+				m.sfx("crit", f.pos, 0.0, 0.6)
+				m.sfx("pay_called", f.pos, -2.0, 0.7)
+	if hits > 0:
+		var maxcd := float(ed["cooldown"]) * cd_k("kin")
+		var n := hits if rank("kin") >= 3 else 1
+		cd["e"] = maxf(0.0, float(cd["e"]) - maxcd * float(ed["shave"]) * n)
 
 # ------------------------------------------------------------------ bots
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null:
 		return
-	if not lock.is_empty():
-		if float(lock["t"]) > 0.9: h.inp["ult"] = true
+	var aimp := tgt.pos + Vector3(0, 0.9, 0)
+	if not needle.is_empty():
+		h.inp["aim"] = aimp
 		return
-	if int(h.slot_lv["ult"]) > 0 and float(cd["r"]) <= 0.0 and los and dist < float(r_def()["reach"]) and randf() < 0.35:
-		h.inp["ult"] = true; return
-	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and dist < 9.0 and randf() < 0.3:
-		h.inp["sig"] = true; return
-	if int(h.slot_lv["sec"]) > 0 and rmb_ready() and los and full_ready() and dist < 9.0:
-		# a Called Shot: a quick tap while they're in reach
-		h.inp["aim"] = tgt.pos + Vector3(0, 0.9, 0)
+	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and los and dist > 4.0 and dist < 13.0 and (KitStatus.active(tgt, "rattled") or randf() < 0.15):
+		h.inp["aim"] = aimp
+		h.inp["sig"] = true
+		return
+	if int(h.slot_lv["sec"]) > 0 and rmb_ready() and los and dist < 10.0 and dist > 2.0 and randf() < 0.4:
+		h.inp["aim"] = aimp
 		h.inp["sec"] = true
 		return
-	if int(h.slot_lv["sec"]) > 0 and rmb_ready() and los and dist < 15.0 and (res < 4.0 or dist > 9.0):
-		h.inp["aim"] = tgt.pos + Vector3(0, 0.9, 0)
-		h.inp["sec"] = true
-		if dist > 8.0 or randf() < 0.25: bot_hold["rmb"] = float(rmb_def()["hold"]) + float(rmb_def()["rail"]["time"])
-	# out of ammo: a held slide reloads it
-	if h.ammo <= 0 and h.dashes >= 1.0 and randf() < 0.5:
+	if h.hp < h.max_hp * 0.4 and h.dashes >= 1.0 and randf() < 0.1:
 		h.inp["dash"] = true
-		bot_hold["dash"] = 0.6
+		bot_hold["dash"] = 0.5

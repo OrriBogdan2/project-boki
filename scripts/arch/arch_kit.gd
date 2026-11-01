@@ -934,3 +934,8 @@ func terrain_behind(t: Ent, dir: Vector2, reach: float) -> bool:
 			return true
 		k += 0.3
 	return false
+
+## The kit's own cast animation (HunterAnim.KMOVES): an anticipation, an impact and a follow-through.
+func move(name_: String) -> void:
+	h.kmove = name_
+	h.kmove_at = m.time

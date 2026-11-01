@@ -1076,7 +1076,7 @@ const DASH_BUFFER := 0.18
 const DASH_JUMP_CARRY := 0.55
 
 func do_dash() -> void:
-	if downed or stun_t > 0.0 or root_t > 0.0 or out or Hex.active(self):
+	if downed or stun_t > 0.0 or root_t > 0.0 or out or Hex.active(self) or KitStatus.active(self, "grounded"):
 		return
 	if roll_t > 0.0 and move_kind == "rush":
 		roll_t = 0.0            # a glove/ability rush cancels straight into the dash
@@ -3171,6 +3171,8 @@ func _render_weapon_fx(delta: float) -> void:
 ## For the animation: when this hunter last cast an ability (or threw its kin), and which.
 var cast_at := -9.0
 var cast_slot := ""
+var kmove := ""                 # a kit's own cast animation (HunterAnim.KMOVES) and when it began
+var kmove_at := -9.0
 func _on_ability_used(caster: Node, _id: String, slot: String) -> void:
 	if caster == self and slot != "dodge" and slot != "primary" and m:
 		cast_at = m.time
@@ -3216,6 +3218,7 @@ func _anim_state(stretch: float) -> void:
 	s["charge"] = clampf((mel_hold - 0.15) / maxf(0.1, float(wpn.get("charge_time", 1.0))), 0.0, 1.0) if mel_hold > 0.15 else 0.0
 	s["cast"] = m.time - cast_at
 	s["cast_slot"] = cast_slot
+	s["kmove"] = kmove; s["kmove_t"] = m.time - kmove_at
 	s["hit_t"] = m.time - hurt_at
 	s["hit_k"] = hit_k
 	if last_hit_by and is_instance_valid(last_hit_by):
@@ -3393,6 +3396,7 @@ func render(delta: float, alpha: float) -> void:
 	_render_balloon(delta)
 	Oomph.render_hit(self, delta)
 	Hex.tick(self, delta)
+	KitStatus.tick(self, delta, true)
 	if (drink_t > 0.0 or kit_t > 0.0) and visible and see:
 		vuln_fx_t -= delta
 		if vuln_fx_t <= 0.0:

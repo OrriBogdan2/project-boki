@@ -1659,6 +1659,26 @@ static func gun_parts(gun: Node3D, weapon: String, m_gun: Material, m_dark: Mate
 				part(gun, sphere(0.022, 8), m_acc, Vector3(0, sy, -0.02))
 			part(gun, box(0.012, 0.012, 0.5), toon(Color("d8c9a8")), Vector3(0.02, 0.0, -0.3))
 			part(gun, box(0.02, 0.04, 0.05), glow.call(Color("d8ffb0")), Vector3(0.02, 0.0, -0.56))
+		"coilcaster":
+			# Vireo's forearm coil: a copper tube wound in rings with a glowing mouth and a bracer grip
+			var cop := shiny(Color("c8793c"), 0.7)
+			part(gun, cyl(0.04, 0.05, 0.5, 12), m_dark, Vector3(0, 0.0, -0.22), Vector3.ONE, Vector3(PI / 2, 0, 0))
+			for k in 6:
+				part(gun, cyl(0.062, 0.062, 0.022, 12), cop, Vector3(0, 0.0, -0.06 - k * 0.075), Vector3.ONE, Vector3(PI / 2, 0, 0))
+			part(gun, cyl(0.075, 0.05, 0.07, 12), cop, Vector3(0, 0.0, -0.5), Vector3.ONE, Vector3(PI / 2, 0, 0))
+			part(gun, sphere(0.045, 10), glow.call(Color("9ff5e0")), Vector3(0, 0.0, -0.55))
+			part(gun, box(0.09, 0.05, 0.16), m_acc, Vector3(0, 0.05, 0.06))
+			grip.call(-0.02, 0.15)
+		"quill_rifle":
+			# Marlowe's drum rifle: a squat receiver, a drum of burr charges under it, a long needle barrel
+			var bronze := shiny(Color("b9732f"), 0.6)
+			part(gun, box(0.1, 0.12, 0.42), m_gun, Vector3(0, 0, -0.12))
+			part(gun, cyl(0.1, 0.1, 0.1, 14), bronze, Vector3(0, -0.12, -0.14), Vector3.ONE, Vector3(0, 0, PI / 2))
+			part(gun, cyl(0.02, 0.024, 0.55, 8), m_dark, Vector3(0, 0.02, -0.56), Vector3.ONE, Vector3(PI / 2, 0, 0))
+			part(gun, box(0.05, 0.05, 0.2), m_acc, Vector3(0, 0.08, -0.14))
+			part(gun, box(0.016, 0.03, 0.3), glow.call(Color("ffb36a")), Vector3(0.056, 0.0, -0.16))
+			grip.call(-0.02, 0.15)
+			stock.call(0.07, 0.2, 0.08, 0.05)
 		"spellstaff":
 			# the Mage's staff: a long rune-carved rod with a glowing focus caught in a ring
 			var wood2 := toon(Color("5a4636"))

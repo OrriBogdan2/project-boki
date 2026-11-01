@@ -5,25 +5,143 @@
 	"color": "#5fe3c8",
 	"fantasy": "The storm-kite runner. Charges you up shot by shot, then runs straight through you and comes out the other side with the dash back.",
 	"silhouette": "the copper rod mast and kite pennant on the back",
-	"card": {"loop": "Every hit loads a Spark onto the target; at 4 they're Live. Wirerun through a Live foe for a Blowout: big damage and your dash back at once.", "dash": "Wirerun: hold to stretch it (4 to 7m), let go to streak forward; shots pass through you and anyone you cross takes a hit.", "passive": "Sparks: your hits stack up to 4 on a foe (Live). Wirerun through a Live foe: Blowout, and the dash resets. A knock heals you.", "rmb": "Coilshot: hold to charge a heavy round that throws the first foe back; slammed into a wall or another foe, they're stunned.", "e": "Skycall: mark a spot; a moment later lightning flings everyone there along your aim and pins them to the ground (no dashing).", "r": "Skybreak: rise into a thundercloud shots can't touch, drift, then press R again to crash down and spread every Spark around the blast.", "weapons": {"coilcaster": "A copper coil on the forearm that spits bolts which pass through everyone in a line; each hit loads a Spark."}},
-	"weapons": ["coilcaster"],
-	"resource": {"id": "sparks", "name": "Sparks", "max": 4, "kind": "on_targets", "dur": 4.5, "gap": 0.15, "blow_dmg": 8.0, "blow_pct": 0.15, "knock_heal": 0.15, "col": "#c6fff2"},
-	"passive": {"name": "Sparks", "desc": "Your bolts, Coilshot, Skycall and Skybreak each load a Spark onto what they hit (up to 4, 4.5s, refreshed by every hit). At 4 the foe is Live: a ring of crackling pips over them that everyone sees. Wirerun through a Live foe for a Blowout: 8 damage plus 15% of their health, a T4 hit, their Sparks spent and your dash recharged on the spot. Knocking a hunter down heals you for another 15% of your health on top of the usual knock heal."},
-	"dash": {"id": "wirerun", "name": "Wirerun", "icon": "dash", "col": "#9ff5e0", "cd": 9.0, "dist": [4.0, 7.0], "hold": 0.45, "time": 0.17, "dmg": 10.0, "width": 0.9,
-		"desc": "Press and hold: a lane grows from 4 to 7m over 0.45s for everyone to see; let go and you streak along it. Shots pass straight through you for the whole run, and every foe you cross takes 10. Crossing a Live foe is a Blowout and gives the dash straight back. Picking up a charge mote also gives it back."},
-	"rmb": {"delivery": "projectile", "name": "Coilshot", "short": "Coil", "icon": "shock", "col": "#7dffd8", "cooldown": 10.0, "charges": 1, "hold": 1.0, "min_t": 0.33,
-		"coil": {"dmg": [9.0, 15.0], "range": [6.0, 13.0], "speed": 30.0, "push": [8.0, 14.0], "stun": 0.8, "slam_r": 1.4, "mote_t": 0.5, "mote_life": 6.0, "mote_r": 1.1},
-		"variants": {"tap": "A quick Coilshot (it still takes 0.33s to wind): 9 damage, 6m, a short throw.", "hold": "Hold up to 1s: up to 15 damage, 13m and a big throw. A foe thrown into a wall or into another foe is stunned 0.8s (so is the one they hit). Hitting a hunter drops a charge mote 0.5s later: pick it up for your dash back."},
-		"sockets": {"hit": "add", "ctrl": "add", "ctrl_cap": "soft", "mod": "add"}},
-	"e": {"delivery": "burst", "name": "Skycall", "short": "Sky", "icon": "updraft", "col": "#b8f7ff", "cooldown": 12.0, "reach": 9.0, "delay": 0.55, "radius": 1.9, "dmg": 14.0, "push": 9.0, "lift": 6.5, "grounded": 1.2,
+	"card": {
+		"loop": "Every hit loads a Spark onto the target; at 4 they're Live. Wirerun through a Live foe for a Blowout: big damage and your dash back at once.",
+		"dash": "Wirerun: hold to stretch it (4 to 7m), let go to streak forward; shots pass through you and anyone you cross takes a hit.",
+		"passive": "Sparks: your hits stack up to 4 on a foe (Live). Wirerun through a Live foe: Blowout, and the dash resets. A knock heals you.",
+		"rmb": "Coilshot: hold to charge a heavy round that throws the first foe back; slammed into a wall or another foe, they're stunned.",
+		"e": "Skycall: mark a spot; a moment later lightning flings everyone there along your aim and pins them to the ground (no dashing).",
+		"weapons": {
+			"coilcaster": "A copper coil on the forearm that spits bolts which pass through everyone in a line; each hit loads a Spark."
+		}
+	},
+	"weapons": [
+		"coilcaster"
+	],
+	"resource": {
+		"id": "sparks",
+		"name": "Sparks",
+		"max": 4,
+		"kind": "on_targets",
+		"dur": 4.5,
+		"gap": 0.15,
+		"blow_dmg": 8.0,
+		"blow_pct": 0.15,
+		"knock_heal": 0.15,
+		"col": "#c6fff2"
+	},
+	"passive": {
+		"name": "Sparks",
+		"desc": "Your bolts, Coilshot and Skycall each load a Spark onto what they hit (up to 4, 4.5s, refreshed by every hit). At 4 the foe is Live: a ring of crackling pips over them that everyone sees. Wirerun through a Live foe for a Blowout: 8 damage plus 15% of their health, a T4 hit, their Sparks spent and your dash recharged on the spot. Knocking a hunter down heals you for 15% of your health."
+	},
+	"dash": {
+		"id": "wirerun",
+		"name": "Wirerun",
+		"icon": "dash",
+		"col": "#9ff5e0",
+		"cd": 9.0,
+		"dist": [
+			4.0,
+			7.0
+		],
+		"hold": 0.45,
+		"time": 0.17,
+		"dmg": 10.0,
+		"width": 0.9,
+		"desc": "Press and hold: a lane grows from 4 to 7m over 0.45s for everyone to see; let go and you streak along it. Shots pass straight through you for the whole run, and every foe you cross takes 10. Crossing a Live foe is a Blowout and gives the dash straight back. Picking up a charge mote also gives it back."
+	},
+	"rmb": {
+		"delivery": "projectile",
+		"name": "Coilshot",
+		"short": "Coil",
+		"icon": "shock",
+		"col": "#7dffd8",
+		"cooldown": 10.0,
+		"charges": 1,
+		"hold": 1.0,
+		"min_t": 0.33,
+		"coil": {
+			"dmg": [
+				9.0,
+				15.0
+			],
+			"range": [
+				6.0,
+				13.0
+			],
+			"speed": 30.0,
+			"push": [
+				8.0,
+				14.0
+			],
+			"stun": 0.8,
+			"slam_r": 1.4,
+			"mote_t": 0.5,
+			"mote_life": 6.0,
+			"mote_r": 1.1
+		},
+		"variants": {
+			"tap": "A quick Coilshot (it still takes 0.33s to wind): 9 damage, 6m, a short throw.",
+			"hold": "Hold up to 1s: up to 15 damage, 13m and a big throw. A foe thrown into a wall or into another foe is stunned 0.8s (so is the one they hit). Hitting a hunter drops a charge mote 0.5s later: pick it up for your dash back."
+		},
+		"sockets": {
+			"hit": "add",
+			"ctrl": "add",
+			"ctrl_cap": "soft",
+			"mod": "add"
+		}
+	},
+	"e": {
+		"delivery": "burst",
+		"name": "Skycall",
+		"short": "Sky",
+		"icon": "updraft",
+		"col": "#b8f7ff",
+		"cooldown": 12.0,
+		"reach": 9.0,
+		"delay": 0.55,
+		"radius": 1.9,
+		"dmg": 14.0,
+		"push": 9.0,
+		"lift": 6.5,
+		"grounded": 1.2,
 		"desc": "Mark a spot up to 9m away (a filling ring everyone sees); 0.55s later lightning strikes it: 14 damage, a Spark, and everyone inside is flung along your aim and Grounded for 1.2s (no dashing). It also flings any charge mote it catches, so you can steal a rival's.",
-		"sockets": {"hit": "add", "ctrl": "add", "ctrl_cap": "soft", "util": "add"}},
-	"r": {"delivery": "burst", "name": "Skybreak", "short": "Break", "icon": "quake", "col": "#7af0ff", "cooldown": 100.0, "fuse": 0.35, "fuse_guard": "none", "time": 3.0, "speed_k": 1.35, "reach": 8.0, "cast": 0.3, "radius": 3.0, "dmg": 8.0, "push": 11.0, "tell": 0.3,
-		"desc": "A 0.35s fuse, then you rise into a thundercloud for up to 3s: shots pass through you and you drift 35% faster (anything that isn't a shot still hits, and a stun or root drops you out). Press R again to crash on a spot within 8m (0.3s, the ring shows where): 8 damage, a big throw outward and a Spark, and every foe in the blast takes the most Sparks any of them had. Wait it out and you crash where you're aiming.",
-		"sockets": {"hit": "add", "ctrl": "add", "ctrl_cap": "soft", "guard": "add", "mod": "add"}},
-	"order": ["sec", "dash", "kin", "sec", "dash", "ult", "sec", "kin", "ult", "dash"],
-	"rank3": {"sec": "+20% damage", "kin": "cooldown 3s shorter", "dash": "the run's own hit deals double", "ult": "+50% crash damage"},
-	"rank2": {"sec": "Rank 2: cooldown 10s -> 9s, damage +15%.", "dash": "Rank 2: recharge 9s -> 7.6s.", "kin": "Rank 2: cooldown 12s -> 10.8s, damage +15%.", "ult": "Rank 2 (level 9): cooldown 100s -> 85s, +30% cloud time, +15% damage; +50% crash damage."},
-	"rank_next": {"sec": "Rank 3: cooldown 10s -> 8s, damage +30%; +20% damage on top.", "kin": "Rank 3: cooldown 12s -> 6.6s (3s off), damage +30%.", "dash": "Rank 3: recharge 9s -> 6.3s; the run's own hit deals double."},
-	"tells": {"half": "crackling pips over every target with Sparks, one per Spark", "full": "a Live foe: four bright pips spinning in a ring, a hum and arcs to the ground", "dash_spent": "a fading wire streak where the run went"}
+		"sockets": {
+			"hit": "add",
+			"ctrl": "add",
+			"ctrl_cap": "soft",
+			"util": "add"
+		}
+	},
+	"order": [
+		"sec",
+		"dash",
+		"kin",
+		"sec",
+		"dash",
+		"kin",
+		"sec",
+		"dash",
+		"kin"
+	],
+	"rank3": {
+		"sec": "+20% damage",
+		"kin": "cooldown 3s shorter",
+		"dash": "the run's own hit deals double"
+	},
+	"rank2": {
+		"sec": "Rank 2: cooldown 10s -> 9s, damage +15%.",
+		"dash": "Rank 2: recharge 9s -> 7.6s.",
+		"kin": "Rank 2: cooldown 12s -> 10.8s, damage +15%."
+	},
+	"rank_next": {
+		"sec": "Rank 3: cooldown 10s -> 8s, damage +30%; +20% damage on top.",
+		"kin": "Rank 3: cooldown 12s -> 6.6s (3s off), damage +30%.",
+		"dash": "Rank 3: recharge 9s -> 6.3s; the run's own hit deals double."
+	},
+	"tells": {
+		"half": "crackling pips over every target with Sparks, one per Spark",
+		"full": "a Live foe: four bright pips spinning in a ring, a hum and arcs to the ground",
+		"dash_spent": "a fading wire streak where the run went"
+	}
 }
