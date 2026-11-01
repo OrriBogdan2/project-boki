@@ -168,6 +168,12 @@ func on_dash(use_ex: bool) -> bool:
 	ramp = {"t": 0.0, "hold": false, "dir": h.aim_dir()}
 	return true
 
+## The held Rampage's wind-up as a charge (the shared hold feedback reads it).
+func dash_charge() -> float:
+	if ramp.is_empty() or not bool(ramp.get("hold", false)):
+		return -1.0
+	return clampf((float(ramp["t"]) - float(dash_def().get("tap_t", 0.15))) / windup_t(), 0.0, 1.0)
+
 func windup_t() -> float:
 	var t := float(dash_def().get("windup", 0.7))
 	if rank("dash") >= 3: t = 0.55

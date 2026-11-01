@@ -149,6 +149,7 @@ func tick(dt: float) -> void:
 	res_wait = maxf(0.0, res_wait - dt)
 	_tick(dt)
 	_tells(dt)
+	_tick_charge(dt)
 
 func held(which: String) -> bool:
 	match which:
@@ -678,6 +679,9 @@ func e_payoff_ready() -> bool: return false
 
 ## Frees what this kit hung on the hunter (Hunter.set_arch calls it before swapping kits).
 func teardown() -> void:
+	var ring: Node3D = chg.get("ring")
+	if ring and is_instance_valid(ring): m.fx.end_telegraph(ring)
+	chg = {}
 	for n in self_nodes:
 		if is_instance_valid(n): (n as Node).queue_free()
 	self_nodes.clear()
@@ -720,7 +724,7 @@ func net_pulse(dt: float, on: bool, r := 1.1) -> void:
 ## too); everyone online gets the ring.
 func armed_fx(word: String, slot := "sec") -> void:
 	var rc := res_col()
-	m.fx.word(h.pos + Vector3(0, 2.5, 0), word, rc, false)
+	if word != "": m.fx.word(h.pos + Vector3(0, 2.5, 0), word, rc, false)
 	m.fx.ring(h.pos, 1.5, rc, 0.3)
 	m.fx.burst(h.pos + Vector3(0, 1.3, 0), rc, 14, 3.0, 0.4, -2.0, 1.0)
 	m.sfx("ab_ready", h.pos, -4.0 if h.is_local() else -7.0, 1.0)
@@ -798,6 +802,128 @@ static func solid_mat(c: Color) -> StandardMaterial3D:
 	mt.albedo_color = c
 	mt.no_depth_test = false
 	return mt
+
+# ------------------------------------------------------------------ holds and charges (shared)
+# Every hold in a kit (a charged RMB, a bow draw, a melee charge, a held dash) gets the same feel:
+# a rising wind-up sound in the archetype's own voice (pitch and volume climb, the ticks quicken), a
+# glow building at the hand and a filling ring at the hunter (enemies get the hostile rim), a clear
+# "full" tick (a ping, a flash, a ring), a Net fx ring when it starts and when it's full (so remote
+# players read it), and a release punch scaled by how far it got.
+
+## [sound, pitch at 0, pitch at full] of each archetype's wind-up.
+const CHARGE_VOICE := {
+	"thief": ["swipe", 1.3, 2.3], "archer": ["click", 0.8, 2.0], "mage": ["zap", 0.7, 1.9],
+	"gunslinger": ["reload", 0.8, 1.8], "juggernaut": ["thump", 0.55, 1.3], "bulwark": ["shield", 0.55, 1.2],
+}
+var chg := {}                  # the hold being charged: {src, k, full, tick, ring, glow}
+var charge_last := 0.0         # how far the last hold got when it was let go (tests)
+var charge_fulls := 0          # full ticks played (tests)
+
+## How long the RMB must be held to be fully charged (0 = this RMB's hold isn't a charge, e.g. a shield).
+func rmb_charge_full() -> float:
+	return float(rmb_def().get("hold", 0.0))
+
+## A held dash's charge 0..1 (-1: none). The Juggernaut's Rampage wind-up.
+func dash_charge() -> float:
+	return -1.0
+
+## The hold being charged right now: [source, k 0..1] or ["", -1].
+func charge_now() -> Array:
+	var rf := rmb_charge_full()
+	if rmb_down and rf > 0.0 and not rmb_ctx.get("air", false) and rmb_t > 0.06:
+		return ["rmb", clampf(rmb_t / rf, 0.0, 1.0)]
+	if h.draw_t >= 0.0 and h.draw_t < 5.0:
+		return ["draw", clampf(h.draw_t / 0.9, 0.0, 1.0)]
+	var ck := h.charge_k()
+	if ck > 0.0:
+		return ["melee", ck]
+	var dk := dash_charge()
+	if dk >= 0.0:
+		return ["dash", dk]
+	return ["", -1.0]
+
+func charge_k() -> float:
+	return float(chg.get("k", -1.0)) if not chg.is_empty() else -1.0
+
+func _tick_charge(dt: float) -> void:
+	var cn := charge_now()
+	var src := String(cn[0]); var k := float(cn[1])
+	if src == "" or not is_instance_valid(h) or h.downed or h.out:
+		if not chg.is_empty():
+			_charge_release()
+		return
+	var col := Arch.color(id)
+	if chg.is_empty() or String(chg["src"]) != src:
+		if not chg.is_empty(): _charge_release()
+		chg = {"src": src, "k": k, "full": false, "tick": 0.0}
+		var rc := col
+		var p = m.get("player")
+		if p != null and int(p.team) != h.team: rc = col.lerp(Feel.RIM_ENEMY, 0.45)
+		var ring: Node3D = m.fx.telegraph_circle(h.pos, 1.15 * float(h.cdat.get("scale", 1.0)), Color(rc, 0.9))
+		chg["ring"] = ring
+		var g := own_node()
+		var ball := MeshInstance3D.new()
+		ball.mesh = Models.sphere(0.2, 10)
+		ball.material_override = Models.glow_mat(Color(col.lightened(0.2), 1.0))
+		ball.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		g.add_child(ball)
+		chg["glow"] = g
+		net_ring(h.pos, 0.8, rc)            # remote players: "they're winding something up"
+	chg["k"] = k
+	var ring2: Node3D = chg.get("ring")
+	if ring2 and is_instance_valid(ring2):
+		ring2.global_position = h.pos + Vector3(0, 0.07, 0)
+		m.fx.telegraph_progress(ring2, k)
+	var g2: Node3D = chg.get("glow")
+	if g2 and is_instance_valid(g2):
+		var d := h.aim_dir()
+		g2.visible = tells_visible()
+		g2.global_position = h.position + Vector3(d.x * 0.6, 1.05 * float(h.cdat.get("scale", 1.0)), d.y * 0.6)
+		var full_pulse := (0.3 * sin(m.time * 30.0)) if bool(chg["full"]) else 0.0
+		g2.scale = Vector3.ONE * (0.25 + 1.35 * k + full_pulse)
+	# the wind-up voice: ticks that climb in pitch and volume and come faster as it fills
+	chg["tick"] = float(chg["tick"]) - dt
+	if float(chg["tick"]) <= 0.0 and not bool(chg["full"]):
+		chg["tick"] = lerpf(0.13, 0.05, k)
+		var v: Array = CHARGE_VOICE.get(id, ["click", 0.8, 1.8])
+		var mine := h.is_local()
+		m.sfx(String(v[0]), h.pos, lerpf(-16.0, -6.0, k) - (0.0 if mine else 4.0), lerpf(float(v[1]), float(v[2]), k))
+		if randf() < 0.5: m.fx.burst(h.position + Vector3(randf_range(-0.6, 0.6), 0.4 + randf(), randf_range(-0.6, 0.6)), col, 2, 2.0 + 3.0 * k, 0.25, 0.0, 0.7, (h.pos + Vector3(0, 1.0, 0) - h.position).normalized(), 30.0)
+	if k >= 0.999 and not bool(chg["full"]):
+		chg["full"] = true
+		charge_fulls += 1
+		_charge_full_tick(col)
+
+## Fully charged: a bright ping, a flash at the hand, a ring; everyone online gets the ring.
+func _charge_full_tick(col: Color) -> void:
+	var v: Array = CHARGE_VOICE.get(id, ["click", 0.8, 1.8])
+	m.sfx("ab_ready", h.pos, -3.0 if h.is_local() else -7.0, float(v[2]) * 0.6)
+	m.sfx(String(v[0]), h.pos, -4.0, float(v[2]) * 1.15)
+	var d := h.aim_dir()
+	m.fx.flash(h.pos + Vector3(d.x * 0.6, 1.05, d.y * 0.6), col.lightened(0.4), 0.9, 0.08)
+	m.fx.ring(h.pos, 1.5, Color(col, 0.95), 0.22)
+	if h.is_local() and m.cam: m.cam.punch(0.02)
+	net_ring(h.pos, 1.5, col)
+
+## Let go: the ring and glow go, and the release punches in proportion to the charge.
+func _charge_release() -> void:
+	var k := float(chg.get("k", 0.0))
+	charge_last = k
+	var ring: Node3D = chg.get("ring")
+	if ring and is_instance_valid(ring): m.fx.end_telegraph(ring)
+	var g: Node3D = chg.get("glow")
+	if g and is_instance_valid(g):
+		self_nodes.erase(g)
+		g.queue_free()
+	var full := bool(chg.get("full", false))
+	chg = {}
+	if not is_instance_valid(h) or h.downed:
+		return
+	if h.is_local():
+		Oomph.punch_dir(m, h.aim_dir(), 0.06 + 0.26 * k)
+		if full and m.cam: m.cam.add_trauma(0.12)
+	if k > 0.5:
+		m.fx.burst(h.pos + Vector3(h.aim_dir().x * 0.7, 1.0, h.aim_dir().y * 0.7), Arch.color(id), int(6 + 14 * k), 3.0 + 5.0 * k, 0.3, 0.0, 1.0, Vector3(h.aim_dir().x, 0.1, h.aim_dir().y), 35.0)
 
 ## Terrain (a wall, a rock, a ledge face) within `reach` behind `t` along `dir`.
 func terrain_behind(t: Ent, dir: Vector2, reach: float) -> bool:

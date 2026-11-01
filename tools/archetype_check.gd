@@ -281,11 +281,13 @@ func _archer() -> void:
 	W.kind = wk; W.level = wl
 	aim_at(P, T.pos)
 	K.res = 0.0       # (a full Focus outranks the hold variant)
-	hold(m, P, 0.6)
+	hold(m, P, 1.15)
 	if "--ak-debug" in OS.get_cmdline_user_args(): print("PIN after hold: T at %s P at %s ground ahead %s %s %s lvl %s" % [str(T.pos), str(P.pos), W.ground_at(T.pos.x + 1.0, T.pos.z), W.ground_at(T.pos.x + 1.6, T.pos.z), W.ground_at(T.pos.x + 2.2, T.pos.z), W.level[W.idx(int(T.pos.x) + 2, int(T.pos.z))]])
 	step(m, 0.5)
 	if "--ak-debug" in OS.get_cmdline_user_args(): print("PIN T at %s vx %.2f stun %.2f immune %.2f dr %s" % [str(T.pos), T.vel.x, T.stun_t, T.cc_immune_t, str(T.dr)])
-	ok("archer RMB hold: Pinning Shot pins", K.last_variant == "hold" and dmg(T) >= 14.0 and T.root_t > 0.0, "took %.0f root %.2f" % [dmg(T), T.root_t])
+	ok("archer RMB hold: Heavy Shot pins to the wall", K.last_variant == "hold" and dmg(T) >= 14.0 and T.stun_t > 0.0, "took %.0f stun %.2f" % [dmg(T), T.stun_t])
+	# a full charge: the hold reached full (the shared charge feedback ticked)
+	ok("archer RMB hold: charge reached full", K.charge_fulls >= 1 and K.charge_last >= 0.99, "fulls %d last %.2f" % [K.charge_fulls, K.charge_last])
 	# Deadeye: a full-Focus shot into a pinned (rooted) foe pays out a gold second hit
 	var dd0 := dmg(T); var de0 := K.deadeyes
 	T.root_t = maxf(T.root_t, 1.0)
@@ -294,6 +296,7 @@ func _archer() -> void:
 	P.fire_cd = 0.0; P.ammo = maxi(P.ammo, 1); P.reload_t = 0.0
 	P.inp["fire"] = true; m.step(DT); P.inp["fire"] = false
 	step(m, 0.5)
+	if "--ak-debug" in OS.get_cmdline_user_args(): print("DEADEYE dd0 %.1f now %.1f" % [dd0, dmg(T)])
 	ok("archer Deadeye: Focus shot into a pinned foe", K.deadeyes == de0 + 1 and dmg(T) - dd0 >= 70.0, "deadeyes %d dealt %.0f" % [K.deadeyes - de0, dmg(T) - dd0])
 	# ... and not into a free one
 	fresh(T); K.res = K.res_max(); de0 = K.deadeyes
@@ -323,20 +326,33 @@ func _archer() -> void:
 	P.ak.press_rmb()
 	ok("archer RMB air: Plunge lifts you", K.last_variant == "air" and P.vel.y > 5.0, "vy %.1f" % P.vel.y)
 	step(m, 1.2)
-	# E: Flare reveals
+	# the bow's perfect window: let go right at full draw for +25%
+	P.teleport(home); P.vel = Vector3.ZERO; fresh(T); T.teleport(home + Vector3(-6.5, 0, 0)); aim_at(P, T.pos)    # (clear of the test walls east)
+	P.equip("longbow", 0); step(m, 0.4)
+	var pf0 := K.perfects
+	step(m, 0.95, func(): P.inp["fire"] = true; K.res = 0.0; aim_at(P, T.pos))
+	P.inp["fire"] = false
+	step(m, 0.5)
+	ok("archer bow: perfect release +25%", K.perfects == pf0 + 1 and dmg(T) >= 74.0, "perfects %d took %.0f" % [K.perfects - pf0, dmg(T)])
+	# E: Arrow Rain: a line of falling arrows; damage over time, slow, blight
 	P.teleport(home); fresh(T); T.teleport(home + Vector3(6, 0, 0))
 	P.inp["aim"] = T.pos
 	P.ak.use_e()
-	step(m, 0.6)
-	ok("archer E: Flare reveals", T.reveal_t > 0.5, "reveal %.1f" % T.reveal_t)
-	# R: Skyfall Volley: 0.8s tell, waves, the last roots
-	fresh(T)
-	P.inp["aim"] = T.pos
+	ok("archer E: Arrow Rain cast", K.in_e())
+	step(m, 2.0, func(): K.res = 0.0)
+	ok("archer E: Arrow Rain hurts, slows, blights", dmg(T) >= 10.0 and T.slow_t > 0.0 and T.blight_t > 0.0, "took %.0f slow %.2f blight %.2f" % [dmg(T), T.slow_t, T.blight_t])
+	step(m, 2.5)
+	ok("archer E: Arrow Rain ends", not K.in_e())
+	# R: Great Arrows: three empowered shots, no draw, the third hardest
+	P.teleport(home); fresh(T); T.teleport(home + Vector3(-7.0, 0, 0)); aim_at(P, T.pos); K.res = 0.0
 	ult(m, P)
-	step(m, 0.6)
-	var early := dmg(T)
-	step(m, 2.3)
-	ok("archer R: Volley tell then waves + root", early < 0.5 and dmg(T) >= 20.0 and T.root_t > 0.0, "before tell end %.0f, total %.0f, root %.2f" % [early, dmg(T), T.root_t])
+	ok("archer R: Great Arrows armed", not K.great.is_empty() and int(K.great["left"]) == 3)
+	for i in 3:
+		P.fire_cd = 0.0
+		P.inp["fire"] = true; m.step(DT); P.inp["fire"] = false
+		step(m, 0.45, func(): K.res = 0.0; aim_at(P, T.pos))
+	step(m, 0.3)
+	ok("archer R: three great arrows hit", K.great.is_empty() and dmg(T) >= 95.0, "took %.0f" % dmg(T))
 	await done(m)
 
 # ------------------------------------------------------------------ Mage
@@ -769,7 +785,7 @@ func _feel() -> void:
 	ok("feel: leap flight counts", Feel.missing_windup(st3) <= 0.0)
 	# archetype tells meet the floors
 	ok("feel: Meteor tell >= hard floor", float(Arch.def("mage")["r"]["tell"]) >= Feel.floor_for("hard_cc", "instant"))
-	ok("feel: Volley tell >= soft floor", float(Arch.def("archer")["r"]["tell"]) >= Feel.floor_for("soft_cc", "instant"))
+	ok("feel: Arrow Rain tell >= soft floor", float(Arch.def("archer")["e"]["tell"]) >= Feel.floor_for("soft_cc", "instant"))
 	ok("feel: Heist fuse + mark-out >= self floor", float(Arch.def("thief")["r"]["tell"]) + float(Arch.def("thief")["r"]["fuse"]) >= Feel.floor_for("hard_cc", "self"))
 	ok("feel: Sigil detonation >= soft floor", float(Arch.def("mage")["e"]["det_t"]) >= Feel.floor_for("soft_cc", "instant"))
 	ok("feel: Rampage windup visible >= 0.30", float(Arch.def("juggernaut")["dash"]["windup"]) * 0.5 >= 0.3)

@@ -155,6 +155,10 @@ func rmb_hold_tick(t: float) -> void:
 		rail_tele = tele_lane(h.pos, h.aim_dir(), float(rmb_def()["rail"]["range"][1]), 0.35, Color("ffd23f"), 0.0)
 		m.sfx("rail", h.pos, -14.0, 0.6)
 
+## The Rail is the charge: full at the hold threshold plus its 1s.
+func rmb_charge_full() -> float:
+	return float(rmb_def()["hold"]) + float(rmb_def()["rail"]["time"])
+
 func rmb_auto_t() -> float:
 	return float(rmb_def()["rail"]["time"]) + float(rmb_def()["hold"]) + 0.4
 

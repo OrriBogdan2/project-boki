@@ -873,20 +873,37 @@ follow the same shape, through shared helpers in `ArchKit` (`armed_fx`, `payoff_
 - **Sounds:** `pay_deadeye`, `pay_flashpoint`, `pay_called`, `pay_slam`, synthesized by
   `tools/sfx_combat.py` (appended last, so no other sound changes).
 
-### Archer: Pin -> Focus -> Deadeye
+### Archer: Pin -> Focus -> Deadeye (on a Myth-style hunter-archer baseline)
 
-Snares (tap, Tripwire, Pinning Shot, the Volley's last wave) root people; a snare or Pinning Shot
-that hits adds 40 Focus (a Pin into a wall fills it). At 100 Focus the **Deadeye is armed**: the
-next shot is drawn at once (+20% range) and, if it hits a **pinned** foe (rooted or stunned, or
-within 0.8s of it), a gold second hit lands: +18 damage, a crit, T4.
+Owner direction (Nov 1): a hold-to-charge bow with stages you feel, a wall of falling arrows on E,
+three empowered arrows on R. Mechanics only; names, numbers and art are ours.
+
+| Slot | What it does |
+|---|---|
+| LMB (Longbow) | hold to draw: a creak and flash at stage 1 (0.4s, 30), a ping, flash and ring at full draw (0.9s, 60) that opens a 0.15s **perfect window**: let go inside it for +25% ("PERFECT", 75) |
+| RMB | **tap: Snare** (8, root 0.6; on the ground a Tripwire). **Hold: Heavy Shot**, charged 0.5s -> full at 1.1s: 16 -> 30, push 6 -> 12, pierces 2, a bigger arrow; driven into a wall within 3m it stuns 0.8 ("PINNED"). In the air: Plunge |
+| Dash | Grapple Arrow (unchanged) |
+| Passive | **Focus** -> **Deadeye** (below) |
+| E | **Arrow Rain**: lob a volley up to 9m; 0.35s later (the strip fills, soft-CC floor) a 6m x 2.2m line of arrows rains across your aim for 3.75s: 5 every 0.5s, slow 35%, blight 1s (healing barely takes). A steady patter while it falls. During it the tap snare roots 1.0 |
+| R | **Great Arrows** (0.5s fuse): for 6s your next 3 shots need no draw: great arrows that fly 22m, pierce everyone, knock back and hit 28 / 28 / 44 (the third a payoff hit, T4, stun 1.0 into a wall). Heavy twang and boom, recoil, a big flash |
+
+Snares (tap, Tripwire, Heavy Shot, the Great Arrow's wall stun) root or stun people; a snare or
+Heavy Shot that hits adds 40 Focus (driven into a wall fills it). At 100 Focus the **Deadeye is
+armed**: the next shot is drawn at once (+20% range) and, if it hits a **pinned** foe (rooted or
+stunned, or within 0.8s of it), a gold second hit lands: +18 damage, a crit, T4.
 
 - Tells: a lens glint at the bow from 50 Focus; at 100 a bright star with a light, a thin gold aim
-  line along the shot, and crosshairs over every pinned foe within 18m (everyone sees them);
-  "DEADEYE READY" pops over the archer (at most every 2.5s) and under the crosshair.
+  line along the shot, and crosshairs over every pinned foe within 18m (everyone sees them); the
+  crosshair reads "DEADEYE READY" (or "GREAT ARROWS · n" during the ult).
 - Payoff: "DEADEYE", the arrow's line redrawn in gold, `pay_deadeye`, T4 hitstop and shake.
-- Numbers: Longbow Focus shot 60 + 18 = 78 into a pinned target (a sniper 36 + 18); no cooldown
-  refund, so it's at most about one per snare charge (2 per 9s) and roots have diminishing returns.
-- Bots: snare first when the target isn't pinned; loose the Deadeye when it's armed and they're pinned.
+- Numbers: Longbow Focus shot 60 + 18 = 78 into a rooted target. Note the existing combo system
+  (`Combos.payoff`) also boosts a hit on a stunned target, so a Deadeye on a wall-PINNED foe reads
+  about 108; it needs a full Heavy Shot into a wall first. Great Arrows 100 if all three land
+  (Volley was 30 + a root over 2s, but area); Arrow Rain ~35 over its life plus the slow and blight.
+- Bots: snare first when the target isn't pinned; loose the Deadeye when armed and they're pinned;
+  Arrow Rain across a target's path from 3-10m; Great Arrows at a rival in a long clear line, then
+  fire them through.
+- Retired: Flare Arrow (E), Skyfall Volley (R).
 
 ### Mage: Heat -> Overcharged -> Flashpoint
 

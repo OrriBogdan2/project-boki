@@ -363,6 +363,10 @@ func _catch() -> void:
 	m.fx.burst(h.pos + Vector3(0, 1.0, 0), Color("d8e8ff"), 8, 2.5, 0.25)
 
 # ------------------------------------------------------------------ RMB: Shield (hold to block, release or tap to Bash)
+## The shield is a block, not a charge (the Crushing Blow on LMB is the Bulwark's charge).
+func rmb_charge_full() -> float:
+	return 0.0
+
 ## In the air the press doesn't fire at once: holding it there is Shield Surf.
 func press_rmb() -> void:
 	if busy():

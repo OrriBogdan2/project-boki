@@ -1,16 +1,20 @@
 class_name ArcherKit
 extends ArchKit
-## Archer (light): Grapple Arrow, Focus, Snare (Tripwire, Pinning Shot, Plunge, seeking in the
-## Flare, rooted harder at full Focus), Flare Arrow, Skyfall Volley. docs/ARCHETYPES.md §6.2.
+## Archer (light): Grapple Arrow, Focus, Snare (tap: a rooting snare / Tripwire; hold: a charged
+## Heavy Shot that pierces, knocks back and stuns into a wall; Plunge in the air), Arrow Rain (E),
+## Great Arrows (R). docs/ARCHETYPES.md §6.2 and "Kit loops" (kits4; Myth-style hunter archer ideas).
+## The bow draws in stages you hear and see; let go right at full draw (the perfect window) for +25%.
 ##
 ## The loop (kits4): snares root (Pin) and feed Focus -> full Focus arms the Deadeye (a lens glint and
 ## a thin aim line everyone sees, crosshairs over every pinned foe) -> the next shot is drawn at once,
 ## and into a rooted or stunned foe it's a Deadeye: a gold payoff hit with T4 hitstop and its own sound.
 
-var flare := {}                # the live Flare zone {pos, r, t}
+var rain := {}                 # the live Arrow Rain: {a, b, t, tick, patter, tele}
+var great := {}                # Great Arrows left: {left, t, n}
+var draw_was := -1.0           # last frame's bow draw (stage ticks)
+var perfects := 0              # perfect draws (tests)
 var trips: Array = []          # our live Tripwires (verbs trap dictionaries)
 var pin_tele: Node3D = null    # the Pinning Shot's lane while held
-var volley := {}
 var high_t := 0.0              # re-checks high ground now and then
 var on_high := false
 var loosed := 0.0              # a Focus shot is in the air until this time (its hit can be a Deadeye)
@@ -28,6 +32,7 @@ func res_text() -> String:
 	return "READY" if full_ready() else "%d" % int(res)
 
 func ready_label() -> String:
+	if not great.is_empty(): return "GREAT ARROWS  ·  %d" % int(great["left"])
 	return "DEADEYE READY" if full_ready() else ""
 
 ## Focus from play (a snare that roots, a Pin): the out-of-combat clock doesn't apply to Focus.
@@ -108,19 +113,59 @@ func _tick(dt: float) -> void:
 	var full := full_ready()
 	if full and not was_full and m.time - armed_at > 2.5:
 		armed_at = m.time
-		armed_fx("DEADEYE READY", "")
+		armed_fx("", "")       # (the glint, the aim line and the crosshair label say it; no word every refill)
 	was_full = full
 	_tick_glint(dt)
 	_tick_reticles()
 	net_pulse(dt, full)
 	trips = trips.filter(func(t): return m.verbs.traps.has(t))
-	if not flare.is_empty():
-		flare["t"] = float(flare["t"]) - dt
-		if float(flare["t"]) <= 0.0: flare = {}
 	if pin_tele and is_instance_valid(pin_tele) and rmb_down:
 		m.fx.aim_telegraph(pin_tele, h.pos, h.aim_dir())
-	if not volley.is_empty():
-		_tick_volley(dt)
+		m.fx.telegraph_progress(pin_tele, heavy_k())
+	if not rain.is_empty():
+		_tick_rain(dt)
+	if not great.is_empty():
+		great["t"] = float(great["t"]) - dt
+		if float(great["t"]) <= 0.0 or int(great["left"]) <= 0:
+			great = {}
+	_tick_draw_stages()
+
+## The bow's stages, heard and seen: a creak at stage 1 (0.4s), and at full draw (0.9s) a bright
+## ping and flash that opens the perfect window (let go within it for +25%).
+func _tick_draw_stages() -> void:
+	var t := h.draw_t
+	if t >= 0.0 and t < 5.0 and h.wpn.has("draw"):
+		var d := h.aim_dir()
+		var at := h.pos + Vector3(d.x * 0.6, 1.1, d.y * 0.6)
+		if draw_was < 0.4 and t >= 0.4:
+			m.sfx("click", h.pos, -6.0, 1.3)
+			m.fx.flash(at, res_col(), 0.45, 0.05)
+		var pw := perfect_window()
+		if draw_was < pw.x and t >= pw.x:
+			m.sfx("ab_ready", h.pos, -3.0 if h.is_local() else -7.0, 1.5)
+			m.fx.flash(at, Color.WHITE, 0.9, pw.y - pw.x)
+			m.fx.ring(h.pos, 1.3, res_col(), pw.y - pw.x)
+			net_ring(h.pos, 1.3, res_col())
+	draw_was = t
+
+## The perfect release window of the bow: from full draw for 0.15s.
+func perfect_window() -> Vector2:
+	var st: Array = h.wpn.get("draw", [])
+	var full := float((st[-1] as Array)[0]) if not st.is_empty() else 0.9
+	return Vector2(full, full + float(res_def().get("perfect_t", 0.15)))
+
+## Hunter._loose asks: a bow let go inside the perfect window hits 25% harder.
+func draw_bonus(t: float) -> float:
+	var pw := perfect_window()
+	if t >= pw.x and t <= pw.y:
+		perfects += 1
+		var d := h.aim_dir()
+		m.fx.word(h.pos + Vector3(0, 2.4, 0), "PERFECT", Color("ffffff"), false)
+		m.fx.flash(h.pos + Vector3(d.x * 0.7, 1.1, d.y * 0.7), res_col().lightened(0.4), 1.1, 0.08)
+		m.sfx("rail", h.pos, -6.0, 1.9)
+		if h.is_local(): Oomph.punch_dir(m, d, 0.25)
+		return 1.0 + float(res_def().get("perfect_k", 0.25))
+	return 1.0
 
 func _high_ground() -> bool:
 	var gy: float = m.world.ground_at(h.pos.x, h.pos.z)
@@ -221,9 +266,6 @@ func on_take(_by: Ent, dmg: float, _o: Dictionary) -> void:
 	if dmg > 0.5:
 		add_res(-float(res_def().get("hit_loss", 40.0)))
 
-func in_e() -> bool:
-	return not flare.is_empty() and h.flat_dist(flare["pos"]) < float(flare["r"])
-
 # ------------------------------------------------------------------ dash: Grapple Arrow
 func on_dash(use_ex: bool) -> bool:
 	var dd := dash_def()
@@ -292,8 +334,16 @@ func rmb_hold_tick(t: float) -> void:
 		pin_tele = tele_lane(h.pos, h.aim_dir(), float(rmb_def()["pin"]["range"]), 0.5, Color("ffe0a0"), 0.0)
 		m.fx.flash(h.pos + Vector3(0, 1.2, 0), Color("ffe0a0"), 0.4, 0.1)
 
+## The Heavy Shot charges from the hold threshold to full.
+func rmb_charge_full() -> float:
+	return float(rmb_def()["pin"]["full"])
+
+func heavy_k() -> float:
+	var pd: Dictionary = rmb_def()["pin"]
+	return clampf((rmb_t - float(rmb_def()["hold"])) / maxf(0.05, float(pd["full"]) - float(rmb_def()["hold"])), 0.0, 1.0)
+
 func rmb_auto_t() -> float:
-	return 1.5
+	return float(rmb_def()["pin"]["full"]) + 0.5
 
 func _drop_tele() -> void:
 	if pin_tele and is_instance_valid(pin_tele):
@@ -309,13 +359,12 @@ func fire_rmb(c: Dictionary) -> void:
 		_plunge()
 		return
 	var target_aim := aim()
-	if c.get("e", false):
-		target_aim = _seek(target_aim, float(sd.get("seek_deg", 10.0)))
 	if c.get("hold", false):
-		_pin(target_aim)
+		_pin(target_aim, clampf((float(c["t"]) - float(sd["hold"])) / maxf(0.05, float(sd["pin"]["full"]) - float(sd["hold"])), 0.0, 1.0))
 		return
 	var sn: Dictionary = sd["snare"]
-	var root := float(sn["root_full"]) if c.get("full", false) else float(sn["root"])
+	# full Focus, or with your Arrow Rain falling: the snare roots for longer
+	var root := float(sn["root_full"]) if c.get("full", false) or c.get("e", false) else float(sn["root"])
 	# the arrow comes down at the cursor (up to 11m): a miss plants the Tripwire there
 	var srange := clampf(Vector2(target_aim.x - h.pos.x, target_aim.z - h.pos.z).length() + 0.5, 2.5, float(sn["range"]))
 	var stg := stage("rmb", {"delivery": {"type": "projectile", "speed": float(sn["speed"]), "range": srange, "size": 0.16},
@@ -325,17 +374,6 @@ func fire_rmb(c: Dictionary) -> void:
 		if why != "hit" and e == null:
 			_tripwire(at)}))
 	Feel.cast_sound(m, "projectile", "control", h.pos, h)
-
-func _seek(a: Vector3, deg: float) -> Vector3:
-	var d0 := Vector2(a.x - h.pos.x, a.z - h.pos.z).normalized()
-	var best: Ent = null; var bd := cos(deg_to_rad(deg))
-	for f in m.foes_of(h.team):
-		if not ("reveal_t" in f) or float(f.get("reveal_t")) <= 0.0: continue
-		var to := Vector2(f.pos.x - h.pos.x, f.pos.z - h.pos.z)
-		if to.length() > 14.0: continue
-		var dt := to.normalized().dot(d0)
-		if dt > bd: bd = dt; best = f
-	return (best.pos + Vector3(0, 0.9, 0)) if best else a
 
 func _tripwire(at: Vector3) -> void:
 	var tr := res_def()
@@ -357,23 +395,36 @@ func _tripwire(at: Vector3) -> void:
 	for i in range(n0, m.verbs.traps.size()):
 		trips.append(m.verbs.traps[i])
 
-func _pin(a: Vector3) -> void:
+## The Heavy Shot: a held, charged arrow (0.5s -> full at 1.1s) that pierces, knocks back by its
+## charge and, driven into a wall within 3m, stuns (PINNED). Full charge is a heavy hit.
+func _pin(a: Vector3, k: float) -> void:
 	var pd: Dictionary = rmb_def()["pin"]
-	var stg := stage("rmb", {"delivery": {"type": "projectile", "speed": float(pd["speed"]), "range": float(pd["range"]), "size": 0.2},
-		"effects": [{"type": "damage", "amount": float(pd["dmg"])}, {"type": "push", "strength": float(pd["push"]), "from": "caster"}],
-		"modifiers": [{"type": "pierce", "count": 1}]})
+	var dmg := lerpf(float(pd["dmg"][0]), float(pd["dmg"][1]), k)
+	var push := lerpf(float(pd["push"][0]), float(pd["push"][1]), k)
+	var stg := stage("rmb", {"delivery": {"type": "projectile", "speed": float(pd["speed"]), "range": float(pd["range"]) * (1.0 + 0.2 * k), "size": lerpf(0.2, 0.34, k)},
+		"effects": [{"type": "damage", "amount": dmg}, {"type": "push", "strength": push, "from": "caster"}],
+		"modifiers": [{"type": "pierce", "count": int(pd["pierce"])}]})
 	var dir := Vector2(a.x - h.pos.x, a.z - h.pos.z).normalized()
-	run(stg, cx("rmb", "pinning_shot", a, {"on_foe": func(f: Ent, _c: Dictionary):
+	var extra := {"hit_extra": {"heavy": true}} if k >= 0.99 else {}
+	extra["on_foe"] = func(f: Ent, _c: Dictionary):
 		add_focus(float(res_def().get("snare_gain", 40.0)))
-		# pushed into terrain within 3m: pinned (exploit near_wall), and the shot lines up: full Focus
+		# driven into terrain within 3m: pinned (a stun), and the shot lines up: full Focus
 		if _wall_behind(f, dir, float(pd["wall"])):
 			add_focus(res_max())
 			m.later(0.12, func():
 				if is_instance_valid(f) and not f.dead:
-					f.hurt(0.1, h, {"root": float(pd["root"]), "src": "abil", "ab": "utility", "tags": ["utility", "pin"], "exploit": true, "dr": true})
-					m.fx.word(f.pos + Vector3(0, 2.2, 0), "PINNED", Feel.cat_color("control"), true))}))
+					f.hurt(0.1, h, {"stun": float(pd["stun"]), "src": "abil", "ab": "utility", "tags": ["utility", "pin"], "exploit": true, "dr": true})
+					m.fx.word(f.pos + Vector3(0, 2.2, 0), "PINNED", Feel.cat_color("control"), true)
+					m.fx.dust(f.pos, 10)
+					Feel.shake(m, "t3", h, f.pos, f))
+	run(stg, cx("rmb", "heavy_shot", a, extra))
 	Feel.cast_sound(m, "projectile", "control", h.pos, h)
-	m.sfx("rail", h.pos, -4.0, 1.3)
+	m.sfx("rail", h.pos, lerpf(-6.0, 0.0, k), lerpf(1.4, 0.8, k))
+	m.sfx("sniper", h.pos, lerpf(-12.0, -3.0, k), 1.3)
+	var d := h.aim_dir()
+	m.fx.flash(h.pos + Vector3(d.x * 0.7, 1.1, d.y * 0.7), Color("ffe0a0"), 0.5 + 0.6 * k, 0.07)
+	if k >= 0.99: Feel.shake(m, "t2", h, h.pos)
+	h.vel.x -= d.x * (1.5 + 3.0 * k); h.vel.z -= d.y * (1.5 + 3.0 * k)
 
 func _wall_behind(f: Ent, dir: Vector2, reach: float) -> bool:
 	var g0: float = f.pos.y
@@ -398,67 +449,130 @@ func _plunge() -> void:
 	m.fx.bolt(at + Vector3(0, 1.0, 0), ground(at) + Vector3(0, 0.1, 0), Color("e8f7c0"))
 	m.sfx("whoosh", at, -3.0, 1.3)
 
-# ------------------------------------------------------------------ E: Flare Arrow
+# ------------------------------------------------------------------ E: Arrow Rain
+## A wall of falling arrows: lobbed in front of you, it rains along a line across your aim (6m long,
+## 2.2m deep) for 3.75s: damage over time, a slow and a blight (healing barely takes) on foes inside.
+func in_e() -> bool:
+	return not rain.is_empty()
+
 func cast_e() -> bool:
 	var ed := e_def()
-	var at := aim_at(float(ed["reach"]))
-	var r := float(ed["radius"])
-	var t := float(ed["time"]) + (2.0 if rank("kin") >= 3 else 0.0)
-	m.spawn_shot(h, h.pos + Vector3(0, 1.2, 0), Vector2(at.x - h.pos.x, at.z - h.pos.z).normalized() * maxf(4.0, h.flat_dist(at) / float(ed["flight"])), 0.0, float(ed["flight"]), 0.15, col_of(ed), {"lob": 2.5, "cos": true})
-	m.later(float(ed["flight"]), func():
-		if not is_instance_valid(h): return
-		flare = {"pos": at, "r": r, "t": t}
-		e_t = t
-		var stg := stage("e", {"delivery": {"type": "burst", "origin": "aim", "radius": r}, "effects": [{"type": "mark", "mode": "reveal", "duration": t}]})
-		run(stg, cx("e", "flare", at, {"no_floor": true}))
-		var zst := stage("e", {"delivery": {"type": "zone", "origin": "aim", "radius": minf(r, 6.0), "duration": t, "every": 0.5}, "effects": [{"type": "mark", "mode": "reveal", "duration": 1.0}]}, {})
-		run(zst, cx("e", "flare_zone", at, {"no_floor": true}))
-		# traps and smoke show up too
-		for tr in m.verbs.traps:
-			if Vector2(tr["at"].x - at.x, tr["at"].z - at.z).length() < r: tr["reveal"] = maxf(float(tr.get("reveal", 0.0)), 1.0); tr["seen_by"] = h.team
-		m.fx.ring(at, r, col_of(ed), 0.6)
-		m.fx.burst(at + Vector3(0, 2.5, 0), col_of(ed), 30, 6.0, 0.8, 1.0, 1.4)
-		m.sfx("ping", at, -1.0, 0.9))
-	Feel.cast_sound(m, "projectile", "utility", h.pos, h)
+	var c := aim_at(float(ed["reach"]))
+	var d := Vector2(c.x - h.pos.x, c.z - h.pos.z)
+	d = d.normalized() if d.length() > 0.2 else h.aim_dir()
+	var side := Vector2(-d.y, d.x)
+	var half := float(ed["length"]) * 0.5 + (0.5 if rank("kin") >= 3 else 0.0)
+	var a := c + Vector3(side.x, 0, side.y) * half
+	var b := c - Vector3(side.x, 0, side.y) * half
+	var tell := float(ed["tell"])
+	# the arrows go up first (enemies see the strip fill), then the rain starts
+	var tele := tele_lane(a, -side, half * 2.0, float(ed["width"]), col_of(ed), tell)
+	m.spawn_shot(h, h.pos + Vector3(0, 1.2, 0), d * maxf(4.0, h.flat_dist(c) / tell), 0.0, tell, 0.15, col_of(ed), {"lob": 3.0, "cos": true})
+	for i in 6:
+		m.later(0.05 * i, func(): if is_instance_valid(h): m.fx.burst(h.pos + Vector3(0, 1.5, 0), col_of(ed), 3, 7.0, 0.35, -10.0, 0.8, Vector3.UP, 12.0))
+	m.sfx("ab_throw", h.pos, -2.0, 1.4)
+	net_bolt(a + Vector3(0, 0.2, 0), b + Vector3(0, 0.2, 0), col_of(ed))
+	var t := float(ed["time"])
+	rain = {"a": a, "b": b, "c": c, "d": d, "t": t + tell, "start": tell, "tick": 0.0, "patter": 0.0, "fx": 0.0, "tele": tele}
+	e_t = t + tell
 	return true
 
-# ------------------------------------------------------------------ R: Skyfall Volley
+func _in_rain(f: Ent) -> bool:
+	var fp := Vector2(f.pos.x, f.pos.z)
+	var a: Vector3 = rain["a"]; var b: Vector3 = rain["b"]
+	var cp := Geometry2D.get_closest_point_to_segment(fp, Vector2(a.x, a.z), Vector2(b.x, b.z))
+	return fp.distance_to(cp) < float(e_def()["width"]) * 0.5 + f.r and absf(f.pos.y - a.y) < 2.5
+
+func _tick_rain(dt: float) -> void:
+	var ed := e_def()
+	rain["t"] = float(rain["t"]) - dt
+	if float(rain["t"]) <= 0.0:
+		rain = {}
+		return
+	if float(rain["start"]) > 0.0:
+		rain["start"] = float(rain["start"]) - dt
+		if float(rain["start"]) <= 0.0:
+			# the strip stays marked while it rains
+			rain["tele2"] = tele_lane(rain["a"], Vector2(rain["b"].x - rain["a"].x, rain["b"].z - rain["a"].z).normalized(), float(ed["length"]) + (1.0 if rank("kin") >= 3 else 0.0), float(ed["width"]), Color(col_of(ed), 0.6), float(rain["t"]))
+		return
+	var a: Vector3 = rain["a"]; var b: Vector3 = rain["b"]; var d: Vector2 = rain["d"]
+	# the rain: arrows falling all along the strip, and a steady patter
+	rain["fx"] = float(rain["fx"]) - dt
+	if float(rain["fx"]) <= 0.0:
+		rain["fx"] = 0.06
+		for i in 2:
+			var q := a.lerp(b, randf()) + Vector3(d.x, 0, d.y) * randf_range(-1.0, 1.0) * float(ed["width"]) * 0.45
+			q = ground(q)
+			m.fx.bolt(q + Vector3(randf_range(-0.6, 0.6), 7.0, randf_range(-0.6, 0.6)), q, Color(col_of(ed), 0.9))
+			m.fx.burst(q + Vector3(0, 0.1, 0), col_of(ed), 2, 1.5, 0.2, 4.0, 0.7)
+	rain["patter"] = float(rain["patter"]) - dt
+	if float(rain["patter"]) <= 0.0:
+		rain["patter"] = randf_range(0.07, 0.13)
+		m.sfx("click", a.lerp(b, randf()), -13.0, randf_range(1.6, 2.4))
+	rain["tick"] = float(rain["tick"]) - dt
+	if float(rain["tick"]) > 0.0:
+		return
+	rain["tick"] = float(ed["every"])
+	var stg := stage("e", {"delivery": {"type": "burst", "origin": "here", "radius": 0.0},
+		"effects": [{"type": "damage", "amount": float(ed["dmg"])}, {"type": "slow", "duration": 0.8, "strength": float(ed["slow"])}]})
+	for f in m.foes_of(h.team):
+		if f.hittable() and _in_rain(f):
+			KinExec.apply_foe(stg.effects, f, cx("e", "arrow_rain", f.pos, {"at": f.pos}), f.pos, stg)
+			if "blight_t" in f: f.set("blight_t", maxf(float(f.get("blight_t")), float(ed["blight"])))
+
+# ------------------------------------------------------------------ R: Great Arrows
+## Three empowered arrows: for 6s your next three shots need no draw, fly far, pierce everything,
+## knock back and hit hard, the third hardest (a payoff hit; into a wall it stuns).
 func cast_r() -> bool:
 	var rd := r_def()
-	var at := aim_at(float(rd["reach"]))
-	var r := float(rd["radius"])
-	var tell := float(rd["tell"])
-	tele_circle(at, r, col_of(rd), tell)
-	for i in 8:
-		m.later(0.08 * i, func(): if is_instance_valid(h): m.fx.burst(h.pos + Vector3(0, 1.4, 0), col_of(rd), 3, 6.0, 0.4, -8.0, 0.8, Vector3.UP, 15.0))
-	m.sfx("charge", at, -2.0, 1.8)      # a rising whistle
-	var waves := int(rd["waves"]) + (1 if rank("ult") >= 2 else 0)
-	volley = {"at": at, "t": tell, "left": waves, "n": waves}
-	r_t = tell + float(rd["every"]) * waves + 0.2
+	great = {"left": int(rd["shots"]), "t": float(rd["window"]) * r_dur_k(), "n": 0}
+	r_t = float(great["t"])
+	m.fx.word(h.pos + Vector3(0, 2.6, 0), "GREAT ARROWS", col_of(rd), true)
+	for i in 3:
+		m.fx.ring(h.pos, 0.8 + 0.4 * i, Color(col_of(rd), 0.9), 0.3 + 0.1 * i)
+	m.sfx("ab_ready", h.pos, -2.0, 0.8)
 	return true
 
-func _tick_volley(dt: float) -> void:
-	volley["t"] = float(volley["t"]) - dt
-	if float(volley["t"]) > 0.0:
-		return
+func lmb_override(held: bool, _dt: float) -> bool:
+	if great.is_empty() or int(great["left"]) <= 0:
+		return false
+	if held and h.can_fire() and h.fire_cd <= 0.0 and h.ammo > 0:
+		_great_arrow()
+		h.draw_t = -1.0
+		return true
+	return held
+
+func _great_arrow() -> void:
 	var rd := r_def()
-	var at: Vector3 = volley["at"]
-	var left := int(volley["left"])
-	volley["left"] = left - 1
-	volley["t"] = float(rd["every"])
-	var last := left == 1
-	if left == 2:
-		tele_circle(at, float(rd["inner"]), Feel.cat_color("control"), float(rd["every"]))   # the inner ring's own fill
-	var stg := stage("r", {"delivery": {"type": "burst", "origin": "aim", "radius": float(rd["radius"])},
-		"effects": [{"type": "damage", "amount": float(rd["dmg"]) * r_k()}, {"type": "slow", "duration": 0.8, "strength": float(rd["slow"])}]})
-	run(stg, cx("r", "volley", at, {"no_floor": true}))
-	for i in 6:
-		var q := at + Vector3(randf_range(-1, 1), 0, randf_range(-1, 1)) * float(rd["radius"]) * 0.8
-		m.fx.bolt(q + Vector3(0, 6.0, 0), q, col_of(rd))
-	if last:
-		var ist := stage("r", {"delivery": {"type": "burst", "origin": "aim", "radius": float(rd["inner"])}, "effects": [{"type": "root", "duration": float(rd["root"])}]}, {"ctrl": "add", "ctrl_cap": "soft"})
-		run(ist, cx("r", "volley_root", at, {"no_floor": true}))
-		volley = {}
+	var i := int(great["n"])
+	great["n"] = i + 1
+	great["left"] = int(great["left"]) - 1
+	var last := int(great["left"]) <= 0
+	var dmgs: Array = rd["dmg"]; var pushes: Array = rd["push"]
+	var dmg := float(dmgs[mini(i, dmgs.size() - 1)]) * r_k()
+	var push := float(pushes[mini(i, pushes.size() - 1)])
+	var d := h.aim_dir()
+	h.fire_cd = float(rd["rate"])
+	var stg := stage("r", {"delivery": {"type": "projectile", "speed": float(rd["speed"]), "range": float(rd["range"]), "size": 0.42 if not last else 0.55},
+		"effects": [{"type": "damage", "amount": dmg}, {"type": "push", "strength": push, "from": "caster"}],
+		"modifiers": [{"type": "pierce", "count": 5}]})
+	var extra := {"hit_extra": {"payoff": true} if last else {"heavy": true}, "on_foe": func(f: Ent, _c: Dictionary):
+		if last:
+			payoff_fx(f.pos, "GREAT ARROW", col_of(rd), "pay_deadeye", d, f)
+			if _wall_behind(f, d, 3.0): f.hurt(0.1, h, {"stun": float(rd["wall_stun"]), "src": "abil", "ab": "ult", "tags": ["ult"], "dr": true})
+		else:
+			m.fx.ring(f.pos, 1.4, col_of(rd), 0.25)}
+	run(stg, cx("r", "great_arrow", aim(), extra))
+	# the release: a heavy twang and boom, a big flash, the archer rocked back
+	m.sfx("sniper", h.pos, -1.0, 0.7 if not last else 0.55)
+	m.sfx("ab_rail", h.pos, -6.0, 1.2 if not last else 0.9)
+	m.fx.flash(h.pos + Vector3(d.x * 0.8, 1.1, d.y * 0.8), col_of(rd).lightened(0.3), 1.0 + (0.6 if last else 0.0), 0.08)
+	m.fx.burst(h.pos + Vector3(d.x * 0.8, 1.1, d.y * 0.8), col_of(rd), 16, 9.0, 0.35, 0.0, 1.2, Vector3(d.x, 0.1, d.y), 25.0)
+	Feel.shake(m, "t3" if last else "t2", h, h.pos)
+	if h.is_local(): Oomph.punch_dir(m, -d, 0.3 if last else 0.18)
+	h.vel.x -= d.x * (3.0 if not last else 6.0); h.vel.z -= d.y * (3.0 if not last else 6.0)
+	net_bolt(h.pos + Vector3(0, 1.1, 0), h.pos + Vector3(d.x, 0, d.y) * float(rd["range"]) + Vector3(0, 1.1, 0), col_of(rd))
+	if last: great = {}
 
 # ------------------------------------------------------------------ bots
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
@@ -469,10 +583,14 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 		h.inp["aim"] = tgt.pos + Vector3(0, 0.9, 0)
 		h.inp["fire"] = true
 		return
-	if int(h.slot_lv["ult"]) > 0 and float(cd["r"]) <= 0.0 and dist < float(r_def()["reach"]) and los and randf() < 0.4:
+	# Great Arrows: when a rival is in a long, clear line (then the gun loop fires them through)
+	if int(h.slot_lv["ult"]) > 0 and float(cd["r"]) <= 0.0 and dist < float(r_def()["range"]) * 0.75 and los and tgt is Hunter and randf() < 0.4:
 		h.inp["aim"] = tgt.pos; h.inp["ult"] = true; return
-	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and dist < 13.0 and randf() < 0.3:
-		h.inp["aim"] = tgt.pos; h.inp["sig"] = true; return
+	if not great.is_empty() and los:
+		h.inp["aim"] = tgt.pos + Vector3(0, 0.9, 0); h.inp["fire"] = true; return
+	# Arrow Rain across their path (lead them a little), from mid range
+	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and dist < float(e_def()["reach"]) + 1.0 and dist > 3.0 and randf() < 0.35:
+		h.inp["aim"] = tgt.pos + Vector3(tgt.vel.x, 0, tgt.vel.z) * 0.4; h.inp["sig"] = true; return
 	# snare first: a root pins them (and feeds Focus) for the Deadeye
 	if int(h.slot_lv["sec"]) > 0 and rmb_ready() and los and dist < 13.0 and not pinned(tgt):
 		h.inp["aim"] = tgt.pos + Vector3(0, 0.9, 0)

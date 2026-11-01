@@ -1376,6 +1376,8 @@ func _loose() -> void:
 	for stg in stages:
 		if t >= float(stg[0]):
 			dmg = float(stg[1]); rng = float(stg[2]); spd = float(stg[3])
+	if ak and ak.has_method("draw_bonus") and t < 5.0:
+		dmg *= float(ak.draw_bonus(t))       # let go right at full draw (the perfect window)
 	var keep := wpn
 	wpn = wpn.duplicate()
 	var rk: float = float(Data.RARITY[clampi(wrar, 0, Data.RARITY.size() - 1)]["dmg"])
