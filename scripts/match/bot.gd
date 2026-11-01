@@ -400,6 +400,13 @@ func can_hit(m: Match, h: Hunter, tgt: Ent) -> bool:
 		var o := Vector3(side.x * k, 0, side.y * k)
 		if not m.world.los(Vector3(h.pos.x, base_y, h.pos.z) + o, tgt.pos + o, y):
 			return false
+	# and the shot itself, eye to chest, mustn't clip a lip of ground on the way (firing down off a
+	# shelf at someone just below its edge: the flat check above passes, the real line hits the lip)
+	var y0 := base_y + 0.95; var y1 := tgt.pos.y + 0.9
+	for i in 24:
+		var f := (i + 0.5) / 24.0
+		if m.world.ground_at(lerpf(h.pos.x, tgt.pos.x, f), lerpf(h.pos.z, tgt.pos.z, f)) > lerpf(y0, y1, f) - 0.05:
+			return false
 	return true
 
 const RV_RANGE := 70.0        # how far a bot will go for a downed squadmate
