@@ -22,7 +22,7 @@ extends RefCounted
 ## The fight is loud: everyone within ALERT_R hears the boss roar, gets a ping with the boss's icon on
 ## the minimap and the full map, sees a shaft of light over the lair, and the seal's clock floats over
 ## the gate for anyone outside to read. So a squad outside has a choice: camp the gate, or move on.
-## The kill doesn't open the gate straight away. It stays shut for VICTORY_T (15 s) unless someone
+## The kill doesn't open the gate straight away. It stays shut for VICTORY_T (20 s) unless someone
 ## inside pulls the lever by the gate; meanwhile an updraft blows at the back of the lair that only
 ## those who fought can ride, up over the wall and away on the glider from a side the campers aren't
 ## watching. It dies down when the gate opens. Everyone near hears the boss fall, so campers know the
@@ -43,7 +43,7 @@ const RUNE_HOLD := 2.2
 const EGG_PING_T := 8.0        # the dropped egg shows on everyone's minimap this long
 const CARRY_PING_T := 5.0      # ... and so does whoever picks it up
 const LOCK_T := 90.0           # the longest a fight can keep you sealed in
-const VICTORY_T := 15.0        # after the kill the gate stays shut this long unless the lever is pulled
+const VICTORY_T := 20.0        # after the kill the gate stays shut this long unless the lever is pulled (so campers at the gate wait it out)
 const LEVER_R := 1.7           # reach to pull the gate lever
 const ALERT_R := 150.0         # everyone this close hears a lair fight start (and its boss fall)
 const UP_R := 1.5              # the escape updraft's radius
