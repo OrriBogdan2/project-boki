@@ -78,6 +78,7 @@ var muzzle_light: OmniLight3D
 var raid := "clear"                # the raid condition: rolled per match from the seed (RaidLook)
 var sight_k := 1.0                 # sight range under the raid condition (RaidLook.SIGHT)
 var raid_fx: Node3D = null         # blowing ash / drifting fog that follows the camera (RaidLook.storm_fx)
+var blight: BlightDir = null       # the Blight: its spawns, its scaling and what it hears (BlightDir)
 var music_dir: MusicDir = null     # the layered score's levels (scripts/match/music_dir.gd)
 var collapse_warned := false
 var rng := RandomNumberGenerator.new()
@@ -606,6 +607,10 @@ func _start(o: Dictionary) -> void:
 		spawn_plan.roll(seed_val)
 		spawn_plan.spawn_all()
 	if lairs: lairs.ensure_live()
+	if BlightDir.enabled(opts) and big and world.layout_id != "tutorial":
+		# the Blight: Wardens on the islands from the start, Skitters later (scripts/match/blight_dir.gd)
+		blight = BlightDir.new(self)
+		blight.setup()
 	_trim_shadows(self)
 	for list in [mobs, kins, chests, breaks, shrines, wpicks]:
 		for it in list:
@@ -1077,6 +1082,7 @@ func on_drop_landed(h: Hunter) -> void:
 	h.squash = 0.4
 	if h == player:
 		shake(0.25, h.pos)
+	if blight: blight.on_landed(h)
 
 ## Perks you carry from home: your workshop, and the projects your guild has finished.
 func _apply_home_perks(h: Hunter) -> void:
@@ -1158,6 +1164,8 @@ func spawn_mob(kk: String, at: Vector3) -> Mob:
 ## Gunfire and explosions you can't see show up on the minimap as sound pings.
 var sound_pings: Array = []    # {pos, t, kind, key}
 func note_sound(by, at: Vector3, kind: String) -> void:
+	if blight:
+		blight.noise(at, kind, by)       # the Blight hunts by noise
 	if player == null or player.out:
 		return
 	if by is Ent and (by as Ent).team == player.team:
@@ -1170,6 +1178,23 @@ func note_sound(by, at: Vector3, kind: String) -> void:
 		if sp["key"] == key and time - float(sp["t"]) < 0.7:
 			return
 	sound_pings.append({"pos": at, "t": time, "kind": kind, "key": key})
+	if sound_pings.size() > 40:
+		sound_pings.pop_front()
+
+## A Warden shrieked: heard across the island, and a warning for whoever's close.
+func on_blight_shriek(b: Mob) -> void:
+	blight_ping(b.pos, "shriek")
+	if player and not player.out and player.flat_dist(b) < 26.0 and hud:
+		var lv: float = (b as Blight).lvl
+		hud.toast("A Warden shrieked  ·  the Blight is coming" if lv >= 0.35 else "A Warden spotted you  ·  get out of its light", Color("ff7a3a"))
+
+## The Blight on the minimap: a mark where you hear something you can't see.
+func blight_ping(at: Vector3, kind := "blight") -> void:
+	if player == null or player.out:
+		return
+	if Vector2(at.x - player.pos.x, at.z - player.pos.z).length() > 40.0:
+		return
+	sound_pings.append({"pos": at, "t": time, "kind": kind, "key": "bl" + str(at.snapped(Vector3(3, 3, 3)))})
 	if sound_pings.size() > 40:
 		sound_pings.pop_front()
 
@@ -1975,6 +2000,7 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 		credit = by.owner_h
 	if target is Hunter and target != credit:
 		(target as Hunter).dmg_taken += d
+		if by is Blight: kstat["bl_dmg"] = float(kstat.get("bl_dmg", 0.0)) + d
 	if credit is Hunter and target != credit:
 		credit.dmg_done += d
 		if o.has("leech") and target.team != credit.team and not credit.remote:
@@ -2032,6 +2058,7 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 	cancel_abilities(h)
 	h.downed = true
 	h.downs += 1
+	if by is Blight: kstat["bl_knock"] = int(kstat.get("bl_knock", 0)) + 1      # (tests: what the Blight did)
 	h.down_hp = Data.MATCH["down_hp"]
 	h.hp = 0.0
 	h.revive = 0.0
@@ -2163,6 +2190,7 @@ func eliminate(h: Hunter, by: Ent, why: String, final := false) -> void:
 	if h.out:
 		return
 	h.deaths += 1
+	if by is Blight: kstat["bl_out"] = int(kstat.get("bl_out", 0)) + 1
 	if h.lives > 1 and not h.remote and not over and not final:
 		_lose_life(h, by, why)
 		return
@@ -2443,7 +2471,11 @@ func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
 			var git := found_weapon(mb.pos, String(keys[randi() % keys.size()]), Data.roll_rarity(rng, 1))
 			spawn_weapon(String(git["wid"]), int(git["rar"]), mb.pos, "", true, -1, git)
 			if credit is Hunter: add_feed("%s caught the Glimmerkin's treasure" % credit.pname)
-		if rng.randf() < (0.35 if mb.mkind == "brute" else 0.12):
+		if mb.mkind == "bl_warden":
+			# a Warden's lamp holds something worth the risk: armor, often a tonic
+			drop("armor", mb.pos + Vector3(0, 0.6, 0), 25)
+			if rng.randf() < 0.4: drop("tonic", mb.pos + Vector3(0.4, 0.6, 0), 1)
+		if rng.randf() < (0.35 if mb.mkind == "brute" else (0.0 if mb is Blight else 0.12)):
 			drop("seed", mb.pos + Vector3(0, 0.6, 0), 1, Data.pick_seed())
 		# a Rift Key: always from the Warden, sometimes from an elite (one that can be staggered, or a rare one)
 		if exits and not exits.list.is_empty() and (mb.mkind == "warden" or ((mb.md.get("stag", false) or mb.rarity >= 3) and mb.mkind != "glimmer" and rng.randf() < 0.06)):
@@ -4066,6 +4098,7 @@ func step(dt: float) -> void:
 	for k in kins: k.sim(dt)
 	_prof("kins")
 	for mb in mobs: mb.sim(dt)
+	if blight: blight.tick(dt)
 	_prof("mobs")
 	_separate()
 	_collide_breaks()
@@ -4605,6 +4638,7 @@ func _open_chest(h: Hunter, c: Dictionary, from_net := false) -> void:
 	if c["open"]:
 		return
 	c["open"] = true
+	if blight: blight.noise(c["pos"], "chest", h)      # a chest lid is loud
 	if net_on and not from_net:
 		net_event(["chest", chests.find(c), h.nid if h else ""])
 	var t := int(c.get("tier", 0))
@@ -5734,8 +5768,13 @@ func _ser(e: Ent) -> Array:
 			k.owner_h.nid if k.owner_h else "", int(k.rec.get("level", 1)), String(k.rec.get("name", "")), _r(k.catch_prog), _r(k.vel.x), _r(k.vel.z),
 			1 if k.rec.get("shimmer", false) else 0, String(k.rec.get("acc", "")), ",".join(Mutations.of(k.rec))]
 	var mb: Mob = e
-	return ["m", mb.nid, _r(mb.pos.x), _r(mb.pos.y), _r(mb.pos.z), _r(mb.face), _r(mb.hp), _r(mb.max_hp), MOB_STATES.find(mb.st), mb.mkind,
+	var ms := ["m", mb.nid, _r(mb.pos.x), _r(mb.pos.y), _r(mb.pos.z), _r(mb.face), _r(mb.hp), _r(mb.max_hp), MOB_STATES.find(mb.st), mb.mkind,
 		_r(mb.atk_dir.x), _r(mb.atk_dir.y), _r(mb.st_t), _r(mb.vel.x), _r(mb.vel.z), _r(mb.stag_open), _r(mb.stagger_t)]
+	if mb is Blight:
+		# the Blight: where a Warden's light points, how close it is to shrieking, and its strength
+		var bb: Blight = mb
+		ms.append_array([_r(bb.cone_a), _r(bb.spot), _r(bb.lvl), 1 if bb.tgt != null else 0])
+	return ms
 
 ## Snapshot of what this game owns: its player (mine=true), or the host's world (mine=false).
 func net_snapshot(mine: bool) -> Array:
@@ -5815,8 +5854,17 @@ func _net_make(it: Array) -> Ent:
 			_net_seen_rec[nid] = rec
 			return k
 		"m":
-			var mb := Mob.new()
-			mb.init_mob(self, nid, String(it[9]), Vector3(it[2], it[3], it[4]))
+			var mk := String(it[9])
+			if not Data.MOBS.has(mk):
+				return null
+			var mb: Mob
+			if Data.MOBS[mk].get("blight", false):
+				var bl := Blight.new()
+				bl.init_blight(self, nid, mk, Vector3(it[2], it[3], it[4]), float(it[19]) if it.size() > 19 else 0.1, blight)
+				mb = bl
+			else:
+				mb = Mob.new()
+				mb.init_mob(self, nid, mk, Vector3(it[2], it[3], it[4]))
 			add_child(mb)
 			mb.remote = true
 			mobs.append(mb)
@@ -5876,6 +5924,10 @@ func _net_apply(e: Ent, it: Array) -> void:
 			mb.net_vel = Vector3(it[13], 0, it[14])
 			if it.size() > 16:
 				mb.stag_open = float(it[15]); mb.stagger_t = float(it[16])
+			if mb is Blight and it.size() > 20:
+				var bb: Blight = mb
+				bb.cone_a = float(it[17]); bb.spot = float(it[18]); bb.lvl = float(it[19])
+				bb.tgt = player if int(it[20]) == 1 else null     # (only "alerted or not" matters to a proxy's looks)
 
 func _net_hit_in(x) -> void:
 	if typeof(x) != TYPE_ARRAY or x.size() < 12:
@@ -5980,6 +6032,15 @@ func _net_ev(x, from: String) -> void:
 				who.revive += float(x[2])
 				if who.revive >= 1.0:
 					revive_hunter(who, null)
+		"blsh":
+			# a Warden shrieked on the host's game
+			who = ents_by_id.get(String(x[1]), null)
+			if who is Blight and not who.dead:
+				(who as Blight).shriek_fx()
+		"blgone":
+			who = ents_by_id.get(String(x[1]), null)
+			if who is Blight and not who.dead:
+				(who as Blight).burrow()
 		"mobdead":
 			who = ents_by_id.get(String(x[1]), null)
 			if who is Mob and not who.dead:

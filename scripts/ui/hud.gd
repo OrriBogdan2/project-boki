@@ -367,9 +367,10 @@ func _draw_world_labels() -> void:
 			_ctext(tsp, "%s incoming" % h.pname.substr(0, 10), 12, Color("8fe3c8"), big)
 			c.draw_arc(cam.unproject_position(to.position + Vector3(0, 0.1, 0)), 22.0, 0, TAU, 32, Color(0.56, 0.89, 0.78, 0.4 + 0.3 * sin(m.time * 8.0)), 2.0, true)
 	for mb in m.mobs:
-		if mb.dead or cam.is_position_behind(mb.position):
+		if mb.dead or not mb.visible or cam.is_position_behind(mb.position):
 			continue
 		var hy := 1.4
+		if mb is Blight: hy = 3.0 if mb.mkind == "bl_warden" else 1.1
 		if mb is Boss: hy = 4.8 if mb.mkind == "colossus" else 3.4
 		elif mb.mkind == "ward": hy = 3.0
 		elif mb.mkind == "brute": hy = 2.4
@@ -702,8 +703,9 @@ func _draw_minimap(sz: Vector2) -> void:
 		var age := m.time - float(sp["t"])
 		if age > 1.6: continue
 		var pv: Vector2 = to_map.call(sp["pos"])
-		var boom: bool = sp["kind"] == "boom"
+		var boom: bool = sp["kind"] == "boom" or sp["kind"] == "shriek"
 		var col := Color("ff9a5a") if boom else Color("ff5a5a")
+		if sp["kind"] in ["blight", "shriek"]: col = Color("ff6a2a")      # the Blight: ember
 		var a := clampf(1.0 - age / 1.6, 0.0, 1.0)
 		if on_map.call(pv):
 			c.draw_arc(pv, 3.0 + age * (12.0 if boom else 8.0), 0, TAU, 20, Color(col, a), 2.0, true)
@@ -2682,7 +2684,7 @@ func _draw_world_hover(sz: Vector2, p: Hunter) -> void:
 	var best: Ent = null; var bd := 46.0
 	var cands: Array = []
 	for mb in m.mobs:
-		if not mb.dead: cands.append(mb)
+		if not mb.dead and mb.visible: cands.append(mb)
 	for k in m.kins:
 		if not k.dead and k.visible and k.state != "shoulder": cands.append(k)
 	for h in m.hunters:
@@ -2703,10 +2705,15 @@ func _draw_world_hover(sz: Vector2, p: Hunter) -> void:
 		lines.append(["Monster  ·  %d / %d health" % [int(ceil(mb.hp)), int(mb.max_hp)], MUTED])
 		var how := {"lunge": "Lunges at whoever is closest.", "spit": "Spits from range: keep moving.", "slam": "Winds up a ground slam: step out of the circle.",
 			"fuse": "Rolls in and blows up. Shoot it before it reaches you.", "volley": "Fires a spread of bolts down a line.", "none": "Runs from you. Tame it before it escapes."}
+		if mb is Blight:
+			# the Blight: what it does, and how strong it is right now
+			var bl: Blight = mb
+			lines[1] = ["The Blight  ·  %d / %d health  ·  %s" % [int(ceil(mb.hp)), int(round(mb.max_hp)), "stirring" if bl.lvl < 0.35 else ("hunting" if bl.lvl < 0.8 else "ravenous")], MUTED]
+			how = {"lunge": "Hunts by noise and light. Fast, fragile, comes in packs later on.", "spit": "Sweeps a light. Stay in it and it shrieks, and the Blight nearby comes."}
 		lines.append([String(how.get(String(md["attack"]), "Dangerous up close.")), INK])
 		if md.get("stag", false):
 			lines.append(["Staggerable: hit it with an ability while the purple ring shows.", Color(0.85, 0.6, 1.0)])
-		lines.append(["Drops %d gems." % int(md["gems"]), GOLD])
+		lines.append(["Drops %d gem%s." % [int(md["gems"]), "" if int(md["gems"]) == 1 else "s"], GOLD])
 	elif best is Kin:
 		var k: Kin = best
 		var sp: Dictionary = Data.KIN[k.species]

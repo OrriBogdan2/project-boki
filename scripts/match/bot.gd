@@ -634,6 +634,12 @@ func _choose(m: Match, h: Hunter) -> void:
 			if mb is Boss and (mb as Boss).dormant: continue
 			var d := h.flat_dist(mb)
 			var reach := 16.0 if mb is Boss else 8.0
+			if mb is Blight:
+				# the Blight: fight what's coming for us (a Warden's bolts reach further); hurt and
+				# with nothing to drink, step away instead (_blight_flee) unless it's right on us
+				reach = 11.0 if mb.tgt == h else 7.0
+				if h.hp < h.max_hp * 0.3 and h.tonics <= 0 and d > 2.5:
+					continue
 			if d < reach and absf(mb.pos.y - h.pos.y) < 2.0 and m.world.los(h.pos, mb.pos, h.pos.y + 0.95):
 				var s := 10.0 - d
 				if mb.tgt == h: s += 5.0
@@ -669,6 +675,11 @@ func _choose(m: Match, h: Hunter) -> void:
 			if bc["used"]: continue
 			var d := h.flat_dist(bc["pos"])
 			if d < bd: bd = d; goal = bc["pos"]; gk = "beacon"
+	# hurt with the Blight close: get away from it first
+	if goal == Vector3.INF and m.blight:
+		var fl := _blight_flee(m, h)
+		if fl != Vector3.INF:
+			goal = fl; gk = "flee"
 	# our squad's uplink is charging: every hunter in its yard charges it faster (and an empty yard
 	# drains it), so go and hold it rather than wander off after boxes, pings or lairs (unless we're
 	# sealed in a lair already)
@@ -756,7 +767,7 @@ func _choose(m: Match, h: Hunter) -> void:
 	if goal == Vector3.INF:
 		# roam toward monsters or another island
 		if a["wander"] == Vector3.INF or h.flat_dist(a["wander"]) < 2.0 or randf() < 0.02:
-			var alive_mobs := m.mobs.filter(func(x): return not x.dead)
+			var alive_mobs := m.mobs.filter(func(x): return not x.dead and not (x is Blight))     # (camps level you; the Blight doesn't)
 			if alive_mobs.size() > 0 and randf() < 0.6:
 				a["wander"] = alive_mobs.pick_random().pos
 			else:
@@ -798,6 +809,27 @@ func _choose(m: Match, h: Hunter) -> void:
 			a["goal_best"] = 1e9
 	a["goal"] = goal
 	a["goal_kind"] = gk
+
+## A hurt bot with the Blight near (and nothing to drink) backs off the way it isn't: a spot ten
+## tiles away from the Blight's middle, on solid ground. INF when there's no need.
+func _blight_flee(m: Match, h: Hunter) -> Vector3:
+	if h.hp >= h.max_hp * 0.3 or h.tonics > 0:
+		return Vector3.INF
+	var c := Vector2.ZERO; var n := 0
+	for mb in m.mobs:
+		if mb is Blight and not mb.dead and h.flat_dist(mb) < 10.0:
+			c += Vector2(mb.pos.x, mb.pos.z); n += 1
+	if n == 0:
+		return Vector3.INF
+	c /= float(n)
+	var away := (Vector2(h.pos.x, h.pos.z) - c).normalized()
+	if away.length() < 0.1: away = Vector2(1, 0)
+	for k in [0.0, 0.6, -0.6, 1.2, -1.2]:
+		var d2 := away.rotated(k)
+		var q := h.pos + Vector3(d2.x, 0, d2.y) * 10.0
+		if not m.world.is_void(q.x, q.z) and not m.world.is_block(q.x, q.z):
+			return Vector3(q.x, m.world.ground_at(q.x, q.z), q.z)
+	return Vector3.INF
 
 ## Direction to walk toward a goal, using jump pads to cross to other islands.
 func _path_dir(m: Match, h: Hunter, goal: Vector3) -> Vector2:

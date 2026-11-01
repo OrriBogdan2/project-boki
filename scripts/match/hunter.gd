@@ -917,6 +917,8 @@ func do_dash() -> void:
 	if not grounded and dashes >= 1.0 and not air_dashed and int(owner_stat("air_dashes")) > 0:
 		use_ex = false           # a merge's dodge in the air: a normal dodge, once per airtime
 		air_dashed = true
+	if m.blight:
+		m.blight.noise(pos, "dash", self)     # a dash is loud enough for the Blight nearby
 	if ak:
 		# the archetype's dash shape: it spends its own charge (or the long air dash) itself
 		ak.on_dash(use_ex)
