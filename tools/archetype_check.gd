@@ -441,11 +441,16 @@ func _gunslinger() -> void:
 	step(m, 0.3)
 	if OS.get_cmdline_user_args().has("--ak-debug"): print("  post trick: hp %.1f variant %s ch %.1f T2 %.1f" % [T.hp, K.last_variant, K.ch_rmb, T2.hp])
 	ok("gunslinger RMB tap: Trick Shot", dmg(T) >= 11.0, "took %.0f" % dmg(T))
-	# Called Shot at 6
-	fresh(T); K.res = 6.0; K.ch_rmb = 1.0; K.cd["rmb"] = 0.0
+	# Called Shot at 6: armed, then a stunning crit that reloads the magazine
+	fresh(T); K.res = 5.0; K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; K.load_at = -9.0
+	K.load_chambers(1, true)
+	ok("gunslinger resource full: Called Shot armed", K.full_ready() and K.ready_label() != "" and K.res_text() == "6/6")
+	P.ammo = 1
+	var cs0 := K.called_shots
 	tap(m, P)
 	step(m, 0.3)
 	ok("gunslinger RMB full: Called Shot stuns", K.last_variant == "full" and T.stun_t > 0.0 and dmg(T) >= 20.0 and K.res < 1.0, "took %.0f stun %.2f" % [dmg(T), T.stun_t])
+	ok("gunslinger Called Shot: payoff + reload", K.called_shots == cs0 + 1 and P.ammo == int(P.wpn["mag"]), "payoffs %d ammo %d" % [K.called_shots - cs0, P.ammo])
 	# Rail Charge: a full hold pierces and stuns
 	fresh(T); fresh(T2); T.cc_immune_t = 0.0; K.ch_rmb = 1.0; K.cd["rmb"] = 0.0
 	step(m, 1.0)

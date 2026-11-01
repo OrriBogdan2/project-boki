@@ -905,3 +905,20 @@ Lance on whoever's in the air. Overshoot to 100 and you Vent (the risk stays).
 - Numbers: a plain detonation 10 (was 12.5 when Overcharged); Flashpoint 24 on a 14s E.
 - Bots: Flashpoint when Overcharged and the target stands in the Sigil (90%); otherwise detonate
   now and then or as the Sigil fades.
+
+### Gunslinger: Chambers -> Called Shot
+
+Weapon hits load a chamber (one per 0.25s), a tap roll loads 2. At 6 the **Called Shot is armed**:
+the next Trick Shot (or Rail, or Recoil Shot) is a Called Shot: +70% (a Rail takes half, +35%), a
+crit, stun 0.4, T4 hitstop on its hits; when it lands the cylinder spins a full magazine in, so the
+stun is your window to unload. Quickdraw (E) speeds the loading and doubles the Trick Shot.
+
+- Tells: a gold six-pip cylinder over the hat fills pip by pip (everyone sees it) and spins at 6;
+  the gun glows gold with a light at the muzzle; "CALLED SHOT READY" pops with the reload click and
+  sits under the crosshair; the RMB slot gets the gold dot.
+- Payoff: a gold muzzle flare and hammer crack on the call, then on the hit "CALLED SHOT", the
+  round's line in gold, `pay_called` (a heavy round, a bell ting, the cylinder spinning), T4 shake.
+- Numbers: the Called multiplier was `(1 + 0.4) x 1.5 = 2.1x`; now 1.7x (a Rail 1.35x). Trick Shot
+  12 -> 20 called (was 25); a full Rail 34 -> 46 called (was 71); the two-target bounce case in the
+  check 50 -> 41.
+- Bots: a full cylinder taps a Called Shot within 9m; otherwise the Rail from range.

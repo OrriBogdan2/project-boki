@@ -754,8 +754,8 @@ func self_pips(n: int, lit: int, armed: bool, dt: float) -> void:
 		var ds: Array = []
 		for i in n:
 			var d := MeshInstance3D.new()
-			d.mesh = Models.box(0.2, 0.2, 0.2)
-			d.material_override = Models.glow_mat(Color(res_col(), 0.95))
+			d.mesh = Models.box(0.17, 0.17, 0.17)
+			d.material_override = solid_mat(res_col())
 			d.rotation = Vector3(0.0, 0.0, PI * 0.25)
 			d.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			node.add_child(d)
@@ -782,11 +782,20 @@ func self_pips(n: int, lit: int, armed: bool, dt: float) -> void:
 		var ang := a + TAU * i / float(ds.size())
 		d.position = Vector3(cos(ang) * rad, 0.0, sin(ang) * rad)
 		var on := i < lit
-		var s := (1.0 + float(spips["pop"]) * 0.6) if on else 0.55
-		if armed: s *= 1.25 + 0.12 * sin(m.time * 10.0 + i)
+		var s := (1.0 + float(spips["pop"]) * 0.6) if on else 0.6
+		if armed: s *= 1.2 + 0.12 * sin(m.time * 10.0 + i)
 		d.scale = Vector3.ONE * s
-		var c := res_col().lightened(0.25) if armed else res_col()
-		d.material_override.set_shader_parameter("color", Color(c, 1.0) if on else Color(1, 1, 1, 0.22))
+		var c := res_col().lightened(0.2) if armed else res_col()
+		(d.material_override as StandardMaterial3D).albedo_color = Color(c, 1.0) if on else Color(0.08, 0.08, 0.1, 0.55)
+
+## A flat, unlit, solid colour (pips and plates that must read as their colour, not glow white).
+static func solid_mat(c: Color) -> StandardMaterial3D:
+	var mt := StandardMaterial3D.new()
+	mt.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mt.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mt.albedo_color = c
+	mt.no_depth_test = false
+	return mt
 
 ## Terrain (a wall, a rock, a ledge face) within `reach` behind `t` along `dir`.
 func terrain_behind(t: Ent, dir: Vector2, reach: float) -> bool:

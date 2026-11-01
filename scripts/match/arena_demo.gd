@@ -10,6 +10,8 @@ extends RefCounted
 ##   deadeye     the same, ending on the Deadeye payoff
 ##   mage        a Sigil under the dummy, Overcharged: white-hot runes orbiting, the Sigil primed
 ##   flashpoint  the same, ending on the Flashpoint payoff
+##   gunslinger  rifle hits fill the gold cylinder over the hat; at 6 the gun glows (Called Shot armed)
+##   calledshot  the same, ending on the Called Shot payoff
 ##   card / card_<archetype>   the kit card (K); card_detail: the RMB detail page
 ##   menu        the loadout panel (L)
 ##   smg         the SMG firing at the dummy; add --legacy-shots for the old look and numbers (before)
@@ -121,6 +123,23 @@ static func tick(A: Arena, dt: float) -> void:
 			else:
 				if _at(t, dt, 1.5): P.ak.use_e()                                         # Flashpoint
 				at_t = 1.5 + float(P.ak.e_def()["det_t"]) + 0.08
+		"gunslinger", "calledshot":
+			if t < 0.05:
+				if P.arch != "gunslinger": A.set_arch("gunslinger", "rifle")
+				A.set_kin("puddlet")
+				P.teleport(D.pos + Vector3(-3.6, 0, -1.0))
+				A.home = P.pos
+			_aim(P, D)
+			P.inp["move"] = Vector2.ZERO
+			P.inp["fire"] = t > 0.2 and t < 1.0                                            # hits load the cylinder
+			if t > 0.2 and t < 1.0: P.ak.res_wait = 4.0
+			if _at(t, dt, 1.05) and P.ak.res < 6.0: P.ak.res = 5.0; P.ak.load_at = -9.0; P.ak.load_chambers(1, true)
+			if w == "gunslinger":
+				at_t = 1.7
+			else:
+				if _at(t, dt, 1.7): P.ak.ch_rmb = 1.0; P.ak.cd["rmb"] = 0.0; P.inp["sec_hold"] = false; P.ak.press_rmb()
+				if int(P.ak.get("called_shots")) > 0 and not A.has_meta("cs_at"): A.set_meta("cs_at", t)
+				at_t = float(A.get_meta("cs_at", 9.0)) + 0.06
 		"card", "card_juggernaut", "card_detail", "card_archer", "card_mage", "card_gunslinger", "card_bulwark":
 			if t < 0.05:
 				var ca: String = {"card_juggernaut": "juggernaut", "card_archer": "archer", "card_mage": "mage", "card_gunslinger": "gunslinger", "card_bulwark": "bulwark"}.get(w, "thief")
