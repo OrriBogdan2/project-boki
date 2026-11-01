@@ -560,7 +560,7 @@ func _juggernaut() -> void:
 	K.on_deal(T, 40.0, {"src": "shot"})
 	ok("juggernaut passive: damage heats Rage", K.res > 18.0 and K.res < 26.0, "rage %.1f" % K.res)
 	K.res = 50.0; K.res_wait = 9.0
-	ok("juggernaut passive: Rage adds damage", absf(K.outgoing(T, 100.0, {}) - 106.0) < 0.1, "%.1f" % K.outgoing(T, 100.0, {}))
+	ok("juggernaut passive: Rage adds damage", absf(K.outgoing(T, 100.0, {}) - 104.0) < 0.1, "%.1f" % K.outgoing(T, 100.0, {}))
 	K.cd["e"] = 10.0; P.dashes = 0.0
 	step(m, 1.0)
 	ok("juggernaut passive: ability + dash haste", float(K.cd["e"]) < 8.9 and P.dashes > 1.0 / P.dash_regen() * 1.15, "e cd %.2f dashes %.3f" % [float(K.cd["e"]), P.dashes])
@@ -639,7 +639,7 @@ func _juggernaut() -> void:
 	P.hurt(20.0, T, {"src": "shot"})
 	ok("juggernaut R: invulnerable in the wind-up", K.fusing() and P.hp >= php - 0.01, "hp %.0f -> %.0f" % [php, P.hp])
 	step(m, K.fuse_time())
-	ok("juggernaut R: Doomfall strikes and heals", K.dooms == 1 and dmg(T) >= 35.0 and P.hp > php + 10.0, "took %.0f hp %.0f -> %.0f" % [dmg(T), php, P.hp])
+	ok("juggernaut R: Doomfall strikes and heals", K.dooms == 1 and dmg(T) >= 32.0 and P.hp > php + 10.0, "took %.0f hp %.0f -> %.0f" % [dmg(T), php, P.hp])
 	T.hp = 4.0
 	T.hurt(10.0, P, {"src": "shot"})
 	step(m, 0.1)

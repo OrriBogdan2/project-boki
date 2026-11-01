@@ -1064,18 +1064,21 @@ ready label.
 
 | Slot | Input | What it does |
 |---|---|---|
-| Passive | none | **Rage**: damage you deal heats it (about +0.55 per point; taking hits adds a little); it gives up to +12% damage, +50% dash recharge and +35% cooldown speed; at 100, **Enraged** 5s (+20% damage, the red shell, the hunter swells) and the next Smash is a **Rage Smash**. A knock heals 15% (an assist half) and refills Rampage |
-| LMB | tap / hold | Greatsword (kit-run, `lmb_override`): quick slashes 10 / 10 / 15 every 0.32s, tip bonus; **hold**: charge 0.22 -> full at 0.95s, a **Searing Wave** that rolls 6 -> 10m through everyone in a line, 12 -> 28 (full: burns and slows). Shotgun and minigun fire as before |
+| Passive | none | **Rage**: damage you deal heats it (about +0.55 per point; taking hits adds a little); it gives up to +8% damage, +50% dash recharge and +35% cooldown speed; at 100, **Enraged** 5s (+15% damage, the red shell, the hunter swells) and the next Smash is a **Rage Smash**. A knock heals 15% (an assist half) and refills Rampage |
+| LMB | tap / hold | Greatsword (kit-run, `lmb_override`): quick slashes 9 / 9 / 14 every 0.32s, tip bonus; **hold**: charge 0.22 -> full at 0.95s, a **Searing Wave** that rolls 6 -> 10m through everyone in a line, 12 -> 28 (full: burns and slows). Shotgun and minigun fire as before |
 | RMB | tap / hold / air | **Smash**: tap a Heavy Slam (3m cone, 18, push 6; foes under 40% take +60%, BREAK); hold a charged **Lunge** 3 -> 7m into the first foe (14 -> 26, stun 0.25 -> 0.6); in the air a **Meteor Drop** (2.6m, 16, slow 40%; the centre stunned 0.8) |
 | Shift | tap | **Rampage**: 2 charges of a 4.4m dash attack: 6 to foes along it, the **tip** at the end 14 and a big knock (stun 0.8 into a wall) |
 | E | tap, then recast | **Warchain**: a chain 9m that hooks a foe (8, slow 20%, blighted 4s, leashed to 10m) or bites a wall; recast to haul yourself to its end (into a hooked foe: 10 and stun 0.35); a miss refunds 60% |
-| R | tap | **Doomfall**: a 0.55s wind-up in which you're invulnerable and rise toward a landing circle up to 5m ahead, then a 3.2m crash: 40, push 9, heal 50% of the damage dealt; a knock on anyone it hit within 2s resets its cooldown |
+| R | tap | **Doomfall**: a 0.55s wind-up in which you're invulnerable and rise toward a landing circle up to 5m ahead, then a 3.2m crash: 36, push 9, heal 50% of the damage dealt; a knock on anyone it hit within 2s resets its cooldown |
 
 - Loop: slash and wave to heat Rage (everything gets faster) -> chain them and haul in -> Rampage tip
   -> Enraged -> Rage Smash -> Doomfall to finish; the knock refills Rampage and resets Doomfall.
 - Tells: red heat at the pauldrons that grows with Rage (steam from 50); the Enraged shell and swell
   with a roar; crosshair "RAGE SMASH READY". Payoff: "RAGE SMASH", `pay_rage` (a fire-gust roar into a
   crunching slam), T4; Doomfall: "DOOMFALL", T4.
+- Balance note: in a seed-6 simtest the first build's Juggernaut bot dealt 1274 in 84s (949 over a
+  whole match before), so the slashes went 10/10/15 -> 9/9/14, Rage +12% -> +8% (Enraged +20% -> +15%)
+  and Doomfall 40 -> 36.
 - Bots: slash up close, sometimes a Searing Wave from 4-9.5m; slam within 3m, Lunge from 3-7.5m,
   Meteor from the air; Rampage from 2.5-6m; chain from 4-9m then haul in; Doomfall in reach on a
   wounded target.
@@ -1087,11 +1090,11 @@ ready label.
 |---|---|---|
 | Thief burst | Cash In 26 + knife 10 per 8s | Primed +10 every Vault (7s, reset on a hit); Cash In +32 total; Marks +6% each (was +5%) |
 | Thief control | Fan slow, Heist strikes 14 x4 | Bola Grounded 1.5s, pair stun 0.9; Jackpot 16 / 26 at the rim |
-| Juggernaut sword | 11 / 11 / 18 every 0.5s, hold slam 34 | 10 / 10 / 15 every 0.32s (about 30% more DPS), hold wave 12 -> 28 at range |
+| Juggernaut sword | 11 / 11 / 18 every 0.5s (~27 DPS), hold slam 34 | 9 / 9 / 14 every 0.32s (~29 DPS), hold wave 12 -> 28 at range |
 | Juggernaut RMB | Smash 18 (Rage x1.5 knock) | Slam 18 (+60% under 40%), Rage Smash x1.6 + stun 0.5, Lunge up to 26 |
-| Juggernaut R | Avalanche 6 per stomp over 5s | Doomfall 40 + heal half, resets on a knock |
+| Juggernaut R | Avalanche 6 per stomp over 5s | Doomfall 36 + heal half, resets on a knock |
 
 A medium (145) dies to the Thief in about 3.5s of focused fire with one Cash In (blades ~29 DPS x
 1.18 at 3 Marks, plus 32 every Vault cycle), about the Gunslinger's Called Shot pace; the Juggernaut's
-Rage only adds 12-20% once it's hot, and Doomfall's 40 is under the Archer's Great Arrows (100 if all
+Rage only adds 8-15% once it's hot, and Doomfall's 36 is under the Archer's Great Arrows (100 if all
 three land).

@@ -156,6 +156,23 @@ func _arena() -> void:
 	A.bot_mode = "fighting"; A.set_bot_arch("thief")
 	step(m, 0.5)
 	ok("bot: fights as a thief", A.bot != null and A.bot.arch == "thief")
+	# kits2: the sparring bot really uses the Thief's and the Juggernaut's kits on you
+	for ba in ["thief", "juggernaut"]:
+		A.set_bot_arch(ba)
+		var B: Hunter = A.bot
+		B.slot_lv["ult"] = 1; B.lvl = maxi(B.lvl, 6)
+		P.teleport(A.home); B.teleport(A.home + Vector3(5.0, 0, 0))
+		var seen := {"dash": false}
+		var tb := 0.0
+		while tb < 18.0:
+			P.hp = P.max_hp
+			B.hp = B.max_hp
+			m.step(DT); tb += DT
+			if B.ak is ThiefKit and float((B.ak as ThiefKit).primed_t) > 0.0: seen["dash"] = true
+			if B.ak is JuggernautKit and String(B.ak.st.get("last_dash", "")) == "rampage": seen["dash"] = true
+		var u: Dictionary = B.used
+		ok("bot uses the %s kit (RMB, E or R, dash)" % ba, int(u.get("utility", 0)) > 0 and int(u.get("k1", 0)) + int(u.get("r", 0)) > 0 and bool(seen["dash"]),
+			"rmb %d e %d r %d dash %s" % [int(u.get("utility", 0)), int(u.get("k1", 0)), int(u.get("r", 0)), seen["dash"]])
 	A.bot_mode = "off"; A._spawn_bot()
 	ok("bot: off", A.bot == null)
 	# the panels build

@@ -184,7 +184,7 @@ func on_take(_by: Ent, dmg: float, _o: Dictionary) -> void:
 
 func outgoing(_t: Ent, dmg: float, _o: Dictionary) -> float:
 	var rd := res_def()
-	return dmg * (1.0 + float(rd.get("dmg_k", 0.12)) * heat_k() + (float(rd.get("enraged_dmg", 0.2)) if enraged_t > 0.0 else 0.0))
+	return dmg * (1.0 + float(rd.get("dmg_k", 0.08)) * heat_k() + (float(rd.get("enraged_dmg", 0.15)) if enraged_t > 0.0 else 0.0))
 
 func move_k() -> float:
 	return 0.55 if lmb_t > float(lmb_def().get("tap", 0.22)) else 1.0
@@ -689,7 +689,7 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	# chained: haul in once they're out of sword reach
 	if not chain.is_empty() and chain.get("target") != null and dist > 3.5 and randf() < 0.5:
 		h.inp["sig"] = true; return
-	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and chain.is_empty() and los and dist > 4.0 and dist < float(e_def()["range"]) - 0.5 and randf() < 0.35:
+	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and chain.is_empty() and los and dist > 3.0 and dist < float(e_def()["range"]) - 0.5 and randf() < 0.4:
 		h.inp["aim"] = tgt.pos + Vector3(0, 0.9, 0); h.inp["sig"] = true; return
 	if int(h.slot_lv["sec"]) > 0 and rmb_ready() and los:
 		if not h.grounded and dist < 3.0:
