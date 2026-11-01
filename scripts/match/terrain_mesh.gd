@@ -105,7 +105,7 @@ func _emit(chunk: int) -> void:
 	# each flight is drawn as one piece across its whole width (its steps run unbroken from one side
 	# wall to the other), not tile by tile: per-tile steps restarted their stones, joints and landing
 	# at every tile edge, so a 5-wide flight read as five one-block stairs side by side
-	for F in W.stair_flights():
+	for F in PolishTools.stair_flights(W):
 		await W._slice()
 		var tiles: Array = F["tiles"]
 		var lv0: int = W.level[W.idx(tiles[0].x, tiles[0].y)]

@@ -62,27 +62,6 @@ var biome := {"top": Color("5f8d45"), "top2": Color("4a7538"), "side": Color("8b
 func idx(x: int, z: int) -> int:
 	return z * w + x
 
-## Every flight as {"dir", "tiles"} (tiles in order across the flight), widest first. Tooling only.
-func stair_flights() -> Array:
-	var seen := {}
-	var out: Array = []
-	for si in stairs:
-		if seen.has(si):
-			continue
-		var d: Vector2i = stairs[si]
-		var side := Vector2i(d.y, d.x)
-		var c := Vector2i(si % w, si / w)
-		while inb(c.x - side.x, c.y - side.y) and stairs.get(idx(c.x - side.x, c.y - side.y), Vector2i.ZERO) == d:
-			c -= side
-		var tiles: Array = []
-		while inb(c.x, c.y) and stairs.get(idx(c.x, c.y), Vector2i.ZERO) == d:
-			seen[idx(c.x, c.y)] = true
-			tiles.append(c)
-			c += side
-		out.append({"dir": d, "tiles": tiles})
-	out.sort_custom(func(a, b): return a["tiles"].size() > b["tiles"].size())
-	return out
-
 func inb(x: int, z: int) -> bool:
 	return x >= 0 and z >= 0 and x < w and z < h
 

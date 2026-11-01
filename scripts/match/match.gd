@@ -747,51 +747,8 @@ func _start(o: Dictionary) -> void:
 		player.teleport(b0 + Vector3(2.2, 0, 0.6))
 		spawn_weapon("sniper", 3, b0 + Vector3(1.6, 0, 1.8), "", false)
 		spawn_weapon("smg", 4, b0 + Vector3(3.0, 0, 1.6), "", false)
-	if o.get("chest_demo", false) and player:
-		# test (--chest-demo): on a flat open patch near where you start, a row of crate, chest, pot,
-		# rare chest and powder keg 1.7 m apart, you just below it, so the two kinds of prop can be
-		# told apart in one frame
-		var base: Vector3 = player.pos
-		var busy: Array = []      # exits, portals, pads, chests and breakables already there
-		for ed in world.exit_defs: if ed.has("pos"): busy.append(ed["pos"])
-		for ps in world.portal_spots: busy.append(ps)
-		for pd in world.pads: busy.append(pd["pos"])
-		for c0 in chests: busy.append(c0["pos"])
-		for b0 in breaks: busy.append(b0["pos"])
-		var flat := func(c: Vector3) -> bool:
-			for bp in busy:
-				if Vector2((bp as Vector3).x - c.x, (bp as Vector3).z - c.z).length() < 6.5:
-					return false
-			for dz in [-1.0, 0.0, 1.0, 2.0, 3.0]:
-				for dx in [-4.0, -2.0, 0.0, 2.0, 4.0]:
-					var q: Vector3 = c + Vector3(dx, 0, dz)
-					if world.is_void(q.x, q.z) or world.is_block(q.x, q.z) or absf(world.ground_at(q.x, q.z) - c.y) > 0.05 or world.stairs.has(world.idx(int(floor(q.x)), int(floor(q.z)))):
-						return false
-			return true
-		var found := false
-		for r in range(0, 60):
-			for k in maxi(1, r * 6):
-				var ang := TAU * float(k) / float(maxi(1, r * 6))
-				var c: Vector3 = base + Vector3(cos(ang), 0, sin(ang)) * float(r)
-				c = Vector3(floor(c.x) + 0.5, 0, floor(c.z) + 0.5)
-				if world.is_void(c.x, c.z): continue
-				c.y = world.ground_at(c.x, c.z)
-				if flat.call(c):
-					base = c; found = true; break
-			if found: break
-		var row := ["crate", "chest", "pot", "chest1", "barrel"]
-		for k in row.size():
-			var q: Vector3 = base + Vector3((k - 2) * 1.7, 0, 0)
-			match String(row[k]):
-				"chest": add_chest(q, 0)
-				"chest1": add_chest(q, 1)
-				_: _add_break(String(row[k]), q)
-		player.teleport(base + Vector3(0, 0, 2.6))
-	if player and (has_meta("stairs_demo") or o.get("chest_demo", false)):
-		# screenshots: no monsters standing over what's being shown
-		for mb in mobs.duplicate():
-			if (mb as Mob).pos.distance_to(player.pos) < 9.0:
-				mobs.erase(mb); mb.queue_free()
+	if o.get("chest_demo", false) and player: PolishTools.chest_row(self)     # test: crate/chest/pot/keg in a row
+	if player and (has_meta("stairs_demo") or o.get("chest_demo", false)): PolishTools.clear_mobs(self)
 	if not opts.get("duel", false) and not opts.get("arena", false):
 		await _spawn_wild()
 	await _slice()
@@ -1136,25 +1093,7 @@ func _spawn_hunters() -> void:
 				player = make_hunter("p0", 0, String(opts.get("cls", Data.class_of_save())), Save.d.get("name", "Hunter"), "bot" if opts.get("autoplay", false) else "local", rec, at, my_kit(), rec2)
 				if opts.get("autoplay", false):
 					player.ai = bot_brain.new_mind(rng, 0.7)
-				var at_st := Array(OS.get_cmdline_user_args()).filter(func(a): return String(a) == "--at-stairs" or String(a).begins_with("--at-stairs="))
-				if not at_st.is_empty() and not world.stairs.is_empty():
-					# test: start at the foot of a flight of stairs, in line with its middle step
-					# (--at-stairs=N: the Nth flight, widest first; prints every flight's width)
-					var fl := world.stair_flights()
-					var pick_s := String(at_st[0]).substr(12) if String(at_st[0]).length() > 12 else "0"
-					var pick_n := int(pick_s)
-					if pick_s in ["E", "W", "S", "N"]:
-						# --at-stairs=E: the widest flight climbing that way (E = +x, S = +z, toward the camera)
-						for fi in fl.size():
-							if {Vector2i(1, 0): "E", Vector2i(-1, 0): "W", Vector2i(0, 1): "S", Vector2i(0, -1): "N"}.get(fl[fi]["dir"], "") == pick_s:
-								pick_n = fi; break
-					var F: Dictionary = fl[clampi(pick_n, 0, fl.size() - 1)]
-					print("STAIRS flights=%d widths=%s picked=%d (width %d)" % [fl.size(), str(fl.map(func(f): return "%d%s" % [f["tiles"].size(), {Vector2i(1, 0): "E", Vector2i(-1, 0): "W", Vector2i(0, 1): "S", Vector2i(0, -1): "N"}.get(f["dir"], "?")])), clampi(pick_n, 0, fl.size() - 1), F["tiles"].size()])
-					var mid: Vector2i = F["tiles"][F["tiles"].size() / 2]
-					var sd: Vector2i = F["dir"]
-					at = Vector3(mid.x + 0.5 - sd.x * 2.5, 0, mid.y + 0.5 - sd.y * 2.5)
-					at.y = world.ground_at(at.x, at.z)
-					set_meta("stairs_demo", Vector3(mid.x + 0.5, at.y, mid.y + 0.5))
+				at = PolishTools.stairs_start(self, at)     # test: --at-stairs[=N|E|W|S|N]
 				if opts.has("at_xz"):
 					# test: start at a given spot (map screenshots, --at=x,z)
 					var axz := String(opts["at_xz"]).split(",")
@@ -1563,7 +1502,7 @@ func _spawn_breakables() -> void:
 	var wr := RandomNumberGenerator.new(); wr.seed = seed_val * 31 + 7
 	var keys: Array = Data.weapon_ids()
 	for i in world.weapon_spots.size():
-		var wk0 := ground_weapon_id(String(keys[wr.randi() % keys.size()]), i)
+		var wk0 := DropFamily.ground(String(keys[wr.randi() % keys.size()]), i, net_on, player, seed_val)
 		var wr0 := Data.roll_rarity(wr, 1 if tier >= 2 else 0)
 		var wsp: Vector3 = world.weapon_spots[i]
 		spawn_weapon(wk0, wr0, wsp, "ws%d" % i, false, -1, Loot.weapon(wk0, wr0, Loot.roll_element(wr, world.biome_at(wsp.x, wsp.z))))
@@ -1620,32 +1559,6 @@ func spawn_val(item: Dictionary, at: Vector3) -> void:
 	wpicks.append({"id": "v%d" % wdrop_n, "pos": at, "val": String(item.get("id", "")), "item": item, "rar": int(vd.get("rar", 1)), "node": n, "wid": "", "ammo": -1})
 
 ## A weapon found at a spot: the region's element sometimes, and now and then a named unique.
-## The weapon in a drop someone earned (a chest they opened, a crate they broke, a guard or treasure
-## monster they felled): with an archetype, three times in four one from its own family, so a Thief
-## isn't left looking at rifles it can't hold; otherwise (and the rest of the time) `fallback`, or any.
-## (Boss drops are always the killer's family: Lairs._victory.)
-func earned_weapon_id(by, keys: Array, fallback := "") -> String:
-	var h = by
-	if h != null and not (h is Hunter) and is_instance_valid(h) and "owner_h" in h:
-		h = h.owner_h
-	if h is Hunter and is_instance_valid(h) and String((h as Hunter).arch) != "":
-		var fam: Array = Arch.weapons(String((h as Hunter).arch))
-		if not fam.is_empty() and randf() < 0.75:
-			return String(fam[randi() % fam.size()])
-	return fallback if fallback != "" else String(keys[randi() % keys.size()])
-
-## The weapons lying in the open and beside caches (rolled the same for everyone online): offline,
-## with an archetype, three in five are swapped for one of your own family (picked from `salt`, so
-## the map's other rolls don't move), so the weapons on the ground aren't mostly ones you can't hold.
-func ground_weapon_id(wk: String, salt: int) -> String:
-	if net_on or player == null or String(player.arch) == "":
-		return wk
-	var fam: Array = Arch.weapons(String(player.arch))
-	if fam.is_empty() or fam.has(wk):
-		return wk
-	var hv := absi(hash(salt * 7919 + seed_val))
-	return String(fam[(hv / 7) % fam.size()]) if hv % 5 < 3 else wk
-
 func found_weapon(at: Vector3, wid: String, rar: int, unique_chance := 0.0) -> Dictionary:
 	if unique_chance > 0.0 and rng.randf() < unique_chance:
 		return Loot.weapon("", 0, "", Loot.roll_unique(rng))
@@ -1966,7 +1879,7 @@ func _break(b: Dictionary, by: Ent, from_net := false) -> void:
 				drop("armor", at + Vector3(0, 0.5, 0), 25)
 			if not from_net and randf() < 0.16:
 				var keys: Array = Data.weapon_ids()
-				spawn_weapon(earned_weapon_id(by, keys), Data.roll_rarity(rng), at)
+				spawn_weapon(DropFamily.earned(by, keys), Data.roll_rarity(rng), at)
 		"barrel":
 			_barrel_boom(at, by, from_net)
 
@@ -2784,7 +2697,7 @@ func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
 		if mb.mkind == "warden":
 			# the Warden guards the best things: a weapon (sometimes a named one), treasure, maybe a Soul Ember
 			var wkeys: Array = Data.weapon_ids()
-			var wit := found_weapon(mb.pos, earned_weapon_id(credit, wkeys), Data.roll_rarity(rng, 2), 0.2)
+			var wit := found_weapon(mb.pos, DropFamily.earned(credit, wkeys), Data.roll_rarity(rng, 2), 0.2)
 			spawn_weapon(String(wit["wid"]), int(wit["rar"]), mb.pos + Vector3(-0.8, 0, 0.4), "", true, -1, wit)
 			spawn_val(Loot.valuable(Loot.roll_valuable(rng, 2)), mb.pos + Vector3(0, 0, -0.9))
 			if rng.randf() < 0.5:
@@ -2793,7 +2706,7 @@ func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
 			spawn_val(Loot.valuable(Loot.roll_valuable(rng, 0 if tier == 0 else 1)), mb.pos + Vector3(0, 0, -0.8))
 		if mb.mkind == "glimmer":
 			var keys: Array = Data.weapon_ids()
-			var git := found_weapon(mb.pos, earned_weapon_id(credit, keys), Data.roll_rarity(rng, 1))
+			var git := found_weapon(mb.pos, DropFamily.earned(credit, keys), Data.roll_rarity(rng, 1))
 			spawn_weapon(String(git["wid"]), int(git["rar"]), mb.pos, "", true, -1, git)
 			if credit is Hunter: add_feed("%s caught the Glimmerkin's treasure" % credit.pname)
 		if mb.mkind == "bl_warden":
@@ -5091,7 +5004,7 @@ func _open_chest(h: Hunter, c: Dictionary, from_net := false) -> void:
 	if not from_net and randf() < [0.25, 0.6, 1.0][t]:
 		var keys: Array = Data.weapon_ids()
 		var a := randf() * TAU
-		var wk: String = earned_weapon_id(h, keys, biomes.weapon_at(c["pos"], keys) if biomes else "")
+		var wk: String = DropFamily.earned(h, keys, biomes.weapon_at(c["pos"], keys) if biomes else "")
 		var wrc := mini(Data.RARITY.size() - 1, Data.roll_rarity(rng, maxi(0, t - 1) + (biomes.rarity_bonus_at(c["pos"]) if biomes else 0)))
 		var wit := found_weapon(c["pos"], wk, wrc, [0.0, 0.02, 0.08][t])
 		spawn_weapon(String(wit["wid"]), int(wit["rar"]), c["pos"] + Vector3(cos(a) * 1.1, 0, sin(a) * 1.1), "", true, -1, wit)
