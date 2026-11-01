@@ -1,7 +1,7 @@
 # Handoff: branch `polish` (demo-video polish)
 
 Setup: worktree `/home/claude/kinfall-polish`, branch `polish` = integ29 + loopqa (b7c613d, f6e5970)
-merged, then the commits below. Nothing pushed. Godot runs go through `/home/claude/gq`; my runner
+merged, then the commits below. Godot runs go through `/home/claude/gq`; my runner
 `/home/claude/pol_tools/g.sh <log> [xvfb] <args>` uses a fresh temp XDG_DATA_HOME per run (logs in
 `/home/claude/pol_tools/logs/`). Screenshots: `/home/claude/shots/polish/`.
 
@@ -16,36 +16,27 @@ merged, then the commits below. Nothing pushed. Godot runs go through `/home/cla
 | 6 | 1a943fb | Loading: "Solo · 20 hunters" (squads still counted for duos/trios); `finish()` now covers with ScreenFade ink, frees itself, then reveals, so it never fades over the planning map. Only `finish()` and the mode line touched (loadsmooth owns the rest). |
 | 7 | 52b5cd7 | Lair Label3D name boards fade (transparency) while a toast overlaps them (`Hud._clear_under_toasts`); earned weapon drops (chests, crates, Warden, Glimmerkin) 75% from the earner's archetype family (`Match.earned_weapon_id`); offline ground/cache weapons 60% swapped to the player's family via hash (`Match.ground_weapon_id`, online unchanged); "Make it home" marks cleared when the panel closes any other way (`HomeBuild.tick`). |
 
-## In progress: item 8 (owner art notes), nothing changed in code yet
+## Item 8 (done)
 
-- **Stairs one block wide**: the generator already enforces STAIR_MIN_W=3 (`World._place_stairs`).
-  A debug report on seeds 5 and 11 (`--match --no-drop`) found flight widths only 3-5 and no stair
-  tile turned non-ground afterwards. So the "one block" look is likely visual: check
-  `terrain_mesh.gd` `_stairs` / `_stairs_cut` (side walls per tile, `same` neighbour test at ~line
-  529) or authored-map stairs, or widen STAIR_MIN_W to 4 and make 3-wide flights rarer. Get a
-  screenshot first (`--match --no-drop --at-stairs --shot-time=2 --shot=...`).
-- **Chests vs breakables**: not started. Chests: `Models.chest(t)` / `Models.CHEST_COLS`
-  (scripts/match/models.gd); breakables: `Models.breakable(kind)`. Goal: chunkier chest
-  silhouette plus a distinct colour/glow (e.g. a gold-rimmed lid and soft beacon glow) vs the plain
-  crates/pots/barrels.
+| Part | Commit | What |
+|---|---|---|
+| Stairs | d973f38 | Drawn as one flight across their full width (`terrain_mesh.gd` `_stairs`), not one-block stairs side by side. Flights come from `PolishTools.stair_flights(world)` (widest first). `--at-stairs[=N or E/W/S/N]` starts you at a flight and prints every flight's width. |
+| Chests | 648c43e | Chunkier lacquered chest with claw feet, a lid crest and a glow, three tier colours (`PropSculpt.chest`), clearly different from the crates, pots and barrels. `--chest-demo` lays a row of crate, chest, pot, rare chest and keg (`PolishTools.chest_row`). |
 
-## Left from the task list
+## After merging sync56 (main 0.8.0)
 
-- Item 8 (both parts above).
-- Before shots missing for items 6 (fade, only after sequence) and 7 (after only).
-- Full final check suite NOT run yet: `--check` passes (0 failures) after every commit, but
-  `--arena-check, --archetype-check, --record-check, --home-build-check, --drop-check,
-  --extract-check, --boss-check, --duel-check, --bot-sanity-check, --obstacle-check,
-  --simtest --seed=5` still need running. Watch especially: drop-check and simtest (item 7 changes
-  which weapon ids drop and uses global randf/randi, not the match rng), duel-check and
-  arena-check (SeeThrough runs in every Match), home-build-check (Make it home tick).
+- Merged `origin/main` (sync56) into polish. Conflicts in `match.gd` only: kept main's `--shot-bright` and `--at=x,z`, kept the lighter `vis_dark` default (0.7).
+- `match.gd` and `world.gd` were over their `tools/health.py` budgets, so polish logic moved out: `scripts/match/polish_tools.gd` (PolishTools: `stair_flights`, `stairs_start`, `chest_row`, `clear_mobs`) and `scripts/match/drop_family.gd` (DropFamily: `earned`, `ground`, replacing `Match.earned_weapon_id` / `ground_weapon_id`). `python3 tools/health.py --strict` passes.
+- New `--polish-check` (`tools/polish_check.gd`): drop families, every stair tile in a flight, chest footprint and tier colours.
+- Net.VERSION untouched (polish changes no sync shape; drop families use the earner's own archetype, online ground rolls unchanged).
 
-## Screenshots (/home/claude/shots/polish/)
+## Left
 
-01_tree_before/after, 02_vision_before/after (+ _b pair: same tree scene), 03_farm_boki_before/after
-(+ _crop), 04_updraft_landed_before/after and 04_updraft_sheet_before/after (sequence in upd/),
-05_training_before/after, 06_loading_before/after, 06_loading_to_map_after (frames in loadfade/),
-07_banner_after_1..4 + sheet.
+Nothing. Before shots are missing for items 6 (fade) and 7 (after only).
+
+## Screenshots
+
+Older set in `/home/claude/shots/polish/` (items 1-7: 01_tree .. 07_banner). Item 8 and the post-merge set in `/home/claude/shots/A/` (before_/after_ stairs and chest, chest_gallery, hollow_*).
 
 ## Gotchas
 
