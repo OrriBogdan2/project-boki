@@ -439,6 +439,7 @@ func _build_detail() -> void:
 	detail.add_child(UI.label("Trust %d  ·  %s bond%s" % [int(rec.get("trust", 0)), bd[1], joined], 12, Color("ffb3c6")))
 	detail.add_child(WorkView.chips(rec, 18.0))
 	detail.add_child(IvView.mini(rec, 18.0))      # its IVs, with the numbers on hover
+	AboutView.block(rec, detail, true)            # its size, coat, eyes, habit, serial and origin
 	var cond := ("Asleep, needs on hold (%s)" % Care.condition_name(rec).to_lower()) if KinBox.is_boxed(rec) else Care.condition_name(rec)
 	if rec.has("parents"): cond += "  ·  child of %s and %s" % [rec["parents"][0], rec["parents"][1]]
 	var cl := UI.label(cond, 12, UI.MUTED)
