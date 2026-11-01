@@ -7,9 +7,9 @@ extends PanelContainer
 ## frame (no pagination, no resizing: the card is always SIZE). Used in the Arena / training (K) and
 ## on the expedition loadout (KitCard.strip, a compact row that opens the full card).
 
-const SIZE := Vector2(890, 590)
-const BODY_H := 360.0
-const TILE := Vector2(431, 112)
+const SIZE := Vector2(890, 600)
+const BODY_H := 372.0
+const TILE := Vector2(431, 116)
 const SLOTS := ["dash", "passive", "lmb", "rmb", "e", "r"]
 const KEYS := {"dash": "Shift", "passive": "", "lmb": "LMB", "rmb": "RMB", "e": "E", "r": "R"}
 const LABEL := {"dash": "Dash", "passive": "Passive", "lmb": "Attack", "rmb": "Right click", "e": "Utility", "r": "Ultimate"}
@@ -140,7 +140,7 @@ func _tile(slot: String) -> Control:
 	tg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	top.add_child(tg)
 	tv.add_child(top)
-	var ln := UI.label(String(info["line"]), 14, UI.MUTED)
+	var ln := UI.label(String(info["line"]), 13, UI.MUTED)
 	ln.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	ln.custom_minimum_size = Vector2(220, 0)
 	ln.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -210,15 +210,19 @@ func _kin_strip() -> Control:
 	top.add_child(UI.label(String(ks.theme).capitalize(), 13, UI.MUTED, UI.big))
 	var ab := KinLib.ability(ks.active)
 	if ab:
-		top.add_child(UI.fill())
 		var kk := UI.keycap(Settings.key_cap("kin_ability"), 11)
 		kk.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		top.add_child(kk)
-		top.add_child(UI.label("%s: %s" % [ab.display_name, _first(KinText.ability(ab), 70)], 14, UI.INK))
+		var an := UI.label("%s:  %s" % [ab.display_name, _first(KinText.ability(ab), 78)], 14, UI.INK)
+		an.autowrap_mode = TextServer.AUTOWRAP_OFF
+		an.clip_text = true
+		an.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		top.add_child(an)
 	v.add_child(top)
 	var inf := infusion_lines(arch, ks)
-	var il := UI.label("Infuses  " + "   ·   ".join(inf), 13, Color(kc.lightened(0.35), 0.95))
+	var il := UI.label("Its type infuses your kit:  " + "   ·   ".join(inf), 13, Color(kc.lightened(0.35), 0.95))
 	il.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	il.custom_minimum_size = Vector2(SIZE.x - 70, 0)
 	v.add_child(il)
 	return p
 
@@ -237,7 +241,7 @@ static func slot_text(a: String, slot: String) -> Dictionary:
 			out["detail"] = [["", String(sd.get("desc", ""))], ["Rank 3", String(d.get("rank3", {}).get("dash", ""))]]
 		"passive":
 			var rd: Dictionary = d.get("resource", {})
-			out.merge({"name": String(d["passive"]["name"]), "icon": "pulse", "col": Color(String(rd.get("col", "#ffffff"))),
+			out.merge({"name": String(d["passive"]["name"]), "icon": String({"thief": "satchel", "archer": "scanner", "mage": "blaze_mantle", "gunslinger": "barrage", "juggernaut": "haymaker", "bulwark": "fortify"}.get(a, "burst")), "col": Color(String(rd.get("col", "#ffffff"))),
 				"tag": "no key · builds as you fight", "line": String(cd.get("passive", ""))}, true)
 			var tl: Dictionary = d.get("tells", {})
 			out["detail"] = [["", String(d["passive"]["desc"])], ["What enemies see", "%s; full: %s." % [String(tl.get("half", "")), String(tl.get("full", ""))]]]
