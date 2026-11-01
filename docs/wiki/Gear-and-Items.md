@@ -1,0 +1,50 @@
+# Gear and items
+
+Full numbers: [Weapons](Weapons.md) and [Gloves](Gloves.md).
+
+## Your loadout
+
+- **Weapon.** Each class carries one of its own weapons (its first one is the default; see the class
+  pages). Left click is the weapon; right click is your class's RMB ability.
+- **Gloves.** Two slots: one **active** glove on Q and one **passive** glove that just gives stats. A
+  new one replaces the one in its slot. You can take gloves from your Armory or find them on the run.
+- **Tonics** (1) heal; with full health, 1 uses an **armor kit** instead. **Armor kits** (2) repair armor.
+  Tonics are brewed from Tidebloom at home or at the Infirmary.
+
+## Found on the islands
+
+- **Found weapons.** Some crates, chests, vaults and the Glimmerkin drop weapons with a rarity on
+  top (Fine, Rare, Epic, Legendary). They're stronger than the Common version and yours until the
+  expedition ends, unless you extract with them.
+- **Elements.** Some found weapons carry an element whose hits burn, chill, arc or poison.
+- **Named weapons.** Always Legendary and elemental, with a perk of their own. Wardens and vaults drop them, rarely.
+- **Gloves**, **tonics**, **armor kits** and **armor shards**.
+- **Rift Keys.** Rare. Open a rift hatch (see [Expeditions](Expeditions.md#getting-out)). Lost to your deathbox if you die.
+- **Valuables** to sell at home: Old Coin, Sky Pearl, Boki Idol, Crown Shard, and the **Soul Ember**
+  the Soul Shrine needs.
+- **Rare Eggs** from lair bosses.
+- **Gems** from monsters, chests and meteor stars.
+- **Run perks.** Pick one of three when offered (1, 2 or 3): faster reloads, an extra dash, a longer
+  glide, more health or armor, faster cooldowns and so on. They last the run.
+
+## The backpack
+
+A few slots for weapons, gloves and valuables you mean to carry home. Gems, seeds, tonics and kits are
+counted, not packed, and tamed Boki ride along apart. What's in your hands doesn't take a slot.
+
+- Picking up a better weapon or glove puts it in your hands and the old one in the pack.
+- A full pack asks what to drop.
+- At a deathbox, F opens its loot window; F again **smart loots** (best things first).
+- A weapon you pick up arrives ready to fire (a full magazine, no reload running).
+- Extract and it all goes to the Armory. Die and it goes into your deathbox.
+
+## Cosmetics
+
+**Glider skins** (canopy shape, colours, trail and sound) from the glider rack by the portal, and
+outfits for Boki from the stall, worn into matches too. Cosmetic only.
+
+## Planned
+
+The next gear pass (not in the game yet) gives every class one signature weapon with no weapon
+swapping in matches, and moves rarity onto gear slots (armor, boots, gloves, a utility kit) with
+in-run weapon upgrades instead of replacement weapons.
