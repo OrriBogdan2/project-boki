@@ -2764,6 +2764,10 @@ func _drop_check() -> void:
 	# ground half of the test on solid ground so it tests pings and scouting, not the glide line
 	var base_spot := m.world.free_spot_near(m.world.spawns[0], [], 1.0, 0.5, 8.0)
 	for x in [P, bot]:
+		# (a scripted glide that ends over the abyss loses that hunter: bring them back first, so the
+		# rest tests pings and scouting with everyone alive, not whatever a revive beacon does later)
+		if x.out or x.downed:
+			Life.bring_back(m, x, base_spot + (Vector3(2.0, 0, 0) if x == bot else Vector3.ZERO), 1.0, false)
 		if m.world.is_void(x.pos.x, x.pos.z) or x.pos.y < m.world.ground_at(x.pos.x, x.pos.z) - 1.0:
 			x.teleport(base_spot + (Vector3(2.0, 0, 0) if x == bot else Vector3.ZERO))
 	for mb in m.mobs: mb.queue_free()
