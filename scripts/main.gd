@@ -3840,7 +3840,14 @@ func _home_build_check() -> void:
 	mv.gliding = false
 	var safe: Vector3 = mv.safe_at
 	mv.ppos = Vector3(2.0, 0, 2.0); mv.py = -0.5; mv.pvy = -5.0
-	for i in 60: mv._move_player(0.05)
+	# (no glider: the jump pressed above still reads as pressed in a headless run, which opens one, and
+	# an open glider now lifts you back to the lip over the abyss instead of sinking. A panel open
+	# means no keys)
+	mv.panel_open = "test"
+	for i in 60:
+		mv.gliding = false
+		mv._move_player(0.05)
+	mv.panel_open = ""
 	ok.call(mv.ppos.distance_to(safe) < 0.01 and mv.py >= -0.01, "falling off the island puts you back where you last stood")
 	var tr: HomeTraining = mv.training
 	# (the zone only changes while you're standing, so stand them on the ground each time)
