@@ -1139,15 +1139,7 @@ func _spawn_hunters() -> void:
 					print("STAIRS flights=%d widths=%s picked=%d (width %d)" % [fl.size(), str(fl.map(func(f): return "%d%s" % [f["tiles"].size(), {Vector2i(1, 0): "E", Vector2i(-1, 0): "W", Vector2i(0, 1): "S", Vector2i(0, -1): "N"}.get(f["dir"], "?")])), clampi(pick_n, 0, fl.size() - 1), F["tiles"].size()])
 					var mid: Vector2i = F["tiles"][F["tiles"].size() / 2]
 					var sd: Vector2i = F["dir"]
-					# 2.5 tiles out if that's open ground on the flight's level, else the landing tile
-					# just below it (the only one the generator promises is ground)
-					for back in [2.5, 1.5]:
-						var q := Vector3(mid.x + 0.5 - sd.x * back, 0, mid.y + 0.5 - sd.y * back)
-						if world.is_void(q.x, q.z) or world.is_block(q.x, q.z) or world.stairs.has(world.idx(int(floor(q.x)), int(floor(q.z)))):
-							continue
-						if absf(world.ground_at(q.x, q.z) - world.level[world.idx(mid.x, mid.y)] * World.LEVEL) > 0.05:
-							continue
-						at = q; break
+					at = Vector3(mid.x + 0.5 - sd.x * 2.5, 0, mid.y + 0.5 - sd.y * 2.5)
 					at.y = world.ground_at(at.x, at.z)
 					set_meta("stairs_demo", Vector3(mid.x + 0.5, at.y, mid.y + 0.5))
 				player.teleport(at)
