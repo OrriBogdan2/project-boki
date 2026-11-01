@@ -98,6 +98,8 @@ func outgoing(_t: Ent, dmg: float, _o: Dictionary) -> float: return dmg
 func incoming(_by: Ent, dmg: float, o: Dictionary) -> Array: return [dmg, o]
 func move_k() -> float: return 1.0
 func fire_ok() -> bool: return true
+## The attack key, if this kit runs the weapon's attack itself (true = handled; Hunter.trigger stops).
+func lmb_override(_held: bool, _dt: float) -> bool: return false
 ## The kit's own pace times the R fuse's plant (you stand and gather while it winds up).
 func pace() -> float: return move_k() * (0.35 if not fuse.is_empty() else 1.0)
 func can_shoot() -> bool: return fire_ok() and fuse.is_empty()
@@ -147,6 +149,7 @@ func tick(dt: float) -> void:
 	res_wait = maxf(0.0, res_wait - dt)
 	_tick(dt)
 	_tells(dt)
+	_tick_charge(dt)
 
 func held(which: String) -> bool:
 	match which:
@@ -158,7 +161,7 @@ func _e_end() -> void: pass
 func _r_end() -> void: pass
 
 func busy() -> bool:
-	return h.downed or h.out or h.dropping or h.riding or h.stun_t > 0.0
+	return h.downed or h.out or h.dropping or h.riding or h.stun_t > 0.0 or Hex.active(h)
 
 # ------------------------------------------------------------------ RMB router
 ## The RMB press. Priority when several apply (§3.3): resource full > during R > during E >
@@ -642,7 +645,7 @@ func slot_info(slot: String) -> Dictionary:
 			var sd := e_def()
 			out.merge({"name": String(sd.get("name", "")), "short": String(sd.get("short", "")), "icon": String(sd.get("icon", "")), "col": col_of(sd), "desc": String(sd.get("desc", "")),
 				"cd": float(cd["e"]), "cd_max": float(sd.get("cooldown", 14.0)) * cd_k("kin"), "charges": 1 if float(cd["e"]) <= 0.0 else 0, "max_charges": 1, "verb": "e",
-				"ready": float(cd["e"]) <= 0.0 or (e_t > 0.0 and e_recastable()), "up": e_t}, true)
+				"ready": float(cd["e"]) <= 0.0 or (e_t > 0.0 and e_recastable()), "up": e_t, "full": e_payoff_ready()}, true)
 		"r", "ult":
 			var sd := r_def()
 			out.merge({"name": String(sd.get("name", "")), "short": String(sd.get("short", "")), "icon": String(sd.get("icon", "")), "col": col_of(sd), "desc": String(sd.get("desc", "")),
@@ -658,3 +661,276 @@ func slot_info(slot: String) -> Dictionary:
 func e_recastable() -> bool: return false
 func fires_in_dash() -> bool: return false
 func fire_ok_rmb() -> bool: return true
+
+# ------------------------------------------------------------------ payoffs and state tells (shared)
+# The Thief (Cash In) and the Juggernaut (Rage Smash) set the bar: a kit builds a resource, the
+# hunter visibly changes when its payoff is armed, and the payoff lands with a named word, T4
+# hitstop (the hit carries payoff: true), a T4 shake, its own sound, VFX and a camera punch. The
+# helpers below give the Archer, Mage, Gunslinger and Bulwark the same language.
+
+var self_nodes: Array = []     # nodes this kit hangs on the hunter (freed by teardown on an archetype swap)
+var spips := {}                # the kit's own pips over the hunter's head (Chambers, Guard steps)
+var _pulse_t := 0.0
+
+## The crosshair label while the kit's payoff is armed ("" = none).
+func ready_label() -> String: return ""
+## The payoff lives on E (the Mage's Flashpoint): the E slot gets the gold dot.
+func e_payoff_ready() -> bool: return false
+
+## Frees what this kit hung on the hunter (Hunter.set_arch calls it before swapping kits).
+func teardown() -> void:
+	var ring: Node3D = chg.get("ring")
+	if ring and is_instance_valid(ring): m.fx.end_telegraph(ring)
+	chg = {}
+	for n in self_nodes:
+		if is_instance_valid(n): (n as Node).queue_free()
+	self_nodes.clear()
+	spips = {}
+
+## A node that follows the hunter in world space (top_level child, so it dies with the hunter).
+func own_node() -> Node3D:
+	var n := Node3D.new()
+	n.top_level = true
+	h.add_child(n)
+	self_nodes.append(n)
+	return n
+
+## Whether the hunter's own tells should draw (hidden while down, out, or unseen by the viewer).
+func tells_visible() -> bool:
+	if not is_instance_valid(h) or h.out or h.downed or not h.visible:
+		return false
+	return not h.unseen or h == m.get("player")
+
+func net_ring(at: Vector3, r: float, col: Color) -> void:
+	if m.net_on and not h.remote:
+		m.net_fx(["ring", m._r(at.x), m._r(at.y), m._r(at.z), r, col.to_html(false)])
+
+func net_bolt(a: Vector3, b: Vector3, col: Color) -> void:
+	if m.net_on and not h.remote:
+		m.net_fx(["bolt", m._r(a.x), m._r(a.y), m._r(a.z), m._r(b.x), m._r(b.y), m._r(b.z), col.to_html(false)])
+
+## Other players' games don't run this kit: while the payoff is armed a ring in the resource colour
+## pulses under the hunter for them every 1.1s (the existing Net fx ring; the protocol is unchanged).
+func net_pulse(dt: float, on: bool, r := 1.1) -> void:
+	if not on or not m.net_on or h.remote:
+		_pulse_t = 0.0
+		return
+	_pulse_t -= dt
+	if _pulse_t <= 0.0:
+		_pulse_t = 1.1
+		net_ring(h.pos, r, res_col())
+
+## The payoff becoming armed: a word over the hunter, a ring, the ready ping (the owner's slot pings
+## too); everyone online gets the ring.
+func armed_fx(word: String, slot := "sec") -> void:
+	var rc := res_col()
+	if word != "": m.fx.word(h.pos + Vector3(0, 2.5, 0), word, rc, false)
+	m.fx.ring(h.pos, 1.5, rc, 0.3)
+	m.fx.burst(h.pos + Vector3(0, 1.3, 0), rc, 14, 3.0, 0.4, -2.0, 1.0)
+	m.sfx("ab_ready", h.pos, -4.0 if h.is_local() else -7.0, 1.0)
+	if h.is_local() and slot != "": h._ab_feedback(slot, "ready")
+	net_ring(h.pos, 1.5, rc)
+
+## A payoff landing (Deadeye, Flashpoint, Called Shot, Shield Slam): the named word, a double ring, a
+## burst and a flash, the kit's own sound over a crit, the T4 shake, a camera punch toward it and a HUD
+## flash for whoever landed it; everyone online gets a ring and a column. The hitstop comes from the
+## hit itself (payoff: true is tier 4).
+func payoff_fx(at: Vector3, word: String, col: Color, snd: String, dir := Vector2.ZERO, victim: Ent = null) -> void:
+	m.fx.word(at + Vector3(0, 2.7, 0), word, col, true)
+	m.fx.ring(at, 2.4, col, 0.38)
+	m.fx.ring(at, 1.0, Color(1, 1, 1, 0.9), 0.2)
+	m.fx.burst(at + Vector3(0, 1.1, 0), col, 36, 7.5, 0.65, 8.0, 1.3)
+	m.fx.flash(at + Vector3(0, 1.0, 0), col.lightened(0.4), 1.3, 0.1)
+	if snd != "": m.sfx(snd, at, 0.0, 1.0)
+	m.sfx("crit", at, -7.0, 0.85)
+	Feel.shake(m, "t4", h, at, victim)
+	if h.is_local():
+		if dir.length() > 0.01: Oomph.punch_dir(m, dir, 0.32)
+		if m.cam: m.cam.punch(0.04)
+		if m.hud: m.hud.flash(col, 0.12)
+	net_ring(at, 2.4, col)
+	net_bolt(at + Vector3(0, 0.2, 0), at + Vector3(0, 3.6, 0), col)
+	CombatBus.ability_used.emit(h, id + "_payoff", "secondary")
+
+## The kit's pips floating over the hunter's head (everyone sees them): `n` diamonds on a small ring,
+## `lit` of them bright, spinning and swelling while `armed`. Call every tick.
+func self_pips(n: int, lit: int, armed: bool, dt: float) -> void:
+	if spips.is_empty():
+		var node := own_node()
+		var ds: Array = []
+		for i in n:
+			var d := MeshInstance3D.new()
+			d.mesh = Models.box(0.17, 0.17, 0.17)
+			d.material_override = solid_mat(res_col())
+			d.rotation = Vector3(0.0, 0.0, PI * 0.25)
+			d.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			node.add_child(d)
+			ds.append(d)
+		spips = {"node": node, "d": ds, "lit": 0, "pop": 0.0}
+	var node: Node3D = spips["node"]
+	if not is_instance_valid(node):
+		spips = {}
+		return
+	node.visible = tells_visible() and (lit > 0 or armed)
+	if not node.visible:
+		spips["lit"] = lit
+		return
+	if lit > int(spips["lit"]): spips["pop"] = 1.0
+	spips["lit"] = lit
+	spips["pop"] = maxf(0.0, float(spips["pop"]) - dt * 4.0)
+	var top := 2.35 * float(h.cdat.get("scale", 1.0)) + 0.25
+	node.global_position = h.position + Vector3(0, top, 0)
+	var a: float = m.time * (5.0 if armed else 1.4)
+	var ds: Array = spips["d"]
+	var rad := 0.22 + 0.06 * ds.size()
+	for i in ds.size():
+		var d: MeshInstance3D = ds[i]
+		var ang := a + TAU * i / float(ds.size())
+		d.position = Vector3(cos(ang) * rad, 0.0, sin(ang) * rad)
+		var on := i < lit
+		var s := (1.0 + float(spips["pop"]) * 0.6) if on else 0.6
+		if armed: s *= 1.2 + 0.12 * sin(m.time * 10.0 + i)
+		d.scale = Vector3.ONE * s
+		var c := res_col().lightened(0.2) if armed else res_col()
+		(d.material_override as StandardMaterial3D).albedo_color = Color(c, 1.0) if on else Color(0.08, 0.08, 0.1, 0.55)
+
+## A flat, unlit, solid colour (pips and plates that must read as their colour, not glow white).
+static func solid_mat(c: Color) -> StandardMaterial3D:
+	var mt := StandardMaterial3D.new()
+	mt.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mt.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mt.albedo_color = c
+	mt.no_depth_test = false
+	return mt
+
+# ------------------------------------------------------------------ holds and charges (shared)
+# Every hold in a kit (a charged RMB, a bow draw, a melee charge, a held dash) gets the same feel:
+# a rising wind-up sound in the archetype's own voice (pitch and volume climb, the ticks quicken), a
+# glow building at the hand and a filling ring at the hunter (enemies get the hostile rim), a clear
+# "full" tick (a ping, a flash, a ring), a Net fx ring when it starts and when it's full (so remote
+# players read it), and a release punch scaled by how far it got.
+
+## [sound, pitch at 0, pitch at full] of each archetype's wind-up.
+const CHARGE_VOICE := {
+	"thief": ["swipe", 1.3, 2.3], "archer": ["click", 0.8, 2.0], "mage": ["zap", 0.7, 1.9],
+	"gunslinger": ["reload", 0.8, 1.8], "juggernaut": ["thump", 0.55, 1.3], "bulwark": ["shield", 0.55, 1.2],
+}
+var chg := {}                  # the hold being charged: {src, k, full, tick, ring, glow}
+var charge_last := 0.0         # how far the last hold got when it was let go (tests)
+var charge_fulls := 0          # full ticks played (tests)
+
+## How long the RMB must be held to be fully charged (0 = this RMB's hold isn't a charge, e.g. a shield).
+func rmb_charge_full() -> float:
+	return float(rmb_def().get("hold", 0.0))
+
+## A held dash's charge 0..1 (-1: none). The Juggernaut's Rampage wind-up.
+func dash_charge() -> float:
+	return -1.0
+
+## The hold being charged right now: [source, k 0..1] or ["", -1].
+func charge_now() -> Array:
+	var rf := rmb_charge_full()
+	if rmb_down and rf > 0.0 and not rmb_ctx.get("air", false) and rmb_t > 0.06:
+		return ["rmb", clampf(rmb_t / rf, 0.0, 1.0)]
+	if h.draw_t >= 0.0 and h.draw_t < 5.0:
+		return ["draw", clampf(h.draw_t / 0.9, 0.0, 1.0)]
+	var ck := h.charge_k()
+	if ck > 0.0:
+		return ["melee", ck]
+	var dk := dash_charge()
+	if dk >= 0.0:
+		return ["dash", dk]
+	return ["", -1.0]
+
+func charge_k() -> float:
+	return float(chg.get("k", -1.0)) if not chg.is_empty() else -1.0
+
+func _tick_charge(dt: float) -> void:
+	var cn := charge_now()
+	var src := String(cn[0]); var k := float(cn[1])
+	if src == "" or not is_instance_valid(h) or h.downed or h.out:
+		if not chg.is_empty():
+			_charge_release()
+		return
+	var col := Arch.color(id)
+	if chg.is_empty() or String(chg["src"]) != src:
+		if not chg.is_empty(): _charge_release()
+		chg = {"src": src, "k": k, "full": false, "tick": 0.0}
+		var rc := col
+		var p = m.get("player")
+		if p != null and int(p.team) != h.team: rc = col.lerp(Feel.RIM_ENEMY, 0.45)
+		var ring: Node3D = m.fx.telegraph_circle(h.pos, 1.15 * float(h.cdat.get("scale", 1.0)), Color(rc, 0.9))
+		chg["ring"] = ring
+		var g := own_node()
+		var ball := MeshInstance3D.new()
+		ball.mesh = Models.sphere(0.2, 10)
+		ball.material_override = Models.glow_mat(Color(col.lightened(0.2), 1.0))
+		ball.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		g.add_child(ball)
+		chg["glow"] = g
+		net_ring(h.pos, 0.8, rc)            # remote players: "they're winding something up"
+	chg["k"] = k
+	var ring2: Node3D = chg.get("ring")
+	if ring2 and is_instance_valid(ring2):
+		ring2.global_position = h.pos + Vector3(0, 0.07, 0)
+		m.fx.telegraph_progress(ring2, k)
+	var g2: Node3D = chg.get("glow")
+	if g2 and is_instance_valid(g2):
+		var d := h.aim_dir()
+		g2.visible = tells_visible()
+		g2.global_position = h.position + Vector3(d.x * 0.6, 1.05 * float(h.cdat.get("scale", 1.0)), d.y * 0.6)
+		var full_pulse := (0.3 * sin(m.time * 30.0)) if bool(chg["full"]) else 0.0
+		g2.scale = Vector3.ONE * (0.25 + 1.35 * k + full_pulse)
+	# the wind-up voice: ticks that climb in pitch and volume and come faster as it fills
+	chg["tick"] = float(chg["tick"]) - dt
+	if float(chg["tick"]) <= 0.0 and not bool(chg["full"]):
+		chg["tick"] = lerpf(0.13, 0.05, k)
+		var v: Array = CHARGE_VOICE.get(id, ["click", 0.8, 1.8])
+		var mine := h.is_local()
+		m.sfx(String(v[0]), h.pos, lerpf(-16.0, -6.0, k) - (0.0 if mine else 4.0), lerpf(float(v[1]), float(v[2]), k))
+		if randf() < 0.5: m.fx.burst(h.position + Vector3(randf_range(-0.6, 0.6), 0.4 + randf(), randf_range(-0.6, 0.6)), col, 2, 2.0 + 3.0 * k, 0.25, 0.0, 0.7, (h.pos + Vector3(0, 1.0, 0) - h.position).normalized(), 30.0)
+	if k >= 0.999 and not bool(chg["full"]):
+		chg["full"] = true
+		charge_fulls += 1
+		_charge_full_tick(col)
+
+## Fully charged: a bright ping, a flash at the hand, a ring; everyone online gets the ring.
+func _charge_full_tick(col: Color) -> void:
+	var v: Array = CHARGE_VOICE.get(id, ["click", 0.8, 1.8])
+	m.sfx("ab_ready", h.pos, -3.0 if h.is_local() else -7.0, float(v[2]) * 0.6)
+	m.sfx(String(v[0]), h.pos, -4.0, float(v[2]) * 1.15)
+	var d := h.aim_dir()
+	m.fx.flash(h.pos + Vector3(d.x * 0.6, 1.05, d.y * 0.6), col.lightened(0.4), 0.9, 0.08)
+	m.fx.ring(h.pos, 1.5, Color(col, 0.95), 0.22)
+	if h.is_local() and m.cam: m.cam.punch(0.02)
+	net_ring(h.pos, 1.5, col)
+
+## Let go: the ring and glow go, and the release punches in proportion to the charge.
+func _charge_release() -> void:
+	var k := float(chg.get("k", 0.0))
+	charge_last = k
+	var ring: Node3D = chg.get("ring")
+	if ring and is_instance_valid(ring): m.fx.end_telegraph(ring)
+	var g: Node3D = chg.get("glow")
+	if g and is_instance_valid(g):
+		self_nodes.erase(g)
+		g.queue_free()
+	var full := bool(chg.get("full", false))
+	chg = {}
+	if not is_instance_valid(h) or h.downed:
+		return
+	if h.is_local():
+		Oomph.punch_dir(m, h.aim_dir(), 0.06 + 0.26 * k)
+		if full and m.cam: m.cam.add_trauma(0.12)
+	if k > 0.5:
+		m.fx.burst(h.pos + Vector3(h.aim_dir().x * 0.7, 1.0, h.aim_dir().y * 0.7), Arch.color(id), int(6 + 14 * k), 3.0 + 5.0 * k, 0.3, 0.0, 1.0, Vector3(h.aim_dir().x, 0.1, h.aim_dir().y), 35.0)
+
+## Terrain (a wall, a rock, a ledge face) within `reach` behind `t` along `dir`.
+func terrain_behind(t: Ent, dir: Vector2, reach: float) -> bool:
+	var k := 0.3
+	while k <= reach:
+		var q := t.pos + Vector3(dir.x, 0, dir.y) * (t.r + k)
+		if m.world.is_block(q.x, q.z) or m.world.ground_at(q.x, q.z) > t.pos.y + 0.8:
+			return true
+		k += 0.3
+	return false

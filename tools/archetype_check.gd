@@ -150,6 +150,17 @@ func _controls() -> void:
 	ok("keys: rebindable list names them", Settings.ACTIONS.any(func(a): return a[0] == "kin_ability"))
 
 func _data() -> void:
+	# rank previews: always the NEXT rank first (rank 2 at rank 1), then rank 3's special; every
+	# ability of every archetype has a concrete rank 2
+	var rk_ok := true
+	for a in Arch.ids():
+		for sl in ["sec", "dash", "kin", "ult"]:
+			var r2 := String(Arch.def(a).get("rank2", {}).get(sl, ""))
+			if not (r2.contains("->") and r2.length() > 20): rk_ok = false
+	ok("ranks: every ability has a concrete rank 2", rk_ok)
+	var n1 := Arch.next_ranks("archer", "sec", 1); var n2 := Arch.next_ranks("archer", "sec", 2); var n3 := Arch.next_ranks("archer", "sec", 3)
+	ok("ranks: next rank first (2 at 1, 3 at 2, none at max)", n1.size() == 2 and n1[0][0] == "Rank 2" and n1[1][0] == "Rank 3" and n2.size() == 1 and n2[0][0] == "Rank 3" and n3.is_empty(), str(n1))
+	ok("ranks: R previews rank 2", Arch.next_ranks("mage", "ult", 1).size() == 1 and Arch.next_ranks("mage", "ult", 2).is_empty())
 	var ids := Arch.ids()
 	ok("data: six archetypes", ids.size() == 6, str(ids))
 	for w in ["light", "medium", "heavy"]:
@@ -280,11 +291,32 @@ func _archer() -> void:
 			wl[i] = lv if dx < 2 else lv + 3
 	W.kind = wk; W.level = wl
 	aim_at(P, T.pos)
-	hold(m, P, 0.6)
+	K.res = 0.0       # (a full Focus outranks the hold variant)
+	hold(m, P, 1.15)
 	if "--ak-debug" in OS.get_cmdline_user_args(): print("PIN after hold: T at %s P at %s ground ahead %s %s %s lvl %s" % [str(T.pos), str(P.pos), W.ground_at(T.pos.x + 1.0, T.pos.z), W.ground_at(T.pos.x + 1.6, T.pos.z), W.ground_at(T.pos.x + 2.2, T.pos.z), W.level[W.idx(int(T.pos.x) + 2, int(T.pos.z))]])
 	step(m, 0.5)
 	if "--ak-debug" in OS.get_cmdline_user_args(): print("PIN T at %s vx %.2f stun %.2f immune %.2f dr %s" % [str(T.pos), T.vel.x, T.stun_t, T.cc_immune_t, str(T.dr)])
-	ok("archer RMB hold: Pinning Shot pins", K.last_variant == "hold" and dmg(T) >= 14.0 and T.root_t > 0.0, "took %.0f root %.2f" % [dmg(T), T.root_t])
+	ok("archer RMB hold: Heavy Shot pins to the wall", K.last_variant == "hold" and dmg(T) >= 14.0 and T.stun_t > 0.0, "took %.0f stun %.2f" % [dmg(T), T.stun_t])
+	# a full charge: the hold reached full (the shared charge feedback ticked)
+	ok("archer RMB hold: charge reached full", K.charge_fulls >= 1 and K.charge_last >= 0.99, "fulls %d last %.2f" % [K.charge_fulls, K.charge_last])
+	# Deadeye: a full-Focus shot into a pinned (rooted) foe pays out a gold second hit
+	var dd0 := dmg(T); var de0 := K.deadeyes
+	T.root_t = maxf(T.root_t, 1.0)
+	K.res = K.res_max()
+	ok("archer resource full: Deadeye armed", K.full_ready() and K.ready_label() != "" and K.pinned(T))
+	P.fire_cd = 0.0; P.ammo = maxi(P.ammo, 1); P.reload_t = 0.0
+	P.inp["fire"] = true; m.step(DT); P.inp["fire"] = false
+	step(m, 0.5)
+	if "--ak-debug" in OS.get_cmdline_user_args(): print("DEADEYE dd0 %.1f now %.1f" % [dd0, dmg(T)])
+	ok("archer Deadeye: Focus shot into a pinned foe", K.deadeyes == de0 + 1 and dmg(T) - dd0 >= 70.0, "deadeyes %d dealt %.0f" % [K.deadeyes - de0, dmg(T) - dd0])
+	# ... and not into a free one
+	fresh(T); K.res = K.res_max(); de0 = K.deadeyes
+	step(m, 0.9)      # (past the pin's grace)
+	K.res = K.res_max()
+	P.fire_cd = 0.0; P.ammo = maxi(P.ammo, 1); P.reload_t = 0.0
+	P.inp["fire"] = true; m.step(DT); P.inp["fire"] = false
+	step(m, 0.5)
+	ok("archer Deadeye: none without a pin", K.deadeyes == de0 and dmg(T) >= 50.0, "dealt %.0f" % dmg(T))
 	# Grapple Arrow: bites the ledge and climbs on top
 	P.teleport(home); P.vel = Vector3.ZERO; P.dashes = P.max_dashes()
 	for dz in range(-3, 4):
@@ -305,20 +337,33 @@ func _archer() -> void:
 	P.ak.press_rmb()
 	ok("archer RMB air: Plunge lifts you", K.last_variant == "air" and P.vel.y > 5.0, "vy %.1f" % P.vel.y)
 	step(m, 1.2)
-	# E: Flare reveals
+	# the bow's perfect window: let go right at full draw for +25%
+	P.teleport(home); P.vel = Vector3.ZERO; fresh(T); T.teleport(home + Vector3(-6.5, 0, 0)); aim_at(P, T.pos)    # (clear of the test walls east)
+	P.equip("longbow", 0); step(m, 0.4)
+	var pf0 := K.perfects
+	step(m, 0.95, func(): P.inp["fire"] = true; K.res = 0.0; aim_at(P, T.pos))
+	P.inp["fire"] = false
+	step(m, 0.5)
+	ok("archer bow: perfect release +25%", K.perfects == pf0 + 1 and dmg(T) >= 74.0, "perfects %d took %.0f" % [K.perfects - pf0, dmg(T)])
+	# E: Arrow Rain: a line of falling arrows; damage over time, slow, blight
 	P.teleport(home); fresh(T); T.teleport(home + Vector3(6, 0, 0))
 	P.inp["aim"] = T.pos
 	P.ak.use_e()
-	step(m, 0.6)
-	ok("archer E: Flare reveals", T.reveal_t > 0.5, "reveal %.1f" % T.reveal_t)
-	# R: Skyfall Volley: 0.8s tell, waves, the last roots
-	fresh(T)
-	P.inp["aim"] = T.pos
+	ok("archer E: Arrow Rain cast", K.in_e())
+	step(m, 2.0, func(): K.res = 0.0)
+	ok("archer E: Arrow Rain hurts, slows, blights", dmg(T) >= 10.0 and T.slow_t > 0.0 and T.blight_t > 0.0, "took %.0f slow %.2f blight %.2f" % [dmg(T), T.slow_t, T.blight_t])
+	step(m, 2.5)
+	ok("archer E: Arrow Rain ends", not K.in_e())
+	# R: Great Arrows: three empowered shots, no draw, the third hardest
+	P.teleport(home); fresh(T); T.teleport(home + Vector3(-7.0, 0, 0)); aim_at(P, T.pos); K.res = 0.0
 	ult(m, P)
-	step(m, 0.6)
-	var early := dmg(T)
-	step(m, 2.3)
-	ok("archer R: Volley tell then waves + root", early < 0.5 and dmg(T) >= 20.0 and T.root_t > 0.0, "before tell end %.0f, total %.0f, root %.2f" % [early, dmg(T), T.root_t])
+	ok("archer R: Great Arrows armed", not K.great.is_empty() and int(K.great["left"]) == 3)
+	for i in 3:
+		P.fire_cd = 0.0
+		P.inp["fire"] = true; m.step(DT); P.inp["fire"] = false
+		step(m, 0.45, func(): K.res = 0.0; aim_at(P, T.pos))
+	step(m, 0.3)
+	ok("archer R: three great arrows hit", K.great.is_empty() and dmg(T) >= 95.0, "took %.0f" % dmg(T))
 	await done(m)
 
 # ------------------------------------------------------------------ Mage
@@ -328,54 +373,69 @@ func _mage() -> void:
 	var home: Vector3 = r[4]
 	var K: MageKit = P.ak
 	ok("mage: Spellstaff in hand", P.wid == "spellstaff")
-	# Bolt tap: hit, slow, +20 Heat
+	# Guided Bolt: fires on the press, Runes what it hits, +15 Heat
 	tap(m, P)
-	step(m, 0.4)
-	ok("mage RMB tap: bolt slows, +20 Heat", dmg(T) >= 13.0 and T.slow_t > 0.0 and K.res >= 15.0, "took %.0f heat %.0f" % [dmg(T), K.res])
-	# Lance: a hold pierces both
-	fresh(T); fresh(T2); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0
-	hold(m, P, 0.7)
+	step(m, 0.8)
+	ok("mage RMB: Guided Bolt hits + Runes", dmg(T) >= 9.0 and K.runed(T) and K.res >= 10.0, "took %.0f heat %.0f" % [dmg(T), K.res])
+	# a second spell on the Runed foe detonates it: a Runeburst (root)
+	var d0 := dmg(T); var det0 := K.detonations
+	K.res = 0.0; K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; T.root_t = 0.0
+	tap(m, P)
+	step(m, 0.8)
+	ok("mage passive: second spell detonates the Rune", K.detonations == det0 + 1 and dmg(T) - d0 >= 24.0 and T.root_t > 0.0 and not K.runed(T), "dealt %.0f root %.2f" % [dmg(T) - d0, T.root_t])
+	# held: the bolt bends toward the cursor (round a corner onto a target off to the side)
+	fresh(T); T.teleport(home + Vector3(6.0, 0, 2.5)); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; K.res = 0.0
+	P.inp["aim"] = home + Vector3(7.0, 0.9, -1.5)
+	P.inp["sec_hold"] = true
+	P.ak.press_rmb()
+	step(m, 0.2, func(): P.inp["sec_hold"] = true; P.inp["aim"] = home + Vector3(7.0, 0.9, -1.5))
+	step(m, 1.4, func(): P.inp["sec_hold"] = true; P.inp["aim"] = T.pos + Vector3(0, 0.9, 0))
+	P.inp["sec_hold"] = false
 	step(m, 0.2)
-	ok("mage RMB hold: Lance pierces", K.last_variant == "hold" and dmg(T) >= 20.0 and dmg(T2) >= 20.0, "%.0f / %.0f" % [dmg(T), dmg(T2)])
-	# Sigil, then a bolt through it splits; recast E detonates (lift)
-	fresh(T); fresh(T2); K.res = 0.0; K.ch_rmb = 1.0; K.cd["rmb"] = 0.0
-	P.inp["aim"] = home + Vector3(3.0, 0, 0)
+	ok("mage RMB hold: the bolt steers onto them", dmg(T) >= 12.0, "took %.0f (longer flight hits harder)" % dmg(T))
+	T.teleport(home + Vector3(7.0, 0, 0)); fresh(T); aim_at(P, T.pos)
+	for key in K.runes.keys(): K._clear_rune(key)
+	step(m, 0.3)
+	# Overcharged: a detonation is a Flashpoint (all the Heat, splash, the Bolt back)
+	K.ch_rmb = 1.0; K.cd["rmb"] = 0.0
+	tap(m, P); step(m, 0.8)
+	K.res = 72.0; K.ch_rmb = 1.0; K.cd["rmb"] = 0.0
+	ok("mage resource full: Overcharged + Runed", K.full_ready() and K.ready_label().contains("FLASHPOINT"))
+	var f0 := K.flashpoints; d0 = dmg(T); var t2d := dmg(T2)
+	tap(m, P); step(m, 0.8)
+	ok("mage Flashpoint: all the Heat, a burst", K.flashpoints == f0 + 1 and dmg(T) - d0 >= 35.0 and dmg(T2) > t2d and K.res < 25.0 and K.vent.is_empty(), "dealt %.0f splash %.0f heat %.0f" % [dmg(T) - d0, dmg(T2) - t2d, K.res])
+	# E: Hex turns a hunter into a critter: no attacks, half speed
+	fresh(T); aim_at(P, T.pos); K.res = 0.0
 	P.ak.use_e()
-	ok("mage E: Sigil drawn, +25 Heat", not K.sigil.is_empty() and K.res >= 24.0)
-	aim_at(P, T.pos)
-	tap(m, P)
 	step(m, 0.6)
-	ok("mage RMB through Sigil: splits", K.last_variant == "during_e" and dmg(T) > 0.0, "took %.0f" % dmg(T))
-	T.teleport(home + Vector3(3.0, 0, 0)); fresh(T)
-	var top := {"y": 0.0}
-	var g := T.pos.y
-	P.ak.use_e()
-	step(m, 0.9, func(): top["y"] = maxf(float(top["y"]), T.pos.y - g))
-	ok("mage E recast: detonation lifts", top["y"] > 0.3 and dmg(T) >= 9.0, "rose %.2f took %.0f" % [top["y"], dmg(T)])
-	# Overcharged at 70+; the Vent at 100
+	ok("mage E: Hex lands", Hex.active(T) and K.hexes >= 1 and not T.can_fire() and T.get_node_or_null("HexCritter") != null, "hexed %s" % str(Hex.active(T)))
+	step(m, 1.2)
+	ok("mage E: Hex wears off", not Hex.active(T) and T.model.visible and T.get_node_or_null("HexCritter") == null)
+	# Overcharged at 70; the Vent at 100
 	K.res = 75.0
 	ok("mage resource: Overcharged at 70", K.full_ready())
-	K.res = 90.0; K.ch_rmb = 1.0; K.cd["rmb"] = 0.0
+	K.res = 92.0; K.ch_rmb = 1.0; K.cd["rmb"] = 0.0
 	tap(m, P)
 	step(m, 0.6)
 	ok("mage passive: Vent at 100 resets + locks", K.res < 1.0 and K.lock_t > 0.0, "heat %.0f lock %.2f" % [K.res, K.lock_t])
 	step(m, 1.2)
-	# Blink: a 0.12s windup, then up to 5.5m
+	# Blink: a 0.12s windup, then up to 5.5m; dash again to snap back
 	P.teleport(home); P.dashes = P.max_dashes()
 	P.inp["aim"] = home + Vector3(0, 0, 8.0)
 	P.do_dash()
 	var mid := P.flat_dist(home)
 	step(m, 0.2)
 	ok("mage dash: Blink after its windup", mid < 0.3 and P.flat_dist(home) > 4.5 and P.flat_dist(home) < 6.0, "at windup %.1f, then %.1fm" % [mid, P.flat_dist(home)])
-	# R: Meteor: a 1.0s tell, then the impact spikes an airborne target
-	P.teleport(home); fresh(T); T.teleport(home + Vector3(6, 0, 0))
-	P.inp["aim"] = T.pos
+	var dl := P.dashes
+	P.do_dash()
+	step(m, 0.1)
+	ok("mage dash again: snap back to the sigil", P.flat_dist(home) < 1.0 and K.st.get("last_dash") == "back" and P.dashes >= dl - 0.01, "%.1fm from start" % P.flat_dist(home))
+	# R: Encore: mirrors recast the last spell (a Bolt) at once, then echo
+	P.teleport(home); fresh(T); fresh(T2); T.teleport(home + Vector3(7, 0, 0)); aim_at(P, T.pos); K.last_spell = "bolt"
+	for key in K.runes.keys(): K._clear_rune(key)
 	ult(m, P)
-	step(m, 0.85)
-	var pre := dmg(T)
-	T.vel.y = 7.0; T.grounded = false
-	step(m, 0.4)
-	ok("mage R: Meteor tell then spike", pre < 0.5 and dmg(T) >= 30.0 and T.stun_t > 0.3, "pre %.0f took %.0f stun %.2f" % [pre, dmg(T), T.stun_t])
+	step(m, 1.2)
+	ok("mage R: Encore mirrors recast", not K.encore.is_empty() and dmg(T) >= 10.0, "took %.0f" % dmg(T))
 	await done(m)
 
 # ------------------------------------------------------------------ Gunslinger
@@ -410,11 +470,16 @@ func _gunslinger() -> void:
 	step(m, 0.3)
 	if OS.get_cmdline_user_args().has("--ak-debug"): print("  post trick: hp %.1f variant %s ch %.1f T2 %.1f" % [T.hp, K.last_variant, K.ch_rmb, T2.hp])
 	ok("gunslinger RMB tap: Trick Shot", dmg(T) >= 11.0, "took %.0f" % dmg(T))
-	# Called Shot at 6
-	fresh(T); K.res = 6.0; K.ch_rmb = 1.0; K.cd["rmb"] = 0.0
+	# Called Shot at 6: armed, then a stunning crit that reloads the magazine
+	fresh(T); K.res = 5.0; K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; K.load_at = -9.0
+	K.load_chambers(1, true)
+	ok("gunslinger resource full: Called Shot armed", K.full_ready() and K.ready_label() != "" and K.res_text() == "6/6")
+	P.ammo = 1
+	var cs0 := K.called_shots
 	tap(m, P)
 	step(m, 0.3)
 	ok("gunslinger RMB full: Called Shot stuns", K.last_variant == "full" and T.stun_t > 0.0 and dmg(T) >= 20.0 and K.res < 1.0, "took %.0f stun %.2f" % [dmg(T), T.stun_t])
+	ok("gunslinger Called Shot: payoff + reload", K.called_shots == cs0 + 1 and P.ammo == int(P.wpn["mag"]), "payoffs %d ammo %d" % [K.called_shots - cs0, P.ammo])
 	# Rail Charge: a full hold pierces and stuns
 	fresh(T); fresh(T2); T.cc_immune_t = 0.0; K.ch_rmb = 1.0; K.cd["rmb"] = 0.0
 	step(m, 1.0)
@@ -536,50 +601,93 @@ func _bulwark() -> void:
 	step(m, 0.1)
 	ok("bulwark RMB release: lowered", K.wall.is_empty())
 	# tap: Bash; at 50 Guard, Shield Slam stuns
-	T.teleport(home + Vector3(1.8, 0, 0)); fresh(T); aim_at(P, T.pos)
+	T.teleport(home + Vector3(1.8, 0, 0)); fresh(T); aim_at(P, T.pos); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0
 	var x0 := T.pos.x
 	tap(m, P)
 	step(m, 0.3)
 	ok("bulwark RMB tap: Bash pushes", K.last_variant == "tap" and T.pos.x - x0 > 1.0 and dmg(T) >= 9.0, "pushed %.1f" % (T.pos.x - x0))
 	T.teleport(home + Vector3(1.8, 0, 0)); fresh(T); K.res = 60.0; K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; step(m, 1.0); fresh(T)
+	ok("bulwark resource full: Shield Slam armed", K.full_ready() and K.ready_label() != "")
 	tap(m, P)
 	var early := T.stun_t
 	step(m, 0.5)
 	ok("bulwark RMB full: Shield Slam (0.3s tell) stuns", K.last_variant == "full" and early <= 0.0 and T.stun_t > 0.0 and K.res < 15.0, "stun %.2f guard %.0f" % [T.stun_t, K.res])
-	# Interpose: the braced step blocks a frontal shot
+	# hold to block, let go: the Bash comes out of the block
+	T.teleport(home + Vector3(1.8, 0, 0)); fresh(T); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; K.res = 0.0; step(m, 0.8); fresh(T)
+	x0 = T.pos.x
+	hold(m, P, 0.5)
+	step(m, 0.3)
+	ok("bulwark RMB release after block: Bash", K.wall.is_empty() and K.last_variant == "hold" and T.pos.x - x0 > 1.0, "pushed %.1f" % (T.pos.x - x0))
+	# Crushed: a Bash into a wall stuns and heals
+	var W: World = m.world
+	var lv: int = r[5]
+	var wk: PackedByteArray = W.kind; var wl: PackedByteArray = W.level
+	for dz in range(-3, 4):
+		for dx in range(0, 3):
+			var i: int = W.idx(int(home.x) + 3 + dx, int(home.z) + dz)
+			wk[i] = World.T_GROUND
+			wl[i] = lv if dx < 1 else lv + 3
+	W.kind = wk; W.level = wl
+	T.teleport(home + Vector3(2.2, 0, 0)); fresh(T); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; K.crushed_at = {}
+	P.teleport(home); aim_at(P, T.pos); P.hp = P.max_hp - 40.0
+	var c0 := K.crushes; var hp0 := P.hp
+	step(m, 0.2)
+	tap(m, P)
+	step(m, 0.3)
+	ok("bulwark payoff: Bash into a wall Crushes (stun + heal)", K.crushes == c0 + 1 and T.stun_t > 0.0 and P.hp > hp0, "crushes %d stun %.2f hp %.0f -> %.0f" % [K.crushes - c0, T.stun_t, hp0, P.hp])
+	for dz in range(-3, 4):
+		for dx in range(0, 3):
+			wl[W.idx(int(home.x) + 3 + dx, int(home.z) + dz)] = lv
+	W.level = wl
+	# LMB tap: the mace flies through, lies there, comes back on a second tap
+	T.teleport(home + Vector3(4.0, 0, 0)); fresh(T); P.teleport(home); aim_at(P, T.pos); P.fire_cd = 0.0
+	P.inp["fire"] = true; m.step(DT); P.inp["fire"] = false; m.step(DT)
+	ok("bulwark LMB tap: mace thrown", not K.mace.is_empty())
+	step(m, 0.6)
+	var thrown := dmg(T)
+	ok("bulwark LMB: mace hits and lies", thrown >= 14.0 and String(K.mace.get("st", "")) == "ground", "took %.0f state %s" % [thrown, String(K.mace.get("st", ""))])
+	P.fire_cd = 0.0
+	P.inp["fire"] = true; m.step(DT); P.inp["fire"] = false
+	step(m, 0.8)
+	ok("bulwark LMB tap again: recalled, hits on the way", K.mace.is_empty() and dmg(T) > thrown, "took %.0f" % dmg(T))
+	# LMB hold: a full Crushing Blow
+	T.teleport(home + Vector3(2.0, 0, 0)); fresh(T); P.teleport(home); aim_at(P, T.pos); P.fire_cd = 0.0
+	step(m, 1.3, func(): P.inp["fire"] = true; aim_at(P, T.pos))
+	P.inp["fire"] = false
+	step(m, 0.3)
+	ok("bulwark LMB hold: full Crushing Blow", dmg(T) >= 30.0 and T.stun_t > 0.0, "took %.0f stun %.2f" % [dmg(T), T.stun_t])
+	# dash: Whirl; with the shield up, a Shield Charge
 	P.teleport(home); P.dashes = P.max_dashes(); fresh(T); T.teleport(home + Vector3(6, 0, 0)); aim_at(P, T.pos)
-	P.face = atan2(-1.0, 0.0)
 	P.inp["move"] = Vector2(1, 0)
 	P.do_dash()
-	php = P.hp
-	m.spawn_shot(T, T.pos + Vector3(-0.6, 0.95, 0), Vector2(-40, 0), 30.0, 0.5, 0.15, Color.RED, {})
-	step(m, 0.25)
-	P.inp["move"] = Vector2.ZERO
-	ok("bulwark dash: Interpose front guard", K.st.get("last_dash") == "step" and P.hp >= php, "hp %.0f -> %.0f" % [php, P.hp])
-	# ally under the cursor: leap to them and shield them
-	var A: Hunter = m.make_hunter("A", P.team, "medium", "Ally", "idle", {}, home + Vector3(0, 0, 6.0), {"arch": "none"})
-	A.shield = 0.0
-	P.teleport(home); P.dashes = P.max_dashes(); K.res = 30.0
-	P.inp["aim"] = A.pos
+	step(m, 0.3)
+	ok("bulwark dash: Whirl", K.st.get("last_dash") == "whirl" and P.flat_dist(home) > 2.5, "moved %.1f" % P.flat_dist(home))
+	P.teleport(home); P.dashes = P.max_dashes(); K.lock_t = 0.0; K.shield_hp = K.shield_max()
+	P.inp["sec_hold"] = true
+	P.ak.press_rmb()
+	step(m, 0.3, func(): P.inp["sec_hold"] = true)
 	P.do_dash()
-	step(m, 0.6)
-	ok("bulwark dash: ally leap shields them", K.st.get("last_dash") == "leap" and P.flat_dist(A) < 2.0 and A.shield > 0.0, "dist %.1f shield %.0f" % [P.flat_dist(A), A.shield])
-	# E: Rally Banner gives shield over time
-	P.shield = 0.0; P.teleport(home)
+	var inv := P.inv_t
+	step(m, 0.3, func(): P.inp["sec_hold"] = true)
+	P.inp["sec_hold"] = false; P.inp["move"] = Vector2.ZERO
+	step(m, 0.1)
+	ok("bulwark dash with the shield up: Shield Charge", K.st.get("last_dash") == "charge" and inv > 0.15 and P.flat_dist(home) > 3.0, "inv %.2f moved %.1f" % [inv, P.flat_dist(home)])
+	# E: Mending Ground bursts after 1s and heals
+	P.teleport(home); P.hp = P.max_hp - 50.0; hp0 = P.hp
 	P.inp["aim"] = home + Vector3(1, 0, 0)
 	P.ak.use_e()
-	step(m, 1.2)
-	ok("bulwark E: Banner shields allies inside", P.shield >= 5.0 and K.in_e(), "shield %.0f" % P.shield)
-	# R: Bastion: foes inside pushed out, shots from outside stop, Guard adds time
-	K.res = 100.0
-	T.teleport(home + Vector3(2.0, 0, 0)); fresh(T)
-	ult(m, P)
-	step(m, 0.6)
-	var pushed := T.flat_dist(home)
-	php = P.hp
-	m.spawn_shot(T, home + Vector3(7.0, 0.95, 0), Vector2(-30, 0), 20.0, 0.6, 0.15, Color.RED, {})
 	step(m, 0.5)
-	ok("bulwark R: Bastion pushes out, blocks, +2s", pushed > 4.0 and P.hp >= php and K.r_t > 4.5, "pushed to %.1f hp %.0f->%.0f r_t %.1f" % [pushed, php, P.hp, K.r_t])
+	var mid := P.hp
+	step(m, 0.8)
+	ok("bulwark E: Mending Ground heals after its delay", mid <= hp0 + 1.0 and P.hp >= hp0 + 20.0, "hp %.0f -> %.0f -> %.0f" % [hp0, mid, P.hp])
+	# R: Fissure: the crack stuns, then the eruption pulses; Guard adds a pulse
+	K.res = 50.0
+	P.teleport(home); T.teleport(home + Vector3(5.0, 0, 0)); fresh(T); aim_at(P, T.pos)
+	ult(m, P)
+	step(m, 0.25)
+	var st0 := T.stun_t
+	step(m, 1.8)
+	ok("bulwark R: Fissure stuns then erupts", st0 > 0.0 and dmg(T) >= 30.0 and T.slow_t > 0.0, "stun %.2f took %.0f" % [st0, dmg(T)])
 	await done(m)
 
 # ------------------------------------------------------------------ levels and the Bonded R
@@ -689,10 +797,10 @@ func _feel() -> void:
 	var st3 := StageSpec.parse({"delivery": {"type": "leap", "range": 7, "time": 0.5}}, "", GrammarReport.new())
 	ok("feel: leap flight counts", Feel.missing_windup(st3) <= 0.0)
 	# archetype tells meet the floors
-	ok("feel: Meteor tell >= hard floor", float(Arch.def("mage")["r"]["tell"]) >= Feel.floor_for("hard_cc", "instant"))
-	ok("feel: Volley tell >= soft floor", float(Arch.def("archer")["r"]["tell"]) >= Feel.floor_for("soft_cc", "instant"))
+	ok("feel: Hex is a projectile (dodgeable)", String(Arch.def("mage")["e"]["delivery"]) == "projectile" and float(Arch.def("mage")["e"]["speed"]) <= 24.0)
+	ok("feel: Arrow Rain tell >= soft floor", float(Arch.def("archer")["e"]["tell"]) >= Feel.floor_for("soft_cc", "instant"))
 	ok("feel: Heist fuse + mark-out >= self floor", float(Arch.def("thief")["r"]["tell"]) + float(Arch.def("thief")["r"]["fuse"]) >= Feel.floor_for("hard_cc", "self"))
-	ok("feel: Sigil detonation >= soft floor", float(Arch.def("mage")["e"]["det_t"]) >= Feel.floor_for("soft_cc", "instant"))
+	ok("feel: Blink windup shows the landing", float(Arch.def("mage")["dash"]["windup"]) >= 0.1)
 	ok("feel: Rampage windup visible >= 0.30", float(Arch.def("juggernaut")["dash"]["windup"]) * 0.5 >= 0.3)
 	ok("feel: Avalanche / Bastion plant tells (fuse + tell)", float(Arch.def("juggernaut")["r"]["tell"]) + float(Arch.def("juggernaut")["r"]["fuse"]) >= 0.3 and float(Arch.def("bulwark")["r"]["tell"]) >= 0.3)
 	ok("feel: every R has a fuse of 0.35-0.8s", Arch.ids().all(func(a): return float(Arch.def(a)["r"].get("fuse", 0.0)) >= 0.35 and float(Arch.def(a)["r"].get("fuse", 0.0)) <= 0.8))

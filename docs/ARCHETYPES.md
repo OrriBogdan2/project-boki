@@ -327,6 +327,8 @@ Save CC for after the second Flicker step. Heist's lines show who's next.
 
 ### 6.2 Archer (light)
 
+> **Nov 1 (kits4): superseded in part.** The Archer was rebuilt on a reference baseline (owner direction); the built kit is in "Kit loops" at the end of this document, and it wins where they differ.
+
 **Fantasy:** the warden of high ground. Climbs, reads the field, pins people to walls.
 **Silhouette:** tall and upright, standing still. A long weapon slung across the back rises above
 the head (bow tips or rifle barrel). A feathered cowl crest and a quiver. The **primary feature is
@@ -400,6 +402,8 @@ cut the grapple rope. Watch for the Plunge if you knock them off. Leave Volley c
 ---
 
 ### 6.3 Mage (medium)
+
+> **Nov 1 (kits4): superseded in part.** The Mage was rebuilt on a reference baseline (owner direction); the built kit is in "Kit loops" at the end of this document, and it wins where they differ.
 
 **Fantasy:** the runecaster. Draws sigils, throws bolts that take on the kin's nature, and runs
 dangerously hot.
@@ -483,6 +487,8 @@ before the detonation flash. The Meteor's 1.0s is the longest tell in the game. 
 ---
 
 ### 6.4 Gunslinger (medium)
+
+> **Nov 1 (kits4):** the built kit and its numbers are in "Kit loops" at the end of this document; where they differ from this section, they win.
 
 **Fantasy:** the duelist. A rhythm of six, trick shots off walls, slide and reload.
 **Silhouette:** a wide-brimmed hat, a long split-tail coat that flares when moving, a hip holster
@@ -630,6 +636,8 @@ Earthshatter landing circle are both dodgeable. Kite during Iron Hide and Avalan
 ---
 
 ### 6.6 Bulwark (heavy)
+
+> **Nov 1 (kits4): superseded in part.** The Bulwark was rebuilt on a reference baseline (owner direction); the built kit is in "Kit loops" at the end of this document, and it wins where they differ.
 
 **Fantasy:** the squad's shield. Holds the line, plants a banner, leaps in to save an ally at the edge.
 **Silhouette:** a big rectangular tower shield, or a minigun with a front plate. A square crested
@@ -855,3 +863,160 @@ chest) and the merge starts on the same frame the ult fires, with the BONDED col
 
 An ult that needs targets (Heist, Last Round) checks for them before the fuse, so a fuse never
 fizzles; if everyone escapes during it, almost all of the cooldown comes back.
+
+## Kit loops: every archetype at the Thief / Juggernaut bar (kits4, Nov 1)
+
+The Thief (Marks -> Knife ready at 3 -> Cash In) and the Juggernaut (Rage -> Enraged -> Rage Smash)
+set the bar for "oomph": one resource that the kit's own abilities build, a hunter that visibly
+changes when the payoff is armed, and a named payoff that lands with T4 hitstop (the hit carries
+`payoff: true`), a T4 shake, its own synthesized sound, VFX and a camera punch. The other four now
+follow the same shape, through shared helpers in `ArchKit` (`armed_fx`, `payoff_fx`, `self_pips`,
+`net_pulse`, `net_ring`/`net_bolt`, `terrain_behind`, `ready_label`, `e_payoff_ready`, `teardown`):
+
+- **HUD:** the resource bar and crosshair arc as before, plus a pulsing label under the crosshair
+  while the payoff is armed (`ready_label`) and the gold "ready" dot on the slot the payoff lives on.
+- **Remote players** (whose games don't run your kit): the armed moment and every payoff send the
+  existing Net `fx` ring / bolt events, and an armed kit pulses a ring under the hunter every 1.1s.
+  The protocol shape is unchanged (no `Net.VERSION` bump).
+- **Sounds:** `pay_deadeye`, `pay_flashpoint`, `pay_called`, `pay_slam`, synthesized by
+  `tools/sfx_combat.py` (appended last, so no other sound changes).
+
+### Archer: Pin -> Focus -> Deadeye (on a Myth-style hunter-archer baseline)
+
+Owner direction (Nov 1): a hold-to-charge bow with stages you feel, a wall of falling arrows on E,
+three empowered arrows on R. Mechanics only; names, numbers and art are ours.
+
+| Slot | What it does |
+|---|---|
+| LMB (Longbow) | hold to draw: a creak and flash at stage 1 (0.4s, 30), a ping, flash and ring at full draw (0.9s, 60) that opens a 0.15s **perfect window**: let go inside it for +25% ("PERFECT", 75) |
+| RMB | **tap: Snare** (8, root 0.6; on the ground a Tripwire). **Hold: Heavy Shot**, charged 0.5s -> full at 1.1s: 16 -> 30, push 6 -> 12, pierces 2, a bigger arrow; driven into a wall within 3m it stuns 0.8 ("PINNED"). In the air: Plunge |
+| Dash | Grapple Arrow (unchanged) |
+| Passive | **Focus** -> **Deadeye** (below) |
+| E | **Arrow Rain**: lob a volley up to 9m; 0.35s later (the strip fills, soft-CC floor) a 6m x 2.2m line of arrows rains across your aim for 3.75s: 5 every 0.5s, slow 35%, blight 1s (healing barely takes). A steady patter while it falls. During it the tap snare roots 1.0 |
+| R | **Great Arrows** (0.5s fuse): for 6s your next 3 shots need no draw: great arrows that fly 22m, pierce everyone, knock back and hit 28 / 28 / 44 (the third a payoff hit, T4, stun 1.0 into a wall). Heavy twang and boom, recoil, a big flash |
+
+Snares (tap, Tripwire, Heavy Shot, the Great Arrow's wall stun) root or stun people; a snare or
+Heavy Shot that hits adds 40 Focus (driven into a wall fills it). At 100 Focus the **Deadeye is
+armed**: the next shot is drawn at once (+20% range) and, if it hits a **pinned** foe (rooted or
+stunned, or within 0.8s of it), a gold second hit lands: +18 damage, a crit, T4.
+
+- Tells: a lens glint at the bow from 50 Focus; at 100 a bright star with a light, a thin gold aim
+  line along the shot, and crosshairs over every pinned foe within 18m (everyone sees them); the
+  crosshair reads "DEADEYE READY" (or "GREAT ARROWS · n" during the ult).
+- Payoff: "DEADEYE", the arrow's line redrawn in gold, `pay_deadeye`, T4 hitstop and shake.
+- Numbers: Longbow Focus shot 60 + 18 = 78 into a rooted target. Note the existing combo system
+  (`Combos.payoff`) also boosts a hit on a stunned target, so a Deadeye on a wall-PINNED foe reads
+  about 108; it needs a full Heavy Shot into a wall first. Great Arrows 100 if all three land
+  (Volley was 30 + a root over 2s, but area); Arrow Rain ~35 over its life plus the slow and blight.
+- Bots: snare first when the target isn't pinned; loose the Deadeye when armed and they're pinned;
+  Arrow Rain across a target's path from 3-10m; Great Arrows at a rival in a long clear line, then
+  fire them through.
+- Retired: Flare Arrow (E), Skyfall Volley (R).
+
+### Mage: Rune -> detonate (Runeburst / Flashpoint), Hex, Blink and snap back
+
+Owner direction (Nov 1): the Mage felt too close to the Archer; make it a tricky, mobile spell
+duelist (LeBlanc-style combos; a Sinclair-style steerable RMB). Ideas only; our names and numbers.
+The §6.3 design above (Bolt/Lance, Sigil, Meteor) is superseded by this:
+
+| Slot | What it does |
+|---|---|
+| RMB | **Guided Bolt**: fires on the press (15 m/s, 2.2s); keep holding and it bends toward your cursor (6 rad/s), round cover onto a target. 10 damage, up to 22 after 1.6s in flight, a light slow; it **Runes** what it hits. A rising hum while it flies (remote players see its path as Net fx bolts). In the air: Starfall |
+| Passive | **Runes and Heat**: your next spell on a Runed foe (a Bolt, a Hex, an echo) **detonates** it: a **Runeburst**, 16 + root 0.5, T4. Casting builds Heat (Bolt 15, Hex 25); Overcharged (70+) a detonation is a **Flashpoint**: 30 + 14 to everyone within 2.6m, root 0.8, all the Heat spent with no Vent, the Bolt back. 100 Vents (the risk stays) |
+| E | **Hex**: a dodgeable bolt (20 m/s, 11m; a projectile, so it can be sidestepped or blocked) that turns a hunter into a harmless critter for 1.3s: half speed, no attacks, casts, dashes, gloves or glides; the model swaps for a hopping critter with a rune over it. Monsters are stunned 1s. On a Runed foe it detonates the Rune too (no root on top of the Hex) |
+| Dash | **Blink**: a 0.12s windup (the landing sigil shows), up to 5.5m through walls; the sigil left behind slows foes 0.6s later and for 3s a second dash **snaps you back** to it (free) |
+| R | **Encore** (0.55s fuse): two mirror images at your sides recast your last spell at full power, then echo every Bolt and Hex for 4s at 60% (their bolts steer with yours) |
+
+- Loop: Guided Bolt round a pillar (Rune) -> Hex them (detonates: Runeburst, then they're a critter)
+  -> Blink in, Bolt again; Overcharged, the detonation is a Flashpoint -> snap back out.
+- Tells: rune motes orbit the Mage (one per 20 Heat), white-hot when Overcharged; a rune ring over
+  every Runed foe (it throbs when the next detonation would be a Flashpoint); the crosshair reads
+  "RUNED · hit it again" / "OVERCHARGED: FLASHPOINT". Payoffs: "RUNEBURST" / "FLASHPOINT", T4,
+  `pay_flashpoint`.
+- Hex online: `Hex.apply` sends a Net event `["hex", nid, seconds]`; every game shows the critter,
+  the body's own game runs the rules. **Net.VERSION 0.4.0 -> 0.5.0** (a new event kind).
+- Bots: Guided Bolts steered onto the target (their aim follows it while they hold), Hex rival
+  hunters (always on a Runed one), Encore in range, Blink away when hurt and snap back once safe;
+  a hexed bot scurries away from its target.
+- Retired: Lance, Sigil (and the Sigil-based Flashpoint), Meteor.
+
+### Gunslinger: Chambers -> Called Shot
+
+Weapon hits load a chamber (one per 0.25s), a tap roll loads 2. At 6 the **Called Shot is armed**:
+the next Trick Shot (or Rail, or Recoil Shot) is a Called Shot: +70% (a Rail takes half, +35%), a
+crit, stun 0.4, T4 hitstop on its hits; when it lands the cylinder spins a full magazine in, so the
+stun is your window to unload. Quickdraw (E) speeds the loading and doubles the Trick Shot.
+
+- Tells: a gold six-pip cylinder over the hat fills pip by pip (everyone sees it) and spins at 6;
+  the gun glows gold with a light at the muzzle; "CALLED SHOT READY" pops with the reload click and
+  sits under the crosshair; the RMB slot gets the gold dot.
+- Payoff: a gold muzzle flare and hammer crack on the call, then on the hit "CALLED SHOT", the
+  round's line in gold, `pay_called` (a heavy round, a bell ting, the cylinder spinning), T4 shake.
+- Numbers: the Called multiplier was `(1 + 0.4) x 1.5 = 2.1x`; now 1.7x (a Rail 1.35x). Trick Shot
+  12 -> 20 called (was 25); a full Rail 34 -> 46 called (was 71); the two-target bounce case in the
+  check 50 -> 41.
+- Bots: a full cylinder taps a Called Shot within 9m; otherwise the Rail from range.
+
+### Bulwark: Block -> Guard -> Crushed (rebuilt on an Oath-style shield-tank baseline)
+
+Owner direction (Nov 1): base the kits on SUPERVIVE / League references, and make the Bulwark as
+close to Oath as possible; mechanics only, our own names, art, sounds and numbers. The §6.6 design
+above is superseded by this:
+
+| Slot | What it does |
+|---|---|
+| LMB (Tower Shield & Mace) | **tap: throw the mace** 9m (16, passes through foes); it lies where it lands for 6s and shows foes within 4.5m of it to your team; tap again and it comes back to you, hitting on the way (10). **Hold: Crushing Blow**, 14 -> 34 damage and knock 4 -> 12 over 1.25s (full: stun 0.4); its wind-down carries you forward 3-8 m/s, so a jump out of it rolls into a glide. (`ArchKit.lmb_override`: the kit runs this weapon's attack; the minigun Bulwark fires normally) |
+| RMB | **hold: raise the shield** (160 HP, regenerates 20/s after 2s down, broken = 3s lockout, you walk at 60%); **tap, or let go after a block: Bash** (2.6m cone, 12, push 9; you step into it). Guard 50+: **Shield Slam** (0.3s flare tell, 18, push 12, stun 0.6, spends 50) |
+| Dash | **Whirl**: a 3.6m spinning dash, foes along it knocked aside (6, push 7). **Shield up: Shield Charge**: 4.2m behind the shield, invulnerable for its length, 10 and push 11 |
+| Passive | **Guard**: blocked damage becomes Guard (1 per 2). **Crushed** (the payoff): a Bash, Shield Charge or full Crushing Blow that knocks a foe into terrain or another foe (within 1.5m behind them) stuns it 0.8 (+8 damage, T4), stuns the foe it hit 0.5, and heals you 14 |
+| E | **Mending Ground**: marks ground up to 7m away, or where the mace lies; 1s later it bursts: allies inside heal 26, your shield mends 60, foes inside are slowed |
+| R | **Fissure** (0.5s unstoppable fuse): a crack runs 14m forward at 40 m/s (walls, rocks and rises stop it): 8 and stun 0.6 to everyone it passes; 0.35s later the line erupts in 3 pulses 0.3s apart (9 + slow 0.45 each). All Guard goes in: +1 pulse per 50 |
+
+- Loop: raise the shield into their fire (Guard) -> Shield Charge or Slam them into a wall or into
+  their teammate -> Crushed (stun, heal) -> a full Crushing Blow or the Fissure on the stunned.
+  Throw the mace to scout a corner, then Mending Ground on it.
+- Tells: three rune pips over the helm (33/66/100 Guard); at 50 a gold crest light, the raised
+  shield burns gold, "SLAM READY" / "SHIELD SLAM READY". Payoff: "CRUSHED", `pay_slam`, T4.
+- Bots: shield toward whoever is shooting, Bash up close, Shield Charge / Whirl in from 1.5-4.5m,
+  Mending Ground when hurt or the shield is low, Fissure at 11m; LMB throws from range and winds
+  up Crushing Blows up close.
+- Retired: Interpose (ally leap), Rally Banner, Bastion.
+
+### Six RMBs, six input patterns (owner: "all the RMBs mostly feel the same")
+
+| Archetype | Input | Shape | Sound | Payoff |
+|---|---|---|---|---|
+| Thief | tap, then recast | a thrown knife; the recast teleports you behind the target | a throw, then a cloak snap | Marks; at 3 the knife Cashes In |
+| Archer | hold to charge, release | a heavy piercing arrow, knockback grows with the charge (0.5s -> 1.1s); tap drops a root snare | a creak rising to a ping, then a string-snap and a sniper boom | into a wall within 3m: PINNED (stun); feeds Focus for the Deadeye |
+| Mage | press to fire, hold to steer | a slow glowing bolt that bends toward your cursor round cover, harder the longer it flies | a hum that rises with travel time | Runes the target; the next spell detonates it |
+| Gunslinger | tap (hold = Rail) | a ricochet round off up to 2 walls and on to a second foe | a revolver crack, a hammer click, a ricochet whine | at 6 Chambers a Called Shot (stun, crit, reload) |
+| Juggernaut | tap (hold = leap) | an overhead smash cone; hold leaps into Earthshatter | a cleave and a ground thump | Enraged: Rage Smash |
+| Bulwark | hold to block, release to bash | a frontal shield wall (its own HP), then a forward bash cone you step into | a shield clang, then a plate slam | into a wall or another foe: Crushed (stun + heal) |
+
+### Holds and charges: the wind-up feel (shared, every archetype)
+
+`ArchKit._tick_charge` watches every hold a kit has (a charged RMB via `rmb_charge_full`, a bow
+draw, a melee charge such as the Bulwark's Crushing Blow, a held dash via `dash_charge`, e.g. the
+Juggernaut's Rampage) and gives it one language:
+
+- a rising wind-up voice in the archetype's own sound (`CHARGE_VOICE`: Thief swipe, Archer string
+  creak, Mage zap, Gunslinger cylinder, Juggernaut thump, Bulwark shield): ticks that climb in pitch
+  and volume and quicken as it fills;
+- a filling ring at the hunter (enemies see the hostile rim) and a glow growing at the hand, with
+  motes drawn inward;
+- a clear "full" tick: `ab_ready` plus the voice an octave up, a flash at the hand, a ring;
+- Net fx rings at the start and at full, so remote players read the wind-up;
+- a release punch scaled by the charge (camera punch 0.06-0.32, a muzzle burst above half, trauma
+  at full).
+
+The Archer's bow adds its own stage ticks and the perfect window; the Mage's Guided Bolt hold is a
+steer (its feedback is the bolt's rising hum). Covered by `--arena-check` (every archetype's hold:
+ring, full tick, release) and `--ability-check` (the Gunslinger's Rail as an archetype hold).
+
+### Rank previews: always the next rank
+
+Owner: "why does it show me rank 3 but not rank 2 when it's rank 1?" Every archetype's data now has
+`rank2` (a concrete line per slot, e.g. "cooldown 9s -> 8.1s, damage +15%") and `rank_next` (rank
+3: the cooldown and damage at rank 3 plus its special). `Arch.next_ranks(arch, slot, rank)` returns
+the next rank first, then rank 3 after it; the HUD ability tooltip ("Next · Rank 2: ..."), the
+rank line ("next rank: ...") and the kit card's detail page ("Ranks: Rank 2 ... Rank 3 ...") use it.
