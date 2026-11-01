@@ -84,6 +84,16 @@ docs/TONE_AND_THREATS.md and docs/POSITIONING.md.
   (safer outer islands, a dangerous core, the Walker's route, dark zones). Density target: you meet
   another squad every few minutes, not every few seconds. Bosses, vaults and caches roll per session; a
   few re-roll mid-session as events.
+- **Levels with late joiners (proposal, Nov 1):** keep SUPERVIVE-style in-run levels (level 1, one
+  ability, R at 6) but stop late arrivals from being hopelessly behind:
+  - *Level floor:* a squad arriving mid-session starts at a floor level that rises with session time
+    (e.g. +1 per ~4 min, capped at 5, so R at level 6 is always earned in the run).
+  - *Catch-up XP:* hunters below the session's median level earn bonus XP (e.g. x2, tapering to x1 as
+    they catch up).
+  - *Bounties:* knocking a higher-level hunter pays XP and loot by the level gap; the leaders are worth
+    hunting.
+  - *Soft landing:* drop waves come down over quieter regions with fresh caches nearby, and the Blight
+    ramps per squad (TONE_AND_THREATS §1b).
 - **Scoring:** no last squad standing. A run is measured by what you extract (value, Boki, kills,
   bosses), which feeds progression and any leaderboards.
 - **Offline/bots:** the single-player version runs the same session model with bot squads arriving in
