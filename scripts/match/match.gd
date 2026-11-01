@@ -716,7 +716,7 @@ func _spawn_hunters() -> void:
 					at = Vector3(si % world.w + 0.5 - sd.x * 1.5, 0, si / world.w + 0.5 - sd.y * 1.5)
 					at.y = world.ground_at(at.x, at.z)
 				player.teleport(at)
-				player.tonics = int(Save.d["items"].get("tonic", 0)) + 2; player.free_tonics = 2     # everyone sets out with a couple
+				player.tonics = mini(TONIC_CARRY, int(Save.d["items"].get("tonic", 0)) + 2); player.free_tonics = 2; tonic_stash_left = maxi(0, int(Save.d["items"].get("tonic", 0)) - (player.tonics - 2))     # everyone sets out with a couple, at most TONIC_CARRY in all; the rest stays home
 				if not opts.get("tutorial", false) and not opts.get("training", false):
 					player.rift_keys = int(Save.d["items"].get("rift_key", 0))     # your Rift Keys come with you (and go in your box if you die)
 				_apply_home_perks(player)
@@ -2594,6 +2594,8 @@ func sees(team_i: int, p: Vector3, crouched := false, revealed := false) -> bool
 var _vis_t := 0.0
 var crouch_on := false
 var _perk_keys_down := {}
+var tonic_stash_left := 0     # tonics left in your stash at home this run (added back to what you carry out)
+const TONIC_CARRY := 5        # tonics you can bring into a run (two free + up to three from your stash)
 var _vis_tex_done := false
 func _update_vision() -> void:
 	# the dimming outside your view cone, drawn by the toon shaders
@@ -3362,13 +3364,17 @@ func _gather_input() -> void:
 	else:
 		crouch_on = Input.is_action_pressed("crouch") and not paused
 	player.inp["crouch"] = crouch_on
-	if not perk_offer.is_empty() and not paused:
+	if not paused:
+		# 1-3 pick a perk while a choice is open. A key that picked one stays "used" until it's let
+		# go, so the same press doesn't also drink. (The release has to be noticed even after the
+		# choice closes: before, a pick left the key marked forever and the heal key stopped working.)
 		for pi in 3:
-			if Input.is_physical_key_pressed(KEY_1 + pi) and not _perk_keys_down.has(pi):
+			var down := Input.is_physical_key_pressed(KEY_1 + pi)
+			if not down:
+				_perk_keys_down.erase(pi)
+			elif not perk_offer.is_empty() and not _perk_keys_down.has(pi):
 				_perk_keys_down[pi] = true
 				choose_perk(pi)
-			elif not Input.is_physical_key_pressed(KEY_1 + pi):
-				_perk_keys_down.erase(pi)
 	# the kit: Q glove, E kin ability, C throw kin, R bond, 1 heal (the second kin ability, kin swap
 	# and the separate armor-kit key are retired)
 	if Input.is_action_just_pressed("base") and not paused and duel == null:
@@ -5252,7 +5258,7 @@ func _finish() -> void:
 		r["deaths"] = player.deaths
 		r["revives"] = player.revives
 		r["armor_tier"] = player.armor_tier
-		r["tonics"] = maxi(0, player.tonics - player.free_tonics)
+		r["tonics"] = maxi(0, player.tonics - player.free_tonics) + tonic_stash_left
 		if not opts.get("tutorial", false):
 			r["rift_keys"] = player.rift_keys if result.get("extracted", false) else 0
 		r["stats"] = player.stats.duplicate()
@@ -5321,7 +5327,7 @@ func _spawn_net_hunters(spots: Array, names: Array) -> void:
 		if peer == Net.me:
 			var rec: Dictionary = Save.active_kin()
 			player = make_hunter("P" + peer, t, String(r["cls"]), String(r["name"]), "local", rec, at, my_kit())
-			player.tonics = int(Save.d["items"].get("tonic", 0)) + 2; player.free_tonics = 2     # everyone sets out with a couple
+			player.tonics = mini(TONIC_CARRY, int(Save.d["items"].get("tonic", 0)) + 2); player.free_tonics = 2; tonic_stash_left = maxi(0, int(Save.d["items"].get("tonic", 0)) - (player.tonics - 2))     # everyone sets out with a couple, at most TONIC_CARRY in all; the rest stays home
 			_apply_home_perks(player)
 			if player.kin:
 				_apply_treat(player.kin)
