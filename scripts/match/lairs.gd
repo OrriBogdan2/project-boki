@@ -1263,6 +1263,10 @@ func bot_goal(h: Hunter, leaving: bool) -> Array:
 	if leaving or m.time < 25.0 or h.hp < h.max_hp * 0.55:
 		return []
 	if not a.has("boss_hunt"):
+		# a bot on its own (no squadmate left) waits for level 8 before it thinks about a boss: alone
+		# at level 2-6 they cracked a lair, got sealed in with it and were wiped (5 of 9 seeded simtests)
+		if h.lvl < 8 and not m.hunters.any(func(o): return o != h and o.team == h.team and not o.out):
+			return []
 		# stronger bots go after bosses more often
 		a["boss_hunt"] = randf() < 0.12 + 0.45 * float(a.get("skill", 0.5))
 	if not a["boss_hunt"]:
