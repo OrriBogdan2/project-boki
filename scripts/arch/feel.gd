@@ -267,6 +267,7 @@ const SWEETENER := {"venom": "k_venom", "spore": "k_spore", "gravity": "k_gravit
 const DASH_SOUND := {
 	"thief": [["swipe", 1.7, 0.0]], "archer": [["throw", 1.4, 0.0], ["whoosh", 1.3, 0.12]], "mage": [["portal", 1.7, 0.0]],
 	"gunslinger": [["dash", 1.1, 0.0], ["reload", 1.6, 0.08]], "juggernaut": [["charge", 0.6, 0.0]], "bulwark": [["shield", 0.7, 0.0], ["whoosh", 0.7, 0.05]],
+	"dolm": [["thump", 0.6, 0.0], ["charge", 0.8, 0.04]], "ostra": [["swap", 1.3, 0.0], ["hover", 1.6, 0.05]],
 }
 const MAX_VOICES := 4
 static var _voices := {}       # event key -> voices started this frame

@@ -614,7 +614,7 @@ class ArenaKeys extends Node:
 			KEY_N: a.cycle_bot()
 			KEY_O: a.toggle_cd()
 			KEY_U: a.toggle_ult()
-			KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7:
+			KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9:
 				var ids := Arch.ids()
 				var i := int(k - KEY_2)
 				if i < ids.size(): a.set_arch(String(ids[i]))

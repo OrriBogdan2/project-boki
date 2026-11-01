@@ -43,6 +43,8 @@ static func make(hunter: Hunter, arch_id: String) -> ArchKit:
 		"gunslinger": k = GunslingerKit.new()
 		"juggernaut": k = JuggernautKit.new()
 		"bulwark": k = BulwarkKit.new()
+		"dolm": k = DolmKit.new()
+		"ostra": k = OstraKit.new()
 		_: return null
 	k.h = hunter
 	k.m = hunter.m
@@ -866,7 +868,7 @@ static func solid_mat(c: Color) -> StandardMaterial3D:
 ## [sound, pitch at 0, pitch at full] of each archetype's wind-up.
 const CHARGE_VOICE := {
 	"thief": ["swipe", 1.3, 2.3], "archer": ["click", 0.8, 2.0], "mage": ["zap", 0.7, 1.9],
-	"gunslinger": ["reload", 0.8, 1.8], "juggernaut": ["thump", 0.55, 1.3], "bulwark": ["shield", 0.55, 1.2],
+	"gunslinger": ["reload", 0.8, 1.8], "juggernaut": ["thump", 0.55, 1.3], "bulwark": ["shield", 0.55, 1.2], "dolm": ["thump", 0.5, 1.2], "ostra": ["hover", 0.8, 1.9],
 }
 var chg := {}                  # the hold being charged: {src, k, full, tick, ring, glow}
 var charge_last := 0.0         # how far the last hold got when it was let go (tests)

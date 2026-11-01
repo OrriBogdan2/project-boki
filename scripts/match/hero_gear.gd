@@ -29,6 +29,8 @@ static func _tp(c: Dictionary, key: String, u0: float, u1: float, v0: float, v1:
 static func cover(arch: String, bare: bool) -> String:
 	if bare:
 		return ""
+	if arch in ["dolm", "ostra"]:
+		return GearPair.cover(arch, bare)
 	return {"thief": "hood", "archer": "", "mage": "hat", "gunslinger": "hat", "juggernaut": "helm", "bulwark": "helm"}.get(arch, "")
 
 static func dress(arch: String, c: Dictionary) -> void:
@@ -40,6 +42,8 @@ static func dress(arch: String, c: Dictionary) -> void:
 		"gunslinger": _gunslinger(c)
 		"juggernaut": _juggernaut(c)
 		"bulwark": _bulwark(c)
+		"dolm": GearPair.dolm(c)
+		"ostra": GearPair.ostra(c)
 	if not bool(c["bare"]):
 		_ear_cuffs(c, arch)
 
