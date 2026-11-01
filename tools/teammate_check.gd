@@ -271,7 +271,7 @@ func _caring() -> void:
 	m.revive_hunter(P, null)
 	k.comp.on_boss_kill("the Warden", P.pos)
 	ok(k.comp.history.any(func(e): return e["cat"] == "boss_kill") and k.events.any(func(e): return e["kind"] == "boss_kill" and e.get("boss", "") == "the Warden"), "celebrates a boss kill, and remembers which")
-	k.faint()
+	k.go_down()
 	k.state = "shoulder"; k.hp = k.max_hp * 0.3
 	m._extract(P, "uplink", "test")
 	ok(k.comp.history.any(func(e): return e["cat"] == "extract") and k.events.any(func(e): return e["kind"] == "carried_out" and String(e.get("place", "")) != ""), "celebrates extraction; hurt, it remembers you carried it out")
