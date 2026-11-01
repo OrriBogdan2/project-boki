@@ -10,6 +10,7 @@ func show_result(r: Dictionary) -> void:
 	Sfx.play_ambience("")
 	shown_at = Time.get_ticks_msec()
 	var s := Game.apply_result(r)
+	s["kin_say"] = String(r.get("kin_say", ""))     # what your Boki said as the run ended
 	var bg := ColorRect.new(); bg.color = UI.BG; bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT); add_child(bg)
 	_stage(r, s)
 	var won: bool = r.get("extracted", false)
@@ -254,6 +255,10 @@ func _kin_card(s: Dictionary) -> Control:
 	trow.add_child(bar_box)
 	var ml := UI.label("%s  (%+d)" % [mood, int(round(td))] if absf(td) >= 0.5 else mood, 14, UI.GOOD if td > 0.5 else (Color("ffb36a") if td < -0.5 else UI.MUTED))
 	trow.add_child(ml)
+	if String(s.get("kin_say", "")) != "":
+		var say := UI.label("\u201c%s\u201d" % String(s["kin_say"]), 16, UI.INK)
+		say.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		kv.add_child(say)
 	var tw := create_tween()
 	tw.tween_interval(1.0)
 	tw.tween_method(func(x: float): frac["v"] = x; bar_box.queue_redraw(), was, now, 0.9).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)

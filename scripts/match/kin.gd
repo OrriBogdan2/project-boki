@@ -24,6 +24,8 @@ var speed := 6.5
 var atk_cd := 0.0
 var lunge_t := 0.0
 var target: Ent = null
+var chase_stall := 0.0          # seconds spent chasing a target without getting any closer (a ledge, a wall in the way)
+var ignore_until := {}          # Ent -> m.time: targets it gave up on, left alone for a few seconds
 var fly: Dictionary = {}          # thrown, leaping or rushing
 var pend_skill := Vector3.INF     # ability to cast when it lands
 var pend_slot := ""
@@ -72,6 +74,18 @@ var steal_owner_nid := ""
 var steal_team := -9
 var ring: MeshInstance3D = null   # the team-coloured ring under it
 var shell_fx: Node3D = null       # the glow around its hunter while fused
+var comp: KinCompanion = null     # the teammate side: callouts, caring, where it walks (owned kin only)
+# walking at your heel: while it's "on your shoulder" (carried, thrown from there) and you're on the
+# ground, it hops down and trots beside you instead, and hops back up when you jump, dash or glide.
+# Only where it's drawn changes; everything else still treats it as carried.
+var heel_k := 0.0                 # 0 riding, 1 down at your heel
+var heel_pos := Vector3.INF
+var heel_prev := Vector3.INF
+var heel_face := 0.0
+var heel_moving := false
+var heel_t := 0.0                 # how long you've been steady on your feet
+var heel_spot_c := Vector3.INF
+var heel_spot_t := 0.0
 static var XRAY: Shader = preload("res://shaders/kin_aura_xray.gdshader")
 
 func init_kin(match_node: Node, id: String, species_id: String, record: Dictionary, owner_hunter: Hunter) -> void:
@@ -128,6 +142,8 @@ func init_kin(match_node: Node, id: String, species_id: String, record: Dictiona
 		if ks.auto != "": runner.set_slot("k2", KinLib.ability(ks.auto))
 	runner.rate = 1.0 / maxf(0.3, cd_mult)
 	brain = KinTactics.new(self)
+	if owner_h:
+		comp = KinCompanion.new(self)
 	set_model(Models.kin(species, rec))
 	ring = MeshInstance3D.new()
 	ring.mesh = Models.flat_quad(1.0)
@@ -245,6 +261,8 @@ func _launch(p: Vector3) -> void:
 	var dive := carry_style() == "perch"
 	# a perched kin is thrown as a dive: up off your pack, then straight down onto the spot
 	var start := owner_h.pos + Vector3(0, 3.4 if dive else 1.5, 0)
+	if heel_k >= 0.5 and heel_pos != Vector3.INF and not dive:
+		start = heel_pos + Vector3(0, 0.4, 0)     # it jumps from where it's standing at your heel
 	var dist := Vector2(p.x - start.x, p.z - start.z).length()
 	var maxd := 11.0 if dive else 9.0
 	var d2 := Vector2(p.x - start.x, p.z - start.z)
@@ -483,6 +501,9 @@ func sim(dt: float) -> void:
 			net_follow(dt)
 		elif owner_h:
 			pos = owner_h.pos + Vector3(0, 1.5, 0); prev = pos
+		if comp:
+			comp._decay(dt)
+		_heel_tick(dt)
 		return
 	if hesitate_t > 0.0:
 		hesitate_t -= dt
@@ -518,9 +539,69 @@ func sim(dt: float) -> void:
 				hp = minf(max_hp, hp + max_hp * 0.02 * dt)   # resting in your satchel
 	if owner_h and not owner_h.out and state in ["shoulder", "active"] and brain:
 		brain.think_abilities(dt)
-	if owner_h and not owner_h.out and state in ["shoulder", "active", "returning"] and think_t <= 0.0:
-		think_t = 0.5
-		_callouts()
+	if comp:
+		comp.tick(dt)
+	_heel_tick(dt)
+
+## Down at your heel or up on your shoulder (only how it's drawn; see heel_k).
+func _heel_tick(dt: float) -> void:
+	heel_prev = heel_pos
+	var o := owner_h
+	var want := false
+	if state == "shoulder" and o and comp and carry_style() in ["shoulder", "perch"] and giant.is_empty() \
+			and not o.out and not o.extracted and not o.dropping and not o.riding and not o.downed:
+		var steady: bool = o.grounded and not o.gliding and o.roll_t <= 0.0 and o.pad.is_empty() and o.grap.is_empty()
+		heel_t = heel_t + dt if steady else 0.0
+		want = heel_t > 0.3 and settle >= 1.0 and hesitate_t <= 0.0
+	else:
+		heel_t = 0.0
+	if want:
+		heel_spot_t -= dt
+		if heel_spot_t <= 0.0 or heel_spot_c == Vector3.INF:
+			heel_spot_t = 0.15
+			heel_spot_c = comp.heel_spot()
+		if heel_spot_c == Vector3.INF:
+			want = false
+	heel_moving = false
+	if want:
+		var tgt := heel_spot_c
+		if heel_pos == Vector3.INF or heel_k <= 0.0:
+			heel_pos = tgt
+		var to := Vector2(tgt.x - heel_pos.x, tgt.z - heel_pos.z)
+		var step := (maxf(Vector2(o.vel.x, o.vel.z).length(), speed * 0.6) + 3.0) * dt
+		if to.length() > 0.08:
+			var mv := to.normalized() * minf(to.length(), step)
+			heel_pos += Vector3(mv.x, 0, mv.y)
+			heel_moving = to.length() > 0.25
+			if heel_moving:
+				heel_face = lerp_angle(heel_face, atan2(-to.x, -to.y), minf(1.0, dt * 12.0))
+		var g: float = m.world.ground_at(heel_pos.x, heel_pos.z)
+		heel_pos.y = g if g > World.VOID + 1.0 and not m.world.is_void(heel_pos.x, heel_pos.z) else tgt.y
+		if Vector2(heel_pos.x - o.pos.x, heel_pos.z - o.pos.z).length() > 3.8:
+			want = false        # fell behind (a dash, a jump pad): back up onto the shoulder
+		elif not heel_moving:
+			# standing about: it looks where you look, or at what it's on about
+			var lk: Vector3 = comp.look if comp.look != Vector3.INF else (o.inp.get("aim", o.pos) if o.inp else o.pos)
+			var ld := Vector2(lk.x - heel_pos.x, lk.z - heel_pos.z)
+			if ld.length() > 0.4:
+				heel_face = lerp_angle(heel_face, atan2(-ld.x, -ld.y), minf(1.0, dt * 6.0))
+	heel_k = move_toward(heel_k, 1.0 if want else 0.0, dt * 4.0)
+	if heel_k <= 0.0:
+		heel_pos = Vector3.INF
+		heel_prev = Vector3.INF
+
+## Where its speech bubble sits.
+func bubble_at() -> Vector3:
+	if state == "shoulder" and owner_h and heel_k < 0.5:
+		return owner_h.position + Vector3(0, 2.3, 0)
+	return position + Vector3(0, 1.2, 0)
+
+## Where it is for the eye (down at your heel counts), for tests and callers that care.
+func seen_pos() -> Vector3:
+	if state == "shoulder" and owner_h:
+		var top := owner_h.pos + Vector3(0, 1.5, 0)
+		return top.lerp(heel_pos, heel_k) if heel_pos != Vector3.INF else top
+	return pos
 
 func _sim_shoulder(dt: float) -> void:
 	if owner_h.out or owner_h.extracted:
@@ -668,6 +749,14 @@ func _sim_active(dt: float) -> void:
 		var reach: float = sp["range"] + target.r
 		if d > reach * 0.8:
 			wish = to.normalized() * spd
+			# chasing something it can't get to (up a ledge, round a wall): give up on it for a while
+			# and come back to you, instead of standing there pressing into the wall
+			chase_stall = chase_stall + dt if Vector2(vel.x, vel.z).length() < spd * 0.35 and spd > 0.0 else 0.0
+			if chase_stall > 0.8:
+				chase_stall = 0.0
+				ignore_until[target] = m.time + 5.0
+				target = null
+				wish = Vector2.ZERO
 		if d < reach and atk_cd <= 0.0 and absf(target.pos.y - pos.y) < 1.5:
 			atk_cd = 0.95
 			lunge_t = 0.15
@@ -678,23 +767,43 @@ func _sim_active(dt: float) -> void:
 			melee_n += 1
 			fire_trigger("on_hit", {"at": tp})
 	elif owner_h:
-		# no fight nearby: hang around the owner, closer the more loyal it is
+		# no fight for it: back to your side like a teammate, at your heel or between you and
+		# whatever's close; it hops onto your shoulder if you glide off
 		var to := Vector2(owner_h.pos.x - pos.x, owner_h.pos.z - pos.z)
-		if to.length() > brain.idle_radius() + 1.0:
+		if owner_h.gliding and to.length() > 2.5:
+			state = "returning"
+			return
+		var spot: Vector3 = comp.heel_spot() if comp else Vector3.INF
+		if spot != Vector3.INF and to.length() < 8.0:
+			# keep pace like a teammate: move with you (your velocity) plus a pull toward the heel spot.
+			# Chasing the spot at its own run speed alone left it trailing ~3.5m behind a hunter who
+			# runs faster than it does (archetype paces, hastes, dash carry)
+			var ts := Vector2(spot.x - pos.x, spot.z - pos.z)
+			var ov := Vector2(owner_h.vel.x, owner_h.vel.z)
+			if ts.length() > 0.5 or ov.length() > 0.3:
+				wish = (ov + ts * HEEL_PULL).limit_length(maxf(spd * 1.45, ov.length() * 1.3))
+				if root_t > 0.0 or stun_t > 0.0: wish = Vector2.ZERO
+		elif to.length() > brain.idle_radius() + 1.0:
 			wish = to.normalized() * spd
 		if to.length() > 6.0 and not walkable_to(owner_h.pos):
 			state = "returning"
+		elif to.length() > 8.0:
+			state = "returning"      # well off (after a fight): run back hard, or leap, rather than amble
 	_ground_move(wish, dt)
+
+const HEEL_PULL := 4.0     # 1/s: how hard an out-of-place kin closes on its heel spot, on top of your pace
 
 func _ground_move(wish: Vector2, dt: float) -> void:
 	var hv := Vector2(vel.x, vel.z)
 	var k := 12.0 if grounded else 2.0
-	if hv.length() > speed * 1.3:
+	# speed above a run (a knock, a lunge) eases off slowly; keeping pace with a fast hunter isn't that
+	var run_cap := maxf(speed * 1.3, wish.length() * 1.05)
+	if hv.length() > run_cap:
 		k = 3.0 if grounded else 0.6
 	hv += (wish - hv) * (1.0 - exp(-k * dt))
 	# don't walk off edges on purpose
 	var ahead := Vector2(pos.x, pos.z) + hv.normalized() * (r + 0.25)
-	if grounded and hv.length() <= speed * 1.3 and wish.length() > 0.1 and m.world.is_void(ahead.x, ahead.y):
+	if grounded and hv.length() <= run_cap and wish.length() > 0.1 and m.world.is_void(ahead.x, ahead.y):
 		hv = Vector2.ZERO
 	vel.x = hv.x; vel.z = hv.y
 	slide(dt)
@@ -881,33 +990,7 @@ func hurt(d: float, by: Ent, opts := {}) -> float:
 			return 0.0
 	return super.hurt(d, by, opts)
 
-# ------------------------------------------------------------------ callouts
-func _callouts() -> void:
-	var range_c := 13.0 + t("curiosity") * 6.0
-	var cam: Node = m.cam
-	for f in m.hunters:
-		if f.team == team or not f.targetable():
-			continue
-		var d: float = owner_h.flat_dist(f)
-		if d > range_c or callout_seen.has(f.nid) and m.time - float(callout_seen[f.nid]) < 14.0:
-			continue
-		if owner_h.is_local() and cam and cam.on_screen(f.pos):
-			callout_seen[f.nid] = m.time
-			continue
-		callout_seen[f.nid] = m.time
-		if owner_h.is_local():
-			bark("callout", m.direction_word(owner_h.pos, f.pos))
-			m.ping(f.pos, Color("ff8a6a"))
-		return
-	for wk in m.kins:
-		if not wk.is_wild() or wk.dead or callout_seen.has(wk.nid):
-			continue
-		if owner_h.flat_dist(wk) < range_c * 0.8:
-			callout_seen[wk.nid] = m.time
-			if owner_h.is_local():
-				bark("wild", Data.KIN[wk.species]["name"])
-				m.ping(wk.pos, Color("9fe8ff"))
-			return
+# (callouts, caring and where it walks beside you live in KinCompanion)
 
 # ------------------------------------------------------------------ visuals
 func render(delta: float, alpha: float) -> void:
@@ -953,9 +1036,18 @@ func render(delta: float, alpha: float) -> void:
 		body.position.y = sin(m.time * 6.0) * 0.04
 		body.rotation.x = 0.0
 		return
-	model.set_meta("kstate", "perch" if state == "shoulder" else ("attack" if lunge_t > 0.0 else ""))
+	model.set_meta("kstate", "perch" if state == "shoulder" and heel_k < 0.5 else ("attack" if lunge_t > 0.0 else ""))
+	# body language (KinPuppet): growl, point, whine, cheer...
+	var pose_now: String = comp.pose if comp else ""
+	if state == "reviving" and comp and pose_now == "":
+		pose_now = "nudge"
+	model.set_meta("pose", pose_now)
+	model.set_meta("happy", pose_now in ["cheer", "beckon"])
 	if state == "shoulder" and owner_h and owner_h.model and carry_style() == "mount" and not owner_h.gliding:
 		_render_mount(delta, body)
+		return
+	if state == "shoulder" and owner_h and owner_h.model and heel_k > 0.0 and heel_pos != Vector3.INF:
+		_render_heel(delta, alpha, body)
 		return
 	if state == "shoulder" and owner_h and owner_h.model and carry_style() != "shoulder":
 		# perched on the pack (or a mount curled up into a ball on your back while you glide)
@@ -980,6 +1072,13 @@ func render(delta: float, alpha: float) -> void:
 		body.rotation.x = 0.0
 		body.rotation.y = peek * 0.7
 		body.rotation.z = -nuz * 0.35 + sin(m.time * 9.0) * 0.06 * nuz
+		if comp and comp.look != Vector3.INF:
+			# turned on your shoulder toward what it's on about
+			var ld := Vector2(comp.look.x - global_position.x, comp.look.z - global_position.z)
+			if ld.length() > 0.4:
+				body.rotation.y = clampf(angle_difference(model.rotation.y, atan2(-ld.x, -ld.y)), -1.6, 1.6)
+		if comp and comp.pose == "cheer":
+			body.position.y += absf(sin(m.time * 11.0)) * 0.12
 		return
 	var gs := 1.0
 	model.scale = Vector3.ONE * 0.95 * float(model.get_meta("evo_scale", 1.0)) * gs
@@ -998,6 +1097,74 @@ func render(delta: float, alpha: float) -> void:
 		body.rotation.x = -0.4 if lunge_t > 0.0 else 0.0
 	if state == "flying" and not fly.get("rush", false):
 		body.rotation.x += delta * 14.0
+	if state in ["active", "reviving"]:
+		_render_attention(delta, body)
+
+## Down at its hunter's heel (or hovering at their flank, for a percher): the hop down from the
+## shoulder and back up is the blend between the two spots, with an arc.
+func _render_heel(delta: float, alpha: float, body: Node3D) -> void:
+	var o := owner_h
+	var perch := carry_style() == "perch"
+	var top: Vector3
+	var top_s: float
+	if perch:
+		var torso: Node3D = o.model.get_node("Rig/Torso")
+		top = torso.global_transform * Vector3(0, 0.92, 0.3)
+		top_s = 0.62
+	else:
+		top = (o.model.get_node("Rig/Torso/Shoulder") as Node3D).global_position
+		top_s = 0.55
+	var hp := heel_prev.lerp(heel_pos, alpha) if heel_prev != Vector3.INF else heel_pos
+	var low := hp + Vector3(0, 1.1 if perch else 0.0, 0)
+	# a little show-and-tell for the tutorial: a dash, a jump, a hop
+	if comp and comp.demo.size() > 0:
+		var dk := clampf(float(comp.demo["t"]) / 0.9, 0.0, 1.0)
+		var dd: Vector2 = comp.demo.get("dir", Vector2(0, -1))
+		match String(comp.demo["kind"]):
+			"dash":
+				var sd: Vector2 = Vector2(-dd.y, dd.x) * comp.side
+				low += Vector3(sd.x, 0, sd.y) * sin(dk * PI) * 2.2
+				if dk < 0.1 and m.fx: m.fx.dust(hp, 4)
+			"jump":
+				low += Vector3(dd.x, 0, dd.y) * sin(dk * PI) * 1.2 + Vector3(0, sin(dk * PI) * 1.8, 0)
+			"hop":
+				low += Vector3(0, absf(sin(dk * PI * 2.0)) * 0.45, 0)
+	var hk := heel_k
+	global_position = top.lerp(low, hk) + Vector3(0, sin(hk * PI) * 0.7, 0)
+	model.rotation.y = lerp_angle(o.face, heel_face, hk)
+	var evo := float(model.get_meta("evo_scale", 1.0))
+	model.scale = Vector3.ONE * lerpf(top_s * minf(evo, 1.2), 0.95 * evo, hk)
+	if heel_moving:
+		hop_ph += delta * 6.0
+	body.position.y = absf(sin(hop_ph)) * (0.12 if heel_moving else 0.0)
+	body.rotation.x = 0.0
+	body.rotation.z = lerpf(body.rotation.z, 0.0, minf(1.0, delta * 8.0))
+	body.rotation.y = 0.0
+	_render_attention(delta, body)
+
+## Where its head is: turned toward what it's calling out (or what you're aiming at), bouncing
+## when it cheers, pulled back in a flinch.
+func _render_attention(delta: float, body: Node3D) -> void:
+	if comp == null:
+		return
+	var lk: Vector3 = comp.look
+	if lk == Vector3.INF and owner_h and owner_h.inp and state == "shoulder":
+		lk = owner_h.inp.get("aim", Vector3.INF)
+	if lk != Vector3.INF:
+		var ld := Vector2(lk.x - global_position.x, lk.z - global_position.z)
+		if ld.length() > 0.4:
+			var want := clampf(angle_difference(model.rotation.y, atan2(-ld.x, -ld.y)), -1.3, 1.3)
+			body.rotation.y = lerp_angle(body.rotation.y, want, minf(1.0, delta * 10.0))
+	match comp.pose:
+		"cheer":
+			body.position.y += absf(sin(m.time * 11.0)) * 0.22
+		"flinch":
+			body.position.y += 0.06
+			body.rotation.x = -0.35
+		"growl", "guard":
+			body.rotation.x = 0.12
+		"point", "alert":
+			body.rotation.x = -0.15
 
 ## How high the rider sits on a mount (the hunter's model is raised this much).
 func ride_height() -> float:

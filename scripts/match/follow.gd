@@ -66,6 +66,7 @@ static func spawn(m, h, rec: Dictionary, at: Vector3) -> Kin:
 	k.init_kin(m, "%s|f%d" % [h.nid, n], String(rec["species"]), rec, h)
 	k.role = "follow"
 	k.state = "follow"
+	k.comp = null        # it scouts on its own (_scout); your partner stays the one that talks to you
 	m.add_child(k)
 	k.teleport(at)
 	m.kins.append(k)
