@@ -855,3 +855,35 @@ chest) and the merge starts on the same frame the ult fires, with the BONDED col
 
 An ult that needs targets (Heist, Last Round) checks for them before the fuse, so a fuse never
 fizzles; if everyone escapes during it, almost all of the cooldown comes back.
+
+## Kit loops: every archetype at the Thief / Juggernaut bar (kits4, Nov 1)
+
+The Thief (Marks -> Knife ready at 3 -> Cash In) and the Juggernaut (Rage -> Enraged -> Rage Smash)
+set the bar for "oomph": one resource that the kit's own abilities build, a hunter that visibly
+changes when the payoff is armed, and a named payoff that lands with T4 hitstop (the hit carries
+`payoff: true`), a T4 shake, its own synthesized sound, VFX and a camera punch. The other four now
+follow the same shape, through shared helpers in `ArchKit` (`armed_fx`, `payoff_fx`, `self_pips`,
+`net_pulse`, `net_ring`/`net_bolt`, `terrain_behind`, `ready_label`, `e_payoff_ready`, `teardown`):
+
+- **HUD:** the resource bar and crosshair arc as before, plus a pulsing label under the crosshair
+  while the payoff is armed (`ready_label`) and the gold "ready" dot on the slot the payoff lives on.
+- **Remote players** (whose games don't run your kit): the armed moment and every payoff send the
+  existing Net `fx` ring / bolt events, and an armed kit pulses a ring under the hunter every 1.1s.
+  The protocol shape is unchanged (no `Net.VERSION` bump).
+- **Sounds:** `pay_deadeye`, `pay_flashpoint`, `pay_called`, `pay_slam`, synthesized by
+  `tools/sfx_combat.py` (appended last, so no other sound changes).
+
+### Archer: Pin -> Focus -> Deadeye
+
+Snares (tap, Tripwire, Pinning Shot, the Volley's last wave) root people; a snare or Pinning Shot
+that hits adds 40 Focus (a Pin into a wall fills it). At 100 Focus the **Deadeye is armed**: the
+next shot is drawn at once (+20% range) and, if it hits a **pinned** foe (rooted or stunned, or
+within 0.8s of it), a gold second hit lands: +18 damage, a crit, T4.
+
+- Tells: a lens glint at the bow from 50 Focus; at 100 a bright star with a light, a thin gold aim
+  line along the shot, and crosshairs over every pinned foe within 18m (everyone sees them);
+  "DEADEYE READY" pops over the archer (at most every 2.5s) and under the crosshair.
+- Payoff: "DEADEYE", the arrow's line redrawn in gold, `pay_deadeye`, T4 hitstop and shake.
+- Numbers: Longbow Focus shot 60 + 18 = 78 into a pinned target (a sniper 36 + 18); no cooldown
+  refund, so it's at most about one per snare charge (2 per 9s) and roots have diminishing returns.
+- Bots: snare first when the target isn't pinned; loose the Deadeye when it's armed and they're pinned.

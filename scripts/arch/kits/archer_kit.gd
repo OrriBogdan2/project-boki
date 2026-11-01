@@ -2,6 +2,10 @@ class_name ArcherKit
 extends ArchKit
 ## Archer (light): Grapple Arrow, Focus, Snare (Tripwire, Pinning Shot, Plunge, seeking in the
 ## Flare, rooted harder at full Focus), Flare Arrow, Skyfall Volley. docs/ARCHETYPES.md §6.2.
+##
+## The loop (kits4): snares root (Pin) and feed Focus -> full Focus arms the Deadeye (a lens glint and
+## a thin aim line everyone sees, crosshairs over every pinned foe) -> the next shot is drawn at once,
+## and into a rooted or stunned foe it's a Deadeye: a gold payoff hit with T4 hitstop and its own sound.
 
 var flare := {}                # the live Flare zone {pos, r, t}
 var trips: Array = []          # our live Tripwires (verbs trap dictionaries)
@@ -9,20 +13,74 @@ var pin_tele: Node3D = null    # the Pinning Shot's lane while held
 var volley := {}
 var high_t := 0.0              # re-checks high ground now and then
 var on_high := false
+var loosed := 0.0              # a Focus shot is in the air until this time (its hit can be a Deadeye)
+var pin_until := {}            # foe instance id -> [ent, time]: rooted or stunned (plus a short grace)
+var armed_at := -9.0           # the last "DEADEYE READY" pop (rate-limited)
+var was_full := false
+var glint: Node3D = null       # the lens glint at the bow and the thin aim line (full Focus)
+var reticles := {}             # foe instance id -> node: crosshairs over pinned foes while Deadeye is armed
+var deadeyes := 0              # Deadeyes landed (tests, demo)
 
 func full_ready() -> bool:
 	return res >= res_max() - 0.01
 
 func res_text() -> String:
-	return "%d" % int(res)
+	return "READY" if full_ready() else "%d" % int(res)
+
+func ready_label() -> String:
+	return "DEADEYE READY" if full_ready() else ""
+
+## Focus from play (a snare that roots, a Pin): the out-of-combat clock doesn't apply to Focus.
+func add_focus(v: float) -> void:
+	add_res(v)
 
 ## A full Focus makes the next shot fully drawn or aimed at once, with +20% range (Hunter.fire reads it).
+## The shot stays "loosed" for a moment: if it hits a pinned foe it's a Deadeye.
 func take_focus_shot() -> bool:
 	if res < res_max() - 0.01:
 		return false
 	res = 0.0
-	m.fx.flash(h.pos + Vector3(h.aim_dir().x * 0.6, 1.0, h.aim_dir().y * 0.6), res_col(), 0.5, 0.08)
+	was_full = false
+	loosed = m.time + float(res_def().get("window", 1.2))
+	var d := h.aim_dir()
+	m.fx.flash(h.pos + Vector3(d.x * 0.6, 1.0, d.y * 0.6), res_col(), 0.8, 0.08)
+	m.fx.ring(h.pos + Vector3(d.x * 0.6, 1.0, d.y * 0.6), 0.6, res_col(), 0.15)
+	m.sfx("rail", h.pos, -9.0 if h.is_local() else -12.0, 1.7)       # the string's snap
 	return true
+
+## A rooted or stunned foe (anyone's root counts), or one that was a moment ago.
+func pinned(t: Ent) -> bool:
+	if t == null or not is_instance_valid(t) or t.dead:
+		return false
+	if t.root_t > 0.0 or t.stun_t > 0.0:
+		return true
+	var e: Array = pin_until.get(t.get_instance_id(), [])
+	return not e.is_empty() and float(e[1]) > m.time
+
+func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
+	if loosed <= 0.0 or t == null or t.team == h.team:
+		return
+	if String(o.get("src", "")) != "shot" or o.has("ab"):
+		return
+	loosed = 0.0
+	if pinned(t):
+		var tgt := t
+		m.later(0.02, func(): if is_instance_valid(h) and is_instance_valid(tgt) and not tgt.dead: _deadeye(tgt))
+
+## Deadeye: the Focus shot found a pinned foe. A second, gold hit (a payoff: T4 hitstop, a crit), the
+## arrow's line drawn in gold, its own sound, the T4 shake and a camera punch along the shot.
+func _deadeye(t: Ent) -> void:
+	var rd := res_def()
+	var dir := h.dir_to(t)
+	var gold := Color("ffe27a")
+	t.hurt(float(rd.get("deadeye", 18.0)) * power("sec"), h, {"src": "abil", "ab": "utility", "tags": ["utility", "deadeye"], "payoff": true, "crit": true, "kb": dir * 5.0})
+	deadeyes += 1
+	m.fx.bolt(h.pos + Vector3(0, 1.2, 0), t.pos + Vector3(0, 1.0, 0), gold)
+	m.fx.bolt(h.pos + Vector3(0, 1.25, 0), t.pos + Vector3(0, 1.05, 0), Color(1, 1, 1, 0.8))
+	m.fx.burst(t.pos + Vector3(0, 1.0, 0), res_col(), 18, 9.0, 0.4, 0.0, 1.0, Vector3(dir.x, 0.2, dir.y), 25.0)
+	payoff_fx(t.pos, "DEADEYE", gold, "pay_deadeye", dir, t)
+	net_bolt(h.pos + Vector3(0, 1.2, 0), t.pos + Vector3(0, 1.0, 0), gold)
+	CombatBus.ability_used.emit(h, "deadeye", "secondary")
 
 func _tick(dt: float) -> void:
 	var rd := res_def()
@@ -38,6 +96,23 @@ func _tick(dt: float) -> void:
 		add_res(res_max() / float(rd.get("sneak_t", 2.8)) * k * dt)
 	elif h.grounded and Vector2(h.vel.x, h.vel.z).length() > 2.5:
 		add_res(-float(rd.get("run_drain", 60.0)) * dt)
+	if loosed > 0.0 and m.time > loosed:
+		loosed = 0.0
+	# pinned foes: rooted or stunned now, and for a short grace after (the Deadeye can still land)
+	var grace := float(rd.get("pin_grace", 0.8))
+	for f in m.foes_of(h.team):
+		if (f.root_t > 0.0 or f.stun_t > 0.0) and h.flat_dist(f) < 24.0:
+			pin_until[f.get_instance_id()] = [f, m.time + grace]
+	for key in pin_until.keys():
+		if float(pin_until[key][1]) <= m.time or not is_instance_valid(pin_until[key][0]): pin_until.erase(key)
+	var full := full_ready()
+	if full and not was_full and m.time - armed_at > 2.5:
+		armed_at = m.time
+		armed_fx("DEADEYE READY", "")
+	was_full = full
+	_tick_glint(dt)
+	_tick_reticles()
+	net_pulse(dt, full)
 	trips = trips.filter(func(t): return m.verbs.traps.has(t))
 	if not flare.is_empty():
 		flare["t"] = float(flare["t"]) - dt
@@ -56,6 +131,91 @@ func _high_ground() -> bool:
 		var g: float = m.world.ground_at(q.x, q.z)
 		if g <= World.VOID + 1.0 or g < gy - 0.9: lower += 1
 	return lower >= 3
+
+## The Focus tell on the hunter (everyone sees it): a lens glint at the bow that brightens from 50,
+## and at 100 a bright star with a light and a thin aim line along the shot.
+func _tick_glint(_dt: float) -> void:
+	var f := res_frac()
+	if glint == null or not is_instance_valid(glint):
+		glint = own_node()
+		var star := MeshInstance3D.new()
+		star.name = "Star"
+		star.mesh = Models.sphere(0.16, 10)
+		star.material_override = Models.glow_mat(Color(res_col(), 1.0))
+		star.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		glint.add_child(star)
+		var lt := OmniLight3D.new()
+		lt.name = "Light"
+		lt.light_color = res_col()
+		lt.omni_range = 2.6
+		glint.add_child(lt)
+		var line := MeshInstance3D.new()
+		line.name = "Line"
+		line.mesh = Models.box(0.05, 0.03, 1.0)
+		line.material_override = Models.glow_mat(Color(Color("ffe27a"), 0.55))
+		line.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		glint.add_child(line)
+	var show := tells_visible() and f >= 0.5
+	glint.visible = show
+	if not show:
+		return
+	var d := h.aim_dir()
+	glint.global_position = h.position + Vector3(d.x * 0.55, 1.3 * float(h.cdat.get("scale", 1.0)), d.y * 0.55)
+	var full := full_ready()
+	var star := glint.get_node("Star") as MeshInstance3D
+	var pulse := 0.5 + 0.5 * sin(m.time * 12.0)
+	star.scale = Vector3.ONE * ((1.4 + 0.5 * pulse) if full else lerpf(0.4, 0.9, (f - 0.5) * 2.0))
+	(glint.get_node("Light") as OmniLight3D).light_energy = (1.8 + pulse) if full else 0.0
+	var line := glint.get_node("Line") as MeshInstance3D
+	line.visible = full
+	if full:
+		var reach := 15.0 * (1.0 + float(res_def().get("range_k", 0.2)))
+		line.scale = Vector3(1.0, 1.0, reach)
+		line.position = Vector3(d.x, 0, d.y) * reach * 0.5 + Vector3(0, -0.2, 0)
+		line.rotation = Vector3(0.0, atan2(d.x, d.y), 0.0)
+
+## Crosshairs over every pinned foe while the Deadeye is armed: "this one is about to take it".
+func _tick_reticles() -> void:
+	var want := {}
+	if full_ready() and tells_visible():
+		for key in pin_until:
+			var t: Ent = pin_until[key][0]
+			if is_instance_valid(t) and not t.dead and h.flat_dist(t) < 18.0:
+				want[key] = t
+	for key in reticles.keys():
+		if not want.has(key) or not is_instance_valid(reticles[key]):
+			if is_instance_valid(reticles[key]): (reticles[key] as Node3D).queue_free()
+			reticles.erase(key)
+	for key in want:
+		var t: Ent = want[key]
+		if not reticles.has(key):
+			var n := Node3D.new()
+			n.top_level = true
+			var ring := MeshInstance3D.new()
+			ring.mesh = Models.flat_quad(1.3)
+			ring.material_override = Models.ring_mat(Color(Color("ffe27a"), 0.95), 0.1)
+			ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			n.add_child(ring)
+			for i in 4:
+				var tick := MeshInstance3D.new()
+				tick.mesh = Models.box(0.08, 0.04, 0.32)
+				tick.material_override = Models.glow_mat(Color(Color("ffe27a"), 1.0))
+				var a := TAU * i / 4.0
+				tick.position = Vector3(sin(a), 0, cos(a)) * 0.72
+				tick.rotation.y = a
+				n.add_child(tick)
+			m.add_child(n)
+			reticles[key] = n
+		var rn: Node3D = reticles[key]
+		rn.global_position = t.position + Vector3(0, (2.6 if t is Hunter else 1.9), 0)
+		rn.rotation.y = m.time * 2.5
+		rn.scale = Vector3.ONE * (1.0 + 0.12 * sin(m.time * 10.0))
+
+func teardown() -> void:
+	for key in reticles:
+		if is_instance_valid(reticles[key]): (reticles[key] as Node3D).queue_free()
+	reticles = {}
+	super.teardown()
 
 func on_take(_by: Ent, dmg: float, _o: Dictionary) -> void:
 	if dmg > 0.5:
@@ -160,7 +320,8 @@ func fire_rmb(c: Dictionary) -> void:
 	var srange := clampf(Vector2(target_aim.x - h.pos.x, target_aim.z - h.pos.z).length() + 0.5, 2.5, float(sn["range"]))
 	var stg := stage("rmb", {"delivery": {"type": "projectile", "speed": float(sn["speed"]), "range": srange, "size": 0.16},
 		"effects": [{"type": "damage", "amount": float(sn["dmg"])}, {"type": "root", "duration": root}]})
-	run(stg, cx("rmb", "snare", target_aim, {"on_shot_end": func(at: Vector3, why: String, e):
+	run(stg, cx("rmb", "snare", target_aim, {"on_foe": func(_f: Ent, _c: Dictionary): add_focus(float(res_def().get("snare_gain", 40.0))),
+		"on_shot_end": func(at: Vector3, why: String, e):
 		if why != "hit" and e == null:
 			_tripwire(at)}))
 	Feel.cast_sound(m, "projectile", "control", h.pos, h)
@@ -203,8 +364,10 @@ func _pin(a: Vector3) -> void:
 		"modifiers": [{"type": "pierce", "count": 1}]})
 	var dir := Vector2(a.x - h.pos.x, a.z - h.pos.z).normalized()
 	run(stg, cx("rmb", "pinning_shot", a, {"on_foe": func(f: Ent, _c: Dictionary):
-		# pushed into terrain within 3m: pinned (exploit near_wall)
+		add_focus(float(res_def().get("snare_gain", 40.0)))
+		# pushed into terrain within 3m: pinned (exploit near_wall), and the shot lines up: full Focus
 		if _wall_behind(f, dir, float(pd["wall"])):
+			add_focus(res_max())
 			m.later(0.12, func():
 				if is_instance_valid(f) and not f.dead:
 					f.hurt(0.1, h, {"root": float(pd["root"]), "src": "abil", "ab": "utility", "tags": ["utility", "pin"], "exploit": true, "dr": true})
@@ -301,11 +464,17 @@ func _tick_volley(dt: float) -> void:
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null:
 		return
+	# Deadeye armed and someone pinned in range: loose it at them
+	if full_ready() and los and dist < 15.0 and pinned(tgt):
+		h.inp["aim"] = tgt.pos + Vector3(0, 0.9, 0)
+		h.inp["fire"] = true
+		return
 	if int(h.slot_lv["ult"]) > 0 and float(cd["r"]) <= 0.0 and dist < float(r_def()["reach"]) and los and randf() < 0.4:
 		h.inp["aim"] = tgt.pos; h.inp["ult"] = true; return
 	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and dist < 13.0 and randf() < 0.3:
 		h.inp["aim"] = tgt.pos; h.inp["sig"] = true; return
-	if int(h.slot_lv["sec"]) > 0 and rmb_ready() and los and dist < 13.0:
+	# snare first: a root pins them (and feeds Focus) for the Deadeye
+	if int(h.slot_lv["sec"]) > 0 and rmb_ready() and los and dist < 13.0 and not pinned(tgt):
 		h.inp["aim"] = tgt.pos + Vector3(0, 0.9, 0)
 		h.inp["sec"] = true
 		if dist > 9.0 or randf() < 0.35: bot_hold["rmb"] = float(rmb_def()["hold"]) + 0.15

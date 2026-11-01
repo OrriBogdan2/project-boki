@@ -6,7 +6,9 @@ extends RefCounted
 ##   cashin      the same, ending on the Cash In payoff
 ##   juggernaut  Rage fills on the dummies, Enraged form, an empowered Smash
 ##   ult         the Juggernaut's R fuse (wind-up) a moment before Avalanche fires
-##   card / card_juggernaut   the kit card (K); card_detail: the RMB detail page
+##   archer      a snare roots the dummy, full Focus: the lens glint, the aim line, crosshairs over it
+##   deadeye     the same, ending on the Deadeye payoff
+##   card / card_<archetype>   the kit card (K); card_detail: the RMB detail page
 ##   menu        the loadout panel (L)
 ##   smg         the SMG firing at the dummy; add --legacy-shots for the old look and numbers (before)
 
@@ -83,10 +85,29 @@ static func tick(A: Arena, dt: float) -> void:
 			_aim(P, D)
 			if _at(t, dt, 0.5): P.ak.cd["r"] = 0.0; P.ak.use_r()
 			at_t = 0.5 + P.ak.fuse_time() * 0.7
-		"card", "card_juggernaut", "card_detail":
+		"archer", "deadeye":
 			if t < 0.05:
-				A.set_arch("juggernaut" if w == "card_juggernaut" else "thief")
-				A.set_kin("cindle" if w == "card_juggernaut" else "puddlet")
+				if P.arch != "archer": A.set_arch("archer", "longbow")
+				A.set_kin("puddlet")
+				P.teleport(D.pos + Vector3(0.5, 0, -2.2))
+				A.home = P.pos
+			_aim(P, D)
+			P.inp["move"] = Vector2.ZERO
+			if _at(t, dt, 0.3): P.inp["sec_hold"] = false; P.ak.ch_rmb = 2.0; P.ak.press_rmb()       # the snare roots it
+			if t > 0.35 and t < 2.0: D.root_t = maxf(D.root_t, 0.8)                                  # (keep it pinned for the frame)
+			if w == "archer":
+				if t > 0.9: P.ak.res = P.ak.res_max()
+				at_t = 1.9
+			else:
+				if _at(t, dt, 1.75): P.ak.res = P.ak.res_max(); P.fire_cd = 0.0; P.ammo = maxi(P.ammo, 1); P.inp["fire"] = true
+				if _at(t, dt, 1.8): P.inp["fire"] = false
+				if P.ak.get("deadeyes") and int(P.ak.get("deadeyes")) > 0 and not A.has_meta("de_at"): A.set_meta("de_at", t)
+				at_t = float(A.get_meta("de_at", 9.0)) + 0.06
+		"card", "card_juggernaut", "card_detail", "card_archer", "card_mage", "card_gunslinger", "card_bulwark":
+			if t < 0.05:
+				var ca: String = {"card_juggernaut": "juggernaut", "card_archer": "archer", "card_mage": "mage", "card_gunslinger": "gunslinger", "card_bulwark": "bulwark"}.get(w, "thief")
+				A.set_arch(ca)
+				A.set_kin("cindle" if ca in ["juggernaut", "mage", "bulwark"] else "puddlet")
 			if _at(t, dt, 0.3):
 				A.toggle_card()
 				if w == "card_detail":

@@ -280,11 +280,29 @@ func _archer() -> void:
 			wl[i] = lv if dx < 2 else lv + 3
 	W.kind = wk; W.level = wl
 	aim_at(P, T.pos)
+	K.res = 0.0       # (a full Focus outranks the hold variant)
 	hold(m, P, 0.6)
 	if "--ak-debug" in OS.get_cmdline_user_args(): print("PIN after hold: T at %s P at %s ground ahead %s %s %s lvl %s" % [str(T.pos), str(P.pos), W.ground_at(T.pos.x + 1.0, T.pos.z), W.ground_at(T.pos.x + 1.6, T.pos.z), W.ground_at(T.pos.x + 2.2, T.pos.z), W.level[W.idx(int(T.pos.x) + 2, int(T.pos.z))]])
 	step(m, 0.5)
 	if "--ak-debug" in OS.get_cmdline_user_args(): print("PIN T at %s vx %.2f stun %.2f immune %.2f dr %s" % [str(T.pos), T.vel.x, T.stun_t, T.cc_immune_t, str(T.dr)])
 	ok("archer RMB hold: Pinning Shot pins", K.last_variant == "hold" and dmg(T) >= 14.0 and T.root_t > 0.0, "took %.0f root %.2f" % [dmg(T), T.root_t])
+	# Deadeye: a full-Focus shot into a pinned (rooted) foe pays out a gold second hit
+	var dd0 := dmg(T); var de0 := K.deadeyes
+	T.root_t = maxf(T.root_t, 1.0)
+	K.res = K.res_max()
+	ok("archer resource full: Deadeye armed", K.full_ready() and K.ready_label() != "" and K.pinned(T))
+	P.fire_cd = 0.0; P.ammo = maxi(P.ammo, 1); P.reload_t = 0.0
+	P.inp["fire"] = true; m.step(DT); P.inp["fire"] = false
+	step(m, 0.5)
+	ok("archer Deadeye: Focus shot into a pinned foe", K.deadeyes == de0 + 1 and dmg(T) - dd0 >= 70.0, "deadeyes %d dealt %.0f" % [K.deadeyes - de0, dmg(T) - dd0])
+	# ... and not into a free one
+	fresh(T); K.res = K.res_max(); de0 = K.deadeyes
+	step(m, 0.9)      # (past the pin's grace)
+	K.res = K.res_max()
+	P.fire_cd = 0.0; P.ammo = maxi(P.ammo, 1); P.reload_t = 0.0
+	P.inp["fire"] = true; m.step(DT); P.inp["fire"] = false
+	step(m, 0.5)
+	ok("archer Deadeye: none without a pin", K.deadeyes == de0 and dmg(T) >= 50.0, "dealt %.0f" % dmg(T))
 	# Grapple Arrow: bites the ledge and climbs on top
 	P.teleport(home); P.vel = Vector3.ZERO; P.dashes = P.max_dashes()
 	for dz in range(-3, 4):

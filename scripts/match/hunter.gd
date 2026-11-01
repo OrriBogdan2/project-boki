@@ -284,6 +284,7 @@ func init_hunter(match_node: Node, id: String, team_id: int, class_id: String, n
 ## right click and the class dodge.
 func set_arch(a: String) -> void:
 	arch = "" if a == "" or a == "none" else Arch.fix(a, cls)
+	if ak: ak.teardown()
 	ak = ArchKit.make(self, arch) if arch != "" else null
 	if arch != "" and not Arch.weapon_ok(arch, wid):
 		equip(Arch.default_weapon(arch), wrar)
@@ -303,6 +304,7 @@ func reclass(c: String, a: String, w := "") -> void:
 	dodge_def = Content.class_dodge(cls)
 	r = float(cdat.get("hit_r", 0.38 * float(cdat["scale"])))
 	arch = Arch.fix(a, cls)
+	if ak: ak.teardown()
 	ak = ArchKit.make(self, arch)
 	wid = Arch.weapon_for(arch, cls, w)
 	set_model(Models.hunter(cls, Data.TEAM_COLORS[team % Data.TEAM_COLORS.size()], wid, "", Save.d.get("look", {}) if ctrl == "local" else bot_look, arch))
