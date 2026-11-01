@@ -29,7 +29,7 @@ func _ready() -> void:
 		fade.boot()     # carry on from the boot splash: covered, logo showing, until the first screen is up
 	var args := OS.get_cmdline_user_args()
 	# tooling never touches the real save file: checks, screenshots and --no-save runs play on a copy
-	if "--no-save" in args or "--archetype-check" in args or "--arena-check" in args or Array(args).any(func(x): return String(x).begins_with("--shot=") or String(x).begins_with("--arena-shot=")):
+	if "--no-save" in args or "--archetype-check" in args or "--kit-combo-check" in args or "--arena-check" in args or Array(args).any(func(x): return String(x).begins_with("--shot=") or String(x).begins_with("--arena-shot=")):
 		Save.no_write = true
 	var opts := {}
 	for a in args:
@@ -68,6 +68,9 @@ func _ready() -> void:
 		if a == "--boxrev-demo": opts["life_demo"] = true; opts["boxrev_demo"] = true; opts["no_drop"] = true; opts["squad"] = 3; opts["teams"] = 3
 		if a.begins_with("--length="): opts["length"] = float(a.substr(9))
 		if a == "--no-drop": opts["no_drop"] = true
+		if a.begins_with("--map="): opts["map"] = a.substr(6)            # an expedition on another authored map (e.g. skyreach)
+		if a.begins_with("--at="): opts["at_xz"] = a.substr(5)          # tooling: start standing at x,z (map screenshots)
+		if a.begins_with("--zoom="): opts["zoom_hold"] = float(a.substr(7))   # tooling: hold the camera zoom
 		if a.begins_with("--lost-demo"): opts["lost_demo"] = a.substr(12) if a.length() > 12 else "rival"; opts["no_drop"] = true    # a Boki left behind (hud labels)
 		if a == "--train-demo": opts["train_demo"] = true; opts["no_drop"] = true
 		if a.begins_with("--train-demo="): opts["train_demo"] = a.substr(13); opts["no_drop"] = true
@@ -333,7 +336,7 @@ func _ready() -> void:
 		add_child(load("res://tests/map_overview.gd").new())
 		return
 	if "--mapcheck-authored" in args:
-		load("res://tools/mapcheck.gd").new().run_authored("skyreach", range(1, 21))
+		load("res://tools/mapcheck.gd").new().run_authored(World.layout_for_tier(0), range(1, 21))
 		get_tree().quit()
 		return
 	if "--mapcheck" in args:
@@ -418,6 +421,9 @@ func _ready() -> void:
 	if "--mantle-check" in args:
 		load("res://tools/mantle_check.gd").new().run(self)    # ledges you mean to climb, you climb; the rest never grab you
 		return
+	if "--glide-reach" in args:
+		load("res://tools/glide_reach.gd").new().run(self)    # how far a glide carries over open void (sizes map gaps)
+		return
 	if "--abyss-check" in args:
 		set_meta("abyss_check", load("res://tools/abyss_check.gd").new())
 		get_meta("abyss_check").run(self)
@@ -453,7 +459,7 @@ func _ready() -> void:
 		set_meta("arena_check", arc)        # (kept alive across its awaits)
 		arc.run(self)
 		return
-	if "--archetype-check" in args:
+	if "--archetype-check" in args or "--kit-combo-check" in args:
 		var akc = load("res://tools/archetype_check.gd").new()      # every archetype kit, controls, locks, infusion, feel
 		set_meta("archetype_check", akc)
 		akc.run(self)
@@ -3402,8 +3408,11 @@ func _drop_check() -> void:
 	for f in fol: f.ai["sep_h"] = -1.0       # (bots that break off low down: checked below, not here)
 	# the leader steers; the squad follows in its slots
 	var worst := 0.0; var t := 0.0
+	# (the turn is relative to the ship's heading, so every map and ship route tests the same turn:
+	# veer 17 degrees right of the flight line, then swing a further 85 degrees right)
+	var sdir := Vector2((m.ship["dir"] as Vector3).x, (m.ship["dir"] as Vector3).z).normalized() if m.ship.has("dir") else Vector2(1, 0)
 	while t < 1.3 and P.dropping:
-		P.inp["move"] = Vector2(1, 0.3).normalized() if t < 0.7 else Vector2(-0.2, 1).normalized()
+		P.inp["move"] = sdir.rotated(0.29) if t < 0.7 else sdir.rotated(1.77)
 		m.step(Match.DT); t += Match.DT
 		if t > 0.5:
 			for f in fol:
@@ -3474,12 +3483,12 @@ func _drop_check() -> void:
 		if String(bot.ai.get("goal_kind", "")) == "ping": went = true
 		closest = minf(closest, bot.flat_dist(spot))
 	var replies: Array = D.events.slice(ev0).filter(func(e): return String(e).begins_with("reply"))
-	print("DCHECK ground ping: %s headed there=%s, %.1fm -> got within %.1fm; replies %s" % [bot.pname, went, d0, closest, str(replies)])
+	print("DCHECK ground ping: %s headed there=%s, %.1fm -> got within %.1fm; replies %s (from %s to %s)" % [bot.pname, went, d0, closest, str(replies), str(bot.pos.snapped(Vector3(0.1, 0.1, 0.1))), str(spot.snapped(Vector3(0.1, 0.1, 0.1)))])
 	if not went or closest > 4.0 or not replies.any(func(r): return String(r).ends_with("omw")): ok = false; print("DCHECK FAIL squad bots ignore pings")
 	m.unping(P)
 	if not m.my_ping().is_empty() or bot.ai.has("ping_goal"): ok = false; print("DCHECK FAIL right click didn't take the ping down")
 	# the spawns: the same candidates every match, a different live subset per seed
-	var layout := World.load_layout("skyreach")
+	var layout := World.load_layout(World.layout_for_tier(0))
 	var subsets := {}
 	for sd in [4101, 4102, 4103]:
 		var plan := SpawnPlan.new(m)
@@ -3600,7 +3609,7 @@ func _simtest(opts: Dictionary) -> void:
 		# the Blight: how many it brought out, and what it did (knocks / eliminations / damage on hunters)
 		print("SIMBLIGHT spawned %d alive %d wardens %d shrieks %d knocks %d outs %d dmg %d" % [m.blight.spawned, m.blight.alive().size(), m.blight.wardens.size(), m.blight.shrieks, int(m.kstat.get("bl_knock", 0)), int(m.kstat.get("bl_out", 0)), int(m.kstat.get("bl_dmg", 0.0))])
 	for h in m.hunters:
-		print("  %s team %d %s knocks %d kills %d dmg %d gems %d %s" % [h.pname, h.team, h.cls, h.knocks, h.kills, h.dmg_done, h.gems, "OUT" if h.out else ("EXTRACTED" if h.extracted else "alive")])
+		print("  %s team %d %s %s knocks %d kills %d dmg %d gems %d %s" % [h.pname, h.team, h.cls, h.arch, h.knocks, h.kills, h.dmg_done, h.gems, "OUT" if h.out else ("EXTRACTED" if h.extracted else "alive")])
 	get_tree().quit()
 
 # ------------------------------------------------------------------ browser test hooks

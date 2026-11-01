@@ -40,6 +40,11 @@ var labels: Array = []   # {name, pos: Vector3, kind: "poi" | "choke"} for the m
 var layout_id := ""      # "" for a generated map, else the authored layout's id
 var dyn_walls: Array = []  # barrier walls from abilities (see Verbs): some block movement too
 var authored_portals: Array = []   # Vector2 tile spots from an authored layout, in opening order
+var hand := false        # a fully hand-made layout ("hand": true): nothing placed by dice (see tools/make_hollowcrown.py)
+var authored_stairs := {}   # tile index -> Vector2i: flights the layout placed (ramps, bridge flights)
+var warden_posts: Array = []   # {pos: Vector3, island: int}: where the layout lets Blight Wardens stand
+var trap_spots: Array = []     # {pos: Vector3, island: int}: where the layout puts its regions' traps
+var regions: Array = []        # the layout's named regions [{id, name, purpose, biome, islands}]
 ## The ways out an authored layout places (see Exits): {kind: "dock" | "hatch" | "outpost", pos: Vector3,
 ## out: Vector2 (a dock's way out over the abyss, optional), walled: bool}. Empty: Exits works them out.
 var exit_defs: Array = []
@@ -523,6 +528,9 @@ func _stair_run(c: Vector2i, d: Vector2i) -> Array:
 
 func _place_stairs() -> void:
 	stairs.clear()
+	if hand:
+		stairs = authored_stairs.duplicate()     # a hand-made map has exactly the flights it drew
+		return
 	var srng := RandomNumberGenerator.new(); srng.seed = rng.seed + 41
 	var spots_all: Array = spawns + portal_spots
 	for c in chest_spots: spots_all.append(c["pos"])
@@ -2083,10 +2091,12 @@ static func load_layout(id: String) -> Dictionary:
 	var d = JSON.parse_string(FileAccess.get_file_as_string(path))
 	return d if typeof(d) == TYPE_DICTIONARY else {}
 
-## Which authored map an expedition of this tier uses (all tiers share Skyreach for now, each with
-## its own palette and monsters).
+## Which authored map an expedition of this tier uses (all tiers share the Hollow Crown for now, each
+## with its own palette and monsters; Skyreach is kept as content and loads with opts.map = "skyreach").
 static func layout_for_tier(_tier: int) -> String:
-	return "skyreach"
+	for a in OS.get_cmdline_user_args():
+		if String(a).begins_with("--map="): return String(a).substr(6)     # tooling: every expedition on another map
+	return "hollowcrown"
 
 ## A biome's data (content/biomes/<id>.json), cached.
 static var _biomes := {}
@@ -2126,7 +2136,20 @@ static func _shape_d(S: Dictionary, pt: Vector2) -> float:
 		var cp: Array = S["capsule"]
 		var a := Vector2(float(cp[0]), float(cp[1])); var b := Vector2(float(cp[2]), float(cp[3]))
 		return Geometry2D.get_closest_point_to_segment(pt, a, b).distance_to(pt) / maxf(0.5, float(S["r"]))
+	if S.has("poly"):
+		# a hand-drawn outline: 1 on the line, falling to 0 six tiles inside (so the coast's wobble
+		# and the underside's depth work the same as for the round shapes)
+		var P := _poly_pts(S)
+		var dmin := 1e9
+		for k in P.size():
+			dmin = minf(dmin, Geometry2D.get_closest_point_to_segment(pt, P[k], P[(k + 1) % P.size()]).distance_to(pt))
+		return 1.0 - minf(dmin, 6.0) / 6.0 if Geometry2D.is_point_in_polygon(pt, P) else 1.0 + dmin / 6.0
 	return 99.0
+
+static func _poly_pts(S: Dictionary) -> PackedVector2Array:
+	var P := PackedVector2Array()
+	for q in S["poly"]: P.append(_v2(q))
+	return P
 
 static func _shape_box(S: Dictionary) -> Rect2:
 	if S.has("circle"):
@@ -2142,6 +2165,11 @@ static func _shape_box(S: Dictionary) -> Rect2:
 		var cp: Array = S["capsule"]; var rr := float(S["r"]) + 2.0
 		var a := Vector2(float(cp[0]), float(cp[1])); var b := Vector2(float(cp[2]), float(cp[3]))
 		return Rect2(Vector2(minf(a.x, b.x), minf(a.y, b.y)) - Vector2(rr, rr), (b - a).abs() + Vector2(rr, rr) * 2.0)
+	if S.has("poly"):
+		var P := _poly_pts(S)
+		var bb := Rect2(P[0], Vector2.ZERO)
+		for q in P: bb = bb.expand(q)
+		return bb.grow(3.0)
 	return Rect2()
 
 func generate_authored(L: Dictionary, seed_val: int) -> void:
@@ -2155,6 +2183,9 @@ func generate_authored(L: Dictionary, seed_val: int) -> void:
 	links.clear(); rings.clear(); winds.clear(); updrafts.clear()
 	sheer.clear(); lip.clear(); labels.clear(); walls.clear(); bush.clear(); paint.clear(); authored_portals.clear(); train_route = {}; props.clear()
 	layout_id = String(L.get("id", "authored"))
+	hand = bool(L.get("hand", false))
+	authored_stairs.clear(); warden_posts.clear(); trap_spots.clear()
+	regions = L.get("regions", [])
 	# the ground is the same every match: its noise and depths come from the layout, not the match
 	var lr := RandomNumberGenerator.new(); lr.seed = int(L.get("seed", 1))
 	var nz := FastNoiseLite.new(); nz.seed = int(L.get("seed", 1)); nz.frequency = 0.055   # broad, gentle coastlines
@@ -2200,6 +2231,10 @@ func generate_authored(L: Dictionary, seed_val: int) -> void:
 				cells.append(Vector2i(x, z))
 		var c0: Dictionary = shapes[0]
 		var cen := _shape_box(c0).get_center() if not (c0.has("circle") or c0.has("ellipse")) else _v2(c0.get("circle", c0.get("ellipse", [0, 0])))
+		if c0.has("poly"):
+			cen = Vector2.ZERO
+			for q in _poly_pts(c0): cen += q
+			cen /= float(_poly_pts(c0).size())
 		var poi := _v2(D.get("poi", [cen.x, cen.y]))
 		islands.append({"c": cen, "r": sqrt(cells.size() / PI), "base": 0, "cells": cells, "role": String(D.get("role", "grove")),
 			"form": "authored", "fdir": Vector2.RIGHT, "name": String(D.get("name", "")), "id": String(D["id"]),
@@ -2216,6 +2251,9 @@ func generate_authored(L: Dictionary, seed_val: int) -> void:
 				"role": String(D.get("role", "")), "height": top_lv * LEVEL})
 	await _slice()
 	await _tidy_ground()
+	for ii in defs.size():
+		for R in (defs[ii] as Dictionary).get("ramps", []):
+			HandLayout.stamp_ramp(self, R, ii)
 	# land bridges: narrow, sheer-sided necks of ground between two islands. The whole bridge
 	# belongs to the first island, so walking along it never changes which island you're on.
 	var neck := {}
@@ -2229,6 +2267,9 @@ func generate_authored(L: Dictionary, seed_val: int) -> void:
 		var rr := float(B.get("r", 1.4))
 		var lv0 := int(level[idx(int(p0.x), int(p0.y))]) if kind[idx(int(p0.x), int(p0.y))] != T_VOID else 0
 		var lv1 := int(level[idx(int(p1.x), int(p1.y))]) if kind[idx(int(p1.x), int(p1.y))] != T_VOID else 0
+		var flight := Vector2i.ZERO
+		if lv0 != lv1 and (absf(p1.x - p0.x) < 0.01 or absf(p1.y - p0.y) < 0.01):
+			flight = Vector2i(signi(int(signf(p1.x - p0.x))), signi(int(signf(p1.y - p0.y))))
 		for z in range(int(minf(p0.y, p1.y) - rr - 1), int(maxf(p0.y, p1.y) + rr + 2)):
 			for x in range(int(minf(p0.x, p1.x) - rr - 1), int(maxf(p0.x, p1.x) + rr + 2)):
 				if not inb(x, z):
@@ -2244,6 +2285,18 @@ func generate_authored(L: Dictionary, seed_val: int) -> void:
 				island[i] = a
 				var t := clampf(p0.distance_to(q) / maxf(0.01, p0.distance_to(p1)), 0.0, 1.0)
 				level[i] = mini(lv0, lv1) if t > 0.15 and t < 0.85 else (lv0 if t <= 0.15 else lv1)
+				if flight != Vector2i.ZERO:
+					# ends at different heights: a straight flight of stairs in the middle of the span,
+					# one row per terrace (axis-aligned bridges only)
+					var s := (pt - p0).dot(Vector2(flight))
+					var s0 := p0.distance_to(p1) * 0.5 - absi(lv1 - lv0) * 0.5
+					var j := int(floor(s - s0))
+					if j < 0: level[i] = lv0
+					elif j >= absi(lv1 - lv0): level[i] = lv1
+					elif lv1 > lv0:
+						level[i] = lv0 + j; authored_stairs[i] = flight
+					else:
+						level[i] = lv0 - j - 1; authored_stairs[i] = -flight
 				depth[i] = -1.6
 				neck[i] = true
 				islands[a]["cells"].append(Vector2i(x, z))
@@ -2372,6 +2425,17 @@ func generate_authored(L: Dictionary, seed_val: int) -> void:
 	await _slice()
 	for G in L.get("glides", []):
 		await _slice()
+		if G is Dictionary:
+			# a hand-placed route: run off at take, come down at land (bots follow these)
+			var ga: int = ids.get(String(G["a"]), -1); var gb: int = ids.get(String(G["b"]), -1)
+			if ga < 0 or gb < 0:
+				continue
+			var tk := _v2(G["take"]); var ld := _v2(G["land"])
+			links.append({"from": ga, "to": gb, "take": Vector3(floor(tk.x) + 0.5, ground_at(tk.x, tk.y), floor(tk.y) + 0.5),
+				"land": Vector3(floor(ld.x) + 0.5, ground_at(ld.x, ld.y), floor(ld.y) + 0.5), "glide": true})
+			if String(G.get("name", "")) != "":
+				labels.append({"name": String(G["name"]), "pos": Vector3((tk.x + ld.x) * 0.5, 0, (tk.y + ld.y) * 0.5), "kind": "choke"})
+			continue
 		var a: int = ids.get(String(G[0]), -1); var b: int = ids.get(String(G[1]), -1)
 		if a < 0 or b < 0:
 			continue
@@ -2393,7 +2457,10 @@ func generate_authored(L: Dictionary, seed_val: int) -> void:
 			exit_defs.append({"kind": ek[1], "at": _v2(ap), "out": Vector2(float(ap[2]), float(ap[3])) if (ap as Array).size() >= 4 else Vector2.ZERO,
 				"walled": (ap as Array).size() >= 3 and ek[1] == "outpost" and bool(ap[2])})
 	await _slice()
-	_place_spots()
+	if hand:
+		HandLayout.place_spots(self, defs)
+	else:
+		_place_spots()
 	await _slice()
 	_clear_lair_spots()
 	await _slice()
@@ -2526,10 +2593,19 @@ func _authored_blockers(defs: Array, neck: Dictionary) -> void:
 					if Vector2(x + 0.5, z + 0.5).distance_to(bc) > rad + rng.randf_range(-0.2, 0.3): continue
 					if inb(x, z) and kind[idx(x, z)] == T_GROUND and island[idx(x, z)] == ii and edge_dist(x, z, 2) >= 2:
 						bush[idx(x, z)] = true
+		# hand-placed cover: boulder blocks, single trees, camp supply piles
+		for rk in D.get("rocks", []):
+			for z in range(int(rk[1]), int(rk[3]) + 1):
+				for x in range(int(rk[0]), int(rk[2]) + 1):
+					HandLayout.block(self, x, z, ii, "rock", neck)
+		for tr in D.get("trees", []):
+			HandLayout.block(self, int(tr[0]), int(tr[1]), ii, "tree", neck)
+		for cr in D.get("crates", []):
+			HandLayout.block(self, int(cr[0]), int(cr[1]), ii, "camp", neck)
 		# cover: a few deliberate rock formations (a 2x2 boulder, an L, a short ridge) spaced well
 		# apart on open, flat ground, never single random blocks scattered everywhere
 		var poi := _v2(D.get("poi", [0, 0]))
-		if D.get("perch", false) or D.get("no_rocks", false):
+		if D.get("perch", false) or D.get("no_rocks", false) or hand:
 			continue
 		var cells2: Array = islands[ii]["cells"].duplicate()
 		var want := int(cells2.size() / 240)

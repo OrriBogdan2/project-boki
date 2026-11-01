@@ -15,11 +15,11 @@ const KEYS := {"dash": "Shift", "passive": "", "lmb": "LMB", "rmb": "RMB", "e": 
 const LABEL := {"dash": "Dash", "passive": "Passive", "lmb": "Attack", "rmb": "Right click", "e": "Utility", "r": "Ultimate"}
 ## Which looping preview each archetype's abilities get (KitPreview kinds).
 const PREVIEW := {
-	"thief": {"dash": "dash2", "passive": "marks", "rmb": "knife", "e": "zone", "r": "lines"},
+	"thief": {"dash": "dash", "passive": "marks", "rmb": "projectile", "e": "knife", "r": "lines"},
 	"archer": {"dash": "grapple", "passive": "meter", "rmb": "heavy", "e": "rainwall", "r": "arrows3"},
 	"mage": {"dash": "blink", "passive": "marks", "rmb": "steer", "e": "hex", "r": "mirror"},
 	"gunslinger": {"dash": "dash", "passive": "pips", "rmb": "projectile", "e": "buff", "r": "lines"},
-	"juggernaut": {"dash": "charge", "passive": "meter", "rmb": "leap", "e": "buff", "r": "burst"},
+	"juggernaut": {"dash": "dash2", "passive": "meter", "rmb": "charge", "e": "grapple", "r": "leap"},
 	"bulwark": {"dash": "charge", "passive": "meter", "rmb": "shield", "e": "zone", "r": "fissure"},
 	"tender": {"dash": "dash", "passive": "marks", "rmb": "projectile", "e": "zone"},
 	"rimewright": {"dash": "charge", "passive": "marks", "rmb": "projectile", "e": "shield"},
