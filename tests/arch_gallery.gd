@@ -77,19 +77,19 @@ func _matrix() -> void:
 			var lk := {"race": race, "hair": (race + r) % Models.hair_styles(race).size(), "hair_v": 2, "hair_col": (race * 3 + r) % Models.LOOK_HAIR.size(),
 				"skin": int(Models.RACES[race]["skin"]) if race > 0 else (r % 5), "gender": (race + r) % 2, "face": (race + r) % Models.LOOK_FACES.size(), "body": 1, "outfit": (r + race) % Models.LOOK_OUTFITS.size()}
 			var h := _hunter(arch, lk, r)
-			h.position = Vector3((race - 3.5) * 1.25, 0, (r - 2.5) * 1.5)
+			h.position = Vector3((race - 3.5) * 1.45, 0, (r - 2.5) * 2.3)
 			h.rotation.y = PI * 0.9
 		# a gender / build pair: a slim woman and a sturdy man
 		for k in 2:
 			var lk := {"race": 0, "hair": [1, 0][k], "hair_v": 2, "hair_col": [5, 1][k], "skin": [1, 4][k], "gender": k, "face": 0, "body": [0, 2][k], "outfit": r}
 			var h := _hunter(arch, lk, r)
-			h.position = Vector3((6 + k - 3.5) * 1.25 + 0.3, 0, (r - 2.5) * 1.5)
+			h.position = Vector3((6 + k - 3.5) * 1.45 + 0.4, 0, (r - 2.5) * 2.3)
 			h.rotation.y = PI * 0.9
-		_label(String(HeroKit.ARCHES[arch]["name"]), Vector3(-5.6, 0.1, (r - 2.5) * 1.5 + 0.2), 30)
+		_label(String(HeroKit.ARCHES[arch]["name"]), Vector3(-6.4, 0.1, (r - 2.5) * 2.3 + 0.3), 30)
 		r += 1
 	var cam := Camera3D.new()
 	add_child(cam)
-	cam.position = Vector3(0.4, 9.5, 9.6); cam.rotation = Vector3(-0.72, 0, 0); cam.fov = 50
+	cam.position = Vector3(0.6, 15.5, 11.0); cam.rotation = Vector3(-0.95, 0, 0); cam.fov = 50
 	cam.make_current()
 
 func _heads() -> void:
