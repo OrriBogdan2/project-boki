@@ -282,7 +282,7 @@ func _show_settings() -> void:
 				Save.save_game())
 			name_row.add_child(ne)
 			_group(v, "Camera")
-			_choice(v, "Expedition camera", "cam_style", CamRig.STYLES.keys().map(func(k): return [k, CamRig.STYLES[k]["name"]]))
+			_choice(v, "Camera", "cam_style", CamRig.STYLES.keys().map(func(k): return [k, CamRig.STYLES[k]["name"]]))
 			_choice(v, "Camera follow", "cam_follow", [["supervive", "Supervive (leans to the cursor)"], ["standard", "Standard Dynamic"], ["dynamic", "Fully Dynamic"], ["locked", "Locked"]])
 			_slider(v, "Lean toward the cursor", "cam_lead", 0.0, 1.5)
 			_group(v, "Combat")

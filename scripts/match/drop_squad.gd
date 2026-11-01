@@ -14,6 +14,7 @@ extends RefCounted
 ## break off near the ground to land a little apart.
 
 const PLAN_T := 8.0
+const FOLLOW_GAIN := 5.0      # 1/s: how hard a follower closes the gap to its slot
 ## Formation slots behind the leader: (to the side, behind), in metres, turned with the leader's heading.
 const SLOTS := [Vector2(-2.6, 2.2), Vector2(2.6, 2.2), Vector2(0.0, 4.6), Vector2(-5.0, 4.4), Vector2(5.0, 4.4)]
 
@@ -272,7 +273,8 @@ func target_of(f: Hunter) -> Vector2:
 func follow_hv(f: Hunter, gs: float) -> Vector2:
 	var l: Hunter = f.drop_follow
 	var err := target_of(f) - Vector2(f.pos.x, f.pos.z)
-	return (Vector2(l.vel.x, l.vel.z) + err * 3.0).limit_length(gs * 1.6 + 3.0)
+	# (movefeel) the leader now steers ~3x snappier, so followers close the gap harder (was 3.0)
+	return (Vector2(l.vel.x, l.vel.z) + err * FOLLOW_GAIN).limit_length(gs * 1.6 + 3.0)
 
 func follow_vy(f: Hunter) -> float:
 	var l: Hunter = f.drop_follow
