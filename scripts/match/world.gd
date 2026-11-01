@@ -1048,6 +1048,14 @@ var under := PackedFloat32Array()   # per tile: the height of the island's rocky
 
 ## While a match builds under the loading screen: called after each step, then a frame draws.
 var stage_cb := Callable()
+## Inside a long step under the loading screen: lets a frame draw once the step has had the CPU for
+## PerfLog.SLICE_MS. Built in one go (checks, tools, a client's map bake) it never waits.
+func _slice() -> void:
+	if stage_cb.is_valid() and is_inside_tree() and PerfLog.slice_due():
+		PerfLog.wait_begin()
+		await get_tree().process_frame
+		PerfLog.wait_end()
+
 func _stage(label: String) -> void:
 	PerfLog.mark(label)
 	if stage_cb.is_valid() and is_inside_tree():
@@ -1071,7 +1079,7 @@ func build_meshes() -> void:
 	else:
 		var keep := _visual_seed_begin()
 		tm = TerrainMesh.new(self)
-		parts = tm.build_chunked(32) if w > 96 else [[Vector2i.ZERO, tm.build()]]
+		parts = (await tm.build_chunked(32)) if w > 96 else [[Vector2i.ZERO, await tm.build()]]
 		_visual_seed_end(keep)
 		under = tm.under
 		_rims = tm.rims
@@ -1498,6 +1506,7 @@ func _decorate() -> void:
 	var packed := {}      # imported models, batched: group key -> {mesh, mat, items}
 	var camps: Array = []     # camp supply piles: merged into a few meshes per chunk below
 	for z in h:
+		await _slice()
 		for x in w:
 			var i := idx(x, z)
 			if kind[i] != T_BLOCK or no_deco.has(i) or walls.has(i):
@@ -1580,6 +1589,7 @@ func _decorate() -> void:
 	var pb: Array = []
 	var fcols := [Color("fff3a8"), Color("ff9ac8"), Color("ffffff"), Color("b8a6ff"), Color("ffb070"), Color("8fd8ff")]
 	for z in h:
+		await _slice()
 		for x in w:
 			var i := idx(x, z)
 			if kind[i] != T_GROUND or bridge.has(i) or bush.has(i):
@@ -2096,6 +2106,7 @@ func generate_authored(L: Dictionary, seed_val: int) -> void:
 	for ii in defs.size():
 		ids[String(defs[ii]["id"])] = ii
 	for ii in defs.size():
+		await _slice()
 		var D: Dictionary = defs[ii]
 		var shapes: Array = D.get("shapes", [])
 		if shapes.is_empty():

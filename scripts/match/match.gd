@@ -140,6 +140,15 @@ const STAGE_MS := {"build.generate": 250, "world.terrain": 450, "world.roots": 4
 	"build.hunters": 250, "build.mobs": 200, "build.chests": 60, "build.spawns": 200, "build.hud": 150, "build.finish": 30}
 var _stage_done_ms := 0.0
 
+## Inside a long build step under the loading screen: lets a frame draw once the step has had the
+## CPU for PerfLog.SLICE_MS, so the spinner keeps turning. Built in one go (checks, tools) it never
+## waits, and waiting changes nothing the build computes.
+func _slice() -> void:
+	if _stage_cb.is_valid() and is_inside_tree() and PerfLog.slice_due():
+		PerfLog.wait_begin()
+		await get_tree().process_frame
+		PerfLog.wait_end()
+
 ## One build step finished: log it, and when building under the loading screen let a frame draw.
 func _stage(label: String) -> void:
 	PerfLog.mark(label)
@@ -524,12 +533,12 @@ func _start(o: Dictionary) -> void:
 	elif o.get("tutorial", false):
 		layout = World.load_layout("tutorial")
 	map_name = String(layout.get("name", ""))
+	if _stage_cb.is_valid(): world.stage_cb = _world_step
 	if not layout.is_empty():
-		world.generate_authored(layout, seed_val)
+		await world.generate_authored(layout, seed_val)
 	else:
 		world.generate(seed_val, World.BIG_SIZE if big else 64, World.BIG_ISLANDS if big else 7)
 	await _stage("build.generate")
-	if _stage_cb.is_valid(): world.stage_cb = _world_step
 	await world.build_meshes()
 	world.stage_cb = Callable()
 	fx = Fx.new(); fx.name = "Fx"; add_child(fx)
@@ -557,15 +566,15 @@ func _start(o: Dictionary) -> void:
 		is_host = Net.me == String(o["net"]["host"])
 		Net.begin_match("kf-" + String(o["net"]["mid"]), String(o["net"]["host"]), self)
 	await _stage("build.systems")
-	_spawn_pads_and_exits()
+	await _spawn_pads_and_exits()
 	await _stage("build.pads_exits")
-	_spawn_hunters()
+	await _spawn_hunters()
 	await _stage("build.hunters")
 	if not opts.get("tutorial", false) and not opts.get("duel", false):
-		_spawn_mobs()        # the tutorial brings its own monsters, one step at a time
+		await _spawn_mobs()        # the tutorial brings its own monsters, one step at a time
 	await _stage("build.mobs")
 	if not opts.get("duel", false):
-		_spawn_chests()
+		await _spawn_chests()
 	await _stage("build.chests")
 	if not world.train_route.is_empty() and not opts.get("duel", false):
 		skytrain = SkyTrain.new()
@@ -596,7 +605,7 @@ func _start(o: Dictionary) -> void:
 		spawn_plan.build(layout)
 		if lairs: lairs.plug_into(spawn_plan)     # which boss lairs are live this match
 		spawn_plan.roll(seed_val)
-		spawn_plan.spawn_all()
+		await spawn_plan.spawn_all()
 	if lairs: lairs.ensure_live()
 	_trim_shadows(self)
 	for list in [mobs, kins, chests, breaks, shrines, wpicks]:
@@ -658,6 +667,7 @@ func _build_shot_pool() -> void:
 
 func _spawn_pads_and_exits() -> void:
 	for pd in world.pads:
+		await _slice()
 		var n := Models.jump_pad(Color("8fe3c8"))
 		n.position = pd["pos"]
 		n.rotation.y = atan2(-(pd["land"].x - pd["pos"].x), -(pd["land"].z - pd["pos"].z))
@@ -691,8 +701,10 @@ func _spawn_pads_and_exits() -> void:
 		arc.visible = false
 		add_child(arc)
 		pd["arc"] = arc
+	await _slice()
 	exits = Exits.new()
 	exits.setup(self)
+	await _slice()
 	truce = Truce.new(self)
 	lairs = Lairs.new()
 	lairs.setup(self)
@@ -852,6 +864,7 @@ func _spawn_hunters() -> void:
 		for s in squad:
 			if made >= total and not (t == 0 and s == 0):
 				break
+			await _slice()
 			made += 1
 			var at := base
 			if s > 0:
@@ -1090,6 +1103,7 @@ func _spawn_mobs() -> void:
 	if net_on and not is_host:
 		return
 	for c in world.camp_spots:
+		await _slice()
 		var p: Vector3 = c["pos"]
 		var comp: Array
 		match String(c.get("kind", "normal")):
@@ -1172,8 +1186,10 @@ func _clear_spot(at: Vector3) -> Vector3:
 
 func _spawn_chests() -> void:
 	for cs in world.chest_spots:
+		await _slice()
 		add_chest(cs["pos"], int(cs["tier"]))
 	for sp in world.shrine_spots:
+		await _slice()
 		var n := Models.shrine()
 		n.position = sp
 		add_child(n)

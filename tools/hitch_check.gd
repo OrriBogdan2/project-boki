@@ -57,6 +57,7 @@ var headless := false
 var budget_ms := -1.0
 var seed_v := 4101
 var squad := 3
+var load_only := false     # --load-check: stop at the reveal and judge the loading screen
 var trace := false
 
 func _ready() -> void:
@@ -66,6 +67,7 @@ func _ready() -> void:
 		if a.begins_with("--hitch-seed="): seed_v = int(a.substr(13))
 		if a.begins_with("--hitch-squad="): squad = int(a.substr(14))
 		if a == "--hitch-trace": trace = true
+		if a == "--load-check": load_only = true
 	headless = DisplayServer.get_name() == "headless"
 	var adapter := RenderingServer.get_video_adapter_name().to_lower()
 	software = not headless and (adapter.contains("llvmpipe") or adapter.contains("softpipe") or adapter.contains("swiftshader") or adapter.contains("swrast"))
@@ -112,13 +114,17 @@ func _process(_delta: float) -> void:
 	_walk_us += Time.get_ticks_usec() - c0
 	if m == null:
 		load_compiles += new_c
-		load_frames.append({"wall": wall, "marks": marks})
+		var ld := _loading_node()
+		load_frames.append({"wall": wall, "marks": marks, "render": _render_us / 1000.0, "compiles": new_c,
+			"spin": int(ld.get("spin_draws")) if ld and ld.get("spin_draws") != null else -1, "stage": String(ld.get("stage_label")) if ld and ld.get("stage_label") != null else ""})
 		var cur = Game.main.current
 		if cur is Match and (cur as Match).is_processing() and (cur as Match).hud != null:
 			m = cur
 			m.set_process(false)
 			load_ms = (now - started_us) / 1000.0
 			phase = "first"
+			if load_only:
+				_finish_load()
 		return
 	# what the last frame cost outside our own stepping (known only now)
 	if not frames.is_empty():
@@ -289,6 +295,74 @@ func _trace_lights() -> void:
 	for k in _lights:
 		if not now.has(k): print("HITCH-LIGHT gone ", _lights[k])
 	_lights = now
+
+func _loading_node() -> Node:
+	for ch in Game.main.get_children():
+		var sc = ch.get_script()
+		if sc and String(sc.resource_path).ends_with("loading.gd"):
+			return ch
+	return null
+
+## --load-check: the loading screen from the click to the reveal. Every frame of it should be
+## short enough that the screen keeps moving (and the window never looks hung):
+##   - a real GPU: no frame over 100 ms.
+##   - a software rasterizer or headless: a frame's time outside drawing (wall minus the render
+##     submit, which on llvmpipe is the raster itself) over 150 ms fails. Timings on a busy machine
+##     are noisy: compare runs back to back.
+## and the spinner has to have drawn on every frame the loading screen was up (its draw count goes
+## up each frame; a frame that blocks would show as one step).
+func _finish_load() -> void:
+	_end = true
+	var lines: Array = []
+	lines.append("LOAD renderer=%s adapter=%s window=%s" % [RenderingServer.get_current_rendering_method(), RenderingServer.get_video_adapter_name(), str(get_window().size)])
+	var fl := load_frames.duplicate()
+	var budget := budget_ms if budget_ms > 0.0 else (150.0 if (software or headless) else 100.0)
+	var cpu_only := software or headless
+	var over := 0
+	var worst := 0.0
+	var worst_cpu := 0.0
+	for f in fl:
+		var cpu := float(f["wall"]) - float(f["render"])
+		f["cpu"] = cpu
+		worst = maxf(worst, float(f["wall"]))
+		worst_cpu = maxf(worst_cpu, cpu)
+		if (cpu if cpu_only else float(f["wall"])) > budget: over += 1
+	lines.append("LOAD total %.0f ms over %d frames; longest frame %.0f ms (%.0f ms outside drawing); %d frames over %.0f ms%s" % [load_ms, fl.size(), worst, worst_cpu, over, budget, " (judged outside drawing)" if cpu_only else ""])
+	# the spinner: frames the loading screen was up on, and how many of them drew it
+	var up := 0
+	var drawn := 0
+	var prev := -1
+	for f in fl:
+		var sp := int(f["spin"])
+		if sp < 0:
+			prev = -1
+			continue
+		if prev >= 0:
+			up += 1
+			if sp > prev: drawn += 1
+		prev = sp
+	lines.append("LOAD spinner drew on %d of %d loading-screen frames" % [drawn, up])
+	var ranked := fl.duplicate()
+	ranked.sort_custom(func(a, b): return float(a["cpu" if cpu_only else "wall"]) > float(b["cpu" if cpu_only else "wall"]))
+	lines.append("LOAD longest frames (wall, outside drawing, render, shader compiles, stage shown, build steps inside):")
+	for f in ranked.slice(0, 12):
+		lines.append("LOAD   %7.0f %7.0f %7.0f  c%-3d %-22s %s" % [float(f["wall"]), float(f["cpu"]), float(f["render"]), int(f["compiles"]), String(f["stage"]),
+			", ".join((f["marks"] as Array).map(func(mk): return "%s %.0f" % [mk[1], mk[2]]))])
+	var steps := {}
+	for mk in PerfLog.marks:
+		steps[mk[1]] = float(steps.get(mk[1], 0.0)) + float(mk[2])
+	var sk := steps.keys()
+	sk.sort_custom(func(a, b): return steps[a] > steps[b])
+	lines.append("LOAD build steps (total ms): " + ", ".join(sk.slice(0, 16).map(func(k): return "%s %.0f" % [k, steps[k]])))
+	var spin_ok := up == 0 or drawn >= up - 1
+	var ok := over == 0 and spin_ok and up > 0
+	lines.append("LOAD %s" % ("PASS" if ok else "FAIL (%d slow frames%s%s)" % [over, "" if spin_ok else ", spinner skipped frames", "" if up > 0 else ", no loading screen seen"]))
+	var txt := "\n".join(lines)
+	print(txt)
+	if out_path != "":
+		var fa := FileAccess.open(out_path, FileAccess.WRITE)
+		if fa: fa.store_string(txt + "\n")
+	get_tree().quit(0 if ok else 1)
 
 ## Runs after every other _process in the frame: marks where the scripts ended.
 class Tail extends Node:

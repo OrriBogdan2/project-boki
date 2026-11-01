@@ -55,14 +55,14 @@ func v(x: int, z: int) -> int:
 
 ## Builds the whole terrain mesh.
 func build() -> ArrayMesh:
-	_emit(0)
+	await _emit(0)
 	return _mesh(V, N, C, UV)
 
 ## The same terrain split into square chunks of `chunk` tiles, so the camera (and each shadow
 ## cascade) only draws the ground it can see: [[Vector2i chunk, ArrayMesh], ...]. Cells are traced
 ## row by row, so each chunk is a run of slices of the one big set of arrays.
 func build_chunked(chunk: int) -> Array:
-	_emit(chunk)
+	await _emit(chunk)
 	var by := {}
 	for r in _ranges:
 		var key: Vector2i = r[0]
@@ -86,6 +86,7 @@ func _emit(chunk: int) -> void:
 	_fill_under()
 	_ranges.clear()
 	for cz in range(-1, h):
+		await W._slice()       # under the loading screen: a frame now and then (never waits in one-go builds)
 		var cur := Vector2i(-99, -99)
 		var start := V.size()
 		for cx in range(-1, w):

@@ -58,6 +58,9 @@ var legs: Array[Node3D] = []
 var wings: Array[Node3D] = []
 var spin: Node3D
 var phase := randf() * TAU
+## Blinks and twitches roll on their own generator: they run every frame (the loading screen
+## included), so drawing from the global one would shift whatever the match builds after them.
+static var _idle_rng := RandomNumberGenerator.new()
 var quirk := ""
 var girth := 1.0
 var quirk_t := 3.0     # until the next time it does its habit
@@ -250,8 +253,8 @@ func _process(dt: float) -> void:
 	# blinking, and a squint when dazed
 	blink_t -= dt
 	if blink_t <= 0.0:
-		blink_t = randf_range(1.8, 4.6)
-		if randf() < 0.2:
+		blink_t = _idle_rng.randf_range(1.8, 4.6)
+		if _idle_rng.randf() < 0.2:
 			blink_t = 0.22   # a double blink now and then
 		blink_k = 1.0
 	blink_k = maxf(0.0, blink_k - dt * 8.0)
@@ -279,7 +282,7 @@ func _process(dt: float) -> void:
 	if ears:
 		twitch_t -= dt
 		if twitch_t <= 0.0:
-			twitch_t = randf_range(2.0, 5.0)
+			twitch_t = _idle_rng.randf_range(2.0, 5.0)
 			twitch = 1.0
 		twitch = maxf(0.0, twitch - dt * 6.0)
 		var droop := 0.35 if dazed else 0.0
