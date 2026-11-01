@@ -620,6 +620,7 @@ func _build_env() -> void:
 	var env := WorldEnvironment.new()
 	var e := Look.environment({"top": Color("2a4a8a"), "mid": Color("6a8ad0"), "horizon": Color("ffd2a8"), "below": Color("3a3a6a"),
 		"ambient": Color("c4cbe6"), "ambient_energy": 0.5, "fog": Color("8a96c8"), "fog_height": -4.0, "stars": 0.0})
+	Look.cozy(e)
 	env.environment = e
 	add_child(env)
 	env_res = e
@@ -751,11 +752,14 @@ func _update_sky(d: float) -> void:
 		Sfx.play_ambience("rain" if raining else "home")
 	rain_k = move_toward(rain_k, 1.0 if raining else 0.0, d * 0.3)
 	rain.position = Vector3(ppos.x, 12.0, ppos.z)
-	var day_col := Color("ffe9cf").lerp(Color("ff9a6a"), dusk * 0.8)
+	# home is the warm place: a honey-coloured sun, a long golden hour, and lamps glowing amber
+	# against a soft blue night (the expedition is the cold, moody one)
+	var day_col := Color("ffe2b4").lerp(Color("ff9058"), dusk * 0.85)
 	sun_l.light_color = day_col.lerp(Color("8fa6e0"), 1.0 - light)
-	sun_l.light_energy = lerpf(0.4, 0.9, light) * (1.0 - rain_k * 0.35)
+	sun_l.light_energy = lerpf(0.4, 1.0, light) * (1.0 - rain_k * 0.35)
 	sun_l.rotation_degrees = Vector3(lerpf(-28.0, -62.0, maxf(sun_h, 0.0)), -30.0 + day_t * 80.0, 0)
-	env_res.ambient_light_color = Color("c4cbe6").lerp(Color("8090c8"), 1.0 - light).lerp(Color("ffc9a8"), dusk * 0.35)
+	env_res.ambient_light_color = Color("e6d4c4").lerp(Color("8090c8"), 1.0 - light).lerp(Color("ffc39a"), dusk * 0.45)
+	env_res.fog_light_color = Color("c8a890").lerp(Color("4a5590"), 1.0 - light).lerp(Color("ff9e78"), dusk * 0.5)
 	env_res.ambient_light_energy = lerpf(0.36, 0.45, light) * (1.0 - rain_k * 0.2)
 	env_res.adjustment_enabled = true
 	env_res.adjustment_brightness = lerpf(0.92, 1.0, light) * (1.0 - rain_k * 0.08)
@@ -763,8 +767,9 @@ func _update_sky(d: float) -> void:
 	Look.night(env_res, (1.0 - light) * 0.75)
 	var lamp_on := clampf(1.2 - light * 1.6, 0.0, 1.0)
 	for l in lamps:
-		l.light_energy = 0.25 + lamp_on * 2.2
-		l.omni_range = 4.0 + lamp_on * 3.5
+		l.light_color = Color("ffc37a")
+		l.light_energy = 0.3 + lamp_on * 2.6
+		l.omni_range = 4.0 + lamp_on * 4.0
 
 func _process(delta: float) -> void:
 	var d := minf(delta, 0.05)

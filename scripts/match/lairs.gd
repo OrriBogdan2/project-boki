@@ -591,7 +591,9 @@ func _music(on: bool) -> void:
 	if on == music_on:
 		return
 	music_on = on
-	Sfx.play_music("hollow" if on or m.tier >= 2 else "match", 0.8)
+	# the layered score brings its boss stem in by itself (MusicDir reads music_on)
+	if m.music_dir == null or not m.music_dir.started:
+		Sfx.play_music("hollow" if on or m.tier >= 2 else "match", 0.8)
 
 ## The lair emptied: the boss settles back to sleep in the middle and heals up.
 func reset_boss(b: Boss) -> void:
@@ -621,6 +623,7 @@ func on_boss_phase(b: Boss, p: int) -> void:
 	if m.player and inside(L, m.player.pos, 6.0) and m.hud:
 		m.hud.toast("PHASE %d  ·  %s grows furious" % [p + 1, b.md["name"]], color_of(L))
 	m.sfx("warn", b.pos, 2.0, 0.6)
+	Juice.boss_phase(m, b)
 
 func on_enrage(b: Boss) -> void:
 	if m.player and inside(b.lair, m.player.pos, 6.0) and m.hud:

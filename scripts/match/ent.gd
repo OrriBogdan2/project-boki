@@ -318,9 +318,21 @@ func net_follow(dt: float) -> void:
 var lod_dt := 0.0       # frame time a far-away entity's visuals skipped (Match renders it less often)
 var _flash_set := -1.0
 var _flash_n := -1
+## Presentation only: a hit shoves the model a little along the hit (Juice.hit adds to it) and it
+## springs back; during a hit's freeze the model holds where it was and shivers along that line.
+var flinch := Vector3.ZERO
+var _held := Vector3.INF
 func render(delta: float, alpha: float) -> void:
-	if freeze_t <= 0.0:
-		position = prev.lerp(pos, alpha)
+	if freeze_t <= 0.0 or _held == Vector3.INF:
+		_held = prev.lerp(pos, alpha)
+	if flinch.length_squared() > 0.0001:
+		var fo := flinch
+		if freeze_t > 0.0: fo *= 1.0 if (Engine.get_frames_drawn() & 1) == 0 else -0.6
+		position = _held + fo
+		flinch *= exp(-delta * 16.0)
+	else:
+		flinch = Vector3.ZERO
+		position = _held
 	squash = maxf(0.0, squash - delta * 2.5)
 	var f := clampf(flash_t / 0.12, 0.0, 1.0)
 	# (only when it changes: most frames nothing is flashing, and every set is a render-server call)

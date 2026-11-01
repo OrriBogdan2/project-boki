@@ -15,6 +15,10 @@ var lines: Array = []         # {node, t}
 var flashes: Array = []
 var particle_mat: StandardMaterial3D
 var rng := RandomNumberGenerator.new()
+var sparks: Array[CPUParticles3D] = []    # velocity-stretched streaks (shaders/spark.gdshader)
+var si := 0
+var flash_pool: Array[MeshInstance3D] = []
+var fi := 0
 
 func _ready() -> void:
 	particles = PARTICLES * float(Settings.q("fx"))
@@ -63,6 +67,130 @@ func _ready() -> void:
 		l.visible = false
 		add_child(l)
 		num_pool.append(l)
+	_build_sparks()
+
+func _build_sparks() -> void:
+	var qm := QuadMesh.new(); qm.size = Vector2(1, 1)
+	var sm := ShaderMaterial.new(); sm.shader = load("res://shaders/spark.gdshader")
+	var ramp := Gradient.new()
+	ramp.set_color(0, Color(1, 1, 1, 1)); ramp.set_color(1, Color(1, 1, 1, 0))
+	var shrink := Curve.new()
+	shrink.add_point(Vector2(0, 1)); shrink.add_point(Vector2(1, 0.25))
+	for i in 18:
+		var p := CPUParticles3D.new()
+		p.one_shot = true
+		p.emitting = false
+		p.explosiveness = 1.0
+		p.mesh = qm
+		p.material_override = sm
+		p.lifetime = 0.25
+		p.amount = 8
+		p.particle_flag_align_y = true
+		p.direction = Vector3.UP
+		p.spread = 60.0
+		p.gravity = Vector3(0, -10, 0)
+		p.initial_velocity_min = 5.0
+		p.initial_velocity_max = 10.0
+		p.scale_amount_min = 0.035
+		p.scale_amount_max = 0.06
+		p.scale_amount_curve = shrink
+		p.damping_min = 6.0
+		p.damping_max = 12.0
+		p.color_ramp = ramp
+		p.local_coords = false
+		p.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		add_child(p)
+		sparks.append(p)
+	if _impact_quad == null:
+		_impact_quad = QuadMesh.new(); _impact_quad.size = Vector2(2, 2)
+	var ish: Shader = load("res://shaders/impact.gdshader")
+	for i in 20:
+		var mi := MeshInstance3D.new()
+		mi.mesh = _impact_quad
+		var m := ShaderMaterial.new(); m.shader = ish
+		mi.material_override = m
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		mi.visible = false
+		add_child(mi)
+		flash_pool.append(mi)
+
+## A spray of hot streaks (hit sparks, muzzle embers) along dir.
+func spark(at: Vector3, dir: Vector3, col: Color, amount := 8, speed := 9.0, spread := 50.0, life := 0.22, grav := 10.0, size := 1.0) -> void:
+	if sparks.is_empty():
+		return
+	var p := sparks[si]
+	si = (si + 1) % sparks.size()
+	p.global_position = at
+	var na := maxi(2, int(round(amount * clampf(particles / PARTICLES, 0.4, 1.0))))
+	if p.amount != na: p.amount = na
+	p.color = col
+	p.lifetime = life
+	p.direction = dir.normalized() if dir.length() > 0.01 else Vector3.UP
+	p.spread = spread
+	p.initial_velocity_min = speed * 0.45
+	p.initial_velocity_max = speed
+	p.gravity = Vector3(0, -grav, 0)
+	p.scale_amount_min = 0.035 * size
+	p.scale_amount_max = 0.06 * size
+	p.restart()
+	p.emitting = true
+
+## A gun going off: a short star of flame at the muzzle, embers thrown forward, and on the heavy
+## guns a puff of smoke that hangs for a moment. power: 1 an SMG round .. 3 a slug or a sniper.
+func muzzle(at: Vector3, dir2: Vector2, col: Color, power := 1.0) -> void:
+	var d := Vector3(dir2.x, 0.05, dir2.y).normalized()
+	var hot := Color(1.0, 0.86, 0.55).lerp(col, 0.25)
+	flash(at + d * 0.12, hot, 0.16 + 0.07 * power, 0.05 + 0.012 * power)
+	spark(at, d, hot, int(3 + 2 * power), 7.0 + 3.0 * power, 16.0 + 6.0 * power, 0.09 + 0.02 * power, 0.0, 0.8 + 0.15 * power)
+	if power >= 1.8:
+		burst(at + d * 0.35, Color(0.78, 0.76, 0.74, 0.35), int(3 * power), 1.2, 0.5, -0.6, 1.6, d, 30.0)
+
+## A hit landing: a flash where it struck, sparks thrown out the far side along the shot, a few
+## kicked back toward the shooter; crits flash gold and wider, armor sheds blue shards.
+## power: 0..3 from the damage.
+func impact(at: Vector3, dir: Vector3, col: Color, power := 1.0, crit := false, armor := false) -> void:
+	var fcol := col
+	if crit: fcol = Color("ffd23f")
+	elif armor: fcol = Color("8fd4ff")
+	var sz := (0.26 + 0.14 * power) * (1.45 if crit else 1.0)
+	flash(at, fcol, sz, 0.07 + 0.02 * power + (0.04 if crit else 0.0))
+	var dd := dir.normalized() if dir.length() > 0.01 else Vector3.UP
+	dd = (dd + Vector3(0, 0.35, 0)).normalized()
+	spark(at, dd, fcol.lerp(Color.WHITE, 0.3), int(5 + 4 * power) + (6 if crit else 0), 7.0 + 3.0 * power, 38.0 + (25.0 if crit else 0.0), 0.2 + 0.04 * power, 12.0, 1.0 + 0.2 * power)
+	if power >= 1.0 or crit:
+		spark(at, (-dd + Vector3(0, 0.9, 0)).normalized(), fcol, int(2 + 2 * power), 4.0 + 1.5 * power, 70.0, 0.18, 14.0, 0.8)
+	if armor:
+		burst(at, Color("9ad8ff"), int(4 + 3 * power), 4.5, 0.35, 14.0, 0.8, dd, 70.0)
+	if crit:
+		ring(at + Vector3(0, -0.6, 0), 1.1 + 0.25 * power, Color(1.0, 0.85, 0.3, 0.85), 0.2)
+
+## A straight bolt of light from a to b that flares and fades (a rail shot, a beam ability): a soft
+## camera-facing ribbon (shaders/light_shaft.gdshader) with a white-hot core line inside it.
+var _beam_sh: Shader
+func beam(a: Vector3, b: Vector3, col: Color, width := 0.45, dur := 0.28) -> void:
+	if _beam_sh == null:
+		_beam_sh = load("res://shaders/light_shaft.gdshader")
+	var ln := a.distance_to(b)
+	if ln < 0.2:
+		return
+	var axis := (b - a) / ln
+	for k in 2:
+		var mi := MeshInstance3D.new()
+		var qm := QuadMesh.new(); qm.size = Vector2(1, 1)
+		mi.mesh = qm
+		var m := ShaderMaterial.new(); m.shader = _beam_sh
+		m.set_shader_parameter("color", col if k == 0 else col.lerp(Color.WHITE, 0.75))
+		m.set_shader_parameter("intensity", 2.2 if k == 0 else 3.0)
+		mi.material_override = m
+		var w := width * (1.0 if k == 0 else 0.3)
+		var x_axis := axis.cross(Vector3.UP if absf(axis.y) < 0.95 else Vector3.RIGHT).normalized() * w
+		var z_axis := x_axis.cross(axis).normalized()
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		add_child(mi)
+		mi.global_transform = Transform3D(Basis(x_axis, axis * ln, z_axis), (a + b) * 0.5)
+		var tw := mi.create_tween()
+		tw.tween_method(func(v: float) -> void: m.set_shader_parameter("intensity", v), 2.2 if k == 0 else 3.0, 0.0, dur).set_ease(Tween.EASE_IN)
+		tw.tween_callback(mi.queue_free)
 
 ## Readability: every particle burst is thinned out, so effects mark what happened without
 ## burying the fight under confetti.
@@ -116,17 +244,24 @@ func ghost(at: Vector3, yaw: float, col: Color, scl: float) -> void:
 func number(at: Vector3, v: float, col: Color, crit: bool, prefix := "") -> void:
 	if v < 0.5 or (prefix == "" and not Settings.get_v("damage_numbers")):
 		return
-	# rapid hits on the same spot (a minigun, a burn ticking, pellets) add up on one number instead
-	# of spraying a new one for every tick
+	# rapid hits on the same target (a minigun, an SMG, pellets, a burn ticking) add up on one
+	# number that sits on it and grows with each hit, then floats off once the hits stop
 	for n in nums:
-		if n.has("val") and float(n["t"]) < 0.4 and String(n["pre"]) == prefix and (n["base"] as Vector3).distance_to(at) < 1.3:
+		if n.has("val") and float(n["last"]) < MERGE_T and String(n["pre"]) == prefix and (n["base"] as Vector3).distance_to(at) < 1.6:
 			n["val"] = float(n["val"]) + v
+			n["last"] = 0.0
+			n["base"] = at
+			n["hits"] = int(n["hits"]) + 1
 			var ln: Label3D = n["node"]
 			ln.text = prefix + str(int(round(float(n["val"]))))
 			if crit:
-				ln.modulate = col; ln.font_size = 64
-			ln.scale = Vector3.ONE * (1.7 if crit else 1.4)
-			n["t"] = minf(float(n["t"]), 0.12)
+				n["crit"] = true
+				ln.modulate = col
+			elif not n.get("crit", false):
+				ln.modulate = col
+			ln.font_size = _num_size(float(n["val"]), bool(n.get("crit", false)))
+			ln.modulate.a = 1.0
+			ln.scale = Vector3.ONE * (1.75 if crit else 1.45)
 			return
 	var l: Label3D = num_pool.pop_front()
 	num_pool.append(l)
@@ -135,11 +270,21 @@ func number(at: Vector3, v: float, col: Color, crit: bool, prefix := "") -> void
 			nums.erase(n); break
 	l.text = prefix + str(int(round(v)))
 	l.modulate = col
-	l.font_size = 64 if crit else 50
-	l.global_position = at + Vector3(rng.randf_range(-0.3, 0.3), 0, rng.randf_range(-0.2, 0.2))
+	l.font_size = _num_size(v, crit)
+	var off := Vector3(rng.randf_range(-0.35, 0.35), 0, rng.randf_range(-0.2, 0.2))
+	l.global_position = at + off
 	l.visible = true
-	l.scale = Vector3.ONE * (1.6 if crit else 1.25)
-	nums.append({"node": l, "t": 0.0, "vel": Vector3(rng.randf_range(-0.6, 0.6), 3.2, 0), "val": v, "pre": prefix, "base": at})
+	l.scale = Vector3.ONE * (1.9 if crit else 1.5)
+	nums.append({"node": l, "t": 0.0, "last": 0.0, "vel": Vector3(rng.randf_range(-0.5, 0.5), 2.6, 0), "val": v, "pre": prefix, "base": at, "off": off, "hits": 1, "crit": crit})
+
+## How long a number keeps taking hits after the last one, and how long it lingers on the target.
+const MERGE_T := 0.45
+const STICK_T := 0.3
+
+## Bigger totals and crits read bigger, within a small range so numbers never cover the fight.
+func _num_size(v: float, crit: bool) -> int:
+	var k := clampf(log(maxf(v, 1.0)) / log(10.0) - 1.0, 0.0, 1.0)     # 10 -> 0, 100 -> 1
+	return int(lerpf(46.0, 60.0, k)) + (12 if crit else 0)
 
 ## A short word that floats up (COMBO, an ability's name, BOND READY).
 func word(at: Vector3, txt: String, col: Color, big := false) -> void:
@@ -201,21 +346,23 @@ func slash(at: Vector3, a0: float, arc: float, reach: float, col: Color, heavy :
 
 static var _impact_quad: QuadMesh
 func flash(at: Vector3, col: Color, size := 0.35, dur := 0.06) -> void:
-	var mi := MeshInstance3D.new()
-	# a star of rays round a white-hot core (shaders/impact.gdshader), lasting a little longer than
-	# the old ball so the shape registers
-	if _impact_quad == null:
-		_impact_quad = QuadMesh.new(); _impact_quad.size = Vector2(2, 2)
-	mi.mesh = _impact_quad
-	var m := ShaderMaterial.new(); m.shader = load("res://shaders/impact.gdshader")
+	# a star of rays round a white-hot core (shaders/impact.gdshader), from a pool so a firefight
+	# doesn't make and free a mesh for every shot
+	if flash_pool.is_empty():
+		return
+	var mi := flash_pool[fi]
+	fi = (fi + 1) % flash_pool.size()
+	for f in flashes:
+		if f["node"] == mi:
+			flashes.erase(f); break
+	var m := mi.material_override as ShaderMaterial
 	m.set_shader_parameter("color", col)
 	m.set_shader_parameter("seed", rng.randf() * TAU)
 	m.set_shader_parameter("rays", float([4, 5, 6][rng.randi_range(0, 2)]))
-	mi.material_override = m
+	m.set_shader_parameter("life", 0.0)
 	mi.scale = Vector3.ONE * size * 1.6
-	dur = maxf(dur, 0.1)
-	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	add_child(mi)
+	dur = maxf(dur, 0.07)
+	mi.visible = true
 	mi.global_position = at
 	flashes.append({"node": mi, "t": 0.0, "dur": dur, "s0": size * 1.6})
 
@@ -284,6 +431,24 @@ func _process(delta: float) -> void:
 	for n in nums.duplicate():
 		n["t"] += delta
 		var l: Label3D = n["node"]
+		if n.has("last"):
+			# a damage number: rides on the target while hits keep landing, then lifts off and fades
+			n["last"] += delta
+			var lt: float = n["last"]
+			var base: Vector3 = n["base"]
+			var rise := minf(float(n["t"]), 0.25) * 1.6
+			if lt < STICK_T:
+				l.global_position = l.global_position.lerp(base + n["off"] + Vector3(0, 0.25 + rise, 0), minf(1.0, delta * 18.0))
+			else:
+				n["vel"].y -= 5.0 * delta
+				l.global_position += n["vel"] * delta
+			l.scale = Vector3.ONE * lerpf(l.scale.x, 1.0, minf(1.0, delta * 14.0))
+			var fade := lt - STICK_T
+			l.modulate.a = clampf(1.0 - fade * 2.4, 0.0, 1.0)
+			if fade > 0.45:
+				l.visible = false
+				nums.erase(n)
+			continue
 		n["vel"].y -= 9.0 * delta
 		l.global_position += n["vel"] * delta
 		var k: float = n["t"]
@@ -307,7 +472,7 @@ func _process(delta: float) -> void:
 		mi.scale = Vector3.ONE * float(f.get("s0", 1.0)) * (1.0 + fk * 0.6)
 		(mi.material_override as ShaderMaterial).set_shader_parameter("life", clampf(fk, 0.0, 1.0))
 		if f["t"] >= f["dur"]:
-			mi.queue_free(); flashes.erase(f)
+			mi.visible = false; flashes.erase(f)
 	for g in ghosts.duplicate():
 		g["t"] += delta
 		var k: float = g["t"] / 0.26
