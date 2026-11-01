@@ -1,4 +1,4 @@
-# Adding content to Kinfall
+# Adding content to Project Boki
 
 Everything here is plain JSON under `content/`. The game reads it when it starts; no code changes.
 Colours are hex strings, times are seconds, distances are tiles.

@@ -4,7 +4,7 @@ def j(p): return json.load(open(os.path.join(R, p)))
 def ab(i): return j(f"content/abilities/{i}.json")
 out = []
 w = out.append
-w("# Kinfall abilities\n")
+w("# Project Boki abilities\n")
 w("Every ability in an expedition, by slot. All of them are data: `content/abilities/*.json` (class dashes, weapon RMBs, kin abilities), `content/gloves/*.json` (Q gloves), `content/rules/dash_riders.json` (the kin element riders on Shift) and `content/ultimates/*.json` (R). They are built from the effect verbs in `scripts/combat/effects.gd` and the world verbs in `scripts/combat/verbs.gd` (walls, mirrors, tethers, traps, bridges, yanks, decoys), so a new ability is a new JSON file.\n")
 w("This file is generated from the JSON by a script; the descriptions are the one-liners players see in the kit panel (K) and on hover.\n")
 w("## Ranks\n")

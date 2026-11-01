@@ -95,17 +95,17 @@ func weapon_for(cls: String, w: String) -> String:
 ## The soundtrack. Tracks join your music list the first time you hear them; some only play in
 ## rare places or moments.
 const MUSIC := {
-	"title": {"name": "Kinfall", "hint": "The title screen."},
+	"title": {"name": "Project Boki", "hint": "The title screen."},
 	"home_day": {"name": "Hearthwind", "hint": "Your home island by day."},
 	"home_night": {"name": "Hearthwind (Night)", "hint": "Your home island after dark."},
 	"orchard": {"name": "Orchard Light", "hint": "Cross the bridge to Orchard Isle."},
-	"meadow": {"name": "Tag in the Meadow", "hint": "Cross the bridge to Kin Meadow."},
+	"meadow": {"name": "Tag in the Meadow", "hint": "Cross the bridge to Boki Meadow."},
 	"summit": {"name": "Lookout Wind", "hint": "Cross the bridge to Lookout Peak."},
 	"match": {"name": "Into the Isles", "hint": "Head out on an expedition."},
 	"hollow": {"name": "The Hollow", "hint": "Brave the Hollow."},
 	"hub": {"name": "Market Square", "hint": "Visit the town."},
 	"guild": {"name": "Banners", "hint": "Visit a guild isle."},
-	"lullaby": {"name": "Kin Lullaby", "hint": "Watch a kin evolve."},
+	"lullaby": {"name": "Boki Lullaby", "hint": "Watch a Boki evolve."},
 }
 
 ## One perk per loadout.
@@ -153,7 +153,7 @@ static func auto_bot_diff(tier: int, extracts: int, tutorial := false) -> String
 
 const SIGS := {
 	"cloak": {"name": "Cloak", "cd": 14.0, "desc": "Vanish for 3s and move 35% faster. Firing reveals you."},
-	"mend": {"name": "Mend", "cd": 16.0, "desc": "Heal 35 to you, nearby teammates and kin. Nearby revives jump halfway."},
+	"mend": {"name": "Mend", "cd": 16.0, "desc": "Heal 35 to you, nearby teammates and Boki. Nearby revives jump halfway."},
 	"fortify": {"name": "Fortify", "cd": 16.0, "desc": "A 60 point shield for 5s. Nothing can knock you back."},
 }
 
@@ -295,13 +295,13 @@ const BOSSES := ["colossus", "serpent", "brood"]
 ## Crops grow on the farm while you play matches. Each becomes something for your next match.
 const CROPS := {
 	"emberberry": {"name": "Emberberry", "grow": 2, "color": Color("ff6a4a"), "price": 20,
-		"use": "treat_power", "desc": "Treat: your kin deals 25% more damage next match."},
+		"use": "treat_power", "desc": "Treat: your Boki deals 25% more damage next match."},
 	"tidebloom": {"name": "Tidebloom", "grow": 1, "color": Color("5ab8f0"), "price": 12,
 		"use": "tonic", "desc": "Brews 2 tonics. Key 1 in a match heals 45."},
 	"sunroot": {"name": "Sunroot", "grow": 2, "color": Color("f2c84a"), "price": 18,
-		"use": "treat_hardy", "desc": "Treat: your kin has 40% more health next match."},
+		"use": "treat_hardy", "desc": "Treat: your Boki has 40% more health next match."},
 	"mindmint": {"name": "Mindmint", "grow": 3, "color": Color("8fe0b0"), "price": 25,
-		"use": "treat_calm", "desc": "Treat: +12 trust. Calm kin follow risky orders."},
+		"use": "treat_calm", "desc": "Treat: +12 trust. Calm Boki follow risky orders."},
 	"puffcorn": {"name": "Puffcorn", "grow": 1, "color": Color("f6e3a8"), "price": 8,
 		"use": "snack", "desc": "Snack: your partner gets +4 trust right away. Quick and cheap."},
 	"glowcap": {"name": "Glowcap", "grow": 2, "color": Color("b48cff"), "price": 30, "weight": 0.6,
@@ -314,7 +314,7 @@ const CROPS := {
 ## walk over it (rugs). Prices are in gems at the stall or the decorating catalog.
 const FURN := {
 	"bed": {"name": "Bed", "price": 60, "size": [2, 3]},
-	"kin_bed": {"name": "Kin basket", "price": 25, "size": [1, 1]},
+	"kin_bed": {"name": "Boki basket", "price": 25, "size": [1, 1]},
 	"table": {"name": "Table", "price": 40, "size": [2, 1]},
 	"chair": {"name": "Chair", "price": 15, "size": [1, 1]},
 	"stool": {"name": "Stool", "price": 10, "size": [1, 1]},
@@ -332,14 +332,14 @@ const FURN := {
 	"easel": {"name": "Painting", "price": 40, "size": [1, 1]},
 	"trophy": {"name": "Trophy stand", "price": 70, "size": [1, 1]},
 	"cushion": {"name": "Floor cushion", "price": 12, "size": [1, 1], "walk": true},
-	"toy_ball": {"name": "Kin toy", "price": 8, "size": [1, 1], "walk": true},
+	"toy_ball": {"name": "Boki toy", "price": 8, "size": [1, 1], "walk": true},
 }
 
 ## Rooms you can go into: floor size in tiles and what's in them to begin with.
 const ROOMS := {
 	"house": {"name": "Your house", "w": 10, "d": 8, "floor": Color("8f6644"), "wall": Color("efe2c8"),
 		"start": [["bed", 1, 1, 0], ["rug", 4, 4, 0], ["table", 6, 1, 0], ["chair", 6, 2, 0], ["lamp", 0, 6, 0], ["stove", 9, 1, 0], ["kin_bed", 8, 6, 0], ["plant", 9, 6, 0]]},
-	"cottage": {"name": "Kin Cottage", "w": 8, "d": 6, "floor": Color("86603f"), "wall": Color("e8d8b8"),
+	"cottage": {"name": "Boki Cottage", "w": 8, "d": 6, "floor": Color("86603f"), "wall": Color("e8d8b8"),
 		"start": [["kin_bed", 1, 1, 0], ["kin_bed", 3, 1, 0], ["rug_round", 4, 3, 0], ["toy_ball", 6, 4, 0]]},
 	"cottage2": {"name": "Meadow Cottage", "w": 8, "d": 6, "floor": Color("86603f"), "wall": Color("dfe8c8"),
 		"start": [["kin_bed", 1, 1, 0], ["kin_bed", 6, 1, 0], ["cushion", 3, 3, 0], ["plant", 7, 4, 0]]},
@@ -363,15 +363,15 @@ const BOT_NAMES := Names.BOT      # ~2,000 handles
 
 ## Expedition tiers: deeper islands are harder and richer, and in the Hollow your partner can be lost.
 const TIERS := [
-	{"name": "The Meadow", "desc": "Gentle islands. Your kin are always safe here: lose your loot, never your kin.",
+	{"name": "The Meadow", "desc": "Gentle islands. Your Boki are always safe here: lose your loot, never your Boki.",
 		"mob": 1.0, "loot": 1.0, "kin_lvl": [1, 3], "unlock": 0, "risk_kin": false, "kin_drop": false, "loose_capture": false, "lives": 1,
 		"biome": {"top": Color("5f8d45"), "top2": Color("4a7538"), "side": Color("8b6d52"), "deep": Color("3a3140"), "leaf": Color("5a9a4f")},
 		"sky": Color("10131f"), "ambient": Color("b9c4e6"), "sun": Color("fff1dc"), "clouds": [Color(0.06, 0.07, 0.13), Color(0.22, 0.24, 0.38)]},
-	{"name": "Dusk Isles", "desc": "Tougher monsters, more loot, rarer kin. Kin you have on you drop into your deathbox when you die, and anyone can loot them. Kin out of your hands escape.",
+	{"name": "Dusk Isles", "desc": "Tougher monsters, more loot, rarer Boki. Boki you have on you drop into your deathbox when you die, and anyone can loot them. Boki out of your hands escape.",
 		"mob": 1.45, "loot": 1.75, "kin_lvl": [2, 5], "unlock": 2, "risk_kin": true, "kin_drop": true, "loose_capture": false, "lives": 1,
 		"biome": {"top": Color("56688a"), "top2": Color("465576"), "side": Color("6d5a74"), "deep": Color("2a2440"), "leaf": Color("8a6fb8")},
 		"sky": Color("150f22"), "ambient": Color("c9b4e6"), "sun": Color("ffc9a8"), "clouds": [Color(0.09, 0.05, 0.14), Color(0.32, 0.2, 0.4)]},
-	{"name": "The Hollow", "desc": "Brutal and rich. Kin on you drop into your deathbox and can be looted, and kin out of your hands can be captured (hold the interact key for 3s).",
+	{"name": "The Hollow", "desc": "Brutal and rich. Boki on you drop into your deathbox and can be looted, and Boki out of your hands can be captured (hold the interact key for 3s).",
 		"mob": 2.0, "loot": 2.75, "kin_lvl": [4, 8], "unlock": 5, "risk_kin": true, "kin_drop": true, "loose_capture": true, "lives": 1,
 		"biome": {"top": Color("4f6b5e"), "top2": Color("3d5650"), "side": Color("5a4a44"), "deep": Color("1e1a22"), "leaf": Color("c25a4a")},
 		"sky": Color("0d0b10"), "ambient": Color("d0a0a0"), "sun": Color("ffb090"), "clouds": [Color(0.07, 0.03, 0.04), Color(0.3, 0.12, 0.12)]},
@@ -381,40 +381,40 @@ const TIERS := [
 const ISLES := {
 	"orchard": {"name": "Orchard Isle", "cost": 100, "need": 1, "c": Vector2(69, 11), "r": Vector2(8.5, 6.5),
 		"bridge": [62, 14, 63, 29], "sign": Vector2(60.6, 29.4), "desc": "A sunny isle with room for a greenhouse."},
-	"meadow": {"name": "Kin Meadow", "cost": 140, "need": 2, "c": Vector2(10.5, 30.5), "r": Vector2(8.4, 7.2),
-		"bridge": [17, 30, 26, 31], "sign": Vector2(25.2, 29.0), "desc": "Open fields where kin love to play. Room for a cottage and a training yard."},
+	"meadow": {"name": "Boki Meadow", "cost": 140, "need": 2, "c": Vector2(10.5, 30.5), "r": Vector2(8.4, 7.2),
+		"bridge": [17, 30, 26, 31], "sign": Vector2(25.2, 29.0), "desc": "Open fields where Boki love to play. Room for a cottage and a training yard."},
 	"summit": {"name": "Lookout Peak", "cost": 220, "need": 4, "c": Vector2(45, 9), "r": Vector2(9.0, 6.5),
 		"bridge": [44, 12, 45, 24], "sign": Vector2(46.8, 23.6), "desc": "A high rock for a vault and a trophy hall."},
 	"grove": {"name": "Blossom Grove", "cost": 180, "need": 3, "c": Vector2(12, 53), "r": Vector2(8.5, 6.8),
 		"bridge": [17, 47, 34, 48], "sign": Vector2(34.6, 45.0), "desc": "A quiet grove with open ground to plant, decorate and lay out however you like."},
 	"pines": {"name": "Pine Hollow", "cost": 160, "need": 2, "c": Vector2(25, 11), "r": Vector2(8.0, 6.0),
-		"bridge": [28, 14, 29, 25], "sign": Vector2(30.6, 25.4), "desc": "A sheltered hollow of open ground: room for gardens, ponds and kin beds."},
+		"bridge": [28, 14, 29, 25], "sign": Vector2(30.6, 25.4), "desc": "A sheltered hollow of open ground: room for gardens, ponds and Boki beds."},
 }
 
 ## Buildings you can buy for your islands. "rect" is the tile footprint [x0, z0, x1, z1].
 const BUILDINGS := {
 	"workshop": {"name": "Workshop", "isle": "main", "cost": 90, "rect": [28, 26, 30, 28],
 		"desc": "Tune your glider. You glide 50% longer on expeditions."},
-	"cottage": {"name": "Kin Cottage", "isle": "main", "cost": 110, "rect": [27, 35, 29, 36],
-		"desc": "Kin who stay home rest here and gain 2 trust after every expedition."},
+	"cottage": {"name": "Boki Cottage", "isle": "main", "cost": 110, "rect": [27, 35, 29, 36],
+		"desc": "Boki who stay home rest here and gain 2 trust after every expedition."},
 	"greenhouse": {"name": "Greenhouse", "isle": "orchard", "cost": 150, "rect": [67, 7, 70, 9],
 		"desc": "Four more plots. Crops planted here grow twice as fast."},
 	"cottage2": {"name": "Meadow Cottage", "isle": "meadow", "cost": 140, "rect": [8, 26, 10, 27],
-		"desc": "Kin who stay home gain 2 more trust after every expedition."},
+		"desc": "Boki who stay home gain 2 more trust after every expedition."},
 	"dojo": {"name": "Training Yard", "isle": "meadow", "cost": 180, "rect": [11, 32, 14, 34],
-		"desc": "Kin who stay home gain 40 XP after every expedition."},
+		"desc": "Boki who stay home gain 40 XP after every expedition."},
 	"vault": {"name": "Vault", "isle": "summit", "cost": 220, "rect": [41, 7, 43, 8],
 		"desc": "If you go down, you still keep a third of the gems you were carrying."},
 	"board": {"name": "Challenge House", "isle": "main", "cost": 0, "rect": [31, 22, 33, 23], "free": true,
 		"desc": "Challenges to take on, their rewards, and what they unlock at the market."},
 	"ransom": {"name": "Ransom House", "isle": "main", "cost": 0, "rect": [42, 39, 44, 40], "free": true,
-		"desc": "Old Pell's place. Kin left behind on expeditions end up here, and it's where you deal with rivals who took yours."},
+		"desc": "Old Pell's place. Boki left behind on expeditions end up here, and it's where you deal with rivals who took yours."},
 	"hall": {"name": "Trophy Hall", "isle": "summit", "cost": 120, "rect": [47, 6, 49, 8],
-		"desc": "Keeps your records and every kin you've brought home."},
+		"desc": "Keeps your records and every Boki you've brought home."},
 	"armory": {"name": "Armory", "isle": "main", "cost": 40, "rect": [45, 25, 47, 26],
 		"desc": "Stores the weapons and gloves you bring home. Pick what you take on your next expedition, sell or salvage the rest, and get a bigger backpack."},
 	"shrine": {"name": "Soul Shrine", "isle": "main", "cost": 150, "rect": [49, 35, 50, 36], "needs_ember": true,
-		"desc": "Lit by a Soul Ember. Keeps the souls of kin buried in the graveyard, and can bring one back (a little different)."},
+		"desc": "Lit by a Soul Ember. Keeps the souls of Boki buried in the graveyard, and can bring one back (a little different)."},
 }
 
 const MATCH := {

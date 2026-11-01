@@ -138,7 +138,7 @@ static func learn(rec: Dictionary, st: Dictionary) -> void:
 	add(rec, "swift", float(st.get("throws", 0)) * 0.8)
 
 static func describe(ev: Dictionary, rec: Dictionary) -> String:
-	var kname: String = rec.get("name", "Your kin")
+	var kname: String = rec.get("name", "Your Boki")
 	var a: Dictionary = AFF[ev["aff"]]
 	match String(ev["kind"]):
 		"form":

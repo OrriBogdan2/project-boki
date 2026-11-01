@@ -1358,7 +1358,7 @@ func use_kin_ability(slot: String) -> void:
 	if not k.ready_to_fight():
 		_ab_feedback(slot, "deny")
 		if is_local() and m.hud:
-			m.hud.toast("%s is resting%s" % [k.rec.get("name", "Your kin"), ("  ·  %s swaps in %s" % [Settings.key_cap("swap_kin"), (kin2 as Kin).rec.get("name", "your other kin")]) if kin2 and (kin2 as Kin).hp > 0.0 else ""], Color("a2a8bb"))
+			m.hud.toast("%s is resting%s" % [k.rec.get("name", "Your Boki"), ("  ·  %s swaps in %s" % [Settings.key_cap("swap_kin"), (kin2 as Kin).rec.get("name", "your other Boki")]) if kin2 and (kin2 as Kin).hp > 0.0 else ""], Color("a2a8bb"))
 		return
 	if k.use_ability(slot, _ground_aim()) or k.pend_slot == slot:
 		used[slot] = int(used.get(slot, 0)) + 1
@@ -1378,7 +1378,7 @@ func use_ultimate() -> void:
 		return
 	_ab_feedback("r", "deny")
 	if is_local() and m.hud and ult >= 1.0 and kin and not (kin as Kin).ready_to_fight():
-		m.hud.toast("Your kin has to be with you", Color("a2a8bb"))
+		m.hud.toast("Your Boki has to be with you", Color("a2a8bb"))
 
 ## Tells the HUD a button press landed ("cast": the slot pops) or didn't ("deny": it shakes red
 ## with a soft buzz), so a press on cooldown never just silently does nothing.

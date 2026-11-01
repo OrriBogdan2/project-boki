@@ -36,11 +36,11 @@ const UNIQUE_DMG := 1.1
 const VALUABLES := {
 	"old_coin": {"name": "Old Coin", "col": Color("e8c27a"), "value": 14, "rar": 1, "desc": "Sells for a few gems."},
 	"sky_pearl": {"name": "Sky Pearl", "col": Color("cfeaff"), "value": 32, "rar": 2, "desc": "Sells well."},
-	"kin_idol": {"name": "Kin Idol", "col": Color("ffb0d0"), "value": 58, "rar": 3, "desc": "A little carved kin. Collectors pay a lot."},
+	"kin_idol": {"name": "Boki Idol", "col": Color("ffb0d0"), "value": 58, "rar": 3, "desc": "A little carved Boki. Collectors pay a lot."},
 	"crown_shard": {"name": "Crown Shard", "col": Color("ffd23f"), "value": 105, "rar": 4, "desc": "A piece of an old crown. Worth a fortune."},
-	"soul_ember": {"name": "Soul Ember", "col": Color("9ff0e0"), "value": 140, "rar": 4, "desc": "A warm, glowing ember. The Soul Shrine needs one to raise it, and one for every kin it brings back."},
+	"soul_ember": {"name": "Soul Ember", "col": Color("9ff0e0"), "value": 140, "rar": 4, "desc": "A warm, glowing ember. The Soul Shrine needs one to raise it, and one for every Boki it brings back."},
 	# worth more than anything else you can carry, so smart loot and a full pack always keep it
-	"rare_egg": {"name": "Rare Egg", "col": Color("ffcf4a"), "value": 400, "rar": 4, "desc": "A boss's egg, big and glowing gold. Carry it home and it hatches into a rare kin."},
+	"rare_egg": {"name": "Rare Egg", "col": Color("ffcf4a"), "value": 400, "rar": 4, "desc": "A boss's egg, big and glowing gold. Carry it home and it hatches into a rare Boki."},
 }
 
 ## A lair boss's egg as a backpack item: which rare kin hatches from it, and who guarded it.
@@ -201,8 +201,8 @@ static func sub_of(it: Dictionary) -> String:
 			if not Gear.ALL.has(id): return "Glove"
 			return ("Active glove  ·  " if Gear.active(id) else "Passive glove  ·  ") + Gear.stat_text(id, rar_of(it))
 		"val":
-			if is_rare_egg(it): return "Rare Egg  ·  carry it home and it hatches a rare kin"
-			return "Treasure  ·  sells for %d gems" % sell_price(it) if String(it.get("id", "")) != "soul_ember" else "Revives a kin at the Soul Shrine"
+			if is_rare_egg(it): return "Rare Egg  ·  carry it home and it hatches a rare Boki"
+			return "Treasure  ·  sells for %d gems" % sell_price(it) if String(it.get("id", "")) != "soul_ember" else "Revives a Boki at the Soul Shrine"
 	var bits: Array = []
 	var r: Dictionary = Data.RARITY[rar_of(it)]
 	var dm := (float(r["dmg"]) * (UNIQUE_DMG if String(it.get("uq", "")) != "" else 1.0) - 1.0) * 100.0

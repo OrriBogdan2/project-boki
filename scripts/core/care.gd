@@ -51,9 +51,9 @@ const NATURES := {
 
 ## Things a kin can love or hate. Foods are crops plus what the stall sells.
 const FOODS := {
-	"kibble": {"name": "Kin kibble", "col": Color("c8a26a"), "food": 30.0, "joy": 0.0, "price": 6, "desc": "Plain and filling."},
-	"sweetbun": {"name": "Sweet bun", "col": Color("f6c6a0"), "food": 18.0, "joy": 18.0, "price": 14, "desc": "A treat. Makes any kin happy."},
-	"tonicbrew": {"name": "Pep brew", "col": Color("8ff0a0"), "food": 6.0, "joy": 4.0, "energy": 35.0, "price": 18, "desc": "Wakes a tired kin right up."},
+	"kibble": {"name": "Boki kibble", "col": Color("c8a26a"), "food": 30.0, "joy": 0.0, "price": 6, "desc": "Plain and filling."},
+	"sweetbun": {"name": "Sweet bun", "col": Color("f6c6a0"), "food": 18.0, "joy": 18.0, "price": 14, "desc": "A treat. Makes any Boki happy."},
+	"tonicbrew": {"name": "Pep brew", "col": Color("8ff0a0"), "food": 6.0, "joy": 4.0, "energy": 35.0, "price": 18, "desc": "Wakes a tired Boki right up."},
 }
 const PLAYS := ["fetch", "brush", "bath", "chat", "pet"]
 const PLAY_NAMES := {"fetch": "playing fetch", "brush": "being brushed", "bath": "baths", "chat": "chatting", "pet": "scratches"}

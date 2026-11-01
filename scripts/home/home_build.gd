@@ -765,8 +765,8 @@ func _pay(g: int, s: int, wd := 0, st := 0) -> void:
 func _short(g: int, s: int, wd := 0, st := 0) -> String:
 	if int(Save.d["gems"]) < g: return "gems"
 	if int(Save.d.get("scrap", 0)) < s: return "scrap (salvage spare weapons)"
-	if Work.mat("wood") < wd: return "wood (Timber kin at a Lumber Camp make it)"
-	if Work.mat("stone") < st: return "stone (Stone kin at a Quarry make it)"
+	if Work.mat("wood") < wd: return "wood (Timber Boki at a Lumber Camp make it)"
+	if Work.mat("stone") < st: return "stone (Stone Boki at a Quarry make it)"
 	return "gems"
 
 ## What placing n of id costs after using what's in storage: [gems, scrap, from storage, wood, stone].
@@ -1112,7 +1112,7 @@ func feeder_fits(t: Vector2i, from: String) -> bool:
 		var q := p + Vector3(cos(a) * HomeEcon.SEAT_R, 0, sin(a) * HomeEcon.SEAT_R)
 		var qi := w.idx(int(floor(q.x)), int(floor(q.z)))
 		if not w.is_void(q.x, q.z) and (w.occupy(q.x, q.z, 0.3, 0.0, true) == 0.0 or String(occ.get(qi, "")) == tag) and qi != i: free += 1
-	if free < 3: why = "Kin need room round it to eat"; return false
+	if free < 3: why = "Boki need room round it to eat"; return false
 	var fc: Array = []
 	if from != "":
 		var f0: Dictionary = h.hecon._feeder(from)
@@ -1509,7 +1509,7 @@ func _build_bar() -> void:
 			if i == colour: sb.border_width_bottom = 3; sb.border_width_top = 3; sb.border_width_left = 3; sb.border_width_right = 3; sb.border_color = UI.INK
 			for st in ["normal", "hover", "pressed"]: sw.add_theme_stylebox_override(st, sb)
 			sw.pressed.connect(func(): Sfx.play("click"); set_colour(ci))
-			sw.tooltip_text = "Colour for banners, rugs and kin beds"
+			sw.tooltip_text = "Colour for banners, rugs and Boki beds"
 			tabs.add_child(sw)
 	var ub := UI.button("Undo", func(): undo_last(), 76); ub.disabled = undo.is_empty(); tabs.add_child(ub)
 	tabs.add_child(UI.primary("Done", func(): toggle(), 80))
@@ -1609,7 +1609,7 @@ func _tab_items() -> Array:
 var make := {}                          # item -> [options]; options are Vector2i (feeder) or {x, z, r}
 var make_pick := {}
 var make_marks: Array = []
-const MAKE_ITEMS := [["feeder", "First feeder", "f2c84a"], ["workshop", "Workshop lot", "5ab0f0"], ["cottage", "Kin Cottage lot", "ff9ac8"]]
+const MAKE_ITEMS := [["feeder", "First feeder", "f2c84a"], ["workshop", "Workshop lot", "5ab0f0"], ["cottage", "Boki Cottage lot", "ff9ac8"]]
 
 func needs_making() -> bool:
 	return h.visit.is_empty() and not bool(L().get("made", true))

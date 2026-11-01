@@ -293,7 +293,7 @@ func _draw_world_labels() -> void:
 		var tp := cam.unproject_position(th.position + Vector3(0, 2.8, 0))
 		var on := not cam.is_position_behind(th.position) and Rect2(Vector2(30, 30), sz - Vector2(60, 60)).has_point(tp)
 		if on:
-			_ctext(tp, "Has your kin", 15, GOLD, big)
+			_ctext(tp, "Has your Boki", 15, GOLD, big)
 			c.draw_colored_polygon(PackedVector2Array([tp + Vector2(-8, 6), tp + Vector2(8, 6), tp + Vector2(0, 16)]), GOLD)
 		else:
 			var ctr := sz * 0.5
@@ -1375,7 +1375,7 @@ func _draw_weapon(sz: Vector2, p: Hunter) -> void:
 	var gx := r.position.x + 4.0
 	Icons.draw(c, "gem", Vector2(gx + 8, y + s - 10), 7.0, GOLD)
 	_text(Vector2(gx + 20, y + s - 4), "%d" % p.gems, 18, GOLD if p.gems > 0 else MUTED, big)
-	_text(Vector2(gx + 2, y + 14), "%d seeds · %d kin" % [seeds, p.caught.size()], 10, MUTED, big)
+	_text(Vector2(gx + 2, y + 14), "%d seeds · %d Boki" % [seeds, p.caught.size()], 10, MUTED, big)
 	if not m.opts.get("training", false):
 		# the backpack: slots used (red when full); the key opens it
 		var full := p.pack.size() >= p.pack_cap
@@ -1870,7 +1870,7 @@ func _draw_kit(sz: Vector2, p: Hunter) -> void:
 		if kd1: lines.append([Settings.key_cap("signature"), kd1.display_name, kd1.desc, kd1.color])
 		var ud := Ultimate.def_for(k)
 		if ud: lines.append([Settings.key_cap("ultimate"), ud.display_name + " (bond ultimate)", ud.desc + " Fill the bond meter by fighting together.", ud.color])
-		lines.append([Settings.key_cap("throw"), "Throw / recall " + String(k.rec.get("name", "your kin")), "Stuns what it hits; then your shots deal a combo. Press again to call it back.", kcol])
+		lines.append([Settings.key_cap("throw"), "Throw / recall " + String(k.rec.get("name", "your Boki")), "Stuns what it hits; then your shots deal a combo. Press again to call it back.", kcol])
 	var dsi := p.slot_info("dash")
 	lines.append([Settings.key_cap("dash"), String(dsi["name"]) + ((" + " + String(dsi["rider"])) if String(dsi.get("rider", "")) != "" else ""), String(dsi["desc"]), dsi["col"]])
 	var g0: Dictionary = p.gear[0]
@@ -2034,9 +2034,9 @@ func _draw_downed(sz: Vector2, p: Hunter) -> void:
 	c.draw_rect(Rect2(Vector2.ZERO, sz), Color(0.3, 0.02, 0.02, 0.18))
 	_ctext(Vector2(sz.x * 0.5, sz.y * 0.32), "You're down", 34, BAD, big)
 	var left := p.down_hp / Data.MATCH["down_hp"] * Life.R["bleed_out"]
-	var who := "You're a wisp: %ds left. A teammate or your kin standing on you brings you back. Enemies can stomp or execute you." % int(ceil(left))
+	var who := "You're a wisp: %ds left. A teammate or your Boki standing on you brings you back. Enemies can stomp or execute you." % int(ceil(left))
 	if p.kin and p.kin.state == "fainted":
-		who = "You're a wisp: %ds left, and your kin is out cold. Only a teammate standing on you can bring you back." % int(ceil(left))
+		who = "You're a wisp: %ds left, and your Boki is out cold. Only a teammate standing on you can bring you back." % int(ceil(left))
 	var stomped: bool = p.get_meta("stomped", false)
 	if stomped:
 		var sts: Array = p.get_meta("stompers", [])
@@ -2071,7 +2071,7 @@ func _draw_dead(sz: Vector2, p: Hunter) -> void:
 func _draw_scores(sz: Vector2) -> void:
 	var r := Rect2(Vector2(sz.x * 0.5 - 300, sz.y * 0.18), Vector2(600, 40 + m.hunters.size() * 28))
 	_panel(r, Color(0.05, 0.06, 0.09, 0.9), 14)
-	_text(r.position + Vector2(20, 30), "Hunter", 14, MUTED); _text(r.position + Vector2(260, 30), "Kin", 14, MUTED)
+	_text(r.position + Vector2(20, 30), "Hunter", 14, MUTED); _text(r.position + Vector2(260, 30), "Boki", 14, MUTED)
 	_text(r.position + Vector2(380, 30), "Knocks", 14, MUTED); _text(r.position + Vector2(450, 30), "Damage", 14, MUTED); _text(r.position + Vector2(530, 30), "State", 14, MUTED)
 	var hs := m.hunters.duplicate()
 	hs.sort_custom(func(a, b): return a.team < b.team)
@@ -2227,35 +2227,35 @@ func _tip_lines(id: String, p: Hunter) -> Array:
 			var kd: AbilityDef = k.runner.def_of(id)
 			if kd == null: return []
 			out.append([kd.display_name, kd.color])
-			out.append(["%s's ability  ·  %s" % [k.rec.get("name", "Kin"), Settings.key_cap("signature" if id == "k1" else "kin_skill")], MUTED, 12])
+			out.append(["%s's ability  ·  %s" % [k.rec.get("name", "Boki"), Settings.key_cap("signature" if id == "k1" else "kin_skill")], MUTED, 12])
 			out.append([kd.desc, INK, 14])
-			var where := "Your kin casts it; from your shoulder it's thrown out first." if kd.from == "kin" else "Works on you wherever your kin is."
+			var where := "Your Boki casts it; from your shoulder it's thrown out first." if kd.from == "kin" else "Works on you wherever your Boki is."
 			out.append(["Cooldown %s%s. %s" % [_secs(kd.cooldown / maxf(0.1, k.runner.rate)), ("  ·  ready in %s" % _secs(k.runner.cd_left(id))) if not k.runner.is_ready(id) else "  ·  ready", where], MUTED, 13])
 			if not kd.auto.is_empty():
-				out.append(["Your kin also uses it on its own when it sees the chance (turn this off in Settings).", Color(kd.color, 0.85), 12])
+				out.append(["Your Boki also uses it on its own when it sees the chance (turn this off in Settings).", Color(kd.color, 0.85), 12])
 		"r":
 			var ud := Ultimate.def_for(p.kin) if p.kin else null
 			if ud == null: return []
 			out.append([ud.display_name, ud.color])
 			out.append(["Bond ultimate  ·  %s  ·  %s" % [Settings.key_cap("ultimate"), "fuses onto you" if ud.form == "armor" else "giant form"], MUTED, 12])
 			out.append([ud.desc, INK, 14])
-			out.append(["Bond %d%%. Fills as you and your kin land hits together, faster with combos." % int(p.ult * 100.0), GOLD, 13])
+			out.append(["Bond %d%%. Fills as you and your Boki land hits together, faster with combos." % int(p.ult * 100.0), GOLD, 13])
 		"swap":
 			var b: Kin = p.kin2
 			if b == null: return []
-			out.append(["Swap to %s" % b.rec.get("name", "your other kin"), Data.KIN[b.species]["color"]])
-			out.append(["Second kin  ·  %s" % Settings.key_cap("swap_kin"), MUTED, 12])
+			out.append(["Swap to %s" % b.rec.get("name", "your other Boki"), Data.KIN[b.species]["color"]])
+			out.append(["Second Boki  ·  %s" % Settings.key_cap("swap_kin"), MUTED, 12])
 			var names := []
 			for sl in ["k1", "k2"]:
 				var bd: AbilityDef = b.runner.def_of(sl)
 				if bd: names.append(bd.display_name)
 			var bu := Ultimate.def_for(b)
-			out.append(["Brings out %s: %s, and %s as its bond ultimate. The kin you swap out rests and heals." % [Data.KIN[b.species]["name"], " and ".join(names), bu.display_name if bu else "its ultimate"], INK, 14])
+			out.append(["Brings out %s: %s, and %s as its bond ultimate. The Boki you swap out rests and heals." % [Data.KIN[b.species]["name"], " and ".join(names), bu.display_name if bu else "its ultimate"], INK, 14])
 		"kin":
 			var k: Kin = p.kin
 			if k == null: return []
 			var ai := k.brain
-			out.append(["%s the %s" % [k.rec.get("name", "Kin"), Data.KIN[k.species]["name"]], Data.KIN[k.species]["color"]])
+			out.append(["%s the %s" % [k.rec.get("name", "Boki"), Data.KIN[k.species]["name"]], Data.KIN[k.species]["color"]])
 			out.append(["Level %d  ·  %d / %d health  ·  trust %d" % [int(k.rec.get("level", 1)), int(ceil(k.hp)), int(k.max_hp), int(k.trust)], MUTED, 12])
 			var traits := []
 			if ai.aggression > 0.6: traits.append("aggressive: chases foes far")
@@ -2276,9 +2276,9 @@ func _tip_lines(id: String, p: Hunter) -> Array:
 			if k == null: return []
 			var sp: Dictionary = Data.KIN[k.species]
 			var sh: Dictionary = Data.SHOULDER[sp["shoulder"]]
-			out.append(["Throw %s" % k.rec.get("name", "your kin"), sp["color"]])
-			out.append(["Kin  ·  %s" % Settings.key_cap("throw"), MUTED, 12])
-			out.append(["Throws your kin at the cursor. Whatever it hits is stunned, and your shots crit stunned foes. Press again to call it back.", INK, 14])
+			out.append(["Throw %s" % k.rec.get("name", "your Boki"), sp["color"]])
+			out.append(["Boki  ·  %s" % Settings.key_cap("throw"), MUTED, 12])
+			out.append(["Throws your Boki at the cursor. Whatever it hits is stunned, and your shots crit stunned foes. Press again to call it back.", INK, 14])
 			out.append(["On your shoulder: %s. %s" % [sh["name"], sh["desc"]], Color(sp["color"], 0.95), 13])
 		"dash":
 			var dd: AbilityDef = p.dodge_def
@@ -2396,9 +2396,9 @@ func _draw_world_hover(sz: Vector2, p: Hunter) -> void:
 			var a1: AbilityDef = k.runner.def_of("k1")
 			lines.append(["Yours. %s throws it, %s uses %s." % [Settings.key_cap("throw"), Settings.key_cap("signature"), a1.display_name if a1 else "its ability"], INK])
 		elif k.lost_from == "you" and k.lost_uid != "":
-			lines.append(["Your lost kin! Held by %s. Take it back." % (k.owner_h.pname if k.owner_h else "a rival"), GOLD])
+			lines.append(["Your lost Boki! Held by %s. Take it back." % (k.owner_h.pname if k.owner_h else "a rival"), GOLD])
 		else:
-			lines.append(["%s's kin." % (k.owner_h.pname if k.owner_h else "A rival hunter"), BAD])
+			lines.append(["%s's Boki." % (k.owner_h.pname if k.owner_h else "A rival hunter"), BAD])
 			_kit_lines(lines, k)
 	elif best is Hunter:
 		var h: Hunter = best
@@ -2414,7 +2414,7 @@ func _draw_world_hover(sz: Vector2, p: Hunter) -> void:
 			if not (h.gear[0] as Dictionary).is_empty() and Gear.ALL.has(String(h.gear[0]["id"])):
 				lines.append(["Glove: %s" % String(Gear.ALL[String(h.gear[0]["id"])]["name"]), Gear.ALL[String(h.gear[0]["id"])]["col"]])
 			if h.kin and not (h.kin as Kin).dead:
-				lines.append(["Kin: %s the %s" % [(h.kin as Kin).rec.get("name", "Kin"), Data.KIN[(h.kin as Kin).species]["name"]], Data.KIN[(h.kin as Kin).species]["color"]])
+				lines.append(["Boki: %s the %s" % [(h.kin as Kin).rec.get("name", "Boki"), Data.KIN[(h.kin as Kin).species]["name"]], Data.KIN[(h.kin as Kin).species]["color"]])
 				_kit_lines(lines, h.kin)
 		if h.downed:
 			lines.append(["Down. %s" % ("Hold %s next to them to revive." % Settings.key_cap("interact") if ally else "Finish them before they're revived."), BAD if not ally else GOOD])
