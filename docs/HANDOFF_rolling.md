@@ -136,15 +136,19 @@ The feature is behind the match option `rolling`. The default fixed-length match
 
 | | before (x1.5/level, cap x2) | after (x1.3/level, cap x1.6) |
 |---|---|---|
-| Earlier arrivals at your join | 31, levels 4-10 | LATE2_PRE |
-| Your wave (11:56), gap at 0/2/4 min | -3.5 / +0.0 / +2.0 | LATE2_W5 |
-| Wave 6 (14:40), gap at 0/2/4/6 min | -4.5 / -0.8 / +1.3 / +3.0 | LATE2_W6 |
-| Waves from 10:00, gap 6 min after landing | +1.75 | LATE2_GAP |
-| Catch-up share of all XP | 21.8% | LATE2_SHARE |
-| Bot XP/min on the map (median) | 287 | LATE2_XPM |
+| Earlier arrivals at your join | 31, levels 4-10 | 31, levels 4-10 (same plan) |
+| Your wave (11:56), gap at 0/2/4 min | -3.5 / +0.0 / +2.0 | -1.3 / +3.0 / - |
+| Wave 6 (14:40), gap at 0/2/4/6 min | -4.5 / -0.8 / +1.3 / +3.0 | -1.8 / +0.2 / +3.0 / - |
+| Waves from 10:00, gap 6 min after landing | +1.75 | n/a (no squad lasted 6 min) |
+| Catch-up share of all XP | 21.8% | **11.9%** |
+| Bot XP/min on the map (median) | 287 | 283 |
 
-Before, a squad landing 3-4 levels under the lobby was level with it after 2 minutes and well above it by
-4-6, which then put bounties on them. The new rate closes the gap more slowly. Logs:
+Before, catch-up was a fifth of all XP and a squad 3-4 levels under the lobby was level with it after 2
+minutes. After, catch-up is half as big (11.9% of XP). Late squads still pass the median within 2-4
+minutes, but that now comes from base XP (bots make ~280 XP/min, about a level a minute at levels 4-7),
+not from catch-up. The bots are not deterministic between runs (landing gaps differ: -3.5 vs -1.3 for the
+same wave), so read these as rough. If late joiners still level too fast in playtests, the next lever is
+monster XP, not catch-up. Logs:
 `/home/claude/shots/C/rolling_sim_seed5_join5_before.log`, `..._after.log`.
 
 Fixed along the way:
