@@ -248,20 +248,33 @@ func demo(which: String) -> void:
 		"empty":
 			# the whole island from above, as a new save first sees it
 			h.ppos = land; h.player.position = land
+			for k in h.kins:
+				k["pos"] = land + Vector3(6.0, 0, 4.5); (k["node"] as Node3D).position = k["pos"]; k["t"] = 999.0; k["goal"] = k["pos"]
 			cam.zoom_to = 2.5; cam.zoom = 2.5; cam.snap(Vector3(44, 0, 34))
-		"ghost":
+		"ghost", "ghostbad":
+			# build mode holding the house: on open meadow (green), or turned and pushed into the
+			# wild where it doesn't fit (red)
 			h.hb.toggle()
 			h.hb.cat = "Buildings"
-			h.hb.take("house")
 			var e := demo_place("house", land + Vector3(0, 0, -7), 0)      # find a spot, then take it back up as the ghost
 			if not e.is_empty():
 				var lay: Dictionary = h.hb.L()
 				lay["deco"].erase(e)
 				h.hb.apply(false)
-				h.hb.take("house")
+			h.hb.take("house")
+			if which == "ghost" and not e.is_empty():
 				h.hb.debug_m = Vector2(float(e["x"]) + 2.5, float(e["z"]) + 1.5)
+			elif which == "ghostbad":
+				h.hb.rotate_held()
+				var ti2 := nearest_wild(land + Vector3(0, 0, -7), "tree")
+				var w2: World = h.world
+				h.hb.debug_m = Vector2(ti2 % w2.w + 0.5, ti2 / w2.w + 2.0) if ti2 >= 0 else Vector2(land.x, land.z)
+			for mi in h.hb.ghost.find_children("*", "MeshInstance3D", true, false):
+				(mi as MeshInstance3D).transparency = 0.5
 			h.hb._build_bar()
-			cam.zoom_to = 1.5; cam.zoom = 1.5; cam.snap(land + Vector3(0, 0, -4))
+			var cm: Vector2 = h.hb.debug_m
+			cam.zoom_to = 1.25; cam.zoom = 1.25; cam.snap(Vector3(cm.x, 0, cm.y + 2.0))
+			h.ppos = Vector3(cm.x, 0, cm.y + 2.0); h.player.position = h.ppos
 		"chop", "station", "panel":
 			demo_place("house", land + Vector3(0, 0, -7), 0)
 			demo_place("crop_patch", land + Vector3(7, 0, -3), 0)
@@ -273,16 +286,38 @@ func demo(which: String) -> void:
 			var w: World = h.world
 			var tp := Vector3(ti % w.w + 0.5, 0, ti / w.w + 0.5)
 			if which == "chop":
-				var st := beside(ti, land)
+				# a tree you can stand south of (in front of it for the camera)
+				var st := Vector3.INF
+				var best_d := 1e9
+				for i in h.hb.wild_t:
+					if h.hb.wild_t[i] != "tree": continue
+					var x: int = i % w.w; var z: int = i / w.w
+					if not w.inb(x, z + 1) or w.kind[w.idx(x, z + 1)] != World.T_GROUND or w.kind[w.idx(x, z + 2)] != World.T_GROUND: continue
+					var dd := Vector2(x - land.x, z - land.z).length()
+					if dd < best_d: best_d = dd; ti = i; st = Vector3(x + 0.5, 0, z + 1.45)
+				if st == Vector3.INF: st = beside(ti, land)
 				h.ppos = st; h.player.position = st
-				cam.zoom_to = 0.75; cam.zoom = 0.75; cam.snap(st)
+				for k in h.kins:
+					k["pos"] = st + Vector3(2.0, 0, 1.0); (k["node"] as Node3D).position = k["pos"]
+				cam.zoom_to = 0.6; cam.zoom = 0.6; cam.snap(st)
 				demo_loop = true
 				use({"kind": "wild", "i": ti, "what": "tree"})
 				return
+			# the island's grove: the tree with the most trees round it, away from the landing
+			var bn := -1
+			for i in h.hb.wild_t:
+				if h.hb.wild_t[i] != "tree": continue
+				var p := Vector3(i % w.w + 0.5, 0, i / w.w + 0.5)
+				if Vector2(p.x - land.x, p.z - land.z).length() < 9.0: continue
+				var n := 0
+				for j in h.hb.wild_t:
+					if h.hb.wild_t[j] == "tree" and Vector2(j % w.w - i % w.w, j / w.w - i / w.w).length() < 3.5: n += 1
+				if n > bn: bn = n; tp = p
 			var camp := demo_place("lumber_camp", tp, 0, 2.0)
+			var cc := HomeLayout.deco_center(camp) if not camp.is_empty() else tp
 			var rocks := nearest_wild(tp, "rock")
-			var garden := demo_place("seed_garden", tp + Vector3(0, 0, 3), 0, 3.0)
-			var kiln := demo_place("kiln", tp + Vector3(3, 0, 0), 0, 3.0)
+			var garden := demo_place("seed_garden", cc + (cc - tp).normalized() * 3.0 + Vector3(-2, 0, 0), 0, 1.0)
+			var kiln := demo_place("kiln", cc + (cc - tp).normalized() * 3.0 + Vector3(2, 0, 0), 0, 1.0)
 			var quarry := demo_place("quarry", Vector3(rocks % w.w + 0.5, 0, rocks / w.w + 0.5), 0, 2.0) if rocks >= 0 else {}
 			var roster: Array = Save.d["roster"]
 			var pairs := [[1, camp], [2, garden], [3, kiln]]
@@ -300,7 +335,10 @@ func demo(which: String) -> void:
 				kj["phase"] = "work"; kj["left"] = 999.0; kj["dur"] = 1400.0
 				h.hw._hold(k, String(kj["kind"]))
 				k["t"] = 999.0
-			h.ppos = mid + Vector3(1.2, 0, 2.6); h.player.position = h.ppos
-			cam.zoom_to = 0.85; cam.zoom = 0.85; cam.snap(h.ppos)
+			h.ppos = mid + (mid - tp).normalized() * 2.5 + Vector3(0, 0, 1.0); h.player.position = h.ppos
+			for k in h.kins:
+				if Work.assigned(k["rec"]) < 0:
+					k["pos"] = h.ppos + Vector3(-1.5, 0, 1.5); (k["node"] as Node3D).position = k["pos"]; k["t"] = 999.0; k["goal"] = k["pos"]
+			cam.zoom_to = 0.9; cam.zoom = 0.9; cam.snap(mid + (mid - tp).normalized() * 1.5)
 			if which == "panel" and not camp.is_empty():
 				h.get_tree().create_timer(0.5).timeout.connect(func(): h.hw.open_station(camp))

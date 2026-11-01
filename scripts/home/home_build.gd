@@ -774,7 +774,7 @@ func _targets(skip_b := "") -> Array:
 		var sg: Vector2 = Data.ISLES[k]["sign"]
 		out.append(Vector3(sg.x, 0, sg.y))
 	for t in h.training_targets(): out.append(t)
-	return out
+	return out.filter(func(t): return (t as Vector3).x > -100.0)     # (farm-start fixtures not put down yet)
 
 func _hit(seen: PackedByteArray, p: Vector3) -> bool:
 	var w: World = h.world
@@ -1065,8 +1065,9 @@ func _make_ghost() -> void:
 		var e := {"id": id, "x": 0, "z": 0, "r": int(held["r"]), "u": 1, "c": _held_colour(), "sp": String(Save.active_kin().get("species", "zapple"))}
 		ghost = make_deco(e)
 	if ghost:
+		var see := 0.5 if HomeLayout.CATALOG.get(id, {}).has("fixture") else 0.35     # a house-sized ghost shows the tint under it
 		for mi in ghost.find_children("*", "MeshInstance3D", true, false):
-			(mi as MeshInstance3D).transparency = 0.35
+			(mi as MeshInstance3D).transparency = see
 		for l in _lights_of(ghost): l.queue_free()
 		h.add_child(ghost)
 		ghost.visible = false
@@ -1296,7 +1297,24 @@ func _place_feeder() -> bool:
 	_done(p, "%s set down" % Econ.fdef(f)["name"])
 	return true
 
+## The ghost itself takes the tint too (green fits, red doesn't), so a big one that covers its own
+## tiles still says whether it fits.
+func _tint_ghost() -> void:
+	if not is_instance_valid(ghost):
+		return
+	var want := 1 if ghost_ok else 0
+	if int(ghost.get_meta("tint", -1)) == want:
+		return
+	ghost.set_meta("tint", want)
+	var m := StandardMaterial3D.new()
+	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	m.albedo_color = Color(0.4, 1.0, 0.5, 0.4) if ghost_ok else Color(1.0, 0.3, 0.25, 0.45)
+	for mi in ghost.find_children("*", "MeshInstance3D", true, false):
+		(mi as MeshInstance3D).material_overlay = m
+
 func _draw_cells() -> void:
+	_tint_ghost()
 	if not is_instance_valid(ghost_cells):
 		return
 	for ch in ghost_cells.get_children():

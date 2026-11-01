@@ -2779,7 +2779,9 @@ func _open_shop() -> void:
 			if int(Save.d["plot_cap"]) < 8:
 				goods.append(["plots", "Two more plots", "Grow more at once.", 120 + 80 * (int(Save.d["plot_cap"]) - 4), Color("9c7a52"), func():
 					Save.d["plot_cap"] = int(Save.d["plot_cap"]) + 2
-					_build_plots(), "%d plots" % int(Save.d["plot_cap"])])
+					_build_plots()
+					if fs and plots.size() < int(Save.d["plot_cap"]):
+						_toast("Put down another crop patch for them (Build, Buildings)"), "%d plots" % int(Save.d["plot_cap"])])
 	# open goods first, then the ones still locked
 	goods.sort_custom(func(a, b): return int(Progress.unlocked(a[0])) > int(Progress.unlocked(b[0])))
 	# every good on one page: two columns of one-line rows (the full description on hover)

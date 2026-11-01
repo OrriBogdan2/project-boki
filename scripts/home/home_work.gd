@@ -975,7 +975,7 @@ func open_station(e: Dictionary) -> void:
 	if crew.size() < int(cfg["slots"]):
 		v.add_child(UI.section("Assign a Boki"))
 		if cands.is_empty():
-			v.add_child(UI.label("None of your Boki has the %s knack." % Work.name_of(el), UI.T_BODY, UI.MUTED))
+			v.add_child(UI.label(("No other Boki of yours has the %s knack." if not crew.is_empty() else "None of your Boki has the %s knack.") % Work.name_of(el), UI.T_BODY, UI.MUTED))
 		for r in cands.slice(0, 5):
 			var rr: Dictionary = r
 			var row := UI.hbox(10)

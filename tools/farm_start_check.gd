@@ -81,7 +81,7 @@ func run(m: Node) -> void:
 	print("FARMSTART  plan %s, generated %s, standing %s" % [str(pk), str(rk), str(kinds)])
 	wd0.free()
 	var v := hb.validate()
-	ok(int(v["reached"]) == int(v["open"]), "every bit of open ground can be walked to from the landing (%d of %d)" % [int(v["reached"]), int(v["open"])])
+	ok(bool(v["ok"]) and int(v["reached"]) == int(v["open"]), "every bit of open ground can be walked to from the landing (%d of %d), nothing the island needs is cut off" % [int(v["reached"]), int(v["open"])])
 	# ---------------------------------------------------------------- 2. placing: ghost, tint, turning, one house
 	hb.toggle()
 	hb.cat = "Buildings"; hb._build_bar()
@@ -117,6 +117,8 @@ func run(m: Node) -> void:
 	hb.take("cook_pot")
 	var pp := _spot(hb, home.spots["house"] + Vector3(4, 0, 3))
 	ok(_put(hb, pp) and home.spots["pot"].x > 0.0, "the cooking pot goes down beside it")
+	var v2 := hb.validate()
+	ok(bool(v2["ok"]), "the house door, the plots, the pot and the portal can all be walked to (%d places missed)" % (v2["missing"] as Array).size())
 	ok(int(Save.d["gems"]) == HomeLayout.FS_GEMS - ess + 10, "%d gems left after the essentials (with the first day's +5 for the house and the patch)" % int(Save.d["gems"]))
 	# the house can be picked up and moved again
 	var he: Dictionary = HomeLayout.fixtures(Save.d, "house")[0]

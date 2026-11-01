@@ -194,8 +194,9 @@ static func placed(b: String, d: Dictionary) -> bool:
 static func ensure(d: Dictionary) -> Dictionary:
 	if typeof(d.get("layout")) != TYPE_DICTIONARY:
 		var L := fresh()
-		if not bool(d.get("tutorial", {}).get("home", false)):
-			# a brand new home: a farm-start island of its own, nearly empty (see new_fs)
+		if d.has("tutorial") and not bool(d.get("tutorial", {}).get("home", false)):
+			# a brand new home: a farm-start island of its own, nearly empty (see new_fs). (Only a
+			# real save: someone else's island you're visiting has no "tutorial" and stays as it is.)
 			L = new_fs(d)
 		for s in STOCK if int(L.get("fs", 0)) < 1 else []:
 			var e := {"u": _next_uid(L), "id": String(s[0]), "x": int(floor(float(s[1]))), "z": int(floor(float(s[2]))), "r": 0, "px": float(s[1]), "pz": float(s[2])}
