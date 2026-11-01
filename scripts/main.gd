@@ -420,6 +420,10 @@ func _ready() -> void:
 		# tooling: a scripted expedition with per-phase frame costs and hitches (tests/perf_probe.gd)
 		add_child(load("res://tests/perf_probe.gd").new())
 		return
+	if "--hitch-check" in args:
+		# a seeded expedition through the drop and landing; fails on a stalled frame (tools/hitch_check.gd)
+		add_child(load("res://tools/hitch_check.gd").new())
+		return
 	if OS.has_feature("web"):
 		_expose_test_hooks()
 		var hash := str(JavaScriptBridge.eval("location.hash", true))
