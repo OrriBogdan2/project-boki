@@ -985,8 +985,8 @@ func _vitals(sp: Vector2, w: float, h: Hunter, hp_col: Color, trail: float, numb
 	if numbers:
 		_text(Vector2(hr.end.x + 5, sp.y + 9), str(int(ceil(h.hp))), 12, Color(1, 1, 1, 0.9), big)
 
-func _seg_bar(r: Rect2, val: float, maxv: float, trail: float, col: Color, step: float) -> void:
-	_rounded(r.grow(2.0), Color(0.03, 0.03, 0.05, 0.82), 4)
+func _seg_bar(r: Rect2, val: float, maxv: float, trail: float, col: Color, step: float, edge := 2.0) -> void:
+	_rounded(r.grow(edge), Color(0.03, 0.03, 0.05, 0.82), 4)
 	var f := clampf(val / maxf(1.0, maxv), 0.0, 1.0)
 	if trail > f:
 		c.draw_rect(Rect2(r.position, Vector2(r.size.x * trail, r.size.y)), Color(1.0, 0.92, 0.82, 0.85))
@@ -1674,24 +1674,43 @@ func _chip_of(e: Ent, frac: float) -> float:
 	chip[e.nid] = t
 	return t
 
+## Nameplate size and visibility (SUPERVIVE keeps these small: a thin bar, a small badge, the name
+## only for allies or a rival you point at or are close to).
+const NP_W := 54.0              # bar width
+const NP_HP_H := 5.0            # health bar height
+const NP_AR_H := 2.0            # armor strip height
+const NP_BADGE_R := 6.0
+const NP_NAME_FS := 11
+const NP_NAME_NEAR := 9.0       # a rival this close shows their name
+const NP_HOVER_PX := 46.0       # ... or the mouse within this of their plate
+
+## Does this hunter's plate show their name? Allies always; rivals when hovered or close, or down.
+func _np_show_name(sp: Vector2, h: Hunter) -> bool:
+	if m.player == null or h.team == m.player.team or h.downed:
+		return true
+	if m.player.flat_dist(h) < NP_NAME_NEAR:
+		return true
+	return c.get_local_mouse_position().distance_to(sp) < NP_HOVER_PX
+
 func _nameplate(sp: Vector2, h: Hunter) -> void:
 	if not sp.is_finite():
 		return
 	var col := _unit_col(h)
-	var w := 70.0
+	var w := NP_W
 	var x0 := sp.x - w * 0.5
-	# badge + name
+	# badge (+ the name, when it shows)
 	var cc: Color = Data.CLASSES.get(h.cls, {}).get("color", INK)
-	var bc := Vector2(x0 - 10, sp.y - 16)
-	c.draw_circle(bc, 7.5, Color(0.03, 0.03, 0.05, 0.9))
-	c.draw_arc(bc, 7.5, 0, TAU, 18, col, 1.6, true)
-	_ctext(bc + Vector2(0, 4), String(h.cls).substr(0, 1).to_upper(), 10, cc, big)
-	_text(Vector2(x0 + 2, sp.y - 11), h.pname.substr(0, 14), 13, col.lerp(Color.WHITE, 0.25), big)
+	var bc := Vector2(x0 - NP_BADGE_R - 2.0, sp.y + 1.0)
+	c.draw_circle(bc, NP_BADGE_R, Color(0.03, 0.03, 0.05, 0.85))
+	c.draw_arc(bc, NP_BADGE_R, 0, TAU, 16, Color(col, 0.9), 1.2, true)
+	_ctext(bc + Vector2(0, 3.5), String(h.cls).substr(0, 1).to_upper(), 9, cc, big)
+	if _np_show_name(sp, h):
+		_ctext(Vector2(sp.x, sp.y - 6), h.pname.substr(0, 14), NP_NAME_FS, Color(col.lerp(Color.WHITE, 0.3), 0.9), big)
 	if h.downed:
 		var stomped: bool = h.get_meta("stomped", false)
 		var pulse := 0.5 + 0.5 * sin(m.time * 14.0)
 		var bcol := Color("ff3a2a").lerp(Color.WHITE, 0.3 * pulse) if stomped else Color("ffb36a")
-		_seg_bar(Rect2(Vector2(x0, sp.y - 2), Vector2(w, 6)), h.down_hp, Data.MATCH["down_hp"], 0.0, bcol, 25.0)
+		_seg_bar(Rect2(Vector2(x0, sp.y - 1), Vector2(w, NP_HP_H)), h.down_hp, Data.MATCH["down_hp"], 0.0, bcol, 25.0)
 		var revs: Array = h.get_meta("revivers", [])
 		if stomped:
 			var sts: Array = h.get_meta("stompers", [])
@@ -1702,12 +1721,12 @@ func _nameplate(sp: Vector2, h: Hunter) -> void:
 			_ctext(sp + Vector2(0, 16), "DOWN", 11, Color("ffb36a"), big)
 		return
 	if h.max_armor > 0.5:
-		_seg_bar(Rect2(Vector2(x0, sp.y - 4), Vector2(w, 3)), h.armor, h.max_armor, 0.0, h.armor_col(), 25.0)
+		_seg_bar(Rect2(Vector2(x0, sp.y - 2), Vector2(w, NP_AR_H)), h.armor, h.max_armor, 0.0, h.armor_col(), 25.0, 1.5)
 	var frac := clampf(h.hp / h.max_hp, 0.0, 1.0)
-	_seg_bar(Rect2(Vector2(x0, sp.y + 2), Vector2(w, 7)), h.hp, h.max_hp, _chip_of(h, frac), col if frac > 0.35 else col.lerp(Color.WHITE, 0.2 + 0.2 * sin(m.time * 9.0)), 25.0)
+	_seg_bar(Rect2(Vector2(x0, sp.y + 2), Vector2(w, NP_HP_H)), h.hp, h.max_hp, _chip_of(h, frac), col if frac > 0.35 else col.lerp(Color.WHITE, 0.2 + 0.2 * sin(m.time * 9.0)), 25.0, 1.5)
 	if h.shield > 0.0:
-		c.draw_rect(Rect2(Vector2(x0, sp.y + 2), Vector2(w * clampf(h.shield / 120.0, 0.0, 1.0), 7)), Color(0.85, 0.93, 1.0, 0.5))
-	_status_row(Vector2(sp.x, sp.y + 19), h)
+		c.draw_rect(Rect2(Vector2(x0, sp.y + 2), Vector2(w * clampf(h.shield / 120.0, 0.0, 1.0), NP_HP_H)), Color(0.85, 0.93, 1.0, 0.5))
+	_status_row(Vector2(sp.x, sp.y + 15), h)
 
 ## Little icons for what's happening to someone: stunned, rooted, slowed, burning, shielded, braced.
 func _status_row(at: Vector2, e: Ent) -> void:
@@ -2135,7 +2154,7 @@ func _draw_overhead(p: Hunter) -> void:
 	var vr: Rect2 = cam.get_viewport().get_visible_rect().grow(200.0)
 	if not sp.is_finite() or not vr.has_point(sp):
 		return      # off screen, or a degenerate camera (headless, mid-teleport): huge/NaN coords can't triangulate
-	var w := 84.0
+	var w := 66.0
 	var frac := clampf(p.hp / p.max_hp, 0.0, 1.0)
 	head_hp = maxf(frac, lerpf(head_hp, frac, 0.06))
 	_vitals(sp, w, p, p_team_col().lerp(Color.WHITE, 0.15) if frac > 0.35 else BAD, head_hp, true)
