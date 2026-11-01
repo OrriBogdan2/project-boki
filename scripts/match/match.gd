@@ -215,13 +215,24 @@ func warm_up() -> void:
 		if not is_inside_tree():
 			return
 	for sm in shown: (sm as MeshInstance3D).visible = false
-	# things that start hidden (aim line and ring, gliders, auras, weapon effects, pickups) compile
-	# too: a tiny stand-in of each mesh and material just in front of the camera, for two frames
+	# every material in the match on every kind of geometry it's drawn with (hidden things too: aim
+	# line and ring, gliders, auras, weapon effects, pickups, damage numbers, particles), as tiny
+	# stand-ins just in front of the camera. The Compatibility renderer compiles a separate variant
+	# of a shader for an object lit by an omni light, by a spot light, by both and by neither, so
+	# the stand-ins are drawn once under each: the first muzzle flash after landing (an omni light
+	# on everything round you) and the sky train's headlight sweeping an island no longer stall.
 	var proxies := _warm_proxies()
 	if not proxies.is_empty():
-		await get_tree().process_frame
+		var wl := _warm_lights()
+		for setup in [[false, false], [true, false], [false, true], [true, true]]:
+			wl[0].visible = setup[0]; wl[1].visible = setup[1]
+			await get_tree().process_frame
+			await get_tree().process_frame
+			if not is_inside_tree():
+				return
 		await get_tree().process_frame
 		for px in proxies: px.queue_free()
+		for l in wl: l.queue_free()
 	if muzzle_light: muzzle_light.light_energy = 0.0
 	RenderingServer.global_shader_parameter_set("vis_on", 0.0)
 	cam.global_transform = keep[0]; cam.fov = keep[1]; cam.far = keep[2]
@@ -239,8 +250,9 @@ func warm_up() -> void:
 		Settings.note_benchmark(float(times[times.size() / 2]))
 	PerfLog.skip()
 
-## Stand-ins for every hidden mesh and material in the match, packed into a grid a few metres in
-## front of the camera (see warm_up). Returns them so they can be freed.
+## Stand-ins for every material in the match, one per shader and kind of geometry (a plain mesh,
+## a multimesh, CPU particles, a 3D label or sprite), packed into a grid a few metres in front of the
+## camera (see warm_up). Returns them so they can be freed.
 func _warm_proxies() -> Array:
 	var seen := {}
 	var list: Array = []
@@ -248,38 +260,180 @@ func _warm_proxies() -> Array:
 	while not stack.is_empty():
 		var n: Node = stack.pop_back()
 		for ch in n.get_children(): stack.append(ch)
-		if not (n is MeshInstance3D) or (n as MeshInstance3D).mesh == null or (n as Node3D).is_visible_in_tree():
+		if n is Skeleton3D:
+			# skinned meshes run a skinning shader of their own, first when one is drawn: a copy of
+			# one rig of each make (its meshes follow it, their skeleton path is relative)
+			var sk := "skel:" + ",".join(n.get_children().filter(func(c): return c is MeshInstance3D).map(func(c): return str((c as MeshInstance3D).mesh.get_instance_id() if (c as MeshInstance3D).mesh else 0)))
+			if not seen.has(sk) and seen.size() < 2000:
+				seen[sk] = true
+				list.append(n)
 			continue
-		var mi := n as MeshInstance3D
-		var mats: Array = [mi.material_override]
-		if mi.material_override == null:
-			for si in mi.mesh.get_surface_count(): mats.append(mi.get_active_material(si))
-		var key := [mi.mesh.get_surface_count(), (mi.mesh as ArrayMesh).surface_get_format(0) if mi.mesh is ArrayMesh and mi.mesh.get_surface_count() > 0 else -1, mats, mi.material_overlay]
-		if seen.has(key):
+		if not (n is GeometryInstance3D):
+			continue
+		var key := _warm_key(n as GeometryInstance3D)
+		if key.is_empty() or seen.has(key):
 			continue
 		seen[key] = true
-		list.append(mi)
-		if list.size() >= 400:
+		list.append(n)
+		if list.size() >= 900:
 			break
 	var out: Array = []
 	var basis := cam.global_transform.basis
 	var front := cam.global_position - basis.z * 6.0
 	var cols := int(ceil(sqrt(float(list.size()))))
 	for i in list.size():
-		var src: MeshInstance3D = list[i]
-		var px := MeshInstance3D.new()
-		px.mesh = src.mesh
-		px.material_override = src.material_override
-		px.material_overlay = src.material_overlay
-		for si in src.get_surface_override_material_count():
-			px.set_surface_override_material(si, src.get_surface_override_material(si))
-		px.cast_shadow = src.cast_shadow
+		var px := _warm_proxy(list[i])
+		if px == null:
+			continue
 		add_child(px)
 		var gx := (float(i % cols) / maxf(1.0, cols - 1) - 0.5) * 2.4
 		var gy := (float(i / cols) / maxf(1.0, cols - 1) - 0.5) * 1.4
 		px.global_transform = Transform3D(basis.scaled(Vector3.ONE * 0.04), front + basis.x * gx + basis.y * gy)
 		out.append(px)
 	return out
+
+## What decides which shader variants an instance compiles: the kind of geometry and each surface's
+## shader (a StandardMaterial3D by the features its generated shader depends on). Empty: draws nothing.
+static func _warm_key(gi: GeometryInstance3D) -> String:
+	var kind := gi.get_class()
+	var mesh: Mesh = null
+	if gi is MeshInstance3D:
+		mesh = (gi as MeshInstance3D).mesh
+	elif gi is MultiMeshInstance3D:
+		var mm := (gi as MultiMeshInstance3D).multimesh
+		if mm == null: return ""
+		mesh = mm.mesh
+		kind += "%d%d%d" % [mm.transform_format, int(mm.use_colors), int(mm.use_custom_data)]
+	elif gi is CPUParticles3D:
+		mesh = (gi as CPUParticles3D).mesh
+	elif gi is Label3D or gi is Sprite3D:
+		var sb := gi as GeometryInstance3D
+		var parts: Array = [kind, sb.get("billboard"), sb.get("shaded"), sb.get("double_sided"), sb.get("no_depth_test"), sb.get("fixed_size"),
+			sb.get("alpha_cut"), sb.get("texture_filter"), sb.get("transparent"), sb.material_override]
+		return str(parts)
+	else:
+		return ""
+	if mesh == null or mesh.get_surface_count() == 0:
+		return ""
+	var mats: Array = []
+	if gi.material_override:
+		mats.append(_warm_mat_key(gi.material_override))
+	else:
+		for si in mesh.get_surface_count():
+			var mt: Material = (gi as MeshInstance3D).get_active_material(si) if gi is MeshInstance3D else mesh.surface_get_material(si)
+			mats.append(_warm_mat_key(mt))
+	if gi.material_overlay:
+		mats.append("+" + _warm_mat_key(gi.material_overlay))
+	return kind + ":" + ",".join(mats)
+
+static var _mat_keys := {}
+static func _warm_mat_key(mt: Material) -> String:
+	if mt == null:
+		return "default"
+	var id := mt.get_instance_id()
+	if _mat_keys.has(id):
+		return _mat_keys[id]
+	if _mat_keys.size() > 20000: _mat_keys.clear()
+	var s := ""
+	if mt is ShaderMaterial:
+		var sh: Shader = (mt as ShaderMaterial).shader
+		s = "sh%d" % (sh.get_instance_id() if sh else 0)
+	elif mt is BaseMaterial3D:
+		# the generated shader depends on its switches and modes and on which textures are set,
+		# not on colours and amounts
+		s = "std"
+		for pr in mt.get_property_list():
+			if not (int(pr["usage"]) & PROPERTY_USAGE_STORAGE):
+				continue
+			var t := int(pr["type"])
+			if t == TYPE_BOOL or t == TYPE_INT:
+				s += "%d" % int(mt.get(pr["name"]))
+			elif t == TYPE_OBJECT:
+				s += "1" if mt.get(pr["name"]) is Texture else "0"
+	else:
+		s = mt.get_class()
+	if mt.next_pass:
+		s += ">" + _warm_mat_key(mt.next_pass)
+	_mat_keys[id] = s
+	return s
+
+## A tiny copy of an instance that draws with the same shaders.
+func _warm_proxy(src: Node3D) -> Node3D:
+	if src is Skeleton3D:
+		var rig := src.duplicate(0) as Skeleton3D
+		for ch in rig.get_children():
+			if not (ch is MeshInstance3D): ch.free()
+			else:
+				(ch as MeshInstance3D).visibility_range_end = 0.0
+				(ch as MeshInstance3D).visible = true
+		rig.visible = true
+		return rig
+	var gsrc := src as GeometryInstance3D
+	var px: GeometryInstance3D = null
+	if src is MeshInstance3D:
+		var mi := src as MeshInstance3D
+		var p := MeshInstance3D.new()
+		p.mesh = mi.mesh
+		for si in mi.get_surface_override_material_count():
+			p.set_surface_override_material(si, mi.get_surface_override_material(si))
+		px = p
+	elif src is MultiMeshInstance3D:
+		var smm := (src as MultiMeshInstance3D).multimesh
+		var mm := MultiMesh.new()
+		mm.transform_format = smm.transform_format
+		mm.use_colors = smm.use_colors
+		mm.use_custom_data = smm.use_custom_data
+		mm.mesh = smm.mesh
+		mm.instance_count = 1
+		if mm.transform_format == MultiMesh.TRANSFORM_3D: mm.set_instance_transform(0, Transform3D())
+		else: mm.set_instance_transform_2d(0, Transform2D())
+		if mm.use_colors: mm.set_instance_color(0, Color.WHITE)
+		var p := MultiMeshInstance3D.new()
+		p.multimesh = mm
+		px = p
+	else:
+		# particles, labels, sprites: a copy with their own settings (a label shows every digit, so the
+		# glyphs damage numbers use are in the font's atlas before the first hit)
+		px = gsrc.duplicate(0) as GeometryInstance3D
+		for ch in px.get_children(): ch.free()
+		px.visible = true
+		if px is Label3D: (px as Label3D).text = "0123456789!"
+		if px is CPUParticles3D:
+			var cp := px as CPUParticles3D
+			cp.amount = mini(cp.amount, 4)
+			cp.local_coords = true
+			cp.one_shot = false
+			cp.emitting = true
+			cp.preprocess = maxf(cp.preprocess, 0.2)
+	if px == null:
+		return null
+	if not (src is CPUParticles3D or src is Label3D or src is Sprite3D):
+		px.material_override = gsrc.material_override
+		px.material_overlay = gsrc.material_overlay
+	px.cast_shadow = gsrc.cast_shadow
+	px.visibility_range_end = 0.0
+	px.visibility_range_begin = 0.0
+	return px
+
+## The lights a stand-in can be lit by in play: an omni like the muzzle flash and the lamps, and a
+## spot like the sky train's headlight, both covering the grid of stand-ins.
+func _warm_lights() -> Array:
+	var basis := cam.global_transform.basis
+	var front := cam.global_position - basis.z * 6.0
+	var o := OmniLight3D.new()
+	o.omni_range = 4.0
+	o.light_energy = 0.05
+	o.shadow_enabled = false
+	add_child(o)
+	o.global_position = front - basis.z * 0.5
+	var sp := SpotLight3D.new()
+	sp.spot_range = 14.0
+	sp.spot_angle = 35.0
+	sp.light_energy = 0.05
+	sp.shadow_enabled = false
+	add_child(sp)
+	sp.global_transform = Transform3D(basis, cam.global_position)
+	return [o, sp]
 
 ## Tooling (--perf-probe): microseconds per section of step(), summed while prof_on.
 static var prof_on := false
@@ -290,6 +444,15 @@ func _prof(lbl: String) -> void:
 		var now := Time.get_ticks_usec()
 		if _prof_t > 0 and lbl != "pre": prof[lbl] = int(prof.get(lbl, 0)) + now - _prof_t
 		_prof_t = now
+
+## Tooling (--hitch-check): microseconds per section of _process (the per-frame visuals).
+static var vprof := {}
+var _vprof_t := 0
+func _vprof(lbl: String) -> void:
+	if prof_on:
+		var now := Time.get_ticks_usec()
+		if _vprof_t > 0 and lbl != "pre": vprof[lbl] = int(vprof.get(lbl, 0)) + now - _vprof_t
+		_vprof_t = now
 
 var _render_n := 0
 func _render_now(e: Ent, cf: Vector3, near2: float) -> bool:
@@ -724,7 +887,7 @@ func _spawn_hunters() -> void:
 					at = Vector3(si % world.w + 0.5 - sd.x * 1.5, 0, si / world.w + 0.5 - sd.y * 1.5)
 					at.y = world.ground_at(at.x, at.z)
 				player.teleport(at)
-				player.tonics = int(Save.d["items"].get("tonic", 0)) + 2; player.free_tonics = 2     # everyone sets out with a couple
+				player.tonics = mini(TONIC_CARRY, int(Save.d["items"].get("tonic", 0)) + 2); player.free_tonics = 2; tonic_stash_left = maxi(0, int(Save.d["items"].get("tonic", 0)) - (player.tonics - 2))     # everyone sets out with a couple, at most TONIC_CARRY in all; the rest stays home
 				if not opts.get("tutorial", false) and not opts.get("training", false):
 					player.rift_keys = int(Save.d["items"].get("rift_key", 0))     # your Rift Keys come with you (and go in your box if you die)
 				_apply_home_perks(player)
@@ -2605,6 +2768,8 @@ func sees(team_i: int, p: Vector3, crouched := false, revealed := false) -> bool
 var _vis_t := 0.0
 var crouch_on := false
 var _perk_keys_down := {}
+var tonic_stash_left := 0     # tonics left in your stash at home this run (added back to what you carry out)
+const TONIC_CARRY := 5        # tonics you can bring into a run (two free + up to three from your stash)
 var _vis_tex_done := false
 func _update_vision() -> void:
 	# the dimming outside your view cone, drawn by the toon shaders
@@ -3218,11 +3383,14 @@ func _process(delta: float) -> void:
 		steps += 1
 		step(DT)
 	var alpha := acc / DT
+	_vprof("pre")
 	_update_vision()
+	_vprof("vision")
 	if world.wall_mat:
 		var fp := player.model.global_position + Vector3(0, 0.8, 0) if player and player.model and not player.out else Vector3(0, -999, 0)
 		world.wall_mat.set_shader_parameter("focus", fp)
 	for e in hunters: e.render(delta, alpha)
+	_vprof("hunters")
 	# monsters and wild kin well away from the view animate at a quarter rate (each catches up with
 	# the time it skipped); near ones every frame
 	_render_n += 1
@@ -3242,6 +3410,7 @@ func _process(delta: float) -> void:
 			e.lod_dt = 0.0
 		else:
 			e.lod_dt += delta
+	_vprof("kins_mobs")
 	if verbs: verbs.render(alpha)
 	for s in shots:
 		if s.has("deco"):
@@ -3254,6 +3423,7 @@ func _process(delta: float) -> void:
 				mi.look_at(mi.global_position + Vector3(v.x, 0, v.y), Vector3.UP)
 				var r: float = s["r"]
 				mi.scale = Vector3(r * 2.0, r * 2.0, r * 2.0 + v.length() * 0.025)
+	_vprof("verbs_shots")
 	cam.follow_mode = String(Settings.get_v("cam_follow"))
 	var sty := String(Settings.get_v("cam_style"))
 	if sty != cam_style:
@@ -3311,7 +3481,9 @@ func _process(delta: float) -> void:
 		cam.follow(foc, delta, false)
 	elif player:
 		cam.follow(cam.focus, delta, false)
+	_vprof("camera")
 	_update_aim(alpha)
+	_vprof("aim")
 	for pd in world.pads:
 		var top: Node3D = pd["node"].get_node("Top")
 		top.scale = Vector3.ONE * (1.0 + sin(time * 5.0) * 0.06)
@@ -3374,13 +3546,17 @@ func _gather_input() -> void:
 	else:
 		crouch_on = Input.is_action_pressed("crouch") and not paused
 	player.inp["crouch"] = crouch_on
-	if not perk_offer.is_empty() and not paused:
+	if not paused:
+		# 1-3 pick a perk while a choice is open. A key that picked one stays "used" until it's let
+		# go, so the same press doesn't also drink. (The release has to be noticed even after the
+		# choice closes: before, a pick left the key marked forever and the heal key stopped working.)
 		for pi in 3:
-			if Input.is_physical_key_pressed(KEY_1 + pi) and not _perk_keys_down.has(pi):
+			var down := Input.is_physical_key_pressed(KEY_1 + pi)
+			if not down:
+				_perk_keys_down.erase(pi)
+			elif not perk_offer.is_empty() and not _perk_keys_down.has(pi):
 				_perk_keys_down[pi] = true
 				choose_perk(pi)
-			elif not Input.is_physical_key_pressed(KEY_1 + pi):
-				_perk_keys_down.erase(pi)
 	# the kit: Q glove, E kin ability, C throw kin, R bond, 1 heal (the second kin ability, kin swap
 	# and the separate armor-kit key are retired)
 	if Input.is_action_just_pressed("base") and not paused and duel == null:
@@ -5278,7 +5454,7 @@ func _finish() -> void:
 		r["deaths"] = player.deaths
 		r["revives"] = player.revives
 		r["armor_tier"] = player.armor_tier
-		r["tonics"] = maxi(0, player.tonics - player.free_tonics)
+		r["tonics"] = maxi(0, player.tonics - player.free_tonics) + tonic_stash_left
 		if not opts.get("tutorial", false):
 			r["rift_keys"] = player.rift_keys if result.get("extracted", false) else 0
 		r["stats"] = player.stats.duplicate()
@@ -5347,7 +5523,7 @@ func _spawn_net_hunters(spots: Array, names: Array) -> void:
 		if peer == Net.me:
 			var rec: Dictionary = Save.active_kin()
 			player = make_hunter("P" + peer, t, String(r["cls"]), String(r["name"]), "local", rec, at, my_kit())
-			player.tonics = int(Save.d["items"].get("tonic", 0)) + 2; player.free_tonics = 2     # everyone sets out with a couple
+			player.tonics = mini(TONIC_CARRY, int(Save.d["items"].get("tonic", 0)) + 2); player.free_tonics = 2; tonic_stash_left = maxi(0, int(Save.d["items"].get("tonic", 0)) - (player.tonics - 2))     # everyone sets out with a couple, at most TONIC_CARRY in all; the rest stays home
 			_apply_home_perks(player)
 			if player.kin:
 				_apply_treat(player.kin)
