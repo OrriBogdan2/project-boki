@@ -1555,17 +1555,37 @@ func _collide_breaks() -> void:
 			if world.occupy(e.pos.x + push.x, e.pos.z + push.y, e.r, e.pos.y, e.grounded) == 0.0:
 				e.pos.x += push.x; e.pos.z += push.y
 
+## Wild Boki are scarce on purpose (owner's call): catching one should feel like a goal, not a
+## given. Only about a quarter of the map's wild spots are live in a match (at least 2), picked with
+## a generator of their own so the match's random stream (and every seeded test) is unchanged; the
+## rare Boki spots (SpawnPlan) are separate and stay as they were.
+const WILD_LIVE := 0.25
+const WILD_MIN := 2
+
 func _spawn_wild() -> void:
 	if net_on and not is_host:
 		return
-	for p in world.wild_spots:
+	var spots: Array = world.wild_spots
+	var pick := RandomNumberGenerator.new()
+	pick.seed = hash([seed_val, "wild_live"])
+	var order: Array = range(spots.size())
+	for i in range(order.size() - 1, 0, -1):
+		var j := pick.randi_range(0, i)
+		var tmp = order[i]; order[i] = order[j]; order[j] = tmp
+	var live := {}
+	for i in mini(spots.size(), maxi(WILD_MIN, int(round(spots.size() * WILD_LIVE)))):
+		live[order[i]] = true
+	for si in spots.size():
+		var p: Vector3 = spots[si]
 		var sp: String = Data.common_kin()[rng.randi_range(0, Data.common_kin().size() - 1)]
 		var rec := Save.new_kin(sp)
 		rec["level"] = rng.randi_range(T["kin_lvl"][0], T["kin_lvl"][1])
 		Evo.simulate(rec, rng)
 		rec["shimmer"] = Shiny.roll_wild(rng, tier)   # a rare colour you'll want to catch (1 in 4096, x1.5 in the Hollow)
 		Mutations.roll_wild(rec, rng, tier)          # and now and then a rare mutation (more in harder tiers)
-		spawn_wild(rec, p)
+		# (every spot still rolls, so the draws match; only the live ones get a Boki)
+		if live.has(si):
+			spawn_wild(rec, p)
 
 func spawn_wild(rec: Dictionary, at: Vector3, dazed := false) -> Kin:
 	at = _clear_spot(at)
