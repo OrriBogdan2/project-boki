@@ -33,7 +33,9 @@ static func on_fire(h: Hunter, melee := false) -> void:
 		cam.add_trauma(kick * 0.35)
 		_cam_nudge(cam, -d * kick * KICK_PX)
 	var push := float(w.get("push", 0.0))
-	if push > 0.0 and h.grounded and not h.remote:
+	# the self push is feel for your own hands only: a bot (or a teammate reviving someone) never
+	# drifts off its spot from its own shots
+	if push > 0.0 and h.grounded and h.is_local() and h.ctrl == "local" and h.base_t <= 0.0:
 		h.vel.x -= d.x * push
 		h.vel.z -= d.y * push
 

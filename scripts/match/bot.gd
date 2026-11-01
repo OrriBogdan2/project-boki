@@ -178,6 +178,11 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 			if h.ak:
 				# the archetype's kit: dash, RMB variants, E and R (each kit knows its own moments)
 				h.ak.bot_use(tgt, d, los)
+				if not rv.is_empty() and h.flat_dist(rv["o"]) < 6.0:
+					# picking up a squadmate: no kit move that carries us off them (a Shadow Step
+					# behind the rival, a Rampage, a leap, an ult chase); E and the gun still go
+					inp["dash"] = false; inp["sec"] = false; inp["ult"] = false
+					h.ak.bot_hold["dash"] = 0.0; h.ak.bot_hold["rmb"] = 0.0
 				_use_kin_ab(m, h, tgt)
 			else:
 				_use_sig(m, h, tgt)
