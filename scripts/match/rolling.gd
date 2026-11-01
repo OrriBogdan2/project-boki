@@ -13,7 +13,7 @@ extends RefCounted
 ## Late joiners (ROADMAP §0.6 "Levels with late joiners", approved by the owner Nov 1):
 ##   - level floor: you land at min(FLOOR_MAX, 1 + floor(minutes in / 4)), those levels' points spent
 ##     in your archetype's order, so a minute-20 arrival isn't a level-1 snack;
-##   - catch-up XP: below the lobby's median level your XP counts up to double (xp_mult);
+##   - catch-up XP: below the lobby's median level your XP counts up to CATCHUP_MAX (x1.6; xp_mult);
 ##   - bounties: a hunter BOUNTY_GAP+ levels over the median is marked for everyone, and knocking them
 ##     pays XP and loot by the gap (and any knock on a higher-level hunter pays a little by the gap);
 ##   - soft landing: waves come down over the less crowded side, onto the calm outer ring of the wide map
@@ -37,8 +37,8 @@ const POP := Vector2i(24, 40)      # the hunter target (see POP_MODE for what it
 const POP_MODE := "at_once"
 const FLOOR_EVERY := 240.0         # +1 level floor every 4 minutes into the session
 const FLOOR_MAX := 5               # ... up to 5, so the R (level 6) is always earned in the run
-const CATCHUP_PER_LV := 0.5        # x1.5 one level under the median, x2 two or more under
-const CATCHUP_MAX := 2.0
+const CATCHUP_PER_LV := 0.3        # x1.3 one level under the median, x1.6 two or more under (was 0.5 / x2:
+const CATCHUP_MAX := 1.6           # --rolling-sim had late squads level in 2 min and +0.9..+1.75 over the median by 6)
 const BOUNTY_GAP := 3              # this many levels over the median (and at least BOUNTY_MIN_LV): a bounty
 const BOUNTY_MIN_LV := 5
 const BOUNTY_CD := 45.0            # after a bounty is claimed, the same hunter can't carry a new one for this long
@@ -488,7 +488,7 @@ func grant_xp_quiet(h: Hunter, x: float) -> void:
 		h.skill_pts += 1
 	h._bot_spend()
 
-## Catch-up XP: below the median level of everyone out there, XP counts up to double.
+## Catch-up XP: below the median level of everyone out there, XP counts up to CATCHUP_MAX (x1.6).
 func xp_mult(h: Hunter) -> float:
 	var gap := median - float(h.lvl)
 	if gap <= 0.0:
