@@ -25,6 +25,9 @@ var atk_cd := 0.0
 var lunge_t := 0.0
 var target: Ent = null
 var chase_stall := 0.0          # seconds spent chasing a target without getting any closer (a ledge, a wall in the way)
+## Where you threw it: it holds that spot (guarding it) until there's a reason to come back
+## (you recall it, you go out of leash range, you glide off, it gets hurt). INF when not holding.
+var hold_at := Vector3.INF
 var ignore_until := {}          # Ent -> m.time: targets it gave up on, left alone for a few seconds
 var fly: Dictionary = {}          # thrown, leaping or rushing
 var pend_skill := Vector3.INF     # ability to cast when it lands
@@ -276,6 +279,7 @@ func _launch(p: Vector3) -> void:
 	fly = {"from": start, "to": tgt, "t": 0.0, "dur": dur, "hit": {}, "dive": dive}
 	state = "flying"
 	settle = 0.0
+	hold_at = tgt
 	m.sfx("throw", owner_h.pos, 0.0)
 	CombatBus.kin_thrown.emit(self, owner_h)
 	if danger_at(tgt) > 1.2 and hp < max_hp * 0.4:
@@ -295,6 +299,7 @@ func recall() -> void:
 		fly = {"from": pos, "to": owner_h.pos + Vector3(0, 1.5, 0), "t": 0.0, "dur": clampf(to.length() / 22.0, 0.15, 0.45), "hit": {}, "leap": true, "home": true}
 		state = "flying_home"
 		throw_cd = float(Content.rules("kin_ai").get("recall_cooldown", 1.0))
+		hold_at = Vector3.INF
 		m.sfx("recall", pos, -6.0)
 		CombatBus.kin_recalled.emit(self, owner_h)
 		fire_trigger("on_recall", {"at": owner_h.pos})
@@ -771,8 +776,27 @@ func _sim_active(dt: float) -> void:
 		# whatever's close; it hops onto your shoulder if you glide off
 		var to := Vector2(owner_h.pos.x - pos.x, owner_h.pos.z - pos.z)
 		if owner_h.gliding and to.length() > 2.5:
+			hold_at = Vector3.INF
 			state = "returning"
 			return
+		# (owner) thrown somewhere: it stays there and guards the spot rather than running straight
+		# back. It only comes back for a reason: recalled, you out of leash range or gliding off (above),
+		# it's hurt (above), or the spot can't be reached
+		if hold_at != Vector3.INF:
+			var th := Vector2(hold_at.x - pos.x, hold_at.z - pos.z)
+			if to.length() > brain.leash() * 0.9 or m.world.is_void(hold_at.x, hold_at.z):
+				hold_at = Vector3.INF
+			else:
+				if th.length() > 0.8:
+					wish = th.normalized() * spd * minf(1.0, th.length())
+					chase_stall = chase_stall + dt if Vector2(vel.x, vel.z).length() < spd * 0.25 else 0.0
+					if chase_stall > 1.5:
+						chase_stall = 0.0
+						hold_at = Vector3.INF
+				elif to.length() > 0.5:
+					face = lerp_angle(face, atan2(-to.x, -to.y), minf(1.0, dt * 4.0))
+				_ground_move(wish, dt)
+				return
 		var spot: Vector3 = comp.heel_spot() if comp else Vector3.INF
 		if spot != Vector3.INF and to.length() < 8.0:
 			# keep pace like a teammate: move with you (your velocity) plus a pull toward the heel spot.
@@ -826,6 +850,7 @@ func _sim_return(dt: float) -> void:
 	_ground_move(to.normalized() * speed * 1.25, dt)
 
 func _hop_on() -> void:
+	hold_at = Vector3.INF
 	state = "shoulder"
 	settle = 0.0
 	target = null
