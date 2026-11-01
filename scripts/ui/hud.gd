@@ -2550,7 +2550,7 @@ func _arch_tip(id: String, p: Hunter) -> Array:
 			if k == null or k.runner.def_of("k1") == null: return []
 			var kd: AbilitySpec = k.runner.def_of("k1")
 			out.append([kd.display_name, KinText.color(kd)])
-			out.append(["%s's own ability  ·  %s  ·  it hops out, casts, hops back" % [k.rec.get("name", "Boki"), Settings.key_cap("kin_ability")], MUTED, 12])
+			out.append(["%s's own ability  ·  %s  ·  cast from wherever it is" % [k.rec.get("name", "Boki"), Settings.key_cap("kin_ability")], MUTED, 12])
 			out.append([KinText.ability(k.effective("k1")), INK, 14])
 			out.append(["Cooldown %s%s" % [_secs(kd.cooldown), ("  ·  ready in %s" % _secs(k.runner.cd_left("k1"))) if not k.runner.is_ready("k1") else "  ·  ready"], MUTED, 13])
 			return out

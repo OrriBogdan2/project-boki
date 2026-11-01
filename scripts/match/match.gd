@@ -6593,7 +6593,7 @@ func _tips() -> void:
 	_tip("move", "WASD to move, aim with the mouse, hold left click to shoot. Shift dashes, Space jumps. Hold Space in the air to glide.")
 	if _tip_t > 14.0:
 		if player.ak:
-			_tip("ability", "%s is your Boki's ability: it hops out, casts and hops back. %s and %s are your archetype's; fighting together fills the bond meter, and a full one makes your %s bonded." % [Settings.key_cap("kin_ability"), Settings.key_cap("signature"), Settings.key_cap("ultimate"), Settings.key_cap("ultimate")])
+			_tip("ability", "%s is your Boki's ability, cast from wherever it stands. %s throws and recalls it. Fighting together fills the bond meter, and a full one lets you press %s to merge." % [Settings.key_cap("kin_ability"), Settings.key_cap("throw"), Settings.key_cap("ultimate")])
 		else:
 			_tip("ability", "%s is your Boki's ability. Fighting together fills the bond meter, and %s calls your Boki's bond ultimate." % [Settings.key_cap("signature"), Settings.key_cap("ultimate")])
 	if player.ult >= 1.0 and player.kin:

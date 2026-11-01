@@ -2126,7 +2126,7 @@ func sim(dt: float) -> void:
 				m.use_gear(self, gi)
 	if ak:
 		# the archetype's kit: E utility, right click with its variants, R ultimate; the kin's own
-		# ability is on its own key (C: it hops out, casts, hops back)
+		# ability is on its own key (C: cast from where the Boki is)
 		ak.tick(dt)
 		if inp["sig"]: ak.use_e()
 		if inp["sec"]: ak.press_rmb()
