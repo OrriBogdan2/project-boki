@@ -126,6 +126,18 @@ func _ready() -> void:
 		if a == "--perk-demo": opts["perk_demo"] = true
 		if a.begins_with("--exit-demo="): opts["exit_demo"] = a.substr(12); opts["no_drop"] = true
 		if a == "--truce-demo": opts["truce_demo"] = true; opts["no_drop"] = true
+		if a.begins_with("--teammate-demo="): opts["teammate_demo"] = a.substr(16); opts["no_drop"] = true
+		if a.begins_with("--demo-kin="): opts["demo_kin"] = a.substr(11)      # test: bring this species (level/trust via --demo-kin-lv=)
+		if a.begins_with("--demo-kin-lv="): opts["demo_kin_lv"] = a.substr(14)
+		if a == "--no-tips": Settings.set_v("tips", false, false)     # test: no kit panel or tip banners (screenshots)
+		if a.begins_with("--set-kin=") and not Save.d["roster"].is_empty():
+			# test: your first Boki's level and trust, "level:trust" (how well it talks)
+			var sk := a.substr(10).split(":")
+			Save.d["roster"][0]["level"] = int(sk[0])
+			if sk.size() > 1: Save.d["roster"][0]["trust"] = float(sk[1])
+		if a == "--recall-demo" and not Save.d["roster"].is_empty():
+			# test: your partner just got back from an expedition with something to tell you
+			Save.d["roster"][0]["recall"] = {"kind": "carried_out", "text": "was carried out of the Ember Quarry by you", "place": "the Ember Quarry", "boss": "", "m": 1}
 		if a.begins_with("--lair-demo="): opts["lair_demo"] = a.substr(12); opts["no_drop"] = true
 		if a.begins_with("--lair-boss="): opts["demo_boss"] = a.substr(12)
 		if a == "--plate-demo": opts["plate_demo"] = true; opts["no_drop"] = true; opts["teams"] = 3; opts["squad"] = 3
@@ -357,6 +369,9 @@ func _ready() -> void:
 		var wkc = load("res://tools/work_check.gd").new()      # kin at work: jobs, stations, priorities, shimmer odds
 		set_meta("work_check", wkc)
 		wkc.run(self)
+		return
+	if "--teammate-check" in args:
+		load("res://tools/teammate_check.gd").new().run(self)      # Boki as teammates: following, callouts, caring, the tutorial guide
 		return
 	if "--unique-check" in args:
 		load("res://tools/unique_check.gd").new().run(self)      # every kin its own: rolls, inheritance, ids, migration, size

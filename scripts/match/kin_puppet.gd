@@ -13,6 +13,9 @@ extends Node
 ##   "dazed" (bool) "happy" (bool) "pulse" (set to Time msec when an ability goes off)
 ##   "kstate": "" | "attack" (lunging) | "sleep" | "perch" (riding a shoulder)
 ##   "quirk" (Unique: its idle habit, played now and then while it stands still) "girth" (width)
+##   "pose": body language in a match (KinCompanion): "growl" (low, ears back, tail up, shivering),
+##   "guard", "alert" (tall, ears up), "point" (leaning in, a paw up), "whine" (ears and tail down),
+##   "nudge"/"comfort" (leaning in, soft), "flinch" (a jolt); "" for none
 ## Only Flex and the limbs are posed here; Body stays free for whoever moves the kin (hops,
 ## home quirks and work poses, match lunges).
 
@@ -65,6 +68,18 @@ var quirk := ""
 var girth := 1.0
 var quirk_t := 3.0     # until the next time it does its habit
 var quirk_k := 0.0     # 1 at the start of one, down to 0
+var pose_last := ""
+var pz := {"sy": 1.0, "sz": 1.0, "rx": 0.0, "rz": 0.0, "ear": 0.0, "tail": 0.0, "leg": 0.0, "shiver": 0.0}
+const POSE_T := {
+	"growl": {"sy": 0.86, "rx": 0.2, "ear": 0.45, "tail": -0.6, "shiver": 1.0},
+	"guard": {"sy": 1.02, "rx": 0.08, "ear": 0.4, "tail": -0.7, "shiver": 0.4},
+	"alert": {"sy": 1.08, "rx": -0.14, "ear": -0.35, "tail": -0.3},
+	"point": {"sz": 1.14, "rx": -0.1, "ear": -0.3, "tail": -0.25, "leg": 1.0},
+	"whine": {"sy": 0.92, "rx": 0.18, "ear": 0.6, "tail": 0.6},
+	"nudge": {"rx": 0.14, "rz": 0.16, "ear": 0.3, "tail": 0.2},
+	"comfort": {"rx": 0.12, "rz": -0.18, "ear": 0.35, "tail": 0.3},
+	"beckon": {"ear": -0.25, "rx": -0.06},
+}
 
 func _ready() -> void:
 	root = get_parent() as Node3D
@@ -235,6 +250,20 @@ func _process(dt: float) -> void:
 		rx += air * -0.15
 	# joy: a wiggle side to side
 	rz += sin(t * 14.0) * 0.12 * happy_k
+	# body language in a match (KinCompanion)
+	var pose := String(root.get_meta("pose", ""))
+	if pose != pose_last:
+		if pose == "flinch":
+			sq_v += 3.0; ear_v -= 6.0
+		pose_last = pose
+	var pt: Dictionary = POSE_T.get(pose, {})
+	for key in pz:
+		var base := 1.0 if key in ["sy", "sz"] else 0.0
+		pz[key] = lerpf(float(pz[key]), float(pt.get(key, base)), 1.0 - exp(-10.0 * dt))
+	sy *= float(pz["sy"])
+	sz *= float(pz["sz"])
+	rx += float(pz["rx"])
+	rz += float(pz["rz"]) + sin(t * 45.0) * 0.025 * float(pz["shiver"])
 	# asleep: curled up low, tipped onto its side a little
 	sy *= 1.0 - sleep_k * 0.22
 	sx *= 1.0 + sleep_k * 0.08
@@ -277,7 +306,7 @@ func _process(dt: float) -> void:
 		if dazed or sleep_k > 0.5:
 			rate = 1.2; amp = 0.05
 		tail.rotation.y = sin(t * rate + phase) * amp
-		tail.rotation.x = lerpf(tail.rotation.x, (0.5 if dazed else -0.1 * move_k), 1.0 - exp(-6.0 * dt))
+		tail.rotation.x = lerpf(tail.rotation.x, (0.5 if dazed else -0.1 * move_k + float(pz["tail"])), 1.0 - exp(-6.0 * dt))
 	# ears: spring that flops on landing, perks on a cast, twitches now and then
 	if ears:
 		twitch_t -= dt
@@ -286,7 +315,7 @@ func _process(dt: float) -> void:
 			twitch = 1.0
 		twitch = maxf(0.0, twitch - dt * 6.0)
 		var droop := 0.35 if dazed else 0.0
-		ears.rotation.x = clampf(ear_flop * 0.12, -0.5, 0.5) + droop
+		ears.rotation.x = clampf(ear_flop * 0.12, -0.5, 0.5) + droop + float(pz["ear"])
 		ears.rotation.z = sin(twitch * PI * 2.0) * 0.12
 	# legs: a trot that speeds up with it (diagonal pairs together), a gallop when running (front
 	# pair, then back pair), both feet together for hoppers, tucked up asleep, dangling for flyers
@@ -303,6 +332,7 @@ func _process(dt: float) -> void:
 				a = 0.35 + sin(t * 3.0 + i) * 0.1
 		a += att_k * (-0.5 if i < 2 else 0.3)
 		a = lerpf(a, -0.9 if i < 2 else 0.9, sleep_k)
+		if i == 0: a -= float(pz["leg"]) * 0.9      # a paw up, pointing
 		legs[i].rotation.x = a
 	# wings: a slow flutter at rest, quick beats when it moves; flyers beat fast all the time,
 	# and fold them asleep
