@@ -513,6 +513,10 @@ func _show_pick() -> void:
 		var mystery: bool = d.get("mystery", false)
 		var card := UI.card(UI.CARD, 12, 14)
 		card.custom_minimum_size = Vector2(228, 0)
+		# every egg card the same size, with its button on the same line at the bottom
+		card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		card.size_flags_stretch_ratio = 1.0
+		card.size_flags_vertical = Control.SIZE_FILL
 		if i == chosen:
 			UI.set_card_border(card, UI.ACCENT)
 		var v := UI.vbox(6); card.add_child(v)
@@ -533,7 +537,13 @@ func _show_pick() -> void:
 			pl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 			v.add_child(pl)
 		var ii := i
-		v.add_child((UI.primary if i == chosen else UI.button).call("This one" if i != chosen else "Hatch it", func(): _pick(ii)))
+		v.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		var push := Control.new()
+		push.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		v.add_child(push)
+		var pb: Button = (UI.primary if i == chosen else UI.button).call("This one" if i != chosen else "Hatch it", func(): _pick(ii))
+		pb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		v.add_child(pb)
 		row.add_child(card)
 	bottom.add_child(row)
 
