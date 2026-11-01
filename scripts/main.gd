@@ -1041,6 +1041,7 @@ func _economy_check() -> void:
 	ok.call(ids.has("kin_idol") and not ids.has("old_coin") and m.wpicks.any(func(w): return String(w.get("val", "")) == "old_coin"), "swap drops the coin on the ground and packs the idol: %s" % str(ids))
 	m.hud.close_swap()
 	# a better weapon on the ground goes in your hands, with its element
+	P.set_arch("")      # class weapon rules (a hero's fixed weapon family would refuse the rifle)
 	P.pack_cap = 4
 	m.spawn_weapon("rifle", 3, at, "", false, -1, Loot.weapon("rifle", 3, "fire"))
 	Pack.take_ground(m, P, m.wpicks[m.wpicks.size() - 1])
