@@ -798,6 +798,11 @@ func _process(delta: float) -> void:
 		_farm_tick()
 	_update_sky(d)
 	_update_hover()
+	_hub_room_t -= delta
+	if _hub_room_t <= 0.0:
+		_hub_room_t = 0.2
+		_keep_off_hub(root_ui.get_node_or_null("Hints") if root_ui else null)
+		if training: _keep_off_hub(training.hud)
 	_move_player(d)
 	_move_kin(d)
 	_care_tick(d)
@@ -840,6 +845,23 @@ var climb := {}                # pulling yourself up over an island's rim from b
 
 ## Your class's dodge with the match's numbers: its charges and recharge (Hunter.max_dashes and
 ## dash_regen at rank 1), and the class's long dash (ex_dist, ex_time, ex_cd; Hunter.EX_DASH_CD).
+## The key hints and the Training Grounds bar sit centred at the bottom, and on a 1280-wide window
+## they ran under the hub's buttons (Settings covered the start of each): slide one right of the hub
+## when it would overlap, centred in the room that's left.
+var _hub_room_t := 0.0
+func _keep_off_hub(c) -> void:
+	if not (c is Control) or not is_instance_valid(c) or hub == null or not is_instance_valid(hub) or not hub.is_visible_in_tree():
+		return
+	var cc := c as Control
+	var hr := hub.get_global_rect()
+	var cr := cc.get_global_rect()
+	var vw := get_viewport().get_visible_rect().size.x
+	var room_l := hr.end.x + 12.0
+	var centred := (vw - cr.size.x) * 0.5
+	var want := centred if centred >= room_l else room_l + maxf(0.0, (vw - room_l - cr.size.x) * 0.5)
+	if absf(cr.position.x - want) > 1.0 and cr.end.y > hr.position.y - 4.0:
+		cc.global_position.x = want
+
 func _dodge() -> Dictionary:
 	var ck := training._cls() if training and training.in_zone else Data.class_of_save()
 	var dd := Content.class_dodge(ck)
@@ -2807,7 +2829,8 @@ func _open_kin(rec: Dictionary) -> void:
 	var col: Color = Shiny.body(rec)
 	var partner: bool = rec["uid"] == Save.d.get("active", "")
 	var rare_pre := Mutations.prefix(rec)
-	var v := _new_panel("%s the %s%s%s" % [rec["name"], "shimmering " if rec.get("shimmer", false) else "", (rare_pre + " ") if rare_pre != "" else "", Evo.form_name(rec)], 820)
+	var kpre := ("shimmering " if rec.get("shimmer", false) else "") + ((rare_pre + " ") if rare_pre != "" else "")
+	var v := _new_panel(("%s the %s%s" % [rec["name"], kpre, Evo.form_name(rec)]) if kpre != "" else Data.kin_title(String(rec["name"]), Evo.form_name(rec)), 820)
 	UI.subtitle(v, "Level %d  ·  %s Boki  ·  %s  ·  %s nature" % [int(rec["level"]), String(sp["type"]).capitalize(), Care.stage_name(rec), Care.nature(rec)])
 	var hx := UI.head_extra(v)
 	if partner: hx.add_child(UI.tag("Partner", UI.ACCENT))
@@ -3215,19 +3238,11 @@ func _open_expedition() -> void:
 			Save.save_game()
 			_refresh_player_model()
 			_open_expedition(), 128, wk)
-		var wu := Content.weapon(w)
-		var un: String = Content.ability(wu.utility).display_name if wu and wu.utility != "" and Content.ability(wu.utility) else ""
 		var stat_s := ("Melee: %s damage per hit, reach %.1f" % [str(snappedf(float(wd["dmg"]), 0.1)), float(wd["range"])]) if wd.get("melee", false) else ("%s damage%s, %d per mag, range %d" % [str(snappedf(float(wd["dmg"]), 0.1)), (" x%d" % int(wd["pellets"])) if wd.has("pellets") else "", int(wd["mag"]), int(wd["range"])])
-		wb.tooltip_text = (String(wd.get("desc", "")) + "\n" if wd.has("desc") else "") + stat_s + ("\nRight click: " + un if un != "" else "")
+		# (no "Right click:" line: with an archetype, right click is the archetype's ability, shown above)
+		wb.tooltip_text = (String(wd.get("desc", "")) + "\n" if wd.has("desc") else "") + stat_s
 		wr.add_child(wb)
 	left.add_child(wr)
-	var wdef := Content.weapon(cur_w)
-	var ud: AbilityDef = Content.ability(wdef.utility) if wdef and wdef.utility != "" else null
-	if ud:
-		var ul := UI.label("Right click: %s" % ud.display_name, UI.T_SMALL, UI.MUTED)
-		ul.tooltip_text = ud.desc
-		ul.mouse_filter = Control.MOUSE_FILTER_PASS
-		left.add_child(ul)
 	var ak := Save.active_kin()
 	if not ak.is_empty():
 		left.add_child(UI.spacer(2))
@@ -3325,7 +3340,7 @@ func _kin_pick_row(label_t: String, rec: Dictionary, key: String) -> Control:
 		info.add_child(UI.label("Bring only your partner. Nothing else at risk.", 12, UI.MUTED))
 	else:
 		var sp: Dictionary = Data.KIN[rec["species"]]
-		var nl := UI.label("%s the %s" % [rec["name"], sp["name"]], 17, UI.INK, UI.big)
+		var nl := UI.label(Data.kin_title(String(rec["name"]), String(sp["name"])), 17, UI.INK, UI.big)
 		nl.autowrap_mode = TextServer.AUTOWRAP_OFF
 		nl.clip_text = true
 		info.add_child(nl)
@@ -3337,7 +3352,8 @@ func _kin_pick_row(label_t: String, rec: Dictionary, key: String) -> Control:
 			var ad := KinLib.ability(String(aid))
 			if ad: names.append(ad.display_name)
 		var ud := KinLib.merge(String(sp.get("ultimate", "")))
-		var keys := ("%s / %s" % [Settings.key_cap("signature"), Settings.key_cap("ultimate")]) if key == "active" else ("swap in with %s" % Settings.key_cap("swap_kin"))
+		# (its ability is on C now: E and R are your archetype's)
+		var keys := Settings.key_cap("kin_ability") if key == "active" else ("swap in with %s" % Settings.key_cap("swap_kin"))
 		var al := UI.label("%s  ·  %s  ·  bond: %s" % [keys, ", ".join(names), ud.display_name if ud else "-"], 12, UI.MUTED)
 		al.autowrap_mode = TextServer.AUTOWRAP_OFF
 		al.clip_text = true
@@ -3415,7 +3431,7 @@ func _ransom_card(L: Dictionary) -> Control:
 	UI.set_card_border(card, sp["color"])
 	var v := UI.vbox(6); card.add_child(v)
 	var top := UI.hbox(10)
-	var nm := UI.label("%s the %s  ·  level %d" % [rec["name"], sp["name"], int(rec.get("level", 1))], 18, sp["color"], UI.big)
+	var nm := UI.label("%s  ·  level %d" % [Data.kin_title(String(rec["name"]), String(sp["name"])), int(rec.get("level", 1))], 18, sp["color"], UI.big)
 	nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top.add_child(nm)
 	top.add_child(UI.label("Asking %d" % int(L["ask"]), 16, UI.GOLD, UI.big))
@@ -3942,7 +3958,7 @@ func _open_house() -> void:
 		var sp: Dictionary = Data.KIN[rec["species"]]
 		var dot := ColorRect.new(); dot.color = sp["color"]; dot.custom_minimum_size = Vector2(14, 14)
 		h.add_child(dot)
-		var info := UI.label("%s the %s  ·  level %d  ·  trust %d" % [rec["name"], Evo.form_name(rec), int(rec["level"]), int(rec["trust"])], 15)
+		var info := UI.label("%s  ·  level %d  ·  trust %d" % [Data.kin_title(String(rec["name"]), Evo.form_name(rec)), int(rec["level"]), int(rec["trust"])], 15)
 		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		h.add_child(info)
 		var r: Dictionary = rec
