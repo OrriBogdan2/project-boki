@@ -495,8 +495,9 @@ func _ready() -> void:
 		# tooling: a scripted expedition with per-phase frame costs and hitches (tests/perf_probe.gd)
 		add_child(load("res://tests/perf_probe.gd").new())
 		return
-	if "--hitch-check" in args:
-		# a seeded expedition through the drop and landing; fails on a stalled frame (tools/hitch_check.gd)
+	if "--hitch-check" in args or _has_arg("--load-check"):
+		# a seeded expedition through the drop and landing; fails on a stalled frame (tools/hitch_check.gd);
+		# --load-check stops at the reveal and judges the loading screen
 		add_child(load("res://tools/hitch_check.gd").new())
 		return
 	if OS.has_feature("web"):
@@ -660,9 +661,17 @@ func _has_arg(prefix: String) -> bool:
 
 var _gen := 0
 
+var _ld: Node = null       # the loading screen of a match still on its way
+const HOME_SCRIPT := "res://scripts/home/home.gd"
+
 func show_screen(screen: String, opts: Dictionary) -> void:
 	_gen += 1
 	var gen := _gen
+	# a match left while it was still loading: its loading screen goes, and 3D draws again
+	get_viewport().disable_3d = false
+	if is_instance_valid(_ld) and not _ld.is_queued_for_deletion() and not _ld.get("leaving"):
+		_ld.queue_free()
+	_ld = null
 	var fx := _fades_on()
 	if fx and current:
 		await fade.cover()
@@ -676,7 +685,7 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 		return    # another screen was asked for while this one was still on its way
 	if fx:
 		# the next screen builds this frame (often a heavy one); reveal once it has actually drawn
-		fade.reveal_after(3, 0.55)
+		fade.reveal_after(3, 0.55, func() -> bool: return gen == _gen and is_instance_valid(current) and current.get("building") == true)
 	match screen:
 		"match":
 			# the seed is fixed here, so the loading screen can show the raid condition it rolls
@@ -684,12 +693,20 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 			# a loading screen covers building the world; tests that screenshot by frame count skip it
 			var ld = null
 			if (not opts.get("autoplay", false) or opts.get("probe", false)) and (not _has_arg("--shot=") or _has_arg("--show-loading")):
+				var tier_i := clampi(int(opts.get("tier", 0)), 0, Data.TIERS.size() - 1)
+				Sfx.prefetch(["music_hollow" if tier_i >= 2 else "music_match", "amb_match"])
+				Match.prefetch([Match.HUD_SCRIPT])
 				ld = load("res://scripts/ui/loading.gd").new()
 				ld.setup(opts)
 				add_child(ld)
+				_ld = ld
+				# nothing in 3D shows behind the loading screen while the match builds: drawing the
+				# half-built world every frame only slows the build (see Match.warm_up for the drawing)
+				get_viewport().disable_3d = true
 				await ld.shown
-				await ld.step(0.2)
+				ld.want = 0.04
 				if gen != _gen:
+					get_viewport().disable_3d = false
 					ld.queue_free()
 					return
 			var m := Match.new()
@@ -697,13 +714,19 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 			add_child(m)
 			current = m
 			if ld:
-				# build a step per frame so the loading screen keeps moving, then draw everything once
-				# behind it so no shader compiles mid-drop (see Match.warm_up)
-				await m.start_staged(opts, func(f: float): ld.want = maxf(ld.want, 0.2 + 0.72 * f))
+				# build in short slices so the loading screen keeps moving, then draw everything once
+				# behind it, a batch a frame, so no shader compiles mid-drop (see Match.warm_up)
+				await m.start_staged(opts, func(f: float, stage: String):
+					ld.want = maxf(ld.want, 0.04 + 0.66 * f)
+					ld.set_stage(stage))
+				get_viewport().disable_3d = false
 				if not is_instance_valid(m) or not m.is_inside_tree():
+					ld.queue_free()
 					return
 				if not opts.has("net"): m.set_process(false)
-				await m.warm_up()
+				ld.set_stage("graphics")
+				await m.warm_up(func(f: float): ld.want = maxf(ld.want, 0.7 + 0.28 * f))
+				ld.set_stage("ready")
 				# hold the match still while the bar finishes, except online where everyone runs together
 				await ld.finish()
 				if is_instance_valid(m) and m.is_inside_tree(): m.set_process(true)
@@ -714,6 +737,7 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 			var scr = R.new()
 			current = _layer(scr)
 			scr.show_result(opts)
+			Match.prefetch([HOME_SCRIPT])     # where you're most likely going next
 		"lobby":
 			var L = load("res://scripts/ui/lobby.gd")
 			var scr = L.new()
@@ -723,6 +747,7 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 			var Tt = load("res://scripts/ui/title.gd")
 			current = Tt.new()
 			add_child(current)
+			Match.prefetch([HOME_SCRIPT])     # compiled on a worker thread while the title shows
 		"prologue":
 			var Pr = load("res://scripts/ui/prologue.gd")
 			current = Pr.new()
@@ -734,7 +759,7 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 			current.set("edit_only", bool(opts.get("create", false)))
 			add_child(current)
 		"home":
-			var H = load("res://scripts/home/home.gd")
+			var H = Match.take_prefetched(HOME_SCRIPT)
 			current = H.new()
 			current.set("visit", opts.get("visit", {}))
 			current.set("visit_id", String(opts.get("visit_id", "")))

@@ -52,10 +52,12 @@ func setup(match_node: Match) -> void:
 	cursor.z_index = 100
 	add_child(cursor)
 	cursor.draw.connect(_draw_pointer)
-	_build_minimap()
+	await _build_minimap()
 	# the painted map (smooth coasts, shading, paths) replaces the tile texture once it's baked
 	c.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	await m._slice()      # under the loading screen: a frame now and then (never waits otherwise)
 	MapPaint.request(self, m.world, func(t: Texture2D): map_paint = t)
+	await m._slice()
 	full_map = FullMap.new(self, m)
 
 # ------------------------------------------------------------------ the full map (M)
@@ -127,6 +129,7 @@ func _build_minimap() -> void:
 	var w := m.world
 	var img := Image.create(w.w, w.h, false, Image.FORMAT_RGBA8)
 	for z in w.h:
+		await m._slice()
 		for x in w.w:
 			var i := w.idx(x, z)
 			var col := Color(0, 0, 0, 0)

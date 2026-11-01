@@ -5,6 +5,9 @@ extends Node3D
 const SPEED := 5.0
 
 var world: World
+## Under the ink wipe the farm builds in slices (see _ready): true until it's whole; Main holds the
+## reveal until then.
+var building := false
 var cam: CamRig
 var fx: Fx
 var ui: CanvasLayer
@@ -117,6 +120,14 @@ func _ready() -> void:
 	# so does Old Pell's Ransom House
 	if visit.is_empty() and not Save.d.get("buildings", []).has("ransom"):
 		Save.d["buildings"].append("ransom")
+	# in real play the farm builds under the ink wipe in slices (no 3D drawn meanwhile), so the wipe's
+	# spinner keeps turning and the window never hangs; tools and checks (no wipe) build it in one go
+	building = Game.main != null and Game.main.fade != null and Game.main.fade.covered and is_inside_tree()
+	if building:
+		set_process(false)
+		set_process_unhandled_input(false)
+		get_viewport().disable_3d = true
+		PerfLog.frame_drawn()
 	hecon = HomeEcon.new(self)
 	if visit.is_empty():
 		Econ.ensure()
@@ -128,7 +139,9 @@ func _ready() -> void:
 	_build_env()
 	world = World.new(); add_child(world)
 	var lay := HomeLayout.ensure(_d())
+	await _slice()
 	HomeLayout.make_world(world, int(lay["grow"]), int(lay.get("seed", 0)))
+	await _slice()
 	hb = HomeBuild.new(self)
 	training = HomeTraining.new(self)
 	hw = HomeWork.new(self)
@@ -194,7 +207,10 @@ func _ready() -> void:
 				line += "." if world.kind[i] == World.T_VOID else ("#" if world.kind[i] == World.T_BLOCK else ("o" if world.paint.has(i) else "g"))
 			print(line)
 		get_tree().quit()
-	world.build_meshes()
+	await _slice()
+	if building: world.stage_cb = func(_l: String) -> void: pass
+	await world.build_meshes()
+	world.stage_cb = Callable()
 	fx = Fx.new(); add_child(fx)
 	cam = CamRig.new(); add_child(cam)
 	cam.zoom_to = HOME_ZOOM; cam.zoom = HOME_ZOOM; cam.lead = 0.2
@@ -225,11 +241,14 @@ func _ready() -> void:
 		var bed := Models.kin_bed(Data.KIN[roster[i]["species"]]["color"])
 		bed.position = Vector3(33.4 + (i % 3) * 1.1, 0, 27.6 + (i / 3) * 1.1)
 		add_child(bed)
+	await _slice()
 	_build_lots()
 	if visit.is_empty():
 		_build_burrow()
+	await _slice()
 	_build_bridges()
 	_build_plots()
+	await _slice()
 	player = Models.hunter(Data.class_of_save(), Data.TEAM_COLORS[0], _weapon(), "", Save.d.get("look", {}), Arch.of_save())
 	add_child(player)
 	ppos = Vector3(38.0, 0, 34.5)
@@ -447,12 +466,17 @@ func _ready() -> void:
 		if a.begins_with("--home-at="):
 			var xy := a.substr(10).split(",")
 			ppos = Vector3(float(xy[0]), 0, float(xy[1])); player.position = ppos; cam.snap(ppos)
+	await _slice()
 	_spawn_kin()
+	await _slice()
 	_setup_care()
 	if visit.is_empty():
 		hecon.build()
+	await _slice()
 	training.build()
+	await _slice()
 	hb.build_visuals()
+	await _slice()
 	hb.assign_beds()
 	if "--kin-lineup" in dbg:
 		var lr := RandomNumberGenerator.new(); lr.seed = 11
@@ -466,9 +490,15 @@ func _ready() -> void:
 			kn.rotation.y = PI * 0.1
 			kn.scale *= 1.3
 			add_child(kn)
+	await _slice()
 	_build_ui()
 	_refresh_top()
 	_refresh_day1()
+	if building:
+		building = false
+		set_process(true)
+		set_process_unhandled_input(true)
+		get_viewport().disable_3d = false
 	if visit.is_empty() and int(Save.d.get("box_notice", 0)) > 0:
 		# an old save, first time home since the Kin Burrow: say where everyone went
 		var nb := int(Save.d["box_notice"])
@@ -499,6 +529,13 @@ func _ready() -> void:
 	var ak := Save.active_kin()
 	if visit.is_empty() and Bridge.ai_ok and not ak.is_empty() and int(ak.get("matches", 0)) % 3 == 0:
 		Bridge.refresh_lines(ak)
+
+## While building under the ink wipe: lets a frame draw once the build has had the CPU for a while.
+func _slice() -> void:
+	if building and is_inside_tree() and PerfLog.slice_due():
+		PerfLog.wait_begin()
+		await get_tree().process_frame
+		PerfLog.wait_end()
 
 func _rect_center(rc: Array) -> Vector3:
 	return Vector3((rc[0] + rc[2] + 1) * 0.5, 0, (rc[1] + rc[3] + 1) * 0.5)
