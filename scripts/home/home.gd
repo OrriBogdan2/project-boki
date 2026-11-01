@@ -892,6 +892,15 @@ func _see_through() -> void:
 func _exit_tree() -> void:
 	SeeThrough.off()
 
+## Boki on the farm are drawn bigger than in a match: the farm's camera sits much further back than the
+## expedition's (HOME_ACROSS_REF framing at HOME_ZOOM), and at match size a Boki was a speck beside
+## your hunter there. Presentation only (the farm has no hitboxes; a match's Boki keep their size);
+## back to match size on the Training Grounds, where the view eases to the expedition's framing.
+const FARM_BOKI_SCALE := 1.7
+func _farm_boki_k() -> float:
+	var e := cam_zone_k * cam_zone_k * (3.0 - 2.0 * cam_zone_k)
+	return lerpf(FARM_BOKI_SCALE, 1.0, e)
+
 var climb := {}                # (unused since the ledge float; kept for anything that clears it)
 ## Floating up a ledge, as in a match (Hunter._ledge_float): {lip, n (into the wall), t, at, g0}.
 ## You keep steering the whole way; steering away, a dash or the glider lets go.
@@ -1279,7 +1288,7 @@ func _move_kin(d: float) -> void:
 		if k.has("say"):
 			k["say_t"] = float(k.get("say_t", 0.0)) - d
 			(k["say"] as Label3D).visible = k["say_t"] > 0.0
-		n.scale = Vector3.ONE * (1.05 if rec["uid"] == _d().get("active", "") else 0.9) * float(n.get_meta("evo_scale", 1.0))
+		n.scale = Vector3.ONE * (1.05 if rec["uid"] == _d().get("active", "") else 0.9) * float(n.get_meta("evo_scale", 1.0)) * _farm_boki_k()
 		if k["emote_t"] > 0.0:
 			k["emote_t"] -= d
 			var lbl: Label3D = k["emote"]
