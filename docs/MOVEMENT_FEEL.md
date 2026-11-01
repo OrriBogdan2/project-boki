@@ -103,11 +103,16 @@ Nothing here comes from SUPERVIVE's files.
 
 Other checks:
 
-- `--wallhug-check` (tools/wallhug_check.gd): 40 grabbable rims are hugged from the abyss side. There are 2400 tries over heights from 0.8m above to 4m below the lip, angles of 0/45/65 degrees into the wall, gliding or not, and touching the wall or a step off it falling at full speed. A try counts as caught only when it ends standing on top. Main caught 2141 of 2400 (89.2%); movefeel catches 2400 of 2400.
+- `--wallhug-check` (tools/wallhug_check.gd): 40 grabbable rims are hugged from the abyss side. There are 2400 tries over heights from 0.8m above to 4m below the lip, keys 0/45/65 degrees off straight into the wall, gliding or not, and touching the wall or a step off it falling at full speed. A try counts as caught only when it ends standing on top.
+  - Main caught 2141 of 2400 (89.2%).
+  - Movefeel catches 1578 of 1600 (98.6%) with the keys pushing in (0/45 degrees), target 95%.
+  - Steering mostly along the wall (65 degrees) it catches 691 of 800 (86.4%), target 70%. The ledge rise follows your keys, so sliding along a short rim can carry you off its end. Before the rise reworked the mantle, the scripted mantle caught all 2400.
 - `--mantle-check` (tools/mantle_check.gd): checks the ledge rise, steering and the fling, plus that ledges you don't push into never grab you (see below).
 - `--obstacle-check` (tools/obstacle_slide_check.gd, from branch `stuckfix`): walks round, away from and past every tree and rock cluster on the training map and an expedition island.
-  - Main: OBST_BEFORE.
-  - Movefeel: every lap clean, every walk-away leaves at once, no pull.
+  - Main 3b800a0: a hunter hugging a 3-tile rock cluster on the expedition island is pinned on a corner for 823 steps (13.7s).
+  - Movefeel (and `stuckfix`):
+    - Expedition island: 31 of 31 laps clean, 853 of 853 walk-aways leave at once, 851 walk-pasts with 0.0000m pull.
+    - Training map: all 20 clusters clean.
 
 ## What changed (all in clearly marked `(movefeel)` blocks)
 

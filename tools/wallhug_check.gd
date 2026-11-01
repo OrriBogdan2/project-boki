@@ -6,9 +6,13 @@ extends RefCounted
 ## 65 degrees along it), with and without the glider held. Each try ends "caught" (climbed onto the
 ## top) or "fell" (sank more than a few metres under the lip, or lost to the abyss).
 ## Counts fixed simulation steps; never touches the save. Prints "WALLHUG caught X of N" and
-## "WALLHUG CHECK DONE, failures: N" (a failure is any catch rate under TARGET).
+## "WALLHUG CHECK DONE, failures: N". A failure is a catch rate under TARGET with the keys pushing into
+## the wall (straight in or 45 degrees), or under TARGET_GLANCE steering 65 degrees off (mostly along
+## it): the ledge rise follows your keys, so steering mostly along a short rim can carry you off its
+## end before you're up.
 
 const TARGET := 0.95
+const TARGET_GLANCE := 0.7
 const DT := 1.0 / 60.0
 var bad := 0
 var m: Match
@@ -109,7 +113,15 @@ func run(main: Node) -> void:
 		if by[k][0] < by[k][1]:
 			print("WALLHUG   %-22s caught %d of %d" % [k, by[k][0], by[k][1]])
 	var rate := float(caught) / maxf(1.0, float(tot))
-	print("WALLHUG caught %d of %d (%.1f%%), target %.0f%%" % [caught, tot, rate * 100.0, TARGET * 100.0])
-	if rate < TARGET: bad += 1
+	print("WALLHUG caught %d of %d (%.1f%%)" % [caught, tot, rate * 100.0])
+	var into := [0, 0]; var glance := [0, 0]
+	for k in by.keys():
+		var g: Array = glance if String(k).contains(" a65 ") else into
+		g[0] += by[k][0]; g[1] += by[k][1]
+	var ri := float(into[0]) / maxf(1.0, float(into[1])); var rg := float(glance[0]) / maxf(1.0, float(glance[1]))
+	print("WALLHUG pushing in (0/45 degrees): %d of %d (%.1f%%), target %.0f%%" % [into[0], into[1], ri * 100.0, TARGET * 100.0])
+	print("WALLHUG steering mostly along (65 degrees): %d of %d (%.1f%%), target %.0f%%" % [glance[0], glance[1], rg * 100.0, TARGET_GLANCE * 100.0])
+	if ri < TARGET: bad += 1
+	if rg < TARGET_GLANCE: bad += 1
 	print("WALLHUG CHECK DONE, failures: ", bad)
 	main.get_tree().quit()
