@@ -128,7 +128,15 @@ func load_game() -> void:
 			d[k] = parsed[k]
 		# JSON numbers come back as floats; plots and roster are fine with that.
 
-var no_write := false         # headless checks play with a save without touching the real file
+var no_write := _tool_run()   # headless checks play with a save without touching the real file
+
+## Tooling runs (--no-save, checks that ask for it, screenshots) never write the real save file,
+## from the very first frame (other autoloads may save while starting up).
+static func _tool_run() -> bool:
+	for a in OS.get_cmdline_user_args():
+		if a == "--no-save" or a == "--archetype-check" or String(a).begins_with("--shot="):
+			return true
+	return false
 
 func save_game() -> void:
 	if no_write:

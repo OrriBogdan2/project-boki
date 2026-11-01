@@ -366,12 +366,13 @@ func stage(slot: String, sd: Dictionary, sockets_override = null) -> StageSpec:
 	if not mods.is_empty(): s["modifiers"] = mods
 	var rep := GrammarReport.new()
 	rep.file = "%s.%s" % [id, slot]
-	var out := StageSpec.parse(s, "", rep)
+	var depth := 2 if String((s["delivery"] as Dictionary).get("origin", "")) == "here" else 1
+	var out := StageSpec.parse(s, "", rep, depth)
 	if not rep.ok():
 		# never let a kin's parts break the archetype: fall back to the plain stage
 		push_warning("ArchKit: %s" % "; ".join(rep.errors))
 		var rep2 := GrammarReport.new()
-		out = StageSpec.parse(sd, "", rep2)
+		out = StageSpec.parse(sd, "", rep2, depth)
 	return out
 
 ## A cast context with this hunter as caster and owner, the kin as the kin.

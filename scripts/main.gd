@@ -20,6 +20,9 @@ func _ready() -> void:
 	if _fades_on():
 		fade.boot()     # carry on from the boot splash: covered, logo showing, until the first screen is up
 	var args := OS.get_cmdline_user_args()
+	# tooling never touches the real save file: checks, screenshots and --no-save runs play on a copy
+	if "--no-save" in args or "--archetype-check" in args or Array(args).any(func(x): return String(x).begins_with("--shot=")):
+		Save.no_write = true
 	var opts := {}
 	for a in args:
 		if a.begins_with("--overlay="):
@@ -357,6 +360,11 @@ func _ready() -> void:
 		return
 	if "--duel-check" in args:
 		_duel_check()
+		return
+	if "--archetype-check" in args:
+		var akc = load("res://tools/archetype_check.gd").new()      # every archetype kit, controls, locks, infusion, feel
+		set_meta("archetype_check", akc)
+		akc.run(self)
 		return
 	if "--ability-check" in args:
 		_ability_check()

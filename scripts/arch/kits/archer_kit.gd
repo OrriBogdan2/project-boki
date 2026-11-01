@@ -156,7 +156,9 @@ func fire_rmb(c: Dictionary) -> void:
 		return
 	var sn: Dictionary = sd["snare"]
 	var root := float(sn["root_full"]) if c.get("full", false) else float(sn["root"])
-	var stg := stage("rmb", {"delivery": {"type": "projectile", "speed": float(sn["speed"]), "range": float(sn["range"]), "size": 0.16},
+	# the arrow comes down at the cursor (up to 11m): a miss plants the Tripwire there
+	var srange := clampf(Vector2(target_aim.x - h.pos.x, target_aim.z - h.pos.z).length() + 0.5, 2.5, float(sn["range"]))
+	var stg := stage("rmb", {"delivery": {"type": "projectile", "speed": float(sn["speed"]), "range": srange, "size": 0.16},
 		"effects": [{"type": "damage", "amount": float(sn["dmg"])}, {"type": "root", "duration": root}]})
 	run(stg, cx("rmb", "snare", target_aim, {"on_shot_end": func(at: Vector3, why: String, e):
 		if why != "hit" and e == null:
@@ -246,7 +248,7 @@ func cast_e() -> bool:
 		e_t = t
 		var stg := stage("e", {"delivery": {"type": "burst", "origin": "aim", "radius": r}, "effects": [{"type": "mark", "mode": "reveal", "duration": t}]})
 		run(stg, cx("e", "flare", at, {"no_floor": true}))
-		var zst := stage("e", {"delivery": {"type": "zone", "origin": "aim", "radius": r, "duration": t, "every": 0.5}, "effects": [{"type": "mark", "mode": "reveal", "duration": 1.0}]}, {})
+		var zst := stage("e", {"delivery": {"type": "zone", "origin": "aim", "radius": minf(r, 6.0), "duration": t, "every": 0.5}, "effects": [{"type": "mark", "mode": "reveal", "duration": 1.0}]}, {})
 		run(zst, cx("e", "flare_zone", at, {"no_floor": true}))
 		# traps and smoke show up too
 		for tr in m.verbs.traps:
