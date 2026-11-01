@@ -143,8 +143,8 @@ func show_result(r: Dictionary) -> void:
 			match String(ln["fate"]):
 				"squad": txt = "%s was carried home by your squadmate %s." % [kk["name"], ln["holder"]]; col = UI.GOOD
 				"home": txt = "%s found its own way home. It trusts you that much." % kk["name"]; col = UI.GOOD
-				"rival": txt = "%s was collected by %s. Make them an offer at the Ransom House, or find them out there and take it back." % [kk["name"], ln["holder"]]
-				_: txt = "Nobody collected %s. It's waiting at the Ransom House on your farm." % kk["name"]; col = Color("ffd58a")
+				"rival": txt = "%s was taken by %s. Make them an offer at the Ransom House, or find them out there and take it back." % [kk["name"], ln["holder"]]
+				_: txt = "Nobody claimed %s. It's waiting at the Ransom House on your farm." % kk["name"]; col = Color("ffd58a")
 			var l := UI.label(txt, 15, col); l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 			lv.add_child(l)
 		v.add_child(lc)

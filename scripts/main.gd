@@ -46,7 +46,12 @@ func _ready() -> void:
 				elif which[0] == "saves": Overlay.open_saves()
 				elif which[0] == "inventory":
 					if which.size() > 1: Overlay.inv_tab = which[1]
-					Overlay.open_inventory())
+					Overlay.open_inventory()
+				elif which[0] == "dex":
+					# a Boki's Bokidex page, over the Bokidex: --overlay=dex:puddlet
+					Overlay.inv_tab = "Kindex"
+					Overlay.open_inventory()
+					Overlay.open_dex(which[1] if which.size() > 1 else "cindle"))
 		if a.begins_with("--seed="): opts["seed"] = int(a.substr(7))
 		if a == "--god": opts["god"] = true
 		if a == "--autoplay": opts["autoplay"] = true

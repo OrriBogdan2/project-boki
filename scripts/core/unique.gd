@@ -15,6 +15,8 @@ class_name Unique
 ##   quirk    an idle habit (KinPuppet plays it)
 ##   voice    pitch of its sounds
 ##   birth    a birthmark [shape, place]
+##   sex      "f" or "m", from the seed by a hash of its own (not the roll stream, so adding it
+##            changed none of the other rolls; every Boki made before it gets the same answer)
 ##
 ## Everything rolls from one seed (rec["dna"]["seed"]) with its own RandomNumberGenerator, so it
 ## never touches the global random stream. Wild and bot kin get their seed from the match seed
@@ -131,7 +133,30 @@ static func roll(seed: int) -> Dictionary:
 	d["quirk"] = _pick(r, QUIRKS)
 	d["voice"] = _r4(clampf(1.0 + r.randfn(0.0, VOICE_SD), VOICE_MIN, VOICE_MAX))
 	d["birth"] = [_pick(r, BIRTH_SHAPES), _pick(r, BIRTH_PLACES)]
+	d["sex"] = sex_for_seed(seed)
 	return d
+
+# ------------------------------------------------------------------ sex
+## A Boki's sex from its seed: half and half, never drawn from the roll stream (so it reads the
+## same for a record that has its rolls and for one written before sex existed).
+static func sex_for_seed(seed: int) -> String:
+	return "f" if (hash("%d|sex" % seed) & 1) == 0 else "m"
+
+## "f" or "m" ("" for a bare look-only record).
+static func sex(rec: Dictionary) -> String:
+	var d := of(rec)
+	if d.is_empty():
+		return ""
+	var x := String(d.get("sex", ""))
+	return x if x in ["f", "m"] else sex_for_seed(int(d.get("seed", 0)))
+
+static func sex_name(rec: Dictionary) -> String:
+	return {"f": "Female", "m": "Male"}.get(sex(rec), "")
+
+## Writes the sex into a record's rolls if they don't have it yet (save migration).
+static func ensure_sex(rec: Dictionary) -> void:
+	if typeof(rec.get("dna", null)) == TYPE_DICTIONARY and rec["dna"].has("seed") and not rec["dna"].has("sex"):
+		rec["dna"]["sex"] = sex_for_seed(int(rec["dna"]["seed"]))
 
 ## A record's rolls; a record without any (an old save, another player's kin) reads the ones its
 ## id gives, without being changed. {} for a bare look-only record (no uid, no dna).

@@ -426,7 +426,7 @@ func _draw_world_labels() -> void:
 		var sp := cam.unproject_position(k.position + Vector3(0, 1.05, 0))
 		if k.is_wild():
 			if k.state == "dazed":
-				_ctext(sp + Vector2(0, -8), "Dazed!  %s to catch" % Settings.key_cap("interact"), 17, GOLD, big)
+				_ctext(sp + Vector2(0, -8), "Dazed!  %s to tame" % Settings.key_cap("interact"), 17, GOLD, big)
 				if k.catch_prog > 0.0:
 					_arc(sp + Vector2(0, 10), 9, k.catch_prog, GOLD, 3.0)
 			else:
@@ -2692,7 +2692,7 @@ func _draw_world_hover(sz: Vector2, p: Hunter) -> void:
 		lines.append([String(md["name"]), Color(md["color"]).lightened(0.35)])
 		lines.append(["Monster  ·  %d / %d health" % [int(ceil(mb.hp)), int(mb.max_hp)], MUTED])
 		var how := {"lunge": "Lunges at whoever is closest.", "spit": "Spits from range: keep moving.", "slam": "Winds up a ground slam: step out of the circle.",
-			"fuse": "Rolls in and blows up. Shoot it before it reaches you.", "volley": "Fires a spread of bolts down a line.", "none": "Runs from you. Catch it before it escapes."}
+			"fuse": "Rolls in and blows up. Shoot it before it reaches you.", "volley": "Fires a spread of bolts down a line.", "none": "Runs from you. Tame it before it escapes."}
 		lines.append([String(how.get(String(md["attack"]), "Dangerous up close.")), INK])
 		if md.get("stag", false):
 			lines.append(["Staggerable: hit it with an ability while the purple ring shows.", Color(0.85, 0.6, 1.0)])
@@ -2705,15 +2705,15 @@ func _draw_world_hover(sz: Vector2, p: Hunter) -> void:
 		lines.append(["%s type  ·  level %d  ·  %d / %d health" % [String(sp["type"]).capitalize(), int(k.rec.get("level", 1)), int(ceil(k.hp)), int(k.max_hp)], MUTED])
 		if k.is_wild():
 			if k.state == "dazed":
-				lines.append(["Dazed. Hold %s next to it to catch it." % Settings.key_cap("interact"), GOLD])
+				lines.append(["Dazed. Hold %s next to it to tame it." % Settings.key_cap("interact"), GOLD])
 			else:
-				lines.append(["Knock its health down to daze it, then hold %s to catch it." % Settings.key_cap("interact"), INK])
+				lines.append(["Knock its health down to daze it, then hold %s to tame it." % Settings.key_cap("interact"), INK])
 			if k.rec.get("shimmer", false):
 				lines.append(["A shimmering one. Rare.", Color("ffd6ff")])
 			for mid in Mutations.of(k.rec):
 				lines.append(["%s: %s (%s)" % [Mutations.name_of(mid), String(Mutations.info(mid).get("desc", "")), Mutations.perk_text(mid)], Mutations.col_of(mid)])
 			if k.lost_from != "":
-				lines.append(["Left behind by %s. Whoever collects it keeps it." % ("you" if k.lost_from == "you" else k.lost_from), GOLD if k.lost_from == "you" else MUTED])
+				lines.append(["Left behind by %s. Whoever reaches it first keeps it." % ("you" if k.lost_from == "you" else k.lost_from), GOLD if k.lost_from == "you" else MUTED])
 		elif k.owner_h == p:
 			var a1: AbilitySpec = k.runner.def_of("k1")
 			lines.append(["Yours. %s throws it, %s uses %s." % [Settings.key_cap("throw"), Settings.key_cap("signature"), a1.display_name if a1 else "its ability"], INK])

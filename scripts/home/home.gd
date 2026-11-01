@@ -406,7 +406,9 @@ func _ready() -> void:
 			get_tree().create_timer(0.2).timeout.connect(func():
 				if which == "loadout": _open_loadout()
 				elif which == "expedition": _open_expedition()
-				elif which == "kin": _open_kin(Save.active_kin())
+				elif which == "kin" or which.begins_with("kin:"):
+					if which.begins_with("kin:"): kin_tab = which.substr(4)      # --open=kin:About opens that tab
+					_open_kin(Save.active_kin())
 				elif which == "burrow" or which == "kinbox": _open_burrow()
 				elif which == "shop": _open_shop()
 				elif which == "challenges": _open_challenges()
@@ -2429,11 +2431,13 @@ func _open_kitchen() -> void:
 var shop_tab := "Seeds"
 
 var shop_page := 0
+const SHOP_H := 404.0
 
 ## The market: goods in tabs, shown as cards a page at a time. Some only go on sale once you've
 ## made it out of enough expeditions or finished a challenge at the Challenge House.
 func _open_shop() -> void:
-	var v := _new_panel("Market stall", 800, true)     # it pages its own goods; the scroll is only a fallback
+	var v := _new_panel("Market stall", 800)
+	UI.hold(v, SHOP_H)          # every tab the same size
 	UI.subtitle(v, "Seeds, food, things to wear and things for the farm")
 	UI.head_extra(v).add_child(UI.chip("gem", str(int(Save.d["gems"])), UI.GOLD, "Your gems"))
 	UI.shell_tabs(v, ["Seeds", "Kin food", "Wear", "Home", "Farm", "Sell"], shop_tab, func(t):
@@ -2487,82 +2491,73 @@ func _open_shop() -> void:
 					_build_plots(), "%d plots" % int(Save.d["plot_cap"])])
 	# open goods first, then the ones still locked
 	goods.sort_custom(func(a, b): return int(Progress.unlocked(a[0])) > int(Progress.unlocked(b[0])))
-	var per := 6
-	var pages := maxi(1, int(ceil(goods.size() / float(per))))
-	shop_page = clampi(shop_page, 0, pages - 1)
-	var grid := GridContainer.new(); grid.columns = 3
-	grid.add_theme_constant_override("h_separation", 10); grid.add_theme_constant_override("v_separation", 10)
-	for g in goods.slice(shop_page * per, shop_page * per + per):
+	# every good on one page: two columns of one-line rows (the full description on hover)
+	var grid := GridContainer.new(); grid.columns = 2
+	grid.add_theme_constant_override("h_separation", 10); grid.add_theme_constant_override("v_separation", 8)
+	for g in goods:
 		grid.add_child(_shop_card(g))
 	if goods.is_empty():
 		v.add_child(UI.empty_state("shop", "Nothing for sale", "Come back after your next expedition."))
 	v.add_child(grid)
-	if pages > 1:
-		# page arrows live in the footer so they never get pushed off the panel
-		var ft := UI.footer(v)
-		var pv := UI.ghost("Back", func(): shop_page -= 1; _open_shop(), 90, "back"); pv.disabled = shop_page <= 0
-		var nx := UI.ghost("Next", func(): shop_page += 1; _open_shop(), 90, "next"); nx.disabled = shop_page >= pages - 1
-		var pl := UI.label("Page %d of %d" % [shop_page + 1, pages], UI.T_SMALL, UI.MUTED); pl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		ft.add_child(pv); ft.add_child(pl); ft.add_child(nx)
 
+## One good as a compact row: its icon, name (and what you own), one line of description (all of
+## it on hover), and its price to press.
 func _shop_card(g: Array) -> Control:
 	var key: String = g[0]
 	var open := Progress.unlocked(key)
 	var price: int = g[3]
 	var col: Color = Color(g[4])
-	var card := UI.card(UI.CARD if open else Color(0.1, 0.11, 0.15, 0.9), 14, 14)
-	card.custom_minimum_size = Vector2(240, 158)
-	var v := UI.vbox(8); card.add_child(v)
-	var hr := UI.hbox(10)
+	var card := UI.card(UI.CARD if open else Color(0.1, 0.11, 0.15, 0.9), 10, 12)
+	card.custom_minimum_size = Vector2(364, 0)
+	card.tooltip_text = String(g[2]) + ("" if open else "\n" + Progress.req_text(key))
+	var hr := UI.hbox(10); card.add_child(hr)
 	var sw := PanelContainer.new()
-	var sb := UI._box(Color(col, 0.2) if open else Color(1, 1, 1, 0.05), 10); UI._pad(sb, 7, 7)
+	var sb := UI._box(Color(col, 0.2) if open else Color(1, 1, 1, 0.05), 10); UI._pad(sb, 6, 6)
 	sw.add_theme_stylebox_override("panel", sb)
 	var icon: String = {"seed": "seed", "food": "heart", "tonic": "tonic", "rift_key": "portal", "acc": "paw", "furn": "home", "plots": "seed", "coals": "dash", "incub_slot": "egg"}.get(key.split(":")[0], "gem")
-	sw.add_child(UI.IconDot.new("lock" if not open else icon, col if open else UI.FAINT, 20.0))
-	sw.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	sw.add_child(UI.IconDot.new("lock" if not open else icon, col if open else UI.FAINT, 18.0))
+	sw.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	hr.add_child(sw)
 	var nv := UI.vbox(0); nv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	var nm := UI.label(String(g[1]), UI.T_HEAD - 1, UI.INK if open else UI.MUTED, UI.big)
-	nm.clip_text = true
-	nv.add_child(nm)
+	var top := UI.hbox(6)
+	var nm := UI.label(String(g[1]), UI.T_BODY, UI.INK if open else UI.MUTED, UI.semi)
+	nm.clip_text = true; nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	top.add_child(nm)
 	if open and String(g[6]) != "":
-		nv.add_child(UI.label(String(g[6]), 12, UI.GOOD if String(g[6]) == "yours" else UI.MUTED))
+		top.add_child(UI.label(String(g[6]), 12, UI.GOOD if String(g[6]) == "yours" else UI.MUTED))
+	nv.add_child(top)
+	var d := UI.label(String(g[2]) if open else Progress.req_text(key), 12, UI.MUTED if open else Color("ffb3a8"))
+	d.autowrap_mode = TextServer.AUTOWRAP_OFF
+	d.clip_text = true
+	d.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	nv.add_child(d)
 	hr.add_child(nv)
-	v.add_child(hr)
-	var d := UI.para(String(g[2]), 12, UI.MUTED)
-	d.custom_minimum_size = Vector2(212, 34)
-	d.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	d.max_lines_visible = 3
-	v.add_child(d)
-	if not open:
-		var lk := UI.para("Unlocks: " + Progress.req_text(key), 12, Color("ffb3a8"))
-		v.add_child(lk)
-		return card
-	if price >= 0:
+	if open and price >= 0:
 		var on_buy: Callable = g[5]
 		var can := int(Save.d["gems"]) >= price
 		# a price tag you press: gold on an outline, so a page of goods isn't a wall of orange
-		var b := UI.button("Buy  ·  %d" % price, func():
+		var b := UI.button(str(price), func():
 			if int(Save.d["gems"]) < price: return
 			Save.d["gems"] = int(Save.d["gems"]) - price
 			on_buy.call()
 			Sfx.play("pickup")
 			Save.save_game()
-			_open_shop(), 0, "gem")
+			_open_shop(), 76, "gem")
 		b.add_theme_color_override("font_color", UI.GOLD)
 		b.add_theme_color_override("font_hover_color", Color("ffe08a"))
+		b.tooltip_text = "Buy for %d gems" % price
 		if not can:
 			b.disabled = true
 			b.tooltip_text = "You need %d more gems" % (price - int(Save.d["gems"]))
-		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		v.add_child(b)
+		b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		hr.add_child(b)
 	return card
 
 ## The Challenge House: goals with rewards. Finished ones are claimed here for gems, and some open
 ## up new goods at the market.
 var chal_page := 0
 func _open_challenges() -> void:
-	var v := _new_panel("Challenge House", 780)
+	var v := _new_panel("Challenge House", 800)
 	var ready := Progress.ready_to_claim()
 	var donec: int = Save.d.get("challenges", []).size()
 	UI.subtitle(v, "Goals with rewards. Finished ones are claimed here, and some open new goods at the market.")
@@ -2575,54 +2570,51 @@ func _open_challenges() -> void:
 		var ra := 0 if ready.has(a) else (2 if Progress.done(a[0]) else 1)
 		var rb := 0 if ready.has(b) else (2 if Progress.done(b[0]) else 1)
 		return ra < rb)
-	var per := 4
-	var pages := maxi(1, int(ceil(list.size() / float(per))))
-	chal_page = clampi(chal_page, 0, pages - 1)
-	var grid := GridContainer.new(); grid.columns = 2
-	grid.add_theme_constant_override("h_separation", 10); grid.add_theme_constant_override("v_separation", 10)
-	for c in list.slice(chal_page * per, chal_page * per + per):
+	# every goal on one page: three columns of compact rows, ready ones first
+	var grid := GridContainer.new(); grid.columns = 3
+	grid.add_theme_constant_override("h_separation", 10); grid.add_theme_constant_override("v_separation", 8)
+	for c in list:
 		grid.add_child(_challenge_card(c, ready.has(c)))
 	v.add_child(grid)
-	if pages > 1:
-		var ft := UI.footer(v)
-		var pv := UI.ghost("Back", func(): chal_page -= 1; _open_challenges(), 90, "back"); pv.disabled = chal_page <= 0
-		var nx := UI.ghost("Next", func(): chal_page += 1; _open_challenges(), 90, "next"); nx.disabled = chal_page >= pages - 1
-		var pl := UI.label("Page %d of %d" % [chal_page + 1, pages], UI.T_SMALL, UI.MUTED); pl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		ft.add_child(pv); ft.add_child(pl); ft.add_child(nx)
 
+## One goal as a compact row: its name, a progress bar with the count, and its reward (or Claim).
+## What it asks and what it unlocks show on hover.
 func _challenge_card(c: Array, ready: bool) -> Control:
 	var donec := Progress.done(c[0])
-	var card := UI.card(UI.CARD if not donec else Color(0.1, 0.14, 0.12, 0.9), 14, 14)
-	card.custom_minimum_size = Vector2(360, 120)
-	if ready: UI.set_card_border(card, Color(UI.GOLD, 0.8), 1)
-	var v := UI.vbox(5); card.add_child(v)
-	var hr := UI.hbox(8)
-	var nm := UI.label(String(c[1]), UI.T_HEAD, UI.INK, UI.big); nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	hr.add_child(nm)
-	if donec: hr.add_child(UI.tag("Done", UI.GOOD))
-	hr.add_child(UI.chip("gem", "+%d" % int(c[5]), UI.GOLD, "Reward", 13))
-	v.add_child(hr)
-	v.add_child(UI.para(String(c[2]), UI.T_SMALL, UI.MUTED))
+	var card := UI.card(UI.CARD if not donec else Color(0.1, 0.14, 0.12, 0.9), 9, 10)
+	card.custom_minimum_size = Vector2(240, 0)
+	var ul: Array = Progress.unlocks_of(c[0]).map(func(k): return Progress.item_name(k))
+	card.tooltip_text = String(c[2]) + (("\nUnlocks " + ", ".join(ul)) if ul.size() > 0 else "")
+	var hr := UI.hbox(10); card.add_child(hr)
+	var lv := UI.vbox(4); lv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var nm := UI.label(String(c[1]), UI.T_BODY, UI.INK if not donec else UI.MUTED, UI.semi)
+	nm.clip_text = true
+	lv.add_child(nm)
+	var pr := UI.hbox(8)
 	var cur := mini(Progress.stat(c[3]), int(c[4]))
 	var bar := ProgressBar.new(); bar.max_value = float(c[4]); bar.value = float(cur); bar.show_percentage = false
-	bar.custom_minimum_size = Vector2(320, 8)
+	bar.custom_minimum_size = Vector2(90, 6)
+	bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	if donec: bar.add_theme_stylebox_override("fill", UI._box(UI.GOOD, 5))
-	v.add_child(bar)
-	var br := UI.hbox(8)
-	var ul: Array = Progress.unlocks_of(c[0]).map(func(k): return Progress.item_name(k))
-	var info := UI.label(("%d / %d" % [cur, int(c[4])]) + (("  ·  unlocks " + ", ".join(ul)) if ul.size() > 0 else ""), 12, UI.MUTED)
-	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	info.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	br.add_child(info)
+	pr.add_child(bar)
+	pr.add_child(UI.label("%d / %d" % [cur, int(c[4])], 12, UI.MUTED))
+	if ul.size() > 0: pr.add_child(UI.IconDot.new("lock" if not donec else "check", UI.FAINT, 12.0))
+	lv.add_child(pr)
+	hr.add_child(lv)
 	if ready:
-		br.add_child(UI.primary("Claim", func():
+		var cb := UI.primary("Claim +%d" % int(c[5]), func():
 			var g := Progress.claim(c[0])
 			if g > 0:
 				Sfx.play("unlock")
 				_toast("%s done!  +%d gems" % [c[1], g])
 				_refresh_top()
-			_open_challenges(), 100))
-	v.add_child(br)
+			_open_challenges(), 0)
+		cb.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		hr.add_child(cb)
+	elif donec:
+		hr.add_child(UI.tag("Done", UI.GOOD))
+	else:
+		hr.add_child(UI.chip("gem", "+%d" % int(c[5]), UI.GOLD, "Reward", 13))
 	return card
 
 func _shop_sell(v: VBoxContainer) -> void:
@@ -2795,6 +2787,70 @@ func _say(k: Dictionary, text: String, secs := 4.0, direct := true) -> void:
 	k["say_t"] = secs
 	(k["say"] as Label3D).visible = true
 
+## What a kin does in a match: its abilities, its merge, then how it rides with you. compact: one
+## line each (the card's Training tab); otherwise the full rules (the "Full details" sub-page).
+func _kin_match_rows(rec: Dictionary, c2: Control, compact: bool) -> void:
+	var sp: Dictionary = Data.KIN[rec["species"]]
+	var abl: Array = sp.get("abilities", [])
+	var kspec := KinLib.kin(String(rec["species"]))
+	var ab_row := func(key: String, nm: String, desc: String, c: Color) -> void:
+		var r := UI.hbox(10)
+		var kc := UI.keycap(key, 12); kc.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+		r.add_child(kc)
+		var tv := UI.vbox(1); tv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		tv.add_child(UI.label(nm, UI.T_BODY, c, UI.semi))
+		if compact:
+			var dl := UI.label(desc, 12, UI.MUTED)
+			dl.autowrap_mode = TextServer.AUTOWRAP_OFF
+			dl.clip_text = true
+			dl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+			dl.tooltip_text = desc
+			dl.mouse_filter = Control.MOUSE_FILTER_PASS
+			tv.add_child(dl)
+		else:
+			tv.add_child(UI.para(desc, 12, UI.MUTED))
+		r.add_child(tv)
+		c2.add_child(r)
+	# read from its parts (the kin grammar): what it does, coloured by effect category
+	for ai in abl.size():
+		var ad := KinLib.ability(String(abl[ai]))
+		if ad == null: continue
+		var eff := KinLib.effective(ad, "k1" if ai == 0 else "k2", kspec, rec)
+		ab_row.call(Settings.key_cap("signature") if ai == 0 else "auto", ad.display_name, (KinText.ability(eff) if ai == 0 else KinText.when(ad) + ": " + KinText.ability(eff)), KinText.color(ad).lerp(UI.INK, 0.3))
+	var ud := KinLib.merge(String(sp.get("ultimate", "")))
+	if ud:
+		ab_row.call(Settings.key_cap("ultimate"), "Merge: " + ud.display_name, " ".join(KinText.merge(ud, kspec != null and kspec.carry_style == "mount")), Color("ffd84a").lerp(UI.INK, 0.3))
+	if kspec == null:
+		return
+	var lines: Array = [[KinText.carry(kspec), KinRules.cat_color("sustain").lerp(UI.INK, 0.35)]]
+	var ob := KinText.owner_bonus(KinLib.owner_bonus(kspec, rec))
+	if ob != "": lines.append(["Owner bonus while it's your Boki: " + ob, Color("ffd84a").lerp(UI.INK, 0.35)])
+	var rdt := KinText.rider(kspec)
+	if rdt != "": lines.append(["%s (your dodge): %s" % [String(kspec.dodge_rider.get("name", "")), rdt], UI.MUTED])
+	for ln in lines:
+		if compact:
+			var l := UI.label(String(ln[0]), 12, ln[1])
+			l.autowrap_mode = TextServer.AUTOWRAP_OFF
+			l.clip_text = true
+			l.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+			l.tooltip_text = String(ln[0])
+			l.mouse_filter = Control.MOUSE_FILTER_PASS
+			c2.add_child(l)
+		else:
+			c2.add_child(UI.para(String(ln[0]), 12, ln[1]))
+
+## A sub-page of the card: everything the kin does in a match, in full. Back returns to the card.
+func _open_kin_match(rec: Dictionary) -> void:
+	var v := _new_panel("%s in a match" % String(rec["name"]), 820)
+	UI.hold(v, KIN_CARD_H + 58.0)
+	UI.title_icon(v, UI.sex_icon(rec, 22.0))
+	_kin_match_rows(rec, v, false)
+	UI.footer(v).add_child(UI.button("Back to %s" % String(rec["name"]), func(): _open_kin(rec), 0, "back"))
+
+## The card's body height on every tab (fits a 720p window), so switching tabs or Boki never
+## resizes it.
+const KIN_CARD_H := 400.0
+
 ## The details card: everything about one kin, laid out to fit on screen without scrolling.
 var kin_tab := "Care"
 
@@ -2808,6 +2864,8 @@ func _open_kin(rec: Dictionary) -> void:
 	var partner: bool = rec["uid"] == Save.d.get("active", "")
 	var rare_pre := Mutations.prefix(rec)
 	var v := _new_panel("%s the %s%s%s" % [rec["name"], "shimmering " if rec.get("shimmer", false) else "", (rare_pre + " ") if rare_pre != "" else "", Evo.form_name(rec)], 820)
+	UI.hold(v, KIN_CARD_H)
+	UI.title_icon(v, UI.sex_icon(rec, 22.0))
 	UI.subtitle(v, "Level %d  ·  %s Boki  ·  %s  ·  %s nature" % [int(rec["level"]), String(sp["type"]).capitalize(), Care.stage_name(rec), Care.nature(rec)])
 	var hx := UI.head_extra(v)
 	if partner: hx.add_child(UI.tag("Partner", UI.ACCENT))
@@ -2837,7 +2895,7 @@ func _open_kin(rec: Dictionary) -> void:
 	match kin_tab:
 		"About":
 			# what makes it itself, and where it came from (AboutView: Unique and Save.register)
-			c1.add_child(UI.section("Field notes", UI.FAINT.lightened(0.2)))
+			c1.add_child(UI.section("Who it is", UI.FAINT.lightened(0.2)))
 			AboutView.looks(rec, c1)
 			c2.add_child(UI.section("Where it's from", UI.FAINT.lightened(0.2)))
 			AboutView.history(rec, c2)
@@ -2879,34 +2937,10 @@ func _open_kin(rec: Dictionary) -> void:
 				row.call(c1, Care.STATS[st]["name"], float(rec["stats"][st]) / float(Care.stat_cap(rec)), Care.STATS[st]["col"], str(int(rec["stats"][st])))
 			c1.add_child(UI.para("Train at the yard to raise them. Higher bonds raise the cap.", 12, UI.FAINT))
 			c2.add_child(UI.section("In a match", UI.FAINT.lightened(0.2)))
-			var abl: Array = sp.get("abilities", [])
-			var kspec := KinLib.kin(String(rec["species"]))
-			var ab_row := func(key: String, nm: String, desc: String, c: Color) -> void:
-				var r := UI.hbox(10)
-				var kc := UI.keycap(key, 12); kc.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
-				r.add_child(kc)
-				var tv := UI.vbox(1); tv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-				tv.add_child(UI.label(nm, UI.T_BODY, c, UI.semi))
-				tv.add_child(UI.para(desc, 12, UI.MUTED))
-				r.add_child(tv)
-				c2.add_child(r)
-			# read from its parts (the kin grammar): what it does, coloured by effect category
-			for ai in abl.size():
-				var ad := KinLib.ability(String(abl[ai]))
-				if ad == null: continue
-				var eff := KinLib.effective(ad, "k1" if ai == 0 else "k2", kspec, rec)
-				ab_row.call(Settings.key_cap("signature") if ai == 0 else "auto", ad.display_name, (KinText.ability(eff) if ai == 0 else KinText.when(ad) + ": " + KinText.ability(eff)), KinText.color(ad).lerp(UI.INK, 0.3))
-			var ud := KinLib.merge(String(sp.get("ultimate", "")))
-			if ud:
-				ab_row.call(Settings.key_cap("ultimate"), "Merge: " + ud.display_name, " ".join(KinText.merge(ud, kspec != null and kspec.carry_style == "mount")), Color("ffd84a").lerp(UI.INK, 0.3))
-			if kspec:
-				c2.add_child(UI.para(KinText.carry(kspec), 12, KinRules.cat_color("sustain").lerp(UI.INK, 0.35)))
-				var ob := KinText.owner_bonus(KinLib.owner_bonus(kspec, rec))
-				if ob != "":
-					c2.add_child(UI.para("Owner bonus while it's your Boki: " + ob, 12, Color("ffd84a").lerp(UI.INK, 0.35)))
-				var rdt := KinText.rider(kspec)
-				if rdt != "":
-					c2.add_child(UI.para("%s (your dodge): %s" % [String(kspec.dodge_rider.get("name", "")), rdt], 12, UI.MUTED))
+			_kin_match_rows(rec, c2, true)
+			var more := UI.ghost("Full details", func(): _open_kin_match(rec), 0, "info")
+			more.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+			c2.add_child(more)
 		"Growth":
 			var lead := Evo.leading(rec)
 			var lv := int(rec["level"])
@@ -4571,6 +4605,8 @@ var nook_scroll := 0.0
 var nook_tab := "Pairs"      # Pairs (breeding) or Incubator (Rare Eggs)
 const NOOK_COLS := 4
 const NOOK_TILE := Vector2(128, 0)
+const NOOK_H := 404.0        # the Nook's body height (fits a 720p window)
+const NOOK_SIDE_W := 372.0   # the side panel's width, fixed so picking a Boki never widens the window
 
 ## A short word for why a kin can't pair yet ("" if it can), for the tiles.
 func _pair_short(why: String) -> String:
@@ -4584,7 +4620,8 @@ func _pair_short(why: String) -> String:
 
 func _open_nook() -> void:
 	var egg_in: bool = not Save.d.get("egg", {}).is_empty()
-	var v := _new_panel("Nesting Nook", 1010, true)
+	var v := _new_panel("Nesting Nook", 1010)
+	UI.hold(v, NOOK_H)           # the same size whichever tab, Boki or pair is showing
 	Incubator.ensure()
 	UI.shell_tabs(v, ["Pairs", "Incubator"], nook_tab, func(t): nook_tab = t; _open_nook(), {"Incubator": Incubator.count()} if Incubator.count() > 0 else {})
 	if nook_tab == "Incubator":
@@ -4608,7 +4645,7 @@ func _open_nook() -> void:
 	# the kin, as pictures
 	var sc := ScrollContainer.new()
 	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	sc.custom_minimum_size = Vector2(NOOK_COLS * (NOOK_TILE.x + 8) + 14, 420)
+	sc.custom_minimum_size = Vector2(NOOK_COLS * (NOOK_TILE.x + 8) + 14, NOOK_H - 4)
 	sc.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	var grid := GridContainer.new()
 	grid.columns = NOOK_COLS
@@ -4622,9 +4659,16 @@ func _open_nook() -> void:
 	(func(): if is_instance_valid(sc): sc.scroll_vertical = int(nook_scroll)).call_deferred()
 	# the side: one kin's IVs, the pair, or what this is
 	var dc := UI.card(UI.CARD, 14, 14)
+	dc.custom_minimum_size = Vector2(NOOK_SIDE_W, NOOK_H - 4)
 	dc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	# a pair's IVs side by side can run long: only that side panel scrolls, the window never changes
+	var dsc := ScrollContainer.new()
+	dsc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER     # (DISABLED would pass its content's width up and widen the window)
+	dsc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	dc.add_child(dsc)
 	var dv := UI.vbox(8)
-	dc.add_child(dv)
+	dv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	dsc.add_child(dv)
 	cols.add_child(dc)
 	var viewing := Save.kin(nook_view)
 	if not viewing.is_empty():
@@ -4678,9 +4722,9 @@ func _nook_tile(o: Dictionary, egg_in: bool) -> Control:
 		n.position = Vector2(0, 52)
 		pic_box.add_child(n)
 	tv.add_child(pic_box)
-	var nm := UI.label(String(o["name"]), UI.T_SMALL, UI.INK if why == "" or picked else UI.MUTED, UI.semi)
-	nm.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	nm.clip_text = true
+	var nm := UI.name_with_sex(o, String(o["name"]), UI.T_SMALL, UI.INK if why == "" or picked else UI.MUTED, UI.semi, 11.0)
+	nm.alignment = BoxContainer.ALIGNMENT_CENTER
+	nm.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	tv.add_child(nm)
 	var spl := UI.label(Evo.form_name(o), 11, UI.MUTED)
 	spl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -4710,9 +4754,10 @@ func _nook_detail(rec: Dictionary, dv: VBoxContainer, egg_in: bool) -> void:
 	top.add_child(KinPortrait.view(rec, get_tree(), 72.0))
 	var tv := UI.vbox(2)
 	tv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	var nl := UI.title(String(rec["name"]), UI.T_HEAD + 3, col.lerp(UI.INK, 0.35))
-	nl.clip_text = true
-	tv.add_child(nl)
+	var nrow := UI.hbox(8)
+	nrow.add_child(UI.title(String(rec["name"]), UI.T_HEAD + 3, col.lerp(UI.INK, 0.35)))
+	nrow.add_child(UI.sex_icon(rec, 16.0))
+	tv.add_child(nrow)
 	tv.add_child(UI.label("Level %d %s  ·  %s Boki" % [int(rec["level"]), Evo.form_name(rec), String(sp["type"]).capitalize()], UI.T_SMALL, UI.INK))
 	var why := _can_pair(rec)
 	tv.add_child(UI.label("Ready to pair" if why == "" else why, 12, UI.GOOD if why == "" else UI.MUTED))
