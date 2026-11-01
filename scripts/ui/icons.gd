@@ -3,6 +3,8 @@ class_name Icons
 ## crisp at any size. Coordinates are in a -1..1 box around the centre.
 
 static func draw(c: Control, id: String, at: Vector2, s: float, col: Color) -> void:
+	if not (is_finite(at.x) and is_finite(at.y)) or absf(at.x) > 8000.0 or absf(at.y) > 8000.0:
+		return      # (way off screen, e.g. a status icon over someone far below the camera: at that size small polygons lose their area to float rounding and error "triangulation failed")
 	var w := maxf(2.0, s * 0.16)
 	var P := func(x: float, y: float) -> Vector2: return at + Vector2(x, y) * s
 	var L := func(pts: Array, width := -1.0) -> void:
