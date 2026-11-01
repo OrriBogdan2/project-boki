@@ -250,6 +250,8 @@ game's scale (`Data.CLASSES` HP 124 / 145 / 193; kin abilities hit for 8-22).
 
 ### 6.1 Thief (light)
 
+> **Nov 1 (kits2): superseded.** The Thief was rebuilt on a Shiv-style duelist baseline (owner direction); the built kit is in "Kit loops" at the end of this document, and it wins where they differ.
+
 **Fantasy:** the cutpurse. Slips behind you, marks you, cashes in, gone in smoke.
 **Silhouette:** the smallest and most hunched. A hood with a long pointed tail, a short asymmetric
 cape, a crouched forward run, a reverse-grip blade or a stubby SMG. Eyes glint under the hood. The
@@ -562,6 +564,8 @@ RMB. The held slide is a long line. Break line of sight against Last Round.
 
 ### 6.5 Juggernaut (heavy)
 
+> **Nov 1 (kits2): superseded.** The Juggernaut was rebuilt on a Brall-style greatsword bruiser baseline (owner direction); the built kit is in "Kit loops" at the end of this document, and it wins where they differ.
+
 **Fantasy:** the wrecking ball. Gets angrier, crashes through, slams you into the wall.
 **Silhouette:** the biggest shoulders in the game, with horned pauldrons. Hunched forward, with an
 oversized blade or a drum-fed shotgun and heavy dust footsteps. The **primary feature is the horned pauldrons**.
@@ -854,11 +858,11 @@ chest) and the merge starts on the same frame the ult fires, with the BONDED col
 
 | Archetype | R | Cooldown | Fuse | During the fuse |
 |---|---|---|---|---|
-| Thief | Heist | 105s | 0.40s (then the 0.3s mark-out) | vulnerable: a stun or knock cancels it (R back in 8s) |
+| Thief | Jackpot (kits2) | 95s | 0.45s (you keep shooting through it; the reach and rim rings show) | vulnerable: a stun or knock cancels it (R back in 8s) |
 | Archer | Skyfall Volley | 110s | 0.50s | vulnerable |
 | Mage | Meteor | 105s | 0.55s | vulnerable |
 | Gunslinger | Last Round | 100s | 0.45s | vulnerable |
-| Juggernaut | Avalanche | 115s | 0.60s (the roar; its own tell is now 0.1s) | unstoppable (fortify) |
+| Juggernaut | Doomfall (kits2) | 90s | 0.55s (you rise toward the landing circle) | invulnerable and unstoppable |
 | Bulwark | Bastion | 120s | 0.50s | unstoppable (fortify) |
 
 An ult that needs targets (Heist, Last Round) checks for them before the fuse, so a fuse never
@@ -986,11 +990,11 @@ above is superseded by this:
 
 | Archetype | Input | Shape | Sound | Payoff |
 |---|---|---|---|---|
-| Thief | tap, then recast | a thrown knife; the recast teleports you behind the target | a throw, then a cloak snap | Marks; at 3 the knife Cashes In |
+| Thief | tap | a spinning Bola; the first foe it wraps is Grounded, a second within 3m and both are stunned | a whirr, a cord snap, a stun clang | TANGLED; Marks for the Primed Cash In |
 | Archer | hold to charge, release | a heavy piercing arrow, knockback grows with the charge (0.5s -> 1.1s); tap drops a root snare | a creak rising to a ping, then a string-snap and a sniper boom | into a wall within 3m: PINNED (stun); feeds Focus for the Deadeye |
 | Mage | press to fire, hold to steer | a slow glowing bolt that bends toward your cursor round cover, harder the longer it flies | a hum that rises with travel time | Runes the target; the next spell detonates it |
 | Gunslinger | tap (hold = Rail) | a ricochet round off up to 2 walls and on to a second foe | a revolver crack, a hammer click, a ricochet whine | at 6 Chambers a Called Shot (stun, crit, reload) |
-| Juggernaut | tap (hold = leap) | an overhead smash cone; hold leaps into Earthshatter | a cleave and a ground thump | Enraged: Rage Smash |
+| Juggernaut | tap / hold to charge / in the air | a heavy slam cone (BREAK on the wounded); hold a charged Lunge; air a Meteor Drop | a cleave and a slam; a rising thump into a charge | Enraged: Rage Smash |
 | Bulwark | hold to block, release to bash | a frontal shield wall (its own HP), then a forward bash cone you step into | a shield clang, then a plate slam | into a wall or another foe: Crushed (stun + heal) |
 
 ### Holds and charges: the wind-up feel (shared, every archetype)
@@ -1020,3 +1024,74 @@ Owner: "why does it show me rank 3 but not rank 2 when it's rank 1?" Every arche
 3: the cooldown and damage at rank 3 plus its special). `Arch.next_ranks(arch, slot, rank)` returns
 the next rank first, then rank 3 after it; the HUD ability tooltip ("Next · Rank 2: ..."), the
 rank line ("next rank: ...") and the kit card's detail page ("Ranks: Rank 2 ... Rank 3 ...") use it.
+
+## Kits2: the Thief and the Juggernaut on SUPERVIVE / League baselines (Nov 1)
+
+Owner: "do you think Thief and Juggernaut can be better too? I want it all based on SUPERVIVE / League
+mechanics instead of purely custom." The Thief now follows a Shiv-style duelist and the Juggernaut a
+Brall-style greatsword bruiser. These are mechanics only: the names, numbers, art, sounds and text are
+ours. Both keep their identity (the gold Mark diamonds and coin; Rage into the red Enraged form) and
+follow the kits4 conventions: hold wind-up feel, next-rank previews, and payoffs with T4 hitstop,
+shake, their own sound (`pay_cashin`, `pay_rage` in `tools/sfx_combat.py`), a big word, VFX and a HUD
+ready label.
+
+### Thief: Marks -> Vault -> Primed -> Cash In
+
+| Slot | Input | What it does |
+|---|---|---|
+| Passive | none | **Marks**: weapon hits on the same target you hit last add a Mark (one per 0.3s, max 3, 5s); a hit from behind adds one more; +6% damage from you per Mark. A knock heals 12% of your health (an assist 8%) and resets Vault |
+| LMB | tap / hold | Twin Blades (3-hit combo, hold to spin) or SMG; every hit feeds the Mark chain |
+| Shift | tap | **Vault**: a 3.4m flip (shots pass through it), +30% speed for 1.4s; the next weapon hit within 3s is **Primed**: +10, 2 Marks, Shred (+15% damage taken, 3s), and **landing it resets Vault** |
+| RMB | tap | **Bola**: 10m, 8 damage, a Mark; the first foe it wraps is **Grounded** 1.5s (no dash, jump or glide, slowed 25%); a second foe within 3m is caught too: +12 and stun 0.9 each (TANGLED) |
+| E | tap, then recast | **Shadow Knife**: a dagger that sticks in a foe (9, a Mark, slow 30%) or where it lands for 1.6s; recast, or wait, to **Shadow Step** to it (behind the foe; your next hit counts as from behind) |
+| R | tap | **Jackpot**: a 0.45s fuse you can shoot through (the 8.5m reach and 5m rim rings show), then a knife at every foe in sight within 8.5m: 16, past 5m +10 and blight 3s; everyone hit gets a Mark, all Marks refresh, and for 4s you have 2 free quick Vaults (2.4m, they Prime too) |
+
+- Loop: shoot one target to stack Marks -> Vault -> the Primed hit (+2 Marks, Shred) gives Vault back
+  -> Vault -> the Primed hit into 3 Marks is a **Cash In** (+32 total, crit, stun 0.3, Marks spent).
+- Cash In stays as the 3-stack payoff, now delivered by the Primed hit (the empowered-shot reset loop
+  is the engine, Cash In the punchline). The payoff lives on the dash: the Shift slot gets the gold dot.
+- Tells: gold diamonds orbiting over the target, a spinning gold coin at 3 and a jingle; a gold glint
+  and light at the Thief's hand while Primed; crosshair "PRIMED · next hit" / "CASH IN READY".
+- Payoff: "CASH IN", `pay_cashin` (a blade snap and a spill of coins), T4, a coin burst.
+- Online: Grounded, Shred and blight go to the body's own game through the new Net event
+  `["kst", nid, kind, seconds, k]` (`KitStatus`); **Net.VERSION 0.6.0 -> 0.7.0**.
+- Bots: Bola when a second foe is close (or sometimes alone), the Shadow Knife from 3.5-9m then step
+  to it, Vault to Prime when the hit will land (always into 2+ Marks), Jackpot in reach.
+- Retired: Flicker, the old Knife / Fan / Drop Knife RMB (the Knife and Shadow Step moved to E), Smoke
+  Veil, Heist.
+
+### Juggernaut: Rage heat -> Enraged -> Rage Smash; Doomfall resets on a knock
+
+| Slot | Input | What it does |
+|---|---|---|
+| Passive | none | **Rage**: damage you deal heats it (about +0.55 per point; taking hits adds a little); it gives up to +12% damage, +50% dash recharge and +35% cooldown speed; at 100, **Enraged** 5s (+20% damage, the red shell, the hunter swells) and the next Smash is a **Rage Smash**. A knock heals 15% (an assist half) and refills Rampage |
+| LMB | tap / hold | Greatsword (kit-run, `lmb_override`): quick slashes 10 / 10 / 15 every 0.32s, tip bonus; **hold**: charge 0.22 -> full at 0.95s, a **Searing Wave** that rolls 6 -> 10m through everyone in a line, 12 -> 28 (full: burns and slows). Shotgun and minigun fire as before |
+| RMB | tap / hold / air | **Smash**: tap a Heavy Slam (3m cone, 18, push 6; foes under 40% take +60%, BREAK); hold a charged **Lunge** 3 -> 7m into the first foe (14 -> 26, stun 0.25 -> 0.6); in the air a **Meteor Drop** (2.6m, 16, slow 40%; the centre stunned 0.8) |
+| Shift | tap | **Rampage**: 2 charges of a 4.4m dash attack: 6 to foes along it, the **tip** at the end 14 and a big knock (stun 0.8 into a wall) |
+| E | tap, then recast | **Warchain**: a chain 9m that hooks a foe (8, slow 20%, blighted 4s, leashed to 10m) or bites a wall; recast to haul yourself to its end (into a hooked foe: 10 and stun 0.35); a miss refunds 60% |
+| R | tap | **Doomfall**: a 0.55s wind-up in which you're invulnerable and rise toward a landing circle up to 5m ahead, then a 3.2m crash: 40, push 9, heal 50% of the damage dealt; a knock on anyone it hit within 2s resets its cooldown |
+
+- Loop: slash and wave to heat Rage (everything gets faster) -> chain them and haul in -> Rampage tip
+  -> Enraged -> Rage Smash -> Doomfall to finish; the knock refills Rampage and resets Doomfall.
+- Tells: red heat at the pauldrons that grows with Rage (steam from 50); the Enraged shell and swell
+  with a roar; crosshair "RAGE SMASH READY". Payoff: "RAGE SMASH", `pay_rage` (a fire-gust roar into a
+  crunching slam), T4; Doomfall: "DOOMFALL", T4.
+- Bots: slash up close, sometimes a Searing Wave from 4-9.5m; slam within 3m, Lunge from 3-7.5m,
+  Meteor from the air; Rampage from 2.5-6m; chain from 4-9m then haul in; Doomfall in reach on a
+  wounded target.
+- Retired: the tap/hold Rampage carry, Earthshatter, Iron Hide, Avalanche.
+
+### Numbers against the other four (TTK)
+
+| | Before | After |
+|---|---|---|
+| Thief burst | Cash In 26 + knife 10 per 8s | Primed +10 every Vault (7s, reset on a hit); Cash In +32 total; Marks +6% each (was +5%) |
+| Thief control | Fan slow, Heist strikes 14 x4 | Bola Grounded 1.5s, pair stun 0.9; Jackpot 16 / 26 at the rim |
+| Juggernaut sword | 11 / 11 / 18 every 0.5s, hold slam 34 | 10 / 10 / 15 every 0.32s (about 30% more DPS), hold wave 12 -> 28 at range |
+| Juggernaut RMB | Smash 18 (Rage x1.5 knock) | Slam 18 (+60% under 40%), Rage Smash x1.6 + stun 0.5, Lunge up to 26 |
+| Juggernaut R | Avalanche 6 per stomp over 5s | Doomfall 40 + heal half, resets on a knock |
+
+A medium (145) dies to the Thief in about 3.5s of focused fire with one Cash In (blades ~29 DPS x
+1.18 at 3 Marks, plus 32 every Vault cycle), about the Gunslinger's Called Shot pace; the Juggernaut's
+Rage only adds 12-20% once it's hot, and Doomfall's 40 is under the Archer's Great Arrows (100 if all
+three land).

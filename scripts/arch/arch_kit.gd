@@ -147,6 +147,7 @@ func tick(dt: float) -> void:
 			r_t = 0.0
 			_r_end()
 	res_wait = maxf(0.0, res_wait - dt)
+	_tick_knocks()
 	_tick(dt)
 	_tells(dt)
 	_tick_charge(dt)
@@ -655,10 +656,43 @@ func slot_info(slot: String) -> Dictionary:
 			var sd := dash_def()
 			var dmax := h.max_dashes()
 			out.merge({"name": String(sd.get("name", "")), "short": String(sd.get("name", "")).split(" ")[0], "icon": String(sd.get("icon", "dash")), "col": col_of(sd), "desc": String(sd.get("desc", "")),
-				"cd": (1.0 - fposmod(h.dashes, 1.0)) * h.dash_regen() if h.dashes < 1.0 else 0.0, "cd_max": h.dash_regen(), "charges": int(floor(h.dashes)), "max_charges": int(dmax), "verb": "dash", "ready": h.dashes >= 1.0}, true)
+				"cd": (1.0 - fposmod(h.dashes, 1.0)) * h.dash_regen() if h.dashes < 1.0 else 0.0, "cd_max": h.dash_regen(), "charges": int(floor(h.dashes)), "max_charges": int(dmax), "verb": "dash", "ready": h.dashes >= 1.0, "full": dash_payoff_ready()}, true)
 	return out
 
 func e_recastable() -> bool: return false
+## The payoff lives on the dash (the Thief's Primed shot into 3 Marks): the dash slot gets the gold dot.
+func dash_payoff_ready() -> bool: return false
+
+# ------------------------------------------------------------------ knocks and assists (kits2)
+var touched := {}              # rival hunter id -> [hunter, time of our last hit on them]
+var knocks_seen := 0           # knocks and assists this kit has seen (tests)
+
+## Every hit this hunter lands (Match.on_damage calls it before on_deal): remembered for 5s, so a
+## knock on them inside that window reaches on_knock (mine = the knocking blow was ours, else an assist).
+func note_hit(t: Ent) -> void:
+	if t is Hunter and t.team != h.team:
+		touched[t.get_instance_id()] = [t, m.time]
+
+func _tick_knocks() -> void:
+	if touched.is_empty():
+		return
+	for key in touched.keys():
+		var e: Array = touched[key]
+		var t = e[0]
+		if not is_instance_valid(t):
+			touched.erase(key)
+			continue
+		if (t as Hunter).downed:
+			touched.erase(key)
+			var by = (t as Hunter).last_hit_by
+			if by is Kin and (by as Kin).owner_h: by = (by as Kin).owner_h
+			knocks_seen += 1
+			on_knock(t, by == h)
+		elif m.time - float(e[1]) > 5.0:
+			touched.erase(key)
+
+## A rival we hit in the last 5s was knocked (mine: our blow did it; else an assist).
+func on_knock(_t: Hunter, _mine: bool) -> void: pass
 func fires_in_dash() -> bool: return false
 func fire_ok_rmb() -> bool: return true
 

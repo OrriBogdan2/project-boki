@@ -1367,7 +1367,8 @@ func _draw_arch_abilities(sz: Vector2, p: Hunter) -> void:
 		# the resource-full variant is ready (Cash In, Called Shot, Shield Slam...): a gold dot
 		c.draw_circle(sr.position + Vector2(s - 6, 6), 5.0 + sin(m.time * 8.0), Color("ffd23f"))
 	if p.ak.rmb_down and p.ak.rmb_t > 0.05:
-		var hk := clampf(p.ak.rmb_t / maxf(0.05, float(p.ak.rmb_def().get("hold", 0.3))), 0.0, 1.0)
+		var hfull: float = p.ak.rmb_charge_full() if p.ak.rmb_charge_full() > float(p.ak.rmb_def().get("hold", 0.3)) else float(p.ak.rmb_def().get("hold", 0.3))
+		var hk := clampf(p.ak.rmb_t / maxf(0.05, hfull), 0.0, 1.0)
 		c.draw_arc(sr.get_center(), s * 0.5 + 4.0, -PI / 2, -PI / 2 + TAU * hk, 32, Color(info["col"], 0.9), 3.0, true)
 	x += s + gap
 	var qr := Rect2(Vector2(x, y), Vector2(s, s))
@@ -1382,6 +1383,9 @@ func _draw_arch_abilities(sz: Vector2, p: Hunter) -> void:
 	var di := p.slot_info("dash")
 	var dmax := int(di["max_charges"])
 	_skill_slot("dash", "dash", Rect2(Vector2(x, y), Vector2(s, s)), String(di["icon"]), Settings.key_cap("dash"), di["col"], float(di["cd"]) / maxf(0.01, float(di["cd_max"])) if float(di["cd"]) > 0.0 else 0.0, float(di["cd"]), bool(di["ready"]), int(di["charges"]), dmax)
+	if di.get("full", false):
+		# the payoff lives on the dash (the Thief's Primed shot into 3 Marks): the same gold dot
+		c.draw_circle(Vector2(x, y) + Vector2(s - 6, 6), 5.0 + sin(m.time * 8.0), Color("ffd23f"))
 	x += s + gap
 	var ei := p.slot_info("k1")
 	var er := Rect2(Vector2(x, y), Vector2(s, s))

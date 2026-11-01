@@ -755,7 +755,7 @@ func _on_zero(by: Ent, opts: Dictionary) -> void:
 
 # ------------------------------------------------------------------ actions
 func do_jump() -> void:
-	if downed or stun_t > 0.0 or grap.size() > 0 or out:
+	if downed or stun_t > 0.0 or grap.size() > 0 or out or KitStatus.grounded(self):
 		return
 	if not lfloat.is_empty():
 		_ledge_fling()
@@ -892,7 +892,7 @@ static func abyss_lift_vy(vy: float, depth: float, dt: float) -> float:
 
 func can_glide() -> bool:
 	return not grounded and roll_t <= 0.0 and fly_t <= 0.0 and glide_cd <= 0.0 and not downed and stun_t <= 0.0 \
-		and m.time - kb_t > 0.4 and glide_fuel > FEATHER_MIN and not dropping and charge.is_empty()
+		and m.time - kb_t > 0.4 and glide_fuel > FEATHER_MIN and not dropping and charge.is_empty() and not KitStatus.grounded(self)
 
 func _open_glider() -> void:
 	gliding = true
@@ -1077,6 +1077,9 @@ const DASH_JUMP_CARRY := 0.55
 
 func do_dash() -> void:
 	if downed or stun_t > 0.0 or root_t > 0.0 or out or Hex.active(self):
+		return
+	if KitStatus.grounded(self):
+		_ab_feedback("dash", "deny")      # Grounded (a Thief's Bola): no dash, jump or glide
 		return
 	if roll_t > 0.0 and move_kind == "rush":
 		roll_t = 0.0            # a glove/ability rush cancels straight into the dash

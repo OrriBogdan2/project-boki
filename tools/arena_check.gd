@@ -51,16 +51,16 @@ func _arena() -> void:
 	ok("dummy meter counts it", float(A.dummies[0]["total"]) >= 25.0 and A.dealt >= 25.0, "total %.0f" % float(A.dummies[0]["total"]))
 	A.tick(DT)
 	ok("dummy label shows DPS", String((A.dummies[0]["label"] as Label3D).text).begins_with("DPS"), String((A.dummies[0]["label"] as Label3D).text))
-	# a real knife lands on a dummy
+	# a real Bola lands on a dummy: Grounded, a Mark; SMG hits on it stack Marks (the pips)
 	P.teleport(D.pos + Vector3(0, 0, 4.0)); P.inp["aim"] = D.pos + Vector3(0, 0.9, 0); P.inp["aim_y"] = D.pos.y
 	P.ak.cd["rmb"] = 0.0; P.ak.ch_rmb = 1.0
 	var tot0 := float(A.dummies[0]["total"])
 	P.inp["sec_hold"] = false; P.ak.press_rmb()
 	step(m, 0.5)
-	ok("thief knife hits a dummy and Marks it", float(A.dummies[0]["total"]) > tot0 and (P.ak as ThiefKit).marks_on(D) >= 1, "total %.0f marks %d" % [float(A.dummies[0]["total"]), (P.ak as ThiefKit).marks_on(D)])
+	ok("thief Bola hits a dummy, Grounds and Marks it", float(A.dummies[0]["total"]) > tot0 and (P.ak as ThiefKit).marks_on(D) >= 1, "total %.0f marks %d" % [float(A.dummies[0]["total"]), (P.ak as ThiefKit).marks_on(D)])
 	(P.ak as ThiefKit).add_mark(D, 3, true)
 	step(m, 0.05)
-	ok("three Marks: pips over the dummy, knife ready", (P.ak as ThiefKit).pips.size() >= 1 and P.ak.ch_rmb >= 1.0)
+	ok("three Marks: pips over the dummy, Vault ready for the Cash In", (P.ak as ThiefKit).pips.size() >= 1 and (P.ak as ThiefKit).dash_payoff_ready())
 	# reset: everyone back, healed, meters cleared
 	P.teleport(P.pos + Vector3(3, 0, 0)); P.hp = 10.0
 	A.reset()
@@ -113,7 +113,7 @@ func _arena() -> void:
 			continue
 		var t := 0.0
 		while t < 1.45:
-			if a == "bulwark": P.inp["fire"] = true            # the Crushing Blow is the Bulwark's charge
+			if a in ["bulwark", "thief"]: P.inp["fire"] = true            # the Crushing Blow / the blades' spin are the charge
 			elif t < 0.02: P.ak.bot_hold["rmb"] = 1.45; P.ak.press_rmb()
 			m.step(DT); t += DT
 			if t > 0.4 and mid < 0.0:
@@ -122,12 +122,26 @@ func _arena() -> void:
 		P.inp["fire"] = false
 		step(m, 0.3)
 		ok("hold: %s winds up (ring), ticks full, releases" % a, mid > 0.1 and ring_ok and P.ak.charge_fulls > f0 and P.ak.charge_last > 0.9 and P.ak.chg.is_empty(), "mid %.2f fulls +%d last %.2f" % [mid, P.ak.charge_fulls - f0, P.ak.charge_last])
+	# the Juggernaut's second hold: the greatsword's Searing Wave
+	A.set_arch("juggernaut", "greatsword")
+	P.teleport(A.home); P.inp["aim"] = D.pos + Vector3(0, 0.9, 0); P.fire_cd = 0.0
+	step(m, 0.1)
+	var wf0: int = P.ak.charge_fulls
+	var wmid := {"k": -1.0, "ring": false}
+	var tw := 0.0
+	while tw < 1.2:
+		P.inp["fire"] = true
+		m.step(DT); tw += DT
+		if tw > 0.55 and float(wmid["k"]) < 0.0:
+			wmid["k"] = P.ak.charge_k(); wmid["ring"] = P.ak.chg.get("ring") != null
+	P.inp["fire"] = false
+	step(m, 0.3)
+	ok("hold: juggernaut greatsword winds up a Searing Wave", float(wmid["k"]) > 0.1 and bool(wmid["ring"]) and P.ak.charge_fulls > wf0 and (P.ak as JuggernautKit).waves >= 1, "mid %.2f fulls +%d waves %d" % [float(wmid["k"]), P.ak.charge_fulls - wf0, (P.ak as JuggernautKit).waves])
 	# Rage on dummies: the juggernaut fills up and gets Enraged
 	A.set_arch("juggernaut")
 	var JK: JuggernautKit = P.ak
 	for i in 14:
-		JK.on_deal(D, 10.0, {"src": "shot"})
-		JK.hit_at = -9.0
+		JK.on_deal(D, 16.0, {"src": "shot"})
 	step(m, 0.3)
 	ok("juggernaut: Rage fills to Enraged, the form grows", JK.enraged_t > 0.0 and JK.aura != null and P.model.scale.x > 1.05, "enraged %.1f scale %.2f" % [JK.enraged_t, P.model.scale.x])
 	# R fuse: winds up first, then fires
@@ -135,7 +149,7 @@ func _arena() -> void:
 	P.ak.use_r()
 	ok("R: fuse first", P.ak.fusing() and float(P.ak.cd["r"]) > 60.0)
 	step(m, P.ak.fuse_time() + 0.1)
-	ok("R: then Avalanche", not P.ak.fusing() and P.ak.r_t > 0.0)
+	ok("R: then Doomfall", not P.ak.fusing() and (P.ak as JuggernautKit).dooms == 1)
 	# the sparring bot
 	A.cycle_bot()
 	ok("bot: idle", A.bot != null and A.bot_mode == "idle")

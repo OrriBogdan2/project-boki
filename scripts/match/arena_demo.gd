@@ -2,9 +2,11 @@ class_name ArenaDemo
 extends RefCounted
 ## Screenshot tooling for the Arena: --arena-demo=<what> --arena-shot=<png> plays a scripted moment
 ## and saves the frame at the scripted time, then quits.
-##   thief       Knife, Shadow Step behind the dummy, blades from behind stack Marks (3 pips / coin)
-##   cashin      the same, ending on the Cash In payoff
-##   juggernaut  Rage fills on the dummies, Enraged form, an empowered Smash
+##   thief       SMG hits stack Marks on the dummy (3 = the coin), Vault Primes the next hit (gold glint)
+##   cashin      the same, ending on the Primed hit's Cash In payoff
+##   bola        the Thief's Bola catching two dummies: Grounded, TANGLED
+##   juggernaut  greatsword slashes heat Rage (the shoulder glow), the Enraged form (ragesmash: + the Rage Smash)
+##   wave        the greatsword held into a Searing Wave (--hold-shot: at full charge)
 ##   ult         the Juggernaut's R fuse (wind-up) a moment before Avalanche fires
 ##   archer      a snare roots the dummy, full Focus: the lens glint, the aim line, crosshairs over it
 ##   deadeye     the same, ending on the Deadeye payoff
@@ -15,7 +17,7 @@ extends RefCounted
 ##   calledshot  the same, ending on the Called Shot payoff
 ##   bulwark     the shield raised and burning gold, Guard pips full (Shield Slam armed)
 ##   crushed     the same, then letting go: a Shield Slam into the pillar, Crushed
-##   e_<a> / r_<a> / rmb_<a>   any archetype's E, R or RMB on the still dummy
+##   e_<a> / r_<a> / rmb_<a>   any archetype's E, R or RMB on the still dummy (--e-recast: press E again)
 ##   card / card_<archetype>   the kit card (K); card_detail: the RMB detail page
 ##   menu        the loadout panel (L)
 ##   smg         the SMG firing at the dummy; add --legacy-shots for the old look and numbers (before)
@@ -51,40 +53,72 @@ static func tick(A: Arena, dt: float) -> void:
 	P.hp = P.max_hp
 	match w:
 		"thief", "cashin":
+			# kits2: SMG hits on the dummy stack Marks (gold diamonds, the coin at 3), Vault Primes the next
+			# hit (the gold glint, CASH IN READY), then (cashin) the Primed hit Cashes In
 			if t < 0.05:
-				if P.arch != "thief": A.set_arch("thief")
+				if P.arch != "thief" or P.wid != "smg": A.set_arch("thief", "smg")
 				A.set_kin("puddlet")
-				P.teleport(D.pos + Vector3(0.6, 0, 4.2))
+				P.teleport(D.pos + Vector3(1.6, 0, 1.9))
 				A.home = P.pos
 			_aim(P, D)
-			if _at(t, dt, 0.25): P.inp["sec_hold"] = false; P.ak.press_rmb()        # the knife
-			if _at(t, dt, 0.6):
-				if (P.ak as ThiefKit).recast.is_empty(): (P.ak as ThiefKit)._shadow_step(D, false)   # (if the knife's recast didn't open)
-				else: P.ak.press_rmb()                                    # Shadow Step behind
-			if t > 0.75 and t < 1.6: P.inp["fire"] = true
+			P.inp["move"] = Vector2.ZERO
+			P.inp["fire"] = t > 0.2 and t < 1.2
+			if P.ammo < 3: P.ammo = int(P.wpn["mag"])
+			var TK := P.ak as ThiefKit
+			if _at(t, dt, 1.25) and TK.marks_on(D) < 3: TK.add_mark(D, 3 - TK.marks_on(D), true)
+			if _at(t, dt, 1.3): P.dashes = P.max_dashes(); P.inp["move"] = Vector2(-1, 0); P.do_dash()
 			if w == "thief":
-				if _at(t, dt, 1.3) and (P.ak as ThiefKit).marks_on(D) < 3: (P.ak as ThiefKit).add_mark(D, 3 - (P.ak as ThiefKit).marks_on(D), true)
-				at_t = 1.42
+				at_t = 1.62
 			else:
-				if _at(t, dt, 1.5) and (P.ak as ThiefKit).marks_on(D) < 3: (P.ak as ThiefKit).add_mark(D, 3 - (P.ak as ThiefKit).marks_on(D), true)
-				if _at(t, dt, 1.75): P.inp["fire"] = false; (P.ak as ThiefKit).recast = {}; P.ak.ch_rmb = 1.0; P.inp["sec_hold"] = false; P.ak.press_rmb()
-				at_t = 1.84
-		"juggernaut":
+				if t > 1.6 and t < 1.75: P.inp["fire"] = true
+				if TK.cash_ins > 0 and not A.has_meta("ci_at"): A.set_meta("ci_at", t)
+				at_t = float(A.get_meta("ci_at", 9.0)) + 0.06
+		"bola":
+			# the Bola wraps the dummy and the heavy dummy beside it: both Grounded, TANGLED, stunned
+			var H: Hunter = A.dummies[2]["h"]
 			if t < 0.05:
-				if P.arch != "juggernaut": A.set_arch("juggernaut")
+				if P.arch != "thief": A.set_arch("thief", "smg")
+				A.set_kin("puddlet")
+				P.teleport(D.pos + Vector3(-3.4, 0, 0.2))
+				A.home = P.pos
+			if t < 0.6: H.teleport(D.pos + Vector3(0.0, 0, 2.0)); H.vel = Vector3.ZERO
+			_aim(P, D)
+			P.inp["move"] = Vector2.ZERO
+			if _at(t, dt, 0.4): P.ak.ch_rmb = 1.0; P.ak.press_rmb()
+			if (P.ak as ThiefKit).bola_pairs > 0 and not A.has_meta("bp_at"): A.set_meta("bp_at", t)
+			at_t = float(A.get_meta("bp_at", 9.0)) + 0.12
+		"juggernaut", "ragesmash":
+			# greatsword slashes heat Rage (the shoulder glow grows), Enraged form, then the Rage Smash
+			if t < 0.05:
+				if P.arch != "juggernaut" or P.wid != "greatsword": A.set_arch("juggernaut", "greatsword")
 				A.set_kin("cindle")
 				var H: Hunter = A.dummies[2]["h"]
-				P.teleport(H.pos + Vector3(-1.6, 0, 2.4))
+				P.teleport(H.pos + Vector3(-1.6, 0, 2.2))
 				A.home = P.pos
-				P.ak.res = 70.0
+				P.ak.res = 40.0
 			var H2: Hunter = A.dummies[2]["h"]
 			_aim(P, H2)
-			if t > 0.1 and t < 1.1: P.inp["fire"] = true
-			if _at(t, dt, 1.15):
-				P.inp["fire"] = false
-				if (P.ak as JuggernautKit).enraged_t <= 0.0: (P.ak as JuggernautKit).gain_rage(100.0)
-			if _at(t, dt, 1.55): P.ak.ch_rmb = 1.0; P.inp["sec_hold"] = false; P.ak.press_rmb()
-			at_t = 1.28 if "--before-smash" in OS.get_cmdline_user_args() else 1.58
+			P.inp["move"] = Vector2.ZERO
+			P.inp["fire"] = t > 0.1 and t < 1.1 and fmod(t, 0.36) < 0.12        # tap, tap: quick slashes
+			var JK := P.ak as JuggernautKit
+			if _at(t, dt, 1.15) and JK.enraged_t <= 0.0: JK.gain_rage(100.0)
+			if w == "juggernaut":
+				at_t = 1.45
+			else:
+				if _at(t, dt, 1.55): P.ak.ch_rmb = 1.0; P.ak.cd["rmb"] = 0.0; P.inp["sec_hold"] = false; P.ak.press_rmb()
+				if JK.rage_smashes > 0 and not A.has_meta("rs_at"): A.set_meta("rs_at", t)
+				at_t = float(A.get_meta("rs_at", 9.0)) + 0.08
+		"wave":
+			# the greatsword held: the wind-up (ring, glow, rising thump), then the Searing Wave rolls out
+			if t < 0.05:
+				if P.arch != "juggernaut" or P.wid != "greatsword": A.set_arch("juggernaut", "greatsword")
+				A.set_kin("cindle")
+				P.teleport(D.pos + Vector3(-7.0, 0, -1.0))
+				A.home = P.pos
+			_aim(P, D)
+			P.inp["move"] = Vector2.ZERO
+			P.inp["fire"] = t > 0.3 and t < 1.45
+			at_t = 1.3 if "--hold-shot" in OS.get_cmdline_user_args() else 1.56
 		"ult":
 			if t < 0.05:
 				if P.arch != "juggernaut": A.set_arch("juggernaut")
@@ -162,11 +196,14 @@ static func tick(A: Arena, dt: float) -> void:
 			var go := 0.5
 			if w.begins_with("e_"):
 				if _at(t, dt, go): P.ak.cd["e"] = 0.0; P.ak.use_e()
-				at_t = go + float(A.get_meta("e_shot_after", 0.9))
+				if "--e-recast" in OS.get_cmdline_user_args() and _at(t, dt, go + 0.45): P.ak.use_e()   # (the Shadow Step / the haul)
+				at_t = go + float(A.get_meta("e_shot_after", 0.9 if "--e-recast" not in OS.get_cmdline_user_args() else 0.62))
 			elif w.begins_with("r_"):
 				if _at(t, dt, go): P.ak.cd["r"] = 0.0; P.ak.use_r()
 				if t > go + P.ak.fuse_time() + 0.1 and t < go + P.ak.fuse_time() + 1.2: P.inp["fire"] = true   # (an empowered-shot ult fires through)
 				at_t = go + P.ak.fuse_time() + (1.3 if "--late-shot" in OS.get_cmdline_user_args() else 0.75)
+				if "--fuse-shot" in OS.get_cmdline_user_args(): at_t = go + P.ak.fuse_time() * 0.7     # (before: the wind-up)
+				if "--impact-shot" in OS.get_cmdline_user_args(): at_t = go + P.ak.fuse_time() + 0.1  # (the moment it lands)
 			else:
 				if _at(t, dt, go): P.ak.ch_rmb = float(P.ak.rmb_charges()); P.ak.bot_hold["rmb"] = 0.9; P.ak.press_rmb()
 				at_t = go + 0.7 if "--hold-shot" in OS.get_cmdline_user_args() else go + 1.05

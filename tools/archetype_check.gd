@@ -182,65 +182,103 @@ func _data() -> void:
 func _fake(a: String) -> Dictionary:
 	return {"arch": a, "cls": Arch.weight(a)}
 
-# ------------------------------------------------------------------ Thief
+# ------------------------------------------------------------------ Thief (kits2: Shiv-style duelist)
 func _thief() -> void:
-	var r := setup("thief", 6.0)
-	var m: Match = r[0]; var P: Hunter = r[1]; var T: Hunter = r[2]
+	var r := setup("thief", 4.0, "", true)
+	var m: Match = r[0]; var P: Hunter = r[1]; var T: Hunter = r[2]; var T2: Hunter = r[3]
+	var home: Vector3 = r[4]
 	var K: ThiefKit = P.ak
 	ok("thief: kit + model", K != null and P.model.get_meta("arch") == "thief", P.wid)
-	# Flicker: two steps on one charge, then the Ambush window
-	var p0 := P.pos
-	P.inp["move"] = Vector2(0, 1)
-	var d0 := P.dashes
-	P.do_dash()
-	step(m, 0.15)
-	var p1 := P.pos
-	P.inp["move"] = Vector2(0, -1)
-	P.do_dash()
-	step(m, 0.25)
-	P.inp["move"] = Vector2.ZERO
-	ok("thief dash: Flicker 2 steps, 1 charge", P.flat_dist(p0) < 1.2 and p1.distance_to(p0) > 1.6 and absf((d0 - P.dashes) - 1.0) < 0.15 and K.ambush_t > 0.0, "step1 %.1fm, back to %.1fm, charges %.2f -> %.2f, ambush %.2f" % [p1.distance_to(p0), P.flat_dist(p0), d0, P.dashes, K.ambush_t])
-	# Knife: a hit marks and opens the Shadow Step recast
-	P.teleport(p0); fresh(T); aim_at(P, T.pos)
-	tap(m, P)
-	step(m, 0.3)
-	ok("thief RMB tap: knife hits + Mark", dmg(T) >= 9.0 and K.marks_on(T) >= 1 and not K.recast.is_empty(), "took %.0f, marks %d" % [dmg(T), K.marks_on(T)])
-	K.press_rmb()
-	m.step(DT)
-	ok("thief RMB recast: Shadow Step behind", P.flat_dist(T) < 1.8 and ArchKit.behind(T, P), "dist %.1f" % P.flat_dist(T))
-	# the Fan: a hold throws 3 slowing knives
-	P.teleport(p0); fresh(T); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; aim_at(P, T.pos)
-	hold(m, P, 0.45)
-	step(m, 0.3)
-	ok("thief RMB hold: Fan slows + marks", K.last_variant == "hold" and T.slow_t > 0.0 and K.marks_on(T) >= 1, "variant %s slow %.2f" % [K.last_variant, T.slow_t])
-	# Marks from behind; at 3 the knife Cashes In (+50%, dash back)
-	fresh(T); T.face = 0.0
-	T.teleport(p0 + Vector3(4, 0, 0)); P.teleport(T.pos + Vector3(sin(T.face), 0, cos(T.face)) * 1.5)
-	ok("thief passive: standing behind", ArchKit.behind(T, P))
+	# Marks: consecutive weapon hits on the same target stack; another target restarts the chain
+	T.face = PI * 0.5        # facing the Thief (no from-behind bonus)
+	K.chain_tgt = null; K.mark_gap = {}
+	K.on_deal(T, 5.0, {"src": "shot"})
+	var m1 := K.marks_on(T)
 	K.mark_gap = {}
 	K.on_deal(T, 5.0, {"src": "shot"})
-	ok("thief passive: hit from behind marks", K.marks_on(T) == 1, "marks %d" % K.marks_on(T))
-	K.add_mark(T, 3, true)
-	P.dashes = 0.0
-	P.teleport(p0); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; aim_at(P, T.pos)
-	var dm0 := dmg(T)
-	ok("thief resource full: Cash In ready", K.full_ready() and K.res_text() == "3/3")
-	tap(m, P)
+	ok("thief passive: the same target again stacks a Mark", m1 == 0 and K.marks_on(T) == 1, "%d then %d" % [m1, K.marks_on(T)])
+	K.mark_gap = {}
+	K.on_deal(T2, 5.0, {"src": "shot"}); K.mark_gap = {}
+	K.on_deal(T, 5.0, {"src": "shot"})
+	ok("thief passive: switching targets restarts the chain", K.marks_on(T) == 1 and K.marks_on(T2) == 0, "T %d T2 %d" % [K.marks_on(T), K.marks_on(T2)])
+	T.face = -PI * 0.5; K.mark_gap = {}
+	ok("thief passive: standing behind", ArchKit.behind(T, P))
+	K.on_deal(T, 5.0, {"src": "shot"})
+	ok("thief passive: from behind adds one more", K.marks_on(T) == 3, "marks %d" % K.marks_on(T))
+	ok("thief passive: +6% per Mark", absf(K.outgoing(T, 10.0, {}) - 11.8) < 0.01, "%.2f" % K.outgoing(T, 10.0, {}))
+	K.mark_gap = {}
+	K.on_deal(T, 5.0, {"src": "abil", "ab": "utility"})
+	ok("thief passive: ability hits don't stack", K.marks_on(T) == 3)
+	# Vault: a flip, a burst of speed, the next hit Primed
+	fresh(T); T.face = PI * 0.5; P.teleport(home); P.dashes = P.max_dashes()
+	var d0 := P.dashes
+	P.inp["move"] = Vector2(0, 1)
+	P.do_dash()
 	step(m, 0.3)
-	ok("thief RMB full: Cash In", K.marks_on(T) == 0 and P.dashes >= 0.9 and dmg(T) - dm0 > 14.0, "dealt %.0f dash %.2f" % [dmg(T) - dm0, P.dashes])
-	# E: Smoke Veil hides and counts as "during E" for a silent knife
-	var ns := m.smokes.size()
-	P.inp["aim"] = P.pos
-	P.ak.use_e()
-	ok("thief E: Smoke Veil", m.smokes.size() == ns + 1 and m.in_smoke(P.pos) and K.in_e(), "")
-	K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; K.recast = {}; aim_at(P, T.pos)
+	P.inp["move"] = Vector2.ZERO
+	ok("thief dash: Vault flips, speeds, Primes", P.flat_dist(home) > 2.5 and K.primed_t > 0.0 and K.move_k() > 1.2 and P.dashes < d0 - 0.5, "moved %.1f primed %.2f speed x%.2f dashes %.2f" % [P.flat_dist(home), K.primed_t, K.move_k(), P.dashes])
+	ok("thief HUD: PRIMED label", K.ready_label().begins_with("PRIMED"), K.ready_label())
+	K.chain_tgt = null
+	var hp0 := dmg(T)
+	K.on_deal(T, 5.0, {"src": "shot"})
+	ok("thief Primed hit: +damage, 2 Marks, Shred, Vault back", dmg(T) - hp0 >= 9.0 and K.marks_on(T) == 2 and T.vuln_t > 0.0 and P.dashes >= P.max_dashes() - 0.01 and K.primed_t <= 0.0,
+		"dealt %.0f marks %d vuln %.1f dashes %.2f" % [dmg(T) - hp0, K.marks_on(T), T.vuln_t, P.dashes])
+	K.add_mark(T, 1, true); K.primed_t = 2.0
+	ok("thief payoff armed: CASH IN READY on the dash slot", K.full_ready() and K.dash_payoff_ready() and K.ready_label() == "CASH IN READY" and P.slot_info("dash").get("full", false) and not P.slot_info("sec").get("full", false))
+	hp0 = dmg(T)
+	K.on_deal(T, 5.0, {"src": "shot"})
+	ok("thief Cash In: Primed into 3 Marks pays out", K.cash_ins == 1 and K.marks_on(T) == 0 and dmg(T) - hp0 >= 30.0 and T.stun_t > 0.0, "dealt %.0f stun %.2f" % [dmg(T) - hp0, T.stun_t])
+	# RMB: the Bola grounds; a second foe close by and both are stunned
+	fresh(T); fresh(T2); T2.teleport(T.pos + Vector3(0, 0, 2.0)); P.teleport(home); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; aim_at(P, T.pos)
 	tap(m, P)
-	ok("thief RMB in smoke: during_e variant", K.last_variant == "during_e", K.last_variant)
-	# R: Heist marks out, then blink strikes with 3 Marks
-	fresh(T); P.teleport(p0); K.recast = {}
-	ult(m, P)
-	step(m, 0.9)
-	ok("thief R: Heist strikes + 3 Marks", dmg(T) >= 13.0 and K.marks_on(T) == 3, "took %.0f marks %d" % [dmg(T), K.marks_on(T)])
+	step(m, 0.4)
+	ok("thief RMB: Bola tangles two (Grounded + stun)", K.bola_pairs == 1 and KitStatus.grounded(T) and KitStatus.grounded(T2) and T.stun_t > 0.0 and T2.stun_t > 0.0 and dmg(T) >= 18.0,
+		"pairs %d grounded %s/%s stun %.2f/%.2f dmg %.0f" % [K.bola_pairs, KitStatus.grounded(T), KitStatus.grounded(T2), T.stun_t, T2.stun_t, dmg(T)])
+	T.stun_t = 0.0
+	var tx := T.pos
+	T.dashes = 1.0
+	T.do_dash()
+	T.do_jump()
+	m.step(DT)
+	ok("thief Bola: Grounded can't dash or jump", T.dashes >= 0.99 and T.roll_t <= 0.0 and T.vel.y < 1.0, "dashes %.2f vy %.1f" % [T.dashes, T.vel.y])
+	step(m, 2.2)
+	fresh(T); fresh(T2); T2.teleport(home + Vector3(0, 0, 9.0)); T.teleport(tx); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; aim_at(P, T.pos)
+	tap(m, P)
+	step(m, 0.4)
+	ok("thief RMB: one foe is Grounded, not stunned", KitStatus.grounded(T) and T.stun_t <= 0.0 and K.bola_pairs == 1)
+	step(m, 2.2)
+	# E: the Shadow Knife sticks and slows; recast steps behind them
+	fresh(T); T.face = PI * 0.5; P.teleport(home); aim_at(P, T.pos)
+	P.ak.use_e()
+	step(m, 0.3)
+	ok("thief E: the knife sticks in them (slow, damage)", not K.knife.is_empty() and K.knife.get("target") == T and T.slow_t > 0.0 and dmg(T) >= 8.0, "stuck %s slow %.2f dmg %.0f" % [str(K.knife.get("target")), T.slow_t, dmg(T)])
+	P.ak.use_e()
+	m.step(DT)
+	ok("thief E recast: Shadow Step behind (Ambush)", P.flat_dist(T) < 1.8 and ArchKit.behind(T, P) and K.ambush_t > 0.0 and K.knife.is_empty(), "dist %.1f" % P.flat_dist(T))
+	K.cd["e"] = 0.0; P.teleport(home); fresh(T); aim_at(P, T.pos)
+	P.ak.use_e()
+	step(m, 0.3 + 1.8)
+	ok("thief E: waiting steps you anyway", P.flat_dist(T) < 1.8 and K.knife.is_empty(), "dist %.1f" % P.flat_dist(T))
+	# R: Jackpot hits everyone near, the rim harder with blight; Marks refresh, two quick Vaults
+	fresh(T); fresh(T2); P.teleport(home); T.teleport(home + Vector3(3.5, 0, 0)); T2.teleport(home + Vector3(7.0, 0, 0.5))
+	K.cd["r"] = 0.0
+	P.ak.use_r()
+	ok("thief R: fuse, and you can still shoot", K.fusing() and K.can_shoot())
+	step(m, K.fuse_time() + 0.4)
+	ok("thief R: Jackpot hits all, the rim harder + blight", dmg(T) >= 15.0 and dmg(T2) >= 24.0 and T2.blight_t > 0.0 and T.blight_t <= 0.0 and K.marks_on(T) >= 1 and K.quick == 2,
+		"inner %.0f rim %.0f blight %.1f/%.1f quick %d" % [dmg(T), dmg(T2), T.blight_t, T2.blight_t, K.quick])
+	var ds := P.dashes
+	K.primed_t = 0.0
+	P.do_dash()
+	step(m, 0.2)
+	ok("thief R: a quick Vault is free and Primes", K.quick == 1 and P.dashes >= ds - 0.01 and K.primed_t > 0.0, "quick %d dashes %.2f -> %.2f" % [K.quick, ds, P.dashes])
+	# a knock heals you and resets Vault
+	P.hp = P.max_hp * 0.5; P.dashes = 0.0
+	var php := P.hp
+	T.hp = 4.0
+	T.hurt(10.0, P, {"src": "shot"})
+	step(m, 0.1)
+	ok("thief passive: a knock heals and resets Vault", T.downed and K.knocks_seen >= 1 and P.hp > php + P.max_hp * 0.1 and P.dashes >= P.max_dashes() - 0.01, "hp %.0f -> %.0f dashes %.2f" % [php, P.hp, P.dashes])
 	await done(m)
 
 # ------------------------------------------------------------------ Archer
@@ -510,75 +548,102 @@ func _gunslinger() -> void:
 	ok("gunslinger R: Last Round lock then rounds", early < 0.5 and dmg(T) >= 25.0 and T.stun_t > 0.0, "early %.0f took %.0f stun %.2f" % [early, dmg(T), T.stun_t])
 	await done(m)
 
-# ------------------------------------------------------------------ Juggernaut
+# ------------------------------------------------------------------ Juggernaut (kits2: Brall-style greatsword bruiser)
 func _juggernaut() -> void:
 	var r := setup("juggernaut", 2.4)
 	var m: Match = r[0]; var P: Hunter = r[1]; var T: Hunter = r[2]
 	var home: Vector3 = r[4]; var lv: int = r[5]
 	var K: JuggernautKit = P.ak
-	# Rampage tap shoves
-	var tx := T.pos.x
-	P.inp["dash_down"] = false
+	ok("juggernaut: greatsword, 2 Rampage charges", P.wid == "greatsword" and P.max_dashes() >= 2.0, "%s %.0f" % [P.wid, P.max_dashes()])
+	# Rage: damage dealt heats it; it gives damage and haste
+	K.res = 0.0; K.enraged_t = 0.0
+	K.on_deal(T, 40.0, {"src": "shot"})
+	ok("juggernaut passive: damage heats Rage", K.res > 18.0 and K.res < 26.0, "rage %.1f" % K.res)
+	K.res = 50.0; K.res_wait = 9.0
+	ok("juggernaut passive: Rage adds damage", absf(K.outgoing(T, 100.0, {}) - 106.0) < 0.1, "%.1f" % K.outgoing(T, 100.0, {}))
+	K.cd["e"] = 10.0; P.dashes = 0.0
+	step(m, 1.0)
+	ok("juggernaut passive: ability + dash haste", float(K.cd["e"]) < 8.9 and P.dashes > 1.0 / P.dash_regen() * 1.15, "e cd %.2f dashes %.3f" % [float(K.cd["e"]), P.dashes])
+	K.res = 0.0
+	for i in 10: K.on_deal(T, 20.0, {"src": "shot"})
+	ok("juggernaut passive: Rage -> Enraged", K.enraged_t > 0.0 and K.full_ready() and K.ready_label() == "RAGE SMASH READY", "rage %.0f enraged %.1f" % [K.res, K.enraged_t])
+	# RMB tap Enraged: the Rage Smash payoff
+	P.teleport(home); fresh(T); T.teleport(home + Vector3(2.0, 0, 0)); aim_at(P, T.pos); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0
+	var x0 := T.pos.x
+	tap(m, P)
+	step(m, 0.4)
+	ok("juggernaut RMB full: Rage Smash", K.last_variant == "full" and K.rage_smashes == 1 and dmg(T) >= 25.0 and T.pos.x - x0 > 1.0 and K.enraged_t <= 0.0, "took %.0f pushed %.1f" % [dmg(T), T.pos.x - x0])
+	# tap: Heavy Slam, BREAK on the wounded
+	P.teleport(home); fresh(T); T.teleport(home + Vector3(2.0, 0, 0)); aim_at(P, T.pos); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0
+	T.hp = T.max_hp * 0.3
+	var hp0 := T.hp
+	tap(m, P)
+	step(m, 0.3)
+	ok("juggernaut RMB tap: Heavy Slam, BREAK under 40%", K.last_variant == "tap" and hp0 - T.hp >= 26.0, "dealt %.0f" % (hp0 - T.hp))
+	# hold: the charged Lunge into the first foe
+	P.teleport(home); fresh(T); T.teleport(home + Vector3(5.0, 0, 0)); aim_at(P, T.pos); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0
+	hold(m, P, 0.95)
+	step(m, 0.5)
+	ok("juggernaut RMB hold: charged Lunge hits + stuns", K.last_variant == "hold" and dmg(T) >= 20.0 and T.stun_t > 0.0 and P.flat_dist(home) > 2.0, "took %.0f stun %.2f moved %.1f" % [dmg(T), T.stun_t, P.flat_dist(home)])
+	# air: the downward slam slows, the centre is stunned
+	step(m, 1.0)
+	P.teleport(T.pos + Vector3(-0.6, 3.0, 0)); P.grounded = false; fresh(T); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0
+	P.ak.press_rmb()
+	step(m, 0.5)
+	ok("juggernaut RMB air: Meteor Drop slows, centre stunned", K.last_variant == "air" and dmg(T) >= 14.0 and T.slow_t > 0.0 and T.stun_t > 0.0, "took %.0f slow %.2f stun %.2f" % [dmg(T), T.slow_t, T.stun_t])
+	# Rampage: a dash attack whose tip hits hardest
+	step(m, 1.0)
+	P.teleport(home); fresh(T); T.teleport(home + Vector3(4.3, 0, 0)); aim_at(P, T.pos); P.dashes = 2.0
+	P.inp["move"] = Vector2.ZERO
 	P.do_dash()
 	step(m, 0.5)
-	ok("juggernaut dash tap: shoulder shove", K.st.get("last_dash") == "tap" and T.pos.x - tx > 1.0, "pushed %.1f" % (T.pos.x - tx))
-	# held: the arrow, then the carry into a wall stuns
-	P.teleport(home); fresh(T); T.teleport(home + Vector3(2.0, 0, 0)); P.dashes = P.max_dashes()
+	ok("juggernaut dash: Rampage tip hits hardest", K.tips >= 1 and dmg(T) >= 14.0 and P.dashes < 1.5, "tips %d took %.0f dashes %.2f" % [K.tips, dmg(T), P.dashes])
+	# LMB: a tap slashes; a hold charges a Searing Wave through a line
+	P.teleport(home); fresh(T); T.teleport(home + Vector3(2.0, 0, 0)); aim_at(P, T.pos); P.fire_cd = 0.0
+	P.inp["fire"] = true; m.step(DT); P.inp["fire"] = false
+	step(m, 0.3)
+	ok("juggernaut LMB tap: a quick slash", dmg(T) >= 8.0 and K.waves == 0, "took %.0f" % dmg(T))
+	fresh(T); T.teleport(home + Vector3(7.0, 0, 0)); aim_at(P, T.pos); P.fire_cd = 0.0
+	step(m, 0.5, func(): P.inp["fire"] = true)
+	var midk := K.wave_k()
+	step(m, 0.6, func(): P.inp["fire"] = true)
+	P.inp["fire"] = false
+	step(m, 0.6)
+	ok("juggernaut LMB hold: Searing Wave (charged, ranged)", K.waves == 1 and midk > 0.2 and dmg(T) >= 20.0 and T.slow_t > 0.0, "mid %.2f took %.0f" % [midk, dmg(T)])
+	# E: the Warchain hooks a foe (blight), recast hauls you in (stun)
+	P.teleport(home); fresh(T); T.teleport(home + Vector3(6.0, 0, 0)); aim_at(P, T.pos); K.cd["e"] = 0.0
+	P.ak.use_e()
+	step(m, 0.3)
+	ok("juggernaut E: Warchain hooks + blights", not K.chain.is_empty() and K.chain.get("target") == T and T.blight_t > 0.0 and dmg(T) >= 7.0, "blight %.1f" % T.blight_t)
+	P.ak.use_e()
+	step(m, 0.45)
+	ok("juggernaut E recast: haul in, stun", K.reels == 1 and P.flat_dist(T) < 2.4 and T.stun_t > 0.0, "dist %.1f stun %.2f" % [P.flat_dist(T), T.stun_t])
+	# ... or bites a wall and hauls you to it
 	var W = m.world
 	for dz in range(-3, 4):
 		for dx in range(7, 9):
 			W.level[W.idx(int(home.x) + dx, int(home.z) + dz)] = lv + 3
-	aim_at(P, home + Vector3(8, 0, 0))
-	P.inp["dash_down"] = true
-	P.do_dash()
-	step(m, 0.95, func(): P.inp["dash_down"] = true)
-	ok("juggernaut dash hold: windup slows you", K.move_k() < 0.8 or K.ramp.is_empty())
-	P.inp["dash_down"] = false
-	step(m, 0.6)
-	ok("juggernaut dash hold: carry into the wall stuns", K.st.get("last_dash") == "hold" and T.stun_t > 0.5, "stun %.2f T at %.1f" % [T.stun_t, T.pos.x - home.x])
-	# Rage from hits; Enraged at 100
-	K.res = 0.0; K.enraged_t = 0.0
-	for i in 20:
-		K.hit_at = -9.0
-		K.on_deal(T, 5.0, {"src": "shot"})
-	ok("juggernaut passive: Rage -> Enraged", K.enraged_t > 0.0 and K.full_ready(), "rage %.0f enraged %.1f" % [K.res, K.enraged_t])
-	# Smash tap (empowered): the cone knocks harder
-	P.teleport(home); fresh(T); T.teleport(home + Vector3(2.0, 0, 0)); aim_at(P, T.pos)
-	var x0 := T.pos.x
-	tap(m, P)
-	step(m, 0.4)
-	ok("juggernaut RMB full: empowered Smash", K.last_variant == "full" and dmg(T) >= 15.0 and T.pos.x - x0 > 1.5 and K.enraged_t <= 0.0, "took %.0f pushed %.1f" % [dmg(T), T.pos.x - x0])
-	# Earthshatter: a hold leaps and lifts
-	P.teleport(home); fresh(T); T.teleport(home + Vector3(4.5, 0, 0)); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; aim_at(P, T.pos)
-	var top := {"y": 0.0}
-	var g := T.pos.y
-	hold(m, P, 0.7)
-	step(m, 1.0, func(): top["y"] = maxf(float(top["y"]), T.pos.y - g))
-	ok("juggernaut RMB hold: Earthshatter lifts", K.last_variant == "hold" and top["y"] > 0.4 and dmg(T) >= 18.0, "rose %.2f took %.0f" % [top["y"], dmg(T)])
-	# Meteor Drop from the air
-	P.teleport(T.pos + Vector3(-1.0, 3.0, 0)); P.grounded = false; fresh(T); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0
-	P.ak.press_rmb()
-	step(m, 0.5)
-	ok("juggernaut RMB air: Meteor Drop", K.last_variant == "air" and dmg(T) >= 14.0, "took %.0f" % dmg(T))
-	# Iron Hide: less damage, then the shrug pushes; the tap in it pulls first
-	P.teleport(home); fresh(T); T.teleport(home + Vector3(3.5, 0, 0))
+	P.teleport(home); T.teleport(home + Vector3(0, 0, 5.0)); K.cd["e"] = 0.0; aim_at(P, home + Vector3(8.0, 0, 0))
 	P.ak.use_e()
-	var hp0 := P.hp
+	step(m, 0.35)
+	var anchored: bool = not K.chain.is_empty() and K.chain.get("target") == null
+	P.ak.use_e()
+	step(m, 0.45)
+	ok("juggernaut E: chain a wall, haul yourself to it", anchored and P.flat_dist(home) > 4.0, "anchored %s moved %.1f" % [anchored, P.flat_dist(home)])
+	# R: Doomfall: invulnerable as it winds up, a big strike that heals; a knock resets it
+	P.teleport(home); fresh(T); T.teleport(home + Vector3(3.5, 0, 0)); aim_at(P, T.pos); K.cd["r"] = 0.0
+	P.hp = P.max_hp * 0.5
+	P.ak.use_r()
+	step(m, 0.2)
+	var php := P.hp
 	P.hurt(20.0, T, {"src": "shot"})
-	ok("juggernaut E: Iron Hide -30%", absf((hp0 - P.hp) - 14.0 * (1.0 - Hunter.ARMOR_DR)) < 1.5 or hp0 - P.hp < 15.0, "took %.1f of 20" % (hp0 - P.hp))
-	K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; aim_at(P, T.pos)
-	var dpull := P.flat_dist(T)
-	tap(m, P)
+	ok("juggernaut R: invulnerable in the wind-up", K.fusing() and P.hp >= php - 0.01, "hp %.0f -> %.0f" % [php, P.hp])
+	step(m, K.fuse_time())
+	ok("juggernaut R: Doomfall strikes and heals", K.dooms == 1 and dmg(T) >= 35.0 and P.hp > php + 10.0, "took %.0f hp %.0f -> %.0f" % [dmg(T), php, P.hp])
+	T.hp = 4.0
+	T.hurt(10.0, P, {"src": "shot"})
 	step(m, 0.1)
-	ok("juggernaut RMB in Iron Hide: pulls in", K.last_variant == "during_e" and P.flat_dist(T) < dpull - 0.3, "%.1f -> %.1f" % [dpull, P.flat_dist(T)])
-	# R: Avalanche: stun doesn't land, stomps hurt
-	fresh(T); T.teleport(home + Vector3(1.5, 0, 0)); P.teleport(home)
-	ult(m, P)
-	step(m, 0.5)
-	P.hurt(1.0, T, {"stun": 1.0, "src": "abil"})
-	var st := P.stun_t
-	step(m, 1.0)
-	ok("juggernaut R: Avalanche unstoppable + stomps", st <= 0.0 and dmg(T) >= 5.0 and K.move_k() > 1.2, "stun %.2f took %.0f speed x%.2f" % [st, dmg(T), K.move_k()])
+	ok("juggernaut R: a knock resets Doomfall", T.downed and K.doom_resets == 1 and float(K.cd["r"]) <= 0.0, "cd %.1f" % float(K.cd["r"]))
 	await done(m)
 
 # ------------------------------------------------------------------ Bulwark
@@ -751,7 +816,7 @@ func _infusion() -> void:
 	var v := Arch.infusion(KinLib.kin("cindle"))
 	var f := Arch.fill(Arch.def("thief")["rmb"]["sockets"], v, "rmb", "projectile")
 	var poison: bool = (f["effects"] as Array).any(func(e): return String(e["type"]) == "damage" and float(e.get("over", 0.0)) > 0.0)
-	ok("infusion: Vespyx poisons the Thief's knife", poison, "; ".join(f["notes"]))
+	ok("infusion: Vespyx poisons the Thief's Bola", poison, "; ".join(f["notes"]))
 	var fm := Arch.fill(Arch.def("mage")["rmb"]["sockets"], Arch.infusion(KinLib.kin("pebbit")), "rmb", "projectile")
 	ok("infusion: Gravadillo swaps the Mage bolt's control", fm["swap"] and (fm["effects"] as Array).any(func(e): return KinParts.category(String(e["type"])) == "control"), "; ".join(fm["notes"]))
 	var fj := Arch.fill(Arch.def("juggernaut")["rmb"]["sockets"], Arch.infusion(KinLib.kin("pebbit")), "rmb", "cone")
@@ -775,7 +840,7 @@ func _infusion() -> void:
 	var m: Match = r[0]; var P: Hunter = r[1]; var T: Hunter = r[2]
 	tap(m, P)
 	step(m, 0.3)
-	ok("infusion runtime: knife + poison", T.burn_t > 0.0, "burn %.1f" % T.burn_t)
+	ok("infusion runtime: Bola + poison", T.burn_t > 0.0, "burn %.1f" % T.burn_t)
 	await done(m)
 	r = setup("mage", 6.0, "puddlet")
 	m = r[0]; P = r[1]; T = r[2]
@@ -799,10 +864,9 @@ func _feel() -> void:
 	# archetype tells meet the floors
 	ok("feel: Hex is a projectile (dodgeable)", String(Arch.def("mage")["e"]["delivery"]) == "projectile" and float(Arch.def("mage")["e"]["speed"]) <= 24.0)
 	ok("feel: Arrow Rain tell >= soft floor", float(Arch.def("archer")["e"]["tell"]) >= Feel.floor_for("soft_cc", "instant"))
-	ok("feel: Heist fuse + mark-out >= self floor", float(Arch.def("thief")["r"]["tell"]) + float(Arch.def("thief")["r"]["fuse"]) >= Feel.floor_for("hard_cc", "self"))
+	ok("feel: the Bola and Warchain are projectiles (dodgeable)", String(Arch.def("thief")["rmb"]["delivery"]) == "projectile" and float(Arch.def("thief")["rmb"]["bola"]["speed"]) <= 34.0 and String(Arch.def("juggernaut")["e"]["delivery"]) == "projectile")
 	ok("feel: Blink windup shows the landing", float(Arch.def("mage")["dash"]["windup"]) >= 0.1)
-	ok("feel: Rampage windup visible >= 0.30", float(Arch.def("juggernaut")["dash"]["windup"]) * 0.5 >= 0.3)
-	ok("feel: Avalanche / Bastion plant tells (fuse + tell)", float(Arch.def("juggernaut")["r"]["tell"]) + float(Arch.def("juggernaut")["r"]["fuse"]) >= 0.3 and float(Arch.def("bulwark")["r"]["tell"]) >= 0.3)
+	ok("feel: Doomfall / Fissure plant tells (fuse + tell)", float(Arch.def("juggernaut")["r"]["tell"]) + float(Arch.def("juggernaut")["r"]["fuse"]) >= 0.3 and float(Arch.def("bulwark")["r"]["tell"]) >= 0.3)
 	ok("feel: every R has a fuse of 0.35-0.8s", Arch.ids().all(func(a): return float(Arch.def(a)["r"].get("fuse", 0.0)) >= 0.35 and float(Arch.def(a)["r"].get("fuse", 0.0)) <= 0.8))
 	ok("R cooldowns are big moments (90-120s)", Arch.ids().all(func(a): return float(Arch.def(a)["r"]["cooldown"]) >= 90.0 and float(Arch.def(a)["r"]["cooldown"]) <= 120.0))
 	# hitstop tiers
