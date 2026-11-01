@@ -53,6 +53,7 @@ var look_at_t := Vector3(0, 0.25, 0.5)
 var edit_only := false
 var create_box: Control
 var sub_lbl: Label        # opened from the menu just to change how you look
+var top_box: VBoxContainer    # the title and its line: centred, or over the preview while you make your hunter
 var cam_to := Vector3(0, 3.6, 6.4)
 
 func _ready() -> void:
@@ -273,6 +274,7 @@ func _build_ui() -> void:
 	top.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
 	top.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	top.position.y = 36
+	top_box = top
 	title = UI.title("Choose your first Boki", 40, UI.ACCENT)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_constant_override("outline_size", 12)
@@ -412,8 +414,11 @@ func _show_create() -> void:
 	_rebuild_preview()
 	for e in eggs: (e["holder"] as Node3D).visible = false
 	if sub_lbl: sub_lbl.text = "Drag your hunter (or hold A / D) to turn them round."
-	cam_to = Vector3(0, 1.5, 4.6)
-	look_at_t = Vector3(0.0, 0.9, 1.6)
+	_top_over(0.73)       # over your hunter, clear of the tall creator card on the left
+	# framed to the hunter's height: a big Juggernaut (or a tall race) used to run off the top
+	var hk := clampf(_model_top(preview) / 1.6, 1.0, 1.8) if preview else 1.0
+	cam_to = Vector3(0, 1.5 * hk, 1.6 + 3.0 * hk)
+	look_at_t = Vector3(0.0, 0.9 * hk, 1.6)
 	var card := UI.card(UI.CARD, 14, 16)
 	card.custom_minimum_size = Vector2(500, 0)
 	create_box = card
@@ -490,6 +495,7 @@ func _show_create() -> void:
 		create_box = null
 		for e in eggs: (e["holder"] as Node3D).visible = true
 		if sub_lbl: sub_lbl.text = "Every Boki is different. It will remember how you treat it."
+		_top_over(0.5)
 		if edit_only or Save.d.get("tutorial", {}).get("hatched", false):
 			Game.goto("home")
 			return
@@ -501,6 +507,24 @@ func _show_create() -> void:
 	root_ui.add_child(card)
 	card.set_anchors_and_offsets_preset(Control.PRESET_CENTER_LEFT, Control.PRESET_MODE_MINSIZE, 48)
 	card.offset_top += 46; card.offset_bottom += 46       # clear of the title
+
+## The highest point of a model (its meshes' bounds), in world metres.
+func _model_top(n: Node3D) -> float:
+	var top := 0.0
+	var st: Array = [n]
+	while not st.is_empty():
+		var nd: Node = st.pop_back()
+		if nd is MeshInstance3D and (nd as MeshInstance3D).visible and nd.is_inside_tree():
+			var gi := nd as MeshInstance3D
+			top = maxf(top, (gi.global_transform * gi.get_aabb()).end.y)
+		for ch in nd.get_children(): st.append(ch)
+	return top
+
+## Centres the title block at this fraction of the window's width.
+func _top_over(x_frac: float) -> void:
+	if top_box:
+		top_box.anchor_left = x_frac
+		top_box.anchor_right = x_frac
 
 ## Steps through the six archetypes; the class (weight) and weapon follow it.
 func _step_arch(d: int) -> void:
@@ -725,7 +749,9 @@ func _process(delta: float) -> void:
 				# the big reveal (flash, fanfare, turntable and info), then naming
 				var rv := KinReveal.new(egg_defs[chosen]["species"])
 				add_child(rv)
+				if top_box: top_box.visible = false      # (the reveal has its own title; this one showed through it)
 				rv.proceed.connect(func():
+					if top_box: top_box.visible = true
 					stage = "name"
 					_show_name()))
 			wegg.start()
@@ -744,9 +770,13 @@ func _show_name() -> void:
 	var card := UI.card(UI.CARD, 16, 18)
 	card.custom_minimum_size = Vector2(520, 0)
 	var v := UI.vbox(10); card.add_child(v)
-	v.add_child(UI.section("A new Boki", sp["color"]))
+	# (lifted like the egg names: a dark species colour, Vespyx's plum, vanished on the dark card)
+	var scol: Color = sp["color"]
+	while scol.get_luminance() < 0.55:
+		scol = scol.lerp(Color.WHITE, 0.2)
+	v.add_child(UI.section("A new Boki", scol))
 	v.add_child(UI.title("Name your %s" % sp["name"], 34))
-	v.add_child(UI.label("\"%s\"" % KinSpeak.babble(sp_id, "happy"), 22, sp["color"]))
+	v.add_child(UI.label("\"%s\"" % KinSpeak.babble(sp_id, "happy"), 22, scol))
 	v.add_child(UI.label("It's %s, and it can only babble for now. Whatever you call it, it'll answer to." % String(sp["voice"]).split(",")[0], 16, UI.MUTED))
 	var name_row := UI.hbox(8)
 	var nl := UI.label("Its name", 15, UI.MUTED); nl.custom_minimum_size.x = 120
