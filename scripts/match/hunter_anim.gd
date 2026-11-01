@@ -54,15 +54,17 @@ const STANCE := {
 	"heavy": {"knee": 0.24, "width": 0.17, "lean": 0.03, "bounce": 0.0, "breath": 1.7, "arm": 0.8, "elbow": 1.0},
 }
 ## Each archetype's own stance on top of its class (Models.hunter's "arch" meta): the thief hunched
-## low and forward, the archer tall and upright, the juggernaut leaning in over planted feet, the
-## bulwark wide and square.
+## low and forward, springing on the balls of its feet, the archer tall and upright, the mage chest
+## up with a slow breath (its robe and orb do the moving), the gunslinger loose with a cocked hip,
+## the juggernaut low and wide over planted feet with a slow heavy breath, the bulwark wide and
+## square like a wall.
 const ARCH_STANCE := {
-	"thief": {"knee": 0.36, "lean": 0.2, "width": 0.08},
-	"archer": {"knee": 0.2, "lean": 0.01},
-	"mage": {"lean": 0.03},
-	"gunslinger": {"lean": 0.06, "width": 0.11},
-	"juggernaut": {"lean": 0.14, "width": 0.19, "knee": 0.28},
-	"bulwark": {"lean": 0.02, "width": 0.21, "knee": 0.26},
+	"thief": {"knee": 0.38, "lean": 0.22, "width": 0.085, "bounce": 1.7, "breath": 3.1, "arm": 1.35},
+	"archer": {"knee": 0.16, "lean": 0.0, "width": 0.1, "breath": 2.3},
+	"mage": {"lean": -0.03, "knee": 0.12, "width": 0.07, "breath": 1.8, "arm": 0.8},
+	"gunslinger": {"lean": 0.03, "width": 0.13, "knee": 0.2, "breath": 2.0},
+	"juggernaut": {"lean": 0.1, "width": 0.25, "knee": 0.34, "breath": 1.35, "arm": 0.7},
+	"bulwark": {"lean": 0.0, "width": 0.24, "knee": 0.3, "breath": 1.5, "arm": 0.7},
 }
 ## How far the shoulder pieces turn with the arm (the rest is left behind, so a raised arm slides
 ## under the plate instead of through it).
@@ -246,6 +248,7 @@ var flinch := Vector2.ZERO
 var flinch_v := Vector2.ZERO
 var cast_prev := 99.0
 var cast_slot := ""
+var cast_now := 99.0           # seconds since the last cast (for the arms)
 var emote_id := ""
 var emote_prev := 99.0
 var down_t := 0.0
@@ -795,6 +798,18 @@ func update(dt: float, s: Dictionary) -> void:
 	var yaw := -sin(ph) * 0.16 * r1 * back          # the shoulders swing against the hips
 	var roll := -lean_s * (1.0 + glide_k * 0.6) - bank * 0.8 + wk * 0.05
 	var dz := 0.0
+	if arch == "thief":
+		pitch -= r1 * 0.12           # runs low, chest over the lead foot
+	elif arch == "juggernaut":
+		roll += sin(ph) * 0.06 * r1  # the shoulders roll over each heavy step
+	elif arch == "archer":
+		pitch += r1 * 0.04           # runs tall, eyes up
+	elif arch == "mage":
+		pitch += r1 * 0.05 + still * sin(t * 0.9 + seed_ph) * 0.02    # glides upright; a slow sway standing
+	elif arch == "gunslinger":
+		roll += still * 0.05         # a cocked hip at rest
+	elif arch == "bulwark":
+		yaw *= 0.5                   # the shoulders stay square, a moving wall
 	# dodge poses
 	if dash_k > 0.01:
 		match dash_kind:
@@ -834,12 +849,49 @@ func update(dt: float, s: Dictionary) -> void:
 	var cast_t := float(s.get("cast", 99.0))
 	if cast_t < cast_prev - 0.02 or (cast_t < 0.05 and cast_prev > 0.3):
 		cast_slot = String(s.get("cast_slot", ""))
+		# some casts are swings of the weapon: the juggernaut's Earthshatter is the overhead slam, the
+		# thief's mark-out a spin with both blades out
+		if (arch == "juggernaut" and cast_slot == "utility" and hold == "great") or (arch == "thief" and cast_slot == "ult" and hold == "twin"):
+			swing_t = 0.0; swing_step = -1; swing_dur = 0.55
 	cast_prev = cast_t
 	var cast_k := 0.0
+	cast_now = cast_t
 	if cast_t < 0.6:
 		cast_k = smoothstep(0.0, 0.07, cast_t) * (1.0 - smoothstep(0.32, 0.6, cast_t))
 		pitch -= cast_k * 0.18
 		yaw += cast_k * 0.25
+		# the archetypes' signature casts
+		match arch:
+			"thief":
+				if cast_slot == "utility":
+					# the knife throw: wind up turned away, then whip round into the throw
+					yaw += cast_k * lerpf(0.6, -0.35, smoothstep(0.06, 0.18, cast_t))
+					pitch -= cast_k * 0.15
+				elif cast_slot == "ult":
+					# the mark-out: drop low, arms spread with both blades out
+					pitch -= cast_k * 0.35
+			"archer":
+				if cast_slot == "utility" or cast_slot == "ult":
+					# side-on to the shot, drawing: the shoulders open, the chest up
+					yaw += cast_k * 0.55
+					pitch += cast_k * (0.25 if cast_slot == "ult" else 0.05)
+			"mage":
+				# the cast leans back as the power goes out; the ultimate lifts the whole body
+				pitch += cast_k * (0.3 if cast_slot == "ult" else 0.12)
+			"gunslinger":
+				if cast_slot == "ult":
+					yaw -= cast_k * 0.3         # squared up for the deadeye
+				else:
+					yaw += cast_k * 0.35; pitch -= cast_k * 0.1
+			"bulwark":
+				# braced behind it: low, chest forward, the weight on the front foot
+				pitch -= cast_k * 0.22
+			"juggernaut":
+				if cast_slot == "ult":
+					# the roar: chest up and back, the shoulders thrown wide
+					pitch += cast_k * 0.55
+				elif cast_slot == "utility":
+					pitch -= cast_k * 0.2
 	# emotes
 	var em := String(s.get("emote", ""))
 	var em_t := float(s.get("emote_t", 99.0))
@@ -888,6 +940,14 @@ func update(dt: float, s: Dictionary) -> void:
 	var dr2 := (THIGH * cos(hr) + SHIN * cos(hr + kr)) * cos(wr)
 	var drop := (LEG - maxf(dl2, dr2)) * (1.0 - air_k) * (1.0 - glide_k) * (1.0 - down_k) * (1.0 - dive_k) * (1.0 if roll_t < 0.0 else 0.0)
 	var off := Vector3(wk * 0.028 * still, -drop + bounce * 0.008, 0.0)
+	if arch == "juggernaut":
+		off.y -= absf(cos(ph)) * 0.035 * r1        # each footfall lands with weight
+	elif arch == "thief":
+		off.y += absf(sin(ph)) * 0.025 * r1 + maxf(0.0, bounce) * 0.006   # springy, up on the toes
+	elif arch == "bulwark":
+		off.y -= absf(cos(ph)) * 0.025 * r1        # heavy, even steps
+	elif arch == "mage":
+		off.y += still * (0.012 + sin(t * 1.4 + seed_ph) * 0.008)       # light on its feet, half floating
 	off.y += down_k * 0.15 + base_k * (0.04 + sin(t * 2.0) * 0.015) * smoothstep(0.0, 0.3, base_p)
 	off.y -= revive_k * 0.02
 	if roll_t >= 0.0:
@@ -1125,7 +1185,13 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 			if rest > 0.0:
 				var rb2 := Basis.from_euler(Vector3(2.35, -0.25, 0.0)) * Basis(Vector3.BACK, 0.3)
 				gbas = gbas.slerp(rb2, rest)
-				gpos = gpos.lerp(Vector3(0.1, -0.14, -0.24), rest)
+				if arch == "juggernaut":
+					# the juggernaut carries it in one fist, propped on the shoulder, the other gauntlet
+					# hanging free: the shape of a brute, not a fencer
+					gpos = gpos.lerp(Vector3(0.2, 0.02, -0.12), rest)
+					free_l = maxf(free_l, rest)
+				else:
+					gpos = gpos.lerp(Vector3(0.1, -0.14, -0.24), rest)
 		if hold == "twin":
 			var oc := Vector3(-0.17, -0.06, 0.0)
 			var orot := Basis.from_euler(Vector3(oa.y, oa.x, 0.0))
@@ -1267,6 +1333,22 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 	if cast_k > 0.0:
 		var ct := sh_l + Vector3(0.06, 0.02, -0.4)
 		if cast_slot == "ult": ct = sh_l + Vector3(0.0, 0.42, -0.12)
+		if arch == "thief" and cast_slot == "utility":
+			# the knife leaves the off hand: cocked back by the ear, flung out ahead
+			ct = sh_l + Vector3(-0.08, 0.26, 0.14).lerp(Vector3(0.1, 0.1, -0.5), smoothstep(0.06, 0.18, cast_now))
+		elif arch == "juggernaut" and cast_slot == "ult":
+			ct = sh_l + Vector3(-0.32, 0.3, -0.12)          # the free fist thrown out wide and up
+		elif arch == "archer":
+			# the bow hand straight out ahead; for the volley, high to the sky
+			ct = sh_l + (Vector3(0.0, 0.5, -0.2) if cast_slot == "ult" else Vector3(0.05, 0.08, -0.45))
+		elif arch == "mage":
+			# both palms out (the orb swings ahead with the left), or raised high for the ultimate
+			ct = sh_l + (Vector3(0.05, 0.45, -0.18) if cast_slot == "ult" else Vector3(0.1, 0.12, -0.42))
+		elif arch == "gunslinger" and cast_slot != "ult":
+			# fanning the hammer: the left palm sweeps back over the gun
+			ct = sh_l + Vector3(0.22, 0.0, -0.22).lerp(Vector3(0.3, -0.02, -0.08), smoothstep(0.05, 0.3, cast_now))
+		elif arch == "bulwark":
+			ct = sh_l + Vector3(0.12, 0.05, -0.4)           # a braced forearm, out in front
 		fl = fl.lerp(ct, cast_k)
 	# drink: flask to the mouth
 	if drink_k > 0.0:
