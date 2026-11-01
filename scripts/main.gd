@@ -55,6 +55,10 @@ func _ready() -> void:
 		if a.begins_with("--seed="): opts["seed"] = int(a.substr(7))
 		if a == "--god": opts["god"] = true
 		if a == "--autoplay": opts["autoplay"] = true
+		if a == "--rolling": opts["rolling"] = true      # a rolling 30-minute session (scripts/match/rolling.gd)
+		if a.begins_with("--join-wave="): opts["rolling"] = true; opts["join_wave"] = int(a.substr(12))
+		if a.begins_with("--join-at="): opts["rolling"] = true; opts["join_at"] = float(a.substr(10))
+		if a.begins_with("--rolling-demo="): opts["rolling"] = true; opts["rolling_demo"] = a.substr(15); opts["plan_t"] = 0.4    # screenshots (Rolling.demo)
 		if a == "--record": Record.set_level(1)            # start in recording mode (F10 cycles it)
 		if a.begins_with("--record="): Record.set_level(int(a.substr(9)))    # --record=2: with the HUD hidden
 		if a.begins_with("--arena="): Record.arena_pick = a.substr(8)    # straight into the arena, this archetype picked
@@ -441,6 +445,14 @@ func _ready() -> void:
 	if "--raid-check" in args:
 		load("res://tools/raid_check.gd").new().run(self)        # raid conditions, sight, the armor kit key
 		return
+	if "--rolling-check" in args:
+		var rck = load("res://tools/rolling_check.gd").new()     # rolling sessions: waves, cut-off, level floor, catch-up XP, bounties, the end
+		set_meta("rolling_check", rck)      # (held, so nothing it waits on loses it)
+		rck.run(self)
+		return
+	if "--rolling-sim" in args:
+		load("res://tools/rolling_sim.gd").new().run(self, opts)  # a whole 30-minute rolling session, headless, with bots
+		return
 	if "--bot-sanity-check" in args:
 		_bot_sanity()
 		return
@@ -609,7 +621,7 @@ func _ready() -> void:
 		show_screen("prologue", {"then": "title"})    # test: the opening story
 	elif "--creator" in args:
 		show_screen("hatch", {"create": true})    # test: the hunter creator
-	elif "--match" in args or opts.has("raid_demo") or opts.has("blight_demo"):
+	elif "--match" in args or opts.has("raid_demo") or opts.has("blight_demo") or opts.get("rolling", false):
 		show_screen("match", opts)
 	elif "--duel" in args:
 		show_screen("match", Match.duel_opts())

@@ -54,13 +54,19 @@ func setup() -> void:
 		plan_len = float(o.get("plan_t", PLAN_T))
 		plan_t = plan_len
 		for h in m.hunters:
-			if h.ctrl == "bot" and not h.remote:
+			if h.ctrl == "bot" and not h.remote and (h.riding or m.rolling == null):
 				# leaders always ping their pick early on; the others now and then add theirs after it
 				# (the value is the time left on the countdown when they ping)
 				if is_lead(h):
 					_bot_ping[h.nid] = maxf(0.3, randf_range(plan_len - 3.0, plan_len - 1.2))
 				elif randf() < 0.35:
 					_bot_ping[h.nid] = randf_range(1.2, maxf(1.3, plan_len - 3.5))
+
+## A squad that boards later (a rolling session's drop wave): its first member leads the drop.
+func add_squad(mem: Array) -> void:
+	if mem.is_empty():
+		return
+	leads[(mem[0] as Hunter).team] = mem[0]
 
 func leader(team: int) -> Hunter:
 	var l = leads.get(team, null)
@@ -122,8 +128,8 @@ func _depart() -> void:
 	events.append("depart")
 	for t in leads:
 		var l := leader(int(t))
-		if l == null or l.ctrl != "bot" or l.remote:
-			continue
+		if l == null or l.ctrl != "bot" or l.remote or not l.riding:
+			continue      # (a rolling session's earlier squads are already down)
 		var hp := _human_ping(l.team)
 		if hp != Vector3.INF:
 			_set_land(l, hp)
@@ -235,7 +241,8 @@ func separate(h: Hunter, from_net := false) -> bool:
 ## The leader just jumped: everyone still following jumps with them and takes a slot behind.
 func on_lead_jump(l: Hunter) -> void:
 	var hd := Vector2(l.vel.x, l.vel.z)
-	heading[l.team] = hd.normalized() if hd.length() > 0.1 else Vector2(m.ship.get("dir", Vector3.FORWARD).x, m.ship.get("dir", Vector3.FORWARD).z)
+	var sd: Vector3 = m.ship_of(l).get("dir", Vector3.FORWARD)
+	heading[l.team] = hd.normalized() if hd.length() > 0.1 else Vector2(sd.x, sd.z)
 	var n := 0
 	for f in m.hunters:
 		if f == l or f.team != l.team or not f.riding or f.drop_solo or f.out or f.remote:

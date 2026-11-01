@@ -694,6 +694,24 @@ func _draw_minimap(sz: Vector2) -> void:
 		var sa: Vector2 = to_map.call(m.ship["a"]); var sb: Vector2 = to_map.call(m.ship["b"])
 		c.draw_line(sa, sb, Color(1, 1, 1, 0.35), 2.0, true)
 		c.draw_circle(to_map.call(m.ship_pos()), 5.0, GOLD)
+	if m.rolling:
+		# the other drop waves' skyships (amber), and hunters with a bounty on them (seen by everyone)
+		for ws in m.ships:
+			if ws.get("gone", false) or ws.get("node") == null:
+				continue
+			var wp: Vector2 = to_map.call(m.ship_pos_of(ws))
+			if on_map.call(wp, 3.0):
+				var wa: Vector2 = to_map.call(ws["a"]); var wb: Vector2 = to_map.call(ws["b"])
+				c.draw_line(wa, wb, Color(1.0, 0.72, 0.35, 0.3), 1.5, true)
+				c.draw_circle(wp, 4.5, Color("ffb64a"))
+			else:
+				_edge_arrow(inner, inner.get_center(), wp, Color("ffb64a"))
+		for h in m.hunters:
+			if m.player and h.team == m.player.team or not h.has_meta("bounty") or h.out or h.extracted:
+				continue
+			var bp: Vector2 = to_map.call(h.pos)
+			if on_map.call(bp, 3.0): bounty_marker(c, bp, 0.85)
+			else: _edge_arrow(inner, inner.get_center(), bp, Color("ffb64a"))
 	if m.opts.get("tutorial", false) and m.tut_target != Vector3.INF:
 		var tv: Vector2 = to_map.call(m.tut_target)
 		if on_map.call(tv, 4.0): c.draw_arc(tv, 6.0, 0, TAU, 16, Color("8fe3c8"), 2.5, true)
@@ -799,6 +817,55 @@ func _draw_clock_bar(sz: Vector2, mm: Rect2) -> void:
 	if m.sight_k < 0.99:
 		var st := "SIGHT %d%%" % int(round(m.sight_k * 100.0))
 		_text(Vector2(rr.end.x - 8 - big.get_string_size(st, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x, rr.position.y + 14), st, 10, MUTED, big)
+	if m.rolling:
+		_draw_session_row(Rect2(Vector2(r.position.x, rr.end.y + 4), Vector2(r.size.x, 42)))
+
+## A rolling session (Rolling): the session clock, when you joined, the next drop wave (or the one
+## coming in now), and a bounty on you.
+func _draw_session_row(sr: Rect2) -> void:
+	var ro: Rolling = m.rolling
+	mm_bottom = sr.end.y
+	_rounded(sr, Color(0.04, 0.05, 0.08, 0.78), 6)
+	var amber := Color("ffb64a")
+	var st := m.sess_time()
+	_text(sr.position + Vector2(10, 17), "SESSION %s / %s" % [Rolling.fmt(st), Rolling.fmt(Rolling.SESSION)], 11, INK, big)
+	var jt := "JOINED %s" % Rolling.fmt(ro.t0)
+	_text(Vector2(sr.end.x - 10 - big.get_string_size(jt, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x, sr.position.y + 17), jt, 11, MUTED, big)
+	var line := ""; var col := MUTED
+	var fl: Array = ro.flying_waves()
+	var pulse := 0.65 + 0.35 * sin(m.time * 6.0)
+	if not fl.is_empty():
+		var n := 0
+		for w in fl: n += int(w["n"])
+		line = "WAVE INCOMING  ·  %d SQUAD%s" % [n, "" if n == 1 else "S"]
+		col = Color(amber, pulse)
+	else:
+		var nw: Dictionary = ro.next_wave()
+		if not nw.is_empty():
+			line = "NEXT DROP WAVE  %s" % _fmt(float(nw["t"]) - st)
+			col = amber.lerp(MUTED, 0.45)
+		else:
+			line = "NO MORE DROPS  ·  GET OUT BY 30:00"
+			col = BAD if Rolling.SESSION - st < 120.0 else MUTED
+	_text(sr.position + Vector2(10, 35), line, 11, col, big)
+	if m.player and m.player.has_meta("bounty") and not m.player.out:
+		var bt := "BOUNTY ON YOU"
+		_text(Vector2(sr.end.x - 10 - big.get_string_size(bt, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x, sr.position.y + 35), bt, 11, Color(amber, pulse), big)
+	else:
+		var md := "LOBBY LV %s" % (str(int(ro.median)) if absf(ro.median - round(ro.median)) < 0.01 else "%.1f" % ro.median)
+		_text(Vector2(sr.end.x - 10 - big.get_string_size(md, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x, sr.position.y + 35), md, 10, Color(MUTED, 0.85), big)
+
+## A bounty mark: an amber target with a pulse (on the maps and over a hunter's nameplate).
+func bounty_marker(cv: Control, p: Vector2, k := 1.0) -> void:
+	var amber := Color("ffb64a")
+	var ph := fmod(m.time * 1.2, 1.0)
+	cv.draw_arc(p, (6.0 + ph * 7.0) * k, 0, TAU, 20, Color(amber, 1.0 - ph), 2.0, true)
+	cv.draw_circle(p, 6.5 * k, Color(0, 0, 0, 0.65))
+	cv.draw_arc(p, 5.0 * k, 0, TAU, 18, amber, 2.0, true)
+	cv.draw_circle(p, 2.0 * k, amber)
+	for i in 4:
+		var a := PI * 0.5 * i
+		cv.draw_line(p + Vector2(cos(a), sin(a)) * 3.5 * k, p + Vector2(cos(a), sin(a)) * 8.0 * k, amber, 1.5, true)
 
 var mm_circ := Vector3.ZERO    # the round minimap: centre x, y and radius (0 while it's the square overview)
 func _mm_has(inner: Rect2, v: Vector2, pad := 0.0) -> bool:
@@ -1900,6 +1967,10 @@ func _nameplate(sp: Vector2, h: Hunter) -> void:
 		_ctext(bc + Vector2(0, 3.5), String(h.cls).substr(0, 1).to_upper(), 9, cc, big)
 	if _np_show_name(sp, h):
 		_ctext(Vector2(sp.x, sp.y - 6), h.pname.substr(0, 14), NP_NAME_FS, Color(col.lerp(Color.WHITE, 0.3), 0.9), big)
+	if m.rolling and h.has_meta("bounty"):
+		# a bounty: a target over the plate and what knocking them is worth
+		bounty_marker(c, Vector2(sp.x, sp.y - 30), 1.15)
+		_ctext(Vector2(sp.x, sp.y - 44), "BOUNTY  ·  LV %d" % h.lvl, 11, Color("ffb64a"), big)
 	if h.downed:
 		var stomped: bool = h.get_meta("stomped", false)
 		var pulse := 0.5 + 0.5 * sin(m.time * 14.0)

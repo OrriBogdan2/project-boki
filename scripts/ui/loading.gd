@@ -83,6 +83,7 @@ func setup(opts: Dictionary) -> void:
 		var teams := int(opts.get("teams", 6)); var squad := int(opts.get("squad", 1))
 		mode_line = "%s  •  %d squads  •  skyship drop" % [["Solo", "Duos", "Trios"][clampi(squad - 1, 0, 2)], teams]
 		if opts.has("net"): mode_line = "Online  •  " + mode_line
+		if opts.get("rolling", false): mode_line = "%s  •  rolling 30-minute session  •  join in progress" % ["Solo", "Duos", "Trios"][clampi(squad - 1, 0, 2)]
 		raid = RaidLook.pick(opts, int(opts.get("seed", 0)))
 	tip = TIPS[randi() % TIPS.size()]
 	var r := RandomNumberGenerator.new(); r.seed = hash(title) + tier
