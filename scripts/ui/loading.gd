@@ -77,7 +77,9 @@ func setup(opts: Dictionary) -> void:
 	else:
 		title = String(T["name"]); sub = String(T["desc"])
 		var teams := int(opts.get("teams", 6)); var squad := int(opts.get("squad", 1))
-		mode_line = "%s  •  %d squads  •  skyship drop" % [["Solo", "Duos", "Trios"][clampi(squad - 1, 0, 2)], teams]
+		# solo lobbies count hunters ("Solo · 20 squads" read oddly), squad lobbies count squads
+		var count := ("%d hunters" % teams) if squad <= 1 else ("%d squads" % teams)
+		mode_line = "%s  •  %s  •  skyship drop" % [["Solo", "Duos", "Trios"][clampi(squad - 1, 0, 2)], count]
 		if opts.has("net"): mode_line = "Online  •  " + mode_line
 	tip = TIPS[randi() % TIPS.size()]
 	var r := RandomNumberGenerator.new(); r.seed = hash(title) + tier
@@ -123,6 +125,14 @@ func finish() -> void:
 	while hold > 0.0 and is_inside_tree():
 		hold -= get_process_delta_time()
 		await get_tree().process_frame
+	# gone before the map shows: fading this out over the planning map blended the two for half a
+	# second, so the screen's ink sweeps over first, this goes, and the ink sweeps off the map
+	var sf: ScreenFade = Game.main.get("fade") if Game.main else null
+	if sf and is_inside_tree() and not sf.covered:
+		await sf.cover(0.22)
+		queue_free()
+		sf.reveal(0.4)
+		return
 	leaving = true
 
 func _stage() -> String:
