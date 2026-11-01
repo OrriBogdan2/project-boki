@@ -36,10 +36,16 @@ Owner: "the main thing is getting the game to work with a small amount of people
 for thousands of people off the bat. I want to trial it with ex-SUPERVIVE players first."
 
 This overrides the scale-first parts of the order below. The first online target is the **Playtest MVP**:
-- **Size:** one match at a time, 6-12 real players (2-4 squads), bots fill the rest. One map (Skyreach).
-- **Hosting:** a single dedicated Godot server (headless build of the same project) on one small VM, or a
-  player-hosted listen server for friends; invite code / direct connect from a simple lobby screen.
-  No matchmaking, no regions, no scaling.
+- **Size (owner update):** 20-40 real players per match (e.g. 10 squads of 3-4), bots only to fill gaps.
+  Up to ~100 testers online at once, so 2-3 matches running at the same time. One map (Skyreach), one region.
+- **Hosting:** dedicated headless Godot servers (same project) on one or two VMs, several match processes per
+  VM; a tiny lobby/queue service that fills matches and hands out the server address; invite codes for
+  the closed test. No regions, no global matchmaking, no autoscaling.
+- **Server performance is now a real constraint:** 40 hunters + Boki + mobs + bosses at a fixed 30 Hz tick on
+  one core per match. Needs: interest management (each client only receives what's near it / in its vision),
+  delta-compressed snapshots, budgeted mob AI and shot processing (today's measured 4-5 ms mob AI and up to
+  ~5 ms shots per step must hold at 40 players), and a load test with 40 simulated clients before the
+  first session.
 - **Authority:** server-authoritative simulation (so results are consistent), but light anti-cheat:
   testers are invited. Client prediction for your own movement and lag compensation for shots, because
   ex-SUPERVIVE players will feel input lag immediately.
