@@ -1265,10 +1265,14 @@ func bot_goal(h: Hunter, leaving: bool) -> Array:
 		if L["state"] in ["cleared", "dormant"] or L.get("locked", false): continue
 		# a sealed gate bots can't work (runes, wards) isn't a goal: try the next lair instead of giving up
 		if L["state"] == "sealed" and not (L["entry"] as Array).has("dial"): continue
-		var d := h.flat_dist(L["c"])
+		# (the lair we picked last time reaches a little further: at the edge of the range a bot
+		# walking about flipped between it and a roam goal every think, turning round each time)
+		var d := h.flat_dist(L["c"]) - (15.0 if a.get("lair_pick", "") == String(L["id"]) else 0.0)
 		if d < bd: bd = d; best = L
 	if best.is_empty():
+		a.erase("lair_pick")
 		return []
+	a["lair_pick"] = String(best["id"])
 	if best["state"] == "sealed":
 		if not (best["entry"] as Array).has("dial"):
 			return []
