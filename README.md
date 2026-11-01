@@ -4,6 +4,8 @@ A creature-raising farm and a PvPvE extraction game, built in Godot 4.6.
 
 Your Boki live with you on a floating-island farm. Each species is built from one or two real animals and has an element of its own: Vespyx (fox and scorpion, Venom), Prismander (axolotl with crystal gills, Prism), Mycroll (a hedgehog grown over with glowing toadstools, Spore), Echolop (hare and bat, Echo), Gravadillo (armadillo and rhino beetle, Gravity) and Lunowl (owl and luna moth, Lunar). Each one has its own personality, remembers what you do together, and decides how far it trusts you. In matches it rides on your shoulder, gets thrown into fights, fights on its own, and might refuse an order it thinks is reckless.
 
+**Wiki:** [docs/wiki](docs/wiki/Home.md) has guides for players (classes, Boki, expeditions, the farm, controls) and for the team (architecture, code map, checks, build and ship, networking). Its data pages are generated from the game's files by `tools/gen_wiki.py`.
+
 ## Running it
 
 1. Install [Godot 4.6](https://godotengine.org/download) (the standard build, not .NET).

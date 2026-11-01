@@ -1,15 +1,32 @@
 class_name ThiefKit
 extends ArchKit
-## Thief (light): Flicker, Marks, Knife (Shadow Step, Fan, Drop Knife, silent in smoke, Cash In),
-## Smoke Veil, Heist. docs/ARCHETYPES.md §6.1.
+## Thief (light), kits2: a port of SUPERVIVE's Shiv, ability by ability (supervive.wiki.gg), scaled to
+## our health and TTK; only the names, art, sounds and on-screen text are ours. docs/ARCHETYPES.md.
+##
+## - Passive, Marks (Malice & Resolve): every weapon hit stacks a Mark on the target (gold diamonds over
+##   their head, up to 5): each makes your weapon hits on them stronger. A knock or an assist heals you.
+## - Dash, Vault (Quickflip): a short flip and a burst of speed; the next weapon hit is Primed (+damage,
+##   2 Marks, Shred) and landing it resets Vault (the payoff: T4, pay_cashin, VAULT RESET).
+## - RMB, Bola (Chain Bolas): grounds the first foe it wraps and flies on; a second foe caught and both
+##   are stunned with bonus damage.
+## - E, Shadow Knife (Farstep Dagger): a dagger that sticks to a foe (slows) or a surface; recast to step
+##   to it, or you step there when it runs out.
+## - R, Jackpot (Fusillade): after a fuse, 2s of knives at everyone near (5 each), harder with
+##   anti-heal at the rim, each one refreshing every Mark; two quick weaker Vaults; you keep firing.
 
-var ambush_t := 0.0            # the next hit counts as from behind
-var step2 := {}                # Flicker's second step window: {t, refund_at}
-var recast := {}               # Shadow Step: {target, t}
+var primed_t := 0.0            # Vault primed the next weapon hit
+var haste_t := 0.0             # Vault's burst of speed (ends on the Primed hit)
+var quick := 0                 # Jackpot's free quick Vaults
+var quick_t := 0.0
 var mark_gap := {}             # target id -> time of its last Mark from us (one per 0.3s)
-var heist := {}                # the running Heist: {targets, i, t}
-var smoke: Dictionary = {}     # our live smoke cloud (in m.smokes)
 var pips := {}                 # target instance id -> {node, t: Ent}: the Mark pips over their head
+var knife := {}                # the stuck Shadow Knife: {target, pos, node}
+var bola2 := {}                # the Bola flying on after its first foe: {pos, dir, left, first, node}
+var fus := {}                  # the running Jackpot: {t, next, n}
+var glint: Node3D = null       # the Primed tell: a gold glint at the weapon hand
+var primed_hits := 0           # (tests, demo)
+var bola_pairs := 0
+var jackpot_hits := 0
 
 func _setup() -> void:
 	res = 0.0
@@ -23,38 +40,54 @@ func marks_on(t: Ent) -> int:
 	return int(e[0]) if float(e[1]) > 0.0 else 0
 
 func add_mark(t: Ent, n := 1, force := false) -> void:
-	if t == null or not is_instance_valid(t) or t.dead or t.team == h.team:
+	if t == null or not is_instance_valid(t) or t.dead or t.team == h.team or n <= 0:
 		return
 	var now: float = m.time
-	if not force and now - float(mark_gap.get(t.get_instance_id(), -9.0)) < 0.3:
+	if not force and now - float(mark_gap.get(t.get_instance_id(), -9.0)) < float(res_def().get("gap", 0.3)):
 		return
 	mark_gap[t.get_instance_id()] = now
 	var mk: Dictionary = t.get_meta("marks", {})
 	var e: Array = mk.get(h.nid, [0, 0.0])
-	var c := mini(int(res_def().get("max", 3)), (int(e[0]) if float(e[1]) > 0.0 else 0) + n)
 	var had := int(e[0]) if float(e[1]) > 0.0 else 0
-	mk[h.nid] = [c, float(res_def().get("dur", 6.0))]
+	var c := mini(mark_max(), had + n)
+	mk[h.nid] = [c, float(res_def().get("dur", 4.0))]
 	t.set_meta("marks", mk)
 	t.set_meta("marks_t", now)
 	_pip_pop(t, c)
-	if c >= 3 and had < 3:
-		m.sfx("pickup", t.pos, -2.0, 1.9)       # the victim hears a coin jingle
+	if c >= mark_max() and had < mark_max():
+		m.sfx("pickup", t.pos, -2.0, 1.9)       # the victim hears a coin jingle at full Marks
 		m.sfx("unlock", t.pos, -6.0, 1.7)
 		m.fx.word(t.pos + Vector3(0, 2.5, 0), "MARKED", res_col(), true)
 		m.fx.ring(t.pos, 1.3, res_col(), 0.3)
-		# the purse is full: the Knife comes back right now, so the cash-in is always one click away
-		if ch_rmb < 1.0:
-			ch_rmb = 1.0
-			h._ab_feedback("sec", "ready")
-			m.fx.word(h.pos + Vector3(0, 2.3, 0), "KNIFE READY", res_col(), false)
+		net_ring(t.pos, 1.3, res_col())
 
 func clear_marks(t: Ent) -> void:
 	var mk: Dictionary = t.get_meta("marks", {})
 	mk.erase(h.nid)
 	t.set_meta("marks", mk)
 
-# ---- Marks you can read from across the fight: gold diamonds orbiting over the target's head that
-# light up one by one, and a big spinning coin at 3 (everyone sees them, the victim included) ----
+func mark_max() -> int:
+	return int(res_def().get("max", 5))
+
+## Sets a target's Marks outright (the Bola pooling two foes' Marks at rank 3).
+func set_marks(t: Ent, n: int) -> void:
+	if t == null or not is_instance_valid(t) or t.dead:
+		return
+	var mk: Dictionary = t.get_meta("marks", {})
+	mk[h.nid] = [mini(mark_max(), n), float(res_def().get("dur", 4.0))]
+	t.set_meta("marks", mk)
+	_pip_pop(t, n)
+
+## Every Mark we have on anyone back to its full time (Jackpot).
+func refresh_marks() -> void:
+	for f in m.foes_of(h.team):
+		var mk: Dictionary = f.get_meta("marks", {}) if f.has_meta("marks") else {}
+		if mk.has(h.nid) and int(mk[h.nid][0]) > 0:
+			mk[h.nid][1] = float(res_def().get("dur", 4.0))
+			_pip_pop(f, int(mk[h.nid][0]))
+
+# ---- Marks you can read from across the fight: gold diamonds orbiting over the target's head, one per
+# Mark (five at most), spinning faster as they stack (everyone sees them, the victim included) ----
 func _pip_node(t: Ent) -> Dictionary:
 	var key := t.get_instance_id()
 	if pips.has(key) and is_instance_valid(pips[key]["node"]):
@@ -63,23 +96,16 @@ func _pip_node(t: Ent) -> Dictionary:
 	n.top_level = true
 	var gold := res_col()
 	var ds: Array = []
-	for i in 3:
+	for i in mark_max():
 		var d := MeshInstance3D.new()
-		d.mesh = Models.box(0.3, 0.3, 0.3)
+		d.mesh = Models.box(0.28, 0.28, 0.28)
 		d.material_override = Models.glow_mat(Color(gold, 0.95))
 		d.rotation = Vector3(0.0, 0.0, PI * 0.25)
 		d.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		n.add_child(d)
 		ds.append(d)
-	var coin := MeshInstance3D.new()
-	coin.mesh = Models.cyl(0.48, 0.48, 0.09, 20)
-	coin.material_override = Models.glow_mat(Color(gold.lightened(0.2), 1.0))
-	coin.rotation.x = PI * 0.5
-	coin.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	coin.visible = false
-	n.add_child(coin)
 	m.add_child(n)
-	pips[key] = {"node": n, "t": t, "d": ds, "coin": coin, "pop": 0.0}
+	pips[key] = {"node": n, "t": t, "d": ds, "pop": 0.0}
 	return pips[key]
 
 func _pip_pop(t: Ent, _c: int) -> void:
@@ -99,23 +125,17 @@ func _tick_pips(dt: float) -> void:
 		var top := 2.7 if t is Hunter else 1.9
 		n.global_position = t.position + Vector3(0, top, 0)
 		p["pop"] = maxf(0.0, float(p["pop"]) - dt * 4.0)
-		var a: float = m.time * 2.2
+		var a: float = m.time * (1.6 + 0.6 * c)
 		var ds: Array = p["d"]
-		for i in 3:
+		for i in ds.size():
 			var d: MeshInstance3D = ds[i]
-			var ang := a + TAU * i / 3.0
-			d.position = Vector3(cos(ang) * 0.6, 0.0, sin(ang) * 0.6)
+			var ang := a + TAU * i / float(ds.size())
+			d.position = Vector3(cos(ang) * 0.68, 0.0, sin(ang) * 0.68)
 			var lit := i < c
-			d.scale = Vector3.ONE * ((1.0 + float(p["pop"]) * 0.8) if lit else 0.55)
+			d.scale = Vector3.ONE * ((1.0 + float(p["pop"]) * 0.8 + (0.15 * sin(m.time * 9.0) if c >= ds.size() else 0.0)) if lit else 0.5)
 			d.material_override.set_shader_parameter("color", Color(res_col(), 1.0) if lit else Color(1, 1, 1, 0.22))
-			d.visible = c < 3
-		var coin: MeshInstance3D = p["coin"]
-		coin.visible = c >= 3
-		if coin.visible:
-			coin.rotation.y = m.time * 6.0
-			coin.scale = Vector3.ONE * (1.0 + 0.15 * sin(m.time * 9.0) + float(p["pop"]) * 0.6)
 
-## Highest mark count on any foe (the RMB slot's gold dot, the resource readout).
+## Highest mark count on any foe (the resource readout).
 func best_marks() -> int:
 	var b := 0
 	for f in m.foes_of(h.team):
@@ -123,16 +143,37 @@ func best_marks() -> int:
 	return b
 
 func res_frac() -> float:
-	return float(best_marks()) / 3.0
+	return float(best_marks()) / float(mark_max())
 
 func res_text() -> String:
-	return "%d/3" % best_marks()
+	return "%d/%d" % [best_marks(), mark_max()]
 
+## The payoff is armed: the next weapon hit is Primed.
 func full_ready() -> bool:
-	return best_marks() >= 3
+	return primed_t > 0.0
+
+func dash_payoff_ready() -> bool:
+	return primed_t > 0.0
+
+func ready_label() -> String:
+	return "PRIMED  ·  land it to reset Vault" if primed_t > 0.0 else ""
+
+## The payoff lives on the dash: the right click's slot never shows the gold dot.
+func slot_info(slot: String) -> Dictionary:
+	var out := super.slot_info(slot)
+	if slot in ["sec", "utility"]: out["full"] = false
+	return out
 
 func _tick(dt: float) -> void:
-	ambush_t = maxf(0.0, ambush_t - dt)
+	haste_t = maxf(0.0, haste_t - dt)
+	if primed_t > 0.0:
+		primed_t -= dt
+		if primed_t <= 0.0:
+			primed_t = 0.0
+			m.fx.burst(h.pos + Vector3(0, 1.0, 0), Color(res_col(), 0.6), 6, 1.5, 0.3, -1.0, 0.7)
+	if quick_t > 0.0:
+		quick_t -= dt
+		if quick_t <= 0.0: quick = 0
 	_tick_pips(dt)
 	# marks fade on every target we've touched
 	for f in m.foes_of(h.team):
@@ -141,137 +182,332 @@ func _tick(dt: float) -> void:
 			var e: Array = mk[h.nid]
 			e[1] = float(e[1]) - dt
 			if float(e[1]) <= 0.0: mk.erase(h.nid)
-	if not step2.is_empty():
-		step2["t"] = float(step2["t"]) + dt
-		var win := float(dash_def().get("win_max", 0.7)) + (0.2 if rank("dash") >= 3 else 0.0)
-		if float(step2["t"]) > win:
-			# skipped the second step: a quarter of the cooldown back, and the Ambush opens now
-			h.dashes = minf(h.max_dashes(), h.dashes + float(dash_def().get("skip_refund", 0.25)))
-			ambush_t = maxf(ambush_t, float(dash_def().get("ambush", 1.0)))
-			step2 = {}
-	if not recast.is_empty():
-		recast["t"] = float(recast["t"]) - dt
-		if float(recast["t"]) <= 0.0 or not is_instance_valid(recast["target"]) or (recast["target"] as Ent).dead:
-			recast = {}
-	if not heist.is_empty():
-		_tick_heist(dt)
-	if not smoke.is_empty() and not m.smokes.has(smoke):
-		smoke = {}
+	_tick_knife()
+	if not bola2.is_empty(): _tick_bola2(dt)
+	if not fus.is_empty(): _tick_fus(dt)
+	_tick_glint()
+	_tick_jackpot_tele()
+	net_pulse(dt, full_ready())
 
-# ------------------------------------------------------------------ dash: Flicker
+## The Primed tell: a gold glint and a light at the weapon hand (everyone sees it).
+func _tick_glint() -> void:
+	if glint == null or not is_instance_valid(glint):
+		glint = own_node()
+		var ball := MeshInstance3D.new()
+		ball.mesh = Models.sphere(0.16, 10)
+		ball.material_override = Models.glow_mat(Color(res_col().lightened(0.3), 1.0))
+		ball.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		glint.add_child(ball)
+		var lt := OmniLight3D.new()
+		lt.light_color = res_col()
+		lt.omni_range = 2.6
+		lt.light_energy = 1.8
+		glint.add_child(lt)
+	glint.visible = primed_t > 0.0 and tells_visible()
+	if glint.visible:
+		var d := h.aim_dir()
+		glint.global_position = h.position + Vector3(d.x * 0.55, 1.0 * float(h.cdat.get("scale", 1.0)), d.y * 0.55)
+		var k := 1.3 + 0.3 * sin(m.time * 14.0)
+		glint.scale = Vector3.ONE * k
+		if randf() < 0.3: m.fx.burst(glint.global_position, res_col(), 1, 0.8, 0.25, -1.0, 0.6)
+
+func move_k() -> float:
+	return 1.0 + (float(dash_def().get("haste", 0.3)) if haste_t > 0.0 else 0.0)
+
+# ------------------------------------------------------------------ dash: Vault
 func on_dash(use_ex: bool) -> bool:
 	var dd := dash_def()
-	var step := float(dd.get("step", 2.3)); var tt := float(dd.get("step_t", 0.085))
-	if not step2.is_empty() and float(step2["t"]) >= float(dd.get("win_min", 0.08)) and h.roll_t <= 0.0:
-		# step 2: free, any direction (movement keys, else the cursor)
-		step2 = {}
-		travel(step, tt, {"invuln": float(dd.get("phase", 0.1)), "phase": 0.3, "trail": "ghost"})
-		_afterimage()
-		m.later(tt, func(): ambush_t = maxf(ambush_t, float(dd.get("ambush", 1.0))))
-		m.sfx("swipe", h.pos, -6.0, 2.0)
+	if quick > 0 and quick_t > 0.0:
+		# Jackpot's quick Vaults: shorter, free
+		quick -= 1
+		travel(float(dd["quick_dist"]), float(dd["quick_time"]), {"invuln": 0.08, "phase": 0.2, "trail": "ghost"})
+		_vaulted(true)
 		return true
-	if not step2.is_empty():
-		return true          # too soon after step 1: swallowed
+	if not spend_dash(use_ex):
+		return true
 	if use_ex:
-		if not spend_dash(true): return true
 		travel(float(h.cdat.get("ex_dist", 5.0)), float(h.cdat.get("ex_time", 0.2)), {"invuln": 0.1, "trail": "ghost"}, true)
-		return true
-	if not spend_dash(false): return true
-	travel(step, tt, {"invuln": float(dd.get("phase", 0.1)), "phase": 0.3, "trail": "ghost"})
-	_afterimage()
-	step2 = {"t": 0.0}
+	else:
+		travel(float(dd["dist"]), float(dd["time"]), {"invuln": float(dd["invuln"]), "phase": 0.3, "trail": "ghost"})
+	_vaulted(false)
 	return true
 
-## Enemy cue: a smoke afterimage of the Thief at each start point.
+## After a Vault: the flip's afterimages, the speed, and the next weapon hit Primed.
+func _vaulted(quick_one: bool) -> void:
+	var dd := dash_def()
+	play(flip_for(h.roll_dir, "thf_vault"))
+	_afterimage()
+	var t := float(dd["quick_time"] if quick_one else dd["time"])
+	m.later(t * 0.5, func(): if is_instance_valid(h): _afterimage())
+	haste_t = float(dd["haste_t"])
+	var was := primed_t > 0.0
+	primed_t = float(dd["primed_t"])
+	m.sfx("swipe", h.pos, -5.0, 2.1)
+	m.later(t, func():
+		if not is_instance_valid(h): return
+		m.fx.ring(h.pos, 0.9, res_col(), 0.2)
+		m.sfx("click", h.pos, -6.0 if h.is_local() else -10.0, 2.2))      # the blade turned in the hand: Primed
+	if not was:
+		armed_fx("", "dash")                     # Primed: the ready ping, a ring everyone sees
+
+## Enemy cue: a smoke afterimage of the Thief where it flipped from.
 func _afterimage() -> void:
 	m.fx.ghost(h.position, h.face, Color("6a6480"), float(h.cdat["scale"]))
 	m.fx.burst(h.pos + Vector3(0, 0.8, 0), Color("8a84a0"), 8, 1.5, 0.3, -1.0)
 
 # ------------------------------------------------------------------ passive hooks
-func outgoing(t: Ent, dmg: float, _o: Dictionary) -> float:
-	return dmg * (1.0 + float(res_def().get("per_mark", 0.05)) * float(marks_on(t)))
+## Marks make your weapon hits (and the Primed hit) on that target stronger.
+func outgoing(t: Ent, dmg: float, o: Dictionary) -> float:
+	var weapon := String(o.get("src", "")) == "shot" and String(o.get("ab", "")) == ""
+	if not weapon and not (o.get("tags", []) as Array).has("primed"):
+		return dmg
+	return dmg * (1.0 + float(res_def().get("per_mark", 0.08)) * float(marks_on(t)))
 
 func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
-	if t == null or t.team == h.team or String(o.get("src", "")) == "burn":
+	if t == null or t.team == h.team or t.dead:
 		return
-	if ambush_t > 0.0 or ArchKit.behind(t, h, float(res_def().get("rear_deg", 120.0))):
-		if ambush_t > 0.0:
-			ambush_t = 0.0
-			m.fx.word(t.pos + Vector3(0, 2.0, 0), "AMBUSH", res_col(), false)
-		add_mark(t, 1)
+	if String(o.get("src", "")) != "shot" or String(o.get("ab", "")) != "":
+		return          # only your weapon's hits stack (and spend the Prime)
+	if primed_t > 0.0:
+		_primed_hit(t)
+		return
+	add_mark(t, 1)
 
-# ------------------------------------------------------------------ RMB: Knife
-func rmb_press_extra() -> bool:
-	if recast.is_empty():
-		return false
-	var tgt: Ent = recast["target"]
-	recast = {}
-	if not is_instance_valid(tgt) or tgt.dead or h.flat_dist(tgt) > float(rmb_def()["knife"]["range"]) + 1.5:
-		h._ab_feedback("sec", "deny")
-		return true
-	_shadow_step(tgt, not h.grounded or h.gliding)
-	return true
+## The Primed hit: +damage, 2 Marks and Shred, the speed boost ends, and landing it resets Vault (the
+## payoff: T4 hitstop and shake, pay_cashin, VAULT RESET).
+func _primed_hit(t: Ent) -> void:
+	var dd := dash_def()
+	primed_t = 0.0
+	haste_t = 0.0
+	primed_hits += 1
+	play("thf_primed")
+	var dir := Vector2(t.pos.x - h.pos.x, t.pos.z - h.pos.z).normalized()
+	t.hurt(float(dd["prime_dmg"]) * power("dash") * (1.2 if rank("dash") >= 3 else 1.0), h, {"src": "abil", "ab": "dodge", "tags": ["dodge", "primed"], "crit": true, "melee": true, "kb": dir * 3.0, "payoff": true})
+	if is_instance_valid(t) and not t.dead:
+		add_mark(t, int(dd["prime_marks"]), true)
+		KitStatus.apply(t, "vul", float(dd["shred_t"]), float(dd["shred"]))
+	payoff_fx(t.pos, "VAULT RESET", res_col(), "pay_cashin", dir, t)
+	# the loop: landing it gives Vault straight back
+	h.dashes = h.max_dashes()
+	h._ab_feedback("dash", "ready")
 
+## A rival we hit was knocked (or we assisted): a heal.
+func on_knock(t: Hunter, mine: bool) -> void:
+	var rd := res_def()
+	var amt := h.max_hp * float(rd.get("heal_knock", 0.15) if mine else rd.get("heal_assist", 0.25))
+	h.heal(amt)
+	m.fx.word(h.pos + Vector3(0, 2.5, 0), "TAKEN" if mine else "ASSIST", res_col(), false)
+	m.fx.burst(h.pos + Vector3(0, 1.0, 0), Color("7fe08a"), 14, 2.5, 0.5, -2.0)
+	if is_instance_valid(t): clear_marks(t)
+
+# ------------------------------------------------------------------ RMB: Bola
 func fire_rmb(c: Dictionary) -> void:
 	last_variant = String(c["variant"])
-	if c.get("hold", false):
-		if not spend_rmb(): return
-		_fan(c)
-		return
 	if not spend_rmb(): return
-	_knife(c)
+	var bd: Dictionary = rmb_def()["bola"]
+	var stg := stage("rmb", {"delivery": {"type": "projectile", "speed": float(bd["speed"]), "range": float(bd["range"]), "size": 0.3},
+		"effects": [{"type": "damage", "amount": float(bd["dmg"])}, {"type": "slow", "duration": _ground_t(), "strength": float(bd["slow"])}]})
+	var done := {}
+	play("thf_bola")
+	m.sfx("ab_whirr", h.pos, -5.0, 1.7)
+	m.later(0.14, func():
+		if not is_instance_valid(h) or busy(): return
+		run(stg, cx("rmb", "bola", aim(), {"on_foe": func(f: Ent, _c: Dictionary):
+			if done.has("first") or not is_instance_valid(f): return
+			done["first"] = true
+			_wrap(f)}))
+		Feel.cast_sound(m, "projectile", "control", h.pos, h))
+	net_bolt(h.pos + Vector3(0, 1.0, 0), h.pos + Vector3(h.aim_dir().x, 0, h.aim_dir().y) * float(bd["range"]) + Vector3(0, 1.0, 0), col_of(rmb_def()))
 
-func _knife(c: Dictionary) -> void:
-	var kd: Dictionary = rmb_def()["knife"]
-	var silent: bool = c.get("e", false) and _in_my_smoke(h.pos)
-	var stg := stage("rmb", {"delivery": {"type": "projectile", "speed": float(kd["speed"]), "range": float(kd["range"]), "size": 0.2}, "effects": [{"type": "damage", "amount": float(kd["dmg"])}]})
-	var cc := cx("rmb", "knife", aim(), {"on_foe": func(f: Ent, _c: Dictionary):
-		if f is Hunter or f is Mob or f is Kin:
-			var cash := marks_on(f) >= 3
-			if cash:
-				_cash_in(f)
-			else:
+func _ground_t() -> float:
+	return float(rmb_def()["bola"]["ground"])
+
+## The Bola wraps its first foe: Grounded and a Mark, then it flies on past them.
+func _wrap(f: Ent) -> void:
+	var bd: Dictionary = rmb_def()["bola"]
+	KitStatus.apply(f, "gnd", _ground_t())
+	add_mark(f, 1, true)
+	m.sfx("ab_tether", f.pos, -3.0, 1.4)
+	var dir := Vector2(f.pos.x - h.pos.x, f.pos.z - h.pos.z).normalized()
+	if dir.length() < 0.1: dir = h.aim_dir()
+	var n := own_node()
+	var ball := MeshInstance3D.new()
+	ball.mesh = Models.sphere(0.18, 8)
+	ball.material_override = Models.glow_mat(Color(col_of(rmb_def()), 1.0))
+	ball.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	n.add_child(ball)
+	var left := float(bd["after"]) + (float(bd["after_r3"]) if rank("sec") >= 3 else 0.0)
+	bola2 = {"pos": f.pos + Vector3(0, 0.9, 0), "dir": dir, "left": left, "first": f, "node": n}
+	n.global_position = bola2["pos"]
+
+## The Bola flying on: the next foe it touches is caught too (TANGLED).
+func _tick_bola2(dt: float) -> void:
+	var bd: Dictionary = rmb_def()["bola"]
+	var step := float(bd["speed"]) * dt
+	var p: Vector3 = bola2["pos"]
+	var dir: Vector2 = bola2["dir"]
+	var q := p + Vector3(dir.x, 0, dir.y) * step
+	var n: Node3D = bola2["node"]
+	if m.world.is_block(q.x, q.z) or float(bola2["left"]) <= 0.0:
+		_end_bola2()
+		return
+	bola2["pos"] = q
+	bola2["left"] = float(bola2["left"]) - step
+	if is_instance_valid(n): n.global_position = q
+	var first = bola2["first"]
+	for o in m.foes_of(h.team):
+		if o != first and o.hittable() and Vector2(o.pos.x - q.x, o.pos.z - q.z).length() < o.r + 0.5 and absf(o.pos.y + 0.9 - q.y) < 1.6:
+			_tangle(first, o)
+			_end_bola2()
+			return
+
+func _end_bola2() -> void:
+	var n: Node3D = bola2.get("node")
+	if n and is_instance_valid(n):
+		self_nodes.erase(n)
+		n.queue_free()
+	bola2 = {}
+
+## Two foes in one Bola: both Grounded, stunned and hurt; at rank 3 they pool their Marks.
+func _tangle(f, other: Ent) -> void:
+	var bd: Dictionary = rmb_def()["bola"]
+	var col := col_of(rmb_def())
+	bola_pairs += 1
+	KitStatus.apply(other, "gnd", _ground_t())
+	var both: Array = [other]
+	if f != null and is_instance_valid(f) and not (f as Ent).dead: both.append(f)
+	for t in both:
+		t.hurt(float(bd["pair_dmg"]) * power("sec"), h, {"src": "abil", "ab": "utility", "tags": ["utility", "bola"], "stun": float(bd["pair_stun"]), "dr": true})
+	add_mark(other, 1, true)
+	if rank("sec") >= 3 and both.size() == 2:
+		var pool := marks_on(both[0]) + marks_on(both[1])
+		for t in both: set_marks(t, pool)
+	var a: Vector3 = other.pos if both.size() < 2 else (both[1] as Ent).pos
+	m.fx.bolt(a + Vector3(0, 0.6, 0), other.pos + Vector3(0, 0.6, 0), col)
+	m.fx.bolt(a + Vector3(0, 1.0, 0), other.pos + Vector3(0, 1.0, 0), col.lightened(0.3))
+	var mid := (a + other.pos) * 0.5
+	m.fx.word(mid + Vector3(0, 2.6, 0), "TANGLED", col, true)
+	m.fx.ring(mid, 1.6, col, 0.3)
+	m.sfx("ab_stun", mid, -2.0, 1.1)
+	Feel.shake(m, "t3", h, mid, other)
+	net_bolt(a + Vector3(0, 0.8, 0), other.pos + Vector3(0, 0.8, 0), col)
+
+# ------------------------------------------------------------------ E: Shadow Knife
+func in_e() -> bool:
+	return not knife.is_empty()
+
+func e_recastable() -> bool:
+	return not knife.is_empty()
+
+func cast_e() -> bool:
+	play("thf_knife")
+	m.later(0.12, func():               # cocked by the ear, then thrown on the key pose
+		if not is_instance_valid(h) or busy(): return
+		_throw_knife())
+	return true
+
+func _throw_knife() -> void:
+	var ed := e_def()
+	var stg := stage("e", {"delivery": {"type": "projectile", "speed": float(ed["speed"]), "range": float(ed["range"]), "size": 0.2},
+		"effects": [{"type": "damage", "amount": float(ed["dmg"])}, {"type": "slow", "duration": float(ed["slow_t"]), "strength": float(ed["slow"])}]})
+	run(stg, cx("e", "shadow_knife", aim(), {
+		"on_foe": func(f: Ent, _c: Dictionary):
+			if knife.is_empty() and is_instance_valid(f) and not f.dead:
 				add_mark(f, 1, true)
-			recast = {"target": f, "t": float(rmb_def().get("recast", 1.5)) + (0.5 if rank("sec") >= 3 else 0.0)}})
-	if silent:
-		cc["silent"] = true
-	run(stg, cc)
-	if not silent:
-		Feel.cast_sound(m, "projectile", "damage", h.pos, h, "")
+				_stick(f, f.pos),
+		"on_shot_end": func(at: Vector3, _why: String, e: Ent):
+			if knife.is_empty() and e == null: _stick(null, ground(at))}))
+	Feel.cast_sound(m, "projectile", "damage", h.pos, h)
+	m.sfx("ab_throw", h.pos, -4.0, 1.6)
 
-## Cash In: the three Marks pay out in one big gold hit (a payoff: hitstop, shake, a coin burst),
-## your dash comes back, and the Knife recast to Shadow Step stays open.
-func _cash_in(f: Ent) -> void:
-	var bonus := float(res_def().get("cash_dmg", 26.0)) * power("sec")
-	clear_marks(f)
-	f.hurt(bonus, h, {"src": "abil", "ab": "utility", "tags": ["utility", "cash_in"], "payoff": true, "crit": true, "melee": true, "kb": h.dir_to(f) * 6.0, "stun": 0.25})
-	h.dashes = minf(h.max_dashes(), h.dashes + 1.0)
-	var gold := res_col()
-	m.fx.word(f.pos + Vector3(0, 2.6, 0), "CASH IN", gold, true)
-	m.fx.ring(f.pos, 2.2, gold, 0.35)
-	m.fx.ring(f.pos, 1.0, Color(1, 1, 1, 0.9), 0.2)
-	m.fx.burst(f.pos + Vector3(0, 1.2, 0), gold, 40, 7.5, 0.7, 10.0, 1.3)
-	m.fx.flash(f.pos + Vector3(0, 1.0, 0), gold.lightened(0.4), 1.2, 0.1)
-	m.sfx("pickup", f.pos, 0.0, 1.3)
-	m.sfx("crit", f.pos, -2.0, 0.8)
-	m.sfx("kill", f.pos, -8.0, 1.6)
-	Feel.shake(m, "t4", h, f.pos, f)
-	if h.is_local():
-		Oomph.punch_dir(m, h.dir_to(f), 0.35)
-		if m.hud: m.hud.flash(gold, 0.12)
-	CombatBus.ability_used.emit(h, "cash_in", "secondary")
+func _stick(f: Ent, at: Vector3) -> void:
+	var ed := e_def()
+	var n := own_node()
+	var blade := MeshInstance3D.new()
+	blade.mesh = Models.box(0.12, 0.12, 0.9)
+	blade.material_override = Models.glow_mat(Color(col_of(ed), 1.0))
+	blade.rotation = Vector3(-0.6, 0.0, 0.0)
+	blade.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	n.add_child(blade)
+	var lt := OmniLight3D.new()
+	lt.light_color = col_of(ed)
+	lt.omni_range = 2.6
+	lt.light_energy = 2.2
+	n.add_child(lt)
+	var hilt := MeshInstance3D.new()
+	hilt.mesh = Models.cyl(0.36, 0.36, 0.04, 20)
+	hilt.material_override = Models.glow_mat(Color(col_of(ed), 0.55))
+	hilt.position.y = -0.2
+	hilt.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	n.add_child(hilt)              # a bright ring round it: where you'll step to
+	knife = {"target": f, "pos": at, "node": n}
+	e_t = float(ed["time"])
+	if rank("kin") >= 3:
+		cd["e"] = float(cd["e"]) * (1.0 - float(ed["refund_foe"] if f else ed["refund_wall"]))
+	if f and rank("dash") >= 3:
+		h.dashes = h.max_dashes()           # Vault rank 3: a knife in a foe resets it
+		h._ab_feedback("dash", "ready")
+	n.global_position = at + Vector3(0, 2.15 if f else 0.3, 0)
+	m.fx.ring(at, 0.8, col_of(ed), 0.25)
+	m.sfx("ab_plant", at, -6.0, 1.8)
+	net_ring(at, 0.8, col_of(ed))
 
-func _fan(c: Dictionary) -> void:
-	var fd: Dictionary = rmb_def()["fan"]
-	var stg := stage("rmb", {"delivery": {"type": "projectile", "speed": 34.0, "range": float(fd["range"]), "size": 0.12},
-		"effects": [{"type": "damage", "amount": float(fd["dmg"])}, {"type": "slow", "duration": float(fd["slow_t"]), "strength": float(fd["slow"])}],
-		"modifiers": [{"type": "split", "count": int(fd["count"]), "angle": float(fd["angle"])}]})
-	run(stg, cx("rmb", "fan", aim(), {"on_foe": func(f: Ent, _c: Dictionary): add_mark(f, 1, true)}))
-	Feel.cast_sound(m, "projectile", "control", h.pos, h)
+func _tick_knife() -> void:
+	if knife.is_empty():
+		return
+	var n: Node3D = knife["node"]
+	var f = knife["target"]
+	if f != null and (not is_instance_valid(f) or (f as Ent).dead):
+		knife["target"] = null
+		f = null
+	if f != null:
+		knife["pos"] = (f as Ent).pos
+	if is_instance_valid(n):
+		n.global_position = (knife["pos"] as Vector3) + Vector3(0, 2.15 if f != null else 0.3, 0)
+		n.rotation.y = m.time * 3.0
+		n.visible = true
 
-## Shadow Step: appear behind the foe (Ambush). From the air it's a Drop Knife: a dive that lands
-## behind them with a small burst, out of the glide.
-func _shadow_step(tgt: Ent, dive: bool) -> void:
+func e_recast() -> bool:
+	if knife.is_empty():
+		return false
+	_step_to_knife()
+	return true
+
+## It fell out: you step to it anyway.
+func _e_end() -> void:
+	if not knife.is_empty():
+		_step_to_knife()
+
+func _step_to_knife() -> void:
+	var k := knife
+	knife = {}
+	e_t = 0.0
+	var n: Node3D = k.get("node")
+	if n and is_instance_valid(n):
+		self_nodes.erase(n)
+		n.queue_free()
+	if busy():
+		return
+	var f = k.get("target")
+	play("thf_arrive")
+	if f != null and is_instance_valid(f) and not (f as Ent).dead:
+		_shadow_step(f)
+	else:
+		var at: Vector3 = k["pos"]
+		if m.world.is_void(at.x, at.z) or m.world.is_block(at.x, at.z):
+			return
+		var from := h.pos
+		m.fx.ghost(h.position, h.face, Color("6a6480"), float(h.cdat["scale"]))
+		h.teleport(ground(at))
+		h.vel = Vector3.ZERO
+		h.gliding = false
+		m.fx.bolt(from + Vector3(0, 0.9, 0), h.pos + Vector3(0, 0.9, 0), Color(0.8, 0.95, 1.0, 0.6))
+		m.fx.burst(h.pos + Vector3(0, 0.9, 0), Color("c8f0ff"), 14, 3.0, 0.3)
+		m.sfx("cloak", h.pos, -3.0, 1.6)
+	last_e = "shadow_step"
+
+## Step to the knife in a foe: you appear right at them, on their far side.
+func _shadow_step(tgt: Ent) -> void:
 	var back := Vector2(sin(tgt.face), cos(tgt.face))      # behind = opposite their facing
 	var at := tgt.pos + Vector3(back.x, 0, back.y) * (tgt.r + h.r + 0.35)
 	if m.world.is_void(at.x, at.z) or m.world.is_block(at.x, at.z):
@@ -285,151 +521,132 @@ func _shadow_step(tgt: Ent, dive: bool) -> void:
 	h.gliding = false
 	var dv := Vector2(tgt.pos.x - at.x, tgt.pos.z - at.z)
 	if dv.length() > 0.05: h.face = atan2(-dv.x, -dv.y)
-	h.crit_t = maxf(h.crit_t, 1.5 if h.wid == "twin_blades" else 0.0)
-	if h.wid == "smg": h.wbloom = 0.0; h.set_meta("zero_spread_t", m.time + 1.5)
-	ambush_t = maxf(ambush_t, float(dash_def().get("ambush", 1.0)))
 	m.fx.burst(at + Vector3(0, 0.9, 0), Color("c8f0ff"), 14, 3.0, 0.3)
 	m.fx.bolt(from + Vector3(0, 0.9, 0), at + Vector3(0, 0.9, 0), Color(0.8, 0.95, 1.0, 0.6))
 	m.sfx("cloak", at, -3.0, 1.6)
 	m.sfx("swipe", at, -4.0, 1.9)
 	m.fx.ring(at, 1.0, Color("c8f0ff"), 0.22)
+	net_bolt(from + Vector3(0, 0.9, 0), at + Vector3(0, 0.9, 0), Color("c8f0ff"))
 	if h.is_local():
 		Oomph.punch_dir(m, Vector2(at.x - from.x, at.z - from.z), 0.25)
 		if m.cam: m.cam.punch(0.03)
-	if dive:
-		var dd: Dictionary = rmb_def()["drop"]
-		var stg := stage("rmb", {"delivery": {"type": "burst", "origin": "caster", "radius": float(dd["radius"])}, "effects": [{"type": "damage", "amount": float(dd["dmg"])}]}, {"hit": "add"})
-		run(stg, cx("rmb", "drop_knife", at))
-		last_variant = "air"
-		Feel.shake(m, "leap", h, at)
 
-func _in_my_smoke(p: Vector3) -> bool:
-	return not smoke.is_empty() and Vector2(p.x - smoke["pos"].x, p.z - smoke["pos"].z).length() < float(smoke["r"])
-
-## Inside our own smoke counts as "during E".
-func in_e() -> bool:
-	return _in_my_smoke(h.pos)
-
-# ------------------------------------------------------------------ E: Smoke Veil
-func cast_e() -> bool:
-	var ed := e_def()
-	var r := float(ed["radius"]) + (0.5 if rank("kin") >= 3 else 0.0)
-	var at := aim_at(float(ed["reach"]))
-	var n := Node3D.new()
-	m.add_child(n)
-	n.position = at
-	var mi := MeshInstance3D.new(); mi.mesh = Models.sphere(r, 18)
-	mi.material_override = Models.glow_mat(Color(0.42, 0.42, 0.55, 0.55))
-	mi.scale = Vector3(1, 0.55, 1)
-	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	n.add_child(mi)
-	if not smoke.is_empty() and m.smokes.has(smoke):
-		(smoke["node"] as Node3D).queue_free(); m.smokes.erase(smoke)
-	smoke = {"pos": at, "r": r, "t": float(ed["time"]), "node": n, "by": h}
-	m.smokes.append(smoke)
-	m.fx.burst(at + Vector3(0, 0.6, 0), Color("8a84a0"), 30, 4.0, 0.6, 0.0, 1.6)
-	Feel.cast_sound(m, "zone", "control", at, h)
-	e_t = float(ed["time"])
-	# foes inside are slowed (the kin's typing rides the zone: poison, pull, reveal...)
-	var stg := stage("e", {"delivery": {"type": "zone", "origin": "aim", "radius": r, "duration": float(ed["time"]), "every": 0.5},
-		"effects": [{"type": "slow", "duration": 0.6, "strength": float(ed["slow"])}]})
-	run(stg, cx("e", "smoke_veil", at))
-	return true
-
-# ------------------------------------------------------------------ R: Heist
-func _heist_targets() -> Array:
-	var reach := float(r_def()["reach"])
-	var tg: Array = rival_hunters_in(reach)
-	if tg.is_empty():
-		for f in foes_in(h.pos, reach):
-			if f is Mob and sees(f): tg.append(f)
-	return tg
+# ------------------------------------------------------------------ R: Jackpot (Fusillade)
+func _jackpot_targets() -> Array:
+	return foes_in(h.pos, float(r_def()["reach"])).filter(func(f): return sees(f) and not (f is Kin))
 
 func r_can_cast() -> bool:
-	return not _heist_targets().is_empty()
+	return not _jackpot_targets().is_empty()
 
-func r_no_target_text() -> String: return "No one within 9m to rob"
+func r_no_target_text() -> String: return "No one within 8.5m to rob"
+
+## The fuse: crouched, gathering the knives.
+func _fuse_start(bond: bool) -> void:
+	super._fuse_start(bond)
+	play("thf_volley_wind")
+
+## The fuse and the volleys don't plant you or stop your weapon: keep shooting through them.
+func can_shoot() -> bool:
+	return fire_ok()
+
+func pace() -> float:
+	return move_k() * (0.75 if fusing() else 1.0)
+
+## While the fuse runs, everyone sees the two rings: the knife reach and the rim.
+func _tick_jackpot_tele() -> void:
+	if fusing() and not st.has("jp_tele"):
+		var rd := r_def()
+		st["jp_tele"] = true
+		tele_circle(h.pos, float(rd["reach"]), res_col(), fuse_time())
+		tele_circle(h.pos, float(rd["inner"]), Color(res_col(), 0.6), fuse_time())
+		net_ring(h.pos, float(rd["reach"]), res_col())
+	elif not fusing():
+		st.erase("jp_tele")
 
 func cast_r() -> bool:
 	var rd := r_def()
-	var reach := float(rd["reach"])
-	var n := int(rd["targets"]) + (1 if rank("ult") >= 2 else 0)
-	var tg: Array = rival_hunters_in(reach)
-	if tg.is_empty():
-		# nobody to rob: the nearest monsters stand in (so the ult still works in the wilds)
-		for f in foes_in(h.pos, reach):
-			if f is Mob and sees(f): tg.append(f)
-	if tg.is_empty():
+	if _jackpot_targets().is_empty():
 		return false
-	tg.sort_custom(func(a, b): return h.flat_dist(a) < h.flat_dist(b))
-	tg = tg.slice(0, n)
-	var tell := float(rd["tell"])
-	heist = {"targets": tg, "i": -1, "t": tell, "lines": []}
-	for t in tg:
-		m.fx.bolt(h.pos + Vector3(0, 1.0, 0), t.pos + Vector3(0, 1.0, 0), res_col())
-		m.fx.word(t.pos + Vector3(0, 2.4, 0), "TARGETED", res_col(), true)
-		if t == m.player and m.hud: m.hud.toast_small("TARGETED  ·  break line of sight", res_col())
-	r_t = tell + float(rd["gap"]) * float(tg.size()) + 0.3
-	m.sfx("cloak", h.pos, -1.0, 0.8)
+	var dur := float(rd["time"])
+	fus = {"t": dur, "next": 0.0, "n": int(rd["shots"])}
+	play("thf_volley")
+	quick = int(rd["quick"])
+	quick_t = dur + 0.4
+	r_t = dur
+	m.fx.word(h.pos + Vector3(0, 2.9, 0), "JACKPOT", res_col(), true)
+	m.fx.ring(h.pos, float(rd["reach"]), res_col(), 0.4)
+	m.fx.ring(h.pos, float(rd["inner"]), Color(1, 1, 1, 0.7), 0.3)
+	m.sfx("pickup", h.pos, -4.0, 1.1)
 	return true
 
-func _tick_heist(dt: float) -> void:
-	heist["t"] = float(heist["t"]) - dt
+## One volley every 0.4s: a knife at every foe in reach and sight (they're picked again each time).
+func _tick_fus(dt: float) -> void:
+	fus["t"] = float(fus["t"]) - dt
+	fus["next"] = float(fus["next"]) - dt
+	if float(fus["next"]) <= 0.0 and int(fus["n"]) > 0:
+		var rd := r_def()
+		fus["n"] = int(fus["n"]) - 1
+		fus["next"] = float(rd["time"]) / float(rd["shots"])
+		var gold := res_col()
+		for f in _jackpot_targets():
+			var dist: float = h.flat_dist(f)
+			var rim := dist > float(rd["inner"])
+			var from := h.pos + Vector3(0, 1.0, 0)
+			m.fx.bolt(from, f.pos + Vector3(0, 1.0, 0), Color(gold, 0.9) if rim else Color(Color("c8f0ff"), 0.9))
+			net_bolt(from, f.pos + Vector3(0, 1.0, 0), gold)
+			m.later(dist / 45.0, func(): _jackpot_hit(f, rim))
+		m.sfx("ab_throw", h.pos, -5.0, 1.5)
+		for i in 8:
+			var a: float = TAU * i / 8.0 + m.time
+			m.fx.burst(h.pos + Vector3(cos(a) * 0.6, 1.0, sin(a) * 0.6), gold, 2, 8.0, 0.25, 0.0, 0.6, Vector3(cos(a), 0.05, sin(a)), 8.0)
+	if float(fus["t"]) <= 0.0:
+		fus = {}
+
+func _jackpot_hit(f: Ent, rim: bool) -> void:
+	if not is_instance_valid(f) or f.dead or not is_instance_valid(h):
+		return
 	var rd := r_def()
-	if int(heist["i"]) < 0:
-		# the mark-out: anyone who dashes out of reach or breaks sight drops out
-		if float(heist["t"]) > 0.0:
-			return
-		heist["targets"] = (heist["targets"] as Array).filter(func(t): return is_instance_valid(t) and not t.dead and h.flat_dist(t) <= float(rd["reach"]) + 0.5 and sees(t))
-		heist["i"] = 0
-		heist["t"] = 0.0
-	if float(heist["t"]) > 0.0:
-		return
-	var tg: Array = heist["targets"]
-	var i := int(heist["i"])
-	if i >= tg.size():
-		heist = {}
-		ambush_t = maxf(ambush_t, 1.0)
-		return
-	var t: Ent = tg[i]
-	heist["i"] = i + 1
-	heist["t"] = float(rd["gap"])
-	if not is_instance_valid(t) or t.dead:
-		return
-	h.cloak_t = maxf(h.cloak_t, float(rd["gap"]))      # untargetable for each hop
-	h.inv_t = maxf(h.inv_t, float(rd["gap"]))
-	_shadow_step(t, false)
 	var stg := stage("r", {"delivery": {"type": "burst", "origin": "here", "radius": 0.0}, "effects": [{"type": "damage", "amount": float(rd["dmg"]) * r_k()}]})
-	# the strike: a single-target hit on this foe, then 3 Marks
-	var c := cx("r", "heist", t.pos, {"at": t.pos})
-	KinExec.apply_foe(stg.effects, t, c, t.pos, stg)
-	KinExec.apply_friends(stg.effects, c, h.pos, 1.0)
-	add_mark(t, int(rd["marks"]), true)
-	Feel.hitstop(m, h, t, 14.0, {"melee": true, "payoff": i == tg.size() - 1})
-	m.sfx("swipe", t.pos, -2.0, 1.4)
-	h.cloak_t = 0.0
+	var c := cx("r", "jackpot", f.pos, {"at": f.pos})
+	KinExec.apply_foe(stg.effects, f, c, f.pos, stg)
+	jackpot_hits += 1
+	refresh_marks()            # every knife refreshes all your Marks
+	if is_instance_valid(f) and not f.dead and rim:
+		f.hurt(float(rd["rim_dmg"]) * r_k() * m.dmg_mult(h), h, {"src": "abil", "ab": "ult", "tags": ["ult", "jackpot_rim"], "crit": true})
+		if f.blight_t <= 0.0: m.fx.word(f.pos + Vector3(0, 2.2, 0), "BLIGHTED", Color("b0e070"), false)
+		KitStatus.apply(f, "blt", float(rd["blight"]))
+	m.sfx("slash_hit", f.pos, -6.0, 1.3)
+	m.fx.burst(f.pos + Vector3(0, 1.0, 0), res_col(), 6, 3.0, 0.25)
 
 # ------------------------------------------------------------------ bots
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null:
 		return
-	if not recast.is_empty() and randf() < 0.7:
-		h.inp["sec"] = true
-		return
-	if int(h.slot_lv["ult"]) > 0 and float(cd["r"]) <= 0.0 and rival_hunters_in(float(r_def()["reach"])).size() >= 1 and randf() < 0.5:
-		h.inp["ult"] = true
-		return
-	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and dist < 7.0 and (h.hp < h.max_hp * 0.6 or randf() < 0.25):
-		h.inp["aim"] = h.pos
+	# the dagger is stuck in them: step to them
+	if not knife.is_empty() and knife.get("target") != null and randf() < 0.6:
 		h.inp["sig"] = true
 		return
-	if int(h.slot_lv["sec"]) > 0 and rmb_ready() and los and dist < float(rmb_def()["knife"]["range"]):
+	if int(h.slot_lv["ult"]) > 0 and float(cd["r"]) <= 0.0 and los and dist < float(r_def()["reach"]) - 0.5 and (tgt is Hunter or randf() < 0.3) and randf() < 0.45:
+		h.inp["ult"] = true
+		return
+	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and knife.is_empty() and los and dist > 1.5 and dist < float(e_def()["range"]) - 1.0 and randf() < 0.35:
 		h.inp["aim"] = tgt.pos + Vector3(0, 0.9, 0)
-		h.inp["sec"] = true
-		if dist < 5.0 and randf() < 0.3: bot_hold["rmb"] = float(rmb_def()["hold"]) + 0.1
-	# Flicker behind them once the knife has landed
-	if not step2.is_empty() and float(step2["t"]) > 0.15 and randf() < 0.5:
+		h.inp["sig"] = true
+		return
+	if int(h.slot_lv["sec"]) > 0 and rmb_ready() and los and dist < float(rmb_def()["bola"]["range"]) - 1.0:
+		# best when someone stands behind them along the throw (the Bola flies on and catches both)
+		var pair := false
+		var dv := h.dir_to(tgt)
+		for o in m.foes_of(h.team):
+			if o != tgt and o.hittable() and tgt.flat_dist(o) < float(rmb_def()["bola"]["after"]) and dv.dot(tgt.dir_to(o)) > 0.8: pair = true
+		if pair or tgt is Hunter or randf() < 0.35:
+			h.inp["aim"] = tgt.pos + Vector3(0, 0.9, 0)
+			h.inp["sec"] = true
+	# Vault to Prime the next hit when it will land; flip across them
+	var reach := 2.8 if h.wid == "twin_blades" else 6.5
+	if int(h.slot_lv["dash"]) > 0 and primed_t <= 0.0 and (h.dashes >= 1.0 or quick > 0) and los and dist < reach + 1.5 and randf() < 0.35:
 		var side := h.dir_to(tgt).rotated(PI * 0.5 * (1.0 if randf() < 0.5 else -1.0))
+		if h.wid == "twin_blades" and dist > 2.0: side = (h.dir_to(tgt) + side * 0.5).normalized()
 		h.ai["dash_dir"] = side
 		h.inp["move"] = side
 		h.inp["dash"] = true
