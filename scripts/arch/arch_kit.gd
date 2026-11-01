@@ -660,6 +660,25 @@ func slot_info(slot: String) -> Dictionary:
 	return out
 
 func e_recastable() -> bool: return false
+var anim_id := ""              # the kit move playing on the hunter (HunterAnim.KMOVES), its start
+var anim_at := -9.0
+
+## Plays one of the kit's full-body moves on the hunter (anticipation, key pose, recovery).
+func play(move: String) -> void:
+	anim_id = move
+	anim_at = m.time
+
+## The Vault-style flip that matches a dash direction: forward, back, or a side flip.
+func flip_for(dir: Vector2, base: String) -> String:
+	var fwd := Vector2(-sin(h.face), -cos(h.face))
+	var right := Vector2(cos(h.face), -sin(h.face))
+	if dir.length() < 0.1: return base + "_f"
+	var f := dir.normalized().dot(fwd); var r := dir.normalized().dot(right)
+	if absf(r) > absf(f): return base + ("_r" if r > 0.0 else "_l")
+	return base + ("_f" if f >= 0.0 else "_b")
+
+## Dash charges the kit adds on top of the class's (the Juggernaut's Rampage at rank 3).
+func extra_dashes() -> float: return 0.0
 ## The payoff lives on the dash (the Thief's Primed shot into 3 Marks): the dash slot gets the gold dot.
 func dash_payoff_ready() -> bool: return false
 

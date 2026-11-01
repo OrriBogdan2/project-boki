@@ -1,42 +1,51 @@
 class_name JuggernautKit
 extends ArchKit
-## Juggernaut (heavy), kits2: a greatsword bruiser built on a Brall-style baseline (SUPERVIVE;
-## mechanics only, the names, numbers, art and sounds are ours). docs/ARCHETYPES.md "Kit loops".
+## Juggernaut (heavy), kits2: a port of SUPERVIVE's Brall, ability by ability (supervive.wiki.gg),
+## scaled to our health and TTK; only the names, art, sounds and on-screen text are ours.
 ##
-## - Passive, Rage: damage you deal heats it; it grants bonus damage, dash haste and ability haste.
-##   At 100 you're Enraged (the red shell, the hunter swells): the next Smash is a Rage Smash (the
-##   payoff: T4, pay_rage). A knock heals you and refills Rampage.
-## - LMB (Greatsword): quick slashes; hold to charge a Searing Wave that rolls through a line.
-## - RMB, Smash (adaptive): tap a heavy slam (more to the wounded), hold a charged lunge, in the air a
-##   downward slam that slows and stuns the centre.
-## - Dash, Rampage: a 2-charge dash attack; its tip hits hardest.
-## - E, Warchain: chain a foe (blighted, leashed) or a wall; press again to haul yourself to it.
-## - R, Doomfall: invulnerable as you rise, then a crushing strike that heals you; a knock resets it.
+## - Passive, Rage (Blazing Spirit): damage you deal fills it; full, you're Enraged (the red shell, the
+##   hunter swells): bonus damage, dash haste and ability haste. A knock heals you a share of the
+##   knocked hunter's health (a monster kill, of the monster's).
+## - LMB (Greatsword): quick slashes that hit twice as hard at the tip; hold for a Searing Wave (it
+##   fills Rage fast).
+## - RMB, Smash (Adaptive Strike): tap a wound-up Execution Slam (more to the wounded; its sweet spot
+##   resets Doomfall: the payoff, T4, pay_rage), hold a charged Lunge (a miss doubles the cooldown), in
+##   the air a Meteor Drop (slows; the centre stunned), during the Warchain's pull a Scorching Spin.
+## - Dash, Rampage (Flame Step): 2 charges of a dash attack the way you face, the tip hits double.
+## - E, Warchain (Feysteel Chain): a chain to a foe (blighted) or a wall; recast to pull yourself in.
+## - R, Doomfall (Volcanic Rebuke): invulnerable, then a crushing strike that heals; a knock resets it.
 
 var enraged_t := 0.0
-var lost := 0.0                # health lost toward the next Rage step
 var aura: Node3D = null        # the Enraged look: a red shell, a glow, the hunter grown bigger
 var heat: Node3D = null        # the heat glowing through the pauldrons as Rage builds
 var grow := 0.0                # 0..1 how far into the Enraged form the model is
 var lmb_t := -1.0              # how long the attack key has been held with the greatsword (-1: not)
 var lmb_was := false
 var lmb_buf := 0.0
-var combo_i := 0
-var slash_at := -9.0
 var bot_wave_t := 0.0
-var lunge := {}                # the running Lunge: {end, dir, dmg, stun, emp, hit}
-var chain := {}                # the Warchain: {target, pos, node, yank}
-var doom := {}                 # Doomfall's wind-up: {from, land, tele}
+var slash_n := 0
+var slash_at := -9.0
+var slam_w := {}               # the Execution Slam winding up: {t, warn}
+var lunge := {}                # the running Lunge: {end, dir, k, hit}
+var chain := {}                # the Warchain: {target, pos, node}
+var chain_flying := false
+var reel_t := 0.0              # the Warchain's pull is carrying you (a Smash now is a Scorching Spin)
+var doom := {}                 # Doomfall's wind-up: {from, land}
 var doom_hit := {}             # foe id -> when Doomfall hit them (a knock within 2s resets it)
-var rage_smashes := 0          # (tests, demo)
+var sweet_spots := 0           # (tests, demo)
 var waves := 0
 var tips := 0
 var dooms := 0
 var doom_resets := 0
 var reels := 0
+var spins := 0
+var chain_lunges := 0
+var haul_slams := 0
+var haul := {}                 # a Haul Slam armed for the end of the pull: {k}
+var knock_healed := 0.0        # (tests) health the knock heals gave back
 
 func full_ready() -> bool:
-	return enraged_t > 0.0
+	return false               # no resource-full Smash: Enraged buffs everything instead
 
 func res_frac() -> float:
 	return 1.0 if enraged_t > 0.0 else clampf(res / res_max(), 0.0, 1.0)
@@ -45,11 +54,15 @@ func res_text() -> String:
 	return "ENRAGED" if enraged_t > 0.0 else "%d" % int(res)
 
 func ready_label() -> String:
-	return "RAGE SMASH READY" if enraged_t > 0.0 else ""
+	if not slam_w.is_empty(): return "SMASH  ·  aim it"
+	return "ENRAGED" if enraged_t > 0.0 else ""
 
 ## How hot it is, 0..1 (Enraged counts as all the way).
 func heat_k() -> float:
 	return res_frac()
+
+func enraged_k() -> float:
+	return 1.0 if enraged_t > 0.0 else 0.0
 
 func gain_rage(v: float) -> void:
 	if enraged_t > 0.0:
@@ -57,12 +70,13 @@ func gain_rage(v: float) -> void:
 	add_res(v)
 	touch_res()
 	if res >= res_max():
-		enraged_t = float(res_def().get("enraged_t", 5.0))
+		enraged_t = float(res_def().get("enraged_t", 6.0))
 		res = res_max()
 		_enrage_fx()
 
-## Becoming Enraged: a roar, a red shockwave, and the hunter visibly swells into a red, steaming form
-## (everyone sees it: that's the "back off or bait it out" read).
+func extra_dashes() -> float:
+	return 1.0 if rank("dash") >= 3 else 0.0
+
 func _enrage_fx() -> void:
 	var rc := res_col()
 	m.sfx("knock", h.pos, 0.0, 0.6)          # the roar, audible within 25m
@@ -74,7 +88,6 @@ func _enrage_fx() -> void:
 	Feel.shake(m, "t3", h, h.pos)
 	if h.is_local():
 		if m.hud: m.hud.flash(rc, 0.15)
-		h._ab_feedback("sec", "ready")
 	net_ring(h.pos, 2.8, rc)
 	_make_aura()
 
@@ -153,58 +166,70 @@ func _tick(dt: float) -> void:
 		enraged_t -= dt
 		if enraged_t <= 0.0:
 			enraged_t = 0.0; res = 0.0
+			_drop_aura()
+		# Enraged: cooldowns and dash charges come back faster
+		for k in ["rmb", "e"]:
+			cd[k] = maxf(0.0, float(cd[k]) - dt * float(rd.get("ab_haste", 0.2)))
+		if h.dashes < h.max_dashes():
+			h.dashes = minf(h.max_dashes(), h.dashes + dt / h.dash_regen() * float(rd.get("dash_haste", 0.12)))
 	elif res_wait <= 0.0:
 		add_res(-float(rd.get("decay", 9.0)) * dt)
-	# Rage's haste: cooldowns and dash charges come back faster the hotter you are
-	var hk := heat_k()
-	if hk > 0.0:
-		for k in ["rmb", "e"]:
-			cd[k] = maxf(0.0, float(cd[k]) - dt * float(rd.get("ab_haste", 0.35)) * hk)
-		if h.dashes < h.max_dashes():
-			h.dashes = minf(h.max_dashes(), h.dashes + dt / h.dash_regen() * float(rd.get("dash_haste", 0.5)) * hk)
 	if lmb_buf > 0.0: lmb_buf -= dt
+	reel_t = maxf(0.0, reel_t - dt)
+	if not slam_w.is_empty(): _tick_slam(dt)
 	if not lunge.is_empty(): _tick_lunge()
 	if not chain.is_empty(): _tick_chain(dt)
 	if not doom.is_empty(): _tick_doom()
+	if st.has("bot_haul_at") and m.time >= float(st["bot_haul_at"]):
+		st.erase("bot_haul_at")
+		if rmb_down and not chain.is_empty(): e_recast()     # a bot pulling in with the Smash charged
 	net_pulse(dt, enraged_t > 0.0, 1.4)
 
 func on_deal(t: Ent, dmg: float, o: Dictionary) -> void:
 	if t == null or t.team == h.team:
 		return
 	var rd := res_def()
-	var k := 0.4 if String(o.get("src", "")) == "burn" else 1.0
-	gain_rage(maxf(float(rd.get("min_hit", 2.0)) * k, dmg * float(rd.get("per_dmg", 0.55)) * k))
-
-func on_take(_by: Ent, dmg: float, _o: Dictionary) -> void:
-	lost += dmg
-	var step := h.max_hp * 0.1
-	while lost >= step and step > 0.0:
-		lost -= step
-		gain_rage(float(res_def().get("per_10pct", 5.0)))
+	var src := String(o.get("src", ""))
+	var k := 0.4 if src == "burn" else 1.0
+	if String(o.get("ab", "")) == "primary" and src != "shot":
+		k = float(lmb_def().get("wave_rage", 3.0))       # the Searing Wave fills Rage fast
+	gain_rage(maxf(float(rd.get("min_hit", 2.0)) * k, dmg * float(rd.get("per_dmg", 0.7)) * k))
+	# killing a monster heals you a share of its health
+	if t is Mob and t.hp <= 0.0 and not t.has_meta("jug_fed"):
+		t.set_meta("jug_fed", true)
+		h.heal(t.max_hp * float(rd.get("heal_creep", 0.2)))
 
 func outgoing(_t: Ent, dmg: float, _o: Dictionary) -> float:
-	var rd := res_def()
-	return dmg * (1.0 + float(rd.get("dmg_k", 0.08)) * heat_k() + (float(rd.get("enraged_dmg", 0.15)) if enraged_t > 0.0 else 0.0))
+	return dmg * (1.0 + float(res_def().get("enraged_dmg", 0.15)) * enraged_k())
 
 func move_k() -> float:
+	if not slam_w.is_empty(): return 0.6
 	return 0.55 if lmb_t > float(lmb_def().get("tap", 0.22)) else 1.0
 
-## A knock (ours or one we helped): a heal, Rampage refilled, and Doomfall back if it hit them.
+## A knock (ours, or one we helped with): ours heals a share of the knocked hunter's health; either
+## way, if Doomfall hit them in the last 2s its cooldown resets.
 func on_knock(t: Hunter, mine: bool) -> void:
 	var rd := res_def()
-	h.heal(h.max_hp * float(rd.get("heal_knock", 0.15)) * (1.0 if mine else 0.5))
-	h.dashes = h.max_dashes()
-	m.fx.burst(h.pos + Vector3(0, 1.0, 0), Color("7fe08a"), 16, 2.5, 0.5, -2.0)
+	if mine and is_instance_valid(t):
+		var hp0 := h.hp
+		h.heal(t.max_hp * float(rd.get("heal_knock", 0.2)))
+		knock_healed += h.hp - hp0
+		m.fx.burst(h.pos + Vector3(0, 1.0, 0), Color("7fe08a"), 16, 2.5, 0.5, -2.0)
 	var key := t.get_instance_id() if is_instance_valid(t) else -1
 	if doom_hit.has(key) and m.time - float(doom_hit[key]) <= float(r_def().get("reset_t", 2.0)):
 		doom_hit.erase(key)
-		cd["r"] = 0.0
-		doom_resets += 1
-		m.fx.word(h.pos + Vector3(0, 2.8, 0), "DOOMFALL RESET", col_of(r_def()), true)
-		m.fx.ring(h.pos, 2.0, col_of(r_def()), 0.35)
-		m.sfx("ab_ready", h.pos, -2.0, 0.8)
-		if h.is_local(): h._ab_feedback("r", "ready")
-		net_ring(h.pos, 2.0, col_of(r_def()))
+		_reset_doom()
+
+func _reset_doom() -> void:
+	if float(cd["r"]) <= 0.0:
+		return
+	cd["r"] = 0.0
+	doom_resets += 1
+	m.fx.word(h.pos + Vector3(0, 2.8, 0), "DOOMFALL RESET", col_of(r_def()), true)
+	m.fx.ring(h.pos, 2.0, col_of(r_def()), 0.35)
+	m.sfx("ab_ready", h.pos, -2.0, 0.8)
+	if h.is_local(): h._ab_feedback("r", "ready")
+	net_ring(h.pos, 2.0, col_of(r_def()))
 
 # ------------------------------------------------------------------ LMB: Greatsword (slashes / Searing Wave)
 func lmb_def() -> Dictionary:
@@ -265,21 +290,22 @@ func _bot_target() -> Ent:
 		if f.hittable() and h.flat_dist(f) < bd: bd = h.flat_dist(f); best = f
 	return best
 
-## A quick slash, a 3-hit combo (the third hits harder), strongest on the tip.
+## A quick slash: a cone, twice as hard on the tip (the sweet spot at the far end of the swing).
 func _slash() -> void:
 	var ld := lmb_def()
 	lmb_t = -1.0
 	h.mel_hold = 0.0
-	if m.time - slash_at > float(ld["combo_reset"]): combo_i = 0
-	var cb: Array = ld["combo"]
-	var i := combo_i % cb.size()
-	combo_i += 1
+	h.fire_cd = float(ld["rate"])
+	# quick slashes, alternating right-to-left and back (no heavier third: each is the same cut)
+	if m.time - slash_at > 0.8: slash_n = 0
 	slash_at = m.time
-	var last := i == cb.size() - 1
-	h.fire_cd = float(ld["rate"]) * (1.4 if last else 1.0)
-	h._strike(float(cb[i]) * _wk() / m.dmg_mult(h), float(ld["reach"]), float(ld["arc"]), float(ld["kb"]) * (1.6 if last else 1.0), {"heavy": last})
-	if last:
-		m.fx.dust(h.pos + Vector3(h.aim_dir().x, 0, h.aim_dir().y) * 1.6, 6)
+	h.combo_i = slash_n % 2 + 1
+	slash_n += 1
+	var keep := h.wpn
+	h.wpn = h.wpn.duplicate()
+	h.wpn["tip_bonus"] = float(ld["tip"])
+	h._strike(float(ld["dmg"]) * _wk() / m.dmg_mult(h), float(ld["reach"]), float(ld["arc"]), float(ld["kb"]), {})
+	h.wpn = keep
 
 ## The Searing Wave: a held, charged wave of fire that rolls through everyone in a line (full: it
 ## burns and slows).
@@ -290,6 +316,7 @@ func _wave() -> void:
 	h.mel_hold = 0.0
 	h.fire_cd = float(ld["wave_rate"])
 	waves += 1
+	play("jug_wave")
 	var full := k >= 0.99
 	var rng := lerpf(float(ld["wave_range"][0]), float(ld["wave_range"][1]), k)
 	var size := lerpf(float(ld["wave_size"][0]), float(ld["wave_size"][1]), k)
@@ -350,8 +377,10 @@ func on_dash(use_ex: bool) -> bool:
 	var dd := dash_def()
 	var t := float(dd["time"])
 	var pk := power("dash") / maxf(0.01, m.dmg_mult(h))
-	travel(float(dd["dist"]), t, {"invuln": 0.06, "shove": true, "shove_kb": float(dd["hit_kb"]), "shove_dmg": float(dd["hit_dmg"]) * pk, "trail": "dust"})
+	travel(float(dd["dist"]), t, {"invuln": 0.06, "shove": true, "shove_kb": float(dd["hit_kb"]), "shove_dmg": float(dd["hit_dmg"]) * pk, "trail": "dust", "dir": h.aim_dir()})
 	st["last_dash"] = "rampage"
+	play("jug_dash")
+	h.glide_cd = maxf(h.glide_cd, t + 0.35)    # the dash's wind-down: no glider straight out of it
 	m.later(t * 0.85, func(): if is_instance_valid(h) and not h.downed: _tip())
 	m.sfx("ab_whirr", h.pos, -4.0, 0.7)
 	return true
@@ -364,7 +393,7 @@ func _tip() -> void:
 	var hit := false
 	for f in foes_in(at, float(dd["tip_r"])):
 		hit = true
-		f.hurt(float(dd["tip_dmg"]) * power("dash"), h, {"src": "abil", "ab": "dodge", "tags": ["dodge", "tip"], "kb": dv * float(dd["tip_kb"]), "wallstun": float(dd["tip_stun"]) + (0.4 if rank("dash") >= 3 else 0.0), "melee": true, "crit": true})
+		f.hurt(float(dd["tip_dmg"]) * power("dash"), h, {"src": "abil", "ab": "dodge", "tags": ["dodge", "tip"], "kb": dv * float(dd["tip_kb"]), "wallstun": float(dd["tip_stun"]), "melee": true, "crit": true})
 		m.fx.word(f.pos + Vector3(0, 2.2, 0), "TIP", res_col(), false)
 	m.fx.slash(h.pos + Vector3(0, 0.9, 0), atan2(dv.y, dv.x), deg_to_rad(100.0), 2.2, col_of(dd), true)
 	if hit:
@@ -374,154 +403,275 @@ func _tip() -> void:
 		if h.is_local(): Oomph.punch_dir(m, dv, 0.2)
 		net_ring(at, 1.4, col_of(dd))
 
-# ------------------------------------------------------------------ RMB: Smash (tap / hold Lunge / air)
+# ------------------------------------------------------------------ RMB: Smash (Adaptive Strike)
 func rmb_charge_full() -> float:
 	return float(rmb_def().get("full_t", 0.9))
 
 func rmb_auto_t() -> float:
 	return rmb_charge_full() + 0.4
 
+## Holding past the tap: the Lunge's crouched wind-up pose (held while you charge).
+func rmb_hold_tick(t: float) -> void:
+	if t > float(rmb_def()["hold"]) and anim_id != "jug_lunge_wind" and anim_id != "jug_haul_wind" and not rmb_ctx.get("air", false):
+		play("jug_haul_wind" if rmb_ctx.get("e", false) else "jug_lunge_wind")
+		if not chain.is_empty() or rmb_ctx.get("e", false):
+			# charging on the chain: the links glow hot (everyone sees a chain swing is coming)
+			m.fx.ring(h.pos, 1.2, Color("ffcf6a"), 0.25)
+			net_ring(h.pos, 1.2, Color("ffcf6a"))
+
 func lunge_k(t: float) -> float:
 	var sd := rmb_def()
 	return clampf((t - float(sd["hold"])) / maxf(0.05, float(sd["full_t"]) - float(sd["hold"])), 0.0, 1.0)
 
+## Every Smash's damage: its rank, and +20% at rank 3.
+func smash_k() -> float:
+	return 1.2 if rank("sec") >= 3 else 1.0
+
 func fire_rmb(c: Dictionary) -> void:
 	last_variant = String(c["variant"])
+	if not slam_w.is_empty() or not lunge.is_empty():
+		return
 	if not spend_rmb(): return
-	var emp: bool = c.get("full", false) and enraged_t > 0.0
-	if emp:
-		enraged_t = 0.0; res = 0.0      # the Rage Smash spends the rage
-		_spend_fx()
-		rage_smashes += 1
-	if c.get("air", false):
-		_meteor(emp)
+	if c.get("e", false):
+		# pressed while the Warchain pulls you: a tap spins (Scorching Spin), a held one slams on arrival
+		if c.get("hold", false): _haul_slam(lunge_k(float(c.get("t", 0.0))))
+		else: _spin()
+	elif not chain.is_empty() and c.get("hold", false) and not c.get("air", false):
+		_chain_lunge(lunge_k(float(c.get("t", 0.0))))      # charged while tethered: along the chain
+	elif c.get("air", false):
+		_meteor()
 	elif c.get("hold", false):
-		_lunge(lunge_k(float(c.get("t", 0.0))), emp)
+		_lunge(lunge_k(float(c.get("t", 0.0))))
 	else:
-		_slam(emp)
+		# the Execution Slam winds up first (you keep aiming); everyone sees the warning over you
+		slam_w = {"t": float(rmb_def()["windup"])}
+		play("jug_slam")                # keyed to the wind-up: the crash lands at 0.5s
+		m.fx.word(h.pos + Vector3(0, 2.9, 0), "!", Color("ff5a3a"), true)
+		m.fx.ring(h.pos, 1.3, Color("ff5a3a"), float(rmb_def()["windup"]))
+		m.sfx("charge", h.pos, -4.0, 0.8)
+		net_ring(h.pos, 1.3, Color("ff5a3a"))
 
-## A Rage Smash landing: the payoff (word, T4 shake, pay_rage, camera punch).
-func _rage_payoff(at: Vector3, victim: Ent) -> void:
-	payoff_fx(at, "RAGE SMASH", res_col(), "pay_rage", h.aim_dir(), victim)
+func _tick_slam(dt: float) -> void:
+	slam_w["t"] = float(slam_w["t"]) - dt
+	if h.stun_t > 0.0 or h.downed or Hex.active(h):
+		slam_w = {}          # interrupted
+		return
+	if randf() < 0.5: m.fx.burst(h.pos + Vector3(0, 2.3, 0), Color("ff5a3a"), 1, 1.0, 0.25, 0.0, 0.8)
+	if float(slam_w["t"]) <= 0.0:
+		slam_w = {}
+		_slam()
 
-## The tap: a heavy overhead slam; the wounded (under 40%) take more (BREAK).
-func _slam(emp: bool) -> void:
+## The Execution Slam: a heavy cone; the wounded (under 35%) take +50%; a foe in the sweet spot (the far
+## tip, dead ahead) resets Doomfall (the payoff).
+func _slam() -> void:
 	var sd := rmb_def()
 	var sl: Dictionary = sd["slam"]
-	var rg: Dictionary = sd["rage"]
-	var dk := 1.0 + (float(rg["dmg_k"]) if emp else 0.0)
-	var effs: Array = [{"type": "damage", "amount": float(sl["dmg"]) * dk}, {"type": "push", "strength": minf(16.0, float(sl["push"]) * (float(rg["push_k"]) if emp else 1.0)), "from": "caster"}]
-	if emp: effs.append({"type": "stun", "duration": float(rg["stun"])})
+	var dd := h.aim_dir()
+	var effs: Array = [{"type": "damage", "amount": float(sl["dmg"]) * smash_k()}, {"type": "push", "strength": float(sl["push"]), "from": "caster"}]
 	var stg := stage("rmb", {"delivery": {"type": "cone", "radius": float(sl["radius"]), "angle": float(sl["angle"])}, "effects": effs})
+	var from := h.pos
 	var paid := {}
-	run(stg, cx("rmb", "rage_smash" if emp else "heavy_slam", aim(), {"no_floor": true, "on_foe": func(f: Ent, _c: Dictionary):
+	run(stg, cx("rmb", "execution_slam", aim(), {"no_floor": true, "on_foe": func(f: Ent, _c: Dictionary):
 		if not is_instance_valid(f): return
 		if not f.dead and f.max_hp > 0.0 and f.hp / f.max_hp < float(sl["low"]):
-			f.hurt(float(sl["dmg"]) * dk * float(sl["low_k"]) * power("sec"), h, {"src": "abil", "ab": "utility", "tags": ["utility", "break"], "crit": true, "payoff": emp, "melee": true})
-			m.fx.word(f.pos + Vector3(0, 2.4, 0), "BREAK", Color("ffd0a0"), true)
-		Feel.hitstop(m, h, f, 30.0, {"melee": true, "payoff": emp, "heavy": true})
-		if emp and not paid.has("x"):
+			f.hurt(float(sl["dmg"]) * smash_k() * float(sl["low_k"]) * power("sec"), h, {"src": "abil", "ab": "utility", "tags": ["utility", "execute"], "crit": true, "melee": true})
+			m.fx.word(f.pos + Vector3(0, 2.4, 0), "EXECUTE", Color("ffd0a0"), true)
+		var to := Vector2(f.pos.x - from.x, f.pos.z - from.z)
+		var sw: Array = sl["sweet"]
+		var sweet := to.length() >= float(sw[0]) and to.length() <= float(sw[1]) + f.r and absf(rad_to_deg(dd.angle_to(to.normalized()))) <= float(sl["sweet_deg"])
+		Feel.hitstop(m, h, f, 30.0, {"melee": true, "payoff": sweet, "heavy": true})
+		if sweet and not paid.has("x"):
 			paid["x"] = true
-			_rage_payoff(f.pos, f)}))
-	var dd := h.aim_dir()
-	m.fx.cone(h.pos + Vector3(0, 0.1, 0), dd, float(sl["radius"]), res_col() if emp else col_of(sd))
+			sweet_spots += 1
+			payoff_fx(f.pos, "SWEET SPOT", res_col(), "pay_rage", dd, f)
+			_reset_doom()}))
+	m.fx.cone(h.pos + Vector3(0, 0.1, 0), dd, float(sl["radius"]), col_of(sd))
 	m.fx.slash(h.pos + Vector3(0, 0.9, 0), atan2(dd.y, dd.x), deg_to_rad(110.0), float(sl["radius"]), col_of(sd), true)
-	m.fx.dust(h.pos + Vector3(dd.x, 0, dd.y) * 1.8, 10)
+	m.fx.dust(h.pos + Vector3(dd.x, 0, dd.y) * 2.4, 12)
+	m.fx.ring(h.pos + Vector3(dd.x, 0, dd.y) * 2.6, 0.7, res_col(), 0.2)      # where the sweet spot was
 	Feel.shake(m, "t2", h, h.pos)
-	if h.is_local(): Oomph.punch_dir(m, dd, 0.22 * (1.5 if emp else 1.0))
-	m.sfx("cleave", h.pos, -1.0, 0.8)
-	m.sfx("ab_slam", h.pos, -4.0, 0.9)
-	if emp and paid.is_empty():
-		m.fx.word(h.pos + Vector3(0, 2.6, 0), "RAGE SMASH", res_col(), true)
-		Feel.shake(m, "t4", h, h.pos)
+	if h.is_local(): Oomph.punch_dir(m, dd, 0.24)
+	m.sfx("cleave", h.pos, -1.0, 0.75)
+	m.sfx("ab_slam", h.pos, -3.0, 0.85)
 
-## The hold: a charged lunge into the first foe in its path.
-func _lunge(k: float, emp: bool) -> void:
+## The hold: a charged dash attack into the first foe in its path; a miss doubles the cooldown.
+func _lunge(k: float) -> void:
 	var ld: Dictionary = rmb_def()["lunge"]
-	var dist := lerpf(float(ld["dist"][0]), float(ld["dist"][1]), k) + (1.0 if rank("sec") >= 3 and k >= 0.99 else 0.0)
+	var dist := lerpf(float(ld["dist"][0]), float(ld["dist"][1]), k)
 	var t := dist / float(ld["speed"])
 	var dv := h.aim_dir()
 	travel(dist, t, {"invuln": 0.0, "trail": "dust", "dir": dv})
 	h.fortify_t = maxf(h.fortify_t, t + 0.05)
-	lunge = {"end": m.time + t + 0.02, "dir": dv, "k": k, "emp": emp, "hit": false}
+	lunge = {"end": m.time + t + 0.02, "dir": dv, "k": k}
+	play("jug_lunge")
 	m.fx.word(h.pos + Vector3(0, 2.4, 0), "LUNGE", col_of(rmb_def()), false)
 	m.sfx("charge", h.pos, -3.0, 0.7 + 0.4 * k)
 
 func _tick_lunge() -> void:
 	var ld: Dictionary = rmb_def()["lunge"]
-	var rg: Dictionary = rmb_def()["rage"]
 	var dv: Vector2 = lunge["dir"]
 	for f in m.foes_of(h.team):
 		if f.hittable() and h.flat_dist(f) < h.r + f.r + 0.6 and absf(f.pos.y - h.pos.y) < 1.6:
 			var k := float(lunge["k"])
-			var emp: bool = lunge["emp"]
+			var was_chain: bool = lunge.get("chain", false)
 			lunge = {}
 			h.roll_t = 0.0
 			h.vel = Vector3.ZERO
-			var dmg := lerpf(float(ld["dmg"][0]), float(ld["dmg"][1]), k) * (1.0 + (float(rg["dmg_k"]) if emp else 0.0))
-			var stun := lerpf(float(ld["stun"][0]), float(ld["stun"][1]), k) + (float(rg["stun"]) * 0.5 if emp else 0.0)
-			var stg := stage("rmb", {"delivery": {"type": "burst", "origin": "here", "radius": 0.0}, "effects": [{"type": "damage", "amount": dmg}]}, {"hit": "add", "mod": "add"})
+			if was_chain and f.hittable():
+				f.hurt(1.0, h, {"src": "abil", "ab": "utility", "tags": ["utility", "chain_lunge"], "stun": 0.35, "dr": true})
+				m.fx.word(f.pos + Vector3(0, 2.4, 0), "RUN THROUGH", Color("ffcf6a"), true)
+				m.sfx("ab_tether", f.pos, -2.0, 1.3)
+			var chained: bool = lunge.get("chain", false)
+			var dmg := lerpf(float(ld["dmg"][0]), float(ld["dmg"][1]), k) * smash_k() * (1.25 if chained else 1.0)
+			var stg := stage("rmb", {"delivery": {"type": "burst", "origin": "here", "radius": 0.0}, "effects": [{"type": "damage", "amount": dmg}, {"type": "push", "strength": float(ld["push"]), "from": "caster"}]}, {"hit": "add", "mod": "add"})
 			var c := cx("rmb", "lunge", f.pos, {"at": f.pos})
 			KinExec.apply_foe(stg.effects, f, c, f.pos, stg)
-			if is_instance_valid(f) and not f.dead:
-				f.hurt(1.0 * power("sec"), h, {"src": "abil", "ab": "utility", "tags": ["utility", "lunge"], "stun": stun, "dr": true, "kb": dv * float(ld["push"]) * (1.5 if emp else 1.0), "melee": true, "payoff": emp})
 			m.fx.slash(h.pos + Vector3(0, 0.9, 0), atan2(dv.y, dv.x), deg_to_rad(60.0), 2.4, col_of(rmb_def()), true)
 			m.sfx("cleave", f.pos, 0.0, 0.7)
 			Feel.shake(m, "t3", h, f.pos, f)
 			if h.is_local(): Oomph.punch_dir(m, dv, 0.25)
-			if emp: _rage_payoff(f.pos, f)
 			return
 	if m.time >= float(lunge["end"]) or h.roll_t <= 0.0:
 		lunge = {}
+		h.glide_cd = maxf(h.glide_cd, 0.35)      # the dash's wind-down: no glider straight out of it
+		cd["rmb"] = float(cd["rmb"]) * float(ld["miss_k"])        # struck nothing: the cooldown doubles
+		m.fx.word(h.pos + Vector3(0, 2.2, 0), "MISS", Color("c0b0a0"), false)
 
-## In the air: a downward slam; everyone in it is slowed, the centre stunned.
-func _meteor(emp: bool) -> void:
+## Charged while tethered and let go: the Lunge runs along the chain to its end (the foe it holds, or
+## the wall), harder and with a short stun on the foe; the chain is spent.
+func _chain_lunge(k: float) -> void:
+	var ld: Dictionary = rmb_def()["lunge"]
+	var f = chain.get("target")
+	var dest: Vector3 = chain["pos"]
+	var dv := Vector2(dest.x - h.pos.x, dest.z - h.pos.z)
+	var gap := ((f as Ent).r + h.r) if f != null and is_instance_valid(f) else 0.7
+	var dist := clampf(dv.length() - gap + 0.6, 2.0, float(e_def()["range"]) + 1.0)
+	var t := dist / (float(ld["speed"]) * 1.25)
+	chain_lunges += 1
+	m.fx.bolt(h.pos + Vector3(0, 1.0, 0), dest + Vector3(0, 1.0, 0), Color("ffcf6a"))
+	m.fx.bolt(h.pos + Vector3(0, 0.7, 0), dest + Vector3(0, 0.7, 0), Color(1, 0.95, 0.8, 0.9))
+	net_bolt(h.pos + Vector3(0, 1.0, 0), dest + Vector3(0, 1.0, 0), Color("ffcf6a"))
+	_drop_chain()
+	travel(dist, t, {"invuln": 0.0, "trail": "dust", "dir": dv.normalized()})
+	h.fortify_t = maxf(h.fortify_t, t + 0.05)
+	lunge = {"end": m.time + t + 0.02, "dir": dv.normalized(), "k": k, "chain": true}
+	play("jug_chainlunge")
+	m.fx.word(h.pos + Vector3(0, 2.4, 0), "CHAIN LUNGE", Color("ffcf6a"), true)
+	m.sfx("ab_tether", h.pos, -1.0, 0.9)
+	m.sfx("charge", h.pos, -2.0, 1.1)
+
+## A Haul Slam: armed for the end of the pull (or now, if the pull is over): you arrive in a crash.
+func _haul_slam(k: float) -> void:
+	if reel_t > 0.0:
+		haul = {"k": k}
+		play("jug_haul_wind")
+	else:
+		_haul_land(k)
+
+func _haul_land(k: float) -> void:
+	var hd: Dictionary = rmb_def()["haul"]
+	haul = {}
+	haul_slams += 1
+	var at := h.pos
+	var stg := stage("rmb", {"delivery": {"type": "burst", "origin": "caster", "radius": float(hd["radius"])},
+		"effects": [{"type": "damage", "amount": lerpf(float(hd["dmg"][0]), float(hd["dmg"][1]), k) * smash_k()}, {"type": "push", "strength": float(hd["push"])}]})
+	run(stg, cx("rmb", "haul_slam", at, {"no_floor": true, "on_foe": func(f: Ent, _c: Dictionary):
+		if is_instance_valid(f) and not f.dead:
+			f.hurt(1.0, h, {"src": "abil", "ab": "utility", "tags": ["utility", "haul_slam"], "stun": lerpf(float(hd["stun"][0]), float(hd["stun"][1]), k), "dr": true})}))
+	play("jug_haulslam")
+	m.fx.word(at + Vector3(0, 2.6, 0), "HAUL SLAM", Color("ffcf6a"), true)
+	m.fx.ring(at, float(hd["radius"]), Color("ffcf6a"), 0.35)
+	m.fx.ring(at, 1.0, Color(1, 1, 1, 0.9), 0.2)
+	m.fx.dust(at, 18)
+	m.fx.burst(at + Vector3(0, 0.4, 0), Color("ffcf6a"), 24, 6.0, 0.5, 6.0, 1.2)
+	m.sfx("ab_slam", at, 0.0, 0.65)
+	m.sfx("boom", at, -4.0, 0.9)
+	m.sfx("ab_tether", at, -6.0, 0.6)
+	Feel.shake(m, "t3", h, at)
+	if h.is_local(): Oomph.punch_dir(m, h.aim_dir(), 0.25)
+	net_ring(at, float(hd["radius"]), Color("ffcf6a"))
+
+## In the air: a downward slam; everyone in it is slowed, the centre takes +50% and is stunned.
+func _meteor() -> void:
 	var dd: Dictionary = rmb_def()["drop"]
-	var rg: Dictionary = rmb_def()["rage"]
 	h.gliding = false
 	h.vel = Vector3(h.vel.x * 0.2, -22.0, h.vel.z * 0.2)
+	play("jug_meteor")
 	m.later(0.12, func():
 		if not is_instance_valid(h): return
 		var at := h.pos
-		var dk := 1.0 + (float(rg["dmg_k"]) if emp else 0.0)
 		var stg := stage("rmb", {"delivery": {"type": "burst", "origin": "caster", "radius": float(dd["radius"])},
-			"effects": [{"type": "damage", "amount": float(dd["dmg"]) * dk}, {"type": "slow", "duration": float(dd["slow_t"]), "strength": float(dd["slow"])}]})
-		var paid := {}
+			"effects": [{"type": "damage", "amount": float(dd["dmg"]) * smash_k()}, {"type": "slow", "duration": float(dd["slow_t"]), "strength": float(dd["slow"])}]})
 		run(stg, cx("rmb", "meteor_drop", at, {"no_floor": true, "on_foe": func(f: Ent, _c: Dictionary):
 			if not is_instance_valid(f) or f.dead: return
 			if Vector2(f.pos.x - at.x, f.pos.z - at.z).length() < float(dd["core"]) + f.r:
-				f.hurt(1.0 * power("sec"), h, {"src": "abil", "ab": "utility", "tags": ["utility", "meteor_core"], "stun": float(dd["stun"]), "dr": true, "payoff": emp})
-				m.fx.word(f.pos + Vector3(0, 2.3, 0), "CRUSHED", res_col(), false)
-			if emp and not paid.has("x"):
-				paid["x"] = true
-				_rage_payoff(f.pos, f)}))
+				f.hurt(float(dd["dmg"]) * smash_k() * float(dd["core_k"]) * power("sec"), h, {"src": "abil", "ab": "utility", "tags": ["utility", "meteor_core"], "stun": float(dd["stun"]), "dr": true})
+				m.fx.word(f.pos + Vector3(0, 2.3, 0), "CRUSHED", res_col(), false)}))
 		m.fx.ring(at, float(dd["radius"]), col_of(rmb_def()), 0.3)
 		m.fx.ring(at, float(dd["core"]), Color(1, 1, 1, 0.9), 0.2)
 		m.fx.dust(at, 14)
 		m.sfx("ab_slam", at, -1.0, 0.75)
 		Feel.shake(m, "leap", h, at))
 
-# ------------------------------------------------------------------ E: Warchain
+## During the Warchain's pull: a fiery spin around you that blights everyone it hits.
+func _spin() -> void:
+	var sp: Dictionary = rmb_def()["spin"]
+	spins += 1
+	play("jug_spin")
+	var stg := stage("rmb", {"delivery": {"type": "burst", "origin": "caster", "radius": float(sp["radius"])}, "effects": [{"type": "damage", "amount": float(sp["dmg"]) * smash_k()}]})
+	run(stg, cx("rmb", "scorching_spin", h.pos, {"no_floor": true, "on_foe": func(f: Ent, _c: Dictionary):
+		if is_instance_valid(f) and not f.dead: KitStatus.apply(f, "blt", float(sp["blight"]))}))
+	for i in 3:
+		m.later(0.06 * i, func(): if is_instance_valid(h): m.fx.slash(h.pos + Vector3(0, 0.9, 0), m.time * 11.0, TAU, float(sp["radius"]), Color("ff7a3a"), i == 2))
+	m.fx.ring(h.pos, float(sp["radius"]), Color("ff7a3a"), 0.3)
+	m.fx.word(h.pos + Vector3(0, 2.4, 0), "SCORCHING SPIN", Color("ff7a3a"), false)
+	m.sfx("ab_whirr", h.pos, -2.0, 0.9)
+	m.sfx("ab_blast", h.pos, -6.0, 1.0)
+	net_ring(h.pos, float(sp["radius"]), Color("ff7a3a"))
+
+# ------------------------------------------------------------------ E: Warchain (Feysteel Chain)
+## "During E" for the Smash is the pull itself (the Scorching Spin).
 func in_e() -> bool:
-	return not chain.is_empty()
+	return reel_t > 0.0
 
 func e_recastable() -> bool:
 	return not chain.is_empty()
 
+## The chain's own press: thrown, then recast to pull; its cooldown starts when you pull or it breaks.
+func use_e() -> void:
+	if busy():
+		h._ab_feedback("k1", "deny")
+		return
+	if not chain.is_empty():
+		e_recast()
+		return
+	if chain_flying or float(cd["e"]) > 0.0 or h.root_t > 0.0 or KitStatus.grounded(h):
+		h._ab_feedback("k1", "deny")
+		return
+	if cast_e():
+		h.used["k1"] = int(h.used.get("k1", 0)) + 1
+		h._ab_feedback("k1", "cast")
+		CombatBus.ability_used.emit(h, id + "_e", "kin")
+		last_e = String(e_def().get("name", ""))
+
+func _start_e_cd() -> void:
+	cd["e"] = float(e_def().get("cooldown", 13.0)) * cd_k("kin")
+
 func cast_e() -> bool:
 	var ed := e_def()
-	var reach := float(ed["range"]) + (2.0 if rank("kin") >= 3 else 0.0)
-	var stg := stage("e", {"delivery": {"type": "projectile", "speed": float(ed["speed"]), "range": reach, "size": 0.22, "rope": true},
-		"effects": [{"type": "damage", "amount": float(ed["dmg"])}, {"type": "slow", "duration": float(ed["time"]), "strength": float(ed["slow"])}]})
+	chain_flying = true
+	play("jug_chain")
+	var stg := stage("e", {"delivery": {"type": "projectile", "speed": float(ed["speed"]), "range": float(ed["range"]), "size": 0.22, "rope": true},
+		"effects": [{"type": "damage", "amount": float(ed["dmg"])}]})
 	run(stg, cx("e", "warchain", aim(), {
 		"on_foe": func(f: Ent, _c: Dictionary):
 			if chain.is_empty() and is_instance_valid(f) and not f.dead: _hook(f, f.pos),
 		"on_shot_end": func(at: Vector3, why: String, e: Ent):
+			chain_flying = false
 			if not chain.is_empty() or e != null: return
 			if why == "wall": _hook(null, at)
 			else:
-				# hooked nothing: most of the cooldown back
-				cd["e"] = float(cd["e"]) * (1.0 - float(e_def()["miss_refund"]))
+				_start_e_cd()      # hooked nothing: the chain breaks, its cooldown starts
 				m.fx.word(at + Vector3(0, 1.2, 0), "MISS", Color("c0b0a0"), false)}))
 	m.sfx("ab_throw", h.pos, -3.0, 0.8)
 	m.sfx("ab_tether", h.pos, -6.0, 0.7)
@@ -529,37 +679,32 @@ func cast_e() -> bool:
 
 func _hook(f: Ent, at: Vector3) -> void:
 	var ed := e_def()
+	chain_flying = false
 	var n := own_node()
 	var link := MeshInstance3D.new()
 	link.mesh = Models.box(0.09, 0.09, 1.0)
 	link.material_override = Models.glow_mat(Color(col_of(ed), 0.95))
 	link.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	n.add_child(link)
-	chain = {"target": f, "pos": at, "node": n, "yank": 0.0}
+	chain = {"target": f, "pos": at, "node": n, "refund": 0.0}
 	e_t = float(ed["time"])
 	if f:
 		KitStatus.apply(f, "blt", float(ed["time"]))
 		m.fx.word(f.pos + Vector3(0, 2.3, 0), "CHAINED", col_of(ed), true)
+		if rank("kin") >= 3: chain["refund"] = float(ed["refund_foe"])
 	else:
 		m.fx.word(at + Vector3(0, 1.4, 0), "ANCHORED", col_of(ed), false)
 	m.fx.ring(at, 0.9, col_of(ed), 0.25)
 	m.sfx("ab_tether", at, -2.0, 1.0)
 	net_bolt(h.pos + Vector3(0, 1.0, 0), at + Vector3(0, 1.0, 0), col_of(ed))
 
-func _tick_chain(dt: float) -> void:
-	var ed := e_def()
+func _tick_chain(_dt: float) -> void:
 	var f = chain["target"]
-	if f != null and (not is_instance_valid(f) or (f as Ent).dead):
-		_drop_chain()
+	if (f != null and (not is_instance_valid(f) or (f as Ent).dead)) or h.stun_t > 0.0:
+		_break_chain()          # its foe is gone, or a stun broke it
 		return
 	if f != null:
 		chain["pos"] = (f as Ent).pos
-		# the leash: past 10m they're yanked back toward you
-		chain["yank"] = float(chain["yank"]) - dt
-		if h.flat_dist(f) > float(ed["leash"]) and float(chain["yank"]) <= 0.0:
-			chain["yank"] = 0.35
-			(f as Ent).hurt(0.5, h, {"src": "abil", "ab": "k1", "tags": ["k1", "leash"], "kb": -h.dir_to(f) * 9.0})
-			m.fx.word((f as Ent).pos + Vector3(0, 2.1, 0), "YANK", col_of(ed), false)
 	var n: Node3D = chain["node"]
 	if is_instance_valid(n):
 		var a := h.pos + Vector3(0, 1.0, 0)
@@ -575,14 +720,23 @@ func _drop_chain() -> void:
 	if n and is_instance_valid(n):
 		self_nodes.erase(n)
 		n.queue_free()
+	var refund := float(chain.get("refund", 0.0))
 	chain = {}
 	e_t = 0.0
+	_start_e_cd()
+	if refund > 0.0: cd["e"] = float(cd["e"]) * (1.0 - refund)
+
+func _break_chain() -> void:
+	if chain.is_empty():
+		return
+	m.fx.word(h.pos + Vector3(0, 2.2, 0), "CHAIN BROKE", Color("c0b0a0"), false)
+	_drop_chain()
 
 func _e_end() -> void:
 	if not chain.is_empty():
 		_drop_chain()
 
-## Press E again: haul yourself along the chain to its end (into a hooked foe: a hit and a stun).
+## Press E again: pull yourself along the chain to its end (a Smash on the way is a Scorching Spin).
 func e_recast() -> bool:
 	if chain.is_empty():
 		return false
@@ -590,7 +744,7 @@ func e_recast() -> bool:
 	var f = chain["target"]
 	var dest: Vector3 = chain["pos"]
 	_drop_chain()
-	if busy():
+	if busy() or h.root_t > 0.0:
 		return true
 	var dv := Vector2(dest.x - h.pos.x, dest.z - h.pos.z)
 	var gap := ((f as Ent).r + h.r + 0.2) if f != null else 0.7
@@ -599,19 +753,23 @@ func e_recast() -> bool:
 		return true
 	var t := dist / float(ed["reel_speed"])
 	reels += 1
+	play("jug_reel")
+	if rmb_down and rmb_t > 0.12 and not rmb_ctx.get("air", false):
+		# charging the Smash when you pull: the charge goes into a Haul Slam where you arrive
+		var hk := lunge_k(rmb_t)
+		rmb_down = false
+		rmb_t = 0.0
+		if spend_rmb(true):
+			haul = {"k": hk}
+			last_variant = "during_e"
+			play("jug_haul_wind")
+	m.later(t + 0.02, func():
+		if is_instance_valid(h) and not haul.is_empty() and not h.downed: _haul_land(float(haul["k"])))
 	travel(dist, t, {"invuln": 0.0, "trail": "dust", "dir": dv.normalized()})
-	h.fortify_t = maxf(h.fortify_t, t + 0.05)
+	reel_t = t + 0.15
 	m.fx.bolt(h.pos + Vector3(0, 1.0, 0), dest + Vector3(0, 1.0, 0), col_of(ed))
 	m.sfx("ab_whirr", h.pos, -3.0, 0.6)
 	last_e = "reel"
-	if f != null:
-		m.later(t, func():
-			if not is_instance_valid(h) or not is_instance_valid(f) or (f as Ent).dead: return
-			if h.flat_dist(f) < 2.4:
-				(f as Ent).hurt(float(ed["reel_dmg"]) * power("kin"), h, {"src": "abil", "ab": "k1", "tags": ["k1", "reel"], "stun": float(ed["reel_stun"]), "dr": true, "melee": true, "kb": dv.normalized() * 4.0})
-				m.fx.slash(h.pos + Vector3(0, 0.9, 0), atan2(dv.y, dv.x), deg_to_rad(90.0), 2.0, col_of(ed), true)
-				m.sfx("cleave", h.pos, -2.0, 0.85)
-				Feel.shake(m, "t3", h, h.pos, f))
 	return true
 
 # ------------------------------------------------------------------ R: Doomfall
@@ -624,6 +782,7 @@ func _fuse_start(bond: bool) -> void:
 		land = h.pos
 	land = ground(land)
 	doom = {"from": h.pos, "land": land}
+	play("jug_doom")                    # the brace, the rise, the crash at the end of the fuse
 	tele_circle(land, float(rd["radius"]), col_of(rd), fuse_time())
 	net_ring(land, float(rd["radius"]), col_of(rd))
 	h.vel.y = 7.0
@@ -654,7 +813,7 @@ func cast_r() -> bool:
 	for f in foes_in(land, r):
 		before[f.get_instance_id()] = f.hp
 	var healed := {"hp": 0.0}
-	var heal_k := float(rd["heal"]) + (0.2 if rank("ult") >= 2 else 0.0)
+	var heal_k := float(rd["heal"])
 	var stg := stage("r", {"delivery": {"type": "burst", "origin": "caster", "radius": r},
 		"effects": [{"type": "damage", "amount": float(rd["dmg"]) * r_k()}, {"type": "push", "strength": float(rd["push"])}]})
 	var paid := {}
@@ -684,22 +843,35 @@ func cast_r() -> bool:
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null:
 		return
-	if int(h.slot_lv["ult"]) > 0 and float(cd["r"]) <= 0.0 and los and dist < float(r_def()["reach"]) + 1.5 and (tgt.hp < tgt.max_hp * 0.55 or randf() < 0.25) and randf() < 0.45:
+	# pulled along the chain: spin as you arrive
+	if reel_t > 0.0 and rmb_ready() and int(h.slot_lv["sec"]) > 0:
+		h.inp["sec"] = true; return
+	if int(h.slot_lv["ult"]) > 0 and float(cd["r"]) <= 0.0 and los and dist < float(r_def()["reach"]) + 2.0 and (tgt.hp < tgt.max_hp * 0.55 or randf() < 0.25) and randf() < 0.45:
 		h.inp["aim"] = tgt.pos; h.inp["ult"] = true; return
-	# chained: haul in once they're out of sword reach
-	if not chain.is_empty() and chain.get("target") != null and dist > 3.5 and randf() < 0.5:
-		h.inp["sig"] = true; return
-	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and chain.is_empty() and los and dist > 3.0 and dist < float(e_def()["range"]) - 0.5 and randf() < 0.4:
+	# chained to them: run a Chain Lunge down it, wind up a Smash and pull into a Haul Slam, or just pull
+	if not chain.is_empty() and chain.get("target") != null and dist > 3.5 and not rmb_down:
+		var roll := randf()
+		if rmb_ready() and int(h.slot_lv["sec"]) > 0 and roll < 0.25:
+			h.inp["aim"] = tgt.pos; h.inp["sec"] = true; bot_hold["rmb"] = 1.0; return
+		if rmb_ready() and int(h.slot_lv["sec"]) > 0 and roll < 0.45:
+			h.inp["aim"] = tgt.pos; h.inp["sec"] = true; bot_hold["rmb"] = 1.2
+			st["bot_haul_at"] = m.time + 0.45; return
+		if roll < 0.8:
+			h.inp["sig"] = true; return
+	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and chain.is_empty() and not chain_flying and los and dist > 3.0 and dist < float(e_def()["range"]) - 0.5 and randf() < 0.4:
 		h.inp["aim"] = tgt.pos + Vector3(0, 0.9, 0); h.inp["sig"] = true; return
-	if int(h.slot_lv["sec"]) > 0 and rmb_ready() and los:
+	if int(h.slot_lv["sec"]) > 0 and rmb_ready() and los and slam_w.is_empty():
 		if not h.grounded and dist < 3.0:
 			h.inp["aim"] = tgt.pos; h.inp["sec"] = true
-		elif dist < 3.0:
-			h.inp["aim"] = tgt.pos; h.inp["sec"] = true      # the slam (BREAK on the wounded)
-		elif dist < 7.5 and randf() < 0.5:
+		elif dist < 3.2:
+			h.inp["aim"] = tgt.pos; h.inp["sec"] = true      # the Execution Slam (best on the wounded)
+		elif dist < 7.0 and randf() < 0.45:
 			h.inp["aim"] = tgt.pos; h.inp["sec"] = true
 			bot_hold["rmb"] = float(rmb_def()["hold"]) + (float(rmb_def()["full_t"]) - float(rmb_def()["hold"])) * clampf((dist - 3.0) / 4.0, 0.0, 1.0) + 0.05
-	# Rampage in: the tip is the sweet spot, so dash from about a dash length out
+	# keep the wound-up slam on them while it winds up
+	if not slam_w.is_empty():
+		h.inp["aim"] = tgt.pos
+	# Rampage in: the tip is the sweet spot, so dash from about a dash length out, facing them
 	if int(h.slot_lv["dash"]) > 0 and h.dashes >= 1.0 and los and lunge.is_empty() and dist > 2.5 and dist < 6.0 and randf() < 0.25:
 		h.inp["aim"] = tgt.pos
 		h.ai["dash_dir"] = h.dir_to(tgt)

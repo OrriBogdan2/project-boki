@@ -250,7 +250,7 @@ game's scale (`Data.CLASSES` HP 124 / 145 / 193; kin abilities hit for 8-22).
 
 ### 6.1 Thief (light)
 
-> **Nov 1 (kits2): superseded.** The Thief was rebuilt on a Shiv-style duelist baseline (owner direction); the built kit is in "Kit loops" at the end of this document, and it wins where they differ.
+> **Nov 1 (kits2): superseded.** The Thief was rebuilt as a port of SUPERVIVE's Shiv (owner direction); the built kit is in "Kit loops" at the end of this document, and it wins where they differ.
 
 **Fantasy:** the cutpurse. Slips behind you, marks you, cashes in, gone in smoke.
 **Silhouette:** the smallest and most hunched. A hood with a long pointed tail, a short asymmetric
@@ -564,7 +564,7 @@ RMB. The held slide is a long line. Break line of sight against Last Round.
 
 ### 6.5 Juggernaut (heavy)
 
-> **Nov 1 (kits2): superseded.** The Juggernaut was rebuilt on a Brall-style greatsword bruiser baseline (owner direction); the built kit is in "Kit loops" at the end of this document, and it wins where they differ.
+> **Nov 1 (kits2): superseded.** The Juggernaut was rebuilt as a port of SUPERVIVE's Brall (owner direction); the built kit is in "Kit loops" at the end of this document, and it wins where they differ.
 
 **Fantasy:** the wrecking ball. Gets angrier, crashes through, slams you into the wall.
 **Silhouette:** the biggest shoulders in the game, with horned pauldrons. Hunched forward, with an
@@ -862,7 +862,7 @@ chest) and the merge starts on the same frame the ult fires, with the BONDED col
 | Archer | Skyfall Volley | 110s | 0.50s | vulnerable |
 | Mage | Meteor | 105s | 0.55s | vulnerable |
 | Gunslinger | Last Round | 100s | 0.45s | vulnerable |
-| Juggernaut | Doomfall (kits2) | 90s | 0.55s (you rise toward the landing circle) | invulnerable and unstoppable |
+| Juggernaut | Doomfall (kits2) | 90s | 0.60s (you rise toward the landing circle) | invulnerable and unstoppable |
 | Bulwark | Bastion | 120s | 0.50s | unstoppable (fortify) |
 
 An ult that needs targets (Heist, Last Round) checks for them before the fuse, so a fuse never
@@ -990,11 +990,11 @@ above is superseded by this:
 
 | Archetype | Input | Shape | Sound | Payoff |
 |---|---|---|---|---|
-| Thief | tap | a spinning Bola; the first foe it wraps is Grounded, a second within 3m and both are stunned | a whirr, a cord snap, a stun clang | TANGLED; Marks for the Primed Cash In |
+| Thief | tap | a spinning Bola; the first foe it wraps is Grounded and it flies on; a second foe caught and both are stunned | a whirr, a cord snap, a stun clang | TANGLED; Marks |
 | Archer | hold to charge, release | a heavy piercing arrow, knockback grows with the charge (0.5s -> 1.1s); tap drops a root snare | a creak rising to a ping, then a string-snap and a sniper boom | into a wall within 3m: PINNED (stun); feeds Focus for the Deadeye |
 | Mage | press to fire, hold to steer | a slow glowing bolt that bends toward your cursor round cover, harder the longer it flies | a hum that rises with travel time | Runes the target; the next spell detonates it |
 | Gunslinger | tap (hold = Rail) | a ricochet round off up to 2 walls and on to a second foe | a revolver crack, a hammer click, a ricochet whine | at 6 Chambers a Called Shot (stun, crit, reload) |
-| Juggernaut | tap / hold to charge / in the air | a heavy slam cone (BREAK on the wounded); hold a charged Lunge; air a Meteor Drop | a cleave and a slam; a rising thump into a charge | Enraged: Rage Smash |
+| Juggernaut | tap (wound up) / hold / air / in the pull | an Execution Slam cone after a 0.5s aimed wind-up; hold a Lunge; air a Meteor Drop; in the chain pull a Scorching Spin | a charge hum, a cleave and a slam | the sweet spot resets Doomfall |
 | Bulwark | hold to block, release to bash | a frontal shield wall (its own HP), then a forward bash cone you step into | a shield clang, then a plate slam | into a wall or another foe: Crushed (stun + heal) |
 
 ### Holds and charges: the wind-up feel (shared, every archetype)
@@ -1025,76 +1025,150 @@ Owner: "why does it show me rank 3 but not rank 2 when it's rank 1?" Every arche
 the next rank first, then rank 3 after it; the HUD ability tooltip ("Next · Rank 2: ..."), the
 rank line ("next rank: ...") and the kit card's detail page ("Ranks: Rank 2 ... Rank 3 ...") use it.
 
-## Kits2: the Thief and the Juggernaut on SUPERVIVE / League baselines (Nov 1)
+## Kits2: the Thief and the Juggernaut ported from SUPERVIVE (Nov 1)
 
-Owner: "do you think Thief and Juggernaut can be better too? I want it all based on SUPERVIVE / League
-mechanics instead of purely custom." The Thief now follows a Shiv-style duelist and the Juggernaut a
-Brall-style greatsword bruiser. These are mechanics only: the names, numbers, art, sounds and text are
-ours. Both keep their identity (the gold Mark diamonds and coin; Rage into the red Enraged form) and
-follow the kits4 conventions: hold wind-up feel, next-rank previews, and payoffs with T4 hitstop,
-shake, their own sound (`pay_cashin`, `pay_rage` in `tools/sfx_combat.py`), a big word, VFX and a HUD
-ready label.
+Owner: "do you think Thief and Juggernaut can be better too?", then: port them "as accurately as
+possible, ability-wise, passive included" from the supervive.wiki.gg pages: the Thief is **Shiv**, the
+Juggernaut is **Brall**. Every slot follows the wiki's input pattern, shape, conditions, resets and
+upgrade path; numbers are scaled to our health and TTK (their relative sizes kept); only the names,
+art, sounds and on-screen text are ours. They follow the kits4 conventions (hold wind-up feel,
+next-rank previews, payoffs with T4 hitstop, shake, their own sound via `tools/sfx_combat.py`
+(`pay_cashin`, `pay_rage`), a big word, VFX and a HUD ready label). Ranks: our rank 2 is the shared
+step (cooldown -10%, damage +15%); rank 3 carries the wiki's level 3-4 specials.
 
-### Thief: Marks -> Vault -> Primed -> Cash In
+### Thief = Shiv
 
-| Slot | Input | What it does |
-|---|---|---|
-| Passive | none | **Marks**: weapon hits on the same target you hit last add a Mark (one per 0.3s, max 3, 5s); a hit from behind adds one more; +6% damage from you per Mark. A knock heals 12% of your health (an assist 8%) and resets Vault |
-| LMB | tap / hold | Twin Blades (3-hit combo, hold to spin) or SMG; every hit feeds the Mark chain |
-| Shift | tap | **Vault**: a 3.4m flip (shots pass through it), +30% speed for 1.4s; the next weapon hit within 3s is **Primed**: +10, 2 Marks, Shred (+15% damage taken, 3s), and **landing it resets Vault** |
-| RMB | tap | **Bola**: 10m, 8 damage, a Mark; the first foe it wraps is **Grounded** 1.5s (no dash, jump or glide, slowed 25%); a second foe within 3m is caught too: +12 and stun 0.9 each (TANGLED) |
-| E | tap, then recast | **Shadow Knife**: a dagger that sticks in a foe (9, a Mark, slow 30%) or where it lands for 1.6s; recast, or wait, to **Shadow Step** to it (behind the foe; your next hit counts as from behind) |
-| R | tap | **Jackpot**: a 0.45s fuse you can shoot through (the 8.5m reach and 5m rim rings show), then a knife at every foe in sight within 8.5m: 16, past 5m +10 and blight 3s; everyone hit gets a Mark, all Marks refresh, and for 4s you have 2 free quick Vaults (2.4m, they Prime too) |
+| Slot | Input | Shiv (wiki) | Ours |
+|---|---|---|---|
+| Passive | none | **Malice & Resolve**: each consecutive basic-attack hit on a target adds a stack of bonus damage (LMB 1, empowered shot 2, Chain Bolas); a knock or an assist heals 25% max HP | **Marks**: every weapon hit stacks a Mark on the target (gold diamonds, one per Mark, up to 5; 4s, refreshed): +8% damage from your weapon hits per Mark. Primed hit +2, Bola +1. A knock heals 15% on top of the shared 10% knock heal (25%); an assist heals 25% |
+| LMB | tap / hold | Arcslinger, one stack per hit | Twin Blades or SMG; every hit stacks |
+| Shift | tap | **Quickflip**: a short dash and a speed boost; the next LMB is empowered (damage, 2 stacks, armor shred); landing it resets the cooldown; the speed boost ends on the empowered attack | **Vault**: a 3.4m flip, +30% speed until the next hit (2s max); the next weapon hit within 3s is **Primed**: +10, 2 Marks, Shred (+15% damage taken, 3s); landing it resets Vault (the payoff: VAULT RESET, T4, `pay_cashin`) |
+| RMB | tap | **Chain Bolas**: grounds the first target, travels on after hitting; a second target hit stuns both and deals bonus damage | **Bola**: 10m, 6 and a Mark; the first foe is **Grounded** 1.5s (no dash, jump or glide; slowed 25%) and the Bola flies on 5m past them; a second foe it touches: both stunned 0.9 and +13 (TANGLED) |
+| E (their Q) | tap, recast | **Farstep Dagger**: a dagger that sticks to surfaces or characters (slows 50% 4s); recast to teleport to it; after 6s you teleport anyway | **Shadow Knife**: 12m, sticks in the first foe (8, slow 50% for 2.5s) or where it stops; recast to step to it; after 5s you step anyway |
+| R | tap | **Fusillade**: after a short delay, up to 5 shots at each nearby enemy over 2s, each resetting all stacks' duration; the outer ring takes bonus damage and anti-heal; 2 charges of a weaker dash; LMB usable | **Jackpot**: 0.45s fuse you shoot through (reach and rim rings show), then for 2s a knife every 0.4s at every foe within 8.5m in sight (5 each): 4.5, past 5m +3 and blight 4s; each knife refreshes every Mark; 2 free quick Vaults (2.2m, they Prime too) while it runs |
 
-- Loop: shoot one target to stack Marks -> Vault -> the Primed hit (+2 Marks, Shred) gives Vault back
-  -> Vault -> the Primed hit into 3 Marks is a **Cash In** (+32 total, crit, stun 0.3, Marks spent).
-- Cash In stays as the 3-stack payoff, now delivered by the Primed hit (the empowered-shot reset loop
-  is the engine, Cash In the punchline). The payoff lives on the dash: the Shift slot gets the gold dot.
-- Tells: gold diamonds orbiting over the target, a spinning gold coin at 3 and a jingle; a gold glint
-  and light at the Thief's hand while Primed; crosshair "PRIMED · next hit" / "CASH IN READY".
-- Payoff: "CASH IN", `pay_cashin` (a blade snap and a spill of coins), T4, a coin burst.
-- Online: Grounded, Shred and blight go to the body's own game through the new Net event
-  `["kst", nid, kind, seconds, k]` (`KitStatus`); **Net.VERSION 0.6.0 -> 0.7.0**.
-- Bots: Bola when a second foe is close (or sometimes alone), the Shadow Knife from 3.5-9m then step
-  to it, Vault to Prime when the hit will land (always into 2+ Marks), Jackpot in reach.
-- Retired: Flicker, the old Knife / Fan / Drop Knife RMB (the Knife and Shadow Step moved to E), Smoke
-  Veil, Heist.
+Ranks (wiki levels 2-4 -> our ranks): Bola rank 3 flies 1m further after the first foe and two foes
+caught pool their Marks (level 3 travel, level 3-4 stack combining); Vault rank 3: Primed hits +20% and
+a Shadow Knife sticking in a foe resets Vault (levels 2-4); Shadow Knife rank 3: sticking refunds 25% of
+the cooldown, 50% in a foe (level 3); Jackpot rank 2: -15% cooldown, +15% damage (levels 2-3).
 
-### Juggernaut: Rage heat -> Enraged -> Rage Smash; Doomfall resets on a knock
+- Loop: shoot one target (Marks stack) -> Vault -> the Primed hit (+2 Marks, Shred) resets Vault ->
+  Vault again. Bola into two for the stun; Jackpot to keep every Mark alive while you Vault around.
+- Tells: gold diamonds over the target (spinning faster as they stack, a jingle at 5); a gold glint and
+  light at the hand while Primed; crosshair "PRIMED · land it to reset Vault"; the dash slot's gold dot.
+- Retired: Cash In (Shiv has no 3-stack payoff: the Primed reset is the payoff), Flicker, the old Knife /
+  Fan / Drop Knife, Smoke Veil, Heist, the from-behind Mark rule.
 
-| Slot | Input | What it does |
-|---|---|---|
-| Passive | none | **Rage**: damage you deal heats it (about +0.55 per point; taking hits adds a little); it gives up to +8% damage, +50% dash recharge and +35% cooldown speed; at 100, **Enraged** 5s (+15% damage, the red shell, the hunter swells) and the next Smash is a **Rage Smash**. A knock heals 15% (an assist half) and refills Rampage |
-| LMB | tap / hold | Greatsword (kit-run, `lmb_override`): quick slashes 9 / 9 / 14 every 0.32s, tip bonus; **hold**: charge 0.22 -> full at 0.95s, a **Searing Wave** that rolls 6 -> 10m through everyone in a line, 12 -> 28 (full: burns and slows). Shotgun and minigun fire as before |
-| RMB | tap / hold / air | **Smash**: tap a Heavy Slam (3m cone, 18, push 6; foes under 40% take +60%, BREAK); hold a charged **Lunge** 3 -> 7m into the first foe (14 -> 26, stun 0.25 -> 0.6); in the air a **Meteor Drop** (2.6m, 16, slow 40%; the centre stunned 0.8) |
-| Shift | tap | **Rampage**: 2 charges of a 4.4m dash attack: 6 to foes along it, the **tip** at the end 14 and a big knock (stun 0.8 into a wall) |
-| E | tap, then recast | **Warchain**: a chain 9m that hooks a foe (8, slow 20%, blighted 4s, leashed to 10m) or bites a wall; recast to haul yourself to its end (into a hooked foe: 10 and stun 0.35); a miss refunds 60% |
-| R | tap | **Doomfall**: a 0.55s wind-up in which you're invulnerable and rise toward a landing circle up to 5m ahead, then a 3.2m crash: 36, push 9, heal 50% of the damage dealt; a knock on anyone it hit within 2s resets its cooldown |
+### Juggernaut = Brall
 
-- Loop: slash and wave to heat Rage (everything gets faster) -> chain them and haul in -> Rampage tip
-  -> Enraged -> Rage Smash -> Doomfall to finish; the knock refills Rampage and resets Doomfall.
-- Tells: red heat at the pauldrons that grows with Rage (steam from 50); the Enraged shell and swell
-  with a roar; crosshair "RAGE SMASH READY". Payoff: "RAGE SMASH", `pay_rage` (a fire-gust roar into a
-  crunching slam), T4; Doomfall: "DOOMFALL", T4.
-- Balance note: in a seed-6 simtest the first build's Juggernaut bot dealt 1274 in 84s (949 over a
-  whole match before), so the slashes went 10/10/15 -> 9/9/14, Rage +12% -> +8% (Enraged +20% -> +15%)
-  and Doomfall 40 -> 36.
-- Bots: slash up close, sometimes a Searing Wave from 4-9.5m; slam within 3m, Lunge from 3-7.5m,
-  Meteor from the air; Rampage from 2.5-6m; chain from 4-9m then haul in; Doomfall in reach on a
-  wounded target.
-- Retired: the tap/hold Rampage carry, Earthshatter, Iron Hide, Avalanche.
+| Slot | Input | Brall (wiki) | Ours |
+|---|---|---|---|
+| Passive | none | **Blazing Spirit**: dealing damage builds it; Empowered: +15% damage, +12% dash haste, +20% ability haste; knocking a hunter (or killing a creep) heals 20% of the enemy's max HP | **Rage**: damage you deal fills it (+0.7 per point; a Searing Wave fills it 3x as fast; cools after 3s out of a fight); full = **Enraged** 6s: +15% damage, +12% dash recharge, +20% cooldown speed (the red shell and swell stay). A knock heals 20% of the knocked hunter's max health; a monster kill 20% of its |
+| LMB | tap / hold | **Quick melee** cone slash, the central tip deals bonus equal to the base; **hold**: a charged ranged fireblast that quickly builds Blazing Spirit | Greatsword (kit-run): slashes 8 every 0.34s, alternating, double at the tip (no heavier third: Brall's 3rd/4th-hit bonus was removed in a patch); **hold**: charge 0.22 -> 0.95s, a **Searing Wave** 6 -> 10m, 12 -> 28, through a line (full: burns, slows). Shotgun and minigun as before |
+| RMB | tap / hold / air / with the chain | **Adaptive Strike**, 2.5s cooldown, 0.55s cast you aim freely with a warning overhead: press **Execution Slam** (x1.5 below 35% HP; its sweet spot resets R); hold **Fiery Lunge** (charged dash attack; cooldown doubled on a miss); airborne **Obsidian Slam** (slows; the centre ring +50%, stunned); during the chain pull **Scorching Spin** (anti-heal 5s) | **Smash**, 3s: tap a 0.5s wind-up (a red "!" over you, keep aiming) into a 3.2m cone, 26, +50% under 35%; its **sweet spot** (the far tip, 1.9-3.4m within 22° of your aim) resets Doomfall (the payoff: SWEET SPOT, T4, `pay_rage`). Hold: a 3 -> 7m Lunge, 14 -> 22; a miss doubles the cooldown. Air: Meteor Drop 2.6m, 18 and slow 40%; the centre 1.2m +50% and stun 0.8. With the Warchain: see the combinations below (Scorching Spin, Chain Lunge, Haul Slam) |
+| Shift | tap | **Flame Step**: 2 charges, a dash attack in the facing direction; the tip deals double; a knock restores a charge | **Rampage**: 2 charges, 4.4m the way you face: 7 along it, the tip 14 and a big knock (stun 0.8 into a wall); a knock gives a charge back (the shared knock rule) |
+| E (their Q) | tap, recast | **Feysteel Chain**: attaches to an enemy (damage, anti-heal) or a wall; recast pulls you to it; the cooldown starts on the pull or when it breaks; a stun breaks it; not castable while rooted or grounded | **Warchain**: 10m, hooks a foe (8, blighted while tethered) or bites a wall, 4s; recast pulls you; the cooldown starts on the pull or the break (a miss breaks it); a stun breaks it; no throw while rooted or Grounded |
+| R | tap | **Volcanic Rebuke**: invulnerable 0.65s, then a strike that heals 60% of the damage dealt; a knock resets its cooldown | **Doomfall**: a 0.6s fuse, invulnerable and rising (the landing circle shows), then a 3m crash up to 2.6m ahead: 48, push 9, heal 60% of the damage; a knock on anyone it hit within 2s resets it |
+
+### E + RMB combinations and the other cross-ability interactions
+
+`--kit-combo-check` scripts each of these and asserts the variant that fires (it also runs inside
+`--archetype-check`). "Wiki" rows are SUPERVIVE's own interactions; "owner" rows are the owner's
+asked-for chain combinations ("E, charge RMB, then use either to affect the swing"), each with its own
+pose, sound and VFX.
+
+| Hero | Sequence | Result | Source |
+|---|---|---|---|
+| Juggernaut | E (hooked) -> E (pull) -> RMB tap | **Scorching Spin**: 2.6m spin, 18, blight 4s; a full-body double spin, orange slash rings, a whirr and blast | wiki |
+| Juggernaut | E (hooked or anchored) -> hold RMB -> let go | **Chain Lunge**: the Lunge runs along the chain to its end (x1.25, a 0.35 stun, RUN THROUGH); the chain hand hauls back, gold chain flash, a tether snap and a rising charge; the chain is spent | owner |
+| Juggernaut | E -> hold RMB -> E while holding | **Haul Slam**: pulled in with the charge, a crash where you arrive (2.8m, 16 -> 30 by charge, stun 0.25 -> 0.6); the blade cocked high through the pull, then the drop; gold ring, dust, slam and boom | owner |
+| Juggernaut | E -> E (pull) -> hold RMB | **Haul Slam** on arrival (or at once if the pull is over) | owner |
+| Juggernaut | E attached -> RMB tap | the normal **Execution Slam** (wound up, aimed) | wiki |
+| Juggernaut | RMB tap, sweet spot | **Doomfall's cooldown resets** (SWEET SPOT, T4) | wiki |
+| Juggernaut | R, then a knock on someone it hit (2s) | **Doomfall resets**; the knock also heals 20% of their health and gives a Rampage charge | wiki |
+| Juggernaut | RMB hold that strikes nothing | the Smash cooldown **doubles** | wiki |
+| Juggernaut | Rampage / Lunge, then glide | no glider for the wind-down (0.35s) | wiki (patch notes) |
+| Juggernaut | rooted / Grounded -> E | no chain; a stun on you breaks a chain (its cooldown starts) | wiki (patch notes) |
+| Juggernaut | Enraged (full Rage) | +15% damage, +20% cooldown speed (every Smash, the chain), +12% dash recharge | wiki |
+| Juggernaut | Searing Wave hits | fill Rage 3x as fast | wiki |
+| Thief | Vault -> weapon hit | **Primed**: +10, 2 Marks, Shred; Vault resets; the speed boost ends | wiki |
+| Thief | Shadow Knife in a foe (rank 3) | Vault resets; 50% of the Knife's cooldown back (25% in a wall) | wiki (levels 3-4) |
+| Thief | Shadow Knife -> E (or wait 5s) | step to the knife (the arrival pose) | wiki |
+| Thief | Bola catches two (rank 3) | both foes' Marks pool | wiki (levels 3-4) |
+| Thief | Bola -> Grounded foe | can't dash, jump or glide | wiki |
+| Thief | R fuse / volleys -> LMB | you keep firing | wiki |
+| Thief | R -> Vault | 2 free quick Vaults that Prime; their Primed hit resets Vault too | wiki (the Prime on quick Vaults is ours: the wiki doesn't say) |
+| Thief | R knives | every knife refreshes all Marks | wiki |
+| Thief | knock / assist | heal (25% in all) | wiki |
+
+### Animations (kits2): every ability has its own move
+
+`HunterAnim.KMOVES` holds keyed full-body moves (anticipation, a key pose on the hit, follow-through)
+that the kits play with `ArchKit.play(id)`, timed to their hit: channels for the torso, the legs, the
+free hands, the greatsword's arc and whole-body turns (flips, spins). Juggernaut: the slashes
+alternate (no heavier third, as Brall's), `jug_wave` (the raised charge carving down into a lunge),
+`jug_slam` (0.5s rearing wind-up, the crash on the hit), `jug_lunge_wind` / `jug_lunge`, `jug_meteor`,
+`jug_dash` (shoulder-down, the tip thrust at the end), `jug_chain` / `jug_reel`, `jug_spin`,
+`jug_chainlunge`, `jug_haul_wind` / `jug_haulslam`, `jug_doom` (braced rise, crash at the end of the
+fuse). Thief: SMG recoil and the twin blades' arcs as before, `thf_vault_f/b/l/r` (a tucked flip by
+the dash's direction), `thf_primed`, `thf_bola` (whirled, then slung: the Bola leaves the hand 0.14s
+in), `thf_knife` (cocked by the ear; the knife leaves 0.12s in), `thf_arrive`, `thf_volley_wind` /
+`thf_volley`. Strips: `--arena-demo=anim_<move>` (see `ArenaDemo.ANIM_DEMO`). Kit moves play on the
+hunter's own game and bots; remote players see the effects and the shared weapon swings.
+
+Ranks: Smash rank 3 +20% on every Smash (levels 2-3); Rampage rank 3 a third charge (level 2); Warchain
+rank 3 refunds 33% when it hooks a foe (level 4); Doomfall rank 2 -15% cooldown, +15% damage.
+
+- Loop: slash and wave into Rage -> Enraged (everything comes back faster) -> chain them, pull in and
+  spin -> Rampage tip -> an Execution Slam's sweet spot gives Doomfall back -> Doomfall the wounded,
+  the knock resets it again.
+- Tells: red heat at the pauldrons that grows with Rage; the Enraged shell, swell and roar; the red "!"
+  over the head while a Smash winds up; crosshair "ENRAGED" / "SMASH · aim it".
+- Retired: the Rage Smash (Brall's Empowered state buffs everything instead of one strike), the
+  tap/hold Rampage carry, Earthshatter, Iron Hide, Avalanche, the chain's slow, leash and haul stun.
+
+### Sources cross-checked (Nov 1)
+
+- supervive.wiki.gg **Shiv** and **Brall** pages (ability text, levels 2-4, the patch history per
+  ability) are the baseline for everything above.
+- Wiki patch pages: *Leveling Rework + Big Balance Patch* (Brall: LMB hitbox -20%, sweet spot moved to
+  the central tip, the 3rd/4th consecutive-hit bonus removed, Empowered attack speed +100% -> 0%, R no
+  longer resets on Wisp execution, Flame Step charges 10/6/6/6 and no longer refunds all charges);
+  *Gold + Mobility + Discord Patch* (Brall: Adaptive Strike cast 0.35 -> 0.55s with a warning icon and
+  free aim, Execution x2 -> x1.5 and threshold 45% -> 35%, Flame Step 11/9/7/6, the chain 18/16/14/12
+  with the level-4 refund 50% -> 33%, breaks on stun, no cast while rooted or grounded, dash wind-down
+  frames, turning restricted after RMB -> Shift); *Patch Week 1 Open Beta* (Shiv: LMB range 800 -> 850,
+  empowered 925 -> 950); *Patch Open Beta* (Brall's LMB a slice, not a box; Shiv's dagger sticks to
+  dynamic objects; +30 health for all).
+- Guides: gamerblurb's Brall guide (Execution Slam "double damage" to low health, Lunge "missing doubles
+  mana cost and cooldown", the spin during the chain pull, a "four-hit" LMB with later hits stronger);
+  deltiasgaming's Brall guide (the four RMB forms, a "four-hit combo"); ludo.guide (template only, no
+  data); gamerblurb's Shiv page and esports.gg's hunter list failed to load.
+- Disagreements: the guides' "double damage" and "four-hit combo, later hits stronger" are pre-patch
+  (the wiki's patch history lowers execution to x1.5 and removes the combo bonus): we follow the wiki.
+  Brall's Flame Step cooldown differs between the wiki header (13s) and the patch notes (11/9/7/6); we
+  use the patch notes' shape. The Shiv page lists Farstep's Quickflip reset at level 3 in its patch note
+  and level 4 in its tooltip; ours is rank 3 (our last rank). No source gives Malice's cap or duration.
+
+### Couldn't reproduce (or chose not to)
+
+- Mana: none of it (costs, refunds on hit, the Lunge's double cost) exists in our game.
+- Brall: climbing double-height walls; dodging shots building Blazing Spirit (his level-4 dash
+  upgrade); Volcanic Rebuke sending a knocked hunter straight to the deathbox (ours resets but the
+  knocked hunter goes down as usual); turn restriction when dashing out of a Smash.
+- Shiv: Farstep Dagger sticking to moving objects other than hunters and monsters; Bolas hitting
+  destructibles; whether the weaker Fusillade dashes empower (ours do).
+- The wiki gives no Malice stack cap or duration (ours: 5 and 4s) and no Blazing Spirit duration
+  (ours: 6s Enraged). Online, Grounded, blight and Shred go through Net event `["kst", nid, kind,
+  seconds, k]` (`KitStatus`); **Net.VERSION 0.6.0 -> 0.7.0**.
 
 ### Numbers against the other four (TTK)
 
-| | Before | After |
-|---|---|---|
-| Thief burst | Cash In 26 + knife 10 per 8s | Primed +10 every Vault (7s, reset on a hit); Cash In +32 total; Marks +6% each (was +5%) |
-| Thief control | Fan slow, Heist strikes 14 x4 | Bola Grounded 1.5s, pair stun 0.9; Jackpot 16 / 26 at the rim |
-| Juggernaut sword | 11 / 11 / 18 every 0.5s (~27 DPS), hold slam 34 | 9 / 9 / 14 every 0.32s (~29 DPS), hold wave 12 -> 28 at range |
-| Juggernaut RMB | Smash 18 (Rage x1.5 knock) | Slam 18 (+60% under 40%), Rage Smash x1.6 + stun 0.5, Lunge up to 26 |
-| Juggernaut R | Avalanche 6 per stomp over 5s | Doomfall 36 + heal half, resets on a knock |
-
-A medium (145) dies to the Thief in about 3.5s of focused fire with one Cash In (blades ~29 DPS x
-1.18 at 3 Marks, plus 32 every Vault cycle), about the Gunslinger's Called Shot pace; the Juggernaut's
-Rage only adds 8-15% once it's hot, and Doomfall's 36 is under the Archer's Great Arrows (100 if all
-three land).
+Shiv's scale: LMB 58, a stack ~9 (15% of a shot), empowered 50, bolas 23 (+53 with two), R shot 25
+(+17 rim). Ours keeps those ratios on our weapons: blades 7 / SMG 4.6 a hit, +8% a Mark (capped at 5
+for the SMG's rate), Primed +10, Bola 6 (+13 tangled), Jackpot 4.5 (+3 rim). Brall's: slash 20
+(tip +20), Execution Slam 70 (3.5 slashes), Lunge 45, Obsidian 52, Spin 54, Flame Step 18 / tip 36, R
+130 -> ours slash 8 (tip 16), Slam 26, Lunge 14 -> 22, Meteor 18, Spin 18, Rampage 7 / tip 14,
+Doomfall 48. A medium (145) falls to the Thief in about 4s of steady fire with two Primed hits, to the
+Juggernaut in about 4s with a sweet-spot slam; Doomfall's 48 sits under the Archer's Great Arrows (100
+if all three land).

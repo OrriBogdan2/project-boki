@@ -58,9 +58,9 @@ func _arena() -> void:
 	P.inp["sec_hold"] = false; P.ak.press_rmb()
 	step(m, 0.5)
 	ok("thief Bola hits a dummy, Grounds and Marks it", float(A.dummies[0]["total"]) > tot0 and (P.ak as ThiefKit).marks_on(D) >= 1, "total %.0f marks %d" % [float(A.dummies[0]["total"]), (P.ak as ThiefKit).marks_on(D)])
-	(P.ak as ThiefKit).add_mark(D, 3, true)
+	(P.ak as ThiefKit).add_mark(D, 4, true)
 	step(m, 0.05)
-	ok("three Marks: pips over the dummy, Vault ready for the Cash In", (P.ak as ThiefKit).pips.size() >= 1 and (P.ak as ThiefKit).dash_payoff_ready())
+	ok("five Marks: diamonds over the dummy", (P.ak as ThiefKit).pips.size() >= 1 and (P.ak as ThiefKit).marks_on(D) == 5)
 	# reset: everyone back, healed, meters cleared
 	P.teleport(P.pos + Vector3(3, 0, 0)); P.hp = 10.0
 	A.reset()

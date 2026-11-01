@@ -353,7 +353,7 @@ func accent() -> Color:
 
 func max_dashes() -> float:
 	var base := float(dodge_def.charges) if dodge_def else float(cdat["dashes"])
-	return base + float(int(owner_stat("dodge_charges"))) + float(perk_n("secondwind"))
+	return base + float(int(owner_stat("dodge_charges"))) + float(perk_n("secondwind")) + (ak.extra_dashes() if ak else 0.0)
 
 func dash_regen() -> float:
 	# each rank past the first recharges dashes faster; a kin's dodge_regen too (1 = instantly)
@@ -3219,6 +3219,9 @@ func _anim_state(stretch: float) -> void:
 	s["charge"] = clampf((mel_hold - 0.15) / maxf(0.1, float(wpn.get("charge_time", 1.0))), 0.0, 1.0) if mel_hold > 0.15 else 0.0
 	s["cast"] = m.time - cast_at
 	s["cast_slot"] = cast_slot
+	if ak and ak.anim_id != "":
+		s["kmove"] = ak.anim_id                # the kit's own full-body move (HunterAnim.KMOVES)
+		s["kmove_t"] = m.time - ak.anim_at
 	s["hit_t"] = m.time - hurt_at
 	s["hit_k"] = hit_k
 	if last_hit_by and is_instance_valid(last_hit_by):
