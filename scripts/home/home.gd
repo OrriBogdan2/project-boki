@@ -44,7 +44,6 @@ var chat_log: Array = []       # [{role, content}]
 var chat_kin: Dictionary = {}
 var chat_input: LineEdit
 var chat_busy := false
-var chat_offline_noted := false
 var emote_labels: Array = []
 var pet_done := {}
 
@@ -3522,9 +3521,6 @@ func _send_chat() -> void:
 			_say(k, reply, clampf(3.0 + reply.length() * 0.06, 4.0, 10.0))
 		if chat_kin.get("uid", "") == rec["uid"]:
 			_chat_bubble("assistant", reply)
-			if offline and not chat_offline_noted and is_instance_valid(chat_hist):
-				chat_offline_noted = true
-				_toast(_offline_reason())
 		var loves_chat: bool = rec["likes"]["play"] == "chat"
 		Care.change(rec, "joy", 6.0 if loves_chat else 2.0)
 		if loves_chat and Care.discover(rec, "play"): _toast("%s loves chatting with you" % rec["name"])
@@ -3535,13 +3531,6 @@ func _send_chat() -> void:
 			Save.save_game()
 			if Bridge.ai_ok and rec["uid"] == Save.d.get("active", "") and not rec.has("lines"):
 				Bridge.refresh_lines(rec), "default")
-
-func _offline_reason() -> String:
-	match Bridge.last_err:
-		"no_page": return "%s answers on their own here. In the web version they talk through Claude." % chat_kin.get("name", "Your Boki")
-		"not_granted": return "Claude isn't allowed on this page yet, so %s answers on their own." % chat_kin.get("name", "Your Boki")
-		"rate_limited": return "Claude is busy for a moment, so %s answered on their own." % chat_kin.get("name", "Your Boki")
-	return "Couldn't reach Claude, so %s answered on their own." % chat_kin.get("name", "Your Boki")
 
 # ---- expedition
 var exp_cls := ""
@@ -4314,7 +4303,7 @@ func _show_when_free(lines: Array) -> void:
 func _open_ferry() -> void:
 	var v := _new_panel("Ferry", 520)
 	if not Social.available():
-		v.add_child(UI.label("The ferry connects you with other players: the town, guilds and friends' islands. It runs in the web version of Project Boki.", 15))
+		v.add_child(UI.label("The ferry will connect you with other players: the town, guilds and friends' islands. It isn't running yet. Check back in a later update.", 15))
 		return
 	v.add_child(UI.label("Where to?", 14, UI.MUTED))
 	v.add_child(UI.button("The town: market, notice board and guilds", func(): Game.goto("town", {"mode": "hub"}), 440))
