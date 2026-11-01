@@ -374,6 +374,8 @@ func _ready() -> void:
 				so["sandbox_demo"] = false
 				so["carry_demo"] = true
 			if a == "--merge-demo": so["merge_demo"] = true
+			if a == "--rival-demo": so["rival_demo"] = true
+			if a.begins_with("--rival-kin="): so["rival_kin"] = a.substr(12)
 			if a == "--glide-demo": so["glide_demo"] = true
 			if a.begins_with("--kin-demo="):
 				# test: bring this species (and the next one) and run its whole kit on the dummies

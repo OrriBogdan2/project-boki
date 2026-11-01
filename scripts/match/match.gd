@@ -3182,7 +3182,23 @@ func step(dt: float) -> void:
 		if tick.call(5.2): player.ult = 1.0; pending_input["ult"] = true
 		if tick.call(11.0): pending_input["swap"] = true
 		if time > 1.0: player.inp["fire"] = true
-	if opts.get("carry_demo", false) and player and not player.dropping and not opts.get("glide_demo", false):
+	if opts.get("carry_demo", false) and cam:
+		cam.zoom_to = 0.4          # (screenshots: close and low enough to see the kin on you)
+		cam.pitch = deg_to_rad(42.0)
+	if opts.get("carry_demo", false) and player and time < 0.05 and not opts.get("glide_demo", false) and not train.has("_open"):
+		# (screenshots: step out onto open ground, away from the racks and crates)
+		train["_open"] = true
+		var best := player.pos; var bs := -1
+		for ring_r in [6.0, 9.0, 12.0]:
+			for i in 16:
+				var q: Vector3 = player.pos + Vector3(cos(TAU * i / 16.0), 0, sin(TAU * i / 16.0)) * float(ring_r)
+				var score := 0
+				for dx in range(-3, 4):
+					for dz in range(-3, 4):
+						if not world.is_void(q.x + dx, q.z + dz) and not world.is_block(q.x + dx, q.z + dz) and not world.in_bush(q.x + dx, q.z + dz): score += 1
+				if score > bs: bs = score; best = Vector3(q.x, world.ground_at(q.x, q.z), q.z)
+		player.teleport(best)
+	if opts.get("carry_demo", false) and player and not player.dropping and not opts.get("glide_demo", false) and not opts.get("rival_demo", false):
 		# test hook: walk a slow circle with your kin riding along (mount, perch or shoulder)
 		player.inp["move"] = Vector2(cos(time * 0.6), sin(time * 0.6)) * 0.6 if time > 0.4 else Vector2.ZERO
 		player.inp["aim"] = player.pos + Vector3(cos(time * 0.6), 0.9, sin(time * 0.6)) * 4.0
@@ -3191,15 +3207,40 @@ func step(dt: float) -> void:
 		player.slot_lv["ult"] = maxi(1, int(player.slot_lv["ult"]))
 		player.ult = 1.0
 		player.merge_cd = 0.0
-		KinMerge.cast(player)
+		if KinMerge.cast(player):
+			player.merge_st["t"] = 60.0          # held for the screenshot
+			player.merge_st["T"] = 60.0
 	if opts.get("rival_demo", false) and player and not train.has("_rival") and time > 0.3:
 		# test hook: the nearest rival hunter steps up 5m in front of you (for the hover panel)
 		train["_rival"] = true
+		var rv: Hunter = null
 		for h in hunters:
 			if h.team != player.team:
-				h.teleport(_clear_spot(player.pos + Vector3(4.5, 0, -1.5)))
-				h.ctrl = "idle"
-				break
+				rv = h; break
+		if rv == null:
+			# (the sandbox has no rivals: one steps in, with a kin)
+			var rk := Save.new_kin(String(opts.get("rival_kin", "zapple")))
+			rk["name"] = "Fizz"
+			rv = make_hunter("rival", 7, "light", "Rook", "idle", rk, player.pos + Vector3(4.5, 0, -1.5), bot_kit())
+		var spot := player.pos; var bs := -1
+		for ring_r in [4.0, 5.0, 3.0]:
+			for i in 12:
+				var q: Vector3 = player.pos + Vector3(cos(TAU * i / 12.0), 0, sin(TAU * i / 12.0)) * float(ring_r)
+				if world.is_void(q.x, q.z) or world.is_block(q.x, q.z) or world.in_bush(q.x, q.z) or absf(world.ground_at(q.x, q.z) - player.pos.y) > 0.3:
+					continue
+				var score := 0
+				for dx in range(-1, 2):
+					for dz in range(-1, 2):
+						if not world.is_void(q.x + dx, q.z + dz) and not world.is_block(q.x + dx, q.z + dz) and not world.in_bush(q.x + dx, q.z + dz): score += 1
+				if score > bs: bs = score; spot = Vector3(q.x, world.ground_at(q.x, q.z), q.z)
+		rv.teleport(spot)
+		rv.vel = Vector3.ZERO
+		rv.ctrl = "idle"
+	if opts.get("rival_demo", false) and player and train.has("_rival"):
+		player.inp["move"] = Vector2.ZERO
+		if "--debug-rival" in OS.get_cmdline_user_args() and int(time * 60.0) % 60 == 0:
+			for h in hunters:
+				if h != player: print("RIVAL ", h.pname, " ", h.pos, " vis ", h.visible, " unseen ", h.unseen, " out ", h.out, " team ", h.team)
 	if opts.get("cone_demo", false) and player:
 		player.inp["aim"] = player.pos + Vector3(4.0, 0.95, -5.0)
 		player.inp["crouch"] = opts.get("crouch_demo", false)
