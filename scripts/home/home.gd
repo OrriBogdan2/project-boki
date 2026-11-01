@@ -1216,8 +1216,8 @@ func _move_player(d: float) -> void:
 	else:
 		var spd := Hunter.GLIDE_SPEED * 1.15 if gliding else SPEED * (CROUCH_SPEED if crouching else 1.0)
 		hv += (mv * spd - hv) * (1.0 - exp(-(14.0 if not air else (4.0 if gliding else 6.0)) * d))
-	# on the ground the island's edge stops you; in the air (a jump, a glide) you can sail out past it
-	var guard := not air
+	# the island's edge doesn't hold you: walk off it and you fall (glide back, or the abyss returns you)
+	var guard := false
 	var p0 := ppos
 	var nx := ppos.x + hv.x * d
 	var ox := world.occupy(nx, ppos.z, 0.38, py, guard)
