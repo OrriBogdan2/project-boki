@@ -160,6 +160,8 @@ func tick(dt: float) -> void:
 	if guide.size() > 0:
 		_tut_tick()
 	_almost_home()
+	if m.opts.get("arena", false):
+		return      # (the Arena's dummies and sparring bot aren't hunters to warn you about)
 	var best := _best_callout()
 	if best.is_empty():
 		return

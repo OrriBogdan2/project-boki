@@ -1642,9 +1642,15 @@ var portraits := {}       # nid -> SubViewport
 var portraits_grey := {}  # nid -> ImageTexture
 
 func portrait(h: Hunter) -> Texture2D:
+	var pkey := "%s|%s|%s" % [h.arch, h.cls, h.wid]
+	if portraits.has(h.nid) and String((portraits[h.nid] as Node).get_meta("pkey", pkey)) != pkey:
+		# a new archetype or weapon (the Arena's 2-7 swap): the portrait follows
+		(portraits[h.nid] as Node).queue_free()
+		portraits.erase(h.nid); portraits_grey.erase(h.nid)
 	if not portraits.has(h.nid):
 		var look: Dictionary = Save.d.get("look", {}) if h.ctrl == "local" else h.bot_look
-		var vp := Portraits.make(h.cls, Data.TEAM_COLORS[h.team % Data.TEAM_COLORS.size()], h.wid, look)
+		var vp := Portraits.make(h.cls, Data.TEAM_COLORS[h.team % Data.TEAM_COLORS.size()], h.wid, look, h.arch)
+		vp.set_meta("pkey", pkey)
 		add_child(vp)
 		portraits[h.nid] = vp
 	return (portraits[h.nid] as SubViewport).get_texture()
