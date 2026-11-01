@@ -2714,6 +2714,7 @@ func _try_ledge_grab(dt: float) -> void:
 		dir_in = mv
 	lfloat = {"lip": float(best["gz"]), "n": dir_in.normalized(), "t": 0.0, "g0": bool(inp.get("glide", false)),
 		"shove": (inp["move"] as Vector2).length() < 0.3,     # thrown into the side with no keys: it carries you over
+		"kb0": kb_t,                                          # (a fresh knock ends the rise; the one that threw you here doesn't)
 		"at": Vector2(pos.x, pos.z), "downed": downed, "win": false, "tile": Vector2i(int(best["x"]), int(best["z"])),
 		"max_t": clampf((float(best["gz"]) - pos.y) / LRISE_SPEED, 0.1, 0.9) * (1.35 if downed else 1.0) + 0.3}
 	vel.y = maxf(vel.y, LRISE_MIN)
@@ -2750,7 +2751,7 @@ func _ledge_rise(dt: float, mv: Vector2) -> bool:
 		lf["g0"] = false
 	var off := (Vector2(pos.x, pos.z) - (lf["at"] as Vector2)).dot(-n) > LRISE_OFF
 	var drift := Vector2(pos.x, pos.z).distance_to(lf["at"]) > 2.0     # (a teleport, or far along the face)
-	if off or drift or gliding or downed != bool(lf["downed"]) or out or roll_t > 0.0 or stun_t > 0.0 or knock_t > 0.0 \
+	if off or drift or gliding or downed != bool(lf["downed"]) or out or roll_t > 0.0 or stun_t > 0.0 or kb_t > float(lf.get("kb0", kb_t)) \
 			or fly_t > 0.0 or grounded or dropping or float(lf["t"]) > float(lf["max_t"]) or (glide_now and not bool(lf["g0"])):
 		lfloat = {}
 		return false

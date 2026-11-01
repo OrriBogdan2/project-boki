@@ -65,6 +65,7 @@ func _map(main: Node, label: String, opts: Dictionary) -> void:
 	for h in m.hunters:
 		if h != P: h.teleport(Vector3(-500, 50, -500)); h.out = true
 	for b in m.breaks: b["dead"] = true       # (pots and crates push you about: not what this measures)
+	m.biomes = null                            # (nor do the biomes' hazards: gusts, vents, lightning)
 	for k in m.kins.duplicate():               # (nor do wild Boki or your own: bodies push each other)
 		k.dead = true; m.kins.erase(k); k.queue_free()
 	P.kin = null; P.kin2 = null
