@@ -43,6 +43,16 @@ const FOLLOW := {
 var follow_mode := "supervive"
 var pan := Vector3.ZERO
 var base := Vector3.ZERO      # the followed point, before the cursor pan
+## (movefeel) Follow: tight across (FOLLOW_XZ, ~0.07s) so the hunter stays centred [footage] and
+## stops dead with you; softer up and down so falls and glides don't jolt the view. While gliding
+## Match sets lead_vel (your flat velocity) and the view leans a little ahead of you.
+const FOLLOW_XZ := 15.0       # 1/s (was 8: ~0.65m behind you at a run, drifting on after a stop)
+const FOLLOW_Y := 3.5
+const GLIDE_LEAD := 0.2       # seconds of glide velocity to lean ahead...
+const GLIDE_LEAD_MAX := 1.8   # ...capped (m)
+const GLIDE_LEAD_EASE := 3.0  # 1/s, so the lean eases in and out instead of popping
+var lead_vel := Vector3.ZERO
+var lead_off := Vector3.ZERO
 
 ## Picks one of STYLES (the expedition camera).
 func use_style(id: String) -> void:
@@ -61,6 +71,7 @@ func snap(p: Vector3) -> void:
 	focus = p
 	base = p
 	pan = Vector3.ZERO
+	lead_off = Vector3.ZERO
 	_apply(Vector3.ZERO)
 
 func punch(a: float) -> void:
@@ -104,10 +115,11 @@ func follow(p: Vector3, delta: float, mouse_lead := true) -> void:
 	# far up in the sky you stay on screen
 	var want := Vector3(p.x, maxf(p.y * 0.6, p.y - 4.0), p.z)
 	# across follows briskly; up and down follows softer, so falls and glides don't jolt the view
-	var kxz := 1.0 - exp(-8.0 * delta)
-	var ky := 1.0 - exp(-3.5 * delta)
+	var kxz := 1.0 - exp(-FOLLOW_XZ * delta)
+	var ky := 1.0 - exp(-FOLLOW_Y * delta)
 	base = Vector3(lerpf(base.x, want.x, kxz), lerpf(base.y, want.y, ky), lerpf(base.z, want.z, kxz))
-	focus = base + pan
+	lead_off = lead_off.lerp((lead_vel * GLIDE_LEAD).limit_length(GLIDE_LEAD_MAX), 1.0 - exp(-GLIDE_LEAD_EASE * delta))
+	focus = base + pan + lead_off
 	zoom = lerpf(zoom, zoom_to, minf(1.0, delta * 2.5))
 	top = move_toward(top, top_to, delta * (0.9 if top_to < top else 2.0))
 	chase = move_toward(chase, chase_to, delta * 0.7)
