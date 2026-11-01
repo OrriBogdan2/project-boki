@@ -142,7 +142,16 @@ func apply_result(r: Dictionary) -> Dictionary:
 				continue     # one of yours, back from a rival: handled below
 			var nk: Dictionary = rec.duplicate(true)
 			var from := String(rec.get("lost_from", ""))
-			nk["uid"] = "k%d%d" % [Time.get_ticks_usec() % 1000000, randi() % 1000]
+			randi()      # (the old fresh id used a global roll here: kept so the stream doesn't shift)
+			# it keeps the lasting id it was born with, unless that would clash with one of yours
+			if String(nk.get("uid", "")) == "" or not Save.kin(String(nk["uid"])).is_empty() or not String(nk["uid"]).begins_with("b"):
+				nk["uid"] = Save.new_id()
+			Unique.ensure(nk)
+			nk.erase("serial"); nk.erase("ot")
+			nk["origin"] = {"how": "wild" if (from == "" or from == "you") else "taken", "where": rec.get("caught_at", {}),
+				"t": int(Time.get_unix_time_from_system())}
+			if from != "" and from != "you": nk["origin"]["from"] = from
+			nk.erase("caught_at")
 			if from == "" or from == "you":
 				nk["name"] = Data.default_kin_name(String(nk["species"]))
 				nk["memory"] = []
@@ -161,6 +170,7 @@ func apply_result(r: Dictionary) -> Dictionary:
 			Care.ensure(nk)
 			nk["needs"] = {"food": 45.0, "energy": 40.0, "joy": 45.0, "clean": 30.0}
 			d["roster"].append(nk)
+			Save.register(nk)         # serial, original trainer, the event log
 			KinBox.route_new(nk)      # the farm if there's room; a repeat species goes to the Kin Burrow
 			Care.dex_got(nk)
 			out["caught"].append(nk)
@@ -323,6 +333,7 @@ func _evolve(k: Dictionary, out: Dictionary) -> void:
 		return
 	ev["text"] = Evo.describe(ev, k)
 	if ev["kind"] == "form": Care.dex_mark(k["species"], "form", String(ev["to"]))
+	Save.log_event("evolved", k, {"kind": String(ev["kind"]), "to": String(ev.get("to", ev.get("part", "")))})
 	if not k.has("pending_evo"):
 		k["pending_evo"] = []
 	k["pending_evo"].append(ev)

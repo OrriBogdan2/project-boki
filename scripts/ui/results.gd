@@ -100,18 +100,18 @@ func show_result(r: Dictionary) -> void:
 					var krec: Dictionary = chips[i][3]
 					var hb: HBoxContainer = ch.get_child(0)
 					if Mutations.special(krec): hb.add_child(Mutations.badges(krec, 16.0))
-					hb.add_child(UI.label("·  " + ("Kin Burrow" if KinBox.is_boxed(krec) else "farm"), 13, Color("bfa6ff") if KinBox.is_boxed(krec) else UI.GOOD))
+					hb.add_child(UI.label("·  " + ("Boki Burrow" if KinBox.is_boxed(krec) else "farm"), 13, Color("bfa6ff") if KinBox.is_boxed(krec) else UI.GOOD))
 				flow.add_child(ch)
 			v.add_child(flow)
 			var to_box: Array = (s["caught"] as Array).filter(func(k): return KinBox.is_boxed(k))
 			if not to_box.is_empty():
-				v.add_child(_note("Sent to the Kin Burrow: %s. %s" % [", ".join(to_box.map(func(k): return String(k["name"]))),
+				v.add_child(_note("Sent to the Boki Burrow: %s. %s" % [", ".join(to_box.map(func(k): return String(k["name"]))),
 					"You already have that kind out on the farm." if to_box.all(func(k): return KinBox.dup_on_farm(k)) else "The farm is full (%d/%d)." % [KinBox.farm().size(), KinBox.farm_cap()]], Color("cdb8ff")))
 	# weapons, gloves and treasure: into the armory, or left behind in your deathbox
 	var haul: Array = s.get("haul", []).filter(func(it): return not Loot.is_rare_egg(it))
 	var eggs_home: int = s.get("haul", []).filter(func(it): return Loot.is_rare_egg(it)).size()
 	if won and eggs_home > 0:
-		v.add_child(_note("Brought home a Rare Egg! It went to the Incubator by the Nesting Nook, to hatch into a rare kin." if eggs_home == 1 else "Brought home %d Rare Eggs! They went to the Incubator by the Nesting Nook and hatch one at a time." % eggs_home, UI.GOLD))
+		v.add_child(_note("Brought home a Rare Egg! It went to the Incubator by the Nesting Nook, to hatch into a rare Boki." if eggs_home == 1 else "Brought home %d Rare Eggs! They went to the Incubator by the Nesting Nook and hatch one at a time." % eggs_home, UI.GOLD))
 	if won and not haul.is_empty():
 		v.add_child(UI.section("Into your armory" if Save.has_building("armory") else "Into your armory (build it on the farm to use them)"))
 		var hf := HFlowContainer.new()
@@ -151,7 +151,7 @@ func show_result(r: Dictionary) -> void:
 	for nw in s.get("ransom_news", []):
 		v.add_child(_note(String(nw), Color("ffd58a")))
 	if s.get("kin_stranded", false):
-		v.add_child(_note("With no kin left at home, %s let one of yours go on credit. It waited a long time and trusts you less now." % Ransom.BROKER, UI.BAD))
+		v.add_child(_note("With no Boki left at home, %s let one of yours go on credit. It waited a long time and trusts you less now." % Ransom.BROKER, UI.BAD))
 	if int(s.get("vault_gems", 0)) > 0:
 		v.add_child(_note("Your vault kept %d of the gems you dropped." % int(s["vault_gems"]), UI.GOLD))
 	if s["crops_ready"] > 0:

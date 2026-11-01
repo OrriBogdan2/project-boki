@@ -12,6 +12,7 @@ extends Node
 ## It reads a few metas on the kin root, all optional:
 ##   "dazed" (bool) "happy" (bool) "pulse" (set to Time msec when an ability goes off)
 ##   "kstate": "" | "attack" (lunging) | "sleep" | "perch" (riding a shoulder)
+##   "quirk" (Unique: its idle habit, played now and then while it stands still) "girth" (width)
 ## Only Flex and the limbs are posed here; Body stays free for whoever moves the kin (hops,
 ## home quirks and work poses, match lunges).
 
@@ -57,6 +58,10 @@ var legs: Array[Node3D] = []
 var wings: Array[Node3D] = []
 var spin: Node3D
 var phase := randf() * TAU
+var quirk := ""
+var girth := 1.0
+var quirk_t := 3.0     # until the next time it does its habit
+var quirk_k := 0.0     # 1 at the start of one, down to 0
 
 func _ready() -> void:
 	root = get_parent() as Node3D
@@ -88,6 +93,9 @@ func _ready() -> void:
 	blink_t = randf_range(0.8, 3.5)
 	plan = String(BODY.get(species, "blob"))
 	flex_base = flex.position
+	quirk = String(root.get_meta("quirk", ""))
+	girth = float(root.get_meta("girth", 1.0))
+	quirk_t = 2.0 + fposmod(phase, 3.0)
 
 var _acc := 0.0
 var _n := 0
@@ -191,6 +199,30 @@ func _process(dt: float) -> void:
 			# a blob jiggles, wobbling after every bounce
 			sx += sin(t * 9.0 + phase) * 0.02 * move_k
 			rz += sin(gait * 0.5) * 0.08 * move_k
+	# its own habit (Unique quirk), now and then while it stands about
+	if quirk != "":
+		var idle := (1.0 - move_k) * (1.0 - sleep_k) * (1.0 - att_k) * (0.0 if dazed else 1.0)
+		quirk_t -= dt * idle
+		if quirk_t <= 0.0:
+			quirk_t = 4.0 + fposmod(t * 7.31 + phase * 3.0, 5.0)
+			quirk_k = 1.0
+		var qd := 1.6 if quirk in ["tail_chase", "look_around", "stretch"] else 1.0
+		quirk_k = maxf(0.0, quirk_k - dt / qd)
+		var qk := quirk_k * idle
+		var e := sin(quirk_k * PI)     # in and out
+		match quirk:
+			"tail_chase":
+				if qk > 0.0: ry += (1.0 - quirk_k) * TAU
+			"head_tilt": rz += e * 0.32 * idle
+			"hop": off.y += absf(sin(quirk_k * PI * 3.0)) * 0.09 * qk
+			"sway": rz += sin(quirk_k * PI * 4.0) * 0.14 * qk
+			"sneeze":
+				var sn := clampf((0.35 - absf(quirk_k - 0.4)) * 4.0, 0.0, 1.0) * idle
+				rx += sn * 0.28; sy -= sn * 0.1
+			"stretch": sz += e * 0.16 * idle; sy -= e * 0.07 * idle; rx -= e * 0.12 * idle
+			"ear_flick":
+				if quirk_k > 0.0: twitch = maxf(twitch, e)
+			"look_around": ry += sin(quirk_k * TAU) * 0.6 * qk
 	# attack: a quick lunge, stretched long, head down
 	rx -= att_k * 0.35
 	sz += att_k * 0.18
@@ -206,7 +238,7 @@ func _process(dt: float) -> void:
 	rz += sleep_k * 0.25
 	rx += sleep_k * 0.1
 	off.y -= sleep_k * 0.03
-	flex.scale = Vector3(sx, sy, sx * sz)
+	flex.scale = Vector3(sx * girth, sy, sx * sz * lerpf(1.0, girth, 0.5))
 	flex.position = flex_base + off
 	# a lean into a dizzy wobble
 	if dazed:
@@ -214,7 +246,7 @@ func _process(dt: float) -> void:
 		rx += cos(t * 5.0) * 0.08
 	flex.rotation.z = lerpf(flex.rotation.z, rz, ek)
 	flex.rotation.x = lerpf(flex.rotation.x, rx, ek)
-	flex.rotation.y = lerpf(flex.rotation.y, ry, ek)
+	flex.rotation.y = lerp_angle(flex.rotation.y, ry, ek)
 	# blinking, and a squint when dazed
 	blink_t -= dt
 	if blink_t <= 0.0:

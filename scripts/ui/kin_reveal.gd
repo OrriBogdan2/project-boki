@@ -195,7 +195,7 @@ func _info_card() -> PanelContainer:
 		v.add_child(UI.label("Part %s" % " · part ".join(animals.map(func(a): return String(a).to_lower())), 15, UI.MUTED))
 	if rare:
 		var boss := String(Data.MOBS.get(String(sp.get("boss", rec.get("from_boss", ""))), {}).get("name", "a lair boss"))
-		v.add_child(UI.label("RARE KIN  ·  its egg was guarded by %s" % boss, 15, UI.GOLD))
+		v.add_child(UI.label("RARE BOKI  ·  its egg was guarded by %s" % boss, 15, UI.GOLD))
 	if rec.get("shimmer", false):
 		v.add_child(UI.label("Shimmering! Its own rare colours (about %s)." % Shiny.odds_text(Shiny.WILD), 15, UI.GOLD))
 	for mid in Mutations.of(rec):
@@ -302,13 +302,13 @@ func _play_intro() -> void:
 	if not Mutations.of(rec).is_empty():
 		var pre: String = ("shimmering " if rec.get("shimmer", false) else "") + Mutations.prefix(rec)
 		title_lbl.text = "%s %s %s!" % ["An" if "aeiouAEIOU".contains(pre.substr(0, 1)) else "A", pre, sp["name"]]
-	sub_lbl.text = "%s kin" % String(sp.get("type", "")).capitalize()
+	sub_lbl.text = "%s Boki" % String(sp.get("type", "")).capitalize()
 	if rare:
 		# a boss's egg: a gold flash, gold rays, a shower of gold
 		title_lbl.text = "A RARE %s!" % String(sp["name"]).to_upper()
 		title_lbl.add_theme_color_override("font_color", GOLD_RAY.lightened(0.2))
 		title_lbl.add_theme_color_override("font_outline_color", Color("6a4a10"))
-		sub_lbl.text = "Rare %s kin  ·  hatched from a boss's egg" % String(sp.get("type", "")).capitalize()
+		sub_lbl.text = "Rare %s Boki  ·  hatched from a boss's egg" % String(sp.get("type", "")).capitalize()
 		sub_lbl.add_theme_color_override("font_color", GOLD_RAY)
 		flash.color = Color(1.0, 0.9, 0.55, 1.0)
 		_burst(90)
@@ -507,6 +507,7 @@ func _cry() -> AudioStreamWAV:
 	var base := lerpf(300.0, 820.0, rng.randf())
 	var spd := float(sp.get("speed", 6.5))
 	base *= clampf(spd / 6.5, 0.75, 1.3)
+	base *= Unique.voice(rec)       # its own voice, a little higher or deeper than its kind's
 	var dur := 0.62
 	var buf := PackedFloat32Array(); buf.resize(int(dur * RATE))
 	var syl := [[0.0, 0.2, 1.0, 1.45], [0.25, 0.34, 1.3, 0.9]]   # start, length, pitch from, pitch to

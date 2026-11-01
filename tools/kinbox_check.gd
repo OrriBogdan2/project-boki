@@ -265,9 +265,13 @@ func run(m: Node) -> void:
 		for k in mm:
 			if float(mm[k]) < Mutations.MULT_MIN or float(mm[k]) > Mutations.MULT_MAX: all_ok = false
 	ok(all_ok and Mutations.all().size() >= 8, "%d mutations in content/mutations, every perk within %d%%" % [Mutations.all().size(), int((Mutations.MULT_MAX - 1.0) * 100.0)])
-	var plain := Models.kin(sps[0], _kin(sps[0], "Plain"))
+	# (each kin also rolls its own size, Unique: compare average-sized ones)
+	var plain_r := _kin(sps[0], "Plain"); Unique.ensure(plain_r); plain_r["dna"]["size"] = 0.0
+	var plain := Models.kin(sps[0], plain_r)
+	Unique.ensure(g); g["dna"]["size"] = 0.0
 	var giant := Models.kin(sps[0], g)
 	var tiny_r := _kin(sps[0], "Wee"); tiny_r["mutations"] = ["tiny"]
+	Unique.ensure(tiny_r); tiny_r["dna"]["size"] = 0.0
 	var tiny := Models.kin(sps[0], tiny_r)
 	ok(giant.scale.x > plain.scale.x * 1.25 and tiny.scale.x < plain.scale.x * 0.75, "Giant and Tiny change the model's size (%.2f / %.2f / %.2f)" % [tiny.scale.x, plain.scale.x, giant.scale.x])
 	var alb := _kin(sps[0], "Snow"); alb["mutations"] = ["albino"]
@@ -300,7 +304,7 @@ func run(m: Node) -> void:
 	ok(H.kins.size() == KinBox.farm().size() and not boxed_out and KinBox.boxed().size() == 4, "home puts the %d farm kin out; the %d in the burrow stay inside" % [H.kins.size(), KinBox.boxed().size()])
 	H._open_burrow()
 	for _f in 2: await main.get_tree().process_frame
-	ok(H.panel_open == "Kin Burrow" and is_instance_valid(H.kinbox_view.grid) and H.kinbox_view.grid.get_child_count() == KinBox.PAGE, "the Kin Burrow screen opens with a %d-cell page" % KinBox.PAGE)
+	ok(H.panel_open == "Boki Burrow" and is_instance_valid(H.kinbox_view.grid) and H.kinbox_view.grid.get_child_count() == KinBox.PAGE, "the Kin Burrow screen opens with a %d-cell page" % KinBox.PAGE)
 	H.kinbox_view._quick(KinBox.boxed()[0])
 	ok(KinBox.boxed().size() == 4, "quick move onto a full farm is refused (still %d boxed)" % KinBox.boxed().size())
 	H.kinbox_view._quick(KinBox.farm().filter(func(r): return KinBox.pinned(r) == "")[0])

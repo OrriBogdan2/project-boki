@@ -22,7 +22,7 @@ static func starter_eggs() -> Array:
 const STORY := [
 	"The night after the storm, the old shrine on your island\nstarted to glow.",
 	"When you went to look, there were eggs waiting in the light.\nThree of them, still warm.",
-	"Kin choose their hunters.\nToday, one of them is going to choose you.",
+	"Boki choose their hunters.\nToday, one of them is going to choose you.",
 ]
 
 var cam: Camera3D
@@ -273,12 +273,12 @@ func _build_ui() -> void:
 	top.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
 	top.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	top.position.y = 36
-	title = UI.title("Choose your first kin", 40, UI.ACCENT)
+	title = UI.title("Choose your first Boki", 40, UI.ACCENT)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_constant_override("outline_size", 12)
 	title.add_theme_color_override("font_outline_color", Color(0.05, 0.03, 0.09, 0.85))
 	top.add_child(title)
-	var sub := UI.label("Every kin is different. It will remember how you treat it.", 16, Color(1, 0.95, 0.88, 0.9))
+	var sub := UI.label("Every Boki is different. It will remember how you treat it.", 16, Color(1, 0.95, 0.88, 0.9))
 	sub.add_theme_constant_override("outline_size", 6)
 	sub.add_theme_color_override("font_outline_color", Color(0.05, 0.03, 0.09, 0.8))
 	sub_lbl = sub
@@ -489,12 +489,12 @@ func _show_create() -> void:
 		if create_box: create_box.queue_free()
 		create_box = null
 		for e in eggs: (e["holder"] as Node3D).visible = true
-		if sub_lbl: sub_lbl.text = "Every kin is different. It will remember how you treat it."
+		if sub_lbl: sub_lbl.text = "Every Boki is different. It will remember how you treat it."
 		if edit_only or Save.d.get("tutorial", {}).get("hatched", false):
 			Game.goto("home")
 			return
 		stage = "pick"
-		title.text = "Choose your first kin"
+		title.text = "Choose your first Boki"
 		cam_to = Vector3(0, 3.6, 6.4)
 		_show_pick(), 200))
 	v.add_child(br)
@@ -734,7 +734,7 @@ func _show_name() -> void:
 	var card := UI.card(UI.CARD, 16, 18)
 	card.custom_minimum_size = Vector2(520, 0)
 	var v := UI.vbox(10); card.add_child(v)
-	v.add_child(UI.section("A new kin", sp["color"]))
+	v.add_child(UI.section("A new Boki", sp["color"]))
 	v.add_child(UI.title("Name your %s" % sp["name"], 34))
 	v.add_child(UI.label("\"%s\"" % KinSpeak.babble(sp_id, "happy"), 22, sp["color"]))
 	v.add_child(UI.label("It's %s, and it can only babble for now. Whatever you call it, it'll answer to." % String(sp["voice"]).split(",")[0], 16, UI.MUTED))
@@ -790,6 +790,7 @@ func _finish(sp_id: String, kname: String, you: String, tutorial: bool) -> void:
 	Save.d["roster"] = [rec]
 	Save.d["active"] = rec["uid"]
 	Save.d["name"] = you.strip_edges() if you.strip_edges() != "" else "Hunter"
+	Save.register(rec, "starter")      # serial #1 of its kind, you as its trainer
 	Save.d["tutorial"]["hatched"] = true
 	Save.save_game()
 	Sfx.play("click")

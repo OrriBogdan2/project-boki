@@ -73,9 +73,9 @@ static func lose(k: Dictionary, fate: String, holder: String, tier: int) -> void
 	price(L)
 	(Save.d["lost_kin"] as Array).append(L)
 	if fate == "rival":
-		note_log("%s was collected by %s." % [k.get("name", "Your kin"), holder])
+		note_log("%s was collected by %s." % [k.get("name", "Your Boki"), holder])
 	else:
-		note_log("Nobody collected %s. It's waiting at the Ransom House." % k.get("name", "Your kin"))
+		note_log("Nobody collected %s. It's waiting at the Ransom House." % k.get("name", "Your Boki"))
 
 ## Back on your roster, remembering what happened.
 static func restore(L: Dictionary, how: String) -> Dictionary:
@@ -88,7 +88,7 @@ static func restore(L: Dictionary, how: String) -> Dictionary:
 	if Save.d.get("active", "") == "" or Save.kin(str(Save.d.get("active", ""))).is_empty():
 		Save.d["active"] = k["uid"]
 	KinBox.route_back(k)
-	note_log("%s came home (%s)." % [k.get("name", "Your kin"), how])
+	note_log("%s came home (%s)." % [k.get("name", "Your Boki"), how])
 	return k
 
 ## Buying back at the asking price.
@@ -142,7 +142,7 @@ static func tick(rivals_seen: Array) -> Array:
 	var news: Array = []
 	for L in (Save.d.get("lost_kin", []) as Array).duplicate():
 		L["waited"] = int(L.get("waited", 0)) + 1
-		var nm := String(L["rec"].get("name", "Your kin"))
+		var nm := String(L["rec"].get("name", "Your Boki"))
 		if String(L["where"]) == "ransom":
 			if int(L["waited"]) > SELL_AFTER:
 				var buyer: String = rivals_seen.pick_random() if not rivals_seen.is_empty() else Data.BOT_NAMES.pick_random()
@@ -177,7 +177,7 @@ static func tick(rivals_seen: Array) -> Array:
 			var rv := rival(from)
 			var g := int(round(value(k) * (0.6 + (1.0 - float(rv["greed"])) * 0.5)))
 			offers.append({"uid": k["uid"], "from": from, "gems": g, "m": int(Save.d.get("matches", 0))})
-			news.append("%s wants %s back and is offering %d gems. See the Ransom House." % [from, k.get("name", "a kin"), g])
+			news.append("%s wants %s back and is offering %d gems. See the Ransom House." % [from, k.get("name", "a Boki"), g])
 	Save.d["offers"] = offers
 	return news
 
@@ -194,7 +194,7 @@ static func sell_back(o: Dictionary) -> void:
 	if Save.d.get("active2", "") == k["uid"]:
 		Save.d["active2"] = ""
 	rival(String(o["from"]))["grudge"] = maxf(0.0, float(rival(String(o["from"]))["grudge"]) - 0.1)
-	note_log("You sold %s back to %s for %d gems." % [k.get("name", "a kin"), o["from"], o["gems"]])
+	note_log("You sold %s back to %s for %d gems." % [k.get("name", "a Boki"), o["from"], o["gems"]])
 	Save.save_game()
 
 static func decline(o: Dictionary) -> void:

@@ -210,9 +210,12 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 				h.start_base(mate)
 		if h.base_t > 0.0:
 			move = Vector2.ZERO
-		if h.hp < h.max_hp * 0.45 and h.tonics > 0:
+		# (heals fold the glider now, so a bot only drinks with ground under it, never over the void
+		# or mid-drop)
+		var heal_ok: bool = h.grounded or (not h.gliding and not h.dropping and not h.over_void())
+		if heal_ok and h.hp < h.max_hp * 0.45 and h.tonics > 0:
 			inp["tonic"] = true
-		elif h.armor < h.max_armor * 0.3 and h.armor_kits > 0:
+		elif heal_ok and h.armor < h.max_armor * 0.3 and h.armor_kits > 0:
 			inp["kit"] = true
 		# swap a fainted kin out for the other one
 		if h.kin and (h.kin as Kin).state == "fainted" and h.kin2 and (h.kin2 as Kin).hp > 0.0:
@@ -643,7 +646,13 @@ func _choose(m: Match, h: Hunter) -> void:
 			a.erase("ping_goal")
 	# boss lairs: a dropped Rare Egg, or (bolder bots) a lair to open and its boss to fight
 	if goal == Vector3.INF and m.lairs and not m.lairs.list.is_empty():
-		var lg: Array = m.lairs.bot_goal(h, time_left < 170.0 or a.get("leave", false))
+		# heading home, as far as lairs go: late in the match, carrying a Rare Egg, or a bot that has
+		# decided to leave once the match is far enough along. (The random "leave" roll below can
+		# fire in the first minute; it used to cancel every lair plan right away, though the exits
+		# don't act on it until 30% in, so the bot just wandered.)
+		var egg_home: bool = h.pack.any(func(it): return Loot.is_rare_egg(it))
+		var lair_leave: bool = time_left < 170.0 or egg_home or (a.get("leave", false) and m.time > m.length * 0.3)
+		var lg: Array = m.lairs.bot_goal(h, lair_leave)
 		if not lg.is_empty():
 			goal = lg[0]; gk = String(lg[1])
 	if goal == Vector3.INF and m.exits and not m.exits.list.is_empty():
@@ -687,6 +696,14 @@ func _choose(m: Match, h: Hunter) -> void:
 			else:
 				a["wander"] = m.world.random_ground()
 		goal = a["wander"]; gk = "roam"
+	# a goal we gave up on for now: head for a detour instead, and keep it (re-rolling a fresh one
+	# every think left the bot dithering on the spot)
+	if _banned(m, a, goal):
+		var dt: Vector3 = a.get("detour", Vector3.INF)
+		if dt == Vector3.INF or _banned(m, a, dt) or h.flat_dist(dt) < 2.0:
+			dt = m.world.random_ground()
+			a["detour"] = dt
+		goal = dt; gk = "roam"
 	# give up on goals we can't seem to reach
 	if goal != a["goal"]:
 		a["goal_best"] = 1e9
@@ -704,8 +721,6 @@ func _choose(m: Match, h: Hunter) -> void:
 			a["banned"] = bans
 			a["goal_since"] = m.time
 			a["goal_best"] = 1e9
-	if _banned(m, a, goal):
-		goal = m.world.random_ground(); gk = "roam"
 	a["goal"] = goal
 	a["goal_kind"] = gk
 

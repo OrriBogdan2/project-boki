@@ -127,7 +127,7 @@ func _build_room() -> void:
 		Models.part(gram, Models.cyl(0.05, 0.3, 0.45, 14), Models.toon(Color("d9b04a"), false, 0.3), Vector3(0.12, 1.05, -0.05), Vector3.ONE, Vector3(-0.6, 0, 0))
 		occ[Vector2i(7, 0)] = -2; occ[Vector2i(8, 0)] = -2
 		if visit.is_empty():
-			spots.append({"kind": "journal", "pos": Vector3(7.5, 0, 1.2), "label": "Read the kin journal"})
+			spots.append({"kind": "journal", "pos": Vector3(7.5, 0, 1.2), "label": "Read the Boki journal"})
 			spots.append({"kind": "music", "pos": Vector3(8.5, 0, 1.2), "label": "Play some music"})
 
 # ------------------------------------------------------------------ furniture on the grid
@@ -646,10 +646,10 @@ func _close_panel() -> void:
 
 ## Every kin you have, and who comes along on expeditions.
 func _open_journal() -> void:
-	var v := _new_panel("Kin journal", 640)
-	v.add_child(UI.label("Your kin out on the farm. The one you bring on expeditions is your partner.", 14, UI.MUTED))
+	var v := _new_panel("Boki journal", 640)
+	v.add_child(UI.label("Your Boki out on the farm. The one you bring on expeditions is your partner.", 14, UI.MUTED))
 	if not KinBox.boxed().is_empty():
-		v.add_child(UI.label("%d more asleep in the Kin Burrow (open it on the farm to swap them out)." % KinBox.boxed().size(), 13, Color("cdb8ff")))
+		v.add_child(UI.label("%d more asleep in the Boki Burrow (open it on the farm to swap them out)." % KinBox.boxed().size(), 13, Color("cdb8ff")))
 	for rec in KinBox.farm():
 		var row := UI.card(UI.CARD, 10, 10)
 		var h := UI.hbox(12); row.add_child(h)

@@ -25,7 +25,7 @@ extends RefCounted
 const CATS := {
 	"boss": {"name": "Boss lair", "shape": "skull", "col": Color("ff5a4a"), "announce": true, "pick": [1, 1], "order": 0},
 	"vault": {"name": "Vault", "shape": "vault", "col": Color("f2c84a"), "announce": true, "pick": [2, 2], "order": 1},
-	"rare_kin": {"name": "Rare kin", "shape": "paw", "col": Color("ff9be8"), "announce": false, "pick": [3, 3], "order": 2},
+	"rare_kin": {"name": "Rare Boki", "shape": "paw", "col": Color("ff9be8"), "announce": false, "pick": [3, 3], "order": 2},
 	"cache": {"name": "Item cache", "shape": "crate", "col": Color("8fd8ff"), "announce": false, "pick": [4, 4], "order": 3},
 }
 const REVEAL_R := 9.0          # flat distance at which a hunter on the ground just knows what's there
@@ -214,7 +214,7 @@ func _spawn_rare(p: Vector3, r: RandomNumberGenerator) -> Kin:
 	# (the boss-egg species never turn up in the wild: Data.common_kin)
 	var pool: Array = Data.common_kin()
 	var sp: String = pool[r.randi_range(0, pool.size() - 1)]
-	var rec := Save.new_kin(sp)
+	var rec := Save.new_kin(sp, "", m.kin_seed("rare"))
 	var lv: Array = m.T.get("kin_lvl", [1, 3])
 	rec["level"] = int(lv[1]) + r.randi_range(2, 4)
 	Evo.simulate(rec, r)

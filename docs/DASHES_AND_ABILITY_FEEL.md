@@ -166,7 +166,7 @@ resets that only work if the payoff lands (Shiv, Shrike level 4).
 
 ---
 
-## 3. Kinfall dashes
+## 3. Project Boki dashes
 
 ### 3.1 Model
 
