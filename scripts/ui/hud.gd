@@ -500,7 +500,7 @@ func _draw_top(sz: Vector2) -> void:
 		if guide_hidden:
 			var pill := Rect2(Vector2(sz.x - 196, 16), Vector2(180, 30))
 			_panel(pill, Color(0.06, 0.07, 0.1, 0.8), 10)
-			_text(pill.position + Vector2(12, 20), "Guide %d/%d  ·  G to show" % [n_done, all_rows.size()], 13, MUTED)
+			_text(pill.position + Vector2(12, 20), "Guide %d/%d  ·  H to show" % [n_done, all_rows.size()], 13, MUTED)
 			return
 		var shown: Array = left.slice(0, 6)
 		var box := Rect2(Vector2(sz.x - 346, 16), Vector2(330, 58 + maxi(1, shown.size()) * 24))
@@ -514,7 +514,7 @@ func _draw_top(sz: Vector2) -> void:
 			var key := ("[%s]  " % Settings.key_cap(t[2])) if t[2] != "" else ""
 			if t[0] == "move": key = "[%s%s%s%s]  " % [Settings.key_cap("up"), Settings.key_cap("left"), Settings.key_cap("down"), Settings.key_cap("right")]
 			_text(box.position + Vector2(14, 50 + i * 24), ("→  " if i == 0 else "○  ") + key + String(t[1]), 13, GOLD if i == 0 else INK)
-		_text(box.position + Vector2(14, box.size.y - 10), "G hides the guide and your kit", 11, Color(MUTED, 0.8))
+		_text(box.position + Vector2(14, box.size.y - 10), "H hides the guide and your kit", 11, Color(MUTED, 0.8))
 		return
 	if m.opts.get("tutorial", false):
 		var txt: String = m.tut_text
@@ -1059,8 +1059,8 @@ func _hud_tick(delta: float) -> void:
 	_track_mates(m.player, delta)
 	_loot_tick(delta)
 	glider_hit_t = maxf(0.0, glider_hit_t - delta)
-	# G folds the training guide and the kit panel away (and back)
-	var hd := Input.is_physical_key_pressed(KEY_G)
+	# H folds the training guide (G is send / recall your kin) and the kit panel away (and back)
+	var hd := Input.is_physical_key_pressed(KEY_H)
 	if hd and not _h_down and (m.opts.get("training", false) or m.opts.get("duel", false)):
 		guide_hidden = not guide_hidden
 	_h_down = hd

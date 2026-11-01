@@ -156,7 +156,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 				a["throw_cd"] = randf_range(4, 8)
 			elif k.state == "active" and k.runner.is_ready("k1") and k.flat_dist(tgt) < 6.0 and randf() < 0.5:
 				h.inp["aim"] = Vector3(tgt.pos.x, tgt.pos.y, tgt.pos.z)
-				h.inp["sig"] = true
+				h.inp["kin_ab" if h.ak else "sig"] = true
 				a["throw_cd"] = randf_range(1, 3)
 			elif k.state == "active" and (k.hp < k.max_hp * 0.3 or k.flat_dist(h) > 11.0):
 				k.recall()
@@ -173,8 +173,13 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		a["abil_t"] = float(a.get("abil_t", 0.0)) - dt
 		if a["abil_t"] <= 0.0 and a["react_t"] <= 0.0:
 			a["abil_t"] = randf_range(0.4, 1.0) * (1.0 + (1.0 - abil) * 4.0)
-			_use_sig(m, h, tgt)
-			_use_sec(m, h, tgt)
+			if h.ak:
+				# the archetype's kit: dash, RMB variants, E and R (each kit knows its own moments)
+				h.ak.bot_use(tgt, d, los)
+				_use_kin_ab(m, h, tgt)
+			else:
+				_use_sig(m, h, tgt)
+				_use_sec(m, h, tgt)
 			# the active glove (Q) when its moment comes (hook in range, wall when shot at...)
 			if h.gear_cd[0] <= 0.0 and not (h.gear[0] as Dictionary).is_empty() and Gear.active(String(h.gear[0]["id"])) and randf() < 0.3 + abil * 0.6:
 				var gdf := Gear.def_of(String(h.gear[0]["id"]))
@@ -427,6 +432,17 @@ func _crawl(m: Match, h: Hunter) -> void:
 	if mv.length() > 0 and not _safe(m, h, mv, 1.0):
 		mv = Vector2.ZERO
 	h.inp["move"] = mv
+
+## C with an archetype: the kin's own ability (it hops out, casts and hops back) when it fits.
+func _use_kin_ab(_m: Match, h: Hunter, tgt: Ent) -> void:
+	var k: Kin = h.kin
+	if k == null or not k.ready_to_fight() or tgt == null or not k.runner.is_ready("k1"):
+		return
+	var def := k.runner.def_of("k1")
+	var reach := def.cast_range if def.cast_range > 0.0 else 7.0
+	if h.flat_dist(tgt) < reach + 1.0 and randf() < 0.35:
+		h.inp["aim"] = Vector3(tgt.pos.x, tgt.pos.y, tgt.pos.z)
+		h.inp["kin_ab"] = true
 
 ## Right click: the weapon's utility, used when a target is in reach.
 func _use_sec(m: Match, h: Hunter, tgt: Ent) -> void:

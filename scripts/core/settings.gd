@@ -83,13 +83,13 @@ func note_benchmark(ms: float) -> void:
 	print("Quality: auto picked %s (load benchmark %.1f ms a frame)" % [cur, ms])
 
 ## Bumped when the default kit changes enough that old custom bindings would be nonsense.
-const KEYS_V := 2
+const KEYS_V := 3
 
 ## Rebindable actions, in the order the controls list shows them.
 const ACTIONS := [
 	["up", "Move up"], ["down", "Move down"], ["left", "Move left"], ["right", "Move right"],
-	["fire", "Weapon attack"], ["secondary", "Weapon ability (right click)"], ["dash", "Dash"], ["jump", "Jump (hold to glide)"], ["glide", "Glide (hold in the air)"], ["crouch", "Sneak"],
-	["gear1", "Glove active"], ["signature", "Kin ability"], ["throw", "Throw / recall kin"], ["ultimate", "Bond ultimate"], ["base", "Base to a teammate (squads)"],
+	["fire", "Weapon attack"], ["secondary", "Archetype ability (right click)"], ["dash", "Archetype dash"], ["jump", "Jump (hold to glide)"], ["glide", "Glide (hold in the air)"], ["crouch", "Sneak"],
+	["gear1", "Glove active"], ["signature", "Archetype utility (E)"], ["kin_ability", "Kin ability (hops out, casts, hops back)"], ["throw", "Send / recall kin"], ["ultimate", "Archetype ultimate (bonded when bond is full)"], ["base", "Base to a teammate (squads)"],
 	["interact", "Use, catch, revive, pet"], ["tonic", "Heal (tonic, or armor kit when health is full)"], ["scores", "Scoreboard"], ["emote", "Emote wheel (hold, in a match)"],
 	["map", "Full map (click to ping)"], ["pass_lead", "Pass the drop lead"], ["separate", "Separate from the drop"],
 	["play", "Play fetch with a kin"], ["talk", "Talk to a kin"], ["details", "A kin's details"], ["inventory", "Inventory"],
@@ -118,7 +118,7 @@ func _ready() -> void:
 	if not cf.has_section_key("s", "keys_v") and String(v.get("cam_follow", "")) == "standard":
 		v["cam_follow"] = "supervive"     # the new Supervive-style cursor lean becomes everyone's default once
 	if int(v.get("keys_v", 1)) < KEYS_V or not cf.has_section_key("s", "keys_v"):
-		v["keys"] = {}          # the kit changed (Q/E gloves, C kin, G throw): start from the new defaults
+		v["keys"] = {}          # the kit changed (archetypes: E utility, C kin ability, G send/recall): start from the new defaults
 		v["keys_v"] = KEYS_V
 	if int(v.get("video_v", 1)) < 2 or not cf.has_section_key("s", "video_v"):
 		# crisper by default: 4x MSAA on desktop (the browser build stays on 2x)

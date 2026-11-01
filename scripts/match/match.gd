@@ -77,7 +77,7 @@ var aim_ring: MeshInstance3D
 var muzzle_light: OmniLight3D
 var collapse_warned := false
 var rng := RandomNumberGenerator.new()
-var pending_input := {"base": false, "dash": false, "jump": false, "sig": false, "reload": false, "tonic": false, "kit": false, "throw": false, "skill": false, "ult": false, "sec": false, "gear1": false, "gear2": false, "swap": false}
+var pending_input := {"base": false, "dash": false, "jump": false, "sig": false, "reload": false, "tonic": false, "kit": false, "throw": false, "skill": false, "ult": false, "sec": false, "gear1": false, "gear2": false, "swap": false, "kin_ab": false}
 var zones: Array = []      # hero areas: dome, sanctuary, well
 var fields: Fields = null  # patches made by kin abilities (Thorn Patch)
 var verbs: Verbs = null    # walls, reflect windows, tethers, traps, bridges and yanks left by abilities
@@ -539,7 +539,12 @@ func make_hunter(id: String, team: int, cls: String, pname: String, ctrl: String
 		cls = ["light", "medium", "heavy"][rng.randi_range(0, 2)]
 	if String(kit.get("weapon", "")) == "?":
 		kit = kit.duplicate()
+		# bots get an archetype of their class, and a weapon from its family
+		if ctrl != "local" and String(kit.get("arch", "")) in ["", "?"]:
+			kit["arch"] = Arch.pick(cls, rng)
 		var pool: Array = Data.CLASSES[cls]["weapons"]
+		if Arch.exists(String(kit.get("arch", ""))) and Arch.weight(String(kit["arch"])) == cls:
+			pool = Arch.weapons(String(kit["arch"]))
 		kit["weapon"] = pool[rng.randi_range(0, pool.size() - 1)]
 	h.init_hunter(self, id, team, cls, pname, ctrl, kit)
 	h.lives = 99 if (opts.get("tutorial", false) or opts.get("training", false)) else int(T.get("lives", 2))
@@ -598,7 +603,7 @@ func player_altitude() -> float:
 const TWO_KIN := false
 
 func my_kit() -> Dictionary:
-	return {"weapon": String(opts.get("weapon", Save.d.get("weapon", ""))), "perk": ""}
+	return {"weapon": String(opts.get("weapon", Save.d.get("weapon", ""))), "perk": "", "arch": String(opts.get("arch", Save.d.get("arch", "")))}
 
 func bot_kit() -> Dictionary:
 	# the weapon is picked once the bot's class is known (see make_hunter): any of its class's
@@ -1760,11 +1765,16 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 	# only numbers that involve you: other fights nearby don't spray digits over yours
 	if mine:
 		fx.number(target.pos + Vector3(0, 1.5 if target is Hunter else 1.0, 0), d, col, crit)
-	# impact: a short freeze on heavy hits you deal or take (scaled by the hit, never on chip damage)
-	if mine and src != "burn":
-		var kbv: Vector2 = o.get("kb", Vector2.ZERO) if o.get("kb", null) is Vector2 else Vector2.ZERO
-		if d >= 18.0 or kbv.length() >= 7.0 or o.get("stun", 0.0) > 0.0:
-			freeze_frame(clampf(0.025 + d * 0.0011 + kbv.length() * 0.003, 0.03, 0.075))
+	# archetype passives feed on what happens (Marks, Chambers, Rage, Focus...)
+	if credit is Hunter and (credit as Hunter).ak and target != credit and not credit.remote:
+		(credit as Hunter).ak.on_deal(target, d, o)
+	if target is Hunter and (target as Hunter).ak and not target.remote:
+		(target as Hunter).ak.on_take(by, d, o)
+	# impact: hitstop and shake by tier (docs/DASHES_AND_ABILITY_FEEL.md §5.4-5.5), from what the hit did
+	if src != "burn":
+		var tier := Feel.hitstop(self, by, target, d, o)
+		if tier >= 2 and credit == player:
+			Feel.shake(self, Feel.shake_for_tier(tier), credit, target.pos, target)
 	if credit == player and target != player and src != "burn":
 		sfx("crit" if crit else "hit", target.pos, -4.0 if crit else -6.0, 1.25 if armor_hit else randf_range(0.92, 1.08))
 		if hud: hud.hitmarker(crit, armor_hit)
@@ -3300,7 +3310,8 @@ func _gather_input() -> void:
 		player.inp["fire"] = false
 	# hold Space or Mouse 5 (Mouse 4 works too) in the air to glide; the mouse buttons never jump
 	player.inp["glide"] = (Input.is_action_pressed("jump") or Input.is_action_pressed("glide")) and not paused
-	player.inp["dash_hold"] = Input.is_action_pressed("dash") and bool(Settings.get_v("dash_hold"))
+	player.inp["dash_hold"] = Input.is_action_pressed("dash") and bool(Settings.get_v("dash_hold")) and player.ak == null
+	player.inp["dash_down"] = Input.is_action_pressed("dash") and not paused     # hold-shaped dashes (Slide, Rampage)
 	var quick: bool = Settings.get_v("cast_on_press")
 	player.inp["sec_hold"] = Input.is_action_pressed("secondary") and not paused and not on_panel
 	# crouch: hold by default, or tap to toggle (the web version defaults to toggle, so you never
@@ -3325,7 +3336,7 @@ func _gather_input() -> void:
 	if Input.is_action_just_pressed("base") and not paused and duel == null:
 		pending_input["base"] = true
 	var slot_of := {"dash": "dash", "secondary": "sec", "gear1": "gear", "signature": "kin", "ultimate": "ult"}
-	for a in [["dash", "dash"], ["jump", "jump"], ["signature", "sig"], ["reload", "reload"], ["tonic", "tonic"], ["throw", "throw"], ["ultimate", "ult"], ["secondary", "sec"], ["gear1", "gear1"]]:
+	for a in [["dash", "dash"], ["jump", "jump"], ["signature", "sig"], ["reload", "reload"], ["tonic", "tonic"], ["throw", "throw"], ["ultimate", "ult"], ["secondary", "sec"], ["gear1", "gear1"], ["kin_ability", "kin_ab"]]:
 		if a[0] == "tonic" and (not perk_offer.is_empty() or not _perk_keys_down.is_empty()):
 			continue       # 1, 2 and 3 pick a perk while a choice is open
 		if (map_up or on_panel) and a[0] in ["secondary", "throw"]:
@@ -3341,7 +3352,7 @@ func _gather_input() -> void:
 			if int(player.slot_lv[sl]) == 0:
 				pending_input[a[1]] = true      # locked: the press unlocks it if you have a point
 				continue
-		var aimable: bool = a[0] in ["signature", "ultimate", "gear1", "secondary"] and not quick
+		var aimable: bool = a[0] in ["signature", "ultimate", "gear1", "secondary"] and not quick and not (player.ak != null and a[0] == "secondary")
 		if a[0] == "secondary" and player.runner and player.runner.def_of("utility") and not player.runner.def_of("utility").charge.is_empty():
 			aimable = false       # a charge-up starts on the press and fires on the release
 		if a[0] == "gear1" and (player.gear[0] as Dictionary).is_empty():
@@ -3702,8 +3713,8 @@ func step(dt: float) -> void:
 		if pending_input["base"]:
 			pending_input["base"] = false
 			player.start_base(base_target(player))
-		for k in ["dash", "jump", "sig", "reload", "tonic", "kit", "ult", "sec", "gear1", "gear2", "skill", "swap"]:
-			if pending_input[k]:
+		for k in ["dash", "jump", "sig", "reload", "tonic", "kit", "ult", "sec", "gear1", "gear2", "skill", "swap", "kin_ab"]:
+			if pending_input.get(k, false):
 				player.inp[k] = true
 				pending_input[k] = false
 		if pending_input["throw"]:
@@ -4917,6 +4928,12 @@ func _dome_blocks(s: Dictionary, p: Vector3) -> bool:
 		var c: Vector3 = z["pos"]
 		if Vector2(p.x - c.x, p.z - c.z).length() < z["r"] and Vector2(s["start"].x - c.x, s["start"].z - c.z).length() > z["r"]:
 			fx.burst(p, Color(Color("f2d47a"), 0.8), 6, 2.0, 0.25, 0.0, 0.7)
+			if z.has("hp"):
+				# a Bastion's ring soaks shots until its health runs out
+				z["hp"] = float(z["hp"]) - float(s["dmg"])
+				var ow: Hunter = z.get("owner")
+				if ow and is_instance_valid(ow) and ow.ak: ow.ak.on_block(float(s["dmg"]), s.get("by"))
+				if float(z["hp"]) <= 0.0: z["dur"] = minf(float(z["dur"]), float(z["t"]) + 0.1)
 			return true
 	return false
 
@@ -5260,7 +5277,7 @@ func _spawn_net_hunters(spots: Array, names: Array) -> void:
 				_apply_treat(player.kin)
 			_start_drop(player, at)
 		else:
-			var h := make_hunter("P" + peer, t, String(r["cls"]), String(r["name"]), "remote", krec, at, {"weapon": r.get("weapon", ""), "perk": ""})
+			var h := make_hunter("P" + peer, t, String(r["cls"]), String(r["name"]), "remote", krec, at, {"weapon": r.get("weapon", ""), "perk": "", "arch": String(r.get("arch", ""))})
 			h.remote = true
 			if h.kin:
 				h.kin.remote = true
@@ -5316,7 +5333,7 @@ func _ser(e: Ent) -> Array:
 	if e is Hunter:
 		var h: Hunter = e
 		return ["h", h.nid, _r(h.pos.x), _r(h.pos.y), _r(h.pos.z), _r(h.vel.x), _r(h.vel.y), _r(h.vel.z), _r(h.face), _r(h.hp), h.max_hp, _flags(h),
-			_r(h.down_hp), _r(h.revive), h.team, h.cls, h.pname, _r(h.shield), _r(h.extract_prog), h.kills, h.knocks, int(h.dmg_done), _r(h.armor), h.max_armor]
+			_r(h.down_hp), _r(h.revive), h.team, h.cls, h.pname, _r(h.shield), _r(h.extract_prog), h.kills, h.knocks, int(h.dmg_done), _r(h.armor), h.max_armor, h.arch, h.wid]
 	if e is Kin:
 		var k: Kin = e
 		return ["k", k.nid, _r(k.pos.x), _r(k.pos.y), _r(k.pos.z), _r(k.face), _r(k.hp), _r(k.max_hp), KIN_STATES.find(k.state), k.species,
@@ -5377,7 +5394,9 @@ func _net_make(it: Array) -> Ent:
 	var nid := String(it[1])
 	match String(it[0]):
 		"h":
-			var h := make_hunter(nid, int(it[14]), String(it[15]), String(it[16]), "remote", {}, Vector3(it[2], it[3], it[4]))
+			# the host says which archetype and weapon: a remote body always shows its real silhouette
+			var rk := {"arch": String(it[24]) if it.size() > 24 else "", "weapon": String(it[25]) if it.size() > 25 else ""}
+			var h := make_hunter(nid, int(it[14]), String(it[15]), String(it[16]), "remote", {}, Vector3(it[2], it[3], it[4]), rk)
 			h.remote = true
 			return h
 		"k":

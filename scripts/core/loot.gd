@@ -92,7 +92,12 @@ static func class_of(it: Dictionary) -> String:
 ## packed and carried home, just not held.
 static func usable(h, it: Dictionary) -> bool:
 	var c := class_of(it)
-	return c == "" or h == null or c == String(h.cls)
+	if c == "" or h == null:
+		return true
+	# with an archetype only its own weapon family can be held (the rest still packs and goes home)
+	if String(h.get("arch")) != "" and String(it.get("t", "weapon")) == "weapon":
+		return Arch.weapon_ok(String(h.arch), String(it.get("wid", "")))
+	return c == String(h.cls)
 
 static func keepable(it: Dictionary) -> bool:
 	if it.is_empty():

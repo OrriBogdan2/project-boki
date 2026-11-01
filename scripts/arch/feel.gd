@@ -142,11 +142,11 @@ static var _budget := {}       # nid -> [window start, spent]
 
 ## The hitstop tier of one hit (T0..T5), from what it did (§5.4 table).
 static func tier(target: Ent, d: float, o: Dictionary) -> int:
-	if String(o.get("src", "")) in ["burn", "fall", "heat"] or o.get("tick", false):
+	if String(o.get("src", "")) in ["burn", "fall", "heat", "mob"] or o.get("tick", false):
 		return 0
 	if o.get("bonded", false) or o.get("merge_start", false):
 		return 5
-	if o.get("payoff", false) or o.get("spiked", false) or o.get("exploit", false):
+	if o.get("payoff", false) or o.get("spiked", false) or o.get("exploit", false) or String(o.get("src", "")) == "wall":
 		return 4
 	var mh := maxf(1.0, target.max_hp)
 	var cc := float(o.get("stun", 0.0)) > 0.0 or float(o.get("root", 0.0)) > 0.0 or float(o.get("lift", 0.0)) > 0.0
