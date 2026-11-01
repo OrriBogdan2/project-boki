@@ -535,6 +535,25 @@ func cast_r() -> bool:
 	net_bolt(h.pos + Vector3(0, 0.2, 0), h.pos + Vector3(dir.x, 0, dir.y) * length + Vector3(0, 0.2, 0), col_of(rd))
 	return true
 
+## A rock spur that bursts up out of the crack and sinks back (everyone sees the eruption).
+func _pillar(at: Vector3, tall: float) -> void:
+	var n := MeshInstance3D.new()
+	n.mesh = Models.box(0.55, tall, 0.55)
+	n.material_override = Models.toon(Color("b08a62"))
+	m.add_child(n)
+	n.global_position = at + Vector3(0, -tall * 0.5, 0)
+	n.rotation = Vector3(randf_range(-0.25, 0.25), randf() * TAU, randf_range(-0.25, 0.25))
+	var glow := MeshInstance3D.new()
+	glow.mesh = Models.box(0.62, 0.12, 0.62)
+	glow.material_override = Models.glow_mat(Color(col_of(r_def()), 0.9))
+	glow.position = Vector3(0, tall * 0.5, 0)
+	n.add_child(glow)
+	var tw := n.create_tween()
+	tw.tween_property(n, "global_position", at + Vector3(0, tall * 0.45, 0), 0.08).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw.tween_interval(0.18)
+	tw.tween_property(n, "global_position", at + Vector3(0, -tall * 0.55, 0), 0.25)
+	tw.tween_callback(n.queue_free)
+
 func _near_line(f: Ent, a: Vector3, b: Vector3, w: float) -> bool:
 	var fp := Vector2(f.pos.x, f.pos.z)
 	var cp := Geometry2D.get_closest_point_to_segment(fp, Vector2(a.x, a.z), Vector2(b.x, b.z))
@@ -552,8 +571,9 @@ func _tick_fissure(dt: float) -> void:
 		fissure["front"] = f1
 		var a := from + Vector3(dir.x, 0, dir.y) * f0
 		var b := from + Vector3(dir.x, 0, dir.y) * f1
-		m.fx.dust(b, 4)
-		m.fx.burst(b + Vector3(0, 0.2, 0), col_of(rd), 4, 3.0, 0.3, 4.0, 1.0)
+		m.fx.dust(b, 6)
+		m.fx.burst(b + Vector3(0, 0.2, 0), col_of(rd), 8, 4.0, 0.35, 4.0, 1.2)
+		m.fx.bolt(a + Vector3(0, 0.08, 0), b + Vector3(0, 0.08, 0), col_of(rd).darkened(0.2))     # the crack itself
 		for f in m.foes_of(h.team):
 			if f.hittable() and not (fissure["hit"] as Dictionary).has(f.get_instance_id()) and _near_line(f, from, b, float(rd["width"])):
 				fissure["hit"][f.get_instance_id()] = true
@@ -581,8 +601,10 @@ func _tick_fissure(dt: float) -> void:
 	var k := 0.8
 	while k < length:
 		var q := from + Vector3(dir.x, 0, dir.y) * k
-		m.fx.burst(q + Vector3(0, 0.3, 0), col_of(rd), 5, 5.0, 0.45, 9.0, 1.3, Vector3.UP, 25.0)
-		k += 1.4
+		m.fx.burst(q + Vector3(0, 0.3, 0), col_of(rd), 9, 7.0, 0.5, 9.0, 1.5, Vector3.UP, 20.0)
+		_pillar(ground(q), 0.9 + randf() * 0.7)
+		m.fx.dust(q, 3)
+		k += 1.2
 	m.fx.dust(from + Vector3(dir.x, 0, dir.y) * length * 0.5, 10)
 	m.sfx("boom", from + Vector3(dir.x, 0, dir.y) * length * 0.5, -6.0, 0.7)
 	Feel.shake(m, "t2", h, from + Vector3(dir.x, 0, dir.y) * length * 0.5)

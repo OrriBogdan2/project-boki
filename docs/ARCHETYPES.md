@@ -327,6 +327,8 @@ Save CC for after the second Flicker step. Heist's lines show who's next.
 
 ### 6.2 Archer (light)
 
+> **Nov 1 (kits4): superseded in part.** The Archer was rebuilt on a reference baseline (owner direction); the built kit is in "Kit loops" at the end of this document, and it wins where they differ.
+
 **Fantasy:** the warden of high ground. Climbs, reads the field, pins people to walls.
 **Silhouette:** tall and upright, standing still. A long weapon slung across the back rises above
 the head (bow tips or rifle barrel). A feathered cowl crest and a quiver. The **primary feature is
@@ -400,6 +402,8 @@ cut the grapple rope. Watch for the Plunge if you knock them off. Leave Volley c
 ---
 
 ### 6.3 Mage (medium)
+
+> **Nov 1 (kits4): superseded in part.** The Mage was rebuilt on a reference baseline (owner direction); the built kit is in "Kit loops" at the end of this document, and it wins where they differ.
 
 **Fantasy:** the runecaster. Draws sigils, throws bolts that take on the kin's nature, and runs
 dangerously hot.
@@ -483,6 +487,8 @@ before the detonation flash. The Meteor's 1.0s is the longest tell in the game. 
 ---
 
 ### 6.4 Gunslinger (medium)
+
+> **Nov 1 (kits4):** the built kit and its numbers are in "Kit loops" at the end of this document; where they differ from this section, they win.
 
 **Fantasy:** the duelist. A rhythm of six, trick shots off walls, slide and reload.
 **Silhouette:** a wide-brimmed hat, a long split-tail coat that flares when moving, a hip holster
@@ -630,6 +636,8 @@ Earthshatter landing circle are both dodgeable. Kite during Iron Hide and Avalan
 ---
 
 ### 6.6 Bulwark (heavy)
+
+> **Nov 1 (kits4): superseded in part.** The Bulwark was rebuilt on a reference baseline (owner direction); the built kit is in "Kit loops" at the end of this document, and it wins where they differ.
 
 **Fantasy:** the squad's shield. Holds the line, plants a banner, leaps in to save an ally at the edge.
 **Silhouette:** a big rectangular tower shield, or a minigun with a front plate. A square crested
@@ -973,3 +981,42 @@ above is superseded by this:
   Mending Ground when hurt or the shield is low, Fissure at 11m; LMB throws from range and winds
   up Crushing Blows up close.
 - Retired: Interpose (ally leap), Rally Banner, Bastion.
+
+### Six RMBs, six input patterns (owner: "all the RMBs mostly feel the same")
+
+| Archetype | Input | Shape | Sound | Payoff |
+|---|---|---|---|---|
+| Thief | tap, then recast | a thrown knife; the recast teleports you behind the target | a throw, then a cloak snap | Marks; at 3 the knife Cashes In |
+| Archer | hold to charge, release | a heavy piercing arrow, knockback grows with the charge (0.5s -> 1.1s); tap drops a root snare | a creak rising to a ping, then a string-snap and a sniper boom | into a wall within 3m: PINNED (stun); feeds Focus for the Deadeye |
+| Mage | press to fire, hold to steer | a slow glowing bolt that bends toward your cursor round cover, harder the longer it flies | a hum that rises with travel time | Runes the target; the next spell detonates it |
+| Gunslinger | tap (hold = Rail) | a ricochet round off up to 2 walls and on to a second foe | a revolver crack, a hammer click, a ricochet whine | at 6 Chambers a Called Shot (stun, crit, reload) |
+| Juggernaut | tap (hold = leap) | an overhead smash cone; hold leaps into Earthshatter | a cleave and a ground thump | Enraged: Rage Smash |
+| Bulwark | hold to block, release to bash | a frontal shield wall (its own HP), then a forward bash cone you step into | a shield clang, then a plate slam | into a wall or another foe: Crushed (stun + heal) |
+
+### Holds and charges: the wind-up feel (shared, every archetype)
+
+`ArchKit._tick_charge` watches every hold a kit has (a charged RMB via `rmb_charge_full`, a bow
+draw, a melee charge such as the Bulwark's Crushing Blow, a held dash via `dash_charge`, e.g. the
+Juggernaut's Rampage) and gives it one language:
+
+- a rising wind-up voice in the archetype's own sound (`CHARGE_VOICE`: Thief swipe, Archer string
+  creak, Mage zap, Gunslinger cylinder, Juggernaut thump, Bulwark shield): ticks that climb in pitch
+  and volume and quicken as it fills;
+- a filling ring at the hunter (enemies see the hostile rim) and a glow growing at the hand, with
+  motes drawn inward;
+- a clear "full" tick: `ab_ready` plus the voice an octave up, a flash at the hand, a ring;
+- Net fx rings at the start and at full, so remote players read the wind-up;
+- a release punch scaled by the charge (camera punch 0.06-0.32, a muzzle burst above half, trauma
+  at full).
+
+The Archer's bow adds its own stage ticks and the perfect window; the Mage's Guided Bolt hold is a
+steer (its feedback is the bolt's rising hum). Covered by `--arena-check` (every archetype's hold:
+ring, full tick, release) and `--ability-check` (the Gunslinger's Rail as an archetype hold).
+
+### Rank previews: always the next rank
+
+Owner: "why does it show me rank 3 but not rank 2 when it's rank 1?" Every archetype's data now has
+`rank2` (a concrete line per slot, e.g. "cooldown 9s -> 8.1s, damage +15%") and `rank_next` (rank
+3: the cooldown and damage at rank 3 plus its special). `Arch.next_ranks(arch, slot, rank)` returns
+the next rank first, then rank 3 after it; the HUD ability tooltip ("Next · Rank 2: ..."), the
+rank line ("next rank: ...") and the kit card's detail page ("Ranks: Rank 2 ... Rank 3 ...") use it.

@@ -166,7 +166,7 @@ static func tick(A: Arena, dt: float) -> void:
 			elif w.begins_with("r_"):
 				if _at(t, dt, go): P.ak.cd["r"] = 0.0; P.ak.use_r()
 				if t > go + P.ak.fuse_time() + 0.1 and t < go + P.ak.fuse_time() + 1.2: P.inp["fire"] = true   # (an empowered-shot ult fires through)
-				at_t = go + P.ak.fuse_time() + 0.75
+				at_t = go + P.ak.fuse_time() + (1.3 if "--late-shot" in OS.get_cmdline_user_args() else 0.75)
 			else:
 				if _at(t, dt, go): P.ak.ch_rmb = float(P.ak.rmb_charges()); P.ak.bot_hold["rmb"] = 0.9; P.ak.press_rmb()
 				at_t = go + 0.7 if "--hold-shot" in OS.get_cmdline_user_args() else go + 1.05

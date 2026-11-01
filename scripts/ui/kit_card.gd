@@ -186,8 +186,9 @@ func _show_detail(slot: String) -> void:
 		top.add_child(kc)
 	v.add_child(top)
 	v.add_child(UI.label(String(info["tag"]), 13, col, UI.big))
+	var fs := 15 if (info["detail"] as Array).size() <= 5 else 13      # (a long kit still fits, ranks included)
 	for para in info["detail"]:
-		var p := UI.label(String(para[1]) if para[0] == "" else "%s:  %s" % [para[0], para[1]], 15, UI.INK if para[0] == "" else UI.MUTED)
+		var p := UI.label(String(para[1]) if para[0] == "" else "%s:  %s" % [para[0], para[1]], fs, UI.INK if para[0] == "" else (Color("ffd98a") if para[0] == "Ranks" else UI.MUTED))
 		p.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		v.add_child(p)
 
@@ -238,7 +239,7 @@ static func slot_text(a: String, slot: String) -> Dictionary:
 			var sd: Dictionary = d["dash"]
 			out.merge({"name": String(sd["name"]), "icon": String(sd.get("icon", "dash")), "col": Color(String(sd.get("col", "#ffffff"))),
 				"tag": "%s charge%s · %ss" % [_charges(a), "" if _charges(a) == "1" else "s", KinText.n(float(sd.get("cd", 9.0)))], "line": String(cd.get("dash", sd.get("desc", "")))}, true)
-			out["detail"] = [["", String(sd.get("desc", ""))]] + Arch.next_ranks(a, "dash", -1)
+			out["detail"] = [["", String(sd.get("desc", ""))]] + _ranks(a, "dash")
 		"passive":
 			var rd: Dictionary = d.get("resource", {})
 			out.merge({"name": String(d["passive"]["name"]), "icon": String({"thief": "satchel", "archer": "scanner", "mage": "blaze_mantle", "gunslinger": "barrage", "juggernaut": "haymaker", "bulwark": "fortify"}.get(a, "burst")), "col": Color(String(rd.get("col", "#ffffff"))),
@@ -266,21 +267,31 @@ static func slot_text(a: String, slot: String) -> Dictionary:
 			var det: Array = []
 			for v in ["tap", "hold", "air", "during_e", "full"]:
 				if vs.has(v): det.append([{"tap": "Tap", "hold": "Hold", "air": "In the air", "during_e": "During E", "full": "Resource full"}[v], String(vs[v])])
-			det.append_array(Arch.next_ranks(a, "sec", -1))
+			det.append_array(_ranks(a, "sec"))
 			out["detail"] = det
 		"e":
 			var sd: Dictionary = d["e"]
 			out.merge({"name": String(sd["name"]), "icon": String(sd.get("icon", "")), "col": Color(String(sd.get("col", "#ffffff"))),
 				"tag": "%ss" % KinText.n(float(sd.get("cooldown", 14.0))), "line": String(cd.get("e", ""))}, true)
-			out["detail"] = [["", String(sd.get("desc", ""))]] + Arch.next_ranks(a, "kin", -1)
+			out["detail"] = [["", String(sd.get("desc", ""))]] + _ranks(a, "kin")
 		"r":
 			var sd: Dictionary = d["r"]
 			out.merge({"name": String(sd["name"]), "icon": String(sd.get("icon", "")), "col": Color(String(sd.get("col", "#ffffff"))),
 				"tag": "level 6 · %ss · %ss fuse" % [KinText.n(float(sd.get("cooldown", 100.0))), KinText.n(float(sd.get("fuse", 0.45)))], "line": String(cd.get("r", ""))}, true)
 			var g := "you're unstoppable while it winds up" if String(sd.get("fuse_guard", "none")) == "unstoppable" else "a stun or knock during the wind-up cancels it"
 			out["detail"] = [["", String(sd.get("desc", ""))], ["Fuse", "%ss wind-up everyone can see; %s." % [KinText.n(float(sd.get("fuse", 0.45))), g]],
-				["Bonded", "With a full bond meter your Boki merges with you as it fires."]] + Arch.next_ranks(a, "ult", -1)
+				["Bonded", "With a full bond meter your Boki merges with you as it fires."]] + _ranks(a, "ult")
 	return out
+
+## The ranks to come, in order (rank 2's concrete change first, then rank 3's special), as one row
+## so the detail page never clips the second.
+static func _ranks(a: String, slot: String) -> Array:
+	var nr := Arch.next_ranks(a, slot, -1)
+	if nr.is_empty():
+		return []
+	var parts: Array = []
+	for r in nr: parts.append("%s: %s" % [String(r[0]), String(r[1])])
+	return [["Ranks", "   ".join(parts)]]
 
 static func preview_kind(a: String, slot: String) -> String:
 	if slot == "lmb":
