@@ -46,6 +46,7 @@ func _reset(at: Vector3, v: Vector3, top: float) -> void:
 	P.gliding = false; P.glide_fuel = 1.0; P.glide_cd = 0.0; P.knock_t = 0.0; P.fly_t = 0.0
 	P.stun_t = 0.0; P.kb_t = -9.0; P.mantle_cd = 0.0; P.shot_down = false; P.air_t = 0.3
 	P.dropping = false; P.diving = false; P.last_gy = top
+	if "lfloat" in P: P.set("lfloat", {})
 	for k in ["glide", "glide_btn", "jump", "dash", "fire"]: P.inp[k] = false
 	P.inp["move"] = Vector2.ZERO
 	P.hp = P.max_hp
@@ -87,8 +88,8 @@ func run(main: Node) -> void:
 							P.inp["move"] = into
 							P.inp["glide"] = glide
 							m.step(DT)
-							if P.pad.size() > 0 and P.pad.get("ledge", false):
-								res = "caught"; break
+							# (a ledge rise counts once it has put you on top: see the next line)
+							pass
 							if P.grounded and P.pos.y > top - 0.2:
 								res = "caught"; break
 							if P.out or P.pos.y < top - Hunter.MANTLE_REACH_ABYSS - 1.5:

@@ -27,6 +27,8 @@ Nothing here comes from SUPERVIVE's files.
 - **Opening the glider [guide]:** you hold jump while already jumping or falling, and letting go closes it. No engage delay is published anywhere.
 - **Abyss lift [wiki]:** a rapid upward impulse to ground level, then a rapid deceleration on arrival. Letting go before the top keeps the upward momentum.
 - **Fall depth and glide speed [footage]** (SUPERVIVE_FEEL.md): 1s off an edge is ~8m deep. Glide speed is ~5 m/s, about run speed. The hunter stays roughly centred on screen.
+- **Ledges [footage] and the owner's description:** in the air, touching the side of ground above you while moving into it floats you up. Falling players who touch an island wall spring back onto it, even from a full second deep, in about 0.8s. The owner adds that there's no climb animation: you gain upward momentum, you can fling yourself a little in any direction with WASD, and a well-timed input or jump gives a better fling. The game never takes control.
+- **Feathering:** players tap the glider on and off. The owner points to a video about Nidhogg. The public wiki and guide pages we could read (supervive.wiki.gg Gliding, Abyss) don't describe it, so every feathering number here is [est]. [footage] says heat keeps climbing across repeated drop-and-lift cycles and only really cools on the ground.
 - **Ground movement [spec]:** near-instant acceleration and deceleration (a 0.05–0.1s ramp). Camera follow smoothing is 0.08–0.15s.
 - **Not published:**
   - Jump height or arc.
@@ -37,7 +39,7 @@ Nothing here comes from SUPERVIVE's files.
 
 ## Targets and results
 
-"Before" is main at e7c7086, measured with the same check. "After" is branch `movefeel`.
+"Before" is main as it was when this work started (e7c7086; for the abyss, framing and obstacle rows, main 3b800a0), measured with the same checks. "After" is branch `movefeel`.
 
 | Key | Before | After | Target | Source |
 |---|---|---|---|---|
@@ -57,17 +59,29 @@ Nothing here comes from SUPERVIVE's files.
 | glide_open_press_frames (second press) | 1 | 1 | <= 1 | [guide] |
 | glide_open_hold_s (Space held from the jump) | 0.150s | 0.117s | <= 0.12s | tap/hold split |
 | glide_open_button_frames (glide button) | 6 | 1 | <= 1 | no tap ambiguity |
-| glide_catch_t (terminal fall to sink rate) | 0.383s | 0.133s | <= 0.2s | opens "instantly" |
-| glide_speed / glide_sink | 5.0 / 2.2 | same | ~5 / 2–2.6 | [footage] / [spec] |
+| glide_catch_t (terminal fall to sink rate) | 0.383s | 0.150s | <= 0.2s | opens "instantly" |
+| glide_speed | 5.0 m/s | 6.5 m/s | 6.2–6.8 | owner: "feels weaker than SUPERVIVE"; between [footage] ~5 and [spec] 7–10 |
+| glide_sink | 2.2 m/s | 1.4 m/s | 1.2–1.6 | owner: "falls a bit faster"; [spec] 2–4 is an eyeball guess |
 | glide_turn90_t | 0.617s | 0.200s | <= 0.3s | [est] |
-| glide_reverse_t | 0.950s | 0.433s | <= 0.45s | [est] brake by steering back |
+| glide_reverse_t | 0.950s | 0.417s | <= 0.45s | [est] brake by steering back |
 | glide_brake_ratio (10 m/s, 0.4s against vs let go) | 0.60 | 0.00 | <= 0.8 | brake stays |
-| reglide_frames | 1 | 1 | <= 1 | |
-| dashglide_reopen_frames | 1 | 1 | <= 1 | |
-| dashglide_open_speed | 6.9 m/s | 10.35 m/s | >= 9 | [wiki] momentum + speed |
-| dashglide_1s_speed | 5.7 m/s | 8.85 m/s | >= 7.5 | [wiki] preserved |
-| dashglide_2s_speed | 5.0 m/s | 7.35 m/s | >= 6 | [wiki] preserved |
+| reglide_frames / dashglide_reopen_frames | 1 / 1 | 1 / 1 | <= 1 | |
+| dashglide_open_speed (glider opened out of an air dash) | 6.9 m/s | 13.8 m/s | >= 12 | [wiki] momentum + speed |
+| dashglide_1s_speed | 5.7 m/s | 12.3 m/s | >= 10.5 | [wiki] preserved |
+| dashglide_2s_speed | 5.0 m/s | 10.8 m/s | >= 9 | [wiki] preserved |
+| feather_toggle_frames (let go, press again) | 1 | 1 | <= 1 | no toggle penalty |
+| feather_m vs feather_hold_m (distance before overheating, over the abyss) | (no feathering) | 110.7m vs 90.1m | | |
+| feather_gain | n/a | 1.23x | >= 1.15x | [est] skilled taps beat holding when heat is the limit |
+| ledge_rise_t (1.6m wall, jump and push in) | LEDGE_RT_BEFORE | LEDGE_RT | <= 0.35s | [footage] ~0.8s from a full second deep |
+| ledge_rise_peak_m (no jump: height over the top) | n/a | LEDGE_PEAK | >= 0.2m | [est] a small pop |
+| ledge_fling_timed_m / ledge_fling_early_m (onto the top) | n/a | LEDGE_FT / LEDGE_FE | >= 1.5m | [est] |
+| ledge_fling_timed_up_m | n/a | LEDGE_FU | >= 0.7m | [est] |
+| ledge_fling_gain (timed vs no jump) | n/a | LEDGE_FG | >= 1.5x | [est] rewarding |
+| ledge_window_s | n/a | LEDGE_WIN | >= 0.08s | [est] readable |
 | abyss_lift_t (4m deep to balloon line) | 1.05s | 0.82s | <= 1.0s | [footage] ~1s |
+| abyss_kill_depth (point of no return under the lip) | 6.0m | 13.0m | >= 12m | owner: "needs to be a bit lower"; [footage] ~1.5s of free fall |
+| abyss_recover_depth (deepest a terminal fall can still glide out) | ~6m | 13.0m | >= 11m | |
+| abyss_tint_lip / half / end (screen danger 0..1) | (old HUD rings only) | 0.00 / 0.67 / 0.99 | <= 0.02 / >= 0.6 / >= 0.95 | owner: "really dark/red when going low" |
 | updraft_rise_t (to 8 m/s climb) | 0.333s | 0.233s | <= 0.3s | [est] powerful |
 | drop_dive_vy_t (90% of dive fall) | 0.583s | 0.333s | <= 0.4s | [est] punchy |
 | drop_dive_steer_t (90% of commanded) | 0.783s | 0.233s | <= 0.3s | [est] responsive |
@@ -81,49 +95,77 @@ Nothing here comes from SUPERVIVE's files.
 | render_lag_m (model behind sim at a run) | 0.083m | 0.000m | <= 0.03m | |
 | cam_lag_m (camera behind you at a run) | 0.65m | 0.29m | <= 0.40m | [footage] centred |
 | cam_settle_t (after a stop) | 0.35s | 0.15s | <= 0.35s | |
-| cam_glide_lead_m | -0.67m (trailing) | +0.70m | >= 0.4m | lead in glide |
+| cam_glide_lead_m | -0.67m (trailing) | +0.92m | >= 0.4m | lead in glide |
+| view_across_m (Supervive preset, 16:9) | 28.0m | 23.0m | 22–25m | owner: SUPERVIVE frames tighter |
+| hunter_screen_pct (medium hunter, feet to head) | 5.4% | 7.6% | >= 6% | owner: heroes "feel more important" |
 
-Mantles are measured by `--mantle-check` and were not changed: 0.40–0.58s from a ledge, against [footage] ~0.8s from a full second deep.
+Other checks:
+
+- `--wallhug-check` (tools/wallhug_check.gd): 40 grabbable rims are hugged from the abyss side. There are 2400 tries over heights from 0.8m above to 4m below the lip, angles of 0/45/65 degrees into the wall, gliding or not, and touching the wall or a step off it falling at full speed. A try counts as caught only when it ends standing on top. Main caught 2141 of 2400 (89.2%); movefeel catches 2400 of 2400.
+- `--mantle-check` (tools/mantle_check.gd): checks the ledge rise, steering and the fling, plus that ledges you don't push into never grab you (see below).
+- `--obstacle-check` (tools/obstacle_slide_check.gd, from branch `stuckfix`): walks round, away from and past every tree and rock cluster on the training map and an expedition island.
+  - Main: OBST_BEFORE.
+  - Movefeel: every lap clean, every walk-away leaves at once, no pull.
 
 ## What changed (all in clearly marked `(movefeel)` blocks)
 
-- **Input to screen:**
-  - Input was already read and applied in the same frame. The local player is now drawn at the present: extrapolated by the fraction of a step since the last one (`Hunter.render_pos`, `LOCAL_RENDER_LEAD`). Before, it was interpolated up to a step in the past, so a press showed one frame later and the camera trailed.
-  - Everyone else is still interpolated. A teleport snaps.
-- **Ground:** acceleration 70 → 90 and deceleration 90 → 110 m/s².
-- **Air:**
-  - Air steering went from 22/3 to 40/9 m/s², so letting go in a jump stops you.
-  - Speed above run speed (a dash, a pad, a knockback) still carries at the old 3 m/s².
-- **Falls:**
-  - The 3.2/s ease into a 9 m/s terminal speed is gone. Falls now use gravity x1.2 straight to 10 m/s, which matches the footage depth and tightens the jump arc.
-  - The camera's soft vertical follow was kept, so a fall doesn't jolt the view.
+- **Input to screen:** the local player is drawn at the present (`Hunter.render_pos`, `LOCAL_RENDER_LEAD`), extrapolated by the fraction of a step since the last one. Before, it was interpolated up to a step in the past, so a press showed a frame late and the camera trailed. Everyone else is still interpolated, and a teleport snaps.
+- **Ground:** acceleration 70 → 90 m/s², deceleration 90 → 110 m/s².
+- **Air:** steering 22/3 → 40/9 m/s², so letting go in a jump stops you. Speed above run speed (a dash, a pad, a knockback) still carries at 3 m/s².
+- **Falls:** gravity x1.2 straight to a 10 m/s terminal speed, which matches the footage depth and tightens the jump arc. It replaces the slow 3.2/s ease to 9 m/s. The camera's soft vertical follow keeps falls from jolting the view.
 - **Glider:**
-  - New `glide_steer()`: turns at 420°/s at cruise, in wider arcs above cruise down to 45%. It accelerates at 20 m/s², and over-speed bleeds slowly (1.5 m/s²). Steering more than 115° against your heading brakes at 26 m/s². Letting go drifts.
-  - The canopy catches a fall at 60 m/s² instead of 16.
-  - Space opens the glider after 0.1s (was 0.15s), since a tap is a jump. The glide button (Mouse 5) opens it at once (`inp.glide_btn`, local input only, nothing new is synced).
-  - The abyss lift's brake zone rises at 3.5 m/s per metre left (was 2), so the last metre no longer crawls.
-  - Updrafts grab at 45 m/s² (was 30).
+  - Steering is `glide_steer()`:
+    - 420°/s at cruise, in wider arcs above cruise (down to 45%).
+    - 26 m/s² acceleration; over-speed bleeds at 1.5 m/s².
+    - Steering more than 115° against your heading brakes at 36 m/s². Letting go drifts.
+  - Cruise 5.0 → 6.5 m/s and sink 2.2 → 1.4 m/s. The owner found the glide "falls a bit faster and feels weaker than SUPERVIVE".
+  - The canopy catches a fall at 60 m/s² (was 16).
+  - Space opens the glider after 0.1s (a tap is a jump). The glide button (Mouse 5) opens it at once (`inp.glide_btn`, local input only).
+  - The abyss lift's brake zone rises at 3.5 m/s per metre left (was 2). Updrafts grab at 45 m/s² (was 30).
+- **Feathering** [est] (tap the glider on and off instead of holding it). Constants: `FEATHER_*`, `lift_t`, `glide_off_t`.
+  - Open and close are instant, with no penalty for rapid toggles. The glider reopens with 5% of its heat room left (was 15%).
+  - While the glider is closed in the air its heat cools at 0.06 per second (a full glider is 1.0). The ground still cools it fastest: [footage] "it only really cools on the ground".
+  - For 0.6s after you let go you keep the glide's speed and steering.
+  - The first 0.3s of an abyss lift (the "rapid upward impulse" [wiki]) heats like a level glide. Holding the lift past that costs the full 4x. So short lift taps that coast on the impulse are the skilled, efficient way across.
+  - Unconfirmed: what SUPERVIVE's feathering exactly does. Public pages don't describe it. These numbers are ours, to be checked against the owner's Nidhogg reference video.
 - **Dash into glide** (`glide_handoff(dir, speed)`, `_take_glide_handoff()`):
-  - The Shift dash's end, and a jump out of a dash, register the burst.
-  - If the glider opens within 0.3s heading within about 70° of it, the glider starts at 45% of the burst's speed (max 11 m/s) with a whoosh, a streak and a small camera punch.
-  - Archetype dashes can call `glide_handoff()` as they end. If the glider is still open, it's spent that same step.
+  - The Shift dash's end and a jump out of a dash register the burst. If the glider opens within 0.3s, heading within about 70° of the burst, it starts at 60% of the burst's speed (max 14 m/s). That speed bleeds off slowly.
+  - The burst reads clearly: a loud whoosh, a burst of air, a dense streak trail with afterimages while you stay well above cruise, and a brief camera pull-back (`CamRig.pull_back`).
+  - **Archetype dashes:** call `glide_handoff(dir, speed)` as the dash ends.
+- **Ledge rise** (replaces the scripted mantle; `Hunter._ledge_rise`, `_ledge_fling`, `lfloat`). This follows the owner's description of SUPERVIVE.
+  - When it starts: you're below a ledge in the air and your keys push into it (within about 60 degrees of straight in; over the abyss below a lip, about 78 degrees). You gain upward momentum and float up the face. No climb animation sets your position.
+  - Steering: your keys steer the whole way (ordinary air steering). Nothing holds you to the face except the wall itself.
+  - Letting go: moving 0.9m out from the face, a dash, a fresh glide press, a stun or a knock ends the rise.
+  - Over the top with no jump: a small pop (3.2 m/s), carried toward your keys.
+  - The fling window: the last 0.6m below the top (about 0.12s), shown with a click and a ring. A jump in it flings you at 7 m/s up and 7.5 m/s toward your keys, with a whoosh. A jump earlier gives a weak fling (4.5 m/s up, run speed) and gives up the rest of the rise.
+  - Never grabs you: walking, jumping along a wall, glancing it, or standing next to it with no keys. Gliding past a lip doesn't grab you either unless you steer into it.
+  - Home uses the same rise (`Home._ledge_float`).
+  - A deliberate pull still lands you on top: `Hunter.launch_to` to higher ground (an archer's Grapple onto a ledge, a leap up a cliff) flies a sure arc.
+- **Wall catch over the abyss:** below an island's lip, a wall 0.75m from your side catches you (elsewhere 0.4m), except beside a sheer cliff. The abyss catch reach is 4.5m below the lip (was 3.5m).
+- **Abyss:**
+  - Hunters' point of no return is `World.ABYSS_DEPTH` + 7m: about 13m under the lip (was 6m). Monsters and the home keep the old depth.
+  - As you sink, the local player's screen drains of colour, darkens, goes deep crimson and closes in with a vignette that beats with a heartbeat (`scripts/match/abyss_fx.gd`, a screen shader under the HUD). The HUD adds a heartbeat and a low rumble, and near the end a pulsing "HOLD GLIDE TO LIFT" / "CLIMB OUT".
 - **Drop:**
   - Dive fall 11 → 13 m/s, reached in about 0.3s.
-  - Dive and canopy steering rates 3/4 → 10/11 per second.
-  - Deploying checks your fall to -1.6 m/s (the canopy biting), then settles to 4.2 m/s in about 0.2s. It also gets the glider-open sound, a ring and a small camera punch.
-- **Landing:**
-  - Every landing faster than 4 m/s gets a brief squash (0.07–0.16), a puff of dust and a soft thud.
-  - There is still no lockout. The drop's own landing feedback is unchanged.
-  - Jump buffering now means "within 0.12s of the ground at your fall speed" rather than a fixed 0.9m, so it still works at the faster fall speed.
-- **Jump:** a small dust kick on take-off.
-- **Camera:**
-  - Across follow 8 → 15 per second (about 0.07s). The spec band is 0.08–0.15s; the footage says you stay centred, and the owner asked for no lag.
-  - Vertical follow is unchanged (3.5).
-  - New glide lead: the view leans 0.2s of your glide velocity ahead (max 1.8m), eased at 3 per second.
-  - The pitch, distance, FOV presets and cursor pan are unchanged.
+  - Steering 3/4 → 10/11 per second.
+  - Deploying checks your fall to -1.6 m/s, then settles to 4.2 m/s in about 0.2s. It comes with the glider sound, a ring and a small camera punch.
+- **Landing:** every landing faster than 4 m/s gets a brief squash, a puff and a soft thud, with no lockout. Jump buffering is time-based (0.12s from the ground at your fall speed).
+- **Trees and rocks (`stuckfix`):**
+  - Bodies collide with blocker tiles as true circles (`World.occupy`, `World.push_out_blocks`).
+  - A move into a rock is pushed straight out and slides along it. Only the part of your speed going into it is dropped.
+  - This ends the corner snag that held you until you dashed ("magnetizing").
+- **Camera and scale:**
+  - Follow across: 8 → 15 per second (about 0.07s).
+  - Glide lead: 0.2s of glide velocity (max 1.8m).
+  - The Supervive preset sits at 20.5m (was 25m): about 23m of ground across a 16:9 screen (was 28m).
+  - Hunters are drawn 12% larger (`Hunter.VIS_SCALE`, visual only; hitboxes and rings unchanged).
+  - Together these take the medium hunter from 5.4% to 7.6% of the screen's height.
+- **Settings:**
+  - "Expedition camera" is now "Camera".
+  - The style and follow mode also apply at home (`CamRig.apply_settings`). The farm keeps its own wider framing (`Home._apply_cam_settings`). On the Training Grounds isle the view eases to exactly the expedition framing and hunter size.
 
 ## Not touched
 
-- Dash kits (the archetype branch owns them). Only the generic `glide_handoff()` hook was added.
+- Dash kits (the archetypes own them). Only the generic `glide_handoff()` hook was added, and `launch_to` was made sure for upward targets.
 - The network protocol. Movement runs on the owning machine, and remote hunters still use `net_follow`.
 - Landing performance (branch `landhitch`).

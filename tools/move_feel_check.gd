@@ -54,6 +54,13 @@ const T := {
 	"feather_hold_m":          [">=", 0.0, "m", "holding glide over the abyss until the heat runs out (reference)"],
 	"feather_m":               [">=", 0.0, "m", "tap-feathering over the abyss (lift taps, coast the gaps) until the heat runs out"],
 	"feather_gain":            [">=", 1.15, "x", "[est] skilled feathering covers more ground than holding when heat is the limit"],
+	"ledge_rise_t":            ["<=", 0.35, "s", "[footage] touching ground above you floats you up fast (~0.8s from a full second deep); here a 1.6m wall from a jump"],
+	"ledge_rise_peak_m":       [">=", 0.2, "m", "no jump: you clear the lip with a small pop (height over the top)"],
+	"ledge_fling_early_m":     [">=", 0.0, "m", "a jump as the rise starts: a weak fling (distance onto the top, reference)"],
+	"ledge_fling_timed_m":     [">=", 1.5, "m", "[est] a jump in the window near the top: a real fling onto the top"],
+	"ledge_fling_timed_up_m":  [">=", 0.7, "m", "[est] ...and it goes higher than topping out with no jump"],
+	"ledge_fling_gain":        [">=", 1.5, "x", "[est] timed fling distance vs no jump: a well-timed one is clearly rewarding"],
+	"ledge_window_s":          [">=", 0.08, "s", "[est] the fling window lasts long enough to hit on purpose (~5+ steps)"],
 	"updraft_rise_t":          ["<=", 0.30, "s", "[est] updrafts feel powerful: 8 m/s climb within 0.3s"],
 	"drop_dive_vy_t":          ["<=", 0.40, "s", "[est] punchy skydive: 90% of dive speed"],
 	"drop_dive_steer_t":       ["<=", 0.30, "s", "[est] responsive steering in the dive: 90% of commanded speed"],
@@ -118,6 +125,8 @@ func _reset(p: Vector3, grounded := true) -> void:
 	P.dashes = P.max_dashes(); P.ex_cd = 0.0; P.dash_buf = 0.0; P.drink_t = 0.0; P.kit_t = 0.0
 	P.squash = 0.0; P.hp = P.max_hp
 	P.drop_follow = null
+	if "lfloat" in P: P.set("lfloat", {})
+	if "glide_off_t" in P: P.set("glide_off_t", 9.0)
 	_clear_inp()
 
 ## A spot with flat, open ground `r` metres all round.
@@ -161,6 +170,7 @@ func run(main: Node) -> void:
 	_dash_glide()
 	_abyss_updraft()
 	_feather()
+	_ledge()
 	_drop()
 	_landing()
 	_camera()
@@ -549,6 +559,74 @@ func _feather() -> void:
 		m.step(DT); fr += 1
 		if P.gliding: break
 	rec("feather_toggle_frames", fr if closed else 9.0)
+
+# ---------------------------------------------------------------- the ledge rise and fling
+## A straight wall two terraces (1.6m) high with level open ground in front: jump at it pushing in.
+func _wall2() -> Dictionary:
+	for z in range(3, w.h - 3):
+		for x in range(3, w.w - 3):
+			var i := w.idx(x, z)
+			if w.kind[i] != World.T_GROUND: continue
+			var l0 := int(w.level[i])
+			for d in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+				var hi: Vector2i = Vector2i(x, z) + d
+				var good := true
+				var side := Vector2i(int(d.y), int(d.x))
+				for sd in range(-2, 3):
+					var hs: Vector2i = hi + side * sd
+					for k in range(0, 3):
+						var hk: Vector2i = hs + d * k
+						if not w.inb(hk.x, hk.y) or w.kind[w.idx(hk.x, hk.y)] != World.T_GROUND or int(w.level[w.idx(hk.x, hk.y)]) != l0 + 2 or w.sheer.has(w.idx(hk.x, hk.y)): good = false
+					for back in range(0, 4):
+						var lb: Vector2i = Vector2i(x, z) + side * sd - d * back
+						if not w.inb(lb.x, lb.y) or w.kind[w.idx(lb.x, lb.y)] != World.T_GROUND or int(w.level[w.idx(lb.x, lb.y)]) != l0 or w.stairs.has(w.idx(lb.x, lb.y)): good = false
+				if not good: continue
+				var n := Vector2(d)
+				var face := Vector2(hi.x + 0.5, hi.y + 0.5) - n * 0.5
+				return {"at": face - n * (P.r + 0.6), "n": n, "low": l0 * World.LEVEL, "top": (l0 + 2) * World.LEVEL}
+	return {}
+
+func _ledge() -> void:
+	if not P.has_method("mantling") or not "lfloat" in P:
+		print("MFEEL (no ledge rise on this build)")
+		return
+	var wl := _wall2()
+	if wl.is_empty():
+		print("MFEEL (no 1.6m wall on this map: ledge rise not measured)")
+		return
+	var n: Vector2 = wl["n"]
+	var top: float = wl["top"]
+	var out := {}
+	for mode in ["none", "early", "timed"]:
+		_reset(Vector3(wl["at"].x, wl["low"], wl["at"].y))
+		var rising := 0; var t_rise := -1.0; var peak := -1e9; var lip_at := Vector2.INF; var jumped := false
+		var win_steps := 0
+		for i in 150:
+			P.inp["move"] = n
+			var jump := i == 2
+			if P.call("mantling"):
+				rising += 1
+				if bool(P.get("lfloat").get("win", false)): win_steps += 1
+				if not jumped and mode == "early" and rising == 2: jump = true; jumped = true
+				if not jumped and mode == "timed" and bool(P.get("lfloat").get("win", false)): jump = true; jumped = true
+			P.inp["jump"] = jump
+			m.step(DT)
+			P.inp["jump"] = false
+			if rising > 0 and t_rise < 0.0 and P.pos.y >= top: t_rise = rising * DT
+			if rising > 0 and not P.call("mantling"):
+				peak = maxf(peak, P.pos.y)
+				if lip_at == Vector2.INF: lip_at = Vector2(P.pos.x, P.pos.z)
+			if rising > 0 and P.grounded and not P.call("mantling"):
+				break
+		out[mode] = {"t": t_rise, "peak": peak - top, "dist": (Vector2(P.pos.x, P.pos.z) - lip_at).dot(n) if lip_at != Vector2.INF else 0.0, "win": win_steps * DT}
+	rec("ledge_rise_t", out["none"]["t"] if out["none"]["t"] > 0.0 else 9.0)
+	rec("ledge_rise_peak_m", out["none"]["peak"])
+	rec("ledge_fling_early_m", out["early"]["dist"])
+	rec("ledge_fling_timed_m", out["timed"]["dist"])
+	rec("ledge_fling_timed_up_m", out["timed"]["peak"])
+	rec("ledge_fling_gain", out["timed"]["dist"] / maxf(0.1, out["none"]["dist"]))
+	rec("ledge_window_s", out["none"]["win"])
+	print("MFEEL ledge: no jump +%.2fm then %.2fm on; early jump +%.2fm %.2fm; timed +%.2fm %.2fm" % [out["none"]["peak"], out["none"]["dist"], out["early"]["peak"], out["early"]["dist"], out["timed"]["peak"], out["timed"]["dist"]])
 
 # ---------------------------------------------------------------- the opening drop
 func _drop() -> void:
