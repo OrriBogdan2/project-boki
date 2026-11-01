@@ -38,6 +38,7 @@ func run(main: Node, opts: Dictionary) -> void:
 	var minute_ms: Array = []
 	var last_ms := Time.get_ticks_msec()
 	var max_hunters_alive := 0
+	var gaps := {}          # wave -> minute since landing (0, 2, 4 ...) -> [level - median] (the catch-up curve)
 	while m.time < m.length + 1.0 and m.sess_time() < stop_min * 60.0:
 		m.step(Match.DT)
 		for w in R.waves:
@@ -56,6 +57,14 @@ func run(main: Node, opts: Dictionary) -> void:
 				else:
 					on += 1; lv.append(h.lvl)
 			pops.append(on + air)
+			for h in m.hunters:
+				if h.out or h.extracted or h.riding or h.dropping or not h.has_meta("land_sess"): continue
+				var k := int((m.sess_time() - float(h.get_meta("land_sess"))) / 60.0)
+				if k > 10 or k % 2 == 1: continue
+				var wi := int(h.get_meta("wave", R.join_i))
+				if not gaps.has(wi): gaps[wi] = {}
+				if not (gaps[wi] as Dictionary).has(k): gaps[wi][k] = []
+				(gaps[wi][k] as Array).append(float(h.lvl) - R.median)
 			max_hunters_alive = maxi(max_hunters_alive, on + air)
 			lv.sort()
 			var bn := m.hunters.filter(func(h): return h.has_meta("bounty") and not h.out and not h.extracted).size()
@@ -112,6 +121,19 @@ func run(main: Node, opts: Dictionary) -> void:
 	var med_xp := float(xp_rates[xp_rates.size() / 2]) if not xp_rates.is_empty() else 0.0
 	print("ROLLSIM bot XP per minute on the map: median %.0f (n=%d; Rolling.XP_PER_MIN for earlier arrivals is %.0f)" % [med_xp, xp_rates.size(), Rolling.XP_PER_MIN])
 	print("ROLLSIM landing level by 4-minute block: %s" % str(land_lv.keys().map(func(k): return "%s: %s" % [Rolling.fmt(k * 240.0), str((land_lv[k] as Array).reduce(func(a, b): return maxi(a, b), 0))])))
+	print("ROLLSIM catch-up curve (mean level minus lobby median, by minutes since landing 0/2/4/6/8/10):")
+	var late_gap: Array = []
+	var wkeys: Array = gaps.keys(); wkeys.sort()
+	for wi in wkeys:
+		var row: Array = []
+		for k in [0, 2, 4, 6, 8, 10]:
+			var a: Array = (gaps[wi] as Dictionary).get(k, [])
+			row.append(("%+.1f" % (a.reduce(func(x, y): return x + y, 0.0) / a.size())) if not a.is_empty() else "  - ")
+			if not a.is_empty() and k == 6 and float(R.waves[wi]["t"]) >= 600.0:
+				late_gap.append(a.reduce(func(x, y): return x + y, 0.0) / a.size())
+		print("  wave %2d (%s): %s" % [wi, Rolling.fmt(float(R.waves[wi]["t"])), "  ".join(row)])
+	if not late_gap.is_empty():
+		print("ROLLSIM waves from 10:00 on, 6 min after landing: mean gap to the median %+.2f levels" % (late_gap.reduce(func(x, y): return x + y, 0.0) / late_gap.size()))
 	var S: Dictionary = R.stats
 	print("ROLLSIM totals: %d hunters over the session (%d before you joined), %d landed, %d extracted, %d out; on the map at once %s (max %d)" % [S["joined"] + int(S["prepop"]), int(S["prepop"]), int(S["landed"]),
 		m.hunters.filter(func(h): return h.extracted).size(), m.hunters.filter(func(h): return h.out and not h.extracted).size(),
