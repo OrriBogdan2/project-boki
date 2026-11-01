@@ -69,6 +69,8 @@ static func tick_wisps(m: Match, dt: float) -> void:
 	for o in m.hunters:
 		if not o.downed or o.out or o.remote:
 			continue
+		if CareUtil.carried_tick(m, o):
+			continue          # carried by a teammate: no bleed, no stomp
 		var allies := 0
 		var foes := 0
 		var revivers: Array = []
