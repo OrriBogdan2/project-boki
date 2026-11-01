@@ -75,7 +75,9 @@ var hitstop := 0.0
 var aim_line: MeshInstance3D
 var aim_ring: MeshInstance3D
 var muzzle_light: OmniLight3D
-var raid := "dusk"                 # the raid condition the match is lit under (RaidLook)
+var raid := "clear"                # the raid condition: rolled per match from the seed (RaidLook)
+var sight_k := 1.0                 # sight range under the raid condition (RaidLook.SIGHT)
+var raid_fx: Node3D = null         # blowing ash / drifting fog that follows the camera (RaidLook.storm_fx)
 var music_dir: MusicDir = null     # the layered score's levels (scripts/match/music_dir.gd)
 var collapse_warned := false
 var rng := RandomNumberGenerator.new()
@@ -650,9 +652,19 @@ func _build_env() -> void:
 	add_child(env)
 	var sun := Look.lights(self, T["sun"], 1.0, Vector3(-55, -35, 0), 60.0)
 	sun.shadow_opacity = 0.8
-	# the raid condition: moody dusk by default (scripts/match/raid_look.gd)
-	raid = RaidLook.pick(opts)
+	# the raid condition: rolled from the seed on real expeditions, clear otherwise (scripts/match/raid_look.gd)
+	raid = RaidLook.pick(opts, seed_val)
 	RaidLook.apply(env.environment, sun, get_node_or_null("Fill") as DirectionalLight3D, T, raid)
+	sight_k = float(RaidLook.SIGHT.get(raid, 1.0))
+	RenderingServer.global_shader_parameter_set("vis_dark", float(RaidLook.VIS_DARK.get(raid, 0.42)))
+	RenderingServer.global_shader_parameter_set("vis_ally_range", VIEW_RANGE * sight_k)
+	raid_fx = RaidLook.storm_fx(raid)
+	if raid_fx:
+		add_child(raid_fx)
+
+## How far a hunter sees under this raid condition (crouching shortens it, as before).
+func view_range(crouched := false) -> float:
+	return (14.0 if crouched else VIEW_RANGE) * sight_k
 
 func _build_shot_pool() -> void:
 	var mesh := Models.sphere(0.5, 10)
@@ -2759,7 +2771,8 @@ func can_see(team_i: int, target: Hunter) -> bool:
 func sees(team_i: int, p: Vector3, crouched := false, revealed := false) -> bool:
 	var in_grass := world.in_bush(p.x, p.z) or in_smoke(p)
 	var near := 1.6 if crouched else NEAR_SENSE
-	var rng := VIEW_RANGE + 2.0 if revealed else (14.0 if crouched else VIEW_RANGE)
+	# (muzzle flashes and a Warden's light give you away at full range, whatever the raid condition)
+	var rng := VIEW_RANGE + 2.0 if revealed else view_range(crouched)
 	for h in hunters:
 		if h.team != team_i or h.out or h.extracted or h.riding:
 			continue
@@ -2793,7 +2806,7 @@ func _update_vision() -> void:
 	if looking:
 		RenderingServer.global_shader_parameter_set("vis_focus", player.model.global_position if player.model else player.pos)
 		RenderingServer.global_shader_parameter_set("vis_dir", player.aim_dir())
-		RenderingServer.global_shader_parameter_set("vis_range", (14.0 if player.crouch else VIEW_RANGE) * (1.25 if player.crouch else 1.0))
+		RenderingServer.global_shader_parameter_set("vis_range", view_range(player.crouch) * (1.25 if player.crouch else 1.0))
 		# teammates light up what they see too (up to three)
 		var n := 0
 		for h in hunters:
@@ -3417,6 +3430,8 @@ func _process(delta: float) -> void:
 	_render_n += 1
 	var cf := cam.focus
 	var near2 := pow(34.0 * maxf(1.0, cam.zoom), 2.0)
+	if raid_fx:
+		raid_fx.position = Vector3(cf.x, cf.y, cf.z)
 	for e in kins:
 		if _render_now(e, cf, near2):
 			e.render(delta + e.lod_dt, alpha)

@@ -644,6 +644,8 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 		fade.reveal_after(3, 0.55)
 	match screen:
 		"match":
+			# the seed is fixed here, so the loading screen can show the raid condition it rolls
+			if not opts.has("seed"): opts["seed"] = randi()
 			# a loading screen covers building the world; tests that screenshot by frame count skip it
 			var ld = null
 			if (not opts.get("autoplay", false) or opts.get("probe", false)) and (not _has_arg("--shot=") or _has_arg("--show-loading")):

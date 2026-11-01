@@ -3180,6 +3180,7 @@ func _offline_reason() -> String:
 var exp_cls := ""
 var exp_mode := "solo"
 var exp_tier := 0
+var exp_seed := 0          # the next expedition's seed, rolled when the panel opens: its raid condition shows as a forecast
 
 func _weapon() -> String:
 	return Arch.weapon_for(Arch.of_save(), Data.class_of_save(), String(Save.d.get("weapon", "")))
@@ -3311,6 +3312,13 @@ func _open_expedition() -> void:
 		tb.tooltip_text = {"solo": "20 hunters, every one for themselves", "duo": "10 squads of two", "trio": "7 squads of three"}[mode_keys[String(tb.get_meta("tab"))]]
 	right.add_child(mtabs)
 	right.add_child(UI.label({"solo": "20 hunters, every one for themselves", "duo": "10 squads of two", "trio": "7 squads of three"}[exp_mode], UI.T_SMALL, UI.MUTED))
+	# the raid condition this drop will have (rolled with the match's seed: RaidLook)
+	if exp_seed == 0: exp_seed = randi() | 1
+	var rc := RaidLook.pick({}, exp_seed)
+	right.add_child(UI.spacer(2))
+	right.add_child(UI.section("Conditions"))
+	right.add_child(UI.chip("clock", String(RaidLook.NAMES.get(rc, rc)), RaidLook.COLORS.get(rc, UI.INK), String(RaidLook.BLURBS.get(rc, ""))))
+	right.add_child(UI.para(String(RaidLook.BLURBS.get(rc, "")), 12, UI.MUTED))
 	if not ak.is_empty():
 		right.add_child(UI.para("Go down for good and the Boki you bring are left behind (the Ransom House holds the unclaimed ones).", 12, UI.FAINT))
 	# the way out: practice on the left, go on the right
@@ -3564,6 +3572,8 @@ func _start_match() -> void:
 	o["total"] = Data.MATCH_PLAYERS
 	o["tier"] = exp_tier
 	o["kit_items"] = Econ.begin_raid()      # the armory loadout rides with you
+	if exp_seed != 0: o["seed"] = exp_seed  # the conditions the panel showed
+	exp_seed = 0
 	Save.save_game()
 	Game.start_match(o)
 

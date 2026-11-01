@@ -653,7 +653,7 @@ func _draw_minimap(sz: Vector2) -> void:
 		var pts := PackedVector2Array([pp])
 		for i in 13:
 			var a := a0 - 0.93 + 1.86 * i / 12.0
-			var e := pp + Vector2(cos(a), sin(a)) * Match.VIEW_RANGE * k
+			var e := pp + Vector2(cos(a), sin(a)) * m.view_range() * k
 			pts.append(Vector2(clampf(e.x, inner.position.x, inner.end.x), clampf(e.y, inner.position.y, inner.end.y)))
 		c.draw_colored_polygon(pts, Color(1, 1, 1, 0.07))
 	if m.exits:
@@ -774,6 +774,16 @@ func _draw_clock_bar(sz: Vector2, mm: Rect2) -> void:
 	var prog := clampf(m.time / maxf(1.0, m.length), 0.0, 1.0)
 	c.draw_rect(Rect2(Vector2(r.position.x + 6, r.end.y - 5), Vector2(r.size.x - 12, 2)), Color(1, 1, 1, 0.12))
 	c.draw_rect(Rect2(Vector2(r.position.x + 6, r.end.y - 5), Vector2((r.size.x - 12) * prog, 2)), BAD if left < 30.0 else Color("b9a6ff"))
+	# the raid condition (RaidLook), and how far you see under it
+	var rr := Rect2(Vector2(r.position.x, r.end.y + 4), Vector2(r.size.x, 20))
+	mm_bottom = rr.end.y
+	var rcol: Color = RaidLook.COLORS.get(m.raid, INK)
+	_rounded(rr, Color(0.04, 0.05, 0.08, 0.7), 6)
+	c.draw_circle(rr.position + Vector2(11, 10), 4.0, rcol)
+	_text(rr.position + Vector2(21, 14), String(RaidLook.NAMES.get(m.raid, m.raid)).to_upper(), 10, rcol, big)
+	if m.sight_k < 0.99:
+		var st := "SIGHT %d%%" % int(round(m.sight_k * 100.0))
+		_text(Vector2(rr.end.x - 8 - big.get_string_size(st, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x, rr.position.y + 14), st, 10, MUTED, big)
 
 var mm_circ := Vector3.ZERO    # the round minimap: centre x, y and radius (0 while it's the square overview)
 func _mm_has(inner: Rect2, v: Vector2, pad := 0.0) -> bool:
