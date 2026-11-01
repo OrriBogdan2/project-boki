@@ -2392,7 +2392,7 @@ func _leave_one_kin(h: Hunter, k: Kin) -> void:
 					player_lost.append({"uid": w.lost_uid, "kin": w, "holder": null, "rec": rec})
 					add_feed("%s was left behind" % rec.get("name", "Your Boki"))
 				elif k.lost_from == "you" and player and not player.out:
-					add_feed("%s dropped %s! Catch it and extract to bring it home." % [h.pname, rec.get("name", "your Boki")])
+					add_feed("%s dropped %s! Get to it and extract to bring it home." % [h.pname, rec.get("name", "your Boki")])
 					ping(w.pos, Color("ffd23f"))
 		k.dead = true
 		k.visible = false
@@ -2495,7 +2495,7 @@ func _resolve_lost() -> Array:
 
 func on_wild_dazed(k: Kin) -> void:
 	if player and k.flat_dist(player) < 10.0:
-		add_feed("The wild %s is dazed. Hold %s to catch it!" % [Data.KIN[k.species]["name"], Settings.key_cap("interact")])
+		add_feed("The wild %s is dazed. Hold %s to tame it!" % [Data.KIN[k.species]["name"], Settings.key_cap("interact")])
 
 ## A monster's stagger window opened.
 func on_stag_open(mb: Mob) -> void:
@@ -4101,7 +4101,7 @@ func _update_interact(dt: float) -> void:
 		if best.is_empty() and not opts.get("training", false):
 			for k in kins:
 				if k.state == "dazed" and not k.dead and h.flat_dist(k) < 1.9:
-					best = {"kind": "catch", "ent": k, "label": ("Hold %s to capture %s" % [Settings.key_cap("interact"), k.rec.get("name", "the Boki")]) if k.lost_from != "" else ("Hold " + Settings.key_cap("interact") + " to catch the %s" % Data.KIN[k.species]["name"])}
+					best = {"kind": "catch", "ent": k, "label": ("Hold %s to take %s with you" % [Settings.key_cap("interact"), k.rec.get("name", "the Boki")]) if k.lost_from != "" else ("Hold " + Settings.key_cap("interact") + " to tame the %s" % Data.KIN[k.species]["name"])}
 					break
 		# 3. swap to a weapon on the ground
 		if best.is_empty():
@@ -4263,7 +4263,7 @@ func _catch(h: Hunter, k: Kin) -> void:
 	fx.burst(k.pos + Vector3(0, 0.5, 0), Data.KIN[k.species]["color"], 26, 4.0, 0.7)
 	fx.ring(k.pos, 1.5, Color("fff2a0"), 0.4)
 	if h == player:
-		add_feed("You caught a %s! Extract to keep it." % Data.KIN[k.species]["name"])
+		add_feed("The %s trusts you now. Extract to bring it home." % Data.KIN[k.species]["name"])
 		if player.kin and player.kin.state != "fainted":
 			player.kin.bark("caught")
 
@@ -5727,7 +5727,7 @@ func _net_ev(x, from: String) -> void:
 				var rec: Dictionary = x[3]
 				player.caught.append(rec)
 				sfx("catch", player.pos, 0.0)
-				add_feed("You caught a %s! Extract to keep it." % Data.KIN.get(String(rec.get("species", "cindle")), Data.KIN["cindle"])["name"])
+				add_feed("The %s trusts you now. Extract to bring it home." % Data.KIN.get(String(rec.get("species", "cindle")), Data.KIN["cindle"])["name"])
 
 func _process_net_revives() -> void:
 	if _rev_out.is_empty():
@@ -5776,7 +5776,7 @@ func _tips() -> void:
 		var a2 := k.runner.def_of("k2")
 		_tip("skill", "%s uses %s's %s. Stun or root a foe with your Boki, then shoot it for a combo. %s throws it, and again calls it back to your shoulder." % [Settings.key_cap("signature"), k.rec.get("name", "your Boki"), a1.display_name if a1 else "ability", Settings.key_cap("throw")])
 	if not interact.is_empty() and interact["kind"] == "catch":
-		_tip("catch", "Hold " + Settings.key_cap("interact") + " to catch it. Caught Boki only come home if you extract.")
+		_tip("catch", "Hold " + Settings.key_cap("interact") + " to tame it. A Boki you tame only comes home if you extract.")
 	if exits and not interact.is_empty() and interact["kind"] == "exit":
 		match String(interact["x"]["kind"]):
 			"dock": _tip("exit_dock", "Skiff docks: call the skiff at the horn beacon, survive the monsters it draws until it ties up, then stand on its deck before it leaves.")

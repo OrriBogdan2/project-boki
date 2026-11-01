@@ -73,9 +73,9 @@ static func lose(k: Dictionary, fate: String, holder: String, tier: int) -> void
 	price(L)
 	(Save.d["lost_kin"] as Array).append(L)
 	if fate == "rival":
-		note_log("%s was collected by %s." % [k.get("name", "Your Boki"), holder])
+		note_log("%s was taken home by %s." % [k.get("name", "Your Boki"), holder])
 	else:
-		note_log("Nobody collected %s. It's waiting at the Ransom House." % k.get("name", "Your Boki"))
+		note_log("Nobody came for %s. It's waiting at the Ransom House." % k.get("name", "Your Boki"))
 
 ## Back on your roster, remembering what happened.
 static func restore(L: Dictionary, how: String) -> Dictionary:

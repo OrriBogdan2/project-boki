@@ -402,7 +402,8 @@ func open_inventory() -> void:
 	if Progress.day1_mark("inventory") != "":
 		Sfx.play("unlock", null, -8.0)
 	var v := _page("inventory", "Inventory", 760)
-	UI.head_extra(v).add_child(UI.chip("gem", str(int(Save.d["gems"])), UI.GOLD, "Gems"))
+	if inv_tab == "Items":      # one currency, and only where it matters
+		UI.head_extra(v).add_child(UI.chip("gem", str(int(Save.d["gems"])), UI.GOLD, "Gems"))
 	var icon_of := {"Items": "tonic", "Seeds": "seed", "Crops": "seed", "Furniture": "home", "Kin": "paw", "Kindex": "egg"}
 	UI.shell_tabs(v, ["Items", "Seeds", "Crops", "Furniture", "Kin", "Kindex"], inv_tab, func(t):
 		inv_tab = t; UI._page_of.erase("Inventory"); open_inventory())
@@ -478,26 +479,52 @@ func open_inventory() -> void:
 				var sp: Dictionary = Data.KIN[rec["species"]]
 				cell.call(String(rec["name"]), "Lv %d" % int(rec["level"]), "%s%s%s · %s bond · %s%s" % ["in the Boki Burrow · " if KinBox.is_boxed(rec) else "", (" ".join(Mutations.tags(rec)) + " ") if Mutations.special(rec) else "", Evo.form_name(rec), Care.bond(rec)[1], Care.condition_name(rec).to_lower(), "  · partner" if rec["uid"] == Save.d.get("active", "") else ""], Shiny.body(rec))
 		"Kindex":
+			# the Bokidex is a hunter's field notes: the kinds you've met, what you saw of them, and
+			# which you've tamed and raised. No checklist and no percentage (docs/POSITIONING.md).
 			empty = false
 			Care.dex_sync()
 			var dx: Dictionary = Save.d.get("dex", {})
+			var n_seen := 0; var n_tamed := 0; var n_raised := 0
+			var unmet := 0
 			for spk in Data.KIN:
 				var e: Dictionary = dx.get(spk, {})
 				var sp: Dictionary = Data.KIN[spk]
 				if e.is_empty() or not e.get("seen", false):
-					cell.call("???", "", "Not seen yet. Look for it on expeditions.", Color(0.3, 0.32, 0.4))
+					unmet += 1
 					continue
+				var raised := _dex_raised(spk)
+				var tamed: bool = e.get("caught", false)
+				n_seen += 1
+				if tamed: n_tamed += 1
+				if raised: n_raised += 1
+				var notes: Array = []
+				var animals: Array = sp.get("animals", [])
+				notes.append("%s%s." % [String(sp["type"]).capitalize(), (", part " + " and part ".join(animals.map(func(x): return String(x).to_lower()))) if not animals.is_empty() else ""])
+				if raised: notes.append("You've raised one of your own.")
+				elif tamed: notes.append("You've tamed one. It's still young.")
+				else: notes.append("Seen out on the islands, never tamed.")
 				var forms: Array = e.get("forms", [])
-				var desc := "%s type. %s." % [String(sp["type"]).capitalize(), "Caught" if e.get("caught", false) else "Seen, not caught"]
-				if forms.size() > 0: desc += " Forms: " + ", ".join(forms.slice(0, 3)) + ("..." if forms.size() > 3 else "")
-				if e.get("shimmer", false): desc += " Shimmer found!"
+				if forms.size() > 0: notes.append("Grown into: " + ", ".join(forms.slice(0, 3)) + ("..." if forms.size() > 3 else "") + ".")
+				if e.get("shimmer", false): notes.append("Once saw one in rare colours.")
 				var dm: Array = e.get("mutations", [])
-				if not dm.is_empty(): desc += " Rare: " + ", ".join(dm.map(func(x): return Mutations.name_of(String(x)))) + "."
-				cell.call(String(sp["name"]), "★" if e.get("shimmer", false) else ("✓" if e.get("caught", false) else ""), desc, sp["color"])
+				if not dm.is_empty(): notes.append("Seen with: " + ", ".join(dm.map(func(x): return Mutations.name_of(String(x)).to_lower())) + ".")
+				cell.call(String(sp["name"]), "Raised" if raised else ("Tamed" if tamed else "Seen"), " ".join(notes), sp["color"])
+			var head := UI.para("Field notes. %d kind%s met: %d tamed, %d raised. %s" % [n_seen, "" if n_seen == 1 else "s", n_tamed, n_raised,
+				"Some kinds out there you haven't met yet." if unmet > 0 else "You've met every kind we know of. There may be more."], 13, UI.MUTED)
+			v.add_child(head)
+			v.move_child(head, grid.get_index())
 	if empty:
 		var es: Array = {"Seeds": ["No seeds", "Find them on expeditions or buy them at the stall."], "Crops": ["No crops yet", "Harvest your plots."],
 			"Furniture": ["Nothing stored", "Furniture you buy or put away lands here."], "Kin": ["No Boki yet", "Hatch an egg to get your first."]}.get(inv_tab, ["Nothing here", ""])
 		v.add_child(UI.empty_state(String(icon_of.get(inv_tab, "gem")), es[0], es[1]))
+
+## The Bokidex counts a kind as raised once you've brought one of yours up to level 10 or seen it
+## grow into a new form.
+func _dex_raised(spk: String) -> bool:
+	for r in Save.d.get("roster", []):
+		if String(r.get("species", "")) == spk and (int(r.get("level", 1)) >= 10 or Evo.form_name(r) != String(Data.KIN[spk]["name"])):
+			return true
+	return false
 
 # ------------------------------------------------------------------ save files
 func open_saves() -> void:
