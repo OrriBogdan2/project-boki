@@ -186,7 +186,7 @@ func _loaner_result() -> void:
 	Save.d["roster"] = []; Save.d["gems"] = 0; Save.d["active"] = ""
 	Save.d["floor"] = {"strays": 0, "last_m": -1}
 	Game.apply_result({"extracted": true, "loaner": true, "tier": 0, "gems": 0, "kin_runs": [], "caught": []})
-	var have := Save.d["roster"].size()
+	var have: int = Save.d["roster"].size()
 	var cheap: Dictionary = BokiPens.listings().reduce(func(a, L): return L if a.is_empty() or int(L["price"]) < int(a["price"]) else a, {})
 	var r := BokiPens.buy(String(cheap["id"]))
 	ok(r["ok"] and Save.d["roster"].size() == have + 1, "from zero: one free-kit extract buys a Boki at the pens (%d gems)" % int(cheap["price"]))
@@ -226,7 +226,8 @@ func _exchange() -> void:
 	ok(not Exchange.post("buy", "wood", 1, 9999)["ok"], "a price far off the band is refused")
 	ok(not Exchange.post("buy", "kin", 1, 5)["ok"], "Boki aren't on the order book")
 	# offline turnover fills a fair resting offer over a few expeditions
-	r = Exchange.post("sell", "wood", 10, Exchange.ref_price("wood") + 1)
+	r = Exchange.post("sell", "wood", 10, int(ceil(Exchange.mid("wood"))))
+	ok(r["ok"] and int(r["left"]) > 0, "an offer at the middle of the book rests (%d left)" % int(r.get("left", 0)))
 	var rng := RandomNumberGenerator.new(); rng.seed = 3
 	var fills := 0
 	for i in 8:

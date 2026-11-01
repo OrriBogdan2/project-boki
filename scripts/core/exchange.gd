@@ -147,6 +147,17 @@ static func book(item: String) -> Dictionary:
 	var sk: Array = sells.keys(); sk.sort()
 	return {"buys": bk.map(func(p): return [p, buys[p]]), "sells": sk.map(func(p): return [p, sells[p]])}
 
+## The middle of the book (between the best bid and the best ask): what a fair offer looks like now.
+static func mid(item: String) -> float:
+	book(item)        # (today's makers in place)
+	var b := -1; var a := 1 << 30
+	for o in _book(item):
+		if String(o["who"]) == "you": continue      # your own offers don't move what's fair
+		if o["side"] == "buy": b = maxi(b, int(o["price"]))
+		else: a = mini(a, int(o["price"]))
+	if b < 0 or a == 1 << 30: return float(ref_price(item))
+	return (b + a) * 0.5
+
 static func best(item: String, side: String) -> int:
 	var b := book(item)
 	var rows: Array = b["buys" if side == "buy" else "sells"]
@@ -270,8 +281,8 @@ static func tick(rng: RandomNumberGenerator = null) -> Array:
 	var before := (st["fills"] as Array).size()
 	for o in mine():
 		var item := String(o["item"])
-		var r := ref_price(item)
-		# how far it's priced past today's price toward the other side: a fair one fills more often
+		var r := mid(item)
+		# how far it's priced past the middle of the book toward the other side: a fair one fills more often
 		var edge := (float(o["price"]) - r) / maxf(1.0, r) * (1.0 if o["side"] == "buy" else -1.0)
 		if rng.randf() < clampf(0.45 + edge * 1.5, 0.05, 0.95):
 			var q := maxi(1, int(ceil(int(o["left"]) * rng.randf_range(0.4, 1.0))))

@@ -15,6 +15,33 @@ var note_col := UI.GOOD
 func _init(home) -> void:
 	h = home
 
+## Screenshots (--market-demo): some gems, wood and stone, a week of wood trades, one of your offers
+## resting on the book and one of your Boki listed at the pens. Never written to the save.
+static func demo() -> void:
+	Save.no_write = true
+	Save.d["gems"] = maxi(int(Save.d.get("gems", 0)), 320)
+	Work.ensure()
+	Save.d["mats"]["wood"] = 46; Save.d["mats"]["stone"] = 18
+	Save.d["scrap"] = 7
+	var rng := RandomNumberGenerator.new(); rng.seed = 11
+	var st := Exchange._st()
+	var h: Array = []
+	var px := 3.0
+	for i in 28:
+		px = clampf(px + rng.randf_range(-0.6, 0.7), 2.0, 6.0)
+		h.append([int(Time.get_unix_time_from_system()) - (28 - i) * 3600, int(round(px)), rng.randi_range(4, 30)])
+	st["hist"]["wood"] = h
+	Exchange.book("wood")
+	Exchange.post("sell", "wood", 12, int(ceil(Exchange.mid("wood"))) + 1)
+	if (Save.d["roster"] as Array).size() < 2:
+		var extra := Save.new_kin("burrlet", "Bun"); extra["level"] = 3
+		Save.d["roster"].append(extra)
+	var other: Dictionary = {}
+	for r in Save.d["roster"]:
+		if KinBox.pinned(r) == "": other = r
+	if not other.is_empty() and BokiPens.listings({"kind": "player"}).is_empty():
+		BokiPens.list_mine(String(other["uid"]), Ransom.value(other))
+
 func _say(t: String, good := true) -> void:
 	note = t
 	note_col = UI.GOOD if good else UI.BAD

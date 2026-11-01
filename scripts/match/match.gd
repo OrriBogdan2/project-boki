@@ -1129,8 +1129,6 @@ func _follow_demo(_dt: float) -> void:
 	var what := String(opts["follow_demo"])
 	if not has_meta("fdemo"):
 		set_meta("fdemo", true)
-		for mb in mobs:
-			if mb.flat_dist(player) < 25.0: mb.dead = true; mb.visible = false
 		var at := demo_clear_spot(4.0)
 		var rec := Save.new_kin(String(opts.get("follow_kin", "puddlet")), "", kin_seed("fdemo"))
 		if what == "steal":

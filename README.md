@@ -64,6 +64,16 @@ Touch the side of an island while you're falling (or gliding) and you float back
 - **How Boki fight.** Each Boki's aggression, loyalty and caution (from its species and its own traits) decide how far it chases, how close it stays, who it goes after and when it backs off. Boki also use their abilities on their own (Settings can turn that off); Lunowl's Moonlift will lift you out of a fall into the abyss if it's loyal enough.
 - **Boki at risk by tier.** In the Meadow your Boki are never lost: while you're dead they keep out of sight and come back if you're revived (or go home). In the Dusk Isles the Boki you have on you (shoulder or bench) drop into your deathbox when you die, and anyone who loots the box takes them; Boki out of your hands escape. In the Hollow, Boki out of your hands are also left dazed where they were and anyone can capture them (hold F for 3s). A box revive or looting your own box gets your Boki back; a teammate who loots it carries them home for you. Boki still in a box at the end go to Old Pell's Ransom House on your farm (buy them back or haggle; after 6 expeditions he sells them on), and Boki a rival took stay with that rival (make them an offer, or meet them on a later expedition, sense your Boki nearby, knock them out and take it back). Everything is paid in gems you earn in play.
 
+## Followers, free-kit runs and the markets
+
+Code: `scripts/match/follow.gd`, `scripts/core/loaner.gd`, `scripts/core/lifeline.gd`, `scripts/core/boki_pens.gd`, `scripts/core/exchange.gd`, `scripts/home/home_market.gd`. Server design: `docs/EXCHANGE_SERVER.md`.
+
+- **Followers.** A wild Boki you tame walks beside you for the rest of the run instead of going in your bag (one at a time; a second tame goes in the bag). It doesn't fight, but it calls out rivals near you, and it rides in your satchel while you glide. It can be knocked out (hold F to pick it back up), but nobody else can tame it while you're still in the map, downed or waiting on a revive included. Extract with it close and it comes home. Leave the map without it (out for good, or extracted while it was far off or knocked out) and rivals get a window to tame it: none in the Meadow, 10 s in the Dusk Isles, 30 s in the Hollow. Taming someone's stray takes the tier's capture time and a hit starts it over; your own squad can't take it. If nobody does, it goes home to you. Bots pick up their own knocked-out followers and go after rivals' strays.
+- **Free-kit runs.** From the expedition board: a loaner Boki (a fresh roll of a starter egg), your class's plain weapon and two tonics. Your Boki, armory, stash and keys stay home, and the loaner can't be lost or kept. Whatever you extract with is yours, and an extract pays at least 45 gems.
+- **Never stuck.** With no Boki left at all, a stray common turns up on the farm. Your last Boki can't be released or listed, and free-kit runs are always open, so nobody is left with nothing to play with.
+- **Drift Pens** (the stall's Boki tab). Wenna's ordinary commons, 30-45 gems, restocked daily, and your own listings (5% to list, 5% of the sale). Filter by species, size and IVs.
+- **Tradewind Exchange** (the stall's Exchange tab). An order book for wood, stone, scrap, crops, kibble and tonics: post a buy or sell price, offers match best price first with partial fills, each sale pays a 4% tax, and a price history graph shows recent trades. Offline, Tradewind's traders take the other side; Boki never trade here.
+
 ## Raising Boki
 
 Code: `scripts/core/care.gd`, `scripts/core/kin_speak.gd`, the raising section of `scripts/home/home.gd`.
@@ -145,6 +155,8 @@ godot --headless --path . -- --check                # compile every script
 godot --headless --path . -- --simtest --seed=5      # a whole match on autopilot, printed
 godot --headless --path . -- --mapcheck              # 200 maps: every island reachable, pads clear
 godot --headless --path . -- --unique-check          # every kin its own: rolls, inheritance, ids, save migration, size
+godot --headless --path . -- --follower-check        # tamed Boki follow you: knockouts, steal windows, bots, sync
+godot --headless --path . -- --economy-floor-check   # never stuck: strays, the Drift Pens, free-kit runs, the Exchange, saves
 ```
 
 Frame hitches need a renderer: `--hitch-check` plays a seeded expedition through the loading screen, the drop and the landing, prints the worst frames with what each spent its time on, and fails on a stalled frame or on a shader compiled after the loading screen (thresholds in `tools/hitch_check.gd`). Use a fresh user data dir so the shader cache starts cold:

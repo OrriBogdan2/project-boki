@@ -581,8 +581,11 @@ func _ready_rest() -> void:
 					_open_kin(Save.active_kin())
 				elif which == "burrow" or which == "kinbox": _open_burrow()
 				elif which == "shop": _open_shop()
-				elif which == "pens": hmk.open_pens()
+				elif which == "pens":
+					if "--market-demo" in OS.get_cmdline_user_args(): HomeMarket.demo()
+					hmk.open_pens()
 				elif which.begins_with("exchange"):
+					if "--market-demo" in OS.get_cmdline_user_args(): HomeMarket.demo()
 					if ":" in which: hmk.item = which.split(":")[1]
 					hmk.open_exchange()
 				elif which == "challenges": _open_challenges()

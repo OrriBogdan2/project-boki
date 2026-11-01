@@ -54,7 +54,7 @@ static func take(m, h, rec: Dictionary, at: Vector3) -> Kin:
 static func can_follow(m, h, rec: Dictionary) -> bool:
 	if m.opts.get("tutorial", false) or m.opts.get("training", false) or m.opts.get("no_follow", false):
 		return false
-	if String(rec.get("lost_from", "")) != "" or rec.get("loaner", false):
+	if String(rec.get("lost_from", "")) != "":
 		return false
 	return of(h) == null and not h.out and not h.extracted
 
@@ -88,7 +88,7 @@ static func sim_follow(k: Kin, dt: float) -> void:
 		k.tucked = false
 		k._ground_move(Vector2.ZERO, dt)
 		return
-	var air: bool = h.dropping or h.riding or h.gliding or h.over_void() or not h.grounded and h.pos.y - k.pos.y > 3.0
+	var air: bool = h.dropping or h.riding or h.gliding or h.over_void() or (not h.grounded and h.pos.y - k.pos.y > 3.0)
 	var far := k.flat_dist(h) > TUCK_AT or absf(h.pos.y - k.pos.y) > 2.6
 	if air or far:
 		if not k.tucked:
@@ -257,7 +257,9 @@ static func steal_progress(m, h: Hunter, k: Kin, dt: float) -> void:
 static func watch(m) -> Kin:
 	if m.player == null:
 		return null
-	var k = m.player.get_meta("stray", null)
+	if not m.player.has_meta("stray"):
+		return null
+	var k = m.player.get_meta("stray")
 	if k is Kin and is_instance_valid(k) and not (k as Kin).dead and (k as Kin).role == "stray":
 		return k
 	return null

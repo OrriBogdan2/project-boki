@@ -118,10 +118,11 @@ func _basics() -> void:
 	_steps(4.0)
 	ok(f.flat_dist(P) < 4.0 and not f.tucked, "it trots after you (%.1f m behind)" % f.flat_dist(P))
 	# tucked into the satchel while you glide / over the abyss
-	P.gliding = true
-	_steps(0.1, func(): P.gliding = true)
-	ok(f.tucked and not f.hittable(), "it rides in your satchel while you glide (tucked %s)" % f.tucked)
-	P.gliding = false
+	# off the edge of the island, over the abyss
+	P.teleport(Vector3(P.pos.x, P.pos.y + 6.0, P.pos.z)); P.grounded = false
+	Follow.sim_follow(f, Match.DT)
+	ok(f.tucked and not f.hittable(), "it rides in your satchel while you're up in the air (tucked %s)" % f.tucked)
+	P.grounded = true
 	_put(P, far)
 	_steps(0.5)
 	ok(not f.tucked and f.hittable(), "and hops out when you land")
@@ -366,4 +367,4 @@ func _results_save() -> void:
 	m.opts["tutorial"] = false
 	m.opts["no_follow"] = true
 	_tame(P, w)
-	ok(Follow.of(P) == null and P.caught.size() == 1, "with following off (tutorial, loaner runs), a tame goes in the bag as before")
+	ok(Follow.of(P) == null and P.caught.size() == 1, "with following off (the tutorial), a tame goes in the bag as before")

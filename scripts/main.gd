@@ -381,12 +381,22 @@ func _ready() -> void:
 		htc.run(self)
 		return
 	if "--economy-floor-check" in args:
-		var efc = load("res://tools/economy_floor_check.gd").new()      # never stuck: strays, the pens, free-kit runs, the Exchange, saves
+		var efc_s: GDScript = load("res://tools/economy_floor_check.gd")
+		if efc_s == null or not efc_s.can_instantiate():
+			print("ECONOMY_FLOOR CHECK failed to load, failures: 1")
+			get_tree().quit(1)
+			return
+		var efc = efc_s.new()      # never stuck: strays, the pens, free-kit runs, the Exchange, saves
 		set_meta("economy_floor_check", efc)
 		efc.run(self)
 		return
 	if "--follower-check" in args:
-		var flc = load("res://tools/follower_check.gd").new()      # tamed Boki follow you: knockouts, steal windows, bots, sync
+		var flc_s: GDScript = load("res://tools/follower_check.gd")
+		if flc_s == null or not flc_s.can_instantiate():
+			print("FOLLOWER CHECK failed to load, failures: 1")
+			get_tree().quit(1)
+			return
+		var flc = flc_s.new()      # tamed Boki follow you: knockouts, steal windows, bots, sync
 		set_meta("follower_check", flc)
 		flc.run(self)
 		return
