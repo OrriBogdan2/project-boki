@@ -221,7 +221,10 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		if h.kin and h.kin.state == "active" and h.kin.flat_dist(h) > 6.0:
 			h.kin.recall()
 		# far from the squad with nothing to fight: now and then, base to a teammate
-		if h.base_t <= 0.0 and h.base_cd <= 0.0 and h.grounded and randf() < dt * 0.05:
+		# (not while holding a spot: an uplink's yard, a skiff's deck, a lair: basing away from a
+		# charging uplink left its yard empty to drain)
+		if h.base_t <= 0.0 and h.base_cd <= 0.0 and h.grounded and randf() < dt * 0.05 \
+				and not String(a.get("goal_kind", "")) in ["yard", "board", "lift", "lair_dial", "lair_fight", "lair_camp", "lair_lever"]:
 			var mate := m.base_target(h)
 			if mate and h.flat_dist(mate) > 30.0:
 				h.start_base(mate)
