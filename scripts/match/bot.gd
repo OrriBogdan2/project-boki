@@ -10,6 +10,11 @@ func new_mind(rng: RandomNumberGenerator, skill: float, diff := {}) -> Dictionar
 		"jump_cd": rng.randf_range(2, 5), "throw_cd": rng.randf_range(1.5, 4), "aim_err": Vector2.ZERO, "hurt_hp": 0.0,
 		"wander": Vector3.INF, "stuck": 0.0, "last_pos": Vector3.ZERO}
 
+const ARRIVE_R := 1.5          # bots ease off and stop turning this close to where they're going
+const GOAL_KEEP := 4.0         # metres of extra reach for a goal we're already heading to
+const GOAL_STICK := 5.0        # seconds a bot sticks to a goal before it may flip back to the last one
+const URGENT_GOALS := ["revive", "box", "beacon", "hum", "yard", "board", "lift", "lair_fight", "lair_escape", "lair_lever", "lair_updraft"]
+
 func think(m: Match, h: Hunter, dt: float) -> void:
 	var a := h.ai
 	a["think"] -= dt
@@ -163,6 +168,9 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 			elif k.state == "active" and (k.hp < k.max_hp * 0.3 or k.flat_dist(h) > 11.0):
 				k.recall()
 				a["throw_cd"] = 2.0
+		# holding our uplink's yard: fight from in it, don't chase the waves out (an empty yard drains)
+		if String(a.get("goal_kind", "")) == "yard" and a["goal"] != Vector3.INF and h.flat_dist(a["goal"]) > 2.4:
+			move = (_path_dir(m, h, a["goal"]) + move * 0.3).normalized()
 		# defensive moves
 		if h.hp < a["hurt_hp"] - 12.0 and a["dash_cd"] <= 0.0 and randf() < 0.35 + abil * 0.65:
 			a["dash_cd"] = randf_range(1.2, 3.0) / (0.5 + a["skill"])
@@ -196,7 +204,19 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		var goal: Vector3 = a["goal"]
 		if goal != Vector3.INF:
 			move = _path_dir(m, h, goal)
-			inp["aim"] = Vector3(h.pos.x + move.x * 3.0, h.pos.y + 0.9, h.pos.z + move.y * 3.0)
+			# arriving: ease off over the last stretch instead of running past the spot and back (at
+			# full speed a bot overshot anything closer than a stride, a dropped weapon still popping
+			# in the air, say, and whipped round every few frames: it looked like it was spinning).
+			# And keep looking the way we were going: no turning to face a spot under our feet.
+			var gd := h.flat_dist(goal)
+			if gd < ARRIVE_R and a.get("cross", {}).is_empty():
+				move *= clampf(gd / ARRIVE_R, 0.2, 1.0)
+			if gd >= ARRIVE_R or not a.has("aim_hold"):
+				inp["aim"] = Vector3(h.pos.x + move.x * 3.0, h.pos.y + 0.9, h.pos.z + move.y * 3.0)
+				a["aim_hold"] = Vector2(move.x, move.y).normalized() if move.length() > 0.05 else Vector2(sin(h.face), cos(h.face)) * -1.0
+			else:
+				var ah: Vector2 = a["aim_hold"]
+				inp["aim"] = Vector3(h.pos.x + ah.x * 3.0, h.pos.y + 0.9, h.pos.z + ah.y * 3.0)
 			inp["aim_y"] = h.pos.y
 			if h.flat_dist(goal) < 1.2 and a["goal_kind"] in ["chest", "catch", "revive", "box", "dock", "uplink", "hatch", "lair_dial", "lair_lever"]:
 				inp["interact"] = true
@@ -301,6 +321,32 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 			a["frozen"] = 0.0
 			if Vector2(h.pos.x - a["last_pos"].x, h.pos.z - a["last_pos"].z).length() > 0.08: a["hops"] = 0
 	a["last_pos"] = h.pos
+	_ease_aim(h, dt)
+
+## Turn the way a person would: when the bot isn't shooting or casting this tick, its aim swings
+## round at a capped rate instead of snapping. Goals and targets that flicker (a target stepping in
+## and out of reach, the aim dropping back to the walking direction for a frame) had bots whipping
+## round several times a second. Shots and abilities still aim exactly where they were meant to.
+const AIM_TURN := 5.0          # rad/s with nothing to fight
+const AIM_TURN_FIGHT := 9.0    # rad/s with a target, between shots
+func _ease_aim(h: Hunter, dt: float) -> void:
+	var a := h.ai
+	var inp := h.inp
+	var aim3: Vector3 = inp["aim"]
+	var dv := Vector2(aim3.x - h.pos.x, aim3.z - h.pos.z)
+	if dv.length() < 0.05:
+		return
+	var want := atan2(dv.y, dv.x)
+	var acting: bool = inp.get("fire", false) or inp.get("sig", false) or inp.get("sec", false) or inp.get("gear1", false) \
+		or inp.get("ult", false) or inp.get("dash", false) or inp.get("interact", false)
+	if acting:
+		return
+	# (from where the bot is facing now: Hunter.face points along (-sin, -cos))
+	var cur := atan2(-cos(h.face), -sin(h.face))
+	var rate := AIM_TURN_FIGHT if a.get("tgt") != null else AIM_TURN
+	cur += clampf(wrapf(want - cur, -PI, PI), -rate * dt, rate * dt)
+	var L := maxf(dv.length(), 1.0)
+	inp["aim"] = Vector3(h.pos.x + cos(cur) * L, aim3.y, h.pos.z + sin(cur) * L)
 
 ## A clear shot from where we stand: from our feet's eye height (not the top of a hop), at the lower
 ## of the two heights, so a ledge or a rock between us stops us firing into it.
@@ -620,15 +666,28 @@ func _choose(m: Match, h: Hunter) -> void:
 			if bc["used"]: continue
 			var d := h.flat_dist(bc["pos"])
 			if d < bd: bd = d; goal = bc["pos"]; gk = "beacon"
+	# our squad's uplink is charging: every hunter in its yard charges it faster (and an empty yard
+	# drains it), so go and hold it rather than wander off after boxes, pings or lairs (unless we're
+	# sealed in a lair already)
+	var holding_yard: bool = m.exits != null and String(m.exits.active_for(h.team).get("state", "")) == "charging" \
+		and (m.lairs == null or m.lairs.sealed_lair(h).is_empty())
+	if goal == Vector3.INF and holding_yard:
+		var yg: Array = m.exits.bot_goal(h, true)
+		if not yg.is_empty() and String(yg[1]) == "yard":
+			goal = yg[0]; gk = "yard"
 	# a rival's deathbox revive humming within earshot: go and stop it
 	if goal == Vector3.INF:
 		for b in m.box_hums.values():
 			if int(b["team"]) != h.team and h.flat_dist(b["pos"]) < Match.HUM_RANGE:
 				goal = b["pos"]; gk = "hum"; break
 	# anyone else's box with something in it
+	# (the range checks below reach a little further for what we're already heading to: right at
+	# the edge of one, a bot used to pick it, step away, drop it, step back, every think, turning on
+	# the spot each time)
+	var cur: Vector3 = a["goal"]
 	if goal == Vector3.INF:
 		for b in m.boxes:
-			if not b["empty"] and h.flat_dist(b["pos"]) < 14.0 and not (b["owner"].team == h.team and Life.soul_here(m, b)):
+			if not b["empty"] and h.flat_dist(b["pos"]) < 14.0 + (GOAL_KEEP if b["pos"] == cur else 0.0) and not (b["owner"].team == h.team and Life.soul_here(m, b)):
 				goal = b["pos"]; gk = "box"; break
 	# someone asked us to follow them (a Follow me emote from a teammate or truce partner)
 	if goal == Vector3.INF and a.has("follow"):
@@ -647,7 +706,7 @@ func _choose(m: Match, h: Hunter) -> void:
 		else:
 			a.erase("ping_goal")
 	# boss lairs: a dropped Rare Egg, or (bolder bots) a lair to open and its boss to fight
-	if goal == Vector3.INF and m.lairs and not m.lairs.list.is_empty():
+	if goal == Vector3.INF and m.lairs and not m.lairs.list.is_empty() and not holding_yard:
 		# heading home, as far as lairs go: late in the match, carrying a Rare Egg, or a bot that has
 		# decided to leave once the match is far enough along. (The random "leave" roll below can
 		# fire in the first minute; it used to cancel every lair plan right away, though the exits
@@ -674,13 +733,13 @@ func _choose(m: Match, h: Hunter) -> void:
 			goal = g[0]; gk = String(g[1])
 	if goal == Vector3.INF:
 		for k in m.kins:
-			if k.state == "dazed" and not k.dead and h.flat_dist(k) < 14.0:
+			if k.state == "dazed" and not k.dead and h.flat_dist(k) < 14.0 + (GOAL_KEEP if k.pos.distance_to(cur) < 2.0 else 0.0):
 				goal = k.pos; gk = "catch"; break
 	if goal == Vector3.INF:
 		var bd := 18.0
 		for c in m.chests:
 			if c["open"]: continue
-			var d := h.flat_dist(c["pos"])
+			var d := h.flat_dist(c["pos"]) - (GOAL_KEEP if c["pos"] == cur else 0.0)
 			if d < bd: bd = d; goal = c["pos"]; gk = "chest"
 	if goal == Vector3.INF:
 		var bd := 12.0
@@ -689,7 +748,7 @@ func _choose(m: Match, h: Hunter) -> void:
 				continue
 			if m.lairs and m.lairs.walled_off(h, p["pos"]):
 				continue      # (behind a sealed lair's gate: no way in from here)
-			var d := h.flat_dist(p["pos"])
+			var d := h.flat_dist(p["pos"]) - (GOAL_KEEP if p["pos"].distance_to(cur) < 1.0 else 0.0)
 			if d < bd: bd = d; goal = p["pos"]; gk = "loot"
 	if goal == Vector3.INF:
 		# roam toward monsters or another island
@@ -708,6 +767,15 @@ func _choose(m: Match, h: Hunter) -> void:
 			dt = m.world.random_ground()
 			a["detour"] = dt
 		goal = dt; gk = "roam"
+	# flip-flopping between two goals (A, B, A again within a few seconds): stay on the one we're on
+	# for a while. Two goals pulling opposite ways had a bot turning round every think: it spun.
+	# (a goal that only moved a little is the same one, walking: a kin, a squadmate we follow)
+	if goal != a["goal"] and a["goal"] != Vector3.INF and not gk in URGENT_GOALS and goal.distance_to(a["goal"]) > 3.0 \
+			and goal.distance_to(a.get("prev_goal", Vector3.INF)) < 1.0 and m.time - float(a.get("goal_set_t", -99.0)) < GOAL_STICK:
+		goal = a["goal"]; gk = String(a["goal_kind"])
+	if goal != a["goal"] and (a["goal"] == Vector3.INF or goal.distance_to(a["goal"]) > 3.0):
+		a["prev_goal"] = a["goal"]
+		a["goal_set_t"] = m.time
 	# give up on goals we can't seem to reach
 	if goal != a["goal"]:
 		a["goal_best"] = 1e9

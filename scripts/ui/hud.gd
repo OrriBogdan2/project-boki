@@ -875,7 +875,8 @@ func _draw_exit_labels() -> void:
 					_: line = "Sealed  ·  you have a key" if p.rift_keys > 0 else "Sealed  ·  needs a Rift Key"
 			"outpost":
 				match st:
-					"charging": line = "Uplink %d%%%s" % [int(x["prog"] * 100.0), "  ·  contested" if x["contested"] else ""]
+					"charging": line = "Uplink %d%%%s" % [int(x["prog"] * 100.0), "  ·  contested" if x["contested"] else ("  ·  draining %s" % _fmt(m.exits.drain_left(x)) if x.get("draining", false) else "")]
+					"fizzling": line = "Shutting off"
 					"open": line = "LIFT OPEN  %ds" % int(ceil(x["t"]))
 					"spent": line = "Cooling down"
 					_: line = "Start uplink" if m.exits.startable(x) else ("Online in %s" % _fmt(float(x["open_at"]) - m.time))

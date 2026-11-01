@@ -392,6 +392,9 @@ func _ready() -> void:
 	if "--grammar-runtime-check" in args:
 		_grammar_runtime_check()
 		return
+	if "--bot-sanity-check" in args:
+		_bot_sanity()
+		return
 	if "--simtest" in args:
 		_simtest(opts)
 		return
@@ -2197,6 +2200,90 @@ func _extract_check() -> void:
 	if not P.extracted or m.result.get("how", "") != "uplink": ok = false; print("EXCHECK FAIL lift")
 	done.call(m)
 	await get_tree().process_frame
+	# ---- 3b. one of the squad charges the uplink; more of you in the yard charge it faster (and a
+	# rival still stalls it however many of you there are). Squadmate bots come and hold the yard.
+	m = fresh.call(3)
+	P = m.player
+	var crew: Array = m.hunters.filter(func(x): return x.team == P.team)
+	R = m.hunters.filter(func(x): return x.team != P.team)[0]
+	o = m.exits.of_kind("outpost")[0]
+	m.time = float(o["open_at"]) + 1.0
+	for i in crew.size():
+		var h: Hunter = crew[i]
+		h.teleport(m.world.random_ground()); h.set_meta("pin", h.pos)
+	P.teleport(o["pos"] + Vector3(0.6, 0, 0.6)); P.set_meta("pin", P.pos)
+	run.call(m, 2.0, func(): P.inp["interact"] = true)
+	P.inp["interact"] = false
+	var rates: Array = []
+	for n in [1, 2, 3]:
+		for i in n:
+			var h: Hunter = crew[i]
+			var at: Vector3 = o["pos"] + Vector3(cos(i * 2.1), 0, sin(i * 2.1)) * 1.2
+			h.teleport(at); h.set_meta("pin", at)
+		run.call(m, 0.2, calm.bind(m))
+		var q0 := float(o["prog"])
+		run.call(m, 2.0, calm.bind(m))
+		rates.append((float(o["prog"]) - q0) / 2.0 * m.exits.uplink_time(o))
+	var crew_ok: bool = absf(float(rates[0]) - 1.0) < 0.05 and absf(float(rates[1]) - 1.5) < 0.05 and absf(float(rates[2]) - 1.8) < 0.05
+	print("EXCHECK uplink crew: charge rate x%.2f with one, x%.2f with two, x%.2f with three in the yard (crew %d)" % [rates[0], rates[1], rates[2], int(o.get("crew", 0))])
+	if not crew_ok: ok = false; print("EXCHECK FAIL uplink crew rates")
+	R.teleport(o["pos"] + Vector3(-1.6, 0, 1.0)); R.set_meta("pin", R.pos)
+	run.call(m, 0.2, calm.bind(m))
+	var qc0 := float(o["prog"])
+	run.call(m, 2.0, calm.bind(m))
+	print("EXCHECK uplink crew: three of you and one rival in the yard: contested=%s %d%% -> %d%%" % [o["contested"], int(qc0 * 100), int(float(o["prog"]) * 100)])
+	if not o["contested"] or absf(float(o["prog"]) - qc0) > 0.001: ok = false; print("EXCHECK FAIL contest with a crew")
+	R.remove_meta("pin"); R.teleport(m.world.random_ground())
+	# a squadmate bot elsewhere goes to hold the yard, at its own spot
+	var YB: Hunter = crew[2]
+	YB.remove_meta("pin"); YB.teleport(m.world.random_ground()); YB.ctrl = "bot"
+	var bgx: Array = m.exits.bot_goal(YB, false)
+	print("EXCHECK uplink crew: a squadmate bot heads for %s (%s, %.1fm from the mast)" % [str(bgx.slice(1)), str(bgx[0]) if not bgx.is_empty() else "-", (bgx[0] as Vector3).distance_to(o["pos"]) if not bgx.is_empty() else -1.0])
+	if bgx.is_empty() or String(bgx[1]) != "yard" or not m.exits.in_yard(o, crew[0]) or (bgx[0] as Vector3).distance_to(o["pos"]) > Exits.OUTPOST_R - 0.5: ok = false; print("EXCHECK FAIL bot yard")
+	# ... and it walks there and holds it (the uplink charging the while)
+	for h in m.hunters:
+		if h != YB: h.remove_meta("pin"); h.teleport(m.world.random_ground()); h.set_meta("pin", h.pos)
+	YB.teleport(o["pos"] + Vector3(9.0, 0, 0) if not m.world.is_void(o["pos"].x + 9.0, o["pos"].z) else o["pos"] + Vector3(0, 0, 9.0))
+	var yb_in := 0.0
+	var tyb := 0.0
+	while tyb < 16.0:
+		run.call(m, 0.25, calm.bind(m)); tyb += 0.25
+		if m.exits.in_yard(o, YB): yb_in += 0.25
+	print("EXCHECK uplink crew: the bot held the yard %.1fs of the last 16s (%.1fm from the mast)" % [yb_in, YB.flat_dist(o["pos"])])
+	if yb_in < 8.0 or not m.exits.in_yard(o, YB): ok = false; print("EXCHECK FAIL bot didn't hold the yard")
+	YB.ctrl = "idle"; YB.inp["move"] = Vector2.ZERO
+	# ---- 3c. nobody in the yard: the charge drains (shown on the HUD and over the yard); at nothing
+	# the uplink flickers, shuts off, and after a cooldown can be started again
+	YB.teleport(m.world.random_ground()); YB.set_meta("pin", YB.pos)
+	P.remove_meta("pin"); P.teleport(o["pos"] + Vector3(6.0, 0, 0) if not m.world.is_void(o["pos"].x + 6.0, o["pos"].z) else o["pos"] + Vector3(0, 0, 6.0)); P.set_meta("pin", P.pos)
+	o["prog"] = 0.5
+	run.call(m, 0.2, calm.bind(m))
+	var d0 := float(o["prog"])
+	run.call(m, 3.0, calm.bind(m))
+	var d1 := float(o["prog"])
+	var ust: Dictionary = m.exits.status_for(P)
+	var drain_rate := (d0 - d1) / 3.0 * Exits.UPLINK_DECAY_T
+	print("EXCHECK uplink decay: nobody in the yard: %d%% -> %d%% in 3s (x%.2f of a full drain in %ds); '%s'" % [int(d0 * 100), int(d1 * 100), drain_rate, int(Exits.UPLINK_DECAY_T), String(ust.get("text", ""))])
+	if not o.get("draining", false) or absf(drain_rate - 1.0) > 0.05 or not String(ust.get("text", "")).contains("draining"): ok = false; print("EXCHECK FAIL uplink decay")
+	# back in the yard it charges again
+	P.teleport(o["pos"] + Vector3(0.6, 0, 0.6)); P.set_meta("pin", P.pos)
+	run.call(m, 1.0, calm.bind(m))
+	var d2 := float(o["prog"])
+	if o.get("draining", false) or d2 <= d1: ok = false; print("EXCHECK FAIL back in the yard it didn't charge")
+	# out again until it runs dry
+	P.teleport(o["pos"] + Vector3(6.0, 0, 0) if not m.world.is_void(o["pos"].x + 6.0, o["pos"].z) else o["pos"] + Vector3(0, 0, 6.0)); P.set_meta("pin", P.pos)
+	var seen_fizz := false
+	var tf := 0.0
+	while tf < Exits.UPLINK_DECAY_T + Exits.FIZZLE_T + 2.0 and String(o["state"]) != "spent":
+		run.call(m, 0.25, calm.bind(m)); tf += 0.25
+		if String(o["state"]) == "fizzling": seen_fizz = true
+	print("EXCHECK uplink decay: ran dry after %.1fs: flickered %s, now %s (team %d), %s" % [tf, seen_fizz, o["state"], int(o["team"]), String(m.exits.interact_for(P).get("label", "")) if m.exits.has_method("interact_for") else ""])
+	if not seen_fizz or String(o["state"]) != "spent" or int(o["team"]) != -1: ok = false; print("EXCHECK FAIL uplink fizzle")
+	run.call(m, Exits.FIZZLE_CD + 0.5, calm.bind(m))
+	print("EXCHECK uplink decay: after the cooldown it's %s, startable %s" % [o["state"], m.exits.startable(o)])
+	if String(o["state"]) != "idle" or not m.exits.startable(o): ok = false; print("EXCHECK FAIL uplink not startable again")
+	done.call(m)
+	await get_tree().process_frame
 	# ---- 4. docks close late, one stays open
 	m = fresh.call(2)
 	var closing := m.exits.of_kind("dock").filter(func(x): return float(x["close_at"]) < 1e8).size()
@@ -2939,6 +3026,93 @@ func _boss_check() -> void:
 	ok.call(m3.lairs.list.size() >= 1 and live3 >= 1, "a generated map: %d lair(s), %d live (%s)" % [m3.lairs.list.size(), live3, str(m3.lairs.list.map(func(L): return L["boss"]))])
 	print("BOSSCHECK done, failures: %d" % bad[0])
 	get_tree().quit(1 if bad[0] > 0 else 0)
+## Bots shouldn't look broken: over a few seeded matches, every bot is watched for spinning (its
+## facing swinging back and forth), jump and dash spam, and hanging in the air (which shows its hit ring
+## under it: blue on an ally). Any 5 s window over the limits is flagged, with what the bot was doing.
+func _bot_sanity() -> void:
+	Save.no_write = true
+	Save.d = Save.fresh()
+	Econ.ensure()
+	var seeds := [3, 5, 9]
+	var dur := 150.0
+	var verbose := "--sanity-verbose" in OS.get_cmdline_user_args()
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--sanity-seeds="): seeds = Array(a.substr(15).split(",")).map(func(x): return int(x))
+		if a.begins_with("--sanity-t="): dur = float(a.substr(11))
+	const WIN := 5.0
+	const MAX_TURN := 9.0 * PI      # facing travel in a window (a full fight's strafing is ~3 pi)
+	const MAX_FLIPS := 14           # big reversals of facing in a window
+	const MAX_JUMPS := 6
+	const MAX_DASHES := 6
+	const MAX_RING := 0.6           # share of a window spent in the air over land, ring showing
+	var bad := 0
+	var worst := {}
+	for sd in seeds:
+		var m := Match.new()
+		add_child(m)
+		m.start({"teams": 3, "squad": 3, "tier": 0, "seed": sd, "autoplay": true})
+		m.set_process(false)
+		var st := {}
+		for h in m.hunters:
+			st[h.nid] = {"face": h.face, "dface": 0.0, "turn": 0.0, "flips": 0, "jumps": 0, "dashes": 0, "ring": 0.0, "t": 0.0, "vy": 0.0, "roll": 0.0, "air": 0.0}
+		var flagged := 0
+		var watch := ""
+		for a in OS.get_cmdline_user_args():
+			if a.begins_with("--sanity-watch="): watch = a.substr(15)
+		while m.time < dur and not m.over:
+			m.step(Match.DT)
+			if watch != "":
+				var wn := watch.split("@")
+				var w0 := float(wn[1]) if wn.size() > 1 else 0.0
+				if m.time > w0 and m.time < w0 + 6.0 and int(m.time * 60.0) % 6 == 0:
+					for h in m.hunters:
+						if h.pname == wn[0]:
+							var c: Dictionary = h.ai.get("cross", {})
+							print("WATCH t=%.2f pos=%s vel=%s face=%.2f aim=%s move=%s gr=%s goal=%s kind=%s cross=%s go=%s wp=%s stuck=%.2f detour=%.2f" % [m.time, str(h.pos.snapped(Vector3(0.01,0.01,0.01))), str(h.vel.snapped(Vector3(0.1,0.1,0.1))), h.face, str((h.inp["aim"] as Vector3).snapped(Vector3(0.1,0.1,0.1))), str(h.inp["move"]), h.grounded, str(h.ai.get("goal")), str(h.ai.get("goal_kind")), ("%d>%d take %s land %s" % [c["from"], c["to"], str(c["take"]), str(c["land"])]) if not c.is_empty() else "-", str(h.ai.get("cross_go")), str((h.ai.get("wp", {}) as Dictionary).get("path", []).slice(0, 2)), float(h.ai.get("stuck", 0)), float(h.ai.get("detour_t", 0.0))])
+			for h in m.hunters:
+				if h.out or h.extracted or h.riding or h.dropping or h.downed:
+					continue
+				var s: Dictionary = st[h.nid]
+				var df := wrapf(h.face - float(s["face"]), -PI, PI)
+				s["turn"] = float(s["turn"]) + absf(df)
+				if absf(df) > 0.08 and signf(df) != signf(float(s["dface"])) and absf(float(s["dface"])) > 0.08:
+					s["flips"] = int(s["flips"]) + 1
+				if absf(df) > 0.02: s["dface"] = df
+				s["face"] = h.face
+				if h.vel.y - float(s["vy"]) > 6.0 and h.pad.is_empty() and h.vel.y > 5.0:
+					s["jumps"] = int(s["jumps"]) + 1
+				s["vy"] = h.vel.y
+				if h.roll_t > float(s["roll"]) + 0.05:
+					s["dashes"] = int(s["dashes"]) + 1
+				s["roll"] = h.roll_t
+				if h.hit_marker() == "ring" and not h.gliding:
+					s["ring"] = float(s["ring"]) + Match.DT
+				s["t"] = float(s["t"]) + Match.DT
+				if float(s["t"]) >= WIN:
+					var why: Array = []
+					if float(s["turn"]) > MAX_TURN: why.append("spin %.0f rad" % float(s["turn"]))
+					if int(s["flips"]) > MAX_FLIPS: why.append("%d facing flips" % int(s["flips"]))
+					if int(s["jumps"]) > MAX_JUMPS: why.append("%d jumps" % int(s["jumps"]))
+					if int(s["dashes"]) > MAX_DASHES: why.append("%d dashes" % int(s["dashes"]))
+					if float(s["ring"]) > MAX_RING * WIN: why.append("ring up %.1fs" % float(s["ring"]))
+					for k in ["turn", "flips", "jumps", "dashes", "ring"]:
+						var v := float(s[k])
+						if v > float(worst.get(k, 0.0)): worst[k] = v
+					if not why.is_empty() or verbose:
+						if not why.is_empty(): flagged += 1
+						var a: Dictionary = h.ai
+						print("SANITY %s seed %d t=%.0f %s (%s): %s | goal=%s tgt=%s cross=%s gl=%s gr=%s pos=%s turn=%.1f flips=%d jumps=%d dashes=%d ring=%.1f" % ["FLAG" if not why.is_empty() else "    ", sd, m.time, h.pname, h.ctrl, ", ".join(why),
+							str(a.get("goal_kind", "")), str(a.get("tgt")).get_slice(":", 0), str(a.has("cross")), h.gliding, h.grounded, str(h.pos.snapped(Vector3(0.1, 0.1, 0.1))),
+							float(s["turn"]), int(s["flips"]), int(s["jumps"]), int(s["dashes"]), float(s["ring"])])
+					s["turn"] = 0.0; s["flips"] = 0; s["jumps"] = 0; s["dashes"] = 0; s["ring"] = 0.0; s["t"] = 0.0
+		print("SANITY seed %d: %d flagged windows over %.0fs" % [sd, flagged, m.time])
+		bad += flagged
+		m.queue_free()
+		await get_tree().process_frame
+	print("SANITY worst window: turn %.1f rad, flips %d, jumps %d, dashes %d, ring %.1fs" % [float(worst.get("turn", 0)), int(worst.get("flips", 0)), int(worst.get("jumps", 0)), int(worst.get("dashes", 0)), float(worst.get("ring", 0))])
+	print("SANITY done, failures: %d" % bad)
+	get_tree().quit(1 if bad > 0 else 0)
+
 ## Balance probe for the 90 s seal: a squad of three bots (skill 0.6) walks into each boss's lair and
 ## fights it for real; prints how long the kill takes (or that the seal would have failed).
 func _boss_ttk() -> void:

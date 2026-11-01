@@ -237,6 +237,23 @@ func _ready() -> void:
 	cam.snap(ppos)
 	if "--expedition-test" in dbg:
 		get_tree().create_timer(0.5).timeout.connect(_open_expedition)
+	if "--expedition-scroll-test" in dbg:
+		# test: open the expedition panel, scroll down, press a match-mode tab (which rebuilds the
+		# panel): it should stay where it was scrolled (--no-keep-scroll shows the old jump to the top)
+		get_tree().create_timer(0.5).timeout.connect(func():
+			_open_expedition()
+			get_tree().create_timer(0.6).timeout.connect(func():
+				var sc := _panel_scroll()
+				if sc == null: print("SCROLLTEST no scroll"); return
+				sc.scroll_vertical = int(sc.get_v_scroll_bar().max_value)
+				get_tree().create_timer(0.3).timeout.connect(func():
+					var before := sc.scroll_vertical
+					if "--no-keep-scroll" in dbg: set_meta("no_keep_scroll", true)
+					exp_mode = "duo" if exp_mode != "duo" else "trio"
+					_open_expedition()
+					get_tree().create_timer(0.5).timeout.connect(func():
+						var sc2 := _panel_scroll()
+						print("SCROLLTEST before=%d after=%d max=%d" % [before, sc2.scroll_vertical if sc2 else -1, int(sc2.get_v_scroll_bar().max_value) if sc2 else -1])))))
 	for a in dbg:
 		if a.begins_with("--rack-test"):
 			# test: open the glider rack (optionally on a skin: --rack-test=ember)
@@ -2040,6 +2057,12 @@ func _treat_name(t: String) -> String:
 
 func _new_panel(title_txt: String, width := 520.0, scroll := false) -> VBoxContainer:
 	var prev := panel_open
+	# the same panel rebuilt (a button on it changed something, as the expedition loadout's do):
+	# keep it scrolled where it was instead of jumping back to the top
+	var keep_scroll := -1
+	if prev == title_txt:
+		var old_sc := _panel_scroll()
+		if old_sc: keep_scroll = old_sc.scroll_vertical
 	_close_panel()
 	var pb := UI.scroll_panel(title_txt, width, _close_panel, "Close", scroll)
 	var p: PanelContainer = pb[0]
@@ -2054,7 +2077,33 @@ func _new_panel(title_txt: String, width := 520.0, scroll := false) -> VBoxConta
 	if prev != title_txt:
 		UI.pop_in(p)
 		Sfx.play("whoosh", null, -10.0)
+	if keep_scroll > 0 and not has_meta("no_keep_scroll"):
+		_restore_scroll(p, keep_scroll, 4)
 	return v
+
+## The scroll of the open panel (the newest one in the host), or null.
+func _panel_scroll() -> ScrollContainer:
+	var kids := panel_host.get_children().filter(func(ch): return not ch.is_queued_for_deletion())
+	if kids.is_empty():
+		return null
+	var found := (kids[-1] as Node).find_children("*", "ScrollContainer", true, false)
+	return found[0] as ScrollContainer if not found.is_empty() else null
+
+## Put a rebuilt panel back where it was scrolled to, once its content has been laid out (the panel
+## sizes its scroll a frame or two after it's built, so this tries for a few frames).
+func _restore_scroll(p: Control, val: int, tries: int) -> void:
+	if not is_instance_valid(p) or not p.is_inside_tree():
+		return
+	var found := p.find_children("*", "ScrollContainer", true, false)
+	if found.is_empty():
+		return
+	var sc: ScrollContainer = found[0]
+	sc.scroll_vertical = val
+	if tries > 0 and sc.scroll_vertical != val:
+		get_tree().process_frame.connect(func(): _restore_scroll(p, val, tries - 1), CONNECT_ONE_SHOT)
+	elif tries > 0:
+		# (set again next frame too: a late resize can clamp it back toward the top)
+		get_tree().process_frame.connect(func(): if is_instance_valid(sc) and sc.scroll_vertical != val: _restore_scroll(p, val, tries - 1), CONNECT_ONE_SHOT)
 
 func _close_panel() -> void:
 	var was := panel_open
