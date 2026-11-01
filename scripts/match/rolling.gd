@@ -17,7 +17,7 @@ extends RefCounted
 ##   - bounties: a hunter BOUNTY_GAP+ levels over the median is marked for everyone, and knocking them
 ##     pays XP and loot by the gap (and any knock on a higher-level hunter pays a little by the gap);
 ##   - soft landing: waves come down over the less crowded side, onto the calm outer ring of the wide map
-##     (World.widen_layout), and the fresh-lander grace (Bot.fresh, per hunter) and the Blight's ramp
+##     (WideLayout.widen), and the fresh-lander grace (Bot.fresh, per hunter) and the Blight's ramp
 ##     (BlightDir.land_at, per squad) both key off each squad's own landing time.
 ##
 ## The match clock (Match.time) starts when YOUR wave sets off; the session clock is Match.sess_time()
@@ -80,6 +80,28 @@ var events: Array = []             # what happened, for tests: [session time, te
 
 func _init(match_node: Match) -> void:
 	m = match_node
+
+## Bots: how long they have left out there. A rolling session's squads each mean to stay a while
+## (team_time_left); otherwise it's the match's time left.
+static func bot_time_left(mt: Match, h: Hunter) -> float:
+	if mt.rolling:
+		return mt.rolling.team_time_left(h.team)
+	return mt.length - mt.time
+
+## Bots: are they past this share of their time out there (the match's, or their squad's planned stay)?
+static func bot_past(mt: Match, h: Hunter, k: float) -> bool:
+	if mt.rolling:
+		return mt.rolling.team_elapsed(h.team) > float(mt.rolling.team_stay.get(h.team, STAY.y)) * k
+	return mt.time > mt.length * k
+
+## Aboard a drop wave's skyship: rides it until its jump, then glides to `at`.
+func board(h: Hunter, s: Dictionary, at: Vector3) -> void:
+	h.set_meta("ship", s)
+	h.riding = true
+	h.dropping = false
+	h.ai["land"] = at
+	h.teleport(m.ship_pos_of(s))
+	m.plan_jump(h, at)
 
 static func enabled(o: Dictionary) -> bool:
 	if o.has("net"):
@@ -425,7 +447,7 @@ func _launch(w: Dictionary) -> void:
 				at = m.world.free_spot_near(at + Vector3(rng.randf_range(-2, 2), 0, rng.randf_range(-2, 2)), [], 0.8, 0.45, 6.0)
 			var h := m.make_bot(team, at, _names)
 			h.set_meta("wave", int(w["i"]))
-			m.board(h, s, at)
+			board(h, s, at)
 			mem.append(h)
 		if m.skydrop:
 			m.skydrop.add_squad(mem)

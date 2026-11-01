@@ -107,7 +107,7 @@ func _session(main: Node) -> void:
 	var t0 := float(R.waves[4]["t"])
 	ok(absf(m.sess_t0 - t0) < 0.01 and absf(m.sess_time() - t0) < 0.01, "the session clock starts at your wave (%s), the match clock at 0" % Rolling.fmt(t0))
 	ok(absf(m.length - (Rolling.SESSION - t0)) < 0.01, "the match lasts what's left of the session (%s)" % Rolling.fmt(m.length))
-	ok(m.world.w == World.BIG_SIZE + World.WIDE_PAD * 2 and m.world.layout_id.ends_with("_wide"), "rolling sessions use the wide map (%d tiles, %d islands)" % [m.world.w, m.world.islands.size()])
+	ok(m.world.w == World.BIG_SIZE + WideLayout.WIDE_PAD * 2 and m.world.layout_id.ends_with("_wide"), "rolling sessions use the wide map (%d tiles, %d islands)" % [m.world.w, m.world.islands.size()])
 	var ring := m.world.islands.filter(func(I): return String(I.get("id", "")).begins_with("o_"))
 	ok(ring.size() == 8 and ring.all(func(I): return int(I.get("danger", 9)) == 0 and (I["cells"] as Array).size() > 400), "eight calm outer islands on the ring")
 	var ring_links := m.world.links.filter(func(L): return String(m.world.islands[int(L["from"])].get("id", "")).begins_with("o_"))

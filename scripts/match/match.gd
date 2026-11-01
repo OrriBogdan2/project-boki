@@ -142,19 +142,6 @@ func sess_len() -> float:
 func at_sess(k: float) -> float:
 	return k * sess_len() - sess_t0
 
-## Bots: how long they have left out there. A rolling session's squads each mean to stay a while
-## (Rolling.team_time_left); otherwise it's the match's time left.
-func bot_time_left(h: Hunter) -> float:
-	if rolling:
-		return rolling.team_time_left(h.team)
-	return length - time
-
-## Bots: are they past this share of their time out there (the match's, or their squad's planned stay)?
-func bot_past(h: Hunter, k: float) -> bool:
-	if rolling:
-		return rolling.team_elapsed(h.team) > float(rolling.team_stay.get(h.team, Rolling.STAY.y)) * k
-	return time > length * k
-
 func _ready() -> void:
 	set_process(false)
 
@@ -706,9 +693,7 @@ func _start(o: Dictionary) -> void:
 	var layout := {}
 	# --procgen (or opts.procedural): the old island generator instead, as a fallback
 	if big and not o.get("procedural", false) and not "--procgen" in OS.get_cmdline_user_args():
-		layout = World.load_layout(String(o.get("map", World.layout_for_tier(tier))))
-		if rolling and not layout.is_empty() and not o.get("narrow", false):
-			layout = World.widen_layout(layout)      # 24-40 hunters at once need the room
+		layout = WideLayout.pick(o, rolling, tier)     # a rolling session gets the wide Skyreach; otherwise the expedition map
 	elif o.get("tutorial", false):
 		layout = World.load_layout("tutorial")
 	elif o.get("arena", false):
@@ -1184,15 +1169,6 @@ func make_bot(t: int, at: Vector3, names: Array) -> Hunter:
 	if time > 0.0 and h.kin:
 		_draw_range(h.kin)      # (as the kin made at the start get)
 	return h
-
-## Aboard a drop wave's skyship (rolling sessions): rides it until its jump, then glides to `at`.
-func board(h: Hunter, s: Dictionary, at: Vector3) -> void:
-	h.set_meta("ship", s)
-	h.riding = true
-	h.dropping = false
-	h.ai["land"] = at
-	h.teleport(ship_pos_of(s))
-	plan_jump(h, at)
 
 ## Every match starts in the sky. Hunters glide down from above their squad's side of the map
 ## and steer to wherever they want to land.

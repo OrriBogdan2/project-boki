@@ -702,7 +702,7 @@ func _choose(m: Match, h: Hunter) -> void:
 	if best:
 		return
 	# no fight: pick a goal
-	var time_left := m.bot_time_left(h)     # (a rolling session: this squad's own planned stay)
+	var time_left := Rolling.bot_time_left(m, h)     # (a rolling session: this squad's own planned stay)
 	var goal := Vector3.INF; var gk := ""
 	for o in m.hunters:
 		if o != h and o.team == h.team and o.downed and not o.out:
@@ -770,7 +770,7 @@ func _choose(m: Match, h: Hunter) -> void:
 		# fire in the first minute; it used to cancel every lair plan right away, though the exits
 		# don't act on it until 30% in, so the bot just wandered.)
 		var egg_home: bool = h.pack.any(func(it): return Loot.is_rare_egg(it))
-		var lair_leave: bool = time_left < 170.0 or egg_home or (a.get("leave", false) and m.bot_past(h, 0.3))
+		var lair_leave: bool = time_left < 170.0 or egg_home or (a.get("leave", false) and Rolling.bot_past(m, h, 0.3))
 		var lg: Array = m.lairs.bot_goal(h, lair_leave)
 		if not lg.is_empty():
 			goal = lg[0]; gk = String(lg[1])
@@ -779,7 +779,7 @@ func _choose(m: Match, h: Hunter) -> void:
 		if not a.get("leave", false) and randf() < 0.0015:
 			a["leave"] = true
 		# (not in the first stretch of the match: everyone heading straight home empties the map)
-		var leaving: bool = time_left < 170.0 or (m.bot_past(h, 0.3) and (h.gems > 40 or a.get("leave", false)))
+		var leaving: bool = time_left < 170.0 or (Rolling.bot_past(m, h, 0.3) and (h.gems > 40 or a.get("leave", false)))
 		var g: Array = m.exits.bot_goal(h, leaving)
 		if not g.is_empty() and _banned(m, a, g[0]) and String(g[1]) in ["dock", "uplink"]:
 			g = []
