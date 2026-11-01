@@ -19,8 +19,9 @@ void fragment() {
 	// deepening toward crimson-magenta lower down; the picture keeps its shapes (shading, clouds)
 	vec3 rose = vec3(0.98, 0.30, 0.66);
 	vec3 deep = vec3(0.70, 0.05, 0.30);
-	vec3 tint = mix(rose, deep, smoothstep(0.35, 1.0, k));
-	float s = clamp(0.5 + 0.35 * k, 0.0, 0.88);
+	vec3 tint = mix(rose, deep, smoothstep(0.25, 1.0, k));
+	// (owner) gradual, not binary: no wash at the top of the danger, building to full near the bottom
+	float s = 0.88 * smoothstep(0.0, 1.0, k);
 	vec3 g = mix(c, tint * (0.3 + 1.05 * l), s);
 	// right at the end: darker, and the edges close in with the heartbeat
 	float e = smoothstep(0.7, 1.0, k);
@@ -73,7 +74,12 @@ static func danger_depth(depth: float, span: float, no_heat := false) -> float:
 	if depth <= 0.0:
 		return 0.0
 	var x := clampf(depth / maxf(1.0, span), 0.0, 1.0)
-	x = 1.0 - pow(1.0 - x, 1.6)      # rises fast at first: it's obvious early
-	if no_heat:
-		x = minf(1.0, x * 1.25 + 0.1)
-	return maxf(x, 0.05)
+	# (owner) only closer down and variable: nothing over the first DEAD of the drop, then an ease-in
+	# so it creeps in and gets redder toward the point of no return
+	x = clampf((x - DEAD) / (1.0 - DEAD), 0.0, 1.0)
+	x = pow(x, 1.4)
+	if no_heat and x > 0.0:
+		x = minf(1.0, x * 1.25 + 0.08)
+	return x
+
+const DEAD := 0.35      # share of the drop (balloon line to point of no return) with no tint at all
