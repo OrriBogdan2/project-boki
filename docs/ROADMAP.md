@@ -337,6 +337,9 @@ Total: **21-26 dev-weeks**.
   play. Floors: the free-kit queue (no Boki at risk, ARC-style), a stray common Boki that turns up at
   the farm if you have none, cheap common Boki on the market priced within what one free-kit run earns,
   and the starter flow. Scarce and limited-edition Boki stay scarce; the floor is about commons.
+- **Free-kit Boki (owner idea):** the free-kit queue hands you a free-kit Boki, a fresh roll of a starter
+  egg (random starter species, ordinary rolls). It isn't yours to keep or lose: it's a loaner for that
+  run only, so it can't be farmed into the economy, and losing it costs nothing.
 
 
 ### Goals
