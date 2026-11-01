@@ -555,10 +555,14 @@ func _fill_menu(v: VBoxContainer) -> void:
 		br.add_child(UI.choice(BOT_NAMES[md], bot_mode == md, func(): bot_mode = mm; _spawn_bot(); _fill_menu(v), 96))
 	right.add_child(br)
 	var ba := HBoxContainer.new(); ba.add_theme_constant_override("separation", 6)
-	ba.add_child(UI.label("as", 14, UI.MUTED))
-	for a in Arch.ids():
-		var aa2: String = a
-		ba.add_child(UI.choice(Arch.name_of(a).substr(0, 5), bot_arch == a, func(): set_bot_arch(aa2); _fill_menu(v), 70))
+	ba.add_child(UI.label("Bot archetype", 14, UI.MUTED))
+	var ids := Arch.ids()
+	ba.add_child(UI.button("‹", func(): set_bot_arch(String(ids[(ids.find(bot_arch) - 1 + ids.size()) % ids.size()])); _fill_menu(v), 44))
+	var bl := UI.label(Arch.name_of(bot_arch), 16, Arch.color(bot_arch), UI.big)
+	bl.custom_minimum_size = Vector2(150, 0)
+	bl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	ba.add_child(bl)
+	ba.add_child(UI.button("›", func(): set_bot_arch(String(ids[(ids.find(bot_arch) + 1) % ids.size()])); _fill_menu(v), 44))
 	right.add_child(ba)
 
 func _glove_line() -> String:
