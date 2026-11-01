@@ -7,6 +7,8 @@
   - [Thief](Class-Thief.md)
   - [Archer](Class-Archer.md)
   - [Mage](Class-Mage.md)
+  - [Dolm](Class-Dolm.md)
+  - [Ostra](Class-Ostra.md)
   - [Gunslinger](Class-Gunslinger.md)
   - [Juggernaut](Class-Juggernaut.md)
   - [Bulwark](Class-Bulwark.md)
