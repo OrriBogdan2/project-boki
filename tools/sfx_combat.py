@@ -480,6 +480,21 @@ def build():
         for i in range(1, 4):
             save('%s_%d' % (nm, i), fn(i), rms_db=-22)
 
+    # ============================================================== ability impacts (AbilityFx IMPACT, appended last so
+    # nothing above changes): an ability's damage landing is heavier and brighter than a bullet: a
+    # crack, a deep body, and an energy zing that bends down, so a right click that connects is unmistakable
+    def ab_hit(i):
+        d = 0.75; n = N(d)
+        zing = sat(tone_glide(1400 + 80 * i, 420, 0.35, (1.0, 0.45, 0.2)) * env(N(0.35), 0.001, 0.09), 2.2) * 0.45
+        return mix(click(0.003, 2500, 12000) * 2.4, crack(d, 900, 6000, 0.02) * 2.6, kick(190 + 12 * i, 50, d, 0.012, 0.07, 3.2) * 0.85,
+                   sub(70, 40, d, 0.12) * 0.4, zing, reflections(tail(0.5, 1800, 0.1) * 0.9))
+    takes('ab_hit', ab_hit, 2, rms_db=-15)
+
+    # a charge reaching full: a bright two-note ping with a shimmer
+    save('ab_ready', mix(ring((1568, 2349, 3136), 0.5, (0.18, 0.14, 0.1), (0.45, 0.3, 0.2)),
+                         at(ring((2093, 3136, 4186), 0.45, (0.16, 0.12, 0.08), (0.4, 0.25, 0.15)), 0.06),
+                         click(0.002, 3000, 12000) * 1.0), rms_db=-19)
+
 
 if __name__ == '__main__':
     build()
