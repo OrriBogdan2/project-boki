@@ -806,9 +806,23 @@ static func glide_steer(hv: Vector2, wish: Vector2, gs: float, dt: float) -> Vec
 		s = maxf(ws, s - GLIDE_OVERSPEED * dt)
 	return d * s
 
+## Feathering [est] (SUPERVIVE players tap the glider on and off instead of holding it): opening and
+## closing are instant with no penalty for quick toggles; with the glider closed in the air its heat
+## cools a little (FEATHER_COOL; the ground still cools it fastest, [footage] "it only really cools
+## on the ground"), and for FEATHER_KEEP after a close you keep the glide's speed and steering, so
+## skilled taps (short lifts out of the abyss, coasting the gaps) cover more ground per heat than
+## holding. Numbers in docs/MOVEMENT_FEEL.md; measured by --move-feel-check (feather_*).
+const FEATHER_COOL := 0.06     # [est] heat (fuel share) cooled per second with the glider closed in the air
+const FEATHER_KEEP := 0.6      # [est] seconds after closing the glider that its speed and steering carry
+const FEATHER_MIN := 0.05      # [est] the glider reopens with this much heat room left (was 0.15)
+const FEATHER_TAP := 0.3       # [est] an abyss lift's first this-many seconds are its quick impulse...
+const FEATHER_TAP_HEAT := 1.0  # [est] ...heating like a level glide; held past it, the full 4x
+var glide_off_t := 9.0         # seconds since the glider closed in the air (9 = long ago / on the ground)
+var lift_t := 0.0              # seconds of the current abyss lift (feathering taps stay in the cheap part)
+
 func can_glide() -> bool:
 	return not grounded and roll_t <= 0.0 and fly_t <= 0.0 and glide_cd <= 0.0 and not downed and stun_t <= 0.0 \
-		and m.time - kb_t > 0.4 and glide_fuel > 0.15 and not dropping and charge.is_empty()
+		and m.time - kb_t > 0.4 and glide_fuel > FEATHER_MIN and not dropping and charge.is_empty()
 
 func _open_glider() -> void:
 	gliding = true
@@ -1896,6 +1910,17 @@ func box_reviving() -> bool:
 	return m.time - box_rev_at < 0.12 and not downed and not out
 
 func launch_to(target: Vector3, t: float) -> void:
+	if target.y > pos.y + World.STEP and not m.world.is_void(target.x, target.z):
+		# (movefeel) up onto higher ground (a grapple onto a ledge, a leap up a cliff): the move was
+		# aimed there, so it's a sure arc that clears the lip (a pad flight) instead of a thrown
+		# body that can clip the cliff's edge now that ledges no longer grab you on their own
+		var d := Vector2(target.x - pos.x, target.z - pos.z).length()
+		pad = {"from": pos, "to": target, "t": 0.0, "dur": maxf(0.12, t), "h": 0.6 + 0.12 * d}
+		vel = Vector3((target.x - pos.x) / maxf(0.12, t), 0.0, (target.z - pos.z) / maxf(0.12, t))
+		grounded = false
+		fly_t = 0.0
+		roll_t = 0.0
+		return
 	vel.x = (target.x - pos.x) / t
 	vel.z = (target.z - pos.z) / t
 	vel.y = (target.y - pos.y) / t + 0.5 * H_GRAV * t
@@ -2189,6 +2214,10 @@ func _physics(dt: float) -> void:
 		if grounded:
 			var grip: float = m.ground_grip(pos)     # ice in a frost region: you skid instead of stopping
 			hv = accel2(hv, mv * spd, GROUND_ACCEL * grip, GROUND_DECEL * grip, GROUND_OVERSPEED * grip, dt)
+		elif glide_off_t < FEATHER_KEEP and not dropping:
+			# (feathering) just after letting go of the glider you keep its speed and steering
+			var gsf := GLIDE_SPEED * (1.0 + gear_stat("glide_speed"))
+			hv = glide_steer(hv, mv * gsf, gsf, dt)
 		else:
 			# (movefeel) a jump steers crisply; letting go stops you, except for speed above your run
 			# speed (a dash, a pad, a knockback), which carries
@@ -2496,6 +2525,11 @@ func _update_glide(dt: float) -> void:
 		return
 	if grounded:
 		glide_fuel = minf(1.0, glide_fuel + dt / 1.2)
+		glide_off_t = 9.0
+	elif not gliding:
+		glide_off_t += dt
+		if glide_cd <= 0.0:
+			glide_fuel = minf(1.0, glide_fuel + dt * FEATHER_COOL)     # (feathering) the gaps cool it a little
 	if grounded:
 		shot_down = false
 	# a player takes the glider back with a fresh press of glide; a bot's own glide input (it holds
@@ -2519,16 +2553,20 @@ func _update_glide(dt: float) -> void:
 	if gliding:
 		if not want or not can:
 			gliding = false
+			glide_off_t = 0.0 if want == false and can else 9.0     # (feathering) a let-go, not a knock
 			_glider_sfx("close")
 			if glide_fuel <= 0.0:
 				glide_cd = 0.5
 		elif not in_current:
 			# heat builds faster while the glider is lifting you out of the abyss
-			var hk := (4.0 if below_lip and lip_y - pos.y > 0.3 and vel.y > 0.0 else 1.0) * (2.0 if hit_heat_t > 0.0 else 1.0)     # [footage] ~1s of lift burns a quarter
+			# [footage] ~1s of lift burns a quarter; (feathering) a short tap's impulse costs less
+			var lifting := below_lip and lip_y - pos.y > 0.3 and vel.y > 0.0
+			lift_t = lift_t + dt if lifting else 0.0
+			var hk := ((FEATHER_TAP_HEAT if lift_t <= FEATHER_TAP else 4.0) if lifting else 1.0) * (2.0 if hit_heat_t > 0.0 else 1.0)
 			glide_fuel = maxf(0.0, glide_fuel - dt * hk / (glide_max * (1.0 + gear_stat("heat"))))
 		if not dropping:
 			stats["glide_t"] = float(stats.get("glide_t", 0.0)) + dt
-	elif want and can and air_t >= (0.0 if inp.get("glide_btn", false) else GLIDE_ENGAGE) and glide_fuel > 0.15 and not gliding:
+	elif want and can and air_t >= (0.0 if inp.get("glide_btn", false) else GLIDE_ENGAGE) and glide_fuel > FEATHER_MIN and not gliding:
 		# hold Space in the air and the glider opens a beat after you leave the ground (the glide
 		# button opens it at once: there's no tap-to-jump to tell apart)
 		gliding = true
@@ -2585,6 +2623,10 @@ func _try_ledge_grab(dt: float) -> void:
 		# (movefeel) and a wall a short step away catches you too: falling at full speed just off a
 		# face while steering along it used to slip past (wall-hug check: 15 of 40 at 3m down)
 		reach = r + WALL_CATCH_REACH
+		for sz in range(int(floor(pos.z - r - 0.45)), int(floor(pos.z + r + 0.45)) + 1):
+			for sx in range(int(floor(pos.x - r - 0.45)), int(floor(pos.x + r + 0.45)) + 1):
+				if w.inb(sx, sz) and w.sheer.has(w.idx(sx, sz)):
+					reach = r + 0.4      # a smooth sheer cliff beside you: only the usual reach
 	var best := {}; var bd := 1e9
 	for z in range(int(floor(pos.z - reach)), int(floor(pos.z + reach)) + 1):
 		for x in range(int(floor(pos.x - reach)), int(floor(pos.x + reach)) + 1):

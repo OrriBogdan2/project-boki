@@ -50,6 +50,10 @@ const T := {
 	"abyss_tint_lip":          ["<=", 0.02, "", "no tint gliding at island level"],
 	"abyss_tint_half":         [">=", 0.6, "", "[footage] tint deepens as you sink; owner: unmistakable early"],
 	"abyss_tint_end":          [">=", 0.95, "", "full dark/red right before the point of no return"],
+	"feather_toggle_frames":   ["<=", 1.0, "frames", "feathering: glider closes and reopens the step you let go / press again, no toggle penalty"],
+	"feather_hold_m":          [">=", 0.0, "m", "holding glide over the abyss until the heat runs out (reference)"],
+	"feather_m":               [">=", 0.0, "m", "tap-feathering over the abyss (lift taps, coast the gaps) until the heat runs out"],
+	"feather_gain":            [">=", 1.15, "x", "[est] skilled feathering covers more ground than holding when heat is the limit"],
 	"updraft_rise_t":          ["<=", 0.30, "s", "[est] updrafts feel powerful: 8 m/s climb within 0.3s"],
 	"drop_dive_vy_t":          ["<=", 0.40, "s", "[est] punchy skydive: 90% of dive speed"],
 	"drop_dive_steer_t":       ["<=", 0.30, "s", "[est] responsive steering in the dive: 90% of commanded speed"],
@@ -156,6 +160,7 @@ func run(main: Node) -> void:
 	_glide()
 	_dash_glide()
 	_abyss_updraft()
+	_feather()
 	_drop()
 	_landing()
 	_camera()
@@ -493,6 +498,57 @@ func _abyss_depths(g: Vector3, d: Vector2) -> void:
 	rec("abyss_tint_half", FX.danger(P))
 	P.pos.y = kill + 0.5
 	rec("abyss_tint_end", FX.danger(P))
+
+# ---------------------------------------------------------------- feathering
+## Far out over the open abyss (off the map's edge), heading further out at the island-level line
+## with a full glider: hold glide until it overheats, or feather it (a tap that lifts you out of a
+## dip, let go to coast on the lift and the kept glide speed, tap again when you've dropped ~1.5m).
+## Distance flown before the heat runs out.
+func _feather() -> void:
+	if not "glide_off_t" in P:
+		print("MFEEL (no feathering on this build)")
+		return
+	var lip := flat.y
+	var start := Vector3(-30.0, lip - 0.45, w.h * 0.5)
+	var dist := {}
+	for mode in ["hold", "feather"]:
+		_reset(start, false)
+		P.last_gy = lip
+		P.air_t = 1.0
+		P.gliding = true
+		P.vel = Vector3(-Hunter.GLIDE_SPEED, 0.0, 0.0)
+		var x0 := P.pos.x
+		var holding := true
+		for i in 60 * 60:
+			P.inp["move"] = Vector2(-1, 0)
+			if mode == "feather":
+				var depth: float = lip - P.pos.y
+				if P.gliding and (P.vel.y >= 9.0 or (depth < 0.5 and P.vel.y >= 0.0)):
+					holding = false          # let go: coast on the lift
+				elif not P.gliding and depth > 1.5:
+					holding = true           # dipped: tap it open again
+			P.inp["glide"] = holding
+			m.step(DT)
+			if P.out or P.grounded or P.glide_fuel <= 0.01:
+				break
+		dist[mode] = absf(P.pos.x - x0)
+	rec("feather_hold_m", dist["hold"])
+	rec("feather_m", dist["feather"])
+	rec("feather_gain", dist["feather"] / maxf(1.0, dist["hold"]))
+	# toggling: let go, then press again the very next step
+	_reset(start, false)
+	P.last_gy = lip; P.air_t = 1.0; P.gliding = true; P.glide_fuel = 0.5
+	P.inp["glide"] = true
+	m.step(DT)
+	P.inp["glide"] = false
+	m.step(DT)
+	var closed := not P.gliding
+	P.inp["glide"] = true
+	var fr := 0
+	for i in 5:
+		m.step(DT); fr += 1
+		if P.gliding: break
+	rec("feather_toggle_frames", fr if closed else 9.0)
 
 # ---------------------------------------------------------------- the opening drop
 func _drop() -> void:

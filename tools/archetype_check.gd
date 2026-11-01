@@ -285,6 +285,7 @@ func _archer() -> void:
 	ok("archer dash: no bite hops back", K.st.get("last_grapple") == "hop" and P.pos.z < home.z - 1.5, "z %.1f" % (P.pos.z - home.z))
 	# Plunge from the air
 	P.teleport(home + Vector3(0, 3.0, 0)); P.grounded = false; P.vel = Vector3(0, -2, 0); K.ch_rmb = 2.0; K.cd["rmb"] = 0.0
+	K.res = 0.0     # (Focus filled while standing on the ledge after the zip: a full Focus shot outranks the air variant)
 	P.ak.press_rmb()
 	ok("archer RMB air: Plunge lifts you", K.last_variant == "air" and P.vel.y > 5.0, "vy %.1f" % P.vel.y)
 	step(m, 1.2)
