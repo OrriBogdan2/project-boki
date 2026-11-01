@@ -95,13 +95,13 @@ islands = [
          sheer=[[200, 260]],
          rocks=rocks((147, 81, 148, 81)), bush=[],
          chests=[[164, 79, 1]], camps=[], breakables=[[150, 78, "pot"], [151, 79, "pot"]],
-         wardens=[], traps=[]),
+         wardens=[[160, 81]], traps=[]),
     dict(id="gaol_sw", name="Ashen Gaol", role="camp", region=0, biome="ember", danger=2, poi=[71, 150], noise=0.05,
          shapes=[poly([(48, 138), (62, 133), (74, 139), (77, 156), (68, 166), (52, 164), (44, 152)], 4)],
          sheer=[[20, 80]],
          rocks=rocks((72, 158, 72, 159)), bush=[],
          chests=[[62, 161, 1]], camps=[], breakables=[[51, 140, "barrel"], [52, 140, "crate"]],
-         wardens=[], traps=[]),
+         wardens=[[74, 146]], traps=[]),
     # ---- FROSTGATE (north): a long frozen ridge. The Keep (lv 6, walled) on its east end looks straight
     # down the Gate Span into the Crown; reach it by the West Stair or the narrow South Stair. The open
     # Rimefield to the west has boulders for cover and a light camp.
@@ -185,7 +185,7 @@ islands = [
          landings=[[34, 30], [46, 36], [20, 38]],
          chests=[[26, 24, 1], [42, 28, 0]],
          camps=[], breakables=[[30, 40, "crate"], [31, 40, "barrel"]],
-         wardens=[[36, 21]],
+         wardens=[],
          areas=[[26, 22, "Lark Stones"]]),
     dict(id="highwatch", name="Highwatch", role="landing", region=6, biome="frost", danger=0, poi=[184, 22], noise=0.08,
          shapes=[poly([(170, 12), (192, 10), (204, 22), (202, 40), (186, 46), (172, 38), (166, 24)], 0)],
@@ -214,7 +214,7 @@ islands = [
          landings=[[16, 190], [34, 176], [28, 198]],
          chests=[[38, 186, 0]],
          camps=[], breakables=[[18, 176, "pot"], [19, 176, "pot"]],
-         wardens=[[40, 192]]),
+         wardens=[]),
     # ---- Shardfall: a high shard of rock over the south-east gap (lv 10). A one-way launch pad from
     # Stormbreak or the updraft beside it takes you up; from there you glide down onto the Crown,
     # Thornwood or Stormbreak. A rich chest and the best view of the Thornhive and the Crown's south.

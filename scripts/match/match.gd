@@ -756,6 +756,13 @@ func _start(o: Dictionary) -> void:
 		spawn_plan.build(layout)
 		if lairs: lairs.plug_into(spawn_plan)     # which boss lairs are live this match
 		spawn_plan.roll(seed_val)
+		if opts.has("live_lair"):
+			# a fixed roll for a filmed match (the Demo match): this lair is live, in place of another
+			var keep: Array = spawn_plan.of("boss").filter(func(c): return String(c["name"]) == String(opts["live_lair"]))
+			if not keep.is_empty() and not keep[0]["active"]:
+				var on: Array = spawn_plan.active_of("boss")
+				if not on.is_empty(): on[-1]["active"] = false
+				keep[0]["active"] = true
 		await spawn_plan.spawn_all()
 	if lairs: lairs.ensure_live()
 	if BlightDir.enabled(opts) and big and world.layout_id != "tutorial":
@@ -5113,7 +5120,8 @@ var duel_pad := Vector3.INF
 const DEMO_SEED := 5
 static func demo_opts() -> Dictionary:
 	return {"teams": Data.MATCH_PLAYERS / 2, "squad": 2, "total": Data.MATCH_PLAYERS, "tier": 1, "seed": DEMO_SEED,
-		"raid": "clear", "blight": false, "fresh_t": Settings.DEMO_FRESH_T, "demo_match": true}
+		"raid": "clear", "blight": false, "fresh_t": Settings.DEMO_FRESH_T, "demo_match": true,
+		"live_lair": "The Thornhive"}     # (the Hollow Crown: the Thornhive and Thornwood's uplink share an island)
 
 ## The Arena: a compact practice map with dummies, a sparring bot and the kit card (scripts/match/arena.gd).
 static func arena_opts(arch_id := "") -> Dictionary:

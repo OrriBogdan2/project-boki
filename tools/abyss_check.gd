@@ -38,6 +38,13 @@ func _edges(n: int, sheer := false) -> Array:
 			if not w.is_void(g.x + d.x * 1.6, g.z + d.y * 1.6) or w.is_void(g.x, g.z): continue
 			var is_sheer := w.sheer.has(gi) or w.sheer.has(ti)
 			if is_sheer != sheer: continue
+			# (and a grabbable rim stays grabbable two tiles either way along it: a hand-made map's sheer
+			# arcs end somewhere, and a float that drifts along the face onto a sheer stretch isn't a ledge test)
+			var mixed := false
+			for s2 in [-2.0, -1.0, 1.0, 2.0]:
+				for q2 in [Vector2(g.x + d.y * s2, g.z + d.x * s2), Vector2(g.x + d.x * 0.9 + d.y * s2, g.z + d.y * 0.9 + d.x * s2)]:
+					if w.sheer.has(w.idx(int(floor(q2.x)), int(floor(q2.y)))) != sheer and not w.is_void(q2.x, q2.y): mixed = true
+			if mixed: continue
 			var open := true
 			for dd in [1.1, 1.6, 2.2, 2.8, 3.4, 4.0]:
 				for s in [-0.6, 0.0, 0.6]:
