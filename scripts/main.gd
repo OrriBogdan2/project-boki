@@ -376,6 +376,8 @@ func _ready() -> void:
 		set_meta("work_check", wkc)
 		wkc.run(self)
 		return
+	if "--polish-check" in args:
+		load("res://tools/polish_check.gd").new().run(self)      # polish pass: drop families, stair flights, chest look, see-through
 	if "--teammate-check" in args:
 		load("res://tools/teammate_check.gd").new().run(self)      # Boki as teammates: following, callouts, caring, the tutorial guide
 		return

@@ -198,7 +198,7 @@ func spawn_all() -> void:
 			"cache":
 				c["ref"] = m.add_chest(p, 1)
 				# and a good weapon beside it, the same for everyone online
-				var wk: String = m.ground_weapon_id(String(keys[wr.randi() % keys.size()]), 1000 + int(c["i"]))
+				var wk: String = DropFamily.ground(String(keys[wr.randi() % keys.size()]), 1000 + int(c["i"]), m.net_on, m.player, m.seed_val)
 				var rar := clampi(Data.roll_rarity(wr, 1), 2, 4)
 				var wp := m.world.free_spot_near(p + Vector3(1.4, 0, 0.4), [p], 0.6)
 				wp.y = m.world.ground_at(wp.x, wp.z)
