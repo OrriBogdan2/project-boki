@@ -41,6 +41,17 @@ func _static() -> void:
 	ok(want.keys().all(func(t): return got[t] == want[t]), "level floor = min(5, 1 + minutes/4): %s" % str(got))
 	ok(Rolling.squads_for(0, 3) == 4 and Rolling.squads_for(30, 3) == 2 and Rolling.squads_for(40, 3) == 2, "a wave is 2-4 trios: 4 into an empty map, 2 into a full one")
 	ok(Rolling.wave_hunters(0) == 12 and Rolling.wave_hunters(36) == 6, "6-12 hunters a wave, fewer as the map fills (%d at 0, %d at 36)" % [Rolling.wave_hunters(0), Rolling.wave_hunters(36)])
+	ok(Rolling.POP_MODE in ["at_once", "total"], "the 24-40 target reads as \"%s\" (owner question: at once or over the session)" % Rolling.POP_MODE)
+	# the other reading: the whole session brings 24-40 hunters in all, shared over the waves
+	var tot_ok := true; var tot_rng := Vector2i(999, 0)
+	for sd in range(1, 21):
+		var r := _plan_only(sd, {"squad": 3, "rolling_pop": "total", "join_wave": 0})
+		var sum := 0
+		for i in r.waves.size():
+			sum += r.wave_squads(i, 0) * 3 if i > 0 else int(r.waves[0]["n"]) * 3
+		tot_rng = Vector2i(mini(tot_rng.x, sum), maxi(tot_rng.y, sum))
+		if sum < Rolling.POP.x - 6 or sum > Rolling.POP.y + 6: tot_ok = false
+	ok(tot_ok, "--rolling-pop=total: a session brings about 24-40 hunters in all (trios, 20 seeds: %d-%d)" % [tot_rng.x, tot_rng.y])
 
 # ------------------------------------------------------------------ 2. the plan: waves and the cut-off
 func _plan_only(seed_v: int, o: Dictionary) -> Rolling:
