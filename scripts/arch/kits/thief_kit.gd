@@ -115,9 +115,10 @@ func _pip_pop(t: Ent, _c: int) -> void:
 func _tick_pips(dt: float) -> void:
 	for key in pips.keys():
 		var p: Dictionary = pips[key]
-		var t: Ent = p["t"]
-		var n: Node3D = p["node"]
-		var c := marks_on(t) if is_instance_valid(t) and not t.dead else 0
+		var n = p["node"]
+		var tv = p["t"]     # untyped first: a freed target can't be assigned to a typed var
+		var t: Ent = tv if is_instance_valid(tv) else null
+		var c := marks_on(t) if t != null and not t.dead else 0
 		if c <= 0 or not is_instance_valid(n):
 			if is_instance_valid(n): n.queue_free()
 			pips.erase(key)

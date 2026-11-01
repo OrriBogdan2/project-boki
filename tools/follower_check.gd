@@ -142,7 +142,7 @@ func _knockout() -> void:
 	var R: Hunter = m.hunters.filter(func(x): return x.team != P.team)[0]
 	_put(R, f.pos + Vector3(0.6, 0, 0))
 	f.hurt(9999.0, R, {})
-	ok(f.state == "ko" and not f.dead, "a big hit knocks it out (%s)" % f.state)
+	ok(f.state == "downed" and not f.dead, "a big hit takes it down, the Boki system's way (%s)" % f.state)
 	ok(Follow.of(P) == f, "it's still yours while knocked out")
 	# a rival standing on it can't tame it
 	R.inp["interact"] = true
@@ -156,17 +156,19 @@ func _knockout() -> void:
 	m.revive_hunter(P, P)
 	R.inp["interact"] = false
 	_put(R, m.world.random_ground())
-	# you pick it back up
+	# you run into it: the shipped scoop (KinDowned), and it's walking beside you again
 	_put(P, f.pos + Vector3(0.5, 0, 0))
 	var t := 0.0
-	while t < 2.0 and f.state == "ko":
-		P.inp["interact"] = true
+	while t < 3.0 and f.state == "downed":
 		m.step(Match.DT); t += Match.DT
-	P.inp["interact"] = false
-	ok(f.state == "follow" and f.hp > 0.0, "you pick it back up in about %.1f s" % t)
-	# knocked into the abyss: it scrambles back into the satchel, never lost that way
+	for _i in 3: m.step(Match.DT)
+	ok(f.state == "follow" and f.hp > 0.0 and f.role == "follow" and Follow.of(P) == f, "you scoop it up by running into it (%.1f s) and it follows again" % t)
+	# knocked into the abyss: it comes round on its own (the shipped timer), never lost that way
 	f.fall_out()
-	ok(not f.dead and f.tucked and f.state == "follow", "falling off is never how you lose it")
+	ok(not f.dead and f.state == "downed" and f.down_void and Follow.of(P) == f, "falling off is never how you lose it")
+	f.down_t = 0.2
+	for _i in 30: m.step(Match.DT)
+	ok(f.state == "follow" and not f.dead, "it comes round on its own after a fall (%s)" % f.state)
 
 func _extract_home() -> void:
 	_fresh(1)
@@ -280,12 +282,12 @@ func _bots_pick() -> void:
 	ok(f != null, "a bot tames a dazed Boki and it follows them (%.1f s)" % t)
 	if f == null: return
 	f.hurt(9999.0, null, {})
-	ok(f.state == "ko", "the bot's follower is knocked out")
+	ok(f.state == "downed", "the bot's follower is down")
 	_put(B, f.pos + Vector3(5.0, 0, 0))
 	t = 0.0
-	while t < 12.0 and f.state == "ko":
+	while t < 14.0 and f.state == "downed":
 		m.step(Match.DT); t += Match.DT
-	ok(f.state == "follow", "the bot goes back and picks it up (%.1f s)" % t)
+	ok(f.state == "follow" or f.state == "shoulder", "the bot goes back and runs into it (%.1f s)" % t)
 
 func _bots_steal() -> void:
 	_fresh(2, 1, 3)
@@ -312,7 +314,7 @@ func _bots_steal() -> void:
 	ok(String(Follow.result(m).get("fate", "")) == "stolen", "the owner's results say stolen")
 
 func _net() -> void:
-	ok(Net.VERSION == "0.8.2", "Net.VERSION bumped for the follower sync (%s)" % Net.VERSION)
+	ok(Net.VERSION == "0.9.2", "Net.VERSION bumped for the follower sync (%s)" % Net.VERSION)
 	var me0 := Net.me
 	var host0 := Net.host
 	Net.me = "abc"; Net.host = "hst"

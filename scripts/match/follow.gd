@@ -24,8 +24,8 @@ extends RefCounted
 const NEAR := 2.4            # where it walks: about this far behind you
 const TUCK_AT := 13.0        # further than this (or you're in the air or over the abyss): it rides in your satchel
 const HOME_R := 14.0         # extract with it this close (or in the satchel) and it comes with you
-const PICK_TIME := 1.0       # seconds holding interact to pick your knocked-out follower back up
-const PICK_R := 1.9
+const SCOOP_R := 3.8         # extract with it down this close and you scoop it up on the way out
+const NET_AT := 23           # where the follower fields start in a Kin snapshot (after KinNet's 19..22)
 const SCOUT_R := 13.0        # it calls out rival hunters this close to you
 const SCOUT_AGAIN := 15.0
 
@@ -84,6 +84,11 @@ static func sim_follow(k: Kin, dt: float) -> void:
 	var h: Hunter = k.owner_h
 	if h == null:
 		return
+	if k.state == "shoulder":
+		# it came round (KinDowned.come_round hops a Boki onto the shoulder): back to walking beside you
+		k.state = "follow"
+		k.tucked = true
+		k.hp = maxf(k.hp, 1.0)
 	if h.out or h.extracted:
 		# you're down for the count (or gone): it waits where it is
 		k.tucked = false
@@ -135,40 +140,10 @@ static func _scout(k: Kin, h: Hunter) -> void:
 		k.m.add_feed("%s spotted %s %s" % [k.rec.get("name", "Your follower"), f.pname, k.m.direction_word(h.pos, f.pos)])
 		return
 
-static func sim_ko(k: Kin, dt: float) -> void:
-	if not k.over_void():
-		k.body_vertical(dt)
-	k._ground_move(Vector2.ZERO, dt)
-
-## Knocked out: it lies where it fell until its hunter picks it up. Knocked into the abyss it
-## scrambles back into the satchel instead (falling off is never how you lose it).
-static func knock_out(k: Kin, fell: bool) -> void:
-	k.target = null
-	k.fly = {}
-	if fell and k.owner_h:
-		k.hp = k.max_hp * 0.3
-		k.tucked = true
-		k.state = "follow"
-		k.pos = k.owner_h.pos; k.prev = k.pos
-		return
-	k.hp = 0.0
-	k.state = "ko"
-	k.catch_prog = 0.0
-	k.m.fx.burst(k.pos + Vector3(0, 0.4, 0), k.sp["color"], 16, 3.0)
+## A follower goes down like any Boki (KinDowned: it stays where it fell, you run into it to scoop it
+## up, or it comes round on its own). This only keeps the books for the results.
+static func on_down(k: Kin) -> void:
 	k.m.kstat["follow_ko"] = int(k.m.kstat.get("follow_ko", 0)) + 1
-	if k.owner_h == k.m.player:
-		k.m.add_feed("%s was knocked out. Pick it up (%s)" % [k.rec.get("name", "Your follower"), Settings.key_cap("interact")])
-		k.m.ping(k.pos, Color("fff2a0"))
-
-## Its hunter picked it back up.
-static func pick_up(m, h: Hunter, k: Kin) -> void:
-	k.state = "follow"
-	k.hp = k.max_hp * 0.5
-	k.catch_prog = 0.0
-	m.fx.burst(k.pos + Vector3(0, 0.5, 0), k.sp["color"], 14, 2.5)
-	m.sfx("revive", k.pos, -6.0, 1.4)
-	if h == m.player:
-		m.add_feed("%s is back on its feet" % k.rec.get("name", "Your follower"))
 
 # ------------------------------------------------------------------ the owner leaves the map
 ## Its hunter left the map: out for good ("gone") or extracted ("extract"). Runs on the owner's game.
@@ -179,7 +154,7 @@ static func owner_left(m, h: Hunter, how: String) -> void:
 	if k == null:
 		return
 	# beside you (or in your satchel) it comes too; knocked out right at your feet, you scoop it up
-	var with_you: bool = how == "extract" and ((k.state == "follow" and (k.tucked or k.flat_dist(h) <= HOME_R)) or (k.state == "ko" and k.flat_dist(h) <= PICK_R * 2.0))
+	var with_you: bool = how == "extract" and ((k.state == "follow" and (k.tucked or k.flat_dist(h) <= HOME_R)) or (k.state == "downed" and not k.down_void and k.flat_dist(h) <= SCOOP_R))
 	var secs := steal_secs(m)
 	if with_you or secs <= 0.0:
 		_go_home(m, k, "extracted with you" if with_you else "found its way home")
@@ -188,6 +163,8 @@ static func owner_left(m, h: Hunter, how: String) -> void:
 	k.role = "stray"
 	k.state = "dazed"
 	k.tucked = false
+	k.down_void = false
+	k.down_t = 0.0
 	k.dazed_t = 1e9
 	k.hp = maxf(k.hp, 1.0)
 	k.catch_prog = 0.0
@@ -295,11 +272,11 @@ static func bot_goals(m, h: Hunter) -> Array:
 	var g := bot_goal(m, h)
 	return g if not g.is_empty() else bot_steal(m, h)
 
-## A bot's goal for its follower: pick it up when it's knocked out nearby. [pos, kind] or [].
+## A bot's goal for its follower: run into it when it's down nearby, like BotKin.rescue_goal. [pos, kind] or [].
 static func bot_goal(m, h: Hunter) -> Array:
 	var f = h.get("follower")
-	if f is Kin and is_instance_valid(f) and not (f as Kin).dead and (f as Kin).state == "ko" and h.flat_dist(f) < 40.0:
-		return [(f as Kin).pos, "fpick"]
+	if f is Kin and is_instance_valid(f) and not (f as Kin).dead and (f as Kin).state == "downed" and not (f as Kin).down_void and not h.downed and h.flat_dist(f) < 40.0:
+		return [(f as Kin).pos, "boki"]
 	return []
 
 ## A rival's stray in reach: worth the walk while the window's open. [pos, kind] or [].
@@ -323,3 +300,23 @@ static func finish_later(m: Match) -> void:
 		m.get_tree().create_timer(0.25).timeout.connect(finish_later.bind(m))
 		return
 	m._finish()
+
+# ------------------------------------------------------------------ the network
+## The follower's own snapshot fields, after KinNet's: [role, in the satchel, steal seconds left, its hunter's nid, its name, its team].
+static func net_extra(k: Kin) -> Array:
+	return [Match.KIN_ROLES.find(k.role), 1 if k.tucked else 0, snappedf(k.steal_t, 0.01), k.steal_owner_nid, k.steal_from, k.steal_team]
+
+static func net_role(it: Array) -> int:
+	return int(it[NET_AT]) if it.size() > NET_AT + 5 else 0
+
+static func net_apply(k: Kin, it: Array) -> void:
+	if it.size() <= NET_AT + 5:
+		return
+	var ri := int(it[NET_AT])
+	k.role = String(Match.KIN_ROLES[ri]) if ri >= 0 and ri < Match.KIN_ROLES.size() else ""
+	k.tucked = int(it[NET_AT + 1]) == 1
+	k.steal_t = float(it[NET_AT + 2]); k.steal_owner_nid = String(it[NET_AT + 3]); k.steal_from = String(it[NET_AT + 4]); k.steal_team = int(it[NET_AT + 5])
+	if k.role == "stray" and k.owner_h:
+		k.owner_h.follower = null
+		k.owner_h = null
+		k.team = -1

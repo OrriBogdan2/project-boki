@@ -33,7 +33,7 @@ static func crowd_at(m: Match, h: Hunter, p: Vector3, r: float) -> int:
 static func fresh(m: Match, o: Ent) -> bool:
 	return o is Hunter and ((o as Hunter).dropping or m.time - float(o.get_meta("landed_t", -99.0)) < float(m.opts.get("fresh_t", FRESH_T)))
 
-const URGENT_GOALS := ["revive", "box", "beacon", "hum", "yard", "board", "lift", "lair_fight", "lair_escape", "lair_lever", "lair_updraft"]
+const URGENT_GOALS := ["revive", "boki", "box", "beacon", "hum", "yard", "board", "lift", "lair_fight", "lair_escape", "lair_lever", "lair_updraft"]
 
 func think(m: Match, h: Hunter, dt: float) -> void:
 	var a := h.ai
@@ -176,22 +176,8 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 				a["nolos_t"] = 0.0
 				a["ignore"] = {"e": tgt, "until": m.time + 4.0}
 				a["tgt"] = null
-		# kin
-		var k: Kin = h.kin
 		var abil := float(df.get("abil", 0.7))
-		if k and a["throw_cd"] <= 0.0 and randf() > abil:
-			a["throw_cd"] = randf_range(1.5, 3.5)       # easier bots hold their kin back more
-		elif k and a["throw_cd"] <= 0.0:
-			if k.state == "shoulder" and d < 8.0 and (tgt is Hunter or (tgt is Mob and tgt.mkind == "brute") or randf() < 0.3):
-				k.throw_to(Vector3(tgt.pos.x, tgt.pos.y, tgt.pos.z))
-				a["throw_cd"] = randf_range(4, 8)
-			elif k.state == "active" and k.runner.is_ready("k1") and k.flat_dist(tgt) < 6.0 and randf() < 0.5:
-				h.inp["aim"] = Vector3(tgt.pos.x, tgt.pos.y, tgt.pos.z)
-				h.inp["kin_ab" if h.ak else "sig"] = true
-				a["throw_cd"] = randf_range(1, 3)
-			elif k.state == "active" and (k.hp < k.max_hp * 0.3 or k.flat_dist(h) > 11.0):
-				k.recall()
-				a["throw_cd"] = 2.0
+		BotKin.fight(m, h, tgt, d, abil)       # throw, C, recall
 		# holding our uplink's yard: fight from in it, don't chase the waves out (an empty yard drains)
 		if String(a.get("goal_kind", "")) == "yard" and a["goal"] != Vector3.INF and h.flat_dist(a["goal"]) > 2.4:
 			move = (_path_dir(m, h, a["goal"]) + move * 0.3).normalized()
@@ -214,12 +200,13 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 			if h.ak:
 				# the archetype's kit: dash, RMB variants, E and R (each kit knows its own moments)
 				h.ak.bot_use(tgt, d, los)
+				if not KinCommand.class_ults(): inp["ult"] = false      # R is the Merge: BotKin decides
 				if not rv.is_empty() and h.flat_dist(rv["o"]) < 6.0:
 					# picking up a squadmate: no kit move that carries us off them (a Shadow Step
 					# behind the rival, a Rampage, a leap, an ult chase); E and the gun still go
 					inp["dash"] = false; inp["sec"] = false; inp["ult"] = false
 					h.ak.bot_hold["dash"] = 0.0; h.ak.bot_hold["rmb"] = 0.0
-				_use_kin_ab(m, h, tgt)
+				BotKin.merge(h, tgt, d)
 			else:
 				_use_sig(m, h, tgt)
 				_use_sec(m, h, tgt)
@@ -251,12 +238,12 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 				var ah: Vector2 = a["aim_hold"]
 				inp["aim"] = Vector3(h.pos.x + ah.x * 3.0, h.pos.y + 0.9, h.pos.z + ah.y * 3.0)
 			inp["aim_y"] = h.pos.y
-			if h.flat_dist(goal) < 1.2 and a["goal_kind"] in ["chest", "catch", "fpick", "revive", "box", "dock", "uplink", "hatch", "lair_dial", "lair_lever"]:
+			if h.flat_dist(goal) < 1.2 and a["goal_kind"] in ["chest", "catch", "revive", "box", "dock", "uplink", "hatch", "lair_dial", "lair_lever"]:
 				inp["interact"] = true
 				move = Vector2.ZERO
 			elif h.flat_dist(goal) < 1.0 and a["goal_kind"] in ["beacon", "board", "yard", "lair_camp"]:
 				move = Vector2.ZERO
-		if h.kin and h.kin.state == "active" and h.kin.flat_dist(h) > 6.0:
+		if h.kin and h.kin.state == "active" and h.kin.flat_dist(h) > 6.0 and KinCommand.can_recall(h):
 			h.kin.recall()
 		# far from the squad with nothing to fight: now and then, base to a teammate
 		# (not while holding a spot: an uplink's yard, a skiff's deck, a lair: basing away from a
@@ -276,7 +263,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		elif heal_ok and h.armor < h.max_armor * 0.3 and h.armor_kits > 0:
 			inp["kit"] = true
 		# swap a fainted kin out for the other one
-		if h.kin and (h.kin as Kin).state == "fainted" and h.kin2 and (h.kin2 as Kin).hp > 0.0:
+		if h.kin and (h.kin as Kin).state == "downed" and h.kin2 and (h.kin2 as Kin).hp > 0.0:
 			inp["swap"] = true
 	# ---- reviving: walk to the downed squadmate and stand on them until they're up (shooting back
 	# from there if there's a clear shot). A rival right on top of us is fought, but from beside them
@@ -527,17 +514,6 @@ func _crawl(m: Match, h: Hunter) -> void:
 		mv = Vector2.ZERO
 	h.inp["move"] = mv
 
-## C with an archetype: the kin's own ability (it hops out, casts and hops back) when it fits.
-func _use_kin_ab(_m: Match, h: Hunter, tgt: Ent) -> void:
-	var k: Kin = h.kin
-	if k == null or not k.ready_to_fight() or tgt == null or not k.runner.is_ready("k1"):
-		return
-	var def := k.runner.def_of("k1")
-	var reach := def.cast_range if def.cast_range > 0.0 else 7.0
-	if h.flat_dist(tgt) < reach + 1.0 and randf() < 0.35:
-		h.inp["aim"] = Vector3(tgt.pos.x, tgt.pos.y, tgt.pos.z)
-		h.inp["kin_ab"] = true
-
 ## Right click: the weapon's utility, used when a target is in reach.
 func _use_sec(m: Match, h: Hunter, tgt: Ent) -> void:
 	var a := h.ai
@@ -705,6 +681,9 @@ func _choose(m: Match, h: Hunter) -> void:
 	for o in m.hunters:
 		if o != h and o.team == h.team and o.downed and not o.out:
 			goal = o.pos; gk = "revive"; break
+	if goal == Vector3.INF:
+		goal = BotKin.rescue_goal(h)       # a downed Boki: run into it
+		if goal != Vector3.INF: gk = "boki"
 	# a dead teammate: their deathbox while the soul's there, else a revive beacon
 	if goal == Vector3.INF:
 		for b in m.boxes:

@@ -1,7 +1,7 @@
 class_name FollowDemo
 extends RefCounted
 ## Screenshots of follower Boki (--follow-demo=walk|ko|steal|watch). walk: you just tamed one and
-## it trots after you; ko: it's knocked out beside you; steal: a rival hunter left one behind and its
+## it trots after you; ko: it is down beside you; steal: a rival hunter left one behind and its
 ## steal window is running in front of you; watch: you went out and your own is on its own.
 static func run(m: Match, _dt: float) -> void:
 	var what := String(m.opts["follow_demo"])
