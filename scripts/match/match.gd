@@ -1933,7 +1933,7 @@ func eliminate(h: Hunter, by: Ent, why: String, final := false) -> void:
 		credit = by.owner_h
 	if credit is Hunter and credit != h and credit.team != h.team:
 		credit.kills += 1
-	add_feed("%s is out" % h.pname if why != "abyss" else "%s fell into the abyss" % h.pname)
+	add_feed(out_text(h.pname, why))
 	h.set_meta("died_why", why)
 	h.set_meta("died_at", time)
 	var waiting := false
@@ -1969,7 +1969,7 @@ func eliminate(h: Hunter, by: Ent, why: String, final := false) -> void:
 			_end_soon(2.2)
 		if why != "abyss":
 			_slow(0.8, 0.3)
-		killcam_text = ("Taken out by %s" % credit.pname) if credit is Hunter and credit != h else ("You fell" if why == "abyss" else "You're out")
+		killcam_text = ("Taken out by %s" % credit.pname) if credit is Hunter and credit != h else ("You fell" if why == "abyss" else ("Hit by the Sky Train" if why == "train" else "You're out"))
 	elif credit == player and player and not player.out:
 		# taking out the last rival squad gets the big moment
 		var rivals := hunters.any(func(x): return x.team != player.team and not x.out and not x.extracted)
@@ -1981,6 +1981,49 @@ func eliminate(h: Hunter, by: Ent, why: String, final := false) -> void:
 				hud.toast("Last squad down", Color("ffd23f"))
 			Sfx.duck(1.0)
 	_check_last()
+
+## The kill feed line for someone going out.
+static func out_text(who: String, why: String) -> String:
+	match why:
+		"abyss": return "%s fell into the abyss" % who
+		"train": return "%s was hit by the Sky Train" % who
+	return "%s is out" % who
+
+## Hit by the sky train (SkyTrain._kill_zone): a loud crash, a big burst and the body flung down
+## the line. A hunter goes straight out, no wisp (a spare life still saves them), their deathbox
+## where they were hit; monsters and kin take far more than they can survive.
+func train_hit(e: Ent, fwd: Vector3, spd := 8.0) -> void:
+	var at: Vector3 = e.pos
+	var f2 := Vector2(fwd.x, fwd.z).normalized()
+	var kb := f2 * (14.0 + spd * 1.2)
+	sfx("train_hit", at, 4.0)
+	sfx("boom", at, -2.0, 0.6)
+	fx.burst(at + Vector3(0, 1.0, 0), Color("ffcf6a"), 40, 9.0, 0.6, 12.0, 1.6, Vector3(fwd.x, 0.6, fwd.z), 70.0)
+	fx.burst(at + Vector3(0, 0.8, 0), Color(1, 1, 1, 0.9), 26, 6.0, 0.5, 4.0, 1.3)
+	fx.burst(at + Vector3(0, 0.4, 0), Color("6b5a4a"), 16, 4.0, 0.7, 10.0, 1.2)
+	fx.ring(at, 3.6, Color(1.0, 0.75, 0.4, 0.9), 0.45)
+	fx.flash(at + Vector3(0, 1.0, 0), Color("fff2c0"), 1.4, 0.1)
+	shake(0.9, at)
+	if e is Hunter:
+		var h: Hunter = e
+		if h.out or h.extracted or h.remote:
+			return
+		cancel_abilities(h)
+		h.last_hit_by = null
+		h.grap = {}; h.pad = {}; h.roll_t = 0.0
+		var fling := {"t": time, "from": at, "v": Vector3(kb.x, 9.0, kb.y), "spin": 1.0 if randf() < 0.5 else -1.0}
+		eliminate(h, null, "train")
+		if h.out:
+			h.set_meta("fling", fling)      # (with a spare life they're already gliding back in)
+		if h == player:
+			freeze_frame(0.08)
+			cam.punch(0.2)
+			cam.add_trauma(0.9)
+			if hud: hud.flash(Color("fff2c0"), 0.35)
+	else:
+		e.hurt(9999.0, null, {"src": "train", "kb": kb, "lift": 7.0})
+		if e is Mob and not e is Boss and not e.dead:
+			e.dead = true
 
 ## Losing a life: some of what you carry spills where you went down, and you glide back in
 ## somewhere quiet with full health and a moment of protection.
@@ -2538,6 +2581,9 @@ func _update_vision() -> void:
 
 func _exit_tree() -> void:
 	RenderingServer.global_shader_parameter_set("vis_on", 0.0)
+	for key in box_hums.keys():
+		Sfx.loop_stop(String(key))
+	box_hums.clear()
 	if biomes: biomes.free_up()
 	if duel:
 		duel.teardown()
@@ -3395,7 +3441,16 @@ func step(dt: float) -> void:
 				x.teleport(world.free_spot_near(bc + Vector3(-1.5, 0, 3.0), [bc, player.pos], 1.2, 0.4, 8.0))
 				x.gems = 60
 				x.ctrl = "idle"
+				if opts.get("boxrev_demo", false): x.lives = 1
 				eliminate(x, null, "knocked out")
+				break
+	if opts.get("boxrev_demo", false) and player and time > 0.3:
+		# test: bring the teammate back at their deathbox (the channel's light, the kneel, the hum)
+		for b in boxes:
+			if b["owner"] != player and b["owner"].team == player.team and Life.soul_here(self, b):
+				if player.flat_dist(b["pos"]) > 0.6 and player.box_t <= 0.0:
+					player.teleport(b["pos"] + Vector3(0.5, 0, 0.3))
+				player.inp["interact"] = true
 				break
 	if (opts.get("pack_demo", false) or opts.get("bag_demo", false)) and player and time > 1.0 and not has_meta("pack_demo_done") and hud:
 		# test: a full backpack. pack_demo picks up treasure (the swap window); bag_demo opens the backpack
@@ -3696,6 +3751,7 @@ func step(dt: float) -> void:
 	if not ship.is_empty() and not ship.get("gone", false):
 		_update_ship(dt)
 	_update_interact(dt)
+	_update_box_hums()
 	_prof("interact")
 	if opts.get("perk_demo", false) and player and time > 0.5 and time - dt <= 0.5:
 		# test: a couple of perks already taken and a choice open
@@ -3847,6 +3903,82 @@ func _update_dex(dt: float) -> void:
 				if k.rec.get("shimmer", false):
 					Shiny.sparkle(self, k.pos, k.species, 1.2)      # stars and a chime round it
 
+## A deathbox revive is loud: a rising hum (spatial, carrying ~HUM_RANGE metres, so rivals close by
+## hear it) with a soft ray of light over the box, from the moment the channel starts until it
+## breaks or completes. Rivals who hear it get a sound ping on the minimap; bots come to look.
+const HUM_RANGE := 30.0
+const HUM_DB := 2.0
+var box_hums := {}             # hum key -> its box, while that box's revive hum is playing
+var _hum_seq := 0
+func _update_box_hums() -> void:
+	for b in boxes:
+		var on: bool = time - float(b.get("rev_at", -9.0)) < 0.12
+		var key: String = String(b.get("hum_key", ""))
+		if on:
+			if key == "":
+				_hum_seq += 1
+				key = "boxhum%d" % _hum_seq
+				b["hum_key"] = key
+			var prog := clampf(float(b.get("rev_prog", 0.0)), 0.0, 1.0)
+			if not box_hums.has(key):
+				box_hums[key] = b
+				Sfx.loop_start(key, "revive_hum", b["pos"], HUM_DB, HUM_RANGE)
+				_box_ray(b, true)
+			Sfx.loop_set(key, b["pos"], 0.8 + 0.55 * prog)
+			_box_ray_tick(b, prog)
+			if int(time * 2.0) != int((time - DT) * 2.0):
+				note_sound(b.get("rev_by"), b["pos"], "revive")
+		elif key != "" and box_hums.has(key):
+			_box_hum_stop(b)
+
+func _box_hum_stop(b: Dictionary) -> void:
+	var key: String = String(b.get("hum_key", ""))
+	if key != "":
+		box_hums.erase(key)
+		Sfx.loop_stop(key)
+	_box_ray(b, false)
+
+## The soft column of light and the ring on the ground over a box while it's being revived.
+func _box_ray(b: Dictionary, on: bool) -> void:
+	var n = b.get("ray_node")
+	if on and (n == null or not is_instance_valid(n)):
+		var root := Node3D.new()
+		root.name = "BoxRay"
+		add_child(root)
+		root.position = b["pos"]
+		var col := MeshInstance3D.new()
+		col.mesh = Models.cyl(0.55, 0.85, 7.0, 20)
+		col.position = Vector3(0, 3.5, 0)
+		col.material_override = Models.glow_mat(Color(0.62, 1.0, 0.7, 0.18))
+		col.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		col.name = "Col"
+		root.add_child(col)
+		var ring := MeshInstance3D.new()
+		ring.mesh = Models.cyl(1.6, 1.6, 0.04, 32)
+		ring.position = Vector3(0, 0.06, 0)
+		ring.material_override = Models.glow_mat(Color(0.62, 1.0, 0.7, 0.3))
+		ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		ring.name = "Ring"
+		root.add_child(ring)
+		b["ray_node"] = root
+	elif not on and n != null and is_instance_valid(n):
+		(n as Node).queue_free()
+		b.erase("ray_node")
+
+func _box_ray_tick(b: Dictionary, prog: float) -> void:
+	var n = b.get("ray_node")
+	if n == null or not is_instance_valid(n):
+		return
+	var pulse := 0.5 + 0.5 * sin(time * (5.0 + prog * 7.0))
+	var col: MeshInstance3D = (n as Node3D).get_node("Col")
+	var ring: MeshInstance3D = (n as Node3D).get_node("Ring")
+	(col.material_override as ShaderMaterial).set_shader_parameter("color", Color(0.62, 1.0, 0.7, 0.1 + 0.16 * prog + 0.06 * pulse))
+	col.scale = Vector3(1.0 + 0.15 * pulse, 0.6 + 0.4 * prog, 1.0 + 0.15 * pulse)
+	col.position.y = 3.5 * col.scale.y
+	var rs := 1.0 - 0.55 * prog
+	ring.scale = Vector3(rs, 1.0, rs)
+	(ring.material_override as ShaderMaterial).set_shader_parameter("color", Color(0.62, 1.0, 0.7, 0.25 + 0.3 * pulse))
+
 func _update_interact(dt: float) -> void:
 	for h in hunters:
 		if h.out or h.extracted or h.downed or h.dropping:
@@ -3886,7 +4018,7 @@ func _update_interact(dt: float) -> void:
 					continue
 				var o: Hunter = b["owner"]
 				if o.team == h.team and o != h and Life.soul_here(self, b) and not o.remote:
-					best = {"kind": "boxrev", "box": b, "label": "Hold %s to bring %s back" % [Settings.key_cap("interact"), o.pname], "col": Color("9ee2a0")}
+					best = {"kind": "boxrev", "box": b, "label": ("Hold %s to bring %s back  ·  slow and loud: rivals nearby will hear it" % [Settings.key_cap("interact"), o.pname]) if not h.box_reviving() else "Bringing %s back  ·  let go to stop" % o.pname, "col": Color("9ee2a0")}
 					break
 				if not b["empty"]:
 					var whose: String = "your box" if o == h else o.pname + "'s box"
@@ -3898,6 +4030,7 @@ func _update_interact(dt: float) -> void:
 			h.box_t = 0.0
 		if not want:
 			h.set_meta("loot_hold", false)
+			h.set_meta("box_broke", false)
 		# 2. catch a dazed wild kin (not in training: practice kin go home with nobody)
 		if best.is_empty() and not opts.get("training", false):
 			for k in kins:
@@ -3981,20 +4114,34 @@ func _update_interact(dt: float) -> void:
 						hud.open_loot(b0)
 			"boxrev", "loot":
 				var b: Dictionary = best["box"]
-				# taking a hit breaks the channel
+				var rev: bool = best["kind"] == "boxrev"
+				# taking a hit breaks the channel (a revive has to be let go and started again)
 				if time - h.hurt_at < 0.1:
 					h.box_t = 0.0
-				h.box_t += dt
-				var need: float = Life.R["box_revive_time"] if best["kind"] == "boxrev" else Life.R["loot_time"]
-				if best["kind"] == "boxrev":
-					# everyone can see a deathbox revive going up (and who's doing it)
-					b["rev_prog"] = h.box_t / need
-					b["rev_by"] = h
-					b["rev_at"] = time
-				if h.box_t >= need:
+					if rev: h.set_meta("box_broke", true)
+				if rev and h.get_meta("box_broke", false):
 					h.box_t = 0.0
-					if best["kind"] == "boxrev": Life.box_revive(self, b, h)
-					else: Life.loot_box(self, h, b)
+				else:
+					h.box_t += dt
+					var need: float = Life.R["box_revive_time"] if rev else Life.R["loot_time"]
+					if rev:
+						# everyone can see (and hear: _update_box_hums) a deathbox revive going up, and who's
+						# doing it; the reviver kneels over the box, locked in place
+						b["rev_prog"] = h.box_t / need
+						b["rev_by"] = h
+						b["rev_at"] = time
+						h.box_rev_at = time
+					if h.box_t >= need:
+						h.box_t = 0.0
+						if rev:
+							b["rev_at"] = -9.0
+							h.box_rev_at = -9.0
+							_box_hum_stop(b)
+							sfx("revive_done", b["pos"], 3.0)
+							fx.ring(b["pos"] + Vector3(0, 0.1, 0), 2.6, Color("bff5c0"), 0.5)
+							fx.burst(b["pos"] + Vector3(0, 1.0, 0), Color("bff5c0"), 26, 4.5, 0.7, -2.0, 1.2)
+							Life.box_revive(self, b, h)
+						else: Life.loot_box(self, h, b)
 			"catch":
 				var k: Kin = best["ent"]
 				# capturing someone's lost kin takes longer than catching a wild one
@@ -4653,16 +4800,38 @@ func _balloon_demo() -> void:
 		player.ammo = maxi(player.ammo, 3)
 
 ## Test hook (--train-demo): ride the sky train from a stop; "--train-demo=track" stands you on the
-## track ahead of the engine instead, "--train-demo=view" watches it from a pier.
+## track ahead of the engine instead, "--train-demo=view" watches it from a pier. "walk" and "hit"
+## start with the train already under way: "walk" stands you on a car and walks, strafes, jumps and
+## shoots on it; "hit" stands you on the rails a couple of seconds ahead of the engine.
 func _train_demo() -> void:
 	var mode := String(opts["train_demo"]) if opts["train_demo"] is String else "ride"
 	var st := skytrain
-	if time < DT * 1.5 and mode != "watch":
+	if time < DT * 1.5 and mode in ["walk", "hit"]:
+		var lg: Dictionary = st.legs[0]
+		time = st.dwell + float(lg["t"]) * 0.3
+		opts["train_t0"] = time
+		st.tick(0.0)
+		st.old = st.cur.duplicate()
+	var since: float = time - float(opts.get("train_t0", 0.0))
+	if not opts.has("train_init") and mode != "watch":
+		opts["train_init"] = true
 		cam.zoom_to = 0.8
-		if mode == "track":
+		if mode == "track" or mode == "hit":
 			# a stretch of open track ahead, level with the islands (not down under a bridge)
 			var ps := st.head_s + 20.0
-			while ps < st.head_s + 120.0 and not (world.train_at(ps).y > -0.01 and world.train_at(ps - 6.0).y > -0.01 and world.is_void(world.train_at(ps).x, world.train_at(ps).z)):
+			if mode == "hit":
+				# just a couple of seconds down the line, wherever the rails are level with the islands
+				# open air round the rails somewhere ahead, then the clock moved on until the engine is
+				# a couple of seconds away from it
+				ps = st.head_s + 14.0
+				while ps < st.head_s + st.loop_len and not (world.train_at(ps).y > -0.01 and _open_air(world.train_at(ps), 4.0)):
+					ps += 1.0
+				var t1 := time
+				while time < t1 + 120.0 and not (st.head_v > st.speed * 0.8 and fposmod(ps - st.head_s, st.loop_len) < 11.0):
+					time += 0.05
+					st._place(time)
+				st.old = st.cur.duplicate()
+			while mode == "track" and ps < st.head_s + 120.0 and not (world.train_at(ps).y > -0.01 and world.train_at(ps - 6.0).y > -0.01 and world.is_void(world.train_at(ps).x, world.train_at(ps).z)):
 				ps += 1.0
 			opts["train_pin"] = world.train_at(ps)
 			player.teleport(opts["train_pin"])
@@ -4673,13 +4842,38 @@ func _train_demo() -> void:
 			var t2: Transform3D = st.cur[2]
 			player.teleport(t2.origin + Vector3(0, 0.05, 0))
 		player.grounded = true
-	if mode == "track" and not player.downed and not player.out:
+	if (mode == "track" or mode == "hit") and not player.downed and not player.out:
 		# stand on the rails (pinned there: the track has no floor of its own) and wait for the engine
 		player.pos = opts["train_pin"]; player.vel = Vector3.ZERO; player.grounded = true
 		player.inp["move"] = Vector2.ZERO
+		player.lives = 1
+	if mode == "walk" and not player.out:
+		# forward along the car, across it, a hop, then shooting from the deck
+		var k := 2
+		var tk: Transform3D = st.cur[k]
+		var f2 := Vector2(-tk.basis.z.x, -tk.basis.z.z).normalized()
+		var r2 := Vector2(tk.basis.x.x, tk.basis.x.z).normalized()
+		player.inp["move"] = Vector2.ZERO
+		if since > 0.4 and since < 1.0: player.inp["move"] = f2
+		elif since > 1.0 and since < 1.5: player.inp["move"] = r2
+		elif since > 1.5 and since < 2.3: player.inp["move"] = -f2
+		if absf(since - 2.4) < DT * 0.5: player.inp["jump"] = true
+		if since > 2.9:
+			player.inp["aim"] = player.pos + Vector3(r2.x * 6.0, 0.9, r2.y * 6.0)
+			player.inp["fire"] = fmod(since, 0.5) < 0.1
+			player.ammo = maxi(player.ammo, 3)
 	if int(time * 60.0) % 60 == 0:
 		var t3: Transform3D = st.cur[2]
 		print("TRAIN t=%.1f head=%.1f v=%.1f player=(%.1f,%.2f,%.1f) car2=(%.1f,%.2f,%.1f) grounded=%d hp=%.0f downed=%d out=%d" % [time, st.head_s, st.head_v, player.pos.x, player.pos.y, player.pos.z, t3.origin.x, t3.origin.y, t3.origin.z, int(player.grounded), player.hp, int(player.downed), int(player.out)])
+
+## Nothing but air within `rad` of p (for the demos).
+func _open_air(p: Vector3, rad: float) -> bool:
+	for i in 12:
+		var a := TAU * i / 12.0
+		for d in [rad * 0.5, rad]:
+			if not world.is_void(p.x + cos(a) * d, p.z + sin(a) * d):
+				return false
+	return true
 
 ## Open ground a given distance from the player on the same island.
 func _tut_spot(dist: float, ang0: float) -> Vector3:
@@ -5323,7 +5517,7 @@ func _net_ev(x, from: String) -> void:
 				who.out = true
 				if by == player:
 					player.kills += 1
-				add_feed("%s is out" % who.pname if String(x[3]) != "abyss" else "%s fell into the abyss" % who.pname)
+				add_feed(out_text(who.pname, String(x[3])))
 				if who.kin:
 					who.kin.dead = true
 					who.kin.visible = false

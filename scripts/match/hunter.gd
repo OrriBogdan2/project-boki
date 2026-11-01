@@ -109,6 +109,7 @@ var sick_t := 0.0              # resurrection sickness after a beacon revive: -2
 var stolen_carry := false      # carrying someone else's kin: it struggles, slowing you a little
 var chase: Hunter = null       # whoever has your kin: you run faster toward them
 var box_t := 0.0               # holding interact at a deathbox
+var box_rev_at := -9.0         # last time we were channelling a deathbox revive (kneeling, locked in place)
 var hurt_at := -9.0            # last time a hit landed (channels like a box revive break on it)
 var extracted := false
 var extract_prog := 0.0
@@ -958,11 +959,33 @@ func _dash_rider(ex: bool) -> void:
 var roll_speed := DASH_SPEED
 var wedged_t := 0.0
 
+## World.occupy, with the sky train in it: on a car's deck you walk freely (the deck is your floor,
+## whatever the ground far below or a bridge overhead is doing), the engine is a wall, and walking
+## off a car only takes you onto ground about level with the deck (a pier at a stop): the edge of a
+## car over the abyss holds you like any island edge. Dashes, knockback and jumps go over it.
+func _occ(x: float, z: float, guard: bool) -> float:
+	var st: SkyTrain = m.skytrain
+	if st == null:
+		return m.world.occupy(x, z, r, pos.y, guard)
+	var sw := st.solid_at(x, z, pos.y, r)
+	if sw > 0.0:
+		return sw
+	if st.walk_deck(Vector3(x, pos.y, z), r) > World.VOID + 1.0:
+		return 0.0
+	if not st.on_deck(pos):
+		return m.world.occupy(x, z, r, pos.y, guard)
+	var b: float = m.world.occupy(x, z, r, pos.y, false)
+	if b == 0.0 and guard:
+		var g: float = m.world.ground_at(x, z)
+		if g <= World.VOID + 1.0 or g < pos.y - 0.9:
+			return -1.0
+	return b
+
 ## True only when there's no direction at all you could step: really stuck, not just walking into a wall.
 func _boxed_in() -> bool:
 	for i in 8:
 		var a := TAU * i / 8.0
-		if m.world.occupy(pos.x + cos(a) * 0.2, pos.z + sin(a) * 0.2, r, pos.y, false) == 0.0:
+		if _occ(pos.x + cos(a) * 0.2, pos.z + sin(a) * 0.2, false) == 0.0:
 			return false
 	return true
 var shove := {}                # the heavy charge: who it already hit, and how hard it shoves
@@ -1627,6 +1650,10 @@ func _tick_drink(dt: float) -> void:
 			m.sfx("heal", pos, -2.0)
 			m.fx.burst(pos + Vector3(0, 1.2, 0), Color("8ff0a0"), 14, 2.5, 0.5, -3.0)
 
+## Channelling a deathbox revive right now (Match._update_interact keeps box_rev_at fresh).
+func box_reviving() -> bool:
+	return m.time - box_rev_at < 0.12 and not downed and not out
+
 func launch_to(target: Vector3, t: float) -> void:
 	vel.x = (target.x - pos.x) / t
 	vel.z = (target.z - pos.z) / t
@@ -1709,6 +1736,12 @@ func sim(dt: float) -> void:
 		if down_hp <= 0.0:
 			m.eliminate(self, last_hit_by, "finished")
 			return
+	# bringing a teammate back at their deathbox: kneeling over it, locked in place (let go of
+	# interact to stop)
+	if box_reviving():
+		for kk in ["dash", "jump", "sig", "skill", "sec", "ult", "swap", "reload", "tonic", "kit", "gear1", "gear2", "fire", "throw"]:
+			inp[kk] = false
+		inp["move"] = Vector2.ZERO
 	# mid-stomp you're committed: none of your own buttons do anything until it ends
 	if not stomp.is_empty():
 		for kk in ["dash", "jump", "sig", "skill", "sec", "ult", "swap", "reload", "tonic", "kit", "gear1", "gear2", "fire", "throw"]:
@@ -1947,12 +1980,12 @@ func _physics(dt: float) -> void:
 	wall_hit_v = Vector2.ZERO
 	var step_up := 0.0
 	var nx := pos.x + vel.x * dt
-	var b1: float = m.world.occupy(nx, pos.z, r, pos.y, guard)
+	var b1: float = _occ(nx, pos.z, guard)
 	if b1 == 0.0: pos.x = nx
 	elif grounded and b1 > 0.0 and b1 - pos.y <= World.LEVEL + 0.05: step_up = b1
 	elif b1 > 0.0 or b1 == -1.0: vel.x = 0.0 if b1 == -1.0 else vel.x * -0.1
 	var nz := pos.z + vel.z * dt
-	var b2: float = m.world.occupy(pos.x, nz, r, pos.y, guard)
+	var b2: float = _occ(pos.x, nz, guard)
 	if b2 == 0.0: pos.z = nz
 	elif grounded and b2 > 0.0 and b2 - pos.y <= World.LEVEL + 0.05: step_up = maxf(step_up, b2)
 	elif b2 > 0.0 or b2 == -1.0: vel.z = 0.0 if b2 == -1.0 else vel.z * -0.1
@@ -1962,7 +1995,7 @@ func _physics(dt: float) -> void:
 		pos.y = step_up
 		prev.y = pos.y
 		var fw := mv.normalized() * spd * dt
-		if m.world.occupy(pos.x + fw.x, pos.z + fw.y, r, pos.y, guard) == 0.0:
+		if _occ(pos.x + fw.x, pos.z + fw.y, guard) == 0.0:
 			pos.x += fw.x; pos.z += fw.y
 	elif step_up == 0.0 and (b1 > 0.0 or b2 > 0.0) and hv.length() > 1.0:
 		# caught on a corner: slip sideways around it rather than sticking
@@ -1973,7 +2006,7 @@ func _physics(dt: float) -> void:
 			for side in [Vector2(-dn.y, dn.x), Vector2(dn.y, -dn.x)]:
 				var tx: float = pos.x + (side.x * 0.8 + dn.x * 0.4) * want
 				var tz: float = pos.z + (side.y * 0.8 + dn.y * 0.4) * want
-				if m.world.occupy(tx, tz, r, pos.y, guard) == 0.0:
+				if _occ(tx, tz, guard) == 0.0:
 					pos.x = tx; pos.z = tz
 					break
 	# a safety net: pushing to move for a second without going anywhere means something has us
@@ -2590,7 +2623,7 @@ func _anim_state(stretch: float) -> void:
 			if o != self and o.downed and o.team == team and self in (o.get_meta("revivers", []) as Array):
 				rv = true
 				break
-	s["reviving"] = rv
+	s["reviving"] = rv or box_reviving()
 	# an emote bubble over us
 	var em := ""
 	var et := 99.0
@@ -2614,6 +2647,18 @@ func render(delta: float, alpha: float) -> void:
 	if not model:
 		return
 	model.rotation.y = face
+	if out and has_meta("fling"):
+		# hit by the sky train: the body is flung tumbling through the air for a moment, then gone
+		var fl: Dictionary = get_meta("fling")
+		var ft: float = m.time - float(fl["t"])
+		if ft < 1.2:
+			var v0: Vector3 = fl["v"]
+			visible = true
+			position = (fl["from"] as Vector3) + v0 * ft + Vector3(0, -0.5 * H_GRAV * 0.45 * ft * ft, 0)
+			model.rotation = Vector3(ft * 9.0, face + ft * float(fl["spin"]) * 6.0, ft * 4.0 * float(fl["spin"]))
+			return
+		remove_meta("fling")
+		model.rotation = Vector3(0, face, 0)
 	# riding a mount: you sit up on its back
 	var ride := (kin as Kin).ride_height() if mounted() and not downed else 0.0
 	model.position.y = lerpf(model.position.y, ride, minf(1.0, delta * 12.0))

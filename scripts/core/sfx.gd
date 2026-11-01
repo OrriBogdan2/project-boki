@@ -6,7 +6,7 @@ extends Node
 
 const NAMES := ["smg", "rifle", "thump", "boom", "hit", "crit", "kill", "knock", "hurt", "dash", "jump", "land", "grab",
 	"throw", "kinhit", "skill", "kin_happy", "kin_unsure", "kin_alert", "recall", "pickup", "catch", "warn", "portal",
-	"revive", "click", "reload", "shield", "cloak", "heal", "fall", "plant", "harvest", "ping", "glide", "build", "unlock", "whoosh", "step0", "step1", "step2", "hover", "zap", "bond", "ult", "combo", "swap", "horn", "rail",
+	"revive", "click", "reload", "shield", "cloak", "heal", "fall", "plant", "harvest", "ping", "glide", "build", "unlock", "whoosh", "step0", "step1", "step2", "hover", "zap", "bond", "ult", "combo", "swap", "horn", "rail", "train_hit", "revive_hum", "revive_done",
 	"swipe", "cleave", "charge", "k_venom", "k_spore", "k_gravity", "k_prism", "k_lunar", "k_echo"]
 const POOL := 24
 ## Sounds that only exist as several takes (monster voices, little pops); one is picked at random.
@@ -171,15 +171,16 @@ func has(sname: String) -> bool:
 	return streams.has(sname)
 
 ## How much quieter (dB) a sound at pos is for the listener, or NAN when it's out of earshot.
-func _distance_db(pos) -> float:
+func _distance_db(pos, reach := 0.0) -> float:
 	if pos == null:
 		return 0.0
+	var hr := reach if reach > 0.0 else hear_range
 	var dist := Vector2(pos.x - listener.x, pos.z - listener.z).length()
-	if dist > hear_range:
+	if dist > hr:
 		return NAN
 	# a soft inverse-distance roll-off (about -8 dB by 10 m), easing to silence at the edge of hearing
 	var db := -20.0 * log(1.0 + maxf(0.0, dist - NEAR) / 5.0) / log(10.0)
-	var edge := 1.0 - smoothstep(hear_range * 0.7, hear_range, dist)
+	var edge := 1.0 - smoothstep(hr * 0.7, hr, dist)
 	return db + linear_to_db(maxf(edge, 0.001))
 
 ## A free voice from the pool, so a new sound doesn't cut one that's still ringing (the oldest if all are busy).
@@ -234,6 +235,60 @@ func play(sname: String, pos = null, vol_db := 0.0, pitch_var := 0.07, pitch := 
 	p.pitch_scale = pitch * (1.0 + rng.randf_range(-pitch_var, pitch_var))
 	p.play()
 
+
+## Looping sounds that last as long as something goes on (a deathbox revive's hum): started, moved
+## and re-pitched, and stopped by key. Each has its own voice outside the pool, with the same
+## distance falloff as play() but its own reach (reach > 0 overrides hear_range).
+var loops := {}               # key -> {p: AudioStreamPlayer, pos, vol, reach}
+
+func loop_start(key: String, sname: String, pos = null, vol_db := 0.0, reach := 0.0) -> void:
+	if loops.has(key):
+		return
+	var st = streams.get(sname)
+	if st is Array: st = (st as Array)[0]
+	var p := AudioStreamPlayer.new()
+	p.bus = "SFX"
+	add_child(p)
+	loops[key] = {"p": p, "pos": pos, "vol": vol_db, "reach": reach}
+	if st == null:
+		return
+	if st is AudioStreamWAV and (st as AudioStreamWAV).loop_mode == AudioStreamWAV.LOOP_DISABLED:
+		st = (st as AudioStreamWAV).duplicate()
+		st.loop_mode = AudioStreamWAV.LOOP_FORWARD
+		st.loop_begin = 0
+		st.loop_end = int((st as AudioStreamWAV).get_length() * (st as AudioStreamWAV).mix_rate)
+	p.stream = st
+	_loop_level(loops[key])
+	p.play()
+
+func loop_set(key: String, pos = null, pitch := 1.0) -> void:
+	if not loops.has(key):
+		return
+	var L: Dictionary = loops[key]
+	L["pos"] = pos
+	(L["p"] as AudioStreamPlayer).pitch_scale = maxf(0.05, pitch)
+	_loop_level(L)
+
+func loop_stop(key: String) -> void:
+	if not loops.has(key):
+		return
+	var p: AudioStreamPlayer = loops[key]["p"]
+	loops.erase(key)
+	if is_instance_valid(p):
+		# a short fade so it doesn't click off
+		var tw := p.create_tween()
+		tw.tween_property(p, "volume_db", -60.0, 0.12)
+		tw.tween_callback(p.queue_free)
+
+func loop_on(key: String) -> bool:
+	return loops.has(key)
+
+func _loop_level(L: Dictionary) -> void:
+	var p: AudioStreamPlayer = L["p"]
+	var v := float(L["vol"]) + _distance_db(L["pos"], float(L["reach"]))
+	p.volume_db = -80.0 if is_nan(v) else v
+	var far: bool = L["pos"] != null and Vector2(L["pos"].x - listener.x, L["pos"].z - listener.z).length() > FAR
+	p.bus = "SFXFar" if far else "SFX"
 
 ## Plays a ready-made stream (a glider skin's sound, say) with the same distance falloff as play().
 func play_stream(st: AudioStream, pos = null, vol_db := 0.0, pitch_var := 0.05) -> void:

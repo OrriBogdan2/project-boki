@@ -41,6 +41,10 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 			to = Vector2(land.x - h.pos.x, land.z - h.pos.z)
 		inp["move"] = to.normalized() if to.length() > 0.6 else Vector2.ZERO
 		return
+	# the sky train's horn: off the rails before it gets here
+	if m.skytrain and m.skytrain.eta(h) < SkyTrain.HORN_LEAD + 0.5:
+		inp["move"] = m.skytrain.step_off_dir(h)
+		return
 	if a["think"] <= 0.0:
 		a["think"] = randf_range(0.12, 0.3) / (0.6 + a["skill"])
 		_choose(m, h)
@@ -595,6 +599,11 @@ func _choose(m: Match, h: Hunter) -> void:
 			if bc["used"]: continue
 			var d := h.flat_dist(bc["pos"])
 			if d < bd: bd = d; goal = bc["pos"]; gk = "beacon"
+	# a rival's deathbox revive humming within earshot: go and stop it
+	if goal == Vector3.INF:
+		for b in m.box_hums.values():
+			if int(b["team"]) != h.team and h.flat_dist(b["pos"]) < Match.HUM_RANGE:
+				goal = b["pos"]; gk = "hum"; break
 	# anyone else's box with something in it
 	if goal == Vector3.INF:
 		for b in m.boxes:

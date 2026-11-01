@@ -8,7 +8,7 @@ Code: `scripts/match/`. Rules per mode: `data/rules/trios.tres`, `duos.tres`, `s
 ALIVE ──0 HP──► DOWNED (wisp) ──bleeds out / executed / team wiped──► DEAD (deathbox)
   ▲                  │                                                    │
   └── ally stands on you (4s) ◄┘                                          │
-  ├── teammate holds E at your deathbox (5s, soul still there) ◄──────────┤
+  ├── teammate holds E at your deathbox (8s, soul still there) ◄──────────┤
   └── teammate stands on a revive beacon (6s) ◄───────────────────────────┘
 ```
 
@@ -23,7 +23,7 @@ ALIVE ──0 HP──► DOWNED (wisp) ──bleeds out / executed / team wiped
 | Last one standing | Knocking a team's last standing player wipes the team: no wisp, everyone left dies | — | [patch] |
 | Dead | Your **deathbox** drops with everything you carried. Abyss deaths drop it at the killer's last ground position, or at the edge you fell from | — | [patch] |
 | Box colour | Grey / blue / purple / gold by value | 500 / 2k / 5k | [patch] (colour by value) |
-| Deathbox revive | Teammate holds E at your box while your soul is there. Damage cancels the channel. **You get the box's loot back** | **5s**, 25% HP, 90s soul window | [wiki] / [design] |
+| Deathbox revive | Teammate holds E at your box while your soul is there, kneeling and locked in place, with a loud rising hum anyone within ~30m hears (rivals get a minimap sound ping; bots come to look). Damage cancels the channel (let go and start again). **You get the box's loot back** | **8s**, 25% HP, 90s soul window | [wiki] / [design] |
 | Looting | Press F at a box: a window lists everything in it (icon, rarity colour, "upgrade" where it beats yours). Click to take items one at a time (a glove or weapon swap leaves yours in the box); press F again or Smart loot to take everything useful and leave worse gear. Bots still hold F for 1s | instant | [design] |
 | Revive beacon | Teammate stands on it: brings back every dead or downed teammate. Single use. Map-wide alert. Two teams on it pauses (doesn't reset) | **6s** | [patch] 1.0 |
 | Everbeacon | Unlimited uses, can't be contested | **10s** | [patch] |
@@ -31,7 +31,7 @@ ALIVE ──0 HP──► DOWNED (wisp) ──bleeds out / executed / team wiped
 
 **Why this works for extraction:**
 - Getting picked up from a wisp costs nothing.
-- A box revive costs a dangerous 5s channel, but you keep your loot.
+- A box revive costs a dangerous, noisy 8s channel, but you keep your loot.
 - A beacon revive is safe-ish, but you come back empty-handed.
 - Every death creates a "go back for the box" decision, which is the extraction loop.
 
@@ -128,5 +128,5 @@ All names and multipliers are placeholders.
 - While a teammate revives, the ring fills green and the nameplate reads "<name> reviving 62%". Both teams see it.
 - A teammate near your wisp but outside the range gets "Step in to revive · 1.3m".
 - The downed player sees "<name> is reviving you" under their revive bar.
-- Deathbox revives show the same filling ring at the box, with "<reviver> bringing back <name> 40%".
-- Checked by `--life-check` (stomp: pinned flag, stomper flag, ~6s death at ×2.5; loot window: items, take, smart loot).
+- Deathbox revives show the same filling ring at the box, with "<reviver> bringing back <name> 40%", plus a soft column of light and a shrinking ring over the box while it's channelled, a looping hum that rises in pitch as it fills, and a bright chime when it completes.
+- Checked by `--life-check` (box revive: 8s, the hum starts, a hit breaks it and stops the hum, the hum and light stay on mid-channel and stop after, the reviver kneels locked in place; stomp: pinned flag, stomper flag, ~6s death at ×2.5; loot window: items, take, smart loot).
