@@ -224,7 +224,7 @@ func _find_class(nd: Node, cname: String) -> Node:
 	return null
 
 func _wait_home() -> void:
-	await until(func(): var c := cur(); return c != null and c.get_script() and c.get_script().resource_path.ends_with("home/home.gd") and c.get("player") != null, 120.0, "the farm")
+	await until(func(): var c := cur(); return c != null and c.get_script() and c.get_script().resource_path.ends_with("home/home.gd") and c.get("player") != null, 600.0, "the farm")
 	await wait(3.0)
 
 # ------------------------------------------------------------------ 2. the farm
@@ -249,6 +249,7 @@ func _home() -> void:
 	await shot("farm_walk")
 	Input.action_release("right"); Input.action_release("down")
 	await wait(0.5)
+	await _farm_start(h)
 	if h.kins.is_empty():
 		note_bad("no Boki on the farm")
 	else:
@@ -292,7 +293,7 @@ func _home() -> void:
 		await shot("farm_training_grounds")
 	# the training area (a match)
 	h._start_training()
-	await _wait_match(60.0)
+	await _wait_match(600.0)
 	god = true
 	await mwait(2.0)
 	await shot("training_area")
@@ -302,6 +303,73 @@ func _home() -> void:
 	god = false
 	Game.goto("home")
 	await _wait_home()
+
+## A new farm-start island has no house, crop plots or pot until you put them down. Build mode (B):
+## take each from the Buildings tab, find a spot where its ghost tints green, place it; then plant a
+## seed in the first plot and water it. (An old-style farm already has its plots: nothing to place.)
+func _farm_start(h) -> void:
+	if not h.fs:
+		print("TOUR classic farm: %d plots already out" % h.plots.size())
+		return
+	var hb: HomeBuild = h.hb
+	if hb == null:
+		note_bad("no build mode on the farm"); return
+	print("TOUR farm start: %d plots, house placed %s, %d gems" % [h.plots.size(), h.spots.get("house", Vector3(-999, 0, 0)).x > 0.0, int(Save.d["gems"])])
+	if not hb.active: hb.toggle()
+	await wait(1.0)
+	await shot("farm_build_mode")
+	var near: Vector3 = h.ppos
+	for id in ["house", "crop_patch", "cook_pot"]:
+		if HomeLayout.max_of(id, h._d()) > 0 and HomeLayout.count_of(id, h._d()) >= HomeLayout.max_of(id, h._d()):
+			continue      # (already there)
+		if id == "crop_patch" and not h.plots.is_empty():
+			continue
+		hb.take(id)
+		if hb.held.is_empty():
+			note_bad("build mode wouldn't hand over the %s (%d gems)" % [id, int(Save.d["gems"])]); continue
+		var cs := _build_spot(hb, near + {"house": Vector3(0, 0, -7), "crop_patch": Vector3(6, 0, -3), "cook_pot": Vector3(-4, 0, -3)}[id])
+		if cs.is_empty():
+			note_bad("no room for the %s near %s" % [id, str(near)]); hb._drop_held(); continue
+		hb.cells = cs; hb._check_cells(); hb._draw_cells()
+		await wait(0.6)
+		if id != "cook_pot": await shot("farm_place_%s" % id)
+		if not hb.place_held():
+			note_bad("the %s wouldn't go down (%s)" % [id, hb.why])
+		await wait(0.6)
+	if hb.active: hb.toggle()
+	await wait(0.8)
+	print("TOUR placed: %d plots, house at %s, %d gems left" % [h.plots.size(), str(h.spots.get("house")), int(Save.d["gems"])])
+	if h.plots.is_empty():
+		note_bad("still no crop plots after placing a patch"); return
+	# plant the first seed and water it, through the plot's own panel
+	var pn: Node3D = h.plots[0]
+	h.ppos = pn.position + Vector3(1.0, 0, 1.0); h.player.position = h.ppos; h.cam.snap(h.ppos)
+	await wait(0.8)
+	if not (Save.d["seeds"] as Dictionary).values().any(func(v): return int(v) > 0):
+		Save.d["seeds"]["tidebloom"] = 1      # (the tour may have spent them: give it one to show planting)
+	h._open_plot("plots", 0)
+	await wait(0.8)
+	await shot("farm_plant_panel")
+	if not press("Plant"): return
+	await wait(0.6)
+	h._open_plot("plots", 0)      # an unwatered seedling: this waters it
+	await wait(0.8)
+	var d: Dictionary = Save.d["plots"][0]
+	print("TOUR plot 0: crop=%s watered=%s" % [d["crop"], float(d.get("wt", 0.0)) > 0.0])
+	if String(d["crop"]) == "" or float(d.get("wt", 0.0)) <= 0.0: note_bad("the first plot isn't planted and watered (%s)" % str(d))
+	await shot("farm_planted")
+	if String(h.panel_open) != "": h._close_panel()
+
+## The nearest cells to p where the held building fits ([] if none).
+func _build_spot(hb: HomeBuild, p: Vector3) -> Array:
+	var sz := HomeLayout.size_of(String(hb.held["id"]), int(hb.held["r"]))
+	for rad in range(0, 24):
+		for k in 48:
+			var a := float(k) / 48.0 * TAU
+			var x := int(round(p.x + cos(a) * rad - sz.x * 0.5)); var z := int(round(p.z + sin(a) * rad - sz.y * 0.5))
+			var cs := HomeLayout.cells_of([x, z, x + sz.x - 1, z + sz.y - 1])
+			if hb.fits(hb.held, cs): return cs
+	return []
 
 # ------------------------------------------------------------------ 3. the expedition
 func _wait_match(cap: float) -> bool:
@@ -324,7 +392,7 @@ func _expedition() -> void:
 	for i in 3:
 		await wait(1.6)
 		await shot("loading_%d" % (i + 1))
-	if not await _wait_match(120.0):
+	if not await _wait_match(600.0):
 		return
 	var m = _match()
 	god = true
@@ -637,7 +705,7 @@ func _extract(m) -> void:
 		await until(func(): return not is_instance_valid(m) or P.extracted or m.over, 30.0, "extracting in the lift")
 	await wait(2.0)
 	await shot("extracted")
-	await until(func(): var c := cur(); return c != null and c.get_script() and c.get_script().resource_path.ends_with("results.gd"), 60.0, "the results")
+	await until(func(): var c := cur(); return c != null and c.get_script() and c.get_script().resource_path.ends_with("results.gd"), 300.0, "the results")
 	god = false
 	await wait(2.0)
 	await shot("results")
