@@ -164,6 +164,34 @@ func impact(at: Vector3, dir: Vector3, col: Color, power := 1.0, crit := false, 
 	if crit:
 		ring(at + Vector3(0, -0.6, 0), 1.1 + 0.25 * power, Color(1.0, 0.85, 0.3, 0.85), 0.2)
 
+## A straight bolt of light from a to b that flares and fades (a rail shot, a beam ability): a soft
+## camera-facing ribbon (shaders/light_shaft.gdshader) with a white-hot core line inside it.
+var _beam_sh: Shader
+func beam(a: Vector3, b: Vector3, col: Color, width := 0.45, dur := 0.28) -> void:
+	if _beam_sh == null:
+		_beam_sh = load("res://shaders/light_shaft.gdshader")
+	var ln := a.distance_to(b)
+	if ln < 0.2:
+		return
+	var axis := (b - a) / ln
+	for k in 2:
+		var mi := MeshInstance3D.new()
+		var qm := QuadMesh.new(); qm.size = Vector2(1, 1)
+		mi.mesh = qm
+		var m := ShaderMaterial.new(); m.shader = _beam_sh
+		m.set_shader_parameter("color", col if k == 0 else col.lerp(Color.WHITE, 0.75))
+		m.set_shader_parameter("intensity", 2.2 if k == 0 else 3.0)
+		mi.material_override = m
+		var w := width * (1.0 if k == 0 else 0.3)
+		var x_axis := axis.cross(Vector3.UP if absf(axis.y) < 0.95 else Vector3.RIGHT).normalized() * w
+		var z_axis := x_axis.cross(axis).normalized()
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		add_child(mi)
+		mi.global_transform = Transform3D(Basis(x_axis, axis * ln, z_axis), (a + b) * 0.5)
+		var tw := mi.create_tween()
+		tw.tween_method(func(v: float) -> void: m.set_shader_parameter("intensity", v), 2.2 if k == 0 else 3.0, 0.0, dur).set_ease(Tween.EASE_IN)
+		tw.tween_callback(mi.queue_free)
+
 ## Readability: every particle burst is thinned out, so effects mark what happened without
 ## burying the fight under confetti.
 const PARTICLES := 0.6

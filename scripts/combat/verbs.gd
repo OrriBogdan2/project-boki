@@ -282,6 +282,8 @@ func shot_check(s: Dictionary, p: Vector3) -> String:
 			return "bounce"
 		_hit_wall(w, float(s["dmg"]), s["col"])
 		m.fx.burst(p, w["col"], 6, 3.0, 0.25, 4.0, 0.8)
+		m.fx.flash(p, Color(w["col"]).lerp(Color.WHITE, 0.4), 0.35, 0.07)
+		m.sfx("ab_shield_hit", p, -8.0)
 		return "end"
 	for mr in mirrors:
 		if int(mr["team"]) == int(s["team"]) or s["by"] == mr["ent"]:
@@ -305,6 +307,10 @@ func shot_check(s: Dictionary, p: Vector3) -> String:
 				m.fx.word(att.pos + Vector3(0, 2.0, 0), "PARRIED", mr["col"], true)
 			m.fx.flash(p, mr["col"], 0.5, 0.08)
 			m.sfx("shield", p, 0.0, 1.8)
+			m.sfx("ab_parry", p, 0.0)
+			m.fx.flash(p, Color(mr["col"]).lerp(Color.WHITE, 0.5), 1.2, 0.16)
+			m.fx.spark(p, Vector3.UP, Color(mr["col"]).lerp(Color.WHITE, 0.4), 18, 10.0, 110.0, 0.3, 10.0, 1.2)
+			if ent == m.player or att == m.player: m.freeze_frame(0.07)     # (Feel tier 4: a parry is a payoff)
 			return "end"
 		var att2 = s["by"]
 		var back: Vector2 = -(s["vel"] as Vector2)
@@ -315,6 +321,8 @@ func shot_check(s: Dictionary, p: Vector3) -> String:
 		m.fx.flash(p, mr["col"], 0.4, 0.06)
 		m.fx.burst(p, mr["col"], 8, 4.0, 0.3, 2.0)
 		m.sfx("shield", p, -4.0, 1.9)
+		m.sfx("ab_parry", p, -5.0, 1.25)
+		m.fx.spark(p, Vector3(back.x, 0.3, back.y), Color(mr["col"]).lerp(Color.WHITE, 0.4), 10, 9.0, 30.0, 0.2, 4.0, 1.0)
 		if ent == m.player and m.hud: m.hud.toast_small("REFLECTED", mr["col"])
 		return "bounce"
 	return ""
@@ -401,6 +409,8 @@ func tick(dt: float) -> void:
 			m.fx.bolt(a.pos + Vector3(0, 1.0, 0), b.pos + Vector3(0, 1.0, 0), t["col"])
 			m.fx.word(b.pos + Vector3(0, 2.0, 0), "SNAP", t["col"], true)
 			m.sfx("zap", b.pos, 0.0, 0.8)
+			m.sfx("ab_tether", b.pos, 0.0, 0.7)
+			m.fx.flash(b.pos + Vector3(0, 1.0, 0), Color(t["col"]).lerp(Color.WHITE, 0.4), 1.0, 0.14)
 			if t["yank"]:
 				yank(b, a.pos + Vector3(b.dir_to(a).x, 0, b.dir_to(a).y) * -(float(t["max"]) * 0.5), 0.25)
 			_drop_tether(t)

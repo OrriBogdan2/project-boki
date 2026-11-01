@@ -293,6 +293,10 @@ static func _one(e: Dictionary, caster: Node, ctx: Dictionary) -> void:
 				extra["fx_ctx"] = ctx
 				m.spawn_shot(caster, start, dir * spd, float(e.get("dmg", 0.0)) * pw, rng_e / spd, float(e.get("size", 0.15)), col, extra)
 			m.sfx(String(e.get("sfx", "throw")), caster.pos, -3.0, float(e.get("pitch", 1.0)))
+			if caster is Hunter and String(e.get("from", "")) != "here":
+				# (Juice: a fast piercing round reads as a rail of light; a returning blade whirrs)
+				var dl := "rail" if spd >= 60.0 and e.get("pierce", false) else ("disc" if e.get("return", false) else "projectile")
+				Juice.ab_cast(m, caster, dl, caster.pos, d, col, {"range": rng_e})
 		"area":
 			var at := _where(e, caster, ctx)
 			var r := float(e.get("radius", 2.0))
@@ -300,6 +304,7 @@ static func _one(e: Dictionary, caster: Node, ctx: Dictionary) -> void:
 			m.fx.burst(at + Vector3(0, 0.4, 0), col, int(clampf(r * 10.0, 8.0, 30.0)), 5.0, 0.45, 6.0, 1.1)
 			m.sfx("boom", at, -3.0 if r > 2.0 else -7.0, 1.3 - minf(0.5, r * 0.1))
 			if r > 2.0: m.shake(0.3, at)
+			if not caster is Kin: Juice.ab_land(m, caster, at, r, col)
 			for f in m.foes_of(caster.team):
 				if _hits(f, at, r):
 					var rel := Vector2(f.pos.x - at.x, f.pos.z - at.z)
@@ -320,6 +325,7 @@ static func _one(e: Dictionary, caster: Node, ctx: Dictionary) -> void:
 			var arc := float(e.get("arc", 0.55))
 			m.fx.cone(caster.pos, d, r, col)
 			m.sfx("whoosh", caster.pos, -4.0, 0.9)
+			if caster is Hunter: Juice.ab_cast(m, caster, "cone", caster.pos, d, col, {"radius": r})
 			for f in m.foes_of(caster.team):
 				var to := Vector2(f.pos.x - caster.pos.x, f.pos.z - caster.pos.z)
 				if to.length() < r + f.r and (to.length() < 0.6 or to.normalized().dot(d) > arc) and absf(f.pos.y - caster.pos.y) < 2.2:
@@ -381,6 +387,7 @@ static func _one(e: Dictionary, caster: Node, ctx: Dictionary) -> void:
 			for e2 in e.get("on_land", []):
 				lr = maxf(lr, float(e2.get("radius", 0.0)))
 			var tele: Node3D = m.fx.telegraph_circle(to, lr, Color(col if e.has("color") else Color("ffb070"), 0.9))
+			if caster is Hunter: Juice.ab_cast(m, caster, "leap", caster.pos, _aim_dir(caster, ctx), col)
 			var lt := float(e.get("time", 0.5))
 			var tw := tele.create_tween()
 			tw.tween_method(func(k: float): if is_instance_valid(tele): m.fx.telegraph_progress(tele, k), 0.0, 1.0, lt)
@@ -424,6 +431,7 @@ static func _one(e: Dictionary, caster: Node, ctx: Dictionary) -> void:
 					(t as Hunter).roll_t = 0.0
 				m.fx.burst(t.pos + Vector3(0, 0.3, 0), col, 18, 5.0, 0.5, -2.0)
 				m.sfx("whoosh", t.pos, -2.0, 1.2)
+				if t is Hunter: Juice.ab_cast(m, t, "launch", t.pos, Vector2.ZERO, col)
 		"heal":
 			for t in _targets(e, caster):
 				_heal(t, float(e.get("amount", 20.0)) * _weak_k(caster))
@@ -530,10 +538,12 @@ static func _one(e: Dictionary, caster: Node, ctx: Dictionary) -> void:
 			var g: float = m.world.ground_at(at.x, at.z)
 			at.y = g if g > World.VOID + 1.0 else anchor.pos.y
 			var wl: Dictionary = m.verbs.add_wall(anchor, at, d, e, pw)
+			if caster is Hunter: Juice.ab_cast(m, caster, "wall", at, d, col)
 			wl["team"] = int(caster.team)
 		"reflect":
 			for t in _targets(e, caster):
 				m.verbs.add_mirror(t, e)
+			if caster is Hunter: Juice.ab_cast(m, caster, "reflect", caster.pos, _aim_dir(caster, ctx), col, {"radius": float(e.get("radius", 1.9))})
 		"behind":
 			# appear behind whoever the shot hit, facing them, with crits ready
 			var tg = ctx.get("target", null)
@@ -547,12 +557,14 @@ static func _one(e: Dictionary, caster: Node, ctx: Dictionary) -> void:
 					who.vel = Vector3.ZERO
 					who.face = atan2(back.x, back.y)
 					if who is Hunter: (who as Hunter).crit_t = maxf((who as Hunter).crit_t, float(e.get("crit", 1.5)))
+					if who is Hunter: Juice.ab_cast(m, who, "blink", who.pos, back, col)
 					m.fx.burst(who.pos + Vector3(0, 0.9, 0), col, 14, 3.0, 0.3)
 					m.sfx("cloak", who.pos, -2.0, 1.6)
 		"tether":
 			var b = ctx.get("target", null)
 			if b is Ent and is_instance_valid(b) and not b.dead:
 				m.verbs.add_tether(owner_of(caster) if String(e.get("who", "self")) == "owner" else caster, b, e, pw)
+				if caster is Hunter: Juice.ab_cast(m, caster, "tether", b.pos, Vector2.ZERO, col)
 		"trap":
 			var at := _where(e, caster, ctx, "aim")
 			var nn := int(e.get("count", 1))
@@ -566,6 +578,7 @@ static func _one(e: Dictionary, caster: Node, ctx: Dictionary) -> void:
 					if m.world.is_void(q.x, q.z) or m.world.is_block(q.x, q.z): continue
 					q.y = m.world.ground_at(q.x, q.z)
 				m.verbs.add_trap(caster, q, e, {"slot": ctx.get("slot", ""), "ability": ctx.get("ability", ""), "power": pw})
+				if caster is Hunter and i == 0: Juice.ab_cast(m, caster, "trap", q, d, col, {"radius": float(e.get("radius", 1.1))})
 		"bridge":
 			var d := _aim_dir(caster, ctx)
 			var from: Vector3 = caster.pos

@@ -1796,6 +1796,7 @@ func sim(dt: float) -> void:
 		if not ud.charge.is_empty() and runner.is_ready("utility") and abil_charge.is_empty():
 			abil_charge = {"t": 0.0}       # a charge-up: it fires when you let go
 			m.sfx("rail", pos, -14.0, 0.6)
+			m.sfx("ab_charge", pos, -6.0 if is_local() else -13.0)
 		elif ud.charge.is_empty() and runner.use("utility", {"level": ability_level("sec")}):
 			used["utility"] = int(used.get("utility", 0)) + 1
 			_ab_feedback("sec", "cast")
