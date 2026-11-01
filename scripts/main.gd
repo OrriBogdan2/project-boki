@@ -2653,6 +2653,9 @@ func _boss_check() -> void:
 	B.ai["boss_hunt"] = true
 	B.teleport(L2["dial"] + Vector3(L2["out"].x, 0, L2["out"].y) * 4.0)
 	var tb := m2.time
+	# a dial test, not a loot test: no chests or ground loot to wander off to first
+	for c in m2.chests: c["open"] = true
+	m2.pickups.clear()
 	while L2["state"] == "sealed" and m2.time - tb < 150.0:
 		B.hp = B.max_hp
 		for g in L2["guards"]: if is_instance_valid(g): g.dead = true
