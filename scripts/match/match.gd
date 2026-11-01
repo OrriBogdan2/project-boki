@@ -1286,7 +1286,7 @@ func _spawn_breakables() -> void:
 	var wr := RandomNumberGenerator.new(); wr.seed = seed_val * 31 + 7
 	var keys: Array = Data.weapon_ids()
 	for i in world.weapon_spots.size():
-		var wk0 := String(keys[wr.randi() % keys.size()])
+		var wk0 := ground_weapon_id(String(keys[wr.randi() % keys.size()]), i)
 		var wr0 := Data.roll_rarity(wr, 1 if tier >= 2 else 0)
 		var wsp: Vector3 = world.weapon_spots[i]
 		spawn_weapon(wk0, wr0, wsp, "ws%d" % i, false, -1, Loot.weapon(wk0, wr0, Loot.roll_element(wr, world.biome_at(wsp.x, wsp.z))))
@@ -1343,6 +1343,32 @@ func spawn_val(item: Dictionary, at: Vector3) -> void:
 	wpicks.append({"id": "v%d" % wdrop_n, "pos": at, "val": String(item.get("id", "")), "item": item, "rar": int(vd.get("rar", 1)), "node": n, "wid": "", "ammo": -1})
 
 ## A weapon found at a spot: the region's element sometimes, and now and then a named unique.
+## The weapon in a drop someone earned (a chest they opened, a crate they broke, a guard or treasure
+## monster they felled): with an archetype, three times in four one from its own family, so a Thief
+## isn't left looking at rifles it can't hold; otherwise (and the rest of the time) `fallback`, or any.
+## (Boss drops are always the killer's family: Lairs._victory.)
+func earned_weapon_id(by, keys: Array, fallback := "") -> String:
+	var h = by
+	if h != null and not (h is Hunter) and is_instance_valid(h) and "owner_h" in h:
+		h = h.owner_h
+	if h is Hunter and is_instance_valid(h) and String((h as Hunter).arch) != "":
+		var fam: Array = Arch.weapons(String((h as Hunter).arch))
+		if not fam.is_empty() and randf() < 0.75:
+			return String(fam[randi() % fam.size()])
+	return fallback if fallback != "" else String(keys[randi() % keys.size()])
+
+## The weapons lying in the open and beside caches (rolled the same for everyone online): offline,
+## with an archetype, three in five are swapped for one of your own family (picked from `salt`, so
+## the map's other rolls don't move), so the weapons on the ground aren't mostly ones you can't hold.
+func ground_weapon_id(wk: String, salt: int) -> String:
+	if net_on or player == null or String(player.arch) == "":
+		return wk
+	var fam: Array = Arch.weapons(String(player.arch))
+	if fam.is_empty() or fam.has(wk):
+		return wk
+	var hv := absi(hash(salt * 7919 + seed_val))
+	return String(fam[(hv / 7) % fam.size()]) if hv % 5 < 3 else wk
+
 func found_weapon(at: Vector3, wid: String, rar: int, unique_chance := 0.0) -> Dictionary:
 	if unique_chance > 0.0 and rng.randf() < unique_chance:
 		return Loot.weapon("", 0, "", Loot.roll_unique(rng))
@@ -1663,7 +1689,7 @@ func _break(b: Dictionary, by: Ent, from_net := false) -> void:
 				drop("armor", at + Vector3(0, 0.5, 0), 25)
 			if not from_net and randf() < 0.16:
 				var keys: Array = Data.weapon_ids()
-				spawn_weapon(String(keys[randi() % keys.size()]), Data.roll_rarity(rng), at)
+				spawn_weapon(earned_weapon_id(by, keys), Data.roll_rarity(rng), at)
 		"barrel":
 			_barrel_boom(at, by, from_net)
 
@@ -2453,7 +2479,7 @@ func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
 		if mb.mkind == "warden":
 			# the Warden guards the best things: a weapon (sometimes a named one), treasure, maybe a Soul Ember
 			var wkeys: Array = Data.weapon_ids()
-			var wit := found_weapon(mb.pos, String(wkeys[randi() % wkeys.size()]), Data.roll_rarity(rng, 2), 0.2)
+			var wit := found_weapon(mb.pos, earned_weapon_id(credit, wkeys), Data.roll_rarity(rng, 2), 0.2)
 			spawn_weapon(String(wit["wid"]), int(wit["rar"]), mb.pos + Vector3(-0.8, 0, 0.4), "", true, -1, wit)
 			spawn_val(Loot.valuable(Loot.roll_valuable(rng, 2)), mb.pos + Vector3(0, 0, -0.9))
 			if rng.randf() < 0.5:
@@ -2462,7 +2488,7 @@ func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
 			spawn_val(Loot.valuable(Loot.roll_valuable(rng, 0 if tier == 0 else 1)), mb.pos + Vector3(0, 0, -0.8))
 		if mb.mkind == "glimmer":
 			var keys: Array = Data.weapon_ids()
-			var git := found_weapon(mb.pos, String(keys[randi() % keys.size()]), Data.roll_rarity(rng, 1))
+			var git := found_weapon(mb.pos, earned_weapon_id(credit, keys), Data.roll_rarity(rng, 1))
 			spawn_weapon(String(git["wid"]), int(git["rar"]), mb.pos, "", true, -1, git)
 			if credit is Hunter: add_feed("%s caught the Glimmerkin's treasure" % credit.pname)
 		if rng.randf() < (0.35 if mb.mkind == "brute" else 0.12):
@@ -4685,7 +4711,7 @@ func _open_chest(h: Hunter, c: Dictionary, from_net := false) -> void:
 	if not from_net and randf() < [0.25, 0.6, 1.0][t]:
 		var keys: Array = Data.weapon_ids()
 		var a := randf() * TAU
-		var wk: String = biomes.weapon_at(c["pos"], keys) if biomes else String(keys[randi() % keys.size()])
+		var wk: String = earned_weapon_id(h, keys, biomes.weapon_at(c["pos"], keys) if biomes else "")
 		var wrc := mini(Data.RARITY.size() - 1, Data.roll_rarity(rng, maxi(0, t - 1) + (biomes.rarity_bonus_at(c["pos"]) if biomes else 0)))
 		var wit := found_weapon(c["pos"], wk, wrc, [0.0, 0.02, 0.08][t])
 		spawn_weapon(String(wit["wid"]), int(wit["rar"]), c["pos"] + Vector3(cos(a) * 1.1, 0, sin(a) * 1.1), "", true, -1, wit)

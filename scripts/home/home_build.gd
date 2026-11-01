@@ -1013,6 +1013,11 @@ func _brush_ok(c: Vector2i, mode: String) -> bool:
 
 # ------------------------------------------------------------------ every frame
 func tick(d: float) -> void:
+	if not make_marks.is_empty() and h.panel_open != "Make it home":
+		# "Make it home" closed some other way than Done (its X, Esc): its spot marks go with it
+		for mk in make_marks:
+			if is_instance_valid(mk): mk.queue_free()
+		make_marks.clear()
 	if mesh_t >= 0.0:
 		mesh_t -= d
 		if mesh_t < 0.0:

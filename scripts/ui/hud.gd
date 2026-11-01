@@ -91,6 +91,7 @@ func _process(delta: float) -> void:
 	for t in toasts.duplicate():
 		t["t"] += delta
 		if t["t"] > 1.8: toasts.erase(t)
+	_clear_under_toasts(delta)
 	if tips.size() > 0:
 		tips[0]["t"] += delta
 		if tips[0]["t"] > 7.0: tips.pop_front()
@@ -113,6 +114,31 @@ func flash(col: Color, strength := 0.35) -> void:
 
 func hurt_flash(d: float) -> void:
 	hurt_t = clampf(0.25 + d / 60.0, 0.25, 0.6)
+
+## The lairs' name boards in the world (Label3D over each gate) fade back while a toast (the region
+## banner as you walk into a region, most often) prints over them, so two lines of text never
+## overlap on screen; they come back as it goes. Drawn where _draw puts the toasts.
+func _clear_under_toasts(delta: float) -> void:
+	if m == null or m.lairs == null or m.cam == null:
+		return
+	var sz := c.size
+	var rects: Array = []
+	for i in toasts.size():
+		var t: Dictionary = toasts[i]
+		var y := sz.y * 0.3 + i * 26 - float(t["t"]) * 10.0
+		var w := big.get_string_size(String(t["text"]), HORIZONTAL_ALIGNMENT_LEFT, -1, 20).x
+		rects.append(Rect2(sz.x * 0.5 - w * 0.5 - 14.0, y - 26.0, w + 28.0, 38.0))
+	for L in m.lairs.list:
+		var lbl = (L.get("nodes", {}) as Dictionary).get("label")
+		if not (lbl is Label3D) or not is_instance_valid(lbl):
+			continue
+		var want := 0.0
+		if not rects.is_empty() and (lbl as Label3D).is_visible_in_tree() and not m.cam.is_position_behind((lbl as Label3D).global_position):
+			var sp: Vector2 = m.cam.unproject_position((lbl as Label3D).global_position)
+			var lr := Rect2(sp - Vector2(180, 46), Vector2(360, 92))
+			for r in rects:
+				if (r as Rect2).intersects(lr): want = 0.9
+		(lbl as Label3D).transparency = move_toward((lbl as Label3D).transparency, want, delta * 6.0)
 
 func toast(text: String, col: Color) -> void:
 	toasts.append({"text": text, "col": col, "t": 0.0})
