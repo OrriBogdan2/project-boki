@@ -323,7 +323,7 @@ func _ready_rest() -> void:
 		keep_clear.append([rc[0] - 1, rc[1] - 1, rc[2] + 1, rc[3] + 2])
 	keep_clear.append([BURROW_RECT[0] - 1, BURROW_RECT[1] - 1, BURROW_RECT[2] + 1, BURROW_RECT[3] + 2])
 	for k in Data.ISLES:
-		var rc: Array = Data.ISLES[k]["bridge"]
+		var rc: Array = HomeLayout.isle_bridge(world, k)["rect"]
 		keep_clear.append([rc[0] - 2, rc[1] - 2, rc[2] + 2, rc[3] + 2])
 	for rc in keep_clear:
 		for z in range(rc[1], rc[3] + 1):
@@ -332,7 +332,7 @@ func _ready_rest() -> void:
 					world.kind[world.idx(x, z)] = World.T_GROUND
 	# bridges: work out which tiles they cover before any are opened
 	for k in Data.ISLES:
-		bridges[k] = {"tiles": world.bridge_tiles(Data.ISLES[k]["bridge"]), "built": _has_br(k)}
+		bridges[k] = {"tiles": world.bridge_tiles(HomeLayout.isle_bridge(world, k)["rect"]), "built": _has_br(k)}
 		if bridges[k]["built"]:
 			world.open_bridge(bridges[k]["tiles"])
 	training.prepare()
@@ -730,7 +730,8 @@ func _build_bridges() -> void:
 		var br: Dictionary = bridges[k]
 		var node := Node3D.new(); add_child(node)
 		br["node"] = node
-		var sg := Models.signpost([isd["name"]]); sg.position = Vector3(isd["sign"].x, 0, isd["sign"].y); add_child(sg)
+		var sgp: Vector2 = HomeLayout.isle_bridge(world, k)["sign"]
+		var sg := Models.signpost([isd["name"]]); sg.position = Vector3(sgp.x, 0, sgp.y); add_child(sg)
 		br["sign"] = sg
 		if br["built"]:
 			_lay_planks(k, false)
@@ -748,7 +749,7 @@ func _build_bridges() -> void:
 		br["label"] = lbl
 
 func _bridge_axis(k: String) -> Dictionary:
-	var rc: Array = Data.ISLES[k]["bridge"]
+	var rc: Array = HomeLayout.isle_bridge(world, k)["rect"]
 	var horiz: bool = rc[2] - rc[0] > rc[3] - rc[1]
 	return {"horiz": horiz, "width": (rc[3] - rc[1] + 1.0) if horiz else (rc[2] - rc[0] + 1.0),
 		"mid": (rc[1] + rc[3] + 1) * 0.5 if horiz else (rc[0] + rc[2] + 1) * 0.5}
@@ -1996,7 +1997,7 @@ func _find_interact() -> void:
 	for k in bridges:
 		if bridges[k]["built"]:
 			continue
-		var sg: Vector2 = Data.ISLES[k]["sign"]
+		var sg: Vector2 = HomeLayout.isle_bridge(world, k)["sign"]
 		var d := p2.distance_to(sg)
 		if d < 2.4 and d < bd + 0.4: bd = d; best = {"kind": "bridge", "isle": k}
 	for k in kins:

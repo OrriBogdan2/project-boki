@@ -262,7 +262,7 @@ func _reserve() -> void:
 		rs.call(41, 40, 43, 41)      # the ferry
 		rs.call(int(HomeLayout.LANDING.x) - 2, int(HomeLayout.LANDING.z) - 2, int(HomeLayout.LANDING.x) + 1, int(HomeLayout.LANDING.z) + 1)
 		for k in Data.ISLES:
-			var sg: Vector2 = Data.ISLES[k]["sign"]
+			var sg: Vector2 = HomeLayout.isle_bridge(h.world, k)["sign"]
 			rs.call(int(sg.x) - 1, int(sg.y) - 1, int(sg.x) + 1, int(sg.y) + 1)
 		for t in h.training_reserved():
 			rs.call(t[0], t[1], t[2], t[3])
@@ -282,7 +282,7 @@ func _reserve() -> void:
 	var oc: Vector2 = Data.ISLES["orchard"]["c"]
 	rs.call(int(oc.x) - 4, int(oc.y) + 2, int(oc.x) + 5, int(oc.y) + 4)    # the greenhouse plots
 	for k in Data.ISLES:
-		var sg: Vector2 = Data.ISLES[k]["sign"]
+		var sg: Vector2 = HomeLayout.isle_bridge(h.world, k)["sign"]
 		rs.call(int(sg.x) - 1, int(sg.y) - 1, int(sg.x) + 1, int(sg.y) + 1)
 	for t in h.training_reserved():
 		rs.call(t[0], t[1], t[2], t[3])
@@ -771,7 +771,7 @@ func _targets(skip_b := "") -> Array:
 	if h.visit.is_empty():
 		for f in Econ.feeders(): out.append(Vector3(float(f.get("x", 0.0)), 0, float(f.get("z", 0.0))))
 	for k in Data.ISLES:
-		var sg: Vector2 = Data.ISLES[k]["sign"]
+		var sg: Vector2 = HomeLayout.isle_bridge(h.world, k)["sign"]
 		out.append(Vector3(sg.x, 0, sg.y))
 	for t in h.training_targets(): out.append(t)
 	return out.filter(func(t): return (t as Vector3).x > -100.0)     # (farm-start fixtures not put down yet)

@@ -341,6 +341,132 @@ static func make_world(world: World, level: int, seed := 0, sk := 0.0) -> void:
 	defs.append_array(HomeTraining.defs())      # the Training Grounds, which every home has
 	world.make_islands(SEED, W, H, defs)
 	grow_main(world, level, seed, sk)
+	var spans := {}
+	# a farm-start island's ponds and cliffs (wild_fs) can't take a bridge's foot or its sign
+	var bad := {}
+	if sk > 0.0:
+		var wt := wild_fs(world, seed, sk, {})
+		for i in wt:
+			if String(wt[i]) in ["water", "cliff"]: bad[i] = true
+	for k in Data.ISLES:
+		spans[k] = bridge_span(world, k, bad)
+	world.set_meta("isle_bridges", spans)
+
+## (feelfix) Where the bridge to isle k goes on this world: {"rect": [x0, z0, x1, z1], "sign":
+## Vector2}. The main island's outline differs per seed, so the span is found from the real edges:
+## along the isle's usual axis (Data.ISLES[k]["bridge"]), the two-tile-wide strip with the shortest
+## run of open sky that starts on the isle's edge and ends on the main island's edge, both ends at
+## ground level, nothing else in between. The sign (where you build it) stands on the main island
+## beside the bridge's foot. Falls back to the fixed rect if no strip fits.
+static func bridge_span(world: World, k: String, bad := {}) -> Dictionary:
+	var rc: Array = Data.ISLES[k]["bridge"]
+	var fallback := {"rect": rc, "sign": Data.ISLES[k]["sign"]}
+	var ii := -1
+	for i in world.islands.size():
+		if String(world.islands[i]["id"]) == k: ii = i
+	if ii < 0:
+		return fallback
+	var horiz: bool = rc[2] - rc[0] > rc[3] - rc[1]
+	var ic: Vector2 = Data.ISLES[k]["c"]
+	var mid: float = (rc[1] + rc[3]) * 0.5 if horiz else (rc[0] + rc[2]) * 0.5
+	# which way the main island lies from the isle, along the bridge
+	var dir: float = signf(((rc[0] + rc[2]) * 0.5 - ic.x) if horiz else ((rc[1] + rc[3]) * 0.5 - ic.y))
+	if dir == 0.0: dir = 1.0
+	var ic_a := int(floor(ic.x if horiz else ic.y))
+	var limit := world.w if horiz else world.h
+	var at := func(a: int, b: int) -> int:     # tile index at (along a, across b)
+		var x := a if horiz else b; var z := b if horiz else a
+		return world.idx(x, z) if world.inb(x, z) else -1
+	var level_ok := func(a: int, b: int) -> bool:
+		var x := (a if horiz else b); var z := (b if horiz else a)
+		if not world.inb(x, z) or bad.has(world.idx(x, z)): return false
+		return absf(world.ground_at(x + 0.5, z + 0.5)) < 0.3
+	var cands: Array = []
+	for off in range(-8, 9):
+		var b0 := int(floor(mid)) + off
+		var a_start := -1; var a_end := -1; var good := true
+		for b in [b0, b0 + 1]:
+			# from the isle's centre walk toward the main island: isle ground, then sky, then main ground
+			var a := ic_a; var last_isle := -1; var first_main := -1
+			while a >= 0 and a < limit:
+				var i: int = at.call(a, b)
+				if i < 0: break
+				if world.island[i] == ii and world.kind[i] != World.T_VOID:
+					last_isle = a
+				elif world.kind[i] != World.T_VOID:
+					if world.island[i] == 0 and last_isle >= 0: first_main = a
+					break
+				elif last_isle >= 0 and absf(a - last_isle) > 24:
+					break
+				a += int(dir)
+			if last_isle < 0 or first_main < 0 or not level_ok.call(last_isle, b) or not level_ok.call(first_main, b) or not level_ok.call(first_main + int(dir), b):
+				good = false; break
+			var s0 := last_isle + int(dir); var s1 := first_main - int(dir)
+			a_start = s0 if a_start < 0 else (maxi(a_start, s0) if dir > 0 else mini(a_start, s0))
+			a_end = s1 if a_end < 0 else (mini(a_end, s1) if dir > 0 else maxi(a_end, s1))
+		if not good: continue
+		# both columns must be open sky over the whole span (the shorter column's ends are trimmed
+		# by the longer one's land, so check the union run is all sky or the two islands)
+		var lo := mini(a_start, a_end); var hi := maxi(a_start, a_end)
+		if (hi - lo) < 0 or (dir > 0 and a_start > a_end) or (dir < 0 and a_start < a_end):
+			continue
+		var clean := true
+		for b in [b0, b0 + 1]:
+			for a in range(lo, hi + 1):
+				var i: int = at.call(a, b)
+				if i < 0 or (world.kind[i] != World.T_VOID and world.island[i] != 0 and world.island[i] != ii): clean = false
+		if not clean: continue
+		cands.append({"b0": b0, "lo": lo, "hi": hi, "score": float(hi - lo) + absf(off) * 0.35})
+	cands.sort_custom(func(p, q): return float(p["score"]) < float(q["score"]))
+	for cd in cands:
+		# span the gap from isle edge to main edge (the land tiles at either end are left as they are)
+		var lo2: int = cd["lo"]; var hi2: int = cd["hi"]
+		var b0b: int = cd["b0"]
+		# extend to cover any sky the shorter column still has next to the land
+		while true:
+			var grow := false
+			for b in [b0b, b0b + 1]:
+				var i: int = at.call(lo2 - 1, b)
+				if i >= 0 and world.kind[i] == World.T_VOID: grow = true
+			if not grow: break
+			lo2 -= 1
+		while true:
+			var grow := false
+			for b in [b0b, b0b + 1]:
+				var i: int = at.call(hi2 + 1, b)
+				if i >= 0 and world.kind[i] == World.T_VOID: grow = true
+			if not grow: break
+			hi2 += 1
+		var foot := (hi2 + 1) if dir > 0 else (lo2 - 1)
+		var head := (lo2 - 1) if dir > 0 else (hi2 + 1)
+		# both ends land on the right island at ground level, in both columns
+		var ends_ok := true
+		for b in [b0b, b0b + 1]:
+			var fi: int = at.call(foot, b); var hi_: int = at.call(head, b)
+			if fi < 0 or hi_ < 0 or world.island[fi] != 0 or world.kind[fi] == World.T_VOID or world.island[hi_] != ii or world.kind[hi_] == World.T_VOID:
+				ends_ok = false
+			elif not level_ok.call(foot, b) or not level_ok.call(head, b) or not level_ok.call(foot + int(dir), b):
+				ends_ok = false
+		if not ends_ok: continue
+		var rect: Array = [lo2, b0b, hi2, b0b + 1] if horiz else [b0b, lo2, b0b + 1, hi2]
+		# the sign: on the main island, a step back from the bridge's foot, to one side
+		var sign := Vector2.INF
+		for cand in [[foot + int(dir), b0b - 1], [foot + int(dir), b0b + 2], [foot, b0b - 1], [foot, b0b + 2], [foot + 2 * int(dir), b0b - 1], [foot + 2 * int(dir), b0b + 2]]:
+			var i: int = at.call(cand[0], cand[1])
+			if i >= 0 and world.island[i] == 0 and world.kind[i] == World.T_GROUND and level_ok.call(cand[0], cand[1]):
+				var along := float(cand[0]) + 0.5; var across := float(cand[1]) + (0.6 if cand[1] < b0b else 0.4)
+				sign = Vector2(along, across) if horiz else Vector2(across, along)
+				break
+		if sign == Vector2.INF: continue
+		return {"rect": rect, "sign": sign}
+	return fallback
+
+## The bridge to isle k on this home world (bridge_span, worked out when the world was made).
+static func isle_bridge(world: World, k: String) -> Dictionary:
+	if world and world.has_meta("isle_bridges"):
+		var sp: Dictionary = world.get_meta("isle_bridges")
+		if sp.has(k): return sp[k]
+	return {"rect": Data.ISLES[k]["bridge"], "sign": Data.ISLES[k]["sign"]}
 
 ## The meadow's outline. seed 0 is the classic island; any other seed gives its own shape: the
 ## meadow's size wobbles, its edge noise differs and one to three headlands bulge out of it.
