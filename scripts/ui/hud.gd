@@ -330,8 +330,8 @@ func _draw_world_labels() -> void:
 			c.draw_colored_polygon(PackedVector2Array([edge + d * 18.0, edge - d * 6.0 + perp * 11.0, edge - d * 6.0 - perp * 11.0]), GOLD)
 			_ctext(edge - d * 26.0, "%dm" % int(m.player.flat_dist(th)), 13, GOLD, big)
 	# the tutorial's marker: a pin over what to go to, or an arrow at the screen edge, with the distance
-	if m.opts.get("tutorial", false) and m.tut_target != Vector3.INF and m.player and not m.player.out:
-		_draw_waypoint(m.tut_target, m.tut_label, Color("8fe3c8"))
+	if m.opts.get("tutorial", false) and m.tut_target != Vector3.INF and m.player and not m.player.out and not m.tut_kin_leading():
+		_draw_waypoint(m.tut_target, m.tut_label, Color("8fe3c8"))     # (your Boki leading the way replaces it)
 	_draw_exit_labels()
 	_draw_lair_labels()
 	_draw_truce_marks()
@@ -443,15 +443,13 @@ func _draw_bubbles() -> void:
 		var k: Kin = b["ent"]
 		if k.dead:
 			continue
-		var at := k.position + Vector3(0, 1.2, 0)
-		if k.state == "shoulder" and k.owner_h:
-			at = k.owner_h.position + Vector3(0, 2.3, 0)
+		var at := k.bubble_at()
 		if cam.is_position_behind(at):
 			continue
 		var sp := cam.unproject_position(at)
 		if not (is_finite(sp.x) and is_finite(sp.y)) or absf(sp.x) > 1e5 or absf(sp.y) > 1e5:
 			continue
-		var a := clampf((2.6 - b["t"]) * 3.0, 0.0, 1.0) * clampf(b["t"] * 8.0, 0.0, 1.0)
+		var a := clampf((float(b.get("life", 2.6)) - b["t"]) * 3.0, 0.0, 1.0) * clampf(b["t"] * 8.0, 0.0, 1.0)
 		var s: String = b["text"]
 		var tw := body.get_string_size(s, HORIZONTAL_ALIGNMENT_LEFT, -1, 15).x
 		var r := Rect2(sp + Vector2(-tw * 0.5 - 12, -44), Vector2(tw + 24, 30))
@@ -465,8 +463,8 @@ func _draw_bubbles() -> void:
 func _draw_pings(sz: Vector2) -> void:
 	var cam := m.cam
 	for p in m.pings:
-		if p.has("by"):
-			continue        # squad pings get a waypoint instead (see _draw_squad_pings)
+		if p.has("by") or p.has("kin"):
+			continue        # squad pings and Boki callouts get a waypoint instead (see _draw_squad_pings)
 		var a := clampf(4.0 - p["t"], 0.0, 1.0)
 		var col := Color(p["col"], a)
 		var at: Vector3 = p["pos"] + Vector3(0, 1.0, 0)
@@ -691,7 +689,7 @@ func _draw_minimap(sz: Vector2) -> void:
 			continue        # another squad's ping
 		var pv: Vector2 = to_map.call(pg["pos"])
 		if on_map.call(pv):
-			if pg.has("by"):
+			if pg.has("by") or pg.has("kin"):
 				# a squad ping: a little pin in the pinger's colour
 				c.draw_colored_polygon(PackedVector2Array([pv, pv + Vector2(-4, -7), pv + Vector2(4, -7)]), pg["col"])
 				c.draw_circle(pv + Vector2(0, -9), 5.0, Color(0, 0, 0, 0.6))
@@ -2091,6 +2089,15 @@ func _draw_squad_pings(p: Hunter) -> void:
 		var a := clampf(float(pg.get("life", 4.0)) - float(pg["t"]), 0.0, 1.0)
 		var lbl: String = "Your ping" if by == p else (by.pname if is_instance_valid(by) else "Ping")
 		_draw_waypoint(pg["pos"], lbl, Color(pg["col"], a))
+	# a Boki's callout: a marker with what it spotted, fading after a few seconds
+	for pg in m.pings:
+		if not pg.has("kin") or int(pg.get("team", -1)) != p.team:
+			continue
+		var kk: Kin = pg["kin"] if is_instance_valid(pg["kin"]) else null
+		var a2 := clampf(float(pg.get("life", 5.0)) - float(pg["t"]), 0.0, 1.0) * clampf(float(pg["t"]) * 6.0, 0.0, 1.0)
+		var who := String(kk.rec.get("name", "Boki")) if kk and kk.owner_h != p else ""
+		var lbl2 := String(pg.get("label", ""))
+		_draw_waypoint(pg["pos"], ("%s: %s" % [who, lbl2]) if who != "" else lbl2, Color(pg["col"], a2))
 
 ## For the first seconds of every match: what each of your buttons does.
 func _draw_kit(sz: Vector2, p: Hunter) -> void:

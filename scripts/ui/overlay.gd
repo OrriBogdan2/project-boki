@@ -300,6 +300,7 @@ func _show_settings() -> void:
 			rec_row.add_child(rec_ob)
 			_group(v, "Kin")
 			_toggle(v, "Boki also use your E ability on their own", "kin_auto", "They can spend cooldowns you wanted (their own auto ability is always on)")
+			_choice(v, "Boki chattiness", "kin_chatter", [["quiet", "Quiet (only danger and your health)"], ["normal", "Normal"], ["chatty", "Chatty (points out everything)"]])
 			if admin_allowed():
 				_group(v, "Admin")
 				_choice(v, "Bot difficulty", "bot_diff", [["auto", "Auto (by tier)"]] + Data.BOT_ORDER.map(func(k): return [k, Data.BOT_DIFF[k]["name"]]))

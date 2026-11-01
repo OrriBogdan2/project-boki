@@ -672,6 +672,10 @@ func _boss_dead(L: Dictionary, b: Boss, credit: Ent) -> void:
 	var killer: Hunter = (credit as Kin).owner_h if credit is Kin and (credit as Kin).owner_h else (credit as Hunter if credit is Hunter else null)
 	L["state"] = "cleared"
 	L["cleared_by"] = killer.pname if killer else ""
+	# everyone's Boki who fought it cheers (and remembers it)
+	for hh in m.hunters:
+		if hh.kin and hh.kin.comp and not hh.out and (hh == killer or hh.flat_dist(b) < 22.0) and hh.kin.state != "fainted":
+			hh.kin.comp.on_boss_kill(String(b.md.get("name", "the boss")), b.pos)
 	(L["nodes"]["label"] as Label3D).text = "%s\nCleared" % L["name"]
 	if L.get("locked", false):
 		_victory(L, b)      # the gate stays shut a moment: the lever, the updraft, or wait it out
