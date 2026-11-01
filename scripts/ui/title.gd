@@ -476,8 +476,8 @@ func _build_ui() -> void:
 	tag.add_theme_constant_override("outline_size", 5)
 	tag.add_theme_color_override("font_outline_color", Color(0.04, 0.03, 0.05, 0.7))
 	col.add_child(tag)
-	col.add_child(UI.spacer(30))
 	var has: bool = not Save.d["roster"].is_empty()
+	col.add_child(UI.spacer(12 if has else 30))     # (with a save the menu has one more row: Demo match)
 	# the one big button: carry on where you left off, or start a new story
 	var b1 := _menu_main(("Continue" if has else "New game"), func(): Game.goto("home" if has else "prologue"))
 	col.add_child(b1)
@@ -487,10 +487,14 @@ func _build_ui() -> void:
 	who.add_theme_color_override("font_outline_color", Color(0.04, 0.03, 0.05, 0.7))
 	var wm := MarginContainer.new(); wm.add_theme_constant_override("margin_left", 6); wm.add_child(who)
 	col.add_child(wm)
-	col.add_child(UI.spacer(18))
+	col.add_child(UI.spacer(6 if has else 18))
 	var items: Array = []
 	# the Arena: every archetype's kit against dummies and a sparring bot, no save needed
 	items.append(["Arena", func(): Game.start_match(Match.arena_opts()), "knock"])
+	if has:
+		# one click to a match made for filming: Duos with a bot squadmate who leads the drop to a boss lair
+		# next to an uplink, clear weather, no Blight, the usual rivals (Match.demo_opts)
+		items.append(["Demo match", func(): Game.start_match(Match.demo_opts()), "updraft"])
 	if Net.available():
 		items.append(["Play with friends", func(): Game.goto("lobby", {}), "bond"])
 	items.append(["Save files", func(): Overlay.ctx = "title"; Overlay.open_saves(), "satchel"])

@@ -24,5 +24,7 @@
 		"sockets": {"hit": "add", "ctrl": "add", "ctrl_cap": "soft", "guard": "add", "mod": "add"}},
 	"order": ["dash", "sec", "kin", "sec", "dash", "ult", "sec", "kin", "ult", "gear"],
 	"rank3": {"dash": "the hold windup is 0.7 -> 0.55s", "sec": "Earthshatter's spike stun +0.2s", "kin": "the end burst pushes 14", "ult": "6s, and the first stomp is a 3m burst"},
+	"rank2": {"sec": "Rank 2: cooldown 9s -> 8.1s, damage +15%.", "dash": "Rank 2: recharge 12s -> 10.2s per charge.", "kin": "Rank 2: cooldown 16s -> 14.4s, damage +15%.", "ult": "Rank 2 (level 9): cooldown 115s -> 97.8s, +30% duration, +15% damage; 6s, and the first stomp is a 3m burst."},
+	"rank_next": {"sec": "Rank 3: cooldown 9s -> 7.2s, damage +30%; Earthshatter's spike stun +0.2s.", "kin": "Rank 3: cooldown 16s -> 12.8s, damage +30%; the end burst pushes 14.", "dash": "Rank 3: recharge 12s -> 8.4s; the hold windup is 0.7 -> 0.55s."},
 	"tells": {"half": "red steam from the pauldrons", "full": "red eyes and weapon, a roar within 25m", "dash_spent": "dash pips dark"}
 }

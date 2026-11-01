@@ -54,6 +54,7 @@ func _ready() -> void:
 					Overlay.open_dex(which[1] if which.size() > 1 else "cindle"))
 		if a.begins_with("--seed="): opts["seed"] = int(a.substr(7))
 		if a == "--god": opts["god"] = true
+		if a.begins_with("--cam-style="): Settings.set_v("cam_style", a.substr(12), false)    # tooling: a camera style for one run (camcal)
 		if a == "--autoplay": opts["autoplay"] = true
 		if a == "--record": Record.set_level(1)            # start in recording mode (F10 cycles it)
 		if a.begins_with("--record="): Record.set_level(int(a.substr(9)))    # --record=2: with the HUD hidden
@@ -67,6 +68,7 @@ func _ready() -> void:
 		if a == "--boxrev-demo": opts["life_demo"] = true; opts["boxrev_demo"] = true; opts["no_drop"] = true; opts["squad"] = 3; opts["teams"] = 3
 		if a.begins_with("--length="): opts["length"] = float(a.substr(9))
 		if a == "--no-drop": opts["no_drop"] = true
+		if a.begins_with("--lost-demo"): opts["lost_demo"] = a.substr(12) if a.length() > 12 else "rival"; opts["no_drop"] = true    # a Boki left behind (hud labels)
 		if a == "--train-demo": opts["train_demo"] = true; opts["no_drop"] = true
 		if a.begins_with("--train-demo="): opts["train_demo"] = a.substr(13); opts["no_drop"] = true
 		if a.begins_with("--aim-demo="): opts["aim_demo"] = a.substr(11); opts["no_drop"] = true
@@ -126,6 +128,18 @@ func _ready() -> void:
 		if a == "--perk-demo": opts["perk_demo"] = true
 		if a.begins_with("--exit-demo="): opts["exit_demo"] = a.substr(12); opts["no_drop"] = true
 		if a == "--truce-demo": opts["truce_demo"] = true; opts["no_drop"] = true
+		if a.begins_with("--teammate-demo="): opts["teammate_demo"] = a.substr(16); opts["no_drop"] = true
+		if a.begins_with("--demo-kin="): opts["demo_kin"] = a.substr(11)      # test: bring this species (level/trust via --demo-kin-lv=)
+		if a.begins_with("--demo-kin-lv="): opts["demo_kin_lv"] = a.substr(14)
+		if a == "--no-tips": Settings.set_v("tips", false, false)     # test: no kit panel or tip banners (screenshots)
+		if a.begins_with("--set-kin=") and not Save.d["roster"].is_empty():
+			# test: your first Boki's level and trust, "level:trust" (how well it talks)
+			var sk := a.substr(10).split(":")
+			Save.d["roster"][0]["level"] = int(sk[0])
+			if sk.size() > 1: Save.d["roster"][0]["trust"] = float(sk[1])
+		if a == "--recall-demo" and not Save.d["roster"].is_empty():
+			# test: your partner just got back from an expedition with something to tell you
+			Save.d["roster"][0]["recall"] = {"kind": "carried_out", "text": "was carried out of the Ember Quarry by you", "place": "the Ember Quarry", "boss": "", "m": 1}
 		if a.begins_with("--lair-demo="): opts["lair_demo"] = a.substr(12); opts["no_drop"] = true
 		if a.begins_with("--lair-boss="): opts["demo_boss"] = a.substr(12)
 		if a == "--plate-demo": opts["plate_demo"] = true; opts["no_drop"] = true; opts["teams"] = 3; opts["squad"] = 3
@@ -358,6 +372,9 @@ func _ready() -> void:
 		var wkc = load("res://tools/work_check.gd").new()      # kin at work: jobs, stations, priorities, shimmer odds
 		set_meta("work_check", wkc)
 		wkc.run(self)
+		return
+	if "--teammate-check" in args:
+		load("res://tools/teammate_check.gd").new().run(self)      # Boki as teammates: following, callouts, caring, the tutorial guide
 		return
 	if "--unique-check" in args:
 		load("res://tools/unique_check.gd").new().run(self)      # every kin its own: rolls, inheritance, ids, migration, size
@@ -624,6 +641,11 @@ func _ready() -> void:
 		show_screen("prologue", {"then": "title"})    # test: the opening story
 	elif "--creator" in args:
 		show_screen("hatch", {"create": true})    # test: the hunter creator
+	elif "--demo-match" in args:
+		# the title screen's Demo match (tooling: screenshots of it); other match flags still apply
+		var dm := Match.demo_opts()
+		dm.merge(opts, true)
+		show_screen("match", dm)
 	elif "--match" in args or opts.has("raid_demo") or opts.has("blight_demo"):
 		show_screen("match", opts)
 	elif "--duel" in args:
@@ -702,6 +724,8 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 		fade.reveal_after(3, 0.55, func() -> bool: return gen == _gen and is_instance_valid(current) and current.get("building") == true)
 	match screen:
 		"match":
+			# Settings > Demo (clear weather, no Blight, ...) on offline matches; online ones play the host's rules
+			if not opts.has("net"): Settings.demo_opts(opts)
 			# the seed is fixed here, so the loading screen can show the raid condition it rolls
 			if not opts.has("seed"): opts["seed"] = randi()
 			# a loading screen covers building the world; tests that screenshot by frame count skip it
@@ -1405,6 +1429,19 @@ func _ability_check() -> void:
 	P.inp["sec_hold"] = false
 	_ac_run(m, 0.3)
 	_ac("rail hold-to-charge", T.hp < T.max_hp - 25.0, "took %.0f" % (T.max_hp - T.hp))
+	# the same hold as an archetype (the Gunslinger's Rail): the shared wind-up fills, ticks full, punches out
+	P.set_arch("gunslinger"); P.unlock_all()
+	T.hp = T.max_hp
+	P.inp["aim"] = T.pos + Vector3(0, 0.9, 0)
+	P.ak.cd["rmb"] = 0.0; P.ak.ch_rmb = 1.0
+	P.inp["sec_hold"] = true; P.ak.press_rmb()
+	var hk_mid := [-1.0]
+	_ac_run(m, 1.3, func():
+		P.inp["sec_hold"] = true
+		if hk_mid[0] < 0.0 and P.ak.rmb_t > 0.6: hk_mid[0] = P.ak.charge_k())
+	P.inp["sec_hold"] = false
+	_ac_run(m, 0.3)
+	_ac("archetype hold wind-up", hk_mid[0] > 0.2 and P.ak.charge_fulls >= 1 and P.ak.charge_last > 0.9 and T.hp < T.max_hp - 25.0, "mid %.2f fulls %d took %.0f" % [hk_mid[0], P.ak.charge_fulls, T.max_hp - T.hp])
 	m.queue_free(); await get_tree().process_frame
 	# 13. Breach: throws the target back and you the other way
 	r = _ac_setup(2.5); m = r[0]; P = r[1]; T = r[2]
@@ -2574,7 +2611,14 @@ func _boss_check() -> void:
 	Q.ctrl = "local"
 	spot.call(Q, E["dial"])
 	spot.call(P, E["dial"] + Vector3(E["out"].x, 0, E["out"].y) * 6.0)
-	Q.inp["interact"] = true; run.call(Match.DT); Q.inp["interact"] = false; run.call(0.4)
+	# the gate's guards go for whoever works the dial: a bomber's blast or a spitter's hit could knock Q
+	# off the lectern (the dial stops) or down, depending only on how the frames fall. Keep Q on it and
+	# standing: this part tests the dial's miss, not surviving the guards
+	var pin := func():
+		Q.hp = Q.max_hp; Q.armor = Q.max_armor
+		if Q.downed: m.revive_hunter(Q, Q)
+		if Q.flat_dist(E["dial"]) > 0.25: spot.call(Q, E["dial"])
+	Q.inp["interact"] = true; run.call(Match.DT, pin); Q.inp["interact"] = false; run.call(0.4, pin)
 	var hit_one := false
 	var tq := m.time
 	while not hit_one and m.time - tq < 8.0:
@@ -2583,15 +2627,15 @@ func _boss_check() -> void:
 		for t in E["targets"]:
 			if absf(wrapf(nxt - float(t["a"]), -PI, PI)) <= float(t["w"]) * 0.5 - 0.03: on = true
 		Q.inp["interact"] = on and not Q.inp["interact"]
-		run.call(Match.DT)
+		run.call(Match.DT, pin)
 		hit_one = (E["targets"] as Array).any(func(t): return t["hit"])
-	Q.inp["interact"] = false; run.call(Match.DT)
+	Q.inp["interact"] = false; run.call(Match.DT, pin)
 	var guards0: int = m.lairs._guards_alive(E)
 	var pings0 := m.pings.size()
 	var feed0 := m.feed_all.size()
 	while m.lairs.target_under(E) >= 0:
-		run.call(Match.DT)
-	Q.inp["interact"] = true; run.call(Match.DT); Q.inp["interact"] = false
+		run.call(Match.DT, pin)
+	Q.inp["interact"] = true; run.call(Match.DT, pin); Q.inp["interact"] = false
 	var any_hit: bool = (E["targets"] as Array).any(func(t): return t["hit"])
 	ok.call(hit_one and int(E["fails"]) == 1 and not any_hit and int(E["lock"]) == 0 and float(E["jam"]) > 0.0, "miss: the lock resets (fails %d, arcs lit again, jammed %.1fs)" % [int(E["fails"]), float(E["jam"])])
 	ok.call(m.lairs._guards_alive(E) > guards0 and m.pings.size() > pings0 and m.feed_all.slice(feed0).any(func(f): return String(f).contains("chime")) and Q.reveal_t > 2.0,
@@ -3155,6 +3199,16 @@ func _record_check() -> void:
 	Record.set_level(0)
 	await get_tree().process_frame
 	ok.call(InputMap.has_action("record") and Settings.ACTIONS.any(func(a): return a[0] == "record"), "F10 is a rebindable action (%s)" % Settings.key_cap("record"))
+	# Settings > Demo: clear weather, no Blight, bots hold off fresh landers longer (offline matches)
+	var o0 := Settings.demo_opts({})
+	ok.call(not o0.has("raid") and not o0.has("blight") and not o0.has("fresh_t") and RaidLook.rolls({"big": true}), "demo settings at their defaults change nothing")
+	Settings.set_v("demo_weather", "clear", false); Settings.set_v("demo_blight", false, false); Settings.set_v("demo_fresh", "long", false)
+	var o1 := Settings.demo_opts({"teams": 10})
+	ok.call(RaidLook.pick(o1, 12345) == "clear" and not BlightDir.enabled(o1) and float(o1.get("fresh_t", 0.0)) == Settings.DEMO_FRESH_T, "demo settings: clear weather, no Blight, %ds for fresh landers" % int(Settings.DEMO_FRESH_T))
+	var seen := {}
+	for sd in 40: seen[RaidLook.pick(Settings.demo_opts({}), sd + 1)] = true
+	ok.call(seen.keys() == ["clear"], "always clear over 40 seeds (%s)" % ", ".join(seen.keys()))
+	Settings.set_v("demo_weather", "random", false); Settings.set_v("demo_blight", true, false); Settings.set_v("demo_fresh", "normal", false)
 	print("RECCHECK done, failures: %d" % bad[0])
 	get_tree().quit(1 if bad[0] > 0 else 0)
 
