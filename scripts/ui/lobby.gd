@@ -44,7 +44,7 @@ func _ready() -> void:
 		mode_btns[key] = b
 		modes.add_child(b)
 	v.add_child(track)
-	v.add_child(UI.para("Empty spots are filled with bots, up to 4 squads. Whoever presses Start hosts the match and runs the monsters, so keep that tab in front."))
+	v.add_child(UI.para("Empty spots are filled with bots, up to 4 squads. Whoever presses Start hosts the match and runs the monsters, so keep the game open and in front."))
 	ready_btn = UI.button("I'm ready", _toggle_ready, 160, "check")
 	UI.footer(v).add_child(ready_btn)
 	start_btn = UI.footer_primary(v, "Start the match", _start, 220, "portal")
@@ -88,8 +88,13 @@ func _refresh() -> void:
 		return
 	for c in list_box.get_children():
 		c.queue_free()
-	var how := "through this artifact's room" if Net.mode == "room" else "between browser tabs on this computer (the room isn't available here)"
-	status.text = "Connected %s. %d player%s here." % [how, Net.peers.size(), "" if Net.peers.size() == 1 else "s"] if Net.mode != "" else "Connecting..."
+	var how: String = {"room": "through this artifact's room", "server": "to the Project Boki server"}.get(Net.mode, "between browser tabs on this computer (the room isn't available here)")
+	if Net.mode != "":
+		status.text = "Connected %s. %d player%s here." % [how, Net.peers.size(), "" if Net.peers.size() == 1 else "s"]
+	elif Net.deny_reason != "":
+		status.text = Net.deny_reason
+	else:
+		status.text = "Connecting..."
 	for id in Net.peers:
 		var p: Dictionary = Net.peers[id]
 		if not p.has("lobby"):

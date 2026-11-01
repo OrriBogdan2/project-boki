@@ -758,6 +758,7 @@ func _finish(sp_id: String, kname: String, you: String, tutorial: bool) -> void:
 	Save.d["roster"] = [rec]
 	Save.d["active"] = rec["uid"]
 	Save.d["name"] = you.strip_edges() if you.strip_edges() != "" else "Hunter"
+	Save.register(rec, "starter")      # serial #1 of its kind, you as its trainer
 	Save.d["tutorial"]["hatched"] = true
 	Save.save_game()
 	Sfx.play("click")

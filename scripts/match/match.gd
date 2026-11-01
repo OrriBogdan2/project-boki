@@ -360,6 +360,7 @@ func _start(o: Dictionary) -> void:
 		layout = World.load_layout(String(o.get("map", World.layout_for_tier(tier))))
 	elif o.get("tutorial", false):
 		layout = World.load_layout("tutorial")
+	map_name = String(layout.get("name", ""))
 	if not layout.is_empty():
 		world.generate_authored(layout, seed_val)
 	else:
@@ -604,10 +605,30 @@ func bot_kit() -> Dictionary:
 	# the weapon is picked once the bot's class is known (see make_hunter): any of its class's
 	return {"weapon": "?", "perk": ""}
 
+var _kin_seed_n := 0
+## A seed for a wild or bot kin's inborn rolls (Unique: size, looks, habits), made from the match
+## seed: the same every run of a seeded match, and neither rng nor the global stream is touched.
+func kin_seed(tag: String) -> int:
+	_kin_seed_n += 1
+	return hash("%d|%s|%d" % [seed_val, tag, _kin_seed_n]) & 0x7fffffff
+
+var map_name := ""     # the authored map's name, for where a kin was caught
+## Where a point is, for a caught kin's record: {map, island, biome, tier, tier_name}.
+func where_at(p: Vector3) -> Dictionary:
+	var w := {"map": map_name, "tier": tier, "tier_name": String(T.get("name", ""))}
+	if world:
+		var ii := world.island_of(p.x, p.z)
+		if ii >= 0 and ii < world.islands.size():
+			var nm := String((world.islands[ii] as Dictionary).get("name", ""))
+			if nm != "": w["island"] = nm
+		var b := world.biome_at(p.x, p.z)
+		if b != "": w["biome"] = b
+	return w
+
 var _bot_iv_n := 0
 func bot_kin_record() -> Dictionary:
 	var sp: String = Data.common_kin()[rng.randi_range(0, Data.common_kin().size() - 1)]
-	var rec := Save.new_kin(sp)
+	var rec := Save.new_kin(sp, "", kin_seed("bot"))
 	rec["trust"] = rng.randf_range(40, 80)
 	rec["level"] = rng.randi_range(1, 4 + tier * 3)
 	Evo.simulate(rec, rng)
@@ -681,10 +702,10 @@ func _spawn_hunters() -> void:
 				if opts.has("demo_kin"):
 					var ids: Array = Data.common_kin()
 					var sp0 := String(opts["demo_kin"])
-					rec = Save.new_kin(sp0 if Data.KIN.has(sp0) else "cindle")
+					rec = Save.new_kin(sp0 if Data.KIN.has(sp0) else "cindle", "", kin_seed("demo"))
 					rec["name"] = Data.KIN[rec["species"]]["name"]
 					rec["trust"] = 95.0
-					rec2 = Save.new_kin(String(ids[(ids.find(rec["species"]) + 1) % ids.size()]))
+					rec2 = Save.new_kin(String(ids[(ids.find(rec["species"]) + 1) % ids.size()]), "", kin_seed("demo"))
 				player = make_hunter("p0", 0, String(opts.get("cls", Data.class_of_save())), Save.d.get("name", "Hunter"), "bot" if opts.get("autoplay", false) else "local", rec, at, my_kit(), rec2)
 				if opts.get("autoplay", false):
 					player.ai = bot_brain.new_mind(rng, 0.7)
@@ -1578,7 +1599,7 @@ func _spawn_wild() -> void:
 	for si in spots.size():
 		var p: Vector3 = spots[si]
 		var sp: String = Data.common_kin()[rng.randi_range(0, Data.common_kin().size() - 1)]
-		var rec := Save.new_kin(sp)
+		var rec := Save.new_kin(sp, "", kin_seed("wild"))
 		rec["level"] = rng.randi_range(T["kin_lvl"][0], T["kin_lvl"][1])
 		Evo.simulate(rec, rng)
 		rec["shimmer"] = Shiny.roll_wild(rng, tier)   # a rare colour you'll want to catch (1 in 4096, x1.5 in the Hollow)
@@ -1739,7 +1760,7 @@ func kin_bark(k: Kin, txt: String, cat: String) -> void:
 		var s := "kin_happy"
 		if cat in ["refuse", "hesitate", "scared", "revive_low", "ignore"]: s = "kin_unsure"
 		elif cat in ["callout", "wild"]: s = "kin_alert"
-		sfx(s, null, -6.0)
+		sfx(s, null, -6.0, Unique.voice(k.rec))     # in its own voice
 
 var feed_all: Array = []
 
@@ -3253,6 +3274,7 @@ func _process(delta: float) -> void:
 			# the camera only eases back while gliding, so jumps and falls never change the framing
 			# sneaking (Ctrl) pulls the camera well back for a wide look around [Supervive]
 			cam.zoom_to = 1.25 if player.gliding else (1.45 if player.crouch and player.grounded else 1.0)
+			if train.has("_sizes"): cam.zoom_to = 0.5     # (--size-demo screenshots)
 			# high up, the camera pulls back with your altitude so you can still read the ground
 			var alt := player_altitude()
 			if alt > 4.0:
@@ -3570,6 +3592,23 @@ func step(dt: float) -> void:
 			w.set_meta("lineup", true)
 			i += 1
 		cam.zoom_to = 0.55
+	if "--size-demo" in OS.get_cmdline_user_args() and player:
+		# test: an extra small and an extra large Vespyx side by side, held still (their rings show
+		# the hitbox), and the camera in close
+		if not train.has("_sizes"):
+			var ws: Array = []
+			for si in 2:
+				var srec := Save.new_kin("cindle", "", kin_seed("demo"))
+				srec["dna"]["size"] = -2.8 if si == 0 else 2.8
+				srec["level"] = 6
+				var sq := player.pos + Vector3(-1.2 + si * 2.4, 0, 1.6)
+				var sw := spawn_wild(srec, sq)
+				sw.home = sq
+				sw.set_meta("lineup", true)
+				ws.append(sw)
+			train["_sizes"] = ws
+		for sw in train["_sizes"]:
+			if is_instance_valid(sw): sw.wander_to = sw.home
 	if opts.get("kin_demo", false) and player:
 		# test hook: throw the kin at the nearest dummy, use Q, then V, then the bond ultimate, then swap
 		var tgt: Ent = null; var bd := 1e9
@@ -4203,6 +4242,7 @@ func _catch(h: Hunter, k: Kin) -> void:
 	k.dead = true
 	k.visible = false
 	var rec: Dictionary = k.rec.duplicate(true)
+	rec["caught_at"] = where_at(k.pos)       # provenance: where it was caught (Save.register)
 	if k.lost_from != "":
 		# someone's lost kin: it keeps who it is, and we remember who has it now
 		rec["lost_from"] = k.lost_from

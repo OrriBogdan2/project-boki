@@ -399,7 +399,7 @@ func _build_ui() -> void:
 	col.add_child(wm)
 	col.add_child(UI.spacer(18))
 	var items: Array = []
-	if Bridge.net_available():
+	if Net.available():
 		items.append(["Play with friends", func(): Game.goto("lobby", {}), "bond"])
 	items.append(["Save files", func(): Overlay.ctx = "title"; Overlay.open_saves(), "satchel"])
 	items.append(["Settings", func(): Overlay.ctx = "title"; Overlay.open_settings(), "gear"])

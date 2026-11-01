@@ -265,9 +265,13 @@ func run(m: Node) -> void:
 		for k in mm:
 			if float(mm[k]) < Mutations.MULT_MIN or float(mm[k]) > Mutations.MULT_MAX: all_ok = false
 	ok(all_ok and Mutations.all().size() >= 8, "%d mutations in content/mutations, every perk within %d%%" % [Mutations.all().size(), int((Mutations.MULT_MAX - 1.0) * 100.0)])
-	var plain := Models.kin(sps[0], _kin(sps[0], "Plain"))
+	# (each kin also rolls its own size, Unique: compare average-sized ones)
+	var plain_r := _kin(sps[0], "Plain"); Unique.ensure(plain_r); plain_r["dna"]["size"] = 0.0
+	var plain := Models.kin(sps[0], plain_r)
+	Unique.ensure(g); g["dna"]["size"] = 0.0
 	var giant := Models.kin(sps[0], g)
 	var tiny_r := _kin(sps[0], "Wee"); tiny_r["mutations"] = ["tiny"]
+	Unique.ensure(tiny_r); tiny_r["dna"]["size"] = 0.0
 	var tiny := Models.kin(sps[0], tiny_r)
 	ok(giant.scale.x > plain.scale.x * 1.25 and tiny.scale.x < plain.scale.x * 0.75, "Giant and Tiny change the model's size (%.2f / %.2f / %.2f)" % [tiny.scale.x, plain.scale.x, giant.scale.x])
 	var alb := _kin(sps[0], "Snow"); alb["mutations"] = ["albino"]
