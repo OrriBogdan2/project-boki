@@ -103,16 +103,14 @@ func run(main: Node) -> void:
 		if egg != null: apart = minf(apart, Vector2(wp["pos"].x - egg["pos"].x, wp["pos"].z - egg["pos"].z).length())
 	ok(egg != null and apart >= 3.0 and apart <= 7.0 and m.lairs.inside(F, egg["pos"], 0.0), "the egg sits on its own spot %.1f m from the nearest pile item, inside the lair" % apart)
 	var en: Node3D = egg["node"] if egg != null else null
-	var beam: MeshInstance3D = null
-	if en:
-		for ch in en.get_children():
-			if ch is MeshInstance3D and (ch as MeshInstance3D).mesh is CylinderMesh and ((ch as MeshInstance3D).mesh as CylinderMesh).height > 8.0: beam = ch
-	ok(beam != null and beam.position.y > 4.0, "under its own light beam, %.0f m tall, that the pile doesn't have" % (((beam.mesh as CylinderMesh).height) if beam else 0.0))
-	var pile_beams := 0
+	var beam: MeshInstance3D = en.get_node_or_null("Beam") if en else null
+	ok(beam != null and beam.visible and beam.position.y > 4.0, "under its own light beam, reaching %.0f m up" % ((beam.position.y * 2.0) if beam else 0.0))
+	# the pile's weapon and glove have short coloured pillars; the egg's gold shaft stands far over them
+	var tallest := 0.0
 	for wp in pile:
 		for ch in (wp["node"] as Node3D).get_children():
-			if ch is MeshInstance3D and (ch as MeshInstance3D).mesh is CylinderMesh and ((ch as MeshInstance3D).mesh as CylinderMesh).height > 8.0: pile_beams += 1
-	ok(pile_beams == 0, "the pile itself has no beam: the egg's is the only one")
+			if ch is MeshInstance3D and ch.position.y > tallest: tallest = ch.position.y
+	ok(beam != null and beam.position.y > tallest * 2.0, "its beam reaches %.0f m, over twice the pile's pillars (%.0f m): it reads apart from across the lair" % [(beam.position.y * 2.0) if beam else 0.0, tallest * 2.0])
 	ok(m.lairs.egg_pings.size() > 0, "and it's pinged on everyone's map")
 	# ---------------------------------------------------------------- 2. locked in after the kill; campers locked out
 	ok(F.get("victory", false) and F.get("locked", false) and _gate_shut(F) and m.lairs.victory_left(F) > Lairs.VICTORY_T - 0.5,
