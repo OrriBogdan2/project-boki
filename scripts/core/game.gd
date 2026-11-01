@@ -65,9 +65,9 @@ func _setup_input() -> void:
 	# match keys (docs/ARCHETYPES.md): LMB weapon, RMB the archetype's ability, Shift the archetype's
 	# dash, Space jump and glide (Mouse 5 glides too), Q your active glove, E the archetype's utility,
 	# R the archetype's ultimate (bonded when the bond meter is full), C your kin's own ability (it
-	# hops out, casts and hops back), G (or middle mouse) send / recall your kin, 1 tonic, 2 armor kit, F interact.
+	# cast from where it is), G (or middle mouse) throw / recall your kin, hold G to hold or follow, 1 tonic, 2 armor kit, F interact.
 	_key("signature", [KEY_E])                # the archetype's utility (E)
-	_key("kin_ability", [KEY_C])              # the kin's own ability: tap, it hops out, casts, hops back
+	_key("kin_ability", [KEY_C])              # the kin's own ability: cast from wherever the Boki is
 	_key("kin_skill", [])                     # a kin's second ability: retired from the kit (data kept)
 	_key("interact", [KEY_F])                 # catch, open, pick up, finish a downed enemy (Supervive: F)
 	_key("armor_kit", [KEY_2])                # repair armor with an armor kit (the anvil); tonics are on 1
