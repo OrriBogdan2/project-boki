@@ -92,9 +92,12 @@ func reveal(dur := 0.5) -> void:
 	_tw.tween_callback(func(): rect.mouse_filter = Control.MOUSE_FILTER_IGNORE)
 	await _tw.finished
 
-## Waits a few rendered frames (so a screen that just built has actually drawn), then reveals.
-func reveal_after(frames := 3, dur := 0.5) -> void:
+## Waits a few rendered frames (so a screen that just built has actually drawn), and for as long as
+## hold() says the screen is still building, then reveals.
+func reveal_after(frames := 3, dur := 0.5, hold := Callable()) -> void:
 	for i in frames:
+		await get_tree().process_frame
+	while hold.is_valid() and hold.call():
 		await get_tree().process_frame
 	await reveal(dur)
 

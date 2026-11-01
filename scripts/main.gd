@@ -434,7 +434,7 @@ func _ready() -> void:
 		# tooling: a scripted expedition with per-phase frame costs and hitches (tests/perf_probe.gd)
 		add_child(load("res://tests/perf_probe.gd").new())
 		return
-	if "--hitch-check" in args or "--load-check" in args:
+	if "--hitch-check" in args or _has_arg("--load-check"):
 		# a seeded expedition through the drop and landing; fails on a stalled frame (tools/hitch_check.gd);
 		# --load-check stops at the reveal and judges the loading screen
 		add_child(load("res://tools/hitch_check.gd").new())
@@ -584,6 +584,7 @@ func _has_arg(prefix: String) -> bool:
 var _gen := 0
 
 var _ld: Node = null       # the loading screen of a match still on its way
+const HOME_SCRIPT := "res://scripts/home/home.gd"
 
 func show_screen(screen: String, opts: Dictionary) -> void:
 	_gen += 1
@@ -606,7 +607,7 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 		return    # another screen was asked for while this one was still on its way
 	if fx:
 		# the next screen builds this frame (often a heavy one); reveal once it has actually drawn
-		fade.reveal_after(3, 0.55)
+		fade.reveal_after(3, 0.55, func() -> bool: return gen == _gen and is_instance_valid(current) and current.get("building") == true)
 	match screen:
 		"match":
 			# a loading screen covers building the world; tests that screenshot by frame count skip it
@@ -656,6 +657,7 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 			var scr = R.new()
 			current = _layer(scr)
 			scr.show_result(opts)
+			Match.prefetch([HOME_SCRIPT])     # where you're most likely going next
 		"lobby":
 			var L = load("res://scripts/ui/lobby.gd")
 			var scr = L.new()
@@ -665,6 +667,7 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 			var Tt = load("res://scripts/ui/title.gd")
 			current = Tt.new()
 			add_child(current)
+			Match.prefetch([HOME_SCRIPT])     # compiled on a worker thread while the title shows
 		"prologue":
 			var Pr = load("res://scripts/ui/prologue.gd")
 			current = Pr.new()
@@ -676,7 +679,7 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 			current.set("edit_only", bool(opts.get("create", false)))
 			add_child(current)
 		"home":
-			var H = load("res://scripts/home/home.gd")
+			var H = Match.take_prefetched(HOME_SCRIPT)
 			current = H.new()
 			current.set("visit", opts.get("visit", {}))
 			current.set("visit_id", String(opts.get("visit_id", "")))
