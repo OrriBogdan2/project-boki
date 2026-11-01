@@ -382,6 +382,7 @@ func _ready() -> void:
 		return
 	if "--boki-system-check" in args:
 		load("res://tools/boki_system_check.gd").new().run(self)      # Boki commands (throw, recall, hold/follow, C), the downed Boki, the Merge
+		return
 	if "--teammate-check" in args:
 		load("res://tools/teammate_check.gd").new().run(self)      # Boki as teammates: following, callouts, caring, the tutorial guide
 		return

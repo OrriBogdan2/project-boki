@@ -2604,7 +2604,7 @@ func _tip_lines(id: String, p: Hunter) -> Array:
 			var kd: AbilitySpec = k.runner.def_of(id)
 			if kd == null: return []
 			out.append([kd.display_name, KinText.color(kd)])
-			out.append(["%s's ability  ·  %s" % [k.rec.get("name", "Boki"), Settings.key_cap("signature") if id == "k1" else "its own"], MUTED, 12])
+			out.append(["%s's ability  ·  %s" % [k.rec.get("name", "Boki"), Settings.key_cap("kin_ability" if p.ak else "signature") if id == "k1" else "its own"], MUTED, 12])
 			out.append([KinText.ability(k.effective(id)), INK, 14])
 			var where := "Your Boki casts it; while it rides with you, you do." if kd.from == "kin" else "Works on you wherever your Boki is."
 			out.append(["Cooldown %s%s. %s" % [_secs(kd.cooldown / maxf(0.1, k.runner.rate)), ("  ·  ready in %s" % _secs(k.runner.cd_left(id))) if not k.runner.is_ready(id) else "  ·  ready", where], MUTED, 13])
@@ -2815,7 +2815,7 @@ func _draw_world_hover(sz: Vector2, p: Hunter) -> void:
 				lines.append(["Left behind by %s. Whoever takes it home keeps it." % ("you" if k.lost_from == "you" else k.lost_from), GOLD if k.lost_from == "you" else MUTED])
 		elif k.owner_h == p:
 			var a1: AbilitySpec = k.runner.def_of("k1")
-			lines.append(["Yours. %s throws it, %s uses %s." % [Settings.key_cap("throw"), Settings.key_cap("signature"), a1.display_name if a1 else "its ability"], INK])
+			lines.append(["Yours. %s throws it, %s uses %s." % [Settings.key_cap("throw"), Settings.key_cap("kin_ability" if p.ak else "signature"), a1.display_name if a1 else "its ability"], INK])
 		elif k.lost_from == "you" and k.lost_uid != "":
 			lines.append(["Your lost Boki! Held by %s. Take it back." % (k.owner_h.pname if k.owner_h else "a rival"), GOLD])
 		else:

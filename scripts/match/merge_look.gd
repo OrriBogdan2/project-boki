@@ -6,6 +6,7 @@ extends Node3D
 ## (KinNet). Bigger with the power tier.
 
 const NODE_NAME := "MergeLook"
+const PARTS_NAME := "MergeParts"   # the silhouette parts ride the torso in this container, freed with the look
 var h: Hunter = null
 var form: Dictionary = {}
 var _wings: Array = []
@@ -28,6 +29,10 @@ static func attach(hunter: Hunter, f: Dictionary) -> void:
 static func detach(hunter: Hunter) -> void:
 	if hunter == null:
 		return
+	var torso: Node3D = hunter.model.get_node_or_null("Rig/Torso") if hunter.model else null
+	var box := torso.get_node_or_null(PARTS_NAME) if torso else null
+	if box:
+		torso.remove_child(box); box.queue_free()
 	var old := hunter.get_node_or_null(NODE_NAME)
 	if old:
 		hunter.remove_child(old)
@@ -50,7 +55,12 @@ func build() -> void:
 	mote.position = Vector3(0, 1.0, 0)
 	add_child(mote)
 	var torso: Node3D = h.model.get_node_or_null("Rig/Torso") if h.model else null
-	var parent: Node3D = torso if torso else self
+	var parent: Node3D = self
+	if torso:
+		var box := torso.get_node_or_null(PARTS_NAME)
+		if box: box.free()
+		parent = Node3D.new(); parent.name = PARTS_NAME
+		torso.add_child(parent)
 	var base := Vector3.ZERO if torso else Vector3(0, -0.42, 0)       # the parts are placed relative to the torso origin
 	for p in form["parts"]:
 		_add_part(parent, String(p), col, glow, base, sz)

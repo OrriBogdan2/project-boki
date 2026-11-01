@@ -286,7 +286,12 @@ func _merge() -> void:
 	m.player.ult = 1.0
 	KinMerge.press(m.player)
 	ok(_cdr(m.player) > base_cdr, "merged: your abilities cool down faster (cooldown stat %.2f -> %.2f)" % [base_cdr, _cdr(m.player)])
+	var torso: Node3D = m.player.model.get_node_or_null("Rig/Torso") if m.player.model else null
+	if torso:
+		ok(torso.get_node_or_null(MergeLook.PARTS_NAME) != null, "merged: the form's silhouette parts ride the torso")
 	run_for(float(m.player.merge_st.get("T", 10.0)) + 1.0)
+	if torso:
+		ok(torso.get_node_or_null(MergeLook.PARTS_NAME) == null or torso.get_node(MergeLook.PARTS_NAME).is_queued_for_deletion(), "the merge's parts are removed when it ends (no leftovers stacking up)")
 	ok(not KinMerge.active(m.player) and m.player.kin.state == "shoulder", "the merge ends and the Boki is back on the shoulder (state %s)" % m.player.kin.state)
 	ok(m.player.merge_cd > 0.0, "the slot rests a moment after it (%.1fs)" % m.player.merge_cd)
 

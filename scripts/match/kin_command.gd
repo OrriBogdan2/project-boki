@@ -21,7 +21,10 @@ static func class_ults() -> bool:
 ## The G key, polled every frame for the local player. Returns "tap", "hold" on the frame it is decided,
 ## else "". `blocked`: a menu or map is up (the press is ignored).
 static func poll(h: Hunter, dt: float, blocked: bool) -> String:
-	var down := Input.is_action_pressed("throw") and not blocked
+	if blocked:
+		h.inp["g_t"] = 0.0; h.inp["g_fired"] = true      # swallow the rest of this press: no tap on release
+		return ""
+	var down := Input.is_action_pressed("throw")
 	var t := float(h.inp.get("g_t", 0.0))
 	var out := ""
 	if down:
