@@ -2722,7 +2722,7 @@ func _open_kin(rec: Dictionary) -> void:
 	UI.subtitle(v, "Level %d  ·  %s Boki  ·  %s  ·  %s nature" % [int(rec["level"]), String(sp["type"]).capitalize(), Care.stage_name(rec), Care.nature(rec)])
 	var hx := UI.head_extra(v)
 	if partner: hx.add_child(UI.tag("Partner", UI.ACCENT))
-	elif rec["uid"] == Save.d.get("active2", ""): hx.add_child(UI.tag("Second", UI.TEAL))
+	elif Match.TWO_KIN and rec["uid"] == Save.d.get("active2", ""): hx.add_child(UI.tag("Second", UI.TEAL))
 	if rec.get("farmhand", false): hx.add_child(UI.tag("Farmhand", UI.GOOD))
 	if KinBox.is_boxed(rec): hx.add_child(UI.tag("In the Boki Burrow", Color("cdb8ff")))
 	for mid in Mutations.of(rec):
@@ -2872,7 +2872,7 @@ func _open_kin(rec: Dictionary) -> void:
 			if not swapped.is_empty(): _toast("%s went to the Boki Burrow to make room" % swapped["name"])
 			_spawn_kin(); _refresh_burrow()
 			_open_kin(rec)))
-		if rec["uid"] != Save.d.get("active2", ""):
+		if Match.TWO_KIN and rec["uid"] != Save.d.get("active2", ""):     # (one Boki per run now: no second)
 			fl.add_child(UI.ghost("Bring as second", func():
 				Save.d["active2"] = rec["uid"]
 				Save.save_game()
