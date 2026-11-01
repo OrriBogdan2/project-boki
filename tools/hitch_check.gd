@@ -24,6 +24,10 @@ extends Node
 ##     written for was 6.4 s against a 0.4 s median).
 ##   - headless: nothing renders; a frame's script time over 50 ms fails.
 ## --hitch-budget=ms overrides the fixed numbers. Loading-screen frames are reported, not judged.
+## Whatever the timing, a frame in those phases that compiles a shader variant fails too (counted from
+## writes to user://shader_cache, so run with a fresh user data dir, e.g. XDG_DATA_HOME=/tmp/x, to see
+## them: with a warm cache a variant loads from disk instead). Timings on a busy machine (other
+## processes on the same cores) are noisy; the compile count isn't.
 
 const DT := 1.0 / 60.0
 const JUDGED := ["ride", "drop", "land"]
@@ -133,16 +137,24 @@ func _process(_delta: float) -> void:
 	# the first moments of the ride and the last of the drop are judged frame by frame
 	if phase == "ride" and phase_t < 1.0: k = 1
 	if phase == "drop" and m.player and m.player.pos.y - m.world.ground_at(m.player.pos.x, m.player.pos.z) < 8.0: k = 1
+	Match.prof_on = true
+	Match.prof.clear()
 	var t0 := Time.get_ticks_usec()
 	m.step(DT)
 	var t1 := Time.get_ticks_usec()
+	var secs: Dictionary = Match.prof.duplicate()
+	Match.prof_on = false
 	for i in k - 1:
 		m.step(DT)
 	var t2 := Time.get_ticks_usec()
+	Match.prof_on = true
+	Match.vprof.clear()
 	m._process(DT if k == 1 else 0.0)
+	Match.prof_on = false
+	var vsecs: Dictionary = Match.vprof.duplicate()
 	var t3 := Time.get_ticks_usec()
 	var rec := {"phase": phase, "t": m.time, "k": k, "sim": (t1 - t0) / 1000.0, "sim_extra": (t2 - t1) / 1000.0,
-		"vis": (t3 - t2) / 1000.0, "proc_total": (t3 - t0) / 1000.0, "wall": 0.0, "new": [], "marks": [], "t_end": t3}
+		"vis": (t3 - t2) / 1000.0, "proc_total": (t3 - t0) / 1000.0, "wall": 0.0, "new": [], "marks": [], "t_end": t3, "secs": secs, "vsecs": vsecs}
 	if not headless:
 		var w0 := _walk_us
 		rec["new"] = _new_in_view()
@@ -334,6 +346,16 @@ func _cache_count() -> int:
 func _line(f: Dictionary) -> String:
 	var s := "%7.0f ms  %-8s t=%5.2f  sim %.1f (+%.1f x%d)  vis %.1f  other %.1f  render %.1f  rest %.1f  draws %d  shader compiles %d" % [float(f["wall"]), f["phase"], float(f["t"]),
 		float(f["sim"]), float(f["sim_extra"]), int(f["k"]), float(f["vis"]), float(f.get("other", 0.0)), float(f.get("render", 0.0)), float(f.get("rest", 0.0)), int(f.get("draws", 0)), int(f.get("compiles", 0))]
+	var secs: Dictionary = f.get("secs", {})
+	if float(f["sim"]) > 20.0 and not secs.is_empty():
+		var ks := secs.keys()
+		ks.sort_custom(func(a, b): return secs[a] > secs[b])
+		s += "  sim sections: " + ", ".join(ks.slice(0, 4).map(func(k): return "%s %.1f" % [k, secs[k] / 1000.0]))
+	var vs: Dictionary = f.get("vsecs", {})
+	if float(f["vis"]) > 20.0 and not vs.is_empty():
+		var vk := vs.keys()
+		vk.sort_custom(func(a, b): return vs[a] > vs[b])
+		s += "  visual sections: " + ", ".join(vk.slice(0, 4).map(func(k): return "%s %.1f" % [k, vs[k] / 1000.0]))
 	if not (f["marks"] as Array).is_empty():
 		s += "  steps: " + ", ".join((f["marks"] as Array).map(func(mk): return "%s %.0f" % [mk[1], mk[2]]))
 	return s
@@ -383,6 +405,18 @@ func _finish() -> void:
 			lines.append("HITCH       first in view: " + String(nm))
 		if (f["new"] as Array).size() > 10:
 			lines.append("HITCH       ... and %d more first in view" % ((f["new"] as Array).size() - 10))
+	# every frame after the reveal that compiled shaders, with what came into view on it
+	for f in frames:
+		if int(f.get("compiles", 0)) > 0:
+			lines.append("HITCH compiled %d: " % int(f["compiles"]) + _line(f))
+			for nm in (f["new"] as Array).slice(0, 6):
+				lines.append("HITCH       first in view: " + String(nm))
+	# script spikes cost the same on any GPU: the frames whose own step + visuals took longest
+	var by_script := frames.filter(func(f): return f["phase"] != "first")
+	by_script.sort_custom(func(a, b): return float(a["sim"]) + float(a["vis"]) > float(b["sim"]) + float(b["vis"]))
+	lines.append("HITCH worst script frames (one step + visuals, extra fast-forward steps left out):")
+	for f in by_script.slice(0, 5):
+		lines.append("HITCH   %.1f ms  " % (float(f["sim"]) + float(f["vis"])) + _line(f))
 	var fails := 0
 	var worst_j := 0.0
 	for i in frames.size():
@@ -393,6 +427,10 @@ func _finish() -> void:
 		if j > 1.0:
 			fails += 1
 			lines.append("HITCH FAIL over budget (%.1fx): %s" % [j, _line(f)])
+		elif int(f.get("compiles", 0)) > 0 and not headless:
+			# a shader compiled mid-drop: a stall on any GPU, however fast this one drew it
+			fails += 1
+			lines.append("HITCH FAIL compiled %d shader variant(s) during %s: %s" % [int(f["compiles"]), f["phase"], _line(f)])
 	var bdesc := ("headless script %.0f ms" % (budget_ms if budget_ms > 0.0 else 50.0)) if headless else (("software: 2.5x the frames around it and +1.2 s") if software and budget_ms <= 0.0 else ("%.0f ms" % (budget_ms if budget_ms > 0.0 else 100.0)))
 	lines.append("HITCH budget %s; worst judged frame at %.2f of budget; %s" % [bdesc, worst_j, "PASS" if fails == 0 else "FAIL (%d frames)" % fails])
 	var txt := "\n".join(lines)

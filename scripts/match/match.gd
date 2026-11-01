@@ -224,6 +224,7 @@ func warm_up() -> void:
 		for setup in [[false, false], [true, false], [false, true], [true, true]]:
 			wl[0].visible = setup[0]; wl[1].visible = setup[1]
 			await get_tree().process_frame
+			await get_tree().process_frame
 			if not is_inside_tree():
 				return
 		await get_tree().process_frame
@@ -256,6 +257,14 @@ func _warm_proxies() -> Array:
 	while not stack.is_empty():
 		var n: Node = stack.pop_back()
 		for ch in n.get_children(): stack.append(ch)
+		if n is Skeleton3D:
+			# skinned meshes run a skinning shader of their own, first when one is drawn: a copy of
+			# one rig of each make (its meshes follow it, their skeleton path is relative)
+			var sk := "skel:" + ",".join(n.get_children().filter(func(c): return c is MeshInstance3D).map(func(c): return str((c as MeshInstance3D).mesh.get_instance_id() if (c as MeshInstance3D).mesh else 0)))
+			if not seen.has(sk) and seen.size() < 2000:
+				seen[sk] = true
+				list.append(n)
+			continue
 		if not (n is GeometryInstance3D):
 			continue
 		var key := _warm_key(n as GeometryInstance3D)
@@ -314,27 +323,49 @@ static func _warm_key(gi: GeometryInstance3D) -> String:
 		mats.append("+" + _warm_mat_key(gi.material_overlay))
 	return kind + ":" + ",".join(mats)
 
+static var _mat_keys := {}
 static func _warm_mat_key(mt: Material) -> String:
 	if mt == null:
 		return "default"
+	var id := mt.get_instance_id()
+	if _mat_keys.has(id):
+		return _mat_keys[id]
+	if _mat_keys.size() > 20000: _mat_keys.clear()
 	var s := ""
 	if mt is ShaderMaterial:
 		var sh: Shader = (mt as ShaderMaterial).shader
 		s = "sh%d" % (sh.get_instance_id() if sh else 0)
 	elif mt is BaseMaterial3D:
-		var b := mt as BaseMaterial3D
-		s = "std%d.%d.%d.%d.%d.%d.%d.%d.%d.%d.%d.%d.%d.%d.%d.%d.%d.%d.%d.%d" % [b.transparency, b.shading_mode, b.cull_mode, b.depth_draw_mode, b.blend_mode,
-			int(b.no_depth_test), int(b.vertex_color_use_as_albedo), b.billboard_mode, int(b.billboard_keep_scale), int(b.albedo_texture != null),
-			int(b.emission_enabled), int(b.normal_enabled), int(b.rim_enabled), b.texture_filter, int(b.disable_receive_shadows), int(b.fixed_size),
-			int(b.use_particle_trails), b.distance_fade_mode, int(b.grow), b.diffuse_mode]
+		# the generated shader depends on its switches and modes and on which textures are set,
+		# not on colours and amounts
+		s = "std"
+		for pr in mt.get_property_list():
+			if not (int(pr["usage"]) & PROPERTY_USAGE_STORAGE):
+				continue
+			var t := int(pr["type"])
+			if t == TYPE_BOOL or t == TYPE_INT:
+				s += "%d" % int(mt.get(pr["name"]))
+			elif t == TYPE_OBJECT:
+				s += "1" if mt.get(pr["name"]) is Texture else "0"
 	else:
 		s = mt.get_class()
 	if mt.next_pass:
 		s += ">" + _warm_mat_key(mt.next_pass)
+	_mat_keys[id] = s
 	return s
 
 ## A tiny copy of an instance that draws with the same shaders.
-func _warm_proxy(src: GeometryInstance3D) -> GeometryInstance3D:
+func _warm_proxy(src: Node3D) -> Node3D:
+	if src is Skeleton3D:
+		var rig := src.duplicate(0) as Skeleton3D
+		for ch in rig.get_children():
+			if not (ch is MeshInstance3D): ch.free()
+			else:
+				(ch as MeshInstance3D).visibility_range_end = 0.0
+				(ch as MeshInstance3D).visible = true
+		rig.visible = true
+		return rig
+	var gsrc := src as GeometryInstance3D
 	var px: GeometryInstance3D = null
 	if src is MeshInstance3D:
 		var mi := src as MeshInstance3D
@@ -360,7 +391,7 @@ func _warm_proxy(src: GeometryInstance3D) -> GeometryInstance3D:
 	else:
 		# particles, labels, sprites: a copy with their own settings (a label shows every digit, so the
 		# glyphs damage numbers use are in the font's atlas before the first hit)
-		px = src.duplicate(0) as GeometryInstance3D
+		px = gsrc.duplicate(0) as GeometryInstance3D
 		for ch in px.get_children(): ch.free()
 		px.visible = true
 		if px is Label3D: (px as Label3D).text = "0123456789!"
@@ -374,9 +405,9 @@ func _warm_proxy(src: GeometryInstance3D) -> GeometryInstance3D:
 	if px == null:
 		return null
 	if not (src is CPUParticles3D or src is Label3D or src is Sprite3D):
-		px.material_override = src.material_override
-		px.material_overlay = src.material_overlay
-	px.cast_shadow = src.cast_shadow
+		px.material_override = gsrc.material_override
+		px.material_overlay = gsrc.material_overlay
+	px.cast_shadow = gsrc.cast_shadow
 	px.visibility_range_end = 0.0
 	px.visibility_range_begin = 0.0
 	return px
@@ -410,6 +441,15 @@ func _prof(lbl: String) -> void:
 		var now := Time.get_ticks_usec()
 		if _prof_t > 0 and lbl != "pre": prof[lbl] = int(prof.get(lbl, 0)) + now - _prof_t
 		_prof_t = now
+
+## Tooling (--hitch-check): microseconds per section of _process (the per-frame visuals).
+static var vprof := {}
+var _vprof_t := 0
+func _vprof(lbl: String) -> void:
+	if prof_on:
+		var now := Time.get_ticks_usec()
+		if _vprof_t > 0 and lbl != "pre": vprof[lbl] = int(vprof.get(lbl, 0)) + now - _vprof_t
+		_vprof_t = now
 
 var _render_n := 0
 func _render_now(e: Ent, cf: Vector3, near2: float) -> bool:
@@ -3281,11 +3321,14 @@ func _process(delta: float) -> void:
 		steps += 1
 		step(DT)
 	var alpha := acc / DT
+	_vprof("pre")
 	_update_vision()
+	_vprof("vision")
 	if world.wall_mat:
 		var fp := player.model.global_position + Vector3(0, 0.8, 0) if player and player.model and not player.out else Vector3(0, -999, 0)
 		world.wall_mat.set_shader_parameter("focus", fp)
 	for e in hunters: e.render(delta, alpha)
+	_vprof("hunters")
 	# monsters and wild kin well away from the view animate at a quarter rate (each catches up with
 	# the time it skipped); near ones every frame
 	_render_n += 1
@@ -3305,6 +3348,7 @@ func _process(delta: float) -> void:
 			e.lod_dt = 0.0
 		else:
 			e.lod_dt += delta
+	_vprof("kins_mobs")
 	if verbs: verbs.render(alpha)
 	for s in shots:
 		if s.has("deco"):
@@ -3317,6 +3361,7 @@ func _process(delta: float) -> void:
 				mi.look_at(mi.global_position + Vector3(v.x, 0, v.y), Vector3.UP)
 				var r: float = s["r"]
 				mi.scale = Vector3(r * 2.0, r * 2.0, r * 2.0 + v.length() * 0.025)
+	_vprof("verbs_shots")
 	cam.follow_mode = String(Settings.get_v("cam_follow"))
 	var sty := String(Settings.get_v("cam_style"))
 	if sty != cam_style:
@@ -3373,7 +3418,9 @@ func _process(delta: float) -> void:
 		cam.follow(foc, delta, false)
 	elif player:
 		cam.follow(cam.focus, delta, false)
+	_vprof("camera")
 	_update_aim(alpha)
+	_vprof("aim")
 	for pd in world.pads:
 		var top: Node3D = pd["node"].get_node("Top")
 		top.scale = Vector3.ONE * (1.0 + sin(time * 5.0) * 0.06)
