@@ -1,7 +1,23 @@
 # Handoff: rolling 30-minute sessions (branch `rolling`)
 
-Status: **ready to merge** (Agent C, Nov 1). Pushed to `origin/rolling`; merged with `origin/main` (Net 0.6.0,
-kits4, Blight, farmstart, abysslift). The feature stays behind the `rolling` option, off by default.
+Status: **ready to merge** (Agent C, Nov 1). Pushed to `origin/rolling`; merged with `origin/main` at sync56
+(Net 0.8.0, Hollow Crown default map, health budgets). The feature stays behind the `rolling` option, off by
+default. Net.VERSION is unchanged (0.8.0): rolling adds no sync, so the 0.8.3 slot is not used.
+
+## After the sync56 merge
+
+- Merge conflicts were only in `main.gd` (the `--rolling-shot=` no-save list, and the `--demo-match` / `--match`
+  branch order); both sides kept.
+- **Map:** the default expedition map is now the Hollow Crown. The wide-map ring is written for Skyreach's island
+  ids, so a rolling session builds **the wide Skyreach** (`WideLayout.pick`) unless `--map=` / `opts.map` names a map
+  (then that map is used as it is, un-widened). `opts.narrow` gives plain Skyreach. Widening the Hollow Crown needs
+  its own ring (a follow-up if the owner wants rolling on it).
+- **Health budgets:** the merge pushed `match.gd` and `world.gd` over budget. The wide-map builder moved to
+  `scripts/match/wide_layout.gd` (`class_name WideLayout`), `bot_time_left` / `bot_past` / `board()` moved into
+  `rolling.gd`. Net effect against main: `match.gd` -20 lines, `world.gd` 0. `health.py --strict` is OK.
+- `rolling-check` fixes for the new world: the default-match assertion follows `World.layout_for_tier`; the bounty
+  test clears the rival's cooldown (a bot fight before it can claim one off them); camp respawn counts >= 1; a
+  player already finished off by the autopilot is the match result at 30:00.
 
 ## Branch history
 
