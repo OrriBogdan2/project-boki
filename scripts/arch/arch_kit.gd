@@ -735,7 +735,7 @@ func payoff_fx(at: Vector3, word: String, col: Color, snd: String, dir := Vector
 	m.fx.ring(at, 1.0, Color(1, 1, 1, 0.9), 0.2)
 	m.fx.burst(at + Vector3(0, 1.1, 0), col, 36, 7.5, 0.65, 8.0, 1.3)
 	m.fx.flash(at + Vector3(0, 1.0, 0), col.lightened(0.4), 1.3, 0.1)
-	m.sfx(snd, at, 0.0, 1.0)
+	if snd != "": m.sfx(snd, at, 0.0, 1.0)
 	m.sfx("crit", at, -7.0, 0.85)
 	Feel.shake(m, "t4", h, at, victim)
 	if h.is_local():

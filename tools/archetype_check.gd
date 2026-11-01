@@ -370,6 +370,19 @@ func _mage() -> void:
 	P.ak.use_e()
 	step(m, 0.9, func(): top["y"] = maxf(float(top["y"]), T.pos.y - g))
 	ok("mage E recast: detonation lifts", top["y"] > 0.3 and dmg(T) >= 9.0, "rose %.2f took %.0f" % [top["y"], dmg(T)])
+	# Overcharged: the detonation is a Flashpoint (all the Heat, no Vent, the Bolt back)
+	step(m, 0.5)
+	K.cd["e"] = 0.0; K.res = 0.0
+	P.inp["aim"] = home + Vector3(3.0, 0, 0)
+	P.ak.use_e()
+	K.res = 85.0; K.ch_rmb = 0.0; K.cd["rmb"] = 2.0
+	fresh(T); T.teleport(home + Vector3(3.0, 0, 0))
+	ok("mage resource full: Flashpoint armed", K.e_payoff_ready() and K.ready_label().begins_with("FLASHPOINT"))
+	var f0 := K.flashpoints
+	top["y"] = 0.0
+	P.ak.use_e()
+	step(m, 0.9, func(): top["y"] = maxf(float(top["y"]), T.pos.y - g))
+	ok("mage E recast Overcharged: Flashpoint", K.flashpoints == f0 + 1 and K.last_e == "Flashpoint" and dmg(T) >= 22.0 and top["y"] > 0.3 and K.res < 10.0 and K.vent.is_empty() and K.ch_rmb >= 1.0, "took %.0f heat %.0f bolt %.0f" % [dmg(T), K.res, K.ch_rmb])
 	# Overcharged at 70+; the Vent at 100
 	K.res = 75.0
 	ok("mage resource: Overcharged at 70", K.full_ready())

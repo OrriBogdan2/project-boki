@@ -2,6 +2,11 @@ class_name MageKit
 extends ArchKit
 ## Mage (medium): Blink, Overload (Heat and the Vent), Bolt (Lance, Starfall, split through the
 ## Sigil, Overcharged), Sigil (recast to detonate), Meteor. docs/ARCHETYPES.md §6.3.
+##
+## The loop (kits4): bolts and the Sigil build Heat -> Overcharged at 70 (runes orbit the Mage
+## white-hot, the Sigil glows primed) -> recast E for a Flashpoint: the Sigil detonates with all the
+## Heat (bigger, harder, a payoff hit that lifts), Heat drops to 0 with no Vent and the Bolt is back
+## for the follow-up (or a Meteor spikes the lifted). Overshoot to 100 and you Vent instead.
 
 var sigil := {}                # {pos, r, t, node}
 var vent := {}                 # a Vent winding up: {t}
@@ -10,12 +15,27 @@ var lance_tele: Node3D = null
 var blink := {}                # Blink's windup: {t, to, from, ex}
 var blink_back := {}           # Moon Return / echo recast window: {t, to, k}
 var meteor := {}
+var runes: Node3D = null       # the Heat tell: rune motes orbiting the Mage, white-hot when Overcharged
+var was_over := false
+var armed_at := -9.0
+var flashpoints := 0           # Flashpoints set off (tests, demo)
 
 func over() -> bool:
 	return res >= float(res_def().get("over", 70.0))
 
 func full_ready() -> bool:
 	return over()
+
+func res_text() -> String:
+	return "%d HOT" % int(res) if over() else "%d" % int(res)
+
+func ready_label() -> String:
+	if over() and not sigil.is_empty(): return "FLASHPOINT READY  ·  E"
+	if over(): return "OVERCHARGED"
+	return ""
+
+func e_payoff_ready() -> bool:
+	return over() and not sigil.is_empty()
 
 func add_heat(v: float) -> void:
 	add_res(v)
@@ -49,6 +69,14 @@ func _tick(dt: float) -> void:
 	if not blink_back.is_empty():
 		blink_back["t"] = float(blink_back["t"]) - dt
 		if float(blink_back["t"]) <= 0.0: blink_back = {}
+	var ov := over() and vent.is_empty()
+	if ov and not was_over and m.time - armed_at > 2.0:
+		armed_at = m.time
+		armed_fx("OVERCHARGED", "k1" if not sigil.is_empty() else "")
+	was_over = ov
+	_tick_runes(dt)
+	_tick_sigil_look()
+	net_pulse(dt, ov)
 	if not meteor.is_empty():
 		meteor["t"] = float(meteor["t"]) - dt
 		var mt: Node3D = meteor.get("rock")
@@ -57,6 +85,56 @@ func _tick(dt: float) -> void:
 			mt.position = (meteor["at"] as Vector3) + Vector3(-3.0, 9.0, 2.0) * (1.0 - k)
 		if float(meteor["t"]) <= 0.0:
 			_meteor_hit()
+
+## The Heat tell on the Mage (everyone sees it): a rune mote per 20 Heat orbiting the waist, blue
+## and calm below 70, white-hot, faster and lit from 70 (Overcharged).
+func _tick_runes(_dt: float) -> void:
+	if runes == null or not is_instance_valid(runes):
+		runes = own_node()
+		for i in 5:
+			var d := MeshInstance3D.new()
+			d.mesh = Models.box(0.16, 0.16, 0.16)
+			d.material_override = Models.glow_mat(Color(col_of(e_def()), 0.95))
+			d.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			runes.add_child(d)
+		var lt := OmniLight3D.new()
+		lt.name = "Light"
+		lt.light_color = res_col()
+		lt.omni_range = 3.0
+		runes.add_child(lt)
+	var n := int(ceil(res / 20.0 - 0.01))
+	runes.visible = tells_visible() and n > 0
+	if not runes.visible:
+		return
+	var sc := float(h.cdat.get("scale", 1.0))
+	runes.global_position = h.position + Vector3(0, 1.05 * sc, 0)
+	var ov := over()
+	var hot := res_col().lerp(Color("ffb070"), 0.35)
+	var a: float = m.time * (5.5 if ov else 2.0)
+	for i in 5:
+		var d := runes.get_child(i) as MeshInstance3D
+		d.visible = i < n
+		var ang := a + TAU * i / 5.0
+		var rad := (0.85 if ov else 0.7) * sc
+		d.position = Vector3(cos(ang) * rad, 0.15 * sin(m.time * 3.0 + i), sin(ang) * rad)
+		d.rotation = Vector3(m.time * 2.0, m.time * 3.0 + i, 0.0)
+		d.scale = Vector3.ONE * ((1.4 + 0.25 * sin(m.time * 14.0 + i)) if ov else 1.0)
+		d.material_override.set_shader_parameter("color", Color(hot, 1.0) if ov else Color(col_of(e_def()), 0.9))
+	(runes.get_node("Light") as OmniLight3D).light_energy = (1.6 + 0.6 * sin(m.time * 12.0)) if ov else 0.0
+
+## A primed Sigil (the Mage is Overcharged): its rings burn white-gold and throb, so everyone can read
+## that the detonation will be a Flashpoint.
+func _tick_sigil_look() -> void:
+	if sigil.is_empty() or not is_instance_valid(sigil.get("node")):
+		return
+	var n: Node3D = sigil["node"]
+	var ov := over()
+	var c := res_col().lerp(Color.WHITE, 0.3) if ov else col_of(e_def())
+	for ch in n.get_children():
+		if ch is MeshInstance3D and (ch as MeshInstance3D).material_override:
+			(ch as MeshInstance3D).material_override.set_shader_parameter("color", Color(c, 0.95 if ov else 0.8))
+	n.scale = Vector3.ONE * ((1.0 + 0.05 * sin(m.time * 12.0)) if ov else 1.0)
+	n.rotation.y += 0.02 if ov else 0.004
 
 func move_k() -> float:
 	if rmb_down and rmb_t > 0.15 and not rmb_ctx.get("air", false):
@@ -263,20 +341,63 @@ func e_recast() -> bool:
 	var ed := e_def()
 	var at: Vector3 = sigil["pos"]
 	var r: float = sigil["r"]
-	tele_circle(at, r, Feel.cat_color("control"), float(ed["det_t"]))
-	m.fx.flash(at + Vector3(0, 0.3, 0), col_of(ed), 1.2, float(ed["det_t"]))
 	_drop_sigil()
 	e_t = 0.0
+	if over() and vent.is_empty():
+		_flashpoint(at, r)
+		return true
+	tele_circle(at, r, Feel.cat_color("control"), float(ed["det_t"]))
+	m.fx.flash(at + Vector3(0, 0.3, 0), col_of(ed), 1.2, float(ed["det_t"]))
 	m.later(float(ed["det_t"]), func():
 		if not is_instance_valid(h): return
-		var k := 1.25 if over() else 1.0
 		var stg := stage("e", {"delivery": {"type": "burst", "origin": "aim", "radius": r},
-			"effects": [{"type": "damage", "amount": float(ed["det_dmg"]) * k}, {"type": "lift", "strength": float(ed["det_lift"])}]})
+			"effects": [{"type": "damage", "amount": float(ed["det_dmg"])}, {"type": "lift", "strength": float(ed["det_lift"])}]})
 		run(stg, cx("e", "sigil_detonate", at, {"no_floor": true}))
 		Feel.shake(m, "t3", h, at))
 	h._ab_feedback("k1", "cast")
 	last_e = "Detonate"
 	return true
+
+## Flashpoint: an Overcharged detonation spends all the Heat. The rune collapses inward for the same
+## 0.3s (a bigger, white-gold ring everyone sees), then a payoff burst: more damage and radius, a
+## harder lift (a Meteor spikes it), T4 on each foe it catches; Heat drops to 0 with no Vent and the
+## Bolt comes straight back.
+func _flashpoint(at: Vector3, r0: float) -> void:
+	var ed := e_def()
+	var fd: Dictionary = ed.get("flash", {})
+	res = 0.0
+	vent = {}
+	was_over = false
+	var r := r0 * float(fd.get("r_k", 1.3))
+	var hot := res_col().lerp(Color.WHITE, 0.35)
+	var dt_ := float(ed["det_t"])
+	tele_circle(at, r, hot, dt_)
+	m.fx.ring(at, r, Color(hot, 0.9), dt_)
+	m.fx.flash(at + Vector3(0, 0.4, 0), hot, 1.8, dt_)
+	for i in 10:
+		var a := TAU * i / 10.0
+		var p := at + Vector3(cos(a) * r, 0.3, sin(a) * r)
+		m.fx.burst(p, hot, 3, 9.0, 0.25, 0.0, 1.1, (at + Vector3(0, 0.6, 0) - p).normalized(), 8.0)
+	m.sfx("pay_flashpoint", at, 0.0, 1.0)        # the rush in, then the boom on the detonation
+	net_ring(at, r, hot)
+	h._ab_feedback("k1", "cast")
+	last_e = "Flashpoint"
+	flashpoints += 1
+	m.later(dt_, func():
+		if not is_instance_valid(h): return
+		var stg := stage("e", {"delivery": {"type": "burst", "origin": "aim", "radius": r},
+			"effects": [{"type": "damage", "amount": float(fd.get("dmg", 24.0))}, {"type": "lift", "strength": float(fd.get("lift", 8.5))}]})
+		run(stg, cx("e", "flashpoint", at, {"no_floor": true, "hit_extra": {"payoff": true}}))
+		var dir := Vector2(at.x - h.pos.x, at.z - h.pos.z)
+		payoff_fx(at, "FLASHPOINT", hot, "", dir)
+		m.fx.ring(at, r * 1.15, Color(res_col(), 0.9), 0.45)
+		m.fx.burst(at + Vector3(0, 0.6, 0), Color("ff9a4a"), 30, 9.0, 0.6, 3.0, 1.5)
+		for i in 6:
+			m.later(0.05 * i, func(): if is_instance_valid(h): m.fx.burst(at + Vector3(0, 0.4 + 0.7 * i, 0), hot, 8, 2.2, 0.35, -2.0, 1.2))
+		# the Bolt is straight back: Lance (or Meteor) the lifted
+		ch_rmb = float(rmb_charges()); cd["rmb"] = 0.0; lock_t = 0.0
+		h._ab_feedback("sec", "ready"))
+	CombatBus.ability_used.emit(h, "flashpoint", "kin")
 
 func cast_e() -> bool:
 	var ed := e_def()
@@ -353,7 +474,8 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 		return
 	if int(h.slot_lv["ult"]) > 0 and float(cd["r"]) <= 0.0 and dist < float(r_def()["reach"]) and randf() < 0.35:
 		h.inp["aim"] = tgt.pos; h.inp["ult"] = true; return
-	if not sigil.is_empty() and tgt.flat_dist(sigil["pos"]) < float(sigil["r"]) and randf() < 0.6:
+	# a primed Sigil with them in it: Flashpoint. Not Overcharged: detonate now and then (or as it fades)
+	if not sigil.is_empty() and tgt.flat_dist(sigil["pos"]) < float(sigil["r"]) + 0.5 and (over() and randf() < 0.9 or randf() < 0.25 or float(sigil["t"]) < 1.5):
 		h.inp["sig"] = true; return
 	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and dist < 9.0 and randf() < 0.35:
 		h.inp["aim"] = tgt.pos; h.inp["sig"] = true; return

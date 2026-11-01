@@ -8,6 +8,8 @@ extends RefCounted
 ##   ult         the Juggernaut's R fuse (wind-up) a moment before Avalanche fires
 ##   archer      a snare roots the dummy, full Focus: the lens glint, the aim line, crosshairs over it
 ##   deadeye     the same, ending on the Deadeye payoff
+##   mage        a Sigil under the dummy, Overcharged: white-hot runes orbiting, the Sigil primed
+##   flashpoint  the same, ending on the Flashpoint payoff
 ##   card / card_<archetype>   the kit card (K); card_detail: the RMB detail page
 ##   menu        the loadout panel (L)
 ##   smg         the SMG firing at the dummy; add --legacy-shots for the old look and numbers (before)
@@ -103,6 +105,22 @@ static func tick(A: Arena, dt: float) -> void:
 				if _at(t, dt, 1.8): P.inp["fire"] = false
 				if P.ak.get("deadeyes") and int(P.ak.get("deadeyes")) > 0 and not A.has_meta("de_at"): A.set_meta("de_at", t)
 				at_t = float(A.get_meta("de_at", 9.0)) + 0.06
+		"mage", "flashpoint":
+			if t < 0.05:
+				if P.arch != "mage": A.set_arch("mage", "spellstaff")
+				A.set_kin("cindle")
+				P.teleport(D.pos + Vector3(-3.4, 0, -0.9))
+				A.home = P.pos
+			_aim(P, D)
+			P.inp["move"] = Vector2.ZERO
+			if _at(t, dt, 0.3): P.ak.cd["e"] = 0.0; P.ak.use_e()                       # the Sigil under the dummy
+			if _at(t, dt, 0.5): P.ak.ch_rmb = 1.0; P.inp["sec_hold"] = false; P.ak.press_rmb()   # a bolt through it
+			if t > 0.7 and t < 1.5: P.ak.res = maxf(P.ak.res, 86.0); P.ak.res_wait = 1.0   # ride it Overcharged
+			if w == "mage":
+				at_t = 1.5
+			else:
+				if _at(t, dt, 1.5): P.ak.use_e()                                         # Flashpoint
+				at_t = 1.5 + float(P.ak.e_def()["det_t"]) + 0.08
 		"card", "card_juggernaut", "card_detail", "card_archer", "card_mage", "card_gunslinger", "card_bulwark":
 			if t < 0.05:
 				var ca: String = {"card_juggernaut": "juggernaut", "card_archer": "archer", "card_mage": "mage", "card_gunslinger": "gunslinger", "card_bulwark": "bulwark"}.get(w, "thief")

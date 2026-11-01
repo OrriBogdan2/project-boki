@@ -887,3 +887,21 @@ within 0.8s of it), a gold second hit lands: +18 damage, a crit, T4.
 - Numbers: Longbow Focus shot 60 + 18 = 78 into a pinned target (a sniper 36 + 18); no cooldown
   refund, so it's at most about one per snare charge (2 per 9s) and roots have diminishing returns.
 - Bots: snare first when the target isn't pinned; loose the Deadeye when it's armed and they're pinned.
+
+### Mage: Heat -> Overcharged -> Flashpoint
+
+Bolts (20 Heat, a Lance 35) and the Sigil (25) build Heat. From 70 the Mage is **Overcharged**
+(+25%, bolts pierce) and the **Flashpoint is armed**: recast E and the Sigil detonates with all the
+Heat: 24 damage (a plain detonation is 10), 30% wider, a harder lift (8.5) that a Meteor spikes,
+T4 on each foe it catches. Heat drops to 0 with no Vent, and the Bolt comes straight back for a
+Lance on whoever's in the air. Overshoot to 100 and you Vent (the risk stays).
+
+- Tells: a rune mote per 20 Heat orbits the Mage's waist; Overcharged they burn white-hot, spin
+  faster and light the ground. A primed Sigil's rings turn white-gold and throb, so everyone reads
+  that the detonation will be big. "OVERCHARGED" pops (at most every 2s); the crosshair reads
+  "FLASHPOINT READY · E" with a Sigil down, and the E slot gets the gold dot.
+- Payoff: the same 0.3s detonation tell (soft-CC floor), but a white-gold collapse inward and the
+  rush of `pay_flashpoint`, then the boom: "FLASHPOINT", T4 hitstop and shake, a column of sparks.
+- Numbers: a plain detonation 10 (was 12.5 when Overcharged); Flashpoint 24 on a 14s E.
+- Bots: Flashpoint when Overcharged and the target stands in the Sigil (90%); otherwise detonate
+  now and then or as the Sigil fades.

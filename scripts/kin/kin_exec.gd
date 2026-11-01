@@ -717,6 +717,10 @@ static func apply_foe(effs: Array, f: Ent, cx: Dictionary, center: Vector3, st: 
 	var o := {"src": "kin" if caster is Kin else "abil", "ab": slot if slot != "" else "abil", "tags": [slot, String(cx.get("ability", ""))], "dr": true, "chain": cx.get("chain", [])}
 	if caster is Kin: o["tags"].append("kin")
 	for bk in base: o[bk] = base[bk]
+	# an archetype payoff stage marks its hits (payoff: T4 hitstop; crit), so the hit itself carries the weight
+	var hx = cx.get("hit_extra")
+	if hx is Dictionary:
+		for hk in hx: o[hk] = hx[hk]
 	var dmg := base_dmg
 	var any := base_dmg > 0.0 or not base.is_empty()
 	var post: Array = []
