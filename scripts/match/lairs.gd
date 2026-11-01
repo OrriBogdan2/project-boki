@@ -404,8 +404,7 @@ func _start_dial(L: Dictionary, h: Hunter) -> void:
 	if (L["targets"] as Array).is_empty():
 		_new_lock(L)
 	m.sfx("click", L["dial"], 0.0, 0.8)
-	if h == m.player and m.hud:
-		m.hud.toast_small("Press %s as the needle passes each lit arc" % Settings.key_cap("interact"), color_of(L))
+	# (no toast: the dial panel and the interact prompt both say how already; a third copy sat on your health bar)
 
 func _stop_dial(L: Dictionary) -> void:
 	L["user"] = null
@@ -691,9 +690,12 @@ func _boss_dead(L: Dictionary, b: Boss, credit: Ent) -> void:
 		drop_egg(L, Loot.rare_egg(sp, b.mkind), egg_at)
 	var cls := String(killer.cls) if killer else String(Data.CLASSES.keys()[m.rng.randi() % Data.CLASSES.size()])
 	var keys: Array = Data.CLASSES[cls]["weapons"] if Data.CLASSES.has(cls) else Data.weapon_ids()
+	if killer and String(killer.arch) != "" and not Arch.weapons(String(killer.arch)).is_empty():
+		keys = Arch.weapons(String(killer.arch))     # an archetype can only hold its own family: drop one it can use
 	var wit := m.found_weapon(at, String(keys[m.rng.randi() % keys.size()]), 4 if m.rng.randf() < 0.3 else 3)
-	m.spawn_weapon(String(wit["wid"]), int(wit["rar"]), at + Vector3(-0.9, 0, 0.4), "", true, -1, wit)
-	m.spawn_gear(Gear.roll(m.rng), 4 if m.rng.randf() < 0.3 else 3, at + Vector3(0.9, 0, 0.4))
+	# (1.5 m either side: at 0.9 their names ran into each other)
+	m.spawn_weapon(String(wit["wid"]), int(wit["rar"]), at + Vector3(-1.5, 0, 0.4), "", true, -1, wit)
+	m.spawn_gear(Gear.roll(m.rng), 4 if m.rng.randf() < 0.3 else 3, at + Vector3(1.5, 0, 0.4))
 	m.spawn_val(Loot.valuable("crown_shard" if m.rng.randf() < 0.5 else "kin_idol"), at + Vector3(0, 0, -0.8))
 	if m.exits and not m.exits.list.is_empty() and m.rng.randf() < 0.5:
 		m.exits.drop_key(at + Vector3(0, 0, 1.1))
