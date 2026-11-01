@@ -1498,7 +1498,7 @@ func spawn_weapon(w: String, rar: int, at: Vector3, id := "", send := true, ammo
 		wp["left_at"] = float(item["left_at"])      # put down from someone's hands: the 2 s re-pick rule (Loot.REPICK_T)
 	wpicks.append(wp)
 	if net_on and send:
-		# (the last field, how long ago it left someone's hands, -1 for fresh loot: Net 0.6.1)
+		# (the last field, how long ago it left someone's hands, -1 for fresh loot: Net 0.6.5)
 		net_event(["wdrop", id, w, rar, _r(at.x), _r(at.y), _r(at.z), ammo, String(item.get("el", "")), String(item.get("uq", "")),
 			snappedf(time - float(wp["left_at"]), 0.01) if wp.has("left_at") else -1.0])
 
