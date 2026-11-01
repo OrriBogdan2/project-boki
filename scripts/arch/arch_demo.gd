@@ -45,6 +45,8 @@ static func frame(m: Match) -> void:
 		P.inp["sec_hold"] = false
 	if what == "air" and f == go - 8:
 		P.teleport(P.pos + Vector3(0, 3.0, 0)); P.grounded = false; P.vel = Vector3(1.5, 1.0, 0)
+	if f == go + 2 and T and P.arch == "thief" and P.ak and what != "r":
+		(P.ak as ThiefKit).add_mark(T, 3, true)      # so the Mark pips and the purse show in the shot
 	if f != go:
 		return
 	match what:
@@ -87,6 +89,8 @@ static func _setup(m: Match, P: Hunter, what: String) -> void:
 	if what in ["r", "bonded"]: dist = 4.5
 	for i in 2:
 		var q := at + d * (dist + i * 1.6) + Vector3(-d.z, 0, d.x) * (i * 1.2 - 0.6)
+		if m.world.is_void(q.x, q.z) or m.world.is_block(q.x, q.z) or absf(m.world.ground_at(q.x, q.z) - at.y) > 0.5:
+			q = m.world.free_spot_near(q, [P.pos], 1.2, 0.5, 6.0)
 		q.y = m.world.ground_at(q.x, q.z)
 		var T: Hunter = m.make_hunter("D%d" % i, 7, ["medium", "heavy"][i], ["Rook", "Vale"][i], "idle", {}, q, {"arch": ["gunslinger", "juggernaut"][i]})
 		T.max_hp = 5000.0; T.hp = T.max_hp
@@ -94,13 +98,14 @@ static func _setup(m: Match, P: Hunter, what: String) -> void:
 		T.lvl = [4, 7][i]
 		foes.append(T)
 	m.set_meta("demo_foes", foes)
+	if OS.get_cmdline_user_args().has("--demo-debug"): print("ARCHDEMO setup at %s dir %s foes %s" % [str(at), str(d), str(foes.map(func(x): return x.pos))])
 	if P.kin == null:
 		var rec := Save.new_kin("wisplet" if what == "bonded" else "puddlet"); rec["trust"] = 90.0
 		var k: Kin = m.give_kin(P, rec)
 		k.state = "shoulder"; k.settle = 1.0
 	if m.hud: m.hud.guide_hidden = true
 	P.unlock_all()
-	P.lvl = 7; P.xp = float(Hunter.XP_TO[6]) + 120.0; P.slot_lv["ult"] = 1; P.skill_pts = 1
+	P.lvl = 7; P.xp = float(Hunter.XP_TO[6]) + 120.0; P.slot_lv["ult"] = 1; P.skill_pts = 0
 	if what == "level":
 		P.lvl = 5; P.xp = float(Hunter.XP_TO[5]) - 8.0; P.slot_lv["ult"] = 0; P.skill_pts = 1
 		P.slot_lv["sec"] = 2; P.slot_lv["kin"] = 1

@@ -1383,7 +1383,9 @@ func _draw_arch_abilities(sz: Vector2, p: Hunter) -> void:
 			var kc: Color = Data.KIN[k.species]["color"]
 			var pulse2 := 0.5 + 0.5 * sin(m.time * 6.0)
 			_rounded(ur.grow(3.0 + pulse2 * 3.0), Color(0, 0, 0, 0), 14, Color(kc, 0.55 + 0.4 * pulse2), 3)
-			_ctext(Vector2(ur.get_center().x, ur.position.y - 16), "BONDED", 10, kc, big)
+			var btr := Rect2(Vector2(ur.position.x + 4, ur.position.y - 7), Vector2(ur.size.x - 8, 13))
+			_rounded(btr, Color(0.03, 0.03, 0.05, 0.95), 5, Color(kc, 0.9), 1)
+			_ctext(btr.get_center() + Vector2(0, 4), "BONDED", 9, kc, big)
 		if float(ri.get("up", 0.0)) > 0.0:
 			c.draw_arc(ur.get_center(), us * 0.5 + 4.0, -PI / 2, -PI / 2 + TAU * clampf(float(ri["up"]) / 6.0, 0.0, 1.0), 40, Color("fff4c0"), 3.0, true)
 	if KinMerge.active(p):
