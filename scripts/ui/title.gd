@@ -489,6 +489,8 @@ func _build_ui() -> void:
 	col.add_child(wm)
 	col.add_child(UI.spacer(18))
 	var items: Array = []
+	# the Arena: every archetype's kit against dummies and a sparring bot, no save needed
+	items.append(["Arena", func(): Game.start_match(Match.arena_opts()), "knock"])
 	if Net.available():
 		items.append(["Play with friends", func(): Game.goto("lobby", {}), "bond"])
 	items.append(["Save files", func(): Overlay.ctx = "title"; Overlay.open_saves(), "satchel"])

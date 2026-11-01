@@ -128,6 +128,10 @@ func heal_both() -> void:
 func tick(dt: float) -> void:
 	if bot == null or m.player == null:
 		return
+	# a sparring room: you and the bot always know where each other are (the view cone would
+	# otherwise leave two hunters standing back to back, neither ever spotting the other)
+	bot.reveal_t = maxf(bot.reveal_t, 0.3)
+	m.player.reveal_t = maxf(m.player.reveal_t, 0.3)
 	if _test_cast > 0.0 and m.time >= _test_cast:
 		_test_cast = -1.0
 		bot.inp["aim"] = m.player.pos

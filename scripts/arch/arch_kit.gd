@@ -31,6 +31,8 @@ var st := {}                   # the subclass's own state
 var fx_t := 0.0
 var tell := ""                 # "" | "half" | "full": the resource tell enemies read
 var bonded_glow := false
+var fuse := {}                 # the R's fuse (wind-up) running: {t, T, bond, guard}
+var cd_off := false            # practice toggle (Arena): cooldowns don't run down, they're skipped
 
 static func make(hunter: Hunter, arch_id: String) -> ArchKit:
 	var k: ArchKit
@@ -96,6 +98,9 @@ func outgoing(_t: Ent, dmg: float, _o: Dictionary) -> float: return dmg
 func incoming(_by: Ent, dmg: float, o: Dictionary) -> Array: return [dmg, o]
 func move_k() -> float: return 1.0
 func fire_ok() -> bool: return true
+## The kit's own pace times the R fuse's plant (you stand and gather while it winds up).
+func pace() -> float: return move_k() * (0.35 if not fuse.is_empty() else 1.0)
+func can_shoot() -> bool: return fire_ok() and fuse.is_empty()
 func res_text() -> String: return "%d" % int(round(res))
 func res_frac() -> float: return clampf(res / maxf(1.0, res_max()), 0.0, 1.0)
 func bot_use(_tgt: Ent, _dist: float, _los: bool) -> void: pass
@@ -109,6 +114,11 @@ func tick(dt: float) -> void:
 	var rate := 1.0 + h.gear_stat("cdr")
 	for k in cd.keys():
 		cd[k] = maxf(0.0, float(cd[k]) - dt * rate)
+		if cd_off and not (k == "r" and not fuse.is_empty()): cd[k] = 0.0
+	if cd_off:
+		ch_rmb = float(rmb_charges())
+	if not fuse.is_empty():
+		_tick_fuse(dt)
 	var mx := float(rmb_charges())
 	if ch_rmb < mx and float(cd["rmb"]) <= 0.0:
 		ch_rmb = minf(mx, ch_rmb + 1.0)
@@ -222,30 +232,141 @@ func use_r() -> void:
 	if busy():
 		h._ab_feedback("r", "deny")
 		return
+	if not fuse.is_empty():
+		return
 	if r_t > 0.0 and r_recast():
 		return
 	if float(cd["r"]) > 0.0 or int(h.slot_lv.get("ult", 0)) <= 0:
 		h._ab_feedback("r", "deny")
 		return
+	if not r_can_cast():
+		h._ab_feedback("r", "deny")
+		if h.is_local() and m.hud: m.hud.toast_small(r_no_target_text(), col_of(r_def()))
+		return
 	var will_bond := KinMerge.can_cast(h)
-	bonded = will_bond
+	var ft := fuse_time()
+	if ft <= 0.0:
+		_fire_r(will_bond)
+		return
+	# the fuse: a readable wind-up (pose, energy gathering, a sting, a ring enemies can see), then the
+	# effect fires with a big impact. The cooldown starts now, so the slot reads as spent.
+	fuse = {"t": ft, "T": ft, "bond": will_bond, "guard": String(r_def().get("fuse_guard", "none")), "fx": 0.0}
+	cd["r"] = r_cooldown()
+	h._ab_feedback("r", "cast")
+	_fuse_start(will_bond)
+
+## R's cooldown: the data's, 15% shorter at rank 2.
+func r_cooldown() -> float:
+	return float(r_def().get("cooldown", 100.0)) * (0.85 if rank("ult") >= 2 else 1.0)
+
+## How long R winds up before it goes off (docs/ARCHETYPES.md R fuse; 0 = instant).
+func fuse_time() -> float:
+	return float(r_def().get("fuse", 0.45))
+
+func fusing() -> bool:
+	return not fuse.is_empty()
+
+## Can R start now (Heist needs someone to rob)? Checked before the fuse, so a fuse never fizzles.
+func r_can_cast() -> bool: return true
+func r_no_target_text() -> String: return "Nothing in range"
+
+func _fuse_start(bond: bool) -> void:
+	var rd := r_def()
+	var col := col_of(rd)
+	var T := float(fuse["T"])
+	h.cast_at = m.time; h.cast_slot = "ult"
+	m.fx.word(h.pos + Vector3(0, 2.8, 0), String(rd.get("name", "")).to_upper(), col, true)
+	tele_circle(h.pos, 2.4, col, T)
+	m.fx.ring(h.pos, 0.8, Color(col, 0.9), T)
+	m.sfx("charge", h.pos, 0.0 if h.is_local() else -2.0, 0.55)
+	m.sfx("skill", h.pos, -3.0, 0.6)
+	if bond:
+		m.sfx("bond", h.pos, -3.0, 0.9)
+	if String(fuse["guard"]) == "unstoppable":
+		h.fortify_t = maxf(h.fortify_t, T + 0.05)
+		m.fx.word(h.pos + Vector3(0, 2.2, 0), "UNSTOPPABLE", Color("ffe2a0"), false)
+	if h.is_local() and m.cam:
+		m.cam.punch(0.05)
+	Feel.shake(m, "cast", h, h.pos, null, 3)
+	# everyone else's game: a ring and a column of light where it's winding up (the existing fx path)
+	if m.net_on and not h.remote:
+		m.net_fx(["ring", m._r(h.pos.x), m._r(h.pos.y), m._r(h.pos.z), 2.4, col.to_html(false)])
+		m.net_fx(["bolt", m._r(h.pos.x), m._r(h.pos.y), m._r(h.pos.z), m._r(h.pos.x), m._r(h.pos.y + 4.0), m._r(h.pos.z), col.to_html(false)])
+	CombatBus.ability_used.emit(h, id + "_r_fuse", "ult_fuse")
+
+func _tick_fuse(dt: float) -> void:
+	var rd := r_def()
+	var col := col_of(rd)
+	fuse["t"] = float(fuse["t"]) - dt
+	var unstop := String(fuse["guard"]) == "unstoppable"
+	if unstop:
+		h.fortify_t = maxf(h.fortify_t, 0.1)
+		h.stun_t = 0.0; h.root_t = 0.0
+	elif h.stun_t > 0.0 or h.downed or h.out:
+		# interrupted: the ult fizzles and comes back after a short wait (that's the counterplay)
+		fuse = {}
+		cd["r"] = minf(float(cd["r"]), 8.0)
+		m.fx.word(h.pos + Vector3(0, 2.4, 0), "INTERRUPTED", Color("ff8a7a"), true)
+		m.sfx("warn", h.pos, -4.0, 0.8)
+		return
+	# energy gathers inward, faster and brighter toward the end
+	var k := 1.0 - float(fuse["t"]) / maxf(0.01, float(fuse["T"]))
+	fuse["fx"] = float(fuse["fx"]) - dt
+	if float(fuse["fx"]) <= 0.0:
+		fuse["fx"] = 0.05
+		var a := randf() * TAU
+		var r := lerpf(2.6, 1.2, k)
+		var p := h.pos + Vector3(cos(a) * r, 0.4 + randf() * 1.6, sin(a) * r)
+		var inward := (h.pos + Vector3(0, 1.0, 0) - p).normalized()
+		m.fx.burst(p, col.lightened(0.3 * k), 3, 4.5 + 3.0 * k, 0.28, 0.0, 0.8 + 0.6 * k, inward, 12.0)
+		if bool(fuse["bond"]) and h.kin and (h.kin as Kin).visible:
+			# the Boki pours itself into you: kin-coloured streams from it to your chest
+			var kc: Color = Data.KIN.get((h.kin as Kin).species, {}).get("color", Color.WHITE)
+			var kp: Vector3 = (h.kin as Kin).position + Vector3(0, 0.4, 0)
+			m.fx.burst(kp, kc, 3, 6.0, 0.25, 0.0, 1.0, (h.pos + Vector3(0, 1.1, 0) - kp).normalized(), 10.0)
+			if randf() < 0.35: m.fx.bolt(kp, h.pos + Vector3(0, 1.1, 0), Color(kc, 0.8))
+	if float(fuse["t"]) <= 0.0:
+		var bond: bool = fuse["bond"]
+		fuse = {}
+		_fire_r(bond)
+
+## The ult itself, after the fuse: its effect, then the big impact (and the merge when Bonded).
+func _fire_r(will_bond: bool) -> void:
+	if busy():
+		cd["r"] = minf(float(cd["r"]), 8.0)
+		return
+	bonded = will_bond and KinMerge.can_cast(h)
 	if not cast_r():
 		bonded = false
+		cd["r"] = minf(float(cd["r"]), 2.0)     # nobody left to hit: almost all of it back
 		h._ab_feedback("r", "deny")
 		return
-	cd["r"] = float(r_def().get("cooldown", 70.0))
+	cd["r"] = r_cooldown()
 	h.used["r"] = int(h.used.get("r", 0)) + 1
-	h._ab_feedback("r", "cast")
 	CombatBus.ability_used.emit(h, id + "_r", "ult")
-	Feel.shake(m, "cast", h, h.pos, null, 3)
-	if will_bond:
+	_r_impact()
+	if bonded:
 		_bond_tell()
-		m.later(0.2, func():
-			if is_instance_valid(h) and not h.downed and not h.out and KinMerge.cast(h):
-				Feel.hitstop(m, h, h, 0.0, {"bonded": true})
-				Feel.shake(m, "bonded", h, h.pos)
-				if h.is_local() and m.hud: m.hud.flash(Feel.cat_color("control"), 0.25)
-				Sfx.duck(0.3))
+		if KinMerge.cast(h):
+			Feel.hitstop(m, h, h, 0.0, {"bonded": true})
+			Feel.shake(m, "bonded", h, h.pos)
+			if h.is_local() and m.hud: m.hud.flash(Feel.cat_color("control"), 0.25)
+			Sfx.duck(0.3)
+
+## The ult going off: a burst, a ring, a flash and a camera punch (the payoff of the fuse).
+func _r_impact() -> void:
+	var col := col_of(r_def())
+	m.fx.ring(h.pos, 3.6, Color(col, 0.95), 0.4)
+	m.fx.ring(h.pos, 1.8, Color(1, 1, 1, 0.9), 0.25)
+	m.fx.burst(h.pos + Vector3(0, 1.0, 0), col, 34, 7.0, 0.55, 2.0, 1.4)
+	m.fx.flash(h.pos + Vector3(0, 1.0, 0), col.lightened(0.4), 1.4, 0.12)
+	m.sfx("boom", h.pos, -2.0, 0.8)
+	Feel.shake(m, "t4", h, h.pos, null, 3)
+	if h.is_local():
+		if m.cam: m.cam.punch(0.1)
+		if m.hud: m.hud.flash(col, 0.18)
+	if m.net_on and not h.remote:
+		m.net_fx(["ring", m._r(h.pos.x), m._r(h.pos.y), m._r(h.pos.z), 3.6, col.to_html(false)])
 
 ## The 0.35s transform tell of a Bonded R: a column in the kin's colour visible within 25m.
 func _bond_tell() -> void:
@@ -525,8 +646,8 @@ func slot_info(slot: String) -> Dictionary:
 		"r", "ult":
 			var sd := r_def()
 			out.merge({"name": String(sd.get("name", "")), "short": String(sd.get("short", "")), "icon": String(sd.get("icon", "")), "col": col_of(sd), "desc": String(sd.get("desc", "")),
-				"cd": float(cd["r"]), "cd_max": float(sd.get("cooldown", 70.0)), "charges": 1 if float(cd["r"]) <= 0.0 else 0, "max_charges": 1, "verb": "r",
-				"ready": float(cd["r"]) <= 0.0 and int(h.slot_lv.get("ult", 0)) > 0, "bonded": bonded_glow, "up": r_t}, true)
+				"cd": float(cd["r"]), "cd_max": r_cooldown(), "charges": 1 if float(cd["r"]) <= 0.0 else 0, "max_charges": 1, "verb": "r",
+				"ready": float(cd["r"]) <= 0.0 and int(h.slot_lv.get("ult", 0)) > 0, "bonded": bonded_glow, "up": r_t, "fuse": float(fuse.get("t", 0.0))}, true)
 		"dash", "dodge":
 			var sd := dash_def()
 			var dmax := h.max_dashes()

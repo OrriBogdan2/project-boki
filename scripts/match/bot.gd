@@ -139,7 +139,9 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		var duty := float(df.get("fire", 0.8))
 		if a["burst"] < -randf_range(0.35, 0.6) / maxf(0.25, duty) * (1.0 if duty >= 0.99 else 1.4):
 			a["burst"] = randf_range(0.7, 1.3) * (0.6 + 0.4 * duty)
-		var trig_ok: bool = float(a["react_t"]) <= 0.0 and (a["burst"] > 0.0 or ((float(h.wpn["rate"]) > 0.4 or h.wpn.has("spin_up")) and randf() < duty * dt * 8.0 + (0.0 if duty < 0.99 else 1.0)))
+		# (0.5: after the Oct 31 weapon retune a burst rifle or greatsword still counts as a fast weapon
+		# and keeps its pauses, so bots don't hit harder than before)
+		var trig_ok: bool = float(a["react_t"]) <= 0.0 and (a["burst"] > 0.0 or ((float(h.wpn["rate"]) > 0.5 or h.wpn.has("spin_up")) and randf() < duty * dt * 8.0 + (0.0 if duty < 0.99 else 1.0)))
 		if los and d < float(h.wpn["range"]) + 0.5 and trig_ok:
 			inp["fire"] = true
 			a["nolos_t"] = 0.0
@@ -186,6 +188,11 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 			if h.ak:
 				# the archetype's kit: dash, RMB variants, E and R (each kit knows its own moments)
 				h.ak.bot_use(tgt, d, los)
+				if not rv.is_empty() and h.flat_dist(rv["o"]) < 6.0:
+					# picking up a squadmate: no kit move that carries us off them (a Shadow Step
+					# behind the rival, a Rampage, a leap, an ult chase); E and the gun still go
+					inp["dash"] = false; inp["sec"] = false; inp["ult"] = false
+					h.ak.bot_hold["dash"] = 0.0; h.ak.bot_hold["rmb"] = 0.0
 				_use_kin_ab(m, h, tgt)
 			else:
 				_use_sig(m, h, tgt)

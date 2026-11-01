@@ -29,7 +29,7 @@ func _ready() -> void:
 		fade.boot()     # carry on from the boot splash: covered, logo showing, until the first screen is up
 	var args := OS.get_cmdline_user_args()
 	# tooling never touches the real save file: checks, screenshots and --no-save runs play on a copy
-	if "--no-save" in args or "--archetype-check" in args or Array(args).any(func(x): return String(x).begins_with("--shot=")):
+	if "--no-save" in args or "--archetype-check" in args or "--arena-check" in args or Array(args).any(func(x): return String(x).begins_with("--shot=") or String(x).begins_with("--arena-shot=")):
 		Save.no_write = true
 	var opts := {}
 	for a in args:
@@ -404,6 +404,11 @@ func _ready() -> void:
 	if "--duel-check" in args:
 		_duel_check()
 		return
+	if "--arena-check" in args:
+		var arc = load("res://tools/arena_check.gd").new()      # the Arena, training's practice tools, the kit card
+		set_meta("arena_check", arc)        # (kept alive across its awaits)
+		arc.run(self)
+		return
 	if "--archetype-check" in args:
 		var akc = load("res://tools/archetype_check.gd").new()      # every archetype kit, controls, locks, infusion, feel
 		set_meta("archetype_check", akc)
@@ -591,8 +596,10 @@ func _ready() -> void:
 		show_screen("match", Match.duel_opts())
 	elif Record.arena_pick != "":
 		_open_arena(Record.arena_pick)
+	elif "--arena" in args:
+		_open_arena("")
 	elif "--training" in args:
-		show_screen("match", {"training": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": "--no-drop" in args, "perk_demo": "--perk-demo" in args})
+		show_screen("match", {"training": true, "practice": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": "--no-drop" in args, "perk_demo": "--perk-demo" in args})
 	elif "--tutorial" in args:
 		show_screen("match", {"tutorial": true, "teams": 1, "squad": 1, "tier": 0, "length": 1500.0, "tut_test": "--tut-test" in args})
 	elif args.is_empty() or "--title" in args:
