@@ -199,6 +199,7 @@ func warm_up() -> void:
 		fx.flash(at + Vector3(0, 1, 0), Color.WHITE)
 		fx.spark(at + Vector3(0, 1, 0), Vector3.UP, Color.WHITE, 4)
 		fx.slash(at + Vector3(0, 0.8, 0), 0.0, 2.0, 1.6, Color.WHITE)
+		fx.beam(at + Vector3(0, 1, 0), at + Vector3(2, 1, 0), Color.WHITE)
 		var tg := fx.telegraph_circle(at, 1.5, Color(1, 0.3, 0.2))
 		# the muzzle flash light lights whatever stands near a shot: the lit variants compile now too
 		if muzzle_light:
@@ -2933,6 +2934,9 @@ func spawn_shot(by: Ent, at: Vector3, v2: Vector2, dmg: float, life: float, size
 			vis_col = col.lerp(Color("ff5a3a"), 0.35)
 			vis_col.a = 1.0
 			vis_size *= 1.3
+		elif player and String(extra.get("src", "")) == "abil":
+			vis_col = col.lerp(Color.WHITE, 0.25)      # your right click reads clearly over your own gunfire
+			vis_size *= 1.25
 		elif player:
 			vis_col = Color(col, 0.5)
 			vis_size *= 0.85
@@ -3156,6 +3160,8 @@ func _shot_end(s: Dictionary, at: Vector3, e: Ent, why := "") -> void:
 			Effects.run(fxx["fx_end"], s["by"], c2)
 	if s["node"]:
 		s["node"].visible = false
+	if e == null and String(fxx.get("src", "")) == "abil" and not fxx.get("cos", false):
+		AbilityFx.fizzle(self, at, s["col"])      # a right click that missed still ends visibly
 	if fxx.has("hitset"):
 		if e == null: fx.burst(at, s["col"], 5, 2.0, 0.25, 6.0, 0.6)
 		return        # piercing shots already dealt their hits on the way
@@ -3415,6 +3421,8 @@ func _process(delta: float) -> void:
 	for s in shots:
 		if s.has("deco"):
 			_render_deco(s, alpha)
+		if String((s["x"] as Dictionary).get("src", "")) == "abil":
+			AbilityFx.trail(self, s, (s["prev"] as Vector3).lerp(s["pos"], alpha))
 		if s["node"]:
 			var mi: MeshInstance3D = s["node"]
 			mi.global_position = (s["prev"] as Vector3).lerp(s["pos"], alpha)
@@ -3877,7 +3885,8 @@ func step(dt: float) -> void:
 		# screenshots of hits (Juice): a rival steps up 4m away, holds still, and takes fire
 		if hud: hud.guide_hidden = true
 		if not train.has("_jt"):
-			var q := player.pos + Vector3(4.0, 0, -1.0)
+			Settings.v["tips"] = false
+			var q := world.free_spot_near(player.pos + Vector3(4.0, 0, -1.0), [player.pos], 1.0, 0.45, 6.0)
 			var jt := make_hunter("jtarget", 7, "medium", "Rook", "idle", {}, Vector3(q.x, world.ground_at(q.x, q.z), q.z), bot_kit())
 			jt.lives = 1
 			train["_jt"] = jt
@@ -3886,6 +3895,27 @@ func step(dt: float) -> void:
 			player.inp["aim"] = jt2.pos + Vector3(0, 0.95, 0)
 			player.inp["move"] = Vector2.ZERO
 			player.inp["fire"] = time > 0.6
+	if "--rmb-demo" in OS.get_cmdline_user_args() and player and not player.dropping:
+		# screenshots of a weapon's right click: a rival 5m away takes two shots, then the RMB at
+		# 1.2s (held 1s if it charges); a trap is laid at the rival's feet and they step back onto it
+		if hud: hud.guide_hidden = true
+		if not train.has("_rt"):
+			Settings.v["tips"] = false
+			var q := world.free_spot_near(player.pos + Vector3(5.0, 0, -1.2), [player.pos], 1.0, 0.45, 6.0)
+			var rt := make_hunter("rtarget", 7, "medium", "Rook", "idle", {}, Vector3(q.x, world.ground_at(q.x, q.z), q.z), bot_kit())
+			rt.lives = 1
+			train["_rt"] = rt
+		var rt2: Hunter = train["_rt"]
+		if is_instance_valid(rt2) and not rt2.out:
+			player.inp["aim"] = rt2.pos + Vector3(0, 0.95, 0)
+			player.inp["move"] = Vector2.ZERO
+			player.inp["fire"] = time > 0.5 and time < 0.75
+			if time >= 1.2 and not train.has("_rt_sec"):
+				train["_rt_sec"] = rt2.pos
+				player.inp["sec"] = true
+			player.inp["sec_hold"] = time >= 1.2 and time < 2.2
+			if time >= 2.6 and time < 2.7 and train.has("_rt_sec"):
+				rt2.teleport(train["_rt_sec"])
 	if opts.get("cone_demo", false) and player:
 		player.inp["aim"] = player.pos + Vector3(4.0, 0.95, -5.0)
 		player.inp["crouch"] = opts.get("crouch_demo", false)

@@ -1407,8 +1407,8 @@ func _tick_charge(dt: float) -> void:
 	abil_charge["t"] = float(abil_charge["t"]) + dt
 	var full := float(ud.charge.get("time", 1.0))
 	var k := clampf(float(abil_charge["t"]) / full, 0.0, 1.0)
-	if int(abil_charge["t"] * 10.0) != int((float(abil_charge["t"]) - dt) * 10.0) and k < 1.0:
-		m.fx.burst(pos + Vector3(aim_dir().x * 0.7, 1.0, aim_dir().y * 0.7), ud.color, 3, 1.5, 0.2, 0.0, 0.6)
+	if not unseen:
+		AbilityFx.charging(m, self, k, ud.color, clampf((float(abil_charge["t"]) - dt) / full, 0.0, 1.0))
 	if not inp.get("sec_hold", false) or float(abil_charge["t"]) >= full + 0.6:
 		abil_charge = {}
 		if runner.use("utility", {"level": ability_level("sec"), "charge": maxf(k, float(ud.charge.get("min", 0.0)))}):

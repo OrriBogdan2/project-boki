@@ -418,8 +418,14 @@ func tick(dt: float) -> void:
 			_drop_tether(t)
 	for tr in traps.duplicate():
 		tr["t"] = float(tr["t"]) - dt
+		var was_arming := float(tr["arm"]) > 0.0
 		tr["arm"] = float(tr["arm"]) - dt
 		var caster = tr["caster"]
+		if was_arming and float(tr["arm"]) <= 0.0 and m.player and int(tr["team"]) == int(m.player.team):
+			# armed: a blink and a beep for its own side (rivals only ever see a faint glint)
+			m.fx.flash((tr["at"] as Vector3) + Vector3(0, 0.2, 0), Color(tr["col"]).lerp(Color.WHITE, 0.5), 0.45, 0.1)
+			m.fx.ring(tr["at"], float(tr["r"]), Color(tr["col"], 0.9), 0.25)
+			m.sfx("ping", tr["at"], -12.0 if caster != m.player else -7.0, 1.6)
 		if float(tr["t"]) <= 0.0 or not is_instance_valid(caster):
 			if float(tr["t"]) <= 0.0 and tr.get("kx_end") is Callable:
 				(tr["kx_end"] as Callable).call(tr["at"])      # waited out untriggered: on_end
@@ -435,6 +441,8 @@ func tick(dt: float) -> void:
 				if float(tr["reveal"]) > 0.0 and f is Hunter:
 					f.reveal_t = maxf(f.reveal_t, float(tr["reveal"]))
 				m.fx.word(at + Vector3(0, 1.6, 0), "TRAP", tr["col"], false)
+				m.sfx("click", at, 0.0, 1.7)       # the snap before it goes off
+				m.fx.flash(at + Vector3(0, 0.4, 0), Color(tr["col"]).lerp(Color.WHITE, 0.6), 0.8, 0.1)
 				if caster.dead:
 					_drop_trap(tr); break
 				if tr.get("kx") is Callable:
