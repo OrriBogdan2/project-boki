@@ -180,6 +180,9 @@ var in_current := false        # riding a wind road or an updraft: the glider do
 var glide_max := GLIDE_TIME
 var glide_cd := 0.0
 var glide_k := 0.0             # how far the glider is unfolded, for the model
+var _auto_glide_held := true   # (glide held last frame: auto_glide ends on a fresh press, not a held key)
+var auto_glide := false        # carried by a lair's escape updraft: the glider opens and stays open
+                               # by itself until you land (hold glide yourself to take it back)
 var wind_t := 0.0
 var perk := ""                  # (old single home perk; perks are now found in the run, see perks)
 var perks: Array = []           # perks picked up this expedition, one entry per stack
@@ -2358,6 +2361,12 @@ func _update_glide(dt: float) -> void:
 		glide_fuel = minf(1.0, glide_fuel + dt / 1.2)
 	if grounded:
 		shot_down = false
+	# a player takes the glider back with a fresh press of glide; a bot's own glide input (it holds
+	# glide over the void to recover) must not fold the glider it's being carried on
+	var glide_press: bool = inp.get("glide", false) and not _auto_glide_held and ctrl != "bot"
+	_auto_glide_held = inp.get("glide", false)
+	if auto_glide and (glide_press or downed or out or (grounded and air_t <= 0.0 and vel.y <= 0.0)):
+		auto_glide = false
 	# an overheated glider scorches you while it stays open
 	if gliding and not dropping and glide_fuel <= 0.001 and not downed:
 		heat_burn += dt * 4.0
@@ -2367,7 +2376,7 @@ func _update_glide(dt: float) -> void:
 	# an overheated glider stays open (slow and sinking) until you land or get hit again
 	var can: bool = not grounded and roll_t <= 0.0 and fly_t <= 0.0 and glide_cd <= 0.0 and not downed and stun_t <= 0.0 \
 		and m.time - kb_t > 0.4 and (glide_fuel > 0.0 or gliding) and pad.is_empty() and not shot_down
-	var want: bool = inp.get("glide", false)
+	var want: bool = inp.get("glide", false) or auto_glide
 	if gliding and not _handoff.is_empty() and want and can:
 		_take_glide_handoff()       # (movefeel) a burst that ended with the glider still open
 	if gliding:

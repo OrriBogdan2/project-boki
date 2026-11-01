@@ -42,6 +42,7 @@ func _ready() -> void:
 		Settings.v["msaa"] = 0
 	RenderingServer.viewport_set_measure_render_time(vp_rid, true)
 	process_priority = -100
+	Save.no_write = true      # never touches the dev save (the music list would write it)
 	Save.d["tutorial"]["home"] = true
 	var squad := 1
 	for a in OS.get_cmdline_user_args():

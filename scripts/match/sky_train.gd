@@ -73,6 +73,10 @@ func setup(match_node: Node) -> void:
 		cur.append(Transform3D()); old.append(Transform3D())
 	_place(0.0)
 	old = cur.duplicate()
+	# the cars stand at their first stop from the start (not at the origin until the first tick), so
+	# the loading screen's warm-up draws them, and what their headlight lights, where play will
+	for k in cars_n:
+		(car_nodes[k] as Node3D).transform = cur[k]
 	_attach_crates()
 
 ## Where the engine is at a given match time, and how fast it's going.
