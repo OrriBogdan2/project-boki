@@ -31,6 +31,8 @@ func run(main: Node, opts: Dictionary) -> void:
 	var R: Rolling = m.rolling
 	print("ROLLSIM seed %d squad %d raid %s, built in %d ms: %d waves at %s; you join wave %d (%s); map %d tiles, %d islands" % [m.seed_val, R.size, m.raid, Time.get_ticks_msec() - tb,
 		R.waves.size(), str(R.waves.map(func(w): return Rolling.fmt(float(w["t"])))), R.join_i, Rolling.fmt(R.t0), m.world.w, m.world.islands.size()])
+	for h in m.hunters:
+		h.set_meta("lvl_join", h.lvl)
 	var t_wall := Time.get_ticks_msec()
 	var next_log := floorf(m.sess_time() / 60.0) * 60.0 + 60.0
 	var launched_at := {}
@@ -144,6 +146,10 @@ func run(main: Node, opts: Dictionary) -> void:
 			if not a.is_empty() and k == 6 and float(R.waves[wi]["t"]) >= 600.0:
 				late_gap.append(a.reduce(func(x, y): return x + y, 0.0) / a.size())
 		print("  wave %2d (%s): %s" % [wi, Rolling.fmt(float(R.waves[wi]["t"])), "  ".join(row)])
+	# joined part-way: your wave against the squads that were already out there
+	var pre: Array = m.hunters.filter(func(h): return h.has_meta("landed_t") and float(h.get_meta("landed_t")) < 0.0)
+	if not pre.is_empty():
+		print("ROLLSIM earlier arrivals: %d, levels at your join %s" % [pre.size(), str(pre.map(func(h): return int(h.get_meta("lvl_join", h.lvl))))])
 	if not late_gap.is_empty():
 		print("ROLLSIM waves from 10:00 on, 6 min after landing: mean gap to the median %+.2f levels" % (late_gap.reduce(func(x, y): return x + y, 0.0) / late_gap.size()))
 	var S: Dictionary = R.stats

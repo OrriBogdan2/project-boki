@@ -853,8 +853,11 @@ func _draw_session_row(sr: Rect2) -> void:
 		var bt := "BOUNTY ON YOU"
 		_text(Vector2(sr.end.x - 10 - big.get_string_size(bt, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x, sr.position.y + 35), bt, 11, Color(amber, pulse), big)
 	else:
+		# the lobby's level, where there's room beside the wave line (WAVE INCOMING fills the row)
 		var md := "LOBBY LV %s" % (str(int(ro.median)) if absf(ro.median - round(ro.median)) < 0.01 else "%.1f" % ro.median)
-		_text(Vector2(sr.end.x - 10 - big.get_string_size(md, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x, sr.position.y + 35), md, 10, Color(MUTED, 0.85), big)
+		var mw := big.get_string_size(md, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x
+		if big.get_string_size(line, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x + mw + 28.0 <= sr.size.x:
+			_text(Vector2(sr.end.x - 10 - mw, sr.position.y + 35), md, 10, Color(MUTED, 0.85), big)
 
 ## A bounty mark: an amber target with a pulse (on the maps and over a hunter's nameplate).
 func bounty_marker(cv: Control, p: Vector2, k := 1.0) -> void:

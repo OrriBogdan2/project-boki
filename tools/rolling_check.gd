@@ -174,6 +174,7 @@ func _session(main: Node) -> void:
 	var land_t := 0.0
 	while newc.any(func(h): return h.riding or h.dropping or (not h.grounded and not h.out)) and land_t < 75.0:
 		m.step(Match.DT); land_t += Match.DT
+	for _k in 3: m.step(Match.DT)       # (the session's tick sees them down)
 	var landed: Array = newc.filter(func(h): return not h.riding and not h.dropping and not h.out)
 	ok(landed.size() >= newc.size() - 1, "the wave lands (%d of %d down in %.0f s)" % [landed.size(), newc.size(), land_t])
 	var wfl := Rolling.floor_at(m.sess_time())
@@ -188,7 +189,8 @@ func _session(main: Node) -> void:
 		var x0 := P.xp
 		P.gain_xp(20.0)
 		xs.append(snappedf(P.xp - x0, 0.1))
-	ok(xs == [40.0, 30.0, 20.0, 20.0], "catch-up XP with the lobby at level 6: x2 at level 2, x1.5 at 5, x1 at 6+ (%s)" % str(xs))
+	var want_xs := [2, 5, 6, 8].map(func(lv): return snappedf(20.0 * minf(Rolling.CATCHUP_MAX, 1.0 + maxf(0.0, 6.0 - lv) * Rolling.CATCHUP_PER_LV), 0.1))
+	ok(xs == want_xs and xs[0] > xs[1] and xs[1] > xs[2] and xs[2] == 20.0 and xs[3] == 20.0, "catch-up XP with the lobby at level 6: x%.2f at level 2, x%.2f at 5, x1 at 6+ (%s)" % [xs[0] / 20.0, xs[1] / 20.0, str(xs)])
 	# the median comes from everyone on the ground
 	var onmap: Array = m.hunters.filter(func(h): return R.on_map(h))
 	for i in onmap.size(): (onmap[i] as Hunter).lvl = 3 + (i % 3)     # 3, 4, 5, 3, 4, 5, ...

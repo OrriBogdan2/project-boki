@@ -47,7 +47,8 @@ const BOUNTY_XP_GAP := 40.0
 const GAP_KNOCK_XP := 25.0         # any knock on a higher-level hunter: this much XP per level of the gap
 const STAY := Vector2(480.0, 960.0)     # how long a bot squad means to stay out before heading home (8-16 min)
 const WIPE_PER_MIN := 0.03         # (earlier arrivals, simulated) chance a squad is wiped in a minute
-const XP_PER_MIN := 105.0          # (earlier arrivals) XP a bot makes in a minute out there (--rolling-sim measures it)
+const XP_PER_MIN := 200.0          # (earlier arrivals) XP a bot makes in a minute out there. Was a 105 guess; --rolling-sim
+                                   # --seed=5 measured a median 243/min on the map, 12.8% of it catch-up: ~215 base, less on a picked-over map
 const CAMP_RESPAWN := 240.0        # a cleared monster camp comes back after 4 minutes with nobody near
 const METEOR_EVERY := 360.0        # meteor showers (fresh gems) every 6 minutes of the session
 const LAND_CROWD_R := 30.0
@@ -696,7 +697,11 @@ func demo(mode: String) -> void:
 		var ld: Hunter = _demo["lead"]
 		var gy := m.world.ground_at(ld.pos.x, ld.pos.z) if not m.world.is_void(ld.pos.x, ld.pos.z) else ld.pos.y - 20.0
 		# (armed while they're still well up, so they're mid-descent when the frames have drawn)
-		if (ld.dropping and ld.pos.y - gy < 22.0) or (not ld.riding and not ld.dropping): _demo["armed"] = true
+		if not _demo.has("armed") and ((ld.dropping and ld.pos.y - gy < 22.0) or (not ld.riding and not ld.dropping)):
+			_demo["armed"] = true
+			# stand just under where they are now, so the camera has them gliding in overhead
+			var under := Vector3(ld.pos.x, 0, ld.pos.z)
+			P.teleport(m.world.free_spot_near(under + Vector3(2.5, 0, 3.5), [under], 1.5, 0.45, 12.0))
 	if _demo.has("armed"):
 		_shoot()
 	if mode == "map" and _demo.has("wave") and _demo.has("bounty"):
