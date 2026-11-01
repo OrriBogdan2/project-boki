@@ -197,6 +197,7 @@ static func owner_stat(stat: String, v: float) -> String:
 		"fire_rate": return "+%s fire rate" % pct(v)
 		"reload": return "%s faster reload" % pct(v)
 		"reveal_radius": return "reveals rivals within %sm" % n(v)
+		"cooldown": return "abilities recharge %s faster" % pct(v)
 	return stat
 
 static func passives(list: Array, k := 1.0) -> String:

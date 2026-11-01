@@ -18,20 +18,28 @@ roughly follow its type (an Ember-type knack bakes and warms eggs, Tide waters, 
 
 You bring **one Boki** per expedition. It rides on your shoulder (big ones are ridden, some perch).
 
-- **C** is its own ability: it hops off, casts and hops back. It also has an **auto ability** it uses
+- **C** is its own ability, cast from wherever your Boki is: on your shoulder it casts through you, thrown out it casts where it stands. It also has an **auto ability** it uses
   on its own when the moment is right (Settings can turn that off).
-- **G** (or middle mouse) sends it out to fight on its own; press again to recall it (a 1 second wait
-  before the next send). Thrown out, it holds the spot you sent it to and guards it, and comes back
-  only for a reason: you recall it, you leave its range or glide off, it's hurt, or it can't reach.
+- **G** (or middle mouse): tap to **throw** it to the cursor. Its landing staggers whatever it lands
+  on. Tap again to **recall** it: it leaps back and hits anything along the path (only within a set
+  range; farther out it comes back on its own). **Hold G** to switch between *hold the spot* (it
+  guards where you sent it) and *follow and fight* (it fights beside you). It comes back on its own
+  if you leave its range or glide off, it's hurt, or it can't reach.
+- **A downed Boki** stays where it fell, marked on your screen and the minimap. Run into it to
+  scoop it up (about half a second) and it is back with a good chunk of health; left alone it comes
+  round after 15 to 20 seconds at low health. While it is down you have no C, no Merge and no shoulder
+  perks. Rivals can't take it while you are still in the map.
 - **Your dash** carries a little of it too (a spore puff, a venom trail, a moon blink...).
-- **The bond meter.** Your hits, its hits, combos and its knockouts fill a shared meter. Full, your
-  ultimate becomes a bonded ultimate and your Boki **merges** with you for a few seconds: an armor
-  form or a giant form, depending on the species. Once a run.
+- **The bond meter.** Your hits, its hits, combos and its knockouts fill a shared meter. Press **R**
+  with a full meter and your Boki **merges** with you for a while: you take its colour and silhouette
+  (rivals can read it), and every ability you have changes for the merge by its type and power tier.
+  With the Boki out, it leaps back to you and merges you mid-air. With no Boki (downed or lost) R is
+  only a weak three second surge. Hits on foes your Boki marked fill the meter faster.
 - **Combos.** Your Boki stuns or roots a foe and your next hit on it lands a COMBO. You stun or slow a
   foe and your Boki's next hit POUNCES. Its ability on a burning foe FLARES. See [Rules](Rules.md#combos).
 - **It's a teammate.** It calls out rivals behind you, snipers, monster packs, loot and wild Boki; it
   frets when you're hurt, stands over you when you're down, and pulls you back up (8 seconds) if
-  nobody else can.
+  nobody else can (if it isn't down itself).
 - **It has a mind.** Aggression, loyalty and caution decide how far it chases, how close it stays, who
   it goes after and when it backs off. A Wary Boki may hesitate or refuse a reckless throw; a
   hot-tempered one may ignore a recall to finish a kill.
