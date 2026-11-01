@@ -29,7 +29,7 @@ func _ready() -> void:
 		fade.boot()     # carry on from the boot splash: covered, logo showing, until the first screen is up
 	var args := OS.get_cmdline_user_args()
 	# tooling never touches the real save file: checks, screenshots and --no-save runs play on a copy
-	if "--no-save" in args or "--archetype-check" in args or "--kit-combo-check" in args or "--arena-check" in args or Array(args).any(func(x): return String(x).begins_with("--shot=") or String(x).begins_with("--arena-shot=")):
+	if "--no-save" in args or "--archetype-check" in args or "--kit-combo-check" in args or "--arena-check" in args or "--dredge-combo-check" in args or "--ashwick-combo-check" in args or Array(args).any(func(x): return String(x).begins_with("--shot=") or String(x).begins_with("--arena-shot=")):
 		Save.no_write = true
 	var opts := {}
 	for a in args:
@@ -458,6 +458,9 @@ func _ready() -> void:
 		set_meta("archetype_check", akc)
 		akc.run(self)
 		return
+	for hc in ["dredge", "ashwick"]:       # the hero combo checks (tools/<id>_combo_check.gd)
+		if "--%s-combo-check" % hc in args:
+			set_meta("hero_check", load("res://tools/%s_combo_check.gd" % hc).new()); get_meta("hero_check").run(self); return
 	if "--ability-check" in args:
 		_ability_check()
 		return

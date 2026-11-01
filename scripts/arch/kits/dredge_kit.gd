@@ -249,6 +249,7 @@ func _anchor() -> void:
 	if not h.grounded and not over_void:
 		h.gliding = false
 		h.vel.y = -float(ed["dive"])          # driven down after it (never over the abyss)
+	st["dive_vy"] = h.vel.y               # (tests) what the Anchor left your fall speed at
 	lock_until = m.time + float(dash_def()["lock_t"])
 	net_ring(h.pos, float(ed["radius"]), col_of(ed))
 
