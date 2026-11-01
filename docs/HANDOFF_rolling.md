@@ -1,12 +1,16 @@
 # Handoff: rolling 30-minute sessions (branch `rolling`)
 
-Status: **work in progress**, committed as "WIP: rolling handoff". Not pushed, not merged.
+Status: **ready to merge** (Agent C, Nov 1). Pushed to `origin/rolling`; merged with `origin/main` (Net 0.6.0,
+kits4, Blight, farmstart, abysslift). The feature stays behind the `rolling` option, off by default.
 
 ## Branch history
 
 - `7486d43`: branch point (`blight`, Net.VERSION 0.5.0).
 - `d12b9e1`: `main` merged in (sync48+). It merged cleanly.
 - WIP commit "WIP: rolling handoff": everything below. There are no earlier commits of this work.
+- Agent C (Nov 1): merged `main` twice (farmstart + abysslift, then kits4 + Net 0.6.0), committed the
+  `.gd.uid` files, ran the full suite and the 30-minute sim, tuned `XP_PER_MIN` and catch-up XP, made the
+  population target switchable, fixed the screenshot modes and took the shots. Details below.
 
 ## What's built
 
@@ -81,11 +85,13 @@ The feature is behind the match option `rolling`. The default fixed-length match
 
 ## Net / sync
 
-- **No sync changes.** Net.VERSION stays 0.5.0.
+- **No sync changes.** Net.VERSION is main's **0.6.0** (main took 0.6.0 for Blight + kits4 Hex; rolling
+  adds nothing to the sync shape, so it keeps main's number).
 - Rolling is forced off when `opts.net` exists (`Rolling.enabled`), so online play only gets the fixed
   match.
 - Bounties and levels are computed locally.
-- The roadmap's next step is late-join snapshots. Bump to 0.6.0 when rolling goes online.
+- The roadmap's next step is late-join snapshots. Bump Net.VERSION past main's when rolling goes online
+  (the coordinator reserved 0.6.7 for a rolling sync change).
 
 ## Numbers chosen (constants at the top of rolling.gd)
 
@@ -95,75 +101,111 @@ The feature is behind the match option `rolling`. The default fixed-length match
 | No new waves | last 480 s (after 22:00) |
 | Wave gap | 120-180 s (9-10 waves a session) |
 | Wave size | 6-12 hunters: 2-4 trios, 3-6 duos or 6-12 solos. The fuller the map, the smaller the wave (`POP.y - 4 - pop`, clamped) |
-| Population target | 24-40 hunters on the map at once (the roadmap's "at any moment"; the brief said "24-40 over the session", so the owner should confirm). The model gives ~30 hunters out there at about 15:00 (17-36) |
+| Population target | 24-40 hunters (`POP`). What it counts is `POP_MODE`: `"at_once"` (default, the roadmap's "at any moment": each wave tops the map up) or `"total"` (24-40 join over the whole session, shared over the waves). Per match: `opts.rolling_pop` / `--rolling-pop=at_once\|total`. **Owner question, see below.** |
 | Level floor | min(5, 1 + floor(sess_t / 240)). The points are auto-spent in the archetype's order, for the player too |
-| Catch-up XP | +0.5x per level under the median, capped at x2. The median is over hunters on the ground |
+| Catch-up XP | **+0.3x per level under the median, capped at x1.6** (was +0.5x, x2; tuned from the sim, see below). The median is over hunters on the ground |
 | Bounty | posted at ≥3 levels over the median and level ≥5; cleared once the hunter is less than 2 levels over the median; 45 s cooldown after a claim |
 | Bounty payout | XP 80 + 40/level of the gap; 4 + 2×gap gems and a valuable |
 | Gap-knock XP | 25 per level |
 | Bot stay | 8-16 min. They leave past 30% of that if they have more than 40 gems |
 | Earlier squads | wiped at 3%/min; each squadmate has an 18% chance of having died |
-| `XP_PER_MIN` | 105. This is a guess; the sim is meant to measure it |
+| `XP_PER_MIN` | **200** (was a 105 guess). The sim measured a median 243 XP/min for bots on the map, 12.8% of it catch-up |
 | Camps | come back after 240 s |
 | Meteor showers | every 360 s |
 
-## Checks right now
+## The 30-minute sim and the tuning
 
-- `--check`: **0 failures** (it covers scripts/ only).
-- `--rolling-check`: **59/59 ok, 0 failures, no SCRIPT ERROR** (log was /tmp/rc2.log). It covers:
-  - the schedule over 40 seeds;
-  - the cut-off;
-  - a join at wave 4: the clock, the length, the wide map, the ring islands and links, 27 earlier
-    arrivals at their floors, the picked-over map, the Blight's per-squad `land_at`;
-  - landing at the floor with abilities spent, the soft landing (fresh grace, Blight 0.06 vs 0.55);
-  - the next wave launching exactly on time over the quiet side and landing at its floor;
-  - catch-up XP: x2, x1.5, x1;
-  - the median;
-  - a bounty posted, claimed, paid out (+430 XP, 12 gems + treasure) and on cooldown;
-  - a camp coming back;
-  - meteors;
-  - no joins after the cut-off;
-  - 30:00 ending everyone except the extracted;
-  - the default match untouched.
-- `--rolling-sim`: **not run yet.** Its first run died on a GDScript type-inference parse error
-  (`floor()` → `floorf()`), which is now fixed. `--check-only -s` can't parse tools because autoloads
-  (`Save`) aren't loaded there, so to check it, just run it. Expect ~1x real time or slower with
-  40 hunters, so a full session is 30-60 min wall time. Run it in the background with
-  `--rolling-sim --seed=5`. `--sim-minutes=N` stops early.
-- **Not yet re-run after these changes:** `--blight-check`, `--raid-check`, `--archetype-check`,
-  `--drop-check`, `--extract-check`, `--boss-check`, `--duel-check`, `--bot-sanity-check`,
-  `--economy-check`, `--simtest --seed=5`.
-  - The baseline `--simtest --seed=5` on the merged tree before any change extracted by hatch at 205 s:
-    `SIMTEST done ... sim time 205, result { "extracted": true, "how": "hatch", "where": "Rift Hatch" }`
-    (/home/claude/shots/rolling_base_simtest5.log). Compare against it. `make_bot` keeps the rng order,
-    and the non-rolling paths are written to be identical (`at_sess(k) == k*length`,
-    `bot_past == time > length*k`, ship `t0 = 0`). It still needs confirming.
-  - Script `/home/claude/rolling_checks.sh <args...>` runs a list of checks with logs in /tmp/rl_logs.
-- **Screenshots: not taken yet.** `/home/claude/rolling_shots.sh wave bounty map` writes to
-  /home/claude/shots/rolling/. The `Rolling.demo()` modes were written but never run, so expect to
-  debug them.
+`--rolling-sim --seed=5` (trios, you on autopilot in wave 0), on the merged tree. Log:
+`/home/claude/shots/C/rolling_sim_seed5_run1.log`. 0 failures; 1801 s of session took 4850 s of wall time
+(0.37x real time on the shared 2-CPU box; each sim minute 1.6-3.9 min).
+
+- **Waves:** 9 waves (0:00 to 19:56), every one launched on time (+0.00-0.02 s); none after 22:00; nobody
+  left at 30:00. Each wave brought 4 trios (12 hunters), because the map never filled up.
+- **Population:** 108 hunters over the session; **on the map at once 7-21, median 14** (target 24-40).
+  Waves are sized to fill the map, but hunters go out fast: mean stay 1-4 minutes, 12 extracted, 96 out
+  (51 finished off, 14 team wipes, 13 bled out, 9 executed, 9 abyss). The Blight knocked only 4; almost
+  all of it is hunters fighting hunters. That's bot aggression on a crowded map, not the rolling logic,
+  so I didn't change it here (see Open questions).
+- **Bot XP:** median **243 XP/min** on the map (n=37), 12.8% of all XP from catch-up. `XP_PER_MIN`
+  (the earlier arrivals' head start) was a 105 guess; it's now **200** (243 less the catch-up share,
+  a little lower for a picked-over map).
+- **Bounties:** 54 posted, 19 claimed; level-gap knock XP 2025 in all; 86 camp respawns; 4 meteor showers.
+
+**Catch-up XP for late joiners** (`--join-wave=5`, joins at 11:56, `--sim-minutes=24`). The sim prints
+"level minus lobby median" per wave at 0/2/4/6 minutes after landing.
+
+| | before (x1.5/level, cap x2) | after (x1.3/level, cap x1.6) |
+|---|---|---|
+| Earlier arrivals at your join | 31, levels 4-10 | LATE2_PRE |
+| Your wave (11:56), gap at 0/2/4 min | -3.5 / +0.0 / +2.0 | LATE2_W5 |
+| Wave 6 (14:40), gap at 0/2/4/6 min | -4.5 / -0.8 / +1.3 / +3.0 | LATE2_W6 |
+| Waves from 10:00, gap 6 min after landing | +1.75 | LATE2_GAP |
+| Catch-up share of all XP | 21.8% | LATE2_SHARE |
+| Bot XP/min on the map (median) | 287 | LATE2_XPM |
+
+Before, a squad landing 3-4 levels under the lobby was level with it after 2 minutes and well above it by
+4-6, which then put bounties on them. The new rate closes the gap more slowly. Logs:
+`/home/claude/shots/C/rolling_sim_seed5_join5_before.log`, `..._after.log`.
+
+Fixed along the way:
+- The sim ran out of memory (5 GB, OOM-killed at 16:00): it stepped the match with no frames in between,
+  so nothing `queue_free`d was ever freed. It now yields a frame every 120 steps (main.gd holds it in a
+  meta, like the check). RSS now stays at 0.9-1.6 GB over the 30 minutes.
+- The level floor only applied through `Match.on_drop_landed`. A drop ended early (an ability mid-air, a
+  dip below the islands) skipped it, so one hunter in a wave landed at level 1. `Rolling.tick` now applies
+  the floor to anyone down on the ground who hasn't had it. (Earlier arrivals are marked as done.)
+- A wave counted as "incoming" only until its ship had passed; it now stays incoming until its squads are
+  down, so the HUD's WAVE INCOMING lasts the whole drop.
+
+## Checks (merged tree)
+
+| Check | Failures | Notes |
+|---|---|---|
+| `--check` | 0 | |
+| `--rolling-check` | 0 | 61 checks (2 new: the POP_MODE reading, and the "total" mode's 24-40 over a session: 27-39 over 20 seeds) |
+| `--simtest --seed=5` | n/a | extracted by hatch at 205 s, same as the baseline before the rolling changes |
+| `--rolling-sim --seed=5` | 0 | full 30 minutes, see above |
+| mantle, drop, extract, boss, duel, revive, economy, home-build, arena, archetype, airheal, record, obstacle, bot-sanity, blight, raid, farm-start, abyss | 0 each | no SCRIPT ERROR |
+
+Run on the tree after the first main merge; after the second (kits4) merge `--rolling-check` was re-run.
+
+## Screenshots
+
+`--join-wave=4 --squad=3 --seed=5 --rolling-demo=<mode> --rolling-shot=<png>` (needs xvfb):
+
+- `rolling_wave.png`: a drop wave coming in; the session row shows SESSION / JOINED / WAVE INCOMING.
+- `rolling_bounty.png`: a rival with a bounty a few metres away (nameplate marker), "Bounty on ..." in the
+  feed, the session row with NEXT DROP WAVE and LOBBY LV.
+- `rolling_map.png`: the full map with a DROP WAVE ship and its route, and two bounty markers (LV 8, LV 9); the eight calm ring islands (Ashen Terrace, Rimefold, Brightwater Shoal,
+  Saltwind Shelf, Driftmoor, Kestrel Rise, Hollowmere, Cinderfall Ledge) frame the wide map.
+
+Demo fixes: `--rolling-shot` now counts as a screenshot run (no save writes, no fades), the demo forces a
+clear sky, and the wave shot waits until the squad is mid-descent and stands under it. The HUD's LOBBY LV
+gives way when the wave line needs the room (it overlapped WAVE INCOMING).
+
+## Open questions for the owner
+
+1. **"24-40 hunters": on the map at once, or in total over the session?** The code reads it as at once
+   (the roadmap's wording). One constant switches it: `Rolling.POP_MODE = "total"` (or
+   `--rolling-pop=total` per match).
+2. With bots, the map holds 7-21 hunters at once, not 24-40, because they knock each other out in 1-4
+   minutes. Bigger waves or calmer bots would raise it; that's a bot-behaviour call, left as is.
 
 ## What's left
 
-1. Run `--rolling-sim` (full 30 min). Check the population band, waves on time, extracts and deaths,
-   and the measured bot XP/min, then tune `XP_PER_MIN` to it. Check that the bot stay of 8-16 min
-   gives reasonable extraction.
-2. Run the whole required suite (list above) plus `--simtest --seed=5`, and compare with the baseline.
-3. Take the screenshots (wave drop, HUD with the session clock, bounty marker, full map).
-4. Generate the `.gd.uid` files for the 3 new scripts (`--headless --import` or the editor). The
-   global class cache in my worktree's `.godot` was hand-edited to add `Rolling`. A fresh `.godot`
-   copied from another worktree **won't know `class_name Rolling`** until it's re-imported, and
-   then match.gd fails to compile.
-5. Optional, not done:
+1. Late-join snapshots in the netcode (rolling is offline-only until then).
+2. Optional, not done:
    - "exits start closing" is only the dock-closing schedule;
    - the Walker isn't in the code;
    - the results screen doesn't show joined/left times yet (`r["rolling"]` is there).
 
 ## Gotchas
 
-- **Checks run as RefCounted tool objects: don't `await` in them.** The RefCounted is freed at the
-  first await and the coroutine silently dies, and the process then idles until the timeout. That's
-  why main.gd holds the rolling check in a meta and the check has no awaits.
+- **Checks run as RefCounted tool objects.** A RefCounted is freed at its first await unless something
+  holds it, and the coroutine silently dies (the process then idles until the timeout). main.gd holds the
+  rolling check and the rolling sim in metas; the sim awaits frames, the check doesn't.
+- A long headless sim needs frames: `queue_free` only frees between frames.
+- The `godot` queue wrapper's slots aren't FIFO and `timeout` counts the wait, so use long timeouts.
 - The match clock starts at your join, so anything from before you joined is negative
   (`landed_t`, `land_at`, `cleared_at`).
 - The check skips the clock ahead with `m.time = ...`. When that passes several planned waves, they
