@@ -124,7 +124,7 @@ func _tick_carry(dt: float) -> void:
 			continue
 		if absf(o.pos.y - h.pos.y) > 1.5:
 			continue
-		if h.ctrl == "bot" and not _foes_near(14.0):
+		if h.ctrl == "bot" and not _foes_near(5.0):
 			continue          # a bot only carries when someone is closing in; otherwise it revives on the spot
 		if carrying().size() >= int(pd.get("max", 2)):
 			break
@@ -439,15 +439,19 @@ func _bot_idle(dt: float) -> void:
 	for f in m.foes_of(h.team):
 		if f is Hunter and h.flat_dist(f) < wd:
 			wd = h.flat_dist(f); worst = f
-	if worst != null and wd < 16.0:
+	if carry_t > 4.0:
+		drop_all(false)
+		lock_t = 8.0          # a bot carries for a few seconds at most, then revives them
+	elif worst != null and wd < 9.0:
 		safe_t = 0.0
 		var away := -h.dir_to(worst)
 		h.inp["move"] = away
 		h.inp["fire"] = false
 	else:
 		safe_t += dt
-		if safe_t > 1.0:
+		if safe_t > 0.3:
 			drop_all(false)
+			lock_t = 6.0          # now revive them on the spot
 
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null or not carrying().is_empty():

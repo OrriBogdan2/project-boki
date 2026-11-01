@@ -25,10 +25,6 @@ const PREVIEW := {
 	"rimewright": {"dash": "charge", "passive": "marks", "rmb": "projectile", "e": "shield"},
 }
 
-## The slots a card shows: every archetype's, minus R for the heroes that have none.
-static func slots_of(a: String) -> Array:
-	return SLOTS.filter(func(x): return x != "r" or Arch.def(a).has("r"))
-
 var arch := ""
 var kin_sp := ""
 var body: Control = null
@@ -94,7 +90,7 @@ func _show_grid() -> void:
 	grid.add_theme_constant_override("h_separation", 12)
 	grid.add_theme_constant_override("v_separation", 12)
 	body.add_child(grid)
-	for s in slots_of(arch):
+	for s in SLOTS:
 		grid.add_child(_tile(s))
 
 ## One ability: icon and key, name and a short tag, one line, a looping preview. Click: details.
@@ -280,6 +276,10 @@ static func slot_text(a: String, slot: String) -> Dictionary:
 			out.merge({"name": String(sd["name"]), "icon": String(sd.get("icon", "")), "col": Color(String(sd.get("col", "#ffffff"))),
 				"tag": "%ss" % KinText.n(float(sd.get("cooldown", 14.0))), "line": String(cd.get("e", ""))}, true)
 			out["detail"] = [["", String(sd.get("desc", ""))]] + _ranks(a, "kin")
+		"r" when not d.has("r"):
+			# no hero ultimate: R is the Boki's Merge (the Boki system owns it)
+			out.merge({"name": "Boki Merge", "icon": "bond", "col": Color("ffd27a"), "tag": "Boki system", "line": "Your Boki fuses with you; its kind decides the form."}, true)
+			out["detail"] = [["", "R is not a hero ability here: it is the Boki Merge. Your Boki fuses with you and its kind sets the merged form."]]
 		"r":
 			var sd: Dictionary = d["r"]
 			out.merge({"name": String(sd["name"]), "icon": String(sd.get("icon", "")), "col": Color(String(sd.get("col", "#ffffff"))),
@@ -354,7 +354,7 @@ static func strip(a: String, open_cb: Callable) -> Control:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 6)
 	v.add_child(row)
-	for s in slots_of(a):
+	for s in SLOTS:
 		var info := slot_text(a, s)
 		var b := Button.new()
 		b.custom_minimum_size = Vector2(64, 70)

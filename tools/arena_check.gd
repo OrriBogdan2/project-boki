@@ -97,6 +97,7 @@ func _arena() -> void:
 		ok("swap to %s" % a, P.arch == a and P.ak != null and P.cls == Arch.weight(a))
 	# every hold has the wind-up feel: a charge that fills (ring + glow), a full tick, a release
 	for a in Arch.ids():
+		if not (Arch.def(a)["rmb"].get("variants", {}) as Dictionary).has("hold"): continue          # (the support pair's RMBs are taps)
 		A.set_arch(a)
 		P.teleport(A.home); P.inp["aim"] = D.pos + Vector3(0, 0.9, 0); P.inp["aim_y"] = D.pos.y
 		P.ak.cd["rmb"] = 0.0; P.ak.ch_rmb = float(P.ak.rmb_charges()); P.fire_cd = 0.0
