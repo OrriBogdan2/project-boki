@@ -411,10 +411,10 @@ func _home_check() -> void:
 	while true:
 		await get_tree().process_frame
 		var now := Time.get_ticks_usec()
-		fl.append({"wall": (now - last) / 1000.0, "render": _render_us / 1000.0, "spin": int(fd.get("spin_draws")) if fd.get("spin_draws") != null else 0, "covered": fd.covered, "marks": PerfLog.between(last, now)})
+		fl.append({"wall": (now - last) / 1000.0, "render": _render_us / 1000.0, "spin": int(fd.get("spin_draws")) if fd.get("spin_draws") != null else 0, "covered": fd.covered, "marks": PerfLog.between(last, now), "slice": _slices_between(last, now)})
 		last = now
 		var cur = Game.main.current
-		if built_ms < 0.0 and cur != null and cur.get_script() != null and String(cur.get_script().resource_path).ends_with("home.gd") and cur.is_node_ready() and cur.get("player") != null:
+		if built_ms < 0.0 and cur != null and cur.get_script() != null and String(cur.get_script().resource_path).ends_with("home.gd") and cur.is_node_ready() and cur.get("player") != null and cur.get("building") != true and cur.get("root_ui") != null:
 			built_ms = (now - t0) / 1000.0
 		if built_ms >= 0.0 and shown_ms < 0.0 and not fd.covered:
 			shown_ms = (now - t0) / 1000.0
@@ -432,20 +432,23 @@ func _home_check() -> void:
 		worst = maxf(worst, float(f["wall"])); worst_cpu = maxf(worst_cpu, float(f["cpu"]))
 		if float(f["cpu"] if cpu_only else f["wall"]) > budget: over += 1
 	lines.append("LOAD home: built %.0f ms, revealed %.0f ms after the click; longest frame %.0f ms (%.0f ms outside drawing); %d frames over %.0f ms%s" % [built_ms, shown_ms, worst, worst_cpu, over, budget, " (judged outside drawing)" if cpu_only else ""])
-	# the ink's spinner: once it has drawn, it should draw every frame while the ink stays up
-	var up := 0; var drawn := 0; var prev := -1
+	# the ink's spinner: once it shows after the click, it should draw every frame while the ink stays up
+	var up := 0; var drawn := 0; var prev := -1; var started := false
+	var base_spin := int(fl[0]["spin"]) if not fl.is_empty() else 0
 	for f in fl:
 		var sp := int(f["spin"])
-		if prev > 0 and bool(f["covered"]):
+		if started and bool(f["covered"]):
 			up += 1
 			if sp > prev: drawn += 1
+		elif not started and sp > base_spin:
+			started = true
 		prev = sp
 	lines.append("LOAD spinner on the ink drew on %d of %d frames after it showed" % [drawn, up])
 	var ranked := fl.duplicate()
 	ranked.sort_custom(func(a, b): return float(a["cpu" if cpu_only else "wall"]) > float(b["cpu" if cpu_only else "wall"]))
 	lines.append("LOAD longest frames (wall, outside drawing, render, build steps inside):")
 	for f in ranked.slice(0, 8):
-		lines.append("LOAD   %7.0f %7.0f %7.0f  %s" % [float(f["wall"]), float(f["cpu"]), float(f["render"]), ", ".join((f["marks"] as Array).map(func(mk): return "%s %.0f" % [mk[1], mk[2]]))])
+		lines.append("LOAD   %7.0f %7.0f %7.0f  %s%s" % [float(f["wall"]), float(f["cpu"]), float(f["render"]), ", ".join((f["marks"] as Array).map(func(mk): return "%s %.0f" % [mk[1], mk[2]])), String(f["slice"])])
 	var ok := over == 0 and built_ms >= 0.0 and drawn >= up - 1
 	lines.append("LOAD %s" % ("PASS" if ok else "FAIL"))
 	var txt := "\n".join(lines)
