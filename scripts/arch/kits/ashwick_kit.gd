@@ -146,6 +146,8 @@ func move_k() -> float:
 func lmb_override(held: bool, dt: float) -> bool:
 	if h.wid != "flamethrower":
 		return false
+	if held and h.ammo <= 0 and h.reload_t <= 0.0:
+		h.start_reload()          # out of fuel: the tank refills
 	if not held or not h.can_fire():
 		if was_held:
 			play("as_lance_end")
@@ -166,8 +168,9 @@ func lmb_override(held: bool, dt: float) -> bool:
 	h.mel_hold = minf(spool, float(lmbd()["spool"]))
 	flame_acc += dt
 	var tick := float(lmbd()["tick"])
-	while flame_acc >= tick:
+	while flame_acc >= tick and h.ammo > 0:
 		flame_acc -= tick
+		h.ammo -= 1               # a tick of fuel (10 a second)
 		_flame_tick(tick)
 	return true
 
@@ -177,8 +180,12 @@ func _flame_tick(tick: float) -> void:
 	var k := clampf(spool / float(ld["spool"]), 0.35, 1.0)
 	var muzzle := h.pos + Vector3(dir.x, 1.05, dir.y) * 0.9
 	var col := col_of(d)
-	m.fx.burst(muzzle + Vector3(dir.x, 0, dir.y) * 1.5, Color("ffb04a"), 3, 5.0, 0.3, -2.0, 1.1, Vector3(dir.x, 0.15, dir.y), 18.0)
-	m.fx.burst(muzzle + Vector3(dir.x, 0, dir.y) * 3.2, Color("ff6a2a"), 2, 4.0, 0.3, -2.0, 1.4, Vector3(dir.x, 0.2, dir.y), 24.0)
+	var reach := float(ld["range"]) * minf(1.0, 0.5 + k)
+	var tip := muzzle + Vector3(dir.x, 0.0, dir.y) * reach
+	m.fx.beam(muzzle, tip, Color("ff7a2a"), 0.9 * k + 0.2, 0.16)               # the roaring body of the flame
+	m.fx.beam(muzzle, muzzle + (tip - muzzle) * 0.7, Color("ffd890"), 0.4 * k + 0.1, 0.12)   # its hot core
+	m.fx.burst(muzzle + Vector3(dir.x, 0, dir.y) * 1.5, Color("ffb04a"), 8, 5.0, 0.35, -2.0, 1.6, Vector3(dir.x, 0.15, dir.y), 24.0)
+	m.fx.burst(tip, Color("ff6a2a"), 6, 4.0, 0.4, -2.0, 2.0, Vector3(dir.x, 0.3, dir.y), 40.0)
 	if int(m.time * 10.0) % 4 == 0:
 		m.sfx("as_flame", h.pos, -9.0, 1.0 + randf() * 0.1)
 	var half := deg_to_rad(float(ld["cone_deg"]) * 0.5)
