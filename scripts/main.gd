@@ -106,6 +106,8 @@ func _ready() -> void:
 		if a == "--truce-demo": opts["truce_demo"] = true; opts["no_drop"] = true
 		if a.begins_with("--lair-demo="): opts["lair_demo"] = a.substr(12); opts["no_drop"] = true
 		if a.begins_with("--lair-boss="): opts["demo_boss"] = a.substr(12)
+		if a == "--plate-demo": opts["plate_demo"] = true; opts["no_drop"] = true; opts["teams"] = 3; opts["squad"] = 3
+		if a == "--hold-demo": opts["hold_demo"] = true; opts["no_drop"] = true; opts["teams"] = 4; opts["squad"] = 3
 		if a == "--no-plan": opts["no_plan"] = true
 		if a.begins_with("--plan-t="): opts["plan_t"] = float(a.substr(9))
 		if a == "--map-demo": opts["map_demo"] = "plan"          # the planning map, with pings
@@ -380,6 +382,9 @@ func _ready() -> void:
 		return
 	if "--grammar-runtime-check" in args:
 		_grammar_runtime_check()
+		return
+	if "--hold-check" in args:
+		_hold_check()
 		return
 	if "--record-check" in args:
 		_record_check()
@@ -3026,6 +3031,46 @@ func _boss_check() -> void:
 	ok.call(m3.lairs.list.size() >= 1 and live3 >= 1, "a generated map: %d lair(s), %d live (%s)" % [m3.lairs.list.size(), live3, str(m3.lairs.list.map(func(L): return L["boss"]))])
 	print("BOSSCHECK done, failures: %d" % bad[0])
 	get_tree().quit(1 if bad[0] > 0 else 0)
+## Hold animations: a hold keeps its pose while it's refreshed and lets go cleanly when it stops;
+## every kind rides the snapshot flags (bits 11 and 15-18) and decodes back to itself.
+func _hold_check() -> void:
+	Save.no_write = true
+	Save.d = Save.fresh()
+	Econ.ensure()
+	var bad := 0
+	var m := Match.new()
+	add_child(m)
+	m.start({"training": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
+	for i in 5: await get_tree().process_frame
+	var h: Hunter = m.player
+	for k in Hunter.HOLD_KINDS:
+		h.set_hold(String(k))
+		var f: int = m._flags(h)
+		var back := ((f >> 15) & 15) - 1
+		if f & 2048 == 0 or back < 0 or String(Hunter.HOLD_KINDS[back]) != String(k):
+			bad += 1; print("HOLDCHECK FAIL flags for %s: %d" % [k, f])
+	# (the flags never reach the bits other state uses)
+	h.hold_until = 0.0
+	if m._flags(h) & (2048 | (15 << 15)) != 0: bad += 1; print("HOLDCHECK FAIL flags set with no hold")
+	var t := 0.0
+	var peak := 0.0
+	while t < 0.8:
+		h.set_hold("chest")
+		m.step(Match.DT); t += Match.DT
+		await get_tree().process_frame
+		if h.anim: peak = maxf(peak, h.anim.act_k)
+	var held_kind: String = h.anim.act_kind if h.anim else ""
+	t = 0.0
+	while t < 1.0:
+		m.step(Match.DT); t += Match.DT
+		await get_tree().process_frame
+	var after: float = h.anim.act_k if h.anim else 0.0
+	print("HOLDCHECK chest hold: pose %.2f while held (%s), %.2f a second after letting go, holding '%s'" % [peak, held_kind, after, h.holding()])
+	if h.anim and (peak < 0.6 or held_kind != "chest" or after > 0.1): bad += 1; print("HOLDCHECK FAIL pose")
+	if h.holding() != "": bad += 1; print("HOLDCHECK FAIL the hold didn't lapse")
+	print("HOLDCHECK done, failures: %d" % bad)
+	get_tree().quit(1 if bad > 0 else 0)
+
 ## Recording mode: F10 cycles off / clean / no HUD, Shift+F10 goes straight to no HUD; the debug and
 ## hint nodes hide in clean mode, the HUDs in no-HUD mode, the fps counter goes, tips stop, the camera
 ## softens and orbits only with the HUD hidden; turning it off puts everything back as it was.

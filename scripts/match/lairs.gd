@@ -493,6 +493,7 @@ func _tick_dial(L: Dictionary, dt: float) -> void:
 		if h.out or h.downed or h.extracted or not is_instance_valid(h) or h.flat_dist(L["dial"]) > DIAL_R + 1.3:
 			_stop_dial(L)
 			return
+		h.set_hold("dial")
 		L["needle"] = wrapf(float(L["needle"]) + float(L["dir"]) * speed_of(L) * dt, -PI, PI)
 		L["jam"] = maxf(0.0, float(L["jam"]) - dt)
 		L["grace"] = maxf(0.0, float(L["grace"]) - dt)
@@ -790,6 +791,7 @@ func _victory_open(L: Dictionary, by: Hunter) -> void:
 		tw.tween_property(arm, "rotation:x", 0.75, 0.25).set_trans(Tween.TRANS_BACK)
 	_set_updraft(L, false)
 	if by:
+		by.set_hold("lever", 0.9)
 		m.sfx("click", L["lever"], 4.0, 0.6)
 		m.sfx("unlock", L["lever"], 2.0, 0.8)
 		m.fx.burst(L["lever"] + Vector3(0, 1.6, 0), color_of(L), 18, 3.5, 0.5, -2.0)
