@@ -3668,7 +3668,7 @@ func _open_expedition() -> void:
 	right.add_child(UI.label({"solo": "20 hunters, every one for themselves", "duo": "10 squads of two", "trio": "7 squads of three"}[exp_mode], UI.T_SMALL, UI.MUTED))
 	# the raid condition this drop will have (rolled with the match's seed: RaidLook)
 	if exp_seed == 0: exp_seed = randi() | 1
-	var rc := RaidLook.pick({}, exp_seed)
+	var rc := RaidLook.pick(Settings.demo_opts({}), exp_seed)
 	right.add_child(UI.spacer(2))
 	right.add_child(UI.section("Conditions"))
 	right.add_child(UI.chip("clock", String(RaidLook.NAMES.get(rc, rc)), RaidLook.COLORS.get(rc, UI.INK), String(RaidLook.BLURBS.get(rc, ""))))

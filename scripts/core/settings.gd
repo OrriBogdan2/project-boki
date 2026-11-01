@@ -15,6 +15,8 @@ const DEFAULTS := {
 	"shake": 1.0, "cam_lead": 1.0, "cam_style": "supervive", "cam_follow": "supervive", "dash_hold": false, "damage_numbers": true, "tips": true, "cast_on_press": true, "crouch_toggle": false, "mod_mode": false, "kin_auto": false, "bot_diff": "auto",
 	# accessibility
 	"reduce_flashes": false, "hud_opacity": 1.0,
+	# demo / recording (Settings > Demo): for filming a match, offline only (online matches use the host's rules)
+	"demo_weather": "random", "demo_blight": true, "demo_fresh": "normal", "rec_level": 0,
 	# controls: action -> list of "key:<physical keycode>" / "mouse:<button>"
 	"keys": {}, "keys_v": 2,
 }
@@ -143,6 +145,23 @@ func apply_all() -> void:
 		apply(k)
 	_started = true
 
+## Seconds bots leave a fresh lander alone (Bot.fresh) with Settings > Demo > "Bots leave you be after
+## landing" on Longer.
+const DEMO_FRESH_T := 60.0
+
+## Settings > Demo applied to an offline match's options as it starts (Game.show_screen): the raid
+## condition kept clear (RaidLook.pick reads opts["raid"]), the Blight off (BlightDir.enabled reads
+## opts["blight"]), bots holding off fresh landers for longer (Bot.fresh reads opts["fresh_t"]). Options a
+## tool or demo flag already set win. Returns the same dictionary.
+func demo_opts(o: Dictionary) -> Dictionary:
+	if String(get_v("demo_weather")) == "clear" and not o.has("raid"):
+		o["raid"] = "clear"
+	if not bool(get_v("demo_blight")) and not o.has("blight"):
+		o["blight"] = false
+	if String(get_v("demo_fresh")) == "long" and not o.has("fresh_t"):
+		o["fresh_t"] = DEMO_FRESH_T
+	return o
+
 func get_v(k: String):
 	return v.get(k, DEFAULTS.get(k))
 
@@ -203,6 +222,10 @@ func apply(k: String) -> void:
 		"quality", "quality_found":
 			_apply_quality()
 		"ui_scale": _apply_ui_scale()
+		"rec_level":
+			# recording mode picked in Settings > Demo carries over to the next launch (--record overrides)
+			if not _started and not Array(OS.get_cmdline_user_args()).any(func(x): return String(x).begins_with("--record")):
+				Record.set_level(int(v[k]))
 		"keys":
 			# kin throw moved off right click when heroes got secondaries
 			if v[k].has("throw") and (v[k]["throw"] as Array).has("mouse:2") and not v[k].has("secondary"):

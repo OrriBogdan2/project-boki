@@ -701,6 +701,8 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 		fade.reveal_after(3, 0.55, func() -> bool: return gen == _gen and is_instance_valid(current) and current.get("building") == true)
 	match screen:
 		"match":
+			# Settings > Demo (clear weather, no Blight, ...) on offline matches; online ones play the host's rules
+			if not opts.has("net"): Settings.demo_opts(opts)
 			# the seed is fixed here, so the loading screen can show the raid condition it rolls
 			if not opts.has("seed"): opts["seed"] = randi()
 			# a loading screen covers building the world; tests that screenshot by frame count skip it
@@ -3167,6 +3169,16 @@ func _record_check() -> void:
 	Record.set_level(0)
 	await get_tree().process_frame
 	ok.call(InputMap.has_action("record") and Settings.ACTIONS.any(func(a): return a[0] == "record"), "F10 is a rebindable action (%s)" % Settings.key_cap("record"))
+	# Settings > Demo: clear weather, no Blight, bots hold off fresh landers longer (offline matches)
+	var o0 := Settings.demo_opts({})
+	ok.call(not o0.has("raid") and not o0.has("blight") and not o0.has("fresh_t") and RaidLook.rolls({"big": true}), "demo settings at their defaults change nothing")
+	Settings.set_v("demo_weather", "clear", false); Settings.set_v("demo_blight", false, false); Settings.set_v("demo_fresh", "long", false)
+	var o1 := Settings.demo_opts({"teams": 10})
+	ok.call(RaidLook.pick(o1, 12345) == "clear" and not BlightDir.enabled(o1) and float(o1.get("fresh_t", 0.0)) == Settings.DEMO_FRESH_T, "demo settings: clear weather, no Blight, %ds for fresh landers" % int(Settings.DEMO_FRESH_T))
+	var seen := {}
+	for sd in 40: seen[RaidLook.pick(Settings.demo_opts({}), sd + 1)] = true
+	ok.call(seen.keys() == ["clear"], "always clear over 40 seeds (%s)" % ", ".join(seen.keys()))
+	Settings.set_v("demo_weather", "random", false); Settings.set_v("demo_blight", true, false); Settings.set_v("demo_fresh", "normal", false)
 	print("RECCHECK done, failures: %d" % bad[0])
 	get_tree().quit(1 if bad[0] > 0 else 0)
 
