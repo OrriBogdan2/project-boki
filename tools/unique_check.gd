@@ -74,6 +74,23 @@ func run(m: Node) -> void:
 	ok(absf(float(xs) / N - 0.0228) < 0.006 and absf(float(xl) / N - 0.0228) < 0.006, "XS and XL tails are rare: %.2f%% / %.2f%%" % [100.0 * xs / N, 100.0 * xl / N])
 	ok(props_ok and voice_ok, "proportions stay within +-%d%% and voice within its range" % int(Unique.PROP_MAX * 100))
 	ok(marks.size() == Unique.MARKS.size() and eyes.size() == Unique.EYES.size() and quirks.size() == Unique.QUIRKS.size(), "every coat, eye colour and habit turns up (%s)" % str(marks))
+	# sex: half and half, from the seed alone, and never moving the other rolls
+	var fem := 0
+	for i in N:
+		if Unique.roll(100000 + i)["sex"] == "f": fem += 1
+	ok(absf(float(fem) / N - 0.5) < 0.02, "Boki are about half female, half male (%.1f%% female)" % (100.0 * fem / N))
+	var r0 := Unique.roll(31337)
+	var r0b := r0.duplicate(); r0b.erase("sex")
+	var pre_sex := {"dna": r0b, "uid": "x"}
+	ok(Unique.sex(pre_sex) == r0["sex"] and Unique.sex_for_seed(31337) == r0["sex"], "a record written before sex existed reads the same sex its seed gives")
+	var same_rest := true
+	for i in 200:
+		var a := Unique.roll(700 + i); a.erase("sex")
+		var b := Unique.roll(700 + i); b.erase("sex")
+		if a != b: same_rest = false
+	ok(same_rest and r0.has("birth") and r0.has("voice"), "sex is its own hash of the seed: the other rolls are untouched")
+	var old2 := {"v": 2, "roster": [{"uid": "kA", "species": "cindle", "dna": r0b.duplicate()}], "lost_kin": [], "graves": []}
+	ok(Save.migrate(old2) and int(old2["v"]) == Save.VERSION and String(old2["roster"][0]["dna"].get("sex", "")) == r0["sex"], "a v2 save gets every Boki's sex written down (%s)" % r0["sex"])
 	var big := Save.new_kin("cindle", "Big", 1); big["dna"]["size"] = 2.6
 	var small := Save.new_kin("cindle", "Small", 2); small["dna"]["size"] = -2.6
 	var bi := Unique.size_info(big); var si := Unique.size_info(small)

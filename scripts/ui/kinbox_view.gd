@@ -284,12 +284,10 @@ func _cell(rec: Dictionary, where: String, slot: int) -> Control:
 	sbx.bg_color = bg
 	sbx.set_corner_radius_all(10)
 	sbx.content_margin_left = 4; sbx.content_margin_right = 4; sbx.content_margin_top = 3; sbx.content_margin_bottom = 3
+	# no rarity frames (docs/POSITIONING.md): a rare Boki's cell looks like any other, its rarity
+	# shows on the Boki itself. Only the one you've picked is outlined, in the plain selection colour.
 	if picked:
-		sbx.border_color = UI.GOLD; sbx.set_border_width_all(2)
-	elif not empty and Mutations.special(rec):
-		var ms := Mutations.of(rec)
-		sbx.border_color = Color(Mutations.col_of(ms[0]) if not ms.is_empty() else Color("fff0a0"), 0.6)
-		sbx.set_border_width_all(1)
+		sbx.border_color = UI.INK; sbx.set_border_width_all(2)
 	else:
 		sbx.border_color = Color(1, 1, 1, 0.05 if empty else 0.08); sbx.set_border_width_all(1)
 	c.add_theme_stylebox_override("panel", sbx)
@@ -326,6 +324,9 @@ func _cell(rec: Dictionary, where: String, slot: int) -> Control:
 		var pw := Icons.Glyph.new("paw", UI.GOLD, 14.0)
 		pw.position = Vector2(0, 38)
 		stack.add_child(pw)
+	var sxi := UI.sex_icon(rec, 11.0)
+	sxi.position = Vector2(0, 13)
+	stack.add_child(sxi)
 	var nm := UI.label(String(rec["name"]), 11, sp["color"].lerp(UI.INK, 0.55))
 	nm.autowrap_mode = TextServer.AUTOWRAP_OFF
 	nm.clip_text = true
@@ -418,9 +419,11 @@ func _build_detail() -> void:
 	top.add_child(KinPortrait.view(rec, _tree(), 76.0))
 	var tv := UI.vbox(1)
 	tv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var nrow := UI.hbox(8)
 	var nl := UI.title(String(rec["name"]), 22, col.lerp(UI.INK, 0.35))
-	nl.clip_text = true
-	tv.add_child(nl)
+	nrow.add_child(nl)
+	nrow.add_child(UI.sex_icon(rec, 16.0))
+	tv.add_child(nrow)
 	tv.add_child(UI.label("Level %d %s  ·  %s" % [int(rec["level"]), Evo.form_name(rec), String(sp["type"]).capitalize()], 13, UI.INK))
 	var where := KinBox.went_text(rec) if KinBox.is_boxed(rec) else "Out on the farm"
 	if String(rec["uid"]) == str(Save.d.get("active", "")): where = "Your partner, on the farm"
