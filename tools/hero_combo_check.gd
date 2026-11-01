@@ -28,6 +28,10 @@ func _wall(m: Match, p: Vector3) -> void:
 	var i: int = W.idx(int(floor(p.x)), int(floor(p.z)))
 	W.kind[i] = World.T_BLOCK
 
+func _unwall(m: Match, p: Vector3) -> void:
+	var W = m.world
+	W.kind[W.idx(int(floor(p.x)), int(floor(p.z)))] = World.T_GROUND
+
 func _mage() -> void:
 	var r: Array = ac.setup("mage", 4.0, "", true)
 	var m: Match = r[0]; var P: Hunter = r[1]; var T: Hunter = r[2]; var T2: Hunter = r[3]
@@ -67,10 +71,10 @@ func _mage() -> void:
 	P.teleport(home); T.teleport(home + Vector3(4, 0, 0)); T2.teleport(home + Vector3(5.5, 0.0, 0.0))
 	var W = m.world
 	W.kind[W.idx(int(floor(home.x + 5.6)), int(floor(home.z)))] = World.T_GROUND
-	ac.step(m, 0.1); ac.aim_at(P, T.pos); K.cd["rmb"] = 0.0; K.ch_rmb = 1.0
+	ac.step(m, 0.1); T2.inv_t = 0.0; T.inv_t = 0.0; ac.aim_at(P, T.pos); K.cd["rmb"] = 0.0; K.ch_rmb = 1.0
 	ac.hold(m, P, 1.0)
 	ac.step(m, 0.3)
-	ok("Coilshot into another foe: both stunned", T.stun_t > 0.0 and T2.stun_t > 0.0, "stuns %.2f / %.2f" % [T.stun_t, T2.stun_t])
+	ok("Coilshot into another foe: both stunned", T.stun_t > 0.0 and T2.stun_t > 0.0, "stuns %.2f / %.2f T %s T2 %s slams %d" % [T.stun_t, T2.stun_t, T.pos - home, T2.pos - home, K.slams])
 	# 4. the mote after a hunter hit gives the dash back
 	ac.fresh(T); ac.fresh(T2); T2.teleport(home + Vector3(30, 0, 0)); P.teleport(home); T.teleport(home + Vector3(4, 0, 0)); K.motes.clear(); P.dashes = 0.0
 	ac.step(m, 0.1); ac.aim_at(P, T.pos); K.cd["rmb"] = 0.0; K.ch_rmb = 1.0
@@ -124,11 +128,11 @@ func _gunslinger() -> void:
 	ac.fresh(T); ac.fresh(T2)
 	KitStatus.clear(T, "rattled", false); K.cd["e"] = 0.0; ac.aim_at(P, T.pos)
 	P.ak.use_e(); ac.step(m, 1.1)
-	var clean := ac.dmg(T)
+	var clean: float = ac.dmg(T)
 	ac.fresh(T); KitStatus.apply(T, "rattled", 4.0, false); K.cd["e"] = 0.0; ac.aim_at(P, T.pos)
 	var sk0 := K.skewers
 	P.ak.use_e(); ac.step(m, 1.1)
-	var rat := ac.dmg(T)
+	var rat: float = ac.dmg(T)
 	ok("Longneedle +20% on a Rattled foe", rat > clean * 1.15 and rat < clean * 1.3, "%.1f vs %.1f" % [rat, clean])
 	ok("Longneedle on a Rattled hunter: Skewered payoff", K.skewers == sk0 + 1)
 	ok("Longneedle hit takes 30% off its cooldown", float(K.cd["e"]) <= 12.0 * 0.72, "cd %.1f" % float(K.cd["e"]))
@@ -138,24 +142,26 @@ func _gunslinger() -> void:
 	K.cd["e"] = 0.0; ac.aim_at(P, T.pos)
 	P.ak.use_e(); ac.step(m, 1.1)
 	ok("Longneedle passes through a wall", ac.dmg(T) >= 30.0, "took %.0f" % ac.dmg(T))
+	for zz in [-1, 0, 1]:
+		_unwall(m, home + Vector3(2.5, 0, zz))
 	# 4. a stun breaks the charge
 	K.cd["e"] = 0.0; ac.aim_at(P, T.pos); ac.fresh(T)
 	P.ak.use_e(); ac.step(m, 0.3); P.stun_t = 0.5; ac.step(m, 0.2)
 	ok("Longneedle: a stun cancels the charge", K.needle.is_empty() and ac.dmg(T) < 0.5)
 	P.stun_t = 0.0
 	# 5. Burr stuck in a wall: cone, Rattle 2s, shoved into more terrain = stunned, cooldown -40%
-	ac.fresh(T); P.teleport(home); T.teleport(home + Vector3(8, 0, 1.2)); ac.step(m, 0.1)
+	ac.fresh(T); P.teleport(home); T.teleport(home + Vector3(8.5, 0, 2.6)); ac.step(m, 0.1); T.inv_t = 0.0
 	var W = m.world
 	for z in range(-3, 4):
 		_wall(m, home + Vector3(10.5, 0, 1.0 + z))
-	for x in range(1, 4):
-		_wall(m, home + Vector3(float(x) * 1.0 + 4.6, 0, 3.2))
+	for x in range(5, 10):
+		_wall(m, home + Vector3(float(x) + 0.2, 0, 4.2))
 	P.inp["aim"] = home + Vector3(10.5, 0.9, 1.0); K.cd["rmb"] = 0.0; K.ch_rmb = 1.0
 	var ws0 := K.wall_slams
 	ac.tap(m, P)
 	ac.step(m, 1.2)
 	ok("Burr in a wall: cone hits and Rattles for longer", ac.dmg(T) >= 9.0 and KitStatus.left(T, "rattled") > 1.0, "took %.0f rattled %.1f" % [ac.dmg(T), KitStatus.left(T, "rattled")])
-	ok("Burr cone: shoved into terrain = stun + cooldown shave", K.wall_slams >= ws0 and K.rattles >= 2, "slams %d cd %.1f" % [K.wall_slams, float(K.cd["rmb"])])
+	ok("Burr cone: shoved into terrain = stun + cooldown shave", K.wall_slams == ws0 + 1 and float(K.cd["rmb"]) < 9.0 * 0.7, "slams %d cd %.1f" % [K.wall_slams, float(K.cd["rmb"])])
 	# 6. Knock: heal, Slipstep refreshed, rank 3 resets the Burr
 	P.slot_lv["sec"] = 3
 	P.dashes = 0.0; K.cd["rmb"] = 5.0; K.ch_rmb = 0.0; P.hp = 40.0
