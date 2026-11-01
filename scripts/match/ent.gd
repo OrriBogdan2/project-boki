@@ -261,13 +261,24 @@ func fall_out() -> void:
 ## Horizontal move with walls and rocks; returns true if it bumped something.
 func slide(dt: float, guard := false) -> bool:
 	var bumped := false
-	var nx := pos.x + vel.x * dt
+	# rocks and trees: pushed straight out of them (sliding round), never caught on a corner
+	var tgt := Vector2(pos.x + vel.x * dt, pos.z + vel.z * dt)
+	var po: Vector2 = m.world.push_out_blocks(tgt.x, tgt.y, r, pos.y)
+	if po.distance_squared_to(tgt) > 1e-10:
+		var bn := (po - tgt).normalized()
+		var hv := Vector2(vel.x, vel.z)
+		if hv.dot(bn) < 0.0:
+			hv -= bn * hv.dot(bn)
+			vel.x = hv.x; vel.z = hv.y
+		tgt = po
+		bumped = true
+	var nx := tgt.x
 	var b1: float = m.world.occupy(nx, pos.z, r, pos.y, guard)
 	if b1 == 0.0:
 		pos.x = nx
 	else:
 		vel.x *= -0.1; bumped = true
-	var nz := pos.z + vel.z * dt
+	var nz := tgt.y
 	var b2: float = m.world.occupy(pos.x, nz, r, pos.y, guard)
 	if b2 == 0.0:
 		pos.z = nz

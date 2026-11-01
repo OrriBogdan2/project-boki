@@ -101,6 +101,9 @@ var coyote := 0.0
 var jump_buf := 0.0
 var fly_t := 0.0
 var mantle_cd := 0.0
+## The ledge rise (SUPERVIVE's ledge float): {lip, n (into the wall), t, max_t, at, face (start
+## point), g0 (glide held when it began), downed, win (timing window opened)}. See _ledge_rise.
+var lfloat := {}
 var grap_cd := 0.0
 var grap: Dictionary = {}       # floating back up a ledge
 var push_t := 0.0
@@ -703,6 +706,9 @@ func _on_zero(by: Ent, opts: Dictionary) -> void:
 # ------------------------------------------------------------------ actions
 func do_jump() -> void:
 	if downed or stun_t > 0.0 or grap.size() > 0 or out:
+		return
+	if not lfloat.is_empty():
+		_ledge_fling()
 		return
 	if dropping and diving:
 		_deploy()
@@ -2137,8 +2143,14 @@ func _mantle_point(k: float) -> Vector3:
 	var e2 := u2 * u2 * (3.0 - 2.0 * u2)
 	return Vector3(lerpf(f.x, b.x, e2), lerpf(lip, b.y, e2) + 0.22 * sin(u2 * PI), lerpf(f.z, b.z, e2))
 
+## True while you're rising up a ledge (or in a scripted pad mantle).
+func mantling() -> bool:
+	return not lfloat.is_empty() or (not pad.is_empty() and pad.has("face"))
+
 ## How far through the climbing part of a mantle you are (0 when not mantling), for the animation.
 func mantle_k() -> float:
+	if not lfloat.is_empty():
+		return 1.0
 	if pad.is_empty() or not pad.has("face"):
 		return 0.0
 	var k := clampf(float(pad["t"]) / float(pad["dur"]), 0.0, 1.0)
@@ -2228,7 +2240,9 @@ func _physics(dt: float) -> void:
 	vel.x = hv.x; vel.z = hv.y
 	update_lip()
 	_update_glide(dt)
-	if gliding and in_current:
+	if not lfloat.is_empty() and _ledge_rise(dt, mv):
+		pass   # rising up a ledge's face (sets vel.y; your keys steer as in any jump)
+	elif gliding and in_current:
 		pass   # the current sets the height
 	elif gliding and not dropping and below_lip and glide_fuel > 0.001:
 		# below ground level over the abyss the glider lifts you hard, then brakes near the top.
@@ -2272,12 +2286,28 @@ func _physics(dt: float) -> void:
 	var pre_v := Vector2(vel.x, vel.z)
 	wall_hit_v = Vector2.ZERO
 	var step_up := 0.0
-	var nx := pos.x + vel.x * dt
+	# rocks and trees: slide round them. Where you're heading is pushed straight out of any blocker
+	# it overlaps, and the part of your speed going into it is dropped (no bounce, no catch on a
+	# corner); the axis moves below then only meet terrain, edges and walls.
+	var tgt := Vector2(pos.x + vel.x * dt, pos.z + vel.z * dt)
+	var po: Vector2 = m.world.push_out_blocks(tgt.x, tgt.y, r, pos.y)
+	var block_n := Vector2.ZERO     # out of the rock you met this step (its face's normal)
+	var rock_b := 0.0               # ...and its top, standing in for occupy()'s answer below
+	if po.distance_squared_to(tgt) > 1e-10:
+		block_n = (po - tgt).normalized()
+		rock_b = m.world.ground_at(tgt.x - block_n.x * r * 0.7, tgt.y - block_n.y * r * 0.7) + World.BLOCK_H
+		var hvb := Vector2(vel.x, vel.z)
+		var into := hvb.dot(block_n)
+		if into < 0.0:
+			hvb -= block_n * into
+			vel.x = hvb.x; vel.z = hvb.y
+		tgt = po
+	var nx := tgt.x
 	var b1: float = _occ(nx, pos.z, guard)
 	if b1 == 0.0: pos.x = nx
 	elif grounded and b1 > 0.0 and b1 - pos.y <= World.LEVEL + 0.05: step_up = b1
 	elif b1 > 0.0 or b1 == -1.0: vel.x = 0.0 if b1 == -1.0 else vel.x * -0.1
-	var nz := pos.z + vel.z * dt
+	var nz := tgt.y
 	var b2: float = _occ(pos.x, nz, guard)
 	if b2 == 0.0: pos.z = nz
 	elif grounded and b2 > 0.0 and b2 - pos.y <= World.LEVEL + 0.05: step_up = maxf(step_up, b2)
@@ -2296,7 +2326,11 @@ func _physics(dt: float) -> void:
 		var want := hv.length() * dt
 		if moved < want * 0.35:
 			var dn := hv.normalized()
-			for side in [Vector2(-dn.y, dn.x), Vector2(dn.y, -dn.x)]:
+			# (try first the side that leads away from what stopped you, never round toward it)
+			var wn := -Vector2(pre_v.x if b1 > 0.0 else 0.0, pre_v.y if b2 > 0.0 else 0.0)
+			var sides := [Vector2(-dn.y, dn.x), Vector2(dn.y, -dn.x)]
+			if wn.dot(sides[1]) > wn.dot(sides[0]): sides.reverse()
+			for side in sides:
 				var tx: float = pos.x + (side.x * 0.8 + dn.x * 0.4) * want
 				var tz: float = pos.z + (side.y * 0.8 + dn.y * 0.4) * want
 				if _occ(tx, tz, guard) == 0.0:
@@ -2315,14 +2349,18 @@ func _physics(dt: float) -> void:
 					m.fx.dust(pos, 4)
 		else:
 			wedged_t = 0.0
-	var blk := maxf(b1, b2)
+	var blk := maxf(maxf(b1, b2), rock_b)
+	# (a rock you slid along counts as a wall you hit, with the part of your speed that went into it)
+	var rock_v := block_n * minf(0.0, pre_v.dot(block_n)) if rock_b > 0.0 else Vector2.ZERO
 	if b1 > 0.0 or b2 > 0.0:
 		wall_hit_v = Vector2(pre_v.x if b1 > 0.0 else 0.0, pre_v.y if b2 > 0.0 else 0.0)
-	if (b1 > 0.0 or b2 > 0.0) and blk > pos.y + 0.6:
+	elif rock_v.length() > 0.01:
+		wall_hit_v = rock_v
+	if (b1 > 0.0 or b2 > 0.0 or rock_v.length() > 0.01) and blk > pos.y + 0.6:
 		# against a wall: in the air you can kick off it; knocked into it hard, you're stunned
 		if not grounded:
 			wall_touch_t = 0.2
-			wall_n = Vector2(-signf(pre_v.x) if b1 > 0.0 else 0.0, -signf(pre_v.y) if b2 > 0.0 else 0.0).normalized()
+			wall_n = Vector2(-signf(pre_v.x) if b1 > 0.0 else 0.0, -signf(pre_v.y) if b2 > 0.0 else 0.0).normalized() if (b1 > 0.0 or b2 > 0.0) else block_n
 		if m.time - kb_t < 0.6 and pre_v.length() > 8.0 and wslam_t <= 0.0 and not remote:
 			wslam_t = 1.2
 			var st := maxf(0.9, wallstun)
@@ -2337,7 +2375,7 @@ func _physics(dt: float) -> void:
 	# a hop onto a rock only when you meant it: you jumped (still rising) and you're pushing into it.
 	# Brushing a rock or a terrace while stepping down, falling or being knocked never throws you up
 	# onto it (that was the "random bounce").
-	var push_in := Vector2(pre_v.x if b1 > 0.0 else 0.0, pre_v.y if b2 > 0.0 else 0.0)
+	var push_in := Vector2(pre_v.x if b1 > 0.0 else 0.0, pre_v.y if b2 > 0.0 else 0.0) + rock_v
 	var wants: bool = (inp["move"] as Vector2).dot(push_in) > 0.2 if push_in.length() > 0.01 else false
 	if not grounded and not dropping and vel.y > 0.5 and wants and blk > 0.0 and blk < pos.y + 1.6 and mantle_cd <= 0.0 \
 			and blk - pos.y < World.BLOCK_H - 0.1 and m.time - kb_t > 0.4:
@@ -2545,7 +2583,7 @@ func _update_glide(dt: float) -> void:
 			heat_burn -= 2.0
 			hurt(2.0, null, {"src": "heat"})
 	# an overheated glider stays open (slow and sinking) until you land or get hit again
-	var can: bool = not grounded and roll_t <= 0.0 and fly_t <= 0.0 and glide_cd <= 0.0 and not downed and stun_t <= 0.0 \
+	var can: bool = (lfloat.is_empty() or (bool(inp.get("glide", false)) and not bool(lfloat.get("g0", true)))) and not grounded and roll_t <= 0.0 and fly_t <= 0.0 and glide_cd <= 0.0 and not downed and stun_t <= 0.0 \
 		and m.time - kb_t > 0.4 and (glide_fuel > 0.0 or gliding) and pad.is_empty() and not shot_down
 	var want: bool = inp.get("glide", false) or auto_glide
 	if gliding and not _handoff.is_empty() and want and can:
@@ -2582,7 +2620,7 @@ func _update_glide(dt: float) -> void:
 # back up onto it, the way Supervive does it. Walking into a step up a few terraces high does
 # the same after a short push. Getting launched hard still carries you past the edge.
 func _try_ledge_grab(dt: float) -> void:
-	if grap.size() > 0 or pad.size() > 0 or fly_t > 0.0 or charge.size() > 0 or dropping or shot_down or pos.y < last_gy - 14.0 or (grounded and stun_t > 0.0):
+	if not lfloat.is_empty() or grap.size() > 0 or pad.size() > 0 or fly_t > 0.0 or charge.size() > 0 or dropping or shot_down or pos.y < last_gy - 14.0 or (grounded and stun_t > 0.0):
 		push_t = 0.0
 		return
 	var w: World = m.world
@@ -2644,12 +2682,10 @@ func _try_ledge_grab(dt: float) -> void:
 			var toward := Vector2(ex - pos.x, ez - pos.z)
 			if grounded and toward.dot(mv) <= 0.0:
 				continue
-			# (movefeel) over the abyss, hugging a wall while drifting mostly along it still counts as
-			# pushing into it (up to ~78 degrees off straight in; elsewhere ~70)
-			# Touching the wall over the abyss (an inside corner, the end of a face) with a key held is
-			# hugging it whatever the angle: SUPERVIVE rarely lets a wall-hugger sink under an island.
-			var hugging := void_here and d <= r + 0.12
-			if not grounded and not hugging and (toward.length() > 0.01 and toward.normalized().dot(mv.normalized()) < (0.2 if void_here else 0.35)):
+			# (movefeel) over the abyss below a lip, steering mostly along a wall still counts as pushing
+			# into it (up to ~78 degrees off straight in): SUPERVIVE rarely lets a wall-hugger sink under
+			# an island. Elsewhere the ledge rise wants a real push (LRISE_PUSH, ~60 degrees)
+			if not grounded and (toward.length() > 0.01 and toward.normalized().dot(mv.normalized()) < (0.2 if void_here and last_gy - pos.y > 0.3 else LRISE_PUSH)):
 				continue
 			if not grounded and not void_here:
 				# off the void, only a wall you're heading into and that rises above where you last stood:
@@ -2661,33 +2697,16 @@ func _try_ledge_grab(dt: float) -> void:
 				best = {"x": x, "z": z, "gz": gz, "ex": ex, "ez": ez}
 	if best.is_empty():
 		return
-	var cx: float = best["x"] + 0.5; var cz: float = best["z"] + 0.5
-	var a := atan2(cz - best["ez"], cx - best["ex"])
-	var land := Vector3(cx, best["gz"], cz)
-	for k in [1.25, 0.9, 0.6]:
-		var lx: float = best["ex"] + cos(a) * k; var lz: float = best["ez"] + sin(a) * k
-		if absf(w.ground_at(lx, lz) - best["gz"]) < 0.1 and not w.is_block(lx, lz):
-			land = Vector3(lx, best["gz"], lz); break
-	if w.is_block(land.x, land.z):
-		return
-	# Supervive-style mantle: no hang and no stop, one quick fluid vault from wherever you touched
-	# the cliff up and over onto the top, carrying your run on the far side
-	var rise: float = float(best["gz"]) - pos.y
-	var hv0 := Vector2(vel.x, vel.z)
-	var dir_in := Vector2(cos(a), sin(a))
-	var carry := clampf(hv0.dot(dir_in), 0.0, base_speed * 1.3)
-	var over := Vector3(land.x + dir_in.x * carry * 0.12, land.y, land.z + dir_in.y * carry * 0.12)
-	if not w.is_block(over.x, over.z) and absf(w.ground_at(over.x, over.z) - land.y) < 0.1:
-		land = over
-	# the climb goes in two parts so the body never cuts through the cliff's corner: first straight
-	# up the face (held just outside the wall), then forward over the lip once you're above it
-	var face := Vector3(float(best["ex"]) - dir_in.x * (r + 0.05), pos.y, float(best["ez"]) - dir_in.y * (r + 0.05))
-	if w.is_block(face.x, face.z) or w.ground_at(face.x, face.z) > pos.y + 0.05:
-		face = Vector3(pos.x, pos.y, pos.z)
-	var up_t := clampf(rise / MANTLE_RISE, 0.16, 0.85) * (1.35 if downed else 1.0)
-	var over_t := 0.2 * (1.3 if downed else 1.0)
-	pad = {"from": pos, "face": face, "lip": float(best["gz"]) + 0.14, "to": land, "t": 0.0, "dur": up_t + over_t, "split": up_t / (up_t + over_t),
-		"ledge": true, "carry": maxf(carry, base_speed * 0.8)}
+	# (ledge rise) no snap and no fixed path: you gain upward momentum and float up the face while
+	# your own keys and momentum carry you sideways (see _ledge_rise)
+	var dir_in := Vector2(float(best["ex"]) - pos.x, float(best["ez"]) - pos.z)
+	if dir_in.length() < 0.01:
+		dir_in = mv
+	lfloat = {"lip": float(best["gz"]), "n": dir_in.normalized(), "t": 0.0, "g0": bool(inp.get("glide", false)),
+		"at": Vector2(pos.x, pos.z), "downed": downed, "win": false,
+		"max_t": clampf((float(best["gz"]) - pos.y) / LRISE_SPEED, 0.1, 0.9) * (1.35 if downed else 1.0) + 0.3}
+	vel.y = maxf(vel.y, LRISE_MIN)
+	grounded = false
 	grap = {}
 	grap_cd = LEDGE_CD
 	push_t = 0.0
@@ -2696,6 +2715,80 @@ func _try_ledge_grab(dt: float) -> void:
 	m.sfx("grab", pos, -8.0, 1.2)
 	m.fx.burst(pos + Vector3(0, 0.6, 0), Color("cfeaff"), 6, 2.0, 0.3, 0.0)
 	m.on_ledge_grab(self)
+
+## (ledge rise) One step of rising up a ledge: sets vel.y and returns true while it lasts. Your
+## horizontal speed is the ordinary air steering (_physics): keys and momentum work the whole way,
+## and the wall itself (World.occupy) is all that holds you to the face while you push into it.
+## Over the top you pop up a little toward wherever you're holding. Moving off the face, a dash, a
+## fresh glide press, a stun or a knock end it. A jump during the rise flings you (_ledge_fling).
+const LRISE_SPEED := 14.0      # [footage] a deep mantle returns to the top in ~0.8s (was MANTLE_RISE)
+const LRISE_MIN := 4.0         # never slower than this near the top
+const LRISE_POP := 3.2         # [est] up speed as you clear the lip with no jump
+const LRISE_PUSH := 0.5        # keys at least this far into the wall (dot, ~60 degrees) to start a rise
+const LRISE_OFF := 0.9         # moved this far out from the face: you've let go
+const LRISE_WINDOW := 0.6      # [est] the fling window: the last this-many metres below the top (~0.12s)
+const FLING_UP := 7.0          # [est] a fling timed in the window: up speed...
+const FLING_SPEED := 7.5       # [est] ...and speed toward your keys (run speed is ~5)
+const FLING_EARLY_UP := 4.5    # [est] a jump before the window: a weaker fling
+func _ledge_rise(dt: float, mv: Vector2) -> bool:
+	var lf := lfloat
+	lf["t"] = float(lf["t"]) + dt
+	var n: Vector2 = lf["n"]
+	var glide_now: bool = inp.get("glide", false)
+	if not glide_now:
+		lf["g0"] = false
+	var off := (Vector2(pos.x, pos.z) - (lf["at"] as Vector2)).dot(-n) > LRISE_OFF
+	var drift := Vector2(pos.x, pos.z).distance_to(lf["at"]) > 2.0     # (a teleport, or far along the face)
+	if off or drift or gliding or downed != bool(lf["downed"]) or out or roll_t > 0.0 or stun_t > 0.0 or knock_t > 0.0 \
+			or fly_t > 0.0 or grounded or dropping or float(lf["t"]) > float(lf["max_t"]) or (glide_now and not bool(lf["g0"])):
+		lfloat = {}
+		return false
+	var lip: float = lf["lip"]
+	var left := lip + 0.12 - pos.y
+	if left <= 0.0:
+		# over the lip: a small pop, carried toward your keys
+		lfloat = {}
+		vel.y = LRISE_POP
+		if mv.length() > 0.3:
+			var hv := Vector2(vel.x, vel.z)
+			var d := mv.normalized()
+			var along := hv.dot(d)
+			if along < base_speed * 0.9:
+				hv += d * (base_speed * 0.9 - along)
+			vel.x = hv.x; vel.z = hv.y
+		mantle_cd = 0.3
+		return true
+	if not bool(lf["win"]) and left <= LRISE_WINDOW:
+		# the fling window opens: a tick and a quick ring, so the timing reads
+		lf["win"] = true
+		if is_local():
+			m.sfx("click", pos, -8.0, 1.6)
+			m.fx.ring(pos + Vector3(0, 0.1, 0), 0.9, Color(1, 1, 1, 0.8), 0.18)
+	vel.y = clampf(left * 14.0, LRISE_MIN, LRISE_SPEED) * (0.75 if downed else 1.0)
+	return true
+
+## A jump during a ledge rise: in the window near the top, a strong fling (higher, faster, a whoosh);
+## earlier, a weaker one. Either way toward the keys you hold (or up and onto the ledge with none).
+func _ledge_fling() -> void:
+	var lf := lfloat
+	lfloat = {}
+	var mvv: Vector2 = inp.get("move", Vector2.ZERO)
+	var d: Vector2 = mvv.normalized() if mvv.length() > 0.3 else (lf["n"] as Vector2)
+	var hv := Vector2(vel.x, vel.z)
+	var timed: bool = lf.get("win", false)
+	var spd := FLING_SPEED if timed else base_speed
+	var along := hv.dot(d)
+	if along < spd:
+		hv += d * (spd - along)
+	vel.x = hv.x; vel.z = hv.y
+	vel.y = FLING_UP if timed else FLING_EARLY_UP     # (an early jump gives up the rest of the rise)
+	mantle_cd = 0.3
+	air_t = 0.0        # (held Space opens the glider a beat later, as after any jump)
+	stats["flings"] = int(stats.get("flings", 0)) + (1 if timed else 0)
+	m.sfx("jump", pos, -6.0)
+	if timed:
+		m.sfx("whoosh", pos, -6.0 if is_local() else -12.0, 1.3)
+		m.fx.burst(pos + Vector3(0, 0.8, 0), Color("e6f6ff"), 10, 3.5, 0.35, 0.0, 0.8, Vector3(-d.x, 0.2, -d.y), 30.0)
 
 ## Floating up the side: rise to the lip, drift onto it, then a small hop onto the top.
 func _grapple(dt: float) -> void:

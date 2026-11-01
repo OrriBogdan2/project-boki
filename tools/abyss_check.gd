@@ -58,7 +58,7 @@ func _edges(n: int, sheer := false) -> Array:
 func _reset(at: Vector3, v: Vector3) -> void:
 	h.out = false; h.gone = false; h.downed = false; h.down_hp = 100.0
 	h.teleport(at)
-	h.grounded = false; h.vel = v; h.pad = {}; h.grap = {}; h.grap_cd = 0.0; h.roll_t = 0.0
+	h.grounded = false; h.vel = v; h.pad = {}; h.lfloat = {}; h.grap = {}; h.grap_cd = 0.0; h.roll_t = 0.0
 	h.gliding = false; h.glide_fuel = 1.0; h.glide_cd = 0.0; h.knock_t = 0.0; h.fly_t = 0.0
 	h.stun_t = 0.0; h.kb_t = -9.0; h.mantle_cd = 0.0; h.shot_down = false; h.air_t = 0.0
 	h.inp["move"] = Vector2.ZERO; h.inp["glide"] = false; h.inp["jump"] = false; h.inp["dash"] = false
@@ -89,15 +89,15 @@ func _run(sec: float, drive: Callable) -> Dictionary:
 			break
 		r["low"] = minf(float(r["low"]), h.pos.y)
 		r["inside"] = maxf(float(r["inside"]), _inside(h))
-		if not h.pad.is_empty() and h.pad.has("face"):
+		if h.mantling():
 			r["mantled"] = true
 			r["clip"] = maxf(float(r["clip"]), _inside(h))
-		elif not h.grounded and h.pad.is_empty():
+		elif not h.grounded and h.pad.is_empty() and not h.mantling():
 			# hanging in the air without moving: snagged on the face
 			still = still + 1 if absf(h.pos.y - last_y) < 0.002 and not h.gliding else 0
 			r["stuck"] = maxi(int(r["stuck"]), still)
 		last_y = h.pos.y
-		if r["mantled"] and h.pad.is_empty() and h.grounded:
+		if r["mantled"] and not h.mantling() and h.pad.is_empty() and h.grounded:
 			r["landed"] = true; r["t"] = t
 			break
 		if not h.grounded: r["air"] = true
@@ -240,13 +240,13 @@ func run(main: Node) -> void:
 		var dir: Vector2 = e["dir"]; var top: float = e["top"]
 		b.out = false; b.gone = false; b.downed = false; b.hp = b.max_hp
 		b.teleport(Vector3(e["ex"] + dir.x * 0.9, top - 0.4, e["ez"] + dir.y * 0.9))
-		b.grounded = false; b.vel = Vector3(dir.x * 3.0, -2.0, dir.y * 3.0); b.pad = {}; b.grap_cd = 0.0
+		b.grounded = false; b.vel = Vector3(dir.x * 3.0, -2.0, dir.y * 3.0); b.pad = {}; b.lfloat = {}; b.grap_cd = 0.0
 		b.last_gy = top; b.kb_t = m.time - 0.35; b.gliding = false
 		var t := 0.0; var deep := 0.0
 		while t < 3.0 and not b.out:
 			m.step(Match.DT); t += Match.DT
 			deep = maxf(deep, _inside(b))
-			if b.grounded and b.pad.is_empty() and absf(b.pos.y - top) < 0.7 and t > 0.1: break
+			if b.grounded and b.pad.is_empty() and not b.mantling() and absf(b.pos.y - top) < 0.7 and t > 0.1: break
 		bn += 1
 		if not b.out and b.grounded and deep < 0.05: bgood += 1
 	ok(bgood == bn, "bots knocked off beside a ledge climb back: %d of %d" % [bgood, bn])
