@@ -73,6 +73,9 @@ var env_res: Environment
 var sun_l: DirectionalLight3D
 var p_anim: HunterAnim = null
 var p_fired := 99.0             # seconds since you last attacked (the Training Grounds), for the animation
+var crouch_on := false          # crouching (the match's crouch key and its tap-to-toggle setting)
+var p_crouch_k := 0.0           # the crouched pose, eased in and out
+const CROUCH_SPEED := 0.55      # walking speed crouched (the same as in a match)
 var p_swing_n := 0              # melee swings so far, so each one plays its arc
 var lamps: Array = []           # OmniLight3D
 var day_t := 0.3                # 0..1, 0.25 is morning, 0.5 noon, 0.75 dusk
@@ -237,6 +240,22 @@ func _ready() -> void:
 	cam.snap(ppos)
 	if "--expedition-test" in dbg:
 		get_tree().create_timer(0.5).timeout.connect(_open_expedition)
+	if "--home-crouch-test" in dbg:
+		# test: walk right crouched for a second, then standing: crouched is slower, and posed low
+		# (--crouch-still: stay crouched and still, for a screenshot)
+		set_meta("crouch_test", true)
+		if not "--crouch-still" in dbg:
+			get_tree().create_timer(0.6).timeout.connect(func():
+				Input.action_press("right")
+				var x0 := ppos.x
+				get_tree().create_timer(1.0).timeout.connect(func():
+					var v_crouch := ppos.x - x0
+					var ck := p_crouch_k
+					remove_meta("crouch_test")
+					var x1 := ppos.x
+					get_tree().create_timer(1.0).timeout.connect(func():
+						Input.action_release("right")
+						print("HOMECROUCH crouched %.2f m/s (pose %.2f), standing %.2f m/s, pose now %.2f" % [v_crouch, ck, ppos.x - x1, p_crouch_k]))))
 	if "--expedition-scroll-test" in dbg:
 		# test: open the expedition panel, scroll down, press a match-mode tab (which rebuilds the
 		# panel): it should stay where it was scrolled (--no-keep-scroll shows the old jump to the top)
@@ -900,6 +919,17 @@ func _move_player(d: float) -> void:
 	ex_cd = maxf(0.0, ex_cd - d)
 	var gh := _ground_h(ppos.x, ppos.z)
 	var air := py > gh + 0.001 or pvy > 0.0
+	# crouch: held by default, or tapped to toggle (Settings crouch_toggle), as in a match
+	if Settings.get_v("crouch_toggle"):
+		if can_act and Input.is_action_just_pressed("crouch"):
+			crouch_on = not crouch_on
+		if Input.is_action_just_pressed("jump") or Input.is_action_just_pressed("dash"):
+			crouch_on = false
+	else:
+		crouch_on = can_act and Input.is_action_pressed("crouch")
+	if has_meta("crouch_test"): crouch_on = true
+	var crouching := crouch_on and not air and dash_t <= 0.0 and not gliding
+	p_crouch_k = move_toward(p_crouch_k, 1.0 if crouching else 0.0, d * 8.0)
 	if can_act and Input.is_action_just_pressed("dash") and dash_t <= 0.0:
 		try_dash(mv, air)
 	var hv := Vector2(pvel.x, pvel.z)
@@ -908,7 +938,7 @@ func _move_player(d: float) -> void:
 		hv = dash_v
 		if dash_t <= 0.0: hv = dash_v * (Hunter.DASH_CARRY_AIR if air else Hunter.DASH_CARRY_GROUND)
 	else:
-		var spd := Hunter.GLIDE_SPEED * 1.15 if gliding else SPEED
+		var spd := Hunter.GLIDE_SPEED * 1.15 if gliding else SPEED * (CROUCH_SPEED if crouching else 1.0)
 		hv += (mv * spd - hv) * (1.0 - exp(-(14.0 if not air else (4.0 if gliding else 6.0)) * d))
 	# on the ground the island's edge stops you; in the air (a jump, a glide) you can sail out past it
 	var guard := not air
@@ -998,7 +1028,7 @@ func _move_player(d: float) -> void:
 		p_anim = HunterAnim.new(player)
 	p_fired += d
 	var ps := {"vel": Vector3(hv.x, pvy if air else 0.0, hv.y), "face": pface, "grounded": not air, "gliding": gliding, "rolling": dash_t > 0.0, "dash_dir": dash_v, "fired": p_fired,
-		"swing_n": p_swing_n, "combo": maxi(0, p_swing_n - 1) % 3}
+		"swing_n": p_swing_n, "combo": maxi(0, p_swing_n - 1) % 3, "crouch": p_crouch_k}
 	if air and not gliding and gh > World.VOID + 1.0:
 		ps["air_h"] = clampf(py - gh, 0.0, 30.0)
 	p_anim.update(d, ps)
