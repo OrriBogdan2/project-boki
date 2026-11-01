@@ -694,6 +694,8 @@ func _boss_dead(L: Dictionary, b: Boss, credit: Ent) -> void:
 		m.exits.drop_key(at + Vector3(0, 0, 1.1))
 	# the egg: of the floor spots EGG_APART out from the pile, the one furthest from every pile item
 	var pile_at: Array = [at + Vector3(-1.5, 0, 0.4), at + Vector3(1.5, 0, 0.4), at + Vector3(0, 0, -0.8), at + Vector3(0, 0, 1.1)]
+	for wp in m.wpicks:      # (and clear of anything already lying on the lair's floor)
+		if inside(L, wp["pos"], 0.0): pile_at.append(wp["pos"])
 	var egg_at := at
 	var best := -1.0
 	for k in 12:

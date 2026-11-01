@@ -80,6 +80,9 @@ func run(main: Node) -> void:
 	for L in m.lairs.list: if String(L["boss"]) == "colossus": F = L
 	ok(is_equal_approx(Lairs.VICTORY_T, 20.0), "the post-kill lock is %d s" % int(Lairs.VICTORY_T))
 	# ---------------------------------------------------------------- 1. the loot: few things, all good; the egg apart under its own beam
+	# a weapon already lying in the lair where the egg would fall: the egg finds a spot clear of it too
+	var stray_at := m.lairs._floor_spot(F, F["c"] + Vector3(-F["out"].y, 0, F["out"].x) * 4.0, 1.0)
+	m.spawn_weapon("rifle", 4, stray_at, "", false)
 	var w0 := m.wpicks.size()
 	var kill_t := _kill(F, P, C)
 	var gems_new: Array = dropped.filter(func(p): return String(p["kind"]) == "gem")
@@ -101,7 +104,8 @@ func run(main: Node) -> void:
 	for wp in pile:
 		pile_c += wp["pos"] / float(maxi(1, pile.size()))
 		if egg != null: apart = minf(apart, Vector2(wp["pos"].x - egg["pos"].x, wp["pos"].z - egg["pos"].z).length())
-	ok(egg != null and apart >= 3.0 and apart <= 7.0 and m.lairs.inside(F, egg["pos"], 0.0), "the egg sits on its own spot %.1f m from the nearest pile item, inside the lair" % apart)
+	var stray_d: float = Vector2(egg["pos"].x - stray_at.x, egg["pos"].z - stray_at.z).length() if egg != null else 0.0
+	ok(egg != null and apart >= 3.0 and apart <= 7.0 and stray_d >= 2.5 and m.lairs.inside(F, egg["pos"], 0.0), "the egg sits on its own spot %.1f m from the nearest pile item (%.1f m from a rifle already lying there), inside the lair" % [apart, stray_d])
 	var en: Node3D = egg["node"] if egg != null else null
 	var beam: MeshInstance3D = en.get_node_or_null("Beam") if en else null
 	ok(beam != null and beam.visible and beam.position.y > 4.0, "under its own light beam, reaching %.0f m up" % ((beam.position.y * 2.0) if beam else 0.0))
