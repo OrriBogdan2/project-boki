@@ -29,7 +29,7 @@ func _ready() -> void:
 		fade.boot()     # carry on from the boot splash: covered, logo showing, until the first screen is up
 	var args := OS.get_cmdline_user_args()
 	# tooling never touches the real save file: checks, screenshots and --no-save runs play on a copy
-	if "--no-save" in args or "--archetype-check" in args or "--arena-check" in args or Array(args).any(func(x): return String(x).begins_with("--shot=") or String(x).begins_with("--arena-shot=")):
+	if "--no-save" in args or "--archetype-check" in args or "--arena-check" in args or "--mage-combo-check" in args or "--gunslinger-combo-check" in args or Array(args).any(func(x): return String(x).begins_with("--shot=") or String(x).begins_with("--arena-shot=")):
 		Save.no_write = true
 	var opts := {}
 	for a in args:
@@ -451,6 +451,11 @@ func _ready() -> void:
 		var akc = load("res://tools/archetype_check.gd").new()      # every archetype kit, controls, locks, infusion, feel
 		set_meta("archetype_check", akc)
 		akc.run(self)
+		return
+	if "--mage-combo-check" in args or "--gunslinger-combo-check" in args:
+		var hcc = load("res://tools/hero_combo_check.gd").new()      # Vireo's and Marlowe's cross-ability interactions
+		set_meta("hero_combo_check", hcc)
+		hcc.run(self, "mage" if "--mage-combo-check" in args else "gunslinger")
 		return
 	if "--ability-check" in args:
 		_ability_check()

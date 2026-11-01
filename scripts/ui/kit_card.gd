@@ -17,8 +17,8 @@ const LABEL := {"dash": "Dash", "passive": "Passive", "lmb": "Attack", "rmb": "R
 const PREVIEW := {
 	"thief": {"dash": "dash2", "passive": "marks", "rmb": "knife", "e": "zone", "r": "lines"},
 	"archer": {"dash": "grapple", "passive": "meter", "rmb": "heavy", "e": "rainwall", "r": "arrows3"},
-	"mage": {"dash": "blink", "passive": "marks", "rmb": "steer", "e": "hex", "r": "mirror"},
-	"gunslinger": {"dash": "dash", "passive": "pips", "rmb": "projectile", "e": "buff", "r": "lines"},
+	"mage": {"dash": "dash2", "passive": "marks", "rmb": "heavy", "e": "zone"},
+	"gunslinger": {"dash": "dash", "passive": "pips", "rmb": "projectile", "e": "lines"},
 	"juggernaut": {"dash": "charge", "passive": "meter", "rmb": "leap", "e": "buff", "r": "burst"},
 	"bulwark": {"dash": "charge", "passive": "meter", "rmb": "shield", "e": "zone", "r": "fissure"},
 }
@@ -88,8 +88,12 @@ func _show_grid() -> void:
 	grid.add_theme_constant_override("h_separation", 12)
 	grid.add_theme_constant_override("v_separation", 12)
 	body.add_child(grid)
-	for s in SLOTS:
+	for s in slots_of(arch):
 		grid.add_child(_tile(s))
+
+## The slots this archetype has (Vireo and Marlowe have no R: the Boki Merge owns it).
+static func slots_of(a: String) -> Array:
+	return SLOTS if Arch.def(a).has("r") else SLOTS.filter(func(x): return x != "r")
 
 ## One ability: icon and key, name and a short tag, one line, a looping preview. Click: details.
 func _tile(slot: String) -> Control:
@@ -306,6 +310,7 @@ static func infusion_lines(a: String, ks: KinSpec) -> Array:
 	var d := Arch.def(a)
 	for slot in ["rmb", "e", "r"]:
 		var sd: Dictionary = d.get(slot, {})
+		if sd.is_empty(): continue
 		var f := Arch.fill(sd.get("sockets", {}), inf, slot, String(sd.get("delivery", "projectile" if slot == "rmb" else "burst")))
 		var notes: Array = (f.get("notes", []) as Array).filter(func(x): return not String(x).contains("fallback")).map(func(x):
 			var s := String(x)
@@ -348,7 +353,7 @@ static func strip(a: String, open_cb: Callable) -> Control:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 6)
 	v.add_child(row)
-	for s in SLOTS:
+	for s in slots_of(a):
 		var info := slot_text(a, s)
 		var b := Button.new()
 		b.custom_minimum_size = Vector2(64, 70)

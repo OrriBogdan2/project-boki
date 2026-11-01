@@ -252,6 +252,57 @@ var flinch_v := Vector2.ZERO
 var cast_prev := 99.0
 var cast_slot := ""
 var cast_now := 99.0           # seconds since the last cast (for the arms)
+## The kit moves (Hunter.kmove, set by ArchKit.move): one pose track per ability. Each key is
+## [time, pitch (+ leans back), yaw, crouch, left hand xyz from the shoulder, left weight, right hand xyz, right weight];
+## an anticipation, a strong impact pose timed to the hit, and a follow-through back to neutral.
+const KMOVES := {
+	"mage_rmb": {"dur": 0.95, "keys": [
+		[0.0, 0.0, 0.0, 0.0, 0, 0, 0, 0, 0, 0, 0, 0],
+		[0.18, 0.28, 0.45, 0.2, 0.12, 0.12, 0.2, 1.0, 0, 0, 0, 0],       # coil drawn back, shoulders turned
+		[0.33, -0.38, -0.35, 0.32, 0.0, 0.06, -0.58, 1.0, 0, 0, 0, 0],   # the throw: lunge, palm thrust
+		[0.55, -0.12, -0.1, 0.12, 0.05, 0.0, -0.4, 0.6, 0, 0, 0, 0],
+		[0.95, 0.0, 0.0, 0.0, 0, 0, 0, 0, 0, 0, 0, 0]]},
+	"mage_dash": {"dur": 1.6, "keys": [
+		[0.0, 0.0, 0.0, 0.0, 0, 0, 0, 0, 0, 0, 0, 0],
+		[0.14, -0.32, 0.0, 0.55, -0.22, 0.0, 0.32, 1.0, 0.22, 0.0, 0.32, 1.0],   # sprinter's crouch, both arms back
+		[1.6, -0.32, 0.0, 0.55, -0.22, 0.0, 0.32, 1.0, 0.22, 0.0, 0.32, 1.0]]},
+	"mage_dash_go": {"dur": 0.7, "keys": [
+		[0.0, -0.32, 0.0, 0.55, -0.22, 0.0, 0.32, 1.0, 0.22, 0.0, 0.32, 1.0],
+		[0.08, -0.62, 0.0, 0.3, -0.3, -0.1, 0.45, 1.0, 0.3, -0.1, 0.45, 1.0],     # streaking: flat out, arms trailing
+		[0.3, -0.35, 0.0, 0.15, -0.28, 0.0, 0.3, 0.7, 0.28, 0.0, 0.3, 0.7],
+		[0.7, 0.0, 0.0, 0.0, 0, 0, 0, 0, 0, 0, 0, 0]]},
+	"mage_e": {"dur": 1.0, "keys": [
+		[0.0, 0.0, 0.0, 0.0, 0, 0, 0, 0, 0, 0, 0, 0],
+		[0.22, 0.3, 0.0, 0.0, -0.04, 0.58, -0.04, 1.0, 0, 0, 0, 0],       # one hand to the sky, calling it down
+		[0.34, -0.3, 0.0, 0.3, 0.06, -0.12, -0.5, 1.0, 0, 0, 0, 0],       # slammed down at the mark
+		[0.62, -0.1, 0.0, 0.12, 0.05, 0.0, -0.3, 0.5, 0, 0, 0, 0],
+		[1.0, 0.0, 0.0, 0.0, 0, 0, 0, 0, 0, 0, 0, 0]]},
+	"gunslinger_rmb": {"dur": 0.7, "keys": [
+		[0.0, 0.0, 0.0, 0.0, 0, 0, 0, 0, 0, 0, 0, 0],
+		[0.14, 0.12, 0.55, 0.1, -0.08, 0.3, 0.16, 1.0, 0, 0, 0, 0],       # the burr cocked back by the ear
+		[0.22, -0.22, -0.42, 0.18, 0.1, 0.1, -0.55, 1.0, 0, 0, 0, 0],     # the lob
+		[0.4, -0.06, -0.1, 0.05, 0.05, 0.0, -0.3, 0.5, 0, 0, 0, 0],
+		[0.7, 0.0, 0.0, 0.0, 0, 0, 0, 0, 0, 0, 0, 0]]},
+	"gunslinger_e": {"dur": 1.5, "keys": [
+		[0.0, 0.0, 0.0, 0.0, 0, 0, 0, 0, 0, 0, 0, 0],
+		[0.22, -0.12, 0.3, 0.4, 0.05, 0.05, -0.46, 0.85, 0, 0, 0, 0],     # braced low behind the long barrel
+		[0.78, -0.16, 0.3, 0.45, 0.05, 0.05, -0.46, 0.85, 0, 0, 0, 0],
+		[0.86, 0.48, 0.2, 0.12, 0.1, 0.0, -0.3, 0.6, 0, 0, 0, 0],         # the recoil throws the chest back
+		[1.2, 0.12, 0.05, 0.05, 0, 0, 0, 0.2, 0, 0, 0, 0],
+		[1.5, 0.0, 0.0, 0.0, 0, 0, 0, 0, 0, 0, 0, 0]]},
+	"gunslinger_dash": {"dur": 0.9, "keys": [
+		[0.0, 0.0, 0.0, 0.0, 0, 0, 0, 0, 0, 0, 0, 0],
+		[0.1, 0.4, 0.0, 0.62, -0.3, 0.05, -0.08, 0.8, 0.3, 0.05, -0.08, 0.5],   # sat back into the skid, arms out for balance
+		[0.55, 0.3, 0.0, 0.5, -0.3, 0.05, -0.08, 0.8, 0.3, 0.05, -0.08, 0.5],
+		[0.9, 0.0, 0.0, 0.0, 0, 0, 0, 0, 0, 0, 0, 0]]},
+}
+var km_pitch := 0.0
+var km_yaw := 0.0
+var km_c := 0.0
+var km_lh := Vector3.ZERO
+var km_lw := 0.0
+var km_rh := Vector3.ZERO
+var km_rw := 0.0
 var emote_id := ""
 var emote_prev := 99.0
 var down_t := 0.0
@@ -321,6 +372,28 @@ func _init(m: Node3D) -> void:
 	_setup_weapon(String(m.get_meta("wid", "")))
 
 ## The arms on the weapon in a relaxed carry, for a model nothing animates (galleries, portraits).
+## Evaluate one KMOVES track at `kt` seconds into the move (all zeros when it's over).
+func _kmove(name_: String, kt: float) -> void:
+	km_pitch = 0.0; km_yaw = 0.0; km_c = 0.0; km_lw = 0.0; km_rw = 0.0
+	if not KMOVES.has(name_):
+		return
+	var mv: Dictionary = KMOVES[name_]
+	if kt >= float(mv["dur"]):
+		return
+	var keys: Array = mv["keys"]
+	var i := 0
+	while i < keys.size() - 2 and kt >= float((keys[i + 1] as Array)[0]):
+		i += 1
+	var a: Array = keys[i]; var b: Array = keys[i + 1]
+	var u := smoothstep(float(a[0]), float(b[0]), kt)
+	km_pitch = lerpf(float(a[1]), float(b[1]), u)
+	km_yaw = lerpf(float(a[2]), float(b[2]), u)
+	km_c = lerpf(float(a[3]), float(b[3]), u)
+	km_lh = Vector3(lerpf(float(a[4]), float(b[4]), u), lerpf(float(a[5]), float(b[5]), u), lerpf(float(a[6]), float(b[6]), u))
+	km_lw = lerpf(float(a[7]), float(b[7]), u)
+	km_rh = Vector3(lerpf(float(a[8]), float(b[8]), u), lerpf(float(a[9]), float(b[9]), u), lerpf(float(a[10]), float(b[10]), u))
+	km_rw = lerpf(float(a[11]), float(b[11]), u)
+
 static func rest_pose(m: Node3D) -> void:
 	if not m.has_node("Rig/Torso/ArmLPivot"):
 		return
@@ -712,7 +785,7 @@ func update(dt: float, s: Dictionary) -> void:
 		else:
 			hr += shuffle_lift * 0.35; kr -= shuffle_lift * 0.7
 	# crouch, landing, slam: knees bend, hips drop
-	var bend := maxf(crouch_k * 0.75, land_k * 0.85) + slam_k * 0.5
+	var bend := maxf(maxf(crouch_k, km_c) * 0.75, land_k * 0.85) + slam_k * 0.5
 	hl += bend * 0.62; hr += bend * 0.5
 	kl -= bend * 1.2; kr -= bend * 1.05
 	if slam_k > 0.0:
@@ -902,6 +975,9 @@ func update(dt: float, s: Dictionary) -> void:
 					pitch += cast_k * 0.55
 				elif cast_slot == "utility":
 					pitch -= cast_k * 0.2
+	# the kit's own moves (KMOVES)
+	_kmove(String(s.get("kmove", "")), float(s.get("kmove_t", 99.0)))
+	pitch += km_pitch; yaw += km_yaw
 	# emotes
 	var em := String(s.get("emote", ""))
 	var em_t := float(s.get("emote_t", 99.0))
@@ -1368,6 +1444,13 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 		elif arch == "bulwark":
 			ct = sh_l + Vector3(0.12, 0.05, -0.4)           # a braced forearm, out in front
 		fl = fl.lerp(ct, cast_k)
+	# a kit move: the free hand (and, for the runner's sprint, both) follow the pose track
+	if km_lw > 0.0:
+		fl = fl.lerp(sh_l + km_lh, km_lw)
+		free_l = maxf(free_l, km_lw)
+	if km_rw > 0.0:
+		fr = fr.lerp(sh_r + km_rh, km_rw)
+		free_r = maxf(free_r, km_rw)
 	# drink: flask to the mouth
 	if drink_k > 0.0:
 		fl = fl.lerp(sh_l + Vector3(0.16, 0.2, -0.17), drink_k)

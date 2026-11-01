@@ -8,11 +8,7 @@ extends RefCounted
 ##   ult         the Juggernaut's R fuse (wind-up) a moment before Avalanche fires
 ##   archer      a snare roots the dummy, full Focus: the lens glint, the aim line, crosshairs over it
 ##   deadeye     the same, ending on the Deadeye payoff
-##   mage        a Guided Bolt Runes the dummy; Overcharged: white-hot runes orbiting the Mage
-##   flashpoint  the same, then a second bolt detonates the Rune: the Flashpoint payoff
-##   hex         the Hex turning the dummy into a critter
-##   gunslinger  rifle hits fill the gold cylinder over the hat; at 6 the gun glows (Called Shot armed)
-##   calledshot  the same, ending on the Called Shot payoff
+##   hero_<id>_<move>   Vireo (mage) and Marlowe (gunslinger) moments, see scripts/arch/hero_demo.gd
 ##   bulwark     the shield raised and burning gold, Guard pips full (Shield Slam armed)
 ##   crushed     the same, then letting go: a Shield Slam into the pillar, Crushed
 ##   e_<a> / r_<a> / rmb_<a>   any archetype's E, R or RMB on the still dummy
@@ -111,44 +107,8 @@ static func tick(A: Arena, dt: float) -> void:
 				if _at(t, dt, 1.8): P.inp["fire"] = false
 				if P.ak.get("deadeyes") and int(P.ak.get("deadeyes")) > 0 and not A.has_meta("de_at"): A.set_meta("de_at", t)
 				at_t = float(A.get_meta("de_at", 9.0)) + 0.06
-		"mage", "flashpoint", "hex":
-			if t < 0.05:
-				if P.arch != "mage": A.set_arch("mage", "spellstaff")
-				A.set_kin("cindle")
-				P.teleport(D.pos + Vector3(-3.6, 0, -1.2))
-				A.home = P.pos
-			_aim(P, D)
-			P.inp["move"] = Vector2.ZERO
-			if w == "hex":
-				if _at(t, dt, 0.4): P.ak.cd["e"] = 0.0; P.ak.use_e()
-				if Hex.active(D) and not A.has_meta("hx_at"): A.set_meta("hx_at", t)
-				at_t = float(A.get_meta("hx_at", 9.0)) + 0.35
-			else:
-				if _at(t, dt, 0.3): P.ak.ch_rmb = 1.0; P.ak.bot_hold["rmb"] = 0.3; P.ak.press_rmb()     # a Guided Bolt Runes the dummy
-				if t > 0.7 and t < 1.5: P.ak.res = maxf(P.ak.res, 82.0); P.ak.res_wait = 1.0        # ride it Overcharged
-				if w == "mage":
-					at_t = 1.45
-				else:
-					if _at(t, dt, 1.5): P.ak.ch_rmb = 1.0; P.ak.cd["rmb"] = 0.0; P.ak.res = 74.0; P.ak.press_rmb()   # the second spell: Flashpoint
-					if int(P.ak.get("flashpoints")) > 0 and not A.has_meta("fp_at"): A.set_meta("fp_at", t)
-					at_t = float(A.get_meta("fp_at", 9.0)) + 0.06
-		"gunslinger", "calledshot":
-			if t < 0.05:
-				if P.arch != "gunslinger": A.set_arch("gunslinger", "rifle")
-				A.set_kin("puddlet")
-				P.teleport(D.pos + Vector3(-3.6, 0, -1.0))
-				A.home = P.pos
-			_aim(P, D)
-			P.inp["move"] = Vector2.ZERO
-			P.inp["fire"] = t > 0.2 and t < 1.0                                            # hits load the cylinder
-			if t > 0.2 and t < 1.0: P.ak.res_wait = 4.0
-			if _at(t, dt, 1.05) and P.ak.res < 6.0: P.ak.res = 5.0; P.ak.load_at = -9.0; P.ak.load_chambers(1, true)
-			if w == "gunslinger":
-				at_t = 1.7
-			else:
-				if _at(t, dt, 1.7): P.ak.ch_rmb = 1.0; P.ak.cd["rmb"] = 0.0; P.inp["sec_hold"] = false; P.ak.press_rmb()
-				if int(P.ak.get("called_shots")) > 0 and not A.has_meta("cs_at"): A.set_meta("cs_at", t)
-				at_t = float(A.get_meta("cs_at", 9.0)) + 0.06
+		_ when w.begins_with("hero_"):
+			at_t = HeroDemo.tick(A, P, D, t, dt, w)         # Vireo and Marlowe (scripts/arch/hero_demo.gd)
 		_ when w.begins_with("e_") or w.begins_with("r_") or w.begins_with("rmb_"):
 			# any archetype's E, R or RMB on the still dummy: e_<arch>, r_<arch>, rmb_<arch> (rmb holds 0.9s)
 			var ar := w.split("_")[1]
