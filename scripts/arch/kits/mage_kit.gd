@@ -180,7 +180,7 @@ func on_dash(use_ex: bool) -> bool:
 	var tele := tele_lane(h.pos, h.aim_dir(), 1.0, 0.9, col_of(dd), 0.0)
 	var endc: Node3D = m.fx.telegraph_circle(h.pos, 0.7, Color(col_of(dd), 0.9))
 	wire = {"t": 0.0, "tele": tele, "end": endc}
-	move("mage_dash")
+	play("mage_dash")
 	m.sfx("zap", h.pos, -8.0, 0.7)
 	return true
 
@@ -221,7 +221,7 @@ func _run(L: float, d: Vector2) -> void:
 	travel(L, time, {"invuln": time + 0.05, "phase": 1.0, "trail": "roll", "dir": d})
 	h.phase_t = maxf(h.phase_t, time + 0.05)
 	last_dash_kind = "wire"
-	move("mage_dash_go")
+	play("mage_dash_go")
 	var dmg := float(dd["dmg"]) * (2.0 if rank("dash") >= 3 else 1.0)
 	h.dash_pass = {"hit": {}, "w": float(dd["width"]) + 0.6, "kx": func(f: Ent): _wire_hit(f, dmg)}
 	var a := h.pos + Vector3(0, 0.9, 0)
@@ -274,7 +274,7 @@ func fire_rmb(c: Dictionary) -> void:
 	var min_t := float(sd["min_t"])
 	var k := clampf((held_t - min_t) / (float(sd["hold"]) - min_t), 0.0, 1.0)
 	last_variant = "hold" if k > 0.5 else "tap"
-	move("mage_rmb")
+	play("mage_rmb")
 	var wait := maxf(0.0, min_t - held_t)
 	if wait > 0.0:
 		m.later(wait, func(): if is_instance_valid(h) and not h.downed: _coil(k))
@@ -383,7 +383,7 @@ func cast_e() -> bool:
 	m.sfx("zap", h.pos, -4.0, 1.1)
 	m.sfx("charge", at, -8.0, 1.8)
 	net_ring(at, float(ed["radius"]), col_of(ed))
-	move("mage_e")
+	play("mage_e")
 	return true
 
 func _tick_strikes(dt: float) -> void:

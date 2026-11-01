@@ -108,6 +108,11 @@ func run(main_node: Node) -> void:
 	var only := ""
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--ak-only="): only = String(a).substr(10)
+	for who in ["mage", "gunslinger"]:
+		if "--%s-combo-check" % who in OS.get_cmdline_user_args():
+			var hc = load("res://tools/hero_combo_check.gd").new()      # Vireo's and Marlowe's cross-ability interactions
+			await hc.run(main_node, who)
+			return
 	if "--kit-combo-check" in OS.get_cmdline_user_args():
 		await _combos()
 		print("AKCHECK DONE, %d checks, failures: %d" % [n, fails])

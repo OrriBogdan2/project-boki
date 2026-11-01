@@ -101,7 +101,7 @@ func on_dash(use_ex: bool) -> bool:
 		return true
 	travel(float(dd["roll"]), float(dd["roll_t"]), {"invuln": float(dd["invuln"]), "trail": "roll"})
 	slide = {"t": 0.0, "held": false, "dir": h.roll_dir}
-	move("gunslinger_dash")
+	play("gunslinger_dash")
 	m.later(0.08, func(): if is_instance_valid(h): m.sfx("click", h.pos, -8.0, 1.8))
 	return true
 
@@ -165,7 +165,7 @@ func fire_rmb(c: Dictionary) -> void:
 	var at := h.pos + Vector3(d.x * 0.8, 1.0, d.y * 0.8)
 	n.global_position = at
 	burrs.append({"pos": at, "dir": d, "t": 0.0, "node": n, "stuck": null, "wall": false, "fuse": -1.0, "range": float(bd["range"])})
-	move("gunslinger_rmb")
+	play("gunslinger_rmb")
 	m.sfx("ab_throw", h.pos, -2.0, 0.8)
 	m.sfx("click", h.pos, -5.0, 0.8)
 	if h.is_local(): Oomph.punch_dir(m, -d, 0.08)
@@ -282,7 +282,7 @@ func cast_e() -> bool:
 	e_t = float(ed["charge"]) + 0.1
 	m.sfx("charge", h.pos, -3.0, 1.1)
 	net_ring(h.pos, 1.2, col_of(ed))
-	move("gunslinger_e")
+	play("gunslinger_e")
 	return true
 
 func rmb_hold_tick(_t: float) -> void:
