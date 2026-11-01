@@ -76,8 +76,9 @@ const T := {
 	"cam_lag_m":               ["<=", 0.40, "m", "[footage] hunter stays roughly centred; [spec] follow 0.08-0.15s"],
 	"cam_settle_t":            ["<=", 0.35, "s", "camera settles on you after a stop"],
 	"cam_glide_lead_m":        [">=", 0.4, "m", "slight lead in glide direction"],
-	"view_across_m":           ["~", [22.0, 25.0], "m", "ground across a 16:9 screen at the focus (owner: tighter than the 28m footage estimate)"],
-	"hunter_screen_pct":       [">=", 6.0, "%", "medium hunter, feet to head, as a share of screen height (owner: heroes read bigger)"],
+	"view_across_m":           ["~", [22.0, 25.0], "m", "ground across a 16:9 screen at the focus (camcal: ~17 hunter silhouettes across, as in gameplay frames)"],
+	"hunter_screen_pct":       ["~", [6.4, 7.6], "%", "medium hunter, feet to head straight up, as a share of screen height (camcal: its on-screen silhouette ~10.5%, as in gameplay frames)"],
+	"hunter_feet_below_pct":   ["~", [1.5, 5.0], "%", "feet below the screen centre, as a share of screen height (camcal: ~3% in gameplay frames)"],
 }
 
 var results := {}
@@ -772,6 +773,7 @@ func _screen_scale() -> void:
 	print("MFEEL framing: style supervive pitch %.0f dist %.1f fov %.0f, viewport %dx%d, model scale %.2f, model %.2fm tall" % [rad_to_deg(cam.pitch), cam.dist, cam.fov, int(vw), int(vh), P.model.scale.y, now[2]])
 	rec("view_across_m", 2.0 * cam.dist * tan(hfov * 0.5))
 	rec("hunter_screen_pct", now[1] / vh * 100.0)
+	rec("hunter_feet_below_pct", (float(now[3]) - vh * 0.5) / vh * 100.0)
 	# the same measure for the framing before movefeel (25m, hunters at their plain size), for the doc
 	var d0 := cam.dist
 	var vs: float = Hunter.VIS_SCALE
@@ -808,7 +810,7 @@ func _model_span(cam: CamRig) -> Array:
 	var c := P.model.global_position
 	var feet := cam.unproject_position(Vector3(c.x, ylo, c.z))
 	var head := cam.unproject_position(Vector3(c.x, yhi, c.z))
-	return [hi - lo, absf(feet.y - head.y), yhi - ylo]
+	return [hi - lo, absf(feet.y - head.y), yhi - ylo, feet.y]
 
 # ---------------------------------------------------------------- end to end: key -> sim -> screen
 func _e2e() -> void:

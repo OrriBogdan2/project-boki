@@ -64,6 +64,21 @@ static func pick(cls: String, rng: RandomNumberGenerator) -> String:
 
 # ------------------------------------------------------------------ weapon families
 ## The weapons an archetype can hold (its family). The first is the default.
+## The rank previews for one slot ("sec", "dash", "kin", "ult"), from the rank you have: always the
+## NEXT rank's concrete change first (rank 2 when you're rank 1), then rank 3's special after it.
+## cur 0 (or -1: no context, e.g. the kit card) lists every rank to come. [[label, text]...]
+static func next_ranks(id: String, slot: String, cur: int) -> Array:
+	var d := def(id)
+	var r2: Dictionary = d.get("rank2", {})
+	var r3: Dictionary = d.get("rank_next", {})
+	var out: Array = []
+	var mx := 2 if slot == "ult" else 3
+	if cur < mx and cur <= 1 and r2.has(slot):
+		out.append(["Rank 2", String(r2[slot]).trim_prefix("Rank 2: ").trim_prefix("Rank 2 (level 9): ")])
+	if slot != "ult" and cur < 3 and r3.has(slot):
+		out.append(["Rank 3", String(r3[slot]).trim_prefix("Rank 3: ")])
+	return out
+
 static func weapons(id: String) -> Array:
 	return def(id).get("weapons", [])
 

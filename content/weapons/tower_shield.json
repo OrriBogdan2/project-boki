@@ -21,13 +21,13 @@
 		"range": 2.4,
 		"arc": 120.0,
 		"kb_influence": 0.4,
-		"charge_time": 0.8,
+		"charge_time": 1.25,
 		"charged_dmg": 28.0,
 		"charged_kb": 8.0,
 		"size": 0.24,
 		"color": "#d8e8ff",
 		"sfx": "cleave",
-		"desc": "A 2-hit mace combo, 2.4m. Hold 0.8s for an overhead: 24 damage, push 8. Right click raises the tower shield.",
+		"desc": "Tap to throw the mace: it passes through foes, lies where it lands (your team sees foes near it) and comes back when you tap again, hitting on the way. Hold to wind up a Crushing Blow (full at 1.25s: 34 damage, a big knock, stun 0.4) that carries you forward. Right click raises the tower shield.",
 		"kick": 0.09
 	},
 	"utility": ""

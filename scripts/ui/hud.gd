@@ -1405,6 +1405,9 @@ func _draw_arch_abilities(sz: Vector2, p: Hunter) -> void:
 	var ei := p.slot_info("k1")
 	var er := Rect2(Vector2(x, y), Vector2(s, s))
 	_skill_slot("kin", "k1", er, String(ei["icon"]), Settings.key_cap("signature"), ei["col"], float(ei["cd"]) / maxf(0.01, float(ei["cd_max"])) if float(ei["cd"]) > 0.0 and float(ei.get("up", 0.0)) <= 0.0 else 0.0, float(ei["cd"]) if float(ei.get("up", 0.0)) <= 0.0 else 0.0, bool(ei["ready"]))
+	if ei.get("full", false):
+		# the payoff lives on E (the Mage's Flashpoint): the same gold dot as the right click's
+		c.draw_circle(er.position + Vector2(s - 6, 6), 5.0 + sin(m.time * 8.0), Color("ffd23f"))
 	if float(ei.get("up", 0.0)) > 0.0:
 		c.draw_arc(er.get_center(), s * 0.5 + 4.0, -PI / 2, -PI / 2 + TAU * clampf(float(ei["up"]) / maxf(0.1, float(p.ak.e_def().get("time", 5.0))), 0.0, 1.0), 32, Color(ei["col"], 0.9), 3.0, true)
 	x += s + gap
@@ -2321,6 +2324,11 @@ func _draw_crosshair(p: Hunter) -> void:
 		c.draw_arc(mp, 30, PI * 1.62, PI * 1.62 + PI * 0.76, 24, Color(0, 0, 0, 0.35), 3.0, true)
 		if rf > 0.0:
 			c.draw_arc(mp, 30, PI * 1.62, PI * 1.62 + PI * 0.76 * rf, 24, Color(rc, 0.95 if p.ak.tell == "full" else 0.7), 3.0 if p.ak.tell == "full" else 2.0, true)
+		# the payoff is armed (DEADEYE, FLASHPOINT, CALLED SHOT, SLAM): a pulsing word under the arc
+		var rl := p.ak.ready_label()
+		if rl != "":
+			var pk := 0.5 + 0.5 * sin(m.time * 9.0)
+			_ctext(mp + Vector2(0, 50), rl, 13, Color(rc.lightened(0.2), 0.75 + 0.25 * pk), big)
 	# aiming at a truce partner: a reminder before you break it
 	if m.truce and not m.truce.pacts.is_empty():
 		var ph: Hunter = m.truce.partner_at(p.inp["aim"], p.team)
@@ -2567,10 +2575,11 @@ func _arch_tip(id: String, p: Hunter) -> Array:
 	out.append([String(si["name"]), si["col"]])
 	out.append(["%s %s  ·  %s  ·  %s" % [Arch.name_of(p.arch), slot_name, Settings.key_cap(key), p.rank_text({"sec": "sec", "k1": "k1", "r": "r", "dash": "dash"}[id])], MUTED, 12])
 	out.append([String(si["desc"]), INK, 13])
-	var r3: Dictionary = p.ak.d.get("rank3", {})
+	# what the next rank does, concretely (rank 2 when you're rank 1), then rank 3's special after it
 	var sk: String = {"sec": "sec", "k1": "kin", "r": "ult", "dash": "dash"}[id]
-	if r3.has(sk):
-		out.append(["%s: %s" % ["Rank 2" if sk == "ult" else "Rank 3", String(r3[sk])], Color(si["col"], 0.85), 12])
+	var nr := Arch.next_ranks(p.arch, sk, int(p.slot_lv.get(sk, 0)))
+	for i in nr.size():
+		out.append(["%s%s: %s" % ["Next  ·  " if i == 0 else "", String(nr[i][0]), String(nr[i][1])], Color(si["col"], 0.95 if i == 0 else 0.7), 12])
 	if id == "r":
 		out.append(["Unlocks at level %d, rank 2 at %d. With a full bond meter it's Bonded: your Boki merges as it fires." % [int(Hunter.ULT_AT[0]), int(Hunter.ULT_AT[1])], MUTED, 12])
 	if id == "sec":

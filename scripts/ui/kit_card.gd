@@ -16,11 +16,11 @@ const LABEL := {"dash": "Dash", "passive": "Passive", "lmb": "Attack", "rmb": "R
 ## Which looping preview each archetype's abilities get (KitPreview kinds).
 const PREVIEW := {
 	"thief": {"dash": "dash2", "passive": "marks", "rmb": "knife", "e": "zone", "r": "lines"},
-	"archer": {"dash": "grapple", "passive": "meter", "rmb": "projectile", "e": "zone", "r": "rain"},
-	"mage": {"dash": "blink", "passive": "meter", "rmb": "projectile", "e": "zone", "r": "rain"},
+	"archer": {"dash": "grapple", "passive": "meter", "rmb": "heavy", "e": "rainwall", "r": "arrows3"},
+	"mage": {"dash": "blink", "passive": "marks", "rmb": "steer", "e": "hex", "r": "mirror"},
 	"gunslinger": {"dash": "dash", "passive": "pips", "rmb": "projectile", "e": "buff", "r": "lines"},
 	"juggernaut": {"dash": "charge", "passive": "meter", "rmb": "leap", "e": "buff", "r": "burst"},
-	"bulwark": {"dash": "dash", "passive": "meter", "rmb": "shield", "e": "zone", "r": "dome"},
+	"bulwark": {"dash": "charge", "passive": "meter", "rmb": "shield", "e": "zone", "r": "fissure"},
 }
 
 var arch := ""
@@ -186,8 +186,9 @@ func _show_detail(slot: String) -> void:
 		top.add_child(kc)
 	v.add_child(top)
 	v.add_child(UI.label(String(info["tag"]), 13, col, UI.big))
+	var fs := 15 if (info["detail"] as Array).size() <= 5 else 13      # (a long kit still fits, ranks included)
 	for para in info["detail"]:
-		var p := UI.label(String(para[1]) if para[0] == "" else "%s:  %s" % [para[0], para[1]], 15, UI.INK if para[0] == "" else UI.MUTED)
+		var p := UI.label(String(para[1]) if para[0] == "" else "%s:  %s" % [para[0], para[1]], fs, UI.INK if para[0] == "" else (Color("ffd98a") if para[0] == "Ranks" else UI.MUTED))
 		p.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		v.add_child(p)
 
@@ -238,7 +239,7 @@ static func slot_text(a: String, slot: String) -> Dictionary:
 			var sd: Dictionary = d["dash"]
 			out.merge({"name": String(sd["name"]), "icon": String(sd.get("icon", "dash")), "col": Color(String(sd.get("col", "#ffffff"))),
 				"tag": "%s charge%s · %ss" % [_charges(a), "" if _charges(a) == "1" else "s", KinText.n(float(sd.get("cd", 9.0)))], "line": String(cd.get("dash", sd.get("desc", "")))}, true)
-			out["detail"] = [["", String(sd.get("desc", ""))], ["Rank 3", String(d.get("rank3", {}).get("dash", ""))]]
+			out["detail"] = [["", String(sd.get("desc", ""))]] + _ranks(a, "dash")
 		"passive":
 			var rd: Dictionary = d.get("resource", {})
 			out.merge({"name": String(d["passive"]["name"]), "icon": String({"thief": "satchel", "archer": "scanner", "mage": "blaze_mantle", "gunslinger": "barrage", "juggernaut": "haymaker", "bulwark": "fortify"}.get(a, "burst")), "col": Color(String(rd.get("col", "#ffffff"))),
@@ -266,21 +267,31 @@ static func slot_text(a: String, slot: String) -> Dictionary:
 			var det: Array = []
 			for v in ["tap", "hold", "air", "during_e", "full"]:
 				if vs.has(v): det.append([{"tap": "Tap", "hold": "Hold", "air": "In the air", "during_e": "During E", "full": "Resource full"}[v], String(vs[v])])
-			det.append(["Rank 3", String(d.get("rank3", {}).get("sec", ""))])
+			det.append_array(_ranks(a, "sec"))
 			out["detail"] = det
 		"e":
 			var sd: Dictionary = d["e"]
 			out.merge({"name": String(sd["name"]), "icon": String(sd.get("icon", "")), "col": Color(String(sd.get("col", "#ffffff"))),
 				"tag": "%ss" % KinText.n(float(sd.get("cooldown", 14.0))), "line": String(cd.get("e", ""))}, true)
-			out["detail"] = [["", String(sd.get("desc", ""))], ["Rank 3", String(d.get("rank3", {}).get("kin", ""))]]
+			out["detail"] = [["", String(sd.get("desc", ""))]] + _ranks(a, "kin")
 		"r":
 			var sd: Dictionary = d["r"]
 			out.merge({"name": String(sd["name"]), "icon": String(sd.get("icon", "")), "col": Color(String(sd.get("col", "#ffffff"))),
 				"tag": "level 6 · %ss · %ss fuse" % [KinText.n(float(sd.get("cooldown", 100.0))), KinText.n(float(sd.get("fuse", 0.45)))], "line": String(cd.get("r", ""))}, true)
 			var g := "you're unstoppable while it winds up" if String(sd.get("fuse_guard", "none")) == "unstoppable" else "a stun or knock during the wind-up cancels it"
 			out["detail"] = [["", String(sd.get("desc", ""))], ["Fuse", "%ss wind-up everyone can see; %s." % [KinText.n(float(sd.get("fuse", 0.45))), g]],
-				["Bonded", "With a full bond meter your Boki merges with you as it fires."], ["Rank 2", String(d.get("rank3", {}).get("ult", ""))]]
+				["Bonded", "With a full bond meter your Boki merges with you as it fires."]] + _ranks(a, "ult")
 	return out
+
+## The ranks to come, in order (rank 2's concrete change first, then rank 3's special), as one row
+## so the detail page never clips the second.
+static func _ranks(a: String, slot: String) -> Array:
+	var nr := Arch.next_ranks(a, slot, -1)
+	if nr.is_empty():
+		return []
+	var parts: Array = []
+	for r in nr: parts.append("%s: %s" % [String(r[0]), String(r[1])])
+	return [["Ranks", "   ".join(parts)]]
 
 static func preview_kind(a: String, slot: String) -> String:
 	if slot == "lmb":
@@ -492,6 +503,72 @@ class KitPreview extends Control:
 				var k6 := fmod(t, 1.0)
 				if k6 < 0.6:
 					draw_circle(foe.lerp(me + Vector2(R * 2.2, 0), k6 / 0.6), R * 0.5, red)
+			"heavy":
+				# a held draw (a growing ring), then a heavy shot that knocks the foe back into a wall
+				var wx := w * 0.92
+				draw_line(Vector2(wx, h * 0.3), Vector2(wx, h * 0.95), Color(0.7, 0.62, 0.5), 5.0)
+				if t < 0.45:
+					draw_arc(me, R * (2.6 - t * 3.0), 0, TAU * (t / 0.45), 20, Color(col, 0.9), 3.0, true)
+				else:
+					var k8 := clampf((t - 0.45) / 0.2, 0.0, 1.0)
+					draw_line(me, me.lerp(foe, k8), Color(col, 0.9), 5.0)
+					if k8 >= 1.0:
+						foe = foe.lerp(Vector2(wx - R * 1.2, foe.y), clampf((t - 0.65) / 0.15, 0.0, 1.0))
+						hit = true
+			"rainwall":
+				# a line of arrows falling across the foe's path
+				var c0 := foe + Vector2(0, -h * 0.28)
+				var c1 := foe + Vector2(0, h * 0.28)
+				draw_line(c0, c1, Color(col, 0.35), R * 2.4)
+				for i in 6:
+					var k9 := fmod(t * 2.2 + i * 0.17, 1.0)
+					var x0 := c0.lerp(c1, (i + 0.5) / 6.0)
+					draw_line(x0 + Vector2(-R * 0.5, -h * 0.25 * (1.0 - k9)), x0 + Vector2(0, -h * 0.25 * (1.0 - k9) + R), col, 2.0)
+				hit = fmod(t * 2.2, 1.0) > 0.85
+			"arrows3":
+				# three big arrows, the third the biggest
+				for i in 3:
+					var k10 := clampf((t - i * 0.25) / 0.2, 0.0, 1.0)
+					if k10 > 0.0 and k10 < 1.0:
+						var p3 := me.lerp(foe, k10)
+						draw_line(p3 - Vector2(R * (2.0 + i), 0), p3, col, 3.0 + i * 2.0)
+					if k10 >= 1.0 and t < i * 0.25 + 0.3: hit = true
+			"steer":
+				# a bolt that bends round a pillar onto the foe
+				draw_rect(Rect2(Vector2(w * 0.45, h * 0.45), Vector2(w * 0.08, h * 0.35)), Color(0.6, 0.55, 0.5, 0.8), true)
+				var k11 := clampf(t / 0.8, 0.0, 1.0)
+				var pa := me; var pb := Vector2(w * 0.5, h * 0.22); var pc := foe
+				var q0 := pa.lerp(pb, k11); var q1 := pb.lerp(pc, k11)
+				var pt := q0.lerp(q1, k11)
+				draw_circle(pt, R * (0.6 + 0.5 * k11), col)
+				draw_arc(pt, R * (1.1 + 0.6 * k11), 0, TAU, 14, Color(col, 0.5), 2.0, true)
+				hit = k11 >= 1.0 and t < 0.95
+			"hex":
+				var k12 := clampf(t / 0.5, 0.0, 1.0)
+				if k12 < 1.0:
+					draw_circle(me.lerp(foe, k12), R * 0.7, col)
+				else:
+					# the foe turned into a small critter, a ring of runes over it
+					draw_circle(foe + Vector2(0, R * 0.5), R * 0.6, Color("f7c6ff"))
+					draw_arc(foe, R * 2.0, t * 6.0, t * 6.0 + TAU * 0.8, 16, Color(col, 0.8), 2.0, true)
+					foe = Vector2(-99, -99)
+			"mirror":
+				for sgn in [-1.0, 1.0]:
+					var mp := me + Vector2(R * 1.5, sgn * h * 0.25)
+					draw_circle(mp, R, Color(col, 0.45))
+					var k13 := fmod(t * 1.5, 1.0)
+					draw_circle(mp.lerp(foe, k13), R * 0.4, Color(col, 0.8))
+				hit = fmod(t * 1.5, 1.0) > 0.85
+			"fissure":
+				var k14 := clampf(t / 0.35, 0.0, 1.0)
+				var end := me.lerp(Vector2(w * 0.95, me.y), k14)
+				draw_line(me, end, Color(col, 0.9), 3.0)
+				if t > 0.5:
+					for i in 5:
+						var px := me.lerp(Vector2(w * 0.95, me.y), (i + 0.5) / 5.0)
+						draw_line(px, px + Vector2(0, -h * 0.25 * sin(clampf((t - 0.5) * 4.0, 0.0, 1.0) * PI)), col, 4.0)
+				foe = Vector2(w * 0.7, me.y)
+				hit = t > 0.3
 			"dome":
 				draw_arc(me + Vector2(w * 0.2, 0), w * 0.3, PI, TAU, 24, Color(col, 0.8), 3.0, true)
 				var k7 := fmod(t, 1.0)

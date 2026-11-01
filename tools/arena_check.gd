@@ -95,6 +95,33 @@ func _arena() -> void:
 		A.set_arch(a)
 		step(m, 0.05)
 		ok("swap to %s" % a, P.arch == a and P.ak != null and P.cls == Arch.weight(a))
+	# every hold has the wind-up feel: a charge that fills (ring + glow), a full tick, a release
+	for a in Arch.ids():
+		A.set_arch(a)
+		P.teleport(A.home); P.inp["aim"] = D.pos + Vector3(0, 0.9, 0); P.inp["aim_y"] = D.pos.y
+		P.ak.cd["rmb"] = 0.0; P.ak.ch_rmb = float(P.ak.rmb_charges()); P.fire_cd = 0.0
+		step(m, 0.1)
+		var f0: int = P.ak.charge_fulls
+		var mid := -1.0
+		var ring_ok := false
+		if a == "mage":
+			# the Guided Bolt's hold is a steer: the bolt flies and hums while you hold
+			P.ak.bot_hold["rmb"] = 0.8; P.ak.press_rmb()
+			step(m, 0.3)
+			ok("hold: mage RMB steers a live bolt", not (P.ak as MageKit).bolts.is_empty() and P.ak.rmb_down)
+			step(m, 0.8)
+			continue
+		var t := 0.0
+		while t < 1.45:
+			if a == "bulwark": P.inp["fire"] = true            # the Crushing Blow is the Bulwark's charge
+			elif t < 0.02: P.ak.bot_hold["rmb"] = 1.45; P.ak.press_rmb()
+			m.step(DT); t += DT
+			if t > 0.4 and mid < 0.0:
+				mid = P.ak.charge_k()
+				ring_ok = P.ak.chg.get("ring") != null and is_instance_valid(P.ak.chg.get("ring"))
+		P.inp["fire"] = false
+		step(m, 0.3)
+		ok("hold: %s winds up (ring), ticks full, releases" % a, mid > 0.1 and ring_ok and P.ak.charge_fulls > f0 and P.ak.charge_last > 0.9 and P.ak.chg.is_empty(), "mid %.2f fulls +%d last %.2f" % [mid, P.ak.charge_fulls - f0, P.ak.charge_last])
 	# Rage on dummies: the juggernaut fills up and gets Enraged
 	A.set_arch("juggernaut")
 	var JK: JuggernautKit = P.ak

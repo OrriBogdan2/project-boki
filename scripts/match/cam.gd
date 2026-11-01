@@ -8,10 +8,13 @@ const LEAD_X := 4.2
 const LEAD_Z := 5.4
 ## Expedition camera presets (Settings "cam_style"): pitch in degrees, distance, field of view.
 const STYLES := {
-	# pitch and FOV measured from footage; distance pulled in from the footage estimate of 25m (about 28m
-	# of ground across a 16:9 screen) to 20.5m (~23m across) at the owner's call (movefeel): SUPERVIVE
-	# frames tighter and its heroes read bigger (with Hunter.VIS_SCALE, ~5.4% -> ~7.5% of screen height)
-	"supervive": {"pitch": 65.0, "dist": 20.5, "fov": 35.0, "name": "Supervive"},
+	# (camcal) measured from real gameplay frames (docs/MOVEMENT_FEEL.md, "Camera calibration"): a 65.5 deg
+	# pitch and a ~32 deg vertical lens (fitted from a floor ring, a platform rim and the perspective of
+	# matching barrels and posts), the hunter's silhouette ~10.5% of the screen's height with the feet a
+	# little below the centre (the view aims at the body: "rise" metres above the focus). ~23.5m across.
+	"supervive": {"pitch": 66.0, "dist": 23.0, "fov": 32.0, "rise": 1.0, "name": "Supervive"},
+	# the movefeel framing before camcal (a wider 35 deg lens, aimed at the feet), kept as an option
+	"supervive_wide": {"pitch": 65.0, "dist": 20.5, "fov": 35.0, "rise": 0.0, "name": "Supervive (wider lens)"},
 	"high": {"pitch": 70.0, "dist": 27.0, "fov": 36.0, "name": "Top-down"},
 	"classic": {"pitch": 57.0, "dist": 32.2, "fov": 28.0, "name": "Classic (flat, far)"},
 	"low": {"pitch": 50.0, "dist": 23.0, "fov": 42.0, "name": "Low (more horizon)"},
@@ -29,6 +32,7 @@ var top := 0.0                # 0 = the usual angle, 1 = looking straight down (
 var top_to := 0.0
 var pitch := deg_to_rad(57.0)  # how steeply the camera looks down
 var dist := 32.2              # how far back it sits
+var rise := 0.0               # (camcal) the view aims this far above the focus (the style's "rise")
 var yaw := 0.0                # turned around the focus (0 = looking north); only the skyship ride turns it
 var yaw_to := 0.0
 var chase := 0.0              # 0 = the usual angle, 1 = low behind-the-ship view
@@ -70,6 +74,7 @@ func use_style(id: String) -> void:
 	pitch = deg_to_rad(float(st["pitch"]))
 	dist = float(st["dist"])
 	fov = float(st["fov"])
+	rise = float(st.get("rise", 0.0))
 
 ## The Settings camera (style and follow), wherever there's a CamRig: a match, the farm, the
 ## Training Grounds. Cheap enough to call every frame.
@@ -181,8 +186,11 @@ func _apply(shake: Vector3) -> void:
 	var d := dist * dist_mul * z * (1.0 + 0.15 * k)
 	# (Record.orbit_yaw: recording mode's slow orbit round the player, with the HUD hidden)
 	var back := Vector3(0, sin(p), cos(p)).rotated(Vector3.UP, yaw + Record.orbit_yaw)
-	position = focus + back * d + shake
-	look_at(focus + shake, Vector3.UP if p < deg_to_rad(85.0) else Vector3(0, 0, -1).rotated(Vector3.UP, yaw + Record.orbit_yaw))
+	# (camcal) aim at the body rather than the feet, so you sit a touch low on screen [footage];
+	# faded out toward the bird's-eye and ship views
+	var aim := focus + Vector3(0, rise * (1.0 - k) * (1.0 - c), 0)
+	position = aim + back * d + shake
+	look_at(aim + shake, Vector3.UP if p < deg_to_rad(85.0) else Vector3(0, 0, -1).rotated(Vector3.UP, yaw + Record.orbit_yaw))
 
 ## Where the mouse points on the horizontal plane at height y.
 func mouse_on_plane(y: float) -> Vector3:
