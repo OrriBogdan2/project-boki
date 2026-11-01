@@ -831,3 +831,27 @@ Subsets and gaps:
   spikes from the front specifically, Last Round lock lines are drawn as flickering bolts (no thickening mesh).
 - Sounds are placeholders layered from the existing Sfx set (`Feel.DELIVERY_TELL`, `CATEGORY_IMPACT`,
   `SWEETENER`, `DASH_SOUND`); the level-up chime is a three-note layer of existing sounds.
+
+## Ult fuse and cooldowns (owner, Oct 31)
+
+"Ult base cooldown seems too low" and "ulting needs an animation for the fuse and then the effect
+after". Every R now winds up before it fires (`r.fuse` in `content/archetypes/*.json`, run by
+`ArchKit.use_r` / `_tick_fuse` / `_fire_r`): the hunter plants (35% move speed, no weapon fire), the
+ult's name pops over them, energy gathers inward, a filling ring shows to everyone (hostile rim for
+enemies, also sent to other players through the existing Net `fx` ring/bolt events), a sting plays and
+the camera pushes in. Then the effect fires with an impact (ring, burst, flash, T4 shake, camera
+punch). The cooldown starts at the fuse, so the slot reads as spent; R rank 2 is 15% shorter. A
+Bonded R pours the Boki into the hunter during the fuse (kin-coloured streams from the Boki to the
+chest) and the merge starts on the same frame the ult fires, with the BONDED column.
+
+| Archetype | R | Cooldown | Fuse | During the fuse |
+|---|---|---|---|---|
+| Thief | Heist | 105s | 0.40s (then the 0.3s mark-out) | vulnerable: a stun or knock cancels it (R back in 8s) |
+| Archer | Skyfall Volley | 110s | 0.50s | vulnerable |
+| Mage | Meteor | 105s | 0.55s | vulnerable |
+| Gunslinger | Last Round | 100s | 0.45s | vulnerable |
+| Juggernaut | Avalanche | 115s | 0.60s (the roar; its own tell is now 0.1s) | unstoppable (fortify) |
+| Bulwark | Bastion | 120s | 0.50s | unstoppable (fortify) |
+
+An ult that needs targets (Heist, Last Round) checks for them before the fuse, so a fuse never
+fizzles; if everyone escapes during it, almost all of the cooldown comes back.

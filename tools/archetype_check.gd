@@ -108,8 +108,10 @@ func run(main_node: Node) -> void:
 	var only := ""
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--ak-only="): only = String(a).substr(10)
-	if only == "gunslinger":
-		await _gunslinger()
+	if only != "":
+		# one archetype's section only (debugging)
+		await call("_" + only)
+		print("AKCHECK DONE, %d checks, failures: %d" % [n, fails])
 		main.get_tree().quit()
 		return
 	_controls()
@@ -267,13 +269,16 @@ func _archer() -> void:
 	ok("archer RMB tap: Tripwire on the ground", m.verbs.traps.size() > nt and K.trips.size() >= 1, "%d traps" % m.verbs.traps.size())
 	# Pinning Shot: pushed into a wall within 3m, pinned
 	fresh(T); K.ch_rmb = 2.0; K.cd["rmb"] = 0.0
+	if "--ak-debug" in OS.get_cmdline_user_args(): print("PIN build: T at %s P at %s vel %s" % [str(T.pos), str(P.pos), str(T.vel)])
 	var W = m.world
 	for dz in range(-3, 4):
 		var i: int = W.idx(int(T.pos.x) + 2, int(T.pos.z) + dz)
 		W.level[i] = lv + 3
 	aim_at(P, T.pos)
 	hold(m, P, 0.6)
+	if "--ak-debug" in OS.get_cmdline_user_args(): print("PIN after hold: T at %s P at %s" % [str(T.pos), str(P.pos)])
 	step(m, 0.5)
+	if "--ak-debug" in OS.get_cmdline_user_args(): print("PIN T at %s vx %.2f stun %.2f immune %.2f dr %s" % [str(T.pos), T.vel.x, T.stun_t, T.cc_immune_t, str(T.dr)])
 	ok("archer RMB hold: Pinning Shot pins", K.last_variant == "hold" and dmg(T) >= 14.0 and T.root_t > 0.0, "took %.0f root %.2f" % [dmg(T), T.root_t])
 	# Grapple Arrow: bites the ledge and climbs on top
 	P.teleport(home); P.vel = Vector3.ZERO; P.dashes = P.max_dashes()

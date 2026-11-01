@@ -5,6 +5,7 @@
 	"color": "#9fe0a8",
 	"fantasy": "The warden of high ground. Climbs, reads the field, pins people to walls.",
 	"silhouette": "the long weapon over the shoulder",
+	"card": {"loop": "Stand still to build Focus, then a Focus shot or a wall-pinning snare sets up the Volley.", "dash": "Fire a grapple line: zip up to a ledge, or hop back from open ground.", "passive": "Focus builds while you hold still; at full your next shot is drawn at once.", "rmb": "A snare that roots (or plants a Tripwire); hold for a Pinning Shot.", "e": "A flare that reveals everyone (and traps, stealth, smoke) in 7m.", "r": "A 5m circle of arrow waves that slows, then roots the middle.", "weapons": {"longbow": "Hold to draw: 30, or 60 at full draw.", "sniper": "A visible aim laser, then one heavy round."}},
 	"weapons": ["longbow", "sniper"],
 	"resource": {"id": "focus", "name": "Focus", "max": 100, "kind": "meter", "still_t": 1.4, "sneak_t": 2.8, "high_k": 1.5, "run_drain": 60.0, "hit_loss": 40.0, "range_k": 0.2, "col": "#d8ffb0"},
 	"passive": {"name": "Focus", "desc": "Builds while you stand still (full in 1.4s), sneak (2.8s), 50% faster on high ground. Drains while running and drops 40 when hit. At 100 your next shot is fully drawn or aimed at once, with +20% range."},

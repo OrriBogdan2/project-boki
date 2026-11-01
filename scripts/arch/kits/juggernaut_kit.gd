@@ -389,6 +389,10 @@ func _e_end() -> void:
 	var stg := stage("e", {"delivery": {"type": "burst", "origin": "caster", "radius": float(ed["end_r"])}, "effects": [{"type": "push", "strength": push}]}, {"hit": "add", "ctrl": "add", "ctrl_cap": "soft", "util": "add"})
 	run(stg, cx("e", "shrug_off", h.pos, {"no_floor": true}))
 	m.fx.word(h.pos + Vector3(0, 2.2, 0), "SHRUG", col_of(ed), false)
+	m.fx.ring(h.pos, float(ed["end_r"]), col_of(ed), 0.3)
+	m.fx.dust(h.pos, 12)
+	m.sfx("knock", h.pos, -6.0, 0.9)
+	Feel.shake(m, "t2", h, h.pos)
 
 # ------------------------------------------------------------------ R: Avalanche
 func cast_r() -> bool:

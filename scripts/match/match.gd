@@ -60,6 +60,7 @@ var bubbles: Array = []     # {ent, text, t, cat}
 var interact := {}          # what F would do right now for the local player
 var paused := false
 var duel: Duel = null
+var arena: Arena = null   # the Arena (opts "arena") or the training area's practice tools
 var shot_n := 0          # the duel room: you and one sparring bot (opts "duel")
 var slowmo := 0.0
 var slow_k := 0.35
@@ -523,6 +524,8 @@ func _start(o: Dictionary) -> void:
 		layout = World.load_layout(String(o.get("map", World.layout_for_tier(tier))))
 	elif o.get("tutorial", false):
 		layout = World.load_layout("tutorial")
+	elif o.get("arena", false):
+		layout = World.load_layout("arena")     # the practice arena (scripts/match/arena.gd)
 	map_name = String(layout.get("name", ""))
 	if not layout.is_empty():
 		world.generate_authored(layout, seed_val)
@@ -561,19 +564,20 @@ func _start(o: Dictionary) -> void:
 	await _stage("build.pads_exits")
 	_spawn_hunters()
 	await _stage("build.hunters")
-	if not opts.get("tutorial", false) and not opts.get("duel", false):
+	if not opts.get("tutorial", false) and not opts.get("duel", false) and not opts.get("arena", false):
 		_spawn_mobs()        # the tutorial brings its own monsters, one step at a time
 	await _stage("build.mobs")
-	if not opts.get("duel", false):
+	if not opts.get("duel", false) and not opts.get("arena", false):
 		_spawn_chests()
 	await _stage("build.chests")
-	if not world.train_route.is_empty() and not opts.get("duel", false):
+	if not world.train_route.is_empty() and not opts.get("duel", false) and not opts.get("arena", false):
 		skytrain = SkyTrain.new()
 		skytrain.name = "SkyTrain"
 		add_child(skytrain)
 		skytrain.setup(self)
 	Life.place_beacons(self)
-	_spawn_breakables()
+	if not opts.get("arena", false):
+		_spawn_breakables()
 	for rg in world.rings:
 		var rn := Models.air_ring()
 		rn.position = rg["pos"]
@@ -588,7 +592,7 @@ func _start(o: Dictionary) -> void:
 		player.teleport(b0 + Vector3(2.2, 0, 0.6))
 		spawn_weapon("sniper", 3, b0 + Vector3(1.6, 0, 1.8), "", false)
 		spawn_weapon("smg", 4, b0 + Vector3(3.0, 0, 1.6), "", false)
-	if not opts.get("duel", false):
+	if not opts.get("duel", false) and not opts.get("arena", false):
 		_spawn_wild()
 	if not (opts.get("duel", false) or opts.get("tutorial", false) or opts.get("training", false)):
 		# the map is fixed; what's out on it this time isn't (rare kin, vaults, item caches, boss lairs)
@@ -622,6 +626,10 @@ func _start(o: Dictionary) -> void:
 		duel.setup(self)
 		duel.attach_keys()
 		hud.toast("Duel room  ·  B sets up the bot  ·  X resets", Color("f3eee2"))
+	if player and duel == null and not opts.get("tutorial", false) and (opts.get("arena", false) or opts.get("practice", false)):
+		# the Arena, and the same practice tools on the training island (dummies, swaps, kit card)
+		arena = Arena.new()
+		arena.setup(self, "arena" if opts.get("arena", false) else "practice")
 	await _stage("build.hud")
 	_build_aim()
 	Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
@@ -2819,6 +2827,8 @@ func _exit_tree() -> void:
 	if biomes: biomes.free_up()
 	if duel:
 		duel.teardown()
+	if arena:
+		arena.teardown()
 	if _bond_cb.is_valid() and CombatBus.hit_landed.is_connected(_bond_cb):
 		CombatBus.hit_landed.disconnect(_bond_cb)
 	if _combo_cb.is_valid() and CombatBus.status_applied.is_connected(_combo_cb):
@@ -3566,7 +3576,7 @@ func _gather_input() -> void:
 				choose_perk(pi)
 	# the kit: Q glove, E kin ability, C throw kin, R bond, 1 heal (the second kin ability, kin swap
 	# and the separate armor-kit key are retired)
-	if Input.is_action_just_pressed("base") and not paused and duel == null:
+	if Input.is_action_just_pressed("base") and not paused and duel == null and not opts.get("arena", false):
 		pending_input["base"] = true
 	var slot_of := {"dash": "dash", "secondary": "sec", "gear1": "gear", "signature": "kin", "ultimate": "ult"}
 	for a in [["dash", "dash"], ["jump", "jump"], ["signature", "sig"], ["reload", "reload"], ["tonic", "tonic"], ["throw", "throw"], ["ultimate", "ult"], ["secondary", "sec"], ["gear1", "gear1"], ["kin_ability", "kin_ab"]]:
@@ -3983,6 +3993,9 @@ func step(dt: float) -> void:
 	if duel:
 		duel.after_think()
 		duel.tick(dt)
+	if arena:
+		arena.after_think()
+		arena.tick(dt)
 	_prof("train")
 	for h in hunters: h.sim(dt)
 	_prof("hunters")
@@ -4615,8 +4628,8 @@ var tut_used0 := {}
 # ---- training area
 ## [id, what to do, the action whose key it uses ("" for none)]
 const TRAIN := [["move", "Walk around", "up"], ["dash", "Dash", "dash"], ["glide", "Jump, then hold Mouse 5 or Space in the air to glide", "jump"],
-	["shoot", "Shoot a target dummy", "fire"], ["ability", "Use your Boki's ability", "signature"], ["ult", "Fill the bond meter and use your bond ultimate", "ultimate"],
-	["secondary", "Use your weapon ability (right click)", "secondary"], ["glove", "Use your glove (pick one up from the rack first)", "gear1"],
+	["shoot", "Shoot a target dummy", "fire"], ["ability", "Use your E ability", "signature"], ["ult", "Use your ultimate (R: open from the start here)", "ultimate"],
+	["secondary", "Use your right click (tap it, then hold it)", "secondary"], ["glove", "Use your glove (pick one up from the rack first)", "gear1"],
 	["crouch", "Sneak: slower, steadier aim, harder to spot", "crouch"],
 	["throw", "Throw your Boki at a dummy", "throw"], ["combo", "Land a combo: shoot a foe your Boki just stunned or rooted", "fire"], ["tonic", "Heal (tonic, or armor kit when health is full)", "tonic"],
 	["stagger", "Stagger a big dummy: hit it with an ability while it has a purple ring", "signature"],
@@ -4626,6 +4639,13 @@ var train := {}
 var train_t := 0.0
 
 var duel_pad := Vector3.INF
+
+## The Arena: a compact practice map with dummies, a sparring bot and the kit card (scripts/match/arena.gd).
+static func arena_opts(arch_id := "") -> Dictionary:
+	var o := {"arena": true, "training": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 6262, "no_drop": true}
+	if Arch.exists(arch_id):
+		o["arch"] = arch_id; o["cls"] = Arch.weight(arch_id); o["weapon"] = Arch.default_weapon(arch_id)
+	return o
 
 ## The training pad that takes you to the duel room.
 static func duel_opts() -> Dictionary:
@@ -4641,6 +4661,8 @@ func _update_training(dt: float) -> void:
 	train_t += dt
 	if player.downed and train_t > 2.0:
 		revive_hunter(player, null)
+	if opts.get("arena", false):
+		return        # the Arena runs its own (scripts/match/arena.gd)
 	var was_ult: bool = train.get("_ult_full", false)
 	# everything recharges quickly here
 	player.ult = minf(1.0, player.ult + dt / 6.0)
@@ -4657,12 +4679,12 @@ func _update_training(dt: float) -> void:
 		"dash": player.roll_t > 0.0,
 		"glide": player.gliding and not player.dropping,
 		"shoot": player.dmg_done > 0.0,
-		"ability": player.kin != null and (player.kin as Kin).runner.has_slot("k1") and not (player.kin as Kin).runner.is_ready("k1"),
+		"ability": (player.ak != null and float(player.ak.cd["e"]) > 0.0) or (player.ak == null and player.kin != null and (player.kin as Kin).runner.has_slot("k1") and not (player.kin as Kin).runner.is_ready("k1")),
 		"glove": float(player.gear_cd[0]) > 0.0,
 		"combo": int(player.stats.get("combos", 0)) > 0,
 		"crouch": player.crouch,
-		"secondary": player.runner != null and player.runner.has_slot("utility") and not player.runner.is_ready("utility"),
-		"ult": was_ult and player.ult < 0.5,
+		"secondary": (player.ak != null and player.ak.last_variant != "") or (player.runner != null and player.runner.has_slot("utility") and not player.runner.is_ready("utility")),
+		"ult": (player.ak != null and float(player.ak.cd["r"]) > 0.0) or (was_ult and player.ult < 0.5),
 		"throw": player.kin != null and player.kin.st_throws > 0,
 		"tonic": player.tonics < int(train.get("_tonics", player.tonics)),
 		"ledge": player.grap.size() > 0 or player.mantle_k() > 0.0,
@@ -4689,7 +4711,7 @@ func _update_training(dt: float) -> void:
 
 ## The checklist for this hero: the secondary step only shows for heroes that have one.
 func train_rows() -> Array:
-	return TRAIN.filter(func(t): return t[0] != "secondary" or (player != null and player.runner != null and player.runner.has_slot("utility")))
+	return TRAIN.filter(func(t): return t[0] != "secondary" or (player != null and (player.ak != null or (player.runner != null and player.runner.has_slot("utility")))))
 
 func _train_label(k: String) -> String:
 	for t in TRAIN:

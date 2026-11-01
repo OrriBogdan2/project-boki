@@ -5,6 +5,7 @@
 	"color": "#ffcf6a",
 	"fantasy": "The duelist. A rhythm of six, trick shots off walls, slide and reload.",
 	"silhouette": "the brim and coat tails",
+	"card": {"loop": "Weapon hits load six Chambers; a full cylinder makes your Trick Shot a stunning Called Shot.", "dash": "Tap to roll and reload a third; hold to slide and shoot, full reload at the end.", "passive": "Chambers: each hit loads one; at 6 your next Trick Shot is a Called Shot.", "rmb": "A ricochet Trick Shot; hold to fan the hammer.", "e": "Quickdraw: 3s of faster fire, instant reload and a dash back.", "r": "Lock every rival in sight, then fire one round per lock.", "weapons": {"rifle": "Steady auto fire; damage drops on long strings.", "burst_rifle": "Three-round bursts."}},
 	"weapons": ["rifle", "burst_rifle"],
 	"resource": {"id": "chambers", "name": "Chambers", "max": 6, "kind": "count", "gap": 0.25, "roll": 2, "wait": 4.0, "drain": 1.0, "called_k": 0.4, "called_stun": 0.4, "col": "#ffd23f"},
 	"passive": {"name": "Six Chambers", "desc": "Each weapon hit loads a chamber (one per 0.25s); a tap roll loads 2. At 6 the gun glows gold and your next Trick Shot is a Called Shot: +40%, a crit and stun 0.4. Chambers drain after 4s without a hit."},

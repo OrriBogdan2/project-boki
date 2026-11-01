@@ -15,12 +15,15 @@ const STAGGER_T := 0.28        # ... for this long
 const STAGGER_SLOW := 0.45     # ... slowed this much
 const HEAVY_FLINCH := 2.6      # the flinch of a stagger, relative to a chip hit
 const KICK_PX := 0.55          # camera recoil offset per unit of kick (metres of view shift)
+static var legacy := false     # tooling (--legacy-shots): the old look, for before/after shots
 
 # ------------------------------------------------------------------ shooting
 ## A shot (or swing) leaving: the camera kicks back along the aim for the local shooter, and heavy
 ## weapons shove the shooter back a little (shotgun, sniper, bow).
 static func on_fire(h: Hunter, melee := false) -> void:
 	if h == null or h.m == null:
+		return
+	if legacy:
 		return
 	var w: Dictionary = h.wpn
 	var kick := float(w.get("kick", 0.05 if not melee else 0.04))
@@ -101,6 +104,10 @@ static func render_hit(h: Hunter, delta: float) -> void:
 ## The colour, size and halo of a shot as the local player sees it. What can hurt you stays the
 ## hottest thing on screen; your own shots are bright, solid bolts too (they used to be dim specks).
 static func shot_look(m: Node, by: Ent, col: Color, size: float) -> Array:
+	if legacy:
+		var p0 = m.get("player")
+		if p0 and by.team != p0.team: return [Color(col.lerp(Color("ff5a3a"), 0.35), 1.0), size * 2.6, 0.0]
+		return [Color(col, 0.5), size * 1.7, 0.0]
 	var vis_col := col
 	var vis_size := size * 2.0
 	var halo := 0.28
@@ -120,4 +127,6 @@ static func shot_look(m: Node, by: Ent, col: Color, size: float) -> Array:
 
 ## How long the streak behind a shot reads, from its speed (and the weapon's "tracer" scale).
 static func tracer_len(r: float, speed: float, k := 1.0) -> float:
+	if legacy:
+		return r * 2.0 + speed * 0.025
 	return r * 2.0 + minf(3.2, speed * 0.05 * k)

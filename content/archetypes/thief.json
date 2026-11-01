@@ -5,6 +5,7 @@
 	"color": "#c9a0ff",
 	"fantasy": "The cutpurse. Slips behind you, marks you, cashes in, gone in smoke.",
 	"silhouette": "the hood tail and cape",
+	"card": {"loop": "Shots and hits from behind stack Marks on a target; at 3 your Knife is ready and Cashes In.", "dash": "Two quick steps; after the last, your next hit counts as from behind.", "passive": "Hits from behind Mark the target (up to 3); 3 Marks = Knife ready, Cash In.", "rmb": "Throw a knife (1 Mark); recast to Shadow Step behind them.", "e": "A smoke cloud that hides you; knives from inside are silent.", "r": "Blink-strike up to 4 hunters in a row: 14 damage and 3 Marks each.", "weapons": {"twin_blades": "3-hit combo; hold for a spin. Crits after a Shadow Step.", "smg": "Hold to spray; zero spread after a Shadow Step."}},
 	"weapons": ["twin_blades", "smg"],
 	"resource": {"id": "marks", "name": "Marks", "max": 3, "kind": "on_targets", "dur": 6.0, "per_mark": 0.05, "rear_deg": 120, "cash_bonus": 0.5, "cash_dmg": 26.0, "col": "#ffd23f"},
 	"passive": {"name": "Marks", "desc": "Hits from behind (or in the Ambush window) Mark the target: up to 3, 6s, +5% damage from you each. At 3 the Knife is ready at once, and your next Knife on them Cashes In: a 26-damage gold payoff and your dash charge back."},

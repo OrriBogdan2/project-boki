@@ -120,6 +120,9 @@ func build() -> void:
 	_label(wl, "Climb: jump at the wall", Vector3(0, 2.9, 0), UI.INK, 30)
 	var gl := Node3D.new(); gl.position = Vector3(48.6, 0, 56.5); h.add_child(gl)
 	_label(gl, "Glide the gap: jump, hold Space", Vector3(0, 1.6, 0), UI.INK, 30)
+	# the full archetype kits live in the Arena: a sign here, L takes you there, K shows your kit card
+	var ar := Node3D.new(); ar.position = Vector3(42.5, 0, 53.2); h.add_child(ar)
+	_label(ar, "L  ·  Arena: full kits, swap archetype, Boki and glove\nK  ·  your kit card", Vector3(0, 2.0, 0), Color("ffe9b8"), 30)
 
 func _label(parent: Node3D, text: String, at: Vector3, col: Color, size := 40) -> Label3D:
 	var l := Label3D.new()
@@ -394,6 +397,15 @@ func _area(at: Vector3, r: float, dmg: float, col: Color) -> void:
 func input(event: InputEvent) -> bool:
 	if not in_zone:
 		return false
+	if event is InputEventKey and event.pressed and not event.echo:
+		# the Arena runs the real archetype kits (this yard is a stand-in): L goes there, K shows the card
+		if (event as InputEventKey).physical_keycode == KEY_L:
+			Save.save_game()
+			Game.start_match(Match.arena_opts(Arch.of_save()))
+			return true
+		if (event as InputEventKey).physical_keycode == KEY_K and h.has_method("_open_kit_card"):
+			h._open_kit_card()
+			return true
 	for slot in ["secondary", "gear1", "signature", "ultimate"]:
 		if event.is_action_pressed(slot):
 			if not cast(slot) and kit.has(slot):

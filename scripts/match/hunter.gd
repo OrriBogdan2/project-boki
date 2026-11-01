@@ -257,6 +257,28 @@ func set_arch(a: String) -> void:
 		equip(Arch.default_weapon(arch), wrar)
 	_kit_from_weapon()
 
+## Practice (the Arena and training): become another class and archetype on the spot. Health,
+## speed, size, dash charges, the model and the kit change; your kin, level and slot ranks stay.
+func reclass(c: String, a: String, w := "") -> void:
+	if Data.CLASSES.has(c):
+		cls = c
+	cdat = Data.CLASSES[cls]
+	if KinMerge.active(self): KinMerge.end(self, "broken")
+	max_hp = float(cdat["hp"]) + kin_hp_added; hp = max_hp
+	max_armor = round(float(cdat["hp"]) * ARMOR_DUR); armor = max_armor; base_armor = max_armor
+	glide_max = GLIDE_TIME * float(cdat.get("glide_cap", 1.0))
+	base_speed = cdat["speed"]
+	dodge_def = Content.class_dodge(cls)
+	r = float(cdat.get("hit_r", 0.38 * float(cdat["scale"])))
+	arch = Arch.fix(a, cls)
+	ak = ArchKit.make(self, arch)
+	wid = Arch.weapon_for(arch, cls, w)
+	set_model(Models.hunter(cls, Data.TEAM_COLORS[team % Data.TEAM_COLORS.size()], wid, "", Save.d.get("look", {}) if ctrl == "local" else bot_look, arch))
+	anim = null
+	equip(wid, 0)
+	dashes = max_dashes(); ex_cd = 0.0
+	roll_t = 0.0; stun_t = 0.0; root_t = 0.0
+
 ## Swap to a found weapon for the rest of the expedition.
 func equip(w: String, rar: int, with_ammo := -1) -> void:
 	wid = w; wrar = rar

@@ -5,6 +5,7 @@
 	"color": "#ff8a6a",
 	"fantasy": "The wrecking ball. Gets angrier, crashes through, slams you into the wall.",
 	"silhouette": "the horned pauldrons",
+	"card": {"loop": "Trading hits fills Rage; Enraged, your Smash hits harder and Rampage winds up twice as fast.", "dash": "Tap: a shoulder shove. Hold: charge an arrow and carry someone into a wall.", "passive": "Rage fills as you deal and take hits; at 100 you're Enraged for 5s.", "rmb": "A knock cone; hold to leap into an Earthshatter slam; in the air, a Meteor Drop.", "e": "Iron Hide: 3s of 30% less damage and no knockback, then a shove.", "r": "Avalanche: 5s unstoppable and faster, stomping everyone around you.", "weapons": {"greatsword": "A huge slow 3-hit combo; hold to slam.", "shotgun": "Seven slugs that stop at 5m.", "minigun": "Spin up, then a hose of rounds."}},
 	"weapons": ["greatsword", "shotgun", "minigun"],
 	"resource": {"id": "rage", "name": "Rage", "max": 100, "kind": "meter", "per_hit": 8.0, "per_10pct": 10.0, "wall": 20.0, "decay": 12.0, "wait": 3.0, "enraged_t": 5.0, "col": "#ff4a3a"},
 	"passive": {"name": "Rage", "desc": "+8 per hit, +10 per 10% of your health lost, +20 on a wall slam; cools after 3s out of a fight. At 100 you're Enraged for 5s: your next Smash is empowered (+50% knock; Earthshatter +1m and stuns everyone it lifts) and Rampage winds up twice as fast."},

@@ -5,6 +5,7 @@
 	"color": "#7fb8ff",
 	"fantasy": "The runecaster. Draws sigils, throws bolts that take on the Boki's nature, and runs dangerously hot.",
 	"silhouette": "the hat and robe flare",
+	"card": {"loop": "Casting builds Heat; Overcharged spells hit harder, but at 100 you Vent.", "dash": "A telegraphed blink through walls that leaves a slowing rune.", "passive": "Heat: spells add it; 70+ Overcharged (+25%); 100 Vents a nova.", "rmb": "A slowing bolt; hold for a piercing Lance.", "e": "A rune zone: allies faster, bolts split; press E again to detonate.", "r": "Call a Meteor on a 4m circle: 30 damage, spikes anyone airborne.", "weapons": {"spellstaff": "Slow, heavy magic bolts.", "longsword": "A reaching 3-hit combo; hold for a thrust."}},
 	"weapons": ["spellstaff", "longsword"],
 	"resource": {"id": "heat", "name": "Heat", "max": 100, "kind": "risk", "tap": 20.0, "hold": 35.0, "e": 25.0, "decay": 18.0, "wait": 1.2, "over": 70.0, "vent_t": 0.4, "vent_r": 3.0, "vent_dmg": 14.0, "vent_push": 9.0, "lock": 1.0, "col": "#ffe6a0"},
 	"passive": {"name": "Overload (Heat)", "desc": "RMB adds 20 Heat (a hold 35), E adds 25; it cools after 1.2s. At 70+ you're Overcharged: RMB and E +25% damage and radius, bolts pierce. At 100 you Vent: a 0.4s ring, then a 3m nova (14, push 9), Heat 0, RMB locked 1s."},

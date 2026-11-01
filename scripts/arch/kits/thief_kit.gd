@@ -291,6 +291,11 @@ func _shadow_step(tgt: Ent, dive: bool) -> void:
 	m.fx.burst(at + Vector3(0, 0.9, 0), Color("c8f0ff"), 14, 3.0, 0.3)
 	m.fx.bolt(from + Vector3(0, 0.9, 0), at + Vector3(0, 0.9, 0), Color(0.8, 0.95, 1.0, 0.6))
 	m.sfx("cloak", at, -3.0, 1.6)
+	m.sfx("swipe", at, -4.0, 1.9)
+	m.fx.ring(at, 1.0, Color("c8f0ff"), 0.22)
+	if h.is_local():
+		Oomph.punch_dir(m, Vector2(at.x - from.x, at.z - from.z), 0.25)
+		if m.cam: m.cam.punch(0.03)
 	if dive:
 		var dd: Dictionary = rmb_def()["drop"]
 		var stg := stage("rmb", {"delivery": {"type": "burst", "origin": "caster", "radius": float(dd["radius"])}, "effects": [{"type": "damage", "amount": float(dd["dmg"])}]}, {"hit": "add"})
