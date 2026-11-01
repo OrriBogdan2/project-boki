@@ -25,7 +25,7 @@ const TIPS := [
 	"Your Boki stuns or roots a foe? Shoot it right away for a combo.",
 	"In a squad, B bases you to the teammate nearest your cursor: 3s standing still, broken by any hit, and you arrive weakened for 3s.",
 	"Gloves drop from chests, vaults and bosses. One active glove (Q) and one passive glove at a time; a new one replaces the old.",
-	"Go down for good and the Boki you brought are left behind. Old Pell's Ransom House sells back the ones nobody collects.",
+	"Go down for good and the Boki you brought are left behind. Old Pell's Ransom House sells back the ones nobody claims.",
 	"A rival took your Boki? You'll sense it when they're nearby. Take it back.",
 	"Wild Boki with a ring under them can be tamed. Daze them first, then win them over.",
 	"Jump off the skyship over an island nobody else picked. Space opens your glider early for a longer, slower last stretch.",

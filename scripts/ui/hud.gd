@@ -2664,7 +2664,7 @@ func _draw_world_hover(sz: Vector2, p: Hunter) -> void:
 		lines.append([String(md["name"]), Color(md["color"]).lightened(0.35)])
 		lines.append(["Monster  ·  %d / %d health" % [int(ceil(mb.hp)), int(mb.max_hp)], MUTED])
 		var how := {"lunge": "Lunges at whoever is closest.", "spit": "Spits from range: keep moving.", "slam": "Winds up a ground slam: step out of the circle.",
-			"fuse": "Rolls in and blows up. Shoot it before it reaches you.", "volley": "Fires a spread of bolts down a line.", "none": "Runs from you. Catch it before it escapes."}
+			"fuse": "Rolls in and blows up. Shoot it before it reaches you.", "volley": "Fires a spread of bolts down a line.", "none": "Runs from you. Tame it before it escapes."}
 		lines.append([String(how.get(String(md["attack"]), "Dangerous up close.")), INK])
 		if md.get("stag", false):
 			lines.append(["Staggerable: hit it with an ability while the purple ring shows.", Color(0.85, 0.6, 1.0)])

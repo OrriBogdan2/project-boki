@@ -318,6 +318,9 @@ func _cell(rec: Dictionary, where: String, slot: int) -> Control:
 		var pw := Icons.Glyph.new("paw", UI.GOLD, 14.0)
 		pw.position = Vector2(0, 38)
 		stack.add_child(pw)
+	var sxi := UI.sex_icon(rec, 11.0)
+	sxi.position = Vector2(0, 13)
+	stack.add_child(sxi)
 	var nm := UI.label(String(rec["name"]), 11, sp["color"].lerp(UI.INK, 0.55))
 	nm.autowrap_mode = TextServer.AUTOWRAP_OFF
 	nm.clip_text = true
@@ -410,9 +413,11 @@ func _build_detail() -> void:
 	top.add_child(KinPortrait.view(rec, _tree(), 76.0))
 	var tv := UI.vbox(1)
 	tv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var nrow := UI.hbox(8)
 	var nl := UI.title(String(rec["name"]), 22, col.lerp(UI.INK, 0.35))
-	nl.clip_text = true
-	tv.add_child(nl)
+	nrow.add_child(nl)
+	nrow.add_child(UI.sex_icon(rec, 16.0))
+	tv.add_child(nrow)
 	tv.add_child(UI.label("Level %d %s  ·  %s" % [int(rec["level"]), Evo.form_name(rec), String(sp["type"]).capitalize()], 13, UI.INK))
 	var where := KinBox.went_text(rec) if KinBox.is_boxed(rec) else "Out on the farm"
 	if String(rec["uid"]) == str(Save.d.get("active", "")): where = "Your partner, on the farm"
