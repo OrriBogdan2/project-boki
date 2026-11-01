@@ -3449,6 +3449,7 @@ func _process(delta: float) -> void:
 	if sty != cam_style:
 		cam_style = sty
 		cam.use_style(sty)
+	cam.lead_vel = Vector3.ZERO      # (movefeel) only a live glide leans the view (set below)
 	if player and player.riding:
 		# aboard the skyship: a low view from just behind and above it, looking ahead along its
 		# course over the islands, like riding the bus in a battle royale
@@ -3482,7 +3483,8 @@ func _process(delta: float) -> void:
 			if alt > 4.0:
 				cam.zoom_to *= 1.0 + clampf((alt - 4.0) / 24.0, 0.0, 0.7)
 			cam.top_to = 0.0
-		cam.follow(player.prev.lerp(player.pos, alpha), delta, not player.dropping)
+		cam.lead_vel = cam_lead_vel()
+		cam.follow(player.render_pos(alpha), delta, not player.dropping)
 	elif player and (player.downed or player.out):
 		# death camera: frame you and whoever got you
 		var foc := player.prev.lerp(player.pos, alpha)
@@ -3520,6 +3522,12 @@ func _process(delta: float) -> void:
 		f["t"] += delta
 		if f["t"] > 6.0: feed.erase(f)
 
+## (movefeel) The camera leans a little ahead of a glide so you see where you're going (CamRig.lead_vel).
+func cam_lead_vel() -> Vector3:
+	if player == null or not player.gliding or player.dropping or player.out:
+		return Vector3.ZERO
+	return Vector3(player.vel.x, 0.0, player.vel.z)
+
 func _gather_input() -> void:
 	if player == null or player.out or opts.get("tut_test", false):
 		return       # (the tutorial test drives the player itself)
@@ -3553,6 +3561,7 @@ func _gather_input() -> void:
 		player.inp["fire"] = false
 	# hold Space or Mouse 5 (Mouse 4 works too) in the air to glide; the mouse buttons never jump
 	player.inp["glide"] = (Input.is_action_pressed("jump") or Input.is_action_pressed("glide")) and not paused
+	player.inp["glide_btn"] = Input.is_action_pressed("glide") and not paused     # (movefeel) opens the glider with no tap/hold wait
 	player.inp["dash_hold"] = Input.is_action_pressed("dash") and bool(Settings.get_v("dash_hold")) and player.ak == null
 	player.inp["dash_down"] = Input.is_action_pressed("dash") and not paused     # hold-shaped dashes (Slide, Rampage)
 	var quick: bool = Settings.get_v("cast_on_press")
@@ -4006,6 +4015,14 @@ func step(dt: float) -> void:
 			player.teleport(player.pos + Vector3(0, 6, 0)); player.grounded = false
 		player.inp["glide"] = true
 		player.inp["move"] = Vector2(1, 0.3).normalized()
+	if opts.get("dashglide_demo", false) and player:
+		# test (movefeel): glide along, Shift at 0.7s, keep holding glide: the glider keeps the dash
+		if time < 0.05:
+			player.teleport(player.pos + Vector3(0, 7, 0)); player.grounded = false
+			player.unlock_all()
+		player.inp["glide"] = true
+		player.inp["move"] = Vector2(1, 0.3).normalized()
+		if time > 0.7 and time - DT <= 0.7: pending_input["dash"] = true
 	if opts.has("abyss_demo") and player:
 		_abyss_demo(String(opts["abyss_demo"]))
 	if player and not player.out:

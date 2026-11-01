@@ -12,6 +12,9 @@ extends RefCounted
 ## Prints "ACHECK ok|FAIL ..." lines and "ACHECK DONE, failures: N".
 
 var bad := 0
+## How far under the lowest lip around a hunter is lost (movefeel: the hunter's abyss is deeper than the
+## monsters' World.ABYSS_DEPTH; it was 6m, the old checks' "< 7m")
+const KILL_DEPTH := World.ABYSS_DEPTH + Hunter.ABYSS_EXTRA
 var m: Match
 var w: World
 var h: Hunter
@@ -153,7 +156,7 @@ func run(main: Node) -> void:
 	var dn := 0; var dgood := 0; var worst_drop := 0.0; var worst_t := 0.0; var stuck := 0; var grabbed := 0
 	for e in edges:
 		var dir: Vector2 = e["dir"]; var top: float = e["top"]
-		_reset(Vector3(e["ex"] + dir.x * (h.r + 0.6), top - 3.6, e["ez"] + dir.y * (h.r + 0.6)), Vector3(0, -4.0, 0))
+		_reset(Vector3(e["ex"] + dir.x * (h.r + 0.6), top - (Hunter.MANTLE_REACH_ABYSS + 0.1), e["ez"] + dir.y * (h.r + 0.6)), Vector3(0, -4.0, 0))
 		h.last_gy = top
 		var r := _run(6.0, func(_t): h.inp["move"] = -dir)
 		dn += 1
@@ -162,8 +165,8 @@ func run(main: Node) -> void:
 		worst_drop = maxf(worst_drop, _ref(Vector3(e["ex"], top, e["ez"])) - float(r["low"]))
 		worst_t = maxf(worst_t, float(r["t"]))
 		stuck = maxi(stuck, int(r["stuck"]))
-	ok(grabbed == 0, "3.6m below the lip: no ledge grab (%d grabbed)" % grabbed)
-	ok(dgood == dn and worst_drop < 7.0 and worst_t < 1.5, "below the grab reach the abyss takes you: %d of %d, deepest %.1fm below the lowest lip around, within %.2fs" % [dgood, dn, worst_drop, worst_t])
+	ok(grabbed == 0, "%.1fm below the lip: no ledge grab (%d grabbed)" % [Hunter.MANTLE_REACH_ABYSS + 0.1, grabbed])
+	ok(dgood == dn and worst_drop < KILL_DEPTH + 1.0 and worst_t < 2.4, "below the grab reach the abyss takes you: %d of %d, deepest %.1fm below the lowest lip around, within %.2fs" % [dgood, dn, worst_drop, worst_t])
 	ok(stuck < 6, "sliding down the face never snags (longest hang %d frames)" % stuck)
 	# a plain walk off the edge: how far below the lip before the abyss
 	var e0: Dictionary = edges[0]
@@ -174,7 +177,7 @@ func run(main: Node) -> void:
 	var r0 := _run(8.0, func(t):
 		h.inp["move"] = d0 if t < 0.3 else Vector2.ZERO
 		h.inp["dash"] = t < Match.DT * 1.5)
-	ok(r0["fell"] and _ref(Vector3(e0["ex"], e0["top"], e0["ez"])) - float(r0["low"]) < 7.0, "dashing off an edge: lost %.1fm below the lip (%.1fm below the lowest lip around) after %.2fs" % [float(e0["top"]) - float(r0["low"]), _ref(Vector3(e0["ex"], e0["top"], e0["ez"])) - float(r0["low"]), r0["t"]])
+	ok(r0["fell"] and _ref(Vector3(e0["ex"], e0["top"], e0["ez"])) - float(r0["low"]) < KILL_DEPTH + 1.0, "dashing off an edge: lost %.1fm below the lip (%.1fm below the lowest lip around) after %.2fs" % [float(e0["top"]) - float(r0["low"]), _ref(Vector3(e0["ex"], e0["top"], e0["ez"])) - float(r0["low"]), r0["t"]])
 	# ---------------------------------------------------------------- 4. dash, glide, knockback from below
 	var ins := 0.0; var cases := 0
 	for e in edges:

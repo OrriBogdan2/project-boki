@@ -8,7 +8,10 @@ const LEAD_X := 4.2
 const LEAD_Z := 5.4
 ## Expedition camera presets (Settings "cam_style"): pitch in degrees, distance, field of view.
 const STYLES := {
-	"supervive": {"pitch": 65.0, "dist": 25.0, "fov": 35.0, "name": "Supervive"},     # measured from footage
+	# pitch and FOV measured from footage; distance pulled in from the footage estimate of 25m (about 28m
+	# of ground across a 16:9 screen) to 20.5m (~23m across) at the owner's call (movefeel): SUPERVIVE
+	# frames tighter and its heroes read bigger (with Hunter.VIS_SCALE, ~5.4% -> ~7.5% of screen height)
+	"supervive": {"pitch": 65.0, "dist": 20.5, "fov": 35.0, "name": "Supervive"},
 	"high": {"pitch": 70.0, "dist": 27.0, "fov": 36.0, "name": "Top-down"},
 	"classic": {"pitch": 57.0, "dist": 32.2, "fov": 28.0, "name": "Classic (flat, far)"},
 	"low": {"pitch": 50.0, "dist": 23.0, "fov": 42.0, "name": "Low (more horizon)"},
@@ -21,6 +24,7 @@ var zoom := 1.0
 var zoom_to := 1.0
 var lead := 1.0
 var kick := 0.0               # a quick zoom-in punch on big moments
+var pull := 0.0               # (movefeel) a quick pull-back (a dash into a glide), the opposite of kick
 var top := 0.0                # 0 = the usual angle, 1 = looking straight down (the opening drop)
 var top_to := 0.0
 var pitch := deg_to_rad(57.0)  # how steeply the camera looks down
@@ -43,13 +47,43 @@ const FOLLOW := {
 var follow_mode := "supervive"
 var pan := Vector3.ZERO
 var base := Vector3.ZERO      # the followed point, before the cursor pan
+## (movefeel) Follow: tight across (FOLLOW_XZ, ~0.07s) so the hunter stays centred [footage] and
+## stops dead with you; softer up and down so falls and glides don't jolt the view. While gliding
+## Match sets lead_vel (your flat velocity) and the view leans a little ahead of you.
+const FOLLOW_XZ := 15.0       # 1/s (was 8: ~0.65m behind you at a run, drifting on after a stop)
+const FOLLOW_Y := 3.5
+const GLIDE_LEAD := 0.2       # seconds of glide velocity to lean ahead...
+const GLIDE_LEAD_MAX := 1.8   # ...capped (m)
+const GLIDE_LEAD_EASE := 3.0  # 1/s, so the lean eases in and out instead of popping
+var lead_vel := Vector3.ZERO
+var lead_off := Vector3.ZERO
 
-## Picks one of STYLES (the expedition camera).
+var style_id := ""
+## Multiplies the distance on top of zoom: the home keeps its own wider framing with any style (see
+## Home._apply_cam_settings); 1 everywhere in a match.
+var dist_mul := 1.0
+
+## Picks one of STYLES (Settings "Camera").
 func use_style(id: String) -> void:
 	var st: Dictionary = STYLES.get(id, STYLES["supervive"])
+	style_id = id if STYLES.has(id) else "supervive"
 	pitch = deg_to_rad(float(st["pitch"]))
 	dist = float(st["dist"])
 	fov = float(st["fov"])
+
+## The Settings camera (style and follow), wherever there's a CamRig: a match, the farm, the
+## Training Grounds. Cheap enough to call every frame.
+func apply_settings() -> void:
+	follow_mode = String(Settings.get_v("cam_follow"))
+	var sty := String(Settings.get_v("cam_style"))
+	if sty != style_id:
+		use_style(sty)
+
+## Metres of ground across a 16:9 screen at the focus, for a style at zoom 1.
+static func style_across(id: String) -> float:
+	var st: Dictionary = STYLES.get(id, STYLES["supervive"])
+	var hfov := 2.0 * atan(tan(deg_to_rad(float(st["fov"])) * 0.5) * 16.0 / 9.0)
+	return 2.0 * float(st["dist"]) * tan(hfov * 0.5)
 
 func _ready() -> void:
 	fov = 28.0
@@ -61,10 +95,15 @@ func snap(p: Vector3) -> void:
 	focus = p
 	base = p
 	pan = Vector3.ZERO
+	lead_off = Vector3.ZERO
 	_apply(Vector3.ZERO)
 
 func punch(a: float) -> void:
 	kick = maxf(kick, a)
+
+## A brief pull-back that eases in fast and settles over ~0.6s (speed bursts).
+func pull_back(a: float) -> void:
+	pull = maxf(pull, a)
 
 func add_trauma(a: float) -> void:
 	trauma = minf(1.0, trauma + a * float(Settings.get_v("shake")))
@@ -104,10 +143,11 @@ func follow(p: Vector3, delta: float, mouse_lead := true) -> void:
 	# far up in the sky you stay on screen
 	var want := Vector3(p.x, maxf(p.y * 0.6, p.y - 4.0), p.z)
 	# across follows briskly; up and down follows softer, so falls and glides don't jolt the view
-	var kxz := 1.0 - exp(-8.0 * delta)
-	var ky := 1.0 - exp(-3.5 * delta)
+	var kxz := 1.0 - exp(-FOLLOW_XZ * delta)
+	var ky := 1.0 - exp(-FOLLOW_Y * delta)
 	base = Vector3(lerpf(base.x, want.x, kxz), lerpf(base.y, want.y, ky), lerpf(base.z, want.z, kxz))
-	focus = base + pan
+	lead_off = lead_off.lerp((lead_vel * GLIDE_LEAD).limit_length(GLIDE_LEAD_MAX), 1.0 - exp(-GLIDE_LEAD_EASE * delta))
+	focus = base + pan + lead_off
 	zoom = lerpf(zoom, zoom_to, minf(1.0, delta * 2.5))
 	top = move_toward(top, top_to, delta * (0.9 if top_to < top else 2.0))
 	chase = move_toward(chase, chase_to, delta * 0.7)
@@ -122,14 +162,15 @@ func follow(p: Vector3, delta: float, mouse_lead := true) -> void:
 
 func _apply(shake: Vector3) -> void:
 	kick = maxf(0.0, kick - get_process_delta_time() * 0.5)
-	var z := zoom * (1.0 - kick)
+	pull = maxf(0.0, pull - get_process_delta_time() * 0.2)
+	var z := zoom * (1.0 - kick) * (1.0 + pull)
 	far = (120.0 * maxf(1.0, z) + 30.0) * (1.0 + 1.5 * chase)
 	var k := top * top * (3.0 - 2.0 * top)
 	var c := chase * chase * (3.0 - 2.0 * chase)
 	# pitch: the style's angle, tipped toward straight down for a bird's-eye view, or low behind
 	# the skyship for the ride
 	var p := lerpf(lerpf(pitch, deg_to_rad(88.0), k), deg_to_rad(30.0), c)
-	var d := dist * z * (1.0 + 0.15 * k)
+	var d := dist * dist_mul * z * (1.0 + 0.15 * k)
 	var back := Vector3(0, sin(p), cos(p)).rotated(Vector3.UP, yaw)
 	position = focus + back * d + shake
 	look_at(focus + shake, Vector3.UP if p < deg_to_rad(85.0) else Vector3(0, 0, -1).rotated(Vector3.UP, yaw))

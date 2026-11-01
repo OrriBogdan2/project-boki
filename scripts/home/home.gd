@@ -195,6 +195,7 @@ func _ready() -> void:
 	fx = Fx.new(); add_child(fx)
 	cam = CamRig.new(); add_child(cam)
 	cam.zoom_to = HOME_ZOOM; cam.zoom = HOME_ZOOM; cam.lead = 0.2
+	_apply_cam_settings(0.0)
 	if "--home-wide" in OS.get_cmdline_user_args():
 		cam.zoom_to = 2.6; cam.zoom = 2.6     # test: the whole farm in one shot
 	var house := Models.house(); house.position = spots["house"]; add_child(house)
@@ -789,6 +790,7 @@ func _process(delta: float) -> void:
 	if hw: hw.tick(d)
 	if hinc: hinc.tick(d)
 	if training: training.tick(d)
+	_apply_cam_settings(d)
 	cam.follow(ppos, d, panel_open == "" and train.is_empty())
 	_find_interact()
 	if hb and hb.active:
@@ -815,8 +817,37 @@ var safe_at := Vector3(38.0, 0, 34.5)
 var glider_node: MeshInstance3D = null
 const HOME_ZOOM := 1.2         # the camera on arriving home: midway between close (0.8) and the widest the wheel goes (1.6)
 const MANTLE := 1.5            # ledges this far above your feet pop you up when you jump at them
-const MANTLE_ABYSS := Hunter.MANTLE_REACH_ABYSS   # falling past an island's side, you catch its edge from this far below
+const MANTLE_ABYSS := 3.5   # falling past an island's side, you catch its edge from this far below (pinned: the expedition reach grew to 4.5 in movefeel)
 const FALL_RESPAWN := -40.0    # (a backstop: the abyss takes you a few metres under the island, World.abyss_floor)
+## (movefeel) The Settings camera at home too, so you can try it here: the style's angle and lens and
+## your follow mode everywhere. The farm keeps its own wider framing (the same ground across as the
+## old home camera, whatever the style, so every zoom and panel shot here still frames the same);
+## on the Training Grounds isle the view eases to exactly the expedition's framing and your hunter
+## to its expedition size (Hunter.VIS_SCALE), so movement and combat there look as they will out there.
+const HOME_ACROSS_REF := "classic"   # the style the home's zooms were framed with
+var cam_zone_k := 0.0                # 0 on the farm, 1 on the Training Grounds (eased)
+var cam_home_zoom := HOME_ZOOM       # your farm zoom, kept while you're on the Training Grounds
+var cam_in_train := false
+func _apply_cam_settings(d: float) -> void:
+	cam.apply_settings()
+	var in_train: bool = training != null and training.in_zone
+	if in_train != cam_in_train:
+		cam_in_train = in_train
+		if in_train:
+			cam_home_zoom = cam.zoom_to
+			cam.zoom_to = 1.0
+		else:
+			cam.zoom_to = cam_home_zoom
+	var k_to := 1.0 if in_train else 0.0
+	cam_zone_k = k_to if d <= 0.0 else move_toward(cam_zone_k, k_to, d * 2.5)
+	var home_mul := CamRig.style_across(HOME_ACROSS_REF) / CamRig.style_across(cam.style_id)
+	var e := cam_zone_k * cam_zone_k * (3.0 - 2.0 * cam_zone_k)
+	cam.dist_mul = lerpf(home_mul, 1.0, e)
+	if player and is_instance_valid(player):
+		if not player.has_meta("base_scale"):
+			player.set_meta("base_scale", player.scale)
+		player.scale = (player.get_meta("base_scale") as Vector3) * lerpf(1.0, Hunter.VIS_SCALE, e)
+
 var climb := {}                # pulling yourself up over an island's rim from below: {from, to, lip, t, dur, split}
 
 ## Your class's dodge with the match's numbers: its charges and recharge (Hunter.max_dashes and
