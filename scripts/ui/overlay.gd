@@ -553,7 +553,8 @@ func _play_slot(n: int) -> void:
 	Save.use_slot(n)
 	close()
 	Social.refresh_guild()
-	Game.goto("home" if not Save.d["roster"].is_empty() else "hatch")
+	# a brand-new save opens with the story, which then leads into the first egg
+	Game.goto("home" if not Save.d["roster"].is_empty() else "prologue")
 
 # ------------------------------------------------------------------ admin
 func open_admin() -> void:
