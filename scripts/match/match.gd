@@ -1799,7 +1799,7 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 	CombatBus.hit_landed.emit(by, target, d, tags)
 	var crit: bool = o.get("crit", false)
 	var src: String = o.get("src", "")
-	if target is Hunter and (target as Hunter).kin and by != target:
+	if target is Hunter and (target as Hunter).kin and by != target and src != "burn":
 		var tk: Kin = (target as Hunter).kin
 		if tk.comp: tk.comp.on_owner_hit(d, by)       # its Boki flinches with it
 	var credit: Ent = by
@@ -3882,6 +3882,8 @@ func step(dt: float) -> void:
 	if opts.get("tutorial", false):
 		if opts.get("tut_test", false):
 			_tut_drive()
+			if "--tut-slow" in OS.get_cmdline_user_args():
+				player.inp["move"] = (player.inp["move"] as Vector2) * 0.5     # test: walk, so your Boki can lead (screenshots)
 		_update_tutorial(dt)
 	if opts.get("training", false) and duel == null:
 		_update_training(dt)

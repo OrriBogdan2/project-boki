@@ -484,8 +484,9 @@ static func demo_tick(m, mode: String) -> void:
 		p.max_hp = 5000.0
 		p.hp = 5000.0
 		p.inp["aim"] = p.pos + Vector3(4, 0.9, 1)
-		m.cam.zoom_to = 0.8
+		m.cam.zoom_to = 0.6
 		st["pin"] = p.pos
+		print("TMDEMO start t=%.1f at %s" % [m.time, str(p.pos)])
 		var foe: Hunter = null
 		for h in m.hunters:
 			if h.team != p.team:
@@ -515,6 +516,7 @@ static func demo_tick(m, mode: String) -> void:
 			if t > 1.0 and not st.has("said"):
 				st["said"] = true
 				k.comp.callout("behind", foe2.pos, m.direction_word(p.pos, foe2.pos), foe2, "h" + foe2.nid)
+				print("TMDEMO callout at t=%.1f foe %s" % [m.time, str(foe2.pos)])
 			if st.has("said"):
 				k.comp.pose = "growl"
 				k.comp.pose_t = 1.0

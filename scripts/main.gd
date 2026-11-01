@@ -104,6 +104,12 @@ func _ready() -> void:
 		if a.begins_with("--teammate-demo="): opts["teammate_demo"] = a.substr(16); opts["no_drop"] = true
 		if a.begins_with("--demo-kin="): opts["demo_kin"] = a.substr(11)      # test: bring this species (level/trust via --demo-kin-lv=)
 		if a.begins_with("--demo-kin-lv="): opts["demo_kin_lv"] = a.substr(14)
+		if a == "--no-tips": Settings.set_v("tips", false, false)     # test: no kit panel or tip banners (screenshots)
+		if a.begins_with("--set-kin=") and not Save.d["roster"].is_empty():
+			# test: your first Boki's level and trust, "level:trust" (how well it talks)
+			var sk := a.substr(10).split(":")
+			Save.d["roster"][0]["level"] = int(sk[0])
+			if sk.size() > 1: Save.d["roster"][0]["trust"] = float(sk[1])
 		if a == "--recall-demo" and not Save.d["roster"].is_empty():
 			# test: your partner just got back from an expedition with something to tell you
 			Save.d["roster"][0]["recall"] = {"kind": "carried_out", "text": "was carried out of the Ember Quarry by you", "place": "the Ember Quarry", "boss": "", "m": 1}
