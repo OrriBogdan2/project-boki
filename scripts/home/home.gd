@@ -406,6 +406,7 @@ func _ready() -> void:
 			get_tree().create_timer(0.2).timeout.connect(func():
 				if which == "loadout": _open_loadout()
 				elif which == "expedition": _open_expedition()
+				elif which == "kitcard": _open_kit_card()
 				elif which == "kin" or which.begins_with("kin:"):
 					if which.begins_with("kin:"): kin_tab = which.substr(4)      # --open=kin:About opens that tab
 					_open_kin(Save.active_kin())
@@ -3234,9 +3235,8 @@ func _open_expedition() -> void:
 		ab.tooltip_text = "%s\nDash: %s  ·  Passive: %s\nRMB: %s  ·  E: %s  ·  R: %s (level 6)" % [String(adf.get("fantasy", "")), String(adf["dash"]["name"]), String(adf["passive"]["name"]), String(adf["rmb"]["name"]), String(adf["e"]["name"]), String(adf["r"]["name"])]
 		arow.add_child(ab)
 	left.add_child(arow)
-	var adsc := UI.label("Dash %s  ·  %s  ·  RMB %s  ·  E %s  ·  R %s" % [String(Arch.def(cur_a)["dash"]["name"]), String(Arch.def(cur_a)["passive"]["name"]), String(Arch.def(cur_a)["rmb"]["name"]), String(Arch.def(cur_a)["e"]["name"]), String(Arch.def(cur_a)["r"]["name"])], UI.T_SMALL, Arch.color(cur_a))
-	adsc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	left.add_child(adsc)
+	# your abilities before a run: the kit card's compact row (click for the full card)
+	left.add_child(KitCard.strip(cur_a, _open_kit_card))
 	left.add_child(UI.spacer(2))
 	left.add_child(UI.section("Weapon"))
 	var wr := UI.hbox(8)
@@ -3315,12 +3315,21 @@ func _open_expedition() -> void:
 		right.add_child(UI.para("Go down for good and the Boki you bring are left behind (the Ransom House holds the unclaimed ones).", 12, UI.FAINT))
 	# the way out: practice on the left, go on the right
 	var fl := UI.footer_left(v)
+	fl.add_child(UI.ghost("Arena", func(): Save.save_game(); Game.start_match(Match.arena_opts(Arch.of_save())), 0, "knock"))
 	fl.add_child(UI.ghost("Training area", _start_training, 0, "jump"))
 	fl.add_child(UI.ghost("Duel room", _start_duel, 0, "knock"))
 	if Net.available():
 		fl.add_child(UI.ghost("Play online", func(): Game.goto("lobby", {"cls": Data.class_of_save(), "tier": exp_tier}), 0, "bond"))
 	var start_b := UI.footer_primary(v, "Start expedition", _confirm_start, 250, "portal")
 	start_b.grab_focus.call_deferred()
+
+## The full kit card for your archetype and Boki (KitCard), over the expedition panel.
+func _open_kit_card() -> void:
+	var v := _new_panel("Your kit", KitCard.SIZE.x + 40, true)
+	var ak := Save.active_kin()
+	var card := KitCard.make(Arch.of_save(), String(ak.get("species", "")))
+	v.add_child(card)
+	UI.footer_left(v).add_child(UI.ghost("Back to the expedition", _open_expedition, 0))
 
 ## The old separate loadout page now lives inside the expedition panel.
 func _open_loadout() -> void:
@@ -3507,7 +3516,7 @@ func _ransom_card(L: Dictionary) -> Control:
 func _start_training() -> void:
 	Save.d["cls"] = Data.class_of_save()
 	Save.save_game()
-	Game.start_match({"training": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242})
+	Game.start_match({"training": true, "practice": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242})
 
 ## The duel room: you against one sparring bot you set up yourself.
 func _start_duel() -> void:

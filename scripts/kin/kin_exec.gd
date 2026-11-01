@@ -192,6 +192,9 @@ static func _deliver(st: StageSpec, cx: Dictionary) -> void:
 		if dl == "projectile" and float(st.delivery.params.get("speed", 0.0)) >= 60.0: dl = "rail"
 		AbilityFx.cast(cx["m"], cx["caster"], dl, from, _dir(st, cx, from), _color(st),
 			{"range": float(st.delivery.params.get("range", 10.0)), "radius": float(st.delivery.params.get("radius", 1.5)), "grammar": true})
+		# the tell sound for grammar casts is Feel's (pointed at AbilityFx's rows), once per caster a frame
+		if not cx.get("silent", false):
+			Feel.sound(cx["m"], "tell", dl, from, cx["caster"])
 	match st.delivery.type:
 		"projectile": _projectile(st, cx)
 		"cone": _cone(st, cx)

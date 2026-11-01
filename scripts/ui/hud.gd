@@ -490,6 +490,8 @@ func _draw_top(sz: Vector2) -> void:
 	if m.duel:
 		_draw_duel(sz)
 		return
+	if m.opts.get("arena", false):
+		return        # the Arena draws its own key line and meter (scripts/match/arena.gd)
 	if m.opts.get("training", false):
 		if Record.clean():
 			return      # (recording: no training banner or checklist)

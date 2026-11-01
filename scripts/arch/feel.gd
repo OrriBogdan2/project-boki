@@ -190,9 +190,12 @@ static func hitstop(m: Node, by: Ent, target: Ent, d: float, o: Dictionary) -> i
 	var mine: bool = p != null and (by == p or target == p or (by is Kin and (by as Kin).owner_h == p))
 	if not bool(m.get("net_on")) and mine:
 		var want := tt if target == p else (ta if melee else 0.0)
-		if t >= 4 and by == p: want = maxf(want, ta)
+		# a payoff you land (Cash In, a wall slam, a spike) freezes you too, even from range
+		if t >= 4 and by == p: want = maxf(want, float(HITSTOP[t][0]) * k)
 		want = _spend(p, want, now)
 		if want > 0.0: m.freeze_frame(want)
+		# your ranged hits never freeze you (Capcom), but the body you hit still holds for its tier
+		if by == p and target: target.freeze_t = maxf(target.freeze_t, tt)
 	else:
 		if target: target.freeze_t = maxf(target.freeze_t, tt)
 		if by and melee: by.freeze_t = maxf(by.freeze_t, ta)
@@ -248,6 +251,14 @@ const DELIVERY_TELL := {
 	"zone": ["cloak", 0.8], "trap": ["plant", 1.2], "wall": ["build", 0.9], "aura": ["shield", 0.8],
 	"tether": ["grab", 1.0], "leap": ["whoosh", 0.7], "blink": ["portal", 1.6], "summon": ["portal", 0.9], "dash": ["dash", 1.0],
 }
+## The tell and impact rows come from AbilityFx (the pop branch's synthesized ability sounds), so archetype kits, Boki and weapon right clicks share one sound language; these tables are
+## the fallback.
+static func tell_row(delivery: String) -> Array:
+	return AbilityFx.feel_tell(delivery) if AbilityFx.TELL.has(delivery) else DELIVERY_TELL.get(delivery, ["skill", 1.0])
+
+static func impact_row(cat: String) -> Array:
+	return AbilityFx.feel_impact(cat) if AbilityFx.IMPACT.has(cat) else CATEGORY_IMPACT.get(cat, ["hit", 1.0])
+
 ## Layer 3, the impact, by effect category: [sound, pitch]. Control is a hard hit then a held tone.
 const CATEGORY_IMPACT := {"damage": ["thump", 1.0], "control": ["zap", 0.8], "sustain": ["heal", 1.1], "shield": ["shield", 1.2], "utility": ["ping", 1.3]}
 ## Layer 4, the kin theme's sweetener.
@@ -273,8 +284,15 @@ static func sound(m: Node, layer: String, what: String, at: Vector3, by: Ent = n
 	if _voices.size() > 64: _voices.clear()
 	var row: Array = []
 	match layer:
-		"tell": row = DELIVERY_TELL.get(what, ["skill", 1.0])
-		"impact": row = CATEGORY_IMPACT.get(what, ["hit", 1.0])
+		"tell":
+			# one tell per caster per frame: the grammar runner (KinExec) and a kit's own cast_sound
+			# can both ask for it
+			var tk := "tell|%d|%d" % [by.get_instance_id() if by else 0, Engine.get_physics_frames()]
+			if _voices.has(tk):
+				return
+			_voices[tk] = 1
+			row = tell_row(what)
+		"impact": row = impact_row(what)
 		"sweet":
 			var sn := String(SWEETENER.get(what, ""))
 			if sn == "": return

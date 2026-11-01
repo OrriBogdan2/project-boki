@@ -10,6 +10,8 @@ var ramp := {}                 # Rampage: {t, tele, hold} while Shift is down; {
 var charge := {}               # the running hold charge: {target, end_t, dir}
 var aval := {}                 # Avalanche: {tell, t, stomp, slammed}
 var iron := false
+var aura: Node3D = null        # the Enraged look: a red shell, a glow, the hunter grown bigger
+var grow := 0.0                # 0..1 how far into the Enraged form the model is
 
 func full_ready() -> bool:
 	return enraged_t > 0.0
@@ -28,12 +30,80 @@ func gain_rage(v: float) -> void:
 	if res >= res_max():
 		enraged_t = float(res_def().get("enraged_t", 5.0))
 		res = res_max()
-		m.sfx("knock", h.pos, 0.0, 0.6)          # the roar, audible within 25m
-		m.fx.word(h.pos + Vector3(0, 2.5, 0), "ENRAGED", res_col(), true)
-		m.fx.ring(h.pos, 2.4, res_col(), 0.4)
-		Feel.shake(m, "t3", h, h.pos)
+		_enrage_fx()
+
+## Becoming Enraged: a roar, a red shockwave, and the hunter visibly swells into a red, steaming form
+## (everyone sees it: that's the "back off or bait it out" read).
+func _enrage_fx() -> void:
+	var rc := res_col()
+	m.sfx("knock", h.pos, 0.0, 0.6)          # the roar, audible within 25m
+	m.sfx("charge", h.pos, -3.0, 0.45)
+	m.fx.word(h.pos + Vector3(0, 2.8, 0), "ENRAGED", rc, true)
+	m.fx.ring(h.pos, 2.8, rc, 0.45)
+	m.fx.ring(h.pos, 1.4, Color(1, 0.9, 0.8, 0.9), 0.25)
+	m.fx.burst(h.pos + Vector3(0, 1.2, 0), rc, 30, 6.0, 0.6, -2.0, 1.4)
+	Feel.shake(m, "t3", h, h.pos)
+	if h.is_local() and m.hud: m.hud.flash(rc, 0.15)
+	if m.net_on and not h.remote:
+		m.net_fx(["ring", m._r(h.pos.x), m._r(h.pos.y), m._r(h.pos.z), 2.8, rc.to_html(false)])
+	_make_aura()
+
+func _make_aura() -> void:
+	if aura and is_instance_valid(aura):
+		return
+	aura = Node3D.new()
+	var rc := res_col()
+	var sh := MeshInstance3D.new()
+	sh.mesh = Models.sphere(0.95, 16)
+	sh.material_override = Models.glow_mat(Color(rc, 0.16))
+	sh.scale = Vector3(1.0, 1.35, 1.0)
+	sh.position.y = 1.05
+	sh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	sh.name = "Shell"
+	aura.add_child(sh)
+	var ring := MeshInstance3D.new()
+	ring.mesh = Models.cyl(1.05, 1.05, 0.04, 24)
+	ring.material_override = Models.glow_mat(Color(rc, 0.45))
+	ring.position.y = 0.05
+	ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	aura.add_child(ring)
+	var lt := OmniLight3D.new()
+	lt.light_color = rc
+	lt.light_energy = 1.6
+	lt.omni_range = 3.5
+	lt.position.y = 1.2
+	aura.add_child(lt)
+	h.add_child(aura)
+
+func _drop_aura() -> void:
+	if aura and is_instance_valid(aura):
+		aura.queue_free()
+	aura = null
+
+## Spending the Rage: the shell bursts outward and the hunter shrinks back.
+func _spend_fx() -> void:
+	var rc := res_col()
+	m.fx.ring(h.pos, 3.4, rc, 0.4)
+	m.fx.burst(h.pos + Vector3(0, 1.0, 0), rc, 26, 7.0, 0.5, 4.0, 1.3)
+	_drop_aura()
+
+func _tick_look(dt: float) -> void:
+	var want := 1.0 if enraged_t > 0.0 else 0.0
+	grow = move_toward(grow, want, dt * (6.0 if want > grow else 3.0))
+	if h.model:
+		h.model.scale = Vector3.ONE * (1.0 + 0.16 * grow)
+	if aura and is_instance_valid(aura):
+		var sh := aura.get_node_or_null("Shell") as MeshInstance3D
+		if sh: sh.scale = Vector3(1.0, 1.35, 1.0) * (1.0 + 0.06 * sin(m.time * 10.0))
+		if randf() < dt * 14.0:
+			# red steam off the shoulders
+			for sx in [-0.45, 0.45]:
+				m.fx.burst(h.pos + Vector3(sx, 1.75, 0), res_col(), 2, 1.6, 0.5, -3.0, 0.9)
+	if enraged_t <= 0.0 and aura:
+		_drop_aura()
 
 func _tick(dt: float) -> void:
+	_tick_look(dt)
 	if enraged_t > 0.0:
 		enraged_t -= dt
 		if enraged_t <= 0.0:
@@ -228,6 +298,9 @@ func fire_rmb(c: Dictionary) -> void:
 	var kk := 1.5 if emp else 1.0
 	if emp:
 		enraged_t = 0.0; res = 0.0      # the empowered Smash spends the rage
+		_spend_fx()
+		m.fx.word(h.pos + Vector3(0, 2.6, 0), "RAGE SMASH", res_col(), true)
+		Feel.shake(m, "t4", h, h.pos)
 	if c.get("air", false):
 		var dd: Dictionary = sd["drop"]
 		h.gliding = false
@@ -262,7 +335,15 @@ func fire_rmb(c: Dictionary) -> void:
 		var od: Dictionary = sd["over"]
 		var effs: Array = [{"type": "damage", "amount": 12.0 if shotgun else float(od["dmg"])}, {"type": "push", "strength": minf(16.0, (13.0 if shotgun else float(od["push"])) * kk), "from": "caster"}]
 		var stg := stage("rmb", {"delivery": {"type": "cone", "radius": 3.5 if shotgun else float(od["radius"]), "angle": 70.0 if shotgun else float(od["angle"])}, "effects": effs})
-		run(stg, cx("rmb", "breach" if shotgun else "overhead_smash", aim(), {"no_floor": true}))
+		run(stg, cx("rmb", "breach" if shotgun else "overhead_smash", aim(), {"no_floor": true, "on_foe": func(f: Ent, _c: Dictionary):
+			# a solid smash: a payoff-weight hit-stop when it's empowered
+			Feel.hitstop(m, h, f, 30.0, {"melee": true, "payoff": kk > 1.0, "heavy": true})}))
+		var dd := h.aim_dir()
+		m.fx.cone(h.pos + Vector3(0, 0.1, 0), dd, 3.5 if shotgun else float(od["radius"]), res_col() if kk > 1.0 else col_of(sd))
+		m.fx.slash(h.pos + Vector3(0, 0.9, 0), atan2(dd.y, dd.x), deg_to_rad(110.0), float(od["radius"]), col_of(sd), true)
+		m.fx.dust(h.pos + Vector3(dd.x, 0, dd.y) * 1.8, 10)
+		Feel.shake(m, "t2", h, h.pos)
+		if h.is_local(): Oomph.punch_dir(m, dd, 0.22 * kk)
 		if shotgun:
 			var d := h.aim_dir()
 			h.vel.x = -d.x * 9.0; h.vel.z = -d.y * 9.0
@@ -308,6 +389,10 @@ func _e_end() -> void:
 	var stg := stage("e", {"delivery": {"type": "burst", "origin": "caster", "radius": float(ed["end_r"])}, "effects": [{"type": "push", "strength": push}]}, {"hit": "add", "ctrl": "add", "ctrl_cap": "soft", "util": "add"})
 	run(stg, cx("e", "shrug_off", h.pos, {"no_floor": true}))
 	m.fx.word(h.pos + Vector3(0, 2.2, 0), "SHRUG", col_of(ed), false)
+	m.fx.ring(h.pos, float(ed["end_r"]), col_of(ed), 0.3)
+	m.fx.dust(h.pos, 12)
+	m.sfx("knock", h.pos, -6.0, 0.9)
+	Feel.shake(m, "t2", h, h.pos)
 
 # ------------------------------------------------------------------ R: Avalanche
 func cast_r() -> bool:

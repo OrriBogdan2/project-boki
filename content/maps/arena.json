@@ -1,0 +1,26 @@
+{
+ "id": "arena",
+ "name": "The Arena",
+ "size": 52,
+ "seed": 31,
+ "notes": "The practice arena: one round floor ringed by low ruin walls with four gates, four pillars to slam people into, a raised dais on the north side for high ground, two patches of tall grass, and a small bench islet to the south across a short bridge (where the generator puts spawn points; the arena itself teleports you to the floor). No monsters, chests or breakables are spawned on it.",
+ "islands": [
+  {"id": "floor", "name": "The Arena", "role": "grove", "region": 0, "poi": [26, 26], "noise": 0.04, "biome": "meadow", "danger": 0, "no_rocks": true,
+   "shapes": [{"circle": [26, 26], "r": 14, "lv": 0}, {"rect": [21, 13, 31, 17], "lv": 1}],
+   "sheer": [],
+   "walls": [{"ring": [26, 26], "r": 12.2, "gates": 4, "gate_w": 3.5}],
+   "pillars": [[21, 21], [31, 21], [21, 31], [31, 31]],
+   "bush": [[16, 30, 1.6], [36, 30, 1.6]]},
+  {"id": "bench", "name": "Bench", "role": "grove", "region": 1, "poi": [26, 47], "noise": 0.04, "biome": "meadow", "danger": 0, "no_rocks": true,
+   "shapes": [{"circle": [26, 47], "r": 4.2, "lv": 0}], "sheer": []}
+ ],
+ "bridges": [
+  {"name": "Bench Bridge", "a": "floor", "b": "bench", "from": [26, 39], "to": [26, 44], "r": 1.4}
+ ],
+ "winds": [],
+ "pads": [],
+ "updrafts": [],
+ "outposts": [],
+ "chokepoints": [],
+ "glides": []
+}
