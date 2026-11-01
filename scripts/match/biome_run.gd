@@ -648,6 +648,8 @@ func _tick_region_banner() -> void:
 	var P = m.player
 	if P == null or P.out or P.dropping or P.riding or m.hud == null:
 		return
+	if m.opts.get("arena", false) or m.opts.get("training", false):
+		return      # the Arena and the training area aren't a region out in the wild ("Few monsters...")
 	var b := w.biome_at(P.pos.x, P.pos.z)
 	if b == "" or b == player_biome:
 		return
