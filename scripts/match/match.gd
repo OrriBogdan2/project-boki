@@ -277,11 +277,20 @@ func warm_up(progress := Callable()) -> void:
 	# telegraph is held up for it (the views' own are gone by now)
 	var late_cb := func(f: float) -> void:
 		if progress.is_valid(): progress.call(0.9 + 0.1 * f)
-	var tg_late := fx.telegraph_circle(cam.global_position - cam.global_transform.basis.z * 6.0, 1.5, Color(1, 0.3, 0.2))
+	var late_at := cam.global_position - cam.global_transform.basis.z * 6.0
+	var tg_late := fx.telegraph_circle(late_at, 1.5, Color(1, 0.3, 0.2))
+	# (and a still copy of a melee swoosh: the real one frees itself in a fifth of a second)
+	fx.slash(late_at, 0.0, 2.0, 1.6, Color.WHITE)
+	var swoosh: Node = null
+	if fx.get_child_count() > 0 and fx.get_child(fx.get_child_count() - 1) is MeshInstance3D:
+		swoosh = fx.get_child(fx.get_child_count() - 1).duplicate(0)
+		add_child(swoosh)
+		(swoosh as Node3D).global_position = late_at
 	batched = await _warm_batches(late_cb, seen)
 	if not batched:
 		return
 	fx.end_telegraph(tg_late)
+	if swoosh: swoosh.queue_free()
 	for sm in shown: (sm as MeshInstance3D).visible = false
 	if muzzle_light: muzzle_light.light_energy = 0.0
 	RenderingServer.global_shader_parameter_set("vis_on", 0.0)
