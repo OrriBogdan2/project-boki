@@ -9,8 +9,9 @@ const LEAD_Z := 5.4
 ## Expedition camera presets (Settings "cam_style"): pitch in degrees, distance, field of view.
 const STYLES := {
 	# pitch and FOV measured from footage; distance pulled in from the footage estimate of 25m (about 28m
-	# of ground across a 16:9 screen) to 21.5m (~24m across) at the owner's call (movefeel): heroes read bigger
-	"supervive": {"pitch": 65.0, "dist": 21.5, "fov": 35.0, "name": "Supervive"},
+	# of ground across a 16:9 screen) to 20.5m (~23m across) at the owner's call (movefeel): SUPERVIVE
+	# frames tighter and its heroes read bigger (with Hunter.VIS_SCALE, ~5.4% -> ~7.5% of screen height)
+	"supervive": {"pitch": 65.0, "dist": 20.5, "fov": 35.0, "name": "Supervive"},
 	"high": {"pitch": 70.0, "dist": 27.0, "fov": 36.0, "name": "Top-down"},
 	"classic": {"pitch": 57.0, "dist": 32.2, "fov": 28.0, "name": "Classic (flat, far)"},
 	"low": {"pitch": 50.0, "dist": 23.0, "fov": 42.0, "name": "Low (more horizon)"},
@@ -57,12 +58,32 @@ const GLIDE_LEAD_EASE := 3.0  # 1/s, so the lean eases in and out instead of pop
 var lead_vel := Vector3.ZERO
 var lead_off := Vector3.ZERO
 
-## Picks one of STYLES (the expedition camera).
+var style_id := ""
+## Multiplies the distance on top of zoom: the home keeps its own wider framing with any style (see
+## Home._apply_cam_settings); 1 everywhere in a match.
+var dist_mul := 1.0
+
+## Picks one of STYLES (Settings "Camera").
 func use_style(id: String) -> void:
 	var st: Dictionary = STYLES.get(id, STYLES["supervive"])
+	style_id = id if STYLES.has(id) else "supervive"
 	pitch = deg_to_rad(float(st["pitch"]))
 	dist = float(st["dist"])
 	fov = float(st["fov"])
+
+## The Settings camera (style and follow), wherever there's a CamRig: a match, the farm, the
+## Training Grounds. Cheap enough to call every frame.
+func apply_settings() -> void:
+	follow_mode = String(Settings.get_v("cam_follow"))
+	var sty := String(Settings.get_v("cam_style"))
+	if sty != style_id:
+		use_style(sty)
+
+## Metres of ground across a 16:9 screen at the focus, for a style at zoom 1.
+static func style_across(id: String) -> float:
+	var st: Dictionary = STYLES.get(id, STYLES["supervive"])
+	var hfov := 2.0 * atan(tan(deg_to_rad(float(st["fov"])) * 0.5) * 16.0 / 9.0)
+	return 2.0 * float(st["dist"]) * tan(hfov * 0.5)
 
 func _ready() -> void:
 	fov = 28.0
@@ -149,7 +170,7 @@ func _apply(shake: Vector3) -> void:
 	# pitch: the style's angle, tipped toward straight down for a bird's-eye view, or low behind
 	# the skyship for the ride
 	var p := lerpf(lerpf(pitch, deg_to_rad(88.0), k), deg_to_rad(30.0), c)
-	var d := dist * z * (1.0 + 0.15 * k)
+	var d := dist * dist_mul * z * (1.0 + 0.15 * k)
 	var back := Vector3(0, sin(p), cos(p)).rotated(Vector3.UP, yaw)
 	position = focus + back * d + shake
 	look_at(focus + shake, Vector3.UP if p < deg_to_rad(85.0) else Vector3(0, 0, -1).rotated(Vector3.UP, yaw))

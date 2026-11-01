@@ -66,7 +66,7 @@ const T := {
 	"cam_settle_t":            ["<=", 0.35, "s", "camera settles on you after a stop"],
 	"cam_glide_lead_m":        [">=", 0.4, "m", "slight lead in glide direction"],
 	"view_across_m":           ["~", [22.0, 25.0], "m", "ground across a 16:9 screen at the focus (owner: tighter than the 28m footage estimate)"],
-	"hunter_screen_pct":       [">=", 6.0, "%", "medium hunter's height as a share of screen height (owner: heroes read bigger)"],
+	"hunter_screen_pct":       [">=", 6.0, "%", "medium hunter, feet to head, as a share of screen height (owner: heroes read bigger)"],
 }
 
 var results := {}
@@ -618,7 +618,32 @@ func _screen_scale() -> void:
 	cam.snap(P.pos)
 	for i in 120:
 		cam.follow(P.position, DT, false)
+	var vh := cam.get_viewport().get_visible_rect().size.y
+	var vw := cam.get_viewport().get_visible_rect().size.x
+	var aspect := 16.0 / 9.0
+	var hfov := 2.0 * atan(tan(deg_to_rad(cam.fov) * 0.5) * aspect)
+	# (Camera3D keeps the vertical FOV, so a share of screen HEIGHT doesn't depend on the window shape)
+	var now := _model_span(cam)
+	print("MFEEL framing: style supervive pitch %.0f dist %.1f fov %.0f, viewport %dx%d, model scale %.2f, model %.2fm tall" % [rad_to_deg(cam.pitch), cam.dist, cam.fov, int(vw), int(vh), P.model.scale.y, now[2]])
+	rec("view_across_m", 2.0 * cam.dist * tan(hfov * 0.5))
+	rec("hunter_screen_pct", now[1] / vh * 100.0)
+	# the same measure for the framing before movefeel (25m, hunters at their plain size), for the doc
+	var d0 := cam.dist
+	var vs: float = Hunter.VIS_SCALE
+	cam.dist = 25.0
+	P.model.scale /= vs
+	cam.snap(P.pos)
+	var was := _model_span(cam)
+	print("MFEEL framing before (dist 25.0, scale /%.2f): %.1fm across, hunter %.1f%% of screen height (silhouette %.1f%%); now silhouette %.1f%%" % [vs, 2.0 * 25.0 * tan(hfov * 0.5), was[1] / vh * 100.0, was[0] / vh * 100.0, now[0] / vh * 100.0])
+	P.model.scale *= vs
+	cam.dist = d0
+	cam.snap(P.pos)
+
+## [silhouette px (every corner on screen, so depth counts too), standing px (feet to the top of the
+## head, straight up at the hunter), model height m] for the player's model (no glider, no ring).
+func _model_span(cam: CamRig) -> Array:
 	var lo := 1e9; var hi := -1e9
+	var ylo := 1e9; var yhi := -1e9
 	var stack: Array = [P.model]
 	while not stack.is_empty():
 		var n: Node = stack.pop_back()
@@ -634,13 +659,11 @@ func _screen_scale() -> void:
 				var wp: Vector3 = mi.global_transform * ab.get_endpoint(k)
 				var sp := cam.unproject_position(wp)
 				lo = minf(lo, sp.y); hi = maxf(hi, sp.y)
-	var vh := cam.get_viewport().get_visible_rect().size.y
-	var vw := cam.get_viewport().get_visible_rect().size.x
-	var aspect := 16.0 / 9.0
-	var hfov := 2.0 * atan(tan(deg_to_rad(cam.fov) * 0.5) * aspect)
-	print("MFEEL framing: style supervive pitch %.0f dist %.1f fov %.0f, viewport %dx%d, model scale %.2f" % [rad_to_deg(cam.pitch), cam.dist, cam.fov, int(vw), int(vh), P.model.scale.y])
-	rec("view_across_m", 2.0 * cam.dist * tan(hfov * 0.5))
-	rec("hunter_screen_pct", (hi - lo) / vh * 100.0)
+				ylo = minf(ylo, wp.y); yhi = maxf(yhi, wp.y)
+	var c := P.model.global_position
+	var feet := cam.unproject_position(Vector3(c.x, ylo, c.z))
+	var head := cam.unproject_position(Vector3(c.x, yhi, c.z))
+	return [hi - lo, absf(feet.y - head.y), yhi - ylo]
 
 # ---------------------------------------------------------------- end to end: key -> sim -> screen
 func _e2e() -> void:
