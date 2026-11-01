@@ -4,18 +4,16 @@ extends RefCounted
 ## south of the portal. Inside it your whole kit works (weapon on LMB / RMB, glove on Q, your kin's
 ## ability on E, the ultimate on R) against practice dummies: one that stands still, one that
 ## strafes, one that lobs slow orbs at you to dodge, and a row of range targets. There's a climbing
-## wall to mantle, a gap to glide across to a little islet, and a pad that resets your cooldowns.
-## Everywhere else at home you only move (walk, jump, dash, glide).
+## wall to mantle, a pad that resets your cooldowns, and east of the isle a parkour course with a
+## time trial (home_parkour.gd). Everywhere else at home you only move (walk, jump, dash, glide).
 ##
 ## The numbers and names come from the match's content (WeaponDef, AbilityDef, Gear, and the kin
 ## grammar through KinLib); the casting here is a small stand-alone version, because the match's runner needs a
 ## whole Match (hunters, mobs, projectiles, HUD) to run in.
 
-const C := Vector2(40, 56)          # the isle
-const R := Vector2(8.0, 4.4)
-const GAP_C := Vector2(55, 57)      # the islet across the glide gap
-const GAP_R := Vector2(2.6, 2.2)
-const BRIDGE := [39, 46, 40, 53]
+const C := Vector2(40, 57)          # the isle (bigger than it was: 8 x 4.4)
+const R := Vector2(9.5, 5.6)
+const BRIDGE := [39, 46, 40, 52]
 const WALL := [33, 56, 35, 57]      # the climbing wall: a block two terraces high
 const PAD := Vector3(42.5, 0, 58.5)
 const STILL := Vector3(36.5, 0, 54.5)
@@ -23,7 +21,7 @@ const MOVER := Vector3(40.5, 0, 55.0)
 const SHOOTER := Vector3(44.5, 0, 54.0)
 const RACK := Vector3(38.5, 0, 58.8)    # the Try-on rack: any class, weapon, glove and kin, here only
 const TAGS := {"light": "skirmisher · mobile · fragile", "medium": "all-rounder · mid range", "heavy": "frontline · tank · close range"}
-const TARGETS := [Vector3(46.5, 0, 57.5), Vector3(46.5, 0, 59.0), Vector3(45.0, 0, 60.0)]
+const TARGETS := [Vector3(32.6, 0, 58.6), Vector3(33.2, 0, 60.2), Vector3(35.4, 0, 61.2)]
 
 var h
 var dummies: Array = []        # {node, pos, kind, base, hits: [[t, dmg]], label, t}
@@ -39,23 +37,26 @@ var pad_t := 0.0
 var now := 0.0
 var try := {}                  # what you're trying on here: {cls, weapon, glove, kin}
 var loaner: Node3D = null      # a kin of the species you're trying, when it isn't one of yours
+var course: HomeParkour = null  # the parkour course and its time trial
 
 func _init(home) -> void:
 	h = home
+	course = HomeParkour.new(self)
 
 static func defs() -> Array:
-	return [["training", C, R], ["training_gap", GAP_C, GAP_R]]
+	return [["training", C, R]]
 
 static func reserved() -> Array:
-	return [[int(C.x - R.x) - 1, int(C.y - R.y) - 1, int(C.x + R.x) + 1, int(C.y + R.y) + 1],
-		[int(GAP_C.x - GAP_R.x) - 1, int(GAP_C.y - GAP_R.y) - 1, int(GAP_C.x + GAP_R.x) + 1, int(GAP_C.y + GAP_R.y) + 1],
+	var out: Array = [[int(C.x - R.x) - 1, int(C.y - R.y) - 1, int(C.x + R.x) + 1, int(C.y + R.y) + 1],
 		[BRIDGE[0] - 1, BRIDGE[1] - 1, BRIDGE[2] + 1, BRIDGE[3]]]
+	out.append_array(HomeParkour.reserved())
+	return out
 
 static func is_zone(world: World, p: Vector3) -> bool:
 	if String(world.island_id(p.x, p.z)).begins_with("training"):
 		return true
-	# the open air over the glide gap (between the isle and the islet) is part of the course too
-	return world.is_void(p.x, p.z) and p.x > C.x and p.x < GAP_C.x + GAP_R.x + 1.0 and absf(p.z - GAP_C.y) < maxf(R.y, GAP_R.y) + 1.5
+	# the open air between the isle and the course's isles (gaps, glides) is part of the grounds too
+	return world.is_void(p.x, p.z) and HomeParkour.AREA.has_point(Vector2(p.x, p.z))
 
 ## Before the meshes: the bridge's planks become ground, and the climbing wall rises.
 func prepare() -> void:
@@ -71,6 +72,7 @@ func prepare() -> void:
 			if w.inb(x, z) and w.kind[w.idx(x, z)] == World.T_BLOCK and w.island_id(x, z) == "training":
 				w.kind[w.idx(x, z)] = World.T_GROUND       # no rim trees in the way of practice
 	w.paint_path(Vector2i(39, 41), Vector2i(39, 46), Color("9c7a52"), true)
+	course.prepare()
 	for z in range(int(C.y) - 1, int(C.y) + 2):
 		for x in range(int(C.x) - 5, int(C.x) + 6):
 			w.paint_tile(x, z, Color("c9a77a"))
@@ -91,12 +93,13 @@ func build() -> void:
 			h.add_child(pl)
 	var sign := Models.signpost(["Training", "Grounds"]); sign.position = Vector3(41.6, 0, 45.2); sign.rotation.y = -0.2; h.add_child(sign)
 	# the zone's edge: a soft glowing line across the bridge end
+	var ez := float(BRIDGE[3]) + 0.4
 	var edge := MeshInstance3D.new(); var em := BoxMesh.new(); em.size = Vector3(2.2, 0.04, 0.12); edge.mesh = em
-	edge.material_override = Models.glow_mat(Color(0.55, 1.0, 0.85, 0.55)); edge.position = Vector3(40.0, 0.05, 51.6)
+	edge.material_override = Models.glow_mat(Color(0.55, 1.0, 0.85, 0.55)); edge.position = Vector3(40.0, 0.05, ez)
 	h.add_child(edge)
 	for sx in [-1.0, 1.0]:
-		var post := Models.part(h, Models.cyl(0.07, 0.09, 1.6, 8), Models.toon(Color("6a7a8a")), Vector3(40.0 + sx * 1.15, 0.8, 51.6))
-		Models.part(h, Models.sphere(0.12, 8), Models.toon(Color("9ff0e0"), false, 1.2), Vector3(40.0 + sx * 1.15, 1.7, 51.6))
+		var post := Models.part(h, Models.cyl(0.07, 0.09, 1.6, 8), Models.toon(Color("6a7a8a")), Vector3(40.0 + sx * 1.15, 0.8, ez))
+		Models.part(h, Models.sphere(0.12, 8), Models.toon(Color("9ff0e0"), false, 1.2), Vector3(40.0 + sx * 1.15, 1.7, ez))
 		post.name = "ZonePost"
 	var rk := Node3D.new(); rk.position = RACK; h.add_child(rk)
 	var wd := Models.toon(Color("7a5236"))
@@ -118,8 +121,7 @@ func build() -> void:
 	_label(pad, "Reset cooldowns", Vector3(0, 1.0, 0), Color("9ff0e0"), 34)
 	var wl := Node3D.new(); wl.position = Vector3(34.5, 0, 56.6); h.add_child(wl)
 	_label(wl, "Climb: jump at the wall", Vector3(0, 2.9, 0), UI.INK, 30)
-	var gl := Node3D.new(); gl.position = Vector3(48.6, 0, 56.5); h.add_child(gl)
-	_label(gl, "Glide the gap: jump, hold Space", Vector3(0, 1.6, 0), UI.INK, 30)
+	course.build()
 
 func _label(parent: Node3D, text: String, at: Vector3, col: Color, size := 40) -> Label3D:
 	var l := Label3D.new()
@@ -209,9 +211,10 @@ func _glove() -> String:
 func tick(d: float) -> void:
 	now += d
 	var was := in_zone
-	# in the air (a jump, a glide across the gap) you're still where you took off from: the zone
-	# only changes once you're standing somewhere
-	var standing: bool = h.pvy == 0.0 and not h.gliding
+	# in the air (a jump, a glide across a gap, an air dash, a pull-up from below the rim) you're
+	# still where you took off from: the zone only changes once your feet are on the ground
+	var gh: float = h._ground_h(h.ppos.x, h.ppos.z)
+	var standing: bool = h.climb.is_empty() and h.pvy == 0.0 and not h.gliding and gh > World.VOID + 1.0 and absf(h.py - gh) < 0.03
 	if standing or not h.visit.is_empty():
 		in_zone = is_zone(h.world, h.ppos) and h.visit.is_empty()
 	if in_zone != was:
@@ -221,6 +224,7 @@ func tick(d: float) -> void:
 			_build_hud()
 		else:
 			h._toast("Leaving the Training Grounds: abilities off")
+			course.stats["leaves"] += 1
 			if not try.is_empty():
 				try = {}
 				h._refresh_player_model()
@@ -266,6 +270,7 @@ func tick(d: float) -> void:
 				pad_t = 1.5
 		_update_hud()
 	_step_shots(d)
+	course.tick(d)
 
 func _step_shots(d: float) -> void:
 	for s in shots.duplicate():

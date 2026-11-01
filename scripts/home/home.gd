@@ -54,6 +54,7 @@ var hb: HomeBuild = null         # build mode and the island's layout (home_buil
 var training: HomeTraining = null  # the Training Grounds isle, where your combat kit works (home_training.gd)
 var hw: HomeWork = null            # kin at work: jobs, stations and the Job Board (home_work.gd, Work)
 var hinc: HomeIncubator = null     # the Incubator by the Nesting Nook, where Rare Eggs hatch (home_incubator.gd, Incubator)
+var hwd: HomeWardrobe = null       # the wardrobe by the house: dress-up for the farm (home_wardrobe.gd, Wardrobe)
 
 ## The island being shown: yours, or the one you're visiting.
 func _d() -> Dictionary:
@@ -128,6 +129,7 @@ func _ready() -> void:
 	HomeLayout.make_world(world, int(lay["grow"]), int(lay.get("seed", 0)))
 	hb = HomeBuild.new(self)
 	training = HomeTraining.new(self)
+	hwd = HomeWardrobe.new(self)
 	hw = HomeWork.new(self)
 	if visit.is_empty(): Work.ensure()
 	var path_col := Color("9c7a52")
@@ -183,6 +185,7 @@ func _ready() -> void:
 	hb.prepare_world()
 	if visit.is_empty():
 		world.set_block_rect(BURROW_RECT[0], BURROW_RECT[1], BURROW_RECT[2], BURROW_RECT[3])
+		hwd.reserve(world)
 	if "--print-home" in OS.get_cmdline_user_args():
 		for z in range(0, world.h):
 			var line := "%2d " % z
@@ -226,7 +229,7 @@ func _ready() -> void:
 		_build_burrow()
 	_build_bridges()
 	_build_plots()
-	player = Models.hunter(Data.class_of_save(), Data.TEAM_COLORS[0], _weapon(), "", Save.d.get("look", {}))
+	player = Models.hunter(Data.class_of_save(), Data.TEAM_COLORS[0], _weapon(), "", Wardrobe.farm_appearance())     # dressed for the farm
 	add_child(player)
 	ppos = Vector3(38.0, 0, 34.5)
 	if spawn == "house":
@@ -412,6 +415,8 @@ func _ready() -> void:
 	if visit.is_empty():
 		hecon.build()
 	training.build()
+	if visit.is_empty():
+		hwd.build()
 	hb.build_visuals()
 	hb.assign_beds()
 	if "--kin-lineup" in dbg:
@@ -757,6 +762,7 @@ func _process(delta: float) -> void:
 		_farm_tick()
 	_update_sky(d)
 	_update_hover()
+	if training: training.course.pre_tick(d)      # (a test or demo bot sets the controls first)
 	_move_player(d)
 	_move_kin(d)
 	_care_tick(d)
@@ -767,6 +773,7 @@ func _process(delta: float) -> void:
 	if hw: hw.tick(d)
 	if hinc: hinc.tick(d)
 	if training: training.tick(d)
+	if hwd: hwd.tick(d)
 	cam.follow(ppos, d, panel_open == "" and train.is_empty())
 	_find_interact()
 	if hb and hb.active:
@@ -867,7 +874,36 @@ func start_dash(dir: Vector2, speed: float, time: float) -> void:
 
 ## The ground under a point: its terrace height, or World.VOID over the sky.
 func _ground_h(x: float, z: float) -> float:
-	return world.ground_at(x, z)
+	var g := world.ground_at(x, z)
+	if training and g <= World.VOID + 1.0:
+		g = training.course.plat_top(x, z)      # the parkour course's drifting raft
+	return g
+
+func _on_raft(x: float, z: float) -> bool:
+	return world.ground_at(x, z) <= World.VOID + 1.0 and _ground_h(x, z) > World.VOID + 1.0
+
+## The controls for moving at home. A test or demo bot (ParkourBot) can drive them through
+## sim_input instead of the keyboard: {move: Vector2, held: {action: true}, just: {action: true}}.
+var sim_input := {}
+
+func _in_axis() -> Vector2:
+	if not sim_input.is_empty():
+		return sim_input.get("move", Vector2.ZERO)
+	return Vector2(Input.get_axis("left", "right"), Input.get_axis("up", "down"))
+
+func _in_just(a: String) -> bool:
+	if not sim_input.is_empty():
+		return bool(sim_input.get("just", {}).get(a, false))
+	return Input.is_action_just_pressed(a)
+
+func _in_held(a: String) -> bool:
+	if not sim_input.is_empty():
+		return bool(sim_input.get("held", {}).get(a, false))
+	return Input.is_action_pressed(a)
+
+## Can't glide here (the parkour course's gusts).
+func _no_glide() -> bool:
+	return training != null and training.course.no_glide(ppos)
 
 func _move_player(d: float) -> void:
 	if not climb.is_empty():
@@ -876,14 +912,14 @@ func _move_player(d: float) -> void:
 	var mv := Vector2.ZERO
 	var can_act := panel_open == "" and not Overlay.is_open() and not chat_open and train.is_empty()
 	if can_act:
-		mv = Vector2(Input.get_axis("left", "right"), Input.get_axis("up", "down"))
+		mv = _in_axis()
 		if mv.length() > 1.0: mv = mv.normalized()
 	var dg := _dodge()
 	dash_charges = minf(float(dg["charges"]), dash_charges + d / maxf(0.1, float(dg["cd"])))
 	ex_cd = maxf(0.0, ex_cd - d)
 	var gh := _ground_h(ppos.x, ppos.z)
 	var air := py > gh + 0.001 or pvy > 0.0
-	if can_act and Input.is_action_just_pressed("dash") and dash_t <= 0.0:
+	if can_act and _in_just("dash") and dash_t <= 0.0:
 		try_dash(mv, air)
 	var hv := Vector2(pvel.x, pvel.z)
 	if dash_t > 0.0:
@@ -894,14 +930,15 @@ func _move_player(d: float) -> void:
 		var spd := Hunter.GLIDE_SPEED * 1.15 if gliding else SPEED
 		hv += (mv * spd - hv) * (1.0 - exp(-(14.0 if not air else (4.0 if gliding else 6.0)) * d))
 	# on the ground the island's edge stops you; in the air (a jump, a glide) you can sail out past it
+	# (the raft over the sky is ground too, walk on and off it)
 	var guard := not air
 	var p0 := ppos
 	var nx := ppos.x + hv.x * d
-	var ox := world.occupy(nx, ppos.z, 0.38, py, guard)
+	var ox := world.occupy(nx, ppos.z, 0.38, py, guard and not _on_raft(nx, ppos.z))
 	if ox == 0.0: ppos.x = nx
 	elif not _mantle(nx, ppos.z, ox, air): hv.x = 0.0
 	var nz := ppos.z + hv.y * d
-	var oz := world.occupy(ppos.x, nz, 0.38, py, guard)
+	var oz := world.occupy(ppos.x, nz, 0.38, py, guard and not _on_raft(ppos.x, nz))
 	if oz == 0.0: ppos.z = nz
 	elif not _mantle(ppos.x, nz, oz, air): hv.y = 0.0
 	pvel = Vector3(hv.x, 0, hv.y)
@@ -927,16 +964,19 @@ func _move_player(d: float) -> void:
 	gh = _ground_h(ppos.x, ppos.z)
 	air = py > gh + 0.001 or pvy > 0.0
 	# jump; in the air, a second press (or holding Space, or the glide key) opens the glider
-	var jump_now := can_act and Input.is_action_just_pressed("jump")
+	var jump_now := can_act and _in_just("jump")
 	if jump_now and not air:
 		pvy = JUMP_V
 		air = true
 		glide_hold = 0.0
 		Sfx.play("jump", null, -12.0)
 	elif air and can_act:
-		var holding := Input.is_action_pressed("jump") or Input.is_action_pressed("glide")
+		var holding := _in_held("jump") or _in_held("glide")
 		glide_hold = glide_hold + d if holding else 0.0
-		if not gliding and dash_t <= 0.0 and (jump_now or Input.is_action_just_pressed("glide") or (holding and glide_hold > Hunter.GLIDE_ENGAGE and pvy < 2.0)):
+		if gliding and _no_glide():
+			gliding = false
+			glide_hold = -0.4      # the gust folds it: no reopening on the spot
+		if not gliding and dash_t <= 0.0 and not _no_glide() and (jump_now or _in_just("glide") or (holding and glide_hold > Hunter.GLIDE_ENGAGE and pvy < 2.0)):
 			gliding = true
 			Sfx.play("whoosh", null, -10.0, 0.1, 0.8)
 		elif gliding and not holding:
@@ -1183,6 +1223,13 @@ func _mantle(x: float, z: float, top: float, air: bool) -> bool:
 		break
 	if to == Vector3.INF:
 		return false
+	# stand on the ledge, not on its very lip: a little further in if it's the same height there
+	for k2 in [4, 3, 2, 1]:
+		var q2: Vector2 = Vector2(to.x, to.z) + dv * (0.1 * k2)
+		var g2 := _ground_h(q2.x, q2.y)
+		if absf(g2 - to.y) < 0.01 and not world.is_block(q2.x, q2.y) and world.occupy(q2.x, q2.y, 0.38, g2, false) == 0.0:
+			to = Vector3(q2.x, g2, q2.y)
+			break
 	if to.y - py > 0.6 or side:
 		# a real pull-up (or caught from below): straight up the face, then over the lip, as in a match
 		var up_t := clampf((to.y - py) / Hunter.MANTLE_RISE, 0.16, 0.85)
@@ -1232,6 +1279,8 @@ func _climb_step(d: float) -> void:
 func _respawn_safe() -> void:
 	climb = {}
 	ppos = safe_at
+	var cp: Vector3 = training.course.respawn_at() if training else Vector3.INF
+	if cp != Vector3.INF: ppos = cp      # mid-run on the parkour course: back to the checkpoint
 	py = _ground_h(ppos.x, ppos.z)
 	if py <= World.VOID + 1.0: py = 0.0
 	pvy = 0.0; pvel = Vector3.ZERO; gliding = false; dash_t = 0.0
@@ -1239,7 +1288,7 @@ func _respawn_safe() -> void:
 	cam.snap(ppos)
 	if fx: fx.burst(ppos + Vector3(0, 0.8, 0), Color("cfe8ff"), 16, 3.0, 0.5)
 	Sfx.play("whoosh", null, -4.0, 0.1, 0.7)
-	_toast("The wind caught you")
+	_toast("The wind caught you" if cp == Vector3.INF else "Back to the checkpoint")
 
 ## The glider over your head while you glide (your equipped skin).
 func _glider_look() -> void:
@@ -1613,6 +1662,8 @@ func _find_interact() -> void:
 		best = {"kind": "incubator"}
 	if p2.distance_to(Vector2(YARD_AT.x, YARD_AT.z)) < 1.6 and best.is_empty():
 		best = {"kind": "yard"}
+	if hwd and visit.is_empty() and is_instance_valid(hwd.node) and hwd.near(ppos):
+		best = {"kind": "wardrobe"}
 	if training and visit.is_empty() and training.near_rack(ppos):
 		best = {"kind": "tryon"}
 	if hecon:
@@ -1755,6 +1806,7 @@ func _label_for(it: Dictionary) -> String:
 		"egg": return ("Help the %s hatch!" if _egg_ready() else "Warm the %s") % _egg_label()
 		"yard": return "Train your partner"
 		"tryon": return "Try on a class, weapon, glove or kin"
+		"wardrobe": return "Open the wardrobe"
 		"nook": return "Pair two kin for an egg"
 		"incubator": return hinc.prompt()
 		"burrow": return "Open the Kin Burrow (%d asleep inside)" % KinBox.boxed().size()
@@ -1792,6 +1844,7 @@ func _use(it: Dictionary) -> void:
 			if Incubator.any_ready(): _hatch_incubator(String(hinc.nearest_ready(ppos).get("id", "")))
 			else: nook_tab = "Incubator"; _open_nook()
 		"tryon": training.open_tryon()
+		"wardrobe": hwd.open()
 		"burrow": _open_burrow()
 		"feeder", "grave", "graveyard", "place": hecon.use(it)
 		"station": open_job_board()
@@ -3678,7 +3731,7 @@ func _refresh_player_model() -> void:
 	var rot := player.rotation
 	player.queue_free()
 	var w := _weapon()
-	player = Models.hunter(Data.class_of_save(), Data.TEAM_COLORS[0], w, "", Save.d.get("look", {}))
+	player = Models.hunter(Data.class_of_save(), Data.TEAM_COLORS[0], w, "", Wardrobe.farm_appearance())
 	player.position = at; player.rotation = rot
 	add_child(player)
 

@@ -627,6 +627,14 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 	var bare := outfit == "bare"
 	var oi: int = OUTFIT_KEYS.find(outfit) if not outfit in ["", "bare", "plain"] else int(lk["outfit"])
 	if oi < 0: oi = 3
+	# each archetype can have its own colourway (picked at the farm's wardrobe): colour only, the
+	# archetype's shapes never change
+	var acs = appearance.get("arch_cols", {})
+	if outfit in ["", "plain"] and typeof(acs) == TYPE_DICTIONARY and acs.has(arch):
+		oi = clampi(int(acs[arch]), 0, OUTFIT_COLS.size() - 1)
+	# on the farm (and in social spaces) the wardrobe's dress-up takes the archetype gear's place
+	var farm: bool = bool(appearance.get("farm_on", false))
+	var farm_look: Dictionary = appearance.get("farm", {}) if typeof(appearance.get("farm")) == TYPE_DICTIONARY else {}
 	var hero_col: Color = OUTFIT_COLS[oi]
 	# the outfit is the gear's colourway: a saturated coat, a pale shirt, dark trousers, team colour
 	# on the strongest shapes (hood, cape, crest, pauldron tops, shield), gold on the edges
@@ -726,7 +734,7 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 	_face(torso, int(lk["face"]), gender, m_dark, m_skin, skin_c, int(lk["detail"]), hair_c, team_col)
 	# what the archetype wears on its head decides how much hair shows (a hat: all but the crown; a
 	# hood or helm: only what spills out below)
-	var cov := HeroGear.cover(arch, bare)
+	var cov := HeroGear.cover(arch, bare) if not farm else Wardrobe.cover(farm_look)
 	var hair_n := Node3D.new(); hair_n.name = "Hair"; torso.add_child(hair_n)
 	if rid == "human":
 		HeroHair.human(hair_n, int(lk["hair"]), fem, m_hair, hk, cov)
@@ -774,7 +782,8 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 		"m": {"body": m_body, "shirt": m_shirt, "pants": m_pants, "leather": m_leather, "skin": m_skin, "hair": m_hair, "dark": m_dark, "acc": m_acc,
 			"gold": m_gold, "gun": m_gun, "hero": m_hero, "trim": m_trim, "steel": m_steel, "glow": m_glow, "glow_soft": m_glow_soft, "bone": m_bone,
 			"wood": m_wood, "fur": m_fur, "feather": m_feather, "cloak": m_cloak, "hat": m_hat}}
-	HeroGear.dress(arch, ctx)
+	if farm: Wardrobe.dress(ctx, farm_look)
+	else: HeroGear.dress(arch, ctx)
 	gun_parts(gun, weapon, m_gun, m_dark, m_acc)
 	gun.scale = Vector3.ONE * float(CLASS_LOOK.get(cls, {}).get("weapon", 1.0))     # heavies carry big guns
 	if not gun.has_node("Mag"):
@@ -869,6 +878,7 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 	root.set_meta("race", rid)
 	root.set_meta("cls", cls)
 	root.set_meta("arch", arch)
+	root.set_meta("farm", farm)
 	root.set_meta("wid", weapon)
 	HunterAnim.rest_pose(root)       # hands on the weapon even where nothing animates it (portraits, galleries)
 	var rs := float(race["scale"])

@@ -200,6 +200,8 @@ func _reserve() -> void:
 		rs.call(int(sg.x) - 1, int(sg.y) - 1, int(sg.x) + 1, int(sg.y) + 1)
 	for t in h.training_reserved():
 		rs.call(t[0], t[1], t[2], t[3])
+	var wa := HomeWardrobe.AT
+	rs.call(int(wa.x) - 1, int(wa.z), int(wa.x) + 1, int(wa.z) + 1)      # the wardrobe and the spot in front of it
 
 func _apply_theme() -> void:
 	var t: Dictionary = HomeLayout.THEMES.get(String(L().get("theme", "meadow")), HomeLayout.THEMES["meadow"])
@@ -678,6 +680,7 @@ func _targets(skip_b := "") -> Array:
 		var sg: Vector2 = Data.ISLES[k]["sign"]
 		out.append(Vector3(sg.x, 0, sg.y))
 	for t in h.training_targets(): out.append(t)
+	if h.hwd and h.visit.is_empty(): out.append(h.hwd.spot())
 	return out
 
 func _hit(seen: PackedByteArray, p: Vector3) -> bool:

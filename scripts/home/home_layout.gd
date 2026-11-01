@@ -242,6 +242,7 @@ static func make_world(world: World, level: int, seed := 0) -> void:
 		defs.append([k, Data.ISLES[k]["c"], Data.ISLES[k]["r"]])
 	defs.append_array(HomeTraining.defs())      # the Training Grounds, which every home has
 	world.make_islands(SEED, W, H, defs)
+	HomeParkour.carve(world)                    # ... and the parkour course off its east side
 	grow_main(world, level, seed)
 
 ## The meadow's outline. seed 0 is the classic island; any other seed gives its own shape: the

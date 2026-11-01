@@ -52,7 +52,7 @@ func _ready() -> void:
 		_build_hub()
 		Sfx.play_music("hub")
 	Sfx.play_ambience("home")
-	player = Models.hunter(Data.class_of_save(), Data.TEAM_COLORS[0], Data.weapon_for(Data.class_of_save(), String(Save.d.get("weapon", ""))), "", Save.d.get("look", {}))
+	player = Models.hunter(Data.class_of_save(), Data.TEAM_COLORS[0], Data.weapon_for(Data.class_of_save(), String(Save.d.get("weapon", ""))), "", Wardrobe.farm_appearance())     # dressed for home (the wardrobe)
 	add_child(player)
 	player.position = ppos
 	for a in OS.get_cmdline_user_args():

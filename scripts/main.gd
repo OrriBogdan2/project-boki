@@ -381,6 +381,12 @@ func _ready() -> void:
 	if "--home-build-check" in args:
 		_home_build_check()
 		return
+	if "--wardrobe-check" in args:
+		load("res://tools/wardrobe_check.gd").new().run(self)      # farm dress-up stays on the farm; matches show the archetype
+		return
+	if "--parkour-check" in args:
+		load("res://tools/parkour_check.gd").new().run(self)      # the Training Grounds' parkour course, every class
+		return
 	for a in args:
 		if a.begins_with("--map-bake="):
 			# tooling: bake the painted map of an authored layout (no world meshes) and save it as a PNG
