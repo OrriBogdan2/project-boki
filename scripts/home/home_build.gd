@@ -63,16 +63,27 @@ func prepare_world() -> void:
 	_apply_wild()
 
 # ------------------------------------------------------------------ a procedural home's wild land
-var wild_t := {}                       # tile index -> "tree" | "rock" | "water": the wild still standing
+var wild_t := {}                       # tile index -> "tree" | "rock" | "water" | "cliff": the wild still standing
+var cliff_t := {}                      # tile index -> true: raised cliff tiles (farm-start islands)
 
 func _seed() -> int:
 	return int(L().get("seed", 0))
+
+func fs() -> bool:
+	return int(L().get("fs", 0)) >= 1
+
+## The wild a seed gives this island, from the farm-start generator or the older procedural one.
+func _wild_of(w: World) -> Dictionary:
+	if fs():
+		return HomeLayout.wild_fs(w, _seed(), float(L().get("sk", 1.0)), _wild_keep())
+	return HomeLayout.wild(w, _seed(), _wild_keep())
 
 func _wild_keep() -> Dictionary:
 	var w: World = h.world
 	var keep := reserved.duplicate()
 	for i in occ: keep[i] = true
 	for b in Data.BUILDINGS:
+		if not HomeLayout.placed(b, h._d()): continue
 		var rc := HomeLayout.rect_of(b, h._d())
 		for c in HomeLayout.cells_of([rc[0] - 1, rc[1] - 1, rc[2] + 1, rc[3] + 3]):
 			if w.inb(c.x, c.y): keep[w.idx(c.x, c.y)] = true
@@ -91,30 +102,49 @@ func _seed_water() -> void:
 		return
 	lay["wild_water"] = true
 	var w: World = h.world
-	var wt := HomeLayout.wild(w, _seed(), _wild_keep())
+	var wt := _wild_of(w)
 	for i in wt:
 		if wt[i] == "water": lay["water"][HomeLayout.key(i % w.w, i / w.w)] = 1
 
 func _apply_wild() -> void:
+	var w: World = h.world
+	# the wild standing from before goes back to open ground first, so it's worked out afresh
+	# (otherwise the generator would see its own trees as blocked and leave them out)
+	for i in wild_t:
+		if wild_t[i] != "water" and w.kind[i] == World.T_BLOCK and not blocked.has(i):
+			w.kind[i] = World.T_GROUND
+			w.props.erase(i)
 	wild_t.clear()
 	if _seed() == 0:
 		return
-	var w: World = h.world
 	var cl: Dictionary = L().get("cleared", {})
-	var wt := HomeLayout.wild(w, _seed(), _wild_keep())
+	for i in cliff_t:
+		# cliffs from before: level ground again until they're laid back down below
+		w.level[i] = 0
+		w.no_deco.erase(i)
+	cliff_t.clear()
+	var wt := _wild_of(w)
 	for i in wt:
 		if wt[i] == "water" or cl.has(HomeLayout.key(i % w.w, i / w.w)): continue
 		if w.kind[i] == World.T_GROUND:
 			w.kind[i] = World.T_BLOCK
 			w.props[i] = wt[i]
 			wild_t[i] = wt[i]
+			if wt[i] == "cliff":
+				# a ridge of bare rock: raised ground, nothing growing on it
+				w.level[i] = 2
+				w.no_deco[i] = true
+				cliff_t[i] = true
 	# nothing may be shut in: open the wild (and any generated water) round every pocket
 	var lay := L()
 	for k in lay["water"]:
 		var c := HomeLayout.unkey(k)
 		if w.inb(c.x, c.y): wild_t[w.idx(c.x, c.y)] = "water"
 	var dp: Vector3 = h._house_door()
-	var left := HomeLayout.open_up(w, Vector2i(int(floor(dp.x)), int(floor(dp.z))), wild_t)
+	var left := HomeLayout.open_up_fs(w, Vector2i(int(floor(dp.x)), int(floor(dp.z))), wild_t) if fs() else HomeLayout.open_up(w, Vector2i(int(floor(dp.x)), int(floor(dp.z))), wild_t)
+	for i in cliff_t.keys():
+		if not left.has(i):
+			w.no_deco.erase(i); cliff_t.erase(i)
 	for k in (lay["water"] as Dictionary).keys():
 		var c := HomeLayout.unkey(k)
 		if w.inb(c.x, c.y) and not left.has(w.idx(c.x, c.y)):
@@ -126,16 +156,59 @@ func _apply_wild() -> void:
 	for i in w.props.keys():
 		if w.kind[i] != World.T_BLOCK: w.props.erase(i)
 
-func clear_wild(t: Vector2i) -> bool:
+## Takes a wild tree or boulder out (cliffs stay). regrow: seconds until it grows back (chopped and
+## mined wild does; land cleared with the Clear the wild brush stays clear).
+func clear_wild(t: Vector2i, regrow := 0.0) -> bool:
 	var w: World = h.world
 	if not w.inb(t.x, t.y): return false
 	var i := w.idx(t.x, t.y)
-	if not wild_t.has(i): return false
+	if not wild_t.has(i) or wild_t[i] == "cliff": return false
+	var what := String(wild_t[i])
 	wild_t.erase(i)
 	w.props.erase(i)
 	w.kind[i] = World.T_GROUND
-	L()["cleared"][HomeLayout.key(t.x, t.y)] = 1
+	var k := HomeLayout.key(t.x, t.y)
+	L()["cleared"][k] = 1
+	if regrow > 0.0:
+		L()["regrow"][k] = {"t": int(Time.get_unix_time_from_system() + regrow), "w": what}
+	else:
+		L()["regrow"].erase(k)
 	return true
+
+## Chopped trees and mined boulders whose time has come grow back, if nothing's been put there and
+## nobody's standing on the spot. Returns how many did.
+func regrow_due(now := -1.0) -> int:
+	if now < 0.0: now = Time.get_unix_time_from_system()
+	var lay := L()
+	var rg: Dictionary = lay.get("regrow", {})
+	var w: World = h.world
+	var n := 0
+	for k in rg.keys():
+		var ent = rg[k]
+		if typeof(ent) != TYPE_DICTIONARY or float(ent.get("t", 0.0)) > now: continue
+		var c := HomeLayout.unkey(k)
+		if not w.inb(c.x, c.y): rg.erase(k); continue
+		var i := w.idx(c.x, c.y)
+		var p := Vector3(c.x + 0.5, 0, c.y + 0.5)
+		if Vector2(h.ppos.x - p.x, h.ppos.z - p.z).length() < 1.4 or h.kins.any(func(o): return Vector2(o["pos"].x - p.x, o["pos"].z - p.z).length() < 1.2):
+			continue        # someone's standing there: try again later
+		rg.erase(k)
+		if occ.has(i) or reserved.has(i) or w.kind[i] != World.T_GROUND or w.paint.has(i):
+			continue        # you've put something there: it stays yours
+		lay["cleared"].erase(k)
+		w.kind[i] = World.T_BLOCK
+		w.props[i] = String(ent.get("w", "tree"))
+		wild_t[i] = String(ent.get("w", "tree"))
+		n += 1
+	if n > 0:
+		# nothing may be shut in by what grew back
+		var dp: Vector3 = h._house_door()
+		wild_t = HomeLayout.open_up_fs(w, Vector2i(int(floor(dp.x)), int(floor(dp.z))), wild_t) if fs() else HomeLayout.open_up(w, Vector2i(int(floor(dp.x)), int(floor(dp.z))), wild_t)
+		mesh_t = 0.2
+		ver += 1
+		_reach_cache.clear()
+		refresh_grid()
+	return n
 
 ## The usability rules a home must pass: plenty of open ground on the main island, every bit of it
 ## reachable from the house, and every place the island needs (doors, portal, farm...) reachable.
@@ -181,6 +254,19 @@ func _reserve() -> void:
 		for z in range(z0, z1 + 1):
 			for x in range(x0, x1 + 1):
 				if w.inb(x, z): reserved[w.idx(x, z)] = true
+	if fs():
+		# a farm-start island keeps only the way in clear: the portal, its rack and ferry, and the
+		# landing where you arrive; the rest is yours to lay out
+		rs.call(36, 37, 40, 41)      # the portal and its sign
+		rs.call(33, 39, 35, 41)      # the glider rack
+		rs.call(41, 40, 43, 41)      # the ferry
+		rs.call(int(HomeLayout.LANDING.x) - 2, int(HomeLayout.LANDING.z) - 2, int(HomeLayout.LANDING.x) + 1, int(HomeLayout.LANDING.z) + 1)
+		for k in Data.ISLES:
+			var sg: Vector2 = Data.ISLES[k]["sign"]
+			rs.call(int(sg.x) - 1, int(sg.y) - 1, int(sg.x) + 1, int(sg.y) + 1)
+		for t in h.training_reserved():
+			rs.call(t[0], t[1], t[2], t[3])
+		return
 	rs.call(35, 24, 41, 29)      # the house and its door step
 	rs.call(41, 26, 43, 28)      # the cooking pot
 	rs.call(28, 31, 32, 34)      # the market stall
@@ -247,6 +333,7 @@ func _apply_blockers() -> void:
 				w.no_deco[i] = true
 				blocked[i] = true
 	for b in Data.BUILDINGS:
+		if not HomeLayout.placed(b, h._d()): continue      # a farm-start lot you haven't put down yet
 		var built: bool = h._has_b(b)
 		for c in HomeLayout.cells_of(HomeLayout.rect_of(b, h._d())):
 			mark.call(c, "b:" + b, built)
@@ -291,11 +378,16 @@ func apply(ground := false) -> void:
 	ver += 1
 	_reach_cache.clear()
 	refresh_grid()
+	if h.has_method("_sync_fixtures"): h._sync_fixtures()
 	h.unstick()
 	assign_beds()
 
 func _sync_buildings() -> void:
 	for b in h.lots:
+		if not HomeLayout.placed(b, h._d()):
+			(h.lots[b]["node"] as Node3D).visible = false
+			h.lots[b]["at"] = h.FAR; h.lots[b]["door"] = h.FAR
+			continue
 		var p := HomeLayout.place_of(b, h._d())
 		var rc := HomeLayout.rect_of(b, h._d())
 		var l: Dictionary = h.lots[b]
@@ -319,6 +411,8 @@ func make_deco(e: Dictionary) -> Node3D:
 	var n: Node3D = null
 	if HomeLayout.CATALOG.get(id, {}).has("work"):
 		n = WorkModels.station(id, e, rng)       # a work station (scripts/home/work_models.gd)
+	if HomeLayout.CATALOG.get(id, {}).has("fixture"):
+		return WorkModels.fixture(id, e, rng)     # the house, crop patch, pot... (farm-start islands)
 	if Flora.on() and id in ["bush", "tree", "pine", "blossom_tree"]:
 		# the same sculpted trees and bushes as the expedition islands (see Flora)
 		var v := rng.randi_range(0, Flora.VARIANTS - 1)
@@ -627,7 +721,8 @@ func cell_reason(c: Vector2i, self_tag := "") -> String:
 	if o != "" and o != self_tag:
 		return "Something's already there"
 	if wild_t.has(i):
-		return "Wild land: clear it first (Island tab, Clear the wild)"
+		if wild_t[i] == "cliff": return "That's a cliff"
+		return "Wild land: chop it with an axe or pickaxe, or clear it (Island tab)" if fs() else "Wild land: clear it first (Island tab, Clear the wild)"
 	if w.kind[i] == World.T_BLOCK and not (blocked.has(i) and o == self_tag):
 		return "Something's in the way"
 	if reserved.has(i) or _near_feeder(c) or _near_plot(c):
@@ -668,9 +763,10 @@ func _targets(skip_b := "") -> Array:
 	for nm in ["portal", "pot", "stall", "rack", "ferry"]:
 		if h.spots.has(nm): out.append(h.spots[nm])
 	out.append(h.NEST_AT); out.append(h.INCUB_AT); out.append(h.YARD_AT); out.append(h.POND_EDGE)
-	out.append(HomeEcon.GATE_AT)
+	out.append(h.hecon.gate_pos() if h.hecon else HomeEcon.GATE_AT)
+	if h.spots.has("house") and h.spots["house"].x > -100.0: out.append(h._house_door())
 	for b in h.lots:
-		if b != skip_b: out.append(h.lots[b]["door"] if h.lots[b]["built"] else h.lots[b]["at"])
+		if b != skip_b and HomeLayout.placed(b, h._d()): out.append(h.lots[b]["door"] if h.lots[b]["built"] else h.lots[b]["at"])
 	for p in h.plots + h.gh_plots: out.append((p as Node3D).position)
 	if h.visit.is_empty():
 		for f in Econ.feeders(): out.append(Vector3(float(f.get("x", 0.0)), 0, float(f.get("z", 0.0))))
@@ -731,6 +827,19 @@ func fits(item: Dictionary, at: Array) -> bool:
 			return false
 	var solid: bool = item.get("kind", "") == "b" and h._has_b(String(item["id"])) or (item.get("kind", "") == "deco" and HomeLayout.blocks(String(item["id"])))
 	var door := Vector3.INF
+	if item.get("kind", "") == "deco" and HomeLayout.CATALOG.get(String(item["id"]), {}).get("door", false):
+		# the house: its door step has to be open ground you can get to
+		door = HomeLayout.fixture_door({"id": item["id"], "x": at[0].x, "z": at[0].y, "r": int(item.get("r", 0))})
+		var dt0 := Vector2i(int(floor(door.x)), int(floor(door.z)))
+		var w0: World = h.world
+		var d_ok := w0.inb(dt0.x, dt0.y)
+		if d_ok:
+			var di0 := w0.idx(dt0.x, dt0.y)
+			d_ok = (w0.kind[di0] == World.T_GROUND or String(occ.get(di0, "")) == tag) and not (at as Array).has(dt0) \
+				and (not occ.has(di0) or String(occ[di0]) == tag) and not wild_t.has(di0) and _isle_ok(di0)
+		if not d_ok:
+			why = "Its door would face something"
+			return false
 	if item.get("kind", "") == "b":
 		door = HomeLayout.door_at(skip_b, at[0].x, at[0].y, int(item["r"]))
 		var dt := Vector2i(int(floor(door.x)), int(floor(door.z)))
@@ -861,6 +970,10 @@ func toggle() -> void:
 func take(id: String) -> void:
 	_drop_held()
 	var c: Dictionary = HomeLayout.CATALOG[id]
+	var mx := HomeLayout.max_of(id, h._d())
+	if mx > 0 and int(L()["inv"].get(id, 0)) == 0 and HomeLayout.count_of(id, h._d()) >= mx:
+		h._toast(_max_text(id, mx))
+		return
 	var g := cost_of(id, 1)
 	if not c.has("brush") and not c.has("line") and int(g[2]) == 0 and not _can_pay(int(g[0]), int(g[1]), int(g[3]), int(g[4])):
 		h._toast("Not enough %s" % _short(int(g[0]), int(g[1]), int(g[3]), int(g[4])))
@@ -868,6 +981,11 @@ func take(id: String) -> void:
 	held = {"kind": "deco", "id": id, "r": 0, "from": -1}
 	_make_ghost()
 	_build_bar()
+
+func _max_text(id: String, mx: int) -> String:
+	if id == "crop_patch":
+		return "Every plot has a patch already: buy more plots at the market first"
+	return "You already have %s" % ("a %s" % String(HomeLayout.CATALOG[id]["name"]).to_lower() if mx == 1 else "%d of those" % mx)
 
 func take_building(b: String) -> void:
 	_drop_held()
@@ -1001,7 +1119,7 @@ func _brush_ok(c: Vector2i, mode: String) -> bool:
 	if not w.inb(c.x, c.y): return false
 	var i := w.idx(c.x, c.y)
 	if mode == "wild":
-		return wild_t.has(i)
+		return wild_t.has(i) and wild_t[i] != "cliff"
 	if w.kind[i] == World.T_VOID or w.bridge.has(i) or not _isle_ok(i) or reserved.has(i):
 		return false
 	var o := String(occ.get(i, ""))
@@ -1311,11 +1429,12 @@ func place_held() -> bool:
 		return _place_feeder()
 	if held["kind"] == "b":
 		_snap()
+		var was := HomeLayout.placed(id, h._d())
 		lay["b"][id] = {"x": cells[0].x, "z": cells[0].y, "r": int(held["r"])}
 		held = {}
 		_clear_ghost()
 		apply(false)
-		_done(HomeLayout.rect_center(HomeLayout.rect_of(id, h._d())), "%s moved" % Data.BUILDINGS[id]["name"])
+		_done(HomeLayout.rect_center(HomeLayout.rect_of(id, h._d())), ("%s moved" if was else ("%s put up" if h._has_b(id) else "%s lot marked out: walk up to it to build")) % Data.BUILDINGS[id]["name"])
 		return true
 	var c: Dictionary = HomeLayout.CATALOG[id]
 	if c.has("brush"):
@@ -1563,9 +1682,27 @@ func _tab_items() -> Array:
 					if nf <= 0: continue
 					var kk: String = kind
 					out.append({"t": "%s\n×%d to set down" % [Econ.FEEDERS[kind]["name"], nf], "cb": func(): take_feeder(kk), "on": held.get("kind", "") == "feeder" and String(held.get("from", "x")) == "" and String(held.get("id", "")) == kind})
+			if fs():
+				# a farm-start island's own things: the house and the essentials first
+				for id in HomeLayout.CATALOG:
+					var fc: Dictionary = HomeLayout.CATALOG[id]
+					if String(fc["cat"]) != "Buildings": continue
+					var iid: String = id
+					var pc := cost_of(id, 1)
+					var mx := HomeLayout.max_of(id, h._d())
+					var full: bool = mx > 0 and int(lay["inv"].get(id, 0)) == 0 and HomeLayout.count_of(id, h._d()) >= mx
+					out.append({"t": "%s\n%s" % [fc["name"], ("built" if mx == 1 else "all placed") if full else price_text(id)], "cb": func(): take(iid),
+						"on": held.get("kind", "") == "deco" and String(held.get("id", "")) == id and int(held.get("from", -1)) < 0,
+						"off": full or (int(pc[2]) == 0 and not _can_pay(int(pc[0]), int(pc[1]), int(pc[3]), int(pc[4]))),
+						"tip": (_max_text(id, mx) + ". " if full else "") + String(fc.get("desc", ""))})
 			for b in h.lots:
 				var bb: String = b
 				var nm: String = Data.BUILDINGS[b]["name"]
+				if not HomeLayout.placed(b, h._d()):
+					var cost := "free" if bool(Data.BUILDINGS[b].get("free", false)) or h._has_b(b) else "%d gems" % int(Data.BUILDINGS[b]["cost"])
+					out.append({"t": "%s\n%s" % [nm, "Place it" if h._has_b(b) else "Mark a lot · %s" % cost], "cb": func(): take_building(bb),
+						"on": held.get("kind", "") == "b" and String(held.get("id", "")) == b, "tip": String(Data.BUILDINGS[b]["desc"])})
+					continue
 				var isl: int = h.world.island_of(h.lots[b]["at"].x, h.lots[b]["at"].z)
 				var open: bool = isl >= 0 and _isle_ok(h.world.idx(int(floor(h.lots[b]["at"].x)), int(floor(h.lots[b]["at"].z))))
 				out.append({"t": "%s\n%s" % [nm, "Move" if h._has_b(b) else "Move the lot"], "cb": func(): take_building(bb), "off": not open,
