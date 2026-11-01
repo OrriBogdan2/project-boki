@@ -191,6 +191,10 @@ func tick(dt: float) -> void:
 		lb.text = "DPS %d   ·   last %d\ntotal %d" % [int(round(dps)), int(round(float(dm["last"]))), int(round(float(dm["total"])))] if float(dm["total"]) > 0.0 else {"still": "DUMMY", "strafe": "STRAFER", "heavy": "HEAVY  ·  slam me into the pillar"}[dm["kind"]]
 	while not hits_all.is_empty() and m.time - float(hits_all[0][0]) > 6.0:
 		hits_all.pop_front()
+	# the sparring bot and you always see each other (the view cone never hides a sparring partner)
+	if bot and is_instance_valid(bot):
+		bot.reveal_t = maxf(bot.reveal_t, 0.3)
+		P.reveal_t = maxf(P.reveal_t, 0.3)
 	# the sparring bot: back up after a beat
 	if bot and is_instance_valid(bot) and bot.downed:
 		if bot_down_t < 0.0: bot_down_t = 1.5

@@ -74,7 +74,7 @@ static func tick(A: Arena, dt: float) -> void:
 				P.inp["fire"] = false
 				if (P.ak as JuggernautKit).enraged_t <= 0.0: (P.ak as JuggernautKit).gain_rage(100.0)
 			if _at(t, dt, 1.55): P.ak.ch_rmb = 1.0; P.inp["sec_hold"] = false; P.ak.press_rmb()
-			at_t = 1.5 if "--before-smash" in OS.get_cmdline_user_args() else 1.62
+			at_t = 1.28 if "--before-smash" in OS.get_cmdline_user_args() else 1.58
 		"ult":
 			if t < 0.05:
 				if P.arch != "juggernaut": A.set_arch("juggernaut")
