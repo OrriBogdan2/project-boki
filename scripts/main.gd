@@ -339,6 +339,11 @@ func _ready() -> void:
 		set_meta("title_check", ttc)
 		ttc.run(self)
 		return
+	if "--hatch-check" in args:
+		var htc = load("res://tools/hatch_check.gd").new()      # the hatch: a quiet, personal moment
+		set_meta("hatch_check", htc)
+		htc.run(self)
+		return
 	if "--economy-check" in args:
 		_economy_check()
 		return
