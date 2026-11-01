@@ -126,12 +126,21 @@ func _follow() -> void:
 	k.throw_to(P.pos + Vector3(5, 0, 0))
 	for i in 60: m.step(Match.DT)
 	var was := k.state
+	var spot: Vector3 = k.hold_at
+	# (owner) thrown out with nothing to fight: it holds the spot while you're near, it doesn't run back
+	for i in 120:
+		for mb in m.mobs: mb.dead = true; mb.visible = false
+		m.step(Match.DT)
+	var held := spot != Vector3.INF and k.state == "active" and Vector2(k.pos.x - spot.x, k.pos.z - spot.z).length() < 1.6
+	ok(was == "active" and held, "thrown out, it holds that spot while you stay near (%s, %.1fm from the spot)" % [k.state, Vector2(k.pos.x - spot.x, k.pos.z - spot.z).length() if spot != Vector3.INF else 99.0])
+	# ...and comes back once you walk out of its leash range
 	var far := [0.0]      # (an Array: a lambda captures plain locals by value)
-	_walk(P, Vector2(0, -1), 3.0, func():
-		# (the training area keeps spawning practice dummies round you: keep them away for this part)
+	_walk(P, Vector2(0, -1), 5.0, func():
 		for mb in m.mobs: mb.dead = true; mb.visible = false
 		if k.state == "active": far[0] = maxf(far[0], k.flat_dist(P)))
-	ok(was == "active" and (k.state == "active" and k.flat_dist(P) < 2.6 or k.state == "shoulder"), "out on the field it walks back to your side (%s, %.1fm, max %.1fm)" % [k.state, k.flat_dist(P), far[0]])
+	_walk(P, Vector2(0, -1), 1.5, func():
+		for mb in m.mobs: mb.dead = true; mb.visible = false)
+	ok(k.state == "shoulder" or (k.state == "active" and k.flat_dist(P) < 3.0) or k.state in ["returning", "flying_home"], "you walk out of range: it comes back to your side (%s, %.1fm)" % [k.state, k.flat_dist(P)])
 	# a threat close by: it stands between you and it
 	var T: Hunter = m.make_hunter("T", 5, "medium", "Rival", "idle", {}, P.pos + Vector3(6, 0, 0))
 	T.max_hp = 1e5; T.hp = 1e5
