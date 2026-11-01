@@ -507,6 +507,7 @@ func _cry() -> AudioStreamWAV:
 	var base := lerpf(300.0, 820.0, rng.randf())
 	var spd := float(sp.get("speed", 6.5))
 	base *= clampf(spd / 6.5, 0.75, 1.3)
+	base *= Unique.voice(rec)       # its own voice, a little higher or deeper than its kind's
 	var dur := 0.62
 	var buf := PackedFloat32Array(); buf.resize(int(dur * RATE))
 	var syl := [[0.0, 0.2, 1.0, 1.45], [0.25, 0.34, 1.3, 0.9]]   # start, length, pitch from, pitch to
