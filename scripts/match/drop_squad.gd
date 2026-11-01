@@ -107,6 +107,8 @@ func _bot_plan_ping(h: Hunter) -> void:
 			var bd := 60.0
 			for c in m.spawn_plan.active_of("vault"):
 				var d := Vector2((c["pos"] as Vector3).x - at.x, (c["pos"] as Vector3).z - at.z).length()
+				if Bot.crowd_at(m, h, c["pos"], 25.0) > 0:
+					continue      # (another squad is already going there: no pile-up on the vault)
 				if d < bd: bd = d; at = c["pos"]
 	else:
 		var lp := _ping_of(leader(h.team))

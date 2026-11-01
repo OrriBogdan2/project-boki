@@ -176,6 +176,19 @@ func load_kit() -> void:
 	if kd and kd.merge != "":
 		var ud := KinLib.merge(kd.merge)
 		kit["ultimate"] = {"name": ud.display_name if ud else "Ultimate", "cd": 20.0, "color": Color("ff9ac8"), "effects": [{"type": "area", "dmg": 40.0, "r": 4.0}]}
+	# your archetype's kit names: right click, E and R are the archetype's now (the yard still plays
+	# rough stand-ins for them); the bar used to name the old weapon/kin kit (RMB Slam, E Hook...)
+	var arch := Arch.of_save()
+	if arch != "" and try.get("cls", "") == "":
+		var ad: Dictionary = Arch.def(arch)
+		for sp2 in [["secondary", "rmb"], ["signature", "e"], ["ultimate", "r"]]:
+			var sd: Dictionary = ad.get(sp2[1], {})
+			if sd.is_empty(): continue
+			if not kit.has(sp2[0]):
+				kit[sp2[0]] = {"cd": float(sd.get("cooldown", 8.0)), "effects": [{"type": "area", "dmg": 20.0, "r": 3.0}]}
+			kit[sp2[0]]["name"] = String(sd.get("short", sd.get("name", "")))
+			kit[sp2[0]]["color"] = Color(String(sd.get("col", "#ffffff")))
+			kit[sp2[0]].erase("kin")
 
 ## A kin ability for the yard: its name, cooldown, category colour, and rough shots or areas with
 ## the damage its parts add up to (the yard's dummies only count damage).

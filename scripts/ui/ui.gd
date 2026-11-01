@@ -922,7 +922,10 @@ static func paged(content: VBoxContainer, margin: float, key: String, head: Cont
 		_live[key] = int(_live.get(key, 0)) + 1
 		state["t0"] = Time.get_ticks_msec()
 		refit.call()
-		wrap.get_tree().create_timer(0.35).timeout.connect(func(): if is_instance_valid(wrap): refit.call())
+		# (by instance id: a lambda that captured the wrapper itself errors when it's freed first,
+		# "Lambda capture at index 0 was freed", e.g. a menu closed within the 0.35 s)
+		var wid := wrap.get_instance_id()
+		wrap.get_tree().create_timer(0.35).timeout.connect(func(): if is_instance_id_valid(wid): refit.call())
 		var vpt := wrap.get_viewport()
 		if vpt and not vpt.size_changed.is_connected(refit): vpt.size_changed.connect(refit))
 	wrap.tree_exiting.connect(func():

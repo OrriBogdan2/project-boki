@@ -1066,6 +1066,7 @@ func _update_ship(dt: float) -> void:
 
 func on_drop_landed(h: Hunter) -> void:
 	h.inv_t = maxf(h.inv_t, 2.0)     # a moment to get your bearings after landing
+	h.set_meta("landed_t", time)     # bots leave a fresh lander be for a while (Bot.fresh)
 	if world.is_block(h.pos.x, h.pos.z):
 		var best := h.pos; var bd := 1e9
 		for dz in range(-2, 3):
@@ -6184,10 +6185,15 @@ func _tips() -> void:
 		return
 	_tip("move", "WASD to move, aim with the mouse, hold left click to shoot. Shift dashes, Space jumps. Hold Space in the air to glide.")
 	if _tip_t > 14.0:
-		_tip("ability", "%s is your Boki's ability. Fighting together fills the bond meter, and %s calls your Boki's bond ultimate." % [Settings.key_cap("signature"), Settings.key_cap("ultimate")])
+		if player.ak:
+			_tip("ability", "%s is your Boki's ability: it hops out, casts and hops back. %s and %s are your archetype's; fighting together fills the bond meter, and a full one makes your %s bonded." % [Settings.key_cap("kin_ability"), Settings.key_cap("signature"), Settings.key_cap("ultimate"), Settings.key_cap("ultimate")])
+		else:
+			_tip("ability", "%s is your Boki's ability. Fighting together fills the bond meter, and %s calls your Boki's bond ultimate." % [Settings.key_cap("signature"), Settings.key_cap("ultimate")])
 	if player.ult >= 1.0 and player.kin:
 		var ud := KinMerge.def_for(player.kin)
-		if ud: _tip("ult", "Your bond is full. %s merges you with your Boki: %s." % [Settings.key_cap("ultimate"), ud.display_name])
+		if ud and player.ak == null: _tip("ult", "Your bond is full. %s merges you with your Boki: %s." % [Settings.key_cap("ultimate"), ud.display_name])
+		elif ud and int(player.slot_lv.get("ult", 0)) > 0:
+			_tip("ult", "Your bond is full: your next %s is bonded, and merges you with your Boki (%s) as it goes off." % [Settings.key_cap("ultimate"), ud.display_name])
 	var k: Kin = player.kin
 	if k == null:
 		return
@@ -6201,7 +6207,7 @@ func _tips() -> void:
 	if k.state == "active":
 		var a1 := k.runner.def_of("k1")
 		var a2 := k.runner.def_of("k2")
-		_tip("skill", "%s uses %s's %s. Stun or root a foe with your Boki, then shoot it for a combo. %s throws it, and again calls it back to your shoulder." % [Settings.key_cap("signature"), k.rec.get("name", "your Boki"), a1.display_name if a1 else "ability", Settings.key_cap("throw")])
+		_tip("skill", "%s uses %s's %s. Stun or root a foe with your Boki, then shoot it for a combo. %s throws it, and again calls it back to your shoulder." % [Settings.key_cap("kin_ability" if player.ak else "signature"), k.rec.get("name", "your Boki"), a1.display_name if a1 else "ability", Settings.key_cap("throw")])
 	if not interact.is_empty() and interact["kind"] == "catch":
 		_tip("catch", "Hold " + Settings.key_cap("interact") + " to tame it. A Boki you tame only comes home if you extract.")
 	if exits and not interact.is_empty() and interact["kind"] == "exit":

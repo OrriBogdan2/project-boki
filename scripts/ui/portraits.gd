@@ -53,8 +53,8 @@ static func make(cls: String, team_col: Color, wid: String, look: Dictionary) ->
 
 ## A desaturated, darkened copy of a rendered portrait (null until the portrait has been drawn).
 static func grey(tex: Texture2D) -> ImageTexture:
-	if tex == null:
-		return null
+	if tex == null or DisplayServer.get_name() == "headless":
+		return null       # (headless checks: the dummy renderer has no pixels and errors "Parameter t is null")
 	var img := tex.get_image()
 	if img == null or img.is_empty():
 		return null
