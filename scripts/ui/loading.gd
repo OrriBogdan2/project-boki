@@ -19,7 +19,7 @@ const TIPS := [
 	"Jump at a wall in the air to kick off it. Light hunters get two kicks.",
 	"Crates and barrels break when you shoot or dash through them. Some hide a better weapon.",
 	"Weapons you find out here are stronger than your own, but only for this expedition.",
-	"Health and armor don't come back on their own. 1 heals: a tonic when you're hurt, an armor kit when your health is full. You take more damage while you do either.",
+	"Health and armor don't come back on their own. 1 drinks a tonic, 2 repairs your armor with a kit. You take more damage while you do either.",
 	"Fight alongside your Boki to fill the bond meter, then R calls its bond ultimate.",
 	"E is your Boki's ability, and every Boki has a different one. Q fires the active glove you found out here.",
 	"Your Boki stuns or roots a foe? Shoot it right away for a combo.",
@@ -33,6 +33,9 @@ const TIPS := [
 	"A teammate is down? Stand on their wisp to bring them back. Stand on an enemy's to stomp it, or hold F to finish them.",
 	"Dash through a shot at the last moment and you take nothing.",
 	"Shrines on the islands give a short power-up. Stand by one and hold F.",
+	"The Blight hunts by noise and light. Gunfire, blasts, opened chests and dashing draw it in; sneaking doesn't.",
+	"A Warden's light sweeps the ground. Stay in it and it shrieks, and the Blight nearby comes running. Crouch to stay out of its reach.",
+	"The Blight starts weak and grows the longer your squad is out, the deeper you go, and at night.",
 ]
 const STAGES := ["Raising the islands", "Waking the monsters", "Hiding the loot", "Fueling the skyship", "Ready"]
 
@@ -47,6 +50,7 @@ var T: Dictionary
 var title := ""
 var sub := ""
 var mode_line := ""
+var raid := ""           # the raid condition this expedition rolled ("" when it doesn't roll one)
 var tip := ""
 var islands: Array = []  # [x (0..1), y (0..1), size, depth, seed]
 var stars: Array = []
@@ -79,6 +83,7 @@ func setup(opts: Dictionary) -> void:
 		var teams := int(opts.get("teams", 6)); var squad := int(opts.get("squad", 1))
 		mode_line = "%s  •  %d squads  •  skyship drop" % [["Solo", "Duos", "Trios"][clampi(squad - 1, 0, 2)], teams]
 		if opts.has("net"): mode_line = "Online  •  " + mode_line
+		raid = RaidLook.pick(opts, int(opts.get("seed", 0)))
 	tip = TIPS[randi() % TIPS.size()]
 	var r := RandomNumberGenerator.new(); r.seed = hash(title) + tier
 	for i in 9:
@@ -168,6 +173,11 @@ func _draw() -> void:
 	_wrap(Vector2(cx, base + 96), sub, 17, minf(620.0, sz.x - 60.0), Color(UI.MUTED, a))
 	if mode_line != "":
 		_text(Vector2(cx, base + 176), mode_line, UI.semi, 15, Color(UI.TEAL, a))
+	if raid != "":
+		# the raid condition, shown before you drop
+		var rc: Color = RaidLook.COLORS.get(raid, UI.INK)
+		_text(Vector2(cx, base + 204), "CONDITIONS  ·  " + String(RaidLook.NAMES.get(raid, raid)).to_upper(), UI.caps, 13, Color(rc, a), 2)
+		_wrap(Vector2(cx, base + 210), String(RaidLook.BLURBS.get(raid, "")), 14, minf(560.0, sz.x - 60.0), Color(UI.MUTED, a * 0.9))
 	# progress
 	var tw_ := minf(660.0, sz.x - 60.0)
 	var lines := UI.body.get_multiline_string_size(tip, HORIZONTAL_ALIGNMENT_CENTER, tw_ - 40.0, 15, 3).y

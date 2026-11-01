@@ -2254,6 +2254,8 @@ static func rare_egg_small(spot: Color, s := 1.0) -> Node3D:
 # ---------------------------------------------------------------- monsters
 static func mob(kind: String) -> Node3D:
 	var md: Dictionary = Data.MOBS[kind]
+	if md.get("blight", false):
+		return BlightModels.build(kind)
 	if md.get("boss", false) or md.get("ward", false):
 		return BossModels.build(kind)
 	if Flora.v2():

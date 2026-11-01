@@ -87,6 +87,14 @@ vis_ally2={
 "type": "vec4",
 "value": Vector4(0, 0, 0, -1)
 }
+vis_ally_range={
+"type": "float",
+"value": 24.0
+}
+vis_dark={
+"type": "float",
+"value": 0.42
+}
 
 [physics]
 common/physics_ticks_per_second=60

@@ -76,7 +76,10 @@ var hitstop := 0.0
 var aim_line: MeshInstance3D
 var aim_ring: MeshInstance3D
 var muzzle_light: OmniLight3D
-var raid := "dusk"                 # the raid condition the match is lit under (RaidLook)
+var raid := "clear"                # the raid condition: rolled per match from the seed (RaidLook)
+var sight_k := 1.0                 # sight range under the raid condition (RaidLook.SIGHT)
+var raid_fx: Node3D = null         # blowing ash / drifting fog that follows the camera (RaidLook.storm_fx)
+var blight: BlightDir = null       # the Blight: its spawns, its scaling and what it hears (BlightDir)
 var music_dir: MusicDir = null     # the layered score's levels (scripts/match/music_dir.gd)
 var collapse_warned := false
 var rng := RandomNumberGenerator.new()
@@ -608,6 +611,10 @@ func _start(o: Dictionary) -> void:
 		spawn_plan.roll(seed_val)
 		spawn_plan.spawn_all()
 	if lairs: lairs.ensure_live()
+	if BlightDir.enabled(opts) and big and world.layout_id != "tutorial":
+		# the Blight: Wardens on the islands from the start, Skitters later (scripts/match/blight_dir.gd)
+		blight = BlightDir.new(self)
+		blight.setup()
 	_trim_shadows(self)
 	for list in [mobs, kins, chests, breaks, shrines, wpicks]:
 		for it in list:
@@ -658,9 +665,19 @@ func _build_env() -> void:
 	add_child(env)
 	var sun := Look.lights(self, T["sun"], 1.0, Vector3(-55, -35, 0), 60.0)
 	sun.shadow_opacity = 0.8
-	# the raid condition: moody dusk by default (scripts/match/raid_look.gd)
-	raid = RaidLook.pick(opts)
+	# the raid condition: rolled from the seed on real expeditions, clear otherwise (scripts/match/raid_look.gd)
+	raid = RaidLook.pick(opts, seed_val)
 	RaidLook.apply(env.environment, sun, get_node_or_null("Fill") as DirectionalLight3D, T, raid)
+	sight_k = float(RaidLook.SIGHT.get(raid, 1.0))
+	RenderingServer.global_shader_parameter_set("vis_dark", float(RaidLook.VIS_DARK.get(raid, 0.42)))
+	RenderingServer.global_shader_parameter_set("vis_ally_range", VIEW_RANGE * sight_k)
+	raid_fx = RaidLook.storm_fx(raid)
+	if raid_fx:
+		add_child(raid_fx)
+
+## How far a hunter sees under this raid condition (crouching shortens it, as before).
+func view_range(crouched := false) -> float:
+	return (14.0 if crouched else VIEW_RANGE) * sight_k
 
 func _build_shot_pool() -> void:
 	var mesh := Models.sphere(0.5, 10)
@@ -1082,6 +1099,7 @@ func on_drop_landed(h: Hunter) -> void:
 	h.squash = 0.4
 	if h == player:
 		shake(0.25, h.pos)
+	if blight: blight.on_landed(h)
 
 ## Perks you carry from home: your workshop, and the projects your guild has finished.
 func _apply_home_perks(h: Hunter) -> void:
@@ -1163,6 +1181,8 @@ func spawn_mob(kk: String, at: Vector3) -> Mob:
 ## Gunfire and explosions you can't see show up on the minimap as sound pings.
 var sound_pings: Array = []    # {pos, t, kind, key}
 func note_sound(by, at: Vector3, kind: String) -> void:
+	if blight:
+		blight.noise(at, kind, by)       # the Blight hunts by noise
 	if player == null or player.out:
 		return
 	if by is Ent and (by as Ent).team == player.team:
@@ -1175,6 +1195,23 @@ func note_sound(by, at: Vector3, kind: String) -> void:
 		if sp["key"] == key and time - float(sp["t"]) < 0.7:
 			return
 	sound_pings.append({"pos": at, "t": time, "kind": kind, "key": key})
+	if sound_pings.size() > 40:
+		sound_pings.pop_front()
+
+## A Warden shrieked: heard across the island, and a warning for whoever's close.
+func on_blight_shriek(b: Mob) -> void:
+	blight_ping(b.pos, "shriek")
+	if player and not player.out and player.flat_dist(b) < 26.0 and hud:
+		var lv: float = (b as Blight).lvl
+		hud.toast("A Warden shrieked  ·  the Blight is coming" if lv >= 0.35 else "A Warden spotted you  ·  get out of its light", Color("ff7a3a"))
+
+## The Blight on the minimap: a mark where you hear something you can't see.
+func blight_ping(at: Vector3, kind := "blight") -> void:
+	if player == null or player.out:
+		return
+	if Vector2(at.x - player.pos.x, at.z - player.pos.z).length() > 40.0:
+		return
+	sound_pings.append({"pos": at, "t": time, "kind": kind, "key": "bl" + str(at.snapped(Vector3(3, 3, 3)))})
 	if sound_pings.size() > 40:
 		sound_pings.pop_front()
 
@@ -1981,6 +2018,7 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 		credit = by.owner_h
 	if target is Hunter and target != credit:
 		(target as Hunter).dmg_taken += d
+		if by is Blight: kstat["bl_dmg"] = float(kstat.get("bl_dmg", 0.0)) + d
 	if credit is Hunter and target != credit:
 		credit.dmg_done += d
 		if o.has("leech") and target.team != credit.team and not credit.remote:
@@ -2038,6 +2076,7 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 	cancel_abilities(h)
 	h.downed = true
 	h.downs += 1
+	if by is Blight: kstat["bl_knock"] = int(kstat.get("bl_knock", 0)) + 1      # (tests: what the Blight did)
 	h.down_hp = Data.MATCH["down_hp"]
 	h.hp = 0.0
 	h.revive = 0.0
@@ -2169,6 +2208,7 @@ func eliminate(h: Hunter, by: Ent, why: String, final := false) -> void:
 	if h.out:
 		return
 	h.deaths += 1
+	if by is Blight: kstat["bl_out"] = int(kstat.get("bl_out", 0)) + 1
 	if h.lives > 1 and not h.remote and not over and not final:
 		_lose_life(h, by, why)
 		return
@@ -2449,7 +2489,11 @@ func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
 			var git := found_weapon(mb.pos, String(keys[randi() % keys.size()]), Data.roll_rarity(rng, 1))
 			spawn_weapon(String(git["wid"]), int(git["rar"]), mb.pos, "", true, -1, git)
 			if credit is Hunter: add_feed("%s caught the Glimmerkin's treasure" % credit.pname)
-		if rng.randf() < (0.35 if mb.mkind == "brute" else 0.12):
+		if mb.mkind == "bl_warden":
+			# a Warden's lamp holds something worth the risk: armor, often a tonic
+			drop("armor", mb.pos + Vector3(0, 0.6, 0), 25)
+			if rng.randf() < 0.4: drop("tonic", mb.pos + Vector3(0.4, 0.6, 0), 1)
+		if rng.randf() < (0.35 if mb.mkind == "brute" else (0.0 if mb is Blight else 0.12)):
 			drop("seed", mb.pos + Vector3(0, 0.6, 0), 1, Data.pick_seed())
 		# a Rift Key: always from the Warden, sometimes from an elite (one that can be staggered, or a rare one)
 		if exits and not exits.list.is_empty() and (mb.mkind == "warden" or ((mb.md.get("stag", false) or mb.rarity >= 3) and mb.mkind != "glimmer" and rng.randf() < 0.06)):
@@ -2777,7 +2821,8 @@ func can_see(team_i: int, target: Hunter) -> bool:
 func sees(team_i: int, p: Vector3, crouched := false, revealed := false) -> bool:
 	var in_grass := world.in_bush(p.x, p.z) or in_smoke(p)
 	var near := 1.6 if crouched else NEAR_SENSE
-	var rng := VIEW_RANGE + 2.0 if revealed else (14.0 if crouched else VIEW_RANGE)
+	# (muzzle flashes and a Warden's light give you away at full range, whatever the raid condition)
+	var rng := VIEW_RANGE + 2.0 if revealed else view_range(crouched)
 	for h in hunters:
 		if h.team != team_i or h.out or h.extracted or h.riding:
 			continue
@@ -2811,7 +2856,7 @@ func _update_vision() -> void:
 	if looking:
 		RenderingServer.global_shader_parameter_set("vis_focus", player.model.global_position if player.model else player.pos)
 		RenderingServer.global_shader_parameter_set("vis_dir", player.aim_dir())
-		RenderingServer.global_shader_parameter_set("vis_range", (14.0 if player.crouch else VIEW_RANGE) * (1.25 if player.crouch else 1.0))
+		RenderingServer.global_shader_parameter_set("vis_range", view_range(player.crouch) * (1.25 if player.crouch else 1.0))
 		# teammates light up what they see too (up to three)
 		var n := 0
 		for h in hunters:
@@ -3436,6 +3481,8 @@ func _process(delta: float) -> void:
 	_render_n += 1
 	var cf := cam.focus
 	var near2 := pow(34.0 * maxf(1.0, cam.zoom), 2.0)
+	if raid_fx:
+		raid_fx.position = Vector3(cf.x, cf.y, cf.z)
 	for e in kins:
 		if _render_now(e, cf, near2):
 			e.render(delta + e.lod_dt, alpha)
@@ -3610,14 +3657,16 @@ func _gather_input() -> void:
 			elif not perk_offer.is_empty() and not _perk_keys_down.has(pi):
 				_perk_keys_down[pi] = true
 				choose_perk(pi)
-	# the kit: Q glove, E kin ability, C throw kin, R bond, 1 heal (the second kin ability, kin swap
-	# and the separate armor-kit key are retired)
+	# the kit: Q glove, E kin ability, C throw kin, R bond, 1 heal, 2 armor kit (the second kin
+	# ability and kin swap are retired)
 	if Input.is_action_just_pressed("base") and not paused and duel == null and not opts.get("arena", false):
 		pending_input["base"] = true
 	var slot_of := {"dash": "dash", "secondary": "sec", "gear1": "gear", "signature": "kin", "ultimate": "ult"}
-	for a in [["dash", "dash"], ["jump", "jump"], ["signature", "sig"], ["reload", "reload"], ["tonic", "tonic"], ["throw", "throw"], ["ultimate", "ult"], ["secondary", "sec"], ["gear1", "gear1"], ["kin_ability", "kin_ab"]]:
-		if a[0] == "tonic" and (not perk_offer.is_empty() or not _perk_keys_down.is_empty()):
+	for a in [["dash", "dash"], ["jump", "jump"], ["signature", "sig"], ["reload", "reload"], ["tonic", "tonic"], ["armor_kit", "kit"], ["throw", "throw"], ["ultimate", "ult"], ["secondary", "sec"], ["gear1", "gear1"], ["kin_ability", "kin_ab"]]:
+		if a[0] in ["tonic", "armor_kit"] and (not perk_offer.is_empty() or not _perk_keys_down.is_empty()):
 			continue       # 1, 2 and 3 pick a perk while a choice is open
+		if a[0] == "armor_kit" and arena != null:
+			continue       # the Arena's 2-7 swap archetypes (and nothing wears out there)
 		if (map_up or on_panel) and a[0] in ["secondary", "throw"]:
 			continue       # right click takes your ping down while the map is up (and casts nothing over a window)
 		if a[0] == "secondary" and aim_hold != "" and aim_hold != "secondary" and Input.is_action_just_pressed("secondary"):
@@ -4035,6 +4084,16 @@ func step(dt: float) -> void:
 		truce.demo()
 	if opts.has("exit_demo") and exits and player and not player.dropping:
 		exits.demo(String(opts["exit_demo"]))
+	if opts.get("raid_demo", false) and hud and not hud.guide_hidden:
+		Settings.v["tips"] = false          # (screenshots of a raid condition: no tutorial cards)
+		hud.guide_hidden = true
+	if "--kit-demo" in OS.get_cmdline_user_args() and player and time > 0.3 and not train.has("_kitdemo"):
+		# screenshots: hurt and with cracked armor, so the tonic (1) and armor kit (2) slots are both lit
+		train["_kitdemo"] = true
+		player.hp = player.max_hp * 0.6
+		player.armor = player.max_armor * 0.25
+	if opts.has("blight_demo") and blight and player and not player.dropping and time > 0.2:
+		blight.demo(String(opts["blight_demo"]))
 	if opts.get("glide_demo", false) and player:
 		if time < 0.05:
 			player.teleport(player.pos + Vector3(0, 6, 0)); player.grounded = false
@@ -4091,6 +4150,7 @@ func step(dt: float) -> void:
 	for k in kins: k.sim(dt)
 	_prof("kins")
 	for mb in mobs: mb.sim(dt)
+	if blight: blight.tick(dt)
 	_prof("mobs")
 	_separate()
 	_collide_breaks()
@@ -4630,6 +4690,7 @@ func _open_chest(h: Hunter, c: Dictionary, from_net := false) -> void:
 	if c["open"]:
 		return
 	c["open"] = true
+	if blight: blight.noise(c["pos"], "chest", h)      # a chest lid is loud
 	if net_on and not from_net:
 		net_event(["chest", chests.find(c), h.nid if h else ""])
 	var t := int(c.get("tier", 0))
@@ -5768,8 +5829,13 @@ func _ser(e: Ent) -> Array:
 			k.owner_h.nid if k.owner_h else "", int(k.rec.get("level", 1)), String(k.rec.get("name", "")), _r(k.catch_prog), _r(k.vel.x), _r(k.vel.z),
 			1 if k.rec.get("shimmer", false) else 0, String(k.rec.get("acc", "")), ",".join(Mutations.of(k.rec))]
 	var mb: Mob = e
-	return ["m", mb.nid, _r(mb.pos.x), _r(mb.pos.y), _r(mb.pos.z), _r(mb.face), _r(mb.hp), _r(mb.max_hp), MOB_STATES.find(mb.st), mb.mkind,
+	var ms := ["m", mb.nid, _r(mb.pos.x), _r(mb.pos.y), _r(mb.pos.z), _r(mb.face), _r(mb.hp), _r(mb.max_hp), MOB_STATES.find(mb.st), mb.mkind,
 		_r(mb.atk_dir.x), _r(mb.atk_dir.y), _r(mb.st_t), _r(mb.vel.x), _r(mb.vel.z), _r(mb.stag_open), _r(mb.stagger_t)]
+	if mb is Blight:
+		# the Blight: where a Warden's light points, how close it is to shrieking, and its strength
+		var bb: Blight = mb
+		ms.append_array([_r(bb.cone_a), _r(bb.spot), _r(bb.lvl), 1 if bb.tgt != null else 0])
+	return ms
 
 ## Snapshot of what this game owns: its player (mine=true), or the host's world (mine=false).
 func net_snapshot(mine: bool) -> Array:
@@ -5849,8 +5915,17 @@ func _net_make(it: Array) -> Ent:
 			_net_seen_rec[nid] = rec
 			return k
 		"m":
-			var mb := Mob.new()
-			mb.init_mob(self, nid, String(it[9]), Vector3(it[2], it[3], it[4]))
+			var mk := String(it[9])
+			if not Data.MOBS.has(mk):
+				return null
+			var mb: Mob
+			if Data.MOBS[mk].get("blight", false):
+				var bl := Blight.new()
+				bl.init_blight(self, nid, mk, Vector3(it[2], it[3], it[4]), float(it[19]) if it.size() > 19 else 0.1, blight)
+				mb = bl
+			else:
+				mb = Mob.new()
+				mb.init_mob(self, nid, mk, Vector3(it[2], it[3], it[4]))
 			add_child(mb)
 			mb.remote = true
 			mobs.append(mb)
@@ -5910,6 +5985,10 @@ func _net_apply(e: Ent, it: Array) -> void:
 			mb.net_vel = Vector3(it[13], 0, it[14])
 			if it.size() > 16:
 				mb.stag_open = float(it[15]); mb.stagger_t = float(it[16])
+			if mb is Blight and it.size() > 20:
+				var bb: Blight = mb
+				bb.cone_a = float(it[17]); bb.spot = float(it[18]); bb.lvl = float(it[19])
+				bb.tgt = player if int(it[20]) == 1 else null     # (only "alerted or not" matters to a proxy's looks)
 
 func _net_hit_in(x) -> void:
 	if typeof(x) != TYPE_ARRAY or x.size() < 12:
@@ -6014,6 +6093,15 @@ func _net_ev(x, from: String) -> void:
 				who.revive += float(x[2])
 				if who.revive >= 1.0:
 					revive_hunter(who, null)
+		"blsh":
+			# a Warden shrieked on the host's game
+			who = ents_by_id.get(String(x[1]), null)
+			if who is Blight and not who.dead:
+				(who as Blight).shriek_fx()
+		"blgone":
+			who = ents_by_id.get(String(x[1]), null)
+			if who is Blight and not who.dead:
+				(who as Blight).burrow()
 		"mobdead":
 			who = ents_by_id.get(String(x[1]), null)
 			if who is Mob and not who.dead:

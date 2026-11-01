@@ -128,6 +128,9 @@ func _ready() -> void:
 		if a == "--map-mid-demo": opts["map_demo"] = "mid"; opts["no_drop"] = true    # the map mid-match, some spawns scouted
 		if a == "--drop-demo": opts["drop_demo"] = "lead"; opts["plan_t"] = 0.6        # the squad gliding in formation behind you
 		if a == "--drop-follow-demo": opts["drop_demo"] = "follow"; opts["plan_t"] = 0.6   # ... behind a squadmate
+		if a.begins_with("--raid-demo="): opts["raid"] = a.substr(12); opts["raid_demo"] = true; opts["no_drop"] = true    # a raid condition's look (RaidLook)
+		if a == "--blight-demo": opts["blight_demo"] = "all"; opts["no_drop"] = true      # a Warden's light and a Skitter pack (BlightDir.demo)
+		if a.begins_with("--blight-demo="): opts["blight_demo"] = a.substr(14); opts["no_drop"] = true
 	if "--check" in args:
 		var CheckT = load("res://tools/check.gd")
 		var bad := 0
@@ -432,6 +435,12 @@ func _ready() -> void:
 	if "--record-check" in args:
 		_record_check()
 		return
+	if "--blight-check" in args:
+		load("res://tools/blight_check.gd").new().run(self)      # the Blight: spawns, scaling, noise, early weakness
+		return
+	if "--raid-check" in args:
+		load("res://tools/raid_check.gd").new().run(self)        # raid conditions, sight, the armor kit key
+		return
 	if "--bot-sanity-check" in args:
 		_bot_sanity()
 		return
@@ -600,7 +609,7 @@ func _ready() -> void:
 		show_screen("prologue", {"then": "title"})    # test: the opening story
 	elif "--creator" in args:
 		show_screen("hatch", {"create": true})    # test: the hunter creator
-	elif "--match" in args:
+	elif "--match" in args or opts.has("raid_demo") or opts.has("blight_demo"):
 		show_screen("match", opts)
 	elif "--duel" in args:
 		show_screen("match", Match.duel_opts())
@@ -670,6 +679,8 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 		fade.reveal_after(3, 0.55)
 	match screen:
 		"match":
+			# the seed is fixed here, so the loading screen can show the raid condition it rolls
+			if not opts.has("seed"): opts["seed"] = randi()
 			# a loading screen covers building the world; tests that screenshot by frame count skip it
 			var ld = null
 			if (not opts.get("autoplay", false) or opts.get("probe", false)) and (not _has_arg("--shot=") or _has_arg("--show-loading")):
@@ -3434,7 +3445,7 @@ func _simtest(opts: Dictionary) -> void:
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--kill-at="): kill_at = float(a.substr(10))
 		if a.begins_with("--sim-until="): until = float(a.substr(12))
-	print("SIMTEST seed ", m.seed_val)
+	print("SIMTEST seed ", m.seed_val, " raid ", m.raid, " blight ", m.blight != null)
 	while not m.over and m.time < m.length + 5.0 and m.time < until:
 		m.step(Match.DT)
 		if kill_at > 0.0 and m.time >= kill_at and m.player and not m.player.out:
@@ -3488,6 +3499,9 @@ func _simtest(opts: Dictionary) -> void:
 	print("SIMSTAT breaks %d/%d weapons left %d rarities %s staggers %d rings %d pads %d" % [nb, m.breaks.size(), m.wpicks.size(), str(wr), m.stag_n, m.ring_n, m.world.pads.size()])
 	print("SIMTEST done in %dms, sim time %d, result %s" % [Time.get_ticks_msec() - t0, m.time, str(m.result)])
 	print("SIMKIN %s lost=%s" % [str(m.kstat), str(m._resolve_lost().map(func(L): return [L["fate"], L["holder"]]))])
+	if m.blight:
+		# the Blight: how many it brought out, and what it did (knocks / eliminations / damage on hunters)
+		print("SIMBLIGHT spawned %d alive %d wardens %d shrieks %d knocks %d outs %d dmg %d" % [m.blight.spawned, m.blight.alive().size(), m.blight.wardens.size(), m.blight.shrieks, int(m.kstat.get("bl_knock", 0)), int(m.kstat.get("bl_out", 0)), int(m.kstat.get("bl_dmg", 0.0))])
 	for h in m.hunters:
 		print("  %s team %d %s knocks %d kills %d dmg %d gems %d %s" % [h.pname, h.team, h.cls, h.knocks, h.kills, h.dmg_done, h.gems, "OUT" if h.out else ("EXTRACTED" if h.extracted else "alive")])
 	get_tree().quit()

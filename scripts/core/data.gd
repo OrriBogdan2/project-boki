@@ -242,6 +242,13 @@ const MOBS := {
 	"brood": {"name": "The Brood Mother", "hp": 1350.0, "speed": 2.3, "dmg": 18.0, "range": 9.0, "windup": 1.0, "cd": 1.7,
 		"r": 1.55, "gems": 40, "color": Color("8a9a3a"), "attack": "boss", "stag": true, "stag_k": 0.04, "boss": true,
 		"egg": "hivara", "enrage": 75.0},
+	# the Blight (scripts/match/blight.gd, BlightDir): the Wyrm's corruption, hunting by noise and
+	# light. These are the base numbers; BlightDir scales health and damage from weak (the first
+	# minutes, outer islands) to full (late, the core, night). "lvl" 1 is full strength.
+	"bl_skitter": {"name": "Blight Skitter", "hp": 30.0, "speed": 5.4, "dmg": 8.0, "range": 1.15, "windup": 0.5, "cd": 1.35,
+		"r": 0.4, "gems": 1, "color": Color("3e3634"), "attack": "lunge", "blight": true},
+	"bl_warden": {"name": "Blight Warden", "hp": 150.0, "speed": 1.3, "dmg": 12.0, "range": 9.0, "windup": 1.1, "cd": 2.8,
+		"r": 0.8, "gems": 4, "color": Color("4a4240"), "attack": "spit", "blight": true},
 	# a lair's ward stones: break all three (guards come out as you do) and its seal fails
 	"ward": {"name": "Ward Stone", "hp": 150.0, "speed": 0.0, "dmg": 0.0, "range": 0.0, "windup": 1.0, "cd": 999.0,
 		"r": 0.7, "gems": 3, "color": Color("8fd8ff"), "attack": "none", "ward": true},
