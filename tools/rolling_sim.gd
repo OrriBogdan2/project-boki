@@ -6,7 +6,7 @@ extends RefCounted
 ## by minute, levels and XP rates, and what it cost to run. Options: --seed=N, --squad=N,
 ## --join-wave=N (start later; the earlier waves are then simulated), --sim-minutes=N (stop early).
 ## Fails (exit 1) if a wave doesn't launch on time, anyone drops in after the cut-off, or anyone is
-## still out there after 30:00.
+## still out there after 30:00. (Main holds this object in a meta: it awaits frames, see the loop.)
 
 var bad := 0
 
@@ -39,8 +39,14 @@ func run(main: Node, opts: Dictionary) -> void:
 	var last_ms := Time.get_ticks_msec()
 	var max_hunters_alive := 0
 	var gaps := {}          # wave -> minute since landing (0, 2, 4 ...) -> [level - median] (the catch-up curve)
+	var n_step := 0
 	while m.time < m.length + 1.0 and m.sess_time() < stop_min * 60.0:
 		m.step(Match.DT)
+		n_step += 1
+		if n_step % 120 == 0:
+			# let a frame go by now and then: nodes freed with queue_free (effects, drops, the dead)
+			# only really go between frames, and a whole session without one runs out of memory
+			await main.get_tree().process_frame
 		for w in R.waves:
 			if int(w["i"]) > R.join_i and String(w["state"]) != "planned" and not launched_at.has(int(w["i"])):
 				launched_at[int(w["i"])] = m.sess_time()

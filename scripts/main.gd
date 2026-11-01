@@ -464,7 +464,9 @@ func _ready() -> void:
 		rck.run(self)
 		return
 	if "--rolling-sim" in args:
-		load("res://tools/rolling_sim.gd").new().run(self, opts)  # a whole 30-minute rolling session, headless, with bots
+		var rsim = load("res://tools/rolling_sim.gd").new()      # a whole 30-minute rolling session, headless, with bots
+		set_meta("rolling_sim", rsim)       # (held: it yields frames so freed nodes really go, and must outlive its awaits)
+		rsim.run(self, opts)
 		return
 	if "--bot-sanity-check" in args:
 		_bot_sanity()
