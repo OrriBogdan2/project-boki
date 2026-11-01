@@ -538,6 +538,7 @@ static func demo_roster() -> void:
 		r["got_t"] = Time.get_unix_time_from_system() - (72 - i) * 3600.0
 		Save.d["roster"].append(r)
 		KinBox.route_new(r)
+	Save.register_all()
 	Save.d["box"]["names"][0] = "Box 1: Keepers"
 	Save.d["tutorial"]["home"] = true
 	Save.d["tutorial"]["day1_done"] = true

@@ -124,6 +124,20 @@ serial are never inherited.
   This is the hook for ranked play or lower tiers to neutralize size later: set the option when
   starting those matches.
 
+## Showing it to the player
+
+Following docs/POSITIONING.md (design branch): rarity shows in the Boki itself (its size, coat,
+eyes, shape and habits on the model), never in rarity-coloured UI. The kin card's **About** tab
+reads as field notes, plain sentences in the card's normal ink: "Stands 45 cm and weighs 5.6 kg.
+Very large for a Vespyx (XL): few grow this big." and "Spotted with pale spots", then where it's
+from (origin, date, who first raised it, parents, its number "#0042 of Vespyx"). No gold serials,
+no coloured size badges. The Nesting Nook and Kin Burrow side panels show a three-line version.
+Player-facing words say *tamed*, not caught (internal event names stay `caught`).
+
+Screenshot hooks: `--kinbox-demo=unique` (eight Echolop from XS to XL, every coat), `--nest-demo=card-about`
+(the About tab), `--nest-demo=kin` (the Nook panel), `--training --no-drop --size-demo` (an XS and
+an XL Vespyx in a match, their rings showing the hitbox). `--normalize-size` sets `Unique.normalize`.
+
 ## Later, with a server
 
 - The server mints ids, serials and editions; the client never does. Today's ids are made on the

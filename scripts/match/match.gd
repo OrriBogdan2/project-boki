@@ -3254,6 +3254,7 @@ func _process(delta: float) -> void:
 			# the camera only eases back while gliding, so jumps and falls never change the framing
 			# sneaking (Ctrl) pulls the camera well back for a wide look around [Supervive]
 			cam.zoom_to = 1.25 if player.gliding else (1.45 if player.crouch and player.grounded else 1.0)
+			if train.has("_sizes"): cam.zoom_to = 0.5     # (--size-demo screenshots)
 			# high up, the camera pulls back with your altitude so you can still read the ground
 			var alt := player_altitude()
 			if alt > 4.0:
@@ -3571,18 +3572,23 @@ func step(dt: float) -> void:
 			w.set_meta("lineup", true)
 			i += 1
 		cam.zoom_to = 0.55
-	if "--size-demo" in OS.get_cmdline_user_args() and player and not train.has("_sizes"):
-		# test: an extra small and an extra large Vespyx side by side (their rings show the hitbox)
-		train["_sizes"] = true
-		for si in 2:
-			var srec := Save.new_kin("cindle", "", kin_seed("demo"))
-			srec["dna"]["size"] = -2.8 if si == 0 else 2.8
-			srec["level"] = 6
-			var sq := player.pos + Vector3(-1.1 + si * 2.2, 0, -1.8)
-			var sw := spawn_wild(srec, sq)
-			sw.home = sq
-			sw.set_meta("lineup", true)
-		cam.zoom_to = 0.42
+	if "--size-demo" in OS.get_cmdline_user_args() and player:
+		# test: an extra small and an extra large Vespyx side by side, held still (their rings show
+		# the hitbox), and the camera in close
+		if not train.has("_sizes"):
+			var ws: Array = []
+			for si in 2:
+				var srec := Save.new_kin("cindle", "", kin_seed("demo"))
+				srec["dna"]["size"] = -2.8 if si == 0 else 2.8
+				srec["level"] = 6
+				var sq := player.pos + Vector3(-1.2 + si * 2.4, 0, 1.6)
+				var sw := spawn_wild(srec, sq)
+				sw.home = sq
+				sw.set_meta("lineup", true)
+				ws.append(sw)
+			train["_sizes"] = ws
+		for sw in train["_sizes"]:
+			if is_instance_valid(sw): sw.wander_to = sw.home
 	if opts.get("kin_demo", false) and player:
 		# test hook: throw the kin at the nearest dummy, use Q, then V, then the bond ultimate, then swap
 		var tgt: Ent = null; var bd := 1e9

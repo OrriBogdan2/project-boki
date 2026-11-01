@@ -2748,9 +2748,9 @@ func _open_kin(rec: Dictionary) -> void:
 	match kin_tab:
 		"About":
 			# what makes it itself, and where it came from (AboutView: Unique and Save.register)
-			c1.add_child(UI.section("About", col.lerp(UI.INK, 0.35)))
+			c1.add_child(UI.section("Field notes", UI.FAINT.lightened(0.2)))
 			AboutView.looks(rec, c1)
-			c2.add_child(UI.section("History", UI.FAINT.lightened(0.2)))
+			c2.add_child(UI.section("Where it's from", UI.FAINT.lightened(0.2)))
 			AboutView.history(rec, c2)
 		"Care":
 			var bd: Array = Care.bond(rec)
@@ -4746,6 +4746,7 @@ func _nest_demo(which: String) -> void:
 	var rare := Care.hatch_rare({"sp": "cairnback" if Data.KIN.has("cairnback") else String(Data.common_kin()[0]), "boss": ""}, rng)
 	rare["name"] = "Tor"
 	Save.d["roster"].append(rare); KinBox.route_new(rare)
+	Save.register_all()      # numbers, origin and first trainer for the made-up kin
 	nook_pick = []; nook_view = ""; nook_scroll = 0.0; nook_tab = "Pairs"
 	if which.begins_with("incub"):
 		# five Rare Eggs in the cradles (warming, one ready), two waiting on the shelf, an Ember kin at the brazier
