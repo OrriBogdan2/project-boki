@@ -132,7 +132,7 @@ var _was_match := false
 func _process(_d: float) -> void:
 	var m = _match()
 	if m == null or not is_instance_valid(m) or m.player == null:
-		if _was_match and String(Game.last_result.get("why", "")) != "extracted":
+		if _was_match and not Game.last_result.is_empty() and String(Game.last_result.get("why", "")) != "extracted":
 			print("TOUR the match ended: %s; last feed: %s" % [str(Game.last_result.get("why", "?")), str(_feed.slice(-8))])
 		_was_match = false
 		return
@@ -349,11 +349,24 @@ func _expedition() -> void:
 	await until(func(): return not m.player.dropping and m.player.grounded, 60.0, "landing")
 	await mwait(0.6)
 	await shot("landed")
-	for step in [_fight, _level_up, func(mm): await _cast_round(mm, "exp", true), _tame, _lair, _extract]:
-		if not is_instance_valid(m) or m.over:
-			note_bad("the match ended early (%s)" % str(Game.last_result.get("why", "?")))
-			return
-		await step.call(m)
+	# (direct awaits: resuming these through Callable.call() once crashed Godot 4.6.2 with SIGSEGV)
+	await _fight(m)
+	if _gone(m): return
+	await _level_up(m)
+	if _gone(m): return
+	await _cast_round(m, "exp", true)
+	if _gone(m): return
+	await _tame(m)
+	if _gone(m): return
+	await _lair(m)
+	if _gone(m): return
+	await _extract(m)
+
+func _gone(m) -> bool:
+	if is_instance_valid(m) and not m.over:
+		return false
+	note_bad("the match ended early (%s)" % str(Game.last_result.get("why", "?")))
+	return true
 
 func _nearest_mob(m, maxd := 1e9) -> Mob:
 	var best: Mob = null; var bd := maxd
