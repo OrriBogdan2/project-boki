@@ -539,6 +539,12 @@ func _tame(m) -> void:
 	var P: Hunter = m.player
 	var rec := Save.new_kin("puddlet", "", 77)
 	rec["level"] = 3
+	# (somewhere clear of deathboxes: a box beside you takes the F press before the Boki does)
+	for b in m.boxes:
+		if P.flat_dist(b["pos"]) < 4.0:
+			var away: Vector3 = m.world.free_spot_near(P.pos + (P.pos - b["pos"]).normalized() * 6.0, [], 0.8, 0.4, 8.0)
+			P.teleport(Vector3(away.x, m.world.ground_at(away.x, away.z), away.z)); m.cam.snap(P.pos)
+			break
 	var at: Vector3 = m.world.free_spot_near(P.pos + Vector3(2.2, 0, 1.0), [], 0.8, 0.4, 6.0)
 	var k = m.spawn_wild(rec, Vector3(at.x, m.world.ground_at(at.x, at.z), at.z), true)
 	await mwait(0.8)
@@ -584,7 +590,8 @@ func _lair(m) -> void:
 	var w0 := Time.get_ticks_msec()
 	var shots_dial := 0
 	await key("interact", 0.05)
-	while L["state"] == "sealed" and Time.get_ticks_msec() - w0 < 40000:
+	var dial_t0: float = m.time
+	while L["state"] == "sealed" and m.time - dial_t0 < 40.0 and Time.get_ticks_msec() - w0 < 600000:
 		var on := false
 		if float(L["jam"]) <= 0.0 and float(L["grace"]) <= 0.0:
 			var nxt: float = float(L["needle"]) + float(L["dir"]) * float(m.lairs.speed_of(L)) * 0.05
