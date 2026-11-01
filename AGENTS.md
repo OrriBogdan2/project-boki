@@ -3,6 +3,7 @@
 Read this before changing code. The goal: every change leaves the codebase as easy to work in as it was, or easier. New features must not add debt.
 
 ## 1. Before you write code
+- **Apply the expert checklist.** Go through `docs/GAMEDEV_CHECKLIST.md` (game feel, systems, performance, rendering) for anything gameplay-facing, and use the matching techniques by name.
 - **Read the area first.** Find the existing system that already does something similar and extend it. Don't build a parallel one. Search with `grep -rn` across `scripts/` and `content/`.
 - **Anything that touches a core system needs a short design note first.** Core systems are movement, combat, networking, the save format, and the match flow. Write it in `docs/decisions/NNNN-title.md` using the template there. It covers the problem, the options, the choice, and what it affects, in 10-20 lines. Small features don't need one.
 - **Data over code.** Classes, Boki, gloves, weapons, maps and rules live in `content/` as JSON. A new hero, item or map should mostly be data plus one focused script, never edits scattered across `match.gd`.
