@@ -922,3 +922,28 @@ stun is your window to unload. Quickdraw (E) speeds the loading and doubles the 
   12 -> 20 called (was 25); a full Rail 34 -> 46 called (was 71); the two-target bounce case in the
   check 50 -> 41.
 - Bots: a full cylinder taps a Called Shot within 9m; otherwise the Rail from range.
+
+### Bulwark: Block -> Guard -> Crushed (rebuilt on an Oath-style shield-tank baseline)
+
+Owner direction (Nov 1): base the kits on SUPERVIVE / League references, and make the Bulwark as
+close to Oath as possible; mechanics only, our own names, art, sounds and numbers. The §6.6 design
+above is superseded by this:
+
+| Slot | What it does |
+|---|---|
+| LMB (Tower Shield & Mace) | **tap: throw the mace** 9m (16, passes through foes); it lies where it lands for 6s and shows foes within 4.5m of it to your team; tap again and it comes back to you, hitting on the way (10). **Hold: Crushing Blow**, 14 -> 34 damage and knock 4 -> 12 over 1.25s (full: stun 0.4); its wind-down carries you forward 3-8 m/s, so a jump out of it rolls into a glide. (`ArchKit.lmb_override`: the kit runs this weapon's attack; the minigun Bulwark fires normally) |
+| RMB | **hold: raise the shield** (160 HP, regenerates 20/s after 2s down, broken = 3s lockout, you walk at 60%); **tap, or let go after a block: Bash** (2.6m cone, 12, push 9; you step into it). Guard 50+: **Shield Slam** (0.3s flare tell, 18, push 12, stun 0.6, spends 50) |
+| Dash | **Whirl**: a 3.6m spinning dash, foes along it knocked aside (6, push 7). **Shield up: Shield Charge**: 4.2m behind the shield, invulnerable for its length, 10 and push 11 |
+| Passive | **Guard**: blocked damage becomes Guard (1 per 2). **Crushed** (the payoff): a Bash, Shield Charge or full Crushing Blow that knocks a foe into terrain or another foe (within 1.5m behind them) stuns it 0.8 (+8 damage, T4), stuns the foe it hit 0.5, and heals you 14 |
+| E | **Mending Ground**: marks ground up to 7m away, or where the mace lies; 1s later it bursts: allies inside heal 26, your shield mends 60, foes inside are slowed |
+| R | **Fissure** (0.5s unstoppable fuse): a crack runs 14m forward at 40 m/s (walls, rocks and rises stop it): 8 and stun 0.6 to everyone it passes; 0.35s later the line erupts in 3 pulses 0.3s apart (9 + slow 0.45 each). All Guard goes in: +1 pulse per 50 |
+
+- Loop: raise the shield into their fire (Guard) -> Shield Charge or Slam them into a wall or into
+  their teammate -> Crushed (stun, heal) -> a full Crushing Blow or the Fissure on the stunned.
+  Throw the mace to scout a corner, then Mending Ground on it.
+- Tells: three rune pips over the helm (33/66/100 Guard); at 50 a gold crest light, the raised
+  shield burns gold, "SLAM READY" / "SHIELD SLAM READY". Payoff: "CRUSHED", `pay_slam`, T4.
+- Bots: shield toward whoever is shooting, Bash up close, Shield Charge / Whirl in from 1.5-4.5m,
+  Mending Ground when hurt or the shield is low, Fissure at 11m; LMB throws from range and winds
+  up Crushing Blows up close.
+- Retired: Interpose (ally leap), Rally Banner, Bastion.

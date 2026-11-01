@@ -1305,6 +1305,8 @@ var strike_at_end := {}        # a charged lunge's hit, which lands where the lu
 ## Called every frame with the attack key's state; decides what that means for this weapon.
 func trigger(dt: float) -> void:
 	var held: bool = inp["fire"]
+	if ak and ak.lmb_override(held, dt):
+		return          # the archetype runs this weapon's attack itself (the Bulwark's mace: throw / smash)
 	if wpn.get("melee", false):
 		swing_buf = maxf(0.0, swing_buf - dt)
 		if swing_buf > 0.0 and fire_cd <= 0.0 and can_fire():

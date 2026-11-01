@@ -572,50 +572,93 @@ func _bulwark() -> void:
 	step(m, 0.1)
 	ok("bulwark RMB release: lowered", K.wall.is_empty())
 	# tap: Bash; at 50 Guard, Shield Slam stuns
-	T.teleport(home + Vector3(1.8, 0, 0)); fresh(T); aim_at(P, T.pos)
+	T.teleport(home + Vector3(1.8, 0, 0)); fresh(T); aim_at(P, T.pos); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0
 	var x0 := T.pos.x
 	tap(m, P)
 	step(m, 0.3)
 	ok("bulwark RMB tap: Bash pushes", K.last_variant == "tap" and T.pos.x - x0 > 1.0 and dmg(T) >= 9.0, "pushed %.1f" % (T.pos.x - x0))
 	T.teleport(home + Vector3(1.8, 0, 0)); fresh(T); K.res = 60.0; K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; step(m, 1.0); fresh(T)
+	ok("bulwark resource full: Shield Slam armed", K.full_ready() and K.ready_label() != "")
 	tap(m, P)
 	var early := T.stun_t
 	step(m, 0.5)
 	ok("bulwark RMB full: Shield Slam (0.3s tell) stuns", K.last_variant == "full" and early <= 0.0 and T.stun_t > 0.0 and K.res < 15.0, "stun %.2f guard %.0f" % [T.stun_t, K.res])
-	# Interpose: the braced step blocks a frontal shot
+	# hold to block, let go: the Bash comes out of the block
+	T.teleport(home + Vector3(1.8, 0, 0)); fresh(T); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; K.res = 0.0; step(m, 0.8); fresh(T)
+	x0 = T.pos.x
+	hold(m, P, 0.5)
+	step(m, 0.3)
+	ok("bulwark RMB release after block: Bash", K.wall.is_empty() and K.last_variant == "hold" and T.pos.x - x0 > 1.0, "pushed %.1f" % (T.pos.x - x0))
+	# Crushed: a Bash into a wall stuns and heals
+	var W: World = m.world
+	var lv: int = r[5]
+	var wk: PackedByteArray = W.kind; var wl: PackedByteArray = W.level
+	for dz in range(-3, 4):
+		for dx in range(0, 3):
+			var i: int = W.idx(int(home.x) + 3 + dx, int(home.z) + dz)
+			wk[i] = World.T_GROUND
+			wl[i] = lv if dx < 1 else lv + 3
+	W.kind = wk; W.level = wl
+	T.teleport(home + Vector3(2.2, 0, 0)); fresh(T); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; K.crushed_at = {}
+	P.teleport(home); aim_at(P, T.pos); P.hp = P.max_hp - 40.0
+	var c0 := K.crushes; var hp0 := P.hp
+	step(m, 0.2)
+	tap(m, P)
+	step(m, 0.3)
+	ok("bulwark payoff: Bash into a wall Crushes (stun + heal)", K.crushes == c0 + 1 and T.stun_t > 0.0 and P.hp > hp0, "crushes %d stun %.2f hp %.0f -> %.0f" % [K.crushes - c0, T.stun_t, hp0, P.hp])
+	for dz in range(-3, 4):
+		for dx in range(0, 3):
+			wl[W.idx(int(home.x) + 3 + dx, int(home.z) + dz)] = lv
+	W.level = wl
+	# LMB tap: the mace flies through, lies there, comes back on a second tap
+	T.teleport(home + Vector3(4.0, 0, 0)); fresh(T); P.teleport(home); aim_at(P, T.pos); P.fire_cd = 0.0
+	P.inp["fire"] = true; m.step(DT); P.inp["fire"] = false; m.step(DT)
+	ok("bulwark LMB tap: mace thrown", not K.mace.is_empty())
+	step(m, 0.6)
+	var thrown := dmg(T)
+	ok("bulwark LMB: mace hits and lies", thrown >= 14.0 and String(K.mace.get("st", "")) == "ground", "took %.0f state %s" % [thrown, String(K.mace.get("st", ""))])
+	P.fire_cd = 0.0
+	P.inp["fire"] = true; m.step(DT); P.inp["fire"] = false
+	step(m, 0.8)
+	ok("bulwark LMB tap again: recalled, hits on the way", K.mace.is_empty() and dmg(T) > thrown, "took %.0f" % dmg(T))
+	# LMB hold: a full Crushing Blow
+	T.teleport(home + Vector3(2.0, 0, 0)); fresh(T); P.teleport(home); aim_at(P, T.pos); P.fire_cd = 0.0
+	step(m, 1.3, func(): P.inp["fire"] = true; aim_at(P, T.pos))
+	P.inp["fire"] = false
+	step(m, 0.3)
+	ok("bulwark LMB hold: full Crushing Blow", dmg(T) >= 30.0 and T.stun_t > 0.0, "took %.0f stun %.2f" % [dmg(T), T.stun_t])
+	# dash: Whirl; with the shield up, a Shield Charge
 	P.teleport(home); P.dashes = P.max_dashes(); fresh(T); T.teleport(home + Vector3(6, 0, 0)); aim_at(P, T.pos)
-	P.face = atan2(-1.0, 0.0)
 	P.inp["move"] = Vector2(1, 0)
 	P.do_dash()
-	php = P.hp
-	m.spawn_shot(T, T.pos + Vector3(-0.6, 0.95, 0), Vector2(-40, 0), 30.0, 0.5, 0.15, Color.RED, {})
-	step(m, 0.25)
-	P.inp["move"] = Vector2.ZERO
-	ok("bulwark dash: Interpose front guard", K.st.get("last_dash") == "step" and P.hp >= php, "hp %.0f -> %.0f" % [php, P.hp])
-	# ally under the cursor: leap to them and shield them
-	var A: Hunter = m.make_hunter("A", P.team, "medium", "Ally", "idle", {}, home + Vector3(0, 0, 6.0), {"arch": "none"})
-	A.shield = 0.0
-	P.teleport(home); P.dashes = P.max_dashes(); K.res = 30.0
-	P.inp["aim"] = A.pos
+	step(m, 0.3)
+	ok("bulwark dash: Whirl", K.st.get("last_dash") == "whirl" and P.flat_dist(home) > 2.5, "moved %.1f" % P.flat_dist(home))
+	P.teleport(home); P.dashes = P.max_dashes(); K.lock_t = 0.0; K.shield_hp = K.shield_max()
+	P.inp["sec_hold"] = true
+	P.ak.press_rmb()
+	step(m, 0.3, func(): P.inp["sec_hold"] = true)
 	P.do_dash()
-	step(m, 0.6)
-	ok("bulwark dash: ally leap shields them", K.st.get("last_dash") == "leap" and P.flat_dist(A) < 2.0 and A.shield > 0.0, "dist %.1f shield %.0f" % [P.flat_dist(A), A.shield])
-	# E: Rally Banner gives shield over time
-	P.shield = 0.0; P.teleport(home)
+	var inv := P.inv_t
+	step(m, 0.3, func(): P.inp["sec_hold"] = true)
+	P.inp["sec_hold"] = false; P.inp["move"] = Vector2.ZERO
+	step(m, 0.1)
+	ok("bulwark dash with the shield up: Shield Charge", K.st.get("last_dash") == "charge" and inv > 0.15 and P.flat_dist(home) > 3.0, "inv %.2f moved %.1f" % [inv, P.flat_dist(home)])
+	# E: Mending Ground bursts after 1s and heals
+	P.teleport(home); P.hp = P.max_hp - 50.0; hp0 = P.hp
 	P.inp["aim"] = home + Vector3(1, 0, 0)
 	P.ak.use_e()
-	step(m, 1.2)
-	ok("bulwark E: Banner shields allies inside", P.shield >= 5.0 and K.in_e(), "shield %.0f" % P.shield)
-	# R: Bastion: foes inside pushed out, shots from outside stop, Guard adds time
-	K.res = 100.0
-	T.teleport(home + Vector3(2.0, 0, 0)); fresh(T)
-	ult(m, P)
-	step(m, 0.6)
-	var pushed := T.flat_dist(home)
-	php = P.hp
-	m.spawn_shot(T, home + Vector3(7.0, 0.95, 0), Vector2(-30, 0), 20.0, 0.6, 0.15, Color.RED, {})
 	step(m, 0.5)
-	ok("bulwark R: Bastion pushes out, blocks, +2s", pushed > 4.0 and P.hp >= php and K.r_t > 4.5, "pushed to %.1f hp %.0f->%.0f r_t %.1f" % [pushed, php, P.hp, K.r_t])
+	var mid := P.hp
+	step(m, 0.8)
+	ok("bulwark E: Mending Ground heals after its delay", mid <= hp0 + 1.0 and P.hp >= hp0 + 20.0, "hp %.0f -> %.0f -> %.0f" % [hp0, mid, P.hp])
+	# R: Fissure: the crack stuns, then the eruption pulses; Guard adds a pulse
+	K.res = 50.0
+	P.teleport(home); T.teleport(home + Vector3(5.0, 0, 0)); fresh(T); aim_at(P, T.pos)
+	ult(m, P)
+	step(m, 0.25)
+	var st0 := T.stun_t
+	step(m, 1.8)
+	ok("bulwark R: Fissure stuns then erupts", st0 > 0.0 and dmg(T) >= 30.0 and T.slow_t > 0.0, "stun %.2f took %.0f" % [st0, dmg(T)])
 	await done(m)
 
 # ------------------------------------------------------------------ levels and the Bonded R

@@ -98,6 +98,8 @@ func outgoing(_t: Ent, dmg: float, _o: Dictionary) -> float: return dmg
 func incoming(_by: Ent, dmg: float, o: Dictionary) -> Array: return [dmg, o]
 func move_k() -> float: return 1.0
 func fire_ok() -> bool: return true
+## The attack key, if this kit runs the weapon's attack itself (true = handled; Hunter.trigger stops).
+func lmb_override(_held: bool, _dt: float) -> bool: return false
 ## The kit's own pace times the R fuse's plant (you stand and gather while it winds up).
 func pace() -> float: return move_k() * (0.35 if not fuse.is_empty() else 1.0)
 func can_shoot() -> bool: return fire_ok() and fuse.is_empty()
