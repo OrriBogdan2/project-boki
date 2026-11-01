@@ -337,6 +337,14 @@ Total: **21-26 dev-weeks**.
   play. Floors: the free-kit queue (no Boki at risk, ARC-style), a stray common Boki that turns up at
   the farm if you have none, cheap common Boki on the market priced within what one free-kit run earns,
   and the starter flow. Scarce and limited-edition Boki stay scarce; the floor is about commons.
+- **The Exchange (owner, Nov 1):** a RuneScape Grand Exchange-style order book for commodities: wood,
+  stone, ore, crops, cooked food, tonics, crafting parts, Boki food, building materials. Players post buy
+  and sell offers at a price, the server matches them (partial fills, a small tax as a gem sink, price
+  history graph). Materials come from runs and from Boki working the farm (Palworld-style stations that
+  produce while you're away), so automation feeds the economy. Boki are NOT on the order book: each is
+  unique, so they trade through a separate Boki market (listings or auctions with filters on species,
+  size, IVs, markings, provenance, edition) and direct player-to-player trades. Both are server-side
+  (ROADMAP §1 / ARCHITECTURE_PLAN Phase 6); never real money.
 - **Free-kit Boki (owner idea):** the free-kit queue hands you a free-kit Boki, a fresh roll of a starter
   egg (random starter species, ordinary rolls). It isn't yours to keep or lose: it's a loaner for that
   run only, so it can't be farmed into the economy, and losing it costs nothing.
