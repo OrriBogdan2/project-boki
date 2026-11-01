@@ -1032,7 +1032,7 @@ func _move_kin(d: float) -> void:
 				if arrived:
 					k["hold_t"] = 1.4; k["joy_t"] = 0.9; k["t"] = randf_range(2.5, 4.0)
 					_emote(k, "♥" if float(k["rec"]["trust"]) > 55.0 else "♪")
-					Sfx.play("kin_happy", k["pos"], -10.0, 0.15)
+					Sfx.play("kin_happy", k["pos"], -10.0, 0.15, Unique.voice(k["rec"]))
 		var pos: Vector3 = k["pos"]
 		var rec: Dictionary = k["rec"]
 		var trust := float(rec["trust"])
@@ -1054,7 +1054,7 @@ func _move_kin(d: float) -> void:
 				k["t"] = randf_range(1.5, 3.0)
 				if k["chase_t"] > 0.0:
 					_emote(k, "♪"); _emote(other, "!")
-					Sfx.play("kin_happy", other["pos"], -14.0, 0.15, 1.2)
+					Sfx.play("kin_happy", other["pos"], -14.0, 0.15, 1.2 * Unique.voice(other["rec"]))
 					if not other.get("busy", false) and randf() < 0.7:
 						other["chase"] = k; other["chase_t"] = 4.0
 				k["goal"] = world.random_ground(maxi(here, 0))
@@ -1416,7 +1416,7 @@ func _whistle() -> void:
 			k.erase("nap_go"); k.erase("nap_go_t"); k.erase("going_in")
 			k["called_t"] = 7.0
 			_emote(k, "!")
-			Sfx.play("kin_alert", k["pos"], -12.0, 0.15)
+			Sfx.play("kin_alert", k["pos"], -12.0, 0.15, Unique.voice(k["rec"]))
 			if world.island_of(k["pos"].x, k["pos"].z) != my_isle and my_isle >= 0:
 				_start_leap(k, ppos + slot))
 	if not inside.is_empty():
@@ -2606,7 +2606,7 @@ func _pet_kin(k: Dictionary) -> void:
 	_face(k["pos"])
 	_emote(k, "♥", true)
 	fx.burst(k["pos"] + Vector3(0, 0.9, 0), Color("ff8fb0"), 12, 1.8)
-	Sfx.play("kin_happy", null, -4.0, 0.12)
+	Sfx.play("kin_happy", null, -4.0, 0.12, Unique.voice(rec))
 	if pet_done.get(rec["uid"], -1) != int(Save.d["matches"]):
 		pet_done[rec["uid"]] = int(Save.d["matches"])
 		Save.remember(rec, "petted", "got a long scratch behind the ears", 1.5)
@@ -2729,7 +2729,7 @@ func _open_kin(rec: Dictionary) -> void:
 		var mt := UI.tag(Mutations.name_of(mid), Mutations.col_of(mid))
 		mt.tooltip_text = Mutations.perk_text(mid)
 		hx.add_child(mt)
-	UI.shell_tabs(v, ["Care", "Training", "Growth"], kin_tab, func(t): kin_tab = t; _open_kin(rec))
+	UI.shell_tabs(v, ["Care", "Training", "Growth", "About"], kin_tab, func(t): kin_tab = t; _open_kin(rec))
 	var row := func(parent: Control, label_txt: String, frac: float, c: Color, right := "", lw := 92.0) -> void:
 		var r := UI.hbox(10)
 		var l := UI.label(label_txt, UI.T_SMALL, UI.MUTED); l.custom_minimum_size.x = lw
@@ -2746,6 +2746,12 @@ func _open_kin(rec: Dictionary) -> void:
 	var c2 := UI.vbox(8); c2.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	cols.add_child(c1); cols.add_child(c2)
 	match kin_tab:
+		"About":
+			# what makes it itself, and where it came from (AboutView: Unique and Save.register)
+			c1.add_child(UI.section("Field notes", UI.FAINT.lightened(0.2)))
+			AboutView.looks(rec, c1)
+			c2.add_child(UI.section("Where it's from", UI.FAINT.lightened(0.2)))
+			AboutView.history(rec, c2)
 		"Care":
 			var bd: Array = Care.bond(rec)
 			var nb: Array = Care.next_bond(rec)
@@ -4611,6 +4617,7 @@ func _nook_detail(rec: Dictionary, dv: VBoxContainer, egg_in: bool) -> void:
 	if mk.get_child_count() > 0: tv.add_child(mk)
 	top.add_child(tv)
 	dv.add_child(top)
+	AboutView.block(rec, dv, true)      # its size, coat, eyes, habit and where it came from
 	dv.add_child(IvView.heading())
 	IvView.first_view_line(dv)
 	var mid := UI.hbox(10)
@@ -4739,6 +4746,7 @@ func _nest_demo(which: String) -> void:
 	var rare := Care.hatch_rare({"sp": "cairnback" if Data.KIN.has("cairnback") else String(Data.common_kin()[0]), "boss": ""}, rng)
 	rare["name"] = "Tor"
 	Save.d["roster"].append(rare); KinBox.route_new(rare)
+	Save.register_all()      # numbers, origin and first trainer for the made-up kin
 	nook_pick = []; nook_view = ""; nook_scroll = 0.0; nook_tab = "Pairs"
 	if which.begins_with("incub"):
 		# five Rare Eggs in the cradles (warming, one ready), two waiting on the shelf, an Ember kin at the brazier
@@ -4777,6 +4785,7 @@ func _nest_demo(which: String) -> void:
 		"card": kin_tab = "Growth"; _open_kin(kid)
 		"card-care": kin_tab = "Care"; _open_kin(kid)
 		"card-train": kin_tab = "Training"; _open_kin(kid)
+		"card-about": kin_tab = "About"; _open_kin(kid)
 		"box": KinBoxView.sel = String(kid["uid"]); KinBoxView.page = KinBox.page_of(kid) if KinBox.is_boxed(kid) else 0; _open_burrow()
 		_: _open_nook()
 
@@ -4830,6 +4839,7 @@ func _hatch_play(baby: Dictionary, rare: bool, boss: String, at: Vector3, hide: 
 		Save.remember(baby, "born", "hatched in the nest on your farm", 0.0)
 	Progress.add("hatched")
 	Save.d["roster"].append(baby)
+	Save.register(baby)           # its serial, you as its trainer, and "hatched" in the log
 	KinBox.route_new(baby)        # a repeat of a kind already on the farm goes to the Kin Burrow (unless it's rare)
 	Care.dex_got(baby)
 	Save.save_game()
@@ -4901,7 +4911,9 @@ func _name_baby(baby: Dictionary) -> void:
 	v.add_child(picks)
 	ne.text = String(baby["name"])
 	v.add_child(UI.primary("Welcome home", func():
+		var was_name := String(baby["name"])
 		baby["name"] = ne.text.strip_edges() if ne.text.strip_edges() != "" else String(baby["name"])
+		if String(baby["name"]) != was_name: Save.log_event("renamed", baby, {"from": was_name})
 		Save.save_game()
 		_close_panel()
 		var old := _kin_entry(baby)

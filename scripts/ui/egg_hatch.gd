@@ -122,6 +122,7 @@ func _gp(local: Vector3) -> Vector3:
 	return global_transform * local
 
 func _sfx(n: String, vol := 0.0, pitch := 1.0) -> void:
+	if n.begins_with("kin_"): pitch *= Unique.voice(rec)     # the hatchling's own voice
 	Sfx.play(n, null, vol, 0.08, pitch)
 
 # ------------------------------------------------------------------ the hatch

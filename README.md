@@ -75,6 +75,7 @@ Code: `scripts/core/care.gd`, `scripts/core/kin_speak.gd`, the raising section o
 - **Bond.** Trust ranks: Wary, Friendly, Close (skills hit harder), Devoted (rushes to revive you), Soulbound (never refuses, +10% to everything).
 - **Talking.** Newly hatched Boki only say their own name ("Ves! Vespyx?"), and get their meaning across with tone and what they do. Around level 4 with some trust they pick up a few words, around level 8 short sentences, and by level 12 with a Devoted bond they talk freely.
 - **Natures, life stages, eggs.** Each Boki has a nature from its strongest traits and grows from Hatchling to Youngling, Grown and Elder. Two Boki at level 5 with a Close bond can leave an egg in the nest; the baby mixes their personalities and may come out shimmering (rare colours, also found wild about 1 in 25).
+- **No two Boki alike.** Every Boki is born with its own height and weight (a bell curve for its species, with rare XS and XL ones at the edges, and the Giant and Tiny mutations rarer still), slightly different proportions, a shift in its colours, its own coat pattern (spots, stripes, patches or freckles, placed so no two match), an eye colour, ear and tail shapes, an idle habit, a voice of its own, a birthmark and a favourite food. Eggs take after both parents. Size matters a little in a fight: bigger Boki are a touch tougher and slower, smaller ones quicker, never by more than 4%. The About tab on a Boki's card shows all of it, plus where and when it was found, who first raised it, and its number among its kind ("#0042 of Vespyx"). See `docs/BOKI_IDENTITY.md`.
 - **Outfits and the Bokidex.** The stall sells things for Boki to wear, worn into matches too. The Bokidex tab in the inventory tracks every species you've seen, caught, evolved and found shimmering.
 
 ## The Boki's mind
@@ -143,6 +144,7 @@ Every character and prop is built from simple meshes in `models.gd`. Swapping in
 godot --headless --path . -- --check                # compile every script
 godot --headless --path . -- --simtest --seed=5      # a whole match on autopilot, printed
 godot --headless --path . -- --mapcheck              # 200 maps: every island reachable, pads clear
+godot --headless --path . -- --unique-check          # every kin its own: rolls, inheritance, ids, save migration, size
 ```
 
 ## Web build

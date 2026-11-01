@@ -107,6 +107,7 @@ static func ensure(rec: Dictionary) -> void:
 		rec["known"] = []          # which of food / hates / play you've found out
 	if not rec.has("ivs") or typeof(rec["ivs"]) != TYPE_DICTIONARY:
 		rec["ivs"] = ivs_from_uid(String(rec.get("uid", "x")))     # old saves: fixed by the kin's id
+	Unique.ensure(rec)          # its inborn size, looks and habits (old saves: fixed by the kin's id)
 
 static func need(rec: Dictionary, n: String) -> float:
 	ensure(rec)
@@ -344,6 +345,7 @@ static func feed(rec: Dictionary, f: String) -> Dictionary:
 		change(rec, "energy", float(FOODS[f].get("energy", 0.0)))
 	if out["love"]:
 		joy += 22.0
+		fill *= Unique.FAV_FILL       # its favourite food: a little more filling too
 		out["new"] = discover(rec, "food")
 	var was := need(rec, "food")
 	change(rec, "food", fill)
@@ -477,6 +479,11 @@ static func breed(a: Dictionary, b: Dictionary, rng: RandomNumberGenerator, sp :
 	var inh := inherit_ivs(a, b, rng, inherit_n)
 	baby["ivs"] = inh["ivs"]
 	baby["iv_from"] = inh["from"]       # stat -> which parent (index into "parents") it came from
+	# its own looks and habits, a blend of both parents' (Unique.inherit, its own seed: rng untouched)
+	baby["dna"] = Unique.inherit(a, b, int(baby["dna"]["seed"]))
+	baby["lineage"] = {"parents": [String(a.get("uid", "")), String(b.get("uid", ""))], "names": [String(a["name"]), String(b["name"])],
+		"gen": maxi(int((a.get("lineage", {}) as Dictionary).get("gen", 0)), int((b.get("lineage", {}) as Dictionary).get("gen", 0))) + 1}
+	baby["origin"] = {"how": "egg", "where": {"place": "home"}}
 	ensure(baby)
 	return baby
 
@@ -499,6 +506,7 @@ static func hatch_rare(egg: Dictionary, rng: RandomNumberGenerator) -> Dictionar
 	baby["shimmer"] = rng.randf() < Shiny.EGG[0]      # as rare as any egg
 	baby["from_boss"] = String(egg.get("boss", ""))
 	baby["ivs"] = rare_ivs(rng)        # three stats 26 or better (shimmer doesn't touch IVs)
+	baby["origin"] = {"how": "boss_egg", "where": {"place": "home", "lair": String(egg.get("boss", ""))}}
 	Evo.ensure(baby)
 	ensure(baby)
 	return baby

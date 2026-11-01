@@ -11,5 +11,10 @@
 		"belly": "#d8ffd0",
 		"glow": "#f0ff6a",
 		"wing": "#1f5a4a"
+	},
+	"size": {
+		"cm": 38,
+		"kg": 2.8,
+		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
 	}
 }

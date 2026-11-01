@@ -189,7 +189,7 @@ func _check_discord(id: int, tok: String) -> void:
 		if allowed_roles.has(String(r)):
 			ok = true
 	if not ok:
-		_deny(id, "You need the Kinfall Playtester role in the Project Boki Discord to join this playtest.")
+		_deny(id, "You need the Project Boki Playtester role in the Project Boki Discord to join this playtest.")
 		return
 	var nm := String(member.get("nick")) if member.get("nick") != null else String(me.get("global_name") if me.get("global_name") != null else me.get("username", "Hunter"))
 	_admit(id, uid, nm)
