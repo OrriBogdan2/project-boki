@@ -13,6 +13,7 @@ func ok(cond: bool, what: String) -> void:
 
 var m: Match
 var keep: Array = []
+var dropped: Array = []      # the pickups the last boss kill dropped
 
 func _god() -> void:
 	for h in keep:
@@ -50,7 +51,9 @@ func _kill(L: Dictionary, P: Hunter, C: Hunter) -> float:
 	var b: Boss = L["boss_mob"]
 	if b.buried: b._clear_attack()
 	b.stagger_t = 0.0
+	var pk0: Array = m.pickups.duplicate()
 	b.hurt(b.hp + b.max_hp, P, {"src": "shot"})
+	dropped = m.pickups.filter(func(p): return not pk0.has(p))      # (before anyone walks over them)
 	_run(0.2)
 	for a in L["adds"]: if is_instance_valid(a) and not a.dead: a.dead = true; a.visible = false
 	if not m.perk_offer.is_empty(): m.perk_offer = {}
@@ -79,6 +82,12 @@ func run(main: Node) -> void:
 	# ---------------------------------------------------------------- 1. the loot: few things, all good; the egg apart under its own beam
 	var w0 := m.wpicks.size()
 	var kill_t := _kill(F, P, C)
+	var gems_new: Array = dropped.filter(func(p): return String(p["kind"]) == "gem")
+	var other_new: Array = dropped.filter(func(p): return String(p["kind"]) != "gem" and String(p["kind"]) != "key")
+	var gem_total := 0
+	for p in gems_new: gem_total += int(p["v"])
+	ok(gems_new.size() <= Match.BOSS_GEM_DROPS and gem_total >= int(Data.MOBS["colossus"]["gems"]) * 2 and other_new.is_empty(),
+		"its gems come as %d big drops worth %d in all (not %d little ones), no armor shards or seeds" % [gems_new.size(), gem_total, int(Data.MOBS["colossus"]["gems"])])
 	var b: Boss = F["boss_mob"]
 	var drops: Array = m.wpicks.slice(w0)
 	var egg = F.get("egg_wp")
@@ -92,7 +101,7 @@ func run(main: Node) -> void:
 	for wp in pile:
 		pile_c += wp["pos"] / float(maxi(1, pile.size()))
 		if egg != null: apart = minf(apart, Vector2(wp["pos"].x - egg["pos"].x, wp["pos"].z - egg["pos"].z).length())
-	ok(egg != null and apart >= 2.0 and apart <= 6.0 and m.lairs.inside(F, egg["pos"], 0.0), "the egg sits on its own spot %.1f m from the nearest pile item, inside the lair" % apart)
+	ok(egg != null and apart >= 3.0 and apart <= 7.0 and m.lairs.inside(F, egg["pos"], 0.0), "the egg sits on its own spot %.1f m from the nearest pile item, inside the lair" % apart)
 	var en: Node3D = egg["node"] if egg != null else null
 	var beam: MeshInstance3D = null
 	if en:

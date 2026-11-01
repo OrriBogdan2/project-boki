@@ -41,6 +41,7 @@ const GRACE_T := 0.3           # the press that starts the dial doesn't count as
 const GUARD_CAP := 6           # guards a lair can have out at once
 const RUNE_HOLD := 2.2
 const EGG_PING_T := 8.0        # the dropped egg shows on everyone's minimap this long
+const EGG_APART := 4.5         # a boss's Rare Egg lands this far from its loot pile, on a spot of its own
 const CARRY_PING_T := 5.0      # ... and so does whoever picks it up
 const LOCK_T := 90.0           # the longest a fight can keep you sealed in
 const VICTORY_T := 20.0        # after the kill the gate stays shut this long unless the lever is pulled (so campers at the gate wait it out)
@@ -680,14 +681,6 @@ func _boss_dead(L: Dictionary, b: Boss, credit: Ent) -> void:
 	# glove, one treasure, sometimes a Rift Key), and the Rare Egg on its own spot a few steps away,
 	# under its own beam, so it's never lost in the pile
 	var at := _floor_spot(L, b.pos, 0.0)
-	var to_mid := Vector2(float(L["c"].x) - at.x, float(L["c"].z) - at.z)
-	var egg_dir := to_mid.normalized() if to_mid.length() > 1.0 else Vector2(-L["out"].y, L["out"].x)
-	var egg_at := _floor_spot(L, at + Vector3(egg_dir.x, 0, egg_dir.y) * 3.6, 1.8)
-	if Vector2(egg_at.x - at.x, egg_at.z - at.z).length() < 2.4:
-		egg_at = _floor_spot(L, at - Vector3(egg_dir.x, 0, egg_dir.y) * 3.6, 1.8)
-	var sp := String(b.md.get("egg", ""))
-	if Data.KIN.has(sp):
-		drop_egg(L, Loot.rare_egg(sp, b.mkind), egg_at)
 	var cls := String(killer.cls) if killer else String(Data.CLASSES.keys()[m.rng.randi() % Data.CLASSES.size()])
 	var keys: Array = Data.CLASSES[cls]["weapons"] if Data.CLASSES.has(cls) else Data.weapon_ids()
 	if killer and String(killer.arch) != "" and not Arch.weapons(String(killer.arch)).is_empty():
@@ -699,6 +692,19 @@ func _boss_dead(L: Dictionary, b: Boss, credit: Ent) -> void:
 	m.spawn_val(Loot.valuable("crown_shard" if m.rng.randf() < 0.5 else "kin_idol"), at + Vector3(0, 0, -0.8))
 	if m.exits and not m.exits.list.is_empty() and m.rng.randf() < 0.5:
 		m.exits.drop_key(at + Vector3(0, 0, 1.1))
+	# the egg: of the floor spots EGG_APART out from the pile, the one furthest from every pile item
+	var pile_at: Array = [at + Vector3(-1.5, 0, 0.4), at + Vector3(1.5, 0, 0.4), at + Vector3(0, 0, -0.8), at + Vector3(0, 0, 1.1)]
+	var egg_at := at
+	var best := -1.0
+	for k in 12:
+		var a := TAU * float(k) / 12.0
+		var q := _floor_spot(L, at + Vector3(cos(a), 0, sin(a)) * EGG_APART, 1.8)
+		var near := 1e9
+		for pp in pile_at: near = minf(near, Vector2(q.x - pp.x, q.z - pp.z).length())
+		if near > best: best = near; egg_at = q
+	var sp := String(b.md.get("egg", ""))
+	if Data.KIN.has(sp):
+		drop_egg(L, Loot.rare_egg(sp, b.mkind), egg_at)
 	# XP for everyone who fought it: the most for the killer's squad
 	for h in m.hunters:
 		if h.out or h.extracted or not inside(L, h.pos, 4.0):

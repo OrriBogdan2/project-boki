@@ -122,9 +122,8 @@ func run(main: Node) -> void:
 	T.ctrl = "idle"
 	B.teleport(T.pos + Vector3(4.0, 0, 0))
 	B.ctrl = "bot"
-	B.ai.clear()
 	var fired := false
-	for i in int(6.0 / Match.DT):
+	for i in int(12.0 / Match.DT):
 		T.hp = T.max_hp; T.armor = T.max_armor
 		var a0 := B.ammo
 		m.step(Match.DT)

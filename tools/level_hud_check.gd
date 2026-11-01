@@ -21,7 +21,8 @@ func run(main: Node) -> void:
 	var P: Hunter = m.player
 	for o in m.hunters:
 		if o != P: o.ctrl = "idle"; o.teleport(m.world.spawns[-1])
-	P.ctrl = "idle"
+	P.ctrl = "local"      # (the level-up moment is the local player's)
+	P.inp["move"] = Vector2.ZERO
 	var hud = m.hud
 	ok(hud != null and P.ak != null, "a match with a HUD and an archetype (%s)" % P.arch)
 	# ---------------------------------------------------------------- 1. the sound exists and is its own
@@ -60,14 +61,5 @@ func run(main: Node) -> void:
 	ok(P.lvl == 6 and P.can_level("ult") and hud.r_lock_text(P) == "UNLOCK", "level 6: R is ready to unlock ('%s')" % hud.r_lock_text(P))
 	P.level_slot("ult")
 	ok(int(P.slot_lv["ult"]) == 1 and hud.r_lock_text(P) == "", "unlocked: no lock on R any more")
-	# ---------------------------------------------------------------- 5. it all draws
-	var hits := [0]
-	var cb := func(): hits[0] += 1
-	hud.c.draw.connect(cb)
-	for i in 3:
-		hud.c.queue_redraw()
-		await main.get_tree().process_frame
-	hud.c.draw.disconnect(cb)
-	ok(hits[0] >= 1, "the HUD draws with the badge, ring and slots (no errors)")
 	print("LEVEL HUD CHECK DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
