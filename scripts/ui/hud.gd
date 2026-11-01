@@ -217,15 +217,13 @@ func _draw_all() -> void:
 		var rate := 1.6 + red * 3.4
 		abyss_pulse += get_process_delta_time() * rate
 		var pulse := pow(0.5 + 0.5 * sin(abyss_pulse * TAU), 3.0)
-		# a soft cold wash over everything, then a heavy vignette that closes in from the edges
-		c.draw_rect(Rect2(Vector2.ZERO, sz), Color(0.08, 0.04, 0.16, abyss_a * 0.28))
-		var rings := 9
-		for i in rings:
-			var inset := i * minf(sz.x, sz.y) * 0.035 * (0.6 + abyss_a)
-			var a := abyss_a * (0.34 - float(i) * 0.034)
+		# (the magenta wash itself is AbyssFx's shader) near the end, crimson edges beat with the heart
+		var ek := clampf((abyss_a - 0.6) / 0.4, 0.0, 1.0)
+		for i in 6:
+			var inset := i * minf(sz.x, sz.y) * 0.03
+			var a := ek * (0.22 - float(i) * 0.035) * (0.6 + 0.4 * pulse)
 			if a <= 0.0: break
-			var col := Color(0.04, 0.02, 0.1).lerp(Color(0.35, 0.02, 0.04), red * pulse)
-			c.draw_rect(Rect2(Vector2(inset, inset), sz - Vector2(inset, inset) * 2.0), Color(col, a), false, minf(sz.x, sz.y) * 0.04)
+			c.draw_rect(Rect2(Vector2(inset, inset), sz - Vector2(inset, inset) * 2.0), Color(0.45, 0.02, 0.18, a), false, minf(sz.x, sz.y) * 0.035)
 		if abyss_a > 0.15 and p == m.player:
 			var beat := int(floor(abyss_pulse))
 			if beat != abyss_beat:

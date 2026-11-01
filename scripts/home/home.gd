@@ -818,7 +818,8 @@ func _process(delta: float) -> void:
 	if hinc: hinc.tick(d)
 	if training: training.tick(d)
 	_apply_cam_settings(d)
-	cam.follow(ppos, d, panel_open == "" and train.is_empty())
+	cam.follow(Vector3(ppos.x, minf(py, 0.0), ppos.z), d, panel_open == "" and train.is_empty())
+	_abyss_tint(d)
 	_find_interact()
 	if hb and hb.active:
 		return
@@ -1380,6 +1381,24 @@ func _climb_step(d: float) -> void:
 		pvy = 0.0
 		Sfx.play("land", null, -12.0)
 		if fx: fx.dust(ppos, 3)
+
+## Under island level over the abyss the view goes magenta, as in a match (AbyssFx), deeper toward
+## the point of no return.
+const ABYSS_FX := preload("res://scripts/match/abyss_fx.gd")
+var abyss_fx: CanvasLayer = null
+var abyss_k := 0.0
+func _abyss_tint(d: float) -> void:
+	var want := 0.0
+	if world.is_void(ppos.x, ppos.z) and climb.is_empty():
+		var top := _abyss_lip() - 0.5
+		var kill: float = world.abyss_floor(ppos.x, ppos.z) - Hunter.ABYSS_EXTRA - (Hunter.ABYSS_GLIDE_ROOM if gliding else 0.0)
+		want = ABYSS_FX.danger_depth(top - py, top - kill)
+	abyss_k = want if want < abyss_k else lerpf(abyss_k, want, 1.0 - exp(-12.0 * d))     # snaps back as you come up
+	if abyss_fx == null and abyss_k > 0.004:
+		abyss_fx = ABYSS_FX.new()
+		add_child(abyss_fx)
+	if abyss_fx:
+		abyss_fx.show_danger(abyss_k, 0.0)
 
 ## The island lip you're under over the abyss: the lowest ground close by (World.abyss_ref), else
 ## where you last stood.
