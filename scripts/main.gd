@@ -1434,8 +1434,9 @@ func _ability_check() -> void:
 	P.inp["sec_hold"] = false
 	_ac_run(m, 0.3)
 	_ac("rail hold-to-charge", T.hp < T.max_hp - 25.0, "took %.0f" % (T.max_hp - T.hp))
-	# the same hold as an archetype (the Gunslinger's Rail): the shared wind-up fills, ticks full, punches out
-	P.set_arch("gunslinger"); P.unlock_all()
+	# the same hold as an archetype (Vireo's Coilshot): the shared wind-up fills, ticks full, punches out
+	P.reclass("light", "mage"); P.unlock_all()
+	_ac_run(m, 0.3)      # (the swap to a Light body settles on the ground first)
 	T.hp = T.max_hp
 	P.inp["aim"] = T.pos + Vector3(0, 0.9, 0)
 	P.ak.cd["rmb"] = 0.0; P.ak.ch_rmb = 1.0
@@ -1446,7 +1447,7 @@ func _ability_check() -> void:
 		if hk_mid[0] < 0.0 and P.ak.rmb_t > 0.6: hk_mid[0] = P.ak.charge_k())
 	P.inp["sec_hold"] = false
 	_ac_run(m, 0.3)
-	_ac("archetype hold wind-up", hk_mid[0] > 0.2 and P.ak.charge_fulls >= 1 and P.ak.charge_last > 0.9 and T.hp < T.max_hp - 25.0, "mid %.2f fulls %d took %.0f" % [hk_mid[0], P.ak.charge_fulls, T.max_hp - T.hp])
+	_ac("archetype hold wind-up", hk_mid[0] > 0.2 and P.ak.charge_fulls >= 1 and P.ak.charge_last > 0.9 and T.hp < T.max_hp - 10.0, "mid %.2f fulls %d took %.0f" % [hk_mid[0], P.ak.charge_fulls, T.max_hp - T.hp])
 	m.queue_free(); await get_tree().process_frame
 	# 13. Breach: throws the target back and you the other way
 	r = _ac_setup(2.5); m = r[0]; P = r[1]; T = r[2]
