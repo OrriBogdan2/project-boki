@@ -929,6 +929,8 @@ func bot_goal(h: Hunter, leaving: bool) -> Array:
 	var best := {}; var bd := 110.0
 	for L in list:
 		if L["state"] in ["cleared", "dormant"] or L.get("locked", false): continue
+		# a sealed gate bots can't work (runes, wards) isn't a goal: try the next lair instead of giving up
+		if L["state"] == "sealed" and not (L["entry"] as Array).has("dial"): continue
 		var d := h.flat_dist(L["c"])
 		if d < bd: bd = d; best = L
 	if best.is_empty():

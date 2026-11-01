@@ -9,7 +9,7 @@ const TIPS := [
 	"Hits don't knock you out of a glide, but they drain your glider twice as fast. Run it dry and you're spiked: you drop like a stone.",
 	"Knocked off an edge? Touch the island's side and you float back up onto it.",
 	"Exits open partway through. Stand inside one to fly home with everything you carry.",
-	"C (or middle mouse) throws your kin. It stuns whatever it hits, and pressing it again calls it back.",
+	"C (or middle mouse) throws your Boki. It stuns whatever it hits, and pressing it again calls it back.",
 	"Left and right click both belong to your weapon: every weapon has its own right-click ability. Try them in Training.",
 	"You only see what's in front of you. Rivals behind you or past a wall stay hidden, and so do you.",
 	"Tall grass hides you from anyone outside it. Shooting gives you away for a moment.",
@@ -20,14 +20,14 @@ const TIPS := [
 	"Crates and barrels break when you shoot or dash through them. Some hide a better weapon.",
 	"Weapons you find out here are stronger than your own, but only for this expedition.",
 	"Health and armor don't come back on their own. 1 heals: a tonic when you're hurt, an armor kit when your health is full. You take more damage while you do either.",
-	"Fight alongside your kin to fill the bond meter, then R calls its bond ultimate.",
-	"E is your kin's ability, and every kin has a different one. Q fires the active glove you found out here.",
-	"Your kin stuns or roots a foe? Shoot it right away for a combo.",
+	"Fight alongside your Boki to fill the bond meter, then R calls its bond ultimate.",
+	"E is your Boki's ability, and every Boki has a different one. Q fires the active glove you found out here.",
+	"Your Boki stuns or roots a foe? Shoot it right away for a combo.",
 	"In a squad, B bases you to the teammate nearest your cursor: 3s standing still, broken by any hit, and you arrive weakened for 3s.",
 	"Gloves drop from chests, vaults and bosses. One active glove (Q) and one passive glove at a time; a new one replaces the old.",
-	"Go down for good and the kin you brought are left behind. Old Pell's Ransom House sells back the ones nobody collects.",
-	"A rival took your kin? You'll sense it when they're nearby. Take it back.",
-	"Wild kin with a ring under them can be caught. Weaken them first.",
+	"Go down for good and the Boki you brought are left behind. Old Pell's Ransom House sells back the ones nobody collects.",
+	"A rival took your Boki? You'll sense it when they're nearby. Take it back.",
+	"Wild Boki with a ring under them can be caught. Weaken them first.",
 	"Jump off the skyship over an island nobody else picked. Space opens your glider early for a longer, slower last stretch.",
 	"Falling all the way into the abyss is death. Glide (hold Mouse 5 or Space) below the edge to catch an updraft back up, or touch the cliff to mantle onto it.",
 	"A teammate is down? Stand on their wisp to bring them back. Stand on an enemy's to stomp it, or hold F to finish them.",
@@ -71,7 +71,7 @@ func setup(opts: Dictionary) -> void:
 	tier = clampi(int(opts.get("tier", 0)), 0, Data.TIERS.size() - 1)
 	T = Data.TIERS[tier]
 	if opts.get("tutorial", false):
-		title = "First Expedition"; sub = "A short, safe trip with %s to learn the ropes. No rivals out here yet." % String(Save.active_kin().get("name", "your kin"))
+		title = "First Expedition"; sub = "A short, safe trip with %s to learn the ropes. No rivals out here yet." % String(Save.active_kin().get("name", "your Boki"))
 	elif opts.get("training", false):
 		title = "Training Grounds"; sub = "Dummies, ledges and boosters. No danger here."
 	else:

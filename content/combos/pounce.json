@@ -2,7 +2,7 @@
 	"id": "pounce",
 	"name": "Pounce",
 	"label": "POUNCE",
-	"desc": "You stun or slow a foe: your kin's next hit on it within 2.5s deals 60% more.",
+	"desc": "You stun or slow a foe: your Boki's next hit on it within 2.5s deals 60% more.",
 	"setup_by": "owner",
 	"statuses": [
 		"stun",

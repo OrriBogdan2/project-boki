@@ -399,9 +399,7 @@ func _build_ui() -> void:
 	col.add_child(wm)
 	col.add_child(UI.spacer(18))
 	var items: Array = []
-	if has:
-		items.append(["The story so far", func(): Game.goto("prologue", {"then": "title"}), "egg"])
-	if Bridge.net_available():
+	if Net.available():
 		items.append(["Play with friends", func(): Game.goto("lobby", {}), "bond"])
 	items.append(["Save files", func(): Overlay.ctx = "title"; Overlay.open_saves(), "satchel"])
 	items.append(["Settings", func(): Overlay.ctx = "title"; Overlay.open_settings(), "gear"])
@@ -414,7 +412,7 @@ func _build_ui() -> void:
 		UI.pop_in(ch, 0.25 + i * 0.06)
 		i += 1
 	# bottom corners: what this is, and how to drive the menu without a mouse
-	var ver := UI.label("Kinfall  ·  early build  ·  open source", 13, Color(1, 1, 1, 0.5))
+	var ver := UI.label("Project Boki  ·  early build  ·  open source", 13, Color(1, 1, 1, 0.5))
 	ver.autowrap_mode = TextServer.AUTOWRAP_OFF
 	ver.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
 	ver.offset_left = 28; ver.offset_top = -40; ver.offset_bottom = -18
@@ -561,7 +559,7 @@ class TitleLogo extends Control:
 		queue_redraw()
 	func _draw() -> void:
 		var f: Font = UI.big
-		var txt := "KINFALL"
+		var txt := "PROJECT BOKI"
 		var fs := 108
 		var w := f.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
 		var base := Vector2(4, size.y - 34)

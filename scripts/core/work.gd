@@ -20,7 +20,7 @@ class_name Work
 ##   Save.d["mats"]    {wood, stone}: building materials, spent in build mode and on expansions
 
 const ELEMENTS := {
-	"ember": {"name": "Ember", "col": Color("ff7a3a"), "job": "Kindling", "desc": "Keeps the Hearth Oven going (firewood becomes kin kibble), and warms the Incubator's Rare Egg twice as fast."},
+	"ember": {"name": "Ember", "col": Color("ff7a3a"), "job": "Kindling", "desc": "Keeps the Hearth Oven going (firewood becomes Boki kibble), and warms the Incubator's Rare Egg twice as fast."},
 	"tide": {"name": "Tide", "col": Color("4ab0ff"), "job": "Watering", "desc": "Waters the crops so they grow."},
 	"bloom": {"name": "Bloom", "col": Color("6fd86a"), "job": "Planting", "desc": "Sows seeds in empty plots and tends growing crops along."},
 	"spark": {"name": "Spark", "col": Color("ffe04a"), "job": "Powering", "desc": "Cranks the Spark Mill: a powered farm works half again as fast."},
@@ -28,9 +28,9 @@ const ELEMENTS := {
 	"forage": {"name": "Forage", "col": Color("f0c04a"), "job": "Harvesting", "desc": "Picks ripe crops into your pantry."},
 	"timber": {"name": "Timber", "col": Color("b0784a"), "job": "Lumbering", "desc": "Fells the wild trees round a Lumber Camp and splits its logs into wood."},
 	"stone": {"name": "Stone", "col": Color("a8b0c4"), "job": "Mining", "desc": "Breaks the boulders round a Quarry and mines its rock into stone."},
-	"frost": {"name": "Frost", "col": Color("a6eeff"), "job": "Cooling", "desc": "Keeps the Cold Store cold: fresh food fills kin up 15% more."},
+	"frost": {"name": "Frost", "col": Color("a6eeff"), "job": "Cooling", "desc": "Keeps the Cold Store cold: fresh food fills Boki up 15% more."},
 	"haul": {"name": "Haul", "col": Color("c6a4ff"), "job": "Hauling", "desc": "Carries logs and stone to the Storage Chest, and food to feeders that run low."},
-	"mend": {"name": "Mend", "col": Color("ff8ab4"), "job": "Mending", "desc": "Cheers up tired, glum or hungry kin, and brews tonics at the Infirmary."},
+	"mend": {"name": "Mend", "col": Color("ff8ab4"), "job": "Mending", "desc": "Cheers up tired, glum or hungry Boki, and brews tonics at the Infirmary."},
 	"ranch": {"name": "Ranch", "col": Color("ffcf9a"), "job": "Ranching", "desc": "Lounges in the Ranch Pen and makes things: glowcaps, sweet buns, kibble."},
 }
 const ORDER := ["tide", "bloom", "forage", "ember", "timber", "stone", "craft", "spark", "frost", "haul", "mend", "ranch"]
@@ -159,7 +159,7 @@ static func why_not(rec: Dictionary) -> String:
 	if rec.is_empty():
 		return "nobody"
 	if KinBox.is_boxed(rec):
-		return "Asleep in the Kin Burrow"
+		return "Asleep in the Boki Burrow"
 	if rec.get("work_rest", false):
 		return "Resting only"
 	if rec.get("ghost_wait", false):

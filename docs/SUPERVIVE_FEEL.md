@@ -1,4 +1,4 @@
-# Supervive-style feel for Kinfall (phase 1: camera + movement)
+# Supervive-style feel for Project Boki (phase 1: camera + movement)
 
 Clean-room rebuild. Nothing here comes from Supervive's files. The values come from the community wiki, published settings guides, frame-by-frame measurements of 60fps gameplay videos, or my estimates. Each one is tagged in `scripts/feel/feel_config.gd`: `[wiki]`, `[guide]`, `[footage]` or `[est]`.
 
@@ -65,7 +65,7 @@ Videos studied: TheSixGame's full walkthrough (60fps), Ryan Lemur's Celeste guid
 | Jump | 1.28m apex, 0.62s | [est] |
 | Mini / ex dash | 3.9m / 6.7m | [est] |
 
-## Combat hooks for Kinfall
+## Combat hooks for Project Boki
 `incoming_damage_multiplier()` · `notify_damaged()` (drops gliders) · `try_spike()` / `is_spikeable()` · `depth_below_ground()` · `launch(impulse)` · `main_ability_on_cooldown`. Signals: `dashed`, `glide_started`/`glide_ended`, `overheat_started`, `overheat_tick(damage)`, `mantled`, `spiked`, `fell_into_abyss`.
 
 ## Still estimates

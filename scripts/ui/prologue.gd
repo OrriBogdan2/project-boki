@@ -96,9 +96,9 @@ func _ready() -> void:
 		{"a": S + Vector3(-34, 6, 26), "la": S + Vector3(0, 2, -10), "b": S + Vector3(-8, 9, 30), "lb": S + Vector3(10, 4, -14), "dur": 8.0,
 			"chapter": "THE FLIGHT", "tint": Color("ffa04a"), "grade": 0.3, "text": "The survivors fled on anything that could still fly,\nwith the Wyrm's fire at their backs.", "event": "flee"},
 		{"a": K + Vector3(0, 3.2, 9.5), "la": K + Vector3(0, 0.8, 0), "b": K + Vector3(-4.5, 2.4, 6.0), "lb": K + Vector3(0, 0.9, 0), "dur": 8.0,
-			"chapter": "THE KIN", "tint": Color("7ae8ff"), "grade": 0.22, "text": "On the broken isles, they found they weren't alone.\nSmall bright creatures, the kin, came out to meet them.", "event": "kin"},
+			"chapter": "THE BOKI", "tint": Color("7ae8ff"), "grade": 0.22, "text": "On the broken isles, they found they weren't alone.\nSmall bright creatures, the Boki, came out to meet them.", "event": "kin"},
 		{"a": H + Vector3(18, 16, 26), "la": H + Vector3(0, 0, 0), "b": H + Vector3(-10, 12, 24), "lb": H + Vector3(2, 0, -2), "dur": 7.0,
-			"chapter": "THE REBUILDING", "tint": Color("ffd88a"), "grade": 0.2, "text": "Side by side with the kin, they started over:\nfarms, bridges and homes, one island at a time."},
+			"chapter": "THE REBUILDING", "tint": Color("ffd88a"), "grade": 0.2, "text": "Side by side with the Boki, they started over:\nfarms, bridges and homes, one island at a time."},
 		{"a": D + Vector3(-6, 30, 26), "la": D + Vector3(4, 8, -30), "b": D + Vector3(-2, 22, 10), "lb": D + Vector3(8, -6, -46), "dur": 8.0,
 			"chapter": "THE WILD ISLES", "tint": Color("b08aff"), "grade": 0.28, "text": "Now hunters fly out to the wild isles to bring back what the fall left behind.\nAnd far below the clouds, something is stirring again.", "event": "drop"},
 	]
@@ -456,7 +456,7 @@ func _title_card() -> void:
 	col.alignment = BoxContainer.ALIGNMENT_CENTER
 	col.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	card.add_child(col)
-	var big := Label.new(); big.text = "KINFALL"
+	var big := Label.new(); big.text = "PROJECT BOKI"
 	big.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	big.add_theme_font_override("font", UI.big); big.add_theme_font_size_override("font_size", 110)
 	big.add_theme_color_override("font_color", Color("f7a03c"))

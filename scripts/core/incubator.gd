@@ -50,8 +50,11 @@ static func ensure() -> void:
 	migrate()
 	settle()
 
+static var _n := 0
+## An id for an egg. No global randi(): bringing an egg home must not shift the global random stream.
 static func _id() -> String:
-	return "re%d%d" % [Time.get_ticks_usec() % 1000000, randi() % 100000]
+	_n += 1
+	return "re%d_%d" % [Time.get_ticks_usec(), _n]
 
 ## An older save kept its Rare Egg in the breeding nest: it goes into a cradle (or the front of
 ## the shelf), and the nest is free for pairs again. True if one moved.

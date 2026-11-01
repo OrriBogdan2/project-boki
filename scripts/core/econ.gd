@@ -15,7 +15,7 @@ const PACK_UPGRADE := [[120, 4], [260, 10], [450, 20]]
 
 const FEEDERS := {
 	"trough": {"name": "Wooden trough", "cap": 6, "mult": 1.0, "seats": 3, "auto": false, "joy": 0.0, "price": 40, "col": Color("a07850"),
-		"desc": "Holds 6 meals. Hungry kin come and help themselves."},
+		"desc": "Holds 6 meals. Hungry Boki come and help themselves."},
 	"basket": {"name": "Woven feeder", "cap": 10, "mult": 1.15, "seats": 4, "auto": false, "joy": 2.0, "price": 90, "col": Color("d8b878"),
 		"desc": "Holds 10 meals, and food from it fills 15% more."},
 	"hopper": {"name": "Auto hopper", "cap": 14, "mult": 1.25, "seats": 5, "auto": true, "joy": 3.0, "price": 200, "col": Color("8fb8d8"),
@@ -336,6 +336,7 @@ static func kin_dies(rec: Dictionary, cause: String) -> Dictionary:
 		"cause": cause, "t": Time.get_unix_time_from_system(), "m": int(d.get("matches", 0)), "mem": mem.slice(maxi(0, mem.size() - 8)),
 		"shimmer": rec.get("shimmer", false), "ghost": rec.get("ghost", false), "title": String(rec.get("title", "")), "soul": false, "rec": rec.duplicate(true)}
 	d["graves"].append(g)
+	Save.log_event("died", rec, {"cause": cause})
 	if str(d.get("active", "")) == String(rec["uid"]):
 		d["active"] = d["roster"][0]["uid"] if not (d["roster"] as Array).is_empty() else ""
 	if str(d.get("active2", "")) == String(rec["uid"]):
@@ -351,7 +352,7 @@ static func souls_kept() -> int:
 static func epitaph(g: Dictionary) -> String:
 	var sp: Dictionary = Data.KIN.get(String(g.get("species", "")), {})
 	var why := "Starved while you were away" if String(g.get("cause", "")) == "starved" else "Lost"
-	return "%s, a level %d %s. %s." % [g["name"], int(g["level"]), sp.get("name", "kin"), why]
+	return "%s, a level %d %s. %s." % [g["name"], int(g["level"]), sp.get("name", "Boki"), why]
 
 ## What bringing a kin back costs: one Soul Ember, and gems by its level.
 static func revive_cost(g: Dictionary) -> int:
@@ -376,7 +377,10 @@ static func revive(g: Dictionary, rng: RandomNumberGenerator = null) -> Dictiona
 	use_ember()
 	Save.d["gems"] = int(Save.d["gems"]) - revive_cost(g)
 	var rec: Dictionary = (g["rec"] as Dictionary).duplicate(true)
-	rec["uid"] = "k%d%d" % [Time.get_ticks_usec() % 1000000, rng.randi() % 1000]
+	rng.randi()      # (the old fresh id took a roll here: kept so a seeded revive stays the same)
+	# it comes back as itself: the same lasting id (a very old grave with none gets one now)
+	if String(rec.get("uid", "")) == "" or not Save.kin(String(rec["uid"])).is_empty():
+		rec["uid"] = Save.new_id()
 	# its personality comes back a little rearranged
 	var tr: Dictionary = rec.get("traits", {})
 	var keys: Array = tr.keys()
@@ -404,6 +408,7 @@ static func revive(g: Dictionary, rng: RandomNumberGenerator = null) -> Dictiona
 	Care.ensure(rec)
 	rec["needs"] = {"food": 80.0, "energy": 60.0, "joy": 55.0, "clean": 90.0}
 	Save.remember(rec, "returned", "came back from the Soul Shrine, %s" % rec["title"], 0.0)
+	Save.log_event("revived", rec)
 	Save.d["roster"].append(rec)
 	KinBox.route_back(rec)
 	Save.d["graves"].erase(g)

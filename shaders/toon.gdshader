@@ -47,6 +47,14 @@ uniform float recolor_min_val = 0.0;  // (dark trunks can share a hue with orang
 uniform float recolor_ref = 0.6;      // the band's typical brightness, which maps onto recolor_to
 uniform float tex_sat = 1.0;          // overall saturation of the texture's own colours
 uniform float color_tint = 0.0;       // with use_vertex_color: how much the instance colour also tints the rest
+// A kin's own coat marks (Unique.dress): 0 none, 1 spots, 2 stripes, 3 patches, 4 freckles, in the
+// part's own space, offset by a per-kin seed so no two kin wear the same pattern.
+uniform int mark_kind = 0;
+uniform vec4 mark_color : source_color = vec4(0.2, 0.15, 0.1, 1.0);
+uniform vec3 mark_seed = vec3(0.0);
+uniform float mark_scale = 9.0;
+uniform float mark_amt = 0.5;
+uniform float mark_glow = 0.0;
 #include "res://shaders/noise.gdshaderinc"
 #include "res://shaders/vis.gdshaderinc"
 varying vec3 lpos;
@@ -68,6 +76,45 @@ vec3 rgb2hsv(vec3 c) {
 	return vec3(abs(q.z + (q.w - q.y) / (6.0 * d + 1.0e-10)), d / (q.x + 1.0e-10), q.x);
 }
 
+float mk_h31(vec3 p) { return fract(sin(dot(p, vec3(127.1, 311.7, 74.7))) * 43758.5453); }
+vec3 mk_h33(vec3 p) {
+	return fract(sin(vec3(dot(p, vec3(127.1, 311.7, 74.7)), dot(p, vec3(269.5, 183.3, 246.1)), dot(p, vec3(113.5, 271.9, 124.6)))) * 43758.5453);
+}
+float mk_vn3(vec3 p) {
+	vec3 i = floor(p); vec3 f = fract(p);
+	vec3 u = f * f * (3.0 - 2.0 * f);
+	return mix(mix(mix(mk_h31(i), mk_h31(i + vec3(1, 0, 0)), u.x), mix(mk_h31(i + vec3(0, 1, 0)), mk_h31(i + vec3(1, 1, 0)), u.x), u.y),
+		mix(mix(mk_h31(i + vec3(0, 0, 1)), mk_h31(i + vec3(1, 0, 1)), u.x), mix(mk_h31(i + vec3(0, 1, 1)), mk_h31(i + vec3(1, 1, 1)), u.x), u.y), u.z);
+}
+// spots: jittered cells, some empty, each spot its own size
+float mk_spots(vec3 q, float amt) {
+	vec3 i = floor(q); vec3 f = fract(q);
+	float m = 0.0;
+	for (int z = -1; z <= 1; z++) for (int y = -1; y <= 1; y++) for (int x = -1; x <= 1; x++) {
+		vec3 g = vec3(float(x), float(y), float(z));
+		vec3 o = mk_h33(i + g);
+		float keep = step(mk_h31(i + g + 17.0), 0.35 + amt * 0.6);
+		float r = mix(0.18, 0.36, o.z) * (0.7 + amt * 0.6);
+		float dd = length(g + o * 0.7 + 0.15 - f);
+		m = max(m, keep * (1.0 - smoothstep(r - 0.05, r, dd)));
+	}
+	return m;
+}
+float mk_pattern(vec3 q) {
+	if (mark_kind == 1) { return mk_spots(q, mark_amt); }
+	if (mark_kind == 2) {
+		float w = mk_vn3(q * 0.45) * 3.2;
+		float s = sin(q.x * 1.6 + q.z * 0.4 + w);
+		return smoothstep(0.82 - mark_amt * 0.9, 0.95 - mark_amt * 0.9, s);
+	}
+	if (mark_kind == 3) {
+		float n = mk_vn3(q) * 0.7 + mk_vn3(q * 2.3 + 5.0) * 0.3;
+		return smoothstep(0.68 - mark_amt * 0.3, 0.72 - mark_amt * 0.3, n);
+	}
+	if (mark_kind == 4) { return mk_spots(q, mark_amt * 0.5) * 0.85; }
+	return 0.0;
+}
+
 void fragment() {
 	vec3 c = albedo.rgb;
 	if (use_tex) {
@@ -84,6 +131,11 @@ void fragment() {
 		if (use_vertex_color) { c *= mix(vec3(1.0), COLOR.rgb, color_tint * (1.0 - band * recolor)); }
 	} else if (use_vertex_color) { c *= COLOR.rgb; }
 	else if (vertex_ao) { c *= COLOR.rgb; }
+	float mk = 0.0;
+	if (mark_kind > 0) {
+		mk = mk_pattern(lpos * mark_scale + mark_seed);
+		c = mix(c, mark_color.rgb, mk * 0.92);
+	}
 	// hand-painted variation: soft blotches of slightly lighter and darker paint
 	float n = vnoise(lpos.xz * 7.0 + lpos.y * 4.0) * 0.6 + vnoise(lpos.xy * 15.0 + 3.1) * 0.4;
 	c *= 1.0 + (n - 0.5) * 2.0 * paint;
@@ -127,7 +179,7 @@ void fragment() {
 	// a faint rim everywhere (so silhouettes lift off dark ground even in shadow); the crisp,
 	// light-facing rim is added per light below
 	float rim = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 3.0);
-	EMISSION = flash_color.rgb * flash * 0.9 + c * glow + rim_color.rgb * rim * rim_amount * 0.12 * (1.0 - fog);
+	EMISSION = flash_color.rgb * flash * 0.9 + c * glow + rim_color.rgb * rim * rim_amount * 0.12 * (1.0 - fog) + mark_color.rgb * mk * mark_glow;
 	ROUGHNESS = 1.0;
 	SPECULAR = 0.0;
 }

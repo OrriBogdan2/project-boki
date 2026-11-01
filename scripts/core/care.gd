@@ -58,7 +58,7 @@ const IV_INHERIT_MAX := 5
 ## Rare Eggs from boss lairs: this many stats are always at least IV_RARE_FLOOR.
 const IV_RARE_HIGH := 3
 const IV_RARE_FLOOR := 26
-const IV_EXPLAIN := "IVs are what a kin is born with: 0 to 31 a stat, fixed for life, passed down when kin breed. 31 is up to 10% better than 0."
+const IV_EXPLAIN := "IVs are what a Boki is born with: 0 to 31 a stat, fixed for life, passed down when Boki breed. 31 is up to 10% better than 0."
 
 const BONDS := [
 	[0.0, "Wary", "Might refuse a risky throw."],
@@ -78,9 +78,9 @@ const NATURES := {
 
 ## Things a kin can love or hate. Foods are crops plus what the stall sells.
 const FOODS := {
-	"kibble": {"name": "Kin kibble", "col": Color("c8a26a"), "food": 30.0, "joy": 0.0, "price": 6, "desc": "Plain and filling."},
-	"sweetbun": {"name": "Sweet bun", "col": Color("f6c6a0"), "food": 18.0, "joy": 18.0, "price": 14, "desc": "A treat. Makes any kin happy."},
-	"tonicbrew": {"name": "Pep brew", "col": Color("8ff0a0"), "food": 6.0, "joy": 4.0, "energy": 35.0, "price": 18, "desc": "Wakes a tired kin right up."},
+	"kibble": {"name": "Boki kibble", "col": Color("c8a26a"), "food": 30.0, "joy": 0.0, "price": 6, "desc": "Plain and filling."},
+	"sweetbun": {"name": "Sweet bun", "col": Color("f6c6a0"), "food": 18.0, "joy": 18.0, "price": 14, "desc": "A treat. Makes any Boki happy."},
+	"tonicbrew": {"name": "Pep brew", "col": Color("8ff0a0"), "food": 6.0, "joy": 4.0, "energy": 35.0, "price": 18, "desc": "Wakes a tired Boki right up."},
 }
 const PLAYS := ["fetch", "brush", "bath", "chat", "pet"]
 const PLAY_NAMES := {"fetch": "playing fetch", "brush": "being brushed", "bath": "baths", "chat": "chatting", "pet": "scratches"}
@@ -107,6 +107,7 @@ static func ensure(rec: Dictionary) -> void:
 		rec["known"] = []          # which of food / hates / play you've found out
 	if not rec.has("ivs") or typeof(rec["ivs"]) != TYPE_DICTIONARY:
 		rec["ivs"] = ivs_from_uid(String(rec.get("uid", "x")))     # old saves: fixed by the kin's id
+	Unique.ensure(rec)          # its inborn size, looks and habits (old saves: fixed by the kin's id)
 
 static func need(rec: Dictionary, n: String) -> float:
 	ensure(rec)
@@ -344,6 +345,7 @@ static func feed(rec: Dictionary, f: String) -> Dictionary:
 		change(rec, "energy", float(FOODS[f].get("energy", 0.0)))
 	if out["love"]:
 		joy += 22.0
+		fill *= Unique.FAV_FILL       # its favourite food: a little more filling too
 		out["new"] = discover(rec, "food")
 	var was := need(rec, "food")
 	change(rec, "food", fill)
@@ -406,7 +408,7 @@ static func iv_grade(rec: Dictionary) -> Array:
 	if t >= 126: return ["Remarkable", "Born remarkable: one in a great many."]
 	if t >= 101: return ["Fine stock", "Comes from fine stock, well above most."]
 	if t >= 76: return ["Good stock", "Comes from good stock, a cut above average."]
-	return ["Ordinary stock", "Ordinary stock: much like any other kin."]
+	return ["Ordinary stock", "Ordinary stock: much like any other Boki."]
 
 ## Its best stats (all those tied for the top).
 static func iv_best(rec: Dictionary) -> Array:
@@ -477,6 +479,11 @@ static func breed(a: Dictionary, b: Dictionary, rng: RandomNumberGenerator, sp :
 	var inh := inherit_ivs(a, b, rng, inherit_n)
 	baby["ivs"] = inh["ivs"]
 	baby["iv_from"] = inh["from"]       # stat -> which parent (index into "parents") it came from
+	# its own looks and habits, a blend of both parents' (Unique.inherit, its own seed: rng untouched)
+	baby["dna"] = Unique.inherit(a, b, int(baby["dna"]["seed"]))
+	baby["lineage"] = {"parents": [String(a.get("uid", "")), String(b.get("uid", ""))], "names": [String(a["name"]), String(b["name"])],
+		"gen": maxi(int((a.get("lineage", {}) as Dictionary).get("gen", 0)), int((b.get("lineage", {}) as Dictionary).get("gen", 0))) + 1}
+	baby["origin"] = {"how": "egg", "where": {"place": "home"}}
 	ensure(baby)
 	return baby
 
@@ -499,6 +506,7 @@ static func hatch_rare(egg: Dictionary, rng: RandomNumberGenerator) -> Dictionar
 	baby["shimmer"] = rng.randf() < Shiny.EGG[0]      # as rare as any egg
 	baby["from_boss"] = String(egg.get("boss", ""))
 	baby["ivs"] = rare_ivs(rng)        # three stats 26 or better (shimmer doesn't touch IVs)
+	baby["origin"] = {"how": "boss_egg", "where": {"place": "home", "lair": String(egg.get("boss", ""))}}
 	Evo.ensure(baby)
 	ensure(baby)
 	return baby

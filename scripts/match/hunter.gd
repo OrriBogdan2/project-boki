@@ -410,6 +410,9 @@ func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
 	armor_wait = ARMOR_WAIT
 	if drink_t > 0.0 or kit_t > 0.0:
 		d *= CONSUME_VULN
+		# drinking or repairing leaves you open: any real hit spills it (you keep the tonic or kit)
+		if d >= 1.0 and opts.get("src", "") != "heat":
+			_interrupt_consume()
 	if armor > 0.0 and opts.get("src", "") not in ["fall", "burn", "heat"]:
 		d *= 1.0 - ARMOR_DR
 		# your kin's armor stats make it wear more slowly
@@ -1487,7 +1490,7 @@ func use_kin_ability(slot: String) -> void:
 	if not k.ready_to_fight():
 		_ab_feedback(slot, "deny")
 		if is_local() and m.hud:
-			m.hud.toast("%s is resting%s" % [k.rec.get("name", "Your kin"), ("  ·  %s swaps in %s" % [Settings.key_cap("swap_kin"), (kin2 as Kin).rec.get("name", "your other kin")]) if kin2 and (kin2 as Kin).hp > 0.0 else ""], Color("a2a8bb"))
+			m.hud.toast("%s is resting%s" % [k.rec.get("name", "Your Boki"), ("  ·  %s swaps in %s" % [Settings.key_cap("swap_kin"), (kin2 as Kin).rec.get("name", "your other Boki")]) if kin2 and (kin2 as Kin).hp > 0.0 else ""], Color("a2a8bb"))
 		return
 	if k.use_ability(slot, _ground_aim()) or k.pend_slot == slot:
 		used[slot] = int(used.get(slot, 0)) + 1
@@ -1508,7 +1511,7 @@ func use_ultimate() -> void:
 		return
 	_ab_feedback("r", "deny")
 	if is_local() and m.hud and ult >= 1.0 and kin and not (kin as Kin).ready_to_fight():
-		m.hud.toast("Your kin has to be with you", Color("a2a8bb"))
+		m.hud.toast("Your Boki has to be with you", Color("a2a8bb"))
 
 ## Tells the HUD a button press landed ("cast": the slot pops) or didn't ("deny": it shakes red
 ## with a soft buzz), so a press on cooldown never just silently does nothing.
@@ -1589,11 +1592,15 @@ func heal(n: float) -> void:
 ## stunned or going down spills it (you keep the tonic). It heals when you finish.
 const DRINK_TIME := 1.1
 var drink_t := 0.0
+var vuln_fx_t := 0.0            # paces the pulsing "vulnerable" tell while drinking or repairing
 func use_tonic() -> void:
-	if tonics <= 0 or downed or hp >= max_hp or drink_t > 0.0 or gliding or not grounded:
+	if tonics <= 0 or downed or hp >= max_hp or drink_t > 0.0:
 		return
+	_fold_for_action()
 	drink_t = DRINK_TIME
+	vuln_fx_t = 0.0
 	m.sfx("pickup", pos, -6.0, 0.7)
+	m.fx.word(pos + Vector3(0, 2.3, 0), "VULNERABLE", Color("ff6a4a"))
 
 ## 1: heal. One key for both consumables: a tonic when you're hurt, otherwise an armor kit when
 ## your armor is down. Pressing it with nothing to fix (or nothing to use) buzzes.
@@ -1615,10 +1622,13 @@ var finish_t := 0.0             # holding interact over a downed enemy (until th
 var stomp: Dictionary = {}      # committed stomp on an enemy wisp: {o, t, hits} (see Life)
 var kit_t := 0.0
 func use_kit() -> void:
-	if armor_kits <= 0 or downed or armor >= max_armor - 0.5 or kit_t > 0.0 or drink_t > 0.0 or gliding or not grounded:
+	if armor_kits <= 0 or downed or armor >= max_armor - 0.5 or kit_t > 0.0 or drink_t > 0.0:
 		return
+	_fold_for_action()
 	kit_t = KIT_TIME
+	vuln_fx_t = 0.0
 	m.sfx("build", pos, -6.0, 1.3)
+	m.fx.word(pos + Vector3(0, 2.3, 0), "VULNERABLE", Color("ff6a4a"))
 
 func _tick_kit(dt: float) -> void:
 	if kit_t <= 0.0:
@@ -1750,6 +1760,11 @@ func sim(dt: float) -> void:
 	# inputs
 	for gk in [["dash", "dash", "dash"], ["sec", "sec", "sec"], ["gear1", "gear", "gear0"], ["sig", "kin", "k1"], ["ult", "ult", "r"]]:
 		_gate(gk[0], gk[1], gk[2])
+	if dropping and not grounded and ctrl != "bot":
+		for bk in ["sec", "sig", "ult", "tonic", "kit", "gear1", "gear2"]:
+			if inp.get(bk, false):
+				_break_drop()
+				break
 	if not downed and not dropping and not out:
 		gain_xp(dt * 1.2)       # a slow trickle, so a careful run still levels
 	_tick_base(dt)
@@ -2158,6 +2173,40 @@ func _deploy() -> void:
 	vel.y = maxf(vel.y, -3.0)
 	m.sfx("glide", pos, -2.0)
 	m.fx.burst(pos + Vector3(0, 1.7, 0), Color("f3eee2"), 12, 3.0, 0.4, 0.0)
+
+## The opening drop ends early when you press an ability, gear or a heal mid-air: the glider folds
+## and you fall free with the speed you had, so you can dive, pull up and drink or cast on the way
+## down. You lose the drop's protection (you can be hit from then on) and land like any other fall.
+func _break_drop() -> void:
+	if not dropping or grounded:
+		return
+	dropping = false
+	diving = false
+	gliding = false
+	glide_fuel = 1.0
+	glide_cd = 0.25
+	_glider_sfx("close")
+	m.fx.burst(pos + Vector3(0, 1.7, 0), Color("f3eee2"), 10, 2.5, 0.35, 0.0)
+
+## Using a heal in the air: out of the drop if you were in it, and the glider folds (it can't be
+## held while you drink; holding glide again opens it after a beat and spills what's left).
+func _fold_for_action() -> void:
+	if dropping:
+		_break_drop()
+	elif gliding:
+		gliding = false
+		glide_cd = maxf(glide_cd, 0.4)
+		_glider_sfx("close")
+
+## Knocked out of a drink or a repair: it spills (nothing is used up) and everyone sees it.
+func _interrupt_consume() -> void:
+	if drink_t <= 0.0 and kit_t <= 0.0:
+		return
+	drink_t = 0.0
+	kit_t = 0.0
+	m.fx.word(pos + Vector3(0, 2.3, 0), "INTERRUPTED", Color("ff8a5a"))
+	m.fx.burst(pos + Vector3(0, 1.3, 0), Color("ff7a4a"), 10, 3.0, 0.35, 8.0)
+	m.sfx("crit", pos, -4.0, 0.7)
 
 ## Hold jump while falling to open the glider. It folds when you land, run out, dash, or get hit.
 var air_t := 0.0                # time since you left the ground
@@ -2747,3 +2796,9 @@ func render(delta: float, alpha: float) -> void:
 	var ring := model.get_node("TeamRing") as MeshInstance3D
 	ring.visible = not downed
 	_render_balloon(delta)
+	if (drink_t > 0.0 or kit_t > 0.0) and visible and see:
+		vuln_fx_t -= delta
+		if vuln_fx_t <= 0.0:
+			vuln_fx_t = 0.22
+			m.fx.ring(pos + Vector3(0, 0.05, 0), 1.05, Color(1.0, 0.33, 0.22, 0.85), 0.24)
+			m.fx.burst(pos + Vector3(0, 2.05, 0), Color("ff6a4a"), 3, 1.2, 0.3, -1.0, 0.8)

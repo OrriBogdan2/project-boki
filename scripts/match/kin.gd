@@ -105,7 +105,13 @@ func init_kin(match_node: Node, id: String, species_id: String, record: Dictiona
 		max_hp *= Care.iv_mult(rec, "hp"); hp = max_hp
 		dmg *= Care.iv_mult(rec, "atk")
 		speed *= Care.iv_mult(rec, "spd")
-	r = 0.36 * (1.0 + minf(rec.get("forms", []).size() * 0.08, 0.4)) * (1.3 if ks and ks.size == "large" else 1.0)
+	# its own size (Unique): a tiny capped trade-off (bigger: a little more health, a little slower)
+	# and a hitbox to match; both off in a normalized match (Unique.normalized)
+	var norm := Unique.normalized(match_node)
+	var um := Unique.match_mods(rec, norm)
+	max_hp *= float(um["hp"]); hp = max_hp
+	speed *= float(um["speed"])
+	r = 0.36 * (1.0 + minf(rec.get("forms", []).size() * 0.08, 0.4)) * (1.3 if ks and ks.size == "large" else 1.0) * Unique.hit_scale(rec, norm)
 	state = "shoulder" if owner_h else "wild"
 	settle = 1.0
 	runner = KinRunner.new()
@@ -209,7 +215,7 @@ func throw_to(p: Vector3, slot := "") -> void:
 	var verdict := consider_throw(p) if owner_h.is_local() or randf() < 0.3 else "go"
 	if verdict == "refuse":
 		bark("refuse")
-		m.sfx("kin_unsure", owner_h.pos, -2.0)
+		m.sfx("kin_unsure", owner_h.pos, -2.0, Unique.voice(rec))
 		note("refused", "refused to jump into a fight that looked too dangerous", -1.0)
 		return
 	if slot != "":
@@ -219,7 +225,7 @@ func throw_to(p: Vector3, slot := "") -> void:
 		hesitate_t = 0.45
 		hesitate_to = p
 		bark("hesitate")
-		m.sfx("kin_unsure", owner_h.pos, -4.0)
+		m.sfx("kin_unsure", owner_h.pos, -4.0, Unique.voice(rec))
 		return
 	_launch(p)
 

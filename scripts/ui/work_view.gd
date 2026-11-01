@@ -180,12 +180,12 @@ static func _drop(h: Node, rec: Dictionary) -> void:
 # ------------------------------------------------------------------ the Job Board
 static func open(h: Node) -> void:
 	var v: VBoxContainer = h._new_panel("Job Board", 1010)
-	UI.subtitle(v, "Farm kin take the jobs they're best at on their own. Set what matters most.")
+	UI.subtitle(v, "Farm Boki take the jobs they're best at on their own. Set what matters most.")
 	var hx := UI.head_extra(v)
-	hx.add_child(UI.chip("seed", "%d wood" % Work.mat("wood"), Work.col_of("timber"), "Wood: from Timber kin at a Lumber Camp"))
-	hx.add_child(UI.chip("seed", "%d stone" % Work.mat("stone"), Work.col_of("stone"), "Stone: from Stone kin at a Quarry"))
-	hx.add_child(UI.chip("gem", "%d scrap" % int(Save.d.get("scrap", 0)), Work.col_of("craft"), "Scrap: from Craft kin at a Workbench"))
-	hx.add_child(UI.chip("heart", "%d kibble" % int(Save.d["items"].get("kibble", 0)), Work.col_of("ember"), "Kibble: from Ember kin at the Hearth Oven"))
+	hx.add_child(UI.chip("seed", "%d wood" % Work.mat("wood"), Work.col_of("timber"), "Wood: from Timber Boki at a Lumber Camp"))
+	hx.add_child(UI.chip("seed", "%d stone" % Work.mat("stone"), Work.col_of("stone"), "Stone: from Stone Boki at a Quarry"))
+	hx.add_child(UI.chip("gem", "%d scrap" % int(Save.d.get("scrap", 0)), Work.col_of("craft"), "Scrap: from Craft Boki at a Workbench"))
+	hx.add_child(UI.chip("heart", "%d kibble" % int(Save.d["items"].get("kibble", 0)), Work.col_of("ember"), "Kibble: from Ember Boki at the Hearth Oven"))
 	UI.shell_tabs(v, ["Jobs", "Kin"], tab, func(t): tab = t; open(h))
 	var hw = h.hw
 	if tab == "Jobs":
@@ -205,18 +205,18 @@ static func open(h: Node) -> void:
 		v.add_child(list)
 		var rows: Array = hw.workers()
 		if rows.is_empty():
-			list.add_child(UI.empty_state("paw", "Nobody on the farm", "Kin out on the farm take jobs. Kin asleep in the Kin Burrow never work."))
+			list.add_child(UI.empty_state("paw", "Nobody on the farm", "Boki out on the farm take jobs. Boki asleep in the Boki Burrow never work."))
 		for w in rows:
 			list.add_child(_kin_row(h, w))
 		var nb := KinBox.boxed().size()
 		if nb > 0:
-			list.add_child(UI.para("%d more asleep in the Kin Burrow: kin in the burrow never work." % nb, 12, UI.FAINT))
+			list.add_child(UI.para("%d more asleep in the Boki Burrow: Boki in the burrow never work." % nb, 12, UI.FAINT))
 	var ft := UI.footer(v)
 	var made: Dictionary = Work.ensure()["made"]
 	var bits: Array = []
 	for key in ["wood", "stone", "kibble", "scrap", "watered", "sown", "tonics"]:
 		if int(made.get(key, 0)) > 0: bits.append("%d %s" % [int(made[key]), key])
-	var ml := UI.label(("Made so far: " + ", ".join(bits)) if not bits.is_empty() else "Build work stations (Build, Work tab) and your kin get going.", 12, UI.MUTED)
+	var ml := UI.label(("Made so far: " + ", ".join(bits)) if not bits.is_empty() else "Build work stations (Build, Work tab) and your Boki get going.", 12, UI.MUTED)
 	ml.autowrap_mode = TextServer.AUTOWRAP_OFF
 	ft.add_child(ml)
 	UI.footer_primary(v, "Done", func(): h._close_panel(), 100)
@@ -243,7 +243,7 @@ static func _job_row(h: Node, el: String, waiting: int, who: Array) -> Control:
 	sl.autowrap_mode = TextServer.AUTOWRAP_OFF
 	top.add_child(sl)
 	tv.add_child(top)
-	var sub := UI.label(("Best: %s (%d)" % [best, bl]) if best != "" else "No farm kin has it", 12, UI.MUTED if best != "" else Color("ff9a8a"))
+	var sub := UI.label(("Best: %s (%d)" % [best, bl]) if best != "" else "No farm Boki has it", 12, UI.MUTED if best != "" else Color("ff9a8a"))
 	sub.autowrap_mode = TextServer.AUTOWRAP_OFF
 	sub.tooltip_text = String(e["desc"])
 	sub.mouse_filter = Control.MOUSE_FILTER_PASS
