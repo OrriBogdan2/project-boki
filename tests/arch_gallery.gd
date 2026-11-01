@@ -19,14 +19,19 @@ func _ready() -> void:
 	var env := WorldEnvironment.new()
 	env.environment = Look.environment({"top": Color("2a4a8a"), "mid": Color("6a8ad0"), "horizon": Color("ffd2a8"), "stars": 0.0})
 	add_child(env)
-	Look.lights(self, Color("fff1dc"), 1.0, Vector3(-42, -32, 0), 40.0)
+	var showcase := Array(OS.get_cmdline_user_args()).any(func(a): return String(a).begins_with("--showcase"))
+	# the showcase is lit like a match (the sun high and in front of the camera's side), the rest backlit
+	Look.lights(self, Color("fff1dc"), 1.0, Vector3(-50, 145, 0) if showcase else Vector3(-42, -32, 0), 40.0)
 	var ground := MeshInstance3D.new()
 	var pm := PlaneMesh.new(); pm.size = Vector2(80, 60)
 	ground.mesh = pm
 	ground.material_override = Models.toon(Color("6f9a4a"), false)
 	add_child(ground)
 	var args := OS.get_cmdline_user_args()
-	if "--arch-matrix" in args:
+	if "--showcase" in args or "--showcase-top" in args or "--showcase-poses" in args:
+		ground.material_override = Models.toon(Color("4f7a3e"), false)
+		_showcase()
+	elif "--arch-matrix" in args:
 		_matrix()
 	elif "--arch-heads" in args:
 		_heads()
@@ -119,6 +124,86 @@ func _heads() -> void:
 	add_child(cam)
 	cam.make_current()
 
+## The hero showcase (Thief and Juggernaut), for the hero-art screenshots:
+##   --showcase        three of each across races and genders, close up from a three-quarter view
+##   --showcase-top    the same hunters from the match camera (Supervive preset: 65°, 25 m, fov 35);
+##                     --showcase-zoom halves the field of view to inspect what reads at that angle
+##   --showcase-poses  each archetype frozen in idle, run, attack, RMB cast and ultimate
+## Optional: --showcase-arch=thief|juggernaut (only that one), --showcase-outfit=<index>.
+var frozen := false
+func _showcase() -> void:
+	var args := OS.get_cmdline_user_args()
+	var only := _arg("--showcase-arch=", "")
+	var arches := ["thief", "juggernaut"] if only == "" else [only]
+	var looks := {
+		"thief": [{"race": 0, "gender": 0, "hair": 1, "hair_col": 0, "skin": 2, "face": 4, "outfit": 1},
+			{"race": 1, "gender": 1, "hair": 0, "hair_col": 5, "skin": 2, "face": 7, "outfit": 3},
+			{"race": 3, "gender": 0, "hair": 0, "hair_col": 3, "skin": 11, "face": 0, "outfit": 2}],
+		"juggernaut": [{"race": 0, "gender": 1, "hair": 0, "hair_col": 1, "skin": 4, "face": 7, "outfit": 7, "detail": 5},
+			{"race": 2, "gender": 1, "hair": 0, "hair_col": 10, "skin": 19, "face": 4, "outfit": 5},
+			{"race": 4, "gender": 0, "hair": 1, "hair_col": 6, "skin": 12, "face": 0, "outfit": 8}],
+	}
+	var oo := int(_arg("--showcase-outfit=", "-1"))
+	var cam := Camera3D.new()
+	add_child(cam)
+	if "--showcase-poses" in args:
+		var poses := ["idle", "run", "attack", "cast", "ult"]
+		var r := 0
+		for arch in arches:
+			for i in poses.size():
+				var lk: Dictionary = (looks[arch][0] as Dictionary).duplicate()
+				lk["hair_v"] = 2; lk["body"] = 1
+				if oo >= 0: lk["outfit"] = oo
+				var h := _hunter(arch, lk, 0)
+				h.position = Vector3((i - 2.0) * 1.9, 0, -r * 3.2)
+				h.rotation.y = PI * 0.82
+				_pose(anims[anims.size() - 1][0], h, poses[i], arch)
+				_label(poses[i], h.position + Vector3(0, 0.03, 1.0), 22)
+			r += 1
+		frozen = true
+		cam.position = Vector3(0, 4.6 + 1.2 * (arches.size() - 1), 6.2); cam.rotation = Vector3(-0.5, 0, 0); cam.fov = 50
+		cam.make_current()
+		return
+	var i := 0
+	for arch in arches:
+		for lk0 in looks[arch]:
+			var lk: Dictionary = (lk0 as Dictionary).duplicate()
+			lk["hair_v"] = 2; lk["body"] = 1
+			if oo >= 0: lk["outfit"] = oo
+			var h := _hunter(arch, lk, i % 2)
+			var n := arches.size() * 3
+			h.position = Vector3((i - (n - 1) * 0.5) * 1.55, 0, 0)
+			h.rotation.y = PI * 0.86
+			i += 1
+	if "--showcase-top" in args:
+		# the Supervive camera preset (Cam.STYLES "supervive"), looking at the middle of the row
+		var p := deg_to_rad(65.0)
+		cam.position = Vector3(0, sin(p) * 25.0, cos(p) * 25.0); cam.rotation = Vector3(-p, 0, 0)
+		cam.fov = 17.5 if "--showcase-zoom" in args else 35.0
+	else:
+		cam.position = Vector3(0, 1.55, 5.6 + 0.6 * (arches.size() - 1)); cam.rotation = Vector3(-0.1, 0, 0); cam.fov = 46 if arches.size() > 1 else 40
+	cam.make_current()
+
+## Runs the animation into a pose and holds it there (a few hundred small steps).
+func _pose(an: HunterAnim, h: Node3D, pose: String, arch: String) -> void:
+	var s := {"fired": 99.0, "face": h.rotation.y, "grounded": true}
+	var fwd := Vector3(-sin(h.rotation.y), 0, -cos(h.rotation.y))
+	var steps := 90
+	for k in steps:
+		s["fired"] = 99.0
+		match pose:
+			"run":
+				s["vel"] = fwd * (5.2 if arch == "thief" else 4.7)
+			"attack":
+				if k == steps - 9: s["swing_n"] = 1; s["combo"] = 0
+			"cast":
+				if k >= steps - 12: s["cast"] = (k - (steps - 12)) / 60.0; s["cast_slot"] = "utility"
+			"ult":
+				if k >= steps - 14: s["cast"] = (k - (steps - 14)) / 60.0; s["cast_slot"] = "ult"
+		an.update(1.0 / 60.0, s)
+
 func _process(delta: float) -> void:
+	if frozen:
+		return
 	for a in anims:
 		(a[0] as HunterAnim).update(delta, {"fired": 99.0, "face": (a[1] as Node3D).rotation.y})
