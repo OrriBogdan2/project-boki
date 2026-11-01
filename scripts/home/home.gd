@@ -1057,6 +1057,10 @@ func _move_player(d: float) -> void:
 	if air:
 		if not lfl.is_empty() and _ledge_float(d, mv):
 			pass
+		elif gliding and gh <= World.VOID + 1.0 and py < _abyss_lip() - 0.5:
+			# below an island's lip over the abyss the glider pulls you up, harder the deeper you are
+			# (the match's lift: Hunter.abyss_lift_vy). The farm never had it: you only sank
+			pvy = Hunter.abyss_lift_vy(pvy, _abyss_lip() - py, d)
 		elif gliding and pvy <= 0.0:
 			pvy = move_toward(pvy, -Hunter.GLIDE_SINK, Hunter.GLIDE_CATCH * d)
 		else:
@@ -1070,7 +1074,7 @@ func _move_player(d: float) -> void:
 			pvy = 0.0
 			gliding = false
 			Sfx.step(null, -16.0)
-		elif py < FALL_RESPAWN or (gh <= World.VOID + 1.0 and py < world.abyss_floor(ppos.x, ppos.z) - (Hunter.ABYSS_GLIDE_ROOM if gliding else 0.0)):
+		elif py < FALL_RESPAWN or (gh <= World.VOID + 1.0 and py < world.abyss_floor(ppos.x, ppos.z) - Hunter.ABYSS_EXTRA - (Hunter.ABYSS_GLIDE_ROOM if gliding else 0.0)):
 			_respawn_safe()
 	else:
 		py = gh
@@ -1376,6 +1380,15 @@ func _climb_step(d: float) -> void:
 		pvy = 0.0
 		Sfx.play("land", null, -12.0)
 		if fx: fx.dust(ppos, 3)
+
+## The island lip you're under over the abyss: the lowest ground close by (World.abyss_ref), else
+## where you last stood.
+func _abyss_lip() -> float:
+	var a: float = world.abyss_ref(ppos.x, ppos.z)
+	if a > World.VOID + 1.0:
+		return a
+	var s: float = _ground_h(safe_at.x, safe_at.z)
+	return s if s > World.VOID + 1.0 else 0.0
 
 ## Dropped into the sky: the wind carries you back to where you last stood. No harm done.
 func _respawn_safe() -> void:
