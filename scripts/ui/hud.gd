@@ -214,18 +214,18 @@ func _draw_all() -> void:
 	var want_a: float = ABYSS_FX.danger(p) if p == m.player else 0.0
 	if want_a <= 0.02:
 		abyss_cued = false
-	if want_a <= 0.5:
+	if want_a <= 0.7:
 		abyss_warned = false
 	abyss_a = lerpf(abyss_a, want_a, 1.0 - exp(-10.0 * get_process_delta_time()))
 	if abyss_fx:
 		abyss_fx.show_danger(abyss_a, pow(0.5 + 0.5 * sin(abyss_pulse * TAU), 3.0) if abyss_a > 0.005 else 0.0)
 	if abyss_a > 0.005:
-		var red := clampf((abyss_a - 0.35) / 0.65, 0.0, 1.0)
+		var red := clampf((abyss_a - 0.55) / 0.45, 0.0, 1.0)     # (AbyssFx: ~0.55 just under the lip, 1 at the end)
 		var rate := 1.6 + red * 3.4
 		abyss_pulse += get_process_delta_time() * rate
 		var pulse := pow(0.5 + 0.5 * sin(abyss_pulse * TAU), 3.0)
 		# (the magenta wash itself is AbyssFx's shader) near the end, crimson edges beat with the heart
-		var ek := clampf((abyss_a - 0.6) / 0.4, 0.0, 1.0)
+		var ek := clampf((abyss_a - 0.75) / 0.25, 0.0, 1.0)
 		for i in 6:
 			var inset := i * minf(sz.x, sz.y) * 0.03
 			var a := ek * (0.22 - float(i) * 0.035) * (0.6 + 0.4 * pulse)
@@ -235,7 +235,7 @@ func _draw_all() -> void:
 		if p == m.player and abyss_a > 0.08 and not abyss_cued:
 			abyss_cued = true
 			Sfx.play("whoosh", null, -6.0, 0.0, 0.55)
-		if p == m.player and abyss_a > 0.75 and not abyss_warned:
+		if p == m.player and abyss_a > 0.85 and not abyss_warned:
 			abyss_warned = true
 			Sfx.play("warn", null, -4.0, 0.0, 0.8)
 		if abyss_a > 0.1 and p == m.player:
@@ -245,9 +245,9 @@ func _draw_all() -> void:
 				Sfx.play("thump", null, -12.0 + abyss_a * 14.0, 0.0, 0.7 + red * 0.15)
 				if red > 0.3 and beat % 2 == 0:
 					Sfx.play("boom", null, -24.0 + red * 10.0, 0.0, 0.35)     # a low rumble under the heartbeat
-		if abyss_a > 0.6 and p == m.player:
+		if abyss_a > 0.8 and p == m.player:
 			# the point of no return is close: say so, pulsing, in the middle of the screen
-			var wk := clampf((abyss_a - 0.6) / 0.3, 0.0, 1.0)
+			var wk := clampf((abyss_a - 0.8) / 0.15, 0.0, 1.0)
 			var txt := "HOLD GLIDE TO LIFT" if p.glide_fuel > 0.001 and not p.gliding else ("CLIMB OUT" if p.glide_fuel > 0.001 else "NO GLIDER HEAT")
 			_ctext(Vector2(sz.x * 0.5, sz.y * 0.36), txt, 26, Color(1.0, 0.25 + 0.35 * pulse, 0.2, 0.55 + 0.45 * wk * (0.5 + 0.5 * pulse)), big)
 	if p and not p.downed and not p.out and p.hp < p.max_hp * 0.35:

@@ -1603,11 +1603,11 @@ var abyss_fx: CanvasLayer = null
 var abyss_k := 0.0
 func _abyss_tint(d: float) -> void:
 	var want := 0.0
-	if world.is_void(ppos.x, ppos.z) and climb.is_empty():
+	if world.is_void(ppos.x, ppos.z) and climb.is_empty() and pvy <= ABYSS_FX.RISE_OFF:     # (rising back up: no tint)
 		var top := _abyss_lip() - 0.5
 		var kill: float = world.abyss_floor(ppos.x, ppos.z) - Hunter.ABYSS_EXTRA - (Hunter.ABYSS_GLIDE_ROOM if gliding else 0.0)
 		want = ABYSS_FX.danger_depth(top - py, top - kill)
-	abyss_k = want if want < abyss_k else lerpf(abyss_k, want, 1.0 - exp(-12.0 * d))     # snaps back as you come up
+	abyss_k = lerpf(abyss_k, want, 1.0 - exp(-(12.0 if want > abyss_k else 9.0) * d))     # in fast, out over a few frames
 	if abyss_fx == null and abyss_k > 0.004:
 		abyss_fx = ABYSS_FX.new()
 		add_child(abyss_fx)

@@ -2638,6 +2638,10 @@ func _abyss_demo(mode: String) -> void:
 	elif t < 0.8:
 		player.inp["move"] = Vector2(0, 1)      # run toward the camera and jump off the edge
 		if t >= 0.55 and t < 0.55 + DT * 1.5: player.inp["jump"] = true
+	elif mode == "dip":
+		# (feelfix) the reference's repeated dips: fall, glide back up, let go and fall again, glide home
+		player.inp["glide"] = (t > 1.7 and t < 2.5) or t > 3.4
+		player.inp["move"] = Vector2(0, -1) if t > 3.4 else Vector2.ZERO
 	else:
 		player.inp["move"] = Vector2(0, -1) if mode == "grab" else Vector2.ZERO
 
