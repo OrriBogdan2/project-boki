@@ -74,7 +74,7 @@ func _refresh_modes() -> void:
 
 func _announce() -> void:
 	var k := Save.active_kin()
-	Net.set_presence({"name": Save.d.get("name", "Hunter"), "cls": opts.get("cls", Data.class_of_save()), "weapon": Save.d.get("weapon", ""), "ready": is_ready, "lobby": 1,
+	Net.set_presence({"name": Save.d.get("name", "Hunter"), "cls": opts.get("cls", Data.class_of_save()), "weapon": Save.d.get("weapon", ""), "arch": Arch.of_save(), "ready": is_ready, "lobby": 1,
 		"kin": {"species": k.get("species", "cindle"), "level": int(k.get("level", 1)), "name": k.get("name", "Boki"), "traits": k.get("traits", {}), "trust": float(k.get("trust", 50))}})
 
 func _toggle_ready() -> void:

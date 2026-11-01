@@ -61,18 +61,20 @@ func _setup_input() -> void:
 	_key("up", [KEY_W, KEY_UP]); _key("down", [KEY_S, KEY_DOWN])
 	_key("left", [KEY_A, KEY_LEFT]); _key("right", [KEY_D, KEY_RIGHT])
 	_key("fire", [], MOUSE_BUTTON_LEFT)
-	_key("secondary", [], MOUSE_BUTTON_RIGHT) # your hero's right-click ability
-	# match keys (one short kit, like Supervive): LMB weapon, RMB weapon ability, Shift dash, Space
-	# jump and glide (Mouse 5 glides too), Q your active glove, E your kin's ability,
-	# C or middle mouse throw / recall your kin, R the bond ultimate, 1 heal, F interact, Ctrl sneak.
-	_key("signature", [KEY_E])                # your kin's ability
+	_key("secondary", [], MOUSE_BUTTON_RIGHT) # your archetype's right-click ability (its variants: tap, hold, air...)
+	# match keys (docs/ARCHETYPES.md): LMB weapon, RMB the archetype's ability, Shift the archetype's
+	# dash, Space jump and glide (Mouse 5 glides too), Q your active glove, E the archetype's utility,
+	# R the archetype's ultimate (bonded when the bond meter is full), C your kin's own ability (it
+	# hops out, casts and hops back), G (or middle mouse) send / recall your kin, 1 heal, F interact.
+	_key("signature", [KEY_E])                # the archetype's utility (E)
+	_key("kin_ability", [KEY_C])              # the kin's own ability: tap, it hops out, casts, hops back
 	_key("kin_skill", [])                     # a kin's second ability: retired from the kit (data kept)
 	_key("interact", [KEY_F])                 # catch, open, pick up, finish a downed enemy (Supervive: F)
 	_key("armor_kit", [])                     # merged into heal (1)
 	_key("gear1", [KEY_Q])                    # your active glove
 	_key("gear2", [])                         # the second glove slot is passive: no key
 	_key("crouch", [KEY_CTRL])                # sneak: slower, quieter, and you see further
-	_key("throw", [KEY_C], MOUSE_BUTTON_MIDDLE)  # throw your kin, or call it back (C or middle mouse)
+	_key("throw", [KEY_G], MOUSE_BUTTON_MIDDLE)  # send your kin out to fight on its own, or recall it (G or middle mouse)
 	_key("base", [KEY_B])                     # base to a teammate: a 3s channel (squads only)
 	_key("swap_kin", [])                      # one kin per expedition now; kept so old code paths compile
 	_key("dash", [KEY_SHIFT])
@@ -80,7 +82,7 @@ func _setup_input() -> void:
 	_key("glide", [], MOUSE_BUTTON_XBUTTON2)  # hold Mouse 5 (the front side button) in the air to glide, like holding Space; never jumps
 	_key("glide", [], MOUSE_BUTTON_XBUTTON1)  # Mouse 4 glides too (not advertised)
 	_key("reload", [])                        # reloading is automatic
-	_key("ultimate", [KEY_R])                 # bond ultimate, when the bond meter is full
+	_key("ultimate", [KEY_R])                 # the archetype's ultimate (level 6); bonded when the bond meter is full
 	_key("tonic", [KEY_1])
 	_key("scores", [KEY_TAB])
 	_key("menu", [KEY_ESCAPE])

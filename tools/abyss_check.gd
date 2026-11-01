@@ -115,6 +115,7 @@ func run(main: Node) -> void:
 	m.mobs.clear()
 	w = m.world
 	h = m.hunters[0]
+	h.set_arch("")      # edge physics with the plain class dash (archetype dashes: --archetype-check)
 	for o in m.hunters:
 		o.ctrl = "idle"
 		if o != h: o.teleport(w.random_ground())

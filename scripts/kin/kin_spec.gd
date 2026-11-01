@@ -34,8 +34,9 @@ var evo_root := ""
 var evo_paths: Array = []    # [{affinity, nodes: [ids]}]
 var voice := {}
 var egg := {}
+var infusion := {}           # optional: what this kin lends archetype sockets (docs/ARCHETYPES.md §4.2); derived when absent
 
-const FIELDS := ["grammar", "id", "name", "animals", "theme", "flavor", "colors", "look", "body", "stats", "personality", "ai", "carry", "throw", "dodge_rider", "active", "auto", "merge", "evolution", "voice", "egg"]
+const FIELDS := ["grammar", "id", "name", "animals", "theme", "flavor", "colors", "look", "body", "stats", "personality", "ai", "carry", "throw", "dodge_rider", "active", "auto", "merge", "evolution", "voice", "egg", "infusion"]
 const REQUIRED := ["grammar", "id", "name", "animals", "colors", "look", "body", "stats", "personality", "ai", "carry", "active", "merge"]
 
 static func parse(v: Variant, rep: GrammarReport) -> KinSpec:
@@ -166,7 +167,37 @@ static func parse(v: Variant, rep: GrammarReport) -> KinSpec:
 		var e := rep.obj(d["egg"], "egg")
 		rep.keys(e, "egg", ["name", "temper", "desc", "play"], ["name"])
 		for key in e: k.egg[key] = rep.text(e, key, "egg")
+	if d.has("infusion"):
+		k.infusion = _infusion(d["infusion"], rep)
 	return k
+
+## The optional infusion block: one effect part per socket (hit, ctrl, guard, util), a list of
+## modifiers in order of preference (mod), and move: blink. Each must sit in its socket's category.
+static func _infusion(v: Variant, rep: GrammarReport) -> Dictionary:
+	var d := rep.obj(v, "infusion")
+	var out := {}
+	rep.keys(d, "infusion", ["hit", "ctrl", "guard", "util", "mod", "move"])
+	var cats := {"hit": ["damage", "utility"], "ctrl": ["control"], "guard": ["sustain"], "util": ["utility"]}
+	for key in cats:
+		if not d.has(key):
+			continue
+		var e := PartSpec.parse("effect", d[key], "infusion." + key, rep)
+		if e == null:
+			continue
+		if not (cats[key] as Array).has(e.category()):
+			rep.err("infusion." + key, "a %s socket takes %s parts, not %s (%s)" % [key, " or ".join(cats[key]), e.type, e.category()])
+			continue
+		out[key] = [e] if key == "ctrl" else e
+	if d.has("mod"):
+		var ml: Array = []
+		var arr := rep.arr(d["mod"], "infusion.mod")
+		for i in arr.size():
+			var m := PartSpec.parse("modifier", arr[i], "infusion.mod[%d]" % i, rep)
+			if m: ml.append(m)
+		out["mod"] = ml
+	if d.has("move"):
+		out["move"] = rep.choice(d, "move", ["blink"], "infusion", "blink")
+	return out
 
 ## A block of 0..1 numbers with exactly these keys (plus `extra` keys handled by the caller).
 static func _unit_block(d: Dictionary, key: String, names: Array, rep: GrammarReport, extra: Array = []) -> Dictionary:

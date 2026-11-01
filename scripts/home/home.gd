@@ -227,7 +227,7 @@ func _ready() -> void:
 		_build_burrow()
 	_build_bridges()
 	_build_plots()
-	player = Models.hunter(Data.class_of_save(), Data.TEAM_COLORS[0], _weapon(), "", Save.d.get("look", {}))
+	player = Models.hunter(Data.class_of_save(), Data.TEAM_COLORS[0], _weapon(), "", Save.d.get("look", {}), Arch.of_save())
 	add_child(player)
 	ppos = Vector3(38.0, 0, 34.5)
 	if spawn == "house":
@@ -2753,7 +2753,7 @@ func _open_kin(rec: Dictionary) -> void:
 	UI.subtitle(v, "Level %d  ·  %s Boki  ·  %s  ·  %s nature" % [int(rec["level"]), String(sp["type"]).capitalize(), Care.stage_name(rec), Care.nature(rec)])
 	var hx := UI.head_extra(v)
 	if partner: hx.add_child(UI.tag("Partner", UI.ACCENT))
-	elif rec["uid"] == Save.d.get("active2", ""): hx.add_child(UI.tag("Second", UI.TEAL))
+	elif Match.TWO_KIN and rec["uid"] == Save.d.get("active2", ""): hx.add_child(UI.tag("Second", UI.TEAL))
 	if rec.get("farmhand", false): hx.add_child(UI.tag("Farmhand", UI.GOOD))
 	if KinBox.is_boxed(rec): hx.add_child(UI.tag("In the Boki Burrow", Color("cdb8ff")))
 	for mid in Mutations.of(rec):
@@ -2903,7 +2903,7 @@ func _open_kin(rec: Dictionary) -> void:
 			if not swapped.is_empty(): _toast("%s went to the Boki Burrow to make room" % swapped["name"])
 			_spawn_kin(); _refresh_burrow()
 			_open_kin(rec)))
-		if rec["uid"] != Save.d.get("active2", ""):
+		if Match.TWO_KIN and rec["uid"] != Save.d.get("active2", ""):     # (one Boki per run now: no second)
 			fl.add_child(UI.ghost("Bring as second", func():
 				Save.d["active2"] = rec["uid"]
 				Save.save_game()
@@ -3090,7 +3090,7 @@ var exp_mode := "solo"
 var exp_tier := 0
 
 func _weapon() -> String:
-	return Data.weapon_for(Data.class_of_save(), String(Save.d.get("weapon", "")))
+	return Arch.weapon_for(Arch.of_save(), Data.class_of_save(), String(Save.d.get("weapon", "")))
 
 func _open_expedition() -> void:
 	_day1("portal")
@@ -3110,7 +3110,8 @@ func _open_expedition() -> void:
 	var ctabs := UI.tabs(cnames, String(Data.CLASSES[cur_c]["name"]), func(nm):
 		var ck: String = cname_of[nm]
 		Save.d["cls"] = ck
-		Save.d["weapon"] = Data.CLASSES[ck]["weapon"]
+		Save.d["arch"] = Arch.fix(String(Save.d.get("arch", "")), ck)
+		Save.d["weapon"] = Arch.default_weapon(String(Save.d["arch"]))
 		# weapons are class-locked: an armory weapon for another class drops back to the class weapon
 		if HomeEcon.fix_loadout_class(): _toast("Your armory weapon is for another class: taking the %s instead" % Data.weapon_stats(Data.CLASSES[ck]["weapon"])["name"])
 		Save.save_game()
@@ -3125,10 +3126,30 @@ func _open_expedition() -> void:
 	cl.autowrap_mode = TextServer.AUTOWRAP_OFF
 	left.add_child(cl)
 	left.add_child(UI.spacer(2))
+	# the archetype: two per class, each with its own kit and weapon family (docs/ARCHETYPES.md)
+	left.add_child(UI.section("Archetype"))
+	var arow := UI.hbox(8)
+	var cur_a := Arch.of_save()
+	for a in Arch.of_class(cur_c):
+		var ak: String = a
+		var ab := UI.choice(Arch.name_of(a), a == cur_a, func():
+			Save.d["arch"] = ak
+			Save.d["weapon"] = Arch.default_weapon(ak)
+			Save.save_game()
+			_refresh_player_model()
+			_open_expedition(), 150)
+		var adf := Arch.def(a)
+		ab.tooltip_text = "%s\nDash: %s  ·  Passive: %s\nRMB: %s  ·  E: %s  ·  R: %s (level 6)" % [String(adf.get("fantasy", "")), String(adf["dash"]["name"]), String(adf["passive"]["name"]), String(adf["rmb"]["name"]), String(adf["e"]["name"]), String(adf["r"]["name"])]
+		arow.add_child(ab)
+	left.add_child(arow)
+	var adsc := UI.label("Dash %s  ·  %s  ·  RMB %s  ·  E %s  ·  R %s" % [String(Arch.def(cur_a)["dash"]["name"]), String(Arch.def(cur_a)["passive"]["name"]), String(Arch.def(cur_a)["rmb"]["name"]), String(Arch.def(cur_a)["e"]["name"]), String(Arch.def(cur_a)["r"]["name"])], UI.T_SMALL, Arch.color(cur_a))
+	adsc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	left.add_child(adsc)
+	left.add_child(UI.spacer(2))
 	left.add_child(UI.section("Weapon"))
 	var wr := UI.hbox(8)
 	var cur_w := _weapon()
-	for w in ccd["weapons"]:
+	for w in Arch.weapons(cur_a):
 		var wd: Dictionary = Data.weapon_stats(w)
 		var wk: String = w
 		var wb := UI.choice(String(wd["name"]), w == cur_w, func():
@@ -3715,7 +3736,7 @@ func _refresh_player_model() -> void:
 	var rot := player.rotation
 	player.queue_free()
 	var w := _weapon()
-	player = Models.hunter(Data.class_of_save(), Data.TEAM_COLORS[0], w, "", Save.d.get("look", {}))
+	player = Models.hunter(Data.class_of_save(), Data.TEAM_COLORS[0], w, "", Save.d.get("look", {}), Arch.of_save())
 	player.position = at; player.rotation = rot
 	add_child(player)
 
