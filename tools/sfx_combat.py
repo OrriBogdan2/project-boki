@@ -495,6 +495,51 @@ def build():
                          at(ring((2093, 3136, 4186), 0.45, (0.16, 0.12, 0.08), (0.4, 0.25, 0.15)), 0.06),
                          click(0.002, 3000, 12000) * 1.0), rms_db=-19)
 
+    # ============================================================== archetype payoffs (appended last so
+    # nothing above changes): each kit's cash-in has its own signature, so you know by ear what just landed
+    # Archer Deadeye: a whip-crack of the string, a split-the-air snap, a glassy high ring that bends down
+    def pay_deadeye(i):
+        d = 1.0
+        glass = ring((2637, 3951, 5274), d, (0.25, 0.16, 0.08), (0.5, 0.3, 0.16))
+        whistle = sat(tone_glide(3200, 900, 0.3, (1.0, 0.3)) * env(N(0.3), 0.001, 0.08), 2.0) * 0.35
+        return mix(click(0.002, 4000, 14000) * 3.0, crack(d, 2000, 11000, 0.01) * 3.0, kick(320, 60, d, 0.008, 0.06, 3.4) * 0.8,
+                   sub(80, 40, d, 0.1) * 0.35, at(glass * 1.3, 0.01), whistle, reflections(tail(0.7, 2200, 0.12) * 0.9))
+    takes('pay_deadeye', pay_deadeye, 1, rms_db=-14)
+
+    # Mage Flashpoint: a sucking-in rush, then a deep whoomph with a bright sparkle shower and a falling tone
+    def pay_flashpoint(i):
+        d = 1.4; n = N(d)
+        suck = sweep(0.22, 600, 5000, 3.0) * np.linspace(0.2, 1.0, N(0.22)) ** 2 * 1.6
+        boom = mix(kick(150, 38, d, 0.02, 0.16, 3.6) * 0.9, sub(60, 30, d, 0.3) * 0.6, crack(d, 200, 2400, 0.08) * 2.4)
+        spark = grains(1.0, 420, 3500, 11000, 0.001, 0.004, fall=0.3) * 1.4
+        fall = sat(tone_glide(1600, 300, 0.6, (1.0, 0.5, 0.25)) * env(N(0.6), 0.002, 0.18), 2.0) * 0.4
+        return mix(suck, at(click(0.003, 2500, 12000) * 2.6, 0.2), at(boom, 0.2), at(spark, 0.22), at(fall, 0.21),
+                   at(reflections(tail(1.0, 1400, 0.3) * 1.2), 0.22))
+    takes('pay_flashpoint', pay_flashpoint, 1, rms_db=-14)
+
+    # Gunslinger Called Shot: a heavy round, a bell-bright ting, and the cylinder spinning after it
+    def pay_called(i):
+        d = 1.1
+        bell = ring((1760, 3520 * 1.003, 5280 * 0.997, 7040), d, (0.4, 0.2, 0.12, 0.06), (0.55, 0.25, 0.14, 0.06))
+        spin = np.zeros(N(0.5))
+        for k in range(9):
+            c = click(0.002, 3000 + 300 * k, 9000) * (1.0 - k / 10.0)
+            s0 = N(0.035 * k + 0.004 * k * k)
+            if s0 + len(c) < len(spin): spin[s0:s0 + len(c)] += c
+        return mix(click(0.004, 2500, 12000) * 3.0, kick(220, 50, d, 0.01, 0.07, 3.6) * 0.9, crack(d, 700, 7000, 0.03) * 3.0,
+                   sub(70, 38, d, 0.12) * 0.45, at(bell * 1.4, 0.006), at(spin * 1.6, 0.32),
+                   reflections(tail(0.9, 1600, 0.2) * 1.1))
+    takes('pay_called', pay_called, 1, rms_db=-14)
+
+    # Bulwark Shield Slam: a huge plate clang (inharmonic), a body slam under it, and a ringing shimmer
+    def pay_slam(i):
+        d = 1.2
+        f = 330
+        clang = ring((f, f * 1.58, f * 2.31, f * 3.47, f * 4.9), d, (0.5, 0.32, 0.22, 0.14, 0.08), (0.6, 0.45, 0.32, 0.18, 0.1))
+        return mix(click(0.005, 1500, 9000) * 2.8, kick(170, 40, d, 0.015, 0.12, 3.8) * 1.0, sub(55, 30, d, 0.22) * 0.6,
+                   crack(d, 300, 3000, 0.05) * 2.8, at(clang * 1.3, 0.004), reflections(tail(1.0, 1200, 0.25) * 1.2))
+    takes('pay_slam', pay_slam, 1, rms_db=-14)
+
 
 if __name__ == '__main__':
     build()

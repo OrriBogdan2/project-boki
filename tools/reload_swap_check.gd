@@ -3,7 +3,7 @@ extends RefCounted
 ## put down is full the next time anyone picks it up, unless it's picked back up within Loot.REPICK_T
 ## (2 s): then it keeps the bullets it had, so dropping and re-grabbing is never a free reload.
 ## Covers the backpack's Equip, the backpack's Drop, a ground swap, a bot's ground swap, a bot that
-## keeps fighting after its swap, and the online copy of a put-down gun (Net 0.5.1 "wdrop" carries
+## keeps fighting after its swap, and the online copy of a put-down gun (Net 0.6.1 "wdrop" carries
 ## how long ago it left someone's hands). Never touches the save.
 
 var bad := 0
@@ -137,8 +137,8 @@ func run(main: Node) -> void:
 		if B.ammo > 0 and B.reload_t <= 0.0: reloaded = true; break
 	ok(fired and reloaded, "the bot fights on with the gun it swapped to: fires (%s), runs dry and reloads on its own (%s)" % [fired, reloaded])
 	B.ctrl = "idle"
-	# ---------------------------------------------------------------- 6. online: the put-down age travels with the gun (Net 0.5.1)
-	ok(Net.VERSION != "0.5.0", "the network version moved on for the wider wdrop event (%s)" % Net.VERSION)
+	# ---------------------------------------------------------------- 6. online: the put-down age travels with the gun (Net 0.6.1)
+	ok(Net.VERSION not in ["0.5.0", "0.6.0"], "the network version moved on for the wider wdrop event (%s)" % Net.VERSION)
 	var evs: Array = []
 	m.net_on = true
 	var sent: Array = Net.out_events.duplicate()

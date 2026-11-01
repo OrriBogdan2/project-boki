@@ -24,5 +24,7 @@
 		"sockets": {"hit": "add", "ctrl": "add", "ctrl_cap": "soft", "guard": "add", "mod": "add"}},
 	"order": ["sec", "dash", "kin", "sec", "dash", "ult", "sec", "kin", "ult", "gear"],
 	"rank3": {"sec": "Shadow Step recast window 1.5 -> 2.0s", "dash": "second-step window 0.7 -> 0.9s", "kin": "radius +0.5m", "ult": "a 5th target, +15% damage"},
+	"rank2": {"sec": "Rank 2: cooldown 8s -> 7.2s, damage +15%.", "dash": "Rank 2: recharge 6.5s -> 5.5s per charge.", "kin": "Rank 2: cooldown 18s -> 16.2s, damage +15%.", "ult": "Rank 2 (level 9): cooldown 105s -> 89.2s, +30% duration, +15% damage; a 5th target, +15% damage."},
+	"rank_next": {"sec": "Rank 3: cooldown 8s -> 6.4s, damage +30%; Shadow Step recast window 1.5 -> 2.0s.", "kin": "Rank 3: cooldown 18s -> 14.4s, damage +30%; radius +0.5m.", "dash": "Rank 3: recharge 6.5s -> 4.5s; second-step window 0.7 -> 0.9s."},
 	"tells": {"half": "Mark pips over targets", "full": "gold purse glyph and a coin jingle on a 3-Mark target", "dash_spent": "two smoke afterimages, dash pips dark"}
 }

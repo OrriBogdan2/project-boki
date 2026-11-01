@@ -1498,7 +1498,7 @@ func spawn_weapon(w: String, rar: int, at: Vector3, id := "", send := true, ammo
 		wp["left_at"] = float(item["left_at"])      # put down from someone's hands: the 2 s re-pick rule (Loot.REPICK_T)
 	wpicks.append(wp)
 	if net_on and send:
-		# (the last field, how long ago it left someone's hands, -1 for fresh loot: Net 0.5.1)
+		# (the last field, how long ago it left someone's hands, -1 for fresh loot: Net 0.6.1)
 		net_event(["wdrop", id, w, rar, _r(at.x), _r(at.y), _r(at.z), ammo, String(item.get("el", "")), String(item.get("uq", "")),
 			snappedf(time - float(wp["left_at"]), 0.01) if wp.has("left_at") else -1.0])
 
@@ -6184,6 +6184,10 @@ func _net_ev(x, from: String) -> void:
 		return
 	var who: Ent = null
 	match String(x[0]):
+		"hex":
+			# a Mage's Hex landed: the body's own game runs the rules, every game shows the critter
+			who = ents_by_id.get(String(x[1]), null)
+			if who is Hunter: Hex.apply(who as Hunter, float(x[2]), false)
 		"s":
 			var col := Color.html(String(x[8]))
 			var ex := {"cos": true}

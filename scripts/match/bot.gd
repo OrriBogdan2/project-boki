@@ -195,6 +195,10 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		# holding our uplink's yard: fight from in it, don't chase the waves out (an empty yard drains)
 		if String(a.get("goal_kind", "")) == "yard" and a["goal"] != Vector3.INF and h.flat_dist(a["goal"]) > 2.4:
 			move = (_path_dir(m, h, a["goal"]) + move * 0.3).normalized()
+		# hexed into a critter: no fighting, just scurry away until it wears off
+		if Hex.active(h):
+			move = -to
+			inp["fire"] = false
 		# defensive moves
 		if h.hp < a["hurt_hp"] - 12.0 and a["dash_cd"] <= 0.0 and randf() < 0.35 + abil * 0.65:
 			a["dash_cd"] = randf_range(1.2, 3.0) / (0.5 + a["skill"])
@@ -395,6 +399,13 @@ func can_hit(m: Match, h: Hunter, tgt: Ent) -> bool:
 	for k in [0.0, 1.0, -1.0]:
 		var o := Vector3(side.x * k, 0, side.y * k)
 		if not m.world.los(Vector3(h.pos.x, base_y, h.pos.z) + o, tgt.pos + o, y):
+			return false
+	# and the shot itself, eye to chest, mustn't clip a lip of ground on the way (firing down off a
+	# shelf at someone just below its edge: the flat check above passes, the real line hits the lip)
+	var y0 := base_y + 0.95; var y1 := tgt.pos.y + 0.9
+	for i in 24:
+		var f := (i + 0.5) / 24.0
+		if m.world.ground_at(lerpf(h.pos.x, tgt.pos.x, f), lerpf(h.pos.z, tgt.pos.z, f)) > lerpf(y0, y1, f) - 0.05:
 			return false
 	return true
 
