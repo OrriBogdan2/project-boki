@@ -1,4 +1,4 @@
-# Weapon firing data: how attacks work in Supervive, and what Kinfall does with it
+# Weapon firing data: how attacks work in Supervive, and what Project Boki does with it
 
 Sources:
 - Frame-by-frame measurements of 60fps practice-range footage: Ryan Lemur's all-abilities video and the TheSixGame walkthrough.
@@ -82,7 +82,7 @@ Units: Supervive's 1 unit = 1 cm. Tags: `[footage]`, `[patch]`, `[wiki]`, `[gap]
 
 ---
 
-## What Kinfall now does with this (`scripts/combat/`)
+## What Project Boki now does with this (`scripts/combat/`)
 
 - **`projectile.gd`:** real projectiles for every gun:
   - Each frame does a sweep test, so fast shots can't pass through targets.

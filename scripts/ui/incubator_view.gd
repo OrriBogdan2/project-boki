@@ -15,7 +15,7 @@ static func build(home: Node, v: VBoxContainer, reopen: Callable, hatch: Callabl
 	var coals := int(Save.d["items"].get("coals", 0))
 	UI.head_extra(v).add_child(UI.chip("dash", "%d Ember Coals" % coals, Color("ff9a4a"), "Stoke them into the brazier: every egg warms faster for %d minutes. The market stall sells them." % int(Incubator.COAL_SECS / 60.0)))
 	if Incubator.count() == 0 and Incubator.slots() == Incubator.SLOTS:
-		v.add_child(UI.empty_state("egg", "No Rare Eggs yet", "Beat a boss in its lair and carry its egg home: it comes to the Incubator to hatch into a rare kin. It has %d cradles to start with." % Incubator.SLOTS))
+		v.add_child(UI.empty_state("egg", "No Rare Eggs yet", "Beat a boss in its lair and carry its egg home: it comes to the Incubator to hatch into a rare Boki. It has %d cradles to start with." % Incubator.SLOTS))
 		return
 	# what's warming them
 	var warm := _warmer(home)
@@ -35,12 +35,12 @@ static func build(home: Node, v: VBoxContainer, reopen: Callable, hatch: Callabl
 			if home.hinc: home.fx.burst(home.INCUB_AT + Vector3(0, 1.0, -0.45), Color("ff9a3a"), 22, 2.6)
 		reopen.call(), 0, "dash")
 	st.disabled = coals <= 0 or not Incubator.any_warming()
-	st.tooltip_text = ("Every egg warms faster for %d more minutes (stacks with an Ember kin)" % int(Incubator.COAL_SECS / 60.0)) if coals > 0 else "No Ember Coals: the market stall sells them (Farm tab)"
+	st.tooltip_text = ("Every egg warms faster for %d more minutes (stacks with an Ember Boki)" % int(Incubator.COAL_SECS / 60.0)) if coals > 0 else "No Ember Coals: the market stall sells them (Farm tab)"
 	hb.add_child(st)
 	v.add_child(hb)
 	if warm.is_empty():
 		var embers: Array = (Save.d["roster"] as Array).filter(func(r): return Work.level(r, "ember") > 0 and not KinBox.is_boxed(r))
-		var line := "An Ember kin on the farm warms them twice as fast (an Ember job on the Job Board)."
+		var line := "An Ember Boki on the farm warms them twice as fast (an Ember job on the Job Board)."
 		if not embers.is_empty(): line += " %s can do it." % ", ".join(embers.slice(0, 3).map(func(r): return String(r["name"])))
 		else: line += " You don't have one out on the farm."
 		v.add_child(UI.para(line, 12, UI.MUTED))

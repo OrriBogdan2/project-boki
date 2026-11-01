@@ -2,8 +2,12 @@
 config_version=5
 
 [application]
-config/name="Kinfall"
-config/description="Raise kin on your farm, then take them into PvPvE extraction matches."
+config/name="Project Boki"
+config/description="Raise Boki on your farm, then take them into PvPvE extraction matches."
+config/use_custom_user_dir=true
+config/custom_user_dir_name="godot/app_userdata/Kinfall"
+config/custom_user_dir_name.windows="Godot/app_userdata/Kinfall"
+config/custom_user_dir_name.macos="Godot/app_userdata/Kinfall"
 run/main_scene="res://scenes/main.tscn"
 config/features=PackedStringArray("4.6", "GL Compatibility")
 run/max_fps=0
@@ -36,6 +40,10 @@ window/vsync/vsync_mode=1
 [gui]
 theme/custom_font="res://fonts/Rubik.ttf"
 common/show_focus_state_on_pointer_event=false
+
+[internationalization]
+
+locale/translations=PackedStringArray("res://translations/rebrand.en.po")
 
 [shader_globals]
 

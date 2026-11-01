@@ -1,4 +1,4 @@
-# Kinfall Expedition Spec (estimate-based)
+# Project Boki Expedition Spec (estimate-based)
 
 Status: **ESTIMATES**. Every number here is derived from public sources
 (official wiki, patch notes, gameplay footage) and reasonable conversion,

@@ -6,7 +6,7 @@ const CHALLENGES := [
 	["first_out", "First Way Home", "Make it out of an expedition.", "extracts", 1, 40],
 	["mobs25", "Pest Control", "Defeat 25 monsters.", "mobs", 25, 60],
 	["harvest20", "Green Thumb", "Harvest 20 crops.", "harvested", 20, 50],
-	["catch3", "Collector", "Bring 3 wild kin home.", "caught", 3, 80],
+	["catch3", "Collector", "Bring 3 wild Boki home.", "caught", 3, 80],
 	["rings20", "Ring Runner", "Fly through 20 air rings.", "rings", 20, 60],
 	["glide", "Sky Legs", "Spend 3 minutes gliding.", "glide_s", 180, 60],
 	["feather", "Featherweight", "Feather back up from below an island's edge 5 times.", "feathers", 5, 80],
@@ -17,7 +17,7 @@ const CHALLENGES := [
 	["build2", "Homestead", "Build 2 buildings.", "built", 2, 80],
 	["hatch1", "New Life", "Hatch an egg from the nest.", "hatched", 1, 60],
 	["out5", "Old Hand", "Make it out of 5 expeditions.", "extracts", 5, 150],
-	["bond90", "Soulbound", "Reach a Soulbound bond with any kin.", "max_trust", 90, 120],
+	["bond90", "Soulbound", "Reach a Soulbound bond with any Boki.", "max_trust", 90, 120],
 	["out15", "Island Legend", "Make it out of 15 expeditions.", "extracts", 15, 300],
 ]
 
@@ -45,7 +45,7 @@ const SHOP_REQ := {
 
 # ---- your first day: a short list of things to try, each worth a few gems. Shared by the island
 # and the rooms inside the house, so the list stays on screen and counts wherever you do the thing.
-const DAY1 := [["pet", "Pet a kin"], ["fetch", "Play fetch with a kin"], ["plant", "Plant a seed in your farm"], ["water", "Water it"],
+const DAY1 := [["pet", "Pet a Boki"], ["fetch", "Play fetch with a Boki"], ["plant", "Plant a seed in your farm"], ["water", "Water it"],
 	["inside", "Go inside your house"], ["inventory", "Open your inventory"], ["portal", "Visit the portal"]]
 const DAY1_KEYS := {"pet": "interact", "fetch": "play", "water": "interact", "inventory": "inventory"}
 
@@ -92,7 +92,7 @@ static func day1_box() -> PanelContainer:
 	head.add_child(UI.label("%d / %d" % [dd.size(), DAY1.size()], 12, UI.MUTED, UI.caps))
 	v.add_child(UI.bar(float(dd.size()) / maxf(1.0, DAY1.size()), UI.GOOD, 270.0, 5.0))
 	v.add_child(UI.spacer(2))
-	var kname: String = Save.active_kin().get("name", "your kin")
+	var kname: String = Save.active_kin().get("name", "your Boki")
 	var next_found := false
 	for st in DAY1:
 		var done: bool = dd.has(st[0])

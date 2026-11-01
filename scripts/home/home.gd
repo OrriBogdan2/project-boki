@@ -434,8 +434,8 @@ func _ready() -> void:
 		var nb := int(Save.d["box_notice"])
 		Save.d.erase("box_notice")
 		Save.save_game()
-		_show_when_free(["The farm has room for %d kin out at once now. Your partner, your first kin and your closest ones stayed out; the other %d curled up in the new Kin Burrow, south of the market stall by the pond." % [KinBox.farm_cap(), nb],
-			"Kin in the burrow sleep: they don't get hungry and don't need looking after. Swap them out whenever you like, or expand the cottages for more room."])
+		_show_when_free(["The farm has room for %d Boki out at once now. Your partner, your first Boki and your closest ones stayed out; the other %d curled up in the new Boki Burrow, south of the market stall by the pond." % [KinBox.farm_cap(), nb],
+			"Boki in the burrow sleep: they don't get hungry and don't need looking after. Swap them out whenever you like, or expand the cottages for more room."])
 	if visit.is_empty():
 		hecon.show_away()
 	if not visit.is_empty():
@@ -1754,10 +1754,10 @@ func _label_for(it: Dictionary) -> String:
 			return "Spend time with %s" % rec["name"]
 		"egg": return ("Help the %s hatch!" if _egg_ready() else "Warm the %s") % _egg_label()
 		"yard": return "Train your partner"
-		"tryon": return "Try on a class, weapon, glove or kin"
-		"nook": return "Pair two kin for an egg"
+		"tryon": return "Try on a class, weapon, glove or Boki"
+		"nook": return "Pair two Boki for an egg"
 		"incubator": return hinc.prompt()
-		"burrow": return "Open the Kin Burrow (%d asleep inside)" % KinBox.boxed().size()
+		"burrow": return "Open the Boki Burrow (%d asleep inside)" % KinBox.boxed().size()
 		"feeder", "grave", "graveyard", "place": return hecon.label(it)
 		"station": return "Job Board" if it["id"] == "job_board" else "%s: open the Job Board" % HomeLayout.CATALOG[it["id"]]["name"]
 	return ""
@@ -2010,7 +2010,7 @@ func open_build() -> void:
 
 func _refresh_top() -> void:
 	if not visit.is_empty():
-		topbar.text = "Visiting %s's island   ·   Pet their kin, leave a gift at the house   ·   The portal takes you home" % String(visit.get("name", "a friend")).substr(0, 16)
+		topbar.text = "Visiting %s's island   ·   Pet their Boki, leave a gift at the house   ·   The portal takes you home" % String(visit.get("name", "a friend")).substr(0, 16)
 		topbar.visible = true
 		return
 	topbar.visible = false
@@ -2022,12 +2022,12 @@ func _refresh_top() -> void:
 		ch.queue_free()
 	if not ak.is_empty():
 		var kc: Color = Data.KIN.get(String(ak.get("species", "")), {}).get("color", UI.ACCENT)
-		top_chips.add_child(_top_chip("paw", String(ak.get("name", "")), kc, "Your partner: the kin that comes on expeditions with you"))
+		top_chips.add_child(_top_chip("paw", String(ak.get("name", "")), kc, "Your partner: the Boki that comes on expeditions with you"))
 	top_chips.add_child(_top_chip("gem", str(int(Save.d["gems"])), UI.GOLD, "Gems: spend them on buildings, seeds and treats"))
 	top_chips.add_child(_top_chip("tonic", str(int(Save.d["items"].get("tonic", 0))), Color("ff8a9a"), "Tonics: drink one (1) on an expedition to heal"))
 	top_chips.add_child(_top_chip("seed", str(crops), UI.GOOD, "Crops you've harvested"))
 	if treat != "":
-		top_chips.add_child(_top_chip("heart", "Treat: " + _treat_name(treat), Color("ffb0d0"), "A treat is ready to give to a kin"))
+		top_chips.add_child(_top_chip("heart", "Treat: " + _treat_name(treat), Color("ffb0d0"), "A treat is ready to give to a Boki"))
 
 ## One number on the top bar: an icon, the value, and a tooltip saying what it is.
 func _top_chip(icon: String, txt: String, col: Color, tip := "") -> Control:
@@ -2104,11 +2104,11 @@ func _open_welcome() -> void:
 	# shown once: marked seen as soon as it opens, however it's closed
 	Save.d["tutorial"]["home"] = true
 	Save.save_game()
-	var kn: String = Save.active_kin().get("name", "your kin")
+	var kn: String = Save.active_kin().get("name", "your Boki")
 	var v := _new_panel("Welcome home", 580)
 	UI.subtitle(v, "This little island is yours.")
 	v.add_child(UI.para("%s lives here with you now, and it remembers everything you do together." % kn, UI.T_BODY + 1, UI.INK))
-	v.add_child(UI.para("Between expeditions you grow crops, build up your island and look after your kin. When you're ready, the portal takes you out to the wild isles to hunt for treasure, seeds and new kin.", UI.T_BODY, UI.MUTED))
+	v.add_child(UI.para("Between expeditions you grow crops, build up your island and look after your Boki. When you're ready, the portal takes you out to the wild isles to hunt for treasure, seeds and new Boki.", UI.T_BODY, UI.MUTED))
 	v.add_child(UI.para("Just remember: what you find out there is only yours once you make it back.", UI.T_BODY, UI.ACCENT_HI))
 	var go := UI.hbox(8)
 	go.add_child(UI.label("Walk up to anything and press", UI.T_BODY, UI.INK))
@@ -2305,7 +2305,7 @@ func _open_kitchen() -> void:
 		row.add_child(UI.button(label_txt, func():
 			var ak := Save.active_kin()
 			if (cd["use"] == "snack" or cd["use"] == "levelup") and ak.is_empty():
-				_toast("You need a partner kin for that")
+				_toast("You need a partner Boki for that")
 				return
 			Save.d["crops"][sk] = int(Save.d["crops"][sk]) - 1
 			match String(cd["use"]):
@@ -2373,7 +2373,7 @@ func _open_shop() -> void:
 			for a in Data.ACCS:
 				var ad: Dictionary = Data.ACCS[a]
 				var ak: String = a
-				goods.append(["acc:" + a, ad["name"], "Put it on from a kin's card (Dress). Worn on expeditions too.", -1 if owned.has(a) else int(ad["price"]), ad["col"], func():
+				goods.append(["acc:" + a, ad["name"], "Put it on from a Boki's card (Dress). Worn on expeditions too.", -1 if owned.has(a) else int(ad["price"]), ad["col"], func():
 					if not Save.d.has("accs"): Save.d["accs"] = []
 					Save.d["accs"].append(ak), "yours" if owned.has(a) else ""])
 		"Home":
@@ -2719,12 +2719,12 @@ func _open_kin(rec: Dictionary) -> void:
 	var partner: bool = rec["uid"] == Save.d.get("active", "")
 	var rare_pre := Mutations.prefix(rec)
 	var v := _new_panel("%s the %s%s%s" % [rec["name"], "shimmering " if rec.get("shimmer", false) else "", (rare_pre + " ") if rare_pre != "" else "", Evo.form_name(rec)], 820)
-	UI.subtitle(v, "Level %d  ·  %s kin  ·  %s  ·  %s nature" % [int(rec["level"]), String(sp["type"]).capitalize(), Care.stage_name(rec), Care.nature(rec)])
+	UI.subtitle(v, "Level %d  ·  %s Boki  ·  %s  ·  %s nature" % [int(rec["level"]), String(sp["type"]).capitalize(), Care.stage_name(rec), Care.nature(rec)])
 	var hx := UI.head_extra(v)
 	if partner: hx.add_child(UI.tag("Partner", UI.ACCENT))
 	elif rec["uid"] == Save.d.get("active2", ""): hx.add_child(UI.tag("Second", UI.TEAL))
 	if rec.get("farmhand", false): hx.add_child(UI.tag("Farmhand", UI.GOOD))
-	if KinBox.is_boxed(rec): hx.add_child(UI.tag("In the Kin Burrow", Color("cdb8ff")))
+	if KinBox.is_boxed(rec): hx.add_child(UI.tag("In the Boki Burrow", Color("cdb8ff")))
 	for mid in Mutations.of(rec):
 		var mt := UI.tag(Mutations.name_of(mid), Mutations.col_of(mid))
 		mt.tooltip_text = Mutations.perk_text(mid)
@@ -2808,7 +2808,7 @@ func _open_kin(rec: Dictionary) -> void:
 				c2.add_child(UI.para(KinText.carry(kspec), 12, KinRules.cat_color("sustain").lerp(UI.INK, 0.35)))
 				var ob := KinText.owner_bonus(KinLib.owner_bonus(kspec, rec))
 				if ob != "":
-					c2.add_child(UI.para("Owner bonus while it's your kin: " + ob, 12, Color("ffd84a").lerp(UI.INK, 0.35)))
+					c2.add_child(UI.para("Owner bonus while it's your Boki: " + ob, 12, Color("ffd84a").lerp(UI.INK, 0.35)))
 				var rdt := KinText.rider(kspec)
 				if rdt != "":
 					c2.add_child(UI.para("%s (your dodge): %s" % [String(kspec.dodge_rider.get("name", "")), rdt], 12, UI.MUTED))
@@ -2863,7 +2863,7 @@ func _open_kin(rec: Dictionary) -> void:
 			if Save.d.get("active2", "") == rec["uid"]: Save.d["active2"] = Save.d.get("active", "")
 			Save.d["active"] = rec["uid"]
 			Save.save_game()
-			if not swapped.is_empty(): _toast("%s went to the Kin Burrow to make room" % swapped["name"])
+			if not swapped.is_empty(): _toast("%s went to the Boki Burrow to make room" % swapped["name"])
 			_spawn_kin(); _refresh_burrow()
 			_open_kin(rec)))
 		if rec["uid"] != Save.d.get("active2", ""):
@@ -2881,13 +2881,13 @@ func _open_kin(rec: Dictionary) -> void:
 			_toast("%s is out on the farm" % rec["name"])
 			_open_kin(rec)))
 	elif KinBox.pinned(rec) == "":
-		fl.add_child(UI.ghost("Put in Kin Burrow", func():
+		fl.add_child(UI.ghost("Put in Boki Burrow", func():
 			var bwhy := KinBox.to_box(rec)
 			if bwhy != "": _toast(bwhy); return
 			Save.save_game(); _spawn_kin(); _refresh_burrow()
-			_toast("%s curled up in the Kin Burrow (%s)" % [rec["name"], KinBox.page_name(KinBox.page_of(rec))])
+			_toast("%s curled up in the Boki Burrow (%s)" % [rec["name"], KinBox.page_name(KinBox.page_of(rec))])
 			_open_kin(rec)))
-	fl.add_child(UI.ghost("Kin Burrow", func(): KinBoxView.sel = String(rec["uid"]); KinBoxView.page = KinBox.page_of(rec) if KinBox.is_boxed(rec) else KinBoxView.page; _open_burrow()))
+	fl.add_child(UI.ghost("Boki Burrow", func(): KinBoxView.sel = String(rec["uid"]); KinBoxView.page = KinBox.page_of(rec) if KinBox.is_boxed(rec) else KinBoxView.page; _open_burrow()))
 	if rec.get("farmhand", false):
 		fl.add_child(UI.ghost("Stop farming", func():
 			rec.erase("farmhand")
@@ -2973,8 +2973,8 @@ func _chat_bubble(_role: String, _text: String) -> void:
 	var lines: Array = []
 	var turns: Array = chat_log.slice(1)
 	for t in turns.slice(maxi(0, turns.size() - 4)):
-		lines.append(("You: " if t["role"] == "user" else "%s: " % chat_kin.get("name", "Kin")) + String(t["content"]))
-	chat_hist.text = "\n".join(lines) if lines.size() > 0 else "Type below and press Enter. %s answers above its head." % chat_kin.get("name", "Your kin")
+		lines.append(("You: " if t["role"] == "user" else "%s: " % chat_kin.get("name", "Boki")) + String(t["content"]))
+	chat_hist.text = "\n".join(lines) if lines.size() > 0 else "Type below and press Enter. %s answers above its head." % chat_kin.get("name", "Your Boki")
 
 func _send_chat() -> void:
 	if chat_input == null or chat_busy:
@@ -3042,10 +3042,10 @@ func _send_chat() -> void:
 
 func _offline_reason() -> String:
 	match Bridge.last_err:
-		"no_page": return "%s answers on their own here. In the web version they talk through Claude." % chat_kin.get("name", "Your kin")
-		"not_granted": return "Claude isn't allowed on this page yet, so %s answers on their own." % chat_kin.get("name", "Your kin")
-		"rate_limited": return "Claude is busy for a moment, so %s answered on their own." % chat_kin.get("name", "Your kin")
-	return "Couldn't reach Claude, so %s answered on their own." % chat_kin.get("name", "Your kin")
+		"no_page": return "%s answers on their own here. In the web version they talk through Claude." % chat_kin.get("name", "Your Boki")
+		"not_granted": return "Claude isn't allowed on this page yet, so %s answers on their own." % chat_kin.get("name", "Your Boki")
+		"rate_limited": return "Claude is busy for a moment, so %s answered on their own." % chat_kin.get("name", "Your Boki")
+	return "Couldn't reach Claude, so %s answered on their own." % chat_kin.get("name", "Your Boki")
 
 # ---- expedition
 var exp_cls := ""
@@ -3115,7 +3115,7 @@ func _open_expedition() -> void:
 	var ak := Save.active_kin()
 	if not ak.is_empty():
 		left.add_child(UI.spacer(2))
-		left.add_child(UI.section("Kin you bring"))
+		left.add_child(UI.section("Boki you bring"))
 		left.add_child(_kin_pick_row("Partner", ak, "active"))
 		if Match.TWO_KIN and Save.d["roster"].size() > 1:
 			left.add_child(_kin_pick_row("Second", Save.second_kin(), "active2"))
@@ -3140,7 +3140,7 @@ func _open_expedition() -> void:
 		th.add_child(tv)
 		var nrow := UI.hbox(8)
 		nrow.add_child(UI.label(String(td["name"]), UI.T_HEAD, UI.INK if not locked else UI.MUTED, UI.big))
-		if td["risk_kin"]: nrow.add_child(UI.tag("Kin at risk", UI.BAD))
+		if td["risk_kin"]: nrow.add_child(UI.tag("Boki at risk", UI.BAD))
 		tv.add_child(nrow)
 		if locked:
 			var need := int(td["unlock"]) - ex
@@ -3162,7 +3162,7 @@ func _open_expedition() -> void:
 	right.add_child(mtabs)
 	right.add_child(UI.label({"solo": "20 hunters, every one for themselves", "duo": "10 squads of two", "trio": "7 squads of three"}[exp_mode], UI.T_SMALL, UI.MUTED))
 	if not ak.is_empty():
-		right.add_child(UI.para("Go down for good and the kin you bring are left behind (the Ransom House holds the unclaimed ones).", 12, UI.FAINT))
+		right.add_child(UI.para("Go down for good and the Boki you bring are left behind (the Ransom House holds the unclaimed ones).", 12, UI.FAINT))
 	# the way out: practice on the left, go on the right
 	var fl := UI.footer_left(v)
 	fl.add_child(UI.ghost("Training area", _start_training, 0, "jump"))
@@ -3191,7 +3191,7 @@ func _kin_pick_row(label_t: String, rec: Dictionary, key: String) -> Control:
 		Save.d[key] = ids[(i + dir + ids.size()) % ids.size()] if ids.size() > 0 else cur
 		Save.save_game()
 		_open_expedition()
-	var prev_b := UI.icon_button("back", func(): cycle.call(-1), "Previous kin", 12.0)
+	var prev_b := UI.icon_button("back", func(): cycle.call(-1), "Previous Boki", 12.0)
 	prev_b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	row.add_child(prev_b)
 	if not rec.is_empty():
@@ -3213,7 +3213,7 @@ func _kin_pick_row(label_t: String, rec: Dictionary, key: String) -> Control:
 		nl.autowrap_mode = TextServer.AUTOWRAP_OFF
 		nl.clip_text = true
 		info.add_child(nl)
-		var sl := UI.label("%s  ·  level %d  ·  trust %d%s" % [label_t, int(rec.get("level", 1)), int(rec["trust"]), "  ·  asleep in the Kin Burrow: comes out to go with you" if KinBox.is_boxed(rec) else ""], 12, Color("cdb8ff") if KinBox.is_boxed(rec) else UI.MUTED)
+		var sl := UI.label("%s  ·  level %d  ·  trust %d%s" % [label_t, int(rec.get("level", 1)), int(rec["trust"]), "  ·  asleep in the Boki Burrow: comes out to go with you" if KinBox.is_boxed(rec) else ""], 12, Color("cdb8ff") if KinBox.is_boxed(rec) else UI.MUTED)
 		sl.autowrap_mode = TextServer.AUTOWRAP_OFF
 		info.add_child(sl)
 		var names: Array = []
@@ -3229,7 +3229,7 @@ func _kin_pick_row(label_t: String, rec: Dictionary, key: String) -> Control:
 		al.mouse_filter = Control.MOUSE_FILTER_PASS
 		info.add_child(al)
 	row.add_child(info)
-	var next_b := UI.icon_button("next", func(): cycle.call(1), "Next kin", 12.0)
+	var next_b := UI.icon_button("next", func(): cycle.call(1), "Next Boki", 12.0)
 	next_b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	row.add_child(next_b)
 	return card
@@ -3245,7 +3245,7 @@ func _open_ransom() -> void:
 	var at_house: Array = lost.filter(func(L): return String(L["where"]) == "ransom")
 	var held: Array = lost.filter(func(L): return String(L["where"]) == "rival")
 	var offers: Array = Save.d.get("offers", [])
-	UI.subtitle(v, "%s keeps the kin nobody came back for, for %d expeditions. Rivals who took yours will listen to an offer." % [Ransom.BROKER, Ransom.SELL_AFTER])
+	UI.subtitle(v, "%s keeps the Boki nobody came back for, for %d expeditions. Rivals who took yours will listen to an offer." % [Ransom.BROKER, Ransom.SELL_AFTER])
 	UI.head_extra(v).add_child(UI.chip("gem", str(int(Save.d["gems"])), UI.GOLD, "Your gems"))
 	var tab_ids := {"At the house": "house", "Held by rivals": "rivals", "Offers": "offers", "What happened": "log"}
 	var tab_names := {"house": "At the house", "rivals": "Held by rivals", "offers": "Offers", "log": "What happened"}
@@ -3255,12 +3255,12 @@ func _open_ransom() -> void:
 		"house", "rivals":
 			var list: Array = at_house if ransom_tab == "house" else held
 			if list.is_empty():
-				v.add_child(UI.empty_state("paw", "Nobody here", "Every kin you've lost is home or with a rival." if ransom_tab == "house" else "No rival is holding any of your kin."))
+				v.add_child(UI.empty_state("paw", "Nobody here", "Every Boki you've lost is home or with a rival." if ransom_tab == "house" else "No rival is holding any of your Boki."))
 			for L in list:
 				v.add_child(_ransom_card(L))
 		"offers":
 			if offers.is_empty():
-				v.add_child(UI.empty_state("gem", "No offers", "When you take home a kin a rival left behind, they may ask to buy it back. Their offers show up here."))
+				v.add_child(UI.empty_state("gem", "No offers", "When you take home a Boki a rival left behind, they may ask to buy it back. Their offers show up here."))
 			for o in offers.duplicate():
 				var k := Save.kin(String(o["uid"]))
 				if k.is_empty():
@@ -3381,16 +3381,16 @@ func _confirm_start() -> void:
 	if not td.get("risk_kin", false):
 		_start_match()
 		return
-	var v := _new_panel("Your kin can be lost", 640)
+	var v := _new_panel("Your Boki can be lost", 640)
 	var names: Array = []
 	for rec in Save.d.get("roster", []):
 		if rec.get("uid", "") in [Save.d.get("active", ""), Save.d.get("active2", "")]:
-			names.append(String(rec.get("name", "your kin")))
-	var who := " and ".join(names) if not names.is_empty() else "the kin you bring"
+			names.append(String(rec.get("name", "your Boki")))
+	var who := " and ".join(names) if not names.is_empty() else "the Boki you bring"
 	var lines := ["In %s, if you die, %s drop into your deathbox. Anyone who loots it takes them, and a rival who gets them out keeps them." % [td["name"], who]]
 	if td.get("loose_capture", false):
-		lines.append("Kin out of your hands (thrown or fighting) can also be captured while you're dead.")
-	lines.append("If a rival takes your kin you can chase them down in the match (they're marked and you're faster heading their way), get a teammate to bring you back at your box, or ask for them back after the run.")
+		lines.append("Boki out of your hands (thrown or fighting) can also be captured while you're dead.")
+	lines.append("If a rival takes your Boki you can chase them down in the match (they're marked and you're faster heading their way), get a teammate to bring you back at your box, or ask for them back after the run.")
 	for ln in lines:
 		var l := UI.label(ln, 15, UI.INK)
 		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -3523,7 +3523,7 @@ func _open_lot(b: String) -> void:
 			var resting: Array = []
 			for rec in Save.d["roster"]:
 				if rec["uid"] != Save.d.get("active", ""): resting.append(rec["name"])
-			v.add_child(UI.label(("Resting here: " + ", ".join(resting)) if resting.size() > 0 else "Nobody's resting here right now. Kin who aren't your partner sleep here.", 15, UI.MUTED))
+			v.add_child(UI.label(("Resting here: " + ", ".join(resting)) if resting.size() > 0 else "Nobody's resting here right now. Boki who aren't your partner sleep here.", 15, UI.MUTED))
 		return
 	if b == "shrine":
 		hecon.open_shrine_lot()
@@ -3658,11 +3658,11 @@ func _open_hall() -> void:
 	grid.add_theme_constant_override("h_separation", 30); grid.add_theme_constant_override("v_separation", 6)
 	for row in [["Expeditions", int(Save.d["matches"])], ["Made it out", int(Save.d.get("extracts", 0))],
 			["Hunters knocked out", int(st.get("knocks", 0))], ["Best match, kills", int(st.get("best_kills", 0))],
-			["Most gems carried home", int(st.get("best_gems", 0))], ["Kin brought home", int(st.get("caught", 0))]]:
+			["Most gems carried home", int(st.get("best_gems", 0))], ["Boki brought home", int(st.get("caught", 0))]]:
 		grid.add_child(UI.label(row[0], 16, UI.MUTED))
 		grid.add_child(UI.label(str(row[1]), 18, UI.GOLD, UI.big))
 	v.add_child(grid)
-	v.add_child(UI.section("Your kin"))
+	v.add_child(UI.section("Your Boki"))
 	var kr := HFlowContainer.new()
 	kr.add_theme_constant_override("h_separation", 8)
 	for rec in Save.d["roster"]:
@@ -3786,7 +3786,7 @@ func _show_when_free(lines: Array) -> void:
 func _open_ferry() -> void:
 	var v := _new_panel("Ferry", 520)
 	if not Social.available():
-		v.add_child(UI.label("The ferry connects you with other players: the town, guilds and friends' islands. It runs in the web version of Kinfall.", 15))
+		v.add_child(UI.label("The ferry connects you with other players: the town, guilds and friends' islands. It runs in the web version of Project Boki.", 15))
 		return
 	v.add_child(UI.label("Where to?", 14, UI.MUTED))
 	v.add_child(UI.button("The town: market, notice board and guilds", func(): Game.goto("town", {"mode": "hub"}), 440))
@@ -3808,7 +3808,7 @@ func _open_ferry() -> void:
 		for r in rows.slice(0, 12):
 			var d: Dictionary = r["d"]
 			var row := UI.hbox(10)
-			var l := UI.label("%s  ·  %d kin  ·  %d buildings" % [d["name"], d["roster"].size(), d["buildings"].size()], 15)
+			var l := UI.label("%s  ·  %d Boki  ·  %d buildings" % [d["name"], d["roster"].size(), d["buildings"].size()], 15)
 			l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			row.add_child(l)
 			var rid: String = r["id"]
@@ -3819,7 +3819,7 @@ func _open_ferry() -> void:
 # ---- house
 func _open_house() -> void:
 	var v := _new_panel("Your house", 620)
-	v.add_child(UI.label("Your kin. The one you bring on expeditions is your partner.", 15, UI.MUTED))
+	v.add_child(UI.label("Your Boki. The one you bring on expeditions is your partner.", 15, UI.MUTED))
 	for rec in Save.d["roster"]:
 		var row := UI.card(UI.CARD, 10, 10)
 		var h := UI.hbox(12); row.add_child(h)
@@ -3871,7 +3871,7 @@ func _build_burrow() -> void:
 	burrow_node.scale = Vector3.ONE * 0.8
 	add_child(burrow_node)
 	var bl := Label3D.new()
-	bl.text = "Kin Burrow"; bl.font = UI.big; bl.font_size = 40; bl.pixel_size = 0.008; bl.outline_size = 10
+	bl.text = "Boki Burrow"; bl.font = UI.big; bl.font_size = 40; bl.pixel_size = 0.008; bl.outline_size = 10
 	bl.modulate = Color("d9c8ff"); bl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	bl.position = BURROW_AT + Vector3(0, 1.85, 0.3)
 	add_child(bl)
@@ -4442,7 +4442,7 @@ func _can_pair(rec: Dictionary) -> String:
 	if int(rec["level"]) < 5: return "Needs to be level 5"
 	if float(rec["trust"]) < 50.0: return "Needs a Close bond (trust 50)"
 	if int(rec.get("bred_m", -99)) > int(Save.d["matches"]) - 3: return "Needs a few more expeditions' rest"
-	if KinBox.full(): return "Your farm and the Kin Burrow are full"
+	if KinBox.full(): return "Your farm and the Boki Burrow are full"
 	if not Save.d.get("egg", {}).is_empty(): return "There's already an egg in the nest"
 	return ""
 
@@ -4479,8 +4479,8 @@ func _open_nook() -> void:
 	var roster: Array = (Save.d["roster"] as Array).duplicate()
 	var ready_n := roster.filter(func(o): return _can_pair(o) == "").size()
 	UI.subtitle(v, ("There's a %s in the nest. It hatches after your next expedition, or in about ten minutes at home." % _egg_label()) if egg_in
-		else "Pick two kin who are close. They leave an egg that mixes their personalities and takes some of their IVs.")
-	UI.head_extra(v).add_child(UI.chip("egg", "%d ready" % ready_n, UI.GOOD if ready_n >= 2 else UI.MUTED, "Kin who can pair now: level 5, a Close bond, rested"))
+		else "Pick two Boki who are close. They leave an egg that mixes their personalities and takes some of their IVs.")
+	UI.head_extra(v).add_child(UI.chip("egg", "%d ready" % ready_n, UI.GOOD if ready_n >= 2 else UI.MUTED, "Boki who can pair now: level 5, a Close bond, rested"))
 	# picked first, then the ready ones, then the rest; higher levels first
 	var rank := func(o) -> int: return 0 if nook_pick.has(o["uid"]) else (1 if _can_pair(o) == "" else 2)
 	roster.sort_custom(func(x, y):
@@ -4517,7 +4517,7 @@ func _open_nook() -> void:
 		_nook_pair(Save.kin(String(nook_pick[0])), Save.kin(String(nook_pick[1])), dv)
 	else:
 		_nook_intro(dv, egg_in)
-	UI.footer_left(v).add_child(UI.label("Click a kin to see its IVs", UI.T_SMALL, UI.FAINT))
+	UI.footer_left(v).add_child(UI.label("Click a Boki to see its IVs", UI.T_SMALL, UI.FAINT))
 	if not egg_in:
 		var pr := UI.footer_primary(v, "Pair them" if nook_pick.size() < 2 else "Pair %s and %s" % [Save.kin(String(nook_pick[0]))["name"], Save.kin(String(nook_pick[1]))["name"]], func():
 			if nook_pick.size() < 2: return
@@ -4597,7 +4597,7 @@ func _nook_detail(rec: Dictionary, dv: VBoxContainer, egg_in: bool) -> void:
 	var nl := UI.title(String(rec["name"]), UI.T_HEAD + 3, col.lerp(UI.INK, 0.35))
 	nl.clip_text = true
 	tv.add_child(nl)
-	tv.add_child(UI.label("Level %d %s  ·  %s kin" % [int(rec["level"]), Evo.form_name(rec), String(sp["type"]).capitalize()], UI.T_SMALL, UI.INK))
+	tv.add_child(UI.label("Level %d %s  ·  %s Boki" % [int(rec["level"]), Evo.form_name(rec), String(sp["type"]).capitalize()], UI.T_SMALL, UI.INK))
 	var why := _can_pair(rec)
 	tv.add_child(UI.label("Ready to pair" if why == "" else why, 12, UI.GOOD if why == "" else UI.MUTED))
 	var mk := UI.hbox(4)
@@ -4686,9 +4686,9 @@ func _nook_pair(a: Dictionary, b: Dictionary, dv: VBoxContainer) -> void:
 func _nook_intro(dv: VBoxContainer, egg_in: bool) -> void:
 	dv.add_child(UI.section("How it works", UI.FAINT.lightened(0.2)))
 	if egg_in:
-		dv.add_child(UI.para("The nest is taken until this egg hatches. You can still look through your kin's IVs.", UI.T_SMALL, UI.INK))
+		dv.add_child(UI.para("The nest is taken until this egg hatches. You can still look through your Boki's IVs.", UI.T_SMALL, UI.INK))
 	else:
-		dv.add_child(UI.para("Pick two kin who are ready: level 5, a Close bond, and rested from their last egg. The egg hatches after your next expedition, or in about ten minutes at home.", UI.T_SMALL, UI.INK))
+		dv.add_child(UI.para("Pick two Boki who are ready: level 5, a Close bond, and rested from their last egg. The egg hatches after your next expedition, or in about ten minutes at home.", UI.T_SMALL, UI.INK))
 	dv.add_child(UI.spacer(4))
 	dv.add_child(IvView.heading())
 	dv.add_child(UI.para(Care.IV_EXPLAIN, UI.T_SMALL, UI.MUTED))
@@ -4699,7 +4699,7 @@ func _nook_intro(dv: VBoxContainer, egg_in: bool) -> void:
 		dv.add_child(UI.label("%s is picked. Pick one more." % r["name"], UI.T_SMALL, UI.ACCENT_HI))
 	elif not egg_in:
 		dv.add_child(UI.spacer(4))
-		dv.add_child(UI.label("Click a kin to see its IVs, then pick two.", UI.T_SMALL, UI.ACCENT_HI))
+		dv.add_child(UI.label("Click a Boki to see its IVs, then pick two.", UI.T_SMALL, UI.ACCENT_HI))
 
 func _make_egg(rec: Dictionary, ok: Dictionary) -> void:
 	# which parent it takes after is settled now, so the egg can wear that element's name and colour
@@ -4886,7 +4886,7 @@ func _name_baby(baby: Dictionary) -> void:
 		mr.add_child(mtl)
 		v.add_child(mr)
 	if KinBox.is_boxed(baby):
-		var bl := UI.label("Sent to the Kin Burrow (%s): you already have a %s out on the farm. Swap it out any time." % [KinBox.page_name(KinBox.page_of(baby)), sp["name"]] if KinBox.dup_on_farm(baby) else "Sent to the Kin Burrow (%s): the farm is full." % KinBox.page_name(KinBox.page_of(baby)), 14, Color("cdb8ff"))
+		var bl := UI.label("Sent to the Boki Burrow (%s): you already have a %s out on the farm. Swap it out any time." % [KinBox.page_name(KinBox.page_of(baby)), sp["name"]] if KinBox.dup_on_farm(baby) else "Sent to the Boki Burrow (%s): the farm is full." % KinBox.page_name(KinBox.page_of(baby)), 14, Color("cdb8ff"))
 		bl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		v.add_child(bl)
 	var row := UI.hbox(8)
@@ -4918,7 +4918,7 @@ func _open_wear(rec: Dictionary) -> void:
 	var v := _new_panel("Dress %s" % rec["name"], 520)
 	var owned: Array = Save.d.get("accs", [])
 	if owned.is_empty():
-		v.add_child(UI.label("You don't own anything for kin to wear yet. The market stall sells bells, bows, hats and more.", 15))
+		v.add_child(UI.label("You don't own anything for Boki to wear yet. The market stall sells bells, bows, hats and more.", 15))
 		return
 	var grid := GridContainer.new(); grid.columns = 2
 	grid.add_theme_constant_override("h_separation", 8); grid.add_theme_constant_override("v_separation", 8)
@@ -4979,7 +4979,7 @@ func _open_feed(rec: Dictionary) -> void:
 
 func _open_train(rec: Dictionary) -> void:
 	var v := _new_panel("Train %s" % rec["name"], 560)
-	v.add_child(UI.label("A short drill at the yard. Time your presses: gold is great, orange is good. Costs some energy and food; a happy kin learns faster.", 14, UI.MUTED))
+	v.add_child(UI.label("A short drill at the yard. Time your presses: gold is great, orange is good. Costs some energy and food; a happy Boki learns faster.", 14, UI.MUTED))
 	for s in Care.STATS:
 		var st: Dictionary = Care.STATS[s]
 		var row := UI.hbox(10)

@@ -89,10 +89,10 @@ const KEYS_V := 2
 const ACTIONS := [
 	["up", "Move up"], ["down", "Move down"], ["left", "Move left"], ["right", "Move right"],
 	["fire", "Weapon attack"], ["secondary", "Weapon ability (right click)"], ["dash", "Dash"], ["jump", "Jump (hold to glide)"], ["glide", "Glide (hold in the air)"], ["crouch", "Sneak"],
-	["gear1", "Glove active"], ["signature", "Kin ability"], ["throw", "Throw / recall kin"], ["ultimate", "Bond ultimate"], ["base", "Base to a teammate (squads)"],
+	["gear1", "Glove active"], ["signature", "Boki ability"], ["throw", "Throw / recall Boki"], ["ultimate", "Bond ultimate"], ["base", "Base to a teammate (squads)"],
 	["interact", "Use, catch, revive, pet"], ["tonic", "Heal (tonic, or armor kit when health is full)"], ["scores", "Scoreboard"], ["emote", "Emote wheel (hold, in a match)"],
 	["map", "Full map (click to ping)"], ["pass_lead", "Pass the drop lead"], ["separate", "Separate from the drop"],
-	["play", "Play fetch with a kin"], ["talk", "Talk to a kin"], ["details", "A kin's details"], ["inventory", "Inventory"],
+	["play", "Play fetch with a Boki"], ["talk", "Talk to a Boki"], ["details", "A Boki's details"], ["inventory", "Inventory"],
 	["build", "Build mode at home / decorate indoors"], ["rotate", "Turn a piece (build mode)"],
 ]
 

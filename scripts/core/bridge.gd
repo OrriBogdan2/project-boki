@@ -52,7 +52,7 @@ func kin_brief(k: Dictionary) -> String:
 	var m: Array = k.get("memory", [])
 	for i in range(maxi(0, m.size() - 12), m.size()):
 		mem.append("- " + String(m[i]["text"]))
-	return ("You are %s, a small creature called a kin (species: %s, a %s type) who lives on a floating-island farm with your hunter. " +
+	return ("You are %s, a small creature called a Boki (species: %s, a %s type) who lives on a floating-island farm with your hunter. " +
 		"Your voice: %s. Traits from 0 to 1: bravery %.2f, loyalty %.2f, temper %.2f, curiosity %.2f. " +
 		"Trust in your hunter: %d out of 100 (below 30 you are wary and a bit cold, above 70 you are warm and devoted). " +
 		"You are level %d and have been on %d expeditions, made it out of %d. " +
@@ -92,7 +92,7 @@ func refresh_lines(k: Dictionary, cb := Callable()) -> void:
 		return
 	var prompt := kin_brief(k) + "\n\nWrite short in-match voice lines (2 to 7 words each, no emoji, no quotes) as JSON with these keys, 3 lines each: " + \
 		"throw (being thrown into a fight), refuse (refusing a dangerous throw), hesitate (going reluctantly), scared (retreating hurt), " + \
-		"revive (rushing to revive your downed hunter), kill (after a knock), caught (a new kin was caught), extract (escaping the islands). " + \
+		"revive (rushing to revive your downed hunter), kill (after a knock), caught (a new Boki was caught), extract (escaping the islands). " + \
 		"Let your trust level and memories colour the lines. Reply with the JSON object only."
 	ask([{"role": "user", "content": prompt}], func(txt: String):
 		var s := txt.strip_edges()

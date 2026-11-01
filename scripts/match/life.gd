@@ -251,7 +251,7 @@ static func box_items(m: Match, h: Hunter, b: Dictionary) -> Array:
 	for i in (b["caught"] as Array).size():
 		var rec: Dictionary = b["caught"][i]
 		var sp: Dictionary = Data.KIN.get(String(rec.get("species", "")), {})
-		out.append({"key": "caught", "i": i, "name": "%s the %s" % [rec.get("name", "Kin"), sp.get("name", "kin")], "sub": "Kin", "icon": "paw", "col": sp.get("color", Color("ffb0d0")), "upgrade": true})
+		out.append({"key": "caught", "i": i, "name": "%s the %s" % [rec.get("name", "Boki"), sp.get("name", "Boki")], "sub": "Kin", "icon": "paw", "col": sp.get("color", Color("ffb0d0")), "upgrade": true})
 	if int(b["tonics"]) > 0:
 		out.append({"key": "tonics", "name": "%d tonic%s" % [int(b["tonics"]), "" if int(b["tonics"]) == 1 else "s"], "sub": "Heals", "icon": "tonic", "col": Color("ff8a9a"), "upgrade": true})
 	if int(b.get("keys", 0)) > 0:
@@ -295,7 +295,7 @@ static func take_item(m: Match, h: Hunter, b: Dictionary, it: Dictionary) -> voi
 				(b["caught"] as Array).remove_at(i)
 				if h == m.player and String(rec.get("lost_from", "")) == "you":
 					m.give_kin(h, rec)
-					m.add_feed("%s is back with you!" % rec.get("name", "Your kin"))
+					m.add_feed("%s is back with you!" % rec.get("name", "Your Boki"))
 				else:
 					h.caught.append(rec)
 					if String(rec.get("lost_from", "")) != "" and String(rec.get("lost_from", "")) != h.pname:
@@ -383,7 +383,7 @@ static func loot_box(m: Match, h: Hunter, b: Dictionary) -> void:
 		if h == m.player and String(rec.get("lost_from", "")) == "you":
 			# one of yours the dead hunter had taken: it's straight back at your side
 			m.give_kin(h, rec)
-			m.add_feed("%s is back with you!" % rec.get("name", "Your kin"))
+			m.add_feed("%s is back with you!" % rec.get("name", "Your Boki"))
 			continue
 		h.caught.append(rec)
 		if String(rec.get("lost_from", "")) != "" and String(rec.get("lost_from", "")) != h.pname:
@@ -487,12 +487,12 @@ static func kin_on_death(m: Match, h: Hunter, b: Dictionary) -> void:
 				(b["kin"] as Array).append(rec)
 				if h == m.player:
 					m.player_lost.append({"uid": String(rec.get("uid", "")), "kin": null, "box": b, "holder": null, "rec": rec})
-					m.add_feed("%s dropped into your deathbox" % rec.get("name", "Your kin"))
+					m.add_feed("%s dropped into your deathbox" % rec.get("name", "Your Boki"))
 			elif h == m.player:
 				# no ground to drop a box on (lost to the abyss): the kin is swept away with it and
 				# turns up at the Ransom House, same as an unclaimed box. Falling off isn't a way out.
 				m.player_lost.append({"uid": String(rec.get("uid", "")), "kin": null, "box": {}, "holder": null, "rec": rec})
-				m.add_feed("%s was lost with you to the abyss" % rec.get("name", "Your kin"))
+				m.add_feed("%s was lost with you to the abyss" % rec.get("name", "Your Boki"))
 			continue
 		if not training and not on_you and bool(m.T.get("loose_capture", false)):
 			# loose in the world: dazed, and anyone can capture it
@@ -511,14 +511,14 @@ static func _kin_from_box(m: Match, h: Hunter, b: Dictionary) -> void:
 	for rec in b.get("kin", []):
 		if h == o:
 			m.give_kin(h, rec)
-			if h == m.player: m.add_feed("%s is back with you" % rec.get("name", "Your kin"))
+			if h == m.player: m.add_feed("%s is back with you" % rec.get("name", "Your Boki"))
 			continue
 		var r2: Dictionary = (rec as Dictionary).duplicate(true)
 		if o == m.player:
 			r2["lost_from"] = "you"
 			for L in m.player_lost:
 				if String(L["uid"]) == String(rec.get("uid", "")): L["holder"] = h
-			m.add_feed(("%s is carrying %s for you" if h.team == o.team else "%s took %s from your box!") % [h.pname, rec.get("name", "your kin")])
+			m.add_feed(("%s is carrying %s for you" if h.team == o.team else "%s took %s from your box!") % [h.pname, rec.get("name", "your Boki")])
 			if h.team != o.team:
 				h.stolen_carry = true
 				m.kin_stolen(h, rec)

@@ -1,4 +1,4 @@
-# Contributing to Kinfall
+# Contributing to Project Boki
 
 Kinfall is open source and built in the open. Anyone can fork it, mod it, and send changes back.
 
