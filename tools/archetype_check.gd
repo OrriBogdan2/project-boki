@@ -150,6 +150,17 @@ func _controls() -> void:
 	ok("keys: rebindable list names them", Settings.ACTIONS.any(func(a): return a[0] == "kin_ability"))
 
 func _data() -> void:
+	# rank previews: always the NEXT rank first (rank 2 at rank 1), then rank 3's special; every
+	# ability of every archetype has a concrete rank 2
+	var rk_ok := true
+	for a in Arch.ids():
+		for sl in ["sec", "dash", "kin", "ult"]:
+			var r2 := String(Arch.def(a).get("rank2", {}).get(sl, ""))
+			if not (r2.contains("->") and r2.length() > 20): rk_ok = false
+	ok("ranks: every ability has a concrete rank 2", rk_ok)
+	var n1 := Arch.next_ranks("archer", "sec", 1); var n2 := Arch.next_ranks("archer", "sec", 2); var n3 := Arch.next_ranks("archer", "sec", 3)
+	ok("ranks: next rank first (2 at 1, 3 at 2, none at max)", n1.size() == 2 and n1[0][0] == "Rank 2" and n1[1][0] == "Rank 3" and n2.size() == 1 and n2[0][0] == "Rank 3" and n3.is_empty(), str(n1))
+	ok("ranks: R previews rank 2", Arch.next_ranks("mage", "ult", 1).size() == 1 and Arch.next_ranks("mage", "ult", 2).is_empty())
 	var ids := Arch.ids()
 	ok("data: six archetypes", ids.size() == 6, str(ids))
 	for w in ["light", "medium", "heavy"]:

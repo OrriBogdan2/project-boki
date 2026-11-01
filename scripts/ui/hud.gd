@@ -2532,10 +2532,11 @@ func _arch_tip(id: String, p: Hunter) -> Array:
 	out.append([String(si["name"]), si["col"]])
 	out.append(["%s %s  ·  %s  ·  %s" % [Arch.name_of(p.arch), slot_name, Settings.key_cap(key), p.rank_text({"sec": "sec", "k1": "k1", "r": "r", "dash": "dash"}[id])], MUTED, 12])
 	out.append([String(si["desc"]), INK, 13])
-	var r3: Dictionary = p.ak.d.get("rank3", {})
+	# what the next rank does, concretely (rank 2 when you're rank 1), then rank 3's special after it
 	var sk: String = {"sec": "sec", "k1": "kin", "r": "ult", "dash": "dash"}[id]
-	if r3.has(sk):
-		out.append(["%s: %s" % ["Rank 2" if sk == "ult" else "Rank 3", String(r3[sk])], Color(si["col"], 0.85), 12])
+	var nr := Arch.next_ranks(p.arch, sk, int(p.slot_lv.get(sk, 0)))
+	for i in nr.size():
+		out.append(["%s%s: %s" % ["Next  ·  " if i == 0 else "", String(nr[i][0]), String(nr[i][1])], Color(si["col"], 0.95 if i == 0 else 0.7), 12])
 	if id == "r":
 		out.append(["Unlocks at level %d, rank 2 at %d. With a full bond meter it's Bonded: your Boki merges as it fires." % [int(Hunter.ULT_AT[0]), int(Hunter.ULT_AT[1])], MUTED, 12])
 	if id == "sec":

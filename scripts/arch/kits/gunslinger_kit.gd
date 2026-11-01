@@ -227,7 +227,10 @@ func _trick(k: float, called: bool, _vis: float) -> void:
 	else:
 		ex["wall_bounce"] = walls
 		run(stg, cx("rmb", "trick_shot", aim(), ex))
+	# a revolver's crack, the hammer's click and the ricochet's whine: unlike any bow or bolt
 	m.sfx("rifle", h.pos, -2.0, 1.25)
+	m.sfx("click", h.pos, -6.0, 2.3)
+	m.later(0.09, func(): if is_instance_valid(h): m.sfx("ab_whirr", h.pos, -9.0, 2.4))
 
 ## A Called Shot's hits carry the payoff (T4 hitstop, a crit); the first one also pays out the moment.
 func _called_cx(called: bool) -> Dictionary:

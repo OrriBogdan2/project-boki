@@ -238,7 +238,7 @@ static func slot_text(a: String, slot: String) -> Dictionary:
 			var sd: Dictionary = d["dash"]
 			out.merge({"name": String(sd["name"]), "icon": String(sd.get("icon", "dash")), "col": Color(String(sd.get("col", "#ffffff"))),
 				"tag": "%s charge%s · %ss" % [_charges(a), "" if _charges(a) == "1" else "s", KinText.n(float(sd.get("cd", 9.0)))], "line": String(cd.get("dash", sd.get("desc", "")))}, true)
-			out["detail"] = [["", String(sd.get("desc", ""))], ["Rank 3", String(d.get("rank3", {}).get("dash", ""))]]
+			out["detail"] = [["", String(sd.get("desc", ""))]] + Arch.next_ranks(a, "dash", -1)
 		"passive":
 			var rd: Dictionary = d.get("resource", {})
 			out.merge({"name": String(d["passive"]["name"]), "icon": String({"thief": "satchel", "archer": "scanner", "mage": "blaze_mantle", "gunslinger": "barrage", "juggernaut": "haymaker", "bulwark": "fortify"}.get(a, "burst")), "col": Color(String(rd.get("col", "#ffffff"))),
@@ -266,20 +266,20 @@ static func slot_text(a: String, slot: String) -> Dictionary:
 			var det: Array = []
 			for v in ["tap", "hold", "air", "during_e", "full"]:
 				if vs.has(v): det.append([{"tap": "Tap", "hold": "Hold", "air": "In the air", "during_e": "During E", "full": "Resource full"}[v], String(vs[v])])
-			det.append(["Rank 3", String(d.get("rank3", {}).get("sec", ""))])
+			det.append_array(Arch.next_ranks(a, "sec", -1))
 			out["detail"] = det
 		"e":
 			var sd: Dictionary = d["e"]
 			out.merge({"name": String(sd["name"]), "icon": String(sd.get("icon", "")), "col": Color(String(sd.get("col", "#ffffff"))),
 				"tag": "%ss" % KinText.n(float(sd.get("cooldown", 14.0))), "line": String(cd.get("e", ""))}, true)
-			out["detail"] = [["", String(sd.get("desc", ""))], ["Rank 3", String(d.get("rank3", {}).get("kin", ""))]]
+			out["detail"] = [["", String(sd.get("desc", ""))]] + Arch.next_ranks(a, "kin", -1)
 		"r":
 			var sd: Dictionary = d["r"]
 			out.merge({"name": String(sd["name"]), "icon": String(sd.get("icon", "")), "col": Color(String(sd.get("col", "#ffffff"))),
 				"tag": "level 6 · %ss · %ss fuse" % [KinText.n(float(sd.get("cooldown", 100.0))), KinText.n(float(sd.get("fuse", 0.45)))], "line": String(cd.get("r", ""))}, true)
 			var g := "you're unstoppable while it winds up" if String(sd.get("fuse_guard", "none")) == "unstoppable" else "a stun or knock during the wind-up cancels it"
 			out["detail"] = [["", String(sd.get("desc", ""))], ["Fuse", "%ss wind-up everyone can see; %s." % [KinText.n(float(sd.get("fuse", 0.45))), g]],
-				["Bonded", "With a full bond meter your Boki merges with you as it fires."], ["Rank 2", String(d.get("rank3", {}).get("ult", ""))]]
+				["Bonded", "With a full bond meter your Boki merges with you as it fires."]] + Arch.next_ranks(a, "ult", -1)
 	return out
 
 static func preview_kind(a: String, slot: String) -> String:

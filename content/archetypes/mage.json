@@ -15,5 +15,7 @@
 	"r": {"delivery": "projectile", "name": "Encore", "short": "Encore", "icon": "vanish", "col": "#c4a8ff", "cooldown": 100.0, "fuse": 0.55, "fuse_guard": "none", "time": 4.0, "offset": 1.6, "echo_k": 0.6, "tell": 0.55, "desc": "A 0.55s fuse, then two mirror images appear at your sides and recast your last spell (Bolt or Hex) at full power; for 4s they echo every Bolt and Hex you cast at 60%. Their bolts steer with yours.", "sockets": {"hit": "add", "ctrl": "add", "ctrl_cap": "soft", "guard": "add", "mod": "add"}},
 	"order": ["sec", "kin", "dash", "sec", "kin", "ult", "sec", "kin", "ult", "dash"],
 	"rank3": {"sec": "the bolt turns 30% faster", "kin": "Hex lasts 0.3s longer", "dash": "the sigil's slow doubles", "ult": "the mirrors last 5.2s"},
+	"rank2": {"sec": "Rank 2: cooldown 2.5s -> 2.2s, damage +15%.", "dash": "Rank 2: recharge 9s -> 7.6s per charge.", "kin": "Rank 2: cooldown 14s -> 12.6s, damage +15%.", "ult": "Rank 2 (level 9): cooldown 100s -> 85s, +30% duration, +15% damage; the mirrors last 5.2s."},
+	"rank_next": {"sec": "Rank 3: cooldown 2.5s -> 2s, damage +30%; the bolt turns 30% faster.", "kin": "Rank 3: cooldown 14s -> 11.2s, damage +30%; Hex lasts 0.3s longer.", "dash": "Rank 3: recharge 9s -> 6.3s; the sigil's slow doubles."},
 	"tells": {"half": "rune motes orbit the Mage (one per 20 Heat); a rune ring over every Runed foe", "full": "white-hot orbiting runes (Overcharged); the Runes throb", "dash_spent": "the sigil left behind, dash pip dark"}
 }

@@ -25,5 +25,7 @@
 		"sockets": {"hit": "add", "ctrl": "add", "ctrl_cap": "soft", "guard": "add"}},
 	"order": ["sec", "dash", "kin", "sec", "dash", "ult", "sec", "kin", "ult", "gear"],
 	"rank3": {"sec": "+1 wall bounce", "dash": "a perfect dodge also loads 2 chambers", "kin": "+1s", "ult": "14m reach"},
+	"rank2": {"sec": "Rank 2: cooldown 7s -> 6.3s, damage +15%.", "dash": "Rank 2: recharge 9s -> 7.6s per charge.", "kin": "Rank 2: cooldown 16s -> 14.4s, damage +15%.", "ult": "Rank 2 (level 9): cooldown 100s -> 85s, +30% duration, +15% damage; 14m reach."},
+	"rank_next": {"sec": "Rank 3: cooldown 7s -> 5.6s, damage +30%; +1 wall bounce.", "kin": "Rank 3: cooldown 16s -> 12.8s, damage +30%; +1s.", "dash": "Rank 3: recharge 9s -> 6.3s; a perfect dodge also loads 2 chambers."},
 	"tells": {"half": "the gold cylinder over the hat fills pip by pip", "full": "a gold glow at the gun, the cylinder spinning, a click", "dash_spent": "dust streak and shell casings"}
 }

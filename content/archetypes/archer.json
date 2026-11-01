@@ -15,5 +15,7 @@
 	"r": {"delivery": "projectile", "name": "Great Arrows", "short": "Great", "icon": "skypierce", "col": "#ffcf6a", "cooldown": 100.0, "fuse": 0.5, "fuse_guard": "none", "shots": 3, "window": 6.0, "rate": 0.4, "range": 22.0, "speed": 70.0, "dmg": [28.0, 28.0, 44.0], "push": [8.0, 8.0, 14.0], "wall_stun": 1.0, "tell": 0.5, "desc": "A 0.5s fuse, then for 6s your next 3 shots need no draw: great arrows that fly 22m, pierce everyone, knock back and hit for 28, 28 and 44 (the third a payoff hit that stuns 1.0 into a wall).", "sockets": {"hit": "add", "ctrl": "add", "ctrl_cap": "soft", "guard": "add", "mod": "add"}},
 	"order": ["sec", "dash", "kin", "sec", "kin", "ult", "sec", "dash", "ult", "kin"],
 	"rank3": {"sec": "max 3 live Tripwires", "dash": "the backward hop refunds 40%", "kin": "the Arrow Rain is 1m longer", "ult": "the window lasts 7.8s"},
+	"rank2": {"sec": "Rank 2: cooldown 9s -> 8.1s, damage +15%.", "dash": "Rank 2: recharge 7s -> 6s per charge.", "kin": "Rank 2: cooldown 15s -> 13.5s, damage +15%.", "ult": "Rank 2 (level 9): cooldown 100s -> 85s, +30% duration, +15% damage; the window lasts 7.8s."},
+	"rank_next": {"sec": "Rank 3: cooldown 9s -> 7.2s, damage +30%; max 3 live Tripwires.", "kin": "Rank 3: cooldown 15s -> 12s, damage +30%; the Arrow Rain is 1m longer.", "dash": "Rank 3: recharge 7s -> 4.9s; the backward hop refunds 40%."},
 	"tells": {"half": "a faint lens glint", "full": "a bright glint and a thin aim line; crosshairs over every rooted foe", "dash_spent": "the rope line, dash pip dark"}
 }

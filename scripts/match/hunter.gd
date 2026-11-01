@@ -1710,6 +1710,10 @@ func rank_text(slot: String) -> String:
 	var per := "+30% duration, +15% damage" if s == "ult" else ("15% faster recharge" if s == "dash" else "+15% damage, 10% shorter cooldown, longer/bigger effects")
 	if lv <= 0:
 		return "Locked  ·  a skill point unlocks it"
+	if ak and lv < mx:
+		# an archetype slot: the next rank's concrete change (rank 2 when you're rank 1)
+		var nr := Arch.next_ranks(arch, s, lv)
+		if not nr.is_empty(): per = String(nr[0][1])
 	return "Rank %d / %d%s" % [lv, mx, ("  ·  next rank: " + per) if lv < mx else "  ·  max rank"]
 
 ## Cooldown multiplier for a slot's rank: 10% shorter per rank past the first.
