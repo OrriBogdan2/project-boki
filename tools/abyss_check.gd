@@ -314,13 +314,13 @@ func _home(main: Node) -> void:
 					_press(-dir)
 					var before: Vector3 = hm.ppos
 					hm._move_player(DT)
-					if not hm.climb.is_empty(): did_climb = true
+					if not hm.climb.is_empty() or not hm.lfl.is_empty(): did_climb = true
 					if hm.ppos.distance_to(hm.safe_at) < 0.01 and before.distance_to(hm.safe_at) > 0.5:
 						back = true; break
 					low = minf(low, hm.py)
-					if not hm.world.is_void(hm.ppos.x, hm.ppos.z) and hm.world.ground_at(hm.ppos.x, hm.ppos.z) > hm.py + 0.3 and hm.climb.is_empty():
+					if not hm.world.is_void(hm.ppos.x, hm.ppos.z) and hm.world.ground_at(hm.ppos.x, hm.ppos.z) > hm.py + 0.3 and hm.climb.is_empty() and hm.lfl.is_empty():
 						inside = maxf(inside, hm.world.ground_at(hm.ppos.x, hm.ppos.z) - hm.py)
-					if did_climb and hm.climb.is_empty(): break
+					if did_climb and hm.climb.is_empty() and hm.lfl.is_empty() and hm.pvy == 0.0 and absf(hm.py - top) < 0.05: break
 				_press(Vector2.ZERO)
 				if depth < 3.6:
 					if did_climb and absf(hm.py - top) < 0.05 and not hm.world.is_void(hm.ppos.x, hm.ppos.z): climbed += 1

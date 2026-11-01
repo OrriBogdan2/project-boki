@@ -591,9 +591,18 @@ func _ledge() -> void:
 		print("MFEEL (no ledge rise on this build)")
 		return
 	var wl := _wall2()
+	var carved := []      # [index, old level] to put back afterwards (later sections use the flat spot)
 	if wl.is_empty():
-		print("MFEEL (no 1.6m wall on this map: ledge rise not measured)")
-		return
+		# carve one beside the flat test spot: a 5x3 block two terraces high, 3m east of it
+		var x0 := int(floor(flat.x)); var z0 := int(floor(flat.z))
+		var lv := int(w.level[w.idx(x0, z0)])
+		for dz in range(-2, 3):
+			for dx in range(3, 6):
+				var ci := w.idx(x0 + dx, z0 + dz)
+				carved.append([ci, w.level[ci]])
+				w.level[ci] = lv + 2
+		var face := Vector2(x0 + 3.0, z0 + 0.5)
+		wl = {"at": face - Vector2(1, 0) * (P.r + 0.6), "n": Vector2(1, 0), "low": lv * World.LEVEL, "top": (lv + 2) * World.LEVEL}
 	var n: Vector2 = wl["n"]
 	var top: float = wl["top"]
 	var out := {}
@@ -627,6 +636,8 @@ func _ledge() -> void:
 	rec("ledge_fling_gain", out["timed"]["dist"] / maxf(0.1, out["none"]["dist"]))
 	rec("ledge_window_s", out["none"]["win"])
 	print("MFEEL ledge: no jump +%.2fm then %.2fm on; early jump +%.2fm %.2fm; timed +%.2fm %.2fm" % [out["none"]["peak"], out["none"]["dist"], out["early"]["peak"], out["early"]["dist"], out["timed"]["peak"], out["timed"]["dist"]])
+	for cv in carved:
+		w.level[int(cv[0])] = cv[1]
 
 # ---------------------------------------------------------------- the opening drop
 func _drop() -> void:

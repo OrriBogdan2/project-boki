@@ -45,6 +45,8 @@ func run(main: Node) -> void:
 	w = m.world
 	_rims()
 	var walls := _walls(2)
+	if walls.size() < 4:
+		walls.append_array(_carve_walls(6 - walls.size()))
 	print("MCHECK %d walls two terraces high to test against" % walls.size())
 	_jump_climbs(walls)
 	_no_grab(walls)
@@ -151,6 +153,31 @@ func _walls(lv: int) -> Array:
 				break
 	return out
 
+## Raises a 5x3 block two terraces high beside flat open ground (the map has too few straight walls
+## of its own): the same {at, n, low, top} as _walls.
+func _carve_walls(n_want: int) -> Array:
+	var out: Array = []
+	for k in 3000:
+		if out.size() >= n_want: break
+		var g := w.random_ground()
+		var x0 := int(floor(g.x)); var z0 := int(floor(g.z))
+		var lv := int(w.level[w.idx(x0, z0)])
+		var good := true
+		for dz in range(-4, 5):
+			for dx in range(-5, 6):
+				var tx := x0 + dx; var tz := z0 + dz
+				if not w.inb(tx, tz): good = false; break
+				var i := w.idx(tx, tz)
+				if w.kind[i] != World.T_GROUND or int(w.level[i]) != lv or w.stairs.has(i) or w.walls.has(i): good = false
+			if not good: break
+		if not good: continue
+		for dz in range(-2, 3):
+			for dx in range(1, 4):
+				w.level[w.idx(x0 + dx, z0 + dz)] = lv + 2
+		var face := Vector2(x0 + 1.0, z0 + 0.5)
+		out.append({"at": face - Vector2(1, 0) * (h.r + 0.02), "n": Vector2(1, 0), "low": lv * World.LEVEL, "top": (lv + 2) * World.LEVEL})
+	return out
+
 # ---------------------------------------------------------------- 2. jump at a high wall and climb it
 func _jump_climbs(walls: Array) -> void:
 	var tried := 0; var good := 0
@@ -187,7 +214,7 @@ func _no_grab(walls: Array) -> void:
 			if mode == "walk" or mode == "jump": keys = along
 			if mode == "glance": keys = along.rotated(-deg_to_rad(25.0) * signf(along.cross(n)))
 			var got := false
-			for i in 50:
+			for i in 30:      # (0.5s: stays alongside the wall, short of its ends)
 				h.inp["move"] = keys
 				h.inp["jump"] = mode != "walk" and i == 3
 				var b := Vector2(h.pos.x, h.pos.z)
@@ -196,7 +223,9 @@ func _no_grab(walls: Array) -> void:
 				if h.mantling(): got = true
 				# moved toward the wall more than the keys asked
 				pulled = maxf(pulled, (a - b).dot(n) - maxf(0.0, keys.dot(n)) * h.base_speed * 1.3 * DT)
-			if got: grabbed += 1
+			if got:
+				grabbed += 1
+				print("MCHECK   floated: %s along the wall at %s (keys %s)" % [mode, str(at), str(keys)])
 	ok(grabbed == 0, "walking or jumping along a wall, glancing it, or jumping beside it with no keys: no float in %d cases (%d floated)" % [cases, grabbed])
 	ok(pulled <= 0.004, "never moved toward the wall more than the keys ask (worst %.4fm in a step)" % pulled)
 
@@ -255,14 +284,14 @@ func _fling(walls: Array) -> void:
 		var hs := 0.0; var ds := 0.0; var nn := 0
 		for wl in walls.slice(0, 6):
 			var n: Vector2 = wl["n"]
-			var at: Vector2 = (wl["at"] as Vector2) - n * 0.6
-			_reset(Vector3(at.x, wl["low"], at.y), Vector3.ZERO, true)
-			m.step(DT)
+			# in the air beside the face, 1.35m below its top (the whole rise to play with), pushing in
+			var at: Vector2 = (wl["at"] as Vector2) - n * 0.05
 			var top: float = wl["top"]
+			_reset(Vector3(at.x, top - 1.35, at.y), Vector3.ZERO, false)
 			var rising := 0; var peak := -1e9; var x_top := Vector2.INF; var jumped := false
 			for i in 120:
 				h.inp["move"] = n
-				var jump := i == 2
+				var jump := false
 				if h.mantling(): rising += 1
 				if not jumped and h.mantling():
 					if mode == "early" and rising == 2: jump = true; jumped = true
@@ -303,9 +332,11 @@ func _sheer() -> void:
 		while t < 1.5:
 			h.inp["move"] = -dir
 			m.step(DT); t += DT
-			if h.grounded and h.pos.y > top - 0.3:
-				# caught: fine only if it was a neighbouring lip tile, not the sheer one
-				var lx := int(floor(h.pos.x)); var lz := int(floor(h.pos.z))
-				if w.sheer.has(w.idx(lx, lz)) or Vector2(lx + 0.5 - gx, lz + 0.5 - gz).length() < 1.2: s_caught += 1
+			if h.mantling() and h.lfloat.has("tile"):
+				# caught: fine only if it was a lip tile away from the sheer one, not it or its neighbour
+				var lt: Vector2i = h.lfloat["tile"]
+				if w.sheer.has(w.idx(lt.x, lt.y)) or Vector2(lt.x + 0.5 - gx, lt.y + 0.5 - gz).length() < 1.2:
+					s_caught += 1
+					print("MCHECK   sheer caught: sheer tile (%.1f, %.1f) dir %s, rose from tile %s, hunter at %s, %.2fm under the top" % [gx, gz, str(dir), str(lt), str(h.pos.snapped(Vector3(0.01, 0.01, 0.01))), top - h.pos.y])
 				break
 	ok(s_caught == 0, "sheer cliffs: caught %d of %d falling past (should be 0)" % [s_caught, s_tried])

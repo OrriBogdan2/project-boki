@@ -72,12 +72,14 @@ Nothing here comes from SUPERVIVE's files.
 | feather_toggle_frames (let go, press again) | 1 | 1 | <= 1 | no toggle penalty |
 | feather_m vs feather_hold_m (distance before overheating, over the abyss) | (no feathering) | 110.7m vs 90.1m | | |
 | feather_gain | n/a | 1.23x | >= 1.15x | [est] skilled taps beat holding when heat is the limit |
-| ledge_rise_t (1.6m wall, jump and push in) | LEDGE_RT_BEFORE | LEDGE_RT | <= 0.35s | [footage] ~0.8s from a full second deep |
-| ledge_rise_peak_m (no jump: height over the top) | n/a | LEDGE_PEAK | >= 0.2m | [est] a small pop |
-| ledge_fling_timed_m / ledge_fling_early_m (onto the top) | n/a | LEDGE_FT / LEDGE_FE | >= 1.5m | [est] |
-| ledge_fling_timed_up_m | n/a | LEDGE_FU | >= 0.7m | [est] |
-| ledge_fling_gain (timed vs no jump) | n/a | LEDGE_FG | >= 1.5x | [est] rewarding |
-| ledge_window_s | n/a | LEDGE_WIN | >= 0.08s | [est] readable |
+| ledge_rise_t (1.6m wall, jump and push in: contact to over the top) | (scripted mantle) | 0.08s | <= 0.35s | [footage] ~0.8s from a full second deep |
+| rim climb, 2.5m under a rim over the void (`--mantle-check`) | 0.40–0.58s (scripted) | 0.55–0.63s | < 1.4s | [footage] ~0.8s |
+| ledge_rise_peak_m (no jump: height over the top) | n/a | 0.36m | >= 0.2m | [est] a small pop |
+| fling from a 1.35m rise (`--mantle-check`, 6 walls): none / early jump / timed jump | n/a | +0.38m & 1.25m on / +0.24m & 1.31m / +0.94m & 2.22m | timed beats both | [est] |
+| ledge_fling_timed_m (from a jump at a 1.6m wall) | n/a | 4.28m | >= 1.5m | [est] |
+| ledge_fling_timed_up_m | n/a | 0.95m | >= 0.7m | [est] |
+| ledge_fling_gain (timed vs no jump, distance) | n/a | 3.4x (1.8x from a 1.35m rise) | >= 1.5x | [est] rewarding |
+| ledge_window_s | n/a | 0.117s (7 steps) | >= 0.08s | [est] readable |
 | abyss_lift_t (4m deep to balloon line) | 1.05s | 0.82s | <= 1.0s | [footage] ~1s |
 | abyss_kill_depth (point of no return under the lip) | 6.0m | 13.0m | >= 12m | owner: "needs to be a bit lower"; [footage] ~1.5s of free fall |
 | abyss_recover_depth (deepest a terminal fall can still glide out) | ~6m | 13.0m | >= 11m | |
@@ -137,11 +139,12 @@ Other checks:
   - Steering: your keys steer the whole way (ordinary air steering). Nothing holds you to the face except the wall itself.
   - Letting go: moving 0.9m out from the face, a dash, a fresh glide press, a stun or a knock ends the rise.
   - Over the top with no jump: a small pop (3.2 m/s), carried toward your keys.
-  - The fling window: the last 0.6m below the top (about 0.12s), shown with a click and a ring. A jump in it flings you at 7 m/s up and 7.5 m/s toward your keys, with a whoosh. A jump earlier gives a weak fling (4.5 m/s up, run speed) and gives up the rest of the rise.
+  - The fling window: the last 0.6m below the top (about 0.12s), shown with a click and a ring. A jump in it flings you to 0.9m over the top at 7.5 m/s toward your keys, with a whoosh. A jump earlier gives a weak fling (just over the top, at run speed).
   - Never grabs you: walking, jumping along a wall, glancing it, or standing next to it with no keys. Gliding past a lip doesn't grab you either unless you steer into it.
   - Home uses the same rise (`Home._ledge_float`).
   - A deliberate pull still lands you on top: `Hunter.launch_to` to higher ground (an archer's Grapple onto a ledge, a leap up a cliff) flies a sure arc.
-- **Wall catch over the abyss:** below an island's lip, a wall 0.75m from your side catches you (elsewhere 0.4m), except beside a sheer cliff. The abyss catch reach is 4.5m below the lip (was 3.5m).
+- **Wall catch over the abyss:** below an island's lip, a wall 0.75m from your side catches you (elsewhere 0.4m), except near a sheer cliff. The abyss catch reach is 4.5m below the lip (was 3.5m). A sheer cliff right in front of you has nothing to hold, and its neighbours don't catch you through it.
+- **Rock hop:** jumping into a rock while pushing in still hops you onto it. Terrain ledges are the ledge rise's now.
 - **Abyss:**
   - Hunters' point of no return is `World.ABYSS_DEPTH` + 7m: about 13m under the lip (was 6m). Monsters and the home keep the old depth.
   - As you sink, the local player's screen drains of colour, darkens, goes deep crimson and closes in with a vignette that beats with a heartbeat (`scripts/match/abyss_fx.gd`, a screen shader under the HUD). The HUD adds a heartbeat and a low rumble, and near the end a pulsing "HOLD GLIDE TO LIFT" / "CLIMB OUT".

@@ -2375,11 +2375,13 @@ func _physics(dt: float) -> void:
 	# a hop onto a rock only when you meant it: you jumped (still rising) and you're pushing into it.
 	# Brushing a rock or a terrace while stepping down, falling or being knocked never throws you up
 	# onto it (that was the "random bounce").
-	var push_in := Vector2(pre_v.x if b1 > 0.0 else 0.0, pre_v.y if b2 > 0.0 else 0.0) + rock_v
+	# (ledge rise) terrain ledges are the ledge rise's now (_ledge_rise: your keys steer it); this hop
+	# is for rocks only
+	var push_in := rock_v
 	var wants: bool = (inp["move"] as Vector2).dot(push_in) > 0.2 if push_in.length() > 0.01 else false
-	if not grounded and not dropping and vel.y > 0.5 and wants and blk > 0.0 and blk < pos.y + 1.6 and mantle_cd <= 0.0 \
-			and blk - pos.y < World.BLOCK_H - 0.1 and m.time - kb_t > 0.4:
-		vel.y = sqrt(2.0 * H_GRAV * (blk - pos.y + 0.3))
+	if not grounded and not dropping and vel.y > 0.5 and wants and rock_b > 0.0 and rock_b < pos.y + 1.6 and mantle_cd <= 0.0 \
+			and rock_b - pos.y < World.BLOCK_H - 0.1 and m.time - kb_t > 0.4:
+		vel.y = sqrt(2.0 * H_GRAV * (rock_b - pos.y + 0.3))
 		mantle_cd = 0.45
 	var g := ground()
 	if grounded and g < pos.y - 0.05:
@@ -2656,15 +2658,23 @@ func _try_ledge_grab(dt: float) -> void:
 			mv = wall_hit_v.normalized()
 		reach = r + 0.4
 	var void_here := over_void()
+	if not grounded and mv.length() > 0.3:
+		# a smooth sheer cliff right in front of you has nothing to hold, and its neighbours don't
+		# catch you through it either (the deep abyss reach would otherwise reach round its corner)
+		var fr := Vector2(pos.x, pos.z) + mv.normalized() * (r + 0.3)
+		var fi := Vector2i(int(floor(fr.x)), int(floor(fr.y)))
+		if w.inb(fi.x, fi.y) and w.sheer.has(w.idx(fi.x, fi.y)) and w.ground_at(fr.x, fr.y) > pos.y + World.STEP:
+			return
 	if not grounded and void_here and last_gy - pos.y > 0.3:
 		max_rise = MANTLE_REACH_ABYSS      # deep in the abyss, any island wall you touch springs you back up
 		# (movefeel) and a wall a short step away catches you too: falling at full speed just off a
 		# face while steering along it used to slip past (wall-hug check: 15 of 40 at 3m down)
 		reach = r + WALL_CATCH_REACH
-		for sz in range(int(floor(pos.z - r - 0.45)), int(floor(pos.z + r + 0.45)) + 1):
-			for sx in range(int(floor(pos.x - r - 0.45)), int(floor(pos.x + r + 0.45)) + 1):
+		var sr := r + WALL_CATCH_REACH + 0.6
+		for sz in range(int(floor(pos.z - sr)), int(floor(pos.z + sr)) + 1):
+			for sx in range(int(floor(pos.x - sr)), int(floor(pos.x + sr)) + 1):
 				if w.inb(sx, sz) and w.sheer.has(w.idx(sx, sz)):
-					reach = r + 0.4      # a smooth sheer cliff beside you: only the usual reach
+					reach = r + 0.4      # a smooth sheer cliff nearby: only the usual reach
 	var best := {}; var bd := 1e9
 	for z in range(int(floor(pos.z - reach)), int(floor(pos.z + reach)) + 1):
 		for x in range(int(floor(pos.x - reach)), int(floor(pos.x + reach)) + 1):
@@ -2703,7 +2713,8 @@ func _try_ledge_grab(dt: float) -> void:
 	if dir_in.length() < 0.01:
 		dir_in = mv
 	lfloat = {"lip": float(best["gz"]), "n": dir_in.normalized(), "t": 0.0, "g0": bool(inp.get("glide", false)),
-		"at": Vector2(pos.x, pos.z), "downed": downed, "win": false,
+		"shove": (inp["move"] as Vector2).length() < 0.3,     # thrown into the side with no keys: it carries you over
+		"at": Vector2(pos.x, pos.z), "downed": downed, "win": false, "tile": Vector2i(int(best["x"]), int(best["z"])),
 		"max_t": clampf((float(best["gz"]) - pos.y) / LRISE_SPEED, 0.1, 0.9) * (1.35 if downed else 1.0) + 0.3}
 	vel.y = maxf(vel.y, LRISE_MIN)
 	grounded = false
@@ -2727,9 +2738,9 @@ const LRISE_POP := 3.2         # [est] up speed as you clear the lip with no jum
 const LRISE_PUSH := 0.5        # keys at least this far into the wall (dot, ~60 degrees) to start a rise
 const LRISE_OFF := 0.9         # moved this far out from the face: you've let go
 const LRISE_WINDOW := 0.6      # [est] the fling window: the last this-many metres below the top (~0.12s)
-const FLING_UP := 7.0          # [est] a fling timed in the window: up speed...
-const FLING_SPEED := 7.5       # [est] ...and speed toward your keys (run speed is ~5)
-const FLING_EARLY_UP := 4.5    # [est] a jump before the window: a weaker fling
+const FLING_HEIGHT := 0.9     # [est] a fling timed in the window peaks this high over the top...
+const FLING_SPEED := 7.5       # [est] ...going this fast toward your keys (run speed is ~5)
+const FLING_EARLY_HEIGHT := 0.2  # [est] a jump before the window: only just over the top, at run speed
 func _ledge_rise(dt: float, mv: Vector2) -> bool:
 	var lf := lfloat
 	lf["t"] = float(lf["t"]) + dt
@@ -2749,13 +2760,19 @@ func _ledge_rise(dt: float, mv: Vector2) -> bool:
 		# over the lip: a small pop, carried toward your keys
 		lfloat = {}
 		vel.y = LRISE_POP
+		var hv := Vector2(vel.x, vel.z)
 		if mv.length() > 0.3:
-			var hv := Vector2(vel.x, vel.z)
 			var d := mv.normalized()
 			var along := hv.dot(d)
 			if along < base_speed * 0.9:
 				hv += d * (base_speed * 0.9 - along)
-			vel.x = hv.x; vel.z = hv.y
+		# keys still leaning into the ledge (or a shove that threw you at it): enough speed onto the top
+		# to land on it, on top of whatever your keys asked for
+		if (mv.length() > 0.3 and mv.normalized().dot(n) > 0.15) or (bool(lf.get("shove", false)) and mv.length() <= 0.3):
+			var inn := hv.dot(n)
+			if inn < base_speed * 0.6:
+				hv += n * (base_speed * 0.6 - inn)
+		vel.x = hv.x; vel.z = hv.y
 		mantle_cd = 0.3
 		return true
 	if not bool(lf["win"]) and left <= LRISE_WINDOW:
@@ -2781,7 +2798,9 @@ func _ledge_fling() -> void:
 	if along < spd:
 		hv += d * (spd - along)
 	vel.x = hv.x; vel.z = hv.y
-	vel.y = FLING_UP if timed else FLING_EARLY_UP     # (an early jump gives up the rest of the rise)
+	# up speed to peak FLING_HEIGHT (or FLING_EARLY_HEIGHT) over the top from wherever you are on the face
+	var left := maxf(0.0, float(lf["lip"]) + 0.12 - pos.y)
+	vel.y = sqrt(2.0 * H_GRAV * (left + (FLING_HEIGHT if timed else FLING_EARLY_HEIGHT)))
 	mantle_cd = 0.3
 	air_t = 0.0        # (held Space opens the glider a beat later, as after any jump)
 	stats["flings"] = int(stats.get("flings", 0)) + (1 if timed else 0)

@@ -1256,7 +1256,7 @@ func _ledge_float(d: float, mv: Vector2) -> bool:
 		var spd := Hunter.FLING_SPEED if timed else SPEED
 		if hv.dot(dir) < spd: hv += dir * (spd - hv.dot(dir))
 		pvel = Vector3(hv.x, 0, hv.y)
-		pvy = Hunter.FLING_UP if timed else Hunter.FLING_EARLY_UP
+		pvy = sqrt(2.0 * GRAV * (maxf(0.0, left) + (Hunter.FLING_HEIGHT if timed else Hunter.FLING_EARLY_HEIGHT)))
 		glide_hold = 0.0
 		Sfx.play("whoosh" if timed else "jump", null, -8.0, 0.1, 1.3)
 		return true
@@ -1266,6 +1266,7 @@ func _ledge_float(d: float, mv: Vector2) -> bool:
 		if mv.length() > 0.3:
 			var hv := Vector2(pvel.x, pvel.z)
 			if hv.dot(dir) < SPEED * 0.9: hv += dir * (SPEED * 0.9 - hv.dot(dir))
+			if mv.normalized().dot(n) > 0.15 and hv.dot(n) < SPEED * 0.6: hv += n * (SPEED * 0.6 - hv.dot(n))
 			pvel = Vector3(hv.x, 0, hv.y)
 	else:
 		pvy = clampf(left * 14.0, Hunter.LRISE_MIN, Hunter.LRISE_SPEED)
