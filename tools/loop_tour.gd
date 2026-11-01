@@ -127,10 +127,17 @@ func key_event(code: Key) -> void:
 	Input.parse_input_event(e2)
 	await frames(2)
 
+var _feed: Array = []
+var _was_match := false
 func _process(_d: float) -> void:
 	var m = _match()
 	if m == null or not is_instance_valid(m) or m.player == null:
+		if _was_match and String(Game.last_result.get("why", "")) != "extracted":
+			print("TOUR the match ended: %s; last feed: %s" % [str(Game.last_result.get("why", "?")), str(_feed.slice(-8))])
+		_was_match = false
 		return
+	_was_match = not m.over
+	_feed = m.feed_all
 	if god:
 		var P: Hunter = m.player
 		P.hp = P.max_hp
@@ -342,12 +349,11 @@ func _expedition() -> void:
 	await until(func(): return not m.player.dropping and m.player.grounded, 60.0, "landing")
 	await mwait(0.6)
 	await shot("landed")
-	await _fight(m)
-	await _level_up(m)
-	await _cast_round(m, "exp", true)
-	await _tame(m)
-	await _lair(m)
-	await _extract(m)
+	for step in [_fight, _level_up, func(mm): await _cast_round(mm, "exp", true), _tame, _lair, _extract]:
+		if not is_instance_valid(m) or m.over:
+			note_bad("the match ended early (%s)" % str(Game.last_result.get("why", "?")))
+			return
+		await step.call(m)
 
 func _nearest_mob(m, maxd := 1e9) -> Mob:
 	var best: Mob = null; var bd := maxd
@@ -369,28 +375,28 @@ func _fight(m) -> void:
 		m.cam.snap(P.pos)
 	var kills := 0
 	var w0 := Time.get_ticks_msec()
-	while kills < 3 and Time.get_ticks_msec() - w0 < 90000:
+	while kills < 3 and Time.get_ticks_msec() - w0 < 90000 and is_instance_valid(m) and not m.over:
 		mb = _nearest_mob(m, 30.0)
 		if mb == null:
 			break
 		aim_at = mb
 		Input.action_press("fire")
 		var t0: float = m.time
-		while is_instance_valid(mb) and not mb.dead and m.time - t0 < 12.0:
+		while is_instance_valid(m) and not m.over and is_instance_valid(mb) and not mb.dead and m.time - t0 < 12.0:
 			var d: float = P.flat_dist(mb)
 			Input.action_release("left"); Input.action_release("right"); Input.action_release("up"); Input.action_release("down")
 			var reach: float = 2.2 if P.wpn.get("melee", false) else 7.0
 			if d > reach:
-				var dir: Vector2 = P.dir_to(mb)
-				if dir.x > 0.35: Input.action_press("right")
-				if dir.x < -0.35: Input.action_press("left")
-				if dir.y > 0.35: Input.action_press("down")
-				if dir.y < -0.35: Input.action_press("up")
+				# (step up to it rather than walk: held keys walked the hunter off a bridge into the abyss)
+				var to: Vector3 = mb.pos + (P.pos - mb.pos).normalized() * (reach * 0.7)
+				if not m.world.is_void(to.x, to.z):
+					P.teleport(Vector3(to.x, m.world.ground_at(to.x, to.z), to.z))
 			await get_tree().process_frame
 			if kills == 0 and m.time - t0 > 1.2 and m.time - t0 < 1.3: await shot("fight")
 		if is_instance_valid(mb) and mb.dead: kills += 1
 	for a in ["fire", "left", "right", "up", "down"]: Input.action_release(a)
 	aim_at = null
+	if not is_instance_valid(m): return
 	print("TOUR fought: %d kills, level %d, xp %.0f" % [kills, P.lvl, P.xp])
 	await shot("fight_after")
 
