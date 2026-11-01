@@ -2133,12 +2133,28 @@ func _physics(dt: float) -> void:
 	var pre_v := Vector2(vel.x, vel.z)
 	wall_hit_v = Vector2.ZERO
 	var step_up := 0.0
-	var nx := pos.x + vel.x * dt
+	# rocks and trees: slide round them. Where you're heading is pushed straight out of any blocker
+	# it overlaps, and the part of your speed going into it is dropped (no bounce, no catch on a
+	# corner); the axis moves below then only meet terrain, edges and walls.
+	var tgt := Vector2(pos.x + vel.x * dt, pos.z + vel.z * dt)
+	var po: Vector2 = m.world.push_out_blocks(tgt.x, tgt.y, r, pos.y)
+	var block_n := Vector2.ZERO     # out of the rock you met this step (its face's normal)
+	var rock_b := 0.0               # ...and its top, standing in for occupy()'s answer below
+	if po.distance_squared_to(tgt) > 1e-10:
+		block_n = (po - tgt).normalized()
+		rock_b = m.world.ground_at(tgt.x - block_n.x * r * 0.7, tgt.y - block_n.y * r * 0.7) + World.BLOCK_H
+		var hvb := Vector2(vel.x, vel.z)
+		var into := hvb.dot(block_n)
+		if into < 0.0:
+			hvb -= block_n * into
+			vel.x = hvb.x; vel.z = hvb.y
+		tgt = po
+	var nx := tgt.x
 	var b1: float = _occ(nx, pos.z, guard)
 	if b1 == 0.0: pos.x = nx
 	elif grounded and b1 > 0.0 and b1 - pos.y <= World.LEVEL + 0.05: step_up = b1
 	elif b1 > 0.0 or b1 == -1.0: vel.x = 0.0 if b1 == -1.0 else vel.x * -0.1
-	var nz := pos.z + vel.z * dt
+	var nz := tgt.y
 	var b2: float = _occ(pos.x, nz, guard)
 	if b2 == 0.0: pos.z = nz
 	elif grounded and b2 > 0.0 and b2 - pos.y <= World.LEVEL + 0.05: step_up = maxf(step_up, b2)
@@ -2157,7 +2173,11 @@ func _physics(dt: float) -> void:
 		var want := hv.length() * dt
 		if moved < want * 0.35:
 			var dn := hv.normalized()
-			for side in [Vector2(-dn.y, dn.x), Vector2(dn.y, -dn.x)]:
+			# (try first the side that leads away from what stopped you, never round toward it)
+			var wn := -Vector2(pre_v.x if b1 > 0.0 else 0.0, pre_v.y if b2 > 0.0 else 0.0)
+			var sides := [Vector2(-dn.y, dn.x), Vector2(dn.y, -dn.x)]
+			if wn.dot(sides[1]) > wn.dot(sides[0]): sides.reverse()
+			for side in sides:
 				var tx: float = pos.x + (side.x * 0.8 + dn.x * 0.4) * want
 				var tz: float = pos.z + (side.y * 0.8 + dn.y * 0.4) * want
 				if _occ(tx, tz, guard) == 0.0:
@@ -2176,14 +2196,18 @@ func _physics(dt: float) -> void:
 					m.fx.dust(pos, 4)
 		else:
 			wedged_t = 0.0
-	var blk := maxf(b1, b2)
+	var blk := maxf(maxf(b1, b2), rock_b)
+	# (a rock you slid along counts as a wall you hit, with the part of your speed that went into it)
+	var rock_v := block_n * minf(0.0, pre_v.dot(block_n)) if rock_b > 0.0 else Vector2.ZERO
 	if b1 > 0.0 or b2 > 0.0:
 		wall_hit_v = Vector2(pre_v.x if b1 > 0.0 else 0.0, pre_v.y if b2 > 0.0 else 0.0)
-	if (b1 > 0.0 or b2 > 0.0) and blk > pos.y + 0.6:
+	elif rock_v.length() > 0.01:
+		wall_hit_v = rock_v
+	if (b1 > 0.0 or b2 > 0.0 or rock_v.length() > 0.01) and blk > pos.y + 0.6:
 		# against a wall: in the air you can kick off it; knocked into it hard, you're stunned
 		if not grounded:
 			wall_touch_t = 0.2
-			wall_n = Vector2(-signf(pre_v.x) if b1 > 0.0 else 0.0, -signf(pre_v.y) if b2 > 0.0 else 0.0).normalized()
+			wall_n = Vector2(-signf(pre_v.x) if b1 > 0.0 else 0.0, -signf(pre_v.y) if b2 > 0.0 else 0.0).normalized() if (b1 > 0.0 or b2 > 0.0) else block_n
 		if m.time - kb_t < 0.6 and pre_v.length() > 8.0 and wslam_t <= 0.0 and not remote:
 			wslam_t = 1.2
 			var st := maxf(0.9, wallstun)
@@ -2198,7 +2222,7 @@ func _physics(dt: float) -> void:
 	# a hop onto a rock only when you meant it: you jumped (still rising) and you're pushing into it.
 	# Brushing a rock or a terrace while stepping down, falling or being knocked never throws you up
 	# onto it (that was the "random bounce").
-	var push_in := Vector2(pre_v.x if b1 > 0.0 else 0.0, pre_v.y if b2 > 0.0 else 0.0)
+	var push_in := Vector2(pre_v.x if b1 > 0.0 else 0.0, pre_v.y if b2 > 0.0 else 0.0) + rock_v
 	var wants: bool = (inp["move"] as Vector2).dot(push_in) > 0.2 if push_in.length() > 0.01 else false
 	if not grounded and not dropping and vel.y > 0.5 and wants and blk > 0.0 and blk < pos.y + 1.6 and mantle_cd <= 0.0 \
 			and blk - pos.y < World.BLOCK_H - 0.1 and m.time - kb_t > 0.4:
