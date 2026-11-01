@@ -304,6 +304,14 @@ func _kin_after(k: Dictionary, run: Dictionary, won: bool, r: Dictionary, treat:
 		if counts[kind] > 1:
 			txt += " (%d times)" % counts[kind]
 		Save.remember(k, kind, txt)
+	# the moment it'll bring up when you get home (KinSpeak.recall_line), the biggest one first
+	for kind in ["carried_out", "boss_kill", "revived", "stood_over", "comforted", "knock_together", "escaped"]:
+		if counts.has(kind):
+			for e in evs:
+				if e["kind"] == kind:
+					k["recall"] = {"kind": kind, "text": String(e["text"]), "place": String(e.get("place", "the islands")), "boss": String(e.get("boss", "")), "m": int(d.get("matches", 0))}
+					break
+			break
 	if won:
 		k["wins"] = int(k.get("wins", 0)) + 1
 		Save.remember(k, "extracted", "made it out of the islands with you", 3.0)

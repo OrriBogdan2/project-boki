@@ -898,6 +898,10 @@ func _spawn_hunters() -> void:
 					rec = Save.new_kin(sp0 if Data.KIN.has(sp0) else "cindle", "", kin_seed("demo"))
 					rec["name"] = Data.KIN[rec["species"]]["name"]
 					rec["trust"] = 95.0
+					if opts.has("demo_kin_lv"):
+						var lt := String(opts["demo_kin_lv"]).split(":")
+						rec["level"] = int(lt[0])
+						if lt.size() > 1: rec["trust"] = float(lt[1])
 					rec2 = Save.new_kin(String(ids[(ids.find(rec["species"]) + 1) % ids.size()]), "", kin_seed("demo"))
 				player = make_hunter("p0", 0, String(opts.get("cls", Data.class_of_save())), Save.d.get("name", "Hunter"), "bot" if opts.get("autoplay", false) else "local", rec, at, my_kit(), rec2)
 				if opts.get("autoplay", false):
@@ -1945,16 +1949,30 @@ func my_ping() -> Dictionary:
 		if player and pg.get("by") == player: return pg
 	return {}
 
-func kin_bark(k: Kin, txt: String, cat: String) -> void:
+func kin_bark(k: Kin, txt: String, cat: String, life := 2.6) -> void:
 	for b in bubbles:
 		if b["ent"] == k:
 			bubbles.erase(b); break
-	bubbles.append({"ent": k, "text": txt, "t": 0.0, "cat": cat})
+	bubbles.append({"ent": k, "text": txt, "t": 0.0, "cat": cat, "life": maxf(life, 2.6 + txt.length() * 0.02)})
 	if k.owner_h == player:
 		var s := "kin_happy"
-		if cat in ["refuse", "hesitate", "scared", "revive_low", "ignore"]: s = "kin_unsure"
-		elif cat in ["callout", "wild"]: s = "kin_alert"
+		if cat in ["refuse", "hesitate", "scared", "revive_low", "ignore", "low_hp", "yelp", "comfort", "sniper"]: s = "kin_unsure"
+		elif cat in ["callout", "wild", "behind", "hunter", "pack", "boss", "egg", "loot", "exit", "collapse", "cover"]: s = "kin_alert"
 		sfx(s, null, -3.0, Unique.voice(k.rec))     # in its own voice, above the louder combat layer
+	elif player and k.owner_h and k.owner_h.team == player.team and cat in ["behind", "hunter", "sniper", "pack", "boss", "egg"]:
+		sfx("kin_alert", k.pos, -8.0, Unique.voice(k.rec))   # a squadmate's Boki calling something out
+
+## A Boki's callout ping (KinCompanion): a labelled marker over the spot for a few seconds, on the
+## minimap too, for its squad. Returns the ping so a moving target can be followed.
+func kin_ping(k: Kin, p: Vector3, col: Color, label: String) -> Dictionary:
+	for pg in pings:
+		if pg.get("kin") == k:
+			pings.erase(pg); break
+	var pg := {"pos": p, "col": col, "t": 0.0, "life": 5.0, "kin": k, "label": label, "team": k.team}
+	pings.append(pg)
+	if k.owner_h == player or (player and k.team == player.team):
+		sfx("ping", null, -9.0, 1.3)
+	return pg
 
 var feed_all: Array = []
 
@@ -1976,6 +1994,9 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 	var crit: bool = o.get("crit", false)
 	var src: String = o.get("src", "")
 	Oomph.react(self, target, by, d, o)     # flinch, stagger, hit-shake (the gameplay side of oomph)
+	if target is Hunter and (target as Hunter).kin and by != target and src != "burn":
+		var tk: Kin = (target as Hunter).kin
+		if tk.comp: tk.comp.on_owner_hit(d, by)       # its Boki flinches with it
 	var credit: Ent = by
 	if by is Kin and by.owner_h:
 		credit = by.owner_h
@@ -2066,6 +2087,8 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 			credit.dashes = minf(credit.max_dashes(), floorf(credit.dashes) + 1.0)
 			credit.ex_cd = 0.0 if credit.max_dashes() <= 1.0 else credit.ex_cd
 		add_feed("%s knocked %s" % [credit.pname, h.pname])
+		if credit.kin and credit.kin.comp and credit.kin.state != "fainted":
+			credit.kin.comp.on_knock(h.pos)
 		if credit == player:
 			_reward_moment(h.pos)
 			if player.kin and player.kin.state != "fainted":
@@ -2077,6 +2100,8 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 	Juice.knock(self, h, credit)
 	if net_on and not h.remote:
 		net_event(["knock", h.nid, credit.nid if credit else ""])
+	if h.kin and h.kin.comp and h.kin.state != "fainted":
+		h.kin.comp.on_owner_down()
 	if h == player:
 		cam.add_trauma(0.6)
 		if h.kin and h.kin.state != "fainted":
@@ -2162,6 +2187,8 @@ func revive_hunter(h: Hunter, by: Ent) -> void:
 	sfx("revive", h.pos, 0.0)
 	fx.ring(h.pos, 1.8, Color("9ee2a0"), 0.4)
 	add_feed("%s is back up" % h.pname)
+	if h.kin and h.kin.comp and h.kin.state != "fainted" and by != h.kin:
+		h.kin.comp.on_owner_up()
 	if by is Hunter and by != h:
 		(by as Hunter).revives += 1
 
@@ -3537,7 +3564,7 @@ func _process(delta: float) -> void:
 			(pd["arc"] as Node3D).visible = near or player.pad.size() > 0 and (player.pad["to"] as Vector3).distance_to(pd["land"]) < 0.5
 	for b in bubbles.duplicate():
 		b["t"] += delta
-		if b["t"] > 2.6: bubbles.erase(b)
+		if b["t"] > float(b.get("life", 2.6)): bubbles.erase(b)
 	for p in pings.duplicate():
 		p["t"] += delta
 		if p["t"] > float(p.get("life", 4.0)): pings.erase(p)
@@ -4035,6 +4062,8 @@ func step(dt: float) -> void:
 		truce.demo()
 	if opts.has("exit_demo") and exits and player and not player.dropping:
 		exits.demo(String(opts["exit_demo"]))
+	if opts.has("teammate_demo"):
+		KinCompanion.demo_tick(self, String(opts["teammate_demo"]))
 	if opts.get("glide_demo", false) and player:
 		if time < 0.05:
 			player.teleport(player.pos + Vector3(0, 6, 0)); player.grounded = false
@@ -4146,6 +4175,8 @@ func step(dt: float) -> void:
 	if opts.get("tutorial", false):
 		if opts.get("tut_test", false):
 			_tut_drive()
+			if "--tut-slow" in OS.get_cmdline_user_args():
+				player.inp["move"] = (player.inp["move"] as Vector2) * 0.5     # test: walk, so your Boki can lead (screenshots)
 		_update_tutorial(dt)
 	if opts.get("training", false) and duel == null:
 		_update_training(dt)
@@ -4934,6 +4965,9 @@ func _update_tutorial(dt: float) -> void:
 		"extract": done = false
 	# the marker follows whatever this step is about
 	_tut_point(id)
+	# and your Boki leads the way, shows you how and hints in its own voice (KinCompanion.tut)
+	if player.kin and player.kin.comp:
+		player.kin.comp.tut(id, _tut_goal(id))
 	if tut_wait > 0.0:
 		tut_wait -= dt
 		return
@@ -4997,6 +5031,29 @@ func _tut_point(id: String) -> void:
 			if not o.is_empty():
 				tut_target = o["pos"]
 				tut_label = {"goexit": "Outpost", "uplink": "Uplink", "defend": "Outpost", "extract": "Lift"}[id]
+
+## What a step is about, for your Boki to lead you to or point at (Vector3.INF for nothing).
+func _tut_goal(id: String) -> Vector3:
+	match id:
+		"shoot", "throw", "kin1", "defend":
+			var best: Ent = null; var bd := 1e9
+			for mb in mobs:
+				if not mb.dead and player.flat_dist(mb) < bd: bd = player.flat_dist(mb); best = mb
+			if best: return best.pos
+			if id == "defend":
+				var od := _tut_outpost()
+				return od["pos"] if not od.is_empty() else Vector3.INF
+		"chest":
+			for c in chests:
+				if not c["open"] and c.get("tut", false): return c["pos"]
+		"goexit", "uplink", "extract":
+			var o := _tut_outpost()
+			if not o.is_empty(): return o["pos"]
+	return Vector3.INF
+
+## Is your Boki out ahead leading you right now? (Then the HUD drops its own arrow.)
+func tut_kin_leading() -> bool:
+	return player != null and player.kin != null and player.kin.comp != null and player.kin.comp.leading()
 
 ## Keeps exactly one monster around for a step that needs a target (if it fell off, another comes).
 func _tut_keep_foe(kind: String) -> void:
@@ -5527,6 +5584,7 @@ func _extract(h: Hunter, how := "", where := "") -> void:
 	Juice.extract(self, h, col)
 	add_feed("%s extracted" % h.pname)
 	if h.kin:
+		if h.kin.comp: h.kin.comp.on_extract()
 		h.kin.visible = false
 	if h == player:
 		if h.kin and h.kin.state != "fainted":
@@ -5637,6 +5695,11 @@ func _finish() -> void:
 		else:
 			var lb := Life.box_of(self, player)
 			r["lost_items"] = Pack._box_things(lb).map(func(c): return c["it"]) if not lb.is_empty() else Pack.haul(player)
+		# a run that ended without getting out: your Boki stays close (and remembers it)
+		if not result.get("extracted", false) and player.kin and player.kin.comp:
+			player.kin.comp.on_loss()
+		if player.kin:
+			r["kin_say"] = KinVoice.callout(player.kin, "comfort") if not result.get("extracted", false) else KinVoice.line(player.kin, "extract")
 		# what each kin you brought did, for its memories and growth
 		r["kin_runs"] = []
 		for kk in [player.kin, player.kin2]:
@@ -5984,6 +6047,11 @@ func _net_ev(x, from: String) -> void:
 		"emo":
 			var eh: Hunter = ents_by_id.get(String(x[1]), null) as Hunter
 			if truce and eh: truce.emote(eh, String(x[2]), true)
+		"kc":
+			# a Boki's callout (KinCompanion): its ping, its body turning, its bark here too
+			var kk: Kin = ents_by_id.get(String(x[1]), null) as Kin
+			if kk and kk.comp and x.size() >= 6:
+				kk.comp.heard(String(x[2]), Vector3(float(x[3]), float(x[4]), float(x[5])))
 		"sping":
 			var ph: Hunter = ents_by_id.get(String(x[1]), null) as Hunter
 			if ph: squad_ping(ph, Vector3(x[2], x[3], x[4]), true)
