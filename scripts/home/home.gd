@@ -2131,11 +2131,14 @@ func _restore_scroll(p: Control, val: int, tries: int) -> void:
 		return
 	var sc: ScrollContainer = found[0]
 	sc.scroll_vertical = val
-	if tries > 0 and sc.scroll_vertical != val:
-		get_tree().process_frame.connect(func(): _restore_scroll(p, val, tries - 1), CONNECT_ONE_SHOT)
-	elif tries > 0:
-		# (set again next frame too: a late resize can clamp it back toward the top)
-		get_tree().process_frame.connect(func(): if is_instance_valid(sc) and sc.scroll_vertical != val: _restore_scroll(p, val, tries - 1), CONNECT_ONE_SHOT)
+	if tries <= 0:
+		return
+	# next frame, try again (the panel sizes its scroll a frame or two late, and a late resize can
+	# clamp it back toward the top). By id: the panel may be gone by then.
+	var pid := p.get_instance_id()
+	get_tree().process_frame.connect(func():
+		var pp := instance_from_id(pid) as Control
+		if pp: _restore_scroll(pp, val, tries - 1), CONNECT_ONE_SHOT)
 
 func _close_panel() -> void:
 	var was := panel_open
