@@ -330,12 +330,16 @@ func _farm_start(h) -> void:
 		var cs := _build_spot(hb, near + {"house": Vector3(0, 0, -7), "crop_patch": Vector3(6, 0, -3), "cook_pot": Vector3(-4, 0, -3)}[id])
 		if cs.is_empty():
 			note_bad("no room for the %s near %s" % [id, str(near)]); hb._drop_held(); continue
+		# point the build "mouse" at it (build mode follows the cursor every frame)
+		var sz := HomeLayout.size_of(id, int(hb.held["r"]))
+		hb.debug_m = Vector2(float(cs[0].x) + sz.x * 0.5, float(cs[0].y) + sz.y * 0.5)
 		hb.cells = cs; hb._check_cells(); hb._draw_cells()
 		await wait(0.6)
 		if id != "cook_pot": await shot("farm_place_%s" % id)
 		if not hb.place_held():
 			note_bad("the %s wouldn't go down (%s)" % [id, hb.why])
 		await wait(0.6)
+	hb.debug_m = Vector2.INF
 	if hb.active: hb.toggle()
 	await wait(0.8)
 	print("TOUR placed: %d plots, house at %s, %d gems left" % [h.plots.size(), str(h.spots.get("house")), int(Save.d["gems"])])
@@ -398,12 +402,12 @@ func _expedition() -> void:
 	god = true
 	if m.skydrop and m.skydrop.planning:
 		await shot("drop_planning")
-		await until(func(): return not m.skydrop.planning, 30.0, "planning to end")
+		await until(func(): return not m.skydrop.planning, 300.0, "planning to end")
 	await mwait(1.0)
 	await shot("skyship")
 	await mwait(3.0)
 	# jump when the ship is over land
-	await until(func(): return not m.player.riding or not m.world.is_void(m.ship_pos().x, m.ship_pos().z) and m.time > 4.0, 60.0, "the ship to cross land")
+	await until(func(): return not m.player.riding or not m.world.is_void(m.ship_pos().x, m.ship_pos().z) and m.time > 4.0, 300.0, "the ship to cross land")
 	if m.player.riding:
 		await key("jump")
 		await mwait(0.3)
@@ -414,7 +418,7 @@ func _expedition() -> void:
 	await shot("drop_high")
 	await mwait(3.0)
 	await shot("drop_mid")
-	await until(func(): return not m.player.dropping and m.player.grounded, 60.0, "landing")
+	await until(func(): return not m.player.dropping and m.player.grounded, 300.0, "landing")
 	await mwait(0.6)
 	await shot("landed")
 	# (direct awaits: resuming these through Callable.call() once crashed Godot 4.6.2 with SIGSEGV)

@@ -437,6 +437,10 @@ func _draw_world_labels() -> void:
 			var gd: Dictionary = Gear.ALL[String(wp["gear"])]
 			_ctext(sp, String(gd["name"]), 15, gd["col"], big)
 			_ctext(sp + Vector2(0, 14), ("active  ·  " + Settings.key_cap("gear1")) if Gear.active(String(wp["gear"])) else "passive", 11, Color(INK, 0.75))
+		elif wp.has("val"):
+			# treasure and the Rare Egg: their own names (a valuable has no weapon, it read as a rifle)
+			var it := Pack.ground_item(wp)
+			_ctext(sp, Loot.name_of(it), 16, Loot.col_of(it), big)
 		else:
 			_ctext(sp, String(Data.weapon_stats(String(wp["wid"]), int(wp["rar"]))["name"]), 16, r["color"], big)
 	for k in m.kins:
