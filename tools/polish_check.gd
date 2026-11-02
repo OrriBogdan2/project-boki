@@ -3,6 +3,7 @@ extends RefCounted
 ##   1. weapon drops lean toward the earner's archetype family (DropFamily), but not always
 ##   2. every stair tile belongs to a full-width flight (PolishTools.stair_flights), on the default map
 ##   3. a chest reads as a different, chunkier thing than the crates, pots and barrels
+##   4. building a chest draws nothing from the match's seeded global random stream
 
 var bad := 0
 
@@ -67,6 +68,12 @@ func run(main: Node) -> void:
 	var c0: Color = Models.CHEST_COLS[0][0]; var c1: Color = Models.CHEST_COLS[1][0]; var c2: Color = Models.CHEST_COLS[2][0]
 	ok(c0 != c1 and c1 != c2 and c0 != c2, "the three chest tiers have their own colours")
 	ch.queue_free(); cr.queue_free()
+	# 4. a CPUParticles3D (or GPUParticles3D) draws a seed from the global stream when it is made: a few
+	# chests in a match then moved every later roll (where the squad's bots land), failing --drop-check
+	seed(31337); var r0 := randi()
+	seed(31337)
+	for t in 3: Models.chest(t).free()
+	ok(randi() == r0, "building chests leaves the seeded global random stream alone")
 	m.queue_free()
 	print("POLISH DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)

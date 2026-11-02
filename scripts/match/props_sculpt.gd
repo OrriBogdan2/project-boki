@@ -149,17 +149,19 @@ static func chest(tier := 0) -> Node3D:
 	# the glow: a soft halo round the chest and a few sparks drifting up off the lid
 	var halo := Models.part(bcn, Models.sphere(1.0, 14), Models.glow_mat(Color(rc, 0.16 + 0.04 * tier)), Vector3(0, 0.45, 0), Vector3(1.05, 0.62, 0.85) * (1.0 + tier * 0.1), Vector3.ZERO, "Halo")
 	halo.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	var sp := CPUParticles3D.new(); sp.name = "Sparks"
-	sp.amount = 6 + 2 * tier; sp.lifetime = 1.6
-	sp.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX
-	sp.emission_box_extents = Vector3(W * 0.45, 0.05, D * 0.4)
-	sp.direction = Vector3.UP; sp.spread = 12.0
-	sp.initial_velocity_min = 0.35; sp.initial_velocity_max = 0.7
-	sp.gravity = Vector3.ZERO
-	sp.scale_amount_min = 0.04; sp.scale_amount_max = 0.08
-	var sm := SphereMesh.new(); sm.radius = 0.5; sm.height = 1.0; sm.radial_segments = 6; sm.rings = 3
-	sp.mesh = sm
-	sp.material_override = Models.glow_mat(Color(Color(rc).lightened(0.3), 0.85))
+	# (a multimesh and a shader, not a particle system: making a CPUParticles3D draws a seed from the
+	# match's seeded global random stream, so every chest moved every later roll - where the squad's
+	# bots land and what they do - and a GPUParticles3D does the same)
+	var sm := SphereMesh.new(); sm.radius = 1.0; sm.height = 2.0; sm.radial_segments = 6; sm.rings = 3
+	var smm := MultiMesh.new(); smm.transform_format = MultiMesh.TRANSFORM_3D
+	smm.mesh = sm; smm.instance_count = 6 + 2 * tier
+	for k in smm.instance_count: smm.set_instance_transform(k, Transform3D.IDENTITY)
+	var sp := MultiMeshInstance3D.new(); sp.name = "Sparks"; sp.multimesh = smm
+	var spm := ShaderMaterial.new(); spm.shader = load("res://shaders/chest_sparks.gdshader")
+	spm.set_shader_parameter("glow", Color(Color(rc).lightened(0.3), 0.85))
+	spm.set_shader_parameter("extents", Vector3(W * 0.45, 0.05, D * 0.4))
+	sp.material_override = spm
+	sp.extra_cull_margin = 2.0
 	sp.position = Vector3(0, H + 0.35, 0)
 	sp.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	bcn.add_child(sp)
