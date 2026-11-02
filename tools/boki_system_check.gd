@@ -340,4 +340,4 @@ func _surge() -> void:
 
 # ------------------------------------------------------------------ 8. net
 func _net() -> void:
-	ok(Net.VERSION == "0.9.0", "the net version moved for the new snapshot shape (%s)" % Net.VERSION)
+	ok(Net.VERSION.begins_with("0.9."), "the net version moved for the new snapshot shape (%s)" % Net.VERSION)      # (0.9.x: other branches bump the patch)
