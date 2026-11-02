@@ -35,23 +35,32 @@ Rank 2 / 3: Grapnel -10% cooldown steps, rank 3 refunds 33% on a hit. Barge rank
 Dropped. Slugwave is flavour: nothing in the loop (Salvage, grapnel, anchor, back hits) resets on it or feeds from it.
 
 ## Combinations (all scripted in `--dredge-combo-check`)
-| Do this | You get |
-|---|---|
-| Grapnel hit, then wait for the arrival | foe lands Grounded at your feet, "HAULED" payoff |
-| Grapnel, then Anchor Drop on the Grounded foe | 25 damage, stun, slam; the combo the kit is built for |
-| During the reel: RMB, E, the gun | denied (only the barge works) |
-| During the reel: barge | works; the reel continues |
-| Anchor Drop, then barge within 0.8s | barge turns at most 35 degrees |
-| Anchor in the air (rank 3) | driven down; up to +75% damage by height |
-| Anchor over the abyss | no downward push |
-| Grapnel into a wall | the hook stops there, nobody is pulled |
-| Reel with a wall in the way | the foe is stopped at the wall |
-| Reel over a gap in the island | the body is carried over the void and falls (existing knock/abyss rules) |
-| A hit from behind | +50% |
-| Knock or assist | +1 Salvage (+2.5% health); a knock also heals |
-| Downed | -1 Salvage |
-| Rank 3 Grapnel hit | refunds 33% of its cooldown |
-| Rank 3 pellet hit | trims the barge recharge |
+| Do this | You get | Asserted by (check line) |
+|---|---|---|
+| Grapnel hit, then wait for the arrival | foe lands Grounded at your feet, "HAULED" payoff | "grapnel: hooks the first foe, reel begins"; "grapnel: foe arrives and lands Grounded" |
+| Grapnel, then Anchor Drop on the Grounded foe | 25 damage, stun, slam; the combo the kit is built for | "combo: reel > Anchor Drop = damage, stun, Grounded"; "anchor: E cooldown set" |
+| During the reel: RMB, E, the gun | denied (only the barge works) | "reel: a second Grapnel is denied"; "reel: E is denied while reeling"; "reel: the gun is locked" |
+| During the reel: barge | works; the reel continues | "reel: the barge still works" |
+| Anchor Drop, then barge within 0.8s | barge turns at most 35 degrees | "combo: Anchor > barge turns at most 35 degrees" |
+| Anchor in the air (rank 3) | driven down; up to +75% damage by height | "anchor: in the air it drives you down"; "anchor rank 3: height adds damage (up to +75%)" |
+| Anchor over the abyss | no downward push | "abyss: the Anchor never pushes you down over the void" |
+| Grapnel into a wall | the hook stops there, nobody is pulled | "wall: the hook stops at the wall, nobody is pulled" |
+| Reel with a wall in the way | the foe is stopped at the wall | "wall: a reel is stopped by a wall, the foe stays behind it" |
+| Reel over a gap in the island | the body is carried over the void and falls (existing knock/abyss rules) | "abyss: a foe reeled over the void falls (knock rules)" |
+| A hit from behind | +50% | "passive: from behind +50%, from the front none" |
+| Knock or assist | +1 Salvage (+2.5% health); a knock also heals | "passive: a knock = 1 stack, +2.5% health, a heal"; "passive: an assist stacks but does not heal"; "passive: capped at 10 stacks (+25%)" |
+| Downed | -1 Salvage | "passive: being downed costs a stack" |
+| Rank 3 Grapnel hit | refunds 33% of its cooldown | "grapnel rank 3: a hit refunds a third of the cooldown" |
+| Rank 3 pellet hit | trims the barge recharge | "barge rank 3: a pellet hit trims the recharge" |
+
+## Animation moves
+Keyed full-body moves live in `scripts/match/kmoves_pair.gd` (`KMovesPair.MOVES`, sampled through `HunterAnim.km_sample`).
+| Ability | KMOVES ids | Pose idea |
+|---|---|---|
+| Grapnel (RMB) | `dr_throw`, `dr_reel`, `dr_pullend` | rope arm coiled over the shoulder then thrown; braced lean-back while reeling (held up to 3s); settle when the foe arrives |
+| Barge (Shift) | `dr_barge` | head down, shoulder driven in, arms tucked |
+| Anchor Drop (E) | `dr_anchor` | fist hauled overhead on the toes, then driven down |
+| Shotgun (LMB), Salvage passive | none (class default fire pose) | the passive is shown by the brass tells, not a move |
 
 ## Engine notes
 The reel moves the foe in small steps against the world's occupancy test (walls and cliffs block, the void does not),

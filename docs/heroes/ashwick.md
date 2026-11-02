@@ -35,20 +35,30 @@ Folded in as a rank-3 upgrade of Spark Leap (the fire trail, 3s, slows and build
 flight itself is flavour, but its burn zone is the one place the source builds Ignite without aiming.
 
 ## Combinations (all scripted in `--ashwick-combo-check`)
-| Do this | You get |
-|---|---|
-| Hold the lance ~1s | Char to 31: Flashover level 1 |
-| Keep holding on a burning foe | burn upgrades to level 2 (FLASHOVER payoff) |
-| Cinder Shot on an unburnt foe | Flashover level 1 |
-| Cinder Shot on a burning foe | upgrade + spread (to foes within 4m, at the original level) |
-| Spark Leap | 17 Char on the foe it passes |
-| Spark Leap rank 3 | burn upgrades at once, fire trail burns whoever stands in it |
-| Furnace Cloak | damage, 16 Char, Anti-Heal, drag, shield |
-| Cloak or lance behind a wall | nothing (line of sight and walls) |
-| Knock | heal and the cloak resets |
-| Rank 3 ability that stokes | 25% cooldown refund |
-| Char past 31 | discarded; Char left alone falls off after 5s |
-| Fire trail over the abyss | never forms |
+| Do this | You get | Asserted by (check line) |
+|---|---|---|
+| Hold the lance ~1s | Char to 31: Flashover level 1 | "lance: hold = damage and Char building"; "lance: ~1s of fire = Flashover level 1" |
+| Keep holding on a burning foe | burn upgrades to level 2 (FLASHOVER payoff) | "lance: kept on a burning foe it upgrades to level 2" |
+| Cinder Shot on an unburnt foe | Flashover level 1 | "cinder: a hit Flashes the foe over" |
+| Cinder Shot on a burning foe | upgrade + spread (to foes within 4m, at the original level) | "combo: lance burn > Cinder Shot = upgrade + spread" |
+| Spark Leap | 17 Char on the foe it passes | "leap: damage and 17 Char on the foe it passes" |
+| Spark Leap rank 3 | burn upgrades at once, fire trail burns whoever stands in it | "leap rank 3: stokes at once and leaves a fire trail"; "leap rank 3: the trail burns whoever stands in it" |
+| Furnace Cloak | damage, 16 Char, Anti-Heal, drag, shield | "cloak: damage, Char, Anti-Heal and a shield"; "cloak: foes in sight are dragged toward you" |
+| Cloak or lance behind a wall | nothing (line of sight and walls) | "wall: the lance does not burn through a wall"; "wall: the cloak does not reach behind a wall" |
+| Knock | heal and the cloak resets | "passive: a knock resets the cloak and heals" |
+| Rank 3 ability that stokes | 25% cooldown refund | "rank 3: stoking refunds a quarter of the cooldown" |
+| Char past 31 | discarded; Char left alone falls off after 5s | "passive: Char past 31 is discarded (burn, then 0)"; "passive: Char falls off all at once after 5s" |
+| Fire trail over the abyss | never forms | "abyss: the fire trail never forms over the void" |
+
+## Animation moves
+Keyed full-body moves live in `scripts/match/kmoves_pair.gd` (`KMovesPair.MOVES`, sampled through `HunterAnim.km_sample`).
+| Ability | KMOVES ids | Pose idea |
+|---|---|---|
+| Torch Lance (LMB, held) | `as_lance` (hold), `as_lance_end` | braced forward behind the nozzle, off hand steadying the hose; relax on release |
+| Cinder Shot (RMB) | `as_shot` | gun hand cocked back, thrust out, body kicks back |
+| Spark Leap (Shift) | `as_leap` | deep crouch, then stretched out along the leap, legs trailing |
+| Furnace Cloak (E) | `as_cloak` | curled in with arms crossed, then thrown wide as the heat goes off |
+| Flashover (passive) | none | shown by the burning foe, not a move |
 
 ## Engine notes
 The burn uses the engine's own burn status (damage over time, credit to Ashwick); remote bodies get it through a
