@@ -13,12 +13,18 @@ static var _cache := {}
 const ARCHES := {
 	"thief": {"name": "Thief", "cls": "light"},
 	"archer": {"name": "Archer", "cls": "light"},
-	"mage": {"name": "Mage", "cls": "medium"},
-	"gunslinger": {"name": "Gunslinger", "cls": "medium"},
+	"mage": {"name": "Vireo", "cls": "light"},
+	"gunslinger": {"name": "Marlowe", "cls": "medium"},
 	"juggernaut": {"name": "Juggernaut", "cls": "heavy"},
 	"bulwark": {"name": "Bulwark", "cls": "heavy"},
+	"dredge": {"name": "Dredge", "cls": "heavy"},
+	"ashwick": {"name": "Ashwick", "cls": "heavy"},
+	"tender": {"name": "Linnet", "cls": "medium"},
+	"rimewright": {"name": "Tamsin", "cls": "light"},
+	"dolm": {"name": "Dolm", "cls": "medium"},
+	"ostra": {"name": "Ostra", "cls": "medium"},
 }
-const ARCH_ORDER := ["thief", "archer", "mage", "gunslinger", "juggernaut", "bulwark"]
+const ARCH_ORDER := ["thief", "archer", "mage", "gunslinger", "juggernaut", "bulwark", "dredge", "ashwick", "tender", "rimewright", "dolm", "ostra"]
 const ARCH_DEFAULT := {"light": "thief", "medium": "gunslinger", "heavy": "juggernaut"}
 
 ## Which archetype a hunter wears: asked for by name, else from the look, else the class default.

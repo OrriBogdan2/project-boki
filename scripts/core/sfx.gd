@@ -4,20 +4,21 @@ extends Node
 ## across the map stays soft. The SFX bus has a gentle compressor, a touch of room reverb and a
 ## limiter, so a crowd of sounds blends together instead of piling up into peaks.
 
-const NAMES := ["smg", "rifle", "thump", "boom", "hit", "crit", "kill", "knock", "hurt", "dash", "jump", "land", "grab",
+const NAMES := ["splash", "swim", "drip", "smg", "rifle", "thump", "boom", "hit", "crit", "kill", "knock", "hurt", "dash", "jump", "land", "grab",
 	"throw", "kinhit", "skill", "kin_happy", "kin_unsure", "kin_alert", "recall", "pickup", "catch", "warn", "portal",
 	"revive", "click", "reload", "shield", "cloak", "heal", "fall", "plant", "harvest", "ping", "glide", "build", "unlock", "whoosh", "step0", "step1", "step2", "hover", "zap", "bond", "ult", "combo", "swap", "horn", "rail", "train_hit", "revive_hum", "revive_done", "scan_pop",
 	"swipe", "cleave", "charge", "k_venom", "k_spore", "k_gravity", "k_prism", "k_lunar", "k_echo",
 	"shotgun", "sniper", "hit_heavy", "slash_hit", "armor_hit", "armor_break", "knock_confirm", "extract_ok",
 	"ab_throw", "ab_rail", "ab_charge", "ab_blast", "ab_leap", "ab_slam", "ab_wall", "ab_shield_hit", "ab_guard", "ab_parry",
 	"ab_plant", "ab_tether", "ab_blink", "ab_whirr", "ab_stun", "ab_slow", "ab_hit", "ab_ready",
-	"pay_deadeye", "pay_flashpoint", "pay_called", "pay_slam", "pay_cashin", "pay_rage"]
+	"pay_deadeye", "pay_flashpoint", "pay_called", "pay_slam", "pay_cashin", "pay_rage", "level_up",
+	"hero_blowout", "hero_skewer", "pay_salvage", "dr_haul", "dr_anchor", "as_flame", "as_ignite", "as_cloak", "pay_rockfall", "pay_collapse"]
 const POOL := 24
 ## Sounds that only exist as several takes (monster voices, little pops); one is picked at random.
 const VOICES := ["v_skitter", "v_spitter", "v_brute", "v_bomber", "v_sentinel", "v_glimmer", "v_warden", "die_small", "die_big",
 	"step_grass", "step_stone", "step_snow", "step_wood"]
 ## The shortest gap before the same sound can play again, so a crowd doesn't machine-gun it.
-const MIN_GAP := {"pay_deadeye": 120, "pay_flashpoint": 150, "pay_called": 120, "pay_slam": 150, "pay_cashin": 120, "pay_rage": 150, "ab_hit": 60, "ab_shield_hit": 70, "ab_stun": 150, "ab_slow": 120, "hit": 45, "crit": 60, "hit_heavy": 70, "slash_hit": 60, "armor_hit": 70, "armor_break": 200, "hurt": 120, "kinhit": 60, "die_small": 90, "die_big": 150, "land": 80, "step0": 60, "step1": 60, "step2": 60}
+const MIN_GAP := {"pay_deadeye": 120, "pay_flashpoint": 150, "pay_called": 120, "pay_slam": 150, "pay_cashin": 120, "pay_rage": 150, "pay_rockfall": 150, "pay_collapse": 150, "ab_hit": 60, "ab_shield_hit": 70, "ab_stun": 150, "ab_slow": 120, "hit": 45, "crit": 60, "hit_heavy": 70, "slash_hit": 60, "armor_hit": 70, "armor_break": 200, "hurt": 120, "kinhit": 60, "die_small": 90, "die_big": 150, "land": 80, "step0": 60, "step1": 60, "step2": 60}
 ## On top of that, at most STACK_MAX of one sound start within STACK_MS, each extra one a little quieter.
 const STACK_MAX := 3
 const STACK_MS := 90
@@ -243,6 +244,18 @@ func set_layers(want: Dictionary) -> void:
 	for st in want:
 		layer_want[st] = clampf(float(want[st]), 0.0, 1.0)
 
+## Leaving a match for any other screen (Main.show_screen): the layered score and the abyss / ruins
+## beds belong to the match, so they fade out with the screen change. Without this they outlived it,
+## because the title asks for the "match" wind that is already the current ambience (an early
+## return) and so never cleared the beds. The single tracks and the main ambience are left to the
+## next screen's play_music / play_ambience, which crossfade them.
+func reset_scene_audio(fade := 1.2) -> void:
+	if not layers.is_empty():
+		_stop_layers(fade)
+		music_name = ""
+	if not amb_layers.is_empty():
+		clear_amb_layers(fade)
+
 func _stop_layers(fade: float) -> void:
 	for st in layers:
 		var p: AudioStreamPlayer = layers[st]
@@ -269,11 +282,11 @@ func amb_layer(name: String, level: float) -> void:
 		amb_layers[name] = {"p": p, "want": 0.0}
 	amb_layers[name]["want"] = clampf(level, 0.0, 1.0)
 
-func clear_amb_layers() -> void:
+func clear_amb_layers(fade := 1.0) -> void:
 	for n in amb_layers:
 		var p: AudioStreamPlayer = amb_layers[n]["p"]
 		var tw := create_tween()
-		tw.tween_property(p, "volume_db", -60.0, 1.0)
+		tw.tween_property(p, "volume_db", -60.0, fade)
 		tw.tween_callback(p.queue_free)
 	amb_layers = {}
 

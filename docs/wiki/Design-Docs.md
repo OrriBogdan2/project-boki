@@ -21,7 +21,7 @@ versions on `main` are newer.
 
 | Doc | What it covers |
 |---|---|
-| `docs/ARCHETYPES.md` | The six classes: who gives what, key layout, run levels, sockets and infusion, the merge vs R. Its "Kit loops" and "Kits2" sections at the end describe the built kits and win where they differ |
+| `docs/ARCHETYPES.md` | The classes (it opens with the first six): who gives what, key layout, run levels, sockets and infusion, the merge vs R. Its "Kit loops" and "Kits2" sections at the end describe the built kits and win where they differ |
 | `docs/DASHES_AND_ABILITY_FEEL.md` | A distinct dash per class and per class + Boki pairing; the feel pass; the global feel spec |
 | `docs/KIN_GRAMMAR.md` | The Boki ability grammar: deliveries, effects, modifiers, triggers, budgets, the validator. Read before adding a Boki |
 | `docs/BOKI_IDENTITY.md` | What makes every Boki its own: ids, inborn rolls, provenance |

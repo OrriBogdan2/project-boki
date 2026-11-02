@@ -764,7 +764,7 @@ func _guards() -> void:
 
 # ------------------------------------------------------------------ 7. the net and the bots
 func _net() -> void:
-	ok(Net.VERSION == "0.11.0", "Net.VERSION moved to %s" % Net.VERSION)
+	ok(Net.VERSION.naturalnocasecmp_to("0.11.0") >= 0, "Net.VERSION moved to %s (at least 0.11.0)" % Net.VERSION)
 	var P := merged("pebbit")
 	var R := rival()
 	var f := MergeForm.of(P)

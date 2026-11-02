@@ -249,7 +249,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		# far from the squad with nothing to fight: now and then, base to a teammate
 		# (not while holding a spot: an uplink's yard, a skiff's deck, a lair: basing away from a
 		# charging uplink left its yard empty to drain)
-		if h.base_t <= 0.0 and h.base_cd <= 0.0 and h.grounded and randf() < dt * 0.05 \
+		if h.base_t <= 0.0 and h.base_cd <= 0.0 and h.grounded and randf() < dt * 0.05 and not a.has("ping_goal") \
 				and not String(a.get("goal_kind", "")) in ["yard", "board", "lift", "lair_dial", "lair_fight", "lair_camp", "lair_lever"]:
 			var mate := m.base_target(h)
 			if mate and h.flat_dist(mate) > 30.0:
@@ -636,15 +636,17 @@ func _choose(m: Match, h: Hunter) -> void:
 		var d := h.flat_dist(o)
 		# early on bots farm monsters and only fight hunters who come close or shoot them
 		var provoked: bool = h.last_hit_by == o or (o is Hunter and h.last_hit_by == o.kin)
-		if not provoked and fresh(m, o):
+		if (not provoked and fresh(m, o)) or m.demo_shielded(o):
 			continue
 		var reach := (13.0 if m.time > 100.0 or provoked else 8.0) * float((a.get("diff", {}) as Dictionary).get("aggro", 1.0))
 		if provoked: reach = maxf(reach, 10.0)
+		var bounty: bool = m.rolling != null and o.has_meta("bounty")
+		if bounty: reach += 5.0        # (a rolling session: a hunter with a bounty on them is worth going after)
 		if d > reach or absf(o.pos.y - h.pos.y) > 3.0:
 			continue
 		if not m.world.los(h.pos, o.pos, h.pos.y + 0.95) and d > 4.0:
 			continue
-		var s: float = 20.0 - d + (6.0 if o == a["tgt"] else 0.0) - o.hp * 0.03
+		var s: float = 20.0 - d + (6.0 if o == a["tgt"] else 0.0) - o.hp * 0.03 + (5.0 if bounty else 0.0)
 		if s > bs: bs = s; best = o
 	if best == null:
 		for mb in m.mobs:
@@ -677,7 +679,7 @@ func _choose(m: Match, h: Hunter) -> void:
 	if best:
 		return
 	# no fight: pick a goal
-	var time_left := m.length - m.time
+	var time_left := Rolling.bot_time_left(m, h)     # (a rolling session: this squad's own planned stay)
 	var goal := Vector3.INF; var gk := ""
 	for o in m.hunters:
 		if o != h and o.team == h.team and o.downed and not o.out:
@@ -739,6 +741,7 @@ func _choose(m: Match, h: Hunter) -> void:
 		var pp: Vector3 = pg["pos"]
 		if m.time < float(pg["until"]) and h.flat_dist(pp) > 3.5 and not m.world.is_void(pp.x, pp.z):
 			goal = pp; gk = "ping"
+			if h.base_t > 0.0: h.cancel_base()      # (a base channel would hold us still, then carry us off to a mate and drop the ping)
 		else:
 			a.erase("ping_goal")
 	# boss lairs: a dropped Rare Egg, or (bolder bots) a lair to open and its boss to fight
@@ -748,7 +751,7 @@ func _choose(m: Match, h: Hunter) -> void:
 		# fire in the first minute; it used to cancel every lair plan right away, though the exits
 		# don't act on it until 30% in, so the bot just wandered.)
 		var egg_home: bool = h.pack.any(func(it): return Loot.is_rare_egg(it))
-		var lair_leave: bool = time_left < 170.0 or egg_home or (a.get("leave", false) and m.time > m.length * 0.3)
+		var lair_leave: bool = time_left < 170.0 or egg_home or (a.get("leave", false) and Rolling.bot_past(m, h, 0.3))
 		var lg: Array = m.lairs.bot_goal(h, lair_leave)
 		if not lg.is_empty():
 			goal = lg[0]; gk = String(lg[1])
@@ -757,7 +760,7 @@ func _choose(m: Match, h: Hunter) -> void:
 		if not a.get("leave", false) and randf() < 0.0015:
 			a["leave"] = true
 		# (not in the first stretch of the match: everyone heading straight home empties the map)
-		var leaving: bool = time_left < 170.0 or (m.time > m.length * 0.3 and (h.gems > 40 or a.get("leave", false)))
+		var leaving: bool = time_left < 170.0 or (Rolling.bot_past(m, h, 0.3) and (h.gems > 40 or a.get("leave", false)))
 		var g: Array = m.exits.bot_goal(h, leaving)
 		if not g.is_empty() and _banned(m, a, g[0]) and String(g[1]) in ["dock", "uplink"]:
 			g = []

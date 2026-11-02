@@ -260,7 +260,7 @@ func _book() -> void:
 	ok(not bool(Care.dex_entry("pebbit").get("seen", false)), "a Boki far out of sight is not logged")
 	var old := {"v": 3, "roster": [{"species": "puddlet", "name": "Old"}, {"species": "cindle", "name": "Older"}], "dex": {"puddlet": {"seen": false, "caught": true, "forms": [], "shimmer": false, "mutations": []}}}
 	var upgraded: bool = Save.migrate(old)
-	ok(upgraded and int(old["v"]) == Save.VERSION and Save.VERSION == 4, "a v3 save upgrades to v%d" % Save.VERSION)
+	ok(upgraded and int(old["v"]) == Save.VERSION and Save.VERSION >= 4, "a v3 save upgrades to v%d" % Save.VERSION)
 	var dx: Dictionary = old["dex"]
 	ok(bool(dx.get("puddlet", {}).get("seen", false)) and bool(dx.get("cindle", {}).get("seen", false)) and bool(dx.get("cindle", {}).get("caught", false)), "...Boki you own count as seen, and are in the book even with no entry")
 	ok(dx["puddlet"].has("places") and dx["cindle"].has("places"), "...and every entry gets its places list")
@@ -287,7 +287,7 @@ func _net() -> void:
 	run_for(Capture.HOLD_OVER + 0.5)
 	ok(not Capture.active(rival) and k.scan_by == null, "a scan nobody confirms times out, so the Boki can wake up again")
 	ok(BlightDir.LOUD.has("scan"), "the scan is a sound rivals and the Blight react to")
-	ok(Net.VERSION == "0.11.0", "Net.VERSION is %s (merge forms: 0.11.0)" % Net.VERSION)
+	ok(Net.VERSION.naturalnocasecmp_to("0.11.0") >= 0, "Net.VERSION is %s (at least merge forms' 0.11.0)" % Net.VERSION)
 
 # ------------------------------------------------------------------ 9. bots
 func _bots() -> void:

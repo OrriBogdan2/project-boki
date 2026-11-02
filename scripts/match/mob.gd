@@ -141,7 +141,7 @@ func _engaged_on(t: Ent) -> int:
 func _find_target() -> Ent:
 	var best: Ent = null; var bd := 7.5 if st == "idle" else 11.0
 	for h in m.hunters:
-		if not h.targetable():
+		if not h.targetable() or m.demo_shielded(h):
 			continue
 		var d := flat_dist(h)
 		if d > 2.6 and h.reveal_t <= 0.0 and (m.world.in_bush(h.pos.x, h.pos.z) or m.in_smoke(h.pos)):
@@ -196,7 +196,7 @@ func sim(dt: float) -> void:
 			if wander != Vector3.INF:
 				wish = dir_to(wander) * spd * 0.3
 		"chase":
-			if tgt == null or tgt.dead or not tgt.hittable() or (tgt is Hunter and not tgt.targetable()) or flat_dist(camp) > 13.0:
+			if tgt == null or tgt.dead or not tgt.hittable() or (tgt is Hunter and not tgt.targetable()) or m.demo_shielded(tgt) or flat_dist(camp) > 13.0:
 				tgt = _find_target()
 				engaged = false
 				if tgt == null:

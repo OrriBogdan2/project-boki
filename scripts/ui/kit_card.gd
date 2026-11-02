@@ -17,10 +17,16 @@ const LABEL := {"dash": "Dash", "passive": "Passive", "lmb": "Attack", "rmb": "R
 const PREVIEW := {
 	"thief": {"dash": "dash", "passive": "marks", "rmb": "projectile", "e": "knife", "r": "lines"},
 	"archer": {"dash": "grapple", "passive": "meter", "rmb": "heavy", "e": "rainwall", "r": "arrows3"},
-	"mage": {"dash": "blink", "passive": "marks", "rmb": "steer", "e": "hex", "r": "mirror"},
-	"gunslinger": {"dash": "dash", "passive": "pips", "rmb": "projectile", "e": "buff", "r": "lines"},
+	"mage": {"dash": "dash2", "passive": "marks", "rmb": "heavy", "e": "zone"},
+	"gunslinger": {"dash": "dash", "passive": "pips", "rmb": "projectile", "e": "lines"},
 	"juggernaut": {"dash": "dash2", "passive": "meter", "rmb": "charge", "e": "grapple", "r": "leap"},
 	"bulwark": {"dash": "charge", "passive": "meter", "rmb": "shield", "e": "zone", "r": "fissure"},
+	"dredge": {"dash": "dash2", "passive": "meter", "rmb": "grapple", "e": "charge"},
+	"ashwick": {"dash": "dash", "passive": "meter", "rmb": "projectile", "e": "zone"},
+	"tender": {"dash": "dash", "passive": "marks", "rmb": "projectile", "e": "zone"},
+	"rimewright": {"dash": "charge", "passive": "marks", "rmb": "projectile", "e": "shield"},
+	"dolm": {"dash": "dash2", "passive": "meter", "rmb": "heavy", "e": "zone"},
+	"ostra": {"dash": "blink", "passive": "meter", "rmb": "projectile", "e": "zone"},
 }
 
 var arch := ""
@@ -88,7 +94,7 @@ func _show_grid() -> void:
 	grid.add_theme_constant_override("h_separation", 12)
 	grid.add_theme_constant_override("v_separation", 12)
 	body.add_child(grid)
-	for s in SLOTS:
+	for s in slots_of(arch):
 		grid.add_child(_tile(s))
 
 ## One ability: icon and key, name and a short tag, one line, a looping preview. Click: details.
@@ -229,6 +235,10 @@ func _kin_strip() -> Control:
 
 # ------------------------------------------------------------------ data → text
 ## Name, icon, colour, a short tag, the one line, and the detail page's paragraphs for one slot.
+## The slots an archetype has (no Ultimate tile for the heroes whose R is the Boki Merge).
+static func slots_of(a: String) -> Array:
+	return SLOTS.filter(func(s): return s != "r" or Arch.def(a).has("r"))
+
 static func slot_text(a: String, slot: String) -> Dictionary:
 	var d := Arch.def(a)
 	var cd: Dictionary = d.get("card", {})
@@ -250,7 +260,7 @@ static func slot_text(a: String, slot: String) -> Dictionary:
 			var wl: Dictionary = cd.get("weapons", {})
 			var ws: Array = Arch.weapons(a)
 			var w0 := String(ws[0]) if not ws.is_empty() else ""
-			out.merge({"name": String(Data.weapon_stats(w0).get("name", w0)), "icon": w0, "tag": "your weapon", "line": String(wl.get(w0, Data.weapon_stats(w0).get("desc", "")))}, true)
+			out.merge({"name": String(Data.weapon_stats(w0).get("name", w0)), "icon": w0, "tag": "signature weapon", "line": String(wl.get(w0, Data.weapon_stats(w0).get("desc", "")))}, true)
 			var det: Array = []
 			for w in ws:
 				var st: Dictionary = Data.weapon_stats(w)
@@ -274,17 +284,21 @@ static func slot_text(a: String, slot: String) -> Dictionary:
 			out.merge({"name": String(sd["name"]), "icon": String(sd.get("icon", "")), "col": Color(String(sd.get("col", "#ffffff"))),
 				"tag": "%ss" % KinText.n(float(sd.get("cooldown", 14.0))), "line": String(cd.get("e", ""))}, true)
 			out["detail"] = [["", String(sd.get("desc", ""))]] + _ranks(a, "kin")
+		"r" when not d.has("r"):
+			# no hero ultimate: R is the Boki's Merge (the Boki system owns it)
+			out.merge({"name": "Boki Merge", "icon": "bond", "col": Color("ffd27a"), "tag": "Boki system", "line": "Your Boki fuses with you; its kind decides the form."}, true)
+			out["detail"] = [["", "R is not a hero ability here: it is the Boki Merge. Your Boki fuses with you and its kind sets the merged form."]]
 		"r":
 			# R is the Merge for every class (docs/decisions/0001); the class's own ultimate is held back behind
 			# boki_system.json class_ults until the hero-port work folds it into the kits
-			var sd: Dictionary = d["r"]
-			var on := KinCommand.class_ults()
+			var sd: Dictionary = d.get("r", {})        # (a hero with no class R: only the Merge shows)
+			var on := KinCommand.class_ults() and not sd.is_empty()
 			out.merge({"name": String(sd["name"]) if on else "Merge", "icon": String(sd.get("icon", "")) if on else "bond", "col": Color(String(sd.get("col", "#ffffff"))) if on else Color("ffd27a"),
 				"tag": ("level 6 · %ss · %ss fuse" % [KinText.n(float(sd.get("cooldown", 100.0))), KinText.n(float(sd.get("fuse", 0.45)))]) if on else "level 6 · full bond meter", "line": String(cd.get("r", "")) if on else "You and your Boki become one: its colour, its type, your abilities changed."}, true)
 			out["detail"] = [["Merge", "Press R with a full bond meter (it fills as your Boki lands hits, as you hit what it marked, and on combos). You take the Boki's colour and silhouette, and every ability of yours changes for the merge by its type and power."],
 				["Boki out?", "It leaps back through anything in its way and merges you in mid-air."],
 				["No Boki", "A downed or lost Boki: only a weak 3 second surge."],
-				["Held back", "%s: %s (the class ultimate, off while R is the Merge)" % [String(sd["name"]), String(sd.get("desc", ""))]]] + _ranks(a, "ult")
+				] + ([["Held back", "%s: %s (the class ultimate, off while R is the Merge)" % [String(sd["name"]), String(sd.get("desc", ""))]]] + _ranks(a, "ult") if not sd.is_empty() else [])
 	return out
 
 ## The ranks to come, in order (rank 2's concrete change first, then rank 3's special), as one row
@@ -310,6 +324,7 @@ static func infusion_lines(a: String, ks: KinSpec) -> Array:
 	var d := Arch.def(a)
 	for slot in ["rmb", "e", "r"]:
 		var sd: Dictionary = d.get(slot, {})
+		if sd.is_empty(): continue
 		var f := Arch.fill(sd.get("sockets", {}), inf, slot, String(sd.get("delivery", "projectile" if slot == "rmb" else "burst")))
 		var notes: Array = (f.get("notes", []) as Array).filter(func(x): return not String(x).contains("fallback")).map(func(x):
 			var s := String(x)
@@ -352,7 +367,7 @@ static func strip(a: String, open_cb: Callable) -> Control:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 6)
 	v.add_child(row)
-	for s in SLOTS:
+	for s in slots_of(a):
 		var info := slot_text(a, s)
 		var b := Button.new()
 		b.custom_minimum_size = Vector2(64, 70)

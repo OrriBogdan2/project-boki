@@ -25,6 +25,7 @@ var target: Node3D = null
 var trauma := 0.0
 var zoom := 1.0
 var zoom_to := 1.0
+var user_zoom := 1.0           # the mouse wheel in the practice areas (Practice); multiplies the match's own zoom
 var lead := 1.0
 var kick := 0.0               # a quick zoom-in punch on big moments
 var pull := 0.0               # (movefeel) a quick pull-back (a dash into a glide), the opposite of kick
@@ -191,6 +192,24 @@ func _apply(shake: Vector3) -> void:
 	var aim := focus + Vector3(0, rise * (1.0 - k) * (1.0 - c), 0)
 	position = aim + back * d + shake
 	look_at(aim + shake, Vector3.UP if p < deg_to_rad(85.0) else Vector3(0, 0, -1).rotated(Vector3.UP, yaw + Record.orbit_yaw))
+
+## Character lean (feelfix): hunters are tipped back (their tops away from the camera, so their
+## fronts turn up to face it) by this much, about their feet, so at the calibrated angle you see
+## faces and bodies (as in the reference footage) instead of the tops of hats, without changing the
+## world's framing. Faded out for the bird's-eye and the
+## ship's chase view. The world is drawn at the style's pitch; characters read as if at ~pitch - lean.
+const CHAR_LEAN := deg_to_rad(20.0)
+func char_lean() -> Basis:
+	var k := top * top * (3.0 - 2.0 * top)
+	var c := chase * chase * (3.0 - 2.0 * chase)
+	var a := CHAR_LEAN * (1.0 - k) * (1.0 - c)
+	if a < 0.001:
+		return Basis()
+	return Basis(Vector3.RIGHT.rotated(Vector3.UP, yaw + Record.orbit_yaw), -a)
+
+## A body's basis: leaned toward the camera (char_lean), then turned to `face`, keeping its scale.
+func char_basis(face: float, scl: Vector3) -> Basis:
+	return char_lean() * Basis(Vector3.UP, face).scaled_local(scl)
 
 ## Where the mouse points on the horizontal plane at height y.
 func mouse_on_plane(y: float) -> Vector3:

@@ -1,0 +1,14 @@
+{
+ "id": "magpie",
+ "name": "Magpie Pouch",
+ "short": "Magpie",
+ "verb": "",
+ "cd": 0,
+ "slot": "kit",
+ "col": "f2c84a",
+ "stats": {
+  "gems": 0.25
+ },
+ "icon": "gem",
+ "desc": "Shiny things stick: gems you pick up are worth more."
+}

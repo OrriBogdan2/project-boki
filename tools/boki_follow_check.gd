@@ -403,7 +403,7 @@ func _net() -> void:
 		KinNet.apply_kin(k, arr)
 		seen[c] = k.cmd
 	ok(seen == {"guard": "guard", "follow": "follow", "chase": "chase", "return": "return"}, "the order rides the kin snapshot and comes back out %s" % [seen])
-	ok(Net.VERSION == "0.11.0", "Net.VERSION is 0.11.0 (merge forms moved it past 0.10.0) (%s)" % Net.VERSION)
+	ok(Net.VERSION.naturalnocasecmp_to("0.11.0") >= 0, "Net.VERSION is at least 0.11.0 (merge forms moved it past 0.10.0) (%s)" % Net.VERSION)
 
 # ------------------------------------------------------------------ 10. orders in the air, the giant merge
 func _air_orders() -> void:

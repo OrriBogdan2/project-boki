@@ -533,7 +533,7 @@ func _step_arch(d: int) -> void:
 	var a := String(ids[i])
 	Save.d["arch"] = a
 	Save.d["cls"] = Arch.weight(a)
-	Save.d["weapon"] = Arch.default_weapon(a)
+	Save.d["weapon"] = Arch.signature(a)
 	Sfx.play("hover", null, -6.0)
 	_show_create()
 

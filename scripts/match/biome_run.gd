@@ -556,20 +556,9 @@ func _tick_hazards(dt: float) -> void:
 						hz["phase"] = "idle"; hz["t"] = rng.randf_range(7.0, 10.0)
 
 # ------------------------------------------------------------------ loot
-## A weapon for a chest at p: the region leans toward its own weapons.
-func weapon_at(p: Vector3, keys: Array) -> String:
-	var L: Dictionary = _biome(p).get("loot", {})
-	var wts: Dictionary = L.get("weapons", {})
-	if wts.is_empty():
-		return String(keys[randi() % keys.size()])
-	var tot := 0.0
-	for k in wts: if keys.has(k): tot += float(wts[k])
-	var r := rng.randf() * tot
-	for k in wts:
-		if not keys.has(k): continue
-		r -= float(wts[k])
-		if r <= 0.0: return String(k)
-	return String(keys[randi() % keys.size()])
+## Slot weights for gear found at p (by slot name): the region leans toward its own kind of gear.
+func slot_lean_at(p: Vector3) -> Dictionary:
+	return _biome(p).get("loot", {}).get("slots", {})
 
 ## Extra rarity steps for loot in this region (the Gloom pays better), plus the island's danger.
 func rarity_bonus_at(p: Vector3) -> int:

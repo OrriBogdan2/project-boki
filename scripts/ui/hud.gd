@@ -93,6 +93,7 @@ func _process(delta: float) -> void:
 	for t in toasts.duplicate():
 		t["t"] += delta
 		if t["t"] > 1.8: toasts.erase(t)
+	_clear_under_toasts(delta)
 	if tips.size() > 0:
 		tips[0]["t"] += delta
 		if tips[0]["t"] > 7.0: tips.pop_front()
@@ -115,6 +116,32 @@ func flash(col: Color, strength := 0.35) -> void:
 
 func hurt_flash(d: float) -> void:
 	hurt_t = clampf(0.25 + d / 60.0, 0.25, 0.6)
+
+## The lairs' name boards in the world (Label3D over each gate) fade back while a toast (the region
+## banner as you walk into a region, most often) prints over them, so two lines of text never
+## overlap on screen; they come back as it goes. Drawn where _draw puts the toasts.
+func _clear_under_toasts(delta: float) -> void:
+	if m == null or m.lairs == null or m.cam == null:
+		return
+	var sz := c.size
+	var rects: Array = []
+	for i in toasts.size():
+		var t: Dictionary = toasts[i]
+		var y := sz.y * 0.3 + i * 26 - float(t["t"]) * 10.0
+		var w := big.get_string_size(String(t["text"]), HORIZONTAL_ALIGNMENT_LEFT, -1, 20).x
+		rects.append(Rect2(sz.x * 0.5 - w * 0.5 - 14.0, y - 26.0, w + 28.0, 38.0))
+	for L in m.lairs.list:
+		var lnodes = L.get("nodes")
+		var lbl = lnodes.get("label") if lnodes is Dictionary else null
+		if not (lbl is Label3D) or not is_instance_valid(lbl):
+			continue
+		var want := 0.0
+		if not rects.is_empty() and (lbl as Label3D).is_visible_in_tree() and not m.cam.is_position_behind((lbl as Label3D).global_position):
+			var sp: Vector2 = m.cam.unproject_position((lbl as Label3D).global_position)
+			var lr := Rect2(sp - Vector2(180, 46), Vector2(360, 92))
+			for r in rects:
+				if (r as Rect2).intersects(lr): want = 0.9
+		(lbl as Label3D).transparency = move_toward((lbl as Label3D).transparency, want, delta * 6.0)
 
 func toast(text: String, col: Color) -> void:
 	toasts.append({"text": text, "col": col, "t": 0.0})
@@ -214,18 +241,18 @@ func _draw_all() -> void:
 	var want_a: float = ABYSS_FX.danger(p) if p == m.player else 0.0
 	if want_a <= 0.02:
 		abyss_cued = false
-	if want_a <= 0.5:
+	if want_a <= 0.7:
 		abyss_warned = false
 	abyss_a = lerpf(abyss_a, want_a, 1.0 - exp(-10.0 * get_process_delta_time()))
 	if abyss_fx:
 		abyss_fx.show_danger(abyss_a, pow(0.5 + 0.5 * sin(abyss_pulse * TAU), 3.0) if abyss_a > 0.005 else 0.0)
 	if abyss_a > 0.005:
-		var red := clampf((abyss_a - 0.35) / 0.65, 0.0, 1.0)
+		var red := clampf((abyss_a - 0.55) / 0.45, 0.0, 1.0)     # (AbyssFx: ~0.55 just under the lip, 1 at the end)
 		var rate := 1.6 + red * 3.4
 		abyss_pulse += get_process_delta_time() * rate
 		var pulse := pow(0.5 + 0.5 * sin(abyss_pulse * TAU), 3.0)
 		# (the magenta wash itself is AbyssFx's shader) near the end, crimson edges beat with the heart
-		var ek := clampf((abyss_a - 0.6) / 0.4, 0.0, 1.0)
+		var ek := clampf((abyss_a - 0.75) / 0.25, 0.0, 1.0)
 		for i in 6:
 			var inset := i * minf(sz.x, sz.y) * 0.03
 			var a := ek * (0.22 - float(i) * 0.035) * (0.6 + 0.4 * pulse)
@@ -235,7 +262,7 @@ func _draw_all() -> void:
 		if p == m.player and abyss_a > 0.08 and not abyss_cued:
 			abyss_cued = true
 			Sfx.play("whoosh", null, -6.0, 0.0, 0.55)
-		if p == m.player and abyss_a > 0.75 and not abyss_warned:
+		if p == m.player and abyss_a > 0.85 and not abyss_warned:
 			abyss_warned = true
 			Sfx.play("warn", null, -4.0, 0.0, 0.8)
 		if abyss_a > 0.1 and p == m.player:
@@ -245,9 +272,9 @@ func _draw_all() -> void:
 				Sfx.play("thump", null, -12.0 + abyss_a * 14.0, 0.0, 0.7 + red * 0.15)
 				if red > 0.3 and beat % 2 == 0:
 					Sfx.play("boom", null, -24.0 + red * 10.0, 0.0, 0.35)     # a low rumble under the heartbeat
-		if abyss_a > 0.6 and p == m.player:
+		if abyss_a > 0.8 and p == m.player:
 			# the point of no return is close: say so, pulsing, in the middle of the screen
-			var wk := clampf((abyss_a - 0.6) / 0.3, 0.0, 1.0)
+			var wk := clampf((abyss_a - 0.8) / 0.15, 0.0, 1.0)
 			var txt := "HOLD GLIDE TO LIFT" if p.glide_fuel > 0.001 and not p.gliding else ("CLIMB OUT" if p.glide_fuel > 0.001 else "NO GLIDER HEAT")
 			_ctext(Vector2(sz.x * 0.5, sz.y * 0.36), txt, 26, Color(1.0, 0.25 + 0.35 * pulse, 0.2, 0.55 + 0.45 * wk * (0.5 + 0.5 * pulse)), big)
 	if p and not p.downed and not p.out and p.hp < p.max_hp * 0.35:
@@ -280,6 +307,7 @@ func _draw_all() -> void:
 			_draw_vitals(sz, p)
 			_draw_abilities(sz, p)
 			_draw_weapon(sz, p)
+			GearPanel.draw(self, sz, p)
 			_draw_kin_card(sz, p)
 			_draw_squad(sz, p)
 			_draw_perks(sz, p)
@@ -379,7 +407,7 @@ func _draw_world_labels() -> void:
 	for h in m.hunters:
 		if h == m.player or h.out or h.extracted or not h.model or not h.model.visible or h.unseen:
 			continue
-		var sp := cam.unproject_position(h.position + Vector3(0, 2.35, 0))
+		var sp := cam.unproject_position(_head(h, 2.35))
 		if cam.is_position_behind(h.position):
 			continue
 		_nameplate(sp, h)
@@ -440,21 +468,42 @@ func _draw_world_labels() -> void:
 			if ct > bfrac:
 				c.draw_rect(Rect2(br.position + Vector2(bw * bfrac, 0), Vector2(bw * (ct - bfrac), 6)), Color(1.0, 0.95, 0.88, 0.8))
 			_status_row(sp + Vector2(0, 16), mb)
-	# found weapons: name and rarity when you're close enough to care
+	# gear and tunings on the ground: name and rarity when you're close enough to care. Tags that would overlap one
+	# already drawn this frame step up above it, so a few drops side by side stay readable.
 	var pp: Vector3 = m.player.pos if m.player else cam.focus
+	var tags: Array = []
 	for wp in m.wpicks:
 		var wpos: Vector3 = wp["pos"]
 		if Vector2(wpos.x - pp.x, wpos.z - pp.z).length() > 7.0 or cam.is_position_behind(wpos):
 			continue
-		var r: Dictionary = Data.RARITY[int(wp["rar"])]
+		var r: Dictionary = Data.RARITY[clampi(int(wp["rar"]), 0, Data.RARITY.size() - 1)]
 		var sp := cam.unproject_position(wpos + Vector3(0, 1.45, 0))
-		if wp.has("gear") and Gear.ALL.has(String(wp["gear"])):
-			# a glove: its name, and which slot it goes in
-			var gd: Dictionary = Gear.ALL[String(wp["gear"])]
-			_ctext(sp, String(gd["name"]), 15, gd["col"], big)
-			_ctext(sp + Vector2(0, 14), ("active  ·  " + Settings.key_cap("gear1")) if Gear.active(String(wp["gear"])) else "passive", 11, Color(INK, 0.75))
+		var is_gear: bool = wp.has("gear") and Gear.ALL.has(String(wp["gear"]))
+		var is_tune: bool = wp.has("tune") and Data.PERKS.has(String(wp["tune"]))
+		var it := {} if (is_gear or is_tune) else Pack.ground_item(wp)
+		var nm := String(Loot.name_of(Pack.ground_item(wp))) if is_gear else (String(Data.PERKS[String(wp["tune"])]["name"]) if is_tune else Loot.name_of(it))
+		var tw := big.get_string_size(nm, HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x + 10.0
+		var tag := Rect2(sp + Vector2(-tw * 0.5, -16.0), Vector2(tw, 32.0 if (is_gear or is_tune) else 20.0))
+		for tries in 4:
+			var bumped := false
+			for o in tags:
+				if (o as Rect2).intersects(tag):
+					bumped = true
+					tag.position.y = (o as Rect2).position.y - tag.size.y - 2.0
+			if not bumped:
+				break
+		sp.y += tag.position.y - (sp.y - 16.0)
+		tags.append(tag)
+		if is_gear:
+			# a piece of gear: its name, rarity and which slot it goes in
+			_ctext(sp, nm, 15, r["color"], big)
+			_ctext(sp + Vector2(0, 14), Gear.slot_name(String(wp["gear"])) + ((" · " + Settings.key_cap("gear1")) if Gear.active(String(wp["gear"])) else ""), 11, Color(INK, 0.75))
+		elif is_tune:
+			var pd: Dictionary = Data.PERKS[String(wp["tune"])]
+			_ctext(sp, nm, 15, pd["col"], big)
+			_ctext(sp + Vector2(0, 14), "weapon upgrade · walk over it", 11, Color(INK, 0.75))
 		else:
-			_ctext(sp, String(Data.weapon_stats(String(wp["wid"]), int(wp["rar"]))["name"]), 16, r["color"], big)
+			_ctext(sp, nm, 16, Loot.col_of(it), big)
 	for k in m.kins:
 		if k.dead or not k.visible or k.state == "shoulder" or cam.is_position_behind(k.position):
 			continue
@@ -717,6 +766,24 @@ func _draw_minimap(sz: Vector2) -> void:
 		var sa: Vector2 = to_map.call(m.ship["a"]); var sb: Vector2 = to_map.call(m.ship["b"])
 		c.draw_line(sa, sb, Color(1, 1, 1, 0.35), 2.0, true)
 		c.draw_circle(to_map.call(m.ship_pos()), 5.0, GOLD)
+	if m.rolling:
+		# the other drop waves' skyships (amber), and hunters with a bounty on them (seen by everyone)
+		for ws in m.ships:
+			if ws.get("gone", false) or ws.get("node") == null:
+				continue
+			var wp: Vector2 = to_map.call(m.ship_pos_of(ws))
+			if on_map.call(wp, 3.0):
+				var wa: Vector2 = to_map.call(ws["a"]); var wb: Vector2 = to_map.call(ws["b"])
+				c.draw_line(wa, wb, Color(1.0, 0.72, 0.35, 0.3), 1.5, true)
+				c.draw_circle(wp, 4.5, Color("ffb64a"))
+			else:
+				_edge_arrow(inner, inner.get_center(), wp, Color("ffb64a"))
+		for h in m.hunters:
+			if m.player and h.team == m.player.team or not h.has_meta("bounty") or h.out or h.extracted:
+				continue
+			var bp: Vector2 = to_map.call(h.pos)
+			if on_map.call(bp, 3.0): bounty_marker(c, bp, 0.85)
+			else: _edge_arrow(inner, inner.get_center(), bp, Color("ffb64a"))
 	if m.opts.get("tutorial", false) and m.tut_target != Vector3.INF:
 		var tv: Vector2 = to_map.call(m.tut_target)
 		if on_map.call(tv, 4.0): c.draw_arc(tv, 6.0, 0, TAU, 16, Color("8fe3c8"), 2.5, true)
@@ -828,6 +895,20 @@ func _draw_clock_bar(sz: Vector2, mm: Rect2) -> void:
 	if m.sight_k < 0.99:
 		var st := "SIGHT %d%%" % int(round(m.sight_k * 100.0))
 		_text(Vector2(rr.end.x - 8 - big.get_string_size(st, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x, rr.position.y + 14), st, 10, MUTED, big)
+	if m.rolling:
+		SessionRow.draw(self, Rect2(Vector2(r.position.x, rr.end.y + 4), Vector2(r.size.x, 42)))
+
+## A bounty mark: an amber target with a pulse (on the maps and over a hunter's nameplate).
+func bounty_marker(cv: Control, p: Vector2, k := 1.0) -> void:
+	var amber := Color("ffb64a")
+	var ph := fmod(m.time * 1.2, 1.0)
+	cv.draw_arc(p, (6.0 + ph * 7.0) * k, 0, TAU, 20, Color(amber, 1.0 - ph), 2.0, true)
+	cv.draw_circle(p, 6.5 * k, Color(0, 0, 0, 0.65))
+	cv.draw_arc(p, 5.0 * k, 0, TAU, 18, amber, 2.0, true)
+	cv.draw_circle(p, 2.0 * k, amber)
+	for i in 4:
+		var a := PI * 0.5 * i
+		cv.draw_line(p + Vector2(cos(a), sin(a)) * 3.5 * k, p + Vector2(cos(a), sin(a)) * 8.0 * k, amber, 1.5, true)
 
 var mm_circ := Vector3.ZERO    # the round minimap: centre x, y and radius (0 while it's the square overview)
 func _mm_has(inner: Rect2, v: Vector2, pad := 0.0) -> bool:
@@ -1217,6 +1298,7 @@ var lvl_seen := -1
 ## A level just went up (Hunter.gain_xp): the badge pops and the portrait bursts gold.
 func level_up(_lv: int) -> void:
 	lvl_pop = 0.35
+	flash(Color("ffd27a"), 0.16)      # a soft gold wash over the whole screen
 
 func _level_badge(pr: Rect2, p: Hunter) -> void:
 	var gold := Color("ffd27a")
@@ -1285,7 +1367,7 @@ func _draw_glider_heat(p: Hunter) -> void:
 	var heat := 1.0 - p.glide_fuel
 	if not p.gliding and heat < 0.01:
 		return
-	var at := p.position + Vector3(0, 2.25 * float(p.cdat["scale"]), 0)
+	var at := _head(p, 2.25 * float(p.cdat["scale"]))
 	if m.cam.is_position_behind(at):
 		return
 	var cpt := m.cam.unproject_position(at) + Vector2(58, -6)
@@ -1441,6 +1523,17 @@ func _draw_arch_abilities(sz: Vector2, p: Hunter) -> void:
 		var brr := Rect2(Vector2(x, y + s - 34.0), Vector2(34, 34))
 		_ab_slot("base", brr, "swap", Settings.key_cap("base"), Color("8fe3c8"), p.base_cd / Hunter.BASE_CD if p.base_cd > 0.0 else 0.0, p.base_cd, p.base_cd <= 0.0 and p.base_t <= 0.0)
 
+## What the R slot says about its lock: "LV 6" until then, "UNLOCK" with a point to spend on it,
+## "" once it's unlocked.
+func r_lock_text(p: Hunter) -> String:
+	if int(p.slot_lv.get("ult", 0)) > 0:
+		return ""
+	if p.can_level("ult"):
+		return "UNLOCK"
+	if p.lvl >= int(Hunter.ULT_AT[0]):
+		return "NEXT POINT"
+	return "LV %d" % int(Hunter.ULT_AT[0])
+
 ## One ability in the row, aware of run levels: locked, unlockable, or ranked with pips above.
 func _skill_slot(slot: String, id: String, r: Rect2, icon: String, key: String, col: Color, cdf: float, cds: float, ready: bool, ch := -1, mx := 0) -> void:
 	var p := m.player
@@ -1463,8 +1556,13 @@ func _skill_slot(slot: String, id: String, r: Rect2, icon: String, key: String, 
 		_rounded(Rect2(lc + Vector2(-7, -6), Vector2(14, 11)), lcol, 3)
 		if can:
 			_ctext(Vector2(r.get_center().x, r.position.y - 7), "UNLOCK", 10, Color("ffd27a"), big)
-		elif slot == "ult" and p.ak == null:
-			_ctext(Vector2(r.get_center().x, r.position.y - 7), "LV %d" % int(Hunter.ULT_AT[0]), 10, Color(MUTED, 0.9), big)
+		elif slot == "ult":
+			# R: a tag over the slot saying when it opens, so it never reads as just on cooldown
+			var lt := r_lock_text(p)
+			var tw := big.get_string_size(lt, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x + 12.0
+			var tr := Rect2(Vector2(r.get_center().x - tw * 0.5, r.position.y - 17), Vector2(tw, 14))
+			_rounded(tr, Color(0.03, 0.03, 0.05, 0.95), 5, Color(MUTED, 0.7), 1)
+			_ctext(Vector2(r.get_center().x, tr.end.y - 3), lt, 10, Color(INK, 0.9), big)
 		_keycap(Vector2(r.get_center().x, r.end.y), key, lcol if can else Color(MUTED, 0.6))
 		return
 	_ab_slot(id, r, icon, key, col, cdf, cds, ready, ch, mx)
@@ -1528,7 +1626,7 @@ func _draw_kin_card(sz: Vector2, p: Hunter) -> void:
 func _draw_weapon(sz: Vector2, p: Hunter) -> void:
 	var w := 270.0
 	var r := Rect2(Vector2(sz.x - w - 18, sz.y - 18 - 62), Vector2(w, 62))
-	var rc: Color = Loot.col_of(Loot.of_hand(p)) if Loot.keepable(Loot.of_hand(p)) else Color("e6dccb")
+	var rc: Color = Loot.ELEMENTS[p.welem]["col"] if p.welem != "" else Color("e6dccb")
 	_rounded(r, Color(0.04, 0.05, 0.08, 0.88), 12, Color(rc, 0.45), 1)
 	hover_spots.append([r, "weapon"])
 	c.draw_rect(Rect2(r.position + Vector2(0, 10), Vector2(3, r.size.y - 20)), rc)
@@ -1904,6 +2002,10 @@ func _nameplate(sp: Vector2, h: Hunter) -> void:
 		_ctext(bc + Vector2(0, 3.5), String(h.cls).substr(0, 1).to_upper(), 9, cc, big)
 	if _np_show_name(sp, h):
 		_ctext(Vector2(sp.x, sp.y - 6), h.pname.substr(0, 14), NP_NAME_FS, Color(col.lerp(Color.WHITE, 0.3), 0.9), big)
+	if m.rolling and h.has_meta("bounty"):
+		# a bounty: a target over the plate and what knocking them is worth
+		bounty_marker(c, Vector2(sp.x, sp.y - 30), 1.15)
+		_ctext(Vector2(sp.x, sp.y - 44), "BOUNTY  ·  LV %d" % h.lvl, 11, Color("ffb64a"), big)
 	if h.downed:
 		var stomped: bool = h.get_meta("stomped", false)
 		var pulse := 0.5 + 0.5 * sin(m.time * 14.0)
@@ -2156,7 +2258,7 @@ func _draw_kit(sz: Vector2, p: Hunter) -> void:
 		if rv.has("hold"): rdesc += "  Hold: %s" % String(rv["hold"])
 		lines.append([Settings.key_cap("secondary"), String(ak.rmb_def().get("name", "Right click")), rdesc, ak.col_of(ak.rmb_def())])
 		lines.append([Settings.key_cap("signature"), String(ak.e_def().get("name", "E")), String(ak.e_def().get("desc", "")), ak.col_of(ak.e_def())])
-		lines.append([Settings.key_cap("ultimate"), String(ak.r_def().get("name", "R")) + ("" if p.lvl >= int(Hunter.ULT_AT[0]) else "  (level %d)" % int(Hunter.ULT_AT[0])), String(ak.r_def().get("desc", "")), ak.col_of(ak.r_def())])
+		lines.append([Settings.key_caps("ultimate"), String(ak.r_def().get("name", "R")) + ("" if p.lvl >= int(Hunter.ULT_AT[0]) else "  (level %d)" % int(Hunter.ULT_AT[0])), String(ak.r_def().get("desc", "")), ak.col_of(ak.r_def())])
 	if p.kin and p.ak:
 		var k: Kin = p.kin
 		var kcol: Color = Data.KIN[k.species]["color"]
@@ -2169,7 +2271,7 @@ func _draw_kit(sz: Vector2, p: Hunter) -> void:
 		var kd1: AbilitySpec = k.runner.def_of("k1")
 		if kd1: lines.append([Settings.key_cap("signature"), kd1.display_name, KinText.ability(k.effective("k1")), KinText.color(kd1)])
 		var ud := KinMerge.def_for(k)
-		if ud: lines.append([Settings.key_cap("ultimate"), ud.display_name + " (merge)", " ".join(KinText.merge(ud, k.carry_style() == "mount")) + " Merge: needs a full bond meter. Unlocks at level %d." % int(Hunter.ULT_AT[0]), GOLD])
+		if ud: lines.append([Settings.key_caps("ultimate"), ud.display_name + " (merge)", " ".join(KinText.merge(ud, k.carry_style() == "mount")) + " Merge: needs a full bond meter. Unlocks at level %d." % int(Hunter.ULT_AT[0]), GOLD])
 		lines.append([Settings.key_cap("throw"), "Orders for " + String(k.rec.get("name", "your Boki")), "Tap: Sic at the cursor (it staggers what it lands on), or call it back when it is away. Hold and flick: Chase, Guard, Return, Follow.", kcol])
 	var dsi := p.slot_info("dash")
 	lines.append([Settings.key_cap("dash"), String(dsi["name"]) + ((" + " + String(dsi["rider"])) if String(dsi.get("rider", "")) != "" else ""), String(dsi["desc"]), dsi["col"]])
@@ -2251,7 +2353,7 @@ func _draw_perk_offer(sz: Vector2) -> void:
 	var total := ids.size() * cw + (ids.size() - 1) * gap
 	var x := sz.x * 0.5 - total * 0.5
 	var y := sz.y - 290.0         # below your hunter, above your perk badges and bars
-	var head: String = {"shrine": "THE SHRINE OFFERS A PERK", "chest": "SOMETHING ELSE IN THE CHEST", "boss": "A BOSS'S POWER", "brute": "SPOILS OF THE BRUTE"}.get(String(off.get("src", "")), "PICK A PERK")
+	var head: String = {"shrine": "THE SHRINE OFFERS A PERK", "chest": "SOMETHING ELSE IN THE CHEST", "boss": "A BOSS'S POWER", "brute": "SPOILS OF THE BRUTE", "level": "LEVEL UP: UPGRADE YOUR WEAPON"}.get(String(off.get("src", "")), "PICK A PERK")
 	_ctext(Vector2(sz.x * 0.5, y - 12), String(head) + "  ·  lasts this expedition", 13, Color(GOLD, 0.95), big)
 	var pulse := 0.5 + 0.5 * sin(m.time * 4.0)
 	for i in ids.size():
@@ -2441,33 +2543,30 @@ var abyss_a := 0.0
 const ABYSS_FX := preload("res://scripts/match/abyss_fx.gd")
 var abyss_fx: CanvasLayer = null
 
+var dash_seen: Array = []      # per segment of the dash strip: was it full last frame (for the flash)
+var dash_flash: Array = []     # per segment: seconds left on its "it's back" flash
+
+## A point `up` metres above a hunter's feet, following the body's lean toward the camera
+## (CamRig.char_lean), so bars and names stay just over the head.
+func _head(h: Node3D, up: float) -> Vector3:
+	return h.position + (m.cam.char_lean() * Vector3(0, up, 0) if m.cam else Vector3(0, up, 0))
+
 ## Health and stamina (dash charges) right above your hunter, where your eyes already are.
 func _draw_overhead(p: Hunter) -> void:
 	var cam := m.cam
-	var at := p.position + Vector3(0, 2.7 * float(p.cdat["scale"]), 0)
+	var at := _head(p, 2.7 * float(p.cdat["scale"]))
 	if cam.is_position_behind(at) or p.downed or p.riding:
 		return
 	var sp := cam.unproject_position(at)
 	var vr: Rect2 = cam.get_viewport().get_visible_rect().grow(200.0)
 	if not sp.is_finite() or not vr.has_point(sp):
 		return      # off screen, or a degenerate camera (headless, mid-teleport): huge/NaN coords can't triangulate
+	sp = sp.round()     # whole pixels: the bars and pips don't shimmer as the camera glides
 	var w := 66.0
 	var frac := clampf(p.hp / p.max_hp, 0.0, 1.0)
 	head_hp = maxf(frac, lerpf(head_hp, frac, 0.06))
 	_vitals(sp, w, p, p_team_col().lerp(Color.WHITE, 0.15) if frac > 0.35 else BAD, head_hp, true)
-	# stamina: one yellow pip per dash under the bars, the next one filling as it recharges
-	var n := int(p.max_dashes()) + 1
-	for i in n:
-		var cpt := sp + Vector2(-w * 0.5 + 6 + i * 13, 17)
-		# the last pip is the long dash (Shift in the air, or when the short ones are spent)
-		var fill := clampf(p.dashes - i, 0.0, 1.0) if i < n - 1 else 1.0 - p.ex_cd / Hunter.EX_DASH_CD
-		var dia := PackedVector2Array([cpt + Vector2(0, -5), cpt + Vector2(5, 0), cpt + Vector2(0, 5), cpt + Vector2(-5, 0)])
-		c.draw_colored_polygon(dia, Color(0.04, 0.04, 0.06, 0.8))
-		if fill >= 1.0:
-			var inner := PackedVector2Array([cpt + Vector2(0, -3.5), cpt + Vector2(3.5, 0), cpt + Vector2(0, 3.5), cpt + Vector2(-3.5, 0)])
-			c.draw_colored_polygon(inner, STAMINA_COL)
-		elif fill > 0.0:
-			c.draw_arc(cpt, 3.0, -PI * 0.5, -PI * 0.5 + TAU * fill, 10, Color(STAMINA_COL, 0.6), 2.0)
+	DashStrip.draw(self, Rect2(Vector2(sp.x - w * 0.5, sp.y + 14), Vector2(w, 4)), p)
 	_status_row(sp + Vector2(0, 30), p)
 	# high up: a small readout of how far above the ground you are
 	var alt := m.player_altitude() if p == m.player else 0.0
@@ -2524,9 +2623,7 @@ func _draw_hover_tip(sz: Vector2, p: Hunter) -> void:
 	for i in range(1, lines.size()):
 		h += _wrapped_h(String(lines[i][0]), w - 28, int(lines[i][2])) + 4.0
 	var anchor: Rect2 = hit[0]
-	var pos := Vector2(anchor.get_center().x - w * 0.5, anchor.position.y - h - 14)
-	pos.x = clampf(pos.x, 8, sz.x - w - 8)
-	pos.y = maxf(8, pos.y)
+	var pos := HudTip.place(anchor, Vector2(w, h), sz)      # above if it fits, else beside; always on screen, never over the slot
 	var a := clampf((hover_t - 0.25) / 0.12, 0.0, 1.0)
 	var box := Rect2(pos, Vector2(w, h))
 	_rounded(box, Color(0.05, 0.06, 0.09, 0.95 * a), 12, Color(head[1], 0.6 * a), 2)
@@ -2593,6 +2690,8 @@ func _tip_lines(id: String, p: Hunter) -> Array:
 			out.append([String(pd["desc"]), INK])
 			out.append(["Found this expedition. Gone when it ends.", MUTED])
 		return out
+	if id.begins_with("gslot:"):
+		return GearPanel.tip(p, int(id.substr(6)))
 	if p.ak and id in ["sec", "k1", "r", "dash", "kin_ab", "throw"]:
 		return _arch_tip(id, p)
 	match id:
@@ -2622,7 +2721,7 @@ func _tip_lines(id: String, p: Hunter) -> Array:
 			if ud == null: return []
 			var giant: bool = (p.kin as Kin).carry_style() == "mount"
 			out.append([ud.display_name, GOLD])
-			out.append(["Merge  ·  %s  ·  %s" % [Settings.key_cap("ultimate"), "your mount grows giant" if giant else "you take its colour and power"], MUTED, 12])
+			out.append(["Merge  ·  %s  ·  %s" % [Settings.key_caps("ultimate"), "your mount grows giant" if giant else "you take its colour and power"], MUTED, 12])
 			for ln in KinText.merge(ud, giant):
 				out.append([String(ln), INK, 13])
 			out.append(["Unlocks at level %d with a full meter. The bond fills as your Boki lands hits, as you hit what it marked, and on combos. Boki out? You leap-merge. No Boki: a weak surge. Then %ss before it can go again." % [int(Hunter.ULT_AT[0]), KinText.n(KinParts.MERGE_SPENT_TIME)], GOLD, 12])
@@ -2688,19 +2787,18 @@ func _tip_lines(id: String, p: Hunter) -> Array:
 		"pack":
 			out.append(["Backpack  %d/%d" % [p.pack.size(), p.pack_cap], INK])
 			out.append(["Open  ·  %s" % Settings.key_cap("inventory"), MUTED, 12])
-			out.append(["Weapons, gloves and treasure you're carrying home. Extract to keep it all in your armory; die and it stays in your deathbox. Bigger backpacks at the armory.", INK, 14])
+			out.append(["Gear and treasure you're carrying home. Extract to keep it all in your armory; die and it stays in your deathbox. Bigger backpacks at the armory.", INK, 14])
 		"weapon":
 			var wp: Dictionary = p.wpn
-			var hand := Loot.of_hand(p)
-			var rc: Color = Loot.col_of(hand) if Loot.keepable(hand) else Color("e6dccb")
-			out.append([wp["name"], rc])
-			out.append(["%s weapon  ·  reloads by itself when empty" % (String(Data.RARITY[p.wrar]["name"]) if p.wrar > 0 else "Standard"), MUTED, 12])
-			if Loot.keepable(hand) and Loot.sub_of(hand) != "Plain":
-				out.append([Loot.sub_of(hand), Loot.el_col(hand), 13])
+			out.append([wp["name"], Color("e6dccb")])
+			out.append(["Your signature weapon  ·  reloads by itself when empty", MUTED, 12])
+			var ups := WeaponUps.summary(p)
+			if ups != "":
+				out.append([ups, GOOD, 13])
 			var rate := 1.0 / maxf(0.01, float(wp["rate"]))
 			out.append(["%.0f damage a shot  ·  %.1f shots a second  ·  about %d damage a second" % [float(wp["dmg"]), rate, int(float(wp["dmg"]) * rate)], INK, 14])
 			out.append(["Magazine %d  ·  reload %s  ·  range %d tiles" % [int(wp["mag"]), _secs(float(wp["reload"])), int(float(wp.get("range", 10.0)))], MUTED, 13])
-			out.append(["Shots spread while you move or jump. Stand still or crouch to tighten them.", MUTED, 12])
+			out.append(["It's the one weapon you carry; level-ups, chests and tunings on the ground make it stronger.", MUTED, 12])
 		"vitals":
 			out.append(["%s class" % String(p.cls).capitalize(), hc])
 			out.append(["Speed %.1f  ·  %s" % [p.base_speed, String(p.cdat.get("desc", ""))], MUTED, 12])
@@ -2936,9 +3034,11 @@ func loot_is(b: Dictionary) -> bool:
 func mouse_on_ui() -> bool:
 	return wheel_open or map_open() or mouse_on_panel()
 
-## The cursor is over one of the item windows (deathbox loot, swap, backpack).
+var ui_extra: Array = []      # other panels that own the mouse (the practice areas' bottom bar)
+
+## The cursor is over one of the item windows (deathbox loot, swap, backpack) or a panel in ui_extra.
 func mouse_on_panel() -> bool:
-	for pn in [loot_panel, swap_panel, pack_panel]:
+	for pn in [loot_panel, swap_panel, pack_panel] + ui_extra:
 		if pn != null and is_instance_valid(pn) and pn.visible and not pn.is_queued_for_deletion() and pn.get_global_rect().grow(6.0).has_point(pn.get_global_mouse_position()):
 			return true
 	return false
@@ -2992,7 +3092,7 @@ func _loot_tick(_delta: float) -> void:
 		close_loot()
 		return
 	# rebuild only when what's in it (or what you're holding) changes
-	var sig := str(Life.box_items(m, p, b).map(func(it): return [it["name"], it["upgrade"]])) + str(p.gear) + p.wid + str(p.wrar) + str(p.pack.size())
+	var sig := str(Life.box_items(m, p, b).map(func(it): return [it["name"], it["upgrade"]])) + str(p.gear) + p.wid + str(p.pack.size())
 	if sig != loot_sig:
 		_build_loot()
 
@@ -3002,7 +3102,7 @@ func _build_loot() -> void:
 	if loot_panel and is_instance_valid(loot_panel):
 		loot_panel.queue_free()
 	var items: Array = Life.box_items(m, p, b)
-	loot_sig = str(items.map(func(it): return [it["name"], it["upgrade"]])) + str(p.gear) + p.wid + str(p.wrar) + str(p.pack.size())
+	loot_sig = str(items.map(func(it): return [it["name"], it["upgrade"]])) + str(p.gear) + p.wid + str(p.pack.size())
 	var pc := PanelContainer.new()
 	pc.theme = UI.theme()
 	pc.mouse_filter = Control.MOUSE_FILTER_STOP
@@ -3058,7 +3158,7 @@ func _build_loot() -> void:
 		sub.custom_minimum_size.x = 210
 		col.add_child(sub)
 		row.add_child(col)
-		if it["key"] in ["gear", "weapon"]:
+		if it["key"] == "gear":
 			var tag := UI.label("UPGRADE" if it["upgrade"] else "WORSE", 11, GOOD if it["upgrade"] else MUTED, UI.caps)
 			tag.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 			row.add_child(tag)
@@ -3070,7 +3170,7 @@ func _build_loot() -> void:
 			row.add_child(vt)
 		var itc: Dictionary = it
 		var verb := "Take"
-		if it["key"] in ["gear", "weapon"]: verb = "Swap"
+		if it["key"] == "gear": verb = "Swap"
 		elif it["key"] == "pack" and it.get("full", false): verb = "Swap" if it["upgrade"] else "Full"
 		var take_it := func():
 			if loot_open != null and m.player:
@@ -3161,11 +3261,11 @@ func _item_row(it: Dictionary, buttons: Array, note := "") -> Control:
 	var rs := StyleBoxFlat.new()
 	rs.bg_color = Color(col, 0.09)
 	rs.set_corner_radius_all(9)
-	rs.border_color = Color(Loot.el_col(it), 0.6); rs.border_width_left = 3
+	rs.border_color = Color(Loot.col_of(it), 0.6); rs.border_width_left = 3
 	rs.content_margin_left = 8; rs.content_margin_right = 8; rs.content_margin_top = 5; rs.content_margin_bottom = 5
 	rp.add_theme_stylebox_override("panel", rs)
 	var row := UI.hbox(8); rp.add_child(row)
-	row.add_child(Icons.Glyph.new(Loot.icon_of(it), Loot.el_col(it), 24.0))
+	row.add_child(Icons.Glyph.new(Loot.icon_of(it), Loot.col_of(it), 24.0))
 	var cv := UI.vbox(0); cv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var nm := UI.label(Loot.name_of(it) + (("  ·  " + note) if note != "" else ""), 15, col, UI.semi)
 	nm.autowrap_mode = TextServer.AUTOWRAP_OFF
@@ -3284,7 +3384,7 @@ func close_pack() -> void:
 	pack_panel = null
 
 func _pack_state(p: Hunter) -> String:
-	return str(p.pack.map(func(it): return it.get("uid", ""))) + p.wid + str(p.wrar) + p.welem + str(p.gear) + str(p.pack_cap) + str(p.caught.size())
+	return str(p.pack.map(func(it): return it.get("uid", ""))) + p.wid + p.welem + str(p.gear) + str(p.pack_cap) + str(p.caught.size())
 
 func _build_pack() -> void:
 	if pack_panel and is_instance_valid(pack_panel):
@@ -3296,23 +3396,21 @@ func _build_pack() -> void:
 	head.add_child(_pack_chip(p))
 	var cl := UI.button("✕", func(): close_pack(), 36); cl.flat = true
 	head.add_child(cl)
-	v.add_child(UI.label("In your hands", 12, MUTED, UI.caps))
-	var hand := Loot.of_hand(p)
-	v.add_child(_item_row(hand, [], "" if Loot.keepable(hand) else "always yours"))
+	v.add_child(UI.label("Wearing", 12, MUTED, UI.caps))
 	for g in p.gear:
 		if not (g as Dictionary).is_empty():
-			v.add_child(_item_row(Loot.glove(String(g["id"]), int(g["rar"])), []))
+			v.add_child(_item_row(Loot.gear(String(g["id"]), int(g["rar"])), []))
 	v.add_child(UI.label("Carrying home  ·  extract to keep it all", 12, MUTED, UI.caps))
 	var sl := _scroll_rows(v)
 	var rows: VBoxContainer = sl[1]
 	if p.pack.is_empty():
-		rows.add_child(UI.label("Nothing yet. Weapons, gloves and treasure you pick up go here.", 13, MUTED))
+		rows.add_child(UI.label("Nothing yet. Gear and treasure you pick up go here.", 13, MUTED))
 	for i in p.pack.size():
 		var idx := i
 		var it: Dictionary = p.pack[i]
 		var bts: Array = []
-		if String(it.get("t", "")) in ["weapon", "glove"]:
-			bts.append(["Equip", func(): Pack.use_from_pack(m, m.player, idx); _build_pack(), true])
+		if String(it.get("t", "")) == "gear":
+			bts.append(["Wear", func(): Pack.use_from_pack(m, m.player, idx); _build_pack(), true])
 		bts.append(["Drop", func(): Pack.drop_from_pack(m, m.player, idx); _build_pack()])
 		rows.add_child(_item_row(it, bts))
 	for k in p.pack_cap - p.pack.size():
@@ -3495,7 +3593,7 @@ func _draw_truce_marks() -> void:
 			continue
 		var e := Truce.emote_def(String(s["id"]))
 		var a := clampf((Truce.BUBBLE_T - float(s["t"])) * 2.0, 0.0, 1.0) * clampf(float(s["t"]) * 8.0, 0.0, 1.0)
-		var sp := cam.unproject_position(h.position + Vector3(0, 3.3, 0)) + Vector2(0, -6.0 * minf(1.0, float(s["t"]) * 4.0))
+		var sp := cam.unproject_position(_head(h, 3.3)) + Vector2(0, -6.0 * minf(1.0, float(s["t"]) * 4.0))
 		if not c.get_viewport_rect().grow(240.0).has_point(sp):
 			continue     # (far off screen, e.g. someone falling away into the abyss: the bubble's triangles degenerate and spam "triangulation failed")
 		var label := String(e["name"])
@@ -3513,7 +3611,7 @@ func _draw_truce_marks() -> void:
 	for h in m.hunters:
 		if h.team == me.team or h.out or h.extracted or h.unseen or not h.visible or cam.is_position_behind(h.position):
 			continue
-		var tp := cam.unproject_position(h.position + Vector3(0, 2.55, 0))
+		var tp := cam.unproject_position(_head(h, 2.55))
 		if not c.get_viewport_rect().grow(240.0).has_point(tp):
 			continue
 		if m.truce.is_marked(h):
@@ -3667,11 +3765,20 @@ func _draw_lair_victory(sz: Vector2, p: Hunter) -> void:
 		return
 	var col: Color = Lairs.color_of(L)
 	var w := minf(620.0, sz.x * 0.52)
-	var r := Rect2(Vector2(sz.x * 0.5 - w * 0.5, 22), Vector2(w, 46))
+	var r := Rect2(Vector2(sz.x * 0.5 - w * 0.5, 22), Vector2(w, 54))
 	_rounded(r, Color(0.04, 0.04, 0.07, 0.85), 10, Color(col, 0.6), 2)
-	_ctext(Vector2(sz.x * 0.5, r.position.y + 20), "VICTORY  ·  gate opens in %s  ·  pull the lever, or ride the updraft" % Lairs.clock(m.lairs.victory_left(L)), 15, col, big)
+	# a padlock: you're locked in with the loot until the clock runs out (or you open it early)
+	var lc := r.position + Vector2(24, 26)
+	c.draw_arc(lc + Vector2(0, -5), 6.0, PI, TAU, 12, col, 2.5, true)
+	_rounded(Rect2(lc + Vector2(-8, -5), Vector2(16, 13)), col, 3)
+	_ctext(Vector2(sz.x * 0.5 + 8, r.position.y + 20), "VICTORY  ·  LOCKED IN  ·  gate opens in %s" % Lairs.clock(m.lairs.victory_left(L)), 15, col, big)
 	var k := Settings.key_cap("interact")
-	_ctext(Vector2(sz.x * 0.5, r.position.y + 38), "%s at the lever by the gate  ·  the updraft at the back carries only those who fought" % k, 11, MUTED)
+	_ctext(Vector2(sz.x * 0.5 + 8, r.position.y + 37), "%s at the lever by the gate opens it now  ·  the updraft at the back carries only those who fought" % k, 11, MUTED)
+	# the lock's clock draining
+	var bw := r.size.x - 64.0
+	var f := clampf(m.lairs.victory_left(L) / Lairs.VICTORY_T, 0.0, 1.0)
+	_rounded(Rect2(Vector2(r.position.x + 48, r.end.y - 10), Vector2(bw, 4)), Color(1, 1, 1, 0.12), 2)
+	_rounded(Rect2(Vector2(r.position.x + 48, r.end.y - 10), Vector2(bw * f, 4)), col, 2)
 	feed_top = maxf(feed_top, r.end.y + 8.0)
 
 ## At the top of the screen while you're in a lair with its boss awake: name, phase, health with

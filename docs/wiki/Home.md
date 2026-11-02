@@ -18,8 +18,8 @@ hand; change the data and rerun the script. Hand-written pages may also hold gen
 |---|---|
 | [Getting started](Getting-Started.md) | Your first egg, the tutorial, the farm and your first expedition |
 | [Controls](Controls.md) | Every key, in a match and at home |
-| [Classes](Classes.md) | The six classes and how levels and ranks work |
-| [Thief](Class-Thief.md), [Archer](Class-Archer.md), [Mage](Class-Mage.md), [Gunslinger](Class-Gunslinger.md), [Juggernaut](Class-Juggernaut.md), [Bulwark](Class-Bulwark.md) | One page per class |
+| [Classes](Classes.md) | The twelve classes and how levels and ranks work |
+| [Thief](Class-Thief.md), [Archer](Class-Archer.md), [Vireo](Class-Vireo.md), [Marlowe](Class-Marlowe.md), [Juggernaut](Class-Juggernaut.md), [Bulwark](Class-Bulwark.md) | One page per class |
 | [Boki](Boki.md) | Types, personality, scanning, breeding, bonds, losing a Boki |
 | [Boki species](Boki-Species.md) *(generated)* | Every species with its abilities, merge and evolution paths |
 | [Boki growth](Boki-Growth.md) *(generated)* | Evolution nodes, mutations, bond ranks, IVs, natures |
@@ -42,6 +42,7 @@ hand; change the data and rerun the script. Hand-written pages may also hold gen
 | [Checks](Checks.md) | Every `--*-check` hook and what it asserts |
 | [Build and ship](Build-and-Ship.md) | Godot version, worktrees, ship.sh, exports, releases |
 | [Networking](Networking.md) | `Net`, the relay, message topics, `Net.VERSION` |
+| [Roadmap](../ROADMAP.md) | What shipped, what is being built, and what comes next (updated every build) |
 | [Design docs](Design-Docs.md) | Index of `docs/` and the `design` branch |
 | [Contributing and licensing](Contributing-and-Licensing.md) | GPL code, the asset license, NOTICE, the CLA |
 | [Inspirations](Inspirations.md) | Which mechanics came from which games (design notes) |

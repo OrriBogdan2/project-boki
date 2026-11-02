@@ -685,7 +685,7 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 	var boot_k := float(CLASS_LOOK.get(cls, {}).get("boots", 1.0))
 	var gender := int(lk["gender"])
 	var fem := gender == 0
-	var heavy_gear := arch in ["juggernaut", "bulwark"]
+	var heavy_gear := arch in ["juggernaut", "bulwark", "dredge", "ashwick"]
 	# legs swing from the hip: a tapered thigh, a knee guard, and a boot in one piece hanging from
 	# the knee (so the leg can bend), with a cuff that overlaps the trousers
 	var knees := {}
@@ -1516,6 +1516,7 @@ static func prism_tip() -> PrismMesh:
 ## exaggerated hero-shooter shapes (rounded receivers, flared muzzles, fat grips and stocks) with a
 ## glowing accent per weapon. The barrel runs along -Z; the trigger hand holds near the origin.
 static func gun_parts(gun: Node3D, weapon: String, m_gun: Material, m_dark: Material, m_acc: Material) -> void:
+	if HeroArms.build(gun, weapon, m_gun, m_dark, m_acc): return      # Dolm's and Ostra's fixed weapons
 	var glow := func(c: Color) -> ShaderMaterial: return toon(c, false, 1.1)
 	var stock := func(z0: float, z1: float, h: float, w: float) -> void:
 		part(gun, HeroKit.loft("stock|%.2f|%.2f|%.2f" % [z0, z1, h], [Vector3(0, 0.0, z0), Vector3(0, -0.02, lerpf(z0, z1, 0.5)), Vector3(0, -0.05, z1)], [Vector2(w * 0.5, h * 0.4), Vector2(w * 0.5, h * 0.5), Vector2(w * 0.55, h * 0.75)], 10, Vector3.UP, 0.85), m_dark)
@@ -1635,6 +1636,7 @@ static func gun_parts(gun: Node3D, weapon: String, m_gun: Material, m_dark: Mate
 			for k in 3:
 				part(gun, cyl(0.041, 0.041, 0.02, 10), m_acc, Vector3(0, 0, 0.0 + k * 0.08), Vector3.ONE, Vector3(PI / 2, 0, 0))
 			part(gun, sphere(0.06, 12), dark, Vector3(0, 0, 0.27))
+		"flamethrower": HeroGearPair.flamer(gun, m_gun, m_dark, m_acc)
 		"minigun":
 			# a spinning bundle of six barrels on a chunky drum
 			part(gun, box(0.22, 0.22, 0.36), m_gun, Vector3(0, 0, -0.06))
@@ -1659,6 +1661,28 @@ static func gun_parts(gun: Node3D, weapon: String, m_gun: Material, m_dark: Mate
 				part(gun, sphere(0.022, 8), m_acc, Vector3(0, sy, -0.02))
 			part(gun, box(0.012, 0.012, 0.5), toon(Color("d8c9a8")), Vector3(0.02, 0.0, -0.3))
 			part(gun, box(0.02, 0.04, 0.05), glow.call(Color("d8ffb0")), Vector3(0.02, 0.0, -0.56))
+		"coilcaster":
+			# Vireo's forearm coil: a copper tube wound in rings with a glowing mouth and a bracer grip
+			var cop := shiny(Color("c8793c"), 0.7)
+			part(gun, cyl(0.04, 0.05, 0.5, 12), m_dark, Vector3(0, 0.0, -0.22), Vector3.ONE, Vector3(PI / 2, 0, 0))
+			for k in 6:
+				part(gun, cyl(0.062, 0.062, 0.022, 12), cop, Vector3(0, 0.0, -0.06 - k * 0.075), Vector3.ONE, Vector3(PI / 2, 0, 0))
+			part(gun, cyl(0.075, 0.05, 0.07, 12), cop, Vector3(0, 0.0, -0.5), Vector3.ONE, Vector3(PI / 2, 0, 0))
+			part(gun, sphere(0.045, 10), glow.call(Color("9ff5e0")), Vector3(0, 0.0, -0.55))
+			part(gun, box(0.09, 0.05, 0.16), m_acc, Vector3(0, 0.05, 0.06))
+			grip.call(-0.02, 0.15)
+		"quill_rifle":
+			# Marlowe's drum rifle: a squat receiver, a drum of burr charges under it, a long needle barrel
+			var bronze := shiny(Color("b9732f"), 0.6)
+			part(gun, box(0.1, 0.12, 0.42), m_gun, Vector3(0, 0, -0.12))
+			part(gun, cyl(0.1, 0.1, 0.1, 14), bronze, Vector3(0, -0.12, -0.14), Vector3.ONE, Vector3(0, 0, PI / 2))
+			part(gun, cyl(0.02, 0.024, 0.55, 8), m_dark, Vector3(0, 0.02, -0.56), Vector3.ONE, Vector3(PI / 2, 0, 0))
+			part(gun, box(0.05, 0.05, 0.2), m_acc, Vector3(0, 0.08, -0.14))
+			part(gun, box(0.016, 0.03, 0.3), glow.call(Color("ffb36a")), Vector3(0.056, 0.0, -0.16))
+			grip.call(-0.02, 0.15)
+			stock.call(0.07, 0.2, 0.08, 0.05)
+		"lantern_crook", "hoar_fan":
+			HeroGearCare.weapon(gun, weapon, m_gun, m_dark, m_acc)
 		"spellstaff":
 			# the Mage's staff: a long rune-carved rod with a glowing focus caught in a ring
 			var wood2 := toon(Color("5a4636"))
@@ -1687,21 +1711,6 @@ static func gun_parts(gun: Node3D, weapon: String, m_gun: Material, m_dark: Mate
 			part(gun, cyl(0.12, 0.12, 0.62, 14), m_gun, Vector3(0, 0, -0.2), Vector3.ONE, Vector3(PI / 2, 0, 0))
 			part(gun, cyl(0.15, 0.14, 0.1, 14), m_acc, Vector3(0, 0, -0.52), Vector3.ONE, Vector3(PI / 2, 0, 0))
 			grip.call(-0.02, 0.18)
-
-## A found weapon floating over the ground, with a light pillar in its rarity's colour.
-static func weapon_drop(weapon: String, rar: int) -> Node3D:
-	var root := Node3D.new()
-	var col: Color = Data.RARITY[rar]["color"]
-	var spin := Node3D.new(); spin.name = "Spin"; spin.position = Vector3(0, 0.7, 0); root.add_child(spin)
-	var gun := Node3D.new(); gun.scale = Vector3.ONE * 2.3; gun.rotation.z = 0.25; spin.add_child(gun)
-	gun_parts(gun, weapon, toon(Color("4a4d5c")), toon(Color("2b2a33")), toon(col, true, 0.5))
-	var beam := part(root, cyl(0.14, 0.26, 5.0, 10), glow_mat(Color(col, 0.34)), Vector3(0, 2.5, 0))
-	beam.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	var ring := MeshInstance3D.new(); ring.mesh = flat_quad(1.3)
-	var rm := ring_mat(col, 0.12); rm.set_shader_parameter("fill", 0.12)
-	ring.material_override = rm; ring.position.y = 0.05
-	root.add_child(ring)
-	return root
 
 ## A piece of gear lying on the ground: a glowing gem-like token with a light beam.
 static func gear_drop(col: Color, rar: int) -> Node3D:
