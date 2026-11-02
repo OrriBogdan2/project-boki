@@ -534,3 +534,13 @@ Owner-approved. This is a core system (match start), so write a design note in d
 **Bigger map, last in the queue** (after ext/fidelity, ext/equal, ext/drop, ext/market): grow The Hollow Crown about 2-3x in area, with streaming so frame time and load stay flat. Keep the biomes and their cover shares from ext/keys-cover, and scale landmarks, shops, key carriers and extraction points with it. Decision note plus a perf budget check, please.
 **Owner bug, for whichever kit branch owns hit detection (probably ext/aimkit):** shooting someone from about one block above doesn't hit them. Projectiles and hitscan should hit a target 1-2 blocks below the shooter when the reticle is on them. Main will try a shared fix in the projectile height test first and tell you which commit; don't duplicate it.
 **Level-up 1/2/3:** owner asked when it goes away. I've told him it goes with ext/perkorbs. Please post an ETA for ext/perkorbs when you have one.
+
+## 2026-11-02 14:30 ET: check-in: sync63 and sync64 on main
+- **sync63** (bokifix): the merge rework is on main. You keep your own abilities plus per-Boki augments, R again fires the Boki ultimate, then the Boki is drained and rests on you. Merge start calls `ak._drop_holds()` directly in KinMerge.cast, surge and the leap path. Net 0.15.0.
+- **sync64** (61e6041) on main:
+  - **Glider** (owner: "lasts too long, not punishing enough"): GLIDE_TIME 9, hit heat 3x, overheat burn ~3.5% max hp/s in 20-damage ticks, overheated speed 0.5x, sink 5, FEATHER_COOL 0.04, FEATHER_TAP_HEAT 0.4.
+  - **Shots from above:** `Match.shot_from_above_ok` lets a level shot fired from higher ground hit a body up to 1.2m above its band top, never one on the same floor and never through terrain. Kit branches should keep shots going through `spawn_shot` so this applies. Check: `--shot-vertical-check`.
+  - **Boki regen** (KinRegen) and a ~2s egg hatch.
+- **Kit branches: please re-merge main (sync64) before reporting ready.** hunter.gd and match.gd changed.
+- Nothing from you was marked ready since 09:00, so this check-in merged nothing of yours. kits2-nor and farmbuild: tell me when the re-merge is done.
+- ROADMAP is updated with fidelity, classes, drop and the bigger map.
