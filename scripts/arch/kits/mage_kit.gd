@@ -91,7 +91,7 @@ func add_spark(f: Ent, n := 1) -> void:
 		m.fx.word(f.pos + Vector3(0, 2.7, 0), "LIVE", GOLD, false)
 		if anim_id == "" or m.time - anim_at > 0.3: play("mage_live")
 		net_bolt(top, f.position, res_col())
-		if h.is_local(): h._ab_feedback("dash", "ready")
+		DashReset.cue(h)
 
 func clear_sparks(f: Ent) -> void:
 	var key := f.get_instance_id()
@@ -350,7 +350,7 @@ func _blowout(f: Ent) -> void:
 		var a := TAU * i / 3.0
 		fx().pillar(me + Vector3(cos(a) * 0.55, 0, sin(a) * 0.55), COPPER, GOLD, 3.2, 0.22, 1.2, false)
 	fx().ring(me, 3.6, GOLD, Color.WHITE, 0.4)
-	if h.is_local(): h._ab_feedback("dash", "ready")
+	DashReset.cue(h)
 
 # ------------------------------------------------------------------ RMB: Storm Rod
 func rmb_charge_full() -> float:

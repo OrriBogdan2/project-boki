@@ -112,7 +112,7 @@ func _on_knock(t: Ent) -> void:
 	m.fx.word(h.pos + Vector3(0, 2.4, 0), "+KNOCK", Color("8ff0a0"), false)
 	m.sfx("vn_stim", h.pos, -3.0)
 	play("gunslinger_knock")
-	if h.is_local(): h._ab_feedback("dash", "ready")
+	DashReset.cue(h)
 
 # ------------------------------------------------------------------ LMB: the rifle's rounds
 ## Each round: a hot ember needle with a cooling tail, a bronze star at the muzzle, the shoulder kick.

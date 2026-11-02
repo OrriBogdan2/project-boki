@@ -217,7 +217,7 @@ func _mage() -> void:
 	ok("small: a finger bolt passes through everyone in line", ac.dmg(T) > 0.0 and ac.dmg(T2) > 0.0, "%.0f / %.0f sparks %d %d" % [ac.dmg(T), ac.dmg(T2), K.spark_n(T), K.spark_n(T2)])
 	P.dashes = 0.0; T2.hp = 0.0; T2.downed = true
 	K.on_deal(T2, 5.0, {"src": "shot"})
-	ok("small: a knock does NOT give Wirerun back (heals only)", P.dashes < 0.5)
+	ok("small: Vireo's kit gives no Wirerun on a knock (the game-wide takedown reset is DashReset's)", P.dashes < 0.5)
 	T2.downed = false; T2.hp = T2.max_hp; T2.teleport(home + Vector3(30, 0, 0))
 	P.dashes = P.max_dashes(); P.teleport(home); ac.step(m, 0.1)
 	P.inp["dash_down"] = true; P.do_dash(); ac.step(m, 0.1, func(): P.inp["dash_down"] = true)
