@@ -2,7 +2,7 @@
 
 Review shots for each hero: kit card, each ability, the payoff, animation frame strips and a neutral full-body portrait. PNGs are downscaled to at most 1280 px wide. Captions come from the shot manifests.
 
-Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-tender), [Tamsin](#tamsin-rimewright), [Dredge](#dredge-dredge), [Ashwick](#ashwick-ashwick), [Dolm](#dolm-dolm), [Ostra](#ostra-ostra), [Archer](#archer-archer), [Bulwark](#bulwark-bulwark), [Thief](#thief-thief), [Juggernaut](#juggernaut-juggernaut), [Farm building](#farm-building-farmbuild), [classes](#classes-classes), [aimkit](#aimkit-aimkit), [moosh-moosh/v2](#moosh-moosh/v2-moosh-moosh/v2), [moosh-moosh/v2/anim](#moosh-moosh/v2/anim-moosh-moosh/v2/anim), [tamsin/v2](#tamsin/v2-tamsin/v2), [tamsin/v2/anim](#tamsin/v2/anim-tamsin/v2/anim), [dancer/v2](#dancer/v2-dancer/v2), [dancer/v2/before](#dancer/v2/before-dancer/v2/before), [zedran/v2](#zedran/v2-zedran/v2), [zedran/v2/before](#zedran/v2/before-zedran/v2/before), [dancer/v2/anim](#dancer/v2/anim-dancer/v2/anim), [zedran/v2/anim](#zedran/v2/anim-zedran/v2/anim), [linwick/v2](#linwick/v2-linwick/v2), [linwick/v2/anim](#linwick/v2/anim-linwick/v2/anim), [linwick/v2/before](#linwick/v2/before-linwick/v2/before), [linwick/v2/after](#linwick/v2/after-linwick/v2/after), [dredge/v2](#dredge/v2-dredge/v2), [dredge/v2/anim](#dredge/v2/anim-dredge/v2/anim), [dredge/v2/before](#dredge/v2/before-dredge/v2/before), [dredge/v2/after](#dredge/v2/after-dredge/v2/after), [pin/v2](#pin/v2-pin/v2), [bjorn/v2](#bjorn/v2-bjorn/v2), [pin/v2/anim](#pin/v2/anim-pin/v2/anim), [bjorn/v2/anim](#bjorn/v2/anim-bjorn/v2/anim), [vireo/v2](#vireo/v2-vireo/v2), [vireo/v2/anim](#vireo/v2/anim-vireo/v2/anim), [venator/v2/anim](#venator/v2/anim-venator/v2/anim), [venator/v2](#venator/v2-venator/v2), [breah/v2](#breah/v2-breah/v2), [ostra/v2](#ostra/v2-ostra/v2), [breah/v2/anim](#breah/v2/anim-breah/v2/anim), [ostra/v2/anim](#ostra/v2/anim-ostra/v2/anim), [linwick/v2/ult](#linwick/v2/ult-linwick/v2/ult), [dredge/v2/ult](#dredge/v2/ult-dredge/v2/ult), [hunters](#hunters-hunters)
+Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-tender), [Tamsin](#tamsin-rimewright), [Dredge](#dredge-dredge), [Ashwick](#ashwick-ashwick), [Dolm](#dolm-dolm), [Ostra](#ostra-ostra), [Archer](#archer-archer), [Bulwark](#bulwark-bulwark), [Thief](#thief-thief), [Juggernaut](#juggernaut-juggernaut), [Farm building](#farm-building-farmbuild), [classes](#classes-classes), [aimkit](#aimkit-aimkit), [moosh-moosh/v2](#moosh-moosh/v2-moosh-moosh/v2), [moosh-moosh/v2/anim](#moosh-moosh/v2/anim-moosh-moosh/v2/anim), [tamsin/v2](#tamsin/v2-tamsin/v2), [tamsin/v2/anim](#tamsin/v2/anim-tamsin/v2/anim), [dancer/v2](#dancer/v2-dancer/v2), [dancer/v2/before](#dancer/v2/before-dancer/v2/before), [zedran/v2](#zedran/v2-zedran/v2), [zedran/v2/before](#zedran/v2/before-zedran/v2/before), [dancer/v2/anim](#dancer/v2/anim-dancer/v2/anim), [zedran/v2/anim](#zedran/v2/anim-zedran/v2/anim), [linwick/v2](#linwick/v2-linwick/v2), [linwick/v2/anim](#linwick/v2/anim-linwick/v2/anim), [linwick/v2/before](#linwick/v2/before-linwick/v2/before), [linwick/v2/after](#linwick/v2/after-linwick/v2/after), [dredge/v2](#dredge/v2-dredge/v2), [dredge/v2/anim](#dredge/v2/anim-dredge/v2/anim), [dredge/v2/before](#dredge/v2/before-dredge/v2/before), [dredge/v2/after](#dredge/v2/after-dredge/v2/after), [pin/v2](#pin/v2-pin/v2), [bjorn/v2](#bjorn/v2-bjorn/v2), [pin/v2/anim](#pin/v2/anim-pin/v2/anim), [bjorn/v2/anim](#bjorn/v2/anim-bjorn/v2/anim), [vireo/v2](#vireo/v2-vireo/v2), [vireo/v2/anim](#vireo/v2/anim-vireo/v2/anim), [venator/v2/anim](#venator/v2/anim-venator/v2/anim), [venator/v2](#venator/v2-venator/v2), [breah/v2](#breah/v2-breah/v2), [ostra/v2](#ostra/v2-ostra/v2), [breah/v2/anim](#breah/v2/anim-breah/v2/anim), [ostra/v2/anim](#ostra/v2/anim-ostra/v2/anim), [linwick/v2/ult](#linwick/v2/ult-linwick/v2/ult), [dredge/v2/ult](#dredge/v2/ult-dredge/v2/ult), [hunters](#hunters-hunters), [pin/v2/ult](#pin/v2/ult-pin/v2/ult), [bjorn/v2/ult](#bjorn/v2/ult-bjorn/v2/ult)
 
 ## Vireo (mage)
 
@@ -2183,3 +2183,63 @@ Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-t
 **The full hold's reveal burst: shockwave rings and the flash in Archer's colour as NEW HUNTER steps in over the farm**
 
 ![The full hold's reveal burst: shockwave rings and the flash in Archer's colour as NEW HUNTER steps in over the farm](hunters/reveal_burst.png)
+
+## pin/v2/ult (pin/v2/ult)
+
+**Starpiercer up: the beam's lane to 18 m, the ticked ring at her feet, three pips over her head**
+
+![Starpiercer up: the beam's lane to 18 m, the ticked ring at her feet, three pips over her head](pin/v2/ult/ult_pin_telegraph.png)
+
+**Key frame: the 0.3 s nock, string to the cheek, the bow glowing, the lane filling**
+
+![Key frame: the 0.3 s nock, string to the cheek, the bow glowing, the lane filling](pin/v2/ult/ult_pin_nock.png)
+
+**Impact: the beam through the target, a white burst cloud and a teal star**
+
+![Impact: the beam through the target, a white burst cloud and a teal star](pin/v2/ult/ult_pin_impact.png)
+
+**The last beam: a wider beam, a bigger burst, the hard kick**
+
+![The last beam: a wider beam, a bigger burst, the hard kick](pin/v2/ult/ult_pin_final.png)
+
+**Strip, Starpiercer cast: the one-frame flash, the bow swept across the chest, settle**
+
+![Strip, Starpiercer cast: the one-frame flash, the bow swept across the chest, settle](pin/v2/ult/strip_pin_ult_cast.png)
+
+**Strip, the 0.3 s nock: side-on, low, string to the cheek, the bow glowing**
+
+![Strip, the 0.3 s nock: side-on, low, string to the cheek, the bow glowing](pin/v2/ult/strip_pin_ult_nock.png)
+
+**Strip, a beam loosed: the kick back, the hand flung behind, the skid and settle**
+
+![Strip, a beam loosed: the kick back, the hand flung behind, the skid and settle](pin/v2/ult/strip_pin_ult_loose.png)
+
+**Strip, the last beam: a bigger kick off her feet, the hard landing crouch**
+
+![Strip, the last beam: a bigger kick off her feet, the hard landing crouch](pin/v2/ult/strip_pin_ult_final.png)
+
+## bjorn/v2/ult (bjorn/v2/ult)
+
+**Faultline wind-up: four 4 x 4.5 m cells to 16 m shown to everyone, the hammer overhead**
+
+![Faultline wind-up: four 4 x 4.5 m cells to 16 m shown to everyone, the hammer overhead](bjorn/v2/ult/ult_bjorn_telegraph.png)
+
+**Key frame: the slam, gold light flooding the near cell, the streak setting off**
+
+![Key frame: the slam, gold light flooding the near cell, the streak setting off](bjorn/v2/ult/ult_bjorn_slam.png)
+
+**Impact: slabs heaving up cell by cell, the target thrown**
+
+![Impact: slabs heaving up cell by cell, the target thrown](bjorn/v2/ult/ult_bjorn_impact.png)
+
+**After: the ember scar along the lane (10 s, slows foes on it)**
+
+![After: the ember scar along the lane (10 s, slows foes on it)](bjorn/v2/ult/ult_bjorn_scar.png)
+
+**Strip, Faultline wind-up: planted wide, the hammer hauled overhead (0.4 s)**
+
+![Strip, Faultline wind-up: planted wide, the hammer hauled overhead (0.4 s)](bjorn/v2/ult/strip_bul_ult_wind.png)
+
+**Strip, the slam: one frame down into the ground, the deep crouch, spikes heaving up, the slow rise**
+
+![Strip, the slam: one frame down into the ground, the deep crouch, spikes heaving up, the slow rise](bjorn/v2/ult/strip_bul_ult_slam.png)
