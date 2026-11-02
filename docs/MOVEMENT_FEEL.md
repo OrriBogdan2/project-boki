@@ -182,16 +182,16 @@ Other checks:
 
 ## Move pass: wall moves, ledges that answer, a springier abyss (`--wallmove-check`)
 
-- **Wall kick** (`WallMoves`, every hunter): in the air, pressing into a wall, jump adds `KICK_RISE` 0.9m (about a terrace, so a jump tops out at ~2.25m) to the jump you are on. Once per airtime; landing gives it back. Jump + kick + mantle (1.5m) tops 4 terraces (3.2m, the Cinder Steps plateau); 5 terraces (4.0m) stay sheer. The older kick, pressing away from the wall, is unchanged.
-- **Wall bounce** (`WallMoves`): a dash, glide or boosted jump that hits a wall more than 20 degrees off its normal and at least 4 m/s into it reflects about the normal, keeping 85% of the speed. Your keys steer the rebound for 0.25s at 25 m/s^2. Head-on it stops as before. Walls low enough to mantle, knockbacks and slow jumps don't bounce. Dust, spark and the landing thud sound mark it.
-- **Ledges:** the rise no longer waits for the apex of a jump. Any airborne state (rising, falling, gliding, just after releasing the glider, after a dash) catches a ledge top within `MANTLE_REACH` above you when you press into it, or when glide momentum carries you into it. A ledge higher than where you last stood counts after 0.5s in the air (`LEDGE_AIR_T`) or in a glide; before, launching from a higher place meant the ledge never caught you. Only a tile sharing an edge with yours counts, so sliding along a wall never pulls you up it.
+- **Wall kick** (`WallMoves`, every hunter): one kick per airtime, either way. Pressing into a wall, jump adds `KICK_RISE` 0.9m (about a terrace, so a jump tops out at ~2.25m) to the jump you are on. Pressing away from it still pushes you off at 7.5 m/s (the light class's second kick is gone). The glider stays shut until the kick's rise ends, so a held jump doesn't add height. Jump + kick + mantle (1.5m) tops 4 terraces (3.2m, the Cinder Steps plateau); 5 terraces (4.0m) stay sheer for a tap jump. A held jump already floats you higher before any kick (the glider's lighter gravity), so a held jump + kick + mantle clears a 5-terrace wall.
+- **Wall bounce** (`WallMoves`): an airborne dash, glide or boosted jump that hits a wall more than 20 degrees off its normal and at least 4 m/s into it reflects about the normal, keeping 85% of the speed. Your keys steer the rebound for 0.25s at 25 m/s^2. Head-on it stops as before. Ground dashes, shoves and charges, walls low enough to mantle, knockbacks and slow jumps don't bounce. Dust, a spark and the landing thud mark it.
+- **Ledges:** the rise no longer waits for the apex of a jump. Any airborne state (rising, falling, gliding, just after releasing the glider, after a dash) catches a ledge top within `MANTLE_REACH` above you when you press into it, or when glide momentum carries you into it. A ledge higher than where you last stood counts once you have been in the air 0.5s (`GlideLift.LEDGE_AIR_T`), are gliding, or let go of the glider within the last 0.6s (`FEATHER_KEEP`); before, launching from a higher place meant the ledge never caught you. Stunned or rooted players never grab a ledge. Only a tile sharing an edge with yours counts, so sliding along a wall never pulls you up it.
 - **Abyss (SUPERVIVE-like float):**
 
 | Constant | Before | After | Why |
 |---|---|---|---|
-| `ABYSS_OPEN_KICK` | none | 6 m/s | spring when the glider opens more than 2.5m under the lip |
+| `GlideLift.OPEN_KICK` | none | 6 m/s, once per lift, 8% of the heat, capped at `ABYSS_LIFT_CAP` | spring when the glider opens more than 2.5m under the lip |
 | `ABYSS_LIP_VY` | 1.5 m/s | 3.5 m/s | the lift reaches the lip still rising and floats over it |
-| `ABYSS_HANG_GRAV` / `ABYSS_HANG_T` | 1.0 / none | 0.35 / 0.9s | lower gravity at the top of a lift: a soft hang |
+| `GlideLift.HANG_GRAV` / `HANG_T` | 1.0 / none | 0.35 / 0.9s | lower gravity at the top of a lift: a soft hang |
 | `GLIDE_DECEL` | 2.0 | 1.4 | less drag, a long coast |
 | `GLIDE_OVERSPEED` | 1.5 | 1.1 | momentum carries longer |
 

@@ -1,18 +1,32 @@
 class_name WallMoves
 extends RefCounted
 ## A hunter's wall kick and wall bounce (one instance per hunter, hooked from Hunter).
-## Kick: in the air, pressing into a wall, a jump kicks you up it. It adds KICK_RISE of height to the
-## jump you were on, once per airtime, so a four-terrace wall is climbable with a mantle on top and
-## a five-terrace one stays sheer. Bounce: hitting a wall at an angle with speed (a dash, a glide, a
-## boosted jump) rebounds you off it; head-on you just stop, as ever, and a jump there kicks.
+## Kick: in the air against a wall, a jump kicks you off it, once per airtime. Pressing into the wall
+## adds KICK_RISE of height to the jump you are on (so a four-terrace wall is climbable with a mantle
+## on top and a five-terrace one stays sheer); pressing away pushes you off it. Bounce: hitting a
+## wall at an angle with speed in the air (a dash, a glide, a boosted jump) rebounds you off it;
+## head-on you just stop, as ever, and a jump there kicks.
 
 const KICK_RISE := 0.9          # m of extra jump height, about one terrace (World.LEVEL 0.8)
-const KICK_PRESS := 0.4         # keys this far into the wall (dot) count as pressing in, about 66 degrees
+const KICK_PRESS := 0.4         # keys this far into the wall (dot, ~66 degrees) climb it
+const KICK_AWAY := 0.4          # keys this far away from the wall (dot) push off it
+const KICK_KEYS_MIN := 0.3      # stick deflection that counts as pressing a direction
+const KICK_PUSH := 7.5          # m/s away from the wall for a push-off
+const KICK_SLIDE_KEEP := 0.6    # share of the speed along the wall a push-off keeps
+const KICK_PUSH_JUMP := 0.9     # share of JUMP_V a push-off jumps with
+const KICK_VOL := -4.0          # dB
+const KICK_PITCH := 1.4
+const BOUNCE_VOL := -6.0        # dB
+const BOUNCE_PITCH := 1.5
 const BOUNCE_KEEP := 0.85       # share of the speed that survives the rebound
 const BOUNCE_HEAD_ON_DEG := 20.0  # closer than this to the wall's normal it doesn't bounce
 const BOUNCE_MIN_INTO := 4.0    # m/s into the wall: a walking-speed jump brushing a wall doesn't ricochet
+const BOUNCE_KNOCK_QUIET := 0.6  # s after a knockback in which the wall slam rules apply instead of a bounce
 const BOUNCE_STEER := 25.0      # m/s^2 your keys steer the rebound for BOUNCE_WINDOW
 const BOUNCE_WINDOW := 0.25     # s to steer before ordinary air control returns
+const BOUNCE_DUST := 3          # dust puffs
+const FX_OFFSET := 0.3          # m the spark sits in front of the wall face
+const FX_HEIGHT := 0.8          # m above the feet
 
 var kicked := false             # this airtime's kick is used
 var bounce_t := 0.0
@@ -24,28 +38,37 @@ func land() -> void:
 	kicked = false
 	bounce_t = 0.0
 
-## A jump pressed in the air against a wall you are pushing into: kicks you up. True if it did.
+## A jump pressed in the air against a wall: kicks you up it or off it. True if it did.
 func try_kick(h: Hunter) -> bool:
 	if kicked or h.wall_touch_t <= 0.0 or h.dropping or h.remote or h.wall_n.length() < 0.1:
 		return false
 	var keys: Vector2 = h.inp.get("move", Vector2.ZERO)
-	if keys.length() < 0.3 or keys.normalized().dot(-h.wall_n) < KICK_PRESS:
+	if keys.length() < KICK_KEYS_MIN:
+		return false
+	var toward := keys.normalized().dot(h.wall_n)
+	if toward < -KICK_PRESS:
+		var rise := pow(maxf(h.vel.y, 0.0), 2.0) / (2.0 * Hunter.H_GRAV) + KICK_RISE
+		h.vel.y = sqrt(2.0 * Hunter.H_GRAV * rise)
+	elif toward > KICK_AWAY:
+		var push := h.wall_n * KICK_PUSH + Vector2(h.vel.x, h.vel.z).slide(h.wall_n) * KICK_SLIDE_KEEP
+		h.vel = Vector3(push.x, Hunter.JUMP_V * KICK_PUSH_JUMP, push.y)
+	else:
 		return false
 	kicked = true
 	h.wall_touch_t = 0.0
-	var rise := pow(maxf(h.vel.y, 0.0), 2.0) / (2.0 * Hunter.H_GRAV) + KICK_RISE
-	h.vel.y = sqrt(2.0 * Hunter.H_GRAV * rise)
-	h.gliding = false
-	h.air_t = 0.0
+	# no glider until the rise is done, so a held jump keeps the kick's height
+	h.glide_cd = maxf(h.glide_cd, h.vel.y / Hunter.H_GRAV)
 	h.stats["wall_kicks"] = int(h.stats.get("wall_kicks", 0)) + 1
-	h.m.sfx("jump", h.pos, -4.0, 1.4)
-	h.m.fx.burst(h.pos + Vector3(h.wall_n.x * -0.3, 0.8, h.wall_n.y * -0.3), Color("e6dccb"), 8, 2.5, 0.3)
+	h.m.sfx("jump", h.pos, KICK_VOL, KICK_PITCH)
+	h.m.fx.burst(_fx_at(h), Color("e6dccb"), 8, 2.5, 0.3)
 	return true
 
-## Called the step a wall stopped you in the air or in a dash, with the velocity you hit it at and the
-## wall's top. Reflects an angled hit about the wall's normal.
+## Called the step a wall stopped you in the air, with the velocity you hit it at and the wall's top.
+## Reflects an angled hit about the wall's normal.
 func hit(h: Hunter, hit_v: Vector2, wall_top: float) -> void:
-	if h.remote or h.dropping or h.mantling() or h.m.time - h.kb_t < 0.6 or wall_top - h.pos.y <= Hunter.MANTLE_REACH:
+	if h.grounded or h.remote or h.dropping or h.mantling() or h.m.time - h.kb_t < BOUNCE_KNOCK_QUIET:
+		return
+	if wall_top - h.pos.y <= Hunter.MANTLE_REACH or not h.shove.is_empty() or not h.charge.is_empty():
 		return
 	var into := -hit_v.dot(h.wall_n)
 	if into < BOUNCE_MIN_INTO or into > hit_v.length() * cos(deg_to_rad(BOUNCE_HEAD_ON_DEG)):
@@ -60,9 +83,9 @@ func hit(h: Hunter, hit_v: Vector2, wall_top: float) -> void:
 		bounce_t = BOUNCE_WINDOW
 		_rebound = out
 		_rebound_speed = out.length()
-	h.m.sfx("land", h.pos, -6.0, 1.5)
-	h.m.fx.burst(h.pos + Vector3(h.wall_n.x * -0.3, 0.8, h.wall_n.y * -0.3), Color("ffe9b0"), 8, 3.0, 0.25, 4.0, 0.8)
-	h.m.fx.dust(h.pos, 3)
+	h.m.sfx("land", h.pos, BOUNCE_VOL, BOUNCE_PITCH)
+	h.m.fx.burst(_fx_at(h), Color("ffe9b0"), 8, 3.0, 0.25, 4.0, 0.8)
+	h.m.fx.dust(h.pos, BOUNCE_DUST)
 
 ## While the rebound window lasts your keys steer it. Called every step after the ordinary air control.
 func carry(h: Hunter, keys: Vector2, dt: float) -> void:
@@ -75,3 +98,6 @@ func carry(h: Hunter, keys: Vector2, dt: float) -> void:
 	_rebound = (_rebound + keys * BOUNCE_STEER * dt).limit_length(_rebound_speed)
 	h.vel.x = _rebound.x
 	h.vel.z = _rebound.y
+
+func _fx_at(h: Hunter) -> Vector3:
+	return h.pos + Vector3(-h.wall_n.x * FX_OFFSET, FX_HEIGHT, -h.wall_n.y * FX_OFFSET)

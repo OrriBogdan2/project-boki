@@ -52,6 +52,7 @@ func run(main: Node) -> void:
 	_bounce(w4)
 	_ledges(_carve(2, 2)[0])
 	_lift()
+	_guards(_carve(2, 1)[0], w5[0])
 	print("WCHECK DONE, failures: ", bad)
 	main.get_tree().quit()
 
@@ -78,7 +79,12 @@ func _reset(at: Vector3, grounded: bool, v := Vector3.ZERO) -> void:
 	h.dropping = false
 	h.last_gy = at.y
 	h.air_t = 0.0 if grounded else 0.5
-	h.wm.land()
+	h.wall_moves.land()
+	h.wall_touch_t = 0.0
+	h.glide_lift.kicked = false
+	h.glide_lift.hang_t = 0.0
+	h.shot_down = false
+	h.root_t = 0.0
 	for k in ["glide", "jump", "dash", "fire"]:
 		h.inp[k] = false
 	h.inp["move"] = Vector2.ZERO
@@ -113,7 +119,7 @@ func _carve(ups: int, count: int) -> Array:
 				w.level[w.idx(x0 + dx, z0 + dz)] = lv + ups
 		var face := Vector2(x0 + 1.0, z0 + 0.5)
 		out.append({"at": face - Vector2(1, 0) * (h.r + 0.02), "n": Vector2(1, 0),
-			"low": lv * World.LEVEL, "top": (lv + ups) * World.LEVEL})
+			"low": lv * World.LEVEL, "top": (lv + ups) * World.LEVEL, "x0": x0, "z0": z0})
 	return out
 
 # ---------------------------------------------------------------- 1. wall kick
@@ -163,11 +169,12 @@ func _kick(w4: Dictionary, w5: Dictionary, w5b: Dictionary) -> void:
 
 # ---------------------------------------------------------------- 2. wall bounce
 ## Airborne at `speed` against the 4-terrace wall, `deg` off its normal. Returns the velocity after contact.
-func _hit(wl: Dictionary, deg: float, speed: float, dash := false) -> Vector2:
+func _hit(wl: Dictionary, deg: float, speed: float, dash := false, grounded_dash := false) -> Vector2:
 	var n: Vector2 = wl["n"]
 	var dir := (n * 1.0).rotated(deg_to_rad(deg))
 	var at: Vector2 = (wl["at"] as Vector2) - n * 0.4
-	_reset(Vector3(at.x, wl["low"] + 0.5, at.y), dash, Vector3(dir.x * speed, 0, dir.y * speed))
+	var y_off := 0.0 if grounded_dash else 0.5
+	_reset(Vector3(at.x, wl["low"] + y_off, at.y), grounded_dash, Vector3(dir.x * speed, 0, dir.y * speed))
 	if dash:
 		h.roll_t = 0.3
 		h.roll_dir = dir
@@ -190,6 +197,9 @@ func _bounce(wl: Dictionary) -> void:
 	var head := _hit(wl, 0.0, 10.0)
 	ok(head.dot(-n) < 2.0, "head-on it doesn't bounce (away %.1f m/s)" % head.dot(-n))
 	var dash := _hit(wl, 40.0, 20.0, true)
+	var flat := _hit(wl, 40.0, 20.0, true, true)
+	var flat_away := flat.dot(-n)
+	ok(flat_away < 0.0 and h.wall_touch_t <= 0.0, "a ground dash slides as before (away %.1f)" % flat_away)
 	var away := dash.dot(-n)
 	ok(away > 8.0 and dash.length() > 14.0, "a 40 degree dash reflects: %.1f m/s, away %.1f" % [dash.length(), away])
 	var slow := _hit(wl, 45.0, 5.0)
@@ -275,3 +285,98 @@ func _lift() -> void:
 	print("WCHECK lift: peak %.2fm over the lip, hang %.2fs" % [peak, hang * DT])
 	ok(peak >= LIFT_PEAK_MIN, "the lift floats %.2fm above the lip (want >= %.1fm)" % [peak, LIFT_PEAK_MIN])
 	ok(hang * DT >= LIFT_HANG_MIN, "and hangs %.2fs near the top (want >= %.2fs)" % [hang * DT, LIFT_HANG_MIN])
+
+# ---------------------------------------------------------------- 5. guards from review
+## One open-kick signature: a single step where vertical speed jumps by several m/s.
+func _spring_count(tap: bool) -> int:
+	var edge := _rim()
+	var g: Vector3 = edge["at"]
+	var d: Vector2 = edge["dir"]
+	_reset(Vector3(g.x + d.x * 5.0, g.y - 6.0, g.z + d.y * 5.0), false, Vector3(0, -8.0, 0))
+	h.last_gy = g.y
+	h.update_lip()
+	var springs := 0
+	var last_vy := h.vel.y
+	for i in 40:
+		h.inp["jump"] = true
+		h.inp["glide"] = (i % 4 < 2) if tap else true
+		m.step(DT)
+		if h.vel.y - last_vy > 4.0:
+			springs += 1
+		last_vy = h.vel.y
+	return springs
+
+func _guards(low_wall: Dictionary, high_wall: Dictionary) -> void:
+	var taps := _spring_count(true)
+	ok(taps <= 1, "tap-open, release, tap-open springs once, not each time (%d springs)" % taps)
+	ok(h.vel.y <= Hunter.ABYSS_LIFT_CAP + 0.01, "the spring never beats the lift cap (%.1f m/s)" % h.vel.y)
+	var edge := _rim()
+	var g: Vector3 = edge["at"]
+	var d: Vector2 = edge["dir"]
+	_reset(Vector3(g.x + d.x * 5.0, g.y - 6.0, g.z + d.y * 5.0), false, Vector3(0, -8.0, 0))
+	h.last_gy = g.y
+	h.update_lip()
+	h.shot_down = true
+	var top_vy := -99.0
+	for i in 10:
+		h.inp["jump"] = i % 2 == 0
+		h.inp["glide"] = true
+		m.step(DT)
+		top_vy = maxf(top_vy, h.vel.y)
+	ok(top_vy < 1.0 and not h.gliding, "a shot-down glider gets no spring and doesn't open (best %.1f m/s)" % top_vy)
+	_stunned(low_wall)
+	_one_kick(high_wall)
+	_blocked(low_wall)
+
+func _stunned(wl: Dictionary) -> void:
+	for mode in ["stun", "root"]:
+		var fall := func(_i: int, n: Vector2) -> void:
+			h.inp["move"] = n
+			if mode == "stun":
+				h.stun_t = 1.0
+			else:
+				h.root_t = 1.0
+		var r := _ledge_try(wl, 1.0, Vector3(0, -6.0, 0), fall)
+		ok(not r["mantled"], "a %s player falling against a 2-terrace ledge doesn't grab it" % mode)
+
+## Push-off and climb kicks share one use per airtime; a held glide doesn't add height to a kick.
+func _one_kick(wl: Dictionary) -> void:
+	var n: Vector2 = wl["n"]
+	var at: Vector2 = (wl["at"] as Vector2) - n * 0.05
+	_reset(Vector3(at.x, wl["low"] + 1.0, at.y), false, Vector3(0, 0.0, 0))
+	h.wall_touch_t = 0.2
+	h.wall_n = -n
+	h.inp["move"] = -n
+	h.inp["jump"] = true
+	m.step(DT)
+	var pushed := h.vel.dot(Vector3(-n.x, 0, -n.y))
+	h.wall_touch_t = 0.2
+	h.inp["move"] = n
+	var vy0 := h.vel.y
+	h.inp["jump"] = true
+	m.step(DT)
+	ok(pushed > 5.0 and h.vel.y <= vy0 + 0.01, "push-off and climb kicks share one use (push %.1f m/s)" % pushed)
+	_reset(Vector3(at.x, wl["low"] + 1.0, at.y), false, Vector3.ZERO)
+	h.wall_touch_t = 0.2
+	h.wall_n = -n
+	h.gliding = true
+	h.inp["move"] = n
+	h.inp["glide"] = true
+	h.inp["jump"] = true
+	m.step(DT)
+	h.inp["jump"] = false
+	var v1 := h.vel.y
+	m.step(DT)
+	m.step(DT)
+	var arc := h.vel.y < v1 - Hunter.H_GRAV * DT * 1.5
+	ok(not h.gliding and arc, "a kick folds the glider while you rise (vy %.1f to %.1f)" % [v1, h.vel.y])
+
+## Ledge tiles that are blocked (rocks, trees) are never mantled onto.
+func _blocked(wl: Dictionary) -> void:
+	for dz in range(-2, 3):
+		for dx in range(1, 4):
+			w.kind[w.idx(int(wl["x0"]) + dx, int(wl["z0"]) + dz)] = World.T_BLOCK
+	var fall := func(_i: int, n: Vector2) -> void:
+		h.inp["move"] = n
+	var r := _ledge_try(wl, 1.0, Vector3(0, -6.0, 0), fall)
+	ok(not r["mantled"], "a blocked ledge tile is never mantled onto")
