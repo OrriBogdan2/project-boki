@@ -182,12 +182,6 @@ const MOVES := {
 		[0.05, {"fl": Vector3(0.08, 0.15, -0.4), "hw": 1.0}],
 		[0.1, {"fl": Vector3(0.0, -0.05, -0.12), "hw": 1.0, "p": 0.1, "sq": 0.12}],
 		[0.34, {}]]},
-	# a teammate takes the wall's frost shield (passive proc): a little two-finger salute
-	"tm_ward": {"keys": [
-		[0.0, {}],
-		[0.1, {"fl": Vector3(0.05, 0.5, -0.05), "hw": 1.0, "r": 0.06}],
-		[0.24, {"fl": Vector3(-0.15, 0.45, -0.25), "hw": 1.0}],
-		[0.45, {}]]},
 }
 
 ## The length of a move (s), 0 for none.
