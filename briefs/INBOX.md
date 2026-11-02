@@ -113,3 +113,22 @@ From the main session. Relay this to every running agent (kitfix ult passes, ext
 
    `health.py --strict` now runs `tools/style_lint.py` as a ratchet: no file may get worse. After merging main, run `python3 tools/style_lint.py` and clean any file you made worse; `--update` is only for locking in improvements. **Reports must state lines added and removed, plus any new files, assets or settings with the reason for each.** Leave the kit files you touch cleaner than you found them.
 4. **Kit review:** an independent Opus review of all six kitfix pairs is running on the local machine. A fix list per hunter will come through INBOX within the hour; hold the kit merges until then. The ult passes can continue.
+
+## 2026-11-02 22:40 UTC: KIT REVIEW, round 1 (first 6 hunters). Polish pass needed before any merge
+Independent reviews are in **briefs/kit-review/REVIEW_<name>.md**. The mechanics and aim modes are largely right; the animations and effects mostly don't read at gameplay zoom. Verdicts:
+- **Bjorn: REWORK, the visuals only.**
+  - The held-LMB hammer spin needs a visible circle with a gold trail and a gold charge ring.
+  - The shield needs to be a solid pale-gold slab with its sigil.
+  - The slam needs a real 180° flaming crescent.
+  - His body must not fall flat during the slam or Smash.
+  - The planted hammer stands upright, with a vertical beam.
+- **Pin, Dancer, Zedran, Vireo, Venator: PASS WITH FIXES.** Each file has a ranked fix list (and a few after-shots that don't show what they claim).
+
+**Do:** run one Opus polish pass per pair (pin-bjorn, dancer-juggernaut, vireo-venator) on the same branch. If the ult pass on that branch is still running, run the polish right after it finishes; don't run both at once on one branch.
+- Fix every item in the review, top-down.
+- **Readability rule:** each key pose must be obvious at default gameplay zoom. Use exaggerated anticipation and follow-through, weapon arcs at least as large as the body, and trails, crescents and flashes in the hero's colour.
+- Retake every screenshot at both default gameplay zoom and a close-up, and make sure each after-shot shows what its name says.
+- Follow the style ratchet.
+- Report lines added and removed.
+
+The reviews for the other 3 pairs (linwick-dredge, moosh-tamsin, breah-ostra) follow shortly.
