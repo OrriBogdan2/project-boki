@@ -272,6 +272,8 @@ func smash_k() -> float:
 	var md := lmb_def()
 	return clampf((lmb_t - float(md["tap"])) / maxf(0.05, float(md["full"]) - float(md["tap"])), 0.0, 1.0)
 
+const CARRY_T := 0.2           # s the slam's forward carry lasts
+
 ## The Crushing Blow let go: the hammer sweeps round from behind into a 180 degree flaming crescent in
 ## front, and the slam carries him forward (owner note: a strong slam with forward momentum).
 func _smash() -> void:
@@ -292,9 +294,10 @@ func _smash() -> void:
 	h._strike(dmg / m.dmg_mult(h), float(md["smash_reach"]), float(md["smash_arc"]), kb, {"heavy": true, "charged": true, "stun": float(md["smash_stun"]) if full else 0.0})
 	var dv := h.aim_dir()
 	# the slam carries him forward (a jump out of it still glides)
-	var carry := lerpf(float(md.get("carry", [6.0, 13.0])[0]), float(md.get("carry", [6.0, 13.0])[1]), k)
+	var cr: Array = md.get("carry", [1.6, 3.4])
 	if h.grounded:
-		h.vel.x += dv.x * carry; h.vel.z += dv.y * carry
+		var carry := lerpf(float(cr[0]), float(cr[1]), k)          # m carried over CARRY_T
+		h.dash_with({"type": "dash", "speed": carry / CARRY_T, "time": CARRY_T, "invuln": 0.0, "dir": dv, "trail": "dust"})
 	var front := h.pos + Vector3(dv.x, 0, dv.y) * 1.6
 	fx.slam(h.pos, dv, k)
 	m.fx.dust(front, 8 + int(10 * k))

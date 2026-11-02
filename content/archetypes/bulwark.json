@@ -61,8 +61,8 @@
 		"smash_stun": 0.4,
 		"smash_rate": 0.7,
 		"carry": [
-			6.0,
-			13.0
+			1.6,
+			3.4
 		]
 	},
 	"dash": {

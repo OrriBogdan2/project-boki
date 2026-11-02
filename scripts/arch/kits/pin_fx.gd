@@ -159,9 +159,10 @@ func skin(s: Dictionary, kind: String) -> void:
 			return
 
 func note_hit(at: Vector3) -> void:
-	hits.append([at, Time.get_ticks_msec()])
+	hits.append([at, h.m.time])
 
-func _tick_shots() -> void:
+## Moves the skinned arrows and plants the spent ones (the kit calls it every step; _process too, for smooth frames).
+func tick_shots() -> void:
 	var a := Engine.get_physics_interpolation_fraction()
 	var seen := {}
 	for s in h.m.shots:
@@ -177,8 +178,8 @@ func _tick_shots() -> void:
 		if v.length() > 0.5:
 			n.rotation = Vector3(0, atan2(-v.x, -v.y), 0)
 		e["pos"] = s["pos"]; e["life"] = float(s["life"])
-	var now := Time.get_ticks_msec()
-	hits = hits.filter(func(hh): return now - int(hh[1]) < 200)
+	var now: float = h.m.time
+	hits = hits.filter(func(hh): return now - float(hh[1]) < 0.2)
 	for sid in live.keys():
 		if seen.has(sid):
 			continue
@@ -337,7 +338,7 @@ func _process(delta: float) -> void:
 			var f := clampf(float(c["t"]) / 1.0, 0.0, 1.0)
 			n2.scale = Vector3.ONE * f
 			if float(c["t"]) <= 0.0: n2.visible = false
-	_tick_shots()
+	tick_shots()
 	_tick_rain(delta)
 	_tick_streaks(delta)
 	if tint:

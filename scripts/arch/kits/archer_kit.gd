@@ -147,6 +147,7 @@ func _tick(dt: float) -> void:
 	draw.tick()
 	spirit.tick(dt)
 	_tag_shots()
+	fx.tick_shots()
 
 ## Hunter.trigger scales the bow's draw by this (the quick draw after a perfect release).
 func draw_rate() -> float:
@@ -357,6 +358,7 @@ func rmb_auto_t() -> float:
 ## (Hunter.spirit_t; ending inside something still puts her back where she entered).
 func _drop_holds() -> void:
 	rmb_down = false
+	h.draw_t = -1.0
 	_drop_tele()
 	draw.drop()
 	spirit.end("merge")

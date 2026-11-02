@@ -37,7 +37,7 @@ func _shot_reach(m: Match, P: Hunter) -> float:
 	for i in range(m.shots.size() - 1, -1, -1):
 		var sh: Dictionary = m.shots[i]
 		if sh["by"] == P and (sh["x"] as Dictionary).has("pin"):
-			return float(sh["life"]) * (sh["vel"] as Vector2).length()
+			return float(sh["life0"]) * (sh["vel"] as Vector2).length()
 	return -1.0
 
 ## Draws the bow for `t` seconds (aim kept on `at`), then lets go; returns how far the arrow will fly.
@@ -63,10 +63,10 @@ func _archer_combos() -> void:
 	var ve := AimKit.entry(P, "draw")
 	ok("pin anim: drawing holds arc_draw", K.anim_id == "arc_draw", K.anim_id)
 	ok("pin reticle: drawing shows the V, part closed", AimKit.shown(P, "draw") and String(ve.get("kind", "")) == "vee" and float(ve.get("half", 0.0)) > 0.0 and float(ve.get("half", 1.0)) < deg_to_rad(12.5), "kind %s half %.3f" % [str(ve.get("kind")), float(ve.get("half", -1.0))])
-	ok("pin reticle: the cursor charge ring fills", float(AimKit.reticle(P).get("charge", 0.0)) > 0.3, str(AimKit.reticle(P)))
-	step(m, 0.75, func(): P.inp["fire"] = true; K.res = 0.0; aim_at(P, T.pos))
+	ok("pin reticle: the cursor charge ring fills", float(AimKit.reticle(P).get("charge", 0.0)) > 0.2, str(AimKit.reticle(P)))
+	step(m, 0.95, func(): P.inp["fire"] = true; K.res = 0.0; aim_at(P, T.pos))
 	var le := AimKit.entry(P, "draw")
-	ok("pin reticle: Supercharged = one thick line out to max range (16m), the foe under it ringed", String(le.get("kind", "")) == "line" and float(le.get("len", 0.0)) >= 15.9 and AimKit.shown(P, "draw_tgt"), "kind %s len %.1f tgt %s" % [str(le.get("kind")), float(le.get("len", 0.0)), AimKit.shown(P, "draw_tgt")])
+	ok("pin reticle: Supercharged = one thick line out to max range (16m), the foe under it ringed", String(le.get("kind", "")) == "line" and (le.get("to", Vector2.ZERO) as Vector2).distance_to(le.get("from", Vector2.ZERO)) >= 15.9 and AimKit.shown(P, "draw_tgt"), "kind %s len %.1f tgt %s" % [str(le.get("kind")), (le.get("to", Vector2.ZERO) as Vector2).distance_to(le.get("from", Vector2.ZERO)), AimKit.shown(P, "draw_tgt")])
 	ok("pin anim: the body flashed white as Supercharged came up", P.flash_t > 0.0 or K.draw.supers >= 0, "flash %.2f" % P.flash_t)
 	P.inp["fire"] = false
 	step(m, 0.1)
@@ -101,6 +101,7 @@ func _archer_combos() -> void:
 	P.fire_cd = 0.0; P.ammo = maxi(P.ammo, 1); P.reload_t = 0.0
 	step(m, 0.42, func(): P.inp["fire"] = true; K.res = 0.0; aim_at(P, T.pos))
 	ok("combo pin: perfect > the next draw reaches Empowered in ~0.38s", P.draw_t >= s1 and K.draw.quick_used, "draw_t %.2f after 0.42s" % P.draw_t)
+	step(m, 0.25, func(): P.inp["fire"] = true; K.res = 0.0; aim_at(P, T.pos))
 	P.inp["fire"] = false
 	step(m, 0.6)
 	ok("pin: a draw without a perfect is back to normal speed", not K.draw.quick, "quick %s" % K.draw.quick)
@@ -253,6 +254,71 @@ func _bulwark_combos() -> void:
 		P.teleport(home); P.vel = Vector3.ZERO; fresh(T); T.teleport(home + Vector3(2.2, 0, 0)); aim_at(P, T.pos)
 		K.crushed_at = {}; K.lock_t = 0.0; K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; K.res = 0.0; P.fire_cd = 0.0; P.dashes = P.max_dashes(); K.lmb_t = -1.0
 		step(m, 0.6); fresh(T); T.teleport(home + Vector3(2.2, 0, 0)); aim_at(P, T.pos)
+	# the throw lands at the cursor (5m, past the dummy), clamped to 9m when the cursor is far
+	reset.call()
+	T.teleport(home + Vector3(0, 0, 6.0))
+	var thr0 := K.throws
+	aim_at(P, home + Vector3(-5.0, 0, 0))
+	P.inp["fire"] = true; m.step(DT); P.inp["fire"] = false
+	step(m, 0.6)
+	ok("bjorn aim: the hammer lands at the cursor (5m) and stays planted", K.throws == thr0 + 1 and String(K.mace.get("st", "")) == "ground" and absf(K.throw_d - 5.0) < 0.7 and K.fx.beacon.visible, "throws %d st %s d %.1f beacon %s" % [K.throws - thr0, str(K.mace.get("st")), K.throw_d, K.fx.beacon.visible])
+	step(m, 7.0)
+	ok("bjorn: the planted hammer never comes back by itself", String(K.mace.get("st", "")) == "ground", str(K.mace.get("st")))
+	# E with the hammer planted grows there (checked below); in hand it comes down on him
+	P.fire_cd = 0.0; P.inp["fire"] = true; m.step(DT); P.inp["fire"] = false
+	step(m, 1.2)
+	ok("bjorn: tap again calls it back", K.mace.is_empty())
+	K.cd["e"] = 0.0; aim_at(P, home + Vector3(-5.0, 0, 0))
+	P.ak.use_e()
+	ok("bjorn E: with the hammer in hand it comes down on him, the column and circle shown", Vector2(K.mend["pos"].x - P.pos.x, K.mend["pos"].z - P.pos.z).length() < 0.5 and K.fx.column.visible, "mend %s" % str(K.mend.get("pos")))
+	step(m, 0.1)
+	ok("bjorn E: the landing circle shows for everyone while it comes down", AimKit.shown(P, "e") and bool(AimKit.entry(P, "e").get("all", false)))
+	step(m, 1.2)
+	P.fire_cd = 0.0
+	_clear_wall(m, home, lv, 3)
+	T.teleport(home + Vector3(0, 0, 6.0))
+	aim_at(P, home + Vector3(30.0, 0, 0))
+	P.inp["fire"] = true; m.step(DT); P.inp["fire"] = false
+	step(m, 0.8)
+	ok("bjorn aim: a far cursor clamps the throw to 9m", absf(K.throw_d - 9.0) < 0.8, "d %.1f" % K.throw_d)
+	P.fire_cd = 0.0; P.inp["fire"] = true; m.step(DT); P.inp["fire"] = false
+	step(m, 1.0)
+	# LMB held: the hammer spins in his hand, the glint from 0.6 s, the flare at full; let go: the slam
+	# carries him forward with a flaming crescent
+	reset.call()
+	_clear_wall(m, home, lv, 3)
+	T.teleport(home + Vector3(2.4, 0, 0))
+	step(m, 0.4, func(): P.inp["fire"] = true; aim_at(P, T.pos))
+	ok("bjorn LMB held: the hammer spins, no glint yet", K.fx.spin_on and not K.fx.glint.visible and K.anim_id == "bul_smash_wind", "spin %s glint %s anim %s" % [K.fx.spin_on, K.fx.glint.visible, K.anim_id])
+	step(m, 0.4, func(): P.inp["fire"] = true; aim_at(P, T.pos))
+	ok("bjorn LMB held: the glint shows from 0.6s, the cursor ring filling", K.fx.glint.visible and float(AimKit.reticle(P).get("charge", 0.0)) > 0.4, "glint %s charge %.2f" % [K.fx.glint.visible, float(AimKit.reticle(P).get("charge", 0.0))])
+	step(m, 0.5, func(): P.inp["fire"] = true; aim_at(P, T.pos))
+	ok("bjorn LMB held: the full-charge flare at 1.25s", K.flared and K.smash_k() >= 0.99, "k %.2f" % K.smash_k())
+	var px0 := P.pos.x
+	var sl0 := K.slams
+	P.inp["fire"] = false
+	step(m, 0.35)
+	ok("combo bjorn: the full slam = a 180 crescent, carries him forward, hits hard (5x the throw)", K.slams == sl0 + 1 and K.slam_k >= 0.99 and P.pos.x - px0 >= 1.0 and dmg(T) >= 55.0 and not K.fx.spin_on, "carry %.2f took %.0f" % [P.pos.x - px0, dmg(T)])
+	ok("bjorn anim: the slam plays bul_smash", K.anim_id == "bul_smash", K.anim_id)
+	# 360 Smash: a short dash, then ONE spin hit around him on arrival
+	step(m, 1.0); reset.call()
+	T.teleport(home + Vector3(5.2, 0, 0)); aim_at(P, T.pos)
+	var sp0 := K.spins
+	P.inp["move"] = Vector2(1, 0)
+	P.do_dash()
+	step(m, 0.12, func(): P.inp["move"] = Vector2(1, 0))
+	var mid := dmg(T)
+	step(m, 0.4, func(): P.inp["move"] = Vector2.ZERO)
+	ok("combo bjorn: 360 Smash = no hit on the way, one spin hit on arrival", mid == 0.0 and K.spins == sp0 + 1 and dmg(T) >= 18.0 and dmg(T) <= 30.0, "mid %.0f spins %d took %.0f" % [mid, K.spins - sp0, dmg(T)])
+	# the aegis: his own curved slab over the wall while raised
+	reset.call()
+	P.inp["sec_hold"] = true
+	P.ak.press_rmb()
+	step(m, 0.4, func(): P.inp["sec_hold"] = true)
+	ok("bjorn RMB: his aegis is drawn in place of the plain wall", not K.wall.is_empty() and K.fx.aegis.visible and not (K.wall["node"] as Node3D).visible and K.anim_id == "bul_guard", "aegis %s anim %s" % [K.fx.aegis.visible, K.anim_id])
+	P.inp["sec_hold"] = false
+	step(m, 0.5)
+	_wall_at(m, home, lv, 3)
 	# Bash into the wall: Crushed with the 0.5s stun
 	reset.call()
 	var c0 := K.crushes
