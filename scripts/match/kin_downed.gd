@@ -9,7 +9,7 @@ extends RefCounted
 ##     the progress then drains back over rescue_drain_s instead of resetting. An enemy hunter standing on the Boki
 ##     (within contest_r) blocks the pick-up and pauses the progress ("Contested"). At the end it is back on the shoulder
 ##     with rescue_hp of its health. Nobody else can rescue it: it can't be hurt, scanned or taken
-##     while the owner is still in the map (a hunter who goes out leaves it behind as before, Match._leave_one_kin)
+##     while the owner is still in the map (a hunter who goes out leaves it guarding where it stands, KinLoss)
 ##   - otherwise it comes round on its own after 15-20s (trusting Boki sooner) at low health (recover_hp)
 ##   - a Boki that fell into the abyss can only come round on the timer
 ##   - while down: no C, no Merge, no carry passives (Kin.ready_to_fight, KinMerge.boki_with_you)

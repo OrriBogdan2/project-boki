@@ -2860,7 +2860,7 @@ func _draw_world_hover(sz: Vector2, p: Hunter) -> void:
 			for mid in Mutations.of(k.rec):
 				lines.append(["%s: %s (%s)" % [Mutations.name_of(mid), String(Mutations.info(mid).get("desc", "")), Mutations.perk_text(mid)], INK])
 			if k.lost_from != "":
-				lines.append(["Left behind by %s. Whoever takes it home keeps it." % ("you" if k.lost_from == "you" else k.lost_from), GOLD if k.lost_from == "you" else MUTED])
+				lines.append(["Guarding where %s fell. Scan it and whoever gets out with it keeps it; its owner can pick it up if revived." % ("you" if k.lost_from == "you" else k.lost_from), GOLD if k.lost_from == "you" else MUTED])
 		elif k.owner_h == p:
 			var a1: AbilitySpec = k.runner.def_of("k1")
 			lines.append(["Yours. %s throws it, %s uses %s." % [Settings.key_cap("throw"), Settings.key_cap("kin_ability" if p.ak else "signature"), a1.display_name if a1 else "its ability"], INK])

@@ -56,6 +56,10 @@ static func scan_frac(h: Hunter) -> float:
 static func block_reason(h: Hunter, k: Kin) -> String:
 	if k == null or k.dead or k.state != "dazed":
 		return "Knock it out first"
+	if not KinLoss.scannable_by(h, k):
+		return "That Boki is on your side"
+	if k.rescue_on or k.rescue_t > 0.0:
+		return "Its owner is picking it up"
 	if h.caught.size() >= box_cap():
 		return "Box full (%d/%d): release a capsule first" % [h.caught.size(), box_cap()]
 	return ""

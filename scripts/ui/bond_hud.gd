@@ -1,6 +1,6 @@
 class_name BondHud
 extends RefCounted
-## The bond pull on the HUD (docs/decisions/0008, KinBond), drawn through the in-match HUD `H`:
+## The bond pull on the HUD (docs/decisions/0008, KinTrack), drawn through the in-match HUD `H`:
 ##   - the squad of a captured Boki, once up: "<Boki> is this way" over the captor, or an arrow at the screen edge pointing at them
 ##   - the captor: a "Tracked" chip while they carry one
 ## Kept out of hud.gd (a god file): hud.gd makes one call.
@@ -14,14 +14,14 @@ static func draw(H) -> void:
 	if p == null:
 		return
 	var sz: Vector2 = H.c.size
-	if KinBond.tracked(p) and not p.out:
+	if KinTrack.tracked(p) and not p.out:
 		_tracked(H, sz)
-	if not KinBond.pulling(p):
+	if not KinTrack.pulling(p):
 		return
-	var th := KinBond.captor_for(m, p.team)
+	var th := KinTrack.captor_for(m, p.team)
 	if th == null:
 		return
-	var label := "%s is this way" % KinBond.name_for(th, p.team)
+	var label := "%s is this way" % KinTrack.name_for(th, p.team)
 	var cam: Camera3D = m.cam
 	var tp := cam.unproject_position(th.position + Vector3(0, 2.8, 0))
 	var behind := cam.is_position_behind(th.position)

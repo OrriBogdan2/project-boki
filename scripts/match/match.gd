@@ -2333,7 +2333,7 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 	cancel_abilities(h)
 	h.downed = true
 	h.downs += 1
-	KinBond.drop_carried(self, h, h.pos)
+	KinTrack.drop_carried(self, h, h.pos)
 	if by is Blight: kstat["bl_knock"] = int(kstat.get("bl_knock", 0)) + 1      # (tests: what the Blight did)
 	h.down_hp = Data.MATCH["down_hp"]
 	h.hp = 0.0
@@ -2489,6 +2489,7 @@ func eliminate(h: Hunter, by: Ent, why: String, final := false) -> void:
 	h.set_meta("died_why", why)
 	h.set_meta("died_at", time)
 	var waiting := false
+	if net_on: KinTrack.drop_carried(self, h, h.pos)       # (offline, Life.drop_box does it at the box)
 	if not net_on and not h.remote:
 		# everything they carried goes into a deathbox where they fell. While a teammate is still
 		# in the fight they can bring them back at it (or at a revive beacon)
@@ -2917,7 +2918,7 @@ func giant_free(k: Kin) -> bool:
 ## shoulder, or onto the bench if you already have one out.
 func give_kin(h: Hunter, rec: Dictionary) -> Kin:
 	var k := Kin.new()
-	k.init_kin(self, next_id(h.nid + "k"), rec["species"], rec, h)
+	k.init_kin(self, KinLoss.kin_id(self, h), rec["species"], rec, h)
 	add_child(k)
 	k.teleport(h.pos + Vector3(1.0, 0, 0.7))
 	kins.append(k)
@@ -2942,9 +2943,9 @@ func kin_stolen(thief: Hunter, rec: Dictionary) -> void:
 	if hud:
 		hud.toast("%s took %s! Chase them down: they're marked, and you're faster heading their way" % [thief.pname, rec.get("name", "your Boki")], Color("ffd23f"))
 
-## Who has one of your squad's Boki right now (an enemy still in the match), or null (KinBond).
+## Who has one of your squad's Boki right now (an enemy still in the match), or null (KinTrack).
 func kin_thief() -> Hunter:
-	return KinBond.captor_for(self, player.team) if player else null
+	return KinTrack.captor_for(self, player.team) if player else null
 
 func _tick_chase() -> void:
 	if player == null:
@@ -2952,8 +2953,8 @@ func _tick_chase() -> void:
 	var th := kin_thief()
 	player.chase = th
 	if th:
-		th.reveal_t = maxf(th.reveal_t, 0.5)     # the captor can't hide (their map spot pings every bond_ping_s: KinBond.tick)
-	KinBond.tick(self, Match.DT)
+		th.reveal_t = maxf(th.reveal_t, 0.5)     # the captor can't hide (their map spot pings every bond_ping_s: KinTrack.tick)
+	KinTrack.tick(self, Match.DT)
 
 ## Where each of your lost kin ends up when the match is over (KinLoss.resolve).
 func _resolve_lost() -> Array:
@@ -4885,7 +4886,7 @@ func _catch(h: Hunter, k: Kin) -> void:
 			net_event(["catch", k.nid, h.nid])
 		return
 	if net_on:
-		net_event(["caught", k.nid, h.nid, k.rec])
+		net_event(["caught", k.nid, h.nid, k.rec, (k.lost_owner as Hunter).nid if k.lost_owner is Hunter else ""])
 	k.dead = true
 	k.visible = false
 	var rec: Dictionary = k.rec.duplicate(true)
@@ -4906,7 +4907,7 @@ func _catch(h: Hunter, k: Kin) -> void:
 		rec["trust"] = 20.0
 		rec["memory"] = []
 	h.caught.append(rec)
-	KinBond.on_caught(self, h, k, rec)
+	KinTrack.on_caught(self, h, k, rec)
 	if h == player:
 		add_feed("%s is in your box (%d/%d). Extract to bring it home." % [Data.KIN[k.species]["name"], h.caught.size(), Capture.box_cap()])
 		if player.kin and player.kin.state != "downed":
@@ -6451,7 +6452,7 @@ func _net_ev(x, from: String) -> void:
 			if is_host:
 				var k: Kin = ents_by_id.get(String(x[1]), null)
 				var h: Hunter = ents_by_id.get(String(x[2]), null)
-				if k and h and not k.dead and k.state == "dazed":
+				if k and h and not k.dead and KinLoss.scannable_by(h, k) and not (k.rescue_on or k.rescue_t > 0.0):     # (not while its owner is cradling it)
 					_catch(h, k)
 		"caught":
 			var k: Kin = ents_by_id.get(String(x[1]), null)
@@ -6463,6 +6464,12 @@ func _net_ev(x, from: String) -> void:
 				player.caught.append(rec)
 				sfx("scan_pop", player.pos, 0.0)
 				add_feed("%s is in your box (%d/%d). Extract to bring it home." % [Data.KIN.get(String(rec.get("species", "cindle")), Data.KIN["cindle"])["name"], mini(player.caught.size(), Capture.box_cap()), Capture.box_cap()])
+			var cap = ents_by_id.get(String(x[2]), null)
+			var own = ents_by_id.get(String(x[4]), null) if x.size() > 4 else null
+			if cap is Hunter and own is Hunter and typeof(x[3]) == TYPE_DICTIONARY:
+				KinTrack.on_caught_net(self, cap, x[3], own)      # the captor and the owner learn of the bond
+		"gdrop":
+			KinLoss.on_gdrop(self, String(x[1]), x[5], Vector3(x[2], x[3], x[4]))      # a captor fell: its Boki stands up again (owner's game)
 
 func _process_net_revives() -> void:
 	if _rev_out.is_empty():

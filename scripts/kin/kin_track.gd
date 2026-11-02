@@ -1,4 +1,4 @@
-class_name KinBond
+class_name KinTrack
 extends RefCounted
 ## The bond pull (docs/decisions/0008). While an enemy hunter carries your captured Boki in their box:
 ##   - you and your squad, once up (alive, not downed), see an edge-of-screen arrow "<Boki> is this way" at the captor (BondHud)
@@ -13,17 +13,35 @@ const META := "bond"
 static func entries(h: Hunter) -> Array:
 	return h.get_meta(META, [])
 
+## Drops the entry on this game only.
+static func forget(h: Hunter, uid: String) -> void:
+	_remove(h, uid, false)
+
 static func tracked(h: Hunter) -> bool:
 	return not entries(h).is_empty()
 
-## A scan just put one of someone's Boki in this hunter's box.
+## A scan just put one of someone's Boki in this hunter's box (the host or an offline game; the other games get
+## the same through the "caught" event: on_caught_net).
 static func on_caught(m, h: Hunter, k: Kin, rec: Dictionary) -> void:
 	var o = k.lost_owner
-	if not (o is Hunter) or (o as Hunter).team == h.team:
+	if o is Hunter:
+		register(h, rec, o)
+
+static func register(h: Hunter, rec: Dictionary, o: Hunter) -> void:
+	if o.team == h.team:
 		return
-	_add(h, {"uid": String(rec.get("uid", "")), "name": String(rec.get("name", "Boki")), "owner": (o as Hunter).nid, "team": (o as Hunter).team})
+	_add(h, {"uid": String(rec.get("uid", "")), "name": String(rec.get("name", "Boki")), "owner": o.nid, "team": o.team})
 	h.set_meta("bond_t", 0.0)             # (the first ping goes out at once)
-	KinNet.event(m, "bond", h, h.pos, "%s|%d|%s|%s" % [(o as Hunter).nid, (o as Hunter).team, rec.get("uid", ""), rec.get("name", "Boki")])
+
+## The "caught" event, in every game but the one that ran the scan: the captor's game and the owner's game learn of it.
+static func on_caught_net(m, captor: Hunter, rec: Dictionary, o: Hunter) -> void:
+	register(captor, rec, o)
+	if o.team != captor.team:
+		for L in m.player_lost:
+			if String(L["uid"]) == String(rec.get("uid", "")):
+				L["holder"] = captor
+		if o == m.player:
+			m.kin_stolen(captor, rec)
 
 static func _add(h: Hunter, e: Dictionary) -> void:
 	var es := entries(h).duplicate()
@@ -31,20 +49,20 @@ static func _add(h: Hunter, e: Dictionary) -> void:
 	es.append(e)
 	h.set_meta(META, es)
 
-static func _remove(h: Hunter, uid: String) -> void:
+## No longer carried. The game that owns the captor tells the others (they have no way to see a released capsule).
+static func _remove(h: Hunter, uid: String, send := true) -> void:
 	var es := entries(h).filter(func(x): return x["uid"] != uid)
 	if es.is_empty():
 		h.remove_meta(META)
 	else:
 		h.set_meta(META, es)
+	if send:
+		KinNet.event(h.m, "unbond", h, h.pos, uid)
 
 ## An event from another game (KinNet.on_event).
 static func on_net(h: Hunter, kind: String, extra: String) -> void:
-	var p := extra.split("|")
-	if kind == "bond" and p.size() >= 4:
-		_add(h, {"uid": p[2], "name": p[3], "owner": p[0], "team": int(p[1])})
-	elif kind == "unbond":
-		_remove(h, p[0])
+	if kind == "unbond":
+		_remove(h, extra.split("|")[0], false)
 
 ## The hunter carrying one of this team's Boki (the nearest first), or null.
 static func captor_for(m, team: int) -> Hunter:
@@ -78,7 +96,7 @@ static func tick(m, dt: float) -> void:
 			c.remove_meta(META)
 			continue
 		for e in es.duplicate():
-			if not c.caught.any(func(r): return String(r.get("uid", "")) == String(e["uid"])) and not c.remote:
+			if not c.remote and not c.caught.any(func(r): return String(r.get("uid", "")) == String(e["uid"])):
 				_remove(c, String(e["uid"]))          # let go, or lost another way
 		if c.out or c.downed or entries(c).is_empty():
 			continue
@@ -94,31 +112,29 @@ static func tick(m, dt: float) -> void:
 					m.sfx("ping", null, -10.0)
 		c.set_meta("bond_t", t)
 
-## The captor is knocked or killed: what they carried drops dazed at `at`, guarding for its owner.
+## The captor is knocked or killed (in the game that owns them): what they carried drops dazed at `at`, guarding for its
+## owner. Every game hears it through the "gdrop" event; the owner's game puts the Boki back in the world (KinLoss.on_gdrop).
 static func drop_carried(m, h: Hunter, at: Vector3) -> void:
 	if h.remote or at == Vector3.INF or m.opts.get("training", false):
 		return
 	for e in entries(h).duplicate():
+		var uid := String(e["uid"])
 		var idx := -1
 		for i in h.caught.size():
-			if String(h.caught[i].get("uid", "")) == String(e["uid"]):
+			if String(h.caught[i].get("uid", "")) == uid:
 				idx = i
 		var owner = m.ents_by_id.get(String(e["owner"]), null)
-		if idx < 0 or not (owner is Hunter) or (owner as Hunter).extracted:
+		var spot := at + Vector3(0.9, 0, 0.5)
+		if idx < 0 or not (owner is Hunter) or (owner as Hunter).extracted or KinLoss.ground(m, spot) == Vector3.INF:
+			_remove(h, uid)               # (it stays in their box)
 			continue
 		var rec: Dictionary = (h.caught[idx] as Dictionary).duplicate(true)
 		if rec.has("prev_trust"):
 			rec["trust"] = float(rec["prev_trust"])
 		rec.erase("prev_trust")
 		rec.erase("lost_from")
-		var g := KinLoss.spawn_guard(m, owner, rec, at + Vector3(0.9, 0, 0.5))
-		if g == null:
-			continue
-		h.caught.remove_at(idx)
-		for L in m.player_lost:
-			if String(L["uid"]) == String(e["uid"]):
-				L["kin"] = g
-				L["holder"] = null
-		KinNet.event(m, "unbond", h, h.pos, String(e["uid"]))
+		if m.net_on:
+			m.net_event(["gdrop", String(e["owner"]), spot.x, spot.y, spot.z, rec])
+		KinLoss.on_gdrop(m, String(e["owner"]), rec, spot)
 		m.add_feed("%s dropped %s" % [h.pname, e["name"]])
 	h.remove_meta(META)
