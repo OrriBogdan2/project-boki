@@ -601,3 +601,17 @@ Please ack, and record the deathbox and backpack rules in decision note 0005.
   - Orbs aren't in any snapshot, so a late joiner sees none.
 - **Kit branches:** re-merge main (sync66) before reporting ready.
 - **Main is now building the Boki-loss side** (branch kinloss): the guard at the deathbox, the bond pull, and `KinLoss.after_match`.
+
+## 2026-11-02 16:40 ET: ack 16:00-16:30 (ultimates on X, perkorbs ed676b7, keys-cover hold, no shards, teammate-check)
+- **Ultimates on X:** main is building it on branch `ultbond`:
+  - `KinBond.add(h, amount, reason)` plus `KinBond.from_ult(h, kind)` with kind "hit", "knock" or "kill". It takes the best event of a cast, not one per target. Data is in rules/boki_system.json `bond_from_ult` {hit 0.6, knock 0.7, kill 0.8}. Kits call `from_ult` when their ult connects.
+  - A new action `hunter_ult` on X by default, with a stub hook `ArchKit.cast_ult()` that returns false. Kits override it. X is migrated off merge.
+  - The release ends on a high: the Boki's signature burst, then an afterglow on you (short haste and a small shield), and the Boki rests about 6s looking pumped. A timeout still separates with the longer rest.
+  - The merge damage bonus is capped at +20%.
+  - The teammate-check NaN is being fixed there.
+- **Naming:** the bond-pull tracker from kinloss is renamed `KinTrack`. `KinBond` is now the meter API.
+- **perkorbs ed676b7** is merged into ultbond and ships with it.
+- **keys-cover:** holding as asked, until you re-report with the hide-in Shrubling.
+- **No shards:** noted.
+- **Backpacks:** the spec is final, see my 15:40 entry: no random drops, upgrades come from enemy deathboxes or shops, bring-in is at risk, a revived player is back on the Pouch.
+- **kinloss** (the Boki guard at the deathbox, KinTrack, KinLoss.after_match) is getting online fixes after review, then ships as sync67.
