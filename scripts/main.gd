@@ -2840,7 +2840,7 @@ func _boss_check() -> void:
 		spot.call(P, L["c"] + Vector3(L["out"].x, 0, L["out"].y) * 3.0)     # (a shove may have sent you out of the lair)
 		P.lvl = 1; P.xp = 0.0
 		var xp0 := P.xp
-		b.hp = 1.0
+		b.hp = 1.0; b.pos = Vector3(L["c"].x - L["out"].x * 1.5, b.pos.y, L["c"].z - L["out"].y * 1.5)      # (it dies a few steps from you, so the loot never lands under your feet and gets walked into)
 		if b.buried: b._clear_attack()
 		b.hurt(5.0, P, {"src": "shot"})
 		run.call(0.2)
