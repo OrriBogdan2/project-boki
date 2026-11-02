@@ -1,14 +1,13 @@
 # Tamsin, the Rimewright (`rimewright`, light skirmisher with a shelter)
 
-Internal design doc. Source behaviour reference: SUPERVIVE's Celeste (gameplay only).
+Internal design doc. Source behaviour reference: the hero named in the Inspired-by table in docs/ARCHETYPES.md (gameplay only).
 
 ## Research summary
 Sources:
-- https://supervive.wiki.gg/wiki/Celeste (abilities and upgrade tables; the only source used)
-- a patch-note search returned only other games' Celeste patches, nothing SUPERVIVE-specific.
+- The reference hero's public kit page and guides (see the Inspired-by table in docs/ARCHETYPES.md)
 
 Version chosen: the wiki's current kit as it stood when the branch was built (late Oct 2026).
-Important finding: in the source Celeste is an ice damage and control hero, not a healer, although the task brief calls both heroes healers. We kept the source behaviour and gave her the squad-facing part through the Rink Wall (a frost shield for teammates who touch it, once per wall). Flagged as an open question.
+Important finding: in the source the hero is an ice damage and control hero, not a healer, although the task brief calls both heroes healers. We kept the source behaviour and gave her the squad-facing part through the Rink Wall (a frost shield for teammates who touch it, once per wall). Flagged as an open question.
 Where the wiki has no E (Q is the wall): we map the wall to E (Q is the glove slot).
 
 ## Our kit

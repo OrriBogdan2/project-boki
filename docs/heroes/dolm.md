@@ -1,12 +1,12 @@
 # Dolm (archetype id `dolm`, Medium)
 
-Internal note: the behaviour reference is the SUPERVIVE hero Tetra. Nothing below is player-facing; every name, number and
+Internal note: the behaviour reference is the hero named in the Inspired-by table in docs/ARCHETYPES.md. Nothing below is player-facing; every name, number and
 word in the shipped game is our own (renames done in the finish pass: Stonesight -> Tremor Sense, Landslide -> Rubble Rush,
 Rockwave -> Stone Row, which had matched the source names).
 
 ## Research summary
-- Sources read: https://supervive.wiki.gg/wiki/Tetra (ability text, level table; the Patch History section is empty),
-  plus the shared kit conventions in docs/ARCHETYPES.md and docs/DASHES_AND_ABILITY_FEEL.md (Tetra rows: dash and kit cohesion).
+- Sources read: the reference hero's public kit page (ability text, level table; its patch history is empty),
+  plus the shared kit conventions in docs/ARCHETYPES.md and docs/DASHES_AND_ABILITY_FEEL.md (the reference hero's rows: dash and kit cohesion).
   The wiki gives no ranges, stun times or damage numbers for this hero, so ours are derived from our own time-to-kill.
 - Where sources disagree: none. The only mismatch is internal: the page lists the wall under Q and has no E; our kit
   uses E for the wall (ours has no gear-Q conflict because gloves own Q, but the E slot is the kit slot for a tool).

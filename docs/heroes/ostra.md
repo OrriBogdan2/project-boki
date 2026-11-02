@@ -1,11 +1,11 @@
 # Ostra (archetype id `ostra`, Medium)
 
-Internal note: the behaviour reference is the SUPERVIVE hero Void. Nothing below is player-facing; every name, number and
+Internal note: the behaviour reference is the hero named in the Inspired-by table in docs/ARCHETYPES.md. Nothing below is player-facing; every name, number and
 word in the shipped game is our own (finish-pass renames: Swap -> Lantern Trade, Rift Snap -> Shard Fan, which had matched
 or echoed the source; "gravity orb" became "drifting orb").
 
 ## Research summary
-- Sources read: https://supervive.wiki.gg/wiki/Void (abilities, level table, patch history), plus the Void rows in
+- Sources read: the reference hero's public kit page (abilities, level table, patch history), plus its rows in
   docs/DASHES_AND_ABILITY_FEEL.md (dash: aimed lob, 1.7s travel, 1.25s empowered, swaps places).
 - Patch history used: 05.02.25 the orb charge became binary (charged or not, not time-scaled); 18.12.24 unempowered shots
   stopped piercing terrain and gained 35% range, Swap cooldown cut (12/9/9 -> 10/7/7), bomb damage +10%; 22.01.25 Swap level-4

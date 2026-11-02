@@ -1,13 +1,10 @@
 # Linnet, the Tender (`tender`, medium support)
 
-Internal design doc. Source behaviour reference: SUPERVIVE's Elluna (gameplay only; nothing of her names, look or text is used in the game).
+Internal design doc. Source behaviour reference: the hero named in the Inspired-by table in docs/ARCHETYPES.md (gameplay only; nothing of its names, look or text is used in the game).
 
 ## Research summary
 Sources:
-- https://supervive.wiki.gg/wiki/Elluna (ability and upgrade tables; the main source)
-- Deltia's Gaming, "Supervive: Elluna Abilities Guide" (deltiasgaming.com) for skill order and feel
-- a Dot Esports (dotesports.com) note on skill priority (Q first)
-- a patch-note search found no Elluna-specific changes newer than the wiki page.
+- The reference hero's public kit page and guides (see the Inspired-by table in docs/ARCHETYPES.md)
 
 Version chosen: the wiki's current kit as it stood when the branch was built (late Oct 2026). No patch history was needed.
 Disagreements: none material. The wiki lists no E (her heal is on Q, her ult is R); we map Q to our E because Q is the glove slot here. The guides stress Q first, matching our `order`.

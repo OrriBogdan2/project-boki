@@ -1,10 +1,10 @@
 # Archer (id `archer`, Light) - accuracy pass
 
-Behaviour reference: the SUPERVIVE hero Myth (internal note; nothing of the source's names or look ships). Player-facing names are our own.
+Behaviour reference: the hero named in the Inspired-by table in docs/ARCHETYPES.md (internal note; nothing of the source's names or look ships). Player-facing names are our own.
 
 ## Research summary
 Sources (gameplay only; notes in our own words, nothing of the source ships):
-- https://supervive.wiki.gg/wiki/Myth (hero page: passive, every slot, rank rows; re-read for this finish pass)
+- The reference hero's public kit page and guides (see the Inspired-by table in docs/ARCHETYPES.md)
 - The page's inline patch history (bow damage 18.12.24, charge hold 20.11.24, rank text changes)
 - Combination inferences from the ability text (wall stun then a follow-up hit, knocks refunding mobility)
 
