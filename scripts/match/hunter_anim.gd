@@ -1034,7 +1034,7 @@ func update(dt: float, s: Dictionary) -> void:
 ## turns about the hips: forward flip, side flip, spin), sq (squash; negative stretches), legs
 ## [hl kl hr kr] with lw (their weight), fl / fr (a free hand's place from its shoulder) with hw / rw,
 ## blade (the greatsword's yaw, pitch, roll, like SWINGS) with bw, rad (the blade's reach), gp (a
-## gun's extra pitch). A move with "hold": true stays on its last key until another replaces it.
+## gun's extra pitch), wa / wo (a held weapon's extra pitch, yaw, roll and offset). A move with "hold": true stays on its last key until another replaces it.
 const KMOVES := {
 	# ---------------------------------------------------------------- Juggernaut
 	# the Searing Wave let go: the raised blade carves down and forward, a long low lunge after it
@@ -1216,41 +1216,6 @@ const KMOVES := {
 		[0.10, {"p": 0.40, "legs": [0.65, -1.26, 0.53, -1.10], "lw": 1.0, "fl": Vector3(-0.30, 0.05, -0.08), "hw": 0.80, "fr": Vector3(0.30, 0.05, -0.08), "rw": 0.50}],
 		[0.55, {"p": 0.30, "legs": [0.53, -1.02, 0.42, -0.90], "lw": 1.0, "fl": Vector3(-0.30, 0.05, -0.08), "hw": 0.80, "fr": Vector3(0.30, 0.05, -0.08), "rw": 0.50}],
 		[0.90, {}]]},
-	# ---------------------------------------------------------------- Linnet (tender) and Tamsin (rimewright)
-	# Burrseed: wound back with the seed cupped by the ear, then a flick forward
-	"tend_seed": {"keys": [
-		[0.0, {}],
-		[0.09, {"p": 0.14, "y": -0.3, "r": -0.06, "fl": Vector3(-0.1, 0.3, 0.15), "hw": 1.0}],
-		[0.12, {"p": 0.1, "y": -0.2, "r": -0.04, "fl": Vector3(-0.1, 0.3, 0.15), "hw": 1.0}],
-		[0.17, {"p": -0.38, "y": 0.35, "r": 0.05, "fl": Vector3(0.08, 0.12, -0.52), "hw": 1.0}],
-		[0.2, {"p": -0.38, "y": 0.35, "r": 0.05, "fl": Vector3(0.08, 0.12, -0.52), "hw": 1.0}],
-		[0.4, {"p": -0.15, "y": 0.15, "fl": Vector3(0.08, 0.12, -0.52), "hw": 0.6}],
-		[0.6, {}]]},
-	# Hearthlight: a crouch to gather the light, then up with the lantern hand lifted high
-	"tend_hearth": {"keys": [
-		[0.0, {}],
-		[0.1, {"p": -0.2, "fl": Vector3(0.05, 0.0, -0.15), "hw": 1.0}],
-		[0.14, {"p": -0.2, "fl": Vector3(0.05, 0.0, -0.15), "hw": 1.0}],
-		[0.24, {"p": 0.22, "y": 0.05, "fl": Vector3(0.02, 0.58, -0.1), "hw": 1.0}],
-		[0.34, {"p": 0.22, "y": 0.05, "fl": Vector3(0.02, 0.58, -0.1), "hw": 1.0}],
-		[0.6, {}]]},
-	# Rime Javelin: shoulders wound back, then whipped through into the throw
-	"rime_javelin": {"keys": [
-		[0.0, {}],
-		[0.1, {"p": 0.08, "y": -0.55, "r": -0.1, "fl": Vector3(0.12, 0.15, 0.35), "hw": 1.0}],
-		[0.12, {"p": 0.08, "y": -0.55, "r": -0.1, "fl": Vector3(0.12, 0.15, 0.35), "hw": 1.0}],
-		[0.19, {"p": -0.3, "y": 0.65, "r": 0.1, "fl": Vector3(0.06, 0.1, -0.55), "hw": 1.0}],
-		[0.22, {"p": -0.3, "y": 0.65, "r": 0.1, "fl": Vector3(0.06, 0.1, -0.55), "hw": 1.0}],
-		[0.5, {"p": -0.05, "y": 0.1, "fl": Vector3(0.06, 0.1, -0.55), "hw": 0.5}],
-		[0.6, {}]]},
-	# Ice slam: hands together low, then both pushed out and down onto the ice
-	"rime_slam": {"keys": [
-		[0.0, {}],
-		[0.12, {"p": -0.15, "fl": Vector3(0.0, -0.1, -0.2), "hw": 1.0}],
-		[0.15, {"p": -0.15, "fl": Vector3(0.0, -0.1, -0.2), "hw": 1.0}],
-		[0.22, {"p": -0.42, "fl": Vector3(0.02, -0.12, -0.55), "hw": 1.0}],
-		[0.3, {"p": -0.42, "fl": Vector3(0.02, -0.12, -0.55), "hw": 1.0}],
-		[0.6, {}]]},
 	# ---------------------------------------------------------------- Dolm and Ostra
 	# Boulder: both hands gathered at the chest, then thrown from the hip with the whole back
 	"dolm_lmb": {"keys": [
@@ -1425,7 +1390,7 @@ var km_prev_t := 99.0
 
 ## Samples the kit move at time `tt`: each channel eased between the keys around it.
 static func km_sample(id: String, tt: float) -> Dictionary:
-	var mv: Dictionary = KMOVES.get(id, KMovesPair.MOVES.get(id, MergeMoves.MOVES.get(id, {})))
+	var mv: Dictionary = KMOVES.get(id, KMovesPair.MOVES.get(id, MergeMoves.MOVES.get(id, KMovesCare.MOVES.get(id, {}))))
 	if mv.is_empty():
 		return {}
 	var keys: Array = mv["keys"]
@@ -1453,7 +1418,7 @@ static func km_sample(id: String, tt: float) -> Dictionary:
 		if la.is_empty(): la = lb
 		if lb.is_empty(): lb = la
 		out[c] = [lerpf(la[0], lb[0], u), lerpf(la[1], lb[1], u), lerpf(la[2], lb[2], u), lerpf(la[3], lb[3], u)]
-	for c in ["fl", "fr", "blade"]:
+	for c in ["fl", "fr", "blade", "wa", "wo"]:
 		var has_a := pa.has(c); var has_b := pb.has(c)
 		if not has_a and not has_b: continue
 		var va2: Vector3 = pa.get(c, pb.get(c)); var vb2: Vector3 = pb.get(c, pa.get(c))
@@ -1698,6 +1663,10 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 		gpos = gpos.lerp(Vector3(0.12, 0.42, -0.02), fk)
 		ay = lerpf(ay, 1.57, fk)
 	if not melee:
+		if km.has("wa"):          # a kit move's weapon pivot: extra pitch, yaw, roll about the grip (KMovesCare)
+			var wa: Vector3 = km["wa"]
+			ap += wa.x; ay += wa.y; ar += wa.z
+		if km.has("wo"): gpos += km["wo"] as Vector3
 		gbas = Basis.from_euler(Vector3(ap, ay, ar))
 		ap = lp; ay = ly; ar = 0.0
 	# emotes: the weapon goes away, the hands do the talking

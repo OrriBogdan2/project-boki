@@ -2,7 +2,7 @@
 
     python3 tools/gen_care_sfx.py      (then: godot --headless --import)
 
-tend_* : Linnet's warm, wooden and lantern-bright sounds. rime_* : Tamsin's glassy, gliding, cracking ones.
+tend_* : Moosh Moosh's warm, wooden and lantern-bright sounds. rime_* : Tamsin's glassy, gliding, cracking ones.
 """
 import math, os, random, struct, wave
 
@@ -50,22 +50,68 @@ def save(name, x, db=-19.0, tail=0.03):
         w.setnchannels(1); w.setsampwidth(2); w.setframerate(SR)
         w.writeframes(b''.join(struct.pack('<h', int(max(-1, min(1, v)) * 32767)) for v in x))
 
-# ---- Linnet: wood, wick and lantern glass
-save('tend_ember', mix(scale(mul(tone(900, 420, 0.12), env(N(0.12), 0.003, 0.04)), 0.6), scale(mul(bp(noise(0.12), 1500, 5000), env(N(0.12), 0.002, 0.02)), 0.5)), -23)
-save('tend_seed', mix(mul(tone(300, 520, 0.16), env(N(0.16), 0.004, 0.06)), scale(mul(bp(noise(0.2), 400, 1600), env(N(0.2), 0.01, 0.07)), 0.5)), -21)
-save('tend_stick', mix(mul(bp(noise(0.12), 700, 3000), env(N(0.12), 0.002, 0.03)), scale(mul(tone(220, 150, 0.1), env(N(0.1), 0.002, 0.03)), 0.6)), -21)
-save('tend_root', mix(scale(mul(lp(noise(0.5), 900), env(N(0.5), 0.03, 0.18)), 0.9), scale(mul(tone(110, 62, 0.4), env(N(0.4), 0.01, 0.14)), 0.7), at(scale(mul(bp(noise(0.2), 1200, 4000), env(N(0.2), 0.004, 0.05)), 0.5), 0.05)), -18)
-save('tend_hearth', mix(bell(587, 0.7, 0.28), scale(at(bell(784, 0.6, 0.24), 0.08), 0.7), scale(at(bell(988, 0.5, 0.2), 0.16), 0.5)), -21)
-save('tend_toss', mix(scale(mul(bp(noise(0.3), 500, 2600), env(N(0.3), 0.06, 0.1)), 0.5), mul(tone(500, 1000, 0.25), env(N(0.25), 0.02, 0.1))), -21)
-save('tend_flare', mix(bell(523, 0.9, 0.35), scale(bell(659, 0.9, 0.3), 0.8), scale(bell(784, 0.9, 0.3), 0.7), scale(mul(bp(noise(0.5), 1500, 6000), env(N(0.5), 0.01, 0.15)), 0.4)), -18)
+# ---- Moosh Moosh: wood, wick and lantern glass
+def chirp(f0, f1, d, a=0.004, dec=0.08): return mul(tone(f0, f1, d, 0.1), env(N(d), a, dec))
+def hiss(d, lo, hi, a=0.003, dec=0.05): return mul(bp(noise(d), lo, hi), env(N(d), a, dec))
+def rise(d, lo, hi):
+    n = N(d); x = bp(noise(d), lo, hi)
+    return [v * (i / n) ** 1.5 for i, v in enumerate(x)]
+def trem(x, hz, depth=0.5): return [v * (1 - depth + depth * math.sin(2 * math.pi * hz * i / SR)) for i, v in enumerate(x)]
+def sparkle(n, d, lo=2400, hi=5200, gap=0.03):
+    return mix(*[at(scale(bell(rnd.uniform(lo, hi), 0.25, 0.05), rnd.uniform(0.3, 0.7)), i * gap + rnd.uniform(0, gap * 0.5)) for i in range(n)]) if n else [0.0]
+
+# ---- Moosh Moosh: wood, wick and lantern glass
+# Moon Shot: a soft wooden flick, a moth-wing whoosh and a little lantern chime on top
+save('tend_ember', mix(scale(chirp(900, 420, 0.12, 0.003, 0.04), 0.5), scale(hiss(0.14, 1500, 5000, 0.002, 0.03), 0.5), scale(bell(1320, 0.18, 0.05), 0.3)), -23)
+# the Empowered shot: the same flick, deeper, with a brighter two-note chime
+save('tend_ember_emp', mix(scale(chirp(700, 300, 0.18, 0.003, 0.06), 0.6), scale(hiss(0.2, 1200, 4500, 0.002, 0.05), 0.5), scale(bell(1320, 0.3, 0.08), 0.5), scale(at(bell(1760, 0.3, 0.08), 0.05), 0.45)), -21)
+# Burrseed held: a dry rattle of seed husks rising under the fingers
+save('tend_seed_aim', mix(scale(trem(rise(0.6, 600, 2400), 22, 0.7), 0.7), scale(mul(tone(180, 260, 0.6), env(N(0.6), 0.2, 0.6)), 0.3)), -26)
+# Burrseed thrown: a whippy wooden snap and a rush of air
+save('tend_seed', mix(chirp(300, 620, 0.14, 0.003, 0.05), scale(hiss(0.22, 400, 1800, 0.01, 0.07), 0.6), scale(hiss(0.05, 2000, 6000, 0.001, 0.01), 0.5)), -20)
+# Burrseed sticks: a thorny thock and the disc humming up under the foe
+save('tend_stick', mix(hiss(0.1, 700, 3000, 0.002, 0.03), scale(chirp(220, 150, 0.1, 0.002, 0.03), 0.6), scale(mul(tone(330, 440, 0.6), env(N(0.6), 0.1, 0.4)), 0.35)), -21)
+# Burrseed bursts: roots cracking out of the ground with a low thump and a violet shimmer
+save('tend_root', mix(scale(mul(lp(noise(0.5), 900), env(N(0.5), 0.02, 0.16)), 0.9), scale(chirp(110, 55, 0.45, 0.005, 0.15), 0.8), at(scale(hiss(0.25, 1200, 4000, 0.003, 0.05), 0.5), 0.04), scale(at(sparkle(5, 0.3, 1800, 3200, 0.04), 0.06), 0.5)), -17)
+# Hearthlight lit: three warm bells climbing and a breath of rising air
+save('tend_hearth', mix(bell(587, 0.7, 0.28), scale(at(bell(784, 0.6, 0.24), 0.08), 0.7), scale(at(bell(988, 0.5, 0.2), 0.16), 0.5), scale(rise(0.35, 800, 3000), 0.3)), -21)
+# Hearthlight thrown: a quick airy swoop
+save('tend_toss', mix(scale(hiss(0.24, 500, 2600, 0.04, 0.08), 0.5), chirp(500, 1100, 0.2, 0.02, 0.08)), -21)
+# ... landing on the cursor: a soft glassy bloom
+save('tend_land', mix(bell(880, 0.5, 0.18), scale(bell(1320, 0.4, 0.14), 0.5), scale(mul(lp(noise(0.3), 600), env(N(0.3), 0.01, 0.1)), 0.5)), -21)
+save('tend_flare', mix(bell(523, 0.9, 0.35), scale(bell(659, 0.9, 0.3), 0.8), scale(bell(784, 0.9, 0.3), 0.7), scale(hiss(0.5, 1500, 6000, 0.01, 0.15), 0.4)), -18)
+# Relay Step: a light hop, a skip of cloth and wood
+save('tend_hop', mix(scale(hiss(0.16, 600, 2500, 0.004, 0.05), 0.7), scale(chirp(420, 260, 0.08, 0.002, 0.03), 0.5)), -23)
+# ... through a teammate: a bright little two-bell "pass"
+save('tend_relay', mix(bell(1046, 0.4, 0.12), scale(at(bell(1568, 0.4, 0.12), 0.06), 0.8)), -21)
+# Bearer: hoisting someone onto the pack: a grunt of leather and a wooden creak
+save('tend_pickup', mix(scale(mul(lp(noise(0.3), 500), env(N(0.3), 0.03, 0.1)), 0.8), scale(trem(chirp(160, 120, 0.3, 0.02, 0.15), 30, 0.6), 0.6)), -20)
+# Kindled to 5: a crackle of catching embers
+save('tend_kindled', mix(*[at(scale(hiss(0.03, 2000, 7000, 0.001, 0.008), rnd.uniform(0.4, 1.0)), rnd.uniform(0, 0.25)) for _ in range(9)] + [scale(chirp(260, 520, 0.2, 0.01, 0.1), 0.4)]), -21)
 
 # ---- Tamsin: ice, blades, glass
-save('rime_shard', mix(scale(mul(tone(2300, 1500, 0.07), env(N(0.07), 0.002, 0.025)), 0.6), scale(mul(hp(noise(0.08), 3500), env(N(0.08), 0.001, 0.02)), 0.6)), -24)
-save('rime_lance', mix(scale(mul(tone(380, 1500, 0.2), env(N(0.2), 0.01, 0.08)), 0.7), scale(mul(bp(noise(0.25), 1500, 6000), env(N(0.25), 0.02, 0.09)), 0.7)), -20)
-save('rime_burst', mix(mul(hp(noise(0.4), 2500), env(N(0.4), 0.002, 0.1)), scale(mul(tone(700, 200, 0.25), env(N(0.25), 0.003, 0.08)), 0.6), scale(bell(2200, 0.4, 0.1), 0.4)), -17)
-save('rime_splinter', mix(mul(hp(noise(0.7), 1800), env(N(0.7), 0.001, 0.18)), scale(mul(tone(160, 55, 0.5), env(N(0.5), 0.002, 0.14)), 0.9), scale(bell(1800, 0.7, 0.16), 0.5), scale(at(bell(2600, 0.5, 0.12), 0.06), 0.4)), -14)
+# Ice Dart: a thin glassy flick
+save('rime_shard', mix(scale(chirp(2300, 1500, 0.07, 0.002, 0.025), 0.6), scale(mul(hp(noise(0.08), 3500), env(N(0.08), 0.001, 0.02)), 0.6)), -24)
+# ... skating: a heavier, straighter crack of a lance of ice
+save('rime_beam', mix(scale(chirp(1600, 900, 0.12, 0.002, 0.05), 0.7), scale(mul(hp(noise(0.14), 2500), env(N(0.14), 0.001, 0.04)), 0.7), scale(bell(2600, 0.2, 0.05), 0.3)), -21)
+# Ice Spear held: crystal growing in the hand, a rising glassy shimmer
+save('rime_spear_aim', mix(scale(rise(0.6, 3000, 8000), 0.5), scale(sparkle(8, 0.6, 2600, 5600, 0.06), 0.6)), -26)
+save('rime_lance', mix(scale(chirp(380, 1500, 0.2, 0.01, 0.08), 0.7), scale(hiss(0.25, 1500, 6000, 0.02, 0.09), 0.7)), -20)
+# the spear lands: a crunch into ice and the slow zone's cold whistle
+save('rime_zone', mix(hiss(0.12, 1000, 4000, 0.001, 0.03), scale(mul(tone(1200, 1000, 0.8), env(N(0.8), 0.2, 0.5)), 0.25), scale(sparkle(4, 0.4, 3000, 5000, 0.08), 0.4)), -21)
+# ... detonating: a deep crack and a spray of glass
+save('rime_burst', mix(mul(hp(noise(0.45), 2500), env(N(0.45), 0.002, 0.11)), scale(chirp(700, 160, 0.3, 0.003, 0.1), 0.7), scale(bell(2200, 0.4, 0.1), 0.4), scale(at(sparkle(6, 0.4, 3000, 6000, 0.03), 0.03), 0.5)), -16)
+save('rime_splinter', mix(mul(hp(noise(0.7), 1800), env(N(0.7), 0.001, 0.18)), scale(chirp(160, 55, 0.5, 0.002, 0.14), 0.9), scale(bell(1800, 0.7, 0.16), 0.5), scale(at(bell(2600, 0.5, 0.12), 0.06), 0.4), scale(at(sparkle(8, 0.5, 2500, 6000, 0.025), 0.04), 0.5)), -14)
 sk = noise(0.6); e = env(N(0.6), 0.04, 0.5)
 save('rime_run', scale([v * (0.5 + 0.5 * math.sin(2 * math.pi * 9 * i / SR)) * e[i] for i, v in enumerate(bp(sk, 2000, 7000))], 0.8), -26)
-save('rime_wall', mix(scale(mul(tone(120, 80, 0.5), env(N(0.5), 0.01, 0.15)), 0.9), scale(mul(bp(noise(0.5), 600, 3500), env(N(0.5), 0.03, 0.15)), 0.7), scale(bell(1400, 0.5, 0.15), 0.4)), -17)
-save('rime_freeze', mix(bell(1900, 0.5, 0.14), scale(mul(bp(noise(0.3), 3000, 8000), env(N(0.3), 0.002, 0.07)), 0.6), scale(mul(tone(240, 120, 0.2), env(N(0.2), 0.002, 0.06)), 0.5)), -19)
+# the hockey stop: a hard scrape of blades
+save('rime_stop', mix(scale(mul(bp(noise(0.3), 2500, 8000), env(N(0.3), 0.005, 0.12)), 0.9), scale(trem(hiss(0.3, 1500, 5000, 0.005, 0.12), 60, 0.5), 0.5)), -21)
+# the wall's tell: a sparkle gathering at her feet
+save('rime_wall_tell', mix(scale(sparkle(6, 0.25, 3000, 6500, 0.03), 0.8), scale(rise(0.22, 4000, 9000), 0.4)), -24)
+save('rime_wall', mix(scale(chirp(120, 80, 0.5, 0.01, 0.15), 0.9), scale(hiss(0.5, 600, 3500, 0.03, 0.15), 0.7), scale(bell(1400, 0.5, 0.15), 0.4), scale(mul(lp(noise(0.35), 300), env(N(0.35), 0.005, 0.12)), 0.8)), -16)
+save('rime_freeze', mix(bell(1900, 0.5, 0.14), scale(hiss(0.3, 3000, 8000, 0.002, 0.07), 0.6), scale(chirp(240, 120, 0.2, 0.002, 0.06), 0.5)), -19)
+# the air dash: a spinning whirl of cold air
+save('rime_flip', mix(scale(trem(hiss(0.3, 900, 5000, 0.03, 0.12), 14, 0.6), 0.8), scale(bell(3000, 0.2, 0.06), 0.3)), -22)
+# the frost shield on a teammate: a soft crystalline chime
+save('rime_ward', mix(bell(1568, 0.5, 0.16), scale(at(bell(2093, 0.45, 0.14), 0.05), 0.6), scale(sparkle(3, 0.3, 3000, 5000, 0.05), 0.4)), -21)
 print('support sounds written')
