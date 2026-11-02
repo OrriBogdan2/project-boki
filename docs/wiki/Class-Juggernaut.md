@@ -9,18 +9,20 @@ every knock.
    faster dash recharge and faster cooldowns, with a red shell everyone can see.
 2. The greatsword slashes fast and hits twice as hard at the tip. Hold it for a **Searing Wave**,
    which fills Rage three times as fast.
-3. **Rampage** (Shift, 2 charges): a dash attack the way you face; its tip hits hardest and can stun into a wall.
-4. **Smash** (RMB): tap for a wound-up **Finishing Slam** (more to the badly hurt); hold for a **Lunge**;
-   in the air for a **Meteor Drop**.
+3. **Rampage** (Shift, 3 charges): a short dash attack the way you face; its tip hits hardest and can stun into a wall.
+4. **Smash** (RMB): tap for a wound-up **Finishing Slam** behind a magenta strike lane (more to the
+   badly hurt, who show a red outline while it's ready); hold for a **Lunge**: crouch while a lane grows
+   ahead of you and flashes magenta at full (you can jump while you charge), then let go to fling
+   yourself forward; in the air, a disc shows under your cursor and the **Meteor Drop** dives onto it.
 5. **Warchain** (E): hook a foe or a wall, then press E again to pull yourself in.
-6. At **Smash rank 3** the Finishing Slam's sweet spot also brings a **crash** down on the foe: a
-   3m burst that heals you off what it dealt. R is the Boki Merge, not a class ultimate.
+6. The Finishing Slam's sweet spot also brings a **crash** down on the foe: a 3m burst that heals you
+   off what it dealt. R is the Boki Merge, not a class ultimate.
 
 ## Combos and interactions
 
 | Do this | And you get |
 |---|---|
-| Finishing Slam lands its sweet spot (the far tip, dead ahead) | A SWEET SPOT payoff; at Smash rank 3 also a 3m crash that heals you (it rests 12s) |
+| Finishing Slam lands its sweet spot (the far tip, dead ahead) | A 3m crash that heals you 60% of what it deals (it rests 12s, 8s at rank 3) |
 | The crash, then a knock on anyone it hit within 2s | The crash is ready again; the knock heals you and gives a Rampage charge back |
 | Warchain hooked, pull (E), then tap RMB during the pull | **Cinder Spin**: a spin around you that blights |
 | Warchain attached, hold RMB and let go | **Chain Lunge** along the chain: harder, with a short stun |
