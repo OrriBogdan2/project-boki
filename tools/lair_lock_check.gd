@@ -91,11 +91,12 @@ func run(main: Node) -> void:
 	var w0 := m.wpicks.size()
 	var kill_t := _kill(F, P, C)
 	var gems_new: Array = dropped.filter(func(p): return String(p["kind"]) == "gem")
-	var other_new: Array = dropped.filter(func(p): return String(p["kind"]) != "gem" and String(p["kind"]) != "key")
+	# (a utility item from the boss table is loot now, on the 1/2/3 belt: ext/equal, UtilityDrops)
+	var other_new: Array = dropped.filter(func(p): return String(p["kind"]) != "gem" and String(p["kind"]) != "key" and not UtilityBelt.is_item(String(p["kind"])))
 	var gem_total := 0
 	for p in gems_new: gem_total += int(p["v"])
 	ok(gems_new.size() <= Match.BOSS_GEM_DROPS and gem_total >= int(Data.MOBS["colossus"]["gems"]) * 2 and other_new.is_empty(),
-		"its gems come as %d big drops worth %d in all (not %d little ones), no armor shards or seeds" % [gems_new.size(), gem_total, int(Data.MOBS["colossus"]["gems"])])
+		"its gems come as %d big drops worth %d in all (not %d little ones), no armor shards or seeds (a utility item may come)" % [gems_new.size(), gem_total, int(Data.MOBS["colossus"]["gems"])])
 	var b: Boss = F["boss_mob"]
 	var drops: Array = m.wpicks.slice(w0)
 	var egg = F.get("egg_wp")
