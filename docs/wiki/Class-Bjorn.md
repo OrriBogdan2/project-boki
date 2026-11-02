@@ -68,7 +68,7 @@ What the in-game kit card (K) says.
 
 **Guard (passive).** Damage your aegis blocks becomes Guard (1 per 2 blocked, max 100); at 50 your Bash is a Shield Slam (push 12, stun 0.6, spends 50). Crushed: a Bash, Shield Charge or full Crushing Blow that knocks a foe into a wall or another foe stuns it 0.5 (8 damage) and heals you 24.
 
-**360 Smash (dash, Shift, 9s cooldown).** 360 Smash: a 4.2m dash, then one full spin of the hammer around you (2.2m): 24 damage, push 7. With the aegis raised it's a Shield Charge: 4.2m behind the aegis, invulnerable for its length, 10 damage and push 11 (into a wall or a foe: Crushed). Shift while spinning up a Crushing Blow: a short plain dash that costs half a charge.
+**360 Smash (dash, Shift, 9s cooldown).** 360 Smash: a 4.2m dash (0.28s), then one full spin of the hammer around you (2.2m): 24 damage, push 7. With the aegis raised it's a Shield Charge: 4.2m behind the aegis, invulnerable for its length, 10 damage and push 11 (into a wall or a foe: Crushed). Shift while spinning up a Crushing Blow: a short plain dash that costs half a charge.
 
 **Aegis (RMB, 6s cooldown).**
 
@@ -77,7 +77,7 @@ What the in-game kit card (K) says.
 - *In the air:* Shield Surf: hold to block from the front while gliding.
 - *Resource full:* Guard 50+: Shield Slam, 18 damage, push 12 and stun 0.6 (spends 50).
 
-**Mending Ground (E, 16s cooldown).** A green light column comes down for 1s on your planted hammer (on you with the hammer in hand), then it heals allies inside 26; if your aegis is raised it mends 60. Foes inside are slowed.
+**Mending Ground (E, 16s cooldown).** A green light column comes down for 1s on your planted hammer (on you with the hammer in hand), then it heals allies inside 26; if your aegis is raised it mends 60. Foes inside are slowed. A downed teammate inside is a third of the way back up.
 
 ### Ranks
 

@@ -322,7 +322,7 @@ func on_dash(use_ex: bool) -> bool:
 		return true
 	if ex:
 		# the long dash (in the air, or out of charges): Pin's own flick and tumble, a green streak behind
-		travel(float(h.cdat.get("ex_dist", 4.2)), 0.2, {"invuln": 0.1, "trail": "roll"}, true)
+		travel(float(h.cdat.get("ex_dist", 4.2)), 0.22, {"invuln": 0.1, "trail": "roll"}, true)     # 19 m/s, the base dash speed (sync62)
 		play("pin_flick")
 		st["last_dash"] = "flick"
 		for i in 4:

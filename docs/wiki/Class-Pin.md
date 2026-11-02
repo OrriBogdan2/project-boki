@@ -71,7 +71,7 @@ What the in-game kit card (K) says.
 
 **Focus (passive).** Builds while you stand still (full in 1.4s), sneak (2.8s), 50% faster on high ground; a snare or Heavy Shot that hits adds 40 (a wall pin fills it). Drains while running and drops 40 when hit. At 100 your next shot is Supercharged or aimed at once, with +20% range, and if it hits a rooted or stunned foe it is a Deadeye: +18 damage, a crit. Hawk Sense: rivals under half health are seen through cover within 22m. A knock heals 18 and gives a dash charge back.
 
-**Spirit Walk (dash, Shift, 6s cooldown).** A quick dodge roll in the direction you move (or aim), then 2.8s as a spirit: rocks, trees, pillars and ability barriers don't stop you (cliffs and ledges still do) and you move 15% faster. Taking damage ends it. If it ends while you're inside something you lose 30 Focus and are put back where you went in.
+**Spirit Walk (dash, Shift, 6s cooldown).** A quick dodge roll in the direction you move (or aim), then 2.8s as a spirit: rocks, trees, pillars and ability barriers don't stop you (cliffs and ledges still do); you move 15% faster, 35% inside something. Walking into something leaves a spirit orb there for 4s: anyone who touches it walks as a spirit too. Taking damage ends it. If it ends while you're inside something you lose 30 Focus and are put back where you went in.
 
 **Snare (RMB, 9s cooldown, 2 charges).**
 
@@ -81,7 +81,7 @@ What the in-game kit card (K) says.
 - *During E:* With your Hail Wall falling the tap snare roots 1.0.
 - *Resource full:* At 100 Focus the tap roots 1.0.
 
-**Hail Wall (E, 9s cooldown).** Lob a volley: 0.35s later arrows rain for 4.4s on a curved wall 120 degrees wide round you, at the cursor distance (2-9m). Foes inside take 5 every 0.5s, are slowed 35% and burn blue (healing barely takes).
+**Hail Wall (E, 9s cooldown).** Lob a volley: 0.35s later arrows rain for 4.4s on a curved wall 120 degrees wide round you, at the cursor distance (2-9m). Foes inside take 5 every 0.5s, are slowed 35% and burn blue (healing barely takes). A Heavy Shot that knocks a burning foe Cremates them: +10 and a longer burn.
 
 ### Ranks
 

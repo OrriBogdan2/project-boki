@@ -279,7 +279,7 @@ func smash_k() -> float:
 	var md := lmb_def()
 	return clampf((lmb_t - float(md["tap"])) / maxf(0.05, float(md["full"]) - float(md["tap"])), 0.0, 1.0)
 
-const CARRY_T := 0.2           # s the slam's forward carry lasts
+const CARRY_T := 0.24          # s the slam's forward carry lasts
 
 ## The Crushing Blow let go: the hammer sweeps round from behind into a 180 degree flaming crescent in
 ## front, and the slam carries him forward (owner note: a strong slam with forward momentum).
