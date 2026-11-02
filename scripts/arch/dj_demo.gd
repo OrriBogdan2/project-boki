@@ -41,22 +41,42 @@ static func trigger(P: Hunter, D: Hunter, mv: String, t: float, dt: float) -> vo
 		"thf_lmb":
 			P.inp["fire"] = t > 0.49 and t < 0.52
 		"thf_primed":
-			if at(t, dt, 0.5): P.dashes = P.max_dashes(); P.inp["move"] = Vector2(0, 1); P.do_dash()
+			if at(t, dt, 0.5):
+				P.dashes = P.max_dashes()
+				P.inp["move"] = Vector2(0, 1)
+				P.do_dash()
 			P.inp["fire"] = t > 0.85 and t < 0.88
 		"thf_vault":
-			if at(t, dt, 0.5): P.dashes = P.max_dashes(); P.inp["move"] = Vector2(0, 1); P.do_dash()
+			if at(t, dt, 0.5):
+				P.dashes = P.max_dashes()
+				P.inp["move"] = Vector2(0, 1)
+				P.do_dash()
 			if t > 0.5 and t < 0.8: P.inp["move"] = Vector2(0, 1)
 		"thf_exdash":
-			if at(t, dt, 0.5): P.ex_cd = 0.0; P.roll_dir = Vector2(0, 1); K.on_dash(true)
+			if at(t, dt, 0.5):
+				P.ex_cd = 0.0
+				P.roll_dir = Vector2(0, 1)
+				K.on_dash(true)
 		"thf_bola":
-			if at(t, dt, 0.5): K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; P.inp["sec_hold"] = false; K.press_rmb()
+			if at(t, dt, 0.5):
+				K.ch_rmb = 1.0
+				K.cd["rmb"] = 0.0
+				P.inp["sec_hold"] = false
+				K.press_rmb()
 		"thf_knife":
-			if at(t, dt, 0.5): K.cd["e"] = 0.0; K.use_e()
+			if at(t, dt, 0.5):
+				K.cd["e"] = 0.0
+				K.use_e()
 		"thf_blink":
-			if at(t, dt, 0.4): K.cd["e"] = 0.0; P.inp["aim"] = P.pos + Vector3(0, 0.9, 5.0); K.use_e()
+			if at(t, dt, 0.4):
+				K.cd["e"] = 0.0
+				P.inp["aim"] = P.pos + Vector3(0, 0.9, 5.0)
+				K.use_e()
 			if at(t, dt, 1.0): K.use_e()
 		"thf_volley":
-			if at(t, dt, 0.5): (K as ThiefKit).jp_cd = 0.0; (K as ThiefKit).add_mark(D, 5, true)
+			if at(t, dt, 0.5):
+				(K as ThiefKit).jp_cd = 0.0
+				(K as ThiefKit).add_mark(D, 5, true)
 			P.inp["fire"] = t > 0.9 and t < 1.0
 		"thf_reset", "thf_flourish", "jug_roar":
 			if at(t, dt, 0.5): K.play(mv)
@@ -67,27 +87,66 @@ static func trigger(P: Hunter, D: Hunter, mv: String, t: float, dt: float) -> vo
 			P.inp["fire"] = t > 0.4 and t < 1.44
 		"jug_slam", "jug_crash":
 			if t < 0.45: P.teleport(Vector3(D.pos.x - 3.2, P.pos.y, D.pos.z))
-			if at(t, dt, 0.5): K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; P.inp["sec_hold"] = false; K.press_rmb()
+			if at(t, dt, 0.5):
+				K.ch_rmb = 1.0
+				K.cd["rmb"] = 0.0
+				P.inp["sec_hold"] = false
+				K.press_rmb()
 		"jug_lunge":
-			if at(t, dt, 0.5): K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; K.bot_hold["rmb"] = 0.9; K.press_rmb()
+			if at(t, dt, 0.5):
+				K.ch_rmb = 1.0
+				K.cd["rmb"] = 0.0
+				K.bot_hold["rmb"] = 0.9
+				K.press_rmb()
 		"jug_meteor":
-			if at(t, dt, 0.4): P.teleport(Vector3(D.pos.x - 4.0, P.pos.y + 3.0, D.pos.z)); P.grounded = false; P.vel = Vector3.ZERO
-			if at(t, dt, 0.5): K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; K.press_rmb()
+			if at(t, dt, 0.4):
+				P.teleport(Vector3(D.pos.x - 4.0, P.pos.y + 3.0, D.pos.z))
+				P.grounded = false
+				P.vel = Vector3.ZERO
+			if at(t, dt, 0.5):
+				K.ch_rmb = 1.0
+				K.cd["rmb"] = 0.0
+				K.press_rmb()
 		"jug_dash":
-			if at(t, dt, 0.5): P.dashes = P.max_dashes(); P.do_dash()
+			if at(t, dt, 0.5):
+				P.dashes = P.max_dashes()
+				P.do_dash()
 		"jug_exdash":
-			if at(t, dt, 0.5): P.ex_cd = 0.0; P.grounded = false; K.on_dash(true)
+			if at(t, dt, 0.5):
+				P.ex_cd = 0.0
+				P.grounded = false
+				K.on_dash(true)
 		"jug_chain":
-			if at(t, dt, 0.5): K.cd["e"] = 0.0; K.use_e()
+			if at(t, dt, 0.5):
+				K.cd["e"] = 0.0
+				K.use_e()
 			if at(t, dt, 0.9): K.use_e()
 		"jug_chainlunge":
-			if at(t, dt, 0.5): K.cd["e"] = 0.0; K.use_e()
-			if at(t, dt, 0.8): K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; K.bot_hold["rmb"] = 0.85; K.press_rmb()
+			if at(t, dt, 0.5):
+				K.cd["e"] = 0.0
+				K.use_e()
+			if at(t, dt, 0.8):
+				K.ch_rmb = 1.0
+				K.cd["rmb"] = 0.0
+				K.bot_hold["rmb"] = 0.85
+				K.press_rmb()
 		"jug_haul":
-			if at(t, dt, 0.5): K.cd["e"] = 0.0; K.use_e()
-			if at(t, dt, 0.8): K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; K.bot_hold["rmb"] = 1.5; K.press_rmb()
+			if at(t, dt, 0.5):
+				K.cd["e"] = 0.0
+				K.use_e()
+			if at(t, dt, 0.8):
+				K.ch_rmb = 1.0
+				K.cd["rmb"] = 0.0
+				K.bot_hold["rmb"] = 1.5
+				K.press_rmb()
 			if at(t, dt, 1.2): K.use_e()
 		"jug_spin":
-			if at(t, dt, 0.5): K.cd["e"] = 0.0; K.use_e()
+			if at(t, dt, 0.5):
+				K.cd["e"] = 0.0
+				K.use_e()
 			if at(t, dt, 0.84): K.use_e()
-			if at(t, dt, 0.88): K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; P.inp["sec_hold"] = false; K.press_rmb()
+			if at(t, dt, 0.88):
+				K.ch_rmb = 1.0
+				K.cd["rmb"] = 0.0
+				P.inp["sec_hold"] = false
+				K.press_rmb()

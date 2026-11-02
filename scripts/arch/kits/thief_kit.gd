@@ -175,7 +175,8 @@ func _tick_pips(dt: float) -> void:
 			var ang := a + TAU * i / float(ds.size())
 			d.position = Vector3(cos(ang) * 0.78, 0.0, sin(ang) * 0.78)
 			var lit := i < c
-			d.scale = Vector3.ONE * ((1.0 + float(p["pop"]) * 0.8 + (0.15 * sin(m.time * 9.0) if c >= ds.size() else 0.0)) if lit else 0.45)
+			var wob: float = 0.15 * sin(m.time * 9.0) if c >= ds.size() else 0.0
+			d.scale = Vector3.ONE * ((1.0 + float(p["pop"]) * 0.8 + wob) if lit else 0.45)
 			d.material_override.set_shader_parameter("color", Color(res_col(), 1.0) if lit else Color(1, 1, 1, 0.2))
 
 ## Highest mark count on any foe (the resource readout).
@@ -302,9 +303,12 @@ func _bolt() -> void:
 	var v := Vector2(to.x - start.x, to.z - start.z)
 	var spd := (sd["vel"] as Vector2).length()
 	var dist := clampf(v.length(), AimMode.MIN_D, rng)
-	sd["pos"] = start; sd["prev"] = start; sd["start"] = start
+	sd["pos"] = start
+	sd["prev"] = start
+	sd["start"] = start
 	if v.length() > 0.05: sd["vel"] = v.normalized() * spd
-	sd["life"] = dist / spd; sd["life0"] = sd["life"]
+	sd["life"] = dist / spd
+	sd["life0"] = sd["life"]
 	var x: Dictionary = sd["x"]
 	x["kx"] = func(s: Dictionary, at: Vector3, e: Ent, why: String) -> void: _bolt_end(s, at, e, why, emp)
 	# the throw: the firing arm whips forward, the torso turns into it (KMovesDJ thf_lmb_r / thf_lmb_l)
@@ -335,7 +339,9 @@ func _bolt_end(s: Dictionary, at: Vector3, e: Ent, why: String, emp: bool) -> vo
 	last_bolt_end = at
 	if e != null:
 		if emp: _primed_on = e
-		fx().star(at, BOLT_GOLD if not emp else Color("ffe070"), 1.5 if emp else 0.7, 0.24 if emp else 0.14)
+		fx().star(at, BOLT_GOLD if not emp else Color("ffe070"),
+				1.5 if emp else 0.7,
+				0.24 if emp else 0.14)
 		if emp: m.fx.spark(at, Vector3.UP, EMP_BLUE, 14, 11.0, 70.0)
 	elif why == "expire":
 		fizzles += 1
@@ -354,8 +360,11 @@ func on_dash(use_ex: bool) -> bool:
 		travel(float(h.cdat.get("ex_dist", 5.0)), float(h.cdat.get("ex_time", 0.2)), {"invuln": 0.1}, true)
 		play("thf_exdash")
 		for i in 3:
-			m.later(0.05 * i, func(): if is_instance_valid(h): m.fx.spark(h.pos + Vector3(0, 0.9, 0), Vector3(-h.roll_dir.x, 0.1, -h.roll_dir.y), Arch.color(id), 8, 8.0, 25.0, 0.22, 0.0, 1.2))
-		m.later(float(h.cdat.get("ex_time", 0.2)), func(): if is_instance_valid(h): m.fx.ring(h.pos, 0.8, Arch.color(id), 0.18))
+			m.later(0.05 * i,
+					func(): if is_instance_valid(h): m.fx.spark(h.pos + Vector3(0, 0.9, 0),
+							Vector3(-h.roll_dir.x, 0.1, -h.roll_dir.y), Arch.color(id), 8, 8.0, 25.0, 0.22, 0.0, 1.2))
+		m.later(float(h.cdat.get("ex_time", 0.2)),
+				func(): if is_instance_valid(h): m.fx.ring(h.pos, 0.8, Arch.color(id), 0.18))
 		return true
 	else:
 		travel(float(dd["dist"]), float(dd["time"]), {"invuln": float(dd["invuln"]), "phase": 0.3})
@@ -384,7 +393,8 @@ func _vaulted() -> void:
 		armed_fx("", "dash")                     # empowered: the ready ping, a ring everyone sees
 
 func _swoosh(dir: Vector2) -> void:
-	fx().crescent(h.pos + Vector3(0, 0.85, 0), dir, 300.0, 0.95, Color(1, 1, 1, 0.9), Color(0.82, 0.86, 1.0, 0.7), 0.28, PI * 0.5)
+	fx().crescent(h.pos + Vector3(0, 0.85, 0), dir, 300.0, 0.95, Color(1, 1, 1, 0.9), Color(0.82, 0.86, 1.0, 0.7), 0.28,
+			PI * 0.5)
 
 # ------------------------------------------------------------------ passive hooks
 ## Marks make your bolts (the empowered one too) on that target stronger.
@@ -415,7 +425,9 @@ func _primed_hit(t: Ent) -> void:
 	if is_instance_valid(t) and not t.dead:
 		KitStatus.apply(t, "vul", float(dd["shred_t"]), float(dd["shred"]))
 	payoff_fx(t.pos, "VAULT RESET", res_col(), "pay_cashin", dir, t)
-	m.later(0.1, func(): if is_instance_valid(h) and anim_id != "thf_vault_r" and anim_id != "thf_vault_l": play("thf_reset"))
+	m.later(0.1, func():
+		if is_instance_valid(h) and anim_id != "thf_vault_r" and anim_id != "thf_vault_l":
+			play("thf_reset"))
 	h.dashes = h.max_dashes()
 	DashReset.cue(h)
 
@@ -430,7 +442,8 @@ func on_knock(t: Hunter, mine: bool) -> void:
 		clear_marks(t)
 	fx().pillar(h.pos, Color("5ae07a"), 3.4, 0.6, 0.7)
 	play("thf_flourish")
-	m.fx.word(h.pos + Vector3(0, 2.6, 0), "+%d" % int(round(got)) if got >= 1.0 else ("TAKEN" if mine else "ASSIST"), Color("7fe08a"), true)
+	var who: String = "TAKEN" if mine else "ASSIST"
+	m.fx.word(h.pos + Vector3(0, 2.6, 0), "+%d" % int(round(got)) if got >= 1.0 else who, Color("7fe08a"), true)
 	m.sfx("dj_heal", h.pos, -4.0, 1.0)
 
 # ------------------------------------------------------------------ Jackpot (the fifth Mark)
@@ -454,15 +467,20 @@ func _jackpot(t: Ent) -> void:
 	DashReset.cue(h)
 
 func _jackpot_targets() -> Array:
-	return foes_in(h.pos, float(jackpot_def()["reach"])).filter(func(f): return sees(f) and not (f is Kin) and f.hittable())
+	var near: Array = foes_in(h.pos, float(jackpot_def()["reach"]))
+	return near.filter(func(f): return sees(f) and not (f is Kin) and f.hittable())
 
 func _tick_jackpot(dt: float) -> void:
 	var jd := jackpot_def()
 	jp["t"] = float(jp["t"]) + dt
 	var gk := clampf(float(jp["t"]) / float(jd["grow"]), 0.0, 1.0)
 	# the ring grows out from her, then rides with her (everyone sees it)
-	AimKit.circle(h, "jackpot", {"self": true, "r": float(jd["reach"]) * (0.25 + 0.75 * gk), "col": col_of(jd), "all": true, "ticks": true, "fill": 0.25 * gk})
-	AimKit.circle(h, "jackpot_rim", {"self": true, "r": float(jd["inner"]) * gk, "col": Color(col_of(jd), 0.6), "all": true, "dashed": true, "alpha": 0.6})
+	AimKit.circle(h, "jackpot",
+			{"self": true, "r": float(jd["reach"]) * (0.25 + 0.75 * gk), "col": col_of(jd), "all": true, "ticks": true,
+					"fill": 0.25 * gk})
+	AimKit.circle(h, "jackpot_rim",
+			{"self": true, "r": float(jd["inner"]) * gk, "col": Color(col_of(jd), 0.6), "all": true, "dashed": true,
+					"alpha": 0.6})
 	if float(jp["t"]) >= float(jp["next"]) and int(jp["n"]) > 0:
 		jp["n"] = int(jp["n"]) - 1
 		jp["next"] = float(jp["next"]) + float(jd["time"]) / float(jd["shots"])
@@ -473,7 +491,8 @@ func _tick_jackpot(dt: float) -> void:
 		if hit: m.sfx("dj_blade", h.pos, -6.0, randf_range(0.95, 1.1))
 	if int(jp["n"]) <= 0 and float(jp["t"]) >= float(jp["next"]):
 		jp = {}
-		AimKit.hide(h, "jackpot"); AimKit.hide(h, "jackpot_rim")
+		AimKit.hide(h, "jackpot")
+		AimKit.hide(h, "jackpot_rim")
 
 ## One blade from her hand at a foe in the ring: a cosmetic shot flies, the hit lands on arrival.
 func _jackpot_blade(f: Ent) -> void:
@@ -497,10 +516,12 @@ func _jackpot_hit(f: Ent, rim: bool) -> void:
 	var dmg := float(jd["dmg"]) + (float(jd["rim_dmg"]) if rim else 0.0)
 	f.hurt(dmg * power("passive"), h, {"src": "abil", "ab": "mark", "tags": ["jackpot"], "crit": rim})
 	if rim and is_instance_valid(f) and not f.dead:
-		KitStatus.apply(f, "blt", float(jd.get("rim_blight", 4.0)))      # the rim also cuts healing (the source's outer ring)
+		# the rim also cuts healing (the source's outer ring)
+		KitStatus.apply(f, "blt", float(jd.get("rim_blight", 4.0)))
 	jackpot_hits += 1
 	refresh_marks()
-	fx().star(f.pos + Vector3(0, 1.0, 0), col_of(jd) if not rim else Color("ff5a6a"), 0.9 if rim else 0.6, 0.18)
+	fx().star(f.pos + Vector3(0, 1.0, 0), col_of(jd) if not rim else Color("ff5a6a"),
+			0.9 if rim else 0.6, 0.18)
 
 # ------------------------------------------------------------------ RMB: Bola
 func fire_rmb(c: Dictionary) -> void:
@@ -524,7 +545,9 @@ func _tick_bola_cast(dt: float) -> void:
 	bola_cast["t"] = float(bola_cast["t"]) - dt
 	var k := 1.0 - clampf(float(bola_cast["t"]) / float(bd["cast"]), 0.0, 1.0)
 	# the source's lane is a translucent white strip with chevrons; the fill front runs gold toward the throw
-	AimKit.lane(h, "rmb", {"len": lane_len(), "width": float(bd["lane_w"]), "chevrons": 4, "tip": true, "fill": k, "col": Color(1, 1, 1), "col2": col_of(rmb_def()), "alpha": 1.35})
+	AimKit.lane(h, "rmb",
+			{"len": lane_len(), "width": float(bd["lane_w"]), "chevrons": 4, "tip": true, "fill": k,
+					"col": Color(1, 1, 1), "col2": col_of(rmb_def()), "alpha": 1.35})
 	if float(bola_cast["t"]) <= 0.0:
 		bola_cast = {}
 		AimKit.hide(h, "rmb")
@@ -532,14 +555,19 @@ func _tick_bola_cast(dt: float) -> void:
 
 func _throw_bola() -> void:
 	var bd: Dictionary = rmb_def()["bola"]
-	var stg := stage("rmb", {"delivery": {"type": "projectile", "speed": float(bd["speed"]), "range": float(bd["range"]), "size": 0.3},
-		"effects": [{"type": "damage", "amount": float(bd["dmg"])}, {"type": "slow", "duration": _ground_t(), "strength": float(bd["slow"])}]})
+	var stg := stage("rmb", {"delivery": {"type": "projectile", "speed": float(bd["speed"]),
+			"range": float(bd["range"]), "size": 0.3},
+		"effects": [{"type": "damage", "amount": float(bd["dmg"])},
+				{"type": "slow", "duration": _ground_t(), "strength": float(bd["slow"])}]})
 	var dv := h.aim_dir()
-	bola = {"pos": h.pos + Vector3(dv.x * 0.5, 1.0, dv.y * 0.5), "dir": dv, "left": float(bd["range"]), "first": null, "bounces": int(bd["bounces"]), "stg": stg}
+	bola = {"pos": h.pos + Vector3(dv.x * 0.5, 1.0, dv.y * 0.5), "dir": dv, "left": float(bd["range"]), "first": null,
+			"bounces": int(bd["bounces"]), "stg": stg}
 	m.sfx("dj_bola_throw", h.pos, -3.0, 1.0)
 	Feel.cast_sound(m, "projectile", "control", h.pos, h)
-	fx().star(h.pos + Vector3(dv.x * 0.6, 1.2, dv.y * 0.6), col_of(rmb_def()), 0.8, 0.12)      # the yellow flash of the throw
-	net_bolt(h.pos + Vector3(0, 1.0, 0), h.pos + Vector3(dv.x, 0, dv.y) * lane_len() + Vector3(0, 1.0, 0), col_of(rmb_def()))
+	# the yellow flash of the throw
+	fx().star(h.pos + Vector3(dv.x * 0.6, 1.2, dv.y * 0.6), col_of(rmb_def()), 0.8, 0.12)
+	net_bolt(h.pos + Vector3(0, 1.0, 0), h.pos + Vector3(dv.x, 0, dv.y) * lane_len() + Vector3(0, 1.0, 0),
+			col_of(rmb_def()))
 
 func _ground_t() -> float:
 	return float(rmb_def()["bola"]["ground"])
@@ -628,8 +656,10 @@ func _tick_wrapped(dt: float) -> void:
 			continue
 		var e := f as Ent
 		var r := e.r + 0.35 + 0.08 * sin(m.time * 10.0)
-		AimKit.circle(h, "gnd%d" % key, {"at": e.pos, "r": r, "col": col_of(rmb_def()), "all": true, "hot": 0.4, "lw": 0.09})
-		AimKit.circle(h, "gnd2%d" % key, {"at": e.pos, "r": r * 0.7, "col": Color("fff0a0"), "all": true, "dashed": true})
+		AimKit.circle(h, "gnd%d" % key,
+				{"at": e.pos, "r": r, "col": col_of(rmb_def()), "all": true, "hot": 0.4, "lw": 0.09})
+		AimKit.circle(h, "gnd2%d" % key,
+				{"at": e.pos, "r": r * 0.7, "col": Color("fff0a0"), "all": true, "dashed": true})
 
 ## Two foes in one Bola: both Grounded, stunned and hurt; at rank 3 they pool their Marks.
 func _tangle(f, other: Ent) -> void:
@@ -641,7 +671,9 @@ func _tangle(f, other: Ent) -> void:
 	var both: Array = [other]
 	if f != null and is_instance_valid(f) and not (f as Ent).dead: both.append(f)
 	for t in both:
-		t.hurt(float(bd["pair_dmg"]) * power("sec"), h, {"src": "abil", "ab": "utility", "tags": ["utility", "bola"], "stun": float(bd["pair_stun"]), "dr": true})
+		t.hurt(float(bd["pair_dmg"]) * power("sec"), h,
+				{"src": "abil", "ab": "utility", "tags": ["utility", "bola"], "stun": float(bd["pair_stun"]),
+						"dr": true})
 	add_mark(other, 1, true)
 	if rank("sec") >= 3 and both.size() == 2:
 		var pool := marks_on(both[0]) + marks_on(both[1])
@@ -674,7 +706,8 @@ func _throw_knife() -> void:
 	var ed := e_def()
 	var rng := AimMode.dist(h, float(ed["range"]))     # to the cursor, 14m at most
 	var stg := stage("e", {"delivery": {"type": "projectile", "speed": float(ed["speed"]), "range": rng, "size": 0.2},
-		"effects": [{"type": "damage", "amount": float(ed["dmg"])}, {"type": "slow", "duration": float(ed["slow_t"]), "strength": float(ed["slow"])}]})
+		"effects": [{"type": "damage", "amount": float(ed["dmg"])},
+				{"type": "slow", "duration": float(ed["slow_t"]), "strength": float(ed["slow"])}]})
 	var land := ground(AimMode.point(h, float(ed["range"])))     # with nothing on the way it lies where you aimed
 	var n0: int = m.shots.size()
 	run(stg, cx("e", "shadow_knife", aim(), {
@@ -715,7 +748,8 @@ func _tick_knife() -> void:
 	var at: Vector3 = knife["pos"]
 	var dv: Vector2 = knife["dir"]
 	if tells_visible() or f != null:
-		fx().place("knife%d" % h.get_instance_id(), "dagger", at + Vector3(0, 1.2 if f != null else 0.35, 0), dv * 0.01, col_of(e_def()), Color("ffcf5a"), 0.2, 0.2)
+		fx().place("knife%d" % h.get_instance_id(), "dagger", at + Vector3(0, 1.2 if f != null else 0.35, 0), dv * 0.01,
+				col_of(e_def()), Color("ffcf5a"), 0.2, 0.2)
 	AimKit.circle(h, "knife", {"at": at, "r": 1.6, "col": Color(1, 1, 1), "ticks": true, "alpha": 0.8})
 
 func e_recast() -> bool:

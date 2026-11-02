@@ -74,15 +74,20 @@ func _take(kind: String, build: Callable) -> Node3D:
 	var old: Node3D = arr.pop_front()
 	arr.append(old)
 	for e in live:
-		if e["node"] == old: live.erase(e); break
+		if e["node"] == old:
+			live.erase(e)
+			break
 	for r in riders:
-		if r["node"] == old: riders.erase(r); break
+		if r["node"] == old:
+			riders.erase(r)
+			break
 	return old
 
 # ------------------------------------------------------------------ meshes
 func _quad_mesh() -> QuadMesh:
 	if _quad == null:
-		_quad = QuadMesh.new(); _quad.size = Vector2(2, 2)
+		_quad = QuadMesh.new()
+		_quad.size = Vector2(2, 2)
 	return _quad
 
 ## An open column 1 m tall, radius 1: UV.x round it, UV.y from the foot (0) to the top (1).
@@ -93,15 +98,24 @@ func _column() -> ArrayMesh:
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var n := 16
 	for i in n:
-		var a0 := TAU * i / n; var a1 := TAU * (i + 1) / n
-		var p0 := Vector3(cos(a0), 0, sin(a0)); var p1 := Vector3(cos(a1), 0, sin(a1))
-		var u0 := float(i) / n; var u1 := float(i + 1) / n
-		st.set_uv(Vector2(u0, 0)); st.add_vertex(p0)
-		st.set_uv(Vector2(u1, 0)); st.add_vertex(p1)
-		st.set_uv(Vector2(u1, 1)); st.add_vertex(p1 + Vector3.UP)
-		st.set_uv(Vector2(u0, 0)); st.add_vertex(p0)
-		st.set_uv(Vector2(u1, 1)); st.add_vertex(p1 + Vector3.UP)
-		st.set_uv(Vector2(u0, 1)); st.add_vertex(p0 + Vector3.UP)
+		var a0 := TAU * i / n
+		var a1 := TAU * (i + 1) / n
+		var p0 := Vector3(cos(a0), 0, sin(a0))
+		var p1 := Vector3(cos(a1), 0, sin(a1))
+		var u0 := float(i) / n
+		var u1 := float(i + 1) / n
+		st.set_uv(Vector2(u0, 0))
+		st.add_vertex(p0)
+		st.set_uv(Vector2(u1, 0))
+		st.add_vertex(p1)
+		st.set_uv(Vector2(u1, 1))
+		st.add_vertex(p1 + Vector3.UP)
+		st.set_uv(Vector2(u0, 0))
+		st.add_vertex(p0)
+		st.set_uv(Vector2(u1, 1))
+		st.add_vertex(p1 + Vector3.UP)
+		st.set_uv(Vector2(u0, 1))
+		st.add_vertex(p0 + Vector3.UP)
 	_col = st.commit()
 	return _col
 
@@ -113,12 +127,18 @@ func _ribbon_mesh() -> ArrayMesh:
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	for ax in [Vector3.RIGHT, Vector3.UP]:
 		var w: Vector3 = ax * 0.5
-		st.set_uv(Vector2(0, 0)); st.add_vertex(-w)
-		st.set_uv(Vector2(0, 1)); st.add_vertex(w)
-		st.set_uv(Vector2(1, 1)); st.add_vertex(w + Vector3(0, 0, 1))
-		st.set_uv(Vector2(0, 0)); st.add_vertex(-w)
-		st.set_uv(Vector2(1, 1)); st.add_vertex(w + Vector3(0, 0, 1))
-		st.set_uv(Vector2(1, 0)); st.add_vertex(-w + Vector3(0, 0, 1))
+		st.set_uv(Vector2(0, 0))
+		st.add_vertex(-w)
+		st.set_uv(Vector2(0, 1))
+		st.add_vertex(w)
+		st.set_uv(Vector2(1, 1))
+		st.add_vertex(w + Vector3(0, 0, 1))
+		st.set_uv(Vector2(0, 0))
+		st.add_vertex(-w)
+		st.set_uv(Vector2(1, 1))
+		st.add_vertex(w + Vector3(0, 0, 1))
+		st.set_uv(Vector2(1, 0))
+		st.add_vertex(-w + Vector3(0, 0, 1))
 	_ribbon = st.commit()
 	return _ribbon
 
@@ -132,14 +152,30 @@ func _crescent_mesh(arc_deg: float) -> ArrayMesh:
 	var n := 18
 	var arc := deg_to_rad(arc_deg)
 	for i in n:
-		var u0 := -arc * 0.5 + arc * float(i) / n; var u1 := -arc * 0.5 + arc * float(i + 1) / n
-		var w0 := sin(PI * float(i) / n); var w1 := sin(PI * float(i + 1) / n)
-		var o0 := Vector3(sin(u0), 0, -cos(u0)); var o1 := Vector3(sin(u1), 0, -cos(u1))
-		var a := o0; var b := o1
-		var c := o1 * lerpf(1.0, 0.5, w1); var d := o0 * lerpf(1.0, 0.5, w0)
-		var ua := float(i) / n; var ub := float(i + 1) / n
-		st.set_uv(Vector2(ua, 0)); st.add_vertex(a); st.set_uv(Vector2(ub, 0)); st.add_vertex(b); st.set_uv(Vector2(ub, 1)); st.add_vertex(c)
-		st.set_uv(Vector2(ua, 0)); st.add_vertex(a); st.set_uv(Vector2(ub, 1)); st.add_vertex(c); st.set_uv(Vector2(ua, 1)); st.add_vertex(d)
+		var u0 := -arc * 0.5 + arc * float(i) / n
+		var u1 := -arc * 0.5 + arc * float(i + 1) / n
+		var w0 := sin(PI * float(i) / n)
+		var w1 := sin(PI * float(i + 1) / n)
+		var o0 := Vector3(sin(u0), 0, -cos(u0))
+		var o1 := Vector3(sin(u1), 0, -cos(u1))
+		var a := o0
+		var b := o1
+		var c := o1 * lerpf(1.0, 0.5, w1)
+		var d := o0 * lerpf(1.0, 0.5, w0)
+		var ua := float(i) / n
+		var ub := float(i + 1) / n
+		st.set_uv(Vector2(ua, 0))
+		st.add_vertex(a)
+		st.set_uv(Vector2(ub, 0))
+		st.add_vertex(b)
+		st.set_uv(Vector2(ub, 1))
+		st.add_vertex(c)
+		st.set_uv(Vector2(ua, 0))
+		st.add_vertex(a)
+		st.set_uv(Vector2(ub, 1))
+		st.add_vertex(c)
+		st.set_uv(Vector2(ua, 1))
+		st.add_vertex(d)
 	var mesh := st.commit()
 	_cres[key] = mesh
 	return mesh
@@ -150,8 +186,10 @@ static func star_mesh(pts: int, inner: float) -> ArrayMesh:
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var n := pts * 2
 	for i in n:
-		var a0 := TAU * i / n; var a1 := TAU * (i + 1) / n
-		var r0 := 1.0 if i % 2 == 0 else inner; var r1 := 1.0 if (i + 1) % 2 == 0 else inner
+		var a0 := TAU * i / n
+		var a1 := TAU * (i + 1) / n
+		var r0 := 1.0 if i % 2 == 0 else inner
+		var r1 := 1.0 if (i + 1) % 2 == 0 else inner
 		st.add_vertex(Vector3.ZERO)
 		st.add_vertex(Vector3(cos(a0) * r0, 0, sin(a0) * r0))
 		st.add_vertex(Vector3(cos(a1) * r1, 0, sin(a1) * r1))
@@ -172,16 +210,16 @@ func _play(n: MeshInstance3D, kind: String, col: Color, col2: Color, dur: float,
 	live.append({"node": n, "t": 0.0, "dur": maxf(0.05, dur), "kind": kind, "s0": s0, "mat": mt})
 
 ## A camera-facing four-point star (Dancer's knock, a tip hit, the bolt's impact).
-func star(at: Vector3, col: Color, size := 1.0, dur := 0.35, core := Color.WHITE) -> void:
+func star(at: Vector3, col: Color, sz := 1.0, dur := 0.35, core := Color.WHITE) -> void:
 	var n := _fx("star", M_STAR, _quad_mesh(), true)
 	n.global_position = at
-	_play(n, "star", col, core, dur, Vector3.ONE * size)
+	_play(n, "star", col, core, dur, Vector3.ONE * sz)
 
 ## A soft ring that opens and fades where a bolt ran out (at the cursor).
-func puff(at: Vector3, col: Color, size := 0.6, dur := 0.3, speck := Color.WHITE) -> void:
+func puff(at: Vector3, col: Color, sz := 0.6, dur := 0.3, speck := Color.WHITE) -> void:
 	var n := _fx("puff", M_PUFF, _quad_mesh(), true)
 	n.global_position = at
-	_play(n, "puff", col, speck, dur, Vector3.ONE * size)
+	_play(n, "puff", col, speck, dur, Vector3.ONE * sz)
 
 ## A column of light rising on someone (the knock heal).
 func pillar(at: Vector3, col: Color, height := 3.2, radius := 0.55, dur := 0.7) -> void:
@@ -191,7 +229,8 @@ func pillar(at: Vector3, col: Color, height := 3.2, radius := 0.55, dur := 0.7) 
 
 ## A two-tone blade arc in front of `at` facing `dir` (outer edge `col`, inner fill `col2`), swept over
 ## `dur`. `tilt` turns it about the facing (PI/2: a vertical arc, the Cartwheel's swoosh).
-func crescent(at: Vector3, dir: Vector2, arc_deg: float, reach: float, col: Color, col2: Color, dur := 0.22, tilt := 0.0) -> void:
+func crescent(at: Vector3, dir: Vector2, arc_deg: float, reach: float, col: Color, col2: Color, dur := 0.22,
+		tilt := 0.0) -> void:
 	var key := "cres%d" % int(round(arc_deg))
 	var n := _take(key, func(): return _mi(_crescent_mesh(arc_deg), _mat(M_CRESCENT, col, col2))) as MeshInstance3D
 	n.global_position = at
@@ -211,36 +250,53 @@ func ghosts(from: Vector3, to: Vector3, count: int, yaw: float, col: Color, scl 
 		n.global_position = from.lerp(to, k) + Vector3(0, 0.7 * scl, 0)
 		n.rotation = Vector3(0, yaw, 0)
 		n.scale = Vector3(1.0, 1.0, 1.25) * scl
-		live.append({"node": n, "t": -0.04 * i, "dur": 0.32 + 0.05 * i, "kind": "ghost", "s0": n.scale, "mat": n.material_override, "col": col})
+		live.append({"node": n, "t": -0.04 * i, "dur": 0.32 + 0.05 * i, "kind": "ghost", "s0": n.scale,
+				"mat": n.material_override, "col": col})
 
 # ------------------------------------------------------------------ projectile looks
 ## The look of each projectile (built once per pooled node): a head that spins and a trail behind.
 func _build_rider(kind: String, col: Color, col2: Color) -> Node3D:
 	var n := Node3D.new()
-	var head := Node3D.new(); head.name = "Head"; n.add_child(head)
+	var head := Node3D.new()
+	head.name = "Head"
+	n.add_child(head)
 	match kind:
 		"chakram":
 			# Dancer's bolt: a flared four-point chakram, hot white centre, a gold comet behind
 			head.add_child(_mi(star_mesh(4, 0.38), Models.glow_mat(Color(col, 1.0))))
-			var c := _mi(Models.sphere(0.32, 8), Models.glow_mat(Color(col2, 1.0))); head.add_child(c)
+			var c := _mi(Models.sphere(0.32, 8), Models.glow_mat(Color(col2, 1.0)))
+			head.add_child(c)
 			head.scale = Vector3.ONE * 0.34
 		"chakram_big":
 			# the empowered shot: a big blue chakram inside a crackling gold streak
 			head.add_child(_mi(star_mesh(6, 0.45), Models.glow_mat(Color(col2, 1.0))))
 			head.add_child(_mi(Models.sphere(0.35, 8), Models.glow_mat(Color(1, 1, 1, 1))))
 			head.scale = Vector3.ONE * 0.6
-			var bolt := _mi(_ribbon_mesh(), _mat(M_BOLT, col, Color(1, 1, 0.85, 1))); bolt.name = "Bolt"; n.add_child(bolt)
+			var bolt := _mi(_ribbon_mesh(), _mat(M_BOLT, col, Color(1, 1, 0.85, 1)))
+			bolt.name = "Bolt"
+			n.add_child(bolt)
 		"bola":
 			# the Bola: two glowing weights on a short crackling cord, whirling
 			for sx in [-1.0, 1.0]:
-				var w := _mi(Models.sphere(0.16, 8), Models.glow_mat(Color(col, 1.0))); w.position = Vector3(sx * 0.42, 0, 0); head.add_child(w)
-				var g := _mi(Models.sphere(0.08, 6), Models.glow_mat(Color(col2, 1.0))); g.position = Vector3(sx * 0.42, 0.0, 0); head.add_child(g)
-			var cord := _mi(Models.box(0.84, 0.03, 0.03), Models.glow_mat(Color(col2, 0.9))); head.add_child(cord)
+				var w := _mi(Models.sphere(0.16, 8), Models.glow_mat(Color(col, 1.0)))
+				w.position = Vector3(sx * 0.42, 0, 0)
+				head.add_child(w)
+				var g := _mi(Models.sphere(0.08, 6), Models.glow_mat(Color(col2, 1.0)))
+				g.position = Vector3(sx * 0.42, 0.0, 0)
+				head.add_child(g)
+			var cord := _mi(Models.box(0.84, 0.03, 0.03), Models.glow_mat(Color(col2, 0.9)))
+			head.add_child(cord)
 		"dagger":
 			# the Phantom Dagger: a long dark blade with a violet edge, point first
-			var bl := _mi(Models.box(0.07, 0.035, 0.62), Models.glow_mat(Color(Color("2a1f3a"), 1.0))); bl.position.z = -0.12; head.add_child(bl)
-			var ed := _mi(Models.box(0.025, 0.05, 0.6), Models.glow_mat(Color(col, 1.0))); ed.position = Vector3(0.04, 0, -0.12); head.add_child(ed)
-			var gd := _mi(Models.box(0.2, 0.05, 0.05), Models.glow_mat(Color(col2, 1.0))); gd.position.z = 0.2; head.add_child(gd)
+			var bl := _mi(Models.box(0.07, 0.035, 0.62), Models.glow_mat(Color(Color("2a1f3a"), 1.0)))
+			bl.position.z = -0.12
+			head.add_child(bl)
+			var ed := _mi(Models.box(0.025, 0.05, 0.6), Models.glow_mat(Color(col, 1.0)))
+			ed.position = Vector3(0.04, 0, -0.12)
+			head.add_child(ed)
+			var gd := _mi(Models.box(0.2, 0.05, 0.05), Models.glow_mat(Color(col2, 1.0)))
+			gd.position.z = 0.2
+			head.add_child(gd)
 		"blade":
 			# a Jackpot blade: a small cyan-and-red spinning star
 			head.add_child(_mi(star_mesh(3, 0.3), Models.glow_mat(Color(col, 1.0))))
@@ -248,7 +304,8 @@ func _build_rider(kind: String, col: Color, col2: Color) -> Node3D:
 			head.scale = Vector3.ONE * 0.3
 		"crescent_bolt":
 			# Juggernaut's Searing Wave: a red standing crescent of flame, pushed blade first
-			var cr := _mi(_crescent_mesh(120.0), _mat(M_CRESCENT, col, col2)); cr.name = "Cres"
+			var cr := _mi(_crescent_mesh(120.0), _mat(M_CRESCENT, col, col2))
+			cr.name = "Cres"
 			(cr.material_override as ShaderMaterial).set_shader_parameter("progress", 1.0)
 			cr.position.z = 0.8
 			cr.scale = Vector3.ONE * 1.3
@@ -257,8 +314,13 @@ func _build_rider(kind: String, col: Color, col2: Color) -> Node3D:
 			# the Warchain's head: a barbed iron hook
 			head.add_child(_mi(Models.box(0.12, 0.12, 0.4), Models.toon(Color("4a3a30"), false, 0.2)))
 			for sx in [-1.0, 1.0]:
-				var b := _mi(Models.box(0.06, 0.06, 0.26), Models.glow_mat(Color(col, 1.0))); b.position = Vector3(sx * 0.1, 0, -0.18); b.rotation.y = sx * 0.7; head.add_child(b)
-	var tr := _mi(_ribbon_mesh(), _mat(M_COMET, col, col2)); tr.name = "Trail"; n.add_child(tr)
+				var b := _mi(Models.box(0.06, 0.06, 0.26), Models.glow_mat(Color(col, 1.0)))
+				b.position = Vector3(sx * 0.1, 0, -0.18)
+				b.rotation.y = sx * 0.7
+				head.add_child(b)
+	var tr := _mi(_ribbon_mesh(), _mat(M_COMET, col, col2))
+	tr.name = "Trail"
+	n.add_child(tr)
 	return n
 
 func _rider(kind: String, col: Color, col2: Color) -> Node3D:
@@ -272,15 +334,19 @@ func _rider(kind: String, col: Color, col2: Color) -> Node3D:
 
 ## Rides a look on a shot (match.gd's shot dictionary) until it ends; `on_end(at)` runs when it does.
 ## trail: the streak's length in m, width: its width.
-func ride(sd: Dictionary, kind: String, col: Color, col2: Color, trail := 1.2, width := 0.3, on_end := Callable()) -> void:
+func ride(sd: Dictionary, kind: String, col: Color, col2: Color, trail := 1.2, width := 0.3,
+		on_end := Callable()) -> void:
 	var n := _rider(kind, col, col2)
-	riders.append({"node": n, "sd": sd, "kind": kind, "spin": randf() * TAU, "trail": trail, "width": width, "on_end": on_end, "last": sd["pos"]})
+	riders.append({"node": n, "sd": sd, "kind": kind, "spin": randf() * TAU, "trail": trail, "width": width,
+			"on_end": on_end, "last": sd["pos"]})
 	_pose(n, kind, sd["pos"], sd["vel"], trail, width, 0.0)
 
 ## Shows a projectile look this step (a kit-run projectile: the Bola flying on). Stop calling and it hides.
-func place(id: String, kind: String, at: Vector3, vel: Vector2, col: Color, col2: Color, trail := 1.0, width := 0.3) -> void:
+func place(id: String, kind: String, at: Vector3, vel: Vector2, col: Color, col2: Color, trail := 1.0,
+		width := 0.3) -> void:
 	var e: Dictionary = placed.get(id, {})
-	if e.is_empty() or not is_instance_valid(e["node"]) or String(e["kind"]) != kind or not (e["node"] as Node3D).visible:
+	if (e.is_empty() or not is_instance_valid(e["node"]) or String(e["kind"]) != kind
+			or not (e["node"] as Node3D).visible):
 		e = {"node": _rider(kind, col, col2), "kind": kind, "spin": 0.0}
 		placed[id] = e
 	e["t"] = m.time
@@ -326,7 +392,8 @@ func chain(id: String, a: Vector3, b: Vector3, wavy: float, col: Color, col2: Co
 	mi2.visible = true
 	mi2.global_transform = Transform3D.IDENTITY
 	var mt := mi2.material_override as ShaderMaterial
-	mt.set_shader_parameter("color", col); mt.set_shader_parameter("color2", col2)
+	mt.set_shader_parameter("color", col)
+	mt.set_shader_parameter("color2", col2)
 	var length := a.distance_to(b)
 	mt.set_shader_parameter("stripes", 1.0)
 	var im2: ImmediateMesh = e["mesh"]
@@ -346,8 +413,10 @@ func chain(id: String, a: Vector3, b: Vector3, wavy: float, col: Color, col2: Co
 		var wv := sin(k * length * 5.0 + m.time * 18.0) * 0.22 * wavy * sin(k * PI)
 		p += side * wv + Vector3.UP * wv * 0.4
 		var up := Vector3.UP * width * 0.5
-		im2.surface_set_uv(Vector2(k * links, 0)); im2.surface_add_vertex(p - up - side * width * 0.3)
-		im2.surface_set_uv(Vector2(k * links, 1)); im2.surface_add_vertex(p + up + side * width * 0.3)
+		im2.surface_set_uv(Vector2(k * links, 0))
+		im2.surface_add_vertex(p - up - side * width * 0.3)
+		im2.surface_set_uv(Vector2(k * links, 1))
+		im2.surface_add_vertex(p + up + side * width * 0.3)
 	im2.surface_end()
 
 func unchain(id: String) -> void:
@@ -366,7 +435,8 @@ func _process(delta: float) -> void:
 	for e in live.duplicate():
 		var n: Node3D = e["node"]
 		if not is_instance_valid(n):
-			live.erase(e); continue
+			live.erase(e)
+			continue
 		e["t"] = float(e["t"]) + delta
 		var u := clampf(float(e["t"]) / float(e["dur"]), 0.0, 1.0)
 		var mt: ShaderMaterial = e["mat"]
