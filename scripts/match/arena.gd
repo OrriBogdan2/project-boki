@@ -8,7 +8,7 @@ extends RefCounted
 ##   one that stands and watches you, one that strafes, a heavy one by a pillar to slam into; each
 ##   shows its damage per second, last hit and total over its head, and heals up when left alone
 ## - a sparring bot you can switch Off / Idle / Moving / Fighting (N), and give any archetype
-## - a reset (X), cooldowns off (O: dash, RMB, E, R and the glove), the ultimate unlocked (U)
+## - a reset (Backspace; X is the ultimate's second key), cooldowns off (O: dash, RMB, E, R and the glove), the ultimate unlocked (U)
 ## - a quick swap without leaving: 2-7 picks an archetype; L opens the loadout (archetype, weapon,
 ##   Boki, glove, toggles), K the kit card
 ## Nobody dies here: a downed player or bot is back up after a beat.
@@ -546,7 +546,7 @@ func _fill_menu(v: VBoxContainer) -> void:
 	var tr := HBoxContainer.new(); tr.add_theme_constant_override("separation", 6)
 	tr.add_child(UI.choice("Cooldowns off  (O)", cd_off, func(): toggle_cd(); _fill_menu(v), 170))
 	tr.add_child(UI.choice("Ultimate unlocked  (U)", ult_on, func(): toggle_ult(); _fill_menu(v), 200))
-	tr.add_child(UI.button("Reset  (X)", func(): reset(), 110))
+	tr.add_child(UI.button("Reset  (Backspace)", func(): reset(), 110))
 	right.add_child(tr)
 	var br := HBoxContainer.new(); br.add_theme_constant_override("separation", 6)
 	br.add_child(UI.label("Bot (N)", 14, UI.MUTED))
@@ -609,7 +609,7 @@ class ArenaKeys extends Node:
 				if a.card_layer: a._close_card()
 				elif a.menu_layer: a.close_menu()
 				else: handled = false
-			KEY_X:
+			KEY_BACKSPACE:
 				if not a.m.paused: a.reset()
 			KEY_N: a.cycle_bot()
 			KEY_O: a.toggle_cd()

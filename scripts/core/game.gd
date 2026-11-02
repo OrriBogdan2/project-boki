@@ -82,7 +82,7 @@ func _setup_input() -> void:
 	_key("glide", [], MOUSE_BUTTON_XBUTTON2)  # hold Mouse 5 (the front side button) in the air to glide, like holding Space; never jumps
 	_key("glide", [], MOUSE_BUTTON_XBUTTON1)  # Mouse 4 glides too (not advertised)
 	_key("reload", [])                        # reloading is automatic
-	_key("ultimate", [KEY_R])                 # the archetype's ultimate (level 6); bonded when the bond meter is full
+	_key("ultimate", [KEY_R, KEY_X])          # (X: its default second key) the archetype's ultimate (level 6); bonded when the bond meter is full
 	_key("tonic", [KEY_1])
 	_key("scores", [KEY_TAB])
 	_key("menu", [KEY_ESCAPE])
@@ -90,6 +90,7 @@ func _setup_input() -> void:
 	_key("talk", [KEY_T])                     # at home: talk to a kin
 	_key("details", [KEY_C])                  # at home: a kin's details
 	_key("whistle", [KEY_H])                  # at home: whistle, and your kin come running
+	_key("hero", [KEY_J])                     # at home: change hero (class and archetype) right there
 	_key("inventory", [KEY_I])                # your things
 	_key("build", [KEY_B])                    # at home: build mode (lay out the island); indoors: decorate
 	_key("rotate", [KEY_R])                   # build mode: turn what you're holding
@@ -98,7 +99,7 @@ func _setup_input() -> void:
 	_key("pass_lead", [KEY_P])                # riding in / dropping: pass the drop lead to a squadmate
 	_key("record", [KEY_F10])                 # recording mode (Record): clean HUD, then no HUD
 	_key("record_orbit", [KEY_F9])            # recording mode, HUD hidden: slow camera orbit
-	_key("separate", [KEY_X])                 # riding in / dropping behind the leader: break away and drop solo
+	_key("separate", [KEY_Z])                 # (was X, now the ultimate's second key) riding in / dropping behind the leader: break away and drop solo
 
 func goto(screen: String, opts := {}) -> void:
 	match_opts = opts

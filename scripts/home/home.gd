@@ -44,7 +44,6 @@ var chat_log: Array = []       # [{role, content}]
 var chat_kin: Dictionary = {}
 var chat_input: LineEdit
 var chat_busy := false
-var chat_offline_noted := false
 var emote_labels: Array = []
 var pet_done := {}
 
@@ -53,6 +52,7 @@ var visit: Dictionary = {}     # when visiting someone: their island snapshot (s
 var visit_id := ""
 var petted := {}
 var hecon: HomeEcon = null       # the armory, feeders, starving, graveyard and Soul Shrine (home_econ.gd)
+var water := HomeWater.new(self)      # the ponds you wade and swim in (home_water.gd)
 var hb: HomeBuild = null         # build mode and the island's layout (home_build.gd, home_layout.gd)
 var training: HomeTraining = null  # the Training Grounds isle, where your combat kit works (home_training.gd)
 var hw: HomeWork = null            # kin at work: jobs, stations and the Job Board (home_work.gd, Work)
@@ -197,7 +197,10 @@ func _classic_layout(path_col: Color) -> void:
 	for z in range(30, 38):
 		for x in range(43, 48):
 			world.paint_tile(x, z, Color("6b4a33"))
-	world.set_block_rect(32, 36, 34, 38)   # pond
+	# the pond: water you can wade into and swim in (HomeWater), nothing grows in it
+	for z in range(36, 39):
+		for x in range(32, 35):
+			world.no_deco[world.idx(x, z)] = true
 
 # ------------------------------------------------------------------ a farm-start island's fixtures
 func _fx1(fx: String) -> Dictionary:
@@ -324,7 +327,7 @@ func _ready_rest() -> void:
 		keep_clear.append([rc[0] - 1, rc[1] - 1, rc[2] + 1, rc[3] + 2])
 	keep_clear.append([BURROW_RECT[0] - 1, BURROW_RECT[1] - 1, BURROW_RECT[2] + 1, BURROW_RECT[3] + 2])
 	for k in Data.ISLES:
-		var rc: Array = Data.ISLES[k]["bridge"]
+		var rc: Array = HomeLayout.isle_bridge(world, k)["rect"]
 		keep_clear.append([rc[0] - 2, rc[1] - 2, rc[2] + 2, rc[3] + 2])
 	for rc in keep_clear:
 		for z in range(rc[1], rc[3] + 1):
@@ -333,7 +336,7 @@ func _ready_rest() -> void:
 					world.kind[world.idx(x, z)] = World.T_GROUND
 	# bridges: work out which tiles they cover before any are opened
 	for k in Data.ISLES:
-		bridges[k] = {"tiles": world.bridge_tiles(Data.ISLES[k]["bridge"]), "built": _has_br(k)}
+		bridges[k] = {"tiles": world.bridge_tiles(HomeLayout.isle_bridge(world, k)["rect"]), "built": _has_br(k)}
 		if bridges[k]["built"]:
 			world.open_bridge(bridges[k]["tiles"])
 	training.prepare()
@@ -377,6 +380,7 @@ func _ready_rest() -> void:
 	(portal.get_node("Beam") as CPUParticles3D).emitting = true
 	if not fs:
 		var pond := Models.pond(1.9, 1.5); pond.position = Vector3(33.5, 0, 37.5); add_child(pond)
+		(pond.get_child(0) as MeshInstance3D).material_override = HomeBuild.water_mat()      # animated water
 		for fp in [[Vector3(45.4, 0, 29.4), 0.0, 5.0], [Vector3(45.4, 0, 37.6), 0.0, 5.0], [Vector3(47.8, 0, 33.5), PI / 2, 8.0], [Vector3(42.4, 0, 35.6), PI / 2, 4.0]]:
 			var f := Models.fence(fp[2]); f.position = fp[0]; f.rotation.y = fp[1]; add_child(f)
 	# (the farm's lamps and flower beds are decorations now: see HomeLayout.STOCK)
@@ -731,7 +735,8 @@ func _build_bridges() -> void:
 		var br: Dictionary = bridges[k]
 		var node := Node3D.new(); add_child(node)
 		br["node"] = node
-		var sg := Models.signpost([isd["name"]]); sg.position = Vector3(isd["sign"].x, 0, isd["sign"].y); add_child(sg)
+		var sgp: Vector2 = HomeLayout.isle_bridge(world, k)["sign"]
+		var sg := Models.signpost([isd["name"]]); sg.position = Vector3(sgp.x, 0, sgp.y); add_child(sg)
 		br["sign"] = sg
 		if br["built"]:
 			_lay_planks(k, false)
@@ -749,7 +754,7 @@ func _build_bridges() -> void:
 		br["label"] = lbl
 
 func _bridge_axis(k: String) -> Dictionary:
-	var rc: Array = Data.ISLES[k]["bridge"]
+	var rc: Array = HomeLayout.isle_bridge(world, k)["rect"]
 	var horiz: bool = rc[2] - rc[0] > rc[3] - rc[1]
 	return {"horiz": horiz, "width": (rc[3] - rc[1] + 1.0) if horiz else (rc[2] - rc[0] + 1.0),
 		"mid": (rc[1] + rc[3] + 1) * 0.5 if horiz else (rc[0] + rc[2] + 1) * 0.5}
@@ -1204,9 +1209,11 @@ func _move_player(d: float) -> void:
 	else:
 		crouch_on = can_act and Input.is_action_pressed("crouch")
 	if has_meta("crouch_test"): crouch_on = true
-	var crouching := crouch_on and not air and dash_t <= 0.0 and not gliding
+	var wdep := water.depth(ppos.x, ppos.z) if py < 0.4 else 0
+	water.step(wdep, d, mv, air)
+	var crouching := crouch_on and not air and dash_t <= 0.0 and not gliding and wdep == 0
 	p_crouch_k = move_toward(p_crouch_k, 1.0 if crouching else 0.0, d * 8.0)
-	if can_act and Input.is_action_just_pressed("dash") and dash_t <= 0.0:
+	if can_act and Input.is_action_just_pressed("dash") and dash_t <= 0.0 and not water.swimming:
 		try_dash(mv, air)
 	_mv = mv
 	var hv := Vector2(pvel.x, pvel.z)
@@ -1215,10 +1222,10 @@ func _move_player(d: float) -> void:
 		hv = dash_v
 		if dash_t <= 0.0: hv = dash_v * (Hunter.DASH_CARRY_AIR if air else Hunter.DASH_CARRY_GROUND)
 	else:
-		var spd := Hunter.GLIDE_SPEED * 1.15 if gliding else SPEED * (CROUCH_SPEED if crouching else 1.0)
+		var spd := Hunter.GLIDE_SPEED * 1.15 if gliding else SPEED * (CROUCH_SPEED if crouching else 1.0) * water.speed_mul(wdep, air)
 		hv += (mv * spd - hv) * (1.0 - exp(-(14.0 if not air else (4.0 if gliding else 6.0)) * d))
-	# on the ground the island's edge stops you; in the air (a jump, a glide) you can sail out past it
-	var guard := not air
+	# the island's edge doesn't hold you: walk off it and you fall (glide back, or the abyss returns you)
+	var guard := false
 	var p0 := ppos
 	var nx := ppos.x + hv.x * d
 	var ox := world.occupy(nx, ppos.z, 0.38, py, guard)
@@ -1252,7 +1259,7 @@ func _move_player(d: float) -> void:
 	air = py > gh + 0.001 or pvy > 0.0
 	# jump; in the air, a second press (or holding Space, or the glide key) opens the glider
 	var jump_now := can_act and Input.is_action_just_pressed("jump")
-	if jump_now and not air:
+	if jump_now and not air and not water.swimming:
 		pvy = JUMP_V
 		air = true
 		glide_hold = 0.0
@@ -1294,7 +1301,7 @@ func _move_player(d: float) -> void:
 		if gh > World.VOID + 1.0 and world.kind[world.idx(int(floor(ppos.x)), int(floor(ppos.z)))] == World.T_GROUND:
 			safe_at = ppos
 	_glider_look()
-	player.position = ppos + Vector3(0, py, 0)
+	player.position = ppos + Vector3(0, py - water.drop_y(), 0)
 	# face the mouse; with the mouse outside the window, face where you're walking
 	var vp := get_viewport()
 	var mp := vp.get_mouse_position()
@@ -1308,11 +1315,12 @@ func _move_player(d: float) -> void:
 		want = atan2(-hv.x, -hv.y)
 	if hg and hg.busy(): want = hg.face()      # chopping: face the tree
 	pface = lerp_angle(pface, want, minf(1.0, d * 14.0))
-	player.rotation.y = pface
+	player.basis = cam.char_basis(pface, player.scale)     # leaned toward the camera, as in a match
+	player.basis = water.tilt(player.basis, hv.length())      # swimming: tipped into a stroke
 	if p_anim == null or p_anim.model != player:
 		p_anim = HunterAnim.new(player)
 	p_fired += d
-	var ps := {"vel": Vector3(hv.x, pvy if air else 0.0, hv.y), "face": pface, "grounded": not air, "gliding": gliding, "rolling": dash_t > 0.0, "dash_dir": dash_v, "fired": p_fired,
+	var ps := {"vel": Vector3(hv.x, pvy if air else 0.0, hv.y), "face": pface, "grounded": not air, "gliding": gliding or water.k > 0.5, "rolling": dash_t > 0.0, "dash_dir": dash_v, "fired": p_fired,
 		"swing_n": p_swing_n, "combo": maxi(0, p_swing_n - 1) % 3, "crouch": p_crouch_k}
 	if air and not gliding and gh > World.VOID + 1.0:
 		ps["air_h"] = clampf(py - gh, 0.0, 30.0)
@@ -1459,6 +1467,7 @@ func _move_kin(d: float) -> void:
 		k["pos"] = pos
 		var n: Node3D = k["node"]
 		n.position = pos
+		water.paddle(k, pos, n, d)
 		if k.get("going_in", false) and Vector2(pos.x - _house_door().x, pos.z - _house_door().z).length() < 0.6:
 			k.erase("going_in")
 			var night_now := sin((day_t - 0.25) * TAU) < -0.2
@@ -1604,11 +1613,11 @@ var abyss_fx: CanvasLayer = null
 var abyss_k := 0.0
 func _abyss_tint(d: float) -> void:
 	var want := 0.0
-	if world.is_void(ppos.x, ppos.z) and climb.is_empty():
+	if world.is_void(ppos.x, ppos.z) and climb.is_empty() and pvy <= ABYSS_FX.RISE_OFF:     # (rising back up: no tint)
 		var top := _abyss_lip() - 0.5
 		var kill: float = world.abyss_floor(ppos.x, ppos.z) - Hunter.ABYSS_EXTRA - (Hunter.ABYSS_GLIDE_ROOM if gliding else 0.0)
 		want = ABYSS_FX.danger_depth(top - py, top - kill)
-	abyss_k = want if want < abyss_k else lerpf(abyss_k, want, 1.0 - exp(-12.0 * d))     # snaps back as you come up
+	abyss_k = lerpf(abyss_k, want, 1.0 - exp(-(12.0 if want > abyss_k else 9.0) * d))     # in fast, out over a few frames
 	if abyss_fx == null and abyss_k > 0.004:
 		abyss_fx = ABYSS_FX.new()
 		add_child(abyss_fx)
@@ -1997,7 +2006,7 @@ func _find_interact() -> void:
 	for k in bridges:
 		if bridges[k]["built"]:
 			continue
-		var sg: Vector2 = Data.ISLES[k]["sign"]
+		var sg: Vector2 = HomeLayout.isle_bridge(world, k)["sign"]
 		var d := p2.distance_to(sg)
 		if d < 2.4 and d < bd + 0.4: bd = d; best = {"kind": "bridge", "isle": k}
 	for k in kins:
@@ -2248,6 +2257,15 @@ func _unhandled_input(event: InputEvent) -> void:
 			return
 		if event.button_index == MOUSE_BUTTON_WHEEL_UP: cam.zoom_to = clampf(cam.zoom_to - 0.08, 0.55, 1.6)
 		if event.button_index == MOUSE_BUTTON_WHEEL_DOWN: cam.zoom_to = clampf(cam.zoom_to + 0.08, 0.55, 1.6)
+	if panel_open == "Hero" and event is InputEventKey and event.pressed and not event.echo and (event as InputEventKey).physical_keycode == KEY_K and has_meta("hero_hover"):
+		_hero_kit(String(get_meta("hero_hover")))      # K over a hero: its full kit card
+		get_viewport().set_input_as_handled()
+		return
+	if event.is_action_pressed("hero") and visit.is_empty() and not chat_open and not Overlay.is_open() and not building_now and (panel_open == "" or panel_open == "Hero"):
+		if panel_open == "Hero": _close_panel()
+		else: _open_hero()
+		get_viewport().set_input_as_handled()
+		return
 	if event.is_action_pressed("whistle") and panel_open == "" and not chat_open and visit.is_empty() and train.is_empty() and not Overlay.is_open():
 		_whistle()
 		get_viewport().set_input_as_handled()
@@ -2347,6 +2365,7 @@ func hub_items() -> Array:
 	if has_method("open_build"):
 		items.append(["build", "Build", "hammer", func(): call("open_build")])
 	items.append(["settings", "Settings", "gear", func(): Overlay.ctx = "home"; Overlay.open_settings()])
+	items.append(["hero", "Hero", "swap", _open_hero])
 	return items
 
 func _build_hub() -> void:
@@ -3185,7 +3204,7 @@ func _kin_match_rows(rec: Dictionary, c2: Control, compact: bool) -> void:
 		ab_row.call(Settings.key_cap("signature") if ai == 0 else "auto", ad.display_name, (KinText.ability(eff) if ai == 0 else KinText.when(ad) + ": " + KinText.ability(eff)), KinText.color(ad).lerp(UI.INK, 0.3))
 	var ud := KinLib.merge(String(sp.get("ultimate", "")))
 	if ud:
-		ab_row.call(Settings.key_cap("ultimate"), "Merge: " + ud.display_name, " ".join(KinText.merge(ud, kspec != null and kspec.carry_style == "mount")), Color("ffd84a").lerp(UI.INK, 0.3))
+		ab_row.call(Settings.key_caps("ultimate"), "Merge: " + ud.display_name, " ".join(KinText.merge(ud, kspec != null and kspec.carry_style == "mount")), Color("ffd84a").lerp(UI.INK, 0.3))
 	if kspec == null:
 		return
 	var lines: Array = [[KinText.carry(kspec), KinRules.cat_color("sustain").lerp(UI.INK, 0.35)]]
@@ -3522,9 +3541,6 @@ func _send_chat() -> void:
 			_say(k, reply, clampf(3.0 + reply.length() * 0.06, 4.0, 10.0))
 		if chat_kin.get("uid", "") == rec["uid"]:
 			_chat_bubble("assistant", reply)
-			if offline and not chat_offline_noted and is_instance_valid(chat_hist):
-				chat_offline_noted = true
-				_toast(_offline_reason())
 		var loves_chat: bool = rec["likes"]["play"] == "chat"
 		Care.change(rec, "joy", 6.0 if loves_chat else 2.0)
 		if loves_chat and Care.discover(rec, "play"): _toast("%s loves chatting with you" % rec["name"])
@@ -3535,13 +3551,6 @@ func _send_chat() -> void:
 			Save.save_game()
 			if Bridge.ai_ok and rec["uid"] == Save.d.get("active", "") and not rec.has("lines"):
 				Bridge.refresh_lines(rec), "default")
-
-func _offline_reason() -> String:
-	match Bridge.last_err:
-		"no_page": return "%s answers on their own here. In the web version they talk through Claude." % chat_kin.get("name", "Your Boki")
-		"not_granted": return "Claude isn't allowed on this page yet, so %s answers on their own." % chat_kin.get("name", "Your Boki")
-		"rate_limited": return "Claude is busy for a moment, so %s answered on their own." % chat_kin.get("name", "Your Boki")
-	return "Couldn't reach Claude, so %s answered on their own." % chat_kin.get("name", "Your Boki")
 
 # ---- expedition
 var exp_cls := ""
@@ -3696,6 +3705,99 @@ func _open_kit_card() -> void:
 	var card := KitCard.make(Arch.of_save(), String(ak.get("species", "")))
 	v.add_child(card)
 	UI.footer_left(v).add_child(UI.ghost("Back to the expedition", _open_expedition, 0))
+
+# ---- hero: change who you play right here on the farm (no trip to the expedition panel)
+## Whether an archetype can be picked yet, and what it takes if not. Everything is open for now;
+## the class-unlock system plugs in here (return false and a requirement line for locked ones).
+static func hero_unlocked(_arch: String) -> bool:
+	return true
+static func hero_requirement(_arch: String) -> String:
+	return ""
+
+## The six heroes (two per weight class): portrait, name, weight class; hover for the kit, K or the
+## Kit button for the full kit card. Picking one swaps your hunter in place and saves it as your
+## expedition default (the expedition panel and the Training Grounds start on it).
+func _open_hero() -> void:
+	var v := _new_panel("Hero", 860)
+	UI.subtitle(v, "Who you play. Saved as your expedition pick. Hover a hero for its kit, %s to open the full kit card." % "K")
+	var grid := GridContainer.new(); grid.columns = 3
+	grid.add_theme_constant_override("h_separation", 12); grid.add_theme_constant_override("v_separation", 12)
+	v.add_child(grid)
+	var cur := Arch.of_save()
+	for cls in ["light", "medium", "heavy"]:
+		for a in Arch.of_class(cls):
+			var ak: String = a
+			var unlocked := hero_unlocked(ak)
+			var card := UI.tile_card(ak == cur, func(): if unlocked: _pick_hero(ak), 10, Arch.color(ak))
+			card.custom_minimum_size = Vector2(258, 0)
+			var row := UI.hbox(10)
+			card.add_child(row)
+			var vp := Portraits.make(cls, Data.TEAM_COLORS[0], Arch.default_weapon(ak), Save.d.get("look", {}), ak)
+			card.add_child(vp)
+			var tex := TextureRect.new()
+			tex.texture = vp.get_texture()
+			tex.custom_minimum_size = Vector2(84, 84)
+			tex.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+			tex.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+			tex.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+			tex.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			row.add_child(tex)
+			var col := UI.vbox(2); col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			col.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			row.add_child(col)
+			col.add_child(UI.label(Arch.name_of(ak), 18, Arch.color(ak) if unlocked else UI.FAINT, UI.big))
+			var cd: Dictionary = Data.CLASSES[cls]
+			col.add_child(UI.label("%s  ·  %d health  ·  %d dash%s" % [String(cd["name"]), int(cd["hp"]), int(cd["dashes"]), "es" if int(cd["dashes"]) > 1 else ""], 12, UI.MUTED))
+			var adf := Arch.def(ak)
+			var fan := UI.para(String(adf.get("fantasy", "")), 12, UI.INK if unlocked else UI.FAINT)
+			fan.custom_minimum_size.x = 150
+			col.add_child(fan)
+			if ak == cur:
+				col.add_child(UI.label("Playing", 12, UI.GOOD, UI.semi))
+			elif not unlocked:
+				col.add_child(UI.label("Locked: " + hero_requirement(ak), 12, UI.FAINT, UI.semi))
+			var kitb := UI.ghost("Kit (K)", func(): _hero_kit(ak), 0)
+			kitb.focus_mode = Control.FOCUS_NONE
+			col.add_child(kitb)
+			card.tooltip_text = "%s  ·  %s class\nDash: %s  ·  Passive: %s\nRMB: %s  ·  E: %s  ·  R: %s (level 6)" % [Arch.name_of(ak), String(cd["name"]), String(adf["dash"]["name"]), String(adf["passive"]["name"]), String(adf["rmb"]["name"]), String(adf["e"]["name"]), String(adf["r"]["name"])]
+			card.set_meta("arch", ak)
+			card.mouse_entered.connect(func(): set_meta("hero_hover", ak))
+			if not unlocked:
+				card.modulate = Color(0.55, 0.55, 0.6, 0.8)
+			grid.add_child(card)
+	set_meta("hero_grid", grid)
+
+func _hero_kit(ak: String) -> void:
+	var v := _new_panel("Kit: %s" % Arch.name_of(ak), KitCard.SIZE.x + 40, true)
+	v.add_child(KitCard.make(ak, String(Save.active_kin().get("species", ""))))
+	UI.footer_left(v).add_child(UI.ghost("Back to heroes", _open_hero, 0))
+
+## Plays `ak` from now on: saved as the expedition pick (class, archetype, its weapon family), and the
+## hunter on the farm turns into it with a flash, a puff and a sound.
+func _pick_hero(ak: String) -> void:
+	if not Arch.exists(ak) or not hero_unlocked(ak):
+		return
+	var same := ak == Arch.of_save()
+	Save.d["cls"] = Arch.weight(ak)
+	Save.d["arch"] = ak
+	Save.d["weapon"] = Arch.default_weapon(ak)
+	if HomeEcon.fix_loadout_class(): pass
+	Save.save_game()
+	_close_panel()
+	if same:
+		return
+	_refresh_player_model()
+	# the flourish: a burst of the hero's colour, a white flash on the new body, a pop of scale
+	var col := Arch.color(ak)
+	if fx:
+		fx.burst(ppos + Vector3(0, py + 1.0, 0), col, 28, 4.0, 0.6)
+		fx.burst(ppos + Vector3(0, py + 0.3, 0), Color.WHITE, 12, 2.5, 0.4)
+	Sfx.play("unlock", null, -6.0, 0.0, 1.15)
+	Sfx.play("whoosh", null, -10.0, 0.0, 1.3)
+	player.scale = Vector3(0.6, 1.35, 0.6)
+	var tw := create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw.tween_property(player, "scale", Vector3.ONE, 0.35)
+	_toast("Now playing %s (%s). Your expeditions start with it." % [Arch.name_of(ak), String(Data.CLASSES[Arch.weight(ak)]["name"])])
 
 ## The old separate loadout page now lives inside the expedition panel.
 func _open_loadout() -> void:
@@ -4314,7 +4416,7 @@ func _show_when_free(lines: Array) -> void:
 func _open_ferry() -> void:
 	var v := _new_panel("Ferry", 520)
 	if not Social.available():
-		v.add_child(UI.label("The ferry connects you with other players: the town, guilds and friends' islands. It runs in the web version of Project Boki.", 15))
+		v.add_child(UI.label("The ferry will connect you with other players: the town, guilds and friends' islands. It isn't running yet. Check back in a later update.", 15))
 		return
 	v.add_child(UI.label("Where to?", 14, UI.MUTED))
 	v.add_child(UI.button("The town: market, notice board and guilds", func(): Game.goto("town", {"mode": "hub"}), 440))

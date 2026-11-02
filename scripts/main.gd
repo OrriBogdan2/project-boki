@@ -430,6 +430,18 @@ func _ready() -> void:
 	if "--life-check" in args:
 		_life_check()
 		return
+	if "--swim-check" in args:
+		set_meta("swim_check", load("res://tools/swim_check.gd").new())     # wading and swimming in the farm's pond
+		get_meta("swim_check").run(self)
+		return
+	if "--hero-check" in args:
+		set_meta("hero_check", load("res://tools/hero_check.gd").new())     # change hero on the farm
+		get_meta("hero_check").run(self)
+		return
+	if "--keybind-check" in args:
+		set_meta("keybind_check", load("res://tools/keybind_check.gd").new())     # two keys per action, the ult on R and X, clashes
+		get_meta("keybind_check").run(self)
+		return
 	if "--mantle-check" in args:
 		load("res://tools/mantle_check.gd").new().run(self)    # ledges you mean to climb, you climb; the rest never grab you
 		return
@@ -592,6 +604,7 @@ func _ready() -> void:
 			if a.begins_with("--rival-kin="): so["rival_kin"] = a.substr(12)
 			if a == "--glide-demo": so["glide_demo"] = true
 			if a == "--dashglide-demo": so["dashglide_demo"] = true
+			if a == "--dashpip-demo": so["dashpip_demo"] = true     # test: spend every dash, then watch the strip refill
 			if a.begins_with("--kin-demo="):
 				# test: bring this species (and the next one) and run its whole kit on the dummies
 				so["demo_kin"] = a.substr(11)
@@ -2709,7 +2722,7 @@ func _boss_check() -> void:
 	spot.call(P, F["dial"])
 	walk.call(P, -outv, 6.0, func(): return m.lairs.inside(F, P.pos, 0.3))
 	var in_gateway: bool = m.lairs.inside(F, P.pos, 0.3) and F["state"] == "open"
-	walk.call(P, outv, 3.0)
+	walk.call(P, outv, 1.5)      # (1.5 s: 3 s walked off the island edge, which is allowed now)
 	ok.call(in_gateway and F["state"] == "open" and fb.dormant and not F.get("locked", false) and not m.lairs.inside(F, P.pos, 0.5) and gate_free.call(F),
 		"before the fight: into the gateway and back out, the boss still asleep (%.1fm out)" % P.flat_dist(F["c"]))
 	# step in: it wakes and the gate seals behind you, the ward lit
@@ -2863,8 +2876,10 @@ func _boss_check() -> void:
 			var refused: bool = not (L["flown"] as Array).has(Q) and qy <= qy0 + 0.05 and not Q.auto_glide
 			spot.call(Q, up)
 			run.call(0.2)
-			refused = refused and not (L["flown"] as Array).has(Q) and Q.pos.y < float(L["c"].y) + 1.0 and not m.lairs.inside(L, Q.pos, 0.0)
+			# (a person walks off an island's edge now, so an outsider shoved off the lair may fall out of the match: that counts as shoved out)
+			refused = refused and not (L["flown"] as Array).has(Q) and Q.pos.y < float(L["c"].y) + 1.0 and (Q.out or not m.lairs.inside(L, Q.pos, 0.0))
 			ok.call(refused, "the updraft refuses outsiders: no lift over it (%.2fm), shoved off and out (%.1fm from the middle)" % [qy - qy0, Q.flat_dist(L["c"])])
+			if Q.out or Q.downed: Life.bring_back(m, Q, m.world.spawns[0] if not m.world.spawns.is_empty() else m.world.random_ground(), 1.0, false)
 			Q.ctrl = "idle"; park.call(Q)
 			# a hunter who fought rides it: up over the wall and away from the back, the gate still shut
 			spot.call(P, up)
@@ -3542,6 +3557,7 @@ func _drop_check() -> void:
 	if not hidden.is_empty():
 		var hc: Dictionary = hidden[0]
 		var before := sp.state_for(hc, P.team)
+		if P.out or P.downed: Life.bring_back(m, P, hc["pos"], 1.0, false)      # (walking off an island is allowed now: the player may have gone over the edge during the checks above; same bring-back as the ground half)
 		P.teleport(hc["pos"] + Vector3(1.5, 0, 0))
 		for i in 30: m.step(Match.DT)
 		print("DCHECK scouting %s: %s -> %s" % [hc["id"], before, sp.state_for(hc, P.team)])
@@ -3825,7 +3841,7 @@ func _home_build_check() -> void:
 	var wt: Vector2i = spot.call({"kind": "deco", "id": "bush", "from": -1})
 	hb.drag = {"from": wt, "tiles": {wt: true}, "last": wt}
 	hb.cells = [wt]; hb._check_cells()
-	ok.call(hb.place_held() and home.world.is_block(wt.x + 0.5, wt.y + 0.5), "a pond tile goes down and can't be walked into")
+	ok.call(hb.place_held() and home.water.depth(wt.x + 0.5, wt.y + 0.5) > 0 and not home.world.is_block(wt.x + 0.5, wt.y + 0.5), "a pond tile goes down (water you can wade into, but nothing can be built on it)")
 	# kin walk round a fence
 	var fx := 56; var fz := 41
 	var line: Array = []
@@ -3874,7 +3890,7 @@ func _home_build_check() -> void:
 	Save.d = JSON.parse_string(js)
 	var home2 = await _hb_home()
 	ok.call(home2.lots["workshop"]["at"].distance_to(ws_at) < 0.01 and (HomeLayout.of(Save.d)["deco"] as Array).size() == deco_n and home2.hb.nodes.size() > 0 and home2.world.is_block(fx + 0.5, fz + 0.5), "after a save and reload the Workshop, %d decorations and the fence are where they were" % deco_n)
-	ok.call(home2.world.is_block(wt.x + 0.5, wt.y + 0.5) and home2.world.paint.has(home2.world.idx(pt.x, pt.y)), "the pond tile and the path come back too")
+	ok.call(home2.water.depth(wt.x + 0.5, wt.y + 0.5) > 0 and home2.world.paint.has(home2.world.idx(pt.x, pt.y)), "the pond tile and the path come back too")
 	# expanding
 	var gl := int(HomeLayout.of(Save.d)["grow"])
 	ok.call(home2.hb.expand() and int(HomeLayout.of(Save.d)["grow"]) == gl + 1, "Expand pays and grows the island a step (now %d)" % (gl + 1))

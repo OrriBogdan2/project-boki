@@ -1,0 +1,54 @@
+extends RefCounted
+## --hero-check: changing hero on the farm (Home._open_hero, J or the Hero button). Six heroes, two
+## per weight class; picking one swaps the farm hunter's model in place and saves it as the expedition
+## pick (class, archetype, weapon family), so the expedition panel and the Training Grounds start on
+## it; locked heroes would grey out (all open for now). With --shots-dir=<dir>: the panel and the result.
+
+var bad := 0
+
+func ok(cond: bool, what: String) -> void:
+	print("HERO %s %s" % ["ok  " if cond else "FAIL", what])
+	if not cond: bad += 1
+
+func run(main: Node) -> void:
+	var tree := main.get_tree()
+	Save.no_write = true
+	var d := Save.fresh()
+	var k := Save.new_kin("zapple", "Pip"); d["roster"].append(k); d["active"] = k["uid"]
+	d["tutorial"] = {"hatched": true, "intro": true, "home": true, "day1_done": true}
+	d["cls"] = "medium"; d["arch"] = "gunslinger"
+	Save.d = d
+	var hm = await main._hb_home()
+	for i in 30: await tree.process_frame
+	var shot := ""
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--shots-dir="): shot = a.substr(12)
+	var items: Array = hm.hub_items().map(func(it): return String(it[0]))
+	ok(items.has("hero"), "the farm's bottom bar has a Hero button (%s)" % str(items))
+	ok(InputMap.has_action("hero") and Settings.key_cap("hero") == "J", "and a key (%s), rebindable in Settings" % Settings.key_cap("hero"))
+	var ev := InputEventAction.new(); ev.action = "hero"; ev.pressed = true
+	hm._unhandled_input(ev)
+	await tree.process_frame
+	ok(hm.panel_open == "Hero", "J opens the hero panel on the farm")
+	var grid: GridContainer = hm.get_meta("hero_grid")
+	var cards: Array = grid.get_children()
+	var archs: Array = cards.map(func(c): return String(c.get_meta("arch", "")))
+	ok(cards.size() == 6 and archs.has("thief") and archs.has("bulwark"), "six heroes: %s" % str(archs))
+	ok(cards.all(func(c): return String(c.tooltip_text).contains("Dash:") and String(c.tooltip_text).contains("class")), "each shows its weight class and kit on hover")
+	ok(Arch.ids().all(func(a): return hm.hero_unlocked(a)), "everything is unlocked for now (hero_unlocked is the hook for the unlock system)")
+	for i in 20: await tree.process_frame
+	if shot != "": tree.root.get_texture().get_image().save_png(shot + "/hero_panel.png")
+	var old_model: Node3D = hm.player
+	hm._pick_hero("archer")
+	await tree.process_frame
+	ok(String(Save.d["cls"]) == "light" and Arch.of_save() == "archer" and String(Save.d["weapon"]) == Arch.default_weapon("archer"), "picking the Archer saves it as your expedition pick (cls %s, arch %s, weapon %s)" % [Save.d["cls"], Arch.of_save(), Save.d["weapon"]])
+	ok(hm.player != old_model and is_instance_valid(hm.player) and hm.panel_open == "", "and the farm hunter turns into it in place")
+	hm._open_expedition()
+	await tree.process_frame
+	ok(hm.panel_open == "Expedition" and Arch.of_save() == "archer", "the expedition panel opens on it")
+	hm._close_panel()
+	for i in 12: await tree.process_frame
+	if shot != "": tree.root.get_texture().get_image().save_png(shot + "/hero_swapped.png")
+	hm.queue_free()
+	print("HERO DONE, failures: %d" % bad)
+	tree.quit()

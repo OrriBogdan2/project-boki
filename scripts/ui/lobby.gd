@@ -88,7 +88,7 @@ func _refresh() -> void:
 		return
 	for c in list_box.get_children():
 		c.queue_free()
-	var how: String = {"room": "through this artifact's room", "server": "to the Project Boki server"}.get(Net.mode, "between browser tabs on this computer (the room isn't available here)")
+	var how: String = {"room": "to the room", "server": "to the Project Boki server"}.get(Net.mode, "on this computer")
 	if Net.mode != "":
 		status.text = "Connected %s. %d player%s here." % [how, Net.peers.size(), "" if Net.peers.size() == 1 else "s"]
 	elif Net.deny_reason != "":

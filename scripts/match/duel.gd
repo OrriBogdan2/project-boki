@@ -247,7 +247,7 @@ class DuelKeys extends Node:
 			if d.menu_layer: d.close_menu()
 			elif not Overlay.is_open(): d.open_menu()
 			get_viewport().set_input_as_handled()
-		elif k == KEY_X and d.menu_layer == null and not d.m.paused:
+		elif k == KEY_BACKSPACE and d.menu_layer == null and not d.m.paused:
 			d.reset()
 			get_viewport().set_input_as_handled()
 		elif k == KEY_ESCAPE and d.menu_layer:

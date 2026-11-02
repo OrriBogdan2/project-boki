@@ -192,6 +192,24 @@ func _apply(shake: Vector3) -> void:
 	position = aim + back * d + shake
 	look_at(aim + shake, Vector3.UP if p < deg_to_rad(85.0) else Vector3(0, 0, -1).rotated(Vector3.UP, yaw + Record.orbit_yaw))
 
+## Character lean (feelfix): hunters are tipped back (their tops away from the camera, so their
+## fronts turn up to face it) by this much, about their feet, so at the calibrated angle you see
+## faces and bodies (as in the reference footage) instead of the tops of hats, without changing the
+## world's framing. Faded out for the bird's-eye and the
+## ship's chase view. The world is drawn at the style's pitch; characters read as if at ~pitch - lean.
+const CHAR_LEAN := deg_to_rad(20.0)
+func char_lean() -> Basis:
+	var k := top * top * (3.0 - 2.0 * top)
+	var c := chase * chase * (3.0 - 2.0 * chase)
+	var a := CHAR_LEAN * (1.0 - k) * (1.0 - c)
+	if a < 0.001:
+		return Basis()
+	return Basis(Vector3.RIGHT.rotated(Vector3.UP, yaw + Record.orbit_yaw), -a)
+
+## A body's basis: leaned toward the camera (char_lean), then turned to `face`, keeping its scale.
+func char_basis(face: float, scl: Vector3) -> Basis:
+	return char_lean() * Basis(Vector3.UP, face).scaled_local(scl)
+
 ## Where the mouse points on the horizontal plane at height y.
 func mouse_on_plane(y: float) -> Vector3:
 	var mp := get_viewport().get_mouse_position()

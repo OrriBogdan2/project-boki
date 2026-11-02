@@ -63,6 +63,13 @@ func _arena() -> void:
 	ok("five Marks: diamonds over the dummy", (P.ak as ThiefKit).pips.size() >= 1 and (P.ak as ThiefKit).marks_on(D) == 5)
 	# reset: everyone back, healed, meters cleared
 	P.teleport(P.pos + Vector3(3, 0, 0)); P.hp = 10.0
+	var bk := InputEventKey.new(); bk.physical_keycode = KEY_BACKSPACE; bk.keycode = KEY_BACKSPACE; bk.pressed = true
+	var xk := InputEventKey.new(); xk.physical_keycode = KEY_X; xk.keycode = KEY_X; xk.pressed = true
+	A.keys_node._unhandled_input(xk)      # X is the ultimate's second key now: it must not reset the arena
+	ok("X doesn't reset the arena (it is an ultimate key now)", P.flat_dist(A.home) > 1.0)
+	A.keys_node._unhandled_input(bk)      # Backspace resets
+	ok("Backspace resets the arena", P.flat_dist(A.home) < 0.2)
+	P.teleport(P.pos + Vector3(3, 0, 0)); P.hp = 10.0
 	A.reset()
 	ok("reset: you're home and healed", P.flat_dist(A.home) < 0.2 and P.hp >= P.max_hp - 0.1)
 	ok("reset: dummies full and meters clear", D.hp >= Arena.DUMMY_HP - 0.1 and float(A.dummies[0]["total"]) == 0.0 and A.dealt == 0.0)

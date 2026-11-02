@@ -118,7 +118,7 @@ func run(m: Node) -> void:
 	var pp := _spot(hb, home.spots["house"] + Vector3(4, 0, 3))
 	ok(_put(hb, pp) and home.spots["pot"].x > 0.0, "the cooking pot goes down beside it")
 	var v2 := hb.validate()
-	ok(bool(v2["ok"]), "the house door, the plots, the pot and the portal can all be walked to (%d places missed)" % (v2["missing"] as Array).size())
+	ok(bool(v2["ok"]), "the house door, the plots, the pot and the portal can all be walked to (%d places missed; %d of %d open reached)" % [(v2["missing"] as Array).size(), int(v2["reached"]), int(v2["open"])])
 	ok(int(Save.d["gems"]) == HomeLayout.FS_GEMS - ess + 10, "%d gems left after the essentials (with the first day's +5 for the house and the patch)" % int(Save.d["gems"]))
 	# the house can be picked up and moved again
 	var he: Dictionary = HomeLayout.fixtures(Save.d, "house")[0]
@@ -146,6 +146,13 @@ func run(m: Node) -> void:
 	if st == Vector3.INF:
 		for i in hb.wild_t:
 			if hb.wild_t[i] == "tree" and hg.beside(i, home.spots["house"]) != Vector3.INF: ti = i; st = hg.beside(i, home.spots["house"]); break
+	# (a boulder standing next to the chosen tree is the nearer thing from some spots, on some random seeds:
+	# take a tree whose spot resolves to the tree itself)
+	if hg.find(Vector2(st.x, st.z)).get("i", -1) != ti:
+		for i in hb.wild_t:
+			var bs: Vector3 = hg.beside(i, home.spots["house"])
+			if hb.wild_t[i] == "tree" and bs != Vector3.INF and hg.find(Vector2(bs.x, bs.z)).get("i", -1) == i:
+				ti = i; st = bs; break
 	home.ppos = st; home.player.position = st
 	var it: Dictionary = hg.find(Vector2(st.x, st.z))
 	ok(not it.is_empty() and it["kind"] == "wild" and hg.label(it).begins_with("Needs an axe"), "next to a tree the prompt says you need an axe (%s)" % (hg.label(it) if not it.is_empty() else "nothing"))
@@ -317,6 +324,57 @@ func run(m: Node) -> void:
 	var uniq := {}
 	for f in feats: uniq[f] = true
 	ok(uniq.size() >= 3, "and its features differ: %s" % " / ".join(feats))
+	# ---------------------------------------------------------------- 8b. bridges to the isles (feelfix)
+	# on every seed each isle's bridge spans the real gap: it starts on the isle's edge and ends on the
+	# main island's edge, both ends at ground level, all of it open sky in between, and its sign
+	# (where you build it) stands on open main-island ground within reach of the bridge's foot
+	var bseeds := 0; var bbad: Array = []
+	for n in 50:
+		var sd := 1000 + n * 7919
+		var sk := HomeLayout.fs_scale(sd)
+		var wd := World.new()
+		HomeLayout.make_world(wd, 0, sd, sk)
+		var wt := HomeLayout.wild_fs(wd, sd, sk, {})
+		var seed_ok := true
+		for k in Data.ISLES:
+			var sp: Dictionary = HomeLayout.isle_bridge(wd, k)
+			var rc: Array = sp["rect"]
+			var why := ""
+			if rc == Data.ISLES[k]["bridge"] and not (sp["sign"] as Vector2).is_equal_approx(Data.ISLES[k]["sign"]): why = "odd"
+			var horiz: bool = rc[2] - rc[0] > rc[3] - rc[1]
+			var tiles: Array = wd.bridge_tiles(rc)
+			# (a ragged edge can leave a tile of either island's land in the strip: fine at ground level)
+			for z in range(rc[1], rc[3] + 1):
+				for x in range(rc[0], rc[2] + 1):
+					if wd.kind[wd.idx(x, z)] != World.T_VOID and (not wd.island_id(x + 0.5, z + 0.5) in ["main", k] or absf(wd.ground_at(x + 0.5, z + 0.5)) > 0.3):
+						why = "something else in the way at %d,%d" % [x, z]
+			if tiles.size() < 2: why = "no sky to span"
+			var ends := {}
+			for b in range(rc[1] if horiz else rc[0], (rc[3] if horiz else rc[2]) + 1):
+				for a in [(rc[0] if horiz else rc[1]) - 1, (rc[2] if horiz else rc[3]) + 1]:
+					var x: int = a if horiz else b; var z: int = b if horiz else a
+					var i := wd.idx(x, z)
+					if wd.kind[i] == World.T_VOID: why = "an end hangs over the sky at %d,%d" % [x, z]
+					elif absf(wd.ground_at(x + 0.5, z + 0.5)) > 0.3: why = "an end is off ground level (%.2f) at %d,%d" % [wd.ground_at(x + 0.5, z + 0.5), x, z]
+					elif wt.get(i, "") in ["water", "cliff"]: why = "an end lands in %s" % wt[i]
+					else: ends[wd.island_id(x + 0.5, z + 0.5)] = true
+			if not (ends.has("main") and ends.has(k)): why = "doesn't join main and %s: %s" % [k, str(ends.keys())]
+			var sg: Vector2 = sp["sign"]
+			var si := wd.idx(int(floor(sg.x)), int(floor(sg.y)))
+			if wd.island[si] != 0 or wd.kind[si] != World.T_GROUND or wt.get(si, "") in ["water", "cliff"]: why = "the sign isn't on open main ground (%s, island %d, kind %d, wild %s)" % [str(sg), wd.island[si], wd.kind[si], wt.get(si, "")]
+			# the bridge's main-side foot: within reach of the sign
+			var foot := Vector2.INF
+			for b in range(rc[1] if horiz else rc[0], (rc[3] if horiz else rc[2]) + 1):
+				for a in [(rc[0] if horiz else rc[1]) - 1, (rc[2] if horiz else rc[3]) + 1]:
+					var x: int = a if horiz else b; var z: int = b if horiz else a
+					if wd.island_id(x + 0.5, z + 0.5) == "main": foot = Vector2(x + 0.5, z + 0.5)
+			if foot == Vector2.INF or foot.distance_to(sg) > 2.3: why = "the sign is %.1f from the bridge's foot" % (foot.distance_to(sg) if foot != Vector2.INF else 99.0)
+			if why != "":
+				seed_ok = false
+				if bbad.size() < 6: bbad.append("seed %d %s: %s" % [sd, k, why])
+		if seed_ok: bseeds += 1
+		wd.free()
+	ok(bseeds == 50, "50 seeds: every isle's bridge spans the gap edge to edge at ground level with its sign in reach (%d of 50) %s" % [bseeds, "; ".join(bbad)])
 	# ---------------------------------------------------------------- 9. old saves keep their farm
 	var od := Save.fresh()
 	var ok2 := Save.new_kin("puddlet", "Drip"); od["roster"].append(ok2); od["active"] = ok2["uid"]

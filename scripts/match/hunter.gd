@@ -2373,9 +2373,9 @@ func _physics(dt: float) -> void:
 			# ([footage] ~8m in the first second off an edge). The camera's soft vertical follow keeps
 			# it from jolting the view; the body itself never floats.
 			vel.y = maxf(vel.y - H_GRAV * FALL_MULT * dt, -TERMINAL)
-	# walking can't take you off an edge, except as a wisp: a downed player can drift off a ledge on
-	# purpose to escape a stomp, and catch the cliff on the way down (see _try_ledge_grab)
-	var guard := grounded and roll_t <= 0.0 and hv.length() <= spd * 1.25 and not (downed and ctrl == "local")
+	# a person walks straight off an island's edge and falls (then the glider and the abyss rules
+	# take over); only bots keep an edge guard, so walking can't carry one into the abyss by accident
+	var guard := ctrl == "bot" and grounded and roll_t <= 0.0 and hv.length() <= spd * 1.25
 	# horizontal with walls; mantle onto ledges you run or fall into
 	var x0 := pos.x; var z0 := pos.z
 	var pre_v := Vector2(vel.x, vel.z)
@@ -3295,7 +3295,8 @@ func render(delta: float, alpha: float) -> void:
 	visible = not out and not extracted and not riding and not unseen
 	if not model:
 		return
-	model.rotation.y = face
+	if m.cam: model.basis = m.cam.char_basis(face, model.scale)     # leaned toward the camera (CamRig.char_lean)
+	else: model.rotation.y = face
 	if out and has_meta("fling"):
 		# hit by the sky train: the body is flung tumbling through the air for a moment, then gone
 		var fl: Dictionary = get_meta("fling")
@@ -3308,6 +3309,7 @@ func render(delta: float, alpha: float) -> void:
 			return
 		remove_meta("fling")
 		model.rotation = Vector3(0, face, 0)
+		if m.cam: model.basis = m.cam.char_basis(face, model.scale)
 	# riding a mount: you sit up on its back
 	var ride := (kin as Kin).ride_height() if mounted() and not downed else 0.0
 	model.position.y = lerpf(model.position.y, ride, minf(1.0, delta * 12.0))

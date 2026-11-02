@@ -214,18 +214,18 @@ func _draw_all() -> void:
 	var want_a: float = ABYSS_FX.danger(p) if p == m.player else 0.0
 	if want_a <= 0.02:
 		abyss_cued = false
-	if want_a <= 0.5:
+	if want_a <= 0.7:
 		abyss_warned = false
 	abyss_a = lerpf(abyss_a, want_a, 1.0 - exp(-10.0 * get_process_delta_time()))
 	if abyss_fx:
 		abyss_fx.show_danger(abyss_a, pow(0.5 + 0.5 * sin(abyss_pulse * TAU), 3.0) if abyss_a > 0.005 else 0.0)
 	if abyss_a > 0.005:
-		var red := clampf((abyss_a - 0.35) / 0.65, 0.0, 1.0)
+		var red := clampf((abyss_a - 0.55) / 0.45, 0.0, 1.0)     # (AbyssFx: ~0.55 just under the lip, 1 at the end)
 		var rate := 1.6 + red * 3.4
 		abyss_pulse += get_process_delta_time() * rate
 		var pulse := pow(0.5 + 0.5 * sin(abyss_pulse * TAU), 3.0)
 		# (the magenta wash itself is AbyssFx's shader) near the end, crimson edges beat with the heart
-		var ek := clampf((abyss_a - 0.6) / 0.4, 0.0, 1.0)
+		var ek := clampf((abyss_a - 0.75) / 0.25, 0.0, 1.0)
 		for i in 6:
 			var inset := i * minf(sz.x, sz.y) * 0.03
 			var a := ek * (0.22 - float(i) * 0.035) * (0.6 + 0.4 * pulse)
@@ -235,7 +235,7 @@ func _draw_all() -> void:
 		if p == m.player and abyss_a > 0.08 and not abyss_cued:
 			abyss_cued = true
 			Sfx.play("whoosh", null, -6.0, 0.0, 0.55)
-		if p == m.player and abyss_a > 0.75 and not abyss_warned:
+		if p == m.player and abyss_a > 0.85 and not abyss_warned:
 			abyss_warned = true
 			Sfx.play("warn", null, -4.0, 0.0, 0.8)
 		if abyss_a > 0.1 and p == m.player:
@@ -245,9 +245,9 @@ func _draw_all() -> void:
 				Sfx.play("thump", null, -12.0 + abyss_a * 14.0, 0.0, 0.7 + red * 0.15)
 				if red > 0.3 and beat % 2 == 0:
 					Sfx.play("boom", null, -24.0 + red * 10.0, 0.0, 0.35)     # a low rumble under the heartbeat
-		if abyss_a > 0.6 and p == m.player:
+		if abyss_a > 0.8 and p == m.player:
 			# the point of no return is close: say so, pulsing, in the middle of the screen
-			var wk := clampf((abyss_a - 0.6) / 0.3, 0.0, 1.0)
+			var wk := clampf((abyss_a - 0.8) / 0.15, 0.0, 1.0)
 			var txt := "HOLD GLIDE TO LIFT" if p.glide_fuel > 0.001 and not p.gliding else ("CLIMB OUT" if p.glide_fuel > 0.001 else "NO GLIDER HEAT")
 			_ctext(Vector2(sz.x * 0.5, sz.y * 0.36), txt, 26, Color(1.0, 0.25 + 0.35 * pulse, 0.2, 0.55 + 0.45 * wk * (0.5 + 0.5 * pulse)), big)
 	if p and not p.downed and not p.out and p.hp < p.max_hp * 0.35:
@@ -379,7 +379,7 @@ func _draw_world_labels() -> void:
 	for h in m.hunters:
 		if h == m.player or h.out or h.extracted or not h.model or not h.model.visible or h.unseen:
 			continue
-		var sp := cam.unproject_position(h.position + Vector3(0, 2.35, 0))
+		var sp := cam.unproject_position(_head(h, 2.35))
 		if cam.is_position_behind(h.position):
 			continue
 		_nameplate(sp, h)
@@ -1285,7 +1285,7 @@ func _draw_glider_heat(p: Hunter) -> void:
 	var heat := 1.0 - p.glide_fuel
 	if not p.gliding and heat < 0.01:
 		return
-	var at := p.position + Vector3(0, 2.25 * float(p.cdat["scale"]), 0)
+	var at := _head(p, 2.25 * float(p.cdat["scale"]))
 	if m.cam.is_position_behind(at):
 		return
 	var cpt := m.cam.unproject_position(at) + Vector2(58, -6)
@@ -2156,7 +2156,7 @@ func _draw_kit(sz: Vector2, p: Hunter) -> void:
 		if rv.has("hold"): rdesc += "  Hold: %s" % String(rv["hold"])
 		lines.append([Settings.key_cap("secondary"), String(ak.rmb_def().get("name", "Right click")), rdesc, ak.col_of(ak.rmb_def())])
 		lines.append([Settings.key_cap("signature"), String(ak.e_def().get("name", "E")), String(ak.e_def().get("desc", "")), ak.col_of(ak.e_def())])
-		lines.append([Settings.key_cap("ultimate"), String(ak.r_def().get("name", "R")) + ("" if p.lvl >= int(Hunter.ULT_AT[0]) else "  (level %d)" % int(Hunter.ULT_AT[0])), String(ak.r_def().get("desc", "")), ak.col_of(ak.r_def())])
+		lines.append([Settings.key_caps("ultimate"), String(ak.r_def().get("name", "R")) + ("" if p.lvl >= int(Hunter.ULT_AT[0]) else "  (level %d)" % int(Hunter.ULT_AT[0])), String(ak.r_def().get("desc", "")), ak.col_of(ak.r_def())])
 	if p.kin and p.ak:
 		var k: Kin = p.kin
 		var kcol: Color = Data.KIN[k.species]["color"]
@@ -2169,7 +2169,7 @@ func _draw_kit(sz: Vector2, p: Hunter) -> void:
 		var kd1: AbilitySpec = k.runner.def_of("k1")
 		if kd1: lines.append([Settings.key_cap("signature"), kd1.display_name, KinText.ability(k.effective("k1")), KinText.color(kd1)])
 		var ud := KinMerge.def_for(k)
-		if ud: lines.append([Settings.key_cap("ultimate"), ud.display_name + " (merge)", " ".join(KinText.merge(ud, k.carry_style() == "mount")) + " Merge: needs a full bond meter. Unlocks at level %d." % int(Hunter.ULT_AT[0]), GOLD])
+		if ud: lines.append([Settings.key_caps("ultimate"), ud.display_name + " (merge)", " ".join(KinText.merge(ud, k.carry_style() == "mount")) + " Merge: needs a full bond meter. Unlocks at level %d." % int(Hunter.ULT_AT[0]), GOLD])
 		lines.append([Settings.key_cap("throw"), "Orders for " + String(k.rec.get("name", "your Boki")), "Tap: Sic at the cursor (it staggers what it lands on), or call it back when it is away. Hold and flick: Chase, Guard, Return, Follow.", kcol])
 	var dsi := p.slot_info("dash")
 	lines.append([Settings.key_cap("dash"), String(dsi["name"]) + ((" + " + String(dsi["rider"])) if String(dsi.get("rider", "")) != "" else ""), String(dsi["desc"]), dsi["col"]])
@@ -2441,33 +2441,69 @@ var abyss_a := 0.0
 const ABYSS_FX := preload("res://scripts/match/abyss_fx.gd")
 var abyss_fx: CanvasLayer = null
 
+var dash_seen: Array = []      # per segment of the dash strip: was it full last frame (for the flash)
+var dash_flash: Array = []     # per segment: seconds left on its "it's back" flash
+
+## Dash charges as one slim segmented strip tucked under the health bar: a segment per short dash,
+## then a shorter pale-blue one for the long dash. The one recharging fills smoothly left to right;
+## a segment that comes back flashes white for a moment.
+func _dash_strip(r: Rect2, p: Hunter) -> void:
+	var nshort := int(p.max_dashes())
+	var n := nshort + 1
+	var gap := 3.0
+	var long_w := 12.0
+	var seg_w := (r.size.x - long_w - gap * float(n - 1)) / float(maxi(1, nshort))
+	if dash_seen.size() != n:
+		dash_seen.resize(n); dash_seen.fill(true)
+		dash_flash.resize(n); dash_flash.fill(0.0)
+	var dt := get_process_delta_time()
+	var x := r.position.x
+	for i in n:
+		var is_long := i == n - 1
+		var sw := long_w if is_long else seg_w
+		var sr := Rect2(Vector2(x, r.position.y), Vector2(sw, r.size.y))
+		var fill := clampf(1.0 - p.ex_cd / maxf(0.01, Hunter.EX_DASH_CD), 0.0, 1.0) if is_long else clampf(p.dashes - float(i), 0.0, 1.0)
+		var col: Color = Color("bfe6ff") if is_long else STAMINA_COL
+		var full := fill >= 0.999
+		if full and not bool(dash_seen[i]):
+			dash_flash[i] = 0.28
+		dash_seen[i] = full
+		dash_flash[i] = maxf(0.0, float(dash_flash[i]) - dt)
+		c.draw_rect(sr.grow(1.5), Color(0.03, 0.03, 0.05, 0.82))
+		if full:
+			c.draw_rect(sr, col)
+			c.draw_rect(Rect2(sr.position, Vector2(sw, 1.0)), Color(1, 1, 1, 0.35))
+		else:
+			c.draw_rect(sr, Color(col, 0.16))
+			if fill > 0.0:
+				c.draw_rect(Rect2(sr.position, Vector2(sw * fill, r.size.y)), Color(col, 0.6))
+				c.draw_rect(Rect2(Vector2(sr.position.x + sw * fill - 1.0, sr.position.y), Vector2(1.0, r.size.y)), Color(1, 1, 1, 0.7))
+		var fl := float(dash_flash[i]) / 0.28
+		if fl > 0.0:
+			c.draw_rect(sr.grow(1.0 * fl), Color(1, 1, 1, 0.85 * fl))
+		x += sw + gap
+
+## A point `up` metres above a hunter's feet, following the body's lean toward the camera
+## (CamRig.char_lean), so bars and names stay just over the head.
+func _head(h: Node3D, up: float) -> Vector3:
+	return h.position + (m.cam.char_lean() * Vector3(0, up, 0) if m.cam else Vector3(0, up, 0))
+
 ## Health and stamina (dash charges) right above your hunter, where your eyes already are.
 func _draw_overhead(p: Hunter) -> void:
 	var cam := m.cam
-	var at := p.position + Vector3(0, 2.7 * float(p.cdat["scale"]), 0)
+	var at := _head(p, 2.7 * float(p.cdat["scale"]))
 	if cam.is_position_behind(at) or p.downed or p.riding:
 		return
 	var sp := cam.unproject_position(at)
 	var vr: Rect2 = cam.get_viewport().get_visible_rect().grow(200.0)
 	if not sp.is_finite() or not vr.has_point(sp):
 		return      # off screen, or a degenerate camera (headless, mid-teleport): huge/NaN coords can't triangulate
+	sp = sp.round()     # whole pixels: the bars and pips don't shimmer as the camera glides
 	var w := 66.0
 	var frac := clampf(p.hp / p.max_hp, 0.0, 1.0)
 	head_hp = maxf(frac, lerpf(head_hp, frac, 0.06))
 	_vitals(sp, w, p, p_team_col().lerp(Color.WHITE, 0.15) if frac > 0.35 else BAD, head_hp, true)
-	# stamina: one yellow pip per dash under the bars, the next one filling as it recharges
-	var n := int(p.max_dashes()) + 1
-	for i in n:
-		var cpt := sp + Vector2(-w * 0.5 + 6 + i * 13, 17)
-		# the last pip is the long dash (Shift in the air, or when the short ones are spent)
-		var fill := clampf(p.dashes - i, 0.0, 1.0) if i < n - 1 else 1.0 - p.ex_cd / Hunter.EX_DASH_CD
-		var dia := PackedVector2Array([cpt + Vector2(0, -5), cpt + Vector2(5, 0), cpt + Vector2(0, 5), cpt + Vector2(-5, 0)])
-		c.draw_colored_polygon(dia, Color(0.04, 0.04, 0.06, 0.8))
-		if fill >= 1.0:
-			var inner := PackedVector2Array([cpt + Vector2(0, -3.5), cpt + Vector2(3.5, 0), cpt + Vector2(0, 3.5), cpt + Vector2(-3.5, 0)])
-			c.draw_colored_polygon(inner, STAMINA_COL)
-		elif fill > 0.0:
-			c.draw_arc(cpt, 3.0, -PI * 0.5, -PI * 0.5 + TAU * fill, 10, Color(STAMINA_COL, 0.6), 2.0)
+	_dash_strip(Rect2(Vector2(sp.x - w * 0.5, sp.y + 14), Vector2(w, 4)), p)
 	_status_row(sp + Vector2(0, 30), p)
 	# high up: a small readout of how far above the ground you are
 	var alt := m.player_altitude() if p == m.player else 0.0
@@ -2622,7 +2658,7 @@ func _tip_lines(id: String, p: Hunter) -> Array:
 			if ud == null: return []
 			var giant: bool = (p.kin as Kin).carry_style() == "mount"
 			out.append([ud.display_name, GOLD])
-			out.append(["Merge  ·  %s  ·  %s" % [Settings.key_cap("ultimate"), "your mount grows giant" if giant else "you take its colour and power"], MUTED, 12])
+			out.append(["Merge  ·  %s  ·  %s" % [Settings.key_caps("ultimate"), "your mount grows giant" if giant else "you take its colour and power"], MUTED, 12])
 			for ln in KinText.merge(ud, giant):
 				out.append([String(ln), INK, 13])
 			out.append(["Unlocks at level %d with a full meter. The bond fills as your Boki lands hits, as you hit what it marked, and on combos. Boki out? You leap-merge. No Boki: a weak surge. Then %ss before it can go again." % [int(Hunter.ULT_AT[0]), KinText.n(KinParts.MERGE_SPENT_TIME)], GOLD, 12])
@@ -3495,7 +3531,7 @@ func _draw_truce_marks() -> void:
 			continue
 		var e := Truce.emote_def(String(s["id"]))
 		var a := clampf((Truce.BUBBLE_T - float(s["t"])) * 2.0, 0.0, 1.0) * clampf(float(s["t"]) * 8.0, 0.0, 1.0)
-		var sp := cam.unproject_position(h.position + Vector3(0, 3.3, 0)) + Vector2(0, -6.0 * minf(1.0, float(s["t"]) * 4.0))
+		var sp := cam.unproject_position(_head(h, 3.3)) + Vector2(0, -6.0 * minf(1.0, float(s["t"]) * 4.0))
 		if not c.get_viewport_rect().grow(240.0).has_point(sp):
 			continue     # (far off screen, e.g. someone falling away into the abyss: the bubble's triangles degenerate and spam "triangulation failed")
 		var label := String(e["name"])
@@ -3513,7 +3549,7 @@ func _draw_truce_marks() -> void:
 	for h in m.hunters:
 		if h.team == me.team or h.out or h.extracted or h.unseen or not h.visible or cam.is_position_behind(h.position):
 			continue
-		var tp := cam.unproject_position(h.position + Vector3(0, 2.55, 0))
+		var tp := cam.unproject_position(_head(h, 2.55))
 		if not c.get_viewport_rect().grow(240.0).has_point(tp):
 			continue
 		if m.truce.is_marked(h):

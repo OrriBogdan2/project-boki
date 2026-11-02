@@ -2654,6 +2654,10 @@ func _abyss_demo(mode: String) -> void:
 	elif t < 0.8:
 		player.inp["move"] = Vector2(0, 1)      # run toward the camera and jump off the edge
 		if t >= 0.55 and t < 0.55 + DT * 1.5: player.inp["jump"] = true
+	elif mode == "dip":
+		# (feelfix) the reference's repeated dips: fall, glide back up, let go and fall again, glide home
+		player.inp["glide"] = (t > 1.7 and t < 2.5) or t > 3.4
+		player.inp["move"] = Vector2(0, -1) if t > 3.4 else Vector2.ZERO
 	else:
 		player.inp["move"] = Vector2(0, -1) if mode == "grab" else Vector2.ZERO
 
@@ -4375,6 +4379,11 @@ func step(dt: float) -> void:
 		player.inp["glide"] = true
 		player.inp["move"] = Vector2(1, 0.3).normalized()
 		if time > 0.7 and time - DT <= 0.7: pending_input["dash"] = true
+	if opts.get("dashpip_demo", false) and player:
+		# test (HUD): on foot, spend the short dashes and then the long one, then stand still and refill
+		player.inp["move"] = Vector2(1, 0.2).normalized() if time < 1.6 else Vector2.ZERO
+		for t in [0.4, 0.9, 1.4]:
+			if time > t and time - DT <= t: pending_input["dash"] = true
 	if opts.has("abyss_demo") and player:
 		_abyss_demo(String(opts["abyss_demo"]))
 	if player and not player.out:
@@ -5100,6 +5109,13 @@ var train := {}
 var train_t := 0.0
 
 var duel_pad := Vector3.INF
+
+## The Demo match's landing grace: for the first fresh_t seconds after you land (Bot.fresh), until you
+## hurt something yourself, nothing targets you (bots, even ones your Boki picked a fight with, and
+## camp monsters) and stray hits from others' fights do no harm. Only in the Demo match.
+var player_engaged := false
+func demo_shielded(e: Ent) -> bool:
+	return e != null and e == player and bool(opts.get("demo_match", false)) and not player_engaged and Bot.fresh(self, e)
 
 ## The Demo match (title screen): a real Duos expedition set up for filming. A fixed map roll, clear
 ## weather, no Blight, normal rivals (who leave you be for a minute after you land), on the Dusk Isles (the first tier where a Boki can be lost: one in
