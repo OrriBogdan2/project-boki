@@ -82,7 +82,8 @@ func _setup_input() -> void:
 	_key("glide", [], MOUSE_BUTTON_XBUTTON2)  # hold Mouse 5 (the front side button) in the air to glide, like holding Space; never jumps
 	_key("glide", [], MOUSE_BUTTON_XBUTTON1)  # Mouse 4 glides too (not advertised)
 	_key("reload", [])                        # reloading is automatic
-	_key("ultimate", [KEY_R, KEY_X])          # (X: its default second key) the archetype's ultimate (level 6); bonded when the bond meter is full
+	_key("ultimate", [KEY_R])                 # merge with your Boki when the bond meter is full
+	_key("hunter_ult", [KEY_X])               # the hero's own ultimate (opens at level 6)
 	_key("tonic", [KEY_1])
 	_key("scores", [KEY_TAB])
 	_key("menu", [KEY_ESCAPE])

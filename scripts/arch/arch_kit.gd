@@ -106,6 +106,11 @@ func cast_e() -> bool: return false
 func e_recast() -> bool: return false                # E pressed while it's up (Sigil detonation)
 func cast_r() -> bool: return false
 func r_recast() -> bool: return false                # R pressed while it runs (Last Round release)
+## X (the "hunter_ult" action): the hero's own ultimate; true when it went off. Kits with one override it, gate
+## it with ult_ready() and spend it with ult_spent(); its numbers are the "r" data and cd["r"] its cooldown.
+func cast_ult() -> bool: return false
+## The hero ultimate's running time left, 0..1 (the HUD's ring round the X slot); 0 when it isn't running.
+func ult_running() -> float: return 0.0
 func on_dash(_ex: bool) -> bool: return false        # true = the archetype handled the dash
 func on_deal(_t: Ent, _dmg: float, _o: Dictionary) -> void: pass
 func on_take(_by: Ent, _dmg: float, _o: Dictionary) -> void: pass
@@ -284,6 +289,44 @@ func use_r() -> void:
 	cd["r"] = r_cooldown()
 	h._ab_feedback("r", "cast")
 	_fuse_start(will_bond)
+
+## The hero ultimate is open: a point in the "ult" slot and the hunter at its level ("unlock" in the data, 6).
+func r_unlocked() -> bool:
+	return int(h.slot_lv.get("ult", 0)) > 0 and h.lvl >= int(r_def().get("unlock", Hunter.ULT_AT[0]))
+
+## X can go now: the hero has one, it is open and off cooldown, and nothing holds the hunter (a merge
+## included: the form owns the buttons). A refusal buzzes the X slot.
+func ult_ready() -> bool:
+	var ready := not r_def().is_empty() and r_unlocked() and float(cd["r"]) <= 0.0
+	if not ready or busy() or KinMerge.active(h):
+		h._ab_feedback("x", "deny")
+		return false
+	return true
+
+## X went off: its cooldown starts, and the HUD and the combat bus hear of it.
+func ult_spent() -> void:
+	cd["r"] = r_cooldown()
+	h.used["r"] = int(h.used.get("r", 0)) + 1
+	h.cast_at = m.time
+	h.cast_slot = "ult"
+	h._ab_feedback("x", "cast")
+	CombatBus.ability_used.emit(h, id + "_ult", "ultimate")
+
+## Stand-in amounts (of a full meter) for ult_bond until the main session's KinBond.from_ult ships.
+const ULT_BOND_STANDIN := {"hit": 0.6, "knock": 0.7, "kill": 0.8}
+
+## A landed ultimate fills the bond meter, once per cast, for its best event: "hit", "knock" or "kill".
+## Guarded stub: it calls KinBond.from_ult(h, kind) when that exists (branch ultbond), else Bond.add with
+## the stand-in amounts. Swap it for the direct call once ultbond is on main.
+func ult_bond(kind: String) -> void:
+	for gc in ProjectSettings.get_global_class_list():
+		if gc["class"] != "KinBond":
+			continue
+		var kin_bond: Script = load(String(gc["path"]))
+		if kin_bond.get_script_method_list().any(func(md): return md["name"] == "from_ult"):
+			kin_bond.call("from_ult", h, kind)
+			return
+	Bond.add(h, float(ULT_BOND_STANDIN.get(kind, 0.0)))
 
 ## R's cooldown: the data's, 15% shorter at rank 2.
 func r_cooldown() -> float:
@@ -678,7 +721,7 @@ func slot_info(slot: String) -> Dictionary:
 			var sd := r_def()
 			out.merge({"name": String(sd.get("name", "")), "short": String(sd.get("short", "")), "icon": String(sd.get("icon", "")), "col": col_of(sd), "desc": String(sd.get("desc", "")),
 				"cd": float(cd["r"]), "cd_max": r_cooldown(), "charges": 1 if float(cd["r"]) <= 0.0 else 0, "max_charges": 1, "verb": "r",
-				"ready": float(cd["r"]) <= 0.0 and int(h.slot_lv.get("ult", 0)) > 0, "bonded": bonded_glow, "up": r_t, "fuse": float(fuse.get("t", 0.0))}, true)
+				"ready": float(cd["r"]) <= 0.0 and r_unlocked(), "bonded": bonded_glow, "up": r_t, "fuse": float(fuse.get("t", 0.0))}, true)
 		"dash", "dodge":
 			var sd := dash_def()
 			var dmax := h.max_dashes()

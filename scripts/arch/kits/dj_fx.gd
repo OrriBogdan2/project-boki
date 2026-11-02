@@ -298,7 +298,7 @@ func _build_rider(kind: String, col: Color, col2: Color) -> Node3D:
 			gd.position.z = 0.2
 			head.add_child(gd)
 		"blade":
-			# a Jackpot blade: a small cyan-and-red spinning star
+			# an Encore blade: a small spinning star in its two colours
 			head.add_child(_mi(star_mesh(3, 0.3), Models.glow_mat(Color(col, 1.0))))
 			head.add_child(_mi(Models.sphere(0.25, 6), Models.glow_mat(Color(col2, 1.0))))
 			head.scale = Vector3.ONE * 0.3

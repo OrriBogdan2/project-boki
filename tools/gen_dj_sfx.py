@@ -91,4 +91,17 @@ save('jug_drop', mix(scale(mul(bp(noise(0.4), 300, 2500), rise(N(0.4), 0.8)), 0.
 save('jug_wave', mix(scale(mul(bp(noise(0.6), 200, 1600), env(N(0.6), 0.02, 0.25)), 0.9), scale(chirp(220, 90, 0.5, 0.01, 0.2, 0.4), 0.6), scale(hiss(0.5, 2000, 6000, 0.03, 0.15), 0.4)), -18)
 save('jug_chain', mix(*[scale(at(chirp(900 + 120 * k, 700, 0.06, 0.001, 0.02, 0.6), 0.035 * k), 0.6 - 0.05 * k) for k in range(7)], scale(hiss(0.3, 1000, 4000, 0.01, 0.1), 0.4)), -20)
 save('jug_dash', mix(scale(mul(bp(noise(0.35), 200, 1500), env(N(0.35), 0.01, 0.12)), 0.9), scale(hiss(0.35, 1500, 5000, 0.02, 0.1), 0.5), scale(chirp(150, 80, 0.3, 0.01, 0.1), 0.5)), -19)
+# ---- the ultimates (X)
+# Dancer's Encore: the ring opening (a rising shimmer that lands on two bells), the whirr while the blades
+# fly (2s of pulsing air), and the quick thunk of a blade landing
+save('dj_encore', mix(scale(mul(whirl(0.45, 8, 22, 2400), rise(N(0.45), 0.5)), 0.8), scale(mul(tone(500, 1400, 0.45), rise(N(0.45), 0.6)), 0.35), scale(at(bell(1319, 0.5, 0.2), 0.4), 0.7), scale(at(bell(1976, 0.4, 0.16), 0.44), 0.5)), -18)
+wn = N(2.0)
+save('dj_encore_whirr', mul(whirl(2.0, 14, 14, 1800), [min(1.0, i / N(0.15)) * min(1.0, (wn - i) / N(0.3)) for i in range(wn)]), -25)
+save('dj_encore_hit', mix(chirp(520, 180, 0.08, 0.001, 0.03, 0.5), scale(hiss(0.05, 2500, 7000, 0.001, 0.012), 0.6), scale(mul(lp(noise(0.06), 400), env(N(0.06), 0.001, 0.02)), 0.6)), -22)
+# Zedran's Gilded Riposte: the guard (a blade drawn up with a ring and a low hum swelling), a bright metallic
+# ting for each hit it blocks, and the cleave (a heavy whoosh into a crunch)
+gn = N(0.65)
+save('jug_guard', mix(scale(at(bell(784, 0.6, 0.25), 0.02), 0.7), scale(hiss(0.2, 3000, 8000, 0.002, 0.06), 0.5), scale(mul(tone(110, 165, 0.65, 0.5), rise(gn, 0.8)), 0.6), scale(mul(bp(noise(0.65), 400, 1400), rise(gn, 1.4)), 0.35)), -18)
+save('jug_ting', mix(bell(2093, 0.35, 0.09), scale(bell(3136, 0.3, 0.06), 0.6), scale(hiss(0.06, 4000, 9000, 0.001, 0.015), 0.5)), -17)
+save('jug_riposte', mix(scale(mul(bp(noise(0.3), 250, 2200), [math.sin(math.pi * min(1.0, i / N(0.22))) ** 1.5 for i in range(N(0.3))]), 0.9), scale(at(mul(lp(noise(0.5), 380), env(N(0.5), 0.002, 0.16)), 0.18), 1.0), scale(at(chirp(140, 42, 0.45, 0.002, 0.16, 0.4), 0.18), 0.9), scale(at(hiss(0.3, 900, 4000, 0.002, 0.08), 0.19), 0.6)), -14)
 print('dj/jug sounds written')

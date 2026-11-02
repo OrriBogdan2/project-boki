@@ -7,9 +7,8 @@ extends ArchKit
 ##   to 12m) and fizzles there; a thin aim line ends at the cursor, gold while the next bolt is empowered.
 ## - Passive, Marks: every bolt that hits stacks a Mark on the target (gold diamonds over their head, up
 ##   to 8): each makes your bolts on them stronger. A knock or an assist heals you.
-## - Jackpot (a Mark trigger, not a key; kits2-nor's fold of the source R): the fifth Mark opens a cyan
-##   ring round you; for 1.2s a blade flies at each foe in it, harder at the rim, refreshing every Mark,
-##   and the Vault comes back. No R: that key is the Boki Merge.
+## - X, Encore (ThiefUlt, level 6): a ring grows round her, then for 2s blades fly at every foe inside it,
+##   harder from the outer band, refreshing every Mark; the Vault comes back. R is the Boki Merge.
 ## - Dash, Vault: a short cartwheel; the next bolt is empowered (3.5x, 2 Marks, Shred) and landing it
 ##   gives the Vault back (the payoff: T4, pay_cashin, VAULT RESET).
 ## - RMB, Bola: a 0.4s wind-up with the lane showing, then a kit-run Bola that grounds the first foe and
@@ -33,8 +32,7 @@ var pips := {}                 # target instance id -> {node, t: Ent}: the Mark 
 var knife := {}                # the stuck Shadow Knife: {target, pos, dir}
 var bola_cast := {}            # the Bola winding up, lane showing: {t}
 var bola := {}                 # the Bola in flight: {pos, dir, left, first, bounces, stg}
-var jp := {}                   # Jackpot running: {t, next, n}
-var jp_cd := 0.0               # Jackpot is resting (seconds)
+var encore: ThiefUlt           # X, the ultimate
 var wrapped := {}              # foe instance id -> [foe, time left]: the binding rings on the Grounded
 var glint: Node3D = null       # the empowered tell: a gold glint at the weapon hand
 var hand := 0                  # 0: the next bolt leaves the right hand, 1: the left
@@ -43,8 +41,6 @@ var primed_hits := 0           # (tests, demo)
 var bola_pairs := 0
 var bola_bounces := 0
 var bola_breaks := 0
-var jackpot_hits := 0          # blades landed
-var jackpots := 0              # bursts opened
 var bolts := 0                 # bolts thrown
 var fizzles := 0               # bolts that ran out at the cursor
 var last_bolt_end := Vector3.ZERO
@@ -53,15 +49,27 @@ var blinks := 0
 
 func _setup() -> void:
 	res = 0.0
+	encore = ThiefUlt.new(self)
 
 func fx() -> DJFx:
 	return DJFx.of(m)
 
-## A Boki merge starting drops the Bola's wind-up and a running Jackpot (nothing fires, nothing is left
-## for after the merge). Hold fields: bola_cast, jp.
+## A Boki merge starting drops the Bola's wind-up and a running Encore (nothing fires, nothing is left
+## for after the merge). Hold fields: bola_cast, encore.st.
 func _drop_holds() -> void:
 	bola_cast = {}
-	jp = {}
+	encore.drop()
+
+# ------------------------------------------------------------------ X: Encore (ThiefUlt)
+func cast_ult() -> bool:
+	if not ult_ready():
+		return false
+	encore.start()
+	ult_spent()
+	return true
+
+func ult_running() -> float:
+	return encore.left_k()
 
 # ---- Marks live on the targets: meta "marks" {dancer nid: [count, time left]} ----
 func marks_on(t: Ent) -> int:
@@ -88,15 +96,8 @@ func add_mark(t: Ent, n := 1, force := false) -> void:
 	_pip_pop(t, c)
 	_on_marks(t, had, c)
 
-## Crossing the Jackpot count (5) opens Jackpot; reaching the cap (8) chimes.
+## Reaching the cap (8) chimes.
 func _on_marks(t: Ent, had: int, c: int) -> void:
-	var at := int(jackpot_def().get("at", 5))
-	if had < at and c >= at:
-		m.sfx("pickup", t.pos, -2.0, 1.9)       # the victim hears a coin jingle at the Jackpot count
-		m.fx.word(t.pos + Vector3(0, 2.5, 0), "MARKED", res_col(), true)
-		fx().star(t.pos + Vector3(0, 1.2, 0), res_col(), 1.0, 0.3)
-		net_ring(t.pos, 1.3, res_col())
-		_jackpot(t)
 	if had < mark_max() and c >= mark_max():
 		m.sfx("unlock", t.pos, -6.0, 1.7)
 
@@ -120,7 +121,7 @@ func set_marks(t: Ent, n: int) -> void:
 	_pip_pop(t, n)
 	_on_marks(t, had, mini(mark_max(), n))
 
-## Every Mark we have on anyone back to its full time (each Jackpot blade).
+## Every Mark we have on anyone back to its full time (each Encore blade).
 func refresh_marks() -> void:
 	for f in m.foes_of(h.team):
 		var mk: Dictionary = f.get_meta("marks", {}) if f.has_meta("marks") else {}
@@ -210,7 +211,6 @@ func slot_info(slot: String) -> Dictionary:
 
 func _tick(dt: float) -> void:
 	haste_t = maxf(0.0, haste_t - dt)
-	jp_cd = maxf(0.0, jp_cd - dt)
 	if primed_t > 0.0:
 		primed_t -= dt
 		if primed_t <= 0.0:
@@ -226,7 +226,7 @@ func _tick(dt: float) -> void:
 			if float(e[1]) <= 0.0: mk.erase(h.nid)
 	if not bola_cast.is_empty(): _tick_bola_cast(dt)
 	if not bola.is_empty(): _tick_bola(dt)
-	if not jp.is_empty(): _tick_jackpot(dt)
+	encore.tick(dt)
 	_tick_wrapped(dt)
 	_tick_knife()
 	_tick_glint()
@@ -445,83 +445,6 @@ func on_knock(t: Hunter, mine: bool) -> void:
 	var who: String = "TAKEN" if mine else "ASSIST"
 	m.fx.word(h.pos + Vector3(0, 2.6, 0), "+%d" % int(round(got)) if got >= 1.0 else who, Color("7fe08a"), true)
 	m.sfx("dj_heal", h.pos, -4.0, 1.0)
-
-# ------------------------------------------------------------------ Jackpot (the fifth Mark)
-func jackpot_def() -> Dictionary:
-	return d.get("jackpot", {})
-
-## Five Marks on a foe: the ring opens, then blades at everyone inside it for 1.2s; the Vault is back.
-## It rests 10s so a long fight can't chain it. The payoff: T4, pay_cashin.
-func _jackpot(t: Ent) -> void:
-	var jd := jackpot_def()
-	if jp_cd > 0.0 or not jp.is_empty() or t is Kin or h.downed or Hex.active(h) or KinMerge.active(h):
-		return
-	jp_cd = float(jd["cd"])
-	jackpots += 1
-	jp = {"t": 0.0, "next": float(jd["grow"]), "n": int(jd["shots"])}
-	play("thf_volley")
-	m.fx.word(h.pos + Vector3(0, 2.9, 0), "JACKPOT", col_of(jd), true)
-	m.sfx("dj_jackpot", h.pos, -2.0, 1.0)
-	net_ring(h.pos, float(jd["reach"]), col_of(jd))
-	h.dashes = h.max_dashes()
-	DashReset.cue(h)
-
-func _jackpot_targets() -> Array:
-	var near: Array = foes_in(h.pos, float(jackpot_def()["reach"]))
-	return near.filter(func(f): return sees(f) and not (f is Kin) and f.hittable())
-
-func _tick_jackpot(dt: float) -> void:
-	var jd := jackpot_def()
-	jp["t"] = float(jp["t"]) + dt
-	var gk := clampf(float(jp["t"]) / float(jd["grow"]), 0.0, 1.0)
-	# the ring grows out from her, then rides with her (everyone sees it)
-	AimKit.circle(h, "jackpot",
-			{"self": true, "r": float(jd["reach"]) * (0.25 + 0.75 * gk), "col": col_of(jd), "all": true, "ticks": true,
-					"fill": 0.25 * gk})
-	AimKit.circle(h, "jackpot_rim",
-			{"self": true, "r": float(jd["inner"]) * gk, "col": Color(col_of(jd), 0.6), "all": true, "dashed": true,
-					"alpha": 0.6})
-	if float(jp["t"]) >= float(jp["next"]) and int(jp["n"]) > 0:
-		jp["n"] = int(jp["n"]) - 1
-		jp["next"] = float(jp["next"]) + float(jd["time"]) / float(jd["shots"])
-		var hit := false
-		for f in _jackpot_targets():
-			_jackpot_blade(f)
-			hit = true
-		if hit: m.sfx("dj_blade", h.pos, -6.0, randf_range(0.95, 1.1))
-	if int(jp["n"]) <= 0 and float(jp["t"]) >= float(jp["next"]):
-		jp = {}
-		AimKit.hide(h, "jackpot")
-		AimKit.hide(h, "jackpot_rim")
-
-## One blade from her hand at a foe in the ring: a cosmetic shot flies, the hit lands on arrival.
-func _jackpot_blade(f: Ent) -> void:
-	var jd := jackpot_def()
-	var from := h.pos + Vector3(0, 1.0, 0)
-	var to := f.pos + Vector3(0, 1.0, 0)
-	var dv := Vector2(to.x - from.x, to.z - from.z)
-	var dist := dv.length()
-	var spd := 30.0
-	var n0: int = m.shots.size()
-	m.spawn_shot(h, from, dv.normalized() * spd, 0.0, dist / spd, 0.08, col_of(jd), {"cos": true})
-	if m.shots.size() > n0:
-		fx().ride(m.shots[-1], "blade", col_of(jd), Color("ff5a6a"), 0.9, 0.22)
-	var rim := dist > float(jd["inner"])
-	m.later(dist / spd, func(): _jackpot_hit(f, rim))
-
-func _jackpot_hit(f: Ent, rim: bool) -> void:
-	if not is_instance_valid(h) or not is_instance_valid(f) or f.dead or not f.hittable():
-		return
-	var jd := jackpot_def()
-	var dmg := float(jd["dmg"]) + (float(jd["rim_dmg"]) if rim else 0.0)
-	f.hurt(dmg * power("passive"), h, {"src": "abil", "ab": "mark", "tags": ["jackpot"], "crit": rim})
-	if rim and is_instance_valid(f) and not f.dead:
-		# the rim also cuts healing (the source's outer ring)
-		KitStatus.apply(f, "blt", float(jd.get("rim_blight", 4.0)))
-	jackpot_hits += 1
-	refresh_marks()
-	fx().star(f.pos + Vector3(0, 1.0, 0), col_of(jd) if not rim else Color("ff5a6a"),
-			0.9 if rim else 0.6, 0.18)
 
 # ------------------------------------------------------------------ RMB: Bola
 func fire_rmb(c: Dictionary) -> void:
@@ -815,6 +738,9 @@ func _blink(to: Vector3) -> void:
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null:
 		return
+	# Encore once a foe is well inside the ring's reach (it rides with her, so she can chase them)
+	if r_unlocked() and float(cd["r"]) <= 0.0 and los and dist < float(r_def()["reach"]) * 0.7:
+		h.inp["hult"] = true
 	# the dagger is stuck in them: step to them
 	if not knife.is_empty() and knife.get("target") != null and randf() < 0.6:
 		h.inp["sig"] = true

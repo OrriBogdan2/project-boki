@@ -5,6 +5,7 @@ extends RefCounted
 ## landing, the telegraph while aiming or holding, the charge timings, the payoffs, and the merge holds.
 
 const AKCheck := preload("res://tools/archetype_check.gd")
+const ULT := preload("res://tools/dj_ult_check.gd")      # both heroes' ultimates on X, and the burst cap
 var A: AKCheck
 
 ## Standalone: one hero's sections (both for "all"). Prints AKCHECK lines like --archetype-check.
@@ -37,9 +38,9 @@ func thief(a) -> void:
 			P.wid)
 	A.ok("dancer: her moves are keyed (KMovesDJ)",
 			["thf_lmb_r", "thf_lmb_l", "thf_primed", "thf_vault_r", "thf_vault_l", "thf_bola", "thf_knife",
-					"thf_arrive", "thf_volley"].all(func(mv): return not HunterAnim.km_sample(mv, 0.1).is_empty()))
+					"thf_arrive", "thf_encore", "thf_encore_throw_r", "thf_encore_throw_l"]
+			.all(func(mv): return not HunterAnim.km_sample(mv, 0.1).is_empty()))
 	# LMB: a bolt every 0.45s from alternating hands, each one to the cursor
-	K.jp_cd = 99.0
 	P.fire_cd = 0.0
 	var hands := []
 	A.step(m, 1.0, func():
@@ -137,26 +138,6 @@ func thief(a) -> void:
 			A.dmg(T) >= 30.0 and K.marks_on(T) == 2 and T.vuln_t > 0.0 and K.move_k() <= 1.0
 			and P.dashes >= P.max_dashes() - 0.01 and K.primed_t <= 0.0 and K.primed_hits == 1,
 		"dealt %.0f marks %d vuln %.1f dashes %.2f" % [A.dmg(T), K.marks_on(T), T.vuln_t, P.dashes])
-	# Jackpot: the fifth Mark opens the ring, blades at everyone inside, Marks refreshed, the Vault back
-	A.fresh(T)
-	A.fresh(T2)
-	T.teleport(home + Vector3(3.0, 0, 0))
-	T2.teleport(home + Vector3(0, 0, 5.5))
-	P.teleport(home)
-	K.jp_cd = 0.0
-	P.dashes = 0.0
-	K.add_mark(T, 5, true)
-	m.step(A.DT)
-	A.ok("dancer Jackpot: the fifth Mark opens it; the cyan ring everyone sees; the Vault comes back",
-			K.jackpots == 1 and AimKit.shown(P, "jackpot") and bool(AimKit.entry(P, "jackpot").get("all", false))
-			and P.dashes >= P.max_dashes() - 0.01 and K.jp_cd > 5.0)
-	A.step(m, 1.9)
-	A.ok("dancer Jackpot: 1.2s of blades at each foe in the ring, harder at the rim, Marks refreshed",
-			K.jackpot_hits >= 10 and A.dmg(T) >= 25.0 and A.dmg(T2) > A.dmg(T) and K.marks_on(T) == 5
-			and K.jp.is_empty(),
-		"blades %d inner %.0f rim %.0f marks %d" % [K.jackpot_hits, A.dmg(T), A.dmg(T2), K.marks_on(T)])
-	A.ok("dancer Jackpot small mechanic: the rim blights (healing cut), the inside doesn't",
-			T2.blight_t > 0.0 and T.blight_t <= 0.0, "rim %.1f inner %.1f" % [T2.blight_t, T.blight_t])
 	# RMB: a 0.4s wind-up with the lane showing, then the Bola grounds the first, flies on, tangles a second
 	A.fresh(T)
 	A.fresh(T2)
@@ -166,7 +147,6 @@ func thief(a) -> void:
 	K.ch_rmb = 1.0
 	K.cd["rmb"] = 0.0
 	A.aim_at(P, T.pos)
-	K.jp_cd = 99.0
 	A.tap(m, P)
 	A.step(m, 0.2)
 	var bl: Dictionary = AimKit.entry(P, "rmb")
@@ -278,9 +258,10 @@ func thief(a) -> void:
 			capped and DJFx.of(m).made <= made + 6, "made %d -> %d" % [made, DJFx.of(m).made])
 	await A.done(m)
 	await _growth()
+	await ULT.new().dancer(A)
 
 
-## A Jackpot blade's damage on the first foe with the hunter at level `lvl`.
+## An Encore blade's damage on the first foe with the hunter at level `lvl`.
 func _blade(lvl: int) -> float:
 	var r = A.setup("thief", 6.0)
 	var m: Match = r[0]
@@ -289,7 +270,7 @@ func _blade(lvl: int) -> float:
 	var K: ThiefKit = P.ak
 	P.lvl = lvl
 	A.fresh(T)
-	K._jackpot_hit(T, false)
+	K.encore._hit(T, false)
 	var d: float = A.dmg(T)
 	await A.done(m)
 	return d
@@ -298,7 +279,7 @@ func _blade(lvl: int) -> float:
 func _growth() -> void:
 	var d1: float = await _blade(1)
 	var d10: float = await _blade(10)
-	A.ok("dancer Jackpot: a blade grows with level (LevelGrowth.ap 1.0 -> %.2f)" % (1.0 + LevelGrowth.ap_pct(10)),
+	A.ok("dancer Encore: a blade grows with level (LevelGrowth.ap 1.0 -> %.2f)" % (1.0 + LevelGrowth.ap_pct(10)),
 			d1 > 4.0 and absf(d10 / d1 - (1.0 + LevelGrowth.ap_pct(10))) < 0.01, "L1 %.2f L10 %.2f" % [d1, d10])
 
 
@@ -386,9 +367,8 @@ func juggernaut(a) -> void:
 	A.step(m, 0.4)
 	A.ok("juggernaut RMB tap: Finishing Slam winds up, then lands",
 			winding and early <= 0.0 and A.dmg(T) >= 24.0 and K.last_variant == "tap", "took %.0f" % A.dmg(T))
-	A.ok("juggernaut RMB: the sweet spot crashes at rank 1 (the old Doomfall, now reachable)",
-			K.sweet_spots == 1 and K.crashes == 1 and K.crash_cd > 5.0,
-			"spots %d crashes %d" % [K.sweet_spots, K.crashes])
+	A.ok("juggernaut RMB: the sweet spot marks the foe for the Riposte reset (no crash any more)",
+			K.sweet_spots == 1 and K.sweet_hit.has(T.get_instance_id()), "spots %d" % K.sweet_spots)
 	P.teleport(home)
 	A.fresh(T)
 	T.teleport(home + Vector3(1.2, 0, 0))
@@ -557,35 +537,29 @@ func juggernaut(a) -> void:
 	var side_off := absf(P.pos.z - straight.z)
 	A.ok("juggernaut Warchain small mechanic: sideways input shifts the arrival by at least 1.5m",
 			side_off >= 1.5, "%.2f m aside" % side_off)
-	# Smash rank 3 (the old Doomfall): the sweet spot also crashes (3m) and heals 60% of what it deals; it
-	# rests, and a knock on a foe it hit makes it ready again
-	P.slot_lv["sec"] = 3
-	A.step(m, 3.0)
+	# the source's Execution Slam: knock a foe within 2s of its sweet spot and the ultimate (X) is ready again
+	P.lvl = maxi(P.lvl, 6)
+	P.slot_lv["ult"] = 1
+	A.step(m, 2.5)
 	P.teleport(home)
 	A.fresh(T)
 	T.teleport(home + Vector3(2.6, 0, 0))
 	A.aim_at(P, T.pos)
 	K.ch_rmb = 1.0
 	K.cd["rmb"] = 0.0
-	K.crash_cd = 0.0
-	P.hp = P.max_hp * 0.5
-	var php := P.hp
+	K.cd["r"] = 15.0
 	A.tap(m, P)
 	A.step(m, 0.9)
-	A.ok("juggernaut Smash rank 3: the sweet spot crashes, and it rests 8s",
-			K.crashes == 2 and K.sweet_spots == 2 and K.crash_cd <= 8.0 and A.dmg(T) >= 44.0 and K.crash_cd > 5.0,
-			"crashes %d took %.0f rest %.1f" % [K.crashes, A.dmg(T), K.crash_cd])
-	A.ok("juggernaut Smash: the crash heals 60% of its damage", P.hp > php + 12.0, "hp %.0f -> %.0f" % [php, P.hp])
-	P.hp = P.max_hp * 0.5
 	T.hp = 4.0
 	T.hurt(10.0, P, {"src": "shot"})
 	A.step(m, 0.1)
-	A.ok("juggernaut Smash: a knock on a foe it hit resets the crash",
-			T.downed and K.crash_resets == 1 and K.crash_cd <= 0.0 and K.knock_healed > 0.0,
-			"rest %.1f resets %d" % [K.crash_cd, K.crash_resets])
+	A.ok("juggernaut Smash small mechanic: a knock after the sweet spot resets the Gilded Riposte",
+			T.downed and K.slam_resets == 1 and float(K.cd["r"]) <= 0.0 and K.knock_healed > 0.0,
+			"x cd %.1f resets %d" % [float(K.cd["r"]), K.slam_resets])
 	A.ok("juggernaut passive: a knock heals 20% of their health",
-			K.knock_healed >= 70.0, "healed %.0f" % K.knock_healed)
+			K.knock_healed >= 0.19 * T.max_hp, "healed %.0f of %.0f" % [K.knock_healed, T.max_hp])
 	await A.done(m)
+	await ULT.new().zedran(A)
 
 
 # ------------------------------------------------------------------ cross-ability combinations (--kit-combo-check)
@@ -664,42 +638,25 @@ func combos(a) -> void:
 			is_instance_valid(DJFx.of(m).chains.get("war%d" % P.get_instance_id(), {}).get("node"))
 			and (DJFx.of(m).chains["war%d" % P.get_instance_id()]["node"] as Node3D).visible)
 	A.step(m, 0.8)
-	# Finishing Slam's sweet spot below rank 3 is the payoff only; at rank 3 it also crashes
+	# the Finishing Slam's sweet spot, then a knock within 2s: the Riposte (X) is ready again, a heal, a dash back
+	P.lvl = maxi(P.lvl, 6)
+	P.slot_lv["ult"] = 1
 	P.teleport(home)
 	A.fresh(T)
 	T.teleport(home + Vector3(2.6, 0, 0))
 	A.aim_at(P, T.pos)
 	K.ch_rmb = 1.0
 	K.cd["rmb"] = 0.0
-	K.crash_cd = 0.0
-	var cs := K.crashes
+	K.cd["r"] = 15.0
 	A.tap(m, P)
 	A.step(m, 0.8)
-	A.ok("combo jug: RMB sweet spot (rank 1) = crash", K.sweet_spots >= 1 and K.crashes == cs + 1)
-	P.slot_lv["sec"] = 3
-	A.step(m, 3.0)
-	P.teleport(home)
-	A.fresh(T)
-	T.teleport(home + Vector3(2.6, 0, 0))
-	A.aim_at(P, T.pos)
-	K.ch_rmb = 1.0
-	K.cd["rmb"] = 0.0
-	K.crash_cd = 0.0
-	P.hp = P.max_hp * 0.5
-	var php := P.hp
-	A.tap(m, P)
-	A.step(m, 0.8)
-	A.ok("combo jug: RMB sweet spot (rank 3) = crash + heal",
-			K.crashes == cs + 2 and P.hp > php + 12.0 and K.crash_cd > 5.0,
-			"hp %.0f -> %.0f rest %.1f" % [php, P.hp, K.crash_cd])
-	# the crash, then a knock within 2s: the crash is ready again, a heal, a dash charge back
 	P.dashes = 0.0
-	var rs := K.crash_resets
+	var rs := K.slam_resets
 	T.hp = 4.0
 	T.hurt(10.0, P, {"src": "shot"})
 	A.step(m, 0.05)
-	A.ok("combo jug: crash > knock = crash reset + heal + a dash",
-			K.crash_resets == rs + 1 and K.crash_cd <= 0.0 and K.knock_healed > 0.0 and P.dashes >= 0.99,
+	A.ok("combo jug: RMB sweet spot > knock = Riposte reset + heal + a dash",
+			K.slam_resets == rs + 1 and float(K.cd["r"]) <= 0.0 and K.knock_healed > 0.0 and P.dashes >= 0.99,
 			"dashes %.2f" % P.dashes)
 	await A.done(m)
 	r = A.setup("juggernaut", 6.0)
@@ -756,7 +713,6 @@ func combos(a) -> void:
 	var T2: Hunter = r[3]
 	home = r[4]
 	var TK: ThiefKit = P.ak
-	TK.jp_cd = 99.0
 	# Vault > empowered bolt hits: Vault reset, speed ends
 	P.dashes = P.max_dashes()
 	A.aim_at(P, T.pos)
@@ -832,29 +788,8 @@ func combos(a) -> void:
 			"T %d T2 %d" % [TK.marks_on(T), TK.marks_on(T2)])
 	A.ok("combo dancer: Bola > Grounded = no dash", KitStatus.grounded(T) and _dash_blocked(T))
 	A.step(m, 2.0)
-	# an empowered bolt on 3 Marks makes 5 (it adds 2): Jackpot
-	P.teleport(home)
-	A.fresh(T)
-	A.fresh(T2)
-	T.teleport(home + Vector3(3.5, 0, 0))
-	T2.teleport(home + Vector3(5.5, 0, 0.5))
-	TK.jp_cd = 0.0
-	A.aim_at(P, T.pos)
-	TK.add_mark(T, 3, true)
-	TK.primed_t = 1.0
-	P.fire_cd = 0.0
-	var jb := TK.jackpots
-	P.inp["fire"] = true
-	m.step(A.DT)
-	P.inp["fire"] = false
-	A.step(m, 0.3)
-	A.ok("combo dancer: empowered bolt on 3 Marks = 5 Marks = Jackpot",
-			TK.jackpots == jb + 1 and TK.marks_on(T) == 5, "marks %d" % TK.marks_on(T))
-	A.step(m, 1.8)
-	A.ok("combo dancer: Jackpot blades refresh the Marks and resets the Vault",
-			TK.jackpot_hits >= 6 and float(T.get_meta("marks")[P.nid][1]) > 2.0 and P.dashes >= P.max_dashes() - 0.01)
-	A.ok("combo dancer: Jackpot rests (no second burst at once)", _jackpot_rests(TK, T))
 	await A.done(m)
+	await ULT.new().combos(A)
 	await merge_holds()
 
 ## True when a dash attempt leaves `t` with the dashes it had (Grounded blocks the dash).
@@ -863,13 +798,6 @@ func _dash_blocked(t: Hunter) -> bool:
 	t.stun_t = 0.0
 	t.do_dash()
 	return t.dashes == d0
-
-## True when 5 fresh Marks on `t` don't set off a second Jackpot at once (it rests).
-func _jackpot_rests(tk: ThiefKit, t: Hunter) -> bool:
-	var j0 := tk.jackpots
-	tk.clear_marks(t)
-	tk.add_mark(t, 5, true)
-	return tk.jackpots == j0
 
 ## A Boki merge starting mid-hold: nothing the hunter was holding or winding up fires, and none of it is left
 ## behind for when the merge ends (ArchKit.drop_holds: the kits' _drop_holds, then AimKit.clear).
@@ -942,7 +870,7 @@ func merge_holds() -> void:
 			K.lunge.is_empty() and not K.rmb_down and K.ch_rmb >= chg, "charges %.1f of %.1f" % [K.ch_rmb, chg])
 	A.ok("merge hold jug: an armed Haul Slam is dropped", K.haul.is_empty() and K.haul_slams == 0)
 	await A.done(m)
-	# ---- Dancer: the Bola's wind-up and a running Jackpot stop when a merge starts
+	# ---- Dancer: the Bola's wind-up stops when a merge starts (a running Encore: tools/dj_ult_check.gd)
 	r = A.setup("thief", 4.0, "cindle")
 	m = r[0]
 	P = r[1]
@@ -959,24 +887,6 @@ func merge_holds() -> void:
 	A.step(m, 0.8)
 	A.ok("merge hold dancer: the wound-up Bola is not thrown",
 			TK.bola_cast.is_empty() and TK.bola.is_empty() and not KitStatus.grounded(T) and not AimKit.shown(P, "rmb"))
-	await A.done(m)
-	r = A.setup("thief", 4.0, "cindle")
-	m = r[0]
-	P = r[1]
-	T = r[2]
-	TK = P.ak
-	P.ult = 1.0
-	P.merge_cd = 0.0
-	TK.jp_cd = 0.0
-	TK.add_mark(T, 5, true)
-	A.step(m, 0.08)
-	KinMerge.cast(P)
-	var jh := TK.jackpot_hits
-	A.step(m, 1.6)
-	A.ok("merge hold dancer: Jackpot's blades stop and its ring goes",
-			TK.jackpots == 1 and TK.jackpot_hits == jh and TK.jp.is_empty() and not AimKit.shown(P, "jackpot")
-			and KinMerge.active(P),
-			"blades after %d" % (TK.jackpot_hits - jh))
 	await A.done(m)
 	# ---- Juggernaut: a Meteor Drop diving when a merge starts doesn't land
 	r = A.setup("juggernaut", 4.0, "cindle")

@@ -109,18 +109,28 @@ const MOVES := {
 		[0.35, {"blade": Vector3(0.0, -1.3, 0.0), "bw": 0.9, "rad": 0.55, "p": -0.6, "lift": -0.14, "sq": 0.25,
 				"lw": 1.0, "legs": [1.1, -1.6, -0.4, -1.0]}],
 		[0.7, {}]]},
-	# the crash (the old Doomfall, now the Finishing Slam's sweet spot): the blade wrenched up overhead
-	# out of the slam and brought down again on the spot, two-handed
-	"jug_crash": {"keys": [
-		[0.0, {"blade": Vector3(0.0, -1.2, 0.0), "bw": 1.0, "rad": 0.55, "p": -0.6, "lw": 1.0,
-				"legs": [1.0, -1.4, -0.35, -0.8]}],
-		[0.05, {"blade": Vector3(0.0, 2.9, 0.0), "bw": 1.0, "p": 0.4, "lift": 0.18, "sq": -0.3, "lw": 1.0,
-				"legs": [0.3, -0.6, 0.1, -0.5]}],
-		[0.11, {"blade": Vector3(0.0, -1.4, 0.0), "bw": 1.0, "rad": 0.6, "p": -0.8, "lift": -0.22, "sq": 0.55,
-				"lw": 1.0, "legs": [1.2, -1.7, -0.5, -1.3]}],
-		[0.45, {"blade": Vector3(0.0, -1.3, 0.0), "bw": 0.9, "rad": 0.55, "p": -0.65, "lift": -0.15, "sq": 0.25,
-				"lw": 1.0, "legs": [1.1, -1.6, -0.45, -1.2]}],
-		[0.85, {}]]},
+	# Gilded Riposte, the guard (ult f33-f38, 0.6s): planted wide, the blade drawn up vertical in front of
+	# him, braced and shivering a little under the gold
+	"jug_guard": {"keys": [
+		[0.0, {}],
+		[0.08, {"blade": Vector3(0.0, 2.4, 0.0), "bw": 1.0, "rad": 0.3, "p": 0.08, "sq": 0.18, "lift": -0.08,
+				"lw": 1.0, "legs": [0.75, -1.1, -0.55, -0.75]}],
+		[0.36, {"blade": Vector3(0.0, 2.5, 0.0), "bw": 1.0, "rad": 0.28, "p": 0.04, "sq": 0.24, "lift": -0.1,
+				"lw": 1.0, "legs": [0.8, -1.15, -0.6, -0.8]}],
+		[0.66, {"blade": Vector3(0.0, 2.3, 0.0), "bw": 1.0, "rad": 0.3, "p": 0.1, "sq": 0.2, "lift": -0.09,
+				"lw": 1.0, "legs": [0.8, -1.15, -0.6, -0.8]}]]},
+	# ... the answer (f39-f44): the blade drops low for a beat, then he lunges and cleaves it up through
+	# them, stretched tall on the release, and settles back heavy
+	"jug_riposte": {"keys": [
+		[0.0, {"blade": Vector3(0.0, -1.2, 0.0), "bw": 1.0, "rad": 0.6, "p": 0.3, "sq": 0.25, "lift": -0.12,
+				"lw": 1.0, "legs": [1.0, -1.4, -0.4, -0.9]}],
+		[0.06, {"blade": Vector3(0.0, 3.0, 0.0), "bw": 1.0, "rad": 0.55, "p": 0.38, "sq": -0.35, "lift": 0.16,
+				"lw": 1.0, "legs": [1.2, -0.6, -0.75, -0.3]}],
+		[0.14, {"blade": Vector3(0.0, 2.7, 0.0), "bw": 1.0, "rad": 0.5, "p": 0.2, "sq": -0.12, "lift": 0.04,
+				"lw": 1.0, "legs": [1.15, -0.65, -0.7, -0.3]}],
+		[0.3, {"blade": Vector3(0.0, 1.6, 0.0), "bw": 0.8, "rad": 0.45, "p": -0.1, "sq": 0.12, "lw": 0.8,
+				"legs": [0.9, -0.8, -0.5, -0.4]}],
+		[0.45, {}]]},
 	# ---------------------------------------------------------------- Dancer (thief)
 	# Arc Bolts, one per hand (footage 0028-0039: 2-3 frames a shot, one arm whipped forward from a wide
 	# low stance, the torso turned about 30 degrees into it, the legs keeping their stance). The arm
@@ -181,18 +191,28 @@ const MOVES := {
 		[0.06, {"lift": -0.14, "p": -0.45, "sq": 0.45, "lw": 1.0, "legs": [1.25, -2.0, -0.2, -1.6]}],
 		[0.3, {"lift": -0.1, "p": -0.35, "sq": 0.2, "lw": 1.0, "legs": [1.15, -1.8, -0.15, -1.4]}],
 		[0.6, {}]]},
-	# Jackpot (0296-0350): she keeps walking and shooting, the body snapping side to side as the free
-	# arm flings the blades out (no leg keys: the walk keeps the legs)
-	"thf_volley": {"keys": [
-		[0.0, {"p": 0.12, "sq": -0.15}],
-		[0.2, {"y": 0.55, "fl": Vector3(0.1, 0.15, -0.5), "hw": 1.0}],
-		[0.4, {"y": -0.55, "fl": Vector3(-0.45, 0.15, -0.1), "hw": 1.0}],
-		[0.6, {"y": 0.55, "fl": Vector3(0.1, 0.15, -0.5), "hw": 1.0}],
-		[0.8, {"y": -0.55, "fl": Vector3(-0.45, 0.15, -0.1), "hw": 1.0}],
-		[1.0, {"y": 0.55, "fl": Vector3(0.1, 0.15, -0.5), "hw": 1.0}],
-		[1.2, {"y": -0.55, "fl": Vector3(-0.45, 0.15, -0.1), "hw": 1.0}],
-		[1.4, {"y": 0.55, "fl": Vector3(0.1, 0.15, -0.5), "hw": 1.0}],
-		[1.6, {}]]},
+	# Encore (ult f27-f35): both blades raised as the ring grows (anticipation, a little squash), then a
+	# whole-body spin as it opens (no leg keys: she keeps walking)
+	"thf_encore": {"keys": [
+		[0.0, {}],
+		[0.1, {"fl": Vector3(-0.3, 0.55, 0.1), "hw": 1.0, "fr": Vector3(0.3, 0.55, 0.1), "rw": 1.0, "p": 0.18,
+				"sq": 0.15}],
+		[0.38, {"fl": Vector3(-0.35, 0.6, 0.05), "hw": 1.0, "fr": Vector3(0.35, 0.6, 0.05), "rw": 1.0, "p": 0.1,
+				"sq": 0.2, "fy": 0.0}],
+		[0.58, {"fl": Vector3(-0.55, 0.35, 0.0), "hw": 1.0, "fr": Vector3(0.55, 0.35, 0.0), "rw": 1.0, "p": -0.1,
+				"sq": -0.2, "fy": 6.283}],
+		[0.8, {}]]},
+	# ... each volley (f33-f35): the torso snaps round as one arm flings a blade out, the other trailing
+	"thf_encore_throw_r": {"keys": [
+		[0.0, {"y": -0.35, "fr": Vector3(0.2, 0.4, 0.2), "rw": 1.0, "sq": 0.08}],
+		[0.06, {"y": 0.6, "fr": Vector3(0.55, 0.15, -0.4), "rw": 1.0, "fl": Vector3(-0.3, 0.2, 0.25), "hw": 0.7,
+				"sq": -0.1}],
+		[0.3, {}]]},
+	"thf_encore_throw_l": {"keys": [
+		[0.0, {"y": 0.35, "fl": Vector3(-0.2, 0.4, 0.2), "hw": 1.0, "sq": 0.08}],
+		[0.06, {"y": -0.6, "fl": Vector3(-0.55, 0.15, -0.4), "hw": 1.0, "fr": Vector3(0.3, 0.2, 0.25), "rw": 0.7,
+				"sq": -0.1}],
+		[0.3, {}]]},
 	# ---------------------------------------------------------------- per-hero base dash (the long air dash)
 	# Dancer flicks into a forward tumble, tucked, then opens out to land light
 	"thf_exdash": {"keys": [

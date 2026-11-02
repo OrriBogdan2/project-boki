@@ -11,7 +11,7 @@ const SIZE := Vector2(890, 600)
 const BODY_H := 372.0
 const TILE := Vector2(431, 116)
 const SLOTS := ["dash", "passive", "lmb", "rmb", "e", "r"]
-const KEYS := {"dash": "Shift", "passive": "", "lmb": "LMB", "rmb": "RMB", "e": "E", "r": "R"}
+const KEYS := {"dash": "Shift", "passive": "", "lmb": "LMB", "rmb": "RMB", "e": "E", "r": "X"}
 const LABEL := {"dash": "Dash", "passive": "Passive", "lmb": "Attack", "rmb": "Right click", "e": "Utility", "r": "Ultimate"}
 ## Which looping preview each archetype's abilities get (KitPreview kinds).
 const PREVIEW := {
@@ -235,7 +235,7 @@ func _kin_strip() -> Control:
 
 # ------------------------------------------------------------------ data → text
 ## Name, icon, colour, a short tag, the one line, and the detail page's paragraphs for one slot.
-## The slots an archetype has (no Ultimate tile for the heroes whose R is the Boki Merge).
+## The slots an archetype has (the Ultimate tile, on X, only for the heroes with an ultimate of their own).
 static func slots_of(a: String) -> Array:
 	return SLOTS.filter(func(s): return s != "r" or Arch.def(a).has("r"))
 
@@ -256,8 +256,6 @@ static func slot_text(a: String, slot: String) -> Dictionary:
 				"tag": "no key · builds as you fight", "line": String(cd.get("passive", ""))}, true)
 			var tl: Dictionary = d.get("tells", {})
 			out["detail"] = [["", String(d["passive"]["desc"])], ["What enemies see", "%s; full: %s." % [String(tl.get("half", "")), String(tl.get("full", ""))]]]
-			if d.has("jackpot"):
-				out["detail"].append([String(d["jackpot"]["name"]), String(d["jackpot"]["desc"])])
 		"lmb":
 			var wl: Dictionary = cd.get("weapons", {})
 			var ws: Array = Arch.weapons(a)
@@ -291,16 +289,14 @@ static func slot_text(a: String, slot: String) -> Dictionary:
 			out.merge({"name": "Boki Merge", "icon": "bond", "col": Color("ffd27a"), "tag": "Boki system", "line": "Your Boki fuses with you; its kind decides the form."}, true)
 			out["detail"] = [["", "R is not a hero ability here: it is the Boki Merge. Your Boki fuses with you and its kind sets the merged form."]]
 		"r":
-			# R is the Merge for every class (docs/decisions/0001); the class's own ultimate is held back behind
-			# boki_system.json class_ults until the hero-port work folds it into the kits
-			var sd: Dictionary = d.get("r", {})        # (a hero with no class R: only the Merge shows)
-			var on := KinCommand.class_ults() and not sd.is_empty()
-			out.merge({"name": String(sd["name"]) if on else "Merge", "icon": String(sd.get("icon", "")) if on else "bond", "col": Color(String(sd.get("col", "#ffffff"))) if on else Color("ffd27a"),
-				"tag": ("level 6 · %ss · %ss fuse" % [KinText.n(float(sd.get("cooldown", 100.0))), KinText.n(float(sd.get("fuse", 0.45)))]) if on else "level 6 · full bond meter", "line": String(cd.get("r", "")) if on else "You and your Boki become one: its colour, its type, your abilities changed."}, true)
-			out["detail"] = [["Merge", "Press R with a full bond meter (it fills as your Boki lands hits, as you hit what it marked, and on combos). You take the Boki's colour and silhouette, and every ability of yours changes for the merge by its type and power."],
-				["Boki out?", "It leaps back through anything in its way and merges you in mid-air."],
-				["No Boki", "A downed or lost Boki: only a weak 3 second surge."],
-				] + ([["Held back", "%s: %s (the class ultimate, off while R is the Merge)" % [String(sd["name"]), String(sd.get("desc", ""))]]] + _ranks(a, "ult") if not sd.is_empty() else [])
+			# the hero's own ultimate, on X (R stays the Boki Merge)
+			var sd: Dictionary = d["r"]
+			out.merge({"name": String(sd["name"]), "icon": String(sd.get("icon", "")), "col": Color(String(sd.get("col", "#ffffff"))),
+				"tag": "level %d · %ss" % [int(sd.get("unlock", 6)), KinText.n(float(sd.get("cooldown", 20.0)))],
+				"line": String(cd.get("ult", ""))}, true)
+			out["detail"] = [["", String(sd.get("desc", ""))],
+				["Bond", "Landing it on a rival hunter fills your bond meter a long way (never the cast alone)."]
+				] + _ranks(a, "ult")
 	return out
 
 ## The ranks to come, in order (rank 2's concrete change first, then rank 3's special), as one row

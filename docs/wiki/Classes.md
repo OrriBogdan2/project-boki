@@ -49,20 +49,20 @@ your class in the Expedition menu, and you can try every class against dummies i
 
 ### All 12 classes
 
-| Class | Weight | Weapons | Passive | Dash | RMB | E | R |
+| Class | Weight | Weapons | Passive | Dash | RMB | E | X (ultimate; R is the Boki Merge) |
 |---|---|---|---|---|---|---|---|
-| [Dancer](Class-Dancer.md) | Light | Arc Bolts | Marks | Vault | Bola | Shadow Knife | none (Boki Merge) |
-| [Archer](Class-Archer.md) | Light | Longbow | Focus | Grapple Arrow | Snare | Hail Wall | none (Boki Merge) |
-| [Vireo](Class-Vireo.md) | Light | Coilcaster | Sparks | Wirerun | Coilshot | Skycall | none (Boki Merge) |
-| [Marlowe](Class-Marlowe.md) | Medium | Quill Rifle | Fever | Slipstep | Burr Charge | Longneedle | none (Boki Merge) |
-| [Zedran](Class-Zedran.md) | Heavy | Greatsword | Rage | Rampage | Smash | Warchain | none (Boki Merge) |
-| [Bulwark](Class-Bulwark.md) | Heavy | Tower Shield & Mace | Guard | Whirl | Shield | Mending Ground | none (Boki Merge) |
-| [Dredge](Class-Dredge.md) | Heavy | Shotgun | Salvage | Barge | Grapnel | Anchor Drop | none (Boki Merge) |
-| [Ashwick](Class-Ashwick.md) | Heavy | Torch Lance | Flashover | Spark Leap | Cinder Shot | Furnace Cloak | none (Boki Merge) |
-| [Linnet](Class-Linnet.md) | Medium | Lantern Crook | Bearer | Relay Step | Burrseed | Hearthlight | none (Boki Merge) |
-| [Tamsin](Class-Tamsin.md) | Light | Hoar Fan | Hoarfrost | Rinkrun | Sleet Lance | Rink Wall | none (Boki Merge) |
-| [Dolm](Class-Dolm.md) | Medium | Rubble Fists | Tremor Sense | Rubble Rush | Quakefall | Stone Row | none (Boki Merge) |
-| [Ostra](Class-Ostra.md) | Medium | Tether Lantern | Swell | Lantern Trade | Shard Fan | Brimseed | none (Boki Merge) |
+| [Dancer](Class-Dancer.md) | Light | Arc Bolts | Marks | Vault | Bola | Shadow Knife | Encore |
+| [Archer](Class-Archer.md) | Light | Longbow | Focus | Grapple Arrow | Snare | Hail Wall | none yet |
+| [Vireo](Class-Vireo.md) | Light | Coilcaster | Sparks | Wirerun | Coilshot | Skycall | none yet |
+| [Marlowe](Class-Marlowe.md) | Medium | Quill Rifle | Fever | Slipstep | Burr Charge | Longneedle | none yet |
+| [Zedran](Class-Zedran.md) | Heavy | Greatsword | Rage | Rampage | Smash | Warchain | Gilded Riposte |
+| [Bulwark](Class-Bulwark.md) | Heavy | Tower Shield & Mace | Guard | Whirl | Shield | Mending Ground | none yet |
+| [Dredge](Class-Dredge.md) | Heavy | Shotgun | Salvage | Barge | Grapnel | Anchor Drop | none yet |
+| [Ashwick](Class-Ashwick.md) | Heavy | Torch Lance | Flashover | Spark Leap | Cinder Shot | Furnace Cloak | none yet |
+| [Linnet](Class-Linnet.md) | Medium | Lantern Crook | Bearer | Relay Step | Burrseed | Hearthlight | none yet |
+| [Tamsin](Class-Tamsin.md) | Light | Hoar Fan | Hoarfrost | Rinkrun | Sleet Lance | Rink Wall | none yet |
+| [Dolm](Class-Dolm.md) | Medium | Rubble Fists | Tremor Sense | Rubble Rush | Quakefall | Stone Row | none yet |
+| [Ostra](Class-Ostra.md) | Medium | Tether Lantern | Swell | Lantern Trade | Shard Fan | Brimseed | none yet |
 
 ### Weight classes
 
@@ -76,7 +76,7 @@ The weight class sets health, speed, mass and dash charges; the class kit sits o
 
 ### Run levels
 
-Every expedition starts at level 1 with one skill point and every ability locked. Each level gives a point. Ranks per slot: RMB 3, Glove (Q) 3, Dash (Shift) 3, E 3, R (ultimate) 2. The ultimate opens at level 6 (rank 2 at 9).
+Every expedition starts at level 1 with one skill point and every ability locked. Each level gives a point. Ranks per slot: RMB 3, Glove (Q) 3, Dash (Shift) 3, E 3, X (ultimate) 2. The ultimate opens at level 6 (rank 2 at 9).
 
 | Level | Total XP |  |
 |---|---|---|
@@ -85,10 +85,10 @@ Every expedition starts at level 1 with one skill point and every ability locked
 | 3 | 170 |  |
 | 4 | 300 |  |
 | 5 | 460 |  |
-| 6 | 650 | R unlocks |
+| 6 | 650 | X and the Merge unlock |
 | 7 | 870 |  |
 | 8 | 1120 |  |
-| 9 | 1400 | R rank 2 |
+| 9 | 1400 | X rank 2 |
 | 10 | 1710 |  |
 
 <!-- /gen:classes -->

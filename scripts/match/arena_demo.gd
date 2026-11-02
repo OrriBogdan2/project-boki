@@ -6,11 +6,9 @@ extends RefCounted
 ##   primed      the same, ending on the Primed hit landing (VAULT RESET, the payoff)
 ##   bola        the Thief's Bola catching two dummies: Grounded, TANGLED
 ##   juggernaut  greatsword slashes fill Rage (the shoulder glow), the Enraged form
-##   sweetspot   then a rank-3 Finishing Slam winds up and lands its sweet spot (--hold-shot: the wind-up);
-##               it also brings the crash down and heals
-##   crash       the same, framed on the crash and the heal that follows the slam
-##   jackpot     the Thief's fifth Mark releases the knife burst (the knives in flight)
-##   jackpotpay  the same, on the last knife: the JACKPOT payoff and the free Vault
+##   sweetspot   then a Finishing Slam winds up and lands its sweet spot (--hold-shot: the wind-up)
+##   encore / encorehit   Dancer's X: the ring growing (the telegraph), then a volley landing (the impact)
+##   riposte / ripostehit Zedran's X: the guard with its strip (the telegraph), then the cleave landing
 ##   wave        the greatsword held into a Searing Wave (--hold-shot: at full charge)
 ##   archer      a snare roots the dummy, full Focus: the lens glint, the aim line, crosshairs over it
 ##   deadeye     the same, ending on the Deadeye payoff
@@ -125,13 +123,12 @@ static func tick(A: Arena, dt: float) -> void:
 				P.ak.press_rmb()
 			if (P.ak as ThiefKit).bola_pairs > 0 and not A.has_meta("bp_at"): A.set_meta("bp_at", t)
 			at_t = float(A.get_meta("bp_at", 9.0)) + 0.12
-		"juggernaut", "sweetspot", "crash":
-			# greatsword slashes fill Rage (the shoulder glow) into the Enraged form; (sweetspot) then an
-			# Finishing Slam (rank 3) winds up (the warning) and lands its sweet spot: the crash comes down and heals
+		"juggernaut", "sweetspot":
+			# greatsword slashes fill Rage (the shoulder glow) into the Enraged form; (sweetspot) then a
+			# Finishing Slam winds up (the warning) and lands its sweet spot
 			if t < 0.05:
 				if P.arch != "juggernaut" or P.wid != "greatsword": A.set_arch("juggernaut", "greatsword")
 				A.set_kin("cindle")
-				P.slot_lv["sec"] = 3                 # rank 3: the sweet spot also crashes
 				var H: Hunter = A.dummies[2]["h"]
 				P.teleport(H.pos + Vector3(-1.6, 0, 2.2))
 				A.home = P.pos
@@ -155,8 +152,8 @@ static func tick(A: Arena, dt: float) -> void:
 					P.ak.press_rmb()
 				if w == "sweetspot" and "--hold-shot" in OS.get_cmdline_user_args(): at_t = 1.5
 				else:
-					if JK.crashes > 0 and not A.has_meta("ss_at"): A.set_meta("ss_at", t)
-					at_t = float(A.get_meta("ss_at", 9.0)) + (0.08 if w == "sweetspot" else 0.3)
+					if JK.sweet_spots > 0 and not A.has_meta("ss_at"): A.set_meta("ss_at", t)
+					at_t = float(A.get_meta("ss_at", 9.0)) + 0.08
 		"wave":
 			# the greatsword held: the wind-up (ring, glow, rising thump), then the Searing Wave rolls out
 			if t < 0.05:
@@ -168,22 +165,28 @@ static func tick(A: Arena, dt: float) -> void:
 			P.inp["move"] = Vector2.ZERO
 			P.inp["fire"] = t > 0.3 and t < 1.45
 			at_t = 1.3 if "--hold-shot" in OS.get_cmdline_user_args() else 1.56
-		"jackpot", "jackpotpay":
-			# kits2-nor: the Thief's fifth Mark on the dummy releases Jackpot: a burst of knives, Marks
-			# refreshed, one free Vault; (jackpotpay) the last knife lands and the payoff goes off
+		"encore", "encorehit":
+			# Dancer's Encore: the dummy stands in the ring's outer band, a second one inside it
 			if t < 0.05:
 				if P.arch != "thief" or P.wid != "arc_bolts": A.set_arch("thief", "arc_bolts")
 				A.set_kin("puddlet")
-				P.teleport(D.pos + Vector3(-3.4, 0, 1.4))
+				P.teleport(D.pos + Vector3(-4.6, 0, 0.6))
 				A.home = P.pos
 			_aim(P, D)
 			P.inp["move"] = Vector2.ZERO
-			var JT := P.ak as ThiefKit
-			if _at(t, dt, 0.1): JT.add_mark(D, 4, true)
-			P.inp["fire"] = t > 0.5 and t < 0.8
-			if P.ammo < 3: P.ammo = int(P.wpn["mag"])
-			if JT.jackpots > 0 and not A.has_meta("jp_at"): A.set_meta("jp_at", t)
-			at_t = float(A.get_meta("jp_at", 9.0)) + (0.2 if w == "jackpot" else 0.46)
+			if _at(t, dt, 0.3): DJDemo.cast_ult(P)
+			at_t = 0.55 if w == "encore" else 1.24
+		"riposte", "ripostehit":
+			# Zedran's Gilded Riposte: the guard with the strip toward the dummy, then the cleave through it
+			if t < 0.05:
+				if P.arch != "juggernaut" or P.wid != "greatsword": A.set_arch("juggernaut", "greatsword")
+				A.set_kin("cindle")
+				P.teleport(D.pos + Vector3(-2.6, 0, 0.4))
+				A.home = P.pos
+			_aim(P, D)
+			P.inp["move"] = Vector2.ZERO
+			if _at(t, dt, 0.3): DJDemo.cast_ult(P)
+			at_t = 0.75 if w == "riposte" else 1.07
 		"archer", "deadeye":
 			if t < 0.05:
 				if P.arch != "archer": A.set_arch("archer", "longbow")

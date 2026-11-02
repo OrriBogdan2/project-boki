@@ -9,14 +9,15 @@ extends ArchKit
 ## - LMB (Greatsword): quick slashes that hit twice as hard at the tip; hold for a Searing Wave (it
 ##   fills Rage fast).
 ## - RMB, Smash (Adaptive Strike): tap a wound-up Finishing Slam behind a magenta strike lane (more to
-##   the wounded, who are outlined red while it's ready; its sweet spot crashes: the old Doomfall, a
-##   burst that heals you, reset by a knock: the payoff, T4, pay_rage), hold a charged Lunge (a crouched
+##   the wounded, who are outlined red while it's ready; a foe knocked within 2s of its sweet spot makes
+##   the Gilded Riposte ready again: the payoff, T4, pay_rage), hold a charged Lunge (a crouched
 ##   wind-up, a lane that grows and turns magenta at full, a rising whine; you can jump while charging;
 ##   release flings you forward, a miss doubles the cooldown), in the air a Meteor Drop onto a disc at
 ##   the cursor (slows; the centre stunned), during the Warchain's pull a Cinder Spin.
 ## - Dash, Rampage (Flame Step): 3 charges of a dash attack the way you face, the tip hits double.
 ## - E, Warchain (Feysteel Chain): a chain to a foe (blighted) or a wall; recast to pull yourself in.
-## No R: that key is the Boki Merge. The old ultimate lives on as the Finishing Slam's crash (every rank).
+## - X, Gilded Riposte (JuggernautUlt, level 6): a 0.65s gold guard that blocks everything, then a lunging
+##   upward cleave that heals 80% of its damage; a knock with it makes it ready again. R is the Boki Merge.
 ## Matched to the footage in briefs/hero-ref/juggernaut.md; docs/heroes/juggernaut.md.
 
 const SLASH_OUT := Color("ff3df0")     # the slash crescent's magenta edge
@@ -43,13 +44,12 @@ var lunge := {}                # the running Lunge: {end, dir, k, hit}
 var chain := {}                # the Warchain: {target, pos, node}
 var chain_flying := false
 var reel_t := 0.0              # the Warchain's pull is carrying you (a Smash now is a Cinder Spin)
-var crash_cd := 0.0            # the rank-3 crash is resting (seconds)
-var crash_hit := {}            # foe id -> when the crash hit them (a knock within 2s resets it)
+var sweet_hit := {}            # foe id -> when the Slam's sweet spot hit them (a knock within 2s resets X)
+var riposte: JuggernautUlt     # X, the ultimate
 var sweet_spots := 0           # (tests, demo)
 var waves := 0
 var tips := 0
-var crashes := 0
-var crash_resets := 0
+var slam_resets := 0           # Riposte resets from a Slam sweet spot then a knock
 var reels := 0
 var spins := 0
 var chain_lunges := 0
@@ -60,6 +60,9 @@ var lunge_full := false        # the Lunge charge reached full (its flash played
 var drops := 0                 # (tests)
 var last_drop := Vector3.ZERO
 var knock_healed := 0.0        # (tests) health the knock heals gave back
+
+func _setup() -> void:
+	riposte = JuggernautUlt.new(self)
 
 func full_ready() -> bool:
 	return false               # no resource-full Smash: Enraged buffs everything instead
@@ -200,7 +203,7 @@ func _tick(dt: float) -> void:
 	if not slam_w.is_empty(): _tick_slam(dt)
 	if not lunge.is_empty(): _tick_lunge()
 	if not chain.is_empty(): _tick_chain(dt)
-	crash_cd = maxf(0.0, crash_cd - dt)
+	riposte.tick(dt)
 	if not drop.is_empty(): _tick_drop(dt)
 	# a held pose ends with its hold (a charge dropped without a release must not freeze the body)
 	if (anim_id == "jug_wave_wind" and lmb_t < 0.0) or (anim_id == "jug_lunge_wind" and not rmb_down):
@@ -230,11 +233,12 @@ func outgoing(_t: Ent, dmg: float, _o: Dictionary) -> float:
 	return dmg * (1.0 + float(res_def().get("enraged_dmg", 0.15)) * enraged_k())
 
 func move_k() -> float:
+	if riposte.running(): return riposte.move_k()
 	if not slam_w.is_empty(): return 0.6
 	return 0.55 if lmb_t > float(lmb_def().get("tap", 0.22)) else 1.0
 
 ## A knock (ours, or one we helped with): ours heals a share of the knocked hunter's health; either
-## way, if the crash hit them in the last 2s it is ready again.
+## way, if the Slam's sweet spot hit them in the last 2s the Gilded Riposte is ready again.
 func on_knock(t: Hunter, mine: bool) -> void:
 	var rd := res_def()
 	if mine and is_instance_valid(t):
@@ -247,31 +251,52 @@ func on_knock(t: Hunter, mine: bool) -> void:
 		m.sfx("dj_heal", h.pos, -4.0, 0.8)
 		if h.is_local() and m.hud: m.hud.flash(Color(1, 0.1, 0.05), 0.12)      # the red tint of a kill
 	var key := t.get_instance_id() if is_instance_valid(t) else -1
-	if crash_hit.has(key) and m.time - float(crash_hit[key]) <= float(crash_def().get("reset_t", 2.0)):
-		crash_hit.erase(key)
-		_reset_crash()
+	if sweet_hit.has(key) and m.time - float(sweet_hit[key]) <= float(rmb_def()["slam"].get("reset_t", 2.0)):
+		sweet_hit.erase(key)
+		_reset_riposte()
 
-func crash_def() -> Dictionary:
-	return rmb_def().get("crash", {})
-
-func _reset_crash() -> void:
-	if crash_cd <= 0.0:
+## The Slam's sweet spot then a knock: the Gilded Riposte (X) is ready again (once it is unlocked).
+func _reset_riposte() -> void:
+	if float(cd["r"]) <= 0.0 or not r_unlocked():
 		return
-	crash_cd = 0.0
-	crash_resets += 1
-	m.fx.word(h.pos + Vector3(0, 2.8, 0), "CRASH RESET", col_of(rmb_def()), true)
-	m.fx.ring(h.pos, 2.0, col_of(rmb_def()), 0.35)
+	cd["r"] = 0.0
+	slam_resets += 1
+	m.fx.word(h.pos + Vector3(0, 2.8, 0), "RIPOSTE READY", col_of(r_def()), true)
+	m.fx.ring(h.pos, 2.0, col_of(r_def()), 0.35)
 	m.sfx("ab_ready", h.pos, -2.0, 0.8)
-	if h.is_local(): h._ab_feedback("sec", "ready")
-	net_ring(h.pos, 2.0, col_of(rmb_def()))
+	if h.is_local(): h._ab_feedback("x", "ready")
+	net_ring(h.pos, 2.0, col_of(r_def()))
+
+# ------------------------------------------------------------------ X: Gilded Riposte (JuggernautUlt)
+func cast_ult() -> bool:
+	if not ult_ready():
+		return false
+	riposte.start()
+	ult_spent()
+	return true
+
+func ult_running() -> float:
+	return riposte.left_k()
+
+## Planted in the guard and the cleave: no other button does anything.
+func busy() -> bool:
+	return super.busy() or (riposte != null and riposte.move_k() <= 0.0)
+
+## The guard takes every hit (no damage, no crowd control) and counts it.
+func incoming(by: Ent, dmg: float, o: Dictionary) -> Array:
+	if riposte.block(by, o):
+		return [0.0, o]
+	return [dmg, o]
 
 # ------------------------------------------------------------------ LMB: Greatsword (slashes / Searing Wave)
 func _wk() -> float:
 	return h.wup_dmg * m.dmg_mult(h)
 
 ## A Boki merge starting (ArchKit's single cleanup hook) drops everything held or wound up: the Searing
-## Wave charge, the Finishing Slam's wind-up and an armed Haul Slam. Nothing fires and nothing is left over.
+## Wave charge, the Finishing Slam's wind-up, an armed Haul Slam and a running Gilded Riposte (guard or
+## cleave). Nothing fires and nothing is left over.
 func _drop_holds() -> void:
+	riposte.drop()
 	lmb_t = -1.0
 	lmb_buf = 0.0
 	h.mel_hold = 0.0
@@ -290,7 +315,8 @@ func wave_k() -> float:
 func lmb_override(held: bool, dt: float) -> bool:
 	if h.wid != "greatsword":
 		return false
-	if KinMerge.active(h):          # merged: the form owns the attack key, a charge from before it must not go off
+	if KinMerge.active(h) or riposte.move_k() <= 0.0:
+		# merged, the form owns the attack key (a charge from before must not go off); guarding, no swings
 		lmb_was = false
 		return true
 	var ld := lmb_def()
@@ -422,7 +448,7 @@ func _wave() -> void:
 
 # ------------------------------------------------------------------ dash: Rampage
 func on_dash(use_ex: bool) -> bool:
-	if not lunge.is_empty():
+	if not lunge.is_empty() or riposte.move_k() <= 0.0:
 		return true
 	if use_ex and not h.grounded:
 		if not spend_dash(true): return true
@@ -554,7 +580,7 @@ func _tick_slam(dt: float) -> void:
 		_slam()
 
 ## The Finishing Slam: a heavy cone; the wounded (under 35%) take +50%; a foe in the sweet spot (the far
-## tip, dead ahead) is the payoff; at rank 3 it also crashes (_crash).
+## tip, dead ahead) is the payoff, and a knock on that foe within 2s makes the Gilded Riposte ready again.
 func _slam() -> void:
 	var sd := rmb_def()
 	var sl: Dictionary = sd["slam"]
@@ -579,9 +605,8 @@ func _slam() -> void:
 			paid["x"] = true
 			sweet_spots += 1
 			payoff_fx(f.pos, "SWEET SPOT", res_col(), "pay_rage", dd, f)
-			if rank("sec") >= int(crash_def().get("rank", 3)) and crash_cd <= 0.0:
-				var at := f.pos
-				m.later(0.08, func(): if is_instance_valid(h): _crash(at))}))
+		if sweet:
+			sweet_hit[f.get_instance_id()] = m.time}))
 	AimKit.hide(h, "slam")
 	m.fx.cone(h.pos + Vector3(0, 0.1, 0), dd, float(sl["radius"]), col_of(sd))
 	fx().crescent(h.pos + Vector3(0, 0.6, 0), dd, 80.0, float(sl["radius"]), SLASH_OUT, SLASH_IN, 0.24, PI * 0.5)
@@ -964,49 +989,14 @@ func e_recast() -> bool:
 	last_e = "reel"
 	return true
 
-# ------------------------------------------------------------------ Smash rank 3: the crash
-## The sweet spot at rank 3 brings the old Doomfall down on the foe: a 3m crash that hits everyone
-## (not just the sweet-spot foe) and heals you 60% of what it dealt. It rests 12s; a knock on
-## anyone it hit within 2s makes it ready at once.
-func _crash(land: Vector3) -> void:
-	var cr := crash_def()
-	crash_cd = float(cr["cd_r3"] if rank("sec") >= 3 else cr["cd"])
-	crashes += 1
-	play("jug_crash")
-	fx().star(land + Vector3(0, 1.2, 0), Color("ff6a4a"), 3.0, 0.35, Color(1, 0.95, 0.8))
-	fx().crescent(land + Vector3(0, 0.3, 0), h.aim_dir(), 300.0, float(cr["radius"]), Color("ff6a4a"), Color("ffd08a"),
-			0.3)
-	var r := float(cr["radius"])
-	var before := {}
-	for f in foes_in(land, r):
-		before[f.get_instance_id()] = f.hp
-	var healed := {"hp": 0.0}
-	var stg := stage("rmb", {"delivery": {"type": "burst", "origin": "here", "radius": r},
-		"effects": [{"type": "damage", "amount": float(cr["dmg"]) * smash_k()},
-				{"type": "push", "strength": float(cr["push"]), "from": "caster"}]})
-	run(stg, cx("rmb", "crash", land, {"at": land, "no_floor": true, "on_foe": func(f: Ent, _c: Dictionary):
-		if not is_instance_valid(f): return
-		var key := f.get_instance_id()
-		crash_hit[key] = m.time
-		var lostp := maxf(0.0, float(before.get(key, f.hp)) - f.hp) if not f.dead or f.hp <= 0.0 else 0.0
-		healed["hp"] = float(healed["hp"]) + lostp * (1.0 if f is Hunter else 0.5)
-		Feel.hitstop(m, h, f, 40.0, {"melee": true, "payoff": true, "heavy": true})}))
-	var amt := float(healed["hp"]) * float(cr["heal"])
-	if amt > 0.5:
-		h.heal(amt)
-		m.fx.word(h.pos + Vector3(0, 2.2, 0), "+%d" % int(round(amt)), Color("7fe08a"), true)
-		m.fx.burst(h.pos + Vector3(0, 1.0, 0), Color("7fe08a"), 18, 3.0, 0.6, -2.0)
-	m.fx.word(land + Vector3(0, 3.1, 0), "CRASH", col_of(rmb_def()), true)
-	m.fx.ring(land, r, col_of(rmb_def()), 0.4)
-	m.fx.dust(land, 20)
-	m.sfx("ab_slam", land, 0.0, 0.6)
-	m.sfx("boom", land, -2.0, 0.7)
-	Feel.shake(m, "t4", h, land)
-	net_ring(land, r, col_of(rmb_def()))
-
 # ------------------------------------------------------------------ bots
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null:
+		return
+	# the Gilded Riposte up close: the guard eats what they throw, then the cleave answers
+	if r_unlocked() and float(cd["r"]) <= 0.0 and los and dist < float(r_def()["len"]):
+		h.inp["aim"] = tgt.pos + Vector3(0, 0.9, 0)
+		h.inp["hult"] = true
 		return
 	# pulled along the chain: spin as you arrive
 	if reel_t > 0.0 and rmb_ready() and int(h.slot_lv["sec"]) > 0:

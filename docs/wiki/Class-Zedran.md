@@ -15,15 +15,17 @@ every knock.
    ahead of you and flashes magenta at full (you can jump while you charge), then let go to fling
    yourself forward; in the air, a disc shows under your cursor and the **Meteor Drop** dives onto it.
 5. **Warchain** (E): hook a foe or a wall, then press E again to pull yourself in.
-6. The Finishing Slam's sweet spot also brings a **crash** down on the foe: a 3m burst that heals you
-   off what it dealt. R is the Boki Merge, not a class ultimate.
+6. **Gilded Riposte** (X, from level 6): a 0.65s gold guard where nothing hurts or stuns you, then you lunge
+   into an upward cleave through the strip ahead and heal 80% of what it deals. Each hit you block makes it
+   harder; a knock with it makes it ready again. R is the Boki Merge.
 
 ## Combos and interactions
 
 | Do this | And you get |
 |---|---|
-| Finishing Slam lands its sweet spot (the far tip, dead ahead) | A 3m crash that heals you 60% of what it deals (it rests 12s, 8s at rank 3) |
-| The crash, then a knock on anyone it hit within 2s | The crash is ready again; the knock heals you and gives a Rampage charge back |
+| Finishing Slam's sweet spot (the far tip, dead ahead), then a knock on that foe within 2s | The Gilded Riposte is ready again |
+| Gilded Riposte while they unload on you | Every hit blocked (two at most) makes the cleave 20% harder |
+| Warchain in, then the Riposte | Dive in, eat their answer in the guard, cleave back |
 | Warchain hooked, pull (E), then tap RMB during the pull | **Cinder Spin**: a spin around you that blights |
 | Warchain attached, hold RMB and let go | **Chain Lunge** along the chain: harder, with a short stun |
 | Warchain, hold RMB, then E while holding (or pull, then hold) | **Haul Slam** where you arrive, stronger the longer you charged |
@@ -60,8 +62,9 @@ What the in-game kit card (K) says.
 | Loop | Melee bruiser: get in, chain them close, and finish the wounded. |
 | Passive: Rage | Damage fills Rage. Full, you're Enraged: more damage, faster dashes and cooldowns. Knocks heal you. |
 | Dash: Rampage | Three charges of a short dash attack the way you face. Its tip hits twice as hard. |
-| RMB: Smash | Tap: a heavy slam, harder on the wounded; its sweet spot crashes and heals you. Hold: charge, then fling yourself forward. In the air: slam down at your cursor. |
+| RMB: Smash | Tap: a heavy slam, harder on the wounded; a knock after its sweet spot resets your ultimate. Hold: charge, then fling yourself forward. In the air: slam down at your cursor. |
 | E: Warchain | Throw a chain at a foe or a wall. Press E again to pull yourself to it. |
+| X: Gilded Riposte | Guard for 0.65s, taking nothing, then lunge into a cleave that heals you; a knock with it resets it. |
 | Weapon: Greatsword | Wide slashes, double at the tip. Hold to throw a Searing Wave. |
 
 ### Abilities in full
@@ -72,12 +75,14 @@ What the in-game kit card (K) says.
 
 **Smash (RMB, 2s cooldown).**
 
-- *Tap:* Finishing Slam: a 0.6s wind-up you aim freely (everyone sees the strike lane), then a 4m strike ahead: 26 and push 6; foes under 35% (outlined in red while the Smash is ready) take +50%. Landing its sweet spot (the far tip, dead ahead) brings a 3m crash down on the foe: 24, push 7, and you heal 60% of the damage it deals. The crash rests 12s; a knock on anyone it hit within 2s makes it ready at once.
+- *Tap:* Finishing Slam: a 0.6s wind-up you aim freely (everyone sees the strike lane), then a 4m strike ahead: 26 and push 6; foes under 35% (outlined in red while the Smash is ready) take +50%. Its sweet spot is the far tip, dead ahead: knock a hunter within 2s of hitting them there and the Gilded Riposte is ready again.
 - *Hold:* Lunge: a crouched wind-up (the lane grows ahead of you, magenta and flashing at full, 0.8s), then release to fling yourself 4.5 -> 7.5m forward into the first foe: 14 -> 20. You can jump while you charge. Strike nothing and the cooldown doubles.
 - *In the air:* Meteor Drop: a disc shows under your cursor (5m at most); you dive onto it, a 2.6m burst: 18 and slow 40% for 1.5s; the centre (1.2m) takes +50% and is stunned 0.8.
 - *During E:* With the Warchain: tap while it pulls you for a Cinder Spin (2.6m, 18, blights 4s); hold while it pulls you, or hold and then pull, for a Haul Slam where you arrive (2.8m, 16 -> 30, stun 0.25 -> 0.6); hold while it's attached and let go for a Chain Lunge along it (x1.25 and a short stun).
 
 **Warchain (E, 9.5s cooldown).** Throw a chain 10m: it hooks the first foe (8 damage, blighted while tethered: healing barely takes) or bites a wall, for 4s. Press E again to pull yourself to it. The cooldown starts when you pull or the chain breaks (a stun breaks it); you can't throw it while rooted or grounded.
+
+**Gilded Riposte (X, level 6, 22s cooldown).** Plant in a gold guard for 0.65s: nothing hurts or stuns you, and each hit you block (two at most) makes the answer 20% harder. Then you lunge 1.8m and cleave up through the 1.8m x 3.6m strip ahead (everyone sees it through the guard): 34, and you heal 80% of what it deals (less while blighted). Knock a hunter with it and it is ready again at once.
 
 ### Ranks
 
@@ -85,18 +90,19 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 
 | Slot | Rank 2 | Rank 3 |
 |---|---|---|
-| RMB | cooldown 2s -> 1.8s, damage +15%. | cooldown 2s -> 1.6s, damage +30%; +20% damage on every Smash, and the crash rests 8s. |
+| RMB | cooldown 2s -> 1.8s, damage +15%. | cooldown 2s -> 1.6s, damage +30%; +20% damage on every Smash. |
 | Dash (Shift) | recharge 9s -> 7.6s per charge. | recharge 9s -> 6.3s; the tip hits +25% harder. |
 | E | cooldown 9.5s -> 8.6s, damage +15%. | cooldown 9.5s -> 7.6s, damage +30%; hooking a foe refunds 33% of the cooldown. |
+| X (ultimate) | Rank 2 (level 9): cooldown 22s -> 18.7s, damage +15%. |  |
 
-**Suggested level-up order** (what bots follow): Dash (Shift) > RMB > E > RMB > Dash (Shift) > E > RMB > E > Dash (Shift) > Glove (Q).
+**Suggested level-up order** (what bots follow): Dash (Shift) > RMB > E > RMB > Dash (Shift) > X (ultimate) > RMB > E > X (ultimate) > Glove (Q).
 
 ### What enemies can read
 
 | Moment | Tell |
 |---|---|
 | Building up | red heat glowing through the pauldrons as Rage fills, steam from half |
-| Armed / full | Enraged: a red shell, the hunter swells, a roar within 25m; a magenta strike lane while a Smash winds up; a red outline on anyone wounded enough to finish |
+| Armed / full | Enraged: a red shell, the hunter swells, a roar within 25m; a magenta strike lane while a Smash winds up; a red outline on anyone wounded enough to finish; a gold glow and a white strip ahead of him while he guards |
 | Dash spent | dash pips dark |
 
 <!-- /gen:kit -->

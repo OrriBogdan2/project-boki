@@ -12,13 +12,13 @@ const ANIM := {
 	"thf_bola": ["thief", "arc_bolts", [0.5, 0.6, 0.76, 0.92, 0.98, 1.2]],
 	"thf_knife": ["thief", "arc_bolts", [0.5, 0.56, 0.62, 0.7, 0.85, 1.0]],
 	"thf_blink": ["thief", "arc_bolts", [0.99, 1.01, 1.04, 1.1, 1.25, 1.5]],
-	"thf_volley": ["thief", "arc_bolts", [0.55, 0.75, 0.95, 1.15, 1.35, 1.7]],
+	"thf_encore": ["thief", "arc_bolts", [0.5, 0.6, 0.75, 0.92, 1.0, 1.35]],
 	"thf_reset": ["thief", "arc_bolts", [0.5, 0.54, 0.58, 0.64, 0.74, 0.95]],
 	"thf_flourish": ["thief", "arc_bolts", [0.5, 0.58, 0.68, 0.85, 1.0, 1.3]],
 	"jug_slash": ["juggernaut", "greatsword", [0.5, 0.54, 0.58, 0.64, 0.74, 0.95]],
 	"jug_wave": ["juggernaut", "greatsword", [0.5, 0.9, 1.4, 1.46, 1.55, 1.85]],
 	"jug_slam": ["juggernaut", "greatsword", [0.6, 0.85, 1.08, 1.12, 1.25, 1.6]],
-	"jug_crash": ["juggernaut", "greatsword", [1.12, 1.18, 1.22, 1.3, 1.45, 1.8]],
+	"jug_riposte": ["juggernaut", "greatsword", [0.55, 0.85, 1.12, 1.18, 1.26, 1.5]],
 	"jug_lunge": ["juggernaut", "greatsword", [0.6, 0.95, 1.3, 1.43, 1.5, 1.8]],
 	"jug_meteor": ["juggernaut", "greatsword", [0.5, 0.55, 0.62, 0.7, 0.85, 1.1]],
 	"jug_dash": ["juggernaut", "greatsword", [0.5, 0.56, 0.62, 0.7, 0.8, 1.0]],
@@ -73,10 +73,8 @@ static func trigger(P: Hunter, D: Hunter, mv: String, t: float, dt: float) -> vo
 				P.inp["aim"] = P.pos + Vector3(0, 0.9, 5.0)
 				K.use_e()
 			if at(t, dt, 1.0): K.use_e()
-		"thf_volley":
-			if at(t, dt, 0.5):
-				(K as ThiefKit).jp_cd = 0.0
-				(K as ThiefKit).add_mark(D, 5, true)
+		"thf_encore":
+			if at(t, dt, 0.5): cast_ult(P)
 			P.inp["fire"] = t > 0.9 and t < 1.0
 		"thf_reset", "thf_flourish", "jug_roar":
 			if at(t, dt, 0.5): K.play(mv)
@@ -85,7 +83,10 @@ static func trigger(P: Hunter, D: Hunter, mv: String, t: float, dt: float) -> vo
 			P.inp["fire"] = t > 0.49 and t < 0.51
 		"jug_wave":
 			P.inp["fire"] = t > 0.4 and t < 1.44
-		"jug_slam", "jug_crash":
+		"jug_riposte":
+			if t < 0.45: P.teleport(Vector3(D.pos.x - 2.4, P.pos.y, D.pos.z))
+			if at(t, dt, 0.5): cast_ult(P)
+		"jug_slam":
 			if t < 0.45: P.teleport(Vector3(D.pos.x - 3.2, P.pos.y, D.pos.z))
 			if at(t, dt, 0.5):
 				K.ch_rmb = 1.0
@@ -150,3 +151,10 @@ static func trigger(P: Hunter, D: Hunter, mv: String, t: float, dt: float) -> vo
 				K.cd["rmb"] = 0.0
 				P.inp["sec_hold"] = false
 				K.press_rmb()
+
+## X with the ultimate open (level 6, a point in it) and off cooldown.
+static func cast_ult(P: Hunter) -> void:
+	P.lvl = maxi(P.lvl, int(Hunter.ULT_AT[0]))
+	P.slot_lv["ult"] = maxi(1, int(P.slot_lv["ult"]))
+	P.ak.cd["r"] = 0.0
+	P.ak.cast_ult()

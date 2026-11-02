@@ -12,8 +12,9 @@ cartwheel empowers the next bolt, and landing that bolt gives the cartwheel stra
 3. Land it and Vault comes back. Cartwheel again. Keep the chain going and the Marks never drop.
 4. **Bola** (right click): the lane shows for a moment while you aim, then the Bola grounds the first foe
    and flies on; catch a second and both are stunned. It bounces once off a wall.
-5. The fifth Mark on a foe opens **Jackpot**: a cyan ring round you, blades at everyone inside it, harder at
-   the rim, and the Vault back. R is the Boki Merge, not a class ultimate.
+5. **Encore** (X, from level 6): a rose ring grows round you and rides with you; for 2s blades fly at every
+   foe inside it, harder from its outer edge (which also blights them), and the Vault comes back. Landing it
+   on a rival hunter fills your bond meter a long way. R is the Boki Merge.
 
 ## Combos and interactions
 
@@ -25,8 +26,9 @@ cartwheel empowers the next bolt, and landing that bolt gives the cartwheel stra
 | Bola catches a second foe | Both stunned 0.9s and +13 damage (TANGLED). At rank 3 their Marks pool |
 | Shadow Knife, then E again (or wait 6s) | You blink to the knife through a trail of afterimages |
 | Shadow Knife sticks in a foe (rank 3) | Vault comes back and half the Knife's cooldown comes back (a quarter on the ground) |
-| The fifth Mark on a foe | **Jackpot**: a ring of blades for 1.2s (every blade refreshes all your Marks) and the Vault back; it rests 10s |
-| An empowered bolt on 3 Marks | It lands the fourth and fifth, so it sets Jackpot off by itself |
+| Encore (X) | Up to 5 blades at each foe in the ring over 2s; every blade refreshes your Marks; you keep moving and shooting |
+| Bola, then Encore | The Grounded foe can't leave the ring and takes every blade |
+| Keep a foe at the ring's edge | Harder blades and a 6s blight (healing barely takes) |
 | Knock or assist | You heal (a quarter of your health in all on a knock) |
 
 ## Tips
@@ -56,17 +58,16 @@ What the in-game kit card (K) says.
 | Slot | Card text |
 |---|---|
 | Loop | Ranged duelist: stay on one foe, cartwheel, and land the big shot. |
-| Passive: Marks | Each hit on the same foe adds a Mark: +12% damage, up to 8. The fifth sets off Jackpot. Knocks heal you. |
+| Passive: Marks | Each hit on the same foe adds a Mark: +12% damage, up to 8. Knocks heal you. |
 | Dash: Vault | Cartwheel a short way. Your next bolt is a big empowered shot; land it and you get the Vault back. |
 | RMB: Bola | A short wind-up, then a Bola down the lane: it grounds the first foe and flies on. Catch a second and both are stunned. |
 | E: Shadow Knife | Throw a dagger to your cursor or into a foe. Press E again to blink to it. |
+| X: Encore | A ring opens round you: for 2s blades fly at every foe in it, harder and blighting from its edge. |
 | Weapon: Arc Bolts | Bolts from alternating hands every 0.45s. Each one lands at your cursor. |
 
 ### Abilities in full
 
-**Marks (passive).** Every bolt that hits puts a Mark on the target (up to 8, each lasting 4s and refreshed by the next): your bolts on them deal +12% per Mark. The empowered shot adds 2, the Bola 1. The fifth Mark sets off Jackpot (below). A knock heals you 15% of your health on top of the usual knock heal (25% in all) and bursts a crimson star on them; an assist heals 25%.
-
-**Jackpot (Mark trigger).** The fifth Mark on a foe opens Jackpot: a cyan ring of 6.3m grows out from you (0.4s), then for 1.2s a blade flies every 0.2s at each foe inside it: 5 each, +4 past 4m (the rim), where it also blights for 4s (healing barely takes). Every blade refreshes all your Marks, and Jackpot gives you the Vault back. You keep moving and shooting. Then it rests 10s.
+**Marks (passive).** Every bolt that hits puts a Mark on the target (up to 8, each lasting 4s and refreshed by the next): your bolts on them deal +12% per Mark. The empowered shot adds 2, the Bola 1. A knock heals you 15% of your health on top of the usual knock heal (25% in all) and bursts a crimson star on them; an assist heals 25%.
 
 **Vault (dash, Shift, 4.5s cooldown).** A 2.4m cartwheel the way you move (shots pass through it) and +30% speed until your next hit (2s at most). Your next bolt within 3s is empowered: it flies 12% further for 3.5 times the damage, 2 Marks and Shred; firing it ends the speed (+15% damage taken for 3s). Landing it gives the Vault back.
 
@@ -77,6 +78,8 @@ What the in-game kit card (K) says.
 
 **Shadow Knife (E, 15s cooldown).** Throw a dagger to your cursor (14m at most): it sticks in the first foe on the way (8 damage, slowed 50% for 2.5s) or lands where you aimed. Press E again to blink to it at once, leaving a trail of afterimages; after 6s you step to it anyway.
 
+**Encore (X, level 6, 24s cooldown).** A rose ring grows round you (0.4s) to 5.4m and rides with you; for 2s a blade flies every 0.4s at each foe inside it (5 at most): 8 each, 12 from the outer band (past 4m), which also blights them for 6s (healing barely takes). You keep moving, shooting and dashing; casting it gives the Vault back, and every blade refreshes your Marks. Allies are untouched.
+
 ### Ranks
 
 Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the special.
@@ -86,15 +89,16 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | RMB | cooldown 7s -> 6.3s, damage +15%. | cooldown 7s -> 5.6s, damage +30%; flies 1m further after the first foe, and two foes caught pool their Marks. |
 | Dash (Shift) | recharge 4.5s -> 3.8s per charge. | recharge 4.5s -> 3.2s; empowered shots +20%, and a Shadow Knife that sticks in a foe gives the Vault back. |
 | E | cooldown 15s -> 13.5s, damage +15%. | cooldown 15s -> 12s, damage +30%; sticking refunds 25% of the cooldown (50% in a foe). |
+| X (ultimate) | Rank 2 (level 9): cooldown 24s -> 20.4s, damage +15%. |  |
 
-**Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > RMB > E > Dash (Shift) > Glove (Q).
+**Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > Dash (Shift) > X (ultimate) > RMB > E > X (ultimate) > Glove (Q).
 
 ### What enemies can read
 
 | Moment | Tell |
 |---|---|
 | Building up | gold Mark diamonds over the target, one per stack |
-| Armed / full | eight diamonds spinning fast; a gold glint in the hand and a gold aim line while the next bolt is empowered; a cyan ring round her while Jackpot runs |
+| Armed / full | eight diamonds spinning fast; a gold glint in the hand and a gold aim line while the next bolt is empowered; a rose ring round her and blades circling her while Encore runs |
 | Dash spent | a white cartwheel arc, dash pip dark |
 
 <!-- /gen:kit -->

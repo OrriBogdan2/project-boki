@@ -2,7 +2,7 @@ class_name KitStatus
 extends RefCounted
 ## Statuses the archetype kits put on a body that a plain hit can't carry over the network (kits2):
 ##   gnd  Grounded (the Thief's Bola): no dash, jump or glide; the hunter's legs show the tangled cords
-##   blt  Blight (the Juggernaut's Warchain, the Thief's Jackpot rim): healing on the body is cut
+##   blt  Blight (the Juggernaut's Warchain, Dancer's Encore rim): healing on the body is cut
 ##   vul  Shred (the Thief's Primed shot): the body takes `k` more damage
 ##   rat  Rattled (Marlowe's Burr Charge): slowed, and her rifle and Longneedle hit harder; stars over the head
 ##   dsr  Disoriented (Ostra's Trade): slowed by `k`; a DIZZY word and a teal ring

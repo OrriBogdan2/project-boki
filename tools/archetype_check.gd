@@ -196,12 +196,19 @@ func _data() -> void:
 		if sd2.has("r") or (sd2["card"] as Dictionary).has("r"): sup_ok = false          # no R for the support pair
 		if (sd2["rmb"] as Dictionary).get("variants", {}).is_empty() or String(sd2["e"].get("desc", "")).length() < 40: sup_ok = false
 	ok("data: support heroes complete, no R", sup_ok)
-	ok("data: Thief and Juggernaut have no R (it is the Boki Merge); Jackpot and the crash are data", Arch.def("thief").has("jackpot") and Arch.def("juggernaut")["rmb"].has("crash") and not Arch.def("thief").has("r") and not Arch.def("juggernaut").has("r") and not Arch.def("thief")["card"].has("r") and not Arch.def("juggernaut")["card"].has("r"))
+	var dj_ults := _has_ult("thief") and _has_ult("juggernaut")
+	ok("data: Dancer and Zedran have their own ultimate (X, level 6); no Jackpot fold, no crash fold",
+			dj_ults and not Arch.def("thief").has("jackpot") and not Arch.def("juggernaut")["rmb"].has("crash"))
 	ok("weapons: fix keeps the class", Arch.fix("thief", "heavy") == "juggernaut" and Arch.fix("bulwark", "heavy") == "bulwark")
 
 # ------------------------------------------------------------------ Dancer (thief): tools/dancer_jug_check.gd
 func _thief() -> void:
 	await _dj().thief(self)
+
+## The hero has its own ultimate on X: "r" data opening at level 6, and a card line for it.
+func _has_ult(arch: String) -> bool:
+	var d := Arch.def(arch)
+	return int(d.get("r", {}).get("unlock", 0)) == 6 and d["card"].has("ult") and not d["card"].has("r")
 
 func _dj() -> RefCounted:
 	return load("res://tools/dancer_jug_check.gd").new()
@@ -521,7 +528,7 @@ func _levels_and_bond() -> void:
 	P.lvl = 1; P.xp = 0.0; P.skill_pts = 1
 	for s in Hunter.SLOTS: P.slot_lv[s] = 0
 	ok("R: locked at level 1", not P.can_level("ult"))
-	P.ak.use_r()
+	P.ak.cast_ult()
 	ok("R: can't cast while locked", float(P.ak.cd["r"]) <= 0.0 and P.ak.r_t <= 0.0)
 	P.gain_xp(float(Hunter.XP_TO[5]) + 1.0)
 	ok("R: level 6 opens it", P.lvl >= 6 and P.can_level("ult"), "lvl %d" % P.lvl)
@@ -531,11 +538,14 @@ func _levels_and_bond() -> void:
 	P.skill_pts = maxi(P.skill_pts, 1)
 	ok("R: rank 2 at level 9", P.lvl >= 9 and P.can_level("ult"), "lvl %d" % P.lvl)
 	P.skill_pts = 0
-	# no class ultimate (the Thief and Juggernaut lost theirs): pressing R through the kit does nothing, the Merge owns the key
-	P.ult = 1.0; P.merge_cd = 0.0; P.ak.cd["r"] = 0.0
-	P.ak.use_r()
+	# X is the hero's own ultimate: it casts at level 6 and, even with the bond full, never merges (R does)
+	P.ult = 1.0
+	P.merge_cd = 0.0
+	P.ak.cd["r"] = 0.0
+	P.ak.cast_ult()
 	step(m, 0.5)
-	ok("R: no class ultimate, the kit's press does nothing", float(P.ak.cd["r"]) <= 0.0 and not P.ak.fusing() and not P.ak.bonded and not KinMerge.active(P))
+	ok("X: the hero ultimate casts and never merges (R is the Merge)",
+			float(P.ak.cd["r"]) > 10.0 and not P.ak.bonded and not KinMerge.active(P))
 	await done(m)
 
 # ------------------------------------------------------------------ cross-ability combinations (--kit-combo-check)
@@ -619,7 +629,7 @@ func _feel() -> void:
 	ok("feel: Arrow Rain tell >= soft floor", float(Arch.def("archer")["e"]["tell"]) >= Feel.floor_for("soft_cc", "instant"))
 	ok("feel: the Bola and Warchain are projectiles (dodgeable)", String(Arch.def("thief")["rmb"]["delivery"]) == "projectile" and float(Arch.def("thief")["rmb"]["bola"]["speed"]) <= 34.0 and String(Arch.def("juggernaut")["e"]["delivery"]) == "projectile")
 	ok("feel: Wirerun shows its lane while it grows", float(Arch.def("mage")["dash"]["hold"]) >= 0.3)
-	ok("feel: the Smash's crash comes after a 0.5s wind-up", float(Arch.def("juggernaut")["rmb"]["windup"]) >= 0.3)
+	ok("feel: the Finishing Slam lands after a 0.5s wind-up", float(Arch.def("juggernaut")["rmb"]["windup"]) >= 0.3)
 	ok("feel: every R has a fuse of 0.35-0.8s", Arch.ids().filter(func(a): return Arch.def(a).has("r")).all(func(a): return float(Arch.def(a)["r"].get("fuse", 0.0)) >= 0.35 and float(Arch.def(a)["r"].get("fuse", 0.0)) <= 0.8))
 	ok("R cooldowns are big moments (90-120s)", Arch.ids().filter(func(a): return Arch.def(a).has("r")).all(func(a): return float(Arch.def(a)["r"]["cooldown"]) >= 90.0 and float(Arch.def(a)["r"]["cooldown"]) <= 120.0))
 	# hitstop tiers
