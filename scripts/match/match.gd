@@ -4884,7 +4884,7 @@ func _update_interact(dt: float) -> void:
 		if exits:
 			# (using an exit beats picking up a weapon or opening a chest that happens to be there)
 			var ex := exits.interact_for(h)
-			if best.is_empty() or (ex.has("act") and String(best.get("kind", "")) in ["weapon", "chest", "shrine"]): best = ex
+			if best.is_empty() or (ex.has("act") and String(best.get("kind", "")) in ["weapon", "chest", "locked", "shrine"]): best = ex
 		# 6. the lairs: work a gate's dial, light a rune
 		if lairs:
 			var lx := lairs.interact_for(h)
