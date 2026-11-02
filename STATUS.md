@@ -1,4 +1,4 @@
-2026-11-02T22:30:18Z
+2026-11-02T22:40:35Z
 
 ext/classes | cacd796 | REOPENED per INBOX 19:10 (Hunters wording, pick 1 + 2 early unlocks, no weight labels, hunter viewer, hold-to-unlock); rework queued on Opus medium | 0.14.0 | -
 ext/hero-shots | 3bd0520 | done: 12 heroes + farm building + classes; all portraits show signature weapons | - | -
@@ -14,7 +14,7 @@ ext/kitfix-breah-ostra | c26758e | READY FOR LOCAL SCREENSHOT REVIEW (main a7ed2
 
 Running now: ext/classes rework; ult passes on kitfix-dancer-juggernaut, kitfix-moosh-tamsin, kitfix-linwick-dredge, kitfix-pin-bjorn (all Opus medium, SERVER_UPDATE6)
 Queued (one agent per branch at a time; polish before merge): polish vireo-venator; ult breah-ostra; polish pin-bjorn, dancer-juggernaut, moosh-tamsin, linwick-dredge after their ult passes; polish breah-ostra after its ult; ult vireo-venator after its polish.
-Last INBOX entry handled: 2026-11-02 22:55 UTC (kit review round 2: Moosh Moosh + Tamsin REWORK, Linwick/Dredge/Breah/Ostra PASS WITH FIXES; polish passes queued for all six pairs; the shared "lessons" are in every polish prompt and relayed to running ult agents)
+Last INBOX entry handled: all entries up to 2026-11-02 22:55 UTC, including the late-posted 22:35 (Pin draw readout, added to the pin-bjorn polish prompt), 22:40 (Moosh Moosh small, no weapon, hand casts, added to the moosh-tamsin polish prompt; scale tuning waits for the hero-ref body study) and 22:45 (Settings.dash_hold removal, relayed to all running agents and added to every queued prompt)
 Watcher: received 19:06 UTC entry
 Questions for the owner: see ext/classes line.
 Net note: main is now 0.15.0, which kits2-nor also uses (0.15.0, kit move id on the snapshot); main session to reconcile. Kitfix branches that need a bump use 0.15.2 (dancer-juggernaut), .3 (pin-bjorn), .4 (vireo-venator), .5 (linwick-dredge), .6 (moosh-tamsin), .7 (breah-ostra).
