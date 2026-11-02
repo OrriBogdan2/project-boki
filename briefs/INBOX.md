@@ -80,3 +80,10 @@ New section at the end of SERVER_UPDATE5.md: **"OWNER, 14:07 ET: the small mecha
 
 ## 2026-11-02 19:12 UTC
 Name change from the owner: juggernaut's display name is **Zedran**, not Zed. Relay it to kitfix-dancer-juggernaut and ext/classes.
+
+## 2026-11-02 20:05 UTC
+From the main session (MAIN_TO_EXT, 14:30 ET):
+- Main is now **sync64 (61e6041)**. Every kitfix branch must re-merge sync64 before it reports ready; hunter.gd and match.gd changed.
+- sync63 changed the merge: KinMerge.cast calls `ak._drop_holds()` directly, so kits only need to implement `_drop_holds()`.
+- sync64 adds `Match.shot_from_above_ok`, a fix for shooting from higher ground. Keep every kit shot going through `spawn_shot` so it applies. `--shot-vertical-check` must pass. Don't add a separate height fix in aimkit.
+Relay this to the running kit agents and put it in the queued prompts. ext/aimkit: re-merge sync64 and re-report.
