@@ -112,7 +112,8 @@ AimKit.circle(h, "e", {"self": true, "r": 4.5, "all": true, "dur": 0.2})   # Lin
 AimKit.circle(h, "end", {"at": end_p, "r": 2.25, "ticks": true, "star": true})   # Vireo Surge end marker
 ```
 Params: `at` (the cursor point, clamped to `range`), `range`, `self` (centred on the hunter), `r`
-(1.35), `fill` (0..1 radial), `ticks`, `star`, `dashed`, `core`.
+(1.35), `fill` (0..1 radial), `ticks`, `star`, `dashed`, `core`, `pointer` (a `Vector2`: a chevron on
+the rim pointing that way, as on Vireo's E drag disc).
 
 ### Circle with a growing sweet spot
 ```gdscript
@@ -145,7 +146,9 @@ AimKit.star(h, "lock", {"at": foe.pos, "size": 0.5})          # a glint on the g
 ```
 The two parallel lines (Ostra RMB) are `lane` with `"rails": true` and no chevrons. The Bjorn R
 rectangle is a plain `lane`. The Juggernaut hold-blast arc round the body is `circle` with
-`"self": true`. A target highlight ring at someone's feet is a small `circle` at their position.
+`"self": true`. A target highlight ring at someone's feet is a small `circle` at their position. Vireo's E is a
+`circle` with `ticks` and `"pointer": drag_dir`, plus a `lane` with `"from": disc, "tip": true` for the
+drag arrow.
 
 ### Reading back, hiding, clearing
 - `AimKit.shown(h, id)`: is it up?

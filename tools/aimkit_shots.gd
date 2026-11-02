@@ -18,6 +18,7 @@ const SHOTS := [
 	["lane_full", 6.0, 3.0, false, "The same lane at full charge: full length, hot, col_full magenta"],
 	["lane_narrow", 6.0, 5.0, false, "Lane narrowing while charging, k 0.7 (Venator E Ion Cannon cast)"],
 	["lane_rails", 6.0, 5.0, false, "Rails lane with chevrons, end circle with ticks and a glint sliding out with the charge (Vireo Shift Surge)"],
+	["circle_pointer", 6.0, 3.5, false, "Placed circle with ticks, a rim chevron and an arrow lane for the drag direction (Vireo E)"],
 	["lane_chevrons", 6.0, 4.0, false, "Chevron lane with an end cap (Dancer RMB Trickshot cast window, thief colour)"],
 	["vee_open", 6.0, 3.0, false, "Draw V opening 25 degrees at k 0.3, a glint riding the line (Pin LMB draw toward Empowered)"],
 	["vee_closed", 6.0, 3.0, false, "Draw V closed into one bright line at k 1 (Pin Empowered ready)"],
@@ -101,6 +102,10 @@ func _show(what: String) -> void:
 		"lane_rails":
 			AimKit.lane(P, "a", {"len": 13.0, "width": 0.35, "rails": true, "chevrons": 5, "col": col("mage")})
 			AimKit.circle(P, "b", {"at": home + Vector3(13.0 * 0.6, 0, 0), "r": 2.25, "ticks": true, "star": true, "col": col("mage")})
+		"circle_pointer":
+			var at := home + Vector3(4.0, 0, 1.5)
+			AimKit.circle(P, "a", {"at": at, "r": 1.8, "ticks": true, "pointer": Vector2(0.6, -0.8), "col": col("mage"), "col2": Color("ffd25a")})
+			AimKit.lane(P, "b", {"from": at, "dir": Vector2(0.6, -0.8), "len": 4.0, "width": 0.5, "tip": true, "col": col("mage")})
 		"lane_chevrons": AimKit.lane(P, "a", {"len": 11.0, "width": 1.8, "chevrons": 4, "col": col("thief")})
 		"vee_open": AimKit.vee(P, "a", {"k": 0.3, "glint": 0.35, "col": col("archer")})
 		"vee_closed": AimKit.vee(P, "a", {"k": 1.0, "glint": 0.0, "col": col("archer")})

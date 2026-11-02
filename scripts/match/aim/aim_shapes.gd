@@ -129,6 +129,9 @@ static func _circle(g: AimGeo, e: Dictionary) -> void:
 			g.ribbon(ctr + d * (r - 0.28), ctr + d * (r + 0.12), lw * 1.3, _rim(e))
 	if e["star"]:
 		g.star(ctr, minf(0.45, r * 0.3), _hot(e), PI * 0.25)
+	var pd: Vector2 = e["pointer"]
+	if pd != Vector2.ZERO:
+		g.chevron(ctr + pd * (r + 0.32), pd, 0.3, lw * 1.4, _hot(e))     # a rim chevron: which way it will throw or drag
 
 static func _arc_wall(g: AimGeo, e: Dictionary) -> void:
 	var ctr: Vector2 = e["center"]; var u: Vector2 = e["dir"]

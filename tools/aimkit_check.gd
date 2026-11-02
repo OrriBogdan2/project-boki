@@ -97,7 +97,7 @@ func _all_shapes(P: Hunter, k: float, T: Hunter) -> void:
 	AimKit.dotted(P, "dotted", {"len": 9.0})
 	AimKit.vee(P, "vee", {"k": k, "glint": 0.4})
 	AimKit.cone(P, "cone", {"from": T.pos, "dir": Vector2(-1, 0), "len": 6.0, "deg": 100.0, "fill": k})
-	AimKit.circle(P, "circle", {"r": 1.35, "ticks": true, "star": true, "fill": k})
+	AimKit.circle(P, "circle", {"r": 1.35, "ticks": true, "star": true, "fill": k, "pointer": Vector2(0, 1)})
 	AimKit.sweet(P, "sweet", {"self": true, "k": k})
 	AimKit.arc_wall(P, "arc")
 	AimKit.swap(P, "swap", {"fill": k})
