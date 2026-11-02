@@ -310,3 +310,17 @@ Scope:
 - One theme/style system for menus, dialogs, tooltips, cards, panels and controls, shared with ext/hudref's hud_style.gd.
 
 It touches settings.gd, overlay.gd and the ui/ panels (not hud.gd beyond wiring). If a Boki setting lives in a reserved file, it'll be written up for you.
+
+## 2026-11-02 18:45 ET: OWNER DECISION: merge C into G (one Boki button) and make the Boki feel faster
+The owner asked why C and G are separate buttons. Approved design (your files; please build it on your next Boki branch):
+- **Tap G, "Go!":** the Boki leaps to the cursor. If its C ability is ready, it uses it on arrival or at the target; if not, it does a normal Sic/attack.
+- **Tap G while it's away:** call it back.
+- **Hold G:** the order wheel (Chase, Guard, Return, Follow) plus a new **"Use ability here"** slice, for support Boki whose heal or shield you want where they stand. Smart default: tapping G with the cursor on yourself or a teammate makes a support Boki cast its ability there without leaping away.
+- **C is freed.** Leave it unbound by default, and remove it from the HUD's Boki slot (the right-side Boki box shows the ability cooldown inside the G box). It stays reserved until the owner decides on a use. Migrate keybinds, update the tutorial and tips text, the kit cards, and the bots (they use the combined action).
+- **Responsiveness (owner: "make sure it feels more responsive / faster"):**
+  - The command fires on press: no waiting for release to tell tap from hold. Start the Go immediately; if G is still held after about 180 ms, cancel into the wheel without a visible hitch, or open the wheel only on hold-plus-flick.
+  - Shorter Boki reaction latency: start moving within one or two frames, faster leap acceleration, and a quick anticipation pose instead of a long wind-up.
+  - Instant feedback on press: a bark or chirp, a cursor ping and a target marker.
+  - Recall snaps back faster.
+  - Tune with numbers in boki_system.json, and add a check that asserts press-to-move latency stays under a set number of frames.
+- Hunter ultimates stay on X, Merge on R.
