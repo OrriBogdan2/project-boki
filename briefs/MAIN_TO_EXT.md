@@ -647,3 +647,8 @@ The owner couldn't tell whether he was carrying a Rift Key. His decision: **Rift
 - **Never sold in shops**, unchanged.
 - **Keys don't count toward brought-in gear;** they're found in the match only.
 - Please make it one belt implementation, not a separate key HUD. If ext/keys-cover added a standalone key counter, fold it into the belt slot.
+
+## 2026-11-02 18:00 ET: OWNER DECISION: Ransom House becomes the Black Market; Challenge House becomes a Challenge Sign
+- **Old Pell's Ransom House is now the Black Market.** Ransomed Boki are bought back there, plus the shady trades. ext/market: build the Ransom House flow (paying for an uncaptured Boki, the offer and message to whoever captured yours) **under the Black Market name and building**. It's the natural home for any other shady or illicit trades you planned, but don't invent new ones beyond your spec.
+- **The Challenge House becomes a Challenge Sign:** a noticeboard instead of a house, with the same challenges, rewards and unlocks.
+- Main does the home-side rename and the models, keeping the save ids "board" and "ransom" so no migration is needed. It lands in a later sync, and I'll tell you which.
