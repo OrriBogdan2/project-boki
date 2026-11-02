@@ -1,6 +1,6 @@
 class_name HeroZones
 extends RefCounted
-## Placement of what Dolm and Ostra leave in the world (rocks, rock bridges, the seed): one legality
+## Placement of what Breah (dolm) and Ostra leave in the world (rocks, rock bridges, the seed): one legality
 ## rule for all of it, and the Net side. A rock or seed only goes on solid ground that a body could
 ## stand on: not in the abyss, not inside rocks, trees, cliffs or other walls, not through a wall from
 ## where the caster stands. Rock bridges only replace abyss tiles (Verbs.add_bridge).
@@ -16,6 +16,8 @@ extends RefCounted
 
 const ROCK_COL := Color("c98d4a")
 const ROCK_R := 0.5                  # a rock's footprint when it asks the world if it fits
+const ROCK_TOP := 1.25               # m: a rock's flat top above its base (StoneStand: you stand on it; a jump clears it)
+const ROCK_TH := 0.42                # m: half its depth (wider than a barrier so a body fits on top)
 const STEP := 0.25                   # the walk along a cast, metres
 
 ## Tests read what would go out over the network without a connection (--zone-check).
@@ -74,15 +76,19 @@ static func walk(m: Node, from: Vector3, aim: Vector3, reach: float) -> Dictiona
 	return out
 
 # ------------------------------------------------------------------ rocks
+## Breah's rock: a cluster of basalt columns with flat tops (you stand on them), molten cracks that glow
+## hottest at the base (shaders/molten_rock.gdshader) and a ring of embers where it broke the ground.
+## No other wall in the game looks like it.
 static func rock_node() -> Node3D:
 	var n := Node3D.new()
-	var body := Models.toon(Color("a8794a"), true, 0.5)
-	var top := Models.toon(Color("d9b27a"), true, 0.5)
-	var dark := Models.toon(Color("6e4f35"), true, 0.5)
-	Models.part(n, Models.box(1.15, 0.85, 0.7), body, Vector3(0, 0.42, 0), Vector3.ONE, Vector3(0, 0.05, 0.04))
-	Models.part(n, Models.box(0.7, 0.9, 0.55), top, Vector3(-0.2, 0.95, 0.02), Vector3.ONE, Vector3(0.08, -0.3, 0.12))
-	Models.part(n, Models.box(0.42, 0.62, 0.4), dark, Vector3(0.32, 0.78, -0.05), Vector3.ONE, Vector3(-0.1, 0.4, -0.18))
-	Models.part(n, Models.box(1.05, 0.12, 0.6), dark, Vector3(0, 0.06, 0.02))
+	var cols := [[Vector3(-0.32, 0, 0.05), 0.34, ROCK_TOP], [Vector3(0.12, 0, -0.1), 0.38, ROCK_TOP - 0.06], [Vector3(0.42, 0, 0.12), 0.28, ROCK_TOP - 0.18], [Vector3(-0.02, 0, 0.22), 0.26, ROCK_TOP - 0.3]]
+	for c in cols:
+		var hgt: float = c[2]
+		var col := Models.part(n, Models.cyl(float(c[1]) * 0.92, float(c[1]), hgt, 6), KitLooks.rock_mat(0.35, randf() * 10.0), (c[0] as Vector3) + Vector3(0, hgt * 0.5, 0), Vector3.ONE, Vector3(0, randf() * 1.0, 0))
+		col.name = "Col"
+		Models.part(n, Models.cyl(float(c[1]) * 0.8, float(c[1]) * 0.92, 0.06, 6), Models.toon(Color("6e5444"), false, 0.0), (c[0] as Vector3) + Vector3(0, hgt + 0.02, 0))
+	var base := Models.part(n, Models.cyl(0.78, 0.86, 0.05, 10), Models.glow_mat(Color(1.0, 0.42, 0.12, 0.55)), Vector3(0, 0.03, 0))
+	base.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	return n
 
 ## Builds a rock (a movement-blocking Verbs wall wearing a rock's look). send: tell the other games.
@@ -95,12 +101,15 @@ static func rock(m: Node, by: Ent, at: Vector3, dir: Vector2, rid: String, len_:
 	w["node"] = n
 	w["rock"] = true
 	w["rid"] = rid
+	w["top"] = ROCK_TOP
+	w["th"] = ROCK_TH
 	m.verbs._place_wall(w, n)
 	n.scale = Vector3(len_ / 1.15, 0.05, 1.0)
 	n.create_tween().tween_property(n, "scale", Vector3(len_ / 1.15, 1.0, 1.0), 0.18).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	if is_instance_valid(old):
 		old.queue_free()
 	m.fx.burst(at + Vector3(0, 0.3, 0), Color("d9b27a"), 10, 3.0, 0.4, 8.0, 1.0)
+	m.fx.spark(at + Vector3(0, 0.2, 0), Vector3.UP, Color("ff7a2a"), 8, 5.0, 40.0, 0.3, 10.0, 1.0)
 	if send and by != null and (m.net_on or capture) and not by.remote:
 		tx(m, ["zone", "rock", by.nid, rid, m._r(at.x), m._r(at.y), m._r(at.z), snappedf(dir.x, 0.001), snappedf(dir.y, 0.001), snappedf(len_, 0.01), snappedf(time_, 0.1), snappedf(hp, 0.1)])
 	return w
@@ -127,13 +136,16 @@ static func bridge(m: Node, by: Ent, from: Vector3, dir: Vector2, len_: float, w
 	return n
 
 # ------------------------------------------------------------------ the seed (visual; the caster's game runs the rules)
+## The seed: a pale translucent drum on the ground filled with a slow indigo swirl (shaders/void_glass),
+## growing to its full width, with a bright rim ring. Ostra's own shape; no other zone looks like it.
 static func seed_visual(m: Node, sid: String, at: Vector3, rmax: float, grow: float, col: Color) -> Node3D:
 	var n := Node3D.new()
 	var core := MeshInstance3D.new()
 	core.name = "Core"
-	core.mesh = Models.sphere(0.5, 14)
-	core.material_override = Models.glow_mat(Color(col, 0.55))
+	core.mesh = Models.cyl(1.0, 1.0, 1.0, 28)
+	core.material_override = KitLooks.glass_mat(Color("1a0636"), Color(col.lightened(0.25), 1.0), 0.75)
 	core.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	core.position = Vector3(0, 0.5, 0)
 	n.add_child(core)
 	var ring := MeshInstance3D.new()
 	ring.name = "Ring"
@@ -142,11 +154,10 @@ static func seed_visual(m: Node, sid: String, at: Vector3, rmax: float, grow: fl
 	ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	n.add_child(ring)
 	m.add_child(n)
-	n.global_position = at + Vector3(0, 0.9, 0)
-	ring.global_position = at + Vector3(0, 0.06, 0)
-	n.scale = Vector3.ONE * 0.3
+	n.global_position = at + Vector3(0, 0.02, 0)
+	n.scale = Vector3(0.45, 0.9, 0.45)
 	var tw := n.create_tween()
-	tw.tween_property(n, "scale", Vector3.ONE * rmax * 1.6, grow).set_trans(Tween.TRANS_SINE)
+	tw.tween_property(n, "scale", Vector3(rmax, 1.4, rmax), grow).set_trans(Tween.TRANS_SINE)
 	var seeds: Dictionary = m.get_meta("zone_seeds", {})
 	seeds[sid] = n
 	m.set_meta("zone_seeds", seeds)
@@ -157,7 +168,7 @@ static func seed_pop(m: Node, sid: String, col: Color) -> void:
 	var n: Node3D = seeds.get(sid)
 	seeds.erase(sid)
 	if n != null and is_instance_valid(n):
-		m.fx.ring(n.global_position - Vector3(0, 0.9, 0), n.scale.x * 0.7, col, 0.3)
+		m.fx.ring(n.global_position, n.scale.x, col, 0.3)
 		n.queue_free()
 
 # ------------------------------------------------------------------ moving a body

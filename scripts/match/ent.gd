@@ -71,7 +71,7 @@ func ground() -> float:
 		var d: float = st.deck_y(pos)
 		if d > World.VOID + 1.0 and (g < d or g > pos.y + 0.9):
 			g = d
-	return g
+	return StoneStand.top_under(m.world.dyn_walls, pos, r, g)
 
 ## The height shots and blasts aim at to hit this body. (A hunter who has dropped below an
 ## island's lip is hit through the balloon floating at ground level above them.)

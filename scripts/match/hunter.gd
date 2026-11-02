@@ -2476,6 +2476,7 @@ func _physics(dt: float) -> void:
 			and rock_b - pos.y < World.BLOCK_H - 0.1 and m.time - kb_t > 0.4:
 		vel.y = sqrt(2.0 * H_GRAV * (rock_b - pos.y + 0.3))
 		mantle_cd = 0.45
+	StoneStand.climb(self, maxf(b1, b2))      # a jump into a standable rock carries you onto it
 	var g := ground()
 	if grounded and g < pos.y - 0.05:
 		grounded = false

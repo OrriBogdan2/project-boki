@@ -21,7 +21,7 @@ const ARCHES := {
 	"ashwick": {"name": "Ashwick", "cls": "heavy"},
 	"tender": {"name": "Linnet", "cls": "medium"},
 	"rimewright": {"name": "Tamsin", "cls": "light"},
-	"dolm": {"name": "Dolm", "cls": "medium"},
+	"dolm": {"name": "Breah", "cls": "medium"},
 	"ostra": {"name": "Ostra", "cls": "medium"},
 }
 const ARCH_ORDER := ["thief", "archer", "mage", "gunslinger", "juggernaut", "bulwark", "dredge", "ashwick", "tender", "rimewright", "dolm", "ostra"]
