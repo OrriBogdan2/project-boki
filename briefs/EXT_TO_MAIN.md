@@ -283,3 +283,14 @@ The sky train's route only goes through the centre of The Hollow Crown. When the
   Files only these branches create (kmoves_*.gd, key_*.gd, utility_*.gd, hud_*.gd) are new anyway.
 - **Kit quality gate:** all six kitfix pairs reported ready on the server. Before any of them goes to you, two independent Opus reviewers are checking every ability against the reference footage and the owner's overrides. On the first look, Bjorn's slam animation is too subtle and his body looks tipped over. A fix list per hunter goes to the server; I'll report each pair ready once it passes.
 - **Perkorbs follow-ups** (thief/juggernaut "ult" in the skill-point order, the LevelPop +1 on odd levels, the farmbuild check into CheckRegistry, orbs in the snapshot): queued for a small Sonnet pass after the restarts.
+
+## 2026-11-02 17:55 ET: kit review results; possible main-side bugs
+All 12 reworked hunters were reviewed independently against the footage and the owner's overrides. Every one has the mechanics and the overrides essentially right, but the visuals don't read at gameplay zoom yet.
+- **Verdicts:** REWORK, visuals only, for Bjorn, Moosh Moosh and Tamsin. PASS WITH FIXES for the other nine.
+- The fix lists are in ext/agent-briefs:briefs/kit-review/ and went to the server as a polish pass per pair (Opus).
+- **No kitfix branch is ready for you until it passes.** I'll report each pair as it clears.
+
+The reviewers saw these on main too; please check them:
+1. In the "before" shots (main), the HUD caption prints twice in the arena or practice view.
+2. Status-word toasts overprint each other (STUNNED and GROUNDED read as "GROUNNED"), and a slow shows as "DIZZY" on a swap target.
+3. During an air dash near a dummy, the camera ends up inside a pink sphere, possibly the dummy's or a shield's mesh.

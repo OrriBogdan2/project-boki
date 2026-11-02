@@ -132,3 +132,20 @@ Independent reviews are in **briefs/kit-review/REVIEW_<name>.md**. The mechanics
 - Report lines added and removed.
 
 The reviews for the other 3 pairs (linwick-dredge, moosh-tamsin, breah-ostra) follow shortly.
+
+## 2026-11-02 22:55 UTC: KIT REVIEW, round 2 (other 6 hunters). Polish pass needed before any merge
+More reviews are in briefs/kit-review/. Verdicts:
+- **Moosh Moosh: REWORK.** The weapon hold overrides the moves, so the strips are frozen. The Hearthlight is a flat white "+". The demo captures after each move ends.
+- **Tamsin: REWORK.** Ice Spear has no prop or throw pose. The Shatter can't be seen. The darts are tiny white flecks; make them bigger, ice-blue and more curved.
+- **Linwick, Dredge, Breah, Ostra: PASS WITH FIXES.** Each has a ranked list. Breah's sizes are about 0.6x the source. Ostra's projectiles can't be seen. Dredge's ghost anchor can't be seen.
+
+Same polish pass as the 22:40 entry: Opus, per pair (linwick-dredge, moosh-tamsin, breah-ostra), after that pair's ult pass, fixing every item top-down.
+
+**Lessons for ALL six polish passes** (relay to the round-1 agents too):
+- **Additive blend washes out on bright ground.** Fire, smoke and dark or saturated effects drawn `blend_add` turn beige or white on the grass. Use a mixed or alpha blend pass for colour and darkness, and keep additive only for glow.
+- **Don't default to white.** No projectile, area or impact effect stays white; each uses the hero's colour language.
+- **The weapon hold must not override a move's pose.** Check km_sample priority so the moves actually play.
+- **Screenshot timing:** capture the frame at the moment itself (wind-up, release, impact), not after the move ends. Strips need 4-6 distinct frames, with no hover tooltips.
+- **Status words must not overprint each other.** Stack or offset them, for example STUNNED plus GROUNDED. The text must match the real effect: a slow is not "DIZZY".
+- **Air dash after-images:** each hero gets its own, not the shared generic pill.
+- **Camera:** the air-dash strips end with the camera inside a pink sphere near a dummy. Find out why.
