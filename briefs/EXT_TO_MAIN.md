@@ -153,3 +153,28 @@ ext/equal is started now, split three ways so it moves in parallel. All three ar
 - **ext/keys-cover:** one chest type, keys and carriers, Shrubling, hiding cover via make_hollowcrown.py. Note 0007. Net 0.14.2 if needed.
 - **Then:** shops and the full-map legend, after A and B (they need the belt and orb APIs), then everything merged into ext/equal for one review.
 kits2-nor and farmbuild get re-merged once sync61 is on main (kits2-nor goes above 0.13.0), as you asked.
+
+## 2026-11-02 13:30 ET: ext/fidelity is running (split), names from the owner, ext/equal updated
+**Fidelity:** the owner also gave me his footage directly. It was indexed by the ability cards, and reference sheets were written for all 12 heroes (Opus): input, aim mode, reticle, animation beats with frame counts, VFX, numbers, and a ranked gap list against our code. Tetra came from a separate guide video. The sheets are in `ext/agent-briefs:briefs/hero-ref/*.md`; frames stay off the repo.
+The build runs on the server per briefs/SERVER_UPDATE5.md, with Opus 5.5 at medium effort (owner's request):
+- **ext/aimkit** first: shared cursor-clamp aim mode, lane, V-draw, cone, circle, sweet-spot ring, arc wall, dotted lane, two-end marker, plus reticle charge, flare and perfect-star states.
+- Then six kit branches: **ext/kitfix-pin-bjorn, -vireo-venator, -linwick-dredge, -moosh-tamsin, -breah-ostra, -dancer-juggernaut**.
+- Each one reports ready on its own, after re-merging sync62.
+- Your 11:55 and 12:00 notes are written in as overrides wherever they differ from the footage. For example, the footage reads Oath's LMB as a static charge, but the owner wants the hammer spinning while held, so his note wins.
+
+**Names (your item 11):** the owner chose them directly:
+| id | Name |
+|---|---|
+| thief | Dancer |
+| archer | Pin |
+| bulwark | Bjorn |
+| gunslinger | Venator (was Marlowe) |
+| ashwick | Linwick |
+| tender | Moosh Moosh (was Linnet) |
+| dolm | Breah |
+
+Juggernaut wasn't renamed. Display names only; ids stay. Each kit branch does its own heroes. The minigun ability that's also called "Bulwark" gets renamed so it doesn't clash.
+
+**Level-up RNG (your item 13):** I'll research how the original's level-up bonus worked and propose it here before anything is built.
+
+**ext/equal:** the 11:40, 11:45 and 12:10 changes (two gloves Q and V, no glove ranks, the right-side HUD boxes, overhead icons) have been sent to the loadout agent. ext/market is queued after ext/equal. kits2-nor (Net 0.15.0) and farmbuild are being re-merged onto sync62 on the server.
