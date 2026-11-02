@@ -790,6 +790,8 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 	if current:
 		current.queue_free()
 		current = null
+	if screen != "match":
+		Sfx.reset_scene_audio()      # the match's score and beds don't follow you out of it (the old match is gone, so nothing re-creates them)
 	await get_tree().process_frame
 	if gen != _gen:
 		return    # another screen was asked for while this one was still on its way
@@ -2836,7 +2838,7 @@ func _boss_check() -> void:
 		if not (p1 == 1 and p2 == 2 and invul_ok and enr):
 			print("BOSS  (phases %d %d, invul %s, enraged %s, hp %d/%d, dead %s, damage by team %s, feed %s)" % [p1, p2, invul_ok, enr, int(b.hp), int(b.max_hp), b.dead, str(b.damage_by), str(m.feed_all.slice(-8))])
 		ok.call(atks.size() >= 3, "%s used %d attacks: %s" % [b.md["name"], atks.size(), str(atks.keys())])
-		var w0 := m.wpicks.size()
+		var w0 := m.wpicks.size(); var brands0 := P.perks.filter(func(k): return String(k).begins_with("brand_")).size()      # (a Brand dropped where you stand is taken on the spot)
 		spot.call(P, L["c"] + Vector3(L["out"].x, 0, L["out"].y) * 3.0)     # (a shove may have sent you out of the lair)
 		P.lvl = 1; P.xp = 0.0
 		var xp0 := P.xp
@@ -2855,14 +2857,15 @@ func _boss_check() -> void:
 		ok.call(L.get("locked", false) and L.get("victory", false) and gate_shut.call(L) and L.get("up_on", false) and (lvn.get_node("Lit") as Node3D).visible and (vent.get_node("Air") as Node3D).visible
 			and m.lairs.victory_left(L) > Lairs.VICTORY_T - 0.5 and m.lairs.sealed_lair(P) == L,
 			"%s falls: the gate stays shut (opens in %s), the lever lit, the updraft blowing" % [b.md["name"], Lairs.clock(m.lairs.victory_left(L))])
+		var pile_now: Array = m.wpicks.slice(w0)      # the drop as it landed (walking about can pick some of it up)
 		# no walking out yet
 		spot.call(P, L["c"] + Vector3(L["out"].x, 0, L["out"].y) * (float(L["half"]) - 2.0))
 		walk.call(P, Vector2(L["out"].x, L["out"].y), 1.2)
 		ok.call(m.lairs.inside(L, P.pos, 0.0) and gate_shut.call(L), "after the kill: walking at the shut gate keeps you in")
 		spot.call(P, L["c"] + Vector3(L["out"].x, 0, L["out"].y) * 3.0)
 		# a small pile, all of it good, and the egg on its own spot a few steps away
-		var pile: Array = m.wpicks.slice(w0).filter(func(wp): return not wp.get("egg", false))
-		var usable: bool = pile.any(func(wp): return wp.has("gear") and int(wp["rar"]) >= 3) and pile.any(func(wp): return wp.has("tune"))
+		var pile: Array = pile_now.filter(func(wp): return not wp.get("egg", false))
+		var usable: bool = pile.any(func(wp): return wp.has("gear") and int(wp["rar"]) >= 3) and (pile.any(func(wp): return wp.has("tune")) or P.perks.filter(func(k): return String(k).begins_with("brand_")).size() > brands0)
 		var good: bool = pile.all(func(wp): return int(wp["rar"]) >= 3 if not wp.has("val") else Loot.value(Pack.ground_item(wp)) >= 40)
 		var apart := 99.0
 		if ew != null:

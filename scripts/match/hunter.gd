@@ -53,8 +53,8 @@ const DASH_CARRY_GROUND := 0.15   # (was 0.35) out of a dash you stop almost dea
 const DASH_CARRY_AIR := 0.3      # (was 0.75, which slid you ~15m+ in the air)
 const SPIKE_STUN := 0.7         # [wiki] stun when a spiked glider hits the ground (docs/EXPEDITION_SPEC.md)
 const SPIKE_DMG := 8.0
-const DASH_SPEED := 23.0
-const DASH_TIME := 0.15
+const DASH_SPEED := 19.0      # m/s: the base dash (owner: 23 felt too fast); 19 x 0.19s = 3.6m
+const DASH_TIME := 0.19       # s
 const DASH_REGEN := 2.2
 const LEDGE_REACH := 2.8
 const LEDGE_CD := 0.45
@@ -1234,8 +1234,8 @@ var shove := {}                # the heavy charge: who it already hit, and how h
 
 func dash_with(e: Dictionary) -> void:
 	var d: Vector2 = inp["move"]
-	if d.length() < 0.1:
-		d = aim_dir()
+	if d.length() < 0.1 or (is_local() and Settings.get_v("dash_to_cursor")):
+		d = aim_dir()      # standing still, or the "Dash toward the cursor" setting
 	if e.has("dir") and (e["dir"] as Vector2).length() > 0.01:
 		d = e["dir"]
 	roll_dir = d.normalized()
