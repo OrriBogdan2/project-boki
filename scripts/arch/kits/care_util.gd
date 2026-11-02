@@ -5,6 +5,17 @@ extends RefCounted
 ## revive hook, and carrying a downed teammate. Net: heals and revives use the existing "heal" and
 ## "rev" events; carrying adds one "carry" event (Net 0.14.0).
 
+## Where a hunter's hand is now (the animated hand), else a point beside the chest: casts and held props
+## start there.
+static func hand_at(h: Hunter, right: bool) -> Vector3:
+	var a := h.anim
+	if a != null:
+		var hand: Node3D = a.hand_r if right else a.hand_l
+		if hand != null and is_instance_valid(hand):
+			return hand.global_position
+	var side := Vector2(cos(h.face), -sin(h.face)) * (0.22 if right else -0.22)
+	return h.pos + Vector3(side.x, 0.75, side.y)
+
 ## Living teammates of `h` (never `h`), standing or downed, optionally within r of `at`.
 static func mates(m: Node, h: Hunter, at := Vector3.INF, r := 1e9, include_downed := true) -> Array:
 	var out: Array = []

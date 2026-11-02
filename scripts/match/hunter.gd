@@ -282,7 +282,7 @@ func init_hunter(match_node: Node, id: String, team_id: int, class_id: String, n
 	_kit_from_weapon()
 	dashes = max_dashes()
 	ammo = wpn["mag"]
-	r = float(cdat.get("hit_r", 0.38 * float(cdat["scale"])))
+	r = Arch.hit_r(arch, cdat)
 	set_model(Models.hunter(cls, Data.TEAM_COLORS[team % Data.TEAM_COLORS.size()], wid, "", Save.d.get("look", {}) if ctrl == "local" else bot_look, arch))
 
 ## Switches the archetype mid-match (tests, practice). "" puts back the old class kit: the weapon's
@@ -293,6 +293,7 @@ func set_arch(a: String) -> void:
 	ak = ArchKit.make(self, arch) if arch != "" else null
 	if arch != "" and not Arch.weapon_ok(arch, wid):
 		equip(Arch.signature(arch))
+	r = Arch.hit_r(arch, cdat)
 	_kit_from_weapon()
 
 ## Practice (the Arena and training): become another class and archetype on the spot. Health,
@@ -308,8 +309,8 @@ func reclass(c: String, a: String, w := "") -> void:
 	glide_max = GLIDE_TIME * float(cdat.get("glide_cap", 1.0))
 	base_speed = cdat["speed"]
 	dodge_def = Content.class_dodge(cls)
-	r = float(cdat.get("hit_r", 0.38 * float(cdat["scale"])))
 	arch = Arch.fix(a, cls)
+	r = Arch.hit_r(arch, cdat)
 	if ak: ak.teardown()
 	ak = ArchKit.make(self, arch)
 	wid = Arch.weapon_for(arch, cls, w)

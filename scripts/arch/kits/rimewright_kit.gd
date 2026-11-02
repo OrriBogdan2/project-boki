@@ -30,6 +30,8 @@ var stats := {"darts": 0, "beams": 0, "spears": 0, "detonations": 0, "rimes": 0,
 var rime := {}                 # Rimelock running: {t, at, slow: {instance id: seconds in the rink}, creak}
 var last_stunned := 0          # foes the last Rimelock crash stunned (tests)
 var ult_look: UltLook
+const SHELL_T := 0.15          # s the icy shell shows on a foe before the 8-dart Shatter bursts
+const SHATTER_R := 2.7         # m, the Shatter's spike starburst (about 1.5 body heights)
 
 func _setup() -> void:
 	res = 0.0
@@ -95,15 +97,20 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 		fan_hits[key] = e
 		if int(e["n"]) >= int(pd.get("fan_hits", 8)):
 			fan_hits.erase(key)
-			splinter(t.pos, float(pd["fan_splinter"]), float(pd["splinter_r"]) * 0.8, t)
+			# an icy shell closes over them for a beat, then it bursts
+			lk().burst("shell", t.pos, {"dur": SHELL_T + 0.05, "ent": t})
+			var at := t.pos
+			m.later(SHELL_T, func(): splinter(at, float(pd["fan_splinter"]), float(pd["splinter_r"]) * 0.8, t))
 
 ## Shatter: a starburst of ice spikes round the foe, damage and more Chill to everyone near.
 func splinter(at: Vector3, dmg: float, r: float, skip: Ent = null) -> void:
 	splinter_log += 1
 	var col := res_col()
 	CareUtil.payoff(m, h, at, "SHATTER", col, "rime_splinter")
-	lk().burst("spikes", at, {"r": r * 0.75, "dur": 0.65})
-	lk().burst("flare", at, {"col": Color("9af0e6"), "rim": Color(1, 1, 1), "r": r, "dur": 0.3, "pattern": 2.0})
+	lk().burst("spikes", at, {"r": SHATTER_R, "dur": 0.7})
+	var ring := {"col": Color("3fc8e0"), "rim": Color("bff7ff"), "r": SHATTER_R, "dur": 0.35, "pattern": 2.0}
+	lk().burst("flare", at, ring)
+	m.fx.spark(at + Vector3(0, 0.8, 0), Vector3.UP, Color("6fe0f0"), 18, 8.0, 180.0, 0.35, 8.0, 1.1)
 	play_soft("tm_shatter")
 	for f in foes_in(at, r):
 		if f == skip and f.hp <= 0.0:
@@ -139,7 +146,7 @@ func _tick(dt: float) -> void:
 		var n := int(e2["n"])
 		lk().keep(
 				"frost%d" % key, "frost", (tv2 as Node3D).global_position,
-				{"r": 0.9 + 0.04 * n, "a": 0.25 + 0.6 * float(n) / 8.0})
+				{"r": 0.7 + 0.08 * n, "a": 0.15 + 0.75 * float(n) / 8.0})
 	_tick_darts(dt)
 	_tick_rinkrun(dt)
 	_tick_wall_cast(dt)
@@ -186,7 +193,7 @@ func _throw_dart() -> void:
 		lk().skin(s, "beam" if skating else "shard")
 		if not skating:
 			darts.append({"s": s, "side": side, "passed": false})
-	m.fx.flash(start, Color("e8ffff"), 0.3 if not skating else 0.5, 0.05)
+	m.fx.flash(start, Color("9af0ff"), 0.3 if not skating else 0.5, 0.05)
 	m.sfx("rime_beam" if skating else String(wd["sfx"]), h.pos, -2.0, 1.0 + 0.06 * side)
 	if skating:
 		stats["beams"] += 1
@@ -277,7 +284,7 @@ func _tick_rinkrun(dt: float) -> void:
 	rinkrun["t"] = float(rinkrun["t"]) + dt
 	var t := float(rinkrun["t"])
 	# she skates on over a ledge (only a glide, a stun or letting go ends it)
-	var stop := h.downed or h.stun_t > 0.0 or h.out or t >= float(dd.get("max_t", 2.4)) or h.gliding
+	var stop := h.downed or h.stun_t > 0.0 or h.out or t >= float(dd.get("max_t", 1.6)) or h.gliding
 	if t > float(dd.get("min_t", 0.2)) and not held("dash"):
 		stop = true
 	if stop:
@@ -291,7 +298,8 @@ func _tick_rinkrun(dt: float) -> void:
 		cur = cur.rotated(clampf(cur.angle_to(mv.normalized()), -steer * dt, steer * dt))
 	rinkrun["dir"] = cur
 	h.roll_dir = cur
-	h.roll_speed = float(dd.get("speed", 8.0))
+	# full speed within `ramp` s of the push-off
+	h.roll_speed = float(dd.get("speed", 11.5)) * lerpf(0.45, 1.0, clampf(t / float(dd.get("ramp", 0.2)), 0.0, 1.0))
 	h.roll_t = 0.1
 	h.move_kind = "rinkrun"
 	# the stride move, replayed every 0.56 s
@@ -314,12 +322,13 @@ func _drop_holds() -> void:
 		spear_aim = false
 		rmb_down = false
 		if anim_id == "tm_spear_aim": anim_id = ""
+		lk().drop("spear_prop")
 	wall_cast = {}
 
 func _rinkrun_end() -> void:
 	var dd := dash_def()
 	var t := float(rinkrun.get("t", 0.0))
-	var early := 1.0 - clampf(t / float(dd.get("max_t", 2.4)), 0.0, 1.0)
+	var early := 1.0 - clampf(t / float(dd.get("max_t", 1.6)), 0.0, 1.0)
 	h.dashes = minf(h.max_dashes(), h.dashes + early * float(dd.get("refund", 0.6)))
 	h.roll_t = 0.0
 	h.vel.x *= 0.3
@@ -327,27 +336,34 @@ func _rinkrun_end() -> void:
 	rinkrun = {}
 	play("tm_skate_stop")
 	m.sfx("rime_stop", h.pos, -4.0, 1.0)
+	# a spray of ice off the braced blades, thrown on ahead
 	m.fx.burst(
-			h.pos + Vector3(0, 0.15, 0), Color("dffcff"), 12, 3.5, 0.35, 6.0, 0.8,
-			Vector3(h.roll_dir.x, 0.6, h.roll_dir.y), 50.0)
+			h.pos + Vector3(0, 0.15, 0), Color("9af0ff"), 26, 5.0, 0.45, 6.0, 1.1,
+			Vector3(h.roll_dir.x, 0.7, h.roll_dir.y), 55.0)
+	for i in 5:
+		var side := Vector2(-h.roll_dir.y, h.roll_dir.x) * randf_range(-0.5, 0.5)
+		lk().burst("chip", h.position + Vector3(side.x, 0.0, side.y), {"dur": 0.6})
 
 func rinkrunning() -> bool: return not rinkrun.is_empty()
 
-## The skate's ice trail and the air dash's after-images, in her teal.
+## The skate's ribbon of ice chips (left blade, right blade) and the air dash's frost streaks, in her
+## ice colours; her own trail replaces the shared after-image pill.
 func _tick_trails(dt: float) -> void:
+	if h.roll_t > 0.0:
+		h.ghost_t = 0.1
 	if not rinkrun.is_empty():
 		chip_t -= dt
 		if chip_t <= 0.0:
-			chip_t = 0.05
-			var side := Vector2(-h.roll_dir.y, h.roll_dir.x) * (0.18 if int(m.time * 20.0) % 2 == 0 else -0.18)
-			lk().burst("chip", h.position + Vector3(side.x, 0.0, side.y), {"dur": 0.7})
+			chip_t = 0.035
+			var side := Vector2(-h.roll_dir.y, h.roll_dir.x) * (0.2 if int(m.time * 28.0) % 2 == 0 else -0.2)
+			lk().burst("chip", h.position + Vector3(side.x, 0.0, side.y), {"dur": 0.8})
 	elif h.roll_t > 0.0 and h.move_kind == "dash":
 		aft_t -= dt
 		if aft_t <= 0.0:
 			aft_t = 0.03
-			lk().burst(
-					"aft", h.position,
-					{"col": Color("5fd6c4"), "yaw": h.face, "r": float(h.cdat.get("scale", 1.0)), "dur": 0.22})
+			for i in 2:
+				var off := Vector3(randf_range(-0.3, 0.3), randf_range(0.4, 1.4), randf_range(-0.3, 0.3))
+				lk().burst("streak", h.position + off, {"r": randf_range(0.8, 1.2), "dur": 0.35, "dir": h.roll_dir})
 
 # ------------------------------------------------------------------ RMB: Ice Spear
 func rmb_charge_full() -> float: return 0.0
@@ -366,18 +382,28 @@ func rmb_hold_tick(_t: float) -> void:
 		spear_aim = true
 		play("tm_spear_aim")
 		m.sfx("rime_spear_aim", h.pos, -6.0, 1.0)
+	_hold_spear()
+
+## The ice spear in her raised free hand while she aims, head tipped up and on toward the cursor.
+func _hold_spear() -> void:
+	var dir := h.aim_dir()
+	var ahead := Vector3(dir.x, 0.55, dir.y).normalized()
+	var at := CareUtil.hand_at(h, false) + Vector3(0, 0.1, 0)
+	var xf := Transform3D(Basis.looking_at(ahead, Vector3.UP), at)
+	lk().keep("spear_prop", "spear", at, {"xf": xf})
 
 func fire_rmb(c: Dictionary) -> void:
 	last_variant = String(c["variant"])
 	spear_aim = false
 	AimKit.hide(h, "rmb")
+	lk().drop("spear_prop")
 	if not spend_rmb():
 		if anim_id == "tm_spear_aim": anim_id = ""
 		return
 	play("tm_spear")
 	var ld: Dictionary = rmb_def()["lance"]
 	var dir := h.aim_dir()
-	var start := Vector3(h.pos.x + dir.x * 0.6, h.pos.y + 0.95, h.pos.z + dir.y * 0.6)
+	var start := CareUtil.hand_at(h, false)          # it leaves the raised hand
 	var spd := float(ld["speed"])
 	var dist := AimMode.dist(h, float(ld["range"]))          # lands at the cursor, clamped to its range
 	var on_land := func(_s: Dictionary, at: Vector3, _e: Ent, _why: String): _spear_land(at)

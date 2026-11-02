@@ -1,8 +1,8 @@
 class_name HeroGearCare
 ## Gear for the support pair, kept out of hero_gear.gd.
-##   Moosh Moosh (tender, medium): a courier. A flap cap, a tall wooden pack-frame with a bedroll, and a
-##   caged lantern hanging on a hook ABOVE the head (the silhouette from the match camera: a person
-##   with a glowing lamp on a pole); a rope coil, a tin cup and a cream poncho with an ochre hem.
+##   Moosh Moosh (tender, small): a courier. A flap cap, a small satchel and bedroll low on the back, a
+##   long ember-tipped tail that swings as she scurries, ember light cupped in both palms (she holds
+##   nothing), a rope coil, a tin cup and a cream poncho with an ochre hem.
 ##   Tamsin (rimewright, light): a rink-keeper. An ear-flap cap with a fur band, a huge fluffy collar,
 ##   two long teal scarf tails, blade skates, a cluster of ice shards on one shoulder and a quilted
 ##   short coat. Neither design borrows from any hero in another game.
@@ -33,7 +33,6 @@ static func _tender(c: Dictionary) -> void:
 	var cream := Models.toon(Color("efe2c4"))
 	var ochre := Models.toon(Color("c98a2e"), true, 0.4)
 	var rope := Models.toon(Color("b79a6a"))
-	var lamp := Models.glow_mat(Color(amber, 0.95))
 	# the flap cap: a knit dome with a short peak and two ear flaps tied under the chin
 	if not bool(c["bare"]):
 		var g: Node3D = c["gear"]
@@ -72,37 +71,16 @@ static func _tender(c: Dictionary) -> void:
 		_p(
 				t, Models.box(0.08, 0.1, 0.07), m["leather"], Vector3(0.22 * sx * bw, 0.04, -0.05), Vector3.ONE,
 				Vector3(0, 0.45 * sx, 0))
-	# the pack-frame: two poles up the back, rungs, a bedroll, a crate, and the lamp hook above the head
-	var bz := 0.27 * bw
-	for sx in [-1.0, 1.0]:
-		_p(t, Models.cyl(0.02, 0.02, 1.62, 8), wood, Vector3(0.13 * sx, 0.72, bz))
-	for ry in [0.1, 0.5, 1.0]:
-		_p(t, Models.cyl(0.016, 0.016, 0.3, 8), wood, Vector3(0, ry, bz), Vector3.ONE, Vector3(0, 0, PI * 0.5))
+	# a small satchel low on the back with a bedroll strapped over it: nothing stands above her head
+	var bz := 0.24 * bw
+	_p(t, Models.box(0.28, 0.24, 0.15), wood, Vector3(0, 0.22, bz))
+	_p(t, Models.box(0.29, 0.03, 0.16), ochre, Vector3(0, 0.33, bz))
 	_p(
-			t, Models.cyl(0.095, 0.095, 0.5, 12), m["hero"], Vector3(0, 0.32, bz + 0.1), Vector3.ONE,
+			t, Models.cyl(0.085, 0.085, 0.42, 12), m["hero"], Vector3(0, 0.44, bz + 0.02), Vector3.ONE,
 			Vector3(0, 0, PI * 0.5))
-	for sx in [-0.17, 0.17]:
-		_p(t, Models.cyl(0.1, 0.1, 0.03, 12), cream, Vector3(sx, 0.32, bz + 0.1), Vector3.ONE, Vector3(0, 0, PI * 0.5))
-	_p(t, Models.box(0.26, 0.18, 0.14), wood, Vector3(0, 0.08, bz + 0.1))
-	_p(t, Models.box(0.27, 0.03, 0.15), ochre, Vector3(0, 0.17, bz + 0.1))
-	# the hook: a pole up from the frame, over the head, and a caged lantern hanging off its end
-	_p(
-			t, Models.cyl(0.014, 0.014, 0.72, 8), wood, Vector3(0, 1.62, bz - 0.12), Vector3.ONE,
-			Vector3(PI * 0.5 - 0.3, 0, 0))
-	var lanp := Node3D.new()
-	lanp.name = "Lantern"
-	lanp.position = Vector3(0, 1.36, -0.04)
-	t.add_child(lanp)
-	var core := _p(lanp, Models.sphere(0.075, 14), lamp, Vector3.ZERO)
-	core.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	var lantern_glow := _p(lanp, Models.sphere(0.13, 12), m["glow_soft"], Vector3.ZERO)
-	lantern_glow.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	for k in 4:
-		var a := TAU * k / 4.0 + PI * 0.25
-		_p(lanp, Models.box(0.012, 0.19, 0.012), m["dark"], Vector3(cos(a) * 0.095, 0, sin(a) * 0.095))
-	_p(lanp, Models.cyl(0.0, 0.1, 0.07, 8), m["dark"], Vector3(0, 0.13, 0))
-	_p(lanp, Models.cyl(0.08, 0.06, 0.03, 8), m["dark"], Vector3(0, -0.11, 0))
-	_p(lanp, Models.cyl(0.006, 0.006, 0.12, 4), m["gold"], Vector3(0, 0.22, 0))
+	for sx in [-0.15, 0.15]:
+		_p(t, Models.cyl(0.09, 0.09, 0.03, 12), cream, Vector3(sx, 0.44, bz + 0.02), Vector3.ONE, Vector3(0, 0, PI * 0.5))
+	_tail(t, bw, amber)
 	# a rope coil and a tin cup on the right hip, forearm bracers
 	var rc := TorusMesh.new()
 	rc.inner_radius = 0.06
@@ -114,6 +92,28 @@ static func _tender(c: Dictionary) -> void:
 	for sd in ["L", "R"]:
 		var e2: Node3D = (c["arms"][sd] as Array)[1]
 		_p(e2, HeroKit.cuff(0.062, 0.075, 0.1), m["leather"], Vector3(0, -0.14, 0))
+	_palms(c)
+
+## Her trailing piece: a long ember-tipped brush tail off the small of the back that swings with each
+## quick step (HunterAnim drives the "Tail" pivot). Skipped when the look already has a tail.
+static func _tail(t: Node3D, bw: float, amber: Color) -> void:
+	if t.get_node_or_null("Tail") != null:
+		return
+	var tail := Models._pivot(t, "Tail", Vector3(0, 0.12, 0.2 * bw))
+	var pts := [
+		Vector3(0, 0, 0), Vector3(0, -0.06, 0.18), Vector3(0, -0.02, 0.4), Vector3(0, 0.1, 0.58), Vector3(0, 0.2, 0.66)]
+	var wid := [
+		Vector2(0.05, 0.05), Vector2(0.1, 0.1), Vector2(0.13, 0.12), Vector2(0.1, 0.1), Vector2(0.03, 0.03)]
+	_p(tail, HeroKit.loft("tend_tail", pts, wid, 10, Vector3.UP, 0.8), Models.toon(amber.darkened(0.15), true, 0.4))
+	var tip := _p(tail, Models.sphere(0.075, 10), Models.glow_mat(Color("ffd890", 0.9)), Vector3(0, 0.16, 0.63))
+	tip.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+
+## A soft ember glow cupped in each palm: her casts come out of her hands.
+static func _palms(c: Dictionary) -> void:
+	for sd in ["L", "R"]:
+		var hand: Node3D = (c["arms"][sd] as Array)[2]
+		var glow := _p(hand, Models.sphere(0.05, 8), Models.glow_mat(Color("ffd890", 0.85)), Vector3(0, -0.05, -0.04))
+		glow.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 
 # ------------------------------------------------------------------------------------------ Tamsin
 static func _rime(c: Dictionary) -> void:
@@ -203,49 +203,13 @@ static func _rime(c: Dictionary) -> void:
 		_p(e2, HeroKit.cuff(0.066, 0.092, 0.09), fur, Vector3(0, -0.15, 0))
 
 # ------------------------------------------------------------------------------------------ weapons
-## The Lantern Crook (a shepherd's crook with a little lamp on its hook) and the Hoar Fan (a folding
-## fan of ice slats). The gun points down -Z.
+## Ember Cast (nothing held) and the Hoar Fan (a folding fan of ice slats). The gun points down -Z.
 static func weapon(gun: Node3D, wid: String, m_gun: Material, m_dark: Material, m_acc: Material) -> void:
 	if wid == "lantern_crook":
-		# a knotted ash staff wrapped in leather at the grip, brass collars, the hook curling over a caged
-		# lantern with a warm glass globe, two ribbon tails and a little bell that swing under it
-		var wood := Models.toon(Color("7a5434"))
-		var wood_d := Models.toon(Color("5e3f25"))
-		var brass := Models.shiny(Color("d9a441"), 0.7)
-		_p(gun, Models.cyl(0.022, 0.028, 1.05, 10), wood, Vector3(0, 0, -0.3), Vector3.ONE, Vector3(PI * 0.5, 0, 0))
-		for k in 4:
-			_p(
-					gun, Models.sphere(0.03, 8), wood_d, Vector3(0.012 * (k % 2 * 2 - 1), 0, -0.05 - k * 0.2),
-					Vector3(1, 1, 1.6))
-		_p(
-				gun, Models.cyl(0.03, 0.03, 0.16, 10), Models.toon(Color("6b4a35")), Vector3(0, 0, 0.0),
-				Vector3.ONE, Vector3(PI * 0.5, 0, 0))
-		for zc in [-0.1, 0.1, -0.74]:
-			_p(gun, Models.cyl(0.032, 0.032, 0.03, 10), brass, Vector3(0, 0, zc), Vector3.ONE, Vector3(PI * 0.5, 0, 0))
-		for k in 7:
-			var a := PI * 0.5 + k * 0.42
-			_p(
-					gun, Models.cyl(0.019, 0.022, 0.11, 8), wood,
-					Vector3(0, 0.13 - cos(a) * 0.13, -0.84 - sin(a) * 0.12), Vector3.ONE,
-					Vector3(PI * 0.5 + (a - PI * 0.5) * 0.9, 0, 0))
-		_p(gun, Models.sphere(0.024, 8), brass, Vector3(0, 0.2, -0.78))
-		_p(gun, Models.cyl(0.005, 0.005, 0.1, 4), m_dark, Vector3(0, 0.14, -0.97))
-		var lamp := Models.glow_mat(Color("ffc46a", 0.95))
-		var lamp_core := _p(gun, Models.sphere(0.055, 12), lamp, Vector3(0, 0.03, -0.97))
-		lamp_core.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		var lamp_halo := _p(gun, Models.sphere(0.1, 10), Models.glow_mat(Color("ffd890", 0.22)), Vector3(0, 0.03, -0.97))
-		lamp_halo.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		for k in 4:
-			var a2 := TAU * k / 4.0 + PI * 0.25
-			_p(gun, Models.box(0.008, 0.12, 0.008), brass, Vector3(cos(a2) * 0.062, 0.03, -0.97 + sin(a2) * 0.062))
-		_p(gun, Models.cyl(0.0, 0.07, 0.05, 8), m_dark, Vector3(0, 0.11, -0.97))
-		_p(gun, Models.cyl(0.06, 0.045, 0.025, 8), brass, Vector3(0, -0.04, -0.97))
-		for sx in [-1.0, 1.0]:
-			_p(
-					gun, Models.box(0.025, 0.16, 0.005),
-					Models.toon(Color("e8b0c8") if sx < 0 else Color("c8e07a"), true, 0.5),
-					Vector3(0.03 * sx, -0.1, -0.86), Vector3.ONE, Vector3(0.2, 0, 0.25 * sx))
-		_p(gun, Models.sphere(0.022, 8), brass, Vector3(0, -0.13, -0.9))
+		# Ember Cast: nothing in the hands (an empty Mag keeps the shared gun from adding its magazine)
+		var mag := Node3D.new()
+		mag.name = "Mag"
+		gun.add_child(mag)
 		return
 	# hoar_fan: nine bone slats on a riveted pivot, each tipped with a long ice crystal, a frosted
 	# paper web between them and a teal tassel off the grip

@@ -2,8 +2,9 @@ shader_type spatial;
 // Moosh Moosh and Tamsin ground discs (CareLook): a soft filled disc with a bright rim, an optional
 // sweep that fills toward a trigger, and a sigil per owner. pattern: 0 plain, 1 a lantern plus (heal),
 // 2 a six-spoke frost flake (slow zone), 3 a ring of burr thorns (Burrseed root), 4 Tamsin's Rimelock rink:
-// a ragged crystalline edge and a crack network whose glow (`crack`, 0..1) is the countdown.
-render_mode unshaded, cull_disabled, depth_draw_never, shadows_disabled, blend_add;
+// a ragged crystalline edge and a crack network whose glow (`crack`, 0..1) is the countdown; 5 the
+// Hearthlight: no sigil, the body warm in the middle (color) shading out to the rim colour.
+render_mode unshaded, cull_disabled, depth_draw_never, shadows_disabled, blend_mix;
 uniform vec4 color : source_color = vec4(1.0);
 uniform vec4 rim : source_color = vec4(1.0);
 uniform float fill = 1.0;        // 0..1 inner body strength
@@ -14,7 +15,7 @@ uniform float rim_w = 0.08;
 uniform float crack = 0.0;       // pattern 4: how bright the cracks glow (0..1)
 
 float sigil(vec2 uv, float r, float a) {
-	if (pattern < 0.5) { return 0.0; }
+	if (pattern < 0.5 || pattern > 4.5) { return 0.0; }
 	if (pattern < 1.5) {
 		// a plus: two soft bars
 		vec2 q = abs(uv);
@@ -46,7 +47,7 @@ void fragment() {
 	vec2 uv = UV * 2.0 - 1.0;
 	float r = length(uv);
 	float a = atan(uv.y, uv.x) + spin;
-	if (pattern > 3.5) {
+	if (pattern > 3.5 && pattern < 4.5) {
 		// a ragged ice edge: the disc reads as a sheet of ice, not a clean circle
 		float rag = 0.05 * abs(sin(a * 9.0)) + 0.03 * abs(sin(a * 23.0 + 1.3));
 		r = r / (1.0 - rag);
@@ -61,7 +62,10 @@ void fragment() {
 		sw = smoothstep(sweep - 0.06, sweep, r) * (1.0 - smoothstep(sweep, sweep + 0.02, r));
 	}
 	float sg = sigil(ruv, r, a);
-	vec3 c = color.rgb * (body + sg * 0.9) + rim.rgb * (edge + sw * 1.2);
-	ALBEDO = c;
-	ALPHA = clamp((body + sg + edge + sw) * color.a, 0.0, 1.0);
+	// mixed, not added, so a saturated disc keeps its colour on bright grass
+	float inner = body + sg * 0.9;
+	float outer = edge + sw * 1.2;
+	vec3 body_col = pattern > 4.5 ? mix(color.rgb, rim.rgb, r * r) : color.rgb;
+	ALBEDO = (body_col * inner + rim.rgb * outer) / max(inner + outer, 0.001);
+	ALPHA = clamp((body * 1.6 + sg + edge * 1.2 + sw) * color.a, 0.0, 1.0);
 }

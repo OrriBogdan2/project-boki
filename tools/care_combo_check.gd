@@ -48,7 +48,7 @@ func tender() -> void:
 			AimMode.mode_of(P) == AimMode.MAX and reach > float(P.wpn["range"]) - 0.3, "reach %.1f" % reach)
 	ok(
 			"mm LMB: each ember has its comet look, a swirl at the hand and the flick move",
-			K.stats["swirls"] >= 1 and K.lk().skins.size() >= 1 and K.anim_id == "mm_shot",
+			K.stats["swirls"] >= 1 and K.lk().skins.size() >= 1 and K.anim_id in ["mm_shot_r", "mm_shot_l"],
 			"%s %d" % [K.anim_id, K.stats["swirls"]])
 	step(m, 0.6)
 	# --- Kindle ramp and its foot glow; nodes stay pooled while firing
@@ -100,7 +100,7 @@ func tender() -> void:
 			"mm RMB: held, a dotted lane to the seed's full range and the coiled pose",
 			AimKit.shown(P, "rmb")
 			and String(lane.get("kind", "")) == "dotted"
-			and absf(float(lane.get("len", 0.0)) - 11.0) < 0.1
+			and absf(float(lane.get("len", 0.0)) - float(K.rmb_def()["seed"]["range"])) < 0.1
 			and K.anim_id == "mm_seed_aim",
 			"%s len %.1f %s" % [String(lane.get("kind", "")), float(lane.get("len", 0.0)), K.anim_id])
 	ok("mm RMB: nothing leaves while it is held", _mine(m, P).size() == n0)
@@ -174,7 +174,7 @@ func tender() -> void:
 	P.inp["dash"] = true
 	step(m, 0.05)
 	P.inp["dash"] = false
-	var aft := K.lk().live.filter(func(e): return String(e["kind"]) == "aft").size()
+	var aft := K.lk().live.filter(func(e): return String(e["kind"]) == "mote").size()
 	step(m, 0.25)
 	P.inp["move"] = Vector2.ZERO
 	ok(
@@ -182,6 +182,29 @@ func tender() -> void:
 			P.pos.x - p0.x > 2.5 and absf(P.pos.z - p0.z) < 1.0 and aft >= 1,
 			"dx %.1f dz %.1f aft %d" % [P.pos.x - p0.x, P.pos.z - p0.z, aft])
 	ok("mm Shift: the hop is its own move", K.anim_id in ["mm_dash", "mm_relay"])
+	# --- the air dash is her long floaty glide (dash.air), not the class long dash
+	step(m, 0.4)
+	var g0 := P.pos
+	P.teleport(P.pos + Vector3(0, 3.0, 0))
+	P.ex_cd = 0.0
+	P.inp["move"] = Vector2(1, 0)
+	K.on_dash(true)
+	var lift0 := P.pos.y
+	step(m, 0.5)
+	var sink := lift0 - P.pos.y
+	step(m, 0.4)
+	P.inp["move"] = Vector2.ZERO
+	var glide_d := P.pos.x - g0.x
+	var air: Dictionary = K.dash_def()["air"]
+	ok(
+			"mm air dash: a long glide of about dash.air.dist, held up while it floats (her own move)",
+			absf(glide_d - float(air["dist"])) < 2.0 and sink < 1.0 and K.anim_id == "mm_dash_air",
+			"%.1f m, sank %.2f m in 0.5 s" % [glide_d, sink])
+	ok(
+			"mm body: small (a 0.74 model) with the 0.34 m hitbox",
+			absf(P.r - 0.34) < 0.001 and P.model.scale.y < 0.9,
+			"r %.2f scale %.2f" % [P.r, P.model.scale.y])
+	step(m, 1.0)
 	# --- Bearer: a teammate being stomped can't be picked up (small mechanic), else a pickup move
 	sc.down(m, A)
 	A.teleport(P.pos + Vector3(0.5, 0, 0))
@@ -389,7 +412,14 @@ func rimewright() -> void:
 			"tm Shift: darts while skating are straight beams at 1.6x",
 			bs.size() > nb and absf(bd - float(P.wpn["dmg"]) * 1.6) < 0.05 and K.stats["beams"] >= 1,
 			"dmg %.2f" % bd)
-	step(m, 0.7)
+	step(m, 0.15)
+	var skate_v := Vector2(P.vel.x, P.vel.z).length()
+	ok(
+			"tm Shift: full skating speed (dash.speed) within about 0.2 s, with a ribbon of ice chips",
+			absf(skate_v - float(K.dash_def()["speed"])) < 0.6
+				and K.lk().live.filter(func(e): return String(e["kind"]) == "chip").size() >= 4,
+			"%.1f m/s" % skate_v)
+	step(m, 0.55)
 	ok("tm Shift: the stride move loops while skating", K.anim_id == "tm_skate" and K.rinkrunning(), K.anim_id)
 	ok(
 			"tm Shift: she skates on over a ledge (not stopped by leaving the ground)",
@@ -419,11 +449,14 @@ func rimewright() -> void:
 	var ring: Dictionary = AimKit.entry(P, "rmb")
 	var ra: Vector2 = ring.get("at", Vector2.ZERO)
 	ok(
-			"tm RMB: held, the landing ring sits on the cursor with the raised-spear pose",
-			AimKit.shown(P, "rmb") and ra.distance_to(Vector2(cur.x, cur.z)) < 0.2 and K.anim_id == "tm_spear_aim")
+			"tm RMB: held, the landing ring sits on the cursor with the raised-spear pose and the spear in hand",
+			AimKit.shown(P, "rmb") and ra.distance_to(Vector2(cur.x, cur.z)) < 0.2 and K.anim_id == "tm_spear_aim"
+				and K.lk().showing("spear_prop"))
 	P.inp["sec"] = false
 	P.inp["sec_hold"] = false
-	step(m, 0.35)
+	step(m, 0.02)
+	ok("tm RMB: the held spear leaves her hand on release", not K.lk().showing("spear_prop"))
+	step(m, 0.33)
 	var zat: Vector3 = K.zones[0]["at"] if not K.zones.is_empty() else Vector3.INF
 	ok(
 			"tm RMB: the spear lands at the cursor and leaves a slow zone",

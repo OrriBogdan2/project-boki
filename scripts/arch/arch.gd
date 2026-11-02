@@ -13,6 +13,15 @@ const DEFAULT := {"light": "thief", "medium": "gunslinger", "heavy": "juggernaut
 static func def(id: String) -> Dictionary:
 	return Content._load("archetypes", id)
 
+## An archetype's body tuning ("body" in its JSON): size (model scale), bulk (width), hit_r, plate
+## (nameplate height, m). Empty when it has none.
+static func body(id: String) -> Dictionary:
+	return def(id).get("body", {}) if id != "" and exists(id) else {}
+
+## The hitbox radius of a hunter of this archetype and class (the body's hit_r, else the class's).
+static func hit_r(id: String, cdat: Dictionary) -> float:
+	return float(body(id).get("hit_r", cdat.get("hit_r", 0.38 * float(cdat["scale"]))))
+
 static func ids() -> Array:
 	var out: Array = []
 	for a in ORDER:

@@ -65,8 +65,12 @@ const ARCH_STANCE := {
 	"gunslinger": {"lean": 0.03, "width": 0.13, "knee": 0.2, "breath": 2.0},
 	"juggernaut": {"lean": 0.1, "width": 0.25, "knee": 0.34, "breath": 1.35, "arm": 0.7},
 	"bulwark": {"lean": 0.0, "width": 0.24, "knee": 0.3, "breath": 1.5, "arm": 0.7},
-	"tender": {"lean": 0.04, "knee": 0.14, "width": 0.08, "breath": 2.2, "arm": 0.9},
-	"rimewright": {"knee": 0.3, "lean": 0.12, "width": 0.07, "bounce": 1.3, "breath": 2.8, "arm": 1.15},
+	# tender: small, low and forward with the arms out, quick short steps; rimewright: a tall skater, arms
+	# held out, long strides
+	"tender": {
+		"lean": 0.24, "knee": 0.32, "width": 0.1, "bounce": 1.1, "breath": 2.9, "arm": 1.3, "cadence": 1.25},
+	"rimewright": {
+		"knee": 0.22, "lean": 0.14, "width": 0.1, "bounce": 0.4, "breath": 2.4, "arm": 1.25, "cadence": 1.4},
 	"dolm": {"lean": 0.08, "width": 0.2, "knee": 0.3, "breath": 1.6, "arm": 0.8},
 	"ostra": {"lean": -0.05, "width": 0.07, "knee": 0.1, "breath": 1.7, "arm": 0.8},
 }
@@ -88,6 +92,10 @@ const HOLDS := {
 	"sword": {"gr": Vector3(0, 0, 0.06), "gl": Vector3.INF},
 	"great": {"gr": Vector3(0, 0, 0.02), "gl": Vector3(0, 0, 0.15)},
 	"twin": {"gr": Vector3(0.06, 0, -0.02), "gl": Vector3(-0.1, -0.06, -0.08)},
+	# nothing held: both hands are free and the kit's moves cast from them (Moosh Moosh)
+	"palm": {
+		"pos": Vector3(0.14, -0.25, -0.1), "low": Vector2.ZERO, "gr": Vector3.ZERO, "gl": Vector3.INF,
+		"kick": 0.0, "push": 0.0, "shake": 0.0},
 }
 
 ## Melee swings per combo step: the blade's yaw (left +), pitch (up +) and roll around the swing
@@ -350,6 +358,7 @@ func _setup_weapon(w: String) -> void:
 		"greatsword": hold = "great"
 		"twin_blades": hold = "twin"
 		"tower_shield": hold = "sword"
+		"lantern_crook": hold = "palm"
 		_: hold = w if HOLDS.has(w) else "_gun"
 	hd = HOLDS[hold]
 	mag = null
@@ -646,7 +655,7 @@ func update(dt: float, s: Dictionary) -> void:
 	# ---------------------------------------------------------------- the walk phase and footsteps
 	var ph0 := ph
 	if moving:
-		ph += dt * spd * (2.15 if cls != "heavy" else 1.95)
+		ph += dt * spd * (2.15 if cls != "heavy" else 1.95) * float(st.get("cadence", 1.0))
 		if int(floor(ph / PI)) != int(floor(ph0 / PI)):
 			stepped = true
 	# strafing and backpedalling: the legs turn toward where you're going; backwards they swing the other way
@@ -975,6 +984,8 @@ func update(dt: float, s: Dictionary) -> void:
 		off.y += absf(sin(ph)) * 0.025 * r1 + maxf(0.0, bounce) * 0.006   # springy, up on the toes
 	elif arch == "bulwark":
 		off.y -= absf(cos(ph)) * 0.025 * r1        # heavy, even steps
+	elif arch == "tender":
+		off.y += absf(sin(ph)) * 0.07 * r1         # a small scurry: one quick lift per step
 	elif arch == "mage":
 		off.y += still * (0.012 + sin(t * 1.4 + seed_ph) * 0.008)       # light on its feet, half floating
 	off.y += down_k * 0.15 + base_k * (0.04 + sin(t * 2.0) * 0.015) * smoothstep(0.0, 0.3, base_p)
@@ -1364,7 +1375,8 @@ const KMOVES := {
 		[0.5, {"p": -0.2, "hw": 0.5, "fl": Vector3(0.0, -0.3, -0.3)}],
 		[0.8, {}]]},
 }
-const KM_CH := ["p", "y", "r", "lift", "fx", "fz", "fy", "sq", "lw", "hw", "rw", "bw", "rad", "gp"]
+## wf: how far a kit move takes the held weapon with the body (0: it stays on the aim, 1: it turns with the torso)
+const KM_CH := ["p", "y", "r", "lift", "fx", "fz", "fy", "sq", "lw", "hw", "rw", "bw", "rad", "gp", "wf"]
 var km := {}                   # the kit move's channels this frame (empty: none)
 var km_id := ""
 var km_prev_t := 99.0
@@ -1522,7 +1534,7 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 			var sh := float(hd.get("shake", 0.2)) * 0.012
 			gpos += Vector3(sin(t * 91.0) * sh, cos(t * 77.0) * sh, 0.0)
 		# keep the gun on target while the body leans and twists
-		var lock := lerpf(0.5, 0.95, aim_k) * (1.0 - carry_k)
+		var lock := lerpf(0.5, 0.95, aim_k) * (1.0 - carry_k) * (1.0 - float(km.get("wf", 0.0)))
 		lp = -pitch * lock
 		ly = -yaw * lock
 		# reloads
@@ -1813,8 +1825,10 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 		_flag(emote_k * eh_flag)
 	elif flag:
 		flag.visible = false
-	# the gun goes when it's stowed: the right hand is free then
+	# the gun goes when it's stowed: the right hand is free then (and always with nothing held)
 	free_r = maxf(free_r, 1.0 - gun_vis)
+	if hold == "palm":
+		free_r = 1.0
 	free_l = maxf(free_l, 1.0 - gun_vis)
 	if glide_k > 0.01 or dive_k > 0.01 or down_k > 0.01:
 		free_r = maxf(free_r, maxf(glide_k, maxf(dive_k, down_k)))
@@ -2228,7 +2242,8 @@ func _cloth(dt: float, vel: Vector3, spd: float, mf: float, ms: float, yaw: floa
 		var wag := sin(t * (2.2 + r1 * 6.0) + seed_ph) * (0.18 + r1 * 0.15)
 		if fidget == "tail":
 			wag += sin(fidget_t * 12.0) * 0.5 * sin(_fidget_p() * PI)
-		var wy4 := wag - clampf(ms / 6.0, -1.0, 1.0) * 0.3 + spin * 0.7 - sin(ph) * 0.15 * r1
+		var stride_swing := 0.5 if arch == "tender" else 0.15      # her trailing tail sways with each quick step
+		var wy4 := wag - clampf(ms / 6.0, -1.0, 1.0) * 0.3 + spin * 0.7 - sin(ph) * stride_swing * r1
 		var wx4 := clampf(mf / 6.0, -0.5, 1.0) * 0.2 - fall * 0.3 + glide_k * 0.2
 		if snap:
 			tl_y = wy4; tl_x = wx4

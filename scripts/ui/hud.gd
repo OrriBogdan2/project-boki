@@ -407,7 +407,7 @@ func _draw_world_labels() -> void:
 	for h in m.hunters:
 		if h == m.player or h.out or h.extracted or not h.model or not h.model.visible or h.unseen:
 			continue
-		var sp := cam.unproject_position(_head(h, 2.35))
+		var sp := cam.unproject_position(_head(h, float(Arch.body(h.arch).get("plate", 2.35))))
 		if cam.is_position_behind(h.position):
 			continue
 		_nameplate(sp, h)
@@ -2540,7 +2540,7 @@ func _head(h: Node3D, up: float) -> Vector3:
 ## Health and stamina (dash charges) right above your hunter, where your eyes already are.
 func _draw_overhead(p: Hunter) -> void:
 	var cam := m.cam
-	var at := _head(p, 2.7 * float(p.cdat["scale"]))
+	var at := _head(p, float(Arch.body(p.arch).get("overhead", 2.7 * float(p.cdat["scale"]))))
 	if cam.is_position_behind(at) or p.downed or p.riding:
 		return
 	var sp := cam.unproject_position(at)

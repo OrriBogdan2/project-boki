@@ -877,8 +877,13 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 	HunterAnim.rest_pose(root)       # hands on the weapon even where nothing animates it (portraits, galleries)
 	var rs := float(race["scale"])
 	var ck := float(CLASS_LOOK.get(cls, {}).get("size", 1.0))
-	root.scale = Vector3.ONE * float(Data.CLASSES[cls]["scale"]) * rs * ck
-	ring.scale = Vector3.ONE / (rs * ck)       # the ring under your feet shows the real hitbox, whatever your size
+	var body := Arch.body(arch)
+	var size_k := float(body.get("size", 1.0))
+	var bulk := float(body.get("bulk", 1.0))
+	root.scale = Vector3(bulk, 1.0, bulk) * float(Data.CLASSES[cls]["scale"]) * rs * ck * size_k
+	# the ring under your feet shows the real hitbox, whatever your size
+	var hit_k := Arch.hit_r(arch, Data.CLASSES[cls]) / float(Data.CLASSES[cls]["hit_r"])
+	ring.scale = Vector3(1.0 / bulk, 1.0, 1.0 / bulk) * hit_k / (rs * ck * size_k)
 	return root
 
 ## Moves a hunter's toon material onto the hero shader (hero_toon.gdshader) with the same settings,
