@@ -96,9 +96,9 @@ func run(main: Node) -> void:
 	var egg = F.get("egg_wp")
 	var pile: Array = drops.filter(func(wp): return not wp.get("egg", false))
 	ok(egg != null and drops.has(egg) and Loot.is_rare_egg(Pack.ground_item(egg)), "%s drops a Rare %s" % [b.md["name"], Data.egg_name(String(Pack.ground_item(egg)["sp"])) if egg != null else "?"])
-	ok(pile.size() >= 2 and pile.size() <= 4, "a small pile: %d things (%s)" % [pile.size(), ", ".join(pile.map(func(wp): return Loot.name_of(Pack.ground_item(wp))))])
-	var low: Array = pile.filter(func(wp): return (int(wp["rar"]) < 3) if not wp.has("val") else Loot.value(Pack.ground_item(wp)) < 50)
-	ok(low.is_empty(), "all of it high value: Epic+ weapon and glove, treasure worth 50+ (worth %s)" % str(pile.map(func(wp): return Loot.value(Pack.ground_item(wp)))))
+	ok(pile.size() >= 2 and pile.size() <= 4, "a small pile: %d things (%s)" % [pile.size(), ", ".join(pile.map(func(wp): return String(Data.PERKS[String(wp["tune"])]["name"]) if wp.has("tune") else Loot.name_of(Pack.ground_item(wp))))])
+	var low: Array = pile.filter(func(wp): return false if wp.has("tune") else ((int(wp["rar"]) < 3) if not wp.has("val") else Loot.value(Pack.ground_item(wp)) < 50))
+	ok(low.is_empty(), "all of it high value: Epic+ gear, a weapon upgrade, treasure worth 50+ (worth %s)" % str(pile.map(func(wp): return 0 if wp.has("tune") else Loot.value(Pack.ground_item(wp)))))
 	var apart := 99.0
 	var pile_c := Vector3.ZERO
 	for wp in pile:

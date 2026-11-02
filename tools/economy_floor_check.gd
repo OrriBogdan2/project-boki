@@ -134,8 +134,8 @@ func _loaner_match() -> void:
 	var mine := Save.new_kin("cindle", "Pip")
 	Save.d["roster"] = [mine]; Save.d["active"] = mine["uid"]
 	Save.d["items"]["tonic"] = 5; Save.d["items"]["rift_key"] = 2; Save.d["treat"] = "treat_power"
-	var arm_w := {"uid": "arm_w", "t": "weapon", "rar": 2, "id": "test_blade"}
-	Save.d["armory"] = [arm_w]; Save.d["loadout"] = {"weapon": "arm_w"}
+	var arm_w := {"uid": "arm_w", "t": "gear", "rar": 2, "id": "bastion_plate"}
+	Save.d["armory"] = [arm_w]; Save.d["loadout"] = {"gear2": "arm_w"}
 	var m := Match.new()
 	main.add_child(m)
 	var o := Loaner.opts({"teams": 2, "squad": 1, "tier": 2, "length": 1e9, "seed": 12, "no_drop": true}, 4)
@@ -147,8 +147,8 @@ func _loaner_match() -> void:
 	ok(P.kin2 == null and k != null and k.owner_h == P and k.cmd == "follow", "the loaner is the one active Boki and follows like any other (%s)" % (k.cmd if k else "none"))
 	ok(k != null and k.species in Loaner.STARTERS and int(k.rec["level"]) == 1, "a starter egg's species, level 1")
 	ok(P.rift_keys == 0 and P.tonics == 2, "the basic kit: two free tonics, no keys (%d, %d)" % [P.tonics, P.rift_keys])
-	ok(Loot.of_hand(P).is_empty() or int(Loot.of_hand(P).get("rar", 0)) == 0, "the plain class weapon")
-	ok(Save.d["armory"] == [arm_w] and Save.d["loadout"] == {"weapon": "arm_w"} and Save.d["raid_out"].is_empty(), "your armory and loadout stay home (nothing left the armory)")
+	ok(P.gear.all(func(g): return (g as Dictionary).is_empty()), "no armory gear: the plain kit")
+	ok(Save.d["armory"] == [arm_w] and Save.d["loadout"] == {"gear2": "arm_w"} and Save.d["raid_out"].is_empty(), "your armory and loadout stay home (nothing left the armory)")
 	# die in the Hollow: the loaner never drops into the box or is left behind
 	P.lives = 1
 	m.eliminate(P, null, "knocked out", true)
@@ -189,8 +189,8 @@ func _loaner_result() -> void:
 	mine["trust"] = 50.0
 	Save.d["roster"] = [mine]; Save.d["active"] = mine["uid"]
 	Save.d["items"]["tonic"] = 5; Save.d["items"]["rift_key"] = 2; Save.d["gems"] = 0; Save.d["treat"] = "treat_power"
-	var arm_w := {"uid": "arm_w", "t": "weapon", "rar": 2, "id": "test_blade"}
-	Save.d["armory"] = [arm_w]; Save.d["loadout"] = {"weapon": "arm_w"}
+	var arm_w := {"uid": "arm_w", "t": "gear", "rar": 2, "id": "bastion_plate"}
+	Save.d["armory"] = [arm_w]; Save.d["loadout"] = {"gear2": "arm_w"}
 	var trust0 := float(mine["trust"]); var xp0 := int(mine.get("xp", 0)); var m0 := int(mine.get("matches", 0))
 	# extracted with a little: the stipend tops it up to MIN_PAY
 	var out := Game.apply_result({"extracted": true, "loaner": true, "tier": 0, "gems": 12, "tonics": 5, "kin_runs": [], "caught": []})
@@ -199,12 +199,12 @@ func _loaner_result() -> void:
 	ok(Save.d["roster"].size() == 1 and not Save.d["roster"].any(func(r): return Loaner.is_loaner(r)), "the loaner is never kept")
 	ok(int(Save.d["items"]["tonic"]) == 5 and int(Save.d["items"]["rift_key"]) == 2, "your tonics and keys are untouched")
 	ok(String(Save.d["treat"]) == "treat_power", "your treat is kept on a free-kit run (it was never used)")
-	ok(Save.d["armory"] == [arm_w] and Save.d["loadout"] == {"weapon": "arm_w"}, "your armory and loadout are untouched")
+	ok(Save.d["armory"] == [arm_w] and Save.d["loadout"] == {"gear2": "arm_w"}, "your armory and loadout are untouched")
 	# died: nothing of yours lost, no ransom
 	out = Game.apply_result({"extracted": false, "why": "knocked out", "loaner": true, "tier": 2, "gems": 30, "lost_gems": 30, "tonics": 5, "kin_runs": [],
 		"lost_kin": [{"uid": "x", "fate": "rival", "holder": "Vexa", "rec": Loaner.roll(3)}]})
 	ok(Save.d["roster"].size() == 1 and (Save.d["lost_kin"] as Array).is_empty() and int(out["stipend"]) == 0, "dying on a free-kit run loses nothing of yours")
-	ok(String(Save.d["treat"]) == "treat_power" and Save.d["armory"] == [arm_w] and Save.d["loadout"] == {"weapon": "arm_w"}, "...nor your treat, armory or loadout")
+	ok(String(Save.d["treat"]) == "treat_power" and Save.d["armory"] == [arm_w] and Save.d["loadout"] == {"gear2": "arm_w"}, "...nor your treat, armory or loadout")
 	# the stipend is a floor, not a bonus: nothing is topped up at MIN_PAY or more
 	for g in [Loaner.MIN_PAY, Loaner.MIN_PAY + 1, 200]:
 		var rr := {"extracted": true, "loaner": true, "gems": g}
