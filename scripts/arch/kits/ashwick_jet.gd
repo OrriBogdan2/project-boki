@@ -3,9 +3,8 @@ extends RefCounted
 ## Linwick's ultimate on X, Flue Flight (docs/heroes/ashwick.md): a ring of embers at lift-off, then 1.4s of
 ## low flight toward the cursor that steers with the aim at a capped turn rate. A molten carpet forms under
 ## him as he goes and lasts 4s: it burns, slows and builds Char. X again lands early; a stun ends the flight;
-## a knockback speeds it up. The carpet never forms over the abyss. Each enemy hunter the carpet touches
-## fills the Boki bond (content/rules/bond.json "ult"), and the Furnace Cloak landing on someone standing in
-## it adds a combo bonus.
+## a knockback speeds it up. The carpet never forms over the abyss. An enemy hunter it burns (or knocks, or
+## kills) fills the Boki bond (HeroUlt.landed).
 
 const LAY_STEP := 1.0           # m between two carpet pieces (each one is a pooled LDFx lava strip)
 const NET_EVERY := 3            # carpet pieces between two rings sent to other players' games
@@ -17,7 +16,6 @@ var h: Hunter
 var m: Node
 var flight := {}                # hold: the flight under way {t, dir, speed, last, set_v}
 var trail: Array = []           # carpet pieces: {a, b, until}
-var bond := {}                  # this cast's bond: {ids, paid, combo}
 var tick_acc := 0.0
 var laid := 0
 var flights := 0                # (tests)
@@ -50,7 +48,6 @@ func start() -> bool:
 	h.gliding = false
 	flight = {"t": float(x["time"]), "dir": dir, "speed": speed, "last": k.ground(h.pos), "set_v": dir * speed,
 		"knock": h.knock_t}
-	bond = {"ids": {}, "paid": 0.0, "combo": false}
 	flights += 1
 	k.play("lw_jet")
 	_liftoff_fx()
@@ -82,14 +79,6 @@ func tick(dt: float) -> void:
 ## Is this body standing in the carpet?
 func in_lava(f: Ent) -> bool:
 	return _lava_at(f) != null
-
-## The Furnace Cloak hit someone: standing in this cast's carpet, it adds the combo bond once.
-func on_cloak_hit(f: Ent) -> void:
-	if bond.is_empty() or bool(bond["combo"]) or not (f is Hunter) or not in_lava(f):
-		return
-	bond["combo"] = true
-	HeroUlt.pay_bond(h, float(HeroUlt.bond_rules("ashwick").get("combo", 0.1)), "ult_combo")
-	m.fx.word(f.pos + Vector3(0, 2.6, 0), "STOKED", Color("ffd060"), true)
 
 # ------------------------------------------------------------------ flight
 func _fly(dt: float) -> void:
@@ -187,8 +176,7 @@ func _burn(dt: float) -> void:
 		f.hurt(dmg, h, opts)
 		k.add_char(f, float(x["char"]))
 		trail_hits += 1
-		if f is Hunter:
-			_bond_touch(f)
+		HeroUlt.landed(k, f)
 	for t in trail:
 		if randf() < 0.35 and k.tells_visible():
 			m.fx.burst((t["b"] as Vector3) + Vector3(0, 0.2, 0), Color("ff8a3a"), 2, 1.5, 0.4, -3.0, 1.2)
@@ -206,18 +194,6 @@ func _lava_at(f: Ent):
 		if on.distance_to(fp) < rr:
 			return t
 	return null
-
-## The first touch of each enemy hunter this cast fills the bond, up to the cap.
-func _bond_touch(f: Hunter) -> void:
-	if bond.is_empty() or (bond["ids"] as Dictionary).has(f.get_instance_id()):
-		return
-	(bond["ids"] as Dictionary)[f.get_instance_id()] = true
-	var rl := HeroUlt.bond_rules("ashwick")
-	var amt := minf(float(rl.get("each", 0.3)), float(rl.get("cap", 0.7)) - float(bond["paid"]))
-	if amt <= 0.0:
-		return
-	bond["paid"] = float(bond["paid"]) + amt
-	HeroUlt.pay_bond(h, amt, "ult_hit")
 
 # ------------------------------------------------------------------ looks
 ## A red-orange ember ring about 1.2 bh round his feet, a gold flash and the roar of the bellows jet.

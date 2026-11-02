@@ -4,8 +4,8 @@ extends RefCounted
 ## while a 105 degree fan grows on the ground in front (everyone sees it; it is the exact area, locked at the
 ## press), then two waves 0.6s apart of six heavy brass slugs each (real shots, Match.spawn_shot) with
 ## Anti-Heal. Up close every slug lands; further out only the middle ones do. A stun during the charge stops
-## it; a stun after the first wave stops the second. Each wave that hits an enemy hunter fills the Boki bond
-## (content/rules/bond.json "ult"), per wave, never per slug.
+## it; a stun after the first wave stops the second. A slug that hits, knocks or kills an enemy hunter fills
+## the Boki bond (HeroUlt.landed: the best event of the cast counts, not each slug).
 
 const MUZZLE := 0.9                 # m in front of his chest where the slugs leave his hands
 const RECOVER := 0.3                # s he stays planted after the last wave
@@ -18,7 +18,6 @@ var k: DredgeKit
 var h: Hunter
 var m: Node
 var blast := {}                     # hold: the charge and its waves {t, dir, fired}
-var paid := {}                      # waves of this cast that already filled the bond
 var casts := 0                      # (tests)
 var waves := 0
 var slug_hits := 0
@@ -44,7 +43,6 @@ func start() -> bool:
 	if running():
 		return false
 	blast = {"t": 0.0, "dir": h.aim_dir(), "fired": 0}
-	paid = {}
 	last_wave_hits = []
 	casts += 1
 	k.play("dr_blast")
@@ -139,9 +137,7 @@ func _slug_hit(wave: int, e: Ent, why: String, dmg: float) -> void:
 	KitStatus.apply(e, "blt", float(xd()["blt_t"]))
 	k.fx.orb(e.pos + Vector3(0, 1.0, 0), WAVE_COL[wave % 2], Color.WHITE, 0.9, 0.1)
 	m.fx.burst(e.pos + Vector3(0, 0.6, 0), Color("b48aff"), 4, 2.0, 0.5, -4.0, 0.8, Vector3.UP, 20.0)
-	if e is Hunter and not paid.has(wave):
-		paid[wave] = true
-		HeroUlt.pay_bond(h, float(HeroUlt.bond_rules("dredge").get("wave", 0.35)), "ult_hit")
+	HeroUlt.landed(k, e)
 
 ## A wave goes: a brass sunburst at his fists, a crescent sweep across the fan, a heavy thump and a shove
 ## of the camera back toward him.

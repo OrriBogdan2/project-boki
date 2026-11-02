@@ -1,7 +1,7 @@
 extends RefCounted
 ## Linwick's ultimate on X, Flue Flight, for --ashwick-combo-check (docs/heroes/ashwick.md): the level gate,
 ## the lift-off telegraph and move, the steering lane, the capped turn, the early landing, the carpet's burn,
-## slow and Char, bond only on a land (per hunter, capped, the cloak combo), the cloak mid-flight, no Cinder
+## slow and Char, bond only on a land (the best of hit or knock per cast), the cloak mid-flight, no Cinder
 ## mid-flight, a knockback speeding it up, a stun ending it, never over the abyss, the merge drop, the
 ## cooldown and the burst cap.
 
@@ -67,7 +67,7 @@ func _flight() -> void:
 	var flown := Vector2(P.pos.x - home.x, P.pos.z - home.z).length()
 	ok("ult: a full flight covers about 9-10 body heights in 1.4s", not J.running() and flown > 15.0 and flown < 20.0, "%.1fm" % flown)
 	ok("ult: the flight ends on its own with the landing move", J.landings >= 2 and K.anim_id == "lw_land")
-	ok("ult bond: nothing for a cast that lands on nobody", HeroUlt.paid_total == paid0 and float(J.bond["paid"]) == 0.0, "paid %.2f" % (HeroUlt.paid_total - paid0))
+	ok("ult bond: nothing for a cast that lands on nobody", HeroUlt.paid_total == paid0, "paid %.2f" % (HeroUlt.paid_total - paid0))
 	P.ak.use_x()
 	ok("ult: the cooldown denies a new flight", not J.running() and J.flights == 2, "cd %.1f" % float(K.cd["x"]))
 	await _steer(m, P, K, home)
@@ -109,24 +109,24 @@ func _carpet() -> void:
 	var char_t := K.char_of(T) + 31.0 * float(K.burning(T))
 	ok("ult payoff: the carpet burns, slows and builds Char", ak.dmg(T) > 0.5 and T.slow_t > 0.0 and char_t > 0.0, "dmg %.1f slow %.2f char %.0f" % [ak.dmg(T), T.slow_t, char_t])
 	ok("ult payoff: the slow is about 30%", absf(T.slow_k - 0.3) < 0.01, "slow_k %.2f" % T.slow_k)
-	var paid := float(J.bond["paid"])
 	var sent := HeroUlt.paid_total - paid0
-	ok("ult bond: each hunter the carpet touches adds 0.3 (two: 0.6)", absf(paid - 0.6) < 0.001 and absf(sent - 0.6) < 0.001, "paid %.2f" % paid)
-	P.ult = 0.0
-	HeroUlt.pay_bond(P, 0.3, "test")
+	ok("ult bond: burning a hunter fills it once per cast (a hit: 0.6, two hunters still 0.6)", absf(sent - 0.6) < 0.001, "sent %.2f" % sent)
 	var stub := HeroUlt._bond_hook() == null
-	ok("ult bond: the payout reaches the meter (stub: Bond.add until main ships KinBond.add)", stub and P.ult >= 0.3, "meter %.2f" % P.ult)
-	# the cloak lands on a hunter standing in the carpet: +0.1 once
-	T.teleport(J.trail[-1]["b"])
-	P.teleport(T.pos + Vector3(-2.0, 0, 0))
-	K.cd["e"] = 0.0
-	P.ak.use_e()
-	ak.step(m, 0.4)
-	var combo_sent := HeroUlt.paid_total - paid0
-	ok("ult combo: the cloak on a foe in the carpet adds 0.1 (0.7 in all)", bool(J.bond["combo"]) and absf(combo_sent - 1.0) < 0.001, "sent %.2f" % combo_sent)
-	var T3: Hunter = m.make_hunter("T3", 5, "medium", "Target3", "idle", {}, home + Vector3(0, 0, -3.0), {"arch": "none"})
-	J._bond_touch(T3)
-	ok("ult bond: the carpet's share is capped at 0.7", absf(float(J.bond["paid"]) - 0.7) < 0.001, "paid %.2f" % float(J.bond["paid"]))
+	ok("ult bond: through the guarded KinBond.from_ult stub (Bond.add until ultbond lands)", stub and P.ult >= 0.6, "meter %.2f" % P.ult)
+	# a knock with it tops the cast up to the knock's share
+	ak.step(m, 4.0)
+	ak.fresh(T)
+	T.hp = 0.5
+	T.teleport(home + Vector3(6.0, 0, 0))
+	T2.teleport(home + Vector3(0, 0, -6.0))
+	P.teleport(home)
+	paid0 = HeroUlt.paid_total
+	_cast(P, home + Vector3(16, 0, 0))
+	ak.step(m, 1.6, func(): ak.aim_at(P, home + Vector3(16, 0, 0)))
+	sent = HeroUlt.paid_total - paid0
+	ok("ult bond: a knock with the carpet counts as the cast's best event (0.7)", T.downed and absf(sent - 0.7) < 0.001, "downed %s sent %.2f" % [T.downed, sent])
+	T.downed = false
+	ak.fresh(T)
 	# a new flight with nobody near: the cloak works mid-flight, the Cinder Shot doesn't
 	ak.step(m, 4.0)
 	T.teleport(home + Vector3(0, 0, -5.0))

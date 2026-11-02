@@ -499,7 +499,6 @@ func _cloak_blast() -> void:
 		f.hurt(float(ed["dmg"]) * power("kin") * k, h, {"src": "flame", "ab": "k1", "tags": ["flame", "cloak"]})
 		if add_char(f, float(ed["char"])): stoked = true
 		KitStatus.apply(f, "blt", float(ed["blt_t"]))
-		jet.on_cloak_hit(f)
 		m.fx.burst(f.pos + Vector3(0, 1.4, 0), Color("6a4a5a"), 8, 1.5, 0.6, -1.0, 1.6)      # a smoke puff over the target
 		if f.mass() < 6.0 and not f.remote:
 			drags.append({"e": f, "left": 0.45})

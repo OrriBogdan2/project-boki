@@ -2,7 +2,8 @@ extends RefCounted
 ## --dredge-combo-check: Dredge's abilities and their interactions, scripted one by one in the
 ## archetype check's flat training strip (docs/heroes/dredge.md, combinations table): the Grapnel
 ## reel, only the barge during it, reel into the Anchor Drop, walls and the abyss, the Salvage
-## passive, the back hit, the barge's turn lock after the Anchor, and the rank-3 specials.
+## passive, the back hit, the barge's turn lock after the Anchor, the rank-3 specials, and the X ult,
+## Brass Broadside (tools/dredge_ult_check.gd).
 
 var main: Node
 var fails := 0
@@ -19,6 +20,7 @@ func run(main_node: Node) -> void:
 	ak = load("res://tools/archetype_check.gd").new()
 	ak.main = main
 	await _all()
+	await load("res://tools/dredge_ult_check.gd").new(ak, ok).run()
 	print("DREDGECHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
