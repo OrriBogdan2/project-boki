@@ -148,13 +148,13 @@ func thief(a) -> void:
 	A.ok("dancer E: the dagger sticks in a foe (slow 50%, damage)", not K.knife.is_empty() and K.knife.get("target") == T and T.slow_t > 0.0 and A.dmg(T) >= 7.0, "slow %.2f dmg %.0f" % [T.slow_t, A.dmg(T)])
 	A.step(m, 6.1)
 	A.ok("dancer E: waiting 6s steps you to it anyway", P.flat_dist(T) < 1.8 and K.knife.is_empty(), "dist %.1f" % P.flat_dist(T))
-	# a knock heals a quarter in all; the crimson star and the green pillar
+	# a knock heals a fifth (15% passive, 5% from the takedown reset) in all; the crimson star and the green pillar
 	P.hp = P.max_hp * 0.5
 	var php := P.hp
 	T.hp = 4.0
 	T.hurt(10.0, P, {"src": "shot"})
 	A.step(m, 0.1)
-	A.ok("dancer passive: a knock heals (25% in all), star + pillar", T.downed and K.knocks_seen >= 1 and P.hp >= php + P.max_hp * 0.24 and DJFx.of(m).free_pools.has("pillar") and DJFx.of(m).free_pools.has("star"), "hp %.0f -> %.0f" % [php, P.hp])
+	A.ok("dancer passive: a knock heals (20% in all), star + pillar", T.downed and K.knocks_seen >= 1 and P.hp >= php + P.max_hp * 0.19 and DJFx.of(m).free_pools.has("pillar") and DJFx.of(m).free_pools.has("star"), "hp %.0f -> %.0f" % [php, P.hp])
 	A.fresh(T); T.teleport(home + Vector3(5.0, 0, 0)); T.downed = false
 	A.step(m, 1.4, func(): P.inp["fire"] = true; A.aim_at(P, T.pos))
 	P.inp["fire"] = false
@@ -166,6 +166,26 @@ func thief(a) -> void:
 	var capped := DJFx.of(m).free_pools.values().all(func(arr): return (arr as Array).size() <= DJFx.POOL_CAP)
 	A.ok("dancer fx: pooled (every kind capped, a handful of nodes at most per burst)", capped and DJFx.of(m).made <= made + 6, "made %d -> %d" % [made, DJFx.of(m).made])
 	await A.done(m)
+	await _growth()
+
+
+## A Jackpot blade's damage on the first foe with the hunter at level `lvl`.
+func _blade(lvl: int) -> float:
+	var r = A.setup("thief", 6.0)
+	var m: Match = r[0]; var P: Hunter = r[1]; var T: Hunter = r[2]
+	var K: ThiefKit = P.ak
+	P.lvl = lvl
+	A.fresh(T)
+	K._jackpot_hit(T, false)
+	var d: float = A.dmg(T)
+	await A.done(m)
+	return d
+
+## Ability damage reads ArchKit.power(), so quiet level growth (LevelGrowth.ap) raises it.
+func _growth() -> void:
+	var d1: float = await _blade(1)
+	var d10: float = await _blade(10)
+	A.ok("dancer Jackpot: a blade grows with level (LevelGrowth.ap 1.0 -> %.2f)" % (1.0 + LevelGrowth.ap_pct(10)), d1 > 4.0 and absf(d10 / d1 - (1.0 + LevelGrowth.ap_pct(10))) < 0.01, "L1 %.2f L10 %.2f" % [d1, d10])
 
 
 # ------------------------------------------------------------------ Juggernaut

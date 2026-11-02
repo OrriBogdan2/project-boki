@@ -495,7 +495,7 @@ func _jackpot_hit(f: Ent, rim: bool) -> void:
 		return
 	var jd := jackpot_def()
 	var dmg := float(jd["dmg"]) + (float(jd["rim_dmg"]) if rim else 0.0)
-	f.hurt(dmg * m.dmg_mult(h), h, {"src": "abil", "ab": "mark", "tags": ["jackpot"], "crit": rim})
+	f.hurt(dmg * power("passive"), h, {"src": "abil", "ab": "mark", "tags": ["jackpot"], "crit": rim})
 	if rim and is_instance_valid(f) and not f.dead:
 		KitStatus.apply(f, "blt", float(jd.get("rim_blight", 4.0)))      # the rim also cuts healing (the source's outer ring)
 	jackpot_hits += 1
