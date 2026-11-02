@@ -462,7 +462,7 @@ func on_dash(use_ex: bool) -> bool:
 		if not spend_dash(false): return true
 		h.dashes = minf(h.max_dashes(), h.dashes + 0.5)       # (half the charge comes back: the reduced cooldown)
 		var sd2 := float(dd.get("short", 2.6))
-		travel(sd2, sd2 / float(dd["whirl_speed"]), {"invuln": 0.0, "trail": "dust", "dir": h.aim_dir()})
+		travel(sd2, sd2 / float(dd["whirl_speed"]), {"invuln": 0.0, "trail": "dust", "dir": dash_dir()})
 		st["last_dash"] = "short"
 		short_until = m.time + sd2 / float(dd["whirl_speed"]) + 0.2
 		play("bul_short")

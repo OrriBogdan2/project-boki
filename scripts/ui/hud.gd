@@ -1143,8 +1143,9 @@ func _ab_slot(id: String, rect: Rect2, icon: String, key: String, col: Color, cd
 		c.draw_rect(Rect2(rect.position + Vector2(3, 3), Vector2(rect.size.x - 6, rect.size.y * 0.42)), Color(col, 0.08))
 	Icons.draw(c, icon, ctr + Vector2(0, -2), rect.size.x * 0.27, col if ready else Color(col.lerp(MUTED, 0.6), 0.55))
 	if cd_frac > 0.0:
-		_sweep(ctr, rect.size.x * 0.66, cd_frac, Color(0.0, 0.0, 0.0, 0.52))
-		if cd_secs > 0.0:
+		# a charge coming back while another is ready (dashes): a light sweep, no number, so it never reads as locked
+		_sweep(ctr, rect.size.x * 0.66, cd_frac, Color(0.0, 0.0, 0.0, 0.2 if ready else 0.52))
+		if cd_secs > 0.0 and not ready:
 			_ctext(ctr + Vector2(0, 8), str(int(ceil(cd_secs))) if cd_secs >= 1.0 else "%.1f" % cd_secs, 22, INK, big)
 	if max_ch > 1:
 		for i in max_ch:
@@ -1408,8 +1409,8 @@ func _draw_abilities(sz: Vector2, p: Hunter) -> void:
 	x += s + gap
 	# Shift: your dash
 	var dmax := p.max_dashes()
-	var dcd := (1.0 - fposmod(p.dashes, 1.0)) if p.dashes < dmax else 0.0
-	_skill_slot("dash", "dash", Rect2(Vector2(x, y), Vector2(s, s)), "dash", Settings.key_cap("dash"), Color("bfe6ff"), dcd if p.dashes < 1.0 else 0.0, (1.0 - fposmod(p.dashes, 1.0)) * p.dash_regen() if p.dashes < 1.0 else 0.0, p.dashes >= 1.0, int(floor(p.dashes)), int(dmax))
+	var dcd := (1.0 - fposmod(p.dashes, 1.0)) if p.dashes < dmax - 0.001 else 0.0
+	_skill_slot("dash", "dash", Rect2(Vector2(x, y), Vector2(s, s)), "dash", Settings.key_cap("dash"), Color("bfe6ff"), dcd, dcd * p.dash_regen(), p.dashes >= 1.0, int(floor(p.dashes)), int(dmax))
 	x += s + gap
 	# E: your kin's ability
 	var er := Rect2(Vector2(x, y), Vector2(s, s))
