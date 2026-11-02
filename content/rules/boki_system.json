@@ -24,8 +24,13 @@
 		"recover_s_wary": 20.0,
 		"recover_hp": 0.2,
 		"rescue_hp": 0.6,
-		"rescue_s": 0.5,
-		"rescue_r": 1.5
+		"rescue_s": 3.5,
+		"rescue_r": 1.5,
+		"rescue_drain_s": 2.0,
+		"rescue_block_s": 0.6,
+		"rescue_slack": 0.7,
+		"rescue_kneel_frac": 0.12,
+		"rescue_done_s": 0.45
 	},
 	"follow": {
 		"separation_r": 1.2,

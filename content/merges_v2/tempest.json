@@ -5,8 +5,6 @@
 	"flavor": "Lunowl swells into a living eclipse for 7s that drags foes in and flings them skyward.",
 	"theme": "lunar",
 	"duration": 7,
-	"grow_duration": 1.0,
-	"grow_strength": 0.1,
 	"passives": [
 		{
 			"stat": "move_speed",
