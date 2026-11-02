@@ -243,8 +243,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 				move = Vector2.ZERO
 			elif h.flat_dist(goal) < 1.0 and a["goal_kind"] in ["beacon", "board", "yard", "lair_camp"]:
 				move = Vector2.ZERO
-		if h.kin and h.kin.state == "active" and h.kin.flat_dist(h) > 6.0 and KinCommand.can_recall(h):
-			h.kin.recall()
+		BotKin.upkeep(h)
 		# far from the squad with nothing to fight: now and then, base to a teammate
 		# (not while holding a spot: an uplink's yard, a skiff's deck, a lair: basing away from a
 		# charging uplink left its yard empty to drain)

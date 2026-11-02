@@ -1,14 +1,15 @@
 class_name KinCommand
 extends RefCounted
-## The Boki commands (docs/decisions/0001): what G and C do, for the player and for bots.
-##   G tap   Boki on your shoulder: throw it to the cursor (it holds the spot it lands on, and its landing
-##           staggers what it lands on). Boki out: recall it. It leaps back to you and hits anything on its path.
-##           Recall only works within recall_range; further out it comes back on its own (leash).
-##   G hold  toggle "hold the spot" / "follow & fight" (Kin.hold_mode, Kin.hold_at)
+## The Boki commands (docs/decisions/0001, 0002): what G and C do, for the player and for bots.
+##   G tap   Boki out beside you: Sic, it leaps at the cursor (its landing staggers what it lands on).
+##           Boki away (far, guarding, running back): Call back, it leaps to your side and hits what is on its path.
+##           Boki on you (Return): it is thrown at the cursor as before.
+##   G hold  the flick wheel (KinWheel): Chase, Guard, Return, Follow
 ##   C       the Boki's own ability, cast from wherever the Boki is. On your shoulder it is cast through you.
 ##   R       the Merge (KinMerge.press)
 ## A tap is judged on release (so a hold can be told apart); the press is polled each frame (poll),
-## the result is queued in Match.pending_input and applied on the fixed step (tap, toggle_mode).
+## the result is queued in Match.pending_input and applied on the fixed step (tap); a wheel pick waits in
+## h.inp["wheel_pick"] until apply_pick runs on the fixed step.
 ## Numbers: content/rules/boki_system.json.
 
 static func rules() -> Dictionary:
@@ -18,70 +19,133 @@ static func rules() -> Dictionary:
 static func class_ults() -> bool:
 	return bool(rules().get("class_ults", false))
 
-## The G key, polled every frame for the local player. Returns "tap", "hold" on the frame it is decided,
-## else "". `blocked`: a menu or map is up (the press is ignored).
+## The G key, polled every frame for the local player. Returns "tap" on the frame a short press is released,
+## else "". A press held past g_hold_s opens the wheel (KinWheel), and letting go picks. `blocked`: a menu
+## or map is up (the press is ignored).
 static func poll(h: Hunter, dt: float, blocked: bool) -> String:
 	if blocked:
 		h.inp["g_t"] = 0.0; h.inp["g_fired"] = true      # swallow the rest of this press: no tap on release
+		h.inp.erase("wheel")
 		return ""
 	var down := Input.is_action_pressed("throw")
 	var t := float(h.inp.get("g_t", 0.0))
 	var out := ""
+	var mouse: Vector2 = h.get_viewport().get_mouse_position()
 	if down:
 		t += dt
 		if t >= float(rules().get("g_hold_s", 0.35)) and not h.inp.get("g_fired", false):
 			h.inp["g_fired"] = true
-			out = "hold"
+			if h.kin != null and (h.kin as Kin).ready_to_fight():
+				KinWheel.open(h, mouse)
+		if KinWheel.is_open(h):
+			KinWheel.update(h, mouse, dt)
+			h.inp["fire"] = false           # a flick is not a shot
 	else:
-		if t > 0.0 and not h.inp.get("g_fired", false):
+		if KinWheel.is_open(h):
+			h.inp["wheel_pick"] = KinWheel.close(h)
+		elif t > 0.0 and not h.inp.get("g_fired", false):
 			out = "tap"
 		t = 0.0
 		h.inp["g_fired"] = false
 	h.inp["g_t"] = t
 	return out
 
-## 0..1: how far into a hold G is (for the HUD's fill ring).
+## 0..1: how far into a hold G is (for the HUD's fill ring before the wheel opens).
 static func hold_frac(h: Hunter) -> float:
 	if h.inp.get("g_fired", false):
 		return 1.0
 	return clampf(float(h.inp.get("g_t", 0.0)) / maxf(0.05, float(rules().get("g_hold_s", 0.35))), 0.0, 1.0)
 
-## G tap. Throw a shoulder Boki, recall one that is out.
+## Is it far enough from you that a tap calls it back (else a tap sends it at the cursor)?
+static func is_away(h: Hunter, k: Kin) -> bool:
+	var d := k.flat_dist(h)
+	return k.state == "returning" or d > float(rules()["follow"]["away_dist"]) or (k.cmd in ["guard", "chase"] and d > 4.0)
+
+## G tap. Sic / Call back / throw from the shoulder.
 static func tap(h: Hunter) -> void:
 	var k: Kin = h.kin
 	if k == null or h.downed or h.dropping or h.riding:
 		return
 	if KinMerge.active(h) and not h.merge_st.get("surge", false):
-		KinMerge.end(h, "throw")        # throwing your Boki ends the merge, and it goes
+		KinMerge.end(h, "throw")        # sending your Boki ends the merge, and it goes
 	if k.state == "shoulder":
 		if k.throw_cd > 0.0:
 			return
 		k.throw_to(h._ground_aim())
-	elif k.state in ["active", "flying", "returning"]:
-		if k.flat_dist(h) > float(rules().get("recall_range", 24.0)):
-			say(h, "Too far to recall: it is coming back on its own", Color("a2a8bb"))
-			h._ab_feedback("throw", "deny")
-			return
-		k.recall()
+	elif k.state in ["active", "returning"]:
+		if is_away(h, k):
+			call_back(h)
+		elif k.throw_cd <= 0.0:
+			k.throw_to(h._ground_aim())
 	elif k.state == "downed":
 		say(h, ("%s is down: run into it to pick it up" % k.rec.get("name", "Your Boki")) if not k.down_void else "%s fell: it will come round on its own" % k.rec.get("name", "Your Boki"), Color("ffb0a0"))
 
-## Hold G. "hold" (stay where thrown) or "follow" (fight beside you).
-static func toggle_mode(h: Hunter) -> void:
+## Call back: it leaps to your side, hitting what is on its path. Only within the recall range.
+static func call_back(h: Hunter) -> void:
 	var k: Kin = h.kin
-	if k == null or k.dead or k.state in ["downed", "bench", "away", "fused"]:
+	if k.flat_dist(h) > float(rules().get("recall_range", 24.0)):
+		say(h, "Too far to call back: it will hop to you on its own", Color("a2a8bb"))
+		h._ab_feedback("throw", "deny")
 		return
-	set_mode(k, "follow" if k.hold_mode == "hold" else "hold")
-	say(h, "%s: %s" % [k.rec.get("name", "Your Boki"), "hold the spot" if k.hold_mode == "hold" else "follow & fight"], k.sp["color"])
-	h.m.fx.ring(k.pos, 1.2, Color(k.sp["color"], 0.8), 0.3)
-	h.m.sfx("kin_alert" if k.hold_mode == "hold" else "kin_happy", k.pos, -8.0, Unique.voice(k.rec))
+	k.recall()
 
-static func set_mode(k: Kin, mode: String) -> void:
-	k.hold_mode = mode
-	if mode == "follow":
-		k.hold_at = Vector3.INF
-	elif k.state == "active" and k.hold_at == Vector3.INF:
-		k.hold_at = k.pos
+## The wheel pick, on the fixed step.
+static func apply_pick(h: Hunter) -> void:
+	var id := String(h.inp.get("wheel_pick", ""))
+	if id == "":
+		return
+	h.inp.erase("wheel_pick")
+	order(h, id)
+
+## One of the four orders (the wheel, bots, tests). Returns false if it could not be given.
+static func order(h: Hunter, id: String) -> bool:
+	var k: Kin = h.kin
+	if k == null or h.downed or h.dropping or h.riding:
+		return false
+	var tgt: Ent = chase_pick(h) if id == "chase" else null
+	if id == "chase" and tgt == null:
+		say(h, "Nothing to chase", Color("a2a8bb"))
+		return false
+	if KinMerge.active(h) and not h.merge_st.get("surge", false) and id != "return":
+		KinMerge.end(h, "order")
+	var ok := KinFollow.set_cmd(k, id, tgt)
+	if ok:
+		var what := {"chase": "chasing %s" % target_name(tgt), "guard": "guarding this spot", "return": "back on you", "follow": "at your side"}
+		say(h, "%s: %s" % [k.rec.get("name", "Your Boki"), what[id]], k.sp["color"])
+		h.m.fx.ring(k.pos, 1.2, Color(k.sp["color"], 0.8), 0.3)
+		h.m.sfx("kin_alert" if id in ["guard", "chase"] else "kin_happy", k.pos, -8.0, Unique.voice(k.rec))
+	return ok
+
+static func target_name(e: Ent) -> String:
+	if e == null:
+		return ""
+	if e is Hunter:
+		return (e as Hunter).pname
+	if e is Mob:
+		return String((e as Mob).md["name"])
+	if e is Kin:
+		return String(Data.KIN[(e as Kin).species]["name"])
+	return "it"
+
+## What Chase sticks to: the foe under the cursor, else the nearest one to you.
+static func chase_pick(h: Hunter) -> Ent:
+	var k: Kin = h.kin
+	var aim: Vector3 = h.inp.get("aim", h.pos)
+	var best: Ent = null
+	var bd := 1e9
+	for f in h.m.foes_of(h.team):
+		if f.dead or not f.hittable() or (f is Hunter and f.downed):
+			continue
+		if f.flat_dist(h) > float(rules()["follow"]["engage_range"]) * 2.0:
+			continue
+		var d := Vector2(f.pos.x - aim.x, f.pos.z - aim.z).length()
+		if d < 3.0:
+			d -= 100.0           # under the cursor wins over near you
+		else:
+			d = f.flat_dist(h)
+		if d < bd:
+			bd = d; best = f
+	return best
 
 ## C: the Boki's own ability at the cursor, from wherever the Boki is. Out in the field it casts where
 ## it stands (range-limited by the ability); on the shoulder (or merged) it is cast through you.

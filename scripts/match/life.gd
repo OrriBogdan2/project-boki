@@ -446,9 +446,8 @@ static func bring_back(m: Match, o: Hunter, at: Vector3, hp_frac: float, sick: b
 		# your kin was keeping out of sight; it comes straight back to you
 		if kk and not (kk as Kin).dead and (kk as Kin).state == "away":
 			var k: Kin = kk
-			k.teleport(o.pos + Vector3(0, 1.5, 0))
-			k.state = "bench" if k == o.kin2 else "shoulder"
-			if k == o.kin: k._hop_on()
+			k.teleport(o.pos + Vector3(1.0, 0, 0.7))
+			k.state = "bench" if k == o.kin2 else "active"        # it walks back out at your side
 	if o.ctrl == "bot":
 		o.ai = m.bot_brain.new_mind(m.rng, float(m.opts.get("bot_skill", m.bot_cfg.get("skill", 0.6))), m.bot_cfg)
 	m.sfx("revive", o.pos, 0.0)
@@ -480,7 +479,7 @@ static func kin_on_death(m: Match, h: Hunter, b: Dictionary) -> void:
 			continue
 		var k: Kin = kk
 		m.giant_free(k)
-		var on_you: bool = k.state in ["shoulder", "bench", "away"]
+		var on_you: bool = k.state in ["shoulder", "bench", "away"] or k.with_owner()
 		if not training and on_you and bool(m.T.get("kin_drop", false)):
 			var rec: Dictionary = k.rec.duplicate(true)
 			k.dead = true; k.visible = false

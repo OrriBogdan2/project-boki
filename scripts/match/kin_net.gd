@@ -1,23 +1,25 @@
 class_name KinNet
 extends RefCounted
-## What the Boki command system adds to the network (docs/decisions/0001, Net.VERSION 0.9.0). Everything
+## What the Boki command system adds to the network (docs/decisions/0001, 0002, Net.VERSION 0.10.0). Everything
 ## still goes through scripts/core/net.gd; the Match calls these from its snapshot and event code.
-##   - Kin snapshot: indices 19+ = [hold mode, down seconds left, rescue progress, fell in the abyss]
+##   - Kin snapshot: indices 19+ = [order (KinFollow.CMD_IDS index), down seconds left, rescue progress, fell in the abyss]
 ##   - Hunter snapshot: index 26 = the merge form worn ("" when not merged), 27 = merge seconds left
-##   - Events ["kcmd", kind, nid, x, y, z, extra]: throw, recall, merge_leap, down, scoop, round, merge
-##     (extra = the form for "merge"). The owner's game runs the rescue and the recovery timer; other
+##   - Events ["kcmd", kind, nid, x, y, z, extra]: throw (a Sic too), recall (Call back), hop (a leap to your side
+##     or onto you), cmd (a new order; extra = its id), merge_leap, down, scoop, round, merge (extra = the form),
+##     scan_start / scan_stop / scan_done (the capture beam, Capture; nid = the hunter, extra = the Boki's nid). The owner's game runs the rescue and the recovery timer; other
 ##     games get the state and play the moment.
 
 const KIN_AT := 19
 const HUNTER_AT := 26
 
 static func kin_extra(k: Kin) -> Array:
-	return [1 if k.hold_mode == "follow" else 0, snappedf(k.down_t, 0.1), snappedf(KinDowned.scoop_k(k), 0.05), 1 if k.down_void else 0]
+	return [maxi(0, KinFollow.CMD_IDS.find(k.cmd)), snappedf(k.down_t, 0.1), snappedf(KinDowned.scoop_k(k), 0.05), 1 if k.down_void else 0]
 
 static func apply_kin(k: Kin, it: Array) -> void:
 	if it.size() <= KIN_AT + 3:
 		return
-	k.hold_mode = "follow" if int(it[KIN_AT]) == 1 else "hold"
+	var ci := int(it[KIN_AT])
+	k.cmd = KinFollow.CMD_IDS[ci] if ci >= 0 and ci < KinFollow.CMD_IDS.size() else "follow"
 	k.down_t = float(it[KIN_AT + 1])
 	k.rescue_t = float(it[KIN_AT + 2]) * float(KinDowned.rules()["rescue_s"])
 	k.down_void = int(it[KIN_AT + 3]) == 1
@@ -47,11 +49,10 @@ static func decode_form(s: String) -> Dictionary:
 		"style": p[7], "word": p[8], "surge": p[9] == "1", "rider": {}, "dash": {}, "haste": 0.0, "stun": 0.0, "k": 1.0, "dur": 0.0}
 
 ## Tell the other games something happened to this Boki or hunter (only for bodies this game owns).
-static func event(m: Match, kind: String, e: Ent, at := Vector3.INF) -> void:
+static func event(m: Match, kind: String, e: Ent, at := Vector3.INF, extra := "") -> void:
 	if not m.net_on or e.remote:
 		return
 	var p: Vector3 = e.pos if at == Vector3.INF else at
-	var extra := ""
 	if kind == "merge" and e is Hunter:
 		extra = encode_form(MergeForm.of(e as Hunter))
 	m.net_event(["kcmd", kind, e.nid, snappedf(p.x, 0.01), snappedf(p.y, 0.01), snappedf(p.z, 0.01), extra])
@@ -68,8 +69,12 @@ static func on_event(m: Match, x: Array) -> void:
 		"throw":
 			m.fx.ring(at, 1.2, Color((e as Kin).sp["color"], 0.8) if e is Kin else Color.WHITE, 0.3)
 			m.sfx("throw", at, -4.0)
-		"recall", "merge_leap":
+		"recall", "merge_leap", "hop":
 			m.sfx("recall", at, -6.0)
+		"cmd":
+			m.fx.ring(at, 1.2, Color((e as Kin).sp["color"], 0.8) if e is Kin else Color.WHITE, 0.3)
+		"scan_start", "scan_stop", "scan_done":
+			Capture.on_net(m, e as Hunter, String(x[1]), String(x[6]))
 		"down":
 			m.fx.burst(at + Vector3(0, 0.4, 0), (e as Kin).sp["color"] if e is Kin else Color.WHITE, 16, 3.0)
 		"scoop", "round":

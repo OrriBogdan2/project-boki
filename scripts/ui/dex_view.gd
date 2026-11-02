@@ -1,7 +1,7 @@
 class_name DexView
 extends RefCounted
-## The Bokidex: field notes on every kind of Boki, laid out like a creature index. A grid of
-## numbered tiles (#001...): a Boki you've tamed shows in full colour, one you've only seen is a dark
+## The Field Book: field notes on every kind of Boki, laid out like a creature index. A grid of
+## numbered tiles (#001...): a Boki you've caught shows in full colour, one you've only seen is a dark
 ## silhouette, one you've never met is a "?". Each tile carries a small type badge, and a soft
 ## sparkle when you've found its shimmer form. Clicking a tile opens its page: the Boki turning on a
 ## stand, its number, name and type, a field note, its size range, the forms you've found, where it
@@ -35,7 +35,7 @@ static func type_name(t: String) -> String:
 static func type_col(t: String) -> Color:
 	return TYPES.get(t, {}).get("col", Color("a9b0bf"))
 
-## Its number in the Bokidex: the order species are listed in (Data.KIN: the starters first).
+## Its number in the Field Book: the order species are listed in (Data.KIN: the starters first).
 static func number(spk: String) -> int:
 	return Data.KIN.keys().find(spk) + 1
 
@@ -49,25 +49,25 @@ static func entry(spk: String) -> Dictionary:
 static func seen(spk: String) -> bool:
 	return bool(entry(spk).get("seen", false))
 
-static func tamed(spk: String) -> bool:
+static func caught(spk: String) -> bool:
 	return bool(entry(spk).get("caught", false))
 
-## [seen, tamed] across every species (tamed ones count as seen).
+## [seen, caught] across every species (caught ones count as seen).
 static func counts() -> Vector2i:
 	var s := 0; var t := 0
 	for spk in Data.KIN:
-		if seen(spk) or tamed(spk): s += 1
-		if tamed(spk): t += 1
+		if seen(spk) or caught(spk): s += 1
+		if caught(spk): t += 1
 	return Vector2i(s, t)
 
-## The grid, under a "Seen N · Tamed N" line. on_open(species) opens a tile's page.
+## The grid, under a "Seen N · Caught N" line. on_open(species) opens a tile's page.
 static func grid(v: VBoxContainer, tree: SceneTree, on_open: Callable) -> void:
 	Care.dex_sync()
 	demo()
 	var c := counts()
 	var head := UI.hbox(14)
 	head.add_child(UI.chip("eye", "Seen %d" % c.x, UI.INK))
-	head.add_child(UI.chip("paw", "Tamed %d" % c.y, UI.INK))
+	head.add_child(UI.chip("paw", "Caught %d" % c.y, UI.INK))
 	var hint := UI.label("Field notes on every Boki you've met. Click one to read its page.", UI.T_SMALL, UI.MUTED)
 	hint.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
@@ -83,8 +83,8 @@ static func grid(v: VBoxContainer, tree: SceneTree, on_open: Callable) -> void:
 
 ## One numbered tile.
 static func tile(spk: String, tree: SceneTree, on_open: Callable) -> Control:
-	var is_tamed := tamed(spk)
-	var is_seen := is_tamed or seen(spk)
+	var is_caught := caught(spk)
+	var is_seen := is_caught or seen(spk)
 	var t: PanelContainer
 	if is_seen:
 		var sk := spk
@@ -112,10 +112,10 @@ static func tile(spk: String, tree: SceneTree, on_open: Callable) -> Control:
 		holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		var pv := KinPortrait.view({"species": spk, "level": 5}, tree, PORTRAIT)
 		pv.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-		if not is_tamed:
-			pv.modulate = Color(0.05, 0.06, 0.1, 0.92)      # seen, not tamed: a dark silhouette
+		if not is_caught:
+			pv.modulate = Color(0.05, 0.06, 0.1, 0.92)      # seen, not caught: a dark silhouette
 		holder.add_child(pv)
-		if is_tamed and bool(entry(spk).get("shimmer", false)):
+		if is_caught and bool(entry(spk).get("shimmer", false)):
 			var sp := Sparkle.new()
 			sp.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 			sp.tooltip_text = "Shimmer form found"
@@ -124,13 +124,13 @@ static func tile(spk: String, tree: SceneTree, on_open: Callable) -> Control:
 	else:
 		var q := UI.title("?", 40, Color(1, 1, 1, 0.16))
 		pic.add_child(q)
-	var name_l := UI.label(String(Data.KIN[spk]["name"]) if is_seen else "???", UI.T_SMALL, UI.INK if is_tamed else UI.MUTED, UI.semi)
+	var name_l := UI.label(String(Data.KIN[spk]["name"]) if is_seen else "???", UI.T_SMALL, UI.INK if is_caught else UI.MUTED, UI.semi)
 	name_l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	name_l.clip_text = true
 	col.add_child(name_l)
 	return t
 
-## Screenshots only (--dex-demo, never saved): one species seen but not tamed, and a shimmer found.
+## Screenshots only (--dex-demo, never saved): one species seen but not caught, and a shimmer found.
 static func demo() -> void:
 	if not "--dex-demo" in OS.get_cmdline_user_args():
 		return
@@ -139,7 +139,7 @@ static func demo() -> void:
 	Save.d["dex"] = dx
 	var ids: Array = Data.KIN.keys()
 	for spk in ids:
-		if not tamed(spk) and not dx.has(spk):
+		if not caught(spk) and not dx.has(spk):
 			dx[spk] = {"seen": true, "caught": false, "forms": [], "shimmer": false, "mutations": []}
 			break
 	if not ids.is_empty() and dx.has(ids[1]):
@@ -151,7 +151,7 @@ static func demo() -> void:
 static func detail(v: VBoxContainer, spk: String, tree: SceneTree) -> void:
 	var sp: Dictionary = Data.KIN[spk]
 	var e := entry(spk)
-	var is_tamed := tamed(spk)
+	var is_caught := caught(spk)
 	var row := UI.hbox(UI.GAP_BIG + 6)
 	v.add_child(row)
 	# the Boki turning on its stand (a silhouette if you've only seen it)
@@ -160,12 +160,12 @@ static func detail(v: VBoxContainer, spk: String, tree: SceneTree) -> void:
 	stage.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	row.add_child(stage)
 	if KinPortrait.available():
-		var spin := Spinner.make({"species": spk, "level": 5, "shimmer": false}, not is_tamed)
+		var spin := Spinner.make({"species": spk, "level": 5, "shimmer": false}, not is_caught)
 		stage.add_child(spin)
 	else:
 		var dc := CenterContainer.new(); stage.add_child(dc)
 		var d := KinPortrait.view({"species": spk}, tree, 160)
-		if not is_tamed: d.modulate = Color(0.05, 0.06, 0.1, 0.92)
+		if not is_caught: d.modulate = Color(0.05, 0.06, 0.1, 0.92)
 		dc.add_child(d)
 	var info := UI.vbox(7)
 	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -183,7 +183,7 @@ static func detail(v: VBoxContainer, spk: String, tree: SceneTree) -> void:
 	th.add_child(TypeIcon.new(t, 18.0))
 	th.add_child(UI.label("%s type" % type_name(t), UI.T_SMALL, UI.INK, UI.semi))
 	trow.add_child(tchip)
-	trow.add_child(UI.tag("Tamed" if is_tamed else "Seen", UI.GOOD if is_tamed else UI.MUTED))
+	trow.add_child(UI.tag("Caught" if is_caught else "Seen", UI.GOOD if is_caught else UI.MUTED))
 	info.add_child(trow)
 	var note := UI.para(_field_note(spk), UI.T_SMALL + 1, UI.INK)
 	note.custom_minimum_size.x = 360
@@ -200,7 +200,7 @@ static func detail(v: VBoxContainer, spk: String, tree: SceneTree) -> void:
 		var fc := UI.vbox(2)
 		fc.custom_minimum_size.x = 64
 		var fp := KinPortrait.view(_form_rec(spk, String(fname)), tree, 46.0)
-		if not is_tamed: fp.modulate = Color(0.05, 0.06, 0.1, 0.92)
+		if not is_caught: fp.modulate = Color(0.05, 0.06, 0.1, 0.92)
 		var fcc := CenterContainer.new(); fcc.add_child(fp)
 		fc.add_child(fcc)
 		var fn := UI.label(String(fname), 11, UI.MUTED)
@@ -275,7 +275,7 @@ static func _kg(x: float) -> String:
 	return ("%.1f" % x) if x < 10.0 else str(int(round(x)))
 
 ## Where it lives: wild across the islands, or only from a lair boss's Rare Egg; and where you've
-## tamed yours.
+## caught yours.
 static func _habitat(spk: String) -> String:
 	var out := ""
 	if Data.is_rare(spk):
@@ -294,7 +294,10 @@ static func _habitat(spk: String) -> String:
 		var pl := String(w.get("island", w.get("map", "")))
 		if pl != "" and not places.has(pl): places.append(pl)
 	if not places.is_empty():
-		out += " You tamed yours at %s." % ", ".join(places.slice(0, 2))
+		out += " You caught yours at %s." % ", ".join(places.slice(0, 2))
+	var sighted: Array = FieldBook.places(spk)
+	if not sighted.is_empty():
+		out += " Last seen at %s." % ", ".join(sighted.slice(-2))      # (logged on sight, newest last)
 	return out
 
 ## A look-only record wearing a found form (from its name: the root plus an affinity's suffix).
@@ -385,7 +388,7 @@ class Sparkle extends Control:
 			draw_colored_polygon(PackedVector2Array([p + Vector2(0, -r * 1.6), p + Vector2(r * 0.35, 0), p + Vector2(0, r * 1.6), p + Vector2(-r * 0.35, 0)]), col)
 			draw_colored_polygon(PackedVector2Array([p + Vector2(-r * 1.6, 0), p + Vector2(0, r * 0.35), p + Vector2(r * 1.6, 0), p + Vector2(0, -r * 0.35)]), col)
 
-## A Boki turning slowly on a little stand, live (for the Bokidex page).
+## A Boki turning slowly on a little stand, live (for the Field Book page).
 class Spinner extends SubViewportContainer:
 	var turn: Node3D
 	static func make(rec: Dictionary, silhouette := false) -> Spinner:
