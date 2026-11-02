@@ -5,7 +5,8 @@ extends RefCounted
 ##      and the order bloom > meadow > gloom > storm and ember > frost (the shares are printed)
 ##   2. cover comes as patches (no single tufts), never on stairs, bridges or their edges, landing drop
 ##      circles, or the foot of an exit
-##   3. in the bush biomes every extraction point has a patch in sight
+##   3. in the bush biomes every extraction point has a patch in sight, and chests and camps in bloom
+##      and meadow have a patch beside them (ambush play)
 ##   4. cover never closes a path: from every landing a bush-free walk reaches each chest, camp and exit
 ##      on its island, and the tile A* still finds a way
 ##   5. Shrublings have somewhere to live: each bush biome has spots with 3+ patches in sprint range
@@ -32,6 +33,7 @@ func run(main_node: Node) -> void:
 		_shares(w, sd, T)
 		_placement(w, sd)
 		_sight(w, sd)
+		_ambush(w, sd)
 		_paths(w, sd)
 		_homes(w, sd)
 		w.free()
@@ -145,6 +147,26 @@ func _sight(w: World, sd: int) -> void:
 					if dd <= 14.0 and w.los(Vector3(e.x, e.y + 1.0, e.z), Vector3(t.x + 0.5, e.y + 1.0, t.y + 0.5), e.y + 1.0): nlos += 1
 			missing.append("%s at (%d,%d) %s nearest %.1f m, %d in sight" % [ed["kind"], e.x, e.z, b, nd, nlos])
 	ok("seed %d: a patch in sight of each of the %d exits in bush biomes" % [sd, seen_n], missing.is_empty() and seen_n >= 6, ", ".join(missing))
+
+## Ambush play: in the bush biomes most chests and camps have a patch beside them (within 7 m).
+func _ambush(w: World, sd: int) -> void:
+	var spots: Array = []
+	for c in w.chest_spots: spots.append(c["pos"])
+	for c in w.camp_spots: spots.append(c["pos"])
+	var tot := 0; var near := 0
+	for p in spots:
+		if not ["bloom", "meadow"].has(w.biome_at(p.x, p.z)): continue
+		tot += 1
+		var hit := false
+		for dz in range(-7, 8):
+			for dx in range(-7, 8):
+				if dx * dx + dz * dz > 49: continue
+				var x := int(floor(p.x)) + dx; var z := int(floor(p.z)) + dz
+				if w.inb(x, z) and w.bush.has(w.idx(x, z)):
+					hit = true; break
+			if hit: break
+		if hit: near += 1
+	ok("seed %d: bloom/meadow chests and camps with cover beside them" % sd, tot > 0 and near * 4 >= tot * 3, "%d of %d" % [near, tot])
 
 # ------------------------------------------------------------------ 4. paths stay open
 func _paths(w: World, sd: int) -> void:

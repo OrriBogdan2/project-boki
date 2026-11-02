@@ -209,6 +209,12 @@ func _shrubling() -> void:
 	P.teleport(_ground_near(m, S.pos + Vector3(30.0, 0, 0)))
 	step(m, 4.0)
 	ok("Grounded: it can no longer dive", S.ss == "flee", S.ss)
+	# a grab (the shared yank every hook and pull uses) drags it to the hunter
+	P.teleport(_ground_near(m, S.pos + Vector3(7.0, 0, 0)))
+	var to := _ground_near(m, S.pos + Vector3(5.5, 0, 0))
+	m.verbs.yank(S, to, 0.4)
+	step(m, 0.45)
+	ok("a grab drags it in", Vector2(S.pos.x - to.x, S.pos.z - to.z).length() < 1.2, "%.2f m off" % Vector2(S.pos.x - to.x, S.pos.z - to.z).length())
 	# a hit while disguised gives it away; killing it drops the key
 	S.hp = S.max_hp
 	var np := m.pickups.filter(func(p): return String(p["kind"]) == "ckey").size()
