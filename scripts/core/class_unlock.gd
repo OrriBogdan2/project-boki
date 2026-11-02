@@ -139,10 +139,10 @@ static func level_needed(id: String) -> int:
 static func earned(id: String) -> bool:
 	return bool(goal_progress(id)["done"]) and level() >= level_needed(id)
 
-## "locked" (nothing done), "progress" (some of it done), "open".
+## "locked" (goal not started), "progress" (some of the goal done, or done and waiting on the level), "open".
 static func status(id: String) -> String:
 	if is_open(id): return "open"
-	if earned(id) or float(goal_progress(id)["frac"]) > 0.0 or level() > 1: return "progress"
+	if float(goal_progress(id)["frac"]) > 0.0: return "progress"
 	return "locked"
 
 ## What it takes, in one line, for a locked class's card.

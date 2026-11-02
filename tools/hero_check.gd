@@ -17,6 +17,7 @@ func run(main: Node) -> void:
 	var k := Save.new_kin("zapple", "Pip"); d["roster"].append(k); d["active"] = k["uid"]
 	d["tutorial"] = {"hatched": true, "intro": true, "home": true, "day1_done": true}
 	d["cls"] = "medium"; d["arch"] = "gunslinger"
+	d["classes"] = ClassUnlock.legacy()      # (this check is about the picker itself: an old save, every class open; the locked picker is --class-unlock-check)
 	Save.d = d
 	var hm = await main._hb_home()
 	for i in 30: await tree.process_frame
@@ -34,8 +35,8 @@ func run(main: Node) -> void:
 	var cards: Array = grid.get_children()
 	var archs: Array = cards.map(func(c): return String(c.get_meta("arch", "")))
 	ok(cards.size() == Arch.ids().size() and archs.has("thief") and archs.has("bulwark") and archs.has("dolm") and archs.has("tender"), "every hero has a card: %s" % str(archs))
-	ok(cards.all(func(c): return String(c.tooltip_text).contains("Dash:") and String(c.tooltip_text).contains("class")), "each shows its weight class and kit on hover")
-	ok(Arch.ids().all(func(a): return HeroGrid.unlocked(a)), "everything is unlocked for now (HeroGrid.unlocked is the hook for the unlock system)")
+	ok(cards.all(func(c): return String(c.tooltip_text).contains("Dash:") and String(c.tooltip_text).contains("weight")), "each shows its weight and kit on hover")
+	ok(Arch.ids().all(func(a): return HeroGrid.unlocked(a)), "an old save has every class open (new saves unlock through play: --class-unlock-check)")
 	for i in 20: await tree.process_frame
 	if shot != "": tree.root.get_texture().get_image().save_png(shot + "/hero_panel.png")
 	if shot != "":      # the rest of the grid, scrolled into view

@@ -18,6 +18,7 @@ const CHECKS := {
 	"--archer-combo-check": ["res://tools/archer_bulwark_combo_check.gd", "hero_check", null],
 	"--bulwark-combo-check": ["res://tools/archer_bulwark_combo_check.gd", "hero_check", null],
 	"--music-leave-check": ["res://tools/music_leave_check.gd", "music_leave_check", null],
+	"--class-unlock-check": ["res://tools/class_unlock_check.gd", "class_unlock_check", null],
 	"--hero-combo-check": ["res://tools/archer_bulwark_combo_check.gd", "hero_check", null],
 }
 
