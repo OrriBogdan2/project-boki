@@ -83,8 +83,8 @@ const MOVES := {
 	# lunging after it, the impact the frame after, then 0.4 s to recover
 	"bul_smash": {"keys": [
 		[0.0, {"y": 0.85, "p": 0.18, "lift": -0.1, "sq": 0.16, "gp": 0.3, "lw": 1.0, "legs": [0.65, -0.95, -0.5, -0.55], "hw": 1.0, "fl": Vector3(-0.05, 0.14, -0.45)}],
-		[0.08, {"y": -0.65, "p": -0.7, "lift": -0.14, "sq": 0.45, "gp": -0.8, "lw": 1.0, "legs": [1.15, -1.5, -0.45, -0.9]}],
-		[0.16, {"y": -0.55, "p": -0.6, "lift": -0.12, "sq": 0.3, "gp": -0.7, "lw": 1.0, "legs": [1.1, -1.4, -0.4, -0.85]}],
+		[0.08, {"y": -0.65, "p": -0.35, "lift": -0.14, "sq": 0.45, "gp": -0.9, "lw": 1.0, "legs": [1.15, -1.5, -0.45, -0.9]}],
+		[0.16, {"y": -0.55, "p": -0.3, "lift": -0.12, "sq": 0.3, "gp": -0.8, "lw": 1.0, "legs": [1.1, -1.4, -0.4, -0.85]}],
 		[0.55, {}]]},
 	# the aegis raised: braced low behind it, the shield arm out front (holds while it's up)
 	"bul_guard": {"hold": true, "keys": [
