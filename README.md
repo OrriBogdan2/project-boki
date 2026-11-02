@@ -2,7 +2,7 @@
 
 Review shots for each hero: kit card, each ability, the payoff, animation frame strips and a neutral full-body portrait. PNGs are downscaled to at most 1280 px wide. Captions come from the shot manifests.
 
-Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-tender), [Tamsin](#tamsin-rimewright), [Dredge](#dredge-dredge), [Ashwick](#ashwick-ashwick), [Dolm](#dolm-dolm), [Ostra](#ostra-ostra), [Archer](#archer-archer), [Bulwark](#bulwark-bulwark), [Thief](#thief-thief), [Juggernaut](#juggernaut-juggernaut), [Farm building](#farm-building-farmbuild), [classes](#classes-classes), [aimkit](#aimkit-aimkit), [moosh-moosh/v2](#moosh-moosh/v2-moosh-moosh/v2), [moosh-moosh/v2/anim](#moosh-moosh/v2/anim-moosh-moosh/v2/anim), [tamsin/v2](#tamsin/v2-tamsin/v2), [tamsin/v2/anim](#tamsin/v2/anim-tamsin/v2/anim), [dancer/v2](#dancer/v2-dancer/v2), [dancer/v2/before](#dancer/v2/before-dancer/v2/before), [zedran/v2](#zedran/v2-zedran/v2), [zedran/v2/before](#zedran/v2/before-zedran/v2/before), [dancer/v2/anim](#dancer/v2/anim-dancer/v2/anim), [zedran/v2/anim](#zedran/v2/anim-zedran/v2/anim), [linwick/v2](#linwick/v2-linwick/v2), [linwick/v2/anim](#linwick/v2/anim-linwick/v2/anim), [linwick/v2/before](#linwick/v2/before-linwick/v2/before), [linwick/v2/after](#linwick/v2/after-linwick/v2/after), [dredge/v2](#dredge/v2-dredge/v2), [dredge/v2/anim](#dredge/v2/anim-dredge/v2/anim), [dredge/v2/before](#dredge/v2/before-dredge/v2/before), [dredge/v2/after](#dredge/v2/after-dredge/v2/after), [pin/v2](#pin/v2-pin/v2), [bjorn/v2](#bjorn/v2-bjorn/v2), [pin/v2/anim](#pin/v2/anim-pin/v2/anim), [bjorn/v2/anim](#bjorn/v2/anim-bjorn/v2/anim), [vireo/v2](#vireo/v2-vireo/v2), [vireo/v2/anim](#vireo/v2/anim-vireo/v2/anim), [venator/v2/anim](#venator/v2/anim-venator/v2/anim), [venator/v2](#venator/v2-venator/v2)
+Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-tender), [Tamsin](#tamsin-rimewright), [Dredge](#dredge-dredge), [Ashwick](#ashwick-ashwick), [Dolm](#dolm-dolm), [Ostra](#ostra-ostra), [Archer](#archer-archer), [Bulwark](#bulwark-bulwark), [Thief](#thief-thief), [Juggernaut](#juggernaut-juggernaut), [Farm building](#farm-building-farmbuild), [classes](#classes-classes), [aimkit](#aimkit-aimkit), [moosh-moosh/v2](#moosh-moosh/v2-moosh-moosh/v2), [moosh-moosh/v2/anim](#moosh-moosh/v2/anim-moosh-moosh/v2/anim), [tamsin/v2](#tamsin/v2-tamsin/v2), [tamsin/v2/anim](#tamsin/v2/anim-tamsin/v2/anim), [dancer/v2](#dancer/v2-dancer/v2), [dancer/v2/before](#dancer/v2/before-dancer/v2/before), [zedran/v2](#zedran/v2-zedran/v2), [zedran/v2/before](#zedran/v2/before-zedran/v2/before), [dancer/v2/anim](#dancer/v2/anim-dancer/v2/anim), [zedran/v2/anim](#zedran/v2/anim-zedran/v2/anim), [linwick/v2](#linwick/v2-linwick/v2), [linwick/v2/anim](#linwick/v2/anim-linwick/v2/anim), [linwick/v2/before](#linwick/v2/before-linwick/v2/before), [linwick/v2/after](#linwick/v2/after-linwick/v2/after), [dredge/v2](#dredge/v2-dredge/v2), [dredge/v2/anim](#dredge/v2/anim-dredge/v2/anim), [dredge/v2/before](#dredge/v2/before-dredge/v2/before), [dredge/v2/after](#dredge/v2/after-dredge/v2/after), [pin/v2](#pin/v2-pin/v2), [bjorn/v2](#bjorn/v2-bjorn/v2), [pin/v2/anim](#pin/v2/anim-pin/v2/anim), [bjorn/v2/anim](#bjorn/v2/anim-bjorn/v2/anim), [vireo/v2](#vireo/v2-vireo/v2), [vireo/v2/anim](#vireo/v2/anim-vireo/v2/anim), [venator/v2/anim](#venator/v2/anim-venator/v2/anim), [venator/v2](#venator/v2-venator/v2), [breah/v2](#breah/v2-breah/v2), [ostra/v2](#ostra/v2-ostra/v2), [breah/v2/anim](#breah/v2/anim-breah/v2/anim), [ostra/v2/anim](#ostra/v2/anim-ostra/v2/anim)
 
 ## Vireo (mage)
 
@@ -1853,3 +1853,275 @@ Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-t
 **BEFORE (origin/main) Gap 4 RMB aim lane: before, thrown on the press with no lane; after, a held lane with an arrow tip and the foe in it marked**
 
 ![BEFORE (origin/main) Gap 4 RMB aim lane: before, thrown on the press with no lane; after, a held lane with an arrow tip and the foe in it marked](venator/v2/before/venator/rmb_aim.png)
+
+## breah/v2 (breah/v2)
+
+**Kit card in the new format (role + one line per slot)**
+
+![Kit card in the new format (role + one line per slot)](breah/v2/after_pair_card_dolm.png)
+
+**AFTER gap 1: punch sweeps the row, flaming rocks in a stream, ROCKFALL**
+
+![AFTER gap 1: punch sweeps the row, flaming rocks in a stream, ROCKFALL](breah/v2/after_pair_dolm_pay.png)
+
+**AFTER: curved basalt-column row 2.2m ahead, standable**
+
+![AFTER: curved basalt-column row 2.2m ahead, standable](breah/v2/after_pair_dolm_rocks.png)
+
+**AFTER gap 2/3: hop slam with the big circle and sweet spot**
+
+![AFTER gap 2/3: hop slam with the big circle and sweet spot](breah/v2/after_pair_dolm_slam.png)
+
+**BEFORE gap 1: punch launches rocks (single volley, tan shots)**
+
+![BEFORE gap 1: punch launches rocks (single volley, tan shots)](breah/v2/before_pair_dolm_pay.png)
+
+**BEFORE: Stone Row, straight row of tan boxes 3m ahead**
+
+![BEFORE: Stone Row, straight row of tan boxes 3m ahead](breah/v2/before_pair_dolm_rocks.png)
+
+**BEFORE gap 2/3: slam 2.4m ahead, no charge circle**
+
+![BEFORE gap 2/3: slam 2.4m ahead, no charge circle](breah/v2/before_pair_dolm_slam.png)
+
+**Rubble Rush end: the rock rolls on and bursts, slow**
+
+![Rubble Rush end: the rock rolls on and bursts, slow](breah/v2/breah_dash_hit.png)
+
+**Rubble Rush: the rock riding ahead, shoulder-first barrel**
+
+![Rubble Rush: the rock riding ahead, shoulder-first barrel](breah/v2/breah_dash_key.png)
+
+**Jump while charging: the leap forward, the circle comes along**
+
+![Jump while charging: the leap forward, the circle comes along](breah/v2/breah_leap_key.png)
+
+**Punch while charging: the lunge forward**
+
+![Punch while charging: the lunge forward](breah/v2/breah_lunge_key.png)
+
+**Punch impact: the dummy thrown back, molten sparks**
+
+![Punch impact: the dummy thrown back, molten sparks](breah/v2/breah_punch_hit.png)
+
+**Punch release: the straight drive, stretched on the hit**
+
+![Punch release: the straight drive, stretched on the hit](breah/v2/breah_punch_key.png)
+
+**Punch hold: pale lane with chevrons toward the cursor, cursor charge ring, fist glowing**
+
+![Punch hold: pale lane with chevrons toward the cursor, cursor charge ring, fist glowing](breah/v2/breah_punch_tele.png)
+
+**Stone Row up: Breah standing on top of a rock (verticality)**
+
+![Stone Row up: Breah standing on top of a rock (verticality)](breah/v2/breah_row_hit.png)
+
+**Stone Row: basalt columns erupting, palms heaved up**
+
+![Stone Row: basalt columns erupting, palms heaved up](breah/v2/breah_row_key.png)
+
+**Stone Row tell: red-orange flash where each rock will rise (0.2s)**
+
+![Stone Row tell: red-orange flash where each rock will rise (0.2s)](breah/v2/breah_row_tele.png)
+
+**Tremor Sense find: molten ring on the dummy, palm to the ground**
+
+![Tremor Sense find: molten ring on the dummy, palm to the ground](breah/v2/breah_sense_hit.png)
+
+**Tremor Sense: the pale cone while sneaking (widened)**
+
+![Tremor Sense: the pale cone while sneaking (widened)](breah/v2/breah_sense_tele.png)
+
+**Quakefall impact: starburst, stun stars, scorched crater**
+
+![Quakefall impact: starburst, stun stars, scorched crater](breah/v2/breah_slam_hit.png)
+
+**Quakefall release: the hop up, fists overhead**
+
+![Quakefall release: the hop up, fists overhead](breah/v2/breah_slam_key.png)
+
+**Quakefall charge: red circle a hop ahead for everyone, sweet spot growing, crouch**
+
+![Quakefall charge: red circle a hop ahead for everyone, sweet spot growing, crouch](breah/v2/breah_slam_tele.png)
+
+**Boulder impact: burst with a red ground ring, splash**
+
+![Boulder impact: burst with a red ground ring, splash](breah/v2/breah_throw_hit.png)
+
+**Boulder (tap): the underarm hurl, molten boulder leaving the fist**
+
+![Boulder (tap): the underarm hurl, molten boulder leaving the fist](breah/v2/breah_throw_key.png)
+
+**Breah portrait with the basalt Rubble Fists**
+
+![Breah portrait with the basalt Rubble Fists](breah/v2/portrait_dolm.png)
+
+## ostra/v2 (ostra/v2)
+
+**Kit card in the new format (role + one line per slot)**
+
+![Kit card in the new format (role + one line per slot)](ostra/v2/after_pair_card_ostra.png)
+
+**AFTER gap 4: rails and the dark-orb wind-up (single bundle follows)**
+
+![AFTER gap 4: rails and the dark-orb wind-up (single bundle follows)](ostra/v2/after_pair_ostra_fan.png)
+
+**AFTER gap 1/2: violet orb to full range, permanent aim line**
+
+![AFTER gap 1/2: violet orb to full range, permanent aim line](ostra/v2/after_pair_ostra_orb.png)
+
+**AFTER gap 3: high 1.7s lob, both ends shown, sigil filling**
+
+![AFTER gap 3: high 1.7s lob, both ends shown, sigil filling](ostra/v2/after_pair_ostra_trade.png)
+
+**BEFORE gap 4: three-shard fan, no wind-up**
+
+![BEFORE gap 4: three-shard fan, no wind-up](ostra/v2/before_pair_ostra_fan.png)
+
+**BEFORE gap 1: drifting teal orb, no reticle**
+
+![BEFORE gap 1: drifting teal orb, no reticle](ostra/v2/before_pair_ostra_orb.png)
+
+**BEFORE gap 3: 1.0s lob, low arc, landing ring only**
+
+![BEFORE gap 3: 1.0s lob, low arc, landing ring only](ostra/v2/before_pair_ostra_trade.png)
+
+**Ostra reticle: the permanent thin aim line with arrowhead**
+
+![Ostra reticle: the permanent thin aim line with arrowhead](ostra/v2/ostra_aim_tele.png)
+
+**Settled orb impact: ring flash, slow**
+
+![Settled orb impact: ring flash, slow](ostra/v2/ostra_hot_hit.png)
+
+**Settled orb: long blue-violet bolt, recoil**
+
+![Settled orb: long blue-violet bolt, recoil](ostra/v2/ostra_hot_key.png)
+
+**Orb impact past the cursor (full range)**
+
+![Orb impact past the cursor (full range)](ostra/v2/ostra_orb_hit.png)
+
+**Orb: the hand flick, violet teardrop leaving**
+
+![Orb: the hand flick, violet teardrop leaving](ostra/v2/ostra_orb_key.png)
+
+**Brimseed pop: implosion**
+
+![Brimseed pop: implosion](ostra/v2/ostra_seed_hit.png)
+
+**Brimseed near full: the light column**
+
+![Brimseed near full: the light column](ostra/v2/ostra_seed_key.png)
+
+**Brimseed: the growing drum and its ring (everyone sees it)**
+
+![Brimseed: the growing drum and its ring (everyone sees it)](ostra/v2/ostra_seed_tele.png)
+
+**Shard Snap impact: STUNNED, stars over the dummy**
+
+![Shard Snap impact: STUNNED, stars over the dummy](ostra/v2/ostra_snap_hit.png)
+
+**Shard Snap release: the crystal-spear bundle in flight**
+
+![Shard Snap release: the crystal-spear bundle in flight](ostra/v2/ostra_snap_key.png)
+
+**Shard Snap wind-up: two rails, black orb at the hand**
+
+![Shard Snap wind-up: two rails, black orb at the hand](ostra/v2/ostra_snap_tele.png)
+
+**Lantern Trade arrival: swap flash and arrival squash**
+
+![Lantern Trade arrival: swap flash and arrival squash](ostra/v2/ostra_swap_hit.png)
+
+**Lantern Trade: the high lob, sigil filling at the landing**
+
+![Lantern Trade: the high lob, sigil filling at the landing](ostra/v2/ostra_swap_key.png)
+
+**Lantern Trade aim (Shift held): both ends, landing ring at the cursor**
+
+![Lantern Trade aim (Shift held): both ends, landing ring at the cursor](ostra/v2/ostra_swap_tele.png)
+
+**Swollen: the pink sphere, the empower spin**
+
+![Swollen: the pink sphere, the empower spin](ostra/v2/ostra_swollen_key.png)
+
+**Ostra portrait with the caged void Tether Lantern**
+
+![Ostra portrait with the caged void Tether Lantern](ostra/v2/portrait_ostra.png)
+
+## breah/v2/anim (breah/v2/anim)
+
+**Rubble Rush strip: stamp, barrel, braced, squash**
+
+![Rubble Rush strip: stamp, barrel, braced, squash](breah/v2/anim/anim/br_dash.png)
+
+**Air Quakefall strip: fists up, dive, landing smash**
+
+![Air Quakefall strip: fists up, dive, landing smash](breah/v2/anim/anim/br_dive.png)
+
+**Base dash variant strip: heavy shove, lumber, landing squash**
+
+![Base dash variant strip: heavy shove, lumber, landing squash](breah/v2/anim/anim/br_exdash.png)
+
+**Charge-leap strip: crouch, tuck, airborne, fists up**
+
+![Charge-leap strip: crouch, tuck, airborne, fists up](breah/v2/anim/anim/br_leap.png)
+
+**Charge-lunge strip: crouch, drive, back to crouch**
+
+![Charge-lunge strip: crouch, drive, back to crouch](breah/v2/anim/anim/br_lunge.png)
+
+**Punch strip: wind, full wind, drive, overshoot, recover**
+
+![Punch strip: wind, full wind, drive, overshoot, recover](breah/v2/anim/anim/br_punch.png)
+
+**Stone Row strip: stomp, palms down, heave up, settle**
+
+![Stone Row strip: stomp, palms down, heave up, settle](breah/v2/anim/anim/br_raise.png)
+
+**Tremor Sense strip: crouch, palm to ground, head cocked**
+
+![Tremor Sense strip: crouch, palm to ground, head cocked](breah/v2/anim/anim/br_sense.png)
+
+**Quakefall strip: crouch, full charge, hop, smash, settle**
+
+![Quakefall strip: crouch, full charge, hop, smash, settle](breah/v2/anim/anim/br_slam.png)
+
+**Boulder strip: dip, hurl, stretch, settle**
+
+![Boulder strip: dip, hurl, stretch, settle](breah/v2/anim/anim/br_throw.png)
+
+## ostra/v2/anim (ostra/v2/anim)
+
+**Trade arrival strip: stretched, squash, arms wide, settle**
+
+![Trade arrival strip: stretched, squash, arms wide, settle](ostra/v2/anim/anim/os_arrive.png)
+
+**Swollen strip: crouch, lift, spin, land**
+
+![Swollen strip: crouch, lift, spin, land](ostra/v2/anim/anim/os_empower.png)
+
+**Orb strip: flick back, release, recover**
+
+![Orb strip: flick back, release, recover](ostra/v2/anim/anim/os_orb.png)
+
+**Settled bolt strip: draw, fling, recoil, settle**
+
+![Settled bolt strip: draw, fling, recoil, settle](ostra/v2/anim/anim/os_orb_hot.png)
+
+**Pop strip: clench, fling open, settle**
+
+![Pop strip: clench, fling open, settle](ostra/v2/anim/anim/os_pop.png)
+
+**Brimseed strip: raise, palm down, release**
+
+![Brimseed strip: raise, palm down, release](ostra/v2/anim/anim/os_seed.png)
+
+**Shard Snap strip: gather, dark orb, thrust, recoil**
+
+![Shard Snap strip: gather, dark orb, thrust, recoil](ostra/v2/anim/anim/os_snap.png)
+
+**Lantern Trade strip: aim hold, dip, lob high, follow-through**
+
+![Lantern Trade strip: aim hold, dip, lob high, follow-through](ostra/v2/anim/anim/os_swap.png)
