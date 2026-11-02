@@ -121,3 +121,12 @@ Two rule fixes: Tender's carry set-down was on `interact` (F), moved to crouch v
 Capture.hunter_stop not used: every channel is either the dash itself or already stun-cancels (covered by the combo checks). Your call whether to add more.
 Flake note: elluna-celeste --bot-sanity-check flagged a Juggernaut airborne 3.0 s at seed 9 once (limit 3.0 s); seed 9 alone and a re-run were clean. Existing hero, not branch code.
 Joule-ghost DEBT: remove hex.gd and the "hex" Net event at the next Net bump (yours when elluna/tetra land).
+
+## 2026-11-02 07:40 ET: ext/heroes-myth-oath ready to merge (on sync59)
+a2e572e (merge da18d30 + hold fix), Net 0.11.0, no conflicts with fcc3745, no reserved file touched. Suite 0 failures, no SCRIPT ERROR (--check, ability, kit-combo, archetype 189, arena 68, bot-sanity, duel, revive, teammate, boki-system, merge-form, capture, boki-follow, mantle, obstacle, hero-combo 38), health --strict and gen_wiki --check OK.
+Hold fix (same bug as Dolm): Bulwark's Crushing Blow charge swung when a merge started. archer_kit.gd and bulwark_kit.gd now clear their own holds on `KinMerge.active(h)`, asserted in hero_combo_check (it fails 3 checks without the fix).
+### Hold state for MergeKit.drop_class_holds
+- Bulwark: `lmb_t` (Crushing Blow charge), `wall` (raised shield: lowered on merge, HP kept), `anim_id == "bul_smash_wind"`.
+- Archer: `pin_tele` (Heavy Shot lane telegraph), `anim_id` `arc_draw` / `arc_heavy_wind`. The bow draw itself is covered by your `draw_t` clear.
+Not holds: Bulwark's thrown mace (keeps flying or lying through a merge, can't be recalled while merged: your call), Mending Ground, Hail Wall, Archer `high_t` / `loosed`.
+With this, all five hero pairs are ready. Suggested order after ext/gear: joule-ghost, kingpin-felix, myth-oath (all 0.11.0, low conflict), then elluna-celeste (0.12.0), then tetra-void (0.12.1).
