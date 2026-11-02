@@ -72,9 +72,10 @@ func col_of(sd: Dictionary) -> Color: return Color(String(sd.get("col", "#ffffff
 func rank(slot: String) -> int:
 	return h.ability_level(slot)
 
-## +15% damage per rank (Effects.level_k) on top of the hunter's own damage multiplier.
+## +15% damage per rank (Effects.level_k) on top of the hunter's own damage multiplier and the
+## ability power their level gives (LevelGrowth.ap).
 func power(slot: String) -> float:
-	return m.dmg_mult(h) * Effects.level_k({"level": rank(slot)})
+	return m.dmg_mult(h) * Effects.level_k({"level": rank(slot)}) * LevelGrowth.ap(h)
 
 func cd_k(slot: String) -> float:
 	return h.rank_cd_k(slot)
@@ -688,6 +689,31 @@ func slot_info(slot: String) -> Dictionary:
 func e_recastable() -> bool: return false
 var anim_id := ""              # the kit move playing on the hunter (HunterAnim.KMOVES), its start
 var anim_at := -9.0
+
+## The kit's full-body move on the wire (Net 0.16.0): the move id and its age in seconds, after the
+## state array after KinNet.hunter_extra (26-30), at index NET_MOVE_AT. Empty id: nothing playing (an expired move is not sent).
+const NET_MOVE_AT := 31
+const NET_MOVE_LIFE := 3.0     # seconds a move is still worth sending (the longest is about 2.5s)
+
+static func net_move(h: Hunter) -> Array:
+	var k: ArchKit = h.ak
+	if k == null or k.anim_id == "" or h.m.time - k.anim_at > NET_MOVE_LIFE:
+		return ["", 0.0]
+	return [k.anim_id, snappedf(h.m.time - k.anim_at, 0.05)]
+
+## A remote hunter's move starts when the id changes (or the sender's clock says it restarted), then plays
+## on locally like any kit move; old hosts send nothing and the hunter just keeps its weapon poses.
+static func apply_net_move(h: Hunter, it: Array) -> void:
+	if h.ak == null or it.size() <= NET_MOVE_AT + 1:
+		return
+	var id := String(it[NET_MOVE_AT])
+	if id == "":
+		return
+	var age := float(it[NET_MOVE_AT + 1])
+	var k: ArchKit = h.ak
+	if k.anim_id != id or absf((h.m.time - k.anim_at) - age) > 0.3:
+		k.anim_id = id
+		k.anim_at = h.m.time - age
 
 ## Plays one of the kit's full-body moves on the hunter (anticipation, key pose, recovery).
 func play(move: String) -> void:
