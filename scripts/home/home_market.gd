@@ -5,6 +5,7 @@ extends RefCounted
 ## (its "Boki" and "Exchange" tabs) and from --open=pens / --open=exchange. home.gd owns the panel.
 
 var h                         # the Home screen
+var spawn_kin: Callable       # Home._spawn_kin: puts a newly bought Boki on the island
 var filter := {}              # the pens' filters: species, size, min_iv, special, kind
 var item := "wood"            # the Exchange's item on show
 var qty := 10
@@ -12,8 +13,22 @@ var price := 0
 var note := ""
 var note_col := UI.GOOD
 
-func _init(home) -> void:
+func _init(home, spawn_kin_cb: Callable) -> void:
 	h = home
+	spawn_kin = spawn_kin_cb
+
+## --open=pens / --open=exchange[:item] from the home screen. Returns true if it was one of ours.
+func open_named(which: String) -> bool:
+	if which == "pens":
+		if "--market-demo" in OS.get_cmdline_user_args(): HomeMarket.demo()
+		open_pens()
+		return true
+	if which.begins_with("exchange"):
+		if "--market-demo" in OS.get_cmdline_user_args(): HomeMarket.demo()
+		if ":" in which: item = which.split(":")[1]
+		open_exchange()
+		return true
+	return false
 
 ## Screenshots (--market-demo): some gems, wood and stone, a week of wood trades, one of your offers
 ## resting on the book and one of your Boki listed at the pens. Never written to the save.
@@ -83,8 +98,8 @@ func open_pens() -> void:
 	v.add_child(UI.spacer(4))
 	v.add_child(UI.section("Sell one of yours"))
 	var sell_row := UI.hbox(8)
-	var choices: Array = (Save.d["roster"] as Array).filter(func(r): return KinBox.pinned(r) == "" and not r.get("loaner", false))
-	var rules := UI.para("Your partner, your first Boki and your only Boki stay with you. Others can be listed here at a fair price (a 5% listing fee, and 5% of the sale).", 12, UI.FAINT)
+	var choices: Array = (Save.d["roster"] as Array).filter(func(r): return KinBox.pinned(r) == "" and BokiPens.can_list(r))
+	var rules := UI.para("Your partner, your first Boki and your only Boki stay with you, and so do Boki that came from the pens (or wandered in). Up to %d others can be listed at a fair price (a 5%% listing fee, and 5%% of the sale)." % BokiPens.MAX_LISTED, 12, UI.FAINT)
 	rules.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	v.add_child(rules)
 	if not (choices.is_empty() or (Save.d["roster"] as Array).size() <= 1):
@@ -142,7 +157,7 @@ func _pen_card(L: Dictionary) -> Control:
 				Sfx.play("unlock")
 				_say("%s is yours. It's waiting on the farm." % Data.KIN[String(r["rec"]["species"])]["name"])
 				h._refresh_top()
-				if h.has_method("_spawn_kin"): h._spawn_kin()
+				spawn_kin.call()
 			else:
 				Sfx.play("click")
 				_say(String(r["why"]), false)

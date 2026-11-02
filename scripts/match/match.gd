@@ -2827,7 +2827,7 @@ func _update_tracking(dt: float) -> void:
 ## Kin left behind where a hunter went down. They wait, dazed, for someone to collect them.
 func _leave_kin(h: Hunter) -> void:
 	for kk in [h.kin, h.kin2]:
-		if kk == null or Loaner.is_loaner((kk as Kin).rec):
+		if kk == null or not is_instance_valid(kk) or Loaner.is_loaner((kk as Kin).rec):
 			continue
 		_leave_one_kin(h, kk)
 
@@ -5986,8 +5986,6 @@ func _finish() -> void:
 		r["tonics"] = maxi(0, player.tonics - player.free_tonics) + tonic_stash_left
 		if not opts.get("tutorial", false) and not opts.get("loaner", false):
 			r["rift_keys"] = player.rift_keys if result.get("extracted", false) else 0
-		if opts.get("loaner", false):
-			r["tonics"] = int(Save.d["items"].get("tonic", 0))      # the free kit's tonics were never yours
 		r["stats"] = player.stats.duplicate()
 		# weapons, gloves and treasure: home to the armory if you made it out, else what stayed behind
 		if result.get("extracted", false):
@@ -6003,13 +6001,13 @@ func _finish() -> void:
 		# what each kin you brought did, for its memories and growth
 		r["kin_runs"] = []
 		for kk in [player.kin, player.kin2]:
-			if kk == null or Loaner.is_loaner((kk as Kin).rec): continue
+			if kk == null or not is_instance_valid(kk) or Loaner.is_loaner((kk as Kin).rec): continue
 			var k: Kin = kk
 			r["kin_runs"].append({"uid": String(k.rec.get("uid", "")), "events": k.events.duplicate(true), "trust": k.trust,
 				"stats": {"hits": k.st_hits, "kos": k.st_kos, "throws": k.st_throws, "skills": k.st_skills,
 				"revives": k.events.filter(func(e): return e["kind"] == "revived").size(), "caught": player.caught.size(),
 				"won": 1 if result.get("extracted", false) else 0}})
-		if player.kin and not Loaner.is_loaner((player.kin as Kin).rec):
+		if is_instance_valid(player.kin) and not Loaner.is_loaner((player.kin as Kin).rec):
 			var k0: Kin = player.kin
 			r["kin_events"] = k0.events.duplicate(true)
 			r["kin_trust"] = k0.trust

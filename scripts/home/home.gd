@@ -142,7 +142,7 @@ func _ready() -> void:
 		get_viewport().disable_3d = true
 		PerfLog.frame_drawn()
 	hecon = HomeEcon.new(self)
-	hmk = HomeMarket.new(self)
+	hmk = HomeMarket.new(self, _spawn_kin)
 	if visit.is_empty():
 		HomeLayout.ensure(Save.d)     # first: a brand new farm-start island keeps its first trough in storage
 		Econ.ensure()
@@ -581,13 +581,7 @@ func _ready_rest() -> void:
 					_open_kin(Save.active_kin())
 				elif which == "burrow" or which == "kinbox": _open_burrow()
 				elif which == "shop": _open_shop()
-				elif which == "pens":
-					if "--market-demo" in OS.get_cmdline_user_args(): HomeMarket.demo()
-					hmk.open_pens()
-				elif which.begins_with("exchange"):
-					if "--market-demo" in OS.get_cmdline_user_args(): HomeMarket.demo()
-					if ":" in which: hmk.item = which.split(":")[1]
-					hmk.open_exchange()
+				elif hmk.open_named(which): pass      # "pens", "exchange[:item]"
 				elif which == "challenges": _open_challenges()
 				elif which.begins_with("ransom"):
 					if ":" in which: ransom_tab = which.split(":")[1]
@@ -3672,18 +3666,7 @@ func _open_expedition() -> void:
 		elif exp_tier == i:
 			tv.add_child(UI.para(String(td["desc"]), UI.T_SMALL, Color("ffb3a8") if td["risk_kin"] else UI.MUTED))
 		right.add_child(tc)
-	if Loaner.available():
-		# the free-kit queue: a loaner Boki and the basic kit, nothing of yours at risk (Loaner)
-		var fkc := UI.card(Color(UI.GOLD, 0.08), 12, 10)
-		var fkr := UI.hbox(10); fkc.add_child(fkr)
-		fkr.add_child(UI.IconDot.new("egg", UI.GOLD, 20.0))
-		var fkv := UI.vbox(1); fkv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		fkv.add_child(UI.label("Or a free-kit run: nothing at risk", 15, UI.GOLD, UI.semi))
-		var fkl := UI.para("A loaner Boki (a fresh starter, lent for one run), your class's plain weapon and two tonics. Your Boki, armory and stash stay home. Keep whatever you extract with; an extract pays at least %d gems." % Loaner.MIN_PAY, 12, UI.MUTED)
-		fkl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		fkv.add_child(fkl)
-		fkr.add_child(fkv)
-		right.add_child(fkc)
+	HomeFreeKit.card(right)      # the free-kit run (home_freekit.gd)
 	right.add_child(UI.spacer(2))
 	right.add_child(UI.section("Match"))
 	var mode_names := {"solo": "Solo", "duo": "Duos", "trio": "Trios"}
@@ -3709,14 +3692,7 @@ func _open_expedition() -> void:
 	fl.add_child(UI.ghost("Duel room", _start_duel, 0, "knock"))
 	if Net.available():
 		fl.add_child(UI.ghost("Play online", func(): Game.goto("lobby", {"cls": Data.class_of_save(), "tier": exp_tier}), 0, "bond"))
-	if Loaner.available():
-		var fk := UI.ghost("Free-kit run", _start_free_kit, 0, "egg")
-		fk.tooltip_text = "A basic loadout and a loaner Boki (a fresh starter). Nothing of yours is at risk; whatever you bring out is yours. An extract pays at least %d gems." % Loaner.MIN_PAY
-		fl.add_child(fk)
-	if ak.is_empty():
-		var fb := UI.footer_primary(v, "Free-kit run", _start_free_kit, 250, "egg")
-		fb.grab_focus.call_deferred()
-		return
+	if HomeFreeKit.buttons(fl, v, self, ak.is_empty()): return      # (no Boki of your own: only the free-kit run)
 	var start_b := UI.footer_primary(v, "Start expedition", _confirm_start, 250, "portal")
 	start_b.grab_focus.call_deferred()
 
@@ -3956,20 +3932,6 @@ func _confirm_start() -> void:
 	row.add_child(UI.primary("I understand, go", _start_match, 220))
 	row.add_child(UI.button("Back", _open_expedition, 140))
 	v.add_child(row)
-
-## A free-kit run (Loaner): a basic loadout and a loaner Boki, nothing of yours at risk.
-func _start_free_kit() -> void:
-	Save.d["cls"] = Data.class_of_save()
-	Save.save_game()
-	var o := {"teams": Data.MATCH_PLAYERS, "squad": 1}
-	match exp_mode:
-		"duo": o = {"teams": Data.MATCH_PLAYERS / 2, "squad": 2}
-		"trio": o = {"teams": int(ceil(Data.MATCH_PLAYERS / 3.0)), "squad": 3}
-	o["total"] = Data.MATCH_PLAYERS
-	o["tier"] = exp_tier
-	if exp_seed != 0: o["seed"] = exp_seed
-	exp_seed = 0
-	Game.start_match(Loaner.opts(o))
 
 func _start_match() -> void:
 	# kin picked from the Kin Burrow come out to go with you
@@ -4493,17 +4455,11 @@ func _setup_care() -> void:
 		return
 	# the time you were away: needs drift, kin eat from the feeders, and hungry ones may starve
 	hecon.away = Econ.catch_up_all()
-	# nobody is left with no Boki: a stray turns up (Lifeline)
+	# nobody is left with no Boki: a stray turns up (Lifeline; the toast is in home_freekit.gd)
 	var floor_ev := Lifeline.check()
 	if hecon.away.any(func(e): return e["kind"] == "died") or not floor_ev.is_empty():
 		_spawn_kin()
-	for fe in floor_ev:
-		if String(fe["kind"]) == "stray":
-			var srec: Dictionary = fe["rec"]
-			get_tree().create_timer(1.0).timeout.connect(func():
-				if is_instance_valid(self) and is_inside_tree():
-					_show_when_free(["A stray %s wandered onto the farm. With no Boki of your own, it's decided to stay with you." % Data.KIN[String(srec["species"])]["name"],
-						"You can always take a free-kit run (a loaner Boki, nothing at risk) or buy a Boki at %s's Drift Pens." % BokiPens.MERCHANT]))
+	HomeFreeKit.toast_stray(self, floor_ev)
 	# what Boki assigned to stations made while you were away (Work.catch_up)
 	away_work = Work.catch_up()
 	if not away_work.is_empty():

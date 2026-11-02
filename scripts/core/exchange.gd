@@ -28,6 +28,8 @@ const BACKEND := "local"
 const TAX := 0.04              # of the gems in each fill, paid by the seller: the Exchange's sink
 const MAX_OPEN := 8            # your open offers at once
 const HIST_CAP := 60
+const WALK := 0.15             # offline, Tradewind's quotes walk at most this far from the middle of the book per run
+                               # (so an offer priced further out than this never fills)
 const MAKER_DEPTH := 3         # market maker levels each side
 const PRICE_BAND := [0.4, 2.5] # offers must be within this times the reference price
 
@@ -118,9 +120,12 @@ static func _makers(item: String, force := false) -> void:
 	for o in buys + sells: book.erase(o)
 	var st := _st()
 	var rng := RandomNumberGenerator.new()
-	rng.seed = hash("xch|%s|%s|%d" % [item, String(st.get("day", "")), int(st.get("n", 0))])
+	# today's middle comes from the item's base price and the day alone: not from the last trade or
+	# from a counter, so buying a side out and refilling it never ratchets the price (and a refill
+	# is the same quotes as before, at the same spread)
+	rng.seed = hash("xch|%s|%s" % [item, String(st.get("day", ""))])
 	var b := band(item)
-	var mid := clampi(int(round(ref_price(item) * rng.randf_range(0.92, 1.08))), b.x + 1, b.y - 1)
+	var mid := clampi(int(round(float(COMMODITIES[item]["ref"]) * rng.randf_range(0.92, 1.08))), b.x + 1, b.y - 1)
 	for i in MAKER_DEPTH:
 		var gap := 1 + i
 		book.append({"id": _id(), "side": "buy", "item": item, "qty": 20 + 10 * i, "left": 20 + 10 * i, "price": maxi(b.x, mid - gap), "t": _now() - 100 + i, "who": "tw"})
@@ -237,12 +242,16 @@ static func _match(o: Dictionary) -> int:
 		if int(r["left"]) <= 0: book.erase(r)
 	return filled
 
+## The tax on one fill, rounded up so a small fill still pays something (4% of 12 gems is 1, not 0).
+static func tax_of(gems: int) -> int:
+	return int(ceil(gems * TAX - 0.0001))
+
 ## One fill between a buyer and a seller offer at px per unit.
-static func _fill(b: Dictionary, s: Dictionary, item: String, q: int, px: int) -> void:
+static func _fill(b: Dictionary, s: Dictionary, item: String, q: int, px: int) -> Dictionary:
 	b["left"] = int(b["left"]) - q
 	s["left"] = int(s["left"]) - q
 	var gems := q * px
-	var tax := int(round(gems * TAX))
+	var tax := tax_of(gems)
 	if String(b["who"]) == "you":
 		# the gems were escrowed at the buyer's own price: the difference comes back
 		_add(item, q)
@@ -254,10 +263,13 @@ static func _fill(b: Dictionary, s: Dictionary, item: String, q: int, px: int) -
 		s["got"] = int(s.get("got", 0)) + gems - tax
 	_record(item, px, q)
 	var st := _st()
+	var rec := {}
 	if String(b["who"]) == "you" or String(s["who"]) == "you":
-		st["fills"].append({"t": _now(), "item": item, "qty": q, "price": px, "side": "buy" if String(b["who"]) == "you" else "sell", "tax": tax if String(s["who"]) == "you" else 0})
+		rec = {"t": _now(), "item": item, "qty": q, "price": px, "side": "buy" if String(b["who"]) == "you" else "sell", "tax": tax if String(s["who"]) == "you" else 0}
+		st["fills"].append(rec)
 		while (st["fills"] as Array).size() > 40: (st["fills"] as Array).pop_front()
 	st["taxed"] = int(st.get("taxed", 0)) + tax
+	return rec
 
 ## Takes an open offer down; what's left in escrow comes back. {ok, why}.
 static func cancel(id: String) -> Dictionary:
@@ -272,25 +284,34 @@ static func cancel(id: String) -> Dictionary:
 				return {"ok": true, "why": ""}
 	return {"ok": false, "why": "Not your offer"}
 
-## Time passes (once per expedition, offline): the makers move with the day and walk toward your
-## resting offers a little, so a fair offer fills over a few runs. Returns new fills of your offers.
+## Time passes (once per expedition, offline). Tradewind's traders walk their quotes a random way
+## up or down (at most WALK of the middle of the book) and your resting offers fill at THE TRADER'S
+## quote, only when that quote reaches your price (so you never get worse than you asked, and never
+## better than the walk). An offer priced more than WALK from the middle has no chance at all. The
+## offline traders' spread is wider than the book makers' (at least 8% of the middle each way), so
+## buying off the book and selling back by tick never turns a profit. Returns new fills of your offers.
 static func tick(rng: RandomNumberGenerator = null) -> Array:
 	if rng == null:
 		rng = RandomNumberGenerator.new(); rng.randomize()
-	var st := _st()
-	var before := (st["fills"] as Array).size()
+	var new_fills: Array = []      # (not a slice of the fills log: that is capped, and the cap would hide new ones)
 	for o in mine():
 		var item := String(o["item"])
-		var r := mid(item)
-		# how far it's priced past the middle of the book toward the other side: a fair one fills more often
-		var edge := (float(o["price"]) - r) / maxf(1.0, r) * (1.0 if o["side"] == "buy" else -1.0)
-		if rng.randf() < clampf(0.45 + edge * 1.5, 0.05, 0.95):
-			var q := maxi(1, int(ceil(int(o["left"]) * rng.randf_range(0.4, 1.0))))
-			var px := int(o["price"])
-			var other := {"id": _id(), "side": "sell" if o["side"] == "buy" else "buy", "item": item, "qty": q, "left": q, "price": px, "t": _now(), "who": "tw"}
-			_fill(o if o["side"] == "buy" else other, other if o["side"] == "buy" else o, item, q, px)
-			if int(o["left"]) <= 0: _book(item).erase(o)
-	return (st["fills"] as Array).slice(before)
+		var m := mid(item)
+		var price := int(o["price"])
+		if absf(float(price) - m) > m * WALK:
+			continue
+		var buying: bool = o["side"] == "buy"
+		var gap := maxi(1, int(ceil(m * 0.08)))
+		var walked := int(round(m * (1.0 + rng.randf_range(-WALK, WALK))))
+		var px := walked + gap if buying else walked - gap
+		if (buying and px > price) or (not buying and px < price):
+			continue
+		var q := mini(int(o["left"]), maxi(1, int(ceil(int(o["left"]) * rng.randf_range(0.4, 1.0)))))
+		var other := {"id": _id(), "side": "sell" if buying else "buy", "item": item, "qty": q, "left": q, "price": px, "t": _now(), "who": "tw"}
+		var f := _fill(o if buying else other, other if buying else o, item, q, px)
+		if not f.is_empty(): new_fills.append(f)
+		if int(o["left"]) <= 0: _book(item).erase(o)
+	return new_fills
 
 ## Gems taken by the Exchange's tax, in all (for the economy check and telemetry later).
 static func taxed() -> int:

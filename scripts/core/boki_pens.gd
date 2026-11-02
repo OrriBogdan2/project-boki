@@ -26,6 +26,10 @@ const LIST_FEE := 0.05        # a listing costs 5% of its price up front (a gem 
 const SALE_TAX := 0.05        # and 5% of the sale price on a sale (ROADMAP §2 market fees)
 const BACKEND := "local"      # "local" today; "server" once the backend exists (docs/EXCHANGE_SERVER.md)
 const MERCHANT := "Wenna"
+const MAX_LISTED := 3         # your open listings at once
+## Boki that cost you nothing (or were bought here) can't be listed: otherwise the pens would be a
+## gem mint (buy at 30-45, resell at ~70). Origins from Boki.origin.how.
+const NO_RESALE := ["market", "stray", "loaner"]
 
 static func _st() -> Dictionary:
 	if typeof(Save.d.get("pens", null)) != TYPE_DICTIONARY:
@@ -64,10 +68,13 @@ static func fair_range(rec: Dictionary) -> Vector2i:
 	return Vector2i(maxi(PEN_PRICE_MIN, v / 2), v * 3)
 
 ## Fresh pen stock once a day: commons only, ordinary rolls (no shimmer, no mutations, level 1-2).
-static func restock(force := false) -> void:
+## The day is stored and the stock only rolls when today is LATER than the stored day: buying the
+## pens out leaves them empty until tomorrow, and setting the clock back neither restocks nor
+## moves the stored day backwards. ("YYYY-MM-DD" strings compare in date order.)
+static func restock() -> void:
 	var st := _st()
 	var day := _today()
-	if st["day"] == day and not force and not st["stock"].is_empty():
+	if String(st["day"]) != "" and day <= String(st["day"]):
 		return
 	st["day"] = day
 	st["stock"] = []
@@ -144,6 +151,10 @@ static func buy(id: String) -> Dictionary:
 	Save.save_game()
 	return {"ok": true, "why": "", "rec": rec}
 
+## Can this Boki be put up at all? (Not one that came from the pens, wandered in, or was lent.)
+static func can_list(rec: Dictionary) -> bool:
+	return not NO_RESALE.has(String((rec.get("origin", {}) as Dictionary).get("how", "")))
+
 ## Puts one of your Boki up at the pens. It leaves your farm while it's listed. {ok, why, id}.
 static func list_mine(uid: String, price: int) -> Dictionary:
 	var rec := Save.kin(uid)
@@ -154,8 +165,13 @@ static func list_mine(uid: String, price: int) -> Dictionary:
 	var why := KinBox.pinned(rec)
 	if why != "":
 		return {"ok": false, "why": why}
-	if rec.get("loaner", false):
-		return {"ok": false, "why": "A loaner isn't yours to sell"}
+	var egg: Dictionary = Save.d.get("egg", {})       # (the same guard as KinBox.release)
+	if not egg.is_empty() and (String(egg.get("a", "")) == uid or String(egg.get("b", "")) == uid):
+		return {"ok": false, "why": "Its egg is still in the Nesting Nook: wait for it to hatch"}
+	if not can_list(rec):
+		return {"ok": false, "why": "Wenna won't take back a Boki that came from her pens or wandered in. Raise one, hatch one, or catch one."}
+	if (_st()["mine"] as Array).size() >= MAX_LISTED:
+		return {"ok": false, "why": "You can have %d Boki listed at a time" % MAX_LISTED}
 	var fr := fair_range(rec)
 	if price < fr.x or price > fr.y:
 		return {"ok": false, "why": "Price it between %d and %d" % [fr.x, fr.y]}

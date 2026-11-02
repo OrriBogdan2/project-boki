@@ -185,7 +185,8 @@ func apply_result(r: Dictionary) -> Dictionary:
 	if r.has("rift_keys"):
 		d["items"]["rift_key"] = int(r["rift_keys"])     # carried keys come home with you, or stay in your deathbox
 	var treat: String = d.get("treat", "")
-	d["treat"] = ""
+	if not r.get("loaner", false):
+		d["treat"] = ""      # (a free-kit run never used it, so it keeps)
 	# every kin you brought remembers the match
 	var runs: Array = r.get("kin_runs", [])
 	if runs.is_empty() and not Save.active_kin().is_empty() and not r.get("loaner", false):
