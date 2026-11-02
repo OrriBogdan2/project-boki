@@ -666,7 +666,6 @@ func e_recastable() -> bool: return false
 var anim_id := ""              # the kit move playing on the hunter (HunterAnim.KMOVES), its start
 var anim_at := -9.0
 
-## Plays one of the kit's full-body moves on the hunter (anticipation, key pose, recovery).
 ## The kit's full-body move on the wire (Net 0.11.1): the move id and its age in seconds, after the
 ## state array after KinNet.hunter_extra (26-30), at index NET_MOVE_AT. Empty id: nothing playing (an expired move is not sent).
 const NET_MOVE_AT := 31
@@ -692,6 +691,7 @@ static func apply_net_move(h: Hunter, it: Array) -> void:
 		k.anim_id = id
 		k.anim_at = h.m.time - age
 
+## Plays one of the kit's full-body moves on the hunter (anticipation, key pose, recovery).
 func play(move: String) -> void:
 	anim_id = move
 	anim_at = m.time
