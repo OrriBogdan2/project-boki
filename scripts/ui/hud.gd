@@ -2545,7 +2545,7 @@ func _arch_tip(id: String, p: Hunter) -> Array:
 		"throw":
 			if k == null: return []
 			out.append(["Send / recall", Color("cfe8ff")])
-			out.append(["%s  ·  tap: throw %s to the cursor, tap again to call it back (it hits what it passes). Hold: it holds its spot, or follows and fights. A downed Boki stays where it fell: run into it to bring it back." % [Settings.key_cap("throw"), k.rec.get("name", "your Boki")], INK, 13])
+			out.append(["%s  ·  tap: Sic %s at the cursor, or Call it back when it is away (it hits what it passes). Hold: Chase, Guard, Return or Follow. A downed Boki stays where it fell: run into it to bring it back." % [Settings.key_cap("throw"), k.rec.get("name", "your Boki")], INK, 13])
 			return out
 	var si := p.slot_info(id)
 	var slot_name: String = {"sec": "Right click", "k1": "Utility (E)", "r": "Ultimate (R)", "dash": "Dash"}[id]

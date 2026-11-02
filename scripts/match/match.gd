@@ -5077,7 +5077,7 @@ const TUT := [
 	["shoot", "%W"],
 	["utility", "Press %K: %A"],
 	["kin1", "Press %K: %s uses %A"],
-	["throw", "Press %K to throw %s at the monster"],
+	["throw", "Press %K to Sic %s at the monster"],
 	["chest", "Walk to the chest and hold %K to open it"],
 	["goexit", "Follow the marker to the outpost: its uplink calls you a way home"],
 	["uplink", "Hold %K at the uplink mast to start it"],
@@ -5095,7 +5095,7 @@ const TRAIN := [["move", "Walk around", "up"], ["dash", "Dash", "dash"], ["glide
 	["shoot", "Shoot a target dummy", "fire"], ["ability", "Use your E ability", "signature"], ["ult", "Use your ultimate (R: open from the start here)", "ultimate"],
 	["secondary", "Use your right click (tap it, then hold it)", "secondary"], ["glove", "Use your glove (pick one up from the rack first)", "gear1"],
 	["crouch", "Sneak: slower, steadier aim, harder to spot", "crouch"],
-	["throw", "Throw your Boki at a dummy", "throw"], ["combo", "Land a combo: shoot a foe your Boki just stunned or rooted", "fire"], ["tonic", "Heal (tonic, or armor kit when health is full)", "tonic"],
+	["throw", "Sic your Boki at a dummy", "throw"], ["combo", "Land a combo: shoot a foe your Boki just stunned or rooted", "fire"], ["tonic", "Heal (tonic, or armor kit when health is full)", "tonic"],
 	["stagger", "Stagger a big dummy: hit it with an ability while it has a purple ring", "signature"],
 	["smash", "Break a crate or pot", "fire"], ["weapon", "Take a found weapon off the ground", "interact"],
 	["ledge", "Dash off an edge and float back up", ""]]
@@ -6585,7 +6585,7 @@ func _tips() -> void:
 	_tip("move", "WASD to move, aim with the mouse, hold left click to shoot. Shift dashes, Space jumps. Hold Space in the air to glide.")
 	if _tip_t > 14.0:
 		if player.ak:
-			_tip("ability", "%s is your Boki's ability, cast from wherever it stands. %s throws and recalls it. Fighting together fills the bond meter, and a full one lets you press %s to merge." % [Settings.key_cap("kin_ability"), Settings.key_cap("throw"), Settings.key_cap("ultimate")])
+			_tip("ability", "%s is your Boki's ability, cast from wherever it stands. %s sics it at a foe (tap), calls it back when it is away, and opens the order wheel (hold). Fighting together fills the bond meter, and a full one lets you press %s to merge." % [Settings.key_cap("kin_ability"), Settings.key_cap("throw"), Settings.key_cap("ultimate")])
 		else:
 			_tip("ability", "%s is your Boki's ability. Fighting together fills the bond meter, and %s calls your Boki's bond ultimate." % [Settings.key_cap("signature"), Settings.key_cap("ultimate")])
 	if player.ult >= 1.0 and player.kin:
