@@ -254,14 +254,14 @@ static func _burst(c: CanvasItem, at: Vector2, t: float, col: Color) -> void:
 		return
 	var k := 1.0 - t / BURST_T          # 0 -> 1 over the burst
 	var a := clampf(t / (BURST_T * 0.35), 0.0, 1.0)
-	var ease := 1.0 - pow(1.0 - minf(1.0, k * 3.0), 3.0)
+	var ez := 1.0 - pow(1.0 - minf(1.0, k * 3.0), 3.0)
 	var pts := PackedVector2Array()
 	for i in 12:
 		var ang := TAU * float(i) / 12.0 + 0.13
 		var d := Vector2(cos(ang), sin(ang) * 0.75)
-		var r0 := 10.0 + 26.0 * ease
+		var r0 := 10.0 + 26.0 * ez
 		pts.append(at + d * r0); pts.append(at + d * (r0 + 8.0 + 6.0 * float(i % 2)))
 	c.draw_multiline(pts, Color(col, a), 3.0)
-	c.draw_arc(at, 8.0 + 20.0 * ease, 0, TAU, 28, Color(Color.WHITE, 0.6 * a), 2.0, true)
+	c.draw_arc(at, 8.0 + 20.0 * ez, 0, TAU, 28, Color(Color.WHITE, 0.6 * a), 2.0, true)
 	var sc := 1.0 + 0.6 * (1.0 - minf(1.0, k * 5.0))
 	HudStyle.ctext(c, at + Vector2(0, 8.0 * sc), "DOWN", int(22.0 * sc), Color(Color.WHITE.lerp(col, 0.35), a), 6)

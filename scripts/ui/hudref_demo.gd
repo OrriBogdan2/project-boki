@@ -39,6 +39,9 @@ static func tick(m) -> void:
 			kn.dead = true; kn.visible = false           # no wild Boki wandering into the picture
 		elif kn.owner_h and kn.state != "shoulder":
 			kn.stow()                                      # everyone's Boki rides their shoulder, out of the fight
+	m.bubbles.clear(); m.pings.clear()      # (no Boki chatter or callouts over the plates)
+	if mode == "fight":
+		P.hp = maxf(P.hp, P.max_hp * 0.4)    # (you stay up for the picture)
 	if mode == "plates":
 		var hit: Hunter = m.get_meta("hudref_hit", null)
 		if hit and m.time >= HIT_AT and not m.has_meta("hudref_hit_done"):
@@ -58,7 +61,7 @@ static func _plates(m, P: Hunter) -> void:
 	var base: Vector3 = P.pos
 	for i in foes.size():
 		var h: Hunter = foes[i]
-		_stand(m, h, base + (Vector3((float(i) - 2.0) * 3.2, 0, -3.8) if i < 5 else Vector3((float(i) - 6.5) * 3.2, 0, 5.0)))
+		_stand(m, h, base + (Vector3((float(i) - 2.0) * 3.0, 0, 3.4) if i < 5 else Vector3((float(i) - 6.0) * 3.0, 0, -7.5)))
 		h.lvl = 3 + i
 	P.hp = P.max_hp * 0.62
 	P.armor = P.max_armor * 0.5
@@ -85,4 +88,4 @@ static func _fight(m, P: Hunter) -> void:
 		if i % 3 == 1: h.hp = h.max_hp * 0.55
 		if i % 4 == 2: h.armor = 0.0
 		i += 1
-	P.hp = P.max_hp * 0.3
+	P.hp = P.max_hp * 0.4
