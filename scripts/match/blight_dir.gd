@@ -22,8 +22,8 @@ const RAMP := 420.0               # seconds (per squad) from the soft start to f
 const HEAT_SPAWN := 1.0
 const CAP_BASE := 5               # Blight alive at once (all squads), on top of the Wardens
 const CAP_MAX := 18
-const LOUD := {"shot": 15.0, "boom": 24.0, "revive": 9.0, "kin": 8.0, "chest": 13.0, "dash": 7.0, "step": 4.5, "shriek": 16.0}
-const HEAT := {"shot": 0.04, "boom": 0.15, "revive": 0.05, "kin": 0.02, "chest": 0.12, "dash": 0.03, "step": 0.0, "shriek": 0.25}
+const LOUD := {"shot": 15.0, "boom": 24.0, "revive": 9.0, "kin": 8.0, "chest": 13.0, "dash": 7.0, "step": 4.5, "shriek": 16.0, "scan": 12.0}
+const HEAT := {"shot": 0.04, "boom": 0.15, "revive": 0.05, "kin": 0.02, "chest": 0.12, "dash": 0.03, "step": 0.0, "shriek": 0.25, "scan": 0.05}
 
 var m: Match
 var rng := RandomNumberGenerator.new()

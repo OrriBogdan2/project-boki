@@ -29,7 +29,7 @@ const TIPS := [
 	"Gloves drop from chests, vaults and bosses. One active glove (Q) and one passive glove at a time; a new one replaces the old.",
 	"Go down for good and the Boki you brought are left behind. Old Pell's Ransom House sells back the ones nobody claims.",
 	"A rival took your Boki? You'll sense it when they're nearby. Take it back.",
-	"Wild Boki with a ring under them can be tamed. Daze them first, then win them over.",
+	"Knock a wild Boki out, then hold the use key beside it to scan it. Your box holds three capsules.",
 	"Jump off the skyship over an island nobody else picked. Space opens your glider early for a longer, slower last stretch.",
 	"Falling all the way into the abyss is death. Glide (hold Mouse 5 or Space) below the edge to catch an updraft back up, or touch the cliff to mantle onto it.",
 	"A teammate is down? Stand on their wisp to bring them back. Stand on an enemy's to stomp it, or hold F to finish them.",

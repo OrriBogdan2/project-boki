@@ -466,12 +466,12 @@ func _finish_rebind(ev: InputEvent) -> void:
 # ------------------------------------------------------------------ inventory
 var inv_tab := "Items"
 const INV_H := 404.0          # the inventory's body height on every tab (fits a 720p window)
-var dex_open := ""            # the species whose Bokidex page is open
+var dex_open := ""            # the species whose Field Book page is open
 
-## A Boki's page in the Bokidex (a sub-page of the inventory: Esc or Back returns to the grid).
+## A Boki's page in the Field Book (a sub-page of the inventory: Esc or Back returns to the grid).
 func open_dex(spk: String) -> void:
 	dex_open = spk
-	var v := _page("dex", "Bokidex", 760)
+	var v := _page("dex", "Field Book", 760)
 	UI.hold(v, INV_H + 58.0)        # the inventory's height (a sub-page has no tab row, so its body is taller)
 	DexView.detail(v, spk, get_tree())
 
@@ -482,8 +482,8 @@ func open_inventory() -> void:
 	UI.hold(v, INV_H)          # every tab the same size: switching tabs never resizes the panel
 	if inv_tab == "Items":      # one currency, and only where it matters
 		UI.head_extra(v).add_child(UI.chip("gem", str(int(Save.d["gems"])), UI.GOLD, "Gems"))
-	var icon_of := {"Items": "tonic", "Seeds": "seed", "Crops": "seed", "Furniture": "home", "Kin": "paw", "Kindex": "egg"}
-	UI.shell_tabs(v, ["Items", "Seeds", "Crops", "Furniture", "Kin", "Kindex"], inv_tab, func(t):
+	var icon_of := {"Items": "tonic", "Seeds": "seed", "Crops": "seed", "Furniture": "home", "Kin": "paw", "Field Book": "egg"}
+	UI.shell_tabs(v, ["Items", "Seeds", "Crops", "Furniture", "Kin", "Field Book"], inv_tab, func(t):
 		inv_tab = t; UI._page_of.erase("Inventory"); open_inventory())
 	var grid := GridContainer.new(); grid.columns = 3
 	grid.add_theme_constant_override("h_separation", 10); grid.add_theme_constant_override("v_separation", 10)
@@ -555,8 +555,8 @@ func open_inventory() -> void:
 			for rec in Save.d["roster"]:
 				empty = false
 				grid.add_child(_boki_card(rec))
-		"Kindex":
-			# the Bokidex: numbered tiles, each opening its own page (DexView)
+		"Field Book":
+			# the Field Book: numbered tiles, each opening its own page (DexView)
 			empty = false
 			grid.queue_free()
 			DexView.grid(v, get_tree(), func(spk: String): open_dex(spk))

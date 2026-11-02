@@ -30,7 +30,7 @@ Full numbers: [Weapons](Weapons.md) and [Gloves](Gloves.md).
 ## The backpack
 
 A few slots for weapons, gloves and valuables you mean to carry home. Gems, seeds, tonics and kits are
-counted, not packed, and tamed Boki ride along apart. What's in your hands doesn't take a slot.
+counted, not packed, and scanned Boki (capsules in your box, 3 at most) ride along apart. What's in your hands doesn't take a slot.
 
 - Picking up a better weapon or glove puts it in your hands and the old one in the pack.
 - A full pack asks what to drop.

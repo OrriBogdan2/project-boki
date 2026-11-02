@@ -161,7 +161,7 @@ func run(main: Node) -> void:
 		h.ctrl = "idle"
 		h.inp["move"] = Vector2.ZERO
 		if h != P: h.teleport(Vector3(-500, 50, -500)); h.out = true
-	if P.kin: (P.kin as Kin).state = "shoulder"
+	if P.kin: (P.kin as Kin).stow()
 	P.ctrl = "local"
 	P.unlock_all()
 	flat = _flat_spot(6.5)

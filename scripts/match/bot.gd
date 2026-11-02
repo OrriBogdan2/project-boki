@@ -243,8 +243,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 				move = Vector2.ZERO
 			elif h.flat_dist(goal) < 1.0 and a["goal_kind"] in ["beacon", "board", "yard", "lair_camp"]:
 				move = Vector2.ZERO
-		if h.kin and h.kin.state == "active" and h.kin.flat_dist(h) > 6.0 and KinCommand.can_recall(h):
-			h.kin.recall()
+		BotKin.upkeep(h)
 		# far from the squad with nothing to fight: now and then, base to a teammate
 		# (not while holding a spot: an uplink's yard, a skiff's deck, a lair: basing away from a
 		# charging uplink left its yard empty to drain)
@@ -768,7 +767,7 @@ func _choose(m: Match, h: Hunter) -> void:
 			goal = g[0]; gk = String(g[1])
 	if goal == Vector3.INF:
 		for k in m.kins:
-			if k.state == "dazed" and not k.dead and h.flat_dist(k) < 14.0 + (GOAL_KEEP if k.pos.distance_to(cur) < 2.0 else 0.0):
+			if k.state == "dazed" and not k.dead and Capture.room(h) and h.flat_dist(k) < 14.0 + (GOAL_KEEP if k.pos.distance_to(cur) < 2.0 else 0.0):
 				goal = k.pos; gk = "catch"; break
 	if goal == Vector3.INF:
 		var bd := 18.0

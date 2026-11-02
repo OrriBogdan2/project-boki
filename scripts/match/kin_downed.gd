@@ -3,7 +3,7 @@ extends RefCounted
 ## A downed Boki (docs/decisions/0001), replacing the old 8s faint and teleport:
 ##   - it stays where it fell, marked on screen and the minimap (BokiHud) and glowing in your team colour
 ##   - its owner rescues it by running into it: a short scoop (rescue_s), and it is back on the shoulder
-##     with a good share of its health (rescue_hp). Nobody else can: it can't be hurt, tamed or taken
+##     with a good share of its health (rescue_hp). Nobody else can: it can't be hurt, scanned or taken
 ##     while the owner is still in the map (a hunter who goes out leaves it behind as before, Match._leave_one_kin)
 ##   - otherwise it comes round on its own after 15-20s (trusting Boki sooner) at low health (recover_hp)
 ##   - a Boki that fell into the abyss can only come round on the timer

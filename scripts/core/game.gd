@@ -159,7 +159,7 @@ func apply_result(r: Dictionary) -> Dictionary:
 				nk["name"] = Data.default_kin_name(String(nk["species"]))
 				nk["memory"] = []
 				nk.erase("lost_from")
-				Save.remember(nk, "caught", "was tamed by you out in the islands and brought home")
+				Save.remember(nk, "caught", "was scanned by you out in the islands and brought home")
 			else:
 				# a rival's kin you took home: it still misses them. One that loved its old hunter
 				# (trust 80+) pines for a good while and is very slow to bond with you
