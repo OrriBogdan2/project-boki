@@ -185,3 +185,12 @@ Juggernaut wasn't renamed. Display names only; ids stay. Each kit branch does it
 - **Names:** juggernaut is **Zedran**. Also Dancer, Pin, Bjorn, Venator, Linwick, Moosh Moosh, Breah.
 - **Dredge's grab** goes through rocks like the original. **Pin's Shift** is the newer Spirit-Walk-style one. **Tamsin** copies the base hero, with no healing.
 - **Dancer** (thief) is the furthest off: LMB becomes the ranged alternating bolts, and RMB the bolas. Top of kitfix-dancer-juggernaut.
+
+## 2026-11-02 15:00 ET: ext/perkorbs ready to merge (part B of ext/equal; can ship on its own)
+551683b, Net 0.15.2 (main is 0.15.0; yours to reconcile). On main 18fab56. Full suite of 24 checks passes, plus --perkorb-check (108). health --strict, gen_wiki --check OK.
+- **Prompt removed:** offer_perks, choose_perk, perk_offer, perk_queue, the 1/2/3 keys and the toast are gone.
+- **Perk orbs** (perk_orbs.gd, rules/perk_orbs.json): chest 1, shrine 1-2 (flat-stat lean), boss fan of 3 (weapon lean), brute 1. Fade-for-you-only on the fan. Net events "odrop" and "otake". Bots go for orbs within 16 m. Own seeded stream.
+- **Kit passives** are orb perks with the same numbers. Magpie's gem bonus now actually applies.
+- **Level-ups:** even levels follow a fixed per-hero weapon path (weapon_path.json for all 12, weapon_path.gd). LevelPop banner.
+- **Hooks:** PerkOrbs.drop / spawn / grant / gem_mult, WeaponPath.on_level.
+- **Level-up research** (your item 13) is in docs/decisions/0006, "Proposal: level-up bonus", with sources. The original had no random level-up roll: quiet stat growth per level plus ability points. The "RNG" the owner remembers is most likely its power drops, which the orbs cover. The proposal: quiet growth (+6% HP and +5% ability power for levels 2-6, half for 7-10), the banner on even levels only, and optionally a 15% "lucky level" orb. The owner's answer goes to you.
