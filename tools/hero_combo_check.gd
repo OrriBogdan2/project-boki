@@ -204,6 +204,32 @@ func _mage() -> void:
 	P.ak.use_e(); ac.step(m, 1.6)
 	ok("Skycall without a flick: thrown away from you", T.pos.x > tx0 + 2.0, "%.1f" % (T.pos.x - tx0))
 	ok("Skycall: flings a rival's orb, now yours", K.motes.size() >= 1 and K.motes[0]["owner"] == P)
+	# small mechanics (the wiki's fine print, docs/heroes/mage.md "Small mechanics")
+	ac.fresh(T); ac.fresh(T2); K.sparks.clear(); K.motes.clear(); P.teleport(home); T.teleport(home + Vector3(4, 0, 0)); T2.teleport(home + Vector3(6.5, 0, 0)); ac.step(m, 0.2)
+	T.inv_t = 0.0; T2.inv_t = 0.0; P.dashes = P.max_dashes(); ac.aim_at(P, home + Vector3(11, 0, 0))
+	_dash(m, P, 0.45, func(): if K.run_t > 0.0 and P.phase_t <= 0.0: ok("small: Wirerun ignores projectiles while it runs", false))
+	ac.step(m, 0.1)
+	ok("small: Wirerun ignores projectiles while it runs (phase)", P.phase_t > 0.0 or K.last_dash_kind == "wire")
+	ac.step(m, 0.6)
+	ok("small: Wirerun hits every foe it passes (two in a line)", ac.dmg(T) >= 9.0 and ac.dmg(T2) >= 9.0, "%.0f / %.0f" % [ac.dmg(T), ac.dmg(T2)])
+	ac.fresh(T); ac.fresh(T2); T.teleport(home + Vector3(5, 0, 0)); T2.teleport(home + Vector3(7, 0, 0)); P.teleport(home); ac.step(m, 0.2); T.inv_t = 0.0; T2.inv_t = 0.0
+	ac.aim_at(P, T.pos); _fire(m, P); ac.step(m, 0.6)
+	ok("small: a finger bolt passes through everyone in line", ac.dmg(T) > 0.0 and ac.dmg(T2) > 0.0, "%.0f / %.0f sparks %d %d" % [ac.dmg(T), ac.dmg(T2), K.spark_n(T), K.spark_n(T2)])
+	P.dashes = 0.0; T2.hp = 0.0; T2.downed = true
+	K.on_deal(T2, 5.0, {"src": "shot"})
+	ok("small: a knock does NOT give Wirerun back (heals only)", P.dashes < 0.5)
+	T2.downed = false; T2.hp = T2.max_hp; T2.teleport(home + Vector3(30, 0, 0))
+	P.dashes = P.max_dashes(); P.teleport(home); ac.step(m, 0.1)
+	P.inp["dash_down"] = true; P.do_dash(); ac.step(m, 0.1, func(): P.inp["dash_down"] = true)
+	P.stun_t = 0.3; ac.step(m, 0.05, func(): P.inp["dash_down"] = true)
+	ok("small: a stun mid-hold cancels Wirerun, the charge stays spent", K.wire.is_empty() and P.dashes < 1.0)
+	P.inp["dash_down"] = false; P.stun_t = 0.0; ac.step(m, 0.4)
+	ac.fresh(T); K.sparks.clear(); P.teleport(home); T.teleport(home + Vector3(4, 0, 0)); ac.step(m, 0.2); T.inv_t = 0.0; ac.aim_at(P, T.pos); K.cd["rmb"] = 0.0; K.ch_rmb = 1.0
+	P.inp["sec_hold"] = true; P.ak.press_rmb(); m.step(DT); P.inp["sec_hold"] = false; m.step(DT)
+	ac.step(m, 0.2)
+	var early_r: float = ac.dmg(T)
+	ac.step(m, 0.4)
+	ok("small: Storm Rod's 0.33s minimum cast (a tap still winds)", early_r < 0.5 and ac.dmg(T) >= 15.0, "%.0f then %.0f" % [early_r, ac.dmg(T)])
 	# 10. Grounded: no Wirerun
 	KitStatus.apply(P, "gnd", 1.0, 0.0, false); P.dashes = P.max_dashes(); P.teleport(home)
 	P.inp["dash_down"] = true; P.do_dash()
@@ -340,6 +366,21 @@ func _gunslinger() -> void:
 	ac.step(m, 0.2)
 	ok("Slipstep: let go early, part of it comes back", K.last_dash_kind == "slide" and P.dashes > 0.2)
 	P.inp["move"] = Vector2.ZERO
+	# small mechanics (the wiki's fine print, docs/heroes/gunslinger.md "Small mechanics")
+	P.teleport(home); ac.step(m, 0.3); P.dashes = P.max_dashes(); P.inp["move"] = Vector2(0, 1)
+	P.pos.y = home.y + 2.5; P.grounded = false; P.vel = Vector3.ZERO
+	var z0 := P.pos.z
+	var dsa := P.dashes
+	P.do_dash(); ac.step(m, 0.45)
+	ok("small: an air tap slides 2/3 of the full hold (about 4.7m), a charge spent", K.last_dash_kind == "air_slide" and absf(P.pos.z - z0 - 4.7) < 1.0 and dsa - P.dashes >= 0.5, "%.1f m kind %s" % [P.pos.z - z0, K.last_dash_kind])
+	P.inp["move"] = Vector2.ZERO; ac.step(m, 0.8)
+	ok("small: the rifle loses half its punch over a 10-round string", is_equal_approx(float(P.wpn["sustain_loss"]), 0.5) and int(P.wpn["sustain_rounds"]) == 10)
+	K.res = 3.0; K.res_wait = 0.0; ac.step(m, 0.05)
+	ok("small: Fever wears off all at once", K.res == 0.0)
+	ac.fresh(T); ac.fresh(T2); P.teleport(home); T.teleport(home + Vector3(5, 0, 0)); T2.teleport(home + Vector3(9, 0, 0)); ac.step(m, 0.2); T.inv_t = 0.0; T2.inv_t = 0.0
+	K.cd["e"] = 0.0; ac.aim_at(P, T.pos); P.ak.use_e(); ac.step(m, 0.9)
+	ok("small: Longneedle hits everyone in its line (two)", ac.dmg(T) >= 30.0 and ac.dmg(T2) >= 30.0)
+	T2.teleport(home + Vector3(30, 0, 0))
 	# 7. Hot Streak: a knock gives Slipstep back and heals; rank 3 resets the Burr Charge
 	P.slot_lv["sec"] = 3
 	P.dashes = 0.0; K.cd["rmb"] = 5.0; K.ch_rmb = 0.0; P.hp = 40.0

@@ -89,6 +89,7 @@ func add_spark(f: Ent, n := 1) -> void:
 		m.fx.flash(f.position + Vector3(0, 1.1, 0), GOLD, 1.1, 0.1)
 		m.sfx("vv_static_full", f.pos, -2.0)
 		m.fx.word(f.pos + Vector3(0, 2.7, 0), "LIVE", GOLD, false)
+		if anim_id == "" or m.time - anim_at > 0.3: play("mage_live")
 		net_bolt(top, f.position, res_col())
 		if h.is_local(): h._ab_feedback("dash", "ready")
 

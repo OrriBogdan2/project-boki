@@ -20,6 +20,7 @@ const CHECKS := {
 	"--music-leave-check": ["res://tools/music_leave_check.gd", "music_leave_check", null],
 	"--hero-combo-check": ["res://tools/archer_bulwark_combo_check.gd", "hero_check", null],
 	"--aimkit-check": ["res://tools/aimkit_check.gd", "aimkit_check", null],
+	"--vv-shots": ["res://tools/vv_shots.gd", "vv_shots", null],          # Vireo / Venator screenshots (tools/vv_shots.gd)
 }
 
 ## Runs the registered check named in args, if any. Returns true when one started (Main stops there).

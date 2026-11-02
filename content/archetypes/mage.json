@@ -12,7 +12,7 @@
 		"rmb": "Storm Rod: hold to summon a copper rod, let go to throw it to full range. It knocks the first foe back, stuns them on a wall and leaves a charge orb.",
 		"e": "Skycall: drop a circle at your cursor, then flick the mouse to pick the drag. 0.8s later lightning drags everyone inside that way and grounds them.",
 		"weapons": {
-			"coilcaster": "Finger bolts every 0.8s, left hand then right, out to full range. Each hit adds 1 Static."
+			"coilcaster": "Finger bolts every 0.8s, left hand then right, out to full range through everyone in line. Each hit adds 1 Static."
 		}
 	},
 	"signature": "coilcaster",
@@ -61,7 +61,7 @@
 		"cooldown": 8.0,
 		"charges": 1,
 		"hold": 1.0,
-		"min_t": 0.3,
+		"min_t": 0.33,
 		"coil": {
 			"dmg": [
 				18.0,

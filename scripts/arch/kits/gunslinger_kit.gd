@@ -137,6 +137,17 @@ func _round_end(at: Vector3, vel: Vector2) -> void:
 # ------------------------------------------------------------------ dash: Slipstep
 func on_dash(use_ex: bool) -> bool:
 	var dd := dash_def()
+	if use_ex and h.dashes >= 1.0 and not h.grounded:
+		# an air tap: a slide of 2/3 the full hold's distance (source patch notes), spending a charge
+		h.dashes -= 1.0
+		var ad := float(dd["slide"]) * float(dd.get("air_k", 0.667))
+		travel(ad, float(dd["slide_t"]) * 0.6, {"invuln": float(dd["invuln"])})
+		slide = {"t": 0.0, "held": false, "dir": h.roll_dir, "fx": 0.0, "air": true, "len_t": float(dd["slide_t"]) * 0.6}
+		play("gunslinger_dash")
+		fx().ghost(h.position, h.face, EMBER, float(h.cdat.get("scale", 1.0)), 0.45)
+		m.sfx("vn_slide", h.pos, -4.0, 1.2)
+		last_dash_kind = "air_slide"
+		return true
 	if use_ex:
 		if not spend_dash(true): return true
 		travel(float(h.cdat.get("ex_dist", 4.6)) * 0.9, float(h.cdat.get("ex_time", 0.2)), {"invuln": 0.08}, true)
@@ -165,7 +176,9 @@ func _slide_end(early: bool) -> void:
 	elif rank("dash") >= 3:
 		h.add_buff("move_speed", 0.25, 2.0)
 		fx().ring(h.pos, 1.0, col_of(dd), HOT, 0.25)
-	st["last_dash"] = "slide" if bool(slide.get("held", false)) else "step"
+	if bool(slide.get("air", false)):
+		h.vel.x *= 0.25; h.vel.z *= 0.25          # an air slide stops short instead of carrying on
+	st["last_dash"] = "air_slide" if bool(slide.get("air", false)) else ("slide" if bool(slide.get("held", false)) else "step")
 	last_dash_kind = String(st["last_dash"])
 	slide = {}
 
@@ -180,6 +193,9 @@ func _tick_slide(dt: float) -> void:
 		fx().ghost(h.position, h.face, DEEP.lerp(EMBER, 0.4), float(h.cdat.get("scale", 1.0)) * 0.9, 0.25)
 		m.fx.dust(h.pos, 2)
 	if not bool(slide["held"]):
+		if bool(slide.get("air", false)):
+			if t >= float(slide["len_t"]): _slide_end(false)
+			return
 		if t >= float(dd["tap_t"]) and held("dash") and not h.downed and h.stun_t <= 0.0 and h.root_t <= 0.0 and h.grounded:
 			slide["held"] = true
 			slide["t0"] = t
