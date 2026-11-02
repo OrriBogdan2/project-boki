@@ -28,6 +28,7 @@ const CLIFF := 1.2                     # m: a rise a reeled body can't be dragge
 var pull := {}                  # hold: the reel {t (the foe), left}
 var flying := false             # hold: the hook is in the air
 var hook_sd := {}               # the hook's shot while it flies
+var hauled := 0                 # (tests) times a reeled body was hauled over a rock
 var scoop: Array = []           # wisps (downed hunters) the hook scooped up on its way, reeled in with the catch
 var wind := 0.0                 # hold: the Anchor's wind-up left
 var hop_dir := Vector2.ZERO     # the wind-up's forward hop
@@ -278,11 +279,13 @@ func _grab(f: Ent, ally := false) -> void:
 	grapples += 1
 	if rank("sec") >= 3 and not ally:
 		cd["rmb"] = float(cd["rmb"]) * (1.0 - float(rdf["refund"]))
-	pull = {"t": f, "left": float(rdf["pull_max"]), "v": Vector2.ZERO, "ally": ally, "from": f.pos}
+	var wisp: bool = f is Hunter and (f as Hunter).downed
+	ally = ally or wisp           # a wisp caught head-on is reeled in like an ally: no stun, no Grounded
+	pull = {"t": f, "left": float(rdf["pull_max"]), "v": Vector2.ZERO, "ally": ally, "wisp": wisp, "from": f.pos}
 	KitStatus.apply(h, "gnd", float(rdf["pull_max"]))      # the caster is Grounded while he reels (sheet gap 5)
 	st["self_gnd"] = true
 	if not ally: f.stun_t = maxf(f.stun_t, 0.3)
-	m.fx.word(f.pos + Vector3(0, 2.4, 0), "HOOKED" if not ally else "HOLD ON", col_of(rdf), true)
+	m.fx.word(f.pos + Vector3(0, 2.4, 0), "SCOOPED" if wisp else ("HOOKED" if not ally else "HOLD ON"), col_of(rdf), true)
 	fx.orb(f.pos + Vector3(0, 1.0, 0), ROPE_COL, Color.WHITE, 1.1, 0.15)
 	m.sfx("dr_grab", f.pos, -1.0, 1.0)
 	m.sfx("dr_reel", h.pos, -5.0, 1.0)
@@ -295,7 +298,7 @@ func _grab(f: Ent, ally := false) -> void:
 ## pull). It is dragged over rocks and props; a cliff face or a placed wall stops it; the abyss takes it.
 func _tick_pull(dt: float) -> void:
 	var f = pull["t"]
-	if not is_instance_valid(f) or (f as Ent).dead or ((f is Hunter) and (f as Hunter).downed) or h.stun_t > 0.0 or h.downed:
+	if not is_instance_valid(f) or (f as Ent).dead or ((f is Hunter) and (f as Hunter).downed != bool(pull.get("wisp", false))) or h.stun_t > 0.0 or h.downed:
 		_end_pull(false)
 		return
 	var fe := f as Ent
@@ -342,20 +345,37 @@ func _drag(fe: Ent, dir: Vector2, dist: float) -> float:
 		var s := minf(0.2, dist - moved)
 		var nx := fe.pos.x + dir.x * s; var nz := fe.pos.z + dir.y * s
 		var gy: float = W.ground_at(nx, nz)
-		var top := gy + (World.BLOCK_H if W.is_block(nx, nz) else 0.0)
 		var wall: bool = not W.dyn_walls.is_empty() and Verbs.wall_blocks(W.dyn_walls, nx, nz, fe.r, fe.pos.y) > 0.0
 		if wall or (gy > World.VOID + 1.0 and gy - fe.pos.y > CLIFF):
 			break
+		if W.occupy(nx, nz, fe.r, fe.pos.y, false) != 0.0 and gy > World.VOID + 1.0:
+			# a rock or a prop in the way: haul the body up and over it to the first clear spot beyond
+			var k := s
+			var clear := false
+			while k < 5.0:
+				k += 0.2
+				var qx := fe.pos.x + dir.x * k; var qz := fe.pos.z + dir.y * k
+				var qy: float = W.ground_at(qx, qz)
+				if qy - fe.pos.y > CLIFF: break
+				if W.occupy(qx, qz, fe.r, maxf(fe.pos.y, qy), false) == 0.0:
+					fe.pos.x = qx; fe.pos.z = qz
+					fe.pos.y = maxf(fe.pos.y, qy) + 0.5
+					fe.vel.y = maxf(fe.vel.y, 5.0)      # a little toss as it clears the top
+					clear = true
+					break
+			if not clear:
+				break
+			hauled += 1
+			moved += k
+			continue
 		fe.pos.x = nx; fe.pos.z = nz
-		if gy > World.VOID + 1.0 and top > fe.pos.y:
-			fe.pos.y = top             # hauled up and over the rock
-			fe.vel.y = maxf(fe.vel.y, 0.0)
 		moved += s
 	return moved
 
 func _end_pull(arrived: bool) -> void:
 	var f = pull.get("t")
 	var ally: bool = pull.get("ally", false)
+	var wisp: bool = pull.get("wisp", false)
 	pull = {}
 	scoop = []
 	if st.get("self_gnd", false):
@@ -367,7 +387,7 @@ func _end_pull(arrived: bool) -> void:
 		var rdf := rmb_def()
 		(f as Ent).vel.x = 0.0; (f as Ent).vel.z = 0.0
 		if ally:
-			m.fx.word((f as Ent).pos + Vector3(0, 2.4, 0), "SAVED", col_of(rdf), true)
+			if not wisp: m.fx.word((f as Ent).pos + Vector3(0, 2.4, 0), "SAVED", col_of(rdf), true)
 			return
 		KitStatus.apply(f, "gnd", float(rdf["ground_t"]))
 		payoff_fx((f as Ent).pos, "HAULED", col_of(rdf), "pay_salvage", h.aim_dir(), f)
