@@ -29,7 +29,7 @@ const MOVES := {
 		[0.12, {"p": 0.3, "lift": 0.1, "fl": UP_L, "hw": 1.0, "fr": UP_R, "rw": 1.0}],
 		[0.2, {"p": -0.75, "lift": -0.14, "sq": 0.5, "fl": Vector3(-0.1, -0.2, -0.6), "hw": 1.0, "fr": Vector3(0.1, -0.2, -0.6), "rw": 1.0, "lw": 1.0, "legs": [0.7, -0.9, -0.3, -0.6]}],
 		[0.5, {}]]},
-	# the bulldoze: head down, shoulder first, held while it lasts
+	# the boulder: head down, shoulder first, held while it lasts
 	"mf_roll": {"hold": true, "keys": [
 		[0.0, {}],
 		[0.15, {"p": -0.75, "sq": 0.25, "lift": -0.05, "lw": 1.0, "legs": [1.0, -1.3, -1.0, 0.4], "fl": FWD_L, "fr": FWD_R, "hw": 0.8, "rw": 0.8}]]},

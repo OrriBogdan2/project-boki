@@ -12,8 +12,8 @@
 		"ult": "zap"
 	},
 	"look": {
-		"scale": 1.12,
-		"ring": 3.0,
+		"scale": 1.25,
+		"ring": 4.6,
 		"parts": [
 			"storm_wings",
 			"storm_halo",

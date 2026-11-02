@@ -33,7 +33,7 @@ static func kit_form(id: String, dur := 0.0) -> Dictionary:
 	var lk: Dictionary = fd["look"]
 	return {"id": id, "kit": true, "name": String(fd["name"]), "type": "kit", "color": Color(String(pal["body"])), "glow": Color(String(pal["glow"])),
 		"accent": Color(String(pal.get("accent", pal["glow"]))), "parts": lk["parts"], "style": "kit", "word": String(fd["name"]).to_upper(), "haste": 0.0,
-		"rider": {}, "dash": fd.get("dash", {}), "size": float(lk["scale"]), "ring": float(lk.get("ring", 3.0)), "dur": dur, "surge": false, "def": fd}
+		"rider": {}, "dash": fd.get("dash", {}), "size": float(lk["scale"]), "ring": float(lk.get("ring", 3.0)), "part_k": float(lk.get("part_k", 1.7)), "dur": dur, "surge": false, "def": fd}
 
 ## The stat-style look of a Boki with no form yet, from its type.
 static func fallback_form(ty: String, col: Color, glow: Color) -> Dictionary:
@@ -41,7 +41,7 @@ static func fallback_form(ty: String, col: Color, glow: Color) -> Dictionary:
 	var td: Dictionary = d["types"][ty if (d["types"] as Dictionary).has(ty) else "none"]
 	var fb: Dictionary = d["fallback"]
 	return {"id": "", "kit": false, "name": String(td["word"]).capitalize(), "type": ty, "color": col, "glow": glow, "accent": glow, "parts": td["parts"], "style": String(td["style"]),
-		"word": String(td["word"]), "haste": float(fb["haste"]), "rider": td["rider"].duplicate(), "dash": td["dash"].duplicate(), "size": float(fb["size"]), "ring": 3.0, "dur": 0.0,
+		"word": String(td["word"]), "haste": float(fb["haste"]), "rider": td["rider"].duplicate(), "dash": td["dash"].duplicate(), "size": float(fb["size"]), "ring": 3.0, "part_k": 1.3, "dur": 0.0,
 		"surge": false, "def": {}}
 
 ## The weak merge you get with no Boki able to fight: no silhouette, a plain light.
@@ -49,7 +49,7 @@ static func surge_form() -> Dictionary:
 	var sd: Dictionary = data()["surge"]
 	var c := Color(String(sd["color"]))
 	return {"id": "", "kit": false, "name": String(sd["name"]), "type": "none", "color": c, "glow": c, "accent": c, "parts": [], "style": "nova",
-		"word": String(sd["name"]).to_upper(), "haste": float(sd["haste"]), "rider": {}, "dash": {}, "size": 1.0, "ring": 3.0, "dur": 0.0, "surge": true, "def": {}}
+		"word": String(sd["name"]).to_upper(), "haste": float(sd["haste"]), "rider": {}, "dash": {}, "size": 1.0, "ring": 3.0, "part_k": 1.0, "dur": 0.0, "surge": true, "def": {}}
 
 ## The surge as a MergeSpec, so it runs through the same state and tick as a merge.
 static func surge_spec() -> MergeSpec:

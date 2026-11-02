@@ -1184,7 +1184,17 @@ func _draw_vitals(sz: Vector2, p: Hunter) -> void:
 		var nxt: Color = Hunter.ARMOR_TIERS[p.armor_tier + 1][1]
 		c.draw_rect(Rect2(Vector2(x0, y0 + 3), Vector2(w, 2)), Color(0, 0, 0, 0.35))
 		c.draw_rect(Rect2(Vector2(x0, y0 + 3), Vector2(w * p.armor_frac(), 2)), Color(nxt, 0.9))
-	_seg_bar(Rect2(Vector2(x0, y0 + 7), Vector2(w, 7)), p.armor, p.max_armor, armor_lerp, p.armor_col(), 100.0)
+	var shv := MergeShell.view(p)
+	if shv.y > 0.0 and not p.merge_st.is_empty():
+		# the merged form's shell: its own bright bar in the form's colour, above the health bar, with the number on the right
+		var fcol: Color = (p.merge_st["form"] as Dictionary)["glow"]
+		BokiHud.shell_bar(self, Rect2(Vector2(x0, y0 + 5), Vector2(w, 9)), shv.x / shv.y, fcol, BokiHud.shell_flash(self, p))
+		_text(Vector2(x0 + w - (70 if p.armor <= 0.5 else 170), y0 - 2), "SHELL %d" % int(ceil(shv.x)), 13, fcol, big)
+	else:
+		var fl := BokiHud.shell_flash(self, p)
+		if fl > 0.0:
+			BokiHud.shell_bar(self, Rect2(Vector2(x0, y0 + 5), Vector2(w, 9)), 0.0, p.get_meta("shell_break_col", Color.WHITE), fl)
+		_seg_bar(Rect2(Vector2(x0, y0 + 7), Vector2(w, 7)), p.armor, p.max_armor, armor_lerp, p.armor_col(), 100.0)
 	var hcol := HP_LOW.lerp(Color.WHITE, 0.25 * (0.5 + 0.5 * sin(m.time * 9.0))) if low else HP_COL
 	_seg_bar(Rect2(Vector2(x0, y0 + 17), Vector2(w, 13)), p.hp, p.max_hp, bar_lerp, hcol, 25.0)
 	if p.shield > 0.0:

@@ -9,7 +9,8 @@ const NODE_NAME := "MergeLook"
 const PARTS_NAME := "MergeParts"   # the silhouette parts ride the torso in this container, freed with the look
 const POP_S := 0.28                # s: the silhouette pops in
 const PEEL_S := 0.25               # s: and peels off
-const OVERSHOOT := 1.70158         # ease-out-back
+const OVERSHOOT := 1.70158
+static var WASH: Shader = preload("res://shaders/merge_wash.gdshader")         # ease-out-back
 var h: Hunter = null
 var form: Dictionary = {}
 var rec: Dictionary = {}
@@ -22,6 +23,7 @@ var _leave := -1.0                 # >= 0 while peeling
 var _crack := 0.0                  # seconds of cracking left (a Shatter tell)
 var _base_scale := Vector3.ONE
 var _model: Node3D = null
+var _wash: Array = []              # the meshes wearing the colour wash (an overlay material, removed with the look)
 
 static func attach(hunter: Hunter, f: Dictionary, pop := false) -> void:
 	detach(hunter)
@@ -71,6 +73,10 @@ static func _free_orphan_parts(hunter: Hunter) -> void:
 		box.queue_free()
 
 func _restore() -> void:
+	for mi in _wash:
+		if is_instance_valid(mi):
+			(mi as MeshInstance3D).material_overlay = null
+	_wash.clear()
 	if _model != null and is_instance_valid(_model):
 		_model.scale = _base_scale
 	if _box != null and is_instance_valid(_box):
@@ -87,9 +93,10 @@ func build() -> void:
 	if _model != null:
 		_base_scale = _model.get_meta("merge_base_scale", _model.scale)
 		_model.set_meta("merge_base_scale", _base_scale)
+		_wash_model(_model, glow)
 	_aura = Models.part(self, Models.capsule(0.62, 2.0), Models.aura_mat(glow, 0.7), Vector3(0, 1.0 * sz, 0), Vector3.ONE * sz, Vector3.ZERO, "Aura")
 	_aura.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	_ring = Models.part(self, Models.flat_quad(float(form.get("ring", 3.0))), Models.ring_mat(Color(glow, 0.9), 0.1), Vector3(0, 0.06, 0))
+	_ring = Models.part(self, Models.flat_quad(float(form.get("ring", 3.0))), Models.ring_mat(Color(glow, 1.0), 0.12), Vector3(0, 0.06, 0))
 	_ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	_ring.top_level = true
 	var mote := CPUParticles3D.new()
@@ -114,10 +121,28 @@ func build() -> void:
 			old.free()
 		parent = Node3D.new()
 		parent.name = PARTS_NAME
+		parent.scale = Vector3.ONE * float(form.get("part_k", 1.0))       # bigger and bolder than the hunter: the silhouette reads from above
 		torso.add_child(parent)
 		_box = parent
 	var base := Vector3.ZERO if torso else Vector3(0, -0.42, 0)       # the parts are placed relative to the torso origin
 	rec = MergeParts.build(parent, form, base)
+
+## A colour wash and bright rim in the form's colour over every mesh of the hunter (one shared overlay material).
+func _wash_model(root: Node, glow: Color) -> void:
+	var mat := ShaderMaterial.new()
+	mat.shader = WASH
+	mat.set_shader_parameter("color", Color(glow, 1.0))
+	mat.set_shader_parameter("strength", 0.9)
+	var stack: Array = [root]
+	while not stack.is_empty():
+		var n: Node = stack.pop_back()
+		for c in n.get_children():
+			if String(c.name).begins_with("Merge"):
+				continue
+			stack.append(c)
+		if n is MeshInstance3D and (n as MeshInstance3D).visible and (n as MeshInstance3D).material_overlay == null:
+			(n as MeshInstance3D).material_overlay = mat
+			_wash.append(n)
 
 static func _ease_back(u: float) -> float:
 	var c3 := OVERSHOOT + 1.0

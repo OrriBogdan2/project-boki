@@ -12,8 +12,8 @@
 		"ult": "boom"
 	},
 	"look": {
-		"scale": 1.3,
-		"ring": 3.6,
+		"scale": 1.45,
+		"ring": 5.0,
 		"parts": [
 			"rock_plates",
 			"star_crown",
@@ -78,9 +78,9 @@
 		]
 	},
 	"rmb": {
-		"kind": "bulldoze",
-		"name": "Bulldoze",
-		"icon": "charge",
+		"kind": "boulder",
+		"name": "Boulder Roll",
+		"icon": "roll",
 		"cooldown": 3.0,
 		"range": 3.0,
 		"desc": "Hold to roll armoured through foes, carrying them along. Knockback cannot move you. Let go to slam.",
