@@ -2,7 +2,7 @@
 
 Review shots for each hero: kit card, each ability, the payoff, animation frame strips and a neutral full-body portrait. PNGs are downscaled to at most 1280 px wide. Captions come from the shot manifests.
 
-Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-tender), [Tamsin](#tamsin-rimewright), [Dredge](#dredge-dredge), [Ashwick](#ashwick-ashwick), [Dolm](#dolm-dolm), [Ostra](#ostra-ostra), [Archer](#archer-archer), [Bulwark](#bulwark-bulwark), [Thief](#thief-thief), [Juggernaut](#juggernaut-juggernaut), [Farm building](#farm-building-farmbuild), [classes](#classes-classes), [aimkit](#aimkit-aimkit), [moosh-moosh/v2](#moosh-moosh/v2-moosh-moosh/v2), [moosh-moosh/v2/anim](#moosh-moosh/v2/anim-moosh-moosh/v2/anim), [tamsin/v2](#tamsin/v2-tamsin/v2), [tamsin/v2/anim](#tamsin/v2/anim-tamsin/v2/anim), [dancer/v2](#dancer/v2-dancer/v2), [dancer/v2/before](#dancer/v2/before-dancer/v2/before), [zedran/v2](#zedran/v2-zedran/v2), [zedran/v2/before](#zedran/v2/before-zedran/v2/before), [dancer/v2/anim](#dancer/v2/anim-dancer/v2/anim), [zedran/v2/anim](#zedran/v2/anim-zedran/v2/anim), [linwick/v2](#linwick/v2-linwick/v2), [linwick/v2/anim](#linwick/v2/anim-linwick/v2/anim), [linwick/v2/before](#linwick/v2/before-linwick/v2/before), [linwick/v2/after](#linwick/v2/after-linwick/v2/after), [dredge/v2](#dredge/v2-dredge/v2), [dredge/v2/anim](#dredge/v2/anim-dredge/v2/anim), [dredge/v2/before](#dredge/v2/before-dredge/v2/before), [dredge/v2/after](#dredge/v2/after-dredge/v2/after), [pin/v2](#pin/v2-pin/v2), [bjorn/v2](#bjorn/v2-bjorn/v2), [pin/v2/anim](#pin/v2/anim-pin/v2/anim), [bjorn/v2/anim](#bjorn/v2/anim-bjorn/v2/anim), [vireo/v2](#vireo/v2-vireo/v2), [vireo/v2/anim](#vireo/v2/anim-vireo/v2/anim), [venator/v2/anim](#venator/v2/anim-venator/v2/anim), [venator/v2](#venator/v2-venator/v2), [breah/v2](#breah/v2-breah/v2), [ostra/v2](#ostra/v2-ostra/v2), [breah/v2/anim](#breah/v2/anim-breah/v2/anim), [ostra/v2/anim](#ostra/v2/anim-ostra/v2/anim)
+Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-tender), [Tamsin](#tamsin-rimewright), [Dredge](#dredge-dredge), [Ashwick](#ashwick-ashwick), [Dolm](#dolm-dolm), [Ostra](#ostra-ostra), [Archer](#archer-archer), [Bulwark](#bulwark-bulwark), [Thief](#thief-thief), [Juggernaut](#juggernaut-juggernaut), [Farm building](#farm-building-farmbuild), [classes](#classes-classes), [aimkit](#aimkit-aimkit), [moosh-moosh/v2](#moosh-moosh/v2-moosh-moosh/v2), [moosh-moosh/v2/anim](#moosh-moosh/v2/anim-moosh-moosh/v2/anim), [tamsin/v2](#tamsin/v2-tamsin/v2), [tamsin/v2/anim](#tamsin/v2/anim-tamsin/v2/anim), [dancer/v2](#dancer/v2-dancer/v2), [dancer/v2/before](#dancer/v2/before-dancer/v2/before), [zedran/v2](#zedran/v2-zedran/v2), [zedran/v2/before](#zedran/v2/before-zedran/v2/before), [dancer/v2/anim](#dancer/v2/anim-dancer/v2/anim), [zedran/v2/anim](#zedran/v2/anim-zedran/v2/anim), [linwick/v2](#linwick/v2-linwick/v2), [linwick/v2/anim](#linwick/v2/anim-linwick/v2/anim), [linwick/v2/before](#linwick/v2/before-linwick/v2/before), [linwick/v2/after](#linwick/v2/after-linwick/v2/after), [dredge/v2](#dredge/v2-dredge/v2), [dredge/v2/anim](#dredge/v2/anim-dredge/v2/anim), [dredge/v2/before](#dredge/v2/before-dredge/v2/before), [dredge/v2/after](#dredge/v2/after-dredge/v2/after), [pin/v2](#pin/v2-pin/v2), [bjorn/v2](#bjorn/v2-bjorn/v2), [pin/v2/anim](#pin/v2/anim-pin/v2/anim), [bjorn/v2/anim](#bjorn/v2/anim-bjorn/v2/anim), [vireo/v2](#vireo/v2-vireo/v2), [vireo/v2/anim](#vireo/v2/anim-vireo/v2/anim), [venator/v2/anim](#venator/v2/anim-venator/v2/anim), [venator/v2](#venator/v2-venator/v2), [breah/v2](#breah/v2-breah/v2), [ostra/v2](#ostra/v2-ostra/v2), [breah/v2/anim](#breah/v2/anim-breah/v2/anim), [ostra/v2/anim](#ostra/v2/anim-ostra/v2/anim), [linwick/v2/ult](#linwick/v2/ult-linwick/v2/ult), [dredge/v2/ult](#dredge/v2/ult-dredge/v2/ult)
 
 ## Vireo (mage)
 
@@ -2125,3 +2125,39 @@ Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-t
 **Lantern Trade strip: aim hold, dip, lob high, follow-through**
 
 ![Lantern Trade strip: aim hold, dip, lob high, follow-through](ostra/v2/anim/anim/os_swap.png)
+
+## linwick/v2/ult (linwick/v2/ult)
+
+**Flue Flight key frame: just after X, the lift-off sunburst behind him and the first carpet pieces; the X slot shows its 32s cooldown**
+
+![Flue Flight key frame: just after X, the lift-off sunburst behind him and the first carpet pieces; the X slot shows its 32s cooldown](linwick/v2/ult/linwick_ult_liftoff.png)
+
+**Flue Flight telegraph while flying: the faint heading lane ahead of him (it follows the cursor) and the molten carpet forming behind**
+
+![Flue Flight telegraph while flying: the faint heading lane ahead of him (it follows the cursor) and the molten carpet forming behind](linwick/v2/ult/linwick_ult_telegraph.png)
+
+**Flue Flight impact: the curved 4s lava carpet the steered flight left; the dummy behind burned in it (Char building, the Boki bond meter on R at 62%)**
+
+![Flue Flight impact: the curved 4s lava carpet the steered flight left; the dummy behind burned in it (Char building, the Boki bond meter on R at 62%)](linwick/v2/ult/linwick_ult_impact.png)
+
+**Flue Flight animation strip (lw_jet, lw_land): the ember ring bursts at his feet, he springs up into the jet, flying lean with arms back, mid-flight, landing squash, recovery**
+
+![Flue Flight animation strip (lw_jet, lw_land): the ember ring bursts at his feet, he springs up into the jet, flying lean with arms back, mid-flight, landing squash, recovery](linwick/v2/ult/linwick_ult_strip.png)
+
+## dredge/v2/ult (dredge/v2/ult)
+
+**Brass Broadside telegraph: planted, the 105 degree fan grown on the ground over the 1.1s charge (everyone sees it), sparks between his fists**
+
+![Brass Broadside telegraph: planted, the 105 degree fan grown on the ground over the 1.1s charge (everyone sees it), sparks between his fists](dredge/v2/ult/dredge_ult_telegraph.png)
+
+**Brass Broadside key frame: wave 1 lands point blank, all six slugs (30 on the dummy), the fan edges flash**
+
+![Brass Broadside key frame: wave 1 lands point blank, all six slugs (30 on the dummy), the fan edges flash](dredge/v2/ult/dredge_ult_wave1.png)
+
+**Brass Broadside impact: wave 2 lands 0.6s later (60 in all), Anti-Heal on the dummy**
+
+![Brass Broadside impact: wave 2 lands 0.6s later (60 in all), Anti-Heal on the dummy](dredge/v2/ult/dredge_ult_impact.png)
+
+**Brass Broadside animation strip (dr_blast): press, hunched charge behind the fan, wave 1 shove with the gold burst, rewind, wave 2 shove, recovery**
+
+![Brass Broadside animation strip (dr_blast): press, hunched charge behind the fan, wave 1 shove with the gold burst, rewind, wave 2 shove, recovery](dredge/v2/ult/dredge_ult_strip.png)
