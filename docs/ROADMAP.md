@@ -2,12 +2,14 @@
 
 What has shipped, what is being built, and what comes next. The main session updates this file at every check-in and every ship. For how things work today, see the [wiki](wiki/Home.md). Known shortcuts and their owners are in [DEBT.md](DEBT.md), and design decisions are in [decisions/](decisions/).
 
-Last updated: 2026-11-02 14:30 ET, sync64.
+Last updated: 2026-11-02 16:30 ET, sync66.
 
 ## Shipped
 
 | Build | Date | What landed |
 |---|---|---|
+| sync66 | Nov 2 | The other session's batch: perk orbs replace the 1/2/3 level-up prompt (chest, shrine, brute, a boss fan of 3); level-ups grow your weapon on a fixed path per hunter plus quiet stat growth; shared aim modes and reticles (AimKit); Thief and Juggernaut follow-ups (no class R; Jackpot on the fifth Mark); the farm building pass. Net 0.16.0. |
+| sync65 | Nov 2 | Takedown reset: any knock or kill of an enemy hunter refills Shift and heals 5%. One shared reset cue (3 variants in Settings) and a pop on the Shift icon. A merge no longer looses a drawn arrow. |
 | sync64 | Nov 2 | Glider: 9s of heat (was 14), hits heat it 3x, an overheated glider burns ~3.5%/s, flies at half speed and sinks; lift taps heat at 0.4x so feathering still pays. Shots from higher ground hit a body 1-2 blocks below. The egg hatch is ~2s: the shell fades in under 1s, the Boki hops out, looks around and faces you. Boki regen: 6%/s on Return, 1.5%/s out after 6s without damage, none while downed. |
 | sync63 | Nov 2 | The Merge reworked again: you keep your own hunter's abilities with per-Boki augments; R again within the window fires the Boki's ultimate (3s warning), then the Boki is drained and rests on you ~12s. Starting a merge drops any hold in progress. Net 0.15.0. |
 | sync62 | Nov 2 | UX: no hover growth, tooltips stay on screen, practice bar with hunter picker and zoom everywhere, dash direction setting (WASD by default), slower moves and dashes. Jump out of water, starving warning once, music stops on leaving the duel. |
@@ -26,7 +28,9 @@ Last updated: 2026-11-02 14:30 ET, sync64.
 | ext/fidelity | other session (server, Opus) | Every hunter rebuilt from the owner's footage: ext/aimkit (shared aim modes and reticles) then six kitfix branches. New names: Dancer, Pin, Bjorn, Venator, Linwick, Moosh Moosh, Breah, Zedran. | branch by branch |
 | ext/kits2-nor, ext/farmbuild | other session | Thief and Juggernaut follow-ups; the farm building pass | re-merging onto sync62+ |
 | ext/classes | other session | "Hunters" terminology, pick 1 at creation then 2 more early, a hunter viewer with ability previews, hold-to-unlock | after fidelity |
-| ext/equal | other session | Equal footing with bring-in gear: no armour or perks from home; gloves, boots and 1/2/3 utility items can be brought in (rarity capped by tier). Perk orbs instead of the 1/2/3 prompt. Level-ups grow your weapon automatically. Themed shops at landmarks. Chests need keys from predictable carriers. The bush mimic. Hiding cover varied by biome. | this evening |
+| Boki loss (kinloss, main) | main session | Higher tiers: your Boki guards your deathbox, can be captured; bond-pull arrow and pings; Ransom House or "captured by" after the match | sync67, after online fixes |
+| Ultimates on X (ultbond, main) | main session | Bond hook for hunter ultimates, X freed, a release that ends on a high, merge damage capped at +20% | after sync67 |
+| ext/equal | Equal footing with bring-in gear: no armour or perks from home; gloves, boots and 1/2/3 utility items can be brought in (rarity capped by tier). Perk orbs instead of the 1/2/3 prompt. Level-ups grow your weapon automatically. Themed shops at landmarks. Chests need keys from predictable carriers. The bush mimic. Hiding cover varied by biome. | this evening |
 | ext/drop | other session (queued) | Higher drop (~20s), Fortnite-style dive and float, squad comet with a jumpmaster | after ext/equal |
 | ext/market | other session (queued) | Neopets-style: Shelter (adopt Boki for gems, which are destroyed; rehoming pays nothing), weekly Boki transfer, player stalls with search, Auction House, more item variety, fees and taxes as sinks | late tonight or tomorrow |
 
