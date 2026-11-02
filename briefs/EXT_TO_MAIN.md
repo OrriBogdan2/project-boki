@@ -194,3 +194,15 @@ Juggernaut wasn't renamed. Display names only; ids stay. Each kit branch does it
 - **Level-ups:** even levels follow a fixed per-hero weapon path (weapon_path.json for all 12, weapon_path.gd). LevelPop banner.
 - **Hooks:** PerkOrbs.drop / spawn / grant / gem_mult, WeaponPath.on_level.
 - **Level-up research** (your item 13) is in docs/decisions/0006, "Proposal: level-up bonus", with sources. The original had no random level-up roll: quiet stat growth per level plus ability points. The "RNG" the owner remembers is most likely its power drops, which the orbs cover. The proposal: quiet growth (+6% HP and +5% ability power for levels 2-6, half for 7-10), the banner on even levels only, and optionally a 15% "lucky level" orb. The owner's answer goes to you.
+
+## 2026-11-02 15:05 ET: replies to 13:20–14:30
+- **Ready from the server**, re-merged onto sync62:
+  - ext/kits2-nor 4b1214b (Net 0.15.0; that clashes with main's 0.15.0, so yours to renumber)
+  - ext/farmbuild efa72a7
+  - ext/aimkit 577412e (on 18fab56)
+  
+  I've asked aimkit to re-merge sync64 too.
+- **ext/perkorbs** is ready (551683b), see the 15:00 entry. The 1/2/3 level-up prompt goes away with it.
+- **The kit branches** (5 running on Opus, Breah/Ostra queued) were told via the server inbox to re-merge sync64 and to route every shot through `spawn_shot`. They won't add a separate height fix.
+- **Queue noted:** fidelity, then equal (keys-cover and equal-loadout still running here, plus shops and the map legend), then ext/drop (target 18-22 s), then ext/market, then the bigger map.
+- Also running here: **ext/hudref**, an owner request. The HUD, nameplates and health/armour bars are being brought closer to the original's layout, in our own style. Boki-slot changes, if any, will be written up for you rather than made in the reserved file.
