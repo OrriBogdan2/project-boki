@@ -189,3 +189,39 @@ Not applicable: Juggernaut is not on the rename list (Dancer, Pin, Bjorn, Venato
 - Retaliation: does it strike early when hit, or after a fixed guard time? The dummy deals no damage, so this can't be seen.
 - Air Slam max range from the jump point.
 - What Empowered actually gives (no numbers on the card); and the hold-blast range and damage (no number caught).
+
+## Ultimate (on X)
+
+**Source:** Brall, Retaliation. This is for **Zedran** (id `juggernaut`); the brief's older name "Juggernaut" is now Zedran. Card: "Block damage then strike back with a heavy attack", 21.7 s, 20 mana. Frames are in `/home/claude/svvid/ult/juggernaut/` (frame N = 442 s + (N-1)/10). Casts start at f33 and f51, then a kill test at f77–f101.
+
+1. **Input:** tap.
+   - A fixed guard window, then an automatic counter-strike.
+   - Fine print: **Invulnerable for 0.65 s**, then strike back.
+   - Whether getting hit ends the guard early isn't visible (the dummy deals no damage).
+2. **Aim:**
+   - The strike goes in the **facing / cursor direction**.
+   - A short forward rectangle shows the hit area, about 1 bh wide and 1.5–2 bh long.
+   - He lunges about 1 bh into the strike.
+   - Movement during the guard looks locked; he stays planted in f33–f38.
+3. **Reticle / telegraph:** a white translucent rectangle ahead of him during the guard (f36–f38, and again at f99–f101 after the reset). A **gold glow** on his body during the guard tells enemies "don't hit me".
+4. **Animation beats:**
+   - f33–f38 (0.6 s): guard. The blade is held vertical in front, his body flares gold, and small gold sparks appear.
+   - f39 (0.1 s): the strike, a **long red vertical crescent slash** about 2 bh tall swung down through the target.
+   - f40: impact, a red burst plus the damage number.
+   - f41–f42: a white smoke and impact cloud.
+   - He recovers by about f44, a total of about 1.1 s.
+5. **VFX:** a gold guard glow, then a red crescent and a white cloud. The single huge red crescent is the identity; make ours a different colour or shape (for example a gold-to-white upward cleave).
+6. **Sound:** none. It suggests a metallic guard "ting" on each blocked hit, then a heavy whoosh and a crunch.
+7. **Numbers:**
+   - **396** per strike (f40, f55). The 161 alongside is a Quick Dash hit.
+   - Fine print: 190 + 90%, and he **heals for 80% of the damage dealt**.
+   - On a kill the ult was **immediately reusable** (the rectangle reappears at f99, strike at f101). That is either a training-range reset or a kill reset; open question.
+8. **Ends / combo:**
+   - It ends after the strike.
+   - Combo: dive with Quick Dash or the Air Slam, eat the enemy's burst during the 0.65 s invulnerability, and answer with the counter. It is best used to dodge a telegraphed ult.
+
+**Key frames:** `juggernaut/ult_0033.jpg` (press, guard begins), `ult_0036.jpg` (gold guard glow), `ult_0038.jpg` (guard end, rectangle), `ult_0039.jpg` (red crescent strike), `ult_0040.jpg` (impact 396), `ult_0041.jpg` (white impact cloud), `ult_0055.jpg` (second cast strike), `ult_0101.jpg` (re-cast after a kill).
+
+**Build notes:**
+- **What to build:** X = 0.65 s invulnerable guard (planted, gold body glow), then an automatic forward cleave (1 bh × 2 bh) that heals 80% of damage dealt. Optional: if he blocks a hit during the guard, the strike gains +X% damage.
+- **Bond:** landing the counter on a hunter adds **0.6**. Each hit blocked during the guard adds +0.1 (up to +0.2), so a real "retaliation" fills about 80%.

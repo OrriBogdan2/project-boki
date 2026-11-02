@@ -352,3 +352,35 @@ JSON.
 5. **Cartwheel direction:** movement direction or cursor?
 6. **Phantom Dagger:** is there an auto-teleport timer? What range does it reach with no target?
 7. **Death Blossom:** does it apply passive stacks, and does it count as LMB hits?
+
+## Ultimate (on X)
+
+**Source:** Shiv, Death Blossom. Card: "Shoot at each nearby enemy over 2s", 23.1 s, 20 mana. Frames are in `/home/claude/svvid/ult/dancer/` (frame N = 334 s + (N-1)/10). Casts start at f27, f77, f121 and f195.
+
+1. **Input:** tap. Fine print: "after a short delay", it fires **up to 5 shots at each nearby enemy over 2 s**.
+2. **Aim:**
+   - **Self-centred** and auto-targeted: every enemy inside the ring is shot. The ring **moves with her**, and she runs freely during it (f41–f47 she walks left, ring attached).
+   - No movement slow is visible. She can keep using LMB.
+3. **Reticle / telegraph:**
+   - A **cyan ring** grows from about 1.3 bh (f27) to about 3 bh radius (f31) over about 0.4 s. That growth is the "short delay".
+   - The interior is tinted dark. The ring stays up for the 2 s duration.
+   - Fine print: the **outer band** of the ring is a sweet spot.
+4. **Animation beats:**
+   - f27–f30: the ring grows while she raises her blades.
+   - f31–f50 (about 2 s): small **blue-violet blade projectiles with red tips** orbit and fly out of her to targets inside the ring, one about every 0.2–0.4 s per target. She plays a spinning throw pose between shots (f33–f35).
+   - The end is a plain fade. There is no final burst.
+5. **VFX:** the blades are spinning crescent daggers with short blue trails. On hit: a red flash and damage numbers; the outer-band hits show a **⊘ Anti-Heal icon** over the target (f121). The ring plus orbiting blades read as a "blade storm"; the look isn't overly distinctive.
+6. **Sound:** none. It suggests a whirr while active and quick thunks per hit.
+7. **Numbers:**
+   - Hits of **122, 127, 114**, then **236** (an outer-band hit with the bonus) on one dummy (f121–f127).
+   - Fine print: each shot does 36 + 19%. Targets in the outer ring take +18 + 9.5% and are **Anti-Healed for 6 s**.
+8. **Ends / combo:**
+   - It ends after 2 s.
+   - Combo: dagger-teleport (Phantom Dagger recast) into a group, then Death Blossom, keeping enemies at the ring edge for the bonus and Anti-Heal. Trickshot's ground, then Blossom, is also natural because grounded targets can't leave the ring.
+   - Allies: unaffected.
+
+**Key frames:** `dancer/ult_0027.jpg` (ring starts small), `ult_0029.jpg` (ring growing), `ult_0033.jpg` (full ring, first blades), `ult_0035.jpg` (blade release pose), `ult_0041.jpg` (moving with ring attached), `ult_0047.jpg` (blades crossing to a target), `ult_0121.jpg` (hit 122 with Anti-Heal icon), `ult_0125.jpg` (multi-hit numbers), `ult_0127.jpg` (outer-band 236).
+
+**Build notes:**
+- **What to build:** X = a self-centred 3 bh ring. It grows for 0.4 s, then auto-fires at every enemy inside for 2 s (up to 5 hits each). The outer 25% band adds bonus damage and Anti-Heal. She moves freely throughout.
+- **Bond:** each blade that hits a hunter adds about 0.06, and an outer-band hit adds about 0.1, capped at **0.7** per cast. Five hits on one target gives about 35%; holding two at the edge gives about 70%. It rewards positioning, not just pressing.

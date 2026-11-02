@@ -360,3 +360,50 @@ JSON should keep the old name, but changing the JSON is cleaner). No "Dolm" in t
 5. **Landslide:** does the dash itself damage or push enemies it passes through, before the rock launches?
 6. **Commentary:** spoken tips may add timing details (for example the jump-charge window). Install whisper and
    transcribe `audio.wav` if needed.
+
+## Ultimate (on X)
+
+**Source:** Tetra, Tetraform, from the commentated guide. Frames are in `/home/claude/svvid/ult/breah/` at 10 fps (frame N = 141 s + (N-1)/10 of the guide video). Earlier 4 fps refs are `frames/0571`–`0677`.
+
+**Card** (read at full size, guide at 142.5 s), 35 s, 25 mana:
+
+> TAP to create a giant wall of rocks. Casting this over Abyss will also create temporary terrain. HOLD and drag to position the wall at your desired angle. Rocks spawn after a short delay, from the center outward, and Slow nearby enemies for a brief duration. Punch rocks with Quake Punch (LMB) to launch them, dealing damage and shredding Armor.
+
+1. **Input:**
+   - **Tap:** the wall is placed perpendicular to her aim, at the cursor.
+   - **Hold and drag:** the press point fixes the wall's centre, and dragging the cursor **rotates** the wall around that centre. Release to cast.
+   - In f35–f41 the cursor swings left (red line) while the preview line pivots.
+2. **Aim:**
+   - The centre is **at the cursor** (clamped).
+   - The wall is about 10–12 bh long and one rock thick.
+   - She can move while aiming. The cast itself is instant on release.
+3. **Reticle / telegraph:**
+   - A thin **white line with inward-pointing chevrons** along it.
+   - A small circle at the centre point.
+   - It shows only to the caster while held.
+   - After release, enemies see **orange cracks and fire puffs** along the line for about 0.2 s before the rocks rise.
+4. **Animation beats:**
+   - f35–f44: the hold and drag preview.
+   - f45 (release): fire puffs along the line with orange crack lines.
+   - f47–f51 (0.4 s): rock spikes **erupt from the centre outward**, each with a small flame burst.
+   - f55–f59: the full ridge of about 12 tall dark basalt spikes with glowing orange bases.
+   - It stood for at least about 5–6 s in the footage.
+   - Over the Abyss (guide about 161–169 s): a sand-coloured walkway with spikes along both sides appears as walkable terrain.
+5. **VFX:** a line of fire puffs, then rocks rising centre-out, then a rock ridge. Rocks are generic. The look of our Breah's earth (Dolm) is ours to keep.
+6. **Sound** (commentary audio, not transcribed: no whisper or vosk installed): it suggests a ground rumble and staggered rock cracks.
+7. **Numbers:**
+   - 35 s and 25 mana.
+   - The slow is "brief".
+   - Punched rocks deal Quake Punch rock damage (244 each, from the earlier sheet).
+   - Rocks block bodies and projectiles.
+8. **Ends / combo:**
+   - It ends when the rocks expire (duration not shown; at least 5 s) or are punched away.
+   - Combo: wall off a fleeing enemy or cut a fight in half, then **held Quake Punch launches every rock in the lane** (big burst plus Armor shred), or a Volcano Crusher slam launches rocks outward.
+   - Over the Abyss it is a bridge or escape route.
+   - In the guide (f115) it is also dropped inside an allied zone ult to cage enemies.
+
+**Key frames:** `breah/ult_0025.jpg` (before, aim line), `ult_0035.jpg` (hold: chevron line preview), `ult_0041.jpg` (dragged and rotated preview), `ult_0045.jpg` (release: fire cracks), `ult_0047.jpg` (centre rocks erupt), `ult_0051.jpg` (spreading outward), `ult_0055.jpg` (full ridge), `ult_0059.jpg` (finished wall), `ult_0115.jpg` (wall used inside a teammate's zone).
+
+**Build notes:**
+- **What to build:** X = tap for a wall at the cursor perpendicular to aim, or hold and drag to rotate it. There is a 0.2 s crack telegraph, then rocks rise centre-out over 0.4 s (11 bh, a brief slow, blocking terrain, a bridge over gaps). Our E rank-3 "second row and bridge" fold can go back into being a plain E.
+- **Bond:** the wall deals no damage itself. Pay **0.3** for each hunter slowed by the rise, and **+0.15 per rock launched into a hunter** within 4 s (Quake Punch), capped at 0.8. The ult is built to be cashed in with punches, and that's what fills the bar.

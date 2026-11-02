@@ -275,3 +275,37 @@ Files:
 - Is the 360 Smash a fixed distance or up to the cursor? (It stopped short of the cursor once.) Is it invulnerable?
 - Shield health and regeneration, and movement speed while shielding.
 - What is the blue ring on the target before the Smash (0370, 0378)?
+
+## Ultimate (on X)
+
+**Source:** Oath, Earthshatter. Card: "Create a large fissure that damages enemies caught in it", 33.3 s, 30 mana. Frames are in `/home/claude/svvid/ult/bjorn/` (frame N = 855 s + (N-1)/10). Cast 1 at f25; cast 2 at about f81.
+
+1. **Input:** tap. Fine print wasn't found; the old thebackdash text for Oath's ult is a copy of Kingpin's and is wrong.
+2. **Aim:**
+   - A **fixed-length lane toward the cursor**, about 2.5 bh wide and about 8–9 bh long, starting at Oath.
+   - It is not cursor-clamped: the lane ran past the dummy.
+   - He is planted for the wind-up and slam (f25–f31).
+3. **Reticle / telegraph:**
+   - On press (f25), a **cyan outline rectangle** for the whole lane appears, with a cross-line splitting off a **square cell** around Oath.
+   - The lane reads as stacked square cells, each about 2.5 × 2.5 bh.
+   - The outline stays while the fissure travels, so enemies see the whole danger area for about 0.4 s before the first eruption.
+4. **Animation beats:**
+   - f25–f28 (0.4 s): wind-up, hammer raised overhead.
+   - f29: the slam into the near cell, which floods with **gold light**.
+   - f31–f35 (0.4 s): a **bright fire and light streak races down the lane** to the far end.
+   - f35–f39: the cells crack (white zig-zag cracks), and each cell lifts as a **translucent glass-like slab or block**, one after another from near to far (f39: the 2nd cell raised).
+   - The dummy is hit at about f37 (a red burst).
+   - f43 onward: a glowing **yellow zig-zag crack** stays along the lane's centre line for about 10 s (it was gone by f71 of cast 1).
+5. **VFX:** the cyan cell grid, the gold flash, the racing streak, cracking cells that pop up as slabs, and the lingering lightning-crack. The **cyan cell grid with rising glass slabs** is `distinctive`. Ours should keep "a lane erupts near to far, then a scar remains" with our own rock look.
+6. **Sound:** none. It suggests a heavy slam thud, then a rolling rumble that runs down the lane and a crackle while the scar persists.
+7. **Numbers:** the damage number wasn't legible (the dummy was knocked in cast 2). The lingering crack's effect (damage, slow, or just a visual) isn't shown.
+8. **Ends / combo:**
+   - It ends after the eruption. The scar persists for about 10 s, function unknown.
+   - Combo: Barrier Shield to walk forward safely, then Earthshatter down the line of enemies. Thrown-hammer positioning (Purify Zone) also sets up the angle.
+   - Allies: unaffected.
+
+**Key frames:** `bjorn/ult_0023.jpg` (before), `ult_0025.jpg` (cyan lane telegraph), `ult_0027.jpg` (wind-up), `ult_0029.jpg` (slam, gold cell), `ult_0031.jpg` (streak racing), `ult_0035.jpg` (cells cracking), `ult_0037.jpg` (dummy hit), `ult_0039.jpg` (slab rising), `ult_0043.jpg` (zoomed-out lane), `ult_0053.jpg` (lingering crack).
+
+**Build notes:**
+- **What to build:** X = a 0.4 s planted wind-up showing a 2.5 × 9 bh lane toward the cursor, then the fissure erupts cell by cell (about 0.15 s per cell), knocking up each enemy once. It leaves a 10 s scar; suggest a mild slow so it has a function.
+- **Bond:** the first hunter hit adds **0.6**, and each extra hunter adds 0.1, capped at 0.8. The long lane is easy to land on a group, so per-target pay keeps it fair.

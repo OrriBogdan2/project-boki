@@ -227,3 +227,40 @@ The end-of-segment summary screen (`venator/summary_screen.png`, frames 0260-026
 - Is Daze a stun or only a damage-taken mark? The dummy can't show it.
 - Combat Stim's knock reset isn't demonstrated, and no knock happens in the clip.
 - The large faint circle around Ghost: a range ring, or arena art?
+
+## Ultimate (on X)
+
+**Source:** Ghost, Mini Nuke. Card: "Fire a mini nuke at target location", 37.5 s, 40 mana. Frames are in `/home/claude/svvid/ult/venator/` (frame N = 559 s + (N-1)/10). Cast 1 runs f29→f45 on a dummy; cast 2 runs f95→f111 on an empty spot.
+
+1. **Input:** a single tap. There is no hold and no recast. He keeps walking or jumping after the cast (f103: he takes a jump pad while it falls).
+2. **Aim:** **at the cursor**, clamped to a long range (the dummy was about 5 bh away and in range). It is not a skillshot: it lands exactly where the cursor was at cast time and doesn't track.
+3. **Reticle / telegraph:**
+   - While aiming, only the usual thin line to the cursor (f27).
+   - On cast, a **ground disc of radius about 1.8–2 bh** appears at the target (f30): violet fill with a cyan rim.
+   - Over the next 1.1 s the rim becomes a **ring of glyph/rune marks** (f41), and the centre shows a **red-orange hot core**: the bonus-damage centre.
+   - Enemies can see it the whole time. It is a fair dodge window.
+4. **Animation beats:**
+   - f29: a short arm raise and fire.
+   - f30–f44 (1.5 s): the telegraph. A **blue-violet light column** rises over the disc (f36), and a missile (a green-white streak) descends through it (f36–f44).
+   - f45: impact.
+   - f46–f75 (about 3 s): the burning zone.
+   - Total from cast to impact: **1.6 s** in both casts.
+5. **VFX:**
+   - Impact: a green-white flash column and a big yellow damage number.
+   - Zone: a **dark-purple disc with flames**, edged by a bright yellow-green glyph ring at the same radius, for about 3 s. Ticks at about 0.5 s intervals.
+   - The rune ring is `distinctive`. Keep "warning disc → falling shell → fire zone" in our own art.
+6. **Sound:** none. It suggests a rising whistle during the fall, a deep boom on impact and a crackle in the zone.
+7. **Numbers:**
+   - Impact **931** on a centred dummy (f45). Zone ticks **144** (f48–f60).
+   - The dummy was knocked out after about 3 s in the zone (f77, red KO star).
+   - Fine print (thebackdash; older "arcane napalm" wording): 83 + 104% damage, **+50% in the centre**; the zone lasts **3 s** at 42 + 23% per second and **slows**.
+8. **Ends / combo:**
+   - It ends when the zone fades.
+   - Combo: Combat Slide or Ion Cannon to keep enemies in the zone. Throw it at a fight that is already stuck: stunned targets, or a chokepoint.
+   - Allies: no friendly-fire effect is mentioned.
+
+**Key frames:** `venator/ult_0027.jpg` (aim line), `ult_0030.jpg` (disc telegraph appears), `ult_0036.jpg` (light column, falling shell), `ult_0041.jpg` (rune rim, hot centre), `ult_0045.jpg` (impact 931), `ult_0048.jpg` (fire zone, ticks), `ult_0060.jpg` (zone mid-life), `ult_0077.jpg` (KO), `ult_0103.jpg` (empty-ground cast with the red core visible, caster moving).
+
+**Build notes:**
+- **What to build:** X = a cursor-placed artillery strike. Show a 1.6 s readable disc of about 2 bh with a hot centre (+50%), then a 3 s slow and burn zone. The caster stays free to move.
+- **Bond:** the impact adds 0.6 for one enemy hunter caught, or **0.8** for a centre hit or 2 or more enemies. Zone ticks add nothing, so the meter rewards landing the telegraphed hit and not standing in a puddle.

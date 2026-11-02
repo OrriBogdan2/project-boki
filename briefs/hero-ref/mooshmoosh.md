@@ -213,3 +213,45 @@ The end summary (`0292`) shows that player's own keybinds; the default layout is
 - The Empowered idle shot: the pause length and its bonus (range? damage?). Not isolated in the clip.
 - **Backpack:** carry speed, the shield, and drop rules. Not shown.
 - Divine Intervention teleported a standing ally (`0279`), though the card says "if they're knocked". The dummy's state is unclear.
+
+## Ultimate (on X)
+
+**Source:** Elluna, Divine Intervention. Card: "Channel a heal on an ally, teleporting them to you at the end if they're knocked", 41.6 s, 50 mana. Frames are in `/home/claude/svvid/ult/mooshmoosh/` (frame N = 747 s + (N-1)/10). Cast at f25, end at f74.
+
+1. **Input:**
+   - Tap with the cursor over an ally. This is unit-targeted, so you need an ally (or an ally's wisp) under the cursor; f19–f24 show the aim line onto the ally.
+   - Then a **channel of about 5 s** (f25→f74).
+2. **Aim / movement:**
+   - Ally-targeted.
+   - **Elluna can walk during the channel**. She moves several bh in f41–f72, and the tether follows.
+   - A **large gold ring about 7 bh in radius** centred on her marks the tether range. It probably breaks if the ally leaves it; the video doesn't test this.
+3. **Reticle / telegraph:**
+   - Targeting: the usual line to the cursor.
+   - Channel:
+     - a **pink-white light beam** tether from her to the ally;
+     - a small white ring under each of them;
+     - the gold range ring;
+     - green "+" sparkles rising off the ally.
+4. **Animation beats:**
+   - f25: a green plus-burst on the ally.
+   - f26–f73: she holds a channel pose with one raised hand and walks normally.
+   - f74–f75: the end. A **green burst at Elluna's side** and the ally reappears there (teleported).
+   - f77: both stand together, and the green sparkle fades. Recovery is instant.
+5. **VFX:** the tether beam, the range ring, the heal sparkles and the green arrival burst. A healing tether is generic; the crescent-moon motif elsewhere in her kit is the distinctive part, so avoid it.
+6. **Sound:** none. It suggests a soft choir or hum during the channel and a chime and whoosh on the teleport.
+7. **Numbers:**
+   - Card: 41.6 s and 50 mana.
+   - Fine print (thebackdash): heals the ally or allied **Wisp** for 44 + 11.2% **per second for 5 s**. **Wisps are resurrected and teleported to you.**
+   - The heal-tick numbers weren't legible in the frames.
+8. **Ends / combo:**
+   - It ends at 5 s, with the teleport if the ally is knocked or a wisp.
+   - Combo: a save button. Tether a diving or knocked teammate, walk away from danger, and they arrive at your side healed.
+   - Pairs with Rejuvenating Aura thrown on the arrival spot.
+
+**Fine print not found:** whether damage interrupts the channel, whether there's a break range, and whether enemies can stop the teleport.
+
+**Key frames:** `mooshmoosh/ult_0019.jpg` (target line onto an ally), `ult_0025.jpg` (cast: green burst, tether), `ult_0028.jpg` (range ring appears), `ult_0041.jpg` (walking while channelling), `ult_0060.jpg` (mid-channel), `ult_0072.jpg` (late channel), `ult_0074.jpg` (end: arrival burst), `ult_0075.jpg` (ally teleported beside her), `ult_0077.jpg` (after).
+
+**Build notes:**
+- **What to build:** X on an ally (or a downed ally or their wisp): a 5 s heal tether that lets her move, with a range of about 7 bh. At the end a downed ally is teleported to her and revived, or a wisp is resurrected.
+- **Bond:** a support ult can't "land" on enemies. Pay **0.6** on a completed channel, and **0.8** if it rescued a downed ally or wisp. The ally's own bond meter could get +0.2 too.

@@ -206,3 +206,50 @@ Tamsin is not in the rename list; the archetype JSON is already "Tamsin".
 - Does the wall stop at the cursor or at a fixed distance? Can it be re-pressed?
 - Skate max duration and refund rules.
 - The passive name is not shown separately; "Shatter" comes from the LMB card.
+
+## Ultimate (on X)
+
+**Source:** Celeste, Ice Crash. Card: "Become **invulnerable** and create a large slowing zone. Stuns all targets after a delay." 45.8 s, 50 mana. The card shows at **1128–1148 s**, not about 1168 as the task listed; after 1150 s the video moves to unrelated gameplay. Frames are in `/home/claude/svvid/ult/tamsin/` (frame N = 1125 s + (N-1)/10). There are four casts:
+
+| Cast | Start | Stun |
+|---|---|---|
+| 1 | f25 | f57 |
+| 2 | f83 | f117 |
+| 3 | f155 | about f187 |
+| 4 | f195 | f227 |
+
+1. **Input:**
+   - Tap to enter. **Recast ends it early**.
+   - Fine print: if recast "late enough" (about 3.2–3.5 s in), it deals the damage and **stuns everyone in the radius**. Line of sight blocks it.
+   - Every cast in the video waited the full about 3.2–3.4 s.
+2. **Aim / movement:**
+   - **Self-centred.** She is encased in an ice crystal and stays **rooted** for the duration.
+   - The zone is centred on her and doesn't move.
+3. **Reticle / telegraph:**
+   - The zone itself: a **translucent blue disc of about 4 bh radius** that snaps out over about 0.2 s (f25→f27), with a ragged, crystalline edge.
+   - Cracked-ice lines spread through it and brighten as the timer runs (f35→f55). The brightness is the countdown cue for enemies.
+4. **Animation beats:**
+   - f25: a **star-shaped ice crystal** forms around her, with spikes radiating out. She is invulnerable inside it.
+   - f27–f55 (about 3 s): the hold. The zone slows enemies, with stacking slow, and the crack network glows brighter.
+   - f57: the crash. A **blue light pillar** comes down, an ice block encases each enemy in range (the dummy shows **607** and an ice-block stun), and her crystal **shatters into a radial burst of blue shards** about 2 bh (f57–f59).
+   - f61: recovery. The zone is gone and she is free.
+5. **VFX:**
+   - A blue zone with crack lines, a star crystal shell, a shard burst on release and ice blocks on stunned targets.
+   - The 8-point crystal "snowflake star" shell is `distinctive`.
+   - Ours (Tamsin) should use its own frost-shell shape.
+6. **Sound:** none. It suggests a crackling freeze on cast, creaking ice during the hold and a glassy shatter-boom on release.
+7. **Numbers:**
+   - **607** on release (f57).
+   - Fine print: 120 + 125% plus a stun for everything in the radius, and the **slow stacks for up to 3.5 s**.
+   - The stun duration wasn't legible (the dummy stayed encased about 0.5 s).
+8. **Ends / combo:**
+   - It ends on the timer or on a recast.
+   - Combo: Ice Wall pushes enemies into the zone (or traps them inside it), then the crash stun into a Glacial or LMB burst.
+   - It doubles as a full-invulnerability panic button: an early recast gives a short invulnerability without the stun.
+   - Allies: unaffected; no ally buff is mentioned.
+
+**Key frames:** `tamsin/ult_0023.jpg` (before), `ult_0025.jpg` (crystal shell, zone snaps out), `ult_0027.jpg` (full zone), `ult_0035.jpg` (cracks spreading), `ult_0053.jpg` (bright pre-crash), `ult_0057.jpg` (crash: pillar, 607), `ult_0058.jpg` (shard burst), `ult_0059.jpg` (shards, ice-block target), `ult_0061.jpg` (recovery), `ult_0110.jpg` (second cast, mid-hold).
+
+**Build notes:**
+- **What to build:** X = rooted and invulnerable inside a frost shell, with a 4 bh stacking-slow zone. Recast any time to end it. At 3.2 s or later (or automatically at 3.5 s) it releases damage and a stun in the radius, with line of sight checked.
+- **Bond:** each hunter stunned by the release adds 0.4, capped at **0.8**. An early-cancelled (defensive) use gives 0, so the meter only pays for holding your nerve.

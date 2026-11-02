@@ -245,3 +245,45 @@ The in-demo card names differ a little from the end summary (`0604`): "Superchar
 - The Impaling Shot wall stun duration and the charge time to full. The wall case isn't shown cleanly.
 - How a knock "cremates" a burning enemy: VFX or a mechanic?
 - Spirit Walk speed, and whether you can shoot during it.
+
+## Ultimate (on X)
+
+**Source:** Myth, Primal Forces. Card: "Tap to empower your next 3 Supercharged Shots (LMB) with Primal Forces. Primal Forces pierces enemies, has increased range, deals destruction damage, and shreds armor. The Final Shot also deals execution damage." Card: **33.3 s, 40 mana**. Frames are in `/home/claude/svvid/ult/pin/` (frame N = 685 s + (N-1)/10). Cast at f33; the empowered shots land at about f48, f63 and f78. A second round runs about f101–f129.
+
+1. **Input:**
+   - Tap. It's a self-buff with no cast lock.
+   - The payoff is then delivered through **LMB charged shots**: you still draw the bow.
+   - Fine print (thebackdash, an older version named "Virideth's Fury"): **empowered arrows need no charge**, and the buff **lasts 6 s**.
+   - In the video, each shot still shows a short magenta draw of about 0.4–0.8 s.
+2. **Aim:**
+   - The same as LMB: a skillshot to the cursor direction.
+   - Each shot becomes a **long piercing beam** that runs well past the target, at about 1.5× normal range.
+   - She can walk between shots.
+3. **Reticle / telegraph:**
+   - Cast: a **pink-magenta burst** around her (f33).
+   - While empowered, the draw reticle at her feet becomes a **magenta crosshair ring** (f36, f46), and her bow glows pink.
+   - The HUD shows a 3-pip counter on the ult icon.
+4. **Animation beats:**
+   - f33 (0.1 s): the empower flash.
+   - Each shot: the draw (magenta glow builds, about 0.4–0.8 s), then release (f48), a thick magenta beam that appears at once along the whole line, then impact on the target with a **white burst cloud** (f50).
+   - The cadence is about **1.5 s per shot**, so all 3 shots fit in about 4.5 s, inside the 6 s window.
+5. **VFX:**
+   - A thick pink-magenta beam with a white core, lasting about 0.2 s, plus a white flak cloud on impact.
+   - The final shot's beam is the same, with a slightly bigger burst.
+   - A beam-arrow is generic. Our Pin should use our own colour.
+6. **Sound:** none. It suggests a deeper bowstring thrum and a cracking boom per shot.
+7. **Numbers:**
+   - Hits of **463 – 503** on a dummy per empowered shot (f50, f64).
+   - Fine print (older): 220 + 100% Explosive damage per shot, with the **final shot 280 + 105%**.
+   - The current card adds **armor shred** and **execution damage on the final shot**.
+8. **Ends / combo:**
+   - It ends after 3 shots or after 6 s.
+   - Combo: Impaling Shot (knockback or pin) or Rain of Arrows to hold a target, then three piercing beams down the lane, with the final one executing.
+   - Piercing rewards lining enemies up.
+   - Allies: no effect.
+
+**Key frames:** `pin/ult_0031.jpg` (before), `ult_0033.jpg` (empower flash), `ult_0036.jpg` (magenta crosshair draw), `ult_0044.jpg` (draw with pink bow), `ult_0048.jpg` (beam release), `ult_0050.jpg` (white impact, 463), `ult_0062.jpg` (second beam), `ult_0064.jpg` (second impact), `ult_0066.jpg` (follow-through and number).
+
+**Build notes:**
+- **What to build:** X = a self-buff. The next 3 LMB shots (6 s window) become instant full-charge piercing beams at 1.5× range with armor shred, and the 3rd executes below a threshold.
+- **Bond:** since the cast itself is free, pay only on hits. Each empowered shot that hits at least one hunter adds 0.22, and the final shot hit adds 0.12 extra. All three landing gives about **0.78**; a whiff gives nothing.

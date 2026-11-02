@@ -198,3 +198,39 @@ The text was read from the in-game cards at full resolution (`linwick/cards_inga
 - Jetpack: cursor-targeted or fixed distance? Can he act while flying? The landing isn't clear.
 - What resets or ends Blazing, and how long does Burning last on its own? Ticks were still going at 0060 (about 3 s after release).
 - The flamethrower's real range limit and fuel (none visible).
+
+## Ultimate (on X)
+
+**Source:** Felix, Jetpack. Card: "Lift off and fly forward, setting the ground on fire behind you", 25 s, 40 mana. Frames are in `/home/claude/svvid/ult/linwick/` (frame N = 256 s + (N-1)/10). Three casts start at f25, f65 and f127; the third ends in a Flame Shield combo at f137–f139.
+
+1. **Input:** tap. Lift-off is instant. Fine print: **reactivating ends the flight early**.
+2. **Aim:**
+   - The flight starts toward the cursor and **steers toward the cursor while flying**. The fire trails are visibly curved: f34→f38 bends from up-right to up, and the second cast bends as well.
+   - Flight length is about 9–10 bh in about 1.3–1.4 s (about 7 bh/s).
+   - It is not cursor-clamped. He flies the full duration unless recast.
+3. **Reticle / telegraph:** none beyond the normal cursor. Enemies see only the burst and the growing trail.
+4. **Animation beats:**
+   - f25 (0.1 s): a **red-orange ember burst** ring about 1.2 bh around his feet.
+   - f26–f39 (about 1.4 s): he flies low and upright. The trail is laid continuously under him.
+   - The landing has no big impact. He simply continues on foot (f39–f41).
+   - In cast 3 he fires Flame Shield the moment he lands: an orange ring of about 2.2 bh at f137, then a big yellow starburst explosion and a pull at f139.
+5. **VFX:**
+   - The trail is a **molten carpet about 1 bh wide**: yellow-orange cracked lava with dark purple, charred edges and floating embers.
+   - It lasts about **4 s**, then fades from the oldest end.
+   - The lava with purple char is a palette, not a shape, so it isn't strongly distinctive. Still, use our own palette.
+6. **Sound:** none. It suggests a jet roar on lift-off and fire crackle along the trail.
+7. **Numbers:**
+   - Trail ticks **16** on a dummy (earlier sheet). 11 on the shield combo (f139).
+   - Fine print (thebackdash): the fire deals 160 + 44% per second for **4 s**, **slows**, and **builds Ignite quickly**.
+8. **Ends / combo:**
+   - It ends at the end of the flight or on a recast.
+   - Combo: fly through or around enemies to lay a slowing, Igniting carpet, then land on them with **Flame Shield** (pull + Anti-Heal + shield). The pull drags them into the lava.
+   - Escape use: fly away and leave fire behind to block a chase.
+
+**Fine print not found:** whether he can be interrupted or is crowd-control immune while flying, and whether he can cross gaps. The flight looked to be over ground only.
+
+**Key frames:** `linwick/ult_0024.jpg` (before), `ult_0025.jpg` (ember burst lift-off), `ult_0027.jpg` (trail begins), `ult_0034.jpg` and `ult_0038.jpg` (curving trail, steering), `ult_0068.jpg` (second cast, early trail), `ult_0072.jpg` (full trail), `ult_0137.jpg` (lands into Flame Shield ring), `ult_0139.jpg` (shield explosion on the trail).
+
+**Build notes:**
+- **What to build:** X = a 1.4 s steerable flight at about 7 bh/s that follows the cursor with a capped turn rate. It lays a 1 bh lava strip (4 s, slow, Ignite build-up). X again lands early.
+- **Bond:** each distinct enemy hunter that the lava touches adds 0.3, capped at **0.7**. Landing E on someone standing in the lava adds a +0.1 combo bonus, so a full Jetpack→E play fills about 80%.

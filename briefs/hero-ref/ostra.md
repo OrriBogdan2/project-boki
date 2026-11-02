@@ -212,3 +212,38 @@ Ostra is not in the rename list.
 - E cooldown (not legible on the card).
 - Max ranges of the orb and Snap.
 - Does the orb charge gradually, or in steps?
+
+## Ultimate (on X)
+
+**Source:** Void, Black Hole. Card: "Summon a powerful vortex that stuns and pulls enemies toward its center for 3.5s and deals 2.5 damage every 0.1s. **Empowered:** Radius increases from 350 to 500." 58.3 s, 30 mana. Frames are in `/home/claude/svvid/ult/ostra/` (frame N = 1039 s + (N-1)/10). A normal cast at f23; an Empowered cast at about f89.
+
+1. **Input:** tap.
+2. **Aim:** placed **at the cursor**, clamped to range. The cast was about 2–3 bh away, on the dummy, and the vortex centred there.
+3. **Reticle / telegraph:**
+   - On press, a **pale blue translucent dome** of the final radius (350 units, about 2 bh) appears at the target (f23).
+   - **Violet tendrils or a reaching hand** extend from Void to the dome (f27–f30).
+   - About 1.0 s later the dome becomes the vortex (f33).
+   - Empowered: the dome is larger (500 units, about 2.8 bh) with a **hot pink core** (f89–f95).
+4. **Animation beats:**
+   - f23: a hand thrust.
+   - f23–f32 (1.0 s): the telegraph.
+   - f33: the vortex opens. The enemy is **snapped to the centre and stunned** (a pink marker over its head), then held.
+   - f33–f66 (about 3.4 s): a purple spiral disc rotates, with small black debris orbs circling the rim.
+   - f66: it closes with no explosion.
+   - Void is free to act during it (f50: she is shooting).
+5. **VFX:** the blue dome, then a rotating violet galaxy-spiral disc with orbiting black orbs. The "black-hole spiral" is common, but the hand-tendril cast is `distinctive`; drop it.
+6. **Sound:** none. It suggests a rising suction whoosh and a low droning hum during the hold.
+7. **Numbers:**
+   - Card: 2.5 every 0.1 s for 3.5 s, about **87.5 total base**. Stun and pull for 3.5 s. Radius 350, or 500 Empowered.
+   - Fine print: Empowered damage is **Explosive**, so it hits destructibles harder.
+   - Card cooldown 58.3 s, 30 mana.
+8. **Ends / combo:**
+   - It ends after 3.5 s.
+   - Combo: Void Snap (stun) or a Gravity Well bomb (Reactivate to detonate, 180 + scaling) into the clustered, stunned targets. Hands of Fate gets Empowered first for the bigger radius.
+   - Allies: unaffected.
+
+**Key frames:** `ostra/ult_0021.jpg` (aim), `ult_0023.jpg` (blue dome telegraph), `ult_0027.jpg` (tendrils reaching), `ult_0030.jpg` (dome about to snap), `ult_0033.jpg` (vortex opens, pull), `ult_0050.jpg` (hold, Void acting freely), `ult_0066.jpg` (closing), `ult_0089.jpg` (Empowered dome, pink core), `ult_0095.jpg` (Empowered telegraph), `ult_0101.jpg` (Empowered vortex, bigger).
+
+**Build notes:**
+- **What to build:** X = cursor-placed (clamped) 1.0 s dome telegraph, then a 3.5 s pull and stun vortex of about 2 bh (about 2.8 bh when Empowered) with small ticking damage. Ostra is free to act during it.
+- **Bond:** each hunter caught when it opens adds 0.4, capped at **0.8**. A 3.5 s stun is huge, so pay on the catch, not per tick.

@@ -389,3 +389,40 @@ Vireo is not one of the renamed heroes in this pass, so there is nothing to list
    between placing and committing.
 7. **Static from the spear:** does the spear apply a stack? It isn't shown, and the info panel doesn't
    say.
+
+## Ultimate (on X)
+
+**Source:** Joule, Eye of the Storm. Card: "Launch into the air, then pick a location on the ground to forcefully land", 37.5 s, 50 mana (training-range numbers). Ult study frames are in `/home/claude/svvid/ult/vireo/` (10 fps; frame N = 67 s + (N-1)/10). Two casts: f28→f49 and f81→f97.
+
+1. **Input:** two presses. The first press launches her straight up. A second press (or click) picks the landing spot, and she crashes down there. The airborne phase lasted about 1.6–2.0 s in both casts. The video doesn't show whether there is a maximum hover time with an auto-land; see the open questions.
+2. **Aim:** the landing point is **at the cursor**, clamped inside a large range ring centred on the take-off point (ring radius about 8–9 bh at the zoomed-out camera). She is self-cast on take-off and cursor-placed on landing. While she is airborne the camera **zooms out** (f30→f36) so that the whole ring fits on screen.
+3. **Reticle / telegraph:**
+   - On press (f28), a thin **gold range ring** snaps out around her.
+   - Within about 0.4 s the ring's interior is shaded **dark blue-violet**, and the rim gains gold lightning crackle (f34–f45).
+   - The cursor becomes a **small gold bracket reticle**, two curved arcs like a crown, `distinctive`, on the ground (f36).
+   - On landing, a small **gold landing ring** about 1.3 bh in radius flashes at the spot for about 0.1–0.2 s (f47).
+4. **Animation beats (10 fps):**
+   - f28–f31 (0.3 s): crouch, then take-off. A dust puff is left on the ground at the take-off spot (f32).
+   - f32–f46 (about 1.4 s): airborne. Her body is shown up high with an **INVULNERABLE** tag (f45). The world below is dimmed inside the ring.
+   - f47 (0.1 s): the landing marker.
+   - f49 (impact): a **vertical gold light pillar** slams down onto the marker, with a gold shock ring about 1.5 bh and spark spray (f49–f50).
+   - f51+: orange lightning stays on the ground at her feet for about 0.5 s. She is immediately free to fire LMB again (f51 shows a normal shot).
+5. **VFX (functional):** a range ring, a dark interior and a cursor bracket; then a sky-to-ground pillar of light plus a shock ring. The pillar-from-the-sky with a crown reticle is `distinctive`. Ours should keep "a thunder strike from above at the cursor" in our own palette.
+6. **Sound feel:** none audible. It suggests a rising whoosh on launch, an electric hum while airborne and a thunder crack on landing.
+7. **Numbers:**
+   - Card: 37.5 s and 50 mana.
+   - Fine print, from thebackdash.com hunter list (pre-1.0 wording): on landing it deals 40 + 22% damage in an area, Knockback, and **1 Static stack** on each enemy hit. She is **Invulnerable** while she is a storm in the air.
+   - gameleap lists "Thunderstorm [R] 60 s" (an older cooldown).
+   - The earlier sheet saw 115 on a landing.
+8. **Ends / combo:**
+   - It ends on landing.
+   - Combo: land in the middle of a group to give Static and knock them about, then Surge (Shift) through the Static-charged targets.
+   - It also serves as a full-invulnerability dodge and a repositioning tool across gaps.
+
+**Fine print not found:** the max hover time, whether you can cancel, how she treats allies (no ally effect is mentioned), and whether a knock-up versus a knock-back happens. The supervive.wiki.gg page was blocked during research.
+
+**Key frames:** `vireo/ult_0027.jpg` (before cast), `ult_0029.jpg` (range ring snaps out), `ult_0034.jpg` (take-off dust, interior shading), `ult_0036.jpg` (gold bracket reticle), `ult_0045.jpg` (airborne, INVULNERABLE), `ult_0047.jpg` (landing marker), `ult_0049.jpg` (light-pillar impact), `ult_0051.jpg` (recovery, LMB right after).
+
+**Build notes:**
+- **What to build:** X = press to leap and become invulnerable (about 2 s max, with an auto-land at the cursor when time runs out), with a camera zoom-out and a range ring of about 8 bh. Press again (or LMB) to slam at the clamped cursor. The slam is an AoE of about 1.5 bh radius, a knockback and +1 Static (our `mage` charge stacks).
+- **Bond:** each enemy hunter hit by the slam adds 0.35 bond, capped at **0.75** per cast (`Bond.add(h, …)`). Landing on 2 or more enemies fills about 75% of the bar, so the Merge on R follows straight after the slam.

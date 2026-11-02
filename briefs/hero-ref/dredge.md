@@ -244,3 +244,36 @@ Dredge keeps its name; it isn't in the rename list.
 - Whether Iron Smash in the air drives you down (our rank feature). Not shown.
 - What the backstab bonus is worth; not shown separately. Also the max-health gain per knock (the HP bar isn't legible).
 - Whether Buckshot uses ammo or a magazine. No reload is seen in about 20 s of fire, and each shot costs 10 mana.
+
+## Ultimate (on X)
+
+**Source:** Kingpin, Kaiju Blast. Card: "Fire a double energy blast, damaging and anti-healing", 20.8 s, 25 mana. Frames are in `/home/claude/svvid/ult/dredge/` (frame N = 511 s + (N-1)/10). Casts start at f22 and about f83.
+
+**Correction to the earlier sheet:** it is **one press = two waves about 0.6 s apart**, not a tap-then-recast. In f34 and f40 both waves come from the same cast. The second use at about f83 is a new cast after the range's cooldown-reset pad.
+
+1. **Input:** tap. It auto-fires two waves.
+2. **Aim:**
+   - A **cone toward the cursor**, about 100–110° wide and about 3–3.5 bh deep, locked at cast.
+   - He stands planted during the charge; no movement is seen in f22–f41.
+3. **Reticle / telegraph:**
+   - A **translucent white-pink fan** grows outward on the ground from his front over about 1.1 s (f22→f33), with magenta energy crackling on his arms.
+   - The fan is the exact hit area.
+4. **Animation beats:**
+   - f22–f33 (1.1 s): charge, hunched with energy building.
+   - f34: wave 1, a fan of **6 magenta orbs** bursting out to the fan edge in about 0.2 s.
+   - f35–f38: the orbs fade.
+   - f40: wave 2, the same fan again (6 orbs, bluer).
+   - f41–f43: recovery. Total about 2.1 s.
+5. **VFX:** six big glowing teardrop orbs per wave in a fan. On hit: a yellow damage number and green Anti-Heal streaks rising from the target. The fan-of-orbs shape is generic; keep our Dredge colour language.
+6. **Sound:** none. It suggests a rising charge hum, then two heavy "thoom" blasts.
+7. **Numbers:**
+   - Wave 1 **756**, wave 2 **648 + 135** at point blank (f34, f40). That is about 1,540 if every orb lands.
+   - Fine print: 6 slugs per wave, each 35 + 18%, with **Anti-Heal**.
+8. **Ends / combo:** Kaiju Grasp (the pull arrives stunned at your feet), then Kaiju Blast at point blank so every orb of both waves connects. Iron Smash's stun also covers the 1.1 s charge.
+
+**Key frames:** `dredge/ult_0022.jpg` (press), `ult_0026.jpg` (fan telegraph growing), `ult_0033.jpg` (full fan, arms crackling), `ult_0034.jpg` (wave 1 hit, 756), `ult_0035.jpg` (6-orb fan), `ult_0040.jpg` (wave 2 hit, 648), `ult_0041.jpg` (wave 2 fan), `ult_0047.jpg` (recovery).
+
+**Build notes:**
+- **What to build:** X = a 1.1 s planted charge with a visible 105° × 3.3 bh fan, then 2 waves 0.6 s apart of 6 projectiles each, with Anti-Heal.
+- **Bond:** each wave that hits a hunter adds 0.35, so both waves land for **0.7**. Make it per wave, not per orb, so point-blank doesn't overfill.
+- **Source check:** this does match Kingpin's kit (Kaiju Grasp, Iron Smash, Kaiju Blast all appear on the cards), so the "Kingpin" guess for this segment is right.
