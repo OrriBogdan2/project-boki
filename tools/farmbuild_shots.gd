@@ -5,10 +5,22 @@ extends RefCounted
 
 var main: Node
 var dir := ""
+var hm = null             # the Home screen being shot
 
 func _shot(name: String, caption: String) -> void:
 	for i in 3: await main.get_tree().process_frame
+	if main.fade: main.fade.reveal(0.05)      # the boot splash still covers a screen made straight from a tool
+	await main.get_tree().create_timer(0.25).timeout
+	if hm:
+		hm._close_panel()      # the welcome card
+		if hm.day1_box: hm.day1_box.visible = false
+		await main.get_tree().process_frame
+		hm.set_process(false)      # (the hover card and the prompt come back every frame otherwise)
+		if hm.hover_box: hm.hover_box.visible = false
+		hm.prompt_box.visible = false
+		await main.get_tree().process_frame
 	var img := main.get_viewport().get_texture().get_image()
+	if hm: hm.set_process(true)
 	img.save_png("%s/%s.png" % [dir, name])
 	print("FBSHOT %s|%s" % [name, caption])
 
@@ -27,7 +39,14 @@ func _spot(hb: HomeBuild, p: Vector3) -> Array:
 			if hb.fits(hb.held, cs): return cs
 	return []
 
-func _look(home, p: Vector3, zoom: float) -> void:
+## The home builds itself over a few frames when drawing for real: wait until its UI exists.
+func _ready_home(home) -> void:
+	for i in 900:
+		if home.root_ui != null and home.hb != null and home.player != null: break
+		await main.get_tree().process_frame
+
+func _look(home, target: Vector3, zoom: float) -> void:
+	var p := target + Vector3(3.2, 0, 2.6)      # you stand a little way off so the building is in clear view
 	home.ppos = p
 	home.player.position = p
 	home.cam.zoom_to = zoom
@@ -43,6 +62,16 @@ func _sim(home, secs: float) -> void:
 		home.hw.tick(0.05)
 		if i % 100 == 0: await main.get_tree().process_frame
 
+## Runs the farm until a Boki is hammering at a site that already has some swings in (for the mid-build shots).
+func _until_working(home, e: Dictionary, min_got: int) -> void:
+	for i in 120:
+		await _sim(home, 1.0)
+		if not FarmSites.has_site(e): return
+		var working := false
+		for k in home.kins:
+			if k.has("job") and String(k["job"].get("kind", "")) == "build" and String(k["job"].get("phase", "")) == "work": working = true
+		if working and int(e["site"]["got"]) >= min_got: return
+
 func run(m: Node, out_dir: String) -> void:
 	main = m
 	dir = out_dir
@@ -54,11 +83,12 @@ func run(m: Node, out_dir: String) -> void:
 	d["tutorial"] = {"hatched": true, "intro": true}
 	Save.d = d
 	Save.d["gems"] = 500
-	Save.d["stats"] = {"extracts": 1, "bosses": 0, "caught": 0, "harvested": 70, "hatched": 1, "fb_built": 0}
+	Save.d["stats"] = {"extracts": 1, "bosses": 0, "caught": 0, "harvested": 40, "hatched": 1, "fb_built": 0}      # farm level 2
 	Save.d["extracts"] = 1
 	Save.d["mats"] = {"wood": 40, "stone": 30, "fibre": 20}
 	Save.d["items"]["coals"] = 4
 	var home = await main._hb_home()
+	await _ready_home(home)
 	var hb: HomeBuild = home.hb
 	home._close_panel()
 	hb.toggle()
@@ -80,24 +110,30 @@ func run(m: Node, out_dir: String) -> void:
 	home.queue_free()
 	await main.get_tree().process_frame
 	home = await main._hb_home()
+	await _ready_home(home)
 	hb = home.hb
 	home._close_panel()
+	hm = home
+	if main.fade: main.fade.reveal(0.05)
+	await main.get_tree().create_timer(1.0).timeout
 	var L := HomeLayout.of(Save.d)
 	var hp: Vector3 = home.spots["house"]
 	# 1. build mode: the Work tab, locked entries with their requirement
-	_look(home, hp + Vector3(-1, 0, 6), 1.5)
+	_look(home, hp + Vector3(-1, 0, 3), 1.1)
 	hb.toggle()
+	home.cam.zoom_to = 1.1; home.cam.zoom = 1.1
 	hb.cat = "Work"; hb._build_bar()
 	hb.debug_m = Vector2(hp.x - 5.0, hp.z + 6.0)
 	await _shot("01_build_mode", "Build mode, Work tab: the Lumber Camp and Quarry are open at farm level 2, the rest show what unlocks them; prices are material icons")
 	# 2. a valid preview
 	hb.take("lumber_camp")
-	var cc := _spot(hb, hp + Vector3(-6, 0, 5))
+	var cc := _spot(hb, hp + Vector3(-5, 0, 4))
+	home.cam.zoom_to = 0.8; home.cam.zoom = 0.8
 	hb.debug_m = Vector2(cc[0].x + 1.0, cc[0].y + 0.5)
 	hb.tick(0.05)
 	await _shot("02_preview_valid", "Placement preview, valid: green footprint outline, snapping grid, Lumber Camp ghost")
 	# 3. an invalid preview (on the house)
-	hb.debug_m = Vector2(hp.x, hp.z)
+	hb.debug_m = Vector2(hp.x - 1.0, hp.z)
 	hb.tick(0.05)
 	await _shot("03_preview_invalid", "Placement preview, invalid: red outline and the reason floats over it")
 	# 4. place it, Boki build it
@@ -107,11 +143,11 @@ func run(m: Node, out_dir: String) -> void:
 	hb.toggle()
 	home.hw.scan_t = 0.0
 	home.hw.scan()
-	_look(home, HomeLayout.deco_center(HomeLayout.of(Save.d)["deco"][-1]) + Vector3(0, 0, 1.5), 0.9)
+	_look(home, HomeLayout.deco_center(HomeLayout.of(Save.d)["deco"][-1]), 0.6)
 	var camp: Dictionary = {}
 	for e in L["deco"]:
 		if String(e["id"]) == "lumber_camp": camp = e
-	await _sim(home, 22.0)
+	await _until_working(home, camp, 1)
 	await _shot("04_boki_building", "A Boki building the Lumber Camp site: scaffolding, rising walls and a progress bar")
 	var mid := int(camp["site"]["got"]) if camp.has("site") else -1
 	print("FBSHOT  site got %d of %d" % [mid, int(camp["site"]["need"]) if camp.has("site") else 0])
@@ -128,15 +164,24 @@ func run(m: Node, out_dir: String) -> void:
 	hb.toggle()
 	home.hw.scan_t = 0.0
 	home.hw.scan()
-	await _sim(home, 30.0)
+	_look(home, HomeLayout.deco_center(camp), 0.55)
+	await _until_working(home, camp, 1)
 	await _shot("07_upgrade_in_progress", "Upgrading: scaffolding goes up round the working camp with its bar")
 	await _sim(home, 200.0)
 	hb.toggle()
+	hb.upgrade(int(camp["u"]))      # tier 3
+	hb.toggle()
+	home.hw.scan_t = 0.0
+	home.hw.scan()
+	await _sim(home, 260.0)
+	hb.toggle()
+	_look(home, HomeLayout.deco_center(camp) + Vector3(1.8, 0, 0), 0.5)
 	hb.take("quarry")
 	var qc := _spot(hb, HomeLayout.deco_center(camp) + Vector3(3.5, 0, 0))
 	_put(hb, qc)
 	hb.toggle()
 	await _sim(home, 200.0)
+	_look(home, HomeLayout.deco_center(camp) + Vector3(0.6, 0, 0), 0.62)
 	await _shot("08_tier3_beside_tier1", "A tier 3 Lumber Camp (gold plinth, tall pennant, corner lanterns) beside a plain tier 1 Quarry")
 	print("FBSHOT DONE")
 	main.get_tree().quit()

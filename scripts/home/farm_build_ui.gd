@@ -24,7 +24,7 @@ static func outline(root: Node3D, cells: Array, ok: bool) -> void:
 	line.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	line.albedo_color = Color(0.7, 1.0, 0.75, 0.95) if ok else Color(1.0, 0.5, 0.42, 0.95)
 	line.no_depth_test = true
-	var w := 0.07
+	var w := 0.1
 	var xa := float(x0); var xb := float(x1 + 1); var za := float(z0); var zb := float(z1 + 1)
 	for seg in [[xa, za, xb, za], [xa, zb, xb, zb], [xa, za, xa, zb], [xb, za, xb, zb]]:
 		var horiz: bool = seg[1] == seg[3]
@@ -69,16 +69,16 @@ static func note(root: Node3D, cells: Array, text: String) -> void:
 	var l := Label3D.new()
 	l.set_meta("fbui", "note")
 	l.text = text
-	l.font_size = 40
-	l.pixel_size = 0.009
-	l.outline_size = 12
+	l.font_size = 48
+	l.pixel_size = 0.012
+	l.outline_size = 16
 	l.modulate = Color("ffb0a0")
 	l.outline_modulate = Color(0.1, 0.05, 0.05, 0.9)
 	l.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	l.no_depth_test = true
 	l.render_priority = 3
 	var c: Vector2i = cells[0]
-	l.position = Vector3(c.x + 0.5, 2.3, c.y + 0.5)
+	l.position = Vector3(c.x + 0.5, 1.7, c.y + 0.5)
 	root.add_child(l)
 
 ## A little squash and settle on a node that was just placed.
