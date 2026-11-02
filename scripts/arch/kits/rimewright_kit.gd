@@ -170,8 +170,7 @@ func on_dash(use_ex: bool) -> bool:
 		travel(float(h.cdat.get("ex_dist", 5.0)), float(h.cdat.get("ex_time", 0.2)), {"invuln": 0.1, "trail": "ghost"}, true)
 		return true
 	if not spend_dash(false): return true
-	var dir := h.inp["move"] as Vector2
-	if dir.length() < 0.1: dir = h.aim_dir()
+	var dir := dash_dir()
 	rinkrun = {"t": 0.0, "dir": dir.normalized()}
 	m.sfx("rime_run", h.pos, -3.0, 1.0)
 	m.fx.ring(h.pos, 1.0, col_of(dd), 0.3)

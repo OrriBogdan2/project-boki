@@ -427,6 +427,14 @@ func spend_dash(use_ex: bool) -> bool:
 
 ## A travelling dash of a given length and time (the Effects dash, so perfect dodges, riders and
 ## the dash buffer all work as before).
+## The way a plain dash goes: where you're moving (WASD), or the cursor when you stand still or turn on
+## Settings > "Dash toward the cursor". Aimed movement (a grapple, a blink to a spot) uses the cursor instead.
+func dash_dir() -> Vector2:
+	var move: Vector2 = h.inp.get("move", Vector2.ZERO)
+	if move.length() < 0.1 or (h.is_local() and Settings.get_v("dash_to_cursor")):
+		return h.aim_dir()
+	return move.normalized()
+
 func travel(dist: float, t: float, extra := {}, use_ex := false) -> void:
 	var e := {"type": "dash", "speed": dist / maxf(0.02, t), "time": t, "invuln": float(extra.get("invuln", 0.0))}
 	for k in extra:
@@ -683,7 +691,7 @@ func slot_info(slot: String) -> Dictionary:
 			var sd := dash_def()
 			var dmax := h.max_dashes()
 			out.merge({"name": String(sd.get("name", "")), "short": String(sd.get("name", "")).split(" ")[0], "icon": String(sd.get("icon", "dash")), "col": col_of(sd), "desc": String(sd.get("desc", "")),
-				"cd": (1.0 - fposmod(h.dashes, 1.0)) * h.dash_regen() if h.dashes < 1.0 else 0.0, "cd_max": h.dash_regen(), "charges": int(floor(h.dashes)), "max_charges": int(dmax), "verb": "dash", "ready": h.dashes >= 1.0, "full": dash_payoff_ready()}, true)
+				"cd": (1.0 - fposmod(h.dashes, 1.0)) * h.dash_regen() if h.dashes < dmax - 0.001 else 0.0, "cd_max": h.dash_regen(), "charges": int(floor(h.dashes)), "max_charges": int(dmax), "verb": "dash", "ready": h.dashes >= 1.0, "full": dash_payoff_ready()}, true)
 	return out
 
 func e_recastable() -> bool: return false
