@@ -8,13 +8,23 @@ extends ArchKit
 ##   knocked hunter's health (a monster kill, of the monster's).
 ## - LMB (Greatsword): quick slashes that hit twice as hard at the tip; hold for a Searing Wave (it
 ##   fills Rage fast).
-## - RMB, Smash (Adaptive Strike): tap a wound-up Finishing Slam (more to the wounded; its sweet spot is
-##   the payoff, T4, pay_rage, and at rank 3 it also crashes: a burst that heals you, reset by a knock),
-##   hold a charged Lunge (a miss doubles the cooldown), in the air a Meteor Drop (slows; the centre
-##   stunned), during the Warchain's pull a Cinder Spin.
-## - Dash, Rampage (Flame Step): 2 charges of a dash attack the way you face, the tip hits double.
+## - RMB, Smash (Adaptive Strike): tap a wound-up Finishing Slam behind a magenta strike lane (more to
+##   the wounded, who are outlined red while it's ready; its sweet spot crashes: the old Doomfall, a
+##   burst that heals you, reset by a knock: the payoff, T4, pay_rage), hold a charged Lunge (a crouched
+##   wind-up, a lane that grows and turns magenta at full, a rising whine; you can jump while charging;
+##   release flings you forward, a miss doubles the cooldown), in the air a Meteor Drop onto a disc at
+##   the cursor (slows; the centre stunned), during the Warchain's pull a Cinder Spin.
+## - Dash, Rampage (Flame Step): 3 charges of a dash attack the way you face, the tip hits double.
 ## - E, Warchain (Feysteel Chain): a chain to a foe (blighted) or a wall; recast to pull yourself in.
-## No R: that key is the Boki Merge. The old ultimate lives on as the Smash's rank-3 crash.
+## No R: that key is the Boki Merge. The old ultimate lives on as the Finishing Slam's crash (every rank).
+## Matched to the footage in briefs/hero-ref/juggernaut.md; docs/heroes/juggernaut.md.
+
+const SLASH_OUT := Color("ff3df0")     # the slash crescent's magenta edge
+const SLASH_IN := Color("ffe9a0")      # ... and its flame-yellow fill
+const LUNGE_RED := Color("ff4a3a")     # the Lunge lane while charging
+const LUNGE_FULL := Color("ff3df0")    # ... at full
+const DROP_PURPLE := Color("b06aff")   # the Meteor Drop's landing disc
+const EXEC_RED := Color("ff2a2a")      # the wounded-enough-to-finish outline
 
 var enraged_t := 0.0
 var aura: Node3D = null        # the Enraged look: a red shell, a glow, the hunter grown bigger
@@ -43,6 +53,10 @@ var spins := 0
 var chain_lunges := 0
 var haul_slams := 0
 var haul := {}                 # a Haul Slam armed for the end of the pull: {k}
+var drop := {}                 # a Meteor Drop diving onto its disc: {land, t}
+var lunge_full := false        # the Lunge charge reached full (its flash played)
+var drops := 0                 # (tests)
+var last_drop := Vector3.ZERO
 var knock_healed := 0.0        # (tests) health the knock heals gave back
 
 func full_ready() -> bool:
@@ -75,8 +89,9 @@ func gain_rage(v: float) -> void:
 		res = res_max()
 		_enrage_fx()
 
+## Three Rampage charges from rank 1 (the source's Quick Dash has 3).
 func extra_dashes() -> float:
-	return 1.0 if rank("dash") >= 3 else 0.0
+	return 1.0
 
 func _enrage_fx() -> void:
 	var rc := res_col()
@@ -181,6 +196,9 @@ func _tick(dt: float) -> void:
 	if not lunge.is_empty(): _tick_lunge()
 	if not chain.is_empty(): _tick_chain(dt)
 	crash_cd = maxf(0.0, crash_cd - dt)
+	if not drop.is_empty(): _tick_drop(dt)
+	if chain_flying: _tick_chain_flight()
+	_tick_tells()
 	if st.has("bot_haul_at") and m.time >= float(st["bot_haul_at"]):
 		st.erase("bot_haul_at")
 		if rmb_down and not chain.is_empty(): e_recast()     # a bot pulling in with the Smash charged
@@ -215,7 +233,11 @@ func on_knock(t: Hunter, mine: bool) -> void:
 		var hp0 := h.hp
 		h.heal(t.max_hp * float(rd.get("heal_knock", 0.2)))
 		knock_healed += h.hp - hp0
-		m.fx.burst(h.pos + Vector3(0, 1.0, 0), Color("7fe08a"), 16, 2.5, 0.5, -2.0)
+		fx().pillar(h.pos, Color("5ae07a"), 3.6, 0.7, 0.75)
+		fx().star(t.pos + Vector3(0, 1.3, 0), Color("ff2a2a"), 3.2, 0.55, Color(1, 0.85, 0.8))
+		m.fx.word(h.pos + Vector3(0, 2.7, 0), "+%d" % int(round(h.hp - hp0)), Color("7fe08a"), true)
+		m.sfx("dj_heal", h.pos, -4.0, 0.8)
+		if h.is_local() and m.hud: m.hud.flash(Color(1, 0.1, 0.05), 0.12)      # the red tint of a kill
 	var key := t.get_instance_id() if is_instance_valid(t) else -1
 	if crash_hit.has(key) and m.time - float(crash_hit[key]) <= float(crash_def().get("reset_t", 2.0)):
 		crash_hit.erase(key)
@@ -247,6 +269,11 @@ func _drop_holds() -> void:
 	h.mel_hold = 0.0
 	slam_w = {}
 	haul = {}
+	drop = {}
+	lunge_full = false
+
+func fx() -> DJFx:
+	return DJFx.of(m)
 
 func wave_k() -> float:
 	var ld := lmb_def()
@@ -311,11 +338,28 @@ func _slash() -> void:
 	var keep := h.wpn
 	h.wpn = h.wpn.duplicate()
 	h.wpn["tip_bonus"] = float(ld["tip"])
+	h.wpn["color"] = SLASH_OUT
 	h._strike(float(ld["dmg"]) * _wk() / m.dmg_mult(h), float(ld["reach"]), float(ld["arc"]), float(ld["kb"]), {})
 	h.wpn = keep
+	# the two-tone crescent (magenta edge, flame-yellow fill), sweeping the other way each swing, and a
+	# white star on anyone caught at the tip
+	var dv := h.aim_dir()
+	fx().crescent(h.pos + Vector3(0, 0.85, 0), dv, float(ld["arc"]), float(ld["reach"]) + 0.2, SLASH_OUT, SLASH_IN, 0.2, 0.0 if slash_n % 2 == 1 else PI)
+	for f in foes_in(h.pos, float(ld["reach"]) + 0.4):
+		var to := Vector2(f.pos.x - h.pos.x, f.pos.z - h.pos.z)
+		if to.length() >= float(ld["reach"]) * 0.7 and absf(dv.angle_to(to)) <= deg_to_rad(float(ld["arc"]) * 0.5):
+			fx().star(f.pos + Vector3(0, 1.1, 0), Color(1, 1, 1), 1.3, 0.2, Color(1, 0.95, 0.8))
+	m.sfx("jug_slash", h.pos, -5.0 if h.is_local() else -9.0, randf_range(0.95, 1.08))
 
 ## The Searing Wave: a held, charged wave of fire that rolls through everyone in a line (full: it
 ## burns and slows).
+var _shots0 := 0
+## The shot this kit just put in the air (a stage projectile), or null.
+func _my_last_shot():
+	if m.shots.size() > _shots0 and m.shots[-1]["by"] == h:
+		return m.shots[-1]
+	return null
+
 func _wave() -> void:
 	var ld := lmb_def()
 	var k := wave_k()
@@ -334,30 +378,14 @@ func _wave() -> void:
 	var stg := StageSpec.parse({"delivery": {"type": "projectile", "speed": float(ld["wave_speed"]), "range": rng, "size": size}, "effects": effs, "modifiers": [{"type": "pierce", "count": 6}]}, "", GrammarReport.new())
 	var c := KinExec.make_cx(m, h, h.kin, h, aim(), _wk(), "primary", "searing_wave")
 	c["silent"] = true
+	_shots0 = m.shots.size()
 	KinExec.run_stage(stg, c)
-	# the fire rolling along its line: a glowing crescent of flame everyone sees travel
+	# the fire rolling along its line: a red standing crescent of flame (pooled) riding the wave's shot
 	var dv := h.aim_dir()
 	var from := h.pos
-	var wn := own_node()
-	var crest := MeshInstance3D.new()
-	crest.mesh = Models.box(size * 2.6, 0.75 + 0.5 * k, 0.5)
-	crest.material_override = Models.glow_mat(Color(Color("ff7a3a").lerp(res_col(), 0.5 if full else 0.0), 0.85))
-	crest.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	wn.add_child(crest)
-	var core := MeshInstance3D.new()
-	core.mesh = Models.box(size * 1.6, 0.4 + 0.3 * k, 0.25)
-	core.material_override = Models.glow_mat(Color(1.0, 0.92, 0.7, 0.95))
-	core.position.z = -0.15
-	core.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	wn.add_child(core)
-	wn.rotation.y = atan2(dv.x, dv.y)
-	var a0 := from + Vector3(dv.x * 0.8, 0.45, dv.y * 0.8)
-	var a1 := from + Vector3(dv.x * rng, 0.45, dv.y * rng)
-	wn.global_position = a0
-	var tw := wn.create_tween()
-	tw.tween_property(wn, "global_position", a1, (rng - 0.8) / float(ld["wave_speed"]))
-	tw.parallel().tween_property(wn, "scale", Vector3(1.25, 1.0, 1.0), (rng - 0.8) / float(ld["wave_speed"]))
-	tw.tween_callback(func(): if is_instance_valid(wn): wn.queue_free())
+	var sd = _my_last_shot()
+	if sd != null: fx().ride(sd, "crescent_bolt", Color("ff3a2a"), Color("ffb070") if not full else Color("fff0b0"), 1.6, size * 2.2)
+	m.sfx("jug_wave", h.pos, -2.0, 1.0 - 0.15 * k)
 	var steps := int(rng / 1.2)
 	for s in steps:
 		var p := from + Vector3(dv.x, 0, dv.y) * (1.0 + 1.2 * s)
@@ -387,6 +415,9 @@ func on_dash(use_ex: bool) -> bool:
 	travel(float(dd["dist"]), t, {"invuln": 0.06, "shove": true, "shove_kb": float(dd["hit_kb"]), "shove_dmg": float(dd["hit_dmg"]) * pk, "trail": "dust", "dir": h.aim_dir()})
 	st["last_dash"] = "rampage"
 	play("jug_dash")
+	for i in 3:      # orange flame streaks behind him
+		m.later(t * 0.3 * i, func(): if is_instance_valid(h): m.fx.spark(h.pos + Vector3(0, 0.9, 0), Vector3(-h.aim_dir().x, 0.15, -h.aim_dir().y), Color("ff9a3a"), 10, 9.0, 25.0, 0.25, 0.0, 1.4))
+	m.sfx("jug_dash", h.pos, -4.0 if h.is_local() else -8.0, 1.0)
 	h.glide_cd = maxf(h.glide_cd, t + 0.35)    # the dash's wind-down: no glider straight out of it
 	m.later(t * 0.85, func(): if is_instance_valid(h) and not h.downed: _tip())
 	m.sfx("ab_whirr", h.pos, -4.0, 0.7)
@@ -400,7 +431,7 @@ func _tip() -> void:
 	var hit := false
 	for f in foes_in(at, float(dd["tip_r"])):
 		hit = true
-		f.hurt(float(dd["tip_dmg"]) * power("dash"), h, {"src": "abil", "ab": "dodge", "tags": ["dodge", "tip"], "kb": dv * float(dd["tip_kb"]), "wallstun": float(dd["tip_stun"]), "melee": true, "crit": true})
+		f.hurt(float(dd["tip_dmg"]) * power("dash") * (1.25 if rank("dash") >= 3 else 1.0), h, {"src": "abil", "ab": "dodge", "tags": ["dodge", "tip"], "kb": dv * float(dd["tip_kb"]), "wallstun": float(dd["tip_stun"]), "melee": true, "crit": true})
 		m.fx.word(f.pos + Vector3(0, 2.2, 0), "TIP", res_col(), false)
 	m.fx.slash(h.pos + Vector3(0, 0.9, 0), atan2(dv.y, dv.x), deg_to_rad(100.0), 2.2, col_of(dd), true)
 	if hit:
@@ -419,7 +450,23 @@ func rmb_auto_t() -> float:
 
 ## Holding past the tap: the Lunge's crouched wind-up pose (held while you charge).
 func rmb_hold_tick(t: float) -> void:
-	if t > float(rmb_def()["hold"]) and anim_id != "jug_lunge_wind" and anim_id != "jug_haul_wind" and not rmb_ctx.get("air", false):
+	var sd := rmb_def()
+	if t > float(sd["hold"]) and not rmb_ctx.get("air", false) and not rmb_ctx.get("e", false):
+		# the Lunge charging: a lane grows ahead of you with a fill, magenta and flashing at full; the
+		# cursor ring fills; a rising whine on the way in, a ping at full
+		var k := lunge_k(t)
+		var ld: Dictionary = sd["lunge"]
+		AimKit.lane(h, "rmb", {"len": float(ld["dist"][1]), "len0": float(ld["dist"][0]), "k": k, "fill": k, "width": 1.3, "col": LUNGE_RED, "col_full": LUNGE_FULL, "tip": true})
+		AimKit.charge(h, k, {"col": LUNGE_RED, "col2": LUNGE_FULL})
+		if anim_id != "jug_lunge_wind" and chain.is_empty():
+			m.sfx("jug_charge", h.pos, -3.0 if h.is_local() else -7.0, 1.0)
+		if k >= 1.0 and not lunge_full:
+			lunge_full = true
+			var d := h.aim_dir()
+			fx().star(h.pos + Vector3(d.x * 0.5, 1.0, d.y * 0.5), LUNGE_FULL, 1.8, 0.22)
+			m.sfx("jug_full", h.pos, -2.0 if h.is_local() else -6.0, 1.0)
+			if h.is_local() and m.cam: m.cam.add_trauma(0.1)
+	if t > float(sd["hold"]) and anim_id != "jug_lunge_wind" and anim_id != "jug_haul_wind" and not rmb_ctx.get("air", false):
 		play("jug_haul_wind" if rmb_ctx.get("e", false) else "jug_lunge_wind")
 		if not chain.is_empty() or rmb_ctx.get("e", false):
 			# charging on the chain: the links glow hot (everyone sees a chain swing is coming)
@@ -452,17 +499,19 @@ func fire_rmb(c: Dictionary) -> void:
 	else:
 		# the Finishing Slam winds up first (you keep aiming); everyone sees the warning over you
 		slam_w = {"t": float(rmb_def()["windup"])}
-		play("jug_slam")                # keyed to the wind-up: the crash lands at 0.5s
-		m.fx.word(h.pos + Vector3(0, 2.9, 0), "!", Color("ff5a3a"), true)
-		m.fx.ring(h.pos, 1.3, Color("ff5a3a"), float(rmb_def()["windup"]))
-		m.sfx("charge", h.pos, -4.0, 0.8)
-		net_ring(h.pos, 1.3, Color("ff5a3a"))
+		play("jug_slam")                # keyed to the wind-up: the strike lands at 0.6s
+		m.sfx("jug_slam_wind", h.pos, -3.0, 1.0)
+		net_ring(h.pos, 1.3, SLASH_OUT)
 
 func _tick_slam(dt: float) -> void:
 	slam_w["t"] = float(slam_w["t"]) - dt
 	if h.stun_t > 0.0 or h.downed or Hex.active(h):
 		slam_w = {}          # interrupted
 		return
+	# the short magenta strike lane ahead of him, filling as the wind-up runs (everyone sees it)
+	var sl: Dictionary = rmb_def()["slam"]
+	var wk := 1.0 - clampf(float(slam_w["t"]) / float(rmb_def()["windup"]), 0.0, 1.0)
+	AimKit.lane(h, "slam", {"len": float(sl["radius"]), "width": 1.9, "fill": wk, "col": SLASH_OUT, "all": true, "chevrons": 2})
 	if randf() < 0.5: m.fx.burst(h.pos + Vector3(0, 2.3, 0), Color("ff5a3a"), 1, 1.0, 0.25, 0.0, 0.8)
 	if float(slam_w["t"]) <= 0.0:
 		slam_w = {}
@@ -494,8 +543,10 @@ func _slam() -> void:
 			if rank("sec") >= int(crash_def().get("rank", 3)) and crash_cd <= 0.0:
 				var at := f.pos
 				m.later(0.08, func(): if is_instance_valid(h): _crash(at))}))
+	AimKit.hide(h, "slam")
 	m.fx.cone(h.pos + Vector3(0, 0.1, 0), dd, float(sl["radius"]), col_of(sd))
-	m.fx.slash(h.pos + Vector3(0, 0.9, 0), atan2(dd.y, dd.x), deg_to_rad(110.0), float(sl["radius"]), col_of(sd), true)
+	fx().crescent(h.pos + Vector3(0, 0.6, 0), dd, 80.0, float(sl["radius"]), SLASH_OUT, SLASH_IN, 0.24, PI * 0.5)
+	m.sfx("jug_slam_hit", h.pos, -1.0, 1.0)
 	m.fx.dust(h.pos + Vector3(dd.x, 0, dd.y) * 2.4, 12)
 	m.fx.ring(h.pos + Vector3(dd.x, 0, dd.y) * 2.6, 0.7, res_col(), 0.2)      # where the sweet spot was
 	Feel.shake(m, "t2", h, h.pos)
@@ -509,7 +560,10 @@ func _lunge(k: float) -> void:
 	var dist := lerpf(float(ld["dist"][0]), float(ld["dist"][1]), k)
 	var t := dist / float(ld["speed"])
 	var dv := h.aim_dir()
+	lunge_full = false
+	AimKit.hide(h, "rmb")
 	travel(dist, t, {"invuln": 0.0, "trail": "dust", "dir": dv})
+	fx().crescent(h.pos + Vector3(0, 0.9, 0), dv, 50.0, 2.0, LUNGE_RED, Color(1, 0.8, 0.6), 0.25)
 	h.fortify_t = maxf(h.fortify_t, t + 0.05)
 	lunge = {"end": m.time + t + 0.02, "dir": dv, "k": k}
 	play("jug_lunge")
@@ -536,6 +590,10 @@ func _tick_lunge() -> void:
 			var c := cx("rmb", "lunge", f.pos, {"at": f.pos})
 			KinExec.apply_foe(stg.effects, f, c, f.pos, stg)
 			m.fx.slash(h.pos + Vector3(0, 0.9, 0), atan2(dv.y, dv.x), deg_to_rad(60.0), 2.4, col_of(rmb_def()), true)
+			# the impact: a huge white burst and a horizontal red slash across them
+			fx().star(f.pos + Vector3(0, 1.1, 0), Color(1, 1, 1), 2.6 + 1.4 * k, 0.3, Color(1, 1, 1))
+			fx().crescent(f.pos + Vector3(0, 1.0, 0), dv.rotated(PI * 0.5), 120.0, 1.6, LUNGE_RED, Color(1, 0.6, 0.5), 0.2)
+			m.sfx("jug_lunge_hit", f.pos, -1.0, 1.0)
 			m.sfx("cleave", f.pos, 0.0, 0.7)
 			Feel.shake(m, "t3", h, f.pos, f)
 			if h.is_local(): Oomph.punch_dir(m, dv, 0.25)
@@ -600,27 +658,78 @@ func _haul_land(k: float) -> void:
 	if h.is_local(): Oomph.punch_dir(m, h.aim_dir(), 0.25)
 	net_ring(at, float(hd["radius"]), Color("ffcf6a"))
 
-## In the air: a downward slam; everyone in it is slowed, the centre takes +50% and is stunned.
+## In the air: a dive onto the disc at the cursor (5m at most from under you); everyone in the burst
+## is slowed, the centre takes +50% and is stunned.
 func _meteor() -> void:
 	var dd: Dictionary = rmb_def()["drop"]
+	var land := _drop_point()
+	var height := maxf(0.0, h.pos.y - land.y)
+	var t := clampf(height / 22.0, 0.1, 0.6)
 	h.gliding = false
-	h.vel = Vector3(h.vel.x * 0.2, -22.0, h.vel.z * 0.2)
+	h.vel = Vector3((land.x - h.pos.x) / t, -22.0, (land.z - h.pos.z) / t)
+	drop = {"land": land, "t": t}
 	play("jug_meteor")
-	m.later(0.12, func():
-		if not is_instance_valid(h): return
-		var at := h.pos
-		var stg := stage("rmb", {"delivery": {"type": "burst", "origin": "caster", "radius": float(dd["radius"])},
-			"effects": [{"type": "damage", "amount": float(dd["dmg"]) * smash_k()}, {"type": "slow", "duration": float(dd["slow_t"]), "strength": float(dd["slow"])}]})
-		run(stg, cx("rmb", "meteor_drop", at, {"no_floor": true, "on_foe": func(f: Ent, _c: Dictionary):
-			if not is_instance_valid(f) or f.dead: return
-			if Vector2(f.pos.x - at.x, f.pos.z - at.z).length() < float(dd["core"]) + f.r:
-				f.hurt(float(dd["dmg"]) * smash_k() * float(dd["core_k"]) * power("sec"), h, {"src": "abil", "ab": "utility", "tags": ["utility", "meteor_core"], "stun": float(dd["stun"]), "dr": true})
-				m.fx.word(f.pos + Vector3(0, 2.3, 0), "CRUSHED", res_col(), false)}))
-		m.fx.ring(at, float(dd["radius"]), col_of(rmb_def()), 0.3)
-		m.fx.ring(at, float(dd["core"]), Color(1, 1, 1, 0.9), 0.2)
-		m.fx.dust(at, 14)
-		m.sfx("ab_slam", at, -1.0, 0.75)
-		Feel.shake(m, "leap", h, at))
+	m.sfx("jug_drop", h.pos, -2.0, 1.0)
+	AimKit.circle(h, "drop", {"at": land, "r": float(dd["radius"]), "col": DROP_PURPLE, "all": true, "ticks": true, "fill": 0.4, "dur": t + 0.05})
+
+## Where a Meteor Drop would land now: the cursor, clamped to the reach from under you, on open ground.
+func _drop_point() -> Vector3:
+	var dd: Dictionary = rmb_def()["drop"]
+	var at := AimMode.point(h, float(dd.get("reach", 5.0)), AimMode.CURSOR, 0.0)
+	if m.world.is_void(at.x, at.z) or m.world.is_block(at.x, at.z):
+		at = Vector3(h.pos.x, at.y, h.pos.z)
+	return ground(at)
+
+func _tick_drop(dt: float) -> void:
+	drop["t"] = float(drop["t"]) - dt
+	if float(drop["t"]) > 0.0 and not h.grounded:
+		return
+	var land: Vector3 = drop["land"]
+	drop = {}
+	if h.downed or KinMerge.active(h):
+		return
+	if h.pos.distance_to(land) > 0.8 and not m.world.is_block(land.x, land.z):
+		h.teleport(land)
+	h.vel = Vector3.ZERO
+	_drop_hit(h.pos)
+
+func _drop_hit(at: Vector3) -> void:
+	var dd: Dictionary = rmb_def()["drop"]
+	drops += 1
+	last_drop = at
+	var stg := stage("rmb", {"delivery": {"type": "burst", "origin": "caster", "radius": float(dd["radius"])},
+		"effects": [{"type": "damage", "amount": float(dd["dmg"]) * smash_k()}, {"type": "slow", "duration": float(dd["slow_t"]), "strength": float(dd["slow"])}]})
+	run(stg, cx("rmb", "meteor_drop", at, {"no_floor": true, "on_foe": func(f: Ent, _c: Dictionary):
+		if not is_instance_valid(f) or f.dead: return
+		if Vector2(f.pos.x - at.x, f.pos.z - at.z).length() < float(dd["core"]) + f.r:
+			f.hurt(float(dd["dmg"]) * smash_k() * float(dd["core_k"]) * power("sec"), h, {"src": "abil", "ab": "utility", "tags": ["utility", "meteor_core"], "stun": float(dd["stun"]), "dr": true})
+			m.fx.word(f.pos + Vector3(0, 2.3, 0), "CRUSHED", res_col(), false)}))
+	fx().star(at + Vector3(0, 0.6, 0), Color(1, 1, 1), 2.6, 0.3, Color(1, 1, 1))
+	fx().crescent(at + Vector3(0, 0.2, 0), h.aim_dir(), 330.0, float(dd["radius"]), DROP_PURPLE, Color("ffd0ff"), 0.3)
+	m.fx.spark(at, Vector3.UP, DROP_PURPLE, 16, 10.0, 70.0)
+	m.fx.dust(at, 18)
+	m.sfx("ab_slam", at, -1.0, 0.75)
+	m.sfx("jug_slam_hit", at, -3.0, 0.8)
+	Feel.shake(m, "leap", h, at)
+	net_ring(at, float(dd["radius"]), DROP_PURPLE)
+
+## The reads that aren't a key press: the wounded outlined red while the Smash is ready (yours only),
+## the landing disc under the cursor while you're in the air with it ready, and the ring round the body
+## while the Searing Wave charges.
+func _tick_tells() -> void:
+	if not h.is_local() or busy() or KinMerge.active(h):
+		return
+	var sl: Dictionary = rmb_def()["slam"]
+	if rmb_ready():
+		for f in foes_in(h.pos, 9.0):
+			if f.max_hp > 0.0 and f.hp / f.max_hp < float(sl["low"]):
+				AimKit.circle(h, "exec%d" % f.get_instance_id(), {"at": f.pos, "r": f.r + 0.4, "col": EXEC_RED, "hot": 0.5, "lw": 0.1})
+		if not h.grounded and drop.is_empty() and not h.gliding:
+			AimKit.circle(h, "drop_aim", {"at": _drop_point(), "r": float(rmb_def()["drop"]["radius"]), "col": DROP_PURPLE, "alpha": 0.7, "ticks": true})
+	if lmb_t > float(lmb_def()["tap"]):
+		var k := wave_k()
+		AimKit.circle(h, "wave", {"self": true, "r": 1.35, "fill": k, "col": Color(1, 1, 1)})
+		AimKit.charge(h, k, {"col": Color("ff6a4a")})
 
 ## During the Warchain's pull: a fiery spin around you that blights everyone it hits.
 func _spin() -> void:
@@ -672,6 +781,7 @@ func cast_e() -> bool:
 	play("jug_chain")
 	var stg := stage("e", {"delivery": {"type": "projectile", "speed": float(ed["speed"]), "range": float(ed["range"]), "size": 0.22, "rope": true},
 		"effects": [{"type": "damage", "amount": float(ed["dmg"])}]})
+	_shots0 = m.shots.size()
 	run(stg, cx("e", "warchain", aim(), {
 		"on_foe": func(f: Ent, _c: Dictionary):
 			if chain.is_empty() and is_instance_valid(f) and not f.dead: _hook(f, f.pos),
@@ -682,20 +792,17 @@ func cast_e() -> bool:
 			else:
 				_start_e_cd()      # hooked nothing: the chain breaks, its cooldown starts
 				m.fx.word(at + Vector3(0, 1.2, 0), "MISS", Color("c0b0a0"), false)}))
-	m.sfx("ab_throw", h.pos, -3.0, 0.8)
+	var sd = _my_last_shot()
+	if sd != null: fx().ride(sd, "hook", Color("ff9a3a"), Color("ffcf6a"), 0.6, 0.15)
+	m.sfx("jug_chain", h.pos, -3.0, 1.0)
 	m.sfx("ab_tether", h.pos, -6.0, 0.7)
 	return true
 
 func _hook(f: Ent, at: Vector3) -> void:
 	var ed := e_def()
 	chain_flying = false
-	var n := own_node()
-	var link := MeshInstance3D.new()
-	link.mesh = Models.box(0.09, 0.09, 1.0)
-	link.material_override = Models.glow_mat(Color(col_of(ed), 0.95))
-	link.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	n.add_child(link)
-	chain = {"target": f, "pos": at, "node": n, "refund": 0.0}
+	chain = {"target": f, "pos": at, "node": null, "refund": 0.0}
+	fx().star(at + Vector3(0, 1.0 if f else 0.5, 0), Color("ffd84a"), 0.9, 0.18)      # the spark at the anchor
 	e_t = float(ed["time"])
 	if f:
 		KitStatus.apply(f, "blt", float(ed["time"]))
@@ -714,15 +821,18 @@ func _tick_chain(_dt: float) -> void:
 		return
 	if f != null:
 		chain["pos"] = (f as Ent).pos
-	var n: Node3D = chain["node"]
-	if is_instance_valid(n):
+	# attached: a straight striped chain, orange and dark links, that stays on as you walk
+	if tells_visible() or f != null:
 		var a := h.pos + Vector3(0, 1.0, 0)
 		var b: Vector3 = (chain["pos"] as Vector3) + Vector3(0, 1.0 if f != null else 0.6, 0)
-		var len := maxf(0.1, a.distance_to(b))
-		n.global_position = (a + b) * 0.5
-		n.visible = tells_visible() or f != null
-		if len > 0.2: n.look_at(b, Vector3.UP)
-		(n.get_child(0) as MeshInstance3D).scale = Vector3(1.0, 1.0, len)
+		fx().chain("war%d" % h.get_instance_id(), a, b, 0.0, Color("ff9a3a"), Color("3a2a22"), 0.13)
+
+## In flight: a loose orange zig-zag from the hand to the hook.
+func _tick_chain_flight() -> void:
+	for s in m.shots:
+		if s["by"] == h and (s["x"] as Dictionary).get("rope", false):
+			fx().chain("war%d" % h.get_instance_id(), h.pos + Vector3(0, 1.0, 0), s["pos"], 1.0, Color("ff9a3a"), Color("ffcf6a"), 0.1)
+			return
 
 func _drop_chain() -> void:
 	var n: Node3D = chain.get("node")
@@ -787,9 +897,11 @@ func e_recast() -> bool:
 ## anyone it hit within 2s makes it ready at once.
 func _crash(land: Vector3) -> void:
 	var cr := crash_def()
-	crash_cd = float(cr["cd"])
+	crash_cd = float(cr["cd_r3"] if rank("sec") >= 3 else cr["cd"])
 	crashes += 1
-	play("jug_slam")
+	play("jug_crash")
+	fx().star(land + Vector3(0, 1.2, 0), Color("ff6a4a"), 3.0, 0.35, Color(1, 0.95, 0.8))
+	fx().crescent(land + Vector3(0, 0.3, 0), h.aim_dir(), 300.0, float(cr["radius"]), Color("ff6a4a"), Color("ffd08a"), 0.3)
 	var r := float(cr["radius"])
 	var before := {}
 	for f in foes_in(land, r):

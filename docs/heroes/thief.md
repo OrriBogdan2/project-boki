@@ -1,82 +1,86 @@
-# Thief (archetype id `thief`, light)
+# Dancer (archetype id `thief`, light)
 
-Branch history: kits2 ported the kit from the source hero, kits2-nor (Nov 2) removed its R. Player-facing
-names and text are ours; the source is named only in this research section, in docs/ARCHETYPES.md and in
-docs/wiki/Inspirations.md.
+Branch history: kits2 ported the kit from the source hero, kits2-nor (Nov 2) removed its R, and
+ext/kitfix-dancer-juggernaut (Nov 2, server update 5) matched it to the gameplay footage and renamed the hero
+from Thief to Dancer. Player-facing names and text are ours; the source is named only in this research
+section, in docs/ARCHETYPES.md and in docs/wiki/Inspirations.md. Ids and file names stay `thief`.
 
 ## Research summary
 
-- **Source hero:** Shiv, from SUPERVIVE (supervive.wiki.gg ability text, levels 2-4 and the patch history per
-  ability). Version chosen: the wiki's current page as read on Nov 1, with the patch notes' shapes where the
-  header and the notes disagree.
-- **Patches that shaped it:** *Patch Week 1 Open Beta* (LMB range 800 -> 850, empowered 925 -> 950), *Patch
-  Open Beta* (the dagger sticks to dynamic objects, +30 health for all).
-- **Disagreements:** the wiki lists the dagger's Quickflip reset at level 3 in the patch note and level 4 in
-  the tooltip (ours: rank 3, our last rank). No source gives Malice's stack cap or duration (ours: 5 Marks, 4s).
-  gamerblurb's Shiv page and esports.gg's hunter list failed to load, so nothing rests on them.
-- **Not reproduced:** mana (the game has none), the dagger sticking to moving props other than hunters and
-  monsters, the Bolas hitting destructibles.
+- **Source hero:** Shiv, from SUPERVIVE. The kit now follows the footage reference sheet
+  (`briefs/hero-ref/dancer.md`, frames at 5 fps) where it disagrees with the wiki text.
+- **The big change:** the source's left click is a ranged bolt from alternating hands that stops at the
+  cursor. Our old signature (Twin Blades, a melee combo) is replaced by **Arc Bolts** (our name, our model).
+- **Not reproduced:** mana (the game has none), the dagger sticking to moving props.
 
 ## Scaling
 
-Shiv's scale (LMB 58, a stack about 15% of a shot, empowered attack 50, bolas 23 (+53 with two), ult shot 25)
-is kept as ratios on our weapons: blades 7 / SMG 4.6 a hit, +8% a Mark, Primed +10, Bola 6 (+13 tangled),
-Jackpot 4.5 a knife. A medium hunter (145) falls in about 4s of steady fire with two Primed hits. Rank 2 is
-the shared step (cooldown -10%, damage +15%); rank 3 carries the source's level 3-4 specials.
+Ratios, not raw numbers: a bolt is 9 (the source basic attack, 137), the empowered bolt is 3.5x (474),
+a Mark is +12% of a bolt (the +17 steps on 137), the Bola is 5 (74) and +13 for a pair (199), a Jackpot blade
+is 5, +4 at the rim (88-108 close, 151-236 at the edge). Cooldown ratios: Vault 4.5s (Cartwheel 4.2),
+Bola 7s (Trickshot 6.7), Shadow Knife 15s (Phantom Dagger 15).
 
 ## Per-slot table
 
 | Slot | Input | What it does (ours) | Source behaviour | Difference and why |
 |---|---|---|---|---|
-| Passive, Marks | none | Every weapon hit puts a Mark on the target (one per 0.3s, max 5, 4s, refreshed); +8% weapon damage per Mark. The fifth Mark sets off Jackpot. A knock heals 15% on top of the shared 10% (25% in all); an assist heals 25% | Malice and Resolve: consecutive hits stack bonus damage; a knock or assist heals 25% | Gold diamonds over the target make the stack readable. The cap and time are ours (the wiki gives none) |
-| Trigger, Jackpot | the fifth Mark | 4 knives at that foe over 0.45s (4.5 each, in sight within 14m); each refreshes every Mark; one free Vault for 4s; rests 8s | Fusillade (R): after a delay up to 5 shots at each nearby enemy over 2s, each resetting stack durations; the outer ring takes bonus damage and anti-heal; 2 weaker dashes | R is the Boki Merge now, so the ult becomes a payoff of the Marks loop. Refresh and the free dash are kept; the all-foes volley, rim ring and blight are dropped (a trigger on one foe cannot also be an area ult) |
-| LMB | tap, hold | Twin Blades (3-hit combo, hold for a spin) or SMG; every hit Marks | Arcslinger, one stack per hit | Weapons are our shared ones |
-| Dash, Vault | Shift | A 3.4m flip, +30% speed until the next hit (2s max); the next hit within 3s is Primed: +10, 2 Marks, Shred (+15% damage taken for 3s); landing it resets Vault | Quickflip: a short dash and speed; the next LMB is empowered; landing it resets the cooldown | As the source |
-| RMB, Bola | tap | 10m, 6 and a Mark; the first foe is Grounded 1.5s (no dash, jump or glide; slowed 25%) and the Bola flies on 5m; a second foe: both stunned 0.9 and +13 (TANGLED) | Chain Bolas | As the source; rank 3 flies 1m further and pools two foes' Marks |
-| E, Shadow Knife | tap, recast | 12m, sticks in the first foe (8, slow 50% for 2.5s) or a wall; recast to step to it; after 5s you step anyway | Farstep Dagger: sticks, slows 50% for 4s, recast to teleport, auto after 6s | Shorter slow and fuse for our TTK; rank 3 refunds 25% (50% in a foe) and a knife in a foe resets Vault |
-| R | none | None. Press R for the Boki Merge | Fusillade | See "Ult choice" |
+| LMB, Arc Bolts | hold | A spinning gold chakram from alternating hands every 0.45s, 34 m/s; it flies to the cursor (12m at most) and fizzles there in a blue-violet puff. A thin white aim line to the cursor with an arrow tick, gold while the next bolt is empowered | Arcslinger: the same, cursor-placed, 0.45s | Range 12m (the footage shows at least 7 bh); no magazine |
+| Passive, Marks | none | Every bolt that hits adds a Mark (up to 8, 4s, refreshed): +12% bolt damage per Mark. A knock heals 15% on top of the shared 10% (25% in all) with a crimson star on the knocked and a green pillar on her | Malice: about +12% of a shot per consecutive hit, still climbing at 8; knock heal with a green pillar | Gold diamonds over the target keep the stack readable (ours) |
+| Trigger, Jackpot | the fifth Mark | A cyan 6.3m ring grows out from her (0.4s), then for 1.2s a blade every 0.2s at each foe inside: 5, +4 past 4m; each blade refreshes every Mark; the Vault comes back; she keeps moving and shooting; rests 10s | Death Blossom (R): a 3.5 bh ring, a blade at every enemy inside every 0.2s for 2s, bonus near the edge, resets Cartwheel | R is the Boki Merge, so it fires off the fifth Mark (kits2-nor's design), shorter |
+| Dash, Vault | Shift | A 2.4m cartwheel (0.25s) the way you move, a white arc traced by hands and feet; +30% speed until the next hit; the next bolt within 3s is empowered: a big blue chakram in a gold lightning streak, 3.5x, 2 Marks, Shred; landing it gives the Vault back | Cartwheel: a short sideways cartwheel, the next LMB empowered, a hit resets it | As the source |
+| RMB, Bola | tap | A 0.4s wind-up (whirled overhead) with a chevron lane showing (1.4m wide, 10.8m long) that follows your aim, then the Bola flies 7m: 5 and a Mark, the first foe Grounded 1.5s with yellow binding rings, and it flies on 3.8m; it bounces once off a wall; a second foe: both stunned 0.9 and +13 | Trickshot: the lane for 0.4-0.6s, Grounded on the first, Stunned on two, bounces off terrain | As the source |
+| E, Shadow Knife | tap, recast | A dagger to the cursor (14m at most): it sticks in the first foe on the way (8, slowed 50% for 2.5s) or lands where you aimed; a white circle marks it; recast blinks you there through 5 cyan afterimages; after 6s you step anyway | Phantom Dagger: sticks or lands, recast teleports with a ghost chain | As the source |
+| R | none | The Boki Merge | Death Blossom | See Jackpot |
 
-## Ult choice
+## Assumptions (where the footage is silent; easy to change in content/archetypes/thief.json)
 
-R is the Boki Merge for every hero (owner, Nov 1), so the Fusillade became the **fifth-Mark trigger**:
-the Thief's whole loop already builds toward five Marks, and a payoff at the top of the stack rewards the same
-play the ult used to ask for, without a button.
+1. **Trickshot input:** a fixed 0.4s cast with the lane, not a hold-and-release. The lane follows the aim during the cast.
+2. **Trickshot stun:** only a second foe stuns; a wall bounce does not count as a second target.
+3. **Arcslinger range:** 12m (about 6.7 bh), clamped; the cursor point is the landing point.
+4. **Mark cap and time:** 8 Marks, 4s each, refreshed by every hit (the footage still climbed at 8). Jackpot fires at 5.
+5. **Cartwheel direction:** the movement direction (WASD), the aim when standing still; the cartwheel turns in the plane of travel.
+6. **Phantom Dagger timer:** 6s, then you step to it anyway (the wiki's rule); no target: it lands at the cursor.
+7. **Death Blossom (Jackpot) and Marks:** its blades refresh Marks but do not add them, and do not count as bolt hits.
+8. **An empowered bolt that misses** is spent (no Vault reset).
 
 ## Combinations
 
-All are scripted in `--kit-combo-check` (which also runs inside `--archetype-check`); the check names are the
-strings it prints.
+All are scripted in `--kit-combo-check` (also inside `--archetype-check`) and `--dancer-combo-check`
+(tools/dancer_jug_check.gd); the check names are the strings it prints.
 
 | Sequence | Result | Check |
 |---|---|---|
-| Vault, then a weapon hit | Primed: +10, 2 Marks, Shred; Vault resets; the speed ends | `combo thief: Vault > hit = Primed + Vault reset` |
-| Shadow Knife into a foe (rank 3) | Vault resets; half the Knife's cooldown back | `combo thief: Knife in a foe (rank 3) = Vault reset + refund` |
-| Shadow Knife, then E | step to them | `combo thief: Knife > E = step to them` |
-| Bola catches two (rank 3) | their Marks pool | `combo thief: Bola on two (rank 3) = pooled Marks` |
-| Bola, then Grounded | no dash, jump or glide | `combo thief: Bola > Grounded = no dash` |
-| Primed hit on 3 Marks | the fifth Mark: Jackpot goes off | `combo thief: Primed hit on 3 Marks = the fifth Mark = Jackpot` |
-| Fifth Mark | 4 knives, every Mark refreshed, rests 8s | `combo thief: 5th Mark = Jackpot burst, Marks refreshed` and `thief Jackpot: resting, a second fifth Mark does nothing` (--archetype-check) |
-| Jackpot, then Vault | a free Vault (no charge) that Primes | `combo thief: Jackpot > Vault = free Vault that Primes` |
-| Jackpot, free Vault, then a hit | Primed hit; Vault resets | `combo thief: Jackpot > free Vault > hit = Vault reset` |
-| Knock or assist | heal (25% in all) | `thief passive: a knock heals (25% in all)` |
+| Vault, then a bolt that hits | empowered: 3.5x, 2 Marks, Shred; Vault back; the speed ends | `combo dancer: Vault > bolt = empowered hit + Vault reset` |
+| Vault > bolt > Vault > bolt | the reset loop | `combo dancer: the reset loop (Vault > bolt > Vault > bolt)` |
+| Vault, then a bolt that misses | spent, no reset | `combo dancer: an empowered bolt that misses is spent` |
+| Shadow Knife into a foe (rank 3) | Vault back; half the Knife's cooldown back | `combo dancer: Knife in a foe (rank 3) = Vault reset + refund` |
+| Shadow Knife, then E | step to them | `combo dancer: Knife > E = step to them` |
+| Bola catches two (rank 3) | their Marks pool | `combo dancer: Bola on two (rank 3) = pooled Marks` |
+| Bola, then Grounded | no dash, jump or glide | `combo dancer: Bola > Grounded = no dash` |
+| Empowered bolt on 2 Marks | 5 Marks: Jackpot | `combo dancer: empowered bolt on 2 Marks = 5 Marks = Jackpot` |
+| Jackpot | blades refresh the Marks, the Vault is back, it rests | `combo dancer: Jackpot blades refresh the Marks and resets the Vault`, `combo dancer: Jackpot rests (no second burst at once)` |
+| Knock or assist | heal (25% in all), star and pillar | `dancer passive: a knock heals (25% in all), star + pillar` |
 
 ## Animation moves
 
-`HunterAnim.KMOVES`: `thf_vault_f/b/l/r` (a tucked flip by the dash direction), `thf_primed`, `thf_bola`,
-`thf_knife`, `thf_arrive`, `thf_volley` (0.7s, the Jackpot burst: the free hand slings the knives, the body
-snapping round). `thf_volley_wind` went with the R. Strips: `--arena-demo=anim_<move>`.
+`KMovesDJ` (scripts/match/kmoves_dj.gd): `thf_lmb_r` / `thf_lmb_l` (the body for each throw: release at
+0.08s, follow-through to 0.22, back by 0.42; the arm is the twin-hold swing), `thf_primed`, `thf_vault_r` /
+`thf_vault_l` (a cartwheel, legs split, 0.55s), `thf_bola` (whirl overhead through the 0.4s lane, sling at
+0.42), `thf_knife` (a spin into a side-arm throw, released at 0.12), `thf_arrive`, `thf_volley` (Jackpot, no
+leg keys so she walks).
+
+## Look and sound (all ours)
+
+- Arc Bolts model: two dark ring blades with swept spikes and a gold inner edge (scripts/match/hero_arms_dj.gd).
+- Effects: scripts/arch/kits/dj_fx.gd and shaders/dj_fx.gdshader, every node pooled: the gold chakram and its
+  comet trail, the empowered blue chakram in a lightning streak, the fizzle puff, the Bola's two weights, the
+  dagger, the cyan afterimage chain, the knock star and heal pillar, the cartwheel arc.
+- Sounds: tools/gen_dj_sfx.py (`dj_*`), synthesized.
 
 ## Engine notes
 
-- Jackpot lives in `ThiefKit._jackpot` / `_jackpot_knife`; numbers in content/archetypes/thief.json
-  `"jackpot"`. It is triggered from `add_mark` / `set_marks` when a count crosses from below 5 to 5.
-- Knives use `src: abil`, so they never stack Marks themselves; the free Vault reuses the `quick` path of
-  `on_dash` (no charge, 2.8m).
-- No `"r"` in the JSON: `ArchKit.use_r` refuses the press, the kit card's R page is the Merge, and the wiki
-  generator shows "Boki Merge" for the R slot.
-- Net: the kit move id rides the hunter snapshot from Net 0.15.0, so remote players see the flips and the burst pose.
-
-## Starting a Boki merge
-
-The Thief holds nothing, but a Jackpot burst already in the air stops when a merge starts (the knives are
-timed releases that check for it). Scripted in `--kit-combo-check` as `merge hold thief:`.
+- Bolts are weapon shots (`h.fire()` with `h.shot_aim = AimMode.CURSOR`); the kit then moves the start to the
+  throwing hand, re-aims at the clamped cursor point, and hangs a `kx` end callback for the impact and the
+  empowered hit. The empowered damage is on the shot itself.
+- The Bola is kit-run (it flies on through its first foe and bounces), with the stage's effects applied on the wrap.
+- Holds cleared by `_drop_holds()` on a merge: `bola_cast`, `jp`.

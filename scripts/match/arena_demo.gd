@@ -31,13 +31,13 @@ const OLD_SMG := {"dmg": 2.76, "rate": 0.07, "speed": 55.0, "mag": 36, "kb": 0.5
 ## --arena-demo=anim_<move>: a strip of frames of one kit move, cropped round the hunter, side by side
 ## (the frame times are in seconds of the demo; the move is triggered at 0.5 unless noted).
 const ANIM_DEMO := {
-	"thf_shot": ["thief", "twin_blades", [0.62, 0.66, 0.7, 0.74, 0.78, 0.82]],
-	"thf_blades": ["thief", "twin_blades", [0.52, 0.58, 0.64, 0.84, 0.9, 0.96]],
-	"thf_vault": ["thief", "twin_blades", [0.5, 0.56, 0.62, 0.68, 0.76, 0.86, 1.0]],
-	"thf_primed": ["thief", "twin_blades", [0.5, 0.6, 0.78, 0.81, 0.85, 0.95]],
-	"thf_bola": ["thief", "twin_blades", [0.5, 0.55, 0.6, 0.65, 0.7, 0.85]],
-	"thf_knife": ["thief", "twin_blades", [0.5, 0.57, 0.63, 0.7, 0.96, 1.02, 1.15]],
-	"thf_volley": ["thief", "twin_blades", [0.5, 0.56, 0.62, 0.68, 0.76, 0.86, 1.0]],
+	"thf_shot": ["thief", "arc_bolts", [0.62, 0.66, 0.7, 0.74, 0.78, 0.82]],
+	"thf_blades": ["thief", "arc_bolts", [0.52, 0.58, 0.64, 0.84, 0.9, 0.96]],
+	"thf_vault": ["thief", "arc_bolts", [0.5, 0.56, 0.62, 0.68, 0.76, 0.86, 1.0]],
+	"thf_primed": ["thief", "arc_bolts", [0.5, 0.6, 0.78, 0.81, 0.85, 0.95]],
+	"thf_bola": ["thief", "arc_bolts", [0.5, 0.55, 0.6, 0.65, 0.7, 0.85]],
+	"thf_knife": ["thief", "arc_bolts", [0.5, 0.57, 0.63, 0.7, 0.96, 1.02, 1.15]],
+	"thf_volley": ["thief", "arc_bolts", [0.5, 0.56, 0.62, 0.68, 0.76, 0.86, 1.0]],
 	"jug_slash": ["juggernaut", "greatsword", [0.42, 0.48, 0.56, 0.78, 0.84, 0.92]],
 	"jug_wave": ["juggernaut", "greatsword", [0.4, 0.8, 1.3, 1.46, 1.52, 1.62, 1.85]],
 	"jug_slam": ["juggernaut", "greatsword", [0.55, 0.75, 0.92, 0.98, 1.02, 1.15, 1.45]],
@@ -105,7 +105,7 @@ static func tick(A: Arena, dt: float) -> void:
 			# kits2: SMG hits on the dummy stack Marks (gold diamonds, one per Mark), Vault Primes the next
 			# hit (the gold glint, PRIMED), then (primed) the Primed hit lands: VAULT RESET
 			if t < 0.05:
-				if P.arch != "thief" or P.wid != "twin_blades": A.set_arch("thief", "twin_blades")
+				if P.arch != "thief" or P.wid != "arc_bolts": A.set_arch("thief", "arc_bolts")
 				A.set_kin("puddlet")
 				P.teleport(D.pos + Vector3(1.6, 0, 1.9))
 				A.home = P.pos
@@ -125,7 +125,7 @@ static func tick(A: Arena, dt: float) -> void:
 			# the Bola wraps the dummy and the heavy dummy beside it: both Grounded, TANGLED, stunned
 			var H: Hunter = A.dummies[2]["h"]
 			if t < 0.05:
-				if P.arch != "thief": A.set_arch("thief", "twin_blades")
+				if P.arch != "thief": A.set_arch("thief", "arc_bolts")
 				A.set_kin("puddlet")
 				P.teleport(D.pos + Vector3(-3.4, 0, 0.2))
 				A.home = P.pos
@@ -176,7 +176,7 @@ static func tick(A: Arena, dt: float) -> void:
 			# kits2-nor: the Thief's fifth Mark on the dummy releases Jackpot: a burst of knives, Marks
 			# refreshed, one free Vault; (jackpotpay) the last knife lands and the payoff goes off
 			if t < 0.05:
-				if P.arch != "thief" or P.wid != "twin_blades": A.set_arch("thief", "twin_blades")
+				if P.arch != "thief" or P.wid != "arc_bolts": A.set_arch("thief", "arc_bolts")
 				A.set_kin("puddlet")
 				P.teleport(D.pos + Vector3(-3.4, 0, 1.4))
 				A.home = P.pos
@@ -236,7 +236,7 @@ static func tick(A: Arena, dt: float) -> void:
 			at_t = PairDemo.tick(A, P, D, t, dt, w)          # Dolm and Ostra (scripts/arch/pair_demo.gd)
 		_ when w.begins_with("anim_"):
 			var mv := w.substr(5)
-			var spec: Array = ANIM_DEMO.get(mv, PairDemo.ANIM.get(mv, ["thief", "twin_blades", [1.0]]))
+			var spec: Array = ANIM_DEMO.get(mv, PairDemo.ANIM.get(mv, ["thief", "arc_bolts", [1.0]]))
 			if t < 0.05:
 				if P.arch != String(spec[0]) or P.wid != String(spec[1]): A.set_arch(String(spec[0]), String(spec[1]))
 				A.set_kin("")
@@ -291,7 +291,7 @@ static func tick(A: Arena, dt: float) -> void:
 		"smg":
 			if not A.has_meta("demo_set"):
 				A.set_meta("demo_set", true)
-				A.set_arch("thief", "twin_blades")
+				A.set_arch("thief", "arc_bolts")
 				P.teleport(D.pos + Vector3(-4.0, 0, 2.5))
 				A.home = P.pos
 				if legacy:

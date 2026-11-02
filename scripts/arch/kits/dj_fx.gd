@@ -250,7 +250,8 @@ func _build_rider(kind: String, col: Color, col2: Color) -> Node3D:
 			# Juggernaut's Searing Wave: a red standing crescent of flame, pushed blade first
 			var cr := _mi(_crescent_mesh(120.0), _mat(M_CRESCENT, col, col2)); cr.name = "Cres"
 			(cr.material_override as ShaderMaterial).set_shader_parameter("progress", 1.0)
-			cr.rotation = Vector3(0, PI, 0)
+			cr.position.z = 0.8
+			cr.scale = Vector3.ONE * 1.3
 			head.add_child(cr)
 		"hook":
 			# the Warchain's head: a barbed iron hook
