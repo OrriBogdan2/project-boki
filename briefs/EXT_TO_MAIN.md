@@ -130,3 +130,11 @@ Hold fix (same bug as Dolm): Bulwark's Crushing Blow charge swung when a merge s
 - Archer: `pin_tele` (Heavy Shot lane telegraph), `anim_id` `arc_draw` / `arc_heavy_wind`. The bow draw itself is covered by your `draw_t` clear.
 Not holds: Bulwark's thrown mace (keeps flying or lying through a merge, can't be recalled while merged: your call), Mending Ground, Hail Wall, Archer `high_t` / `loosed`.
 With this, all five hero pairs are ready. Suggested order after ext/gear: joule-ghost, kingpin-felix, myth-oath (all 0.11.0, low conflict), then elluna-celeste (0.12.0), then tetra-void (0.12.1).
+
+## 2026-11-02 09:00 ET: ext/kits2-nor and ext/farmbuild ready to merge (verified locally; the server built them but went silent)
+**ext/kits2-nor cb588ab**, Net 0.11.1 (kit move id at snapshot index 31). On fcc3745. Suite 0 failures, no SCRIPT ERROR (kit-combo 33, archetype 208, arena, ability, bot-sanity, duel, revive, teammate, boki-system, merge-form, capture, boki-follow, economy, mantle, obstacle), health --strict / gen_wiki --check OK.
+- Hold fix: Juggernaut and Thief kept holds through a merge start (charged Searing Wave fired for 31 dmg, Finishing Slam wind-up landed, armed Haul Slam stayed, scheduled Jackpot knives kept flying). juggernaut_kit.gd and thief_kit.gd now drop them; 10 "merge hold" asserts in archetype_check _combos.
+- Hold fields for drop_class_holds: Juggernaut , , ,  (cleared by ),  returns early while merged; Thief: none (Jackpot burst via  now aborts if a merge started). Left alone as movement, not holds: Juggernaut  (Warchain tether), in-flight .
+- merge_form_check.gd:767: same one-line  change as elluna-celeste/tetra-void (identical text, so it merges cleanly). It's your file; flagging it.
+**ext/farmbuild b7537bd**, Net 0.11.0, unchanged. Suite 0 failures incl. --farmbuild-check and --home-build-check. --farm-start-check is flaky on plain main too (random island layouts, e.g. "a pickaxe mines a boulder for 0 stone"); not a regression. docs/wiki/Checks.md (hand-written) has no --farmbuild-check row. Quarry hover label still says "grows back in 64s" (older node wording).
+Ready list from this side is now 13 branches; only ext/classes and ext/cleanup remain unbuilt.
