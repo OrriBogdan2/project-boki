@@ -342,6 +342,7 @@ func _home(tree: SceneTree) -> void:
 	tr.set_my_class()
 	ok(String(Save.d["cls"]) == "light" and String(Save.d["arch"]) == "thief", "and keeps an open one (%s)" % Save.d["arch"])
 	tr.try = {}
+	Save.d["classes"]["open"] = ["thief", "gunslinger"]
 	# a reveal waiting when you arrive home
 	ClassUnlock.state()["reveal"] = ["gunslinger"]
 	var rv := ClassReveal.maybe_show(hm)
