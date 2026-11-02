@@ -2397,35 +2397,7 @@ func hub_items() -> Array:
 	return items
 
 func _build_hub() -> void:
-	hub = UI.glass(6, 16)
-	hub.mouse_filter = Control.MOUSE_FILTER_STOP
-	var row := UI.hbox(4); hub.add_child(row)
-	var items := hub_items()
-	for i in items.size():
-		var it: Array = items[i]
-		var cb: Callable = it[3]
-		var b := UI.button("", func(): _hub_go(cb, String(it[0])))
-		b.theme_type_variation = "Ghost"
-		b.focus_mode = Control.FOCUS_NONE
-		b.custom_minimum_size = Vector2(62, 58)
-		b.tooltip_text = "%s  (%d)" % [it[1], i + 1]
-		var ic := UI.IconDot.new(String(it[2]), UI.INK, 22.0)
-		ic.position = Vector2(23, 9)
-		b.add_child(ic)
-		var lb := UI.label(String(it[1]), 11, UI.MUTED, UI.semi)
-		lb.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		lb.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
-		lb.offset_top = -19; lb.offset_bottom = -4
-		lb.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		b.add_child(lb)
-		var kc := UI.keycap(str(i + 1), 10)
-		kc.position = Vector2(2, 2)
-		kc.modulate.a = 0.75
-		b.add_child(kc)
-		b.mouse_entered.connect(func(): ic.col = UI.ACCENT_HI; ic.queue_redraw(); lb.add_theme_color_override("font_color", UI.INK))
-		b.mouse_exited.connect(func(): ic.col = UI.INK; ic.queue_redraw(); lb.add_theme_color_override("font_color", UI.MUTED))
-		hub_btns[String(it[0])] = b
-		row.add_child(b)
+	hub = HubBar.build(hub_items(), _hub_go, hub_btns)
 	root_ui.add_child(hub)
 	hub.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT, Control.PRESET_MODE_MINSIZE, 14)
 	hub.grow_vertical = Control.GROW_DIRECTION_BEGIN

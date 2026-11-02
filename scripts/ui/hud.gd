@@ -3034,9 +3034,11 @@ func loot_is(b: Dictionary) -> bool:
 func mouse_on_ui() -> bool:
 	return wheel_open or map_open() or mouse_on_panel()
 
-## The cursor is over one of the item windows (deathbox loot, swap, backpack).
+var ui_extra: Array = []      # other panels that own the mouse (the practice areas' bottom bar)
+
+## The cursor is over one of the item windows (deathbox loot, swap, backpack) or a panel in ui_extra.
 func mouse_on_panel() -> bool:
-	for pn in [loot_panel, swap_panel, pack_panel]:
+	for pn in [loot_panel, swap_panel, pack_panel] + ui_extra:
 		if pn != null and is_instance_valid(pn) and pn.visible and not pn.is_queued_for_deletion() and pn.get_global_rect().grow(6.0).has_point(pn.get_global_mouse_position()):
 			return true
 	return false

@@ -173,6 +173,10 @@ func open_pause(where: String) -> void:
 		v.add_child(b)
 		return b
 	var res: Button = item.call("Resume", "next", close, "Esc", "Primary")
+	var psc = Game.main.screen_node() if where == "match" and Game.main else null
+	var practice: Practice = Practice.of(psc) if psc is Match else null
+	if practice:
+		item.call("Change hero", "swap", func(): close(); PracticeHero.open(practice), Settings.key_cap("hero"))
 	if where != "match":
 		item.call("Inventory", "bag", open_inventory, Settings.key_cap("inventory"))
 	item.call("Settings", "gear", func():
@@ -204,10 +208,7 @@ func open_pause(where: String) -> void:
 		var tut: bool = m.opts.get("tutorial", false) or m.opts.get("training", false)
 		var leave := func():
 			close()
-			m.paused = false
-			if m.player and m.player.out: Life.make_gone(m, m.player)
-			m.result = {"extracted": tut, "why": "left"}
-			m._finish()
+			Practice.leave(m, tut)
 		if tut:
 			item.call("Leave the training area" if m.opts.get("training", false) else "Skip the tutorial", "back", leave)
 		else:
