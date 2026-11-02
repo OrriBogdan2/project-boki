@@ -1657,7 +1657,9 @@ func _emit_shot() -> void:
 		extra["farf"] = [rng * float(wpn.get("far_start", 0.6)), float(wpn["far_mult"]), rng]
 	if AimMode.take(self) == AimMode.CURSOR:
 		life = AimMode.dist(self, rng) / spd      # lands at the cursor, clamped to range (scripts/match/aim/aim_mode.gd)
-	if wpn.get("pierce", false): extra["pierce"] = true; extra["hitset"] = {}      # through everyone in line (Vireo's bolts)
+	if wpn.get("pierce", false):      # through everyone in line (Vireo's bolts)
+		extra["pierce"] = true
+		extra["hitset"] = {}
 	if wpn.has("boom"):
 		extra["boom"] = wpn["boom"]; extra["boom_kb"] = wpn["boom_kb"]
 	if crit_t > 0.0:
@@ -3202,6 +3204,16 @@ var anim_s := {}
 var _anim_dt := 0.0
 var _anim_n := 0
 const DODGE_ANIM := {"light": "phase", "medium": "roll", "heavy": "charge"}
+
+## The rig's dodge pose: a strike's lunge, a rush, the kit's own (Slipstep's slide), else the class's.
+func _dodge_anim() -> String:
+	if not strike_at_end.is_empty():
+		return "lunge"
+	if move_kind in ["rush", "rinkrun"]:
+		return "rush"
+	var own := ak.dodge_anim() if ak else ""
+	return own if own != "" else String(DODGE_ANIM.get(cls, "roll"))
+
 func _anim_state(stretch: float) -> void:
 	var s := anim_s
 	s["vel"] = vel; s["face"] = face
@@ -3210,7 +3222,7 @@ func _anim_state(stretch: float) -> void:
 	s["diving"] = diving
 	s["rolling"] = roll_t > 0.0
 	s["dash_dir"] = roll_dir
-	s["dash_kind"] = "lunge" if not strike_at_end.is_empty() else ("rush" if move_kind in ["rush", "rinkrun"] else String(DODGE_ANIM.get(cls, "roll")))
+	s["dash_kind"] = _dodge_anim()
 	s["crouch"] = crouch_k
 	s["downed"] = downed
 	s["ledge"] = grap.size() > 0
@@ -3360,7 +3372,8 @@ func render(delta: float, alpha: float) -> void:
 	var tc: Color = Data.TEAM_COLORS[team % Data.TEAM_COLORS.size()]
 	if roll_t > 0.0:
 		ghost_t -= delta
-		if ghost_t <= 0.0 and model.visible:
+		var kit_trail := ak != null and ak.own_dash_trail()     # the kit draws its hero's own after-images
+		if ghost_t <= 0.0 and model.visible and not kit_trail:
 			ghost_t = 0.028
 			m.fx.ghost(position, face, tc, float(cdat["scale"]))
 	elif gliding:

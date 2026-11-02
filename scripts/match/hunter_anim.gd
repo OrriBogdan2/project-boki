@@ -1036,7 +1036,8 @@ func update(dt: float, s: Dictionary) -> void:
 ## turns about the hips: forward flip, side flip, spin), sq (squash; negative stretches), legs
 ## [hl kl hr kr] with lw (their weight), fl / fr (a free hand's place from its shoulder) with hw / rw,
 ## blade (the greatsword's yaw, pitch, roll, like SWINGS) with bw, rad (the blade's reach), gp (a
-## gun's extra pitch). A move with "hold": true stays on its last key until another replaces it.
+## gun's extra pitch), wa / wo (a held weapon's extra pitch, yaw, roll and offset).
+## A move with "hold": true stays on its last key until another replaces it.
 const KMOVES := {
 	# ---------------------------------------------------------------- Juggernaut
 	# the Searing Wave let go: the raised blade carves down and forward, a long low lunge after it
@@ -1390,7 +1391,7 @@ static func km_sample(id: String, tt: float) -> Dictionary:
 		if la.is_empty(): la = lb
 		if lb.is_empty(): lb = la
 		out[c] = [lerpf(la[0], lb[0], u), lerpf(la[1], lb[1], u), lerpf(la[2], lb[2], u), lerpf(la[3], lb[3], u)]
-	for c in ["fl", "fr", "blade"]:
+	for c in ["fl", "fr", "blade", "wa", "wo"]:
 		var has_a := pa.has(c); var has_b := pb.has(c)
 		if not has_a and not has_b: continue
 		var va2: Vector3 = pa.get(c, pb.get(c)); var vb2: Vector3 = pb.get(c, pa.get(c))
@@ -1635,6 +1636,12 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 		gpos = gpos.lerp(Vector3(0.12, 0.42, -0.02), fk)
 		ay = lerpf(ay, 1.57, fk)
 	if not melee:
+		if km.has("wa"):          # a kit move's weapon pivot: extra pitch, yaw, roll about the grip (KMovesCare)
+			var wa: Vector3 = km["wa"]
+			ap += wa.x
+			ay += wa.y
+			ar += wa.z
+		if km.has("wo"): gpos += km["wo"] as Vector3
 		gbas = Basis.from_euler(Vector3(ap, ay, ar))
 		ap = lp; ay = ly; ar = 0.0
 	# emotes: the weapon goes away, the hands do the talking
@@ -1989,13 +1996,16 @@ func _reload_mag(r: float) -> void:
 # ==================================================================== fidgets
 ## Picks a fidget now and then while standing still: each class and race has its own.
 func _tick_fidget(dt: float, still: float, s: Dictionary) -> void:
+	# a kit move playing (a held channel pose too) owns the hands: no fidget may override its pose
+	var kit_pose := not km.is_empty()
 	if fidget != "":
 		fidget_t += dt
-		if fidget_t >= fidget_dur or still < 0.6 or float(s.get("fired", 99.0)) < 0.5 or String(s.get("emote", "")) != "":
+		var interrupted := still < 0.6 or float(s.get("fired", 99.0)) < 0.5 or String(s.get("emote", "")) != ""
+		if fidget_t >= fidget_dur or interrupted or kit_pose:
 			fidget = ""
 			fidget_wait = 4.0 + _rand() * 7.0
 		return
-	if idle_t < 2.5 or still < 0.9:
+	if idle_t < 2.5 or still < 0.9 or kit_pose:
 		return
 	fidget_wait -= dt
 	if fidget_wait > 0.0:

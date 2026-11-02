@@ -1,41 +1,47 @@
 extends RefCounted
-## --vv-shots --shots-dir=<dir> [--vv-hero=mage|gunslinger] [--vv-tag=v2|before]: screenshots of Vireo's and
-## Venator's abilities in a live Arena match (run under xvfb with a renderer): for each ability the
-## telegraph or reticle while aiming, the key animation frame and the impact, plus a 4-6 frame
-## animation strip per move (anticipation, release, follow-through, recovery) cropped round the hero.
-## Writes <dir>/MANIFEST_<hero>_<tag>.txt lines "<name>/<tag>|<file>|<caption>" (strips under /anim).
-## Uses only long-standing match and kit calls, so the same file also shoots "before" frames on main.
+## --vv-shots --shots-dir=<dir> [--vv-hero=mage|gunslinger] [--vv-tag=v2/polish]: screenshots of Vireo's
+## and Venator's abilities in a live Arena match (run under xvfb with a renderer). Each moment is taken at
+## the default gameplay zoom and again as a close-up crop round what it shows; every move also gets a
+## 4-6 frame strip cropped round the hero (anticipation, release, follow-through, recovery). Files go
+## straight into <dir> as <hero>_<name>.png, and <dir>/MANIFEST_<hero>.txt gets one line per file:
+## "<hero>/<tag>|<file>|<caption>". Uses only long-standing match and kit calls.
+
+const DT := 1.0 / 60.0
+const STRIP_CROP := Vector2i(120, 140)       # px round the hero for a strip frame (scaled 2.5x)
+const CLOSE_CROP := Vector2i(320, 220)       # px round the subject for a close-up (scaled 2x)
 
 var main: Node
 var m: Match
 var P: Hunter
 var T: Hunter
 var dir := ""
-var tag := "v2"
+var tag := "v2/polish"
 var who := "mage"
-var name_ := "vireo"
+var hero_name := "vireo"
 var home := Vector3.ZERO
 var lines: Array = []
 var strips := {}               # strip file -> Array of Image
-var t := 0.0
-const DT := 1.0 / 60.0
 
 func run(main_node: Node) -> void:
 	main = main_node
 	for a in OS.get_cmdline_user_args():
-		if String(a).begins_with("--shots-dir="): dir = String(a).substr(12)
-		if String(a).begins_with("--vv-hero="): who = String(a).substr(10)
-		if String(a).begins_with("--vv-tag="): tag = String(a).substr(9)
-	name_ = "vireo" if who == "mage" else "venator"
-	var fxt := who == "fxtest"
-	if fxt: who = "mage"; tag = "fxtest"
+		var arg := String(a)
+		if arg.begins_with("--shots-dir="):
+			dir = arg.substr(12)
+		if arg.begins_with("--vv-hero="):
+			who = arg.substr(10)
+		if arg.begins_with("--vv-tag="):
+			tag = arg.substr(9)
+	hero_name = "vireo" if who == "mage" else "venator"
 	DirAccess.make_dir_recursive_absolute(dir)
 	await _setup()
-	if fxt: await _fxtest()
-	elif who == "mage": await _vireo()
-	else: await _venator()
-	var f := FileAccess.open(dir.path_join("MANIFEST_%s_%s.txt" % [name_, tag]), FileAccess.WRITE)
-	for l in lines: f.store_line(l)
+	if who == "mage":
+		await _vireo()
+	else:
+		await _venator()
+	var f := FileAccess.open(dir.path_join("MANIFEST_%s.txt" % hero_name), FileAccess.WRITE)
+	for l in lines:
+		f.store_line(l)
 	f.close()
 	print("VVSHOTS %d in %s" % [lines.size(), dir])
 	main.get_tree().quit(0)
@@ -48,7 +54,8 @@ func _setup() -> void:
 	await m.start(o)
 	m.set_process(false)
 	P = m.player
-	for mb in m.mobs: mb.queue_free()
+	for mb in m.mobs:
+		mb.queue_free()
 	m.mobs.clear()
 	var fade = main.get("fade")
 	if fade != null:
@@ -56,7 +63,8 @@ func _setup() -> void:
 	home = _spot(P.pos)
 	T = m.make_hunter("T", 5, "medium", "Target", "idle", {}, home + Vector3(7.0, 0, 0), {"arch": "none"})
 	for x in m.hunters:
-		if x != P and x != T: x.teleport(home + Vector3(-30, 0, 30))
+		if x != P and x != T:
+			x.teleport(home + Vector3(-30, 0, 30))
 	await _reset(7.0)
 
 ## A flat stretch of island away from the start (as tools/aimkit_shots.gd).
@@ -64,205 +72,461 @@ func _spot(start: Vector3) -> Vector3:
 	var W = m.world
 	for z in range(6, W.h - 6, 3):
 		for x in range(6, W.w - 18, 3):
-			if Vector2(x - start.x, z - start.z).length() < 24.0:
-				continue
-			var lv: int = int(W.level[W.idx(x, z)])
-			var good := true
-			for dz in range(-4, 5):
-				for dx in range(-3, 15):
-					var i: int = W.idx(x + dx, z + dz)
-					if W.kind[i] != World.T_GROUND or int(W.level[i]) != lv or W.stairs.has(i) or W.walls.has(i) or W.props.has(i) or W.bridge.has(i):
-						good = false; break
-				if not good: break
-			if good:
-				return Vector3(x + 0.5, lv * World.LEVEL, z + 0.5)
+			if Vector2(x - start.x, z - start.z).length() >= 24.0 and _flat(W, x, z):
+				return Vector3(x + 0.5, int(W.level[W.idx(x, z)]) * World.LEVEL, z + 0.5)
 	return start
 
+func _flat(W, x: int, z: int) -> bool:
+	var lv: int = int(W.level[W.idx(x, z)])
+	for dz in range(-4, 5):
+		for dx in range(-3, 15):
+			var i: int = W.idx(x + dx, z + dz)
+			var odd: bool = W.stairs.has(i) or W.walls.has(i) or W.props.has(i) or W.bridge.has(i)
+			if W.kind[i] != World.T_GROUND or int(W.level[i]) != lv or odd:
+				return false
+	return true
+
 func _reset(td: float, tz := 0.0) -> void:
-	P.teleport(home); P.vel = Vector3.ZERO
-	T.teleport(home + Vector3(td, 0, tz)); T.vel = Vector3.ZERO
-	T.hp = T.max_hp; T.stun_t = 0.0; T.inv_t = 0.0
-	for k in ["fire", "sec_hold", "dash_down"]: P.inp[k] = false
+	P.teleport(home)
+	P.vel = Vector3.ZERO
+	T.teleport(home + Vector3(td, 0, tz))
+	T.vel = Vector3.ZERO
+	T.hp = T.max_hp
+	T.armor = 0.0                  # an unarmoured target: crits show as the gold numbers
+	T.stun_t = 0.0
+	T.inv_t = 0.0
+	for k in ["fire", "sec_hold", "dash_down"]:
+		P.inp[k] = false
 	P.inp["move"] = Vector2.ZERO
 	var sp = P.ak.get("sparks")
-	if sp is Dictionary: (sp as Dictionary).clear()
-	if T.has_meta("rat_until"): T.set_meta("rat_until", 0.0)
-	P.ak.cd["rmb"] = 0.0; P.ak.cd["e"] = 0.0; P.ak.ch_rmb = float(P.ak.rmb_charges()); P.dashes = P.max_dashes()
+	if sp is Dictionary:
+		(sp as Dictionary).clear()
+	if T.has_meta("rat_until"):
+		T.set_meta("rat_until", 0.0)
+	P.ak.cd["rmb"] = 0.0
+	P.ak.cd["e"] = 0.0
+	P.ak.ch_rmb = float(P.ak.rmb_charges())
+	P.dashes = P.max_dashes()
+	P.ex_cd = 0.0
 	_aim(T.pos)
-	await _go(0.4)
+	await _go(0.5)
 	T.inv_t = 0.0
 
 func _aim(p: Vector3) -> void:
-	P.inp["aim"] = p + Vector3(0, 0.9, 0); P.inp["aim_y"] = p.y
+	P.inp["aim"] = p + Vector3(0, 0.9, 0)
+	P.inp["aim_y"] = p.y
 
 ## Steps the match `secs`, rendering every frame; `each` runs before each step; `marks` is
-## [[time, kind, file, caption], ...] with kind "full" (the whole view) or a strip file (a crop round the hero).
+## [[time, kind, file, caption, focus], ...]: kind "full" (the view plus a close-up round `focus`, a
+## Callable giving a world point, the hero if left out) or a strip file (a crop round the hero).
 func _go(secs: float, each := Callable(), marks: Array = [], lead := 3.5) -> void:
 	var t0 := 0.0
 	var todo := marks.duplicate()
+	todo.sort_custom(func(x, y): return float(x[0]) < float(y[0]))
 	while t0 < secs:
-		if each.is_valid(): each.call(t0)
-		m.step(DT); t0 += DT
-		P.face = atan2(-(P.inp["aim"].x - P.pos.x), -(P.inp["aim"].z - P.pos.z)) if P.roll_t <= 0.0 else P.face
+		if each.is_valid():
+			each.call(t0)
+		m.step(DT)
+		t0 += DT
+		_park_others()
+		if P.roll_t <= 0.0:
+			P.face = atan2(-(P.inp["aim"].x - P.pos.x), -(P.inp["aim"].z - P.pos.z))
 		m.cam.snap(P.pos + Vector3(lead, 0, 0))
-		for h in m.hunters: h.render(DT, 1.0)
+		for h in m.hunters:
+			h.render(DT, 1.0)
 		await main.get_tree().process_frame
 		while not todo.is_empty() and t0 >= float(todo[0][0]):
 			var mk: Array = todo.pop_front()
-			_take(String(mk[1]), String(mk[2]), String(mk[3]))
+			var focus: Callable = mk[4] if mk.size() > 4 else Callable()
+			_take(String(mk[1]), String(mk[2]), String(mk[3]), focus)
 
-func _take(kind: String, file: String, caption: String) -> void:
+## The Arena's moving dummies walk back toward the player; keep them parked far off so none ends up
+## between the camera and the hero (that was the pink blob filling the last strip frames).
+func _park_others() -> void:
+	for x in m.hunters:
+		if x != P and x != T and x.flat_dist(P) < 26.0:
+			x.teleport(home + Vector3(-30, 0, 30))
+			x.vel = Vector3.ZERO
+
+func _take(kind: String, file: String, caption: String, focus: Callable) -> void:
 	var img := main.get_viewport().get_texture().get_image()
 	if kind == "full":
-		img.save_png(dir.path_join(file))
-		lines.append("%s/%s|%s|%s" % [name_, tag, file, caption])
+		var name_full := "%s_%s.png" % [hero_name, file]
+		img.save_png(dir.path_join(name_full))
+		lines.append("%s/%s|%s|%s" % [hero_name, tag, name_full, caption])
+		var at: Vector3 = focus.call() if focus.is_valid() else P.position + Vector3(0, 0.9, 0)
+		var close := _crop(img, at, CLOSE_CROP, 2.0)
+		var name_close := "%s_%s_close.png" % [hero_name, file]
+		close.save_png(dir.path_join(name_close))
+		lines.append("%s/%s|%s|%s (close-up)" % [hero_name, tag, name_close, caption])
 		return
+	var crop := _crop(img, P.position + Vector3(0, 0.9, 0), STRIP_CROP, 2.5)
+	var strip_file := "%s_%s.png" % [hero_name, kind]
+	if not strips.has(strip_file):
+		strips[strip_file] = []
+		lines.append("%s/%s|%s|%s" % [hero_name, tag, strip_file, caption])
+	(strips[strip_file] as Array).append(crop)
+	_save_strip(strip_file)
+
+## The region `px` round world point `at` on the image, scaled by `zoom`.
+func _crop(img: Image, at: Vector3, px: Vector2i, zoom: float) -> Image:
 	var cam := main.get_viewport().get_camera_3d()
-	var c := cam.unproject_position(P.position + Vector3(0, 0.9, 0))
-	var sz := Vector2i(120, 140)
-	var rg := Rect2i(Vector2i(int(c.x) - sz.x / 2, int(c.y) - sz.y / 2), sz).intersection(Rect2i(Vector2i.ZERO, img.get_size()))
+	var c := cam.unproject_position(at)
+	var corner := Vector2i(int(c.x) - px.x / 2, int(c.y) - px.y / 2)
+	var rg := Rect2i(corner, px).intersection(Rect2i(Vector2i.ZERO, img.get_size()))
 	var crop := img.get_region(rg)
-	crop.resize(sz.x * 5 / 2, sz.y * 5 / 2, Image.INTERPOLATE_BILINEAR)
-	if not strips.has(kind):
-		strips[kind] = []
-		lines.append("%s/%s/anim|%s|%s" % [name_, tag, kind, caption])
-	(strips[kind] as Array).append(crop)
-	_save_strip(kind)
+	crop.resize(int(px.x * zoom), int(px.y * zoom), Image.INTERPOLATE_BILINEAR)
+	return crop
 
 func _save_strip(file: String) -> void:
-	var fr: Array = strips[file]
-	var w: int = (fr[0] as Image).get_width(); var hh: int = (fr[0] as Image).get_height()
-	var out := Image.create(w * fr.size() + 4 * (fr.size() - 1), hh, false, (fr[0] as Image).get_format())
+	var frames: Array = strips[file]
+	var w: int = (frames[0] as Image).get_width()
+	var hh: int = (frames[0] as Image).get_height()
+	var out := Image.create(w * frames.size() + 4 * (frames.size() - 1), hh, false, (frames[0] as Image).get_format())
 	out.fill(Color(0.05, 0.05, 0.07))
-	for i in fr.size():
-		out.blit_rect(fr[i], Rect2i(Vector2i.ZERO, Vector2i(w, hh)), Vector2i(i * (w + 4), 0))
+	for i in frames.size():
+		var fr: Image = frames[i]
+		out.blit_rect(fr, Rect2i(Vector2i.ZERO, Vector2i(fr.get_width(), fr.get_height())), Vector2i(i * (w + 4), 0))
 	out.save_png(dir.path_join(file))
 
+## Strip marks for `file` at each of `times` (the caption goes on the first).
 func _strip(file: String, caption: String, times: Array) -> Array:
 	var out: Array = []
-	for tt in times: out.append([tt, file, file, caption])
+	for tt in times:
+		out.append([tt, file, file, caption])
 	return out
 
-func _merge(a: Array, b: Array) -> Array:
-	var c := a + b
-	c.sort_custom(func(x, y): return float(x[0]) < float(y[0]))
-	return c
+func _on_target() -> Vector3:
+	return T.position + Vector3(0, 1.0, 0)
+
+func _between() -> Vector3:
+	return (P.position + T.position) * 0.5 + Vector3(0, 0.9, 0)
 
 # ------------------------------------------------------------------ Vireo
 func _vireo() -> void:
-	var K = P.ak
-	# LMB: the line to full range with the cursor close, the bolt in flight, the impact; the strip
+	await _vireo_lmb()
+	await _vireo_static()
+	await _vireo_rmb()
+	await _vireo_dash()
+	await _vireo_e()
+
+func _vireo_lmb() -> void:
 	await _reset(7.0)
 	_aim(home + Vector3(3.0, 0, 0))
-	await _go(0.2, Callable(), [[0.15, "full", "lmb_aim.png", "LMB aim: the line runs through a near cursor (3m) on to full range"]])
+	await _go(0.2,
+			Callable(),
+			[[0.15, "full", "lmb_aim", "LMB aim: the line runs through a near cursor (3m) on to full range"]])
 	await _reset(9.0)
-	var hold_fire := func(_t): P.inp["fire"] = true
-	var mk := _merge(_strip("anim_lmb.png", "LMB finger bolts: twist, arm flung out, snap, settle; left then right", [0.02, 0.07, 0.13, 0.35, 0.85, 0.9]),
-		[[0.1, "full", "lmb_bolt.png", "LMB: a jagged bolt from the fingertip (no gun), crackle at the hand"], [0.32, "full", "lmb_impact.png", "LMB impact: splinters spray back toward her; the Static marker over the head"]])
-	await _go(1.0, hold_fire, mk)
+	var hold_fire := func(_t: float): P.inp["fire"] = true
+	var beats := [0.01, 0.03, 0.06, 0.09, 0.2, 0.35]
+	var marks := _strip("anim_lmb_l",
+			"LMB left hand: rest, drawn back to the chest, flung out with the finger pointed,"
+		+ "the recoil snap up, follow-through, settled", beats)
+	var right: Array = []
+	for b in beats:
+		right.append(0.8 + float(b))
+	marks += _strip("anim_lmb_r", "LMB right hand (the finger gun): rest, pulled in, punched out, the wrist "
+		+ "flicked up by the recoil, follow-through, settled", right)
+	marks.append([0.05,
+			"full",
+			"lmb_fire",
+			"LMB release: the arm out, the fingertip crackling with teal arcs, gold sparks at her feet"])
+	marks.append([0.14, "full", "lmb_bolt", "LMB: the jagged teal bolt (about 1.2m) in flight, gold core", _bolt_spot])
+	marks.append([0.3,
+			"full",
+			"lmb_impact",
+			"LMB impact: teal splinters spray back toward her; the Static marker above the HP bar",
+			_on_target])
+	await _go(1.25, hold_fire, marks)
 	P.inp["fire"] = false
-	# Static marker growing; Live sky bolt
+
+func _bolt_spot() -> Vector3:
+	return P.position + Vector3(4.0, 1.0, 0)
+
+func _vireo_static() -> void:
+	var K = P.ak
 	await _reset(6.0)
-	if K.has_method("add_spark"):
-		K.add_spark(T, 2)
-		await _go(0.3, Callable(), [[0.25, "full", "static_2.png", "Static: 2 stacks, the marker's count and sparks on the body"]])
-		K.add_spark(T, 2)
-		await _go(0.3, Callable(), [[0.05, "full", "static_live.png", "Static: the 4th stack calls a sky bolt, they're Live"]])
-	# RMB: the rod held with its fixed lane, the full flash, the throw and impact; strips
+	K.add_spark(T, 1)
+	var one := "Static 1: one pip lit, a bold 1 on a dark disc above the HP bar, 2 body sparks"
+	await _go(0.3, Callable(), [[0.25, "full", "static_1", one, _on_target]])
+	K.add_spark(T, 1)
+	await _go(0.3,
+			Callable(),
+			[[0.25, "full", "static_2", "Static 2: two pips, the count, 4 sparks on the body", _on_target]])
+	K.add_spark(T, 2)
+	var live := _strip("anim_live",
+			"Passive proc: a foe goes Live, her left hand flicked up to the sky as the bolt drops",
+			[0.01, 0.07, 0.15, 0.3, 0.5])
+	live.append([0.06,
+			"full",
+			"static_live",
+			"Static 4: the sky bolt, LIVE above the marker, all pips gold, 8 sparks and arcs",
+			_on_target])
+	await _go(0.6, Callable(), live)
+
+func _vireo_rmb() -> void:
+	var K = P.ak
 	await _reset(6.0)
 	K.press_rmb()
-	var hold_r := func(_t): P.inp["sec_hold"] = true
-	await _go(1.02, hold_r, _merge(_strip("anim_rmb_hold.png", "RMB summon and hold: the rod raised by the shoulder, side-on", [0.03, 0.1, 0.3, 0.7]),
-		[[0.5, "full", "rmb_aim.png", "RMB held: the rod in the hand and a fixed double-rail lane to full range"], [1.0, "full", "rmb_full.png", "RMB full: the white body flash"]]))
+	var hold_r := func(_t: float): P.inp["sec_hold"] = true
+	var marks := _strip("anim_rmb_hold",
+			"RMB summon and hold: the rod arrives in a burst, the arm raises it upright by the shoulder, side-on",
+			[0.02, 0.06, 0.14, 0.4, 0.9])
+	marks.append([0.05,
+			"full",
+			"rmb_summon",
+			"RMB pressed: the copper Storm Rod arrives in her raised hand with a teal crackle and a ring"])
+	marks.append([0.5,
+			"full",
+			"rmb_aim",
+			"RMB held: the rod upright in her hand (no RELOADING), a fixed double-rail lane to full range"])
+	marks.append([1.0, "full", "rmb_full", "RMB full: the white body flash, the lane gold"])
+	await _go(1.02, hold_r, marks)
 	P.inp["sec_hold"] = false
-	await _go(0.8, Callable(), _merge(_strip("anim_rmb_throw.png", "RMB throw: overarm whip, stretch, follow-through, recover", [0.02, 0.08, 0.16, 0.4, 0.7]),
-		[[0.18, "full", "rmb_impact.png", "RMB impact: white-gold blast, shock ring, the target knocked back, an orb left at the impact"], [0.6, "full", "rmb_orb.png", "The charge orb zapping the target with Static"]]))
-	# Shift: the held lane and end ring growing, the release silhouette, the arrival
+	var throw := _strip("anim_rmb_throw",
+			"RMB throw: overarm whip, stretch at the release, follow-through, recover",
+			[0.01, 0.06, 0.12, 0.25, 0.5])
+	throw.append([0.18,
+			"full",
+			"rmb_impact",
+			"RMB impact: a gold blast, teal crackle and a shock ring, the target knocked back",
+			_on_target])
+	throw.append([0.75,
+			"full",
+			"rmb_orb",
+			"The charge orb: a gold core in a teal shell with spinning bands, short teal arcs crackling off it",
+			_orb_spot])
+	await _go(0.8, Callable(), throw)
+
+func _orb_spot() -> Vector3:
+	var motes: Array = P.ak.get("motes")
+	return (motes[0]["pos"] as Vector3) + Vector3(0, 0.6, 0) if not motes.is_empty() else _on_target()
+
+func _vireo_dash() -> void:
+	var K = P.ak
 	await _reset(6.0)
 	_aim(home + Vector3(3.0, 0, 0))
-	P.inp["dash_down"] = true; P.do_dash()
-	var hold_d := func(_t): P.inp["dash_down"] = true
-	await _go(0.62, hold_d, _merge(_strip("anim_dash.png", "Shift: the charging crouch, then the streak and re-forming on arrival", [0.05, 0.3, 0.6]),
-		[[0.25, "full", "dash_aim_mid.png", "Shift held: rails out to max, the ticked end ring partway (short of nothing: the cursor plays no part)"], [0.6, "full", "dash_aim_full.png", "Shift held to full: the end ring at 12.6m, past the 3m cursor"]]))
+	P.inp["dash_down"] = true
+	P.do_dash()
+	var hold_d := func(_t: float): P.inp["dash_down"] = true
+	var marks := _strip("anim_dash",
+			"Shift: the charging crouch, the streak (her gold-teal after-images), re-forming on arrival",
+			[0.05, 0.3, 0.6])
+	marks.append([0.25,
+			"full",
+			"dash_aim_mid",
+			"Shift held: rails out to max, the ticked end ring partway (the cursor plays no part)"])
+	marks.append([0.6, "full", "dash_aim_full", "Shift held to full: the end ring at 12.6m, past the 3m cursor"])
+	await _go(0.62, hold_d, marks)
 	P.inp["dash_down"] = false
-	await _go(0.8, Callable(), _merge(_strip("anim_dash.png", "", [0.05, 0.42, 0.6]), [[0.08, "full", "dash_run.png", "Shift released: a lightning streak, the body a silhouette"], [0.46, "full", "dash_arrive.png", "Shift arrival: a ring burst with spark needles"]]), 6.0)
+	var run := _strip("anim_dash", "", [0.06, 0.42, 0.6])
+	run.append([0.08,
+			"full",
+			"dash_run",
+			"Shift released: a lightning streak, the body a trail of her own gold-teal after-images"])
+	run.append([0.46, "full", "dash_arrive", "Shift arrival: a ring burst with spark needles"])
+	await _go(0.8, Callable(), run, 6.0)
+	# the base air dash (her own variant): a tumble with teal after-images in her silhouette
+	await _reset(6.0, 6.0)
+	P.dashes = 0.0
+	P.do_dash()
+	var ex := _strip("anim_dash_ex",
+			"Air dash (her base dash variant): the tuck, the forward tumble, her teal after-images, the landing",
+			[0.02, 0.07, 0.14, 0.22, 0.36, 0.5])
+	ex.append([0.15,
+			"full",
+			"dash_ex",
+			"Air dash: her own teal after-images (her silhouette, not a shared pill) and the teal streak"])
+	await _go(0.6, Callable(), ex)
 	# the payoff: Wirerun through a Live target
 	await _reset(5.0)
-	if K.has_method("add_spark"): K.add_spark(T, 4)
+	K.add_spark(T, 4)
 	_aim(T.pos + Vector3(3, 0, 0))
-	P.inp["dash_down"] = true; P.do_dash()
+	P.inp["dash_down"] = true
+	P.do_dash()
 	await _go(0.3, hold_d)
 	P.inp["dash_down"] = false
-	await _go(0.6, Callable(), [[0.2, "full", "blowout.png", "Payoff: Wirerun through a Live foe, BLOWOUT, the copper refund columns on her"]], 4.0)
-	# E: placed at the cursor, the flick, the countdown pillar, the strike and drag
+	await _go(0.6,
+			Callable(),
+			[[0.2, "full", "blowout", "Payoff: Wirerun through a Live foe, BLOWOUT, the copper refund columns on her"]],
+			4.0)
+
+func _vireo_e() -> void:
+	var K = P.ak
 	await _reset(7.0)
 	K.use_e()
-	var flick := func(tt):
-		if tt > 0.05: _aim(home + Vector3(4.0, 0, 0))
-	await _go(1.6, flick, _merge(_strip("anim_e.png", "E: a one-arm sweep toward the spot, the hand snapped down", [0.03, 0.08, 0.16, 0.45, 0.8]),
-		[[0.2, "full", "e_aim.png", "E: the circle at the cursor, the flick sets the drag arrow and the rim chevron (toward her: a pull)"], [0.7, "full", "e_count.png", "E countdown: dark disc, crackling copper rim, a pillar of light narrowing"],
-		[1.15, "full", "e_strike.png", "E strike: lightning, the target dragged toward her, Grounded with shackle rings"]]))
+	var flick := func(tt: float):
+		if tt > 0.05:
+			_aim(home + Vector3(4.0, 0, 0))
+	var marks := _strip("anim_e",
+			"E: the arm sweeps toward the spot, flicks up for the drag, stays up, snaps down at the strike",
+			[0.02, 0.07, 0.14, 0.3, 0.7, 1.16])
+	marks.append([0.2,
+			"full",
+			"e_aim",
+			"E: the dark disc at the cursor; the flick sets the drag arrow and the gold rim chevron (a pull)",
+			_on_target])
+	marks.append([0.7,
+			"full",
+			"e_count",
+			"E countdown: a dark violet disc, a crackling copper rim, gold veins, the gold pillar narrowing",
+			_on_target])
+	marks.append([1.15,
+			"full",
+			"e_strike",
+			"E strike: lightning, the target dragged toward her, Grounded with shackle rings",
+			_on_target])
+	await _go(1.6, flick, marks)
 
 # ------------------------------------------------------------------ Venator
 func _venator() -> void:
-	var K = P.ak
-	# LMB: rounds past the cursor; on a Dazed target big gold numbers
+	await _venator_lmb()
+	await _venator_rmb()
+	await _venator_dash()
+	await _venator_e()
+	await _venator_knock()
+
+func _venator_lmb() -> void:
 	await _reset(8.0)
 	_aim(home + Vector3(3.0, 0, 0))
-	var hold_fire := func(_t): P.inp["fire"] = true
-	await _go(0.6, hold_fire, _merge(_strip("anim_lmb.png", "LMB: the shoulder takes each kick, head on the sights", [0.02, 0.06, 0.1, 0.14]),
-		[[0.3, "full", "lmb_aim.png", "LMB: ember tracers through a near cursor out to full range, the muzzle star"]]))
+	var hold_fire := func(_t: float): P.inp["fire"] = true
+	var marks := _strip("anim_lmb",
+			"LMB, one round: rest, the 0.03s shoulder kick with the muzzle flipped up, recovering, ready",
+			[0.005, 0.03, 0.06, 0.1, 0.118])
+	marks.append([0.31,
+			"full",
+			"lmb_aim",
+			"LMB: ember tracers through a near cursor out to full range, the bronze muzzle star"])
+	await _go(0.6, hold_fire, marks)
 	P.inp["fire"] = false
 	await _reset(7.0)
 	KitStatus.apply(T, "rat", 3.0)
-	await _go(0.7, hold_fire, [[0.6, "full", "lmb_dazed.png", "LMB on a Dazed target: big gold numbers (+90%)"]])
+	await _go(0.75,
+			hold_fire,
+			[0.72, "full", "lmb_dazed", "LMB on a Dazed target: the big gold numbers (+90%) in frame", _on_target]])
 	P.inp["fire"] = false
-	# RMB: the held lane (target marked), the throw, the stick on the ground with the cone, the blast
+
+## The passive: a knock gives Slipstep back (last: the target stays down after it).
+func _venator_knock() -> void:
+	await _reset(6.0)
+	P.dashes = 0.0
+	T.hp = 2.0
+	var hold_fire := func(_t: float): P.inp["fire"] = true
+	var knock := _strip("anim_knock",
+			"Passive proc (Hot Streak): a knock, the rifle spun up onto his shoulder, chin up",
+		[0.02, 0.1, 0.2, 0.35, 0.55])
+	knock.append([0.12,
+			"full",
+			"knock",
+			"Hot Streak: the knock gives Slipstep back: +KNOCK, the ember column and ring on him"])
+	await _go(0.6, hold_fire, knock)
+	P.inp["fire"] = false
+
+func _venator_rmb() -> void:
+	var K = P.ak
 	await _reset(6.0)
 	_aim(home + Vector3(3.0, 0, 0))
 	K.press_rmb()
-	var hold_r := func(_t): P.inp["sec_hold"] = true
-	await _go(0.6, hold_r, _merge(_strip("anim_rmb.png", "RMB: cocked over the shoulder while aiming, the overhand throw, follow-through", [0.05, 0.5]),
-		[[0.5, "full", "rmb_aim.png", "RMB held: a fixed lane with an arrow tip past the cursor; the target in it is marked"]]))
+	var hold_r := func(_t: float): P.inp["sec_hold"] = true
+	var marks := _strip("anim_rmb_hold",
+			"RMB held: the spiked charge raised over his shoulder in the left hand, the rifle kept forward",
+			[0.02, 0.06, 0.12, 0.5])
+	marks.append([0.5,
+			"full",
+			"rmb_aim",
+			"RMB held: the charge cocked by his head, a fixed lane with an arrow tip; the target in it marked"])
+	await _go(0.6, hold_r, marks)
 	P.inp["sec_hold"] = false
 	T.teleport(home + Vector3(8.5, 0, 0))
-	await _go(1.6, Callable(), _merge(_strip("anim_rmb.png", "", [0.07, 0.16, 0.4]),
-		[[0.25, "full", "rmb_flight.png", "RMB: the spiked charge flies past the person, on to the lane's end"], [0.75, "full", "rmb_cone.png", "RMB stuck on the ground: the cone shows back toward him for 0.9s (everyone sees it)"],
-		[1.37, "full", "rmb_blast.png", "RMB blast: the cone front, the target shoved toward him and Dazed (swirl)"]]), 5.0)
+	var throw := _strip("anim_rmb_throw",
+			"RMB throw: the overhand whip, the stretch at the release, follow-through, recover",
+			[0.01, 0.05, 0.1, 0.2, 0.45])
+	throw.append([0.2,
+			"full",
+			"rmb_flight",
+			"RMB: the bronze spiked charge in flight with its ember smear, past the person",
+			_burr_spot])
+	throw.append([0.75,
+			"full",
+			"rmb_cone",
+			"RMB stuck on the ground: the cone shows back toward him for its fuse (everyone sees it)",
+			_burr_spot])
+	throw.append([1.37,
+			"full",
+			"rmb_blast",
+			"RMB blast: the cone front, the target shoved toward him and Dazed (swirl)",
+			_on_target])
+	await _go(1.6, Callable(), throw, 5.0)
 	# the wall version
 	await _reset(6.0)
+	_wall(World.T_BLOCK)
+	_aim(home + Vector3(9.5, 0, 0))
+	K.press_rmb()
+	await _go(0.05)
+	var wall := [[0.8, "full", "rmb_wall_cone", "RMB on a wall: stuck, the cone back out toward him", _burr_spot]]
+	wall.append([1.33, "full", "rmb_wall_blast", "RMB wall blast", _burr_spot])
+	await _go(1.6, Callable(), wall, 5.0)
+	_wall(World.T_GROUND)
+
+func _wall(kind: int) -> void:
 	var W = m.world
 	for z in range(-3, 4):
-		W.kind[W.idx(int(floor(home.x + 9.5)), int(floor(home.z + z)))] = World.T_BLOCK
-	_aim(home + Vector3(9.5, 0, 0))
-	K.press_rmb(); await _go(0.05)
-	await _go(1.6, Callable(), [[0.8, "full", "rmb_wall_cone.png", "RMB on a wall: stuck, the cone back out toward him"], [1.33, "full", "rmb_wall_blast.png", "RMB wall blast"]], 5.0)
-	for z in range(-3, 4):
-		W.kind[W.idx(int(floor(home.x + 9.5)), int(floor(home.z + z)))] = World.T_GROUND
-	# Shift: a slide one way while shooting another
+		W.kind[W.idx(int(floor(home.x + 9.5)), int(floor(home.z + z)))] = kind
+
+func _burr_spot() -> Vector3:
+	var burrs: Array = P.ak.get("burrs")
+	return burrs[0]["pos"] if not burrs.is_empty() else _on_target()
+
+func _venator_dash() -> void:
 	await _reset(7.0)
 	P.inp["move"] = Vector2(0, -1)
-	var slide := func(_t): P.inp["dash_down"] = true; P.inp["fire"] = true; P.inp["move"] = Vector2(0, -1)
-	P.inp["dash_down"] = true; P.do_dash()
-	await _go(0.8, slide, _merge(_strip("anim_dash.png", "Shift: dropped feet-first, leaning back, rifle up and firing; the stand-up", [0.02, 0.1, 0.3, 0.6, 0.78]),
-		[[0.22, "full", "dash.png", "Shift: sliding one way while shooting another; the ember afterimage and ring at the start"]]))
-	P.inp["dash_down"] = false; P.inp["fire"] = false; P.inp["move"] = Vector2.ZERO
-	# E: the narrowing line, the beam, the recoil
+	var slide := func(_t: float):
+		P.inp["dash_down"] = true
+		P.inp["fire"] = true
+		P.inp["move"] = Vector2(0, -1)
+	P.inp["dash_down"] = true
+	P.do_dash()
+	var marks := _strip("anim_dash",
+			"Shift: feet-first, leaning back but upright enough to aim, both hands on the rifle, firing; stand-up",
+			[0.02, 0.1, 0.3, 0.6, 0.78])
+	marks.append([0.12,
+			"full",
+			"dash",
+			"Shift: sliding one way, shooting another; his ember after-image, the start ring, a dust scrape"])
+	await _go(0.8, slide, marks)
+	P.inp["dash_down"] = false
+	P.inp["fire"] = false
+	P.inp["move"] = Vector2.ZERO
+	# the base air dash (his own variant): a barrel roll with ember after-images in his silhouette
+	await _reset(6.0, 6.0)
+	P.dashes = 0.0
+	P.do_dash()
+	var ex := _strip("anim_dash_ex",
+			"Air dash (his base dash variant): a shoulder-led barrel roll with his ember after-images, the landing",
+			[0.02, 0.07, 0.14, 0.22, 0.36, 0.5])
+	ex.append([0.15, "full", "dash_ex", "Air dash: his own ember after-images (his silhouette, not a shared pill)"])
+	await _go(0.6, Callable(), ex)
+
+func _venator_e() -> void:
+	var K = P.ak
 	await _reset(9.0)
 	K.use_e()
-	await _go(1.2, Callable(), _merge(_strip("anim_e.png", "E: braced through the 0.6s cast, the recoil throws the chest back, settle", [0.05, 0.3, 0.58, 0.66, 0.8, 1.05]),
-		[[0.1, "full", "e_aim_start.png", "E cast start: a wide bright line full length"], [0.5, "full", "e_aim_end.png", "E cast end: narrowed to a thin core"], [0.68, "full", "e_fire.png", "E fire: the beam, muzzle orb and flare, the smoke ring and recoil"]]))
+	var marks := _strip("anim_e",
+			"E: braced through the 0.6s cast, the recoil throws the chest back, settle",
+			[0.05, 0.3, 0.58, 0.66, 0.8, 1.05])
+	marks.append([0.1,
+			"full",
+			"e_aim_start",
+			"E cast start: a wide ember line full length, the ember orb at the muzzle"])
+	marks.append([0.5, "full", "e_aim_end", "E cast end: narrowed to a thin core, the muzzle orb swollen"])
+	marks.append([0.68,
+			"full",
+			"e_fire",
+			"E fire: an ember beam with a hot core and bronze edges, the ember muzzle orb, the smoke ring and recoil"])
+	await _go(1.2, Callable(), marks)
 	# payoff: Longneedle on a Dazed hunter
 	await _reset(8.0)
 	KitStatus.apply(T, "rat", 3.0)
 	K.use_e()
-	await _go(1.0, Callable(), [[0.72, "full", "skewer.png", "Payoff: Longneedle through a Dazed hunter, SKEWERED"]])
-
-func _fxtest() -> void:
-	var f := VVFx.of(m)
-	f.pillar(home + Vector3(3, 0, -2), Color("ffc95a"), Color.WHITE, 6.0, 0.8, 30.0, false)
-	f.ring(home + Vector3(6, 0, 0), 2.0, Color.WHITE, Color("ffc95a"), 30.0)
-	f.disc(home + Vector3(3, 0, 3), 1.8, Color("3a2d6e"), Color("e08a46"), 30.0)
-	f.fan(home + Vector3(10, 0, 0), Vector2(-1, 0), 5.0, 100.0, Color("ff9a5c"), Color("fff1c8"), 30.0)
-	f.star(home + Vector3(1, 1, 0), Color("ffc95a"), Color.WHITE, 1.0, 30.0)
-	await _go(0.5, Callable(), [[0.4, "full", "fxtest.png", "fx test"]])
+	var skewer := "Payoff: Longneedle through a Dazed hunter at the hit: SKEWERED and the number"
+	await _go(0.8, Callable(), [[0.66, "full", "skewer", skewer, _on_target]])

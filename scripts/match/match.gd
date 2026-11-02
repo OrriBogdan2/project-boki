@@ -6841,7 +6841,9 @@ func _update_aim(alpha: float) -> void:
 	var at := p.prev.lerp(p.pos, alpha)
 	var aim: Vector3 = p.inp["aim"]
 	var d := Vector2(aim.x - at.x, aim.z - at.z)
-	var dist := float(p.wpn["range"]) if String(p.wpn.get("aim", "")) == "max" else minf(d.length(), float(p.wpn["range"]))      # max-range weapons: the line runs past the cursor
+	# max-range weapons: the line runs past the cursor
+	var to_max := String(p.wpn.get("aim", "")) == "max"
+	var dist := float(p.wpn["range"]) if to_max else minf(d.length(), float(p.wpn["range"]))
 	if dist > 0.6:
 		var dir := d.normalized()
 		var y := at.y + 0.95 * float(p.cdat["scale"])

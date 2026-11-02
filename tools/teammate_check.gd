@@ -369,8 +369,10 @@ func _far_ground(m: Match, P: Hunter) -> Vector3:
 	var best: Vector3 = m.world.random_ground()
 	for i in 40:
 		var g: Vector3 = m.world.random_ground()
-		if Vector2(g.x - P.pos.x, g.z - P.pos.z).length() > Vector2(best.x - P.pos.x, best.z - P.pos.z).length(): best = g
-		if Vector2(best.x - P.pos.x, best.z - P.pos.z).length() >= 40.0: break
+		if P.flat_dist(g) > P.flat_dist(best):
+			best = g
+		if P.flat_dist(best) >= 40.0:
+			break
 	return best
 
 ## A spot `d` m from `at` on solid ground (east first), so a throw never lands the Boki in the abyss.
@@ -379,6 +381,8 @@ func _solid_spot(m: Match, at: Vector3, d: float) -> Vector3:
 		var ok_all := true
 		for k in range(1, int(d) + 2):
 			var q: Vector3 = at + v * float(k)
-			if m.world.is_void(q.x, q.z) or m.world.is_block(q.x, q.z): ok_all = false; break
+			if m.world.is_void(q.x, q.z) or m.world.is_block(q.x, q.z):
+				ok_all = false
+				break
 		if ok_all: return at + v * d
 	return at + Vector3(d, 0, 0)

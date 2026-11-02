@@ -468,7 +468,8 @@ func _gunslinger() -> void:
 	var m: Match = r[0]; var P: Hunter = r[1]; var T: Hunter = r[2]; var T2: Hunter = r[3]
 	var home: Vector3 = r[4]
 	var K: GunslingerKit = P.ak
-	ok("venator: Quill Rifle in hand, medium, no R", P.wid == "quill_rifle" and Arch.weight("gunslinger") == "medium" and not Arch.def("gunslinger").has("r"))
+	var medium := Arch.weight("gunslinger") == "medium"
+	ok("venator: Quill Rifle in hand, medium, no R", P.wid == "quill_rifle" and medium and not Arch.def("gunslinger").has("r"))
 	# Fever: abilities stack lifesteal (4 x 5%)
 	P.hp = 60.0
 	K.on_deal(T, 10.0, {"src": "abil", "ab": "utility"})
@@ -482,7 +483,8 @@ func _gunslinger() -> void:
 	fresh(T); T2.teleport(home + Vector3(12, 0, 0)); P.teleport(home); T.teleport(home + Vector3(7, 0, 0)); step(m, 0.2); aim_at(P, T.pos); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0
 	tap(m, P)
 	step(m, 1.6)
-	ok("venator RMB: the cone blast hits and Dazes", dmg(T) >= 12.0 and KitStatus.rattled(T) and K.rattles >= 1, "took %.0f" % dmg(T))
+	var dazed := KitStatus.rattled(T) and K.rattles >= 1
+	ok("venator RMB: the cone blast hits and Dazes", dmg(T) >= 12.0 and dazed, "took %.0f" % dmg(T))
 	ok("venator RMB: the blast fed Fever", K.res >= 1.0, "fever %.0f" % K.res)
 	var base := K.outgoing(T, 10.0, {"src": "shot"})
 	ok("venator Dazed: rifle +90%", is_equal_approx(base, 19.0), "%.1f" % base)
