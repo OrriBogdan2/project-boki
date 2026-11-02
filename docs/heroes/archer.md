@@ -8,7 +8,7 @@ Sources (gameplay only, notes in our own words):
 - Patch notes quoted on that page (18.12.24 bow damage, 20.11.24 charge hold, rank text changes)
 - Combo inferences from the ability text (wall stun then follow-up damage, knocks refunding mobility)
 
-Where they disagreed: the wiki's rank-3 row for the volley says both "-2s cooldown, +30% arc" (page) and "-4s cooldown, +30% arc" (20.11.24 patch). Chosen: the later patch, folded into our shared rank steps (cooldown -10% / -20%) plus the 30% wider wall at rank 3. The passive heal is listed as 500 HP, which is out of line with the other heroes' per-knock heals; we scale heal by the same health ratio the other heroes use (about 18% of our 100 HP).
+Where they disagreed: the wiki's rank-3 row for the volley says both "-2s cooldown, +30% arc" (page) and "-4s cooldown, +30% arc" (20.11.24 patch). Chosen: the later patch, folded into our shared rank steps (cooldown -10% / -20%) plus the 30% wider wall at rank 3. The passive heal is listed as 500 HP, which is out of line with the other heroes' per-knock heals; we scale the heal to our Light class (124 HP): 18, about 15% of its health.
 Version chosen: the latest listed (patch 20.11.24 values).
 
 ## Source slots against ours (what changed in this pass)
@@ -27,7 +27,7 @@ Version chosen: the latest listed (patch 20.11.24 values).
 The source ultimate (three empowered, undrawn, piercing shots) is flavour: the loop works without it and our Deadeye already plays the same "next shot needs no draw and hits harder" role. Dropped; no R (R is the Merge).
 
 ## Scaling
-Light class, 100 HP base: tap snare 8, full Heavy Shot 30 (+12 wall hit), Hail Wall 5 per 0.5s, Deadeye +18. Source numbers were used only as ratios (charge time 1 : stun 1.2 : wall hit about a third of a full shot).
+Light class, 124 HP: tap snare 8, full Heavy Shot 30 (+12 wall hit), Hail Wall 5 per 0.5s, Deadeye +18. Source numbers were used only as ratios (charge time 1 : stun 1.2 : wall hit about a third of a full shot).
 
 ## Cross-ability interactions
 | Combination | Result | Check |

@@ -23,7 +23,7 @@ extends RefCounted
 ##   menu        the loadout panel (L)
 ##   anim_<move> a strip of frames of one kit move (ANIM_DEMO: thf_shot thf_blades thf_vault thf_primed
 ##               thf_bola thf_knife thf_volley jug_slash jug_wave jug_slam jug_lunge jug_meteor jug_dash
-##               jug_chain jug_chainlunge jug_haul jug_spin jug_doom)
+##               jug_chain jug_chainlunge jug_haul jug_spin jug_doom, arc_* and bul_* for the Archer and Bulwark)
 ##   smg         the SMG firing at the dummy; add --legacy-shots for the old look and numbers (before)
 
 const OLD_SMG := {"dmg": 2.76, "rate": 0.07, "speed": 55.0, "mag": 36, "kb": 0.5, "size": 0.1, "kick": 0.0, "tracer": 0.5}
@@ -50,6 +50,24 @@ const ANIM_DEMO := {
 	"jug_haul": ["juggernaut", "greatsword", [1.0, 1.24, 1.32, 1.42, 1.52, 1.62, 1.9]],
 	"jug_spin": ["juggernaut", "greatsword", [0.88, 0.92, 0.98, 1.04, 1.1, 1.18, 1.35]],
 	"jug_doom": ["juggernaut", "greatsword", [0.55, 0.75, 0.95, 1.08, 1.13, 1.3, 1.6]],
+	"arc_draw": ["archer", "longbow", [0.5, 0.7, 0.9, 1.1, 1.3, 1.6]],
+	"arc_loose": ["archer", "longbow", [0.8, 0.88, 0.94, 1.0, 1.12, 1.3]],
+	"arc_heavy_wind": ["archer", "longbow", [0.55, 0.7, 0.9, 1.1, 1.3, 1.6]],
+	"arc_heavy": ["archer", "longbow", [1.2, 1.35, 1.42, 1.48, 1.58, 1.8]],
+	"arc_snare": ["archer", "longbow", [0.5, 0.54, 0.58, 0.64, 0.74, 0.9]],
+	"arc_hail": ["archer", "longbow", [0.5, 0.56, 0.64, 0.74, 0.95, 1.2]],
+	"arc_zip": ["archer", "longbow", [0.5, 0.56, 0.62, 0.7, 0.85, 1.1]],
+	"arc_hop": ["archer", "longbow", [0.5, 0.56, 0.62, 0.7, 0.85, 1.1]],
+	"arc_plunge": ["archer", "longbow", [0.5, 0.56, 0.62, 0.68, 0.8, 1.0]],
+	"bul_throw": ["bulwark", "tower_shield", [0.5, 0.54, 0.58, 0.64, 0.72, 0.9]],
+	"bul_recall": ["bulwark", "tower_shield", [0.98, 1.05, 1.12, 1.2, 1.3, 1.5]],
+	"bul_smash_wind": ["bulwark", "tower_shield", [0.5, 0.7, 0.9, 1.1, 1.4, 1.7]],
+	"bul_smash": ["bulwark", "tower_shield", [1.1, 1.2, 1.25, 1.3, 1.4, 1.65]],
+	"bul_bash": ["bulwark", "tower_shield", [0.5, 0.54, 0.58, 0.64, 0.76, 0.95]],
+	"bul_whirl": ["bulwark", "tower_shield", [0.5, 0.55, 0.6, 0.66, 0.75, 0.95]],
+	"bul_charge": ["bulwark", "tower_shield", [0.7, 0.75, 0.82, 0.9, 1.0, 1.2]],
+	"bul_short": ["bulwark", "tower_shield", [0.85, 0.92, 0.98, 1.05, 1.15, 1.35]],
+	"bul_mend": ["bulwark", "tower_shield", [0.5, 0.56, 0.64, 0.74, 0.95, 1.25]],
 }
 
 static func what() -> String:
@@ -369,6 +387,39 @@ static func _anim_trigger(A: Arena, P: Hunter, D: Hunter, mv: String, t: float, 
 			if _at(t, dt, 0.88): K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; P.inp["sec_hold"] = false; K.press_rmb()
 		"jug_doom":
 			if _at(t, dt, 0.5): K.cd["r"] = 0.0; K.use_r()
+		"arc_draw", "arc_loose", "arc_heavy_wind", "arc_heavy", "arc_snare", "arc_hail", "arc_zip", "arc_hop", "arc_plunge", "bul_throw", "bul_recall", "bul_smash_wind", "bul_smash", "bul_bash", "bul_whirl", "bul_charge", "bul_short", "bul_mend":
+			_anim_hero(A, P, mv, t, dt)
+
+## The scripted input for the Archer's and Bulwark's kit moves (the accuracy pass).
+static func _anim_hero(A: Arena, P: Hunter, mv: String, t: float, dt: float) -> void:
+	var K: ArchKit = P.ak
+	var fire := false
+	match mv:
+		"arc_draw": fire = t > 0.4 and t < 1.7
+		"arc_loose": fire = t > 0.4 and t < 0.9
+		"arc_heavy_wind": if _at(t, dt, 0.5): K.ch_rmb = 2.0; K.cd["rmb"] = 0.0; K.bot_hold["rmb"] = 1.6; K.press_rmb()
+		"arc_heavy": if _at(t, dt, 0.5): K.ch_rmb = 2.0; K.cd["rmb"] = 0.0; K.bot_hold["rmb"] = 0.9; K.press_rmb()
+		"arc_snare": if _at(t, dt, 0.5): K.ch_rmb = 2.0; K.cd["rmb"] = 0.0; P.inp["sec_hold"] = false; K.press_rmb()
+		"arc_hail": if _at(t, dt, 0.5): K.cd["e"] = 0.0; K.use_e()
+		"arc_zip": if _at(t, dt, 0.5): K.play("arc_zip")          # (the arena is flat: nothing for the line to bite, so the move is played directly)
+		"arc_hop": if _at(t, dt, 0.5): P.dashes = P.max_dashes(); P.inp["aim"] = P.pos - Vector3(4, 0, 0); P.do_dash()
+		"arc_plunge":
+			if _at(t, dt, 0.4): P.teleport(P.pos + Vector3(0, 3.0, 0)); P.grounded = false; P.vel = Vector3.ZERO
+			if _at(t, dt, 0.5): K.ch_rmb = 2.0; K.cd["rmb"] = 0.0; K.press_rmb()
+		"bul_throw": fire = t > 0.5 and t < 0.53
+		"bul_recall": fire = (t > 0.4 and t < 0.43) or (t > 1.0 and t < 1.03)
+		"bul_smash_wind": fire = t > 0.4 and t < 2.0
+		"bul_smash": fire = t > 0.4 and t < 1.2
+		"bul_bash": if _at(t, dt, 0.5): K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; P.inp["sec_hold"] = false; K.press_rmb()
+		"bul_whirl": if _at(t, dt, 0.5): P.dashes = P.max_dashes(); P.do_dash()
+		"bul_charge":
+			if _at(t, dt, 0.3): K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; K.bot_hold["rmb"] = 3.0; K.press_rmb()
+			if _at(t, dt, 0.7): P.dashes = P.max_dashes(); P.do_dash()
+		"bul_short":
+			fire = t > 0.4 and t < 1.6
+			if _at(t, dt, 0.9): P.dashes = P.max_dashes(); P.do_dash()
+		"bul_mend": if _at(t, dt, 0.5): K.cd["e"] = 0.0; K.use_e()
+	P.inp["fire"] = fire
 
 ## One frame of the strip: a square round the hunter; the last one writes the strip and quits.
 static func _grab(A: Arena, P: Hunter, last: bool) -> void:

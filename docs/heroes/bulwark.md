@@ -12,7 +12,7 @@ Where they disagreed: the Shift cost/cooldown listing shows two values (11 / 7);
 ## Source slots against ours
 | Slot | Input | Before | After | Source behaviour | Difference and why |
 |---|---|---|---|---|---|
-| Passive | knock into wall/foe | Crushed: stun 0.8, heal 14 | stun 0.5 (latest patch), heal 14; only Bash, Shield Charge and a full Crushing Blow count (Whirl does not) | Shield Bash or full smash into a wall/enemy stuns briefly and heals | Heal scaled to our health. The Guard meter (Shield Slam at 50) stays as our own loop |
+| Passive | knock into wall/foe | Crushed: stun 0.8, heal 14 | stun 0.5 (latest patch), heal 24 (about 12% of the Heavy class's 193 HP, in line with the source's per-knock share); only Bash, Shield Charge and a full Crushing Blow count (Whirl does not) | Shield Bash or full smash into a wall/enemy stuns briefly and heals | Heal scaled to our health. The Guard meter (Shield Slam at 50) stays as our own loop |
 | LMB | tap / again | throw the mace through foes, recall on a second tap | unchanged | Throw, recall hitting on the way, allies see around the hammer | Already matched; move set added |
 | LMB | hold | Crushing Blow, full at 1.25s | unchanged, charge pose | Hammer smash, full at 1.25s | - |
 | RMB | hold | Shield, Bash on tap/release | unchanged | Hold to block the front | Bash on tap is our extension (source puts the bash on Shift) |
@@ -24,7 +24,7 @@ Where they disagreed: the Shift cost/cooldown listing shows two values (11 / 7);
 The source ultimate (a stunning, erupting fissure) is flavour: the loop is block, knock into walls, heal. Dropped; no R (R is the Merge).
 
 ## Scaling
-Heavy class: shield 160 HP, Crushing Blow 14-34 and push 4-12, Bash 12, Slam 18, Crushed 8 + stun 0.5 + heal 14, Mending Ground 26 (+25% rank 2). Ratios from the source: smash 1.25s full, stun 0.5s, field cooldown 12s class.
+Heavy class (193 HP): shield 160 HP, Crushing Blow 14-34 and push 4-12, Bash 12, Slam 18, Crushed 8 + stun 0.5 + heal 24, Mending Ground 26 (+25% rank 2). Ratios from the source: smash 1.25s full, stun 0.5s, field cooldown 12s class.
 
 ## Cross-ability interactions
 | Combination | Result | Check |
