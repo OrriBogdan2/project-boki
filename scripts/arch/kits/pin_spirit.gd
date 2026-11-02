@@ -53,6 +53,8 @@ func tick(dt: float) -> void:
 	t -= dt
 	h.spirit_t = maxf(t, 0.0)
 	inside = blocked_here()
+	if k.anim_id == "pin_roll" and k.m.time - k.anim_at > 0.4:
+		k.play("pin_walk")
 	if inside:
 		passed += 1
 	else:

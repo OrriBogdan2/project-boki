@@ -316,7 +316,7 @@ func _archer() -> void:
 	# the Longbow draws: a full draw hits for 60
 	fresh(T); K.res = 0.0
 	step(m, 0.05, func(): P.inp["fire"] = true)
-	step(m, 1.0, func(): P.inp["fire"] = true; K.res = 0.0)
+	step(m, 1.2, func(): P.inp["fire"] = true; K.res = 0.0)
 	P.inp["fire"] = false
 	step(m, 0.5)
 	ok("archer weapon: Longbow full draw", dmg(T) >= 50.0, "took %.0f" % dmg(T))

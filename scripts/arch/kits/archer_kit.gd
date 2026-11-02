@@ -97,6 +97,7 @@ func _deadeye(t: Ent) -> void:
 	var gold := Color("ffe27a")
 	t.hurt(float(rd.get("deadeye", 18.0)) * power("sec"), h, {"src": "abil", "ab": "utility", "tags": ["utility", "deadeye"], "payoff": true, "crit": true, "kb": dir * 5.0})
 	deadeyes += 1
+	play("pin_deadeye")
 	m.fx.bolt(h.pos + Vector3(0, 1.2, 0), t.pos + Vector3(0, 1.0, 0), gold)
 	m.fx.bolt(h.pos + Vector3(0, 1.25, 0), t.pos + Vector3(0, 1.05, 0), Color(1, 1, 1, 0.8))
 	m.fx.burst(t.pos + Vector3(0, 1.0, 0), res_col(), 18, 9.0, 0.4, 0.0, 1.0, Vector3(dir.x, 0.2, dir.y), 25.0)
@@ -191,6 +192,7 @@ func on_knock(t: Hunter, mine: bool) -> void:
 	h.dashes = minf(h.max_dashes(), h.dashes + float(rd.get("knock_dash", 1.0)))
 	m.fx.burst(h.pos + Vector3(0, 1.0, 0), Color("9fe0a8"), 14, 2.5, 0.5, -2.0)
 	m.fx.word(h.pos + Vector3(0, 2.4, 0), "RUN DOWN", res_col(), true)
+	play("pin_rundown")
 	m.fx.ring(h.pos, 1.6, res_col(), 0.3)
 	m.sfx("ab_ready", h.pos, -3.0, 1.3)
 	net_ring(h.pos, 1.6, res_col())
@@ -313,7 +315,16 @@ func _arrow_hit(t: Ent) -> void:
 
 # ------------------------------------------------------------------ dash: Spirit Walk
 func on_dash(use_ex: bool) -> bool:
-	if not spend_dash(use_ex and not h.gliding):
+	var ex := use_ex and not h.gliding
+	if not spend_dash(ex):
+		return true
+	if ex:
+		# the long dash (in the air, or out of charges): Pin's own flick and tumble, a green streak behind
+		travel(float(h.cdat.get("ex_dist", 4.2)), 0.2, {"invuln": 0.1, "trail": "roll"}, true)
+		play("pin_flick")
+		st["last_dash"] = "flick"
+		for i in 4:
+			m.later(0.05 * i, func(): if is_instance_valid(h): m.fx.burst(h.pos + Vector3(0, 0.8, 0), PinFx.GREEN, 4, 1.5, 0.3, 0.0, 0.9))
 		return true
 	CombatBus.ability_used.emit(h, "spirit_walk", "dodge")
 	spirit.start(use_ex)
@@ -362,7 +373,7 @@ func _drop_holds() -> void:
 	_drop_tele()
 	draw.drop()
 	spirit.end("merge")
-	if anim_id in ["arc_draw", "arc_heavy_wind", "pin_roll"]:
+	if anim_id in ["arc_draw", "arc_over", "arc_heavy_wind", "pin_roll", "pin_walk"]:
 		anim_id = ""
 
 func _drop_tele() -> void:

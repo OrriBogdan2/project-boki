@@ -64,6 +64,7 @@ func add_guard(v: float) -> void:
 	for step in [33.0, 66.0, 100.0]:
 		if was < step and res >= step:
 			m.fx.ring(h.pos, 1.0 + step / 100.0, res_col(), 0.25)      # the shield runes light in steps
+			if anim_id == "": play("bul_armed")
 	if was < float(res_def().get("slam", 50.0)) and full_ready():
 		armed_fx("SLAM READY", "sec")
 
@@ -93,6 +94,7 @@ func _tick(dt: float) -> void:
 			m.fx.word(h.pos + Vector3(0, 2.2, 0), "SHIELD BROKEN", Feel.cat_color("damage"), false)
 			var d0 := h.aim_dir()
 			fx.aegis_break(h.pos + Vector3(d0.x, 0, d0.y) * 0.95)
+			play("bul_break")
 			m.sfx("bjorn_break", h.pos, -2.0)
 		else:
 			shield_hp = float(wall["hp"])
@@ -195,6 +197,7 @@ func _try_crush(t: Ent, dir: Vector2) -> void:
 			other.hurt(float(rd.get("crush_dmg", 8.0)) * power("sec"), h, {"src": "abil", "ab": "utility", "tags": ["utility", "crushed"], "stun": float(rd.get("crush_stun", 0.8)) * 0.6, "dr": true})
 		h.heal(float(rd.get("crush_heal", 24.0)))
 		payoff_fx(tgt.pos, "CRUSHED", res_col(), "pay_slam", dir, tgt)
+		if not anim_id in ["bul_smash", "bul_charge"]: play("bul_crush")
 		m.fx.dust(tgt.pos, 14))
 
 # ------------------------------------------------------------------ LMB: the mace (throw / Crushing Blow)
@@ -489,7 +492,7 @@ func fire_rmb(c: Dictionary) -> void:
 	var slam: bool = c["full"]
 	var go := func():
 		if not is_instance_valid(h) or h.downed: return
-		play("bul_bash")
+		if not slam: play("bul_bash")
 		var effs: Array = [{"type": "damage", "amount": float(rmb_def()["slam"]["dmg"]) if slam else float(bd["dmg"])}, {"type": "push", "strength": float(rmb_def()["slam"]["push"]) if slam else float(bd["push"]), "from": "caster"}]
 		if slam: effs.append({"type": "stun", "duration": float(rmb_def()["slam"]["stun"])})
 		knock_until = m.time + 0.2
@@ -504,8 +507,9 @@ func fire_rmb(c: Dictionary) -> void:
 		if h.grounded:
 			h.vel.x += dv.x * 4.0; h.vel.z += dv.y * 4.0         # you step into it
 	if slam:
-		# Shield Slam spends 50 Guard; a 0.3s shield flare is the tell
+		# Shield Slam spends 50 Guard; a 0.3s shield flare is the tell (its own wind-up and drive)
 		res -= float(res_def().get("slam", 50.0))
+		play("bul_slamshield")
 		m.fx.flash(h.pos + Vector3(h.aim_dir().x * 0.8, 1.0, h.aim_dir().y * 0.8), res_col(), 0.9, float(rmb_def()["slam"]["tell"]))
 		tele_lane(h.pos, h.aim_dir(), float(bd["radius"]), 2.0, Feel.cat_color("control"), float(rmb_def()["slam"]["tell"]))
 		net_ring(h.pos, 1.6, res_col())
@@ -545,8 +549,17 @@ func on_dash(use_ex: bool) -> bool:
 		return true
 	if not spend_dash(use_ex):
 		return true
+	if use_ex:
+		# the long dash (in the air, or out of charges): Bjorn lumbers in shoulder first, shoving foes aside
+		var de := float(h.cdat.get("ex_dist", 4.2))
+		travel(de, de / float(dd.get("lumber_speed", 14.0)), {"invuln": 0.1, "shove": true, "shove_kb": 6.0, "shove_dmg": 0.0, "trail": "dust"}, true)
+		st["last_dash"] = "lumber"
+		play("bul_lumber")
+		for i in 4:
+			m.later(0.07 * i, func(): if is_instance_valid(h): m.fx.dust(h.pos, 5); m.fx.burst(h.pos + Vector3(0, 0.6, 0), Color(String(d.get("color", "#8fd0ff"))), 3, 1.2, 0.3, 0.0, 1.2))
+		return true
 	# 360 Smash: a short fixed dash in the aim (or move) direction, then ONE full spin hit around him
-	var dist2 := (float(dd["whirl"]) if not use_ex else float(h.cdat.get("ex_dist", 4.2))) + (1.0 if rank("dash") >= 3 else 0.0)
+	var dist2 := float(dd["whirl"]) + (1.0 if rank("dash") >= 3 else 0.0)
 	var t2 := dist2 / float(dd["whirl_speed"])
 	travel(dist2, t2, {"invuln": 0.1, "trail": "dust"}, use_ex)
 	st["last_dash"] = "whirl"

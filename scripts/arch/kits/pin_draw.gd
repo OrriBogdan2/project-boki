@@ -31,6 +31,7 @@ var supers := 0
 var last_kind := ""            # the kind of the last arrow loosed: tap, arrow, super, over
 var pending := ""              # the kind the next shot of ours gets skinned as
 var tgt: Ent = null            # the foe under the Supercharged line
+var perfect_now := false       # the arrow just loosed was a perfect release (its own move)
 
 func _init(kit: ArcherKit) -> void:
 	k = kit
@@ -65,6 +66,7 @@ func bonus(t: float) -> float:
 	var pt := perfect_t()
 	quick = false
 	quick_used = false
+	perfect_now = false
 	if t >= 5.0:
 		# a full Focus shot: drawn at once, the Supercharged line
 		h.shot_aim = AimMode.MAX
@@ -87,6 +89,7 @@ func bonus(t: float) -> float:
 func _perfect() -> void:
 	perfects += 1
 	quick = true
+	perfect_now = true
 	var d := h.aim_dir()
 	var side := Vector2(-d.y, d.x)
 	var at := h.pos + Vector3(d.x * 0.45 + side.x * 0.35, 1.15 * _sc(), d.y * 0.45 + side.y * 0.35)
@@ -122,6 +125,7 @@ func tick() -> void:
 			k.net_ring(h.pos, 1.3, k.res_col())
 		if was < over_t() and t >= over_t():
 			k.m.sfx("pin_overdraw", h.pos, -10.0, 0.9)
+			k.play("arc_over")
 		_reticle(t, s, col)
 	else:
 		k.fx.hold_bow_star(Vector3.ZERO, 0.0)
@@ -129,10 +133,17 @@ func tick() -> void:
 	if drawing and was < 0.0:
 		k.play("arc_draw")
 		k.m.sfx("pin_draw", h.pos, -9.0 if h.is_local() else -13.0)
-	elif not drawing and was >= 0.0 and was < 5.0 and k.anim_id == "arc_draw":
-		k.play("arc_super" if last_kind == "super" else "arc_loose")
+	elif not drawing and was >= 0.0 and was < 5.0 and k.anim_id in ["arc_draw", "arc_over"]:
+		k.play(release_move())
 		k.m.sfx("pin_loose_super" if last_kind == "super" else "pin_loose", h.pos, -3.0 if h.is_local() else -7.0)
 	was = t
+
+## Each release has its own move: a tap's snap, Empowered's loose, Supercharged's kick, a perfect's
+## flourish, an overdrawn droop.
+func release_move() -> String:
+	if perfect_now:
+		return "arc_perfect"
+	return {"tap": "arc_tap", "arrow": "arc_loose", "super": "arc_super", "over": "arc_over_loose"}.get(last_kind, "arc_loose")
 
 func _reticle(t: float, s: Vector2, col: Color) -> void:
 	AimKit.charge(h, clampf(t / s.y, 0.0, 1.0), {"col": col, "flare": false})

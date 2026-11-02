@@ -54,6 +54,14 @@ const ANIM_DEMO := {
 	"arc_hail": ["archer", "longbow", [0.5, 0.56, 0.64, 0.74, 0.95, 1.2]],
 	"pin_roll": ["archer", "longbow", [0.5, 0.53, 0.56, 0.6, 0.66, 0.8]],
 	"arc_super": ["archer", "longbow", [1.6, 1.66, 1.7, 1.75, 1.85, 2.1]],
+	"arc_tap": ["archer", "longbow", [0.5, 0.56, 0.6, 0.66, 0.74, 0.9]],
+	"arc_perfect": ["archer", "longbow", [0.98, 1.06, 1.12, 1.2, 1.32, 1.5]],
+	"arc_over": ["archer", "longbow", [1.5, 1.95, 2.05, 2.15, 2.25, 2.4]],
+	"arc_over_loose": ["archer", "longbow", [2.3, 2.42, 2.48, 2.56, 2.7, 2.95]],
+	"pin_walk": ["archer", "longbow", [0.5, 0.6, 0.8, 1.2, 1.8, 2.6]],
+	"pin_flick": ["archer", "longbow", [0.5, 0.54, 0.58, 0.63, 0.7, 0.85]],
+	"pin_deadeye": ["archer", "longbow", [0.5, 0.56, 0.7, 0.9, 1.1, 1.3]],
+	"pin_rundown": ["archer", "longbow", [0.5, 0.58, 0.64, 0.72, 0.85, 1.0]],
 	"arc_plunge": ["archer", "longbow", [0.5, 0.56, 0.62, 0.68, 0.8, 1.0]],
 	"bul_throw": ["bulwark", "tower_shield", [0.5, 0.54, 0.58, 0.64, 0.72, 0.9]],
 	"bul_recall": ["bulwark", "tower_shield", [0.98, 1.05, 1.12, 1.2, 1.3, 1.5]],
@@ -64,6 +72,12 @@ const ANIM_DEMO := {
 	"bul_charge": ["bulwark", "tower_shield", [0.7, 0.75, 0.82, 0.9, 1.0, 1.2]],
 	"bul_short": ["bulwark", "tower_shield", [0.85, 0.92, 0.98, 1.05, 1.15, 1.35]],
 	"bul_mend": ["bulwark", "tower_shield", [0.5, 0.56, 0.64, 0.74, 0.95, 1.25]],
+	"bul_guard": ["bulwark", "tower_shield", [0.5, 0.56, 0.62, 0.7, 0.9, 1.2]],
+	"bul_crush": ["bulwark", "tower_shield", [0.5, 0.58, 0.64, 0.72, 0.85, 1.05]],
+	"bul_slamshield": ["bulwark", "tower_shield", [0.5, 0.62, 0.76, 0.84, 0.95, 1.2]],
+	"bul_break": ["bulwark", "tower_shield", [0.5, 0.54, 0.58, 0.68, 0.85, 1.1]],
+	"bul_armed": ["bulwark", "tower_shield", [0.5, 0.55, 0.6, 0.68, 0.76, 0.86]],
+	"bul_lumber": ["bulwark", "tower_shield", [0.5, 0.56, 0.62, 0.72, 0.85, 1.05]],
 }
 
 static func what() -> String:
@@ -357,7 +371,7 @@ static func _anim_trigger(A: Arena, P: Hunter, D: Hunter, mv: String, t: float, 
 			if _at(t, dt, 0.88): K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; P.inp["sec_hold"] = false; K.press_rmb()
 		"jug_doom":
 			if _at(t, dt, 0.5): K.cd["r"] = 0.0; K.use_r()
-		"arc_draw", "arc_loose", "arc_heavy_wind", "arc_heavy", "arc_snare", "arc_hail", "pin_roll", "arc_super", "arc_plunge", "bul_throw", "bul_recall", "bul_smash_wind", "bul_smash", "bul_bash", "bul_whirl", "bul_charge", "bul_short", "bul_mend":
+		"arc_draw", "arc_loose", "arc_heavy_wind", "arc_heavy", "arc_snare", "arc_hail", "pin_roll", "arc_super", "arc_plunge", "arc_tap", "arc_perfect", "arc_over", "arc_over_loose", "pin_walk", "pin_flick", "pin_deadeye", "pin_rundown", "bul_guard", "bul_crush", "bul_slamshield", "bul_break", "bul_armed", "bul_lumber", "bul_throw", "bul_recall", "bul_smash_wind", "bul_smash", "bul_bash", "bul_whirl", "bul_charge", "bul_short", "bul_mend":
 			_anim_hero(A, P, mv, t, dt)
 
 ## The scripted input for the Archer's and Bulwark's kit moves (the accuracy pass).
@@ -389,6 +403,16 @@ static func _anim_hero(A: Arena, P: Hunter, mv: String, t: float, dt: float) -> 
 			fire = t > 0.4 and t < 1.6
 			if _at(t, dt, 0.9): P.dashes = P.max_dashes(); P.do_dash()
 		"bul_mend": if _at(t, dt, 0.5): K.cd["e"] = 0.0; K.use_e()
+		"arc_tap": fire = t > 0.4 and t < 0.5
+		"arc_perfect": fire = t > 0.35 and t < 0.35 + 0.62
+		"arc_over", "arc_over_loose": fire = t > 0.4 and t < 2.3
+		"pin_walk": if _at(t, dt, 0.5): P.dashes = P.max_dashes(); P.inp["aim"] = P.pos + Vector3(4, 0, 0); P.do_dash()
+		"pin_flick", "bul_lumber": if _at(t, dt, 0.5): P.dashes = 0.0; P.ex_cd = 0.0; P.do_dash()
+		"pin_deadeye", "pin_rundown", "bul_crush", "bul_break", "bul_armed": if _at(t, dt, 0.5): K.play(mv)
+		"bul_guard":
+			P.inp["sec_hold"] = t > 0.45
+			if _at(t, dt, 0.5): K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; K.set("lock_t", 0.0); K.press_rmb()
+		"bul_slamshield": if _at(t, dt, 0.5): K.res = 60.0; K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; P.inp["sec_hold"] = false; K.press_rmb()
 	P.inp["fire"] = fire
 
 ## One frame of the strip: a square round the hunter; the last one writes the strip and quits.
