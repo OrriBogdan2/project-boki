@@ -10,20 +10,19 @@ shot. Holds high ground and grapples onto ledges.
    Heavy Shot that pierces and, driven into a wall, stuns (PINNED).
 3. Snares and Heavy Shots that hit build **Focus**. At 100 your next shot is drawn at once with more
    range, and if it hits a rooted or stunned foe it's a **Deadeye**: a gold crit for +18.
-4. **Arrow Rain** (E) across a path slows and blights everyone walking through it.
-5. **Great Arrows** (R): three shots with no draw that fly far, pierce everyone and knock back; the third hits hardest.
+4. **Hail Wall** (E) across a path slows and blights everyone walking through it for 4.5s.
+5. A knock heals you and gives a dash charge back; rivals under half health show through cover (Hawk Sense).
 
 ## Combos and interactions
 
 | Do this | And you get |
 |---|---|
 | Snare, then a full-Focus shot on the rooted foe | Deadeye (+18, crit) |
-| Heavy Shot that pushes a foe into a wall within 3m | Stunned 0.8 (PINNED); fills Focus |
-| Tap snare while your Arrow Rain is falling | It roots 1.0s instead of 0.6s |
+| Heavy Shot that pushes a foe into a wall within 3m | Stunned 1.2 (PINNED), plus an extra wall hit; fills Focus |
+| Tap snare while your Hail Wall is falling | It roots 1.0s instead of 0.6s |
 | Tap snare at 100 Focus | Roots 1.0s |
 | RMB in the air (Plunge) | Shoots straight down, pushes foes, lifts you 3m and cools your glider |
 | Grapple Arrow into a ledge | You zip up and climb on top; Focus builds faster up high. Into nothing: a hop back |
-| Third Great Arrow into a wall | A payoff hit that stuns 1.0s |
 
 ## Tips
 
@@ -52,10 +51,10 @@ What the in-game kit card (K) says.
 | Slot | Card text |
 |---|---|
 | Loop | Snares root and feed Focus; full Focus makes your next shot into a rooted foe a Deadeye. Run foes down to heal and dash again. |
-| Passive: Focus | Focus fills standing still and when a snare roots; full = Deadeye ready (+18, crit). Hawk Sense: foes under half health show through cover. A knock heals 18. |
-| Dash: Grapple Arrow | Fire a grapple line: zip up to a ledge (Focus builds faster up high), or hop back. A knock gives a charge back. |
-| RMB: Snare | Tap: a rooting snare. Hold: a charged Heavy Shot that pierces and knocks back; into a wall it hits again and pins 1.2s. |
-| E: Hail Wall | Hail Wall: a wall of falling arrows across their path for 4.5s (damage, slow, healing blighted). |
+| Passive: Focus | Focus builds standing still or on a snare; full = Deadeye. Hurt foes show through cover; a knock heals. |
+| Dash: Grapple Arrow | Fire a grapple line: zip up a ledge, or hop back. A knock gives a charge back. |
+| RMB: Snare | Tap: a rooting snare. Hold: a Heavy Shot; into a wall it hits again and pins. |
+| E: Hail Wall | A wall of falling arrows across their path for 4.5s: damage, slow, blight. |
 | Weapon: Longbow | Hold to draw in stages: 30, then 60 at full; let go right at a stage (PERFECT) for a bonus. |
 | Weapon: Sniper | A visible aim laser, then one heavy round. |
 
@@ -70,7 +69,7 @@ What the in-game kit card (K) says.
 - *Tap:* A snare arrow 11m: 8 damage and root 0.6 on a foe; on the ground it plants a Tripwire (root 1.2, reveal 3s).
 - *Hold:* Heavy Shot: charge 0.5s -> full at 1.1s (rising creak, a ring, a ping at full): 16 -> 30 damage, push 6 -> 12, pierces 2; driven into a wall within 3m it hits again (up to 12) and stuns 1.2 (PINNED).
 - *In the air:* Plunge: shoot straight down, push 8 around you, lift yourself 3m, cool the glider.
-- *During E:* With your Arrow Rain falling the tap snare roots 1.0.
+- *During E:* With your Hail Wall falling the tap snare roots 1.0.
 - *Resource full:* At 100 Focus the tap roots 1.0.
 
 **Hail Wall (E, 15s cooldown).** Lob a volley up to 9m: 0.35s later a wall of arrows falls along a 6m line across your aim for 4.5s. Foes inside take 5 every 0.5s, are slowed 35% and blighted (healing barely takes).

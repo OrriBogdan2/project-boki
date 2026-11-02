@@ -5,6 +5,7 @@ extends "res://tools/archetype_check.gd"
 
 func run(main_node: Node) -> void:
 	main = main_node
+	main_node.set_meta("hero_combo_check", self)     # (a RefCounted that is only awaiting is freed with its last holder, and the run silently stops)
 	var args := OS.get_cmdline_user_args()
 	var both := "--hero-combo-check" in args
 	if both or "--archer-combo-check" in args: await _archer_combos()
@@ -100,7 +101,7 @@ func _archer_combos() -> void:
 	P.ak.press_rmb()
 	ok("archer anim: plunge plays arc_plunge", K.anim_id == "arc_plunge", K.anim_id)
 	ok("archer: no class R", not K.d.has("r") and K.r_def().is_empty())
-	# (the match is not freed here: freeing it after these scripted knocks never returns in a headless run; run() quits)
+	await done(m)
 
 func _bulwark_combos() -> void:
 	var r := setup("bulwark", 2.2)

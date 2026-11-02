@@ -2,7 +2,7 @@ class_name ArcherKit
 extends ArchKit
 ## Archer (light): Grapple Arrow, Focus, Snare (tap: a rooting snare / Tripwire; hold: a charged
 ## Heavy Shot that pierces, knocks back and stuns into a wall; Plunge in the air), Hail Wall (E),
-## (no R: the class ultimate is held back while R is the Merge). docs/ARCHETYPES.md §6.2 and "Kit loops" (kits4; Myth-style hunter archer ideas).
+## (no R: the class ultimate is held back while R is the Merge). docs/ARCHETYPES.md §6.2 and "Kit loops" (kits4).
 ## The bow draws in stages you hear and see; let go right at full draw (the perfect window) for +25%.
 ##
 ## The loop (kits4): snares root (Pin) and feed Focus -> full Focus arms the Deadeye (a lens glint and
@@ -161,7 +161,7 @@ func perfect_window() -> Vector2:
 	return Vector2(full, full + float(res_def().get("perfect_t", 0.15)))
 
 ## Hunter._loose asks: a bow let go inside a stage's perfect window hits harder: +25% at full draw,
-## +15% at the first stage (Myth-style: a perfect release exists in both stages).
+## +15% at the first stage (a perfect release exists in both stages).
 func draw_bonus(t: float) -> float:
 	var pw := perfect_window()
 	var st: Array = h.wpn.get("draw", [])

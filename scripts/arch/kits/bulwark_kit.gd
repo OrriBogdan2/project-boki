@@ -1,7 +1,7 @@
 class_name BulwarkKit
 extends ArchKit
-## Bulwark (heavy): the squad's shield. docs/ARCHETYPES.md §6.6 and "Kit loops" (kits4: rebuilt on an
-## Oath-style shield-tank baseline; mechanics only, names and numbers our own).
+## Bulwark (heavy): the squad's shield. docs/ARCHETYPES.md §6.6 and "Kit loops" (kits4: rebuilt as
+## a shield-tank baseline; mechanics only, names and numbers our own).
 ##
 ## - LMB (Tower Shield & Mace): tap throws the mace (it passes through foes, lies where it lands and
 ##   shows foes near it to your team; tap again to call it back, hitting on the way); hold charges a
