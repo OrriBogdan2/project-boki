@@ -232,9 +232,6 @@ func _reset_doom() -> void:
 	net_ring(h.pos, 2.0, col_of(r_def()))
 
 # ------------------------------------------------------------------ LMB: Greatsword (slashes / Searing Wave)
-func lmb_def() -> Dictionary:
-	return d.get("lmb", {})
-
 func _wk() -> float:
 	return h.wup_dmg * m.dmg_mult(h)
 
@@ -289,12 +286,6 @@ func lmb_override(held: bool, dt: float) -> bool:
 		lmb_buf = 0.0
 		_slash()
 	return true
-
-func _bot_target() -> Ent:
-	var best: Ent = null; var bd := 12.0
-	for f in m.foes_of(h.team):
-		if f.hittable() and h.flat_dist(f) < bd: bd = h.flat_dist(f); best = f
-	return best
 
 ## A quick slash: a cone, twice as hard on the tip (the sweet spot at the far end of the swing).
 func _slash() -> void:

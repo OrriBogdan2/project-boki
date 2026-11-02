@@ -30,7 +30,6 @@ var pops := 0
 var collapses := 0
 var seed_denied := 0
 
-func lmb_def() -> Dictionary: return d.get("lmb", {})
 func is_swollen() -> bool: return swollen_t > 0.0
 
 func res_text() -> String: return "SWOLLEN" if is_swollen() else "%d" % int(res)
