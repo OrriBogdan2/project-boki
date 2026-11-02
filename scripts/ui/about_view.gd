@@ -81,7 +81,7 @@ static func origin_text(rec: Dictionary) -> String:
 	var tn := String(w.get("tier_name", ""))
 	if tn != "": place += (" (%s)" % tn) if place != "" else tn
 	match String(o.get("how", "unknown")):
-		"wild": return "Tamed in the wild" + ((" at " + place) if place != "" else "")
+		"wild": return "Scanned in the wild" + ((" at " + place) if place != "" else "")
 		"taken": return "Taken from %s" % String(o.get("from", "a rival")) + ((" at " + place) if place != "" else "")
 		"egg": return "Hatched in your Nesting Nook"
 		"boss_egg":
@@ -190,7 +190,7 @@ static func origin_short(rec: Dictionary) -> String:
 	var w: Dictionary = o.get("where", {}) if typeof(o.get("where", null)) == TYPE_DICTIONARY else {}
 	var place := String(w.get("island", w.get("map", "")))
 	match String(o.get("how", "unknown")):
-		"wild": return "Tamed" + ((" at " + place) if place != "" else " in the wild")
+		"wild": return "Scanned" + ((" at " + place) if place != "" else " in the wild")
 		"taken": return "Taken from %s" % String(o.get("from", "a rival"))
 		"egg": return "Hatched at home"
 		"boss_egg": return "Hatched from a Rare Egg"

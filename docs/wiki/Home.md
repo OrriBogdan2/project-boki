@@ -20,7 +20,7 @@ hand; change the data and rerun the script. Hand-written pages may also hold gen
 | [Controls](Controls.md) | Every key, in a match and at home |
 | [Classes](Classes.md) | The six classes and how levels and ranks work |
 | [Thief](Class-Thief.md), [Archer](Class-Archer.md), [Mage](Class-Mage.md), [Gunslinger](Class-Gunslinger.md), [Juggernaut](Class-Juggernaut.md), [Bulwark](Class-Bulwark.md) | One page per class |
-| [Boki](Boki.md) | Types, personality, taming, breeding, bonds, losing a Boki |
+| [Boki](Boki.md) | Types, personality, scanning, breeding, bonds, losing a Boki |
 | [Boki species](Boki-Species.md) *(generated)* | Every species with its abilities, merge and evolution paths |
 | [Boki growth](Boki-Growth.md) *(generated)* | Evolution nodes, mutations, bond ranks, IVs, natures |
 | [Expeditions](Expeditions.md) | The drop, gliding, the abyss, lairs, exits, the Blight, weather, dying |
