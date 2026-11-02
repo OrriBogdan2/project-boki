@@ -201,7 +201,7 @@ func _squad() -> void:
 		var weapon := String(WEAPONS[arch])
 		if i == 0 and Save.d.has("look"):
 			lk = Save.d["look"]          # you lead the squad, as you look
-			weapon = Data.weapon_for(Data.class_of_save(), String(Save.d.get("weapon", "")))
+			weapon = Arch.weapon_for(Arch.of_save(), Data.class_of_save(), String(Save.d.get("weapon", "")))
 			cls = Data.class_of_save()
 		var h := Models.hunter(cls, Data.TEAM_COLORS[0], weapon, "", lk, arch)
 		var sl: Array = slots[i]
