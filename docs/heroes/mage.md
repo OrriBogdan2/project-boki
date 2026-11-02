@@ -18,6 +18,9 @@ Where they disagreed: the guides rank the Q (lightning strike) and RMB (spear) p
 0.3s in later patches, the dash blast radius shrank (200 to 160). We took the latest wiki values
 (spear cast 0.33s, dash radius reduced) and built the kit around the dash-through-charged-target loop.
 
+Version chosen: the wiki page values after the Leveling Rework patch, taking the later number wherever
+a patch page and the ability page differ. Rank 4 source upgrades are mapped onto our rank 3.
+
 ## Scaling
 Source health is roughly 8 to 10 times ours (Light = 124 HP). Damage numbers were scaled by about 1/9 and
 rounded; cooldown ratios, ranges (units to metres at about 1/100) and the Spark count (4) were kept.
@@ -56,11 +59,21 @@ the spear's mote already resets the dash. If Merge later wants a stack-spreading
 | Knock | heal 15% | `--archetype-check` |
 
 ## Animation moves (`HunterAnim.KMOVES`)
-`mage_rmb` (coil drawn back, lunge and palm thrust, recover), `mage_dash` (sprinter's crouch, both arms
-back while the lane grows), `mage_dash_go` (flat-out streak, arms trailing), `mage_e` (one hand to the
-sky, slammed down at the mark). Frame strips: `~/shots/heroes-joule-ghost/strip_*.png`.
+| Ability | Move id | Look |
+|---|---|---|
+| LMB Coilcaster | none (stock firing pose) | the bolts and forearm glow carry it |
+| RMB Coilshot | `mage_rmb` | coil drawn back, lunge and palm thrust, recover |
+| Shift Wirerun (lane growing) | `mage_dash` (held) | sprinter's crouch, both arms back |
+| Shift Wirerun (released) | `mage_dash_go` | flat-out streak, arms trailing, easing to stride |
+| E Skycall | `mage_e` | one hand to the sky, slammed down at the mark |
+Frame strips: `~/shots/heroes-joule-ghost/strip_mage_*.png`.
 
 ## Engine notes
-Grounded and Rattled are `KitStatus` statuses carried by the Net event `["kst", nid, kind, seconds]`
-(Net 0.6.1): the body's own game runs the rules, every game shows the look. Remote players do not run the
-kit, so they see the Live pips only as the Net ring pulse, not the per-target pips.
+- Grounded and Rattled are `KitStatus` statuses carried by the Net event `["kst", nid, kind, seconds, k]`
+  (Net 0.7.0, already on main): the body's own game runs the rules, every game shows the look. Remote
+  players do not run the kit, so they see the Live pips only as the Net ring pulse, not the per-target pips.
+- No new Net events or state keys: this branch keeps main's Net version.
+- Kit: `scripts/arch/kits/mage_kit.gd`, data `content/archetypes/mage.json`, weapon `content/weapons/coilcaster.json`.
+  Look: `scripts/match/hero_gear.gd`. Gallery and screenshot hook: `scripts/arch/hero_demo.gd` (`--hero-demo`).
+- Blowout has its own sound `hero_blowout` (`tools/gen_hero_sfx.py`, pure Python).
+- `scripts/arch/hex.gd` is unused by this kit now; it is filed in `docs/DEBT.md` for removal with the `"hex"` event.

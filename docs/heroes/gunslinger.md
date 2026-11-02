@@ -16,6 +16,9 @@ Where they disagreed: the passive stack bonus is 6% on the current wiki and was 
 (we took 6%). Rank 4 effects (grenade reset on a knock, railgun cooldown per target) are the late
 upgrades; we mapped them onto our rank 3.
 
+Version chosen: the current wiki page (6% passive stack, post Leveling Rework cooldowns), later
+values over earlier ones.
+
 ## Scaling
 Our Medium has 145 HP against roughly 1.4k to 1.6k, about 1/10. Rifle 6 per round (24 round drum,
 0.12s), Burr Charge 13 blast (2 on attach), cone 10, Longneedle 36. Ranges at about 1/100.
@@ -49,10 +52,18 @@ and needle, fed by Fever) does not need it. Nothing was folded in.
 | Fever + rifle | lifesteal on every shot | `--archetype-check` |
 
 ## Animation moves (`HunterAnim.KMOVES`)
-`gunslinger_rmb` (burr cocked by the ear, lob), `gunslinger_e` (braced low behind the barrel, recoil throws
-the chest back), `gunslinger_dash` (sat back into the skid, arms out). Frame strips in
-`~/shots/heroes-joule-ghost/strip_*.png`.
+| Ability | Move id | Look |
+|---|---|---|
+| LMB Quill Rifle | none (stock firing pose) | muzzle flash and casings carry it |
+| RMB Burr Charge | `gunslinger_rmb` | burr cocked by the ear, then the lob |
+| Shift Slipstep | `gunslinger_dash` | sat back into the skid, arms out for balance |
+| E Longneedle | `gunslinger_e` | braced low behind the barrel for the 0.8s charge, recoil throws the chest back |
+Frame strips: `~/shots/heroes-joule-ghost/strip_gunslinger_*.png`.
 
 ## Engine notes
-Rattled is a `KitStatus` status (Net event `["kst", nid, kind, seconds]`, Net 0.6.1); the target's own game
-applies the slow and every game shows the stars.
+- Rattled is a `KitStatus` status (Net event `["kst", nid, kind, seconds, k]`, Net 0.7.0, already on main);
+  the target's own game applies the slow and every game shows the stars.
+- No new Net events or state keys: this branch keeps main's Net version.
+- Kit: `scripts/arch/kits/gunslinger_kit.gd`, data `content/archetypes/gunslinger.json`, weapon
+  `content/weapons/quill_rifle.json`. Look: `scripts/match/hero_gear.gd`.
+- Skewered has its own sound `hero_skewer` (`tools/gen_hero_sfx.py`, pure Python).
