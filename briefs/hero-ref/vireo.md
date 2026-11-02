@@ -1,0 +1,391 @@
+# Vireo (`mage`): reference sheet from the Joule footage
+
+Source: `/home/claude/svvid/hero/vireo/frames` (all.mp4 0 to 81 s, 5 fps, frame N = second (N-1)/5).
+Key frames copied to `/home/claude/hero-ref/vireo/`. Compared against origin/main 4f82978 (a descendant
+of 7881774; origin/main moved on while this pass ran) in the worktree `/home/claude/ref-vireo`.
+
+Scale used: the hero is about 40 px tall (head to feet) in these frames. The training dummy stands about
+215 px (about 5.5 body heights) in front of the hero in most shots. The camera is top-down with a slight
+tilt, so vertical distances on screen are a little foreshortened. All times come from frame counts
+(1 frame = 0.2 s, so every timing is ±0.1 s).
+
+The clip ends with the in-game hero info panel (frames 0396 to 0403, `0398.jpg`). That panel uses a
+different keymap: E = spear, SPACE = Surge, L SHIFT = javelin, Q = ult. It adds rules the slot cards
+leave out:
+- LMB applies 1 Static stack.
+- The spear is HOLD and release, and it stuns if the target hits a wall.
+- Surge reset: "Hitting Static Charged enemies resets Surge's cooldown and does bonus damage".
+- The javelin applies 2 Static stacks.
+- The ult is PRESS, then reactivate. It applies Static and spawns Lightning Orbs.
+
+## 1. Source summary
+
+| Slot (video) | Ability | Input | Aim type | Cooldown / cost | Effect |
+|---|---|---|---|---|---|
+| Passive | Gathering Storm | n/a | n/a | n/a | Attacks and spells apply Static. At 4 stacks the target is fully Static Charged. Dashing through a charged target consumes the charge for heavy damage. Spells can spawn Lightning Orbs; collecting one resets Surge's cooldown. |
+| LMB | Lightning Bolt | tap or hold (auto-repeat) | skillshot along the cursor direction; always flies to **max range** | 0.8 s per bolt | A fast bolt that applies 1 Static. Damage 117 on the dummy (later 146). |
+| RMB | Lightning Spear | hold, then release | skillshot along the cursor direction; flies to **max range** and stops on the first enemy hit | 7 s, 20 mana | Damage 472 (later 590) plus a knockback. Stuns if the target is knocked into a wall. Drops one Lightning Orb at the impact point. |
+| L SHIFT | Surge | hold to charge, release to dash | direction from the cursor; length set by **charge time, not by cursor distance** | 6.7 s, 25 mana | Invulnerable lightning dash. Passing through a charged enemy detonates it (1078 / 1348 damage) and refunds Surge. Passing through an orb also refunds Surge. |
+| E | Lightning Javelin | press to place, then aim a direction | ground spot **at the cursor**; direction set by the cursor after placement | 9.2 s, 25 mana | 0.8 s later lightning strikes the spot: 291 damage, 2 Static. Enemies (and orbs) are pulled along the chosen direction and become GROUNDED. |
+| R | Eye of the Storm | press to launch, reactivate to land | landing spot **at the cursor**, clamped inside a large ring | 37.5 s, 50 mana | Leaps into the air, during which the camera zooms out. The hero then crashes down at the chosen spot: 115 damage AoE, applies Static, spawns Lightning Orb(s). |
+
+## 2. Per-ability detail
+
+### Passive: Gathering Storm (frames 0001 to 0025, card in `0003`; the info panel in `0398`)
+- **Input:** none.
+- **Stacks:** each LMB bolt adds 1 stack, the javelin adds 2, and the ult adds stacks too.
+- **Stack display:** nothing clear shows for stacks 1 to 3 (at most a faint violet glow above the bar,
+  `0005`, `0009`). On the 4th stack (`0016`):
+  - A tall gold lightning bolt drops from the sky onto the target.
+  - A yellow-lightning-on-violet-disc icon appears above its HP bar.
+  - A glowing white-gold orb sits on its chest from then on (`0017` to `0025` and later).
+  - The charge lasted at least the 8 frames shown (1.6 s or more). The decay time is not shown.
+- **Detonation** (`0135`): dashing through a charged target shows a magenta damage number with a magenta
+  bolt glyph (1078 at `0135`, about 1348 at `0336`) and briefly tints the target red. At the same moment a
+  large green-yellow starburst flashes where the hero is (about 4 body heights across). After that,
+  2 to 4 green vertical light columns stand on the hero for about 1.6 s (`0136` to `0142`), with green
+  sparks. The Surge icon shows ready immediately (`0135`, `0142` HUD).
+- **Orb collection** (`0165`) uses the same green starburst and green columns. Mark the green
+  "refund" columns as `distinctive`: we keep the function but use our own colour and shape.
+- **Sound:** no audio in the main video.
+
+### LMB: Lightning Bolt (frames 0001 to 0040, card `0033`)
+- **Input:** hold to auto-fire, one bolt every 4 frames (0.8 s). Damage numbers land at frames 4, 8,
+  12 and 16. The card shows a 0.8 s cooldown, and the HUD icon counts it down ("0.3" at `0033`). There is
+  no magazine and no reload.
+- **Aiming:** the bolt goes in the cursor's direction and **travels to max range no matter where the
+  cursor is**:
+  - At `0038` the cursor is only about 150 px away, yet the indicator and the bolt run on to about 300 px.
+  - At `0032` and `0033` the bolt passes the cursor and keeps going.
+  - Max range ≈ 300 px ≈ 7.5 body heights.
+  - This matches Ghost's autos, not Myth's cursor-placed shots.
+- **Reticle and indicator:**
+  - The cursor is a small white **ring with a centre dot**, about 25 px across, drawn with a dark
+    outline and 4 short gaps (`0016` zoom).
+  - A thin white line at about 30% opacity runs from the hero, **through the cursor, to max range**,
+    and ends in a small arrow tick (`0026` to `0040`).
+  - The line is always shown while this hero aims, not only while firing.
+- **Animation** (`0003` to `0020`, hero zoom): the hero alternates hands.
+  - On each cast she twists her torso and flings one arm forward (`0003`, `0006`, `0010`, `0015`), then
+    settles back to a wide stance with both arms out (`0004`, `0008`, `0012`).
+  - Small gold sparks pop around her feet with every cast.
+  - She faces the cursor.
+  - She stood still in every LMB shot, so the footage doesn't show whether she can walk while firing.
+- **VFX:**
+  - The projectile is a short orange-gold comet streak (about 30 px) with a thin white tail.
+  - It is fast, roughly 0.4 s to max range (about 700 to 800 px/s, or about 18 body heights per second).
+  - On impact a fan of 3 to 5 gold lightning splinters sprays back toward the caster (`0012`, `0014`).
+- **Numbers:** 117 damage (146 in later segments, likely a level or power difference). Applies 1 Static.
+
+### RMB: Lightning Spear (frames 0041 to 0090, card `0060`)
+- **Input:** hold, then release (info panel: "HOLD and release to throw"). Timing in all 3 casts:
+  1. Press at `0043`, `0057` and `0078`: a flash, and a tall gold spear appears upright at her right side.
+  2. Hold for 4 frames with the spear crackling in her hand (`0044` to `0047`).
+  3. **Her whole body flashes white for 1 frame** (`0048`, `0062`, `0083`). This reads as the
+     "fully charged" flash.
+  4. The throw comes on the next frame (`0049`, `0063`, `0084`).
+  5. So press to throw is about 1.2 s every time. The player may have released on the flash, or the
+     throw may be automatic at full charge.
+- **Aiming:**
+  - The throw follows the cursor's direction and flies to **max range** unless it hits something. At
+    `0049` to `0050` it passes the cursor and ends near the end of the lane.
+  - The lane is the same length as the LMB line (about 300 px) and **does not grow while held**.
+  - The target is not shown being slowed.
+  - She did not walk during the hold, so the footage doesn't show whether moving is allowed.
+- **Reticle:** the LMB's single line becomes a **narrow double-line lane** (two thin white rails about
+  6 px apart, with small chevrons inside). It runs from the hero to max range and stays up for the whole
+  hold (`0044` to `0048`). The cursor ring stays the same.
+- **Animation:**
+  - Press: the spear materialises in a burst (`0043`).
+  - Hold: she stands side-on with the spear raised by her right shoulder. Gold arcs crawl over her and
+    the spear.
+  - Flash: a white body flash (`0048`).
+  - Throw: an overarm throw. The spear leaves as a long gold lightning streak, and she recovers in
+    about 0.4 s.
+  - Mark the hand-summoned lightning spear as `distinctive`: keep the held-projectile idea, use our own
+    shape.
+- **VFX:**
+  - Flight is nearly instant: a 200 px gold streak that reaches the dummy within 1 frame (`0063` to
+    `0064`).
+  - The impact is a white-gold explosion with a puff cloud about 2.5 body heights wide (`0064`, `0085`).
+  - The target turns pink or magenta for about 2 s while displaced (`0065` to `0074`).
+  - A white shock ring expands around it (`0068`).
+- **Knockback:**
+  - About 1 body height on open ground (`0064` to `0066`).
+  - When the dummy hit the pillar (`0085` to `0090`) it was **STUNNED**: the label sits above the bar
+    for more than 1 s.
+- **Lightning Orb** (`0068`, `0087` to `0095`, `0151` to `0160`):
+  - It appears at the impact point the frame after the hit, on the dummy as well as on hunters.
+  - It is a crackling yellow sphere about 0.5 body heights across, hovering low.
+  - Short yellow arcs jump between the orb and the nearby enemy.
+  - It sat for at least 3 s (`0151` to `0163`) before being collected.
+- **Numbers:** 472 damage (590 in a later segment), 7 s cooldown, 20 mana.
+
+### Shift: Surge (frames 0095 to 0172; card `0102`; combos `0128` to `0172`, `0277` to `0300`, `0361` to `0369`)
+- **Input:** hold to charge, release to dash.
+  - The cooldown starts on press: the HUD shows 7 at `0102` while she is still holding.
+  - The charge from press to full length takes about 0.6 s (`0101` to `0104`).
+  - Releasing early gives a shorter dash: at `0131` the end circle is on the dummy, at `0132` just past it.
+- **Aiming:**
+  - The direction follows the cursor and keeps tracking it while held.
+  - **The length comes from the charge, not the cursor.** At `0102` the end circle sits about
+    180 px out while the cursor is at about 290 px; at `0104` the circle has grown past the cursor.
+  - Full length ≈ 310 px ≈ 7.5 to 8 body heights, about the same as the LMB range.
+- **Reticle:**
+  - The lane is a pair of faint white rails out to max range.
+  - Its end is marked by a **large white circle**, about 2.5 body heights across, with 4 cardinal tick
+    marks and a 4-point star glint at the centre (`0102`).
+  - The circle slides outward along the lane as the charge grows (`0102`, `0103`, `0104`).
+  - The cursor ring stays where the cursor is.
+- **Animation:**
+  - Press (`0101`): a vertical gold lightning bolt slams down onto her. Mark this as `distinctive` as
+    an effect, though it is a useful "charging" tell.
+  - Hold: a low crouch, leaning into the dash, with gold crackle around her (`0103`).
+  - Release (`0105`): her body becomes a **yellow lightning silhouette**, labelled **INVULNERABLE**.
+  - Travel (`0106` to `0108`, about 0.6 s for full length; the camera follows): a long gold streak
+    with a 3 to 4 body-height trail.
+  - Arrival (`0109`): a gold ring burst about 3 body heights across with radial spark needles.
+  - She re-forms and recovers over about 0.4 s (`0110` to `0111`).
+- **Combo and recast:**
+  - Dashing through a charged dummy detonates it (`0133` to `0135`), and Surge is ready again at once
+    (HUD `0135`, `0142`).
+  - Dashing through a Lightning Orb also refunds it (`0161` to `0165`; the HUD shows Surge ready at
+    `0165`). She then dashes straight back (`0168` to `0171`).
+  - When the dashing body crosses the dummy but no detonation happens, it takes a 146 hit (`0165`, `0300`).
+- **Numbers:** 6.7 s cooldown, 25 mana. Detonation 1078 to 1348. Pass hit 146 (probably the dash's own
+  damage).
+
+### E: Lightning Javelin (frames 0181 to 0226 and 0277 to 0285, card `0200`)
+- **Input:** press to place, then aim a direction.
+  - At `0184` the placement circle appears where the cursor was on the previous frame (`0183`).
+  - The cursor then moves off to one side. A translucent arrow lane drawn from the circle shows the pull
+    direction.
+  - About 1 frame later (`0185` to `0186`) the strike is committed. This was either a release or a
+    second click; the video can't tell which.
+  - The committed disc carries a gold **chevron on its rim pointing toward the cursor**: the pull
+    direction (`0186` to `0189`, and `0198`).
+- **Aiming:** the area is placed **at the cursor** (clamped to range), and the pull goes **in the
+  direction chosen after placing**. It is not the direction from the hero to the target: at `0186` the
+  hero is below the disc but the chevron points left.
+- **Reticle:**
+  - Placement shows a white circle about 2 body heights across, with 4 tick marks, plus the direction
+    arrow lane (`0184`).
+  - Once committed (`0186` to `0189`) it becomes a dark blue-violet disc on the ground with an
+    orange-gold crackling rim and the gold chevron.
+  - Then a gold pillar of light descends onto it over 3 frames, narrowing as it lands (`0187` to
+    `0189`). This is the countdown.
+- **Timing:** from the disc appearing to the strike is 4 frames (0.8 s, `0186` to `0190`). The strike
+  flash is white-gold, about 2 body heights across (`0190`). Lightning forks crackle at `0191`, and a
+  dark scorch lingers about 0.4 s (`0192`).
+- **Effect on targets** (`0197` to `0209`, `0212` to `0224`):
+  - 291 damage.
+  - The target flashes red and white and is labelled **GROUNDED**.
+  - It slides along the ground (no launch arc) about 4 body heights over about 1 s, roughly toward the
+    chosen direction.
+  - It is wrapped in 2 to 3 spinning yellow electric rings (shackles) that last 1.5 s or more.
+- **Orbs:** the javelin also flings a Lightning Orb. At `0278` to `0285` an orb sitting under the strike
+  is thrown about 6 body heights to the left as a gold streak. She then Surges through it for the reset
+  (`0287` to `0291`).
+- **Animation:** a one-arm sweep or throw toward the spot with gold sparks (`0185` to `0186`). It is
+  small, with no long wind-up.
+- **Numbers:** 291 damage, 2 Static stacks, 9.2 s cooldown, 25 mana.
+
+### R: Eye of the Storm (frames 0349 to 0395, card `0360`)
+- **Input:** press to launch, reactivate to crash down.
+  1. Press (`0349`, `0372`): a large gold ring about 15 body heights across, centred on the hero,
+     shows the landing range.
+  2. About 0.4 s later she crouches and leaps with a white dust puff (`0352`, `0374`).
+  3. In the air she is labelled MIDAIR, the **camera zooms out**, and the ground inside the ring
+     darkens to a deep violet with lightning veins (`0353` to `0357`, `0375` to `0383`).
+  4. She stayed up 1.2 to 1.8 s in the two casts. Then, labelled INVULNERABLE, she streaks as a
+     lightning bolt to the spot (`0379` to `0383`).
+  5. She lands with a white cloud and a small orange ring at the landing site (`0358`, `0384`).
+  6. A gold pillar and radial starburst follow (`0360`, `0385`).
+- **Aiming:** the landing spot is **at the cursor**, clamped inside the ring. A gold four-bracket
+  crest marker sits at the cursor on the ground (`0376`).
+- **Effect:** 115 damage on the dummy (`0385` to `0386`). An orb appears beside the dummy afterwards
+  (`0387` to `0395`). It applies Static.
+- **Numbers:** 37.5 s cooldown, 50 mana.
+- **For us:** R is the Boki Merge, and the doc drops this ult. See gap 12.
+
+## 3. The combo the kit is built around
+1. Bolts (1 stack each), the javelin (2) or the ult build 4 Static on a target. When it reaches 4, a sky
+   bolt and the charged icon show it.
+2. Surge through the charged target: a magenta number of about 9 to 11 LMB hits (1078 / 1348), and
+   Surge back at once.
+3. The spear sets up the second dash. It knocks the target back (and stuns it against walls) and
+   leaves an orb at the impact point. The javelin can fling that orb to a better spot. Dashing through
+   the orb resets Surge again, so Joule chains dash, orb, dash (`0161` to `0171`, `0287` to `0300`).
+
+## 4. Key frames (`/home/claude/hero-ref/vireo/`)
+| File | Caption |
+|---|---|
+| 0016.jpg | 4th Static stack: a sky bolt hits the dummy and the charged icon appears above its HP bar |
+| 0033.jpg | LMB: the white line runs from the hero, through the cursor ring, to max range; the bolt is past the cursor; Lightning Bolt card |
+| 0038.jpg | LMB with the cursor close: the line still extends to the same max range |
+| 0043.jpg | RMB press: the spear materialises upright at her side (flash) |
+| 0048.jpg | RMB: the double-rail lane to max range, and the 1-frame white body flash just before the throw |
+| 0064.jpg | Spear impact on the dummy: 472, white-gold blast |
+| 0068.jpg | After the spear: the dummy knocked back (pink tint, shock ring), the Lightning Orb left at the impact point |
+| 0088.jpg | Spear into a pillar: STUNNED label, orb on the ground |
+| 0102.jpg | Surge held: the big end circle (4 ticks, star glint) partway along the lane, short of the cursor; Surge card; Shift icon already on 7 |
+| 0105.jpg | Surge release: the hero as a lightning silhouette, INVULNERABLE |
+| 0109.jpg | Surge arrival: gold ring burst with radial sparks |
+| 0135.jpg | Detonation: magenta 1078 with a bolt glyph on the dummy, green-yellow flash on the hero, Shift icon ready |
+| 0165.jpg | Surge through an orb: green flash and sky bolt, 146 pass hit, Shift ready |
+| 0184.jpg | E placement: the circle at the previous cursor spot plus the direction lane |
+| 0188.jpg | E committed: dark disc, crackling rim, chevron toward the cursor, gold pillar descending |
+| 0203.jpg | E hit: 291, GROUNDED, dummy dragged inside yellow shackle rings |
+| 0283.jpg | E flings a Lightning Orb left (the orb as a gold streak) |
+| 0376.jpg | R airborne: camera zoomed out, darkened ring area, gold crest marker at the cursor |
+| 0385.jpg | R landing: gold pillar and starburst, 115 |
+| 0398.jpg | In-game info panel with the extra rules (HOLD spear, wall stun, Surge reset, javelin = 2 stacks, ult = reactivate) |
+
+## 5. Gaps against ours, ranked by how much they change the feel
+
+Our files: `scripts/arch/kits/mage_kit.gd` (the kit), `content/archetypes/mage.json`,
+`content/weapons/coilcaster.json`, `scripts/match/hunter_anim.gd` (KMOVES `mage_*`),
+`scripts/match/match.gd` `_update_aim()` (the global aim line) and `scripts/ui/hud.gd`
+`_draw_crosshair()`.
+
+1. **[mechanic] [numbers] Orbs drop on every spear hit, at once, and are the main reset engine.**
+   - Source: the orb appears at the impact point the next frame, on any enemy including the dummy.
+     The ult also spawns orbs.
+   - Ours: `_coil_hit()` drops a mote only when `f is Hunter`, and only after `mote_t` 0.5 s.
+   - The source loop is dash, orb, dash. Ours almost never offers the second dash outside a duel.
+   - Change: in `_coil_hit()`, call `_drop_mote` on every foe hit (keep it from spawning on a miss), at
+     the impact point, with `mote_t` at about 0.05.
+   - If the merge keeps a flavour of the ult, let `add_spark` reaching Live also spawn a mote (see
+     open question 3).
+2. **[mechanic] Surge's cooldown starts on press.**
+   - Source: the cooldown starts on **press** (HUD 7 at `0102`), not on release. The detonation refund
+     already matches (`_blowout()`).
+   - Change: in `on_dash()`, spend the charge when the hold starts. Today `spend_dash` runs in `_run()`.
+   - If you do this, make `_end_wire()` on a cancel (stun, root or Grounded) refund the spent charge,
+     or accept the loss the way the source does.
+3. **[aim] [reticle] LMB: the line and the bolt go to max range, past the cursor.**
+   - Our bolt already flies its full `range` (`hunter.gd` primary fire, `life = rng / spd`).
+   - But `match.gd _update_aim()` clamps the aim line to `min(cursor distance, range)`, so ours reads
+     as cursor-placed.
+   - Source: a thin white line about 30% opacity, always out to max range, ending in a small arrow
+     tick.
+   - Change: in `_update_aim()`, read a weapon flag (say `"aim_full": true` in `coilcaster.json`) that
+     draws the line at the full `range` and adds an end tick.
+4. **[numbers] LMB cadence and ammo.**
+   - Source: one bolt every 0.8 s, no magazine, no reload. A bolt is worth about 1/4 of a spear and
+     about 1/9 of a detonation.
+   - Ours: `coilcaster.json` fires every 0.42 s with `mag` 12, `reload` 1.3 and `pierce` true. The
+     footage never shows a bolt pierce; the info panel just says "Fire a bolt of lightning".
+   - Change: set `rate` to about 0.8, scale `dmg` up so the DPS stays where it is (about 15), and drop
+     the mag (or make it huge). Consider `pierce: false`, a design call.
+   - With a 0.8 s cadence, each Spark matters, and it takes about 2.4 s of bolts to make a foe Live,
+     as in the source.
+5. **[anim] [vfx] RMB is a held, summoned spear, not a coil palm-thrust.**
+   - Source: a flash, then a tall spear upright in her right hand, held about 1 s with crackle. A
+     1-frame white full-body flash, then an overarm throw that leaves a long lightning streak.
+   - Ours: `mage_rmb` has the coil drawn back, a lunge and a palm thrust, with no held prop.
+   - Changes:
+     - A new KMOVES `mage_rmb_hold` (hold: arm raised by the shoulder, side-on stance) and
+       `mage_rmb` (overarm release).
+     - A visible held prop in `rmb_hold_tick`, which is a natural home for our own copper-rod javelin
+       look.
+     - When `rmb_t` reaches `hold`, a body flash (`m.fx.flash` on `h`) as the "full" tell.
+6. **[mechanic] [reticle] RMB: fixed max-range lane, and charge does not change range.**
+   - Source: the lane is about 7.5 body heights from the press and does not grow while held.
+   - Ours: `coil.range` lerps 6 to 13 m with the hold, and the telegraph shows only the max range.
+   - Change: a fixed `range` in `mage.json` and `_coil()`, keeping the damage and push lerp if wanted.
+   - The lane should be the double-rail look, narrower than the dash lane: `tele_lane` width about 0.3,
+     not 0.5.
+   - Also check `min_t` 0.33. The source shortest press to throw seen was 1.2 s every time (see open
+     question 1).
+7. **[reticle] Surge end marker.**
+   - Source: a big end circle about 2.5 body heights across with 4 tick marks and a star glint,
+     sliding out along faint twin rails. The cursor plays no part in the length.
+   - Ours: `on_dash()` creates `telegraph_circle(h.pos, 0.7, ...)` (radius 0.7, much smaller) and a
+     lane of width 0.9.
+   - Ours already ignores cursor distance, so that part matches.
+   - Change: radius about 1.5, add ticks and a centre glint in `fx.telegraph_circle` (or a new
+     `fx.end_marker`), and thin the lane to rails.
+8. **[vfx] [anim] Surge look.**
+   - Source:
+     - A sky bolt onto the hero on press.
+     - A crouch while held (ours `mage_dash` matches).
+     - On release the body becomes a lightning silhouette with an INVULNERABLE label, and a long
+       3 to 4 body-height trail.
+     - On arrival, a ring burst about 3 body heights wide with radial needles.
+   - Ours: a `bolt` line from start to end and the "roll" trail.
+   - Changes:
+     - In `_run()`, hide or tint the model as an emissive silhouette for `time`.
+     - Add an arrival `m.fx.ring` plus `burst` at the end point (`m.later(time, ...)`).
+     - Add a vertical `m.fx.bolt` onto `h` in `on_dash()`.
+9. **[mechanic] [aim] E: place, then pick the direction.**
+   - Source: the circle locks at the cursor, then the cursor sets the pull direction, shown by an
+     arrow lane and a rim chevron. Targets are dragged along the ground about 4 body heights, without
+     a launch.
+   - Ours: `cast_e()` takes the direction from hero to spot, and `_strike()` uses `impulse(dir*push,
+     lift 6.5)`, which tosses them up.
+   - Changes:
+     - Make E a hold. Press locks `at`, holding draws `tele_lane` from `at` toward the cursor, and
+       release fixes `dir = (cursor - at)`.
+     - A plain tap keeps today's direction.
+     - Set `lift` to about 0.5 so it is a slide, not a fling.
+     - The doc's note "our E has no hold-to-place" should become "hold to aim the pull".
+10. **[numbers] E: delay, stacks and Grounded.**
+    - Source: 0.8 s from the commit to the strike, 2 Static, GROUNDED with shackle rings for 1.5 s or
+      more, and a 9.2 s cooldown.
+    - Ours: `delay` 0.55, 1 Spark (`add_spark(f)`), `grounded` 1.2, `cooldown` 12.
+    - Change: `delay` to 0.8, `add_spark(f, 2)` in `_strike()`, and `grounded` to about 1.5.
+    - Cooldown: keep the source's ratio to the spear and dash, which is E < spear×1.3 and
+      dash ≈ spear.
+11. **[numbers] Cooldown ratios.**
+    - Source: spear 7, Surge 6.7, javelin 9.2 (about 1 : 1 : 1.3).
+    - Ours: RMB 10, dash 9, E 12.
+    - Keep our absolute pacing if needed, but the source lets Surge come back as often as the spear
+      even without resets. Consider 8 / 8 / 10.5.
+12. **[vfx] Telegraph for E.**
+    - Source: a dark disc, a crackling gold rim and a light pillar descending as the countdown.
+    - Ours: a filling circle (`tele_circle`), and the strike is a `bolt` from 9 m up.
+    - Change: add a narrowing vertical beam over the delay, using `fx` in `cast_e()` and `_strike()`.
+    - The descending pillar is generic enough to keep; give it our teal and copper.
+13. **[vfx] Static display.**
+    - Source: stacks 1 to 3 are nearly invisible. At 4, a sky bolt, an icon over the HP bar and a
+      chest glow.
+    - Ours: a pip ring that grows from the first Spark. Ours is more readable, so keep it.
+    - Add the sky bolt (ours has `m.fx.bolt` arcs to the ground while Live; add one bolt from above at
+      the moment of going Live in `add_spark()`).
+14. **[anim] LMB alternating hands.**
+    - Source: each bolt is thrown from alternating hands with a torso twist, with sparks at the feet.
+    - Ours: KMOVES has no mage LMB move (stock firing pose; the cast pose in `hunter_anim.gd` around
+      line 1824 is one palm out).
+    - Change: a light additive `mage_lmb_l` / `mage_lmb_r` alternating per shot, played from
+      `on_fire`, or the hunter's shot hook.
+15. **[mechanic] Spear knockback size.**
+    - Source: about 1 body height on open ground, then a stun against walls. The "pink" displaced
+      state lasts about 2 s.
+    - Ours: push 8 to 14 (impulse) with an instant collision check along the throw.
+    - Verify in-game that our push lands about 1.5 to 2 m and not much more.
+16. **[sfx]** No audio in the main video. Nothing to copy.
+17. **[mechanic] R (dropped).**
+    - The source ult is a long-range relocate that spawns orbs and applies Static.
+    - Under the Merge rule it stays dropped.
+    - Possible fold: the dash refund already covers mobility. If the merge wants a hook, "landing
+      spawns a mote" fits `_drop_mote`.
+
+## 6. Rename
+Vireo is not one of the renamed heroes in this pass, so there is nothing to list.
+
+## 7. Open questions
+1. **Spear charge:** is the throw automatic at full charge? Every cast was 1.2 s from press to throw,
+   with the white flash 1 frame before. Does charge scale damage or knockback (472 vs 590 were at the
+   same distance)?
+2. **Detonation:** does it also spawn an orb? Surge was ready at `0135` with no orb visible. The info
+   panel says detonation resets the cooldown directly. Ours resets it directly too.
+3. **Orb duration, and the zap:** does an orb expire, and does it zap nearby enemies? Short arcs from
+   the orb to the dummy appear at `0066` to `0074`.
+4. **Static decay time:** the charge was still up after about 2 s. The decay time isn't shown.
+5. **Movement while casting:** can she move while holding the spear or Surge, or while firing the LMB?
+   The hero never walked during a cast in the footage.
+6. **E input:** is the commit a release of E or a second click? In both cases about 1 frame passed
+   between placing and committing.
+7. **Static from the spear:** does the spear apply a stack? It isn't shown, and the info panel doesn't
+   say.

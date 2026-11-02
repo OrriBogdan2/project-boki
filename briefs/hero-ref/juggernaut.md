@@ -1,0 +1,191 @@
+# Juggernaut (our id `juggernaut`), source: Brall
+
+- **Footage:** `/home/claude/svvid/hero/juggernaut/frames/`, 5 fps; frame N = video second 360 + (N-1)/5.
+  - I confirmed the window by the "BRALL" title card (0001-0013) and the next hero's "KINGPIN" title card at about 457 s.
+  - The ability windows: LMB 0014-0120, RMB 0121-0250, Air Slam 0251-0300, Tether Chain 0301-0366, Quick Dash 0371-0420, Retaliation 0421-0465, summary screen 0466-0480.
+- **Key frames:** `/home/claude/hero-ref/juggernaut/`.
+- **Our code:** origin/main 4f82978. The kit is `scripts/arch/kits/juggernaut_kit.gd`, the data `content/archetypes/juggernaut.json`, the moves are `jug_*` in `scripts/match/hunter_anim.gd` KMOVES (lines 1041-1120), and the design notes are in `docs/ARCHETYPES.md` ("Juggernaut = Brall", line 1066). There is no `docs/heroes/juggernaut.md`.
+- **The footage version matches our port's structure.** The names differ from the wiki names our port cites (Blazing Spirit / Adaptive Strike / Flame Step / Feysteel Chain / Volcanic Rebuke): the video shows Fighting Spirit / Heavy Attack / Quick Dash / Tether Chain / Retaliation. The video is the newer or alpha build.
+- **Scale:** Brall is about 50 px tall. "bh" is one body height, about 1.8 m in our world. Our ranges match the measured bh × 1.8; see venator.md.
+
+## 1. Source summary
+
+The text was read from the in-game cards (`juggernaut/cards_ingame.png`) and the summary screen (`summary_screen.png`).
+
+| Slot | Ability | Input | Aim type | Cooldown / cost | Effect |
+|---|---|---|---|---|---|
+| Passive | Fighting Spirit | none | none | none | "Deal damage to become **Empowered**." Summary: "**Heal** when you knock an enemy or kill a creep." |
+| LMB | Quick Attack | press = melee series; hold = ranged blast | melee cone toward the aim; the blast is a direction projectile flying past the cursor to max range | 0.2 s | "Quick attack, hold to fire a projectile." |
+| RMB | Heavy Attack | press = **Execution Slam**; hold = **Charge Dash**; airborne = **Air Slam**; while tether-chaining = **Anti-Heal Spin** | Slam and Dash in the aim direction with a lane; Air Slam lands on a **cursor-placed** circle | 1.2 s (Air Slam card 5 s), 20 mana | Slam: execution damage, and **resets Retaliation if you knock an enemy**. Dash: charge and release a dash attack. Air: strike down, Slow and Stun. Spin: spin attack + Anti-Heal. |
+| Shift | Quick Dash | press, **3 charges** (summary) | facing / aim direction | 0.4 s between uses, 20 mana | "Dash while attacking in your facing direction." |
+| E | Tether Chain | press, then press again (recast) | a skillshot hook toward the cursor | 9.4 s, 25 mana | Attaches to enemies or walls; reactivate to pull yourself to it. |
+| R | Retaliation | press | self, with a forward strike rectangle | 21.7 s, 20 mana | "Become **Invulnerable**, then strike back with a heavy attack." "Killing an enemy with this attack resets it." |
+
+## 2. Per ability
+
+### Passive: Fighting Spirit
+1. **Input:** none. Damage you deal builds it, then you are Empowered.
+2. **Aim:** none.
+3. **Reticle:** none.
+4. **Animation:** none.
+5. **VFX:**
+   - After the execution knock (0158-0175), **the whole screen tints red** and a red aura with dark-red drips sits on Brall. This is likely Empowered, or the knock feedback.
+   - A **green heal orb and a green light-rain column** drop on Brall at the knock (0158-0165, 0455-0458). That is the knock heal.
+7. **Numbers:** no meter is readable.
+8. **Payoff:** knocks heal. Retaliation resets on a kill; the Execution Slam resets Retaliation on a knock.
+
+### LMB: Quick Attack (0014-0120; `quick_attack_strip.jpg`)
+1. **Input:**
+   - Press for a melee **series**. The swings alternate: right-to-left, then left-to-right (0026 / 0029 / 0033).
+   - He keeps walking while swinging.
+   - Hold to fire a ranged blast. A charge of about 0.6-1.0 s shows a **thin white circular arc around Brall** (0087), then the blast fires.
+2. **Aim:**
+   - The slash is a wide arc in front of him, about 180°, with a radius of about 1.8 bh (0026, 0029).
+   - Several swings face away from the cursor (0053, 0057), so the swing may follow the facing (movement) direction rather than the cursor. Unconfirmed.
+   - The blast flies toward the cursor and **past it** to max range, leaving the screen (0081-0082, 0088, 0095).
+3. **Reticle:** no indicator for slashes. The charge arc shows for the blast.
+4. **Animation:**
+   - A one-handed greatsword swung flat at waist height. Each swing is about 1 frame of wind-up and 1 frame of swing (0.2-0.4 s).
+   - The blade is held trailing behind between swings, with a flaming yellow trail on the edge (0027, 0034).
+5. **VFX:**
+   - The slash arc is a **two-tone crescent: a magenta outer edge and a yellow-white flame inner fill** (0026, 0029, 0050).
+   - The blast is a **red crescent bolt with a red glow**, flying at about 20 bh/s. On hitting a target, a red burst (0118).
+7. **Numbers:**
+   - Body hits are 94 (0047-0051).
+   - A **tip / sweet-spot hit is 151, with a big white star flash** (0054, 0058). The tip is about 1.6x.
+
+### RMB: Heavy Attack (0121-0250; `charge_dash_strip.jpg`)
+**Hold: Charge Dash** (0121-0127, 0141-0146)
+- **Input and charge:**
+  - Hold to charge. Brall crouches with the blade low behind (0124-0125).
+  - A **translucent red lane grows forward from him** as he charges (0124-0125). It **turns bright magenta at full charge** (0126, 0145). Full charge comes after about 0.6-0.8 s.
+- **Release:**
+  - He dashes about 2.5-3 bh (about 5 m) in about 0.2 s along the lane.
+  - He stops at the target with a **huge white burst and a horizontal red slash** (0127, 0146).
+- **Numbers:** a short charge hit for 559; a full charge for **771** (large yellow crit-style numbers).
+
+**Press: Execution Slam** (0154-0158)
+- The target **under the execute threshold is outlined in red** (0154: the red rim on the dummy).
+- Brall winds up for about 0.6 s (0155-0157) with the blade cocked low behind.
+- A **short magenta lane** shows at the end of the wind-up (0157).
+- The strike reaches about 2.4 bh (the dummy) with a giant **magenta "1066" and a lightning glyph** (0158). The dummy is executed.
+- Then the knock effects: a red KO star, the green heal column, and the red screen tint.
+- It isn't certain this was a press rather than the hold variant. The card says the press is the execution.
+
+**Airborne: Air Slam** (0251-0300)
+- He jumps (or launches off a ledge).
+- A **purple glowing disc (about 1.2 bh radius) is drawn at the landing point under the cursor** (0263, 0286-0287): cursor-placed.
+- He slams down: a white dust explosion with multicolour spikes (0288). 370 damage.
+- On the cliff demo the dummy was knocked off the edge (0291-0292: the knock-out beam).
+- Card: 5 s, Slow and Stun.
+
+**While chaining: Anti-Heal Spin** (0333-0336)
+- Recast the chain to pull in, press RMB on arrival.
+- A **magenta ring spin** of about 1.2 bh radius. 253 damage, with the Anti-Heal ⊘ icon on the target.
+
+### Shift: Quick Dash (0371-0420)
+1. **Input:** press. **3 charges.** 0.4 s between uses.
+2. **Aim:** in the facing / aim direction (0387: toward the cursor).
+3. **Reticle:** none.
+4. **Animation:** a short dash, about 2 bh in about 0.2 s, with the sword thrust forward and **orange flame streaks behind** (0387-0388).
+5. **VFX:** the flame streaks; a burst on hit (0401).
+7. **Numbers:** 161 on the dummy (0401-0403). He ends next to or past the dummy.
+
+### E: Tether Chain (0301-0366)
+1. **Input:** press to throw; press again to pull himself to the attached point.
+2. **Aim:** a skillshot toward the cursor. On the wall test it flies about 7 bh in about 0.4 s (0303-0305).
+3. **Reticle:** no lane seen.
+4. **Animation:** a throwing arm cocks and casts. During the pull he leans into the chain.
+5. **VFX:**
+   - In flight the chain is an **orange wavy zig-zag** (0303-0304).
+   - Once attached it becomes a **straight striped chain (orange and dark links)** with a yellow spark at the anchor (0305).
+   - **The tether stays attached while Brall walks** (0305-0317: about 2.5 s, still connected).
+6. **Pull:** recast → he is pulled about 5 bh in about 0.4 s. A white dust puff marks the start point (0333).
+7. **Numbers:** 9.4 s and 25 mana. Anti-Heal on a hooked enemy (the ⊘ icon, 0333-0341).
+
+### R: Retaliation (0421-0465; `retaliation_strip.jpg`)
+1. **Input:** press.
+   - Brall takes a **guard stance with the blade vertical in front** and a golden glow (0425-0429, 0436).
+   - A **white translucent rectangle (about 1 bh wide, 1.5 bh long) shows in front**: the strike area (0435-0436, 0458-0460).
+   - After about 0.4-1.0 s, a **huge red vertical crescent strike** comes forward (0430, 0438), then a white impact cloud (0431, 0439).
+   - The video does not show whether the strike comes early when he is hit (the dummy deals no damage).
+2. **Aim:** the forward rectangle in the aim direction.
+3. **Numbers:**
+   - 396 per strike, plus 161 (the Quick Dash, 0437).
+   - On the kill test (0451-0462), the kill gives a big red KO star, the green heal column and **the ability is immediately reusable**: the rectangle reappears at 0458 and he strikes again at 0461.
+   - Card: 21.7 s and 20 mana.
+
+## 3. Key frames (`/home/claude/hero-ref/juggernaut/`)
+
+| File | Caption |
+|---|---|
+| 0026.jpg, 0029.jpg | Quick Attack alternating slashes: magenta + yellow crescent arcs. |
+| 0058.jpg | Tip hit: a white star flash, 151. |
+| 0081.jpg | The hold blast leaving: a red crescent bolt. |
+| 0087.jpg | Hold-blast charge: the white arc around Brall. |
+| 0126.jpg | Charge Dash: the lane turns magenta at full charge. |
+| 0127.jpg | Charge Dash impact: 559. |
+| 0145.jpg / 0146.jpg | Fully charged dash, then a 771 impact. |
+| 0154.jpg | Execute threshold: the red outline on the low-HP target. |
+| 0158.jpg | Execution Slam: 1066 with the execute glyph. |
+| 0263.jpg / 0287.jpg | Air Slam landing disc at the cursor. |
+| 0288.jpg | Air Slam impact. |
+| 0304.jpg | Tether Chain in flight: the wavy orange chain. |
+| 0333.jpg | Hooked dummy; Brall pulls in (start puff). |
+| 0335.jpg | Anti-Heal Spin on arrival (253). |
+| 0387.jpg | Quick Dash with flame streaks. |
+| 0401.jpg | Quick Dash hit (161). |
+| 0435.jpg | Retaliation guard and strike rectangle. |
+| 0437.jpg | Retaliation red crescent strike. |
+| 0454.jpg / 0455.jpg | Kill: a red KO star, then the green heal column. |
+| cards_ingame.png | All in-game cards at full resolution. |
+| summary_screen.png | The summary screen: the Heavy Attack variants and Quick Dash's 3 charges. |
+| charge_dash_strip.jpg | 0122-0127 and 0141-0146: lane growth to magenta, then the impact. |
+| quick_attack_strip.jpg | 0023-0034: the slash series. |
+| retaliation_strip.jpg | 0425-0462: guard, strike, the kill reset. |
+
+## 4. Gaps against ours (ranked by how much they change the feel)
+
+1. **`mechanic`: Doomfall is unreachable, which kills the Smash payoff.**
+   - `content/rules/boki_system.json` has `"class_ults": false`, so R is the Merge and `JuggernautKit.cast_r` never runs. But the Execution Slam's "sweet spot resets Doomfall" (`_slam`, `_reset_doom`) and "a knock resets Doomfall" are still the design's payoff.
+   - The source's R (Retaliation) is a different move anyway: a guard stance that grants invulnerability, then a forward strike in a rectangle, reset on a kill. Ours is a rise-and-crash.
+   - Change: fold something the player can actually trigger into a non-R slot, and re-point the Smash payoff. For example, make the Execution Slam sweet spot / knock give a Rampage charge back or Enrage instantly. Or fold a "guard then strike back" variant into RMB.
+   - Files: `scripts/arch/kits/juggernaut_kit.gd` `_slam`, `_reset_doom`, `on_knock`, plus the card text in `juggernaut.json`.
+2. **`reticle`: the Charge Dash (our Lunge) has no lane.**
+   - Source: a translucent red lane grows forward while charging and **turns bright magenta at full charge**. The release dash follows it, and the impact is a huge white burst and a horizontal red slash.
+   - Ours: `rmb_hold_tick` only plays the `jug_lunge_wind` pose.
+   - Change: add `tele_lane(h.pos, aim, lunge length at k, ...)` updated per tick with `lunge_k`, and colour-flip it at k = 1. Add a big white burst on `_tick_lunge` contact.
+3. **`numbers`: the Lunge length.**
+   - Source: about 2.5-3 bh (about 5 m), whether short or full charge; damage grows from 559 to 771 (about 1.4x).
+   - Ours: 3 → 7 m with damage 14 → 22 (1.6x).
+   - Change: `rmb.lunge.dist` to about [4.5, 5.5]. Keep the damage ratio.
+4. **`reticle` / `mechanic`: the Execution Slam telegraph and target.**
+   - Source: **a low-HP target shows a red outline** (the execute threshold). The slam has a short magenta lane and reaches about 2.4 bh (about 4.3 m).
+   - Ours: a 3.2 m, 100° cone, a "!" word over the head and a 1.3 m ring around self.
+   - Change: (a) outline foes under `low` (35%) in red when Juggernaut has RMB ready (a status tell). (b) Swap the "!" ring for a forward lane or rectangle telegraph during `slam_w`. (c) Consider a 4.3 m reach.
+5. **`mechanic` / `aim`: Air Slam (our Meteor Drop) is cursor-placed in the source.**
+   - Source: a purple disc at the cursor while airborne, then the slam lands there.
+   - Ours: `_meteor` slams straight down where you are.
+   - Change: in `_meteor`, travel to the cursor (clamped to about 5 m) before the impact. Show the landing disc during the descent.
+6. **`mechanic`: Quick Dash has 3 charges and a near-zero gap.**
+   - Source: 3 charges, 0.4 s between uses, about 2 bh (about 3.6 m), 161 damage on hit.
+   - Ours: Rampage has 2 charges (the third at rank 3), 9 s each, 4.4 m.
+   - Change: 3 charges at rank 1 if the owner wants the source feel (`dash.cd`, extra charge logic). The dash distance could drop to about 3.6 m.
+7. **`vfx`: the slash look.**
+   - Source: wide (about 180°) two-tone crescents, magenta outside and flame-yellow inside, that alternate. The tip hit is a **white star flash**.
+   - Ours: `_slash` uses a 140° arc through `h._strike` and its default slash fx.
+   - Change: widen `lmb.arc` to about 170-180. Use a two-tone slash fx for the greatsword. Add a star flash for tip hits.
+8. **`reticle`: the hold-blast charge tell.** Source: a thin white arc circles Brall while charging. Ours: `h.mel_hold` (the generic hold ring). Probably fine; make sure a ring is visible around the body, not only at the cursor.
+9. **`vfx`: the Warchain look.** Source: a wavy orange chain in flight that straightens into a striped link chain once attached; the tether stays attached while you walk (about 2.5 s+). Ours: check `cast_e` / `_tick_chain`. The 4 s attach window matches.
+10. **`vfx` / `sfx`: knock feedback.** Source: a giant red KO star, a green heal column on Brall and a red screen tint (0454-0458). Ours: `on_knock` heals 20%. Add a heal column and a brief red screen flash for the local player.
+11. **`numbers`: cooldowns.** Source: RMB 1.2 s (ours 3 s), Air Slam 5 s, chain 9.4 s (ours 13 s). The source hunter is level 9, so these may be reduced. Ours reach 2.4 s and 10.4 s at rank 3. Consider shortening RMB toward 2 s at rank 1.
+
+## 5. Rename
+Not applicable: Juggernaut is not on the rename list (Dancer, Pin, Bjorn, Venator, Linwick, Moosh Moosh, Breah).
+
+## 6. Open questions
+- Does Quick Attack swing toward the cursor or the movement direction? Some swings point away from the cursor.
+- Was 0154-0158 a press (Execution Slam) or the hold dash on an executable target? The lane looks the same.
+- Retaliation: does it strike early when hit, or after a fixed guard time? The dummy deals no damage, so this can't be seen.
+- Air Slam max range from the jump point.
+- What Empowered actually gives (no numbers on the card); and the hold-blast range and damage (no number caught).
