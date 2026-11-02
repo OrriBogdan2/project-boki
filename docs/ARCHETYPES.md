@@ -1203,5 +1203,5 @@ games' heroes). Mechanics only: every name, number, text, look and sound in the 
 | `dredge` | Dredge | [Kingpin](https://supervive.wiki.gg/wiki/Kingpin) | `docs/heroes/dredge.md` |
 | `tender` | Linnet, the Tender | [Elluna](https://supervive.wiki.gg/wiki/Elluna) | `docs/heroes/tender.md` |
 | `rimewright` | Tamsin, the Rimewright | [Celeste](https://supervive.wiki.gg/wiki/Celeste) | `docs/heroes/rimewright.md` |
-| `dolm` | Dolm | [Tetra](https://supervive.wiki.gg/wiki/Tetra) | `docs/heroes/dolm.md` |
+| `dolm` | Breah | [Tetra](https://supervive.wiki.gg/wiki/Tetra) | `docs/heroes/dolm.md` |
 | `ostra` | Ostra | [Void](https://supervive.wiki.gg/wiki/Void) | `docs/heroes/ostra.md` |

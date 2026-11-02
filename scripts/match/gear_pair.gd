@@ -1,7 +1,7 @@
 class_name GearPair
 extends RefCounted
-## The look of Dolm and Ostra (HeroGear.dress asks): original silhouettes, built from the same
-## parametric pieces as the first six. Dolm: a stone-plated right shoulder, a rubble collar, a leather
+## The look of Breah (dolm) and Ostra (HeroGear.dress asks): original silhouettes, built from the same
+## parametric pieces as the first six. Breah: a stone-plated right shoulder, a rubble collar, a leather
 ## apron and chisel belt, a bare head under a stone brow band. Ostra: a tall wrapped headcloth with a
 ## long tail, a pale mantle, a trailing hem and three small lanterns that hang behind her.
 

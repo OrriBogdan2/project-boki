@@ -222,7 +222,7 @@ static func tick(A: Arena, dt: float) -> void:
 				if _at(t, dt, go): P.ak.ch_rmb = float(P.ak.rmb_charges()); P.ak.bot_hold["rmb"] = 0.9; P.ak.press_rmb()
 				at_t = go + 0.7 if "--hold-shot" in OS.get_cmdline_user_args() else go + 1.05
 		_ when w.begins_with("pair_"):
-			at_t = PairDemo.tick(A, P, D, t, dt, w)          # Dolm and Ostra (scripts/arch/pair_demo.gd)
+			at_t = PairDemo.tick(A, P, D, t, dt, w)          # Breah and Ostra (scripts/arch/pair_demo.gd)
 		_ when w.begins_with("anim_"):
 			var mv := w.substr(5)
 			var spec: Array = ANIM_DEMO.get(mv, PairDemo.ANIM.get(mv, ["thief", "smg", [1.0]]))

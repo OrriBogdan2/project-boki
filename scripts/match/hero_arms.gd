@@ -1,6 +1,6 @@
 class_name HeroArms
 extends RefCounted
-## The fixed weapons of Dolm (Rubble Fists) and Ostra (Tether Lantern), built on the gun node
+## The fixed weapons of Breah (dolm, Rubble Fists) and Ostra (Tether Lantern), built on the gun node
 ## (Models.gun_parts asks first). The barrel runs along -Z, the hand holds near the origin.
 
 static func build(gun: Node3D, weapon: String, m_gun: Material, m_dark: Material, m_acc: Material) -> bool:
