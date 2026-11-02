@@ -49,11 +49,11 @@ func _draw() -> void:
 	var pt := float(r["perfect"])
 	if pt > 0.0:
 		var pc: Color = r["pcol"]
-		var a := clampf(pt / PERFECT_T * 1.5, 0.0, 1.0)
+		var a := 1.0                            # a flash: full strength for its whole (short) life, then gone
 		draw_circle(mp, 20.0, Color(pc, 0.18 * a))
 		draw_arc(mp, 20.0, 0.0, TAU, 40, Color(pc, 0.7 * a), 2.0, true)
-		_star(mp, 22.0, Color(0.1, 0.06, 0.0, 0.5 * a), 0.0, 1.6)
-		_star(mp, 20.0, Color(pc.lerp(Color.WHITE, 0.35), a), 0.0)
+		_star(mp, 23.0, Color(0.1, 0.06, 0.0, 0.35 * a), 0.0, 1.5)
+		_star(mp, 20.0, Color(pc.lerp(Color.WHITE, 0.25), a), 0.0)
 
 ## A 4-point star (a glint) of radius s.
 func _star(c: Vector2, s: float, col: Color, rot := 0.0, waist_k := 1.0) -> void:

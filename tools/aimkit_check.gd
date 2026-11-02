@@ -34,7 +34,9 @@ func run(main_node: Node) -> void:
 	await _reticle(m, P)
 	_cleanup(m, P)
 	if shots != "":
-		await load("res://tools/aimkit_shots.gd").new().take(main, m, P, T, shots)
+		m.queue_free()
+		await main.get_tree().process_frame
+		await load("res://tools/aimkit_shots.gd").new().take(main, shots)
 	print("AIMKIT DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 

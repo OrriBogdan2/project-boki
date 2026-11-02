@@ -4,9 +4,9 @@ extends RefCounted
 ## defaults). Kept quiet on purpose: a faint fill, a thin rim and a brighter accent only where the
 ## state matters (the charge front, a merged V, the sweet spot). "hot" (0..1) brightens toward white.
 
-const FILL_A := 0.13      # the fill's alpha: readable over grass and sand, never a solid sheet
-const RIM_A := 0.55       # the rim's alpha
-const LW := 0.05          # m: the rim's line width
+const FILL_A := 0.18      # the fill's alpha: readable over grass and sand, never a solid sheet
+const RIM_A := 0.7        # the rim's alpha
+const LW := 0.06          # m: the rim's line width
 
 static func build(g: AimGeo, e: Dictionary) -> void:
 	g.at_height(float(e["y"]))
@@ -61,7 +61,7 @@ static func _lane(g: AimGeo, e: Dictionary) -> void:
 	var ch := int(e["chevrons"])
 	for i in ch:
 		var t := (float(i) + 0.75) / float(ch + 0.5)
-		g.chevron(o + u * l * t, u, minf(w0, w1) * 0.32, lw * 0.9, _rim(e, 0.75))
+		g.chevron(o + u * l * t, u, clampf(minf(w0, w1) * 0.32, 0.14, 0.4), lw * 0.9, _rim(e, 0.75))
 
 static func _dotted(g: AimGeo, e: Dictionary) -> void:
 	var o: Vector2 = e["from"]; var u: Vector2 = e["dir"]

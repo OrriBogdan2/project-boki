@@ -14,7 +14,7 @@ extends RefCounted
 ##   col2    Color   the accent (sweet spot, merged V, glints; default: the archetype resource colour)
 ##   alpha   float   overall strength, 1 = the quiet default
 ##   hot     float   0..1, brightens toward white (full charge); lanes and Vs go hot by themselves at k = 1
-##   lw      float   m, the rim width (0.05)
+##   lw      float   m, the rim width (0.06)
 ##   all     bool    foes and allies see it too (an area someone must dodge); default false = your own
 ##                   aim only. A foe's shows lerped toward the hostile rim colour.
 ##   dur     float   s, how long it stays without a refresh (default 0.1)
