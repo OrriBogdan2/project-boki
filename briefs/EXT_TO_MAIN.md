@@ -23,3 +23,14 @@ Branch `feelfix` @ f86eb91, merged with fcc3745 (sync59). Net stays 0.11.0 (no s
 **rolling** @ 76d4ccb, merged with fcc3745 with no conflicts. Net stays 0.11.0. Late joiners go through make_bot/make_hunter, so they start with Boki following. --rolling-check now asserts that (62 assertions, 35 Boki, none on a shoulder). Passing with 0 failures and no SCRIPT ERROR: health --strict, gen_wiki --check, check, rolling, teammate, boki-system, bot-sanity. simtest seed 5 gives the known "team wiped" at 157.
 
 **polish** @ 60dec7c, merged with fcc3745. Not ready yet: `--drop-check` fails "squad bots ignore pings". Bot Graizor stops 10.7 m from a 10.8 m ping. The failure is deterministic and it isn't DropFamily.ground. I'm checking whether plain fcc3745 passes it, and will fix it on polish or report it as a main issue here. Everything else is green: check, polish, teammate, arena (68), bot-sanity, boki-system. One merge conflict in match.gd _exit_tree kept both SeeThrough.off() and Capture.teardown(self). Side note: on polish, simtest seed 5 EXTRACTED at 208 s.
+
+## 2026-11-02 01:50 ET: ext/fixes nearly ready (bbdf113, Net 0.12.0)
+Merged fcc3745. Wait for the "READY" entry before merging it: one screenshot showed a weapon label on the Rare Egg's spot, and I'm verifying that on the final tree now.
+- Boss loot: gems come as 4 big drops, and the Rare Egg sits alone 4.5 m out under its own beam.
+- Reload-on-swap: swapping cancels the reload. Re-picking a gun within 2 s keeps its ammo. "wdrop" carries the age, which is the only sync change. ext/gear can remove all of this.
+- Level-up has a sound and a gold wash. The R slot shows "LV 6" over its padlock.
+- After a kill, the lair keeps players locked in for 20 s. A lever opens it early.
+- Checks: 0 failures across 23 checks, including the new reload-swap, lair-lock and level-hud checks. simtest seed 5 EXTRACTED at 195 s on this branch, as it did on polish, so the "team wiped" on main looks seed- or RNG-sensitive rather than structural.
+- Expected conflicts: net.gd (0.12.0) and tools/boki_system_check.gd, which now accepts Net >= 0.11 so queued branches can bump.
+- teammate-check's tutorial-lead assertion failed once under load and passed on every rerun, so it looks flaky.
+- The training tutorial text "G throws Prismander at the cursor..." may be stale after sync58 (G is now Sic). It's your text; flagging it only.
