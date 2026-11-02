@@ -424,7 +424,7 @@ func _mage() -> void:
 	P.teleport(home); aim_at(P, T.pos); P.dashes = P.max_dashes(); fresh(T)
 	P.inp["dash_down"] = true
 	P.do_dash()
-	ok("vireo dash: press starts the lane", not K.wire.is_empty() and P.dashes >= 1.0)
+	ok("vireo dash: press starts the lane, the charge spent on the press", not K.wire.is_empty() and P.dashes < 1.0)
 	step(m, 0.5, func(): P.inp["dash_down"] = true; aim_at(P, T.pos))
 	P.inp["dash_down"] = false
 	step(m, 0.5)
@@ -442,15 +442,13 @@ func _mage() -> void:
 	hold(m, P, 1.0)
 	step(m, 0.9)
 	ok("vireo RMB hold: Coilshot hits + Sparks", K.last_variant == "hold" and dmg(T) >= 12.0 and K.spark_n(T) >= 1, "took %.0f" % dmg(T))
-	ok("vireo RMB: a hunter hit drops a mote", K.motes.size() >= 1, str(K.motes.size()))
-	if not K.motes.is_empty():
-		P.teleport(K.motes[0]["pos"]); step(m, 0.2)
-	ok("vireo mote: picking it up gives Wirerun back", K.mote_pickups == 1 and P.dashes >= 1.0)
+	ok("vireo RMB: a hit drops a charge orb", K.motes.size() >= 1, str(K.motes.size()))
+	ok("vireo RMB: the orb does not give Wirerun back (only a full-Static foe does)", P.dashes < 1.0)
 	# Skycall: lightning flings and grounds
 	P.teleport(home); fresh(T); T.teleport(home + Vector3(5, 0, 0)); step(m, 0.2); aim_at(P, T.pos); K.cd["e"] = 0.0
 	var x0 := T.pos.x
 	P.ak.use_e()
-	step(m, 0.9)
+	step(m, 1.2)
 	ok("vireo E: Skycall damages, flings, Sparks", dmg(T) >= 12.0 and T.pos.x > x0 + 1.0 and K.spark_n(T) >= 1, "took %.0f moved %.1f" % [dmg(T), T.pos.x - x0])
 	ok("vireo E: Grounded (no dashing)", KitStatus.grounded(T))
 	var d0 := T.dashes
@@ -464,24 +462,23 @@ func _gunslinger() -> void:
 	var home: Vector3 = r[4]
 	var K: GunslingerKit = P.ak
 	ok("venator: Quill Rifle in hand, medium, no R", P.wid == "quill_rifle" and Arch.weight("gunslinger") == "medium" and not Arch.def("gunslinger").has("r"))
-	# Fever: abilities stack lifesteal
+	# Fever: abilities stack lifesteal (4 x 5%)
 	P.hp = 60.0
 	K.on_deal(T, 10.0, {"src": "abil", "ab": "utility"})
 	K.on_deal(T, 10.0, {"src": "abil", "ab": "k1"})
 	ok("venator passive: abilities build Fever", K.res >= 2.0)
 	var hp0 := P.hp
 	K.on_deal(T, 100.0, {"src": "shot"})
-	ok("venator passive: Fever heals off damage", P.hp > hp0 + 10.0, "healed %.1f" % (P.hp - hp0))
+	ok("venator passive: Fever heals off damage", P.hp > hp0 + 8.0, "healed %.1f" % (P.hp - hp0))
 	K.res = 0.0
-	# Burr Charge on a foe: sticks (2 hits' worth), pops, Rattles
-	fresh(T); T2.teleport(home + Vector3(12, 0, 0)); step(m, 0.2); aim_at(P, T.pos); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0
+	# Burr Charge: thrown past the foe, it blasts a cone back from the ground at the lane's end, Dazing
+	fresh(T); T2.teleport(home + Vector3(12, 0, 0)); P.teleport(home); T.teleport(home + Vector3(7, 0, 0)); step(m, 0.2); aim_at(P, T.pos); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0
 	tap(m, P)
-	step(m, 1.3)
-	ok("venator RMB: Burr Charge sticks, pops, Rattles", dmg(T) >= 12.0 and KitStatus.rattled(T) and K.rattles >= 1, "took %.0f" % dmg(T))
-	ok("venator RMB: attach + blast both fed Fever", K.res >= 2.0, "fever %.0f" % K.res)
-	# a Rattled foe takes more from the rifle
+	step(m, 1.6)
+	ok("venator RMB: the cone blast hits and Dazes", dmg(T) >= 12.0 and KitStatus.rattled(T) and K.rattles >= 1, "took %.0f" % dmg(T))
+	ok("venator RMB: the blast fed Fever", K.res >= 1.0, "fever %.0f" % K.res)
 	var base := K.outgoing(T, 10.0, {"src": "shot"})
-	ok("venator Rattled: rifle +28%", is_equal_approx(base, 12.8), "%.1f" % base)
+	ok("venator Dazed: rifle +90%", is_equal_approx(base, 19.0), "%.1f" % base)
 	# Longneedle: charge, then a piercing beam
 	fresh(T); KitStatus.clear_rattled(T); K.cd["e"] = 0.0; aim_at(P, T.pos)
 	P.ak.use_e()
