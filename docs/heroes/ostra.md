@@ -31,10 +31,15 @@ pearl and sea teal `#7fe0d0`, with void violet `#b06bff` for what she throws and
 | RMB Shard Snap | tap (1 charge) | holding RMB, or during the wind-up, the line becomes two rails the bundle's width (0.7m) | a 0.2s wind-up (a black orb at her hand; she slows 25%), then one bundle of crystal shards to 13m: 12.5 dmg, stuns the first foe 0.8s up close to 1.8s at range, stars over its head and STUNNED, on anyone including the training dummy | `ostra_snap_wind` (hold), `ostra_snap` | `os_snap_wind`, `os_snap`, `os_snap_hit` |
 | Shift Lantern Trade | hold to aim, release (a tap casts at once) | while held: both ends (her ring, the landing ring at the cursor and the link); in flight: both ends for everyone, the sigil filling | a high lob (over 4m up) to the cursor, 1.7s; then she is there, keeping her height over the ground and her momentum, and anyone standing in the landing ring (foes slowed 40% 3s, allies too) goes to where she stood. It never travels by itself: a press in flight is ignored, a press with no charge is refused | `ostra_swap_aim` (hold), `ostra_swap`, `ostra_arrive` | `os_swap_lob`, `os_swap` |
 | E Brimseed | tap, recast | at the cursor (9m), a ring everyone sees growing, dashed until full | a small orb drops onto the spot; a pale drum of indigo swirl grows 6.5s to 3.2m; a light column rises from 68%; E again (from 0.3s) pops it: an implosion, 12 dmg up to 3.5x, Grounded 1s; left alone it pops 0.5s after full (COLLAPSE on a hunter at full) | `ostra_seed`, `ostra_pop` | `os_seed`, `os_full`, `os_pop` |
-| R | (Boki Merge) | | Black Hole stays folded into the rank-3 seed pull | | |
+| X Nightwell (level 6, 64s) | tap | at the cursor, clamped to 10m (on ground short of walls, like the seed): a pale dome of the well's exact size that everyone sees, filling over 1.0s (with a pink core when Swollen) | it opens into a turning violet disc for 3.5s, 3.6m wide (5.1m Swollen): every foe inside in sight of its centre, or who walks in, is stunned until it closes and drawn to the middle (12 m/s), taking 0.16 every 0.1s. Allies are untouched; Ostra acts freely; it closes with no blast. A merge or a knock on her doesn't end the placed well | `ostra_well`, `ostra_well_snap` (on opening) | `os_well`, `os_well_hum` |
+| R | (Boki Merge) | | | | |
 
-Rank 3: Snap +30%; Trade shields allies beside her when she leaves or at the landing (20, 3s); the pop pulls foes within 1.3x
-its radius to the middle first and the growing seed burns.
+Rank 3: Snap +30%; Trade shields allies beside her when she leaves or at the landing (20, 3s); the growing seed burns foes
+inside (the source's level-4 damage over time).
+
+**Unfolded:** the kit pass had folded the source's Black Hole into Brimseed rank 3 (the pop dragging foes from 1.3x its radius
+to the middle). Now that Black Hole is Nightwell on X, the pull is gone from the pop; the burn stays, as it is the source's own
+level-4 bonus.
 
 ## Combinations (`--ostra-combo-check`, tools/ostra_combo_check.gd; placement in `--zone-check`)
 | Combo | Result | Asserted by |
@@ -45,7 +50,11 @@ its radius to the middle first and the growing seed burns.
 | Pause, then fire | a Settled bolt that slows, then plain again | `lmb: the Settled orb hits harder and slows`, `small: the charge is stepped` |
 | Spam Shift | no travel, no second lob; no charge = refused | `owner: spamming Shift in flight never dashes`, `owner: with no charge Shift is refused` |
 | Trade in the air | arrives at the same height, same momentum | `owner: the Trade keeps her height`, `small: the Trade keeps her momentum` |
-| Merge start | Trade, its aim, the Snap wind-up and the prime drop | `merge hold: ...` |
+| Merge start | Trade, its aim, the Snap wind-up and the prime drop; a placed Nightwell keeps going | `merge hold: ...`, `merge: a merge doesn't take the placed well down` |
+| Nightwell, then Seed on the middle, then pop | everyone caught sits stunned at the centre for the seed to grow on them | `ult open: ...`, `ult: the caught foe is drawn to the middle` |
+| Nightwell, then Snap | she acts freely while it holds | `ult: Ostra is free to act while it holds (a Snap)` |
+| Swollen, then Nightwell | the bigger 5.1m well | `ult Swollen: ...` |
+| Nightwell, then the merge | the target lives (burst cap) | `ult burst: the well, merge and its ultimate leave a full-health light hunter standing` |
 
 ## Small mechanics
 | Mechanic | Source | Footage | Ours |
@@ -61,6 +70,14 @@ its radius to the middle first and the growing seed burns.
 | Level 4: allies (and wisps) entering the outgoing zone get a shield | wiki, patch Jan 2025 | no | built: allies beside her when she leaves or at the landing |
 | Anomaly grows 6.5s, up to 3.5x; recast to detonate | wiki | yes | built, recast from 0.3s (sheet) |
 | Empowered builds 10x faster on hunters; +30% Singularity size; knock heals | wiki | | built (Swollen); Swollen seed +30% size |
+| Black Hole stuns and pulls enemies to its centre for 3.5s, small damage every 0.1s | card, wiki | yes (ult f33-f66) | built on X; asserted `ult open`, `drawn to the middle`, `small ticks` |
+| A dome telegraph of the final size before it opens | footage | yes (f23-f32, 1.0s) | built, everyone sees it; asserted |
+| Enemies who enter during the 3.5s are caught too ("for 3.5s") | card | no | built; asserted `a foe who walks in later is caught too` |
+| Empowered: radius 350 -> 500 (and a June patch made Empowered really enlarge it) | card, patch notes (June 25) | yes (f89-f101) | built: 3.6m -> 5.1m when cast Swollen; asserted |
+| Void acts freely while it holds | footage | yes (f50, shooting) | built; asserted with a Snap |
+| Allies unaffected; it never breaks allied destructibles (patch) | sheet, patch notes (June 25) | | built: foes only; it hurts no walls at all |
+| Empowered damage is Explosive (175 a tick to destructibles) | wiki | no | not built: our destructibles are walls that take shot damage; a well tick is not a shot (owner question) |
+| It closes with no explosion | footage | yes (f66) | built |
 
 ## Assumptions (easy to change in content/archetypes/ostra.json)
 - Shift is hold-to-aim, release-to-cast (a tap casts at once): the source shows the landing ring before the press, and this
@@ -70,6 +87,13 @@ its radius to the middle first and the growing seed burns.
 - Brimseed pops by itself 0.5s after full growth (the source does not say).
 - Swollen lasts 9s and fills as before (the source does not show what fills it).
 - Snap range 13m; the orb's range stays 14m.
+- Nightwell range 10m (the footage only shows a 2-3 bh cast), placed like the seed: on ground short of walls.
+- A foe behind a wall from the well's centre is not caught (the source doesn't show one).
+- A caught foe is stunned until the well closes, without stun diminishing returns (it is the ult; the card says 3.5s).
+- Ticks: 0.16 every 0.1s (the source's 2.5 a tick against a 140 orb, scaled to our 9 orb).
+- The well stays when Ostra is knocked or merges; it is a placed thing, and she is free during it.
+- Bond: paid when a hunter is caught (a hit), topped up if one is knocked or killed inside it; never per tick. The sheet's
+  0.4 per hunter capped at 0.8 is the main session's to set (KinBond.from_ult).
 
 ## Animation moves (KMovesStone)
 | Ability | Moves | Strip |
@@ -79,8 +103,12 @@ its radius to the middle first and the growing seed burns.
 | Shift | `ostra_swap_aim` (hold), `ostra_swap`, `ostra_arrive` | `anim_os_swap`, `anim_os_arrive` |
 | E | `ostra_seed`, `ostra_pop` | `anim_os_seed`, `anim_os_pop` |
 | Passive proc | `ostra_empower` | `anim_os_empower` |
+| X | `ostra_well`, `ostra_well_snap` | `anim_os_well` |
 
 ## Engine notes
 - Kit `scripts/arch/kits/ostra_kit.gd`; looks `kit_looks.gd` (pooled skins, aura, stun crown, column); the seed's drum in
   HeroZones.seed_visual (shaders/void_glass.gdshader). Every shot goes through spawn_shot.
-- Net unchanged (0.15.0): the seed and Trade still travel as `["zone", ...]` events.
+- Net unchanged: the seed and Trade still travel as `["zone", ...]` events. Nightwell runs on the caster's game like the
+  seed's pop: hits carry the stun, and a remote body is moved to the centre with the `"tp"` zone event once, on its catch.
+- Nightwell: `scripts/arch/kits/ostra_well.gd` (OstraWell); its looks are pooled KitLooks kinds `well_dome` and `well`. It
+  adds no hold field (nothing to drop on a merge).

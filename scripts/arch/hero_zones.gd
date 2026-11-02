@@ -12,7 +12,7 @@ extends RefCounted
 ##   ["zone", "bridge", nid, x, y, z, dx, dz, len, width, time]
 ##   ["zone", "seed",   nid, sid, x, y, z, rmax, grow]
 ##   ["zone", "pop",    sid]
-## ["zone", "tp",     nid, x, y, z]            a body another game owns was moved (Trade, the rank-3 Brimseed pull): its
+## ["zone", "tp",     nid, x, y, z]            a body another game owns was moved (Trade, the Nightwell catch): its
 ## own game moves it
 
 const ROCK_COL := Color("c98d4a")

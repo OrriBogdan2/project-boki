@@ -206,6 +206,12 @@ func _guards() -> void:
 	P.stun_t = 0.5
 	step(m, 0.1)
 	ok("ult hold: a stun while aiming cancels it, not spent", not K.spine.running() and float(K.cd["x"]) == 0.0)
+	P.stun_t = 0.0
+	_press(m, P, home + Vector3(25, 0, 0), true)
+	step(m, 0.1)
+	var reach := Vector2(K.spine.center.x - home.x, K.spine.center.z - home.z).length()
+	var still_across := absf(K.spine.axis.dot(Vector2(1, 0))) < 0.05
+	ok("ult aim: past 11m the centre is clamped and a held still cursor stays across", reach <= 11.05 and still_across)
 	await done(m)
 
 ## Burst cap: the ridge, a full punch launching it into a light hunter, then straight into the merge and the

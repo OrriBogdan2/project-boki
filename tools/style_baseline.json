@@ -22,9 +22,6 @@
 "long_line": 1,
 "semicolon": 13
 },
-"scripts/arch/hero_zones.gd": {
-"long_line": 13
-},
 "scripts/arch/hex.gd": {
 "long_line": 1,
 "semicolon": 1
@@ -50,9 +47,8 @@
 "semicolon": 11
 },
 "scripts/arch/kits/dolm_kit.gd": {
-"long_line": 9,
-"nested_ternary": 1,
-"semicolon": 2
+"long_line": 1,
+"nested_ternary": 1
 },
 "scripts/arch/kits/dredge_kit.gd": {
 "long_line": 7,
@@ -73,7 +69,7 @@
 "semicolon": 1
 },
 "scripts/arch/kits/ostra_kit.gd": {
-"long_line": 5,
+"long_line": 1,
 "nested_ternary": 1
 },
 "scripts/arch/kits/rimewright_kit.gd": {
@@ -92,9 +88,6 @@
 "scripts/arch/oomph.gd": {
 "long_line": 1,
 "shadow": 1
-},
-"scripts/arch/pair_demo.gd": {
-"semicolon": 16
 },
 "scripts/combat/ability_def.gd": {
 "long_line": 6
@@ -163,7 +156,7 @@
 },
 "scripts/core/game.gd": {
 "history_comment": 1,
-"long_line": 13,
+"long_line": 12,
 "nested_ternary": 1,
 "semicolon": 5
 },
@@ -233,7 +226,7 @@
 "semicolon": 1
 },
 "scripts/core/settings.gd": {
-"long_line": 20,
+"long_line": 19,
 "nested_ternary": 1,
 "semicolon": 4
 },
@@ -604,9 +597,6 @@
 "long_line": 5,
 "semicolon": 5
 },
-"scripts/match/hero_arms.gd": {
-"long_line": 5
-},
 "scripts/match/hero_gear.gd": {
 "long_line": 102,
 "semicolon": 15
@@ -636,7 +626,7 @@
 "shadow": 4
 },
 "scripts/match/hunter_anim.gd": {
-"long_line": 128,
+"long_line": 109,
 "nested_ternary": 6,
 "semicolon": 102
 },
@@ -1062,7 +1052,6 @@
 "shadow": 1
 },
 "tools/arena_check.gd": {
-"long_line": 25,
 "semicolon": 21,
 "shadow": 1
 },
@@ -1144,8 +1133,8 @@
 "semicolon": 49
 },
 "tools/hero_pair_check.gd": {
-"long_line": 36,
-"semicolon": 52,
+"long_line": 15,
+"semicolon": 20,
 "shadow": 1
 },
 "tools/hitch_check.gd": {
@@ -1162,7 +1151,7 @@
 "semicolon": 11
 },
 "tools/keybind_check.gd": {
-"long_line": 8,
+"long_line": 7,
 "semicolon": 3
 },
 "tools/kill_reset_check.gd": {

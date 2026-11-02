@@ -175,17 +175,17 @@ func _build(kind: String) -> Node3D:
 ## Ostra's Nightwell, radius 1 (scaled to the well): a dark violet disc, four spiral arms of light turning
 ## on it, small black orbs riding the rim, and a pink core shown when she cast it Swollen.
 func _build_well(n: Node3D) -> void:
-	Models.part(n, Models.cyl(1.0, 1.0, 0.03, 32), shade_mat(Color(0.12, 0.02, 0.24, 0.72)), Vector3.ZERO)
+	Models.part(n, Models.cyl(1.0, 1.0, 0.03, 32), shade_mat(Color(0.14, 0.03, 0.3, 0.88)), Vector3.ZERO)
 	var spin := Node3D.new()
 	spin.name = "Spin"
 	n.add_child(spin)
-	var arm_mat := Models.glow_mat(Color(0.69, 0.42, 1.0, 0.8))
+	var arm_mat := Models.glow_mat(Color(0.72, 0.3, 1.0, 0.95))
 	for arm in 4:
 		for j in 6:
 			var u := float(j + 1) / 6.0
 			var ang := TAU * arm / 4.0 + u * 2.2
 			var at := Vector3(cos(ang), 0.03, sin(ang)) * u * 0.92
-			Models.part(spin, Models.box(0.06 + 0.1 * u, 0.01, 0.2), arm_mat, at, Vector3.ONE, Vector3(0, -ang, 0))
+			Models.part(spin, Models.box(0.03 + 0.05 * u, 0.01, 0.16), arm_mat, at, Vector3.ONE, Vector3(0, -ang, 0))
 	for i in 8:
 		var a := TAU * i / 8.0
 		Models.part(

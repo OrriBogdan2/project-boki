@@ -11,11 +11,14 @@ extends RefCounted
 const CRACK_COL := Color("ff4a1f")
 const PREVIEW_COL := Color("f4ead8")
 const PUSH_PAD := 0.15                  # m past the rock's half thickness a body on the line is moved to
+const CRACK_LW := 0.16                  # m: the cracks are a heavy line, wider than an aim reticle
+const PUFF_GAP := 0.02                  # s between fire puffs walking along the cracks
 
 var k: DolmKit
 var phase := ""                         # "" | "aim" (X held) | "tell" (the cracks) | "up" (rising, standing)
 var phase_t := 0.0
 var center := Vector3.ZERO
+var press_aim := Vector3.ZERO           # the cursor at the press (the centre may sit short of it, clamped)
 var axis := Vector2.RIGHT               # along the ridge
 var spots: Array = []                   # [{at: Vector3, delay: float, over_void: bool, done: bool}]
 var cast_n := 0
@@ -44,6 +47,7 @@ func start() -> bool:
 	if running():
 		return false
 	center = AimMode.point(k.h, float(xd()["range"]))
+	press_aim = k.aim()
 	axis = _across_aim()
 	phase = "aim"
 	phase_t = 0.0
@@ -72,7 +76,7 @@ func _across_aim() -> Vector2:
 	return Vector2(-dir.y, dir.x)
 
 ## While X is held the ridge pivots on its centre toward the cursor once the cursor has moved
-## `drag_min` away from it; a tap keeps it across the aim.
+## `drag_min` from where it was pressed; a tap keeps it across the aim.
 func _tick_aim(dt: float) -> void:
 	phase_t += dt
 	var h := k.h
@@ -80,8 +84,9 @@ func _tick_aim(dt: float) -> void:
 		drop()
 		return
 	var cur := k.aim()
+	var moved := Vector2(cur.x - press_aim.x, cur.z - press_aim.z).length()
 	var drag := Vector2(cur.x - center.x, cur.z - center.z)
-	if drag.length() >= float(xd()["drag_min"]):
+	if moved >= float(xd()["drag_min"]) and drag.length() > 0.1:
 		axis = drag.normalized()
 	if h.is_local():
 		AimKit.span(h, "x", {"at": center, "dir": axis, "len": float(xd()["len"]), "chevrons": 6, "col": PREVIEW_COL})
@@ -126,8 +131,10 @@ func _tick_tell(dt: float) -> void:
 	var tell := float(xd()["tell"])
 	AimKit.span(k.h, "x_cracks", {
 		"at": center, "dir": axis, "len": float(xd()["len"]), "chevrons": 0, "col": CRACK_COL, "all": true,
-		"hot": phase_t / tell,
+		"lw": CRACK_LW, "alpha": 1.3,
 	})
+	var puff: Dictionary = spots[int(phase_t / PUFF_GAP) % spots.size()]
+	k.m.fx.burst((puff["at"] as Vector3) + Vector3(0, 0.2, 0), Color("ff5a1f"), 6, 3.5, 0.35, 4.0, 1.2)
 	if phase_t >= tell:
 		AimKit.hide(k.h, "x_cracks")
 		phase = "up"

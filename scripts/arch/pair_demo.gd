@@ -25,6 +25,8 @@ const ANIM := {
 	"os_seed": ["ostra", "tether_lantern", [0.5, 0.56, 0.62, 0.72, 0.9, 1.2]],
 	"os_pop": ["ostra", "tether_lantern", [2.0, 2.06, 2.12, 2.2, 2.4, 2.65]],
 	"os_empower": ["ostra", "tether_lantern", [0.5, 0.6, 0.75, 0.9, 1.05, 1.35]],
+	"br_spine": ["dolm", "rubble_fists", [0.6, 0.78, 0.83, 1.1, 1.43, 1.8]],
+	"os_well": ["ostra", "tether_lantern", [0.5, 0.53, 0.56, 0.9, 1.53, 1.62]],
 }
 
 static func at(t: float, dt: float, when: float) -> bool:
@@ -106,7 +108,26 @@ static func trigger(P: Hunter, D: Hunter, mv: String, t: float, dt: float) -> vo
 			if at(t, dt, 2.0): K.use_e()
 		"os_empower":
 			if at(t, dt, 0.5): (K as OstraKit).add_swell(200.0)
+		"br_spine":
+			_spine_input(P, D, t, dt)
+		"os_well":
+			P.lvl = maxi(P.lvl, 6)
+			P.inp["aim"] = D.pos + Vector3(1.6, 0.9, 1.4)
+			if at(t, dt, 0.5):
+				K.cd["x"] = 0.0
+				K.use_x()
 	if P.ammo < 3: P.ammo = int(P.wpn["mag"])
+
+## Basalt Spine: X held from 0.4s at the dummy, the cursor dragged to swing the ridge, let go at 0.72s.
+static func _spine_input(P: Hunter, D: Hunter, t: float, dt: float) -> void:
+	P.lvl = maxi(P.lvl, 6)
+	P.inp["x_down"] = t > 0.38 and t < 0.72
+	if t > 0.38:
+		var swing := clampf((t - 0.45) / 0.2, 0.0, 1.0)
+		P.inp["aim"] = D.pos + Vector3(0.9, 0.9, 0.0) + Vector3(2.2, 0, 2.6) * swing
+	if at(t, dt, 0.4):
+		P.ak.cd["x"] = 0.0
+		P.ak.use_x()
 
 ## Single moments: name -> [the strip move whose input it replays, the time to save the frame at,
 ## where the hunter starts (x offset from the dummy)].
@@ -131,6 +152,10 @@ const SHOTS := {
 	"pair_ostra_seed_tele": ["os_seed", 1.3, -4.5], "pair_ostra_seed_key": ["os_pop", 1.95, -4.5],
 	"pair_ostra_seed_hit": ["os_pop", 2.1, -4.5],
 	"pair_ostra_swollen_key": ["os_empower", 0.8, -4.2],
+	"pair_breah_spine_tele": ["br_spine", 0.58, -3.0], "pair_breah_spine_key": ["br_spine", 0.82, -3.0],
+	"pair_breah_spine_hit": ["br_spine", 1.45, -3.0],
+	"pair_ostra_well_tele": ["os_well", 1.0, -2.5], "pair_ostra_well_key": ["os_well", 1.56, -2.5],
+	"pair_ostra_well_hit": ["os_well", 2.5, -2.5],
 }
 
 ## A still moment; returns the time to save the frame at.

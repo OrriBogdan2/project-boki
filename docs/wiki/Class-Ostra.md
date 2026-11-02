@@ -32,6 +32,7 @@ What the in-game kit card (K) says.
 | LMB | Tether Lantern: quick orbs to full range; pause and the next one is a fast bright bolt that slows. |
 | RMB: Shard Snap | Shard Snap: a short wind-up, then a bundle of shards that stuns the first foe, longer the further it flew. |
 | E: Brimseed | Brimseed: drop a bomb at the cursor that grows for 6.5s; press again to pop it, harder the bigger it grew. |
+| X: Nightwell | Nightwell: from level 6, open a well at the cursor that stuns everything inside for 3.5s and draws it to the middle. |
 | Weapon: Tether Lantern | Quick orbs to full range; pause 1.4s and the next one is a fast bright bolt that slows. |
 
 ### Abilities in full
@@ -46,6 +47,8 @@ What the in-game kit card (K) says.
 
 **Brimseed (E, 11s cooldown).** Drop a seed up to 9m away at the cursor (on ground, short of walls). It swells for 6.5s up to 3.2m wide, a light column rising when it is nearly full, then pops by itself; press E again (from 0.3s) to pop it sooner. Damage 12 up to 3.5 times that by how long it grew, and everyone it catches is Grounded for 1s. Swollen: larger and quicker.
 
+**Nightwell (X, hero ultimate from level 6, 64s cooldown).** Tap X: a pale dome of the well's exact size appears at the cursor (up to 10m away, on ground short of walls) and everyone sees it for 1.0s. Then the well opens for 3.5s, 3.6m wide: every foe inside, or who walks in, is stunned until it closes and drawn to its middle, taking a small hit every 0.1s. Allies are untouched, and you are free to act. Swollen: 5.1m wide. 64s.
+
 ### Ranks
 
 Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the special.
@@ -54,7 +57,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 |---|---|---|
 | RMB | cooldown 9s -> 8.1s, damage +15%. | cooldown 9s -> 7.2s, damage +30%. |
 | Dash (Shift) | recharge 9s -> 7.6s per charge. | recharge 9s -> 6.3s; allies beside you or at your landing get a 20 shield for 3s. |
-| E | cooldown 11s -> 9.9s, damage +15%. | cooldown 11s -> 8.8s; the pop pulls foes in first and the growing seed burns. |
+| E | cooldown 11s -> 9.9s, damage +15%. | cooldown 11s -> 8.8s; the growing seed burns foes inside. |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > RMB > E > Dash (Shift) > Glove (Q).
 
