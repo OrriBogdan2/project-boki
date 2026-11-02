@@ -172,3 +172,6 @@ The owner says she "doesn't feel or look like Elluna at all".
    - Remove the weapon-hold logic that was freezing her poses (REVIEW_mooshmoosh.md item 1), and make sure the moves drive the arms.
 3. **Feel:** light, quick and bouncy; a small support who darts around.
 4. **Clean room:** match the source's scale, motion and attack style, but her look stays our own original design. Don't recreate the source character's outfit, hair, colours or silhouette.
+
+## 2026-11-02 22:50 UTC
+Owner direction for every kit and polish pass: the **kits** match the source as the baseline (mechanics, timing, aiming, movement). The **characters** will be redesigned as clearly original concepts later; Moosh Moosh, for example, may become a small fire fox. So in the current passes, keep the effects in each hunter's own colour language, and don't invest in body details that copy the source's look. Concentrate on motion, readability and the kit.

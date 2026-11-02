@@ -324,3 +324,9 @@ The owner asked why C and G are separate buttons. Approved design (your files; p
   - Recall snaps back faster.
   - Tune with numbers in boki_system.json, and add a check that asserts press-to-move latency stays under a set number of frames.
 - Hunter ultimates stay on X, Merge on R.
+
+## 2026-11-02 18:50 ET: OWNER DIRECTION: same kits, original designs
+"I want them to feel like copies of the real ones but differently designed art. You can make the Elluna copy a fire fox or something, for example. But I want to start at the baseline of having the same kit."
+- **Kits and feel:** mechanics, timing, aiming, movement and readability match the source as the baseline. That's what the kitfix, polish, ult and body/dash passes are doing.
+- **Characters:** each hunter gets a clearly original design, with its own species or concept, silhouette, palette and theme, chosen to fit the kit's role but not resembling the source character. The owner's example: Moosh Moosh as a small fire fox.
+- **Next (after the kits pass review):** a design-concept pass proposes an original concept for each of the 12 hunters (species or archetype, silhouette, palette, signature props, effect colours). The owner approves them, then the models and effects are rebuilt. I'll post the concepts here first.
