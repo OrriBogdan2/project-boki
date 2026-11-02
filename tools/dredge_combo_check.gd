@@ -364,8 +364,15 @@ func _all() -> void:
 	T.teleport(home + Vector3(0, 0, 9.0))
 	ak.aim_at(P, home + Vector3(9.0, 0, 0))
 	P.ak.on_dash(false)
-	ak.step(m, 0.5)
+	ak.step(m, 0.15)
+	var blink_d := P.pos.x - home.x
+	ak.step(m, 0.35)
 	var ground_d := P.pos.x - home.x
+	ok(
+		"barge: a near-blink, about 4.6m within 0.15s, then he stops",
+		blink_d > 4.0 and ground_d < 5.6 and float(K.dash_def()["time"]) <= 0.14,
+		"at 0.15s %.1f, at 0.5s %.1f" % [blink_d, ground_d]
+	)
 	reset.call()
 	T.teleport(home + Vector3(0, 0, 9.0))
 	P.teleport(home + Vector3(0, 3.0, 0))
@@ -374,8 +381,14 @@ func _all() -> void:
 	P.ex_cd = 0.0
 	ak.aim_at(P, home + Vector3(9.0, 0, 0))
 	P.ak.on_dash(true)
-	ak.step(m, 0.4)
+	ak.step(m, 0.15)
+	var air_blink := P.pos.x - home.x
+	ak.step(m, 0.25)
 	var air_d := P.pos.x - home.x
+	ok(
+		"barge: in the air the same blink time, 35% further", air_blink > ground_d * 1.15 and ground_d > 3.5,
+		"air at 0.15s %.1f, ground %.1f" % [air_blink, ground_d]
+	)
 	ok(
 		"barge: further in the air than on the ground", air_d > ground_d * 1.15 and ground_d > 3.5,
 		"ground %.1f air %.1f" % [ground_d, air_d]

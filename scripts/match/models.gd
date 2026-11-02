@@ -833,7 +833,7 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 		merge_static(gun)      # (the twin blades' second dagger is handed to the left hand by HunterAnim)
 	# the race's proportions: head size, how broad the body is, overall height
 	var hkk := float(race["head"]) * (1.06 if arch == "thief" else 1.12)    # big-headed like a hero brawler (faces read from the match camera), heroic not chibi; the thief leaner
-	var bk := float(race["bulk"])
+	var bk := float(race["bulk"]) * float(HeroGearPair.body(arch)["bulk"])
 	head.scale = Vector3.ONE * hkk
 	head.position.y += (hkk - 1.0) * 0.05
 	if bk != 1.0:
@@ -876,7 +876,7 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 	root.set_meta("wid", weapon)
 	HunterAnim.rest_pose(root)       # hands on the weapon even where nothing animates it (portraits, galleries)
 	var rs := float(race["scale"])
-	var ck := float(CLASS_LOOK.get(cls, {}).get("size", 1.0))
+	var ck := float(CLASS_LOOK.get(cls, {}).get("size", 1.0)) * float(HeroGearPair.body(arch)["size"])
 	root.scale = Vector3.ONE * float(Data.CLASSES[cls]["scale"]) * rs * ck
 	ring.scale = Vector3.ONE / (rs * ck)       # the ring under your feet shows the real hitbox, whatever your size
 	return root

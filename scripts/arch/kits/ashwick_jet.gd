@@ -11,6 +11,7 @@ const OVERLAP := 0.45           # m each piece reaches back over the last, so th
 const NET_EVERY := 3            # carpet pieces between two rings sent to other players' games
 const STEER_LEAD := 1.0         # m the heading lane runs past where the flight will end
 const LAVA_DY := 1.6            # m above the carpet a body still stands in it
+const RING_PUFFS := 10          # flame puffs standing round the lift-off ring
 
 var k: AshwickKit
 var h: Hunter
@@ -199,13 +200,17 @@ func _lava_at(f: Ent):
 	return null
 
 # ------------------------------------------------------------------ looks
-## A red-orange ember ring about 1.2 bh round his feet, a gold flash and the roar of the bellows jet.
+## A red-orange ember ring about 1.2 bh round his feet (a solid ring of flame puffs over a deep red wave, so
+## it holds on bright grass), a jagged burst and the roar of the bellows jet.
 func _liftoff_fx() -> void:
 	var x := xd()
 	var r := float(x["burst_r"])
 	var at := k.ground(h.pos)
-	k.fx.wave(at, r, Color("ff4a2a"), 0.35, Color("ffd060"))
-	k.fx.sunburst(at + Vector3(0, 0.3, 0), r * 0.7, Color("ff7a2a"), Color("fff0b0"), 0.25)
+	k.fx.wave(at, r, Color("d8281a"), 0.4, Color(Color("ff8a2a"), 0.7))
+	k.fx.sunburst(at + Vector3(0, 0.3, 0), r * 0.75, Color("ff4a1a"), Color("ffc040"), 0.3)
+	for i in RING_PUFFS:
+		var ang := TAU * float(i) / RING_PUFFS
+		k.fx.puff(at + Vector3(cos(ang) * r, 0.45, sin(ang) * r), LDFx.M_FLAME, Color.BLACK, Color.BLACK, 0.7, 0.4)
 	k.fx.scorch(at, r * 0.5, 1.0)
 	m.fx.burst(at + Vector3(0, 0.3, 0), Color("ff6a3a"), 26, 6.0, 0.45, 3.0, 1.2)
 	AimKit.circle(h, "x_burst", {"self": true, "r": r, "all": true, "dur": 0.15, "col": k.col_of(x), "hot": 0.4})

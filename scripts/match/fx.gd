@@ -280,6 +280,8 @@ func number(at: Vector3, v: float, col: Color, crit: bool, prefix := "") -> void
 ## How long a number keeps taking hits after the last one, and how long it lingers on the target.
 const MERGE_T := 0.45
 const STICK_T := 0.3
+const WORD_STACK_T := 0.5        # s a word still claims its spot for stacking
+const WORD_GAP := 0.6            # m between stacked words, along the camera's up
 
 ## Bigger totals and crits read bigger, within a small range so numbers never cover the fight.
 func _num_size(v: float, crit: bool) -> int:
@@ -296,10 +298,26 @@ func word(at: Vector3, txt: String, col: Color, big := false) -> void:
 	l.text = txt
 	l.modulate = col
 	l.font_size = 58 if big else 40
-	l.global_position = at
+	l.global_position = at + _word_lift(at)
 	l.visible = true
 	l.scale = Vector3.ONE * (1.5 if big else 1.1)
 	nums.append({"node": l, "t": 0.0, "vel": Vector3(0, 2.4, 0)})
+
+## Where to lift a new word so it stacks above the words still rising from the same spot (STUNNED and
+## GROUNDED from one hit) instead of printing over them: along the camera's up, which reads on screen.
+func _word_lift(at: Vector3) -> Vector3:
+	var up := Vector3.UP
+	var cam := get_viewport().get_camera_3d()
+	if cam: up = cam.global_basis.y
+	var lift := 0.0
+	for n in nums:
+		if n.has("last") or float(n["t"]) > WORD_STACK_T:
+			continue
+		var rel: Vector3 = (n["node"] as Label3D).global_position - at
+		var along := rel.dot(up)
+		if (rel - up * along).length() < 1.5 and along > lift - WORD_GAP:
+			lift = along + WORD_GAP
+	return up * lift
 
 func ring(at: Vector3, radius: float, col: Color, dur := 0.35) -> void:
 	var mi := MeshInstance3D.new()

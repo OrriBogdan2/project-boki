@@ -20,9 +20,17 @@ extends ArchKit
 ##   Anti-Heal (DredgeBlast).
 
 const ROPE_COL := Color("f0d070")
-const SLUG_COL := Color("ffd9f2")
-const SLUG_REST := Color("8a7aff")     # a slug hanging at its stop line
-const ANCHOR_COL := Color("ffcf70")
+const BRASS := Color("e0a040")
+const BRASS_HOT := Color("fff0b0")
+const IRON := Color("3a3f48")
+const SLUG_COL := Color("ff4fa8")      # a hot pink streak in flight
+const SLUG_CORE := Color("ffd0ec")
+const SLUG_REST := Color("7a4aff")     # a slug hanging at its stop line: solid violet, dark core
+const ANCHOR_COL := LDFx.ANCHOR_RIM    # seafoam: the anchor's rim, its ring and its stun
+const CAM_TRAIL := 0.4                 # s the camera trails a barge, so the near-blink reads as a jump cut
+const BLINK_CARRY := 3.0               # m/s at most kept out of the near-blink (the class carry would slide him on)
+const HAUL_T := 0.26                   # s per hand-over-hand haul (dr_reel); the rope snaps taut on each
+const DIVE_ANCHOR_UP := 3.4            # m from the anchor's base to its ring: the ring rides at his feet
 const IDLE_T := 0.7                    # s after the last shot the spread cone folds back to one aim line
 const SWING := 6.0                     # 1/s: how fast a reeled body turns onto its new heading (lower swings wider)
 # m: a rise a reeled body can't be dragged up (a cliff face; rocks are hauled over)
@@ -38,6 +46,9 @@ var hop_dir := Vector2.ZERO     # the wind-up's forward hop
 var dive := {}                  # hold: the air smash falling {h0, t}
 var lock_until := -9.0          # the barge can't turn much until then (just after the Anchor)
 var barge_t := 0.0              # the barge's trail is showing
+var trail_t := 0.0              # the next barge after-image
+var blink_t := 0.0              # the barge under way; when it ends he stops, keeping almost none of its speed
+var drop_fx := {}               # the anchor falling through the wind-up (LDFx.anchor_drop's entry)
 var shot_seen := 0              # the last weapon volley the kit dressed
 var shot_at := -9.0
 var stunned: Array = []         # foes the Anchor stunned: {e, until} (the spiral over them)
@@ -144,6 +155,7 @@ func _tick(dt: float) -> void:
 	elif res >= 5.0:
 		tell = "half"
 	self_pips(int(res_max()), int(res), res >= res_max(), dt)
+	if blink_t > 0.0: _tick_blink(dt)
 	if wind > 0.0: _tick_wind(dt)
 	if not dive.is_empty(): _tick_dive(dt)
 	if flying: _tick_hook()
@@ -151,6 +163,7 @@ func _tick(dt: float) -> void:
 	broadside.tick(dt)
 	_tick_gun()
 	_tick_looks(dt)
+	KMovesPair.air_moves(self, "dr_jump", "dr_land")
 	net_pulse(dt, res >= res_max(), 1.8)
 
 ## A Boki merge ends the Anchor's wind-up, the air smash, the reel (the rope goes, no landing effect) and a
@@ -194,8 +207,8 @@ func _dress_volley() -> void:
 	play("dr_shot")
 	var d2 := h.aim_dir()
 	var mz := h.pos + Vector3(d2.x, 0, d2.y) * 1.05 + Vector3(0, 1.0, 0)
-	fx.orb(mz, Color("fff4e0"), Color.WHITE, 0.75, 0.07)          # a white-hot muzzle flash, one frame
-	fx.sunburst(mz, 0.6, Color("ffd0a0"), Color.WHITE, 0.08, true)
+	fx.orb(mz, BRASS, BRASS_HOT, 0.75, 0.07)          # a brass muzzle flash, one frame
+	fx.sunburst(mz, 0.6, Color("ff8a3a"), BRASS_HOT, 0.08, true)
 	m.sfx("dr_shot", h.pos, -5.0 if h.is_local() else -8.0, 1.0)
 	if not tells_visible():
 		return
@@ -208,8 +221,8 @@ func _dress_volley() -> void:
 		seen += 1
 		if sd.get("by") != h or String((sd["x"] as Dictionary).get("pg", "")) != key:
 			continue
-		fx.ride(sd, "slug", SLUG_COL, Color.WHITE, 0.6, 0.12, func(at: Vector3, expired: bool):
-			if expired: fx.dot(at, SLUG_REST, 0.18))
+		fx.ride(sd, "slug", SLUG_COL, SLUG_CORE, 0.9, 0.2, func(at: Vector3, expired: bool):
+			if expired: fx.dot(at, SLUG_REST, 0.26))
 
 func _tick_looks(dt: float) -> void:
 	if not tells_visible():
@@ -217,21 +230,18 @@ func _tick_looks(dt: float) -> void:
 	var id := h.get_instance_id()
 	if not pull.is_empty():
 		# Grounded while he reels: a chain ring at his feet
-		fx.place(
-			"chain%d" % id, "chain", h.pos + Vector3(0, 0.08, 0), Color("f4f0e0"), Color("8a8070"), 0.95, m.time * 0.6
-		)
+		fx.place("chain%d" % id, "chain", h.pos + Vector3(0, 0.08, 0), BRASS, IRON, 0.95, m.time * 0.6)
 	if barge_t > 0.0:
 		barge_t -= dt
-		var d2 := h.aim_dir()
-		fx.orb(h.pos + Vector3(0, 0.9, 0) - Vector3(d2.x, 0, d2.y) * 0.5, Color("ffc860"), Color("fff0c0"), 0.7, 0.22)
+		_barge_trail(dt)
 	for s in stunned.duplicate():
 		var f = s["e"]
 		if not is_instance_valid(f) or (f as Ent).dead or m.time > float(s["until"]):
 			stunned.erase(s)
 			continue
 		fx.place(
-			"spiral%d" % (f as Ent).get_instance_id(), "spiral", (f as Ent).pos + Vector3(0, 2.4, 0), Color("ffe0a0"),
-			Color("8a6aff"), 0.45
+			"spiral%d" % (f as Ent).get_instance_id(), "spiral", (f as Ent).pos + Vector3(0, 2.4, 0), ANCHOR_COL,
+			Color("1a5a6a"), 0.6
 		)
 
 # ------------------------------------------------------------------ RMB: Grapnel
@@ -258,7 +268,7 @@ func fire_rmb(c: Dictionary) -> void:
 			flying = false
 			hook_sd = {}
 			if e == null and pull.is_empty():
-				fx.orb(at, ROPE_COL, Color.WHITE, 0.6, 0.15)
+				fx.orb(at, ROPE_COL, BRASS_HOT, 0.6, 0.15)
 				m.fx.word(at + Vector3(0, 1.2, 0), "SNAGGED" if why == "wall" else "MISS", Color("c0b0a0"), false)}))
 	if m.shots.size() > n0:
 		hook_sd = m.shots[-1]
@@ -293,8 +303,8 @@ func _tick_hook() -> void:
 	if not tells_visible():
 		return
 	var id := h.get_instance_id()
-	fx.rope("rope%d" % id, _hand(), p, ROPE_COL, 0.22)
-	fx.place("claw%d" % id, "claw", p, Color("e0b040"), Color.WHITE, 1.0, atan2(-v.x, -v.y))
+	fx.rope("rope%d" % id, _hand(), p, ROPE_COL)
+	fx.place("claw%d" % id, "claw", p, BRASS, BRASS_HOT, 1.5, atan2(-v.x, -v.y))
 
 func _grab(f: Ent, ally := false) -> void:
 	flying = false
@@ -311,13 +321,15 @@ func _grab(f: Ent, ally := false) -> void:
 	var wisp: bool = f is Hunter and (f as Hunter).downed
 	ally = ally or wisp           # a wisp caught head-on is reeled in like an ally: no stun, no Grounded
 	pull = {"t": f, "left": float(rdf["pull_max"]), "v": Vector2.ZERO, "ally": ally, "wisp": wisp, "from": f.pos}
-	KitStatus.apply(h, "gnd", float(rdf["pull_max"]))      # the caster is Grounded while he reels (sheet gap 5)
+	# the caster is Grounded while he reels (sheet gap 5); the chain ring at his feet is the tell, and the barge
+	# still works
+	KitStatus.apply(h, "gnd", float(rdf["pull_max"]), 0.0, true, "reeling: no jump or glide (the barge still works)")
 	st["self_gnd"] = true
 	if not ally: f.stun_t = maxf(f.stun_t, 0.3)
 	m.fx.word(
 		f.pos + Vector3(0, 2.4, 0), _grab_word(wisp, ally), col_of(rdf), true
 	)
-	fx.orb(f.pos + Vector3(0, 1.0, 0), ROPE_COL, Color.WHITE, 1.1, 0.15)
+	fx.orb(f.pos + Vector3(0, 1.0, 0), ROPE_COL, BRASS_HOT, 1.1, 0.15)
 	m.sfx("dr_grab", f.pos, -1.0, 1.0)
 	m.sfx("dr_reel", h.pos, -5.0, 1.0)
 	play("dr_reel")
@@ -348,8 +360,8 @@ func _tick_pull(dt: float) -> void:
 	if tells_visible():
 		var id := h.get_instance_id()
 		var b := fe.pos + Vector3(0, 0.95, 0)
-		fx.rope("rope%d" % id, _hand(), b, ROPE_COL, 0.22)
-		fx.place("claw%d" % id, "claw", b, Color("e0b040"), Color.WHITE, 1.0, atan2(to.x, to.y))
+		fx.rope("rope%d" % id, _hand(), b, ROPE_COL, _rope_thick())
+		fx.place("claw%d" % id, "claw", b, BRASS, BRASS_HOT, 1.5, atan2(to.x, to.y))
 	if dist <= gap + 0.05:
 		_end_pull(true)
 		return
@@ -374,6 +386,11 @@ func _tick_pull(dt: float) -> void:
 			continue
 		var tw := Vector2(h.pos.x - w.pos.x, h.pos.z - w.pos.z)
 		if tw.length() > gap: _drag(w, tw.normalized(), minf(float(rdf["pull_speed"]) * dt, tw.length() - gap))
+
+## The rope's thickness while reeling: it swells taut on each hand-over-hand haul.
+func _rope_thick() -> float:
+	var since := fposmod(m.time - anim_at - 0.18, HAUL_T)
+	return 0.32 * (1.0 + 0.45 * (1.0 - smoothstep(0.0, 0.12, since)))
 
 ## Moves a body `dist` along `dir` in small steps: over rocks and props (lifted onto them), never up a cliff
 ## face (a rise past CLIFF) or through a placed wall. Returns how far it went. Over the void it just goes on.
@@ -449,6 +466,7 @@ func cast_e() -> bool:
 	wind = float(ed["windup"])
 	hop_dir = h.aim_dir()
 	hops += 1
+	drop_fx = fx.anchor_drop(_slam_spot(float(ed["hop"])), wind)
 	play("dr_anchor")
 	m.sfx("dr_anchor_wind", h.pos, -3.0, 1.0)
 	return true
@@ -459,6 +477,11 @@ func use_e() -> void:
 		return
 	super.use_e()
 
+## Where the anchor will land: in front of where he'll be after `hop_left` more metres of the hop.
+func _slam_spot(hop_left: float) -> Vector3:
+	var dd := h.aim_dir()
+	return ground(h.pos + Vector3(hop_dir.x, 0, hop_dir.y) * hop_left + Vector3(dd.x, 0, dd.y) * 1.7)
+
 ## The wind-up: the fist hauled back, then a hop up and about a body height forward (0.14-0.32s), then the slam.
 func _tick_wind(dt: float) -> void:
 	var ed := e_def()
@@ -466,7 +489,10 @@ func _tick_wind(dt: float) -> void:
 	wind -= dt
 	if h.stun_t > 0.0 or h.downed:
 		wind = 0.0
+		fx.stop(drop_fx)
 		return
+	if not drop_fx.is_empty():
+		drop_fx["at"] = _slam_spot(float(ed["hop"]) * clampf((0.32 - t0) / 0.18, 0.0, 1.0))
 	if t0 >= 0.14 and t0 < 0.32:
 		var step := float(ed["hop"]) / 0.18 * dt
 		var nx := h.pos.x + hop_dir.x * step
@@ -493,16 +519,14 @@ func _anchor() -> void:
 	var on_foe := func(f: Ent, _c: Dictionary): _slammed(f, stun)
 	run(stg, cx("e", "anchor_drop", aim(), {"no_floor": true, "on_foe": on_foe}))
 	var at := h.pos + Vector3(dd.x, 0, dd.y) * 1.7
-	fx.anchor_drop(ground(at), dd, ANCHOR_COL, 0.6, 0.8)
-	fx.crescent(
-		h.pos + Vector3(0, 0.25, 0), dd, float(ed["angle"]), float(ed["radius"]), Color("ffe0a0"), Color("d89040"),
-		0.25
-	)
+	if not drop_fx.is_empty(): drop_fx["at"] = ground(at)
+	drop_fx = {}
+	fx.crescent(h.pos + Vector3(0, 0.25, 0), dd, float(ed["angle"]), float(ed["radius"]), ANCHOR_COL, IRON, 0.25)
 	AimKit.cone(
 		h, "e_hit",
 		{
 			"len": float(ed["radius"]), "deg": float(ed["angle"]), "edges": true, "all": true, "dur": 0.2,
-			"col": Color("ffffff"), "alpha": 0.7
+			"col": ANCHOR_COL, "alpha": 0.7
 		}
 	)
 	m.later(0.08, _anchor_dust.bind(at))
@@ -521,13 +545,14 @@ func _anchor_dust(at: Vector3) -> void:
 	if not is_instance_valid(h):
 		return
 	m.fx.dust(at, 26)
-	fx.wave(ground(at), 1.8, Color("fff4e0"), 0.35)
+	fx.wave(ground(at), 1.8, ANCHOR_COL, 0.35, Color(IRON, 0.5))
 
 func _slammed(f: Ent, stun: float) -> void:
 	var ed := e_def()
 	if not is_instance_valid(f) or f.dead: return
 	f.vel.y = minf(f.vel.y, -16.0)
-	KitStatus.apply(f, "gnd", float(ed["gnd_t"]))
+	# ANCHORED says it all: no separate GROUNDED word over the stun
+	KitStatus.apply(f, "gnd", float(ed["gnd_t"]), 0.0, true, "anchored: no dash, jump or glide")
 	Feel.hitstop(m, h, f, 30.0, {"melee": true, "heavy": true})
 	stunned.append({"e": f, "until": m.time + stun})
 	m.fx.word(f.pos + Vector3(0, 2.3, 0), "ANCHORED", col_of(ed), false)
@@ -564,16 +589,20 @@ func _tick_dive(dt: float) -> void:
 			"ticks": true, "col": ANCHOR_COL
 		}
 	)
-	if tells_visible():
-		var d2 := h.aim_dir()
-		fx.place(
-			"dive_anchor%d" % h.get_instance_id(), "anchor", h.pos + Vector3(d2.x, 0, d2.y) * 0.9 + Vector3(0, -0.4, 0),
-			ANCHOR_COL, Color.WHITE, 0.55, atan2(-d2.x, -d2.y) + PI / 2.0
-		)
+	if tells_visible(): _dive_looks(land, float(ed["quake_r"]))
 	if h.grounded or h.pos.y - gy < 0.12 or float(dive["t"]) > 2.0:
 		var fell := maxf(float(dive["h0"]), float(dive["y0"]) - gy)
 		dive = {}
 		_quake(land, fell)
+
+## The air dive: he rides the anchor down (full size under his feet, ahead of the fall), and the landing
+## ring is a chain of brass links on the ground, solid enough to read on grass.
+func _dive_looks(land: Vector3, r: float) -> void:
+	var id := h.get_instance_id()
+	var under := h.pos - Basis(Vector3.RIGHT, LDFx.ANCHOR_LEAN) * Vector3(0, DIVE_ANCHOR_UP, 0)
+	under.y = maxf(land.y, under.y)
+	fx.place("dive_anchor%d" % id, "anchor", under, ANCHOR_COL, IRON, 1.0)
+	fx.place("dive_ring%d" % id, "chain", land + Vector3(0, 0.08, 0), BRASS, IRON, r / 0.82, m.time * 0.4)
 
 ## The air smash lands: a ring of anchor and dust round the landing, damage scaled by the height fallen.
 func _quake(at: Vector3, fell: float) -> void:
@@ -589,10 +618,10 @@ func _quake(at: Vector3, fell: float) -> void:
 	var on_foe := func(f: Ent, _c: Dictionary): _slammed(f, stun)
 	run(stg, cx("e", "anchor_drop", at, {"at_fixed": at, "no_floor": true, "on_foe": on_foe}))
 	var d2 := h.aim_dir()
-	fx.anchor_drop(at + Vector3(d2.x, 0, d2.y) * 0.9, d2, ANCHOR_COL, 0.45, 0.62)
-	fx.wave(at, r, ANCHOR_COL, 0.45, Color("fff0c0"))
-	fx.wave(at, r * 0.6, Color.WHITE, 0.3)
-	fx.sunburst(at, r * 0.9, Color("ffd890"), Color.WHITE, 0.35)
+	fx.anchor_drop(at + Vector3(d2.x, 0, d2.y) * 0.6, 0.0, 1.0)
+	fx.wave(at, r, ANCHOR_COL, 0.45, Color(IRON, 0.5))
+	fx.wave(at, r * 0.6, BRASS, 0.3)
+	fx.sunburst(at, r * 0.9, BRASS, BRASS_HOT, 0.35)
 	fx.scorch(at, r * 0.6, 1.2, Color("ffb040"), Color("3a3020"))
 	m.fx.dust(at, 34)
 	play("dr_quake")
@@ -620,13 +649,17 @@ func on_dash(use_ex: bool) -> bool:
 	if use_ex and not h.grounded:
 		# the class air dash, further when airborne (sheet: Barge)
 		if not spend_dash(true): return true
-		travel(
-			float(h.cdat.get("ex_dist", 4.2)) * float(dd["air_k"]), float(h.cdat.get("ex_time", 0.21)) * 1.15,
-			{"invuln": 0.08, "trail": "", "dir": dir}, true
-		)
+		# the same near-blink as on foot, 35% further: in the air it is faster, not longer (the class long dash
+		# would otherwise take over its distance and time)
+		var air_dist := float(dd["dist"]) * float(dd["air_k"])
+		travel(air_dist, float(dd["time"]), {"invuln": 0.08, "trail": "", "dir": dir}, true)
+		h.roll_t = float(dd["time"])
+		h.roll_speed = air_dist / h.roll_t
 		play("dr_hop")
 		m.sfx("dr_hop", h.pos, -3.0, 1.0)
-		barge_t = 0.25
+		barge_t = float(dd["time"])
+		blink_t = float(dd["time"]) + 0.02
+		if h.is_local() and m.cam: m.cam.trail(CAM_TRAIL)
 		return true
 	if not spend_dash(false):
 		return true
@@ -641,14 +674,37 @@ func on_dash(use_ex: bool) -> bool:
 	st["last_dash"] = "barge"
 	play("dr_barge")
 	barge_t = float(dd["time"])
+	blink_t = float(dd["time"]) + 0.02
+	if h.is_local() and m.cam: m.cam.trail(CAM_TRAIL)
 	h.glide_cd = maxf(h.glide_cd, float(dd["time"]) + 0.35)
 	m.sfx("dr_barge", h.pos, -2.0, 1.0)
 	return true
 
+## The barge's end: he arrives almost dead still, as in the source (a near-blink with no slide).
+func _tick_blink(dt: float) -> void:
+	blink_t -= dt
+	if blink_t > 0.0 or h.roll_t > 0.0:
+		return
+	blink_t = 0.0
+	var flat := Vector2(h.vel.x, h.vel.z).limit_length(BLINK_CARRY)
+	h.vel.x = flat.x
+	h.vel.z = flat.y
+
+## Dredge's own barge after-images: dark iron shoves with a brass rim, dropped behind him as he lumbers.
+func _barge_trail(dt: float) -> void:
+	trail_t -= dt
+	if trail_t > 0.0:
+		return
+	trail_t = 0.045
+	var d2 := h.aim_dir()
+	fx.puff(h.pos + Vector3(0, 0.9, 0) - Vector3(d2.x, 0, d2.y) * 0.5, LDFx.M_ORB, BRASS, IRON, 0.9, 0.3)
+
+func own_dash_trail() -> bool: return true
+
 ## A red spiky burst where the barge sets off, and an ember scorch left there for a second (sheet 0188).
 func _barge_burst(dir: Vector2) -> void:
 	var at := h.pos
-	fx.sunburst(at + Vector3(0, 0.9, 0), 1.9, Color("ff4a3a"), Color("ffd0a0"), 0.25, true)
+	fx.sunburst(at + Vector3(0, 0.9, 0), 1.9, Color("ff3a2a"), Color("ffb060"), 0.25, true)
 	fx.scorch(ground(at), 0.9, 1.0, Color("ff8a3a"), Color("3a2018"))
 	m.fx.burst(at + Vector3(0, 0.6, 0), Color("ff6a3a"), 12, 4.0, 0.3, 4.0, 1.0, Vector3(-dir.x, 0.3, -dir.y), 50.0)
 

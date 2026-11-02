@@ -307,13 +307,20 @@ func _all() -> void:
 	T2.teleport(home + Vector3(0, 0, -9.0))
 	ak.aim_at(P, home + Vector3(8.0, 0, 0))
 	P.ak.on_dash(false)
-	ak.step(m, 0.3)
+	ak.step(m, 0.1)
+	var d_front := P.pos.x - home.x
+	ak.step(m, 0.26)
 	var d1 := P.pos.x - home.x
+	ok(
+		"ram: about 3.4m in 0.33s, front-loaded (over 40% of it in the first 30%)",
+		d_front > 1.25 and d1 > 3.0 and d1 < 3.9,
+		"after 0.1s %.2f, after 0.36s %.2f" % [d_front, d1]
+	)
 	P.ak.on_dash(false)
 	ak.step(m, 0.45)
 	ok(
-		"ram: toward the cursor, two charges chain within 0.4s",
-		d1 > 3.4 and P.pos.x - home.x > d1 + 3.0 and P.dashes < 0.5,
+		"ram: toward the cursor, two charges chain",
+		P.pos.x - home.x > d1 + 2.8 and P.dashes < 0.5,
 		"first %.1f both %.1f charges %.2f" % [d1, P.pos.x - home.x, P.dashes]
 	)
 	P.dashes = 0.0

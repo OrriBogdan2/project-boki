@@ -73,7 +73,7 @@ func parts(w0: float, w1: float) -> Array:
 	var out: Array = []
 	for pf in puffs:
 		var k := clampf(float(pf["age"]) / maxf(0.01, float(pf["life"])), 0.0, 1.0)
-		out.append({"p": pf["p"], "age": k, "r": radius(pf, w0, w1) * 1.25 + 0.08, "seed": pf["seed"]})
+		out.append({"p": pf["p"], "age": k, "r": radius(pf, w0, w1) * 1.5 + 0.1, "seed": pf["seed"]})
 	return out
 
 ## How far the farthest live puff is from `from` (tests: the stream's reach).

@@ -4,7 +4,8 @@ extends RefCounted
 ## the two kit cards):
 ##   --arena-demo=pr_<move>          a strip of frames of one kit move (anticipation, release, follow-through,
 ##                                   recovery), cropped round the hunter
-##   --arena-demo=pr_f_<move>@<t>    the same scene, the whole view at <t> seconds (telegraph, key frame, impact)
+##   --arena-demo=pr_f_<move>@<t>    the same scene, the whole view at <t> seconds at the default gameplay zoom
+##                                   (telegraph, key frame, impact); pr_c_<move>@<t> the same as a close-up
 ##   --arena-demo=pr_payoff_dr / pr_payoff_as   the payoff moments
 ##   moves: dr_shot dr_throw dr_reel dr_anchor dr_dive dr_barge dr_hop dr_flex
 ##          as_lance as_sweep as_shot as_leap lw_hop as_cloak lw_stoke
@@ -30,6 +31,8 @@ const MOVES := {
 	"dr_blast": ["dredge", "shotgun", [0.5, 1.0, 1.55, 1.62, 2.22, 2.6]],
 }
 
+const GAME_ZOOM := 1.0         # the camera's default gameplay zoom
+
 ## Returns the time to save the single frame at (99: not a single-frame demo).
 static func tick(A: Arena, w: String, t: float, dt: float) -> float:
 	var m := A.m
@@ -43,9 +46,24 @@ static func tick(A: Arena, w: String, t: float, dt: float) -> float:
 			A.toggle_card()
 			ArenaDemo._shot_later(A, 0.7)
 		return 99.0
+	# the scene runs on the match's own clock: a first-use hitch (a shader compiling) can jump the frame
+	# clock past a whole move while the match only steps part of it, and the shot would miss the moment
+	if not A.has_meta("pr_t0"): A.set_meta("pr_t0", float(m.time) - t)
+	var game_t := float(m.time) - float(A.get_meta("pr_t0"))
+	var game_dt := game_t - float(A.get_meta("pr_prev", game_t - dt))
+	A.set_meta("pr_prev", game_t)
+	var at := _tick_move(A, w, game_t, game_dt)
+	return at if at >= 99.0 else t - game_t + at
+
+## One move's scene on the match clock `t`; returns the time to save the single frame at (99: none).
+static func _tick_move(A: Arena, w: String, t: float, dt: float) -> float:
+	var m := A.m
+	var P: Hunter = m.player
+	var D: Hunter = A.dummies[0]["h"]
 	var key := w.substr(3)
 	var payoff := key.begins_with("payoff_")
-	var full := key.begins_with("f_")
+	var close := key.begins_with("c_")
+	var full := key.begins_with("f_") or close
 	var shot_t := 99.0
 	if full:
 		var parts := key.substr(2).split("@")
@@ -55,7 +73,7 @@ static func tick(A: Arena, w: String, t: float, dt: float) -> float:
 	var spec: Array = MOVES.get(mv, MOVES["dr_throw"])
 	if payoff:
 		spec = ["dredge", "shotgun", []] if mv == "dr" else ["ashwick", "flamethrower", []]
-	var zoom := 0.62 if not full else 0.85
+	var zoom := 0.62 if close or not full else GAME_ZOOM
 	if t < 0.05:
 		if P.arch != String(spec[0]) or P.wid != String(spec[1]): A.set_arch(String(spec[0]), String(spec[1]))
 		A.set_kin("")
@@ -110,7 +128,8 @@ static func _drive(A: Arena, P: Hunter, D: Hunter, mv: String, t: float, dt: flo
 				P.dashes = P.max_dashes()
 				P.do_dash()
 		"dr_hop", "lw_hop":
-			if t < go: D.teleport(A.home + Vector3(0, 0, 7.0))
+			# toward the middle of the island, so the hop never carries him off the edge into the void
+			if t < go: D.teleport(A.home + Vector3(7.0, 0, -2.5))
 			if ArenaDemo._at(t, dt, go - 0.15):
 				P.vel.y = 11.0
 				P.grounded = false

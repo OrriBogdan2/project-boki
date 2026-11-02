@@ -10,9 +10,14 @@ extends Node3D
 ## - place(id, kind, ...)  immediate-style looks the kit refreshes every step: "skull", "swirl", "chain",
 ##                         "pip", "spiral", "pilot", "anchor", "glow"; stop calling and they hide
 ## - rope(id, a, b)        the braided Grapnel rope, drawn through walls
-## - one-shots: sunburst, scorch, crescent, wave, dot, lava, orb, anchor_drop, embers
+## - one-shots: sunburst, scorch, crescent, wave, dot, lava, orb, anchor_drop, embers, puff
+##
+## Each look is two passes (shaders/ld_fx.gdshaderinc): an alpha-blended body, so colour and dark rims read
+## on bright grass, and an additive glow chained on as next_pass for the hot cores. _param sets both.
 
 const SHADER: Shader = preload("res://shaders/ld_fx.gdshader")
+const GLOW_SHADER: Shader = preload("res://shaders/ld_fx_glow.gdshader")
+const ANCHOR_SHADER: Shader = preload("res://shaders/ld_anchor.gdshader")
 const ROPE_SHADER: Shader = preload("res://shaders/ld_rope.gdshader")
 const LAVA_SHADER: Shader = preload("res://shaders/ld_lava.gdshader")     # alpha-blended: dark rims stay dark
 const M_FLAME := 0
@@ -32,6 +37,14 @@ const POOL_CAP := 24           # nodes per kind at most; past it the oldest is t
 const KEEP := 0.1              # s an immediate-style look stays without a refresh
 const FLAME_CAP := 32          # hose puffs drawn at most (the kit keeps about 15)
 const HANG_T := 0.3            # s a scattergun slug hangs as a dot at its stop line
+const CINDER_HALO := Color("6a5aff")
+const ROPE_DARK := Color(0.42, 0.3, 0.22)    # the tarred strand of the braid (a vertex colour multiplier)
+const ANCHOR_IRON := Color("3a3f48")
+const ANCHOR_RIM := Color("5cffd8")     # seafoam: "harbour", and it stands off yellow-green grass
+const ANCHOR_DROP := 3.2       # m the anchor falls from (times its scale)
+const ANCHOR_HOLD := 0.25      # s it stays planted after it lands, before it fades
+const ANCHOR_FADE := 0.3
+const ANCHOR_LEAN := 0.75      # rad the anchor leans back toward the camera, so it reads as an anchor from above
 
 var m: Node
 var pools := {}                # kind -> Array of nodes made for it
@@ -62,12 +75,22 @@ static func of(match_node: Node) -> LDFx:
 func _mat(mode: int, col: Color, col2: Color, bb := false) -> ShaderMaterial:
 	var mt := ShaderMaterial.new()
 	mt.shader = LAVA_SHADER if mode == M_LAVA else SHADER
-	mt.set_shader_parameter("mode", mode)
-	mt.set_shader_parameter("color", col)
-	mt.set_shader_parameter("color2", col2)
-	mt.set_shader_parameter("billboard", bb)
-	mt.set_shader_parameter("seed", randf() * 10.0)
+	if mode != M_LAVA:
+		mt.next_pass = ShaderMaterial.new()
+		(mt.next_pass as ShaderMaterial).shader = GLOW_SHADER
+	_param(mt, "mode", mode)
+	_param(mt, "color", col)
+	_param(mt, "color2", col2)
+	_param(mt, "billboard", bb)
+	_param(mt, "seed", randf() * 10.0)
 	return mt
+
+## Sets a shader parameter on a look's body pass and on its glow pass.
+static func _param(mt: Material, key: String, value: Variant) -> void:
+	var sm := mt as ShaderMaterial
+	sm.set_shader_parameter(key, value)
+	if sm.next_pass:
+		(sm.next_pass as ShaderMaterial).set_shader_parameter(key, value)
 
 func _mi(mesh: Mesh, mat: Material) -> MeshInstance3D:
 	var mi := MeshInstance3D.new()
@@ -179,10 +202,13 @@ func _crescent_mesh(arc_deg: float) -> ArrayMesh:
 	_cres[key] = mesh
 	return mesh
 
-## Dredge's anchor as a translucent ghost of light (2 bh tall): shank, stock, ring and two flukes.
-func _anchor_node(col: Color) -> Node3D:
+## Dredge's anchor (2 bh tall): shank, stock, ring and two flukes in solid dark iron with a seafoam rim.
+func _anchor_node() -> Node3D:
 	var n := Node3D.new()
-	var mt := Models.glow_mat(Color(col, 0.7))
+	var mt := ShaderMaterial.new()
+	mt.shader = ANCHOR_SHADER
+	mt.set_shader_parameter("color", ANCHOR_IRON)
+	mt.set_shader_parameter("color2", ANCHOR_RIM)
 	n.set_meta("mat", mt)
 	var add := func(mesh: Mesh, pos: Vector3, rot := Vector3.ZERO) -> void:
 		var p := _mi(mesh, mt)
@@ -202,9 +228,9 @@ func _claw_node(col: Color) -> Node3D:
 	var n := Node3D.new()
 	var mt := ShaderMaterial.new()
 	mt.shader = ROPE_SHADER
-	mt.set_shader_parameter("color", col)
-	mt.set_shader_parameter("color2", Color(1, 1, 1, 1))
-	mt.set_shader_parameter("twist", 0.0)
+	_param(mt, "color", col)
+	_param(mt, "color2", Color(1, 1, 1, 1))
+	_param(mt, "twist", 0.0)
 	var add := func(mesh: Mesh, pos: Vector3, rot := Vector3.ZERO) -> void:
 		var p := _mi(mesh, mt)
 		p.position = pos
@@ -245,8 +271,8 @@ func flame(id: String, parts: Array) -> void:
 		mi2.global_position = p["p"]
 		mi2.scale = Vector3.ONE * float(p["r"])
 		var mt := mi2.material_override as ShaderMaterial
-		mt.set_shader_parameter("life", float(p["age"]))
-		mt.set_shader_parameter("seed", float(p.get("seed", 0.0)) * 10.0)
+		_param(mt, "life", float(p["age"]))
+		_param(mt, "seed", float(p.get("seed", 0.0)) * 10.0)
 
 func flame_off(id: String) -> void:
 	var e: Dictionary = flames.get(id, {})
@@ -266,11 +292,11 @@ func _fx(kind: String, mode: int, mesh: Mesh, bb: bool) -> MeshInstance3D:
 
 func _play(n: Node3D, kind: String, col: Color, col2: Color, dur: float, s0: Vector3, mt: ShaderMaterial) -> Dictionary:
 	if mt:
-		mt.set_shader_parameter("color", col)
-		mt.set_shader_parameter("color2", col2)
-		mt.set_shader_parameter("life", 0.0)
-		mt.set_shader_parameter("progress", 0.0)
-		mt.set_shader_parameter("seed", randf() * 10.0)
+		_param(mt, "color", col)
+		_param(mt, "color2", col2)
+		_param(mt, "life", 0.0)
+		_param(mt, "progress", 0.0)
+		_param(mt, "seed", randf() * 10.0)
 	n.scale = s0
 	var e := {"node": n, "t": 0.0, "dur": maxf(0.05, dur), "kind": kind, "s0": s0, "mat": mt}
 	live.append(e)
@@ -298,7 +324,7 @@ func scorch(at: Vector3, r: float, dur := 1.0, col := Color("ff7a2a"), col2 := C
 	_flat("scorch", M_SCORCH, at, r, col, col2, dur, randf() * TAU)
 
 ## A thin ring that opens out to `r` (a landing ring, a fizzle).
-func wave(at: Vector3, r: float, col: Color, dur := 0.35, col2 := Color(0, 0, 0, 1)) -> void:
+func wave(at: Vector3, r: float, col: Color, dur := 0.35, col2 := Color(0, 0, 0, 0)) -> void:
 	_flat("wave", M_WAVE, at, r, col, col2, dur)
 
 ## A blade arc in front of `at` facing `dir`, swept over `dur`. tilt PI/2: standing up.
@@ -321,11 +347,20 @@ func orb(at: Vector3, col: Color, col2: Color, scl := 0.6, dur := 0.15) -> void:
 	var e := _play(n, "orb", col, col2, dur, Vector3.ONE * scl, n.material_override)
 	e["grow"] = 0.5
 
-## A soft dot left hanging in the air (a scattergun slug at its stop line).
+## A solid dot with a dark core left hanging in the air (a scattergun slug at its stop line).
 func dot(at: Vector3, col: Color, scl := 0.16, dur := HANG_T) -> void:
 	var n := _fx("dot", M_DOT, _quad_mesh(), true)
 	n.global_position = at
-	_play(n, "dot", col, col.lightened(0.35), dur, Vector3.ONE * scl, n.material_override)
+	_play(n, "dot", col, col.darkened(0.7), dur, Vector3.ONE * scl, n.material_override)
+
+## A camera-facing puff that swells and fades (a dash's after-image): mode M_FLAME burns through the fire
+## ramp on its own, M_ORB uses col (the rim) and col2 (the centre).
+func puff(at: Vector3, mode: int, col: Color, col2: Color, scl: float, dur: float) -> void:
+	var kind := "puff%d" % mode
+	var n := _fx(kind, mode, _quad_mesh(), true)
+	n.global_position = at
+	var e := _play(n, kind, col, col2, dur, Vector3.ONE * scl, n.material_override)
+	e["grow"] = 0.6
 
 ## A molten strip from a to b on the ground (the rank-3 fire trail), lasting `dur`.
 func lava(a: Vector3, b: Vector3, width: float, dur: float) -> void:
@@ -338,19 +373,27 @@ func lava(a: Vector3, b: Vector3, width: float, dur: float) -> void:
 	var e := _play(
 		n, "lava", Color("ff8a2a"), Color("4a1238"), dur, Vector3(ln * 0.5, 1, width * 0.5), n.material_override
 	)
-	(n.material_override as ShaderMaterial).set_shader_parameter("progress", ln)
+	_param(n.material_override, "progress", ln)
 	e["keep_progress"] = true
 
-## The Anchor Drop's giant ghost anchor dropping onto `at` (lands at 35% of `dur`, then fades).
-func anchor_drop(at: Vector3, dir: Vector2, col: Color, dur := 0.5, scl := 1.0) -> void:
-	var n := _take("anchor", func(): return _anchor_node(col))
-	n.global_position = at + Vector3(0, 3.2, 0)
-	n.rotation = Vector3(0, atan2(-dir.x, -dir.y) + PI / 2.0, 0)
+## The Anchor Drop's giant anchor falling onto `at` over `fall` seconds (0: already down), planted for
+## ANCHOR_HOLD, then fading. Returns its entry; the kit may move entry["at"] while it falls.
+func anchor_drop(at: Vector3, fall: float, scl := 1.2) -> Dictionary:
+	var n := _take("anchor", _anchor_node)
+	n.global_position = at + Vector3(0, ANCHOR_DROP * scl, 0) * signf(fall)
+	n.rotation = Vector3(ANCHOR_LEAN, 0, 0)
 	n.scale = Vector3.ONE * scl
-	((n.get_meta("mat")) as ShaderMaterial).set_shader_parameter("color", Color(col, 0.7))
-	live.append({
-		"node": n, "t": 0.0, "dur": dur, "kind": "anchor", "s0": n.scale, "mat": n.get_meta("mat"), "at": at, "col": col
-	})
+	_param(n.get_meta("mat"), "fade", 1.0)
+	var e := {
+		"node": n, "t": 0.0, "dur": fall + ANCHOR_HOLD + ANCHOR_FADE, "fall": fall, "kind": "anchor",
+		"s0": n.scale, "mat": n.get_meta("mat"), "at": at
+	}
+	live.append(e)
+	return e
+
+## Ends a one-shot early (an Anchor Drop whose wind-up was stunned out); it hides on the next frame.
+func stop(e: Dictionary) -> void:
+	if not e.is_empty(): e["t"] = float(e["dur"])
 
 ## Embers sprayed up and out of a spot for `dur` (Cinder Shot's impact).
 func embers(at: Vector3, dur := 0.6, col := Color("ff5a3a")) -> void:
@@ -364,35 +407,38 @@ func _build_place(kind: String, col: Color, col2: Color) -> Node3D:
 		"pip": return _mi(_quad_mesh(), _mat(M_PIP, col, col2, true))
 		"spiral": return _mi(_quad_mesh(), _mat(M_SPIRAL, col, col2, true))
 		"pilot", "glow": return _mi(_quad_mesh(), _mat(M_ORB, col, col2, true))
-		"anchor": return _anchor_node(col)
+		"anchor": return _anchor_node()
 		"claw": return _claw_node(col)
-		"skull":
-			# the Flame Skull: a standing crescent of fire wrapped round the front, a hot glow inside it
-			var n := Node3D.new()
-			var cr := _mi(_crescent_mesh(150.0), _mat(M_CRESCENT, col, col2))
-			cr.name = "Cres"
-			(cr.material_override as ShaderMaterial).set_shader_parameter("progress", 1.0)
-			cr.rotation = Vector3(0, 0, PI / 2.0)
-			n.add_child(cr)
-			var cr2 := _mi(_crescent_mesh(110.0), _mat(M_CRESCENT, col2, col))
-			cr2.name = "Cres2"
-			(cr2.material_override as ShaderMaterial).set_shader_parameter("progress", 1.0)
-			cr2.position = Vector3(0, 0, 0.12)
-			cr2.scale = Vector3.ONE * 0.75
-			n.add_child(cr2)
-			var g := _mi(_quad_mesh(), _mat(M_ORB, col, col2, true))
-			g.name = "Glow"
-			g.position = Vector3(0, 0, -0.55)
-			g.scale = Vector3.ONE * 0.55
-			n.add_child(g)
-			for i in 3:
-				var tr := _mi(_ribbon_mesh(), _mat(M_COMET, col, Color("3a1a2a")))
-				tr.name = "Tail%d" % i
-				tr.position = Vector3((i - 1) * 0.32, 0.15 * (1 - absi(i - 1)), 0.1)
-				tr.scale = Vector3(0.28, 0.28, 1.6)
-				n.add_child(tr)
-			return n
+		"skull": return _skull_node(col, col2)
 	return Node3D.new()
+
+## The Flame Skull: a wide crescent of fire lying round his front (it reads from above), a hotter inner
+## crescent, a glow at the brow and ember tails streaming back.
+func _skull_node(col: Color, col2: Color) -> Node3D:
+	var n := Node3D.new()
+	var cr := _mi(_crescent_mesh(150.0), _mat(M_CRESCENT, col, Color("8a1a10")))
+	cr.name = "Cres"
+	_param(cr.material_override, "progress", 1.0)
+	n.add_child(cr)
+	var cr2 := _mi(_crescent_mesh(110.0), _mat(M_CRESCENT, col2, col))
+	cr2.name = "Cres2"
+	_param(cr2.material_override, "progress", 1.0)
+	cr2.position = Vector3(0, 0.05, 0.1)
+	cr2.scale = Vector3.ONE * 0.78
+	n.add_child(cr2)
+	var g := _mi(_quad_mesh(), _mat(M_ORB, col, col2, true))
+	g.name = "Glow"
+	g.position = Vector3(0, 0.1, -0.7)
+	g.scale = Vector3.ONE * 0.5
+	g.sorting_offset = 0.2
+	n.add_child(g)
+	for i in 3:
+		var tr := _mi(_ribbon_mesh(), _mat(M_COMET, col, Color("3a1a2a")))
+		tr.name = "Tail%d" % i
+		tr.position = Vector3((i - 1) * 0.45, 0.1 * (1 - absi(i - 1)), 0.0)
+		tr.scale = Vector3(0.32, 0.32, 2.5)
+		n.add_child(tr)
+	return n
 
 ## Shows an immediate look this step. `basis` orients it (flat looks lie on XZ), scl scales it.
 func place(
@@ -407,14 +453,14 @@ func place(
 	var n: Node3D = e["node"]
 	n.visible = true
 	n.global_position = at
-	n.rotation = Vector3(0, yaw, 0)
+	n.rotation = Vector3(ANCHOR_LEAN if kind == "anchor" else 0.0, yaw, 0)
 	n.scale = Vector3.ONE * scl
 	if n is MeshInstance3D:
 		var mt := (n as MeshInstance3D).material_override as ShaderMaterial
-		mt.set_shader_parameter("color", col)
-		mt.set_shader_parameter("color2", col2)
-		mt.set_shader_parameter("strength", strength)
-		mt.set_shader_parameter("life", 0.0)
+		_param(mt, "color", col)
+		_param(mt, "color2", col2)
+		_param(mt, "strength", strength)
+		_param(mt, "life", 0.0)
 	return n
 
 func unplace(id: String) -> void:
@@ -429,27 +475,31 @@ func shown(id: String) -> bool:
 # ------------------------------------------------------------------ projectile looks
 func _build_rider(kind: String, col: Color, col2: Color) -> Node3D:
 	var n := Node3D.new()
+	var tail_col := col2
 	match kind:
 		"cinder":
-			# Cinder Shot: a red-pink fireball with a yellow core inside a cool violet halo, a smoky comet tail
-			n.add_child(_rider_part("Halo", Color("6a5aff"), Color(0, 0, 0, 1), 0.85))
-			n.add_child(_rider_part("Head", col, col2, 0.55))
+			# Cinder Shot: a red-pink fireball with a yellow core inside a violet halo, a dark smoke tail
+			n.add_child(_rider_part("Halo", CINDER_HALO, CINDER_HALO, 0.95, 0.6))
+			n.add_child(_rider_part("Head", col, col2, 0.5, 1.0))
+			tail_col = Color(Color("3a2a3a"), 0.7)
 		"slug":
-			n.add_child(_rider_part("Head", col, col2, 0.2))
+			n.add_child(_rider_part("Head", col, col2, 0.3, 1.0))
 		"orb":
 			# Brass Broadside: a big glowing teardrop, a soft halo of the wave's colour round a hot core
-			n.add_child(_rider_part("Halo", col, Color(0, 0, 0, 1), 1.25))
-			n.add_child(_rider_part("Head", col2, col, 0.7))
-	var tail_col := Color("3a2a3a") if kind == "cinder" else col2
+			n.add_child(_rider_part("Halo", col, col, 1.25, 0.6))
+			n.add_child(_rider_part("Head", col2, col, 0.7, 1.0))
 	var tr := _mi(_ribbon_mesh(), _mat(M_COMET, col, tail_col))
 	tr.name = "Trail"
 	n.add_child(tr)
 	return n
 
-func _rider_part(part: String, col: Color, col2: Color, scl: float) -> MeshInstance3D:
+## One camera-facing part of a projectile look; the head draws over the halo.
+func _rider_part(part: String, col: Color, col2: Color, scl: float, cover: float) -> MeshInstance3D:
 	var mi := _mi(_quad_mesh(), _mat(M_ORB, col, col2, true))
+	_param(mi.material_override, "strength", cover)
 	mi.name = part
 	mi.scale = Vector3.ONE * scl
+	if part == "Head": mi.sorting_offset = 0.1
 	return mi
 
 ## Rides a look on a shot (match.gd's shot dictionary) until it ends. The plain shot node is handed
@@ -461,10 +511,13 @@ func ride(
 	for c in n.get_children():
 		var mt := (c as MeshInstance3D).material_override as ShaderMaterial
 		if c.name == "Head":
-			mt.set_shader_parameter("color", col2 if kind == "orb" else col)
-			mt.set_shader_parameter("color2", col if kind == "orb" else col2)
-		if c.name == "Trail" or (c.name == "Halo" and kind == "orb"):
-			mt.set_shader_parameter("color", col)
+			_param(mt, "color", col2 if kind == "orb" else col)
+			_param(mt, "color2", col if kind == "orb" else col2)
+		if c.name == "Trail":
+			_param(mt, "color", col)
+		if c.name == "Halo" and kind == "orb":
+			_param(mt, "color", col)
+			_param(mt, "color2", col)
 	var sn = sd.get("node")
 	if sn is Node3D and is_instance_valid(sn):
 		(sn as Node3D).visible = false
@@ -485,7 +538,7 @@ func _pose(n: Node3D, at: Vector3, vel: Vector2, trail: float, width: float) -> 
 		tr.scale = Vector3(width, width, trail * sp)
 
 ## The braided Grapnel rope from a to b this step (seen through walls). Stop calling and it goes.
-func rope(id: String, a: Vector3, b: Vector3, col: Color, thick := 0.22) -> void:
+func rope(id: String, a: Vector3, b: Vector3, col: Color, thick := 0.32) -> void:
 	var e: Dictionary = ropes.get(id, {})
 	if e.is_empty() or not is_instance_valid(e["node"]):
 		var im := ImmediateMesh.new()
@@ -501,7 +554,7 @@ func rope(id: String, a: Vector3, b: Vector3, col: Color, thick := 0.22) -> void
 	var mi2: MeshInstance3D = e["node"]
 	mi2.visible = true
 	mi2.global_transform = Transform3D.IDENTITY
-	(mi2.material_override as ShaderMaterial).set_shader_parameter("color", col)
+	_param(mi2.material_override, "color", col)
 	var im2: ImmediateMesh = e["mesh"]
 	im2.clear_surfaces()
 	var length := a.distance_to(b)
@@ -516,6 +569,7 @@ func rope(id: String, a: Vector3, b: Vector3, col: Color, thick := 0.22) -> void
 	var w := thick * 0.42
 	for s in 3:
 		im2.surface_begin(Mesh.PRIMITIVE_TRIANGLE_STRIP)
+		im2.surface_set_color(ROPE_DARK if s == 1 else Color.WHITE)
 		for i in n + 1:
 			var k := float(i) / n
 			var ph: float = k * length * 4.2 + TAU * s / 3.0 - float(m.time) * 3.0
@@ -550,6 +604,18 @@ func track() -> void:
 		r["last"] = sd["pos"]
 
 # ------------------------------------------------------------------ per frame
+## The falling anchor: an accelerating drop, a squash as it bites into the ground, planted, then faded.
+func _pose_anchor(e: Dictionary, n: Node3D) -> void:
+	var t := float(e["t"])
+	var fall := float(e["fall"])
+	var s0: Vector3 = e["s0"]
+	var drop := clampf(t / fall, 0.0, 1.0) if fall > 0.0 else 1.0
+	n.global_position = (e["at"] as Vector3) + Vector3(0, ANCHOR_DROP * s0.y * (1.0 - drop * drop), 0)
+	var since := t - fall
+	var squash := 1.0 + 0.25 * (1.0 - clampf(since / 0.15, 0.0, 1.0)) if since >= 0.0 else 1.0
+	n.scale = s0 * Vector3(squash, 1.0 / squash, squash)
+	_param(e["mat"], "fade", 1.0 - clampf((since - ANCHOR_HOLD) / ANCHOR_FADE, 0.0, 1.0))
+
 func _alive(sd: Dictionary) -> bool:
 	for s in m.shots:
 		if is_same(s, sd): return true
@@ -566,14 +632,10 @@ func _process(delta: float) -> void:
 		var mt: ShaderMaterial = e["mat"]
 		match String(e["kind"]):
 			"anchor":
-				var fall := clampf(u / 0.35, 0.0, 1.0)
-				n.global_position = (e["at"] as Vector3) + Vector3(0, 3.2 * (1.0 - fall * fall), 0)
-				var sq := 1.0 + (0.25 * (1.0 - clampf((u - 0.35) / 0.2, 0.0, 1.0)) if u >= 0.35 else 0.0)
-				n.scale = (e["s0"] as Vector3) * Vector3(sq, 1.0 / sq, sq)
-				mt.set_shader_parameter("color", Color(e["col"], 0.7 * (1.0 - smoothstep(0.6, 1.0, u))))
+				_pose_anchor(e, n)
 			_:
-				mt.set_shader_parameter("life", u)
-				if e.get("sweep", false): mt.set_shader_parameter("progress", minf(1.0, u * 1.8))
+				_param(mt, "life", u)
+				if e.get("sweep", false): _param(mt, "progress", minf(1.0, u * 1.8))
 				if e.has("grow"): n.scale = (e["s0"] as Vector3) * (1.0 + float(e["grow"]) * u)
 		if u >= 1.0:
 			n.visible = false

@@ -21,6 +21,13 @@ const BOLT_COL := Color("ff4a6a")      # Cinder Shot's red-pink body
 const BOLT_CORE := Color("ffe070")
 const SKULL_COL := Color("ff6a2a")
 const PIP_COL := Color("ff9a3a")
+const PILOT_CORE := Color("c8f8ff")
+const SHIELD_COL := Color("ff5a1a")    # the cloak's fire shield: a deep orange that holds on yellow grass
+const RAM_FRONT := 0.3                 # share of the ram spent at its burst speed, then it slows
+const RAM_FRONT_K := 1.4               # the burst speed against the average (front-loaded, hero-ref)
+const RAM_BACK_K := 0.85
+const EMBER_EVERY := 0.035             # s between the ember puffs a ram or hop leaves behind
+const SKULL_TILT := 0.6                # rad the skull's front edge lifts toward the camera
 const NOZZLE := Vector3(1.3, 0.9, 0.15)  # the nozzle's tip from the feet in the aim pose: forward, up, right (m)
 
 var chars := {}                 # foe id -> {e, n, t}
@@ -33,6 +40,7 @@ var after_t := 0.0              # the slow after letting go
 var relight_t := 0.0            # the lance can't relight until this runs out (0.35s after a release)
 var was_held := false
 var ember_t := 0.0
+var trail_t := 0.0              # the next dash after-image puff
 var cloak_t := 0.0              # hold: the Furnace Cloak's 0.2s ring before the blast
 var bash := {}                  # hold: the Soot Ram under way {t, dir, hit}
 var aiming := false             # hold: Cinder Shot held (the lane shows)
@@ -123,13 +131,17 @@ func _ignite(f: Ent, lvl: int, was: int) -> void:
 	var col := res_col()
 	if lvl == 2 and was < 2:
 		payoff_fx(f.pos, "FLASHOVER", Color("ffe0a0"), "lw_blaze", h.aim_dir(), f)
-		fx.sunburst(f.pos + Vector3(0, 1.0, 0), 1.6, Color("ff7a2a"), Color("fff0b0"), 0.35, true)
-		if not was_held: play("lw_stoke")
+		fx.sunburst(f.pos + Vector3(0, 1.0, 0), 1.6, Color("ff5a1a"), Color("ffd060"), 0.35, true)
+		_stoke_pose()
 	elif was == 0:
 		m.fx.word(f.pos + Vector3(0, 2.3, 0), "ABLAZE", col, false)
 		m.fx.burst(f.pos + Vector3(0, 1.0, 0), col, 22, 4.0, 0.5, -3.0, 1.3)
 		m.sfx("as_ignite", f.pos, -3.0, 1.0)
 		net_ring(f.pos, 1.2, col)
+
+## The Flashover fist pump; mid-roar the nozzle stays on the foe and only the off arm and the body move.
+func _stoke_pose() -> void:
+	play("lw_stoke_lance" if was_held else "lw_stoke")
 
 func _refund(slot: String) -> void:
 	if rank("sec" if slot == "rmb" else "kin") < 3:
@@ -143,7 +155,7 @@ func on_knock(t: Hunter, mine: bool) -> void:
 		return
 	h.heal(h.max_hp * float(rd()["heal_knock"]))
 	m.fx.burst(h.pos + Vector3(0, 1.0, 0), Color("7fe08a"), 14, 2.5, 0.5, -2.0)
-	if not was_held: play("lw_stoke")
+	_stoke_pose()
 	if h.dashes < h.max_dashes():
 		h.dashes = minf(h.max_dashes(), floorf(h.dashes) + 1.0)     # a knock gives back one ram charge, never more
 		st["knock_charges"] = int(st.get("knock_charges", 0)) + 1
@@ -183,16 +195,17 @@ func _tick(dt: float) -> void:
 	if not bash.is_empty(): _tick_bash(dt)
 	if not drags.is_empty(): _tick_drags(dt)
 	jet.tick(dt)
+	KMovesPair.air_moves(self, "lw_jump", "lw_land")
 	if h.shield_t > 0.0 and h.shield > 0.5 and st.get("shield_on", false):
 		if tells_visible():
 			# the Furnace Cloak's shield: a swirling ring of fire hugging Linwick while it holds (about 0.8 bh)
 			fx.place(
-				"swirl%d" % h.get_instance_id(), "swirl", h.pos + Vector3(0, 0.55, 0), Color("ffb040"), Color("fff0b0"),
+				"swirl%d" % h.get_instance_id(), "swirl", h.pos + Vector3(0, 0.55, 0), SHIELD_COL, Color("ffc040"),
 				1.8, m.time * 2.0, 1.0
 			)
 			fx.place(
-				"swirl2%d" % h.get_instance_id(), "swirl", h.pos + Vector3(0, 1.25, 0), Color("ff7a2a"),
-				Color("ffd890"), 1.45, -m.time * 2.6, 0.7
+				"swirl2%d" % h.get_instance_id(), "swirl", h.pos + Vector3(0, 1.25, 0), Color("c8301a"),
+				Color("ff9a3a"), 1.45, -m.time * 2.6, 0.85
 			)
 	else:
 		st["shield_on"] = false
@@ -210,7 +223,7 @@ func _tick_tells(dt: float) -> void:
 	if vis and h.wid == "flamethrower" and not h.downed and not KinMerge.active(h):
 		var fl := 0.85 + 0.15 * sin(m.time * 37.0)
 		var big := 1.0 + (1.2 if was_held and spool < float(lmbd()["spool"]) else 0.0)
-		fx.place("pilot%d" % h.get_instance_id(), "pilot", nozzle(), FLAME_CYAN, Color("e8fbff"), 0.2 * fl * big)
+		fx.place("pilot%d" % h.get_instance_id(), "pilot", nozzle(), FLAME_CYAN, PILOT_CORE, 0.4 * fl * big)
 	ember_t -= dt
 	if ember_t <= 0.0:
 		ember_t = 0.35
@@ -291,7 +304,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 	if not was_held:
 		play("as_lance")
 		m.sfx("lw_pilot", h.pos, -3.0, 1.0)
-		fx.orb(nozzle(), FLAME_CYAN, Color.WHITE, 0.55, float(ld["spool"]))      # the pilot flares cyan before the roar
+		fx.orb(nozzle(), FLAME_CYAN, PILOT_CORE, 0.8, float(ld["spool"]))      # the pilot flares cyan before the roar
 	was_held = true
 	h.idle_fire = 0.0              # firing: no auto-reload mid-roar
 	spool += dt
@@ -392,8 +405,8 @@ func _bolt_end(at: Vector3, expired: bool) -> void:
 	if not expired:
 		return
 	fizzles += 1
-	fx.wave(ground(at), 0.9, Color("bfe0ff"), 0.3, Color("6a5aff"))
-	fx.orb(at, Color("8ab0ff"), Color.WHITE, 0.5, 0.15)
+	fx.wave(ground(at), 0.9, LDFx.CINDER_HALO, 0.3, Color(Color("8ab0ff"), 0.6))
+	fx.orb(at, LDFx.CINDER_HALO, Color("bfe0ff"), 0.5, 0.15)
 	m.sfx("lw_bolt_hit", at, -10.0, 1.5)
 
 func _cinder_hit(f: Ent) -> void:
@@ -403,6 +416,7 @@ func _cinder_hit(f: Ent) -> void:
 	var cur := burning(f)
 	# the impact: a red flash and an ember shower (sheet 0076-0079)
 	fx.orb(f.pos + Vector3(0, 1.0, 0), Color("ff3a3a"), BOLT_CORE, 1.4, 0.18)
+	fx.sunburst(f.pos + Vector3(0, 1.0, 0), 1.3, Color("e0202a"), BOLT_CORE, 0.22, true)
 	fx.embers(f.pos, 0.6)
 	m.sfx("lw_bolt_hit", f.pos, -1.0, 1.0)
 	Feel.hitstop(m, h, f, float(rdf["dmg"]), {})
@@ -448,23 +462,19 @@ func on_dash(use_ex: bool) -> bool:
 	play("as_leap")
 	h.glide_cd = maxf(h.glide_cd, t + 0.35)
 	m.sfx("lw_bash", h.pos, -2.0, 1.0)
-	bash = {"t": t, "dir": dir, "hit": false}
+	bash = {"t": t, "t0": t, "speed": float(dd["dist"]) / t, "dir": dir, "hit": false}
 	return true
 
 ## While the ram flies: the flame skull wraps his front and ember tails stream behind; the first foe it
 ## meets stops the dash with the impact (sheet gap 2).
 func _tick_bash(dt: float) -> void:
 	var dir: Vector2 = bash["dir"]
+	if bash.has("speed") and not bash.get("hit", false) and h.roll_t > 0.0:
+		var into := float(bash["t0"]) - float(bash["t"])
+		h.roll_speed = float(bash["speed"]) * (RAM_FRONT_K if into < RAM_FRONT * float(bash["t0"]) else RAM_BACK_K)
 	bash["t"] = float(bash["t"]) - dt
 	if tells_visible():
-		var f3 := Vector3(dir.x, 0, dir.y)
-		if bash.get("hop", false):
-			fx.orb(h.pos + Vector3(0, 0.7, 0) - f3 * 0.4, Color("ff8a3a"), Color("ffe0a0"), 0.5, 0.25)
-		elif not bash.get("hit", false):
-			fx.place(
-				"skull%d" % h.get_instance_id(), "skull", h.pos + Vector3(0, 0.95, 0) + f3 * 0.35, SKULL_COL,
-				Color("ffe08a"), 1.0, atan2(-dir.x, -dir.y)
-			)
+		_ram_looks(dir, dt)
 	if not bash.get("hit", true):
 		for f in m.foes_of(h.team):
 			if not f.hittable() or absf(f.pos.y - h.pos.y) > 1.8:
@@ -478,6 +488,23 @@ func _tick_bash(dt: float) -> void:
 		bash = {}
 		if not b.get("hop", false) and not b.get("hit", false):
 			m.fx.dust(h.pos, 6)
+
+## The ram's looks: the flame skull round his front (flat, so it reads from above) and Linwick's own
+## after-images, ember puffs that burn out through the fire ramp behind him (the hop leaves them too).
+func _ram_looks(dir: Vector2, dt: float) -> void:
+	var f3 := Vector3(dir.x, 0, dir.y)
+	if not bash.get("hop", false) and not bash.get("hit", false):
+		var skull := fx.place(
+			"skull%d" % h.get_instance_id(), "skull", h.pos + Vector3(0, 0.95, 0) - f3 * 0.5, SKULL_COL,
+			Color("ffe08a"), 1.6, atan2(-dir.x, -dir.y)
+		)
+		skull.rotate_object_local(Vector3.RIGHT, SKULL_TILT)
+	trail_t -= dt
+	if trail_t <= 0.0:
+		trail_t = EMBER_EVERY
+		fx.puff(h.pos + Vector3(0, 0.9, 0) - f3 * 0.3, LDFx.M_FLAME, SKULL_COL, SKULL_COL, 0.75, 0.35)
+
+func own_dash_trail() -> bool: return true
 
 func _bash_impact(f: Ent) -> void:
 	var dd := dash_def()
@@ -497,7 +524,7 @@ func _bash_impact(f: Ent) -> void:
 		stoke(f)
 	var at := (h.pos + f.pos) * 0.5 + Vector3(0, 1.0, 0)
 	fx.sunburst(at, 2.2, Color("ff4a2a"), Color("ffe0a0"), 0.3, true)
-	fx.orb(at, Color("ff6a2a"), Color.WHITE, 1.8, 0.14)
+	fx.orb(at, Color("ff6a2a"), Color("ffe0a0"), 1.8, 0.14)
 	m.fx.burst(at, Color("ff5a3a"), 26, 6.0, 0.45, 6.0, 1.3)
 	m.sfx("lw_bash_hit", f.pos, 0.0, 1.0)
 	Feel.hitstop(m, h, f, 30.0, {"melee": true, "heavy": true})
@@ -529,7 +556,7 @@ func _cloak_blast() -> void:
 	var stoked := false
 	var k := 1.5 if rank("kin") >= 3 else 1.0
 	var r := float(ed["radius"])
-	fx.sunburst(h.pos, r * 1.05, Color("ffb040"), Color("fff4c0"), 0.4)
+	fx.sunburst(h.pos, r * 1.05, Color("ff5a1a"), Color("ffd060"), 0.4)
 	fx.scorch(h.pos, r * 0.75, 1.6)
 	fx.wave(h.pos, r, col, 0.3)
 	m.fx.burst(h.pos + Vector3(0, 1.0, 0), col, 30, 6.0, 0.5, -2.0, 1.4)

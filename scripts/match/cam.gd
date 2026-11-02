@@ -29,6 +29,7 @@ var user_zoom := 1.0           # the mouse wheel in the practice areas (Practice
 var lead := 1.0
 var kick := 0.0               # a quick zoom-in punch on big moments
 var pull := 0.0               # (movefeel) a quick pull-back (a dash into a glide), the opposite of kick
+var trail_t := 0.0            # s left of a slower follow after a blink-fast dash, so it reads as a jump cut
 var top := 0.0                # 0 = the usual angle, 1 = looking straight down (the opening drop)
 var top_to := 0.0
 var pitch := deg_to_rad(57.0)  # how steeply the camera looks down
@@ -55,6 +56,7 @@ var base := Vector3.ZERO      # the followed point, before the cursor pan
 ## (movefeel) Follow: tight across (FOLLOW_XZ, ~0.07s) so the hunter stays centred [footage] and
 ## stops dead with you; softer up and down so falls and glides don't jolt the view. While gliding
 ## Match sets lead_vel (your flat velocity) and the view leans a little ahead of you.
+const TRAIL_XZ := 7.0         # 1/s: the follow while trailing a blink dash (it settles in about 0.4s)
 const FOLLOW_XZ := 15.0       # 1/s (was 8: ~0.65m behind you at a run, drifting on after a stop)
 const FOLLOW_Y := 3.5
 const GLIDE_LEAD := 0.2       # seconds of glide velocity to lean ahead...
@@ -107,6 +109,10 @@ func snap(p: Vector3) -> void:
 func punch(a: float) -> void:
 	kick = maxf(kick, a)
 
+## The camera lags behind for `secs` (a near-blink dash) and then catches up.
+func trail(secs: float) -> void:
+	trail_t = maxf(trail_t, secs)
+
 ## A brief pull-back that eases in fast and settles over ~0.6s (speed bursts).
 func pull_back(a: float) -> void:
 	pull = maxf(pull, a)
@@ -155,7 +161,9 @@ func follow(p: Vector3, delta: float, mouse_lead := true) -> void:
 		want.y = p.y      # below island level: the view goes down with you, so you stay centred and the same size [reference footage]
 	# across follows briskly; up and down follows softer, so falls and glides don't jolt the view
 	# normal play: movefeel's tight follow; recording mode: its own slower, smoother rates
-	var kxz := 1.0 - exp(-(float(rr[0]) if Record.clean() else FOLLOW_XZ) * delta)
+	var rate_xz := TRAIL_XZ if trail_t > 0.0 else FOLLOW_XZ
+	trail_t = maxf(0.0, trail_t - delta)
+	var kxz := 1.0 - exp(-(float(rr[0]) if Record.clean() else rate_xz) * delta)
 	var ky := 1.0 - exp(-(float(rr[1]) if Record.clean() else FOLLOW_Y) * delta)
 	base = Vector3(lerpf(base.x, want.x, kxz), lerpf(base.y, want.y, ky), lerpf(base.z, want.z, kxz))
 	lead_off = lead_off.lerp((lead_vel * GLIDE_LEAD).limit_length(GLIDE_LEAD_MAX), 1.0 - exp(-GLIDE_LEAD_EASE * delta))
