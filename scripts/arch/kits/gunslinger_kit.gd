@@ -350,7 +350,7 @@ func _cone(at: Vector3, out: Vector2, bd: Dictionary, wall: bool) -> void:
 		var to := Vector2(f.pos.x - at.x, f.pos.z - at.z)
 		var away := (out * 0.6 + to.normalized() * 0.4).normalized() if to.length() > 0.2 else out
 		var o := {"src": "abil", "ab": "utility", "tags": ["utility", "burr"], "kb": away * float(bd["push"]), "lift": 2.0}
-		f.hurt(float(bd["cone_dmg"]) * power("sec") * m.dmg_mult(h), h, o)
+		f.hurt(float(bd["cone_dmg"]) * power("sec"), h, o)
 		KitStatus.apply(f, "rat", float(bd["cone_rattle"]))         # Dazed: the training dummy too
 		fx().swirl(f, Color("ff4fb0"), HOT, float(bd["cone_rattle"]))
 		if f is Hunter and terrain_behind(f, away, 2.4):
@@ -429,7 +429,7 @@ func _fire_needle() -> void:
 		if m.cam: m.cam.add_trauma(0.18)
 	h.impulse(-d * float(ed.get("recoil", 6.0)))                  # the recoil shoves him back a step
 	var hits := 0
-	var dmg0: float = float(ed["dmg"]) * power("kin") * m.dmg_mult(h)
+	var dmg0: float = float(ed["dmg"]) * power("kin")
 	for f in m.foes_of(h.team):
 		if not f.hittable(): continue
 		var v := Vector2(f.pos.x - h.pos.x, f.pos.z - h.pos.z)

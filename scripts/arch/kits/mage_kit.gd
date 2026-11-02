@@ -328,7 +328,7 @@ func _wire_hit(f: Ent, dmg: float) -> void:
 	if not is_instance_valid(f) or f.dead: return
 	var was_live := live(f)
 	if was_live: dmg *= float(dash_def()["full_mult"])     # through a fully charged foe: double
-	f.hurt(dmg * m.dmg_mult(h) * power("dash"), h, {"src": "abil", "ab": "dodge", "tags": ["dodge"]})
+	f.hurt(dmg * power("dash"), h, {"src": "abil", "ab": "dodge", "tags": ["dodge"]})
 	m.fx.burst(f.pos + Vector3(0, 0.9, 0), res_col(), 10, 3.5, 0.3)
 	if was_live and is_instance_valid(f) and not f.dead:
 		_blowout(f)

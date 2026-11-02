@@ -19,7 +19,9 @@ func run(main_node: Node, who: String) -> void:
 	main = main_node
 	ac = load("res://tools/archetype_check.gd").new()
 	ac.main = main_node
-	if who == "mage": await _mage()
+	if who == "mage":
+		await _mage()
+		await _growth()
 	else: await _gunslinger()
 	print("HCHECK DONE %s, %d checks, failures: %d" % [who, n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
@@ -50,6 +52,24 @@ func _dash(m: Match, P: Hunter, hold_s: float, each := Callable()) -> void:
 		P.inp["dash_down"] = true
 		if each.is_valid(): each.call())
 	P.inp["dash_down"] = false
+
+## Wirerun's hit on the first foe with the hunter at level `lvl`.
+func _wire(lvl: int) -> float:
+	var r: Array = ac.setup("mage", 4.0, "", true)
+	var m: Match = r[0]; var P: Hunter = r[1]; var T: Hunter = r[2]
+	var K: MageKit = P.ak
+	P.lvl = lvl
+	ac.fresh(T)
+	K._wire_hit(T, 10.0)
+	var d: float = ac.dmg(T)
+	await ac.done(m)
+	return d
+
+## Ability damage reads ArchKit.power() once, so quiet level growth (LevelGrowth.ap) raises it.
+func _growth() -> void:
+	var d1: float = await _wire(1)
+	var d10: float = await _wire(10)
+	ok("growth: Wirerun's hit grows with level (LevelGrowth.ap 1.0 -> %.2f)" % (1.0 + LevelGrowth.ap_pct(10)), d1 > 4.0 and absf(d10 / d1 - (1.0 + LevelGrowth.ap_pct(10))) < 0.01, "L1 %.2f L10 %.2f" % [d1, d10])
 
 # ------------------------------------------------------------------ Vireo
 func _mage() -> void:
