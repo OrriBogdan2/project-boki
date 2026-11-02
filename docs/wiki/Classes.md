@@ -52,11 +52,11 @@ your class in the Expedition menu, and you can try every class against dummies i
 | Class | Weight | Weapons | Passive | Dash | RMB | E | R |
 |---|---|---|---|---|---|---|---|
 | [Thief](Class-Thief.md) | Light | Twin Blades, SMG | Marks | Vault | Bola | Shadow Knife | Jackpot |
-| [Archer](Class-Archer.md) | Light | Longbow, Sniper | Focus | Grapple Arrow | Snare | Arrow Rain | Great Arrows |
+| [Archer](Class-Archer.md) | Light | Longbow, Sniper | Focus | Grapple Arrow | Snare | Hail Wall | Merge |
 | [Mage](Class-Mage.md) | Medium | Spellstaff, Longsword | Runes and Heat | Blink | Guided Bolt | Hex | Encore |
 | [Gunslinger](Class-Gunslinger.md) | Medium | Rifle, Burst Rifle | Six Chambers | Slide Reload | Trick Shot | Quickdraw | Last Round |
 | [Juggernaut](Class-Juggernaut.md) | Heavy | Greatsword, Shotgun, Minigun | Rage | Rampage | Smash | Warchain | Doomfall |
-| [Bulwark](Class-Bulwark.md) | Heavy | Tower Shield & Mace, Minigun | Guard | Whirl | Shield | Mending Ground | Fissure |
+| [Bulwark](Class-Bulwark.md) | Heavy | Tower Shield & Mace, Minigun | Guard | Whirl | Shield | Mending Ground | Merge |
 
 ### Weight classes
 
