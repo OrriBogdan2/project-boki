@@ -45,18 +45,17 @@ func _ready() -> void:
 	kick.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(kick)
 	# the ring of light, with the class standing in it
-	var stage := Control.new(); stage.custom_minimum_size = Vector2(340, 300)
+	var stage := Control.new(); stage.custom_minimum_size = Vector2(340, 310)
 	stage.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	v.add_child(stage)
 	glow = Control.new(); glow.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	glow.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	glow.draw.connect(_draw_glow.bind(col))
 	stage.add_child(glow)
-	var tex := ClassCard.portrait(id, 250.0)
-	(tex.get_child(0) as SubViewport).size = Vector2i(320, 320)
+	var tex := ClassCard.portrait(id, 280.0, true)
 	tex.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
-	tex.offset_left = -125; tex.offset_right = 125; tex.offset_top = -125; tex.offset_bottom = 125
-	tex.pivot_offset = Vector2(125, 125)
+	tex.offset_left = -140; tex.offset_right = 140; tex.offset_top = -140; tex.offset_bottom = 140
+	tex.pivot_offset = Vector2(140, 140)
 	tex.scale = Vector2(0.2, 0.2); tex.modulate.a = 0.0
 	stage.add_child(tex)
 	var nm := UI.title(Arch.name_of(id), 54, col)

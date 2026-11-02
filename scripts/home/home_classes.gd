@@ -8,8 +8,11 @@ const RANK := ["open", "progress", "locked"]
 
 static func open(home: Node) -> void:
 	var v: VBoxContainer = home._new_panel("Classes", 900, true)
-	UI.subtitle(v, "Every class you can play. New ones open as you play: finish a class's goal and reach its account level. Expeditions earn account XP, most for getting out, knocking hunters down and felling bosses.")
+	UI.subtitle(v, "New classes open as you play: finish a goal and reach its account level.")
 	v.add_child(_account_row())
+	var xp_note := UI.para("Expeditions earn account XP: most for getting out, then knocking hunters down and felling bosses.", 12, UI.FAINT)
+	xp_note.custom_minimum_size.x = 600
+	v.add_child(xp_note)
 	if ClassUnlock.all_open() and not Game.modding():
 		v.add_child(UI.para("Every class is open on this save.", 13, UI.GOOD))
 	var grid := GridContainer.new(); grid.columns = 3

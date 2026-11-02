@@ -42,6 +42,9 @@ func run(m: Node) -> void:
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--shots-dir="): shots = a.substr(12)
 	var tree := main.get_tree()
+	if shots != "" and main.fade != null:
+		main.fade.reveal(0.05)      # (the boot splash would cover the screenshots)
+		for i in 20: await tree.process_frame
 	_rules()
 	_starter_pick_rules()
 	_progress_and_unlock()
@@ -216,6 +219,7 @@ func _reveal(tree: SceneTree) -> void:
 			if nd is Label and (nd as Label).text == Arch.name_of("gunslinger"): named = true
 			st.append_array(nd.get_children())
 	ok(named, "it shows the class's name")
+	if shots != "": await tree.create_timer(1.6).timeout      # (the ring and the text ease in)
 	await shot(tree, "unlock_reveal")
 	var seen_before := (ClassUnlock.state()["seen"] as Array).size()
 	if rv != null: rv._finish(false)
@@ -308,6 +312,12 @@ func _home(tree: SceneTree) -> void:
 	ok(by["thief"] == "open" and by["gunslinger"] == "open" and by["juggernaut"] == "progress" and by["tender"] == "progress" or by["tender"] == "locked", "Thief and Gunslinger open, Juggernaut in progress (1/2 knocks)")
 	ok(hm.panel_open == "Classes" and _any_text(hm.panel_host, "Account level"), "it shows the account level")
 	await shot(tree, "classes_screen")
+	var csc: Node = cg
+	while csc != null and not (csc is ScrollContainer): csc = csc.get_parent()
+	if shots != "" and csc != null:
+		(csc as ScrollContainer).scroll_vertical = 100000
+		await shot(tree, "classes_screen_locked")
+		(csc as ScrollContainer).scroll_vertical = 0
 	# the expedition panel: locked classes can't be taken out
 	hm._open_expedition()
 	await tree.process_frame

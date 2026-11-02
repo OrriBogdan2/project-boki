@@ -404,25 +404,17 @@ func _show_class_pick(on := "") -> void:
 	if on == "" or not ClassUnlock.starters().has(on):
 		on = String(ClassUnlock.starters()[0])
 	Save.d["arch"] = on; Save.d["cls"] = Arch.weight(on); Save.d["weapon"] = Arch.signature(on)
-	if look.is_empty():
-		look = Models.clean_look(Save.d.get("look", {}))
 	title.text = "Choose your class"
 	if sub_lbl: sub_lbl.text = "Who you play in a match. Your Boki comes next."
 	_top_over(0.5)
 	_clear_bottom()
-	for e in eggs: (e["holder"] as Node3D).visible = false
-	_rebuild_preview()
-	preview.position = Vector3(0.0, 0, 1.6)
-	cam_to = Vector3(0, 1.7, 5.2)
-	look_at_t = Vector3(0.0, 1.0, 1.6)
+	look_at_t = Vector3(0, 0.25, 0.5)
+	cam_to = Vector3(-3.5, 4.2, 9.0)
 	bottom.add_child(ClassPick.row(on, func(id): Sfx.play("hover", null, -6.0); _show_class_pick(id)))
 	var go := UI.primary("Start as %s" % Arch.name_of(on), func():
 		ClassUnlock.choose_starter(on)
 		Save.save_game()
 		Sfx.play("click")
-		if preview: preview.queue_free()
-		preview = null
-		for e in eggs: (e["holder"] as Node3D).visible = true
 		if sub_lbl: sub_lbl.text = "Every Boki is different. It will remember how you treat it."
 		_end_class_pick(), 260)
 	bottom.add_child(go)

@@ -11,8 +11,9 @@ static func weight_line(id: String) -> String:
 	return "%s weight  ·  %d health  ·  %d dash%s" % [String(cd["name"]), int(cd["hp"]), int(cd["dashes"]), "es" if int(cd["dashes"]) > 1 else ""]
 
 ## The class's portrait as a TextureRect; the SubViewport that renders it is a child of the rect.
-static func portrait(id: String, px := 84.0) -> TextureRect:
-	var vp := Portraits.make(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), Save.d.get("look", {}), id)
+## `body`: the whole standing hunter (the reveal) instead of head and shoulders.
+static func portrait(id: String, px := 84.0, body := false) -> TextureRect:
+	var vp := Portraits.make(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), Save.d.get("look", {}), id, body, int(px * 2.0) if body else Portraits.SIZE)
 	var tex := TextureRect.new()
 	tex.texture = vp.get_texture()
 	tex.custom_minimum_size = Vector2(px, px)
@@ -45,8 +46,9 @@ static func goal_block(id: String, width := 190.0) -> VBoxContainer:
 
 ## A class card for the Classes screen and the starter pick. `cb` runs on click.
 ## Dim when locked; shows the goal when it is not open.
-static func make(id: String, on: bool, cb: Callable, tag := "") -> PanelContainer:
-	var open := ClassUnlock.is_open(id)
+## `starter`: the starter pick, where every card is a live choice (no lock look, no goal).
+static func make(id: String, on: bool, cb: Callable, tag := "", starter := false) -> PanelContainer:
+	var open := ClassUnlock.is_open(id) or starter
 	var card := UI.tile_card(on, cb, 10, Arch.color(id))
 	card.custom_minimum_size = Vector2(262, 0)
 	card.set_meta("arch", id)
