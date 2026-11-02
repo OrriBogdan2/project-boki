@@ -34,6 +34,13 @@ merged, then the commits below. Godot runs go through `/home/claude/gq`; my runn
 
 Merged cleanly (one trivial conflict in the `main.gd` check hooks). Standard suite 0 failures except two things that are the same on plain main: `--teammate-check` "it leads you to (or gets to) the chest and the outpost" (the tutorial now leads on shoot/kin1/throw/goexit/uplink/defend, no "chest"), and `--simtest --seed=5` ends "team wiped" (main: sim 30 s; polish: 63 s) instead of extracting. Both belong to the Boki-system merge.
 
+## After merging sync58 (e5f25ec, Net 0.10.0)
+
+- One conflict, `match.gd` `_exit_tree`: kept both `SeeThrough.off()` and main's `Capture.teardown(self)`. No shoulder-start or hold-F text in polish's files (`see_through.gd` only skips a Boki whose state is "shoulder", which stays harmless). Net.VERSION untouched, sync shape untouched (main's version kept).
+- `after_03_farm.png` not retaken: the farm Boki is Home presentation (`FARM_BOKI_SCALE`) and doesn't depend on the match start state.
+- Checks: health --strict, gen_wiki --check, --check, --polish-check, --teammate-check, --arena-check, --bot-sanity-check, --boki-system-check all 0 failures; `--simtest --seed=5` EXTRACTED (Rift Hatch, sim 227 s; the old "team wiped" is gone).
+- `--drop-check` fails one line on polish only (plain sync58 passes): `DCHECK FAIL squad bots ignore pings` (ground half; the squad bot "Graizor" got within 9.4 m of a 10.8 m ping in 6 s and replied "omw"). Same world and seed as main, but Graizor lands elsewhere ((101,152) vs main's (115,123)) because polish's `DropFamily` changes which weapons lie around and consumes the global RNG, so the bot has a longer detour to the ping spot and the 6 s window is too short. Deterministic on polish (3 runs). The bot does head for the ping (goal_kind "ping") and reply; it is the test scenario, not a stuck bot. Not fixed (main's test, `main.gd` ~3500).
+
 ## Left
 
 Nothing. Before shots are missing for items 6 (fade) and 7 (after only).
