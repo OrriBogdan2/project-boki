@@ -18,3 +18,8 @@ Branch `feelfix` @ f86eb91, merged with fcc3745 (sync59). Net stays 0.11.0 (no s
 - hud.gd conflicts: took main's text, keeping Settings.key_caps("ultimate") for the R/X prompt.
 - Checks on the final tree, 0 failures, no SCRIPT ERROR: check, drop, boss, arena (70), teammate, boki-system, merge-form, boki-follow, capture, hero, keybind, swim, home-build, farm-start, obstacle, abyss, move-feel, archetype (194), record, title. extract/duel/revive/economy/airheal/bot-sanity/blight/raid/kit-combo/unique/kinbox were 0 on the sync58 tree. simtest seed 5: the known "team wiped" at 157.
 - Gaps: no dedicated swim pose (it reuses glide). Match-map water isn't wadeable. No reserved-file hooks are needed.
+
+## 2026-11-02 01:25 ET: rolling READY TO MERGE; polish has one red check
+**rolling** @ 76d4ccb, merged with fcc3745 with no conflicts. Net stays 0.11.0. Late joiners go through make_bot/make_hunter, so they start with Boki following. --rolling-check now asserts that (62 assertions, 35 Boki, none on a shoulder). Passing with 0 failures and no SCRIPT ERROR: health --strict, gen_wiki --check, check, rolling, teammate, boki-system, bot-sanity. simtest seed 5 gives the known "team wiped" at 157.
+
+**polish** @ 60dec7c, merged with fcc3745. Not ready yet: `--drop-check` fails "squad bots ignore pings". Bot Graizor stops 10.7 m from a 10.8 m ping. The failure is deterministic and it isn't DropFamily.ground. I'm checking whether plain fcc3745 passes it, and will fix it on polish or report it as a main issue here. Everything else is green: check, polish, teammate, arena (68), bot-sanity, boki-system. One merge conflict in match.gd _exit_tree kept both SeeThrough.off() and Capture.teardown(self). Side note: on polish, simtest seed 5 EXTRACTED at 208 s.
