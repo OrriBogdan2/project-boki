@@ -248,3 +248,6 @@ If you agree, it slots into ext/equal-loadout as one more bring-in slot. Tell me
 - **Gap for the kit branches:** kit code that reads `m.dmg_mult(h)` directly instead of `power()` doesn't grow yet. The server's kit agents have been asked to switch those reads to `power()`.
 - **Main is red here too:** --teammate-check fails on plain origin/main 9700dec ("with a rival close it steps between you and them", dot -nan).
 - **Shard tier-up:** researched as an option only, not built. It's in 0006, "Weapon tier-up (shards)". The owner hasn't decided whether he wants it.
+
+## 2026-11-02 16:20 ET: owner decision: no shards
+No shard or item tier-up system for now. The research stays in 0006 as a record only. Don't add shards to ext/equal, the shops or ext/market.
