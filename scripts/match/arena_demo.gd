@@ -277,11 +277,11 @@ static func tick(A: Arena, dt: float) -> void:
 			else:
 				if int(P.ak.get("crushes")) > 0 and not A.has_meta("cr_at"): A.set_meta("cr_at", t)
 				at_t = float(A.get_meta("cr_at", 9.0)) + 0.06
-		"card", "card_juggernaut", "card_detail", "card_archer", "card_mage", "card_gunslinger", "card_bulwark":
+		"card", "card_juggernaut", "card_detail", "card_archer", "card_mage", "card_gunslinger", "card_bulwark", "card_tender", "card_rimewright":
 			if t < 0.05:
-				var ca: String = {"card_juggernaut": "juggernaut", "card_archer": "archer", "card_mage": "mage", "card_gunslinger": "gunslinger", "card_bulwark": "bulwark"}.get(w, "thief")
+				var ca: String = {"card_juggernaut": "juggernaut", "card_archer": "archer", "card_mage": "mage", "card_gunslinger": "gunslinger", "card_bulwark": "bulwark", "card_tender": "tender", "card_rimewright": "rimewright"}.get(w, "thief")
 				A.set_arch(ca)
-				A.set_kin("cindle" if ca in ["juggernaut", "mage", "bulwark"] else "puddlet")
+				A.set_kin("cindle" if ca in ["juggernaut", "mage", "bulwark", "tender"] else "puddlet")
 			if _at(t, dt, 0.3):
 				A.toggle_card()
 				if w == "card_detail":

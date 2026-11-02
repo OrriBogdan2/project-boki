@@ -9,10 +9,10 @@
 	"card": {
 		"loop": "Embers Kindle foes; a Burrseed sticks and bursts into roots. Run into a downed friend to carry them out of danger, keep the squad topped up with Hearthlight, and hop through a teammate to wind it back.",
 		"dash": "Relay Step: a short hop. Pass through a teammate and get half a dash back, and 1s off Hearthlight.",
-		"passive": "Bearer: run into a downed teammate to shoulder them (up to 2). A Bearer shield refills when you pick someone up; break it or get stunned and you drop them.",
+		"passive": "Bearer: run into a downed friend to carry up to 2, shielded. A stun or broken shield drops them.",
 		"lmb": "Lantern Crook: embers that Kindle (up to 5); wait a second and the next flies further.",
 		"rmb": "Burrseed: a slow seed that sticks to the first foe; 2s later it bursts into roots around them.",
-		"e": "Hearthlight: a ring of lantern light that heals the squad, then flares; press again to toss it onto a teammate (a downed one drinks it five times over).",
+		"e": "Hearthlight: a ring of light that heals the squad, then flares; press again to toss it to a friend.",
 		"weapons": {
 			"lantern_crook": "Embers every 0.4s; Kindled foes take more and wind your Hearthlight back."
 		}

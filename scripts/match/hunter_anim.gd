@@ -883,9 +883,6 @@ func update(dt: float, s: Dictionary) -> void:
 		cast_k = smoothstep(0.0, 0.07, cast_t) * (1.0 - smoothstep(0.32, 0.6, cast_t))
 		pitch -= cast_k * 0.18
 		yaw += cast_k * 0.25
-		var cm := CareMoves.pose(arch, cast_slot, cast_t)          # (the support pair: per-ability poses)
-		if not cm.is_empty():
-			pitch += float(cm["p"]); yaw += float(cm["y"]); roll += float(cm["r"])
 		# the archetypes' signature casts
 		match arch:
 			"thief":
@@ -1171,6 +1168,41 @@ const KMOVES := {
 		[1.6, {"y": -0.6, "fl": Vector3(-0.42, 0.1, -0.1), "hw": 1.0, "lw": 0.6, "legs": [-0.3, -0.3, 0.6, -0.8]}],
 		[1.8, {"y": 0.5, "fl": Vector3(0.1, 0.15, -0.5), "hw": 1.0, "lw": 0.5, "legs": [0.5, -0.7, -0.3, -0.3]}],
 		[2.2, {}]]},
+	# ---------------------------------------------------------------- Linnet (tender) and Tamsin (rimewright)
+	# Burrseed: wound back with the seed cupped by the ear, then a flick forward
+	"tend_seed": {"keys": [
+		[0.0, {}],
+		[0.09, {"p": 0.14, "y": -0.3, "r": -0.06, "fl": Vector3(-0.1, 0.3, 0.15), "hw": 1.0}],
+		[0.12, {"p": 0.1, "y": -0.2, "r": -0.04, "fl": Vector3(-0.1, 0.3, 0.15), "hw": 1.0}],
+		[0.17, {"p": -0.38, "y": 0.35, "r": 0.05, "fl": Vector3(0.08, 0.12, -0.52), "hw": 1.0}],
+		[0.2, {"p": -0.38, "y": 0.35, "r": 0.05, "fl": Vector3(0.08, 0.12, -0.52), "hw": 1.0}],
+		[0.4, {"p": -0.15, "y": 0.15, "fl": Vector3(0.08, 0.12, -0.52), "hw": 0.6}],
+		[0.6, {}]]},
+	# Hearthlight: a crouch to gather the light, then up with the lantern hand lifted high
+	"tend_hearth": {"keys": [
+		[0.0, {}],
+		[0.1, {"p": -0.2, "fl": Vector3(0.05, 0.0, -0.15), "hw": 1.0}],
+		[0.14, {"p": -0.2, "fl": Vector3(0.05, 0.0, -0.15), "hw": 1.0}],
+		[0.24, {"p": 0.22, "y": 0.05, "fl": Vector3(0.02, 0.58, -0.1), "hw": 1.0}],
+		[0.34, {"p": 0.22, "y": 0.05, "fl": Vector3(0.02, 0.58, -0.1), "hw": 1.0}],
+		[0.6, {}]]},
+	# Rime Javelin: shoulders wound back, then whipped through into the throw
+	"rime_javelin": {"keys": [
+		[0.0, {}],
+		[0.1, {"p": 0.08, "y": -0.55, "r": -0.1, "fl": Vector3(0.12, 0.15, 0.35), "hw": 1.0}],
+		[0.12, {"p": 0.08, "y": -0.55, "r": -0.1, "fl": Vector3(0.12, 0.15, 0.35), "hw": 1.0}],
+		[0.19, {"p": -0.3, "y": 0.65, "r": 0.1, "fl": Vector3(0.06, 0.1, -0.55), "hw": 1.0}],
+		[0.22, {"p": -0.3, "y": 0.65, "r": 0.1, "fl": Vector3(0.06, 0.1, -0.55), "hw": 1.0}],
+		[0.5, {"p": -0.05, "y": 0.1, "fl": Vector3(0.06, 0.1, -0.55), "hw": 0.5}],
+		[0.6, {}]]},
+	# Ice slam: hands together low, then both pushed out and down onto the ice
+	"rime_slam": {"keys": [
+		[0.0, {}],
+		[0.12, {"p": -0.15, "fl": Vector3(0.0, -0.1, -0.2), "hw": 1.0}],
+		[0.15, {"p": -0.15, "fl": Vector3(0.0, -0.1, -0.2), "hw": 1.0}],
+		[0.22, {"p": -0.42, "fl": Vector3(0.02, -0.12, -0.55), "hw": 1.0}],
+		[0.3, {"p": -0.42, "fl": Vector3(0.02, -0.12, -0.55), "hw": 1.0}],
+		[0.6, {}]]},
 }
 const KM_CH := ["p", "y", "r", "lift", "fx", "fz", "fy", "sq", "lw", "hw", "rw", "bw", "rad", "gp"]
 var km := {}                   # the kit move's channels this frame (empty: none)
@@ -1583,8 +1615,6 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 			ct = sh_l + Vector3(0.22, 0.0, -0.22).lerp(Vector3(0.3, -0.02, -0.08), smoothstep(0.05, 0.3, cast_now))
 		elif arch == "bulwark":
 			ct = sh_l + Vector3(0.12, 0.05, -0.4)           # a braced forearm, out in front
-		elif CareMoves.has(arch):
-			ct = sh_l + CareMoves.hand(arch, cast_slot, cast_now)
 		fl = fl.lerp(ct, cast_k)
 	# a kit move's free hands
 	if not km.is_empty():

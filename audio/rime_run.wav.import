@@ -2,13 +2,13 @@
 
 importer="wav"
 type="AudioStreamWAV"
-uid="uid://myhlalppei23"
-path="res://.godot/imported/rime_shatter.wav-e16c39829889aa2c0270faeb61580578.sample"
+uid="uid://c2ykohc44cle6"
+path="res://.godot/imported/rime_run.wav-3f7d08f58a944b65119d6176d7a3d386.sample"
 
 [deps]
 
-source_file="res://audio/rime_shatter.wav"
-dest_files=["res://.godot/imported/rime_shatter.wav-e16c39829889aa2c0270faeb61580578.sample"]
+source_file="res://audio/rime_run.wav"
+dest_files=["res://.godot/imported/rime_run.wav-3f7d08f58a944b65119d6176d7a3d386.sample"]
 
 [params]
 

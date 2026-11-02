@@ -224,7 +224,7 @@ def gen_classes():
         d = ARCH.get(aid)
         if not d: continue
         rows.append([link(class_page_name(aid), d["name"]), d["weight"].title(), ", ".join(wname(w) for w in d["weapons"]),
-                     d["passive"]["name"], d["dash"]["name"], d["rmb"]["name"], d["e"]["name"], d["r"]["name"]])
+                     d["passive"]["name"], d["dash"]["name"], d["rmb"]["name"], d["e"]["name"], d.get("r", {}).get("name", "Boki Merge")])
     wc = []
     for cid in ("light", "medium", "heavy"):
         c = CLASSES.get(cid)
@@ -234,7 +234,7 @@ def gen_classes():
     lv = []
     for i, t in enumerate(xp):
         lv.append([str(i + 1), num(t), "R unlocks" if (i + 1) in ult_at[:1] else ("R rank 2" if (i + 1) in ult_at[1:] else "")])
-    body = "### The six classes\n\n" + table(["Class", "Weight", "Weapons", "Passive", "Dash", "RMB", "E", "R"], rows)
+    body = "### The eight classes\n\n" + table(["Class", "Weight", "Weapons", "Passive", "Dash", "RMB", "E", "R"], rows)
     body += "\n\n### Weight classes\n\nThe weight class sets health, speed, mass and dash charges; the class kit sits on top.\n\n"
     body += table(["Weight", "Health", "Speed (m/s)", "Dash charges", "Mass", "Glide cap", "Classes", "In short"], wc)
     body += "\n\n### Run levels\n\nEvery expedition starts at level 1 with one skill point and every ability locked. "
@@ -259,7 +259,8 @@ def gen_classes():
         b.append("\n### Kit card\n\nWhat the in-game kit card (K) says.\n")
         rows = [["Loop", c.get("loop", "")], ["Passive: " + d["passive"]["name"], c.get("passive", "")], ["Dash: " + d["dash"]["name"], c.get("dash", "")]]
         if c.get("lmb"): rows.append(["LMB", c["lmb"]])
-        rows += [["RMB: " + d["rmb"]["name"], c.get("rmb", "")], ["E: " + d["e"]["name"], c.get("e", "")], ["R: " + d["r"]["name"], c.get("r", "")]]
+        rows += [["RMB: " + d["rmb"]["name"], c.get("rmb", "")], ["E: " + d["e"]["name"], c.get("e", "")]]
+        rows.append(["R: " + d["r"]["name"], c.get("r", "")] if "r" in d else ["R: Boki Merge", "Not a hero ability here: your Boki fuses with you."])
         for w, t in c.get("weapons", {}).items():
             rows.append(["Weapon: " + wname(w), t])
         b.append(table(["Slot", "Card text"], rows))
@@ -275,6 +276,7 @@ def gen_classes():
             b.append("- *%s:* %s" % (names.get(k, k), t))
         b.append("")
         for slot, label in (("e", "E"), ("r", "R")):
+            if slot not in d: continue          # (the support pair has no R)
             x = d[slot]
             b.append("**%s (%s, %s cooldown).** %s\n" % (x["name"], label, secs(x.get("cooldown")), x.get("desc", "")))
         b.append("### Ranks\n\nRank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the special.\n")

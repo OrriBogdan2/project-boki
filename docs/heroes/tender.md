@@ -3,7 +3,13 @@
 Internal design doc. Source behaviour reference: SUPERVIVE's Elluna (gameplay only; nothing of her names, look or text is used in the game).
 
 ## Research summary
-Sources: supervive.wiki.gg/wiki/Elluna (ability and upgrade tables); Deltia's Gaming "Supervive: Elluna Abilities Guide" and a Dot Esports note on skill priority (Q first); a patch-note search found no Elluna-specific changes newer than the wiki page, so the wiki's current kit is the version built.
+Sources:
+- https://supervive.wiki.gg/wiki/Elluna (ability and upgrade tables; the main source)
+- Deltia's Gaming, "Supervive: Elluna Abilities Guide" (deltiasgaming.com) for skill order and feel
+- a Dot Esports (dotesports.com) note on skill priority (Q first)
+- a patch-note search found no Elluna-specific changes newer than the wiki page.
+
+Version chosen: the wiki's current kit as it stood when the branch was built (late Oct 2026). No patch history was needed.
 Disagreements: none material. The wiki lists no E (her heal is on Q, her ult is R); we map Q to our E because Q is the glove slot here. The guides stress Q first, matching our `order`.
 
 ## Our kit
@@ -24,15 +30,35 @@ R choice: dropped as flavour. It does not reset on knocks, refresh the passive o
 ## Combinations
 | Interaction | Implemented in | Check |
 |---|---|---|
-| Ember into Kindled foe winds Hearthlight back | `on_deal` | `--tender-combo-check` |
+| Ember into Kindled foe winds Hearthlight back | `on_deal` | `--tender-combo-check` ("embers Kindle a foe", "ember into a Kindled foe winds Hearthlight back") |
 | Kindle adds damage to embers | `outgoing` | same |
 | Idle crook empowers the next ember (range, double wind-back) | `_tick` | same |
 | Burrseed sticks, bursts, roots, Kindles | `_stick`, `_burst` | same |
 | Relay Step through a teammate: half dash + 1s off Hearthlight | `on_dash` | `--support-check` |
-| Hearthlight toss latches onto first teammate, or the one you carry | `e_recast` | both |
+| Hearthlight toss latches onto first teammate | `e_recast` | `--support-check` ("tossed, latches onto a teammate") |
+| Hearthlight toss at yourself lands on the one you carry | `e_recast` | `--tender-combo-check` |
 | Hearthlight on a downed teammate (5x), rank 3 revive on flare | `_pulse`, `_hearth_end` | `--support-check` |
 | Stun on you puts Hearthlight out | `_tick_hearth` | `--support-check` |
 | Carry: shield, slow, no bleed, drop on stun/shield break, set down | `_tick_carry` | `--support-check` |
-| Rank 3 dash: picking up a teammate refreshes the air dash | `pick_up` | |
+| Rank 3 dash: picking up a teammate refreshes the air dash | `pick_up` | `--support-check` (Relay Step rank 3) |
 
-Engine gaps: none blocking. Online carry uses the new "carry" event (Net 0.6.3); heals and revives reuse "heal" and "rev".
+## Ult choice
+No R. The source's R is a channel heal on an ally or wisp; it does not feed the Kindle, carry or Hearthlight loop, and R on our keyboard now belongs to the Boki Merge. Its useful half (bring a downed friend back up) lives in Hearthlight rank 3.
+
+## Animation moves
+Full-body cast moves are `HunterAnim.KMOVES` entries, played by the kit with `play()` when the ability goes off.
+
+| Ability | KMOVES id | Shape |
+|---|---|---|
+| RMB Burrseed | `tend_seed` | wind back with the seed by the ear, flick forward (hit at 0.17s) |
+| E Hearthlight | `tend_hearth` | crouch to gather the light, rise with the lantern hand lifted (0.24s) |
+| LMB, Relay Step, carry | none | the shared weapon-hold, dash and carry poses are used as they are |
+
+Strips: `tender_rmb_strip`, `tender_e_strip` and the others in the shots folder (made with `--arena=thief --arena-demo=care_tender_<what> --arena-shot=...`, see `scripts/match/care_demo.gd`).
+
+## Engine notes
+- Kit: `scripts/arch/kits/tender_kit.gd`, shared helpers in `care_util.gd` (heals that reach bots and online squadmates, revive hook, carry). Gear and look: `scripts/match/hero_gear_care.gd`. Data: `content/archetypes/tender.json`, `content/weapons/lantern_crook.json`. Sounds: `audio/tend_*.wav` (made by `tools/gen_care_sfx.py`).
+- No R in the data: `ArchKit` skips the ult path, the kit card shows the Boki Merge tile, `--archetype-check` skips R rows for the pair.
+- Net: carrying adds one "carry" event (`["carry", target nid, carrier nid]`, handled in `match.gd` by `CareUtil.set_carry`), so Net.VERSION is 0.10.1. Heals and revives reuse "heal" and "rev".
+- `life.gd` asks `CareUtil.carried_tick` so a carried teammate neither bleeds nor can be stomped.
+- Checks: `--support-check` (all), `--tender-combo-check`.

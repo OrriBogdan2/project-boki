@@ -2,7 +2,7 @@
 
     python3 tools/gen_care_sfx.py      (then: godot --headless --import)
 
-tend_* : Linnet's warm, wooden and lantern-bright sounds. rime_* : Tamsin's glassy, skating, cracking ones.
+tend_* : Linnet's warm, wooden and lantern-bright sounds. rime_* : Tamsin's glassy, gliding, cracking ones.
 """
 import math, os, random, struct, wave
 
@@ -63,9 +63,9 @@ save('tend_flare', mix(bell(523, 0.9, 0.35), scale(bell(659, 0.9, 0.3), 0.8), sc
 save('rime_shard', mix(scale(mul(tone(2300, 1500, 0.07), env(N(0.07), 0.002, 0.025)), 0.6), scale(mul(hp(noise(0.08), 3500), env(N(0.08), 0.001, 0.02)), 0.6)), -24)
 save('rime_lance', mix(scale(mul(tone(380, 1500, 0.2), env(N(0.2), 0.01, 0.08)), 0.7), scale(mul(bp(noise(0.25), 1500, 6000), env(N(0.25), 0.02, 0.09)), 0.7)), -20)
 save('rime_burst', mix(mul(hp(noise(0.4), 2500), env(N(0.4), 0.002, 0.1)), scale(mul(tone(700, 200, 0.25), env(N(0.25), 0.003, 0.08)), 0.6), scale(bell(2200, 0.4, 0.1), 0.4)), -17)
-save('rime_shatter', mix(mul(hp(noise(0.7), 1800), env(N(0.7), 0.001, 0.18)), scale(mul(tone(160, 55, 0.5), env(N(0.5), 0.002, 0.14)), 0.9), scale(bell(1800, 0.7, 0.16), 0.5), scale(at(bell(2600, 0.5, 0.12), 0.06), 0.4)), -14)
+save('rime_splinter', mix(mul(hp(noise(0.7), 1800), env(N(0.7), 0.001, 0.18)), scale(mul(tone(160, 55, 0.5), env(N(0.5), 0.002, 0.14)), 0.9), scale(bell(1800, 0.7, 0.16), 0.5), scale(at(bell(2600, 0.5, 0.12), 0.06), 0.4)), -14)
 sk = noise(0.6); e = env(N(0.6), 0.04, 0.5)
-save('rime_skate', scale([v * (0.5 + 0.5 * math.sin(2 * math.pi * 9 * i / SR)) * e[i] for i, v in enumerate(bp(sk, 2000, 7000))], 0.8), -26)
+save('rime_run', scale([v * (0.5 + 0.5 * math.sin(2 * math.pi * 9 * i / SR)) * e[i] for i, v in enumerate(bp(sk, 2000, 7000))], 0.8), -26)
 save('rime_wall', mix(scale(mul(tone(120, 80, 0.5), env(N(0.5), 0.01, 0.15)), 0.9), scale(mul(bp(noise(0.5), 600, 3500), env(N(0.5), 0.03, 0.15)), 0.7), scale(bell(1400, 0.5, 0.15), 0.4)), -17)
 save('rime_freeze', mix(bell(1900, 0.5, 0.14), scale(mul(bp(noise(0.3), 3000, 8000), env(N(0.3), 0.002, 0.07)), 0.6), scale(mul(tone(240, 120, 0.2), env(N(0.2), 0.002, 0.06)), 0.5)), -19)
 print('support sounds written')

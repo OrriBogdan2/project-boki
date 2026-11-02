@@ -5,7 +5,7 @@
 	"primary": {
 		"dmg": 3.4, "rate": 0.5, "speed": 34, "mag": 99, "reload": 1.0, "kb": 0.4, "spread": 0.0, "range": 10.0, "size": 0.16,
 		"color": "#bff7ef", "sfx": "rime_shard", "fire_slow": 0.9,
-		"desc": "A folding fan of ice slats. Hold to throw a flurry of 4 homing shards, then 3 heavy ones that fly faster and further. Eight shards on one foe Shatter them. Double damage while skating.",
+		"desc": "A folding fan of ice slats. Hold to throw a flurry of 4 homing shards, then 3 heavy ones that fly faster and further. Eight shards on one foe Splinter them. Double damage during a Rinkrun.",
 		"kick": 0.04
 	},
 	"utility": ""

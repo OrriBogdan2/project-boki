@@ -197,6 +197,7 @@ func fire_rmb(c: Dictionary) -> void:
 	last_variant = String(c["variant"])
 	if not spend_rmb():
 		return
+	play("tend_seed")
 	var sd: Dictionary = rmb_def()["seed"]
 	var dir := h.aim_dir()
 	var start := Vector3(h.pos.x + dir.x * 0.6, h.pos.y + 0.95, h.pos.z + dir.y * 0.6)
@@ -263,6 +264,7 @@ func cast_e() -> bool:
 	var ed := e_def()
 	hearth = {"pos": h.pos, "mode": "self", "who": null, "left": float(ed["time"]), "tick": 0.0, "boost": 0.0, "node": _hearth_node(), "revived": false, "tossed": false}
 	e_t = float(ed["time"])
+	play("tend_hearth")
 	m.fx.ring(h.pos, float(ed["radius"]), col_of(ed), 0.5)
 	m.sfx("tend_hearth", h.pos, -2.0, 1.0)
 	m.fx.word(h.pos + Vector3(0, 2.4, 0), "HEARTHLIGHT", col_of(ed), false)

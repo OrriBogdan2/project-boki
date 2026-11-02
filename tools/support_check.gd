@@ -143,8 +143,10 @@ func _tender_support() -> void:
 	# --- carry then a stun drops them
 	T.teleport(P.pos + Vector3(14, 0, 0))
 	P.shield = 0.0
+	P.slot_lv["dash"] = 3; P.ex_cd = 5.0
 	A.teleport(P.pos + Vector3(0.4, 0, 0)); K.lock_t = 0.0; step(m, 0.1)
 	var carried_again := CareUtil.is_carried(A)
+	ok("Relay Step rank 3: picking up a teammate refreshes the air dash", carried_again and P.ex_cd < 0.01, "ex_cd %.2f" % P.ex_cd)
 	P.stun_t = 0.5; step(m, 0.1)
 	ok("Bearer: a stun drops them and locks pickup", carried_again and not CareUtil.is_carried(A) and K.lock_t > 3.0, "again %s lock %.1f" % [str(carried_again), K.lock_t])
 	# --- revive from the flare at rank 3
@@ -227,28 +229,28 @@ func _rime_combos() -> void:
 	P.inp["fire"] = false
 	ok("combo: fan darts Chill", K.chilled(T), "dealt %.0f" % (T.max_hp - T.hp))
 	var base_dmg := T.max_hp - T.hp
-	# skating doubles the fan
+	# rinkrunning doubles the fan
 	T.hp = T.max_hp; K.seq_i = 0; K.seq_next = 0.0
 	P.dashes = P.max_dashes()
 	P.inp["move"] = Vector2(0, 1); P.inp["dash"] = true; P.inp["dash_down"] = true; step(m, 0.05); P.inp["dash"] = false
-	ok("combo: Shift held starts a skate", K.skating() and P.roll_t > 0.0)
+	ok("combo: Shift held starts a rinkrun", K.rinkrunning() and P.roll_t > 0.0)
 	aim_at(P, T.pos)
 	P.inp["fire"] = true
 	step(m, 0.9)
 	P.inp["fire"] = false; P.inp["dash_down"] = false; step(m, 0.3)
 	var sk_dmg := T.max_hp - T.hp
-	ok("combo: skating doubles the fan's damage", sk_dmg > base_dmg * 1.4, "%.1f vs %.1f" % [sk_dmg, base_dmg])
-	ok("combo: letting go early stops the skate and refunds charge", not K.skating() and P.dashes > 0.1, "dashes %.2f" % P.dashes)
+	ok("combo: rinkrunning doubles the fan's damage", sk_dmg > base_dmg * 1.4, "%.1f vs %.1f" % [sk_dmg, base_dmg])
+	ok("combo: letting go early stops the rinkrun and refunds charge", not K.rinkrunning() and P.dashes > 0.1, "dashes %.2f" % P.dashes)
 	m.queue_free()
-	# eight shards on one foe Shatter them
+	# eight shards on one foe Splinter them
 	r = setup("rimewright", 5.0); m = r[0]; P = r[1]; A = r[2]; T = r[3]; K = P.ak
 	var T2: Hunter = m.make_hunter("T2", T.team, "medium", "Target2", "idle", {}, T.pos + Vector3(1.2, 0, 0), {"arch": "none"})
 	T2.max_hp = 10000.0; T2.hp = 10000.0; T2.armor = 0.0; T2.max_armor = 0.0
-	var s0 := K.shatter_log
+	var s0 := K.splinter_log
 	P.inp["fire"] = true
 	step(m, 3.2)
 	P.inp["fire"] = false
-	ok("combo: eight shards on one foe Shatter them", K.shatter_log > s0 and T2.hp < T2.max_hp, "shatters %d, neighbour -%.0f" % [K.shatter_log - s0, T2.max_hp - T2.hp])
+	ok("combo: eight shards on one foe Splinter them", K.splinter_log > s0 and T2.hp < T2.max_hp, "splinters %d, neighbour -%.0f" % [K.splinter_log - s0, T2.max_hp - T2.hp])
 	# Sleet Lance: Chills, slows more up close, goes off twice
 	T.hp = T.max_hp; T2.hp = T2.max_hp
 	T.teleport(P.pos + Vector3(3.0, 0, 0)); T2.teleport(P.pos + Vector3(30, 0, 0)); step(m, 0.05)
@@ -261,14 +263,14 @@ func _rime_combos() -> void:
 	step(m, 1.0)
 	var second := T.max_hp - T.hp
 	ok("combo: Sleet Lance hits, slows up close, and goes off a second time", first > 5.0 and second > first + 8.0 and near_k >= 0.4, "first %.1f total %.1f slow %.2f" % [first, second, near_k])
-	# Shatter on a knock: a Chilled foe at low health
+	# Splinter on a knock: a Chilled foe at low health
 	T.hp = 8.0; K.add_chill(T); T2.teleport(T.pos + Vector3(1.5, 0, 0)); T2.hp = T2.max_hp; step(m, 0.05)
-	var s1 := K.shatter_log
+	var s1 := K.splinter_log
 	var hh := T2.hp
 	aim_at(P, T.pos)
 	P.inp["fire"] = true; step(m, 0.6); P.inp["fire"] = false
 	step(m, 0.8)
-	ok("combo: knocking a Chilled foe Shatters them after a beat", T.downed and K.shatter_log > s1 and T2.hp < hh, "downed %s shatters %d neighbour -%.0f" % [str(T.downed), K.shatter_log - s1, hh - T2.hp])
+	ok("combo: knocking a Chilled foe Splinters them after a beat", T.downed and K.splinter_log > s1 and T2.hp < hh, "downed %s splinters %d neighbour -%.0f" % [str(T.downed), K.splinter_log - s1, hh - T2.hp])
 	m.queue_free()
 	# the wall stops a foe's shot, and E again freezes it
 	r = setup("rimewright", 8.0); m = r[0]; P = r[1]; A = r[2]; T = r[3]; K = P.ak

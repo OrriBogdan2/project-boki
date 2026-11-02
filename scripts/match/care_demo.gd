@@ -25,10 +25,12 @@ static func tick(A: Arena, dt: float, w: String) -> void:
 	A.set_meta("care_t", t)
 	var D: Hunter = A.dummies[0]["h"]
 	if m.cam:
-		m.cam.zoom = 0.3
+		var zm: float = {"carry": 0.3, "pose": 0.3}.get(what, 0.3)          # (the carry wants the pair in frame, the portrait the hero close)
+		m.cam.zoom = zm
+		if what in ["carry", "pose"]: m.cam.zoom_to = zm
 		m.cam.pitch = deg_to_rad(24.0)          # a low three-quarter view so the poses read
-		m.cam.yaw = 2.5
-		m.cam.yaw_to = 2.5
+		m.cam.yaw = 2.5 if what not in ["pose", "carry"] else 0.5
+		m.cam.yaw_to = m.cam.yaw
 	if m.hud: m.hud.guide_hidden = true
 	if not A.has_meta("care_lbl"):
 		A.set_meta("care_lbl", true)

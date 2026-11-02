@@ -3,7 +3,7 @@ extends RefCounted
 ## Support helpers shared by the two support heroes (Linnet the Tender, Tamsin the Rimewright):
 ## squadmate lookups, healing that reaches bots, online squadmates and downed teammates, the
 ## revive hook, and carrying a downed teammate. Net: heals and revives use the existing "heal" and
-## "rev" events; carrying adds one "carry" event (Net 0.6.3).
+## "rev" events; carrying adds one "carry" event (Net 0.10.1).
 
 ## Living teammates of `h` (never `h`), standing or downed, optionally within r of `at`.
 static func mates(m: Node, h: Hunter, at := Vector3.INF, r := 1e9, include_downed := true) -> Array:

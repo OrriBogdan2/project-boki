@@ -1,8 +1,8 @@
 class_name RimewrightKit
 extends ArchKit
 ## Tamsin, the Rimewright (light skirmisher with a shelter). docs/heroes/rimewright.md.
-## Passive Hoarfrost: damage Chills; a knock on a Chilled foe Shatters them. LMB Hoar Fan: a flurry
-## of homing shards ending in three heavy ones. RMB Sleet Lance. Shift Skate (hold). E Rink Wall.
+## Passive Hoarfrost: damage Chills; a knock on a Chilled foe Splinters them. LMB Hoar Fan: a flurry
+## of homing shards ending in three heavy ones. RMB Sleet Lance. Shift Rinkrun (hold). E Rink Wall.
 ## No R: the old ultimate was flavour; the wall's frost shield gives the squad its part.
 
 var chill := {}                # target instance id -> {t: Ent, left: float}
@@ -10,14 +10,14 @@ var fan_hits := {}             # target instance id -> {n: int, left: float}
 var darts: Array = []          # homing shards in flight: {s: Dictionary}
 var seq_i := 0                 # position in the flurry (0-3 light, 4-6 heavy)
 var seq_next := 0.0            # when the next shard may leave
-var skate := {}                # the running skate: {t, dir}
+var rinkrun := {}                # the running Rinkrun: {t, dir}
 var wall := {}                 # the Rink Wall's record: {w, left, sliding, warded: {}, dir}
-var shatter_log := 0           # Shatters fired (tests)
+var splinter_log := 0           # Splinters fired (tests)
 
 func _setup() -> void:
 	res = 0.0
 
-# ------------------------------------------------------------------ Chill and Shatter
+# ------------------------------------------------------------------ Chill and Splinter
 func chilled(t: Ent) -> bool:
 	if t == null or not is_instance_valid(t):
 		return false
@@ -44,13 +44,13 @@ func res_text() -> String: return "%d/%d" % [best_fan(), int(d["passive"].get("f
 func full_ready() -> bool: return false
 
 func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
-	if t == null or t.team == h.team or String(o.get("src", "")) in ["burn", "shatter"]:
+	if t == null or t.team == h.team or String(o.get("src", "")) in ["burn", "splinter"]:
 		return
 	var pd: Dictionary = d["passive"]
-	# the knock or the kill on a Chilled foe: they Shatter a beat later
+	# the knock or the kill on a Chilled foe: they Splinter a beat later
 	if t.hp <= 0.0 and chilled(t) and (t is Hunter or t is Mob):
 		var at := t.pos
-		m.later(float(pd.get("shatter_delay", 0.4)), func(): shatter(at, float(pd["shatter_dmg"]), float(pd["shatter_r"]), t))
+		m.later(float(pd.get("splinter_delay", 0.4)), func(): splinter(at, float(pd["splinter_dmg"]), float(pd["splinter_r"]), t))
 		chill.erase(t.get_instance_id())
 		return
 	add_chill(t)
@@ -63,17 +63,17 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 		if int(e["n"]) >= int(pd.get("fan_hits", 8)):
 			fan_hits.erase(key)
 			var at2 := t.pos
-			shatter(at2, float(pd["fan_shatter"]), float(pd["shatter_r"]) * 0.8, t)
+			splinter(at2, float(pd["fan_splinter"]), float(pd["splinter_r"]) * 0.8, t)
 
-func shatter(at: Vector3, dmg: float, r: float, skip: Ent = null) -> void:
-	shatter_log += 1
+func splinter(at: Vector3, dmg: float, r: float, skip: Ent = null) -> void:
+	splinter_log += 1
 	var col := res_col()
-	CareUtil.payoff(m, h, at, "SHATTER", col, "rime_shatter")
+	CareUtil.payoff(m, h, at, "SPLINTER", col, "rime_splinter")
 	m.fx.ring(at, r, Color.WHITE, 0.4)
 	for f in foes_in(at, r):
 		if f == skip and f.hp <= 0.0:
 			continue
-		f.hurt(dmg * m.dmg_mult(h), h, {"src": "shatter", "ab": "passive", "slow": 1.2, "slow_k": 0.3, "tags": ["passive", "shatter"], "payoff": true})
+		f.hurt(dmg * m.dmg_mult(h), h, {"src": "splinter", "ab": "passive", "slow": 1.2, "slow_k": 0.3, "tags": ["passive", "splinter"], "payoff": true})
 		add_chill(f)
 
 func _tick(dt: float) -> void:
@@ -93,7 +93,7 @@ func _tick(dt: float) -> void:
 		e2["left"] = float(e2["left"]) - dt
 		if float(e2["left"]) <= 0.0: fan_hits.erase(key)
 	_tick_darts(dt)
-	_tick_skate(dt)
+	_tick_rinkrun(dt)
 	_tick_wall(dt)
 	if h.ctrl == "bot":
 		_bot_idle()
@@ -115,7 +115,7 @@ func _throw_shard() -> void:
 	var wd: Dictionary = h.wpn
 	var dir := h.aim_dir()
 	var start := Vector3(h.pos.x + dir.x * 0.6, h.pos.y + 0.95 * float(h.cdat["scale"]), h.pos.z + dir.y * 0.6)
-	var dmg: float = float(wd["dmg"]) * (2.0 if heavy else 1.0) * float(m.dmg_mult(h)) * (2.0 if not skate.is_empty() else 1.0)
+	var dmg: float = float(wd["dmg"]) * (2.0 if heavy else 1.0) * float(m.dmg_mult(h)) * (2.0 if not rinkrun.is_empty() else 1.0)
 	var spd := float(wd["speed"]) * (1.35 if heavy else 1.0)
 	var rng := float(wd["range"]) * (1.4 if heavy else 1.0) * h.shot_range_k
 	h.shot_range_k = 1.0
@@ -156,12 +156,12 @@ func _tick_darts(dt: float) -> void:
 			var ang := clampf(v.angle_to(want), -2.4 * dt, 2.4 * dt)
 			s["vel"] = v.rotated(ang)
 
-# ------------------------------------------------------------------ Shift: Skate
+# ------------------------------------------------------------------ Shift: Rinkrun
 func fires_in_dash() -> bool:
-	return not skate.is_empty()
+	return not rinkrun.is_empty()
 
 func on_dash(use_ex: bool) -> bool:
-	if not skate.is_empty():
+	if not rinkrun.is_empty():
 		return true
 	var dd := dash_def()
 	if use_ex:
@@ -171,35 +171,35 @@ func on_dash(use_ex: bool) -> bool:
 	if not spend_dash(false): return true
 	var dir := h.inp["move"] as Vector2
 	if dir.length() < 0.1: dir = h.aim_dir()
-	skate = {"t": 0.0, "dir": dir.normalized()}
-	m.sfx("rime_skate", h.pos, -3.0, 1.0)
+	rinkrun = {"t": 0.0, "dir": dir.normalized()}
+	m.sfx("rime_run", h.pos, -3.0, 1.0)
 	m.fx.ring(h.pos, 1.0, col_of(dd), 0.3)
 	return true
 
-func _tick_skate(dt: float) -> void:
-	if skate.is_empty():
+func _tick_rinkrun(dt: float) -> void:
+	if rinkrun.is_empty():
 		return
 	var dd := dash_def()
-	skate["t"] = float(skate["t"]) + dt
-	var t := float(skate["t"])
+	rinkrun["t"] = float(rinkrun["t"]) + dt
+	var t := float(rinkrun["t"])
 	var stop := h.downed or h.stun_t > 0.0 or h.out or t >= float(dd.get("max_t", 1.6)) or h.gliding or not h.grounded
 	var holding := held("dash")
 	if t > float(dd.get("min_t", 0.2)) and not holding:
 		stop = true
 	if stop:
-		_skate_end()
+		_rinkrun_end()
 		return
 	# steer gently towards the move keys
 	var mv: Vector2 = h.inp["move"]
-	var cur: Vector2 = skate["dir"]
+	var cur: Vector2 = rinkrun["dir"]
 	if mv.length() > 0.1:
 		var ang := clampf(cur.angle_to(mv.normalized()), -2.2 * dt, 2.2 * dt)
 		cur = cur.rotated(ang)
-	skate["dir"] = cur
+	rinkrun["dir"] = cur
 	h.roll_dir = cur
 	h.roll_speed = float(dd.get("speed", 11.5))
 	h.roll_t = 0.1
-	h.move_kind = "skate"
+	h.move_kind = "rinkrun"
 	if fposmod(t, 0.12) < dt:
 		m.fx.burst(h.pos + Vector3(0, 0.05, 0), col_of(dd), 3, 1.5, 0.3, 0.0, 0.8)
 	if rank("dash") >= 3 and h.over_void():
@@ -208,23 +208,24 @@ func _tick_skate(dt: float) -> void:
 func _ice_bridge() -> void:
 	m.fx.burst(h.pos + Vector3(0, -0.2, 0), res_col(), 4, 1.0, 0.4, 0.0, 1.0)
 
-func _skate_end() -> void:
+func _rinkrun_end() -> void:
 	var dd := dash_def()
-	var t := float(skate.get("t", 0.0))
+	var t := float(rinkrun.get("t", 0.0))
 	var early := 1.0 - clampf(t / float(dd.get("max_t", 1.6)), 0.0, 1.0)
 	h.dashes = minf(h.max_dashes(), h.dashes + early * float(dd.get("refund", 0.6)))
 	h.roll_t = 0.0
 	h.vel.x *= 0.3; h.vel.z *= 0.3
-	skate = {}
+	rinkrun = {}
 	m.fx.ring(h.pos, 0.8, col_of(dd), 0.2)
 
-func skating() -> bool: return not skate.is_empty()
+func rinkrunning() -> bool: return not rinkrun.is_empty()
 
 # ------------------------------------------------------------------ RMB: Sleet Lance
 func fire_rmb(c: Dictionary) -> void:
 	last_variant = String(c["variant"])
 	if not spend_rmb():
 		return
+	play("rime_javelin")
 	var ld: Dictionary = rmb_def()["lance"]
 	var dir := h.aim_dir()
 	var start := Vector3(h.pos.x + dir.x * 0.6, h.pos.y + 0.95, h.pos.z + dir.y * 0.6)
@@ -271,6 +272,7 @@ func cast_e() -> bool:
 	w["y"] = at.y
 	wall = {"w": w, "dir": dir, "sliding": true, "t": 0.0, "warded": {}}
 	e_t = float(ed["slide_t"])
+	play("rime_slam")
 	m.sfx("rime_wall", at, -1.0, 1.0)
 	m.fx.word(at + Vector3(0, 2.4, 0), "RINK WALL", col_of(ed), false)
 	return true
@@ -345,7 +347,7 @@ func _e_end() -> void:
 
 func teardown() -> void:
 	super.teardown()
-	skate = {}
+	rinkrun = {}
 
 # ------------------------------------------------------------------ bots
 func _bot_idle() -> void:
@@ -362,8 +364,8 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	elif int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and dist < 9.0 and los and (h.hp < h.max_hp * 0.8 or randf() < 0.1):
 		h.inp["aim"] = tgt.pos
 		h.inp["sig"] = true
-	# skate in to the fan's range, or away when hurt
-	if skate.is_empty() and h.dashes >= 1.0 and h.grounded and randf() < 0.25:
+	# rinkrun in to the fan's range, or away when hurt
+	if rinkrun.is_empty() and h.dashes >= 1.0 and h.grounded and randf() < 0.25:
 		if h.hp < h.max_hp * 0.4:
 			h.inp["move"] = -h.dir_to(tgt)
 		elif dist > 8.0:
