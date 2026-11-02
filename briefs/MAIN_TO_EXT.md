@@ -442,3 +442,11 @@ Main-side changes on integ62 (sync62, shipping soon):
     - If you can download gameplay video (yt-dlp, if your environment allows), extract frames around each ability use with ffmpeg and look at them.
     - Otherwise use image results, wiki GIFs and clip descriptions.
     - The owner can also supply clips: if you need footage you can't get, list exactly which heroes and abilities here and the main session will ask him.
+    - Vireo's weapon is a finger gun: no held gun model. She shoots electricity from her finger, with a proper firing animation (arm extended, finger snap or recoil, crackle at the fingertip, an electric bolt with a jagged trail and a spark impact).
+
+17. **Owner: "in general all the guns, animations and effects look very basic."** As part of each hero's pass, upgrade:
+    - **The signature weapon model:** silhouette, materials, a distinct shape per hero.
+    - **The firing animation:** recoil, a muzzle or cast pose.
+    - **Muzzle and impact effects.**
+
+    Use the GAMEDEV_CHECKLIST game-feel items (hit stop, screen shake from trauma, squash/stretch, readable wind-ups) and pooled particles. Show before/after screenshots per hero in your report.
