@@ -69,3 +69,42 @@ Review fixes applied on top (all asserted):
 Full suite green (24 checks), health OK, wiki current.
 
 Next merges from you, in your suggested order: heroes joule-ghost, kingpin-felix, myth-oath (0.13.x now: please re-merge main and bump to 0.14.0 if they change sync, else keep main's version), then elluna-celeste and tetra-void. I'll extend MergeKit.drop_class_holds with the hold lists you sent; thanks for those. Also send 087b799 as its own small branch if the owner wants admin tools; it needs a review.
+
+## 2026-11-02 09:35 ET: OWNER DECISION, equal footing in matches (new task for you: ext/equal)
+
+The owner wants the pre-Prisma SUPERVIVE model: everyone drops in on equal footing, then levels up and finds items in the match. Strategy comes from routing: which shops carry which items, and which areas lean to which drops. The only persistent difference between players is their Boki (raised on the farm). Classes still unlock through play (a choice, not power). No loadout model.
+
+Please build this on a new branch ext/equal from main fffac19 (sync60). Don't touch the reserved Boki files.
+
+1. **Nothing combat-relevant comes from home.**
+   - Remove the armory kit (match.gd _apply_armory_kit: worn gear from home) and the home perks (match.gd ~1340: workshop and guild-project perks).
+   - Pack size is the same for everyone (a fixed base; any bigger pack comes from an in-match pickup).
+   - Everyone starts with their hero's signature weapon at base, no gear, the same tonics.
+   - Save migration: gear already in the armory converts to farm materials/gems at a fair rate (tell the owner the rate in the report). Nothing is silently deleted.
+2. **Extracted gear salvages at home** into farm materials and gems. The armory stops being a loadout. Repurpose the screen as a salvage/trophy log, or remove it.
+3. **The free-kit loaner is moot**, since everyone is equal. Remove it, its text, the extract-minimum top-up tied to it, and its checks. Keep the economy floor (a stray common Boki if you have none) and the last-Boki guard.
+4. **Perks become pickups, with no 1/2/3 prompt** (match.gd offer_perks / choose_perk, the perk_offer queue and the toast):
+   - Chests, shrines and bosses drop perk orbs on the ground. A floating icon and name sit above each, in the perk's colour, with a gentle bob and motes like gear. Walk into one to take it.
+   - Bosses drop 3 different orbs in a fan. Taking one fades the other two for you only; teammates can still take them. Chests drop 1, shrines 1-2.
+   - Bots walk to the orb they want.
+   - Orbs sync through Net like wpicks (bump Net to 0.14.0 or above main at the time).
+5. **Level-ups need no choice.** Every other level grows your signature weapon along a fixed per-hero path (data in content, using the existing WeaponUps steps), with a clear level-up pop showing what improved. The remaining weapon perks (brands, magazine, range, fire rate) live in the orb pool. Flat-stat perks (dash charge, glide, health, reload, gem bonus) also come from orbs, mostly shrines.
+6. **In-match shops**, SUPERVIVE-style: 3-4 vendors at fixed landmarks on The Hollow Crown, each with its own stock theme:
+   - armour and health
+   - movement (boots, glide)
+   - weapon perks
+   - Boki care (heals, bond)
+
+   They sell for gems you picked up this run (spending them means less to extract: good tension). Stock is rolled per match with seeded RNG, 3-4 items each. Show each shop's theme on the full map so routing is a decision.
+7. **Make area drop leans visible.** biome_run.gd slot_lean_at / rarity_bonus_at already bias drops by area. Show a short legend on the full map (e.g. "Ember Wastes: weapon perks more likely").
+
+Checks:
+- equal start (two saves with very different farms start a match with identical stats and gear)
+- no 1/2/3 prompt exists
+- perk orbs, the boss fan, and fade-for-you-only
+- the fixed level path
+- shop buy and stock seeding
+- the armory migration
+- bots picking orbs and using shops
+
+Design note in docs/decisions first (core systems). Full suite once, then report ready here with the Net version.
