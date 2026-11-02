@@ -60,7 +60,7 @@ What the in-game kit card (K) says.
 
 ### Abilities in full
 
-**Focus (passive).** Builds while you stand still (full in 1.4s), sneak (2.8s), 50% faster on high ground; a snare or Heavy Shot that hits adds 40 (a wall pin fills it). Drains while running and drops 40 when hit. At 100 your next shot is fully drawn or aimed at once, with +20% range, and if it hits a rooted or stunned foe it is a Deadeye: +18 damage, a crit. Hawk Sense: rivals under half health are seen through cover within 22m. A knock heals 18 and gives a dash charge back.
+**Focus (passive).** Builds while you stand still (full in 1.4s), sneak (2.8s), 50% faster on high ground; a snare or Heavy Shot that hits adds 40 (a wall pin fills it). Drains while running and drops 40 when hit. At 100 your next shot is fully drawn or aimed at once, with +20% range, and if it hits a rooted or stunned foe it is a Deadeye: +18 damage, a crit. Hawk Sense: rivals under half health are seen through cover within 22m. A knock heals 18.
 
 **Grapple Arrow (dash, Shift, 7s cooldown).** A line arrow at the cursor (9m). If it bites a wall, rock or ledge you zip to it and climb on top; if it bites nothing you hop 3.2m back. Works from a glide and cools it.
 

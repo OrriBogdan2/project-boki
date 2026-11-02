@@ -87,7 +87,7 @@ func _on_knock(t: Ent) -> void:
 		ch_rmb = float(rmb_charges()); cd["rmb"] = 0.0
 	m.fx.ring(h.pos, 1.3, Color("8ff0a0"), 0.3)
 	m.fx.word(h.pos + Vector3(0, 2.4, 0), "+KNOCK", Color("8ff0a0"), false)
-	if h.is_local(): h._ab_feedback("dash", "ready")
+	DashReset.cue(h)
 
 # ------------------------------------------------------------------ dash: Slipstep
 func on_dash(use_ex: bool) -> bool:

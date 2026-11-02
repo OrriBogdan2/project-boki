@@ -1,0 +1,29 @@
+{
+ "_doc": "Perk orbs (scripts/match/perk_orbs.gd). Perks are found in the match as floating orbs: chests drop 1, shrines 1 or 2, bosses a fan of 3 different ones. sources: n = [min, max] orbs, lean = how much each kind of perk is favoured at that source (flat = stats, weapon = weapon upgrades and brands, kit = the old kit passives), fan = the orbs form a fan and taking one fades the others for you only. kinds lists the perk ids in each kind (ids come from Data.PERKS). weights scale one perk up or down inside its kind. bot_want is how much a bot wants each perk (higher is taken first); a bot never takes two from one fan.",
+ "take_radius": 1.2,
+ "bot_radius": 16.0,
+ "fan_radius": 2.4,
+ "fan_spread": 0.7,
+ "sources": {
+  "chest": {"n": [1, 1], "lean": {"flat": 1.0, "weapon": 3.0, "kit": 1.5}},
+  "shrine": {"n": [1, 2], "lean": {"flat": 3.0, "weapon": 0.6, "kit": 1.5}},
+  "boss": {"n": [3, 3], "fan": true, "lean": {"flat": 1.0, "weapon": 4.0, "kit": 0.5}},
+  "brute": {"n": [1, 1], "lean": {"flat": 1.0, "weapon": 3.0, "kit": 0.5}}
+ },
+ "kinds": {
+  "flat": ["secondwind", "featherfall", "tailwind", "toughskin", "quickhands", "scavenger", "keen", "fleet", "plating", "focus", "remedy", "overcharge"],
+  "weapon": ["hotload", "deepmag", "quickfeed", "longreach", "brand_fire", "brand_frost", "brand_storm", "brand_venom", "brand_void"],
+  "kit": ["field_kit", "magpie", "satchel", "spyglass", "tinker_roll"]
+ },
+ "weights": {
+  "brand_fire": 0.7, "brand_frost": 0.7, "brand_storm": 0.7, "brand_venom": 0.7, "brand_void": 0.7,
+  "overcharge": 0.6, "remedy": 0.8
+ },
+ "bot_want": {
+  "default": 1.5,
+  "brand_fire": 3.0, "brand_frost": 2.8, "brand_storm": 3.0, "brand_venom": 2.8, "brand_void": 2.6,
+  "hotload": 2.6, "keen": 2.5, "quickfeed": 2.2, "toughskin": 2.4, "plating": 2.2, "secondwind": 2.0,
+  "longreach": 1.8, "deepmag": 1.6, "quickhands": 1.7, "tinker_roll": 1.5, "magpie": 1.0, "scavenger": 1.0,
+  "satchel": 0.8, "spyglass": 0.9, "overcharge": 1.2
+ }
+}
