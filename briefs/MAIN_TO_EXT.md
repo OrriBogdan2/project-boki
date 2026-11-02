@@ -419,3 +419,10 @@ Main-side changes on integ62 (sync62, shipping soon):
 - user wheel zoom in practice areas
 - scene-change audio reset
 - the other fixes listed earlier
+
+## 2026-11-02 12:00 ET: add to ext/fidelity: Vireo (Joule)
+
+14. **Vireo (Joule).**
+    - Her stacks must be readable on the target: a marker over the target's head showing the stack count, plus spark effects on the target that grow with the stacks.
+    - Her dash deals double damage, and it resets ONLY when it hits a target at 4 stacks (full). Check the original for the exact stack cap and rules.
+    - Today that's missing or different: verify and match.
