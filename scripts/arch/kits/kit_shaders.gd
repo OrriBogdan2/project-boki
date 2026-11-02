@@ -41,7 +41,7 @@ void fragment() {
 	float rays = exp(-abs(uv.y) * thin) * max(0.0, 1.0 - abs(uv.x)) + exp(-abs(uv.x) * thin) * max(0.0, 1.0 - abs(uv.y));
 	float core = exp(-r * 7.0);
 	float rg = ring * exp(-pow((r - ring_r) * 18.0, 2.0));
-	float a = clamp((rays + core * 1.4 + rg) * power, 0.0, 1.5) * smoothstep(1.0, 0.85, r);
+	float a = clamp((rays + core * 1.4 + rg) * power, 0.0, 1.5) * (1.0 - smoothstep(0.85, 1.0, r));
 	ALBEDO = mix(color.rgb, vec3(1.0), core * 0.6) * a;
 	ALPHA = clamp(a, 0.0, 1.0) * color.a;
 }
@@ -67,8 +67,8 @@ render_mode unshaded, blend_add, depth_draw_never, cull_disabled, shadows_disabl
 uniform vec4 color : source_color = vec4(1.0);
 uniform float power = 1.0;
 void fragment() {
-	float edge = max(smoothstep(0.08, 0.0, UV.x), smoothstep(0.92, 1.0, UV.x));
-	float top = smoothstep(0.1, 0.0, UV.y);
+	float edge = max((1.0 - smoothstep(0.0, 0.08, UV.x)), smoothstep(0.92, 1.0, UV.x));
+	float top = (1.0 - smoothstep(0.0, 0.1, UV.y));
 	float base = smoothstep(0.75, 1.0, UV.y);
 	float sh = 0.5 + 0.5 * sin((UV.y * 9.0 + TIME * 3.0) + UV.x * 2.0);
 	float a = (0.16 + 0.12 * sh * (1.0 - UV.y * 0.5) + edge * 0.8 + top * 0.5 + base * 0.7) * power;
@@ -89,9 +89,9 @@ void fragment() {
 	float t = TIME * 5.0 + seed;
 	float wob = sin(uv.y * 6.0 + t) * 0.12 + sin(uv.y * 11.0 - t * 1.3) * 0.06;
 	float w = mix(0.75, 0.05, clamp((1.0 - uv.y) * 0.5, 0.0, 1.0));
-	float body = smoothstep(w, w * 0.2, abs(uv.x + wob * (1.0 - uv.y) * 0.5));
+	float body = (1.0 - smoothstep(w * 0.2, w, abs(uv.x + wob * (1.0 - uv.y) * 0.5)));
 	float h = smoothstep(-1.0, -0.2, -uv.y * 0.9 + 0.1 * sin(t + uv.x * 5.0));
-	float a = body * smoothstep(1.0, 0.6, uv.y) * smoothstep(-1.0, -0.4, uv.y) * power;
+	float a = body * (1.0 - smoothstep(0.6, 1.0, uv.y)) * smoothstep(-1.0, -0.4, uv.y) * power;
 	ALBEDO = mix(color.rgb, vec3(1.0), body * h * 0.35) * a;
 	ALPHA = clamp(a, 0.0, 1.0) * color.a;
 }
@@ -106,7 +106,7 @@ uniform float life = 1.0;      // 1 -> 0
 uniform float power = 1.0;
 void fragment() {
 	float across = 1.0 - abs(UV.y * 2.0 - 1.0);
-	float along = smoothstep(0.0, 0.25, UV.x) * smoothstep(1.0, 0.8, UV.x);
+	float along = smoothstep(0.0, 0.25, UV.x) * (1.0 - smoothstep(0.8, 1.0, UV.x));
 	float burn = smoothstep(1.0 - life * 1.2, 1.0 - life * 1.2 + 0.25, UV.x);
 	float lick = 0.75 + 0.25 * sin(UV.x * 40.0 + TIME * 30.0 + UV.y * 9.0);
 	float a = pow(across, 1.2) * along * burn * lick * power;
@@ -132,7 +132,7 @@ void vertex() {
 void fragment() {
 	float up = UV.y;   // 0 at the top, 1 at the foot
 	float ch = fract(up * bands + TIME * speed + abs(UV.x - 0.5) * 1.2);
-	float chev = smoothstep(0.0, 0.08, ch) * smoothstep(0.24, 0.12, ch);
+	float chev = smoothstep(0.0, 0.08, ch) * (1.0 - smoothstep(0.12, 0.24, ch));
 	float fade = smoothstep(0.0, 0.5, up);
 	float a = (0.18 + rim * 0.75 + chev * 0.55) * fade * power;
 	ALBEDO = mix(color.rgb, vec3(1.0), chev * 0.4 + rim * 0.2) * a;
@@ -151,7 +151,7 @@ uniform float spin = 3.0;
 void fragment() {
 	float across = 1.0 - abs(UV.y * 2.0 - 1.0);
 	float sw = fract(UV.x * 6.0 - UV.y * 0.6 + TIME * spin);
-	float streak = smoothstep(0.0, 0.5, sw) * smoothstep(1.0, 0.5, sw);
+	float streak = smoothstep(0.0, 0.5, sw) * (1.0 - smoothstep(0.5, 1.0, sw));
 	float a = pow(across, 1.4) * (0.35 + 0.65 * streak) * life * power;
 	ALBEDO = mix(color.rgb, color2.rgb, streak * across) * a * 1.4;
 	ALPHA = clamp(a, 0.0, 1.0);
@@ -169,7 +169,7 @@ uniform float hurt = 0.0;      // 0 whole .. 1 nearly broken
 uniform float armed = 0.0;     // a Shield Slam is armed: it burns hotter
 void fragment() {
 	vec2 uv = UV;
-	float rim = max(smoothstep(0.06, 0.0, uv.y), smoothstep(0.9, 1.0, uv.y)) + max(smoothstep(0.035, 0.0, uv.x), smoothstep(0.965, 1.0, uv.x));
+	float rim = max((1.0 - smoothstep(0.0, 0.06, uv.y)), smoothstep(0.9, 1.0, uv.y)) + max((1.0 - smoothstep(0.0, 0.035, uv.x)), smoothstep(0.965, 1.0, uv.x));
 	float ribs = smoothstep(0.88, 1.0, abs(sin(uv.x * 3.14159 * 9.0))) * 0.35;
 	vec2 c = vec2((uv.x - 0.5) * 2.6, (uv.y - 0.45) * 1.0);
 	float head = step(abs(c.x), 0.32) * step(abs(c.y + 0.16), 0.09);
