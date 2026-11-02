@@ -524,7 +524,7 @@ func _build_ui() -> void:
 	news.offset_right = -28; news.offset_top = 28
 	var nv := UI.vbox(4); news.add_child(nv)
 	nv.add_child(UI.label("PLAYTEST  ·  BUILD %s" % Net.VERSION, 11, Color("e9b48a"), UI.caps))
-	nv.add_child(UI.label("Six archetypes, one Boki each", UI.T_HEAD, UI.INK, UI.big))
+	nv.add_child(UI.label("Twelve classes, one Boki each", UI.T_HEAD, UI.INK, UI.big))
 	var nl := UI.label("Bring your Boki on a run, bring it home. Tell us what broke.", 13, UI.MUTED)
 	nl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART; nl.custom_minimum_size.x = 280
 	nv.add_child(nl)

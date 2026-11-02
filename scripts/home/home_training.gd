@@ -122,7 +122,7 @@ func build() -> void:
 	_label(gl, "Glide the gap: jump, hold Space", Vector3(0, 1.6, 0), UI.INK, 30)
 	# the full archetype kits live in the Arena: a sign here, L takes you there, K shows your kit card
 	var ar := Node3D.new(); ar.position = Vector3(42.5, 0, 53.2); h.add_child(ar)
-	_label(ar, "L  ·  Arena: full kits, swap archetype, Boki and glove\nK  ·  your kit card", Vector3(0, 2.0, 0), Color("ffe9b8"), 30)
+	_label(ar, "L  ·  Arena: full kits, swap class, Boki and glove\nK  ·  your kit card", Vector3(0, 2.0, 0), Color("ffe9b8"), 30)
 
 func _label(parent: Node3D, text: String, at: Vector3, col: Color, size := 40) -> Label3D:
 	var l := Label3D.new()

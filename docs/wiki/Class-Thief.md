@@ -38,7 +38,7 @@ primes a heavier hit, and landing that hit gives the flip straight back.
 
 |  |  |
 |---|---|
-| Weight class | Light (124 health, 5 m/s, 1 dash charge) |
+| Weight | Light (124 health, 5 m/s, 1 dash charge) |
 | Signature weapon | Twin Blades (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The cutpurse duelist. Sticks to one mark, flips past them, never lets go. |
 | Silhouette | the hood tail and cape |

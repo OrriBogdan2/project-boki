@@ -29,6 +29,7 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--archetype-check` | Every class kit in a flat arena: each dash, passive and resource, RMB variants, E, R (locked until level 6), the bonded R, controls, weapon locks, Boki infusion, feel |
 | `--kit-combo-check` | The cross-ability interactions (E + RMB chains, resets, refunds); also runs inside `--archetype-check` |
 | `--arena-check` | The Arena boots with its tools, dummies take and show damage, reset and swaps work, the kit card builds for every class, the training area works |
+| `--class-unlock-check` | Class unlocks: the starter pick on a new save, goal and account-level progress and the unlock, the reveal, locked classes staying playable in the Arena and practice picker, an old save migrating with every class open, the farm picker greying out locked classes |
 | `--weapon-check[=<id>]` | Every weapon against a standing target at a few ranges (taps and charges), printing the DPS it really lands |
 | `--weapon-clip-check` | No held weapon dips into the ground in any pose, on any class |
 | `--pickup-check` | A picked-up weapon arrives with a full magazine and no reload running, from any source |

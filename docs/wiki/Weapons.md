@@ -96,7 +96,7 @@ Offered three at a time during an expedition (pick with 1, 2 or 3). They last th
 
 ## Without a class kit
 
-Every player and bot now plays a class, whose kit owns Shift and right click. A hunter without one falls back to these: the weight class's dodge and the weapon's own right-click utility.
+Every player and bot now plays a class, whose kit owns Shift and right click. A hunter without one falls back to these: the weight's dodge and the weapon's own right-click utility.
 
 | Weight | Dodge | Cooldown | What it does |
 |---|---|---|---|

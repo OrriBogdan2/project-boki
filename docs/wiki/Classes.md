@@ -64,9 +64,28 @@ your class in the Expedition menu, and you can try every class against dummies i
 | [Dolm](Class-Dolm.md) | Medium | Rubble Fists | Tremor Sense | Rubble Rush | Quakefall | Stone Row | none (Boki Merge) |
 | [Ostra](Class-Ostra.md) | Medium | Tether Lantern | Swell | Lantern Trade | Shard Fan | Brimseed | none (Boki Merge) |
 
-### Weight classes
+### How classes unlock
 
-The weight class sets health, speed, mass and dash charges; the class kit sits on top.
+A new save picks one starting class from Thief, Marlowe, Juggernaut. Every other class opens when its goal is done and the account has reached its level. Account XP comes from expeditions: 15 for playing one, 50 more for getting out, 1 per monster (up to 30), 6 per hunter knocked down (up to 30), 80 per lair boss and 25 per Boki brought home. Level L to L+1 costs 100 + 50 x (L - 1) XP, up to level 20. Locked classes stay playable in the Arena and the Training Grounds, and saves from before class unlocks keep every class open.
+
+| Class | Starter | Goal | Target | Account level |
+|---|---|---|---|---|
+| [Thief](Class-Thief.md) | pick at the start | Defeat 15 monsters | 15 | 2 |
+| [Archer](Class-Archer.md) | play | Make it out of 3 expeditions | 3 | 3 |
+| [Vireo](Class-Vireo.md) | play | Defeat 40 monsters | 40 | 3 |
+| [Marlowe](Class-Marlowe.md) | pick at the start | Make it out of an expedition | 1 | 2 |
+| [Juggernaut](Class-Juggernaut.md) | pick at the start | Knock down 2 hunters | 2 | 2 |
+| [Bulwark](Class-Bulwark.md) | play | Knock down 5 hunters | 5 | 3 |
+| [Dredge](Class-Dredge.md) | play | Make it out of 5 expeditions | 5 | 4 |
+| [Ashwick](Class-Ashwick.md) | play | Defeat a lair boss | 1 | 6 |
+| [Linnet](Class-Linnet.md) | play | Scan a wild Boki and bring it home | 1 | 2 |
+| [Tamsin](Class-Tamsin.md) | play | Stagger 10 monsters with abilities | 10 | 5 |
+| [Dolm](Class-Dolm.md) | play | Wall-slam 5 enemies | 5 | 4 |
+| [Ostra](Class-Ostra.md) | play | Reach level 6 in a match | 6 | 4 |
+
+### Weights
+
+The weight (Light, Medium or Heavy) sets health, speed, mass and dash charges; the class kit sits on top.
 
 | Weight | Health | Speed (m/s) | Dash charges | Mass | Glide cap | Classes | In short |
 |---|---|---|---|---|---|---|---|
