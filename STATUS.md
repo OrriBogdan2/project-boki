@@ -1,4 +1,4 @@
-2026-11-02T21:11:28Z
+2026-11-02T21:30:14Z
 
 ext/classes | cacd796 | REOPENED per INBOX 19:10 (Hunters wording, pick 1 + 2 early unlocks, no weight labels, hunter viewer, hold-to-unlock); rework queued on Opus medium | 0.14.0 | -
 ext/hero-shots | 3bd0520 | done: 12 heroes + farm building + classes; all portraits show signature weapons | - | -
@@ -14,7 +14,7 @@ ext/kitfix-breah-ostra | - | running (Opus) | pending | pending
 
 Running now: kitfix-breah-ostra, ext/classes rework (Opus); power() follow-up across the 5 finished kitfix branches (Sonnet)
 Queued: none (a slot is free; nothing left in SERVER_UPDATE5 or INBOX to start)
-Last INBOX entry handled: 2026-11-02 21:30 UTC (power() relayed to kitfix-breah-ostra; one Sonnet agent merging origin/main (incl. LevelGrowth 998c47e) into the 5 finished kitfix branches, then switching their ability-damage reads to ArchKit.power(); those branches will get new commits)
+Last INBOX entry handled: 2026-11-02 21:35 UTC (X-key ult heads-up noted; nothing started; running agents told to keep X free)
 Watcher: received 19:06 UTC entry
 Questions for the owner: see ext/classes line.
 Net note: main is now 0.15.0, which kits2-nor also uses (0.15.0, kit move id on the snapshot); main session to reconcile. Kitfix branches that need a bump use 0.15.2 (dancer-juggernaut), .3 (pin-bjorn), .4 (vireo-venator), .5 (linwick-dredge), .6 (moosh-tamsin), .7 (breah-ostra).
@@ -30,3 +30,4 @@ Hold state for MergeKit.drop_class_holds:
 - bulwark (Bjorn): nothing new on Hunter (lmb_t, mel_hold existing); spin and glint cleared in _drop_holds
 - mage (Vireo): wire (refunded on drop), rmb_down\/rmb_t + rod prop, strikes entries with phase "flick"
 - gunslinger (Venator): needle, slide, rmb_down\/rmb_t (held grenade aim)
+Ult pass (X, level 6): waiting for the hero-ref ult sections; one Opus follow-up per kitfix pair once each pair is ready and the refs are posted.
