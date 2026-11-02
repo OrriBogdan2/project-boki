@@ -235,9 +235,11 @@ func _stick(e: Ent) -> void:
 
 func _tick_burrs(dt: float) -> void:
 	for b in burrs.duplicate():
-		var t: Ent = b["t"]
-		var n: Node3D = b["node"]
-		if not is_instance_valid(t) or t.dead:
+		var tv = b["t"]     # untyped first: a freed foe or node can't be assigned to a typed var
+		var nv = b["node"]
+		var t: Ent = tv if is_instance_valid(tv) else null
+		var n: Node3D = nv if is_instance_valid(nv) else null
+		if t == null or t.dead:
 			if is_instance_valid(n): n.queue_free()
 			burrs.erase(b)
 			continue

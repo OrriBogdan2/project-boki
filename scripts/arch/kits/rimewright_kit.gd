@@ -80,8 +80,9 @@ func _tick(dt: float) -> void:
 	for key in chill.keys():
 		var e: Dictionary = chill[key]
 		e["left"] = float(e["left"]) - dt
-		var t: Ent = e["t"]
-		if float(e["left"]) <= 0.0 or not is_instance_valid(t) or t.dead:
+		var tv = e["t"]     # untyped first: a freed foe can't be assigned to a typed var
+		var t: Ent = tv if is_instance_valid(tv) else null
+		if float(e["left"]) <= 0.0 or t == null or t.dead:
 			chill.erase(key)
 			continue
 		var ck := float(d["passive"].get("chill_slow", 0.15))
