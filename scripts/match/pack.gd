@@ -1,7 +1,7 @@
 class_name Pack
 ## The backpack on an expedition: a few slots for gear and valuables you mean to carry home (gems,
-## seeds, tonics and kits are counted, not packed, and caught kin ride along apart). What you wear
-## (the five gear slots, Gear) doesn't take a slot. Extract and it all goes home to the armory; die
+## seeds and the utility belt are counted, not packed, and caught kin ride along apart). What you wear
+## (the four gear slots, Gear) doesn't take a slot. Extract and it all goes home to the armory; die
 ## and it goes into your deathbox with everything else.
 ##
 ## Picking something up off the ground: a better piece of gear goes on and the old one into the
@@ -158,7 +158,7 @@ static func haul(h) -> Array:
 static func smart_loot(m, h, b: Dictionary) -> int:
 	var n := 0
 	for it in Life.box_items(m, h, b):
-		if String(it["key"]) in ["keys", "gems", "seeds", "tonics", "kits"]:
+		if String(it["key"]) in ["keys", "gems", "seeds", "belt"]:
 			Life.take_item(m, h, b, it)
 			n += 1
 	# kin one at a time from the front (taking one shifts the rest down)

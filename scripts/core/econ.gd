@@ -1,8 +1,7 @@
 class_name Econ
 ## The home side of loot and kin keeping, all on the save (Save.d):
-##   armory    gear you brought home (Loot items), a storage cap you can raise, the
-##             loadout you take on the next expedition, valuables to sell and scrap to upgrade with
-##   backpack  how many slots you get on an expedition (pack_lvl)
+##   armory    gloves and boots you brought home (Loot items), a storage cap you can raise, the
+##             loadout you take on the next expedition (Equal), valuables to sell and scrap to upgrade with
 ##   feeders   troughs on the farm you fill with food; hungry kin help themselves, even while you're away
 ##   graves    kin that died (starved), with their memories; the Soul Shrine brings one back, changed
 ## Starvation itself is in Care (the starve clock); what it leads to (death, a grave) is here.
@@ -10,8 +9,6 @@ class_name Econ
 # ------------------------------------------------------------------ numbers
 const ARM_CAPS := [16, 24, 32, 40]
 const ARM_UPGRADE := [[100, 6], [220, 14], [400, 25]]       # [gems, scrap] for the next level
-const PACK_CAPS := [6, 8, 10, 12]
-const PACK_UPGRADE := [[120, 4], [260, 10], [450, 20]]
 
 const FEEDERS := {
 	"trough": {"name": "Wooden trough", "cap": 6, "mult": 1.0, "seats": 3, "auto": false, "joy": 0.0, "price": 40, "col": Color("a07850"),
@@ -43,7 +40,7 @@ const TITLES := ["the Returned", "Twice-Born", "Soulbright", "Lantern-Lit", "Emb
 static func ensure() -> void:
 	var d := Save.d
 	ensure_min()
-	for k in ["arm_lvl", "pack_lvl", "scrap"]:
+	for k in ["arm_lvl", "scrap"]:
 		if not d.has(k): d[k] = 0
 	for k in ["feeders", "graves"]:
 		if not d.has(k): d[k] = []
@@ -57,9 +54,11 @@ static func ensure() -> void:
 		for it in d["raid_out"]:
 			_store(it)
 		d["raid_out"] = []
+	Equal.recover_belt()        # utility brought on an expedition that never ended goes back in the stash
 
+## Backpack slots on an expedition: the same for everyone (Equal.BASE_PACK).
 static func pack_cap() -> int:
-	return PACK_CAPS[clampi(int(Save.d.get("pack_lvl", 0)), 0, PACK_CAPS.size() - 1)]
+	return Equal.BASE_PACK
 
 static func arm_cap() -> int:
 	return ARM_CAPS[clampi(int(Save.d.get("arm_lvl", 0)), 0, ARM_CAPS.size() - 1)]
@@ -129,10 +128,10 @@ static func use_ember() -> bool:
 	if int(vd["soul_ember"]) <= 0: vd.erase("soul_ember")
 	return true
 
-## Buy the next armory or backpack level. which: "arm" or "pack". Returns "" or why not.
+## Buy the next armory storage level. Returns "" or why not.
 static func upgrade(which: String) -> String:
 	var lvl := int(Save.d.get(which + "_lvl", 0))
-	var costs: Array = ARM_UPGRADE if which == "arm" else PACK_UPGRADE
+	var costs: Array = ARM_UPGRADE
 	if lvl >= costs.size(): return "Fully upgraded"
 	var c: Array = costs[lvl]
 	if int(Save.d["gems"]) < int(c[0]): return "Not enough gems"
@@ -142,9 +141,9 @@ static func upgrade(which: String) -> String:
 	Save.d[which + "_lvl"] = lvl + 1
 	return ""
 
-## The loadout: slot "gear0".."gear4" (active glove, passive glove, armor, boots, kit; see Gear.SLOTS)
-## -> an armory uid, or "" for none.
-const LOADOUT_SLOTS := ["gear0", "gear1", "gear2", "gear3", "gear4"]
+## The loadout: slot "gear0", "gear1", "gear3" (active glove, passive glove, boots; see Gear.SLOTS,
+## Equal.BRING_SLOTS) -> an armory uid, or "" for none.
+const LOADOUT_SLOTS := ["gear0", "gear1", "gear3"]
 
 static func loadout(slot: String) -> Dictionary:
 	var uid := String(Save.d.get("loadout", {}).get(slot, ""))
@@ -156,17 +155,6 @@ static func set_loadout(slot: String, uid: String) -> void:
 
 static func gear_slot(it: Dictionary) -> String:
 	return "gear%d" % Gear.slot_of(String(it.get("id", "")))
-
-## Setting out: the loadout leaves the armory and rides with you (at risk until you're home).
-static func begin_raid() -> Array:
-	var out: Array = []
-	for slot in LOADOUT_SLOTS:
-		var it := loadout(slot)
-		if it.is_empty(): continue
-		Save.d["armory"].erase(it)
-		out.append(it)
-	Save.d["raid_out"] = out.duplicate(true)
-	return out
 
 ## Back from an expedition: what you carried goes into the armory (sold if it's full), what you
 ## lost is gone. Fills out["haul"], out["lost_items"], out["arm_sold"].
@@ -180,7 +168,13 @@ static func after_raid(r: Dictionary, out: Dictionary) -> void:
 		for it in r.get("haul", []):
 			var item: Dictionary = (it as Dictionary).duplicate(true)
 			if not item.has("uid"): item["uid"] = Loot._uid()
-			if String(item.get("t", "")) != "val" and armory().size() >= arm_cap():
+			if Equal.salvages(item):
+				# armor is found in matches, never kept or brought: it salvages into gems (and the usual materials, below)
+				var sg: int = EqualMigrate.rate(int(item.get("rar", 0)))["gems"]
+				Save.d["gems"] = int(Save.d["gems"]) + sg
+				out["salvage_gems"] = int(out.get("salvage_gems", 0)) + sg
+				item["salvaged"] = true
+			elif String(item.get("t", "")) != "val" and armory().size() >= arm_cap():
 				out["arm_sold"] = int(out["arm_sold"]) + Loot.sell_price(item)
 				Save.d["gems"] = int(Save.d["gems"]) + Loot.sell_price(item)
 				item["sold"] = true

@@ -37,7 +37,7 @@ func _data() -> void:
 	ok("the six archetypes have six different signatures", seen.size() == Arch.ids().size(), "%d" % seen.size())
 	for s in Gear.SLOTS.size():
 		ok("slot %d (%s) has gear to find" % [s, Gear.SLOTS[s]], not Gear.ids_for(s).is_empty())
-	ok("armor, boots and kit pieces exist beyond the old gloves", Gear.ids_for(2).size() >= 2 and Gear.ids_for(3).size() >= 2 and Gear.ids_for(4).size() >= 2)
+	ok("armor and boots pieces exist beyond the old gloves (the kit slot is the utility belt now)", Gear.ids_for(2).size() >= 2 and Gear.ids_for(3).size() >= 2 and Gear.SLOTS.size() == 4)
 	var wup := 0
 	var brands := 0
 	for k in Data.PERKS:
@@ -47,15 +47,15 @@ func _data() -> void:
 	ok("weapon upgrades and Brands exist as perks", wup >= 9 and brands >= 4, "%d upgrades, %d brands" % [wup, brands])
 	ok("rarity multiplier rises Common to Legendary", Gear.mult(0) < Gear.mult(2) and Gear.mult(2) < Gear.mult(3) and Gear.mult(3) < Gear.mult(4))
 	var lo_ok := true
-	for k in ["gear0", "gear1", "gear2", "gear3", "gear4"]:
+	for k in ["gear0", "gear1", "gear3"]:
 		if not Econ.LOADOUT_SLOTS.has(k): lo_ok = false
-	ok("the loadout has five gear slots", lo_ok and Econ.LOADOUT_SLOTS.size() == 5)
+	ok("the loadout has three slots: gloves and boots (armor and kit are not brought in)", lo_ok and Econ.LOADOUT_SLOTS.size() == 3)
 
 func _rolls() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 77
 	var count := [0, 0, 0, 0, 0]
-	var slots := [0, 0, 0, 0, 0]
+	var slots := [0, 0, 0, 0]
 	for i in 4000:
 		var g := GearDrops.roll_gear(rng)
 		count[int(g["rar"])] += 1
@@ -151,12 +151,7 @@ func _match() -> void:
 		P.refresh_gear()
 		ok("and taking it off again does not heal (round %d)" % round_i, P.hp <= hp_hurt + 0.01 and absf(P.hp / P.max_hp - share0) < 0.001, "%.1f / %.1f" % [P.hp, P.max_hp])
 	var cap0 := P.pack_cap
-	P.gear[4] = {"id": "satchel", "rar": 3}
-	P.refresh_gear()
-	ok("a Satchel kit enlarges the pack", P.pack_cap > cap0, "%d -> %d" % [cap0, P.pack_cap])
-	P.gear[4] = {}
-	P.refresh_gear()
-	ok("and takes it back off", P.pack_cap == cap0)
+	ok("the pack is the same size for everyone", cap0 == Equal.BASE_PACK, str(cap0))
 	P.gear[3] = {"id": "windstep_boots", "rar": 1}
 	ok("boots give their movement perk", P.gear_stat("glide_speed") > 0.0)
 	P.gear[3] = {}

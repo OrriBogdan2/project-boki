@@ -1238,6 +1238,7 @@ func _draw_vitals(sz: Vector2, p: Hunter) -> void:
 	# run level (SUPERVIVE-style): a big number in a badge over the portrait's corner, ringed by
 	# progress to the next level with a bright head dot; a level-up pops it and bursts a gold ring
 	_level_badge(pr, p)
+	ArmorHud.badge(self, pr, p)         # the armor level, ringed by progress to the next (armor_hud.gd)
 	if p.lives < 50 and p.lives > 1:
 		for i in p.lives:
 			c.draw_circle(pr.position + Vector2(pr.size.x - 10 - i * 11.0, 10), 4.0, Color("ff7a8a"))
@@ -1255,16 +1256,7 @@ func _draw_vitals(sz: Vector2, p: Hunter) -> void:
 	_text(Vector2(x0, y0 - 2), hp_txt, 20, INK if not low else HP_LOW, big)
 	var hw := big.get_string_size(hp_txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 20).x
 	_text(Vector2(x0 + hw + 4, y0 - 2), "/ %d" % int(p.max_hp), 12, MUTED, big)
-	if p.armor > 0.5:
-		var at := "%d" % int(ceil(p.armor))
-		var aw := big.get_string_size(at, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x
-		_text(Vector2(x0 + w - aw, y0 - 2), at, 13, p.armor_col(), big)
-		_text(Vector2(x0 + w - aw - 8 - big.get_string_size(String(Hunter.ARMOR_TIERS[p.armor_tier][0]).to_upper(), HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x, y0 - 3), String(Hunter.ARMOR_TIERS[p.armor_tier][0]).to_upper(), 10, Color(p.armor_col(), 0.75), big)
-	# progress to the next armor tier: a hairline above the armor bar in the next tier's colour
-	if p.armor_tier < Hunter.ARMOR_TIERS.size() - 1:
-		var nxt: Color = Hunter.ARMOR_TIERS[p.armor_tier + 1][1]
-		c.draw_rect(Rect2(Vector2(x0, y0 + 3), Vector2(w, 2)), Color(0, 0, 0, 0.35))
-		c.draw_rect(Rect2(Vector2(x0, y0 + 3), Vector2(w * p.armor_frac(), 2)), Color(nxt, 0.9))
+	ArmorHud.bar(self, p, x0, y0, w)
 	var shv := MergeShell.view(p)
 	if shv.y > 0.0 and not p.merge_st.is_empty():
 		# the merged form's shell: its own bright bar in the form's colour, above the health bar, with the number on the right
@@ -1659,17 +1651,8 @@ func _draw_weapon(sz: Vector2, p: Hunter) -> void:
 	var y := r.position.y - s - 22.0
 	var x := r.end.x - s
 	var k: Kin = p.kin
-	# 1: heal (a tonic for health; an armor kit once health is full), 2: the armor kit (anvil)
-	var hurt := p.hp < p.max_hp - 0.5
-	var heal_ready := (p.tonics > 0 and hurt) or (p.armor_kits > 0 and p.armor < p.max_armor - 0.5)
-	var hr := Rect2(Vector2(x, y), Vector2(s, s))
-	_ab_slot("tonic", hr, "tonic", Settings.key_cap("tonic"), GOOD, 0.0, 0.0, p.tonics > 0 and hurt)
-	_ctext(Vector2(hr.get_center().x, hr.position.y - 5), "%d" % p.tonics, 12, Color(GOOD, 0.95), big)
-	x -= s + gap
-	var kr := Rect2(Vector2(x, y), Vector2(s, s))
-	_ab_slot("kit", kr, "anvil", Settings.key_cap("armor_kit"), ARMOR_COL, 0.0, 0.0, p.armor_kits > 0 and p.armor < p.max_armor - 0.5)
-	_ctext(Vector2(kr.get_center().x, kr.position.y - 5), "%d" % p.armor_kits, 12, Color(ARMOR_COL, 0.95), big)
-	x -= s + gap
+	# 1 2 3: the utility belt (tonic, armor kit and gadgets: BeltHud)
+	x = BeltHud.draw(self, p, x, y)
 	# C: throw / recall your kin
 	if k:
 		var kc: Color = Data.KIN[k.species]["color"]
@@ -2773,19 +2756,13 @@ func _tip_lines(id: String, p: Hunter) -> Array:
 			if not rd.is_empty():
 				out.append([String(rd.get("name", "")) + ":  " + String(rd.get("desc", "")), Color(String(rd.get("color", "#ffffff"))), 13])
 			out.append(["%d of %d charges. One comes back every %s." % [int(floor(p.dashes)), int(p.max_dashes()), _secs(p.dash_regen())], MUTED, 13])
-		"kit":
-			out.append(["Armor kit", ARMOR_COL])
-			out.append(["Item  ·  %s  (or %s when your health is full)" % [Settings.key_cap("armor_kit"), Settings.key_cap("tonic")], MUTED, 12])
-			out.append(["Repairs your armor to full. Armor takes 20%% off every hit while it lasts, and doesn't come back on its own. You're open while you repair, like drinking. You're carrying %d." % p.armor_kits, INK, 14])
+		"util1", "util2", "util3": out = BeltHud.tip(p, int(id.substr(4)) - 1)
+		"armor_level": out = ArmorHud.tip(p)
 		"base":
 			out.append(["Base to a teammate", Color("8fe3c8")])
 			out.append(["Squads  ·  %s" % Settings.key_cap("base"), MUTED, 12])
 			out.append(["A 3s channel to the teammate nearest your cursor. Stand still: moving, attacking or any damage interrupts it. You arrive weakened for 3s: half damage, and your crowd control, healing and shields are halved.", INK, 14])
 			out.append(["Cooldown %ds%s" % [int(Hunter.BASE_CD), ("  ·  ready in %ds" % int(ceil(p.base_cd))) if p.base_cd > 0.0 else "  ·  ready"], MUTED, 13])
-		"tonic":
-			out.append(["Heal", GOOD])
-			out.append(["Item  ·  %s" % Settings.key_cap("tonic"), MUTED, 12])
-			out.append(["Drinks a tonic (40%% of your health) when you're hurt; with full health it uses an armor kit instead. Neither comes back on its own. Carrying %d tonics and %d kits." % [p.tonics, p.armor_kits], INK, 14])
 		"pack":
 			out.append(["Backpack  %d/%d" % [p.pack.size(), p.pack_cap], INK])
 			out.append(["Open  ·  %s" % Settings.key_cap("inventory"), MUTED, 12])

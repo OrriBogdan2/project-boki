@@ -485,7 +485,7 @@ static func breed(a: Dictionary, b: Dictionary, rng: RandomNumberGenerator, sp :
 		"gen": maxi(int((a.get("lineage", {}) as Dictionary).get("gen", 0)), int((b.get("lineage", {}) as Dictionary).get("gen", 0))) + 1}
 	baby["origin"] = {"how": "egg", "where": {"place": "home"}}
 	if not BokiPens.can_list(a) or not BokiPens.can_list(b):
-		baby["origin"]["pen_line"] = true      # bred from a pen / stray / loaner Boki: still no resale (BokiPens.can_list)
+		baby["origin"]["pen_line"] = true      # bred from a pen / stray Boki: still no resale (BokiPens.can_list)
 	ensure(baby)
 	return baby
 

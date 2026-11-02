@@ -79,11 +79,10 @@ const DEPLOY_POP := -1.6       # the canopy catching: your fall checks to this, 
 const DEPLOY_H := 8.0         # the glider opens by itself this high above the ground
 ## Armor, as in Supervive: it takes a flat share off every hit (ARMOR_DR) for as long as it has
 ## durability left; what gets through hurts your health and wears the durability down by the same
-## amount. Neither comes back on its own: tonics (1) heal, armor kits (2) repair.
+## amount. Neither comes back on its own: tonics heal and armor kits repair (the utility belt, 1 2 3).
 const ARMOR_DR := 0.2
 const ARMOR_DUR := 2.2        # durability as a multiple of max health
 const ARMOR_WAIT := 4.0
-const KIT_TIME := 1.6
 const CONSUME_VULN := 1.2     # you take this much more damage while drinking or repairing
 
 var pname := "Hunter"
@@ -93,7 +92,7 @@ var wid := "rifle"
 var wpn: Dictionary = {}
 var ctrl := "bot"             # local | bot | remote
 var inp := {"move": Vector2.ZERO, "aim": Vector3.ZERO, "fire": false, "dash": false, "jump": false,
-	"throw": false, "skill": false, "sig": false, "interact": false, "reload": false, "tonic": false, "kit": false, "glide": false, "ult": false,
+	"throw": false, "skill": false, "sig": false, "interact": false, "reload": false, "util1": false, "util2": false, "util3": false, "glide": false, "ult": false,
 	"sec": false, "sec_hold": false, "crouch": false, "gear1": false, "gear2": false, "swap": false}
 var base_speed := 5.4
 var ammo := 12
@@ -171,13 +170,19 @@ var air_dashed := false         # the merge's dodge in the air, used this airtim
 var _kst: Dictionary = {}       # owner stats from your kin this step (carry passives + merge), see owner_stat
 var gems := 0
 var lost_gems := 0
-var free_tonics := 0          # the guild forge's tonic: used first, never taken home
 var seeds := {}
 var caught: Array = []        # kin records caught this match
 var kills := 0
 var knocks := 0
 var dmg_done := 0.0
-var tonics := 0
+var belt: Array = UtilityBelt.empty()    # the 1/2/3 utility belt: three slots of {id, n, cd} (UtilityBelt)
+var belt_free: Dictionary = {}                # issued charges, used first and never taken home
+var tonics: int:                              # (the belt's tonics and armor kits, for the code that counts them)
+	get: return UtilityBelt.count(self, "tonic")
+	set(v): UtilityBelt.set_count(self, "tonic", v)
+var armor_kits: int:
+	get: return UtilityBelt.count(self, "armor_kit")
+	set(v): UtilityBelt.set_count(self, "armor_kit", v)
 var ai: Dictionary = {}
 var muzzle_t := 0.0
 var regen_wait := 0.0
@@ -270,6 +275,7 @@ func init_hunter(match_node: Node, id: String, team_id: int, class_id: String, n
 		bot_look = Models.random_look()
 	max_hp = cdat["hp"]; hp = max_hp
 	max_armor = round(max_hp * ARMOR_DUR); armor = max_armor; base_armor = max_armor
+	UtilityBelt.issue(self)
 	glide_max = GLIDE_TIME * float(cdat.get("glide_cap", 1.0))
 	base_speed = cdat["speed"]
 	runner = AbilityRunner.new(self)
@@ -1914,79 +1920,16 @@ func heal(n: float) -> void:
 	if hp - before > 1.0:
 		m.fx.number(pos + Vector3(0, 1.6, 0), hp - before, Color("8ff0a0"), false, "+")
 
-## Drinking a tonic takes a moment: you slow down, lower your gun and drink. Dashing, getting
-## stunned or going down spills it (you keep the tonic). It heals when you finish.
+## Drinking a tonic and repairing with an armor kit take a moment: you slow down, lower your gun and
+## are open to hits (CONSUME_VULN). Dashing, getting stunned or going down spills it (you keep the item).
+## The belt and what each item does: UtilityBelt, UtilityUse.
 const DRINK_TIME := 1.1
+const KIT_TIME := 1.6
 var drink_t := 0.0
+var kit_t := 0.0
 var vuln_fx_t := 0.0            # paces the pulsing "vulnerable" tell while drinking or repairing
-func use_tonic() -> void:
-	if tonics <= 0 or downed or hp >= max_hp or drink_t > 0.0:
-		return
-	_fold_for_action()
-	drink_t = DRINK_TIME
-	vuln_fx_t = 0.0
-	m.sfx("pickup", pos, -6.0, 0.7)
-	m.fx.word(pos + Vector3(0, 2.3, 0), "VULNERABLE", Color("ff6a4a"))
-
-## 1: heal. One key for both consumables: a tonic when you're hurt, otherwise an armor kit when
-## your armor is down. Pressing it with nothing to fix (or nothing to use) buzzes.
-func use_heal() -> void:
-	if drink_t > 0.0 or kit_t > 0.0:
-		return
-	if tonics > 0 and hp < max_hp - 0.5:
-		use_tonic()
-	elif armor_kits > 0 and armor < max_armor - 0.5:
-		use_kit()
-	else:
-		_ab_feedback("tonic", "deny")
-		return
-	_ab_feedback("tonic", "cast")
-
-## Repairing armor with a kit (2): the same kind of short channel as a tonic, with the same
-## vulnerability. Every hunter sets out with a small stack (KIT_START).
-const KIT_START := 2
-var armor_kits := KIT_START
 var finish_t := 0.0             # holding interact over a downed enemy (until the stomp commits)
 var stomp: Dictionary = {}      # committed stomp on an enemy wisp: {o, t, hits} (see Life)
-var kit_t := 0.0
-func use_kit() -> void:
-	if armor_kits <= 0 or downed or armor >= max_armor - 0.5 or kit_t > 0.0 or drink_t > 0.0:
-		return
-	_fold_for_action()
-	kit_t = KIT_TIME
-	vuln_fx_t = 0.0
-	m.sfx("build", pos, -6.0, 1.3)
-	m.fx.word(pos + Vector3(0, 2.3, 0), "VULNERABLE", Color("ff6a4a"))
-
-func _tick_kit(dt: float) -> void:
-	if kit_t <= 0.0:
-		return
-	if downed or stun_t > 0.0 or roll_t > 0.0 or gliding or out:
-		kit_t = 0.0
-		return
-	kit_t -= dt
-	if kit_t <= 0.0:
-		kit_t = 0.0
-		armor_kits -= 1
-		armor = max_armor
-		m.sfx("shield", pos, -2.0, 1.2)
-		m.fx.burst(pos + Vector3(0, 1.2, 0), Color("dfe9f7"), 16, 2.5, 0.5, -3.0)
-
-func _tick_drink(dt: float) -> void:
-	if drink_t <= 0.0:
-		return
-	if downed or stun_t > 0.0 or roll_t > 0.0 or gliding or out:
-		drink_t = 0.0
-		return
-	drink_t -= dt
-	if drink_t <= 0.0:
-		drink_t = 0.0
-		if tonics > 0:
-			tonics -= 1
-			free_tonics = maxi(0, free_tonics - 1)
-			heal(max_hp * 0.4 * (1.0 + 0.4 * float(perk_n("remedy")) + gear_stat("tonic")))
-			m.sfx("heal", pos, -2.0)
-			m.fx.burst(pos + Vector3(0, 1.2, 0), Color("8ff0a0"), 14, 2.5, 0.5, -3.0)
 
 ## Channelling a deathbox revive right now (Match._update_interact keeps box_rev_at fresh).
 func box_reviving() -> bool:
@@ -2029,7 +1972,7 @@ func sim(dt: float) -> void:
 			vel = Vector3.ZERO
 			if ctrl == "local" and inp["jump"]:
 				m.ship_jump(self)
-			for k in ["jump", "dash", "sig", "reload", "tonic", "ult", "fire", "skill", "swap"]:
+			for k in ["jump", "dash", "sig", "reload", "util1", "util2", "util3", "ult", "fire", "skill", "swap"]:
 				inp[k] = false
 		return
 	tick_status(dt)
@@ -2092,12 +2035,12 @@ func sim(dt: float) -> void:
 	# bringing a teammate back at their deathbox: kneeling over it, locked in place (let go of
 	# interact to stop)
 	if box_reviving():
-		for kk in ["dash", "jump", "sig", "skill", "sec", "ult", "swap", "reload", "tonic", "kit", "gear1", "gear2", "fire", "throw", "kin_ab"]:
+		for kk in ["dash", "jump", "sig", "skill", "sec", "ult", "swap", "reload", "util1", "util2", "util3", "gear1", "gear2", "fire", "throw", "kin_ab"]:
 			inp[kk] = false
 		inp["move"] = Vector2.ZERO
 	# mid-stomp you're committed: none of your own buttons do anything until it ends
 	if not stomp.is_empty():
-		for kk in ["dash", "jump", "sig", "skill", "sec", "ult", "swap", "reload", "tonic", "kit", "gear1", "gear2", "fire", "throw", "kin_ab"]:
+		for kk in ["dash", "jump", "sig", "skill", "sec", "ult", "swap", "reload", "util1", "util2", "util3", "gear1", "gear2", "fire", "throw", "kin_ab"]:
 			inp[kk] = false
 		inp["move"] = Vector2.ZERO
 	# inputs
@@ -2106,7 +2049,7 @@ func sim(dt: float) -> void:
 		_gate(gk[0], gk[1], gk[2])
 	KinDowned.commit(self)           # rescuing your Boki: rooted, nothing fires (a dash still cancels it)
 	if dropping and not grounded and ctrl != "bot":
-		for bk in ["sec", "sig", "ult", "tonic", "kit", "gear1", "gear2"]:
+		for bk in ["sec", "sig", "ult", "util1", "util2", "util3", "gear1", "gear2"]:
 			if inp.get(bk, false):
 				_break_drop()
 				break
@@ -2159,18 +2102,9 @@ func sim(dt: float) -> void:
 	if not abil_charge.is_empty():
 		_tick_charge(dt)
 	if inp["reload"]: start_reload()
-	if inp["tonic"]: use_heal()
-	if inp.get("kit", false):
-		# 2: the anvil. Nothing to repair (or no kit) buzzes, like the heal key
-		if kit_t > 0.0 or drink_t > 0.0:
-			pass
-		elif armor_kits > 0 and armor < max_armor - 0.5 and not downed:
-			use_kit()
-			_ab_feedback("kit", "cast")
-		else:
-			_ab_feedback("kit", "deny")
-	_tick_drink(dt)
-	_tick_kit(dt)
+	for ui in UtilityBelt.SLOTS:
+		if inp[UtilityBelt.KEYS[ui]]: UtilityBelt.press(self, ui)
+	UtilityBelt.tick(self, dt)
 	_tick_burst(dt)
 	_tick_weapon(dt)
 	swing_t = maxf(0.0, swing_t - dt)
@@ -2179,7 +2113,7 @@ func sim(dt: float) -> void:
 		else: use_ultimate()
 	trigger(dt)
 	inp["kin_ab"] = false
-	inp["dash"] = false; inp["jump"] = false; inp["sig"] = false; inp["reload"] = false; inp["tonic"] = false; inp["kit"] = false; inp["ult"] = false; inp["sec"] = false; inp["gear1"] = false; inp["gear2"] = false
+	inp["dash"] = false; inp["jump"] = false; inp["sig"] = false; inp["reload"] = false; inp["util1"] = false; inp["util2"] = false; inp["util3"] = false; inp["ult"] = false; inp["sec"] = false; inp["gear1"] = false; inp["gear2"] = false
 	inp["skill"] = false; inp["swap"] = false
 	_physics(dt)
 	var ad := aim_dir()
@@ -2948,8 +2882,8 @@ var bot_look: Dictionary = {}  # how a bot hunter looks (random)
 var runner: AbilityRunner     # weapon utility now; kin abilities later
 var dodge_def: AbilityDef     # the class's dodge
 var stats := {}                # this match's counts for challenges (the local player's)
-var gear: Array = Gear.empty_slots()     # five slots of found gear (Gear.SLOTS): {id, rar}
-var gear_cd: Array = [0.0, 0.0, 0.0, 0.0, 0.0]
+var gear: Array = Gear.empty_slots()     # four slots of found gear (Gear.SLOTS): {id, rar}
+var gear_cd: Array = [0.0, 0.0, 0.0, 0.0]
 
 # ---- run levels: like Supervive, you start each run at level 1 with one skill point and every
 # ability locked. XP comes from fighting (damage, knocks) and a slow trickle; each level gives a

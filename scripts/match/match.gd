@@ -83,7 +83,7 @@ var blight: BlightDir = null       # the Blight: its spawns, its scaling and wha
 var music_dir: MusicDir = null     # the layered score's levels (scripts/match/music_dir.gd)
 var collapse_warned := false
 var rng := RandomNumberGenerator.new()
-var pending_input := {"base": false, "dash": false, "jump": false, "sig": false, "reload": false, "tonic": false, "kit": false, "throw": false, "skill": false, "ult": false, "sec": false, "gear1": false, "gear2": false, "swap": false, "kin_ab": false}
+var pending_input := {"base": false, "dash": false, "jump": false, "sig": false, "reload": false, "util1": false, "util2": false, "util3": false, "throw": false, "skill": false, "ult": false, "sec": false, "gear1": false, "gear2": false, "swap": false, "kin_ab": false}
 var zones: Array = []      # hero areas: dome, sanctuary, well
 var fields: Fields = null  # patches made by kin abilities (Thorn Patch)
 var verbs: Verbs = null    # walls, reflect windows, tethers, traps, bridges and yanks left by abilities
@@ -1101,10 +1101,6 @@ func _spawn_hunters() -> void:
 			if t == 0 and s == 0 and not opts.get("spectate", false):
 				var rec: Dictionary = Save.active_kin()
 				var rec2: Dictionary = Save.second_kin()
-				if opts.get("loaner", false):
-					# a free-kit run: a loaner Boki, nothing of yours comes (Loaner)
-					rec = opts["loaner_rec"] if typeof(opts.get("loaner_rec", null)) == TYPE_DICTIONARY else Loaner.roll(kin_seed("loaner"))
-					rec2 = {}
 				if opts.has("demo_kin"):
 					var ids: Array = Data.common_kin()
 					var sp0 := String(opts["demo_kin"])
@@ -1127,15 +1123,10 @@ func _spawn_hunters() -> void:
 					at.y = world.ground_at(at.x, at.z)
 				if opts.has("zoom_hold"): set_meta("zoom_hold", float(opts["zoom_hold"]))
 				player.teleport(at)
-				player.tonics = mini(TONIC_CARRY, int(Save.d["items"].get("tonic", 0)) + 2); player.free_tonics = 2; tonic_stash_left = maxi(0, int(Save.d["items"].get("tonic", 0)) - (player.tonics - 2))     # everyone sets out with a couple, at most TONIC_CARRY in all; the rest stays home
-				if opts.get("loaner", false):
-					# the free kit: two free tonics, no keys, no treat; your stash stays home untouched
-					player.tonics = 2; player.free_tonics = 2; tonic_stash_left = int(Save.d["items"].get("tonic", 0))
-				elif not opts.get("tutorial", false) and not opts.get("training", false):
+				if not opts.get("tutorial", false) and not opts.get("training", false):
 					player.rift_keys = int(Save.d["items"].get("rift_key", 0))     # your Rift Keys come with you (and go in your box if you die)
-				_apply_home_perks(player)
-				_apply_armory_kit(player)
-				if player.kin and not opts.get("loaner", false):
+				Equal.start(self, player)       # gloves, boots and utility from home, capped by tier; nothing else (equal.gd)
+				if player.kin:
 					_apply_treat(player.kin)
 				_start_drop(player, at)
 				continue
@@ -1336,28 +1327,6 @@ func on_drop_landed(h: Hunter) -> void:
 		shake(0.25, h.pos)
 	if blight: blight.on_landed(h)
 	if rolling: rolling.on_landed(h)
-
-## Perks you carry from home: your workshop, and the projects your guild has finished.
-func _apply_home_perks(h: Hunter) -> void:
-	if Save.has_building("workshop"):
-		h.glide_max *= 1.5
-	var gp: Array = Save.d.get("guild_perks", [])
-	if gp.has("lighthouse"):
-		h.glide_max *= 1.25
-	if gp.has("forge"):
-		h.tonics += 1
-		h.free_tonics += 1
-
-## What you took from the armory: the gear you wear (at risk: die and it's in your deathbox like
-## everything else), and your backpack's size.
-func _apply_armory_kit(h: Hunter) -> void:
-	if opts.get("training", false) or opts.get("tutorial", false) or opts.get("duel", false):
-		return
-	h.pack_cap = Econ.pack_cap()
-	for it in opts.get("kit_items", []):
-		if String(it.get("t", "")) == "gear" and Gear.ALL.has(String(it["id"])):
-			h.gear[Gear.slot_of(String(it["id"]))] = {"id": it["id"], "rar": int(it["rar"])}
-	h.refresh_gear()
 
 func _apply_treat(k: Kin) -> void:
 	match String(Save.d.get("treat", "")):
@@ -1691,17 +1660,6 @@ func use_gear(h: Hunter, slot: int) -> void:
 		sfx("skill", h.pos, -4.0, 1.0)
 		return
 	match gid:
-		"jump_pad":
-			var d := h.aim_dir()
-			var at := Vector3(h.pos.x + d.x * 1.6, h.pos.y, h.pos.z + d.y * 1.6)
-			if world.is_void(at.x, at.z) or world.is_block(at.x, at.z):
-				at = h.pos
-			at.y = world.ground_at(at.x, at.z) if not world.is_void(at.x, at.z) else h.pos.y
-			var n := Models.gear_pad(col)
-			n.position = at
-			add_child(n)
-			gpads.append({"pos": at, "t": 20.0, "node": n, "cd": {}})
-			sfx("throw", h.pos, -2.0, 1.2)
 		"gust_fan":
 			var d := h.aim_dir()
 			h.vel = Vector3(d.x * 9.0, 13.0, d.y * 9.0)
@@ -1735,23 +1693,6 @@ func use_gear(h: Hunter, slot: int) -> void:
 			h.glide_fuel = 1.0
 			h.shot_down = false
 			sfx("shield", h.pos, 0.0, 0.8)
-		"smoke":
-			var n := Models.gear_smoke()
-			n.position = h.pos
-			add_child(n)
-			smokes.append({"pos": h.pos, "r": 3.6, "t": 8.0, "node": n})
-			sfx("cloak", h.pos, 0.0, 0.7)
-		"medkit":
-			h.heal(40.0)
-			h.armor = minf(h.max_armor, h.armor + 20.0)
-			fx.burst(h.pos + Vector3(0, 1.0, 0), col, 16, 3.0, 0.6, -3.0)
-			sfx("heal", h.pos, -2.0, 1.1)
-		"scanner":
-			for o in hunters:
-				if o.team != h.team and not o.out and o.flat_dist(h) < 26.0:
-					o.reveal_t = maxf(o.reveal_t, 3.0)
-			fx.ring(h.pos, 26.0, Color(col, 0.6), 0.8)
-			sfx("ping", h.pos, 0.0, 0.8)
 		"shock":
 			Abil._blast(h, h.pos, 3.4, 12.0, 13.0, col, 5.0, "gear")
 			shake(0.3, h.pos)
@@ -2878,7 +2819,7 @@ func _update_tracking(dt: float) -> void:
 ## Kin left behind where a hunter went down. They wait, dazed, for someone to collect them.
 func _leave_kin(h: Hunter) -> void:
 	for kk in [h.kin, h.kin2]:
-		if kk == null or not is_instance_valid(kk) or Loaner.is_loaner((kk as Kin).rec):
+		if kk == null or not is_instance_valid(kk):
 			continue
 		_leave_one_kin(h, kk)
 
@@ -3144,8 +3085,6 @@ func sees(team_i: int, p: Vector3, crouched := false, revealed := false) -> bool
 var _vis_t := 0.0
 var crouch_on := false
 var _perk_keys_down := {}
-var tonic_stash_left := 0     # tonics left in your stash at home this run (added back to what you carry out)
-const TONIC_CARRY := 5        # tonics you can bring into a run (two free + up to three from your stash)
 var _vis_tex_done := false
 func _update_vision() -> void:
 	# the dimming outside your view cone, drawn by the toon shaders
@@ -3223,7 +3162,7 @@ func drop(kind_s: String, at: Vector3, v: int, key := "", pid := "", vel0 = null
 		"tonic": n = Models.tonic()
 		"armor": n = Models.armor_shard()
 		"key": n = ExitModels.rift_key()
-		_: n = Models.gem()
+		_: n = UtilityBelt.pickup_model(kind_s) if UtilityBelt.is_item(kind_s) else Models.gem()
 	add_child(n)
 	n.position = at
 	var a := randf() * TAU
@@ -3249,7 +3188,7 @@ func _update_pickups(dt: float) -> void:
 				if net_on and not is_host and h != player:
 					continue
 				var d: float = Vector2(h.pos.x - pos.x, h.pos.z - pos.z).length()
-				if d < 2.2 and absf(h.pos.y - pos.y) < 2.0:
+				if d < 2.2 and absf(h.pos.y - pos.y) < 2.0 and UtilityBelt.can_take(h, String(p["kind"])):
 					var dir: Vector3 = (h.pos + Vector3(0, 0.6, 0) - pos)
 					v = dir.normalized() * (6.0 + (2.2 - d) * 6.0)
 					if dir.length() < 0.6:
@@ -3279,12 +3218,8 @@ func _collect(h: Hunter, p: Dictionary) -> void:
 	match p["kind"]:
 		"gem": h.gems += int(round(float(p["v"]) * (1.0 + 0.25 * h.perk_n("scavenger"))))
 		"seed": h.seeds[p["key"]] = int(h.seeds.get(p["key"], 0)) + int(p["v"])
-		"tonic":
-			h.tonics = mini(5, h.tonics + 1)
-			if h == player: hud.toast("+1 tonic", Color("8ff0a0"))
-		"armor":
-			h.armor_kits = mini(3, h.armor_kits + 1)
-			if h == player: hud.toast_small("+1 armor kit", Color("dfe9f7"))
+		"tonic", "armor": UtilityBelt.pickup(h, UtilityBelt.item_of(p["kind"]), 1)
+		_: if UtilityBelt.is_item(String(p["kind"])): UtilityBelt.pickup(h, String(p["kind"]), int(p["v"]))
 		"key":
 			h.rift_keys += 1
 			if h == player:
@@ -3967,15 +3902,15 @@ func _gather_input() -> void:
 			elif not perk_offer.is_empty() and not _perk_keys_down.has(pi):
 				_perk_keys_down[pi] = true
 				choose_perk(pi)
-	# the kit: Q glove, E kin ability, C throw kin, R bond, 1 heal, 2 armor kit (the second kin
+	# the kit: Q glove, E kin ability, C throw kin, R bond, 1 2 3 the utility belt (the second kin
 	# ability and kin swap are retired)
 	if Input.is_action_just_pressed("base") and not paused and duel == null and not opts.get("arena", false):
 		pending_input["base"] = true
 	var slot_of := {"dash": "dash", "secondary": "sec", "gear1": "gear", "signature": "kin", "ultimate": "ult"}
-	for a in [["dash", "dash"], ["jump", "jump"], ["signature", "sig"], ["reload", "reload"], ["tonic", "tonic"], ["armor_kit", "kit"], ["ultimate", "ult"], ["secondary", "sec"], ["gear1", "gear1"], ["kin_ability", "kin_ab"]]:
-		if a[0] in ["tonic", "armor_kit"] and (not perk_offer.is_empty() or not _perk_keys_down.is_empty()):
-			continue       # 1, 2 and 3 pick a perk while a choice is open
-		if a[0] == "armor_kit" and arena != null:
+	for a in [["dash", "dash"], ["jump", "jump"], ["signature", "sig"], ["reload", "reload"], ["util1", "util1"], ["util2", "util2"], ["util3", "util3"], ["ultimate", "ult"], ["secondary", "sec"], ["gear1", "gear1"], ["kin_ability", "kin_ab"]]:
+		if a[0] in UtilityBelt.KEYS and (not perk_offer.is_empty() or not _perk_keys_down.is_empty()):
+			continue       # 1, 2 and 3 pick a perk while a choice is open (until the perk prompt goes: ext/perkorbs)
+		if a[0] in ["util2", "util3"] and arena != null:
 			continue       # the Arena's 2-7 swap archetypes (and nothing wears out there)
 		if (map_up or on_panel) and a[0] in ["secondary", "throw"]:
 			continue       # right click takes your ping down while the map is up (and casts nothing over a window)
@@ -4450,7 +4385,7 @@ func step(dt: float) -> void:
 		if pending_input["base"]:
 			pending_input["base"] = false
 			player.start_base(base_target(player))
-		for k in ["dash", "jump", "sig", "reload", "tonic", "kit", "ult", "sec", "gear1", "gear2", "skill", "swap", "kin_ab"]:
+		for k in ["dash", "jump", "sig", "reload", "util1", "util2", "util3", "ult", "sec", "gear1", "gear2", "skill", "swap", "kin_ab"]:
 			if pending_input.get(k, false):
 				player.inp[k] = true
 				pending_input[k] = false
@@ -5146,7 +5081,7 @@ const TRAIN := [["move", "Walk around", "up"], ["dash", "Dash", "dash"], ["glide
 	["shoot", "Shoot a target dummy", "fire"], ["ability", "Use your E ability", "signature"], ["ult", "Use your ultimate (R: open from the start here)", "ultimate"],
 	["secondary", "Use your right click (tap it, then hold it)", "secondary"], ["glove", "Use your glove (pick one up from the rack first)", "gear1"],
 	["crouch", "Sneak: slower, steadier aim, harder to spot", "crouch"],
-	["throw", "Sic your Boki at a dummy", "throw"], ["combo", "Land a combo: shoot a foe your Boki just stunned or rooted", "fire"], ["tonic", "Heal (tonic, or armor kit when health is full)", "tonic"],
+	["throw", "Sic your Boki at a dummy", "throw"], ["combo", "Land a combo: shoot a foe your Boki just stunned or rooted", "fire"], ["tonic", "Heal with a tonic (belt slot 1)", "util1"],
 	["stagger", "Stagger a big dummy: hit it with an ability while it has a purple ring", "signature"],
 	["smash", "Break a crate or pot", "fire"], ["weapon", "Take a found weapon off the ground", "interact"],
 	["ledge", "Dash off an edge and float back up", ""]]
@@ -6027,7 +5962,6 @@ func _finish() -> void:
 	var r := result.duplicate()
 	r["time"] = time
 	r["tier"] = tier
-	if opts.get("loaner", false): r["loaner"] = true
 	if opts.get("tutorial", false):
 		Save.d["tutorial"]["match"] = true
 		r["tutorial"] = true
@@ -6044,8 +5978,8 @@ func _finish() -> void:
 		r["deaths"] = player.deaths
 		r["revives"] = player.revives
 		r["armor_tier"] = player.armor_tier
-		r["tonics"] = maxi(0, player.tonics - player.free_tonics) + tonic_stash_left
-		if not opts.get("tutorial", false) and not opts.get("loaner", false):
+		r["belt"] = Equal.belt_home(player, result.get("extracted", false))
+		if not opts.get("tutorial", false):
 			r["rift_keys"] = player.rift_keys if result.get("extracted", false) else 0
 		r["stats"] = player.stats.duplicate()
 		# weapons, gloves and treasure: home to the armory if you made it out, else what stayed behind
@@ -6062,18 +5996,18 @@ func _finish() -> void:
 		# what each kin you brought did, for its memories and growth
 		r["kin_runs"] = []
 		for kk in [player.kin, player.kin2]:
-			if kk == null or not is_instance_valid(kk) or Loaner.is_loaner((kk as Kin).rec): continue
+			if kk == null or not is_instance_valid(kk): continue
 			var k: Kin = kk
 			r["kin_runs"].append({"uid": String(k.rec.get("uid", "")), "events": k.events.duplicate(true), "trust": k.trust,
 				"stats": {"hits": k.st_hits, "kos": k.st_kos, "throws": k.st_throws, "skills": k.st_skills,
 				"revives": k.events.filter(func(e): return e["kind"] == "revived").size(), "caught": player.caught.size(),
 				"won": 1 if result.get("extracted", false) else 0}})
-		if is_instance_valid(player.kin) and not Loaner.is_loaner((player.kin as Kin).rec):
+		if is_instance_valid(player.kin):
 			var k0: Kin = player.kin
 			r["kin_events"] = k0.events.duplicate(true)
 			r["kin_trust"] = k0.trust
 		if not player_lost.is_empty() and not result.get("extracted", false):
-			r["lost_kin"] = (_resolve_lost() as Array).filter(func(L): return not Loaner.is_loaner(L.get("rec", {})))
+			r["lost_kin"] = _resolve_lost()
 		r["rivals"] = hunters.filter(func(x): return x.ctrl == "bot" and x.team != player.team).map(func(x): return x.pname)
 	var placed := 1
 	for h in hunters:
@@ -6120,8 +6054,7 @@ func _spawn_net_hunters(spots: Array, names: Array) -> void:
 		if peer == Net.me:
 			var rec: Dictionary = Save.active_kin()
 			player = make_hunter("P" + peer, t, String(r["cls"]), String(r["name"]), "local", rec, at, my_kit())
-			player.tonics = mini(TONIC_CARRY, int(Save.d["items"].get("tonic", 0)) + 2); player.free_tonics = 2; tonic_stash_left = maxi(0, int(Save.d["items"].get("tonic", 0)) - (player.tonics - 2))     # everyone sets out with a couple, at most TONIC_CARRY in all; the rest stays home
-			_apply_home_perks(player)
+			Equal.start(self, player)
 			if player.kin:
 				_apply_treat(player.kin)
 			_start_drop(player, at)

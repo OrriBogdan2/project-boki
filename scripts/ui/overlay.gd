@@ -257,7 +257,7 @@ func _show_settings() -> void:
 		"Controls":
 			UI.subtitle(v, "Two keys per action: click one, then press the new key or mouse button (Esc cancels, x clears it).")
 			var groups := [["Moving", ["up", "down", "left", "right", "jump", "glide", "dash", "crouch"]],
-				["Fighting", ["fire", "secondary", "gear1", "signature", "throw", "ultimate", "tonic", "armor_kit", "base"]],
+				["Fighting", ["fire", "secondary", "gear1", "signature", "throw", "ultimate", "util1", "util2", "util3", "base"]],
 				["Squad and map", ["map", "scores", "emote", "pass_lead", "separate"]],
 				["At home", ["interact", "play", "talk", "details", "inventory", "hero"]]]
 			var named := {}
@@ -517,7 +517,7 @@ func open_inventory() -> void:
 		"Items":
 			empty = false
 			cell.call("Gems", str(int(Save.d["gems"])), "Spend them at the stall, on buildings and furniture.", UI.GOLD, "", Callable(), "gem")
-			cell.call("Tonics", "×%d" % int(Save.d["items"].get("tonic", 0)), "Heal 45 in a match (key %s)." % Settings.key_cap("tonic"), Color("8ff0a0"), "", Callable(), "tonic")
+			cell.call("Tonics", "×%d" % int(Save.d["items"].get("tonic", 0)), "Heal 40% in a match (belt key %s)." % Settings.key_cap("util1"), Color("8ff0a0"), "", Callable(), "tonic")
 			for f in Care.FOODS:
 				var fn := int(Save.d["items"].get(f, 0))
 				if fn > 0: cell.call(Care.FOODS[f]["name"], "×%d" % fn, Care.FOODS[f]["desc"] + " Feed it from a Boki's card.", Care.FOODS[f]["col"])

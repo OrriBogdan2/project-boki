@@ -1,10 +1,10 @@
 class_name Gear
-## Gear found on expeditions. Five slots (SLOTS): an ACTIVE glove you fire with Q, a PASSIVE glove,
-## armor, boots and a utility kit. Rarity (Common to Legendary) lives here, not on weapons: a hunter
+## Gear found on expeditions. Four slots (SLOTS): an ACTIVE glove you fire with Q, a PASSIVE glove,
+## armor and boots. (Utility items are not gear: they live on the three-slot belt, UtilityBelt.) Rarity (Common to Legendary) lives here, not on weapons: a hunter
 ## carries one fixed signature weapon and grows it with weapon upgrades (WeaponUps). Every piece gives
 ## stats; a glove with a cooldown is the active one. Picking up a piece replaces the one in its slot
 ## (the old one drops). Gear lasts one expedition, like perks.
-## Defined in content/gear/*.json: name, slot ("armor", "boots" or "kit"; gloves leave it out and go
+## Defined in content/gear/*.json: name, slot ("armor" or "boots"; gloves leave it out and go
 ## by cooldown), cd, col, icon, stats, desc, and for most active gloves an "effects" list run through
 ## Effects (the same building blocks abilities use).
 
@@ -33,12 +33,12 @@ static func _load() -> void:
 		d["cd"] = float(d.get("cd", 0.0))
 		ALL[id] = d
 
-## Slot index: 0 active glove (Q), 1 passive glove, 2 armor, 3 boots, 4 utility kit.
-const SLOTS := ["glove", "passive", "armor", "boots", "kit"]
-const SLOT_NAMES := ["Active glove", "Passive glove", "Armor", "Boots", "Utility kit"]
+## Slot index: 0 active glove (Q), 1 passive glove, 2 armor, 3 boots.
+const SLOTS := ["glove", "passive", "armor", "boots"]
+const SLOT_NAMES := ["Active glove", "Passive glove", "Armor", "Boots"]
 
 static func empty_slots() -> Array:
-	return [{}, {}, {}, {}, {}]
+	return [{}, {}, {}, {}]
 
 static func active(id: String) -> bool:
 	return float(ALL.get(id, {}).get("cd", 0.0)) > 0.0

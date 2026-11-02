@@ -6,6 +6,8 @@ extends RefCounted
 ## Older checks still hooked inline in main.gd move here in the cleanup pass (docs/DEBT.md).
 
 const CHECKS := {
+	"--equal-check": ["res://tools/equal_check.gd", "equal_check", "all"],
+	"--equal-migrate-check": ["res://tools/equal_check.gd", "equal_check", "migrate"],
 	"--support-check": ["res://tools/support_check.gd", "support_check", "all"],
 	"--tender-combo-check": ["res://tools/support_check.gd", "support_check", "tender"],
 	"--rimewright-combo-check": ["res://tools/support_check.gd", "support_check", "rimewright"],

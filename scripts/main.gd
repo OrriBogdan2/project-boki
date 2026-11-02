@@ -141,6 +141,7 @@ func _ready() -> void:
 		if a.begins_with("--squad="): opts["squad"] = int(a.substr(8))
 		if a.begins_with("--bot-diff="): opts["bot_diff"] = a.substr(11)
 		if a == "--perk-demo": opts["perk_demo"] = true
+		if a == "--equal-demo": opts["equal_demo"] = true; opts["no_drop"] = true      # a hurt hunter with a full belt and levelled armor (screenshots)
 		if a.begins_with("--exit-demo="): opts["exit_demo"] = a.substr(12); opts["no_drop"] = true
 		if a == "--truce-demo": opts["truce_demo"] = true; opts["no_drop"] = true
 		if a.begins_with("--teammate-demo="): opts["teammate_demo"] = a.substr(16); opts["no_drop"] = true
@@ -435,7 +436,7 @@ func _ready() -> void:
 			print("ECONOMY_FLOOR CHECK failed to load, failures: 1")
 			get_tree().quit(1)
 			return
-		var efc = efc_s.new()      # never stuck: strays, the pens, free-kit runs, the Exchange, saves
+		var efc = efc_s.new()      # never stuck: strays, the pens, the Exchange, saves
 		set_meta("economy_floor_check", efc)
 		efc.run(self)
 		return
@@ -1127,9 +1128,9 @@ func _economy_check() -> void:
 	P.welem = "fire"
 	# 2. smart loot: gear on you first, then the pack, best first, never worse for better
 	var gid: String = Gear.ALL.keys()[0]
-	var b := {"owner": Q, "team": Q.team, "pos": P.pos, "gems": 10, "seeds": {"tidebloom": 2}, "caught": [], "tonics": 0, "kits": 0, "soul_until": 0.0,
+	var b := {"owner": Q, "team": Q.team, "pos": P.pos, "gems": 10, "seeds": {"tidebloom": 2}, "caught": [], "belt": [], "soul_until": 0.0,
 		"prog": {}, "node": null, "empty": false, "gear": [{"id": gid, "rar": 4}, {"id": "gale_mantle", "rar": 4}],
-		"pack": [Loot.valuable("old_coin"), Loot.valuable("crown_shard"), Loot.gear("magpie", 1), Loot.gear("windstep_boots", 2), Loot.valuable("sky_pearl")]}
+		"pack": [Loot.valuable("old_coin"), Loot.valuable("crown_shard"), Loot.gear("vest", 1), Loot.gear("windstep_boots", 2), Loot.valuable("sky_pearl")]}
 	P.pack = [Loot.valuable("kin_idol")]
 	P.pack_cap = 3
 	P.gear = Gear.empty_slots(); P.refresh_gear()
@@ -1147,20 +1148,21 @@ func _economy_check() -> void:
 	Save.d["roster"] = [Save.new_kin("cindle", "Pip")]
 	Save.d["active"] = Save.d["roster"][0]["uid"]
 	var haul := Pack.haul(P)
-	var n_arm := haul.filter(func(it): return String(it["t"]) != "val").size()
+	var n_arm := haul.filter(func(it): return String(it["t"]) != "val" and not Equal.salvages(it)).size()      # armor salvages on arrival
 	var out := Game.apply_result({"extracted": true, "haul": haul, "tier": 0, "gems": 5, "kin_runs": []})
 	ok.call(Econ.armory().size() == n_arm and int(Save.d["valuables"].get("crown_shard", 0)) == 1, "extract: %d pieces of gear in the armory, treasure in the vault %s" % [Econ.armory().size(), str(Save.d["valuables"])])
 	ok.call((out.get("haul", []) as Array).size() == haul.size(), "results list what came home (%d)" % (out.get("haul", []) as Array).size())
 	ok.call(int((out.get("mats", {}) as Dictionary).get("wood", 0)) > 0 and Work.mat("wood") > 0, "extract: the haul also gives farm materials %s" % str(out.get("mats", {})))
-	var best_w: Dictionary = Econ.armory().filter(func(it): return String(it["t"]) == "gear")[0]
+	var best_w: Dictionary = Econ.armory().filter(func(it): return Equal.may_bring(it, 2))[0]
 	Econ.set_loadout(Econ.gear_slot(best_w), String(best_w["uid"]))
-	var kit := Econ.begin_raid()
+	var kit := Equal.take_loadout(2)
 	ok.call(kit.size() == 1 and Econ.find(String(best_w["uid"])).is_empty() and (Save.d["raid_out"] as Array).size() == 1, "loadout leaves the armory for the expedition")
 	Game.apply_result({"extracted": true, "haul": kit, "tier": 0, "kin_runs": []})
 	ok.call(not Econ.find(String(best_w["uid"])).is_empty() and not Econ.loadout(Econ.gear_slot(best_w)).is_empty(), "extracting brings the loadout gear back, still picked")
-	Econ.begin_raid()
+	Equal.take_loadout(2)
 	Game.apply_result({"extracted": false, "why": "knocked out", "lost_items": [best_w], "tier": 0, "kin_runs": []})
 	ok.call(Econ.find(String(best_w["uid"])).is_empty() and Econ.loadout(Econ.gear_slot(best_w)).is_empty(), "dying loses the loadout gear")
+	if Econ.armory().size() < 2: Save.d["armory"].append(Loot.gear("skylark_boots", 2))      # armor salvages on arrival now; make sure two pieces are left
 	var sold := Econ.sell(String(Econ.armory()[0]["uid"]))
 	var scrap := Econ.salvage(String(Econ.armory()[0]["uid"]))
 	ok.call(sold > 0 and scrap > 0, "sell (%d gems) and salvage (%d scrap)" % [sold, scrap])
@@ -1217,7 +1219,7 @@ func _economy_check() -> void:
 	ok.call(not back.is_empty() and back["ghost"] and String(back["title"]) != "" and int(back["level"]) == 4 and tdiff > 0.05 and Save.d["roster"].has(back) and not Econ.graves().has(g) and Econ.embers() == 0, "revived kin comes back changed")
 	# an old save (from before the armory and feeders) loads and gets them filled in
 	var old := Save.fresh()
-	for k in ["armory", "raid_out", "loadout", "valuables", "feeders", "graves", "arm_lvl", "pack_lvl", "scrap", "feeder_inv", "feeder_given"]:
+	for k in ["armory", "raid_out", "loadout", "valuables", "feeders", "graves", "arm_lvl", "scrap", "feeder_inv", "feeder_given"]:
 		old.erase(k)
 	var orec := Save.new_kin("zapple", "Oldie")
 	orec.erase("starve")
@@ -1225,7 +1227,7 @@ func _economy_check() -> void:
 	Save.d = old
 	Econ.ensure()
 	Care.catch_up(orec)
-	ok.call(Econ.armory().is_empty() and Econ.feeders().size() == 1 and Econ.graves().is_empty() and Econ.pack_cap() == Econ.PACK_CAPS[0] and Care.starve_stage(orec) == "" and Econ.begin_raid().is_empty(), "an old save loads: a first trough, empty armory, %d-slot backpack" % Econ.pack_cap())
+	ok.call(Econ.armory().is_empty() and Econ.feeders().size() == 1 and Econ.graves().is_empty() and Econ.pack_cap() == Equal.BASE_PACK and Care.starve_stage(orec) == "" and Equal.take_loadout(0).is_empty(), "an old save loads: a first trough, empty armory, %d-slot backpack" % Econ.pack_cap())
 	print("ECON DONE failures: %d" % bad[0])
 	get_tree().quit()
 

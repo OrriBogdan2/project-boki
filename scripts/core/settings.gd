@@ -92,7 +92,7 @@ const ACTIONS := [
 	["up", "Move up"], ["down", "Move down"], ["left", "Move left"], ["right", "Move right"],
 	["fire", "Weapon attack"], ["secondary", "Archetype ability (right click)"], ["dash", "Archetype dash"], ["jump", "Jump (hold to glide)"], ["glide", "Glide (hold in the air)"], ["crouch", "Sneak"],
 	["gear1", "Glove active"], ["signature", "Archetype utility (E)"], ["kin_ability", "Boki ability (cast from where your Boki is)"], ["throw", "Boki orders: tap to Sic or Call back, hold for the order wheel"], ["ultimate", "Merge with your Boki (needs a full bond meter)"], ["base", "Base to a teammate (squads)"],
-	["interact", "Use, scan, revive, pet"], ["tonic", "Heal (tonic, or armor kit when health is full)"], ["armor_kit", "Repair armor (armor kit)"], ["scores", "Scoreboard"], ["emote", "Emote wheel (hold, in a match)"],
+	["interact", "Use, scan, revive, pet"], ["util1", "Utility belt slot 1 (a tonic to start)"], ["util2", "Utility belt slot 2 (an armor kit to start)"], ["util3", "Utility belt slot 3"], ["scores", "Scoreboard"], ["emote", "Emote wheel (hold, in a match)"],
 	["map", "Full map (click to ping)"], ["pass_lead", "Pass the drop lead"], ["separate", "Separate from the drop"],
 	["play", "Play fetch with a Boki"], ["talk", "Talk to a Boki"], ["details", "A Boki's details"], ["inventory", "Inventory"],
 	["build", "Build mode at home / decorate indoors"], ["hero", "Change hero (at home)"], ["rotate", "Turn a piece (build mode)"],
@@ -124,6 +124,7 @@ func _ready() -> void:
 		v["keys"] = {}          # the kit changed (archetypes: E utility, C kin ability, G send/recall): start from the new defaults
 		v["keys_v"] = KEYS_V
 	_migrate_keys2()
+	_migrate_belt_keys()
 	if int(v.get("video_v", 1)) < 2 or not cf.has_section_key("s", "video_v"):
 		# crisper by default: 4x MSAA on desktop (the browser build stays on 2x)
 		if int(v.get("msaa", 2)) == 2 or not cf.has_section_key("s", "msaa"): v["msaa"] = 2 if OS.has_feature("web") else 4
@@ -158,6 +159,14 @@ func _migrate_keys2() -> void:
 			if ul.is_empty(): ul.append("key:%d" % KEY_R)
 			ul.append("key:%d" % KEY_X)
 	v["keys2_v"] = 1
+
+## The heal and armor-kit keys became belt slots 1 and 2 (ext/equal): custom bindings move across.
+func _migrate_belt_keys() -> void:
+	var ks: Dictionary = v["keys"]
+	for pair in [["tonic", "util1"], ["armor_kit", "util2"]]:
+		if ks.has(pair[0]):
+			if not ks.has(pair[1]): ks[pair[1]] = ks[pair[0]]
+			ks.erase(pair[0])
 
 ## Called by Game once the input actions exist, so saved key bindings can replace them.
 func apply_all() -> void:

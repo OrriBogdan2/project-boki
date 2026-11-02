@@ -118,8 +118,10 @@ func show_result(r: Dictionary) -> void:
 		hf.add_theme_constant_override("h_separation", 8); hf.add_theme_constant_override("v_separation", 8)
 		for i in haul.size():
 			var it: Dictionary = haul[i]
-			hf.add_child(_chip(Loot.icon_of(it), Loot.name_of(it) + ("  (sold)" if it.get("sold", false) else ""), Loot.col_of(it), 0.9 + i * 0.1))
+			hf.add_child(_chip(Loot.icon_of(it), Loot.name_of(it) + ("  (sold)" if it.get("sold", false) else ("  (salvaged)" if it.get("salvaged", false) else "")), Loot.col_of(it), 0.9 + i * 0.1))
 		v.add_child(hf)
+		if int(s.get("salvage_gems", 0)) > 0:
+			v.add_child(_note("Armor isn't kept: what you found salvaged for %d gems." % int(s["salvage_gems"]), UI.GOLD))
 		if int(s.get("arm_sold", 0)) > 0:
 			v.add_child(_note("Your armory was full: what didn't fit sold for %d gems." % int(s["arm_sold"]), UI.GOLD))
 	var lost_it: Array = s.get("lost_items", [])
@@ -150,10 +152,6 @@ func show_result(r: Dictionary) -> void:
 		v.add_child(lc)
 	for nw in s.get("ransom_news", []):
 		v.add_child(_note(String(nw), Color("ffd58a")))
-	if s.get("loaner", false):
-		v.add_child(_note("Free-kit run: the loaner Boki went back to %s. Nothing of yours was at risk." % BokiPens.MERCHANT, Color("bfe9ff")))
-	if int(s.get("stipend", 0)) > 0:
-		v.add_child(_note("%s topped up your take by %d gems for making it out." % [BokiPens.MERCHANT, int(s["stipend"])], UI.GOLD))
 	for ps in s.get("pens_sold", []):
 		v.add_child(_note("%s sold at the Drift Pens: +%d gems." % [String(ps["rec"].get("name", "A Boki")), int(ps["paid"])], UI.GOLD))
 	if not (s.get("exchange_fills", []) as Array).is_empty():
