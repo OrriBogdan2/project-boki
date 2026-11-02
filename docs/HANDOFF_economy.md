@@ -1,43 +1,33 @@
 # Handoff: ext/economy (Agent D)
 
-Branch `ext/economy`. Net.VERSION 0.9.2 (after merging sync57, main 0.9.0). Written on resume after the first agent stopped; this is the running status.
+Branch `ext/economy`, merged with main sync58 (e5f25ec, Net 0.10.0). Trimmed on the owner's call: tamed Boki no longer follow you. Main has follow-by-default for your one active Boki and capture-by-scan into the box, so the follower work was removed.
 
 ## Status
 
 | Item | Code | Check | Status |
 |---|---|---|---|
-| Follower Boki | `scripts/match/follow.gd` (+ `follow_demo.gd`), thin wiring in kin.gd / match.gd / hud.gd / life.gd / bot.gd | `--follower-check` | done; rebuilt on the shipped Boki system (below) |
-| Economy floor + cheap Boki market (Drift Pens) | `scripts/core/lifeline.gd`, `boki_pens.gd`, `scripts/home/home_market.gd` | `--economy-floor-check` | done |
+| Economy floor (stray common on the farm when you have no Boki; last Boki can't be released or listed) | `scripts/core/lifeline.gd`, wiring in game.gd / home.gd / results.gd | `--economy-floor-check` | done |
+| Cheap Boki market (Drift Pens) | `scripts/core/boki_pens.gd`, `scripts/home/home_market.gd` | `--economy-floor-check` | done |
 | Free-kit loaner Boki | `scripts/core/loaner.gd`, wiring in game.gd / match.gd / results.gd / home.gd | `--economy-floor-check` | done |
-| Exchange (order book) + server design doc | `scripts/core/exchange.gd`, `docs/EXCHANGE_SERVER.md` | `--economy-floor-check` | local version done; server is a design doc |
-| `--follower-check` | `tools/follower_check.gd` | | registered inline in main.gd (the registry does not exist on this tree; move it when it lands) |
-| `--economy-floor-check` | `tools/economy_floor_check.gd` | | same |
-| Bots | `Follow.bot_goals` called from bot.gd `_choose`; bots run into a downed follower and go after rivals' strays | in `--follower-check` | done |
+| Tradewind Exchange (order book) + server design | `scripts/core/exchange.gd`, `docs/EXCHANGE_SERVER.md` | `--economy-floor-check` | local version done; server is a design doc |
+| `--economy-floor-check` | `tools/economy_floor_check.gd` | | registered inline in main.gd (the registry does not exist on this tree; move it when it lands) |
 
-## Followers on the shipped Boki system (sync57)
+## What was removed in this trim
 
-A follower is a Kin with `role = "follow"`, state `follow` while walking. It uses the shipped pieces, none of them edited:
-- Going down: `Kin.go_down` -> `KinDowned.begin`. It lies where it fell, gets the pillar marker and the squad arrow / label (`BokiHud`), and the owner scoops it by running into it (`KinDowned.tick`), or it comes round on the timer. A fall into the abyss is the timer only. `Follow.on_down` (called from `Match.on_kin_down`) only counts it for stats.
-- Coming round hops the Boki onto the shoulder; `Follow.sim_follow` sees `shoulder` on a follower and puts it back to walking beside you.
-- Sync: `KinNet.kin_extra` fields 19..22, then `Follow.net_extra` fields 23..28 (role, in the satchel, steal seconds, hunter nid, hunter name, team). `Follow.net_apply` reads them. Events are untouched ("fgone" is the only extra event).
-- Bots: a downed follower is a "boki" goal like `BotKin.rescue_goal`; strays use the "catch" goal.
-- The old "ko" state, F-to-pick-up interact and `Follow.pick_up` are gone (F stays reserved).
+`scripts/match/follow.gd`, `follow_demo.gd`, `--follower-check` and its tool, `--follow-demo`, `Follow.net_extra` / `net_apply` (sync fields 23-28, the "fgone" event, `KIN_ROLES`, the `follow` kin state, `Hunter.follower`, the `owner_of` change in net.gd), the `follow_steal` tier keys, the `_bring_home` helper and follower result in game.gd, the follower notes in results.gd, the follower and stray HUD, and every follower hook in kin.gd, match.gd, life.gd, bot.gd, hud.gd and hunter.gd. `scripts/match/kin.gd`, `bot.gd`, `hud.gd`, `hunter.gd` and `net.gd` are now identical to origin/main. The sync shape equals main's, so Net.VERSION stays at main's 0.10.0.
+
+An idea for a left-behind active Boki (rivals get a short window to capture it) is filed in `docs/DEBT.md`; main already has the `lost_from` rule.
+
+## How the kept pieces meet sync58
+
+- Boki bought at the Drift Pens or a stray common go to the farm roster (`KinBox.route_new`) and never into a match. A bought Boki only becomes the active one when you have none, and it joins a match only if it is your active pick.
+- The free-kit loaner is the hunter's one active Boki (`kin2` is empty). It uses the shipped follow (`cmd = "follow"`, Sic, Call back, wheel) like any other, never drops into a box, is never left behind, and goes home to Wenna.
+- Caught Boki in a free-kit run go into the box as usual (capture.gd); nothing here touches capture, taming wording or the reserved Boki-system files.
 
 ## Touch points in files the main session owns
 
-No edits to scripts/kin/*, kin_merge.gd, kin_companion.gd, kin_command.gd, kin_downed.gd, kin_net.gd, bot_kin.gd, boki_hud.gd, the Hunter R input, or any G/C/R/F binding. In `scripts/match/kin.gd` (not in the faint/recall/command code):
-1. `state` comment lists `follow`; new vars `role`, `tucked`, `steal_*`.
-2. `hittable()`: a walking follower is hittable unless tucked.
-3. sim dispatch: `"follow": Follow.sim_follow` and `shoulder` for a follower goes to `Follow.sim_follow`.
-4. `_sim_dazed`: a stray just stands.
-5. `hurt()`: tucked takes no damage.
-6. `render()`: visibility rules for a follower, and `follow` counts as out for the ring.
-
-## Missing hooks (list for the main session, not edited)
-- `KinDowned.rescuable` requires `owner_h` not riding/dropping, fine for followers. A follower tucked while the owner glides can't be hit, so it never goes down in the air; no hook needed.
-- If Boki-system code later iterates `h.kin` / `h.kin2` only, followers are invisible to it by design. If the main session wants followers to count for `_check_team`, that needs a line in match.gd `_check_team`.
-
-## Order done
-1. sync56 and sync57 merged. Logic moved out of match.gd into `follow_demo.gd` and `Follow.finish_later` so health stays inside budget.
-2. Followers rebuilt on KinDowned / KinNet.
-3. Checks, screenshots in `/home/claude/shots/D/` (follower_down_after_sync57.png is the downed follower on the shipped marker).
+- `match.gd`: loaner spawn options in `_spawn_hunters`, `_leave_kin` and `_finish` skip a loaner, `r["loaner"]`. No sync changes.
+- `life.gd`: `kin_on_death` keeps a loaner out of the deathbox (it goes "away").
+- `game.gd`: `apply_result` calls `Loaner.settle`, `BokiPens.tick`, `Exchange.tick`, `Lifeline.check`.
+- `home.gd`, `results.gd`, `main.gd`: market tabs, free-kit button, stray notice, the `--economy-floor-check` hook.
+- `tools/boki_system_check.gd`: the Net version check is "at least 0.10.0" so branches that bump Net don't fail it.

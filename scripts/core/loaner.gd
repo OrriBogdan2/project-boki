@@ -10,7 +10,7 @@ class_name Loaner
 ## or remembers). Your own Boki, armory, tonics, keys and treat are untouched whatever happens.
 ##
 ## Loot rules stay the usual ones: whatever you extract with comes home (gems, seeds, treasure, found
-## weapons and gloves, a Boki you tamed); die and it's in your deathbox like anyone's. An extract
+## weapons and gloves, a Boki you captured); die and it's in your deathbox like anyone's. An extract
 ## pays at least MIN_PAY gems in all (Wenna's stipend), enough for the cheapest Boki at the pens.
 
 const MIN_PAY := 45

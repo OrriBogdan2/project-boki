@@ -83,7 +83,7 @@ var blight: BlightDir = null       # the Blight: its spawns, its scaling and wha
 var music_dir: MusicDir = null     # the layered score's levels (scripts/match/music_dir.gd)
 var collapse_warned := false
 var rng := RandomNumberGenerator.new()
-var pending_input := {"base": false, "dash": false, "jump": false, "sig": false, "reload": false, "tonic": false, "kit": false, "throw": false, "hold": false, "skill": false, "ult": false, "sec": false, "gear1": false, "gear2": false, "swap": false, "kin_ab": false}
+var pending_input := {"base": false, "dash": false, "jump": false, "sig": false, "reload": false, "tonic": false, "kit": false, "throw": false, "skill": false, "ult": false, "sec": false, "gear1": false, "gear2": false, "swap": false, "kin_ab": false}
 var zones: Array = []      # hero areas: dome, sanctuary, well
 var fields: Fields = null  # patches made by kin abilities (Thorn Patch)
 var verbs: Verbs = null    # walls, reflect windows, tethers, traps, bridges and yanks left by abilities
@@ -931,7 +931,7 @@ func make_hunter(id: String, team: int, cls: String, pname: String, ctrl: String
 		var k := Kin.new()
 		k.init_kin(self, id + "k", kin_rec["species"], kin_rec, h)
 		add_child(k)
-		k.teleport(at + Vector3(0, 1.5, 0))
+		k.teleport(at + Vector3(1.0, 0, 0.7))        # out at your side (KinFollow)
 		kins.append(k)
 		ents_by_id[k.nid] = k
 		h.kin = k
@@ -2468,7 +2468,6 @@ func eliminate(h: Hunter, by: Ent, why: String, final := false) -> void:
 		h.gems = 0; h.seeds = {}; h.caught = []
 		# the kin they brought are left behind, dazed, for anyone to collect
 		_leave_kin(h)
-		Follow.owner_left(self, h, "gone")
 		h.gone = true
 	if h == player:
 		if not waiting:
@@ -2722,7 +2721,6 @@ func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
 		player.kin.bark("kill")
 
 func on_kin_down(k: Kin) -> void:
-	if k.role == "follow": Follow.on_down(k)
 	if k.owner_h == player:
 		add_feed("%s is down" % k.rec.get("name", "Your Boki"))
 		if hud:
@@ -2911,7 +2909,7 @@ func give_kin(h: Hunter, rec: Dictionary) -> Kin:
 	var k := Kin.new()
 	k.init_kin(self, next_id(h.nid + "k"), rec["species"], rec, h)
 	add_child(k)
-	k.teleport(h.pos + Vector3(0, 1.5, 0))
+	k.teleport(h.pos + Vector3(1.0, 0, 0.7))
 	kins.append(k)
 	ents_by_id[k.nid] = k
 	if h.kin == null or (h.kin as Kin).dead:
@@ -2999,7 +2997,7 @@ func _resolve_lost() -> Array:
 
 func on_wild_dazed(k: Kin) -> void:
 	if player and k.flat_dist(player) < 10.0:
-		add_feed("The wild %s is dazed. Hold %s to tame it!" % [Data.KIN[k.species]["name"], Settings.key_cap("interact")])
+		add_feed("The wild %s is knocked out. Hold %s beside it to scan it." % [Data.KIN[k.species]["name"], Settings.key_cap("interact")])
 
 ## A monster's stagger window opened.
 func on_stag_open(mb: Mob) -> void:
@@ -3136,6 +3134,7 @@ func _update_vision() -> void:
 
 func _exit_tree() -> void:
 	RenderingServer.global_shader_parameter_set("vis_on", 0.0)
+	Capture.teardown(self)           # scan beams and hums outlive the match otherwise
 	for key in box_hums.keys():
 		Sfx.loop_stop(String(key))
 	box_hums.clear()
@@ -3829,16 +3828,7 @@ func _process(delta: float) -> void:
 		if mate:
 			foc = mate.prev.lerp(mate.pos, alpha)
 			cam.zoom_to = 1.0
-		var fw: Kin = Follow.watch(self)
-		if fw and (player.gone or mate == null):
-			foc = fw.prev.lerp(fw.pos, alpha)
-			cam.zoom_to = 0.9
 		cam.follow(foc, delta, false)
-	elif player and Follow.watch(self):
-		# extracted without your follower: watch its steal window before the results
-		var fw2: Kin = Follow.watch(self)
-		cam.zoom_to = 0.9
-		cam.follow(fw2.prev.lerp(fw2.pos, alpha), delta, false)
 	elif player:
 		cam.follow(cam.focus, delta, false)
 	_vprof("camera")
@@ -3892,9 +3882,8 @@ func _gather_input() -> void:
 	var on_panel: bool = hud != null and hud.mouse_on_panel()      # ... and so do the item windows under the cursor
 	if paused:
 		player.inp["move"] = Vector2.ZERO
-	var g_press := KinCommand.poll(player, get_process_delta_time(), paused or map_up or on_panel)       # G: tap throws / recalls, hold toggles hold / follow
-	if g_press != "":
-		pending_input["throw" if g_press == "tap" else "hold"] = true
+	if KinCommand.poll(player, get_process_delta_time(), paused or map_up or on_panel) == "tap":       # G: tap sics / calls back, hold opens the order wheel
+		pending_input["throw"] = true
 	player.inp["interact"] = Input.is_action_pressed("interact")
 	if lairs and not lairs.puzzle_of(player).is_empty():
 		var pad := Input.get_connected_joypads().size() > 0 and (Input.is_joy_button_pressed(0, JOY_BUTTON_A) or Input.is_joy_button_pressed(0, JOY_BUTTON_X))
@@ -4042,8 +4031,6 @@ func step(dt: float) -> void:
 		if int(time * 60.0) % 90 == 0: player.inp["sig"] = true
 		if time > 4.0 and int(time * 60.0) % 240 == 0:
 			player.ult = 1.0; player.inp["ult"] = true
-	if opts.has("follow_demo") and player and not player.dropping:
-		FollowDemo.run(self, dt)
 	if opts.get("life_demo", false) and player and time < 0.05 and not beacons.is_empty():
 		# test: stand by a revive beacon with a teammate's deathbox next to it
 		var bc: Vector3 = beacons[0]["pos"]
@@ -4412,13 +4399,12 @@ func step(dt: float) -> void:
 		if pending_input["throw"]:
 			pending_input["throw"] = false
 			KinCommand.tap(player)
-		if pending_input["hold"]:
-			pending_input["hold"] = false
-			KinCommand.toggle_mode(player)
+		KinCommand.apply_pick(player)
 	_prof("pre")
 	for h in hunters:
 		if h.ctrl == "bot" and not h.remote and not h.out and not h.extracted:
 			bot_brain.think(self, h, dt)
+	Capture.tick(self, dt)          # a running scan roots its hunter, after the bots have decided
 	_prof("bots")
 	if skytrain: skytrain.tick(dt)
 	if opts.has("train_demo") and skytrain and player:
@@ -4443,7 +4429,6 @@ func step(dt: float) -> void:
 	if skydrop: skydrop.tick(dt)
 	_prof("drop")
 	for k in kins: k.sim(dt)
-	Follow.tick(self, dt)
 	_prof("kins")
 	for mb in mobs: mb.sim(dt)
 	if blight: blight.tick(dt)
@@ -4645,15 +4630,15 @@ func _update_pads(dt: float) -> void:
 var _dex_t := 0.0
 var _shimmer_told := {}
 
-## Wild kin you get a look at go in the Kindex. A shimmer gets called out.
+## Wild kin you get a look at go in the Field Book (FieldBook). A shimmer gets called out.
 func _update_dex(dt: float) -> void:
 	_dex_t -= dt
 	if _dex_t > 0.0 or player == null or player.out or opts.get("autoplay", false):
 		return
 	_dex_t = 1.0
+	FieldBook.scan_sights(self)          # a wild Boki in view goes in the Field Book, with where you saw it
 	for k in kins:
 		if k.is_wild() and not k.dead and player.flat_dist(k) < 11.0:
-			Care.dex_mark(k.species, "seen")
 			if Mutations.special(k.rec) and not _shimmer_told.has(k.nid):
 				_shimmer_told[k.nid] = true
 				var rare := " ".join(Mutations.tags(k.rec))
@@ -4790,14 +4775,11 @@ func _update_interact(dt: float) -> void:
 		if not want:
 			h.set_meta("loot_hold", false)
 			h.set_meta("box_broke", false)
-		# 2. catch a dazed wild kin (not in training: practice kin go home with nobody)
+		# 2. scan a knocked-out wild kin (Capture; not in training: practice kin go home with nobody)
 		if best.is_empty() and not opts.get("training", false):
 			for k in kins:
-				if k.state == "dazed" and not k.dead and h.flat_dist(k) < 1.9 and Follow.can_steal(h, k):
-					if k.role == "stray":
-						best = {"kind": "catch", "ent": k, "label": "Hold %s to tame %s's %s  (%d s left)" % [Settings.key_cap("interact"), k.steal_from, Data.KIN[k.species]["name"], int(ceil(k.steal_t))], "col": Color("ffd23f")}
-						break
-					best = {"kind": "catch", "ent": k, "label": ("Hold %s to take %s with you" % [Settings.key_cap("interact"), k.rec.get("name", "the Boki")]) if k.lost_from != "" else ("Hold " + Settings.key_cap("interact") + " to tame the %s" % Data.KIN[k.species]["name"])}
+				if k.state == "dazed" and not k.dead and h.flat_dist(k) < float(Capture.rules()["range"]):
+					best = {"kind": "catch", "ent": k, "label": CaptureHud.prompt(h, k)}
 					break
 		# 3. swap to a weapon on the ground
 		if best.is_empty():
@@ -4907,16 +4889,7 @@ func _update_interact(dt: float) -> void:
 							Life.box_revive(self, b, h)
 						else: Life.loot_box(self, h, b)
 			"catch":
-				var k: Kin = best["ent"]
-				h.set_hold("tame")
-				# capturing someone's lost kin takes longer than catching a wild one; a stray's
-				# tame also starts over if the tamer is hit (Follow)
-				if k.role == "stray":
-					Follow.steal_progress(self, h, k, dt)
-				else:
-					k.catch_prog += dt / (float(T.get("capture_time", 3.0)) if k.lost_from != "" else 1.3)
-				if k.catch_prog >= 1.0:
-					_catch(h, k)
+				Capture.hold(self, h, best["ent"], dt)
 			"chest":
 				var c: Dictionary = best["chest"]
 				h.set_hold("chest")
@@ -4941,7 +4914,7 @@ func _update_interact(dt: float) -> void:
 func _catch(h: Hunter, k: Kin) -> void:
 	if opts.get("training", false):
 		return
-	if net_on and not Net.owns(k.nid) and (not is_host or k.role != ""):
+	if net_on and not is_host:
 		if k.catch_prog < 5.0:
 			k.catch_prog = 5.0
 			net_event(["catch", k.nid, h.nid])
@@ -4952,8 +4925,6 @@ func _catch(h: Hunter, k: Kin) -> void:
 	k.visible = false
 	var rec: Dictionary = k.rec.duplicate(true)
 	rec["caught_at"] = where_at(k.pos)       # provenance: where it was caught (Save.register)
-	if k.role == "stray":
-		Follow.stolen(self, k, h)
 	if k.lost_from != "":
 		# someone's lost kin: it keeps who it is, and we remember who has it now
 		rec["lost_from"] = k.lost_from
@@ -4969,14 +4940,9 @@ func _catch(h: Hunter, k: Kin) -> void:
 	else:
 		rec["trust"] = 20.0
 		rec["memory"] = []
-	var fol: Kin = Follow.take(self, h, rec, k.pos) if k.role != "stray" else null
-	if fol == null and not h.caught.has(rec):
-		h.caught.append(rec)
-	sfx("catch", k.pos, 0.0)
-	fx.burst(k.pos + Vector3(0, 0.5, 0), Data.KIN[k.species]["color"], 26, 4.0, 0.7)
-	fx.ring(k.pos, 1.5, Color("fff2a0"), 0.4)
+	h.caught.append(rec)
 	if h == player:
-		if fol == null: add_feed("The %s trusts you now. Extract to bring it home." % Data.KIN[k.species]["name"])
+		add_feed("%s is in your box (%d/%d). Extract to bring it home." % [Data.KIN[k.species]["name"], h.caught.size(), Capture.box_cap()])
 		if player.kin and player.kin.state != "downed":
 			player.kin.bark("caught")
 
@@ -5119,7 +5085,7 @@ const TUT := [
 	["shoot", "%W"],
 	["utility", "Press %K: %A"],
 	["kin1", "Press %K: %s uses %A"],
-	["throw", "Press %K to throw %s at the monster"],
+	["throw", "Press %K to Sic %s at the monster"],
 	["chest", "Walk to the chest and hold %K to open it"],
 	["goexit", "Follow the marker to the outpost: its uplink calls you a way home"],
 	["uplink", "Hold %K at the uplink mast to start it"],
@@ -5137,7 +5103,7 @@ const TRAIN := [["move", "Walk around", "up"], ["dash", "Dash", "dash"], ["glide
 	["shoot", "Shoot a target dummy", "fire"], ["ability", "Use your E ability", "signature"], ["ult", "Use your ultimate (R: open from the start here)", "ultimate"],
 	["secondary", "Use your right click (tap it, then hold it)", "secondary"], ["glove", "Use your glove (pick one up from the rack first)", "gear1"],
 	["crouch", "Sneak: slower, steadier aim, harder to spot", "crouch"],
-	["throw", "Throw your Boki at a dummy", "throw"], ["combo", "Land a combo: shoot a foe your Boki just stunned or rooted", "fire"], ["tonic", "Heal (tonic, or armor kit when health is full)", "tonic"],
+	["throw", "Sic your Boki at a dummy", "throw"], ["combo", "Land a combo: shoot a foe your Boki just stunned or rooted", "fire"], ["tonic", "Heal (tonic, or armor kit when health is full)", "tonic"],
 	["stagger", "Stagger a big dummy: hit it with an ability while it has a purple ring", "signature"],
 	["smash", "Break a crate or pot", "fire"], ["weapon", "Take a found weapon off the ground", "interact"],
 	["ledge", "Dash off an edge and float back up", ""]]
@@ -5499,7 +5465,7 @@ func _tut_drive() -> void:
 				if p.flat_dist(best) > 3.0: goto.call(best.pos)
 				if tut_id() == "shoot": p.inp["fire"] = true
 				elif tut_id() == "kin1": p.inp["sig"] = true
-				elif p.kin and p.kin.state == "shoulder": p.kin.throw_to(best.pos)
+				elif p.kin and p.kin.state in ["shoulder", "active"]: p.kin.throw_to(best.pos)
 			elif tut_id() == "kin1":
 				p.inp["sig"] = true
 		"chest":
@@ -5921,7 +5887,6 @@ func _extract(h: Hunter, how := "", where := "") -> void:
 	if h.kin:
 		if h.kin.comp: h.kin.comp.on_extract()
 		h.kin.visible = false
-	Follow.owner_left(self, h, "extract")
 	if h == player:
 		if h.kin and h.kin.state != "downed":
 			h.kin.bark("extract")
@@ -5988,7 +5953,7 @@ func _end_soon(after: float) -> void:
 	if result.get("ending", false):
 		return
 	result["ending"] = true
-	get_tree().create_timer(after).timeout.connect(Follow.finish_later.bind(self))
+	get_tree().create_timer(after).timeout.connect(_finish)
 
 func _finish() -> void:
 	if over:
@@ -6054,9 +6019,6 @@ func _finish() -> void:
 			r["kin_trust"] = k0.trust
 		if not player_lost.is_empty() and not result.get("extracted", false):
 			r["lost_kin"] = (_resolve_lost() as Array).filter(func(L): return not Loaner.is_loaner(L.get("rec", {})))
-		var ff := Follow.result(self)
-		if not ff.is_empty():
-			r["follower"] = ff
 		r["rivals"] = hunters.filter(func(x): return x.ctrl == "bot" and x.team != player.team).map(func(x): return x.pname)
 	var placed := 1
 	for h in hunters:
@@ -6159,8 +6121,7 @@ func _flags(h: Hunter) -> int:
 	if hk >= 0: f |= 2048 | ((hk + 1) << 15)
 	return f
 
-const KIN_STATES := ["shoulder", "flying", "flying_home", "active", "returning", "downed", "reviving", "wild", "dazed", "fused", "follow"]
-const KIN_ROLES := ["", "follow", "stray"]
+const KIN_STATES := ["shoulder", "flying", "flying_home", "active", "returning", "downed", "reviving", "wild", "dazed", "fused"]
 const MOB_STATES := ["idle", "chase", "windup", "lunge", "recover"]
 
 func _ser(e: Ent) -> Array:
@@ -6172,7 +6133,7 @@ func _ser(e: Ent) -> Array:
 		var k: Kin = e
 		return ["k", k.nid, _r(k.pos.x), _r(k.pos.y), _r(k.pos.z), _r(k.face), _r(k.hp), _r(k.max_hp), KIN_STATES.find(k.state), k.species,
 			k.owner_h.nid if k.owner_h else "", int(k.rec.get("level", 1)), String(k.rec.get("name", "")), _r(k.catch_prog), _r(k.vel.x), _r(k.vel.z),
-			1 if k.rec.get("shimmer", false) else 0, String(k.rec.get("acc", "")), ",".join(Mutations.of(k.rec))] + KinNet.kin_extra(k) + Follow.net_extra(k)
+			1 if k.rec.get("shimmer", false) else 0, String(k.rec.get("acc", "")), ",".join(Mutations.of(k.rec))] + KinNet.kin_extra(k)
 	var mb: Mob = e
 	var ms := ["m", mb.nid, _r(mb.pos.x), _r(mb.pos.y), _r(mb.pos.z), _r(mb.face), _r(mb.hp), _r(mb.max_hp), MOB_STATES.find(mb.st), mb.mkind,
 		_r(mb.atk_dir.x), _r(mb.atk_dir.y), _r(mb.st_t), _r(mb.vel.x), _r(mb.vel.z), _r(mb.stag_open), _r(mb.stagger_t)]
@@ -6190,17 +6151,13 @@ func net_snapshot(mine: bool) -> Array:
 			out.append(_ser(player))
 			if player.kin and not player.kin.dead:
 				out.append(_ser(player.kin))
-		for k in kins:
-			# your follower (and your stray while its window runs): yours to send
-			if not k.dead and k.role != "" and k.nid.begins_with("P") and Net.owns(k.nid): out.append(_ser(k))
 		return out
 	for h in hunters:
 		if not h.remote and h != player:
 			out.append(_ser(h))
 			if h.kin and not h.kin.dead: out.append(_ser(h.kin))
 	for k in kins:
-		if k.is_wild() and not k.dead and k.role == "": out.append(_ser(k))
-		elif not k.dead and k.role != "" and not k.remote and not k.nid.begins_with("P") and Net.owns(k.nid): out.append(_ser(k))
+		if k.is_wild() and not k.dead: out.append(_ser(k))
 	for mb in mobs:
 		if not mb.dead: out.append(_ser(mb))
 	return out
@@ -6259,13 +6216,7 @@ func _net_make(it: Array) -> Ent:
 				k.state = "wild"
 			kins.append(k)
 			ents_by_id[nid] = k
-			var role_i := Follow.net_role(it)
-			if role_i == 1 and owner:
-				# someone's follower walks beside them, it isn't their own kin
-				k.role = "follow"
-				k.comp = null
-				owner.follower = k
-			elif owner and owner.kin == null:
+			if owner and owner.kin == null:
 				owner.kin = k
 			_net_seen_rec[nid] = rec
 			return k
@@ -6331,7 +6282,6 @@ func _net_apply(e: Ent, it: Array) -> void:
 			k.net_vel = Vector3(it[14], 0, it[15])
 			k.dead = false
 			KinNet.apply_kin(k, it)
-			Follow.net_apply(k, it)
 		"m":
 			var mb: Mob = e
 			mb.face = it[5]; mb.hp = it[6]; mb.max_hp = it[7]
@@ -6556,17 +6506,11 @@ func _net_ev(x, from: String) -> void:
 					for rec in x[6]:
 						spawn_wild(rec, at, true)
 		"catch":
-			var ck: Kin = ents_by_id.get(String(x[1]), null)
-			if ck and Net.owns(ck.nid) or (is_host and ck and ck.role == ""):
+			if is_host:
+				var k: Kin = ents_by_id.get(String(x[1]), null)
 				var h: Hunter = ents_by_id.get(String(x[2]), null)
-				if ck and h and not ck.dead and ck.state == "dazed" and Follow.can_steal(h, ck):
-					_catch(h, ck)
-		"fgone":
-			var gk: Kin = ents_by_id.get(String(x[1]), null)
-			if gk and gk.remote:
-				gk.dead = true
-				gk.visible = false
-				if gk.owner_h and gk.owner_h.follower == gk: gk.owner_h.follower = null
+				if k and h and not k.dead and k.state == "dazed":
+					_catch(h, k)
 		"caught":
 			var k: Kin = ents_by_id.get(String(x[1]), null)
 			if k:
@@ -6574,10 +6518,9 @@ func _net_ev(x, from: String) -> void:
 				k.visible = false
 			if player and String(x[2]) == player.nid and typeof(x[3]) == TYPE_DICTIONARY:
 				var rec: Dictionary = x[3]
-				var fat: Vector3 = k.pos if k else player.pos
-				if Follow.take(self, player, rec, fat) == null:
-					add_feed("The %s trusts you now. Extract to bring it home." % Data.KIN.get(String(rec.get("species", "cindle")), Data.KIN["cindle"])["name"])
-				sfx("catch", player.pos, 0.0)
+				player.caught.append(rec)
+				sfx("scan_pop", player.pos, 0.0)
+				add_feed("%s is in your box (%d/%d). Extract to bring it home." % [Data.KIN.get(String(rec.get("species", "cindle")), Data.KIN["cindle"])["name"], mini(player.caught.size(), Capture.box_cap()), Capture.box_cap()])
 
 func _process_net_revives() -> void:
 	if _rev_out.is_empty():
@@ -6653,7 +6596,7 @@ func _tips() -> void:
 	_tip("move", "WASD to move, aim with the mouse, hold left click to shoot. Shift dashes, Space jumps. Hold Space in the air to glide.")
 	if _tip_t > 14.0:
 		if player.ak:
-			_tip("ability", "%s is your Boki's ability, cast from wherever it stands. %s throws and recalls it. Fighting together fills the bond meter, and a full one lets you press %s to merge." % [Settings.key_cap("kin_ability"), Settings.key_cap("throw"), Settings.key_cap("ultimate")])
+			_tip("ability", "%s is your Boki's ability, cast from wherever it stands. %s sics it at a foe (tap), calls it back when it is away, and opens the order wheel (hold). Fighting together fills the bond meter, and a full one lets you press %s to merge." % [Settings.key_cap("kin_ability"), Settings.key_cap("throw"), Settings.key_cap("ultimate")])
 		else:
 			_tip("ability", "%s is your Boki's ability. Fighting together fills the bond meter, and %s calls your Boki's bond ultimate." % [Settings.key_cap("signature"), Settings.key_cap("ultimate")])
 	if player.ult >= 1.0 and player.kin:
@@ -6670,13 +6613,13 @@ func _tips() -> void:
 			if player.flat_dist(f) < 9.0:
 				near_foe = true; break
 		if near_foe:
-			_tip("throw", (Settings.key_cap("throw") + " throws %s at the cursor. A Boki that hits a foe stuns it, and your shots crit stunned foes.") % k.rec.get("name", "your Boki"))
+			_tip("throw", (Settings.key_cap("throw") + " sends %s at the cursor. A Boki that hits a foe stuns it, and your shots crit stunned foes. Hold " + Settings.key_cap("throw") + " and flick the mouse for Chase, Guard, Return or Follow.") % k.rec.get("name", "your Boki"))
 	if k.state == "active":
 		var a1 := k.runner.def_of("k1")
 		var a2 := k.runner.def_of("k2")
-		_tip("skill", "%s uses %s's %s. Stun or root a foe with your Boki, then shoot it for a combo. %s throws it, and again calls it back to your shoulder." % [Settings.key_cap("kin_ability" if player.ak else "signature"), k.rec.get("name", "your Boki"), a1.display_name if a1 else "ability", Settings.key_cap("throw")])
+		_tip("skill", "%s uses %s's %s. Stun or root a foe with your Boki, then shoot it for a combo. %s sends it at a foe, and calls it back to your side when it is away." % [Settings.key_cap("kin_ability" if player.ak else "signature"), k.rec.get("name", "your Boki"), a1.display_name if a1 else "ability", Settings.key_cap("throw")])
 	if not interact.is_empty() and interact["kind"] == "catch":
-		_tip("catch", "Hold " + Settings.key_cap("interact") + " to tame it. A Boki you tame only comes home if you extract.")
+		_tip("catch", "Hold %s to scan it. The scan runs 4 seconds on its own: you can't move or shoot, rivals can see and hear it, and a dash cancels it. A Boki you catch only comes home if you extract." % Settings.key_cap("interact"))
 	if exits and not interact.is_empty() and interact["kind"] == "exit":
 		match String(interact["x"]["kind"]):
 			"dock": _tip("exit_dock", "Skiff docks: call the skiff at the horn beacon, survive the monsters it draws until it ties up, then stand on its deck before it leaves.")

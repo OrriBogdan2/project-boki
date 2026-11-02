@@ -5,7 +5,7 @@ extends Node
 ## On desktop the same messages go through the Project Boki relay server instead (net_enet.gd,
 ## scripts/server/relay.gd). The launcher passes `-- --server=host:port --token=<discord token>`.
 
-const VERSION := "0.9.2"        # online play only matches players on the same version; bump on network changes (0.9.2: follower Boki)
+const VERSION := "0.10.0"        # online play only matches players on the same version; bump on network changes
 
 signal peers_changed
 signal message(topic: String, data, from: String)
@@ -177,10 +177,9 @@ func is_host() -> bool:
 	return me == host
 
 func owner_of(nid: String) -> String:
-	# player-owned ids look like "P<peer>" and "P<peer>k", and a player's followers "P<peer>|f<n>"
-	# (Follow); everything else (a bot's follower too) belongs to the host
+	# player-owned ids look like "P<peer>" and "P<peer>k"; everything else belongs to the host
 	if nid.begins_with("P"):
-		return nid.substr(1).get_slice("|", 0).trim_suffix("k")
+		return nid.substr(1).trim_suffix("k")
 	return host
 
 func owns(nid: String) -> bool:

@@ -5870,7 +5870,7 @@ func _econ_tests(dbg) -> void:
 		for i in 4:
 			var rec := Save.new_kin(Data.common_kin()[(i + 2) % Data.common_kin().size()], ["Biscuit", "Wren", "Clove", "Sorrel"][i])
 			rec["level"] = 3 + i * 2
-			Save.remember(rec, "caught", "was tamed by you out in the islands and brought home")
+			Save.remember(rec, "caught", "was scanned by you out in the islands and brought home")
 			Save.remember(rec, "extracted", "made it out of the islands with you")
 			Save.remember(rec, "fed", "was fed emberberry by you")
 			Save.remember(rec, "love", "loved playing fetch with you")

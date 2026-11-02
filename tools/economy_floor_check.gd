@@ -92,6 +92,7 @@ func _pens() -> void:
 	var nk: Dictionary = r.get("rec", {})
 	ok(String(nk.get("origin", {}).get("how", "")) == "market" and nk.has("serial") and String(nk["uid"]) != String(ls[0]["rec"]["uid"]), "a new id, registered, from the market")
 	ok(BokiPens.listings().size() == BokiPens.PEN_STOCK - 1, "it's gone from the pens")
+	ok(Save.d["roster"].has(nk) and String(Save.d.get("active", "")) != String(nk["uid"]), "it goes to the farm roster; your active Boki stays your pick, nothing joins a match")
 	ok(not BokiPens.buy(String(ls[0]["id"]))["ok"], "can't buy it twice")
 
 func _pen_listing() -> void:
@@ -135,10 +136,10 @@ func _loaner_match() -> void:
 	var P := m.player
 	var k: Kin = P.kin
 	ok(k != null and Loaner.is_loaner(k.rec) and String(k.rec["uid"]) != String(mine["uid"]), "a free-kit run brings a loaner Boki, not yours (%s)" % (k.species if k else "none"))
+	ok(P.kin2 == null and k != null and k.owner_h == P and k.cmd == "follow", "the loaner is the one active Boki and follows like any other (%s)" % (k.cmd if k else "none"))
 	ok(k != null and k.species in Loaner.STARTERS and int(k.rec["level"]) == 1, "a starter egg's species, level 1")
 	ok(P.rift_keys == 0 and P.tonics == 2, "the basic kit: two free tonics, no keys (%d, %d)" % [P.tonics, P.rift_keys])
 	ok(Loot.of_hand(P).is_empty() or int(Loot.of_hand(P).get("rar", 0)) == 0, "the plain class weapon")
-	# taming during a free-kit run still works (loot rules are the usual ones)
 	# die in the Hollow: the loaner never drops into the box or is left behind
 	P.lives = 1
 	m.eliminate(P, null, "knocked out", true)

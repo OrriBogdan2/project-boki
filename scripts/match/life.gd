@@ -293,6 +293,9 @@ static func take_item(m: Match, h: Hunter, b: Dictionary, it: Dictionary) -> voi
 			var i := int(it["i"])
 			if i < (b["caught"] as Array).size():
 				var rec: Dictionary = b["caught"][i]
+				if not (h == m.player and String(rec.get("lost_from", "")) == "you") and not Capture.room(h):
+					Capture.full_note(m, h)         # no room in your box: the capsule stays in the deathbox
+					return
 				(b["caught"] as Array).remove_at(i)
 				if h == m.player and String(rec.get("lost_from", "")) == "you":
 					m.give_kin(h, rec)
@@ -351,7 +354,7 @@ static func smart_loot(m: Match, h: Hunter, b: Dictionary) -> int:
 static func _settle_box(b: Dictionary) -> void:
 	b["empty"] = int(b["gems"]) <= 0 and (b["seeds"] as Dictionary).is_empty() and (b["caught"] as Array).is_empty() \
 		and int(b["tonics"]) <= 0 and int(b["kits"]) <= 0 and int(b.get("keys", 0)) <= 0 and (b.get("gear", []) as Array).is_empty() and (b.get("weapon", {}) as Dictionary).is_empty() \
-		and (b.get("pack", []) as Array).is_empty()
+		and (b.get("pack", []) as Array).is_empty() and (b.get("kin", []) as Array).is_empty()
 	_refresh_box(b)
 
 ## Takes everything in a box.
@@ -380,21 +383,28 @@ static func loot_box(m: Match, h: Hunter, b: Dictionary) -> void:
 	h.gems += int(b["gems"])
 	for s in b["seeds"]:
 		h.seeds[s] = int(h.seeds.get(s, 0)) + int(b["seeds"][s])
+	var left: Array = []
 	for rec in b["caught"]:
 		if h == m.player and String(rec.get("lost_from", "")) == "you":
 			# one of yours the dead hunter had taken: it's straight back at your side
 			m.give_kin(h, rec)
 			m.add_feed("%s is back with you!" % rec.get("name", "Your Boki"))
 			continue
+		if not Capture.room(h):
+			left.append(rec)               # the box is full: this capsule stays in the deathbox
+			continue
 		h.caught.append(rec)
 		if String(rec.get("lost_from", "")) != "" and String(rec.get("lost_from", "")) != h.pname:
 			h.stolen_carry = true
+	if not left.is_empty():
+		Capture.full_note(m, h)
+	b["caught"] = left
 	h.tonics += int(b["tonics"])
 	h.armor_kits += int(b["kits"])
 	h.rift_keys += int(b.get("keys", 0))
 	_kin_from_box(m, h, b)
 	var got := int(b["gems"])
-	b["gems"] = 0; b["seeds"] = {}; b["caught"] = []; b["tonics"] = 0; b["kits"] = 0; b["keys"] = 0
+	b["gems"] = 0; b["seeds"] = {}; b["tonics"] = 0; b["kits"] = 0; b["keys"] = 0
 	_settle_box(b)
 	m.sfx("pickup", b["pos"], -2.0, 0.9)
 	m.fx.burst(b["pos"] + Vector3(0, 0.6, 0), Color("ffd36a"), 14, 3.0, 0.4)
@@ -446,9 +456,8 @@ static func bring_back(m: Match, o: Hunter, at: Vector3, hp_frac: float, sick: b
 		# your kin was keeping out of sight; it comes straight back to you
 		if kk and not (kk as Kin).dead and (kk as Kin).state == "away":
 			var k: Kin = kk
-			k.teleport(o.pos + Vector3(0, 1.5, 0))
-			k.state = "bench" if k == o.kin2 else "shoulder"
-			if k == o.kin: k._hop_on()
+			k.teleport(o.pos + Vector3(1.0, 0, 0.7))
+			k.state = "bench" if k == o.kin2 else "active"        # it walks back out at your side
 	if o.ctrl == "bot":
 		o.ai = m.bot_brain.new_mind(m.rng, float(m.opts.get("bot_skill", m.bot_cfg.get("skill", 0.6))), m.bot_cfg)
 	m.sfx("revive", o.pos, 0.0)
@@ -462,8 +471,6 @@ static func bring_back(m: Match, o: Hunter, at: Vector3, hp_frac: float, sick: b
 
 ## Someone died for good: no box revive any more, and no beacon either.
 static func make_gone(m: Match, h: Hunter) -> void:
-	# a follower is on its own now: rivals get the tier's window to tame it (Follow; once only)
-	Follow.owner_left(m, h, "gone")
 	if h.gone:
 		return
 	h.gone = true
@@ -481,12 +488,11 @@ static func kin_on_death(m: Match, h: Hunter, b: Dictionary) -> void:
 		if kk == null or (kk as Kin).dead:
 			continue
 		var k: Kin = kk
-		if k.role != "": continue
 		m.giant_free(k)
 		if Loaner.is_loaner(k.rec):
 			k.state = "away"      # a loaner is never at risk: it keeps out of sight, then goes home to Wenna
 			continue
-		var on_you: bool = k.state in ["shoulder", "bench", "away"]
+		var on_you: bool = k.state in ["shoulder", "bench", "away"] or k.with_owner()
 		if not training and on_you and bool(m.T.get("kin_drop", false)):
 			var rec: Dictionary = k.rec.duplicate(true)
 			k.dead = true; k.visible = false
@@ -515,10 +521,15 @@ static func kin_on_death(m: Match, h: Hunter, b: Dictionary) -> void:
 ## whoever looted it.
 static func _kin_from_box(m: Match, h: Hunter, b: Dictionary) -> void:
 	var o: Hunter = b["owner"]
+	var left: Array = []
 	for rec in b.get("kin", []):
 		if h == o:
 			m.give_kin(h, rec)
 			if h == m.player: m.add_feed("%s is back with you" % rec.get("name", "Your Boki"))
+			continue
+		if not Capture.room(h):
+			left.append(rec)               # the box is full: it stays in the deathbox
+			Capture.full_note(m, h)
 			continue
 		var r2: Dictionary = (rec as Dictionary).duplicate(true)
 		if o == m.player:
@@ -538,7 +549,7 @@ static func _kin_from_box(m: Match, h: Hunter, b: Dictionary) -> void:
 			h.stolen_carry = true
 			if h == m.player: m.add_feed("You took %s's %s! Extract to keep it." % [o.pname, Data.KIN[r2["species"]]["name"]])
 		h.caught.append(r2)
-	b["kin"] = []
+	b["kin"] = left
 
 # ------------------------------------------------------------------ beacons
 static func place_beacons(m: Match) -> void:

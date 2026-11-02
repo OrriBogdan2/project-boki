@@ -144,7 +144,7 @@ var extracted := false
 var extract_prog := 0.0
 ## What this hunter is holding interact for right now (an animation each, see HunterAnim._act_*):
 ## "" or one of HOLD_KINDS. Set every tick by whatever the hold works on; it lapses when not refreshed.
-const HOLD_KINDS := ["tame", "revive", "chest", "dial", "console", "lever", "windup", "shrine", "beacon", "key", "loot", "rune"]
+const HOLD_KINDS := ["scan", "revive", "chest", "dial", "console", "lever", "windup", "shrine", "beacon", "key", "loot", "rune"]
 var hold_kind := ""
 var hold_until := 0.0
 
@@ -158,7 +158,6 @@ func holding() -> String:
 var rift_keys := 0               # Rift Keys carried: each opens a rift hatch once (see Exits); they go in your deathbox
 var kin: Ent = null             # the active kin: its abilities are on Q and V, its ultimate on R
 var kin2: Ent = null            # the benched kin, swapped in with X
-var follower: Ent = null        # a Boki tamed this run that walks with you (Follow)
 var swap_cd := 0.0
 var merge_st: Dictionary = {}   # the merge (bond ultimate) while it runs: {def, t, T, k, giant, pulse} (KinMerge)
 var merge_cd := 0.0             # the spent window after a merge ends
@@ -759,6 +758,7 @@ func _on_zero(by: Ent, opts: Dictionary) -> void:
 func do_jump() -> void:
 	if downed or stun_t > 0.0 or grap.size() > 0 or out or KitStatus.grounded(self):
 		return
+	KinFollow.on_jump(self)         # riding a mount: you come off it into the jump
 	if not lfloat.is_empty():
 		_ledge_fling()
 		return
@@ -1307,7 +1307,7 @@ func _shove_along() -> void:
 		m.shake(0.25, f.pos)
 
 func can_fire() -> bool:
-	if Hex.active(self):
+	if Hex.active(self) or Capture.active(self):
 		return false
 	if ak and not ak.can_shoot():
 		return false

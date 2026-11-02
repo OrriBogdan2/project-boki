@@ -171,6 +171,8 @@ func _arena() -> void:
 		while tb < 40.0:
 			P.hp = P.max_hp
 			B.hp = B.max_hp
+			if int(tb / DT) % int(3.0 / DT) == 1:
+				B.hp = B.max_hp - 20.0     # a hit every 3s: the bot only dashes when it has just been hurt, and the Bokis no longer happen to land one
 			m.step(DT); tb += DT
 			if B.ak is ThiefKit and float((B.ak as ThiefKit).primed_t) > 0.0: seen["dash"] = true
 			if B.ak is JuggernautKit and String(B.ak.st.get("last_dash", "")) == "rampage": seen["dash"] = true

@@ -150,14 +150,6 @@ func show_result(r: Dictionary) -> void:
 		v.add_child(lc)
 	for nw in s.get("ransom_news", []):
 		v.add_child(_note(String(nw), Color("ffd58a")))
-	# the Boki that followed you this run (Follow)
-	var fol: Dictionary = s.get("follower", {})
-	if not fol.is_empty():
-		var fr: Dictionary = fol.get("rec", {})
-		var fname := Data.kin_title(String(fr.get("name", "")), String(Data.KIN.get(String(fr.get("species", "cindle")), Data.KIN["cindle"])["name"]))
-		match String(fol.get("fate", "")):
-			"home": v.add_child(_note("%s %s. It's on your farm now." % [fname, String(fol.get("why", "came home"))], UI.GOOD))
-			"stolen": v.add_child(_note("%s tamed %s before it could get home." % [String(fol.get("holder", "A rival")), fname], UI.BAD))
 	if s.get("loaner", false):
 		v.add_child(_note("Free-kit run: the loaner Boki went back to %s. Nothing of yours was at risk." % BokiPens.MERCHANT, Color("bfe9ff")))
 	if int(s.get("stipend", 0)) > 0:

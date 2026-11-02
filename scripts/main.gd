@@ -48,8 +48,8 @@ func _ready() -> void:
 					if which.size() > 1: Overlay.inv_tab = which[1]
 					Overlay.open_inventory()
 				elif which[0] == "dex":
-					# a Boki's Bokidex page, over the Bokidex: --overlay=dex:puddlet
-					Overlay.inv_tab = "Kindex"
+					# a Boki's Field Book page, over the Field Book: --overlay=dex:puddlet
+					Overlay.inv_tab = "Field Book"
 					Overlay.open_inventory()
 					Overlay.open_dex(which[1] if which.size() > 1 else "cindle"))
 		if a.begins_with("--seed="): opts["seed"] = int(a.substr(7))
@@ -68,7 +68,6 @@ func _ready() -> void:
 		if a == "--boxrev-demo": opts["life_demo"] = true; opts["boxrev_demo"] = true; opts["no_drop"] = true; opts["squad"] = 3; opts["teams"] = 3
 		if a.begins_with("--length="): opts["length"] = float(a.substr(9))
 		if a == "--no-drop": opts["no_drop"] = true
-		if a.begins_with("--follow-demo="): opts["follow_demo"] = a.substr(14); opts["no_drop"] = true
 		if a.begins_with("--map="): opts["map"] = a.substr(6)            # an expedition on another authored map (e.g. skyreach)
 		if a.begins_with("--at="): opts["at_xz"] = a.substr(5)          # tooling: start standing at x,z (map screenshots)
 		if a.begins_with("--zoom="): opts["zoom_hold"] = float(a.substr(7))   # tooling: hold the camera zoom
@@ -384,6 +383,12 @@ func _ready() -> void:
 	if "--boki-system-check" in args:
 		load("res://tools/boki_system_check.gd").new().run(self)      # Boki commands (throw, recall, hold/follow, C), the downed Boki, the Merge
 		return
+	if "--boki-follow-check" in args:
+		load("res://tools/boki_follow_check.gd").new().run(self)      # the Boki follows you: leash, glide hops, Sic / Call back, the wheel, mounts
+		return
+	if "--capture-check" in args:
+		load("res://tools/capture_check.gd").new().run(self)      # capture by scan, the box, the Field Book, the net events
+		return
 	if "--teammate-check" in args:
 		load("res://tools/teammate_check.gd").new().run(self)      # Boki as teammates: following, callouts, caring, the tutorial guide
 		return
@@ -417,16 +422,6 @@ func _ready() -> void:
 		var efc = efc_s.new()      # never stuck: strays, the pens, free-kit runs, the Exchange, saves
 		set_meta("economy_floor_check", efc)
 		efc.run(self)
-		return
-	if "--follower-check" in args:
-		var flc_s: GDScript = load("res://tools/follower_check.gd")
-		if flc_s == null or not flc_s.can_instantiate():
-			print("FOLLOWER CHECK failed to load, failures: 1")
-			get_tree().quit(1)
-			return
-		var flc = flc_s.new()      # tamed Boki follow you: knockouts, steal windows, bots, sync
-		set_meta("follower_check", flc)
-		flc.run(self)
 		return
 	if "--economy-check" in args:
 		_economy_check()
@@ -1695,7 +1690,7 @@ func _grt_kin(m: Match, P: Hunter, sp: String, rec_extra := {}) -> Kin:
 	rec["trust"] = 95.0
 	for kk in rec_extra: rec[kk] = rec_extra[kk]
 	var k := m.give_kin(P, rec)
-	k.state = "shoulder"
+	k.stow()
 	k.settle = 1.0
 	k.brain.think_t = 1e9        # the test casts by hand; its own AI stays quiet (tested on its own below)
 	P.merge_cd = 0.0
@@ -1752,7 +1747,7 @@ func _grammar_runtime_check() -> void:
 	k.use_ability("k1", T.pos + Vector3(-1.0, 0, 0))
 	_ac_run(m, 1.2, func(): acc["top"] = maxf(float(acc["top"]), T.pos.y - g0))
 	_grt("pebbit E Gravity Slam", T.hp < T.max_hp and float(acc["top"]) > 0.3, "took %.0f, rose %.2f" % [T.max_hp - T.hp, acc["top"]])
-	k.state = "shoulder"; k.settle = 1.0
+	k.stow()
 	var nw := m.verbs.walls.size()
 	k.use_ability("k2", P.pos)
 	_grt("pebbit auto Mass Guard wall", m.verbs.walls.size() == nw + 1 and bool(m.verbs.walls[-1]["follow"]), "%d walls" % m.verbs.walls.size())
@@ -1765,7 +1760,7 @@ func _grammar_runtime_check() -> void:
 	m.spawn_shot(T, T.pos + Vector3(-0.6, 0.95, 0), Vector2(-30, 0), 20.0, 0.6, 0.15, Color.RED, {})
 	_ac_run(m, 0.6)
 	_grt("puddlet E Prism Wall reflects", T.hp < thp and P.hp >= php, "shooter took %.0f" % (thp - T.hp))
-	k.state = "shoulder"; k.settle = 1.0
+	k.stow()
 	P.shield = 0.0
 	var nm := m.verbs.mirrors.size()
 	k.use_ability("k2", P.pos)
@@ -1801,7 +1796,7 @@ func _grammar_runtime_check() -> void:
 	_grt("zapple E Echo Chain stuns", T.stun_t > 0.2 and T.hp < T.max_hp, "stun %.2f took %.0f" % [T.stun_t, T.max_hp - T.hp])
 	_ac_run(m, 1.5)
 	_grt_reset(T)
-	k.state = "shoulder"; k.settle = 1.0
+	k.stow()
 	P.crit_t = 0.0
 	k.use_ability("k2", P.pos)
 	_grt("zapple auto Echolocate", T.reveal_t > 0.0 and P.crit_t > 0.0, "reveal %.1f crit %.1f" % [T.reveal_t, P.crit_t])
@@ -1880,7 +1875,7 @@ func _grammar_runtime_check() -> void:
 	k.melee_n = 1
 	var self_fire := k.fire_trigger("on_hit", {"at": T.pos, "chain": ["grt_on_hit"]})
 	var real_fire := k.fire_trigger("on_hit", {"at": T.pos, "chain": []})
-	k.state = "shoulder"; k.settle = 1.0       # (so it doesn't swing at the target itself)
+	k.stow()       # (so it doesn't swing at the target itself)
 	var mel0 := k.melee_n
 	_ac_run(m, 0.3)
 	_grt("no self-trigger", not self_fire and real_fire and k.melee_n == mel0, "own hit fired=%s, melee hit fired=%s, its hits counted as melee %d" % [self_fire, real_fire, k.melee_n - mel0])

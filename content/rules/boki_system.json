@@ -1,5 +1,5 @@
 {
-	"desc": "The Boki command system (docs/decisions/0001): G throw / recall / hold-follow, the downed Boki, the leashes. Distances in metres, times in seconds, hp as a share of max health.",
+	"desc": "The Boki command system (docs/decisions/0001, 0002): G sic / call back / wheel, follow, the downed Boki, the leashes. Distances in metres, times in seconds, hp as a share of max health.",
 	"class_ults": false,
 	"class_ults_doc": "false: R is the Merge for every class. true: R runs the class's own ultimate again (ArchKit.use_r), kept for the hero-port work to fold into kits.",
 	"g_hold_s": 0.35,
@@ -7,8 +7,18 @@
 	"throw_range_dive": 11.0,
 	"recall_range": 24.0,
 	"merge_leap_range": 32.0,
-	"land_stagger": {"radius": 1.7, "stun": 0.7, "kb": 3.0, "dmg_k": 0.8},
-	"recall_hit": {"width": 0.9, "dmg_k": 1.0, "stun": 0.35, "kb": 5.0},
+	"land_stagger": {
+		"radius": 1.7,
+		"stun": 0.7,
+		"kb": 3.0,
+		"dmg_k": 0.8
+	},
+	"recall_hit": {
+		"width": 0.9,
+		"dmg_k": 1.0,
+		"stun": 0.35,
+		"kb": 5.0
+	},
 	"down": {
 		"recover_s_trusting": 15.0,
 		"recover_s_wary": 20.0,
@@ -16,5 +26,37 @@
 		"rescue_hp": 0.6,
 		"rescue_s": 0.5,
 		"rescue_r": 1.5
+	},
+	"follow": {
+		"separation_r": 1.2,
+		"path_every_s": 0.45,
+		"path_goal_moved": 3,
+		"path_fail_backoff_s": 1.5,
+		"path_lookahead": 8,
+		"path_window": 12,
+		"stuck_s": 1.0,
+		"hop_dur": 0.38,
+		"hop_height": 1.1,
+		"hop_on_air_s": 0.4,
+		"hop_off_steady_s": 0.35,
+		"away_dist": 8.0,
+		"combat_radius": 12.0,
+		"hesitate_s": 0.3,
+		"sic_cd": 1.0,
+		"sic_speed": 18.0,
+		"engage_range": 9.0,
+		"guard_leash": 24.0,
+		"chase_leash": 30.0
+	},
+	"follow_doc": "stuck_s: seconds without progress before the hop back. hop_on_air_s: seconds you are off the ground before it hops on (when it cannot walk where you land). hop_off_steady_s: seconds steady on the ground before it hops off again. away_dist: farther than this and a G tap is Call back (else Sic). combat_radius: a foe this close to you or the target means a fight (orders are never refused). path_window: tiles of margin round the trip for the A* search. path_every_s: seconds between searches; path_goal_moved: tiles the goal may move before it searches early; path_fail_backoff_s: wait after a search that found nothing; path_lookahead: path tiles checked ahead for a straight line. separation_r: m it keeps from you.",
+	"wheel": {
+		"deadzone_px": 30,
+		"pop_s": 0.14,
+		"radius_px": 92
+	},
+	"charge_impact": {
+		"radius_k": 1.35,
+		"stun_add": 0.3,
+		"kb_k": 1.4
 	}
 }

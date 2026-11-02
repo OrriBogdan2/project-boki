@@ -9,7 +9,7 @@ _Generated from `scripts/core/data.gd`, `scripts/match/life.gd`, `content/rules`
 |---|---|---|---|---|---|---|
 | The Meadow | x1 | x1 | 1 to 3 | 0 extractions | no | Gentle islands. Your Boki are always safe here: lose your loot, never your Boki. |
 | Dusk Isles | x1.45 | x1.75 | 2 to 5 | 2 extractions | in your deathbox | Tougher monsters, more loot, rarer Boki. Boki you have on you drop into your deathbox when you die, and anyone can loot them. Boki out of your hands escape. |
-| The Hollow | x2 | x2.75 | 4 to 8 | 5 extractions | can be captured | Brutal and rich. Boki on you drop into your deathbox and can be looted, and Boki out of your hands can be captured (hold the interact key for 3s). |
+| The Hollow | x2 | x2.75 | 4 to 8 | 5 extractions | can be captured | Brutal and rich. Boki on you drop into your deathbox and can be looted, and a Boki left out in the world can be scanned and taken (knock it out, then hold the interact key). |
 
 ## Match
 
@@ -49,7 +49,7 @@ From `Life.R` (`scripts/match/life.gd`); the full flow is on [Expeditions](Exped
 
 ## boki_system (`content/rules/boki_system.json`)
 
-The Boki command system (docs/decisions/0001): G throw / recall / hold-follow, the downed Boki, the leashes. Distances in metres, times in seconds, hp as a share of max health.
+The Boki command system (docs/decisions/0001, 0002): G sic / call back / wheel, follow, the downed Boki, the leashes. Distances in metres, times in seconds, hp as a share of max health.
 
 | Setting | Value |
 |---|---|
@@ -63,6 +63,10 @@ The Boki command system (docs/decisions/0001): G throw / recall / hold-follow, t
 | land_stagger | {"radius": 1.7, "stun": 0.7, "kb": 3.0, "dmg_k": 0.8} |
 | recall_hit | {"width": 0.9, "dmg_k": 1.0, "stun": 0.35, "kb": 5.0} |
 | down | {"recover_s_trusting": 15.0, "recover_s_wary": 20.0, "recover_hp": 0.2, "rescue_hp": 0.6, "rescue_s": 0.5, "rescue_r": 1.5} |
+| follow | {"separation_r": 1.2, "path_every_s": 0.45, "path_goal_moved": 3, "path_fail_backoff_s": 1.5, "path_lookahead": 8, "path_window": 12, "stuck_s": 1.0, "hop_dur": 0.38, "hop_height": 1.1, "hop_on_air_s": 0.4, "hop_off_steady_s": 0.35, "away_dist": 8.0, "combat_radius": 12.0, "hesitate_s": 0.3, "sic_cd": 1.0, "sic_speed": 18.0, "engage_range": 9.0, "guard_leash": 24.0, "chase_leash": 30.0} |
+| follow_doc | stuck_s: seconds without progress before the hop back. hop_on_air_s: seconds you are off the ground before it hops on (when it cannot walk where you land). hop_off_steady_s: seconds steady on the ground before it hops off again. away_dist: farther than this and a G tap is Call back (else Sic). combat_radius: a foe this close to you or the target means a fight (orders are never refused). path_window: tiles of margin round the trip for the A* search. path_every_s: seconds between searches; path_goal_moved: tiles the goal may move before it searches early; path_fail_backoff_s: wait after a search that found nothing; path_lookahead: path tiles checked ahead for a straight line. separation_r: m it keeps from you. |
+| wheel | {"deadzone_px": 30, "pop_s": 0.14, "radius_px": 92} |
+| charge_impact | {"radius_k": 1.35, "stun_add": 0.3, "kb_k": 1.4} |
 
 ## Bond meter (`content/rules/bond.json`)
 
@@ -80,6 +84,24 @@ How the bond meter fills (it gates R, the Merge). All values are fractions of a 
 | mob_factor | 0.6 |
 | marked_factor | 2 |
 | mark_s | 4 |
+
+## capture (`content/rules/capture.json`)
+
+Capture by scan (docs/decisions/0002). A wild Boki that is knocked out (dazed) can be scanned: hold the interact key for hold_s to commit, then the scan runs by itself for scan_s. Times in seconds, distances in metres.
+
+| Setting | Value |
+|---|---|
+| hold_s | 0.4 |
+| scan_s | 4 |
+| range | 3.5 |
+| cancel_range | 5 |
+| box_capacity | 3 |
+| box_capacity_doc | How many captured Boki (capsules) a hunter can carry in the run box (Hunter.caught). Full: a new scan is blocked until one is released. |
+| noise_every_s | 0.5 |
+| hear_range | 26 |
+| rise_pitch | [0.8, 1.6] |
+| sight_range | 24 |
+| sight_places_kept | 3 |
 
 ## How Boki fight (`content/rules/kin_ai.json`)
 
