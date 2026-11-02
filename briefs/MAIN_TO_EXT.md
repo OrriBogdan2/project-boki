@@ -465,3 +465,10 @@ The owner changed his mind after thinking about it: powers combining was a big d
 - **Save migration:** today's loadout has one glove; the second slot starts empty.
 - **Bots:** they wear and use two gloves.
 - Note: V is bound to "play" (fetch with a Boki) at home only (game.gd:89). Gloves are match-only, so it can share V; make sure the keybind check treats them as different contexts.
+
+## 2026-11-02 12:15 ET: the owner's footage
+
+The owner shared one long gameplay video split into 3 files. It is NOT split by hero.
+- **Index first:** sample frames every few seconds with ffmpeg and identify which hero is being played (the HUD's portrait, name and ability icons; the character model; the kill feed). Write the timestamp ranges per hero to docs/heroes/FOOTAGE_INDEX.md: video file, start-end, hero, abilities seen.
+- **Then pull dense frames** (every 0.1-0.2s) around each ability use, to read the inputs, timing, targeting, height/momentum and visuals.
+- Keep the video and frames out of the repo (they're the original game's footage); commit only the index and your notes.
