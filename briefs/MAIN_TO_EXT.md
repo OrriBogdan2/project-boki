@@ -450,3 +450,17 @@ Main-side changes on integ62 (sync62, shipping soon):
     - **Muzzle and impact effects.**
 
     Use the GAMEDEV_CHECKLIST game-feel items (hit stop, screen shake from trauma, squash/stretch, readable wind-ups) and pooled particles. Show before/after screenshots per hero in your report.
+
+## 2026-11-02 12:10 ET: CHANGE to ext/equal: TWO active gloves (Q and V)
+
+The owner changed his mind after thinking about it: powers combining was a big draw in the original, so there are two glove slots, both able to hold an active (or passive) glove.
+
+- **Keys:** glove 1 on Q, glove 2 on V (default; rebindable; V is free today, so confirm nothing else binds it). Two of the same glove can't be worn.
+- Neither glove ranks up (as specified at 11:40).
+- **Bring-in:** both glove slots can be brought in (rarity capped by tier).
+- **Utility items stay on 1/2/3.**
+- **Right side of the bottom HUD:** three boxes: Q glove, V glove, C Boki (as at 11:45 but with two glove boxes).
+- **Overhead:** three small icons (two gloves + the Boki type).
+- **Combos:** make sure glove actives can combo with each other and with hero kits (e.g. a grapple into a ground-pound glove). Add a few glove-glove combo assertions to the gear check.
+- **Save migration:** today's loadout has one glove; the second slot starts empty.
+- **Bots:** they wear and use two gloves.
