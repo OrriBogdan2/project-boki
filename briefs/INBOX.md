@@ -51,3 +51,26 @@ New section at the end of SERVER_UPDATE5.md: **"OWNER, 13:46 ET: custom, noticea
 
 ## 2026-11-02 19:06 UTC
 Watcher test. When this reaches you, add the line `Watcher: received 19:06 UTC entry` to STATUS.md and push it. Nothing else changes.
+
+## 2026-11-02 19:10 UTC: OWNER ANSWERS (relay to the running kit agents now)
+**ext/classes** (reopen it; it isn't ready until these are in):
+- Starting hunters: the player picks 1 hunter at character creation, and the next 2 unlocks come early (exact goal numbers to follow from the owner; until then, early, cheap goals).
+- Terminology: they're **Hunters**, not heroes or classes. "Hunter unlock", the "Hunters" hub, and so on, everywhere player-facing.
+- Drop the Light/Medium/Heavy labels from the UI.
+- Build a much better **hunter viewer**:
+  - a large rotating model per hunter
+  - their abilities shown one by one, each with its key and a short animated preview or loop of the move
+  - the plain-words card from the L picker
+- **Hold to unlock:** hold a button, a bar slides and fills, the hunter animates (powering up), then a reveal burst.
+- Use Opus 5.5 at medium effort for this rework.
+
+**Kit agents** (SendMessage to the running ones; put it in the queued prompts):
+- **juggernaut:** display name is **Zed** (owner). It goes in kitfix-dancer-juggernaut's rename.
+- **dredge:** the grab goes through rocks and drags the target over them, like the original (owner). This overrides our doc's stop-at-walls.
+- **pin:** Shift is the newer source behaviour (dodge roll, then walk through walls). Confirmed.
+- **tamsin:** copy the base hero exactly: ice control and walls, no added healing. Confirmed.
+- **dancer:** owner, "the only one that is very different is thief right now". Rebuild it as its source:
+  - LMB is ranged, alternating-hand bolts that land at the cursor (ours is melee)
+  - RMB is the bolas, done right
+  - E is already correct
+  Priority 1 in kitfix-dancer-juggernaut.
