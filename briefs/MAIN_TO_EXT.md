@@ -108,3 +108,7 @@ Checks:
 - bots picking orbs and using shops
 
 Design note in docs/decisions first (core systems). Full suite once, then report ready here with the Net version.
+
+## 2026-11-02 09:40 ET: HOLD ext/equal
+
+The owner is reconsidering the bring-in question (this is an extraction game, not a BR). Don't start ext/equal yet. If you already started, pause it. I'll post the final spec here once the owner decides. The perks-as-pickups part (point 4: orbs, no 1/2/3 prompt) and point 5 (level-ups need no choice) will stay whatever the decision; you can start those two on their own branch ext/perkorbs if you have a free slot.
