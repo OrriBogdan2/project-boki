@@ -666,10 +666,8 @@ func _call_end(done: bool) -> void:
 	var rescue := who != h and who.downed
 	if rescue:
 		_call_home(who)
-	var bd := HeroUlt.bond_of("tender")
-	HeroUlt.bond(h, float(bd.get("rescue" if rescue else "complete", 0.6)), "rescue" if rescue else "complete")
-	if who != h:
-		HeroUlt.bond(who, float(bd.get("ally", 0.2)), "ally")
+	# a support ult lands on a teammate: a completed tether counts as a hit, a rescue as the top event
+	HeroUlt.bond(h, "kill" if rescue else "hit")
 	var at := who.pos if not rescue else h.pos
 	CareUtil.payoff(m, h, at, "HOME" if rescue else "MENDED", Color("9cf07a"), "tend_arrive")
 	lk().burst("flare", at, {"col": Color("9cf07a"), "rim": Color(1, 1, 1), "r": 1.8, "dur": 0.4, "pattern": 1.0})

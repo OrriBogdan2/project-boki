@@ -1,7 +1,8 @@
 class_name CareDemo
 extends RefCounted
 ## Screenshot and frame-strip tooling for the support pair (Arena). Hooked from ArenaDemo with one line.
-##   --arena-demo=care_<tender|rimewright>_<lmb|emp|rmb|e|dash|air|skatefire|carry|payoff|pose> --arena-shot=<png>
+##   --arena-demo=care_<tender|rimewright>_<lmb|emp|rmb|e|dash|air|skatefire|carry|payoff|pose|ultaim|ultkey|ult>
+##   --arena-shot=<png>
 ## Saves <png> (the last frame) and <png without .png>_strip.png: crops of the hero at the times in
 ## TIMES, side by side (anticipation, impact, follow-through).
 
@@ -21,6 +22,12 @@ const TIMES := {
 	"payoff": [0.4, 0.8, 1.2, 1.6, 2.0, 2.5],
 	"tender_payoff": [2.6, 2.75, 2.82, 2.9, 3.0, 3.2],
 	"pose": [0.5, 0.5, 0.5, 0.5],
+	"tender_ultaim": [0.4, 0.6, 0.8, 1.0],
+	"tender_ultkey": [0.55, 0.8, 1.2, 2.0],
+	"tender_ult": [0.55, 1.5, 3.0, 5.42, 5.5, 5.7],
+	"rimewright_ultaim": [0.35, 0.6, 1.2, 2.0],
+	"rimewright_ultkey": [0.33, 0.4, 0.5, 3.0],
+	"rimewright_ult": [0.33, 0.45, 2.0, 3.82, 3.9, 4.05],
 }
 
 static func tick(A: Arena, dt: float, w: String) -> void:
@@ -60,7 +67,7 @@ static func tick(A: Arena, dt: float, w: String) -> void:
 		Al = m.make_hunter("Ally", P.team, "medium", "Ally", "idle", {}, P.pos + Vector3(2.6, 0, 1.2), {"arch": "none"})
 		Al.max_hp = 145.0; Al.hp = 60.0
 		A.set_meta("care_ally", Al)
-		if what in ["carry"]:
+		if what in ["carry", "ult", "ultkey"] and (what == "carry" or arch == "tender"):
 			m.knock(Al, null, {})
 			Al.ctrl = "idle"; Al.down_hp = 80.0
 			Al.teleport(P.pos + Vector3(3.0, 0, 0.0))
@@ -111,6 +118,8 @@ static func tick(A: Arena, dt: float, w: String) -> void:
 				if _at(t, dt, 0.3): Al.hp = 20.0; K.cd["e"] = 0.0; K.use_e()
 		"pose":
 			pass
+		"ultaim", "ultkey", "ult":
+			_ult(A, Al, arch, what, t, dt)
 	# capture the strip
 	var times: Array = TIMES.get(arch + "_" + what, TIMES.get(what, TIMES["rmb"]))
 	var frames: Array = A.get_meta("care_frames", [])
@@ -132,6 +141,29 @@ static func tick(A: Arena, dt: float, w: String) -> void:
 					_strip(A.get_meta("care_frames", []), path.trim_suffix(".png") + "_strip.png")
 					print("ARENASHOT ", path)
 				m.get_tree().quit(), CONNECT_ONE_SHOT), CONNECT_ONE_SHOT)
+
+## The X ultimates: Moosh Moosh holds X over the (downed) teammate, lets go and walks while it
+## channels; Tamsin seals in beside the dummy and lets the rink crack open.
+static func _ult(A: Arena, ally: Hunter, arch: String, what: String, t: float, dt: float) -> void:
+	var P: Hunter = A.m.player
+	P.lvl = maxi(P.lvl, 6)
+	if t < 0.3:
+		P.ak.cd["x"] = 0.0
+	if arch == "tender":
+		P.inp["aim"] = ally.pos + Vector3(0, 0.9, 0)
+		var hold_x := what == "ultaim" or t < 0.5
+		P.inp["hult_down"] = hold_x
+		if _at(t, dt, 0.3):
+			P.inp["hult"] = true
+		var walking := what != "ultaim" and t > 0.8 and t < 2.3
+		P.inp["move"] = Vector2(-0.7, 0.7) if walking else Vector2.ZERO
+		return
+	var D: Hunter = A.dummies[0]["h"]
+	if t < 0.3:
+		P.teleport(D.pos + Vector3(-1.0, 0, 3.5))
+	if _at(t, dt, 0.3):
+		P.inp["hult"] = true
+
 
 static func _at(t: float, dt: float, when: float) -> bool:
 	return t >= when - 0.0001 and t - dt < when - 0.0001

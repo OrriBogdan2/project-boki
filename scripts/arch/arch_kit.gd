@@ -35,7 +35,7 @@ var fuse := {}                 # the R's fuse (wind-up) running: {t, T, bond, gu
 var cd_off := false            # practice toggle (Arena): cooldowns don't run down, they're skipped
 var x_aim := false             # X held to aim the hunter's ultimate (HeroUlt; kits whose ult picks a target)
 var x_aim_t := 0.0
-var x_bond := 0.0              # bond meter this kit's X has paid out so far (HUD tests and checks)
+var x_bond_kind := ""          # the event the last landed X paid the bond for: hit, knock or kill (checks)
 
 static func make(hunter: Hunter, arch_id: String) -> ArchKit:
 	var k: ArchKit

@@ -54,6 +54,7 @@ static func fire(h: Hunter) -> bool:
 		_deny(h)
 		return false
 	k.cd["x"] = cooldown(h)
+	k.x_bond_kind = ""
 	h.used["x"] = int(h.used.get("x", 0)) + 1
 	h.cast_at = h.m.time
 	h._ab_feedback("x", "cast")
@@ -83,35 +84,33 @@ static func _deny(h: Hunter) -> void:
 
 
 # ------------------------------------------------------------------ the bond
-## content/rules/hero_ult.json: per hero, how much of the bond meter a landed ult pays.
-static func rules() -> Dictionary:
-	return Content.rules("hero_ult")
+## Until the main session's ultbond branch lands: what KinBond.from_ult pays per kind when
+## rules/boki_system.json has no bond_from_ult yet (the numbers main announced).
+const BOND_FALLBACK := {"hit": 0.6, "knock": 0.7, "kill": 0.8}
 
 
-static func bond_of(hero_id: String) -> Dictionary:
-	return (rules().get("bond", {}) as Dictionary).get(hero_id, {})
-
-
-## Fills h's bond meter by `amount` (0..1 of the bar) because the ult landed. Calls the main session's
-## public bond hook (KinBond.add(h, amount, reason)) when it exists, else the meter's own Bond.add.
-static func bond(h: Hunter, amount: float, reason: String) -> void:
-	if h == null or amount <= 0.0:
+## The ult landed: pays the bond for its best event this cast ("hit", "knock" or "kill"). Calls the
+## main session's KinBond.from_ult(h, kind) when it exists; until then this guarded stub pays the same
+## amounts from rules/boki_system.json bond_from_ult through Bond.add. Swap it out once ultbond lands.
+static func bond(h: Hunter, kind: String) -> void:
+	if h == null or not BOND_FALLBACK.has(kind):
 		return
-	if h.ak != null:
-		h.ak.x_bond += amount
-	var hook := _bond_hook()
+	var hook := _kin_bond()
 	if hook != null:
-		hook.call("add", h, amount, reason)
+		hook.call("from_ult", h, kind)
 	else:
-		Bond.add(h, amount)
+		var amounts: Dictionary = Content.rules("boki_system").get("bond_from_ult", BOND_FALLBACK)
+		Bond.add(h, float(amounts.get(kind, BOND_FALLBACK[kind])))
+	if h.ak != null:
+		h.ak.x_bond_kind = kind
 
 
-## Guarded stub: the KinBond class ships with the main session's ultbond branch. Until then this is null.
-static func _bond_hook() -> Script:
+## The KinBond script if the ultbond branch is in, else null.
+static func _kin_bond() -> Script:
 	for c in ProjectSettings.get_global_class_list():
 		if String(c["class"]) == "KinBond":
 			var s: Script = load(String(c["path"]))
 			for mt in s.get_script_method_list():
-				if String(mt["name"]) == "add":
+				if String(mt["name"]) == "from_ult":
 					return s
 	return null
