@@ -1016,6 +1016,7 @@ func _sim_dazed(dt: float) -> void:
 		dazed_t -= dt         # (it stays dazed while someone is scanning it)
 	_ground_move(Vector2.ZERO, dt)
 	hp = minf(max_hp * 0.25, hp + dt * 0.5)
+	KinLoss.tick_guard(self, dt)
 	if dazed_t <= 0.0:
 		state = "wild"
 		hp = max_hp * 0.45
@@ -1042,7 +1043,7 @@ func hurt(d: float, by: Ent, opts := {}) -> float:
 # ------------------------------------------------------------------ visuals
 func render(delta: float, alpha: float) -> void:
 	super.render(delta, alpha)
-	visible = not dead and state != "bench" and state != "away" and not (state == "downed" and down_void) and not (owner_h and (owner_h.out or owner_h.extracted or owner_h.riding)) and not KinMerge.inside(self)
+	visible = not dead and state != "bench" and state != "away" and not (state == "downed" and down_void) and not (owner_h and (owner_h.out or owner_h.extracted or owner_h.riding) and not KinLoss.guarding(self)) and not KinMerge.inside(self)
 	KinDowned.render(self, delta)
 	if not model:
 		return

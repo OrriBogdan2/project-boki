@@ -362,32 +362,9 @@ func _draw_world_labels() -> void:
 		var ally: bool = m.player != null and o.team == m.player.team
 		if soul and ally and o != m.player:
 			_ctext(bp, "%s  ·  %ds" % [o.pname, int(ceil(float(b["soul_until"]) - m.time))], 13, Color("9ee2a0"), big)
-		elif not (b.get("kin", []) as Array).is_empty() and m.player and m.player.flat_dist(b["pos"]) < 32.0:
-			# a Boki in a deathbox: whoever loots the box takes it home (the hook: readable from afar)
-			var kn := String((b["kin"][0] as Dictionary).get("name", "Boki"))
-			if o == m.player:
-				_ctext(bp + Vector2(0, -16), "Your box  ·  %s is inside" % kn, 15, GOLD, big)
-			else:
-				_ctext(bp + Vector2(0, -16), "A Boki in %s's box" % o.pname, 16, Color("ffb36a"), big)
-				_ctext(bp + Vector2(0, 2), "loot it and %s is yours" % kn, 12, Color(INK, 0.9), big)
 		elif not b["empty"] and m.player and m.player.flat_dist(b["pos"]) < 14.0:
 			_ctext(bp, "%s's box" % o.pname if o != m.player else "Your box", 12, Life.box_color(b), big)
-	# whoever has your kin: marked over their head, or an arrow at the screen edge
-	var th: Hunter = m.kin_thief() if m.player and not m.player.out else null
-	if th:
-		var sz := c.size
-		var tp := cam.unproject_position(th.position + Vector3(0, 2.8, 0))
-		var on := not cam.is_position_behind(th.position) and Rect2(Vector2(30, 30), sz - Vector2(60, 60)).has_point(tp)
-		if on:
-			_ctext(tp, "Has your Boki", 15, GOLD, big)
-			c.draw_colored_polygon(PackedVector2Array([tp + Vector2(-8, 6), tp + Vector2(8, 6), tp + Vector2(0, 16)]), GOLD)
-		else:
-			var ctr := sz * 0.5
-			var d := (tp - ctr).normalized() if not cam.is_position_behind(th.position) else (ctr - tp).normalized()
-			var edge := ctr + d * minf(sz.x, sz.y) * 0.44
-			var perp := Vector2(-d.y, d.x)
-			c.draw_colored_polygon(PackedVector2Array([edge + d * 18.0, edge - d * 6.0 + perp * 11.0, edge - d * 6.0 - perp * 11.0]), GOLD)
-			_ctext(edge - d * 26.0, "%dm" % int(m.player.flat_dist(th)), 13, GOLD, big)
+	BondHud.draw(self)       # whoever carries your Boki: an arrow to them; and the Tracked chip if that is you
 	# the tutorial's marker: a pin over what to go to, or an arrow at the screen edge, with the distance
 	if m.opts.get("tutorial", false) and m.tut_target != Vector3.INF and m.player and not m.player.out and not m.tut_kin_leading():
 		_draw_waypoint(m.tut_target, m.tut_label, Color("8fe3c8"))     # (your Boki leading the way replaces it)
@@ -2471,12 +2448,9 @@ func _draw_dead(sz: Vector2, p: Hunter) -> void:
 	var left_line := ""
 	for L in m.player_lost:
 		var lk = L.get("kin")
-		var lb: Dictionary = L.get("box", {})
 		var kn := String((L.get("rec", {}) as Dictionary).get("name", "Your Boki"))
-		if lk != null and is_instance_valid(lk) and not (lk as Kin).dead and (lk as Kin).is_wild():
-			left_line = "%s was left behind: rivals can scan it" % kn
-		elif not lb.is_empty() and (lb.get("kin", []) as Array).any(func(r): return String(r.get("uid", "")) == String(L.get("uid", ""))):
-			left_line = "%s is in your deathbox: a rival who loots it takes it" % kn
+		if lk != null and is_instance_valid(lk) and not (lk as Kin).dead and KinLoss.guarding(lk):
+			left_line = "%s is guarding your box: get revived and run into it, or a rival can scan it" % kn
 	if left_line != "":
 		y0 = sz.y * 0.58
 		_ctext(Vector2(sz.x * 0.5, y0 - 64), left_line, 20, GOLD, big)

@@ -42,7 +42,7 @@ static func begin(k: Kin, fell: bool) -> void:
 ## Can the owner scoop it up right now?
 static func rescuable(k: Kin) -> bool:
 	var h := k.owner_h
-	return k.state == "downed" and not k.down_void and h != null and not h.out and not h.extracted and not h.downed and not h.riding and not h.dropping
+	return ((k.state == "downed" and not k.down_void) or KinLoss.guarding(k)) and h != null and not h.out and not h.extracted and not h.downed and not h.riding and not h.dropping
 
 static func tick(k: Kin, dt: float) -> void:
 	var r := rules()
@@ -75,13 +75,17 @@ static func stop_reason(k: Kin, h: Hunter, r: Dictionary) -> String:
 
 ## Is an enemy hunter standing on it? You can't pick it up while they are.
 static func contested(k: Kin) -> bool:
-	if k.state != "downed":
+	if k.state != "downed" and not KinLoss.guarding(k):
 		return false
 	var cr := float(rules()["contest_r"])
 	for e in k.m.hunters:
 		if e.team != k.team and not e.out and not e.downed and not e.dead and k.flat_dist(e) <= cr and absf(e.pos.y - k.pos.y) < 2.2:
 			return true
 	return false
+
+## A guarding Boki (KinLoss) runs the same cradle while it waits.
+static func step_rescue(k: Kin, h: Hunter, dt: float) -> void:
+	_rescue(k, h, rules(), dt)
 
 static func _rescue(k: Kin, h: Hunter, r: Dictionary, dt: float) -> void:
 	var need := float(r["rescue_s"])
@@ -119,8 +123,8 @@ static func stop(k: Kin, h: Hunter, why: String) -> void:
 
 ## Hunter._tick: while you rescue you are rooted and can't attack (a dash still cancels it).
 static func commit(h: Hunter) -> void:
-	var k: Kin = h.kin
-	if k == null or not k.rescue_on or k.state != "downed":
+	var k := KinLoss.rescuing(h)
+	if k == null:
 		return
 	h.inp["move"] = Vector2.ZERO
 	for key in ["fire", "jump", "glide", "sig", "sec", "skill", "ult", "kin_ab", "gear1", "gear2", "throw", "reload", "tonic", "kit", "swap"]:
@@ -138,8 +142,8 @@ static func _rescue_fx(k: Kin, h: Hunter, r: Dictionary, dt: float) -> void:
 
 ## "rs_kneel" / "rs_cradle" while rescuing, "rs_done" for a moment after: the pose id for HunterAnim (and the net snapshot).
 static func rescue_pose(h: Hunter) -> String:
-	var k: Kin = h.kin
-	if k != null and k.rescue_on:
+	var k := KinLoss.rescuing(h)
+	if k != null:
 		return "rs_kneel" if scoop_k(k) < float(rules()["rescue_kneel_frac"]) else "rs_cradle"
 	if h.m.time - float(h.get_meta("rescue_done_at", -9.0)) < float(rules()["rescue_done_s"]):
 		return "rs_done"
@@ -154,7 +158,7 @@ static func anim_state(h: Hunter, s: Dictionary) -> void:
 		t = h.m.time - float(h.get_meta("kpose_at", -9.0))
 	else:
 		id = rescue_pose(h)
-		var k: Kin = h.kin
+		var k := KinLoss.rescuing(h)
 		if id == "rs_kneel" and k != null:
 			t = h.m.time - float(h.get_meta("rescue_at", h.m.time))
 		elif id == "rs_cradle" and k != null:
@@ -179,6 +183,7 @@ static func come_round(k: Kin, rescued: bool) -> void:
 	k.down_void = false
 	var from := k.pos
 	k._hop_on()
+	KinLoss.reclaimed(k)
 	k.m.fx.burst(k.owner_h.pos + Vector3(0, 1.5, 0), k.sp["color"], 12 if rescued else 8, 2.5)
 	k.m.fx.ring(from, 1.2, Color(k.sp["color"], 0.8), 0.3)
 	k.m.sfx("recall", k.owner_h.pos, -4.0)
@@ -203,7 +208,7 @@ const BEACON_H := 3.2     # m: the marker pillar over a downed Boki
 ## The marker over a downed Boki: a pillar in your team colour that your squad can see from afar.
 ## (Its screen label and the minimap dot are BokiHud.)
 static func render(k: Kin, _delta: float) -> void:
-	var show: bool = k.state == "downed" and k.owner_h != null and not k.unseen and k.m.player != null and k.owner_h.team == k.m.player.team
+	var show: bool = (k.state == "downed" or KinLoss.guarding(k)) and k.owner_h != null and not k.unseen and k.m.player != null and k.owner_h.team == k.m.player.team
 	if show and k.beacon == null:
 		var mi := MeshInstance3D.new()
 		var cm := CylinderMesh.new()

@@ -1858,7 +1858,7 @@ func swap_kin(force := false) -> void:
 		return
 	var a: Kin = kin
 	var b: Kin = kin2
-	if b.dead or (a and a.state == "fused"):
+	if b.dead or KinLoss.guarding(b) or (a and (a.state == "fused" or KinLoss.guarding(a))):
 		return
 	if a: a.bench()
 	b.unbench()

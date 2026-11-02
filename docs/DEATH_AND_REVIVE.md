@@ -58,10 +58,12 @@ Risk scales with the tier you queue into (`data/tiers/*.tres`, script `run_tier.
 | Tier | Kin you have on you when you die | Kin out of your hands (thrown, following a teammate) | Loot value |
 |---|---|---|---|
 | **Shallows** (1) | Stay with you, never lost | Follow a living teammate, or flee home | ×1 |
-| **Deeps** (2) | **Drop into your deathbox: anyone can loot them** | Follow a teammate, or flee home | ×1.75 |
-| **Abyss** (3) | **Drop into your deathbox: lootable** | **Can be captured by enemies** (hold E, 3s) | ×2.75 |
+| **Deeps** (2) | **Never lost (docs/decisions/0008)** | Follow a teammate, or flee home | ×1.75 |
+| **Abyss** (3) | **Drop dazed and guard the spot; revive and cradle to take back** | **Enemies can scan them** | ×2.75 |
 
 All names and multipliers are placeholders.
+
+**Superseded by docs/decisions/0008-boki-loss.md** (the Boki drops dazed beside the deathbox instead of into it; the notes below describe the old box rules).
 
 **Getting a kin back in the Deeps or Abyss:**
 - A box revive by your teammate brings you back with your loot and your kin.

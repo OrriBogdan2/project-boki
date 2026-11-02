@@ -8,8 +8,8 @@ _Generated from `scripts/core/data.gd`, `scripts/match/life.gd`, `content/rules`
 | Tier | Monsters | Loot | Wild Boki levels | Unlocks after | Boki at risk | What happens |
 |---|---|---|---|---|---|---|
 | The Meadow | x1 | x1 | 1 to 3 | 0 extractions | no | Gentle islands. Your Boki are always safe here: lose your loot, never your Boki. |
-| Dusk Isles | x1.45 | x1.75 | 2 to 5 | 2 extractions | in your deathbox | Tougher monsters, more loot, rarer Boki. Boki you have on you drop into your deathbox when you die, and anyone can loot them. Boki out of your hands escape. |
-| The Hollow | x2 | x2.75 | 4 to 8 | 5 extractions | can be captured | Brutal and rich. Boki on you drop into your deathbox and can be looted, and a Boki left out in the world can be scanned and taken (knock it out, then hold the interact key). |
+| Dusk Isles | x1.45 | x1.75 | 2 to 5 | 2 extractions | no | Tougher monsters, more loot, rarer Boki. Your Boki is always safe here: it goes home with you if you fall. |
+| The Hollow | x2 | x2.75 | 4 to 8 | 5 extractions | dropped dazed, can be scanned | Brutal and rich. If you fall your Boki drops dazed beside your deathbox and guards it. Get revived and run into it to pick it up, or a rival can scan it and take it (knock it out, then hold the interact key). |
 
 ## Match
 
@@ -62,6 +62,7 @@ The Boki command system (docs/decisions/0001, 0002): G sic / call back / wheel, 
 | merge_leap_range | 32 |
 | land_stagger | {"radius": 1.7, "stun": 0.7, "kb": 3.0, "dmg_k": 0.8} |
 | recall_hit | {"width": 0.9, "dmg_k": 1.0, "stun": 0.35, "kb": 5.0} |
+| loss | {"desc": "Losing a Boki (docs/decisions/0008). loss_min_tier: tiers below it are safe (your Boki goes home with you when you die); from it up, a Boki drops dazed when its hunter dies, guards the spot, and can be scanned by an enemy. bond_ping_s: seconds between map pings of the hunter carrying a captured Boki. guard_r: metres from the deathbox a dropped Boki stands.", "loss_min_tier": 2, "bond_ping_s": 15.0, "guard_r": 1.4} |
 | regen | {"carried_pct_s": 0.06, "out_pct_s": 0.015, "out_delay_s": 6.0, "desc": "Health a Boki wins back on its own, as a share of max health per second: on you (Return, settled) 6%/s; out beside you 1.5%/s once it has gone out_delay_s without taking damage. A downed Boki never regenerates (rescue it). Kin.regen_quiet counts the seconds since it last lost health; Blight cuts it like any healing."} |
 | down | {"recover_s_trusting": 15.0, "recover_s_wary": 20.0, "recover_hp": 0.2, "rescue_hp": 0.6, "rescue_s": 3.5, "rescue_r": 1.5, "rescue_drain_s": 2.0, "rescue_block_s": 0.6, "rescue_slack": 0.7, "contest_r": 1.2, "rescue_kneel_frac": 0.12, "rescue_done_s": 0.45} |
 | follow | {"separation_r": 1.2, "path_every_s": 0.45, "path_goal_moved": 3, "path_fail_backoff_s": 1.5, "path_lookahead": 8, "path_window": 12, "stuck_s": 1.0, "hop_dur": 0.38, "hop_height": 1.1, "hop_on_air_s": 0.4, "hop_off_steady_s": 0.35, "away_dist": 8.0, "combat_radius": 12.0, "hesitate_s": 0.3, "sic_cd": 1.0, "sic_speed": 18.0, "engage_range": 9.0, "disengage_range": 4.0, "guard_leash": 24.0, "chase_leash": 30.0} |
