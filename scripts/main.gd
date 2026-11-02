@@ -381,14 +381,10 @@ func _ready() -> void:
 		wcc.run(self)
 		return
 	if "--farm-start-check" in args:
-		var fsc = load("res://tools/farm_start_check.gd").new()      # a new farm: empty island, placing, chopping, stations, old saves
-		set_meta("farm_start_check", fsc)
-		fsc.run(self)
+		load("res://tools/farm_start_check.gd").new().run(self)      # a new farm: empty island, placing, chopping, stations, old saves
 		return
 	if Array(args).any(func(a): return String(a).begins_with("--farmbuild")):
-		var fbc = load("res://tools/farmbuild_check.gd").new()      # the farm building pass: --farmbuild-check, or --farmbuild-shots=<dir> for screenshots
-		set_meta("farmbuild_check", fbc)
-		fbc.run(self)
+		load("res://tools/farmbuild_check.gd").new().run(self)      # the farm building pass: --farmbuild-check, or --farmbuild-shots=<dir> for screenshots
 		return
 	if "--work-check" in args:
 		var wkc = load("res://tools/work_check.gd").new()      # kin at work: jobs, stations, priorities, shimmer odds
