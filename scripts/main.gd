@@ -29,7 +29,7 @@ func _ready() -> void:
 		fade.boot()     # carry on from the boot splash: covered, logo showing, until the first screen is up
 	var args := OS.get_cmdline_user_args()
 	# tooling never touches the real save file: checks, screenshots and --no-save runs play on a copy
-	if "--no-save" in args or "--archetype-check" in args or "--kit-combo-check" in args or "--mage-combo-check" in args or "--gunslinger-combo-check" in args or "--arena-check" in args or "--dredge-combo-check" in args or "--ashwick-combo-check" in args or Array(args).any(func(x): return String(x).begins_with("--shot=") or String(x).begins_with("--arena-shot=") or String(x).begins_with("--rolling-shot=")):
+	if "--no-save" in args or "--archetype-check" in args or "--kit-combo-check" in args or "--mage-combo-check" in args or "--gunslinger-combo-check" in args or "--zone-check" in args or "--dolm-combo-check" in args or "--ostra-combo-check" in args or "--arena-check" in args or "--dredge-combo-check" in args or "--ashwick-combo-check" in args or Array(args).any(func(x): return String(x).begins_with("--shot=") or String(x).begins_with("--arena-shot=") or String(x).begins_with("--rolling-shot=")):
 		Save.no_write = true
 	var opts := {}
 	for a in args:
@@ -515,6 +515,11 @@ func _ready() -> void:
 		var arc = load("res://tools/arena_check.gd").new()      # the Arena, training's practice tools, the kit card
 		set_meta("arena_check", arc)        # (kept alive across its awaits)
 		arc.run(self)
+		return
+	if "--zone-check" in args or "--dolm-combo-check" in args or "--ostra-combo-check" in args:
+		var hpc = load("res://tools/hero_pair_check.gd").new()      # Dolm and Ostra: placement legality, Net sync, every combination
+		set_meta("hero_pair_check", hpc)
+		hpc.run(self)
 		return
 	if "--archetype-check" in args or "--kit-combo-check" in args or "--mage-combo-check" in args or "--gunslinger-combo-check" in args:
 		var akc = load("res://tools/archetype_check.gd").new()      # every archetype kit, controls, locks, infusion, feel

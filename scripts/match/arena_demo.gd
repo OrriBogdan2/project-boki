@@ -203,9 +203,11 @@ static func tick(A: Arena, dt: float) -> void:
 			else:
 				if _at(t, dt, go): P.ak.ch_rmb = float(P.ak.rmb_charges()); P.ak.bot_hold["rmb"] = 0.9; P.ak.press_rmb()
 				at_t = go + 0.7 if "--hold-shot" in OS.get_cmdline_user_args() else go + 1.05
+		_ when w.begins_with("pair_"):
+			at_t = PairDemo.tick(A, P, D, t, dt, w)          # Dolm and Ostra (scripts/arch/pair_demo.gd)
 		_ when w.begins_with("anim_"):
 			var mv := w.substr(5)
-			var spec: Array = ANIM_DEMO.get(mv, ["thief", "smg", [1.0]])
+			var spec: Array = ANIM_DEMO.get(mv, PairDemo.ANIM.get(mv, ["thief", "smg", [1.0]]))
 			if t < 0.05:
 				if P.arch != String(spec[0]) or P.wid != String(spec[1]): A.set_arch(String(spec[0]), String(spec[1]))
 				A.set_kin("")
@@ -283,6 +285,9 @@ static func tick(A: Arena, dt: float) -> void:
 ## The scripted input for each kit move's strip.
 static func _anim_trigger(A: Arena, P: Hunter, D: Hunter, mv: String, t: float, dt: float) -> void:
 	var K: ArchKit = P.ak
+	if PairDemo.ANIM.has(mv):
+		PairDemo.trigger(P, D, mv, t, dt)
+		return
 	match mv:
 		"thf_shot":
 			P.inp["fire"] = t > 0.55 and t < 0.9

@@ -6380,6 +6380,8 @@ func _net_ev(x, from: String) -> void:
 		return
 	var who: Ent = null
 	match String(x[0]):
+		"zone":
+			HeroZones.net_in(self, x)
 		"kcmd":
 			KinNet.on_event(self, x)       # a Boki command or a merge going off in another game
 		"kst":

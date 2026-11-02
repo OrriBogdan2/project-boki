@@ -1516,6 +1516,7 @@ static func prism_tip() -> PrismMesh:
 ## exaggerated hero-shooter shapes (rounded receivers, flared muzzles, fat grips and stocks) with a
 ## glowing accent per weapon. The barrel runs along -Z; the trigger hand holds near the origin.
 static func gun_parts(gun: Node3D, weapon: String, m_gun: Material, m_dark: Material, m_acc: Material) -> void:
+	if HeroArms.build(gun, weapon, m_gun, m_dark, m_acc): return      # Dolm's and Ostra's fixed weapons
 	var glow := func(c: Color) -> ShaderMaterial: return toon(c, false, 1.1)
 	var stock := func(z0: float, z1: float, h: float, w: float) -> void:
 		part(gun, HeroKit.loft("stock|%.2f|%.2f|%.2f" % [z0, z1, h], [Vector3(0, 0.0, z0), Vector3(0, -0.02, lerpf(z0, z1, 0.5)), Vector3(0, -0.05, z1)], [Vector2(w * 0.5, h * 0.4), Vector2(w * 0.5, h * 0.5), Vector2(w * 0.55, h * 0.75)], 10, Vector3.UP, 0.85), m_dark)

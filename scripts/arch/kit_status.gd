@@ -5,6 +5,7 @@ extends RefCounted
 ##   blt  Blight (the Juggernaut's Warchain, the Thief's Jackpot rim): healing on the body is cut
 ##   vul  Shred (the Thief's Primed shot): the body takes `k` more damage
 ##   rat  Rattled (Marlowe's Burr Charge): slowed, and her rifle and Longneedle hit harder; stars over the head
+##   dsr  Disoriented (Ostra's Trade): slowed by `k`; a DIZZY word and a teal ring
 ## The game that owns the body runs the rules; the caster's game sends the Net event
 ## ["kst", nid, kind, seconds, k] for a remote body (Net.VERSION 0.7.0), every game shows it.
 
@@ -54,6 +55,12 @@ static func apply(e: Ent, kind: String, secs: float, k := 0.0, send := true) -> 
 			e.slow_k = maxf(e.slow_k if e.slow_t > 0.0 else 0.0, RATTLE_SLOW)
 			e.slow_t = maxf(e.slow_t, secs)
 			if not was_r: _show(e, kind, secs)
+		"dsr":
+			var was_d := e.has_meta("dsr_until") and float(m.time) < float(e.get_meta("dsr_until"))
+			e.set_meta("dsr_until", maxf(float(e.get_meta("dsr_until", 0.0)), float(m.time) + secs))
+			e.slow_k = maxf(e.slow_k if e.slow_t > 0.0 else 0.0, k if k > 0.0 else 0.4)
+			e.slow_t = maxf(e.slow_t, secs)
+			if not was_d: _show(e, kind, secs)
 		"vul":
 			e.vuln_k = maxf(e.vuln_k if e.vuln_t > 0.0 else 0.0, k)
 			e.vuln_t = maxf(e.vuln_t, secs)
@@ -101,6 +108,9 @@ static func _show(e: Ent, kind: String, secs: float) -> void:
 			m.later(secs, func(): if is_instance_valid(rn): rn.queue_free())
 			m.fx.word(e.pos + Vector3(0, 2.3, 0), "RATTLED", RATTLE_COL, false)
 			m.fx.ring(e.pos, 1.1, RATTLE_COL, 0.25)
+		"dsr":
+			m.fx.word(e.pos + Vector3(0, 2.1, 0), "DIZZY", Color("7fe0d0"), false)
+			m.fx.ring(e.pos, 1.0, Color("7fe0d0"), 0.3)
 		"vul":
 			m.fx.word(e.pos + Vector3(0, 2.0, 0), "SHRED", Color("ff7a5a"), false)
 			m.fx.ring(e.pos, 0.9, Color("ff7a5a"), 0.25)
