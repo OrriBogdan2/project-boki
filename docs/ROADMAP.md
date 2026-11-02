@@ -2,7 +2,7 @@
 
 What has shipped, what is being built, and what comes next. The main session updates this file at every check-in and every ship. For how things work today, see the [wiki](wiki/Home.md). Known shortcuts and their owners are in [DEBT.md](DEBT.md), and design decisions are in [decisions/](decisions/).
 
-Last updated: 2026-11-02 16:30 ET, sync66.
+Last updated: 2026-11-02 18:40 ET, sync69.
 
 ## Shipped
 
@@ -37,6 +37,12 @@ Last updated: 2026-11-02 16:30 ET, sync66.
 | Bigger map | other session (queued last) | The Hollow Crown ~2-3x in area, streamed so load and frame time stay flat | after ext/market |
 
 ## Next (main session)
+
+- **In flight:** movepass (wall kick and bounce, ledges, abyss lift: review fixes, then sync70); ultbond (R reload, X hunter ultimate, T Merge, bond hook, release afterglow, merge damage cap); kinloss (restart: online fixes, carry your Boki at 90% speed while rescuing).
+- **Boki controls pass:** C folded into G (one Boki button, ability on arrival, "use ability here" slice), faster Boki response with a press-latency check, ownership rings/tags ("Orri's Stormwing"; nickname in kill feed and on hover), leash line, minimap colours.
+- **Tutorial pass:** the bond meter and Merge (T), R reload, X ultimate, gloves on Q/V, the G toggle, perk orbs, keys in utility slots; drop the weapon-pickup step.
+- **Merge identity pass:** a unique transformation and release per Boki or type, its own sound and big word, a readable merged silhouette and aura; forms for the six Boki without one.
+- **Small fixes:** the Scalefolk skin colour not recolouring the body; the Black Market (Ransom tab plus rare stock, built with ext/market) and the Challenge Sign; the double HUD caption in arena; overprinted status toasts; the camera inside a sphere on an air dash near a dummy.
 
 - **Code cleanup** (after kinloss and ultbond land), in small batches, avoiding files with open kitfix branches:
   1. Rename the 126 variables that shadow Godot's names (`tools/style_lint.py` lists them).
