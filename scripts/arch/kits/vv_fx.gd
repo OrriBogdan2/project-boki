@@ -33,6 +33,7 @@ var pools := {}                # kind -> Array of nodes made for it
 var live: Array = []           # one-shot effects: {node, t, dur, kind, s0, follow, spin}
 var riders: Array = []         # looks riding on a shot: {node, sd, kind, len, width, on_end, last, vel}
 var markers := {}              # id -> {node, t, n}
+var rng := RandomNumberGenerator.new()      # cosmetic jitter only: never draws on the global RNG (seeded sims stay the same)
 var made := 0                  # nodes made so far (tests: it stops growing once warm)
 var _ribbon: ArrayMesh
 var _col: ArrayMesh
@@ -94,7 +95,7 @@ func _look(n: Node3D, col: Color, col2: Color, life := 0.0) -> ShaderMaterial:
 	mt.set_shader_parameter("color", col)
 	mt.set_shader_parameter("color2", col2)
 	mt.set_shader_parameter("life", life)
-	mt.set_shader_parameter("seed", randf() * 10.0)
+	mt.set_shader_parameter("seed", rng.randf() * 10.0)
 	mt.set_shader_parameter("strength", 1.0)
 	return mt
 

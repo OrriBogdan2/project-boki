@@ -113,7 +113,7 @@ func _tick_sparks(dt: float) -> void:
 		var n := int(s["n"])
 		fx().marker("vs%d" % key, f, n, mx, res_col(), GOLD, _top(f))
 		if n >= mx and int(m.time * 7.0) != int((m.time - dt) * 7.0):
-			fx().arc(f.position + Vector3(0, _top(f) - 0.3, 0), ground(f.pos) + Vector3(randf_range(-0.5, 0.5), 0.05, randf_range(-0.5, 0.5)), res_col(), GOLD, 0.35, 0.12)
+			fx().arc(f.position + Vector3(0, _top(f) - 0.3, 0), ground(f.pos) + Vector3(fx().rng.randf_range(-0.5, 0.5), 0.05, fx().rng.randf_range(-0.5, 0.5)), res_col(), GOLD, 0.35, 0.12)
 
 func _tick(dt: float) -> void:
 	_tick_sparks(dt)
@@ -187,10 +187,10 @@ func _tick_lmb() -> void:
 func _bolt_end(at: Vector3, vel: Vector2, from: Vector3) -> void:
 	var back := Vector2(from.x - at.x, from.z - at.z).normalized() if vel.length() > 0.1 else Vector2(0, 1)
 	for i in 4:
-		var a := (float(i) - 1.5) * 0.45 + randf_range(-0.15, 0.15)
+		var a := (float(i) - 1.5) * 0.45 + fx().rng.randf_range(-0.15, 0.15)
 		var bd := back.rotated(a)
-		var ln := randf_range(0.5, 1.0)
-		fx().arc(at, at + Vector3(bd.x * ln, randf_range(0.0, 0.4), bd.y * ln), res_col(), GOLD, 0.22, 0.12)
+		var ln := fx().rng.randf_range(0.5, 1.0)
+		fx().arc(at, at + Vector3(bd.x * ln, fx().rng.randf_range(0.0, 0.4), bd.y * ln), res_col(), GOLD, 0.22, 0.12)
 	fx().star(at, GOLD, Color.WHITE, 0.55, 0.12)
 
 # ------------------------------------------------------------------ dash: Wirerun
@@ -275,8 +275,8 @@ func _tick_wire(dt: float) -> void:
 	AimKit.lane(h, "dash", {"len": float(dd["dist"][1]), "width": 0.35, "rails": true, "chevrons": 5, "fill": L / float(dd["dist"][1]), "col": col_of(dd)})
 	AimKit.circle(h, "dash_end", {"at": end, "r": float(dd["end_r"]), "ticks": true, "star": true, "col": col_of(dd), "col2": GOLD, "all": true, "hot": k * 0.6})
 	AimKit.charge(h, k, {"col": col_of(dd), "col2": GOLD})
-	if randf() < 0.35:
-		fx().arc(h.position + Vector3(randf_range(-0.4, 0.4), randf_range(0.2, 1.4), randf_range(-0.4, 0.4)), h.position + Vector3(randf_range(-0.5, 0.5), randf_range(0.2, 1.6), randf_range(-0.5, 0.5)), col_of(dd), GOLD, 0.18, 0.08)
+	if fx().rng.randf() < 0.35:
+		fx().arc(h.position + Vector3(fx().rng.randf_range(-0.4, 0.4), fx().rng.randf_range(0.2, 1.4), fx().rng.randf_range(-0.4, 0.4)), h.position + Vector3(fx().rng.randf_range(-0.5, 0.5), fx().rng.randf_range(0.2, 1.6), fx().rng.randf_range(-0.5, 0.5)), col_of(dd), GOLD, 0.18, 0.08)
 	if not held("dash") or t >= float(dd.get("auto", float(dd["hold"]) + 0.3)):
 		_end_wire(false)
 		_run(L, d, dr)
@@ -394,8 +394,8 @@ func _tick_rod() -> void:
 		var right := Vector3(d.y, 0, -d.x)
 		rod.global_position = h.position + Vector3(0, 1.55, 0) + right * 0.3 - Vector3(d.x, 0, d.y) * 0.15
 		rod.look_at(rod.global_position + Vector3(d.x * 0.35, 1.0, d.y * 0.35), Vector3(d.x, 0, d.y))
-		if randf() < 0.3:
-			fx().arc(rod.global_position + Vector3(0, 0.6, 0), rod.global_position + Vector3(randf_range(-0.3, 0.3), -0.5, randf_range(-0.3, 0.3)), res_col(), GOLD, 0.2, 0.08)
+		if fx().rng.randf() < 0.3:
+			fx().arc(rod.global_position + Vector3(0, 0.6, 0), rod.global_position + Vector3(fx().rng.randf_range(-0.3, 0.3), -0.5, fx().rng.randf_range(-0.3, 0.3)), res_col(), GOLD, 0.2, 0.08)
 	AimKit.lane(h, "rmb", {"len": float(cd_["range"]), "width": 0.3, "rails": true, "chevrons": 4, "k": k, "col": col_of(rmb_def()), "col_full": GOLD})
 	AimKit.charge(h, k, {"col": col_of(rmb_def()), "col2": GOLD, "flare": false})
 
@@ -606,7 +606,7 @@ func _strike(s: Dictionary) -> void:
 	last_strike = {"at": at, "dir": dir}
 	var col := col_of(ed)
 	for i in 3:
-		fx().arc(at + Vector3(randf_range(-0.6, 0.6), 9.0, randf_range(-0.6, 0.6)), at + Vector3(randf_range(-0.4, 0.4), 0.1, randf_range(-0.4, 0.4)), col, GOLD, 1.0 - 0.25 * i, 0.22)
+		fx().arc(at + Vector3(fx().rng.randf_range(-0.6, 0.6), 9.0, fx().rng.randf_range(-0.6, 0.6)), at + Vector3(fx().rng.randf_range(-0.4, 0.4), 0.1, fx().rng.randf_range(-0.4, 0.4)), col, GOLD, 1.0 - 0.25 * i, 0.22)
 	net_bolt(at + Vector3(0, 9.0, 0), at, col)
 	fx().ring(at, float(ed["radius"]) + 0.8, GOLD, Color.WHITE, 0.35)
 	fx().disc(at, float(ed["radius"]) * 0.9, Color("1a1420"), COPPER, 0.45)
