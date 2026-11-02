@@ -238,12 +238,13 @@ func _slide_end(early: bool) -> void:
 ## A tap: a skid that starts fast and bleeds off to a run over roll_t, covering `roll` m (you shoot
 ## through it); the speed falls linearly from the peak that covers the distance.
 func _skid(t: float, dd: Dictionary) -> void:
-	var dur := float(dd["roll_t"])
+	var feel := dash_feel()                 # the global dash feel, as travel() applies it
+	var dur := float(dd["roll_t"]) * float(feel["time"])
 	if t >= dur:
 		_slide_end(false)
 		return
 	var run := float(h.cdat["speed"])
-	var peak := 2.0 * float(dd["roll"]) / dur - run
+	var peak := 2.0 * float(dd["roll"]) * float(feel["dist"]) / dur - run
 	h.roll_speed = lerpf(peak, run, t / dur)
 
 func _tick_slide(dt: float) -> void:

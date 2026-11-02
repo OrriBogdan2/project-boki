@@ -1,33 +1,33 @@
 # Vireo (Light)
 
-The storm-kite runner. Finger bolts load Static onto a foe; at four a sky bolt marks them Live, and a
-Wirerun straight through them hits double and gives the dash back at once.
+The storm-kite runner. Every hit loads a Spark onto your target; at four they are Live, and a Wirerun
+straight through them is a Blowout that gives your dash back at once.
 
 ## How it plays
 
-1. **Coilcaster** (LMB): no gun. She points and a jagged bolt cracks from her fingertip every 0.8s, left hand then right, out to full range and through everyone in line. Each hit adds 1 Static.
-2. **Static** (passive): up to 4 on a foe (4.5s, refreshed by every hit), shown by a marker over their head with sparks that grow per stack. The 4th calls a sky bolt: they are **Live**. A knock heals you 15%.
-3. **Wirerun** (Shift): the charge is spent on the press. Hold: a lane and a big end ring grow out to 12.6m; you can't steer, you keep your height and any speed you had keeps drifting you. Let go: a lightning streak (shots pass through you). Every foe crossed takes a hit; a Live foe takes double, a **Blowout**, and Wirerun comes straight back. Nothing else gives it back.
-4. **Storm Rod** (RMB): hold to summon a copper rod (a fixed 13m lane; your body flashes when it's full), let go to throw it. It knocks the first foe back about a body length, stuns them against a wall or another foe, and leaves a charge orb that zaps nearby foes with Static. A Wirerun through the orb bursts it for 2 Static.
-5. **Skycall** (E): drop a circle at your cursor, then flick the mouse to set the drag: toward you pulls them in, away throws them out. 0.8s later lightning drags everyone inside along the ground, adds 2 Static and grounds them (no dashing). It flings orbs too, stealing a rival's.
-6. There is no R: the Boki Merge takes that key.
+1. **Coilcaster** (LMB) spits bolts that pass through everyone in a line. Each hit loads a Spark.
+2. At four Sparks (4.5s, refreshed by every hit) the foe is **Live**: crackling pips over them that everyone sees.
+3. **Wirerun** (Shift): hold to stretch the lane from 4 to 7m, let go to streak. Shots pass through you and every foe you cross takes a hit. Through a Live foe it is a **Blowout** and the dash resets.
+4. **Coilshot** (RMB): hold to charge a heavy round that throws the first foe back. Into a wall or another foe, they are stunned. A hit on a hunter drops a charge mote; pick it up for your dash back.
+5. **Skycall** (E): mark a spot, and a moment later lightning flings everyone there along your aim and grounds them (no dashing). It steals a rival's mote too.
+6. A knock heals you for 15% of your health. There is no R: the Boki Merge takes that key.
 
 ## Combos and interactions
 
 | Do this | And you get |
 |---|---|
-| Three bolts, then Storm Rod or Skycall | The 4th Static: a sky bolt, a Live foe |
-| Wirerun through a Live foe | Double hit + Blowout, Static spent, Wirerun back |
-| Storm Rod into a wall or another foe | A 0.8s stun (both foes for a collision) |
-| Storm Rod, then let the orb zap them | Static without spending a bolt |
-| Skycall flicked toward you | The crowd pulled in and grounded |
-| Skycall over a rival's orb | The orb flies off and becomes yours |
+| Three bolts, then Coilshot | The fourth Spark: a Live foe |
+| Wirerun through a Live foe | Blowout, Sparks spent, Wirerun back |
+| Coilshot into a wall or another foe | A 0.8s stun (both foes for a collision) |
+| Coilshot a hunter, collect the mote | Wirerun back |
+| Skycall over a rival's mote | The mote flies off and becomes yours |
+| Skycall on a foe with three Sparks, then Wirerun | The chain: Live, then Blowout |
 
 ## Tips
 
-- Bolts first, Wirerun last: only a Live foe gives the dash back.
-- Charge Wirerun standing still if you want it straight: moving before you press drifts the run.
-- The Skycall flick is quick: place, flick, done.
+- Bolts first, Wirerun last: the blowout is worth four hits.
+- Grounded stops dashes, including yours: keep out of enemy Skycalls.
+- A held Wirerun shows its lane to everyone. Let go early on a short gap.
 
 ## Kit
 

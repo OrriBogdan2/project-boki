@@ -63,7 +63,13 @@ static func is_away(h: Hunter, k: Kin) -> bool:
 	var d := k.flat_dist(h)
 	return k.state == "returning" or d > float(rules()["follow"]["away_dist"]) or (k.cmd in ["guard", "chase"] and d > 4.0)
 
-## G tap. Sic / Call back / throw from the shoulder.
+## Sent out or fighting something: a G tap now calls it back rather than sending it again.
+static func is_engaged(k: Kin) -> bool:
+	if bool(k.fly.get("sic", false)):
+		return true
+	return k.target != null and is_instance_valid(k.target) and not k.disengaged
+
+## G tap toggles: beside you it goes (Sic at the cursor); out or fighting it comes back.
 static func tap(h: Hunter) -> void:
 	var k: Kin = h.kin
 	if k == null or h.downed or h.dropping or h.riding:
@@ -81,8 +87,8 @@ static func tap(h: Hunter) -> void:
 			return
 		k.throw_to(h._ground_aim())
 	elif k.state in ["active", "returning"]:
-		if is_away(h, k):
-			call_back(h)
+		if is_away(h, k) or is_engaged(k):
+			call_back(h)          # out or fighting: G brings it back; tap again to send it
 		elif k.throw_cd <= 0.0:
 			k.throw_to(h._ground_aim())
 	elif k.state == "downed":

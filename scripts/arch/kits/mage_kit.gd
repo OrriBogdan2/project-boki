@@ -262,7 +262,8 @@ func wire_len(t: float) -> float:
 
 func run_time(L: float) -> float:
 	var dd := dash_def()
-	return maxf(0.1, L / float(dd["speed"]))      # a constant speed: a longer run takes longer
+	# a constant speed (so a longer run takes longer), slowed by the global dash feel like every dash
+	return maxf(0.1, L / float(dd["speed"])) * float(dash_feel()["time"])
 
 func on_dash(use_ex: bool) -> bool:
 	if use_ex and (h.dashes < 1.0 or wire.size() > 0 or run_t > 0.0):
@@ -356,7 +357,7 @@ func _run(L: float, d: Vector2, drift := Vector2.ZERO) -> void:
 	var dd := dash_def()
 	var time := run_time(L)
 	var a := h.position + Vector3(0, 0.9, 0)
-	travel(L, time, {"invuln": time + 0.05, "phase": 1.0, "dir": d})
+	travel(L, time / float(dash_feel()["time"]), {"invuln": time + 0.05, "phase": 1.0, "dir": d})
 	# momentum carries: the streak adds the drift you had
 	var v := d * (L / time) + drift
 	h.roll_dir = v.normalized()
