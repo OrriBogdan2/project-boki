@@ -137,26 +137,49 @@ static func _rime(c: Dictionary) -> void:
 ## fan of ice slats). The gun points down -Z.
 static func weapon(gun: Node3D, wid: String, m_gun: Material, m_dark: Material, m_acc: Material) -> void:
 	if wid == "lantern_crook":
+		# a knotted ash staff wrapped in leather at the grip, brass collars, the hook curling over a caged
+		# lantern with a warm glass globe, two ribbon tails and a little bell that swing under it
 		var wood := Models.toon(Color("7a5434"))
-		_p(gun, Models.cyl(0.022, 0.026, 1.05, 8), wood, Vector3(0, 0, -0.3), Vector3.ONE, Vector3(PI * 0.5, 0, 0))
-		for k in 5:
-			var a := PI * 0.5 + k * 0.5
-			_p(gun, Models.cyl(0.02, 0.022, 0.12, 8), wood, Vector3(0, 0.1 - cos(a) * 0.1 + 0.02 * k, -0.84 - sin(a) * 0.1), Vector3.ONE, Vector3(PI * 0.5 + (a - PI * 0.5) * 0.9, 0, 0))
-		_p(gun, Models.cyl(0.006, 0.006, 0.1, 4), m_dark, Vector3(0, 0.12, -0.96))
+		var wood_d := Models.toon(Color("5e3f25"))
+		var brass := Models.shiny(Color("d9a441"), 0.7)
+		_p(gun, Models.cyl(0.022, 0.028, 1.05, 10), wood, Vector3(0, 0, -0.3), Vector3.ONE, Vector3(PI * 0.5, 0, 0))
+		for k in 4:
+			_p(gun, Models.sphere(0.03, 8), wood_d, Vector3(0.012 * (k % 2 * 2 - 1), 0, -0.05 - k * 0.2), Vector3(1, 1, 1.6))
+		_p(gun, Models.cyl(0.03, 0.03, 0.16, 10), Models.toon(Color("6b4a35")), Vector3(0, 0, 0.0), Vector3.ONE, Vector3(PI * 0.5, 0, 0))
+		for zc in [-0.1, 0.1, -0.74]:
+			_p(gun, Models.cyl(0.032, 0.032, 0.03, 10), brass, Vector3(0, 0, zc), Vector3.ONE, Vector3(PI * 0.5, 0, 0))
+		for k in 7:
+			var a := PI * 0.5 + k * 0.42
+			_p(gun, Models.cyl(0.019, 0.022, 0.11, 8), wood, Vector3(0, 0.13 - cos(a) * 0.13, -0.84 - sin(a) * 0.12), Vector3.ONE, Vector3(PI * 0.5 + (a - PI * 0.5) * 0.9, 0, 0))
+		_p(gun, Models.sphere(0.024, 8), brass, Vector3(0, 0.2, -0.78))
+		_p(gun, Models.cyl(0.005, 0.005, 0.1, 4), m_dark, Vector3(0, 0.14, -0.97))
 		var lamp := Models.glow_mat(Color("ffc46a", 0.95))
-		_p(gun, Models.sphere(0.05, 10), lamp, Vector3(0, 0.02, -0.96)).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		_p(gun, Models.cyl(0.0, 0.06, 0.04, 8), m_dark, Vector3(0, 0.08, -0.96))
-		_p(gun, Models.cyl(0.05, 0.04, 0.02, 8), m_dark, Vector3(0, -0.04, -0.96))
-		_p(gun, Models.cyl(0.03, 0.03, 0.04, 8), m_acc, Vector3(0, 0, -0.1), Vector3.ONE, Vector3(PI * 0.5, 0, 0))
+		_p(gun, Models.sphere(0.055, 12), lamp, Vector3(0, 0.03, -0.97)).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		_p(gun, Models.sphere(0.1, 10), Models.glow_mat(Color("ffd890", 0.22)), Vector3(0, 0.03, -0.97)).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		for k in 4:
+			var a2 := TAU * k / 4.0 + PI * 0.25
+			_p(gun, Models.box(0.008, 0.12, 0.008), brass, Vector3(cos(a2) * 0.062, 0.03, -0.97 + sin(a2) * 0.062))
+		_p(gun, Models.cyl(0.0, 0.07, 0.05, 8), m_dark, Vector3(0, 0.11, -0.97))
+		_p(gun, Models.cyl(0.06, 0.045, 0.025, 8), brass, Vector3(0, -0.04, -0.97))
+		for sx in [-1.0, 1.0]:
+			_p(gun, Models.box(0.025, 0.16, 0.005), Models.toon(Color("e8b0c8") if sx < 0 else Color("c8e07a"), true, 0.5), Vector3(0.03 * sx, -0.1, -0.86), Vector3.ONE, Vector3(0.2, 0, 0.25 * sx))
+		_p(gun, Models.sphere(0.022, 8), brass, Vector3(0, -0.13, -0.9))
 		return
-	# hoar_fan: seven slats spread over a half disc, tipped in glowing ice, on a short grip
+	# hoar_fan: nine bone slats on a riveted pivot, each tipped with a long ice crystal, a frosted
+	# paper web between them and a teal tassel off the grip
 	var bone := Models.toon(Color("e8f2f0"))
-	var ice := Models.glow_mat(Color("9af0e6", 0.85))
+	var ice := CareLook.ice_mat(Color("9af0e6"), 0.85, 0.35)
+	var web := Models.glow_mat(Color("bff7ef", 0.35))
 	_p(gun, Models.cyl(0.022, 0.026, 0.22, 8), m_dark, Vector3(0, -0.03, -0.02), Vector3.ONE, Vector3(PI * 0.5, 0, 0))
 	for k in 9:
-		var a := -1.15 + 2.3 * float(k) / 8.0
+		var a := -1.2 + 2.4 * float(k) / 8.0
 		var dir := Vector3(sin(a), cos(a), 0)
 		var base := Vector3(0, 0.0, -0.16)
-		_p(gun, Models.box(0.035, 0.34, 0.012), bone, base + dir * 0.19, Vector3.ONE, Vector3(0, 0, -a))
-		_p(gun, Models.box(0.03, 0.08, 0.016), ice, base + dir * 0.36, Vector3.ONE, Vector3(0, 0, -a))
-	_p(gun, Models.sphere(0.03, 8), m_acc, Vector3(0, 0.0, -0.16))
+		_p(gun, Models.box(0.03, 0.32, 0.01), bone, base + dir * 0.18, Vector3.ONE, Vector3(0, 0, -a))
+		var tip := _p(gun, Models.crystal(0.026, 0.16 + 0.04 * float(k % 2), 4), ice, base + dir * 0.4, Vector3.ONE, Vector3(0, 0, -a))
+		tip.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		if k < 8:
+			var a2 := a + 0.15
+			_p(gun, Models.box(0.075, 0.24, 0.004), web, base + Vector3(sin(a2), cos(a2), 0) * 0.2, Vector3.ONE, Vector3(0, 0, -a2)).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_p(gun, Models.sphere(0.032, 8), m_acc, Vector3(0, 0.0, -0.16))
+	_p(gun, Models.cyl(0.012, 0.02, 0.12, 6), Models.toon(Color("2f9c92"), true, 0.4), Vector3(0, -0.1, 0.08))

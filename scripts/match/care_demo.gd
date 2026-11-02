@@ -1,18 +1,26 @@
 class_name CareDemo
 extends RefCounted
 ## Screenshot and frame-strip tooling for the support pair (Arena). Hooked from ArenaDemo with one line.
-##   --arena-demo=care_<tender|rimewright>_<lmb|rmb|e|dash|carry|payoff|pose> --arena-shot=<png>
+##   --arena-demo=care_<tender|rimewright>_<lmb|emp|rmb|e|dash|air|skatefire|carry|payoff|pose> --arena-shot=<png>
 ## Saves <png> (the last frame) and <png without .png>_strip.png: crops of the hero at the times in
 ## TIMES, side by side (anticipation, impact, follow-through).
 
 const TIMES := {
-	"rmb": [0.28, 0.34, 0.4, 0.47, 0.6, 0.9, 2.6],
-	"e": [0.28, 0.36, 0.45, 0.6, 0.9, 2.0, 3.0],
-	"dash": [0.28, 0.34, 0.4, 0.5, 0.7, 0.9, 1.1],
-	"lmb": [0.35, 0.5, 0.65, 0.8, 1.0, 1.2, 1.4],
-	"carry": [0.3, 0.6, 1.0, 1.5, 2.0, 2.4, 2.8],
-	"payoff": [0.4, 0.8, 1.2, 1.6, 2.0, 2.2, 2.5],
-	"pose": [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5],
+	"rmb": [0.55, 0.84, 0.9, 0.98, 1.2, 1.75],
+	"rimewright_rmb": [0.55, 0.84, 0.9, 1.0, 1.4, 3.0],
+	"e": [0.34, 0.4, 0.48, 0.62, 1.06, 1.25],
+	"rimewright_e": [0.36, 0.45, 0.55, 0.62, 1.1, 1.56],
+	"dash": [0.3, 0.33, 0.38, 0.45, 0.52, 0.7],
+	"rimewright_dash": [0.32, 0.4, 0.6, 0.75, 1.05, 1.2],
+	"air": [0.3, 0.33, 0.37, 0.42, 0.5, 0.68],
+	"lmb": [0.33, 0.37, 0.4, 0.45, 0.55, 1.2],
+	"rimewright_lmb": [0.32, 0.34, 0.37, 0.42, 0.6, 1.2],
+	"emp": [1.3, 1.36, 1.41, 1.46, 1.56, 1.8],
+	"skatefire": [0.5, 0.6, 0.64, 0.7, 0.9, 1.1],
+	"carry": [0.3, 0.6, 1.0, 1.5, 2.0, 2.8],
+	"payoff": [0.4, 0.8, 1.2, 1.6, 2.0, 2.5],
+	"tender_payoff": [2.6, 2.75, 2.82, 2.9, 3.0, 3.2],
+	"pose": [0.5, 0.5, 0.5, 0.5],
 }
 
 static func tick(A: Arena, dt: float, w: String) -> void:
@@ -31,6 +39,12 @@ static func tick(A: Arena, dt: float, w: String) -> void:
 		m.cam.pitch = deg_to_rad(24.0)          # a low three-quarter view so the poses read
 		m.cam.yaw = 2.5 if what not in ["pose", "carry"] else 0.5
 		m.cam.yaw_to = m.cam.yaw
+		# the last (full) frame looks down the aim from behind and wider, so the telegraph or impact shows
+		var tl: Array = TIMES.get(arch + "_" + what, TIMES.get(what, TIMES["rmb"]))
+		if what != "pose" and t >= float(tl[-1]) + 0.02:
+			m.cam.yaw = 0.0; m.cam.yaw_to = 0.0
+			m.cam.zoom = 0.6; m.cam.zoom_to = 0.6
+			m.cam.pitch = deg_to_rad(40.0)
 	if m.hud: m.hud.guide_hidden = true
 	if not A.has_meta("care_lbl"):
 		A.set_meta("care_lbl", true)
@@ -56,11 +70,12 @@ static func tick(A: Arena, dt: float, w: String) -> void:
 	var go := 0.3
 	match what:
 		"rmb":
-			if _at(t, dt, go): K.ch_rmb = float(K.rmb_charges()); P.inp["sec_hold"] = false; K.press_rmb()
+			if _at(t, dt, go): K.ch_rmb = float(K.rmb_charges()); P.inp["sec_hold"] = true; K.press_rmb()
+			if _at(t, dt, 0.8): P.inp["sec_hold"] = false
 		"e":
 			if _at(t, dt, go): K.cd["e"] = 0.0; K.use_e()
-			if arch == "tender" and _at(t, dt, 1.0): K.use_e()
-			if arch == "rimewright" and _at(t, dt, 1.4): K.use_e()
+			if arch == "tender" and _at(t, dt, 1.0): P.inp["aim"] = P.pos + Vector3(-4.0, 0.9, -2.0); K.use_e()
+			if arch == "rimewright" and _at(t, dt, 1.5): K.use_e()
 		"dash":
 			if arch == "tender":
 				P.dashes = P.max_dashes()
@@ -68,11 +83,21 @@ static func tick(A: Arena, dt: float, w: String) -> void:
 					Al.teleport(P.pos + Vector3(2.0, 0, 0)); P.inp["move"] = Vector2(1, 0)
 				if _at(t, dt, go): P.inp["aim"] = P.pos + Vector3(5, 0.9, 0); P.do_dash()
 			else:
-				P.inp["move"] = Vector2(0, -1)
+				P.inp["move"] = Vector2(1, 0)
 				if _at(t, dt, go): P.dashes = P.max_dashes(); P.inp["dash_down"] = true; P.do_dash()
 				if t > 1.0: P.inp["dash_down"] = false
+		"air":
+			P.inp["move"] = Vector2(1, 0)
+			if _at(t, dt, go): K.on_dash(true)
 		"lmb":
 			P.inp["fire"] = t > 0.3 and t < 1.5
+		"emp":
+			P.inp["fire"] = t > 1.28 and t < 1.32
+		"skatefire":
+			P.inp["move"] = Vector2(1, 0)
+			if _at(t, dt, go): P.dashes = P.max_dashes(); P.inp["dash_down"] = true; P.do_dash()
+			P.inp["fire"] = t > 0.55 and t < 1.0
+			if t > 1.0: P.inp["dash_down"] = false
 		"carry":
 			if t > 0.3 and t < 3.0: P.inp["move"] = Vector2(-1, 0) if t > 1.0 else Vector2(1, 0)
 			else: P.inp["move"] = Vector2.ZERO
@@ -87,7 +112,7 @@ static func tick(A: Arena, dt: float, w: String) -> void:
 		"pose":
 			pass
 	# capture the strip
-	var times: Array = TIMES.get(what, TIMES["rmb"])
+	var times: Array = TIMES.get(arch + "_" + what, TIMES.get(what, TIMES["rmb"]))
 	var frames: Array = A.get_meta("care_frames", [])
 	for i in times.size():
 		if _at(t, dt, float(times[i]) + 0.05):
