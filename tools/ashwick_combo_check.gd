@@ -22,8 +22,28 @@ func run(main_node: Node) -> void:
 	ak = load("res://tools/archetype_check.gd").new()
 	ak.main = main
 	await _all()
+	await _growth()
 	print("ASHCHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
+
+## Soot Ram's hit on the first foe with the hunter at level `lvl`.
+func _ram(lvl: int) -> float:
+	var r: Array = ak.setup("ashwick", 4.0, "", true)
+	var m: Match = r[0]; var P: Hunter = r[1]; var T: Hunter = r[2]
+	var K: AshwickKit = P.ak
+	P.lvl = lvl
+	ak.fresh(T)
+	K.bash = {"dir": Vector2(1, 0), "start": P.pos}
+	K._bash_impact(T)
+	var d: float = ak.dmg(T)
+	await ak.done(m)
+	return d
+
+## Ability damage reads ArchKit.power(), so quiet level growth (LevelGrowth.ap) raises it.
+func _growth() -> void:
+	var d1: float = await _ram(1)
+	var d10: float = await _ram(10)
+	ok("growth: the Soot Ram's hit grows with level (LevelGrowth.ap 1.0 -> %.2f)" % (1.0 + LevelGrowth.ap_pct(10)), d1 > 4.0 and absf(d10 / d1 - (1.0 + LevelGrowth.ap_pct(10))) < 0.01, "L1 %.2f L10 %.2f" % [d1, d10])
 
 func _all() -> void:
 	var r: Array = ak.setup("ashwick", 4.0, "", true)
