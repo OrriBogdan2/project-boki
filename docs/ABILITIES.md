@@ -11,11 +11,11 @@ Every hunter plays one of six archetypes (`content/archetypes/*.json`, run by `s
 | Archetype | Weight | Weapons | Dash | Passive | RMB | E | R |
 |---|---|---|---|---|---|---|---|
 | **Thief** | light | Twin Blades / SMG | Flicker | Marks | Knife | Smoke Veil (18s) | Heist (70s) |
-| **Archer** | light | Longbow / Sniper | Grapple Arrow | Focus | Snare | Flare Arrow (16s) | Skyfall Volley (75s) |
+| **Pin** | light | Longbow / Sniper | Spirit Walk | Focus | Snare | Flare Arrow (16s) | Skyfall Volley (75s) |
 | **Mage** | medium | Spellstaff / Longsword | Blink | Overload (Heat) | Bolt | Sigil (14s) | Meteor (70s) |
 | **Gunslinger** | medium | Rifle / Burst Rifle | Slide Reload | Six Chambers | Trick Shot | Quickdraw (16s) | Last Round (70s) |
 | **Juggernaut** | heavy | Greatsword / Shotgun / Minigun | Rampage | Rage | Smash | Iron Hide (16s) | Avalanche (75s) |
-| **Bracewall** | heavy | Tower Shield & Mace / Minigun | Interpose | Guard | Shield | Rally Banner (18s) | Bastion (80s) |
+| **Bjorn** | heavy | War Hammer & Aegis / Minigun | Interpose | Guard | Shield | Rally Banner (18s) | Bastion (80s) |
 
 ### Thief (light)
 
@@ -33,7 +33,7 @@ _The cutpurse. Slips behind you, marks you, cashes in, gone in smoke._
 - **R: Heist** (70s, level 6). Gold lines mark up to 4 rival hunters within 9m (0.4s, anyone who dashes out or breaks sight drops out), then four blink strikes 0.2s apart: 14 damage and 3 Marks each. You end behind the last with Ambush open.
 - Level-up order (bots too): RMB, Dash, E, RMB, Dash, R, RMB, E, R, Q
 
-### Archer (light)
+### Pin (light)
 
 _The warden of high ground. Climbs, reads the field, pins people to walls._
 
@@ -97,7 +97,7 @@ _The wrecking ball. Gets angrier, crashes through, slams you into the wall._
 - **R: Avalanche** (75s, level 6). A 0.35s roar, then 5s unstoppable (no stun, root or knockback; slows half strength) and 30% faster, stomping every 0.5s (6, push 6). The first wall slam on each foe stuns 1.0. Rampage charges refill.
 - Level-up order (bots too): Dash, RMB, E, RMB, Dash, R, RMB, E, R, Q
 
-### Bulwark (heavy)
+### Bjorn (heavy)
 
 _The squad's shield. Holds the line, plants a banner, leaps in to save an ally at the edge._
 
