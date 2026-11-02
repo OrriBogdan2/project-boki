@@ -173,9 +173,11 @@ at 26 px, outside the HUD's 22 px ammo ring and inside its 30 px resource arc.
   Use a stable id per ability (`"rmb"`, `"e_drag"`). Don't call from `_process`.
 - **Hold telegraphs need no cleanup code.** When the hold ends, stop calling and it goes within 0.1 s.
   Call `AimKit.hide` if it must vanish on the release frame.
-- **Merge start is handled.** `ArchKit.drop_holds()` runs your `_drop_holds()` and then
-  `AimKit.clear(h)`. It runs on the merge cast and every step while merged. Call `drop_holds()`, never
-  `_drop_holds()` directly. `dur` telegraphs are cleared too.
+- **Merge start is handled.** Whatever starts a merge, a merged or transforming hunter
+  (`KinMerge.active` / `KinMerge.transforming`) shows nothing: AimDraw drops its entries and cursor
+  states, and new calls are ignored until the merge ends. `ArchKit.drop_holds()` (your `_drop_holds()`
+  then `AimKit.clear(h)`) also clears it on the spot. Inside ArchKit code call `drop_holds()`, not
+  `_drop_holds()`. (KinMerge, which is reserved, calls `_drop_holds()` directly; the gate covers it.)
 - **Who sees it.**
   - Aim reticles (lanes, Vs, lines) stay at the default `all: false`.
   - Areas a foe must read or dodge (slam circles, a stuck grenade's cone, a placed nuke) use `all: true`.
