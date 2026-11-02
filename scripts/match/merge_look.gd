@@ -65,6 +65,10 @@ static func crackle(hunter: Hunter, secs: float) -> void:
 	if ml:
 		ml._crack = secs
 
+func _parts_box() -> Node3D:
+	var torso: Node3D = h.model.get_node_or_null("Rig/Torso") if h and h.model else null
+	return (torso.get_node_or_null(PARTS_NAME) if torso else null) as Node3D
+
 static func _free_orphan_parts(hunter: Hunter) -> void:
 	var torso: Node3D = hunter.model.get_node_or_null("Rig/Torso") if hunter.model else null
 	var box := torso.get_node_or_null(PARTS_NAME) if torso else null
@@ -187,5 +191,13 @@ func _process(dt: float) -> void:
 	if _ring:
 		_ring.global_position = Vector3(h.global_position.x, h.global_position.y + 0.06, h.global_position.z)
 		_ring.scale = Vector3.ONE * (1.0 + 0.07 * sin(_t * 6.0)) * clampf(k, 0.0, 1.2)
+	# the last seconds of the window: the aura and the parts flicker, faster as it runs out
+	var wl := MergeAugment.warn_left(h)
+	var on := wl <= 0.0 or fmod(_t * (6.0 + (3.0 - minf(wl, 3.0)) * 4.0), 1.0) < 0.62
+	if _aura:
+		_aura.visible = on
+	var box := _parts_box()
+	if box:
+		box.visible = on
 	var moving := Vector2(h.vel.x, h.vel.z).length() > 2.0
 	MergeParts.animate(rec, _t, dt, moving)
