@@ -113,11 +113,11 @@ const MOVES := {
 	# him, braced and shivering a little under the gold
 	"jug_guard": {"keys": [
 		[0.0, {}],
-		[0.08, {"blade": Vector3(0.0, 2.4, 0.0), "bw": 1.0, "rad": 0.3, "p": 0.08, "sq": 0.18, "lift": -0.08,
+		[0.08, {"blade": Vector3(0.0, 1.55, 0.0), "bw": 1.0, "rad": 0.45, "p": 0.08, "sq": 0.18, "lift": -0.08,
 				"lw": 1.0, "legs": [0.75, -1.1, -0.55, -0.75]}],
-		[0.36, {"blade": Vector3(0.0, 2.5, 0.0), "bw": 1.0, "rad": 0.28, "p": 0.04, "sq": 0.24, "lift": -0.1,
+		[0.36, {"blade": Vector3(0.0, 1.6, 0.0), "bw": 1.0, "rad": 0.42, "p": 0.04, "sq": 0.24, "lift": -0.1,
 				"lw": 1.0, "legs": [0.8, -1.15, -0.6, -0.8]}],
-		[0.66, {"blade": Vector3(0.0, 2.3, 0.0), "bw": 1.0, "rad": 0.3, "p": 0.1, "sq": 0.2, "lift": -0.09,
+		[0.66, {"blade": Vector3(0.0, 1.5, 0.0), "bw": 1.0, "rad": 0.45, "p": 0.1, "sq": 0.2, "lift": -0.09,
 				"lw": 1.0, "legs": [0.8, -1.15, -0.6, -0.8]}]]},
 	# ... the answer (f39-f44): the blade drops low for a beat, then he lunges and cleaves it up through
 	# them, stretched tall on the release, and settles back heavy
@@ -192,16 +192,16 @@ const MOVES := {
 		[0.3, {"lift": -0.1, "p": -0.35, "sq": 0.2, "lw": 1.0, "legs": [1.15, -1.8, -0.15, -1.4]}],
 		[0.6, {}]]},
 	# Encore (ult f27-f35): both blades raised as the ring grows (anticipation, a little squash), then a
-	# whole-body spin as it opens (no leg keys: she keeps walking)
+	# whole-body spin as it opens, done by 0.4s when the first volley's throw takes over (no leg keys: she walks)
 	"thf_encore": {"keys": [
 		[0.0, {}],
-		[0.1, {"fl": Vector3(-0.3, 0.55, 0.1), "hw": 1.0, "fr": Vector3(0.3, 0.55, 0.1), "rw": 1.0, "p": 0.18,
+		[0.08, {"fl": Vector3(-0.3, 0.55, 0.1), "hw": 1.0, "fr": Vector3(0.3, 0.55, 0.1), "rw": 1.0, "p": 0.18,
 				"sq": 0.15}],
-		[0.38, {"fl": Vector3(-0.35, 0.6, 0.05), "hw": 1.0, "fr": Vector3(0.35, 0.6, 0.05), "rw": 1.0, "p": 0.1,
+		[0.2, {"fl": Vector3(-0.35, 0.6, 0.05), "hw": 1.0, "fr": Vector3(0.35, 0.6, 0.05), "rw": 1.0, "p": 0.1,
 				"sq": 0.2, "fy": 0.0}],
-		[0.58, {"fl": Vector3(-0.55, 0.35, 0.0), "hw": 1.0, "fr": Vector3(0.55, 0.35, 0.0), "rw": 1.0, "p": -0.1,
+		[0.38, {"fl": Vector3(-0.55, 0.35, 0.0), "hw": 1.0, "fr": Vector3(0.55, 0.35, 0.0), "rw": 1.0, "p": -0.1,
 				"sq": -0.2, "fy": 6.283}],
-		[0.8, {}]]},
+		[0.55, {}]]},
 	# ... each volley (f33-f35): the torso snaps round as one arm flings a blade out, the other trailing
 	"thf_encore_throw_r": {"keys": [
 		[0.0, {"y": -0.35, "fr": Vector3(0.2, 0.4, 0.2), "rw": 1.0, "sq": 0.08}],

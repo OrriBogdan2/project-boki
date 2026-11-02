@@ -9,8 +9,8 @@ extends RefCounted
 ## knock or a kill, the best of the cleave; ArchKit.ult_bond). Owned by JuggernautKit.
 
 const GOLD := Color("ffc94a")          # the guard's glow and the cleave's outer edge (the source's is red)
-const WHITE_HOT := Color("fff6dc")     # the cleave's inner fill, the impact cloud
-const LANE_COL := Color("fff0c8")
+const HOT := Color("ffe39a")           # the cleave's inner fill and the impact cloud: his gold, run hot
+const LANE_COL := Color("ffd98a")      # the strip ahead: a pale gold
 const BLOCK_GAP := 0.08                # s: hits closer together than this (one shotgun blast) count once
 
 var k: JuggernautKit
@@ -59,7 +59,7 @@ func start() -> void:
 	st = {"phase": "guard", "t": 0.0, "elapsed": 0.0, "dir": h.aim_dir(), "blocks": 0, "last_block": -9.0}
 	k.play("jug_guard")
 	_show_glow(true)
-	k.m.fx.word(h.pos + Vector3(0, 2.9, 0), String(data()["name"]).to_upper(), GOLD, true)
+	k.m.fx.word(h.pos + Vector3(0, 3.6, 0), String(data()["name"]).to_upper(), GOLD, true)
 	k.m.sfx("jug_guard", h.pos, -2.0 if h.is_local() else -5.0, 1.0)
 	k.m.fx.ring(h.pos, 1.3, Color(GOLD, 0.9), 0.3)
 	k.net_ring(h.pos, 1.3, GOLD)
@@ -131,7 +131,7 @@ func _land(d: Dictionary) -> void:
 	var blocks := int(st["blocks"])
 	var dmg := float(d["dmg"]) * (1.0 + float(d["block_k"]) * float(blocks)) * k.power("ult")
 	var mid := from + Vector3(dir.x, 0, dir.y) * float(d["len"]) * 0.55
-	k.fx().crescent(mid + Vector3(0, 1.0, 0), dir, 150.0, float(d["len"]) * 0.6, GOLD, WHITE_HOT, 0.24, PI * 0.5)
+	k.fx().crescent(mid + Vector3(0, 1.0, 0), dir, 150.0, float(d["len"]) * 0.6, GOLD, HOT, 0.24, PI * 0.5)
 	var best := ""
 	last_dealt = 0.0
 	for f in k.m.foes_of(h.team):
@@ -165,8 +165,8 @@ func _land(d: Dictionary) -> void:
 ## On someone hit: the white impact cloud, the hit-stop and a heavy shake.
 func _impact(f: Ent, dir: Vector2, dealt: float) -> void:
 	var h := k.h
-	k.fx().star(f.pos + Vector3(0, 1.2, 0), WHITE_HOT, 2.4, 0.3, Color.WHITE)
-	k.m.fx.burst(f.pos + Vector3(0, 0.8, 0), Color(1, 1, 1, 0.85), 22, 3.0, 0.6, -1.0, 1.6)
+	k.fx().star(f.pos + Vector3(0, 1.2, 0), GOLD, 2.4, 0.3, HOT)
+	k.m.fx.burst(f.pos + Vector3(0, 0.8, 0), Color(HOT, 0.85), 22, 3.0, 0.6, -1.0, 1.6)
 	k.m.fx.burst(f.pos + Vector3(0, 1.0, 0), GOLD, 12, 6.0, 0.35, 4.0, 1.0, Vector3(dir.x, 0.6, dir.y), 50.0)
 	Feel.hitstop(k.m, h, f, dealt, {"melee": true, "payoff": true, "heavy": true})
 	Feel.shake(k.m, "t4", h, f.pos, f)
@@ -193,7 +193,7 @@ func block(by: Ent, o: Dictionary) -> bool:
 		st["blocks"] = mini(int(st["blocks"]) + 1, int(data()["blocks_max"]))
 		var from := by.pos if by != null and is_instance_valid(by) else h.pos + Vector3(0, 0, -1)
 		var to := Vector3(from.x - h.pos.x, 0.3, from.z - h.pos.z).normalized()
-		k.m.fx.spark(h.pos + Vector3(0, 1.2, 0) + to * 0.5, to, Color.WHITE, 10, 9.0, 40.0, 0.2, 0.0, 1.1)
+		k.m.fx.spark(h.pos + Vector3(0, 1.2, 0) + to * 0.5, to, HOT, 10, 9.0, 40.0, 0.2, 0.0, 1.1)
 		k.m.fx.word(h.pos + Vector3(0, 2.3, 0), "BLOCKED", GOLD, false)
 		k.m.sfx("jug_ting", h.pos, -3.0, 1.0 + 0.08 * float(st["blocks"]))
 	return true

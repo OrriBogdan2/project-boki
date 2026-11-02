@@ -12,7 +12,7 @@ cartwheel empowers the next bolt, and landing that bolt gives the cartwheel stra
 3. Land it and Vault comes back. Cartwheel again. Keep the chain going and the Marks never drop.
 4. **Bola** (right click): the lane shows for a moment while you aim, then the Bola grounds the first foe
    and flies on; catch a second and both are stunned. It bounces once off a wall.
-5. **Encore** (X, from level 6): a rose ring grows round you and rides with you; for 2s blades fly at every
+5. **Encore** (X, from level 6): a violet ring grows round you and rides with you; for 2s blades fly at every
    foe inside it, harder from its outer edge (which also blights them), and the Vault comes back. Landing it
    on a rival hunter fills your bond meter a long way. R is the Boki Merge.
 
@@ -78,7 +78,7 @@ What the in-game kit card (K) says.
 
 **Shadow Knife (E, 15s cooldown).** Throw a dagger to your cursor (14m at most): it sticks in the first foe on the way (8 damage, slowed 50% for 2.5s) or lands where you aimed. Press E again to blink to it at once, leaving a trail of afterimages; after 6s you step to it anyway.
 
-**Encore (X, level 6, 24s cooldown).** A rose ring grows round you (0.4s) to 5.4m and rides with you; for 2s a blade flies every 0.4s at each foe inside it (5 at most): 8 each, 12 from the outer band (past 4m), which also blights them for 6s (healing barely takes). You keep moving, shooting and dashing; casting it gives the Vault back, and every blade refreshes your Marks. Allies are untouched.
+**Encore (X, level 6, 24s cooldown).** A violet ring grows round you (0.4s) to 5.4m and rides with you; for 2s a blade flies every 0.4s at each foe inside it (5 at most): 8 each, 12 from the outer band (past 4m), which also blights them for 6s (healing barely takes). You keep moving, shooting and dashing; casting it gives the Vault back, and every blade refreshes your Marks. Allies are untouched.
 
 ### Ranks
 
@@ -98,7 +98,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | Moment | Tell |
 |---|---|
 | Building up | gold Mark diamonds over the target, one per stack |
-| Armed / full | eight diamonds spinning fast; a gold glint in the hand and a gold aim line while the next bolt is empowered; a rose ring round her and blades circling her while Encore runs |
+| Armed / full | eight diamonds spinning fast; a gold glint in the hand and a gold aim line while the next bolt is empowered; a violet ring round her and blades circling her while Encore runs |
 | Dash spent | a white cartwheel arc, dash pip dark |
 
 <!-- /gen:kit -->

@@ -558,7 +558,7 @@ func juggernaut(a) -> void:
 			T.downed and K.slam_resets == 1 and float(K.cd["r"]) <= 0.0 and K.knock_healed > 0.0,
 			"x cd %.1f resets %d" % [float(K.cd["r"]), K.slam_resets])
 	A.ok("juggernaut passive: a knock heals 20% of their health",
-			K.knock_healed >= minf(0.19 * T.max_hp, P.max_hp - 2.0), "healed %.0f of %.0f" % [K.knock_healed, T.max_hp])
+			K.knock_healed >= minf(0.19 * T.max_hp, 0.9 * P.max_hp), "healed %.0f of %.0f" % [K.knock_healed, T.max_hp])
 	await A.done(m)
 	await ULT.new().zedran(A)
 

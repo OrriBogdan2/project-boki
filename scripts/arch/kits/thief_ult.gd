@@ -1,7 +1,7 @@
 class_name ThiefUlt
 extends RefCounted
 ## Dancer's ultimate on X, Encore (her "r" data in content/archetypes/thief.json; the source's Death Blossom,
-## briefs/hero-ref/dancer.md "Ultimate (on X)"). A rose ring grows out from her over 0.4s (the short delay),
+## briefs/hero-ref/dancer.md "Ultimate (on X)"). A violet ring grows out from her over 0.4s (the short delay),
 ## then rides with her for 2s while a blade flies from her at every foe inside it every 0.4s (up to 5 each).
 ## Blades from the outer band of the ring (past 75% of its radius) hit harder and blight (healing barely
 ## takes) for 6s. She keeps moving, shooting and dashing; the cast gives her Vault back, and every blade
@@ -9,10 +9,10 @@ extends RefCounted
 ## it (a hit, a knock or a kill; ArchKit.ult_bond), never the cast alone. Owned by ThiefKit (cast_ult, _tick,
 ## _drop_holds).
 
-const RING_COL := Color("ff8ac8")      # the ring and the blades' trail: rose, hers (the source's is cyan)
+const RING_COL := Color("c9a0ff")      # the ring and the blades: her violet (the source's is cyan)
 const RIM_COL := Color("ffd25a")       # the outer band, where blades hit harder
 const BLADE_TIP := Color("fff2c0")
-const HIT_COL := Color("ff4a5a")       # the red flash a blade leaves on what it hits
+const HIT_COL := Color("e070ff")       # the flash a blade leaves on what it hits: her violet, run hot
 const BLADE_SPEED := 30.0              # m/s: the cosmetic blade's flight (the hit lands when it arrives)
 const ORBITERS := 3                    # blades circling her while it runs
 const ORBIT_R := 0.9                   # m
@@ -55,7 +55,7 @@ func start() -> void:
 	st = {"t": 0.0, "next": float(d["grow"]), "n": int(d["shots"]), "hits": {}, "best": ""}
 	var h := k.h
 	k.play("thf_encore")
-	k.m.fx.word(h.pos + Vector3(0, 2.9, 0), String(d["name"]).to_upper(), RING_COL, true)
+	k.m.fx.word(h.pos + Vector3(0, 3.6, 0), String(d["name"]).to_upper(), RING_COL, true)
 	k.m.sfx("dj_encore", h.pos, -2.0 if h.is_local() else -5.0, 1.0)
 	k.m.later(float(d["grow"]), func(): if running(): k.m.sfx("dj_encore_whirr", h.pos, -6.0, 1.0))
 	k.net_ring(h.pos, float(d["reach"]), RING_COL)
@@ -156,6 +156,7 @@ func _hit(f: Ent, rim: bool) -> void:
 	var o := {"src": "abil", "ab": "ult", "tags": ["encore"], "crit": rim}
 	if rim:
 		o["blight"] = float(d["rim_blight"])
+	var was_blighted := f.blight_t > 0.0
 	var dealt := f.hurt(dmg * k.power("ult"), h, o)
 	if dealt <= 0.0:
 		return
@@ -163,7 +164,9 @@ func _hit(f: Ent, rim: bool) -> void:
 	if rim:
 		rim_blades += 1
 		k.fx().puff(f.pos + Vector3(0, 1.0, 0), RIM_COL, 0.8, 0.3, HIT_COL)
-		k.m.fx.word(f.pos + Vector3(0, 2.3, 0), "BLIGHT", Color("b08aff"), false)
+		if not was_blighted:
+			# once, as the blight lands (above the damage numbers, so they don't overprint)
+			k.m.fx.word(f.pos + Vector3(0, 3.0, 0), "BLIGHT", Color("b08aff"), false)
 	k.fx().star(f.pos + Vector3(0, 1.0, 0), HIT_COL, 0.8 if rim else 0.55, 0.16)
 	k.m.sfx("dj_encore_hit", f.pos, -8.0, randf_range(0.9, 1.15) * (0.85 if rim else 1.0))
 	k.refresh_marks()
