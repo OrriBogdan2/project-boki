@@ -92,7 +92,7 @@ func refresh_lines(k: Dictionary, cb := Callable()) -> void:
 		return
 	var prompt := kin_brief(k) + "\n\nWrite short in-match voice lines (2 to 7 words each, no emoji, no quotes) as JSON with these keys, 3 lines each: " + \
 		"throw (being thrown into a fight), refuse (refusing a dangerous throw), hesitate (going reluctantly), scared (retreating hurt), " + \
-		"revive (rushing to revive your downed hunter), kill (after a knock), caught (a new Boki was tamed), extract (escaping the islands). " + \
+		"revive (rushing to revive your downed hunter), kill (after a knock), caught (a new Boki was scanned into your box), extract (escaping the islands). " + \
 		"Let your trust level and memories colour the lines. Reply with the JSON object only."
 	ask([{"role": "user", "content": prompt}], func(txt: String):
 		var s := txt.strip_edges()

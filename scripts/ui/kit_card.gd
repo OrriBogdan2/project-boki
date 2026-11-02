@@ -281,12 +281,16 @@ static func slot_text(a: String, slot: String) -> Dictionary:
 			out.merge({"name": "Boki Merge", "icon": "bond", "col": Color("ffd27a"), "tag": "Boki system", "line": "Your Boki fuses with you; its kind decides the form."}, true)
 			out["detail"] = [["", "R is not a hero ability here: it is the Boki Merge. Your Boki fuses with you and its kind sets the merged form."]]
 		"r":
+			# R is the Merge for every class (docs/decisions/0001); the class's own ultimate is held back behind
+			# boki_system.json class_ults until the hero-port work folds it into the kits
 			var sd: Dictionary = d["r"]
-			out.merge({"name": String(sd["name"]), "icon": String(sd.get("icon", "")), "col": Color(String(sd.get("col", "#ffffff"))),
-				"tag": "level 6 · %ss · %ss fuse" % [KinText.n(float(sd.get("cooldown", 100.0))), KinText.n(float(sd.get("fuse", 0.45)))], "line": String(cd.get("r", ""))}, true)
-			var g := "you're unstoppable while it winds up" if String(sd.get("fuse_guard", "none")) == "unstoppable" else "a stun or knock during the wind-up cancels it"
-			out["detail"] = [["", String(sd.get("desc", ""))], ["Fuse", "%ss wind-up everyone can see; %s." % [KinText.n(float(sd.get("fuse", 0.45))), g]],
-				["Bonded", "With a full bond meter your Boki merges with you as it fires."]] + _ranks(a, "ult")
+			var on := KinCommand.class_ults()
+			out.merge({"name": String(sd["name"]) if on else "Merge", "icon": String(sd.get("icon", "")) if on else "bond", "col": Color(String(sd.get("col", "#ffffff"))) if on else Color("ffd27a"),
+				"tag": ("level 6 · %ss · %ss fuse" % [KinText.n(float(sd.get("cooldown", 100.0))), KinText.n(float(sd.get("fuse", 0.45)))]) if on else "level 6 · full bond meter", "line": String(cd.get("r", "")) if on else "You and your Boki become one: its colour, its type, your abilities changed."}, true)
+			out["detail"] = [["Merge", "Press R with a full bond meter (it fills as your Boki lands hits, as you hit what it marked, and on combos). You take the Boki's colour and silhouette, and every ability of yours changes for the merge by its type and power."],
+				["Boki out?", "It leaps back through anything in its way and merges you in mid-air."],
+				["No Boki", "A downed or lost Boki: only a weak 3 second surge."],
+				["Held back", "%s: %s (the class ultimate, off while R is the Merge)" % [String(sd["name"]), String(sd.get("desc", ""))]]] + _ranks(a, "ult")
 	return out
 
 ## The ranks to come, in order (rank 2's concrete change first, then rank 3's special), as one row

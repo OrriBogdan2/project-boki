@@ -48,7 +48,7 @@ func setup(arch: String, dist: float, kin_sp := "", second := false) -> Array:
 	if kin_sp != "":
 		var rec := Save.new_kin(kin_sp); rec["trust"] = 95.0
 		var k: Kin = m.give_kin(P, rec)
-		k.state = "shoulder"; k.settle = 1.0; k.brain.think_t = 1e9
+		k.stow(); k.brain.think_t = 1e9
 	P.ult = 0.0
 	var T: Hunter = m.make_hunter("T", 5, "medium", "Target", "idle", {}, home + Vector3(dist, 0, 0), {"arch": "none"})
 	T.max_hp = 10000.0; T.hp = T.max_hp; T.armor = 0.0; T.max_armor = 0.0
@@ -992,15 +992,13 @@ func _kin_ability() -> void:
 	aim_at(P, P.pos + Vector3(3.0, 0, 0))
 	P.inp["kin_ab"] = true
 	m.step(DT)
-	var hopped := k.state != "shoulder"
 	var spent := not k.runner.is_ready("k1")
-	ok("C: hops out and casts its own active", hopped and spent, "state %s" % k.state)
-	step(m, 2.5)
-	ok("C: hops back to the shoulder", k.state == "shoulder", "state %s" % k.state)
+	ok("C: casts its own active, through you (the Boki stays on the shoulder)", k.state == "shoulder" and spent, "state %s" % k.state)
+	step(m, 0.5)
 	ok("C: doesn't touch the archetype E", float(P.ak.cd["e"]) <= 0.0)
 	# G: send / recall (the old throw) still works
 	k.throw_cd = 0.0; k.settle = 1.0
-	m._player_throw()
+	KinCommand.tap(P)
 	step(m, 0.6)
 	ok("G: sends the kin out", k.state in ["active", "flying"], k.state)
 	await done(m)

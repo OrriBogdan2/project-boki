@@ -16,25 +16,37 @@ roughly follow its type (an Ember-type knack bakes and warms eggs, Tide waters, 
 
 ## In a match
 
-You bring **one Boki** per expedition. It rides on your shoulder (big ones are ridden, some perch).
+You bring **one Boki** per expedition. It walks beside you and fights with you; on the **Return** order it goes back onto you (big ones are ridden, some perch).
 
-- **C** is its own ability: it hops off, casts and hops back. It also has an **auto ability** it uses
+- **C** is its own ability, cast from wherever your Boki is: on you (Return) it casts through you, out in the world it casts where it stands. It also has an **auto ability** it uses
   on its own when the moment is right (Settings can turn that off).
-- **G** (or middle mouse) sends it out to fight on its own; press again to recall it (a 1 second wait
-  before the next send). Thrown out, it holds the spot you sent it to and guards it, and comes back
-  only for a reason: you recall it, you leave its range or glide off, it's hurt, or it can't reach.
+- **G** (or middle mouse): with your Boki at your side, tap to **Sic** it at the cursor: it leaps there and its
+  landing staggers whatever it lands on. With it away, tap to **Call back**: it leaps to your side and hits
+  anything along the path (only within a set range; farther out it comes back on its own). **Hold G** for the
+  order wheel and flick toward one: **Chase** (go for what is under the cursor), **Guard** (hold this spot),
+  **Return** (back onto you: perch, or you ride it) or **Follow** (the default: beside you). A Boki you are
+  carrying only gives its carried bonuses on **Return**, so choose between a fighting partner and a perk.
+  It never leaves you behind: if it is stuck or too far it leaps back to your side, and on a glide or a
+  long drop it hops onto you and hops off again once you are steady. In a fight it never turns down an
+  order, though a Wary one may think about it for a moment.
+- **A downed Boki** stays where it fell, marked on your screen and the minimap. Run into it to
+  scoop it up (about half a second) and it is back with a good chunk of health; left alone it comes
+  round after 15 to 20 seconds at low health. While it is down you have no C, no Merge and no shoulder
+  perks. Rivals can't take it while you are still in the map.
 - **Your dash** carries a little of it too (a spore puff, a venom trail, a moon blink...).
-- **The bond meter.** Your hits, its hits, combos and its knockouts fill a shared meter. Full, your
-  ultimate becomes a bonded ultimate and your Boki **merges** with you for a few seconds: an armor
-  form or a giant form, depending on the species. Once a run.
+- **The bond meter.** Your hits, its hits, combos and its knockouts fill a shared meter. Press **R**
+  with a full meter and your Boki **merges** with you for a while: you take its colour and silhouette
+  (rivals can read it), and every ability you have changes for the merge by its type and power tier.
+  With the Boki out, it leaps back to you and merges you mid-air. With no Boki (downed or lost) R is
+  only a weak three second surge. Hits on foes your Boki marked fill the meter faster.
 - **Combos.** Your Boki stuns or roots a foe and your next hit on it lands a COMBO. You stun or slow a
   foe and your Boki's next hit POUNCES. Its ability on a burning foe FLARES. See [Rules](Rules.md#combos).
 - **It's a teammate.** It calls out rivals behind you, snipers, monster packs, loot and wild Boki; it
   frets when you're hurt, stands over you when you're down, and pulls you back up (8 seconds) if
-  nobody else can.
+  nobody else can (if it isn't down itself).
 - **It has a mind.** Aggression, loyalty and caution decide how far it chases, how close it stays, who
-  it goes after and when it backs off. A Wary Boki may hesitate or refuse a reckless throw; a
-  hot-tempered one may ignore a recall to finish a kill.
+  it goes after and when it backs off. Away from a fight, a Wary Boki may refuse a reckless Sic; a
+  hot-tempered one may ignore a Call back to finish a kill.
 
 ## Personality and bond
 
@@ -79,9 +91,14 @@ it, and its number among its kind.
 
 ## Getting more Boki
 
-- **Taming.** Wild Boki are rare on expeditions, and rare-Boki spots are rolled each match (they show
-  as "?" on the map until someone sees them). Knock a wild Boki out and it's dazed for a few seconds:
-  hold **F** on it to tame it. It comes home with you only if you **extract**.
+- **Scanning.** Wild Boki are rare on expeditions, and rare-Boki spots are rolled each match (they show
+  as "?" on the map until someone sees them). Knock a wild Boki out, then hold **F** beside it for a
+  moment: a 4 second scan starts on its own. You can't move or shoot while it runs, a dash cancels it,
+  and anything that stuns, roots or knocks you back interrupts it (plain damage does not). Rivals can see
+  the beam and hear it. It goes into your **box** as a capsule (3 at a time; release one in the
+  backpack to make room) and comes home with you only if you **extract**. It never joins the fight: you
+  always have exactly one active Boki. Every Boki you glimpse is written into the **Field Book**, with
+  where you saw it.
 - **Breeding.** Two Boki at level 5 with a Close bond, rested from their last egg, can leave an egg in
   the **Nesting Nook**. It hatches after your next expedition, or in about ten minutes at home. The
   baby mixes its parents' personalities, takes 3 of its 5 IVs from them, and can inherit a mutation.
@@ -115,6 +132,4 @@ you. A Boki left behind shows a banner over it ("Your Boki was left here"). Afte
 
 Everything is paid in gems you earn in play. Boki and Boki power are never sold for money.
 
-_Planned (not in the game yet):_ a Boki tamed on a run will follow you instead of riding in your pack,
-can be knocked out but only taken by others after you've left the map, and a free starter kit so
-nobody is ever left with no Boki and no gems.
+_Planned (not in the game yet):_ a free starter kit so nobody is ever left with no Boki and no gems.
