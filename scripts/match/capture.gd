@@ -136,6 +136,11 @@ static func _tick_scan(m, h: Hunter, st: Dictionary, dt: float) -> void:
 	if frac >= 1.0:
 		complete(m, h, k)
 
+## Crowd control on a hunter: stun, root, a knockback, Grounded, a hex, a grapple or a pad flight. It interrupts
+## a scan here and a rescue (KinDowned); plain damage does not.
+static func controlled(h: Hunter) -> bool:
+	return h.stun_t > 0.0 or h.root_t > 0.0 or h.knock_t > 0.0 or h.m.time - h.kb_time < 0.2 or KitStatus.grounded(h) or Hex.active(h) or not h.grap.is_empty() or not h.pad.is_empty()
+
 ## What stops a scan: "dash" (your choice), crowd control, or the Boki gone. "" keeps it going.
 ## Plain damage is not on the list.
 static func interrupt_reason(h: Hunter, k: Kin) -> String:
@@ -145,7 +150,7 @@ static func interrupt_reason(h: Hunter, k: Kin) -> String:
 		return "down"
 	if h.inp.get("dash", false) or h.roll_t > 0.0:
 		return "dash"
-	if h.stun_t > 0.0 or h.root_t > 0.0 or h.knock_t > 0.0 or h.m.time - h.kb_time < 0.2 or KitStatus.grounded(h) or Hex.active(h) or not h.grap.is_empty() or not h.pad.is_empty():
+	if controlled(h):
 		return "cc"
 	if h.flat_dist(k) > float(rules()["cancel_range"]):
 		return "cc"
