@@ -2873,8 +2873,10 @@ func _boss_check() -> void:
 			var refused: bool = not (L["flown"] as Array).has(Q) and qy <= qy0 + 0.05 and not Q.auto_glide
 			spot.call(Q, up)
 			run.call(0.2)
-			refused = refused and not (L["flown"] as Array).has(Q) and Q.pos.y < float(L["c"].y) + 1.0 and not m.lairs.inside(L, Q.pos, 0.0)
+			# (a person walks off an island's edge now, so an outsider shoved off the lair may fall out of the match: that counts as shoved out)
+			refused = refused and not (L["flown"] as Array).has(Q) and Q.pos.y < float(L["c"].y) + 1.0 and (Q.out or not m.lairs.inside(L, Q.pos, 0.0))
 			ok.call(refused, "the updraft refuses outsiders: no lift over it (%.2fm), shoved off and out (%.1fm from the middle)" % [qy - qy0, Q.flat_dist(L["c"])])
+			if Q.out or Q.downed: Life.bring_back(m, Q, m.world.spawns[0] if not m.world.spawns.is_empty() else m.world.random_ground(), 1.0, false)
 			Q.ctrl = "idle"; park.call(Q)
 			# a hunter who fought rides it: up over the wall and away from the back, the gate still shut
 			spot.call(P, up)
