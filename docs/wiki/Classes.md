@@ -51,11 +51,11 @@ your class in the Expedition menu, and you can try every class against dummies i
 
 | Class | Weight | Weapons | Passive | Dash | RMB | E | R |
 |---|---|---|---|---|---|---|---|
-| [Thief](Class-Thief.md) | Light | Twin Blades | Marks | Vault | Bola | Shadow Knife | Jackpot |
+| [Thief](Class-Thief.md) | Light | Twin Blades | Marks | Vault | Bola | Shadow Knife | none (Boki Merge) |
 | [Pin](Class-Pin.md) | Light | Longbow | Focus | Spirit Walk | Snare | Hail Wall | none (Boki Merge) |
 | [Vireo](Class-Vireo.md) | Light | Coilcaster | Sparks | Wirerun | Coilshot | Skycall | none (Boki Merge) |
 | [Marlowe](Class-Marlowe.md) | Medium | Quill Rifle | Fever | Slipstep | Burr Charge | Longneedle | none (Boki Merge) |
-| [Juggernaut](Class-Juggernaut.md) | Heavy | Greatsword | Rage | Rampage | Smash | Warchain | Doomfall |
+| [Juggernaut](Class-Juggernaut.md) | Heavy | Greatsword | Rage | Rampage | Smash | Warchain | none (Boki Merge) |
 | [Bjorn](Class-Bjorn.md) | Heavy | War Hammer & Aegis | Guard | 360 Smash | Aegis | Mending Ground | none (Boki Merge) |
 | [Dredge](Class-Dredge.md) | Heavy | Shotgun | Salvage | Barge | Grapnel | Anchor Drop | none (Boki Merge) |
 | [Ashwick](Class-Ashwick.md) | Heavy | Torch Lance | Flashover | Spark Leap | Cinder Shot | Furnace Cloak | none (Boki Merge) |

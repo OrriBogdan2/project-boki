@@ -256,6 +256,8 @@ static func slot_text(a: String, slot: String) -> Dictionary:
 				"tag": "no key · builds as you fight", "line": String(cd.get("passive", ""))}, true)
 			var tl: Dictionary = d.get("tells", {})
 			out["detail"] = [["", String(d["passive"]["desc"])], ["What enemies see", "%s; full: %s." % [String(tl.get("half", "")), String(tl.get("full", ""))]]]
+			if d.has("jackpot"):
+				out["detail"].append([String(d["jackpot"]["name"]), String(d["jackpot"]["desc"])])
 		"lmb":
 			var wl: Dictionary = cd.get("weapons", {})
 			var ws: Array = Arch.weapons(a)
