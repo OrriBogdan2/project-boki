@@ -38,6 +38,13 @@ Last updated: 2026-11-02 16:30 ET, sync66.
 
 ## Next (main session)
 
+- **Code cleanup** (after kinloss and ultbond land), in small batches, avoiding files with open kitfix branches:
+  1. Rename the 126 variables that shadow Godot's names (`tools/style_lint.py` lists them).
+  2. Remove review leftovers: deathbox Boki reads (LCHECK, economy_floor_check), "ult" in the thief/juggernaut skill order, stale comments.
+  3. Move the 74 inline checks from main.gd into tools/check_registry.gd.
+  4. Unpack the worst-reading files (packed `;` lines, nested ternaries, history comments) and lock in each with `style_lint.py --update`.
+  5. Split match.gd and hud.gd once the hunter rebuilds settle.
+
 - A reset cue of our own (dash reset, kill reset), modelled on the feel of the owner's reference clip.
 
 - Stormwing: the wings render too large and float off the body.
