@@ -425,6 +425,17 @@ func _pens_no_mint() -> void:
 	ok(int(Save.d["gems"]) < g0, "so buy-then-list can only lose gems (%d -> %d)" % [g0, int(Save.d["gems"])])
 	var stray := Lifeline.stray()
 	ok(not BokiPens.list_mine(String(stray["uid"]), BokiPens.fair_range(stray).y)["ok"], "a stray can't be listed either")
+	# a baby bred from two pen Boki is not a way round it (its own origin is "egg")
+	var bp2: Dictionary = BokiPens.buy(String(BokiPens.listings()[0]["id"]))["rec"]
+	var baby := Care.breed(bought, bp2, RandomNumberGenerator.new())
+	Save.d["roster"].append(baby)
+	ok(String(baby["origin"]["how"]) == "egg" and not BokiPens.can_list(baby), "a baby bred from two pen Boki can't be listed (stamped pen_line)")
+	var old_baby := baby.duplicate(true); old_baby["origin"].erase("pen_line"); old_baby["uid"] = Save.new_id()
+	Save.d["roster"].append(old_baby)
+	ok(not BokiPens.can_list(old_baby), "and an older baby without the stamp is caught through its parents")
+	var own_a := Save.new_kin("cindle", "OwnA"); var own_b := Save.new_kin("puddlet", "OwnB")
+	Save.d["roster"].append(own_a); Save.d["roster"].append(own_b)
+	ok(BokiPens.can_list(Care.breed(own_a, own_b, RandomNumberGenerator.new())), "a baby of two Boki you raised is still listable")
 	# the Nesting Nook's egg parents can't be listed
 	var pa := Save.new_kin("cindle", "Mum"); var pb := Save.new_kin("puddlet", "Dad")
 	Save.d["roster"].append(pa); Save.d["roster"].append(pb)

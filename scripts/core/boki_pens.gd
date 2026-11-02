@@ -151,9 +151,18 @@ static func buy(id: String) -> Dictionary:
 	Save.save_game()
 	return {"ok": true, "why": "", "rec": rec}
 
-## Can this Boki be put up at all? (Not one that came from the pens, wandered in, or was lent.)
-static func can_list(rec: Dictionary) -> bool:
-	return not NO_RESALE.has(String((rec.get("origin", {}) as Dictionary).get("how", "")))
+## Can this Boki be put up at all? (Not one that came from the pens, wandered in, or was lent, nor a
+## baby bred from one: Care.breed stamps origin.pen_line; older babies are checked through their parents.)
+static func can_list(rec: Dictionary, depth := 0) -> bool:
+	var origin: Dictionary = rec.get("origin", {})
+	if NO_RESALE.has(String(origin.get("how", ""))) or bool(origin.get("pen_line", false)):
+		return false
+	if depth < 4:
+		for puid in (rec.get("lineage", {}) as Dictionary).get("parents", []):
+			var par := Save.kin(String(puid))
+			if not par.is_empty() and not can_list(par, depth + 1):
+				return false
+	return true
 
 ## Puts one of your Boki up at the pens. It leaves your farm while it's listed. {ok, why, id}.
 static func list_mine(uid: String, price: int) -> Dictionary:

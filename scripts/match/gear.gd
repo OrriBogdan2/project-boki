@@ -155,8 +155,9 @@ static func apply_worn(h) -> void:
 	var hp_new: float = h.gear_stat("hp")
 	var hp_old := float(h.get_meta("gear_hp", 0.0))
 	if absf(hp_new - hp_old) > 0.01:
+		var old_max: float = h.max_hp
 		h.max_hp += hp_new - hp_old
-		h.hp = clampf(h.hp + maxf(hp_new - hp_old, 0.0), 1.0, h.max_hp)
+		h.hp = clampf(h.hp * h.max_hp / maxf(old_max, 1.0), 1.0, h.max_hp)      # the same share of the bar, so swapping armor never heals
 		h.set_meta("gear_hp", hp_new)
 	var pk_new := int(round(h.gear_stat("pack")))
 	var pk_old := int(h.get_meta("gear_pack", 0))

@@ -50,6 +50,10 @@ func run(main: Node) -> void:
 	S.v["keys2_v"] = 0
 	S._migrate_keys2()
 	ok(S.v["keys"]["ultimate"] == ["key:%d" % KEY_R, "key:%d" % KEY_T], "a second key someone already chose is kept")
+	S.v["keys"] = {"dash": ["key:%d" % KEY_X]}
+	S.v["keys2_v"] = 0
+	S._migrate_keys2()
+	ok(S.v["keys"]["ultimate"] == ["key:%d" % KEY_R] and S.v["keys"]["dash"] == ["key:%d" % KEY_X], "X used by another action and no saved ultimate: the ultimate is pinned to R so X fires only the other action (%s)" % str(S.v["keys"]))
 	S.reset_all()
 	# the arena and duel resets are on Backspace now
 	var ar := FileAccess.get_file_as_string("res://scripts/match/arena.gd")

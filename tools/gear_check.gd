@@ -84,7 +84,20 @@ func _migration() -> void:
 	var types := (d["armory"] as Array).map(func(it): return String(it.get("t", "")))
 	ok("migration: stored weapons are gone, gloves become gear", not types.has("weapon") and types.has("gear") and types.has("valuable") and (d["raid_out"] as Array).is_empty(), str(types))
 	ok("migration: weapons break down into scrap", int(d["scrap"]) >= 3 + 4 + 2 + 1, "scrap %d" % int(d["scrap"]))
-	ok("migration: glove loadout keys move to gear slots", d["loadout"].get("gear0", "") == "ig1" and not d["loadout"].has("glove0") and not d["loadout"].has("weapon") and not d["loadout"].has("gear1"), str(d["loadout"]))
+	ok("migration: an old glove that is armor now lands in the armor slot (not gear0)", d["loadout"].get("gear2", "") == "ig1" and not d["loadout"].has("gear0") and not d["loadout"].has("glove0") and not d["loadout"].has("weapon") and not d["loadout"].has("gear1"), str(d["loadout"]))
+	# a v4 loadout whose two "gloves" are really vest + boots, with a third piece (an active glove) in the armory
+	var d2 := {"v": 4, "arch": "mage", "scrap": 0,
+		"armory": [{"t": "glove", "id": "vest", "rar": 1, "uid": "a1"}, {"t": "glove", "id": "boots", "rar": 2, "uid": "a2"},
+			{"t": "glove", "id": "blink", "rar": 0, "uid": "a3"}, {"t": "glove", "id": "blink", "rar": 3, "uid": "a4"}],
+		"raid_out": [], "loadout": {"glove0": "a1", "glove1": "a2"}}
+	GearSave.migrate(d2)
+	ok("migration: vest and boots keep both pieces, each in its own real slot", d2["loadout"].get("gear2", "") == "a1" and d2["loadout"].get("gear3", "") == "a2" and d2["loadout"].size() == 2, str(d2["loadout"]))
+	var d3 := {"v": 4, "arch": "mage", "scrap": 0,
+		"armory": [{"t": "glove", "id": "blink", "rar": 0, "uid": "a3"}, {"t": "glove", "id": "blink", "rar": 3, "uid": "a4"}],
+		"raid_out": [], "loadout": {"glove0": "a3", "glove1": "a4"}}
+	GearSave.migrate(d3)
+	var left: Array = (d3["armory"] as Array).map(func(it): return String(it["uid"]))
+	ok("migration: two pieces for one slot: one is worn, the other stays in the armory (nothing lost)", d3["loadout"].size() == 1 and d3["loadout"].get("gear0", "") == "a3" and left.has("a4") and left.has("a3"), "%s %s" % [str(d3["loadout"]), str(left)])
 	ok("migration: the weapon you carry is your signature", String(d["weapon"]) == Arch.signature("mage"), String(d["weapon"]))
 	var s := Save.fresh()
 	ok("a fresh save is v%d" % Save.VERSION, int(s["v"]) == Save.VERSION and Save.VERSION >= 5)
@@ -126,6 +139,17 @@ func _match() -> void:
 	P.gear[2] = {}
 	P.refresh_gear()
 	ok("taking the armor off takes the health back", absf(P.max_hp - hp0) < 0.6, "%.1f" % P.max_hp)
+	# swapping armor keeps the same share of the health bar: it must never heal (pack swap, review finding)
+	P.hp = P.max_hp * 0.4
+	var share0 := P.hp / P.max_hp
+	var hp_hurt := P.hp
+	for round_i in 3:
+		P.gear[2] = {"id": "quilted_coat", "rar": 2}
+		P.refresh_gear()
+		ok("wearing armor while hurt keeps the same share of the bar (round %d)" % round_i, absf(P.hp / P.max_hp - share0) < 0.001, "%.1f / %.1f" % [P.hp, P.max_hp])
+		P.gear[2] = {}
+		P.refresh_gear()
+		ok("and taking it off again does not heal (round %d)" % round_i, P.hp <= hp_hurt + 0.01 and absf(P.hp / P.max_hp - share0) < 0.001, "%.1f / %.1f" % [P.hp, P.max_hp])
 	var cap0 := P.pack_cap
 	P.gear[4] = {"id": "satchel", "rar": 3}
 	P.refresh_gear()

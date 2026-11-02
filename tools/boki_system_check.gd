@@ -139,6 +139,7 @@ func _throw() -> void:
 	var mb := mob_at("skitter", land + Vector3(0, 0, 1.3))
 	var stunned := false
 	var landed_d := -1.0          # how far from you it was the moment it landed (it then walks back to your side under Follow)
+	var after_fly := ""           # the state it was in the first step after the throw ended: the landing itself
 	aim_at(P, land)
 	KinCommand.tap(P)
 	ok(k.state == "flying", "G tap throws the Boki from the shoulder (state %s)" % k.state)
@@ -146,10 +147,12 @@ func _throw() -> void:
 		_clear_mobs()
 		m.step(Match.DT)
 		if is_instance_valid(mb) and mb.stun_t > 0.0: stunned = true
+		if after_fly == "" and k.state != "flying": after_fly = k.state
 		if landed_d < 0.0 and k.state == "active": landed_d = k.flat_dist(P)
 	ok(int(tags_seen.get("land", 0)) >= 1, "the landing hits what it lands near (land hits %d)" % int(tags_seen.get("land", 0)))
 	ok(stunned, "...and briefly stuns it")
-	ok(k.state in ["active", "flying"] and landed_d > 4.0, "the Boki lands out where it was sent (%.1fm), and is out in the world (%s)" % [landed_d, k.state])
+	# (later it may be off on a skill of its own, a rush or a leap, so the end state says nothing: the landing step does)
+	ok(after_fly == "active" and landed_d > 4.0, "the Boki lands out where it was sent (%.1fm), and is out in the world (landing state %s)" % [landed_d, after_fly])
 
 # ------------------------------------------------------------------ 2. recall: hits along the path
 func _recall() -> void:

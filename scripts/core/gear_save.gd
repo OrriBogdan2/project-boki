@@ -25,14 +25,20 @@ static func migrate(data: Dictionary) -> void:
 					out.append(it)
 		data[key] = out
 	data["scrap"] = scrap
-	var uids := {}
+	var by_uid := {}
 	for key in ["armory", "raid_out"]:
-		for it in data[key]: uids[String((it as Dictionary).get("uid", ""))] = true
+		for it in data[key]: by_uid[String((it as Dictionary).get("uid", ""))] = it
+	# the old glove loadout is re-keyed by where each piece really goes now (an old passive "glove" may be
+	# armor or boots today); a second piece for a slot that is taken just stays in the armory, never lost
 	var lo_new := {}
 	var lo: Dictionary = data.get("loadout", {})
-	for k in lo:
-		var nk: String = String({"glove0": "gear0", "glove1": "gear1"}.get(String(k), ""))
-		if nk != "" and uids.has(String(lo[k])):
+	var lo_keys: Array = lo.keys()
+	lo_keys.sort()
+	for k in lo_keys:
+		if not ["glove0", "glove1"].has(String(k)) or not by_uid.has(String(lo[k])):
+			continue
+		var nk := "gear%d" % Gear.slot_of(String((by_uid[String(lo[k])] as Dictionary).get("id", "")))
+		if not lo_new.has(nk):
 			lo_new[nk] = lo[k]
 	data["loadout"] = lo_new
 	# the weapon you carry is your archetype's signature now

@@ -150,6 +150,8 @@ func _migrate_keys2() -> void:
 		if a != "ultimate" and a != "separate" and (ks[a] as Array).has("key:%d" % KEY_X): x_used = true
 	if ks.has("separate") and (ks["separate"] as Array).has("key:%d" % KEY_X):
 		ks["separate"] = ["key:%d" % KEY_Z]
+	if x_used and not ks.has("ultimate"):
+		ks["ultimate"] = ["key:%d" % KEY_R]      # X is bound elsewhere: the default ultimate [R, X] must not also fire on it
 	if ks.has("ultimate") and not x_used:
 		var ul: Array = ks["ultimate"]
 		if ul.size() < 2 and not ul.has("key:%d" % KEY_X):
