@@ -3,12 +3,12 @@ extends RefCounted
 ##   1. a fresh tame becomes a follower beside you, not a bag entry; a second tame goes in the bag
 ##   2. it trots after you, and rides in your satchel while you glide or cross the abyss
 ##   3. it can be knocked out; nobody else can tame it while you're in the map (downed or dead and
-##      waiting on a revive included); you pick it back up
+##      waiting on a revive included); you run into it (the shipped scoop)
 ##   4. extract with it close: it comes home (apply_result puts it on the roster)
 ##   5. leave the map without it: steal windows by tier (Meadow none, Dusk Isles 10 s, Hollow 30 s);
 ##      a teammate can't take it; a rival's tame is slower and a hit starts it over; a rival tames
 ##      it in time -> theirs; nobody does -> it goes home
-##   6. bots: a bot picks its knocked-out follower back up, and a bot goes and tames a rival's stray
+##   6. bots: a bot runs into its downed follower, and a bot goes and tames a rival's stray
 ##   7. online: follower ids belong to their hunter's game, the snapshot carries role and window
 ##   8. the results/save: a follower you lost to a rival never reaches the roster
 ## Prints FOLLOW ok/FAIL lines and "FOLLOW DONE, failures: N".
@@ -329,7 +329,7 @@ func _net() -> void:
 	_tame(P, _wild(at + Vector3(1.0, 0, 0)))
 	var f := Follow.of(P)
 	var row: Array = m._ser(f)
-	ok(row.size() >= 25 and int(row[19]) == 1 and m.KIN_STATES[int(row[8])] == "follow", "the snapshot carries role and state (%d fields)" % row.size())
+	ok(row.size() >= 29 and int(row[Follow.NET_AT]) == 1 and m.KIN_STATES[int(row[8])] == "follow", "the snapshot carries role and state (%d fields)" % row.size())
 	# a remote copy of it is built as that hunter's follower, not their own Boki
 	var R: Hunter = m.hunters.filter(func(x): return x != P)[0]
 	var row2 := row.duplicate()
@@ -339,7 +339,8 @@ func _net() -> void:
 	m._net_apply(rk, row2)
 	ok(rk != null and rk.role == "follow" and R.follower == rk and R.kin == own, "a remote follower is built as a follower")
 	# it turns stray from the snapshot
-	row2[19] = 2; row2[8] = m.KIN_STATES.find("dazed"); row2[21] = 9.5; row2[22] = R.nid; row2[23] = R.pname; row2[24] = R.team
+	var n := Follow.NET_AT
+	row2[n] = 2; row2[8] = m.KIN_STATES.find("dazed"); row2[n + 2] = 9.5; row2[n + 3] = R.nid; row2[n + 4] = R.pname; row2[n + 5] = R.team
 	m._net_apply(rk, row2)
 	ok(rk.role == "stray" and rk.owner_h == null and absf(rk.steal_t - 9.5) < 0.01 and R.follower == null, "and becomes a stray with its window from the snapshot")
 
