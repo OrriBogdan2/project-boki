@@ -1,6 +1,6 @@
 class_name CareUtil
 extends RefCounted
-## Support helpers shared by the two support heroes (Linnet the Tender, Tamsin the Rimewright):
+## Support helpers shared by the two support heroes (Moosh Moosh the Tender, Tamsin the Rimewright):
 ## squadmate lookups, healing that reaches bots, online squadmates and downed teammates, the
 ## revive hook, and carrying a downed teammate. Net: heals and revives use the existing "heal" and
 ## "rev" events; carrying adds one "carry" event (Net 0.14.0).

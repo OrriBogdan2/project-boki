@@ -1,5 +1,5 @@
 extends RefCounted
-## --support-check: the support pair (Linnet the Tender, Tamsin the Rimewright). Ally heals, downed
+## --support-check: the support pair (Moosh Moosh the Tender, Tamsin the Rimewright). Ally heals, downed
 ## teammates (heal, carry, drop, revive), the dash through a teammate, the Rink Wall's frost shield.
 ## --tender-combo-check and --rimewright-combo-check script each cross-ability interaction in
 ## docs/heroes. Mode: "all" | "tender" | "rimewright". Prints SUPPORT PASS/FAIL.

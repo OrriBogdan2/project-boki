@@ -1,6 +1,6 @@
 class_name HeroGearCare
 ## Gear for the support pair, kept out of hero_gear.gd.
-##   Linnet (tender, medium): a courier. A flap cap, a tall wooden pack-frame with a bedroll, and a
+##   Moosh Moosh (tender, medium): a courier. A flap cap, a tall wooden pack-frame with a bedroll, and a
 ##   caged lantern hanging on a hook ABOVE the head (the silhouette from the match camera: a person
 ##   with a glowing lamp on a pole); a rope coil, a tin cup and a cream poncho with an ochre hem.
 ##   Tamsin (rimewright, light): a rink-keeper. An ear-flap cap with a fur band, a huge fluffy collar,
@@ -21,7 +21,7 @@ static func dress(arch: String, c: Dictionary) -> void:
 	else:
 		_rime(c)
 
-# ------------------------------------------------------------------------------------------ Linnet
+# ------------------------------------------------------------------------------------------ Moosh Moosh
 static func _tender(c: Dictionary) -> void:
 	var m: Dictionary = c["m"]
 	var t: Node3D = c["torso"]

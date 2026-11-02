@@ -19,7 +19,7 @@ const ARCHES := {
 	"bulwark": {"name": "Bulwark", "cls": "heavy"},
 	"dredge": {"name": "Dredge", "cls": "heavy"},
 	"ashwick": {"name": "Ashwick", "cls": "heavy"},
-	"tender": {"name": "Linnet", "cls": "medium"},
+	"tender": {"name": "Moosh Moosh", "cls": "medium"},
 	"rimewright": {"name": "Tamsin", "cls": "light"},
 	"dolm": {"name": "Dolm", "cls": "medium"},
 	"ostra": {"name": "Ostra", "cls": "medium"},

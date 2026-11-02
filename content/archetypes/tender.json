@@ -1,20 +1,21 @@
 {
 	"id": "tender",
-	"name": "Linnet",
+	"name": "Moosh Moosh",
 	"role": "Tender",
 	"weight": "medium",
 	"color": "#ffc46a",
 	"fantasy": "The squad's courier and field medic. Shoulders the fallen and runs them out, keeps the squad on its feet with lantern light, pins chasers with burr-seeds.",
 	"silhouette": "the tall pack-frame with its lantern above the head",
 	"card": {
-		"loop": "Embers Kindle foes; a Burrseed sticks and bursts into roots. Run into a downed friend to carry them out of danger, keep the squad topped up with Hearthlight, and hop through a teammate to wind it back.",
-		"dash": "Relay Step: a short hop. Pass through a teammate and get half a dash back, and 1s off Hearthlight.",
-		"passive": "Bearer: run into a downed friend to carry up to 2, shielded. A stun or broken shield drops them.",
-		"lmb": "Lantern Crook: embers that Kindle (up to 5); wait a second and the next flies further.",
-		"rmb": "Burrseed: a slow seed that sticks to the first foe; 2s later it bursts into roots around them.",
-		"e": "Hearthlight: a ring of light that heals the squad, then flares; press again to toss it to a friend.",
+		"role": "Support medic: heals and carries the downed, roots whoever chases them.",
+		"loop": "Support medic: heals and carries the downed, roots whoever chases them.",
+		"lmb": "Lantern Crook: hold to flick embers that fly past the cursor; each hit on a foe adds Kindle.",
+		"rmb": "Burrseed: hold to aim the lane, let go to throw; it sticks to a foe and roots them 0.7s later.",
+		"e": "Hearthlight: a healing ring on you; press again to throw it to the cursor.",
+		"dash": "Relay Step: a quick hop where you move; through a teammate it refunds half a dash.",
+		"passive": "Bearer: run into a downed teammate to carry up to 2 behind a shield.",
 		"weapons": {
-			"lantern_crook": "Embers every 0.4s; Kindled foes take more and wind your Hearthlight back."
+			"lantern_crook": "Hold to flick embers that fly past the cursor; each hit on a foe adds Kindle."
 		}
 	},
 	"signature": "lantern_crook",
@@ -24,7 +25,7 @@
 		"max": 5,
 		"kind": "on_targets",
 		"dur": 4.0,
-		"per_stack": 1.0,
+		"per_stack": 0.72,
 		"refund": 0.2,
 		"emp_refund": 0.4,
 		"emp_idle": 1.0,
@@ -34,7 +35,7 @@
 	},
 	"passive": {
 		"name": "Bearer",
-		"desc": "Run into a downed teammate to shoulder them (up to 2; never one an enemy is standing on). You carry a Bearer shield (40, +6 a level) that refills each time you pick someone up. While you carry them they don't bleed out and can't be stomped, and you move 30% slower. Press crouch to set them down. If the shield breaks or you're stunned, rooted or hexed, you're stunned 0.6s, drop them, and can't pick anyone up for 4s. Your embers Kindle foes (up to 5, 4s): each stack adds 1 damage to your embers, and an ember into a Kindled foe winds Hearthlight back 0.2s (0.4s for a long-range ember).",
+		"desc": "Run into a downed teammate to shoulder them (up to 2; never one an enemy is standing on). You carry a Bearer shield (40, +6 a level) that refills each time you pick someone up. While you carry them they don't bleed out and can't be stomped, and you move 30% slower. Press crouch to set them down. If the shield breaks or you're stunned, rooted or hexed, you're stunned 0.6s, drop them, and can't pick anyone up for 4s. Your embers Kindle foes (up to 5, 4s): each stack adds 0.7 damage to your embers, and an ember into a Kindled foe winds Hearthlight back 0.2s (0.4s for a long-range ember).",
 		"shield": 40.0,
 		"shield_lv": 6.0,
 		"slow": 0.3,
@@ -64,21 +65,21 @@
 		"short": "Burr",
 		"icon": "binding",
 		"col": "#c8e07a",
-		"cooldown": 10.0,
+		"cooldown": 8.0,
 		"charges": 1,
-		"hold": 0.0,
+		"hold": 0.25,
 		"seed": {
-			"speed": 12.0,
+			"speed": 30.0,
 			"range": 11.0,
 			"hit_r": 0.7,
 			"dmg": 9.0,
-			"delay": 2.0,
+			"delay": 0.7,
 			"burst_r": 2.2,
-			"burst_dmg": 35.0,
+			"burst_dmg": 32.0,
 			"root": 1.1
 		},
 		"variants": {
-			"tap": "A slow seed (12 m/s, 11m) that sticks to the first foe it hits (9 damage). Everyone sees the burr on them. 2s later it bursts: 35 damage and root 1.1s to them and every foe within 2.2m, and each is Kindled."
+			"tap": "Hold to show a faint dotted lane to the seed's full 11m (it flies past the cursor); let go to throw. A fast seed (30 m/s) sticks to the first foe it hits (9 damage) and a violet disc the size of the burst shows under them at once, filling. 0.7s later it bursts: 32 damage and root 1.1s to them and every foe within 2.2m, and each is Kindled."
 		},
 		"sockets": {
 			"hit": "add",
@@ -95,23 +96,24 @@
 		"col": "#ffd27a",
 		"cooldown": 11.0,
 		"time": 2.5,
-		"radius": 3.5,
+		"radius": 2.6,
 		"every": 0.5,
 		"over": 10.0,
 		"burst": 22.0,
 		"self_k": 0.33,
 		"wisp_k": 5.0,
 		"reach": 9.0,
-		"toss_speed": 18.0,
+		"toss_speed": 45.0,
 		"latch_r": 1.0,
 		"boost": 0.5,
-		"desc": "A 3.5m ring of lantern light round you for 2.5s: it heals teammates inside 10 over its life, then flares for 22. Press E again to toss it up to 9m: for 1s its healing is 50% stronger, and it latches onto the first teammate it passes. It heals you at a third, and a downed teammate five times over. A stun while it's on you puts it out.",
+		"desc": "A 2.6m ring of lantern light round you for 2.5s: it heals teammates inside 10 over its life, then flares for 22. Press E again to throw it to the cursor (up to 9m, it lands almost at once and widens to 2.9m): for 1s its healing is 50% stronger, and it latches onto the first teammate it passes. It heals you at a third, and a downed teammate five times over. A stun while it's on you puts it out.",
 		"sockets": {
 			"guard": "add",
 			"util": "add"
 		},
 		"toss_boost_t": 1.0,
-		"boost_t": 1.0
+		"boost_t": 1.0,
+		"thrown_radius": 2.9
 	},
 	"order": [
 		"kin",
@@ -131,18 +133,18 @@
 		"kin": "the closing flare also stands a downed teammate in the ring back up"
 	},
 	"rank2": {
-		"sec": "Rank 2: cooldown 10s -> 9s, damage +15%.",
+		"sec": "Rank 2: cooldown 8s -> 7.2s, damage +15%.",
 		"dash": "Rank 2: recharge 7.5s -> 6.4s per charge.",
 		"kin": "Rank 2: cooldown 11s -> 9.9s, healing +15%."
 	},
 	"rank_next": {
-		"sec": "Rank 3: cooldown 10s -> 8s, damage +30%; the roots last 0.3s longer.",
+		"sec": "Rank 3: cooldown 8s -> 6.4s, damage +30%; the roots last 0.3s longer.",
 		"kin": "Rank 3: cooldown 11s -> 8.8s, healing +30%; the closing flare also stands a downed teammate in the ring back up.",
 		"dash": "Rank 3: recharge 7.5s -> 5.3s; picking up a teammate refreshes your long air dash."
 	},
 	"tells": {
 		"half": "ember sparks over the foes she has Kindled, one per stack",
-		"full": "a foe at 5 Kindle burns bright; a burr on someone pulses a green ring everyone sees",
+		"full": "a foe at 5 Kindle burns bright; a stuck Burrseed shows its violet disc under them, filling, for everyone",
 		"dash_spent": "dash pip dark"
 	},
 	"lmb_note": "Lantern Crook"
