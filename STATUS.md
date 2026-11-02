@@ -1,4 +1,4 @@
-2026-11-02T23:15:02Z
+2026-11-02T23:15:25Z
 
 ext/classes | 854258a | ready to merge (on main ea65d23 sync66) | 0.16.0 (no new sync; save stays v6, adds early_used/told) | full suite 0 failures; --hunter-unlock-check (alias --class-unlock-check) 90 checks; simtest seed-5 wipe same as main. Hunters wording everywhere, weight labels gone, pick 1 at creation + 2 early free picks, HunterViewer (turntable + looping ability moves), hold-to-unlock (1.6 s) with reveal. X row shows only when hero data has "x". Expect wiki conflicts with kitfix renames (Classes.md, sidebar). Owner Qs: all 12 as starters or fewer? early goals (placeholder: play 1, extract 1)? keep per-Hunter goals/levels? 1.6 s hold OK? merge_forms text still says "weight class" (reserved); Arena "Heavy dummy".
 ext/hero-shots | 3bd0520 | done: 12 heroes + farm building + classes; all portraits show signature weapons | - | -
@@ -14,7 +14,7 @@ ext/kitfix-breah-ostra | c26758e | READY FOR LOCAL SCREENSHOT REVIEW (main a7ed2
 
 Running now: ult passes on dancer-juggernaut, breah-ostra; polish vireo-venator, linwick-dredge, pin-bjorn (all Opus)
 Queued (one agent per branch at a time): polish moosh-tamsin (next; ult done); polish dancer-juggernaut after its ult; polish breah-ostra after its ult; ult vireo-venator after its polish.
-Last INBOX entry handled: 2026-11-02 23:00 UTC (Moosh Moosh body/scale/movement study added to the queued moosh-tamsin polish prompt; the other 11 hunters' body sections are still to come)
+Last INBOX entry handled: 2026-11-02 23:20 UTC (body studies: linwick+dredge relayed to the running linwick-dredge polish (Dredge dash change will be flagged); tamsin added to the queued moosh-tamsin polish; breah+ostra added to the queued breah-ostra polish)
 Watcher: received 19:06 UTC entry
 Questions for the owner: see ext/classes line.
 Net note: main is now 0.15.0, which kits2-nor also uses (0.15.0, kit move id on the snapshot); main session to reconcile. Kitfix branches that need a bump use 0.15.2 (dancer-juggernaut), .3 (pin-bjorn), .4 (vireo-venator), .5 (linwick-dredge), .6 (moosh-tamsin), .7 (breah-ostra).
