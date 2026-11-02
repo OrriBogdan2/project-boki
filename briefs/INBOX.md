@@ -39,3 +39,9 @@ Also, in parallel, use Sonnet for these: re-merge ext/kits2-nor (cb588ab) and ex
 - Full suite, push, report in STATUS.md.
 ext/classes: base it on current main (it has all heroes). The renames in SERVER_UPDATE5 change display names only; if classes touches the same strings, use the new names.
 Keep pushing STATUS.md on every agent start and finish.
+
+## 2026-11-02 18:25 UTC
+Corrections to my 18:10 entry:
+- kits2-nor Net is **0.15.0**, as the main session asked (sync61 is already 0.14.0).
+- Re-merge kits2-nor and farmbuild onto **sync62** (current main).
+- SERVER_UPDATE5 now ends with "OWNER PLAYTEST NOTES". They override the footage where they differ, notably: Bjorn spins the hammer while LMB is held, Juggernaut's RMB hold flings you far, and Ostra's RMB has 1 charge and stuns. Re-read the file before starting the kit agents.

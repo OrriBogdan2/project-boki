@@ -61,7 +61,7 @@ Shared aiming and telegraph helpers that the kits will call. New files only, plu
   - Thief's leftover Jackpot R definition goes.
 - **Where the video is silent** (the sheet's open questions), pick the most likely behaviour and record it under "Assumptions" in docs/heroes/<id>.md, so the owner can correct it.
 - **Owner notes:**
-  - **Bjorn's LMB:** per the footage, holding LMB charges one big forward swing (body tracks the cursor, a glint grows, a flare at full charge, a flaming crescent on release), and the 360 spin is on Shift. Build that unless the INBOX says the owner wants an LMB spin.
+  - **Bjorn's LMB:** the owner wants him **spinning the hammer while LMB is held**, then on release a strong slam that also carries him forward (owner playtest note 2). This overrides the footage reading of a static charge. Keep the footage's cursor-facing, growing glint, full-charge flare and flaming crescent on the slam. Shift stays the dash-into-360 spin.
   - **Dredge's grab** stops at walls on purpose in our doc. Keep that unless the owner says otherwise.
   - **Pin's Shift** is Spirit Walk in the newer source. Build Spirit Walk (dodge roll, then 2.8 s through walls) and drop the grapple.
 - **Hold state:**
@@ -84,3 +84,48 @@ Shared aiming and telegraph helpers that the kits will call. New files only, plu
 ## Report
 - In STATUS.md, per branch: commit, Net, checks, gaps fixed and gaps left with reasons, assumptions made.
 - Tell the local machine in STATUS.md when each pair is ready. The local machine reviews the screenshots before anything goes to main.
+
+## OWNER PLAYTEST NOTES: these override the footage where they differ
+Read `MAIN_TO_EXT.md` entries "11:55 ET: OWNER PLAYTEST (sync61), hero fidelity pass" and "12:00 ET: add to ext/fidelity: Vireo (Joule)" in full. This update IS that ext/fidelity pass, split into ext/aimkit plus six ext/kitfix-* branches; report ready per pair.
+
+Per hero:
+- **Juggernaut:** RMB hold reads clearly:
+  - a big wind-up pose, a rising sound, a fill, a "full" flash
+  - you can jump while holding
+  - release flings you far forward
+- **Bjorn:**
+  - the throw lands at the cursor
+  - LMB hold spins the hammer, and release is a slam with forward momentum
+  - his shield looks unique to him
+- **Pin:**
+  - a visible draw wind-up and a clear flash at the perfect moment
+  - shots go to the cursor
+- **Breah:**
+  - raised rocks give verticality: she can stand on and climb them
+  - punching rocks sends them flying
+  - LMB is a hold
+- **Ostra:**
+  - spamming Shift must never dash in random directions
+  - Shift keeps his height
+  - RMB has 1 charge, not 3, and must visibly stun, including on the training dummy
+- **Venator:** the grenade explodes in a visible cone when it hits a wall or the ground, never on hitting a person.
+- **Tamsin:**
+  - her shots look like ice shards, come out slowly and home onto targets
+  - her ice wall looks unique to her
+- **Dredge:** E in the air smashes straight down, the anchor lands with him, a ring shows at the landing, and height adds damage.
+- **Vireo:**
+  - a stack marker over the target's head, with sparks that grow per stack
+  - the dash does double damage and resets ONLY when it hits a target at full stacks
+  - E: place the area, then flick the drag direction to pull foes toward you or throw them away; the area is a circle with its own look
+  - her dash locks her own control and holds her height, but keeps her momentum
+  - she fires electricity from a finger gun: no gun model, arm extended, a snap or recoil, a crackle at the fingertip, a jagged bolt, a spark impact
+
+Across all heroes:
+- every projectile looks distinct: its own shape, colour, trail and impact
+- every wall or barrier looks unique to its owner
+- every ability gets its own shape language, a wind-up tell, an impact and a KMOVES pose
+- upgrade the signature weapon model, firing animation, muzzle and impact effects, using the GAMEDEV_CHECKLIST game-feel items (hit stop, trauma shake, squash and stretch)
+- pool every effect
+- **L loadout picker:** rewrite every hero's card in one format: a role line, then one plain line each for LMB, RMB, E, Shift and passive.
+- **ArchKit._drop_holds()** (on main since sync61) is the single hook every kit implements for merge-start cleanup. Use it, not ad-hoc `KinMerge.active` checks.
+- Re-merge main (sync62 or newer) before reporting a pair ready. Sync62 slowed base movement and dashes, so re-check any dash speeds a kit hard-codes.
