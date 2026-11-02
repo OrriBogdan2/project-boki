@@ -457,10 +457,12 @@ func _drop_holds() -> void:
 	if lmb_t >= 0.0:
 		lmb_t = -1.0
 		h.mel_hold = 0.0
+	flared = false
+	if fx: fx.hold_end()
 	if not wall.is_empty():
 		_lower()
 	rmb_down = false
-	if anim_id == "bul_smash_wind":
+	if anim_id in ["bul_smash_wind", "bul_guard"]:
 		anim_id = ""
 
 func _lower() -> void:
