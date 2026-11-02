@@ -4,6 +4,13 @@ Status: **ready to merge** (Agent C, Nov 1). Pushed to `origin/rolling`; merged 
 (Net 0.8.0, Hollow Crown default map, health budgets). The feature stays behind the `rolling` option, off by
 default. Net.VERSION is unchanged (0.8.0): rolling adds no sync, so the 0.8.3 slot is not used.
 
+## After the sync58 merge (e5f25ec, Net 0.10.0)
+
+- Merged `origin/main` with no conflicts. Net.VERSION stays 0.10.0 (rolling adds no sync; main's shape kept).
+- Late joiners need nothing extra: `Rolling.populate_before` and the wave landings go through `Match.make_bot` / `make_hunter`, and `Kin` now starts `state = "active"`, `cmd = "follow"` for every owned Boki. New assertion in `--rolling-check` ("late joiners and the earlier arrivals start with their active Boki following, none on a shoulder", 35 Boki) pins it, so a regression to shoulder-start shows up here.
+- Checks (all 0 failures, no SCRIPT ERROR): `--rolling-check` (62 assertions), `--check`, `--teammate-check`, `--boki-system-check`, `--bot-sanity-check`; `health.py --strict` OK; `gen_wiki.py --check` 15 unchanged.
+- `--simtest --seed=5`: "team wiped" at sim 56 s. Plain sync58 (e5f25ec) gives the identical result (56 s, team wiped), so it is main, not rolling (rolling is off in the simtest).
+
 ## After the sync56 merge
 
 - Merge conflicts were only in `main.gd` (the `--rolling-shot=` no-save list, and the `--demo-match` / `--match`

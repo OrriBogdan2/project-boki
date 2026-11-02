@@ -120,6 +120,15 @@ func _session(main: Node) -> void:
 		if h.lvl < Rolling.floor_at(landed) or h.riding or h.dropping: lv_ok = false
 		lv_sum += h.lvl
 	ok(lv_ok, "they're on the ground, at least at the floor for when they landed (mean level %.1f)" % (float(lv_sum) / maxf(1.0, pre.size())))
+	# Boki start state (Net 0.10.0): everyone, early arrivals included, has one active Boki walking beside them
+	var kin_ok := true; var kin_n := 0
+	for h in m.hunters:
+		var k = h.kin
+		if k == null: continue      # (no Boki in this save)
+		kin_n += 1
+		if k.state == "shoulder" or k.state == "wild" or k.owner_h != h or k.cmd != "follow":
+			kin_ok = false; print("ROLLING kin start: %s riding=%s %s/%s" % [h.pname, h.riding, k.state, k.cmd])
+	ok(kin_ok and kin_n >= 8, "late joiners and the earlier arrivals start with their active Boki following, none on a shoulder (%d Boki)" % kin_n)
 	var mine: Array = m.hunters.filter(func(h): return h.riding)
 	ok(m.player.riding and mine.size() == int(R.waves[4]["n"]) * 3 and int(R.waves[4]["n"]) >= 2 and int(R.waves[4]["n"]) <= 4, "your wave: you and %d others on the skyship (%d squads)" % [mine.size() - 1, int(R.waves[4]["n"])])
 	var open_chests := m.chests.filter(func(c): return c["open"]).size()
