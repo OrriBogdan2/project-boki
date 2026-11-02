@@ -14,23 +14,22 @@ into each other. Heals the squad from where its mace lands.
    comes back hitting on a second tap); hold for a **Crushing Blow**.
 5. **Whirl** (Shift) knocks foes aside; with the shield up it's a **Shield Charge**, invulnerable for its length.
 6. **Mending Ground** (E) heals allies and mends your shield at your aim or where the mace lies.
-7. **Fissure** (R): a crack runs forward and stuns everyone it passes, then erupts; Guard adds pulses.
 
 ## Combos and interactions
 
 | Do this | And you get |
 |---|---|
-| Bash, Shield Charge or full Crushing Blow into a wall or another foe | Crushed: stun 0.8, +8 damage, you heal 14; the foe it hit is stunned too |
+| Bash, Shield Charge or full Crushing Blow into a wall or another foe | Crushed: stun 0.5, +8 damage, you heal 24 |
 | Bash with 50+ Guard | Shield Slam: push 12, stun 0.6 (spends 50) |
 | Shift with the shield raised | Shield Charge: invulnerable, heavier knock |
 | Throw the mace, then E | Mending Ground lands where the mace lies |
-| Fissure with Guard banked | +1 pulse per 50 Guard (all of it is spent) |
+| Hold LMB, then Shift | A short plain dash for half a charge; the wind-up goes on |
 | RMB in the air (Shield Surf) | Block from the front while gliding |
 
 ## Tips
 
 - Raise the shield into their fire first: the Guard pays for the Slam.
-- Fight near walls and pillars. A Crushed stun sets up a full Crushing Blow or the Fissure.
+- Fight near walls and pillars. A Crushed stun sets up a full Crushing Blow.
 - Throw the mace round a corner to scout it, then heal there.
 - A broken shield locks you out for 3s: drop it before it breaks.
 
@@ -55,18 +54,17 @@ What the in-game kit card (K) says.
 |---|---|
 | Loop | Block to build Guard, then bash, charge or smash foes into walls or each other: Crushed stuns them and heals you. |
 | Passive: Guard | Guard from blocking (50 = Shield Slam); knock a foe into a wall or a foe: Crushed (stun, heal). |
-| Dash: Whirl | Whirl: a spinning dash that knocks foes aside; with the shield up, a Shield Charge. |
+| Dash: Whirl | A spinning dash that knocks foes aside. Shield up: a Shield Charge. Mid-smash: a short hop. |
 | LMB | Tap: throw the mace (passes through, recall it); hold: a Crushing Blow that carries you on. |
 | RMB: Shield | Hold to raise the shield and block; let go (or tap) to Bash. |
-| E: Mending Ground | Mending Ground: a healing burst at the lying mace (or your aim) after 1s. |
-| R: Fissure | Fissure: a crack runs forward and stuns, then the ground erupts and slows. |
+| E: Mending Ground | A healing burst at the lying mace (or your aim) after 1s; mends the shield only while raised. |
 | Weapon: Tower Shield & Mace | Throw the mace and call it back; hold for a Crushing Blow. |
 
 ### Abilities in full
 
-**Guard (passive).** Damage your shield blocks becomes Guard (1 per 2 blocked, max 100); at 50 your Bash is a Shield Slam (push 12, stun 0.6, spends 50) and Fissure spends it all for +1 pulse per 50. Crushed: a Bash, Shield Charge or full Crushing Blow that knocks a foe into a wall or another foe stuns it 0.8 (8 damage) and heals you 14.
+**Guard (passive).** Damage your shield blocks becomes Guard (1 per 2 blocked, max 100); at 50 your Bash is a Shield Slam (push 12, stun 0.6, spends 50). Crushed: a Bash, Shield Charge or full Crushing Blow that knocks a foe into a wall or another foe stuns it 0.5 (8 damage) and heals you 24.
 
-**Whirl (dash, Shift, 10s cooldown).** Whirl: a 3.6m spinning dash that knocks foes aside (6 damage, push 7). With the shield raised it's a Shield Charge: 4.2m behind the shield, invulnerable for its length, 10 damage and push 11 (into a wall or a foe: Crushed).
+**Whirl (dash, Shift, 10s cooldown).** Whirl: a 3.6m spinning dash that knocks foes aside (6 damage, push 7). With the shield raised it's a Shield Charge: 4.2m behind the shield, invulnerable for its length, 10 damage and push 11 (into a wall or a foe: Crushed). Shift while winding up a Crushing Blow: a short plain dash that costs half a charge.
 
 **Shield (RMB, 6s cooldown).**
 
@@ -75,9 +73,7 @@ What the in-game kit card (K) says.
 - *In the air:* Shield Surf: hold to block from the front while gliding.
 - *Resource full:* Guard 50+: Shield Slam, 18 damage, push 12 and stun 0.6 (spends 50).
 
-**Mending Ground (E, 16s cooldown).** Mark ground up to 7m away (or where your thrown mace lies): 1s later it bursts, healing allies inside 26 and mending your shield 60; foes inside are slowed.
-
-**Fissure (R, 110s cooldown).** A 0.5s unstoppable fuse, then a crack runs 14m forward (walls and rises stop it): 8 damage and stun 0.6 to everyone it passes. Then the line erupts in 3 pulses 0.3s apart (9 damage, slow 0.45 each); +1 pulse per 50 Guard, which it spends.
+**Mending Ground (E, 16s cooldown).** Mark ground up to 7m away (or where your thrown mace lies): 1s later it bursts, healing allies inside 26; if your shield is raised it mends 60. Foes inside are slowed.
 
 ### Ranks
 
@@ -87,10 +83,9 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 |---|---|---|
 | RMB | cooldown 6s -> 5.4s, damage +15%. | cooldown 6s -> 4.8s, damage +30%; shield HP +60. |
 | Dash (Shift) | recharge 10s -> 8.5s per charge. | recharge 10s -> 7s; Whirl and Shield Charge +1m. |
-| E | cooldown 16s -> 14.4s, damage +15%. | cooldown 16s -> 12.8s, damage +30%; Mending Ground +0.5m and heals 10 more. |
-| R (ultimate) | Rank 2 (level 9): cooldown 110s -> 93.5s, +30% duration, +15% damage; Fissure reaches 17m. |  |
+| E | cooldown 16s -> 14.4s, healing +25%. | cooldown 16s -> 12.8s, healing +25%; Mending Ground +0.5m and heals 10 more. |
 
-**Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > E > R (ultimate) > RMB > Dash (Shift) > R (ultimate) > Glove (Q).
+**Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > E > RMB > Dash (Shift) > Glove (Q).
 
 ### What enemies can read
 

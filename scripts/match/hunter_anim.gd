@@ -65,6 +65,10 @@ const ARCH_STANCE := {
 	"gunslinger": {"lean": 0.03, "width": 0.13, "knee": 0.2, "breath": 2.0},
 	"juggernaut": {"lean": 0.1, "width": 0.25, "knee": 0.34, "breath": 1.35, "arm": 0.7},
 	"bulwark": {"lean": 0.0, "width": 0.24, "knee": 0.3, "breath": 1.5, "arm": 0.7},
+	"tender": {"lean": 0.04, "knee": 0.14, "width": 0.08, "breath": 2.2, "arm": 0.9},
+	"rimewright": {"knee": 0.3, "lean": 0.12, "width": 0.07, "bounce": 1.3, "breath": 2.8, "arm": 1.15},
+	"dolm": {"lean": 0.08, "width": 0.2, "knee": 0.3, "breath": 1.6, "arm": 0.8},
+	"ostra": {"lean": -0.05, "width": 0.07, "knee": 0.1, "breath": 1.7, "arm": 0.8},
 }
 ## How far the shoulder pieces turn with the arm (the rest is left behind, so a raised arm slides
 ## under the plate instead of through it).
@@ -1166,6 +1170,253 @@ const KMOVES := {
 		[1.6, {"y": -0.6, "fl": Vector3(-0.42, 0.1, -0.1), "hw": 1.0, "lw": 0.6, "legs": [-0.3, -0.3, 0.6, -0.8]}],
 		[1.8, {"y": 0.5, "fl": Vector3(0.1, 0.15, -0.5), "hw": 1.0, "lw": 0.5, "legs": [0.5, -0.7, -0.3, -0.3]}],
 		[2.2, {}]]},
+	# ---------------------------------------------------------------- Vireo (mage) and Marlowe (gunslinger)
+	# Coilshot: the coil drawn back with the shoulders turned, then the lunge and palm thrust on release
+	"mage_rmb": {"keys": [
+		[0.00, {}],
+		[0.18, {"p": 0.28, "y": 0.45, "legs": [0.20, -0.41, 0.17, -0.36], "lw": 1.0, "fl": Vector3(0.12, 0.12, 0.20), "hw": 1.00}],
+		[0.33, {"p": -0.38, "y": -0.35, "legs": [0.34, -0.65, 0.27, -0.58], "lw": 1.0, "fl": Vector3(0.00, 0.06, -0.58), "hw": 1.00, "sq": 0.12}],
+		[0.55, {"p": -0.12, "y": -0.10, "legs": [0.12, -0.24, 0.10, -0.22], "lw": 1.0, "fl": Vector3(0.05, 0.00, -0.40), "hw": 0.60}],
+		[0.95, {}]]},
+	# Wirerun held: a sprinter's crouch, both arms back while the lane grows
+	"mage_dash": {"hold": true, "keys": [
+		[0.00, {}],
+		[0.14, {"p": -0.32, "legs": [0.58, -1.12, 0.48, -0.99], "lw": 1.0, "fl": Vector3(-0.22, 0.00, 0.32), "hw": 1.00, "fr": Vector3(0.22, 0.00, 0.32), "rw": 1.00}]]},
+	# Wirerun let go: flat out, stretched, arms trailing, easing back to stride
+	"mage_dash_go": {"keys": [
+		[0.00, {"p": -0.32, "legs": [0.58, -1.12, 0.48, -0.99], "lw": 1.0, "fl": Vector3(-0.22, 0.00, 0.32), "hw": 1.00, "fr": Vector3(0.22, 0.00, 0.32), "rw": 1.00}],
+		[0.08, {"p": -0.62, "legs": [0.32, -0.61, 0.26, -0.54], "lw": 1.0, "fl": Vector3(-0.30, -0.10, 0.45), "hw": 1.00, "fr": Vector3(0.30, -0.10, 0.45), "rw": 1.00, "sq": -0.2}],
+		[0.30, {"p": -0.35, "legs": [0.15, -0.31, 0.12, -0.27], "lw": 1.0, "fl": Vector3(-0.28, 0.00, 0.30), "hw": 0.70, "fr": Vector3(0.28, 0.00, 0.30), "rw": 0.70}],
+		[0.70, {}]]},
+	# Skycall: one hand to the sky, then slammed down at the mark
+	"mage_e": {"keys": [
+		[0.00, {}],
+		[0.22, {"p": 0.30, "fl": Vector3(-0.04, 0.58, -0.04), "hw": 1.00}],
+		[0.34, {"p": -0.30, "legs": [0.32, -0.61, 0.26, -0.54], "lw": 1.0, "fl": Vector3(0.06, -0.12, -0.50), "hw": 1.00, "sq": 0.15}],
+		[0.62, {"p": -0.10, "legs": [0.12, -0.24, 0.10, -0.22], "lw": 1.0, "fl": Vector3(0.05, 0.00, -0.30), "hw": 0.50}],
+		[1.00, {}]]},
+	# Burr Charge: the burr cocked by the ear, then the lob
+	"gunslinger_rmb": {"keys": [
+		[0.00, {}],
+		[0.14, {"p": 0.12, "y": 0.55, "legs": [0.10, -0.20, 0.09, -0.19], "lw": 1.0, "fl": Vector3(-0.08, 0.30, 0.16), "hw": 1.00}],
+		[0.22, {"p": -0.22, "y": -0.42, "legs": [0.19, -0.37, 0.15, -0.32], "lw": 1.0, "fl": Vector3(0.10, 0.10, -0.55), "hw": 1.00}],
+		[0.40, {"p": -0.06, "y": -0.10, "legs": [0.05, -0.10, 0.05, -0.09], "lw": 1.0, "fl": Vector3(0.05, 0.00, -0.30), "hw": 0.50}],
+		[0.70, {}]]},
+	# Longneedle: braced low behind the barrel for the 0.8s charge, the recoil throws the chest back on the shot
+	"gunslinger_e": {"keys": [
+		[0.00, {}],
+		[0.22, {"p": -0.12, "y": 0.30, "legs": [0.42, -0.82, 0.34, -0.71], "lw": 1.0, "fl": Vector3(0.05, 0.05, -0.46), "hw": 0.85}],
+		[0.78, {"p": -0.16, "y": 0.30, "legs": [0.48, -0.92, 0.39, -0.80], "lw": 1.0, "fl": Vector3(0.05, 0.05, -0.46), "hw": 0.85}],
+		[0.86, {"p": 0.48, "y": 0.20, "legs": [0.12, -0.24, 0.10, -0.22], "lw": 1.0, "fl": Vector3(0.10, 0.00, -0.30), "hw": 0.60, "sq": -0.1}],
+		[1.20, {"p": 0.12, "y": 0.05, "legs": [0.05, -0.10, 0.05, -0.09], "lw": 1.0}],
+		[1.50, {}]]},
+	# Slipstep: sat back into the skid, arms out for balance
+	"gunslinger_dash": {"keys": [
+		[0.00, {}],
+		[0.10, {"p": 0.40, "legs": [0.65, -1.26, 0.53, -1.10], "lw": 1.0, "fl": Vector3(-0.30, 0.05, -0.08), "hw": 0.80, "fr": Vector3(0.30, 0.05, -0.08), "rw": 0.50}],
+		[0.55, {"p": 0.30, "legs": [0.53, -1.02, 0.42, -0.90], "lw": 1.0, "fl": Vector3(-0.30, 0.05, -0.08), "hw": 0.80, "fr": Vector3(0.30, 0.05, -0.08), "rw": 0.50}],
+		[0.90, {}]]},
+	# ---------------------------------------------------------------- Linnet (tender) and Tamsin (rimewright)
+	# Burrseed: wound back with the seed cupped by the ear, then a flick forward
+	"tend_seed": {"keys": [
+		[0.0, {}],
+		[0.09, {"p": 0.14, "y": -0.3, "r": -0.06, "fl": Vector3(-0.1, 0.3, 0.15), "hw": 1.0}],
+		[0.12, {"p": 0.1, "y": -0.2, "r": -0.04, "fl": Vector3(-0.1, 0.3, 0.15), "hw": 1.0}],
+		[0.17, {"p": -0.38, "y": 0.35, "r": 0.05, "fl": Vector3(0.08, 0.12, -0.52), "hw": 1.0}],
+		[0.2, {"p": -0.38, "y": 0.35, "r": 0.05, "fl": Vector3(0.08, 0.12, -0.52), "hw": 1.0}],
+		[0.4, {"p": -0.15, "y": 0.15, "fl": Vector3(0.08, 0.12, -0.52), "hw": 0.6}],
+		[0.6, {}]]},
+	# Hearthlight: a crouch to gather the light, then up with the lantern hand lifted high
+	"tend_hearth": {"keys": [
+		[0.0, {}],
+		[0.1, {"p": -0.2, "fl": Vector3(0.05, 0.0, -0.15), "hw": 1.0}],
+		[0.14, {"p": -0.2, "fl": Vector3(0.05, 0.0, -0.15), "hw": 1.0}],
+		[0.24, {"p": 0.22, "y": 0.05, "fl": Vector3(0.02, 0.58, -0.1), "hw": 1.0}],
+		[0.34, {"p": 0.22, "y": 0.05, "fl": Vector3(0.02, 0.58, -0.1), "hw": 1.0}],
+		[0.6, {}]]},
+	# Rime Javelin: shoulders wound back, then whipped through into the throw
+	"rime_javelin": {"keys": [
+		[0.0, {}],
+		[0.1, {"p": 0.08, "y": -0.55, "r": -0.1, "fl": Vector3(0.12, 0.15, 0.35), "hw": 1.0}],
+		[0.12, {"p": 0.08, "y": -0.55, "r": -0.1, "fl": Vector3(0.12, 0.15, 0.35), "hw": 1.0}],
+		[0.19, {"p": -0.3, "y": 0.65, "r": 0.1, "fl": Vector3(0.06, 0.1, -0.55), "hw": 1.0}],
+		[0.22, {"p": -0.3, "y": 0.65, "r": 0.1, "fl": Vector3(0.06, 0.1, -0.55), "hw": 1.0}],
+		[0.5, {"p": -0.05, "y": 0.1, "fl": Vector3(0.06, 0.1, -0.55), "hw": 0.5}],
+		[0.6, {}]]},
+	# Ice slam: hands together low, then both pushed out and down onto the ice
+	"rime_slam": {"keys": [
+		[0.0, {}],
+		[0.12, {"p": -0.15, "fl": Vector3(0.0, -0.1, -0.2), "hw": 1.0}],
+		[0.15, {"p": -0.15, "fl": Vector3(0.0, -0.1, -0.2), "hw": 1.0}],
+		[0.22, {"p": -0.42, "fl": Vector3(0.02, -0.12, -0.55), "hw": 1.0}],
+		[0.3, {"p": -0.42, "fl": Vector3(0.02, -0.12, -0.55), "hw": 1.0}],
+		[0.6, {}]]},
+	# ---------------------------------------------------------------- Dolm and Ostra
+	# Boulder: both hands gathered at the chest, then thrown from the hip with the whole back
+	"dolm_lmb": {"keys": [
+		[0.00, {}],
+		[0.10, {"p": 0.22, "legs": [0.30, -0.60, 0.26, -0.55], "lw": 1.0, "fl": Vector3(-0.08, 0.22, -0.2), "hw": 1.0, "fr": Vector3(0.08, 0.22, -0.2), "rw": 1.0}],
+		[0.20, {"p": -0.45, "sq": 0.1, "legs": [0.44, -0.82, 0.36, -0.72], "lw": 1.0, "fl": Vector3(-0.1, 0.12, -0.62), "hw": 1.0, "fr": Vector3(0.1, 0.12, -0.62), "rw": 1.0}],
+		[0.45, {"p": -0.12, "fl": Vector3(-0.1, 0.0, -0.3), "hw": 0.5, "fr": Vector3(0.1, 0.0, -0.3), "rw": 0.5}],
+		[0.70, {}]]},
+	# Punch held: sunk low, the fist cocked far back, the free forearm up as a guard
+	"dolm_wind": {"hold": true, "keys": [
+		[0.00, {}],
+		[0.18, {"p": 0.2, "y": 0.6, "sq": 0.18, "legs": [0.5, -1.0, 0.42, -0.9], "lw": 1.0, "fl": Vector3(-0.05, 0.3, -0.38), "hw": 1.0, "fr": Vector3(0.34, 0.14, 0.5), "rw": 1.0}]]},
+	# Punch let go: the hips and shoulders unwind into a straight drive
+	"dolm_punch": {"keys": [
+		[0.00, {"p": 0.2, "y": 0.6, "sq": 0.18, "legs": [0.5, -1.0, 0.42, -0.9], "lw": 1.0, "fl": Vector3(-0.05, 0.3, -0.38), "hw": 1.0, "fr": Vector3(0.34, 0.14, 0.5), "rw": 1.0}],
+		[0.07, {"p": -0.6, "y": -0.55, "sq": 0.1, "legs": [0.62, -1.12, 0.5, -0.98], "lw": 1.0, "fl": Vector3(-0.2, 0.1, -0.15), "hw": 1.0, "fr": Vector3(0.0, 0.08, -0.82), "rw": 1.0}],
+		[0.22, {"p": -0.3, "y": -0.2, "fr": Vector3(0.0, 0.0, -0.5), "rw": 0.7, "fl": Vector3(-0.2, 0.1, -0.15), "hw": 0.5}],
+		[0.55, {}]]},
+	# Quakefall held: both fists lifted overhead, the back arched
+	"dolm_rmb_wind": {"hold": true, "keys": [
+		[0.00, {}],
+		[0.2, {"p": 0.42, "lift": 0.1, "legs": [0.2, -0.38, 0.16, -0.3], "lw": 1.0, "fl": Vector3(-0.16, 1.0, 0.1), "hw": 1.0, "fr": Vector3(0.16, 1.0, 0.1), "rw": 1.0}]]},
+	# Quakefall released: both fists driven into the ground, knees wide, the whole body folds over them
+	"dolm_rmb": {"keys": [
+		[0.00, {"p": 0.42, "lift": 0.1, "fl": Vector3(-0.16, 1.0, 0.1), "hw": 1.0, "fr": Vector3(0.16, 1.0, 0.1), "rw": 1.0}],
+		[0.14, {"p": -0.7, "lift": -0.08, "sq": 0.34, "legs": [0.7, -1.3, 0.6, -1.2], "lw": 1.0, "fl": Vector3(-0.16, -0.62, -0.5), "hw": 1.0, "fr": Vector3(0.16, -0.62, -0.5), "rw": 1.0}],
+		[0.40, {"p": -0.35, "sq": 0.14, "legs": [0.4, -0.8, 0.34, -0.7], "lw": 1.0, "fl": Vector3(-0.16, -0.3, -0.35), "hw": 0.7, "fr": Vector3(0.16, -0.3, -0.35), "rw": 0.7}],
+		[0.85, {}]]},
+	# Rubble Rush: shoulder first, fists forward behind the boulder, a hard lean
+	"dolm_dash": {"keys": [
+		[0.00, {}],
+		[0.08, {"p": -0.7, "y": 0.35, "legs": [0.7, -1.2, 0.5, -0.9], "lw": 1.0, "fl": Vector3(-0.1, -0.05, -0.55), "hw": 1.0, "fr": Vector3(0.1, -0.05, -0.55), "rw": 1.0}],
+		[0.24, {"p": -0.5, "y": 0.2, "legs": [0.4, -0.7, 0.6, -1.0], "lw": 1.0, "fl": Vector3(-0.1, 0.0, -0.8), "hw": 1.0, "fr": Vector3(0.1, 0.0, -0.8), "rw": 1.0}],
+		[0.60, {}]]},
+	# Stone Row: one stomp, then both palms pressed to the ground to lift the stone
+	"dolm_e": {"keys": [
+		[0.00, {}],
+		[0.12, {"p": 0.12, "legs": [-0.9, 0.9, 0.2, -0.3], "lw": 1.0, "fl": Vector3(-0.2, 0.3, -0.1), "hw": 1.0, "fr": Vector3(0.2, 0.3, -0.1), "rw": 1.0}],
+		[0.24, {"p": -0.6, "sq": 0.3, "legs": [0.7, -1.2, 0.6, -1.1], "lw": 1.0, "fl": Vector3(-0.2, -0.75, -0.42), "hw": 1.0, "fr": Vector3(0.2, -0.75, -0.42), "rw": 1.0}],
+		[0.50, {"p": -0.5, "sq": 0.24, "fl": Vector3(-0.2, -0.7, -0.45), "hw": 1.0, "fr": Vector3(0.2, -0.7, -0.45), "rw": 1.0}],
+		[0.95, {}]]},
+	# Lantern Trade: the lantern lobbed underhand, the body rising a little as she lets it go
+	"ostra_dash": {"keys": [
+		[0.00, {}],
+		[0.12, {"p": -0.2, "sq": 0.14, "legs": [0.3, -0.6, 0.24, -0.5], "lw": 1.0, "fr": Vector3(0.22, -0.4, 0.1), "rw": 1.0}],
+		[0.26, {"p": 0.3, "lift": 0.12, "fr": Vector3(0.12, 0.7, -0.5), "rw": 1.0, "fl": Vector3(-0.3, 0.1, -0.1), "hw": 0.8}],
+		[0.50, {"p": 0.12, "lift": 0.08, "fr": Vector3(0.1, 0.3, -0.3), "rw": 0.5}],
+		[0.95, {}]]},
+	# Shard Fan: both hands drawn in to the chest, then thrown apart and forward in a flat push
+	"ostra_rmb": {"keys": [
+		[0.00, {}],
+		[0.10, {"p": 0.3, "legs": [0.16, -0.3, 0.14, -0.28], "lw": 1.0, "fl": Vector3(-0.04, 0.22, -0.1), "hw": 1.0, "fr": Vector3(0.04, 0.22, -0.1), "rw": 1.0}],
+		[0.20, {"p": -0.45, "sq": 0.1, "legs": [0.34, -0.65, 0.3, -0.58], "lw": 1.0, "fl": Vector3(-0.3, 0.14, -0.62), "hw": 1.0, "fr": Vector3(0.3, 0.14, -0.62), "rw": 1.0}],
+		[0.45, {"p": -0.1, "fl": Vector3(-0.2, 0.1, -0.3), "hw": 0.5, "fr": Vector3(0.2, 0.1, -0.3), "rw": 0.5}],
+		[0.80, {}]]},
+	# Brimseed: a kneeling plant, one palm to the ground, then rising with the palm open
+	"ostra_e": {"keys": [
+		[0.00, {}],
+		[0.18, {"p": -0.55, "sq": 0.32, "legs": [0.9, -1.5, 0.3, -0.9], "lw": 1.0, "fr": Vector3(0.1, -0.78, -0.4), "rw": 1.0, "fl": Vector3(-0.3, 0.0, -0.1), "hw": 0.6}],
+		[0.40, {"p": -0.45, "sq": 0.28, "fr": Vector3(0.1, -0.78, -0.4), "rw": 1.0}],
+		[0.70, {"p": 0.15, "lift": 0.06, "fr": Vector3(0.2, 0.3, -0.35), "rw": 1.0}],
+		[1.10, {}]]},
+	# ---------------------------------------------------------------- Archer (kit moves, accuracy pass)
+	# the bow drawn: side-on, the chest up and back, the string hand pulled to the cheek (holds while you draw)
+	"arc_draw": {"hold": true, "keys": [
+		[0.0, {}],
+		[0.3, {"p": 0.12, "y": 0.35, "lw": 1.0, "legs": [0.35, -0.5, -0.25, -0.3], "rw": 0.6, "fr": Vector3(0.0, 0.18, 0.1)}]]},
+	# the string let go: the body snaps back from the recoil, the hand flung open behind
+	"arc_loose": {"keys": [
+		[0.0, {"p": 0.12, "y": 0.35, "lw": 1.0, "legs": [0.35, -0.5, -0.25, -0.3], "rw": 0.6, "fr": Vector3(0.0, 0.18, 0.1)}],
+		[0.05, {"p": 0.28, "y": 0.1, "sq": -0.1, "lw": 1.0, "legs": [0.4, -0.45, -0.3, -0.25], "rw": 1.0, "fr": Vector3(0.2, 0.05, 0.3)}],
+		[0.3, {"p": 0.05, "lw": 0.5, "legs": [0.2, -0.3, -0.1, -0.2]}],
+		[0.5, {}]]},
+	# the Heavy Shot's draw: a deep crouch, weight back, the shoulders turned hard (holds)
+	"arc_heavy_wind": {"hold": true, "keys": [
+		[0.0, {}],
+		[0.35, {"p": 0.2, "y": 0.55, "lift": -0.12, "sq": 0.18, "lw": 1.0, "legs": [0.8, -1.2, -0.5, -0.7], "rw": 0.8, "fr": Vector3(0.05, 0.2, 0.2)}],
+		[0.9, {"p": 0.28, "y": 0.6, "lift": -0.16, "sq": 0.25, "lw": 1.0, "legs": [0.9, -1.3, -0.55, -0.8], "rw": 1.0, "fr": Vector3(0.08, 0.22, 0.28)}]]},
+	# ... let go: thrown back by the shot, then planting out of it
+	"arc_heavy": {"keys": [
+		[0.0, {"p": 0.28, "y": 0.6, "lift": -0.16, "sq": 0.25, "lw": 1.0, "legs": [0.9, -1.3, -0.55, -0.8], "rw": 1.0, "fr": Vector3(0.08, 0.22, 0.28)}],
+		[0.06, {"p": 0.5, "y": 0.1, "lift": 0.05, "sq": -0.2, "lw": 1.0, "legs": [0.5, -0.5, -0.4, -0.2], "rw": 1.0, "fr": Vector3(0.3, 0.0, 0.4)}],
+		[0.28, {"p": 0.25, "lift": -0.05, "lw": 0.8, "legs": [0.6, -0.8, -0.3, -0.4]}],
+		[0.6, {}]]},
+	# the snare: a quick flick of the bow hand, a half-step forward
+	"arc_snare": {"keys": [
+		[0.0, {"p": 0.1, "y": 0.2}],
+		[0.07, {"p": -0.3, "y": -0.2, "lw": 0.7, "legs": [0.6, -0.5, -0.4, -0.2]}],
+		[0.3, {}]]},
+	# the Hail Wall: the free hand thrown to the sky, the whole body arching back to lob
+	"arc_hail": {"keys": [
+		[0.0, {"p": 0.1}],
+		[0.12, {"p": 0.45, "lift": 0.06, "hw": 1.0, "fl": Vector3(0.0, 0.6, 0.1), "lw": 0.8, "legs": [0.3, -0.5, 0.3, -0.5]}],
+		[0.3, {"p": -0.3, "hw": 1.0, "fl": Vector3(0.0, 0.1, -0.55), "lw": 0.8, "legs": [0.7, -0.6, -0.3, -0.3]}],
+		[0.7, {}]]},
+	# the grapple zip: stretched forward along the line, the legs trailing
+	"arc_zip": {"keys": [
+		[0.0, {"p": -0.2, "hw": 1.0, "fl": Vector3(0.0, 0.1, -0.5)}],
+		[0.1, {"p": -0.65, "sq": -0.3, "lw": 1.0, "legs": [-0.6, -0.2, 0.9, -0.9], "hw": 1.0, "fl": Vector3(0.0, 0.2, -0.6)}],
+		[0.45, {"p": -0.3, "lw": 0.6, "legs": [0.5, -0.6, 0.5, -0.6]}],
+		[0.7, {}]]},
+	# the hop back: a backward tuck and flip away from the shot line
+	"arc_hop": {"keys": [
+		[0.0, {"p": 0.3, "lift": 0.05}],
+		[0.1, {"p": 0.5, "fx": 0.9, "sq": 0.25, "lw": 1.0, "legs": [1.2, -1.5, 1.2, -1.5]}],
+		[0.28, {"p": 0.2, "fx": 1.6, "lw": 1.0, "legs": [0.9, -1.1, 0.9, -1.1]}],
+		[0.5, {}]]},
+	# the plunge: shooting straight down, folded over the bow
+	"arc_plunge": {"keys": [
+		[0.0, {"p": -0.5, "sq": 0.2, "lw": 1.0, "legs": [1.0, -1.4, 1.0, -1.4]}],
+		[0.12, {"p": -0.9, "sq": 0.4, "lw": 1.0, "legs": [1.2, -1.7, 1.2, -1.7]}],
+		[0.45, {}]]},
+	# ---------------------------------------------------------------- Bulwark (kit moves, accuracy pass)
+	# the mace thrown: the body twists back, then whips round and the arm snaps out
+	"bul_throw": {"keys": [
+		[0.0, {"y": 0.7, "p": 0.1, "lw": 1.0, "legs": [0.4, -0.6, -0.2, -0.3]}],
+		[0.08, {"y": -0.8, "p": -0.35, "sq": -0.1, "lw": 1.0, "legs": [0.8, -0.7, -0.5, -0.3]}],
+		[0.32, {"y": -0.2, "p": -0.1, "lw": 0.6}],
+		[0.55, {}]]},
+	# the mace called back: the free hand reaches out, then draws in and catches
+	"bul_recall": {"keys": [
+		[0.0, {"hw": 1.0, "fl": Vector3(0.05, 0.1, -0.55), "p": -0.1}],
+		[0.2, {"hw": 1.0, "fl": Vector3(0.05, 0.1, -0.6), "p": -0.15}],
+		[0.34, {"hw": 1.0, "fl": Vector3(-0.05, -0.05, -0.15), "p": 0.1, "sq": 0.12}],
+		[0.55, {}]]},
+	# the Crushing Blow's draw: weight rocked back, the whole frame loaded (holds)
+	"bul_smash_wind": {"hold": true, "keys": [
+		[0.0, {}],
+		[0.4, {"p": 0.4, "lift": 0.1, "y": 0.5, "lw": 1.0, "legs": [-0.2, -0.3, 0.4, -0.5]}],
+		[1.0, {"p": 0.5, "lift": 0.18, "y": 0.6, "sq": -0.15, "lw": 1.0, "legs": [0.0, -0.3, 0.5, -0.6]}]]},
+	# ... the crash: slammed forward and down, the ground shaking under the landing
+	"bul_smash": {"keys": [
+		[0.0, {"p": 0.5, "lift": 0.18, "y": 0.6, "lw": 1.0, "legs": [0.0, -0.3, 0.5, -0.6]}],
+		[0.07, {"p": -0.75, "lift": -0.15, "y": -0.5, "sq": 0.5, "lw": 1.0, "legs": [1.1, -1.5, -0.4, -0.9]}],
+		[0.3, {"p": -0.5, "lift": -0.1, "sq": 0.25, "lw": 1.0, "legs": [1.0, -1.3, -0.35, -0.8]}],
+		[0.65, {}]]},
+	# the Bash: a short-stepped shoulder shove behind the shield
+	"bul_bash": {"keys": [
+		[0.0, {"p": 0.15, "y": 0.3, "lw": 1.0, "legs": [0.2, -0.4, -0.1, -0.2]}],
+		[0.07, {"p": -0.45, "y": -0.2, "sq": 0.3, "lw": 1.0, "legs": [0.9, -0.9, -0.5, -0.4]}],
+		[0.28, {"p": -0.2, "lw": 0.7}],
+		[0.5, {}]]},
+	# Whirl: a full turn about the vertical, low and braced
+	"bul_whirl": {"keys": [
+		[0.0, {"fy": 0.0, "sq": 0.15, "lw": 1.0, "legs": [0.6, -0.8, -0.3, -0.4]}],
+		[0.1, {"fy": 3.1, "sq": 0.1, "lw": 1.0, "legs": [0.6, -0.8, -0.3, -0.4]}],
+		[0.2, {"fy": 6.28, "sq": 0.1, "lw": 1.0, "legs": [0.5, -0.7, -0.3, -0.4]}],
+		[0.4, {"fy": 6.28}],
+		[0.5, {"fy": 6.28}]]},
+	# the Shield Charge: head down, the whole body a ram
+	"bul_charge": {"keys": [
+		[0.0, {"p": -0.5, "y": 0.2, "sq": 0.2, "lw": 1.0, "legs": [0.8, -1.0, -0.6, -0.4]}],
+		[0.16, {"p": -0.7, "sq": 0.3, "lw": 1.0, "legs": [1.1, -1.1, -0.8, -0.3]}],
+		[0.34, {"p": -0.3, "lw": 0.6, "legs": [0.7, -0.8, -0.4, -0.3]}],
+		[0.6, {}]]},
+	# the short dash out of a loaded Crushing Blow: a small hop-step that keeps the lean
+	"bul_short": {"keys": [
+		[0.0, {"p": 0.4, "lift": 0.1, "y": 0.6, "lw": 1.0, "legs": [-0.2, -0.3, 0.4, -0.5]}],
+		[0.1, {"p": 0.3, "lift": 0.05, "y": 0.5, "lw": 1.0, "legs": [0.7, -0.6, -0.5, -0.3]}],
+		[0.25, {"p": 0.4, "lift": 0.1, "y": 0.6, "lw": 1.0, "legs": [0.0, -0.3, 0.5, -0.6]}]]},
+	# Mending Ground: a stamped foot and the free hand driving down into the earth
+	"bul_mend": {"keys": [
+		[0.0, {"lift": 0.12, "p": 0.1, "hw": 1.0, "fl": Vector3(0.0, 0.4, -0.2)}],
+		[0.14, {"lift": -0.1, "p": -0.5, "sq": 0.35, "hw": 1.0, "fl": Vector3(0.0, -0.5, -0.4), "lw": 1.0, "legs": [0.9, -1.2, -0.3, -0.8]}],
+		[0.5, {"p": -0.2, "hw": 0.5, "fl": Vector3(0.0, -0.3, -0.3)}],
+		[0.8, {}]]},
 }
 const KM_CH := ["p", "y", "r", "lift", "fx", "fz", "fy", "sq", "lw", "hw", "rw", "bw", "rad", "gp"]
 var km := {}                   # the kit move's channels this frame (empty: none)
@@ -1174,7 +1425,7 @@ var km_prev_t := 99.0
 
 ## Samples the kit move at time `tt`: each channel eased between the keys around it.
 static func km_sample(id: String, tt: float) -> Dictionary:
-	var mv: Dictionary = KMOVES.get(id, MergeMoves.MOVES.get(id, {}))
+	var mv: Dictionary = KMOVES.get(id, KMovesPair.MOVES.get(id, MergeMoves.MOVES.get(id, {})))
 	if mv.is_empty():
 		return {}
 	var keys: Array = mv["keys"]

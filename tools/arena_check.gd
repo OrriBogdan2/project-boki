@@ -103,19 +103,24 @@ func _arena() -> void:
 		ok("swap to %s" % a, P.arch == a and P.ak != null and P.cls == Arch.weight(a))
 	# every hold has the wind-up feel: a charge that fills (ring + glow), a full tick, a release
 	for a in Arch.ids():
+		if not (Arch.def(a)["rmb"].get("variants", {}) as Dictionary).has("hold"): continue          # (the support pair's RMBs are taps)
+		if Arch.def(a).get("no_hold", false): continue      # a kit with no hold input (Ostra: her orb pauses, nothing is held)
 		A.set_arch(a)
 		P.teleport(A.home); P.inp["aim"] = D.pos + Vector3(0, 0.9, 0); P.inp["aim_y"] = D.pos.y
 		P.ak.cd["rmb"] = 0.0; P.ak.ch_rmb = float(P.ak.rmb_charges()); P.fire_cd = 0.0
 		step(m, 0.1)
+		if float(P.ak.rmb_def().get("hold", 0.0)) <= 0.0:
+			continue            # no RMB hold variant (Dredge, Ashwick: their hold is the lance, see --ashwick-combo-check)
 		var f0: int = P.ak.charge_fulls
 		var mid := -1.0
 		var ring_ok := false
-		if a == "mage":
-			# the Guided Bolt's hold is a steer: the bolt flies and hums while you hold
-			P.ak.bot_hold["rmb"] = 0.8; P.ak.press_rmb()
-			step(m, 0.3)
-			ok("hold: mage RMB steers a live bolt", not (P.ak as MageKit).bolts.is_empty() and P.ak.rmb_down)
-			step(m, 0.8)
+		if a == "gunslinger":
+			# Marlowe's hold is Longneedle's charge (E): a ring, a full tick, the shot
+			P.ak.cd["e"] = 0.0; P.ak.use_e()
+			step(m, 0.5)
+			ok("hold: gunslinger Longneedle winds up (ring)", not P.ak.chg.is_empty() and is_instance_valid(P.ak.chg.get("ring")))
+			step(m, 0.7)
+			ok("hold: gunslinger Longneedle ticks full and fires", P.ak.charge_fulls > f0 and P.ak.chg.is_empty())
 			continue
 		var t := 0.0
 		while t < 1.45:
@@ -236,12 +241,12 @@ func _cards() -> void:
 		var c := KitCard.make(a, "cindle")
 		host.add_child(c)
 		await main.get_tree().process_frame
-		ok("kit card builds: %s" % a, c.grid != null and c.grid.get_child_count() == 6 and c.size.x <= KitCard.SIZE.x + 1.0, "size %s" % str(c.size))
+		ok("kit card builds: %s" % a, c.grid != null and c.grid.get_child_count() == KitCard.slots_of(a).size() and c.size.x <= KitCard.SIZE.x + 1.0, "size %s" % str(c.size))
 		var s0 := c.size
 		c._show_detail("rmb")
 		await main.get_tree().process_frame
 		ok("kit card sub-page keeps its size: %s" % a, c.page == "rmb" and c.size.is_equal_approx(s0), "%s -> %s" % [str(s0), str(c.size)])
-		for s in KitCard.SLOTS:
+		for s in KitCard.slots_of(a):
 			var info := KitCard.slot_text(a, s)
 			if String(info["line"]) == "" or String(info["name"]) == "":
 				ok("kit card text %s.%s" % [a, s], false)

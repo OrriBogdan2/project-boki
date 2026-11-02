@@ -3637,7 +3637,7 @@ func _open_expedition() -> void:
 			_refresh_player_model()
 			_open_expedition(), 150)
 		var adf := Arch.def(a)
-		ab.tooltip_text = "%s\nDash: %s  ·  Passive: %s\nRMB: %s  ·  E: %s  ·  R: %s (level 6)" % [String(adf.get("fantasy", "")), String(adf["dash"]["name"]), String(adf["passive"]["name"]), String(adf["rmb"]["name"]), String(adf["e"]["name"]), String(adf["r"]["name"])]
+		ab.tooltip_text = "%s\nDash: %s  ·  Passive: %s\nRMB: %s  ·  E: %s  ·  R: Boki Merge" % [String(adf.get("fantasy", "")), String(adf["dash"]["name"]), String(adf["passive"]["name"]), String(adf["rmb"]["name"]), String(adf["e"]["name"])]
 		arow.add_child(ab)
 	left.add_child(arow)
 	# your abilities before a run: the kit card's compact row (click for the full card)

@@ -33,11 +33,19 @@ func run(main: Node) -> void:
 	var grid: GridContainer = hm.get_meta("hero_grid")
 	var cards: Array = grid.get_children()
 	var archs: Array = cards.map(func(c): return String(c.get_meta("arch", "")))
-	ok(cards.size() == 6 and archs.has("thief") and archs.has("bulwark"), "six heroes: %s" % str(archs))
+	ok(cards.size() == Arch.ids().size() and archs.has("thief") and archs.has("bulwark") and archs.has("dolm") and archs.has("tender"), "every hero has a card: %s" % str(archs))
 	ok(cards.all(func(c): return String(c.tooltip_text).contains("Dash:") and String(c.tooltip_text).contains("class")), "each shows its weight class and kit on hover")
 	ok(Arch.ids().all(func(a): return HomeHero.unlocked(a)), "everything is unlocked for now (HomeHero.unlocked is the hook for the unlock system)")
 	for i in 20: await tree.process_frame
 	if shot != "": tree.root.get_texture().get_image().save_png(shot + "/hero_panel.png")
+	if shot != "":      # the rest of the grid, scrolled into view
+		var sc: Node = grid
+		while sc != null and not (sc is ScrollContainer): sc = sc.get_parent()
+		if sc != null:
+			(sc as ScrollContainer).scroll_vertical = 100000
+			for i in 20: await tree.process_frame
+			tree.root.get_texture().get_image().save_png(shot + "/hero_panel_2.png")
+			(sc as ScrollContainer).scroll_vertical = 0
 	var old_model: Node3D = hm.player
 	HomeHero.pick(hm, "archer")
 	await tree.process_frame

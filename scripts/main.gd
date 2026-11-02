@@ -29,7 +29,7 @@ func _ready() -> void:
 		fade.boot()     # carry on from the boot splash: covered, logo showing, until the first screen is up
 	var args := OS.get_cmdline_user_args()
 	# tooling never touches the real save file: checks, screenshots and --no-save runs play on a copy
-	if "--no-save" in args or "--archetype-check" in args or "--kit-combo-check" in args or "--arena-check" in args or Array(args).any(func(x): return String(x).begins_with("--shot=") or String(x).begins_with("--arena-shot=") or String(x).begins_with("--rolling-shot=")):
+	if "--no-save" in args or "--archetype-check" in args or "--kit-combo-check" in args or "--mage-combo-check" in args or "--gunslinger-combo-check" in args or "--zone-check" in args or "--dolm-combo-check" in args or "--ostra-combo-check" in args or "--hero-combo-check" in args or "--archer-combo-check" in args or "--bulwark-combo-check" in args or "--arena-check" in args or "--dredge-combo-check" in args or "--ashwick-combo-check" in args or Array(args).any(func(x): return String(x).begins_with("--shot=") or String(x).begins_with("--arena-shot=") or String(x).begins_with("--rolling-shot=")):
 		Save.no_write = true
 	var opts := {}
 	for a in args:
@@ -316,7 +316,7 @@ func _ready() -> void:
 		print("BIOME sim ok, time %.0f, mobs left %d, fields %d" % [bm.time, bm.mobs.filter(func(x): return not x.dead).size(), bm.fields.list.size()])
 		get_tree().quit()
 		return
-	if "--arch-lineup" in args or "--arch-matrix" in args or "--arch-heads" in args:
+	if "--arch-lineup" in args or "--showcase" in args or "--arch-matrix" in args or "--arch-heads" in args:
 		add_child(load("res://tests/arch_gallery.gd").new())
 		return
 	if "--hair-gallery" in args or "--class-lineup" in args:
@@ -367,6 +367,8 @@ func _ready() -> void:
 		var kbc = load("res://tools/kinbox_check.gd").new()      # the farm cap, the Kin Burrow and rare mutations
 		set_meta("kinbox_check", kbc)      # kept alive while it waits on frames
 		kbc.run(self)
+		return
+	if CheckRegistry.run(self, args):      # registered checks (tools/check_registry.gd)
 		return
 	if "--revive-check" in args:
 		var rvc = load("res://tools/revive_check.gd").new()      # bot squadmates pick you up first
@@ -510,7 +512,7 @@ func _ready() -> void:
 		set_meta("arena_check", arc)        # (kept alive across its awaits)
 		arc.run(self)
 		return
-	if "--archetype-check" in args or "--kit-combo-check" in args:
+	if "--archetype-check" in args or "--kit-combo-check" in args or "--mage-combo-check" in args or "--gunslinger-combo-check" in args:
 		var akc = load("res://tools/archetype_check.gd").new()      # every archetype kit, controls, locks, infusion, feel
 		set_meta("archetype_check", akc)
 		akc.run(self)
@@ -1480,8 +1482,9 @@ func _ability_check() -> void:
 	P.inp["sec_hold"] = false
 	_ac_run(m, 0.3)
 	_ac("rail hold-to-charge", T.hp < T.max_hp - 25.0, "took %.0f" % (T.max_hp - T.hp))
-	# the same hold as an archetype (the Gunslinger's Rail): the shared wind-up fills, ticks full, punches out
-	P.set_arch("gunslinger"); P.unlock_all()
+	# the same hold as an archetype (Vireo's Coilshot): the shared wind-up fills, ticks full, punches out
+	P.reclass("light", "mage"); P.unlock_all()
+	_ac_run(m, 0.3)      # (the swap to a Light body settles on the ground first)
 	T.hp = T.max_hp
 	P.inp["aim"] = T.pos + Vector3(0, 0.9, 0)
 	P.ak.cd["rmb"] = 0.0; P.ak.ch_rmb = 1.0
@@ -1492,7 +1495,7 @@ func _ability_check() -> void:
 		if hk_mid[0] < 0.0 and P.ak.rmb_t > 0.6: hk_mid[0] = P.ak.charge_k())
 	P.inp["sec_hold"] = false
 	_ac_run(m, 0.3)
-	_ac("archetype hold wind-up", hk_mid[0] > 0.2 and P.ak.charge_fulls >= 1 and P.ak.charge_last > 0.9 and T.hp < T.max_hp - 25.0, "mid %.2f fulls %d took %.0f" % [hk_mid[0], P.ak.charge_fulls, T.max_hp - T.hp])
+	_ac("archetype hold wind-up", hk_mid[0] > 0.2 and P.ak.charge_fulls >= 1 and P.ak.charge_last > 0.9 and T.hp < T.max_hp - 10.0, "mid %.2f fulls %d took %.0f" % [hk_mid[0], P.ak.charge_fulls, T.max_hp - T.hp])
 	m.queue_free(); await get_tree().process_frame
 	# 13. Breach: throws the target back and you the other way
 	r = _ac_setup(2.5); m = r[0]; P = r[1]; T = r[2]

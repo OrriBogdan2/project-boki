@@ -55,7 +55,7 @@ static func open(home: Node) -> void:
 			var kitb := UI.ghost("Kit (K)", func(): kit(home, ak), 0)
 			kitb.focus_mode = Control.FOCUS_NONE
 			col.add_child(kitb)
-			card.tooltip_text = "%s  ·  %s class\nDash: %s  ·  Passive: %s\nRMB: %s  ·  E: %s  ·  R: %s (level 6)" % [Arch.name_of(ak), String(cd["name"]), String(adf["dash"]["name"]), String(adf["passive"]["name"]), String(adf["rmb"]["name"]), String(adf["e"]["name"]), String(adf["r"]["name"])]
+			card.tooltip_text = "%s  ·  %s class\nDash: %s  ·  Passive: %s\nRMB: %s  ·  E: %s  ·  R: Boki Merge" % [Arch.name_of(ak), String(cd["name"]), String(adf["dash"]["name"]), String(adf["passive"]["name"]), String(adf["rmb"]["name"]), String(adf["e"]["name"])]
 			card.set_meta("arch", ak)
 			card.mouse_entered.connect(func(): home.set_meta("hero_hover", ak))
 			if not can:

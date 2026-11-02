@@ -1,16 +1,15 @@
 class_name ArcherKit
 extends ArchKit
 ## Archer (light): Grapple Arrow, Focus, Snare (tap: a rooting snare / Tripwire; hold: a charged
-## Heavy Shot that pierces, knocks back and stuns into a wall; Plunge in the air), Arrow Rain (E),
-## Great Arrows (R). docs/ARCHETYPES.md §6.2 and "Kit loops" (kits4; Myth-style hunter archer ideas).
+## Heavy Shot that pierces, knocks back and stuns into a wall; Plunge in the air), Hail Wall (E),
+## (no R: the class ultimate is held back while R is the Merge). docs/ARCHETYPES.md §6.2 and "Kit loops" (kits4).
 ## The bow draws in stages you hear and see; let go right at full draw (the perfect window) for +25%.
 ##
 ## The loop (kits4): snares root (Pin) and feed Focus -> full Focus arms the Deadeye (a lens glint and
 ## a thin aim line everyone sees, crosshairs over every pinned foe) -> the next shot is drawn at once,
 ## and into a rooted or stunned foe it's a Deadeye: a gold payoff hit with T4 hitstop and its own sound.
 
-var rain := {}                 # the live Arrow Rain: {a, b, t, tick, patter, tele}
-var great := {}                # Great Arrows left: {left, t, n}
+var rain := {}                 # the live Hail Wall: {a, b, t, tick, patter, tele}
 var draw_was := -1.0           # last frame's bow draw (stage ticks)
 var perfects := 0              # perfect draws (tests)
 var trips: Array = []          # our live Tripwires (verbs trap dictionaries)
@@ -24,6 +23,9 @@ var was_full := false
 var glint: Node3D = null       # the lens glint at the bow and the thin aim line (full Focus)
 var reticles := {}             # foe instance id -> node: crosshairs over pinned foes while Deadeye is armed
 var deadeyes := 0              # Deadeyes landed (tests, demo)
+var knock_healed := 0.0        # health the knock passive gave back (tests)
+var sense_t := 0.0
+var pins := 0                  # wall pins landed (tests)
 
 func full_ready() -> bool:
 	return res >= res_max() - 0.01
@@ -32,7 +34,6 @@ func res_text() -> String:
 	return "READY" if full_ready() else "%d" % int(res)
 
 func ready_label() -> String:
-	if not great.is_empty(): return "GREAT ARROWS  ·  %d" % int(great["left"])
 	return "DEADEYE READY" if full_ready() else ""
 
 ## Focus from play (a snare that roots, a Pin): the out-of-combat clock doesn't apply to Focus.
@@ -88,6 +89,8 @@ func _deadeye(t: Ent) -> void:
 	CombatBus.ability_used.emit(h, "deadeye", "secondary")
 
 func _tick(dt: float) -> void:
+	if KinMerge.active(h):
+		_drop_holds()
 	var rd := res_def()
 	high_t -= dt
 	if high_t <= 0.0:
@@ -115,6 +118,10 @@ func _tick(dt: float) -> void:
 		armed_at = m.time
 		armed_fx("", "")       # (the glint, the aim line and the crosshair label say it; no word every refill)
 	was_full = full
+	sense_t -= dt
+	if sense_t <= 0.0:
+		sense_t = 0.3
+		_sense_injured()
 	_tick_glint(dt)
 	_tick_reticles()
 	net_pulse(dt, full)
@@ -124,10 +131,6 @@ func _tick(dt: float) -> void:
 		m.fx.telegraph_progress(pin_tele, heavy_k())
 	if not rain.is_empty():
 		_tick_rain(dt)
-	if not great.is_empty():
-		great["t"] = float(great["t"]) - dt
-		if float(great["t"]) <= 0.0 or int(great["left"]) <= 0:
-			great = {}
 	_tick_draw_stages()
 
 ## The bow's stages, heard and seen: a creak at stage 1 (0.4s), and at full draw (0.9s) a bright
@@ -146,6 +149,11 @@ func _tick_draw_stages() -> void:
 			m.fx.flash(at, Color.WHITE, 0.9, pw.y - pw.x)
 			m.fx.ring(h.pos, 1.3, res_col(), pw.y - pw.x)
 			net_ring(h.pos, 1.3, res_col())
+	# the bow's own move: held while drawing, the snap when it's let go
+	if t >= 0.0 and t < 5.0 and h.wpn.has("draw") and draw_was < 0.0:
+		play("arc_draw")
+	elif t < 0.0 and draw_was >= 0.0 and anim_id == "arc_draw":
+		play("arc_loose")
 	draw_was = t
 
 ## The perfect release window of the bow: from full draw for 0.15s.
@@ -154,18 +162,43 @@ func perfect_window() -> Vector2:
 	var full := float((st[-1] as Array)[0]) if not st.is_empty() else 0.9
 	return Vector2(full, full + float(res_def().get("perfect_t", 0.15)))
 
-## Hunter._loose asks: a bow let go inside the perfect window hits 25% harder.
+## Hunter._loose asks: a bow let go inside a stage's perfect window hits harder: +25% at full draw,
+## +15% at the first stage (a perfect release exists in both stages).
 func draw_bonus(t: float) -> float:
 	var pw := perfect_window()
-	if t >= pw.x and t <= pw.y:
+	var st: Array = h.wpn.get("draw", [])
+	var p1 := float((st[0] as Array)[0]) if st.size() > 1 else -9.0
+	var in1: bool = t >= p1 and t <= p1 + float(res_def().get("perfect_t", 0.15)) and p1 > 0.0
+	if (t >= pw.x and t <= pw.y) or in1:
 		perfects += 1
 		var d := h.aim_dir()
 		m.fx.word(h.pos + Vector3(0, 2.4, 0), "PERFECT", Color("ffffff"), false)
 		m.fx.flash(h.pos + Vector3(d.x * 0.7, 1.1, d.y * 0.7), res_col().lightened(0.4), 1.1, 0.08)
 		m.sfx("rail", h.pos, -6.0, 1.9)
 		if h.is_local(): Oomph.punch_dir(m, d, 0.25)
-		return 1.0 + float(res_def().get("perfect_k", 0.25))
+		return 1.0 + float(res_def().get("perfect_k", 0.25)) * (1.0 if not in1 else 0.6)
 	return 1.0
+
+## Passive, Hawk Sense: rivals under half health are seen through cover and fog within 22m.
+func _sense_injured() -> void:
+	var rd := res_def()
+	for f in m.foes_of(h.team):
+		if f is Hunter and not f.dead and f.hp < f.max_hp * float(rd.get("sense_hp", 0.5)) and h.flat_dist(f) < float(rd.get("sense_r", 22.0)):
+			f.reveal_t = maxf(f.reveal_t, 0.4)
+
+## Passive: a knock heals us and gives a dash charge back.
+func on_knock(t: Hunter, mine: bool) -> void:
+	if not mine or not is_instance_valid(t): return
+	var rd := res_def()
+	var hp0 := h.hp
+	h.heal(float(rd.get("knock_heal", 18.0)))
+	knock_healed += h.hp - hp0
+	h.dashes = minf(h.max_dashes(), h.dashes + float(rd.get("knock_dash", 1.0)))
+	m.fx.burst(h.pos + Vector3(0, 1.0, 0), Color("9fe0a8"), 14, 2.5, 0.5, -2.0)
+	m.fx.word(h.pos + Vector3(0, 2.4, 0), "RUN DOWN", res_col(), true)
+	m.fx.ring(h.pos, 1.6, res_col(), 0.3)
+	m.sfx("ab_ready", h.pos, -3.0, 1.3)
+	net_ring(h.pos, 1.6, res_col())
 
 func _high_ground() -> bool:
 	var gy: float = m.world.ground_at(h.pos.x, h.pos.z)
@@ -282,9 +315,11 @@ func on_dash(use_ex: bool) -> bool:
 		# bit nothing: a hop back, away from the cursor
 		travel(float(dd.get("hop", 3.2)), 0.14, {"invuln": 0.0, "dir": -dir, "trail": "roll"}, use_ex)
 		st["last_grapple"] = "hop"
+		play("arc_hop")
 		if rank("dash") >= 3: h.dashes = minf(h.max_dashes(), h.dashes + 0.4)
 		return true
 	st["last_grapple"] = "zip"
+	play("arc_zip")
 	var dist := Vector2(bite.x - from.x, bite.z - from.z).length()
 	var t := clampf(dist / float(dd.get("zip_speed", 22.0)), 0.18, 0.45)
 	m.fx.bolt(from + Vector3(0, 1.2, 0), bite + Vector3(0, 0.3, 0), Color("e8f7c0"))
@@ -331,6 +366,7 @@ func _bite(dir: Vector2, reach: float, max_up: float) -> Vector3:
 func rmb_hold_tick(t: float) -> void:
 	if t > 0.15 and pin_tele == null and not rmb_ctx.get("air", false):
 		# the draw shows a glint and the lane to enemies (a hard-CC telegraph)
+		play("arc_heavy_wind")
 		pin_tele = tele_lane(h.pos, h.aim_dir(), float(rmb_def()["pin"]["range"]), 0.5, Color("ffe0a0"), 0.0)
 		m.fx.flash(h.pos + Vector3(0, 1.2, 0), Color("ffe0a0"), 0.4, 0.1)
 
@@ -345,6 +381,15 @@ func heavy_k() -> float:
 func rmb_auto_t() -> float:
 	return float(rmb_def()["pin"]["full"]) + 0.5
 
+## A Boki merge ends the bow draw and the Heavy Shot's hold with no shot (Hunter.draw_t and rmb_down are cleared by
+## MergeKit.drop_class_holds; the lane telegraph and the draw pose are this kit's).
+func _drop_holds() -> void:
+	rmb_down = false
+	if pin_tele != null:
+		_drop_tele()
+	if anim_id in ["arc_draw", "arc_heavy_wind"]:
+		anim_id = ""
+
 func _drop_tele() -> void:
 	if pin_tele and is_instance_valid(pin_tele):
 		m.fx.end_telegraph(pin_tele)
@@ -356,14 +401,17 @@ func fire_rmb(c: Dictionary) -> void:
 	if not spend_rmb(): return
 	var sd := rmb_def()
 	if c.get("air", false):
+		play("arc_plunge")
 		_plunge()
 		return
 	var target_aim := aim()
 	if c.get("hold", false):
+		play("arc_heavy")
 		_pin(target_aim, clampf((float(c["t"]) - float(sd["hold"])) / maxf(0.05, float(sd["pin"]["full"]) - float(sd["hold"])), 0.0, 1.0))
 		return
+	play("arc_snare")
 	var sn: Dictionary = sd["snare"]
-	# full Focus, or with your Arrow Rain falling: the snare roots for longer
+	# full Focus, or with your Hail Wall falling: the snare roots for longer
 	var root := float(sn["root_full"]) if c.get("full", false) or c.get("e", false) else float(sn["root"])
 	# the arrow comes down at the cursor (up to 11m): a miss plants the Tripwire there
 	var srange := clampf(Vector2(target_aim.x - h.pos.x, target_aim.z - h.pos.z).length() + 0.5, 2.5, float(sn["range"]))
@@ -410,7 +458,9 @@ func _pin(a: Vector3, k: float) -> void:
 		add_focus(float(res_def().get("snare_gain", 40.0)))
 		# driven into terrain within 3m: pinned (a stun), and the shot lines up: full Focus
 		if _wall_behind(f, dir, float(pd["wall"])):
+			pins += 1
 			add_focus(res_max())
+			f.hurt(float(pd.get("wall_dmg", 12.0)) * k * power("sec"), h, {"src": "abil", "ab": "utility", "tags": ["utility", "pin"], "heavy": true})
 			m.later(0.12, func():
 				if is_instance_valid(f) and not f.dead:
 					f.hurt(0.1, h, {"stun": float(pd["stun"]), "src": "abil", "ab": "utility", "tags": ["utility", "pin"], "exploit": true, "dr": true})
@@ -449,7 +499,7 @@ func _plunge() -> void:
 	m.fx.bolt(at + Vector3(0, 1.0, 0), ground(at) + Vector3(0, 0.1, 0), Color("e8f7c0"))
 	m.sfx("whoosh", at, -3.0, 1.3)
 
-# ------------------------------------------------------------------ E: Arrow Rain
+# ------------------------------------------------------------------ E: Hail Wall
 ## A wall of falling arrows: lobbed in front of you, it rains along a line across your aim (6m long,
 ## 2.2m deep) for 3.75s: damage over time, a slow and a blight (healing barely takes) on foes inside.
 func in_e() -> bool:
@@ -461,7 +511,7 @@ func cast_e() -> bool:
 	var d := Vector2(c.x - h.pos.x, c.z - h.pos.z)
 	d = d.normalized() if d.length() > 0.2 else h.aim_dir()
 	var side := Vector2(-d.y, d.x)
-	var half := float(ed["length"]) * 0.5 + (0.5 if rank("kin") >= 3 else 0.0)
+	var half := float(ed["length"]) * (0.65 if rank("kin") >= 3 else 0.5)
 	var a := c + Vector3(side.x, 0, side.y) * half
 	var b := c - Vector3(side.x, 0, side.y) * half
 	var tell := float(ed["tell"])
@@ -472,6 +522,7 @@ func cast_e() -> bool:
 		m.later(0.05 * i, func(): if is_instance_valid(h): m.fx.burst(h.pos + Vector3(0, 1.5, 0), col_of(ed), 3, 7.0, 0.35, -10.0, 0.8, Vector3.UP, 12.0))
 	m.sfx("ab_throw", h.pos, -2.0, 1.4)
 	net_bolt(a + Vector3(0, 0.2, 0), b + Vector3(0, 0.2, 0), col_of(ed))
+	play("arc_hail")
 	var t := float(ed["time"])
 	rain = {"a": a, "b": b, "c": c, "d": d, "t": t + tell, "start": tell, "tick": 0.0, "patter": 0.0, "fx": 0.0, "tele": tele}
 	e_t = t + tell
@@ -493,7 +544,7 @@ func _tick_rain(dt: float) -> void:
 		rain["start"] = float(rain["start"]) - dt
 		if float(rain["start"]) <= 0.0:
 			# the strip stays marked while it rains
-			rain["tele2"] = tele_lane(rain["a"], Vector2(rain["b"].x - rain["a"].x, rain["b"].z - rain["a"].z).normalized(), float(ed["length"]) + (1.0 if rank("kin") >= 3 else 0.0), float(ed["width"]), Color(col_of(ed), 0.6), float(rain["t"]))
+			rain["tele2"] = tele_lane(rain["a"], Vector2(rain["b"].x - rain["a"].x, rain["b"].z - rain["a"].z).normalized(), float(ed["length"]) * (1.3 if rank("kin") >= 3 else 1.0), float(ed["width"]), Color(col_of(ed), 0.6), float(rain["t"]))
 		return
 	var a: Vector3 = rain["a"]; var b: Vector3 = rain["b"]; var d: Vector2 = rain["d"]
 	# the rain: arrows falling all along the strip, and a steady patter
@@ -517,62 +568,8 @@ func _tick_rain(dt: float) -> void:
 		"effects": [{"type": "damage", "amount": float(ed["dmg"])}, {"type": "slow", "duration": 0.8, "strength": float(ed["slow"])}]})
 	for f in m.foes_of(h.team):
 		if f.hittable() and _in_rain(f):
-			KinExec.apply_foe(stg.effects, f, cx("e", "arrow_rain", f.pos, {"at": f.pos}), f.pos, stg)
+			KinExec.apply_foe(stg.effects, f, cx("e", "hail_wall", f.pos, {"at": f.pos}), f.pos, stg)
 			if "blight_t" in f: f.set("blight_t", maxf(float(f.get("blight_t")), float(ed["blight"])))
-
-# ------------------------------------------------------------------ R: Great Arrows
-## Three empowered arrows: for 6s your next three shots need no draw, fly far, pierce everything,
-## knock back and hit hard, the third hardest (a payoff hit; into a wall it stuns).
-func cast_r() -> bool:
-	var rd := r_def()
-	great = {"left": int(rd["shots"]), "t": float(rd["window"]) * r_dur_k(), "n": 0}
-	r_t = float(great["t"])
-	m.fx.word(h.pos + Vector3(0, 2.6, 0), "GREAT ARROWS", col_of(rd), true)
-	for i in 3:
-		m.fx.ring(h.pos, 0.8 + 0.4 * i, Color(col_of(rd), 0.9), 0.3 + 0.1 * i)
-	m.sfx("ab_ready", h.pos, -2.0, 0.8)
-	return true
-
-func lmb_override(held: bool, _dt: float) -> bool:
-	if great.is_empty() or int(great["left"]) <= 0:
-		return false
-	if held and h.can_fire() and h.fire_cd <= 0.0 and h.ammo > 0:
-		_great_arrow()
-		h.draw_t = -1.0
-		return true
-	return held
-
-func _great_arrow() -> void:
-	var rd := r_def()
-	var i := int(great["n"])
-	great["n"] = i + 1
-	great["left"] = int(great["left"]) - 1
-	var last := int(great["left"]) <= 0
-	var dmgs: Array = rd["dmg"]; var pushes: Array = rd["push"]
-	var dmg := float(dmgs[mini(i, dmgs.size() - 1)]) * r_k()
-	var push := float(pushes[mini(i, pushes.size() - 1)])
-	var d := h.aim_dir()
-	h.fire_cd = float(rd["rate"])
-	var stg := stage("r", {"delivery": {"type": "projectile", "speed": float(rd["speed"]), "range": float(rd["range"]), "size": 0.42 if not last else 0.55},
-		"effects": [{"type": "damage", "amount": dmg}, {"type": "push", "strength": push, "from": "caster"}],
-		"modifiers": [{"type": "pierce", "count": 5}]})
-	var extra := {"hit_extra": {"payoff": true} if last else {"heavy": true}, "on_foe": func(f: Ent, _c: Dictionary):
-		if last:
-			payoff_fx(f.pos, "GREAT ARROW", col_of(rd), "pay_deadeye", d, f)
-			if _wall_behind(f, d, 3.0): f.hurt(0.1, h, {"stun": float(rd["wall_stun"]), "src": "abil", "ab": "ult", "tags": ["ult"], "dr": true})
-		else:
-			m.fx.ring(f.pos, 1.4, col_of(rd), 0.25)}
-	run(stg, cx("r", "great_arrow", aim(), extra))
-	# the release: a heavy twang and boom, a big flash, the archer rocked back
-	m.sfx("sniper", h.pos, -1.0, 0.7 if not last else 0.55)
-	m.sfx("ab_rail", h.pos, -6.0, 1.2 if not last else 0.9)
-	m.fx.flash(h.pos + Vector3(d.x * 0.8, 1.1, d.y * 0.8), col_of(rd).lightened(0.3), 1.0 + (0.6 if last else 0.0), 0.08)
-	m.fx.burst(h.pos + Vector3(d.x * 0.8, 1.1, d.y * 0.8), col_of(rd), 16, 9.0, 0.35, 0.0, 1.2, Vector3(d.x, 0.1, d.y), 25.0)
-	Feel.shake(m, "t3" if last else "t2", h, h.pos)
-	if h.is_local(): Oomph.punch_dir(m, -d, 0.3 if last else 0.18)
-	h.vel.x -= d.x * (3.0 if not last else 6.0); h.vel.z -= d.y * (3.0 if not last else 6.0)
-	net_bolt(h.pos + Vector3(0, 1.1, 0), h.pos + Vector3(d.x, 0, d.y) * float(rd["range"]) + Vector3(0, 1.1, 0), col_of(rd))
-	if last: great = {}
 
 # ------------------------------------------------------------------ bots
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
@@ -583,12 +580,7 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 		h.inp["aim"] = tgt.pos + Vector3(0, 0.9, 0)
 		h.inp["fire"] = true
 		return
-	# Great Arrows: when a rival is in a long, clear line (then the gun loop fires them through)
-	if int(h.slot_lv["ult"]) > 0 and float(cd["r"]) <= 0.0 and dist < float(r_def()["range"]) * 0.75 and los and tgt is Hunter and randf() < 0.4:
-		h.inp["aim"] = tgt.pos; h.inp["ult"] = true; return
-	if not great.is_empty() and los:
-		h.inp["aim"] = tgt.pos + Vector3(0, 0.9, 0); h.inp["fire"] = true; return
-	# Arrow Rain across their path (lead them a little), from mid range
+	# Hail Wall across their path (lead them a little), from mid range
 	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and dist < float(e_def()["reach"]) + 1.0 and dist > 3.0 and randf() < 0.35:
 		h.inp["aim"] = tgt.pos + Vector3(tgt.vel.x, 0, tgt.vel.z) * 0.4; h.inp["sig"] = true; return
 	# snare first: a root pins them (and feeds Focus) for the Deadeye
