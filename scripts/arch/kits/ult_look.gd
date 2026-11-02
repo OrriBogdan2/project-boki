@@ -31,7 +31,8 @@ func _build(kind: String) -> Node3D:
 			_off(Models.part(n, col, glow_mat(Color(1, 1, 1, 0.9), 1.0), Vector3(0, 0.5, 0), Vector3(0.35, 1, 0.35)))
 		"block":
 			_off(Models.part(n, Models.box(1.0, 2.0, 1.0), ice_mat(Color("bfeeff"), 0.55, 0.35), Vector3(0, 1.0, 0)))
-			var cap := _off(Models.part(n, Models.crystal(0.3, 0.6, 4), ice_mat(Color("e8ffff"), 0.8, 0.5), Vector3(0, 2.1, 0)))
+			var cap := _off(Models.part(
+					n, Models.crystal(0.3, 0.6, 4), ice_mat(Color("e8ffff"), 0.8, 0.5), Vector3(0, 2.1, 0)))
 			cap.rotation = Vector3(0, 0.6, 0)
 	root.add_child(n)
 	return n
@@ -63,7 +64,8 @@ func _build_rink(n: Node3D) -> void:
 	for i in FRINGE:
 		var a := TAU * i / FRINGE
 		var tall := 0.35 + 0.3 * absf(sin(float(i) * 2.7))
-		var c := _off(Models.part(fringe, Models.crystal(0.08, tall, 4), ice_mat(Color("bff7ef"), 0.75, 0.3), Vector3.ZERO))
+		var c := _off(Models.part(
+				fringe, Models.crystal(0.08, tall, 4), ice_mat(Color("bff7ef"), 0.75, 0.3), Vector3.ZERO))
 		c.set_meta("a", a)
 		c.rotation = Vector3(0.35 * cos(float(i) * 1.9), a, 0.45 * sin(a))
 
@@ -76,9 +78,11 @@ func _build_bud(n: Node3D) -> void:
 		p.name = "Petal%d" % i
 		p.rotation = Vector3(0, a, 0)
 		n.add_child(p)
-		var blade := _off(Models.part(p, Models.crystal(0.24, 2.5, 5), ice_mat(Color("aee8ff"), 0.55, 0.3), Vector3(0, 1.15, 0.62)))
+		var blade := _off(Models.part(
+				p, Models.crystal(0.24, 2.5, 5), ice_mat(Color("aee8ff"), 0.55, 0.3), Vector3(0, 1.15, 0.62)))
 		blade.rotation = Vector3(-0.42, 0, 0)
-		var tip := _off(Models.part(p, Models.crystal(0.1, 0.7, 4), ice_mat(Color("e8ffff"), 0.8, 0.6), Vector3(0, 0.25, 0.75)))
+		var tip := _off(Models.part(
+				p, Models.crystal(0.1, 0.7, 4), ice_mat(Color("e8ffff"), 0.8, 0.6), Vector3(0, 0.25, 0.75)))
 		tip.rotation = Vector3(0.9, 0, 0)
 	var glow := _off(Models.part(n, Models.capsule(0.5, 1.9), glow_mat(Color("9fe0ff", 0.28)), Vector3(0, 1.0, 0)))
 	glow.name = "Core"

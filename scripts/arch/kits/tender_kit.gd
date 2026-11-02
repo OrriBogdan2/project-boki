@@ -10,7 +10,8 @@ extends ArchKit
 var kind := {}                 # target instance id -> {t: Ent, n: int, left: float}
 var burrs: Array = []          # seeds stuck to foes: {t: Ent, left, total: float, id: int}
 var burr_n := 0
-var hearth := {}               # the light: {pos, mode: self|flying|latched|ground, to, who, left, tick, boost, node, revived}
+# the light: {pos, mode: self|flying|latched|ground, to, who, left, tick, boost, node, revived}
+var hearth := {}
 var emp_until := 0.0           # the ember in flight left an idle gun (long range, double refund)
 var lock_t := 0.0              # can't pick anyone up (after dropping them)
 var pick_blocked := 0.0
@@ -24,7 +25,7 @@ var shot_seen := 0             # the hunter's shot counter at the last ember we 
 var seed_aim := false          # RMB held: the dotted lane and the coiled pose are up (a hold: dropped on merge)
 var aft_t := 0.0               # next dash after-image
 var stats := {"embers": 0, "emp": 0, "swirls": 0, "flares": 0, "calls": 0, "rescues": 0, "broken": 0}   # tests
-var call := {}                 # Hearth Call running: {who: Hunter, left, tick, fx} (a channel: dropped on merge)
+var hearth_call := {}          # Hearth Call running: {who: Hunter, left, tick, fx} (a channel: dropped on merge)
 var ult_look: UltLook          # the tether (pooled, made on first use)
 
 func _setup() -> void:
@@ -124,8 +125,11 @@ func _tick_look(dt: float) -> void:
 			var emp: bool = float(s["life0"]) * (s["vel"] as Vector2).length() > float(h.wpn["range"]) * 1.2
 			lk().skin(s, "ember")
 			var d2 := h.aim_dir()
-			lk().burst("swirl", h.pos + Vector3(d2.x * 0.5, 1.05, d2.y * 0.5), {"r": 0.55 if not emp else 0.8, "dur": 0.12, "dir": d2})
-			stats["embers"] += 1; stats["swirls"] += 1
+			lk().burst(
+					"swirl", h.pos + Vector3(d2.x * 0.5, 1.05, d2.y * 0.5),
+					{"r": 0.55 if not emp else 0.8, "dur": 0.12, "dir": d2})
+			stats["embers"] += 1
+			stats["swirls"] += 1
 			if emp:
 				stats["emp"] += 1
 				play("mm_shot_emp")
@@ -138,13 +142,19 @@ func _tick_look(dt: float) -> void:
 		var n := kindle_on(e["t"])
 		if n > 0:
 			var t: Ent = e["t"]
-			lk().keep("kin%d" % key, "kindle", t.pos, {"r": 0.55 + 0.12 * n, "col": Color("b98aff").lerp(Color("ffb347"), float(n) / 5.0), "a": 0.35 + 0.13 * n, "fill": 0.6, "pattern": 0.0})
+			lk().keep(
+					"kin%d" % key, "kindle", t.pos,
+					{
+						"r": 0.55 + 0.12 * n, "col": Color("b98aff").lerp(Color("ffb347"), float(n) / 5.0),
+						"a": 0.35 + 0.13 * n, "fill": 0.6, "pattern": 0.0})
 	# the dash's after-images in her lantern colour
 	if h.roll_t > 0.0 and h.move_kind == "dash":
 		aft_t -= dt
 		if aft_t <= 0.0:
 			aft_t = 0.035
-			lk().burst("aft", h.position, {"col": Color("ffd27a"), "yaw": h.face, "r": float(h.cdat.get("scale", 1.0)), "dur": 0.25})
+			lk().burst(
+					"aft", h.position,
+					{"col": Color("ffd27a"), "yaw": h.face, "r": float(h.cdat.get("scale", 1.0)), "dur": 0.25})
 	lk().tick(dt)
 	if ult_look != null:
 		ult_look.tick(dt)
@@ -152,7 +162,7 @@ func _tick_look(dt: float) -> void:
 ## A Boki merge sets a carried teammate down (unbroken: no stun), ends the Burrseed aim (no throw),
 ## and keeps the key from picking anyone up meanwhile.
 func _drop_holds() -> void:
-	if not call.is_empty():
+	if not hearth_call.is_empty():
 		_call_end(false)
 	if seed_aim or rmb_down:
 		seed_aim = false
@@ -255,7 +265,8 @@ func on_dash(use_ex: bool) -> bool:
 	last_dash_pass = false
 	var ar := float(dd.get("ally_r", 1.1))
 	for o in CareUtil.mates(m, h, Vector3.INF, 1e9, false):
-		var c := Geometry2D.get_closest_point_to_segment(Vector2(o.pos.x, o.pos.z), Vector2(from.x, from.z), Vector2(to.x, to.z))
+		var c := Geometry2D.get_closest_point_to_segment(
+				Vector2(o.pos.x, o.pos.z), Vector2(from.x, from.z), Vector2(to.x, to.z))
 		if Vector2(o.pos.x, o.pos.z).distance_to(c) < ar + o.r and absf(o.pos.y - from.y) < 2.0:
 			last_dash_pass = true
 			if use_ex:
@@ -298,10 +309,13 @@ func fire_rmb(c: Dictionary) -> void:
 	var dir := h.aim_dir()
 	var start := Vector3(h.pos.x + dir.x * 0.6, h.pos.y + 0.95, h.pos.z + dir.y * 0.6)
 	var life := AimMode.dist(h, float(sd["range"]), AimMode.MAX) / float(sd["speed"])
-	var extra := {"src": "abil", "ab": "utility", "tracer": 0.0, "kb": 0.0, "kx": func(s: Dictionary, at: Vector3, e: Ent, _why: String):
+	var on_hit := func(_s: Dictionary, _at: Vector3, e: Ent, _why: String):
 		if e != null and e.team != h.team and not e.dead:
-			_stick(e)}
-	m.spawn_shot(h, start, dir * float(sd["speed"]), float(sd["dmg"]) * power("sec"), life, float(sd["hit_r"]) * 0.5, col_of(rmb_def()), extra)
+			_stick(e)
+	var extra := {"src": "abil", "ab": "utility", "tracer": 0.0, "kb": 0.0, "kx": on_hit}
+	m.spawn_shot(
+			h, start, dir * float(sd["speed"]), float(sd["dmg"]) * power("sec"), life, float(sd["hit_r"]) * 0.5,
+			col_of(rmb_def()), extra)
 	lk().skin(lk().last_shot(), "burr")
 	# the cast flare round her (about 1.5 bh across)
 	lk().burst("flare", h.pos, {"col": Color("dff0ff"), "rim": Color(1, 1, 1), "r": 1.4, "dur": 0.25})
@@ -330,7 +344,11 @@ func _tick_burrs(dt: float) -> void:
 		b["left"] = float(b["left"]) - dt
 		var k := 1.0 - float(b["left"]) / maxf(0.01, float(b["total"]))
 		# the area rides on the foe (Assumption: it sticks to them), filling toward the root
-		lk().keep(key, "disc", t.pos, {"r": float(sd["burst_r"]), "col": Color("8a5cff"), "rim": Color("d6b8ff"), "fill": 0.9, "sweep": k, "pattern": 3.0, "spin": m.time * 0.8, "a": 0.9})
+		lk().keep(
+				key, "disc", t.pos,
+				{
+					"r": float(sd["burst_r"]), "col": Color("8a5cff"), "rim": Color("d6b8ff"), "fill": 0.9,
+					"sweep": k, "pattern": 3.0, "spin": m.time * 0.8, "a": 0.9})
 		AimKit.circle(h, key, {"at": t.pos, "r": float(sd["burst_r"]), "fill": k, "all": true, "col": Color("b98aff")})
 		if float(b["left"]) <= 0.0:
 			burrs.erase(b)
@@ -344,16 +362,24 @@ func _burst(t: Ent) -> void:
 	var rr := float(sd["burst_r"])
 	var col := col_of(rmb_def())
 	# the flare: the disc snaps out bigger and brighter, then a root beam holds on each foe
-	lk().burst("flare", at, {"col": Color("a070ff"), "rim": Color("f0e0ff"), "r": rr * 1.5, "dur": 0.45, "pattern": 3.0})
+	lk().burst(
+			"flare", at,
+			{"col": Color("a070ff"), "rim": Color("f0e0ff"), "r": rr * 1.5, "dur": 0.45, "pattern": 3.0})
 	m.fx.burst(at + Vector3(0, 0.5, 0), Color("c9a0ff"), 26, 5.0, 0.6, 3.0, 1.2)
 	m.fx.burst(at + Vector3(0, 0.2, 0), col, 14, 3.5, 0.5, 6.0, 1.0)
 	m.sfx("tend_root", at, 0.0, 1.0)
 	Feel.shake(m, "t3", h, at)
 	var root := float(sd["root"]) + (0.3 if rank("sec") >= 3 else 0.0)
 	for f in foes_in(at, rr):
-		f.hurt(float(sd["burst_dmg"]) * power("sec"), h, {"src": "abil", "ab": "utility", "root": root, "dr": true, "kindle": true, "tags": ["utility", "burrseed"]})
+		f.hurt(
+				float(sd["burst_dmg"]) * power("sec"), h,
+				{
+					"src": "abil", "ab": "utility", "root": root, "dr": true, "kindle": true,
+					"tags": ["utility", "burrseed"]})
 		lk().burst("beam_root", f.pos, {"col": Color("b98aff"), "r": 1.0, "dur": root, "ent": f})
-		lk().burst("flare", f.pos, {"col": Color("8a5cff"), "rim": Color("d6b8ff"), "r": 1.0, "dur": root, "pattern": 3.0})
+		lk().burst(
+				"flare", f.pos,
+				{"col": Color("8a5cff"), "rim": Color("d6b8ff"), "r": 1.0, "dur": root, "pattern": 3.0})
 	m.fx.word(at + Vector3(0, 2.2, 0), "ROOTED", col, false)
 	stats["flares"] += 1
 	play_soft("mm_tug")
@@ -361,7 +387,9 @@ func _burst(t: Ent) -> void:
 # ------------------------------------------------------------------ E: Hearthlight
 func cast_e() -> bool:
 	var ed := e_def()
-	hearth = {"pos": h.pos, "mode": "self", "who": null, "left": float(ed["time"]), "tick": 0.0, "boost": 0.0, "revived": false, "tossed": false}
+	hearth = {
+			"pos": h.pos, "mode": "self", "who": null, "left": float(ed["time"]), "tick": 0.0, "boost": 0.0,
+			"revived": false, "tossed": false}
 	e_t = float(ed["time"])
 	play("mm_hearth")
 	# the lantern plus over her hand and green light rising round her
@@ -418,7 +446,8 @@ func _tick_hearth(dt: float) -> void:
 		return
 	var ed := e_def()
 	# a stun on the bearer puts the light out
-	var on_me: bool = String(hearth["mode"]) == "self" or (String(hearth["mode"]) == "latched" and hearth.get("who") == h)
+	var on_me: bool = String(hearth["mode"]) == "self" or (
+			String(hearth["mode"]) == "latched" and hearth.get("who") == h)
 	if on_me and h.stun_t > 0.0:
 		_hearth_end(false, "OUT")
 		return
@@ -441,8 +470,11 @@ func _tick_hearth(dt: float) -> void:
 	var tossed := bool(hearth.get("tossed", false))
 	# on her: a soft pink-white rim, a faint inside; thrown: a bright filled disc with a white rim
 	var gk := float(hearth["left"]) / maxf(0.01, float(ed["time"]))
-	lk().keep("hearth", "hearth", c, {"r": hearth_r(), "col": Color("bfefff") if tossed else Color("ffd8c8"), "rim": Color(1, 1, 1) if tossed else Color("ffe6f0"),
-		"fill": 1.6 if tossed else 0.45, "pattern": 1.0, "a": (1.2 if tossed else 0.85) * (0.6 + 0.4 * gk), "spin": m.time * 0.5, "lamp": not tossed})
+	var look_p := {"r": hearth_r(), "col": Color("ffd8c8"), "rim": Color("ffe6f0"), "fill": 0.45, "pattern": 1.0,
+		"a": 0.85 * (0.6 + 0.4 * gk), "spin": m.time * 0.5, "lamp": not tossed}
+	if tossed:
+		look_p.merge({"col": Color("bfefff"), "rim": Color(1, 1, 1), "fill": 1.6, "a": 1.2 * (0.6 + 0.4 * gk)}, true)
+	lk().keep("hearth", "hearth", c, look_p)
 	hearth["left"] = float(hearth["left"]) - dt
 	e_t = float(hearth["left"])
 	hearth["tick"] = float(hearth["tick"]) + dt
@@ -478,7 +510,9 @@ func _hearth_end(flare: bool, word: String) -> void:
 		var amt := float(ed["burst"]) * heal_k()
 		var col := col_of(ed)
 		CareUtil.payoff(m, h, c, "HEARTH", col, "tend_flare")
-		lk().burst("flare", c, {"col": Color("fff0c0"), "rim": Color(1, 1, 1), "r": rr * 1.15, "dur": 0.4, "pattern": 1.0})
+		lk().burst(
+				"flare", c,
+				{"col": Color("fff0c0"), "rim": Color(1, 1, 1), "r": rr * 1.15, "dur": 0.4, "pattern": 1.0})
 		lk().burst("rays", c, {"col": Color("ffe6a0"), "r": rr * 0.6, "dur": 0.4})
 		play_soft("mm_flare")
 		for o in m.hunters:
@@ -506,7 +540,7 @@ func in_e() -> bool: return not hearth.is_empty()
 func teardown() -> void:
 	super.teardown()
 	hearth = {}
-	call = {}
+	hearth_call = {}
 	burrs.clear()
 	if look != null:
 		look.teardown()
@@ -527,7 +561,7 @@ func ult_aims() -> bool:
 
 
 func ult_running() -> bool:
-	return not call.is_empty()
+	return not hearth_call.is_empty()
 
 
 ## X again while it runs does nothing (the source has no early end); the press is swallowed.
@@ -583,7 +617,7 @@ func cast_ult() -> bool:
 		if anim_id == "mm_call_aim":
 			anim_id = ""
 		return false
-	call = {"who": who, "left": float(x_def()["time"]), "tick": 0.0, "fx": 0.0}
+	hearth_call = {"who": who, "left": float(x_def()["time"]), "tick": 0.0, "fx": 0.0}
 	stats["calls"] += 1
 	play("mm_call")
 	m.sfx("tend_call", h.pos, -1.0, 1.0)
@@ -596,26 +630,26 @@ func cast_ult() -> bool:
 
 
 func _tick_call(dt: float) -> void:
-	if call.is_empty():
+	if hearth_call.is_empty():
 		return
 	var xd := x_def()
-	var who: Hunter = call["who"] if is_instance_valid(call["who"]) else null
+	var who: Hunter = hearth_call["who"] if is_instance_valid(hearth_call["who"]) else null
 	if who == null or who.out or who.extracted:
 		_call_end(false)
 		return
 	if h.downed or h.out or h.stun_t > 0.0 or h.flat_dist(who) > float(xd["range"]) + who.r:
 		_call_end(false)
 		return
-	call["left"] = float(call["left"]) - dt
-	call["tick"] = float(call["tick"]) + dt
+	hearth_call["left"] = float(hearth_call["left"]) - dt
+	hearth_call["tick"] = float(hearth_call["tick"]) + dt
 	var every := float(xd["every"])
-	if float(call["tick"]) >= every:
-		call["tick"] = float(call["tick"]) - every
+	if float(hearth_call["tick"]) >= every:
+		hearth_call["tick"] = float(hearth_call["tick"]) - every
 		_call_heal(who, float(xd["heal_ps"]) * every)
 	_call_look(who, dt)
 	if anim_id == "" or (anim_id != "mm_call_hold" and m.time - anim_at >= KMovesCare.length(anim_id)):
 		play("mm_call_hold")
-	if float(call["left"]) <= 0.0:
+	if float(hearth_call["left"]) <= 0.0:
 		_call_end(true)
 
 
@@ -638,9 +672,9 @@ func _call_look(who: Hunter, dt: float) -> void:
 		AimKit.circle(h, "x_pick", {"at": who.pos, "r": 0.7, "col": Color(1, 1, 1), "all": true})
 		var hand := h.pos + Vector3(0, 1.75, 0)
 		ulk().keep("tether", "tether", hand, {"b": who.pos + Vector3(0, 1.1, 0)})
-	call["fx"] = float(call["fx"]) - dt
-	if float(call["fx"]) <= 0.0:
-		call["fx"] = 0.22
+	hearth_call["fx"] = float(hearth_call["fx"]) - dt
+	if float(hearth_call["fx"]) <= 0.0:
+		hearth_call["fx"] = 0.22
 		var up := who.pos + Vector3(randf_range(-0.4, 0.4), 0.6 + randf() * 0.8, randf_range(-0.4, 0.4))
 		lk().burst("plus", up, {"r": 0.28, "dur": 0.5})
 		m.fx.burst(who.pos + Vector3(0, 0.5, 0), Color("9cf07a"), 4, 1.4, 0.7, -3.0, 0.7, Vector3.UP, 25.0)
@@ -650,8 +684,8 @@ func _call_look(who: Hunter, dt: float) -> void:
 ## The end: on time, a downed teammate is pulled to her side and stood up (a rescue), and the bond pays;
 ## broken early, nothing pays.
 func _call_end(done: bool) -> void:
-	var who: Hunter = call["who"] if is_instance_valid(call.get("who")) else null
-	call = {}
+	var who: Hunter = hearth_call["who"] if is_instance_valid(hearth_call.get("who")) else null
+	hearth_call = {}
 	for id_ in ["x", "x_me", "x_pick", "x_line"]:
 		AimKit.hide(h, id_)
 	if ult_look != null:
@@ -712,7 +746,8 @@ func _bot_idle(dt: float) -> void:
 	var wd := 1e9
 	for f in m.foes_of(h.team):
 		if f is Hunter and h.flat_dist(f) < wd:
-			wd = h.flat_dist(f); worst = f
+			wd = h.flat_dist(f)
+			worst = f
 	if carry_t > 4.0:
 		drop_all(false)
 		lock_t = 8.0          # a bot carries for a few seconds at most, then revives them
@@ -732,7 +767,13 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null or not carrying().is_empty():
 		return
 	# a seed on the nearest rival from mid range
-	if int(h.slot_lv["sec"]) > 0 and rmb_ready() and los and dist < 10.0 and dist > 2.5 and tgt is Hunter and randf() < 0.7:
+	if (int(h.slot_lv["sec"]) > 0
+			and rmb_ready()
+			and los
+			and dist < 10.0
+			and dist > 2.5
+			and tgt is Hunter
+			and randf() < 0.7):
 		h.inp["aim"] = tgt.pos + Vector3(0, 0.9, 0)
 		h.inp["sec"] = true
 	# a hop through a teammate when one is close and we're being pressed
@@ -743,7 +784,7 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 
 ## A bot calls a downed or badly hurt teammate home when it can.
 func _bot_call() -> void:
-	if not call.is_empty() or not HeroUlt.can_cast(h):
+	if not hearth_call.is_empty() or not HeroUlt.can_cast(h):
 		return
 	for o in CareUtil.mates(m, h, h.pos, float(x_def()["range"]) - 1.0):
 		if o.downed or o.hp < o.max_hp * 0.35:

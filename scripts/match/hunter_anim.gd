@@ -1034,7 +1034,8 @@ func update(dt: float, s: Dictionary) -> void:
 ## turns about the hips: forward flip, side flip, spin), sq (squash; negative stretches), legs
 ## [hl kl hr kr] with lw (their weight), fl / fr (a free hand's place from its shoulder) with hw / rw,
 ## blade (the greatsword's yaw, pitch, roll, like SWINGS) with bw, rad (the blade's reach), gp (a
-## gun's extra pitch), wa / wo (a held weapon's extra pitch, yaw, roll and offset). A move with "hold": true stays on its last key until another replaces it.
+## gun's extra pitch), wa / wo (a held weapon's extra pitch, yaw, roll and offset).
+## A move with "hold": true stays on its last key until another replaces it.
 const KMOVES := {
 	# ---------------------------------------------------------------- Juggernaut
 	# the Searing Wave let go: the raised blade carves down and forward, a long low lunge after it
@@ -1370,7 +1371,8 @@ var km_prev_t := 99.0
 
 ## Samples the kit move at time `tt`: each channel eased between the keys around it.
 static func km_sample(id: String, tt: float) -> Dictionary:
-	var mv: Dictionary = KMOVES.get(id, KMovesPair.MOVES.get(id, MergeMoves.MOVES.get(id, KMovesCare.MOVES.get(id, {}))))
+	var kit_mv: Dictionary = MergeMoves.MOVES.get(id, KMovesCare.MOVES.get(id, {}))
+	var mv: Dictionary = KMOVES.get(id, KMovesPair.MOVES.get(id, kit_mv))
 	if mv.is_empty():
 		return {}
 	var keys: Array = mv["keys"]
@@ -1645,7 +1647,9 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 	if not melee:
 		if km.has("wa"):          # a kit move's weapon pivot: extra pitch, yaw, roll about the grip (KMovesCare)
 			var wa: Vector3 = km["wa"]
-			ap += wa.x; ay += wa.y; ar += wa.z
+			ap += wa.x
+			ay += wa.y
+			ar += wa.z
 		if km.has("wo"): gpos += km["wo"] as Vector3
 		gbas = Basis.from_euler(Vector3(ap, ay, ar))
 		ap = lp; ay = ly; ar = 0.0

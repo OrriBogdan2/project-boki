@@ -33,14 +33,16 @@ const TIMES := {
 static func tick(A: Arena, dt: float, w: String) -> void:
 	var parts := w.split("_")
 	if parts.size() < 3: return
-	var arch := String(parts[1]); var what := String(parts[2])
+	var arch := String(parts[1])
+	var what := String(parts[2])
 	var m := A.m
 	var P: Hunter = m.player
 	var t := float(A.get_meta("care_t", 0.0)) + dt
 	A.set_meta("care_t", t)
 	var D: Hunter = A.dummies[0]["h"]
 	if m.cam:
-		var zm: float = {"carry": 0.3, "pose": 0.3}.get(what, 0.3)          # (the carry wants the pair in frame, the portrait the hero close)
+		# (the carry wants the pair in frame, the portrait the hero close)
+		var zm: float = {"carry": 0.3, "pose": 0.3}.get(what, 0.3)
 		m.cam.zoom = zm
 		if what in ["carry", "pose"]: m.cam.zoom_to = zm
 		m.cam.pitch = deg_to_rad(24.0)          # a low three-quarter view so the poses read
@@ -49,8 +51,10 @@ static func tick(A: Arena, dt: float, w: String) -> void:
 		# the last (full) frame looks down the aim from behind and wider, so the telegraph or impact shows
 		var tl: Array = TIMES.get(arch + "_" + what, TIMES.get(what, TIMES["rmb"]))
 		if what != "pose" and t >= float(tl[-1]) + 0.02:
-			m.cam.yaw = 0.0; m.cam.yaw_to = 0.0
-			m.cam.zoom = 0.6; m.cam.zoom_to = 0.6
+			m.cam.yaw = 0.0
+			m.cam.yaw_to = 0.0
+			m.cam.zoom = 0.6
+			m.cam.zoom_to = 0.6
 			m.cam.pitch = deg_to_rad(40.0)
 	if m.hud: m.hud.guide_hidden = true
 	if not A.has_meta("care_lbl"):
@@ -65,11 +69,13 @@ static func tick(A: Arena, dt: float, w: String) -> void:
 		P.teleport(D.pos + Vector3(-1.0, 0, 7.5))
 		A.home = P.pos
 		Al = m.make_hunter("Ally", P.team, "medium", "Ally", "idle", {}, P.pos + Vector3(2.6, 0, 1.2), {"arch": "none"})
-		Al.max_hp = 145.0; Al.hp = 60.0
+		Al.max_hp = 145.0
+		Al.hp = 60.0
 		A.set_meta("care_ally", Al)
 		if what in ["carry", "ult", "ultkey"] and (what == "carry" or arch == "tender"):
 			m.knock(Al, null, {})
-			Al.ctrl = "idle"; Al.down_hp = 80.0
+			Al.ctrl = "idle"
+			Al.down_hp = 80.0
 			Al.teleport(P.pos + Vector3(3.0, 0, 0.0))
 	P.inp["aim"] = D.pos + Vector3(0, 0.9, 0)
 	P.inp["aim_y"] = D.pos.y
@@ -77,21 +83,34 @@ static func tick(A: Arena, dt: float, w: String) -> void:
 	var go := 0.3
 	match what:
 		"rmb":
-			if _at(t, dt, go): K.ch_rmb = float(K.rmb_charges()); P.inp["sec_hold"] = true; K.press_rmb()
+			if _at(t, dt, go):
+				K.ch_rmb = float(K.rmb_charges())
+				P.inp["sec_hold"] = true
+				K.press_rmb()
 			if _at(t, dt, 0.8): P.inp["sec_hold"] = false
 		"e":
-			if _at(t, dt, go): K.cd["e"] = 0.0; K.use_e()
-			if arch == "tender" and _at(t, dt, 1.0): P.inp["aim"] = P.pos + Vector3(-4.0, 0.9, -2.0); K.use_e()
+			if _at(t, dt, go):
+				K.cd["e"] = 0.0
+				K.use_e()
+			if arch == "tender" and _at(t, dt, 1.0):
+				P.inp["aim"] = P.pos + Vector3(-4.0, 0.9, -2.0)
+				K.use_e()
 			if arch == "rimewright" and _at(t, dt, 1.5): K.use_e()
 		"dash":
 			if arch == "tender":
 				P.dashes = P.max_dashes()
 				if t < go:
-					Al.teleport(P.pos + Vector3(2.0, 0, 0)); P.inp["move"] = Vector2(1, 0)
-				if _at(t, dt, go): P.inp["aim"] = P.pos + Vector3(5, 0.9, 0); P.do_dash()
+					Al.teleport(P.pos + Vector3(2.0, 0, 0))
+					P.inp["move"] = Vector2(1, 0)
+				if _at(t, dt, go):
+					P.inp["aim"] = P.pos + Vector3(5, 0.9, 0)
+					P.do_dash()
 			else:
 				P.inp["move"] = Vector2(1, 0)
-				if _at(t, dt, go): P.dashes = P.max_dashes(); P.inp["dash_down"] = true; P.do_dash()
+				if _at(t, dt, go):
+					P.dashes = P.max_dashes()
+					P.inp["dash_down"] = true
+					P.do_dash()
 				if t > 1.0: P.inp["dash_down"] = false
 		"air":
 			P.inp["move"] = Vector2(1, 0)
@@ -102,7 +121,10 @@ static func tick(A: Arena, dt: float, w: String) -> void:
 			P.inp["fire"] = t > 1.28 and t < 1.32
 		"skatefire":
 			P.inp["move"] = Vector2(1, 0)
-			if _at(t, dt, go): P.dashes = P.max_dashes(); P.inp["dash_down"] = true; P.do_dash()
+			if _at(t, dt, go):
+				P.dashes = P.max_dashes()
+				P.inp["dash_down"] = true
+				P.do_dash()
 			P.inp["fire"] = t > 0.55 and t < 1.0
 			if t > 1.0: P.inp["dash_down"] = false
 		"carry":
@@ -115,7 +137,10 @@ static func tick(A: Arena, dt: float, w: String) -> void:
 					D.hp = 1.0
 				P.inp["fire"] = t > 0.5 and t < 1.0
 			else:
-				if _at(t, dt, 0.3): Al.hp = 20.0; K.cd["e"] = 0.0; K.use_e()
+				if _at(t, dt, 0.3):
+					Al.hp = 20.0
+					K.cd["e"] = 0.0
+					K.use_e()
 		"pose":
 			pass
 		"ultaim", "ultkey", "ult":
@@ -171,12 +196,14 @@ static func _at(t: float, dt: float, when: float) -> bool:
 ## Crops around the middle of each frame (the hero is centred by the camera), scaled, side by side.
 static func _strip(frames: Array, path: String) -> void:
 	if frames.is_empty(): return
-	var cw := 360; var ch := 360
+	var cw := 360
+	var ch := 360
 	var out := Image.create(cw * frames.size(), ch, false, Image.FORMAT_RGBA8)
 	for i in frames.size():
 		var img: Image = frames[i]
 		var cx := img.get_width() / 2 - cw / 2
 		var cy := int(img.get_height() * 0.56) - ch / 2
-		var crop := img.get_region(Rect2i(maxi(0, cx), maxi(0, cy), mini(cw, img.get_width()), mini(ch, img.get_height())))
+		var crop := img.get_region(Rect2i(
+				maxi(0, cx), maxi(0, cy), mini(cw, img.get_width()), mini(ch, img.get_height())))
 		out.blit_rect(crop, Rect2i(0, 0, crop.get_width(), crop.get_height()), Vector2i(i * cw, 0))
 	out.save_png(path)

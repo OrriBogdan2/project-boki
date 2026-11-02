@@ -22,7 +22,7 @@ const CAP := 24               # per kind: past this the oldest live one is reuse
 var m: Node
 var h: Hunter
 var root: Node3D
-var free := {}                # kind -> Array[Node3D] (hidden)
+var free_pool := {}              # kind -> Array[Node3D] (hidden)
 var skins: Array = []         # {s: shot, n: Node3D, kind}
 var live: Array = []          # {n, kind, t, dur, at, p}
 var held := {}                # key -> {n, kind, last, p}
@@ -39,22 +39,33 @@ func _init(match_node: Node, hunter: Hunter) -> void:
 func teardown() -> void:
 	if is_instance_valid(root):
 		root.queue_free()
-	skins.clear(); live.clear(); held.clear(); free.clear()
+	skins.clear()
+	live.clear()
+	held.clear()
+	free_pool.clear()
 
 # ------------------------------------------------------------------ materials
 static func ice_mat(c: Color, a := 0.75, glow := 0.0) -> ShaderMaterial:
-	var mt := ShaderMaterial.new(); mt.shader = ICE
-	mt.set_shader_parameter("color", Color(c, a)); mt.set_shader_parameter("edge", c.lightened(0.6)); mt.set_shader_parameter("glow", glow)
+	var mt := ShaderMaterial.new()
+	mt.shader = ICE
+	mt.set_shader_parameter("color", Color(c, a))
+	mt.set_shader_parameter("edge", c.lightened(0.6))
+	mt.set_shader_parameter("glow", glow)
 	return mt
 
 static func glow_mat(c: Color, fade := 1.0) -> ShaderMaterial:
-	var mt := ShaderMaterial.new(); mt.shader = GLOW
-	mt.set_shader_parameter("color", c); mt.set_shader_parameter("fade_end", fade)
+	var mt := ShaderMaterial.new()
+	mt.shader = GLOW
+	mt.set_shader_parameter("color", c)
+	mt.set_shader_parameter("fade_end", fade)
 	return mt
 
 static func disc_mat(c: Color, rim: Color, pattern: float) -> ShaderMaterial:
-	var mt := ShaderMaterial.new(); mt.shader = DISC
-	mt.set_shader_parameter("color", c); mt.set_shader_parameter("rim", rim); mt.set_shader_parameter("pattern", pattern)
+	var mt := ShaderMaterial.new()
+	mt.shader = DISC
+	mt.set_shader_parameter("color", c)
+	mt.set_shader_parameter("rim", rim)
+	mt.set_shader_parameter("pattern", pattern)
 	return mt
 
 static func _off(mi: MeshInstance3D) -> MeshInstance3D:
@@ -63,10 +74,12 @@ static func _off(mi: MeshInstance3D) -> MeshInstance3D:
 
 ## A ribbon behind a moving head: a flat and an upright strip along +Z (the head flies toward -Z).
 static func _tail(n: Node3D, w: float, length: float, c: Color) -> Node3D:
-	var t := Node3D.new(); t.name = "Tail"
+	var t := Node3D.new()
+	t.name = "Tail"
 	n.add_child(t)
 	for up in [false, true]:
-		var pm := PlaneMesh.new(); pm.size = Vector2(w, length)
+		var pm := PlaneMesh.new()
+		pm.size = Vector2(w, length)
 		var mi := _off(Models.part(t, pm, glow_mat(c), Vector3(0, 0, length * 0.5)))
 		if up: mi.rotation = Vector3(0, 0, PI * 0.5)
 	return t
@@ -79,48 +92,67 @@ func _build(kind: String) -> Node3D:
 	match kind:
 		"ember":
 			# Moon-bright ember: a teardrop comet head, a white core and a warm soft tail
-			_off(Models.part(n, Models.sphere(0.11, 10), Models.glow_mat(Color("ffd890", 0.95)), Vector3.ZERO, Vector3(1, 1, 1.7)))
+			_off(Models.part(
+					n, Models.sphere(0.11, 10), Models.glow_mat(Color("ffd890", 0.95)), Vector3.ZERO,
+					Vector3(1, 1, 1.7)))
 			_off(Models.part(n, Models.sphere(0.05, 8), Models.glow_mat(Color(1, 1, 1, 1)), Vector3(0, 0, -0.04)))
 			_off(Models.part(n, Models.sphere(0.22, 10), Models.glow_mat(Color("ffb347", 0.22)), Vector3.ZERO))
 			_tail(n, 0.16, 1.6, Color("ffc46a", 0.75))
 		"burr":
 			# a spiky green burr that tumbles, a fluff halo and a pale seed-down tail
-			var sp := Node3D.new(); sp.name = "Spin"; n.add_child(sp)
+			var sp := Node3D.new()
+			sp.name = "Spin"
+			n.add_child(sp)
 			_off(Models.part(sp, Models.sphere(0.16, 10), Models.toon(Color("9cc04a"), true, 0.8), Vector3.ZERO))
 			for i in 12:
-				var a := TAU * i / 12.0; var b := (0.6 if i % 2 == 0 else -0.6)
+				var a := TAU * i / 12.0
+				var b := (0.6 if i % 2 == 0 else -0.6)
 				var dv := Vector3(cos(a) * cos(b), sin(b), sin(a) * cos(b))
-				var sm := _off(Models.part(sp, Models.cyl(0.0, 0.035, 0.16, 5), Models.toon(Color("e6f2a0"), true, 0.9), dv * 0.18))
+				var sm := _off(Models.part(
+						sp, Models.cyl(0.0, 0.035, 0.16, 5), Models.toon(Color("e6f2a0"), true, 0.9), dv * 0.18))
 				sm.basis = Basis(Quaternion(Vector3.UP, dv.normalized()))
 			_off(Models.part(n, Models.sphere(0.34, 10), Models.glow_mat(Color("c8e07a", 0.2)), Vector3.ZERO))
 			_tail(n, 0.22, 1.4, Color("e8f6b8", 0.55))
 		"shard":
 			# an ice dart: a long four-sided crystal, tip first, with a short frost streak
-			var c := _off(Models.part(n, Models.crystal(0.06, 0.5, 4), ice_mat(Color("bff7ef"), 0.8, 0.25), Vector3.ZERO))
+			var c := _off(Models.part(
+					n, Models.crystal(0.06, 0.5, 4), ice_mat(Color("bff7ef"), 0.8, 0.25), Vector3.ZERO))
 			c.rotation = Vector3(-PI * 0.5, 0, PI * 0.25)
 			_off(Models.part(n, Models.sphere(0.06, 8), Models.glow_mat(Color(1, 1, 1, 0.9)), Vector3(0, 0, -0.2)))
 			_tail(n, 0.09, 0.9, Color("9af0e6", 0.6))
 		"beam":
 			# the skating dart: a thick straight lance of ice with a long bright streak
-			var c2 := _off(Models.part(n, Models.crystal(0.1, 1.0, 5), ice_mat(Color("dffcff"), 0.9, 0.5), Vector3.ZERO))
+			var c2 := _off(Models.part(
+					n, Models.crystal(0.1, 1.0, 5), ice_mat(Color("dffcff"), 0.9, 0.5), Vector3.ZERO))
 			c2.rotation = Vector3(-PI * 0.5, 0, 0)
 			_tail(n, 0.2, 2.6, Color("bff7ff", 0.85))
 		"spear":
 			# the Ice Spear: a long shaft with a four-point star at the head and a long white trail
-			var sh := _off(Models.part(n, Models.crystal(0.05, 1.1, 4), ice_mat(Color("e8ffff"), 0.85, 0.4), Vector3(0, 0, 0.2)))
+			var sh := _off(Models.part(
+					n, Models.crystal(0.05, 1.1, 4), ice_mat(Color("e8ffff"), 0.85, 0.4), Vector3(0, 0, 0.2)))
 			sh.rotation = Vector3(-PI * 0.5, 0, 0)
-			var st := Node3D.new(); st.name = "Spin"; st.position = Vector3(0, 0, -0.35); n.add_child(st)
+			var st := Node3D.new()
+			st.name = "Spin"
+			st.position = Vector3(0, 0, -0.35)
+			n.add_child(st)
 			for i in 4:
 				var a2 := TAU * i / 4.0
-				var pt := _off(Models.part(st, Models.crystal(0.05, 0.36, 4), ice_mat(Color("ffffff"), 0.9, 0.7), Vector3(cos(a2), sin(a2), 0) * 0.16))
+				var pt := _off(Models.part(
+						st, Models.crystal(0.05, 0.36, 4), ice_mat(Color("ffffff"), 0.9, 0.7),
+						Vector3(cos(a2), sin(a2), 0) * 0.16))
 				pt.rotation = Vector3(0, 0, a2 - PI * 0.5)
 			_off(Models.part(n, Models.sphere(0.14, 8), Models.glow_mat(Color(1, 1, 1, 0.8)), Vector3(0, 0, -0.35)))
 			_tail(n, 0.14, 3.2, Color(1, 1, 1, 0.75))
 		"swirl":
 			# the thin white ring that whips round the casting hand for a beat
-			var pm := PlaneMesh.new(); pm.size = Vector2(2, 2)
-			_off(Models.part(n, pm, Models.ring_mat(Color(1, 1, 1, 0.9), 0.08), Vector3.ZERO, Vector3.ONE, Vector3(PI * 0.5, 0, 0)))
-			_off(Models.part(n, pm, Models.ring_mat(Color("ffe6b0", 0.7), 0.05), Vector3.ZERO, Vector3.ONE * 0.7, Vector3(PI * 0.5, 0, 0.6)))
+			var pm := PlaneMesh.new()
+			pm.size = Vector2(2, 2)
+			_off(Models.part(
+					n, pm, Models.ring_mat(Color(1, 1, 1, 0.9), 0.08), Vector3.ZERO, Vector3.ONE,
+					Vector3(PI * 0.5, 0, 0)))
+			_off(Models.part(
+					n, pm, Models.ring_mat(Color("ffe6b0", 0.7), 0.05), Vector3.ZERO, Vector3.ONE * 0.7,
+					Vector3(PI * 0.5, 0, 0.6)))
 		"plus":
 			# the lantern plus: a big soft glowing cross with a halo
 			var gc := Color("9cf07a")
@@ -131,8 +163,10 @@ func _build(kind: String) -> Node3D:
 			# upright light planes (rays rise round her; a column falls over a foe; the root beam holds)
 			var cnt := 6 if kind == "rays" else 2
 			for i in cnt:
-				var pm2 := PlaneMesh.new(); pm2.size = Vector2(0.18 if kind == "rays" else 1.0, 3.0)
-				var mi := _off(Models.part(n, pm2, glow_mat(Color(1, 1, 1, 0.8), 0.0 if kind != "rays" else 1.0), Vector3.ZERO))
+				var pm2 := PlaneMesh.new()
+				pm2.size = Vector2(0.18 if kind == "rays" else 1.0, 3.0)
+				var mi := _off(Models.part(
+						n, pm2, glow_mat(Color(1, 1, 1, 0.8), 0.0 if kind != "rays" else 1.0), Vector3.ZERO))
 				var a3 := TAU * i / cnt
 				if kind == "rays":
 					mi.position = Vector3(cos(a3) * 0.75, 1.5, sin(a3) * 0.75)
@@ -141,46 +175,65 @@ func _build(kind: String) -> Node3D:
 					mi.position = Vector3(0, 1.5, 0)
 					mi.rotation = Vector3(PI * 0.5, a3 * 0.5 + PI * 0.25, 0)
 		"disc", "flare", "zone", "kindle", "hearth":
-			var pm3 := PlaneMesh.new(); pm3.size = Vector2(2, 2)
+			var pm3 := PlaneMesh.new()
+			pm3.size = Vector2(2, 2)
 			_off(Models.part(n, pm3, disc_mat(Color.WHITE, Color.WHITE, 0.0), Vector3(0, 0.06, 0))).name = "Disc"
 			if kind == "hearth":
 				# the lantern light riding over the ring, and a soft glow round it
-				var lamp := _off(Models.part(n, Models.sphere(0.2, 12), Models.glow_mat(Color("fff0c0", 0.95)), Vector3(0, 1.3, 0)))
+				var lamp := _off(Models.part(
+						n, Models.sphere(0.2, 12), Models.glow_mat(Color("fff0c0", 0.95)), Vector3(0, 1.3, 0)))
 				lamp.name = "Lamp"
 				_off(Models.part(lamp, Models.sphere(0.42, 12), Models.glow_mat(Color("ffd27a", 0.25)), Vector3.ZERO))
 			if kind == "zone":
 				# the slow zone's crystal that spins over its middle
-				var cr := Node3D.new(); cr.name = "Spin"; cr.position = Vector3(0, 0.9, 0); n.add_child(cr)
+				var cr := Node3D.new()
+				cr.name = "Spin"
+				cr.position = Vector3(0, 0.9, 0)
+				n.add_child(cr)
 				_off(Models.part(cr, Models.crystal(0.16, 0.7, 4), ice_mat(Color("e8ffff"), 0.85, 0.5), Vector3.ZERO))
 				for i in 3:
 					var a4 := TAU * i / 3.0
-					_off(Models.part(cr, Models.crystal(0.06, 0.3, 4), ice_mat(Color("bff7ef"), 0.8, 0.3), Vector3(cos(a4) * 0.32, -0.2, sin(a4) * 0.32), Vector3.ONE, Vector3(0, 0, 0.5)))
+					_off(Models.part(
+							cr, Models.crystal(0.06, 0.3, 4), ice_mat(Color("bff7ef"), 0.8, 0.3),
+							Vector3(cos(a4) * 0.32, -0.2, sin(a4) * 0.32), Vector3.ONE, Vector3(0, 0, 0.5)))
 		"aft":
 			# a dash after-image in the hero's colour (tinted per call)
-			_off(Models.part(n, Models.capsule(0.3, 1.25), Models.glow_mat(Color(1, 1, 1, 0.5)), Vector3(0, 0.7, 0), Vector3(1, 1, 1.3)))
+			_off(Models.part(
+					n, Models.capsule(0.3, 1.25), Models.glow_mat(Color(1, 1, 1, 0.5)), Vector3(0, 0.7, 0),
+					Vector3(1, 1, 1.3)))
 		"dome":
-			_off(Models.part(n, Models.sphere(1.0, 16), Models.glow_mat(Color("dffcff", 0.5)), Vector3.ZERO, Vector3(1, 0.7, 1)))
-			_off(Models.part(n, Models.sphere(0.94, 16), ice_mat(Color("bff7ef"), 0.25, 0.2), Vector3.ZERO, Vector3(1, 0.7, 1)))
+			_off(Models.part(
+					n, Models.sphere(1.0, 16), Models.glow_mat(Color("dffcff", 0.5)), Vector3.ZERO,
+					Vector3(1, 0.7, 1)))
+			_off(Models.part(
+					n, Models.sphere(0.94, 16), ice_mat(Color("bff7ef"), 0.25, 0.2), Vector3.ZERO,
+					Vector3(1, 0.7, 1)))
 		"spikes":
 			# Shatter: a starburst of ice spikes thrown up round the foe
 			for i in 12:
 				var a5 := TAU * i / 12.0 + (0.12 if i % 2 else 0.0)
 				var ln := 1.0 if i % 2 == 0 else 0.7
-				var sk := _off(Models.part(n, Models.crystal(0.11, 1.0, 4), ice_mat(Color("aef6ec"), 0.85, 0.35), Vector3.ZERO))
+				var sk := _off(Models.part(
+						n, Models.crystal(0.11, 1.0, 4), ice_mat(Color("aef6ec"), 0.85, 0.35), Vector3.ZERO))
 				sk.set_meta("dir", Vector3(cos(a5), 0, sin(a5)))
 				sk.set_meta("ln", ln)
-				sk.basis = Basis(Quaternion(Vector3.UP, Vector3(cos(a5), 0.75, sin(a5)).normalized())).scaled(Vector3(1, ln, 1))
+				sk.basis = Basis(Quaternion(
+						Vector3.UP, Vector3(cos(a5), 0.75, sin(a5)).normalized())).scaled(Vector3(1, ln, 1))
 		"shell":
 			# the frost shell: crystals grown round a body
 			for i in 7:
 				var a6 := TAU * i / 7.0
-				var s2 := _off(Models.part(n, Models.crystal(0.16, 1.1 - 0.12 * (i % 3), 5), ice_mat(Color("bff7ef"), 0.55, 0.2), Vector3(cos(a6) * 0.32, 0.6 + 0.12 * (i % 2), sin(a6) * 0.32)))
+				var s2 := _off(Models.part(
+						n, Models.crystal(0.16, 1.1 - 0.12 * (i % 3), 5), ice_mat(Color("bff7ef"), 0.55, 0.2),
+						Vector3(cos(a6) * 0.32, 0.6 + 0.12 * (i % 2), sin(a6) * 0.32)))
 				s2.basis = Basis(Quaternion(Vector3.UP, Vector3(cos(a6) * 0.35, 1.0, sin(a6) * 0.35).normalized()))
 		"frost":
 			_off(Models.part(n, Models.capsule(0.42, 1.5), Models.glow_mat(Color("9af0e6", 0.3)), Vector3(0, 0.8, 0)))
 		"chip":
 			# one ice chip of the skate trail
-			_off(Models.part(n, Models.crystal(0.07, 0.26, 4), ice_mat(Color("bff7ef"), 0.8, 0.3), Vector3(0, 0.08, 0), Vector3.ONE, Vector3(0.6, 0, 0.4)))
+			_off(Models.part(
+					n, Models.crystal(0.07, 0.26, 4), ice_mat(Color("bff7ef"), 0.8, 0.3), Vector3(0, 0.08, 0),
+					Vector3.ONE, Vector3(0.6, 0, 0.4)))
 		"wall":
 			_build_wall(n)
 	root.add_child(n)
@@ -190,19 +243,22 @@ func _build(kind: String) -> Node3D:
 func _build_wall(n: Node3D) -> void:
 	for i in 9:
 		var hh := 1.6 + 0.7 * absf(sin(float(i) * 2.3)) + (0.4 if i == 4 else 0.0)
-		var p := _off(Models.part(n, Models.crystal(0.34, hh, 5), ice_mat(Color("9fe9e4"), 0.62, 0.15), Vector3(0, hh * 0.5, 0)))
+		var p := _off(Models.part(
+				n, Models.crystal(0.34, hh, 5), ice_mat(Color("9fe9e4"), 0.62, 0.15), Vector3(0, hh * 0.5, 0)))
 		p.name = "P%d" % i
 		p.set_meta("h", hh)
 		p.rotation = Vector3(0.12 * sin(float(i) * 1.7), float(i) * 0.9, 0.16 * cos(float(i) * 1.3))
-	var foot := _off(Models.part(n, Models.box(1.0, 0.35, 0.8), ice_mat(Color("dffcff"), 0.45, 0.1), Vector3(0, 0.17, 0)))
+	var foot := _off(Models.part(
+			n, Models.box(1.0, 0.35, 0.8), ice_mat(Color("dffcff"), 0.45, 0.1), Vector3(0, 0.17, 0)))
 	foot.name = "Foot"
-	var pm := PlaneMesh.new(); pm.size = Vector2(1.0, 1.6)
+	var pm := PlaneMesh.new()
+	pm.size = Vector2(1.0, 1.6)
 	var mist := _off(Models.part(n, pm, disc_mat(Color("bff7ef", 0.5), Color("e8ffff", 0.6), 2.0), Vector3(0, 0.05, 0)))
 	mist.name = "Mist"
 
 # ------------------------------------------------------------------ pool
 func _take(kind: String) -> Node3D:
-	var fl: Array = free.get(kind, [])
+	var fl: Array = free_pool.get(kind, [])
 	while not fl.is_empty():
 		var n: Node3D = fl.pop_back()
 		if is_instance_valid(n):
@@ -223,9 +279,9 @@ func _give(kind: String, n: Node3D) -> void:
 	if not is_instance_valid(n):
 		return
 	n.visible = false
-	var fl: Array = free.get(kind, [])
+	var fl: Array = free_pool.get(kind, [])
 	fl.append(n)
-	free[kind] = fl
+	free_pool[kind] = fl
 
 # ------------------------------------------------------------------ shots
 ## Rides a pooled look on a shot (the shared round shrinks to nothing, its hit radius stays).
@@ -360,10 +416,12 @@ func _style(e: Dictionary, k: float) -> void:
 				if mi == null: continue
 				var dv3: Vector3 = mi.get_meta("dir", Vector3.FORWARD)
 				mi.position = dv3 * r * 0.55 * up + Vector3(0, -sink * 0.7, 0)
-				mi.scale = Vector3(r * 0.6, r * 1.1 * float(mi.get_meta("ln", 1.0)) * _out_back(up), r * 0.6) * (1.0 - sink * 0.5)
+				mi.scale = Vector3(
+						r * 0.6, r * 1.1 * float(mi.get_meta("ln", 1.0)) * _out_back(up), r * 0.6) * (1.0 - sink * 0.5)
 			_tint(n, col, 1.0 - sink * 0.8)
 		"shell":
-			n.scale = Vector3.ONE * lerpf(0.4, 1.0, _out_back(clampf(k * 6.0, 0.0, 1.0))) * (1.0 - 0.3 * smoothstep(0.8, 1.0, k))
+			n.scale = Vector3.ONE * lerpf(
+					0.4, 1.0, _out_back(clampf(k * 6.0, 0.0, 1.0))) * (1.0 - 0.3 * smoothstep(0.8, 1.0, k))
 			_tint(n, col, 1.0 - smoothstep(0.8, 1.0, k))
 		"chip":
 			n.scale = Vector3.ONE * (1.0 - k)
@@ -376,7 +434,8 @@ func _style(e: Dictionary, k: float) -> void:
 			_tint(n, col, fade)
 
 static func _out_back(x: float) -> float:
-	var c1 := 1.70158; var c3 := c1 + 1.0
+	var c1 := 1.70158
+	var c3 := c1 + 1.0
 	return 1.0 + c3 * pow(x - 1.0, 3.0) + c1 * pow(x - 1.0, 2.0)
 
 ## Fades every material under n (shader "color" alpha or "alpha"), keeping each part's own colour
@@ -429,7 +488,9 @@ func keep(key: String, kind: String, at: Vector3, p := {}) -> void:
 			var r := float(p.get("r", 1.0))
 			n.scale = Vector3(r, 1.0, r)
 			var col: Color = p.get("col", Color.WHITE)
-			_disc(n, col, p.get("rim", col.lightened(0.4)), float(p.get("a", 1.0)), float(p.get("pattern", 0.0)), float(p.get("sweep", -1.0)), float(p.get("spin", 0.0)))
+			_disc(
+					n, col, p.get("rim", col.lightened(0.4)), float(p.get("a", 1.0)), float(p.get("pattern", 0.0)),
+					float(p.get("sweep", -1.0)), float(p.get("spin", 0.0)))
 			var dm := n.get_node_or_null("Disc") as MeshInstance3D
 			if dm: (dm.material_override as ShaderMaterial).set_shader_parameter("fill", float(p.get("fill", 1.0)))
 			var lamp := n.get_node_or_null("Lamp") as Node3D
@@ -460,7 +521,8 @@ func _tick_held() -> void:
 
 ## The Rink Wall's pillars spread over the wall's current span, hit flashes whitening them.
 func _place_wall(n: Node3D, p: Dictionary) -> void:
-	var a: Vector2 = p["a"]; var b: Vector2 = p["b"]
+	var a: Vector2 = p["a"]
+	var b: Vector2 = p["b"]
 	var mid := (a + b) * 0.5
 	var ln := maxf(0.4, a.distance_to(b))
 	n.global_position = Vector3(mid.x, float(p.get("y", n.global_position.y)), mid.y)
