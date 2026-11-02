@@ -39,5 +39,5 @@ Rockwave second row and bridge.
 ## Zones
 Rocks and bridges go through `HeroZones`: solid ground within a step of the caster, no blocker tiles, no walls or rocks,
 no bodies inside, line of sight from the caster, never over the abyss. Bridges only replace abyss tiles and restore them.
-Net 0.9.1: `["zone", ...]` events (rock, rockgo, bridge, seed, pop). `--zone-check` covers legality, collision, abyss
+Net 0.10.1: `["zone", ...]` events (rock, rockgo, bridge, seed, pop). `--zone-check` covers legality, collision, abyss
 edges and Net rebuild on a second game.
