@@ -895,45 +895,7 @@ func _draw_clock_bar(sz: Vector2, mm: Rect2) -> void:
 		var st := "SIGHT %d%%" % int(round(m.sight_k * 100.0))
 		_text(Vector2(rr.end.x - 8 - big.get_string_size(st, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x, rr.position.y + 14), st, 10, MUTED, big)
 	if m.rolling:
-		_draw_session_row(Rect2(Vector2(r.position.x, rr.end.y + 4), Vector2(r.size.x, 42)))
-
-## A rolling session (Rolling): the session clock, when you joined, the next drop wave (or the one
-## coming in now), and a bounty on you.
-func _draw_session_row(sr: Rect2) -> void:
-	var ro: Rolling = m.rolling
-	mm_bottom = sr.end.y
-	_rounded(sr, Color(0.04, 0.05, 0.08, 0.78), 6)
-	var amber := Color("ffb64a")
-	var st := m.sess_time()
-	_text(sr.position + Vector2(10, 17), "SESSION %s / %s" % [Rolling.fmt(st), Rolling.fmt(Rolling.SESSION)], 11, INK, big)
-	var jt := "JOINED %s" % Rolling.fmt(ro.t0)
-	_text(Vector2(sr.end.x - 10 - big.get_string_size(jt, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x, sr.position.y + 17), jt, 11, MUTED, big)
-	var line := ""; var col := MUTED
-	var fl: Array = ro.flying_waves()
-	var pulse := 0.65 + 0.35 * sin(m.time * 6.0)
-	if not fl.is_empty():
-		var n := 0
-		for w in fl: n += int(w["n"])
-		line = "WAVE INCOMING  ·  %d SQUAD%s" % [n, "" if n == 1 else "S"]
-		col = Color(amber, pulse)
-	else:
-		var nw: Dictionary = ro.next_wave()
-		if not nw.is_empty():
-			line = "NEXT DROP WAVE  %s" % _fmt(float(nw["t"]) - st)
-			col = amber.lerp(MUTED, 0.45)
-		else:
-			line = "NO MORE DROPS  ·  GET OUT BY 30:00"
-			col = BAD if Rolling.SESSION - st < 120.0 else MUTED
-	_text(sr.position + Vector2(10, 35), line, 11, col, big)
-	if m.player and m.player.has_meta("bounty") and not m.player.out:
-		var bt := "BOUNTY ON YOU"
-		_text(Vector2(sr.end.x - 10 - big.get_string_size(bt, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x, sr.position.y + 35), bt, 11, Color(amber, pulse), big)
-	else:
-		# the lobby's level, where there's room beside the wave line (WAVE INCOMING fills the row)
-		var md := "LOBBY LV %s" % (str(int(ro.median)) if absf(ro.median - round(ro.median)) < 0.01 else "%.1f" % ro.median)
-		var mw := big.get_string_size(md, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x
-		if big.get_string_size(line, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x + mw + 28.0 <= sr.size.x:
-			_text(Vector2(sr.end.x - 10 - mw, sr.position.y + 35), md, 10, Color(MUTED, 0.85), big)
+		SessionRow.draw(self, Rect2(Vector2(r.position.x, rr.end.y + 4), Vector2(r.size.x, 42)))
 
 ## A bounty mark: an amber target with a pulse (on the maps and over a hunter's nameplate).
 func bounty_marker(cv: Control, p: Vector2, k := 1.0) -> void:
@@ -2583,45 +2545,6 @@ var abyss_fx: CanvasLayer = null
 var dash_seen: Array = []      # per segment of the dash strip: was it full last frame (for the flash)
 var dash_flash: Array = []     # per segment: seconds left on its "it's back" flash
 
-## Dash charges as one slim segmented strip tucked under the health bar: a segment per short dash,
-## then a shorter pale-blue one for the long dash. The one recharging fills smoothly left to right;
-## a segment that comes back flashes white for a moment.
-func _dash_strip(r: Rect2, p: Hunter) -> void:
-	var nshort := int(p.max_dashes())
-	var n := nshort + 1
-	var gap := 3.0
-	var long_w := 12.0
-	var seg_w := (r.size.x - long_w - gap * float(n - 1)) / float(maxi(1, nshort))
-	if dash_seen.size() != n:
-		dash_seen.resize(n); dash_seen.fill(true)
-		dash_flash.resize(n); dash_flash.fill(0.0)
-	var dt := get_process_delta_time()
-	var x := r.position.x
-	for i in n:
-		var is_long := i == n - 1
-		var sw := long_w if is_long else seg_w
-		var sr := Rect2(Vector2(x, r.position.y), Vector2(sw, r.size.y))
-		var fill := clampf(1.0 - p.ex_cd / maxf(0.01, Hunter.EX_DASH_CD), 0.0, 1.0) if is_long else clampf(p.dashes - float(i), 0.0, 1.0)
-		var col: Color = Color("bfe6ff") if is_long else STAMINA_COL
-		var full := fill >= 0.999
-		if full and not bool(dash_seen[i]):
-			dash_flash[i] = 0.28
-		dash_seen[i] = full
-		dash_flash[i] = maxf(0.0, float(dash_flash[i]) - dt)
-		c.draw_rect(sr.grow(1.5), Color(0.03, 0.03, 0.05, 0.82))
-		if full:
-			c.draw_rect(sr, col)
-			c.draw_rect(Rect2(sr.position, Vector2(sw, 1.0)), Color(1, 1, 1, 0.35))
-		else:
-			c.draw_rect(sr, Color(col, 0.16))
-			if fill > 0.0:
-				c.draw_rect(Rect2(sr.position, Vector2(sw * fill, r.size.y)), Color(col, 0.6))
-				c.draw_rect(Rect2(Vector2(sr.position.x + sw * fill - 1.0, sr.position.y), Vector2(1.0, r.size.y)), Color(1, 1, 1, 0.7))
-		var fl := float(dash_flash[i]) / 0.28
-		if fl > 0.0:
-			c.draw_rect(sr.grow(1.0 * fl), Color(1, 1, 1, 0.85 * fl))
-		x += sw + gap
-
 ## A point `up` metres above a hunter's feet, following the body's lean toward the camera
 ## (CamRig.char_lean), so bars and names stay just over the head.
 func _head(h: Node3D, up: float) -> Vector3:
@@ -2642,7 +2565,7 @@ func _draw_overhead(p: Hunter) -> void:
 	var frac := clampf(p.hp / p.max_hp, 0.0, 1.0)
 	head_hp = maxf(frac, lerpf(head_hp, frac, 0.06))
 	_vitals(sp, w, p, p_team_col().lerp(Color.WHITE, 0.15) if frac > 0.35 else BAD, head_hp, true)
-	_dash_strip(Rect2(Vector2(sp.x - w * 0.5, sp.y + 14), Vector2(w, 4)), p)
+	DashStrip.draw(self, Rect2(Vector2(sp.x - w * 0.5, sp.y + 14), Vector2(w, 4)), p)
 	_status_row(sp + Vector2(0, 30), p)
 	# high up: a small readout of how far above the ground you are
 	var alt := m.player_altitude() if p == m.player else 0.0
