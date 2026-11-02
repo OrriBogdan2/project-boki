@@ -290,7 +290,7 @@ func _primed_hit(t: Ent) -> void:
 	payoff_fx(t.pos, "VAULT RESET", res_col(), "pay_cashin", dir, t)
 	# the loop: landing it gives Vault straight back
 	h.dashes = h.max_dashes()
-	h._ab_feedback("dash", "ready")
+	DashReset.cue(h)
 
 ## A rival we hit was knocked (or we assisted): a heal.
 func on_knock(t: Hunter, mine: bool) -> void:
@@ -447,7 +447,7 @@ func _stick(f: Ent, at: Vector3) -> void:
 		cd["e"] = float(cd["e"]) * (1.0 - float(ed["refund_foe"] if f else ed["refund_wall"]))
 	if f and rank("dash") >= 3:
 		h.dashes = h.max_dashes()           # Vault rank 3: a knife in a foe resets it
-		h._ab_feedback("dash", "ready")
+		DashReset.cue(h)
 	n.global_position = at + Vector3(0, 2.15 if f else 0.3, 0)
 	m.fx.ring(at, 0.8, col_of(ed), 0.25)
 	m.sfx("ab_plant", at, -6.0, 1.8)

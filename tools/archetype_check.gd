@@ -286,13 +286,13 @@ func _thief() -> void:
 	step(m, 1.4)
 	ok("thief R: 5 knives each, the rim harder + blight", K.jackpot_hits >= 9 and dmg(T) >= 20.0 and dmg(T2) >= 30.0 and T2.blight_t > 0.0 and T.blight_t <= 0.0,
 		"knives %d inner %.0f rim %.0f blight %.1f/%.1f" % [K.jackpot_hits, dmg(T), dmg(T2), T.blight_t, T2.blight_t])
-	# a knock (Resolve) heals you a quarter of your health in all
+	# a knock (Resolve) heals you a fifth of your health in all: 15% from the passive, 5% from the takedown reset
 	P.hp = P.max_hp * 0.5
 	var php := P.hp
 	T.hp = 4.0
 	T.hurt(10.0, P, {"src": "shot"})
 	step(m, 0.1)
-	ok("thief passive: a knock heals (25% in all)", T.downed and K.knocks_seen >= 1 and P.hp >= php + P.max_hp * 0.24, "hp %.0f -> %.0f" % [php, P.hp])
+	ok("thief passive: a knock heals (20% in all)", T.downed and K.knocks_seen >= 1 and P.hp >= php + P.max_hp * 0.19, "hp %.0f -> %.0f" % [php, P.hp])
 	await done(m)
 
 # ------------------------------------------------------------------ Archer
