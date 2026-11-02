@@ -767,7 +767,7 @@ func _choose(m: Match, h: Hunter) -> void:
 			goal = g[0]; gk = String(g[1])
 	if goal == Vector3.INF:
 		for k in m.kins:
-			if k.state == "dazed" and not k.dead and h.flat_dist(k) < 14.0 + (GOAL_KEEP if k.pos.distance_to(cur) < 2.0 else 0.0):
+			if k.state == "dazed" and not k.dead and Capture.room(h) and h.flat_dist(k) < 14.0 + (GOAL_KEEP if k.pos.distance_to(cur) < 2.0 else 0.0):
 				goal = k.pos; gk = "catch"; break
 	if goal == Vector3.INF:
 		var bd := 18.0

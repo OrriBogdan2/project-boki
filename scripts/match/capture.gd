@@ -26,6 +26,16 @@ static func rules() -> Dictionary:
 static func box_cap() -> int:
 	return int(rules()["box_capacity"])
 
+## Is there a place left in the box?
+static func room(h: Hunter) -> bool:
+	return h.caught.size() < box_cap()
+
+## "Box full" for the local player (the capsule stays where it was: a deathbox, the ground).
+static func full_note(m, h: Hunter) -> void:
+	if h.is_local() and m.hud and m.time - float(h.get_meta("cap_full_msg", -9.0)) > 1.5:
+		h.set_meta("cap_full_msg", m.time)
+		m.hud.toast("Box full (%d/%d): release a capsule first" % [h.caught.size(), box_cap()], Color("ffb0a0"))
+
 static func state(h: Hunter) -> Dictionary:
 	return h.get_meta("cap", {})
 
@@ -100,7 +110,8 @@ static func tick(m, dt: float) -> void:
 		_tick_scan(m, h, st, dt)
 
 static func _tick_scan(m, h: Hunter, st: Dictionary, dt: float) -> void:
-	var k: Kin = st["k"]
+	var kv = st.get("k")                     # (untyped first: the Boki may have been freed)
+	var k: Kin = kv if is_instance_valid(kv) else null
 	var why := interrupt_reason(h, k)
 	if why != "":
 		cancel(m, h, why)
@@ -152,18 +163,32 @@ static func cancel(m, h: Hunter, why: String) -> void:
 	if k is Kin and is_instance_valid(k):
 		(k as Kin).scan_by = null
 		_send(m, "scan_stop", h, k, 0.0)
-	if why != "out" and why != "gone" and h.is_local() and m.hud:
-		m.hud.toast("Scan cancelled: hold %s beside it to try again" % Settings.key_cap("interact") if why == "dash" else "Scan interrupted: hold %s to try again" % Settings.key_cap("interact"), Color("ffd89a"))
-	m.sfx("kin_unsure", h.pos, -6.0)
+	if why in ["dash", "cc"]:               # (the player-facing interruptions; a hunter leaving or a Boki gone is quiet)
+		if h.is_local() and m.hud:
+			m.hud.toast("Scan cancelled: hold %s beside it to try again" % Settings.key_cap("interact") if why == "dash" else "Scan interrupted: hold %s to try again" % Settings.key_cap("interact"), Color("ffd89a"))
+		m.sfx("kin_unsure", h.pos, -6.0)
+
+## The match is going away: stop every beam and hum (a loop key outlives the node that started it).
+static func teardown(m) -> void:
+	for h in m.hunters:
+		if not is_instance_valid(h):
+			continue
+		var st := state(h)
+		if not st.is_empty():
+			_stop_fx(m, h, st)
+			h.remove_meta("cap")
 
 static func complete(m, h: Hunter, k: Kin) -> void:
 	var st := state(h)
 	h.remove_meta("cap")
 	_stop_fx(m, h, st)
 	k.scan_by = null
+	if not room(h):
+		# the box filled while it ran (a deathbox looted, a net catch): it lets go, and rivals see it stop, not finish
+		_send(m, "scan_stop", h, k, 0.0)
+		full_note(m, h)
+		return
 	_send(m, "scan_done", h, k, 1.0)
-	if h.caught.size() >= box_cap():
-		return                   # (the box filled while it ran: it lets go)
 	_pop(m, h, k)
 	m._catch(h, k)
 
@@ -186,7 +211,8 @@ static func _send(m, kind: String, h: Hunter, k: Kin, frac: float) -> void:
 ## An event from another game about one of their hunters scanning.
 static func on_net(m, h: Hunter, kind: String, extra: String) -> void:
 	var parts := extra.split("|")
-	var k: Kin = m.ents_by_id.get(parts[0], null)
+	var kv = m.ents_by_id.get(parts[0], null)
+	var k: Kin = kv if is_instance_valid(kv) and kv is Kin else null
 	match kind:
 		"scan_start":
 			if k == null:

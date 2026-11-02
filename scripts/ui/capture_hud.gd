@@ -49,6 +49,11 @@ static func dazed_label(H, k: Kin, sp: Vector2) -> void:
 		if hf > 0.0:
 			H._arc(sp + Vector2(0, -10), 20.0, hf, H.GOLD, 4.0)
 
+## Was this capsule's Release clicked once in the last 3 seconds (the second click confirms)?
+static func armed_for(m, p: Hunter, idx: int) -> bool:
+	var a: Dictionary = p.get_meta("release_arm", {})
+	return not a.is_empty() and idx < p.caught.size() and String(a.get("uid", "x")) == String(p.caught[idx].get("uid", "")) and m.time - float(a.get("t", -9.0)) < 3.0
+
 ## The "In your box" section of the backpack: one row per capsule, with Release.
 static func pack_section(H, v: VBoxContainer, p: Hunter, rebuild: Callable) -> void:
 	v.add_child(UI.label("%s  ·  captured Bokis ride home in capsules" % box_text(p), 12, H.MUTED, UI.caps))
@@ -62,7 +67,13 @@ static func pack_section(H, v: VBoxContainer, p: Hunter, rebuild: Callable) -> v
 		var nm := UI.label("%s  ·  %s" % [rec.get("name", "Boki"), Data.KIN[String(rec["species"])]["name"]], 14, H.INK)
 		nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(nm)
-		row.add_child(UI.button("Release", func():
-			Capture.release(H.m, H.m.player, idx)
-			rebuild.call()))
+		var armed := armed_for(H.m, p, idx)
+		var bt := UI.button("Release %s?" % rec.get("name", "it") if armed else "Release", func():
+			if armed_for(H.m, p, idx):
+				p.remove_meta("release_arm")
+				Capture.release(H.m, H.m.player, idx)
+			else:
+				p.set_meta("release_arm", {"uid": String(p.caught[idx].get("uid", "")), "t": H.m.time})      # first click: ask again
+			rebuild.call())
+		row.add_child(bt)
 		v.add_child(row)

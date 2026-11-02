@@ -3127,6 +3127,7 @@ func _update_vision() -> void:
 
 func _exit_tree() -> void:
 	RenderingServer.global_shader_parameter_set("vis_on", 0.0)
+	Capture.teardown(self)           # scan beams and hums outlive the match otherwise
 	for key in box_hums.keys():
 		Sfx.loop_stop(String(key))
 	box_hums.clear()
@@ -6509,7 +6510,7 @@ func _net_ev(x, from: String) -> void:
 				var rec: Dictionary = x[3]
 				player.caught.append(rec)
 				sfx("scan_pop", player.pos, 0.0)
-				add_feed("%s is in your box (%d/%d). Extract to bring it home." % [Data.KIN.get(String(rec.get("species", "cindle")), Data.KIN["cindle"])["name"], player.caught.size(), Capture.box_cap()])
+				add_feed("%s is in your box (%d/%d). Extract to bring it home." % [Data.KIN.get(String(rec.get("species", "cindle")), Data.KIN["cindle"])["name"], mini(player.caught.size(), Capture.box_cap()), Capture.box_cap()])
 
 func _process_net_revives() -> void:
 	if _rev_out.is_empty():

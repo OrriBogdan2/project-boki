@@ -9,6 +9,9 @@ extends RefCounted
 ##   7. the Field Book: logged on sight with a place; the v3 save migration
 ##   8. the net: rivals see and hear the scan (events, a timeout when nobody confirms)
 ##   9. bots scan the same way
+##  10. mid-scan: a hunter downed, extracted or killed, walking past the cancel range, and the box filling
+##      during the scan all clean up (no beam, no hum, the Boki wakes up on its own timer)
+##  11. looting a deathbox cannot push your box past its capacity
 
 var bad := 0
 var m: Match
@@ -92,7 +95,7 @@ func run(mn: Node) -> void:
 	var only := ""
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--capture-only="): only = a.substr(15)
-	for part in ["gating", "flow", "interrupts", "box", "own_kin", "book", "net", "bots"]:
+	for part in ["gating", "flow", "interrupts", "mid_scan", "box", "loot", "own_kin", "book", "net", "bots", "bots_full"]:
 		if only == "" or only.split(",").has(part):
 			call("_" + part)
 	print("CAPTURE DONE, failures: ", bad)
@@ -308,3 +311,93 @@ func _bots() -> void:
 		if Capture.active(bot): scanned = true
 	ok(scanned, "a bot walks to a knocked-out wild Boki and holds a scan")
 	ok(bot.caught.size() == 1 and k.dead, "...and the capsule ends up in its box (%.1fs)" % t)
+
+# ------------------------------------------------------------------ 10. what happens mid-scan
+func _mid_scan() -> void:
+	for why in ["downed", "extracted", "killed", "range"]:
+		_fresh()
+		var P := m.player
+		var k := wild()
+		begin(P)
+		if not Capture.active(P):
+			ok(false, "%s: the scan did not start" % why)
+			continue
+		var hum := "scanhum" + P.nid
+		run_for(0.5)
+		match why:
+			"downed": P.downed = true
+			"extracted": P.extracted = true
+			"killed": P.out = true
+			"range": k.teleport(P.pos + Vector3(float(Capture.rules()["cancel_range"]) + 3.0, 0, 0))      # (knocked away, or you were: past the range)
+		run_for(0.2)
+		ok(Capture.state(P).is_empty() and k.scan_by == null and not Sfx.loop_on(hum) and k.state == "dazed" and P.caught.is_empty(), "%s mid-scan: the scan is gone, no hum, the Boki is free and still dazed" % why)
+	# the match ending mid-scan stops the hum (loop keys outlive the node)
+	_fresh()
+	var P2 := m.player
+	var k2 := wild()
+	begin(P2)
+	run_for(0.3)
+	var hum2 := "scanhum" + P2.nid
+	var had_hum := Sfx.loop_on(hum2)
+	Capture.teardown(m)
+	ok(Capture.state(P2).is_empty() and not Sfx.loop_on(hum2), "tearing the match down stops the scan hum (it was %s)" % ("on" if had_hum else "never started here"))
+	# the box fills while the scan runs: it lets go, nothing is added past the cap
+	_fresh()
+	var P3 := m.player
+	var k3 := wild()
+	begin(P3)
+	run_for(1.0)
+	for i in Capture.box_cap():
+		P3.caught.append(Save.new_kin("puddlet", "Filler%d" % i, 10 + i))
+	run_for(float(Capture.rules()["scan_s"]) + 0.3)
+	ok(P3.caught.size() == Capture.box_cap() and not k3.dead and k3.state == "dazed" and k3.scan_by == null and Capture.state(P3).is_empty(), "the box filling during the scan: it lets go, the box stays at %d and the Boki is not taken" % P3.caught.size())
+
+# ------------------------------------------------------------------ 11. looting
+func _loot() -> void:
+	_fresh()
+	var P := m.player
+	var cap := Capture.box_cap()
+	var b := {"caught": [Save.new_kin("cindle", "Spare", 5)], "kin": [], "owner": null, "pos": P.pos, "gems": 0, "seeds": {}, "tonics": 0, "kits": 0, "keys": 0,
+		"node": null, "empty": false, "gear": [], "weapon": {}, "pack": []}
+	for i in cap:
+		P.caught.append(Save.new_kin("puddlet", "Filler%d" % i, 10 + i))
+	Life.take_item(m, P, b, {"key": "caught", "i": 0})
+	ok(P.caught.size() == cap and (b["caught"] as Array).size() == 1, "a deathbox capsule you cannot fit stays in the box (yours %d/%d)" % [P.caught.size(), cap])
+	P.caught.pop_back()
+	Life.take_item(m, P, b, {"key": "caught", "i": 0})
+	ok(P.caught.size() == cap and (b["caught"] as Array).is_empty(), "...and with a free place it comes across")
+	# a rival's Boki in a deathbox (the kin list)
+	var rival: Hunter = null
+	for h in m.hunters:
+		if h.team != P.team:
+			rival = h; break
+	var b2 := {"caught": [], "kin": [Save.new_kin("cindle", "Taken", 6)], "owner": rival, "pos": P.pos}
+	Life._kin_from_box(m, P, b2)
+	ok(P.caught.size() == cap and (b2["kin"] as Array).size() == 1, "...the same for a rival's Boki in their box (it stays: %d left)" % (b2["kin"] as Array).size())
+	P.caught.pop_back()
+	Life._kin_from_box(m, P, b2)
+	ok(P.caught.size() == cap and (b2["kin"] as Array).is_empty(), "...and it comes across when there is room")
+
+func _bots_full() -> void:
+	_fresh()
+	var P := m.player
+	var bot: Hunter = null
+	for h in m.hunters:
+		if h.team != P.team:
+			bot = h; break
+	bot.ctrl = "bot"
+	bot.teleport(P.pos + Vector3(-6.0, 0, 2.0))
+	P.teleport(P.pos + Vector3(30.0, 0, 0))
+	for i in Capture.box_cap():
+		bot.caught.append(Save.new_kin("puddlet", "Filler%d" % i, 10 + i))
+	var rec := Save.new_kin("puddlet", "", 31)
+	var at: Vector3 = bot.pos + Vector3(4.0, 0, 0.0)
+	var k := m.spawn_wild(rec, Vector3(at.x, m.world.ground_at(at.x, at.z), at.z), true)
+	var chose := false
+	var scanned := false
+	var t := 0.0
+	while t < 8.0:
+		_tidy(); m.step(Match.DT); t += Match.DT
+		if String(bot.ai.get("goal_kind", "")) == "catch": chose = true
+		if not Capture.state(bot).is_empty(): scanned = true
+	ok(not chose and not scanned and not k.dead, "a bot with a full box does not walk to a knocked-out Boki or scan it")

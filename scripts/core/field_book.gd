@@ -48,7 +48,14 @@ static func migrate(data: Dictionary) -> void:
 	for spk in dx.keys():
 		var e: Dictionary = dx[spk]
 		if not e.has("places"): e["places"] = []
+	var recs: Array = []
 	for rec in data.get("roster", []):
+		recs.append(rec)
+	for key in ["lost_kin", "graves"]:           # a Boki you lost or buried was yours too
+		for e in data.get(key, []):
+			if typeof(e) == TYPE_DICTIONARY and typeof(e.get("rec", null)) == TYPE_DICTIONARY:
+				recs.append(e["rec"])
+	for rec in recs:
 		if typeof(rec) != TYPE_DICTIONARY or not rec.has("species"):
 			continue
 		var spk := String(rec["species"])
