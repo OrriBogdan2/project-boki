@@ -36,89 +36,6 @@
 		},
 		"why": "run-speed bonus by weight class (a light hero keeps the most speed; merge cap +40%)"
 	},
-	"dash": {
-		"burst": 6.0,
-		"radius": 2.2,
-		"slow_k": 0.3,
-		"slow_s": 1.2,
-		"visual": "prism",
-		"why": "a dodge leaves a refracting flash that slows what it touches"
-	},
-	"lmb": {
-		"name": "Crystal Shards",
-		"icon": "skypierce",
-		"cooldown": 0.32,
-		"range": 14.0,
-		"pose": [
-			"mf_shard"
-		],
-		"desc": "Fire two piercing crystal shards. They pass through foes.",
-		"why": "2 shards every 0.32s, 8 dmg each, pierce",
-		"seq": [
-			[
-				{
-					"type": "projectile",
-					"count": 2,
-					"spread": 0.1,
-					"dmg": 8,
-					"speed": 36.0,
-					"range": 15.0,
-					"size": 0.15,
-					"pierce": true,
-					"color": "#9ff3ff",
-					"sfx": "throw",
-					"pitch": 1.7
-				}
-			]
-		]
-	},
-	"rmb": {
-		"kind": "prism",
-		"name": "Prism",
-		"icon": "brightshield",
-		"cooldown": 1.2,
-		"range": 2.1,
-		"desc": "Hold a prism up toward the cursor. Shots that hit it fly back at whoever fired them, hitting harder the longer you held.",
-		"arc": 0.3,
-		"radius": 2.1,
-		"dmg_k": [
-			1.0,
-			1.5
-		],
-		"drain_s": 3.0,
-		"fill_s": 0.8,
-		"slow": 0.6,
-		"why": "~145 degree frontal arc, 2.1m; reflected damage x1.0 rising to x1.5 at full (0.8s); up to 3s; you move at 60% while holding"
-	},
-	"e": {
-		"name": "Crystal Wall",
-		"icon": "wall",
-		"cooldown": 9.0,
-		"range": 7.0,
-		"desc": "Raise a crystal wall at the cursor that reflects shots, and pulse healing to your squad around it.",
-		"why": "4.4m wall for 7s, heals 9 every second to allies within 3.4m",
-		"effects": [
-			{
-				"type": "wall",
-				"at": "aim",
-				"length": 4.4,
-				"hp": 170,
-				"time": 7.0,
-				"reflect": true,
-				"move": true,
-				"color": "#bff6ff"
-			},
-			{
-				"type": "zone",
-				"at": "aim",
-				"radius": 3.4,
-				"time": 7.0,
-				"every": 1.0,
-				"heal": 9,
-				"color": "#9dffd0"
-			}
-		]
-	},
 	"r": {
 		"name": "Shatter",
 		"icon": "burst",
@@ -165,5 +82,71 @@
 				]
 			}
 		]
-	}
+	},
+	"aug": {
+		"lmb": {
+			"name": "Crystal Shards",
+			"icon": "skypierce",
+			"desc": "Every hit sends piercing crystal shards through foes and slows them.",
+			"pierce": true,
+			"slow_s": 1.2,
+			"slow_k": 0.3,
+			"color": "#9ff3ff"
+		},
+		"rmb": {
+			"name": "Prism Burst",
+			"icon": "brightshield",
+			"desc": "Your right click also throws a ring of crystals that slows foes and shields you. Recharges 20% faster.",
+			"cd_k": 0.8,
+			"effects": [
+				{
+					"type": "area",
+					"at": "self",
+					"radius": 3.6,
+					"dmg": 7,
+					"slow": 1.5,
+					"slow_k": 0.35,
+					"color": "#9ff3ff"
+				},
+				{
+					"type": "shield",
+					"target": "owner",
+					"amount": 14,
+					"time": 4.0,
+					"color": "#bff6ff"
+				}
+			]
+		},
+		"e": {
+			"name": "Prism Pulse",
+			"icon": "wall",
+			"desc": "Your E also pulses a shield to your squad. Recharges 20% faster.",
+			"cd_k": 0.8,
+			"effects": [
+				{
+					"type": "shield",
+					"target": "allies",
+					"radius": 5.0,
+					"amount": 22,
+					"time": 4.0,
+					"color": "#9ff3ff"
+				}
+			]
+		},
+		"dash": {
+			"kind": "reflect",
+			"name": "Mirror Step",
+			"icon": "brightshield",
+			"desc": "A short reflect window while you dash: shots that hit it fly back.",
+			"window": 0.5,
+			"arc": 0.3,
+			"radius": 2.1,
+			"dmg_k": 1.2,
+			"color": "#9ff3ff"
+		},
+		"stats": {
+			"damage_reduction": 0.12
+		}
+	},
+	"aug_why": "the augment set of this Boki type, identical for every hero: LMB rider, RMB and E add-on effects, the form dash and a modest passive"
 }

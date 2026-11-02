@@ -1104,7 +1104,6 @@ func do_dash() -> void:
 	if ak:
 		# the archetype's dash shape: it spends its own charge (or the long air dash) itself
 		ak.on_dash(use_ex)
-		MergeForm.on_dash(self)
 		return
 	if use_ex:
 		if ex_cd > 0.0:
@@ -1118,7 +1117,6 @@ func do_dash() -> void:
 	var effs: Array = dodge_def.effects if dodge_def else [{"type": "dash", "speed": DASH_SPEED, "time": DASH_TIME, "invuln": 0.14}]
 	Effects.run(effs, self, {"slot": "dodge", "ability": dodge_def.id if dodge_def else "dash", "level": ability_level("dash")})
 	_dash_rider(use_ex)
-	MergeForm.on_dash(self)
 	CombatBus.ability_used.emit(self, dodge_def.id if dodge_def else "dash", "dodge")
 
 ## The theme of the kin you brought ("venom", "lunar"...). Cosmetic only: it tints, never rules.
@@ -1878,6 +1876,7 @@ func _kin_riders(extra: Dictionary) -> void:
 	var mo := KinMerge.on_shot(self)
 	if not mo.is_empty():
 		lists.append([mo, 1.0])
+	MergeAugment.lmb(self, extra)          # a merge form's rider on this attack (docs/decisions/0004)
 	for pair in lists:
 		var os: Dictionary = pair[0]
 		var kk: float = pair[1]
@@ -2074,7 +2073,6 @@ func sim(dt: float) -> void:
 	bloom = lerpf(bloom, want_bloom, 1.0 - exp(-(10.0 if want_bloom > bloom else 4.0) * dt))
 	if remote:
 		net_follow(dt)
-		MergeHolds.remote_prism(self)
 		return
 	if not downed and not dropping:
 		Bond.passive(self, dt)
@@ -2104,7 +2102,7 @@ func sim(dt: float) -> void:
 			inp[kk] = false
 		inp["move"] = Vector2.ZERO
 	# inputs
-	MergeKit.route(self)             # merged: LMB, RMB and E are the form's (whatever your slot ranks), C is off
+	MergeAugment.route(self)         # merging: nothing fires mid-transformation; merged in a form, C is off
 	for gk in [["dash", "dash", "dash"], ["sec", "sec", "sec"], ["gear1", "gear", "gear0"], ["sig", "kin", "k1"], ["ult", "ult", "r"]]:
 		_gate(gk[0], gk[1], gk[2])
 	KinDowned.commit(self)           # rescuing your Boki: rooted, nothing fires (a dash still cancels it)
@@ -2360,8 +2358,8 @@ func _physics(dt: float) -> void:
 			# so you can cross until the heat runs out
 			if over_void() and glide_fuel > 0.001 and vel.y < 0.0 and pos.y + vel.y * dt < lip_y:
 				vel.y = minf(0.0, (lip_y - pos.y) / dt)
-	elif MergeHolds.hovering(self):
-		vel.y = MergeHolds.hover_vy(self, vel.y, dt)      # a merged form's hover (or its ultimate's climb)
+	elif MergeKit.rising(self):
+		vel.y = MergeKit.rise_vy(self)      # the ultimate's climb (Thunderhead)
 	elif roll_t > 0.0 and not grounded and not dropping:
 		vel.y = 0.0          # a dash in the air holds your height for its length
 	elif not grounded:
@@ -3185,6 +3183,8 @@ func _render_weapon_fx(delta: float) -> void:
 var cast_at := -9.0
 var cast_slot := ""
 func _on_ability_used(caster: Node, _id: String, slot: String) -> void:
+	if caster == self:
+		MergeAugment.on_used(self, slot)          # a merge form's add-ons on RMB, E and Shift
 	if caster == self and slot != "dodge" and slot != "primary" and m:
 		cast_at = m.time
 		cast_slot = "ult" if slot in ["ult", "ultimate"] else slot

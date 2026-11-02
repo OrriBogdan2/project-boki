@@ -295,16 +295,19 @@ static func merge(ms: MergeSpec, giant := false) -> Array:
 		out.append("Merged %s: %s" % ["E" if slot == "active" else "auto ability", ", ".join(bits)])
 	return out
 
-## A merge with a form (content/merge_forms): what you become, its shell, and the four slots (the same for everyone).
+## A merge with a form (content/merge_forms): what you become, its shell, what it adds to your own abilities, its ultimate (the same for everyone).
 static func form_lines(ms: MergeSpec, fd: Dictionary) -> Array:
 	var f := MergeForm.kit_form(ms.id)
 	var out: Array = []
 	out.append("You become %s for %ss. A shell (%s hp by weight class) takes damage first; if it breaks, the merge ends." % [fd["name"], n(ms.duration), "/".join([n(MergeShell.size_for("light", f)), n(MergeShell.size_for("medium", f)), n(MergeShell.size_for("heavy", f))])])
-	out.append("Left click, %s: %s" % [fd["lmb"]["name"], fd["lmb"]["desc"]])
-	out.append("Right click (hold), %s: %s" % [fd["rmb"]["name"], fd["rmb"]["desc"]])
-	out.append("E, %s: %s" % [fd["e"]["name"], fd["e"]["desc"]])
-	out.append("R again, %s: %s It ends the merge. Ready %ss in." % [fd["r"]["name"], fd["r"]["desc"], n(float(MergeForm.data()["ult_lock_s"]))])
-	out.append("Shift dashes with a flourish; Q still works; C is off. Your Boki is part of you until it ends.")
+	var a: Dictionary = fd["aug"]
+	out.append("You keep your own abilities and they get stronger:")
+	out.append("Left click, %s: %s" % [a["lmb"]["name"], a["lmb"]["desc"]])
+	out.append("Right click, %s: %s" % [a["rmb"]["name"], a["rmb"]["desc"]])
+	out.append("E, %s: %s" % [a["e"]["name"], a["e"]["desc"]])
+	out.append("Shift, %s: %s" % [a["dash"]["name"], a["dash"]["desc"]])
+	out.append("R again, %s: %s It ends the merge and drains your Boki for %ss. Ready %ss in." % [fd["r"]["name"], fd["r"]["desc"], n(float(MergeForm.data()["rest_s"])), n(float(MergeForm.data()["ult_lock_s"]))])
+	out.append("C is off while merged. Your Boki is part of you until it ends.")
 	return out
 
 ## The aiming shape shown while E is held (Match._update_indicators): [kind, reach, size(, "front")].

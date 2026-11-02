@@ -2299,8 +2299,6 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 	if mine:
 		fx.number(target.pos + Vector3(0, 1.5 if target is Hunter else 1.0, 0), d, col, crit)
 	# archetype passives feed on what happens (Marks, Chambers, Rage, Focus...)
-	if src == "abil" and credit is Hunter and not (credit as Hunter).merge_st.is_empty():
-		MergeForm.on_ability_hit(credit as Hunter, target, d, o)       # a merged form rides on every class ability
 	if credit is Hunter and (credit as Hunter).ak and target != credit and not credit.remote:
 		(credit as Hunter).ak.note_hit(target)
 		(credit as Hunter).ak.on_deal(target, d, o)
@@ -3533,7 +3531,7 @@ func _shot_end(s: Dictionary, at: Vector3, e: Ent, why := "") -> void:
 		c2["end"] = why
 		c2["dir"] = (s["vel"] as Vector2).normalized()
 		if e: c2["target"] = e
-		if e and fxx.has("fx_hit"):
+		if e and fxx.has("fx_hit") and not _swing_seen(fxx, e):          # (a swing's strikes run a rider once per foe)
 			Effects.run(fxx["fx_hit"], s["by"], c2)
 		if why == "wall" and fxx.has("fx_wall"):
 			Effects.run(fxx["fx_wall"], s["by"], c2)
@@ -3549,6 +3547,9 @@ func _shot_end(s: Dictionary, at: Vector3, e: Ent, why := "") -> void:
 		if e == null: fx.burst(at, s["col"], 5, 2.0, 0.25, 6.0, 0.6)
 		return        # piercing shots already dealt their hits on the way
 	_shot_apply(s, at, e)
+
+func _swing_seen(x: Dictionary, e: Ent) -> bool:
+	return x.has("swing") and swing_hits.has("%s|%s" % [x["swing"], e.nid if e.nid != "" else str(e.get_instance_id())])
 
 ## A piercing or boomerang shot passing through something: its on-hit effects and damage, then on.
 func _shot_hit(s: Dictionary, at: Vector3, e: Ent) -> void:

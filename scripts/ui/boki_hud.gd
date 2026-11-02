@@ -71,7 +71,13 @@ static func r_slot(H, p: Hunter, ur: Rect2, us: float) -> void:
 			chip = String(ri.get("name", "ULT")).to_upper()
 		elif String(ri.get("plan", "")) == "ult" and not bool(ri.get("ulting", false)):
 			chip = "ULT %.1fs" % cd_left
-		_chip(H, ur, chip, col)
+		var wl := MergeAugment.warn_left(p)
+		if wl > 0.0:
+			# the last seconds of the window: the slot flashes and the chip counts down
+			var fl := 0.5 + 0.5 * sin(H.m.time * (10.0 + (3.0 - minf(wl, 3.0)) * 4.0))
+			H._rounded(ur.grow(RING_GROW + 2.0 + fl * 3.0), Color(col, 0.18 * fl), 14, Color(1.0, 0.4, 0.3, 0.5 + 0.5 * fl), 3)
+			chip = "ENDS %.1fs" % wl
+		_chip(H, ur, chip, Color(1.0, 0.5, 0.4) if wl > 0.0 else col)
 		return
 	# the meter: a fill from the bottom and a ring along the outline, in the Boki's colour
 	var bond := clampf(p.ult, 0.0, 1.0)
@@ -88,6 +94,27 @@ static func r_slot(H, p: Hunter, ur: Rect2, us: float) -> void:
 		_ring(H, ur.grow(RING_GROW), 1.0, Color(col, 0.55 + 0.45 * pulse2), 3.0 + pulse2)
 		if cd_left <= 0.0:
 			_chip(H, ur, {"merge": "MERGE", "leap": "MERGE", "surge": "SURGE", "far": "TOO FAR", "rescue": "RESCUE"}.get(plan, "MERGE"), col if plan not in ["far", "rescue"] else DOWN_COL)
+
+## A slot the Merge makes stronger: a ring and a small badge (the Boki's first letter) in the form's colour.
+## slot: "lmb" | "rmb" | "e" | "dash". Nothing outside a live Merge.
+static func aug_mark(H, p: Hunter, r: Rect2, slot: String) -> void:
+	var mk := MergeAugment.mark(p, slot)
+	if mk.is_empty():
+		return
+	var col: Color = mk["col"]
+	var pl := 0.6 + 0.4 * sin(H.m.time * 5.0)
+	H._rounded(r.grow(2.0), Color(col, 0.10), 11, Color(col, 0.55 + 0.35 * pl), 2)
+	var b := Rect2(Vector2(r.position.x + 1, r.end.y - 14), Vector2(14, 14))
+	H._rounded(b, Color(col, 0.95), 5)
+	H._ctext(b.get_center() + Vector2(0, 4), String(mk["badge"]), 10, Color(0.05, 0.05, 0.08), H.big)
+
+## The rest timer on the Boki card after the ultimate drained it.
+static func rest_card(H, k: Kin, pc: Vector2, rr: float) -> void:
+	if not k.resting():
+		return
+	H.c.draw_circle(pc, rr - 4, Color(0, 0, 0, 0.5))
+	H._ctext(pc + Vector2(0, 5), "%d" % int(ceil(k.rest_t)), 14, H.INK, H.big)
+	H._ctext(pc + Vector2(0, rr + 14), "RESTING", 9, Color(H.INK, 0.8), H.big)
 
 ## A progress ring that follows the slot's outline (a rounded square), from the top centre clockwise.
 static func _ring(H, r: Rect2, frac: float, col: Color, width: float) -> void:
@@ -167,6 +194,10 @@ static func cg_slots(H, p: Hunter, x: float, y: float, s: float) -> float:
 	if in_form:
 		H._rounded(gr, Color(0.04, 0.04, 0.06, 0.72), 8)
 		mode = "MERGED"
+	elif k.resting():
+		H._rounded(gr, Color(0.04, 0.04, 0.06, 0.72), 8)
+		H._ctext(gr.get_center() + Vector2(0, 4), str(int(ceil(k.rest_t))), 14, Color(H.INK, 0.8), H.big)
+		mode = "RESTING"
 	H._ctext(Vector2(gr.get_center().x, gr.position.y - 5), mode, 8, DOWN_COL if down else (Color(H.INK, 0.5) if in_form else Color(k.sp["color"], 0.95)), H.big)
 	if KinWheel.is_open(p):
 		wheel(H, p)
