@@ -1,6 +1,6 @@
 # 0003: Merge forms, a kit swap with a transformation and an ultimate
 
-- **Status:** accepted (owner design of Nov 1 2026; supersedes the merge-tier parts of [0001](0001-boki-merge-and-commands.md))
+- **Status:** accepted; the kit swap (LMB/RMB/E, MergeHolds) was replaced by augments on Nov 2 2026, see [0004](0004-merge-augments.md) (owner design of Nov 1 2026; supersedes the merge-tier parts of [0001](0001-boki-merge-and-commands.md))
 - **Date:** 2026-11-01
 - **Area:** combat / networking / UI (the Merge, hunter inputs, Net)
 

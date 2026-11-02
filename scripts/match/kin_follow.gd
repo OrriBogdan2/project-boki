@@ -67,18 +67,40 @@ static func leash(k: Kin) -> float:
 		"chase": return _r("chase_leash")
 	return float(KinCommand.rules()["recall_range"])
 
+# ------------------------------------------------------------------ disengage
+## An explicit Follow (the wheel) or Call back, given in a fight, means "come to my side and stay": the Boki stops
+## picking targets (Kin._sim_active) until a reason ends it. No timer. Out of a fight nothing changes.
+static func disengage(k: Kin) -> void:
+	k.disengaged = in_combat(k, k.pos)
+
+static func is_disengaged(k: Kin) -> bool:
+	return k.disengaged and k.cmd == "follow"
+
+## The reasons (a), (b) of docs/decisions/0002, from Match.on_damage: you hurt a foe (it joins your target), or a foe
+## hit it or you from within disengage_range. (c), Sic or Chase, is in set_cmd / sic / Kin._launch.
+static func on_damage(target: Ent, by: Ent, d: float) -> void:
+	if d <= 0.0 or by == null or target == null or by.team == target.team:
+		return
+	if by is Hunter and (by as Hunter).kin != null:
+		((by as Hunter).kin as Kin).disengaged = false
+	var k: Kin = target as Kin if target is Kin else ((target as Hunter).kin if target is Hunter else null)
+	if k != null and k.disengaged and by.flat_dist(target) <= _r("disengage_range"):
+		k.disengaged = false
+
 # ------------------------------------------------------------------ the order
 ## Give the order. Returns false (and says why) if it cannot be done. `target` is for chase.
 static func set_cmd(k: Kin, cmd: String, target: Ent = null) -> bool:
-	if k.dead or k.state in ["downed", "bench", "away", "fused", "reviving"] or k.owner_h == null:
+	if k.dead or k.state in ["downed", "bench", "away", "fused", "reviving"] or k.owner_h == null or k.rest_t > 0.0:
 		return false
 	var o := k.owner_h
 	match cmd:
 		"follow":
 			k.cmd = "follow"; k.hold_at = Vector3.INF; k.chase_target = null
+			disengage(k)
 			if k.state == "shoulder":
 				hop_off(k)
 		"guard":
+			k.disengaged = false
 			if k.state == "shoulder":
 				hop_off(k)
 			k.cmd = "guard"; k.chase_target = null
@@ -86,11 +108,13 @@ static func set_cmd(k: Kin, cmd: String, target: Ent = null) -> bool:
 		"chase":
 			if target == null or target.dead or not target.hittable():
 				return false
+			k.disengaged = false
 			k.cmd = "chase"; k.chase_target = target; k.hold_at = Vector3.INF
 			k.target = target
 			if k.state == "shoulder":
 				sic(k, target.pos)
 		"return":
+			k.disengaged = false
 			k.cmd = "return"; k.hold_at = Vector3.INF; k.chase_target = null; k.target = null
 			if k.state in ["active", "returning"]:
 				if k.flat_dist(o) <= float(KinCommand.rules()["recall_range"]):
@@ -121,6 +145,7 @@ static func sic(k: Kin, p: Vector3) -> void:
 	var g: float = k.m.world.ground_at(tgt.x, tgt.z)
 	tgt.y = g if g > World.VOID + 1.0 else k.pos.y
 	k.st_throws += 1
+	k.disengaged = false
 	k.fly = {"from": k.pos, "to": tgt, "t": 0.0, "dur": clampf(d2.length() / _r("sic_speed"), 0.18, 0.6), "hit": {}, "sic": true,
 		"charge": k.carry_style() == "mount"}
 	k.state = "flying"
