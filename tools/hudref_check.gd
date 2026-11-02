@@ -1,0 +1,107 @@
+extends RefCounted
+## --hudref-check: the overhead plates and the bottom bar read like the reference HUD (hero-ref/HUD.md).
+##   1. segments follow max health (HudStyle.seg_step: 25 each, doubling past 12)
+##   2. the chip holds after a hit, then drains to the new health; the frame flashes on the hit
+##   3. armour (a strip under health) and shields (past the end of health) are drawn
+##   4. a downed hunter shows the downed plate and a status word replaces a slowed rival's name
+##   5. an ability cooling down shows its countdown on the slot
+## Runs the --hudref-demo=plates scene headless (real frames, the real HUD) and reads what
+## HudPlate.shown / Hud.slot_text say was drawn. Never touches the save.
+
+var bad := 0
+var main: Node
+
+func ok(cond: bool, what: String) -> void:
+	print("HUDREF %s %s" % ["ok  " if cond else "FAIL", what])
+	if not cond: bad += 1
+
+func frames_until(m: Match, t: float) -> void:
+	var guard := 0
+	while m.time < t and guard < 20000:
+		await main.get_tree().process_frame
+		guard += 1
+
+func run(main_node: Node) -> void:
+	main = main_node
+	Save.no_write = true
+	Save.d = Save.fresh()
+	Econ.ensure()
+	# ---------------------------------------------------------------- 1. segments follow max health
+	ok(HudStyle.seg_count(100.0) == 4 and HudStyle.seg_count(145.0) == 6 and HudStyle.seg_count(300.0) == 12, "25 health a segment: 100 -> 4, 145 -> 6, 300 -> 12 (%d %d %d)" % [HudStyle.seg_count(100.0), HudStyle.seg_count(145.0), HudStyle.seg_count(300.0)])
+	ok(HudStyle.seg_count(600.0) == 12 and HudStyle.seg_step(600.0) == 50.0, "a huge pool doubles the segment size instead of crowding (600 -> 12 of 50)")
+	var m := Match.new()
+	main.add_child(m)
+	m.start({"teams": 3, "squad": 3, "tier": 0, "length": 1e9, "seed": 5, "no_drop": true, "hudref_demo": "plates", "arch": "thief", "cls": Arch.weight("thief"), "weapon": Arch.signature("thief")})
+	var hud = m.hud
+	await frames_until(m, 1.0)
+	var P: Hunter = m.player
+	var foes: Array = m.hunters.filter(func(x): return x != P)
+	ok(hud != null and foes.size() >= 5, "a match with the HUD and five rivals in a row (%d)" % foes.size())
+	if foes.size() < 5:
+		return _done()
+	var full: Hunter = foes[0]
+	var sh: Dictionary = hud.plates.shown.get(full.nid, {})
+	ok(int(sh.get("segs", -1)) == HudStyle.seg_count(full.max_hp), "the drawn plate has one segment per 25 health (%s for %d)" % [str(sh.get("segs")), int(full.max_hp)])
+	full.max_hp = 300.0; full.hp = 300.0
+	await main.get_tree().process_frame
+	await main.get_tree().process_frame
+	ok(int((hud.plates.shown.get(full.nid, {}) as Dictionary).get("segs", -1)) == 12, "raise their max health to 300: the plate redraws with 12 segments")
+	# ---------------------------------------------------------------- 2. the chip holds, then drains
+	var hp := HudPlate.new()
+	var dt := 1.0 / 60.0
+	hp.tick(dt); hp.chip_of(full, 1.0, dt)
+	hp.tick(dt); var c0 := hp.chip_of(full, 0.6, dt)
+	ok(absf(c0 - 1.0) < 0.001 and hp.flash_of(full) > 0.5, "a hit: the lost chunk stays as a chip (%.2f) and the frame flashes" % c0)
+	var t := 0.0
+	var held := true
+	while t < HudPlate.CHIP_HOLD - 0.05:
+		hp.tick(dt); var cc := hp.chip_of(full, 0.6, dt); t += dt
+		if cc < 0.999: held = false
+	ok(held, "the chip holds for %.2fs after the hit" % HudPlate.CHIP_HOLD)
+	var drained_at := -1.0
+	while t < 2.0:
+		hp.tick(dt); var cc := hp.chip_of(full, 0.6, dt); t += dt
+		if cc <= 0.6001 and drained_at < 0.0: drained_at = t
+	ok(drained_at > HudPlate.CHIP_HOLD and drained_at < HudPlate.CHIP_HOLD + 0.6, "... then drains to the new health quickly (gone at %.2fs)" % drained_at)
+	hp.tick(dt); hp.chip_of(full, 0.9, dt)
+	ok(absf(hp.chip_of(full, 0.9, dt) - 0.9) < 0.001, "a heal pulls the chip up with it (no chip above health)")
+	# the real plate of the rival hit just before the picture shows its chip
+	await frames_until(m, HudRefDemo.HIT_AT + 0.1)
+	var hit: Hunter = foes[1]
+	var hs: Dictionary = hud.plates.shown.get(hit.nid, {})
+	ok(hit.hp < hit.max_hp and float(hs.get("chip", 0.0)) > hit.hp / hit.max_hp + 0.05, "the rival hit at %.1fs shows a chip on their plate (%.2f over %.2f)" % [HudRefDemo.HIT_AT, float(hs.get("chip", 0.0)), hit.hp / hit.max_hp])
+	await frames_until(m, HudRefDemo.HIT_AT + HudPlate.CHIP_HOLD + 1.0)
+	hs = hud.plates.shown.get(hit.nid, {})
+	ok(absf(float(hs.get("chip", 1.0)) - hit.hp / hit.max_hp) < 0.01, "... and a second later it has drained (%.2f)" % float(hs.get("chip", 1.0)))
+	# ---------------------------------------------------------------- 3. armour and shield
+	var arm: Hunter = foes[2]
+	var as_: Dictionary = hud.plates.shown.get(arm.nid, {})
+	ok(arm.armor > 0.5 and bool(as_.get("armor", false)), "an armoured rival's plate draws the armour strip")
+	ok(arm.shield > 0.0 and bool(as_.get("shield", false)) and HudPlate.shield_frac(arm) > 0.0, "a shielded rival's plate draws the shield past their health (%.2f of the bar)" % HudPlate.shield_frac(arm))
+	arm.armor = 0.0
+	await main.get_tree().process_frame
+	ok(float((hud.plates.st.get(arm.nid, {}) as Dictionary).get("brk", 0.0)) > 0.0, "armour hitting zero cracks the strip")
+	# ---------------------------------------------------------------- 4. downed, and status words
+	var dn: Hunter = foes[4]
+	var ds: Dictionary = hud.plates.shown.get(dn.nid, {})
+	ok(dn.downed and bool(ds.get("downed", false)) and String(ds.get("word", "")).begins_with("DOWN"), "a downed rival shows the downed plate ('%s')" % String(ds.get("word", "")))
+	var sl: Hunter = foes[3]
+	ok(String((hud.plates.shown.get(sl.nid, {}) as Dictionary).get("word", "")) == "SLOWED", "a slowed rival's plate says SLOWED over the bar")
+	m.knock(foes[0], P, {})
+	await main.get_tree().process_frame
+	ok(float((hud.plates.st.get(foes[0].nid, {}) as Dictionary).get("burst", 0.0)) > 0.0, "going down pops the knock burst over them")
+	# ---------------------------------------------------------------- 5. cooldown text
+	P.slot_lv["kin"] = 1
+	P.ak.cd["e"] = 6.4
+	await main.get_tree().process_frame
+	await main.get_tree().process_frame
+	var ei := P.slot_info("k1")
+	var txt := String(hud.slot_text.get("k1", ""))
+	ok(txt != "" and txt == HudSlot.cd_text(float(ei["cd"])), "E cooling down shows its seconds on the slot ('%s' for %.2fs)" % [txt, float(ei["cd"])])
+	ok(HudSlot.cd_text(0.42) == "0.4" and HudSlot.cd_text(3.2) == "4", "whole seconds, tenths under one second")
+	ok(hud.hover_spots.any(func(x): return String(x[1]) == "vitals"), "the bottom-left vitals block is drawn")
+	_done()
+
+func _done() -> void:
+	print("HUDREF CHECK DONE, failures: ", bad)
+	main.get_tree().quit(1 if bad > 0 else 0)

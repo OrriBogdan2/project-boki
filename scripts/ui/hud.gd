@@ -8,6 +8,7 @@ var cursor: Control
 var big: Font = preload("res://fonts/LilitaOne-Regular.ttf")
 var body: Font = preload("res://fonts/Rubik.ttf")
 var hit_t := 0.0
+var plates := HudPlate.new()     # overhead plates' chip, flash, armour-break and knock state
 var hit_crit := false
 var hurt_t := 0.0
 var toasts: Array = []
@@ -23,7 +24,6 @@ func map_region(tiles: Rect2) -> Rect2:
 	var k := Vector2(float(t.get_width()) / m.world.w, float(t.get_height()) / m.world.h)
 	return Rect2(tiles.position * k, tiles.size * k)
 var kit_t0 := 0.0
-var bar_lerp := 1.0
 
 const INK := Color("f3eee2")
 const MUTED := Color("a9b0bf")
@@ -88,6 +88,7 @@ func _process(delta: float) -> void:
 	_tick_wheel()
 	hit_t = maxf(0.0, hit_t - delta)
 	_hud_tick(delta)
+	plates.tick(delta)
 	flash_t = maxf(0.0, flash_t - delta * 4.0)
 	hurt_t = maxf(0.0, hurt_t - delta)
 	for t in toasts.duplicate():
@@ -304,7 +305,7 @@ func _draw_all() -> void:
 	if p:
 		_draw_hurt_dirs(sz)
 		if not p.out and not p.extracted:
-			_draw_vitals(sz, p)
+			HudVitals.draw(self, sz, p)
 			_draw_abilities(sz, p)
 			_draw_weapon(sz, p)
 			GearPanel.draw(self, sz, p)
@@ -1050,13 +1051,13 @@ func _narrow(sz: Vector2) -> bool:
 ## ------------------------------------------------------------------ combat HUD
 ## Bottom centre: armor and health over the ability row. Bottom left: your kin. Bottom right: your
 ## weapon and what you're carrying. Left: your squad. Hits on you show which way they came from.
-const ARMOR_COL := Color("dfe9f7")      # armor: silver-white, segmented, sits above health
+const ARMOR_COL := Color("dfe9f7")      # armor kits and repairs (the armour strip itself: HudStyle / armor_col)
 const STAMINA_COL := Color("ffd66a")    # dash charges: yellow pips under the bars
-const HP_COL := Color("8fe0a0")
 const HP_LOW := Color("ff6a5a")
 var armor_lerp := 1.0
 var ready_was := {}        # slot id -> was it ready last frame, for the "ready" flash
 var ready_flash := {}      # slot id -> time left on its flash
+var slot_text := {}        # slot id -> the countdown it shows now (HudSlot; checks read it)
 var slot_fx := {}          # slot id -> {kind: "cast"|"deny", t}: a pop when a press lands, a red shake when it can't
 
 ## A press on an ability slot: "cast" pops it, "deny" (on cooldown, not ready) shakes it red.
@@ -1082,106 +1083,13 @@ func toast_small(text: String, col: Color) -> void:
 func _rounded(r: Rect2, col: Color, rad := 10, border := Color(0, 0, 0, 0), bw := 0) -> void:
 	c.draw_style_box(_box(col, rad, border, bw, true), r)
 
-## A pie slice covering the part of a slot still on cooldown, sweeping clockwise from the top.
-func _sweep(center: Vector2, radius: float, frac: float, col: Color) -> void:
-	if frac <= 0.001:
-		return
-	var pts := PackedVector2Array([center])
-	var n := 28
-	var a0 := -PI / 2.0 + TAU * (1.0 - frac)
-	for i in n + 1:
-		var a := a0 + TAU * frac * float(i) / n
-		pts.append(center + Vector2(cos(a), sin(a)) * radius)
-	c.draw_colored_polygon(pts, col)
-
-## A segmented bar: ticks every `step` points, a pale trail where damage was just taken.
-## Armor over health, the same everywhere: a thin silver armor bar (empty outline when broken, so
-## you know it comes back), a thick health bar in 25-point chunks with a pale trail for damage just
-## taken, and little shield and cross marks so it's clear which is which.
-func _vitals(sp: Vector2, w: float, h: Hunter, hp_col: Color, trail: float, numbers := false) -> void:
-	if not sp.is_finite() or absf(sp.x) > 20000.0 or absf(sp.y) > 20000.0:
-		return      # (far off screen: a polygon that big can't be triangulated)
-	var x0 := sp.x - w * 0.5
-	if h.max_armor > 0.5:
-		var ar := Rect2(Vector2(x0, sp.y - 9), Vector2(w, 4))
-		_seg_bar(ar, h.armor, h.max_armor, 0.0, h.armor_col(), 100.0)
-		var sc := Vector2(x0 - 9, sp.y - 7)
-		var shp := PackedVector2Array([sc + Vector2(-4, -4), sc + Vector2(4, -4), sc + Vector2(4, 0), sc + Vector2(0, 4.5), sc + Vector2(-4, 0)])
-		c.draw_colored_polygon(shp, Color(0.03, 0.03, 0.05, 0.85))
-		c.draw_polyline(shp + PackedVector2Array([shp[0]]), Color(h.armor_col(), 1.0 if h.armor > 0.5 else 0.35), 1.5)
-	var hr := Rect2(Vector2(x0, sp.y), Vector2(w, 9))
-	_seg_bar(hr, h.hp, h.max_hp, trail, hp_col, 25.0)
-	if h.shield > 0.0:
-		c.draw_rect(Rect2(hr.position, Vector2(w * clampf(h.shield / 120.0, 0.0, 1.0), 9)), Color(0.85, 0.93, 1.0, 0.5))
-	var pc := Vector2(x0 - 9, sp.y + 4.5)
-	c.draw_circle(pc, 5.5, Color(0.03, 0.03, 0.05, 0.85))
-	c.draw_rect(Rect2(pc - Vector2(3.5, 1), Vector2(7, 2)), hp_col)
-	c.draw_rect(Rect2(pc - Vector2(1, 3.5), Vector2(2, 7)), hp_col)
-	if numbers:
-		_text(Vector2(hr.end.x + 5, sp.y + 9), str(int(ceil(h.hp))), 12, Color(1, 1, 1, 0.9), big)
-
-func _seg_bar(r: Rect2, val: float, maxv: float, trail: float, col: Color, step: float, edge := 2.0) -> void:
-	_rounded(r.grow(edge), Color(0.03, 0.03, 0.05, 0.82), 4)
-	var f := clampf(val / maxf(1.0, maxv), 0.0, 1.0)
-	if trail > f:
-		c.draw_rect(Rect2(r.position, Vector2(r.size.x * trail, r.size.y)), Color(1.0, 0.92, 0.82, 0.85))
-	c.draw_rect(Rect2(r.position, Vector2(r.size.x * f, r.size.y)), col)
-	c.draw_rect(Rect2(r.position, Vector2(r.size.x * f, r.size.y * 0.35)), Color(1, 1, 1, 0.18))
-	var ticks := int(maxv / step)
-	for i in range(1, ticks + (0 if fmod(maxv, step) > 0.01 else 0)):
-		var x := r.position.x + r.size.x * (i * step / maxv)
-		if x < r.end.x - 1.0:
-			c.draw_line(Vector2(x, r.position.y), Vector2(x, r.end.y), Color(0.03, 0.03, 0.05, 0.85), 2.0)
-
+## The key label under a slot (HudStyle.key_pill).
 func _keycap(center: Vector2, key: String, col: Color) -> void:
-	var kw := big.get_string_size(key, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x
-	var kr := Rect2(center - Vector2(kw * 0.5 + 6, 9), Vector2(kw + 12, 18))
-	_rounded(kr, Color(0.04, 0.04, 0.06, 0.95), 6, col, 1)
-	c.draw_string(big, Vector2(kr.position.x + 6, kr.position.y + 14), key, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, col)
+	HudStyle.key_pill(c, center, key, col)
 
-## One ability slot: icon, cooldown sweep and seconds, charges, key, and a flash when it's ready.
+## One ability slot (HudSlot draws it; BokiHud's slots come through here too).
 func _ab_slot(id: String, rect: Rect2, icon: String, key: String, col: Color, cd_frac: float, cd_secs: float, ready: bool, charges := -1, max_ch := 0, label := "") -> void:
-	var sfx_d: Dictionary = slot_fx.get(id, {})
-	var deny := 0.0
-	var pop := 0.0
-	if not sfx_d.is_empty():
-		var ft := float(sfx_d["t"])
-		if sfx_d["kind"] == "deny":
-			deny = clampf(1.0 - ft / 0.35, 0.0, 1.0)
-			rect.position.x += sin(ft * 70.0) * 5.0 * deny
-		else:
-			pop = clampf(1.0 - ft / 0.3, 0.0, 1.0)
-			rect = rect.grow(-rect.size.x * 0.08 * sin(pop * PI))
-	var ctr := rect.get_center()
-	hover_spots.append([rect, id])
-	var was: bool = ready_was.get(id, true)
-	if ready and not was:
-		ready_flash[id] = 0.35
-	ready_was[id] = ready
-	_rounded(rect, Color(0.05, 0.06, 0.09, 0.9), 12, col if ready else Color(1, 1, 1, 0.12), 2)
-	if ready:
-		c.draw_rect(Rect2(rect.position + Vector2(3, 3), Vector2(rect.size.x - 6, rect.size.y * 0.42)), Color(col, 0.08))
-	Icons.draw(c, icon, ctr + Vector2(0, -2), rect.size.x * 0.27, col if ready else Color(col.lerp(MUTED, 0.6), 0.55))
-	if cd_frac > 0.0:
-		_sweep(ctr, rect.size.x * 0.66, cd_frac, Color(0.0, 0.0, 0.0, 0.52))
-		if cd_secs > 0.0:
-			_ctext(ctr + Vector2(0, 8), str(int(ceil(cd_secs))) if cd_secs >= 1.0 else "%.1f" % cd_secs, 22, INK, big)
-	if max_ch > 1:
-		for i in max_ch:
-			var pc := Vector2(rect.position.x + rect.size.x * 0.5 + (i - (max_ch - 1) * 0.5) * 10.0, rect.position.y + 8)
-			c.draw_circle(pc, 3.2, Color(0, 0, 0, 0.6))
-			c.draw_circle(pc, 2.4, col if i < charges else Color(1, 1, 1, 0.18))
-	if label != "":
-		_ctext(Vector2(ctr.x, rect.position.y - 6), label, 11, Color(INK, 0.85))
-	if key != "": _keycap(Vector2(ctr.x, rect.end.y), key, col if ready else MUTED)
-	if deny > 0.0:
-		_rounded(rect, Color(0.9, 0.15, 0.1, 0.22 * deny), 12, Color(1.0, 0.35, 0.3, deny), 3)
-	if pop > 0.0:
-		_rounded(rect.grow((1.0 - pop) * 14.0), Color(1, 1, 1, 0.12 * pop), 14, Color(col.lerp(Color.WHITE, 0.5), pop), 3)
-	var fl := float(ready_flash.get(id, 0.0))
-	if fl > 0.0:
-		var k := 1.0 - fl / 0.35
-		_rounded(rect.grow(2.0 + k * 8.0), Color(0, 0, 0, 0), 14, Color(col, 1.0 - k), 3)
+	HudSlot.ab_slot(self, id, rect, icon, key, col, cd_frac, cd_secs, ready, charges, max_ch, label)
 
 var guide_hidden := false
 var abyss_pulse := 0.0
@@ -1217,81 +1125,10 @@ func _hud_tick(delta: float) -> void:
 		t["t"] = float(t["t"]) + delta
 		if float(t["t"]) > 1.4: small_toasts.erase(t)
 
-## Health and armor over the ability row, with your class badge, lives and glider cloth.
-## The bottom-left cluster, laid out like Supervive's: your hunter's portrait with the run level
-## badge (and XP ring) in its corner and your kin perched on the other, armor over segmented health
-## beside it, and the ability row under the bars.
+## The bottom-left cluster (HudVitals draws the portrait and bars; the ability row sits under them).
 const HUD_PORTRAIT := Vector2(112, 132)
 func _hud_origin(sz: Vector2) -> Vector2:
 	return Vector2(18, sz.y - 18 - HUD_PORTRAIT.y)
-
-func _draw_vitals(sz: Vector2, p: Hunter) -> void:
-	var o := _hud_origin(sz)
-	var pr := Rect2(o, HUD_PORTRAIT)
-	var hc: Color = p.accent()
-	# the portrait, framed in your class colour
-	_rounded(pr.grow(4.0), Color(0.03, 0.03, 0.05, 0.92), 14, Color(hc, 0.85), 2)
-	_draw_portrait(pr, p, "down" if p.downed else "", hc)
-	c.draw_rect(Rect2(pr.position + Vector2(0, pr.size.y - 30), Vector2(pr.size.x, 30)), Color(0, 0, 0, 0.35))
-	_text(pr.position + Vector2(40, pr.size.y - 9), String(p.cdat["name"]).to_upper(), 12, Color(hc, 0.95), big)
-	hover_spots.append([pr, "vitals"])
-	# run level (SUPERVIVE-style): a big number in a badge over the portrait's corner, ringed by
-	# progress to the next level with a bright head dot; a level-up pops it and bursts a gold ring
-	_level_badge(pr, p)
-	if p.lives < 50 and p.lives > 1:
-		for i in p.lives:
-			c.draw_circle(pr.position + Vector2(pr.size.x - 10 - i * 11.0, 10), 4.0, Color("ff7a8a"))
-	# bars to the right of the portrait
-	var x0 := pr.end.x + 16.0
-	var w := 318.0
-	var y0 := o.y + 16.0
-	var frac := clampf(p.hp / p.max_hp, 0.0, 1.0)
-	bar_lerp = move_toward(bar_lerp, frac, get_process_delta_time() * (0.35 if bar_lerp > frac else 4.0))
-	var af := clampf(p.armor / maxf(1.0, p.max_armor), 0.0, 1.0)
-	armor_lerp = move_toward(armor_lerp, af, get_process_delta_time() * (0.5 if armor_lerp > af else 4.0))
-	hover_spots.append([Rect2(Vector2(x0, y0 - 18), Vector2(w, 50)), "vitals"])
-	var low := frac < 0.35
-	var hp_txt := str(int(ceil(p.hp)))
-	_text(Vector2(x0, y0 - 2), hp_txt, 20, INK if not low else HP_LOW, big)
-	var hw := big.get_string_size(hp_txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 20).x
-	_text(Vector2(x0 + hw + 4, y0 - 2), "/ %d" % int(p.max_hp), 12, MUTED, big)
-	if p.armor > 0.5:
-		var at := "%d" % int(ceil(p.armor))
-		var aw := big.get_string_size(at, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x
-		_text(Vector2(x0 + w - aw, y0 - 2), at, 13, p.armor_col(), big)
-		_text(Vector2(x0 + w - aw - 8 - big.get_string_size(String(Hunter.ARMOR_TIERS[p.armor_tier][0]).to_upper(), HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x, y0 - 3), String(Hunter.ARMOR_TIERS[p.armor_tier][0]).to_upper(), 10, Color(p.armor_col(), 0.75), big)
-	# progress to the next armor tier: a hairline above the armor bar in the next tier's colour
-	if p.armor_tier < Hunter.ARMOR_TIERS.size() - 1:
-		var nxt: Color = Hunter.ARMOR_TIERS[p.armor_tier + 1][1]
-		c.draw_rect(Rect2(Vector2(x0, y0 + 3), Vector2(w, 2)), Color(0, 0, 0, 0.35))
-		c.draw_rect(Rect2(Vector2(x0, y0 + 3), Vector2(w * p.armor_frac(), 2)), Color(nxt, 0.9))
-	var shv := MergeShell.view(p)
-	if shv.y > 0.0 and not p.merge_st.is_empty():
-		# the merged form's shell: its own bright bar in the form's colour, above the health bar, with the number on the right
-		var fcol: Color = (p.merge_st["form"] as Dictionary)["glow"]
-		BokiHud.shell_bar(self, Rect2(Vector2(x0, y0 + 5), Vector2(w, 9)), shv.x / shv.y, fcol, BokiHud.shell_flash(self, p))
-		_text(Vector2(x0 + w - (70 if p.armor <= 0.5 else 170), y0 - 2), "SHELL %d" % int(ceil(shv.x)), 13, fcol, big)
-	else:
-		var fl := BokiHud.shell_flash(self, p)
-		if fl > 0.0:
-			BokiHud.shell_bar(self, Rect2(Vector2(x0, y0 + 5), Vector2(w, 9)), 0.0, p.get_meta("shell_break_col", Color.WHITE), fl)
-		_seg_bar(Rect2(Vector2(x0, y0 + 7), Vector2(w, 7)), p.armor, p.max_armor, armor_lerp, p.armor_col(), 100.0)
-	var hcol := HP_LOW.lerp(Color.WHITE, 0.25 * (0.5 + 0.5 * sin(m.time * 9.0))) if low else HP_COL
-	_seg_bar(Rect2(Vector2(x0, y0 + 17), Vector2(w, 13)), p.hp, p.max_hp, bar_lerp, hcol, 25.0)
-	if p.shield > 0.0:
-		c.draw_rect(Rect2(Vector2(x0, y0 + 17), Vector2(w * clampf(p.shield / 120.0, 0.0, 1.0), 13)), Color(0.85, 0.93, 1.0, 0.45))
-	if p.ak:
-		_draw_res_bar(x0, y0 + 32, w, p)
-	# hidden in the grass
-	var grass := m.world.in_bush(p.pos.x, p.pos.z)
-	if grass or p.crouch:
-		var hid := p.reveal_t <= 0.0
-		var txt := ("HIDDEN" if hid else "SPOTTED") if grass else ("CROUCHED" if hid else "SPOTTED")
-		var fg: Color = (Color("8fe0a0") if grass else Color("c9d2e0")) if hid else HP_LOW
-		var tw := big.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x
-		var hr := Rect2(Vector2(sz.x * 0.5 - tw * 0.5 - 12, sz.y - 104), Vector2(tw + 24, 20))
-		_rounded(hr, (Color(0.05, 0.12, 0.06, 0.85) if grass else Color(0.08, 0.09, 0.12, 0.85)) if hid else Color(0.25, 0.06, 0.05, 0.85), 10)
-		_text(hr.position + Vector2(12, 15), txt, 13, fg, big)
 
 var lvl_pop := 0.0
 var lvl_seen := -1
@@ -1299,36 +1136,6 @@ var lvl_seen := -1
 func level_up(_lv: int) -> void:
 	lvl_pop = 0.35
 	flash(Color("ffd27a"), 0.16)      # a soft gold wash over the whole screen
-
-func _level_badge(pr: Rect2, p: Hunter) -> void:
-	var gold := Color("ffd27a")
-	if lvl_seen >= 0 and p.lvl > lvl_seen and lvl_pop <= 0.0:
-		lvl_pop = 0.35
-	lvl_seen = p.lvl
-	lvl_pop = maxf(0.0, lvl_pop - get_process_delta_time())
-	var k := 1.0 - lvl_pop / 0.35
-	var sc := 1.0 + 0.35 * sin(k * PI) if lvl_pop > 0.0 else 1.0
-	if lvl_pop > 0.0:
-		_rounded(pr.grow(6.0 + k * 22.0), Color(0, 0, 0, 0), 16, Color(gold, 1.0 - k), 4)
-		_rounded(pr.grow(2.0 + k * 10.0), Color(gold, 0.18 * (1.0 - k)), 14)
-	var bc := pr.position + Vector2(6, pr.size.y - 6)
-	var r := 26.0 * sc
-	c.draw_circle(bc, r, Color(0.03, 0.03, 0.05, 0.97))
-	c.draw_arc(bc, r - 3.0, 0, TAU, 48, Color(1, 1, 1, 0.12), 4.0, true)
-	var xf := p.xp_frac()
-	c.draw_arc(bc, r - 3.0, -PI / 2, -PI / 2 + TAU * xf, 48, gold, 4.0, true)
-	if xf > 0.01 and xf < 0.999:
-		var ha := -PI / 2 + TAU * xf
-		c.draw_circle(bc + Vector2(cos(ha), sin(ha)) * (r - 3.0), 3.6, Color(1.0, 0.97, 0.85))
-	_ctext(bc + Vector2(0, 9.0 * sc), str(p.lvl), int(26.0 * sc), INK if lvl_pop <= 0.0 else INK.lerp(gold, 1.0 - k), big)
-	if p.skill_pts > 0:
-		var pulse := 0.5 + 0.5 * sin(m.time * 5.0)
-		var sp := bc + Vector2(22, -22)
-		c.draw_circle(sp, 10.0 + pulse, gold)
-		_ctext(sp + Vector2(0, 5), "+%d" % p.skill_pts if p.skill_pts > 1 else "+", 13, Color(0.1, 0.07, 0.02), big)
-	# the archetype's name under the portrait instead of just the class
-	if p.ak:
-		_text(pr.position + Vector2(36, pr.size.y + 14), Arch.name_of(p.arch).to_upper() + "  ·  " + String(p.cdat["name"]).to_upper(), 10, Color(Arch.color(p.arch), 0.9), big)
 
 ## The archetype resource under the health bar, with its name and tells (ARCHETYPES §3.2).
 func _draw_res_bar(x0: float, y: float, w: float, p: Hunter) -> void:
@@ -1537,53 +1344,9 @@ func r_lock_text(p: Hunter) -> String:
 		return "NEXT POINT"
 	return "LV %d" % int(Hunter.ULT_AT[0])
 
-## One ability in the row, aware of run levels: locked, unlockable, or ranked with pips above.
+## One ability in the row, aware of run levels (HudSlot.skill_slot).
 func _skill_slot(slot: String, id: String, r: Rect2, icon: String, key: String, col: Color, cdf: float, cds: float, ready: bool, ch := -1, mx := 0) -> void:
-	var p := m.player
-	var lv := int(p.slot_lv.get(slot, 1))
-	var can := p.can_level(slot)
-	if lv <= 0:
-		hover_spots.append([r, id])
-		var sfx_d: Dictionary = slot_fx.get(id, {})
-		if not sfx_d.is_empty() and sfx_d["kind"] == "deny":
-			r.position.x += sin(float(sfx_d["t"]) * 70.0) * 5.0 * clampf(1.0 - float(sfx_d["t"]) / 0.35, 0.0, 1.0)
-		var pulse := 0.5 + 0.5 * sin(m.time * 5.0)
-		_rounded(r, Color(0.03, 0.03, 0.05, 0.9), 10, Color("ffd27a") if can else Color(1, 1, 1, 0.1), 2 if can else 1)
-		if can:
-			_rounded(r.grow(2.0 + pulse * 2.0), Color(0, 0, 0, 0), 12, Color(1.0, 0.82, 0.48, 0.25 + 0.4 * pulse), 2)
-		Icons.draw(c, icon, r.get_center() + Vector2(0, -2), r.size.x * 0.25, Color(col.lerp(MUTED, 0.5), 0.45 if can else 0.22))
-		# a small padlock
-		var lc := r.get_center() + Vector2(0, 4)
-		var lcol := Color("ffd27a") if can else Color(MUTED, 0.85)
-		c.draw_arc(lc + Vector2(0, -6), 5.0, PI, TAU, 12, lcol, 2.0, true)
-		_rounded(Rect2(lc + Vector2(-7, -6), Vector2(14, 11)), lcol, 3)
-		if can:
-			_ctext(Vector2(r.get_center().x, r.position.y - 7), "UNLOCK", 10, Color("ffd27a"), big)
-		elif slot == "ult":
-			# R: a tag over the slot saying when it opens, so it never reads as just on cooldown
-			var lt := r_lock_text(p)
-			var tw := big.get_string_size(lt, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x + 12.0
-			var tr := Rect2(Vector2(r.get_center().x - tw * 0.5, r.position.y - 17), Vector2(tw, 14))
-			_rounded(tr, Color(0.03, 0.03, 0.05, 0.95), 5, Color(MUTED, 0.7), 1)
-			_ctext(Vector2(r.get_center().x, tr.end.y - 3), lt, 10, Color(INK, 0.9), big)
-		_keycap(Vector2(r.get_center().x, r.end.y), key, lcol if can else Color(MUTED, 0.6))
-		return
-	_ab_slot(id, r, icon, key, col, cdf, cds, ready, ch, mx)
-	# rank pips above the icon
-	var mxl := int(Hunter.SLOT_MAX.get(slot, 3))
-	var pw := 9.0; var pg := 3.0
-	var px := r.get_center().x - (mxl * pw + (mxl - 1) * pg) * 0.5
-	for i in mxl:
-		c.draw_rect(Rect2(Vector2(px + i * (pw + pg), r.position.y - 7), Vector2(pw, 3)), Color(col, 0.95) if i < lv else Color(1, 1, 1, 0.16))
-	if can:
-		var pulse := 0.5 + 0.5 * sin(m.time * 5.0)
-		# the frame glows gold while a point can go in; hovering shows the Alt+key to spend it
-		_rounded(r.grow(2.0 + pulse * 2.0), Color(0, 0, 0, 0), 13, Color(1.0, 0.82, 0.48, 0.3 + 0.45 * pulse), 2)
-		if hover_id == id:
-			_ctext(Vector2(r.get_center().x, r.position.y - 18), "ALT+" + key, 11, Color("ffd27a"), big)
-		var cp := Vector2(r.end.x - 2, r.position.y + 2)
-		c.draw_circle(cp, 8.0 + pulse, Color("ffd27a"))
-		_ctext(cp + Vector2(0, 4.5), "+", 13, Color(0.1, 0.07, 0.02), big)
+	HudSlot.skill_slot(self, slot, id, r, icon, key, col, cdf, cds, ready, ch, mx)
 
 ## Your kin, perched on the top corner of your portrait: its face, a health ring and its state.
 func _draw_kin_card(sz: Vector2, p: Hunter) -> void:
@@ -1813,10 +1576,10 @@ func _draw_squad(sz: Vector2, p: Hunter) -> void:
 			_text(Vector2(r.end.x - 8 - body.get_string_size(dist_txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x, r.position.y + 18), dist_txt, 11, MUTED, body)
 		match lbl:
 			"ALIVE":
-				if h.max_armor > 0.5:
-					_seg_bar(Rect2(Vector2(tx, r.position.y + 27), Vector2(tw, 4)), h.armor, h.max_armor, 0.0, h.armor_col(), 25.0)
 				var frac := clampf(h.hp / h.max_hp, 0.0, 1.0)
-				_seg_bar(Rect2(Vector2(tx, r.position.y + 34), Vector2(tw, 8)), h.hp, h.max_hp, _chip_of(h, frac), HP_COL if frac > 0.35 else HP_LOW, 25.0)
+				HudStyle.seg_bar(c, Rect2(Vector2(tx, r.position.y + 29), Vector2(tw, 8)), h.hp, h.max_hp, HudStyle.hp_fill(HudStyle.ALLY, frac, m.time), _chip_of(h, frac), HudPlate.shield_frac(h), plates.flash_of(h))
+				if h.max_armor > 0.5:
+					HudStyle.strip(c, Rect2(Vector2(tx, r.position.y + 38), Vector2(tw, 3)), h.armor / h.max_armor, h.armor_col())
 				if _has_status(h):
 					_status_row(Vector2(tx + tw * 0.5, r.position.y + 52), h)
 			"WISP":
@@ -1950,8 +1713,7 @@ func _screen_dir(dv: Vector2) -> float:
 ## Supervive-style nameplate over another hunter: a class badge and the name, armor segments over a
 ## segmented health bar (each tick is a fixed chunk of health), a white chip that drains after a hit,
 ## and a row of status icons. Allies wear their team colour, enemies hostile red. No mana anywhere.
-const HOSTILE := Color("ff5a4a")
-var chip := {}            # nid -> trailing health fraction (the white chip after a hit)
+const HOSTILE := HudStyle.FOE
 
 func _unit_col(h: Hunter) -> Color:
 	if m.player and h.team != m.player.team:
@@ -1962,18 +1724,9 @@ func p_team_col() -> Color:
 	return Data.TEAM_COLORS[m.player.team % Data.TEAM_COLORS.size()] if m.player else GOOD
 
 func _chip_of(e: Ent, frac: float) -> float:
-	var was := float(chip.get(e.nid, frac))
-	var t := maxf(frac, move_toward(was, frac, get_process_delta_time() * 0.6))
-	chip[e.nid] = t
-	return t
+	return plates.chip_of(e, frac, get_process_delta_time())
 
-## Nameplate size and visibility (SUPERVIVE keeps these small: a thin bar, a small badge, the name
-## only for allies or a rival you point at or are close to).
-const NP_W := 54.0              # bar width
-const NP_HP_H := 5.0            # health bar height
-const NP_AR_H := 2.0            # armor strip height
-const NP_BADGE_R := 6.0
-const NP_NAME_FS := 11
+## Who sees a rival's name on their plate (HudPlate draws it).
 const NP_NAME_NEAR := 9.0       # a rival this close shows their name
 const NP_HOVER_PX := 46.0       # ... or the mouse within this of their plate
 
@@ -1988,62 +1741,13 @@ func _np_show_name(sp: Vector2, h: Hunter) -> bool:
 func _nameplate(sp: Vector2, h: Hunter) -> void:
 	if not sp.is_finite():
 		return
-	var col := _unit_col(h)
-	var w := NP_W
-	var x0 := sp.x - w * 0.5
-	# badge (+ the name, when it shows)
-	var cc: Color = Data.CLASSES.get(h.cls, {}).get("color", INK)
-	var bc := Vector2(x0 - NP_BADGE_R - 2.0, sp.y + 1.0)
-	var foe: bool = m.player != null and h.team != m.player.team
-	if foe:
-		# an enemy's run level, with a gold rim once their ultimate is open (level 6+)
-		var ult_open := h.lvl >= int(Hunter.ULT_AT[0])
-		c.draw_circle(bc, NP_BADGE_R + 1.0, Color(0.03, 0.03, 0.05, 0.88))
-		c.draw_arc(bc, NP_BADGE_R + 1.0, 0, TAU, 18, Color("ffd27a") if ult_open else Color(col, 0.9), 1.8 if ult_open else 1.2, true)
-		_ctext(bc + Vector2(0, 3.5), str(h.lvl), 10, Color("ffd27a") if ult_open else INK, big)
-	else:
-		c.draw_circle(bc, NP_BADGE_R, Color(0.03, 0.03, 0.05, 0.85))
-		c.draw_arc(bc, NP_BADGE_R, 0, TAU, 16, Color(col, 0.9), 1.2, true)
-		_ctext(bc + Vector2(0, 3.5), String(h.cls).substr(0, 1).to_upper(), 9, cc, big)
-	if _np_show_name(sp, h):
-		_ctext(Vector2(sp.x, sp.y - 6), h.pname.substr(0, 14), NP_NAME_FS, Color(col.lerp(Color.WHITE, 0.3), 0.9), big)
+	plates.draw(self, sp, h, _np_show_name(sp, h))
 	if m.rolling and h.has_meta("bounty"):
 		# a bounty: a target over the plate and what knocking them is worth
-		bounty_marker(c, Vector2(sp.x, sp.y - 30), 1.15)
-		_ctext(Vector2(sp.x, sp.y - 44), "BOUNTY  ·  LV %d" % h.lvl, 11, Color("ffb64a"), big)
-	if h.downed:
-		var stomped: bool = h.get_meta("stomped", false)
-		var pulse := 0.5 + 0.5 * sin(m.time * 14.0)
-		var bcol := Color("ff3a2a").lerp(Color.WHITE, 0.3 * pulse) if stomped else Color("ffb36a")
-		_seg_bar(Rect2(Vector2(x0, sp.y - 1), Vector2(w, NP_HP_H)), h.down_hp, Data.MATCH["down_hp"], 0.0, bcol, 25.0)
-		var revs: Array = h.get_meta("revivers", [])
-		if stomped:
-			var sts: Array = h.get_meta("stompers", [])
-			_ctext(sp + Vector2(0, 16), "STOMPED  ·  %s" % (sts[0] as Hunter).pname if not sts.is_empty() else "STOMPED", 11, bcol, big)
-		elif h.revive > 0.0 and not revs.is_empty():
-			_ctext(sp + Vector2(0, 16), "%s reviving  %d%%" % [(revs[0] as Hunter).pname, int(h.revive * 100.0)], 11, GOOD, big)
-		else:
-			_ctext(sp + Vector2(0, 16), "DOWN", 11, Color("ffb36a"), big)
-		return
-	if h.max_armor > 0.5:
-		_seg_bar(Rect2(Vector2(x0, sp.y - 2), Vector2(w, NP_AR_H)), h.armor, h.max_armor, 0.0, h.armor_col(), 25.0, 1.5)
-	var frac := clampf(h.hp / h.max_hp, 0.0, 1.0)
-	_seg_bar(Rect2(Vector2(x0, sp.y + 2), Vector2(w, NP_HP_H)), h.hp, h.max_hp, _chip_of(h, frac), col if frac > 0.35 else col.lerp(Color.WHITE, 0.2 + 0.2 * sin(m.time * 9.0)), 25.0, 1.5)
-	if h.shield > 0.0:
-		c.draw_rect(Rect2(Vector2(x0, sp.y + 2), Vector2(w * clampf(h.shield / 120.0, 0.0, 1.0), NP_HP_H)), Color(0.85, 0.93, 1.0, 0.5))
-	# dash pips under the bar within 14m: "they used it, now go" (DASHES §3.3)
-	if m.player and h != m.player and h.flat_dist(m.player) < 14.0:
-		var dm := int(h.max_dashes())
-		for i in dm:
-			var pc := Vector2(x0 + 2.0 + i * 7.0, sp.y + 2.0 + NP_HP_H + 2.0)
-			c.draw_rect(Rect2(pc, Vector2(5, 2)), STAMINA_COL if float(i) < floor(h.dashes) else Color(1, 1, 1, 0.18))
-	# an archetype's resource tell, readable from the other side (glow at half, bright at full)
-	if h.ak and h.ak.tell != "" and h != m.player:
-		var rc: Color = h.ak.res_col()
-		var tk := 0.5 + 0.5 * sin(m.time * (8.0 if h.ak.tell == "full" else 3.0))
-		c.draw_circle(Vector2(x0 + w + 6.0, sp.y + 3), 3.0 + (1.5 * tk if h.ak.tell == "full" else 0.0), Color(rc, 0.5 + 0.4 * tk if h.ak.tell == "full" else 0.45))
-	_draw_marks(Vector2(sp.x, sp.y - 24), h)
-	_status_row(Vector2(sp.x, sp.y + 15), h)
+		bounty_marker(c, Vector2(sp.x, sp.y - 34), 1.15)
+		_ctext(Vector2(sp.x, sp.y - 48), "BOUNTY  ·  LV %d" % h.lvl, 11, Color("ffb64a"), big)
+	if not h.downed:
+		_draw_marks(Vector2(sp.x, sp.y - 28), h)
 
 ## A Thief's Marks over their target's head: pips, and a pulsing purse at 3 (both sides see them).
 func _draw_marks(at: Vector2, e: Ent) -> void:
@@ -2067,20 +1771,13 @@ func _draw_marks(at: Vector2, e: Ent) -> void:
 
 ## Little icons for what's happening to someone: stunned, rooted, slowed, burning, shielded, braced.
 func _status_row(at: Vector2, e: Ent) -> void:
-	var icons: Array = []
-	if e.stun_t > 0.0: icons.append(["concussion", Color("fff27a")])
-	if e.root_t > 0.0: icons.append(["binding", Color("8fe0a0")])
-	if e.slow_t > 0.0: icons.append(["snare", Color("9ae8ff")])
-	if e.burn_t > 0.0: icons.append(["fireball", Color("ff9a5a")])
-	if e is Hunter and (e as Hunter).shield > 0.0: icons.append(["brightshield", Color("d8ecff")])
-	if e.guard_t > 0.0: icons.append(["anchor", Color("f2e6cf")])
-	if e is Hunter and (e as Hunter).weak_t > 0.0: icons.append(["swap", Color("ffb36a"), (e as Hunter).weak_t])
+	var icons: Array = HudPlate.statuses(e)
 	var x := at.x - icons.size() * 8.0 + 8.0
 	for ic in icons:
 		c.draw_circle(Vector2(x, at.y), 7.0, Color(0.03, 0.03, 0.05, 0.85))
 		Icons.draw(c, String(ic[0]), Vector2(x, at.y), 4.2, ic[1])
-		if ic.size() > 2:
-			_ctext(Vector2(x, at.y + 17), "%.1f" % float(ic[2]), 10, ic[1], big)
+		if float(ic[3]) > 0.0:
+			_ctext(Vector2(x, at.y + 17), "%.1f" % float(ic[3]), 10, ic[1], big)
 		x += 16.0
 
 ## Teammates you can't see on screen get an arrow at the screen edge (with distance, coloured by
@@ -2541,7 +2238,6 @@ func _draw_tip(sz: Vector2, t: Dictionary) -> void:
 	_panel(r, Color(0.98, 0.95, 0.88, 0.94 * a), 12)
 	c.draw_multiline_string(body, r.position + Vector2(20, 28), text, HORIZONTAL_ALIGNMENT_LEFT, w - 40.0, 16, -1, Color(0.1, 0.09, 0.12, a))
 
-var head_hp := 1.0
 var abyss_cued := false
 var abyss_warned := false
 var abyss_a := 0.0
@@ -2567,12 +2263,8 @@ func _draw_overhead(p: Hunter) -> void:
 	if not sp.is_finite() or not vr.has_point(sp):
 		return      # off screen, or a degenerate camera (headless, mid-teleport): huge/NaN coords can't triangulate
 	sp = sp.round()     # whole pixels: the bars and pips don't shimmer as the camera glides
-	var w := 66.0
-	var frac := clampf(p.hp / p.max_hp, 0.0, 1.0)
-	head_hp = maxf(frac, lerpf(head_hp, frac, 0.06))
-	_vitals(sp, w, p, p_team_col().lerp(Color.WHITE, 0.15) if frac > 0.35 else BAD, head_hp, true)
-	DashStrip.draw(self, Rect2(Vector2(sp.x - w * 0.5, sp.y + 14), Vector2(w, 4)), p)
-	_status_row(sp + Vector2(0, 30), p)
+	var w := HudStyle.PLATE_W_SELF
+	plates.draw_self(self, sp, p)
 	# high up: a small readout of how far above the ground you are
 	var alt := m.player_altitude() if p == m.player else 0.0
 	if alt > 6.0 and not p.grounded:
