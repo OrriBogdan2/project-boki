@@ -42,6 +42,7 @@ hand; change the data and rerun the script. Hand-written pages may also hold gen
 | [Checks](Checks.md) | Every `--*-check` hook and what it asserts |
 | [Build and ship](Build-and-Ship.md) | Godot version, worktrees, ship.sh, exports, releases |
 | [Networking](Networking.md) | `Net`, the relay, message topics, `Net.VERSION` |
+| [Roadmap](../ROADMAP.md) | What shipped, what is being built, and what comes next (updated every build) |
 | [Design docs](Design-Docs.md) | Index of `docs/` and the `design` branch |
 | [Contributing and licensing](Contributing-and-Licensing.md) | GPL code, the asset license, NOTICE, the CLA |
 | [Inspirations](Inspirations.md) | Which mechanics came from which games (design notes) |

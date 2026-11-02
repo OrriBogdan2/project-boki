@@ -2,7 +2,7 @@ class_name HomeWater
 extends RefCounted
 ## (feelfix) The farm's ponds are water you can wade into and swim in. The edge tiles are shallow
 ## (you wade, slower); the middle is deep (you swim: sunk to the shoulders, slower still, tipped into
-## a stroke while you move, no dash, no jump, no tools). Going in splashes, swimming plays strokes
+## a stroke while you move, no dash, no tools; Space kicks you up out of the water). Going in splashes, swimming plays strokes
 ## and ripples, climbing out drips; a Boki paddles low in it. Water is never void.
 ##
 ## home.gd calls: depth(x, z) each step, step(...) with it, speed_mul(...), drop_y(), tilt(...) and
@@ -13,6 +13,7 @@ const SWIM_SPEED := 0.5      # walk-speed multiplier in the deep middle
 const SINK_DEEP := 0.62      # m the hunter sinks swimming
 const SINK_WADE := 0.14      # m the hunter sinks wading
 const STROKE_TILT := 0.75    # rad tipped forward at full swim speed
+const BREACH_V := 0.85       # share of a normal jump's lift when you kick up out of deep water
 
 var h                        # the Home screen
 var swimming := false
@@ -56,7 +57,7 @@ func tilt(b: Basis, speed: float) -> Basis:
 ## Splashes, strokes and sounds as you go in, swim about and climb out.
 func step(wdep: int, d: float, mv: Vector2, air: bool) -> void:
 	swimming = wdep == 2 and not air
-	k = move_toward(k, 1.0 if wdep == 2 else 0.0, d * 2.6)
+	k = move_toward(k, 1.0 if wdep == 2 and not air else 0.0, d * (2.6 if wdep == 2 and not air else 7.0))     # rise out fast on a jump
 	wade_k = move_toward(wade_k, 1.0 if wdep >= 1 else 0.0, d * 4.0)
 	var fx = h.fx
 	var at: Vector3 = h.ppos + Vector3(0, 0.08, 0)
@@ -86,6 +87,16 @@ func step(wdep: int, d: float, mv: Vector2, air: bool) -> void:
 		if fx:
 			fx.ring(at, 0.55 if moving else 0.4, Color(0.85, 0.95, 1.0, 0.55), 0.6)
 			if moving: fx.burst(at + Vector3(0, 0.1, 0), Color("e8f7ff"), 4, 1.6, 0.35)
+
+## Jumping while swimming: a kick up out of the water (a bit lower than a jump on land), with a
+## splash and a spray of droplets. Returns the upward speed to use.
+func breach(jump_v: float) -> float:
+	var at: Vector3 = h.ppos + Vector3(0, 0.08, 0)
+	Sfx.play("splash", h.ppos, -7.0, 0.08, 1.15)
+	if h.fx:
+		h.fx.burst(at + Vector3(0, 0.3, 0), Color("e8f7ff"), 18, 3.6, 0.55, 12.0, 1.0, Vector3.UP, 40.0)
+		h.fx.ring(at, 1.1, Color(0.85, 0.95, 1.0, 0.8), 0.45)
+	return jump_v * BREACH_V
 
 ## A Boki in the pond: low in the water, bobbing, a ripple now and then; a splash going in.
 func paddle(kd: Dictionary, pos: Vector3, n: Node3D, d: float) -> void:

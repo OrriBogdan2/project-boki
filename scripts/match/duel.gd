@@ -288,12 +288,35 @@ func _fill_menu(v: VBoxContainer) -> void:
 		h.add_child(val)
 		h.add_child(UI.button("›", func(): cycle(what, 1); _fill_menu(v), 44))
 		v.add_child(h)
+	if m.arena:
+		v.add_child(_kin_row(v))      # your Boki: any species, a loaner if you don't own it (never saved)
 	var acts := UI.hbox(8)
 	acts.add_child(UI.button("Reset round", func(): reset(); close_menu(), 150))
 	acts.add_child(UI.button("Heal both", func(): heal_both(), 130))
 	acts.add_child(UI.button("Clear stats", func(): _clear_stats(); round_n = 1, 130))
 	v.add_child(acts)
 	v.add_child(UI.label("B opens this menu  ·  X resets the round  ·  Esc leaves the room", 13, UI.MUTED))
+
+## Pick the Boki you duel with: the same list as the Arena menu (yours, or a loaner of any species
+## that never reaches your roster; the training area has no way out).
+func _kin_row(v: VBoxContainer) -> HBoxContainer:
+	var P: Hunter = m.player
+	var opts: Array = m.arena._kin_choices()
+	var cur := String((P.kin as Kin).species) if P.kin and not (P.kin as Kin).dead else ""
+	var i := maxi(0, opts.find(cur))
+	var h := UI.hbox(8)
+	var l := UI.label("Your Boki", 15, UI.MUTED); l.custom_minimum_size.x = 120
+	h.add_child(l)
+	var step := func(d: int):
+		m.arena.set_kin(String(opts[posmod(i + d, opts.size())]))
+		_fill_menu(v)
+	h.add_child(UI.button("‹", func(): step.call(-1), 44))
+	var nm := "None" if cur == "" else String(Data.KIN.get(cur, {}).get("name", cur))
+	var val := UI.label(nm, 16, UI.INK); val.custom_minimum_size.x = 200
+	val.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	h.add_child(val)
+	h.add_child(UI.button("›", func(): step.call(1), 44))
+	return h
 
 func close_menu() -> void:
 	if menu_layer:

@@ -565,8 +565,7 @@ func _kin_choices() -> Array:
 		if sp != "" and not out.has(sp) and KinLib.kin(sp): out.append(sp)
 	for sp in KinLib.kin_ids():
 		if not out.has(sp) and Data.KIN.has(sp): out.append(sp)
-	out = out.slice(0, 11)
-	out.append("")
+	out.append("")      # every species, however many there are (the grid scrolls with the menu)
 	return out
 
 func close_menu() -> void:

@@ -10,7 +10,7 @@
 	"resource": {"id": "salvage", "name": "Salvage", "max": 10, "kind": "stacks", "per_stack": 0.025, "back_k": 0.5, "heal_knock": 0.16, "col": "#e0b040"},
 	"passive": {"name": "Salvage", "desc": "Each knock or assist adds a Salvage stack (+2.5% health, 10 at most); being downed costs one. Hits on a hunter's back deal 50% more. Knocking a hunter heals you 16% of your health."},
 	"dash": {"id": "barge", "name": "Barge", "icon": "dash2", "col": "#f0d070", "cd": 12.0,
-		"dist": 4.6, "time": 0.21, "hit_dmg": 5.0, "hit_kb": 4.0, "lock_t": 0.8, "lock_deg": 35.0, "cut": 0.25,
+		"dist": 4.6, "time": 0.34, "hit_dmg": 5.0, "hit_kb": 4.0, "lock_t": 0.8, "lock_deg": 35.0, "cut": 0.25,
 		"desc": "A 4.6m shoulder barge (2 charges): shoves foes along it for 5. It is usable while reeling someone in. Just after the Anchor your turn is limited to 35 degrees."},
 	"rmb": {"delivery": "projectile", "name": "Grapnel", "short": "Grapnel", "icon": "hook", "col": "#f0d070", "cooldown": 14.0, "charges": 1, "hold": 0.0,
 		"range": 11.5, "speed": 38.0, "dmg": 6.0, "pull_speed": 15.0, "pull_max": 3.0, "gap": 1.5, "ground_t": 1.0, "refund": 0.33,

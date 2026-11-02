@@ -42,7 +42,7 @@ every knock.
 
 |  |  |
 |---|---|
-| Weight class | Heavy (193 health, 4.73 m/s, 2 dash charges) |
+| Weight class | Heavy (193 health, 4.55 m/s, 2 dash charges) |
 | Signature weapon | Greatsword (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The wrecking ball. Burns hotter with every hit, chains you in, and finishes it. |
 | Silhouette | the horned pauldrons |
