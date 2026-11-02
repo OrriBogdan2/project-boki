@@ -129,3 +129,11 @@ Across all heroes:
 - **L loadout picker:** rewrite every hero's card in one format: a role line, then one plain line each for LMB, RMB, E, Shift and passive.
 - **ArchKit._drop_holds()** (on main since sync61) is the single hook every kit implements for merge-start cleanup. Use it, not ad-hoc `KinMerge.active` checks.
 - Re-merge main (sync62 or newer) before reporting a pair ready. Sync62 slowed base movement and dashes, so re-check any dash speeds a kit hard-codes.
+
+## OWNER, 13:46 ET: custom, noticeable animations for every ability and every dash
+- **Every ability needs its own clearly visible animation**, timed to the reference sheet's beats: LMB, every LMB variant (tap, hold, perfect, overdraw), RMB, Shift, E, the passive procs, and the payoff moments. "A pose change" is not enough. Use exaggerated, readable key poses, anticipation before release, overshoot and settle, squash and stretch, weapon trails, and secondary motion (cloak, hair, weapon swing). The footage is the reference for what each move should communicate.
+- **Dashes count too:**
+  - each hero's Shift ability gets its own animation
+  - the shared base dash gets a per-hero variant: posture, lean, a trail in the hero's colour, a landing settle. A heavy hero lumbers and shoves; a light one flicks or tumbles.
+- **Screenshots:** for each hero, add a strip of 4–6 frames for every animation (anticipation, release, follow-through, recovery) under `ext/hero-shots:<newname>/v2/anim/`. The owner reviews these.
+- Animations are procedural (hunter_anim.gd KMOVES plus kit-driven offsets). If a move needs bone or rig motion the procedural system can't express, add the smallest general capability to the animation system (a new curve type, a limb IK target, a weapon pivot) and say what you added.
