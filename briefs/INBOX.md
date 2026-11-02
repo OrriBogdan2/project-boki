@@ -175,3 +175,12 @@ The owner says she "doesn't feel or look like Elluna at all".
 
 ## 2026-11-02 22:50 UTC
 Owner direction for every kit and polish pass: the **kits** match the source as the baseline (mechanics, timing, aiming, movement). The **characters** will be redesigned as clearly original concepts later; Moosh Moosh, for example, may become a small fire fox. So in the current passes, keep the effects in each hunter's own colour language, and don't invest in body details that copy the source's look. Concentrate on motion, readability and the kit.
+
+## 2026-11-02 23:00 UTC
+briefs/hero-ref/mooshmoosh.md now ends with "Body, scale and movement feel". Build it in the moosh-tamsin polish pass:
+- **Scale:** 0.74 of a medium, and drop the tall pack-frame or lantern above her head. `hit_r` 0.40 → 0.34. Nameplate offset about 2.05 m for others.
+- **Movement:** a low, forward-leaning scurry at about 1.25× step cadence, ±5% bob, a trailing piece that swings with the stride, quick starts and stops, and the torso facing the cursor when strafing.
+- **Attacks:** no weapon. A straight-arm punch-push cast with alternating hands: 0.07 s wind-up, thrust, a hold of about 0.1 s, and a ±45° torso twist. The RMB release has a small hop.
+- **Ground dash:** keep 4.2 m in 0.16 s, plus a small hop.
+- **Air dash:** a long, floaty glide (a head-first streak, then a tucked float, then a soft landing). Start at about 8–9 m over about 0.8 s. The owner decides whether to go up to the source's 11–15 m; data-driven, so it's easy to change.
+The other 11 hunters' body sections follow within the hour.
