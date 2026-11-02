@@ -55,7 +55,8 @@
 		"time": 2.8,
 		"walk_k": 1.15,
 		"stuck_cost": 30.0,
-		"desc": "A quick dodge roll in the direction you move (or aim), then 2.8s as a spirit: rocks, trees, pillars and ability barriers don't stop you (cliffs and ledges still do) and you move 15% faster. Taking damage ends it. If it ends while you're inside something you lose 30 Focus and are put back where you went in."
+		"desc": "A quick dodge roll in the direction you move (or aim), then 2.8s as a spirit: rocks, trees, pillars and ability barriers don't stop you (cliffs and ledges still do); you move 15% faster, 35% inside something. Walking into something leaves a spirit orb there for 4s: anyone who touches it walks as a spirit too. Taking damage ends it. If it ends while you're inside something you lose 30 Focus and are put back where you went in.",
+		"inside_k": 1.35
 	},
 	"rmb": {
 		"delivery": "projectile",
@@ -89,14 +90,15 @@
 				30.0
 			],
 			"push": [
-				6.0,
+				8.0,
 				12.0
 			],
 			"pierce": 2,
 			"wall": 3.0,
 			"stun": 1.2,
 			"full": 1.1,
-			"wall_dmg": 12.0
+			"wall_dmg": 12.0,
+			"max_hold": 3.0
 		},
 		"plunge": {
 			"radius": 2.0,
@@ -133,7 +135,7 @@
 		"dmg": 5.0,
 		"slow": 0.35,
 		"blight": 1.0,
-		"desc": "Lob a volley: 0.35s later arrows rain for 4.4s on a curved wall 120 degrees wide round you, at the cursor distance (2-9m). Foes inside take 5 every 0.5s, are slowed 35% and burn blue (healing barely takes).",
+		"desc": "Lob a volley: 0.35s later arrows rain for 4.4s on a curved wall 120 degrees wide round you, at the cursor distance (2-9m). Foes inside take 5 every 0.5s, are slowed 35% and burn blue (healing barely takes). A Heavy Shot that knocks a burning foe Cremates them: +10 and a longer burn.",
 		"sockets": {
 			"hit": "add",
 			"ctrl": "add",
@@ -142,7 +144,8 @@
 			"guard": "add"
 		},
 		"rmin": 2.0,
-		"deg": 120.0
+		"deg": 120.0,
+		"cremate": 10.0
 	},
 	"order": [
 		"sec",

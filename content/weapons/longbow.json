@@ -38,7 +38,8 @@
 		"overdraw_t": 0.5,
 		"overdraw_k": 0.5,
 		"quick_k": 1.6,
-		"aim": "cursor"
+		"aim": "cursor",
+		"perfect_slow": 0.85
 	},
 	"utility": ""
 }

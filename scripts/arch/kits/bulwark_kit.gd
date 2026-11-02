@@ -38,6 +38,9 @@ var throw_d := 0.0
 var slams := 0                 # (checks) Crushing Blows let go, the last one's charge and carry start
 var slam_k := 0.0
 var spins := 0                 # (checks) 360 Smash spin hits
+var kickstarts := 0             # (checks) downed teammates Mending Ground started reviving
+var throw_at := -9.0           # when the hammer last left his hand (the recall lockout)
+const WINDDOWN := 0.3          # s after a slam or a spin hit before he can open the glider (wiki: wind-down frames keep the momentum)
 
 func _setup() -> void:
 	shield_hp = shield_max()
@@ -219,7 +222,8 @@ func lmb_override(held: bool, dt: float) -> bool:
 	var md := lmb_def()
 	if not mace.is_empty():
 		# the mace is out: a press calls it back
-		if pressed and String(mace["st"]) != "back":
+		# (wiki patch 20.11.24: a recall can't come within 0.25 s of the throw)
+		if pressed and String(mace["st"]) != "back" and m.time - throw_at >= float(md.get("recall_lock", 0.25)):
 			_recall()
 		return true
 	var local := h.ctrl == "local"
@@ -293,6 +297,7 @@ func _smash() -> void:
 	h.fire_cd = float(md["smash_rate"])
 	slams += 1
 	slam_k = k
+	h.glide_cd = maxf(h.glide_cd, WINDDOWN)
 	if full: knock_until = m.time + 0.25
 	h._strike(dmg / m.dmg_mult(h), float(md["smash_reach"]), float(md["smash_arc"]), kb, {"heavy": true, "charged": true, "stun": float(md["smash_stun"]) if full else 0.0})
 	var dv := h.aim_dir()
@@ -330,7 +335,8 @@ func _throw() -> void:
 	h.fire_cd = float(md["throw_rate"])
 	var at := h.pos + Vector3(0, 1.0, 0)
 	# it lands at the cursor, clamped to its range
-	var dist := AimMode.dist(h, float(md["throw_range"]))
+	var dist := AimMode.dist(h, float(md["throw_range"]), AimMode.CURSOR, float(md.get("throw_min", 5.0)))   # (wiki: at least 5 m)
+	throw_at = m.time
 	mace = {"st": "fly", "pos": at, "dir": h.aim_dir(), "d": 0.0, "to": dist, "hit": {}, "t": 0.0}
 	throws += 1
 	h.swing_t = 0.18; h.swing_n += 1
@@ -576,6 +582,7 @@ func _spin_hit() -> void:
 	var dd := dash_def()
 	var r := float(dd.get("spin_r", 2.2))
 	spins += 1
+	h.glide_cd = maxf(h.glide_cd, WINDDOWN)
 	h._strike(float(dd["whirl_dmg"]) * _wk() / m.dmg_mult(h), r, 360.0, float(dd["whirl_kb"]), {"heavy": true})
 	fx.smash_ring(h.pos)
 	m.fx.dust(h.pos, 10)
@@ -604,6 +611,12 @@ func _mend_burst() -> void:
 	var r: float = mend["r"]
 	mend = {}
 	var heal := float(ed["heal"]) + (10.0 if rank("kin") >= 3 else 0.0)
+	# a downed teammate inside starts coming back (wiki: allied wisps hit by the burst begin to resurrect)
+	for o in m.hunters:
+		if o != h and o.team == h.team and o.downed and not o.out and Vector2(o.pos.x - at.x, o.pos.z - at.z).length() < r:
+			o.revive = minf(0.95, o.revive + float(ed.get("revive", 0.35)))
+			kickstarts += 1
+			m.fx.burst(o.pos + Vector3(0, 0.8, 0), BjornFx.GREEN, 14, 3.0, 0.5, -3.0)
 	for o in m.hunters:
 		if o.team == h.team and not o.out and not o.downed and Vector2(o.pos.x - at.x, o.pos.z - at.z).length() < r:
 			o.heal(heal * (1.25 if rank("kin") >= 2 else 1.0))

@@ -107,6 +107,7 @@ func _archer_combos() -> void:
 	P.fire_cd = 0.0; P.ammo = maxi(P.ammo, 1); P.reload_t = 0.0
 	step(m, 0.42, func(): P.inp["fire"] = true; K.res = 0.0; aim_at(P, T.pos))
 	ok("combo pin: perfect > the next draw reaches Empowered in ~0.38s", P.draw_t >= s1 and K.draw.quick_used, "draw_t %.2f after 0.42s" % P.draw_t)
+	ok("pin small: after a perfect the draw slows you less (0.85 not 0.7, wiki)", absf(K.move_k() * 0.7 - 0.85) < 0.01, "move_k %.2f" % K.move_k())
 	step(m, 0.25, func(): P.inp["fire"] = true; K.res = 0.0; aim_at(P, T.pos))
 	P.inp["fire"] = false
 	step(m, 0.6)
@@ -125,6 +126,7 @@ func _archer_combos() -> void:
 	step(m, 0.55, func(): P.inp["sec_hold"] = true; aim_at(P, T.pos))
 	var bar1 := float(AimKit.entry(P, "rmb_bar").get("len", 0.0))
 	ok("pin RMB held: the bar grows with the charge, to 2 body heights", bar1 > bar0 + 0.5 and bar1 >= 3.5, "%.2f -> %.2f" % [bar0, bar1])
+	ok("pin small: the Heavy Shot can be held 3 s before it looses by itself (wiki)", absf(K.rmb_auto_t() - 3.0) < 0.01 and float(K.rmb_def()["pin"]["push"][0]) >= 8.0, "auto %.1f" % K.rmb_auto_t())
 	P.inp["sec_hold"] = false
 	m.step(DT)
 	step(m, 0.3)
@@ -147,6 +149,16 @@ func _archer_combos() -> void:
 	ok("archer anim: Hail Wall plays arc_hail", K.anim_id == "arc_hail", K.anim_id)
 	step(m, 1.6, func(): K.res = 0.0)
 	ok("pin E: a foe on the arc 45 degrees off the aim burns, one inside it does not", dmg(T) >= 5.0 and T.blight_t > 0.0 and dmg(T2) == 0.0 and K.fx.panels[0].visible, "on arc %.0f inside %.0f" % [dmg(T), dmg(T2)])
+	# small mechanic (wiki): a Heavy Shot knocking a foe that burns in the wall Cremates it
+	var cr0 := K.cremations
+	K.ch_rmb = 2.0; K.cd["rmb"] = 0.0
+	P.inp["sec_hold"] = true
+	P.ak.press_rmb()
+	step(m, 0.7, func(): P.inp["sec_hold"] = true; aim_at(P, T.pos); K.res = 0.0)
+	P.inp["sec_hold"] = false
+	m.step(DT)
+	step(m, 0.3)
+	ok("pin small: Heavy Shot into a foe burning in the Hail Wall = CREMATED", K.cremations == cr0 + 1, "cremations %d" % (K.cremations - cr0))
 	step(m, 3.5)
 	# Hail Wall, then a snare tap: roots 1.0 (the longer root), and the move plays
 	fresh(T); K.cd["e"] = 0.0; K.res = 0.0; K.ch_rmb = 2.0; K.cd["rmb"] = 0.0
@@ -186,20 +198,33 @@ func _archer_combos() -> void:
 	step(m, 0.1)
 	ok("pin anim: Spirit Walk's roll plays pin_roll", K.anim_id == "pin_roll", K.anim_id)
 	var in0 := K.spirit.passed
-	step(m, 1.2, func(): P.inp["move"] = Vector2(1, 0))
+	var mk := [0.0]
+	step(m, 1.2, func():
+		P.inp["move"] = Vector2(1, 0)
+		if K.spirit.inside: mk[0] = maxf(mk[0], K.move_k()))
+	var mk_in: float = mk[0]
+	ok("pin small: faster inside something during Spirit Walk (x1.35, wiki +50 move speed in terrain)", absf(mk_in - 1.35) < 0.01, "move_k inside %.2f" % mk_in)
+	ok("pin small: walking into the rock left a spirit orb at the entry", K.spirit.orbs.size() >= 1, "orbs %d" % K.spirit.orbs.size())
+	if K.spirit.orbs.size() >= 1:
+		var tp0 := T.pos
+		T.teleport(K.spirit.orbs[0]["pos"]); T.spirit_t = 0.0
+		step(m, 0.1)
+		ok("pin small: anyone touching the orb walks as a spirit too", T.spirit_t > 2.0, "ghost %.2f granted %d" % [T.spirit_t, K.spirit.granted.size()])
+		T.teleport(tp0)
 	ok("pin anim: after the roll she walks as a spirit (pin_walk)", K.anim_id == "pin_walk", K.anim_id)
 	ok("combo pin: Spirit Walk passes through a rock column", P.pos.x > bx + 1.3 and K.spirit.passed > in0, "x %.1f (rock at %d) inside %d" % [P.pos.x, bx, K.spirit.passed - in0])
 	# ...and ending inside it puts her back where she went in, for 30 Focus
+	K.spirit.end("time"); step(m, 0.5)
 	P.teleport(home); P.vel = Vector3.ZERO; P.dashes = P.max_dashes(); K.res = 80.0
 	P.inp["move"] = Vector2(1, 0)
 	P.do_dash()
-	step(m, 0.35, func(): P.inp["move"] = Vector2(1, 0))
+	step(m, 0.25, func(): P.inp["move"] = Vector2.ZERO)
 	P.teleport(Vector3(bx + 0.5, home.y, home.z)); P.inp["move"] = Vector2.ZERO
 	step(m, 0.05)
 	var sn0 := K.spirit.snapped
 	var f0 := K.res
 	K.spirit.end("time")
-	ok("combo pin: Spirit Walk ending inside a rock = back to the entry, Focus spent", K.spirit.snapped == sn0 + 1 and P.pos.x < bx and K.res <= f0 - 29.0, "x %.1f focus %.0f -> %.0f" % [P.pos.x, f0, K.res])
+	ok("combo pin: Spirit Walk ending inside a rock = back to the entry, Focus spent", K.spirit.snapped == sn0 + 1 and P.pos.x < bx and K.res <= f0 - 29.0, "x %.1f (rock %d, entry %.1f) focus %.0f -> %.0f" % [P.pos.x, bx, K.spirit.entry.x, f0, K.res])
 	# damage ends it
 	P.teleport(home); P.dashes = P.max_dashes()
 	P.do_dash()
@@ -297,6 +322,19 @@ func _bulwark_combos() -> void:
 	ok("bjorn aim: a far cursor clamps the throw to 9m", absf(K.throw_d - 9.0) < 0.8, "d %.1f" % K.throw_d)
 	P.fire_cd = 0.0; P.inp["fire"] = true; m.step(DT); P.inp["fire"] = false
 	step(m, 1.0)
+	# small mechanics (wiki): it flies at least 5 m, and can't be recalled in its first 0.25 s
+	P.fire_cd = 0.0
+	aim_at(P, home + Vector3(2.0, 0, 0))
+	P.inp["fire"] = true; m.step(DT); P.inp["fire"] = false
+	step(m, 0.05)
+	P.fire_cd = 0.0; P.inp["fire"] = true; m.step(DT); P.inp["fire"] = false
+	ok("bjorn small: a recall in the first 0.25 s is ignored", String(K.mace.get("st", "")) == "fly", str(K.mace.get("st")))
+	step(m, 0.6)
+	ok("bjorn small: a close cursor still throws 5 m", absf(K.throw_d - 5.0) < 0.6, "d %.1f" % K.throw_d)
+	P.fire_cd = 0.0; P.inp["fire"] = true; m.step(DT); P.inp["fire"] = false
+	step(m, 1.0)
+	P.fire_cd = 0.0; P.inp["fire"] = true; m.step(DT); P.inp["fire"] = false
+	step(m, 1.0)
 	# LMB held: the hammer spins in his hand, the glint from 0.6 s, the flare at full; let go: the slam
 	# carries him forward with a flaming crescent
 	reset.call()
@@ -306,14 +344,17 @@ func _bulwark_combos() -> void:
 	ok("bjorn LMB held: the hammer spins, no glint yet", K.fx.spin_on and not K.fx.glint.visible and K.anim_id == "bul_smash_wind", "spin %s glint %s anim %s" % [K.fx.spin_on, K.fx.glint.visible, K.anim_id])
 	step(m, 0.4, func(): P.inp["fire"] = true; aim_at(P, T.pos))
 	ok("bjorn LMB held: the glint shows from 0.6s, the cursor ring filling", K.fx.glint.visible and float(AimKit.reticle(P).get("charge", 0.0)) > 0.4, "glint %s charge %.2f" % [K.fx.glint.visible, float(AimKit.reticle(P).get("charge", 0.0))])
-	step(m, 0.5, func(): P.inp["fire"] = true; aim_at(P, T.pos))
+	step(m, 0.62, func(): P.inp["fire"] = true; aim_at(P, T.pos))
 	ok("bjorn LMB held: the full-charge flare at 1.25s", K.flared and K.smash_k() >= 0.99, "k %.2f" % K.smash_k())
 	var px0 := P.pos.x
 	var sl0 := K.slams
 	P.inp["fire"] = false
-	step(m, 0.35)
+	m.step(DT); m.step(DT)
+	var gcd := P.glide_cd
+	step(m, 0.32)
 	ok("combo bjorn: the full slam = a 180 crescent, carries him forward, hits hard (5x the throw)", K.slams == sl0 + 1 and K.slam_k >= 0.99 and P.pos.x - px0 >= 1.0 and dmg(T) >= 55.0 and not K.fx.spin_on, "carry %.2f took %.0f" % [P.pos.x - px0, dmg(T)])
 	ok("bjorn anim: the slam plays bul_smash", K.anim_id == "bul_smash", K.anim_id)
+	ok("bjorn small: wind-down after the slam, no glider straight away (momentum kept)", gcd >= 0.25, "glide_cd %.2f" % gcd)
 	# 360 Smash: a short dash, then ONE spin hit around him on arrival
 	step(m, 1.0); reset.call()
 	T.teleport(home + Vector3(5.2, 0, 0)); aim_at(P, T.pos)
@@ -399,6 +440,18 @@ func _bulwark_combos() -> void:
 	ok("anim bulwark: Mending Ground plays bul_mend", K.anim_id == "bul_mend", K.anim_id)
 	step(m, 1.3)
 	ok("combo bulwark: E with the shield down heals but does not mend it", P.hp >= P.max_hp - 8.0 and K.shield_hp < 55.0, "hp %.0f shield %.0f" % [P.hp, K.shield_hp])
+	# small mechanics (wiki): a broken aegis isn't repaired by it; a downed teammate inside starts coming back
+	K.cd["e"] = 0.0; K.shield_hp = 0.0; K.lock_t = 3.0; K.down_t = 0.0
+	var A: Hunter = m.make_hunter("A", P.team, "medium", "Mate", "idle", {}, P.pos + Vector3(0, 0, 2.7), {"arch": "none"})
+	T.teleport(home + Vector3(0, 0, -5.0))
+	step(m, 0.1)
+	A.downed = true; A.revive = 0.0; A.down_hp = 1000.0
+	var ks0 := K.kickstarts
+	P.ak.use_e()
+	step(m, 1.2)
+	ok("bjorn small: Mending Ground doesn't repair a broken aegis", K.shield_hp < 1.0, "shield %.0f" % K.shield_hp)
+	ok("bjorn small: a downed teammate inside Mending Ground starts reviving", K.kickstarts == ks0 + 1 and A.revive >= 0.3, "revive %.2f" % A.revive)
+	A.downed = false; A.teleport(home + Vector3(0, 0, -30)); K.lock_t = 0.0
 	K.cd["e"] = 0.0; K.lock_t = 0.0; P.hp = P.max_hp - 30.0; K.shield_hp = 40.0
 	P.inp["sec_hold"] = true
 	P.ak.press_rmb()

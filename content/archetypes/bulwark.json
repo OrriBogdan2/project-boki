@@ -63,7 +63,9 @@
 		"carry": [
 			1.6,
 			3.4
-		]
+		],
+		"throw_min": 5.0,
+		"recall_lock": 0.25
 	},
 	"dash": {
 		"id": "smash360",
@@ -141,14 +143,15 @@
 		"heal": 26.0,
 		"shield": 60.0,
 		"slow": 0.25,
-		"desc": "A green light column comes down for 1s on your planted hammer (on you with the hammer in hand), then it heals allies inside 26; if your aegis is raised it mends 60. Foes inside are slowed.",
+		"desc": "A green light column comes down for 1s on your planted hammer (on you with the hammer in hand), then it heals allies inside 26; if your aegis is raised it mends 60. Foes inside are slowed. A downed teammate inside is a third of the way back up.",
 		"sockets": {
 			"guard": "add",
 			"ctrl": "swap",
 			"ctrl_cap": "soft",
 			"util": "add",
 			"hit": "add"
-		}
+		},
+		"revive": 0.35
 	},
 	"order": [
 		"sec",

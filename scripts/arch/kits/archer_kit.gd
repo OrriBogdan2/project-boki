@@ -31,6 +31,7 @@ var deadeyes := 0              # Deadeyes landed (tests, demo)
 var knock_healed := 0.0        # health the knock passive gave back (tests)
 var sense_t := 0.0
 var pins := 0                  # wall pins landed (tests)
+var cremations := 0            # Heavy Shots that knocked a foe burning in the Hail Wall (tests)
 
 func _setup() -> void:
 	fx = PinFx.new(h)
@@ -147,6 +148,7 @@ func _tick(dt: float) -> void:
 		_tick_rain(dt)
 	draw.tick()
 	spirit.tick(dt)
+	spirit.tick_orbs(dt)
 	_tag_shots()
 	fx.tick_shots()
 
@@ -331,8 +333,15 @@ func on_dash(use_ex: bool) -> bool:
 	return true
 
 ## While walking as a spirit she moves a little quicker.
+## While walking as a spirit she moves quicker, quicker still inside something (wiki: +50 move speed in
+## terrain); a draw right after a perfect release slows her less (wiki: perfect shots ease the self-slow).
 func move_k() -> float:
-	return float(dash_def().get("walk_k", 1.15)) if spirit and spirit.active() else 1.0
+	var k := 1.0
+	if spirit and spirit.active():
+		k = float(dash_def().get("inside_k", 1.35)) if spirit.inside else float(dash_def().get("walk_k", 1.15))
+	if draw and draw.quick and h.draw_t >= 0.0:
+		k *= float(h.wpn.get("perfect_slow", 0.85)) / maxf(0.05, float(h.wpn.get("draw_slow", 0.7)))
+	return k
 
 # ------------------------------------------------------------------ RMB: Snare
 func rmb_hold_tick(t: float) -> void:
@@ -361,8 +370,9 @@ func heavy_k() -> float:
 	var pd: Dictionary = rmb_def()["pin"]
 	return clampf((rmb_t - float(rmb_def()["hold"])) / maxf(0.05, float(pd["full"]) - float(rmb_def()["hold"])), 0.0, 1.0)
 
+## The Heavy Shot can be held up to 3 s after it's full before it looses by itself (wiki patch 20.11.24).
 func rmb_auto_t() -> float:
-	return float(rmb_def()["pin"]["full"]) + 0.5
+	return float(rmb_def()["pin"].get("max_hold", 3.0))
 
 ## A Boki merge ends every hold and channel of this kit with no shot: the bow draw (Hunter.draw_t, cleared by
 ## MergeKit.drop_class_holds; its reticle here), the Heavy Shot's hold and its gold telegraph, and Spirit Walk
@@ -449,6 +459,13 @@ func _pin(a: Vector3, k: float) -> void:
 		m.fx.dust(f.pos, 10)
 		m.later(0.15, func(): if is_instance_valid(f): m.fx.ring(f.pos, 1.1, Color.WHITE, 0.3))
 		m.sfx("pin_heavy_hit", f.pos, -3.0)
+		# knocked while burning in the Hail Wall: Cremated (a burst of the blue fire)
+		if not rain.is_empty() and _in_rain(f):
+			cremations += 1
+			f.hurt(float(e_def().get("cremate", 10.0)) * power("kin"), h, {"src": "abil", "ab": "signature", "tags": ["signature", "cremate"]})
+			if "blight_t" in f: f.set("blight_t", maxf(float(f.get("blight_t")), float(e_def()["blight"]) + 1.5))
+			m.fx.burst(f.pos + Vector3(0, 1.0, 0), Color("5aa8ff"), 18, 4.0, 0.5, -3.0, 1.2)
+			m.fx.word(f.pos + Vector3(0, 2.4, 0), "CREMATED", Color("8ac8ff"), false)
 		# driven into terrain within 3m: pinned (a stun), and the shot lines up: full Focus
 		if _wall_behind(f, dir, float(pd["wall"])):
 			pins += 1
