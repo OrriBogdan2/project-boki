@@ -50,6 +50,10 @@ var down_t := 0.0                 # downed: seconds until it comes round on its 
 var down_total := 0.0
 var rescue_t := 0.0               # downed: rescue progress in seconds (KinDowned: run into it; drains back after an interrupt)
 var rescue_on := false            # downed: its owner is rescuing it right now (kneeling, rooted)
+var regen_quiet := 0.0             # seconds since it last lost health (KinRegen)
+var regen_hp := 0.0               # its health at the end of the last step (KinRegen)
+var regen_fx := 0.0               # countdown to the next healing mote (KinRegen)
+var mending := false              # KinRegen is healing it right now (the HUD pulses its bar)
 var rescue_block := 0.0           # downed: seconds before a rescue can start again (after a dash cancelled one)
 var down_void := false            # downed: it fell into the abyss, only the timer brings it back
 var last_safe := Vector3.INF      # the last solid ground it stood on, where a fall marks it
@@ -624,6 +628,7 @@ func sim(dt: float) -> void:
 				hp = minf(max_hp, hp + max_hp * 0.02 * dt)   # resting in your satchel
 	if owner_h and not owner_h.out and state in ["shoulder", "active"] and brain:
 		brain.think_abilities(dt)
+	KinRegen.tick(self, dt)
 	if comp:
 		comp.tick(dt)
 

@@ -3411,7 +3411,7 @@ func _update_shots(dt: float) -> void:
 				_shot_end(s, p, null)
 				hit = true; break
 			for e in _shot_targets(s):
-				if Vector2(e.pos.x - p.x, e.pos.z - p.z).length() < e.r + s["r"] + HIT_SLACK and shot_height_ok(e, p.y):
+				if Vector2(e.pos.x - p.x, e.pos.z - p.z).length() < e.r + s["r"] + HIT_SLACK and (shot_height_ok(e, p.y) or shot_from_above_ok(s, e, p.y)):
 					if sx.has("hitset"):
 						# piercing / boomerang shots hit each thing once per pass and fly on
 						var key: int = e.get_instance_id()
@@ -3457,6 +3457,16 @@ func _update_shots(dt: float) -> void:
 func shot_height_ok(e: Ent, y: float) -> bool:
 	var b := shot_band(e)
 	return y > b.x and y < b.y
+
+## A shot fired from a terrace above its target (a level shot, or one the aim didn't bend) still hits a body
+## standing up to ABOVE_SLACK below the top of its band: the muzzle sits ~1m over the shooter's feet, so from
+## 1-2 terraces up a level shot would otherwise sail over the head. Only while the shot is still higher than the
+## body's feet, so it can't hit a body on a floor far below (and walls and terraces still stop it before that).
+const ABOVE_SLACK := 1.2
+func shot_from_above_ok(s: Dictionary, e: Ent, y: float) -> bool:
+	var b := shot_band(e)
+	var st := s["start"] as Vector3      # (fired from higher GROUND, not a jump or a glide over the same floor)
+	return st.y > b.y - 0.3 and y > b.x and y < b.y + ABOVE_SLACK and world.ground_at(st.x, st.z) > shot_stance_y(e) + 0.8
 
 ## A shot's centre this close to the edge of a body's hit circle (radius `r`) still connects, so a
 ## bullet touching the circle of radius r + HIT_SLACK hits. That circle is what hit markers draw.
