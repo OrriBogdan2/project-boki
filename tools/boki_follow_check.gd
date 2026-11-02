@@ -219,6 +219,14 @@ func _sic_call() -> void:
 	run_for(1.2, func(): stun["v"] = bool(stun["v"]) or (is_instance_valid(mb) and mb.stun_t > 0.0))
 	ok(int(tags_seen.get("land", 0)) >= 1 and bool(stun["v"]), "...and its landing staggers what it lands on (land hits %d)" % int(tags_seen.get("land", 0)))
 	ok(k.cmd == "follow", "...and it stays under the Follow order (%s)" % k.cmd)
+	# close by but sent out or fighting: a second tap brings it back (G toggles)
+	k.teleport(P.pos + Vector3(3.0, 0, 0))
+	k.state = "active"
+	k.fly = {}
+	k.disengaged = false
+	k.target = mob_at("skitter", P.pos + Vector3(4.0, 0, 0))
+	KinCommand.tap(P)
+	ok(k.state == "flying_home", "G tap while it fights close by: Call back, not another Sic (state %s)" % k.state)
 	# away: Call back
 	_fresh()
 	P = m.player
