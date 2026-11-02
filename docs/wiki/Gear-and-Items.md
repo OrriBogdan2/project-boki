@@ -39,6 +39,13 @@ counted, not packed, and scanned Boki (capsules in your box, 3 at most) ride alo
 - A weapon you pick up arrives ready to fire (a full magazine, no reload running).
 - Extract and it all goes to the Armory. Die and it goes into your deathbox.
 
+**Backpack tiers.** Everyone has the free **Pouch**. A **Satchel** (+2 slots), **Pack** (+4) or
+**Rucksack** (+6) is bought at the Armory for gems and scrap and picked on the expedition board; the
+biggest you may bring depends on the difficulty (Satchel, Pack, Rucksack). It is at risk: die and it
+is in your deathbox, and if you're revived you're back on the Pouch. Backpacks never drop at random.
+In a match you get a bigger one by taking it from an enemy's deathbox (yours stays in its place) or
+by buying the next tier at a shop. Extract wearing one and it's yours, even an enemy's.
+
 ## Cosmetics
 
 **Glider skins** (canopy shape, colours, trail and sound) from the glider rack by the portal, and

@@ -5775,6 +5775,7 @@ func _econ_tests(dbg) -> void:
 		HomeNotices.show_migration(self)
 		get_tree().create_timer(0.4).timeout.connect(func():
 			hecon.arm_pick = String(Save.d["armory"][0]["uid"])
+			hecon.arm_tab = "Backpacks" if "--armory-backpacks" in dbg else hecon.arm_tab
 			hecon.open_armory())
 	if "--feeder-test" in dbg or "--starve-test" in dbg:
 		# a clean roster of six, so nothing else from the machine's save (an evolution, a nap) gets in the way

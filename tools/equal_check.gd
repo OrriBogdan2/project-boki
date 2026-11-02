@@ -148,13 +148,16 @@ func _equal_base() -> void:
 				"tier %d: what is brought leaves the stash" % tier)
 		await _drop(m2)
 	ok(cap0 == 2, "(the easiest tier caps at Rare)")
-	# the backpack size comes from one place: base (content/rules) + a brought backpack (none yet) + gear and perk
-	# "pack" stats
+	# the backpack size comes from one place: base (content/rules) + the worn backpack + gear and perk "pack" stats
 	ok(Equal.base_pack() == int(Equal.rules().get("base_pack", -1)) and Econ.pack_cap() == Equal.base_pack(),
 			"the base backpack size is data (%d slots, content/rules/equal.json)" % Equal.base_pack())
 	ok(Equal.pack_slots(PackStub.new(0.0)) == Equal.base_pack()
 			and Equal.pack_slots(PackStub.new(1.0)) == Equal.base_pack() + 1,
 			"pack_slots adds a +1 pack stat (the satchel perk) to the base")
+	var packed := PackStub.new(1.0)
+	packed.backpack = 2
+	ok(Equal.pack_slots(packed) == Equal.base_pack() + Backpacks.slots(2) + 1,
+			"...and the worn backpack's slots (a Pack and the perk: %d)" % Equal.pack_slots(packed))
 	# the workshop and guild perks are gone from the match
 	_farm(true)
 	var m3 := _start(1)
@@ -605,6 +608,7 @@ func _migration() -> void:
 ## A stand-in hunter for Equal.pack_slots: only its "pack" stat matters (a perk's stats count there).
 class PackStub extends RefCounted:
 	var pack := 0.0
+	var backpack := 0
 	func _init(p: float) -> void:
 		pack = p
 	func gear_stat(k: String) -> float:
