@@ -182,6 +182,6 @@ Juggernaut wasn't renamed. Display names only; ids stay. Each kit branch does it
 ## 2026-11-02 14:10 ET: owner answers
 - **Terminology:** "Hunters" (not hero or class), so "Hunter unlock". Drop the Light/Medium/Heavy labels.
 - **Unlocks:** pick 1 hunter at character creation, then 2 more early. A much better hunter viewer (model, animated ability previews) and a hold-to-unlock bar with an animation. Going into ext/classes, which is reopened on the server.
-- **Names:** juggernaut is **Zed**. Also Dancer, Pin, Bjorn, Venator, Linwick, Moosh Moosh, Breah.
+- **Names:** juggernaut is **Zedran**. Also Dancer, Pin, Bjorn, Venator, Linwick, Moosh Moosh, Breah.
 - **Dredge's grab** goes through rocks like the original. **Pin's Shift** is the newer Spirit-Walk-style one. **Tamsin** copies the base hero, with no healing.
 - **Dancer** (thief) is the furthest off: LMB becomes the ranged alternating bolts, and RMB the bolas. Top of kitfix-dancer-juggernaut.
