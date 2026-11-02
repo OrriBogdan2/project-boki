@@ -19,7 +19,7 @@ func setup(arch: String, dist: float, kin_sp := "", second := false) -> Array:
 	var cls := Arch.weight(arch)
 	var m := Match.new()
 	main.add_child(m)
-	m.start({"training": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true, "cls": cls, "arch": arch, "weapon": Arch.default_weapon(arch)})
+	m.start({"training": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true, "cls": cls, "arch": arch, "weapon": Arch.signature(arch)})
 	m.set_process(false)
 	var P: Hunter = m.player
 	for mb in m.mobs: mb.queue_free()
@@ -178,15 +178,11 @@ func _data() -> void:
 		for k in ["dash", "rmb", "e", "r", "resource", "order"]:
 			if not Arch.def(a).has(k): bad.append("%s missing %s" % [a, k])
 	ok("data: every kit complete, weapons exist", bad.is_empty(), str(bad))
-	ok("weapons: Thief can't hold a sniper", not Loot.usable(_fake("thief"), {"t": "weapon", "wid": "sniper"}))
-	ok("weapons: Thief holds blades and SMG", Loot.usable(_fake("thief"), {"t": "weapon", "wid": "twin_blades"}) and Loot.usable(_fake("thief"), {"t": "weapon", "wid": "smg"}))
-	ok("weapons: Archer holds bow and sniper", Loot.usable(_fake("archer"), {"t": "weapon", "wid": "longbow"}) and Loot.usable(_fake("archer"), {"t": "weapon", "wid": "sniper"}) and not Loot.usable(_fake("archer"), {"t": "weapon", "wid": "smg"}))
-	ok("weapons: Mage staff / Bulwark shield", Arch.weapon_ok("mage", "spellstaff") and Arch.weapon_ok("bulwark", "tower_shield") and not Arch.weapon_ok("bulwark", "greatsword"))
-	ok("weapons: out-of-family falls back", Arch.weapon_for("gunslinger", "medium", "longsword") == "rifle")
+	ok("weapons: one signature weapon each", ids.all(func(x): return Arch.weapons(x).size() == 1 and Arch.signature(x) != "" and Arch.weapon_ok(x, Arch.signature(x))), str(ids.map(func(x): return Arch.signature(x))))
+	ok("weapons: Thief blades / Archer bow / Mage staff / Bulwark shield", Arch.signature("thief") == "twin_blades" and Arch.signature("archer") == "longbow" and Arch.signature("mage") == "spellstaff" and Arch.signature("bulwark") == "tower_shield")
+	ok("weapons: another archetype's weapon is not yours", not Arch.weapon_ok("bulwark", "greatsword") and not Arch.weapon_ok("thief", "smg"))
+	ok("weapons: asking for another weapon gives the signature", Arch.weapon_for("gunslinger", "medium", "longsword") == "rifle")
 	ok("weapons: fix keeps the class", Arch.fix("thief", "heavy") == "juggernaut" and Arch.fix("bulwark", "heavy") == "bulwark")
-
-func _fake(a: String) -> Dictionary:
-	return {"arch": a, "cls": Arch.weight(a)}
 
 # ------------------------------------------------------------------ Thief (kits2: a port of SUPERVIVE's Shiv)
 func _thief() -> void:
@@ -290,11 +286,11 @@ func _archer() -> void:
 	step(m, 1.6)
 	ok("archer passive: Focus fills standing still", K.res >= 99.0, "%.0f" % K.res)
 	ok("archer resource tell: full", K.tell == "full")
-	P.equip("sniper", 0)
+	P.equip("sniper")
 	step(m, 0.35)
 	P.inp["fire"] = true; m.step(DT); P.inp["fire"] = false
 	ok("archer Focus: sniper fires at once", P.warm_t <= 0.0 and P.ammo < int(P.wpn["mag"]) and K.res < 1.0, "warm %.2f ammo %d" % [P.warm_t, P.ammo])
-	P.equip("longbow", 0)
+	P.equip("longbow")
 	step(m, 0.3)
 	# the Longbow draws: a full draw hits for 60
 	fresh(T); K.res = 0.0
@@ -374,7 +370,7 @@ func _archer() -> void:
 	step(m, 1.2)
 	# the bow's perfect window: let go right at full draw for +25%
 	P.teleport(home); P.vel = Vector3.ZERO; fresh(T); T.teleport(home + Vector3(-6.5, 0, 0)); aim_at(P, T.pos)    # (clear of the test walls east)
-	P.equip("longbow", 0); step(m, 0.4)
+	P.equip("longbow"); step(m, 0.4)
 	var pf0 := K.perfects
 	step(m, 0.95, func(): P.inp["fire"] = true; K.res = 0.0; aim_at(P, T.pos))
 	P.inp["fire"] = false

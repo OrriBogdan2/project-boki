@@ -51,12 +51,12 @@ your class in the Expedition menu, and you can try every class against dummies i
 
 | Class | Weight | Weapons | Passive | Dash | RMB | E | R |
 |---|---|---|---|---|---|---|---|
-| [Thief](Class-Thief.md) | Light | Twin Blades, SMG | Marks | Vault | Bola | Shadow Knife | Jackpot |
-| [Archer](Class-Archer.md) | Light | Longbow, Sniper | Focus | Grapple Arrow | Snare | Arrow Rain | Great Arrows |
-| [Mage](Class-Mage.md) | Medium | Spellstaff, Longsword | Runes and Heat | Blink | Guided Bolt | Hex | Encore |
-| [Gunslinger](Class-Gunslinger.md) | Medium | Rifle, Burst Rifle | Six Chambers | Slide Reload | Trick Shot | Quickdraw | Last Round |
-| [Juggernaut](Class-Juggernaut.md) | Heavy | Greatsword, Shotgun, Minigun | Rage | Rampage | Smash | Warchain | Doomfall |
-| [Bulwark](Class-Bulwark.md) | Heavy | Tower Shield & Mace, Minigun | Guard | Whirl | Shield | Mending Ground | Fissure |
+| [Thief](Class-Thief.md) | Light | Twin Blades | Marks | Vault | Bola | Shadow Knife | Jackpot |
+| [Archer](Class-Archer.md) | Light | Longbow | Focus | Grapple Arrow | Snare | Arrow Rain | Great Arrows |
+| [Mage](Class-Mage.md) | Medium | Spellstaff | Runes and Heat | Blink | Guided Bolt | Hex | Encore |
+| [Gunslinger](Class-Gunslinger.md) | Medium | Rifle | Six Chambers | Slide Reload | Trick Shot | Quickdraw | Last Round |
+| [Juggernaut](Class-Juggernaut.md) | Heavy | Greatsword | Rage | Rampage | Smash | Warchain | Doomfall |
+| [Bulwark](Class-Bulwark.md) | Heavy | Tower Shield & Mace | Guard | Whirl | Shield | Mending Ground | Fissure |
 
 ### Weight classes
 

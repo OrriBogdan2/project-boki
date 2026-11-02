@@ -80,9 +80,9 @@ func run(main: Node) -> void:
 	for L in m.lairs.list: if String(L["boss"]) == "colossus": F = L
 	ok(is_equal_approx(Lairs.VICTORY_T, 20.0), "the post-kill lock is %d s" % int(Lairs.VICTORY_T))
 	# ---------------------------------------------------------------- 1. the loot: few things, all good; the egg apart under its own beam
-	# a weapon already lying in the lair where the egg would fall: the egg finds a spot clear of it too
+	# a piece of gear already lying in the lair where the egg would fall: the egg finds a spot clear of it too
 	var stray_at := m.lairs._floor_spot(F, F["c"] + Vector3(-F["out"].y, 0, F["out"].x) * 4.0, 1.0)
-	m.spawn_weapon("rifle", 4, stray_at, "", false)
+	m.spawn_gear("bastion_plate", 4, stray_at, "", false)
 	var w0 := m.wpicks.size()
 	var kill_t := _kill(F, P, C)
 	var gems_new: Array = dropped.filter(func(p): return String(p["kind"]) == "gem")

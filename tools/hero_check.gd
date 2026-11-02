@@ -41,7 +41,7 @@ func run(main: Node) -> void:
 	var old_model: Node3D = hm.player
 	hm._pick_hero("archer")
 	await tree.process_frame
-	ok(String(Save.d["cls"]) == "light" and Arch.of_save() == "archer" and String(Save.d["weapon"]) == Arch.default_weapon("archer"), "picking the Archer saves it as your expedition pick (cls %s, arch %s, weapon %s)" % [Save.d["cls"], Arch.of_save(), Save.d["weapon"]])
+	ok(String(Save.d["cls"]) == "light" and Arch.of_save() == "archer" and String(Save.d["weapon"]) == Arch.signature("archer"), "picking the Archer saves it as your expedition pick (cls %s, arch %s, weapon %s)" % [Save.d["cls"], Arch.of_save(), Save.d["weapon"]])
 	ok(hm.player != old_model and is_instance_valid(hm.player) and hm.panel_open == "", "and the farm hunter turns into it in place")
 	hm._open_expedition()
 	await tree.process_frame

@@ -8,12 +8,12 @@ extends Node
 ## lineage, edition). A small append-only event log (d["log"], LOG_CAP) keeps what happened to whom.
 ## See docs/BOKI_IDENTITY.md.
 
-const VERSION := 4
+const VERSION := 5
 const MAX_MEMORY := 40
 const SLOTS := 6
 const LOG_CAP := 200
 ## Upgrades, oldest first: MIGRATIONS[n] turns a version-n save into version n + 1.
-const MIGRATIONS := {1: "_migrate_1_to_2", 2: "_migrate_2_to_3", 3: "_migrate_3_to_4"}
+const MIGRATIONS := {1: "_migrate_1_to_2", 2: "_migrate_2_to_3", 3: "_migrate_3_to_4", 4: "_migrate_4_to_5"}
 
 var d: Dictionary = {}
 var slot := 1                 # which save file is in play
@@ -90,7 +90,7 @@ func fresh() -> Dictionary:
 		"rivals": {},         # rival hunters you've dealt with: how greedy they are, how they feel about you
 		"offers": [],         # rivals asking to buy back kin you took from them
 		"ransom_log": [],     # what happened at the Ransom House, newest last
-		"armory": [],         # weapons and gloves brought home (Loot items); see Econ
+		"armory": [],         # gear brought home (Loot items); see Econ
 		"arm_lvl": 0, "pack_lvl": 0, "scrap": 0,
 		"loadout": {},        # what you take on the next expedition: slot -> armory uid
 		"valuables": {},      # treasure to sell, and Soul Embers
@@ -263,6 +263,11 @@ func migrate(data: Dictionary) -> bool:
 		v += 1
 		data["v"] = v
 	return true
+
+## v4 -> v5: the gear model. Stored weapons become scrap, gloves become gear items, the loadout
+## moves to five gear slots (GearSave).
+func _migrate_4_to_5(data: Dictionary) -> void:
+	GearSave.migrate(data)
 
 ## v3 -> v4: the Field Book. Every species you own counts as seen, and each entry gets its "places" list.
 func _migrate_3_to_4(data: Dictionary) -> void:

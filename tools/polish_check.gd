@@ -1,9 +1,8 @@
 extends RefCounted
 ## --polish-check: the demo-video polish pass. Prints PASS/FAIL lines.
-##   1. weapon drops lean toward the earner's archetype family (DropFamily), but not always
-##   2. every stair tile belongs to a full-width flight (PolishTools.stair_flights), on the default map
-##   3. a chest reads as a different, chunkier thing than the crates, pots and barrels
-##   4. building a chest draws nothing from the match's seeded global random stream
+##   1. every stair tile belongs to a full-width flight (PolishTools.stair_flights), on the default map
+##   2. a chest reads as a different, chunkier thing than the crates, pots and barrels
+##   3. building a chest draws nothing from the match's seeded global random stream
 
 var bad := 0
 
@@ -31,26 +30,7 @@ func run(main: Node) -> void:
 	main.add_child(m)
 	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 7, "no_drop": true, "weapon": "rifle"})
 	m.set_process(false)
-	# 1. drop families
-	var arch := ""
-	var fam: Array = []
-	for a in Arch.ids():
-		fam = Arch.weapons(String(a))
-		if fam.size() >= 1 and fam.size() < 8:
-			arch = String(a); break
-	var keys: Array = Data.WEAPONS.keys() if "WEAPONS" in Data else ["rifle", "smg", "sniper"]
-	var P: Hunter = m.player
-	var oldarch = P.arch
-	P.arch = arch
-	var inside := 0
-	for i in 400:
-		if fam.has(DropFamily.earned(P, keys)): inside += 1
-	ok(arch != "" and inside >= 280, "earned drops come from the %s family %d/400 times" % [arch, inside])
-	ok(inside < 400 or keys.size() <= fam.size(), "...but not every time")
-	ok(DropFamily.earned(null, ["a"]) == "a", "no earner: any weapon from the list")
-	ok(DropFamily.ground("zzz", 3, true, P, 1) == "zzz", "online: the ground rolls are left alone for everyone")
-	P.arch = oldarch
-	# 2. stairs
+	# 1. stairs
 	var W = m.world
 	var fl: Array = PolishTools.stair_flights(W)
 	var n := 0
@@ -59,7 +39,7 @@ func run(main: Node) -> void:
 		n += (f["tiles"] as Array).size()
 		if (f["tiles"] as Array).size() < 2: thin += 1
 	ok(n == W.stairs.size(), "all %d stair tiles sit in a flight (%d flights, %d thin)" % [W.stairs.size(), fl.size(), thin])
-	# 3. chest vs breakables
+	# 2. chest vs breakables
 	var ch := Models.chest(0)
 	var cr := Models.breakable("crate")
 	main.add_child(ch); main.add_child(cr)

@@ -39,7 +39,7 @@ reloads you. Trick shots bounce off walls, and the slide reloads on the move.
 |  |  |
 |---|---|
 | Weight class | Medium (145 health, 5 m/s, 1 dash charge) |
-| Weapons | Rifle, Burst Rifle (first is the default) |
+| Signature weapon | Rifle (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The duelist. A rhythm of six, trick shots off walls, slide and reload. |
 | Silhouette | the brim and coat tails |
 | Resource | Chambers (max 6) |
@@ -57,7 +57,6 @@ What the in-game kit card (K) says.
 | E: Quickdraw | Quickdraw: 3s of faster fire, an instant reload and a dash charge back. |
 | R: Last Round | Lock every rival in sight, then fire one round per lock. |
 | Weapon: Rifle | Steady auto fire; damage drops on long strings. |
-| Weapon: Burst Rifle | Three-round bursts. |
 
 ### Abilities in full
 

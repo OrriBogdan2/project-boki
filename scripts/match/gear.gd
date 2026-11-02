@@ -1,10 +1,12 @@
 class_name Gear
-## Gloves found on expeditions (Supervive's grips). Two slots: slot 1 holds an ACTIVE glove you
-## fire with Q, slot 2 a PASSIVE glove that only gives stats. Every glove gives stats; a glove with a
-## cooldown is an active one and goes in slot 1, one without goes in slot 2. Picking up a glove
-## replaces the one in its slot (the old one drops). They last one expedition, like perks.
-## Defined in content/gloves/*.json: name, cd, col, icon, stats, desc, and for most new actives an
-## "effects" list run through Effects (the same building blocks abilities use).
+## Gear found on expeditions. Five slots (SLOTS): an ACTIVE glove you fire with Q, a PASSIVE glove,
+## armor, boots and a utility kit. Rarity (Common to Legendary) lives here, not on weapons: a hunter
+## carries one fixed signature weapon and grows it with weapon upgrades (WeaponUps). Every piece gives
+## stats; a glove with a cooldown is the active one. Picking up a piece replaces the one in its slot
+## (the old one drops). Gear lasts one expedition, like perks.
+## Defined in content/gear/*.json: name, slot ("armor", "boots" or "kit"; gloves leave it out and go
+## by cooldown), cd, col, icon, stats, desc, and for most active gloves an "effects" list run through
+## Effects (the same building blocks abilities use).
 
 static var ALL: Dictionary = {}
 
@@ -13,7 +15,7 @@ static func _static_init() -> void:
 
 static func _load() -> void:
 	ALL = {}
-	var dir := DirAccess.open("res://content/gloves")
+	var dir := DirAccess.open("res://content/gear")
 	if dir == null:
 		return
 	var files: Array = []
@@ -22,7 +24,7 @@ static func _load() -> void:
 		if fn.ends_with(".json"): files.append(fn)
 	files.sort()
 	for fn in files:
-		var txt := FileAccess.get_file_as_string("res://content/gloves/" + String(fn))
+		var txt := FileAccess.get_file_as_string("res://content/gear/" + String(fn))
 		var d = JSON.parse_string(txt)
 		if typeof(d) != TYPE_DICTIONARY:
 			continue
@@ -31,12 +33,33 @@ static func _load() -> void:
 		d["cd"] = float(d.get("cd", 0.0))
 		ALL[id] = d
 
+## Slot index: 0 active glove (Q), 1 passive glove, 2 armor, 3 boots, 4 utility kit.
+const SLOTS := ["glove", "passive", "armor", "boots", "kit"]
+const SLOT_NAMES := ["Active glove", "Passive glove", "Armor", "Boots", "Utility kit"]
+
+static func empty_slots() -> Array:
+	return [{}, {}, {}, {}, {}]
+
 static func active(id: String) -> bool:
 	return float(ALL.get(id, {}).get("cd", 0.0)) > 0.0
 
-## Which slot a glove goes in: 0 the active slot (Q), 1 the passive slot.
+## Which slot a piece goes in: its "slot" key, else gloves by cooldown (0 the active slot, 1 passive).
 static func slot_of(id: String) -> int:
+	var sn := String(ALL.get(id, {}).get("slot", ""))
+	if sn != "":
+		return maxi(2, SLOTS.find(sn))
 	return 0 if active(id) else 1
+
+static func slot_name(id: String) -> String:
+	return SLOT_NAMES[slot_of(id)]
+
+## Ids of every piece for a slot index.
+static func ids_for(slot: int) -> Array:
+	var out: Array = []
+	for k in ALL:
+		if slot_of(String(k)) == slot: out.append(k)
+	out.sort()
+	return out
 
 static func icon_of(id: String) -> String:
 	return String(ALL.get(id, {}).get("icon", id))
@@ -102,15 +125,41 @@ static func stat_text(id: String, rar: int) -> String:
 	for s in st:
 		var v := float(st[s]) * k
 		match s:
-			"speed": bits.append("+%d%% move speed" % int(round(v * 100)))
+			"speed": bits.append("%+d%% move speed" % int(round(v * 100)))
 			"glide_speed": bits.append("+%d%% glide speed" % int(round(v * 100)))
 			"heat": bits.append("+%d%% glider heat" % int(round(v * 100)))
 			"armor": bits.append("+%d armor" % int(round(v)))
 			"dmg": bits.append("+%d%% damage" % int(round(v * 100)))
 			"cdr": bits.append("%d%% faster abilities" % int(round(v * 100)))
+			"hp": bits.append("+%d health" % int(round(v)))
+			"reload": bits.append("%d%% faster reloads" % int(round(v * 100)))
+			"tonic": bits.append("tonics heal %d%% more" % int(round(v * 100)))
+			"pack": bits.append("+%d backpack slot%s" % [pack_bonus(rar, float(st[s])), "" if pack_bonus(rar, float(st[s])) == 1 else "s"])
+			"dodge": bits.append("dashes back %d%% sooner" % int(round(v * 100)))
+			"gems": bits.append("+%d%% gems" % int(round(v * 100)))
+			"sight": bits.append("+%d%% sight" % int(round(v * 100)))
 	return ", ".join(bits)
+
+## Backpack slots a kit adds at a rarity (rounded: 1 up to Rare, 2 from Epic).
+static func pack_bonus(rar: int, base: float) -> int:
+	return int(round(base * mult(rar)))
 
 static func roll(r: RandomNumberGenerator) -> String:
 	var keys: Array = ALL.keys()
 	keys.sort()
 	return keys[r.randi_range(0, keys.size() - 1)]
+
+## Gear stats that change a number worked out once (max health, backpack size) are re-applied here
+## whenever the worn gear changes. What was added last time is kept on the hunter, so it never stacks.
+static func apply_worn(h) -> void:
+	var hp_new: float = h.gear_stat("hp")
+	var hp_old := float(h.get_meta("gear_hp", 0.0))
+	if absf(hp_new - hp_old) > 0.01:
+		h.max_hp += hp_new - hp_old
+		h.hp = clampf(h.hp + maxf(hp_new - hp_old, 0.0), 1.0, h.max_hp)
+		h.set_meta("gear_hp", hp_new)
+	var pk_new := int(round(h.gear_stat("pack")))
+	var pk_old := int(h.get_meta("gear_pack", 0))
+	if pk_new != pk_old:
+		h.pack_cap += pk_new - pk_old
+		h.set_meta("gear_pack", pk_new)

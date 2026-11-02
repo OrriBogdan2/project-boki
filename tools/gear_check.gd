@@ -1,0 +1,231 @@
+extends RefCounted
+## --gear-check: every archetype carries one fixed signature weapon, no weapon pickups ever spawn,
+## gear rolls the Common..Legendary rarities, gear and weapon upgrades change the numbers they say,
+## the chest / crate / Blight / boss drop tables give gear and tunings (bosses fewer and better),
+## and a v4 save (weapons, gloves, glove loadout) migrates to v5 gear. Prints GEARCHECK PASS/FAIL.
+
+var main: Node
+var fails := 0
+var n := 0
+
+func ok(name: String, cond: bool, info := "") -> void:
+	n += 1
+	printerr("GEARCHECK %-52s %s  %s" % [name, "PASS" if cond else "FAIL", info])
+	if not cond: fails += 1
+
+func run(main_node: Node) -> void:
+	main = main_node
+	Save.no_write = true
+	Save.d = Save.fresh()
+	Econ.ensure()
+	_data()
+	_rolls()
+	_migration()
+	await _match()
+	print("GEARCHECK DONE, %d checks, failures: %d" % [n, fails])
+	main.get_tree().quit(1 if fails > 0 else 0)
+
+func _data() -> void:
+	var seen := {}
+	var good := true
+	for a in Arch.ids():
+		var sg := Arch.signature(String(a))
+		if sg == "" or not FileAccess.file_exists("res://content/weapons/%s.json" % sg) or not Arch.weapon_ok(String(a), sg) or (Arch.weapons(String(a)) as Array).size() != 1:
+			good = false
+		seen[sg] = true
+	ok("each archetype names one signature weapon", good, str(seen.keys()))
+	ok("the six archetypes have six different signatures", seen.size() == Arch.ids().size(), "%d" % seen.size())
+	for s in Gear.SLOTS.size():
+		ok("slot %d (%s) has gear to find" % [s, Gear.SLOTS[s]], not Gear.ids_for(s).is_empty())
+	ok("armor, boots and kit pieces exist beyond the old gloves", Gear.ids_for(2).size() >= 2 and Gear.ids_for(3).size() >= 2 and Gear.ids_for(4).size() >= 2)
+	var wup := 0
+	var brands := 0
+	for k in Data.PERKS:
+		if Data.PERKS[k].has("wup"):
+			wup += 1
+			if Data.PERKS[k]["wup"].has("brand"): brands += 1
+	ok("weapon upgrades and Brands exist as perks", wup >= 9 and brands >= 4, "%d upgrades, %d brands" % [wup, brands])
+	ok("rarity multiplier rises Common to Legendary", Gear.mult(0) < Gear.mult(2) and Gear.mult(2) < Gear.mult(3) and Gear.mult(3) < Gear.mult(4))
+	var lo_ok := true
+	for k in ["gear0", "gear1", "gear2", "gear3", "gear4"]:
+		if not Econ.LOADOUT_SLOTS.has(k): lo_ok = false
+	ok("the loadout has five gear slots", lo_ok and Econ.LOADOUT_SLOTS.size() == 5)
+
+func _rolls() -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 77
+	var count := [0, 0, 0, 0, 0]
+	var slots := [0, 0, 0, 0, 0]
+	for i in 4000:
+		var g := GearDrops.roll_gear(rng)
+		count[int(g["rar"])] += 1
+		slots[Gear.slot_of(String(g["id"]))] += 1
+	ok("gear rolls every rarity, Common most and Legendary least", count.min() > 0 and count[1] > count[3] and count[3] > count[4], str(count))
+	ok("gear rolls every slot", slots.min() > 0, str(slots))
+	var up := [0, 0, 0, 0, 0]
+	for i in 2000: up[GearDrops.roll_rarity(rng, 2)] += 1
+	ok("a rarity bonus pushes drops up", up[0] == 0 and up[2] + up[3] + up[4] > count[2] / 2, str(up))
+	var floor_ok := true
+	for i in 500:
+		if GearDrops.roll_rarity(rng, 0, 2) < 2: floor_ok = false
+	ok("min_rar is a floor", floor_ok)
+	var forced := true
+	for i in 200:
+		if Gear.slot_of(String(GearDrops.roll_gear(rng, 0, 0, 3)["id"])) != 3: forced = false
+	ok("a forced slot gives that slot's gear", forced)
+
+func _migration() -> void:
+	var d := {"v": 4, "arch": "mage", "weapon": "shotgun", "scrap": 3,
+		"armory": [{"t": "weapon", "wid": "smg", "rar": 3, "el": "fire", "uq": "", "uid": "iw1"},
+			{"t": "glove", "id": "vest", "rar": 2, "uid": "ig1"}, {"t": "valuable", "id": "old_coin", "uid": "iv1"}],
+		"raid_out": [{"t": "weapon", "wid": "pistol", "rar": 0, "el": "", "uq": "", "uid": "iw2"}],
+		"loadout": {"weapon": "iw1", "glove0": "ig1", "glove1": "gone"}}
+	GearSave.migrate(d)
+	var types := (d["armory"] as Array).map(func(it): return String(it.get("t", "")))
+	ok("migration: stored weapons are gone, gloves become gear", not types.has("weapon") and types.has("gear") and types.has("valuable") and (d["raid_out"] as Array).is_empty(), str(types))
+	ok("migration: weapons break down into scrap", int(d["scrap"]) >= 3 + 4 + 2 + 1, "scrap %d" % int(d["scrap"]))
+	ok("migration: glove loadout keys move to gear slots", d["loadout"].get("gear0", "") == "ig1" and not d["loadout"].has("glove0") and not d["loadout"].has("weapon") and not d["loadout"].has("gear1"), str(d["loadout"]))
+	ok("migration: the weapon you carry is your signature", String(d["weapon"]) == Arch.signature("mage"), String(d["weapon"]))
+	var s := Save.fresh()
+	ok("a fresh save is v%d" % Save.VERSION, int(s["v"]) == Save.VERSION and Save.VERSION >= 5)
+	Save.d = Save.fresh()
+	var before := int(Save.d.get("scrap", 0))
+	var mats := GearSave.extract_mats([Loot.gear("quilted_coat", 0), Loot.gear("quilted_coat", 4), Loot.valuable("old_coin")])
+	ok("extracting gear gives farm materials, more for rarer gear", int(mats["wood"]) + int(mats["stone"]) + int(mats["scrap"]) > 0 and int(Save.d["scrap"]) >= before)
+	var lo := GearSave.extract_mats([Loot.gear("quilted_coat", 4)])
+	var hi := GearSave.extract_mats([Loot.gear("quilted_coat", 0)])
+	ok("a Legendary breaks down into more than a Common", int(lo["wood"]) + int(lo["stone"]) + int(lo["scrap"]) > int(hi["wood"]) + int(hi["stone"]) + int(hi["scrap"]))
+
+func _start(arch: String, seed_: int) -> Match:
+	var m := Match.new()
+	main.add_child(m)
+	await m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": seed_, "no_drop": true, "arch": arch, "cls": Arch.weight(arch)})
+	m.set_process(false)
+	for mb in m.mobs: mb.queue_free()
+	m.mobs.clear()
+	return m
+
+func _match() -> void:
+	# 1. every archetype starts with its signature weapon
+	for a in Arch.ids():
+		var m := await _start(String(a), 11)
+		var P: Hunter = m.player
+		ok("%s: starts with its signature %s" % [a, Arch.signature(String(a))], P.wid == Arch.signature(String(a)), P.wid)
+		var bots_ok := true
+		for h in m.hunters:
+			if not Arch.weapon_ok(h.arch, h.wid): bots_ok = false
+		ok("%s match: every hunter holds their archetype's weapon" % a, bots_ok)
+		m.queue_free()
+	var m := await _start("archer", 5)
+	var P: Hunter = m.player
+	# 2. gear effects
+	var hp0 := P.max_hp
+	P.gear[2] = {"id": "quilted_coat", "rar": 2}
+	P.refresh_gear()
+	ok("armor gear adds health", absf(P.max_hp - hp0 - 22.0 * Gear.mult(2)) < 0.6, "%.1f -> %.1f" % [hp0, P.max_hp])
+	P.gear[2] = {}
+	P.refresh_gear()
+	ok("taking the armor off takes the health back", absf(P.max_hp - hp0) < 0.6, "%.1f" % P.max_hp)
+	var cap0 := P.pack_cap
+	P.gear[4] = {"id": "satchel", "rar": 3}
+	P.refresh_gear()
+	ok("a Satchel kit enlarges the pack", P.pack_cap > cap0, "%d -> %d" % [cap0, P.pack_cap])
+	P.gear[4] = {}
+	P.refresh_gear()
+	ok("and takes it back off", P.pack_cap == cap0)
+	P.gear[3] = {"id": "windstep_boots", "rar": 1}
+	ok("boots give their movement perk", P.gear_stat("glide_speed") > 0.0)
+	P.gear[3] = {}
+	var hi := Loot.gear("quilted_coat", 4)
+	var lo := Loot.gear("quilted_coat", 0)
+	ok("a Legendary is worth more than a Common", Loot.value(hi) > Loot.value(lo))
+	# 3. weapon upgrades
+	var d0 := float(P.wpn["dmg"])
+	var mag0 := int(P.wpn["mag"])
+	ok("a one-shot weapon is never offered Deep Magazine", not P.perk_open("deepmag"))
+	P.add_perk("hotload")
+	ok("Hotload hits harder", absf(float(P.wpn["dmg"]) - d0 * 1.10) < 0.01 * d0 + 0.001, "%.2f -> %.2f" % [d0, float(P.wpn["dmg"])])
+	ok("Deep Magazine is no use to the longbow, so it can't be taken", int(P.wpn["mag"]) == mag0)
+	ok("the weapon in hand is still the signature", P.wid == Arch.signature("archer"))
+	var rf := await _start("gunslinger", 6)
+	var G: Hunter = rf.player
+	var gm0 := int(G.wpn["mag"])
+	G.add_perk("deepmag")
+	ok("Deep Magazine holds more rounds for a magazine weapon", int(G.wpn["mag"]) > gm0, "%d -> %d" % [gm0, int(G.wpn["mag"])])
+	rf.queue_free()
+	P.add_perk("brand_fire")
+	ok("a Brand sets the element on every hit", P.welem == "fire", P.welem)
+	P.add_perk("brand_frost")
+	ok("the latest Brand wins", P.welem == "frost", P.welem)
+	ok("the upgrade line names them", WeaponUps.summary(P).contains("Hotload") and WeaponUps.summary(P).contains("Brand"), WeaponUps.summary(P))
+	# a level-up offers only weapon upgrades
+	m.perk_offer = {}
+	m.perk_queue.clear()
+	m.offer_perks(P, "level")
+	var only_wup := not m.perk_offer.is_empty()
+	for id in m.perk_offer.get("ids", []):
+		if not Data.PERKS[id].has("wup"): only_wup = false
+	ok("a level-up offers weapon upgrades only", only_wup, str(m.perk_offer.get("ids", [])))
+	m.perk_offer = {}
+	# 4. drop tables: gear and tunings, never a weapon
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 9
+	var at: Vector3 = P.pos + Vector3(3, 0, 3)
+	var tables: Array = ["ground", "cache", "crate", "chest0", "chest1", "chest2", "brute", "sentinel", "warden", "glimmer", "bl_skitter", "bl_warden", "boss"]
+	var total := {}
+	for t in tables:
+		total[t] = 0
+		for i in 40:
+			total[t] += GearDrops.run_table(m, String(t), at, rng, {"h": P}).size()
+	var clean := true
+	for wp in m.wpicks:
+		if not (wp.has("gear") or wp.has("tune") or wp.has("val")) or String(wp.get("wid", "")) != "":
+			clean = false
+	ok("no weapon pickups spawn from any table", clean and not m.wpicks.is_empty(), "%d pickups" % m.wpicks.size())
+	ok("every table is defined and drops something", tables.all(func(t): return int(total[t]) > 0), str(total))
+	ok("chests pay more than crates", int(total["chest2"]) > int(total["chest0"]) and int(total["chest0"]) > int(total["crate"]))
+	var bossn := 0
+	var low := false
+	var brand := false
+	var legend := 0
+	for i in 200:
+		var r := GearDrops.run_table(m, "boss", at, rng, {"h": null, "net": false})
+		bossn += r.size()
+		for e in r:
+			if e["kind"] == "gear":
+				if int(e["rar"]) < 2: low = true
+				if int(e["rar"]) == 4: legend += 1
+			elif Data.PERKS[e["id"]]["wup"].has("brand"): brand = true
+	ok("a boss drops few items", float(bossn) / 200.0 <= 4.0, "%.2f a boss" % (float(bossn) / 200.0))
+	ok("boss gear is Rare or better, with a Brand and sometimes Legendary", not low and brand and legend > 0, "legend %d/200" % legend)
+	var per_chest := float(total["chest2"]) / 40.0
+	ok("a boss drops fewer than a rich chest has junk, but better", float(bossn) / 200.0 <= maxf(per_chest, 3.0))
+	# 5. walking over a tuning applies it; gear goes into its slot and the old piece drops
+	for wp in m.wpicks.duplicate():
+		if is_instance_valid(wp["node"]): wp["node"].queue_free()
+	m.wpicks.clear()
+	var P2: Hunter = P
+	P2.perks.clear()
+	WeaponUps.apply(P2)
+	m.spawn_tune("longreach", P2.pos, "", false)
+	m.take_pick(P2, m.wpicks[0])
+	ok("taking a tuning applies it", P2.perks.has("longreach") and m.wpicks.is_empty(), str(P2.perks))
+	P2.gear[2] = {"id": "quilted_coat", "rar": 0}
+	m.spawn_gear("bastion_plate", 3, P2.pos, "", false)
+	m.take_pick(P2, m.wpicks[0])
+	ok("taking gear replaces the slot", String(P2.gear[2]["id"]) == "bastion_plate" and int(P2.gear[2]["rar"]) == 3)
+	ok("and the old piece drops to the ground", m.wpicks.size() == 1 and String(m.wpicks[0].get("gear", "")) == "quilted_coat")
+	# 6. a bot picks up a rarer piece than it wears
+	var bot: Hunter = null
+	for h in m.hunters:
+		if h != P: bot = h
+	if bot != null:
+		bot.gear[2] = {}
+		ok("bots want gear for an empty slot", GearDrops.bot_wants(bot, "bastion_plate", 0))
+		bot.gear[2] = {"id": "bastion_plate", "rar": 3}
+		ok("bots leave a worse piece alone", not GearDrops.bot_wants(bot, "quilted_coat", 1))
+		var r2 := RandomNumberGenerator.new(); r2.seed = 3
+		bot.gear = Gear.empty_slots()
+		GearDrops.bot_start(bot, r2, "hard")
+		ok("a hard bot starts with gear on", bot.gear.any(func(g): return not (g as Dictionary).is_empty()))
+	m.queue_free()

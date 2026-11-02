@@ -1,6 +1,6 @@
 class_name Econ
 ## The home side of loot and kin keeping, all on the save (Save.d):
-##   armory    weapons and gloves you brought home (Loot items), a storage cap you can raise, the
+##   armory    gear you brought home (Loot items), a storage cap you can raise, the
 ##             loadout you take on the next expedition, valuables to sell and scrap to upgrade with
 ##   backpack  how many slots you get on an expedition (pack_lvl)
 ##   feeders   troughs on the farm you fill with food; hungry kin help themselves, even while you're away
@@ -142,7 +142,10 @@ static func upgrade(which: String) -> String:
 	Save.d[which + "_lvl"] = lvl + 1
 	return ""
 
-## The loadout: slot "weapon", "glove0" (active) or "glove1" (passive) -> an armory uid, or "" for none.
+## The loadout: slot "gear0".."gear4" (active glove, passive glove, armor, boots, kit; see Gear.SLOTS)
+## -> an armory uid, or "" for none.
+const LOADOUT_SLOTS := ["gear0", "gear1", "gear2", "gear3", "gear4"]
+
 static func loadout(slot: String) -> Dictionary:
 	var uid := String(Save.d.get("loadout", {}).get(slot, ""))
 	return find(uid) if uid != "" else {}
@@ -151,13 +154,13 @@ static func set_loadout(slot: String, uid: String) -> void:
 	if uid == "": Save.d["loadout"].erase(slot)
 	else: Save.d["loadout"][slot] = uid
 
-static func glove_slot(it: Dictionary) -> String:
-	return "glove%d" % Gear.slot_of(String(it.get("id", "")))
+static func gear_slot(it: Dictionary) -> String:
+	return "gear%d" % Gear.slot_of(String(it.get("id", "")))
 
 ## Setting out: the loadout leaves the armory and rides with you (at risk until you're home).
 static func begin_raid() -> Array:
 	var out: Array = []
-	for slot in ["weapon", "glove0", "glove1"]:
+	for slot in LOADOUT_SLOTS:
 		var it := loadout(slot)
 		if it.is_empty(): continue
 		Save.d["armory"].erase(it)
@@ -184,6 +187,7 @@ static func after_raid(r: Dictionary, out: Dictionary) -> void:
 			else:
 				_store(item)
 			out["haul"].append(item)
+		out["mats"] = GearSave.extract_mats(out["haul"])
 	else:
 		out["lost_items"] = r.get("lost_items", [])
 	# loadout pieces that didn't come home are gone from it

@@ -306,6 +306,7 @@ func _draw_all() -> void:
 			_draw_vitals(sz, p)
 			_draw_abilities(sz, p)
 			_draw_weapon(sz, p)
+			GearPanel.draw(self, sz, p)
 			_draw_kin_card(sz, p)
 			_draw_squad(sz, p)
 			_draw_perks(sz, p)
@@ -466,7 +467,7 @@ func _draw_world_labels() -> void:
 			if ct > bfrac:
 				c.draw_rect(Rect2(br.position + Vector2(bw * bfrac, 0), Vector2(bw * (ct - bfrac), 6)), Color(1.0, 0.95, 0.88, 0.8))
 			_status_row(sp + Vector2(0, 16), mb)
-	# found weapons: name and rarity when you're close enough to care. Tags that would overlap one
+	# gear and tunings on the ground: name and rarity when you're close enough to care. Tags that would overlap one
 	# already drawn this frame step up above it, so a few drops side by side stay readable.
 	var pp: Vector3 = m.player.pos if m.player else cam.focus
 	var tags: Array = []
@@ -474,12 +475,14 @@ func _draw_world_labels() -> void:
 		var wpos: Vector3 = wp["pos"]
 		if Vector2(wpos.x - pp.x, wpos.z - pp.z).length() > 7.0 or cam.is_position_behind(wpos):
 			continue
-		var r: Dictionary = Data.RARITY[int(wp["rar"])]
+		var r: Dictionary = Data.RARITY[clampi(int(wp["rar"]), 0, Data.RARITY.size() - 1)]
 		var sp := cam.unproject_position(wpos + Vector3(0, 1.45, 0))
-		var glove: bool = wp.has("gear") and Gear.ALL.has(String(wp["gear"]))
-		var nm := String(Gear.ALL[String(wp["gear"])]["name"]) if glove else String(Data.weapon_stats(String(wp["wid"]), int(wp["rar"]))["name"])
+		var is_gear: bool = wp.has("gear") and Gear.ALL.has(String(wp["gear"]))
+		var is_tune: bool = wp.has("tune") and Data.PERKS.has(String(wp["tune"]))
+		var it := {} if (is_gear or is_tune) else Pack.ground_item(wp)
+		var nm := String(Loot.name_of(Pack.ground_item(wp))) if is_gear else (String(Data.PERKS[String(wp["tune"])]["name"]) if is_tune else Loot.name_of(it))
 		var tw := big.get_string_size(nm, HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x + 10.0
-		var tag := Rect2(sp + Vector2(-tw * 0.5, -16.0), Vector2(tw, 32.0 if glove else 20.0))
+		var tag := Rect2(sp + Vector2(-tw * 0.5, -16.0), Vector2(tw, 32.0 if (is_gear or is_tune) else 20.0))
 		for tries in 4:
 			var bumped := false
 			for o in tags:
@@ -490,17 +493,16 @@ func _draw_world_labels() -> void:
 				break
 		sp.y += tag.position.y - (sp.y - 16.0)
 		tags.append(tag)
-		if glove:
-			# a glove: its name, and which slot it goes in
-			var gd: Dictionary = Gear.ALL[String(wp["gear"])]
-			_ctext(sp, nm, 15, gd["col"], big)
-			_ctext(sp + Vector2(0, 14), ("active  ·  " + Settings.key_cap("gear1")) if Gear.active(String(wp["gear"])) else "passive", 11, Color(INK, 0.75))
-		elif wp.has("val"):
-			# treasure and the Rare Egg: their own names (a valuable has no weapon, it read as a rifle)
-			var it := Pack.ground_item(wp)
-			_ctext(sp, Loot.name_of(it), 16, Loot.col_of(it), big)
+		if is_gear:
+			# a piece of gear: its name, rarity and which slot it goes in
+			_ctext(sp, nm, 15, r["color"], big)
+			_ctext(sp + Vector2(0, 14), Gear.slot_name(String(wp["gear"])) + ((" · " + Settings.key_cap("gear1")) if Gear.active(String(wp["gear"])) else ""), 11, Color(INK, 0.75))
+		elif is_tune:
+			var pd: Dictionary = Data.PERKS[String(wp["tune"])]
+			_ctext(sp, nm, 15, pd["col"], big)
+			_ctext(sp + Vector2(0, 14), "weapon upgrade · walk over it", 11, Color(INK, 0.75))
 		else:
-			_ctext(sp, nm, 16, r["color"], big)
+			_ctext(sp, nm, 16, Loot.col_of(it), big)
 	for k in m.kins:
 		if k.dead or not k.visible or k.state == "shoulder" or cam.is_position_behind(k.position):
 			continue
@@ -1661,7 +1663,7 @@ func _draw_kin_card(sz: Vector2, p: Hunter) -> void:
 func _draw_weapon(sz: Vector2, p: Hunter) -> void:
 	var w := 270.0
 	var r := Rect2(Vector2(sz.x - w - 18, sz.y - 18 - 62), Vector2(w, 62))
-	var rc: Color = Loot.col_of(Loot.of_hand(p)) if Loot.keepable(Loot.of_hand(p)) else Color("e6dccb")
+	var rc: Color = Loot.ELEMENTS[p.welem]["col"] if p.welem != "" else Color("e6dccb")
 	_rounded(r, Color(0.04, 0.05, 0.08, 0.88), 12, Color(rc, 0.45), 1)
 	hover_spots.append([r, "weapon"])
 	c.draw_rect(Rect2(r.position + Vector2(0, 10), Vector2(3, r.size.y - 20)), rc)
@@ -2388,7 +2390,7 @@ func _draw_perk_offer(sz: Vector2) -> void:
 	var total := ids.size() * cw + (ids.size() - 1) * gap
 	var x := sz.x * 0.5 - total * 0.5
 	var y := sz.y - 290.0         # below your hunter, above your perk badges and bars
-	var head: String = {"shrine": "THE SHRINE OFFERS A PERK", "chest": "SOMETHING ELSE IN THE CHEST", "boss": "A BOSS'S POWER", "brute": "SPOILS OF THE BRUTE"}.get(String(off.get("src", "")), "PICK A PERK")
+	var head: String = {"shrine": "THE SHRINE OFFERS A PERK", "chest": "SOMETHING ELSE IN THE CHEST", "boss": "A BOSS'S POWER", "brute": "SPOILS OF THE BRUTE", "level": "LEVEL UP: UPGRADE YOUR WEAPON"}.get(String(off.get("src", "")), "PICK A PERK")
 	_ctext(Vector2(sz.x * 0.5, y - 12), String(head) + "  ·  lasts this expedition", 13, Color(GOLD, 0.95), big)
 	var pulse := 0.5 + 0.5 * sin(m.time * 4.0)
 	for i in ids.size():
@@ -2766,6 +2768,8 @@ func _tip_lines(id: String, p: Hunter) -> Array:
 			out.append([String(pd["desc"]), INK])
 			out.append(["Found this expedition. Gone when it ends.", MUTED])
 		return out
+	if id.begins_with("gslot:"):
+		return GearPanel.tip(p, int(id.substr(6)))
 	if p.ak and id in ["sec", "k1", "r", "dash", "kin_ab", "throw"]:
 		return _arch_tip(id, p)
 	match id:
@@ -2861,19 +2865,18 @@ func _tip_lines(id: String, p: Hunter) -> Array:
 		"pack":
 			out.append(["Backpack  %d/%d" % [p.pack.size(), p.pack_cap], INK])
 			out.append(["Open  ·  %s" % Settings.key_cap("inventory"), MUTED, 12])
-			out.append(["Weapons, gloves and treasure you're carrying home. Extract to keep it all in your armory; die and it stays in your deathbox. Bigger backpacks at the armory.", INK, 14])
+			out.append(["Gear and treasure you're carrying home. Extract to keep it all in your armory; die and it stays in your deathbox. Bigger backpacks at the armory.", INK, 14])
 		"weapon":
 			var wp: Dictionary = p.wpn
-			var hand := Loot.of_hand(p)
-			var rc: Color = Loot.col_of(hand) if Loot.keepable(hand) else Color("e6dccb")
-			out.append([wp["name"], rc])
-			out.append(["%s weapon  ·  reloads by itself when empty" % (String(Data.RARITY[p.wrar]["name"]) if p.wrar > 0 else "Standard"), MUTED, 12])
-			if Loot.keepable(hand) and Loot.sub_of(hand) != "Plain":
-				out.append([Loot.sub_of(hand), Loot.el_col(hand), 13])
+			out.append([wp["name"], Color("e6dccb")])
+			out.append(["Your signature weapon  ·  reloads by itself when empty", MUTED, 12])
+			var ups := WeaponUps.summary(p)
+			if ups != "":
+				out.append([ups, GOOD, 13])
 			var rate := 1.0 / maxf(0.01, float(wp["rate"]))
 			out.append(["%.0f damage a shot  ·  %.1f shots a second  ·  about %d damage a second" % [float(wp["dmg"]), rate, int(float(wp["dmg"]) * rate)], INK, 14])
 			out.append(["Magazine %d  ·  reload %s  ·  range %d tiles" % [int(wp["mag"]), _secs(float(wp["reload"])), int(float(wp.get("range", 10.0)))], MUTED, 13])
-			out.append(["Shots spread while you move or jump. Stand still or crouch to tighten them.", MUTED, 12])
+			out.append(["It's the one weapon you carry; level-ups, chests and tunings on the ground make it stronger.", MUTED, 12])
 		"vitals":
 			out.append(["%s class" % String(p.cls).capitalize(), hc])
 			out.append(["Speed %.1f  ·  %s" % [p.base_speed, String(p.cdat.get("desc", ""))], MUTED, 12])
@@ -3165,7 +3168,7 @@ func _loot_tick(_delta: float) -> void:
 		close_loot()
 		return
 	# rebuild only when what's in it (or what you're holding) changes
-	var sig := str(Life.box_items(m, p, b).map(func(it): return [it["name"], it["upgrade"]])) + str(p.gear) + p.wid + str(p.wrar) + str(p.pack.size())
+	var sig := str(Life.box_items(m, p, b).map(func(it): return [it["name"], it["upgrade"]])) + str(p.gear) + p.wid + str(p.pack.size())
 	if sig != loot_sig:
 		_build_loot()
 
@@ -3175,7 +3178,7 @@ func _build_loot() -> void:
 	if loot_panel and is_instance_valid(loot_panel):
 		loot_panel.queue_free()
 	var items: Array = Life.box_items(m, p, b)
-	loot_sig = str(items.map(func(it): return [it["name"], it["upgrade"]])) + str(p.gear) + p.wid + str(p.wrar) + str(p.pack.size())
+	loot_sig = str(items.map(func(it): return [it["name"], it["upgrade"]])) + str(p.gear) + p.wid + str(p.pack.size())
 	var pc := PanelContainer.new()
 	pc.theme = UI.theme()
 	pc.mouse_filter = Control.MOUSE_FILTER_STOP
@@ -3231,7 +3234,7 @@ func _build_loot() -> void:
 		sub.custom_minimum_size.x = 210
 		col.add_child(sub)
 		row.add_child(col)
-		if it["key"] in ["gear", "weapon"]:
+		if it["key"] == "gear":
 			var tag := UI.label("UPGRADE" if it["upgrade"] else "WORSE", 11, GOOD if it["upgrade"] else MUTED, UI.caps)
 			tag.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 			row.add_child(tag)
@@ -3243,7 +3246,7 @@ func _build_loot() -> void:
 			row.add_child(vt)
 		var itc: Dictionary = it
 		var verb := "Take"
-		if it["key"] in ["gear", "weapon"]: verb = "Swap"
+		if it["key"] == "gear": verb = "Swap"
 		elif it["key"] == "pack" and it.get("full", false): verb = "Swap" if it["upgrade"] else "Full"
 		var take_it := func():
 			if loot_open != null and m.player:
@@ -3334,11 +3337,11 @@ func _item_row(it: Dictionary, buttons: Array, note := "") -> Control:
 	var rs := StyleBoxFlat.new()
 	rs.bg_color = Color(col, 0.09)
 	rs.set_corner_radius_all(9)
-	rs.border_color = Color(Loot.el_col(it), 0.6); rs.border_width_left = 3
+	rs.border_color = Color(Loot.col_of(it), 0.6); rs.border_width_left = 3
 	rs.content_margin_left = 8; rs.content_margin_right = 8; rs.content_margin_top = 5; rs.content_margin_bottom = 5
 	rp.add_theme_stylebox_override("panel", rs)
 	var row := UI.hbox(8); rp.add_child(row)
-	row.add_child(Icons.Glyph.new(Loot.icon_of(it), Loot.el_col(it), 24.0))
+	row.add_child(Icons.Glyph.new(Loot.icon_of(it), Loot.col_of(it), 24.0))
 	var cv := UI.vbox(0); cv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var nm := UI.label(Loot.name_of(it) + (("  ·  " + note) if note != "" else ""), 15, col, UI.semi)
 	nm.autowrap_mode = TextServer.AUTOWRAP_OFF
@@ -3457,7 +3460,7 @@ func close_pack() -> void:
 	pack_panel = null
 
 func _pack_state(p: Hunter) -> String:
-	return str(p.pack.map(func(it): return it.get("uid", ""))) + p.wid + str(p.wrar) + p.welem + str(p.gear) + str(p.pack_cap) + str(p.caught.size())
+	return str(p.pack.map(func(it): return it.get("uid", ""))) + p.wid + p.welem + str(p.gear) + str(p.pack_cap) + str(p.caught.size())
 
 func _build_pack() -> void:
 	if pack_panel and is_instance_valid(pack_panel):
@@ -3469,23 +3472,21 @@ func _build_pack() -> void:
 	head.add_child(_pack_chip(p))
 	var cl := UI.button("✕", func(): close_pack(), 36); cl.flat = true
 	head.add_child(cl)
-	v.add_child(UI.label("In your hands", 12, MUTED, UI.caps))
-	var hand := Loot.of_hand(p)
-	v.add_child(_item_row(hand, [], "" if Loot.keepable(hand) else "always yours"))
+	v.add_child(UI.label("Wearing", 12, MUTED, UI.caps))
 	for g in p.gear:
 		if not (g as Dictionary).is_empty():
-			v.add_child(_item_row(Loot.glove(String(g["id"]), int(g["rar"])), []))
+			v.add_child(_item_row(Loot.gear(String(g["id"]), int(g["rar"])), []))
 	v.add_child(UI.label("Carrying home  ·  extract to keep it all", 12, MUTED, UI.caps))
 	var sl := _scroll_rows(v)
 	var rows: VBoxContainer = sl[1]
 	if p.pack.is_empty():
-		rows.add_child(UI.label("Nothing yet. Weapons, gloves and treasure you pick up go here.", 13, MUTED))
+		rows.add_child(UI.label("Nothing yet. Gear and treasure you pick up go here.", 13, MUTED))
 	for i in p.pack.size():
 		var idx := i
 		var it: Dictionary = p.pack[i]
 		var bts: Array = []
-		if String(it.get("t", "")) in ["weapon", "glove"]:
-			bts.append(["Equip", func(): Pack.use_from_pack(m, m.player, idx); _build_pack(), true])
+		if String(it.get("t", "")) == "gear":
+			bts.append(["Wear", func(): Pack.use_from_pack(m, m.player, idx); _build_pack(), true])
 		bts.append(["Drop", func(): Pack.drop_from_pack(m, m.player, idx); _build_pack()])
 		rows.add_child(_item_row(it, bts))
 	for k in p.pack_cap - p.pack.size():

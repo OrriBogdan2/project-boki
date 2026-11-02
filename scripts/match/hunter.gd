@@ -228,12 +228,10 @@ var drop_follow: Hunter = null  # gliding down in formation behind this squad's 
 var drop_slot := 0            # which slot of the formation
 var drop_solo := false        # broke away from the squad's drop
 var bless_t := 0.0
-var wrar := 0                 # rarity of the weapon in hand, 0 for the one you brought
-var winst: Dictionary = {}    # the weapon in hand as an item you can carry home (Loot), {} for the plain one
-var welem := ""               # its element ("fire", "frost", ...): a rider on every hit (Loot.rider)
-var wuniq := ""               # a named unique's id
+var wup_dmg := 1.0            # your signature weapon's damage from weapon upgrades (WeaponUps): kits scale their own hits by it
+var welem := ""               # its element ("fire", "frost", ...) from a Brand upgrade: a rider on every hit (Loot.rider)
 var el_n := 0                 # attacks made with the element, for "every Nth hit" riders
-var pack: Array = []          # the backpack: weapons, gloves and valuables to carry home (Loot items)
+var pack: Array = []          # the backpack: gear and valuables to carry home (Loot items)
 var pack_cap := 6
 var swap_hold := false
 var dash_at := -9.0           # when the last dash started, for perfect dodges
@@ -264,7 +262,7 @@ func init_hunter(match_node: Node, id: String, team_id: int, class_id: String, n
 	if ka == "?": ka = Arch.pick_for(cls, "%s|%s" % [id, str(match_node.get("seed_val"))])
 	arch = "" if ka == "none" else Arch.fix(ka, cls)
 	wid = Arch.weapon_for(arch, cls, String(kit.get("weapon", ""))) if arch != "" else Data.weapon_for(cls, String(kit.get("weapon", "")))
-	wpn = Data.weapon_stats(wid, 0)
+	wpn = Data.weapon_stats(wid)
 	perk = ""
 	pname = name_txt
 	ctrl = control
@@ -293,7 +291,7 @@ func set_arch(a: String) -> void:
 	if ak: ak.teardown()
 	ak = ArchKit.make(self, arch) if arch != "" else null
 	if arch != "" and not Arch.weapon_ok(arch, wid):
-		equip(Arch.default_weapon(arch), wrar)
+		equip(Arch.signature(arch))
 	_kit_from_weapon()
 
 ## Practice (the Arena and training): become another class and archetype on the spot. Health,
@@ -315,15 +313,16 @@ func reclass(c: String, a: String, w := "") -> void:
 	wid = Arch.weapon_for(arch, cls, w)
 	set_model(Models.hunter(cls, Data.TEAM_COLORS[team % Data.TEAM_COLORS.size()], wid, "", Save.d.get("look", {}) if ctrl == "local" else bot_look, arch))
 	anim = null
-	equip(wid, 0)
+	equip(wid)
 	dashes = max_dashes(); ex_cd = 0.0
 	roll_t = 0.0; stun_t = 0.0; root_t = 0.0
 
-## Swap to a found weapon for the rest of the expedition.
-func equip(w: String, rar: int, with_ammo := -1) -> void:
-	wid = w; wrar = rar
-	winst = {}; welem = ""; wuniq = ""
-	wpn = Data.weapon_stats(w, rar)
+## Puts a weapon in hand with this run's weapon upgrades on it (WeaponUps). A hunter has one
+## signature weapon (Arch.signature), so this is only called to build it, or when practice swaps archetype.
+func equip(w: String, with_ammo := -1) -> void:
+	wid = w
+	wpn = Data.weapon_stats(w)
+	WeaponUps.apply(self)
 	_kit_from_weapon()
 	wbloom = 0.0; warm_t = 0.0; spin = 0.0; spun_t = 0.0; sus_n = 0; mel_hold = 0.0; strike_at_end = {}
 	ammo = int(wpn["mag"]) if with_ammo < 0 else mini(with_ammo, int(wpn["mag"])); reload_t = 0.0; fire_cd = 0.25
@@ -333,8 +332,7 @@ func equip(w: String, rar: int, with_ammo := -1) -> void:
 		for ch in gun.get_children():
 			if ch.name != "Muzzle":
 				ch.queue_free()
-		var acc: Color = Data.RARITY[rar]["color"] if rar > 0 else Data.TEAM_COLORS[team % Data.TEAM_COLORS.size()]
-		Models.gun_parts(gun, w, Models.toon(Color("4a4d5c")), Models.toon(Color("2b2a33")), Models.toon(acc, true, 0.45 if rar > 0 else 0.0))
+		Models.gun_parts(gun, w, Models.toon(Color("4a4d5c")), Models.toon(Color("2b2a33")), Models.toon(Data.TEAM_COLORS[team % Data.TEAM_COLORS.size()], true, 0.0))
 
 ## Chasing down whoever took your kin: 18% faster heading their way. Carrying a stolen kin: 8% slower.
 func _chase_mod(mv: Vector2) -> float:
@@ -358,7 +356,7 @@ func max_dashes() -> float:
 func dash_regen() -> float:
 	# each rank past the first recharges dashes faster; a kin's dodge_regen too (1 = instantly)
 	var base := float(ak.dash_def().get("cd", 9.0)) if ak else (dodge_def.cooldown if dodge_def else DASH_REGEN)
-	return base * (1.0 - 0.15 * float(maxi(0, int(slot_lv.get("dash", 1)) - 1))) * (1.0 - minf(0.9, owner_stat("dodge_regen")))
+	return base * (1.0 - 0.15 * float(maxi(0, int(slot_lv.get("dash", 1)) - 1))) * (1.0 - minf(0.9, owner_stat("dodge_regen") + gear_stat("dodge")))
 
 ## Right click is always your weapon's ability, as left click is its attack.
 func _kit_from_weapon() -> void:
@@ -1416,8 +1414,7 @@ func _loose() -> void:
 		dmg *= float(ak.draw_bonus(t))       # let go right at full draw (the perfect window)
 	var keep := wpn
 	wpn = wpn.duplicate()
-	var rk: float = float(Data.RARITY[clampi(wrar, 0, Data.RARITY.size() - 1)]["dmg"])
-	wpn["dmg"] = dmg * rk; wpn["range"] = rng; wpn["speed"] = spd
+	wpn["dmg"] = dmg * wup_dmg; wpn["range"] = rng; wpn["speed"] = spd
 	_release()
 	wpn = keep
 	if t >= float((stages[-1] as Array)[0]) if not stages.is_empty() else false:
@@ -1684,7 +1681,7 @@ func _emit_shot() -> void:
 func start_reload() -> void:
 	if reload_t > 0.0 or ammo >= int(wpn["mag"]) or downed or wpn.get("melee", false):
 		return
-	reload_t = float(wpn["reload"]) * (1.0 - owner_stat("reload")) * (0.7 if perk_n("quickhands") > 0 else 1.0)
+	reload_t = float(wpn["reload"]) * (1.0 - owner_stat("reload") - gear_stat("reload")) * (0.7 if perk_n("quickhands") > 0 else 1.0)
 	m.sfx("reload", pos, -8.0)
 
 func use_signature() -> void:
@@ -1987,7 +1984,7 @@ func _tick_drink(dt: float) -> void:
 		if tonics > 0:
 			tonics -= 1
 			free_tonics = maxi(0, free_tonics - 1)
-			heal(max_hp * 0.4 * (1.4 if perk_n("remedy") > 0 else 1.0))
+			heal(max_hp * 0.4 * (1.0 + 0.4 * float(perk_n("remedy")) + gear_stat("tonic")))
 			m.sfx("heal", pos, -2.0)
 			m.fx.burst(pos + Vector3(0, 1.2, 0), Color("8ff0a0"), 14, 2.5, 0.5, -3.0)
 
@@ -2951,8 +2948,8 @@ var bot_look: Dictionary = {}  # how a bot hunter looks (random)
 var runner: AbilityRunner     # weapon utility now; kin abilities later
 var dodge_def: AbilityDef     # the class's dodge
 var stats := {}                # this match's counts for challenges (the local player's)
-var gear: Array = [{}, {}]     # two slots of found gear: {id, rar}
-var gear_cd: Array = [0.0, 0.0]
+var gear: Array = Gear.empty_slots()     # five slots of found gear (Gear.SLOTS): {id, rar}
+var gear_cd: Array = [0.0, 0.0, 0.0, 0.0, 0.0]
 
 # ---- run levels: like Supervive, you start each run at level 1 with one skill point and every
 # ability locked. XP comes from fighting (damage, knocks) and a slow trickle; each level gives a
@@ -2976,6 +2973,8 @@ func gain_xp(x: float) -> void:
 	while lvl < XP_TO.size() and xp >= float(XP_TO[lvl]):
 		lvl += 1
 		skill_pts += 1
+		if lvl % 2 == 0 and m and not remote:
+			m.offer_perks(self, "level")      # every other level: a weapon upgrade to choose (WeaponUps)
 		# a gold ring pulse on the hunter that everyone nearby sees
 		if m and m.fx and visible and not unseen:
 			m.fx.ring(pos, 2.0, Color("ffd27a"), 0.4)
@@ -3098,6 +3097,7 @@ func armor_col() -> Color:
 func refresh_gear() -> void:
 	max_armor = round(base_armor * (1.0 + ARMOR_TIER_BONUS * float(armor_tier))) + gear_stat("armor")
 	armor = minf(armor, max_armor)
+	Gear.apply_worn(self)
 
 func gear_stat(k: String) -> float:
 	var t := 0.0
@@ -3127,7 +3127,7 @@ func perk_n(id: String) -> int:
 
 ## Can this perk still be offered to you (not at its stack limit)?
 func perk_open(id: String) -> bool:
-	return perk_n(id) < int(Data.PERKS.get(id, {}).get("max", 1))
+	return perk_n(id) < int(Data.PERKS.get(id, {}).get("max", 1)) and WeaponUps.fits(self, id)
 
 ## Takes a perk for the rest of the expedition. Stats that are worked out once (health, glider,
 ## dash charges, armor) are updated on the spot.
@@ -3142,6 +3142,8 @@ func add_perk(id: String) -> void:
 			glide_max *= 1.6
 		"secondwind":
 			dashes = minf(max_dashes(), dashes + 1.0)
+	if (Data.PERKS[id] as Dictionary).has("wup"):
+		WeaponUps.apply(self)
 	refresh_gear()
 
 func add_stat(k: String, n := 1) -> void:

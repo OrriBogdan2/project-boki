@@ -181,7 +181,7 @@ func _try_crush(t: Ent, dir: Vector2) -> void:
 
 # ------------------------------------------------------------------ LMB: the mace (throw / Crushing Blow)
 func _wk() -> float:
-	return float(Data.RARITY[clampi(h.wrar, 0, Data.RARITY.size() - 1)]["dmg"]) * m.dmg_mult(h)
+	return h.wup_dmg * m.dmg_mult(h)
 
 func lmb_override(held: bool, dt: float) -> bool:
 	if h.wid != "tower_shield":

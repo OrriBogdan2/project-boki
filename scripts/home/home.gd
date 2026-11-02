@@ -107,10 +107,10 @@ func _ready() -> void:
 	var dbg := OS.get_cmdline_user_args()
 	for a in dbg:
 		if a.begins_with("--home-weapon="):
-			# test: wear a given weapon at home (and the class that carries it)
+			# test: wear a given weapon at home (as the archetype whose signature it is)
 			var wk := a.substr(14)
-			for ck in Data.CLASSES:
-				if (Data.CLASSES[ck]["weapons"] as Array).has(wk): Save.d["cls"] = ck
+			for ak0 in Arch.archetypes_of(wk):
+				Save.d["cls"] = Arch.weight(String(ak0)); Save.d["arch"] = ak0
 			Save.d["weapon"] = wk
 			Save.d.erase("loadout")
 			Save.no_write = true
@@ -3606,9 +3606,7 @@ func _open_expedition() -> void:
 		var ck: String = cname_of[nm]
 		Save.d["cls"] = ck
 		Save.d["arch"] = Arch.fix(String(Save.d.get("arch", "")), ck)
-		Save.d["weapon"] = Arch.default_weapon(String(Save.d["arch"]))
-		# weapons are class-locked: an armory weapon for another class drops back to the class weapon
-		if HomeEcon.fix_loadout_class(): _toast("Your armory weapon is for another class: taking the %s instead" % Data.weapon_stats(Data.CLASSES[ck]["weapon"])["name"])
+		Save.d["weapon"] = Arch.signature(String(Save.d["arch"]))
 		Save.save_game()
 		_refresh_player_model()
 		_open_expedition(), {}, 120)
@@ -3621,7 +3619,7 @@ func _open_expedition() -> void:
 	cl.autowrap_mode = TextServer.AUTOWRAP_OFF
 	left.add_child(cl)
 	left.add_child(UI.spacer(2))
-	# the archetype: two per class, each with its own kit and weapon family (docs/ARCHETYPES.md)
+	# the archetype: two per class, each with its own kit and signature weapon (docs/ARCHETYPES.md)
 	left.add_child(UI.section("Archetype"))
 	var arow := UI.hbox(8)
 	var cur_a := Arch.of_save()
@@ -3629,7 +3627,7 @@ func _open_expedition() -> void:
 		var ak: String = a
 		var ab := UI.choice(Arch.name_of(a), a == cur_a, func():
 			Save.d["arch"] = ak
-			Save.d["weapon"] = Arch.default_weapon(ak)
+			Save.d["weapon"] = Arch.signature(ak)
 			Save.save_game()
 			_refresh_player_model()
 			_open_expedition(), 150)
@@ -3640,22 +3638,11 @@ func _open_expedition() -> void:
 	# your abilities before a run: the kit card's compact row (click for the full card)
 	left.add_child(KitCard.strip(cur_a, _open_kit_card))
 	left.add_child(UI.spacer(2))
-	left.add_child(UI.section("Weapon"))
-	var wr := UI.hbox(8)
-	var cur_w := _weapon()
-	for w in Arch.weapons(cur_a):
-		var wd: Dictionary = Data.weapon_stats(w)
-		var wk: String = w
-		var wb := UI.choice(String(wd["name"]), w == cur_w, func():
-			Save.d["weapon"] = wk
-			Save.save_game()
-			_refresh_player_model()
-			_open_expedition(), 128, wk)
-		var stat_s := ("Melee: %s damage per hit, reach %.1f" % [str(snappedf(float(wd["dmg"]), 0.1)), float(wd["range"])]) if wd.get("melee", false) else ("%s damage%s, %d per mag, range %d" % [str(snappedf(float(wd["dmg"]), 0.1)), (" x%d" % int(wd["pellets"])) if wd.has("pellets") else "", int(wd["mag"]), int(wd["range"])])
-		# (no "Right click:" line: with an archetype, right click is the archetype's ability, shown above)
-		wb.tooltip_text = (String(wd.get("desc", "")) + "\n" if wd.has("desc") else "") + stat_s
-		wr.add_child(wb)
-	left.add_child(wr)
+	left.add_child(UI.section("Signature weapon"))
+	var wd: Dictionary = Data.weapon_stats(Arch.signature(cur_a))
+	var wb := UI.choice(String(wd["name"]), true, func(): pass, 200, Arch.signature(cur_a))
+	wb.tooltip_text = (String(wd.get("desc", "")) + "\n" if wd.has("desc") else "") + "The one weapon you carry. It grows during a run: level-ups, chests and tunings upgrade it."
+	left.add_child(wb)
 	var ak := Save.active_kin()
 	if not ak.is_empty():
 		left.add_child(UI.spacer(2))
@@ -3766,7 +3753,7 @@ func _open_hero() -> void:
 			card.custom_minimum_size = Vector2(258, 0)
 			var row := UI.hbox(10)
 			card.add_child(row)
-			var vp := Portraits.make(cls, Data.TEAM_COLORS[0], Arch.default_weapon(ak), Save.d.get("look", {}), ak)
+			var vp := Portraits.make(cls, Data.TEAM_COLORS[0], Arch.signature(ak), Save.d.get("look", {}), ak)
 			card.add_child(vp)
 			var tex := TextureRect.new()
 			tex.texture = vp.get_texture()
@@ -3814,8 +3801,7 @@ func _pick_hero(ak: String) -> void:
 	var same := ak == Arch.of_save()
 	Save.d["cls"] = Arch.weight(ak)
 	Save.d["arch"] = ak
-	Save.d["weapon"] = Arch.default_weapon(ak)
-	if HomeEcon.fix_loadout_class(): pass
+	Save.d["weapon"] = Arch.signature(ak)
 	Save.save_game()
 	_close_panel()
 	if same:
@@ -5891,15 +5877,15 @@ func _econ_tests(dbg) -> void:
 	if "--armory-test" in dbg:
 		if not Save.d["buildings"].has("armory"): Save.d["buildings"].append("armory")
 		Save.d["armory"] = []
-		for t in [["rifle", 2, "fire", ""], ["sniper", 3, "frost", ""], ["", 0, "", "thunderclap"], ["smg", 1, "", ""], ["shotgun", 4, "venom", ""],
-				["longsword", 2, "storm", ""], ["burst_rifle", 3, "", ""], ["greatsword", 2, "void", ""]]:
-			Save.d["armory"].append(Loot.weapon(String(t[0]), int(t[1]), String(t[2]), String(t[3])))
-		var gk: Array = Gear.ALL.keys()
+		for t in [["vest", 2], ["quilted_coat", 3], ["bastion_plate", 4], ["boots", 1], ["windstep_boots", 3], ["quickstep_boots", 2],
+				["tinker_roll", 2], ["satchel", 4], ["field_kit", 1], ["magpie", 3]]:
+			Save.d["armory"].append(Loot.gear(String(t[0]), int(t[1])))
+		var gk: Array = Gear.ids_for(0) + Gear.ids_for(1)
 		for i in mini(4, gk.size()):
-			Save.d["armory"].append(Loot.glove(String(gk[i]), 1 + i % 4))
+			Save.d["armory"].append(Loot.gear(String(gk[i]), 1 + i % 4))
 		Save.d["valuables"] = {"old_coin": 3, "sky_pearl": 1, "kin_idol": 1, "soul_ember": 1}
 		Save.d["scrap"] = 9
-		Save.d["loadout"] = {"weapon": Save.d["armory"][2]["uid"]}
+		Save.d["loadout"] = {"gear2": Save.d["armory"][2]["uid"], "gear3": Save.d["armory"][4]["uid"]}
 		get_tree().create_timer(0.4).timeout.connect(func():
 			hecon.arm_pick = String(Save.d["armory"][2]["uid"])
 			hecon.open_armory())

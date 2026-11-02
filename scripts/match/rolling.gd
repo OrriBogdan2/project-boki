@@ -258,7 +258,7 @@ func _far_spot(cands: Array, taken: Array) -> Vector3:
 		if sc > bs: bs = sc; best = p
 	return best if best != Vector3.INF else m.world.random_ground()
 
-## Where someone went down before you joined: a few gems and sometimes their weapon, out on the ground.
+## Where someone went down before you joined: a few gems and sometimes a piece of their gear, out on the ground.
 func _old_fight_loot(_t_land: float) -> void:
 	var at: Vector3 = m.world.spawns[rng.randi_range(0, m.world.spawns.size() - 1)] if not m.world.spawns.is_empty() else m.world.random_ground()
 	at = m.world.free_spot_near(at + Vector3(rng.randf_range(-8, 8), 0, rng.randf_range(-8, 8)), [], 1.0, 0.45, 8.0)
@@ -267,9 +267,8 @@ func _old_fight_loot(_t_land: float) -> void:
 	for _i in rng.randi_range(2, 5):
 		m.drop("gem", at + Vector3(0, 0.5, 0), maxi(1, int(round(3 * float(m.T.get("loot", 1.0))))))
 	if rng.randf() < 0.45:
-		var keys: Array = Data.weapon_ids()
-		var wk := String(keys[rng.randi() % keys.size()])
-		m.spawn_weapon(wk, mini(Data.RARITY.size() - 1, Data.roll_rarity(rng, 1)), at + Vector3(0.8, 0, 0.3), "", false)
+		var gg := GearDrops.roll_gear(rng, 1, 0, -1)
+		m.spawn_gear(String(gg["id"]), int(gg["rar"]), at + Vector3(0.8, 0, 0.3), "", false)
 
 ## After the world, monsters, chests and the Blight are in: the map as picked over as the session is old,
 ## the Blight told when the earlier squads landed, and the session's events lined up.

@@ -40,7 +40,7 @@ shot. Holds high ground and grapples onto ledges.
 |  |  |
 |---|---|
 | Weight class | Light (124 health, 5.2 m/s, 1 dash charge) |
-| Weapons | Longbow, Sniper (first is the default) |
+| Signature weapon | Longbow (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The warden of high ground. Climbs, reads the field, pins people to walls. |
 | Silhouette | the long weapon over the shoulder |
 | Resource | Focus (max 100) |
@@ -58,7 +58,6 @@ What the in-game kit card (K) says.
 | E: Arrow Rain | Arrow Rain: a wall of falling arrows across their path (damage, slow, healing blighted). |
 | R: Great Arrows | Great Arrows: your next 3 shots need no draw, fly far, pierce and knock back; the third hits hardest. |
 | Weapon: Longbow | Hold to draw in stages: 30, then 60 at full; let go right at full draw (PERFECT) for +25%. |
-| Weapon: Sniper | A visible aim laser, then one heavy round. |
 
 ### Abilities in full
 

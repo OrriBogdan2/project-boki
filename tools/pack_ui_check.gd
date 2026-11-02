@@ -2,7 +2,7 @@ extends RefCounted
 ## --pack-ui-check: the backpack windows take real mouse clicks. A live match (processing, so the
 ## match's own input handling runs too) with a full backpack: a pick-up opens the swap window, and a
 ## mouse click at each drawn row's Drop button swaps that slot for the new thing; the backpack (I)
-## window's Drop and Equip buttons work by click; firing is held while the cursor is over a window;
+## window's Drop and Wear buttons work by click; firing is held while the cursor is over a window;
 ## Esc still closes them. Never touches the save.
 
 var bad := 0
@@ -94,7 +94,7 @@ func _ids(h: Hunter) -> Array:
 
 func _fill(P: Hunter) -> void:
 	P.pack_cap = 4
-	P.pack = [Loot.valuable("old_coin"), Loot.weapon("smg", 1), Loot.valuable("sky_pearl"), Loot.weapon("shotgun", 2, "venom")]
+	P.pack = [Loot.valuable("old_coin"), Loot.gear("quilted_coat", 1), Loot.valuable("sky_pearl"), Loot.gear("windstep_boots", 2)]
 
 func run(mn: Node) -> void:
 	main = mn
@@ -193,7 +193,7 @@ func run(mn: Node) -> void:
 		ok(false, "loot window: one Swap button for the shard (got %d)" % takes.size())
 	hud.close_loot()
 	m.boxes.erase(bx)
-	# 4. the backpack window (I) on a full pack: Drop and Equip by click
+	# 4. the backpack window (I) on a full pack: Drop and Wear by click
 	_fill(P)
 	await _key(KEY_I)
 	await _frames(4)
@@ -209,15 +209,16 @@ func run(mn: Node) -> void:
 	else:
 		ok(false, "backpack: 4 Drop buttons drawn (got %d)" % pd.size())
 	await _settle(hud.pack_panel)
-	var eq := _buttons(hud.pack_panel, "Equip")
+	var eq := _buttons(hud.pack_panel, "Wear")
 	if not eq.is_empty():
-		var w0 := P.wid
+		var w0 := P.gear.map(func(g): return String((g as Dictionary).get("id", "")))
 		var at: Vector2 = _screen_mid(eq[0])
 		await _click(at)
 		await _frames(3)
-		ok(P.wid != w0, "backpack: clicking Equip swaps the weapon in your hands (%s -> %s, clicked %s, pack %s)" % [w0, P.wid, at, str(P.pack.map(func(it): return Loot.name_of(it)))])
+		var w1 := P.gear.map(func(g): return String((g as Dictionary).get("id", "")))
+		ok(w1 != w0, "backpack: clicking Wear puts the gear on (%s -> %s, clicked %s)" % [str(w0), str(w1), at])
 	else:
-		ok(false, "backpack: an Equip button is drawn")
+		ok(false, "backpack: a Wear button is drawn")
 	await _key(KEY_ESCAPE)
 	ok(not hud.pack_open(), "Esc closes the backpack")
 	print("PACKUI CHECK DONE, failures: ", bad)

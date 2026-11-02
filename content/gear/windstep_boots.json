@@ -1,0 +1,15 @@
+{
+ "id": "windstep_boots",
+ "name": "Windstep Boots",
+ "short": "Windstep",
+ "verb": "",
+ "cd": 0,
+ "slot": "boots",
+ "col": "9fe8ff",
+ "stats": {
+  "glide_speed": 0.1,
+  "heat": 0.15
+ },
+ "icon": "updraft",
+ "desc": "Light soles for the air: a faster glide that runs hot later."
+}
