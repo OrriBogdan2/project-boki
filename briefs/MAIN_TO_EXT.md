@@ -426,3 +426,13 @@ Main-side changes on integ62 (sync62, shipping soon):
     - Her stacks must be readable on the target: a marker over the target's head showing the stack count, plus spark effects on the target that grow with the stacks.
     - Her dash deals double damage, and it resets ONLY when it hits a target at 4 stacks (full). Check the original for the exact stack cap and rules.
     - Today that's missing or different: verify and match.
+    - Vireo's E: in the original you could flick the drag in any direction, pulling caught foes toward you or throwing them away (check the exact input: hold-aim-release or a recast direction). Match it.
+    - Her E's area is a circle with its own look. The owner says it reads as a generic ring today.
+
+15. **Ability animations and effects across all heroes must be unique-looking.** The owner keeps seeing generic circles/rings, generic walls and white flashing projectiles. For every ability give:
+    - its own shape language and colour
+    - a wind-up tell
+    - an impact effect
+    - a hero pose (KMOVES)
+
+    Pool the effects (no per-frame node creation). Treat this as part of each hero's fidelity work, not a separate pass.
