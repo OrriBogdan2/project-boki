@@ -74,4 +74,4 @@ snapping round). `thf_volley_wind` went with the R. Strips: `--arena-demo=anim_<
   `on_dash` (no charge, 2.8m).
 - No `"r"` in the JSON: `ArchKit.use_r` refuses the press, the kit card's R page is the Merge, and the wiki
   generator shows "Boki Merge" for the R slot.
-- Net: the kit move id rides the hunter snapshot from Net 0.10.1, so remote players see the flips and the burst pose.
+- Net: the kit move id rides the hunter snapshot from Net 0.11.1, so remote players see the flips and the burst pose.

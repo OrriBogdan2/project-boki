@@ -667,9 +667,9 @@ var anim_id := ""              # the kit move playing on the hunter (HunterAnim.
 var anim_at := -9.0
 
 ## Plays one of the kit's full-body moves on the hunter (anticipation, key pose, recovery).
-## The kit's full-body move on the wire (Net 0.10.1): the move id and its age in seconds, after the
+## The kit's full-body move on the wire (Net 0.11.1): the move id and its age in seconds, after the
 ## state array's Boki fields (index NET_MOVE_AT). Empty id: nothing playing (an expired move is not sent).
-const NET_MOVE_AT := 28
+const NET_MOVE_AT := 31
 const NET_MOVE_LIFE := 3.0     # seconds a move is still worth sending (the longest is about 2.5s)
 
 static func net_move(h: Hunter) -> Array:

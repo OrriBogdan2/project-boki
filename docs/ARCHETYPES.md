@@ -1120,8 +1120,8 @@ uses `jug_slam`). Thief: SMG recoil and the twin blades' arcs as before, `thf_va
 the dash's direction), `thf_primed`, `thf_bola` (whirled, then slung: the Bola leaves the hand 0.14s
 in), `thf_knife` (cocked by the ear; the knife leaves 0.12s in), `thf_arrive`, `thf_volley` (0.7s, the
 Jackpot burst). Strips: `--arena-demo=anim_<move>` (see `ArenaDemo.ANIM_DEMO`). Kit moves play on the
-hunter's own game and bots, and since Net 0.10.1 on remote players too: the move id and its age ride the
-hunter snapshot (indices 28-29, `ArchKit.net_move` / `apply_net_move`).
+hunter's own game and bots, and since Net 0.11.1 on remote players too: the move id and its age ride the
+hunter snapshot (indices 31-32, `ArchKit.net_move` / `apply_net_move`).
 
 Ranks: Smash rank 3 +20% on every Smash and the sweet-spot crash (levels 2-3, and Volcanic Rebuke); Rampage
 rank 3 a third charge (level 2); Warchain rank 3 refunds 33% when it hooks a foe (level 4).
@@ -1168,7 +1168,7 @@ rank 3 a third charge (level 2); Warchain rank 3 refunds 33% when it hooks a foe
 - The wiki gives no Malice stack cap or duration (ours: 5 and 4s) and no Blazing Spirit duration
   (ours: 6s Enraged). Online, Grounded, blight and Shred go through Net event `["kst", nid, kind,
   seconds, k]` (`KitStatus`); **Net.VERSION 0.6.0 -> 0.7.0**. The kit move id rides the hunter snapshot
-  from **Net.VERSION 0.10.1**.
+  from **Net.VERSION 0.11.1**.
 
 ### Numbers against the other four (TTK)
 

@@ -280,7 +280,7 @@ func _thief() -> void:
 	K.add_mark(T, 5, true)
 	step(m, 0.6)
 	ok("thief Jackpot: resting, a second fifth Mark does nothing", K.jackpots == jb0 + 1 and K.jackpot_hits - jk0 == 4)
-	# Net 0.10.1: the kit's full-body move (id and age) rides the hunter snapshot, so remote players see the pose
+	# Net 0.11.1: the kit's full-body move (id and age) rides the hunter snapshot, so remote players see the pose
 	K.play("thf_vault_f")
 	step(m, 0.2)
 	var nm := ArchKit.net_move(P)
@@ -289,7 +289,7 @@ func _thief() -> void:
 	pk.resize(ArchKit.NET_MOVE_AT)
 	pk.append_array(nm)
 	ArchKit.apply_net_move(P, pk)
-	ok("net: the kit move id and age ride the hunter snapshot", String(nm[0]) == "thf_vault_f" and K.anim_id == "thf_vault_f" and absf((m.time - K.anim_at) - float(nm[1])) < 0.01 and Net.VERSION.naturalnocasecmp_to("0.10.1") >= 0, "%s %s" % [str(nm), Net.VERSION])
+	ok("net: the kit move id and age ride the hunter snapshot", String(nm[0]) == "thf_vault_f" and K.anim_id == "thf_vault_f" and absf((m.time - K.anim_at) - float(nm[1])) < 0.01 and Net.VERSION.naturalnocasecmp_to("0.11.1") >= 0, "%s %s" % [str(nm), Net.VERSION])
 	# a knock (Resolve) heals you a quarter of your health in all
 	P.hp = P.max_hp * 0.5
 	var php := P.hp

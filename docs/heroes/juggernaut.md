@@ -85,4 +85,4 @@ Finishing Slam and the Cinder Spin everywhere the player can read them (content,
   old `cd["r"]`.
 - No `"r"` in the JSON: `ArchKit.use_r` refuses the press, the kit card's R page is the Merge, and the wiki
   generator shows "Boki Merge" for the R slot.
-- Net: the kit move id rides the hunter snapshot from Net 0.10.1, so remote players see the slams and lunges.
+- Net: the kit move id rides the hunter snapshot from Net 0.11.1, so remote players see the slams and lunges.
