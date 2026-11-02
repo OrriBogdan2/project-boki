@@ -273,7 +273,7 @@ func run(m: Node) -> void:
 	var texts := []
 	for o in [{"how": "wild", "where": {"island": "The Heart", "map": "Skyreach", "tier_name": "The Meadow"}}, {"how": "boss_egg", "where": {"lair": ""}}, {"how": "starter"}, {"how": "market", "from": "Wren"}, {"how": "taken", "from": "Vexa"}, {}]:
 		texts.append(AboutView.origin_text({"origin": o}))
-	ok(texts[0] == "Tamed in the wild at The Heart, Skyreach (The Meadow)" and texts[5] == "From before records were kept", "origins read well: %s" % str(texts))
+	ok(texts[0] == "Scanned in the wild at The Heart, Skyreach (The Meadow)" and texts[5] == "From before records were kept", "origins read well: %s" % str(texts))
 	ok(AboutView.parents_text(baby).begins_with("Ma and Pa"), "parents shown: %s" % AboutView.parents_text(baby))
 	box.free(); box2.free()
 	print("UNIQUE DONE, failures: %d" % bad)

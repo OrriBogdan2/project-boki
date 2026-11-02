@@ -9,7 +9,7 @@ _Generated from `scripts/core/data.gd`, `scripts/match/life.gd`, `content/rules`
 |---|---|---|---|---|---|---|
 | The Meadow | x1 | x1 | 1 to 3 | 0 extractions | no | Gentle islands. Your Boki are always safe here: lose your loot, never your Boki. |
 | Dusk Isles | x1.45 | x1.75 | 2 to 5 | 2 extractions | in your deathbox | Tougher monsters, more loot, rarer Boki. Boki you have on you drop into your deathbox when you die, and anyone can loot them. Boki out of your hands escape. |
-| The Hollow | x2 | x2.75 | 4 to 8 | 5 extractions | can be captured | Brutal and rich. Boki on you drop into your deathbox and can be looted, and Boki out of your hands can be captured (hold the interact key for 3s). |
+| The Hollow | x2 | x2.75 | 4 to 8 | 5 extractions | can be captured | Brutal and rich. Boki on you drop into your deathbox and can be looted, and a Boki left out in the world can be scanned and taken (knock it out, then hold the interact key). |
 
 ## Match
 
