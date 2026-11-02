@@ -21,9 +21,9 @@ static func kit(home: Node, ak: String) -> void:
 ## Plays `ak` from now on: saved as the expedition pick (weight, class, its weapon family), and the
 ## hunter on the farm turns into it with a flash, a puff and a sound.
 static func pick(home: Node, ak: String) -> void:
+	var same := ak == Arch.of_save()
 	if not Arch.exists(ak) or not HeroGrid.save_pick(ak):
 		return
-	var same := ak == Arch.of_save()
 	home._close_panel()
 	if same:
 		return

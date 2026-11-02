@@ -20,6 +20,7 @@ func run(main: Node) -> void:
 	var k := Save.new_kin("zapple", "Pip"); d["roster"].append(k); d["active"] = k["uid"]
 	d["tutorial"] = {"hatched": true, "intro": true, "home": true, "day1_done": true}
 	d["cls"] = "medium"; d["arch"] = "gunslinger"
+	d["classes"] = ClassUnlock.legacy()      # (this check is about the practice picker: an old save, every class open; locked classes: --class-unlock-check)
 	Save.d = d
 	var areas := {
 		"training": {"training": true, "practice": true},

@@ -327,9 +327,10 @@ func _home(tree: SceneTree) -> void:
 	# the Classes screen: play an open class from it
 	HomeClasses.open(hm)
 	await tree.process_frame
+	var old_model: Node3D = hm.player
 	HomeClasses._click(hm, "gunslinger")
 	await tree.process_frame
-	ok(Arch.of_save() == "gunslinger", "an open class can be picked from the Classes screen")
+	ok(Arch.of_save() == "gunslinger" and hm.player != old_model and is_instance_valid(hm.player), "an open class can be picked from the Classes screen, and the farm hunter turns into it")
 	# training yard "set as my class" refuses a weight with nothing open
 	Save.d["classes"]["open"] = ["thief"]
 	# a reveal waiting when you arrive home
