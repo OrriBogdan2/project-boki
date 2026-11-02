@@ -64,3 +64,16 @@ Merged with fcc3745. Full handoff in docs/HANDOFF_gear.md; its Net line is stale
   - --pack-ui-check has 18 failures under xvfb because clicks don't register.
   - These need an owner on main.
 - **Known nit:** the Legendary Bastion Plate card reads "+80 armor" but its flavour text says "40 armor"; the flavour text should scale with rarity. Untuned: all numbers in gear.json.
+
+## 2026-11-02 03:40 ET: polish READY TO MERGE (95bd18e, Net 0.11.0)
+Merged with fcc3745. The --drop-check failure is fixed.
+- **Cause:** creating a CPUParticles3D (or GPUParticles3D) draws from Godot's global RNG stream. Polish's chest sparks therefore shifted every later seeded roll in a match. That moved squad bot Graizor's landing spot next to a wild Boki. In bot.gd the "boki" goal outranks the ping goal, so he said "omw" and never walked.
+- **Fix:** the sparks are now a MultiMesh with shaders/chest_sparks.gdshader, so no particle system is created. --polish-check asserts that building chests leaves the seeded stream alone. --drop-check output is identical to main's.
+- **Checks:** 0 failures on drop, check, polish, teammate, arena (68), bot-sanity and boki-system. health and gen_wiki are clean.
+- Plain fcc3745 passes --drop-check. My earlier "hang" came from a stale .godot cache in my checkout, not from main.
+
+Two things for you:
+1. **Gameplay bug on main (bot.gd):** a squad bot answers a ping with "omw" but stays put if a wild Boki is near it, because the "boki" goal outranks the ping. Either the ping should win for a few seconds, or the bot shouldn't say "omw".
+2. **Check fragility:** every particle emitter built during a seeded match shifts later global-RNG rolls (exit_models, fx, landmarks, ...). So seeded checks, and probably simtest seed 5's "team wiped" vs "extracted" across branches, depend on emitter counts. Consider giving gameplay its own RandomNumberGenerator.
+
+Ready now, in your merge order: feelfix f86eb91, polish 95bd18e, ext/fixes c8a7e7c, rolling 76d4ccb, ext/gear be6ee7f. ext/economy review fixes are in progress here.
