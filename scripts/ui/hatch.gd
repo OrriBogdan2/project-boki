@@ -29,7 +29,7 @@ var cam: Camera3D
 var fx: Fx
 var eggs: Array = []          # {node, base, data}
 var chosen := -1
-var stage := "intro"          # intro | pick | warm | hatching | name
+var stage := "intro"          # intro | class (a new save picks its starter class) | create | pick | warm | hatching | name
 var story_i := 0
 var story_lbl: Label
 var story_box: Control
@@ -356,7 +356,9 @@ func _end_intro() -> void:
 		if c: c.queue_free()
 	if story_box: story_box.queue_free()
 	title.get_parent().visible = true
-	if not Save.d.has("look") or edit_only or "--create" in OS.get_cmdline_user_args():
+	if ClassUnlock.needs_starter() and not edit_only:
+		_show_class_pick()
+	elif not Save.d.has("look") or edit_only or "--create" in OS.get_cmdline_user_args():
 		_show_create()
 	else:
 		cam_to = Vector3(0, 3.6, 6.4)
@@ -364,7 +366,7 @@ func _end_intro() -> void:
 
 var turning := false
 func _unhandled_input(event: InputEvent) -> void:
-	if stage == "create" and preview:
+	if (stage == "create" or stage == "class") and preview:
 		# drag with the mouse (or hold A / D) to turn your hunter round
 		if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 			turning = event.pressed
@@ -396,6 +398,45 @@ func _clear_bottom() -> void:
 	for ch in bottom.get_children():
 		ch.queue_free()
 
+# ---- your class (a new save picks one of the starters; ClassUnlock, ClassPick)
+func _show_class_pick(on := "") -> void:
+	stage = "class"
+	if on == "" or not ClassUnlock.starters().has(on):
+		on = String(ClassUnlock.starters()[0])
+	Save.d["arch"] = on; Save.d["cls"] = Arch.weight(on); Save.d["weapon"] = Arch.signature(on)
+	if look.is_empty():
+		look = Models.clean_look(Save.d.get("look", {}))
+	title.text = "Choose your class"
+	if sub_lbl: sub_lbl.text = "Who you play in a match. Your Boki comes next."
+	_top_over(0.5)
+	_clear_bottom()
+	for e in eggs: (e["holder"] as Node3D).visible = false
+	_rebuild_preview()
+	preview.position = Vector3(0.0, 0, 1.6)
+	cam_to = Vector3(0, 1.7, 5.2)
+	look_at_t = Vector3(0.0, 1.0, 1.6)
+	bottom.add_child(ClassPick.row(on, func(id): Sfx.play("hover", null, -6.0); _show_class_pick(id)))
+	var go := UI.primary("Start as %s" % Arch.name_of(on), func():
+		ClassUnlock.choose_starter(on)
+		Save.save_game()
+		Sfx.play("click")
+		if preview: preview.queue_free()
+		preview = null
+		for e in eggs: (e["holder"] as Node3D).visible = true
+		if sub_lbl: sub_lbl.text = "Every Boki is different. It will remember how you treat it."
+		_end_class_pick(), 260)
+	bottom.add_child(go)
+
+## After the class: make your hunter if you have not, else straight to the eggs.
+func _end_class_pick() -> void:
+	if not Save.d.has("look") or "--create" in OS.get_cmdline_user_args():
+		_show_create()
+	else:
+		stage = "pick"
+		title.text = "Choose your first Boki"
+		cam_to = Vector3(0, 3.6, 6.4)
+		_show_pick()
+
 # ---- your hunter
 const LOOK_ROWS := [["race", "Race", Models.LOOK_RACES], ["gender", "Gender", Models.LOOK_GENDERS], ["body", "Body", Models.LOOK_BODIES], ["face", "Face", Models.LOOK_FACES],
 	["detail", "Details", Models.LOOK_DETAILS], ["skin", "Skin", Models.LOOK_SKIN], ["hair", "Hair", Models.LOOK_HAIRS], ["hair_col", "Hair colour", Models.LOOK_HAIR], ["outfit", "Outfit", Models.LOOK_OUTFITS]]
@@ -423,18 +464,21 @@ func _show_create() -> void:
 	card.custom_minimum_size = Vector2(500, 0)
 	create_box = card
 	var v := UI.vbox(8); card.add_child(v)
-	# the archetype: who you are in a match (its silhouette, gear and weapon family always read true)
+	# the class: who you are in a match (its silhouette, gear and weapon family always read true). Only
+	# the open ones are in the stepper (a new save has just its starter)
 	var cur_a := Arch.of_save()
 	var ar := UI.hbox(8)
-	var al := UI.label("Archetype", UI.T_BODY, UI.MUTED); al.custom_minimum_size.x = 120
+	var al := UI.label("Class", UI.T_BODY, UI.MUTED); al.custom_minimum_size.x = 120
 	al.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	ar.add_child(al)
-	ar.add_child(UI.icon_button("back", func(): _step_arch(-1), "Previous", 12.0))
+	if ClassUnlock.open_ids().size() > 1:
+		ar.add_child(UI.icon_button("back", func(): _step_arch(-1), "Previous", 12.0))
 	var av := UI.label(Arch.name_of(cur_a), UI.T_BODY, Arch.color(cur_a), UI.semi); av.custom_minimum_size.x = 170
 	av.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	av.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	ar.add_child(av)
-	ar.add_child(UI.icon_button("next", func(): _step_arch(1), "Next", 12.0))
+	if ClassUnlock.open_ids().size() > 1:
+		ar.add_child(UI.icon_button("next", func(): _step_arch(1), "Next", 12.0))
 	v.add_child(ar)
 	var ad := Arch.def(cur_a)
 	var adl := UI.label("%s  ·  %s\n%s" % [String(Data.CLASSES[Arch.weight(cur_a)]["name"]), " / ".join(Arch.weapons(cur_a).map(func(w): return String(Data.weapon_stats(w)["name"]))), String(ad.get("fantasy", ""))], UI.T_SMALL, UI.ACCENT_HI)
@@ -526,9 +570,9 @@ func _top_over(x_frac: float) -> void:
 		top_box.anchor_left = x_frac
 		top_box.anchor_right = x_frac
 
-## Steps through the six archetypes; the class (weight) and weapon follow it.
+## Steps through the open classes; the weight and weapon follow it.
 func _step_arch(d: int) -> void:
-	var ids := Arch.ids()
+	var ids := ClassUnlock.open_ids()
 	var i := posmod(ids.find(Arch.of_save()) + d, ids.size())
 	var a := String(ids[i])
 	Save.d["arch"] = a
@@ -554,7 +598,7 @@ func _rebuild_preview() -> void:
 		preview_yaw = preview.rotation.y
 		preview.queue_free()
 	var pa := Arch.of_save()
-	look.erase("arch")      # the archetype's gear is never part of the look
+	look.erase("arch")      # the class's gear is never part of the look
 	preview = Models.hunter(Data.class_of_save(), Data.TEAM_COLORS[0], Arch.weapon_for(pa, Data.class_of_save(), String(Save.d.get("weapon", ""))), "", look, pa)
 	preview.position = Vector3(0.8, 0, 1.6)
 	preview.rotation.y = preview_yaw
@@ -693,7 +737,7 @@ func _process(delta: float) -> void:
 	if ship:
 		ship.position.x += delta * 1.6
 		if ship.position.x > 60.0: ship.position.x = -60.0
-	if stage == "create":
+	if stage == "create" or stage == "class":
 		cam.look_at(look_at_t)
 		if preview and not (get_viewport().gui_get_focus_owner() is LineEdit):
 			preview.rotation.y += (Input.get_axis("left", "right")) * delta * 2.5

@@ -667,6 +667,7 @@ func _ready_rest() -> void:
 			"Boki in the burrow sleep: they don't get hungry and don't need looking after. Swap them out whenever you like, or expand the cottages for more room."])
 	if visit.is_empty():
 		hecon.show_away()
+		ClassReveal.maybe_show(self)     # a class this run opened steps into the light (ClassUnlock)
 	if not visit.is_empty():
 		pass
 	elif hb.needs_making():
@@ -3599,18 +3600,22 @@ func _open_expedition() -> void:
 	var cur_c := Data.class_of_save()
 	var cols := UI.hbox(UI.GAP_BIG + 8)
 	v.add_child(cols)
-	# left: who you are (class, weapon, kin)
+	# left: who you are (weight, class, weapon, kin)
 	var left := UI.vbox(10); left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	cols.add_child(left)
-	left.add_child(UI.section("Class"))
+	left.add_child(UI.section("Weight"))
 	var cnames: Array = []
 	var cname_of := {}
 	for c in ["light", "medium", "heavy"]:
 		cnames.append(String(Data.CLASSES[c]["name"])); cname_of[String(Data.CLASSES[c]["name"])] = c
 	var ctabs := UI.tabs(cnames, String(Data.CLASSES[cur_c]["name"]), func(nm):
 		var ck: String = cname_of[nm]
+		var open_a := ClassUnlock.fix(String(Save.d.get("arch", "")), ck)      # (only a class that is open)
+		if open_a == "":
+			_toast("No %s weight class is open yet. See Hero, then Classes and goals." % String(Data.CLASSES[ck]["name"]).to_lower())
+			return
 		Save.d["cls"] = ck
-		Save.d["arch"] = Arch.fix(String(Save.d.get("arch", "")), ck)
+		Save.d["arch"] = open_a
 		Save.d["weapon"] = Arch.signature(String(Save.d["arch"]))
 		Save.save_game()
 		_refresh_player_model()
@@ -3624,8 +3629,8 @@ func _open_expedition() -> void:
 	cl.autowrap_mode = TextServer.AUTOWRAP_OFF
 	left.add_child(cl)
 	left.add_child(UI.spacer(2))
-	# the archetype: two per class, each with its own kit and signature weapon (docs/ARCHETYPES.md)
-	left.add_child(UI.section("Archetype"))
+	# the class: four per weight, each with its own kit and signature weapon (docs/ARCHETYPES.md); locked ones are greyed
+	left.add_child(UI.section("Class"))
 	var arow := UI.hbox(8)
 	var cur_a := Arch.of_save()
 	for a in Arch.of_class(cur_c):
@@ -3636,8 +3641,10 @@ func _open_expedition() -> void:
 			Save.save_game()
 			_refresh_player_model()
 			_open_expedition(), 150)
+		if not ClassUnlock.is_open(ak):
+			ab.disabled = true
 		var adf := Arch.def(a)
-		ab.tooltip_text = "%s\nDash: %s  ·  Passive: %s\nRMB: %s  ·  E: %s  ·  R: Boki Merge" % [String(adf.get("fantasy", "")), String(adf["dash"]["name"]), String(adf["passive"]["name"]), String(adf["rmb"]["name"]), String(adf["e"]["name"])]
+		ab.tooltip_text = ("Locked: %s\n" % ClassUnlock.requirement(ak) if ab.disabled else "") + "%s\nDash: %s  ·  Passive: %s\nRMB: %s  ·  E: %s  ·  R: Boki Merge" % [String(adf.get("fantasy", "")), String(adf["dash"]["name"]), String(adf["passive"]["name"]), String(adf["rmb"]["name"]), String(adf["e"]["name"])]
 		arow.add_child(ab)
 	left.add_child(arow)
 	# your abilities before a run: the kit card's compact row (click for the full card)

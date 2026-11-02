@@ -6048,6 +6048,7 @@ func _finish() -> void:
 		if not opts.get("tutorial", false) and not opts.get("loaner", false):
 			r["rift_keys"] = player.rift_keys if result.get("extracted", false) else 0
 		r["stats"] = player.stats.duplicate()
+		r["lvl"] = player.lvl      # (class unlock goals: best level in a match)
 		# weapons, gloves and treasure: home to the armory if you made it out, else what stayed behind
 		if result.get("extracted", false):
 			r["haul"] = Pack.haul(player)

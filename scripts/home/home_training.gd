@@ -561,8 +561,12 @@ func open_tryon() -> void:
 ## The class you're trying becomes the one you take on expeditions (with its archetype's signature weapon).
 func set_my_class() -> void:
 	var cls := _cls()
+	var open_a := ClassUnlock.fix(String(Save.d.get("arch", "")), cls)     # (a locked class can be tried here, not taken on expeditions)
+	if open_a == "":
+		h._toast("That weight has no open class yet. Locked classes stay playable in the Arena.")
+		return
 	Save.d["cls"] = cls
-	Save.d["arch"] = Arch.fix(String(Save.d.get("arch", "")), cls)
+	Save.d["arch"] = open_a
 	Save.d["weapon"] = Arch.signature(String(Save.d["arch"]))
 	Save.save_game()
 	h._toast("You're a %s now, carrying the %s" % [Data.CLASSES[cls]["name"], String(Data.weapon_stats(String(Save.d["weapon"])).get("name", "class weapon"))])

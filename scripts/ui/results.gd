@@ -77,6 +77,7 @@ func show_result(r: Dictionary) -> void:
 		one.add_child(UI.label(str(t[1]), UI.T_SMALL, UI.INK, UI.semi))
 		small.add_child(one)
 	v.add_child(small)
+	v.add_child(ClassCard.results_strip(s))
 	if won:
 		var chips: Array = []
 		if int(s["gems"]) > 0:

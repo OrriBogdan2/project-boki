@@ -131,7 +131,7 @@ func apply_result(r: Dictionary) -> Dictionary:
 	var won: bool = r.get("extracted", false)
 	# lifetime counts for challenges
 	var ms: Dictionary = r.get("stats", {})
-	for k in ["mobs", "rings", "feathers", "staggers", "slams", "spikes"]:
+	for k in ["mobs", "rings", "feathers", "staggers", "slams", "spikes", "bosses"]:
 		if ms.has(k): Progress.add(k, int(ms[k]))
 	Progress.add("glide_s", int(float(ms.get("glide_t", 0.0))))
 	Progress.add("knocks", int(r.get("knocks", 0)))
@@ -291,6 +291,7 @@ func apply_result(r: Dictionary) -> Dictionary:
 				p["wet"] = 0
 			if int(p["stage"]) == grow:
 				out["crops_ready"] += 1
+	out["class_unlock"] = ClassUnlock.after_match(r)     # account XP, and any class this run opened (the reveal plays at home)
 	# the floor: nobody is left with no Boki and no way to play (Lifeline)
 	out["floor"] = Lifeline.check()
 	Save.save_game()
