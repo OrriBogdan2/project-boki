@@ -2839,6 +2839,7 @@ func _boss_check() -> void:
 			print("BOSS  (phases %d %d, invul %s, enraged %s, hp %d/%d, dead %s, damage by team %s, feed %s)" % [p1, p2, invul_ok, enr, int(b.hp), int(b.max_hp), b.dead, str(b.damage_by), str(m.feed_all.slice(-8))])
 		ok.call(atks.size() >= 3, "%s used %d attacks: %s" % [b.md["name"], atks.size(), str(atks.keys())])
 		var w0 := m.wpicks.size()
+		var brands0 := P.perks.filter(func(k): return String(k).begins_with("brand_")).size()      # (a Brand dropped where you stand is taken on the spot)
 		spot.call(P, L["c"] + Vector3(L["out"].x, 0, L["out"].y) * 3.0)     # (a shove may have sent you out of the lair)
 		P.lvl = 1; P.xp = 0.0
 		var xp0 := P.xp
@@ -2865,7 +2866,8 @@ func _boss_check() -> void:
 		spot.call(P, L["c"] + Vector3(L["out"].x, 0, L["out"].y) * 3.0)
 		# a small pile, all of it good, and the egg on its own spot a few steps away
 		var pile: Array = pile_now.filter(func(wp): return not wp.get("egg", false))
-		var usable: bool = pile.any(func(wp): return wp.has("gear") and int(wp["rar"]) >= 3) and pile.any(func(wp): return wp.has("tune"))
+		var took_brand: bool = P.perks.filter(func(k): return String(k).begins_with("brand_")).size() > brands0
+		var usable: bool = pile.any(func(wp): return wp.has("gear") and int(wp["rar"]) >= 3) and (pile.any(func(wp): return wp.has("tune")) or took_brand)
 		var good: bool = pile.all(func(wp): return int(wp["rar"]) >= 3 if not wp.has("val") else Loot.value(Pack.ground_item(wp)) >= 40)
 		var apart := 99.0
 		if ew != null:
