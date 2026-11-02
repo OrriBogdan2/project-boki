@@ -74,7 +74,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | E | cooldown 10.5s -> 8.5s, damage and shield +25%. | cooldown 10.5s -> 6.5s, damage and shield +50%; refunds 25% of the cooldown when it stokes. |
 | R (ultimate) |  |  |
 
-**Suggested level-up order** (what bots follow): rmb > Dash (Shift) > E > rmb > Dash (Shift) > E > rmb > Dash (Shift) > E > Glove (Q).
+**Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > Glove (Q).
 
 ### What enemies can read
 

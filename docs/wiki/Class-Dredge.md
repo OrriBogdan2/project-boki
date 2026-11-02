@@ -74,7 +74,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | E | cooldown 10s -> 8.5s, damage +15%, stun +0.1s. | cooldown 10s -> 7s, damage +30%; cast in the air, up to +75% damage by height. |
 | R (ultimate) |  |  |
 
-**Suggested level-up order** (what bots follow): rmb > e > Dash (Shift) > rmb > e > Dash (Shift) > rmb > e > Dash (Shift) > Glove (Q).
+**Suggested level-up order** (what bots follow): RMB > E > Dash (Shift) > RMB > E > Dash (Shift) > RMB > E > Dash (Shift) > Glove (Q).
 
 ### What enemies can read
 
