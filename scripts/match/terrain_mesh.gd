@@ -102,13 +102,26 @@ func _emit(chunk: int) -> void:
 			_cell(cx, cz)
 		if chunk > 0 and cur.x != -99: _ranges.append([cur, start, V.size()])
 	await W._slice()
-	for si in W.stairs:
+	# each flight is drawn as one piece across its whole width (its steps run unbroken from one side
+	# wall to the other), not tile by tile: per-tile steps restarted their stones, joints and landing
+	# at every tile edge, so a 5-wide flight read as five one-block stairs side by side
+	for F in PolishTools.stair_flights(W):
 		await W._slice()
-		var i: int = si
-		if W.kind[i] != W.T_VOID:
-			var s0 := V.size()
-			_stairs(i % w, i / w, W.stairs[i], W.level[i] * LEVEL)
-			if chunk > 0: _ranges.append([Vector2i((i % w) / chunk, (i / w) / chunk), s0, V.size()])
+		var tiles: Array = F["tiles"]
+		var lv0: int = W.level[W.idx(tiles[0].x, tiles[0].y)]
+		if tiles.any(func(q): return W.kind[W.idx(q.x, q.y)] == W.T_VOID or W.level[W.idx(q.x, q.y)] != lv0):
+			for q in tiles:
+				var i: int = W.idx(q.x, q.y)
+				if W.kind[i] == W.T_VOID: continue
+				var s0 := V.size()
+				_stairs(q.x, q.y, F["dir"], W.level[i] * LEVEL)
+				if chunk > 0: _ranges.append([Vector2i(q.x / chunk, q.y / chunk), s0, V.size()])
+			continue
+		var org := _flight_origin(tiles, F["dir"])
+		var mid: Vector2i = tiles[tiles.size() / 2]
+		var s1 := V.size()
+		_stairs(org.x, org.y, F["dir"], W.level[W.idx(org.x, org.y)] * LEVEL, tiles.size())
+		if chunk > 0: _ranges.append([Vector2i(mid.x / chunk, mid.y / chunk), s1, V.size()])
 
 func _mesh(vv: PackedVector3Array, nn: PackedVector3Array, cc: PackedColorArray, uu: PackedVector2Array) -> ArrayMesh:
 	var arr := []
@@ -510,9 +523,23 @@ func _under_tri(p: Array, _lv: Array, bio: Dictionary) -> void:
 	_tri3(a, b, c, fn, cols[0], cols[1], cols[2], S_UNDER, false)
 
 # ------------------------------------------------------------------ stairs
-## A carved stone flight across one tile, rising toward dir, with stone side walls where the flight
-## ends (a wide authored flight only gets them at its two ends).
-func _stairs(x: int, z: int, dir: Vector2i, y: float) -> void:
+## The tile a flight's "across" coordinate starts from: _stairs maps s = 0..1 across tile (x, z) in
+## a direction that depends on dir, so the flight's s = 0..span runs from this end tile on.
+func _flight_origin(tiles: Array, dir: Vector2i) -> Vector2i:
+	var across: Vector2
+	match dir:
+		Vector2i(1, 0): across = Vector2(0, 1)
+		Vector2i(-1, 0): across = Vector2(0, -1)
+		Vector2i(0, 1): across = Vector2(-1, 0)
+		_: across = Vector2(1, 0)
+	var best: Vector2i = tiles[0]
+	for q in tiles:
+		if Vector2(q).dot(across) < Vector2(best).dot(across): best = q
+	return best
+
+## A carved stone flight rising toward dir, `span` tiles wide starting at tile (x, z) (see
+## _flight_origin), with stone side walls where the flight ends.
+func _stairs(x: int, z: int, dir: Vector2i, y: float, span := 1) -> void:
 	var i := z * w + x
 	var bio: Dictionary = W._bio(i)
 	var stone := Color("cdc4b2").lerp(Color(bio["side"]), 0.22).lerp(Color(bio["top"]), 0.08)
@@ -529,16 +556,23 @@ func _stairs(x: int, z: int, dir: Vector2i, y: float) -> void:
 	var side_a := Vector3(-dir.y, 0, dir.x)
 	# which ends of the flight need a side wall
 	var cheeks: Array = []
+	var L := float(span)
 	for sv in [0.0, 1.0]:
-		var sd: Vector3 = to_world.call(0.5, -0.5 if sv == 0.0 else 1.5, 0.0)
+		var sd: Vector3 = to_world.call(0.5, -0.5 if sv == 0.0 else L + 0.5, 0.0)
 		var nx := int(floor(sd.x)); var nz := int(floor(sd.z))
 		var j := nz * w + nx
 		var same: bool = nx >= 0 and nz >= 0 and nx < w and nz < h and W.stairs.has(j) and W.stairs[j] == dir
 		cheeks.append(not same)
 	var s0 := 0.13 if cheeks[0] else 0.0
-	var s1 := 0.87 if cheeks[1] else 1.0
+	var s1 := L - 0.13 if cheeks[1] else L
 	if Flora.v2():
-		_stairs_cut(x, z, dir, y, to_world, upv, side_a, cheeks, s0, s1, bio)
+		_stairs_cut(x, z, dir, y, to_world, upv, side_a, cheeks, s0, s1, bio, L)
+		return
+	if span > 1:
+		# the first art pass's flight is drawn a tile at a time
+		var step := Vector2i(int(round((to_world.call(0.5, 1.5, 0.0) - to_world.call(0.5, 0.5, 0.0)).x)), int(round((to_world.call(0.5, 1.5, 0.0) - to_world.call(0.5, 0.5, 0.0)).z)))
+		for k in span:
+			_stairs(x + step.x * k, z + step.y * k, dir, y)
 		return
 	for k in n:
 		var u0 := float(k) / n; var u1 := float(k + 1) / n
@@ -580,7 +614,7 @@ func _stairs(x: int, z: int, dir: Vector2i, y: float) -> void:
 ## The second art pass's flight: each step laid from two or three cut stones with chiselled, worn
 ## edges and dark joints, set a little unevenly, moss creeping in at the sides (snow, ash or petals
 ## by biome), and side walls built of chunky blocks with a bevelled coping.
-func _stairs_cut(x: int, z: int, dir: Vector2i, y: float, to_world: Callable, upv: Vector3, side_a: Vector3, cheeks: Array, s0: float, s1: float, bio: Dictionary) -> void:
+func _stairs_cut(x: int, z: int, dir: Vector2i, y: float, to_world: Callable, upv: Vector3, side_a: Vector3, cheeks: Array, s0: float, s1: float, bio: Dictionary, L := 1.0) -> void:
 	var n := 4
 	var rr := RandomNumberGenerator.new(); rr.seed = hash(Vector2i(x, z))
 	var st := Flora.style_ok(W.style_at(z * w + x))
@@ -626,9 +660,9 @@ func _stairs_cut(x: int, z: int, dir: Vector2i, y: float, to_world: Callable, up
 		var la: float = land[0]; var lb: float = land[1]; var ly: float = land[2]
 		var cuts2: Array = [0.0]
 		var at2 := rr.randf_range(0.3, 0.55)
-		while at2 < 0.8:
+		while at2 < L - 0.2:
 			cuts2.append(at2); at2 += rr.randf_range(0.35, 0.55)
-		cuts2.append(1.0)
+		cuts2.append(L)
 		for q in cuts2.size() - 1:
 			var a0: float = float(cuts2[q]) + 0.015
 			var a1: float = float(cuts2[q + 1]) - 0.015
@@ -638,8 +672,8 @@ func _stairs_cut(x: int, z: int, dir: Vector2i, y: float, to_world: Callable, up
 	for q in 2:
 		if not cheeks[q]:
 			continue
-		var na: float = -0.02 if q == 0 else 0.84
-		var nb: float = 0.16 if q == 0 else 1.02
+		var na: float = -0.02 if q == 0 else L - 0.16
+		var nb: float = 0.16 if q == 0 else L + 0.02
 		var cs2 := stone.darkened(0.1)
 		_block(to_world, upv, side_a, -0.3, 0.02, na, nb, -0.04, 0.56, cs2, rr)
 		_block(to_world, upv, side_a, -0.33, 0.05, na - 0.025, nb + 0.025, 0.56, 0.64, cs2.lightened(0.16), rr)
@@ -647,8 +681,8 @@ func _stairs_cut(x: int, z: int, dir: Vector2i, y: float, to_world: Callable, up
 	for q in 2:
 		if not cheeks[q]:
 			continue
-		var sa: float = 0.0 if q == 0 else 0.87
-		var sb: float = 0.13 if q == 0 else 1.0
+		var sa: float = 0.0 if q == 0 else L - 0.13
+		var sb: float = 0.13 if q == 0 else L
 		var outn: Vector3 = -side_a if q == 0 else side_a
 		var cs := stone.darkened(0.06)
 		for part in 2:

@@ -747,6 +747,8 @@ func _start(o: Dictionary) -> void:
 		player.teleport(b0 + Vector3(2.2, 0, 0.6))
 		spawn_weapon("sniper", 3, b0 + Vector3(1.6, 0, 1.8), "", false)
 		spawn_weapon("smg", 4, b0 + Vector3(3.0, 0, 1.6), "", false)
+	if o.get("chest_demo", false) and player: PolishTools.chest_row(self)     # test: crate/chest/pot/keg in a row
+	if player and (has_meta("stairs_demo") or o.get("chest_demo", false)): PolishTools.clear_mobs(self)
 	if not opts.get("duel", false) and not opts.get("arena", false):
 		await _spawn_wild()
 	await _slice()
@@ -833,7 +835,7 @@ func _build_env() -> void:
 	raid = RaidLook.pick(opts, seed_val)
 	RaidLook.apply(env.environment, sun, get_node_or_null("Fill") as DirectionalLight3D, T, raid)
 	sight_k = float(RaidLook.SIGHT.get(raid, 1.0))
-	RenderingServer.global_shader_parameter_set("vis_dark", 1.0 if "--shot-bright" in OS.get_cmdline_user_args() else float(RaidLook.VIS_DARK.get(raid, 0.42)))     # (--shot-bright: map screenshots without the sight shading)
+	RenderingServer.global_shader_parameter_set("vis_dark", 1.0 if "--shot-bright" in OS.get_cmdline_user_args() else float(RaidLook.VIS_DARK.get(raid, 0.7)))     # (--shot-bright: map screenshots without the sight shading)
 	RenderingServer.global_shader_parameter_set("vis_ally_range", VIEW_RANGE * sight_k)
 	raid_fx = RaidLook.storm_fx(raid)
 	if raid_fx:
@@ -1091,12 +1093,7 @@ func _spawn_hunters() -> void:
 				player = make_hunter("p0", 0, String(opts.get("cls", Data.class_of_save())), Save.d.get("name", "Hunter"), "bot" if opts.get("autoplay", false) else "local", rec, at, my_kit(), rec2)
 				if opts.get("autoplay", false):
 					player.ai = bot_brain.new_mind(rng, 0.7)
-				if "--at-stairs" in OS.get_cmdline_user_args() and not world.stairs.is_empty():
-					# test: start beside a flight of stairs
-					var si: int = world.stairs.keys()[0]
-					var sd: Vector2i = world.stairs[si]
-					at = Vector3(si % world.w + 0.5 - sd.x * 1.5, 0, si / world.w + 0.5 - sd.y * 1.5)
-					at.y = world.ground_at(at.x, at.z)
+				at = PolishTools.stairs_start(self, at)     # test: --at-stairs[=N|E|W|S|N]
 				if opts.has("at_xz"):
 					# test: start at a given spot (map screenshots, --at=x,z)
 					var axz := String(opts["at_xz"]).split(",")
@@ -1451,22 +1448,36 @@ func _spawn_breakables() -> void:
 		_add_break(String(b["kind"]), b["pos"])
 	if opts.get("training", false) and player:
 		# something to smash and something to pick up right where you start
-		for t in [[Vector3(-2.0, 0, 1.2), "crate"], [Vector3(-2.6, 0, 2.2), "pot"], [Vector3(2.2, 0, 1.0), "weapon"]]:
+		for t in [[Vector3(-2.0, 0, 1.2), "crate"], [Vector3(-2.6, 0, 2.2), "pot"], [Vector3(1.4, 0, 1.6), "weapon"]]:
 			var q: Vector3 = player.pos + t[0]
 			if world.is_void(q.x, q.z) or world.is_block(q.x, q.z):
 				continue
 			q.y = world.ground_at(q.x, q.z)
 			if t[1] == "weapon": spawn_weapon("sniper", 2, q, "", false)
 			else: _add_break(t[1], q)
-		# a glove rack: a row of gloves to try (actives go in your Q slot, passives in the other)
-		var gi := 0
+		# a glove rack: gloves to try (actives go in your Q slot, passives in the other), in two
+		# staggered rows 2.6 m apart so their name tags don't run into each other (one row 1.8 m apart
+		# printed "Fissure GlMirror GloHook GIce Bridge Glove"); spots off the island are skipped for
+		# the next free one, so all six make it onto the ground
+		var spots: Array = []
+		for row in [[-2.4, 0.0], [-4.6, 1.3], [0.0, 1.3], [2.4, 0.0], [4.6, 1.3]]:
+			# across the row from the middle out: 0, 2.6, -2.6, 5.2 ... (or 1.3, -1.3, 3.9 ... staggered)
+			for k in 6:
+				var x := (float(row[1]) + float((k + (1 if row[1] == 0.0 else 0)) / 2) * 2.6) * (1.0 if k % 2 == 0 else -1.0)
+				if Vector2(x, float(row[0])).length() <= 6.2:
+					spots.append(Vector3(x, 0, float(row[0])))
+		var used: Array = [Vector3(-2.0, 0, 1.2), Vector3(-2.6, 0, 2.2), Vector3(1.4, 0, 1.6), Vector3(3.6, 0, 2.6), Vector3(-3.6, 0, 2.6), Vector3(0, 0, 4.0)]
 		for gid in ["blink", "quake", "bubble", "grapple", "frost", "power_core"]:
-			var q2: Vector3 = player.pos + Vector3(-4.5 + gi * 1.8, 0, -2.6)
-			gi += 1
-			if world.is_void(q2.x, q2.z) or world.is_block(q2.x, q2.z):
-				continue
-			q2.y = world.ground_at(q2.x, q2.z)
-			spawn_gear(gid, 2, q2)
+			for off in spots:
+				var q2: Vector3 = player.pos + off
+				if used.any(func(u): return (u as Vector3).distance_to(off) < 2.3):
+					continue
+				if world.is_void(q2.x, q2.z) or world.is_block(q2.x, q2.z) or absf(world.ground_at(q2.x, q2.z) - player.pos.y) > 1.7:
+					continue
+				used.append(off)
+				q2.y = world.ground_at(q2.x, q2.z)
+				spawn_gear(gid, 2, q2)
+				break
 		# the way into the duel room: a glowing pad next to where you start
 		if not opts.get("duel", false):
 			for off in [Vector3(3.6, 0, 2.6), Vector3(-3.6, 0, 2.6), Vector3(3.6, 0, -1.0), Vector3(0, 0, 4.0)]:
@@ -1482,14 +1493,16 @@ func _spawn_breakables() -> void:
 				lbl.text = "DUEL ROOM\n%s to enter" % Settings.key_cap("interact")
 				lbl.font = UI.big; lbl.font_size = 40; lbl.pixel_size = 0.01; lbl.outline_size = 12
 				lbl.modulate = Color("ffb0a0"); lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED; lbl.no_depth_test = true
-				lbl.position = dq + Vector3(0, 2.0, 0)
+				# drawn after every other see-through thing (pad glow, pickup beams), so nothing covers it
+				lbl.render_priority = 100; lbl.outline_render_priority = 99
+				lbl.position = dq + Vector3(0, 2.7, 0)
 				add_child(lbl)
 				break
 	# the weapons lying in the open are the same for everyone in an online match
 	var wr := RandomNumberGenerator.new(); wr.seed = seed_val * 31 + 7
 	var keys: Array = Data.weapon_ids()
 	for i in world.weapon_spots.size():
-		var wk0 := String(keys[wr.randi() % keys.size()])
+		var wk0 := DropFamily.ground(String(keys[wr.randi() % keys.size()]), i, net_on, player, seed_val)
 		var wr0 := Data.roll_rarity(wr, 1 if tier >= 2 else 0)
 		var wsp: Vector3 = world.weapon_spots[i]
 		spawn_weapon(wk0, wr0, wsp, "ws%d" % i, false, -1, Loot.weapon(wk0, wr0, Loot.roll_element(wr, world.biome_at(wsp.x, wsp.z))))
@@ -1866,7 +1879,7 @@ func _break(b: Dictionary, by: Ent, from_net := false) -> void:
 				drop("armor", at + Vector3(0, 0.5, 0), 25)
 			if not from_net and randf() < 0.16:
 				var keys: Array = Data.weapon_ids()
-				spawn_weapon(String(keys[randi() % keys.size()]), Data.roll_rarity(rng), at)
+				spawn_weapon(DropFamily.earned(by, keys), Data.roll_rarity(rng), at)
 		"barrel":
 			_barrel_boom(at, by, from_net)
 
@@ -2690,7 +2703,7 @@ func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
 		if mb.mkind == "warden":
 			# the Warden guards the best things: a weapon (sometimes a named one), treasure, maybe a Soul Ember
 			var wkeys: Array = Data.weapon_ids()
-			var wit := found_weapon(mb.pos, String(wkeys[randi() % wkeys.size()]), Data.roll_rarity(rng, 2), 0.2)
+			var wit := found_weapon(mb.pos, DropFamily.earned(credit, wkeys), Data.roll_rarity(rng, 2), 0.2)
 			spawn_weapon(String(wit["wid"]), int(wit["rar"]), mb.pos + Vector3(-0.8, 0, 0.4), "", true, -1, wit)
 			spawn_val(Loot.valuable(Loot.roll_valuable(rng, 2)), mb.pos + Vector3(0, 0, -0.9))
 			if rng.randf() < 0.5:
@@ -2699,7 +2712,7 @@ func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
 			spawn_val(Loot.valuable(Loot.roll_valuable(rng, 0 if tier == 0 else 1)), mb.pos + Vector3(0, 0, -0.8))
 		if mb.mkind == "glimmer":
 			var keys: Array = Data.weapon_ids()
-			var git := found_weapon(mb.pos, String(keys[randi() % keys.size()]), Data.roll_rarity(rng, 1))
+			var git := found_weapon(mb.pos, DropFamily.earned(credit, keys), Data.roll_rarity(rng, 1))
 			spawn_weapon(String(git["wid"]), int(git["rar"]), mb.pos, "", true, -1, git)
 			if credit is Hunter: add_feed("%s caught the Glimmerkin's treasure" % credit.pname)
 		if mb.mkind == "bl_warden":
@@ -3127,6 +3140,7 @@ func _update_vision() -> void:
 
 func _exit_tree() -> void:
 	RenderingServer.global_shader_parameter_set("vis_on", 0.0)
+	SeeThrough.off()
 	Capture.teardown(self)           # scan beams and hums outlive the match otherwise
 	for key in box_hums.keys():
 		Sfx.loop_stop(String(key))
@@ -3721,6 +3735,7 @@ func _process(delta: float) -> void:
 	elif opts.has("arch_demo"):
 		ArchDemo.frame(self)       # screenshot tooling: one part of an archetype kit, timed to the shot
 	_update_vision()
+	SeeThrough.for_match(self)     # trees and pillars over your hunter or Boki thin out
 	_vprof("vision")
 	if world.wall_mat:
 		var fp := player.model.global_position + Vector3(0, 0.8, 0) if player and player.model and not player.out else Vector3(0, -999, 0)
@@ -4352,9 +4367,12 @@ func step(dt: float) -> void:
 			player.inp["move"] = Vector2(0.8, -0.6).normalized() if fmod(time, 6.0) < 3.0 else Vector2(0.3, 1.0).normalized()
 	if opts.get("truce_demo", false) and truce:
 		truce.demo()
+	if opts.has("see_demo") and player and not player.dropping and not has_meta("see_demo_done"):
+		set_meta("see_demo_done", true)
+		SeeThrough.demo(self, String(opts["see_demo"]))
 	if opts.has("exit_demo") and exits and player and not player.dropping:
 		exits.demo(String(opts["exit_demo"]))
-	if opts.get("raid_demo", false) and hud and not hud.guide_hidden:
+	if (opts.get("raid_demo", false) or opts.get("chest_demo", false) or has_meta("stairs_demo")) and hud and not hud.guide_hidden:
 		Settings.v["tips"] = false          # (screenshots of a raid condition: no tutorial cards)
 		hud.guide_hidden = true
 	if "--kit-demo" in OS.get_cmdline_user_args() and player and time > 0.3 and not train.has("_kitdemo"):
@@ -4983,7 +5001,7 @@ func _open_chest(h: Hunter, c: Dictionary, from_net := false) -> void:
 	if not from_net and randf() < [0.25, 0.6, 1.0][t]:
 		var keys: Array = Data.weapon_ids()
 		var a := randf() * TAU
-		var wk: String = biomes.weapon_at(c["pos"], keys) if biomes else String(keys[randi() % keys.size()])
+		var wk: String = DropFamily.earned(h, keys, biomes.weapon_at(c["pos"], keys) if biomes else "")
 		var wrc := mini(Data.RARITY.size() - 1, Data.roll_rarity(rng, maxi(0, t - 1) + (biomes.rarity_bonus_at(c["pos"]) if biomes else 0)))
 		var wit := found_weapon(c["pos"], wk, wrc, [0.0, 0.02, 0.08][t])
 		spawn_weapon(String(wit["wid"]), int(wit["rar"]), c["pos"] + Vector3(cos(a) * 1.1, 0, sin(a) * 1.1), "", true, -1, wit)

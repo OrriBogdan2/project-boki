@@ -870,6 +870,7 @@ func _inward(isl: int, from: Vector3, away: Vector3) -> Vector3:
 
 var shrine_spots: Array = []     # Vector3
 var break_spots: Array = []      # {pos, kind: crate | pot | barrel}
+var tree_spots: Array = []       # Vector3: every tree's foot (screenshot tooling: --see-demo)
 var weapon_spots: Array = []     # Vector3, a found weapon lying in the open
 var heart_spot := Vector3.INF
 
@@ -1587,6 +1588,7 @@ func _decorate() -> void:
 				camps.append(cp)
 				continue
 			if _pack_prop(packed, what, i, Vector3(x + 0.5, y, z + 0.5), drng):
+				if what == "tree": tree_spots.append(Vector3(x + 0.5, y, z + 0.5))
 				if what in ["tree", "rock"]:
 					_undergrowth(packed, x, z, drng)
 				continue

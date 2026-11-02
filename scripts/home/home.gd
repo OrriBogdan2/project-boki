@@ -1034,6 +1034,7 @@ func _process(delta: float) -> void:
 	if training: training.tick(d)
 	_apply_cam_settings(d)
 	cam.follow(Vector3(ppos.x, minf(py, 0.0), ppos.z), d, panel_open == "" and train.is_empty())
+	_see_through()
 	_abyss_tint(d)
 	_find_interact()
 	if hb and hb.active:
@@ -1090,6 +1091,31 @@ func _apply_cam_settings(d: float) -> void:
 		if not player.has_meta("base_scale"):
 			player.set_meta("base_scale", player.scale)
 		player.scale = (player.get_meta("base_scale") as Vector3) * lerpf(1.0, Hunter.VIS_SCALE, e)
+
+## Trees between the camera and you (or your active Boki) thin out, as in a match (SeeThrough).
+func _see_through() -> void:
+	if player == null or not is_instance_valid(player) or not player.visible:
+		SeeThrough.off()
+		return
+	var b = null
+	var act := String(_d().get("active", ""))
+	for k in kins:
+		var n = k.get("node")
+		if String(k["rec"].get("uid", "")) == act and n is Node3D and is_instance_valid(n) and (n as Node3D).visible and (n as Node3D).is_inside_tree():
+			b = (n as Node3D).global_position
+	SeeThrough.update(cam, player.global_position, b)
+
+func _exit_tree() -> void:
+	SeeThrough.off()
+
+## Boki on the farm are drawn bigger than in a match: the farm's camera sits much further back than the
+## expedition's (HOME_ACROSS_REF framing at HOME_ZOOM), and at match size a Boki was a speck beside
+## your hunter there. Presentation only (the farm has no hitboxes; a match's Boki keep their size);
+## back to match size on the Training Grounds, where the view eases to the expedition's framing.
+const FARM_BOKI_SCALE := 1.7
+func _farm_boki_k() -> float:
+	var e := cam_zone_k * cam_zone_k * (3.0 - 2.0 * cam_zone_k)
+	return lerpf(FARM_BOKI_SCALE, 1.0, e)
 
 var climb := {}                # (unused since the ledge float; kept for anything that clears it)
 ## Floating up a ledge, as in a match (Hunter._ledge_float): {lip, n (into the wall), t, at, g0}.
@@ -1491,7 +1517,7 @@ func _move_kin(d: float) -> void:
 		if k.has("say"):
 			k["say_t"] = float(k.get("say_t", 0.0)) - d
 			(k["say"] as Label3D).visible = k["say_t"] > 0.0
-		n.scale = Vector3.ONE * (1.05 if rec["uid"] == _d().get("active", "") else 0.9) * float(n.get_meta("evo_scale", 1.0))
+		n.scale = Vector3.ONE * (1.05 if rec["uid"] == _d().get("active", "") else 0.9) * float(n.get_meta("evo_scale", 1.0)) * _farm_boki_k()
 		if k["emote_t"] > 0.0:
 			k["emote_t"] -= d
 			var lbl: Label3D = k["emote"]

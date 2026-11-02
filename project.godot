@@ -87,13 +87,25 @@ vis_ally2={
 "type": "vec4",
 "value": Vector4(0, 0, 0, -1)
 }
+see_cam={
+"type": "vec3",
+"value": Vector3(0, 0, 0)
+}
+see_a={
+"type": "vec4",
+"value": Vector4(0, 0, 0, 0)
+}
+see_b={
+"type": "vec4",
+"value": Vector4(0, 0, 0, 0)
+}
 vis_ally_range={
 "type": "float",
 "value": 24.0
 }
 vis_dark={
 "type": "float",
-"value": 0.42
+"value": 0.7
 }
 
 [physics]

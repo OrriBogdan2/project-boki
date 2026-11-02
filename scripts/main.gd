@@ -88,6 +88,7 @@ func _ready() -> void:
 		if a == "--wall-behind": opts["wall_behind"] = true; opts["no_drop"] = true
 		if a == "--meteor-test": opts["meteor_test"] = true; opts["no_drop"] = true
 		if a == "--break-demo": opts["break_demo"] = true; opts["no_drop"] = true
+		if a == "--chest-demo": opts["chest_demo"] = true; opts["no_drop"] = true     # a chest next to breakables (screenshots)
 		if a == "--watch-heart": opts["watch_heart"] = true
 		if a.begins_with("--class="): Save.d["cls"] = a.substr(8); Save.d["weapon"] = ""
 		if a.begins_with("--weapon="):
@@ -153,6 +154,7 @@ func _ready() -> void:
 		if a == "--plate-demo": opts["plate_demo"] = true; opts["no_drop"] = true; opts["teams"] = 3; opts["squad"] = 3
 		if a == "--hold-demo": opts["hold_demo"] = true; opts["no_drop"] = true; opts["teams"] = 4; opts["squad"] = 3
 		if a == "--no-plan": opts["no_plan"] = true
+		if a.begins_with("--see-demo"): opts["see_demo"] = a.substr(11) if a.begins_with("--see-demo=") else "bloom"; opts["no_drop"] = true     # your hunter just behind a big tree
 		if a.begins_with("--plan-t="): opts["plan_t"] = float(a.substr(9))
 		if a == "--map-demo": opts["map_demo"] = "plan"          # the planning map, with pings
 		if a == "--map-mid-demo": opts["map_demo"] = "mid"; opts["no_drop"] = true    # the map mid-match, some spawns scouted
@@ -379,6 +381,9 @@ func _ready() -> void:
 		var wkc = load("res://tools/work_check.gd").new()      # kin at work: jobs, stations, priorities, shimmer odds
 		set_meta("work_check", wkc)
 		wkc.run(self)
+		return
+	if "--polish-check" in args:
+		load("res://tools/polish_check.gd").new().run(self)      # polish pass: drop families, stair flights, chest look, see-through
 		return
 	if "--boki-system-check" in args:
 		load("res://tools/boki_system_check.gd").new().run(self)      # Boki commands (throw, recall, hold/follow, C), the downed Boki, the Merge
