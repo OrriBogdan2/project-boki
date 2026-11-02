@@ -2623,9 +2623,7 @@ func _draw_hover_tip(sz: Vector2, p: Hunter) -> void:
 	for i in range(1, lines.size()):
 		h += _wrapped_h(String(lines[i][0]), w - 28, int(lines[i][2])) + 4.0
 	var anchor: Rect2 = hit[0]
-	var pos := Vector2(anchor.get_center().x - w * 0.5, anchor.position.y - h - 14)
-	pos.x = clampf(pos.x, 8, sz.x - w - 8)
-	pos.y = maxf(8, pos.y)
+	var pos := HudTip.place(anchor, Vector2(w, h), sz)      # above if it fits, else beside; always on screen, never over the slot
 	var a := clampf((hover_t - 0.25) / 0.12, 0.0, 1.0)
 	var box := Rect2(pos, Vector2(w, h))
 	_rounded(box, Color(0.05, 0.06, 0.09, 0.95 * a), 12, Color(head[1], 0.6 * a), 2)
@@ -3036,9 +3034,11 @@ func loot_is(b: Dictionary) -> bool:
 func mouse_on_ui() -> bool:
 	return wheel_open or map_open() or mouse_on_panel()
 
-## The cursor is over one of the item windows (deathbox loot, swap, backpack).
+var ui_extra: Array = []      # other panels that own the mouse (the practice areas' bottom bar)
+
+## The cursor is over one of the item windows (deathbox loot, swap, backpack) or a panel in ui_extra.
 func mouse_on_panel() -> bool:
-	for pn in [loot_panel, swap_panel, pack_panel]:
+	for pn in [loot_panel, swap_panel, pack_panel] + ui_extra:
 		if pn != null and is_instance_valid(pn) and pn.visible and not pn.is_queued_for_deletion() and pn.get_global_rect().grow(6.0).has_point(pn.get_global_mouse_position()):
 			return true
 	return false

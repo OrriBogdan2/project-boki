@@ -404,8 +404,9 @@ static func title(text: String, size := 34, col := INK) -> Label:
 	return l
 
 # ---------------------------------------------------------------- buttons
-## The secondary button (an outline). icon: an Icons id drawn at its left. Hover lifts it a little,
-## pressing sinks it, both in about 100 ms.
+## The secondary button (an outline). icon: an Icons id drawn at its left. Hover fills it with the
+## theme's hover colour (no growing: a button never spills over its neighbours or the panel edge);
+## pressing sinks it a touch, in about 70 ms.
 static func button(text: String, cb: Callable, minw := 0.0, icon := "") -> Button:
 	var b := Button.new()
 	b.text = text
@@ -422,16 +423,14 @@ static func button(text: String, cb: Callable, minw := 0.0, icon := "") -> Butto
 		tw.tween_property(b, "scale", Vector2(s, s), secs).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	b.mouse_entered.connect(func():
 		if b.disabled: return
-		Sfx.play("hover", null, -12.0, 0.05)
-		to.call(1.03, 0.09))
+		Sfx.play("hover", null, -12.0, 0.05))
 	b.mouse_exited.connect(func(): to.call(1.0, 0.11))
 	b.button_down.connect(func(): if not b.disabled: to.call(0.97, 0.07))
-	b.button_up.connect(func(): to.call(1.03 if b.is_hovered() else 1.0, 0.1))
+	b.button_up.connect(func(): to.call(1.0, 0.1))
 	b.focus_entered.connect(func():
 		# keyboard and pad focus tick and lift like the mouse does
 		if not b.is_hovered() and not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
-			Sfx.play("hover", null, -14.0, 0.05)
-			to.call(1.03, 0.09))
+			Sfx.play("hover", null, -14.0, 0.05))
 	b.focus_exited.connect(func(): if not b.is_hovered(): to.call(1.0, 0.11))
 	return b
 
@@ -631,7 +630,7 @@ static func tile_card(on: bool, cb: Callable, pad := 12, col := ACCENT) -> Panel
 	var lit := func(yes: bool) -> void:
 		p.add_theme_stylebox_override("panel", h if yes else n)
 		var tw := p.create_tween()
-		tw.tween_property(p, "scale", Vector2(1.015, 1.015) if yes else Vector2.ONE, 0.09).set_trans(Tween.TRANS_SINE)
+		tw.tween_property(p, "modulate", Color(1.08, 1.08, 1.08) if yes else Color.WHITE, 0.09).set_trans(Tween.TRANS_SINE)      # a brighter fill, never a bigger card
 	p.mouse_entered.connect(func(): Sfx.play("hover", null, -14.0, 0.05); lit.call(true))
 	p.mouse_exited.connect(func(): if not p.has_focus(): lit.call(false))
 	p.focus_entered.connect(func(): lit.call(true))

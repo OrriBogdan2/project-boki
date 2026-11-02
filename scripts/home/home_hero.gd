@@ -3,75 +3,15 @@ extends RefCounted
 ## The Hero panel on the farm (J or the Hero button): every class, its kit, and swapping your
 ## hunter in place. Moved out of home.gd; static functions that take the Home screen.
 
-## Whether a class can be picked yet, and what it takes if not (ClassUnlock: a starter is open from
-## the start, the rest open through play; old saves have everything open).
-static func unlocked(ak: String) -> bool:
-	return ClassUnlock.is_open(ak)
-static func requirement(ak: String) -> String:
-	return ClassUnlock.requirement(ak)
-
-## Every class (four per weight): portrait, name, weight; hover for the kit, K or the Kit button for
-## the full kit card. Locked ones are greyed with their goal; click one to see all the goals on the
-## Classes screen. Picking an open one swaps your hunter in place and saves it as your expedition
-## default (the expedition panel and the Training Grounds start on it).
+## Every class (Arch.ORDER, four per weight): portrait, name, weight; locked ones are greyed with their goal.
+## Hover for the kit, K or the Kit button for the full kit card. Picking one swaps your hunter in place and saves it as your
+## expedition default (the expedition panel and the Training Grounds start on it).
 static func open(home: Node) -> void:
 	var v: VBoxContainer = home._new_panel("Hero", 860)
-	UI.subtitle(v, "Who you play. Saved as your expedition pick. Hover a class for its kit, %s to open the full kit card. Greyed classes open through play." % "K")
-	var grid := GridContainer.new(); grid.columns = 3
-	grid.add_theme_constant_override("h_separation", 12); grid.add_theme_constant_override("v_separation", 12)
-	v.add_child(grid)
-	var cur := Arch.of_save()
-	for cls in ["light", "medium", "heavy"]:
-		for a in Arch.of_class(cls):
-			var ak: String = a
-			var can := unlocked(ak)
-			var card := UI.tile_card(ak == cur, func(): _click(home, ak), 10, Arch.color(ak))
-			card.custom_minimum_size = Vector2(258, 0)
-			var row := UI.hbox(10)
-			card.add_child(row)
-			var vp := Portraits.make(cls, Data.TEAM_COLORS[0], Arch.signature(ak), Save.d.get("look", {}), ak)
-			card.add_child(vp)
-			var tex := TextureRect.new()
-			tex.texture = vp.get_texture()
-			tex.custom_minimum_size = Vector2(84, 84)
-			tex.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
-			tex.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-			tex.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
-			tex.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			row.add_child(tex)
-			var col := UI.vbox(2); col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			col.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			row.add_child(col)
-			col.add_child(UI.label(Arch.name_of(ak), 18, Arch.color(ak) if can else UI.FAINT, UI.big))
-			var cd: Dictionary = Data.CLASSES[cls]
-			col.add_child(UI.label("%s weight  ·  %d health  ·  %d dash%s" % [String(cd["name"]), int(cd["hp"]), int(cd["dashes"]), "es" if int(cd["dashes"]) > 1 else ""], 12, UI.MUTED))
-			var adf := Arch.def(ak)
-			var fan := UI.para(String(adf.get("fantasy", "")), 12, UI.INK if can else UI.FAINT)
-			fan.custom_minimum_size.x = 150
-			col.add_child(fan)
-			if ak == cur:
-				col.add_child(UI.label("Playing", 12, UI.GOOD, UI.semi))
-			elif not can:
-				col.add_child(UI.label("Locked", 12, UI.FAINT, UI.semi))
-				col.add_child(ClassCard.goal_block(ak, 150.0))
-			var kitb := UI.ghost("Kit (K)", func(): kit(home, ak), 0)
-			kitb.focus_mode = Control.FOCUS_NONE
-			col.add_child(kitb)
-			card.tooltip_text = "%s  ·  %s weight\nDash: %s  ·  Passive: %s\nRMB: %s  ·  E: %s  ·  R: Boki Merge" % [Arch.name_of(ak), String(cd["name"]), String(adf["dash"]["name"]), String(adf["passive"]["name"]), String(adf["rmb"]["name"]), String(adf["e"]["name"])]
-			card.set_meta("arch", ak)
-			card.mouse_entered.connect(func(): home.set_meta("hero_hover", ak))
-			if not can:
-				card.modulate = Color(0.55, 0.55, 0.6, 0.8)
-			grid.add_child(card)
+	UI.subtitle(v, "Who you play. Saved as your expedition pick. Hover a class for its kit, %s to open the full kit card. Greyed classes open through play: click one for the goals." % "K")
+	var grid := HeroGrid.build(v, func(ak: String): pick(home, ak), func(ak: String): kit(home, ak), func(ak: String): home.set_meta("hero_hover", ak), true, func(_ak: String): HomeClasses.open(home))
 	home.set_meta("hero_grid", grid)
 	UI.footer_left(v).add_child(UI.ghost("Classes and goals", func(): HomeClasses.open(home), 0))
-
-## An open class is picked; a locked one opens the Classes screen, where its goal is.
-static func _click(home: Node, ak: String) -> void:
-	if unlocked(ak):
-		pick(home, ak)
-	else:
-		HomeClasses.open(home)
 
 static func kit(home: Node, ak: String) -> void:
 	var v: VBoxContainer = home._new_panel("Kit: %s" % Arch.name_of(ak), KitCard.SIZE.x + 40, true)
@@ -81,13 +21,9 @@ static func kit(home: Node, ak: String) -> void:
 ## Plays `ak` from now on: saved as the expedition pick (weight, class, its weapon family), and the
 ## hunter on the farm turns into it with a flash, a puff and a sound.
 static func pick(home: Node, ak: String) -> void:
-	if not Arch.exists(ak) or not unlocked(ak):
+	if not Arch.exists(ak) or not HeroGrid.save_pick(ak):
 		return
 	var same := ak == Arch.of_save()
-	Save.d["cls"] = Arch.weight(ak)
-	Save.d["arch"] = ak
-	Save.d["weapon"] = Arch.signature(ak)
-	Save.save_game()
 	home._close_panel()
 	if same:
 		return
@@ -99,8 +35,8 @@ static func pick(home: Node, ak: String) -> void:
 		home.fx.burst(home.ppos + Vector3(0, home.py + 0.3, 0), Color.WHITE, 12, 2.5, 0.4)
 	Sfx.play("unlock", null, -6.0, 0.0, 1.15)
 	Sfx.play("whoosh", null, -10.0, 0.0, 1.3)
-	home.player.scale = Vector3(0.6, 1.35, 0.6)
+	var pl: Node3D = home.player
 	var tw: Tween = home.create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	tw.tween_property(home.player, "scale", Vector3.ONE, 0.35)
+	tw.tween_method(func(v: Vector3): if is_instance_valid(pl): pl.set_meta("pop", v), Vector3(0.6, 1.35, 0.6), Vector3.ONE, 0.35)
 	home._toast("Now playing %s (%s weight). Your expeditions start with it." % [Arch.name_of(ak), String(Data.CLASSES[Arch.weight(ak)]["name"])])
 

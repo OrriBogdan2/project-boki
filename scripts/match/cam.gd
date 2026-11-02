@@ -25,6 +25,7 @@ var target: Node3D = null
 var trauma := 0.0
 var zoom := 1.0
 var zoom_to := 1.0
+var user_zoom := 1.0           # the mouse wheel in the practice areas (Practice); multiplies the match's own zoom
 var lead := 1.0
 var kick := 0.0               # a quick zoom-in punch on big moments
 var pull := 0.0               # (movefeel) a quick pull-back (a dash into a glide), the opposite of kick

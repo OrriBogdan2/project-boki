@@ -1,7 +1,7 @@
 extends RefCounted
 ## --swim-check: the farm's pond is water (HomeWater.depth). Walk in: the edge is shallow (you wade,
 ## slower, a splash going in), the middle is deep (you swim: lower in the water, slower still, no
-## dash, no jump, no tools); walk out the far side: back on dry ground (a drip). The water is never
+## dash, no tools; Space kicks you up out of the water); walk out the far side: back on dry ground (a drip). The water is never
 ## void (the abyss rules leave it alone) and a Boki can paddle in it. --shots-dir=<dir>: a screenshot
 ## while swimming.
 
@@ -66,13 +66,14 @@ func run(main: Node) -> void:
 						hm._move_player(DT)
 						await tree.process_frame
 					tree.root.get_texture().get_image().save_png(shot + "/swim_after.png")
-		if swam and wd == 0 and hm.ppos.z > 39.2:
+		if swam and wd == 0 and hm.ppos.z > 39.2 and absf(hm.py) < 0.01:      # (landed: the kick out of the water can carry you over the bank)
 			out_dry = true
 			break
 	_press(Vector2.ZERO)
 	ok(waded and wade_speed < dry_speed * 0.8, "walking in, the edge is shallow and slows you (%.1f m/s wading vs %.1f dry)" % [wade_speed, dry_speed])
 	ok(swam and swim_speed < wade_speed and sank > 0.9, "the middle is deep: you swim, slower again (%.1f m/s), sunk in to the shoulders" % swim_speed)
-	ok(not dash_in_water and not jump_in_water, "no dash and no jump while swimming")
+	ok(not dash_in_water, "no dash while swimming")
+	ok(jump_in_water, "Space kicks you up out of deep water (a jump from swimming)")
 	ok(out_dry and not hm.water.swimming and absf(hm.py) < 0.01, "and you climb out the far side onto dry ground (%s)" % str(hm.ppos))
 	# a Boki paddling: its body sits low in the water
 	var kin_ok := false

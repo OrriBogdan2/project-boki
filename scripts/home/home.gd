@@ -1092,9 +1092,8 @@ func _apply_cam_settings(d: float) -> void:
 	var e := cam_zone_k * cam_zone_k * (3.0 - 2.0 * cam_zone_k)
 	cam.dist_mul = lerpf(home_mul, 1.0, e)
 	if player and is_instance_valid(player):
-		if not player.has_meta("base_scale"):
-			player.set_meta("base_scale", player.scale)
-		player.scale = (player.get_meta("base_scale") as Vector3) * lerpf(1.0, Hunter.VIS_SCALE, e)
+		# (the base is always 1: a hero swap's pop rides on top as "pop", so it can't get stuck stretched)
+		player.scale = (player.get_meta("pop", Vector3.ONE) as Vector3) * lerpf(1.0, Hunter.VIS_SCALE, e)
 
 ## Trees between the camera and you (or your active Boki) thin out, as in a match (SeeThrough).
 func _see_through() -> void:
@@ -1289,8 +1288,8 @@ func _move_player(d: float) -> void:
 	air = py > gh + 0.001 or pvy > 0.0
 	# jump; in the air, a second press (or holding Space, or the glide key) opens the glider
 	var jump_now := can_act and Input.is_action_just_pressed("jump")
-	if jump_now and not air and not water.swimming:
-		pvy = JUMP_V
+	if jump_now and not air:
+		pvy = water.breach(JUMP_V) if water.swimming else JUMP_V      # from deep water: a kick up and out
 		air = true
 		glide_hold = 0.0
 		Sfx.play("jump", null, -12.0)
@@ -2399,35 +2398,7 @@ func hub_items() -> Array:
 	return items
 
 func _build_hub() -> void:
-	hub = UI.glass(6, 16)
-	hub.mouse_filter = Control.MOUSE_FILTER_STOP
-	var row := UI.hbox(4); hub.add_child(row)
-	var items := hub_items()
-	for i in items.size():
-		var it: Array = items[i]
-		var cb: Callable = it[3]
-		var b := UI.button("", func(): _hub_go(cb, String(it[0])))
-		b.theme_type_variation = "Ghost"
-		b.focus_mode = Control.FOCUS_NONE
-		b.custom_minimum_size = Vector2(62, 58)
-		b.tooltip_text = "%s  (%d)" % [it[1], i + 1]
-		var ic := UI.IconDot.new(String(it[2]), UI.INK, 22.0)
-		ic.position = Vector2(23, 9)
-		b.add_child(ic)
-		var lb := UI.label(String(it[1]), 11, UI.MUTED, UI.semi)
-		lb.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		lb.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
-		lb.offset_top = -19; lb.offset_bottom = -4
-		lb.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		b.add_child(lb)
-		var kc := UI.keycap(str(i + 1), 10)
-		kc.position = Vector2(2, 2)
-		kc.modulate.a = 0.75
-		b.add_child(kc)
-		b.mouse_entered.connect(func(): ic.col = UI.ACCENT_HI; ic.queue_redraw(); lb.add_theme_color_override("font_color", UI.INK))
-		b.mouse_exited.connect(func(): ic.col = UI.INK; ic.queue_redraw(); lb.add_theme_color_override("font_color", UI.MUTED))
-		hub_btns[String(it[0])] = b
-		row.add_child(b)
+	hub = HubBar.build(hub_items(), _hub_go, hub_btns)
 	root_ui.add_child(hub)
 	hub.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT, Control.PRESET_MODE_MINSIZE, 14)
 	hub.grow_vertical = Control.GROW_DIRECTION_BEGIN
