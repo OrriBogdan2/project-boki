@@ -393,4 +393,4 @@ func _surge() -> void:
 
 # ------------------------------------------------------------------ 8. net
 func _net() -> void:
-	ok(Net.VERSION == "0.11.0", "the net version moved for the new snapshot shape (%s)" % Net.VERSION)
+	ok(int(Net.VERSION.split(".")[1]) >= 11, "the net version moved for the new snapshot shape (%s)" % Net.VERSION)      # (at least 0.11: branches queued behind it bump the number)

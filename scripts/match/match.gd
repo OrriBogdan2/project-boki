@@ -1526,9 +1526,13 @@ func spawn_weapon(w: String, rar: int, at: Vector3, id := "", send := true, ammo
 		wp["item"] = item
 		if String(item.get("el", "")) != "":
 			_element_motes(n, Loot.ELEMENTS[String(item["el"])]["col"], String(item.get("uq", "")) != "")
+	if item.has("left_at"):
+		wp["left_at"] = float(item["left_at"])      # put down from someone's hands: the 2 s re-pick rule (Loot.REPICK_T)
 	wpicks.append(wp)
 	if net_on and send:
-		net_event(["wdrop", id, w, rar, _r(at.x), _r(at.y), _r(at.z), ammo, String(item.get("el", "")), String(item.get("uq", ""))])
+		# (the last field, how long ago it left someone's hands, -1 for fresh loot: Net 0.6.5)
+		net_event(["wdrop", id, w, rar, _r(at.x), _r(at.y), _r(at.z), ammo, String(item.get("el", "")), String(item.get("uq", "")),
+			snappedf(time - float(wp["left_at"]), 0.01) if wp.has("left_at") else -1.0])
 
 ## A found weapon with an element (or a named one) glows its colour, so you can spot it from afar.
 func _element_motes(n: Node3D, col: Color, unique: bool) -> void:
@@ -1780,8 +1784,9 @@ func _take_weapon(h: Hunter, wp: Dictionary, from_net := false, keep_old := fals
 		# the old one is put down where you stand (with the backpack, the player's goes in it instead)
 		var ba := randf() * TAU
 		var back := Vector3(cos(ba), 0, sin(ba)) * 0.9
-		spawn_weapon(String(old_it["wid"]), int(old_it["rar"]), Vector3(h.pos.x + back.x, h.ground(), h.pos.z + back.z), "", true, old_ammo, Loot.clean(old_it) if Loot.keepable(old_it) else {})
-		wpicks[wpicks.size() - 1]["left_at"] = time
+		var left_it: Dictionary = Loot.clean(old_it) if Loot.keepable(old_it) else Loot.weapon(String(old_it["wid"]), int(old_it["rar"]))
+		left_it["left_at"] = time; left_it["ammo_left"] = old_ammo
+		spawn_weapon(String(old_it["wid"]), int(old_it["rar"]), Vector3(h.pos.x + back.x, h.ground(), h.pos.z + back.z), "", true, old_ammo, left_it)
 	var col: Color = Data.RARITY[int(wp["rar"])]["color"]
 	sfx("pickup", h.pos, 0.0, 0.8)
 	fx.ring(h.pos, 1.4, col, 0.35)
@@ -2677,6 +2682,7 @@ func _abyss_demo(mode: String) -> void:
 func S_dev_god() -> bool:
 	return bool(opts.get("god", false)) or bool(opts.get("tutorial", false)) or bool(opts.get("training", false)) or Game.god
 
+const BOSS_GEM_DROPS := 4     # a lair boss's gems come as this many big drops (same total)
 func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
 	if net_on:
 		net_event(["mobdead", mb.nid, by.nid if by else ""])
@@ -2694,9 +2700,12 @@ func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
 	fx.burst(mb.pos + Vector3(0, 0.6, 0), mb.md["color"], 22, 5.0, 0.6)
 	Juice.mob_dead(self, mb, credit, big_mob)
 	if not world.is_void(mb.pos.x, mb.pos.z) and not _o.get("self", false):
-		for i in int(mb.md["gems"]):
-			drop("gem", mb.pos + Vector3(0, 0.6, 0), int(round(3 * float(T["loot"]))))
-		if mb.md.get("stag", false) and rng.randf() < 0.6:
+		# a lair boss pays its gems out as a few big ones (fewer drops, each worth having); the rest scatter small
+		var gn := int(mb.md["gems"])
+		var big_n := BOSS_GEM_DROPS if mb is Boss else gn
+		for i in big_n:
+			drop("gem", mb.pos + Vector3(0, 0.6, 0), int(round(3 * float(T["loot"]) * float(gn) / float(big_n))))
+		if mb.md.get("stag", false) and not (mb is Boss) and rng.randf() < 0.6:
 			drop("armor", mb.pos + Vector3(0, 0.6, 0), 25)
 		if mb.mkind in ["brute", "warden", "sentinel"] and rng.randf() < (1.0 if mb.mkind == "warden" else 0.4):
 			spawn_gear(Gear.roll(rng), Data.roll_rarity(rng, 2 if mb.mkind == "warden" else 0), mb.pos + Vector3(0.8, 0, 0.4))
@@ -2719,7 +2728,7 @@ func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
 			# a Warden's lamp holds something worth the risk: armor, often a tonic
 			drop("armor", mb.pos + Vector3(0, 0.6, 0), 25)
 			if rng.randf() < 0.4: drop("tonic", mb.pos + Vector3(0.4, 0.6, 0), 1)
-		if rng.randf() < (0.35 if mb.mkind == "brute" else (0.0 if mb is Blight else 0.12)):
+		if rng.randf() < (0.35 if mb.mkind == "brute" else (0.0 if mb is Blight or mb is Boss else 0.12)):
 			drop("seed", mb.pos + Vector3(0, 0.6, 0), 1, Data.pick_seed())
 		# a Rift Key: always from the Warden, sometimes from an elite (one that can be staggered, or a rare one)
 		if exits and not exits.list.is_empty() and (mb.mkind == "warden" or ((mb.md.get("stag", false) or mb.rarity >= 3) and mb.mkind != "glimmer" and rng.randf() < 0.06)):
@@ -6493,6 +6502,8 @@ func _net_ev(x, from: String) -> void:
 				if x.size() > 9 and (String(x[8]) != "" or String(x[9]) != ""):
 					nit = Loot.weapon(String(x[2]), int(x[3]), String(x[8]), String(x[9]))
 				spawn_weapon(String(x[2]), int(x[3]), Vector3(x[4], x[5], x[6]), String(x[1]), false, int(x[7]) if x.size() > 7 else -1, nit)
+				if x.size() > 10 and float(x[10]) >= 0.0:
+					wpicks[wpicks.size() - 1]["left_at"] = time - float(x[10])      # just put down: grabbed within 2 s it keeps its bullets
 		"wtake":
 			for wp in wpicks:
 				if wp["id"] == String(x[1]):
