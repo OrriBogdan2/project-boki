@@ -178,7 +178,7 @@ static func demo() -> void:
 		arm.append(Loot.gear(String(gk[i]), 1 + i % 4))
 	d["armory"] = arm
 	Save.migrate(d)
-	for k in ["armory", "equal_notice", "mats", "scrap", "items", "loadout"]:
+	for k in ["armory", "equal_notice", "mats", "scrap", "items", "loadout", "backpacks", "pack_pick"]:
 		Save.d[k] = d[k]
 	Save.d["gems"] = int(d["gems"]) + 300
 	Save.d["valuables"] = {"old_coin": 3, "sky_pearl": 1}
