@@ -22,9 +22,9 @@ static func tick(m) -> void:
 		for s in P.slot_lv: P.slot_lv[s] = 1
 		if mode == "plates": _plates(m, P)
 		else: _fight(m, P)
-	# (the pointer rests on open ground just under you: the camera doesn't lead and no hover card shows)
+	# (the pointer rests on open ground above you: the camera doesn't lead and no hover card shows)
 	var vp: Viewport = m.get_viewport()
-	if vp: vp.warp_mouse(vp.get_visible_rect().size * 0.5 + Vector2(0, 120))
+	if vp: vp.warp_mouse(vp.get_visible_rect().size * 0.5 + Vector2(0, -220))
 	for h in m.hunters:
 		if h == P: continue
 		if mode == "plates" or m.time < 4.0:

@@ -102,7 +102,7 @@ static func icon_row(c: CanvasItem, at: Vector2, icons: Array, size := 14.0) -> 
 		var r := Rect2(Vector2(x, at.y - size * 0.5), Vector2(size, size))
 		c.draw_rect(r, HudStyle.SHADE)
 		c.draw_rect(r, Color(ic[1], 0.8), false, 1.0)
-		Icons.draw(c, String(ic[0]), r.get_center(), size * 0.3, ic[1])
+		Icons.draw(c, String(ic[0]), r.get_center(), size * 0.36, ic[1])
 		x += size + 2.0
 
 ## Shield as a fraction of max health (what the bar draws past the end of health).
