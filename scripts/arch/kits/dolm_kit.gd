@@ -1,7 +1,7 @@
 class_name DolmKit
 extends ArchKit
 ## Breah (id dolm, medium): Tremor Sense, Rubble Fists (tap boulder / hold punch), Landslide, Quakefall,
-## Stone Row. docs/heroes/dolm.md. The loop: raise rocks (Stone Row, or the rock Landslide pushes),
+## Stone Row, and Basalt Spine on X (breah_spine.gd). docs/heroes/dolm.md. The loop: raise rocks (Stone Row, or the rock Landslide pushes),
 ## then launch them with a held punch (every rock in the lane flies, a whole row one after another),
 ## a slam or a dash into the enemy. Rocks are low walls you can stand on and climb (StoneStand).
 ## A slam that knocks or kills resets itself.
@@ -31,6 +31,7 @@ var launch_pay := 0            # launched rocks that hit a hunter (payoff counte
 var rock_hits := {}            # foe instance id -> last time a rock burst on it (repeat bursts deal less)
 var carry := {}                # Landslide's rock riding ahead: {t, dir, hit}
 var slam: BreahSlam
+var spine: BreahSpine
 # counters for the checks
 var punches := 0
 var boulders := 0
@@ -41,7 +42,6 @@ var wall_stuns := 0
 var qf_resets := 0
 var rocks_made := 0
 var sight_pings := 0
-var bridges := 0
 var landslides := 0
 var sweeps := 0                # punches that launched 2+ rocks in a stream
 var last_sweep := 0            # rocks the last punch launched
@@ -53,12 +53,22 @@ func slam_def() -> Dictionary: return rmb_def()["slam"]
 
 func _setup() -> void:
 	slam = BreahSlam.new(self)
+	spine = BreahSpine.new(self)
+
+# ------------------------------------------------------------------ X: Basalt Spine (BreahSpine)
+func cast_ult() -> bool: return spine.start()
+func ult_running() -> bool: return spine.running()
+
+## The id prefix of her rocks (unique per hunter, the same on every game).
+func rid_owner() -> String:
+	return h.nid if h.nid != "" else str(h.get_instance_id())
 
 # ------------------------------------------------------------------ rocks
+## Her Stone Row rocks (the pips and the cap); the Basalt Spine's ridge stands apart from both.
 func my_rocks() -> Array:
 	var out: Array = []
 	for w in m.verbs.walls:
-		if w.get("rock", false) and w.get("by") == h:
+		if w.get("rock", false) and w.get("by") == h and not w.has("ult"):
 			out.append(w)
 	return out
 
@@ -85,7 +95,7 @@ func _new_rock(p: Vector3, dir: Vector2) -> bool:
 	rid_n += 1
 	var rd := rock_def()
 	HeroZones.rock(
-		m, h, p, dir, "%s.r%d" % [h.nid if h.nid != "" else str(h.get_instance_id()), rid_n], float(rd["len"]),
+		m, h, p, dir, "%s.r%d" % [rid_owner(), rid_n], float(rd["len"]),
 		float(rd["time"]), float(rd["hp"])
 	)
 	rocks_made += 1
@@ -100,6 +110,8 @@ func launch(w: Dictionary, dir: Vector2, src: String) -> void:
 	m.fx.burst(mid + Vector3(0, 0.6, 0), Color("d9b27a"), 14, 5.0, 0.4, 6.0, 1.1)
 	m.fx.spark(mid + Vector3(0, 0.4, 0), Vector3(dir.x, 0.6, dir.y), MOLTEN, 10, 7.0, 35.0, 0.3, 6.0, 1.2)
 	_fire_rock(mid + Vector3(0, 0.9, 0), dir, float(rd["dmg"]) * power("kin"), src, "rock", float(rd["range"]))
+	if w.has("ult"):
+		m.shots[-1]["x"]["ult"] = int(w["ult"])
 	launches += 1
 
 func _fire_rock(start: Vector3, dir: Vector2, dmg: float, src: String, skin: String, rng: float) -> void:
@@ -133,9 +145,14 @@ func _rock_end(s: Dictionary, at: Vector3, e: Ent, _why: String, src: String) ->
 	Feel.shake(m, "t2", h, at)
 	net_ring(at, blast, Color("ff5a2a"))
 	var slow_t := float(rd["slow_t"]) if src != "dash" else float(dash_def()["slow_t"])
+	var ult_cast := int(x.get("ult", 0))
+	var splash_dmg := float(s["dmg"]) * 0.6
 	if e != null and is_instance_valid(e) and e.team != h.team:
 		s["dmg"] = float(s["dmg"]) * _repeat_k(e)
 		KitStatus.apply(e, "vul", float(rd["shred_t"]), float(rd["shred"]))
+		if ult_cast > 0:
+			s["dmg"] = spine.capped(e, float(s["dmg"]))
+			_ult_rock_landed(e, ult_cast)
 		x["slow"] = slow_t
 		x["slow_k"] = float(rd["slow_k"])
 		if e is Hunter:
@@ -143,14 +160,24 @@ func _rock_end(s: Dictionary, at: Vector3, e: Ent, _why: String, src: String) ->
 			payoff_fx(e.pos, ROCK_PAY, Color("ffb36a"), "pay_rockfall", h.dir_to(e), e)
 	for f in foes_in(at, blast):
 		if f == e: continue
+		var f_dmg := splash_dmg * _repeat_k(f)
+		if ult_cast > 0:
+			f_dmg = spine.capped(f, f_dmg)
+			_ult_rock_landed(f, ult_cast)
 		f.hurt(
-			float(s["dmg"]) * 0.6 * _repeat_k(f), h,
+			f_dmg, h,
 			{
 				"src": "abil", "ab": "rock", "slow": slow_t, "slow_k": float(rd["slow_k"]),
 				"kb": Vector2(f.pos.x - at.x, f.pos.z - at.z).normalized() * 4.0
 			}
 		)
 		KitStatus.apply(f, "vul", float(rd["shred_t"]), float(rd["shred"]))
+
+## A Basalt Spine rock that reached a hunter inside the bond window fills the bond (judged a beat later, so
+## a knock or kill from this very hit counts as one).
+func _ult_rock_landed(f: Ent, ult_cast: int) -> void:
+	if f is Hunter and spine.bond_open(ult_cast):
+		m.later(0.02, func(): if is_instance_valid(f): HeroUlt.landed(self, f))
 
 func _repeat_k(f: Ent) -> float:
 	var rd := rock_def()
@@ -179,6 +206,7 @@ func _tick(dt: float) -> void:
 	if not carry.is_empty():
 		_tick_carry(dt)
 	slam.tick(dt)
+	spine.tick(dt)
 	_tick_sight(dt)
 
 ## Tremor Sense: sneaking shows a narrow cone ahead that widens the longer you sneak, and the foes in
@@ -211,6 +239,7 @@ func _drop_holds() -> void:
 	dive_k = 0.0
 	carry = {}
 	if slam: slam.drop()
+	if spine: spine.drop()
 	if lmb_t >= 0.0:
 		lmb_t = -1.0
 		h.mel_hold = 0.0
@@ -515,8 +544,8 @@ func on_knock(t: Hunter, mine: bool) -> void:
 		_reset_quake()
 
 # ------------------------------------------------------------------ E: Stone Row
-## The row's spots: 3 rocks in a slight curve across the aim (the outer two set back), and at rank 3 a
-## second row behind. Every spot is judged before the first rock goes up (rocks block sight and walking).
+## The row's spots: 3 rocks in a slight curve across the aim (the outer two set back), and at rank 3 an
+## extra row behind. Every spot is judged before the first rock goes up (rocks block sight and walking).
 func row_spots(dir: Vector2) -> Array:
 	var ed := e_def()
 	var side := Vector2(-dir.y, dir.x)
@@ -543,21 +572,6 @@ func row_spots(dir: Vector2) -> Array:
 func cast_e() -> bool:
 	var ed := e_def()
 	var dir := h.aim_dir()
-	# rank 3 over the abyss: a temporary rock bridge instead of a wall
-	if rank("kin") >= 3:
-		var aimp := aim()
-		if m.world.is_void(aimp.x, aimp.z) or HeroZones.walk(
-			m, h.pos, aimp, float(ed["bridge_len"])
-		)["stopped"] == "abyss":
-			var pw := HeroZones.walk(m, h.pos, aimp, float(ed["bridge_len"]))
-			var from: Vector3 = pw["pos"] if pw["ok"] else h.pos
-			var n := HeroZones.bridge(m, h, from, dir, float(ed["bridge_len"]), 2.0, float(ed["bridge_t"]))
-			if n > 0:
-				bridges += 1
-				play("breah_raise")
-				m.sfx("br_raise", from, -2.0, 0.8)
-				m.fx.ring(from, 1.6, Color("d9b27a"), 0.3)
-				return true
 	var spots := row_spots(dir)
 	if spots.is_empty():
 		if h.is_local() and m.hud: m.hud.toast_small("No room for rocks here", col_of(ed))
@@ -574,25 +588,29 @@ func cast_e() -> bool:
 	m.sfx("br_crack", h.pos, -3.0, 1.0)
 	for j in spots.size():
 		var p2: Vector3 = spots[j][0]
-		var row: int = spots[j][1]
-		# the first row rises all at once; the rank-3 row erupts from its centre outward and slows
-		var delay := tell + (float(ed["stagger"]) * float(j % 3) if row == 1 else 0.0)
-		m.later(delay, func(): if is_instance_valid(h) and not KinMerge.active(h): _raise(p2, dir, row == 1))
-	m.later(tell, func(): if is_instance_valid(h): m.sfx("br_raise", h.pos, -1.0, 1.0); Feel.shake(m, "t2", h, h.pos))
+		m.later(tell, func(): if is_instance_valid(h) and not KinMerge.active(h): _raise(p2, dir))
+	m.later(tell, _raise_feel)
 	net_ring(h.pos, 2.0, col_of(ed))
 	return true
 
-func _raise(p: Vector3, dir: Vector2, slows: bool) -> void:
+func _raise(p: Vector3, dir: Vector2) -> void:
 	if not _new_rock(p, dir):
 		return
 	m.fx.burst(p + Vector3(0, 0.2, 0), MOLTEN, 8, 4.0, 0.3, 8.0, 1.0)
-	if slows:
-		for f in foes_in(p, float(e_def()["slow_r"])):
-			f.hurt(1.0 * power("kin"), h, {"src": "abil", "ab": "e", "slow": float(e_def()["slow_t"]), "slow_k": 0.35})
+
+func _raise_feel() -> void:
+	if not is_instance_valid(h):
+		return
+	m.sfx("br_raise", h.pos, -1.0, 1.0)
+	Feel.shake(m, "t2", h, h.pos)
 
 # ------------------------------------------------------------------ bots
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null:
+		return
+	if HeroUlt.unlocked(self) and float(cd["x"]) <= 0.0 and dist > 3.0 and dist < 9.0 and los and randf() < 0.1:
+		h.inp["aim"] = tgt.pos
+		h.inp["xult"] = true
 		return
 	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and dist > 4.0 and dist < 9.0 and los and randf() < 0.25:
 		h.inp["sig"] = true

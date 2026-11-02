@@ -15,7 +15,8 @@
 		"passive": "Swell: your hits fill Swell (much faster on hunters); full, you are Swollen for 9s and everything grows.",
 		"weapons": {
 			"tether_lantern": "Quick orbs to full range; pause 1.4s and the next one is a fast bright bolt that slows."
-		}
+		},
+		"x": "Nightwell: from level 6, open a well at the cursor that stuns everything inside for 3.5s and draws it to the middle."
 	},
 	"signature": "tether_lantern",
 	"no_hold": true,
@@ -108,7 +109,6 @@
 		"dmg": 12.0,
 		"dmg_max_k": 3.0,
 		"ground": 1.0,
-		"pull": 2.4,
 		"desc": "Drop a seed up to 9m away at the cursor (on ground, short of walls). It swells for 6.5s up to 3.2m wide, a light column rising when it is nearly full, then pops by itself; press E again (from 0.3s) to pop it sooner. Damage 12 up to 3.5 times that by how long it grew, and everyone it catches is Grounded for 1s. Swollen: larger and quicker.",
 		"sockets": {
 			"hit": "add",
@@ -121,6 +121,22 @@
 		"drop": 0.25,
 		"tell_k": 0.68,
 		"linger": 0.5
+	},
+	"x": {
+		"name": "Nightwell",
+		"short": "Well",
+		"icon": "blaze_mantle",
+		"col": "#b06bff",
+		"unlock": 6,
+		"cooldown": 64.0,
+		"range": 10.0,
+		"tell": 1.0,
+		"time": 3.5,
+		"r": 3.6,
+		"r_swollen": 5.1,
+		"tick_dmg": 0.16,
+		"pull": 12.0,
+		"desc": "Tap X: a pale dome of the well's exact size appears at the cursor (up to 10m away, on ground short of walls) and everyone sees it for 1.0s. Then the well opens for 3.5s, 3.6m wide: every foe inside, or who walks in, is stunned until it closes and drawn to its middle, taking a small hit every 0.1s. Allies are untouched, and you are free to act. Swollen: 5.1m wide. 64s."
 	},
 	"order": [
 		"sec",
@@ -137,7 +153,7 @@
 	"rank3": {
 		"sec": "+20% damage",
 		"dash": "allies beside you when you leave, or where you land, get a shield",
-		"kin": "the pop pulls everything inside 1.3x its radius to the middle first, and the seed burns foes inside while it grows"
+		"kin": "the seed burns foes inside while it grows"
 	},
 	"rank2": {
 		"sec": "Rank 2: cooldown 9s -> 8.1s, damage +15%.",
@@ -146,7 +162,7 @@
 	},
 	"rank_next": {
 		"sec": "Rank 3: cooldown 9s -> 7.2s, damage +30%.",
-		"kin": "Rank 3: cooldown 11s -> 8.8s; the pop pulls foes in first and the growing seed burns.",
+		"kin": "Rank 3: cooldown 11s -> 8.8s; the growing seed burns foes inside.",
 		"dash": "Rank 3: recharge 9s -> 6.3s; allies beside you or at your landing get a 20 shield for 3s."
 	},
 	"tells": {

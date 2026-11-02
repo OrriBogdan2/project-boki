@@ -55,6 +55,15 @@ static func glass_mat(core: Color, rim: Color, a := 1.0) -> ShaderMaterial:
 	mt.set_shader_parameter("alpha", a)
 	return mt
 
+## Unlit and alpha-blended: a dark tint that stays dark on bright ground (additive glow would wash out).
+static func shade_mat(c: Color) -> StandardMaterial3D:
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.albedo_color = c
+	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	return mat
+
 static func lump(r: float) -> SphereMesh:
 	var s := SphereMesh.new()
 	s.radius = r
@@ -145,6 +154,16 @@ func _build(kind: String) -> Node3D:
 			Models.part(
 				n, Models.cyl(0.35, 0.55, 6.0, 16), glass_mat(Color("20003a"), Color("b06bff"), 0.7), Vector3(0, 3.0, 0)
 			)
+		"well_dome":
+			Models.part(n, Models.sphere(1.0, 24), glass_mat(Color("0a2440"), Color("a8e4ff"), 0.3), Vector3.ZERO)
+			Models.part(
+				n,
+				Models.sphere(0.3, 16),
+				Models.glow_mat(Color(1.0, 0.31, 0.85, 0.55)),
+				Vector3(0, 0.15, 0)
+			).name = "Core"
+		"well":
+			_build_well(n)
 		"hand":
 			Models.part(n, Models.sphere(0.16, 12), Models.glow_mat(Color(1, 1, 1, 0.9)), Vector3.ZERO).name = "Core"
 			Models.part(n, Models.sphere(0.3, 12), Models.glow_mat(Color(1, 1, 1, 0.25)), Vector3.ZERO).name = "Halo"
@@ -152,6 +171,35 @@ func _build(kind: String) -> Node3D:
 		(c2 as MeshInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(n)
 	return n
+
+## Ostra's Nightwell, radius 1 (scaled to the well): a dark violet disc, four spiral arms of light turning
+## on it, small black orbs riding the rim, and a pink core shown when she cast it Swollen.
+func _build_well(n: Node3D) -> void:
+	Models.part(n, Models.cyl(1.0, 1.0, 0.03, 32), shade_mat(Color(0.12, 0.02, 0.24, 0.72)), Vector3.ZERO)
+	var spin := Node3D.new()
+	spin.name = "Spin"
+	n.add_child(spin)
+	var arm_mat := Models.glow_mat(Color(0.69, 0.42, 1.0, 0.8))
+	for arm in 4:
+		for j in 6:
+			var u := float(j + 1) / 6.0
+			var ang := TAU * arm / 4.0 + u * 2.2
+			var at := Vector3(cos(ang), 0.03, sin(ang)) * u * 0.92
+			Models.part(spin, Models.box(0.06 + 0.1 * u, 0.01, 0.2), arm_mat, at, Vector3.ONE, Vector3(0, -ang, 0))
+	for i in 8:
+		var a := TAU * i / 8.0
+		Models.part(
+			spin,
+			Models.sphere(0.07, 8),
+			Models.toon(Color("0c0414"), false, 0.0),
+			Vector3(cos(a), 0.12, sin(a))
+		)
+	Models.part(
+		n,
+		Models.sphere(0.22, 14),
+		Models.glow_mat(Color(1.0, 0.31, 0.85, 0.85)),
+		Vector3(0, 0.1, 0)
+	).name = "Core"
 
 func _take(kind: String) -> Node3D:
 	var p: Array = pools.get(kind, [])

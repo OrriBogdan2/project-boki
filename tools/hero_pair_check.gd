@@ -88,6 +88,19 @@ func hold(m: Match, P: Hunter, t: float) -> void:
 func rocks(m: Match) -> Array:
 	return m.verbs.walls.filter(func(w): return w.get("rock", false))
 
+## Breah's Basalt Spine laid along the aim across the abyss strip: X held at a centre over the gap, the
+## cursor dragged on along the aim, let go; returns once the cracks are done and the walkway is down.
+func spine_across(m: Match, P: Hunter, home: Vector3) -> void:
+	P.ak.cd["x"] = 0.0
+	P.inp["aim"] = home + Vector3(6.5, 0.9, 0)
+	step(m, 0.1)
+	P.inp["x_down"] = true
+	P.ak.use_x()
+	P.inp["aim"] = home + Vector3(12.0, 0.9, 0)
+	step(m, 0.2)
+	P.inp["x_down"] = false
+	step(m, float(P.ak.x_def()["tell"]) + 0.05)
+
 func void_tiles(m: Match) -> int:
 	var c := 0
 	for i in m.world.kind.size():
@@ -156,25 +169,21 @@ func _zones() -> void:
 		var mid2: Vector3 = (P.ak as DolmKit).rock_mid(w)
 		all_ok = all_ok and not m.world.is_void(mid2.x, mid2.z)
 	ok("stone row: rocks near the edge stay on ground", rocks(m).size() > 0 and all_ok, "rocks %d" % rocks(m).size())
-	# ---- bridge only turns abyss tiles to ground, and gives them back
-	P.slot_lv["kin"] = 3
+	# ---- the Basalt Spine's walkway only turns abyss tiles to ground, and gives them back
 	var before := void_tiles(m)
 	var ground_before: Array = []
 	for i in m.world.kind.size():
 		if m.world.kind[i] != World.T_VOID: ground_before.append(i)
-	P.ak.cd["e"] = 0.0
-	P.inp["aim"] = home + Vector3(8, 0.9, 0)
-	step(m, 1.0)
 	for w in m.verbs.walls.duplicate(): m.verbs._break_wall(w)
-	P.ak.cast_e()
-	step(m, 0.25)      # (the row rises after its 0.2s ground flash)
+	spine_across(m, P, home)
 	var after := void_tiles(m)
-	ok("bridge (rank 3): abyss tiles become ground", (P.ak as DolmKit).bridges == 1 and after < before, "void %d -> %d" % [before, after])
+	var spine := (P.ak as DolmKit).spine
+	ok("bridge (Basalt Spine): abyss tiles become ground", spine.bridges == 1 and after < before, "void %d -> %d" % [before, after])
 	var untouched := true
 	for i in ground_before:
 		untouched = untouched and m.world.kind[i] != World.T_VOID
 	ok("bridge: solid ground is never changed", untouched)
-	step(m, float((P.ak as DolmKit).e_def()["bridge_t"]) + 1.0)
+	step(m, float(P.ak.x_def()["time"]) + 1.0)
 	ok("bridge: the abyss comes back when it ends", void_tiles(m) == before, "void %d vs %d" % [void_tiles(m), before])
 	await done(m)
 	# ---- a block tile and a body in the way
@@ -243,12 +252,9 @@ func _zones() -> void:
 	await done(m)
 	r = setup("dolm", 9.0, 3, 3)
 	m = r[0]; P = r[1]; home = r[3]
-	P.inp["aim"] = home + Vector3(8, 0.9, 0)
-	step(m, 0.5)
 	var v_before := void_tiles(m)
 	HeroZones.sent.clear()
-	P.ak.cast_e()
-	step(m, 0.25)      # (the row rises after its 0.2s ground flash)
+	spine_across(m, P, home)
 	var bev: Array = HeroZones.sent.filter(func(e): return e[1] == "bridge")
 	r2 = setup("dolm", 9.0, 3, 3)
 	m2 = r2[0]

@@ -229,11 +229,49 @@ def os_empower():
     save('os_empower', level(mix(at([v * 0.5 for v in sw], 0, T), at(chord, 0.55, T), at(env(lowpass(noise(0.4), 2500), 0.12), 0.55, T)), 0.13))
 
 
+def br_spine():
+    """Basalt Spine: a ground rumble swelling under the 0.2s cracks, then staggered rock cracks centre-out."""
+    T = 1.3
+    rumble = ramp_in(env(lowpass(noise(1.1), 220), 0.5), 0.6)
+    sub = env(sine_sweep(40, 70, 0.9, 0.9), 0.4)
+    parts = [at([v * 1.2 for v in rumble], 0, T), at(sub, 0.05, T), at(br_crack_hit(), 0.0, T)]
+    for i in range(7):
+        parts.append(at([v * (0.9 - i * 0.08) for v in br_crack_hit()], 0.2 + i * 0.065, T))
+    save('br_spine', level(mix(*parts, grains(T, 0.2, 1.0, 2.0, 500, 2200, (0.02, 0.05))), 0.17))
+
+
+def br_crack_hit():
+    return env(highpass(lowpass(noise(0.14), rng.uniform(2600, 4200)), 400), 0.035)
+
+
+def os_well():
+    """Nightwell cast: a hand-thrust glass ping, then a suction whoosh rising over the 1.0s dome."""
+    T = 1.15
+    ping = glass([1175, 1760], 0.4, 0.15, 0.25)
+    suck = ramp_in(env(lowpass(noise(1.05), 1600), 2.0), 2.2)
+    rise = ramp_in(sine_sweep(120, 420, 1.0, 0.6), 1.8)
+    save('os_well', level(mix(at(ping, 0, T), at([v * 0.8 for v in suck], 0.05, T), at([v * 0.4 for v in rise], 0.05, T)), 0.12))
+
+
+def os_well_hum():
+    """The open well: a low droning hum that beats slowly for 3.5s, then sinks away (no blast)."""
+    T = 3.7
+    a = sine_sweep(62, 58, 3.6, 0.5)
+    b = sine_sweep(93, 87, 3.6, 0.35)
+    drone = mix(a, b, env(lowpass(noise(3.6), 300), 2.5))
+    wob = [v * (0.7 + 0.3 * math.sin(2 * math.pi * 1.6 * i / SR)) for i, v in enumerate(drone)]
+    tail = [v * min(1.0, (len(wob) - i) / (0.5 * SR)) for i, v in enumerate(wob)]
+    thump = env(sine_sweep(160, 55, 0.3), 0.08)
+    save('os_well_hum', level(mix(at(thump, 0, T), at(tail, 0, T)), 0.11))
+
+
 ALL = [br_throw, br_boulder_hit, br_wind, br_punch, br_launch, br_burst, br_rise, br_roll, br_shove, br_leap,
        br_slam, br_crack, br_raise, br_sense, os_orb, os_orb_hot, os_prime, os_snap_wind, os_snap, os_snap_hit,
-       os_swap_lob, os_swap, os_seed, os_full, os_pop, os_empower]
+       os_swap_lob, os_swap, os_seed, os_full, os_pop, os_empower, br_spine, os_well, os_well_hum]
 
 if __name__ == '__main__':
-    for f in ALL:
+    only = sys.argv[1:]          # names to write, or every sound
+    done = [f for f in ALL if not only or f.__name__ in only]
+    for f in done:
         f()
-    print('wrote %d sounds: %s' % (len(ALL), ' '.join(f.__name__ for f in ALL)))
+    print('wrote %d sounds: %s' % (len(done), ' '.join(f.__name__ for f in done)))

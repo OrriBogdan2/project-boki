@@ -1,7 +1,7 @@
 class_name OstraKit
 extends ArchKit
 ## Ostra (medium): Swell, Tether Lantern (a Settled orb after a pause), Lantern Trade, Shard Snap,
-## Brimseed. docs/heroes/ostra.md. The loop: hits (ten times as much on hunters) fill Swell; Swollen,
+## Brimseed, and Nightwell on X (ostra_well.gd). docs/heroes/ostra.md. The loop: hits (ten times as much on hunters) fill Swell; Swollen,
 ## the seed grows bigger and quicker, Trade lands sooner and Snap hits harder. Snap to stun at range,
 ## drop the seed on the stunned foe, let it grow, pop it; Trade puts you or the foe in it.
 ##
@@ -26,6 +26,7 @@ var sid_n := 0
 var swap: Dictionary = {}      # in flight: {t, T, land, from}
 var swap_aim := -1.0           # Shift held to aim the Trade (-1: not aiming)
 var snap: Dictionary = {}      # the Snap's wind-up: {t, k}
+var well: OstraWell            # X: Nightwell
 # counters for the checks
 var swells := 0
 var settled_shots := 0
@@ -41,6 +42,13 @@ var denied_swaps := 0
 var swap_peak := 0.0           # how high the last Trade's lantern flew above its start (checks)
 
 func is_swollen() -> bool: return swollen_t > 0.0
+
+func _setup() -> void:
+	well = OstraWell.new(self)
+
+# ------------------------------------------------------------------ X: Nightwell (OstraWell)
+func cast_ult() -> bool: return well.start()
+func ult_running() -> bool: return well.running()
 
 func res_text() -> String: return "SWOLLEN" if is_swollen() else "%d" % int(res)
 func ready_label() -> String: return "SWOLLEN" if is_swollen() else ""
@@ -110,6 +118,7 @@ func _tick(dt: float) -> void:
 		_tick_swap(dt)
 	if not seed.is_empty():
 		_tick_seed(dt)
+	well.tick(dt)
 	_reticle()
 
 ## Her reticle: the thin line to the cursor, all the time; the Snap's two rails while it winds up or
@@ -459,11 +468,8 @@ func _pop(hit: bool) -> void:
 	m.sfx("os_pop", p, -2.0, 1.0)
 	Feel.shake(m, "t3" if k > 0.6 else "t2", h, p)
 	net_ring(p, rad, TEAL)
-	var catch_r := rad * (1.3 if rank("kin") >= 3 else 1.0)
 	var caught_hunter: Ent = null
-	for f in foes_in(p, catch_r):
-		if rank("kin") >= 3 and Vector2(f.pos.x - p.x, f.pos.z - p.z).length() > rad * 0.3:
-			HeroZones.move_body(m, f, Vector3(p.x, m.world.ground_at(p.x, p.z), p.z))
+	for f in foes_in(p, rad):
 		f.hurt(dmg, h, {"src": "abil", "ab": "e", "payoff": k >= 0.99 and f is Hunter})
 		KitStatus.apply(f, "gnd", float(ed["ground"]))
 		if f is Hunter: caught_hunter = f
@@ -474,6 +480,10 @@ func _pop(hit: bool) -> void:
 # ------------------------------------------------------------------ bots
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null:
+		return
+	if HeroUlt.unlocked(self) and float(cd["x"]) <= 0.0 and dist < 9.0 and los and randf() < 0.1:
+		h.inp["aim"] = tgt.pos
+		h.inp["xult"] = true
 		return
 	if not seed.is_empty():
 		var inside := Vector2(

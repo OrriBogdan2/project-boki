@@ -7,6 +7,10 @@ extends "res://tools/hero_pair_check.gd"
 func run(main_node: Node) -> void:
 	main = main_node
 	await _ostra()
+	var ult_check = load("res://tools/ostra_ult_check.gd").new()
+	await ult_check.ult(main)
+	n += ult_check.n
+	fails += ult_check.fails
 	print("PAIRCHECK ostra DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
@@ -393,22 +397,22 @@ func _ostra() -> void:
 	var h0 := P.hp
 	K.on_knock(T, true)
 	ok("passive: a knock heals 20%", P.hp - h0 >= P.max_hp * 0.19, "healed %.1f" % (P.hp - h0))
-	# rank 3: the pop drags foes in first
+	# rank 3: the growing seed burns; the pop no longer pulls (the pull is Nightwell's, on X)
 	P.slot_lv["kin"] = 3
 	reset.call()
 	T.teleport(home + Vector3(6.0, 0, 0))
 	aim_at(P, T.pos)
 	K.cast_e()
-	step(m, 6.0)
+	step(m, 1.2)
+	ok("rank 3: the growing seed burns a foe inside it", dmg(T) > 0.0, "dmg %.1f" % dmg(T))
+	step(m, 4.8)
 	var sp: Vector3 = K.seed["pos"] if not K.seed.is_empty() else T.pos
-	T.teleport(sp + Vector3(K.seed_radius() * 1.15, 0, 0))
+	var rim := K.seed_radius()
+	T.teleport(sp + Vector3(rim * 1.15, 0, 0))
 	K.e_recast()
 	step(m, 0.2)
-	ok(
-		"rank 3: the pop pulls foes at the rim to the middle",
-		Vector2(T.pos.x - sp.x, T.pos.z - sp.z).length() < 1.5 and dmg(T) > 0.0,
-		"off %.1f" % Vector2(T.pos.x - sp.x, T.pos.z - sp.z).length()
-	)
+	var off := Vector2(T.pos.x - sp.x, T.pos.z - sp.z).length()
+	ok("rank 3: the pop leaves a foe outside its rim where it stands", off > rim, "off %.1f rim %.1f" % [off, rim])
 	P.slot_lv["kin"] = 1
 	# ---- merge start drops every hold
 	reset.call()

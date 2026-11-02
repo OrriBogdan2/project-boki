@@ -8,6 +8,56 @@ extends RefCounted
 
 const MOVES := {
 	# ---------------------------------------------------------------- Breah
+	# Basalt Spine held: sunk wide and low, both fists spread out to the sides at the ground, the body
+	# turned along the ridge being dragged (it holds while X is down)
+	"breah_spine_aim": {"hold": true, "keys": [
+		[0.00, {}],
+		[
+			0.12,
+			{
+				"p": -0.3, "sq": 0.2, "lift": -0.1, "legs": [0.7, -1.3, 0.65, -1.2], "lw": 1.0,
+				"fl": Vector3(-0.7, -0.3, 0.05), "hw": 1.0, "fr": Vector3(0.7, -0.3, 0.05), "rw": 1.0
+			}
+		]]},
+	# Basalt Spine let go: the fists swing up (0.05) and are driven into the ground (0.1, the cracks), she
+	# stays down through the 0.2s cracks and the 0.4s rise, then heaves up as the ridge stands (0.7)
+	"breah_spine": {"keys": [
+		[
+			0.00,
+			{
+				"p": -0.3, "sq": 0.2, "lift": -0.1, "legs": [0.7, -1.3, 0.65, -1.2], "lw": 1.0,
+				"fl": Vector3(-0.7, -0.3, 0.05), "hw": 1.0, "fr": Vector3(0.7, -0.3, 0.05), "rw": 1.0
+			}
+		],
+		[
+			0.05,
+			{
+				"p": 0.3, "lift": 0.18, "sq": -0.2, "legs": [0.5, -1.0, 0.45, -0.9], "lw": 1.0,
+				"fl": Vector3(-0.2, 1.0, 0.0), "hw": 1.0, "fr": Vector3(0.2, 1.0, 0.0), "rw": 1.0
+			}
+		],
+		[
+			0.10,
+			{
+				"p": -0.85, "lift": -0.14, "sq": 0.5, "legs": [0.9, -1.5, 0.8, -1.4], "lw": 1.0,
+				"fl": Vector3(-0.3, -0.72, -0.45), "hw": 1.0, "fr": Vector3(0.3, -0.72, -0.45), "rw": 1.0
+			}
+		],
+		[
+			0.55,
+			{
+				"p": -0.75, "lift": -0.12, "sq": 0.36, "legs": [0.85, -1.45, 0.75, -1.35], "lw": 1.0,
+				"fl": Vector3(-0.32, -0.66, -0.42), "hw": 1.0, "fr": Vector3(0.32, -0.66, -0.42), "rw": 1.0
+			}
+		],
+		[
+			0.70,
+			{
+				"p": 0.25, "lift": 0.1, "sq": -0.18, "legs": [0.3, -0.6, 0.25, -0.5], "lw": 1.0,
+				"fl": Vector3(-0.5, 0.7, -0.1), "hw": 1.0, "fr": Vector3(0.5, 0.7, -0.1), "rw": 1.0
+			}
+		],
+		[1.00, {}]]},
 	# Boulder (tap): no long wind-up. The right fist dips back low (0.06), hurls underarm and up on the
 	# release (0.12, the shot leaves), the body stretching after it, then a quick settle
 	"breah_throw": {"keys": [
@@ -437,6 +487,43 @@ const MOVES := {
 			}
 		],
 		[0.60, {}]]},
+	# Nightwell: the lantern hand thrust up and out at the spot (0.1), held while the dome shows, then down
+	"ostra_well": {"keys": [
+		[0.00, {}],
+		[
+			0.05,
+			{
+				"gp": -0.5, "p": 0.25, "y": -0.35, "sq": 0.14, "fr": Vector3(0.25, -0.1, 0.3), "rw": 1.0,
+				"fl": Vector3(-0.2, 0.2, -0.1), "hw": 0.8
+			}
+		],
+		[
+			0.10,
+			{
+				"gp": 0.9, "p": -0.45, "y": 0.3, "sq": -0.2, "lift": 0.2, "fr": Vector3(0.05, 0.85, -0.8),
+				"rw": 1.0, "fl": Vector3(-0.4, 0.0, 0.3), "hw": 1.0
+			}
+		],
+		[
+			0.40,
+			{
+				"gp": 0.7, "p": -0.35, "y": 0.25, "lift": 0.16, "fr": Vector3(0.05, 0.8, -0.72), "rw": 1.0,
+				"fl": Vector3(-0.38, 0.0, 0.28), "hw": 0.9
+			}
+		],
+		[0.80, {}]]},
+	# the well opens: the raised hand clenches shut and pulls down to the chest, a quarter turn with it
+	"ostra_well_snap": {"keys": [
+		[0.00, {}],
+		[
+			0.06,
+			{
+				"gp": -0.6, "p": 0.3, "y": 0.5, "sq": 0.2, "fr": Vector3(0.05, 0.2, -0.15), "rw": 1.0,
+				"fl": Vector3(-0.05, 0.2, -0.15), "hw": 1.0
+			}
+		],
+		[0.18, {"gp": 0.3, "p": 0.1, "y": 0.2, "sq": 0.05, "fr": Vector3(0.1, 0.1, -0.25), "rw": 0.7}],
+		[0.40, {}]]},
 	# Swollen: lifted off the ground, arms flung up and wide, one full turn in the air, then down
 	"ostra_empower": {"keys": [
 		[0.00, {}],

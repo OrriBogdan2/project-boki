@@ -26,8 +26,8 @@ const PREVIEW := {
 	"ashwick": {"dash": "dash", "passive": "meter", "rmb": "projectile", "e": "zone"},
 	"tender": {"dash": "dash", "passive": "marks", "rmb": "projectile", "e": "zone"},
 	"rimewright": {"dash": "charge", "passive": "marks", "rmb": "projectile", "e": "shield"},
-	"dolm": {"dash": "dash2", "passive": "meter", "rmb": "heavy", "e": "zone"},
-	"ostra": {"dash": "blink", "passive": "meter", "rmb": "projectile", "e": "zone"},
+	"dolm": {"dash": "dash2", "passive": "meter", "rmb": "heavy", "e": "zone", "x": "fissure"},
+	"ostra": {"dash": "blink", "passive": "meter", "rmb": "projectile", "e": "zone", "x": "zone"},
 }
 
 var arch := ""

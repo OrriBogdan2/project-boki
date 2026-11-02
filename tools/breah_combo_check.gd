@@ -7,6 +7,10 @@ extends "res://tools/hero_pair_check.gd"
 func run(main_node: Node) -> void:
 	main = main_node
 	await _breah()
+	var ult_check = load("res://tools/breah_ult_check.gd").new()
+	await ult_check.ult(main)
+	n += ult_check.n
+	fails += ult_check.fails
 	print("PAIRCHECK dolm DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
@@ -475,10 +479,10 @@ func _breah() -> void:
 	var mid_n := rocks(m).size()
 	step(m, 0.4)
 	ok(
-		"rank 3: a second row that erupts from its centre outward", rocks(m).size() == 6 and mid_n < 6,
-		"at 0.25s %d, then %d" % [mid_n, rocks(m).size()]
+		"rank 3: an extra row behind the first, rising with it (the centre-out rise is Basalt Spine's)",
+		rocks(m).size() == 6 and mid_n == 6, "at 0.25s %d, then %d" % [mid_n, rocks(m).size()]
 	)
-	ok("rank 3: the second row slows a foe beside it", T.slow_t > 0.0, "slow %.2f" % T.slow_t)
+	ok("rank 3: the extra row does not slow (the slow is Basalt Spine's)", T.slow_t <= 0.0, "slow %.2f" % T.slow_t)
 	P.slot_lv["sec"] = 1
 	P.slot_lv["kin"] = 1
 	P.slot_lv["dash"] = 1
