@@ -59,6 +59,7 @@ What the in-game kit card (K) says.
 | LMB | Lantern Crook: hold to flick embers that fly past the cursor; each hit on a foe adds Kindle. |
 | RMB: Burrseed | Burrseed: hold to aim the lane, let go to throw; it sticks to a foe and roots them 0.7s later. |
 | E: Hearthlight | Hearthlight: a healing ring on you; press again to throw it to the cursor. |
+| X: Hearth Call | Hearth Call (X, level 6): tether a teammate for 5s of healing while you walk; a downed one is pulled to you and stood up at the end. |
 | Weapon: Lantern Crook | Hold to flick embers that fly past the cursor; each hit on a foe adds Kindle. |
 
 ### Abilities in full
@@ -73,6 +74,8 @@ What the in-game kit card (K) says.
 
 **Hearthlight (E, 11s cooldown).** A 2.6m ring of lantern light round you for 2.5s: it heals teammates inside 10 over its life, then flares for 22. Press E again to throw it to the cursor (up to 9m, it lands almost at once and widens to 2.9m): for 1s its healing is 50% stronger, and it latches onto the first teammate it passes. It heals you at a third, and a downed teammate five times over. A stun while it's on you puts it out.
 
+**Hearth Call (X, level 6, 46s cooldown).** Hold X over a teammate within 12.6m (7 body heights) and let go: a lantern tether heals them 7 a second for 5s while you keep walking (and casting). A gold ring round you shows the tether's reach. At the end a downed teammate is pulled to your side and stood back up; while they are down the tether's healing goes to you instead. It breaks if you are knocked or stunned, or the teammate leaves the ring. With no teammate in the match it lights on you.
+
 ### Ranks
 
 Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the special.
@@ -81,7 +84,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 |---|---|---|
 | RMB | cooldown 8s -> 7.2s, damage +15%. | cooldown 8s -> 6.4s, damage +30%; the roots last 0.3s longer. |
 | Dash (Shift) | recharge 7.5s -> 6.4s per charge. | recharge 7.5s -> 5.3s; picking up a teammate refreshes your long air dash. |
-| E | cooldown 11s -> 9.9s, healing +15%. | cooldown 11s -> 8.8s, healing +30%; the closing flare also stands a downed teammate in the ring back up. |
+| E | cooldown 11s -> 9.9s, healing +15%. | cooldown 11s -> 8.8s, healing +30%; the thrown light's 50% boost lasts 2s instead of 1s. |
 
 **Suggested level-up order** (what bots follow): E > RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > RMB > Dash (Shift) > Glove (Q).
 

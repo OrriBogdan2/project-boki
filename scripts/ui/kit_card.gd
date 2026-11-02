@@ -10,9 +10,10 @@ extends PanelContainer
 const SIZE := Vector2(890, 600)
 const BODY_H := 372.0
 const TILE := Vector2(431, 116)
-const SLOTS := ["dash", "passive", "lmb", "rmb", "e", "r"]
-const KEYS := {"dash": "Shift", "passive": "", "lmb": "LMB", "rmb": "RMB", "e": "E", "r": "R"}
-const LABEL := {"dash": "Dash", "passive": "Passive", "lmb": "Attack", "rmb": "Right click", "e": "Utility", "r": "Ultimate"}
+const SLOTS := ["dash", "passive", "lmb", "rmb", "e", "x", "r"]
+const KEYS := {"dash": "Shift", "passive": "", "lmb": "LMB", "rmb": "RMB", "e": "E", "x": "X", "r": "R"}
+const LABEL := {"dash": "Dash", "passive": "Passive", "lmb": "Attack", "rmb": "Right click", "e": "Utility",
+	"x": "Hunter ultimate", "r": "Ultimate"}
 ## Which looping preview each archetype's abilities get (KitPreview kinds).
 const PREVIEW := {
 	"thief": {"dash": "dash", "passive": "marks", "rmb": "projectile", "e": "knife", "r": "lines"},
@@ -237,7 +238,7 @@ func _kin_strip() -> Control:
 ## Name, icon, colour, a short tag, the one line, and the detail page's paragraphs for one slot.
 ## The slots an archetype has (no Ultimate tile for the heroes whose R is the Boki Merge).
 static func slots_of(a: String) -> Array:
-	return SLOTS.filter(func(s): return s != "r" or Arch.def(a).has("r"))
+	return SLOTS.filter(func(s): return (s != "r" and s != "x") or Arch.def(a).has(s))
 
 static func slot_text(a: String, slot: String) -> Dictionary:
 	var d := Arch.def(a)
@@ -286,6 +287,14 @@ static func slot_text(a: String, slot: String) -> Dictionary:
 			out.merge({"name": String(sd["name"]), "icon": String(sd.get("icon", "")), "col": Color(String(sd.get("col", "#ffffff"))),
 				"tag": "%ss" % KinText.n(float(sd.get("cooldown", 14.0))), "line": String(cd.get("e", ""))}, true)
 			out["detail"] = [["", String(sd.get("desc", ""))]] + _ranks(a, "kin")
+		"x":
+			var xd: Dictionary = d["x"]
+			out.merge({"name": String(xd["name"]), "icon": String(xd.get("icon", "burst")),
+				"col": Color(String(xd.get("col", "#ffffff"))),
+				"tag": "level %d · %ss" % [int(xd.get("unlock", 6)), KinText.n(float(xd.get("cooldown", 45.0)))],
+				"line": String(cd.get("x", ""))}, true)
+			out["detail"] = [["", String(xd.get("desc", ""))],
+				["Boki bond", "Landing it fills a big share of your bond meter; casting it alone fills nothing."]]
 		"r" when not d.has("r"):
 			# no hero ultimate: R is the Boki's Merge (the Boki system owns it)
 			out.merge({"name": "Boki Merge", "icon": "bond", "col": Color("ffd27a"), "tag": "Boki system", "line": "Your Boki fuses with you; its kind decides the form."}, true)

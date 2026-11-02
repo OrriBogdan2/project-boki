@@ -74,7 +74,8 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | Shift | Archetype dash | `dash` | yes |
 | Space | Jump (hold to glide) | `jump` | yes |
 | Mouse 5 / Mouse 4 | Glide (hold in the air) | `glide` | yes |
-| R / X | Merge with your Boki (needs a full bond meter) | `ultimate` | yes |
+| R | Merge with your Boki (needs a full bond meter) | `ultimate` | yes |
+| X | Hunter ultimate (level 6) | `hunter_ult` | yes |
 | 1 | Heal (tonic, or armor kit when health is full) | `tonic` | yes |
 | Tab | Scoreboard | `scores` | yes |
 | Esc | Menu | `menu` | no |

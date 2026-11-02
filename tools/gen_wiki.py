@@ -260,6 +260,8 @@ def gen_classes():
         rows = [["Loop", c.get("loop", "")], ["Passive: " + d["passive"]["name"], c.get("passive", "")], ["Dash: " + d["dash"]["name"], c.get("dash", "")]]
         if c.get("lmb"): rows.append(["LMB", c["lmb"]])
         rows += [["RMB: " + d["rmb"]["name"], c.get("rmb", "")], ["E: " + d["e"]["name"], c.get("e", "")]] + ([["R: " + d["r"]["name"], c.get("r", "")]] if "r" in d else [])
+        if "x" in d:
+            rows.append(["X: " + d["x"]["name"], c.get("x", "")])
         for w, t in c.get("weapons", {}).items():
             rows.append(["Weapon: " + wname(w), t])
         b.append(table(["Slot", "Card text"], rows))
@@ -276,7 +278,7 @@ def gen_classes():
         for k, t in r.get("variants", {}).items():
             b.append("- *%s:* %s" % (names.get(k, k), t))
         b.append("")
-        for slot, label in (("e", "E"), ("r", "R")):
+        for slot, label in (("e", "E"), ("x", "X, level %s" % d.get("x", {}).get("unlock", 6)), ("r", "R")):
             if slot not in d:
                 continue
             x = d[slot]
