@@ -92,11 +92,11 @@ const SHOTS := {
 	"pair_breah_dash_key": ["br_dash", 0.62, -6.5], "pair_breah_dash_hit": ["br_dash", 0.95, -9.0],
 	"pair_breah_row_tele": ["br_raise", 0.56, -4.2], "pair_breah_row_key": ["br_raise", 0.74, -4.2], "pair_breah_row_hit": ["br_raise", 1.2, -4.2],
 	"pair_breah_sense_tele": ["br_sense", 1.4, -6.0], "pair_breah_sense_hit": ["br_sense", 0.75, -6.0],
-	"pair_ostra_aim_tele": ["os_orb", 0.45, -6.0], "pair_ostra_orb_key": ["os_orb", 0.58, -6.0], "pair_ostra_orb_hit": ["os_orb", 0.72, -6.0],
-	"pair_ostra_hot_key": ["os_orb_hot", 1.66, -6.0], "pair_ostra_hot_hit": ["os_orb_hot", 1.8, -6.0],
-	"pair_ostra_snap_tele": ["os_snap", 0.6, -6.0], "pair_ostra_snap_key": ["os_snap", 0.73, -6.0], "pair_ostra_snap_hit": ["os_snap", 1.0, -6.0],
-	"pair_ostra_swap_tele": ["os_swap", 0.85, -7.0], "pair_ostra_swap_key": ["os_swap", 1.75, -7.0], "pair_ostra_swap_hit": ["os_arrive", 2.66, -7.0],
-	"pair_ostra_seed_tele": ["os_seed", 1.3, -5.0], "pair_ostra_seed_key": ["os_pop", 1.95, -5.0], "pair_ostra_seed_hit": ["os_pop", 2.1, -5.0],
+	"pair_ostra_aim_tele": ["os_orb", 0.45, -4.5], "pair_ostra_orb_key": ["os_orb", 0.58, -4.5], "pair_ostra_orb_hit": ["os_orb", 0.72, -4.5],
+	"pair_ostra_hot_key": ["os_orb_hot", 1.66, -4.5], "pair_ostra_hot_hit": ["os_orb_hot", 1.8, -4.5],
+	"pair_ostra_snap_tele": ["os_snap", 0.6, -4.5], "pair_ostra_snap_key": ["os_snap", 0.73, -4.5], "pair_ostra_snap_hit": ["os_snap", 1.0, -4.5],
+	"pair_ostra_swap_tele": ["os_swap", 0.85, -4.5], "pair_ostra_swap_key": ["os_swap", 1.75, -4.5], "pair_ostra_swap_hit": ["os_arrive", 2.66, -4.5],
+	"pair_ostra_seed_tele": ["os_seed", 1.3, -4.5], "pair_ostra_seed_key": ["os_pop", 1.95, -4.5], "pair_ostra_seed_hit": ["os_pop", 2.1, -4.5],
 	"pair_ostra_swollen_key": ["os_empower", 0.8, -4.2],
 }
 

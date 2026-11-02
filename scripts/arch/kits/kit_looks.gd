@@ -82,9 +82,9 @@ func _build(kind: String) -> Node3D:
 			var b := Node3D.new(); b.name = "Spin"; n.add_child(b)
 			for i in 5:
 				var a := TAU * i / 5.0
-				var off := Vector3(cos(a), sin(a), 0.0) * (0.0 if i == 0 else 0.11)
-				var len_ := 1.25 if i == 0 else 0.9
-				var sh := Models.part(b, PrismMesh.new(), glass_mat(Color("240838"), Color("c48cff")), off + Vector3(0, 0, 0.1 * float(i % 2)), Vector3(0.11, len_, 0.11), Vector3(-PI * 0.5, 0, a))
+				var off := Vector3(cos(a), sin(a), 0.0) * (0.0 if i == 0 else 0.17)
+				var len_ := 2.2 if i == 0 else 1.6
+				var sh := Models.part(b, PrismMesh.new(), glass_mat(Color("240838"), Color("c48cff")), off + Vector3(0, 0, 0.1 * float(i % 2)), Vector3(0.2, len_, 0.2), Vector3(-PI * 0.5, 0, a))
 				sh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		"aura":
 			Models.part(n, Models.sphere(1.25, 20), glass_mat(Color("2a0020"), Color("ff4fd8"), 0.45), Vector3(0, 1.0, 0))
