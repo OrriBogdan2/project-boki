@@ -877,9 +877,19 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 	HunterAnim.rest_pose(root)       # hands on the weapon even where nothing animates it (portraits, galleries)
 	var rs := float(race["scale"])
 	var ck := float(CLASS_LOOK.get(cls, {}).get("size", 1.0))
+	var body := hero_body(arch)
+	ck *= float(body.get("size", 1.0))
 	root.scale = Vector3.ONE * float(Data.CLASSES[cls]["scale"]) * rs * ck
 	ring.scale = Vector3.ONE / (rs * ck)       # the ring under your feet shows the real hitbox, whatever your size
+	var torso_node := root.find_child("Torso", true, false) as Node3D
+	if torso_node != null:
+		torso_node.scale.x *= float(body.get("chest", 1.0))
 	return root
+
+## A hero's own body against its class (content/archetypes/<id>.json "body"): size (model scale),
+## chest (upper-body width), hit_r (hitbox radius, m), nameplate (m above the soles).
+static func hero_body(arch: String) -> Dictionary:
+	return Arch.def(arch).get("body", {}) if arch != "" and Arch.exists(arch) else {}
 
 ## Moves a hunter's toon material onto the hero shader (hero_toon.gdshader) with the same settings,
 ## plus the hero tuning: a crisper light/shadow split, shadows that keep their colour, a coloured

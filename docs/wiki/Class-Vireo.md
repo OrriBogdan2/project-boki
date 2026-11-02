@@ -59,7 +59,7 @@ What the in-game kit card (K) says.
 
 **Static (passive).** Your finger bolts, Storm Rod and Skycall each add Static to what they hit (Skycall adds 2; up to 4, 4.5s, refreshed by every hit). A marker over their head shows the count, with sparks on them that grow with every stack. The 4th stack calls a sky bolt onto them: they are Live. Wirerun through a Live foe for a Blowout: the run hits double, plus 16 damage and 18% of their health, their Static is spent and Wirerun is back at once. Nothing else gives Wirerun back. Knocking a hunter down heals you for 15% of your health.
 
-**Wirerun (dash, Shift, 8s cooldown).** Press and hold: the run is charged at once (its cooldown starts on the press). A lane grows 4.5 to 12.6m over 0.6s, its end marked by a big ring; you can't steer yourself while you hold it, you keep your height, and any speed you had keeps drifting you. Let go and you streak along it as lightning (shots pass through you), carrying that drift. Every foe you cross takes 10. A foe at 4 Static takes double, a Blowout, and Wirerun is back at once: the only way it comes back early.
+**Wirerun (dash, Shift, 8s cooldown).** Press and hold: the run is charged at once (its cooldown starts on the press). A lane grows 4.5 to 12.6m over 0.6s, its end marked by a big ring; you can't steer yourself while you hold it, you keep your height, and any speed you had keeps drifting you. Let go and you streak along it as lightning at a steady 32m/s (shots pass through you), carrying that drift. Every foe you cross takes 10. A foe at 4 Static takes double, a Blowout, and Wirerun is back at once: the only way it comes back early.
 
 **Storm Rod (RMB, 8s cooldown).**
 

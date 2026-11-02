@@ -235,6 +235,17 @@ func _slide_end(early: bool) -> void:
 	last_dash_kind = String(st["last_dash"])
 	slide = {}
 
+## A tap: a skid that starts fast and bleeds off to a run over roll_t, covering `roll` m (you shoot
+## through it); the speed falls linearly from the peak that covers the distance.
+func _skid(t: float, dd: Dictionary) -> void:
+	var dur := float(dd["roll_t"])
+	if t >= dur:
+		_slide_end(false)
+		return
+	var run := float(h.cdat["speed"])
+	var peak := 2.0 * float(dd["roll"]) / dur - run
+	h.roll_speed = lerpf(peak, run, t / dur)
+
 func _tick_slide(dt: float) -> void:
 	var dd := dash_def()
 	slide["t"] = float(slide["t"]) + dt
@@ -249,14 +260,16 @@ func _tick_slide(dt: float) -> void:
 				_slide_end(false)
 			return
 		var can_hold := not h.downed and h.stun_t <= 0.0 and h.root_t <= 0.0 and h.grounded
-		if t >= float(dd["tap_t"]) and held("dash") and can_hold:
-			slide["held"] = true
-			slide["t0"] = t
-			h.roll_dir = slide["dir"]
-			h.move_kind = "dash"
-			m.fx.dust(h.pos, 8)
-		elif t >= float(dd["tap_t"]):
-			_slide_end(false)                # a tap: the skid runs its whole length (you shoot through it)
+		if t >= float(dd["tap_t"]) and not bool(slide.get("tap", false)):
+			if held("dash") and can_hold:
+				slide["held"] = true
+				slide["t0"] = t
+				h.roll_dir = slide["dir"]
+				h.move_kind = "dash"
+				m.fx.dust(h.pos, 8)
+				return
+			slide["tap"] = true
+		_skid(t, dd)
 		return
 	var st_t := t - float(slide["t0"])
 	var dur := float(dd["slide_t"])

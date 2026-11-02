@@ -262,7 +262,7 @@ func wire_len(t: float) -> float:
 
 func run_time(L: float) -> float:
 	var dd := dash_def()
-	return maxf(0.16, float(dd["time"]) * L / float(dd["dist"][1]))
+	return maxf(0.1, L / float(dd["speed"]))      # a constant speed: a longer run takes longer
 
 func on_dash(use_ex: bool) -> bool:
 	if use_ex and (h.dashes < 1.0 or wire.size() > 0 or run_t > 0.0):

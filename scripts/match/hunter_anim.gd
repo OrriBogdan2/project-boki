@@ -1503,7 +1503,10 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 		# running with it: one hand, muzzle down and forward, swinging with the arm
 		ap = lerpf(ap, -0.85 + sin(ph) * 0.12, carry_k)
 		ay = lerpf(ay, 0.1, carry_k)
-		gpos = gpos.lerp(Vector3(0.22, -0.3, -0.1 - sin(ph) * 0.06), carry_k)
+		var carry_at := Vector3(0.22, -0.3, -0.1 - sin(ph) * 0.06)
+		if hold == "finger":
+			carry_at = Vector3(0.36, -0.1, -0.12)     # Vireo runs upright with her arms held out wide
+		gpos = gpos.lerp(carry_at, carry_k)
 		free_l = carry_k
 		# recoil: the muzzle kicks up and the gun pushes back
 		ap += kick
@@ -1681,6 +1684,8 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 	var fl := sh_l + Vector3(-0.05 - 0.03 * elbow, -hang + 0.12 * r1, -0.04 - 0.06 * r1) + Vector3(0, absf(swing_l) * 0.05, swing_l * 0.2 * arm_amp)
 	var fr := sh_r + Vector3(0.05 + 0.03 * elbow, -hang + 0.12 * r1, -0.04 - 0.06 * r1) + Vector3(0, absf(swing_r) * 0.05, swing_r * 0.2 * arm_amp)
 	fl += Vector3(0, breath * 0.004 * still, 0)
+	if arch == "mage":
+		fl = fl.lerp(sh_l + Vector3(-0.34, -0.12, -0.1), r1)     # her free arm held out wide as she runs
 	# dodges: arms back (phase lunge), tucked (roll), shoulder guard (charge)
 	if dash_k > 0.01:
 		match dash_kind:

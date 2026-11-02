@@ -165,6 +165,10 @@ func _mage() -> void:
 	P.inp["dash_down"] = false
 	ac.step(m, 0.7)
 	ok("Wirerun: streaks the charged length", _flat(P.pos, home) > 10.5, "%.1f m" % _flat(P.pos, home))
+	var short_v := 4.5 / K.run_time(4.5)
+	var long_v := 12.6 / K.run_time(12.6)
+	ok("Wirerun: a constant ~32 m/s, so a short run is quicker, not slower",
+			absf(short_v - long_v) < 0.5 and long_v > 29.0 and long_v < 36.0, "%.1f / %.1f m/s" % [short_v, long_v])
 	# 4. height holds while charging in the air; drift carries into the run
 	P.teleport(home)
 	ac.step(m, 0.2)
@@ -638,7 +642,16 @@ func _gunslinger() -> void:
 	ok("Slipstep tap: the rifle keeps firing",
 			K.fires_in_dash(),
 			"dashes %.2f -> %.2f slide %s stun %.2f" % [dsh0, P.dashes, K.slide, P.stun_t])
-	ac.step(m, 0.4)
+	P.inp["move"] = Vector2.ZERO
+	ac.step(m, 0.15)
+	var early := _flat(P.pos, home)
+	ac.step(m, 0.15)
+	var skidding := not K.slide.is_empty()
+	ac.step(m, 0.25)
+	var total := _flat(P.pos, home)
+	ok("Slipstep tap: a 0.45s skid that bleeds off (front-loaded, still going at 0.3s, about 4.8m)",
+			skidding and early > total * 0.45 and total > 4.0 and total < 5.6, "%.1f of %.1f m" % [early, total])
+	P.inp["move"] = Vector2(0, 1)
 	ok("Slipstep: along the keys, not the cursor",
 			P.pos.z - home.z > 3.0 and absf(P.pos.x - home.x) < 1.0,
 			"dz %.1f dx %.1f" % [P.pos.z - home.z, P.pos.x - home.x])

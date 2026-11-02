@@ -282,13 +282,14 @@ func init_hunter(match_node: Node, id: String, team_id: int, class_id: String, n
 	_kit_from_weapon()
 	dashes = max_dashes()
 	ammo = wpn["mag"]
-	r = float(cdat.get("hit_r", 0.38 * float(cdat["scale"])))
+	r = _hit_radius()
 	set_model(Models.hunter(cls, Data.TEAM_COLORS[team % Data.TEAM_COLORS.size()], wid, "", Save.d.get("look", {}) if ctrl == "local" else bot_look, arch))
 
 ## Switches the archetype mid-match (tests, practice). "" puts back the old class kit: the weapon's
 ## right click and the class dodge.
 func set_arch(a: String) -> void:
 	arch = "" if a == "" or a == "none" else Arch.fix(a, cls)
+	r = _hit_radius()
 	if ak: ak.teardown()
 	ak = ArchKit.make(self, arch) if arch != "" else null
 	if arch != "" and not Arch.weapon_ok(arch, wid):
@@ -308,8 +309,8 @@ func reclass(c: String, a: String, w := "") -> void:
 	glide_max = GLIDE_TIME * float(cdat.get("glide_cap", 1.0))
 	base_speed = cdat["speed"]
 	dodge_def = Content.class_dodge(cls)
-	r = float(cdat.get("hit_r", 0.38 * float(cdat["scale"])))
 	arch = Arch.fix(a, cls)
+	r = _hit_radius()
 	if ak: ak.teardown()
 	ak = ArchKit.make(self, arch)
 	wid = Arch.weapon_for(arch, cls, w)
@@ -3204,6 +3205,15 @@ var anim_s := {}
 var _anim_dt := 0.0
 var _anim_n := 0
 const DODGE_ANIM := {"light": "phase", "medium": "roll", "heavy": "charge"}
+
+## The hitbox radius: the hero's own (its body's hit_r) or the class's.
+func _hit_radius() -> float:
+	var own := float(Models.hero_body(arch).get("hit_r", 0.0))
+	return own if own > 0.0 else float(cdat.get("hit_r", 0.38 * float(cdat["scale"])))
+
+## Where this hunter's nameplate sits above the soles (m): the hero's own anchor, else 2.35. For the HUD.
+func nameplate_y() -> float:
+	return float(Models.hero_body(arch).get("nameplate", 2.35))
 
 ## The rig's dodge pose: a strike's lunge, a rush, the kit's own (Slipstep's slide), else the class's.
 func _dodge_anim() -> String:

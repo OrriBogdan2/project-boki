@@ -58,7 +58,7 @@ What the in-game kit card (K) says.
 
 **Hot Streak (passive).** Knocking a hunter down gives Slipstep back at once and heals a quarter of your health. Each ability that lands (a Burr Charge blast, Longneedle) also adds a stack of Fever, up to 4, lasting 3.5s: every stack makes your damage heal you for 5%, rifle included. Your rifle does 90% more to a Dazed foe (the numbers turn big and gold), and a string on a Dazed foe doesn't lose its punch.
 
-**Slipstep (dash, Shift, 8.5s cooldown).** Tap: a quick 4.6m skid the way you're moving (not where you aim). Hold: a 7m low slide. You keep shooting through either, and the body keeps aiming. Let go early and part of the cooldown comes back. A knock gives it back. In the air a tap slides 2/3 of the full hold's distance (4.7m) and still spends a charge.
+**Slipstep (dash, Shift, 8.5s cooldown).** Tap: a 4.8m skid that bleeds off over 0.45s, the way you're moving (not where you aim). Hold: a 7m low slide. You keep shooting through either, and the body keeps aiming. Let go early and part of the cooldown comes back. A knock gives it back. In the air a tap slides 2/3 of the full hold's distance (4.7m) and still spends a charge.
 
 **Burr Charge (RMB, 6.5s cooldown).**
 
