@@ -6,15 +6,17 @@ extends RefCounted
 ## skip over a foe between two steps. Numbers: content/rules/boki_system.json land_stagger / recall_hit.
 
 ## The landing: foes within the radius that the flight itself didn't already hit get the stagger.
-static func land(k: Kin, hit: Dictionary) -> void:
+## A charging mount (it carried you, then charged) lands harder: a wider ring, a longer stun, a bigger shove.
+static func land(k: Kin, hit: Dictionary, charge := false) -> void:
 	var r: Dictionary = KinCommand.rules()["land_stagger"]
-	var rad := float(r["radius"])
+	var cm: Dictionary = KinCommand.rules()["charge_impact"] if charge else {"radius_k": 1.0, "stun_add": 0.0, "kb_k": 1.0}
+	var rad := float(r["radius"]) * float(cm["radius_k"])
 	k.m.fx.ring(k.pos, rad, Color(k.sp["color"], 0.8), 0.25)
 	for f in k.m.foes_of(k.team):
 		if hit.has(f.nid) or Vector2(f.pos.x - k.pos.x, f.pos.z - k.pos.z).length() > rad + f.r or absf(f.pos.y - k.pos.y) > 1.8:
 			continue
 		hit[f.nid] = true
-		_strike(k, f, k.dmg * float(r["dmg_k"]), float(r["stun"]), float(r["kb"]), (Vector2(f.pos.x - k.pos.x, f.pos.z - k.pos.z)).normalized(), "land")
+		_strike(k, f, k.dmg * float(r["dmg_k"]), float(r["stun"]) + float(cm["stun_add"]), float(r["kb"]) * float(cm["kb_k"]), (Vector2(f.pos.x - k.pos.x, f.pos.z - k.pos.z)).normalized(), "land")
 	k.m.shake(0.3, k.pos)
 
 ## A leap home from `a` to `b` this step: foes within the path's width get hit once.

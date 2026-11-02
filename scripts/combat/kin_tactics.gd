@@ -55,6 +55,7 @@ func pick_target() -> Ent:
 	var own := k.owner_h
 	var best: Ent = null
 	var bs := -1e9
+	var focus: Ent = KinFollow.owner_focus(k) if own else null       # what you are fighting
 	var attacker: Ent = own.last_hit_by if own else null
 	if attacker is Kin and (attacker as Kin).owner_h:
 		attacker = attacker
@@ -73,6 +74,7 @@ func pick_target() -> Ent:
 		var s := -d
 		if f == attacker: s += 2.0 + loyalty * _r("guard_owner_per_loyalty", 4.0)
 		if f == k.target: s += 1.5
+		if f == focus: s += 3.0
 		if f is Hunter: s += aggression * 1.5
 		if own:
 			s -= own.flat_dist(f) * loyalty * 0.25
