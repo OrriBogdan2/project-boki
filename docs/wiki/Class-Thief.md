@@ -56,7 +56,6 @@ What the in-game kit card (K) says.
 | Dash: Vault | A quick flip and a burst of speed. Your next hit is Primed; land it and Vault comes straight back. |
 | RMB: Bola | Grounds the first foe it wraps, then flies on; catch a second and both are stunned. |
 | E: Shadow Knife | Throw a dagger that sticks to a foe or a wall; recast (or wait) to step to it. |
-| R: Boki Merge | Press R with a full bond meter to merge with your Boki. |
 | Weapon: Twin Blades | Quick 3-hit combo; hold for a spin. Every hit Marks the target. |
 
 ### Abilities in full
@@ -73,8 +72,6 @@ What the in-game kit card (K) says.
 - *In the air:* Thrown from the air the same way.
 
 **Shadow Knife (E, 18s cooldown).** Throw a dagger 12m that sticks in the first foe (8 damage, slowed 50% for 2.5s) or in a wall or the ground where it stops. Press E again to step to it at once; after 5s you step to it anyway.
-
-**Boki Merge (R).** This kit has no ultimate of its own: R is the Boki Merge.
 
 ### Ranks
 

@@ -60,7 +60,6 @@ What the in-game kit card (K) says.
 | Dash: Rampage | Two charges of a dash attack the way you face; its tip hits twice as hard. |
 | RMB: Smash | Tap: a wound-up slam (+50% to the wounded; rank 3: its sweet spot crashes and heals). Hold: a lunge. Air: a slam down. |
 | E: Warchain | Chain a foe (blighted) or a wall; press E again to pull yourself to it. Smash during the pull to spin. |
-| R: Boki Merge | Press R with a full bond meter to merge with your Boki. |
 | Weapon: Greatsword | Quick slashes, double at the tip; hold to charge a Searing Wave. |
 
 ### Abilities in full
@@ -77,8 +76,6 @@ What the in-game kit card (K) says.
 - *During E:* With the Warchain: tap while it pulls you for a Cinder Spin (2.6m, 18, blights 4s); hold while it pulls you, or hold and then pull, for a Haul Slam where you arrive (2.8m, 16 -> 30, stun 0.25 -> 0.6); hold while it's attached and let go for a Chain Lunge along it (x1.25 and a short stun).
 
 **Warchain (E, 13s cooldown).** Throw a chain 10m: it hooks the first foe (8 damage, blighted while tethered: healing barely takes) or bites a wall, for 4s. Press E again to pull yourself to it. The cooldown starts when you pull or the chain breaks (a stun breaks it); you can't throw it while rooted or grounded.
-
-**Boki Merge (R).** This kit has no ultimate of its own: R is the Boki Merge.
 
 ### Ranks
 
