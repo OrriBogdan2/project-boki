@@ -10,18 +10,19 @@ every knock.
 2. The greatsword slashes fast and hits twice as hard at the tip. Hold it for a **Searing Wave**,
    which fills Rage three times as fast.
 3. **Rampage** (Shift, 2 charges): a dash attack the way you face; its tip hits hardest and can stun into a wall.
-4. **Smash** (RMB): tap for a wound-up **Execution Slam** (more to the badly hurt); hold for a **Lunge**;
+4. **Smash** (RMB): tap for a wound-up **Finishing Slam** (more to the badly hurt); hold for a **Lunge**;
    in the air for a **Meteor Drop**.
 5. **Warchain** (E): hook a foe or a wall, then press E again to pull yourself in.
-6. **Doomfall** (R): rise invulnerable, then crash down for big damage and heal off what you dealt.
+6. At **Smash rank 3** the Finishing Slam's sweet spot also brings a **crash** down on the foe: a
+   3m burst that heals you off what it dealt. R is the Boki Merge, not a class ultimate.
 
 ## Combos and interactions
 
 | Do this | And you get |
 |---|---|
-| Execution Slam lands its sweet spot (the far tip, dead ahead) | Doomfall's cooldown resets |
-| Doomfall, then a knock on anyone it hit within 2s | Doomfall resets; the knock heals you and gives a Rampage charge back |
-| Warchain hooked, pull (E), then tap RMB during the pull | **Scorching Spin**: a spin around you that blights |
+| Finishing Slam lands its sweet spot (the far tip, dead ahead) | A SWEET SPOT payoff; at Smash rank 3 also a 3m crash that heals you (it rests 12s) |
+| The crash, then a knock on anyone it hit within 2s | The crash is ready again; the knock heals you and gives a Rampage charge back |
+| Warchain hooked, pull (E), then tap RMB during the pull | **Cinder Spin**: a spin around you that blights |
 | Warchain attached, hold RMB and let go | **Chain Lunge** along the chain: harder, with a short stun |
 | Warchain, hold RMB, then E while holding (or pull, then hold) | **Haul Slam** where you arrive, stronger the longer you charged |
 | A held Lunge that hits nothing | Smash's cooldown doubles |
@@ -32,7 +33,7 @@ every knock.
 
 - Lead with the Searing Wave from range to get Enraged before you close in.
 - Save one Rampage charge to get out; a knock gives it back anyway.
-- Below 35% health targets take +50% from the Execution Slam: finish with it.
+- Below 35% health targets take +50% from the Finishing Slam: finish with it.
 - The chain on a wall is a gap-closer and an escape. Pull to a wall on the far side of a gap.
 
 ## Kit
@@ -57,9 +58,8 @@ What the in-game kit card (K) says.
 | Loop | Deal damage to fill Rage; full, you're Enraged: more damage, faster dashes and cooldowns. |
 | Passive: Rage | Damage fills Rage; full = Enraged (damage, dash and ability haste). Knocks heal you. |
 | Dash: Rampage | Two charges of a dash attack the way you face; its tip hits twice as hard. |
-| RMB: Smash | Tap: a wound-up slam (+50% to the wounded; its sweet spot resets R). Hold: a lunge. Air: a slam down. |
+| RMB: Smash | Tap: a wound-up slam (+50% to the wounded; rank 3: its sweet spot crashes and heals). Hold: a lunge. Air: a slam down. |
 | E: Warchain | Chain a foe (blighted) or a wall; press E again to pull yourself to it. Smash during the pull to spin. |
-| R: Doomfall | Invulnerable as you rise, then a crushing strike that heals you; a knock resets it. |
 | Weapon: Greatsword | Quick slashes, double at the tip; hold to charge a Searing Wave. |
 
 ### Abilities in full
@@ -70,14 +70,12 @@ What the in-game kit card (K) says.
 
 **Smash (RMB, 3s cooldown).**
 
-- *Tap:* Execution Slam: a 0.5s wind-up you aim freely (a warning shows over you), then a 3.2m cone: 26 and push 6; foes under 35% take +50%. Landing its sweet spot (the far tip, dead ahead) resets Doomfall.
+- *Tap:* Finishing Slam: a 0.5s wind-up you aim freely (a warning shows over you), then a 3.2m cone: 26 and push 6; foes under 35% take +50%. Landing its sweet spot (the far tip, dead ahead) is a SWEET SPOT payoff; at rank 3 it also brings a 3m crash down on the foe (24, push 7, heals you 60% of the damage it deals; rests 12s, and a knock on anyone it hit within 2s makes it ready at once).
 - *Hold:* Lunge: charge 0.3 -> full at 0.9s, then a 3 -> 7m dash attack into the first foe: 14 -> 22. Strike nothing and the cooldown doubles.
 - *In the air:* Meteor Drop: slam straight down, a 2.6m burst: 18 and slow 40% for 1.5s; the centre (1.2m) takes +50% and is stunned 0.8.
-- *During E:* With the Warchain: tap while it pulls you for a Scorching Spin (2.6m, 18, blights 4s); hold while it pulls you, or hold and then pull, for a Haul Slam where you arrive (2.8m, 16 -> 30, stun 0.25 -> 0.6); hold while it's attached and let go for a Chain Lunge along it (x1.25 and a short stun).
+- *During E:* With the Warchain: tap while it pulls you for a Cinder Spin (2.6m, 18, blights 4s); hold while it pulls you, or hold and then pull, for a Haul Slam where you arrive (2.8m, 16 -> 30, stun 0.25 -> 0.6); hold while it's attached and let go for a Chain Lunge along it (x1.25 and a short stun).
 
 **Warchain (E, 13s cooldown).** Throw a chain 10m: it hooks the first foe (8 damage, blighted while tethered: healing barely takes) or bites a wall, for 4s. Press E again to pull yourself to it. The cooldown starts when you pull or the chain breaks (a stun breaks it); you can't throw it while rooted or grounded.
-
-**Doomfall (R, 90s cooldown).** A 0.6s wind-up in which you're invulnerable, rising with the blade overhead (everyone sees where it lands), then a crushing strike just ahead of you: a 3m crash, 48 damage and push 9, and you heal 60% of the damage it deals. A knock on anyone it hit within 2s resets its cooldown.
 
 ### Ranks
 
@@ -85,10 +83,9 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 
 | Slot | Rank 2 | Rank 3 |
 |---|---|---|
-| RMB | cooldown 3s -> 2.7s, damage +15%. | cooldown 3s -> 2.4s, damage +30%; +20% damage on every Smash. |
+| RMB | cooldown 3s -> 2.7s, damage +15%. | cooldown 3s -> 2.4s, damage +30%; +20% damage on every Smash, and its sweet spot also crashes (24 in 3m) and heals you 60% of the damage it deals; a knock resets the crash. |
 | Dash (Shift) | recharge 9s -> 7.6s per charge. | recharge 9s -> 6.3s; a third charge. |
 | E | cooldown 13s -> 11.7s, damage +15%. | cooldown 13s -> 10.4s, damage +30%; hooking a foe refunds 33% of the cooldown. |
-| R (ultimate) | Rank 2 (level 9): cooldown 90s -> 76.5s, +15% damage. |  |
 
 **Suggested level-up order** (what bots follow): Dash (Shift) > RMB > E > RMB > Dash (Shift) > R (ultimate) > RMB > E > R (ultimate) > Glove (Q).
 

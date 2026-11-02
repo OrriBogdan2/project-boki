@@ -119,6 +119,32 @@ Hunter unlocks (docs/decisions/0005). A new save picks 1 starting Hunter from `s
 | stats | {"desc": "What a goal can count (Progress.stat, plus best_lvl). Text is player-facing.", "extracts": "expeditions made it out of", "mobs": "monsters defeated", "knocks": "hunters knocked down", "bosses": "lair bosses defeated", "caught": "wild Boki brought home", "staggers": "monsters staggered with abilities", "slams": "enemies wall-slammed", "best_lvl": "best level reached in a match", "matches": "expeditions played"} |
 | classes | {"thief": {"level": 2, "goal": {"stat": "mobs", "target": 15, "text": "Defeat 15 monsters"}}, "gunslinger": {"level": 2, "goal": {"stat": "extracts", "target": 1, "text": "Make it out of an expedition"}}, "juggernaut": {"level": 2, "goal": {"stat": "knocks", "target": 2, "text": "Knock down 2 hunters"}}, "tender": {"level": 2, "goal": {"stat": "caught", "target": 1, "text": "Scan a wild Boki and bring it home"}}, "archer": {"level": 3, "goal": {"stat": "extracts", "target": 3, "text": "Make it out of 3 expeditions"}}, "mage": {"level": 3, "goal": {"stat": "mobs", "target": 40, "text": "Defeat 40 monsters"}}, "bulwark": {"level": 3, "goal": {"stat": "knocks", "target": 5, "text": "Knock down 5 hunters"}}, "dolm": {"level": 4, "goal": {"stat": "slams", "target": 5, "text": "Wall-slam 5 enemies"}}, "ostra": {"level": 4, "goal": {"stat": "best_lvl", "target": 6, "text": "Reach level 6 in a match"}}, "dredge": {"level": 4, "goal": {"stat": "extracts", "target": 5, "text": "Make it out of 5 expeditions"}}, "rimewright": {"level": 5, "goal": {"stat": "staggers", "target": 10, "text": "Stagger 10 monsters with abilities"}}, "ashwick": {"level": 6, "goal": {"stat": "bosses", "target": 1, "text": "Defeat a lair boss"}}} |
 
+## farm_build (`content/rules/farm_build.json`)
+
+The farm building pass (docs/decisions/0004-farm-building.md). Farm level is points from play; items unlock by farm level or a milestone; new buildings are construction sites that Boki build with materials and labour; buildings upgrade L1 to L3. Units: gems and materials are counts, labour is Boki work swings (one swing is about 6 s at building skill 1).
+
+| Setting | Value |
+|---|---|
+| points | {"extracts": 3.0, "bosses": 6.0, "caught": 2.0, "hatched": 2.0, "harvested": 0.25, "built": 2.0, "fb_built": 2.0} |
+| points_doc | Farm points = sum(stat * weight). 'built' counts the lot buildings you built, 'fb_built' the buildings Boki finished on the farm. |
+| levels | [0, 6, 16, 30, 48, 70] |
+| levels_doc | Points needed for farm level 1..6 (index 0 is level 1). |
+| milestones | {"first_extract": {"name": "First extraction", "stat": "extracts", "n": 1, "text": "Make it out of an expedition once"}, "first_boss": {"name": "First boss", "stat": "bosses", "n": 1, "text": "Defeat a boss in a lair"}, "scan3": {"name": "Three scanned", "stat": "caught", "n": 3, "text": "Scan and bring home 3 wild Boki"}} |
+| starter | ["house", "crop_patch", "cook_pot"] |
+| starter_doc | Placed at once, no site: a new farm has no builders yet. |
+| unlock | {"picket": {"level": 2}, "stone_wall": {"level": 3}, "hedge": {"level": 3}, "path_stone": {"level": 2}, "path_wood": {"level": 3}, "water": {"level": 4}, "bush": {"level": 2}, "tree": {"level": 2}, "pine": {"level": 3}, "blossom_tree": {"milestone": "scan3"}, "lantern": {"level": 2}, "lamp_post": {"level": 3}, "bench": {"level": 2}, "kin_bed": {"level": 2}, "rug": {"level": 3}, "rug_long": {"level": 4}, "banner": {"level": 3}, "pillar": {"level": 4}, "kin_statue": {"milestone": "scan3"}, "fountain": {"milestone": "first_boss"}, "job_board": {"level": 2}, "lumber_camp": {"level": 2}, "quarry": {"level": 2}, "storage_chest": {"level": 2}, "hearth_oven": {"level": 3}, "workbench": {"level": 3}, "seed_garden": {"level": 3}, "kiln": {"level": 4}, "spark_mill": {"level": 4}, "ranch_pen": {"level": 4}, "infirmary": {"level": 4}, "cold_store": {"level": 5}, "market_stall": {"level": 2}, "boki_burrow": {"level": 2}, "training_post": {"level": 2}, "nesting_nook": {"level": 3}, "graveyard": {"level": 3}, "workshop": {"level": 2}, "cottage": {"level": 3}, "armory": {"milestone": "first_extract"}, "shrine": {"milestone": "first_boss"}} |
+| cradles | {"6": 4, "7": 5, "8": 6} |
+| cradles_doc | Incubator cradle number -> farm level that lets you buy it. |
+| build | {"market_stall": {"gems": 10, "wood": 6, "fibre": 4, "labour": 4}, "nesting_nook": {"gems": 15, "wood": 10, "fibre": 6, "labour": 6}, "boki_burrow": {"gems": 12, "wood": 8, "stone": 5, "fibre": 4, "labour": 6}, "training_post": {"gems": 10, "wood": 8, "stone": 2, "labour": 4}, "graveyard": {"gems": 8, "stone": 10, "fibre": 2, "labour": 5}, "job_board": {"gems": 5, "wood": 4, "labour": 3}, "lumber_camp": {"gems": 8, "wood": 4, "stone": 2, "labour": 4}, "quarry": {"gems": 8, "wood": 4, "stone": 2, "labour": 4}, "storage_chest": {"gems": 5, "wood": 5, "fibre": 2, "labour": 3}, "hearth_oven": {"gems": 12, "wood": 6, "stone": 6, "labour": 5}, "workbench": {"gems": 10, "wood": 8, "fibre": 2, "labour": 5}, "spark_mill": {"gems": 16, "wood": 8, "stone": 6, "coals": 1, "labour": 7}, "cold_store": {"gems": 14, "wood": 4, "stone": 8, "fibre": 3, "labour": 6}, "ranch_pen": {"gems": 12, "wood": 10, "fibre": 6, "labour": 6}, "infirmary": {"gems": 14, "wood": 6, "stone": 6, "fibre": 4, "labour": 6}, "seed_garden": {"gems": 8, "wood": 4, "fibre": 4, "labour": 4}, "kiln": {"gems": 10, "stone": 8, "wood": 2, "labour": 5}} |
+| upgrade | {"2": {"gems": 20, "wood": 8, "stone": 6, "fibre": 4, "labour": 6, "level": 3}, "3": {"gems": 45, "wood": 14, "stone": 12, "coals": 2, "fibre": 8, "labour": 10, "level": 5}} |
+| upgrade_doc | Cost to reach tier 2 and tier 3. 'level' is the farm level it needs. Work stations work 25% / 50% faster at L2 / L3. |
+| tier_speed | [1.0, 1.25, 1.5] |
+| tier_names | ["", "Sturdy", "Fine"] |
+| upgradable | ["house", "crop_patch", "cook_pot", "market_stall", "nesting_nook", "boki_burrow", "training_post", "graveyard", "job_board", "lumber_camp", "quarry", "storage_chest", "hearth_oven", "workbench", "spark_mill", "cold_store", "ranch_pen", "infirmary", "seed_garden", "kiln"] |
+| house_upgrade | {"2": {"gems": 40, "wood": 10, "stone": 6, "fibre": 6, "labour": 8, "level": 3}, "3": {"gems": 80, "wood": 18, "stone": 14, "coals": 2, "fibre": 10, "labour": 12, "level": 5}} |
+| swing_s | 6 |
+| crew_slots | 2 |
+
 ## gear (`content/rules/gear.json`)
 
 
@@ -163,6 +189,18 @@ How personality traits shape a kin's fighting. aggression, loyalty and caution a
 | recall_cooldown | 1 |
 | swap_cooldown | 3 |
 
+## level_growth (`content/rules/level_growth.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | Quiet growth on every level-up (scripts/match/level_growth.gd). Each level a hunter reaches adds hp (a share of the class's base health) and ap (ability power: a multiplier on ability damage, and on healing and shields from abilities). Levels 2-6 use the full rate; levels 7-10 use half_from's half rate. Nothing pops up for it: the level badge flashes and its tooltip shows the totals. |
+| hp | 0.06 |
+| ap | 0.05 |
+| half_from | 7 |
+| half_k | 0.5 |
+
 ## merge_forms (`content/rules/merge_forms.json`)
 
 How a merge looks and plays (docs/decisions/0003). Forms with a kit live in content/merge_forms/<merge id>.json. This file holds the shared timings, the stat-style fallback every other Boki gets until its form is written (the Boki's type picks its look, rider and dodge burst; the same for everyone, no tiers), and the weak surge.
@@ -181,6 +219,32 @@ How a merge looks and plays (docs/decisions/0003). Forms with a kit live in cont
 | types | {"venom": {"style": "nova", "parts": ["fangs", "tail", "crest"], "word": "VENOM", "rider": {"burn": 5.0, "burn_for": 3.0}, "dash": {"burst": 8.0, "radius": 2.0, "burn": 4.0, "burn_for": 3.0}}, "spore": {"style": "bloom", "parts": ["crest", "plates", "halo"], "word": "SPORE", "rider": {"slow_k": 0.25, "slow_s": 1.6}, "dash": {"burst": 6.0, "radius": 2.4, "slow_k": 0.3, "slow_s": 1.4}}, "gravity": {"style": "quake", "parts": ["plates", "spikes", "halo"], "word": "GRAVITY", "rider": {"kb": -3.5}, "dash": {"burst": 10.0, "radius": 2.2, "kb": -4.0}}, "prism": {"style": "prism", "parts": ["crest", "halo", "wings"], "word": "PRISM", "rider": {"chain": 0.35}, "dash": {"burst": 8.0, "radius": 2.0, "chain": 0.35}}, "lunar": {"style": "spiral", "parts": ["halo", "wings", "crest"], "word": "LUNAR", "rider": {"leech": 0.06}, "dash": {"burst": 6.0, "radius": 2.2, "leech": 0.06}}, "echo": {"style": "storm", "parts": ["antennae", "crest", "wings"], "word": "ECHO", "rider": {"chain": 0.3}, "dash": {"burst": 8.0, "radius": 2.0, "chain": 0.3}}, "ember": {"style": "pillar", "parts": ["horns", "crest", "tail"], "word": "EMBER", "rider": {"burn": 7.0, "burn_for": 2.5}, "dash": {"burst": 10.0, "radius": 2.0, "burn": 6.0, "burn_for": 2.5}}, "frost": {"style": "bloom", "parts": ["spikes", "crest", "halo"], "word": "FROST", "rider": {"slow_k": 0.35, "slow_s": 1.8}, "dash": {"burst": 6.0, "radius": 2.4, "slow_k": 0.4, "slow_s": 1.6}}, "storm": {"style": "storm", "parts": ["wings", "crest", "antennae"], "word": "STORM", "rider": {"chain": 0.4}, "dash": {"burst": 9.0, "radius": 2.2, "chain": 0.4}}, "stone": {"style": "quake", "parts": ["plates", "horns", "spikes"], "word": "STONE", "rider": {"kb": 4.5}, "dash": {"burst": 12.0, "radius": 2.0, "kb": 5.0}}, "bloom": {"style": "bloom", "parts": ["crest", "wings", "halo"], "word": "BLOOM", "rider": {"leech": 0.07}, "dash": {"burst": 5.0, "radius": 2.4, "leech": 0.07}}, "shadow": {"style": "spiral", "parts": ["horns", "wings", "tail"], "word": "SHADOW", "rider": {"slow_k": 0.2, "slow_s": 1.2, "leech": 0.04}, "dash": {"burst": 8.0, "radius": 2.0, "slow_k": 0.25, "slow_s": 1.2}}, "titan": {"style": "quake", "parts": ["horns", "plates", "spikes"], "word": "TITAN", "rider": {"kb": 5.5}, "dash": {"burst": 14.0, "radius": 2.2, "kb": 6.0}}, "swarm": {"style": "storm", "parts": ["antennae", "wings", "spikes"], "word": "SWARM", "rider": {"burn": 3.5, "burn_for": 2.0, "chain": 0.25}, "dash": {"burst": 6.0, "radius": 2.6, "burn": 3.0, "burn_for": 2.0}}, "tempest": {"style": "storm", "parts": ["wings", "crest", "halo"], "word": "TEMPEST", "rider": {"chain": 0.45}, "dash": {"burst": 9.0, "radius": 2.2, "chain": 0.45}}, "none": {"style": "nova", "parts": ["crest", "halo", "plates"], "word": "MERGE", "rider": {"kb": 2.0}, "dash": {"burst": 6.0, "radius": 2.0, "kb": 2.0}}} |
 | shell_base | {"light": 80, "medium": 110, "heavy": 150} |
 | shell_note | hp of the shell every merge gives on top of your own health (docs/decisions/0003): by weight class; a form multiplies it with `shell_k` in its file. Damage hits the shell first; when it breaks the merge ends and the ultimate is lost. |
+
+## perk_orbs (`content/rules/perk_orbs.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | Perk orbs (scripts/match/perk_orbs.gd). Perks are found in the match as floating orbs: chests drop 1, shrines 1 or 2, bosses a fan of 3 different ones. sources: n = [min, max] orbs, lean = how much each kind of perk is favoured at that source (flat = stats, weapon = weapon upgrades and brands, kit = the old kit passives), fan = the orbs form a fan and taking one fades the others for you only. kinds lists the perk ids in each kind (ids come from Data.PERKS). weights scale one perk up or down inside its kind. bot_want is how much a bot wants each perk (higher is taken first); a bot never takes two from one fan. |
+| take_radius | 1.2 |
+| bot_radius | 16 |
+| fan_radius | 2.4 |
+| fan_spread | 0.7 |
+| sources | {"chest": {"n": [1, 1], "lean": {"flat": 1.0, "weapon": 3.0, "kit": 1.5}}, "shrine": {"n": [1, 2], "lean": {"flat": 3.0, "weapon": 0.6, "kit": 1.5}}, "boss": {"n": [3, 3], "fan": true, "lean": {"flat": 1.0, "weapon": 4.0, "kit": 0.5}}, "brute": {"n": [1, 1], "lean": {"flat": 1.0, "weapon": 3.0, "kit": 0.5}}} |
+| kinds | {"flat": ["secondwind", "featherfall", "tailwind", "toughskin", "quickhands", "scavenger", "keen", "fleet", "plating", "focus", "remedy", "overcharge"], "weapon": ["hotload", "deepmag", "quickfeed", "longreach", "brand_fire", "brand_frost", "brand_storm", "brand_venom", "brand_void"], "kit": ["field_kit", "magpie", "satchel", "spyglass", "tinker_roll"]} |
+| weights | {"brand_fire": 0.7, "brand_frost": 0.7, "brand_storm": 0.7, "brand_venom": 0.7, "brand_void": 0.7, "overcharge": 0.6, "remedy": 0.8} |
+| bot_want | {"default": 1.5, "brand_fire": 3.0, "brand_frost": 2.8, "brand_storm": 3.0, "brand_venom": 2.8, "brand_void": 2.6, "hotload": 2.6, "keen": 2.5, "quickfeed": 2.2, "toughskin": 2.4, "plating": 2.2, "secondwind": 2.0, "longreach": 1.8, "deepmag": 1.6, "quickhands": 1.7, "tinker_roll": 1.5, "magpie": 1.0, "scavenger": 1.0, "satchel": 0.8, "spyglass": 0.9, "overcharge": 1.2} |
+
+## weapon_path (`content/rules/weapon_path.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | The fixed weapon path (scripts/match/weapon_path.gd): on every even level (2, 4, 6, 8, 10) a hunter's signature weapon takes the next step on its hero's path, with no choice to make. Each step is a plain weapon upgrade id from Data.PERKS (WeaponUps: hotload = damage, deepmag = magazine, quickfeed = fire rate, longreach = range). One entry per hero in Arch.ORDER. Brands are not on the path: they come from perk orbs. If an orb already maxed a step, the next open plain upgrade is taken instead. default is for a hunter with no hero. |
+| default | ["hotload", "quickfeed", "longreach", "hotload", "quickfeed"] |
+| paths | {"thief": ["hotload", "quickfeed", "longreach", "hotload", "quickfeed"], "archer": ["hotload", "longreach", "quickfeed", "hotload", "longreach"], "mage": ["hotload", "deepmag", "quickfeed", "longreach", "hotload"], "gunslinger": ["quickfeed", "hotload", "deepmag", "hotload", "longreach"], "juggernaut": ["hotload", "longreach", "hotload", "quickfeed", "hotload"], "bulwark": ["hotload", "quickfeed", "longreach", "hotload", "quickfeed"], "dredge": ["hotload", "deepmag", "hotload", "quickfeed", "longreach"], "ashwick": ["hotload", "longreach", "deepmag", "hotload", "quickfeed"], "tender": ["quickfeed", "hotload", "deepmag", "longreach", "hotload"], "rimewright": ["hotload", "longreach", "quickfeed", "hotload", "longreach"], "dolm": ["hotload", "quickfeed", "hotload", "longreach", "quickfeed"], "ostra": ["hotload", "longreach", "deepmag", "quickfeed", "hotload"]} |
 
 ## Combos
 

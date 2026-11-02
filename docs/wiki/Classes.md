@@ -54,11 +54,11 @@ any time.
 
 | Hunter | Health / dashes | Weapons | Passive | Dash | RMB | E | R |
 |---|---|---|---|---|---|---|---|
-| [Thief](Class-Thief.md) | 124 / 1 | Twin Blades | Marks | Vault | Bola | Shadow Knife | Jackpot |
+| [Thief](Class-Thief.md) | 124 / 1 | Twin Blades | Marks | Vault | Bola | Shadow Knife | none (Boki Merge) |
 | [Archer](Class-Archer.md) | 124 / 1 | Longbow | Focus | Grapple Arrow | Snare | Hail Wall | none (Boki Merge) |
 | [Vireo](Class-Vireo.md) | 124 / 1 | Coilcaster | Sparks | Wirerun | Coilshot | Skycall | none (Boki Merge) |
 | [Marlowe](Class-Marlowe.md) | 145 / 1 | Quill Rifle | Fever | Slipstep | Burr Charge | Longneedle | none (Boki Merge) |
-| [Juggernaut](Class-Juggernaut.md) | 193 / 2 | Greatsword | Rage | Rampage | Smash | Warchain | Doomfall |
+| [Juggernaut](Class-Juggernaut.md) | 193 / 2 | Greatsword | Rage | Rampage | Smash | Warchain | none (Boki Merge) |
 | [Bulwark](Class-Bulwark.md) | 193 / 2 | Tower Shield & Mace | Guard | Whirl | Shield | Mending Ground | none (Boki Merge) |
 | [Dredge](Class-Dredge.md) | 193 / 2 | Shotgun | Salvage | Barge | Grapnel | Anchor Drop | none (Boki Merge) |
 | [Ashwick](Class-Ashwick.md) | 193 / 2 | Torch Lance | Flashover | Spark Leap | Cinder Shot | Furnace Cloak | none (Boki Merge) |

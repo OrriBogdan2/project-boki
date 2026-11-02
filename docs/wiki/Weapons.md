@@ -31,7 +31,7 @@ Numbers are per shot or swing before any upgrades. Class kits that run their own
 
 ## Weapon upgrades
 
-No weapon is ever found or swapped: every hunter carries one signature weapon. It grows through upgrade perks (level-ups on even levels, chests, shrines, bosses and tuning pickups on the ground). They last the expedition.
+No weapon is ever found or swapped: every hunter carries one signature weapon. It grows through upgrade perks (each hero's fixed weapon path on even levels, perk orbs from chests, shrines and bosses, and tuning pickups on the ground). They last the expedition.
 
 | Upgrade | Effect | Stacks |
 |---|---|---|
@@ -68,7 +68,7 @@ No weapon is ever found or swapped: every hunter carries one signature weapon. I
 
 ## Run perks
 
-Offered three at a time during an expedition (pick with 1, 2 or 3). They last the run.
+Found as glowing perk orbs during an expedition: walk into one to take it. Chests drop one, shrines one or two, and bosses a fan of three (taking one fades the other two for you only). Shrines favour stat perks; chests and bosses favour weapon perks. They last the run.
 
 | Perk | Effect | Stacks |
 |---|---|---|
@@ -84,6 +84,11 @@ Offered three at a time during an expedition (pick with 1, 2 or 3). They last th
 | Clear Mind | Abilities recharge 12% faster. | 2 |
 | Tailwind | Glide 15% faster. | 1 |
 | Remedy | Tonics heal 40% more. | 1 |
+| Field Surgeon | Needle and thread: tonics heal 35% more. | 1 |
+| Magpie Pouch | Shiny things stick: gems you pick up are worth 25% more. | 1 |
+| Wayfarer's Satchel | A deep bag: one more backpack slot. | 2 |
+| Brass Spyglass | See 12% further through grass and gloom. | 1 |
+| Tinker's Roll | A roll of small tools: reloads 15% faster. | 1 |
 | Hotload | Your weapon hits 10% harder. | 4 |
 | Deep Magazine | 20% more rounds before a reload. | 3 |
 | Quick Feed | Your weapon fires 7% faster. | 3 |

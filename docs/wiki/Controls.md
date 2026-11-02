@@ -22,7 +22,7 @@ ability in a match; **R** turns a piece in build mode and is your ultimate in a 
 | C | Your Boki's own ability: it hops off, casts and hops back |
 | G or middle mouse | Tap: Sic your Boki at the cursor, or Call it back if it is away. Hold: the order wheel (Chase, Guard, Return, Follow) |
 | F | Use: open, pick up, scan a knocked-out wild Boki (hold), revive a teammate, loot a deathbox, finish a downed rival |
-| 1 / 2 | Tonic (heal) / armor kit. With full health, 1 uses an armor kit. While a perk choice is open, 1-3 pick a perk |
+| 1 / 2 | Tonic (heal) / armor kit. With full health, 1 uses an armor kit. |
 | Alt + an ability key | Put a skill point into that ability (pressing a locked ability unlocks it) |
 | Ctrl | Sneak: slower and quieter, steadier aim, harder to spot |
 | B | Base to a teammate (squads): a 3s channel; moving, attacking or any hit breaks it; you arrive weakened for 3s; 40s cooldown |
