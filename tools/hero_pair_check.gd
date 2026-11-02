@@ -123,17 +123,17 @@ func _zones() -> void:
 	P.ak.use_e()
 	step(m, 0.3)
 	var rs := rocks(m)
-	ok("rockwave: three rocks on open ground", rs.size() == 3, "rocks %d" % rs.size())
+	ok("stone row: three rocks on open ground", rs.size() == 3, "rocks %d" % rs.size())
 	var legal := true
 	var blocks := true
 	for w in rs:
 		var mid: Vector3 = K.rock_mid(w)
 		legal = legal and m.world.ground_at(mid.x, mid.z) > World.VOID + 1.0 and not m.world.is_block(mid.x, mid.z)
 		blocks = blocks and m.world.occupy(mid.x, mid.z, 0.4, mid.y, false) > 0.0 and bool(w["move"])
-	ok("rockwave: every rock stands on solid ground", legal)
-	ok("rockwave: rocks block a body (collision)", blocks)
+	ok("stone row: every rock stands on solid ground", legal)
+	ok("stone row: rocks block a body (collision)", blocks)
 	step(m, 0.5)
-	ok("rockwave: a rock stops a walking body", true)
+	ok("stone row: a rock stops a walking body", true)
 	await done(m)
 	# ---- never over the abyss
 	r = setup("dolm", 9.0, 3)
@@ -141,7 +141,7 @@ func _zones() -> void:
 	P.inp["aim"] = home + Vector3(6, 0.9, 0)
 	P.ak.cd["e"] = 0.0
 	var cast: bool = P.ak.cast_e()
-	ok("rockwave: nothing raised with the abyss right ahead", rocks(m).size() == 0 and not cast, "rocks %d cast %s" % [rocks(m).size(), cast])
+	ok("stone row: nothing raised with the abyss right ahead", rocks(m).size() == 0 and not cast, "rocks %d cast %s" % [rocks(m).size(), cast])
 	await done(m)
 	# abyss further out: the row stays on the ground side
 	r = setup("dolm", 9.0, 4)
@@ -153,7 +153,7 @@ func _zones() -> void:
 	for w in rocks(m):
 		var mid2: Vector3 = (P.ak as DolmKit).rock_mid(w)
 		all_ok = all_ok and not m.world.is_void(mid2.x, mid2.z)
-	ok("rockwave: rocks near the edge stay on ground", rocks(m).size() > 0 and all_ok, "rocks %d" % rocks(m).size())
+	ok("stone row: rocks near the edge stay on ground", rocks(m).size() > 0 and all_ok, "rocks %d" % rocks(m).size())
 	# ---- bridge only turns abyss tiles to ground, and gives them back
 	P.slot_lv["kin"] = 3
 	var before := void_tiles(m)
@@ -183,7 +183,7 @@ func _zones() -> void:
 	P.inp["aim"] = home + Vector3(6, 0.9, 0)
 	P.ak.cd["e"] = 0.0
 	var c2: bool = P.ak.cast_e()
-	ok("rockwave: not built through a rock or wall", rocks(m).size() == 0 and not c2, "rocks %d" % rocks(m).size())
+	ok("stone row: not built through a rock or wall", rocks(m).size() == 0 and not c2, "rocks %d" % rocks(m).size())
 	W2.kind[W2.idx(bx, bz)] = World.T_GROUND
 	T.teleport(home + Vector3(3.0, 0, 0))
 	step(m, 0.1)
@@ -193,7 +193,7 @@ func _zones() -> void:
 	for w in rocks(m):
 		var mid3: Vector3 = (P.ak as DolmKit).rock_mid(w)
 		mids_ok = mids_ok and Vector2(mid3.x - T.pos.x, mid3.z - T.pos.z).length() > 0.9
-	ok("rockwave: no rock raised inside a body", rocks(m).size() == 2 and mids_ok, "rocks %d" % rocks(m).size())
+	ok("stone row: no rock raised inside a body", rocks(m).size() == 2 and mids_ok, "rocks %d" % rocks(m).size())
 	# ---- Net: what the caster sends, a second game rebuilds
 	HeroZones.capture = true
 	HeroZones.sent.clear()
