@@ -2,7 +2,7 @@
 
 Review shots for each hero: kit card, each ability, the payoff, animation frame strips and a neutral full-body portrait. PNGs are downscaled to at most 1280 px wide. Captions come from the shot manifests.
 
-Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-tender), [Tamsin](#tamsin-rimewright), [Dredge](#dredge-dredge), [Ashwick](#ashwick-ashwick), [Dolm](#dolm-dolm), [Ostra](#ostra-ostra), [Archer](#archer-archer), [Bulwark](#bulwark-bulwark), [Thief](#thief-thief), [Juggernaut](#juggernaut-juggernaut), [Farm building](#farm-building-farmbuild), [classes](#classes-classes), [aimkit](#aimkit-aimkit)
+Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-tender), [Tamsin](#tamsin-rimewright), [Dredge](#dredge-dredge), [Ashwick](#ashwick-ashwick), [Dolm](#dolm-dolm), [Ostra](#ostra-ostra), [Archer](#archer-archer), [Bulwark](#bulwark-bulwark), [Thief](#thief-thief), [Juggernaut](#juggernaut-juggernaut), [Farm building](#farm-building-farmbuild), [classes](#classes-classes), [aimkit](#aimkit-aimkit), [moosh-moosh/v2](#moosh-moosh/v2-moosh-moosh/v2), [moosh-moosh/v2/anim](#moosh-moosh/v2/anim-moosh-moosh/v2/anim), [tamsin/v2](#tamsin/v2-tamsin/v2), [tamsin/v2/anim](#tamsin/v2/anim-tamsin/v2/anim)
 
 ## Vireo (mage)
 
@@ -673,3 +673,171 @@ Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-t
 **Cursor perfect-window star flash, gold, 0.12 s (3x crop round the cursor)**
 
 ![Cursor perfect-window star flash, gold, 0.12 s (3x crop round the cursor)](aimkit/aimkit_reticle_perfect_zoom.png)
+
+## moosh-moosh/v2 (moosh-moosh/v2)
+
+**Moosh Moosh, neutral full body with the upgraded Lantern Crook**
+
+![Moosh Moosh, neutral full body with the upgraded Lantern Crook](moosh-moosh/v2/after/portrait_tender.png)
+
+**Moon Shot: embers flying past the cursor, Kindle foot glow on the dummy (wide frame down the aim)**
+
+![Moon Shot: embers flying past the cursor, Kindle foot glow on the dummy (wide frame down the aim)](moosh-moosh/v2/after/tender_lmb.png)
+
+**Empowered ember after a 1s pause: the longer ember and its impact**
+
+![Empowered ember after a 1s pause: the longer ember and its impact](moosh-moosh/v2/after/tender_emp.png)
+
+**Burrseed impact: the root disc and root beam on the dummy after the 0.7s delay**
+
+![Burrseed impact: the root disc and root beam on the dummy after the 0.7s delay](moosh-moosh/v2/after/tender_rmb.png)
+
+**AFTER gaps 4-6: thrown to the cursor near-instantly, 2.6m/2.9m, plus and rays, bright thrown disc**
+
+![AFTER gaps 4-6: thrown to the cursor near-instantly, 2.6m/2.9m, plus and rays, bright thrown disc](moosh-moosh/v2/after/tender_e.png)
+
+**Relay Step through the ally: RELAY proc, lantern after-images**
+
+![Relay Step through the ally: RELAY proc, lantern after-images](moosh-moosh/v2/after/tender_dash.png)
+
+**Air dash: tucked roll and landing**
+
+![Air dash: tucked roll and landing](moosh-moosh/v2/after/tender_air.png)
+
+**Bearer: carrying a downed ally behind the shield**
+
+![Bearer: carrying a downed ally behind the shield](moosh-moosh/v2/after/tender_carry.png)
+
+**Hearthlight flare payoff on a hurt ally**
+
+![Hearthlight flare payoff on a hurt ally](moosh-moosh/v2/after/tender_payoff.png)
+
+**BEFORE (origin/main) gaps 1-3: slow seed, no aim lane, small sphere and ring during a 2s delay**
+
+![BEFORE (origin/main) gaps 1-3: slow seed, no aim lane, small sphere and ring during a 2s delay](moosh-moosh/v2/before/tender_rmb.png)
+
+**AFTER gaps 1-3: lane held, fast seed, area disc at once, root at 0.7s**
+
+![AFTER gaps 1-3: lane held, fast seed, area disc at once, root at 0.7s](moosh-moosh/v2/after/tender_rmb_strip.png)
+
+**BEFORE (origin/main) gaps 4-6: slow 18 m/s toss, 3.5m ring, plain look**
+
+![BEFORE (origin/main) gaps 4-6: slow 18 m/s toss, 3.5m ring, plain look](moosh-moosh/v2/before/tender_e.png)
+
+## moosh-moosh/v2/anim (moosh-moosh/v2/anim)
+
+**mm_shot: coil, flick (swirl at the hand), overshoot, settle**
+
+![mm_shot: coil, flick (swirl at the hand), overshoot, settle](moosh-moosh/v2/anim/after/tender_lmb_strip.png)
+
+**mm_shot_emp: up on the toes, big flick, free arm back, settle**
+
+![mm_shot_emp: up on the toes, big flick, free arm back, settle](moosh-moosh/v2/anim/after/tender_emp_strip.png)
+
+**mm_seed_aim held, mm_seed whip and lunge with the cast flare, recovery, mm_tug at the root**
+
+![mm_seed_aim held, mm_seed whip and lunge with the cast flare, recovery, mm_tug at the root](moosh-moosh/v2/anim/after/tender_rmb_strip.png)
+
+**mm_hearth crouch, lantern hand high (plus, rays), then mm_toss fling**
+
+![mm_hearth crouch, lantern hand high (plus, rays), then mm_toss fling](moosh-moosh/v2/anim/after/tender_e_strip.png)
+
+**mm_relay: crouch, stretched hop, wave over the ally, landing squash**
+
+![mm_relay: crouch, stretched hop, wave over the ally, landing squash](moosh-moosh/v2/anim/after/tender_dash_strip.png)
+
+**mm_dash_air: tuck, forward roll, catch, settle**
+
+![mm_dash_air: tuck, forward roll, catch, settle](moosh-moosh/v2/anim/after/tender_air_strip.png)
+
+**Bearer carry walk (mm_pickup plays at the scoop)**
+
+![Bearer carry walk (mm_pickup plays at the scoop)](moosh-moosh/v2/anim/after/tender_carry_strip.png)
+
+**mm_flare: arms flung up as Hearthlight flares**
+
+![mm_flare: arms flung up as Hearthlight flares](moosh-moosh/v2/anim/after/tender_payoff_strip.png)
+
+## tamsin/v2 (tamsin/v2)
+
+**Tamsin, neutral full body with the upgraded Hoar Fan (ice-tipped slats)**
+
+![Tamsin, neutral full body with the upgraded Hoar Fan (ice-tipped slats)](tamsin/v2/after/portrait_rimewright.png)
+
+**Ice Darts: slow shards curving onto the dummy at the cursor, frost glow, aim line**
+
+![Ice Darts: slow shards curving onto the dummy at the cursor, frost glow, aim line](tamsin/v2/after/rimewright_lmb.png)
+
+**Skating fire: straight thick beams at 1.6x, ice-chip trail**
+
+![Skating fire: straight thick beams at 1.6x, ice-chip trail](tamsin/v2/after/rimewright_skatefire.png)
+
+**Ice Spear detonation at the cursor: dome, spikes, ice shell on the target**
+
+![Ice Spear detonation at the cursor: dome, spikes, ice shell on the target](tamsin/v2/after/rimewright_rmb.png)
+
+**Rink Wall in her own look (leaning ice pillars on a frosted footing), slid to the cursor and frozen**
+
+![Rink Wall in her own look (leaning ice pillars on a frosted footing), slid to the cursor and frozen](tamsin/v2/after/rimewright_e.png)
+
+**Skate end: hockey stop**
+
+![Skate end: hockey stop](tamsin/v2/after/rimewright_dash.png)
+
+**Air dash: tumbling side flip with teal after-images**
+
+![Air dash: tumbling side flip with teal after-images](tamsin/v2/after/rimewright_air.png)
+
+**AFTER gap 3: Shatter starburst of ice spikes, 15x a dart**
+
+![AFTER gap 3: Shatter starburst of ice spikes, 15x a dart](tamsin/v2/after/rimewright_payoff.png)
+
+**BEFORE (origin/main) gaps 1-2: 4 light + 3 heavy flurry with a pause, soft homing, generic round**
+
+![BEFORE (origin/main) gaps 1-2: 4 light + 3 heavy flurry with a pause, soft homing, generic round](tamsin/v2/before/rimewright_lmb.png)
+
+**AFTER gaps 1-2: steady stream, alternating hands, bowed darts homing hard**
+
+![AFTER gaps 1-2: steady stream, alternating hands, bowed darts homing hard](tamsin/v2/after/rimewright_lmb_strip.png)
+
+**BEFORE (origin/main) gap 3: Splinter as rings and a word**
+
+![BEFORE (origin/main) gap 3: Splinter as rings and a word](tamsin/v2/before/rimewright_payoff.png)
+
+**BEFORE (origin/main): generic translucent wall slab, full length at once**
+
+![BEFORE (origin/main): generic translucent wall slab, full length at once](tamsin/v2/before/rimewright_e.png)
+
+**AFTER: 0.2s tell, narrow eruption ahead, widening ice pillars**
+
+![AFTER: 0.2s tell, narrow eruption ahead, widening ice pillars](tamsin/v2/after/rimewright_e_strip.png)
+
+## tamsin/v2/anim (tamsin/v2/anim)
+
+**tm_dart_r / tm_dart_l alternating: cock, flick, recover**
+
+![tm_dart_r / tm_dart_l alternating: cock, flick, recover](tamsin/v2/anim/after/rimewright_lmb_strip.png)
+
+**tm_skate_go push-off, tm_skate stride, tm_beam thrusts**
+
+![tm_skate_go push-off, tm_skate stride, tm_beam thrusts](tamsin/v2/anim/after/rimewright_skatefire_strip.png)
+
+**tm_spear_aim held, tm_spear whip and lunge, follow-through, tm_clench at the detonation**
+
+![tm_spear_aim held, tm_spear whip and lunge, follow-through, tm_clench at the detonation](tamsin/v2/anim/after/rimewright_rmb_strip.png)
+
+**tm_wall: crouch tell, hands thrown up as the ice erupts, overshoot, then tm_freeze stamp**
+
+![tm_wall: crouch tell, hands thrown up as the ice erupts, overshoot, then tm_freeze stamp](tamsin/v2/anim/after/rimewright_e_strip.png)
+
+**tm_skate_go, tm_skate stride loop, tm_skate_stop hockey stop**
+
+![tm_skate_go, tm_skate stride loop, tm_skate_stop hockey stop](tamsin/v2/anim/after/rimewright_dash_strip.png)
+
+**tm_dash_air: tuck, side flip, catch, settle**
+
+![tm_dash_air: tuck, side flip, catch, settle](tamsin/v2/anim/after/rimewright_air_strip.png)
+
+**tm_shatter: fan snapped shut, fist clenched**
+
+![tm_shatter: fan snapped shut, fist clenched](tamsin/v2/anim/after/rimewright_payoff_strip.png)
