@@ -136,7 +136,7 @@ static func _tick_scan(m, h: Hunter, st: Dictionary, dt: float) -> void:
 	if frac >= 1.0:
 		complete(m, h, k)
 
-const HARD_KNOCK := 8.0       # m/s: a shove this fast (about 1.5m of slide) or a launch counts as being knocked away; a bullet's nudge does not
+const HARD_KNOCK := 8.0       # m/s (|kb| / mass, as Hunter.impulse computes it): a shove this fast (about 1.5m of slide) or a launch counts as being knocked away; a bullet's nudge does not
 const LAUNCH_AGE := 0.4       # s: how long after the launch it still counts
 
 ## Hard crowd control on a hunter: stun, root, a real knock or a launch, Grounded, a hex, a grapple or a pad flight. It

@@ -73,7 +73,7 @@ static func lmb(h: Hunter, extra: Dictionary) -> void:
 	var fx: Array = (extra.get("fx_hit", []) as Array).duplicate()
 	if a.has("chain"):
 		fx.append({"type": "chain", "count": int(a["chain"]), "first": float(a.get("chain_reach", BURST_RANGE)), "dmg": float(h.wpn["dmg"]) * float(a.get("chain_dmg", 0.5)), "color": col, "skip_here": true})
-	if a.has("every"):
+	if a.has("every") and a.has("slam"):
 		var st := _state(h)
 		st["n"] = int(st["n"]) + 1
 		if int(st["n"]) % int(a["every"]) == 0:
@@ -90,14 +90,15 @@ static func on_used(h: Hunter, slot: String) -> void:
 		return
 	match slot:
 		"secondary", "utility":
-			_addon(h, "rmb", "sec")
+			_addon(h, "rmb")
 		"kin":
-			_addon(h, "e", "e")
+			_addon(h, "e")
 		"dodge":
 			_dash(h)
 
-## The form's effect list at the same spot as the hero's cast, and that slot recharging faster.
-static func _addon(h: Hunter, key: String, cd_key: String) -> void:
+## The form's effect list at the same spot as the hero's cast, and that slot recharging faster. E exists only on
+## ArchKit heroes (the runner has no E slot), so a hero without `ak` has nothing to speed up there.
+static func _addon(h: Hunter, key: String) -> void:
 	var a: Dictionary = (aug(h).get(key, {}) as Dictionary)
 	if a.is_empty():
 		return
@@ -190,6 +191,14 @@ static func _apply(h: Hunter, t: Ent, dmg: float, r: Dictionary) -> void:
 		if best:
 			h.m.fx.bolt(t.pos + Vector3(0, 1.0, 0), best.pos + Vector3(0, 1.0, 0), Color(1, 1, 1, 0.9))
 			best.hurt(maxf(1.0, dmg * float(r["chain"])), h, {"src": "abil", "ab": "form", "tags": ["form"], "form": true})
+
+## KinMerge.end: whatever a form dash left on the hero (the charge's armour) goes with the merge.
+static func drop(h: Hunter) -> void:
+	var dsh: Dictionary = (h.merge_st.get("aug", {}) as Dictionary).get("dash", {})
+	if not dsh.is_empty() and String(dsh.get("kind", "")) == "charge":
+		h.fortify_t = 0.0
+		h.guard_t = 0.0
+		h.guard_k = 0.0
 
 # ------------------------------------------------------------------ every step
 ## KinMerge.tick, live: the dash window and the end-of-window warning.

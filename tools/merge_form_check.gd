@@ -114,7 +114,7 @@ func run(mn: Node) -> void:
 	var only := ""
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--mergeform-only="): only = a.substr(17)
-	for part in ["data", "xform", "aug", "ult", "shell", "tiers", "warn", "net", "bots", "guards"]:
+	for part in ["data", "xform", "aug", "ult", "ends", "shell", "tiers", "warn", "net", "bots", "guards"]:
 		if only == "" or only.split(",").has(part):
 			call("_" + part)
 	CombatBus.ability_used.disconnect(_on_used)
@@ -402,6 +402,111 @@ func _ult() -> void:
 	P.hurt(float(P.merge_st["shell"]) + 50.0, rival(), {"src": "shot"})
 	run_for(0.3)
 	ok(not KinMerge.active(P) and not k.resting(), "a broken shell does not drain the Boki")
+
+# ------------------------------------------------------------------ 3b. every way out removes everything the merge gave
+## A Heavy Star merge with a charge dash under way, ended by `how`; then the augments, passive and dash armour must all be gone.
+func _ended(how: String) -> Hunter:
+	_fresh("pebbit")
+	m.player.kin.stow()
+	m.step(Match.DT)
+	var base_kr := m.player.owner_stat("knockback_resist")
+	var base_dr := m.player.owner_stat("damage_reduction")          # (with the Boki carried: its own bonus stays after the ultimate)
+	var P := merged("pebbit")
+	var k: Kin = P.kin
+	live_kit(P).age = 2.0
+	ok(P.owner_stat("damage_reduction") >= 0.19, "(%s) setup: the passive is on while merged (%.2f -> %.2f)" % [how, base_dr, P.owner_stat("damage_reduction")])
+	CombatBus.ability_used.emit(P, "test_dash", "dodge")
+	run_for(0.1)
+	ok(not (P.merge_st["aug"]["dash"] as Dictionary).is_empty(), "(%s) setup: the charge dash window is open" % how)
+	match how:
+		"ult":
+			P.inp["ult"] = true
+			run_for(float(Content.merge_form("titan")["r"]["end"]) + 0.5)
+			P.inp["ult"] = false
+		"timeout":
+			run_for(float(P.merge_st["T"]) + 0.3)
+		"shell":
+			P.hurt(float(P.merge_st["shell"]) + 600.0, rival(), {"src": "shot"})          # (the charge armours it: a big hit)
+			run_for(0.4)
+		"knock":
+			P.downed = true
+			run_for(0.4)
+			P.downed = false
+		"death":
+			m.eliminate(P, rival(), "test", true)
+			run_for(0.4)
+		"extract":
+			P.extracted = true
+			run_for(0.4)
+	ok(not KinMerge.active(P) and P.merge_st.is_empty(), "(%s) the merge is over" % how)
+	var ex := {}
+	MergeAugment.lmb(P, ex)
+	ok(ex.is_empty(), "(%s) the LMB rider is gone" % how)
+	ok(P.owner_stat("damage_reduction") < 0.19 and P.owner_stat("knockback_resist") <= base_kr + 0.001, "(%s) the passive is gone (damage reduction %.2f, knockback resist %.2f)" % [how, P.owner_stat("damage_reduction"), P.owner_stat("knockback_resist")])
+	ok(P.fortify_t <= 0.0 and P.guard_t <= 0.0, "(%s) the dash armour is gone (fortify %.2f guard %.2f)" % [how, P.fortify_t, P.guard_t])
+	var ex2 := {}
+	P._kin_riders(ex2)
+	ok(not ex2.has("fx_hit") and not ex2.has("pierce"), "(%s) no rider rides your next attack" % how)
+	return P
+
+func _ends() -> void:
+	for how in ["ult", "timeout", "shell", "knock", "death", "extract"]:
+		_ended(how)
+	# no double rider: the Boki's carried bonus is off while it is inside you, and a fallback form has its augment only
+	var P := merged("pebbit")
+	var ex := {}
+	P._kin_riders(ex)
+	ok(not P.kin_carry_on() and not ex.has("ride_dmg") and not ex.has("burn") and not ex.has("kb"), "Heavy Star: only the augment rides a hit, not the Boki's carry bonus")
+	ok(KinMerge.on_shot(P).is_empty(), "...and the merge's own on_shot is empty (it is the augment)")
+	P = merged("cindle")
+	ok(KinMerge.on_shot(P).is_empty(), "a fallback form: the type rider is the augment only, no second on_shot")
+	ex = {}
+	P._kin_riders(ex)
+	var lm: Dictionary = MergeForm.aug_of(MergeForm.of(P)).get("lmb", {})
+	ok(not lm.has("burn") or is_equal_approx(float(ex.get("burn", 0.0)), float(lm["burn"])), "...so a burn rider is not doubled (%.1f vs %.1f)" % [float(ex.get("burn", 0.0)), float(lm.get("burn", 0.0))])
+	# the hero's holds are dropped while transforming (ArchKit._drop_holds, guard `transforming`)
+	_fresh("pebbit")
+	P = m.player
+	P.set_arch("dolm")
+	if P.ak != null and "dive" in P.ak:
+		P.kin.stow()
+		P.ult = 1.0
+		P.ak.dive = true
+		KinMerge.press(P)
+		m.step(Match.DT)
+		m.step(Match.DT)
+		ok(KinMerge.transforming(P) and not bool(P.ak.dive), "a hold started before R (the Dolm dive) is dropped during the transformation")
+	else:
+		ok(false, "setup: the Dolm kit has a dive hold")
+	# a drained Boki: the bot leaves it alone
+	_fresh("pebbit")
+	P = m.player
+	P.kin.stow()
+	P.kin.drain(12.0)
+	var T := foe(P.pos + Vector3(4.0, 0, 0))
+	P.ai["throw_cd"] = 0.0
+	for i in 30:
+		BotKin.fight(m, P, T, 4.0, 1.0)
+		BotKin.upkeep(P)
+		m.step(Match.DT)
+	ok(P.kin.state == "shoulder" and P.kin.cmd == "return" and P.kin.resting(), "a bot does not throw or order a drained Boki (state %s cmd %s)" % [P.kin.state, P.kin.cmd])
+	# disengage ends with the fight (and when the merge starts or the Boki is drained)
+	_fresh("pebbit")
+	P = m.player
+	P.kin.disengaged = true
+	run_for(0.3)
+	ok(not P.kin.disengaged or P.kin.state != "active", "disengage is not left set once the fight is over")
+	P.kin.disengaged = true
+	P.kin.stow()
+	P.ult = 1.0
+	KinMerge.press(P)
+	ok(not P.kin.disengaged, "starting a merge clears it")
+	P.kin.disengaged = true
+	P.kin.drain(1.0)
+	ok(not P.kin.disengaged, "a drain clears it too")
+	# the R slot's fraction stays within 0..1 while drained
+	var ri := P.slot_info("r")
+	ok(float(ri["cd"]) <= float(ri["cd_max"]) + 0.01, "the R slot's cooldown fraction stays within 1 while the Boki rests (%.1f of %.1f)" % [float(ri["cd"]), float(ri["cd_max"])])
 
 # ------------------------------------------------------------------ 4. the shell
 func _shell() -> void:

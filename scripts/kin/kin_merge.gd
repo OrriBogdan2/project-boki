@@ -108,6 +108,7 @@ static func cast(h: Hunter) -> bool:
 	var ms := def_for(k)
 	if ms == null:
 		return false
+	k.disengaged = false
 	h.ult = 0.0
 	MergeAugment.drop_class_holds(h)
 	for bb in h.m.bubbles.duplicate():
@@ -232,6 +233,7 @@ static func end(h: Hunter, why := "time") -> void:
 	var form: Dictionary = st["form"]
 	var k: Kin = h.kin
 	var kit: MergeKit = st["kit"]
+	MergeAugment.drop(h)
 	var drained: bool = why == "ult" and not st.get("surge", false)
 	var rest := float(MergeForm.data()["rest_s"])
 	h.merge_st = {}
@@ -265,6 +267,6 @@ static func on_shot(h: Hunter) -> Dictionary:
 	if not active(h):
 		return {}
 	var ms: MergeSpec = h.merge_st["def"]
-	if ms.on_shot.is_empty() or MergeForm.has_kit(MergeForm.of(h)):
-		return {}          # (a form's LMB rider is its augment, MergeAugment.lmb)
+	if ms.on_shot.is_empty() or not (MergeForm.aug_of(MergeForm.of(h)).get("lmb", {}) as Dictionary).is_empty():
+		return {}          # (a form's LMB rider, fallback forms included, is its augment, MergeAugment.lmb: never both)
 	return ms.on_shot.duplicate()

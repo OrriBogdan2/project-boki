@@ -519,6 +519,7 @@ func drain(secs: float) -> void:
 	if dead or owner_h == null:
 		return
 	giant = {}
+	disengaged = false
 	stow()
 	rest_t = secs
 	m.fx.burst(owner_h.pos + Vector3(0, 1.2, 0), sp["color"], 14, 3.0)
@@ -777,6 +778,8 @@ func walkable_to(p: Vector3) -> bool:
 func _sim_active(dt: float) -> void:
 	if owner_h and (owner_h.out or owner_h.extracted):
 		return
+	if disengaged and not KinFollow.in_combat(self, pos):
+		disengaged = false          # the fight is over: the next one starts engaged again
 	if cmd == "return" and owner_h != null:
 		KinFollow.set_cmd(self, "return", null)       # Return was ordered while it was in the air: it lands, then goes onto you
 		return
