@@ -2,10 +2,14 @@ class_name GearPanel
 extends RefCounted
 ## The gear you wear, drawn above the weapon card: five slots (active glove, passive glove, armor,
 ## boots, utility kit), each with its rarity colour, plus the upgrade line under your weapon. Hover
-## a slot for what it does. Drawn by Hud with its own helpers (no state of its own).
+## a slot for what it does. Drawn by Hud with its own helpers (state: only the cached upgrade line).
 
 const CELL := 38.0
 const GAP := 6.0
+
+static var _ups_key := -1        # hash of the perks the cached upgrade line was built for
+static var _ups_txt := ""
+static var _ups_w := 0.0
 
 ## Rect of slot i for a screen size (right-aligned, above the weapon card and its row of tonic / kit / throw slots).
 static func cell_rect(sz: Vector2, i: int) -> Rect2:
@@ -29,14 +33,17 @@ static func draw(hud, sz: Vector2, p: Hunter) -> void:
 		if i == 0 and float(p.gear_cd[0]) > 0.0:
 			var f := clampf(float(p.gear_cd[0]) / maxf(0.1, Gear.cd_of(String(g["id"]), rar)), 0.0, 1.0)
 			hud.c.draw_rect(Rect2(r.position + Vector2(0, CELL * (1.0 - f)), Vector2(CELL, CELL * f)), Color(0, 0, 0, 0.5))
-	var ups := WeaponUps.summary(p)
-	if ups != "":
+	var perks_key: int = p.perks.hash()      # the upgrade line only changes when the perks do (no string building per frame)
+	if perks_key != _ups_key:
+		_ups_key = perks_key
+		_ups_txt = WeaponUps.summary(p)
+		while _ups_txt.length() > 8 and hud.body.get_string_size(_ups_txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x > 330.0:
+			_ups_txt = _ups_txt.substr(0, _ups_txt.length() - 4).strip_edges().trim_suffix(",") + "..."
+		_ups_w = hud.body.get_string_size(_ups_txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x
+	if _ups_txt != "":
 		var r0 := cell_rect(sz, 0)
 		var right := cell_rect(sz, Gear.SLOTS.size() - 1).end.x
-		while ups.length() > 8 and hud.body.get_string_size(ups, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x > 330.0:
-			ups = ups.substr(0, ups.length() - 4).strip_edges().trim_suffix(",") + "..."
-		var w: float = hud.body.get_string_size(ups, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x
-		hud._text(Vector2(right - w, r0.position.y - 6.0), ups, 11, Color(hud.GOOD, 0.9), hud.body)
+		hud._text(Vector2(right - _ups_w, r0.position.y - 6.0), _ups_txt, 11, Color(hud.GOOD, 0.9), hud.body)
 
 static func _empty_icon(i: int) -> String:
 	return ["glove", "glove", "fortify", "dash", "satchel"][i]

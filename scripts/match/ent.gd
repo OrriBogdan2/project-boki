@@ -103,10 +103,11 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 	if dead or dmg <= 0.0:
 		return 0.0
 	# the Demo match: a fresh lander who hasn't started anything takes no damage (Match.demo_shielded)
-	if m and m.has_method("demo_shielded"):
-		if by and by == m.player and self != m.player:
-			m.player_engaged = true
-		if m.demo_shielded(self):
+	if m is Match:
+		var mt := m as Match
+		if by and by == mt.player and self != mt.player:
+			mt.player_engaged = true
+		if mt.demo_shielded(self):
 			return 0.0
 	if remote:
 		# someone else's game owns this body: show the hit here, let the owner apply it

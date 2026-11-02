@@ -131,7 +131,8 @@ func _clear_under_toasts(delta: float) -> void:
 		var w := big.get_string_size(String(t["text"]), HORIZONTAL_ALIGNMENT_LEFT, -1, 20).x
 		rects.append(Rect2(sz.x * 0.5 - w * 0.5 - 14.0, y - 26.0, w + 28.0, 38.0))
 	for L in m.lairs.list:
-		var lbl = (L.get("nodes", {}) as Dictionary).get("label")
+		var lnodes = L.get("nodes")
+		var lbl = lnodes.get("label") if lnodes is Dictionary else null
 		if not (lbl is Label3D) or not is_instance_valid(lbl):
 			continue
 		var want := 0.0
