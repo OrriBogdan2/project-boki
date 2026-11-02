@@ -319,23 +319,21 @@ static func draw_icon(c: CanvasItem, id: String, at: Vector2, s: float, col: Col
 ## thing is right there on it.
 static func with_key(b: Button, key: String) -> Button:
 	var kc := keycap(key, 12)
-	var w := kc.get_combined_minimum_size().x
-	# make room on the right of every state's face, then park the cap there
-	var room := func() -> void:
-		for st in ["normal", "hover", "pressed", "hover_pressed", "disabled"]:
-			var sb := b.get_theme_stylebox(st)
-			if sb == null: continue
-			var d := sb.duplicate()
-			d.content_margin_right = maxf(sb.content_margin_right, 0.0) + w + 10.0
-			b.add_theme_stylebox_override(st, d)
-	if b.is_inside_tree(): room.call()
-	else: b.tree_entered.connect(room, CONNECT_ONE_SHOT)
 	b.add_child(kc)
+	# once the cap has its real size: make room for it on the right of every state's face (once),
+	# then park it 10 px in from the right edge
 	var place := func():
-		var sb := b.get_theme_stylebox("normal")
-		var r := (sb.content_margin_right - w - 10.0) if sb else 16.0
 		kc.size = kc.get_combined_minimum_size()
-		kc.position = Vector2(b.size.x - maxf(r, 10.0) - w, (b.size.y - kc.size.y) * 0.5)
+		if not b.has_meta("key_room"):
+			b.set_meta("key_room", true)
+			for st in ["normal", "hover", "pressed", "hover_pressed", "disabled"]:
+				var sb := b.get_theme_stylebox(st)
+				if sb == null:
+					continue
+				var d := sb.duplicate()
+				d.content_margin_right = maxf(sb.content_margin_right, 0.0) + kc.size.x + 10.0
+				b.add_theme_stylebox_override(st, d)
+		kc.position = Vector2(b.size.x - 10.0 - kc.size.x, (b.size.y - kc.size.y) * 0.5)
 	b.resized.connect(place)
 	b.tree_entered.connect(func(): place.call_deferred())
 	return b

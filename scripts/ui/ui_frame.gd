@@ -27,7 +27,7 @@ const SHADE_PX := 4                         # the bottom shade (raised) or top s
 const SHADOW_DROP := 0.38                   # the soft shadow sits this share of its size below the box
 
 var _boxes: Array[StyleBoxFlat] = []
-var _where: Array[int] = []                 # per box: 0 the whole rect, 1 the face, 2 the face inset 1 px
+var _where: Array[int] = []                 # per box: 0 the whole rect, 1 the face, 2 / 3 the face inset 1 / 2 px
 
 ## A raised frame (panels, cards, buttons) with this fill, corner radius and drop shadow.
 static func raised(fill_col: Color, radius: int, shadow_px := 0, rim_col := Color(0, 0, 0, 0)) -> UiFrame:
@@ -63,6 +63,8 @@ func _draw(to_canvas_item: RID, rect: Rect2) -> void:
 			r = face
 		elif _where[i] == 2:
 			r = face.grow(-1.0)
+		elif _where[i] == 3:
+			r = face.grow(-2.0)
 		_boxes[i].draw(to_canvas_item, r)
 
 func _get_draw_rect(rect: Rect2) -> Rect2:
@@ -76,8 +78,8 @@ func _face_rect(rect: Rect2) -> Rect2:
 
 func _build() -> void:
 	if shadow > 0 and fill.a > 0.0:
-		_add(_shadow_box(Color(0.0, 0.0, 0.02, 0.42), shadow, float(shadow) * SHADOW_DROP, rad), 1)
-		_add(_shadow_box(Color(0.0, 0.0, 0.02, 0.32), 3, 1.0, rad), 1)
+		_add(_shadow_box(Color(0.0, 0.0, 0.02, 0.42), shadow, float(shadow) * SHADOW_DROP, rad), 3)
+		_add(_shadow_box(Color(0.0, 0.0, 0.02, 0.32), 3, 1.0, rad), 3)
 	if lip > 0:
 		_add(_flat(fill.darkened(0.45), rad), 0)
 	var body := _flat(fill, rad)
@@ -116,10 +118,10 @@ static func _flat(col: Color, radius: int) -> StyleBoxFlat:
 	b.anti_aliasing = true
 	return b
 
-## A soft shadow under the face (the face itself drawn see-through).
+## A soft shadow under the face: a solid core (hidden under the face, drawn just inside it) that
+## casts the blurred shadow, so there is no gap between the box and its shadow.
 static func _shadow_box(col: Color, size_px: int, drop: float, radius: int) -> StyleBoxFlat:
-	var b := _flat(Color(0, 0, 0, 0), radius)
-	b.draw_center = false
+	var b := _flat(col, radius)
 	b.shadow_color = col
 	b.shadow_size = size_px
 	b.shadow_offset = Vector2(0, drop)

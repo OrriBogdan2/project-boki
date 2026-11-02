@@ -136,8 +136,9 @@ func shot_demo(which: PackedStringArray) -> void:
 			tl.text = "Main key: click, then press a key or mouse button"
 			tl.theme_type_variation = "TooltipLabel"
 			tip.add_child(tl)
+			tip.top_level = true
 			tip.position = Vector2(700, 300)
-			root.add_child(tip)
+			host.get_child(host.get_child_count() - 1).add_child(tip)
 
 func ctx_now() -> String:
 	var s = Game.main.screen_node() if Game.main else null
