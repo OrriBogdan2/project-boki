@@ -36,6 +36,7 @@ func _all() -> void:
 	var reset := func():
 		P.teleport(home)
 		P.vel = Vector3.ZERO
+		P.roll_t = 0.0
 		P.hp = P.max_hp
 		P.stun_t = 0.0
 		ak.fresh(T)

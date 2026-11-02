@@ -444,7 +444,18 @@ func dash_dir() -> Vector2:
 		return h.aim_dir()
 	return move.normalized()
 
+static var _dash_feel := {}
+
+## The global dash feel for this hunter (content/rules/dash_feel.json): {dist, time} multipliers.
+func dash_feel() -> Dictionary:
+	if _dash_feel.is_empty():
+		_dash_feel = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/dash_feel.json"))
+	return _dash_feel.get(id, _dash_feel["default"])
+
 func travel(dist: float, t: float, extra := {}, use_ex := false) -> void:
+	var feel := dash_feel()
+	dist *= float(feel["dist"])
+	t *= float(feel["time"])
 	var e := {"type": "dash", "speed": dist / maxf(0.02, t), "time": t, "invuln": float(extra.get("invuln", 0.0))}
 	for k in extra:
 		e[k] = extra[k]
