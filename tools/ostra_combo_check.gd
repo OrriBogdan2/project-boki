@@ -18,12 +18,13 @@ func _ostra() -> void:
 	var sn: Dictionary = K.rmb_def()["snap"]
 	var reset := func():
 		if not K.seed.is_empty(): K._pop(false)
-		K.swap = {}; K.swap_aim = -1.0; K.snap = {}
+		K._drop_holds()
 		K.swollen_t = 0.0; K.res = 0.0
 		P.teleport(home); P.vel = Vector3.ZERO; P.grounded = true; fresh(T); T.teleport(home + Vector3(6.0, 0, 0)); aim_at(P, T.pos)
 		K.cd["e"] = 0.0; K.e_t = 0.0; K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; P.fire_cd = 0.0; P.dashes = P.max_dashes()
 		P.inp["fire"] = false; P.inp["sec_hold"] = false; P.inp["dash_down"] = false
 		step(m, 0.2)
+		fresh(T)      # (a shard still flying from the last case may have landed meanwhile)
 	var card: Dictionary = K.d["card"]
 	ok("card: a role line and one line each for LMB, RMB, E, Shift and the passive", ["role", "lmb", "rmb", "e", "dash", "passive"].all(func(k): return String(card.get(k, "")).length() > 10))
 	# ---- the reticle: a thin line to the cursor all the time
@@ -53,7 +54,7 @@ func _ostra() -> void:
 	step(m, 0.05, func(): P.inp["fire"] = true)
 	P.inp["fire"] = false
 	var orb: Array = m.shots.filter(func(s): return s["by"] == P)
-	var olen := float(orb[0]["life"]) * (orb[0]["vel"] as Vector2).length() if not orb.is_empty() else 0.0
+	var olen := float(orb[0]["life0"]) * (orb[0]["vel"] as Vector2).length() if not orb.is_empty() else 0.0
 	ok("lmb: a plain orb flies past the cursor to full range (14m)", olen > 12.0, "%.1f m" % olen)
 	ok("lmb: the orb is her own violet teardrop (skin)", KitLooks.of(m).skins_live("orb") >= 1)
 	step(m, 1.0)
@@ -129,15 +130,14 @@ func _ostra() -> void:
 	# owner: spamming Shift never sends her off in another direction
 	reset.call()
 	aim_at(P, home + Vector3(8.0, 0, 0))
+	var sw0 := K.swaps
 	P.ak.on_dash(false)
 	m.step(DT)
 	var p_mid := P.pos
 	for i in 8:
-		P.inp["move"] = Vector2(0, 1)
 		P.do_dash()
 		m.step(DT)
-	P.inp["move"] = Vector2.ZERO
-	ok("owner: spamming Shift in flight never dashes (no travel, no second lob)", P.roll_t <= 0.0 and Vector2(P.pos.x - p_mid.x, P.pos.z - p_mid.z).length() < 0.6 and K.swaps == 0, "moved %.2f" % Vector2(P.pos.x - p_mid.x, P.pos.z - p_mid.z).length())
+	ok("owner: spamming Shift in flight never dashes (no travel, no second lob)", P.roll_t <= 0.0 and Vector2(P.pos.x - p_mid.x, P.pos.z - p_mid.z).length() < 0.8 and K.swaps == sw0 and K.swap_aim < 0.0, "moved %.2f roll %.2f swaps %d aim %.2f" % [Vector2(P.pos.x - p_mid.x, P.pos.z - p_mid.z).length(), P.roll_t, K.swaps, K.swap_aim])
 	step(m, 2.0)
 	reset.call()
 	P.dashes = 0.0

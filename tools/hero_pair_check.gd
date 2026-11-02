@@ -136,8 +136,8 @@ func _zones() -> void:
 	step(m, 0.5)
 	ok("stone row: a rock stops a walking body", true)
 	await done(m)
-	# ---- never over the abyss
-	r = setup("dolm", 9.0, 3)
+	# ---- never over the abyss (the row stands 2.2m ahead; the abyss starts 1.5m ahead)
+	r = setup("dolm", 9.0, 2)
 	m = r[0]; P = r[1]; home = r[3]
 	P.inp["aim"] = home + Vector3(6, 0.9, 0)
 	P.ak.cd["e"] = 0.0
