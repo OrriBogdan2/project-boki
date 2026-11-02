@@ -26,7 +26,7 @@ static func rate(k: Kin) -> float:
 
 ## One step. Losing health (an enemy hit, burn) restarts the out-of-combat wait; healing doesn't.
 static func tick(k: Kin, dt: float) -> void:
-	if k.hp < k.regen_hp - 0.0001 or k.state in ["downed", "reviving", "dazed", "fused"]:
+	if k.hp < k.regen_hp - 0.0001 or k.state in ["downed", "reviving", "dazed", "fused", "shoulder"]:
 		k.regen_quiet = 0.0       # (a Boki that just came round starts its wait again)
 	else:
 		k.regen_quiet += dt

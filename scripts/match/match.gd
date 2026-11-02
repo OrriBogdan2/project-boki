@@ -3469,7 +3469,8 @@ func shot_height_ok(e: Ent, y: float) -> bool:
 const ABOVE_SLACK := 1.2
 func shot_from_above_ok(s: Dictionary, e: Ent, y: float) -> bool:
 	var b := shot_band(e)
-	return (s["start"] as Vector3).y > b.y - 0.3 and y > b.x and y < b.y + ABOVE_SLACK
+	var st := s["start"] as Vector3      # (fired from higher GROUND, not a jump or a glide over the same floor)
+	return st.y > b.y - 0.3 and y > b.x and y < b.y + ABOVE_SLACK and world.ground_at(st.x, st.z) > shot_stance_y(e) + 0.8
 
 ## A shot's centre this close to the edge of a body's hit circle (radius `r`) still connects, so a
 ## bullet touching the circle of radius r + HIT_SLACK hits. That circle is what hit markers draw.
