@@ -13,7 +13,8 @@ var lock_t := 0.0              # can't pick anyone up (after dropping them)
 var pick_blocked := 0.0
 var carry_t := 0.0
 var safe_t := 0.0
-var interact_was := false
+var setdown_was := false        # the set-down key (crouch, never F: F is the Boki system's) was down last tick
+const SETDOWN := "crouch"      # the one place to change the set-down key (a Hunter.inp key)
 var last_dash_pass := false    # the last Relay Step went through a teammate (tests)
 
 func _setup() -> void:
@@ -110,13 +111,13 @@ func _tick_carry(dt: float) -> void:
 			drop_all(true)
 			return
 		h.shield_t = maxf(h.shield_t, 2.0)      # the Bearer shield stays up while you carry
-		var down := bool(h.inp.get("interact", false))
-		if down and not interact_was:
+		var down := bool(h.inp.get(SETDOWN, false))
+		if down and not setdown_was:
 			drop_all(false)
-		interact_was = down
+		setdown_was = down
 		return
 	carry_t = 0.0
-	interact_was = bool(h.inp.get("interact", false))
+	setdown_was = bool(h.inp.get(SETDOWN, false))
 	if not can_pick():
 		return
 	for o in CareUtil.mates(m, h, h.pos, float(pd.get("pick_r", 1.1)) + h.r):
@@ -147,7 +148,7 @@ func pick_up(o: Hunter) -> void:
 	if rank("dash") >= 3:
 		h.ex_cd = 0.0
 	if h.is_local() and m.hud:
-		m.hud.toast_small("Carrying %s. Press interact to set them down" % o.pname, res_col())
+		m.hud.toast_small("Carrying %s. Press %s to set them down" % [o.pname, Settings.key_cap(SETDOWN)], res_col())
 
 func drop_all(broken: bool) -> void:
 	for o in carrying():

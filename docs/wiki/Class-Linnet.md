@@ -62,7 +62,7 @@ What the in-game kit card (K) says.
 
 ### Abilities in full
 
-**Bearer (passive).** Run into a downed teammate to shoulder them (up to 2; never one an enemy is standing on). You carry a Bearer shield (40, +6 a level) that refills each time you pick someone up. While you carry them they don't bleed out and can't be stomped, and you move 30% slower. Press interact to set them down. If the shield breaks or you're stunned, rooted or hexed, you're stunned 0.6s, drop them, and can't pick anyone up for 4s. Your embers Kindle foes (up to 5, 4s): each stack adds 1 damage to your embers, and an ember into a Kindled foe winds Hearthlight back 0.2s (0.4s for a long-range ember).
+**Bearer (passive).** Run into a downed teammate to shoulder them (up to 2; never one an enemy is standing on). You carry a Bearer shield (40, +6 a level) that refills each time you pick someone up. While you carry them they don't bleed out and can't be stomped, and you move 30% slower. Press crouch to set them down. If the shield breaks or you're stunned, rooted or hexed, you're stunned 0.6s, drop them, and can't pick anyone up for 4s. Your embers Kindle foes (up to 5, 4s): each stack adds 1 damage to your embers, and an ember into a Kindled foe winds Hearthlight back 0.2s (0.4s for a long-range ember).
 
 **Relay Step (dash, Shift, 7.5s cooldown).** A quick 4.2m hop (in the air: your long dash). Pass through a teammate on the way and half a charge comes back, and Hearthlight's cooldown drops 1s.
 

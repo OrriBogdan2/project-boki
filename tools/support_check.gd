@@ -138,8 +138,8 @@ func _tender_support() -> void:
 	var dh := A.down_hp
 	P.teleport(P.pos + Vector3(5, 0, 0)); step(m, 2.0)
 	ok("Bearer: the carried teammate rides along and does not bleed", A.flat_dist(P) < 1.0 and A.down_hp >= dh - 0.5, "dist %.2f down_hp %.1f -> %.1f" % [A.flat_dist(P), dh, A.down_hp])
-	P.inp["interact"] = true; step(m, 0.1); P.inp["interact"] = false; step(m, 0.1)
-	ok("Bearer: interact sets them down", not CareUtil.is_carried(A) and K.carrying().is_empty())
+	P.inp["crouch"] = true; step(m, 0.1); P.inp["crouch"] = false; step(m, 0.1)
+	ok("Bearer: crouch (never F) sets them down", not CareUtil.is_carried(A) and K.carrying().is_empty())
 	# --- carry then a stun drops them
 	T.teleport(P.pos + Vector3(14, 0, 0))
 	P.shield = 0.0
