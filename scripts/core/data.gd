@@ -343,7 +343,7 @@ const TIERS := [
 		"mob": 1.45, "loot": 1.75, "kin_lvl": [2, 5], "unlock": 2, "risk_kin": true, "kin_drop": true, "loose_capture": false, "lives": 1,
 		"biome": {"top": Color("56688a"), "top2": Color("465576"), "side": Color("6d5a74"), "deep": Color("2a2440"), "leaf": Color("8a6fb8")},
 		"sky": Color("150f22"), "ambient": Color("c9b4e6"), "sun": Color("ffc9a8"), "clouds": [Color(0.09, 0.05, 0.14), Color(0.32, 0.2, 0.4)]},
-	{"name": "The Hollow", "desc": "Brutal and rich. Boki on you drop into your deathbox and can be looted, and Boki out of your hands can be captured (hold the interact key for 3s).",
+	{"name": "The Hollow", "desc": "Brutal and rich. Boki on you drop into your deathbox and can be looted, and a Boki left out in the world can be scanned and taken (knock it out, then hold the interact key).",
 		"mob": 2.0, "loot": 2.75, "kin_lvl": [4, 8], "unlock": 5, "risk_kin": true, "kin_drop": true, "loose_capture": true, "lives": 1,
 		"biome": {"top": Color("4f6b5e"), "top2": Color("3d5650"), "side": Color("5a4a44"), "deep": Color("1e1a22"), "leaf": Color("c25a4a")},
 		"sky": Color("0d0b10"), "ambient": Color("d0a0a0"), "sun": Color("ffb090"), "clouds": [Color(0.07, 0.03, 0.04), Color(0.3, 0.12, 0.12)]},

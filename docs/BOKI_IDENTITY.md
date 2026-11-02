@@ -132,7 +132,7 @@ reads as field notes, plain sentences in the card's normal ink: "Stands 45 cm an
 Very large for a Vespyx (XL): few grow this big." and "Spotted with pale spots", then where it's
 from (origin, date, who first raised it, parents, its number "#0042 of Vespyx"). No gold serials,
 no coloured size badges. The Nesting Nook and Kin Burrow side panels show a three-line version.
-Player-facing words say *tamed*, not caught (internal event names stay `caught`).
+Player-facing words say *scanned* (the box and the Field Book say *caught*), not tamed (internal event names stay `caught`).
 
 Screenshot hooks: `--kinbox-demo=unique` (eight Echolop from XS to XL, every coat), `--nest-demo=card-about`
 (the About tab), `--nest-demo=kin` (the Nook panel), `--training --no-drop --size-demo` (an XS and

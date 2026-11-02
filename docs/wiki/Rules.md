@@ -9,7 +9,7 @@ _Generated from `scripts/core/data.gd`, `scripts/match/life.gd`, `content/rules`
 |---|---|---|---|---|---|---|
 | The Meadow | x1 | x1 | 1 to 3 | 0 extractions | no | Gentle islands. Your Boki are always safe here: lose your loot, never your Boki. |
 | Dusk Isles | x1.45 | x1.75 | 2 to 5 | 2 extractions | in your deathbox | Tougher monsters, more loot, rarer Boki. Boki you have on you drop into your deathbox when you die, and anyone can loot them. Boki out of your hands escape. |
-| The Hollow | x2 | x2.75 | 4 to 8 | 5 extractions | can be captured | Brutal and rich. Boki on you drop into your deathbox and can be looted, and Boki out of your hands can be captured (hold the interact key for 3s). |
+| The Hollow | x2 | x2.75 | 4 to 8 | 5 extractions | can be captured | Brutal and rich. Boki on you drop into your deathbox and can be looted, and a Boki left out in the world can be scanned and taken (knock it out, then hold the interact key). |
 
 ## Match
 
@@ -47,9 +47,30 @@ From `Life.R` (`scripts/match/life.gd`); the full flow is on [Expeditions](Exped
 | sickness_time | 12 | resurrection sickness |
 | sickness_dmg | 0.75 | -25% damage dealt |
 
+## boki_system (`content/rules/boki_system.json`)
+
+The Boki command system (docs/decisions/0001, 0002): G sic / call back / wheel, follow, the downed Boki, the leashes. Distances in metres, times in seconds, hp as a share of max health.
+
+| Setting | Value |
+|---|---|
+| class_ults | False |
+| class_ults_doc | false: R is the Merge for every class. true: R runs the class's own ultimate again (ArchKit.use_r), kept for the hero-port work to fold into kits. |
+| g_hold_s | 0.35 |
+| throw_range | 9 |
+| throw_range_dive | 11 |
+| recall_range | 24 |
+| merge_leap_range | 32 |
+| land_stagger | {"radius": 1.7, "stun": 0.7, "kb": 3.0, "dmg_k": 0.8} |
+| recall_hit | {"width": 0.9, "dmg_k": 1.0, "stun": 0.35, "kb": 5.0} |
+| down | {"recover_s_trusting": 15.0, "recover_s_wary": 20.0, "recover_hp": 0.2, "rescue_hp": 0.6, "rescue_s": 0.5, "rescue_r": 1.5} |
+| follow | {"separation_r": 1.2, "path_every_s": 0.45, "path_goal_moved": 3, "path_fail_backoff_s": 1.5, "path_lookahead": 8, "path_window": 12, "stuck_s": 1.0, "hop_dur": 0.38, "hop_height": 1.1, "hop_on_air_s": 0.4, "hop_off_steady_s": 0.35, "away_dist": 8.0, "combat_radius": 12.0, "hesitate_s": 0.3, "sic_cd": 1.0, "sic_speed": 18.0, "engage_range": 9.0, "guard_leash": 24.0, "chase_leash": 30.0} |
+| follow_doc | stuck_s: seconds without progress before the hop back. hop_on_air_s: seconds you are off the ground before it hops on (when it cannot walk where you land). hop_off_steady_s: seconds steady on the ground before it hops off again. away_dist: farther than this and a G tap is Call back (else Sic). combat_radius: a foe this close to you or the target means a fight (orders are never refused). path_window: tiles of margin round the trip for the A* search. path_every_s: seconds between searches; path_goal_moved: tiles the goal may move before it searches early; path_fail_backoff_s: wait after a search that found nothing; path_lookahead: path tiles checked ahead for a straight line. separation_r: m it keeps from you. |
+| wheel | {"deadzone_px": 30, "pop_s": 0.14, "radius_px": 92} |
+| charge_impact | {"radius_k": 1.35, "stun_add": 0.3, "kb_k": 1.4} |
+
 ## Bond meter (`content/rules/bond.json`)
 
-How the bond meter fills. All values are fractions of a full meter.
+How the bond meter fills (it gates R, the Merge). All values are fractions of a full meter. Your Boki's hits mark the foe for mark_s seconds, and your own hits on a marked foe fill the meter marked_factor times faster. (Every point of damage you or your Boki deal also adds 1/320, see Match.on_damage.)
 
 | Setting | Value |
 |---|---|
@@ -61,6 +82,26 @@ How the bond meter fills. All values are fractions of a full meter.
 | max_per_hit | 0.035 |
 | kin_required | True |
 | mob_factor | 0.6 |
+| marked_factor | 2 |
+| mark_s | 4 |
+
+## capture (`content/rules/capture.json`)
+
+Capture by scan (docs/decisions/0002). A wild Boki that is knocked out (dazed) can be scanned: hold the interact key for hold_s to commit, then the scan runs by itself for scan_s. Times in seconds, distances in metres.
+
+| Setting | Value |
+|---|---|
+| hold_s | 0.4 |
+| scan_s | 4 |
+| range | 3.5 |
+| cancel_range | 5 |
+| box_capacity | 3 |
+| box_capacity_doc | How many captured Boki (capsules) a hunter can carry in the run box (Hunter.caught). Full: a new scan is blocked until one is released. |
+| noise_every_s | 0.5 |
+| hear_range | 26 |
+| rise_pitch | [0.8, 1.6] |
+| sight_range | 24 |
+| sight_places_kept | 3 |
 
 ## How Boki fight (`content/rules/kin_ai.json`)
 
@@ -79,6 +120,18 @@ How personality traits shape a kin's fighting. aggression, loyalty and caution a
 | auto_rate_per_aggression | 0.6 |
 | recall_cooldown | 1 |
 | swap_cooldown | 3 |
+
+## merge_forms (`content/rules/merge_forms.json`)
+
+How a merge looks and what it does to YOUR abilities, driven by the Boki's type (its theme) and power tier, never by hero x Boki pairs (docs/decisions/0001). The Boki's own merge (content/merges_v2) still sets its passives, shot riders and merged Boki abilities. Here: the form you wear, the activation moment, and kit-agnostic changes to every class's abilities.
+
+| Setting | Value |
+|---|---|
+| tiers_doc | power = KinMerge.growth(level and trust) + forms_bonus per evolved form; the tier is the last row whose `from` it reaches. k scales the merge strength, dur adds seconds, haste is faster ability cooldowns (all classes), rider scales the type's rider on ability hits, parts is how many silhouette parts show, size grows the wrapped aura. |
+| forms_bonus | 0.08 |
+| tiers | [{"name": "Bonded", "from": 0.0, "k": 1.0, "dur": 0.0, "haste": 0.12, "rider": 1.0, "parts": 1, "size": 1.0, "stun": 0.0}, {"name": "Fused", "from": 0.4, "k": 1.12, "dur": 1.0, "haste": 0.2, "rider": 1.35, "parts": 2, "size": 1.1, "stun": 0.0}, {"name": "Ascended", "from": 0.75, "k": 1.25, "dur": 2.0, "haste": 0.28, "rider": 1.8, "parts": 3, "size": 1.2, "stun": 0.4}] |
+| surge | {"name": "Surge", "duration": 3.0, "color": "#e8f4ff", "passives": [["damage", 0.1], ["move_speed", 0.1]], "haste": 0.12, "flavor": "No Boki at your side: a weak burst of resolve. 3s of 10% more damage, speed and faster abilities."} |
+| types | {"venom": {"style": "nova", "parts": ["fangs", "tail", "crest"], "word": "VENOM", "rider": {"burn": 5.0, "burn_for": 3.0}, "dash": {"burst": 8.0, "radius": 2.0, "burn": 4.0, "burn_for": 3.0}}, "spore": {"style": "bloom", "parts": ["crest", "plates", "halo"], "word": "SPORE", "rider": {"slow_k": 0.25, "slow_s": 1.6}, "dash": {"burst": 6.0, "radius": 2.4, "slow_k": 0.3, "slow_s": 1.4}}, "gravity": {"style": "quake", "parts": ["plates", "spikes", "halo"], "word": "GRAVITY", "rider": {"kb": -3.5}, "dash": {"burst": 10.0, "radius": 2.2, "kb": -4.0}}, "prism": {"style": "prism", "parts": ["crest", "halo", "wings"], "word": "PRISM", "rider": {"chain": 0.35}, "dash": {"burst": 8.0, "radius": 2.0, "chain": 0.35}}, "lunar": {"style": "spiral", "parts": ["halo", "wings", "crest"], "word": "LUNAR", "rider": {"leech": 0.06}, "dash": {"burst": 6.0, "radius": 2.2, "leech": 0.06}}, "echo": {"style": "storm", "parts": ["antennae", "crest", "wings"], "word": "ECHO", "rider": {"chain": 0.3}, "dash": {"burst": 8.0, "radius": 2.0, "chain": 0.3}}, "ember": {"style": "pillar", "parts": ["horns", "crest", "tail"], "word": "EMBER", "rider": {"burn": 7.0, "burn_for": 2.5}, "dash": {"burst": 10.0, "radius": 2.0, "burn": 6.0, "burn_for": 2.5}}, "frost": {"style": "bloom", "parts": ["spikes", "crest", "halo"], "word": "FROST", "rider": {"slow_k": 0.35, "slow_s": 1.8}, "dash": {"burst": 6.0, "radius": 2.4, "slow_k": 0.4, "slow_s": 1.6}}, "storm": {"style": "storm", "parts": ["wings", "crest", "antennae"], "word": "STORM", "rider": {"chain": 0.4}, "dash": {"burst": 9.0, "radius": 2.2, "chain": 0.4}}, "stone": {"style": "quake", "parts": ["plates", "horns", "spikes"], "word": "STONE", "rider": {"kb": 4.5}, "dash": {"burst": 12.0, "radius": 2.0, "kb": 5.0}}, "bloom": {"style": "bloom", "parts": ["crest", "wings", "halo"], "word": "BLOOM", "rider": {"leech": 0.07}, "dash": {"burst": 5.0, "radius": 2.4, "leech": 0.07}}, "shadow": {"style": "spiral", "parts": ["horns", "wings", "tail"], "word": "SHADOW", "rider": {"slow_k": 0.2, "slow_s": 1.2, "leech": 0.04}, "dash": {"burst": 8.0, "radius": 2.0, "slow_k": 0.25, "slow_s": 1.2}}, "titan": {"style": "quake", "parts": ["horns", "plates", "spikes"], "word": "TITAN", "rider": {"kb": 5.5}, "dash": {"burst": 14.0, "radius": 2.2, "kb": 6.0}}, "swarm": {"style": "storm", "parts": ["antennae", "wings", "spikes"], "word": "SWARM", "rider": {"burn": 3.5, "burn_for": 2.0, "chain": 0.25}, "dash": {"burst": 6.0, "radius": 2.6, "burn": 3.0, "burn_for": 2.0}}, "tempest": {"style": "storm", "parts": ["wings", "crest", "halo"], "word": "TEMPEST", "rider": {"chain": 0.45}, "dash": {"burst": 9.0, "radius": 2.2, "chain": 0.45}}, "none": {"style": "nova", "parts": ["crest", "halo", "plates"], "word": "MERGE", "rider": {"kb": 2.0}, "dash": {"burst": 6.0, "radius": 2.0, "kb": 2.0}}} |
 
 ## Combos
 

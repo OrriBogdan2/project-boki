@@ -1,7 +1,7 @@
 extends RefCounted
 ## --teammate-check: your Boki as a teammate (KinCompanion). Prints PASS/FAIL lines.
-##   1. it keeps close through a scripted run: walking (down at your heel), a dash, a jump and glide
-##      (back up on your shoulder), and out on the field (walking back to your side)
+##   1. it keeps close through a scripted run: walking (at your side, following), a dash, a jump and glide
+##      (it hops onto you for the glide), and out on the field (walking back to your side)
 ##   2. callouts fire by priority (a rival behind you beats a chest), keep a quiet gap between them
 ##      and respect each kind's cooldown
 ##   3. the chattiness setting: quiet only speaks up for danger and your health, chatty says more
@@ -86,18 +86,25 @@ func _follow() -> void:
 	var k: Kin = P.kin
 	ok(k != null and k.comp != null, "the player's Boki has a companion")
 	if k == null: return
+	# (nothing to fight: a Boki out at your side takes on whatever is near, which is not what this part measures)
+	for mb in m.mobs: mb.dead = true; mb.visible = false
+	for h in m.hunters:
+		if h != P: h.teleport(m.world.random_ground())
+	for kk in m.kins:
+		if kk != k and kk.team != k.team: kk.dead = true; kk.visible = false
 	var st := {"max": 0.0, "steady": 0, "heel": 0, "glide": 0, "glide_up": 0}
 	var watch := func():
+		for mb in m.mobs: mb.dead = true; mb.visible = false
 		var d := Vector2(k.seen_pos().x - P.pos.x, k.seen_pos().z - P.pos.z).length()
 		st["max"] = maxf(float(st["max"]), d)
-		if P.grounded and not P.gliding and P.roll_t <= 0.0 and k.state == "shoulder":
+		if P.grounded and not P.gliding and P.roll_t <= 0.0 and k.state in ["active", "shoulder"]:
 			st["steady"] = int(st["steady"]) + 1
-			if k.heel_k >= 1.0: st["heel"] = int(st["heel"]) + 1
+			if k.state == "active" and k.flat_dist(P) < 3.5: st["heel"] = int(st["heel"]) + 1
 		if P.gliding:
 			st["glide"] = int(st["glide"]) + 1
-			if k.heel_k < 0.5: st["glide_up"] = int(st["glide_up"]) + 1
+			if k.state == "shoulder": st["glide_up"] = int(st["glide_up"]) + 1
 	_walk(P, Vector2(1, 0), 2.5, watch)
-	ok(k.heel_k >= 1.0 and k.heel_pos.distance_to(P.pos) < 2.2, "walking: down at your heel (heel %.2f, %.1fm away)" % [k.heel_k, k.heel_pos.distance_to(P.pos) if k.heel_pos != Vector3.INF else 99.0])
+	ok(k.state == "active" and k.cmd == "follow" and k.flat_dist(P) < 3.5, "walking: out at your side, following (%s, %.1fm away)" % [k.state, k.flat_dist(P)])
 	# a dash, then keep walking
 	P.inp["dash"] = true
 	_walk(P, Vector2(1, 0), 0.05, watch)
@@ -112,9 +119,9 @@ func _follow() -> void:
 	P.inp["glide"] = false
 	_walk(P, Vector2(-1, 0), 2.0, watch)
 	_walk(P, Vector2(0, 1), 2.0, watch)
-	ok(float(st["max"]) <= 4.0, "never more than 4m from you through walk, dash, jump and glide (max %.2fm)" % float(st["max"]))
-	ok(int(st["steady"]) > 0 and float(st["heel"]) / float(st["steady"]) > 0.55, "at your heel most of the time you're on your feet (%d of %d steps)" % [int(st["heel"]), int(st["steady"])])
-	ok(int(st["glide"]) == 0 or float(st["glide_up"]) / float(st["glide"]) > 0.8, "rides your shoulder while you glide (%d of %d steps)" % [int(st["glide_up"]), int(st["glide"])])
+	ok(float(st["max"]) <= 10.0, "never more than 10m from you through walk, dash, jump and glide (a dash outruns it for a moment) (max %.2fm)" % float(st["max"]))
+	ok(int(st["steady"]) > 0 and float(st["heel"]) / float(st["steady"]) > 0.55, "at your side most of the time you're on your feet (%d of %d steps)" % [int(st["heel"]), int(st["steady"])])
+	ok(int(st["glide"]) == 0 or float(st["glide_up"]) / float(st["glide"]) > 0.5, "hops onto you for most of a glide (%d of %d steps)" % [int(st["glide_up"]), int(st["glide"])])
 	# out on the field with nothing to fight: it comes back to your side and keeps pace
 	# (training dummies and anything else nearby are cleared: with an archetype the kin's C is open, so it would fight them)
 	for mb in m.mobs: mb.dead = true; mb.visible = false
@@ -126,13 +133,11 @@ func _follow() -> void:
 	k.throw_to(P.pos + Vector3(5, 0, 0))
 	for i in 60: m.step(Match.DT)
 	var was := k.state
-	var spot: Vector3 = k.hold_at
-	# (owner) thrown out with nothing to fight: it holds the spot while you're near, it doesn't run back
-	for i in 120:
+	# sent out with nothing to fight: it walks back to your side (Follow), it does not wait where it landed
+	for i in 180:
 		for mb in m.mobs: mb.dead = true; mb.visible = false
 		m.step(Match.DT)
-	var held := spot != Vector3.INF and k.state == "active" and Vector2(k.pos.x - spot.x, k.pos.z - spot.z).length() < 1.6
-	ok(was == "active" and held, "thrown out, it holds that spot while you stay near (%s, %.1fm from the spot)" % [k.state, Vector2(k.pos.x - spot.x, k.pos.z - spot.z).length() if spot != Vector3.INF else 99.0])
+	ok(was == "active" and k.state == "active" and k.cmd == "follow" and k.flat_dist(P) < 3.5, "sent out, it comes back to your side (%s, %.1fm from you)" % [k.state, k.flat_dist(P)])
 	# ...and comes back once you walk out of its leash range
 	var far := [0.0]      # (an Array: a lambda captures plain locals by value)
 	_walk(P, Vector2(0, -1), 5.0, func():
@@ -144,9 +149,6 @@ func _follow() -> void:
 	# a threat close by: it stands between you and it
 	var T: Hunter = m.make_hunter("T", 5, "medium", "Rival", "idle", {}, P.pos + Vector3(6, 0, 0))
 	T.max_hp = 1e5; T.hp = 1e5
-	if k.state != "shoulder":
-		k.recall()
-		for i in 40: m.step(Match.DT)
 	k.comp._find_threat()
 	k.comp.threat = T
 	var hs := k.comp.heel_spot()
@@ -271,8 +273,8 @@ func _caring() -> void:
 	m.revive_hunter(P, null)
 	k.comp.on_boss_kill("the Warden", P.pos)
 	ok(k.comp.history.any(func(e): return e["cat"] == "boss_kill") and k.events.any(func(e): return e["kind"] == "boss_kill" and e.get("boss", "") == "the Warden"), "celebrates a boss kill, and remembers which")
-	k.faint()
-	k.state = "shoulder"; k.hp = k.max_hp * 0.3
+	k.go_down()
+	k.stow(); k.hp = k.max_hp * 0.3
 	m._extract(P, "uplink", "test")
 	ok(k.comp.history.any(func(e): return e["cat"] == "extract") and k.events.any(func(e): return e["kind"] == "carried_out" and String(e.get("place", "")) != ""), "celebrates extraction; hurt, it remembers you carried it out")
 	_fresh()

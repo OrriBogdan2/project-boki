@@ -197,6 +197,7 @@ static func owner_stat(stat: String, v: float) -> String:
 		"fire_rate": return "+%s fire rate" % pct(v)
 		"reload": return "%s faster reload" % pct(v)
 		"reveal_radius": return "reveals rivals within %sm" % n(v)
+		"cooldown": return "abilities recharge %s faster" % pct(v)
 	return stat
 
 static func passives(list: Array, k := 1.0) -> String:
@@ -216,7 +217,7 @@ static func on_shot(os: Dictionary) -> String:
 	if int(os.get("chain", 0)) > 0: out.append("arc to %d more" % int(os["chain"]))
 	return "your shots: " + ", ".join(out)
 
-const CARRY_NAMES := {"shoulder": "Rides your shoulder", "perch": "Perches on your pack", "mount": "You ride it"}
+const CARRY_NAMES := {"shoulder": "Return: rides your shoulder", "perch": "Return: perches on your pack", "mount": "Return: you ride it"}
 
 ## How it's carried and what that gives you: "You ride it (Anchor): -15% damage taken, half knockback".
 static func carry(ks: KinSpec) -> String:
@@ -232,6 +233,16 @@ static func carry(ks: KinSpec) -> String:
 		"mount": t += ". It curls up on your back while you glide; you can't glide riding it"
 		"perch": t += ". Thrown, it dives on the spot from above"
 	return t
+
+## What you lose while it is out beside you: "Off you: no -15% damage taken" ("" if its carry gives nothing).
+static func carry_off(ks: KinSpec) -> String:
+	if ks == null:
+		return ""
+	var bits := PackedStringArray()
+	if not ks.carry_passives.is_empty(): bits.append("no " + passives(ks.carry_passives).replace(", ", ", no "))
+	var os := on_shot(ks.carry_on_shot)
+	if os != "": bits.append("no " + os)
+	return ("Off you: " + "; ".join(bits)) if not bits.is_empty() else ""
 
 const OWNER_POINTS := {"owner_max_hp": "+%s max health", "owner_armor": "armor wears %s slower", "owner_shield": "%s shield that refills out of a fight",
 	"owner_regen": "+%s hp/s regen", "owner_move_speed": "+%s move speed"}

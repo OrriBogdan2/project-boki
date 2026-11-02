@@ -48,8 +48,8 @@ func _ready() -> void:
 					if which.size() > 1: Overlay.inv_tab = which[1]
 					Overlay.open_inventory()
 				elif which[0] == "dex":
-					# a Boki's Bokidex page, over the Bokidex: --overlay=dex:puddlet
-					Overlay.inv_tab = "Kindex"
+					# a Boki's Field Book page, over the Field Book: --overlay=dex:puddlet
+					Overlay.inv_tab = "Field Book"
 					Overlay.open_inventory()
 					Overlay.open_dex(which[1] if which.size() > 1 else "cindle"))
 		if a.begins_with("--seed="): opts["seed"] = int(a.substr(7))
@@ -101,6 +101,12 @@ func _ready() -> void:
 			opts["arch_demo"] = a.substr(12); opts["no_drop"] = true; opts["training"] = true; opts["unlocked"] = true
 			opts["arch"] = ad[0]; opts["cls"] = Arch.weight(ad[0]); opts["weapon"] = Arch.default_weapon(ad[0])
 			if ad.size() > 2: opts["weapon"] = ad[2]
+		if a.begins_with("--boki-demo="):
+			# screenshots: the Boki commands and the Merge (scripts/match/boki_demo.gd), --boki-demo=throw|recall|downed|merge[:species]
+			var bd := a.substr(12).split(":")
+			opts["boki_demo"] = a.substr(12); opts["arch_demo"] = "gunslinger:rmb"; opts["no_drop"] = true; opts["training"] = true; opts["unlocked"] = true
+			opts["arch"] = "gunslinger"; opts["cls"] = Arch.weight("gunslinger"); opts["weapon"] = Arch.default_weapon("gunslinger")
+			if bd.size() > 1: opts["demo_kin"] = bd[1]
 		if a == "--normalize-size": Unique.normalize = true      # kin size changes no stats or hitboxes (Unique)
 		if a == "--fresh": Save.d = Save.fresh()
 		if a in ["--work-demo", "--work-board", "--work-board=Kin", "--work-card", "--work-box", "--work-hover", "--work-close", "--work-build", "--shiny-lineup"]:
@@ -373,6 +379,15 @@ func _ready() -> void:
 		var wkc = load("res://tools/work_check.gd").new()      # kin at work: jobs, stations, priorities, shimmer odds
 		set_meta("work_check", wkc)
 		wkc.run(self)
+		return
+	if "--boki-system-check" in args:
+		load("res://tools/boki_system_check.gd").new().run(self)      # Boki commands (throw, recall, hold/follow, C), the downed Boki, the Merge
+		return
+	if "--boki-follow-check" in args:
+		load("res://tools/boki_follow_check.gd").new().run(self)      # the Boki follows you: leash, glide hops, Sic / Call back, the wheel, mounts
+		return
+	if "--capture-check" in args:
+		load("res://tools/capture_check.gd").new().run(self)      # capture by scan, the box, the Field Book, the net events
 		return
 	if "--teammate-check" in args:
 		load("res://tools/teammate_check.gd").new().run(self)      # Boki as teammates: following, callouts, caring, the tutorial guide
@@ -1667,7 +1682,7 @@ func _grt_kin(m: Match, P: Hunter, sp: String, rec_extra := {}) -> Kin:
 	rec["trust"] = 95.0
 	for kk in rec_extra: rec[kk] = rec_extra[kk]
 	var k := m.give_kin(P, rec)
-	k.state = "shoulder"
+	k.stow()
 	k.settle = 1.0
 	k.brain.think_t = 1e9        # the test casts by hand; its own AI stays quiet (tested on its own below)
 	P.merge_cd = 0.0
@@ -1724,7 +1739,7 @@ func _grammar_runtime_check() -> void:
 	k.use_ability("k1", T.pos + Vector3(-1.0, 0, 0))
 	_ac_run(m, 1.2, func(): acc["top"] = maxf(float(acc["top"]), T.pos.y - g0))
 	_grt("pebbit E Gravity Slam", T.hp < T.max_hp and float(acc["top"]) > 0.3, "took %.0f, rose %.2f" % [T.max_hp - T.hp, acc["top"]])
-	k.state = "shoulder"; k.settle = 1.0
+	k.stow()
 	var nw := m.verbs.walls.size()
 	k.use_ability("k2", P.pos)
 	_grt("pebbit auto Mass Guard wall", m.verbs.walls.size() == nw + 1 and bool(m.verbs.walls[-1]["follow"]), "%d walls" % m.verbs.walls.size())
@@ -1737,7 +1752,7 @@ func _grammar_runtime_check() -> void:
 	m.spawn_shot(T, T.pos + Vector3(-0.6, 0.95, 0), Vector2(-30, 0), 20.0, 0.6, 0.15, Color.RED, {})
 	_ac_run(m, 0.6)
 	_grt("puddlet E Prism Wall reflects", T.hp < thp and P.hp >= php, "shooter took %.0f" % (thp - T.hp))
-	k.state = "shoulder"; k.settle = 1.0
+	k.stow()
 	P.shield = 0.0
 	var nm := m.verbs.mirrors.size()
 	k.use_ability("k2", P.pos)
@@ -1773,7 +1788,7 @@ func _grammar_runtime_check() -> void:
 	_grt("zapple E Echo Chain stuns", T.stun_t > 0.2 and T.hp < T.max_hp, "stun %.2f took %.0f" % [T.stun_t, T.max_hp - T.hp])
 	_ac_run(m, 1.5)
 	_grt_reset(T)
-	k.state = "shoulder"; k.settle = 1.0
+	k.stow()
 	P.crit_t = 0.0
 	k.use_ability("k2", P.pos)
 	_grt("zapple auto Echolocate", T.reveal_t > 0.0 and P.crit_t > 0.0, "reveal %.1f crit %.1f" % [T.reveal_t, P.crit_t])
@@ -1852,7 +1867,7 @@ func _grammar_runtime_check() -> void:
 	k.melee_n = 1
 	var self_fire := k.fire_trigger("on_hit", {"at": T.pos, "chain": ["grt_on_hit"]})
 	var real_fire := k.fire_trigger("on_hit", {"at": T.pos, "chain": []})
-	k.state = "shoulder"; k.settle = 1.0       # (so it doesn't swing at the target itself)
+	k.stow()       # (so it doesn't swing at the target itself)
 	var mel0 := k.melee_n
 	_ac_run(m, 0.3)
 	_grt("no self-trigger", not self_fire and real_fire and k.melee_n == mel0, "own hit fired=%s, melee hit fired=%s, its hits counted as melee %d" % [self_fire, real_fire, k.melee_n - mel0])
@@ -1975,7 +1990,7 @@ func _grammar_runtime_check() -> void:
 	_ac_run(m, KinParts.MERGE_SPENT_TIME + 0.1)
 	_grt("merge again after the cooldown", blocked and KinMerge.can_cast(P), "")
 	KinMerge.cast(P)
-	m._player_throw()
+	KinCommand.tap(P)
 	_ac_run(m, 0.05)
 	_grt("throwing ends the merge (throw still works)", not KinMerge.active(P) and k.state in ["flying", "active"], "Boki %s" % k.state)
 	_ac_run(m, 1.0)
