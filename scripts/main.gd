@@ -1937,7 +1937,6 @@ func _grammar_runtime_check() -> void:
 	var locked := not k.use_ability("k1", T.pos) and not k.use_ability("k2", T.pos)
 	P.slot_lv["kin"] = 1
 	_grt("locked Boki slot never casts", locked, "")
-	Settings.set_v("kin_auto", false, false)
 	k.target = T
 	k.runner.reset()
 	var used := {"k1": 0, "k2": 0}

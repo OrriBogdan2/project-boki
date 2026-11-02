@@ -12,14 +12,24 @@ const DEFAULTS := {
 	"fullscreen": false, "vsync": true, "max_fps": 0, "msaa": 4, "video_v": 2, "shadows": true, "ui_scale": 1.0, "show_fps": false,
 	"quality": "auto", "quality_found": "",
 	# gameplay
-	"shake": 1.0, "cam_lead": 1.0, "cam_style": "supervive", "cam_follow": "supervive", "dash_hold": false, "dash_to_cursor": false, "damage_numbers": true, "reset_cue": "a", "tips": true, "cast_on_press": true, "crouch_toggle": false, "mod_mode": false, "kin_auto": false, "kin_chatter": "normal", "bot_diff": "auto",
+	"damage_numbers": true, "tips": true, "kin_chatter": "normal", "mod_mode": false, "bot_diff": "auto",
+	# how keys behave (Controls)
+	"cast_on_press": true, "dash_to_cursor": false, "crouch_toggle": false,
+	# camera
+	"cam_style": "supervive", "cam_follow": "supervive", "cam_lead": 1.0,
+	# sounds
+	"reset_cue": "a",
 	# accessibility
-	"reduce_flashes": false, "hud_opacity": 1.0,
+	"shake": 1.0, "reduce_flashes": false,
 	# demo / recording (Settings > Demo): for filming a match, offline only (online matches use the host's rules)
 	"demo_weather": "random", "demo_blight": true, "demo_fresh": "normal", "rec_level": 0,
 	# controls: action -> list of "key:<physical keycode>" / "mouse:<button>"
 	"keys": {}, "keys_v": 2, "keys2_v": 0,
 }
+## Settings that no longer exist (docs/SETTINGS_AUDIT.md). They are dropped from the settings file
+## the first time it's written after they went.
+const REMOVED := ["dash_hold", "kin_auto", "hud_opacity"]
+
 ## Graphics presets (Video → Quality). High is the game's full look; Low and Medium trade detail for
 ## speed, Ultra pushes draw distance, shadows and level of detail further. A preset sets the plain
 ## settings (msaa, shadows) and these knobs, which the renderer and the world builder read through q():
@@ -133,6 +143,8 @@ func _ready() -> void:
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--quality="):
 			v["quality"] = a.substr(10); _quality_basics = true      # tooling: try a preset without saving it
+	if REMOVED.any(func(k): return cf.has_section_key("s", k)):
+		save.call_deferred()
 	if not cf.has_section_key("s", "crouch_toggle") and OS.has_feature("web"):
 		v["crouch_toggle"] = true      # browsers close the tab on Ctrl+W, so don't make people hold Ctrl
 	get_tree().node_added.connect(_on_node_added)
@@ -204,6 +216,9 @@ func set_v(k: String, val, write := true) -> void:
 func save() -> void:
 	var cf := ConfigFile.new()
 	cf.load(PATH)          # keeps the other sections (the last save slot)
+	for k in REMOVED:
+		if cf.has_section_key("s", k):
+			cf.erase_section_key("s", k)
 	for k in v:
 		cf.set_value("s", k, v[k])
 	cf.save(PATH)
