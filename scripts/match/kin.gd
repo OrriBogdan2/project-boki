@@ -30,6 +30,8 @@ var chase_stall := 0.0          # seconds spent chasing a target without getting
 var hold_at := Vector3.INF
 var cmd := "follow"               # its standing order (KinFollow): follow | guard | chase | return. State "shoulder" is "return" or a short traversal carry
 var chase_target: Ent = null      # chase: what it sticks to
+var rest_t := 0.0                 # seconds left drained on you after the owner's merge ultimate (drain): no C, no orders, no Sic
+var disengaged := false           # an explicit Follow / Call back in a fight: it stays at your side until you attack, it or you are hit up close, or you Sic/Chase (KinFollow.disengage)
 var path: Array = []              # its A* path (KinPath), recomputed on path_t
 var path_goal := Vector2i.ZERO
 var path_t := 0.0
@@ -201,7 +203,11 @@ func slot_open(_slot: String) -> bool:
 
 ## Can its abilities and ultimate be used right now?
 func ready_to_fight() -> bool:
-	return not dead and state not in ["downed", "reviving", "bench", "wild", "dazed", "away"]
+	return not dead and rest_t <= 0.0 and state not in ["downed", "reviving", "bench", "wild", "dazed", "away"]
+
+## Drained after the merge ultimate (docs/decisions/0004)?
+func resting() -> bool:
+	return rest_t > 0.0 and not dead
 
 # ------------------------------------------------------------------ mind
 func courage() -> float:
@@ -249,7 +255,7 @@ func bark(cat: String, extra := "") -> void:
 
 # ------------------------------------------------------------------ owner commands
 func throw_to(p: Vector3, slot := "") -> void:
-	if dead or hesitate_t > 0.0 or throw_cd > 0.0:
+	if dead or hesitate_t > 0.0 or throw_cd > 0.0 or rest_t > 0.0:
 		return
 	if state == "active":
 		if slot == "":
@@ -287,6 +293,7 @@ func _order_sic(p: Vector3, from_shoulder := false) -> void:
 
 func _launch(p: Vector3) -> void:
 	st_throws += 1
+	disengaged = false
 	var dive := carry_style() == "perch"
 	# a perched kin is thrown as a dive: up off your pack, then straight down onto the spot
 	var start := owner_h.pos + Vector3(0, 3.4 if dive else 1.5, 0)
@@ -333,6 +340,8 @@ func recall() -> void:
 		hold_at = Vector3.INF
 		if cmd == "guard" or cmd == "chase":
 			cmd = "follow"; chase_target = null
+		if cmd == "follow":
+			KinFollow.disengage(self)       # Call back in a fight: it stays with you
 		m.sfx("recall", pos, -6.0)
 		KinNet.event(m, "recall", self)
 		CombatBus.kin_recalled.emit(self, owner_h)
@@ -504,6 +513,20 @@ func merge_out() -> void:
 		settle = 1.0
 		m.fx.burst(pos, sp["color"], 16, 3.0)
 
+## The merge ended with its ultimate: the Boki is drained. It rests on you, carried and safe (Return), for `secs`.
+## No C, no Sic, no orders until it is over; its carried bonuses still apply.
+func drain(secs: float) -> void:
+	if dead or owner_h == null:
+		return
+	giant = {}
+	disengaged = false
+	stow()
+	rest_t = secs
+	m.fx.burst(owner_h.pos + Vector3(0, 1.2, 0), sp["color"], 14, 3.0)
+	KinNet.event(m, "rest", self, owner_h.pos, "%.1f" % secs)
+	if owner_h.is_local():
+		KinCommand.say(owner_h, "%s is drained: resting on you" % rec.get("name", "Your Boki"), Color("a2a8bb"))
+
 ## A merge with a form ended: the Boki springs out beside you, following (not downed, never a shoulder hop).
 func merge_pop() -> void:
 	if state != "fused" or owner_h == null or dead:
@@ -551,8 +574,13 @@ func sim(dt: float) -> void:
 		if owner_h: pos = owner_h.pos; prev = pos
 		return
 	tick_status(dt)
-	for k in ["atk_cd", "bark_cd", "lunge_t", "throw_cd", "haste_t"]:
+	var was_rest := rest_t > 0.0
+	for k in ["atk_cd", "bark_cd", "lunge_t", "throw_cd", "haste_t", "rest_t"]:
 		set(k, maxf(0.0, get(k) - dt))
+	if was_rest and rest_t <= 0.0 and owner_h:
+		m.fx.ring(owner_h.pos, 1.6, Color(sp["color"], 0.8), 0.3)
+		m.sfx("kin_happy", owner_h.pos, -8.0, Unique.voice(rec))
+		KinCommand.say(owner_h, "%s is rested" % rec.get("name", "Your Boki"), sp["color"])
 	if shield_t > 0.0:
 		shield_t -= dt
 		if shield_t <= 0.0: shield = 0.0
@@ -750,6 +778,8 @@ func walkable_to(p: Vector3) -> bool:
 func _sim_active(dt: float) -> void:
 	if owner_h and (owner_h.out or owner_h.extracted):
 		return
+	if disengaged and not KinFollow.in_combat(self, pos):
+		disengaged = false          # the fight is over: the next one starts engaged again
 	if cmd == "return" and owner_h != null:
 		KinFollow.set_cmd(self, "return", null)       # Return was ordered while it was in the air: it lands, then goes onto you
 		return
@@ -775,7 +805,9 @@ func _sim_active(dt: float) -> void:
 		state = "returning"      # wandered off after a fight: run back (a hop when it cannot walk)
 		return
 	if guard == null and not hang_back:
-		if cmd == "chase" and chase_target != null:
+		if KinFollow.is_disengaged(self):
+			target = null          # told to come back: it does not pick a fight on its own until a reason ends that
+		elif cmd == "chase" and chase_target != null:
 			target = chase_target
 		elif target == null or target.dead or not target.hittable() or (target is Hunter and target.downed) or flat_dist(target) > brain.chase_range() + 3.0 or rng.randf() < dt * 0.5:
 			target = brain.pick_target()

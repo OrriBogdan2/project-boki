@@ -160,7 +160,7 @@ func _flow() -> void:
 
 # ------------------------------------------------------------------ 4. interruptions
 func _interrupts() -> void:
-	for why in ["stun", "root", "dash", "damage", "knock"]:
+	for why in ["stun", "root", "dash", "damage", "nudge", "knock"]:
 		_fresh()
 		var P := m.player
 		var k := wild()
@@ -174,11 +174,12 @@ func _interrupts() -> void:
 			"root": P.root_t = 0.4
 			"dash": P.inp["dash"] = true
 			"damage": P.hurt(8.0, m.hunters[1])
-			"knock": P.knock_t = 0.3
+			"knock": P.impulse(Vector2(Capture.HARD_KNOCK + 4.0, 0) * P.mass())
+			"nudge": P.impulse(Vector2(Capture.HARD_KNOCK - 3.0, 0) * P.mass())
 		run_for(0.1)
 		P.inp["dash"] = false
-		if why == "damage":
-			ok(Capture.active(P) and k.scan_by == P, "plain damage does not interrupt the scan")
+		if why == "damage" or why == "nudge":
+			ok(Capture.active(P) and k.scan_by == P, "%s does not interrupt the scan" % ("a shove under 8 m/s" if why == "nudge" else "plain damage"))
 			run_for(float(Capture.rules()["scan_s"]))
 			ok(P.caught.size() == 1, "...and it completes")
 		else:

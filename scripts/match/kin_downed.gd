@@ -3,9 +3,11 @@ extends RefCounted
 ## A downed Boki (docs/decisions/0001), replacing the old 8s faint and teleport:
 ##   - it stays where it fell, marked on screen and the minimap (BokiHud) and glowing in your team colour
 ##   - its owner rescues it by running into it (no key): a 3.5s rescue (rescue_s). The hunter kneels, picks it up and
-##     cradles it, rooted and unable to attack, with a rising sound and a progress ring over it. A dash cancels it;
-##     crowd control interrupts it (Capture.controlled, the same list as the capture scan; plain damage does not);
-##     the progress then drains back over rescue_drain_s instead of resetting. At the end it is back on the shoulder
+##     cradles it, rooted and unable to attack, with a rising sound and a progress ring over it, like a support
+##     picking up a fallen ally's wisp. A dash cancels it; hard crowd control interrupts it (stun, root, Grounded, a launch or
+##     a real knock: Capture.controlled, the same rule as the capture scan; damage and the small shove of most hits do not);
+##     the progress then drains back over rescue_drain_s instead of resetting. An enemy hunter standing on the Boki
+##     (within contest_r) blocks the pick-up and pauses the progress ("Contested"). At the end it is back on the shoulder
 ##     with rescue_hp of its health. Nobody else can rescue it: it can't be hurt, scanned or taken
 ##     while the owner is still in the map (a hunter who goes out leaves it behind as before, Match._leave_one_kin)
 ##   - otherwise it comes round on its own after 15-20s (trusting Boki sooner) at low health (recover_hp)
@@ -71,6 +73,16 @@ static func stop_reason(k: Kin, h: Hunter, r: Dictionary) -> String:
 		return "cc"
 	return ""
 
+## Is an enemy hunter standing on it? You can't pick it up while they are.
+static func contested(k: Kin) -> bool:
+	if k.state != "downed":
+		return false
+	var cr := float(rules()["contest_r"])
+	for e in k.m.hunters:
+		if e.team != k.team and not e.out and not e.downed and not e.dead and k.flat_dist(e) <= cr and absf(e.pos.y - k.pos.y) < 2.2:
+			return true
+	return false
+
 static func _rescue(k: Kin, h: Hunter, r: Dictionary, dt: float) -> void:
 	var need := float(r["rescue_s"])
 	if k.rescue_on:
@@ -78,6 +90,8 @@ static func _rescue(k: Kin, h: Hunter, r: Dictionary, dt: float) -> void:
 		if why != "":
 			stop(k, h, why)
 			return
+		if contested(k):
+			return                       # (they stand on it: the progress waits, nothing drains)
 		k.rescue_t += dt
 		_rescue_fx(k, h, r, dt)
 		if k.rescue_t >= need:
@@ -89,7 +103,7 @@ static func _rescue(k: Kin, h: Hunter, r: Dictionary, dt: float) -> void:
 	k.rescue_block = maxf(0.0, k.rescue_block - dt)
 	if k.rescue_t > 0.0:
 		k.rescue_t = maxf(0.0, k.rescue_t - dt * need / float(r["rescue_drain_s"]))
-	if k.rescue_block <= 0.0 and rescuable(k) and _near(k, h, float(r["rescue_r"])) and stop_reason(k, h, r) == "":
+	if k.rescue_block <= 0.0 and rescuable(k) and _near(k, h, float(r["rescue_r"])) and stop_reason(k, h, r) == "" and not contested(k):
 		k.rescue_on = true
 		h.set_meta("rescue_at", k.m.time)
 		k.m.sfx("revive_hum", k.pos, -8.0, 1.0)
