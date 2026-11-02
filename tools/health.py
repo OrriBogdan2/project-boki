@@ -6,7 +6,7 @@ Prints file sizes, god-file budgets, duplicate content folders, dynamic calls, c
 in main.gd, and docs/DEBT.md entries. Exit code 1 only when --strict and a god-file budget is exceeded
 (ship.sh runs it in strict mode so god files can't grow). Budgets ratchet: lower them as files get split.
 """
-import os, re, sys
+import os, re, subprocess, sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # god files: current size is the ceiling (plus a little slack for wiring); lower these as refactors land
@@ -80,8 +80,12 @@ def main():
     if os.path.exists(debt):
         n = sum(1 for l in open(debt, encoding="utf-8") if l.startswith("- "))
         print(f"Known debt entries (docs/DEBT.md): {n}")
+    style = subprocess.run([sys.executable, os.path.join(ROOT, "tools", "style_lint.py")], capture_output=True, text=True).stdout
+    print(style.rstrip())
+    if "STYLE FAIL" in style:
+        bad.append("style ratchet (docs/STYLE.md)")
     if bad:
-        print("HEALTH FAIL: god files over budget: " + ", ".join(bad) + " (move new logic into a focused module; see AGENTS.md)")
+        print("HEALTH FAIL: " + ", ".join(bad) + " (god files: move new logic into a focused module, see AGENTS.md; style: see docs/STYLE.md)")
         if strict:
             sys.exit(1)
     else:
