@@ -156,7 +156,7 @@ func _arena() -> void:
 	step(m, 0.3)
 	ok("juggernaut: Rage fills to Enraged, the form grows", JK.enraged_t > 0.0 and JK.aura != null and P.model.scale.x > 1.05, "enraged %.1f scale %.2f" % [JK.enraged_t, P.model.scale.x])
 	# X is Zedran's own ultimate (the Arena opens it with the ult toggle at level 6); R stays the Merge
-	ok("juggernaut: his own ultimate is on X (Gilded Riposte)", String(Arch.def("juggernaut")["r"]["name"]) == "Gilded Riposte")
+	ok("juggernaut: his own ultimate is on X (Gilded Riposte)", String(Arch.def("juggernaut")["x"]["name"]) == "Gilded Riposte")
 	# the sparring bot
 	A.cycle_bot()
 	ok("bot: idle", A.bot != null and A.bot_mode == "idle")
