@@ -1196,27 +1196,27 @@ const KMOVES := {
 		[0.14, {"p": -0.7, "lift": -0.08, "sq": 0.34, "legs": [0.7, -1.3, 0.6, -1.2], "lw": 1.0, "fl": Vector3(-0.16, -0.62, -0.5), "hw": 1.0, "fr": Vector3(0.16, -0.62, -0.5), "rw": 1.0}],
 		[0.40, {"p": -0.35, "sq": 0.14, "legs": [0.4, -0.8, 0.34, -0.7], "lw": 1.0, "fl": Vector3(-0.16, -0.3, -0.35), "hw": 0.7, "fr": Vector3(0.16, -0.3, -0.35), "rw": 0.7}],
 		[0.85, {}]]},
-	# Landslide: shoulder first, fists forward behind the boulder, a hard lean
+	# Rubble Rush: shoulder first, fists forward behind the boulder, a hard lean
 	"dolm_dash": {"keys": [
 		[0.00, {}],
 		[0.08, {"p": -0.7, "y": 0.35, "legs": [0.7, -1.2, 0.5, -0.9], "lw": 1.0, "fl": Vector3(-0.1, -0.05, -0.55), "hw": 1.0, "fr": Vector3(0.1, -0.05, -0.55), "rw": 1.0}],
 		[0.24, {"p": -0.5, "y": 0.2, "legs": [0.4, -0.7, 0.6, -1.0], "lw": 1.0, "fl": Vector3(-0.1, 0.0, -0.8), "hw": 1.0, "fr": Vector3(0.1, 0.0, -0.8), "rw": 1.0}],
 		[0.60, {}]]},
-	# Rockwave: one stomp, then both palms pressed to the ground to lift the stone
+	# Stone Row: one stomp, then both palms pressed to the ground to lift the stone
 	"dolm_e": {"keys": [
 		[0.00, {}],
 		[0.12, {"p": 0.12, "legs": [-0.9, 0.9, 0.2, -0.3], "lw": 1.0, "fl": Vector3(-0.2, 0.3, -0.1), "hw": 1.0, "fr": Vector3(0.2, 0.3, -0.1), "rw": 1.0}],
 		[0.24, {"p": -0.6, "sq": 0.3, "legs": [0.7, -1.2, 0.6, -1.1], "lw": 1.0, "fl": Vector3(-0.2, -0.75, -0.42), "hw": 1.0, "fr": Vector3(0.2, -0.75, -0.42), "rw": 1.0}],
 		[0.50, {"p": -0.5, "sq": 0.24, "fl": Vector3(-0.2, -0.7, -0.45), "hw": 1.0, "fr": Vector3(0.2, -0.7, -0.45), "rw": 1.0}],
 		[0.95, {}]]},
-	# Swap: the lantern lobbed underhand, the body rising a little as she lets it go
+	# Lantern Trade: the lantern lobbed underhand, the body rising a little as she lets it go
 	"ostra_dash": {"keys": [
 		[0.00, {}],
 		[0.12, {"p": -0.2, "sq": 0.14, "legs": [0.3, -0.6, 0.24, -0.5], "lw": 1.0, "fr": Vector3(0.22, -0.4, 0.1), "rw": 1.0}],
 		[0.26, {"p": 0.3, "lift": 0.12, "fr": Vector3(0.12, 0.7, -0.5), "rw": 1.0, "fl": Vector3(-0.3, 0.1, -0.1), "hw": 0.8}],
 		[0.50, {"p": 0.12, "lift": 0.08, "fr": Vector3(0.1, 0.3, -0.3), "rw": 0.5}],
 		[0.95, {}]]},
-	# Rift Snap: both hands drawn in to the chest, then thrown apart and forward in a flat push
+	# Shard Fan: both hands drawn in to the chest, then thrown apart and forward in a flat push
 	"ostra_rmb": {"keys": [
 		[0.00, {}],
 		[0.10, {"p": 0.3, "legs": [0.16, -0.3, 0.14, -0.28], "lw": 1.0, "fl": Vector3(-0.04, 0.22, -0.1), "hw": 1.0, "fr": Vector3(0.04, 0.22, -0.1), "rw": 1.0}],

@@ -20,7 +20,7 @@ Numbers are per shot or swing at Common rarity. Class kits that run their own we
 | SMG | Thief | light | 4.6 | 0.12s | 22 | 1.4s | 7m | Fast and loose. Spread grows the longer you hold it, and damage drops off at the far end. |
 | Sniper | Archer | light | 36 | 1.5s | 5 | 2.2s | 16m | Winds up for 0.6s with a laser showing, then hits hard. Weak point-blank, full damage from half range. |
 | Spellstaff | Mage | medium | 9.5 | 0.55s | 12 | 1.4s | 10m | An orb bolt every 0.45s, 10m. Every 4th bolt hits 50% harder. |
-| Tether Lantern | Ostra | medium | 9 | 0.6s | 12 | 1.5s | 14m | A slow gravity orb every 0.6s, 14m. Pause for 1.4s and the next one is Settled: harder, faster and it slows. |
+| Tether Lantern | Ostra | medium | 9 | 0.6s | 12 | 1.5s | 14m | A slow drifting orb every 0.6s, 14m. Pause for 1.4s and the next one is Settled: harder, faster and it slows. |
 | Tower Shield & Mace | Bulwark | heavy | 11 | 0.55s | 1 | 0.1s | 2.4m | Tap to throw the mace: it passes through foes, lies where it lands (your team sees foes near it) and comes back when you tap again, hitting on the way. Hold to wind up a Crushing Blow (full at 1.25s: 34 damage, a big knock, stun 0.4) that carries you forward. Right click raises the tower shield. |
 | Twin Blades | Thief | light | 7 | 0.3s | 1 | 0.1s | 2.3m | Tap for a quick 3-hit combo. Hold 0.5s for a spinning double slash all around you. Right click to knife and step behind the target. |
 

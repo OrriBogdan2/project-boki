@@ -4,7 +4,7 @@ extends RefCounted
 ##   gnd  Grounded (the Thief's Bola): no dash, jump or glide; the hunter's legs show the tangled cords
 ##   blt  Blight (the Juggernaut's Warchain, the Thief's Jackpot rim): healing on the body is cut
 ##   vul  Shred (the Thief's Primed shot): the body takes `k` more damage
-##   dsr  Disoriented (Ostra's Swap): slowed by `k`; a DIZZY word and a teal ring
+##   dsr  Disoriented (Ostra's Trade): slowed by `k`; a DIZZY word and a teal ring
 ## The game that owns the body runs the rules; the caster's game sends the Net event
 ## ["kst", nid, kind, seconds, k] for a remote body (Net.VERSION 0.7.0), every game shows it.
 

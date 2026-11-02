@@ -1,6 +1,6 @@
 extends RefCounted
 ## --zone-check, --dolm-combo-check, --ostra-combo-check: Dolm and Ostra (docs/heroes/dolm.md, ostra.md).
-##   zone: where rocks, rock bridges, the seed and Swap may land: collision, walls, bodies, abyss edges,
+##   zone: where rocks, rock bridges, the seed and Trade may land: collision, walls, bodies, abyss edges,
 ##         the bridge only replacing abyss tiles and giving them back, and the Net placement events
 ##         (what one game sends, a second game rebuilds identically).
 ##   combos: every interaction of each kit, scripted one by one.
@@ -114,7 +114,7 @@ func done(m: Match) -> void:
 
 # ------------------------------------------------------------------ zones
 func _zones() -> void:
-	# ---- Rockwave on open ground: three legal rocks that stop bodies
+	# ---- Stone Row on open ground: three legal rocks that stop bodies
 	var r := setup("dolm", 9.0)
 	var m: Match = r[0]; var P: Hunter = r[1]; var T: Hunter = r[2]; var home: Vector3 = r[3]
 	var K: DolmKit = P.ak
@@ -254,7 +254,7 @@ func _zones() -> void:
 	ok("net: the bridge is rebuilt identically", bev.size() == 1 and v_before - void_tiles(m) == v2_before - void_tiles(m2) and void_tiles(m2) < v2_before, "a %d b %d" % [v_before - void_tiles(m), v2_before - void_tiles(m2)])
 	await done(m2)
 	await done(m)
-	# ---- Ostra: the seed and Swap respect ground, walls and the abyss
+	# ---- Ostra: the seed and Trade respect ground, walls and the abyss
 	r = setup("ostra", 9.0, 5)
 	m = r[0]; P = r[1]; T = r[2]; home = r[3]
 	var O: OstraKit = P.ak
@@ -325,19 +325,19 @@ func _dolm() -> void:
 	step(m, 0.7)
 	ok("combo: punch into a wall = stun", K.wall_stuns >= 1 and T.stun_t > 0.0, "wall stuns %d stun %.2f" % [K.wall_stuns, T.stun_t])
 	W.kind[W.idx(bx, bz)] = World.T_GROUND
-	# Rockwave > punch: the rocks fly and shred
+	# Stone Row > punch: the rocks fly and shred
 	reset.call()
 	P.ak.use_e()
 	step(m, 0.3)
-	ok("e: Rockwave raises three rocks", rocks(m).size() == 3, "rocks %d" % rocks(m).size())
+	ok("e: Stone Row raises three rocks", rocks(m).size() == 3, "rocks %d" % rocks(m).size())
 	T.teleport(home + Vector3(8.0, 0, 0)); aim_at(P, T.pos)
 	P.fire_cd = 0.0
 	P.inp["fire"] = true
 	step(m, 0.95, func(): P.inp["fire"] = true)
 	P.inp["fire"] = false
 	step(m, 0.8)
-	ok("combo: Rockwave > punch launches the rocks", K.launches >= 1 and dmg(T) >= 10.0 and T.vuln_t > 0.0 and K.launch_pay >= 1, "launches %d took %.1f vuln %.1f pay %d" % [K.launches, dmg(T), T.vuln_t, K.launch_pay])
-	# Rockwave > slam: rocks fly outward
+	ok("combo: Stone Row > punch launches the rocks", K.launches >= 1 and dmg(T) >= 10.0 and T.vuln_t > 0.0 and K.launch_pay >= 1, "launches %d took %.1f vuln %.1f pay %d" % [K.launches, dmg(T), T.vuln_t, K.launch_pay])
+	# Stone Row > slam: rocks fly outward
 	reset.call()
 	P.ak.use_e()
 	step(m, 0.3)
@@ -345,7 +345,7 @@ func _dolm() -> void:
 	K.ch_rmb = 1.0; K.cd["rmb"] = 0.0
 	hold(m, P, 0.4)
 	step(m, 0.6)
-	ok("combo: Rockwave > slam launches the rocks", K.launches > l0, "launches %d -> %d" % [l0, K.launches])
+	ok("combo: Stone Row > slam launches the rocks", K.launches > l0, "launches %d -> %d" % [l0, K.launches])
 	# slam: centre stuns, damage scales with charge
 	reset.call()
 	T.teleport(home + Vector3(2.4, 0, 0)); aim_at(P, T.pos)
@@ -371,13 +371,13 @@ func _dolm() -> void:
 	var dn0 := K.dunks
 	K._slam(0.5, false)
 	ok("rmb: a foe in the air is dunked", K.dunks == dn0 + 1 and T.vel.y < -10.0, "dunks %d vy %.1f" % [K.dunks, T.vel.y])
-	# Landslide: the boulder leaves as you land
+	# Rubble Rush: the boulder leaves as you land
 	reset.call()
 	T.teleport(home + Vector3(8.0, 0, 0)); aim_at(P, T.pos)
 	P.ak.on_dash(false)
 	step(m, 0.9)
-	ok("dash: Landslide shoves a boulder as it ends", K.landslides == 1 and dmg(T) >= 10.0 and T.vuln_t > 0.0 and P.pos.x - home.x > 3.0, "landslides %d took %.1f dx %.1f" % [K.landslides, dmg(T), P.pos.x - home.x])
-	# rank 3: the slam shields, Rockwave doubles and bridges, Landslide goes further
+	ok("dash: Rubble Rush shoves a boulder as it ends", K.landslides == 1 and dmg(T) >= 10.0 and T.vuln_t > 0.0 and P.pos.x - home.x > 3.0, "landslides %d took %.1f dx %.1f" % [K.landslides, dmg(T), P.pos.x - home.x])
+	# rank 3: the slam shields, Stone Row doubles and bridges, Rubble Rush goes further
 	P.slot_lv["sec"] = 3; P.slot_lv["kin"] = 3; P.slot_lv["dash"] = 3
 	reset.call()
 	T.teleport(home + Vector3(2.4, 0, 0)); aim_at(P, T.pos)
@@ -389,14 +389,14 @@ func _dolm() -> void:
 	T.teleport(home + Vector3(12.0, 0, 0))
 	P.ak.use_e()
 	step(m, 0.3)
-	ok("rank 3: Rockwave raises a second row", rocks(m).size() == 6, "rocks %d" % rocks(m).size())
-	# Stonesight
+	ok("rank 3: Stone Row raises a second row", rocks(m).size() == 6, "rocks %d" % rocks(m).size())
+	# Tremor Sense
 	reset.call()
 	T.teleport(home + Vector3(8.0, 0, 0)); aim_at(P, T.pos)
 	var s_front := K.stonesight()
 	T.teleport(home + Vector3(-8.0, 0, 0))
 	var s_back := K.stonesight()
-	ok("passive: Stonesight shows foes in front only", s_front == 1 and s_back == 0, "front %d back %d" % [s_front, s_back])
+	ok("passive: Tremor Sense shows foes in front only", s_front == 1 and s_back == 0, "front %d back %d" % [s_front, s_back])
 	await done(m)
 
 # ------------------------------------------------------------------ Ostra
@@ -442,7 +442,7 @@ func _ostra() -> void:
 	P.inp["fire"] = false
 	step(m, 1.0)
 	ok("lmb: the next orb is plain again", not K.primed or K.settled_shots == 1, "settled %d" % K.settled_shots)
-	# Snap: stun grows with distance, Swollen hits harder
+	# Fan: stun grows with distance, Swollen hits harder
 	reset.call()
 	T.teleport(home + Vector3(2.5, 0, 0)); aim_at(P, T.pos)
 	var sn := [0.0]
@@ -456,22 +456,22 @@ func _ostra() -> void:
 	tap(m, P)
 	step(m, 0.5, func(): sf[0] = maxf(sf[0], T.stun_t))
 	var s_far: float = sf[0]
-	ok("rmb: Rift Snap stuns longer the further it flew", s_far > s_near + 0.2 and s_near > 0.1, "near %.2f far %.2f" % [s_near, s_far])
+	ok("rmb: Shard Fan stuns longer the further it flew", s_far > s_near + 0.2 and s_near > 0.1, "near %.2f far %.2f" % [s_near, s_far])
 	reset.call()
 	K.swollen_t = 5.0
 	T.teleport(home + Vector3(2.5, 0, 0)); aim_at(P, T.pos)
 	tap(m, P)
 	step(m, 0.3)
-	ok("combo: Swollen Snap hits 40% harder", dmg(T) > d_near * 1.25, "plain %.1f swollen %.1f" % [d_near, dmg(T)])
-	# Swap: the foe goes to where you were
+	ok("combo: Swollen Fan hits 40% harder", dmg(T) > d_near * 1.25, "plain %.1f swollen %.1f" % [d_near, dmg(T)])
+	# Trade: the foe goes to where you were
 	reset.call()
 	T.teleport(home + Vector3(8.0, 0, 0)); aim_at(P, T.pos)
 	P.ak.on_dash(false)
 	step(m, 1.2)
-	ok("dash: Swap trades places and slows the foe", K.swaps == 1 and P.pos.x - home.x > 6.0 and T.pos.x - home.x < 2.0 and T.slow_t > 0.0, "me %.1f foe %.1f slow %.1f" % [P.pos.x - home.x, T.pos.x - home.x, T.slow_t])
+	ok("dash: Trade trades places and slows the foe", K.swaps == 1 and P.pos.x - home.x > 6.0 and T.pos.x - home.x < 2.0 and T.slow_t > 0.0, "me %.1f foe %.1f slow %.1f" % [P.pos.x - home.x, T.pos.x - home.x, T.slow_t])
 	reset.call()
 	K.swollen_t = 5.0
-	ok("combo: Swollen Swap is quicker", K.swap_time() < float(K.dash_def()["time"]), "%.2f" % K.swap_time())
+	ok("combo: Swollen Trade is quicker", K.swap_time() < float(K.dash_def()["time"]), "%.2f" % K.swap_time())
 	# Brimseed: pop for more the longer it grew
 	reset.call()
 	T.teleport(home + Vector3(6.0, 0, 0)); aim_at(P, T.pos)
@@ -496,7 +496,7 @@ func _ostra() -> void:
 	K.cast_e()
 	step(m, 6.6)
 	ok("e: a seed left alone pops at full growth (Collapse)", K.collapses == c0 + 1 and K.seed.is_empty(), "collapses %d" % K.collapses)
-	# Snap then pop: the stunned foe stays in the seed
+	# Fan then pop: the stunned foe stays in the seed
 	reset.call()
 	T.teleport(home + Vector3(6.0, 0, 0)); aim_at(P, T.pos)
 	K.cast_e()
@@ -506,8 +506,8 @@ func _ostra() -> void:
 	var stun_in := T.stun_t
 	K.e_recast()
 	step(m, 0.2)
-	ok("combo: Seed > Snap > pop catches the stunned foe", stun_in > 0.1 and dmg(T) >= 20.0, "stun %.2f took %.1f" % [stun_in, dmg(T)])
-	# Seed under you, Swap away through the foe: it lands in the seed
+	ok("combo: Seed > Fan > pop catches the stunned foe", stun_in > 0.1 and dmg(T) >= 20.0, "stun %.2f took %.1f" % [stun_in, dmg(T)])
+	# Seed under you, Trade away through the foe: it lands in the seed
 	reset.call()
 	T.teleport(home + Vector3(8.0, 0, 0)); aim_at(P, P.pos + Vector3(0.5, 0, 0))
 	K.cast_e()
@@ -518,7 +518,7 @@ func _ostra() -> void:
 	var inside := Vector2(T.pos.x - float(K.seed["pos"].x), T.pos.z - float(K.seed["pos"].z)).length() < K.seed_radius() + 0.6 if not K.seed.is_empty() else false
 	K.e_recast()
 	step(m, 0.2)
-	ok("combo: Seed > Swap puts the foe inside it", inside and dmg(T) > 10.0, "inside %s took %.1f" % [inside, dmg(T)])
+	ok("combo: Seed > Trade puts the foe inside it", inside and dmg(T) > 10.0, "inside %s took %.1f" % [inside, dmg(T)])
 	# knocks heal
 	reset.call()
 	P.hp = P.max_hp * 0.4

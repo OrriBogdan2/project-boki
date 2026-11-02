@@ -1,9 +1,9 @@
 class_name OstraKit
 extends ArchKit
-## Ostra (medium): Swell, Tether Lantern (a Settled orb after a pause), Swap, Rift Snap, Brimseed.
+## Ostra (medium): Swell, Tether Lantern (a Settled orb after a pause), Trade, Shard Fan, Brimseed.
 ## docs/heroes/ostra.md. The loop: hits (ten times as much on hunters) fill Swell; Swollen, the seed
-## grows bigger and quicker, Swap lands sooner and Snap hits harder. Plant the seed, Snap to stun,
-## Swap to put the foe in it, pop it for the Collapse.
+## grows bigger and quicker, Trade lands sooner and Fan hits harder. Plant the seed, Fan to stun,
+## Trade to put the foe in it, pop it for the Collapse.
 ##
 ## The seed is a ground zone placed through HeroZones (legal ground, short of walls, never in the
 ## abyss) and synced over Net as ["zone", "seed" | "pop", ...].
@@ -106,7 +106,7 @@ func _tick_weapon() -> void:
 		w["color"] = Color("e8fffa")
 		h.wpn = w
 
-# ------------------------------------------------------------------ dash: Swap
+# ------------------------------------------------------------------ dash: Trade
 func swap_time() -> float:
 	var dd := dash_def()
 	return float(dd["time_swollen"]) if is_swollen() else float(dd["time"])
@@ -187,7 +187,7 @@ func _swap_end(go: bool) -> void:
 				o.shield = maxf(o.shield, float(dd["ally_shield"]))
 				o.shield_t = 3.0
 
-# ------------------------------------------------------------------ RMB: Rift Snap
+# ------------------------------------------------------------------ RMB: Shard Fan
 func fire_rmb(c: Dictionary) -> void:
 	last_variant = String(c["variant"])
 	if not spend_rmb(): return

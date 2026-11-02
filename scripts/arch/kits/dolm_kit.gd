@@ -1,7 +1,7 @@
 class_name DolmKit
 extends ArchKit
-## Dolm (medium): Stonesight, Rubble Fists (tap boulder / hold punch), Landslide, Quakefall, Rockwave.
-## docs/heroes/dolm.md. The loop: raise rocks (Rockwave, or the boulder Landslide shoves out), then
+## Dolm (medium): Tremor Sense, Rubble Fists (tap boulder / hold punch), Rubble Rush, Quakefall, Stone Row.
+## docs/heroes/dolm.md. The loop: raise rocks (Stone Row, or the boulder Rubble Rush shoves out), then
 ## launch them with a punch, a slam or a dash into the enemy. A slam that knocks or kills resets itself.
 ##
 ## Rocks are Verbs walls that block movement (HeroZones.rock), so they respect collision, placement
@@ -125,7 +125,7 @@ func _tick(dt: float) -> void:
 				_slam(0.5, true)
 		else:
 			h.vel.y = minf(h.vel.y, -float(slam_def()["dive_speed"]))
-	# Stonesight: sneaking shows the foes in front, through walls and fog
+	# Tremor Sense: sneaking shows the foes in front, through walls and fog
 	if h.crouch and h.is_local() and not h.downed:
 		sight_t -= dt
 		if sight_t <= 0.0:
@@ -252,7 +252,7 @@ func my_all_rocks_near(reach: float, dir: Vector2) -> Array:
 			out.append(w)
 	return out
 
-# ------------------------------------------------------------------ dash: Landslide
+# ------------------------------------------------------------------ dash: Rubble Rush
 func on_dash(use_ex: bool) -> bool:
 	var dd := dash_def()
 	if use_ex:
@@ -374,7 +374,7 @@ func on_knock(t: Hunter, mine: bool) -> void:
 		slam_hit.erase(t.get_instance_id())
 		_reset_quake()
 
-# ------------------------------------------------------------------ E: Rockwave
+# ------------------------------------------------------------------ E: Stone Row
 func cast_e() -> bool:
 	var ed := e_def()
 	var dir := h.aim_dir()

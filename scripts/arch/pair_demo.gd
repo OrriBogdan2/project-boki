@@ -2,7 +2,7 @@ class_name PairDemo
 extends RefCounted
 ## Screenshot tooling for Dolm and Ostra (used by ArenaDemo): --arena-demo=pair_<what> --arena-shot=<png>.
 ##   pair_card_dolm / pair_card_ostra     the kit card
-##   pair_dolm_rocks / pair_dolm_pay      Rockwave up (rocks beside the dummy) / the ROCKFALL payoff
+##   pair_dolm_rocks / pair_dolm_pay      Stone Row up (rocks beside the dummy) / the ROCKFALL payoff
 ##   pair_ostra_swollen / pair_ostra_seed / pair_ostra_pay    Swollen, a growing seed, the COLLAPSE payoff
 ## and --arena-demo=anim_<move> strips (ANIM): dol_boulder dol_punch dol_dash dol_slam dol_wave
 ## ost_dash ost_snap ost_seed ost_orb.

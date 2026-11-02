@@ -57,8 +57,8 @@ your class in the Expedition menu, and you can try every class against dummies i
 | [Gunslinger](Class-Gunslinger.md) | Medium | Rifle, Burst Rifle | Six Chambers | Slide Reload | Trick Shot | Quickdraw | Last Round |
 | [Juggernaut](Class-Juggernaut.md) | Heavy | Greatsword, Shotgun, Minigun | Rage | Rampage | Smash | Warchain | Doomfall |
 | [Bulwark](Class-Bulwark.md) | Heavy | Tower Shield & Mace, Minigun | Guard | Whirl | Shield | Mending Ground | Fissure |
-| [Dolm](Class-Dolm.md) | Medium | Rubble Fists | Stonesight | Landslide | Quakefall | Rockwave | none (Boki Merge) |
-| [Ostra](Class-Ostra.md) | Medium | Tether Lantern | Swell | Swap | Rift Snap | Brimseed | none (Boki Merge) |
+| [Dolm](Class-Dolm.md) | Medium | Rubble Fists | Tremor Sense | Rubble Rush | Quakefall | Stone Row | none (Boki Merge) |
+| [Ostra](Class-Ostra.md) | Medium | Tether Lantern | Swell | Lantern Trade | Shard Fan | Brimseed | none (Boki Merge) |
 
 ### Weight classes
 

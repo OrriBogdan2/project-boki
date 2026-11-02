@@ -1,11 +1,11 @@
 # Dolm (medium)
 
-The quarry-hand. Raise rocks out of the ground with Rockwave or a dash, then punch or slam them into the enemy. A slam that knocks resets itself.
+The quarry-hand. Raise rocks out of the ground with Stone Row or a dash, then punch or slam them into the enemy. A slam that knocks resets itself.
 
 ## How it plays
 
 1. Tap the attack to hurl a boulder, or hold it and let go to punch.
-2. **Rockwave** (E) raises three rocks. Punch or slam them: they fly, burst and Shred.
+2. **Stone Row** (E) raises three rocks. Punch or slam them: they fly, burst and Shred.
 3. **Quakefall** (RMB): hold, let go, slam. The centre stuns. A knock or kill resets it.
 
 <!-- gen:kit -->
@@ -25,18 +25,18 @@ What the in-game kit card (K) says.
 
 | Slot | Card text |
 |---|---|
-| Loop | Raise rocks with Rockwave or a dash, then punch or slam them into the enemy. A slam that knocks resets itself. |
-| Passive: Stonesight | Sneak to feel enemies in front of you through walls and fog. |
-| Dash: Landslide | Barrel forward and shove a boulder out ahead of you as you land. |
+| Loop | Raise rocks with Stone Row or a dash, then punch or slam them into the enemy. A slam that knocks resets itself. |
+| Passive: Tremor Sense | Sneak to feel enemies in front of you through walls and fog. |
+| Dash: Rubble Rush | Barrel forward and shove a boulder out ahead of you as you land. |
 | RMB: Quakefall | Hold to gather, let go to slam: the centre stuns, rocks nearby fly. Kills and knocks reset it. |
-| E: Rockwave | Raise a wall of three rocks in front of you. Punch or slam them into foes. |
+| E: Stone Row | Raise a wall of three rocks in front of you. Punch or slam them into foes. |
 | Weapon: Rubble Fists | Tap throws a boulder. Hold and let go to punch: it launches foes, stuns them on walls and sends rocks flying. |
 
 ### Abilities in full
 
-**Stonesight (passive).** While sneaking, every enemy within 16m in a 70 degree cone in front of you shows through walls and fog as a stone ring for half a second, refreshed while you keep sneaking.
+**Tremor Sense (passive).** While sneaking, every enemy within 16m in a 70 degree cone in front of you shows through walls and fog as a stone ring for half a second, refreshed while you keep sneaking.
 
-**Landslide (dash, Shift, 9s cooldown).** A 4.2m barrel forward. As you land, a boulder you shoved ahead rockets 12m: 12 damage, a shove and Shred (+15% damage taken for 3s).
+**Rubble Rush (dash, Shift, 9s cooldown).** A 4.2m barrel forward. As you land, a boulder you shoved ahead rockets 12m: 12 damage, a shove and Shred (+15% damage taken for 3s).
 
 **Quakefall (RMB, 10s cooldown).**
 
@@ -44,7 +44,7 @@ What the in-game kit card (K) says.
 - *Hold:* Hold up to 0.8s: a bigger, harder slam (up to 30) whose centre stuns up to 1.2s.
 - *In the air:* In the air you dive, and slam where you land. A foe caught in the air is spiked down for +40%, +20 more over the abyss.
 
-**Rockwave (E, 13s cooldown).** Raise three rocks in a line 3m ahead (on solid ground only, never into bodies). They stop foes and shots, hold 9s, and any punch, slam or dash-launch sends one flying.
+**Stone Row (E, 13s cooldown).** Raise three rocks in a line 3m ahead (on solid ground only, never into bodies). They stop foes and shots, hold 9s, and any punch, slam or dash-launch sends one flying.
 
 ### Ranks
 
