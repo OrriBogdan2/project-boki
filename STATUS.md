@@ -1,4 +1,4 @@
-2026-11-02T20:11:01Z
+2026-11-02T20:23:26Z
 
 ext/classes | cacd796 | REOPENED per INBOX 19:10 (Hunters wording, pick 1 + 2 early unlocks, no weight labels, hunter viewer, hold-to-unlock); rework queued on Opus medium | 0.14.0 | -
 ext/hero-shots | 3bd0520 | done: 12 heroes + farm building + classes; all portraits show signature weapons | - | -
@@ -8,12 +8,12 @@ ext/aimkit | 577412e | sync64 re-merge queued (was ready on main 18fab56); kit b
 ext/kitfix-dancer-juggernaut | 567b3ef | READY FOR LOCAL SCREENSHOT REVIEW on main 9700dec (includes sync64) + aimkit 577412e + kits2-nor 4b1214b | 0.15.0 (no new sync; net.gd combined comment for main vs kits2-nor 0.15.0) | full suite 0 failures; dancer combo 71, juggernaut combo 72, kit combo 39, aimkit 55; simtest team wiped at 23. Dancer rebuilt to source (ranged Arc Bolts to cursor, cartwheel Vault, Bola bounce, Death Blossom Jackpot on 5th Mark); Zedran (renamed) Doomfall folded into Finishing Slam crash, Lunge charge per owner note. Shots: ext/hero-shots dancer/v2, zedran/v2. Owner Qs: Trickshot hold vs fixed 0.4s? wall bounce counts as Bola 2nd target? Arc Bolts 12 m? Mark cap 8 / Jackpot at 5? Zedran double-height wall climb? Lunge fixed ~5 m or grows with charge?
 ext/kitfix-pin-bjorn | - | running (Opus) | pending | pending
 ext/kitfix-vireo-venator | - | running (Opus) | pending | pending
-ext/kitfix-linwick-dredge | - | running (Opus) | pending | pending
+ext/kitfix-linwick-dredge | 9560b93 | READY FOR LOCAL SCREENSHOT REVIEW (main 9700dec incl. sync64 + aimkit 577412e) | 0.15.0 (no new sync) | full suite 0 failures (teammate-check 1 flake in-suite, clean on 2 reruns and on main); ashwick combo 42, dredge combo 48, aimkit 55, shot-vertical OK. Linwick: hose-style flame stream, Soot Ram stops on first foe, burn stages, lane-aimed Cinder Shot. Dredge: Grapnel goes over rocks/props (cliffs >1.2 m and ability walls still stop it), air E smashes down with landing ring and height bonus. Shots: ext/hero-shots linwick/v2, dredge/v2. Owner Qs: rocks-vs-cliffs split OK? air smash height bonus every rank or rank 3 only? keep 8 s lance fuel or endless? Cinder Shot hold-to-aim to cursor OK (one footage sample)? HUD Grounded hint says "no dash" though Dredge can Barge while reeling (shared code).
 ext/kitfix-moosh-tamsin | 6bd7d71 | READY FOR LOCAL SCREENSHOT REVIEW (aimkit 577412e + main 9700dec) | 0.15.0 (no new sync) | full suite 0 failures; tender combo 37, rimewright combo 29, support 66, aimkit 55; simtest ran to end. Shots: ext/hero-shots moosh-moosh/v2, tamsin/v2 (+anim, before/after). Gaps left: Kindle damage-number tint (shared code), Tamsin rank-3 ice bridge (no terrain editing). Tamsin squad shield removed per owner. Owner Qs: Burrseed area sticks to foe or ground? footage 0.7s/1.6x vs wiki 2s/2x OK? Spear 2 charges/7s + 0.5s freeze? Rink Wall stop at cursor or fixed distance?
 ext/kitfix-breah-ostra | - | running (Opus) | pending | pending
 
-Running now: kitfix-pin-bjorn, kitfix-vireo-venator, kitfix-linwick-dredge, kitfix-breah-ostra, ext/classes rework (all Opus)
-Queued: sync64 re-merge of ext/aimkit (Sonnet, next free slot). kitfix-moosh-tamsin and kitfix-dancer-juggernaut already contain sync64 (main 9700dec).
+Running now: kitfix-pin-bjorn, kitfix-vireo-venator, kitfix-breah-ostra, ext/classes rework (Opus); ext/aimkit sync64 re-merge (Sonnet)
+Queued: none
 Last INBOX entry handled: 2026-11-02 20:05 UTC (sync64 relayed to the 4 running kit agents and the classes rework; re-merge of the finished branches queued)
 Watcher: received 19:06 UTC entry
 Questions for the owner: see ext/classes line.
@@ -24,3 +24,5 @@ Hold state for MergeKit.drop_class_holds:
 - rimewright: rinkrun, spear_aim, rmb_down, wall_cast
 - thief (Dancer): bola_cast, jp
 - juggernaut (Zedran): drop, lunge_full, plus kits2-nor lmb_t, lmb_buf, slam_w, haul
+- ashwick (Linwick): hose (hose.clear()), cloak_t, bash, aiming, plus spool, was_held, after_t, flame_acc, h.mel_hold
+- dredge: dive, hook_sd, scoop, plus wind, flying, pull; ending the pull clears st["self_gnd"]
