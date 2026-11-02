@@ -408,13 +408,15 @@ func _draw_world_labels() -> void:
 	for h in m.hunters:
 		if h == m.player or h.out or h.extracted or not h.model or not h.model.visible or h.unseen:
 			continue
-		var sp := cam.unproject_position(_head(h, 2.35))
+		var head := _head(h, HudPlate.plate_offset(h))
+		var sp := cam.unproject_position(head)
 		if cam.is_position_behind(h.position):
 			continue
 		_nameplate(sp, h)
 		BokiHud.form_overhead(self, sp, h)
 	if m.player and not m.player.out and m.player.model and not cam.is_position_behind(m.player.position):
-		BokiHud.form_overhead(self, cam.unproject_position(m.player.position + Vector3(0, 2.35, 0)), m.player)
+		var own_head := m.player.position + Vector3(0, HudPlate.plate_offset(m.player), 0)
+		BokiHud.form_overhead(self, cam.unproject_position(own_head), m.player)
 	# someone basing to a teammate: a ring filling round them, and a marker on where they'll appear
 	for h in m.hunters:
 		if h.base_t <= 0.0 or h.out or (h.unseen and h != m.player) or cam.is_position_behind(h.position):

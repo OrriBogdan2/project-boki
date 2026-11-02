@@ -19,6 +19,7 @@ const BREAK_T := 0.45          # s of the armour-break crack
 const BURST_T := 1.1           # s of the knock burst over someone who just went down
 const LVL_POP_T := 0.7        # s of the pulse on a plate's level badge when that hunter levels up
 const PRUNE_T := 5.0           # s unseen before a hunter's plate state is dropped
+const PLATE_OFFSET := 2.35     # m over the feet where a plate sits unless the archetype sets its own
 
 ## nid -> {chip, hold, frac, armor, flash, brk, down, burst, seen}
 var st := {}
@@ -27,6 +28,11 @@ var _prune_at := 0.0
 ## What the last draw showed for each nid (checks and tools read this): {segs, armor, shield,
 ## downed, word, chip}
 var shown := {}
+
+## How high over this hunter's feet their plate sits: the archetype's optional `plate_offset` (in its
+## content/archetypes JSON, so taller and shorter heroes clear their own heads), else PLATE_OFFSET.
+static func plate_offset(h: Hunter) -> float:
+	return float(Arch.def(h.arch).get("plate_offset", PLATE_OFFSET))
 
 ## Advances the clock (Hud._process) and forgets hunters not drawn for a while.
 func tick(dt: float) -> void:

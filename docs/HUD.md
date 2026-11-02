@@ -20,6 +20,9 @@ Rules of the look:
   pool shows more segments.
 - Bars are a handful of draws each (track, chip, fill, highlight, shield, one multiline for every gap),
   no nodes per segment, so 40 plates on screen stay cheap.
+- Plate height is per hunter: `HudPlate.plate_offset(h)` reads an optional `plate_offset` (metres over the
+  feet) from the hunter's `content/archetypes/<id>.json`, falling back to `HudPlate.PLATE_OFFSET` (2.35). Kit
+  branches set it for taller or shorter heroes.
 - Space kept free for other widgets: under each plate from `sp.y + HudStyle.PLATE_ICON_ROW` (loadout
   icons), and the right half of the bottom bar.
 
