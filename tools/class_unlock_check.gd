@@ -214,10 +214,15 @@ func _viewer(tree: SceneTree) -> void:
 	host.add_child(v)
 	for i in 4: await tree.process_frame
 	v.set_process(false)       # (stepped by hand below)
-	var want: Array = KitCard.slots_of("juggernaut")
-	if not want.has("r"): want.append("r")
+	var want: Array = KitCard.slots_of("juggernaut").filter(func(x): return x != "r") + ["r"]
+	ok(HunterViewer.slots_for("juggernaut") == want and Arch.ids().all(func(a): return not HunterViewer.slots_for(String(a)).has("x")), "no X slot while no Hunter has an X ultimate in data (nothing is bound to X)")
+	var jd := Arch.def("juggernaut")
+	jd["x"] = {"name": "(check)"}      # room for the X ultimate: a Hunter whose data gains one gets an X row before R
+	var with_x := HunterViewer.slots_for("juggernaut")
+	jd.erase("x")
+	ok(with_x.size() == want.size() + 1 and with_x[-2] == "x" and with_x[-1] == "r", "an X ultimate in data shows as its own row, before R (%s)" % str(with_x))
 	ok(v.slots == want, "the viewer shows every ability in order: %s" % str(v.slots))
-	ok(v.rows.size() == want.size() and v.rows.all(func(b): return _texts(b).any(func(t): return t in ["Shift", "LMB", "RMB", "E", "R", "auto"])), "each ability row has its key")
+	ok(v.rows.size() == want.size() and v.rows.all(func(b): return _texts(b).any(func(t): return t in ["Shift", "LMB", "RMB", "E", "X", "R", "auto"])), "each ability row has its key")
 	ok(v.pivot.get_child_count() == 1 and v.model.get_parent() == v.pivot and v.vp.own_world_3d, "the real Hunter model stands in its own SubViewport")
 	var seen: Array = []
 	var moves_ok := true

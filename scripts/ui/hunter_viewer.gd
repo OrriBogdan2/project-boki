@@ -14,7 +14,7 @@ extends PanelContainer
 signal slot_changed(slot: String)
 
 const RULES_PATH := "res://content/rules/hunter_viewer.json"
-const SLOT_NAMES := {"dash": "Dash", "passive": "Passive", "lmb": "Attack", "rmb": "Right click", "e": "Utility", "r": "with your Boki"}
+const SLOT_NAMES := {"dash": "Dash", "passive": "Passive", "lmb": "Attack", "rmb": "Right click", "e": "Utility", "x": "Ultimate", "r": "with your Boki"}
 static var _rules: Dictionary = {}
 
 var id := ""
@@ -41,6 +41,22 @@ var rows: Array = []          # one Button per ability, in `slots` order
 var _swing_n := 0
 var _swing_at := 0.0
 var _melee := false
+
+## The abilities shown, in order. "x" (the Hunter's own ultimate on X, coming back later) shows only
+## once a Hunter's data has an "x" entry; R, the Boki Merge, is always last.
+static func slots_for(hunter_id: String) -> Array:
+	var out: Array = KitCard.slots_of(hunter_id).filter(func(s): return s != "r")
+	if Arch.def(hunter_id).has("x"): out.append("x")
+	out.append("r")
+	return out
+
+## A slot's name, icon, colour and plain line (KitCard's, plus the X ultimate from its own data).
+static func slot_info(hunter_id: String, slot: String) -> Dictionary:
+	if slot != "x":
+		return KitCard.slot_text(hunter_id, slot)
+	var d := Arch.def(hunter_id)
+	var xd: Dictionary = d.get("x", {})
+	return {"name": String(xd.get("name", "")), "icon": String(xd.get("icon", "burst")), "col": Color(String(xd.get("col", "#ffffff"))), "tag": "", "line": String(d.get("card", {}).get("x", xd.get("desc", "")))}
 
 static func rules() -> Dictionary:
 	if _rules.is_empty():
@@ -77,8 +93,7 @@ func _ready() -> void:
 	var col := Arch.color(id)
 	add_theme_stylebox_override("panel", KitCard._box(Color(0.05, 0.045, 0.08, 0.96), 14, Color(col, 0.45), 1, 14, 12))
 	set_meta("hunter_viewer", id)
-	slots = KitCard.slots_of(id)
-	if not slots.has("r"): slots.append("r")      # (R is the Boki Merge for every Hunter: shown last)
+	slots = slots_for(id)
 	var w: Dictionary = Data.weapon_stats(Arch.signature(id))
 	_melee = bool(w.get("melee", false))
 	var row := UI.hbox(16)
@@ -184,7 +199,7 @@ func _build_world(col: Color) -> void:
 
 # ------------------------------------------------------------------ the info column
 func _info(col: Color) -> Control:
-	var v := UI.vbox(6)
+	var v := UI.vbox(4)
 	v.custom_minimum_size.x = 400
 	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	v.add_child(UI.title(Arch.name_of(id), 30, col))
@@ -202,7 +217,7 @@ func _info(col: Color) -> Control:
 	cv.add_child(lp)
 	v.add_child(card)
 	v.add_child(UI.label("Abilities", 12, UI.MUTED, UI.caps))
-	var list := UI.vbox(2)
+	var list := UI.vbox(1)
 	for i in slots.size():
 		var b := _row(String(slots[i]), i, col)
 		rows.append(b)
@@ -211,11 +226,11 @@ func _info(col: Color) -> Control:
 	return v
 
 func _row(slot: String, i: int, col: Color) -> Button:
-	var info := KitCard.slot_text(id, slot)
+	var info := slot_info(id, slot)
 	var b := Button.new()
 	b.flat = true
 	b.focus_mode = Control.FOCUS_NONE
-	b.custom_minimum_size = Vector2(390, 28)
+	b.custom_minimum_size = Vector2(390, 26)
 	b.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	b.set_meta("slot", slot)
 	b.pressed.connect(func(): select(i, true))
@@ -239,7 +254,7 @@ func _row(slot: String, i: int, col: Color) -> Button:
 	return b
 
 func _key(slot: String) -> String:
-	var k := String(KitCard.KEYS.get(slot, ""))
+	var k := "X" if slot == "x" else String(KitCard.KEYS.get(slot, ""))
 	return k if k != "" else "auto"
 
 ## Shows ability `i` (wraps). `held`: a click, so it stays a full turn before the cycle moves on.
@@ -251,7 +266,7 @@ func select(i: int, held := false) -> void:
 	move_t = 0.0
 	_swing_at = 0.0
 	var slot := String(slots[slot_i])
-	var info := KitCard.slot_text(id, slot)
+	var info := slot_info(id, slot)
 	var col := Arch.color(id)
 	if cap_name:
 		(cap_key.get_child(0) as Label).text = _key(slot)
@@ -352,8 +367,8 @@ func _state() -> Dictionary:
 				s["rolling"] = true
 				s["dash_dir"] = Vector2(0, -1)
 				s["vel"] = Vector3(0, 0, -6.0)
-		"rmb", "e", "r":
-			s["cast_slot"] = {"rmb": "secondary", "e": "utility", "r": "ult"}[slot]
+		"rmb", "e", "x", "r":
+			s["cast_slot"] = {"rmb": "secondary", "e": "utility", "x": "ult", "r": "ult"}[slot]
 			s["cast"] = move_t
 	return s
 
