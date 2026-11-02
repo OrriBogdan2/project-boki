@@ -577,7 +577,8 @@ func _scan(m) -> void:
 	var w0 := Time.get_ticks_msec()
 	var caught := false
 	var caught0: int = P.caught.size()
-	while Time.get_ticks_msec() - w0 < 30000:
+	var t_scan: float = m.time
+	while m.time - t_scan < 40.0 and Time.get_ticks_msec() - w0 < 600000 and is_instance_valid(m) and not m.over:      # (sim seconds: a slow box renders a sim second in several real ones)
 		var near: float = P.flat_dist(k) if is_instance_valid(k) else 0.0
 		if near > 1.4:
 			var to: Vector3 = k.pos + (P.pos - k.pos).normalized() * 1.0
@@ -743,7 +744,7 @@ func _extract(m) -> void:
 	print("TOUR uplink now %s" % best["state"])
 	await shot("uplink_open")
 	# step into the light
-	await until(func(): return P.extracted or m.over or not is_instance_valid(m), 40.0, "extracting")
+	await mwait(1.0)
 	if is_instance_valid(m) and not P.extracted and not m.over:
 		P.teleport(Vector3(cp.x, m.world.ground_at(cp.x, cp.z), cp.z))
 		await until(func(): return not is_instance_valid(m) or P.extracted or m.over, 30.0, "extracting in the lift")
@@ -763,7 +764,9 @@ func _extract(m) -> void:
 	if h and Save.d["roster"].size() > 1:
 		var nk: Dictionary = Save.d["roster"][-1]
 		var ke: Dictionary = h._kin_entry(nk)
-		if not ke.is_empty():
+		if KinBox.is_boxed(nk):
+			print("TOUR the caught Boki %s went to the Boki Burrow (the farm has that kind already)" % nk["name"])
+		elif not ke.is_empty():
 			h.ppos = ke["pos"] + Vector3(1.3, 0, 0.9); h.cam.snap(h.ppos)
 			await wait(1.5)
 			await shot("home_new_boki")
