@@ -13,8 +13,7 @@ extends ArchKit
 ##   Payoff, Crushed: a Bash, Shield Charge or full Crushing Blow that knocks a foe into a wall or
 ##   another foe stuns them and heals you (T4, pay_slam).
 ## - E, Mending Ground: a healing burst after 1s, at the lying mace (or your aim); it also mends the shield.
-## - R, Fissure: a crack runs forward (walls stop it) and stuns, then the ground erupts in slowing
-##   pulses; +1 pulse per 50 Guard (spends it).
+## - No R: the class ultimate is held back while R is the Merge.
 
 var wall: Dictionary = {}      # the raised shield (a following verbs wall)
 var shield_hp := 160.0
@@ -22,7 +21,6 @@ var down_t := 0.0              # seconds since it was lowered (regen after 2s)
 var lock_t := 0.0              # broken: locked out
 var front_t := 0.0             # the Shield Charge's front guard
 var mend := {}                 # Mending Ground waiting to burst: {pos, t}
-var fissure := {}              # the running Fissure
 var mace := {}                 # the thrown mace: {} in hand, else {st: fly|ground|back, pos, dir, d, hit, node, t}
 var lmb_t := -1.0              # how long the attack key has been held with the mace in hand (-1: not)
 var lmb_was := false
@@ -93,8 +91,6 @@ func _tick(dt: float) -> void:
 	if not mend.is_empty():
 		mend["t"] = float(mend["t"]) - dt
 		if float(mend["t"]) <= 0.0: _mend_burst()
-	if not fissure.is_empty():
-		_tick_fissure(dt)
 	# Guard: three rune pips over the helm (33 / 66 / 100), a gold crest light when a Slam is armed
 	self_pips(3, int(res / 33.0 + 0.01), full_ready(), dt)
 	_tick_crest()
@@ -215,6 +211,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 			if lmb_t >= bot_smash_t: _smash()
 		return true
 	if held:
+		if lmb_t < float(md["tap"]) and lmb_t + dt >= float(md["tap"]): play("bul_smash_wind")
 		lmb_t = maxf(lmb_t, 0.0) + dt
 		h.mel_hold = lmb_t
 		if lmb_t >= float(md["full"]) + 0.4:
@@ -239,6 +236,7 @@ func smash_k() -> float:
 	return clampf((lmb_t - float(md["tap"])) / maxf(0.05, float(md["full"]) - float(md["tap"])), 0.0, 1.0)
 
 func _smash() -> void:
+	play("bul_smash")
 	var md := lmb_def()
 	var k := smash_k()
 	lmb_t = -1.0
@@ -262,6 +260,7 @@ func _smash() -> void:
 		net_ring(h.pos + Vector3(dv.x, 0, dv.y) * 1.6, 2.2, res_col())
 
 func _throw() -> void:
+	play("bul_throw")
 	var md := lmb_def()
 	lmb_t = -1.0
 	h.mel_hold = 0.0
@@ -285,6 +284,7 @@ func _throw() -> void:
 	net_bolt(at, at + Vector3(mace["dir"].x, 0, mace["dir"].y) * float(md["throw_range"]), Color("d8e8ff"))
 
 func _recall() -> void:
+	play("bul_recall")
 	mace["st"] = "back"
 	mace["hit"] = {}
 	m.sfx("ab_whirr", mace["pos"], -4.0, 0.8)
@@ -376,8 +376,9 @@ func press_rmb() -> void:
 		return
 	rmb_down = true
 	rmb_t = 0.0
-	rmb_ctx = {"air": not h.grounded or h.gliding, "e": in_e(), "r": r_t > 0.0, "full": full_ready()}
+	rmb_ctx = {"air": not h.grounded or h.gliding, "e": in_e(), "full": full_ready()}
 	lmb_t = -1.0; h.mel_hold = 0.0
+	if anim_id == "bul_smash_wind": anim_id = ""
 
 func rmb_hold_tick(t: float) -> void:
 	if t >= float(rmb_def()["hold"]) and wall.is_empty() and lock_t <= 0.0 and shield_hp > 5.0:
@@ -417,6 +418,7 @@ func fire_rmb(c: Dictionary) -> void:
 	var slam: bool = c["full"]
 	var go := func():
 		if not is_instance_valid(h) or h.downed: return
+		play("bul_bash")
 		var effs: Array = [{"type": "damage", "amount": float(rmb_def()["slam"]["dmg"]) if slam else float(bd["dmg"])}, {"type": "push", "strength": float(rmb_def()["slam"]["push"]) if slam else float(bd["push"]), "from": "caster"}]
 		if slam: effs.append({"type": "stun", "duration": float(rmb_def()["slam"]["stun"])})
 		knock_until = m.time + 0.2
@@ -447,6 +449,16 @@ func fire_ok_rmb() -> bool:
 # ------------------------------------------------------------------ dash: Whirl / Shield Charge
 func on_dash(use_ex: bool) -> bool:
 	var dd := dash_def()
+	if lmb_t > float(lmb_def().get("tap", 0.2)) and h.grounded and mace.is_empty():
+		# Shift while winding up the Crushing Blow: a short plain dash (no spin), half a charge, the blow keeps charging
+		if not spend_dash(false): return true
+		h.dashes = minf(h.max_dashes(), h.dashes + 0.5)       # (half the charge comes back: the reduced cooldown)
+		var sd2 := float(dd.get("short", 2.6))
+		travel(sd2, sd2 / float(dd["whirl_speed"]), {"invuln": 0.0, "trail": "dust", "dir": h.aim_dir()})
+		st["last_dash"] = "short"
+		play("bul_short")
+		m.sfx("ab_whirr", h.pos, -6.0, 0.9)
+		return true
 	if not wall.is_empty() and h.grounded:
 		# Shield Charge: behind the raised shield, invulnerable for its length, a heavier knock
 		if not spend_dash(false): return true
@@ -456,6 +468,7 @@ func on_dash(use_ex: bool) -> bool:
 		front_t = t + 0.15
 		knock_until = m.time + t + 0.1
 		st["last_dash"] = "charge"
+		play("bul_charge")
 		m.fx.word(h.pos + Vector3(0, 2.3, 0), "SHIELD CHARGE", col_of(dd), false)
 		m.sfx("shield", h.pos, 0.0, 0.55)
 		return true
@@ -465,6 +478,7 @@ func on_dash(use_ex: bool) -> bool:
 	var t2 := dist2 / float(dd["whirl_speed"])
 	travel(dist2, t2, {"invuln": 0.1, "shove": true, "shove_kb": float(dd["whirl_kb"]), "shove_dmg": float(dd["whirl_dmg"]), "trail": "dust"}, use_ex)
 	st["last_dash"] = "whirl"
+	play("bul_whirl")
 	# the spin: two full slashes around you along the way
 	for i in 3:
 		m.later(t2 * float(i) / 3.0, func():
@@ -479,6 +493,7 @@ func cast_e() -> bool:
 	if not mace.is_empty() and String(mace["st"]) == "ground":
 		at = ground(mace["pos"])          # it grows where the mace lies
 	var r := float(ed["radius"]) + (0.5 if rank("kin") >= 3 else 0.0)
+	play("bul_mend")
 	mend = {"pos": at, "t": float(ed["delay"]), "r": r}
 	e_t = float(ed["delay"])
 	tele_circle(at, r, Feel.cat_color("sustain"), float(ed["delay"]))
@@ -495,11 +510,11 @@ func _mend_burst() -> void:
 	var heal := float(ed["heal"]) + (10.0 if rank("kin") >= 3 else 0.0)
 	for o in m.hunters:
 		if o.team == h.team and not o.out and not o.downed and Vector2(o.pos.x - at.x, o.pos.z - at.z).length() < r:
-			o.heal(heal * (1.0 + 0.15 * float(rank("kin") - 1)))
+			o.heal(heal * (1.25 if rank("kin") >= 2 else 1.0))
 			m.fx.burst(o.pos + Vector3(0, 1.0, 0), Feel.cat_color("sustain"), 12, 2.5, 0.5, -3.0)
-			if o == h:
+			if o == h and not wall.is_empty():
 				shield_hp = minf(shield_max(), shield_hp + float(ed["shield"]))
-				if not wall.is_empty() and m.verbs.walls.has(wall): wall["hp"] = minf(float(wall.get("max_hp", shield_max())), float(wall["hp"]) + float(ed["shield"]))
+				if m.verbs.walls.has(wall): wall["hp"] = minf(float(wall.get("max_hp", shield_max())), float(wall["hp"]) + float(ed["shield"]))
 	# the kin's typing rides the burst (a cleanse, a shield, a slow on foes...)
 	var stg := stage("e", {"delivery": {"type": "burst", "origin": "aim", "radius": r}, "effects": [{"type": "slow", "duration": 1.0, "strength": float(ed["slow"])}]})
 	run(stg, cx("e", "mending_ground", at, {"no_floor": true}))
@@ -508,116 +523,10 @@ func _mend_burst() -> void:
 	m.sfx("heal", at, 0.0, 0.9)
 	net_ring(at, r, Feel.cat_color("sustain"))
 
-# ------------------------------------------------------------------ R: Fissure
-## Where the crack runs: along the aim up to its reach, stopped by walls, rocks and rises.
-func _fissure_end(dir: Vector2, reach: float) -> float:
-	var k := 0.5
-	var y0 := h.pos.y
-	while k <= reach:
-		var q := h.pos + Vector3(dir.x, 0, dir.y) * k
-		var g: float = m.world.ground_at(q.x, q.z)
-		if m.world.is_block(q.x, q.z) or g > y0 + 0.8 or g <= World.VOID + 1.0:
-			return maxf(1.0, k - 0.3)
-		k += 0.25
-	return reach
-
-func cast_r() -> bool:
-	var rd := r_def()
-	var dir := h.aim_dir()
-	var reach := float(rd["reach"]) + (3.0 if rank("ult") >= 2 else 0.0)
-	var length := _fissure_end(dir, reach)
-	var pulses := int(rd["pulses"]) + int(floor(res / 50.0))
-	res = 0.0          # all Guard goes into the cascade: +1 pulse per 50
-	fissure = {"from": h.pos, "dir": dir, "len": length, "front": 0.0, "hit": {}, "wait": 0.0, "erupt": false, "left": pulses, "pt": 0.0}
-	r_t = length / float(rd["crack_speed"]) + float(rd["erupt_after"]) + float(rd["every"]) * pulses + 0.2
-	tele_lane(h.pos, dir, length, float(rd["width"]), col_of(rd), length / float(rd["crack_speed"]) + float(rd["erupt_after"]))
-	m.sfx("ab_slam", h.pos, 0.0, 0.6)
-	net_bolt(h.pos + Vector3(0, 0.2, 0), h.pos + Vector3(dir.x, 0, dir.y) * length + Vector3(0, 0.2, 0), col_of(rd))
-	return true
-
-## A rock spur that bursts up out of the crack and sinks back (everyone sees the eruption).
-func _pillar(at: Vector3, tall: float) -> void:
-	var n := MeshInstance3D.new()
-	n.mesh = Models.box(0.55, tall, 0.55)
-	n.material_override = Models.toon(Color("b08a62"))
-	m.add_child(n)
-	n.global_position = at + Vector3(0, -tall * 0.5, 0)
-	n.rotation = Vector3(randf_range(-0.25, 0.25), randf() * TAU, randf_range(-0.25, 0.25))
-	var glow := MeshInstance3D.new()
-	glow.mesh = Models.box(0.62, 0.12, 0.62)
-	glow.material_override = Models.glow_mat(Color(col_of(r_def()), 0.9))
-	glow.position = Vector3(0, tall * 0.5, 0)
-	n.add_child(glow)
-	var tw := n.create_tween()
-	tw.tween_property(n, "global_position", at + Vector3(0, tall * 0.45, 0), 0.08).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	tw.tween_interval(0.18)
-	tw.tween_property(n, "global_position", at + Vector3(0, -tall * 0.55, 0), 0.25)
-	tw.tween_callback(n.queue_free)
-
-func _near_line(f: Ent, a: Vector3, b: Vector3, w: float) -> bool:
-	var fp := Vector2(f.pos.x, f.pos.z)
-	var cp := Geometry2D.get_closest_point_to_segment(fp, Vector2(a.x, a.z), Vector2(b.x, b.z))
-	return fp.distance_to(cp) < w * 0.5 + f.r and absf(f.pos.y - a.y) < 2.0
-
-func _tick_fissure(dt: float) -> void:
-	var rd := r_def()
-	var from: Vector3 = fissure["from"]
-	var dir: Vector2 = fissure["dir"]
-	var length: float = fissure["len"]
-	if not bool(fissure["erupt"]):
-		# the crack runs: everyone it passes under is stunned
-		var f0 := float(fissure["front"])
-		var f1 := minf(length, f0 + float(rd["crack_speed"]) * dt)
-		fissure["front"] = f1
-		var a := from + Vector3(dir.x, 0, dir.y) * f0
-		var b := from + Vector3(dir.x, 0, dir.y) * f1
-		m.fx.dust(b, 6)
-		m.fx.burst(b + Vector3(0, 0.2, 0), col_of(rd), 8, 4.0, 0.35, 4.0, 1.2)
-		m.fx.bolt(a + Vector3(0, 0.08, 0), b + Vector3(0, 0.08, 0), col_of(rd).darkened(0.2))     # the crack itself
-		for f in m.foes_of(h.team):
-			if f.hittable() and not (fissure["hit"] as Dictionary).has(f.get_instance_id()) and _near_line(f, from, b, float(rd["width"])):
-				fissure["hit"][f.get_instance_id()] = true
-				f.hurt(float(rd["crack_dmg"]) * r_k(), h, {"src": "abil", "ab": "ult", "tags": ["ult", "fissure"], "stun": float(rd["stun"]), "dr": true, "heavy": true})
-				m.fx.word(f.pos + Vector3(0, 2.2, 0), "CRACKED", col_of(rd), false)
-		if f1 >= length:
-			fissure["erupt"] = true
-			fissure["wait"] = float(rd["erupt_after"])
-			Feel.shake(m, "t3", h, b)
-		return
-	if float(fissure["wait"]) > 0.0:
-		fissure["wait"] = float(fissure["wait"]) - dt
-		return
-	fissure["pt"] = float(fissure["pt"]) - dt
-	if float(fissure["pt"]) > 0.0:
-		return
-	fissure["pt"] = float(rd["every"])
-	fissure["left"] = int(fissure["left"]) - 1
-	# an eruption pulse along the whole line: damage and a slow (the kin's typing rides it)
-	var stg := stage("r", {"delivery": {"type": "burst", "origin": "here", "radius": 0.0}, "effects": [{"type": "damage", "amount": float(rd["pulse_dmg"]) * r_k()}, {"type": "slow", "duration": 1.0, "strength": float(rd["slow"])}]})
-	var end := from + Vector3(dir.x, 0, dir.y) * length
-	for f in m.foes_of(h.team):
-		if f.hittable() and _near_line(f, from, end, float(rd["width"]) + 0.4):
-			KinExec.apply_foe(stg.effects, f, cx("r", "fissure", f.pos, {"at": f.pos}), f.pos, stg)
-	var k := 0.8
-	while k < length:
-		var q := from + Vector3(dir.x, 0, dir.y) * k
-		m.fx.burst(q + Vector3(0, 0.3, 0), col_of(rd), 9, 7.0, 0.5, 9.0, 1.5, Vector3.UP, 20.0)
-		_pillar(ground(q), 0.9 + randf() * 0.7)
-		m.fx.dust(q, 3)
-		k += 1.2
-	m.fx.dust(from + Vector3(dir.x, 0, dir.y) * length * 0.5, 10)
-	m.sfx("boom", from + Vector3(dir.x, 0, dir.y) * length * 0.5, -6.0, 0.7)
-	Feel.shake(m, "t2", h, from + Vector3(dir.x, 0, dir.y) * length * 0.5)
-	net_bolt(from + Vector3(0, 0.6, 0), end + Vector3(0, 0.6, 0), col_of(rd))
-	if int(fissure["left"]) <= 0:
-		fissure = {}
-
 # ------------------------------------------------------------------ bots
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null:
 		return
-	if int(h.slot_lv["ult"]) > 0 and float(cd["r"]) <= 0.0 and los and dist < 11.0 and randf() < 0.4:
-		h.inp["aim"] = tgt.pos; h.inp["ult"] = true; return
 	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and (h.hp < h.max_hp * 0.65 or shield_hp < shield_max() * 0.4) and randf() < 0.5:
 		h.inp["aim"] = h.pos; h.inp["sig"] = true; return
 	if int(h.slot_lv["sec"]) > 0:

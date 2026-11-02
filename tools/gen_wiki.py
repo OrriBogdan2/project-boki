@@ -224,7 +224,7 @@ def gen_classes():
         d = ARCH.get(aid)
         if not d: continue
         rows.append([link(class_page_name(aid), d["name"]), d["weight"].title(), ", ".join(wname(w) for w in d["weapons"]),
-                     d["passive"]["name"], d["dash"]["name"], d["rmb"]["name"], d["e"]["name"], d["r"]["name"]])
+                     d["passive"]["name"], d["dash"]["name"], d["rmb"]["name"], d["e"]["name"], d.get("r", {}).get("name", "Merge")])
     wc = []
     for cid in ("light", "medium", "heavy"):
         c = CLASSES.get(cid)
@@ -259,7 +259,8 @@ def gen_classes():
         b.append("\n### Kit card\n\nWhat the in-game kit card (K) says.\n")
         rows = [["Loop", c.get("loop", "")], ["Passive: " + d["passive"]["name"], c.get("passive", "")], ["Dash: " + d["dash"]["name"], c.get("dash", "")]]
         if c.get("lmb"): rows.append(["LMB", c["lmb"]])
-        rows += [["RMB: " + d["rmb"]["name"], c.get("rmb", "")], ["E: " + d["e"]["name"], c.get("e", "")], ["R: " + d["r"]["name"], c.get("r", "")]]
+        rows += [["RMB: " + d["rmb"]["name"], c.get("rmb", "")], ["E: " + d["e"]["name"], c.get("e", "")]]
+        if "r" in d: rows.append(["R: " + d["r"]["name"], c.get("r", "")])
         for w, t in c.get("weapons", {}).items():
             rows.append(["Weapon: " + wname(w), t])
         b.append(table(["Slot", "Card text"], rows))
@@ -275,11 +276,13 @@ def gen_classes():
             b.append("- *%s:* %s" % (names.get(k, k), t))
         b.append("")
         for slot, label in (("e", "E"), ("r", "R")):
+            if slot not in d: continue       # (a hero with no class R)
             x = d[slot]
             b.append("**%s (%s, %s cooldown).** %s\n" % (x["name"], label, secs(x.get("cooldown")), x.get("desc", "")))
         b.append("### Ranks\n\nRank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the special.\n")
         rk = []
         for s in ("sec", "dash", "kin", "ult"):
+            if s == "ult" and "r" not in d: continue
             r2 = d.get("rank2", {}).get(s, "")
             r3 = d.get("rank_next", {}).get(s, "") or ("Rank 3: " + d["rank3"][s] if s in d.get("rank3", {}) and s != "ult" else "")
             rk.append([SLOT_NAMES[s], re.sub(r"^Rank 2:\s*", "", r2), re.sub(r"^Rank 3:\s*", "", r3)])

@@ -13,7 +13,7 @@ w("| Archetype | Weight | Weapons | Dash | Passive | RMB | E | R |\n|---|---|---
 for a in ["thief", "archer", "mage", "gunslinger", "juggernaut", "bulwark"]:
     d = j(f"content/archetypes/{a}.json")
     wn = " / ".join(j(f"content/weapons/{x}.json")["name"] for x in d["weapons"])
-    w(f"| **{d['name']}** | {d['weight']} | {wn} | {d['dash']['name']} | {d['passive']['name']} | {d['rmb']['name']} | {d['e']['name']} ({d['e']['cooldown']:g}s) | {d['r']['name']} ({d['r']['cooldown']:g}s) |")
+    w(f"| **{d['name']}** | {d['weight']} | {wn} | {d['dash']['name']} | {d['passive']['name']} | {d['rmb']['name']} | {d['e']['name']} ({d['e']['cooldown']:g}s) | {(d['r']['name'] + ' (%gs)' % d['r']['cooldown']) if 'r' in d else 'none (R is the Merge)'} |")
 for a in ["thief", "archer", "mage", "gunslinger", "juggernaut", "bulwark"]:
     d = j(f"content/archetypes/{a}.json")
     w(f"\n### {d['name']} ({d['weight']})\n")
@@ -25,7 +25,7 @@ for a in ["thief", "archer", "mage", "gunslinger", "juggernaut", "bulwark"]:
     for v, lab in [("tap", "tap"), ("hold", "hold"), ("air", "in the air"), ("during_e", "with E"), ("full", "resource full")]:
         if v in r["variants"]: w(f"  - {lab}: {r['variants'][v]}")
     w(f"- **E: {d['e']['name']}** ({d['e']['cooldown']:g}s). {d['e']['desc']}")
-    w(f"- **R: {d['r']['name']}** ({d['r']['cooldown']:g}s, level 6). {d['r']['desc']}")
+    if "r" in d: w(f"- **R: {d['r']['name']}** ({d['r']['cooldown']:g}s, level 6). {d['r']['desc']}")
     w("- Level-up order (bots too): " + ", ".join({"sec": "RMB", "dash": "Dash", "kin": "E", "ult": "R", "gear": "Q"}[x] for x in d["order"]))
 w("")
 w("The old class dashes and weapon RMBs below are kept as data (the verbs return as gloves and other content); a hunter with no archetype still uses them.\n")

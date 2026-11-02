@@ -161,6 +161,7 @@ func _data() -> void:
 	var rk_ok := true
 	for a in Arch.ids():
 		for sl in ["sec", "dash", "kin", "ult"]:
+			if sl == "ult" and not Arch.def(a).has("r"): continue      # (Archer and Bulwark have no class R)
 			var r2 := String(Arch.def(a).get("rank2", {}).get(sl, ""))
 			if not (r2.contains("->") and r2.length() > 20): rk_ok = false
 	ok("ranks: every ability has a concrete rank 2", rk_ok)
@@ -175,7 +176,7 @@ func _data() -> void:
 	for a in ids:
 		for wid in Arch.weapons(a):
 			if Content.weapon(String(wid)) == null: bad.append("%s:%s" % [a, wid])
-		for k in ["dash", "rmb", "e", "r", "resource", "order"]:
+		for k in ["dash", "rmb", "e", "resource", "order"]:
 			if not Arch.def(a).has(k): bad.append("%s missing %s" % [a, k])
 	ok("data: every kit complete, weapons exist", bad.is_empty(), str(bad))
 	ok("weapons: Thief can't hold a sniper", not Loot.usable(_fake("thief"), {"t": "weapon", "wid": "sniper"}))
@@ -380,25 +381,15 @@ func _archer() -> void:
 	P.inp["fire"] = false
 	step(m, 0.5)
 	ok("archer bow: perfect release +25%", K.perfects == pf0 + 1 and dmg(T) >= 74.0, "perfects %d took %.0f" % [K.perfects - pf0, dmg(T)])
-	# E: Arrow Rain: a line of falling arrows; damage over time, slow, blight
+	# E: Hail Wall: a line of falling arrows; damage over time, slow, blight
 	P.teleport(home); fresh(T); T.teleport(home + Vector3(6, 0, 0))
 	P.inp["aim"] = T.pos
 	P.ak.use_e()
-	ok("archer E: Arrow Rain cast", K.in_e())
+	ok("archer E: Hail Wall cast", K.in_e())
 	step(m, 2.0, func(): K.res = 0.0)
-	ok("archer E: Arrow Rain hurts, slows, blights", dmg(T) >= 10.0 and T.slow_t > 0.0 and T.blight_t > 0.0, "took %.0f slow %.2f blight %.2f" % [dmg(T), T.slow_t, T.blight_t])
-	step(m, 2.5)
-	ok("archer E: Arrow Rain ends", not K.in_e())
-	# R: Great Arrows: three empowered shots, no draw, the third hardest
-	P.teleport(home); fresh(T); T.teleport(home + Vector3(-7.0, 0, 0)); aim_at(P, T.pos); K.res = 0.0
-	ult(m, P)
-	ok("archer R: Great Arrows armed", not K.great.is_empty() and int(K.great["left"]) == 3)
-	for i in 3:
-		P.fire_cd = 0.0
-		P.inp["fire"] = true; m.step(DT); P.inp["fire"] = false
-		step(m, 0.45, func(): K.res = 0.0; aim_at(P, T.pos))
-	step(m, 0.3)
-	ok("archer R: three great arrows hit", K.great.is_empty() and dmg(T) >= 95.0, "took %.0f" % dmg(T))
+	ok("archer E: Hail Wall hurts, slows, blights", dmg(T) >= 10.0 and T.slow_t > 0.0 and T.blight_t > 0.0, "took %.0f slow %.2f blight %.2f" % [dmg(T), T.slow_t, T.blight_t])
+	step(m, 3.0)
+	ok("archer E: Hail Wall ends", not K.in_e())
 	await done(m)
 
 # ------------------------------------------------------------------ Mage
@@ -777,14 +768,6 @@ func _bulwark() -> void:
 	var mid := P.hp
 	step(m, 0.8)
 	ok("bulwark E: Mending Ground heals after its delay", mid <= hp0 + 1.0 and P.hp >= hp0 + 20.0, "hp %.0f -> %.0f -> %.0f" % [hp0, mid, P.hp])
-	# R: Fissure: the crack stuns, then the eruption pulses; Guard adds a pulse
-	K.res = 50.0
-	P.teleport(home); T.teleport(home + Vector3(5.0, 0, 0)); fresh(T); aim_at(P, T.pos)
-	ult(m, P)
-	step(m, 0.25)
-	var st0 := T.stun_t
-	step(m, 1.8)
-	ok("bulwark R: Fissure stuns then erupts", st0 > 0.0 and dmg(T) >= 30.0 and T.slow_t > 0.0, "stun %.2f took %.0f" % [st0, dmg(T)])
 	await done(m)
 
 # ------------------------------------------------------------------ levels and the Bonded R
@@ -1045,7 +1028,7 @@ func _feel() -> void:
 	ok("feel: leap flight counts", Feel.missing_windup(st3) <= 0.0)
 	# archetype tells meet the floors
 	ok("feel: Hex is a projectile (dodgeable)", String(Arch.def("mage")["e"]["delivery"]) == "projectile" and float(Arch.def("mage")["e"]["speed"]) <= 24.0)
-	ok("feel: Arrow Rain tell >= soft floor", float(Arch.def("archer")["e"]["tell"]) >= Feel.floor_for("soft_cc", "instant"))
+	ok("feel: Hail Wall tell >= soft floor", float(Arch.def("archer")["e"]["tell"]) >= Feel.floor_for("soft_cc", "instant"))
 	ok("feel: the Bola and Warchain are projectiles (dodgeable)", String(Arch.def("thief")["rmb"]["delivery"]) == "projectile" and float(Arch.def("thief")["rmb"]["bola"]["speed"]) <= 34.0 and String(Arch.def("juggernaut")["e"]["delivery"]) == "projectile")
 	ok("feel: Blink windup shows the landing", float(Arch.def("mage")["dash"]["windup"]) >= 0.1)
 	ok("feel: Doomfall / Fissure plant tells (fuse + tell)", float(Arch.def("juggernaut")["r"]["tell"]) + float(Arch.def("juggernaut")["r"]["fuse"]) >= 0.3 and float(Arch.def("bulwark")["r"]["tell"]) >= 0.3)
