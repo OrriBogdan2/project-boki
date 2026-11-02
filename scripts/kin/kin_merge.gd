@@ -70,6 +70,7 @@ static func press(h: Hunter) -> bool:
 	match plan(h):
 		"merge": return cast(h)
 		"leap":
+			MergeAugment.drop_class_holds(h)
 			if h.ak: h.ak._drop_holds()
 			return (h.kin as Kin).merge_leap()
 		"surge": return surge(h)
@@ -95,6 +96,7 @@ static func rescue_text(h: Hunter) -> String:
 static func surge(h: Hunter) -> bool:
 	if plan(h) != "surge":
 		return false
+	MergeAugment.drop_class_holds(h)
 	if h.ak: h.ak._drop_holds()      # whatever the hero had started before R never fires (charges, wind-ups, reels)
 	h.ult = 0.0
 	var ms := MergeForm.surge_spec()

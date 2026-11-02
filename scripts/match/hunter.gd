@@ -62,7 +62,7 @@ const FLOAT_SPEED := 12.0
 const GLIDE_FALL := 1.7
 const GLIDE_SPEED := 6.5       # (movefeel, owner: "feels weaker than SUPERVIVE") between [footage] ~5-5.5 and
                                # [spec] eyeball 7-10 m/s, leaning to the stronger glide; was 5.0
-const GLIDE_TIME := 14.0       # [footage] ~14s of level glide before the heat ring turns hot
+const GLIDE_TIME := 9.0        # (owner: "lasts too long, not punishing enough") was 14s of level glide before the heat ring turns hot
 const GLIDE_DRAG := 1.6         # speed lost per second while gliding (more when going fast)
 const GLIDE_MAX := 15.0
 # The opening drop, battle-royale style: a fast skydive you steer freely, then the glider opens by
@@ -471,14 +471,14 @@ func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
 	if opts.has("wallstun"):
 		wallstun = float(opts["wallstun"])
 	# Getting hit while gliding, as in Supervive: a hit does NOT knock you out of the air by itself
-	# and you take normal damage. What it does is drain the glider at double the usual rate. Only
+	# and you take normal damage. What it does is drain the glider at triple the usual rate. Only
 	# when the glider runs dry are you spiked (stunned, plummeting, a 0.7s stun when you land; over
 	# the abyss that's a fall). Monsters drain it but can't spike you.
 	var spiked := false
 	if gliding and not dropping and dmg > 0.0 and opts.get("src", "") not in ["fall", "burn", "heat"]:
 		var was := glide_fuel
-		# a knock's worth of damage (250 of 1,050) would burn 30% of the glider; hits drain it 2x
-		glide_fuel = maxf(0.0, glide_fuel - 2.0 * dmg * (0.30 / 34.5) / float(cdat.get("glide_cap", 1.0)))
+		# a knock's worth of damage (250 of 1,050) would burn 30% of the glider; hits drain it 3x
+		glide_fuel = maxf(0.0, glide_fuel - 3.0 * dmg * (0.30 / 34.5) / float(cdat.get("glide_cap", 1.0)))
 		hit_heat_t = 1.0
 		if is_local() and m.hud and m.hud.has_method("glider_hit"):
 			m.hud.glider_hit(was - glide_fuel)
@@ -876,11 +876,11 @@ static func glide_steer(hv: Vector2, wish: Vector2, gs: float, dt: float) -> Vec
 ## on the ground"), and for FEATHER_KEEP after a close you keep the glide's speed and steering, so
 ## skilled taps (short lifts out of the abyss, coasting the gaps) cover more ground per heat than
 ## holding. Numbers in docs/MOVEMENT_FEEL.md; measured by --move-feel-check (feather_*).
-const FEATHER_COOL := 0.06     # [est] heat (fuel share) cooled per second with the glider closed in the air
+const FEATHER_COOL := 0.04     # [est] heat (fuel share) cooled per second with the glider closed in the air
 const FEATHER_KEEP := 0.6      # [est] seconds after closing the glider that its speed and steering carry
 const FEATHER_MIN := 0.05      # [est] the glider reopens with this much heat room left (was 0.15)
 const FEATHER_TAP := 0.3       # [est] an abyss lift's first this-many seconds are its quick impulse...
-const FEATHER_TAP_HEAT := 1.0  # [est] ...heating like a level glide; held past it, the full 4x
+const FEATHER_TAP_HEAT := 0.4  # [est] ...heating like a level glide; held past it, the full 4x
 var glide_off_t := 9.0         # seconds since the glider closed in the air (9 = long ago / on the ground)
 var lift_t := 0.0              # seconds of the current abyss lift (feathering taps stay in the cheap part)
 
@@ -2295,7 +2295,7 @@ func _physics(dt: float) -> void:
 	elif gliding:
 		# the glider keeps the speed you bring into it (a dash or a pad into a glide carries) and
 		# drifts on when you let go of the keys
-		var gs := (DIVE_SPEED if diving else DROP_SPEED) if dropping else (GLIDE_SPEED * 0.6 if glide_fuel <= 0.001 else GLIDE_SPEED) * (1.0 + gear_stat("glide_speed"))
+		var gs := (DIVE_SPEED if diving else DROP_SPEED) if dropping else (GLIDE_SPEED * 0.5 if glide_fuel <= 0.001 else GLIDE_SPEED) * (1.0 + gear_stat("glide_speed"))
 		hv = glide_steer(hv, mv * gs, gs, dt)
 		if dropping:
 			# the drop goes where you point and stops when you let go: no fixed heading to circle on
@@ -2345,7 +2345,7 @@ func _physics(dt: float) -> void:
 		# Let go just before ground level to carry the lift up as height (feathering)
 		vel.y = abyss_lift_vy(vel.y, lip_y - pos.y, dt)
 	elif gliding:
-		var sink := (DIVE_FALL if diving else DROP_FALL) if dropping else (3.0 if glide_fuel <= 0.001 else glide_fall(Vector2(vel.x, vel.z).length()))
+		var sink := (DIVE_FALL if diving else DROP_FALL) if dropping else (5.0 if glide_fuel <= 0.001 else glide_fall(Vector2(vel.x, vel.z).length()))
 		if dropping:
 			vel.y = lerpf(vel.y, -sink, 1.0 - exp(-(DIVE_VY_RATE if diving else DROP_VY_RATE) * dt))
 			if drop_follow != null and m.skydrop:
@@ -2674,10 +2674,10 @@ func _update_glide(dt: float) -> void:
 		auto_glide = false
 	# an overheated glider scorches you while it stays open
 	if gliding and not dropping and glide_fuel <= 0.001 and not downed:
-		heat_burn += dt * 4.0
-		if heat_burn >= 2.0:
-			heat_burn -= 2.0
-			hurt(2.0, null, {"src": "heat"})
+		heat_burn += dt * max_hp * 0.035      # an overheated glider burns ~3.5% of your health a second (was a token 4/s)
+		if heat_burn >= 20.0:                  # (in ~20-damage ticks, ~2 a second: not a stream of numbers)
+			heat_burn -= 20.0
+			hurt(20.0, null, {"src": "heat"})
 	# an overheated glider stays open (slow and sinking) until you land or get hit again
 	var can: bool = (lfloat.is_empty() or (bool(inp.get("glide", false)) and not bool(lfloat.get("g0", true)))) and not grounded and roll_t <= 0.0 and fly_t <= 0.0 and glide_cd <= 0.0 and not downed and stun_t <= 0.0 \
 		and m.time - kb_t > 0.4 and (glide_fuel > 0.0 or gliding) and pad.is_empty() and not shot_down

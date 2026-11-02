@@ -144,7 +144,7 @@ On SUPERVIVE-style rules, tuned for extraction (numbers on [Rules](Rules.md#down
   starts a stomp that finishes you. Your Boki can pull you up too (8 s) and goes after anyone who
   comes to stomp you.
 - **Squad wipe.** Knock the last standing member of a squad and the whole squad is out.
-- **Knocks pay.** Knocking someone heals you a little and gives a dash charge back.
+- **Takedowns pay.** Knocking or killing a rival hunter (mobs do not count) heals you 5% and brings every dash back at once, with a bright chime.
 - **Dead.** Everything you carry goes into a **deathbox** where you fell (its colour shows how good the
   loot is). For 90 s a teammate can hold F there for 8 s to bring you back at a quarter of your health
   with your loot. Anyone can loot it.
