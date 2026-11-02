@@ -238,6 +238,7 @@ var welem := ""               # its element ("fire", "frost", ...) from a Brand 
 var el_n := 0                 # attacks made with the element, for "every Nth hit" riders
 var pack: Array = []          # the backpack: gear and valuables to carry home (Loot items)
 var pack_cap := 6
+var backpack := 0              # the backpack tier worn (Backpacks): 0 is the Pouch everyone has
 var swap_hold := false
 var dash_at := -9.0           # when the last dash started, for perfect dodges
 var dodged := false        # F has to be let go between weapon swaps

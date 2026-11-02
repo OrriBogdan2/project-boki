@@ -23,10 +23,9 @@ static func rules() -> Dictionary:
 static func base_pack() -> int:
 	return int(rules().get("base_pack", 6))
 
-## Slots a brought backpack adds. None can be brought yet (equal pack size); a backpack bring-in
-## slot, if it comes, adds its slots here and nothing else needs to change.
-static func backpack_bonus(_h) -> int:
-	return 0
+## Slots the backpack a hunter wears adds (Backpacks: the Pouch adds none).
+static func backpack_bonus(h) -> int:
+	return Backpacks.slots(int(h.backpack))
 
 ## Slots on top of the base: a brought backpack plus every "pack" stat from worn gear and perks
 ## (the satchel perk's +1 is a perk with stats {"pack": 1}). Gear.apply_worn keeps h.pack_cap in step.
@@ -116,6 +115,8 @@ static func picks() -> Array:
 ## Applies what you brought to the local player at the start of a match. Everything else about the
 ## hunter is already the same for everyone (Hunter.init_hunter).
 static func start(m, h) -> void:
+	var tier: int = m.tier
+	h.backpack = mini(int(m.opts.get("backpack", Backpacks.POUCH)), Backpacks.cap(tier))
 	h.pack_cap = pack_slots(h)
 	h.set_meta("gear_pack", pack_bonus(h))       # (Gear.apply_worn counts changes from here)
 	if "--equal-demo" in OS.get_cmdline_user_args():
@@ -124,7 +125,6 @@ static func start(m, h) -> void:
 		m.opts["no_drop"] = true
 	if m.opts.get("training", false) or m.opts.get("tutorial", false) or m.opts.get("duel", false):
 		return
-	var tier: int = m.tier
 	for it in m.opts.get("kit_items", []):
 		if may_bring(it, tier):
 			# gloves: Q first, then V

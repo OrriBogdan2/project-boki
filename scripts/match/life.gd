@@ -209,6 +209,7 @@ static func drop_box(m: Match, h: Hunter, why: String) -> Dictionary:
 		"gear": [], "pack": h.pack.duplicate(true), "keys": h.rift_keys}
 	h.pack = []
 	h.rift_keys = 0
+	Backpacks.into_box(h, b)
 	# the gear you wear goes in the box too (Supervive: the box holds everything); your weapon stays with you
 	for g in h.gear:
 		if not (g as Dictionary).is_empty():
@@ -265,6 +266,9 @@ static func box_items(m: Match, h: Hunter, b: Dictionary) -> Array:
 		out.append({"key": "gear", "i": i, "name": "%s%s" % [(String(r["name"]) + " ") if int(g["rar"]) > 1 else "", gd.get("name", g["id"])],
 			"sub": Gear.WORN_NAMES[slot] + "  ·  " + Gear.stat_text(String(g["id"]), int(g["rar"])),
 			"icon": Gear.icon_of(String(g["id"])), "col": r["color"], "upgrade": up})
+	var pack_row := Backpacks.box_row(h, b)
+	if not pack_row.is_empty():
+		out.append(pack_row)
 	# gear and treasure for the backpack (worth taking if there's room, or it beats the worst thing in it)
 	for i in (b.get("pack", []) as Array).size():
 		var it: Dictionary = b["pack"][i]
@@ -307,6 +311,8 @@ static func take_item(m: Match, h: Hunter, b: Dictionary, it: Dictionary) -> voi
 				break
 		"keys":
 			h.rift_keys += int(b.get("keys", 0)); b["keys"] = 0
+		"backpack":
+			Backpacks.take_from_box(m, h, b)
 		"gear":
 			var gi := int(it["i"])
 			if gi < (b["gear"] as Array).size():
@@ -346,11 +352,13 @@ static func smart_loot(m: Match, h: Hunter, b: Dictionary) -> int:
 static func _settle_box(b: Dictionary) -> void:
 	b["empty"] = int(b["gems"]) <= 0 and (b["seeds"] as Dictionary).is_empty() and (b["caught"] as Array).is_empty() \
 		and (b.get("belt", []) as Array).is_empty() and int(b.get("keys", 0)) <= 0 and (b.get("gear", []) as Array).is_empty() \
-		and (b.get("pack", []) as Array).is_empty() and (b.get("kin", []) as Array).is_empty()
+		and (b.get("pack", []) as Array).is_empty() and (b.get("kin", []) as Array).is_empty() \
+		and int(b.get("backpack", Backpacks.POUCH)) <= Backpacks.POUCH
 	_refresh_box(b)
 
 ## Takes everything in a box.
 static func loot_box(m: Match, h: Hunter, b: Dictionary) -> void:
+	Backpacks.take_from_box(m, h, b)       # first: a bigger backpack makes room for the rest
 	# worn gear: the owner gets theirs back; anyone else only takes upgrades
 	if (b["owner"] as Hunter) == h:
 		for g in (b.get("gear", []) as Array).duplicate():

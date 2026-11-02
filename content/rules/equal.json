@@ -1,5 +1,5 @@
 {
- "_doc": "Equal footing in matches (docs/decisions/0005-equal-footing.md; scripts/match/equal.gd). What a hunter may bring from home: gloves, boots and utility. rarity_cap_by_tier: the highest rarity (0 Common .. 4 Legendary) a brought piece keeps, by difficulty tier (Data.TIERS: The Meadow, Dusk Isles, The Hollow). issue: the belt charges every hunter is given. util_drops: chance that a table (GearDrops tables, by name; _default for any other) also drops one utility item, and how many charges. migration: the v5 to v6 save conversion of armour and kit pieces (gems = item value x gem_k; materials = gear.json extract_mats by rarity), and pack upgrades refunded. base_pack: backpack slots every hunter starts with (Equal.pack_slots adds a brought backpack, none yet, and gear/perk \"pack\" stats).",
+ "_doc": "Equal footing in matches (docs/decisions/0005-equal-footing.md; scripts/match/equal.gd). What a hunter may bring from home: gloves, boots and utility. rarity_cap_by_tier: the highest rarity (0 Common .. 4 Legendary) a brought piece keeps, by difficulty tier (Data.TIERS: The Meadow, Dusk Isles, The Hollow). issue: the belt charges every hunter is given. util_drops: chance that a table (GearDrops tables, by name; _default for any other) also drops one utility item, and how many charges. migration: the v5 to v6 save conversion of armour and kit pieces (gems = item value x gem_k; materials = gear.json extract_mats by rarity); a bought backpack level becomes that backpack, and the levels below it are refunded. base_pack: backpack slots everyone has (the Pouch). backpacks: the tiers (Backpacks), the slots each adds on top of base_pack and its armory price [gems, scrap]. backpack_cap_by_tier: the biggest tier that may be brought, by difficulty tier. backpack_shop: run gems a shop upgrade to that tier costs. bot_backpack: chance a bot sets out with a bigger backpack than the Pouch.",
  "base_pack": 6,
  "rarity_cap_by_tier": [
   2,
@@ -44,13 +44,59 @@
    2,
    3,
    4
-  ],
-  "pack_refund": true
+  ]
  },
  "bot_util": {
   "easy": 0,
   "medium": 1,
   "hard": 1,
   "expert": 1
+ },
+ "backpacks": [
+  {
+   "name": "Pouch",
+   "slots": 0
+  },
+  {
+   "name": "Satchel",
+   "slots": 2,
+   "cost": [
+    120,
+    4
+   ]
+  },
+  {
+   "name": "Pack",
+   "slots": 4,
+   "cost": [
+    260,
+    10
+   ]
+  },
+  {
+   "name": "Rucksack",
+   "slots": 6,
+   "cost": [
+    450,
+    20
+   ]
+  }
+ ],
+ "backpack_cap_by_tier": [
+  1,
+  2,
+  3
+ ],
+ "backpack_shop": [
+  0,
+  25,
+  50,
+  90
+ ],
+ "bot_backpack": {
+  "easy": 0.0,
+  "medium": 0.25,
+  "hard": 0.4,
+  "expert": 0.55
  }
 }

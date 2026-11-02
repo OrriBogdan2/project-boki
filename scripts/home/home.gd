@@ -3952,6 +3952,7 @@ func _start_match() -> void:
 	o["tier"] = exp_tier
 	o["kit_items"] = Equal.take_loadout(exp_tier)      # gloves and boots from the armory ride with you (capped by tier)
 	o["belt_items"] = Equal.take_belt(exp_tier)         # and the utility you picked
+	o["backpack"] = Backpacks.take_home(exp_tier)       # and your backpack
 	if exp_seed != 0: o["seed"] = exp_seed  # the conditions the panel showed
 	exp_seed = 0
 	Save.save_game()

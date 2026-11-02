@@ -5,7 +5,7 @@ extends RefCounted
 ##   armor pieces and kit pieces   become gems and farm materials at a fair rate (below)
 ##   smoke / spring pad / seeker / mending gloves   became utility items: charges in the stash
 ##   gloves and boots              stay (the second glove slot, V, starts empty in the loadout)
-##   bought backpack levels        refunded (the pack is the same size for everyone now)
+##   bought backpack levels        the backpack of that level (Backpacks), the levels below refunded
 ## A one-time notice (data["equal_notice"], shown on the farm) lists everything that converted.
 ##
 ## The rate, per piece: gems = its full item value (Common 3, Fine 8, Rare 18, Epic 36, Legendary 70)
@@ -104,12 +104,19 @@ static func migrate(data: Dictionary) -> Array:
 	for id in moved:
 		items[id] = int(items.get(id, 0)) + int(moved[id])
 	data["items"] = items
-	# bought backpack levels
+	# bought backpack levels: level L was a bigger pack for good; now it is the tier-L backpack to bring
+	# (at risk), and what the levels below it cost comes back
 	var refund := [0, 0]
 	var plvl := clampi(int(data.get("pack_lvl", 0)), 0, PACK_REFUND.size())
-	for i in plvl:
+	for i in maxi(0, plvl - 1):
 		refund[0] += int(PACK_REFUND[i][0])
 		refund[1] += int(PACK_REFUND[i][1])
+	var owned_packs := [0, 0, 0, 0]
+	if plvl > 0:
+		owned_packs[plvl] = 1
+	data["backpacks"] = owned_packs
+	data["pack_pick"] = plvl
+	data["raid_pack"] = 0
 	data["gems"] = int(data["gems"]) + refund[0]
 	data["scrap"] = int(data["scrap"]) + refund[1]
 	data.erase("pack_lvl")
@@ -129,14 +136,17 @@ static func migrate(data: Dictionary) -> Array:
 				bits.append("%s x%d" % [id.replace("_", " "), moved[id]])
 			lines.append("Utility charges in your stash: %s." % ", ".join(bits))
 		if plvl > 0:
-			lines.append("Backpack upgrades refunded: %d gems, %d scrap." % [refund[0], refund[1]])
+			var pack_line := "Your backpack upgrade is now a %s to bring (lost if you go down)" % Backpacks.label(plvl)
+			if refund[0] > 0:
+				pack_line += "; the smaller upgrades refunded: %d gems, %d scrap" % [refund[0], refund[1]]
+			lines.append(pack_line + ".")
 		for i in mini(listed.size(), MAX_LISTED):
 			lines.append("  " + String(listed[i]))
 		if listed.size() > MAX_LISTED:
 			lines.append("  and %d more" % (listed.size() - MAX_LISTED))
 		var still := " (your passive glove is still there)" if had_g1 else ""
 		lines.append("New: a second glove slot on V. Pick a glove for it in the armory%s." % still)
-		lines.append("Armor, perks and bigger packs are found in the match now.")
+		lines.append("Armor and perks are found in the match now.")
 	data["equal_notice"] = lines
 	return lines
 

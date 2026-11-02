@@ -55,6 +55,7 @@ static func ensure() -> void:
 			_store(it)
 		d["raid_out"] = []
 	Equal.recover_belt()        # utility brought on an expedition that never ended goes back in the stash
+	Backpacks.ensure()          # owned backpacks, the pick, and one left out by a crash
 
 ## Backpack slots on an expedition before any bonus: the same for everyone (Equal.base_pack).
 static func pack_cap() -> int:

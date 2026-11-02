@@ -555,18 +555,20 @@ func _migration() -> void:
 			and (d["raid_out"] as Array).is_empty(), "armor, kit and utility-glove pieces leave the armory")
 	# the rate: full item value in gems + the extraction materials of its rarity
 	# vest r2 (18 gems, 1 wood 1 stone), magpie r1 (8, 1 wood), bastion r4 (70, 3 stone 3 scrap), satchel r0 (3, 1
-	# wood); refund 120+260 gems, 4+10 scrap
-	var gems_want := 60 + 18 + 8 + 70 + 3 + 120 + 260
+	# wood); backpack level 2 becomes a Pack, level 1 refunded (120 gems, 4 scrap)
+	var gems_want := 60 + 18 + 8 + 70 + 3 + 120
 	ok(int(d["gems"]) == gems_want,
-			"gems: %d (want %d: item value at 100%% plus the backpack refund)" % [int(d["gems"]), gems_want])
+			"gems: %d (want %d: item value at 100%% plus the smaller backpack level)" % [int(d["gems"]), gems_want])
 	var mats: Dictionary = d.get("mats", {})
 	ok(int(mats.get("wood", 0)) == 3 and int(mats.get("stone", 0)) == 4,
 			"materials: %d wood, %d stone (want 3, 4)" % [int(mats.get("wood", 0)), int(mats.get("stone", 0))])
-	ok(int(d["scrap"]) == 3 + 14, "scrap: %d (want 17: 3 from the plate, 14 refunded)" % int(d["scrap"]))
+	ok(int(d["scrap"]) == 3 + 4, "scrap: %d (want 7: 3 from the plate, 4 refunded)" % int(d["scrap"]))
+	ok(d["backpacks"] == [0, 0, 1, 0] and int(d["pack_pick"]) == 2,
+			"backpack level 2 is now one Pack in the stash, picked (%s)" % str(d["backpacks"]))
 	ok(int(d["items"].get("smoke", 0)) == 3 and int(d["items"]["tonic"]) == 4,
 			"the smoke glove became 3 smoke bombs in the stash")
 	ok(not d.has("pack_lvl") and d["loadout"] == {"gear3": "u6", "gear0": "u5"},
-			"bought backpack levels are gone (refunded) and the loadout keeps only gloves and boots")
+			"the old backpack level is gone (now a backpack) and the loadout keeps only gloves and boots")
 	ok(not d["loadout"].has("gear1") and ids.has("focus"),
 			"the second glove slot (V) starts empty; the old passive glove stays in the armory")
 	var lines: Array = d.get("equal_notice", [])

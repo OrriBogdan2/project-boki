@@ -92,6 +92,7 @@ static func run_table(m, name: String, at: Vector3, rng: RandomNumberGenerator, 
 static func bot_start(h, rng: RandomNumberGenerator, diff: String) -> void:
 	var cfg: Dictionary = (rules().get("bot_start", {}) as Dictionary).get(diff, {})
 	UtilityDrops.bot_start(h, rng, diff)
+	Backpacks.bot_start(h, rng, diff)
 	var n := int(cfg.get("slots", 0))  # boots first, then up to two different active gloves (bots use both: Gloves)
 	if n > 0:
 		var b := roll_gear(rng, int(cfg.get("bonus", 0)), 0, 3)

@@ -2700,9 +2700,10 @@ func _tip_lines(id: String, p: Hunter) -> Array:
 			out.append(["A 3s channel to the teammate nearest your cursor. Stand still: moving, attacking or any damage interrupts it. You arrive weakened for 3s: half damage, and your crowd control, healing and shields are halved.", INK, 14])
 			out.append(["Cooldown %ds%s" % [int(Hunter.BASE_CD), ("  ·  ready in %ds" % int(ceil(p.base_cd))) if p.base_cd > 0.0 else "  ·  ready"], MUTED, 13])
 		"pack":
-			out.append(["Backpack  %d/%d" % [p.pack.size(), p.pack_cap], INK])
+			var pack_tip := Backpacks.tip(p)
+			out.append(pack_tip[0])
 			out.append(["Open  ·  %s" % Settings.key_cap("inventory"), MUTED, 12])
-			out.append(["Gear and treasure you're carrying home. Extract to keep it all in your armory; die and it stays in your deathbox. Bigger backpacks at the armory.", INK, 14])
+			out.append(pack_tip[1])
 		"weapon":
 			var wp: Dictionary = p.wpn
 			out.append([wp["name"], Color("e6dccb")])

@@ -5936,6 +5936,7 @@ func _finish() -> void:
 		r["revives"] = player.revives
 		r["armor_tier"] = player.armor_tier
 		r["belt"] = Equal.belt_home(player, result.get("extracted", false))
+		r["backpack"] = Backpacks.home_tier(player, result.get("extracted", false))
 		if not opts.get("tutorial", false):
 			r["rift_keys"] = player.rift_keys if result.get("extracted", false) else 0
 		r["stats"] = player.stats.duplicate()

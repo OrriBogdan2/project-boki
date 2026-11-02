@@ -775,7 +775,7 @@ func open_armory() -> void:
 	var v: VBoxContainer = h._new_panel("Armory", 960, true)
 	var items: Array = Econ.armory().duplicate()
 	items.sort_custom(func(a, b): return Loot.value(a) > Loot.value(b))
-	var counts := {"Treasure": _treasure_n(), "Utility": _utility_n()}
+	var counts := {"Treasure": _treasure_n(), "Utility": _utility_n(), "Backpacks": HomeBackpacks.count()}
 	for tn in ARM_TABS:
 		counts[tn] = items.filter(func(it): return String(it.get("t", "")) == "gear" and (ARM_TABS[tn] as Array).has(Gear.slot_of(String(it.get("id", ""))))).size()
 	UI.subtitle(v, "Next expedition: %s" % _loadout_line())
@@ -787,10 +787,14 @@ func open_armory() -> void:
 	top.add_child(_chip("bond", "%d" % Econ.embers(), Color("9ff0e0"), "Soul Embers, for the Soul Shrine"))
 	var fl := UI.footer_left(v)
 	fl.add_child(_upgrade_btn("arm", "Storage", Econ.arm_cap(), Econ.ARM_CAPS))
-	if not ARM_TABS.has(arm_tab) and arm_tab not in ["Treasure", "Utility"]: arm_tab = "Gloves"
-	UI.shell_tabs(v, ARM_TABS.keys() + ["Utility", "Treasure"], arm_tab, func(t): arm_tab = t; arm_pick = ""; open_armory(), counts)
+	if not ARM_TABS.has(arm_tab) and arm_tab not in ["Treasure", "Utility", "Backpacks"]:
+		arm_tab = "Gloves"
+	UI.shell_tabs(v, ARM_TABS.keys() + ["Utility", "Backpacks", "Treasure"], arm_tab, func(t): arm_tab = t; arm_pick = ""; open_armory(), counts)
 	if arm_tab == "Treasure":
 		_treasure(v)
+		return
+	if arm_tab == "Backpacks":
+		HomeBackpacks.tab(v, _reopen_armory)
 		return
 	if arm_tab == "Utility":
 		HomeBelt.stash(v)
@@ -812,6 +816,11 @@ func open_armory() -> void:
 	for x in list:
 		grid.add_child(_tile(x))
 	cols.add_child(grid)
+
+## After a purchase: the gem count up top, then the armory again.
+func _reopen_armory() -> void:
+	h._refresh_top()
+	open_armory()
 
 func _chip(icon: String, txt: String, col: Color, tip: String) -> Control:
 	return UI.chip(icon, txt, col, tip, 14)
@@ -986,6 +995,7 @@ func _treasure(v: VBoxContainer) -> void:
 ## "From your armory" rows for the expedition panel: the five gear slots, ‹ › to cycle what's stored.
 func loadout_rows(parent: VBoxContainer, reopen: Callable) -> void:
 	HomeBelt.rows(parent, reopen, h.exp_tier)
+	HomeBackpacks.row(parent, reopen, h.exp_tier)
 	if not Save.has_building("armory") and Econ.armory().is_empty():
 		return
 	parent.add_child(UI.section("From your armory  (gloves and boots)"))
@@ -1021,6 +1031,3 @@ func loadout_rows(parent: VBoxContainer, reopen: Callable) -> void:
 		parent.add_child(card)
 	if held > 0:
 		parent.add_child(UI.label("%d piece%s too rare for this difficulty stay home." % [held, "" if held == 1 else "s"], 12, UI.MUTED))
-	var pl := UI.label("Backpack: %d slots for everyone  ·  what you take can be lost if you go down" % Econ.pack_cap(), 12, UI.MUTED)
-	pl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	parent.add_child(pl)
