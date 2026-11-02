@@ -207,3 +207,21 @@ Body, scale and movement sections are now in for **all 12** hunters (bjorn, pin,
 - **Running poses:** Bjorn pitches forward, shield shoulder first; Dancer leans hard forward; Vireo runs upright with her arms out wide.
 - **Per-hero nameplate offsets** are in each sheet. hud.gd's fixed +2.35 m belongs to ext/hudref, so expose a per-hunter offset hook rather than editing hud.gd yourselves.
 - **Global** (main's call, don't change it in kit branches): the source run speed is the same for every hunter (3.9–4.4 m/s), with short, quick steps (~2.3 strides/s). That's been sent to the main session.
+
+## 2026-11-02 23:40 UTC: OWNER DASH NOTES. These override the reference sheets; relay them to the linwick-dredge, moosh-tamsin and breah-ostra polish passes
+- **Linwick:**
+  - On the ground: a quick, short dash.
+  - In the air: a long, fast "poof" burst that launches him far at high speed. Give it a puff/smoke-burst tell in his colours, keep the momentum after the burst, and give it a distinct air pose.
+- **Dredge:** several short, fast dashes in a row (charges with a short gap between them), each a quick visible burst. NOT a blink: you see him travel, just fast.
+- **Tamsin, the skating dash** (the owner's favourite):
+  - She skates while holding Shift and can keep firing her LMB auto-attack the whole time.
+  - She steers the skate (manipulating the ice): she can curve, it isn't just straight.
+  - The shorter she skates, the more cooldown she gets back.
+  - Make all three feel great. The skate should feel smooth and in control, with a visible ice trail and edge spray when turning.
+- **Breah:** the source's dash is an odd dash followed by a rock thrown at you. The owner prefers a **leap**: she leaps to the target area and the rock comes with or after it. An impact on landing plus the rock hitting reads better. Build it as a leap (arc, a clear take-off and landing, the landing hit plus the rock), and record it in docs/heroes/dolm.md as a deliberate change from the source.
+- **Ostra, the swap dash:**
+  1. Pick a target area (a circle at the cursor, with a landing marker).
+  2. While it's being thrown, **Ostra hovers in place in the air**, even over the abyss. He doesn't fall while the swap is in flight.
+  3. After a few seconds (about 1.8–2 s per the sheet), **everything inside the target circle (enemies, allies, Boki, and items if it makes sense) swaps to where Ostra was, and Ostra goes to the target.**
+  4. Mark both ends clearly during the wait: the origin and the destination circle.
+  5. Bots and online play must handle the multi-unit swap. Assert it: two units in the circle both end up at the origin, and Ostra keeps his height over the abyss.
