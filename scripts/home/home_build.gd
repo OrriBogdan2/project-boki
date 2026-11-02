@@ -41,6 +41,7 @@ var _reach_cache := {}
 var _fence_sig := ""
 var _water_sig := ""
 static var pending_toast := ""
+var popped := -1                       # uid of the deco just placed (its node gets the pop)
 var debug_m := Vector2.INF             # tooling: where the "mouse" is, for screenshots
 
 const BASE_BIOME := {"top": Color("5f8d45"), "top2": Color("4a7538"), "side": Color("8b6d52"), "deep": Color("3a3140"), "leaf": Color("5a9a4f")}
@@ -404,7 +405,15 @@ func _leaf() -> Color:
 	var t: Dictionary = HomeLayout.THEMES.get(String(L().get("theme", "meadow")), {})
 	return Color(String(t["leaf"])) if t.has("leaf") else BASE_BIOME["leaf"]
 
+## A decoration's node: a construction site while it is going up, else the model dressed for its tier.
 func make_deco(e: Dictionary) -> Node3D:
+	if FarmSites.is_site(e):
+		return FarmModels.site(e)
+	var n := _make_base(e)
+	if FarmSites.is_upgrading(e): FarmModels.upgrade_frame(n, e)
+	return FarmModels.dress(n, e)
+
+func _make_base(e: Dictionary) -> Node3D:
 	var id := String(e["id"])
 	var rng := RandomNumberGenerator.new(); rng.seed = int(e.get("u", 1)) * 7919 + 13
 	var col := Color(String(e.get("c", HomeLayout.COLOURS[0])))
@@ -524,7 +533,7 @@ func _sync_deco() -> void:
 		(nodes[u] as Node3D).visible = not (held.get("kind", "") == "deco" and int(held.get("from", -1)) == int(u))
 
 func _sig(e: Dictionary) -> String:
-	return "%s|%d|%d|%d|%s|%s|%s" % [e["id"], int(e["x"]), int(e["z"]), int(e.get("r", 0)), str(e.get("c", "")), str(e.get("px", "")), str(e.get("sp", ""))]
+	return "%s|%d|%d|%d|%s|%s|%s" % [e["id"], int(e["x"]), int(e["z"]), int(e.get("r", 0)), str(e.get("c", "")), str(e.get("px", "")), str(e.get("sp", ""))] + FarmModels.sig(e)
 
 ## Fences join up with the fence next to them: every post gets rails toward its neighbours.
 func _sync_fences() -> void:
@@ -924,7 +933,7 @@ func price_text(id: String) -> String:
 
 # ------------------------------------------------------------------ undo
 func _snap() -> void:
-	undo.append({"L": L().duplicate(true), "gems": int(Save.d["gems"]), "scrap": int(Save.d.get("scrap", 0)), "wood": Work.mat("wood"), "stone": Work.mat("stone")})
+	undo.append({"L": L().duplicate(true), "gems": int(Save.d["gems"]), "scrap": int(Save.d.get("scrap", 0)), "wood": Work.mat("wood"), "stone": Work.mat("stone"), "mats": Save.d["mats"].duplicate(), "coals": FarmSites.have("coals")})
 	if undo.size() > 40:
 		undo.pop_front()
 
@@ -939,6 +948,7 @@ func undo_last() -> bool:
 	Save.d["layout"] = lay
 	Save.d["gems"] = int(s["gems"]); Save.d["scrap"] = int(s["scrap"])
 	if s.has("wood"): Save.d["mats"]["wood"] = int(s["wood"]); Save.d["mats"]["stone"] = int(s["stone"])
+	if s.has("mats"): Save.d["mats"] = (s["mats"] as Dictionary).duplicate(); Save.d["items"]["coals"] = int(s["coals"])
 	apply(paint_changed)
 	Save.save_game()
 	Sfx.play("whoosh", null, -8.0)
@@ -980,6 +990,9 @@ func toggle() -> void:
 	if not can_build():
 		return
 	active = true
+	var opened := FarmUnlocks.announce()
+	if not opened.is_empty():
+		h._toast("New to build: %s" % ", ".join(opened.slice(0, 3).map(func(i): return FarmUnlocks.name_of(String(i)))))
 	h.prompt_box.visible = false
 	h.cam.zoom_to = maxf(h.cam.zoom_to, 1.35)
 	h.set_build_ui(true)
@@ -994,13 +1007,26 @@ func take(id: String) -> void:
 	if mx > 0 and int(L()["inv"].get(id, 0)) == 0 and HomeLayout.count_of(id, h._d()) >= mx:
 		h._toast(_max_text(id, mx))
 		return
+	if not FarmUnlocks.open(id):
+		h._toast("%s: %s" % [FarmUnlocks.name_of(id), FarmUnlocks.lock_text(id)])
+		return
 	var g := cost_of(id, 1)
-	if not c.has("brush") and not c.has("line") and int(g[2]) == 0 and not _can_pay(int(g[0]), int(g[1]), int(g[3]), int(g[4])):
+	if _site_cost(id) != {}:
+		if not FarmSites.can_pay(_site_cost(id)):
+			h._toast("Not enough %s" % FarmSites.label(FarmSites.short_of(_site_cost(id))))
+			return
+	elif not c.has("brush") and not c.has("line") and int(g[2]) == 0 and not _can_pay(int(g[0]), int(g[1]), int(g[3]), int(g[4])):
 		h._toast("Not enough %s" % _short(int(g[0]), int(g[1]), int(g[3]), int(g[4])))
 		return
 	held = {"kind": "deco", "id": id, "r": 0, "from": -1}
 	_make_ghost()
 	_build_bar()
+
+## What a new one of this costs as a construction site ({} when it goes up at once, or comes from storage).
+func _site_cost(id: String) -> Dictionary:
+	if not FarmSites.uses_site(id) or int(L()["inv"].get(id, 0)) > 0:
+		return {}
+	return FarmSites.build_cost(id)
 
 func _max_text(id: String, mx: int) -> String:
 	if id == "crop_patch":
@@ -1034,6 +1060,22 @@ func pick_up_at(c: Vector2i) -> void:
 		_make_ghost()
 		_build_bar()
 		Sfx.play("click")
+
+## Starts an upgrade of the building with this deco uid (the Upgrades tab).
+func upgrade(uid: int) -> bool:
+	var e := _deco_by_uid(uid)
+	if e.is_empty():
+		return false
+	_snap()
+	var r := FarmSites.start_upgrade(e)
+	if r != "":
+		undo.pop_back()
+		h._toast(r)
+		return false
+	apply(false)
+	if nodes.has(uid): FarmBuildUi.pop(nodes[uid])
+	_done(HomeLayout.deco_center(e), "Upgrade started: Boki will build it")
+	return true
 
 func _drop_held() -> void:
 	drag = {}
@@ -1359,6 +1401,8 @@ func _draw_cells() -> void:
 			var post := MeshInstance3D.new(); post.mesh = Models.box(0.14, 0.7, 0.14)
 			post.material_override = good; post.position = Vector3(t.x + 0.5, 0.35, t.y + 0.5)
 			ghost_cells.add_child(post)
+	FarmBuildUi.outline(ghost_cells, cells, ghost_ok)
+	FarmBuildUi.note(ghost_cells, cells, "" if ghost_ok else why)
 	if held["kind"] == "b" and not cells.is_empty():
 		# where the door ends up
 		var door := HomeLayout.door_at(id, cells[0].x, cells[0].y, int(held["r"]))
@@ -1484,31 +1528,42 @@ func place_held() -> bool:
 		return _paint(id, String(c["brush"]))
 	var at: Array = cells.filter(func(t): return not _bad.has(t)) if c.has("line") else [cells[0]]
 	var from := int(held.get("from", -1))
+	popped = -1
 	var n := at.size() if from < 0 else 0
 	var cost := cost_of(id, n)
-	if not _can_pay(int(cost[0]), int(cost[1]), int(cost[3]), int(cost[4])):
+	var site := _site_cost(id) if from < 0 else {}
+	if not site.is_empty():
+		if not FarmSites.can_pay(site):
+			h._toast("Not enough %s" % FarmSites.label(FarmSites.short_of(site)))
+			return false
+	elif not _can_pay(int(cost[0]), int(cost[1]), int(cost[3]), int(cost[4])):
 		h._toast("Not enough %s" % _short(int(cost[0]), int(cost[1]), int(cost[3]), int(cost[4])))
 		return false
 	_snap()
 	if from >= 0:
 		var e := _deco_by_uid(from)
 		e["x"] = at[0].x; e["z"] = at[0].y; e["r"] = int(held["r"]); e.erase("px"); e.erase("pz")
+		popped = from
 		if held.has("c") and String(held["c"]) != "": e["c"] = String(held["c"])
 		held = {}
 		_clear_ghost()
 	else:
 		lay["inv"][id] = int(lay["inv"].get(id, 0)) - int(cost[2])
 		if int(lay["inv"][id]) <= 0: lay["inv"].erase(id)
-		_pay(int(cost[0]), int(cost[1]), int(cost[3]), int(cost[4]))
+		if site.is_empty(): _pay(int(cost[0]), int(cost[1]), int(cost[3]), int(cost[4]))
+		else: FarmSites.pay(site)
 		for t in at:
 			var e := {"u": HomeLayout._next_uid(lay), "id": id, "x": t.x, "z": t.y, "r": int(held["r"])}
 			if c.get("colour", false) or id == "banner": e["c"] = _held_colour()
 			if id == "kin_statue": e["sp"] = String(Save.active_kin().get("species", "zapple"))
+			if not site.is_empty(): FarmSites.begin(e, site)
 			lay["deco"].append(e)
+			popped = int(e["u"])
 		anchor = Vector2i(-999, -999)
 		if is_instance_valid(ghost_cells): ghost_cells.set_meta("sig", "")
 	apply(false)
-	_done(Vector3(at[0].x + 0.5, 0, at[0].y + 0.5), "")
+	_done(Vector3(at[0].x + 0.5, 0, at[0].y + 0.5), "Site marked out: Boki will build it" if not site.is_empty() else "")
+	if nodes.has(popped): FarmBuildUi.pop(nodes[popped])
 	return true
 
 func _paint(id: String, mode: String) -> bool:
@@ -1528,7 +1583,8 @@ func _paint(id: String, mode: String) -> bool:
 		match mode:
 			"path": lay["paths"][k] = id
 			"water": lay["water"][k] = 1
-			"wild": clear_wild(t)
+			"wild":
+				if clear_wild(t): Work.add_mat("fibre", 1)      # cuttings from the clearing
 			"clear":
 				lay["water"].erase(k)
 				if base_paint.has(w.idx(t.x, t.y)): lay["paths"][k] = "none"
@@ -1568,16 +1624,22 @@ func store_held() -> void:
 		return
 	var from := int(held.get("from", -1))
 	if from >= 0:
+		var e0 := _deco_by_uid(from)
+		if FarmSites.tier(e0) > 1:
+			h._toast("Move it instead: storing it would lose its upgrades")
+			return
 		_snap()
 		var lay := L()
 		var e := _deco_by_uid(from)
+		var was_site := FarmSites.is_site(e)
+		FarmSites.cancel(e)       # a site that is taken down gives back what it cost (and is not kept in storage)
 		lay["deco"].erase(e)
-		lay["inv"][String(e["id"])] = int(lay["inv"].get(String(e["id"]), 0)) + 1
+		if not was_site: lay["inv"][String(e["id"])] = int(lay["inv"].get(String(e["id"]), 0)) + 1
 		held = {}
 		_clear_ghost()
 		apply(false)
 		Sfx.play("pickup", null, -6.0)
-		h._toast("%s put in storage" % HomeLayout.CATALOG[String(e["id"])]["name"])
+		h._toast(("%s taken down: materials back" if was_site else "%s put in storage") % HomeLayout.CATALOG[String(e["id"])]["name"])
 		Save.save_game()
 	else:
 		_drop_held()
@@ -1673,6 +1735,10 @@ func _build_bar() -> void:
 			sw.pressed.connect(func(): Sfx.play("click"); set_colour(ci))
 			sw.tooltip_text = "Colour for banners, rugs and Boki beds"
 			tabs.add_child(sw)
+	var fp := FarmUnlocks.progress()
+	if FarmUnlocks.gated():
+		tabs.add_child(UI.chip("hammer", "Farm level %d%s" % [FarmUnlocks.level(), (" · %d/%d" % [int(fp[0]), int(fp[1])]) if fp[1] > 0 else " (max)"], UI.GOLD,
+			"Your farm levels up as you play: extract, scan Boki, hatch, harvest and build. Higher levels open more things to build."))
 	var ub := UI.button("Undo", func(): undo_last(), 76); ub.disabled = undo.is_empty(); tabs.add_child(ub)
 	tabs.add_child(UI.primary("Done", func(): toggle(), 80))
 	# the items
@@ -1696,6 +1762,11 @@ func _build_bar() -> void:
 		if it.get("on", false): b.theme_type_variation = "Chosen"
 		b.disabled = it.get("off", false)
 		if it.has("tip"): b.tooltip_text = String(it["tip"])
+		if it.has("cost"):
+			var cr := FarmIcon.cost_row(it["cost"])
+			cr.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
+			cr.offset_top = -24; cr.offset_bottom = -6
+			b.add_child(cr)
 		row.add_child(b)
 	var next := UI.button("›", func(): page += 1; _build_bar(), 44)
 	next.custom_minimum_size.y = 80; next.disabled = page >= pages - 1
@@ -1713,6 +1784,19 @@ func _build_bar() -> void:
 	bar = card
 	if held.is_empty(): _hover_hint()
 	else: _set_hint()
+
+## The price shown as icons on a bar entry: the construction cost, or the plain gems and materials ({} if it is
+## from storage, or priced per tile or in scrap, which stay as text).
+func _entry_cost(id: String) -> Dictionary:
+	var c: Dictionary = HomeLayout.CATALOG[id]
+	if int(L()["inv"].get(id, 0)) > 0 or c.has("brush") or c.has("line") or c.has("scrap"):
+		return {}
+	var sc := _site_cost(id)
+	if not sc.is_empty(): return sc
+	var out := {}
+	for m in ["gems", "wood", "stone"]:
+		if int(c.get(m, 0)) > 0: out[m] = int(c[m])
+	return out
 
 func _tab_items() -> Array:
 	var out: Array = []
@@ -1734,13 +1818,25 @@ func _tab_items() -> Array:
 					var pc := cost_of(id, 1)
 					var mx := HomeLayout.max_of(id, h._d())
 					var full: bool = mx > 0 and int(lay["inv"].get(id, 0)) == 0 and HomeLayout.count_of(id, h._d()) >= mx
-					out.append({"t": "%s\n%s" % [fc["name"], ("built" if mx == 1 else "all placed") if full else price_text(id)], "cb": func(): take(iid),
+					if not full and not FarmUnlocks.open(id):
+						out.append(FarmBuildUi.locked_entry(id))
+						continue
+					var bc := _entry_cost(id)
+					var en := {"t": "%s\n%s" % [fc["name"], ("built" if mx == 1 else "all placed") if full else ("" if not bc.is_empty() else price_text(id))], "cb": func(): take(iid),
 						"on": held.get("kind", "") == "deco" and String(held.get("id", "")) == id and int(held.get("from", -1)) < 0,
 						"off": full or (int(pc[2]) == 0 and not _can_pay(int(pc[0]), int(pc[1]), int(pc[3]), int(pc[4]))),
-						"tip": (_max_text(id, mx) + ". " if full else "") + String(fc.get("desc", ""))})
+						"tip": (_max_text(id, mx) + ". " if full else "") + String(fc.get("desc", ""))}
+					if not bc.is_empty() and not full:
+						en["cost"] = bc
+						en["off"] = not FarmSites.can_pay(bc) if _site_cost(id) != {} else en["off"]
+						en["tip"] = String(en["tip"]) + (" Boki build it: %d swings of work." % int(bc.get("labour", 0)) if _site_cost(id) != {} else "")
+					out.append(en)
 			for b in h.lots:
 				var bb: String = b
 				var nm: String = Data.BUILDINGS[b]["name"]
+				if not HomeLayout.placed(b, h._d()) and not FarmUnlocks.open(b):
+					out.append(FarmBuildUi.locked_entry(b))
+					continue
 				if not HomeLayout.placed(b, h._d()):
 					var cost := "free" if bool(Data.BUILDINGS[b].get("free", false)) or h._has_b(b) else "%d gems" % int(Data.BUILDINGS[b]["cost"])
 					out.append({"t": "%s\n%s" % [nm, "Place it" if h._has_b(b) else "Mark a lot · %s" % cost], "cb": func(): take_building(bb),
@@ -1750,6 +1846,10 @@ func _tab_items() -> Array:
 				var open: bool = isl >= 0 and _isle_ok(h.world.idx(int(floor(h.lots[b]["at"].x)), int(floor(h.lots[b]["at"].z))))
 				out.append({"t": "%s\n%s" % [nm, "Move" if h._has_b(b) else "Move the lot"], "cb": func(): take_building(bb), "off": not open,
 					"on": held.get("kind", "") == "b" and String(held.get("id", "")) == b, "tip": "" if open else "Build the bridge to its isle first"})
+		"Upgrades":
+			out.append_array(FarmBuildUi.upgrade_entries(self))
+			if out.is_empty():
+				out.append({"t": "Nothing to upgrade yet\nBuild something first", "cb": func(): pass, "off": true})
 		"Island":
 			for t in HomeLayout.THEMES:
 				var tt: String = t
@@ -1774,11 +1874,20 @@ func _tab_items() -> Array:
 				var c: Dictionary = HomeLayout.CATALOG[id]
 				if String(c["cat"]) != cat: continue
 				var iid: String = id
+				if not FarmUnlocks.open(id):
+					out.append(FarmBuildUi.locked_entry(id))
+					continue
 				var pc := cost_of(id, 1)
-				var it := {"t": "%s\n%s" % [c["name"], price_text(id)], "cb": func(): take(iid),
+				var bc := _entry_cost(id)
+				var it := {"t": "%s\n%s" % [c["name"], "" if not bc.is_empty() else price_text(id)], "cb": func(): take(iid),
 					"on": held.get("kind", "") == "deco" and String(held.get("id", "")) == id and int(held.get("from", -1)) < 0,
 					"off": int(pc[2]) == 0 and not _can_pay(int(pc[0]), int(pc[1]), int(pc[3]), int(pc[4]))}
 				if c.has("desc"): it["tip"] = String(c["desc"])
+				if not bc.is_empty():
+					it["cost"] = bc
+					if _site_cost(id) != {}:
+						it["off"] = not FarmSites.can_pay(bc)
+						it["tip"] = String(it.get("tip", "")) + " Boki build it: %d swings of work." % int(bc.get("labour", 0))
 				out.append(it)
 	return out
 

@@ -417,7 +417,7 @@ func _primed_hit(t: Ent) -> void:
 	payoff_fx(t.pos, "VAULT RESET", res_col(), "pay_cashin", dir, t)
 	m.later(0.1, func(): if is_instance_valid(h) and anim_id != "thf_vault_r" and anim_id != "thf_vault_l": play("thf_reset"))
 	h.dashes = h.max_dashes()
-	h._ab_feedback("dash", "ready")
+	DashReset.cue(h)
 
 ## A rival we hit was knocked (or we assisted): a heal, a crimson star on them, a green pillar on us.
 func on_knock(t: Hunter, mine: bool) -> void:
@@ -451,7 +451,7 @@ func _jackpot(t: Ent) -> void:
 	m.sfx("dj_jackpot", h.pos, -2.0, 1.0)
 	net_ring(h.pos, float(jd["reach"]), col_of(jd))
 	h.dashes = h.max_dashes()
-	h._ab_feedback("dash", "ready")
+	DashReset.cue(h)
 
 func _jackpot_targets() -> Array:
 	return foes_in(h.pos, float(jackpot_def()["reach"])).filter(func(f): return sees(f) and not (f is Kin) and f.hittable())
@@ -697,7 +697,7 @@ func _stick(f: Ent, at: Vector3) -> void:
 		cd["e"] = float(cd["e"]) * (1.0 - float(ed["refund_foe"] if f else ed["refund_wall"]))
 	if f and rank("dash") >= 3:
 		h.dashes = h.max_dashes()           # Vault rank 3: a knife in a foe resets it
-		h._ab_feedback("dash", "ready")
+		DashReset.cue(h)
 	fx().star(at + Vector3(0, 1.0 if f else 0.3, 0), Color("ffcf5a"), 0.8, 0.2)
 	m.sfx("ab_plant", at, -6.0, 1.8)
 	net_ring(at, 0.8, col_of(ed))

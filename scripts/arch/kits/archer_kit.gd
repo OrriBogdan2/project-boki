@@ -184,18 +184,16 @@ func _sense_injured() -> void:
 		if f is Hunter and not f.dead and f.hp < f.max_hp * float(rd.get("sense_hp", 0.5)) and h.flat_dist(f) < float(rd.get("sense_r", 22.0)):
 			f.reveal_t = maxf(f.reveal_t, 0.4)
 
-## Passive: a knock heals us and gives a dash charge back.
+## Passive: a knock heals us (the dash comes back for every takedown, see DashReset).
 func on_knock(t: Hunter, mine: bool) -> void:
 	if not mine or not is_instance_valid(t): return
 	var rd := res_def()
 	var hp0 := h.hp
 	h.heal(float(rd.get("knock_heal", 18.0)))
 	knock_healed += h.hp - hp0
-	h.dashes = minf(h.max_dashes(), h.dashes + float(rd.get("knock_dash", 1.0)))
 	m.fx.burst(h.pos + Vector3(0, 1.0, 0), Color("9fe0a8"), 14, 2.5, 0.5, -2.0)
 	m.fx.word(h.pos + Vector3(0, 2.4, 0), "RUN DOWN", res_col(), true)
 	m.fx.ring(h.pos, 1.6, res_col(), 0.3)
-	m.sfx("ab_ready", h.pos, -3.0, 1.3)
 	net_ring(h.pos, 1.6, res_col())
 
 func _high_ground() -> bool:

@@ -56,7 +56,6 @@ func _kill(L: Dictionary, P: Hunter, C: Hunter) -> float:
 	dropped = m.pickups.filter(func(p): return not pk0.has(p))      # (before anyone walks over them)
 	_run(0.2)
 	for a in L["adds"]: if is_instance_valid(a) and not a.dead: a.dead = true; a.visible = false
-	if not m.perk_offer.is_empty(): m.perk_offer = {}
 	return m.time - 0.2
 
 func run(main: Node) -> void:

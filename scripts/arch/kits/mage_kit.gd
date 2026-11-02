@@ -65,7 +65,7 @@ func add_spark(f: Ent, n := 1) -> void:
 		m.fx.ring(f.pos, 1.3, res_col(), 0.3)
 		m.fx.word(f.pos + Vector3(0, 2.5, 0), "LIVE", res_col(), false)
 		net_ring(f.pos, 1.3, res_col())
-		if h.is_local(): h._ab_feedback("dash", "ready")
+		DashReset.cue(h)
 
 func clear_sparks(f: Ent) -> void:
 	var key := f.get_instance_id()
@@ -258,7 +258,7 @@ func _blowout(f: Ent) -> void:
 	m.fx.bolt(f.pos + Vector3(0, 3.4, 0), f.pos + Vector3(0, 0.1, 0), col)
 	payoff_fx(f.pos, "BLOWOUT", col, "", h.dir_to(f), f)
 	m.sfx("hero_blowout", f.pos, 0.0)        # its own voice (tools/gen_hero_sfx.py)
-	if h.is_local(): h._ab_feedback("dash", "ready")
+	DashReset.cue(h)
 
 # ------------------------------------------------------------------ RMB: Coilshot
 func rmb_hold_tick(t: float) -> void:
@@ -368,7 +368,7 @@ func _tick_motes(dt: float) -> void:
 			m.sfx("pickup", h.pos, -4.0, 1.8)
 			m.fx.ring(h.pos, 1.3, col_of(rmb_def()), 0.3)
 			m.fx.word(h.pos + Vector3(0, 2.3, 0), "WIRERUN BACK", col_of(dash_def()), false)
-			if h.is_local(): h._ab_feedback("dash", "ready")
+			DashReset.cue(h)
 			_free_mote(mt)
 
 func _free_mote(mt: Dictionary) -> void:
