@@ -5,47 +5,100 @@ extends RefCounted
 ## (one frame = 0.2 s): anticipation, a key pose on the release, overshoot, follow-through and settle.
 ## fl / fr place a free hand from its shoulder (hw / rw their weight), gp pitches the weapon.
 
+## Pin's held draw: side-on, leaning back, the bow arm out at full reach, the string hand past the chest
+## (the draw's Empowered key and the start of every release)
+const DRAW_LEGS := [0.45, -0.6, -0.35, -0.3]
+const DRAW_HAND := Vector3(0.17, 0.18, 0.36)
+const DRAW_BOW := Vector3(0.04, 0.14, -0.6)
+const DRAW_POSE := {
+	"p": 0.2,
+	"y": 0.8,
+	"lw": 1.0,
+	"legs": DRAW_LEGS,
+	"hw": 1.0,
+	"fl": DRAW_HAND,
+	"rw": 1.0,
+	"fr": DRAW_BOW
+}
+
 const MOVES := {
 	# ---------------------------------------------------------------- Pin (archer; hero sheet pin.md, 5 fps footage)
-	# the bow drawn: side-on to the cursor, the bow arm out at it, the string hand pulled back to the chest
-	# (0.2 s, one footage frame, then held while drawing; a touch deeper by Empowered)
+	# the bow drawn: hard side-on to the cursor, leaning back, the bow arm thrust out at it and the string
+	# hand pulled back past the chest (0.2 s, one footage frame); the bow arm reaches full length by
+	# Empowered (0.6 s), then a tremble builds toward Supercharged (1.15 s) and the pose holds
 	"arc_draw": {"hold": true, "keys": [
 		[0.0, {}],
 		[
 			0.2,
 			{
-				"p": 0.08,
-				"y": 0.55,
+				"p": 0.16,
+				"y": 0.72,
 				"lw": 1.0,
-				"legs": [0.35, -0.5, -0.3, -0.3],
+				"legs": [0.4, -0.55, -0.35, -0.3],
 				"hw": 1.0,
-				"fl": Vector3(0.12, 0.16, 0.12)
+				"fl": Vector3(0.14, 0.17, 0.3),
+				"rw": 1.0,
+				"fr": Vector3(0.04, 0.12, -0.42)
+			}
+		],
+		[0.6, DRAW_POSE],
+		[0.8, DRAW_POSE],
+		[
+			0.9,
+			{
+				"p": 0.21,
+				"y": 0.83,
+				"lw": 1.0,
+				"legs": DRAW_LEGS,
+				"hw": 1.0,
+				"fl": DRAW_HAND,
+				"rw": 1.0,
+				"fr": DRAW_BOW
 			}
 		],
 		[
-			0.6,
+			0.97,
 			{
-				"p": 0.12,
-				"y": 0.62,
+				"p": 0.19,
+				"y": 0.77,
 				"lw": 1.0,
-				"legs": [0.4, -0.55, -0.3, -0.3],
+				"legs": DRAW_LEGS,
 				"hw": 1.0,
-				"fl": Vector3(0.16, 0.17, 0.2)
+				"fl": DRAW_HAND,
+				"rw": 1.0,
+				"fr": DRAW_BOW
 			}
-		]]},
+		],
+		[
+			1.03,
+			{
+				"p": 0.22,
+				"y": 0.85,
+				"lw": 1.0,
+				"legs": DRAW_LEGS,
+				"hw": 1.0,
+				"fl": DRAW_HAND,
+				"rw": 1.0,
+				"fr": DRAW_BOW
+			}
+		],
+		[
+			1.09,
+			{
+				"p": 0.18,
+				"y": 0.75,
+				"lw": 1.0,
+				"legs": DRAW_LEGS,
+				"hw": 1.0,
+				"fl": DRAW_HAND,
+				"rw": 1.0,
+				"fr": DRAW_BOW
+			}
+		],
+		[1.15, DRAW_POSE]]},
 	# the string let go: the hand snaps back open (one frame), no big recoil, then settles
 	"arc_loose": {"keys": [
-		[
-			0.0,
-			{
-				"p": 0.12,
-				"y": 0.62,
-				"lw": 1.0,
-				"legs": [0.4, -0.55, -0.3, -0.3],
-				"hw": 1.0,
-				"fl": Vector3(0.16, 0.17, 0.2)
-			}
-		],
+		[0.0, DRAW_POSE],
 		[
 			0.05,
 			{
@@ -61,17 +114,7 @@ const MOVES := {
 		[0.42, {}]]},
 	# a Supercharged release: the body kicks back hard, a half step back, the hand flung wide behind
 	"arc_super": {"keys": [
-		[
-			0.0,
-			{
-				"p": 0.12,
-				"y": 0.62,
-				"lw": 1.0,
-				"legs": [0.4, -0.55, -0.3, -0.3],
-				"hw": 1.0,
-				"fl": Vector3(0.16, 0.17, 0.2)
-			}
-		],
+		[0.0, DRAW_POSE],
 		[
 			0.05,
 			{
@@ -161,9 +204,22 @@ const MOVES := {
 		[0.6, {}]]},
 	# the snare: a quick flick of the bow hand, a half-step forward
 	"arc_snare": {"keys": [
-		[0.0, {"p": 0.1, "y": 0.2}],
-		[0.07, {"p": -0.3, "y": -0.2, "lw": 0.7, "legs": [0.6, -0.5, -0.4, -0.2]}],
-		[0.3, {}]]},
+		[0.0, {"p": 0.2, "y": 0.45, "sq": -0.08, "hw": 1.0, "fl": Vector3(0.15, 0.2, 0.25)}],
+		[
+			0.07,
+			{
+				"p": -0.6,
+				"y": -0.4,
+				"sq": 0.2,
+				"lw": 1.0,
+				"legs": [1.1, -0.9, -0.7, -0.3],
+				"rw": 1.0,
+				"fr": Vector3(0.0, 0.1, -0.6)
+			}
+		],
+		[0.14, {"p": -0.7, "y": -0.5, "sq": 0.25, "lw": 1.0, "legs": [1.15, -1.0, -0.75, -0.3]}],
+		[0.24, {"p": -0.2, "y": -0.1, "lw": 0.6}],
+		[0.36, {}]]},
 	# Hail Wall: the bow raised high, the body arching back, the volley lobbed up in an arc, then down
 	"arc_hail": {"keys": [
 		[0.0, {"p": 0.1}],
@@ -172,9 +228,9 @@ const MOVES := {
 			{
 				"p": 0.42,
 				"lift": 0.06,
-				"gp": 0.9,
+				"gp": 1.6,
 				"hw": 1.0,
-				"fl": Vector3(0.05, 0.5, 0.05),
+				"fl": Vector3(0.05, 0.8, 0.05),
 				"lw": 0.8,
 				"legs": [0.3, -0.5, 0.3, -0.5]
 			}
@@ -183,9 +239,9 @@ const MOVES := {
 			0.24,
 			{
 				"p": 0.3,
-				"gp": 1.1,
+				"gp": 1.6,
 				"hw": 1.0,
-				"fl": Vector3(0.12, 0.45, 0.2),
+				"fl": Vector3(0.12, 0.75, 0.2),
 				"sq": -0.1,
 				"lw": 0.8,
 				"legs": [0.4, -0.5, 0.1, -0.4]
@@ -201,29 +257,43 @@ const MOVES := {
 				"p": -0.5,
 				"fx": 2.2,
 				"sq": 0.35,
-				"lift": 0.05,
+				"lift": 0.35,
 				"lw": 1.0,
 				"legs": [1.4, -1.9, 1.4, -1.9],
 				"hw": 1.0,
 				"fl": Vector3(0.0, -0.1, -0.2)
 			}
 		],
-		[0.16, {"p": -0.2, "fx": 6.28, "sq": 0.1, "lw": 1.0, "legs": [0.7, -1.0, 0.7, -1.0]}],
-		[0.3, {"p": -0.15, "fx": 6.28, "lw": 0.5, "legs": [0.4, -0.5, -0.2, -0.3]}],
-		[0.42, {"fx": 6.28}]]},
+		[0.16, {"p": -0.3, "fx": 6.28, "sq": 0.15, "lift": 0.2, "lw": 1.0, "legs": [0.7, -1.0, 0.7, -1.0]}],
+		[
+			0.26,
+			{
+				"p": -0.25,
+				"fx": 6.28,
+				"lift": 0.0,
+				"lw": 0.5,
+				"legs": [0.5, -0.7, -0.2, -0.4],
+				"hw": 0.9,
+				"fl": Vector3(-0.15, -0.1, 0.35),
+				"rw": 0.9,
+				"fr": Vector3(0.15, -0.1, 0.35)
+			}
+		]]},
 	# the plunge: shooting straight down, folded over the bow
 	"arc_plunge": {"keys": [
 		[0.0, {"p": -0.5, "sq": 0.2, "lw": 1.0, "legs": [1.0, -1.4, 1.0, -1.4]}],
 		[0.12, {"p": -0.9, "sq": 0.4, "lw": 1.0, "legs": [1.2, -1.7, 1.2, -1.7]}],
 		[0.45, {}]]},
 	# ---------------------------------------------------------------- Bjorn (bulwark; hero sheet bjorn.md)
-	# the hammer thrown: cocked low and behind for one frame, then an overhand throw, arm forward
+	# the hammer thrown: cocked far back and low for one frame, leaning away, then an overhand throw that
+	# overshoots past the front before it settles
 	"bul_throw": {"keys": [
 		[0.0, {}],
-		[0.1, {"y": 0.75, "p": 0.25, "gp": 0.9, "lw": 1.0, "legs": [0.3, -0.5, -0.3, -0.3]}],
+		[0.1, {"y": 1.1, "p": 0.3, "gp": 1.2, "sq": -0.1, "lw": 1.0, "legs": [0.2, -0.5, -0.35, -0.3]}],
 		[0.2, {"y": -0.7, "p": -0.42, "gp": -0.6, "sq": 0.15, "lw": 1.0, "legs": [0.85, -0.7, -0.5, -0.3]}],
-		[0.38, {"y": -0.3, "p": -0.15, "gp": -0.2, "lw": 0.6}],
-		[0.6, {}]]},
+		[0.28, {"y": -0.95, "p": -0.48, "gp": -0.95, "sq": 0.2, "lw": 1.0, "legs": [0.9, -0.75, -0.55, -0.3]}],
+		[0.42, {"y": -0.3, "p": -0.15, "gp": -0.2, "lw": 0.6}],
+		[0.62, {}]]},
 	# the hammer called back: the free hand reaches out, then draws in and catches
 	"bul_recall": {"keys": [
 		[0.0, {"hw": 1.0, "fl": Vector3(0.05, 0.1, -0.55), "p": -0.1}],
@@ -245,7 +315,9 @@ const MOVES := {
 				"lw": 1.0,
 				"legs": [0.55, -0.85, -0.45, -0.5],
 				"hw": 1.0,
-				"fl": Vector3(-0.05, 0.12, -0.42)
+				"fl": Vector3(-0.05, 0.12, -0.42),
+				"rw": 1.0,
+				"fr": Vector3(0.42, 0.38, 0.05)
 			}
 		],
 		[
@@ -259,11 +331,14 @@ const MOVES := {
 				"lw": 1.0,
 				"legs": [0.65, -0.95, -0.5, -0.55],
 				"hw": 1.0,
-				"fl": Vector3(-0.05, 0.14, -0.45)
+				"fl": Vector3(-0.05, 0.14, -0.45),
+				"rw": 1.0,
+				"fr": Vector3(0.45, 0.42, 0.05)
 			}
 		]]},
-	# ... let go: the hammer sweeps round from behind to the front in one frame and crashes down, the body
-	# lunging after it, the impact the frame after, then 0.4 s to recover
+	# ... let go: the hammer arm sweeps round from behind to the front in one frame and crashes down; the
+	# shoulders turn hard with it but the body stays on its feet (the carry's dash lean adds ~0.45 rad
+	# forward, so the move's own pitch stays near zero), the impact the frame after, then 0.4 s to recover
 	"bul_smash": {"keys": [
 		[
 			0.0,
@@ -282,18 +357,30 @@ const MOVES := {
 		[
 			0.08,
 			{
-				"y": -0.65,
-				"p": -0.35,
-				"lift": -0.14,
-				"sq": 0.45,
-				"gp": -0.9,
+				"y": -0.95,
+				"p": 0.05,
+				"lift": -0.12,
+				"sq": 0.3,
+				"gp": -1.1,
 				"lw": 1.0,
-				"legs": [1.15, -1.5, -0.45, -0.9]
+				"legs": [1.15, -1.5, -0.45, -0.9],
+				"rw": 1.0,
+				"fr": Vector3(0.1, -0.1, -0.55)
 			}
 		],
 		[
 			0.16,
-			{"y": -0.55, "p": -0.3, "lift": -0.12, "sq": 0.3, "gp": -0.8, "lw": 1.0, "legs": [1.1, -1.4, -0.4, -0.85]}
+			{
+				"y": -0.8,
+				"p": 0.05,
+				"lift": -0.1,
+				"sq": 0.2,
+				"gp": -1.0,
+				"lw": 1.0,
+				"legs": [1.1, -1.4, -0.4, -0.85],
+				"rw": 1.0,
+				"fr": Vector3(0.05, -0.15, -0.5)
+			}
 		],
 		[0.55, {}]]},
 	# the aegis raised: braced low behind it, the shield arm out front (holds while it's up)
@@ -329,18 +416,57 @@ const MOVES := {
 		],
 		[0.28, {"p": -0.2, "lw": 0.7}],
 		[0.5, {}]]},
-	# 360 Smash: the short dash leaning in (0.23 s), then ONE full turn with the hammer out, low and braced
+	# 360 Smash: a hard 0.17 s run-up (the dash's own lean tips him forward, so the move adds none), ONE full
+	# turn in 0.16 s with the hammer held out at arm's length while he slides on, then a low crouched
+	# recovery to 0.58 s
 	"bul_whirl": {"keys": [
-		[0.0, {"p": -0.12, "sq": 0.15, "lw": 1.0, "legs": [0.9, -0.8, -0.6, -0.4]}],
-		[0.26, {"p": -0.15, "fy": 0.0, "y": 0.6, "sq": 0.2, "lw": 1.0, "legs": [0.7, -0.9, -0.4, -0.5]}],
-		[0.34, {"p": -0.1, "fy": 3.1, "sq": 0.15, "gp": 0.3, "lw": 1.0, "legs": [0.6, -0.8, -0.3, -0.4]}],
-		[0.42, {"p": -0.08, "fy": 6.28, "sq": 0.1, "lw": 1.0, "legs": [0.5, -0.7, -0.3, -0.4]}],
-		[0.66, {"fy": 6.28}]]},
-	# the Shield Charge: head down, the whole body a ram
+		[0.0, {"p": 0.15, "sq": -0.1, "lw": 1.0, "legs": [0.9, -0.8, -0.6, -0.4]}],
+		[
+			0.17,
+			{
+				"p": 0.05,
+				"fy": 0.0,
+				"y": 0.6,
+				"sq": 0.2,
+				"gp": 0.4,
+				"lw": 1.0,
+				"legs": [0.7, -0.9, -0.4, -0.5],
+				"rw": 1.0,
+				"fr": Vector3(0.6, 0.1, 0.0)
+			}
+		],
+		[
+			0.25,
+			{
+				"p": -0.05,
+				"fy": 3.14,
+				"sq": 0.15,
+				"gp": 0.4,
+				"lw": 1.0,
+				"legs": [0.6, -0.8, -0.3, -0.4],
+				"rw": 1.0,
+				"fr": Vector3(0.65, 0.1, 0.0)
+			}
+		],
+		[
+			0.33,
+			{
+				"p": -0.1,
+				"fy": 6.28,
+				"sq": 0.35,
+				"lift": -0.12,
+				"gp": 0.3,
+				"lw": 1.0,
+				"legs": [1.0, -1.4, -0.4, -0.9]
+			}
+		],
+		[0.58, {"p": -0.08, "fy": 6.28, "sq": 0.25, "lift": -0.1, "lw": 1.0, "legs": [0.9, -1.3, -0.35, -0.8]}],
+		[0.75, {"fy": 6.28}]]},
+	# the Shield Charge: head down behind the shield, a ram (on top of the dash's own forward lean)
 	"bul_charge": {"keys": [
-		[0.0, {"p": -0.5, "y": 0.2, "sq": 0.2, "lw": 1.0, "legs": [0.8, -1.0, -0.6, -0.4]}],
-		[0.16, {"p": -0.7, "sq": 0.3, "lw": 1.0, "legs": [1.1, -1.1, -0.8, -0.3]}],
-		[0.34, {"p": -0.3, "lw": 0.6, "legs": [0.7, -0.8, -0.4, -0.3]}],
+		[0.0, {"p": -0.1, "y": 0.2, "sq": 0.2, "lw": 1.0, "legs": [0.8, -1.0, -0.6, -0.4]}],
+		[0.16, {"p": -0.2, "sq": 0.3, "lw": 1.0, "legs": [1.1, -1.1, -0.8, -0.3]}],
+		[0.34, {"p": -0.1, "lw": 0.6, "legs": [0.7, -0.8, -0.4, -0.3]}],
 		[0.6, {}]]},
 	# the short dash out of a spinning Crushing Blow: a small hop-step that keeps the stance
 	"bul_short": {"keys": [
@@ -394,35 +520,49 @@ const MOVES := {
 	# ---------------------------------------------------------------- Pin: the other LMB variants, procs and payoffs
 	# a tap shot (let go before Empowered): a quick snap of the bow hand, half side-on, a little hop of the heel
 	"arc_tap": {"keys": [
-		[0.0, {"y": 0.3, "hw": 0.8, "fl": Vector3(0.08, 0.14, 0.1)}],
-		[
-			0.04,
-			{
-				"y": 0.15,
-				"p": 0.1,
-				"sq": -0.08,
-				"hw": 1.0,
-				"fl": Vector3(0.2, 0.12, 0.26),
-				"lw": 0.6,
-				"legs": [0.2, -0.3, -0.1, -0.2]
-			}
-		],
-		[0.2, {"y": 0.05, "p": -0.04, "sq": 0.05}],
-		[0.34, {}]]},
-	# a perfect release: the string hand flung up and open in a flourish, the chest lifted, a spin of the bow
-	# hand and a proud settle (the gold star shows beside the bow hand)
-	"arc_perfect": {"keys": [
 		[
 			0.0,
 			{
-				"p": 0.12,
-				"y": 0.62,
-				"lw": 1.0,
-				"legs": [0.4, -0.55, -0.3, -0.3],
+				"y": 0.6,
+				"p": 0.1,
 				"hw": 1.0,
-				"fl": Vector3(0.16, 0.17, 0.2)
+				"fl": Vector3(0.12, 0.16, 0.24),
+				"rw": 1.0,
+				"fr": Vector3(0.04, 0.12, -0.45)
 			}
 		],
+		[
+			0.04,
+			{
+				"y": 0.3,
+				"p": 0.22,
+				"sq": -0.16,
+				"hw": 1.0,
+				"fl": Vector3(0.36, 0.12, 0.48),
+				"rw": 1.0,
+				"fr": Vector3(0.04, 0.16, -0.55),
+				"lw": 1.0,
+				"legs": [0.4, -0.6, -0.2, -0.4]
+			}
+		],
+		[
+			0.1,
+			{
+				"y": 0.2,
+				"p": 0.26,
+				"sq": -0.18,
+				"hw": 1.0,
+				"fl": Vector3(0.42, 0.1, 0.52),
+				"lw": 1.0,
+				"legs": [0.4, -0.6, -0.2, -0.4]
+			}
+		],
+		[0.22, {"y": 0.05, "p": -0.08, "sq": 0.1, "hw": 0.5, "fl": Vector3(0.2, 0.05, 0.2)}],
+		[0.36, {}]]},
+	# a perfect release: the string hand flung up and open in a flourish, the chest lifted, a spin of the bow
+	# hand and a proud settle (the gold star shows beside the bow hand)
+	"arc_perfect": {"keys": [
+		[0.0, DRAW_POSE],
 		[
 			0.06,
 			{
@@ -456,17 +596,7 @@ const MOVES := {
 		[0.55, {}]]},
 	# overdrawn: the draw arm starts to shake, the chest sags, the bow dips (held while drawing on)
 	"arc_over": {"hold": true, "keys": [
-		[
-			0.0,
-			{
-				"p": 0.12,
-				"y": 0.62,
-				"lw": 1.0,
-				"legs": [0.4, -0.55, -0.3, -0.3],
-				"hw": 1.0,
-				"fl": Vector3(0.16, 0.17, 0.2)
-			}
-		],
+		[0.0, DRAW_POSE],
 		[
 			0.08,
 			{
@@ -677,7 +807,7 @@ const MOVES := {
 		[
 			0.06,
 			{
-				"p": 0.45,
+				"p": 0.22,
 				"y": 0.3,
 				"r": 0.15,
 				"sq": -0.1,

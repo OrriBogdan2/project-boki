@@ -129,6 +129,14 @@ func star(p: Vector2, s: float, col: Color, rot := 0.0) -> void:
 		var r := p + Vector2(cos(a - PI * 0.25), sin(a - PI * 0.25)) * waist
 		tri(p, r, tip, col); tri(p, tip, l, col)
 
+## A leaf (a long pointed lozenge) of length s centred on p, lying along u: Pin's glint on her draw line.
+func leaf(p: Vector2, u: Vector2, s: float, col: Color) -> void:
+	var n := Vector2(-u.y, u.x) * s * 0.22
+	var tip := p + u * s * 0.5
+	var tail := p - u * s * 0.5
+	tri(tail, p + n, tip, col)
+	tri(tail, tip, p - n, col)
+
 ## An open arrowhead at p pointing along u.
 func arrow(p: Vector2, u: Vector2, s: float, w: float, col: Color) -> void:
 	chevron(p, u, s, w, col)

@@ -6,7 +6,7 @@ extends ArchKit
 ## Starpiercer (level 6, PinUlt: three empowered piercing beams). R is the Merge.
 ## The bow (PinDraw): hold to draw through two stages with a V reticle that closes at each; tap and
 ## Empowered shots land at the cursor, Supercharged ones fly past it to max range; let go right as a stage
-## comes up (a gold star) and the next draw is faster; hold too long and the arrow is overdrawn (half).
+## comes up (a gold fletch burst) and the next draw is faster; hold too long and the arrow is overdrawn (half).
 ##
 ## The loop: snares root (Pin) and feed Focus -> full Focus arms the Deadeye (a lens glint and
 ## a thin aim line everyone sees, crosshairs over every pinned foe) -> the next shot is drawn at once,
@@ -158,6 +158,15 @@ func _tick(dt: float) -> void:
 	spirit.tick_orbs(dt)
 	_tag_shots()
 	fx.tick_shots()
+
+## Her bow hand carries its own tell (PinFx's fletch glint), so the shared charge orb stays off.
+func charge_orb() -> bool:
+	return false
+
+## Her dash after-image: green fletch streaks instead of the shared ghost.
+func dash_afterimage() -> bool:
+	fx.afterimage(h.position, h.face, float(h.cdat.get("scale", 1.0)))
+	return true
 
 ## X: Starpiercer, the next shots empowered.
 func cast_ult() -> bool:
@@ -325,8 +334,9 @@ func _arrow_hit(t: Ent) -> void:
 		if (e["pos"] as Vector3).distance_to(t.pos) < 2.8: kind = String(e["kind"])
 	var at := t.pos + Vector3(0, 1.0, 0)
 	if kind == "super":
-		fx.star(at, 2.2, PinFx.TEAL, 0.2, 0.6, PI * 0.25)
-		m.fx.burst(at, PinFx.TEAL, 16, 7.0, 0.35, 2.0, 1.1)
+		fx.star(at, 1.6, PinFx.TEAL, 0.22, 0.8, PI * 0.25, 2.0)
+		fx.fletch_burst(at, 1.2, Color("a8ffe0"), 0.05, 0.15, 0.0, 5.0)
+		m.fx.burst(at, PinFx.TEAL, 18, 7.0, 0.35, 2.0, 1.2)
 		m.sfx("pin_super_hit", t.pos, -2.0)
 		Feel.shake(m, "t2", h, t.pos, t)
 	elif kind in ["arrow", "tap"]:
@@ -379,7 +389,8 @@ func _heavy_tele() -> void:
 	AimKit.vee(h, "rmb_v", {"k": hk, "col": HEAVY_GOLD, "col2": Color("fff0b0"), "glint": hk * 0.5})
 	AimKit.lane(h, "rmb_bar", {"len": 2.0 * AimKit.BH, "len0": 0.3, "k": hk, "width": 0.3, "fill": hk,
 		"col": HEAVY_GOLD, "col2": Color("fff0b0")})
-	AimKit.charge(h, hk, {"col": HEAVY_GOLD, "col2": Color.WHITE})
+	AimKit.charge(h, hk, {"col": HEAVY_GOLD, "col2": Color("fff0b0")})
+	fx.bow_glint_at(draw.bow_at(), 1.0 if hk >= 0.99 else 0.0, HEAVY_GOLD)
 
 ## The Heavy Shot charges from the hold threshold to full.
 func rmb_charge_full() -> float:
@@ -409,6 +420,7 @@ func _drop_holds() -> void:
 
 func _drop_tele() -> void:
 	pin_aim = false
+	fx.bow_glint_at(Vector3.ZERO, 0.0, HEAVY_GOLD)
 	AimKit.hide(h, "rmb_v"); AimKit.hide(h, "rmb_bar")
 
 func fire_rmb(c: Dictionary) -> void:
@@ -475,10 +487,11 @@ func _pin(a: Vector3, k: float) -> void:
 		# the impact: a red-white burst, a white dust cloud as it's driven back, a white ring round it
 		var at := f.pos + Vector3(0, 1.0, 0)
 		fx.note_hit(f.pos)
-		fx.star(at, 1.3 + 0.6 * k, Color("ff7a6a"), 0.12, 0.0, PI * 0.25)
-		m.fx.burst(at, Color("fff0e8"), 12, 6.0, 0.3, 4.0, 1.0)
-		m.fx.dust(f.pos, 10)
-		m.later(0.15, func(): if is_instance_valid(f): m.fx.ring(f.pos, 1.1, Color.WHITE, 0.3))
+		fx.star(at, 1.5 + 0.7 * k, Color("ff5a4a"), 0.14, 0.0, PI * 0.25, 2.0)
+		m.fx.burst(at, Color("ff8a6a"), 14, 6.5, 0.3, 4.0, 1.2)
+		m.fx.burst(at, Color("fff0e8"), 8, 4.0, 0.25, 4.0, 0.9)
+		m.fx.dust(f.pos, 14)
+		m.later(0.12, func(): if is_instance_valid(f): m.fx.ring(f.pos, 1.3, Color.WHITE, 0.3))
 		m.sfx("pin_heavy_hit", f.pos, -3.0)
 		# knocked while burning in the Hail Wall: Cremated (a burst of the blue fire)
 		if not rain.is_empty() and _in_rain(f):
@@ -554,7 +567,7 @@ func cast_e() -> bool:
 		var u := (float(i) - 2.0) / 2.0 * deg_to_rad(_arc_deg()) * 0.4
 		var dv := d.rotated(u)
 		m.spawn_shot(h, h.pos + Vector3(0, 1.4, 0), dv * maxf(4.0, radius / tell), 0.0, tell, 0.12, col_of(ed), {"lob": 3.5, "cos": true})
-	m.fx.burst(h.pos + Vector3(0, 1.6, 0), col_of(ed), 10, 7.0, 0.35, -10.0, 0.8, Vector3.UP, 14.0)
+	fx.lob(h.pos + Vector3(0, 1.6, 0), d)
 	m.sfx("pin_hail", h.pos, -2.0)
 	net_ring(c, 1.6, col_of(ed))
 	play("arc_hail")

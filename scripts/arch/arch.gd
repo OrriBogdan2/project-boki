@@ -13,6 +13,13 @@ const DEFAULT := {"light": "thief", "medium": "gunslinger", "heavy": "juggernaut
 static func def(id: String) -> Dictionary:
 	return Content._load("archetypes", id)
 
+## A hero's own body over its class (content "body"): size and build multiply the class look, hit_r
+## replaces the class hit radius, plate is the nameplate height (m). Empty for none.
+static func body(id: String) -> Dictionary:
+	if id == "" or not exists(id):
+		return {}
+	return def(id).get("body", {})
+
 static func ids() -> Array:
 	var out: Array = []
 	for a in ORDER:

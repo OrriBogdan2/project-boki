@@ -3,6 +3,10 @@
 	"name": "Pin",
 	"weight": "light",
 	"color": "#9fe0a8",
+	"body": {
+		"size": 1.15,
+		"hit_r": 0.37
+	},
 	"fantasy": "The warden of high ground. Climbs, reads the field, pins people to walls.",
 	"silhouette": "the long weapon over the shoulder",
 	"card": {
@@ -50,12 +54,12 @@
 		"icon": "vanish",
 		"col": "#8dffa8",
 		"cd": 6.0,
-		"roll": 2.6,
+		"roll": 3.0,
 		"roll_t": 0.16,
 		"time": 2.8,
-		"walk_k": 1.15,
+		"walk_k": 1.1,
 		"stuck_cost": 30.0,
-		"desc": "A quick dodge roll in the direction you move (or aim), then 2.8s as a spirit: rocks, trees, pillars and ability barriers don't stop you (cliffs and ledges still do); you move 15% faster, 35% inside something. Walking into something leaves a spirit orb there for 4s: anyone who touches it walks as a spirit too. Taking damage ends it. If it ends while you're inside something you lose 30 Focus and are put back where you went in.",
+		"desc": "A quick dodge roll in the direction you move (or aim), then 2.8s as a spirit: rocks, trees, pillars and ability barriers don't stop you (cliffs and ledges still do); you move 10% faster, 35% inside something. Walking into something leaves a spirit orb there for 4s: anyone who touches it walks as a spirit too. Taking damage ends it. If it ends while you're inside something you lose 30 Focus and are put back where you went in.",
 		"inside_k": 1.35
 	},
 	"rmb": {

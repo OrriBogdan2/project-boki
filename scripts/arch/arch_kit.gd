@@ -712,6 +712,8 @@ var anim_at := -9.0
 
 ## The kit's full-body move on the wire (Net 0.16.0): the move id and its age in seconds, after the
 ## state array after KinNet.hunter_extra (26-30), at index NET_MOVE_AT. Empty id: nothing playing (an expired move is not sent).
+## m: the shared nameplate height over a hunter (ArchKit.plate_height)
+const PLATE_H := 2.35
 const NET_MOVE_AT := 31
 const NET_MOVE_LIFE := 3.0     # seconds a move is still worth sending (the longest is about 2.5s)
 
@@ -970,6 +972,35 @@ func charge_now() -> Array:
 func charge_k() -> float:
 	return float(chg.get("k", -1.0)) if not chg.is_empty() else -1.0
 
+## The colour of the shared charge tell (the ring at the feet, the ticks, the full flash); kits with their
+## own palette override it.
+func charge_color() -> Color:
+	return Arch.color(id)
+
+## The height (m) the hunter's nameplate and overhead bars sit at: the hero's own (content "body"
+## "plate") or the shared default.
+func plate_height() -> float:
+	return float(Arch.body(id).get("plate", PLATE_H))
+
+## Called on each after-image tick of a dash: a kit with its own after-image draws it and returns true;
+## false leaves the shared one.
+func dash_afterimage() -> bool:
+	return false
+
+## Whether the shared charge tell shows its glowing orb at the hand; kits that draw their own hand tell
+## turn it off.
+func charge_orb() -> bool:
+	return true
+
+func _charge_ball(col: Color) -> Node3D:
+	var g := own_node()
+	var ball := MeshInstance3D.new()
+	ball.mesh = Models.sphere(0.2, 10)
+	ball.material_override = Models.glow_mat(Color(col.lightened(0.2), 1.0))
+	ball.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	g.add_child(ball)
+	return g
+
 func _tick_charge(dt: float) -> void:
 	var cn := charge_now()
 	var src := String(cn[0]); var k := float(cn[1])
@@ -977,7 +1008,7 @@ func _tick_charge(dt: float) -> void:
 		if not chg.is_empty():
 			_charge_release()
 		return
-	var col := Arch.color(id)
+	var col := charge_color()
 	if chg.is_empty() or String(chg["src"]) != src:
 		if not chg.is_empty(): _charge_release()
 		chg = {"src": src, "k": k, "full": false, "tick": 0.0}
@@ -986,13 +1017,8 @@ func _tick_charge(dt: float) -> void:
 		if p != null and int(p.team) != h.team: rc = col.lerp(Feel.RIM_ENEMY, 0.45)
 		var ring: Node3D = m.fx.telegraph_circle(h.pos, 1.15 * float(h.cdat.get("scale", 1.0)), Color(rc, 0.9))
 		chg["ring"] = ring
-		var g := own_node()
-		var ball := MeshInstance3D.new()
-		ball.mesh = Models.sphere(0.2, 10)
-		ball.material_override = Models.glow_mat(Color(col.lightened(0.2), 1.0))
-		ball.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		g.add_child(ball)
-		chg["glow"] = g
+		if charge_orb():
+			chg["glow"] = _charge_ball(col)
 		net_ring(h.pos, 0.8, rc)            # remote players: "they're winding something up"
 	chg["k"] = k
 	var ring2: Node3D = chg.get("ring")
@@ -1048,7 +1074,7 @@ func _charge_release() -> void:
 		Oomph.punch_dir(m, h.aim_dir(), 0.06 + 0.26 * k)
 		if full and m.cam: m.cam.add_trauma(0.12)
 	if k > 0.5:
-		m.fx.burst(h.pos + Vector3(h.aim_dir().x * 0.7, 1.0, h.aim_dir().y * 0.7), Arch.color(id), int(6 + 14 * k), 3.0 + 5.0 * k, 0.3, 0.0, 1.0, Vector3(h.aim_dir().x, 0.1, h.aim_dir().y), 35.0)
+		m.fx.burst(h.pos + Vector3(h.aim_dir().x * 0.7, 1.0, h.aim_dir().y * 0.7), charge_color(), int(6 + 14 * k), 3.0 + 5.0 * k, 0.3, 0.0, 1.0, Vector3(h.aim_dir().x, 0.1, h.aim_dir().y), 35.0)
 
 ## Terrain (a wall, a rock, a ledge face) within `reach` behind `t` along `dir`.
 func terrain_behind(t: Ent, dir: Vector2, reach: float) -> bool:

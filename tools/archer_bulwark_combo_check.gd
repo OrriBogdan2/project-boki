@@ -643,7 +643,8 @@ func _bulwark_combos() -> void:
 	m.step(DT)
 	P.inp["fire"] = false
 	step(m, 1.0)
-	# small mechanics (wiki): it flies at least 5 m, and can't be recalled in its first 0.25 s
+	# small mechanics: it flies at least 2.5 m (a cursor at 2 m lands at 2.5 m), and can't be recalled in its
+	# first 0.25 s
 	P.fire_cd = 0.0
 	aim_at(P, home + Vector3(2.0, 0, 0))
 	P.inp["fire"] = true
@@ -660,7 +661,7 @@ func _bulwark_combos() -> void:
 		str(K.mace.get("st"))
 	)
 	step(m, 0.6)
-	ok("bjorn small: a close cursor still throws 5 m", absf(K.throw_d - 5.0) < 0.6, "d %.1f" % K.throw_d)
+	ok("bjorn small: a close cursor still throws 2.5 m", absf(K.throw_d - 2.5) < 0.6, "d %.1f" % K.throw_d)
 	P.fire_cd = 0.0
 	P.inp["fire"] = true
 	m.step(DT)

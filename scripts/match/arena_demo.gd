@@ -57,13 +57,13 @@ const ANIM_DEMO := {
 	"jug_chainlunge": ["juggernaut", "greatsword", [1.0, 1.5, 1.78, 1.84, 1.9, 2.05, 2.3]],
 	"jug_haul": ["juggernaut", "greatsword", [1.0, 1.24, 1.32, 1.42, 1.52, 1.62, 1.9]],
 	"jug_spin": ["juggernaut", "greatsword", [0.88, 0.92, 0.98, 1.04, 1.1, 1.18, 1.35]],
-	"arc_draw": ["archer", "longbow", [0.5, 0.7, 0.9, 1.1, 1.3, 1.6]],
+	"arc_draw": ["archer", "longbow", [0.45, 0.6, 0.8, 1.0, 1.35, 1.5]],
 	"arc_loose": ["archer", "longbow", [0.8, 0.88, 0.94, 1.0, 1.12, 1.3]],
 	"arc_heavy_wind": ["archer", "longbow", [0.55, 0.7, 0.9, 1.1, 1.3, 1.6]],
 	"arc_heavy": ["archer", "longbow", [1.2, 1.35, 1.42, 1.48, 1.58, 1.8]],
 	"arc_snare": ["archer", "longbow", [0.5, 0.54, 0.58, 0.64, 0.74, 0.9]],
 	"arc_hail": ["archer", "longbow", [0.5, 0.56, 0.64, 0.74, 0.95, 1.2]],
-	"pin_roll": ["archer", "longbow", [0.5, 0.53, 0.56, 0.6, 0.66, 0.8]],
+	"pin_roll": ["archer", "longbow", [0.5, 0.54, 0.58, 0.63, 0.7, 0.8]],
 	"arc_super": ["archer", "longbow", [1.6, 1.66, 1.7, 1.75, 1.85, 2.1]],
 	"arc_tap": ["archer", "longbow", [0.5, 0.56, 0.6, 0.66, 0.74, 0.9]],
 	"arc_perfect": ["archer", "longbow", [0.98, 1.06, 1.12, 1.2, 1.32, 1.5]],
@@ -74,12 +74,12 @@ const ANIM_DEMO := {
 	"pin_deadeye": ["archer", "longbow", [0.5, 0.56, 0.7, 0.9, 1.1, 1.3]],
 	"pin_rundown": ["archer", "longbow", [0.5, 0.58, 0.64, 0.72, 0.85, 1.0]],
 	"arc_plunge": ["archer", "longbow", [0.5, 0.56, 0.62, 0.68, 0.8, 1.0]],
-	"bul_throw": ["bulwark", "tower_shield", [0.5, 0.54, 0.58, 0.64, 0.72, 0.9]],
+	"bul_throw": ["bulwark", "tower_shield", [0.5, 0.6, 0.7, 0.78, 0.92, 1.12]],
 	"bul_recall": ["bulwark", "tower_shield", [0.98, 1.05, 1.12, 1.2, 1.3, 1.5]],
 	"bul_smash_wind": ["bulwark", "tower_shield", [0.5, 0.7, 0.9, 1.1, 1.4, 1.7]],
 	"bul_smash": ["bulwark", "tower_shield", [1.1, 1.2, 1.25, 1.3, 1.4, 1.65]],
 	"bul_bash": ["bulwark", "tower_shield", [0.5, 0.54, 0.58, 0.64, 0.76, 0.95]],
-	"bul_whirl": ["bulwark", "tower_shield", [0.5, 0.55, 0.6, 0.66, 0.75, 0.95]],
+	"bul_whirl": ["bulwark", "tower_shield", [0.5, 0.58, 0.7, 0.76, 0.84, 1.0]],
 	"bul_charge": ["bulwark", "tower_shield", [0.7, 0.75, 0.82, 0.9, 1.0, 1.2]],
 	"bul_short": ["bulwark", "tower_shield", [0.85, 0.92, 0.98, 1.05, 1.15, 1.35]],
 	"bul_mend": ["bulwark", "tower_shield", [0.5, 0.56, 0.64, 0.74, 0.95, 1.25]],
@@ -306,8 +306,9 @@ static func tick(A: Arena, dt: float) -> void:
 				A.set_kin("")
 				P.teleport(D.pos + Vector3(-4.0, 0, 0))
 				A.home = P.pos
-				if m.cam: m.cam.zoom = 0.42
-				m.set_meta("zoom_hold", 0.42)
+				var strip_zoom := _anim_zoom()
+				if m.cam: m.cam.zoom = strip_zoom
+				m.set_meta("zoom_hold", strip_zoom)
 			_aim(P, D)
 			P.inp["move"] = Vector2.ZERO
 			P.hp = P.max_hp
@@ -654,6 +655,14 @@ static func _shot_later(A: Arena, secs: float) -> void:
 		A.m.get_viewport().get_texture().get_image().save_png(path)
 		print("ARENASHOT ", path)
 		A.m.get_tree().quit())
+
+## The camera zoom of an anim strip: 0.42 (close) unless --anim-zoom=<z> asks for another (1.0 is the
+## default gameplay zoom).
+static func _anim_zoom() -> float:
+	for a in OS.get_cmdline_user_args():
+		if String(a).begins_with("--anim-zoom="):
+			return float(String(a).substr(12))
+	return 0.42
 
 static func _at(t: float, dt: float, when: float) -> bool:
 	var w := when - 0.0001          # (a step landing exactly on `when` must count once, whatever the rounding)

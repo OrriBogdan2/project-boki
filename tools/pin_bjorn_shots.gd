@@ -13,7 +13,10 @@ var dir := ""
 var home := Vector3.ZERO
 var lines: Array = []
 var before := false
+var crush_rock := Vector3.INF     # the rock the "crush" shot drives the dummy into
 const DT := 1.0 / 60.0
+## the camera's zoom for the close-up of each shot (1.0 is the default gameplay zoom)
+const CLOSE_ZOOM := 0.45
 
 const SHOTS := [
 	# ------------------------------------------------ Pin
@@ -23,7 +26,8 @@ const SHOTS := [
 		"draw",
 		0.35,
 		3.0,
-		"Draw toward Empowered: the V of two lines closing on the cursor, a glint riding out, the cursor ring filling"
+		"Draw toward Empowered: the feathered V closing on the cursor from the bow, the cursor ring"
+			+ " filling, no glint yet"
 	],
 	[
 		"pin_draw_empowered",
@@ -31,7 +35,8 @@ const SHOTS := [
 		"draw",
 		0.64,
 		3.0,
-		"Empowered ready: the lines merged into one bright line, a flash at the bow"
+		"Empowered ready: the lines merged into one bright line, the leaf glint riding out, a green"
+			+ " fletch burst at the bow"
 	],
 	[
 		"pin_draw_super",
@@ -39,17 +44,33 @@ const SHOTS := [
 		"draw_tgt",
 		1.3,
 		4.0,
-		"Supercharged: a thick white line past the cursor to max range, the white star at the bow,"
-			+ " the dummy ringed at its feet"
+		"Supercharged held: the thick feathered mint line past the cursor to max range, the mint fletch glint at"
+			+ " the bow hand, the dummy ringed at its feet"
 	],
-	["pin_overdraw", "archer", "draw_tgt", 1.85, 4.0, "Overdrawn: the line and the star dim, the draw arm shakes"],
+	[
+		"pin_super_ready",
+		"archer",
+		"draw_tgt",
+		1.18,
+		4.0,
+		"Supercharged comes up: the body flash, a mint fletch burst at the bow, the feathered line past the cursor"
+	],
+	[
+		"pin_quick_draw",
+		"archer",
+		"quick",
+		1.16,
+		3.0,
+		"Quick draw after a perfect release: the next Empowered comes up in 0.38 s (merged line, leaf glint)"
+	],
+	["pin_overdraw", "archer", "draw_tgt", 1.85, 4.0, "Overdrawn: the line and the bow glint dim, the draw arm shakes"],
 	[
 		"pin_perfect",
 		"archer",
 		"perfect",
 		0.68,
 		2.5,
-		"Perfect release: the gold four-point star with its ring beside the bow hand, the cursor star"
+		"Perfect release: Pin's gold fletch burst with its ring at the bow hand (0.13 s), the cursor star"
 	],
 	[
 		"pin_arrow_flight",
@@ -57,7 +78,7 @@ const SHOTS := [
 		"empowered_miss",
 		0.87,
 		3.0,
-		"Empowered arrow in flight: a green bolt with a teal head and a green trail, heading for the cursor"
+		"Empowered arrow in flight: a solid green arrow with a teal head and a green trail, heading for the cursor"
 	],
 	[
 		"pin_spent_arrow",
@@ -73,16 +94,23 @@ const SHOTS := [
 		"super_shot",
 		1.33,
 		4.0,
-		"Supercharged arrow: a wide white-teal beam past the cursor"
+		"Supercharged arrow: the thick mint-teal bolt and its wide 5 m trail past the cursor"
 	],
-	["pin_super_hit", "archer", "super_shot", 1.43, 5.0, "Supercharged hit: the teal X-star burst on the dummy"],
+	[
+		"pin_super_hit",
+		"archer",
+		"super_shot",
+		1.43,
+		5.0,
+		"Supercharged hit: the teal X-star and a mint fletch burst on the dummy"
+	],
 	[
 		"pin_heavy_hold",
 		"archer",
 		"heavy",
 		1.0,
 		3.0,
-		"Heavy Shot held: the V in gold and a gold bar growing from the bow"
+		"Heavy Shot held to full: the gold V and bar, the gold fletch glint at the bow hand"
 	],
 	[
 		"pin_heavy_flight",
@@ -90,7 +118,7 @@ const SHOTS := [
 		"heavy",
 		1.27,
 		4.0,
-		"Heavy Shot: the thick gold arrow with violet fins, the pink crescent at her feet"
+		"Heavy Shot: the gold arrow (1.5x) with violet fins and a gold trail, the pink crescent at her feet"
 	],
 	[
 		"pin_heavy_hit",
@@ -98,7 +126,7 @@ const SHOTS := [
 		"heavy",
 		1.4,
 		5.0,
-		"Heavy Shot impact: red-white burst, dust as the dummy is driven back, the white ring"
+		"Heavy Shot impact: a red star and red-white burst, dust as the dummy is driven back, the white ring"
 	],
 	["pin_snare", "archer", "snare", 0.62, 4.0, "Snare tap: the snare arrow flying"],
 	["pin_spirit_roll", "archer", "spirit", 0.6, 2.0, "Spirit Walk: the dodge roll and its green burst"],
@@ -116,7 +144,7 @@ const SHOTS := [
 		"hail",
 		0.6,
 		3.0,
-		"Hail Wall cast: the curved arc at the cursor distance (everyone sees it for the 0.35 s tell)"
+		"Hail Wall cast: the bow raised high, green arrows lobbed up, the curved arc at the cursor distance"
 	],
 	[
 		"pin_hail_rain",
@@ -141,7 +169,7 @@ const SHOTS := [
 		"throw",
 		1.4,
 		3.0,
-		"Planted at the cursor: tilted in the ground under the gold beacon ray"
+		"Planted at the cursor: standing head-down in the ground (1.5x) under the upright gold beacon ray"
 	],
 	["bjorn_recall", "bulwark", "recall", 1.62, 3.0, "Recall: the hammer flying back"],
 	[
@@ -150,18 +178,40 @@ const SHOTS := [
 		"spin",
 		0.75,
 		1.5,
-		"LMB held: the hammer spinning in his hand, side-on, cursor ring filling"
+		"LMB held: the hammer whirled round over his shoulder in a wide circle with a gold-orange"
+			+ " trail, the gold ring at his feet"
 	],
-	["bjorn_glint", "bulwark", "spin", 1.25, 1.5, "LMB held past 0.6 s: the glint on the hammer head"],
-	["bjorn_flare", "bulwark", "spin", 1.78, 1.5, "Full charge: the flare on the hammer head and on the cursor"],
-	["bjorn_slam", "bulwark", "slam", 1.86, 2.0, "Release: the flaming 180 degree crescent, carried forward"],
+	[
+		"bjorn_glint",
+		"bulwark",
+		"spin",
+		1.25,
+		1.5,
+		"LMB held past 0.6 s: the gold glint riding the whirling hammer head"
+	],
+	[
+		"bjorn_flare",
+		"bulwark",
+		"spin",
+		1.71,
+		1.5,
+		"Full charge: the big gold star flare on the hammer head and the cursor flare"
+	],
+	[
+		"bjorn_slam",
+		"bulwark",
+		"slam",
+		1.86,
+		2.0,
+		"Release: the flaming 180 degree crescent (2.7 m), carried forward, the body upright"
+	],
 	[
 		"bjorn_slam_hit",
 		"bulwark",
 		"slam",
-		1.98,
+		1.9,
 		2.5,
-		"Slam impact: white dust on the dummy, the debris trail as it flies"
+		"Slam impact: the damage number and white dust on the dummy, the debris trail"
 	],
 	[
 		"bjorn_aegis",
@@ -169,18 +219,39 @@ const SHOTS := [
 		"aegis",
 		0.9,
 		1.5,
-		"RMB held: his aegis, a curved gold slab with ribs and a hammer sigil"
+		"RMB held: his aegis, a solid pale-gold slab with ribs, a bright rim and his hammer sigil"
 	],
-	["bjorn_aegis_block", "bulwark", "aegis_block", 1.02, 1.5, "Aegis blocking: the flash and yellow sparks"],
-	["bjorn_aegis_break", "bulwark", "aegis_break", 1.2, 1.5, "Aegis broken: gold shards, SHIELD BROKEN"],
-	["bjorn_smash_dash", "bulwark", "smash", 0.6, 3.0, "360 Smash: the short dash"],
+	[
+		"bjorn_aegis_block",
+		"bulwark",
+		"aegis_block",
+		1.1,
+		1.5,
+		"Aegis blocking: the whole slab flashes, gold sparks off its face"
+	],
+	[
+		"bjorn_aegis_break",
+		"bulwark",
+		"aegis_break",
+		1.14,
+		1.5,
+		"Aegis broken: gold shards, SHIELD BROKEN, rocked back on his feet"
+	],
+	[
+		"bjorn_smash_dash",
+		"bulwark",
+		"smash",
+		0.6,
+		3.0,
+		"360 Smash: the hard 0.17 s run-up, upright, the gold chevron wake behind"
+	],
 	[
 		"bjorn_smash_spin",
 		"bulwark",
 		"smash",
 		0.78,
 		3.5,
-		"360 Smash: the one spin hit on arrival, the red-gold swirl ring"
+		"360 Smash: the one spin hit, the red-orange-gold spiral ring, sliding on"
 	],
 	[
 		"bjorn_purify_column",
@@ -191,7 +262,15 @@ const SHOTS := [
 		"Mending Ground with the hammer in hand: the green column coming down on him, the ring filling"
 	],
 	["bjorn_purify_burst", "bulwark", "purify", 1.62, 1.0, "Mending Ground lands: the green ring bloom"],
-	["bjorn_bash", "bulwark", "bash", 0.58, 2.0, "Bash: the shield shove"],
+	["bjorn_bash", "bulwark", "bash", 0.58, 2.0, "Bash: the shield shove and its gold fan of force"],
+	[
+		"bjorn_crushed",
+		"bulwark",
+		"crush",
+		1.8,
+		1.5,
+		"Passive payoff: a full Crushing Blow drives the dummy into a rock: CRUSHED, stunned, Bjorn healed"
+	],
 	# ------------------------------------------------ the ultimates on X (MANIFEST under <hero>/v2/ult)
 	[
 		"ult_pin_telegraph",
@@ -271,7 +350,7 @@ const PAIRS := [
 		"Gap 3 (perfect release): the frame after letting go on the stage"
 	],
 	["gap1_throw_cursor", "bulwark", "throw", 1.4, 3.0, "Gap 1 (aim): the hammer thrown with the cursor at 6 m"],
-	["gap2_slam_numbers", "bulwark", "slam", 2.1, 2.5, "Gap 2 (numbers) and 4 (swing VFX): a full swing on the dummy"],
+	["gap2_slam_numbers", "bulwark", "slam", 1.95, 2.5, "Gap 2 (numbers) and 4 (swing VFX): a full swing on the dummy"],
 	["gap3_hold_glint", "bulwark", "spin", 1.25, 1.5, "Gap 3 (hold): the swing held 0.9 s"],
 ]
 
@@ -418,6 +497,9 @@ func _input(what: String, t: float) -> void:
 		"perfect":
 			P.inp["fire"] = t < 0.62
 			K.res = 0.0
+		"quick":
+			P.inp["fire"] = t < 0.62 or t > 0.76
+			K.res = 0.0
 		"empowered_miss":
 			T.teleport(home + Vector3(0, 0, 8.0))
 			_aim(home + Vector3(5.0, 0, 0))
@@ -516,6 +598,15 @@ func _input(what: String, t: float) -> void:
 			if at.call(0.3):
 				K.cd["x"] = 0.0
 				K.use_x()
+		"crush":
+			if t < DT:
+				crush_rock = _rock_near(home)
+				P.teleport(crush_rock - Vector3(3.9, 0, 0))
+				P.hp = P.max_hp * 0.6
+			if t < 1.7:
+				T.teleport(crush_rock - Vector3(1.4, 0, 0))
+			_aim(crush_rock - Vector3(1.4, 0, 0))
+			P.inp["fire"] = t > 0.3 and t < 1.72
 		"bash":
 			T.teleport(home + Vector3(2.0, 0, 0))
 			_aim(T.pos)
@@ -588,8 +679,18 @@ func _shot(s: Array, pair: bool) -> void:
 		caption_prefix = "After: "
 	var file := prefix + stem + ".png"
 	img.save_png(dir.path_join(file))
-	var sub := "/ult" if stem.begins_with("ult_") else ""
-	lines.append("%s/v2%s|%s|%s%s" % [nm, sub, file, caption_prefix, caption])
+	lines.append("%s/v2/polish|%s|%s%s (gameplay zoom)" % [nm, file, caption_prefix, caption])
+	# the same moment again from close up (the effects run on one more frame)
+	m.cam.zoom = CLOSE_ZOOM
+	m.cam.zoom_to = CLOSE_ZOOM
+	m.cam.snap(P.pos + Vector3(lead * CLOSE_ZOOM, 0, 0))
+	await main.get_tree().process_frame
+	await main.get_tree().process_frame
+	var close_file := prefix + stem + "_close.png"
+	main.get_viewport().get_texture().get_image().save_png(dir.path_join(close_file))
+	lines.append("%s/v2/polish|%s|%s%s (close-up)" % [nm, close_file, caption_prefix, caption])
+	m.cam.zoom = 1.0
+	m.cam.zoom_to = 1.0
 	P.inp["fire"] = false
 	P.inp["sec_hold"] = false
 	P.inp["move"] = Vector2.ZERO

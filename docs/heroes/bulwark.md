@@ -14,16 +14,16 @@ What the source does: tap throws the hammer to the cursor, where it stays plante
 | Slot | Input | What it does now (our words) | Source behaviour | Difference and why |
 |---|---|---|---|---|
 | Passive | knock into wall/foe | Crushed: stun 0.5, 8 damage, heal 24 (Bash, Shield Charge, full Crushing Blow); Guard from blocking (50 = Shield Slam) | Knockout: knocked into a wall, stunned | The heal and Guard stay our own loop (the footage neither confirms nor contradicts the heal) |
-| LMB | tap | War hammer thrown to the cursor (clamped to 9 m, at least 1.5 m), 24 m/s, through foes (12); stays planted (tilted in the ground under a gold beacon ray with rising chevrons, your team sees foes within 4.5 m) until called back | Lands at the cursor, stays until recalled | Matches; no auto-return |
+| LMB | tap | War hammer thrown to the cursor (clamped to 9 m, at least 2.5 m), 24 m/s, through foes (12); stays planted (head-down in the ground under an upright gold beacon ray with rising chevrons, your team sees foes within 4.5 m) until called back | Lands at the cursor, stays until recalled | Matches; no auto-return |
 | LMB | tap again | Recall: flies back hitting on the way (12), caught with an ember flash | 175 out, 175 back | Equal hits, as the source |
 | LMB | hold | Owner note: the hammer spins in his hand, faster as it charges, while he keeps facing the cursor (walks at 55%); a glint on the head from 0.6 s that grows, a flare and a cursor flare at full (1.25 s). Release: Crushing Blow 36-66 (3x-5.5x the throw), 180 degree reach 2.8 m, knock 5-13, stun 0.4 at full; a flaming crescent (white-yellow core, orange and red edges); the slam carries him 1.6-3.4 m forward in 0.24 s; white dust on the target, a debris trail as it flies | A static charged swing, no lunge (footage) | Spinning and the forward carry follow the owner; glint, flare, crescent and ratios follow the footage |
 | RMB | hold | His aegis: a curved gold slab (3 m chord) with ribs, a hammer sigil and a bright rim, shimmering; sparks and a flash on each block, cracks as it weakens, gold shards and SHIELD BROKEN when it breaks (locked 3 s) | Curved pale gold slab, sparks, a break burst | Matches, our own look |
 | RMB | tap / release | Bash (cone 2.6 m, 12, push 9); Guard 50+: Shield Slam (0.3 s tell, 18, stun 0.6) | Bash only as an augment | Kept as our documented extension |
-| Shift | tap | 360 Smash: a fixed 4.2 m dash (15 m/s, 0.28 s: heavier than the 19 m/s base dash), then one full spin hit around him (2.2 m, 24 = 2x the throw, push 7) with a red-gold swirl ring | Short fixed dash, one 360 spin on arrival (350 = 2x the throw) | Matches; cooldown 9 s (source 9.2) |
+| Shift | tap | 360 Smash: a hard fixed 3.5 m dash (~20 m/s, 0.17 s, the sheet's run-up), sliding on about 1 m through one full spin hit around him (2.2 m, 24 = 2x the throw, push 7) with a red-gold swirl ring | Short fixed dash, one 360 spin on arrival (350 = 2x the throw) | Matches; cooldown 9 s (source 9.2) |
 | Shift | aegis up | Shield Charge (4.2 m, invulnerable, 10, push 11, Crushed on a wall) | - | Our extension, kept |
 | Shift | LMB held | a short plain dash, half a charge, the spin keeps charging | - | Our extension, kept |
 | Shift | long dash | In the air or out of charges: a lumbering shoulder shove (`bul_lumber`), shoving foes aside | (base dash) | Our per-hero base dash variant |
-| E | tap | Mending Ground: at the planted hammer, or on himself with the hammer in hand; a green light column comes down over 1 s with a filling ring everyone sees, then a green ring bloom: heals allies inside 26 (mends the aegis 60 while raised), slows foes | Purify Zone at the hammer or on himself | Matches |
+| E | tap | Mending Ground: at the planted hammer, or on himself with the hammer in hand; a green light column comes down over 1 s with a filling ring everyone sees, then a green ring bloom: heals allies inside 26 (mends the aegis 60 while raised), slows foes. Cooldown 11 s | Purify Zone at the hammer or on himself (10 s) | Matches the source ratio to the 360 Smash (10 : 9.2) |
 | X | tap (level 6) | Faultline: planted 0.4 s with the hammer overhead while a 16 m lane of four cells, 4 m long and 4.5 m wide, shows to everyone; the slam strikes the near cell (4, stun 0.3), then the ground erupts cell by cell (0.15 s apart) and throws each foe once (18, stun 0.5, slowed 50% for 1.5 s). A wall, ledge or drop stops it. A glowing scar stays 10 s and slows foes on it 20%. A stun in the wind-up interrupts it (cooldown back to 8 s). Cooldown 33 s | Earthshatter / Abyssalbreaker: a fissure down a lane, a small first hit with a brief stun, cascading eruptions with a heavy slow, blocked by walls, a lingering crack | Lane 2.5 bh wide and 8.9 bh long, as the sheet. Eruption 1.5x the throw (source 1.2x) |
 | R | - | the Boki Merge | - | R is the Merge for every hero. No slot held a folded Earthshatter, so nothing is unfolded |
 
@@ -42,13 +42,20 @@ What the source does: tap throws the hammer to the cursor, where it stays plante
 - Faultline: a stun, a knock or going down in the wind-up interrupts it, and the cooldown comes back to 8 s (as the old R fuse did).
 - Faultline: a raised ledge, a wall tile or a drop stops the fissure at that cell (wiki: blocked by walls); the near cell always strikes.
 - Faultline hits each foe once per cast (the near cell's strike, then one eruption).
-- The 5 m minimum throw beats the cursor when the cursor is closer (source patch note), so a point-blank click lands 5 m out.
+- The throw flies at least 2.5 m: the owner wants it to land where the cursor is anywhere in range, so the source patch note's 5 m minimum is cut to 2.5 m (a point-blank click still clears his own feet).
+- Mending Ground's cooldown is 11 s against the 360 Smash's 9 s, the source's ratio (10 : 9.2).
+
+## Body and movement (hero sheet: Body, scale and movement feel)
+- About 1.15 of a medium tall (content `body.size` 0.975 over the heavy look) and ~1.35 wide (`body.build` 1.18 over the heavy build); the hit radius stays 0.5 so the wider model isn't an easier target.
+- Runs pitched far forward (~0.32 rad at a full run), the shield shoulder leading, shoulders square; quick steps at `spd*2.9` (HunterAnim.STRIDE), as fast as the lights.
+- His dash after-image is his own: a gold chevron wake at chest height (BjornFx.afterimage), not the shared ghost.
+- Nameplate at 2.6 m (`body.plate`, ArchKit.plate_height for the HUD branch to read).
 
 ## Small mechanics (fine print; source, footage, ours)
 | Mechanic | Source | Footage | Ours | Check |
 |---|---|---|---|---|
 | The throw lands at the cursor, clamped to range | sheet bjorn.md, owner note | confirms (0408, 0024-0029) | built | `bjorn aim: the hammer lands at the cursor` |
-| The hammer flies at least 5 m | [wiki patch 20.11.24](https://supervive.wiki.gg/wiki/Oath) | consistent | built: a close cursor still throws 5 m | `bjorn small: a close cursor still throws 5 m` |
+| The hammer flies a minimum distance | [wiki patch 20.11.24](https://supervive.wiki.gg/wiki/Oath) (5 m) | consistent | built at 2.5 m so close clicks land near the cursor (owner: anywhere in range) | `bjorn small: a close cursor still throws 2.5 m` |
 | A recall can't come within 0.25 s of the throw | [wiki patch 20.11.24](https://supervive.wiki.gg/wiki/Oath) | consistent (0.4 s round trips) | built | `bjorn small: a recall in the first 0.25 s is ignored` |
 | It passes through enemies, hitting out and back for the same damage | [wiki: Magnetic Hammer](https://supervive.wiki.gg/wiki/Oath) | confirms (0041, 0043) | built | `bulwark LMB` lines |
 | Allies get vision round the planted hammer | [wiki](https://supervive.wiki.gg/wiki/Oath) | not visible | built (already ours) | archetype check |
@@ -102,7 +109,7 @@ Heavy class (193 HP): throw 12 and recall 12; Crushing Blow 36-66 (3x and 5.5x t
 | RMB hold (aegis) | `bul_guard` (held) | braced low behind it |
 | RMB tap / release (Bash) | `bul_bash`; Shield Slam `bul_slamshield` | the slam has its own 0.3 s wind-up |
 | Aegis broken | `bul_break` | rocked back, shield arm flung wide |
-| Shift (360 Smash) | `bul_whirl` | dash lean 0.22 s, then one full turn |
+| Shift (360 Smash) | `bul_whirl` | a hard 0.17 s run-up, one full turn in 0.16 s with the hammer at arm's length while he slides on, a low crouched recovery to 0.58 s |
 | Shift aegis up / LMB held / long dash | `bul_charge`, `bul_short`, `bul_lumber` | |
 | E (Mending Ground) | `bul_mend` | hammer hauled to the sky, driven down |
 | Payoffs / procs | `bul_crush`, `bul_armed` | the hammer raised in triumph; a Guard pip shrug |

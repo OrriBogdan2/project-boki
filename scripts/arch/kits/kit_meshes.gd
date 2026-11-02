@@ -30,9 +30,10 @@ static func band(r0: float, r1: float, a0: float, a1: float, seg := 32) -> Array
 	_cache[key] = mesh
 	return mesh
 
-## A standing curved wall of radius r and height hgt round the origin, from angle a0 to a1 (as band).
-static func wall(r: float, a0: float, a1: float, hgt: float, seg := 24) -> ArrayMesh:
-	var key := "wall|%.2f|%.3f|%.3f|%.2f|%d" % [r, a0, a1, hgt, seg]
+## A standing curved wall of radius r and height hgt round the origin, from angle a0 to a1 (as band); its
+## top edge sits `lean` metres further out than its foot.
+static func wall(r: float, a0: float, a1: float, hgt: float, seg := 24, lean := 0.0) -> ArrayMesh:
+	var key := "wall|%.2f|%.3f|%.3f|%.2f|%d|%.2f" % [r, a0, a1, hgt, seg, lean]
 	if _cache.has(key):
 		return _cache[key]
 	var st := SurfaceTool.new()
@@ -44,7 +45,9 @@ static func wall(r: float, a0: float, a1: float, hgt: float, seg := 24) -> Array
 		var b1 := lerpf(a0, a1, u1)
 		var q0 := Vector3(sin(b0) * r, 0, -cos(b0) * r)
 		var q1 := Vector3(sin(b1) * r, 0, -cos(b1) * r)
-		var p := [q0 + Vector3(0, hgt, 0), q0, q1, q1 + Vector3(0, hgt, 0)]
+		var top0 := q0 * (r + lean) / r + Vector3(0, hgt, 0)
+		var top1 := q1 * (r + lean) / r + Vector3(0, hgt, 0)
+		var p := [top0, q0, q1, top1]
 		var uv := [Vector2(u0, 0), Vector2(u0, 1), Vector2(u1, 1), Vector2(u1, 0)]
 		var n := Vector3(sin((b0 + b1) * 0.5), 0, -cos((b0 + b1) * 0.5))
 		for k in [0, 1, 2, 0, 2, 3]:

@@ -3,6 +3,11 @@
 	"name": "Bjorn",
 	"weight": "heavy",
 	"color": "#8fd0ff",
+	"body": {
+		"size": 0.975,
+		"build": 1.18,
+		"plate": 2.6
+	},
 	"fantasy": "The squad's shield. Holds the line with his aegis, plants his hammer where the fight is, and heals the spot.",
 	"silhouette": "the shield shape and the banner",
 	"card": {
@@ -65,7 +70,7 @@
 			1.6,
 			3.4
 		],
-		"throw_min": 5.0,
+		"throw_min": 2.5,
 		"recall_lock": 0.25
 	},
 	"dash": {
@@ -74,15 +79,15 @@
 		"icon": "cleave",
 		"col": "#cfe8ff",
 		"cd": 9.0,
-		"whirl": 4.2,
-		"whirl_speed": 15.0,
+		"whirl": 3.5,
+		"whirl_speed": 20.5,
 		"whirl_kb": 7.0,
 		"whirl_dmg": 24.0,
 		"charge": 4.2,
 		"charge_speed": 18.0,
 		"charge_kb": 11.0,
 		"charge_dmg": 10.0,
-		"desc": "360 Smash: a 4.2m dash (0.28s), then one full spin of the hammer around you (2.2m): 24 damage, push 7. With the aegis raised it's a Shield Charge: 4.2m behind the aegis, invulnerable for its length, 10 damage and push 11 (into a wall or a foe: Crushed). Shift while spinning up a Crushing Blow: a short plain dash that costs half a charge.",
+		"desc": "360 Smash: a hard 3.5m dash (0.17s) that slides on through one full spin of the hammer around you (2.2m): 24 damage, push 7. With the aegis raised it's a Shield Charge: 4.2m behind the aegis, invulnerable for its length, 10 damage and push 11 (into a wall or a foe: Crushed). Shift while spinning up a Crushing Blow: a short plain dash that costs half a charge.",
 		"short": 2.6,
 		"spin_r": 2.2
 	},
@@ -137,7 +142,7 @@
 		"short": "Mend",
 		"icon": "dome",
 		"col": "#8fe3c8",
-		"cooldown": 16.0,
+		"cooldown": 11.0,
 		"reach": 0.0,
 		"radius": 3.5,
 		"delay": 1.0,

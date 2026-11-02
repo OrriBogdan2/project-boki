@@ -20,6 +20,8 @@ extends RefCounted
 ##   all     bool    foes and allies see it too (an area someone must dodge); default false = your own
 ##                   aim only. A foe's shows lerped toward the hostile rim colour.
 ##   dur     float   s, how long it stays without a refresh (default 0.1)
+##   fletch  float   lines and Vs only: 0 = plain; > 0 feathers the line with barbs swept back toward
+##                   the hunter (Pin's draw), this big
 
 const BH := 1.8           # m in one body height (the hero sheets measure in bh)
 
@@ -243,7 +245,8 @@ static func _base(h: Hunter, kind: String, p: Dictionary) -> Dictionary:
 	return {"kind": kind, "col": p.get("col", hero_col(h)), "col2": p.get("col2", accent_col(h)),
 		"alpha": float(p.get("alpha", 1.0)), "hot": clampf(float(p.get("hot", 0.0)), 0.0, 1.0),
 		"lw": float(p.get("lw", AimShapes.LW)), "all": bool(p.get("all", false)),
-		"keep": maxf(AimDraw.KEEP, float(p.get("dur", AimDraw.KEEP))), "y": h.pos.y}
+		"keep": maxf(AimDraw.KEEP, float(p.get("dur", AimDraw.KEEP))), "y": h.pos.y,
+		"fletch": float(p.get("fletch", 0.0))}
 
 ## At full charge: hot unless the kit set it, and the full colour if it gave one.
 static func _full(e: Dictionary, p: Dictionary, k: float) -> void:

@@ -16,12 +16,12 @@ Where the footage and our older doc disagree, the footage (the newer version) wi
 |---|---|---|---|---|
 | Passive | always | Focus (fills standing still or sneaking, from snares and pins) + Hawk Sense (foes under half health show through cover within 22 m) + a knock heals 18 (and, as for every hero, the takedown reset returns a dash charge) | Soul Hunter: injured hunters seen through fog; tall-ledge climb | Focus/Deadeye stays as our own loop. The ledge climb has no heightmap equivalent and is left out |
 | LMB | tap | Released before Empowered: 15 damage, lands at the cursor | Weak tap shot (not isolated) | Assumed to land at the cursor too |
-| LMB | hold | Empowered at 0.6 s (30, lands at the cursor up to 12 m); Supercharged at 1.15 s (60, flies past the cursor to 16 m). V reticle, stage flashes, white body flash, thick white line and target ring at Supercharged | Same stages and reticle | Timings at the low end of the footage's ranges (ratio 1 : 1.9) |
-| LMB | perfect | Let go within 0.15 s of a stage coming up: no extra damage, the next draw runs 1.6x until Empowered; a gold four-point star with a ring beside the bow hand, the cursor star, `arc_perfect` | The next Empowered charge is faster; a gold star by the bow hand | The 1.6x is our pick (not measurable at 5 fps) |
-| LMB | overdraw | Held 0.5 s past Supercharged: the line and star dim, the arm shakes (`arc_over`); the arrow does half | About 50% (263 vs 505) | Matches the ratio |
+| LMB | hold | Empowered at 0.6 s (30, lands at the cursor up to 12 m); Supercharged at 1.15 s (60, flies past the cursor to 16 m). Feathered V reticle (barbs swept back to the bow) closing on the cursor, a leaf glint and a green fletch burst when a stage comes up, a body flash, a thick mint line past the cursor to 16 m and a target ring at Supercharged; the fletch glint at the bow hand only while a stage is ready | Same stages and reticle | Timings at the low end of the footage's ranges (ratio 1 : 1.9) |
+| LMB | perfect | Let go within 0.15 s of a stage coming up: no extra damage, the next draw runs 1.6x until Empowered; a brief gold fletch burst (her own motif: feathers radiating from a core, 1.1 m, 0.13 s) with a ring at the bow hand, a higher-pitched shing, the cursor star, `arc_perfect` | The next Empowered charge is faster; a gold star by the bow hand | The 1.6x is our pick (not measurable at 5 fps) |
+| LMB | overdraw | Held 0.5 s past Supercharged: the line and the bow glint dim, the arm shakes (`arc_over`); the arrow does half | About 50% (263 vs 505) | Matches the ratio |
 | RMB | tap | Snare (root 0.6, a Tripwire on a miss) | Impaling Shot tap (uncharged) | Kept as our extension: it feeds Focus, which drives the Deadeye |
 | RMB | hold | Heavy Shot: the V tinted gold plus a gold bar from the bow that grows to 2 body heights with the charge; full at 1.1 s; pierces, knocks back; into a wall within 3 m: a wall hit and a 1.2 s stun (PINNED). Thick gold arrow with violet fins; red-white burst, dust and a white ring on impact; a pink crescent at the feet on release | Same telegraph, arrow and impact | The 1.2 s wall stun stays from the earlier pass |
-| Shift | tap | Spirit Walk: a 2.6 m dodge roll (0.16 s, invulnerable), then 2.8 s walking 15% faster through rocks, trees, pillars and ability barriers (not cliffs). Damage ends it; ending inside something costs 30 Focus and puts her back where she went in. Her screen tints dark blue while inside; a green shell over her | Spirit Walk: dodge roll, 2.8 s through walls and objects; damage ends it; ending inside a wall costs 30 mana and teleports back | Mana is Focus here. Cooldown 6 s on our charge system instead of the source's mana gate |
+| Shift | tap | Spirit Walk: a 3 m dodge roll (0.16 s, invulnerable) that flows straight into the crouched spirit run, then 2.8 s walking 10% faster through rocks, trees, pillars and ability barriers (not cliffs). Damage ends it; ending inside something costs 30 Focus and puts her back where she went in. Her screen tints dark blue while inside; a green shell over her | Spirit Walk: dodge roll, 2.8 s through walls and objects; damage ends it; ending inside a wall costs 30 mana and teleports back | Mana is Focus here. Cooldown 6 s on our charge system instead of the source's mana gate |
 | Shift | long dash | In the air or out of charges: a 4.2 m flick with a sideways tumble (`pin_flick`) and a green streak | (base dash) | Our per-hero base dash variant |
 | E | tap | Hail Wall: lobbed up (0.35 s, everyone sees the arc), then 4.4 s of rain on an arc round her, 120 degrees, at the cursor distance (2-9 m), 1.8 m deep: 5 per 0.5 s, slow 35%, blight (healing barely takes) with blue burn flames. Seven translucent green panels with fletch posts, a ground glow, arrows streaking down | Rain of Arrows: an arc concentric to the hunter, about 120 degrees, at the cursor distance, about 4.4 s | Cooldown 9 s (source 8.3 s with RMB 9 s: the same ratio to our RMB) |
 | X | tap (level 6) | Starpiercer: no cast lock; the next 3 bow shots within 6 s need no draw. Each LMB press nocks 0.3 s, then looses a beam that pierces every foe to 18 m (1.5x Empowered), knocks back 4 and strips 10 armor: 18, 18, then 25 on the last, which finishes a hunter it leaves under 12%. Cooldown 36 s. Telegraph: the beam's lane and a ticked ring at her feet; three pips and a glowing bow everyone sees | Primal Forces: next 3 shots empowered (no charge, 6 s, piercing, longer range, knockback, armor shred, the final shot executes) | Damage scaled down from the source's ratio (a beam is about a Supercharged arrow there; here 0.3x, final 1.39x the beam as the source's 1.41x) so the ult then a merge never takes a full-health light hunter down. Deadeye stays: it is the Focus payoff on a rooted foe, not a three-shot window, so nothing is unfolded |
@@ -34,7 +34,7 @@ Where the footage and our older doc disagree, the footage (the newer version) wi
 - A tap shot (before Empowered) does 15 and lands at the cursor.
 - The Impaling Shot's wall stun stays 1.2 s and its full charge 1.1 s (the earlier pass).
 - "Cremating" a burning enemy with a knock is flavour, not a mechanic: not built.
-- During Spirit Walk she can still shoot and cast, and moves 15% faster (35% inside something).
+- During Spirit Walk she can still shoot and cast, and moves 10% faster (35% inside something; the sheet measures +5-10% outside).
 - The spirit orb lasts 4 s and gives anyone who touches it (ally or foe) one 2.8 s Spirit Walk; they get no roll and no snap-back.
 - Cremation is +10 damage and a longer burn on a foe knocked by the Heavy Shot while it stands in her burning Hail Wall.
 - Not built: the double-wall climb (no heightmap equivalent) and Hail Wall damaging wisps (our downed hunters take no ability damage).
@@ -45,6 +45,12 @@ Where the footage and our older doc disagree, the footage (the newer version) wi
 - Starpiercer beams don't spend Focus and can't be Deadeyes (the two payoffs stay separate).
 - "Inside something" means a rock, tree or pillar tile, or a movement-blocking ability barrier; terrain cliffs and ledges are never passable.
 
+## Body and movement (hero sheet: Body, scale and movement feel)
+- Scale ~0.98 of a medium (content `body.size` 1.15 over the light class look), slim build kept; hit radius 0.37 (`body.hit_r`).
+- Quick, short steps: stride rate `spd*2.9` (HunterAnim.STRIDE); the tall run stays.
+- Her dash after-image is her own: three green fletch streaks at hip, chest and shoulder height (PinFx.afterimage), not the shared ghost.
+- Nameplate height: the shared 2.35 m fits at the new scale (ArchKit.plate_height, read by the HUD branch).
+
 ## Small mechanics (fine print; source, footage, ours)
 | Mechanic | Source | Footage | Ours | Check |
 |---|---|---|---|---|
@@ -53,7 +59,7 @@ Where the footage and our older doc disagree, the footage (the newer version) wi
 | Perfect shots ease the self-slow of drawing | [wiki: Greenwood Bow](https://supervive.wiki.gg/wiki/Myth) | not visible | built: the draw after a perfect slows you to 0.85, not 0.7 | `pin small: after a perfect...` |
 | Overdraw halves the shot | sheet pin.md | confirms (0252-0256) | built | `pin bow: overdrawn` |
 | Spirit Walk: dodge roll, then 2.8 s through walls and objects, not terrain | [wiki: Phase Walk](https://supervive.wiki.gg/wiki/Myth), sheet | confirms (0360) | built | `combo pin: Spirit Walk passes...` |
-| +50 move speed while inside terrain | [wiki: Phase Walk](https://supervive.wiki.gg/wiki/Myth) | not measurable | built: x1.35 inside (x1.15 elsewhere) | `pin small: faster inside...` |
+| +50 move speed while inside terrain | [wiki: Phase Walk](https://supervive.wiki.gg/wiki/Myth) | not measurable | built: x1.35 inside (x1.1 elsewhere) | `pin small: faster inside...` |
 | Walking into a wall leaves a phase orb; allies or enemies touching it also phase | [wiki: Phase Walk](https://supervive.wiki.gg/wiki/Myth) | not shown | built: a 4 s spirit orb at the entry; anyone touching it walks as a spirit for 2.8 s | `pin small: anyone touching the orb...` |
 | Taking damage ends it; ending inside a wall costs 30 mana and teleports back | [wiki](https://supervive.wiki.gg/wiki/Myth), sheet | card text | built (30 Focus) | `pin: damage ends...`, `combo pin: ... ending inside a rock` |
 | Knocking an enemy restores a dash charge | [wiki: Phase Walk](https://supervive.wiki.gg/wiki/Myth) | not shown | built (now main's takedown reset for every hero) | `combo archer: knock > heal + dash charge` |

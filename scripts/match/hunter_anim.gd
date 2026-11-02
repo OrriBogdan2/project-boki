@@ -646,7 +646,7 @@ func update(dt: float, s: Dictionary) -> void:
 	# ---------------------------------------------------------------- the walk phase and footsteps
 	var ph0 := ph
 	if moving:
-		ph += dt * spd * (2.15 if cls != "heavy" else 1.95)
+		ph += dt * spd * float(STRIDE.get(arch, 2.15 if cls != "heavy" else 1.95))
 		if int(floor(ph / PI)) != int(floor(ph0 / PI)):
 			stepped = true
 	# strafing and backpedalling: the legs turn toward where you're going; backwards they swing the other way
@@ -831,7 +831,9 @@ func update(dt: float, s: Dictionary) -> void:
 	elif arch == "gunslinger":
 		roll += still * 0.05         # a cocked hip at rest
 	elif arch == "bulwark":
-		yaw *= 0.5                   # the shoulders stay square, a moving wall
+		yaw *= 0.5                   # the shoulders stay square, a moving wall...
+		pitch -= r1 * 0.32           # ...pitched far forward at a run, the shield shoulder leading
+		yaw += r1 * 0.3
 	# dodge poses
 	if dash_k > 0.01:
 		match dash_kind:
@@ -1294,6 +1296,9 @@ const KMOVES := {
 		[0.70, {"p": 0.15, "lift": 0.06, "fr": Vector3(0.2, 0.3, -0.35), "rw": 1.0}],
 		[1.10, {}]]},
 }
+## Stride rate (walk phase per metre) of heroes whose step differs from their class: quick, short steps
+## (their hero sheets measure ~2.3-2.5 strides a second at a run).
+const STRIDE := {"archer": 2.9, "bulwark": 2.9}
 const KM_CH := ["p", "y", "r", "lift", "fx", "fz", "fy", "sq", "lw", "hw", "rw", "bw", "rad", "gp"]
 var km := {}                   # the kit move's channels this frame (empty: none)
 var km_id := ""

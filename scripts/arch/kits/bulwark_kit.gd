@@ -152,6 +152,18 @@ func move_k() -> float:
 		k = 0.0
 	return k
 
+## The shared charge ring at his feet burns in his gold; the hammer head carries the hand tell (BjornFx).
+func charge_color() -> Color:
+	return BjornFx.GOLD
+
+func charge_orb() -> bool:
+	return false
+
+## His dash after-image: a gold chevron wake instead of the shared ghost.
+func dash_afterimage() -> bool:
+	fx.afterimage(h.position, h.face, float(h.cdat.get("scale", 1.0)))
+	return true
+
 ## Behind the raised shield you can't swing or throw.
 func fire_ok() -> bool:
 	return wall.is_empty() and not ult.planted()
@@ -361,7 +373,7 @@ func _throw() -> void:
 	h.fire_cd = float(md["throw_rate"])
 	var at := h.pos + Vector3(0, 1.0, 0)
 	# it lands at the cursor, clamped to its range
-	var dist := AimMode.dist(h, float(md["throw_range"]), AimMode.CURSOR, float(md.get("throw_min", 5.0)))   # (wiki: at least 5 m)
+	var dist := AimMode.dist(h, float(md["throw_range"]), AimMode.CURSOR, float(md.get("throw_min", 2.5)))
 	throw_at = m.time
 	mace = {"st": "fly", "pos": at, "dir": h.aim_dir(), "d": 0.0, "to": dist, "hit": {}, "t": 0.0}
 	throws += 1
@@ -534,8 +546,7 @@ func fire_rmb(c: Dictionary) -> void:
 		var stg := stage("rmb", {"delivery": {"type": "cone", "radius": float(bd["radius"]), "angle": float(bd["angle"])}, "effects": effs})
 		run(stg, cx("rmb", "shield_slam" if slam else "bash", aim(), {"no_floor": true, "hit_extra": {"heavy": true}}))
 		var dv := h.aim_dir()
-		m.fx.cone(h.pos + Vector3(0, 0.1, 0), dv, float(bd["radius"]), res_col() if slam else col_of(rmb_def()))
-		m.fx.flash(h.pos + Vector3(dv.x * 0.9, 1.0, dv.y * 0.9), res_col() if slam else Color("d8e8ff"), 0.9, 0.06)
+		fx.bash(h.pos, dv, float(bd["radius"]), slam)
 		m.sfx("bjorn_bash", h.pos, -1.0, 0.85 if slam else 1.0)
 		Feel.shake(m, "t3" if slam else "t2", h, h.pos)
 		if h.is_local(): Oomph.punch_dir(m, dv, 0.3 if slam else 0.18)
@@ -593,21 +604,29 @@ func on_dash(use_ex: bool) -> bool:
 		st["last_dash"] = "lumber"
 		play("bul_lumber")
 		for i in 4:
-			m.later(0.07 * i, func(): if is_instance_valid(h): m.fx.dust(h.pos, 5); m.fx.burst(h.pos + Vector3(0, 0.6, 0), Color(String(d.get("color", "#8fd0ff"))), 3, 1.2, 0.3, 0.0, 1.2))
+			m.later(0.07 * i, func(): if is_instance_valid(h): m.fx.dust(h.pos, 5); m.fx.burst(h.pos + Vector3(0, 0.6, 0), BjornFx.GOLD, 3, 1.2, 0.3, 0.0, 1.2))
 		return true
 	# 360 Smash: a short fixed dash in the aim (or move) direction, then ONE full spin hit around him
 	var dist2 := float(dd["whirl"]) + (1.0 if rank("dash") >= 3 else 0.0)
 	var t2 := dist2 / float(dd["whirl_speed"])
-	travel(dist2, t2, {"invuln": 0.1, "trail": "dust"}, use_ex)
+	var wd := dash_dir()
+	travel(dist2, t2, {"invuln": 0.1, "trail": "dust", "dir": wd}, use_ex)
 	st["last_dash"] = "whirl"
 	play("bul_whirl")
-	m.fx.burst(h.pos + Vector3(0, 0.2, 0), Color("e6d8ff"), 8, 3.0, 0.2, 2.0, 0.8)
+	m.fx.burst(h.pos + Vector3(0, 0.2, 0), BjornFx.GOLD, 8, 3.0, 0.2, 2.0, 0.8)
 	m.later(t2, func():
-		if is_instance_valid(h) and not h.downed and not KinMerge.active(h): _spin_hit())
+		if is_instance_valid(h) and not h.downed and not KinMerge.active(h): _spin_hit(wd))
 	return true
 
-## The 360 Smash's spin on arrival: one hit all round him, a red-gold swirl ring.
-func _spin_hit() -> void:
+## m/s he keeps sliding forward with through the 360 Smash's spin (about 1 m)
+const SPIN_GLIDE := 6.0
+
+## The 360 Smash's spin on arrival: one hit all round him, a red-gold swirl ring, still sliding on along
+## `wd`.
+func _spin_hit(wd: Vector2) -> void:
+	if h.grounded:
+		h.vel.x += wd.x * SPIN_GLIDE
+		h.vel.z += wd.y * SPIN_GLIDE
 	var dd := dash_def()
 	var r := float(dd.get("spin_r", 2.2))
 	spins += 1

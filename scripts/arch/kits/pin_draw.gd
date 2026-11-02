@@ -6,18 +6,22 @@ extends RefCounted
 ## - Stages (content/weapons/longbow.json "draw"): a tap shot before stage 1, Empowered at stage 1,
 ##   Supercharged at stage 2. A tap or Empowered shot lands at the cursor (clamped to its range); a
 ##   Supercharged shot flies its full range past the cursor (AimMode via h.shot_aim).
-## - Reticle (world, own player): a thin line to the cursor at rest; drawing, a V of two lines that opens
-##   "open" degrees and closes into one bright line at each stage, a glint riding out along it, the
-##   cursor charge ring filling over the whole draw. Stage 1 ready: the lines merge, a flash at the bow.
-##   Stage 2 ready: the body flashes white, a thick white line out to max range, a white star at the
-##   bow, the first foe under it ringed at the feet. Overdrawn: the line and the star dim.
+## - Reticle (world, own player), all feathered (barbs swept back toward the bow): a thin line to the
+##   cursor at rest; drawing, a V of two lines from the bow that close on the cursor, the cursor charge
+##   ring filling over the whole draw. Stage 1 ready: the lines merge into one bright line, a leaf glint
+##   rides out along it and a green fletch burst flashes at the bow. Stage 2 ready: the body flashes, a
+##   thick mint line runs past the cursor to the shot's full range, the first foe under it ringed at the
+##   feet. The fletch glint at the bow hand shows only while a stage is ready. Overdrawn: all of it dims.
 ## - Perfect release: let go within perfect_t of a stage coming up: the next draw runs quick_k faster
-##   until its stage 1 (no extra damage), a gold four-point star with a ring beside the bow hand.
+##   until its stage 1 (no extra damage), a brief gold fletch burst with a ring at the bow hand.
 ## - Overdraw: held overdraw_t past the last stage, the arrow does overdraw_k of its damage.
 
 const LINE_A := 0.35           # the faint resting aim line's strength
 const MERGE_T := 0.12          # s the merged bright line holds at stage 1 before the V re-opens
-const SUPER_COL := Color("f2fffb")
+const SUPER_COL := Color("a8ffe0")
+const STAGE_COL := Color("e6ffd0")
+## the feather barbs on her draw lines (m at the bow end)
+const FLETCH := 0.22
 const TGT_COL := Color("d8ff6a")
 
 var k: ArcherKit
@@ -97,9 +101,9 @@ func _perfect() -> void:
 	var d := h.aim_dir()
 	var side := Vector2(-d.y, d.x)
 	var at := h.pos + Vector3(d.x * 0.45 + side.x * 0.35, 1.15 * _sc(), d.y * 0.45 + side.y * 0.35)
-	k.fx.star(at, 1.3, PinFx.GOLD, 0.22, 1.0, 0.0, 0.8)
+	k.fx.fletch_burst(at, 1.1, PinFx.GOLD, 0.13, 0.07, 1.0)
 	AimKit.perfect(h)
-	k.m.sfx("pin_perfect", h.pos, -3.0 if h.is_local() else -8.0)
+	k.m.sfx("pin_perfect", h.pos, -3.0 if h.is_local() else -8.0, 1.25)
 	if h.is_local(): Oomph.punch_dir(k.m, d, 0.2)
 
 func _sc() -> float:
@@ -116,23 +120,24 @@ func tick() -> void:
 	var s := stage_t()
 	var col := Color(String(k.d.get("color", "#9fe0a8")))
 	if h.wpn.has("draw") and not drawing and k.tells_visible() and h.can_fire():
-		AimKit.line(h, "draw_rest", {"alpha": LINE_A, "col": col})
+		AimKit.line(h, "draw_rest", {"alpha": LINE_A, "col": col, "fletch": FLETCH * 0.6})
 	if drawing:
 		if was < s.x and t >= s.x:
 			k.m.sfx("pin_stage", h.pos, -6.0 if h.is_local() else -10.0)
-			k.fx.star(bow_at(), 0.7, Color("fff6c0"), 0.12)
-			AimKit.flare(h, {"col2": Color("fff6c0")})
+			k.fx.fletch_burst(bow_at(), 0.8, PinFx.GREEN, 0.05, 0.1, 0.0, 5.0)
+			AimKit.flare(h, {"col2": STAGE_COL})
 		if was < s.y and t >= s.y:
 			k.m.sfx("pin_super", h.pos, -3.0 if h.is_local() else -7.0)
-			h.flash_t = 0.12           # the whole body flashes white once
-			AimKit.flare(h, {"col2": Color.WHITE})
+			h.flash_t = 0.12           # the whole body flashes once
+			k.fx.fletch_burst(bow_at(), 1.0, SUPER_COL, 0.06, 0.12, 0.6, 5.0)
+			AimKit.flare(h, {"col2": SUPER_COL})
 			k.net_ring(h.pos, 1.3, k.res_col())
 		if was < over_t() and t >= over_t():
 			k.m.sfx("pin_overdraw", h.pos, -10.0, 0.9)
 			k.play("arc_over")
 		_reticle(t, s, col)
-	else:
-		k.fx.hold_bow_star(Vector3.ZERO, 0.0)
+	elif was >= 0.0:
+		k.fx.bow_glint_at(Vector3.ZERO, 0.0, col)
 		tgt = null
 	if drawing and was < 0.0:
 		k.play("arc_draw")
@@ -165,9 +170,11 @@ func _reticle(t: float, s: Vector2, col: Color) -> void:
 			kv = 1.0
 		else:
 			kv = clampf((t - s.x - MERGE_T) / maxf(0.05, s.y - s.x - MERGE_T), 0.0, 0.999)
-		var c2 := Color("b6ff8a") if t < s.x else Color("e6ffd0")
-		AimKit.vee(h, "draw", {"k": kv, "glint": fmod(t * 1.6, 1.0) * 0.6, "col": col, "col2": c2})
-		k.fx.hold_bow_star(Vector3.ZERO, 0.0)
+		var c2 := Color("b6ff8a") if t < s.x else STAGE_COL
+		# the leaf glint rides out along the line only while it's merged (a stage just came up)
+		var glint := clampf((t - s.x) / MERGE_T, 0.0, 1.0) if kv >= 1.0 else -1.0
+		AimKit.vee(h, "draw", {"k": kv, "glint": glint, "col": col, "col2": c2, "fletch": FLETCH})
+		k.fx.bow_glint_at(bow_at(), 0.55 if t >= s.x else 0.0, PinFx.GREEN)
 		tgt = null
 		return
 	# Supercharged: the thick white line to max range (dims once overdrawn)
@@ -179,12 +186,13 @@ func _reticle(t: float, s: Vector2, col: Color) -> void:
 		{
 			"len": rng,
 			"col": SUPER_COL if not over else Color("9fb8a0"),
-			"lw": 0.03 if over else 0.075,
-			"hot": 0.0 if over else 0.8,
-			"alpha": 0.45 if over else 1.25
+			"lw": 0.03 if over else 0.09,
+			"hot": 0.0 if over else 0.6,
+			"alpha": 0.45 if over else 1.3,
+			"fletch": FLETCH * (0.5 if over else 1.3)
 		}
 	)
-	k.fx.hold_bow_star(bow_at() + Vector3(0, 0.05, 0), 0.35 if over else 1.0)
+	k.fx.bow_glint_at(bow_at() + Vector3(0, 0.05, 0), 0.3 if over else 1.0, SUPER_COL)
 	tgt = _under_line(rng)
 	if tgt != null and not over:
 		AimKit.circle(h, "draw_tgt", {"at": tgt.pos, "r": 0.85, "col": TGT_COL, "hot": 0.5})
@@ -207,4 +215,4 @@ func _under_line(rng: float) -> Ent:
 func drop() -> void:
 	was = -1.0
 	tgt = null
-	k.fx.hold_bow_star(Vector3.ZERO, 0.0)
+	k.fx.bow_glint_at(Vector3.ZERO, 0.0, Color.WHITE)
