@@ -20,7 +20,7 @@ func emit(nozzle: Vector3, dir: Vector2, carry: Vector3, feet_y: float, speed: f
 	while acc >= EMIT_DT:
 		acc -= EMIT_DT
 		var v := Vector3(dir.x, 0.0, dir.y) * speed + Vector3(carry.x, 0.0, carry.z) * INHERIT
-		puffs.append({"p": nozzle, "v": v, "age": acc, "life": reach / speed, "fy": feet_y, "seed": randf()})
+		puffs.append({"p": nozzle, "v": v, "age": acc, "life": reach / speed, "life0": reach / speed, "fy": feet_y, "seed": randf()})
 		emitted += 1
 
 func snuff() -> void:
@@ -52,8 +52,8 @@ func step(world, dt: float) -> void:
 
 ## The puff's radius now: narrow at the nozzle, billowing at the far end.
 static func radius(pf: Dictionary, w0: float, w1: float) -> float:
-	var k := clampf(float(pf["age"]) / maxf(0.01, float(pf["life"]) if not pf.get("dead", false) else 0.45), 0.0, 1.0)
-	return lerpf(w0, w1, sqrt(k)) * 0.5
+	var k := clampf(float(pf["age"]) / maxf(0.01, float(pf.get("life0", pf["life"]))), 0.0, 1.0)
+	return lerpf(w0, w1, k) * 0.5
 
 ## Is this body inside the live stream (any puff overlapping it)? Returns the touching puff or {}.
 func touching(f: Ent, w0: float, w1: float) -> Dictionary:

@@ -452,6 +452,26 @@ func rope(id: String, a: Vector3, b: Vector3, col: Color, thick := 0.22) -> void
 func rope_shown(id: String) -> bool:
 	return ropes.has(id) and is_instance_valid(ropes[id]["node"]) and (ropes[id]["node"] as Node3D).visible
 
+# ------------------------------------------------------------------ per step
+var _tracked_at := -1.0
+
+## Follows the shots the looks ride on, on the match step (the kits call it from _tick, once per step
+## whoever calls first): records where each is, and when one ends runs its on_end(at, expired).
+func track() -> void:
+	if float(m.time) == _tracked_at:
+		return
+	_tracked_at = float(m.time)
+	for r in riders.duplicate():
+		var n: Node3D = r["node"]
+		var sd: Dictionary = r["sd"]
+		if not _alive(sd) or not is_instance_valid(n):
+			if is_instance_valid(n): n.visible = false
+			riders.erase(r)
+			var expired := float(sd.get("life", 0.0)) <= 0.02
+			if (r["on_end"] as Callable).is_valid(): (r["on_end"] as Callable).call(sd["pos"], expired)
+			continue
+		r["last"] = sd["pos"]
+
 # ------------------------------------------------------------------ per frame
 func _alive(sd: Dictionary) -> bool:
 	for s in m.shots:
@@ -488,17 +508,9 @@ func _process(delta: float) -> void:
 			m.fx.spark((em["at"] as Vector3) + Vector3(0, 0.9, 0), Vector3(randf_range(-0.3, 0.3), 1.0, randf_range(-0.3, 0.3)), em["col"], 6, 5.0, 60.0, 0.45, 9.0, 1.3)
 		if float(em["t"]) >= float(em["dur"]):
 			emitters.erase(em)
-	for r in riders.duplicate():
-		var n: Node3D = r["node"]
-		var sd: Dictionary = r["sd"]
-		if not _alive(sd) or not is_instance_valid(n):
-			if is_instance_valid(n): n.visible = false
-			riders.erase(r)
-			var expired := float(sd.get("life", 0.0)) <= 0.02
-			if (r["on_end"] as Callable).is_valid(): (r["on_end"] as Callable).call(r["last"], expired)
-			continue
-		r["last"] = sd["pos"]
-		_pose(n, sd["pos"], sd["vel"], float(r["trail"]), float(r["width"]))
+	track()
+	for r in riders:
+		_pose(r["node"], r["sd"]["pos"], r["sd"]["vel"], float(r["trail"]), float(r["width"]))
 	for id in placed.keys():
 		var e: Dictionary = placed[id]
 		if m.time - float(e.get("t", 0.0)) > KEEP:

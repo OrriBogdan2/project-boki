@@ -120,6 +120,7 @@ func move_k() -> float:
 
 # ------------------------------------------------------------------ tick
 func _tick(dt: float) -> void:
+	fx.track()
 	if h.downed and not _down_seen:
 		_down_seen = true
 		if res > 0.0:

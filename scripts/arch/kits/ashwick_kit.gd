@@ -155,6 +155,7 @@ func on_knock(t: Hunter, mine: bool) -> void:
 
 # ------------------------------------------------------------------ tick
 func _tick(dt: float) -> void:
+	fx.track()
 	if after_t > 0.0: after_t -= dt
 	if relight_t > 0.0: relight_t -= dt
 	for key in chars.keys():
