@@ -171,7 +171,7 @@ func _try_crush(t: Ent, dir: Vector2) -> void:
 		if other and is_instance_valid(other) and not other.dead:
 			crushed_at[other.get_instance_id()] = m.time
 			other.hurt(float(rd.get("crush_dmg", 8.0)) * power("sec"), h, {"src": "abil", "ab": "utility", "tags": ["utility", "crushed"], "stun": float(rd.get("crush_stun", 0.8)) * 0.6, "dr": true})
-		h.heal(float(rd.get("crush_heal", 14.0)))
+		h.heal(float(rd.get("crush_heal", 24.0)))
 		payoff_fx(tgt.pos, "CRUSHED", res_col(), "pay_slam", dir, tgt)
 		m.fx.dust(tgt.pos, 14))
 
@@ -185,7 +185,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 	var pressed := held and not lmb_was
 	lmb_was = held
 	if not h.can_fire() or h.fire_cd > 0.0:
-		if lmb_t >= 0.0 and not h.can_fire():
+		if lmb_t >= 0.0 and not h.can_fire() and m.time > short_until:
 			lmb_t = -1.0; h.mel_hold = 0.0
 		return true
 	var md := lmb_def()
@@ -391,6 +391,8 @@ func _raise() -> void:
 	h.mel_hold = 0.0
 	last_variant = "air" if rmb_ctx.get("air", false) else "hold"
 
+var short_until := 0.0         # a short dash out of a Crushing Blow is under way: the wind-up waits, it isn't cancelled
+
 func _lower() -> void:
 	if wall.is_empty():
 		return
@@ -456,6 +458,7 @@ func on_dash(use_ex: bool) -> bool:
 		var sd2 := float(dd.get("short", 2.6))
 		travel(sd2, sd2 / float(dd["whirl_speed"]), {"invuln": 0.0, "trail": "dust", "dir": h.aim_dir()})
 		st["last_dash"] = "short"
+		short_until = m.time + sd2 / float(dd["whirl_speed"]) + 0.2
 		play("bul_short")
 		m.sfx("ab_whirr", h.pos, -6.0, 0.9)
 		return true
@@ -514,7 +517,7 @@ func _mend_burst() -> void:
 			m.fx.burst(o.pos + Vector3(0, 1.0, 0), Feel.cat_color("sustain"), 12, 2.5, 0.5, -3.0)
 			if o == h and not wall.is_empty():
 				shield_hp = minf(shield_max(), shield_hp + float(ed["shield"]))
-				if m.verbs.walls.has(wall): wall["hp"] = minf(float(wall.get("max_hp", shield_max())), float(wall["hp"]) + float(ed["shield"]))
+				if m.verbs.walls.has(wall): wall["max_hp"] = shield_max(); wall["hp"] = minf(shield_max(), float(wall["hp"]) + float(ed["shield"]))
 	# the kin's typing rides the burst (a cleanse, a shield, a slow on foes...)
 	var stg := stage("e", {"delivery": {"type": "burst", "origin": "aim", "radius": r}, "effects": [{"type": "slow", "duration": 1.0, "strength": float(ed["slow"])}]})
 	run(stg, cx("e", "mending_ground", at, {"no_floor": true}))

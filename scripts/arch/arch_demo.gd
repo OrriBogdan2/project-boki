@@ -2,7 +2,8 @@ class_name ArchDemo
 extends RefCounted
 ## Screenshot tooling: --arch-demo=<archetype>:<what> puts the player as that archetype in a training
 ## match with two rival dummies ahead and fires one part of the kit a few rendered frames before the
-## shot (--frames=N): dash, rmb (tap), hold, air, e, r, bonded, level (the level HUD with a level-up).
+## shot (--frames=N): dash, rmb (tap), hold, air, e, r, bonded, level (the level HUD with a level-up),
+## or move=<kit move id> (plays that HunterAnim.KMOVES move at 1.5s for a frame strip with --shot-times).
 
 static func frame(m: Match) -> void:
 	var spec := String(m.opts.get("arch_demo", "")).split(":")
@@ -21,6 +22,15 @@ static func frame(m: Match) -> void:
 		return
 	var foes: Array = m.get_meta("demo_foes", [])
 	var T: Hunter = foes[0] if not foes.is_empty() else null
+	if what.begins_with("move="):
+		# frame strips: play one kit move at match time 1.5s (shoot with --shot-times=1.5,1.6,...)
+		if T and is_instance_valid(T):
+			P.inp["aim"] = T.pos + Vector3(0, 0.9, 0); P.inp["aim_y"] = T.pos.y
+		if P.ak and m.time >= 1.5 and not m.has_meta("mv_played"):
+			m.set_meta("mv_played", true)
+			P.ak.anim_at = m.time
+			P.ak.anim_id = what.substr(5)
+		return
 	if T and is_instance_valid(T):
 		T.hp = T.max_hp
 		P.inp["aim"] = T.pos + Vector3(0, 0.9, 0); P.inp["aim_y"] = T.pos.y
