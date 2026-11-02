@@ -529,3 +529,8 @@ Owner-approved. This is a core system (match start), so write a design note in d
 4. ext/market.
 
 - ext/drop timing (owner): aim for about 20s from leaving the ship to landing (not 30); 18-22s is the target band in --drop-check.
+
+## 2026-11-02 13:35 ET: queue addition (owner confirmed), and a fix on your side
+**Bigger map, last in the queue** (after ext/fidelity, ext/equal, ext/drop, ext/market): grow The Hollow Crown about 2-3x in area, with streaming so frame time and load stay flat. Keep the biomes and their cover shares from ext/keys-cover, and scale landmarks, shops, key carriers and extraction points with it. Decision note plus a perf budget check, please.
+**Owner bug, for whichever kit branch owns hit detection (probably ext/aimkit):** shooting someone from about one block above doesn't hit them. Projectiles and hitscan should hit a target 1-2 blocks below the shooter when the reticle is on them. Main will try a shared fix in the projectile height test first and tell you which commit; don't duplicate it.
+**Level-up 1/2/3:** owner asked when it goes away. I've told him it goes with ext/perkorbs. Please post an ETA for ext/perkorbs when you have one.
