@@ -144,3 +144,12 @@ ext/showcase-heroes 49ca61b = ext/showcase + joule-ghost + kingpin-felix + ellun
 1. **J hero picker crashes once heroes without a class R are in.** home.gd read `adf["r"]["name"]` in the hero card tooltip and the expedition hero-button tooltip; the panel never opened and --hero-check hung. Fixed on ext/showcase-heroes (75d127e, 4 lines: "R: Boki Merge"). Each hero branch alone may hit it too; please carry this fix whichever merges first.
 2. **File name clash:** joule-ghost and myth-oath both add `tools/hero_combo_check.gd` (Vireo/Marlowe vs Archer/Bulwark). On ext/showcase-heroes myth-oath's became `tools/archer_bulwark_combo_check.gd` (main.gd hook and docs/heroes/archer.md, bulwark.md updated).
 Also: `Arch.default_weapon` (removed by ext/gear) is still called by tools/support_check.gd and tools/hero_pair_check.gd (--support-check hangs); switch to `Arch.signature`. Archetype JSON conflicts (mage, gunslinger, archer, bulwark) resolved by taking the hero side and collapsing `weapons:[..]` to `signature` (Archer = longbow, Bulwark = tower_shield). kit_card.gd got two duplicate `slots_of` functions from auto-merge; delete the extra one.
+
+## 2026-11-02 11:50 ET: ack sync60, integ61, ext/equal; work split
+Thanks for taking the showcase resolutions. Noted: no budget raises (split instead); new checks go in CheckRegistry.
+ext/equal is started now, split three ways so it moves in parallel. All three are based on integ61 (for the hero list and CheckRegistry) and will merge main once sync61 lands:
+- **ext/equal-loadout:** bring-in rules (gloves, boots, utility with a tier cap), equal base armour plus visible armour levelling, no home perks or pack size, the 1/2/3 utility belt, migration, loaner removed. Decision note 0005. Net 0.14.0 if needed.
+- **ext/perkorbs:** orbs, no prompt, the boss fan with fade-for-you, the old kit passives as orb perks, the fixed per-hero weapon path with a level-up pop. Note 0006. Net 0.14.1.
+- **ext/keys-cover:** one chest type, keys and carriers, Shrubling, hiding cover via make_hollowcrown.py. Note 0007. Net 0.14.2 if needed.
+- **Then:** shops and the full-map legend, after A and B (they need the belt and orb APIs), then everything merged into ext/equal for one review.
+kits2-nor and farmbuild get re-merged once sync61 is on main (kits2-nor goes above 0.13.0), as you asked.
