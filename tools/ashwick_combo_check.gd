@@ -57,7 +57,7 @@ func _all() -> void:
 	ok("lance: the cyan pilot shows, no fire for the first 0.2s", K.fx.shown("pilot%d" % P.get_instance_id()) and K.hose.puffs.is_empty() and ak.dmg(T) == 0.0, "puffs %d dmg %.1f" % [K.hose.puffs.size(), ak.dmg(T)])
 	ak.step(m, 0.6, func(): P.inp["fire"] = true; ak.aim_at(P, home + Vector3(1.5, 0, 0)))
 	var reach: float = K.hose.reach_from(P.pos)
-	ok("lance: the stream runs its full ~7m past a close cursor", reach >= 6.0 and reach <= 7.8, "reach %.1f (cursor 1.5m)" % reach)
+	ok("lance: the stream runs its full ~7m past a close cursor", reach >= 6.5 and reach <= 8.8, "reach %.1f (cursor 1.5m)" % reach)
 	var young := 9.0
 	var old := 0.0
 	for pf in K.hose.puffs:

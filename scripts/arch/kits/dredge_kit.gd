@@ -445,7 +445,7 @@ func _anchor() -> void:
 		"effects": [{"type": "damage", "amount": amt}, {"type": "stun", "duration": stun}]})
 	run(stg, cx("e", "anchor_drop", aim(), {"no_floor": true, "on_foe": func(f: Ent, _c: Dictionary): _slammed(f, stun)}))
 	var at := h.pos + Vector3(dd.x, 0, dd.y) * 1.7
-	fx.anchor_drop(ground(at), dd, ANCHOR_COL, 0.55, 0.62)
+	fx.anchor_drop(ground(at), dd, ANCHOR_COL, 0.6, 0.8)
 	fx.crescent(h.pos + Vector3(0, 0.25, 0), dd, float(ed["angle"]), float(ed["radius"]), Color("ffe0a0"), Color("d89040"), 0.25)
 	AimKit.cone(h, "e_hit", {"len": float(ed["radius"]), "deg": float(ed["angle"]), "edges": true, "all": true, "dur": 0.2, "col": Color("ffffff"), "alpha": 0.7})
 	m.later(0.08, func(): if is_instance_valid(h): m.fx.dust(at, 26); fx.wave(ground(at), 1.8, Color("fff4e0"), 0.35))

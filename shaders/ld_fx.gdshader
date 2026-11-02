@@ -2,7 +2,7 @@ shader_type spatial;
 // Linwick's and Dredge's own effect looks (scripts/arch/kits/ld_fx.gd), one shader, a mode each.
 // life runs 0 -> 1 over an effect; everything is additive and unshaded. Flat looks lie on a PlaneMesh
 // (XZ, UV 0..1); camera-facing looks set `billboard`.
-//   0 flame    a hose puff (MultiMesh, INSTANCE_CUSTOM: x age 0..1, y seed): white-hot core early, then
+//   0 flame    a hose puff (life = its age 0..1, seed): white-hot core early, then
 //              yellow, orange, and a sooty violet fringe as it dies
 //   1 orb      a radial glow: a hot core (color2) inside a halo (color) - the Cinder Shot, the pilot flame
 //   2 comet    a streak along UV.x (0 = head), soft across UV.y, with a smoke tail (color2)
@@ -25,11 +25,9 @@ uniform int mode = 0;
 uniform float seed = 0.0;
 uniform float strength = 1.0;
 uniform bool billboard = false;
-varying vec4 inst;
 #include "res://shaders/noise.gdshaderinc"
 
 void vertex() {
-	inst = INSTANCE_CUSTOM;
 	if (billboard) {
 		float s = length(MODEL_MATRIX[0].xyz);
 		MODELVIEW_MATRIX = VIEW_MATRIX * mat4(INV_VIEW_MATRIX[0] * s, INV_VIEW_MATRIX[1] * s, INV_VIEW_MATRIX[2] * s, MODEL_MATRIX[3]);
@@ -53,13 +51,13 @@ void fragment() {
 	vec2 uv = UV * 2.0 - 1.0;
 	float d = length(uv);
 	if (mode == 0) {
-		float age = inst.x;
-		float sd = inst.y * 31.0;
+		float age = life;
+		float sd = seed * 3.1;
 		float n = fbm3(uv * 2.2 + vec2(sd, -TIME * 3.0 - sd));
 		float edge = 0.62 + 0.3 * n;
 		float body = 1.0 - smoothstep(edge * 0.35, edge, d);
 		float core = (1.0 - smoothstep(0.0, 0.45, d)) * (1.0 - smoothstep(0.1, 0.5, age));
-		c = fire_ramp(age * 0.9 + n * 0.15) * body * (1.0 - smoothstep(0.65, 1.0, age)) * 0.9 + vec3(1.0, 0.95, 0.8) * core * 0.6;
+		c = fire_ramp(0.15 + age * 0.85 + n * 0.15) * body * (1.0 - smoothstep(0.6, 1.0, age)) * 0.42 + vec3(1.0, 0.9, 0.6) * core * 0.25;
 	} else if (mode == 1) {
 		float core = 1.0 - smoothstep(0.0, 0.32, d);
 		float halo = (1.0 - smoothstep(0.2, 1.0, d));

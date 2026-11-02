@@ -4,7 +4,7 @@ extends Node3D
 ## and reused; nothing is created per frame. One shader (shaders/ld_fx.gdshader, a mode per look) plus
 ## the see-through rope shader (shaders/ld_rope.gdshader).
 ##
-## - flame(id, parts)      the Torch Lance hose: one MultiMesh of puffs the kit simulates (immediate style)
+## - flame(id, parts)      the Torch Lance hose: pooled camera-facing puffs the kit simulates (immediate style)
 ## - ride(sd, kind, ...)   a projectile look riding on a shot: "cinder" (Cinder Shot), "slug" (scattergun), "claw" (Grapnel head)
 ## - place(id, kind, ...)  immediate-style looks the kit refreshes every step: "skull", "swirl", "chain",
 ##                         "pip", "spiral", "pilot", "anchor", "glow"; stop calling and they hide
@@ -28,7 +28,7 @@ const M_WAVE := 11
 const M_DOT := 12
 const POOL_CAP := 24           # nodes per kind at most; past it the oldest is taken back
 const KEEP := 0.1              # s an immediate-style look stays without a refresh
-const FLAME_CAP := 64          # hose puffs drawn at most (the kit keeps fewer)
+const FLAME_CAP := 32          # hose puffs drawn at most (the kit keeps about 15)
 const HANG_T := 0.3            # s a scattergun slug hangs as a dot at its stop line
 
 var m: Node
@@ -151,7 +151,7 @@ func _crescent_mesh(arc_deg: float) -> ArrayMesh:
 ## Dredge's anchor as a translucent ghost of light (2 bh tall): shank, stock, ring and two flukes.
 func _anchor_node(col: Color) -> Node3D:
 	var n := Node3D.new()
-	var mt := Models.glow_mat(Color(col, 0.55))
+	var mt := Models.glow_mat(Color(col, 0.7))
 	n.set_meta("mat", mt)
 	var add := func(mesh: Mesh, pos: Vector3, rot := Vector3.ZERO) -> void:
 		var p := _mi(mesh, mt); p.position = pos; p.rotation = rot; n.add_child(p)
@@ -182,47 +182,46 @@ func _claw_node(col: Color) -> Node3D:
 	return n
 
 # ------------------------------------------------------------------ the hose
-## The Flamethrower stream this step: parts [{p, age (0..1), r}]. One MultiMesh node per id.
+## The Torch Lance stream this step: parts [{p, age (0..1), r, seed}]. A pool of camera-facing puffs per id
+## (FLAME_CAP at most), reused every step; stop calling and they hide.
 func flame(id: String, parts: Array) -> void:
 	var e: Dictionary = flames.get(id, {})
-	if e.is_empty() or not is_instance_valid(e["node"]):
-		var mmi := MultiMeshInstance3D.new()
-		var mm := MultiMesh.new()
-		mm.transform_format = MultiMesh.TRANSFORM_3D
-		mm.use_custom_data = true
-		mm.mesh = _quad_mesh()
-		mm.instance_count = FLAME_CAP
-		mm.visible_instance_count = 0
-		mmi.multimesh = mm
-		mmi.material_override = _mat(M_FLAME, Color.WHITE, Color.WHITE, true)
-		mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		mmi.top_level = true
-		mmi.custom_aabb = AABB(Vector3(-200, -50, -200), Vector3(400, 100, 400))
-		add_child(mmi)
-		made += 1
-		e = {"node": mmi}
+	if e.is_empty():
+		e = {"nodes": []}
 		flames[id] = e
 	e["t"] = m.time
-	var node: MultiMeshInstance3D = e["node"]
-	node.visible = true
-	node.global_transform = Transform3D.IDENTITY
-	var mm2 := node.multimesh
+	var nodes: Array = e["nodes"]
 	var n := mini(parts.size(), FLAME_CAP)
-	mm2.visible_instance_count = n
-	for i in n:
+	while nodes.size() < n:
+		var mi := _mi(_quad_mesh(), _mat(M_FLAME, Color.WHITE, Color.WHITE, true))
+		mi.top_level = true
+		add_child(mi)
+		made += 1
+		nodes.append(mi)
+	for i in nodes.size():
+		var mi2: MeshInstance3D = nodes[i]
+		if i >= n:
+			mi2.visible = false
+			continue
 		var p: Dictionary = parts[i]
-		var r := float(p["r"])
-		mm2.set_instance_transform(i, Transform3D(Basis.IDENTITY.scaled(Vector3.ONE * r), p["p"]))
-		mm2.set_instance_custom_data(i, Color(float(p["age"]), float(p.get("seed", 0.0)), 0, 0))
+		mi2.visible = true
+		mi2.global_position = p["p"]
+		mi2.scale = Vector3.ONE * float(p["r"])
+		var mt := mi2.material_override as ShaderMaterial
+		mt.set_shader_parameter("life", float(p["age"]))
+		mt.set_shader_parameter("seed", float(p.get("seed", 0.0)) * 10.0)
 
 func flame_off(id: String) -> void:
 	var e: Dictionary = flames.get(id, {})
-	if not e.is_empty() and is_instance_valid(e["node"]):
-		(e["node"] as Node3D).visible = false
+	for mi in e.get("nodes", []):
+		if is_instance_valid(mi): (mi as Node3D).visible = false
 
-func flame_node(id: String) -> Node3D:
-	var e: Dictionary = flames.get(id, {})
-	return e["node"] if not e.is_empty() and is_instance_valid(e["node"]) else null
+## How many hose puffs are showing for this id (tests).
+func flame_shown(id: String) -> int:
+	var c := 0
+	for mi in flames.get(id, {}).get("nodes", []):
+		if is_instance_valid(mi) and (mi as Node3D).visible: c += 1
+	return c
 
 # ------------------------------------------------------------------ one-shots
 func _fx(kind: String, mode: int, mesh: Mesh, bb: bool) -> MeshInstance3D:
@@ -305,7 +304,7 @@ func anchor_drop(at: Vector3, dir: Vector2, col: Color, dur := 0.5, scl := 1.0) 
 	n.global_position = at + Vector3(0, 3.2, 0)
 	n.rotation = Vector3(0, atan2(-dir.x, -dir.y) + PI / 2.0, 0)
 	n.scale = Vector3.ONE * scl
-	((n.get_meta("mat")) as ShaderMaterial).set_shader_parameter("color", Color(col, 0.55))
+	((n.get_meta("mat")) as ShaderMaterial).set_shader_parameter("color", Color(col, 0.7))
 	live.append({"node": n, "t": 0.0, "dur": dur, "kind": "anchor", "s0": n.scale, "mat": n.get_meta("mat"), "at": at, "col": col})
 
 ## Embers sprayed up and out of a spot for `dur` (Cinder Shot's impact).
@@ -492,7 +491,7 @@ func _process(delta: float) -> void:
 				n.global_position = (e["at"] as Vector3) + Vector3(0, 3.2 * (1.0 - fall * fall), 0)
 				var sq := 1.0 + (0.25 * (1.0 - clampf((u - 0.35) / 0.2, 0.0, 1.0)) if u >= 0.35 else 0.0)
 				n.scale = (e["s0"] as Vector3) * Vector3(sq, 1.0 / sq, sq)
-				mt.set_shader_parameter("color", Color(e["col"], 0.55 * (1.0 - smoothstep(0.55, 1.0, u))))
+				mt.set_shader_parameter("color", Color(e["col"], 0.7 * (1.0 - smoothstep(0.6, 1.0, u))))
 			_:
 				mt.set_shader_parameter("life", u)
 				if e.get("sweep", false): mt.set_shader_parameter("progress", minf(1.0, u * 1.8))
@@ -517,9 +516,8 @@ func _process(delta: float) -> void:
 			if is_instance_valid(e["node"]): (e["node"] as Node3D).visible = false
 			placed.erase(id)
 	for id in flames.keys():
-		var e: Dictionary = flames[id]
-		if m.time - float(e.get("t", 0.0)) > KEEP and is_instance_valid(e["node"]):
-			(e["node"] as Node3D).visible = false
+		if m.time - float(flames[id].get("t", 0.0)) > KEEP:
+			flame_off(id)
 	for id in ropes.keys():
 		var e: Dictionary = ropes[id]
 		if m.time - float(e.get("t", 0.0)) > KEEP and is_instance_valid(e["node"]):

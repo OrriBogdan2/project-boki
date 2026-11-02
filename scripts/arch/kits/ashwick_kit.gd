@@ -20,6 +20,7 @@ const BOLT_COL := Color("ff4a6a")      # Cinder Shot's red-pink body
 const BOLT_CORE := Color("ffe070")
 const SKULL_COL := Color("ff6a2a")
 const PIP_COL := Color("ff9a3a")
+const NOZZLE := Vector3(1.3, 0.9, 0.15)  # the nozzle's tip from the feet in the aim pose: forward, up, right (m)
 
 var chars := {}                 # foe id -> {e, n, t}
 var ignites := {}               # foe id -> {e, lvl, until}
@@ -74,7 +75,7 @@ func _fwd() -> Vector3:
 ## The nozzle: held low at the right hip, pointed forward (sheet: LMB animation).
 func nozzle() -> Vector3:
 	var f := _fwd()
-	return h.pos + f * 0.8 + f.cross(Vector3.UP) * 0.2 + Vector3(0, 0.85, 0)
+	return h.pos + f * NOZZLE.x + f.cross(Vector3.UP) * NOZZLE.z + Vector3(0, NOZZLE.y, 0)
 
 # ------------------------------------------------------------------ Char and Flashover
 func char_of(f: Ent) -> float:

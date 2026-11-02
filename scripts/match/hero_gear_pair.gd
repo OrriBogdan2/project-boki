@@ -161,29 +161,27 @@ static func flamer(gun: Node3D, m_gun: Material, m_dark: Material, m_acc: Materi
 	var brass := Models.toon(Color("c89a3c"), true)
 	brass.set_shader_parameter("gloss", 0.6)
 	var soot := Models.toon(Color("3a3430"), true)
-	var p := func(mesh: Mesh, mat: Material, pos: Vector3, rot := Vector3.ZERO, scl := Vector3.ONE) -> void:
-		Models.part(gun, mesh, mat, pos, scl, rot)
-	p.call(Models.box(0.11, 0.13, 0.32), m_gun, Vector3(0, 0, -0.06))
-	p.call(Models.cyl(0.045, 0.05, 0.52, 14), brass, Vector3(0, 0.03, -0.46), Vector3(PI / 2, 0, 0))
+	_gp(gun, Models.box(0.11, 0.13, 0.32), m_gun, Vector3(0, 0, -0.06))
+	_gp(gun, Models.cyl(0.045, 0.05, 0.52, 14), brass, Vector3(0, 0.03, -0.46), Vector3(PI / 2, 0, 0))
 	for k in 4:
-		p.call(HeroKit.band("lw_rib", 0.056, 0.056, 0.022, 0.012), soot, Vector3(0, 0.03, -0.3 - k * 0.09), Vector3(PI / 2, 0, 0))
-	p.call(HeroKit.loft("lw_bell", [Vector3(0, 0.03, -0.72), Vector3(0, 0.03, -0.8), Vector3(0, 0.03, -0.86)], [Vector2(0.05, 0.05), Vector2(0.075, 0.075), Vector2(0.105, 0.105)], 16, Vector3.UP, 0.9), brass)
+		_gp(gun, HeroKit.band("lw_rib", 0.056, 0.056, 0.022, 0.012), soot, Vector3(0, 0.03, -0.3 - k * 0.09), Vector3(PI / 2, 0, 0))
+	_gp(gun, HeroKit.loft("lw_bell", [Vector3(0, 0.03, -0.72), Vector3(0, 0.03, -0.8), Vector3(0, 0.03, -0.86)], [Vector2(0.05, 0.05), Vector2(0.075, 0.075), Vector2(0.105, 0.105)], 16, Vector3.UP, 0.9), brass)
 	for k in 3:
 		var a := TAU * k / 3.0
-		p.call(Models.box(0.012, 0.012, 0.12), soot, Vector3(cos(a) * 0.08, 0.03 + sin(a) * 0.08, -0.92))
+		_gp(gun, Models.box(0.012, 0.012, 0.12), soot, Vector3(cos(a) * 0.08, 0.03 + sin(a) * 0.08, -0.92))
 	var pilot := Models.toon(Color("6fe8ff"), false, 2.2)
-	p.call(Models.sphere(0.03, 8), pilot, Vector3(0, 0.03, -0.96), Vector3.ZERO, Vector3(1, 1, 1.8))
+	_gp(gun, Models.sphere(0.03, 8), pilot, Vector3(0, 0.03, -0.96), Vector3.ZERO, Vector3(1, 1, 1.8))
 	for sx in [-1.0, 1.0]:
-		p.call(Models.box(0.012, 0.09, 0.2), soot, Vector3(0.055 * sx, 0.09, -0.5))
+		_gp(gun, Models.box(0.012, 0.09, 0.2), soot, Vector3(0.055 * sx, 0.09, -0.5))
 	# the fuel canister under the barrel, two straps and a valve wheel
-	p.call(Models.cyl(0.065, 0.065, 0.3, 14), m_acc, Vector3(0, -0.1, -0.24), Vector3(PI / 2, 0, 0))
+	_gp(gun, Models.cyl(0.065, 0.065, 0.3, 14), m_acc, Vector3(0, -0.1, -0.24), Vector3(PI / 2, 0, 0))
 	for k in 2:
-		p.call(HeroKit.band("lw_strap", 0.07, 0.07, 0.025, 0.01), brass, Vector3(0, -0.1, -0.15 - k * 0.18), Vector3(PI / 2, 0, 0))
-	p.call(HeroKit.band("lw_valve", 0.035, 0.035, 0.012, 0.01), brass, Vector3(0.07, -0.1, -0.08), Vector3(0, 0, PI / 2))
-	p.call(Models.cyl(0.024, 0.024, 0.16, 8), m_dark, Vector3(0, -0.12, -0.52))
+		_gp(gun, HeroKit.band("lw_strap", 0.07, 0.07, 0.025, 0.01), brass, Vector3(0, -0.1, -0.15 - k * 0.18), Vector3(PI / 2, 0, 0))
+	_gp(gun, HeroKit.band("lw_valve", 0.035, 0.035, 0.012, 0.01), brass, Vector3(0.07, -0.1, -0.08), Vector3(0, 0, PI / 2))
+	_gp(gun, Models.cyl(0.024, 0.024, 0.16, 8), m_dark, Vector3(0, -0.12, -0.52))
 	# the hose back to the pack and the grips
-	p.call(HeroKit.loft("lw_hose", [Vector3(0, -0.06, 0.08), Vector3(0.05, -0.2, 0.18), Vector3(0.1, -0.12, 0.34), Vector3(0.12, 0.08, 0.42)], [Vector2(0.022, 0.022), Vector2(0.024, 0.024), Vector2(0.024, 0.024), Vector2(0.02, 0.02)], 8, Vector3.UP, 1.0), m_dark)
-	p.call(Models.cyl(0.022, 0.022, 0.2, 8), m_dark, Vector3(0, -0.11, 0.02))
+	_gp(gun, HeroKit.loft("lw_hose", [Vector3(0, -0.06, 0.08), Vector3(0.05, -0.2, 0.18), Vector3(0.1, -0.12, 0.34), Vector3(0.12, 0.08, 0.42)], [Vector2(0.022, 0.022), Vector2(0.024, 0.024), Vector2(0.024, 0.024), Vector2(0.02, 0.02)], 8, Vector3.UP, 1.0), m_dark)
+	_gp(gun, Models.cyl(0.022, 0.022, 0.2, 8), m_dark, Vector3(0, -0.11, 0.02))
 
 ## Dredge's harbour scattergun: a short, fat iron barrel ending in a flared brass bell, a pump wrapped in
 ## tarred rope, a riveted receiver, a drum of slugs on top and a stubby hook-shaped stock, with a hot
@@ -194,17 +192,18 @@ static func scattergun(gun: Node3D, m_gun: Material, m_dark: Material, m_acc: Ma
 	var iron := Models.toon(Color("4a4d55"), true)
 	var rope := Models.toon(Color("cdb88a"), true)
 	var seam := Models.toon(Color("ffb070"), false, 1.4)
-	var p := func(mesh: Mesh, mat: Material, pos: Vector3, rot := Vector3.ZERO, scl := Vector3.ONE) -> void:
-		Models.part(gun, mesh, mat, pos, scl, rot)
-	p.call(Models.box(0.15, 0.16, 0.36), m_gun, Vector3(0, 0, -0.1))
+	_gp(gun, Models.box(0.15, 0.16, 0.36), m_gun, Vector3(0, 0, -0.1))
 	for k in 3:
-		p.call(Models.sphere(0.014, 6), brass, Vector3(0.078, 0.05 - k * 0.04, -0.2 + k * 0.08))
-	p.call(Models.cyl(0.062, 0.07, 0.4, 14), iron, Vector3(0, 0.03, -0.48), Vector3(PI / 2, 0, 0))
-	p.call(HeroKit.loft("dr_bell", [Vector3(0, 0.03, -0.66), Vector3(0, 0.03, -0.74), Vector3(0, 0.03, -0.8)], [Vector2(0.07, 0.07), Vector2(0.1, 0.1), Vector2(0.14, 0.12)], 16, Vector3.UP, 0.9), brass)
-	p.call(HeroKit.band("dr_bell_lip", 0.14, 0.12, 0.03, 0.014), brass, Vector3(0, 0.03, -0.8), Vector3(PI / 2, 0, 0))
+		_gp(gun, Models.sphere(0.014, 6), brass, Vector3(0.078, 0.05 - k * 0.04, -0.2 + k * 0.08))
+	_gp(gun, Models.cyl(0.062, 0.07, 0.4, 14), iron, Vector3(0, 0.03, -0.48), Vector3(PI / 2, 0, 0))
+	_gp(gun, HeroKit.loft("dr_bell", [Vector3(0, 0.03, -0.66), Vector3(0, 0.03, -0.74), Vector3(0, 0.03, -0.8)], [Vector2(0.07, 0.07), Vector2(0.1, 0.1), Vector2(0.14, 0.12)], 16, Vector3.UP, 0.9), brass)
+	_gp(gun, HeroKit.band("dr_bell_lip", 0.14, 0.12, 0.03, 0.014), brass, Vector3(0, 0.03, -0.8), Vector3(PI / 2, 0, 0))
 	for k in 5:
-		p.call(HeroKit.band("dr_pump_rope", 0.08, 0.075, 0.022, 0.016), rope, Vector3(0, -0.04, -0.3 - k * 0.03), Vector3(PI / 2, 0, 0))
-	p.call(Models.cyl(0.07, 0.07, 0.1, 14), m_acc, Vector3(0, 0.15, -0.1), Vector3(0, 0, PI / 2))
-	p.call(Models.box(0.02, 0.03, 0.26), seam, Vector3(0.08, 0.03, -0.14))
-	p.call(Models.cyl(0.024, 0.024, 0.16, 8), m_dark, Vector3(0, -0.12, 0.02))
-	p.call(HeroKit.loft("dr_stock", [Vector3(0, -0.02, 0.08), Vector3(0, -0.06, 0.2), Vector3(0, -0.12, 0.3)], [Vector2(0.04, 0.06), Vector2(0.045, 0.07), Vector2(0.05, 0.09)], 10, Vector3.UP, 0.85), m_dark)
+		_gp(gun, HeroKit.band("dr_pump_rope", 0.08, 0.075, 0.022, 0.016), rope, Vector3(0, -0.04, -0.3 - k * 0.03), Vector3(PI / 2, 0, 0))
+	_gp(gun, Models.cyl(0.07, 0.07, 0.1, 14), m_acc, Vector3(0, 0.15, -0.1), Vector3(0, 0, PI / 2))
+	_gp(gun, Models.box(0.02, 0.03, 0.26), seam, Vector3(0.08, 0.03, -0.14))
+	_gp(gun, Models.cyl(0.024, 0.024, 0.16, 8), m_dark, Vector3(0, -0.12, 0.02))
+	_gp(gun, HeroKit.loft("dr_stock", [Vector3(0, -0.02, 0.08), Vector3(0, -0.06, 0.2), Vector3(0, -0.12, 0.3)], [Vector2(0.04, 0.06), Vector2(0.045, 0.07), Vector2(0.05, 0.09)], 10, Vector3.UP, 0.85), m_dark)
+
+static func _gp(gun: Node3D, mesh: Mesh, mat: Material, pos := Vector3.ZERO, rot := Vector3.ZERO, scl := Vector3.ONE) -> void:
+	Models.part(gun, mesh, mat, pos, scl, rot)
