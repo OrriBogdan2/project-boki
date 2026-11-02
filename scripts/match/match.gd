@@ -822,6 +822,7 @@ func _start(o: Dictionary) -> void:
 		# the Arena, and the same practice tools on the training island (dummies, swaps, kit card)
 		arena = Arena.new()
 		arena.setup(self, "arena" if opts.get("arena", false) else "practice")
+	Practice.attach(self)      # the practice areas' bottom bar, J hero picker and wheel zoom
 	await _stage("build.hud")
 	_build_aim()
 	Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
@@ -3791,6 +3792,7 @@ func _process(delta: float) -> void:
 			cam.zoom_to = 1.25 if player.gliding else (1.45 if player.crouch and player.grounded else 1.0)
 			if train.has("_sizes"): cam.zoom_to = 0.5     # (--size-demo screenshots)
 			if has_meta("zoom_hold"): cam.zoom_to = float(get_meta("zoom_hold"))     # (--arena-demo screenshots)
+			cam.zoom_to *= cam.user_zoom        # (1 outside the practice areas)
 			# high up, the camera pulls back with your altitude so you can still read the ground
 			var alt := player_altitude()
 			if alt > 4.0:

@@ -107,6 +107,23 @@ func _mage() -> void:
 	ok("Grounded: no Wirerun", K.wire.is_empty())
 	P.inp["dash_down"] = false
 	P.set_meta("gnd_until", 0.0)
+	# 8. a Boki merge that starts mid-hold ends the Wirerun and the Heavy Coil with nothing fired, through the transformation too
+	ac.fresh(T); T2.teleport(home + Vector3(30, 0, 0)); P.teleport(home); T.teleport(home + Vector3(4, 0, 0)); K.sparks.clear(); ac.step(m, 0.1)
+	P.dashes = P.max_dashes(); ac.aim_at(P, T.pos); K.cd["rmb"] = 0.0; K.ch_rmb = 1.0
+	P.inp["dash_down"] = true; P.do_dash()
+	ac.step(m, 0.2, func(): P.inp["dash_down"] = true; ac.aim_at(P, T.pos))
+	var wire_before: bool = not K.wire.is_empty()
+	P.inp["sec_hold"] = true; P.ak.press_rmb()
+	ac.step(m, 0.2, func(): P.inp["dash_down"] = true; P.inp["sec_hold"] = true; ac.aim_at(P, T.pos))
+	ok("merge hold: the Wirerun and the Coil are held before the merge", wire_before and K.rmb_down, "wire %s rmb_down %s" % [wire_before, K.rmb_down])
+	var bl0 := K.blowouts
+	ok("merge hold: a merge is under way", ac.merge_now(P))
+	ac.step(m, 0.1)
+	var took0: float = ac.dmg(T)
+	ac.step(m, 1.0, func(): P.inp["dash_down"] = true; P.inp["sec_hold"] = true)
+	P.inp["dash_down"] = false; P.inp["sec_hold"] = false
+	ac.step(m, 0.5)
+	ok("merge hold: vireo's Wirerun and Coil hold are dropped, nothing fires mid-merge", K.wire.is_empty() and not K.rmb_down and K.rmb_t == 0.0 and K.coil_tele == null and K.blowouts == bl0 and ac.dmg(T) == took0, "wire %s rmb_down %s took %.0f -> %.0f" % [not K.wire.is_empty(), K.rmb_down, took0, ac.dmg(T)])
 	await ac.done(m)
 	fails += ac.fails
 
@@ -178,5 +195,16 @@ func _gunslinger() -> void:
 	P.inp["dash_down"] = false
 	ac.step(m, 0.2)
 	ok("Slipstep: let go early, part of it comes back", K.last_dash_kind == "slide" and P.dashes > 0.2, "dashes %.2f kind %s" % [P.dashes, K.last_dash_kind])
+	# 8. a Boki merge that starts mid-hold ends the Longneedle's charge and a held Slipstep with nothing fired
+	ac.fresh(T); P.teleport(home); T.teleport(home + Vector3(5, 0, 0)); ac.step(m, 0.1); K.cd["e"] = 0.0; ac.aim_at(P, T.pos)
+	P.ak.use_e(); ac.step(m, 0.3)
+	var needle_before: bool = not K.needle.is_empty()
+	ok("merge hold: the Longneedle is charging before the merge", needle_before, "needle %s" % [K.needle.keys()])
+	var sk1 := K.skewers
+	ok("merge hold: a merge is under way", ac.merge_now(P))
+	ac.step(m, 0.1)
+	var took1: float = ac.dmg(T)
+	ac.step(m, 1.3)
+	ok("merge hold: marlowe's Longneedle charge is dropped, no shot mid-merge", K.needle.is_empty() and K.e_t == 0.0 and K.skewers == sk1 and ac.dmg(T) == took1, "needle %s took %.0f -> %.0f" % [not K.needle.is_empty(), took1, ac.dmg(T)])
 	await ac.done(m)
 	fails += ac.fails

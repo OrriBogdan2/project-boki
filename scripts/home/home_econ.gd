@@ -15,7 +15,8 @@ var gate: Node3D
 var carry := {}                     # carrying a feeder to set down: {kind, node, from}
 var acc := 0.0
 var away: Array = []                # what happened while you were away (Econ.catch_up_all)
-var told := {}                      # uid -> the starve stage we last warned about
+var told := {}                      # uid -> the starve stage we last warned about (saved: Save.d["starve_told"], so
+                                    # walking in and out of the house doesn't repeat a warning you've had)
 var arm_pick := ""
 var arm_tab := "Armor"
 
@@ -46,6 +47,9 @@ func move_graveyard() -> void:
 
 func _init(home) -> void:
 	h = home
+	if not (Save.d.get("starve_told") is Dictionary):
+		Save.d["starve_told"] = {}
+	told = Save.d["starve_told"]
 
 # ------------------------------------------------------------------ building it
 func build() -> void:
@@ -548,6 +552,8 @@ func show_away() -> void:
 		if e["kind"] == "died":
 			died.append(e["grave"])
 		elif e["kind"] == "starving":
+			if String(told.get(e["rec"]["uid"], "")) == String(e["stage"]):
+				continue      # already told you about this stage (it's in the Boki's card and the log)
 			var info: Array = Care.STARVE_INFO[String(e["stage"])]
 			lines.append("%s: %s. %s" % [e["rec"]["name"], String(info[0]).to_lower(), info[1]])
 			told[e["rec"]["uid"]] = String(e["stage"])

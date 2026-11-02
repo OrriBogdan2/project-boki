@@ -99,6 +99,13 @@ func hold(m: Match, P: Hunter, t: float) -> void:
 	P.inp["sec_hold"] = false
 	m.step(DT)
 
+## Starts a Boki merge on `h` the way R does (the full merge when it has a Boki to merge with, else the surge).
+func merge_now(h: Hunter) -> bool:
+	h.ult = 1.0
+	if not KinMerge.cast(h):
+		KinMerge.surge(h)
+	return KinMerge.active(h)
+
 func done(m: Match) -> void:
 	m.queue_free()
 	await main.get_tree().process_frame

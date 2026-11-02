@@ -30,7 +30,6 @@ var pops := 0
 var collapses := 0
 var seed_denied := 0
 
-func lmb_def() -> Dictionary: return d.get("lmb", {})
 func is_swollen() -> bool: return swollen_t > 0.0
 
 func res_text() -> String: return "SWOLLEN" if is_swollen() else "%d" % int(res)
@@ -155,6 +154,16 @@ func _tick_swap(dt: float) -> void:
 	if float(swap["t"]) <= 0.0:
 		_swap_end(true)
 
+## A Boki merge ends the Trade in flight (nobody moves) and the Settled orb's prime.
+func _drop_holds() -> void:
+	if not swap.is_empty():
+		_swap_end(false)
+	if primed:
+		primed = false
+		if not base_wpn.is_empty(): h.wpn = base_wpn
+	last_shot_t = m.time
+	prime_until = -9.0
+
 func _swap_end(go: bool) -> void:
 	var dd := dash_def()
 	var land: Vector3 = swap.get("land", h.pos)
@@ -172,8 +181,7 @@ func _swap_end(go: bool) -> void:
 	m.fx.burst(here + Vector3(0, 1.0, 0), TEAL, 16, 4.0, 0.4, -2.0, 1.0)
 	for f in foes_in(land, float(dd["radius"])):
 		swapped_foes += 1
-		if not f.remote:
-			f.teleport(Vector3(from.x, m.world.ground_at(from.x, from.z), from.z))
+		HeroZones.move_body(m, f, Vector3(from.x, m.world.ground_at(from.x, from.z), from.z))
 		KitStatus.apply(f, "dsr", float(dd["slow_t"]), float(dd["slow"]))
 	h.teleport(Vector3(land.x, m.world.ground_at(land.x, land.z), land.z))
 	h.vel.y = 0.0
@@ -300,8 +308,8 @@ func _pop(hit: bool) -> void:
 	var catch_r := rad * (1.3 if rank("kin") >= 3 else 1.0)
 	var caught_hunter: Ent = null
 	for f in foes_in(p, catch_r):
-		if rank("kin") >= 3 and not f.remote and Vector2(f.pos.x - p.x, f.pos.z - p.z).length() > rad * 0.3:
-			f.teleport(Vector3(p.x, m.world.ground_at(p.x, p.z), p.z))
+		if rank("kin") >= 3 and Vector2(f.pos.x - p.x, f.pos.z - p.z).length() > rad * 0.3:
+			HeroZones.move_body(m, f, Vector3(p.x, m.world.ground_at(p.x, p.z), p.z))
 		f.hurt(dmg, h, {"src": "abil", "ab": "e", "payoff": k >= 0.99 and f is Hunter})
 		KitStatus.apply(f, "gnd", float(ed["ground"]))
 		if f is Hunter: caught_hunter = f

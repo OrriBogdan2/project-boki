@@ -1,13 +1,10 @@
 # Linnet, the Tender (`tender`, medium support)
 
-Internal design doc. Source behaviour reference: SUPERVIVE's Elluna (gameplay only; nothing of her names, look or text is used in the game).
+Internal design doc. Source behaviour reference: the hero named in the Inspired-by table in docs/ARCHETYPES.md (gameplay only; nothing of its names, look or text is used in the game).
 
 ## Research summary
 Sources:
-- https://supervive.wiki.gg/wiki/Elluna (ability and upgrade tables; the main source)
-- Deltia's Gaming, "Supervive: Elluna Abilities Guide" (deltiasgaming.com) for skill order and feel
-- a Dot Esports (dotesports.com) note on skill priority (Q first)
-- a patch-note search found no Elluna-specific changes newer than the wiki page.
+- The reference hero's public kit page and guides (see the Inspired-by table in docs/ARCHETYPES.md)
 
 Version chosen: the wiki's current kit as it stood when the branch was built (late Oct 2026). No patch history was needed.
 Disagreements: none material. The wiki lists no E (her heal is on Q, her ult is R); we map Q to our E because Q is the glove slot here. The guides stress Q first, matching our `order`.
@@ -59,6 +56,6 @@ Strips: `tender_rmb_strip`, `tender_e_strip` and the others in the shots folder 
 ## Engine notes
 - Kit: `scripts/arch/kits/tender_kit.gd`, shared helpers in `care_util.gd` (heals that reach bots and online squadmates, revive hook, carry). Gear and look: `scripts/match/hero_gear_care.gd`. Data: `content/archetypes/tender.json`, `content/weapons/lantern_crook.json`. Sounds: `audio/tend_*.wav` (made by `tools/gen_care_sfx.py`).
 - No R in the data: `ArchKit` skips the ult path, the kit card shows the Boki Merge tile, `--archetype-check` skips R rows for the pair.
-- Net: carrying adds one "carry" event (`["carry", target nid, carrier nid]`, handled in `match.gd` by `CareUtil.set_carry`), so Net.VERSION is 0.10.1. Heals and revives reuse "heal" and "rev".
+- Net: carrying adds one "carry" event (`["carry", target nid, carrier nid]`, handled in `match.gd` by `CareUtil.set_carry`), so Net.VERSION is 0.14.0. Heals and revives reuse "heal" and "rev".
 - `life.gd` asks `CareUtil.carried_tick` so a carried teammate neither bleeds nor can be stomped.
 - Checks: `--support-check` (all), `--tender-combo-check`.

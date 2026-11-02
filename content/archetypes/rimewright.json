@@ -15,7 +15,7 @@
 		"e": "Rink Wall: a sliding ice wall that stops shots and shoves foes; press again to freeze it. Friends get a shield.",
 		"weapons": {"hoar_fan": "A flurry of 4 light shards then 3 heavy ones. Eight shards on one foe splinter them."}
 	},
-	"weapons": ["hoar_fan"],
+	"signature": "hoar_fan",
 	"resource": {"id": "chill", "name": "Chill", "max": 8, "kind": "on_targets", "dur": 4.0, "col": "#9af0e6"},
 	"passive": {"name": "Hoarfrost", "desc": "Your damaging abilities Chill foes for 4s (a Chilled foe is a little slower and shows frost). Knocking a Chilled hunter, or felling a Chilled monster, makes them Splinter 0.4s later: 30 damage to everyone within 3m of them, plus Chill. Eight shards of your fan on the same foe Splinter them too, for 20.", "splinter_dmg": 30.0, "splinter_r": 3.0, "splinter_delay": 0.4, "fan_splinter": 20.0, "fan_hits": 8, "chill_slow": 0.15, "chill_t": 4.0},
 	"dash": {"id": "rinkrun", "name": "Rinkrun", "icon": "dash", "col": "#bff7ef", "cd": 11.0, "speed": 11.5, "max_t": 1.6, "refund": 0.6, "min_t": 0.2, "rink_t": 0.0,

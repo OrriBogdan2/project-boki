@@ -49,10 +49,13 @@ func _process(_d: float) -> void:
 func is_open() -> bool:
 	return page != ""
 
-## Admin tools are for the game's owner. On this showcase build they are off in normal play (no F1 / ` panel, no
-## Admin or Mod mode entries in the menus); launch with `-- --admin` to bring them back.
+## Admin tools are for the game's owner: always on desktop, and on the web for the artifact's owner. They are hidden
+## (no F1 / ` panel, no Admin or Mod mode entries in the menus) only when launched with `-- --showcase`, or while
+## recording mode (F10) is on, so filmed footage never shows them.
 func admin_allowed() -> bool:
-	return OS.get_cmdline_user_args().has("--admin") and (not OS.has_feature("web") or Social.is_owner)
+	if OS.get_cmdline_user_args().has("--showcase") or Record.clean():
+		return false
+	return not OS.has_feature("web") or Social.is_owner
 
 # ------------------------------------------------------------------ input
 func _input(event: InputEvent) -> void:
@@ -170,6 +173,10 @@ func open_pause(where: String) -> void:
 		v.add_child(b)
 		return b
 	var res: Button = item.call("Resume", "next", close, "Esc", "Primary")
+	var psc = Game.main.screen_node() if where == "match" and Game.main else null
+	var practice: Practice = Practice.of(psc) if psc is Match else null
+	if practice:
+		item.call("Change hero", "swap", func(): close(); PracticeHero.open(practice), Settings.key_cap("hero"))
 	if where != "match":
 		item.call("Inventory", "bag", open_inventory, Settings.key_cap("inventory"))
 	item.call("Settings", "gear", func():
@@ -201,10 +208,7 @@ func open_pause(where: String) -> void:
 		var tut: bool = m.opts.get("tutorial", false) or m.opts.get("training", false)
 		var leave := func():
 			close()
-			m.paused = false
-			if m.player and m.player.out: Life.make_gone(m, m.player)
-			m.result = {"extracted": tut, "why": "left"}
-			m._finish()
+			Practice.leave(m, tut)
 		if tut:
 			item.call("Leave the training area" if m.opts.get("training", false) else "Skip the tutorial", "back", leave)
 		else:
@@ -289,6 +293,7 @@ func _show_settings() -> void:
 			_slider(v, "Lean toward the cursor", "cam_lead", 0.0, 1.5)
 			_group(v, "Combat")
 			_toggle(v, "Hold Shift for the long dash", "dash_hold", "Tap Shift for the short one")
+			_toggle(v, "Dash toward the cursor", "dash_to_cursor", "Off: you dash the way you're moving (WASD), or toward the cursor when standing still")
 			_toggle(v, "Quick cast", "cast_on_press", "Abilities fire the moment you press them. Off: hold to aim, release to cast")
 			_toggle(v, "Tap to crouch", "crouch_toggle", "Instead of holding the crouch key")
 			_toggle(v, "Damage numbers", "damage_numbers")

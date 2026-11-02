@@ -59,8 +59,6 @@ func on_block(dmg: float, _by) -> void:
 	add_guard(dmg * float(res_def().get("per_hp", 0.5)))
 
 func _tick(dt: float) -> void:
-	if KinMerge.active(h):
-		_drop_holds()
 	if res_wait <= 0.0:
 		add_res(-float(res_def().get("decay", 5.0)) * dt)
 	lock_t = maxf(0.0, lock_t - dt)
@@ -225,15 +223,6 @@ func lmb_override(held: bool, dt: float) -> bool:
 		if lmb_t < float(md["tap"]): _throw()
 		else: _smash()
 	return true
-
-func lmb_def() -> Dictionary:
-	return d.get("lmb", {})
-
-func _bot_target() -> Ent:
-	var best: Ent = null; var bd := 12.0
-	for f in m.foes_of(h.team):
-		if f.hittable() and h.flat_dist(f) < bd: bd = h.flat_dist(f); best = f
-	return best
 
 ## Charge 0..1 of the Crushing Blow being held.
 func smash_k() -> float:

@@ -102,6 +102,13 @@ func _tick(dt: float) -> void:
 	if not pull.is_empty(): _tick_pull(dt)
 	net_pulse(dt, res >= res_max(), 1.8)
 
+## A Boki merge ends the Anchor's wind-up and the reel (the rope goes, no landing effect); a hook in the air grabs nothing.
+func _drop_holds() -> void:
+	wind = 0.0
+	flying = false
+	if not pull.is_empty():
+		_end_pull(false)
+
 # ------------------------------------------------------------------ RMB: Grapnel
 func fire_rmb(c: Dictionary) -> void:
 	c["variant"] = "tap"
@@ -127,6 +134,8 @@ func fire_rmb(c: Dictionary) -> void:
 
 func _grab(f: Ent) -> void:
 	flying = false
+	if KinMerge.active(h):
+		return
 	var rdf := rmb_def()
 	if f.mass() >= 6.0:
 		m.fx.word(f.pos + Vector3(0, 2.4, 0), "TOO HEAVY", Color("c0b0a0"), false)

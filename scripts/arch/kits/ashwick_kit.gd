@@ -12,11 +12,16 @@ extends ArchKit
 ##   leaves a short fire trail (never over the abyss).
 ## - E, Furnace Cloak: scorch, Char, Anti-Heal, drag foes in (walls block), shield for what it hit.
 
+const FLAME_SHADER := preload("res://shaders/light_shaft.gdshader")
+const FLAME_COL := Color("ff7a2a")     # the roar's body
+const FLAME_CORE := Color("ffd890")    # its hot core
+
 var chars := {}                 # foe id -> {e, n, t}
 var ignites := {}               # foe id -> {e, lvl, until}
 var drags: Array = []           # foes being dragged in by the cloak: {e, left}
 var trail: Array = []           # fire-trail points: {p, until}
 var flame_acc := 0.0
+var flame_fx: Array = []          # the roar's two light-shaft quads while the key is down
 var spool := 0.0                # how long the lance has been held
 var after_t := 0.0              # the slow after letting go
 var was_held := false
@@ -138,6 +143,15 @@ func _tick(dt: float) -> void:
 	tell = "full" if _best_char() >= 22.0 else ("half" if _best_char() >= 12.0 else "")
 	net_pulse(dt, not ignites.is_empty(), 1.3)
 
+## A Boki merge ends the Torch Lance's roar and its slow, with nothing fired.
+func _drop_holds() -> void:
+	_flame_end()
+	spool = 0.0
+	was_held = false
+	after_t = 0.0
+	flame_acc = 0.0
+	h.mel_hold = 0.0
+
 func move_k() -> float:
 	if was_held and flame_acc >= 0.0 and h.wid == "flamethrower": return 0.8
 	return 0.6 if after_t > 0.0 else 1.0
@@ -148,7 +162,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 		return false
 	if held and h.ammo <= 0 and h.reload_t <= 0.0:
 		h.start_reload()          # out of fuel: the tank refills
-	if not held or not h.can_fire():
+	if not held or not h.can_fire() or KinMerge.active(h):       # (a merge ends the roar: holding the key on must not relight it)
 		if was_held:
 			play("as_lance_end")
 			after_t = float(lmbd().get("slow_after", 0.35))
@@ -156,6 +170,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 		was_held = false
 		spool = 0.0
 		flame_acc = 0.0
+		_flame_end()
 		return true
 	if not was_held:
 		m.sfx("as_flame", h.pos, -4.0, 0.9)
@@ -167,6 +182,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 	h.idle_fire = 0.0              # firing: no auto-reload mid-roar
 	spool += dt
 	h.mel_hold = minf(spool, float(lmbd()["spool"]))
+	_flame_look()
 	flame_acc += dt
 	var tick := float(lmbd()["tick"])
 	while flame_acc >= tick and h.ammo > 0:
@@ -174,6 +190,58 @@ func lmb_override(held: bool, dt: float) -> bool:
 		h.ammo -= 1               # a tick of fuel (10 a second)
 		_flame_tick(tick)
 	return true
+
+## The roar's look: one body quad and one hot core quad kept while the key is down, re-aimed every step (not a new
+## pair of nodes per 10 Hz tick) and freed when the roar ends. They use the light shaft's camera-facing ribbon.
+func _flame_look() -> void:
+	if not tells_visible():
+		_flame_end()
+		return
+	var ld := lmbd()
+	var dir := h.aim_dir()
+	var k := clampf(spool / float(ld["spool"]), 0.35, 1.0)
+	var muzzle := h.pos + Vector3(dir.x, 1.05, dir.y) * 0.9
+	var tip := muzzle + Vector3(dir.x, 0.0, dir.y) * float(ld["range"]) * minf(1.0, 0.5 + k)
+	if flame_fx.is_empty():
+		var root := own_node()
+		for i in 2:
+			var mi := MeshInstance3D.new()
+			var qm := QuadMesh.new()
+			qm.size = Vector2(1, 1)
+			mi.mesh = qm
+			var mat := ShaderMaterial.new()
+			mat.shader = FLAME_SHADER
+			mat.set_shader_parameter("color", FLAME_COL if i == 0 else FLAME_CORE.lerp(Color.WHITE, 0.75))
+			mi.material_override = mat
+			mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			root.add_child(mi)
+			flame_fx.append(mi)
+	var flicker := 0.85 + 0.15 * sin(m.time * 40.0)
+	for i in 2:
+		var mi: MeshInstance3D = flame_fx[i]
+		var b := tip if i == 0 else muzzle + (tip - muzzle) * 0.7
+		var ln := muzzle.distance_to(b)
+		if ln < 0.2:
+			continue
+		var axis := (b - muzzle) / ln
+		var w := (0.9 * k + 0.2) if i == 0 else (0.4 * k + 0.1)
+		var x_axis := axis.cross(Vector3.UP).normalized() * w
+		var z_axis := x_axis.cross(axis).normalized()
+		mi.global_transform = Transform3D(Basis(x_axis, axis * ln, z_axis), (muzzle + b) * 0.5)
+		(mi.material_override as ShaderMaterial).set_shader_parameter("intensity", (2.2 if i == 0 else 3.0) * flicker)
+
+func _flame_end() -> void:
+	if flame_fx.is_empty():
+		return
+	var root: Node = (flame_fx[0] as Node).get_parent()
+	if is_instance_valid(root):
+		self_nodes.erase(root)
+		root.queue_free()
+	flame_fx = []
+
+func teardown() -> void:
+	super.teardown()
+	flame_fx = []
 
 func _flame_tick(tick: float) -> void:
 	var ld := lmbd()
@@ -183,8 +251,6 @@ func _flame_tick(tick: float) -> void:
 	var col := col_of(d)
 	var reach := float(ld["range"]) * minf(1.0, 0.5 + k)
 	var tip := muzzle + Vector3(dir.x, 0.0, dir.y) * reach
-	m.fx.beam(muzzle, tip, Color("ff7a2a"), 0.9 * k + 0.2, 0.16)               # the roaring body of the flame
-	m.fx.beam(muzzle, muzzle + (tip - muzzle) * 0.7, Color("ffd890"), 0.4 * k + 0.1, 0.12)   # its hot core
 	m.fx.burst(muzzle + Vector3(dir.x, 0, dir.y) * 1.5, Color("ffb04a"), 8, 5.0, 0.35, -2.0, 1.6, Vector3(dir.x, 0.15, dir.y), 24.0)
 	m.fx.burst(tip, Color("ff6a2a"), 6, 4.0, 0.4, -2.0, 2.0, Vector3(dir.x, 0.3, dir.y), 40.0)
 	if int(m.time * 10.0) % 4 == 0:

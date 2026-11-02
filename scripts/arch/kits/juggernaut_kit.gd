@@ -232,11 +232,14 @@ func _reset_doom() -> void:
 	net_ring(h.pos, 2.0, col_of(r_def()))
 
 # ------------------------------------------------------------------ LMB: Greatsword (slashes / Searing Wave)
-func lmb_def() -> Dictionary:
-	return d.get("lmb", {})
-
 func _wk() -> float:
 	return h.wup_dmg * m.dmg_mult(h)
+
+## A Boki merge ends the greatsword's charge with no wave.
+func _drop_holds() -> void:
+	if lmb_t >= 0.0:
+		lmb_t = -1.0
+		h.mel_hold = 0.0
 
 func wave_k() -> float:
 	var ld := lmb_def()
@@ -248,7 +251,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 	var ld := lmb_def()
 	var pressed := held and not lmb_was
 	lmb_was = held
-	if not h.can_fire():
+	if not h.can_fire() or KinMerge.active(h):       # (a merge ends the charge: letting go of it must not swing a wave mid-transformation)
 		if lmb_t >= 0.0:
 			lmb_t = -1.0; h.mel_hold = 0.0
 		return true
@@ -283,12 +286,6 @@ func lmb_override(held: bool, dt: float) -> bool:
 		lmb_buf = 0.0
 		_slash()
 	return true
-
-func _bot_target() -> Ent:
-	var best: Ent = null; var bd := 12.0
-	for f in m.foes_of(h.team):
-		if f.hittable() and h.flat_dist(f) < bd: bd = h.flat_dist(f); best = f
-	return best
 
 ## A quick slash: a cone, twice as hard on the tip (the sweet spot at the far end of the swing).
 func _slash() -> void:

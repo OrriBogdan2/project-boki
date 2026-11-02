@@ -9,11 +9,11 @@ extends RefCounted
 ##   shows its damage per second, last hit and total over its head, and heals up when left alone
 ## - a sparring bot you can switch Off / Idle / Moving / Fighting (N), and give any archetype
 ## - a reset (Backspace; X is the ultimate's second key), cooldowns off (O: dash, RMB, E, R and the glove), the ultimate unlocked (U)
-## - a quick swap without leaving: 2-9 picks an archetype; L opens the loadout (archetype, weapon,
+## - a quick swap without leaving: 2-9 pick one of the first eight archetypes (the loadout lists all); L opens the loadout (archetype, weapon,
 ##   Boki, glove, toggles), K the kit card
 ## Nobody dies here: a downed player or bot is back up after a beat.
 
-const KEYS_HINT := "K kit card   ·   L loadout   ·   2-9 archetype   ·   X reset   ·   N bot   ·   O cooldowns   ·   U ultimate"
+const KEYS_HINT := "K kit card   ·   L loadout   ·   2-9 first eight archetypes (L: all)   ·   X reset   ·   N bot   ·   O cooldowns   ·   U ultimate"
 const BOT_MODES := ["off", "idle", "moving", "fighting"]
 const BOT_NAMES := {"off": "Off", "idle": "Idle", "moving": "Moving", "fighting": "Fights back"}
 const DUMMY_HP := 3000.0
@@ -68,7 +68,7 @@ func setup(match_node: Match, which: String) -> void:
 	m.add_child(keys_node)
 	if m.hud:
 		m.hud.guide_hidden = true
-		m.hud.toast(("Arena" if layout == "arena" else "Training") + "  ·  K kit card  ·  L loadout  ·  2-9 archetype", Color("f3eee2"))
+		m.hud.toast(("Arena" if layout == "arena" else "Training") + "  ·  K kit card  ·  L loadout  ·  2-9 first eight archetypes", Color("f3eee2"))
 
 func teardown() -> void:
 	if _cb.is_valid() and CombatBus.hit_landed.is_connected(_cb):
@@ -482,7 +482,7 @@ func _fill_menu(v: VBoxContainer) -> void:
 	left.add_theme_constant_override("separation", 8)
 	left.custom_minimum_size = Vector2(470, 0)
 	cols.add_child(left)
-	left.add_child(UI.section("Archetype  (2-9)"))
+	left.add_child(UI.section("Archetype  (keys 2-9 pick the first eight)"))
 	var ag := GridContainer.new(); ag.columns = 3
 	ag.add_theme_constant_override("h_separation", 6); ag.add_theme_constant_override("v_separation", 6)
 	for a in Arch.ids():
@@ -565,8 +565,7 @@ func _kin_choices() -> Array:
 		if sp != "" and not out.has(sp) and KinLib.kin(sp): out.append(sp)
 	for sp in KinLib.kin_ids():
 		if not out.has(sp) and Data.KIN.has(sp): out.append(sp)
-	out = out.slice(0, 11)
-	out.append("")
+	out.append("")      # every species, however many there are (the grid scrolls with the menu)
 	return out
 
 func close_menu() -> void:
