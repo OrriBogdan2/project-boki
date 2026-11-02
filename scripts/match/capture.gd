@@ -141,6 +141,12 @@ static func _tick_scan(m, h: Hunter, st: Dictionary, dt: float) -> void:
 static func controlled(h: Hunter) -> bool:
 	return h.stun_t > 0.0 or h.root_t > 0.0 or h.knock_t > 0.0 or h.m.time - h.kb_time < 0.2 or KitStatus.grounded(h) or Hex.active(h) or not h.grap.is_empty() or not h.pad.is_empty()
 
+## What stops any channel on the hunter (a scan, a rescue): "dash" (your choice) or "cc" (crowd control). "" = neither.
+static func hunter_stop(h: Hunter) -> String:
+	if h.inp.get("dash", false) or h.roll_t > 0.0:
+		return "dash"
+	return "cc" if controlled(h) else ""
+
 ## What stops a scan: "dash" (your choice), crowd control, or the Boki gone. "" keeps it going.
 ## Plain damage is not on the list.
 static func interrupt_reason(h: Hunter, k: Kin) -> String:
@@ -148,10 +154,9 @@ static func interrupt_reason(h: Hunter, k: Kin) -> String:
 		return "gone"
 	if h.downed:
 		return "down"
-	if h.inp.get("dash", false) or h.roll_t > 0.0:
-		return "dash"
-	if controlled(h):
-		return "cc"
+	var own := hunter_stop(h)
+	if own != "":
+		return own
 	if h.flat_dist(k) > float(rules()["cancel_range"]):
 		return "cc"
 	return ""

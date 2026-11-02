@@ -30,6 +30,8 @@ static func begin(k: Kin, fell: bool) -> void:
 	k.down_total = lerpf(float(r["recover_s_wary"]), float(r["recover_s_trusting"]), clampf(k.trust / 100.0, 0.0, 1.0))
 	k.down_t = k.down_total
 	k.rescue_t = 0.0
+	k.rescue_on = false
+	k.rescue_block = 0.0
 	k.down_void = fell
 	if fell:
 		k.teleport(k.last_safe if k.last_safe != Vector3.INF else (k.owner_h.pos if k.owner_h else k.pos))
@@ -62,9 +64,10 @@ static func _near(k: Kin, h: Hunter, reach: float) -> bool:
 static func stop_reason(k: Kin, h: Hunter, r: Dictionary) -> String:
 	if not rescuable(k):
 		return "gone"
-	if h.inp.get("dash", false) or h.roll_t > 0.0:
+	var own := Capture.hunter_stop(h)
+	if own == "dash":
 		return "dash"
-	if Capture.controlled(h) or not h.grounded or h.gliding or not _near(k, h, float(r["rescue_r"]) + float(r["rescue_slack"])):
+	if own != "" or not h.grounded or h.gliding or not _near(k, h, float(r["rescue_r"]) + float(r["rescue_slack"])):
 		return "cc"
 	return ""
 
@@ -103,7 +106,7 @@ static func stop(k: Kin, h: Hunter, why: String) -> void:
 ## Hunter._tick: while you rescue you are rooted and can't attack (a dash still cancels it).
 static func commit(h: Hunter) -> void:
 	var k: Kin = h.kin
-	if k == null or not k.rescue_on:
+	if k == null or not k.rescue_on or k.state != "downed":
 		return
 	h.inp["move"] = Vector2.ZERO
 	for key in ["fire", "jump", "glide", "sig", "sec", "skill", "ult", "kin_ab", "gear1", "gear2", "throw", "reload", "tonic", "kit", "swap"]:
@@ -157,6 +160,8 @@ static func come_round(k: Kin, rescued: bool) -> void:
 	k.hp = k.max_hp * float(r["rescue_hp"] if rescued else r["recover_hp"])
 	k.down_t = 0.0
 	k.rescue_t = 0.0
+	k.rescue_on = false          # (its own recovery can fire mid-rescue: the rescuer is free again)
+	k.rescue_block = 0.0
 	k.down_void = false
 	var from := k.pos
 	k._hop_on()
