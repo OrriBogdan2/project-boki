@@ -1034,9 +1034,6 @@ func _life_check() -> void:
 ## Headless check for loot and kin keeping: a full backpack asks to swap, smart loot takes the best
 ## first, extracting fills the armory, feeders feed hungry kin (also while you're away), starving
 ## runs its course to a grave, and the Soul Shrine brings a kin back changed. Never touches the save.
-func step_n(m: Match, n: int) -> void:
-	for i in n: m.step(Match.DT)
-
 func _economy_check() -> void:
 	Save.no_write = true
 	Save.d = Save.fresh()
@@ -3483,34 +3480,25 @@ func _drop_check() -> void:
 	for o in m.hunters:
 		if o.team != P.team:
 			o.ctrl = "idle"; o.teleport(m.world.spawns[-1] + Vector3(0, 0, 0))     # (no fights in the way)
-	# (the spot is random on the island and a bot can be wedged behind a prop on the way, so a miss gets
-	# two more spots; a bot that really ignores pings misses all three)
-	var ping_pass := false
-	for attempt in 3:
-		if attempt > 0:
-			bot.teleport(base_spot + Vector3(2.0, 0, 0))
-			step_n(m, 30)
-		var ev0 := D.events.size()
-		var spot := bot.pos
-		for k in 40:
-			var q := m.world.free_spot_near(bot.pos + Vector3(randf_range(-10, 10), 0, randf_range(-10, 10)), [], 1.0, 0.5, 6.0)
-			if m.world.island_of(q.x, q.z) == m.world.island_of(bot.pos.x, bot.pos.z) and bot.flat_dist(q) > 6.0 and m.world.los(bot.pos, q, bot.pos.y + 1.0):
-				spot = q; break
-		spot.y = m.world.ground_at(spot.x, spot.z)
-		m.squad_ping(P, spot)
-		var d0 := bot.flat_dist(spot)
-		var went := false
-		var closest := d0
-		t = 0.0
-		while t < 6.0:
-			m.step(Match.DT); t += Match.DT
-			if String(bot.ai.get("goal_kind", "")) == "ping": went = true
-			closest = minf(closest, bot.flat_dist(spot))
-		var replies: Array = D.events.slice(ev0).filter(func(e): return String(e).begins_with("reply"))
-		print("DCHECK ground ping: %s headed there=%s, %.1fm -> got within %.1fm; replies %s (from %s to %s)" % [bot.pname, went, d0, closest, str(replies), str(bot.pos.snapped(Vector3(0.1, 0.1, 0.1))), str(spot.snapped(Vector3(0.1, 0.1, 0.1)))])
-		if went and closest <= 4.0 and replies.any(func(r): return String(r).ends_with("omw")): ping_pass = true
-		if ping_pass: break
-	if not ping_pass: ok = false; print("DCHECK FAIL squad bots ignore pings")
+	var ev0 := D.events.size()
+	var spot := bot.pos
+	for k in 40:
+		var q := m.world.free_spot_near(bot.pos + Vector3(randf_range(-10, 10), 0, randf_range(-10, 10)), [], 1.0, 0.5, 6.0)
+		if m.world.island_of(q.x, q.z) == m.world.island_of(bot.pos.x, bot.pos.z) and bot.flat_dist(q) > 6.0 and m.world.los(bot.pos, q, bot.pos.y + 1.0):
+			spot = q; break
+	spot.y = m.world.ground_at(spot.x, spot.z)
+	m.squad_ping(P, spot)
+	var d0 := bot.flat_dist(spot)
+	var went := false
+	var closest := d0
+	t = 0.0
+	while t < 6.0:
+		m.step(Match.DT); t += Match.DT
+		if String(bot.ai.get("goal_kind", "")) == "ping": went = true
+		closest = minf(closest, bot.flat_dist(spot))
+	var replies: Array = D.events.slice(ev0).filter(func(e): return String(e).begins_with("reply"))
+	print("DCHECK ground ping: %s headed there=%s, %.1fm -> got within %.1fm; replies %s (from %s to %s)" % [bot.pname, went, d0, closest, str(replies), str(bot.pos.snapped(Vector3(0.1, 0.1, 0.1))), str(spot.snapped(Vector3(0.1, 0.1, 0.1)))])
+	if not went or closest > 4.0 or not replies.any(func(r): return String(r).ends_with("omw")): ok = false; print("DCHECK FAIL squad bots ignore pings")
 	m.unping(P)
 	if not m.my_ping().is_empty() or bot.ai.has("ping_goal"): ok = false; print("DCHECK FAIL right click didn't take the ping down")
 	# the spawns: the same candidates every match, a different live subset per seed

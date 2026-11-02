@@ -247,7 +247,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		# far from the squad with nothing to fight: now and then, base to a teammate
 		# (not while holding a spot: an uplink's yard, a skiff's deck, a lair: basing away from a
 		# charging uplink left its yard empty to drain)
-		if h.base_t <= 0.0 and h.base_cd <= 0.0 and h.grounded and randf() < dt * 0.05 \
+		if h.base_t <= 0.0 and h.base_cd <= 0.0 and h.grounded and not a.has("ping_goal") and randf() < dt * 0.05 \
 				and not String(a.get("goal_kind", "")) in ["yard", "board", "lift", "lair_dial", "lair_fight", "lair_camp", "lair_lever"]:
 			var mate := m.base_target(h)
 			if mate and h.flat_dist(mate) > 30.0:
@@ -737,6 +737,7 @@ func _choose(m: Match, h: Hunter) -> void:
 		var pp: Vector3 = pg["pos"]
 		if m.time < float(pg["until"]) and h.flat_dist(pp) > 3.5 and not m.world.is_void(pp.x, pp.z):
 			goal = pp; gk = "ping"
+			if h.base_t > 0.0: h.cancel_base()      # (a base channel would hold us still, then carry us off to a mate and drop the ping)
 		else:
 			a.erase("ping_goal")
 	# boss lairs: a dropped Rare Egg, or (bolder bots) a lair to open and its boss to fight
