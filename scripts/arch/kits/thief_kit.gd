@@ -523,7 +523,8 @@ func _tick_bola_cast(dt: float) -> void:
 		return
 	bola_cast["t"] = float(bola_cast["t"]) - dt
 	var k := 1.0 - clampf(float(bola_cast["t"]) / float(bd["cast"]), 0.0, 1.0)
-	AimKit.lane(h, "rmb", {"len": lane_len(), "width": float(bd["lane_w"]), "chevrons": 4, "tip": true, "fill": k, "col": col_of(rmb_def())})
+	# the source's lane is a translucent white strip with chevrons; the fill front runs gold toward the throw
+	AimKit.lane(h, "rmb", {"len": lane_len(), "width": float(bd["lane_w"]), "chevrons": 4, "tip": true, "fill": k, "col": Color(1, 1, 1), "col2": col_of(rmb_def()), "alpha": 1.35})
 	if float(bola_cast["t"]) <= 0.0:
 		bola_cast = {}
 		AimKit.hide(h, "rmb")
