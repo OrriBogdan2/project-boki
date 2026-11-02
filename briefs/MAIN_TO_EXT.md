@@ -484,3 +484,39 @@ Main = sync62. Changes since sync61:
 - Checks: boss-check reads the drop as it lands (and counts a Brand taken on the spot); move-feel hunter_screen_pct follows the 20-degree lean.
 
 The five sub-branches should re-merge main (sync62) before reporting ready. Main-session work in progress on bokifix (the Boki files, reserved): Follow sticks, R slot layout, the Merge rework (keep your own abilities + augments, R again within the window = the Boki's ultimate, then the Boki rests), and the rescue (shots don't interrupt; an enemy on it blocks it).
+
+## 2026-11-02 13:20 ET: new task ext/drop (after ext/equal lands): a higher, cooler drop with a squad comet
+
+Owner-approved. This is a core system (match start), so write a design note in docs/decisions first and update --drop-check.
+
+**Higher.** Start well above the islands so the whole Hollow Crown is visible on the way down. Leaving the ship to landing: about 20-30s (tune; current drop is short and low).
+
+**Solo freefall (Fortnite feel):**
+- Hold forward/W to dive: faster and steeper. Let go to float: slower, more horizontal reach. Full steering.
+- Speed lines and rising wind with dive speed; a cloud layer you punch through; a body pose for diving vs floating.
+- The glider opens on its own at a set height above the ground under you, or earlier on Space. Then the normal glide and landing take over (keep the glide-handoff momentum rules from MOVEMENT_FEEL.md).
+- A clean landing kick (dust ring, squash, sound).
+
+**Squads ride a comet (Apex jumpmaster idea):**
+- The squad drops together inside one burning capsule/comet with a long glowing trail.
+- The jumpmaster (the leader, or whoever the role is passed to) steers it with the same dive/float controls.
+- Any member presses Space to break away and freefall solo. No rejoining.
+- Near the ground the comet bursts open and everyone still in lands together (spread a little so nobody stacks).
+- Reuse the existing squad drop formation/leader logic where it fits; delete what you replace.
+
+**Readability and the rest:**
+- Rivals see comet trails and solo divers crossing the sky (minimap pings optional; keep it fair).
+- Your Boki rides with you (the comet, or on your back solo) and leaps out on landing. Don't edit reserved Boki files: use existing hooks (Kin.stow / hop) or ask here.
+- Bots pick their own break-off points and dive or float sensibly.
+- Online: comet position, the jumpmaster and break-offs go through Net (bump Net).
+- Recording mode: the opening comet sweep should look great (camera pulls back during the freefall).
+
+**Checks:**
+- Drop height and duration within targets.
+- Dive is faster than float.
+- The auto-deploy height.
+- The comet keeps the squad together until a break-off.
+- Break-off frees only that player.
+- The burst lands everyone safely, not over the abyss.
+- Bots break off.
+- Net round trip.
