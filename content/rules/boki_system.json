@@ -19,6 +19,12 @@
 		"stun": 0.35,
 		"kb": 5.0
 	},
+	"regen": {
+		"carried_pct_s": 0.06,
+		"out_pct_s": 0.015,
+		"out_delay_s": 6.0,
+		"desc": "Health a Boki wins back on its own, as a share of max health per second: on you (Return, settled) 6%/s; out beside you 1.5%/s once it has gone out_delay_s without taking damage. A downed Boki never regenerates (rescue it). Kin.regen_quiet counts the seconds since it last lost health; Blight cuts it like any healing."
+	},
 	"down": {
 		"recover_s_trusting": 15.0,
 		"recover_s_wary": 20.0,
@@ -29,6 +35,7 @@
 		"rescue_drain_s": 2.0,
 		"rescue_block_s": 0.6,
 		"rescue_slack": 0.7,
+		"contest_r": 1.2,
 		"rescue_kneel_frac": 0.12,
 		"rescue_done_s": 0.45
 	},
@@ -50,10 +57,11 @@
 		"sic_cd": 1.0,
 		"sic_speed": 18.0,
 		"engage_range": 9.0,
+		"disengage_range": 4.0,
 		"guard_leash": 24.0,
 		"chase_leash": 30.0
 	},
-	"follow_doc": "stuck_s: seconds without progress before the hop back. hop_on_air_s: seconds you are off the ground before it hops on (when it cannot walk where you land). hop_off_steady_s: seconds steady on the ground before it hops off again. away_dist: farther than this and a G tap is Call back (else Sic). combat_radius: a foe this close to you or the target means a fight (orders are never refused). path_window: tiles of margin round the trip for the A* search. path_every_s: seconds between searches; path_goal_moved: tiles the goal may move before it searches early; path_fail_backoff_s: wait after a search that found nothing; path_lookahead: path tiles checked ahead for a straight line. separation_r: m it keeps from you.",
+	"follow_doc": "stuck_s: seconds without progress before the hop back. hop_on_air_s: seconds you are off the ground before it hops on (when it cannot walk where you land). hop_off_steady_s: seconds steady on the ground before it hops off again. disengage_range: m; after an explicit Follow in a fight, a foe hitting the Boki or you from this close sends it back into the fight. away_dist: farther than this and a G tap is Call back (else Sic). combat_radius: a foe this close to you or the target means a fight (orders are never refused). path_window: tiles of margin round the trip for the A* search. path_every_s: seconds between searches; path_goal_moved: tiles the goal may move before it searches early; path_fail_backoff_s: wait after a search that found nothing; path_lookahead: path tiles checked ahead for a straight line. separation_r: m it keeps from you.",
 	"wheel": {
 		"deadzone_px": 30,
 		"pop_s": 0.14,

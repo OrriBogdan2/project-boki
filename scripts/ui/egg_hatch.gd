@@ -267,65 +267,73 @@ func _pop() -> void:
 	# a few bits of shell, nothing more
 	_chips(Vector3(0, cy, 0), 6)
 	_sfx("build", -4.0, 1.05)
-	# the top tips off and rolls to one side of the nest
-	var ct := create_tween().set_parallel(true)
+	# the top tips off to one side and the whole shell shrinks away: gone about 0.8s after the pop
 	var side := Vector3(-0.75, 0, 0.25) * k
-	ct.tween_property(cap, "position:x", side.x, 0.8).set_trans(Tween.TRANS_SINE)
-	ct.tween_property(cap, "position:z", side.z, 0.8).set_trans(Tween.TRANS_SINE)
-	ct.tween_property(cap, "rotation", Vector3(0.3, 0.4, PI), 0.8).set_trans(Tween.TRANS_SINE)
-	var cyt := create_tween()
-	cyt.tween_property(cap, "position:y", cy + 0.3 * k, 0.32).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	cyt.tween_property(cap, "position:y", ry * 0.97, 0.48).set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
-	cyt.tween_callback(_sfx.bind("land", -12.0, 1.4))
-	# inside: the Boki, curled up asleep in the bottom half
+	ct_tip(cap, side, k)
+	_fade_shell(cap, 0.15, 0.4)
+	_fade_shell(cup, 0.4, 0.4)
+	# inside: the Boki, awake at once. It hops out of the shell, looks around, finds you, bounces
 	kin_node = Models.kin(species, rec)
 	get_parent().add_child(kin_node)
-	kin_node.set_meta("kstate", "sleep")
+	kin_node.set_meta("kstate", "")
 	var sit := _gp(Vector3(0, cy * 0.5, 0))
 	kin_node.global_position = sit
 	var you := _you()
 	var face_you := _yaw_to(sit, you)
-	var away := face_you + PI * 0.55            # curled up facing off to one side
+	var away := face_you + PI * 0.55
 	kin_node.rotation.y = away
-	kin_node.scale = Vector3.ONE * 0.92 * kin_scale
+	var ks := kin_scale
+	kin_node.scale = Vector3.ONE * 0.8 * ks
+	var out := global_position + Vector3(0.0, 0.0, hop_out) * k * 1.3
 	var kt := create_tween()
-	kt.tween_property(kin_node, "scale", Vector3.ONE * kin_scale, 0.6).set_trans(Tween.TRANS_SINE)
-	kt.tween_interval(0.6)
-	# it wakes: uncurls, and blinks at the light
+	# 0.0: pops up, stretching, out of the cup and onto the ground
+	kt.tween_callback(_sfx.bind("jump", -10.0, 1.6))
+	kt.tween_property(kin_node, "scale", Vector3(0.95, 1.12, 0.95) * ks, 0.12).set_trans(Tween.TRANS_SINE)
+	kt.tween_callback(func(): _kin_blink())
+	kt.tween_method(func(f: float):
+		kin_node.global_position = Vector3(lerpf(sit.x, out.x, f), lerpf(sit.y, out.y, f) + sin(f * PI) * 0.34 * k, lerpf(sit.z, out.z, f)), 0.0, 1.0, 0.42)
+	# 0.54: lands with a squash and springs back
+	kt.tween_callback(_sfx.bind("land", -12.0, 1.6))
+	kt.tween_property(kin_node, "scale", Vector3(1.14, 0.84, 1.14) * ks, 0.07)
+	kt.tween_property(kin_node, "scale", Vector3.ONE * ks, 0.16).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	# 0.77: a quick look round, one way then the other
+	kt.tween_property(kin_node, "rotation:y", away - 0.6, 0.26).set_trans(Tween.TRANS_SINE)
+	kt.tween_property(kin_node, "rotation:y", away + 0.5, 0.3).set_trans(Tween.TRANS_SINE)
+	# 1.33: finds you, turns, looks up at you, its first happy sound, and a little bounce
+	kt.tween_property(kin_node, "rotation:y", face_you, 0.28).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	kt.tween_callback(func():
-		kin_node.set_meta("kstate", "")
-		_sfx("kin_unsure", -16.0, 1.25))
-	kt.tween_interval(0.55)
-	kt.tween_callback(_kin_blink)
-	kt.tween_interval(0.5)
-	kt.tween_callback(_kin_blink)
-	# looks around: one way, the other, taking in the world
-	kt.tween_property(kin_node, "rotation:y", away - 0.7, 0.55).set_trans(Tween.TRANS_SINE)
-	kt.tween_interval(0.3)
-	kt.tween_property(kin_node, "rotation:y", away + 0.5, 0.6).set_trans(Tween.TRANS_SINE)
-	kt.tween_interval(0.35)
-	# then it finds you: turns, looks up at you, holds it. Its first sound, in its own voice.
-	kt.tween_property(kin_node, "rotation:y", face_you, 0.6).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	kt.tween_callback(func(): _look_up(0.28))
-	kt.tween_interval(0.5)
-	kt.tween_callback(_kin_blink)
-	kt.tween_interval(0.35)
-	kt.tween_callback(func():
+		_look_up(0.28)
 		_sfx("kin_happy", -6.0, 1.05)
 		popped.emit(kin_node))
-	kt.tween_interval(0.7)
+	_bounce(kt, ks, out.y, 0.22)
+	_bounce(kt, ks, out.y, 0.14)
+	kt.tween_interval(0.12)
 	kt.tween_callback(func(): _look_up(0.0))
-	# climbs out toward you
-	var out := global_position + Vector3(0.0, 0.0, hop_out) * k * 1.3
-	kt.tween_callback(_sfx.bind("jump", -12.0, 1.5))
-	kt.tween_property(kin_node, "global_position:z", out.z, 0.5)
-	kt.parallel().tween_property(kin_node, "global_position:x", out.x, 0.5)
-	kt.parallel().tween_method(func(f: float): kin_node.global_position.y = lerpf(sit.y, out.y, f) + sin(f * PI) * 0.3 * k, 0.0, 1.0, 0.5)
-	kt.tween_callback(_sfx.bind("land", -14.0, 1.6))
-	# the empty shell is left behind, then tidied away
-	kt.tween_interval(0.5)
-	kt.tween_property(body, "scale", Vector3.ZERO, 0.4).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
 	kt.tween_callback(func(): done.emit())
+
+## The top half tips off to one side of the nest (position and spin; it then shrinks, see _fade_shell).
+func ct_tip(cap_n: Node3D, side: Vector3, k: float) -> void:
+	var ct := create_tween().set_parallel(true)
+	ct.tween_property(cap_n, "position:x", side.x, 0.5).set_trans(Tween.TRANS_SINE)
+	ct.tween_property(cap_n, "position:z", side.z, 0.5).set_trans(Tween.TRANS_SINE)
+	ct.tween_property(cap_n, "rotation", Vector3(0.3, 0.4, PI), 0.5).set_trans(Tween.TRANS_SINE)
+	var cyt := create_tween()
+	cyt.tween_property(cap_n, "position:y", cy + 0.22 * k, 0.2).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	cyt.tween_property(cap_n, "position:y", cy * 0.5, 0.3).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+
+## A half of the shell shrinks to nothing after `delay`, taking `dur`.
+func _fade_shell(half: Node3D, delay: float, dur: float) -> void:
+	var tw := create_tween()
+	tw.tween_interval(delay)
+	tw.tween_property(half, "scale", Vector3.ZERO, dur).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+
+## One small hop of height `h` metres (a happy bounce), squashing on landing.
+func _bounce(kt: Tween, ks: float, ground_y: float, h: float) -> void:
+	var up := Vector3(0.94, 1.1, 0.94) * ks
+	kt.tween_property(kin_node, "global_position:y", ground_y + h, 0.09).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	kt.parallel().tween_property(kin_node, "scale", up, 0.09)
+	kt.tween_property(kin_node, "global_position:y", ground_y, 0.09).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	kt.parallel().tween_property(kin_node, "scale", Vector3(1.08, 0.92, 1.08) * ks, 0.09)
 
 ## Where "you" are: the hunter if the caller said so, otherwise the camera.
 func _you() -> Vector3:

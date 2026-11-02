@@ -13,7 +13,7 @@
 	},
 	"look": {
 		"scale": 1.25,
-		"part_k": 1.9,
+		"part_k": 1.5,
 		"ring": 4.6,
 		"parts": [
 			"storm_wings",
@@ -35,79 +35,6 @@
 			"move_speed": 0.16
 		},
 		"why": "run-speed bonus by weight class (a light hero keeps the most speed; merge cap +40%)"
-	},
-	"dash": {
-		"burst": 8.0,
-		"radius": 2.4,
-		"chain": 0.5,
-		"visual": "spark",
-		"why": "each dodge crackles: a burst that arcs on to a second foe"
-	},
-	"lmb": {
-		"name": "Chain Bolt",
-		"icon": "chain",
-		"cooldown": 0.17,
-		"range": 15.0,
-		"pose": [
-			"mf_bolt"
-		],
-		"desc": "Fire fast lightning bolts. Each bolt that hits arcs on to one more foe.",
-		"why": "~6 shots/s, 8 dmg + 5 on the arc",
-		"seq": [
-			[
-				{
-					"type": "projectile",
-					"dmg": 8,
-					"speed": 42.0,
-					"range": 17.0,
-					"size": 0.16,
-					"color": "#fff27a",
-					"sfx": "zap",
-					"pitch": 1.5,
-					"on_hit": [
-						{
-							"type": "chain",
-							"skip_here": true,
-							"count": 1,
-							"first": 6.0,
-							"dmg": 5,
-							"color": "#fff27a"
-						}
-					]
-				}
-			]
-		]
-	},
-	"rmb": {
-		"kind": "hover",
-		"name": "Hover",
-		"icon": "updraft",
-		"cooldown": 1.5,
-		"range": 0.0,
-		"desc": "Hold to hover with a slow fall. Cross gaps in the ground while it lasts. Ends when you let go or run out.",
-		"fall": 1.2,
-		"rise": 1.1,
-		"drain_s": 3.5,
-		"fill_s": 0.6,
-		"lift": 4.5,
-		"why": "falls at 1.2 m/s, hovers up to 3.5s per charge, 4.5 m/s hop when started on the ground; 'full' when the lift has settled at 0.6s"
-	},
-	"e": {
-		"kind": "blink",
-		"name": "Storm Blink",
-		"icon": "blink",
-		"cooldown": 0.0,
-		"range": 7.5,
-		"charges": 2,
-		"recharge": 4.5,
-		"desc": "Blink forward through foes, shocking everything along the path. Two charges.",
-		"distance": 7.5,
-		"width": 1.2,
-		"dmg": 16,
-		"stun": 0.25,
-		"iframes": 0.2,
-		"color": "#fff27a",
-		"why": "7.5m, 2 charges, 4.5s each; swept in 0.5m steps so walls stop it and nothing is skipped"
 	},
 	"r": {
 		"name": "Thunderhead",
@@ -142,5 +69,71 @@
 				"color": "#fff27a"
 			}
 		]
-	}
+	},
+	"aug": {
+		"lmb": {
+			"name": "Chain Lightning",
+			"icon": "chain",
+			"desc": "Every hit arcs to 1 more foe for half damage.",
+			"chain": 1,
+			"chain_dmg": 0.5,
+			"chain_reach": 6.0,
+			"color": "#fff27a"
+		},
+		"rmb": {
+			"name": "Storm Burst",
+			"icon": "shock",
+			"desc": "Your right click also crackles: a lightning burst around you that arcs to 2 foes. Recharges 20% faster.",
+			"cd_k": 0.8,
+			"effects": [
+				{
+					"type": "area",
+					"at": "self",
+					"radius": 3.5,
+					"dmg": 9,
+					"stun": 0.2,
+					"color": "#fff27a"
+				},
+				{
+					"type": "chain",
+					"from": "owner",
+					"count": 2,
+					"first": 6.0,
+					"dmg": 8,
+					"color": "#fff27a"
+				}
+			]
+		},
+		"e": {
+			"name": "Storm Surge",
+			"icon": "bolt",
+			"desc": "Your E also throws a lightning ring that stuns for a moment. Recharges 20% faster.",
+			"cd_k": 0.8,
+			"effects": [
+				{
+					"type": "area",
+					"at": "self",
+					"radius": 4.5,
+					"dmg": 10,
+					"stun": 0.35,
+					"color": "#fff27a"
+				}
+			]
+		},
+		"dash": {
+			"kind": "sweep",
+			"name": "Lightning Blink",
+			"icon": "blink",
+			"desc": "Your dash shocks everything along its path.",
+			"dmg": 14,
+			"stun": 0.25,
+			"width": 1.3,
+			"window": 0.4,
+			"color": "#fff27a"
+		},
+		"stats": {
+			"cooldown": 0.1
+		}
+	},
+	"aug_why": "the augment set of this Boki type, identical for every hero: LMB rider, RMB and E add-on effects, the form dash and a modest passive"
 }

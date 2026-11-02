@@ -62,7 +62,7 @@ const FLOAT_SPEED := 12.0
 const GLIDE_FALL := 1.7
 const GLIDE_SPEED := 6.5       # (movefeel, owner: "feels weaker than SUPERVIVE") between [footage] ~5-5.5 and
                                # [spec] eyeball 7-10 m/s, leaning to the stronger glide; was 5.0
-const GLIDE_TIME := 14.0       # [footage] ~14s of level glide before the heat ring turns hot
+const GLIDE_TIME := 9.0        # (owner: "lasts too long, not punishing enough") was 14s of level glide before the heat ring turns hot
 const GLIDE_DRAG := 1.6         # speed lost per second while gliding (more when going fast)
 const GLIDE_MAX := 15.0
 # The opening drop, battle-royale style: a fast skydive you steer freely, then the glider opens by
@@ -470,14 +470,14 @@ func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
 	if opts.has("wallstun"):
 		wallstun = float(opts["wallstun"])
 	# Getting hit while gliding, as in Supervive: a hit does NOT knock you out of the air by itself
-	# and you take normal damage. What it does is drain the glider at double the usual rate. Only
+	# and you take normal damage. What it does is drain the glider at triple the usual rate. Only
 	# when the glider runs dry are you spiked (stunned, plummeting, a 0.7s stun when you land; over
 	# the abyss that's a fall). Monsters drain it but can't spike you.
 	var spiked := false
 	if gliding and not dropping and dmg > 0.0 and opts.get("src", "") not in ["fall", "burn", "heat"]:
 		var was := glide_fuel
-		# a knock's worth of damage (250 of 1,050) would burn 30% of the glider; hits drain it 2x
-		glide_fuel = maxf(0.0, glide_fuel - 2.0 * dmg * (0.30 / 34.5) / float(cdat.get("glide_cap", 1.0)))
+		# a knock's worth of damage (250 of 1,050) would burn 30% of the glider; hits drain it 3x
+		glide_fuel = maxf(0.0, glide_fuel - 3.0 * dmg * (0.30 / 34.5) / float(cdat.get("glide_cap", 1.0)))
 		hit_heat_t = 1.0
 		if is_local() and m.hud and m.hud.has_method("glider_hit"):
 			m.hud.glider_hit(was - glide_fuel)
@@ -726,12 +726,15 @@ func _shot_down() -> void:
 ## stack with whatever you were doing), you slide for a fixed moment without control, and it never
 ## pops you into the air unless the attack says so.
 var knock_t := 0.0
+var launched_at := -9.0        # when a hard shove or a launch last hit you (Capture.controlled: it interrupts a rescue or a scan)
 var knock_steer := 0.3         # how much WASD bends a knockback (the attack decides: 0.3 to 0.5)
 func impulse(kbv: Vector2, lift := -1.0) -> void:
 	if fortify_t > 0.0:
 		return
 	var k := kbv * (1.0 - owner_stat("knockback_resist"))
 	var s := k.length() / mass()
+	if s >= Capture.HARD_KNOCK or (lift >= 0.0 and lift / mass() >= 3.0):
+		launched_at = m.time
 	if s < 0.05:
 		if lift >= 0.0:
 			# a straight-up lift (a slam's crater, an eruption) with no sideways push
@@ -872,11 +875,11 @@ static func glide_steer(hv: Vector2, wish: Vector2, gs: float, dt: float) -> Vec
 ## on the ground"), and for FEATHER_KEEP after a close you keep the glide's speed and steering, so
 ## skilled taps (short lifts out of the abyss, coasting the gaps) cover more ground per heat than
 ## holding. Numbers in docs/MOVEMENT_FEEL.md; measured by --move-feel-check (feather_*).
-const FEATHER_COOL := 0.06     # [est] heat (fuel share) cooled per second with the glider closed in the air
+const FEATHER_COOL := 0.04     # [est] heat (fuel share) cooled per second with the glider closed in the air
 const FEATHER_KEEP := 0.6      # [est] seconds after closing the glider that its speed and steering carry
 const FEATHER_MIN := 0.05      # [est] the glider reopens with this much heat room left (was 0.15)
 const FEATHER_TAP := 0.3       # [est] an abyss lift's first this-many seconds are its quick impulse...
-const FEATHER_TAP_HEAT := 1.0  # [est] ...heating like a level glide; held past it, the full 4x
+const FEATHER_TAP_HEAT := 0.4  # [est] ...heating like a level glide; held past it, the full 4x
 var glide_off_t := 9.0         # seconds since the glider closed in the air (9 = long ago / on the ground)
 var lift_t := 0.0              # seconds of the current abyss lift (feathering taps stay in the cheap part)
 
@@ -1101,7 +1104,6 @@ func do_dash() -> void:
 	if ak:
 		# the archetype's dash shape: it spends its own charge (or the long air dash) itself
 		ak.on_dash(use_ex)
-		MergeForm.on_dash(self)
 		return
 	if use_ex:
 		if ex_cd > 0.0:
@@ -1115,7 +1117,6 @@ func do_dash() -> void:
 	var effs: Array = dodge_def.effects if dodge_def else [{"type": "dash", "speed": DASH_SPEED, "time": DASH_TIME, "invuln": 0.14}]
 	Effects.run(effs, self, {"slot": "dodge", "ability": dodge_def.id if dodge_def else "dash", "level": ability_level("dash")})
 	_dash_rider(use_ex)
-	MergeForm.on_dash(self)
 	CombatBus.ability_used.emit(self, dodge_def.id if dodge_def else "dash", "dodge")
 
 ## The theme of the kin you brought ("venom", "lunar"...). Cosmetic only: it tints, never rules.
@@ -1791,8 +1792,8 @@ func slot_info(slot: String) -> Dictionary:
 			var u := KinMerge.def_for(k) if k and KinMerge.boki_with_you(self) else null
 			var f := MergeForm.for_boki(k) if u else MergeForm.surge_form()
 			var txt: String = " ".join(KinText.merge(u, k.carry_style() == "mount")) if u else String(MergeForm.data()["surge"]["flavor"])
-			out.merge({"name": u.display_name if u else "Surge", "short": u.display_name if u else "Surge", "icon": "bond", "col": f["glow"], "desc": txt, "form": f, "bond": ult,
-				"plan": KinMerge.plan(self), "cd": merge_cd, "cd_max": KinParts.MERGE_SPENT_TIME, "charges": 1 if ult >= 1.0 else 0, "max_charges": 1,
+			out.merge({"name": "Merge", "short": "Merge", "icon": "bond", "col": f["glow"], "desc": txt, "form": f, "bond": ult,
+				"plan": KinMerge.plan(self), "cd": merge_cd, "cd_max": maxf(KinParts.MERGE_SPENT_TIME, float(MergeForm.data()["rest_s"])) if kin != null and kin.resting() else KinParts.MERGE_SPENT_TIME, "charges": 1 if ult >= 1.0 else 0, "max_charges": 1,
 				"ready": KinMerge.plan(self) in ["merge", "leap", "surge"]}, true)
 	return out
 
@@ -1875,6 +1876,7 @@ func _kin_riders(extra: Dictionary) -> void:
 	var mo := KinMerge.on_shot(self)
 	if not mo.is_empty():
 		lists.append([mo, 1.0])
+	MergeAugment.lmb(self, extra)          # a merge form's rider on this attack (docs/decisions/0004)
 	for pair in lists:
 		var os: Dictionary = pair[0]
 		var kk: float = pair[1]
@@ -2071,7 +2073,6 @@ func sim(dt: float) -> void:
 	bloom = lerpf(bloom, want_bloom, 1.0 - exp(-(10.0 if want_bloom > bloom else 4.0) * dt))
 	if remote:
 		net_follow(dt)
-		MergeHolds.remote_prism(self)
 		return
 	if not downed and not dropping:
 		Bond.passive(self, dt)
@@ -2101,7 +2102,7 @@ func sim(dt: float) -> void:
 			inp[kk] = false
 		inp["move"] = Vector2.ZERO
 	# inputs
-	MergeKit.route(self)             # merged: LMB, RMB and E are the form's (whatever your slot ranks), C is off
+	MergeAugment.route(self)         # merging: nothing fires mid-transformation; merged in a form, C is off
 	for gk in [["dash", "dash", "dash"], ["sec", "sec", "sec"], ["gear1", "gear", "gear0"], ["sig", "kin", "k1"], ["ult", "ult", "r"]]:
 		_gate(gk[0], gk[1], gk[2])
 	KinDowned.commit(self)           # rescuing your Boki: rooted, nothing fires (a dash still cancels it)
@@ -2293,7 +2294,7 @@ func _physics(dt: float) -> void:
 	elif gliding:
 		# the glider keeps the speed you bring into it (a dash or a pad into a glide carries) and
 		# drifts on when you let go of the keys
-		var gs := (DIVE_SPEED if diving else DROP_SPEED) if dropping else (GLIDE_SPEED * 0.6 if glide_fuel <= 0.001 else GLIDE_SPEED) * (1.0 + gear_stat("glide_speed"))
+		var gs := (DIVE_SPEED if diving else DROP_SPEED) if dropping else (GLIDE_SPEED * 0.5 if glide_fuel <= 0.001 else GLIDE_SPEED) * (1.0 + gear_stat("glide_speed"))
 		hv = glide_steer(hv, mv * gs, gs, dt)
 		if dropping:
 			# the drop goes where you point and stops when you let go: no fixed heading to circle on
@@ -2343,7 +2344,7 @@ func _physics(dt: float) -> void:
 		# Let go just before ground level to carry the lift up as height (feathering)
 		vel.y = abyss_lift_vy(vel.y, lip_y - pos.y, dt)
 	elif gliding:
-		var sink := (DIVE_FALL if diving else DROP_FALL) if dropping else (3.0 if glide_fuel <= 0.001 else glide_fall(Vector2(vel.x, vel.z).length()))
+		var sink := (DIVE_FALL if diving else DROP_FALL) if dropping else (5.0 if glide_fuel <= 0.001 else glide_fall(Vector2(vel.x, vel.z).length()))
 		if dropping:
 			vel.y = lerpf(vel.y, -sink, 1.0 - exp(-(DIVE_VY_RATE if diving else DROP_VY_RATE) * dt))
 			if drop_follow != null and m.skydrop:
@@ -2357,8 +2358,8 @@ func _physics(dt: float) -> void:
 			# so you can cross until the heat runs out
 			if over_void() and glide_fuel > 0.001 and vel.y < 0.0 and pos.y + vel.y * dt < lip_y:
 				vel.y = minf(0.0, (lip_y - pos.y) / dt)
-	elif MergeHolds.hovering(self):
-		vel.y = MergeHolds.hover_vy(self, vel.y, dt)      # a merged form's hover (or its ultimate's climb)
+	elif MergeKit.rising(self):
+		vel.y = MergeKit.rise_vy(self)      # the ultimate's climb (Thunderhead)
 	elif roll_t > 0.0 and not grounded and not dropping:
 		vel.y = 0.0          # a dash in the air holds your height for its length
 	elif not grounded:
@@ -2672,10 +2673,10 @@ func _update_glide(dt: float) -> void:
 		auto_glide = false
 	# an overheated glider scorches you while it stays open
 	if gliding and not dropping and glide_fuel <= 0.001 and not downed:
-		heat_burn += dt * 4.0
-		if heat_burn >= 2.0:
-			heat_burn -= 2.0
-			hurt(2.0, null, {"src": "heat"})
+		heat_burn += dt * max_hp * 0.035      # an overheated glider burns ~3.5% of your health a second (was a token 4/s)
+		if heat_burn >= 20.0:                  # (in ~20-damage ticks, ~2 a second: not a stream of numbers)
+			heat_burn -= 20.0
+			hurt(20.0, null, {"src": "heat"})
 	# an overheated glider stays open (slow and sinking) until you land or get hit again
 	var can: bool = (lfloat.is_empty() or (bool(inp.get("glide", false)) and not bool(lfloat.get("g0", true)))) and not grounded and roll_t <= 0.0 and fly_t <= 0.0 and glide_cd <= 0.0 and not downed and stun_t <= 0.0 \
 		and m.time - kb_t > 0.4 and (glide_fuel > 0.0 or gliding) and pad.is_empty() and not shot_down
@@ -3182,6 +3183,8 @@ func _render_weapon_fx(delta: float) -> void:
 var cast_at := -9.0
 var cast_slot := ""
 func _on_ability_used(caster: Node, _id: String, slot: String) -> void:
+	if caster == self:
+		MergeAugment.on_used(self, slot)          # a merge form's add-ons on RMB, E and Shift
 	if caster == self and slot != "dodge" and slot != "primary" and m:
 		cast_at = m.time
 		cast_slot = "ult" if slot in ["ult", "ultimate"] else slot

@@ -100,7 +100,7 @@ static func wall_blocks(list: Array, x: float, z: float, r: float, y: float) -> 
 	return 0.0
 
 # ------------------------------------------------------------------ reflect windows
-## A reflect window; returns it so a held one (the Prism, MergeHolds) can refresh and end it.
+## A reflect window; returns it so a held one (a form dash's mirror, MergeAugment) can refresh and end it.
 func add_mirror(ent: Node, e: Dictionary) -> Dictionary:
 	var col := Color(String(e.get("color", "#bff6ff")))
 	var arc := float(e.get("arc", -1.0))

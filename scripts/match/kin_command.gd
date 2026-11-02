@@ -38,7 +38,7 @@ static func poll(h: Hunter, dt: float, blocked: bool) -> String:
 			if h.kin != null and (h.kin as Kin).ready_to_fight():
 				KinWheel.open(h, mouse)
 			elif h.kin != null:
-				say(h, "Your Boki can't take orders right now", Color("ffd89a"))     # (down, away or fused: not a silent swallow)
+				say(h, resting_text(h.kin) if (h.kin as Kin).resting() else "Your Boki can't take orders right now", Color("ffd89a"))     # (down, away or fused: not a silent swallow)
 		if KinWheel.is_open(h):
 			KinWheel.update(h, mouse, dt)
 			h.inp["fire"] = false           # a flick is not a shot
@@ -68,6 +68,9 @@ static func tap(h: Hunter) -> void:
 	var k: Kin = h.kin
 	if k == null or h.downed or h.dropping or h.riding:
 		return
+	if k.resting():
+		say(h, resting_text(k), Color("a2a8bb"))
+		return
 	if KinMerge.in_form(h):
 		say(h, "%s is part of you while you are merged" % k.rec.get("name", "Your Boki"), Color("a2a8bb"))
 		return
@@ -88,6 +91,8 @@ static func tap(h: Hunter) -> void:
 ## Call back: it leaps to your side, hitting what is on its path. Only within the recall range.
 static func call_back(h: Hunter) -> void:
 	var k: Kin = h.kin
+	if k.resting():
+		return
 	if k.flat_dist(h) > float(rules().get("recall_range", 24.0)):
 		say(h, "Too far to call back: it will hop to you on its own", Color("a2a8bb"))
 		h._ab_feedback("throw", "deny")
@@ -106,6 +111,9 @@ static func apply_pick(h: Hunter) -> void:
 static func order(h: Hunter, id: String) -> bool:
 	var k: Kin = h.kin
 	if k == null or h.downed or h.dropping or h.riding:
+		return false
+	if k.resting():
+		say(h, resting_text(k), Color("a2a8bb"))
 		return false
 	if KinMerge.in_form(h):
 		return false          # (merged with a form: your Boki is part of you, orders wait)
@@ -171,9 +179,15 @@ static func c_deny_text(h: Hunter) -> String:
 	var k: Kin = h.kin
 	if k == null:
 		return ""
+	if k.resting():
+		return resting_text(k)
 	if k.state == "downed":
 		return "%s is down: it can't cast" % k.rec.get("name", "Your Boki")
 	return ""
+
+## What a drained Boki says to any order (docs/decisions/0004).
+static func resting_text(k: Kin) -> String:
+	return "%s is resting: %ds" % [k.rec.get("name", "Your Boki"), int(ceil(k.rest_t))]
 
 static func say(h: Hunter, text: String, col: Color) -> void:
 	if h.is_local() and h.m.hud:

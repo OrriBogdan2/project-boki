@@ -518,6 +518,7 @@ func _draw_world_labels() -> void:
 			BokiHud.downed_label(self, k, sp)
 		elif k.hp < k.max_hp:
 			_bar(Rect2(sp + Vector2(-22, 0), Vector2(44, 5)), k.hp / k.max_hp, Data.TEAM_COLORS[k.team % Data.TEAM_COLORS.size()] if k.owner_h != m.player else GOOD)
+			c.draw_rect(Rect2(sp + Vector2(-22, 0), Vector2(44 * k.hp / k.max_hp, 5)), Color(KinRegen.MOTE_COL, KinRegen.pulse(k, m.time)))
 
 func _draw_bubbles() -> void:
 	var cam := m.cam
@@ -1394,8 +1395,8 @@ func _draw_glider_heat(p: Hunter) -> void:
 ## one starts the run locked; rank pips sit above each, a gold border means a point can unlock it
 ## (just press its key), and a gold + means Alt + its key will rank it up.
 func _draw_abilities(sz: Vector2, p: Hunter) -> void:
-	if p.ak or MergeKit.live_of(p) != null:
-		_draw_arch_abilities(sz, p)          # (a merged form's slots are drawn like an archetype's)
+	if p.ak:
+		_draw_arch_abilities(sz, p)
 		return
 	var o := _hud_origin(sz)
 	var s := 50.0
@@ -1435,6 +1436,7 @@ func _draw_abilities(sz: Vector2, p: Hunter) -> void:
 			_skill_slot("kin", "k1", er, KinText.icon(kd), Settings.key_cap("signature"), KinText.color(kd), k.runner.cd_frac("k1"), k.runner.cd_left("k1") if not k.runner.is_ready("k1") else 0.0, rdy)
 			if not k.ready_to_fight() and int(p.slot_lv["kin"]) > 0:
 				_rounded(er, Color(0, 0, 0, 0.45), 10)
+	BokiHud.aug_mark(self, p, er, "e")
 	x += s + gap
 	# R: the Merge (the bond meter), a little bigger; then C and G
 	var us := 58.0
@@ -1479,6 +1481,7 @@ func _draw_arch_abilities(sz: Vector2, p: Hunter) -> void:
 		var hfull: float = p.ak.rmb_charge_full() if p.ak.rmb_charge_full() > float(p.ak.rmb_def().get("hold", 0.3)) else float(p.ak.rmb_def().get("hold", 0.3))
 		var hk := clampf(p.ak.rmb_t / maxf(0.05, hfull), 0.0, 1.0)
 		c.draw_arc(sr.get_center(), s * 0.5 + 4.0, -PI / 2, -PI / 2 + TAU * hk, 32, Color(info["col"], 0.9), 3.0, true)
+	BokiHud.aug_mark(self, p, sr, "rmb")
 	x += s + gap
 	var qr := Rect2(Vector2(x, y), Vector2(s, s))
 	if not g0.is_empty() and Gear.ALL.has(String(g0["id"])):
@@ -1495,6 +1498,7 @@ func _draw_arch_abilities(sz: Vector2, p: Hunter) -> void:
 	if di.get("full", false):
 		# the payoff lives on the dash (the Thief's Primed shot into 3 Marks): the same gold dot
 		c.draw_circle(Vector2(x, y) + Vector2(s - 6, 6), 5.0 + sin(m.time * 8.0), Color("ffd23f"))
+	BokiHud.aug_mark(self, p, Rect2(Vector2(x, y), Vector2(s, s)), "dash")
 	x += s + gap
 	var ei := p.slot_info("k1")
 	var er := Rect2(Vector2(x, y), Vector2(s, s))
@@ -1603,6 +1607,7 @@ func _draw_kin_card(sz: Vector2, p: Hunter) -> void:
 		c.draw_circle(pc, rr - 4, Color(0, 0, 0, 0.55))
 		_ctext(pc + Vector2(0, 5), str(int(ceil(k.down_t))), 14, INK, big)
 	hover_spots.append([Rect2(pc - Vector2(rr, rr), Vector2(rr, rr) * 2.0), "kin"])
+	BokiHud.rest_card(self, k, pc, rr)
 	var st := ""
 	match k.state:
 		"shoulder":
@@ -1629,6 +1634,7 @@ func _draw_weapon(sz: Vector2, p: Hunter) -> void:
 	var rc: Color = Loot.ELEMENTS[p.welem]["col"] if p.welem != "" else Color("e6dccb")
 	_rounded(r, Color(0.04, 0.05, 0.08, 0.88), 12, Color(rc, 0.45), 1)
 	hover_spots.append([r, "weapon"])
+	BokiHud.aug_mark(self, p, Rect2(r.position + Vector2(6, 4), Vector2(18, 18)), "lmb")
 	c.draw_rect(Rect2(r.position + Vector2(0, 10), Vector2(3, r.size.y - 20)), rc)
 	Icons.draw(c, p.wid, r.position + Vector2(40, 34), 26.0, Color(rc, 0.9))
 	var wn := String(p.wpn["name"]).to_upper()
@@ -2724,7 +2730,7 @@ func _tip_lines(id: String, p: Hunter) -> Array:
 			out.append(["Merge  ·  %s  ·  %s" % [Settings.key_caps("ultimate"), "your mount grows giant" if giant else "you take its colour and power"], MUTED, 12])
 			for ln in KinText.merge(ud, giant):
 				out.append([String(ln), INK, 13])
-			out.append(["Unlocks at level %d with a full meter. The bond fills as your Boki lands hits, as you hit what it marked, and on combos. Boki out? You leap-merge. No Boki: a weak surge. Then %ss before it can go again." % [int(Hunter.ULT_AT[0]), KinText.n(KinParts.MERGE_SPENT_TIME)], GOLD, 12])
+			out.append(["Unlocks at level %d with a full meter. The bond fills as your Boki lands hits, as you hit what it marked, and on combos. Boki out? It comes back to you first. No Boki: a weak surge. Then %ss before it can go again." % [int(Hunter.ULT_AT[0]), KinText.n(KinParts.MERGE_SPENT_TIME)], GOLD, 12])
 		"swap":
 			var b: Kin = p.kin2
 			if b == null: return []
