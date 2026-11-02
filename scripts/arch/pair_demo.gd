@@ -3,6 +3,7 @@ extends RefCounted
 ## Screenshot tooling for Dolm and Ostra (used by ArenaDemo): --arena-demo=pair_<what> --arena-shot=<png>.
 ##   pair_card_dolm / pair_card_ostra     the kit card
 ##   pair_dolm_rocks / pair_dolm_pay      Stone Row up (rocks beside the dummy) / the ROCKFALL payoff
+##   pair_dolm_boulder/slam/dash, pair_ostra_orb/fan/trade (single moments)
 ##   pair_ostra_swollen / pair_ostra_seed / pair_ostra_pay    Swollen, a growing seed, the COLLAPSE payoff
 ## and --arena-demo=anim_<move> strips (ANIM): dol_boulder dol_punch dol_dash dol_slam dol_wave
 ## ost_dash ost_snap ost_seed ost_orb.
@@ -80,6 +81,24 @@ static func tick(A: Arena, P: Hunter, D: Hunter, t: float, dt: float, w: String)
 			P.inp["fire"] = t > 0.9 and t < 1.9
 			if int(K.get("launch_pay")) > 0 and not A.has_meta("pay_at"): A.set_meta("pay_at", t)
 			at_t = float(A.get_meta("pay_at", 9.0)) + 0.1
+		"pair_dolm_boulder":
+			P.inp["fire"] = t > 0.3 and t < 0.34
+			at_t = 0.55
+		"pair_dolm_slam":
+			if at(t, dt, 0.3): K.ch_rmb = float(K.rmb_charges()); K.bot_hold["rmb"] = 0.9; K.press_rmb()
+			at_t = 1.35
+		"pair_dolm_dash":
+			if at(t, dt, 0.3): P.dashes = P.max_dashes(); P.do_dash()
+			at_t = 0.6
+		"pair_ostra_orb":
+			P.inp["fire"] = t > 0.3 and t < 0.36
+			at_t = 0.6
+		"pair_ostra_fan":
+			if at(t, dt, 0.3): K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; K.press_rmb()
+			at_t = 0.5
+		"pair_ostra_trade":
+			if at(t, dt, 0.3): P.dashes = P.max_dashes(); P.do_dash()
+			at_t = 1.6
 		"pair_ostra_swollen":
 			if at(t, dt, 0.3): K.add_swell(100.0)
 			at_t = 0.9
@@ -89,5 +108,5 @@ static func tick(A: Arena, P: Hunter, D: Hunter, t: float, dt: float, w: String)
 		"pair_ostra_pay":
 			if at(t, dt, 0.3): K.cd["e"] = 0.0; K.use_e()
 			if int(K.get("collapses")) > 0 and not A.has_meta("pay_at"): A.set_meta("pay_at", t)
-			at_t = float(A.get_meta("pay_at", 9.0)) + 0.1
+			at_t = float(A.get_meta("pay_at", 9.0)) + 0.3
 	return at_t

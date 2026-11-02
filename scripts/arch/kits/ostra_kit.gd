@@ -145,8 +145,8 @@ func _tick_swap(dt: float) -> void:
 	swap["t"] = float(swap["t"]) - dt
 	var land: Vector3 = swap["land"]
 	var u := 1.0 - clampf(float(swap["t"]) / float(swap["T"]), 0.0, 1.0)
-	var ln: MeshInstance3D = swap.get("node")
-	if ln and is_instance_valid(ln):
+	var ln = swap.get("node")
+	if is_instance_valid(ln):
 		var from: Vector3 = swap["from"]
 		ln.global_position = from.lerp(land, u) + Vector3(0, 1.2 + sin(u * PI) * 2.2, 0)
 	if h.downed or h.out or h.stun_t > 0.0:
@@ -159,10 +159,10 @@ func _swap_end(go: bool) -> void:
 	var dd := dash_def()
 	var land: Vector3 = swap.get("land", h.pos)
 	var from: Vector3 = swap.get("from", h.pos)
-	var ln: MeshInstance3D = swap.get("node")
-	var tele: Node3D = swap.get("tele")
-	if tele and is_instance_valid(tele): m.fx.end_telegraph(tele)
-	if ln and is_instance_valid(ln): ln.queue_free()
+	var ln = swap.get("node")
+	var tele = swap.get("tele")
+	if is_instance_valid(tele): m.fx.end_telegraph(tele)
+	if is_instance_valid(ln): ln.queue_free()
 	swap = {}
 	if not go:
 		return
@@ -274,11 +274,11 @@ func _pop(hit: bool) -> void:
 	var p: Vector3 = seed["pos"]
 	var k := clampf(float(seed["t"]) / float(seed["grow"]), 0.0, 1.0)
 	var rad := seed_radius()
-	var tele: Node3D = seed.get("tele")
-	if tele and is_instance_valid(tele): m.fx.end_telegraph(tele)
+	var tele = seed.get("tele")
+	if is_instance_valid(tele): m.fx.end_telegraph(tele)
 	var sid := String(seed["sid"])
-	var vis: Node3D = seed.get("vis")
-	if vis and is_instance_valid(vis): vis.queue_free()
+	var vis = seed.get("vis")
+	if is_instance_valid(vis): vis.queue_free()
 	seed = {}
 	e_t = 0.0
 	HeroZones.seed_pop(m, sid, TEAL)
