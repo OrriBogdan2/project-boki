@@ -351,7 +351,7 @@ const OWNER_STATS := {
 	"damage_reduction": ["defence", "float", 0.15, 0.3, "x", "less damage taken"],
 	"knockback_resist": ["defence", "float", 0.5, 0.75, "x", "less knockback"],
 	"regen": ["defence", "float", 3.0, 8.0, "hp/s", "health regen"],
-	"damage": ["offence", "float", 0.1, 0.35, "x", "more damage"],
+	"damage": ["offence", "float", 0.1, 0.2, "x", "more damage"],
 	"fire_rate": ["offence", "float", 0.2, 0.3, "x", "faster firing"],
 	"reload": ["offence", "float", 0.2, 0.3, "x", "faster reloads"],
 	"reveal_radius": ["senses", "float", 0.0, 20.0, "m", "rivals this near are revealed"],

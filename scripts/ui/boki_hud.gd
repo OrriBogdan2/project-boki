@@ -86,7 +86,8 @@ static func r_slot(H, p: Hunter, ur: Rect2, us: float) -> void:
 	if fh2 > 0.0:
 		H._rounded(Rect2(Vector2(ur.position.x + 3, ur.end.y - 3 - fh2), Vector2(ur.size.x - 6, fh2)), Color(col, 0.30 if bond < 1.0 else 0.45), 9)
 	var plan := String(ri.get("plan", ""))
-	var gl := 1.0 - (H.m.time - float(p.get_meta("bond_flash_at", -9.0))) / BOND_FLASH_S          # a bond gain from an ultimate (KinBond)
+	var flash_age: float = H.m.time - float(p.get_meta("bond_flash_at", -9.0))
+	var gl := 1.0 - flash_age / BOND_FLASH_S
 	if gl > 0.0:
 		H._rounded(ur.grow(RING_GROW + 3.0), Color(1.0, 0.85, 0.3, 0.25 * gl), 14, Color(1.0, 0.85, 0.3, 0.9 * gl), 3)
 	if bond < 1.0:

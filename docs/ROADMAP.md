@@ -8,6 +8,7 @@ Last updated: 2026-11-02 16:30 ET, sync66.
 
 | Build | Date | What landed |
 |---|---|---|
+| ultbond | Nov 2 | Keys: T Merge, R reload, X hunter ultimate (hook only). `KinBond.add` / `from_ult` for ultimate-to-Merge combos. Releasing the merge fires the ultimate, then a 3s afterglow (+15% speed, 8% shield) and a 6s pumped Boki rest. Merge damage capped at +20%. |
 | sync66 | Nov 2 | The other session's batch: perk orbs replace the 1/2/3 level-up prompt (chest, shrine, brute, a boss fan of 3); level-ups grow your weapon on a fixed path per hunter plus quiet stat growth; shared aim modes and reticles (AimKit); Thief and Juggernaut follow-ups (no class R; Jackpot on the fifth Mark); the farm building pass. Net 0.16.0. |
 | sync65 | Nov 2 | Takedown reset: any knock or kill of an enemy hunter refills Shift and heals 5%. One shared reset cue (3 variants in Settings) and a pop on the Shift icon. A merge no longer looses a drawn arrow. |
 | sync64 | Nov 2 | Glider: 9s of heat (was 14), hits heat it 3x, an overheated glider burns ~3.5%/s, flies at half speed and sinks; lift taps heat at 0.4x so feathering still pays. Shots from higher ground hit a body 1-2 blocks below. The egg hatch is ~2s: the shell fades in under 1s, the Boki hops out, looks around and faces you. Boki regen: 6%/s on Return, 1.5%/s out after 6s without damage, none while downed. |

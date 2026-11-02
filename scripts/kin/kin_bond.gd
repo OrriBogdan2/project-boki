@@ -1,8 +1,8 @@
 class_name KinBond
 extends RefCounted
-## The one place the bond meter (Hunter.ult, 0..1) is written to fill it. Fighting fills it through Bond (hits, combos,
-## the passive trickle); a hero's own ultimate fills it through from_ult(), so ult -> Merge is a combo and Merge is never
-## locked behind the ult (fighting alone still fills the bar). Owner-side only: a remote hunter's meter comes from its game.
+## The one place the bond meter (Hunter.ult, 0..1) is filled. Fighting fills it through Bond (hits, combos, the
+## passive trickle); a hero's own ultimate fills it through from_ult(), so ult -> Merge is a combo and Merge is never
+## locked behind the ult. Owner-side only: a remote hunter's meter comes from its own game.
 ## Numbers: content/rules/boki_system.json `bond_from_ult` (a share of the bar per kind of ult event).
 
 const FIGHT := "fight"            # the reason Bond uses; no extra blocks and no flash (it is a constant trickle)

@@ -59,12 +59,16 @@ static func reset(h) -> void:
 		return
 	h.set_meta("growth_hp", 0.0)
 	var want := float(h.cdat.get("hp", 0.0)) * hp_pct(int(h.get_meta("growth_lvl")))
-	h.max_hp += want; h.hp += want
+	h.max_hp += want
+	h.hp += want
 	h.set_meta("growth_hp", want)
 
 ## The level badge tooltip line: what your levels have added so far.
 static func tip(h) -> String:
 	var l := int(h.get_meta("growth_lvl", 1))
 	if l < 2:
-		return "Each level: +%d%% max health, +%d%% ability power (half from level %d)" % [roundi(step("hp", 2) * 100.0), roundi(step("ap", 2) * 100.0), int(rules().get("half_from", 7))]
+		var hp_gain := roundi(step("hp", 2) * 100.0)
+		var ap_pct := roundi(step("ap", 2) * 100.0)
+		var half_from := int(rules().get("half_from", 7))
+		return "Each level: +%d%% max health, +%d%% ability power (half from level %d)" % [hp_gain, ap_pct, half_from]
 	return "From levels: +%d%% max health, +%d%% ability power" % [roundi(hp_pct(l) * 100.0), roundi(ap_pct(l) * 100.0)]
