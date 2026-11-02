@@ -30,8 +30,8 @@ static func draw(hud, sz: Vector2, p: Hunter) -> void:
 		var rc: Color = Data.RARITY[rar]["color"]
 		hud._rounded(r, Color(0.04, 0.05, 0.08, 0.9), 9, Color(rc, 0.85), 2)
 		Icons.draw(hud.c, Gear.icon_of(String(g["id"])), r.get_center(), CELL * 0.28, Gear.ALL[String(g["id"])]["col"])
-		if i == 0 and float(p.gear_cd[0]) > 0.0:
-			var f := clampf(float(p.gear_cd[0]) / maxf(0.1, Gear.cd_of(String(g["id"]), rar)), 0.0, 1.0)
+		if i < 2 and float(p.gear_cd[i]) > 0.0:
+			var f := Gloves.cd_frac(p, i)
 			hud.c.draw_rect(Rect2(r.position + Vector2(0, CELL * (1.0 - f)), Vector2(CELL, CELL * f)), Color(0, 0, 0, 0.5))
 	var perks_key: int = p.perks.hash()      # the upgrade line only changes when the perks do (no string building per frame)
 	if perks_key != _ups_key:
@@ -46,19 +46,19 @@ static func draw(hud, sz: Vector2, p: Hunter) -> void:
 		hud._text(Vector2(right - _ups_w, r0.position.y - 6.0), _ups_txt, 11, Color(hud.GOOD, 0.9), hud.body)
 
 static func _empty_icon(i: int) -> String:
-	return ["glove", "glove", "fortify", "dash", "satchel"][i]
+	return ["glove", "glove", "fortify", "dash"][i]
 
 ## Hover text for slot i: [[line, colour, size?]...]
 static func tip(p: Hunter, i: int) -> Array:
 	var g: Dictionary = p.gear[i]
 	var out: Array = []
 	if g.is_empty() or not Gear.ALL.has(String(g["id"])):
-		out.append([Gear.SLOT_NAMES[i] + " (empty)", Color("a2a8bb")])
-		out.append(["Find %s in chests, vaults, on guards and bosses, or bring it from your armory." % Gear.SLOT_NAMES[i].to_lower(), Color("a2a8bb"), 13])
+		out.append([Gear.WORN_NAMES[i] + " (empty)", Color("a2a8bb")])
+		out.append(["Find %s in chests, vaults, on guards and bosses, or bring it from your armory." % ("a glove" if i < 2 else Gear.SLOT_NAMES[i].to_lower()), Color("a2a8bb"), 13])
 		return out
 	var it := Loot.gear(String(g["id"]), int(g["rar"]))
 	out.append([Loot.name_of(it), Loot.col_of(it)])
-	out.append([Gear.SLOT_NAMES[i] + ("  ·  " + Settings.key_cap("gear1") if i == 0 else ""), Color("a2a8bb"), 12])
+	out.append([Gear.WORN_NAMES[i] if i >= 2 else "%s glove  ·  %s" % ["Active" if Gear.active(String(g["id"])) else "Passive", Gloves.key_cap(i) if Gear.active(String(g["id"])) else "always on"], Color("a2a8bb"), 12])
 	out.append([Gear.desc_of(String(g["id"]), int(g["rar"])), Color("eef1f8"), 14])
 	out.append([Gear.stat_text(String(g["id"]), int(g["rar"])), Color("a2a8bb"), 13])
 	return out

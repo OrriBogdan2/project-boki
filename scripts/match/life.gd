@@ -259,11 +259,11 @@ static func box_items(m: Match, h: Hunter, b: Dictionary) -> Array:
 		var g: Dictionary = b["gear"][i]
 		var gd: Dictionary = Gear.ALL.get(String(g["id"]), {})
 		var r: Dictionary = Data.RARITY[clampi(int(g["rar"]), 0, Data.RARITY.size() - 1)]
-		var slot := Gear.slot_of(String(g["id"]))
+		var slot := Gear.slot_on(h, String(g["id"]))
 		var cur: Dictionary = h.gear[slot]
 		var up := cur.is_empty() or Loot.value(Loot.gear(String(g["id"]), int(g["rar"]))) > Loot.value(Loot.gear(String(cur["id"]), int(cur["rar"])))
 		out.append({"key": "gear", "i": i, "name": "%s%s" % [(String(r["name"]) + " ") if int(g["rar"]) > 1 else "", gd.get("name", g["id"])],
-			"sub": ("%s (%s)  ·  " % [Gear.SLOT_NAMES[slot], Settings.key_cap("gear1")] if slot == 0 else Gear.SLOT_NAMES[slot] + "  ·  ") + Gear.stat_text(String(g["id"]), int(g["rar"])),
+			"sub": Gear.WORN_NAMES[slot] + "  ·  " + Gear.stat_text(String(g["id"]), int(g["rar"])),
 			"icon": Gear.icon_of(String(g["id"])), "col": r["color"], "upgrade": up})
 	# gear and treasure for the backpack (worth taking if there's room, or it beats the worst thing in it)
 	for i in (b.get("pack", []) as Array).size():
@@ -312,7 +312,7 @@ static func take_item(m: Match, h: Hunter, b: Dictionary, it: Dictionary) -> voi
 			if gi < (b["gear"] as Array).size():
 				var g: Dictionary = b["gear"][gi]
 				(b["gear"] as Array).remove_at(gi)
-				var slot := Gear.slot_of(String(g["id"]))
+				var slot := Gear.slot_on(h, String(g["id"]))
 				var old: Dictionary = h.gear[slot]
 				h.gear[slot] = g.duplicate()
 				h.gear_cd[slot] = 0.0

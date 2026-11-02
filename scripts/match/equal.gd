@@ -9,7 +9,7 @@ extends RefCounted
 ## The workshop and guild-project perks, the bigger home backpack and armor from the armory are gone.
 
 const BASE_PACK := 6                       # backpack slots for every hunter (any more comes from a pickup in the match)
-const BRING_SLOTS := [0, 1, 3]             # gear slots that may come from home: glove, passive glove, boots
+const BRING_SLOTS := [0, 1, 3]             # gear KINDS that may come from home (Gear.slot_of): active glove, passive glove, boots
 
 static var _rules: Dictionary = {}
 
@@ -48,10 +48,12 @@ static func why_not(it: Dictionary, tier: int) -> String:
 static func take_loadout(tier: int) -> Array:
 	Econ.ensure_min()
 	var out: Array = []
+	var ids := {}
 	for slot in Econ.LOADOUT_SLOTS:
 		var it := Econ.loadout(slot)
-		if it.is_empty() or not may_bring(it, tier):
-			continue
+		if it.is_empty() or not may_bring(it, tier) or ids.has(String(it["id"])):
+			continue          # (two of the same glove can't be worn: the second stays home)
+		ids[String(it["id"])] = true
 		Save.d["armory"].erase(it)
 		out.append(it)
 	Save.d["raid_out"] = out.duplicate(true)
@@ -95,12 +97,14 @@ static func picks() -> Array:
 ## hunter is already the same for everyone (Hunter.init_hunter).
 static func start(m, h) -> void:
 	h.pack_cap = BASE_PACK
+	if "--equal-demo" in OS.get_cmdline_user_args():
+		m.opts["equal_demo"] = true; m.opts["no_drop"] = true      # screenshots: read here, not in main.gd (its budget)
 	if m.opts.get("training", false) or m.opts.get("tutorial", false) or m.opts.get("duel", false):
 		return
 	var tier: int = m.tier
 	for it in m.opts.get("kit_items", []):
 		if may_bring(it, tier):
-			h.gear[Gear.slot_of(String(it["id"]))] = {"id": it["id"], "rar": int(it["rar"])}
+			h.gear[Gear.slot_on(h, String(it["id"]))] = {"id": it["id"], "rar": int(it["rar"])}      # gloves: Q first, then V
 	# the belt: what you picked, in the order you picked it (slots 1 2 3)
 	if m.opts.has("belt_items"):
 		h.belt = UtilityBelt.empty()
@@ -112,10 +116,17 @@ static func start(m, h) -> void:
 				UtilityBelt.set_slot(h, i, String(e["id"]), int(e["n"]), int(e.get("free", 0)))
 	h.refresh_gear()
 	if m.opts.get("equal_demo", false):
-		_demo(h)
+		_demo(m, h)
 
 ## --equal-demo (screenshots): a belt of three kinds, armor on its way to Epic, a little hurt.
-static func _demo(h) -> void:
+static func _demo(m, h) -> void:
+	h.gear[0] = {"id": "grapple", "rar": 3}
+	h.gear[1] = {"id": "quake", "rar": 2}
+	var t := Timer.new()          # held for the whole shot: the match keeps playing underneath
+	t.wait_time = 0.2
+	t.autostart = true
+	m.add_child(t)
+	t.timeout.connect(func(): _demo_late(m, h))
 	h.belt = UtilityBelt.empty()
 	h.belt_free = {}
 	UtilityBelt.grant(h, "tonic", 3)
@@ -124,6 +135,35 @@ static func _demo(h) -> void:
 	h.armor_gain(780.0)
 	h.hp = h.max_hp * 0.62
 	h.armor = h.max_armor * 0.55
+
+## Held every 0.2s (the rivals are in after the first tick): glove 2 cooling down, the bond part
+## full, and a rival beside you so its overhead row shows (two gloves, one cooling down, a full bond).
+static func _demo_late(m, h) -> void:
+	if not is_instance_valid(h):
+		return
+	Settings.v["tips"] = false          # (a clean frame: no tip card, no level-up choice, no monsters close by)
+	m.perk_offer.clear()
+	for mb in m.mobs:
+		if is_instance_valid(mb) and not mb.dead and mb.flat_dist(h) < 30.0: mb.hp = 0.0; mb.dead = true; mb.visible = false
+	h.gear_cd[1] = 9.0
+	h.ult = 0.7
+	h.hp = maxf(h.hp, h.max_hp * 0.62)
+	for o in m.hunters:
+		if o != h and o.team != h.team:
+			var at: Vector3 = h.pos + Vector3(-3.5, 0, 2.5)
+			for off in [Vector3(-3.5, 0, 2.5), Vector3(3.5, 0, 2.5), Vector3(-3.5, 0, -2.5), Vector3(3.5, 0, -2.5)]:
+				var p: Vector3 = h.pos + off
+				if not m.world.is_void(p.x, p.z) and not m.world.is_block(p.x, p.z):
+					at = Vector3(p.x, m.world.ground_at(p.x, p.z), p.z)
+					break
+			o.teleport(at)
+			o.reveal_t = 1.0
+			o.ctrl = "remote"           # stands still for the shot (no bot mind)
+			o.gear[0] = {"id": "blink", "rar": 4}
+			o.gear[1] = {"id": "barrier", "rar": 1}
+			o.gear_cd[1] = 8.0
+			o.ult = 1.0
+			break
 
 ## What the belt gives back to the farm when the match ends: only if you got out, and only what is
 ## above the everyday issue ({id: n}).

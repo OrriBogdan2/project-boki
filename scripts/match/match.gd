@@ -1650,14 +1650,14 @@ func use_gear(h: Hunter, slot: int) -> void:
 	if not Gear.active(gid):
 		return
 	var gd: Dictionary = Gear.ALL[gid]
-	h.gear_cd[slot] = Gear.cd_of(gid, int(g.get("rar", 1))) * h.rank_cd_k("gear")
+	h.gear_cd[slot] = Gear.cd_of(gid, int(g.get("rar", 1)))      # gloves never rank: the rarity is their only strength
 	var col: Color = gd["col"]
 	h.reveal_t = maxf(h.reveal_t, 0.6)
 	if h == player:
-		h._ab_feedback("gear0", "cast")
+		h._ab_feedback("gear%d" % slot, "cast")
 	if gd.has("effects"):
 		# newer gloves are built from the same effect blocks as abilities, scaled by rarity
-		Effects.run(Gear.effects_of(gid, int(g.get("rar", 1))), h, {"slot": "gear", "ability": gid, "level": h.ability_level("gear")})
+		Effects.run(Gear.effects_of(gid, int(g.get("rar", 1))), h, {"slot": "gear", "ability": gid, "level": 1})
 		sfx("skill", h.pos, -4.0, 1.0)
 		return
 	match gid:
@@ -3908,8 +3908,8 @@ func _gather_input() -> void:
 	# ability and kin swap are retired)
 	if Input.is_action_just_pressed("base") and not paused and duel == null and not opts.get("arena", false):
 		pending_input["base"] = true
-	var slot_of := {"dash": "dash", "secondary": "sec", "gear1": "gear", "signature": "kin", "ultimate": "ult"}
-	for a in [["dash", "dash"], ["jump", "jump"], ["signature", "sig"], ["reload", "reload"], ["util1", "util1"], ["util2", "util2"], ["util3", "util3"], ["ultimate", "ult"], ["secondary", "sec"], ["gear1", "gear1"], ["kin_ability", "kin_ab"]]:
+	var slot_of := {"dash": "dash", "secondary": "sec", "signature": "kin", "ultimate": "ult"}      # (gloves don't rank)
+	for a in [["dash", "dash"], ["jump", "jump"], ["signature", "sig"], ["reload", "reload"], ["util1", "util1"], ["util2", "util2"], ["util3", "util3"], ["ultimate", "ult"], ["secondary", "sec"], ["gear1", "gear1"], ["gear2", "gear2"], ["kin_ability", "kin_ab"]]:
 		if a[0] in UtilityBelt.KEYS and (not perk_offer.is_empty() or not _perk_keys_down.is_empty()):
 			continue       # 1, 2 and 3 pick a perk while a choice is open (until the perk prompt goes: ext/perkorbs)
 		if a[0] in ["util2", "util3"] and arena != null:
@@ -3927,10 +3927,10 @@ func _gather_input() -> void:
 			if int(player.slot_lv[sl]) == 0:
 				pending_input[a[1]] = true      # locked: the press unlocks it if you have a point
 				continue
-		var aimable: bool = a[0] in ["signature", "ultimate", "gear1", "secondary"] and not quick and not (player.ak != null and a[0] == "secondary")
+		var aimable: bool = a[0] in ["signature", "ultimate", "gear1", "gear2", "secondary"] and not quick and not (player.ak != null and a[0] == "secondary")
 		if a[0] == "secondary" and player.runner and player.runner.def_of("utility") and not player.runner.def_of("utility").charge.is_empty():
 			aimable = false       # a charge-up starts on the press and fires on the release
-		if a[0] == "gear1" and (player.gear[0] as Dictionary).is_empty():
+		if a[0] in Gloves.KEYS and (player.gear[Gloves.KEYS.find(a[0])] as Dictionary).is_empty():
 			aimable = false
 		if aimable:
 			# hold to see where it will land, let go to cast it
@@ -6120,7 +6120,7 @@ func _ser(e: Ent) -> Array:
 	if e is Hunter:
 		var h: Hunter = e
 		return ["h", h.nid, _r(h.pos.x), _r(h.pos.y), _r(h.pos.z), _r(h.vel.x), _r(h.vel.y), _r(h.vel.z), _r(h.face), _r(h.hp), h.max_hp, _flags(h),
-			_r(h.down_hp), _r(h.revive), h.team, h.cls, h.pname, _r(h.shield), _r(h.extract_prog), h.kills, h.knocks, int(h.dmg_done), _r(h.armor), h.max_armor, h.arch, h.wid] + KinNet.hunter_extra(h)
+			_r(h.down_hp), _r(h.revive), h.team, h.cls, h.pname, _r(h.shield), _r(h.extract_prog), h.kills, h.knocks, int(h.dmg_done), _r(h.armor), h.max_armor, h.arch, h.wid] + KinNet.hunter_extra(h) + GripNet.hunter_extra(h)
 	if e is Kin:
 		var k: Kin = e
 		return ["k", k.nid, _r(k.pos.x), _r(k.pos.y), _r(k.pos.z), _r(k.face), _r(k.hp), _r(k.max_hp), KIN_STATES.find(k.state), k.species,
@@ -6264,6 +6264,7 @@ func _net_apply(e: Ent, it: Array) -> void:
 			if it.size() > 23:
 				h.armor = float(it[22]); h.max_armor = float(it[23])
 			KinNet.apply_hunter(h, it)
+			GripNet.apply_hunter(h, it)       # gloves, their cooldowns and the bond meter (the overhead row)
 		"k":
 			var k: Kin = e
 			k.face = it[5]; k.hp = it[6]; k.max_hp = it[7]
@@ -6695,8 +6696,8 @@ func _update_indicators(alpha: float) -> void:
 			var ud2: AbilityDef = p.runner.def_of("utility") if p.runner else null
 			if ud2 == null: return
 			spec = ud2.aim_spec(); col = ud2.color
-		"gear1":
-			var g0: Dictionary = p.gear[0]
+		"gear1", "gear2":
+			var g0: Dictionary = p.gear[Gloves.KEYS.find(aim_hold)]
 			if g0.is_empty(): return
 			var gdf := Gear.def_of(String(g0["id"]))
 			spec = gdf.aim_spec(); col = gdf.color

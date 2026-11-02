@@ -72,8 +72,8 @@ func _setup_input() -> void:
 	_key("interact", [KEY_F])                 # catch, open, pick up, finish a downed enemy (Supervive: F)
 	_key("util2", [KEY_2])                    # utility belt slot 2 (an armor kit to start)
 	_key("util3", [KEY_3])                    # utility belt slot 3
-	_key("gear1", [KEY_Q])                    # your active glove
-	_key("gear2", [])                         # the second glove slot is passive: no key
+	_key("gear1", [KEY_Q])                    # glove 1 (Q)
+	_key("gear2", [KEY_V])                    # glove 2 (V; in a match only, so it shares V with "play" at home)
 	_key("crouch", [KEY_CTRL])                # sneak: slower, quieter, and you see further
 	_key("throw", [KEY_G], MOUSE_BUTTON_MIDDLE)  # send your kin out to fight on its own, or recall it (G or middle mouse)
 	_key("base", [KEY_B])                     # base to a teammate: a 3s channel (squads only)

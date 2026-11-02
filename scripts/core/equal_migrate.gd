@@ -4,7 +4,7 @@ extends RefCounted
 ## pieces out of the armory, so nothing is silently deleted:
 ##   armor pieces and kit pieces   become gems and farm materials at a fair rate (below)
 ##   smoke / spring pad / seeker / mending gloves   became utility items: charges in the stash
-##   gloves and boots              stay
+##   gloves and boots              stay (the second glove slot, V, starts empty in the loadout)
 ##   bought backpack levels        refunded (the pack is the same size for everyone now)
 ## A one-time notice (data["equal_notice"], shown on the farm) lists everything that converted.
 ##
@@ -84,6 +84,10 @@ static func migrate(data: Dictionary) -> Array:
 	for k in lo.keys():
 		if gone.has(String(lo[k])):
 			lo.erase(k)
+	# the old loadout had one active glove ("gear0") and a passive one ("gear1"); "gear1" is now the
+	# second glove slot (V) and starts empty. The passive glove stays in the armory, ready to pick.
+	var had_g1 := lo.has("gear1")
+	lo.erase("gear1")
 	data["loadout"] = lo
 	# the rewards
 	data["gems"] = int(data.get("gems", 0)) + int(tot["gems"])
@@ -111,7 +115,7 @@ static func migrate(data: Dictionary) -> Array:
 	data["raid_belt"] = {}
 	# the notice
 	var lines: Array = []
-	if n_armor + n_kit + moved.size() + plvl > 0:
+	if n_armor + n_kit + moved.size() + plvl > 0 or had_g1:
 		lines.append("Matches changed: everyone drops on equal footing now.")
 		lines.append("You keep your gloves and boots. Nothing was deleted:")
 		if n_armor + n_kit > 0:
@@ -127,6 +131,7 @@ static func migrate(data: Dictionary) -> Array:
 			lines.append("  " + String(listed[i]))
 		if listed.size() > MAX_LISTED:
 			lines.append("  and %d more" % (listed.size() - MAX_LISTED))
+		lines.append("New: a second glove slot on V. Pick a glove for it in the armory%s." % (" (your passive glove is still there)" if had_g1 else ""))
 		lines.append("Armor, perks and bigger packs are found in the match now.")
 	data["equal_notice"] = lines
 	return lines

@@ -1738,7 +1738,7 @@ func ability_level(slot: String) -> int:
 
 ## The rank line on an ability's hover panel ("" for things that don't rank).
 func rank_text(slot: String) -> String:
-	var s := String({"sec": "sec", "k1": "kin", "gear0": "gear", "dash": "dash", "r": "ult"}.get(slot, ""))
+	var s := String({"sec": "sec", "k1": "kin", "dash": "dash", "r": "ult"}.get(slot, ""))
 	if s == "":
 		return ""
 	var lv := int(slot_lv.get(s, 0))
@@ -1779,12 +1779,13 @@ func slot_info(slot: String) -> Dictionary:
 				"desc": (d.desc if d else "") + (("  " + String(rd.get("desc", ""))) if not rd.is_empty() else ""), "rider": String(rd.get("name", "")),
 				"cd": (1.0 - fposmod(dashes, 1.0)) * dash_regen() if dashes < 1.0 else 0.0, "cd_max": dash_regen(), "charges": int(floor(dashes)), "max_charges": int(dmax),
 				"verb": d.verb if d else "dash", "ready": dashes >= 1.0}, true)
-		"gear", "gear0", "q":
-			var g: Dictionary = gear[0]
+		"gear", "gear0", "q", "gear1", "v":
+			var gi := 1 if slot in ["gear1", "v"] else 0      # glove 1 (Q) or glove 2 (V); gloves never rank (Gloves)
+			var g: Dictionary = gear[gi]
 			if g.is_empty() or not Gear.ALL.has(String(g["id"])): return out
 			var gd: Dictionary = Gear.ALL[String(g["id"])]
 			out.merge({"name": String(gd["name"]), "short": String(gd.get("short", gd["name"])), "icon": Gear.icon_of(String(g["id"])), "col": gd["col"], "desc": Gear.desc_of(String(g["id"]), int(g["rar"])),
-				"cd": float(gear_cd[0]), "cd_max": Gear.cd_of(String(g["id"]), int(g["rar"])) * rank_cd_k("gear"), "charges": 1 if float(gear_cd[0]) <= 0.0 else 0, "max_charges": 1, "verb": String(gd.get("verb", "")), "ready": float(gear_cd[0]) <= 0.0 and Gear.active(String(g["id"]))}, true)
+				"cd": float(gear_cd[gi]), "cd_max": Gear.cd_of(String(g["id"]), int(g["rar"])), "charges": 1 if float(gear_cd[gi]) <= 0.0 else 0, "max_charges": 1, "verb": String(gd.get("verb", "")), "ready": float(gear_cd[gi]) <= 0.0 and Gear.active(String(g["id"]))}, true)
 		"k1", "e":
 			var k: Kin = kin
 			if k == null or k.runner == null: return out
@@ -2045,7 +2046,7 @@ func sim(dt: float) -> void:
 		inp["move"] = Vector2.ZERO
 	# inputs
 	MergeKit.route(self)             # merged: LMB, RMB and E are the form's (whatever your slot ranks), C is off
-	for gk in [["dash", "dash", "dash"], ["sec", "sec", "sec"], ["gear1", "gear", "gear0"], ["sig", "kin", "k1"], ["ult", "ult", "r"]]:
+	for gk in [["dash", "dash", "dash"], ["sec", "sec", "sec"], ["sig", "kin", "k1"], ["ult", "ult", "r"]]:      # (gloves need no point: Gloves)
 		_gate(gk[0], gk[1], gk[2])
 	KinDowned.commit(self)           # rescuing your Boki: rooted, nothing fires (a dash still cancels it)
 	if dropping and not grounded and ctrl != "bot":
@@ -2889,14 +2890,14 @@ var gear_cd: Array = [0.0, 0.0, 0.0, 0.0]
 # ability locked. XP comes from fighting (damage, knocks) and a slow trickle; each level gives a
 # point to unlock or strengthen an ability. The ultimate opens at level 6 (rank 2 at 9).
 const XP_TO := [0.0, 70.0, 170.0, 300.0, 460.0, 650.0, 870.0, 1120.0, 1400.0, 1710.0]   # total XP to reach level i+1
-const SLOTS := ["sec", "gear", "dash", "kin", "ult"]
-const SLOT_MAX := {"sec": 3, "gear": 3, "dash": 3, "kin": 3, "ult": 2}
+const SLOTS := ["sec", "dash", "kin", "ult"]                  # the hero's own abilities; gloves never rank (Gloves)
+const SLOT_MAX := {"sec": 3, "dash": 3, "kin": 3, "ult": 2}
 const ULT_AT := [6, 9]
 var lvl := 1
 var xp := 0.0
 var skill_pts := 1
 var level_ups := 0          # how many times this run the local level-up moment played (tests)
-var slot_lv := {"sec": 0, "gear": 0, "dash": 0, "kin": 0, "ult": 0}
+var slot_lv := {"sec": 0, "dash": 0, "kin": 0, "ult": 0}
 
 func gain_xp(x: float) -> void:
 	if lvl >= XP_TO.size() or x <= 0.0:
@@ -2946,16 +2947,17 @@ func level_slot(slot: String) -> bool:
 		ult = 1.0
 		if m and m.has_method("on_bond_ready"): m.on_bond_ready(self)
 	if is_local() and m and m.hud:
-		m.hud.ability_feedback({"sec": "sec", "gear": "gear0", "dash": "dash", "kin": "k1", "ult": "r"}[slot], "cast")
+		m.hud.ability_feedback({"sec": "sec", "dash": "dash", "kin": "k1", "ult": "r"}[slot], "cast")
 		m.sfx("unlock", null, -8.0, 1.0 + 0.1 * float(slot_lv[slot]))
 	return true
 
 ## Bots (and anyone skipping the choice) spend points in a sensible order.
 func _bot_spend() -> void:
-	var order := ["sec", "dash", "kin", "gear", "sec", "kin", "dash", "gear", "sec", "kin", "dash", "gear"]
+	var order := ["sec", "dash", "kin", "sec", "kin", "dash", "sec", "kin", "dash"]
 	if ak:
-		# the archetype's recommended order (ARCHETYPES §6), which skips the R until it opens
-		order = (ak.d.get("order", []) as Array).filter(func(x): return x != "ult") + ["gear", "gear", "kin", "dash", "sec"]
+		# the archetype's recommended order (ARCHETYPES §6), which skips the R until it opens (and
+		# any "gear" left in it: gloves don't rank)
+		order = (ak.d.get("order", []) as Array).filter(func(x): return x != "ult" and SLOT_MAX.has(x)) + ["kin", "dash", "sec"]
 	while skill_pts > 0:
 		if can_level("ult"):
 			level_slot("ult"); continue

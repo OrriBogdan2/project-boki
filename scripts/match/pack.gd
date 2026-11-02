@@ -1,7 +1,7 @@
 class_name Pack
 ## The backpack on an expedition: a few slots for gear and valuables you mean to carry home (gems,
 ## seeds and the utility belt are counted, not packed, and caught kin ride along apart). What you wear
-## (the four gear slots, Gear) doesn't take a slot. Extract and it all goes home to the armory; die
+## (two gloves, armor and boots: Gear) doesn't take a slot. Extract and it all goes home to the armory; die
 ## and it goes into your deathbox with everything else.
 ##
 ## Picking something up off the ground: a better piece of gear goes on and the old one into the
@@ -56,7 +56,7 @@ static func _off_ground(m, wp: Dictionary) -> void:
 static func take_ground(m, h, wp: Dictionary) -> void:
 	var it := ground_item(wp)
 	if String(it.get("t", "")) == "gear":
-		var cur: Dictionary = h.gear[Gear.slot_of(String(it["id"]))]
+		var cur: Dictionary = h.gear[Gear.slot_on(h, String(it["id"]))]
 		if cur.is_empty() or Loot.value(it) > Loot.value(Loot.gear(String(cur["id"]), int(cur["rar"]))) or not wants(h, it):
 			_off_ground(m, wp)
 			var old_g := _wear(m, h, it)
@@ -105,7 +105,7 @@ static func swap(m, h, i: int, wp: Dictionary) -> void:
 
 ## Puts a piece of gear on; returns the one it replaced as an item ({} if the slot was empty).
 static func _wear(m, h, it: Dictionary) -> Dictionary:
-	var slot := Gear.slot_of(String(it["id"]))
+	var slot := Gear.slot_on(h, String(it["id"]))      # a glove: the same glove's slot, an empty one, or the weaker one (Gloves)
 	var old: Dictionary = h.gear[slot]
 	h.gear[slot] = {"id": it["id"], "rar": int(it["rar"])}
 	h.gear_cd[slot] = 0.0
@@ -170,7 +170,7 @@ static func smart_loot(m, h, b: Dictionary) -> int:
 		var bg := _best_gear(b, slot)
 		if bg.is_empty():
 			continue
-		var cur: Dictionary = h.gear[slot]
+		var cur: Dictionary = h.gear[Gear.slot_on(h, String(bg["it"]["id"]))]
 		if cur.is_empty() or Loot.value(bg["it"]) > Loot.value(Loot.gear(String(cur["id"]), int(cur["rar"]))):
 			_box_to_hand(m, h, b, bg)
 			n += 1

@@ -141,8 +141,9 @@ static func upgrade(which: String) -> String:
 	Save.d[which + "_lvl"] = lvl + 1
 	return ""
 
-## The loadout: slot "gear0", "gear1", "gear3" (active glove, passive glove, boots; see Gear.SLOTS,
-## Equal.BRING_SLOTS) -> an armory uid, or "" for none.
+## The loadout: slot "gear0", "gear1", "gear3" (glove on Q, glove on V, boots; either kind of glove
+## fits either glove slot, never the same glove twice: Gear.WORN_NAMES, Gloves) -> an armory uid, or
+## "" for none.
 const LOADOUT_SLOTS := ["gear0", "gear1", "gear3"]
 
 static func loadout(slot: String) -> Dictionary:
@@ -153,8 +154,31 @@ static func set_loadout(slot: String, uid: String) -> void:
 	if uid == "": Save.d["loadout"].erase(slot)
 	else: Save.d["loadout"][slot] = uid
 
+## The loadout slot a piece goes in: boots "gear3"; a glove keeps the glove slot it already has,
+## else the first free one (Q, then V), else Q.
 static func gear_slot(it: Dictionary) -> String:
-	return "gear%d" % Gear.slot_of(String(it.get("id", "")))
+	var id := String(it.get("id", ""))
+	if not Gear.is_glove(id):
+		return "gear%d" % Gear.slot_of(id)
+	var lo: Dictionary = Save.d.get("loadout", {})
+	for s in ["gear0", "gear1"]:
+		if String(lo.get(s, "")) == String(it.get("uid", "-")): return s
+	for s in ["gear0", "gear1"]:
+		if loadout(s).is_empty(): return s
+	return "gear0"
+
+## Can this armory piece go in this loadout slot? Gloves in either glove slot (not the glove the
+## other slot already holds, nor a second copy of it), boots in "gear3".
+static func fits_slot(it: Dictionary, slot: String) -> bool:
+	var id := String(it.get("id", ""))
+	if String(it.get("t", "")) != "gear" or not Gear.ALL.has(id):
+		return false
+	if not Gear.is_glove(id):
+		return slot == "gear%d" % Gear.slot_of(id)
+	if not slot in ["gear0", "gear1"]:
+		return false
+	var other := loadout("gear1" if slot == "gear0" else "gear0")
+	return other.is_empty() or (String(other.get("uid", "")) != String(it.get("uid", "")) and String(other.get("id", "")) != id)
 
 ## Back from an expedition: what you carried goes into the armory (sold if it's full), what you
 ## lost is gone. Fills out["haul"], out["lost_items"], out["arm_sold"].

@@ -212,15 +212,8 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 			else:
 				_use_sig(m, h, tgt)
 				_use_sec(m, h, tgt)
-			# the active glove (Q) when its moment comes (hook in range, wall when shot at...)
-			if h.gear_cd[0] <= 0.0 and not (h.gear[0] as Dictionary).is_empty() and Gear.active(String(h.gear[0]["id"])) and randf() < 0.3 + abil * 0.6:
-				var gdf := Gear.def_of(String(h.gear[0]["id"]))
-				var ga := ability_aim(m, h, gdf, tgt)
-				if ga == Vector3.INF and gdf.bot.is_empty() and randf() < abil * 0.3:
-					ga = tgt.pos        # an old glove with no hints: now and then, at the target
-				if ga != Vector3.INF:
-					h.inp["aim"] = ga
-					inp["gear1"] = true
+			# both gloves (Q and V), each when its moment comes (hook in range, wall when shot at...)
+			Gloves.bot_use(h, tgt, abil, inp, func(gdf, t): return ability_aim(m, h, gdf, t))
 	else:
 		a["tgt"] = null
 		var goal: Vector3 = a["goal"]
@@ -359,7 +352,7 @@ func _ease_aim(h: Hunter, dt: float) -> void:
 	if dv.length() < 0.05:
 		return
 	var want := atan2(dv.y, dv.x)
-	var acting: bool = inp.get("fire", false) or inp.get("sig", false) or inp.get("sec", false) or inp.get("gear1", false) \
+	var acting: bool = inp.get("fire", false) or inp.get("sig", false) or inp.get("sec", false) or inp.get("gear1", false) or inp.get("gear2", false) \
 		or inp.get("ult", false) or inp.get("dash", false) or inp.get("interact", false)
 	if acting:
 		return

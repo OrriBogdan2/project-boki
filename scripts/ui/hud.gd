@@ -411,6 +411,7 @@ func _draw_world_labels() -> void:
 		if cam.is_position_behind(h.position):
 			continue
 		_nameplate(sp, h)
+		if not h.downed: GripOverhead.draw(self, sp, h, _np_show_name(sp, h))      # their two gloves and Boki type
 		BokiHud.form_overhead(self, sp, h)
 	if m.player and not m.player.out and m.player.model and not cam.is_position_behind(m.player.position):
 		BokiHud.form_overhead(self, cam.unproject_position(m.player.position + Vector3(0, 2.35, 0)), m.player)
@@ -497,7 +498,7 @@ func _draw_world_labels() -> void:
 		if is_gear:
 			# a piece of gear: its name, rarity and which slot it goes in
 			_ctext(sp, nm, 15, r["color"], big)
-			_ctext(sp + Vector2(0, 14), Gear.slot_name(String(wp["gear"])) + ((" · " + Settings.key_cap("gear1")) if Gear.active(String(wp["gear"])) else ""), 11, Color(INK, 0.75))
+			_ctext(sp + Vector2(0, 14), Gear.slot_name(String(wp["gear"])) + ((" · %s / %s" % [Gloves.key_cap(0), Gloves.key_cap(1)]) if Gear.active(String(wp["gear"])) else ""), 11, Color(INK, 0.75))
 		elif is_tune:
 			var pd: Dictionary = Data.PERKS[String(wp["tune"])]
 			_ctext(sp, nm, 15, pd["col"], big)
@@ -1382,7 +1383,7 @@ func _draw_glider_heat(p: Hunter) -> void:
 	if hot:
 		c.draw_arc(cpt, 17.0 + 2.0 * sin(m.time * 14.0), 0.0, TAU, 32, Color(1.0, 0.3, 0.2, 0.6), 2.0, true)
 
-## The ability row under the bars: right click, Q glove, Shift dash, E kin, R bond ultimate. Every
+## The ability row under the bars: right click, Shift dash, E kin, R bond ultimate (gloves: GripHud). Every
 ## one starts the run locked; rank pips sit above each, a gold border means a point can unlock it
 ## (just press its key), and a gold + means Alt + its key will rank it up.
 func _draw_abilities(sz: Vector2, p: Hunter) -> void:
@@ -1396,22 +1397,10 @@ func _draw_abilities(sz: Vector2, p: Hunter) -> void:
 	var y := o.y + 66.0
 	var k: Kin = p.kin
 	var util: AbilityDef = p.runner.def_of("utility") if p.runner else null
-	var g0: Dictionary = p.gear[0]
-	var g1: Dictionary = p.gear[1]
 	# right click: the weapon's ability
 	var sr := Rect2(Vector2(x, y), Vector2(s, s))
 	if util:
 		_skill_slot("sec", "sec", sr, util.icon, Settings.key_cap("secondary"), util.color, p.runner.cd_frac("utility"), p.runner.cd_left("utility") if not p.runner.is_ready("utility") else 0.0, p.runner.is_ready("utility"), p.runner.charges("utility") if util.charges > 1 else -1, util.charges if util.charges > 1 else 0)
-	x += s + gap
-	# Q: the active glove (an empty slot shows dim, so you know to look for one)
-	var qr := Rect2(Vector2(x, y), Vector2(s, s))
-	if not g0.is_empty() and Gear.ALL.has(String(g0["id"])):
-		var gd: Dictionary = Gear.ALL[String(g0["id"])]
-		var gcd := float(p.gear_cd[0])
-		_skill_slot("gear", "gear0", qr, Gear.icon_of(String(g0["id"])), Settings.key_cap("gear1"), gd["col"], gcd / float(gd["cd"]) if gcd > 0.0 else 0.0, gcd, gcd <= 0.0)
-	else:
-		_skill_slot("gear", "gear0", qr, "glove", Settings.key_cap("gear1"), Color(MUTED, 0.8), 0.0, 0.0, false)
-		if int(p.slot_lv["gear"]) > 0: _ctext(qr.get_center() + Vector2(0, 16), "no glove", 9, Color(MUTED, 0.7))
 	x += s + gap
 	# Shift: your dash
 	var dmax := p.max_dashes()
@@ -1434,14 +1423,7 @@ func _draw_abilities(sz: Vector2, p: Hunter) -> void:
 	BokiHud.r_slot(self, p, ur, us)
 	x += us + gap + 4.0
 	x = BokiHud.cg_slots(self, p, x, y, s)
-	# the passive glove and B (base to a teammate) as small badges at the end of the row
-	if not g1.is_empty() and Gear.ALL.has(String(g1["id"])):
-		var pg: Dictionary = Gear.ALL[String(g1["id"])]
-		var pr := Rect2(Vector2(x, y + s - 34.0), Vector2(34, 34))
-		_rounded(pr, Color(0.05, 0.06, 0.09, 0.85), 9, Color(pg["col"], 0.75), 1)
-		Icons.draw(c, Gear.icon_of(String(g1["id"])), pr.get_center(), 10.0, pg["col"])
-		hover_spots.append([pr, "gear1"])
-		x += 42.0
+	# B (base to a teammate) as a small badge at the end of the row (the gloves sit on the right: GripHud)
 	if m.hunters.any(func(oh): return oh != p and oh.team == p.team):
 		var brr := Rect2(Vector2(x, y + s - 34.0), Vector2(34, 34))
 		_ab_slot("base", brr, "swap", Settings.key_cap("base"), Color("8fe3c8"), p.base_cd / Hunter.BASE_CD if p.base_cd > 0.0 else 0.0, p.base_cd, p.base_cd <= 0.0 and p.base_t <= 0.0)
@@ -1456,8 +1438,6 @@ func _draw_arch_abilities(sz: Vector2, p: Hunter) -> void:
 	var x := o.x + HUD_PORTRAIT.x + 16.0
 	var y := o.y + 74.0
 	var k: Kin = p.kin
-	var g0: Dictionary = p.gear[0]
-	var g1: Dictionary = p.gear[1]
 	var info := p.slot_info("sec")
 	var sr := Rect2(Vector2(x, y), Vector2(s, s))
 	_skill_slot("sec", "sec", sr, String(info["icon"]), Settings.key_cap("secondary"), info["col"], float(info["cd"]) / maxf(0.01, float(info["cd_max"])) if float(info["cd"]) > 0.0 else 0.0, float(info["cd"]), bool(info["ready"]), int(info["charges"]) if int(info["max_charges"]) > 1 else -1, int(info["max_charges"]) if int(info["max_charges"]) > 1 else 0)
@@ -1471,15 +1451,6 @@ func _draw_arch_abilities(sz: Vector2, p: Hunter) -> void:
 		var hfull: float = p.ak.rmb_charge_full() if p.ak.rmb_charge_full() > float(p.ak.rmb_def().get("hold", 0.3)) else float(p.ak.rmb_def().get("hold", 0.3))
 		var hk := clampf(p.ak.rmb_t / maxf(0.05, hfull), 0.0, 1.0)
 		c.draw_arc(sr.get_center(), s * 0.5 + 4.0, -PI / 2, -PI / 2 + TAU * hk, 32, Color(info["col"], 0.9), 3.0, true)
-	x += s + gap
-	var qr := Rect2(Vector2(x, y), Vector2(s, s))
-	if not g0.is_empty() and Gear.ALL.has(String(g0["id"])):
-		var gd: Dictionary = Gear.ALL[String(g0["id"])]
-		var gcd := float(p.gear_cd[0])
-		_skill_slot("gear", "gear0", qr, Gear.icon_of(String(g0["id"])), Settings.key_cap("gear1"), gd["col"], gcd / float(gd["cd"]) if gcd > 0.0 else 0.0, gcd, gcd <= 0.0)
-	else:
-		_skill_slot("gear", "gear0", qr, "glove", Settings.key_cap("gear1"), Color(MUTED, 0.8), 0.0, 0.0, false)
-		if int(p.slot_lv["gear"]) > 0: _ctext(qr.get_center() + Vector2(0, 16), "no glove", 9, Color(MUTED, 0.7))
 	x += s + gap
 	var di := p.slot_info("dash")
 	var dmax := int(di["max_charges"])
@@ -1504,13 +1475,6 @@ func _draw_arch_abilities(sz: Vector2, p: Hunter) -> void:
 	x += us + gap + 4.0
 	# C: the Boki's own ability, G: throw / recall (hold: hold the spot or follow)
 	x = BokiHud.cg_slots(self, p, x, y, s)
-	if not g1.is_empty() and Gear.ALL.has(String(g1["id"])):
-		var pg: Dictionary = Gear.ALL[String(g1["id"])]
-		var pr := Rect2(Vector2(x, y + s - 34.0), Vector2(34, 34))
-		_rounded(pr, Color(0.05, 0.06, 0.09, 0.85), 9, Color(pg["col"], 0.75), 1)
-		Icons.draw(c, Gear.icon_of(String(g1["id"])), pr.get_center(), 10.0, pg["col"])
-		hover_spots.append([pr, "gear1"])
-		x += 42.0
 	if m.hunters.any(func(oh): return oh != p and oh.team == p.team):
 		var brr := Rect2(Vector2(x, y + s - 34.0), Vector2(34, 34))
 		_ab_slot("base", brr, "swap", Settings.key_cap("base"), Color("8fe3c8"), p.base_cd / Hunter.BASE_CD if p.base_cd > 0.0 else 0.0, p.base_cd, p.base_cd <= 0.0 and p.base_t <= 0.0)
@@ -1651,8 +1615,9 @@ func _draw_weapon(sz: Vector2, p: Hunter) -> void:
 	var y := r.position.y - s - 22.0
 	var x := r.end.x - s
 	var k: Kin = p.kin
-	# 1 2 3: the utility belt (tonic, armor kit and gadgets: BeltHud)
+	# 1 2 3: the utility belt (tonic, armor kit and gadgets: BeltHud); Q V C: the gloves and the Boki (GripHud)
 	x = BeltHud.draw(self, p, x, y)
+	GripHud.draw(self, p, r)
 	# C: throw / recall your kin
 	if k:
 		var kc: Color = Data.KIN[k.species]["color"]
@@ -2258,12 +2223,7 @@ func _draw_kit(sz: Vector2, p: Hunter) -> void:
 		lines.append([Settings.key_cap("throw"), "Orders for " + String(k.rec.get("name", "your Boki")), "Tap: Sic at the cursor (it staggers what it lands on), or call it back when it is away. Hold and flick: Chase, Guard, Return, Follow.", kcol])
 	var dsi := p.slot_info("dash")
 	lines.append([Settings.key_cap("dash"), String(dsi["name"]) + ((" + " + String(dsi["rider"])) if String(dsi.get("rider", "")) != "" else ""), String(dsi["desc"]), dsi["col"]])
-	var g0: Dictionary = p.gear[0]
-	if not g0.is_empty() and Gear.ALL.has(String(g0["id"])):
-		var gdd: Dictionary = Gear.ALL[String(g0["id"])]
-		lines.append([Settings.key_cap("gear1"), String(gdd["name"]), Gear.desc_of(String(g0["id"]), int(g0.get("rar", 1))), gdd["col"]])
-	else:
-		lines.append([Settings.key_cap("gear1"), "Glove (empty)", "Find gloves in chests, vaults and on bosses. An active glove goes here.", MUTED])
+	lines.append_array(GripHud.kit_lines(p))
 	var w := 356.0
 	# each row: the key and name, then the description wrapped to the panel
 	var hs: Array = []
@@ -2736,14 +2696,7 @@ func _tip_lines(id: String, p: Hunter) -> Array:
 				var ob := KinText.owner_bonus(p.kin_bonus)
 				if ob != "":
 					out.append(["Owner bonus for the run: " + ob, GOLD, 13])
-		"gear0", "gear1":
-			var g: Dictionary = p.gear[int(id.substr(4))]
-			if g.is_empty(): return []
-			var gd: Dictionary = Gear.ALL[String(g["id"])]
-			out.append([gd["name"], gd["col"]])
-			out.append(["Active glove  ·  %s" % Settings.key_cap("gear1") if int(id.substr(4)) == 0 else "Passive glove", MUTED, 12])
-			out.append([Gear.desc_of(String(g["id"]), int(g.get("rar", 1))), INK, 14])
-			out.append([Gear.stat_text(String(g["id"]), int(g.get("rar", 1))), MUTED, 13])
+		"gear0", "gear1": out = GripHud.tip(p, int(id.substr(4)))
 		"throw": return BokiHud.order_tip(self, p)
 		"dash":
 			var dd: AbilityDef = p.dodge_def

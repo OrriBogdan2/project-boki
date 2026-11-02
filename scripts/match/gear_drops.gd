@@ -91,15 +91,16 @@ static func run_table(m, name: String, at: Vector3, rng: RandomNumberGenerator, 
 static func bot_start(h, rng: RandomNumberGenerator, diff: String) -> void:
 	var cfg: Dictionary = (rules().get("bot_start", {}) as Dictionary).get(diff, {})
 	UtilityDrops.bot_start(h, rng, diff)
-	var order: Array = Equal.BRING_SLOTS.duplicate()      # boots first, then the gloves
-	for i in mini(int(cfg.get("slots", 0)), order.size()):
-		var g := roll_gear(rng, int(cfg.get("bonus", 0)), 0, int(order[i]))
-		h.gear[int(order[i])] = {"id": g["id"], "rar": g["rar"]}
+	var n := int(cfg.get("slots", 0))       # boots first, then up to two different active gloves (bots use both: Gloves)
+	if n > 0:
+		var b := roll_gear(rng, int(cfg.get("bonus", 0)), 0, 3)
+		h.gear[3] = {"id": b["id"], "rar": b["rar"]}
+	Gloves.bot_fill(h, rng, n - 1, int(cfg.get("bonus", 0)))
 	h.refresh_gear()
 
 ## Should a bot walking past this piece take it? An empty slot, or a rarer piece than the worn one.
 static func bot_wants(h, gid: String, rar: int) -> bool:
-	var cur: Dictionary = h.gear[Gear.slot_of(gid)]
+	var cur: Dictionary = h.gear[Gear.slot_on(h, gid)]
 	return cur.is_empty() or rar > int(cur.get("rar", 0))
 
 ## Test hook (--gear-demo): a hunter dressed in one piece per slot at mixed rarities, with a few weapon

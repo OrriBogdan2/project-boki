@@ -992,9 +992,9 @@ func loadout_rows(parent: VBoxContainer, reopen: Callable) -> void:
 	var held := 0
 	for slot in Econ.LOADOUT_SLOTS:
 		var si := int(String(slot).substr(4))
-		var all_here: Array = Econ.armory().filter(func(it): return String(it.get("t", "")) == "gear" and Econ.gear_slot(it) == slot)
+		var all_here: Array = Econ.armory().filter(func(it): return Econ.fits_slot(it, slot))
 		var pool: Array = all_here.filter(func(it): return Equal.may_bring(it, h.exp_tier))
-		held += all_here.size() - pool.size()
+		if slot != "gear1": held += all_here.size() - pool.size()      # (gloves are listed under both glove slots: count them once)
 		if pool.is_empty():
 			continue
 		pool.sort_custom(func(a, b): return Loot.value(a) > Loot.value(b))
@@ -1003,7 +1003,7 @@ func loadout_rows(parent: VBoxContainer, reopen: Callable) -> void:
 		var at := maxi(0, ids.find(String(cur.get("uid", ""))))
 		var card := UI.card(UI.CARD, 6, 10)
 		var row := UI.hbox(8); card.add_child(row)
-		var nm := UI.label("%s:  %s" % [Gear.SLOT_NAMES[si], Loot.name_of(cur) if not cur.is_empty() else "none"], 14, Loot.col_of(cur) if not cur.is_empty() else UI.MUTED, UI.semi)
+		var nm := UI.label("%s:  %s" % [Gear.WORN_NAMES[si], Loot.name_of(cur) if not cur.is_empty() else "none"], 14, Loot.col_of(cur) if not cur.is_empty() else UI.MUTED, UI.semi)
 		nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		nm.clip_text = true
 		nm.tooltip_text = Loot.sub_of(cur) if not cur.is_empty() else ""

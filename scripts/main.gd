@@ -141,7 +141,6 @@ func _ready() -> void:
 		if a.begins_with("--squad="): opts["squad"] = int(a.substr(8))
 		if a.begins_with("--bot-diff="): opts["bot_diff"] = a.substr(11)
 		if a == "--perk-demo": opts["perk_demo"] = true
-		if a == "--equal-demo": opts["equal_demo"] = true; opts["no_drop"] = true      # a hurt hunter with a full belt and levelled armor (screenshots)
 		if a.begins_with("--exit-demo="): opts["exit_demo"] = a.substr(12); opts["no_drop"] = true
 		if a == "--truce-demo": opts["truce_demo"] = true; opts["no_drop"] = true
 		if a.begins_with("--teammate-demo="): opts["teammate_demo"] = a.substr(16); opts["no_drop"] = true
@@ -1675,18 +1674,16 @@ func _ability_check() -> void:
 		n += 1
 	_ac("all abilities run", true, "%d ran" % n)
 	m.queue_free(); await get_tree().process_frame
-	# 22. Ranks: a rank-3 slot makes the same verb stronger and recharge faster
+	# 22. Ranks: a rank-3 slot makes the same verb stronger and recharge faster; a glove never ranks (Gloves)
 	r = _ac_setup(7.0); m = r[0]; P = r[1]; T = r[2]
 	P.inp["aim"] = P.pos + Vector3(2.5, 0.9, 0)
-	P.slot_lv["gear"] = 1
 	_ac_glove(P, "barrier")
 	var hp1: float = m.verbs.walls[-1]["hp"] if not m.verbs.walls.is_empty() else 0.0
 	var cd1: float = P.gear_cd[0]
-	P.slot_lv["gear"] = 3
+	P.lvl = 9; P.skill_pts = 5; P._bot_spend()
 	_ac_glove(P, "barrier")
 	var hp3: float = m.verbs.walls[-1]["hp"] if not m.verbs.walls.is_empty() else 0.0
-	var cd3: float = P.gear_cd[0]
-	_ac("rank 3 glove: tougher, faster", hp3 > hp1 * 1.3 and cd3 < cd1 * 0.85, "wall hp %.0f -> %.0f, cooldown %.1f -> %.1f" % [hp1, hp3, cd1, cd3])
+	_ac("a glove is as strong at level 9 as at level 1 (no ranks)", absf(hp3 - hp1) < 0.01 and absf(float(P.gear_cd[0]) - cd1) < 0.01 and not P.slot_lv.has("gear"), "wall hp %.0f -> %.0f, cooldown %.1f -> %.1f" % [hp1, hp3, cd1, float(P.gear_cd[0])])
 	P.runner.set_slot("utility", Content.ability("leash_bolt"))
 	P.slot_lv["sec"] = 3
 	P.inp["aim"] = T.pos + Vector3(0, 0.9, 0)
