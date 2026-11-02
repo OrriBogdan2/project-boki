@@ -9,7 +9,9 @@ func run(main_node: Node) -> void:
 	var args := OS.get_cmdline_user_args()
 	var both := "--hero-combo-check" in args
 	if both or "--archer-combo-check" in args: await _archer_combos()
-	if both or "--bulwark-combo-check" in args: await _bulwark_combos()
+	if both or "--bulwark-combo-check" in args:
+		await _bulwark_combos()
+		await _growth()
 	print("AKCHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
@@ -282,6 +284,25 @@ func _archer_combos() -> void:
 	step(m, 0.1)
 	ok("merge hold: Spirit Walk ends with the merge", not K.spirit.active() and P.spirit_t <= 0.0, "ghost %.2f" % P.spirit_t)
 	await done(m)
+
+## The 360 Smash's spin hit on the first foe with the hunter at level `lvl`.
+func _spin(lvl: int) -> float:
+	var r := setup("bulwark", 2.2)
+	var m: Match = r[0]; var P: Hunter = r[1]; var T: Hunter = r[2]
+	var K: BulwarkKit = P.ak
+	P.lvl = lvl
+	fresh(T); T.teleport(P.pos + Vector3(1.4, 0, 0)); aim_at(P, T.pos)
+	K._spin_hit()
+	step(m, 0.3)
+	var d := dmg(T)
+	await done(m)
+	return d
+
+## Ability damage reads ArchKit.power(), so quiet level growth (LevelGrowth.ap) raises it.
+func _growth() -> void:
+	var d1: float = await _spin(1)
+	var d10: float = await _spin(10)
+	ok("growth: the 360 Smash spin hit grows with level (LevelGrowth.ap 1.0 -> %.2f)" % (1.0 + LevelGrowth.ap_pct(10)), d1 > 4.0 and absf(d10 / d1 - (1.0 + LevelGrowth.ap_pct(10))) < 0.01, "L1 %.2f L10 %.2f" % [d1, d10])
 
 func _bulwark_combos() -> void:
 	var r := setup("bulwark", 2.2)

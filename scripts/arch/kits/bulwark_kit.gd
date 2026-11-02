@@ -583,7 +583,7 @@ func _spin_hit() -> void:
 	var r := float(dd.get("spin_r", 2.2))
 	spins += 1
 	h.glide_cd = maxf(h.glide_cd, WINDDOWN)
-	h._strike(float(dd["whirl_dmg"]) * _wk() / m.dmg_mult(h), r, 360.0, float(dd["whirl_kb"]), {"heavy": true})
+	h._strike(float(dd["whirl_dmg"]) * h.wup_dmg * power("dash") / maxf(0.01, m.dmg_mult(h)), r, 360.0, float(dd["whirl_kb"]), {"heavy": true})
 	fx.smash_ring(h.pos)
 	m.fx.dust(h.pos, 10)
 	Feel.shake(m, "t2", h, h.pos)
