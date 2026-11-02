@@ -3,7 +3,7 @@ extends RefCounted
 ## The hold on a merged form's RMB, and the swept blink on E (docs/decisions/0003). One shape for all:
 ## press starts it, it fills (a rising tick, a "full" tick at fill_s), and letting go (or running out)
 ## ends it. What it does is the kind:
-##   bulldoze  an armoured roll that carries foes and shrugs off knockback; release slams (grows with the fill)
+##   boulder  an armoured roll that carries foes and shrugs off knockback; release slams (grows with the fill)
 ##   hover     a slow fall that holds at island level over the abyss, so a gap can be crossed; drains
 ##   prism     a reflect window toward the cursor (Verbs mirror); what it catches flies back harder the longer you held
 ## Hunter.gd asks hovering() / hover_vy() from its fall code (three lines), nothing else of the hunter changes.
@@ -21,7 +21,7 @@ static func begin(k: MergeKit) -> void:
 	var h := k.h
 	h.m.sfx("ab_charge", h.pos, -8.0 if h.is_local() else -14.0, 0.8)
 	match kind:
-		"bulldoze":
+		"boulder":
 			var mv: Vector2 = h.inp.get("move", Vector2.ZERO)
 			k.hold["dir"] = mv.normalized() if mv.length() > 0.2 else h.aim_dir()
 			h.move_kind = "rush"
@@ -49,9 +49,10 @@ static func end(k: MergeKit, silent := false) -> void:
 	k.hold = {}
 	var h := k.h
 	match String(hold["kind"]):
-		"bulldoze":
+		"boulder":
 			h.roll_t = 0.0
-			h.fortify_t = 0.0
+			if h.fortify_t <= HOLD_REFRESH:
+				h.fortify_t = 0.0          # (ours; a longer class fortify is left alone)
 			if not silent and float(hold["t"]) >= 0.25:
 				var ctx := k._ctx("rmb")
 				ctx["charge"] = clampf(float(hold["t"]) / float(d["fill_s"]), 0.0, 1.0)
@@ -69,6 +70,28 @@ static func end(k: MergeKit, silent := false) -> void:
 	k.announce("rmb_end", h.pos, 0.0, 0.0)
 	if k.anim_id in ["mf_roll", "mf_hover", "mf_prism"]:
 		k.anim_id = ""
+
+## Other games: a remote hunter holding the Prism (its pose in the snapshot) gets a reflect window here too, so the shooter's
+## game turns the shot (the real shot is simulated by the shooter; the wearer's own game only sees a cosmetic copy of it, so
+## nothing is applied twice). Hunter.sim, remote branch.
+static func remote_prism(h: Hunter) -> void:
+	var mr: Dictionary = h.get_meta("mf_mirror", {})
+	var held := bool(h.get_meta("mf_kit", false)) and String(h.get_meta("kpose", "")) == "mf_prism" and not h.out
+	if not held:
+		if not mr.is_empty():
+			mr["t"] = 0.0
+			h.remove_meta("mf_mirror")
+		return
+	if mr.is_empty() or not h.m.verbs.mirrors.has(mr):
+		var f: Dictionary = Content.merge_form(String(h.get_meta("mf_id", "")))
+		if f.is_empty() or String(f.get("rmb", {}).get("kind", "")) != "prism":
+			return
+		var d: Dictionary = f["rmb"]
+		mr = h.m.verbs.add_mirror(h, {"arc": float(d["arc"]), "radius": float(d["radius"]), "time": HOLD_REFRESH, "dmg_k": float((d["dmg_k"] as Array)[0]),
+			"color": (h.get_meta("mf_glow", Color.WHITE) as Color).to_html(false)})
+		h.set_meta("mf_mirror", mr)
+	mr["t"] = HOLD_REFRESH
+	h.inp["aim"] = h.pos + Vector3(-sin(h.face), 0.0, -cos(h.face)) * 4.0          # (the snapshot carries facing, not the cursor)
 
 static func hovering(h: Hunter) -> bool:
 	var k := MergeKit.live_of(h)
@@ -104,17 +127,17 @@ static func tick(k: MergeKit, dt: float) -> void:
 	if h.stun_t > 0.0 or h.root_t > 0.0 or h.downed or h.out or KitStatus.grounded(h):
 		end(k, true)
 		return
-	if kind == "bulldoze" and h.roll_t > 0.0 and h.move_kind == "dash":
+	if kind == "boulder" and h.roll_t > 0.0 and h.move_kind == "dash":
 		end(k, true)               # a dash cancels it (Shift stays yours)
 		return
 	var held := k.held_rmb()
 	if not held and float(hold["t"]) > 0.08:
 		end(k)
 		return
-	_fill_feedback(k, hold)
+	_fill_feedback(k, hold, dt)
 	match kind:
-		"bulldoze":
-			_bulldoze(k, hold, d, dt)
+		"boulder":
+			_boulder(k, hold, d, dt)
 		"hover":
 			hold["left"] = float(hold["left"]) - dt / float(d["drain_s"])
 			if h.grounded and float(hold["t"]) > 0.3:
@@ -134,9 +157,9 @@ static func tick(k: MergeKit, dt: float) -> void:
 			if float(hold["left"]) <= 0.0:
 				end(k)
 
-static func _fill_feedback(k: MergeKit, hold: Dictionary) -> void:
+static func _fill_feedback(k: MergeKit, hold: Dictionary, dt: float) -> void:
 	var h := k.h
-	hold["tick"] = float(hold["tick"]) - 1.0 / 60.0
+	hold["tick"] = float(hold["tick"]) - dt
 	if float(hold["tick"]) <= 0.0 and not bool(hold["full"]):
 		hold["tick"] = TICK_EVERY
 		h.m.sfx("click", h.pos, -12.0 if h.is_local() else -20.0, 0.9 + 0.8 * float(hold["fill"]))
@@ -147,7 +170,7 @@ static func _fill_feedback(k: MergeKit, hold: Dictionary) -> void:
 		h.m.fx.ring(h.pos, 1.6, col, 0.25)
 		h.m.fx.flash(h.pos + Vector3(0, 1.0, 0), col, 0.9, 0.08)
 
-static func _bulldoze(k: MergeKit, hold: Dictionary, d: Dictionary, dt: float) -> void:
+static func _boulder(k: MergeKit, hold: Dictionary, d: Dictionary, dt: float) -> void:
 	var h := k.h
 	if float(hold["t"]) >= float(d["max_s"]):
 		end(k)
@@ -179,10 +202,9 @@ static func _bulldoze(k: MergeKit, hold: Dictionary, d: Dictionary, dt: float) -
 		if to.dot(dir) < 0.2:
 			continue
 		# carried: pushed at (nearly) your own speed along the roll
-		var ms: float = f.mass() if f.has_method("mass") else 1.0
-		f.impulse(dir * float(d["speed"]) * float(d["carry"]) * ms)
+		f.impulse(dir * float(d["speed"]) * float(d["carry"]) * f.mass())
 		if tick_now:
-			f.hurt(float(d["tick_dmg"]) * h.m.dmg_mult(h), h, {"src": "abil", "ab": "bulldoze", "tags": ["form"], "dr": true})
+			f.hurt(float(d["tick_dmg"]) * h.m.dmg_mult(h), h, {"src": "abil", "ab": "boulder", "tags": ["form"], "dr": true})
 			h.m.fx.dust(f.pos, 2)
 	if int(h.m.time * 10.0) % 3 == 0:
 		h.m.fx.dust(h.pos, 1)
@@ -228,6 +250,7 @@ static func blink(k: MergeKit) -> bool:
 	if k.recharge <= 0.0:
 		k.recharge = float(e["recharge"])
 	var from := h.pos
+	k.announce("blink", best, 0.0, 0.0)          # (before the jump, so the bolt in other games has its length)
 	m.fx.bolt(from + Vector3(0, 1.0, 0), best + Vector3(0, 1.0, 0), col)
 	m.fx.burst(from + Vector3(0, 0.9, 0), col, 12, 3.0, 0.3)
 	h.teleport(best)
@@ -244,7 +267,6 @@ static func blink(k: MergeKit) -> bool:
 	m.sfx("zap", best, -2.0, 1.5)
 	m.sfx("ab_blink", from, -4.0, 1.2)
 	k.play("mf_e")
-	k.announce("blink", best, 0.0, 0.0)
 	k.h.cast_at = m.time
 	k.h.cast_slot = "kin"
 	CombatBus.ability_used.emit(h, "%s_e" % k.form["id"], "kin")

@@ -7,6 +7,7 @@ extends RefCounted
 
 var m: Node = null
 var walls: Array = []     # {a, b: Vector2, y, hp, max_hp, t, team, by, block: "enemy"|"all", move, reflect, node, col, touch, follow, th}
+var _mirror_pool: Dictionary = {}   # key -> free reflect-window nodes (hidden), reused so a held prism does not rebuild its panels each press
 var mirrors: Array = []   # {ent, t, r, arc, team, k, riposte, node, col, front}
 var tethers: Array = []   # {a, b: Ent, max, t, dmg, stun, col, node, pw}
 var traps: Array = []     # {at, r, team, arm, t, effects, caster, ctx, node, col}
@@ -104,6 +105,40 @@ func add_mirror(ent: Node, e: Dictionary) -> Dictionary:
 	var col := Color(String(e.get("color", "#bff6ff")))
 	var arc := float(e.get("arc", -1.0))
 	var r := float(e.get("radius", 1.7))
+	var key := "%.2f|%.2f|%s" % [arc, r, col.to_html(false)]
+	var pool: Array = _mirror_pool.get(key, [])
+	var n: Node3D = null
+	while not pool.is_empty() and n == null:
+		var cand: Node3D = pool.pop_back()
+		if is_instance_valid(cand):
+			n = cand
+			n.visible = true
+	if n == null:
+		n = _build_mirror(arc, r, col)
+		n.set_meta("pool_key", key)
+		m.add_child(n)
+	mirrors.append({"ent": ent, "t": float(e.get("time", 0.6)), "t0": float(e.get("time", 0.6)), "r": r, "arc": arc, "team": int(ent.team),
+		"k": minf(float(e.get("dmg_k", 1.25)), KinRules.REFLECT_MAX), "riposte": float(e.get("riposte", 0.0)), "node": n, "col": col, "caught": 0})
+	m.sfx("shield", ent.pos, -3.0, 1.4)
+	return mirrors[-1]
+
+func _release_mirror(mr: Dictionary) -> void:
+	var nd = mr["node"]
+	if not is_instance_valid(nd):
+		return
+	var key := String(nd.get_meta("pool_key", ""))
+	if key == "":
+		nd.queue_free()
+		return
+	(nd as Node3D).visible = false
+	var pool: Array = _mirror_pool.get(key, [])
+	if pool.size() < 4:
+		pool.append(nd)
+		_mirror_pool[key] = pool
+	else:
+		nd.queue_free()
+
+func _build_mirror(arc: float, r: float, col: Color) -> Node3D:
 	var n := Node3D.new()
 	if arc > -0.99:
 		# a curved frontal shield: a fan of glowing panels
@@ -117,11 +152,7 @@ func add_mirror(ent: Node, e: Dictionary) -> Dictionary:
 		s.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var rg := Models.part(n, Models.flat_quad(r * 2.0), Models.ring_mat(Color(col, 0.9), 0.08), Vector3(0, 0.08, 0))
 	rg.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	m.add_child(n)
-	mirrors.append({"ent": ent, "t": float(e.get("time", 0.6)), "t0": float(e.get("time", 0.6)), "r": r, "arc": arc, "team": int(ent.team),
-		"k": minf(float(e.get("dmg_k", 1.25)), KinRules.REFLECT_MAX), "riposte": float(e.get("riposte", 0.0)), "node": n, "col": col, "caught": 0})
-	m.sfx("shield", ent.pos, -3.0, 1.4)
-	return mirrors[-1]
+	return n
 
 func _mirror_dir(mr: Dictionary) -> Vector2:
 	var ent = mr["ent"]
@@ -395,7 +426,7 @@ func tick(dt: float) -> void:
 		mr["t"] = float(mr["t"]) - dt
 		if float(mr["t"]) <= 0.0 or not is_instance_valid(mr["ent"]) or mr["ent"].dead:
 			mirrors.erase(mr)
-			if is_instance_valid(mr["node"]): mr["node"].queue_free()
+			_release_mirror(mr)
 	for t in tethers.duplicate():
 		var a = t["a"]; var b = t["b"]
 		if not is_instance_valid(a) or not is_instance_valid(b) or a.dead or b.dead or (b is Hunter and (b.downed or b.out)):
@@ -571,3 +602,7 @@ func clear() -> void:
 	for mr in mirrors:
 		if is_instance_valid(mr["node"]): mr["node"].queue_free()
 	mirrors.clear()
+	for k in _mirror_pool:
+		for nd in _mirror_pool[k]:
+			if is_instance_valid(nd): nd.queue_free()
+	_mirror_pool.clear()

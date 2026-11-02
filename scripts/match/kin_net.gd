@@ -30,8 +30,8 @@ static func hunter_extra(h: Hunter) -> Array:
 	var sh := MergeShell.view(h)
 	var pose := ""
 	var k := MergeKit.of(h)
-	if k != null:
-		pose = k.anim_id
+	if k != null and k.anim_id != "":
+		pose = "%s~%d" % [k.anim_id, k.anim_n % 100]
 	if pose == "":
 		pose = KinDowned.rescue_pose(h)
 	return [encode_form(f) if shown else "", snappedf(float(h.merge_st.get("t", 0.0)), 0.1), snappedf(sh.x, 0.5), snappedf(sh.y, 0.5), pose]
@@ -55,15 +55,17 @@ static func apply_hunter(h: Hunter, it: Array) -> void:
 			MergeXform.on_remote_look(h, f)
 		if not f.is_empty():
 			h.set_meta("mf_kit", MergeForm.has_kit(f))
+			h.set_meta("mf_id", String(f["id"]))
 			h.set_meta("mf_glow", f["glow"])
 			h.set_meta("mf_name", f["name"])
 			h.set_meta("mf_dur", float(f["dur"]))
 		h.set_meta("mf_left", float(it[HUNTER_AT + 1]))
 		h.set_meta("shell", float(it[HUNTER_AT + 2]))
 		h.set_meta("shell_max", float(it[HUNTER_AT + 3]))
-	var pose := String(it[HUNTER_AT + 4])
-	if pose != String(h.get_meta("kpose", "")):
-		h.set_meta("kpose", pose)
+	var raw := String(it[HUNTER_AT + 4])
+	if raw != String(h.get_meta("kpose_raw", "")):          # (id~count: the same pose cast again is a new play)
+		h.set_meta("kpose_raw", raw)
+		h.set_meta("kpose", raw.get_slice("~", 0))
 		h.set_meta("kpose_at", h.m.time)
 
 ## The form as a string for the snapshot and the "merge" event. A form with a kit is rebuilt from its content file on the other side.
@@ -78,7 +80,7 @@ static func decode_form(s: String) -> Dictionary:
 	if p[1] == "1" and p[0] != "" and not Content.merge_form(p[0]).is_empty():
 		return MergeForm.kit_form(p[0], float(p[13]))
 	return {"id": p[0], "kit": false, "name": p[2], "type": p[3], "color": Color.html(p[4]), "glow": Color.html(p[5]), "accent": Color.html(p[6]), "parts": Array(p[7].split(",", false)),
-		"size": float(p[8]), "style": p[9], "word": p[10], "surge": p[11] == "1", "ring": float(p[12]), "dur": float(p[13]), "rider": {}, "dash": {}, "haste": 0.0, "def": {}}
+		"size": float(p[8]), "part_k": 1.3, "style": p[9], "word": p[10], "surge": p[11] == "1", "ring": float(p[12]), "dur": float(p[13]), "rider": {}, "dash": {}, "haste": 0.0, "def": {}}
 
 ## Tell the other games something happened to this Boki or hunter (only for bodies this game owns).
 static func event(m: Match, kind: String, e: Ent, at := Vector3.INF, extra := "") -> void:
@@ -117,6 +119,9 @@ static func on_event(m: Match, x: Array) -> void:
 		"merge":
 			MergeXform.on_event(m, at, decode_form(String(x[6])), e as Hunter if e is Hunter else null)
 		"merge_end":
+			if String(x[6]) == "shell" and e is Hunter:
+				(e as Hunter).set_meta("shell_break_at", m.time)
+				(e as Hunter).set_meta("shell_break_col", (e as Hunter).get_meta("mf_glow", Color.WHITE))
 			m.sfx("armor_break" if String(x[6]) == "shell" else "recall", at, -2.0, 0.9 if String(x[6]) == "shell" else 1.3)
 		"mcast":
 			if e is Hunter:

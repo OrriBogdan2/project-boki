@@ -69,6 +69,8 @@ static func separate(h: Hunter, form: Dictionary, why: String) -> void:
 	var col: Color = form["glow"]
 	MergeLook.peel(h)
 	if why == "shell":
+		h.set_meta("shell_break_at", m.time)           # (the plate's bar flashes, BokiHud)
+		h.set_meta("shell_break_col", col)
 		# the shell broke: a louder crack, shards everywhere
 		m.fx.flash(h.pos + Vector3(0, 1.0, 0), Color.WHITE, 2.0, 0.1)
 		m.fx.burst(h.pos + Vector3(0, 1.0, 0), col, 30, 7.0, 0.6)
