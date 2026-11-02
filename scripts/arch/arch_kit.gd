@@ -437,6 +437,14 @@ func spend_dash(use_ex: bool) -> bool:
 
 ## A travelling dash of a given length and time (the Effects dash, so perfect dodges, riders and
 ## the dash buffer all work as before).
+## The way a plain dash goes: where you're moving (WASD), or the cursor when you stand still or turn on
+## Settings > "Dash toward the cursor". Aimed movement (a grapple, a blink to a spot) uses the cursor instead.
+func dash_dir() -> Vector2:
+	var move: Vector2 = h.inp.get("move", Vector2.ZERO)
+	if move.length() < 0.1 or (h.is_local() and Settings.get_v("dash_to_cursor")):
+		return h.aim_dir()
+	return move.normalized()
+
 func travel(dist: float, t: float, extra := {}, use_ex := false) -> void:
 	var e := {"type": "dash", "speed": dist / maxf(0.02, t), "time": t, "invuln": float(extra.get("invuln", 0.0))}
 	for k in extra:

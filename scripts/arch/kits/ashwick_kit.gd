@@ -313,7 +313,7 @@ func sees_from(p: Vector3, o: Ent) -> bool:
 # ------------------------------------------------------------------ dash: Spark Leap
 func on_dash(use_ex: bool) -> bool:
 	var dd := dash_def()
-	var dir := h.aim_dir()
+	var dir := dash_dir()
 	if use_ex and not h.grounded:
 		if not spend_dash(true): return true
 		travel(float(h.cdat.get("ex_dist", 4.2)), float(h.cdat.get("ex_time", 0.21)), {"invuln": 0.08, "trail": "dust", "dir": dir}, true)

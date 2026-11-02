@@ -566,10 +566,10 @@ func _juggernaut() -> void:
 	P.ak.press_rmb()
 	step(m, 0.5)
 	ok("juggernaut RMB air: Meteor Drop slows, centre stunned", K.last_variant == "air" and dmg(T) >= 24.0 and T.slow_t > 0.0 and T.stun_t > 0.0, "took %.0f slow %.2f stun %.2f" % [dmg(T), T.slow_t, T.stun_t])
-	# Rampage (Flame Step): a dash attack the way you face; the tip hits double; rank 3 adds a charge
+	# Rampage (Flame Step): a dash attack, aimed like any dash (Settings); the tip hits double; rank 3 adds a charge
 	step(m, 1.0)
 	P.teleport(home); fresh(T); T.teleport(home + Vector3(4.3, 0, 0)); aim_at(P, T.pos); P.dashes = 2.0
-	P.inp["move"] = Vector2(0, 1)        # (moving sideways: it still goes the way you face)
+	P.inp["move"] = Vector2(1, 0)        # (Rampage follows the dash setting: WASD by default, here toward the target)
 	P.do_dash()
 	step(m, 0.5)
 	P.inp["move"] = Vector2.ZERO
