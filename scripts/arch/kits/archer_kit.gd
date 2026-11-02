@@ -2,12 +2,13 @@ class_name ArcherKit
 extends ArchKit
 ## Pin (id archer, light; docs/heroes/archer.md, hero sheet pin.md). Spirit Walk (Shift), Focus, Snare
 ## (tap: a rooting snare / Tripwire; hold: a charged Heavy Shot that pierces, knocks back and stuns into
-## a wall; Plunge in the air), Hail Wall (E, a curved arc of rain at the cursor distance); no R (the Merge).
+## a wall; Plunge in the air), Hail Wall (E, a curved arc of rain at the cursor distance), and on X
+## Starpiercer (level 6, PinUlt: three empowered piercing beams). R is the Merge.
 ## The bow (PinDraw): hold to draw through two stages with a V reticle that closes at each; tap and
 ## Empowered shots land at the cursor, Supercharged ones fly past it to max range; let go right as a stage
 ## comes up (a gold star) and the next draw is faster; hold too long and the arrow is overdrawn (half).
 ##
-## The loop (kits4): snares root (Pin) and feed Focus -> full Focus arms the Deadeye (a lens glint and
+## The loop: snares root (Pin) and feed Focus -> full Focus arms the Deadeye (a lens glint and
 ## a thin aim line everyone sees, crosshairs over every pinned foe) -> the next shot is drawn at once,
 ## and into a rooted or stunned foe it's a Deadeye: a gold payoff hit with T4 hitstop and its own sound.
 
@@ -15,6 +16,7 @@ var rain := {}                 # the live Hail Wall: {a, b, t, tick, patter, tel
 var draw: PinDraw             # the bow's stages, reticle, perfect release and overdraw
 var spirit: PinSpirit          # Shift: Spirit Walk
 var fx: PinFx                  # Pin's pooled effects
+var ult: PinUlt                # X: Starpiercer
 var perfects: int:
 	get: return draw.perfects if draw else 0
 var trips: Array = []          # our live Tripwires (verbs trap dictionaries)
@@ -38,6 +40,9 @@ func _setup() -> void:
 	h.add_child(fx)
 	self_nodes.append(fx)
 	draw = PinDraw.new(self)
+	ult = PinUlt.new(self)
+	h.add_child(ult)
+	self_nodes.append(ult)
 	spirit = PinSpirit.new(self)
 
 func full_ready() -> bool:
@@ -96,7 +101,8 @@ func _deadeye(t: Ent) -> void:
 	var rd := res_def()
 	var dir := h.dir_to(t)
 	var gold := Color("ffe27a")
-	t.hurt(float(rd.get("deadeye", 18.0)) * power("sec"), h, {"src": "abil", "ab": "utility", "tags": ["utility", "deadeye"], "payoff": true, "crit": true, "kb": dir * 5.0})
+	var opts := {"src": "abil", "ab": "utility", "tags": ["utility", "deadeye"], "payoff": true, "crit": true, "kb": dir * 5.0}
+	t.hurt(float(rd.get("deadeye", 18.0)) * power("sec"), h, opts)
 	deadeyes += 1
 	play("pin_deadeye")
 	m.fx.bolt(h.pos + Vector3(0, 1.2, 0), t.pos + Vector3(0, 1.0, 0), gold)
@@ -147,10 +153,19 @@ func _tick(dt: float) -> void:
 	if not rain.is_empty():
 		_tick_rain(dt)
 	draw.tick()
+	ult.tick(dt)
 	spirit.tick(dt)
 	spirit.tick_orbs(dt)
 	_tag_shots()
 	fx.tick_shots()
+
+## X: Starpiercer, the next shots empowered.
+func cast_ult() -> bool:
+	return ult.cast()
+
+## While Starpiercer is up the bow is the ult's: nock, then a beam (PinUlt.lmb).
+func lmb_override(held: bool, dt: float) -> bool:
+	return ult.lmb(held, dt)
 
 ## Hunter.trigger scales the bow's draw by this (the quick draw after a perfect release).
 func draw_rate() -> float:
@@ -181,7 +196,8 @@ func _tag_shots() -> void:
 func _sense_injured() -> void:
 	var rd := res_def()
 	for f in m.foes_of(h.team):
-		if f is Hunter and not f.dead and f.hp < f.max_hp * float(rd.get("sense_hp", 0.5)) and h.flat_dist(f) < float(rd.get("sense_r", 22.0)):
+		var hurt_enough: bool = f.hp < f.max_hp * float(rd.get("sense_hp", 0.5))
+		if f is Hunter and not f.dead and hurt_enough and h.flat_dist(f) < float(rd.get("sense_r", 22.0)):
 			f.reveal_t = maxf(f.reveal_t, 0.4)
 
 ## Passive: a knock heals us (the dash comes back for every takedown, see DashReset).
@@ -320,7 +336,8 @@ func on_dash(use_ex: bool) -> bool:
 		return true
 	if ex:
 		# the long dash (in the air, or out of charges): Pin's own flick and tumble, a green streak behind
-		travel(float(h.cdat.get("ex_dist", 4.2)), 0.22, {"invuln": 0.1, "trail": "roll"}, true)     # 19 m/s, the base dash speed (sync62)
+		# 19 m/s, the base dash speed
+		travel(float(h.cdat.get("ex_dist", 4.2)), 0.22, {"invuln": 0.1, "trail": "roll"}, true)
 		play("pin_flick")
 		st["last_dash"] = "flick"
 		for i in 4:
@@ -357,7 +374,8 @@ const HEAVY_GOLD := Color("ffc24a")
 func _heavy_tele() -> void:
 	var hk := heavy_k()
 	AimKit.vee(h, "rmb_v", {"k": hk, "col": HEAVY_GOLD, "col2": Color("fff0b0"), "glint": hk * 0.5})
-	AimKit.lane(h, "rmb_bar", {"len": 2.0 * AimKit.BH, "len0": 0.3, "k": hk, "width": 0.3, "fill": hk, "col": HEAVY_GOLD, "col2": Color("fff0b0")})
+	AimKit.lane(h, "rmb_bar", {"len": 2.0 * AimKit.BH, "len0": 0.3, "k": hk, "width": 0.3, "fill": hk,
+		"col": HEAVY_GOLD, "col2": Color("fff0b0")})
 	AimKit.charge(h, hk, {"col": HEAVY_GOLD, "col2": Color.WHITE})
 
 ## The Heavy Shot charges from the hold threshold to full.
@@ -366,7 +384,8 @@ func rmb_charge_full() -> float:
 
 func heavy_k() -> float:
 	var pd: Dictionary = rmb_def()["pin"]
-	return clampf((rmb_t - float(rmb_def()["hold"])) / maxf(0.05, float(pd["full"]) - float(rmb_def()["hold"])), 0.0, 1.0)
+	var hold_t := float(rmb_def()["hold"])
+	return clampf((rmb_t - hold_t) / maxf(0.05, float(pd["full"]) - hold_t), 0.0, 1.0)
 
 ## The Heavy Shot can be held up to 3 s after it's full before it looses by itself (wiki patch 20.11.24).
 func rmb_auto_t() -> float:
@@ -381,7 +400,8 @@ func _drop_holds() -> void:
 	_drop_tele()
 	draw.drop()
 	spirit.end("merge")
-	if anim_id in ["arc_draw", "arc_over", "arc_heavy_wind", "pin_roll", "pin_walk"]:
+	if ult: ult.drop()
+	if anim_id in ["arc_draw", "arc_over", "arc_heavy_wind", "pin_roll", "pin_walk", "pin_ult_nock"]:
 		anim_id = ""
 
 func _drop_tele() -> void:

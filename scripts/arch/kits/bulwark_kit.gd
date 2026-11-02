@@ -15,7 +15,7 @@ extends ArchKit
 ##   another foe stuns them and heals you (T4, pay_slam).
 ## - E, Mending Ground: a green column comes down for 1 s, then heals at the planted hammer (on you when
 ##   the hammer is in hand); it also mends the aegis while it's raised.
-## - No R: the class ultimate is held back while R is the Merge.
+## - X, Faultline (level 6, BjornUlt): planted, a slam, and the ground erupts cell by cell down a lane.
 
 var wall: Dictionary = {}      # the raised shield (a following verbs wall)
 var shield_hp := 160.0
@@ -32,6 +32,7 @@ var crushed_at := {}           # foe id -> last Crush (one per 0.6s each)
 var crushes := 0               # Crushes landed (tests, demo)
 var crest: Node3D = null       # the gold crest light while a Shield Slam is armed
 var fx: BjornFx                # Bjorn's pooled effects
+var ult: BjornUlt              # X: Faultline
 var flared := false            # this hold's full-charge flare has gone off
 var throws := 0                # (checks) hammers thrown, and the last throw's landing distance
 var throw_d := 0.0
@@ -40,13 +41,17 @@ var slam_k := 0.0
 var spins := 0                 # (checks) 360 Smash spin hits
 var kickstarts := 0             # (checks) downed teammates Mending Ground started reviving
 var throw_at := -9.0           # when the hammer last left his hand (the recall lockout)
-const WINDDOWN := 0.3          # s after a slam or a spin hit before he can open the glider (wiki: wind-down frames keep the momentum)
+## s after a slam or a spin hit before he can open the glider (wiki: wind-down frames keep the momentum)
+const WINDDOWN := 0.3
 
 func _setup() -> void:
 	shield_hp = shield_max()
 	fx = BjornFx.new(h)
 	h.add_child(fx)
 	self_nodes.append(fx)
+	ult = BjornUlt.new(self)
+	h.add_child(ult)
+	self_nodes.append(ult)
 
 func shield_max() -> float:
 	return float(rmb_def()["shield"]["hp"]) + (60.0 if rank("sec") >= 3 else 0.0)
@@ -112,11 +117,13 @@ func _tick(dt: float) -> void:
 		if down_t >= float(sd["wait"]) and lock_t <= 0.0:
 			shield_hp = minf(shield_max(), shield_hp + float(sd["regen"]) * dt)
 	_tick_mace(dt)
+	ult.tick(dt)
 	if not mend.is_empty():
 		mend["t"] = float(mend["t"]) - dt
 		var u := 1.0 - clampf(float(mend["t"]) / float(e_def()["delay"]), 0.0, 1.0)
 		fx.purify(mend["pos"], float(mend["r"]), u)
-		AimKit.circle(h, "e", {"at": mend["pos"], "r": float(mend["r"]), "fill": u, "ticks": true, "all": true, "col": BjornFx.GREEN})
+		AimKit.circle(h, "e", {"at": mend["pos"], "r": float(mend["r"]), "fill": u, "ticks": true, "all": true,
+			"col": BjornFx.GREEN})
 		if float(mend["t"]) <= 0.0: _mend_burst()
 	# Guard: three rune pips over the helm (33 / 66 / 100), a gold crest light when a Slam is armed
 	self_pips(3, int(res / 33.0 + 0.01), full_ready(), dt)
@@ -141,11 +148,18 @@ func move_k() -> float:
 		k *= float(rmb_def()["shield"]["slow"])
 	if lmb_t > 0.2:
 		k *= 0.55          # winding up the Crushing Blow
+	if ult.planted():
+		k = 0.0
 	return k
 
 ## Behind the raised shield you can't swing or throw.
 func fire_ok() -> bool:
-	return wall.is_empty()
+	return wall.is_empty() and not ult.planted()
+
+## X: Faultline. The aegis comes down and a Crushing Blow charge is dropped as he plants.
+func cast_ult() -> bool:
+	_drop_holds()
+	return ult.cast()
 
 ## The Shield Charge's front guard: hits from the front 140° are blocked (and become Guard).
 func incoming(by: Ent, dmg: float, o: Dictionary) -> Array:
@@ -176,7 +190,8 @@ func _foe_behind(t: Ent, dir: Vector2, reach: float) -> Ent:
 	for f in m.foes_of(h.team):
 		if f == t or not f.hittable(): continue
 		var to := Vector2(f.pos.x - t.pos.x, f.pos.z - t.pos.z)
-		if to.length() < reach + f.r and to.length() > 0.05 and to.normalized().dot(dir) > 0.5 and absf(f.pos.y - t.pos.y) < 1.4:
+		var ahead := to.length() > 0.05 and to.normalized().dot(dir) > 0.5
+		if to.length() < reach + f.r and ahead and absf(f.pos.y - t.pos.y) < 1.4:
 			return f
 	return null
 
@@ -194,10 +209,14 @@ func _try_crush(t: Ent, dir: Vector2) -> void:
 	m.later(0.02, func():
 		if not is_instance_valid(h) or not is_instance_valid(tgt) or tgt.dead: return
 		crushes += 1
-		tgt.hurt(float(rd.get("crush_dmg", 8.0)) * power("sec"), h, {"src": "abil", "ab": "utility", "tags": ["utility", "crushed"], "payoff": true, "stun": float(rd.get("crush_stun", 0.8)), "dr": true})
+		var crush_dmg := float(rd.get("crush_dmg", 8.0)) * power("sec")
+		var crush_stun := float(rd.get("crush_stun", 0.8))
+		tgt.hurt(crush_dmg, h, {"src": "abil", "ab": "utility", "tags": ["utility", "crushed"], "payoff": true,
+			"stun": crush_stun, "dr": true})
 		if other and is_instance_valid(other) and not other.dead:
 			crushed_at[other.get_instance_id()] = m.time
-			other.hurt(float(rd.get("crush_dmg", 8.0)) * power("sec"), h, {"src": "abil", "ab": "utility", "tags": ["utility", "crushed"], "stun": float(rd.get("crush_stun", 0.8)) * 0.6, "dr": true})
+			other.hurt(crush_dmg, h, {"src": "abil", "ab": "utility", "tags": ["utility", "crushed"],
+				"stun": crush_stun * 0.6, "dr": true})
 		h.heal(float(rd.get("crush_heal", 24.0)))
 		payoff_fx(tgt.pos, "CRUSHED", res_col(), "pay_slam", dir, tgt)
 		if not anim_id in ["bul_smash", "bul_charge"]: play("bul_crush")
@@ -210,9 +229,13 @@ func _wk() -> float:
 func lmb_override(held: bool, dt: float) -> bool:
 	if h.wid != "tower_shield":
 		return false
+	if ult.planted():
+		lmb_was = held
+		return true
 	var pressed := held and not lmb_was
 	lmb_was = held
-	if KinMerge.transforming(h):       # a merge ends the Crushing Blow's charge: letting go of it must not swing mid-transformation
+	# a merge ends the Crushing Blow's charge: letting go of it must not swing mid-transformation
+	if KinMerge.transforming(h):
 		drop_holds()
 		return true
 	if not h.can_fire() or h.fire_cd > 0.0:
@@ -282,7 +305,7 @@ func smash_k() -> float:
 const CARRY_T := 0.24          # s the slam's forward carry lasts
 
 ## The Crushing Blow let go: the hammer sweeps round from behind into a 180 degree flaming crescent in
-## front, and the slam carries him forward (owner note: a strong slam with forward momentum).
+## front, and the slam carries him forward (a strong slam with forward momentum).
 func _smash() -> void:
 	play("bul_smash")
 	var md := lmb_def()
@@ -431,7 +454,7 @@ func rmb_charge_full() -> float:
 
 ## In the air the press doesn't fire at once: holding it there is Shield Surf.
 func press_rmb() -> void:
-	if busy():
+	if busy() or ult.planted():
 		h._ab_feedback("sec", "deny")
 		return
 	if rmb_down:
@@ -468,7 +491,8 @@ func _drop_holds() -> void:
 	if not wall.is_empty():
 		_lower()
 	rmb_down = false
-	if anim_id in ["bul_smash_wind", "bul_guard"]:
+	if ult: ult.drop()
+	if anim_id in ["bul_smash_wind", "bul_guard", "bul_ult_wind"]:
 		anim_id = ""
 
 func _lower() -> void:
@@ -530,6 +554,8 @@ func fire_ok_rmb() -> bool:
 
 # ------------------------------------------------------------------ dash: Whirl / Shield Charge
 func on_dash(use_ex: bool) -> bool:
+	if ult.planted():
+		return true          # planted for the slam: Shift waits
 	var dd := dash_def()
 	if lmb_t > float(lmb_def().get("tap", 0.2)) and h.grounded and mace.is_empty():
 		# Shift while winding up the Crushing Blow: a short plain dash (no spin), half a charge, the blow keeps charging

@@ -9,10 +9,17 @@ func run(main_node: Node) -> void:
 	main_node.set_meta("hero_combo_check", self)
 	var args := OS.get_cmdline_user_args()
 	var both := "--hero-combo-check" in args
-	if both or "--archer-combo-check" in args: await _archer_combos()
+	var ult = load("res://tools/pin_bjorn_ult_check.gd").new()
+	ult.main = main_node
+	if both or "--archer-combo-check" in args:
+		await _archer_combos()
+		await ult.pin()
 	if both or "--bulwark-combo-check" in args:
 		await _bulwark_combos()
 		await _growth()
+		await ult.bjorn()
+	n += ult.n
+	fails += ult.fails
 	print("AKCHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 

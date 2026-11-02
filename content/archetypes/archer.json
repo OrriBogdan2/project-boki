@@ -13,6 +13,7 @@
 		"e": "Rain arrows on a curved wall at the cursor distance: damage, slow and a burn that blocks healing.",
 		"dash": "Spirit Walk: a dodge roll, then 2.8s walking through rocks, trees and barriers.",
 		"passive": "Focus fills while you stand still or land snares; at full your next shot is a Deadeye. Hurt foes show through cover.",
+		"x": "Starpiercer (level 6): your next 3 shots need no draw and fly as piercing beams; the third can finish a foe.",
 		"weapons": {
 			"longbow": "Hold to draw: Empowered lands at the cursor, Supercharged flies past it; let go right on the flash for a faster next draw."
 		}
@@ -145,6 +146,27 @@
 		"rmin": 2.0,
 		"deg": 120.0,
 		"cremate": 10.0
+	},
+	"x": {
+		"name": "Starpiercer",
+		"short": "Starpierce",
+		"icon": "skypierce",
+		"col": "#5affd2",
+		"unlock": 6,
+		"cooldown": 36.0,
+		"shots": 3,
+		"window": 6.0,
+		"nock": 0.3,
+		"recover": 0.6,
+		"range": 18.0,
+		"speed": 140.0,
+		"width": 0.5,
+		"dmg": 18.0,
+		"final_dmg": 25.0,
+		"kb": 4.0,
+		"shred": 10.0,
+		"execute": 0.12,
+		"desc": "Tap: your next 3 bow shots within 6s need no draw. Each press nocks for 0.3s and looses a beam to 18m that pierces every foe, knocks back and strips 10 armor; the third hits harder and finishes a hunter it leaves under 12% health."
 	},
 	"order": [
 		"sec",

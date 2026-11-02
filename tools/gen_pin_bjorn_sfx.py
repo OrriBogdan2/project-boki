@@ -37,6 +37,15 @@ Bjorn (bulwark)
   bjorn_bash       the Bash: a shield thump
   bjorn_purify     Mending Ground cast: a soft rising chord
   bjorn_purify_burst  the heal landing: a bright chord bloom
+The ultimates (X)
+  pin_ult_cast     Starpiercer: a bright rising shimmer over a low swell, a chord blooming out
+  pin_ult_nock     a beam nocked: a short tight string-stretch whine
+  pin_ult_beam     a beam: a deep bowstring thrum and a cracking boom
+  pin_ult_final    the last beam: the same, heavier, with a long ringing tail
+  bjorn_ult_wind   Faultline wind-up: a low strained groan rising as the hammer goes up
+  bjorn_ult_slam   the slam: a huge ground thud with a stone crack
+  bjorn_ult_rumble the fissure: a rolling rumble with rock pops, running away from him
+  bjorn_ult_crackle the scar: a faint ember crackle
 """
 import math, os, random, struct, wave
 
@@ -170,7 +179,38 @@ def bjorn():
     bloom = mix(*[scale(at(bell(f, 0.9, 0.3, (1.0, 2.0, 3.0), (1.0, 0.25, 0.1)), dt), a) for f, a, dt in [(784, 0.6, 0.0), (988, 0.5, 0.04), (1175, 0.45, 0.08), (1568, 0.3, 0.12)]])
     save('bjorn_purify_burst', mix(bloom, scale(whoosh(0.4, 800, 5000, 0.2), 0.5)), -16)
 
+# ------------------------------------------------------------------ the ultimates (their own stream, after the rest)
+def ults():
+    u = random.Random(6106)
+    def unoise(d): return [u.gauss(0, 0.35) for _ in range(N(d))]
+    shimmer = mul(mix(tone(880, 1760, 0.8, 0.0), scale(tone(1320, 2640, 0.8, 0.0), 0.5), scale(hp(unoise(0.8), 5000), 0.2)),
+                  mul(swell(N(0.8), 0.25), env(N(0.8), 0.001, 0.35)))
+    save('pin_ult_cast', mix(shimmer, scale(mul(tone(98, 147, 0.8, 0.3), env(N(0.8), 0.05, 0.3)), 0.7),
+                             scale(at(bell(1175, 0.7, 0.25, (1.0, 1.5, 2.0), (0.8, 0.5, 0.3)), 0.12), 0.6)), -15)
+    save('pin_ult_nock', mul(mix(tone(300, 620, 0.3, 0.3), scale(creak(0.3, 200, 420, 70), 0.5)), swell(N(0.3), 0.25)), -21)
+    crack = mul(hp(unoise(0.25), 1800), env(N(0.25), 0.0005, 0.03))
+    boom = mix(thud(110, 38, 0.6, 0.14), scale(mul(lp(unoise(0.5), 500), env(N(0.5), 0.002, 0.12)), 1.0))
+    save('pin_ult_beam', mix(twang(82, 0.6, 0.12, 1.4), scale(crack, 1.4), scale(at(boom, 0.02), 1.0),
+                             scale(whoosh(0.3, 1500, 7000, 0.1), 0.6)), -13)
+    ring = bell(1568, 1.0, 0.35, (1.0, 2.0, 3.01), (0.6, 0.3, 0.2))
+    save('pin_ult_final', mix(twang(65, 0.8, 0.16, 1.5), scale(crack, 1.8), scale(at(boom, 0.02), 1.4),
+                              scale(at(ring, 0.04), 0.5), scale(whoosh(0.4, 1200, 7000, 0.1), 0.7)), -12)
+    groan = mul(mix(tone(55, 90, 0.5, 0.5, 0.3), scale(creak(0.5, 70, 140, 20), 0.6)), swell(N(0.5), 0.4))
+    save('bjorn_ult_wind', mix(groan, scale(mul(lp(unoise(0.5), 400), swell(N(0.5), 0.45)), 0.6)), -17)
+    stone = mul(bp(unoise(0.3), 900, 5000), env(N(0.3), 0.0005, 0.05))
+    save('bjorn_ult_slam', mix(thud(80, 26, 0.9, 0.25), scale(stone, 1.3), scale(mul(lp(unoise(0.8), 300), env(N(0.8), 0.002, 0.3)), 1.2)), -11)
+    roll = mul(lp(unoise(1.2), 220), [math.sin(math.pi * min(1.0, i / N(1.2) * 1.4)) for i in range(N(1.2))])
+    pops = [0.0] * N(1.2)
+    for k in range(9):
+        pops = mix(pops, at(scale(mul(bp(unoise(0.08), 500, 3000), env(N(0.08), 0.001, 0.02)), u.uniform(0.4, 0.9)), 0.12 * k + u.uniform(0, 0.05)))
+    save('bjorn_ult_rumble', mix(scale(roll, 1.4), pops), -15)
+    crk = [0.0] * N(0.7)
+    for k in range(14):
+        crk = mix(crk, at(scale(mul(hp(unoise(0.02), 2500), env(N(0.02), 0.0005, 0.004)), u.uniform(0.3, 1.0)), u.uniform(0.0, 0.66)))
+    save('bjorn_ult_crackle', mix(crk, scale(mul(lp(unoise(0.7), 300), env(N(0.7), 0.1, 0.3)), 0.3)), -24)
+
 if __name__ == '__main__':
     pin()
     bjorn()
-    print('wrote pin_* and bjorn_* sounds')
+    ults()
+    print('wrote pin_*, bjorn_* and the ult sounds')

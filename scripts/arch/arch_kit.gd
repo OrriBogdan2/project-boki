@@ -15,7 +15,7 @@ var d: Dictionary = {}
 var res := 0.0                 # the passive's resource (Marks live on targets instead)
 var res_wait := 0.0            # seconds left before it decays out of a fight
 var full_was := false
-var cd := {"rmb": 0.0, "e": 0.0, "r": 0.0}
+var cd := {"rmb": 0.0, "e": 0.0, "r": 0.0, "x": 0.0}
 var ch_rmb := 1.0              # RMB charges
 var rmb_down := false          # RMB held since its press
 var rmb_t := 0.0
@@ -106,6 +106,8 @@ func cast_e() -> bool: return false
 func e_recast() -> bool: return false                # E pressed while it's up (Sigil detonation)
 func cast_r() -> bool: return false
 func r_recast() -> bool: return false                # R pressed while it runs (Last Round release)
+## X, the hero's own ultimate: start it now (UltSlot.press has checked the level and cooldown). True = cast.
+func cast_ult() -> bool: return false
 func on_dash(_ex: bool) -> bool: return false        # true = the archetype handled the dash
 func on_deal(_t: Ent, _dmg: float, _o: Dictionary) -> void: pass
 func on_take(_by: Ent, _dmg: float, _o: Dictionary) -> void: pass

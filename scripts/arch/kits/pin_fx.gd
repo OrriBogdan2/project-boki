@@ -47,7 +47,8 @@ func _init(hunter: Hunter) -> void:
 
 func _ready() -> void:
 	for i in STARS:
-		stars.append({"node": KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("star")), "t": 0.0, "dur": 0.0})
+		var star_node := KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("star"))
+		stars.append({"node": star_node, "t": 0.0, "dur": 0.0})
 	bow_star = KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("star", Color.WHITE))
 	for i in ARROWS:
 		arrows.append(_arrow_node())
@@ -59,14 +60,18 @@ func _ready() -> void:
 	for i in 9:
 		var p := KitMeshes.inst(self, Models.box(0.06, 1.0, 0.06), Models.glow_mat(Color(GREEN.lightened(0.4), 0.95)))
 		var fl := MeshInstance3D.new()
-		fl.mesh = Models.prism_tip(); fl.material_override = Models.glow_mat(Color(GREEN, 0.9))
-		fl.scale = Vector3(0.22, 0.24, 0.05); fl.position = Vector3(0, 0.62, 0); fl.rotation = Vector3(PI, 0, 0)
+		fl.mesh = Models.prism_tip()
+		fl.material_override = Models.glow_mat(Color(GREEN, 0.9))
+		fl.scale = Vector3(0.22, 0.24, 0.05)
+		fl.position = Vector3(0, 0.62, 0)
+		fl.rotation = Vector3(PI, 0, 0)
 		fl.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		p.add_child(fl)
 		posts.append(p)
 	glow = KitMeshes.inst(self, KitMeshes.band(1.0, 1.0, -1.0, 1.0), KitShaders.mat("swirl", GREEN))
 	for i in STREAKS:
-		streaks.append({"node": KitMeshes.inst(self, KitMeshes.quad(0.09, 1.3), KitShaders.mat("streak", GREEN)), "t": 0.0})
+		var streak_node := KitMeshes.inst(self, KitMeshes.quad(0.09, 1.3), KitShaders.mat("streak", GREEN))
+		streaks.append({"node": streak_node, "t": 0.0})
 	for i in FLAMES:
 		var fm := KitShaders.mat("flame", Color("5aa8ff"))
 		fm.set_shader_parameter("seed", float(i) * 1.7)
@@ -84,12 +89,15 @@ func _arrow_node() -> Node3D:
 	trail.rotation = Vector3(-PI * 0.5, PI * 0.5, 0)     # lies flat, runs back along +Z
 	trail.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	n.add_child(trail)
-	var shaft := Models.part(n, Models.box(0.035, 0.035, 0.75), Models.glow_mat(GREEN), Vector3(0, 0, 0.3), Vector3.ONE, Vector3.ZERO, "Shaft")
+	var shaft := Models.part(n, Models.box(0.035, 0.035, 0.75), Models.glow_mat(GREEN), Vector3(0, 0, 0.3),
+		Vector3.ONE, Vector3.ZERO, "Shaft")
 	shaft.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	var head := Models.part(n, Models.prism_tip(), Models.glow_mat(TEAL), Vector3(0, 0, -0.1), Vector3(0.12, 0.2, 0.05), Vector3(-PI * 0.5, 0, 0), "Head")
+	var head := Models.part(n, Models.prism_tip(), Models.glow_mat(TEAL), Vector3(0, 0, -0.1),
+		Vector3(0.12, 0.2, 0.05), Vector3(-PI * 0.5, 0, 0), "Head")
 	head.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	for sx in [-1.0, 1.0]:
-		var f := Models.part(n, Models.box(0.16, 0.012, 0.2), Models.glow_mat(Color(GREEN, 0.8)), Vector3(sx * 0.07, 0, 0.62), Vector3.ONE, Vector3(0, sx * 0.35, 0), "Fin%d" % int(sx + 1.0))
+		var f := Models.part(n, Models.box(0.16, 0.012, 0.2), Models.glow_mat(Color(GREEN, 0.8)),
+			Vector3(sx * 0.07, 0, 0.62), Vector3.ONE, Vector3(0, sx * 0.35, 0), "Fin%d" % int(sx + 1.0))
 		f.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	return n
 
@@ -115,25 +123,30 @@ func _dress(n: Node3D, kind: String) -> void:
 	tr.position = Vector3(0, 0, float(lk[4]) * 0.5 + 0.2)
 	tr.visible = true
 	var s := float(lk[6])
-	(n.get_node("Shaft") as Node3D).scale = Vector3(s * (2.2 if kind == "super" else 1.0), s * (2.2 if kind == "super" else 1.0), s)
+	var thick := s * (2.2 if kind == "super" else 1.0)
+	(n.get_node("Shaft") as Node3D).scale = Vector3(thick, thick, s)
 	(n.get_node("Head") as Node3D).scale = Vector3(0.12, 0.2, 0.05) * s * (1.6 if kind == "heavy" else 1.0)
 	for f in ["Fin0", "Fin2"]:
 		(n.get_node(f) as Node3D).scale = Vector3.ONE * s * (1.7 if kind == "heavy" else 1.0)
 
 # ------------------------------------------------------------------ stars
 ## A star flash at `at`: size m across, held `dur` s (it pops in and fades), with an optional ring.
-func star(at: Vector3, size: float, col: Color, dur := 0.12, ring := 0.0, rot := 0.0, power := 1.6) -> void:
+func star(at: Vector3, across: float, col: Color, dur := 0.12, ring := 0.0, rot := 0.0, power := 1.6) -> void:
 	var s: Dictionary = stars[0]
 	for c in stars:
 		if float(c["t"]) >= float(c["dur"]):
-			s = c; break
+			s = c
+			break
 	var n: MeshInstance3D = s["node"]
 	n.visible = true
 	n.global_position = at
 	n.material_override.set_shader_parameter("color", col)
 	n.material_override.set_shader_parameter("ring", ring)
 	n.material_override.set_shader_parameter("rot", rot)
-	s["t"] = 0.0; s["dur"] = dur; s["size"] = size; s["pow"] = power
+	s["t"] = 0.0
+	s["dur"] = dur
+	s["size"] = across
+	s["pow"] = power
 
 ## The white star held at the bow while Supercharged (k 0 = off); dim when overdrawn.
 func hold_bow_star(at: Vector3, k: float) -> void:
@@ -177,7 +190,8 @@ func tick_shots() -> void:
 		n.global_position = p
 		if v.length() > 0.5:
 			n.rotation = Vector3(0, atan2(-v.x, -v.y), 0)
-		e["pos"] = s["pos"]; e["life"] = float(s["life"])
+		e["pos"] = s["pos"]
+		e["life"] = float(s["life"])
 	var now: float = h.m.time
 	hits = hits.filter(func(hh): return now - float(hh[1]) < 0.2)
 	for sid in live.keys():
@@ -197,7 +211,8 @@ func _plant(at: Vector3, v: Vector2, kind: String) -> void:
 	var best: Dictionary = spent[0]
 	for c in spent:
 		if float(c["t"]) <= 0.0:
-			best = c; break
+			best = c
+			break
 		if float(c["t"]) < float(best["t"]): best = c
 	var n: Node3D = best["node"]
 	_dress(n, kind)
@@ -225,8 +240,10 @@ func rain_on(center: Vector3, dir: Vector2, radius: float, deg: float, t: float)
 		(posts[i] as Node3D).global_position = q + Vector3(0, 0.5, 0)
 		(posts[i] as Node3D).visible = true
 	for i in n:
-		var u0 := lerpf(-half, half, float(i) / n); var u1 := lerpf(-half, half, float(i + 1) / n)
-		var q0 := _arc_pt(center, yaw, radius, u0); var q1 := _arc_pt(center, yaw, radius, u1)
+		var u0 := lerpf(-half, half, float(i) / n)
+		var u1 := lerpf(-half, half, float(i + 1) / n)
+		var q0 := _arc_pt(center, yaw, radius, u0)
+		var q1 := _arc_pt(center, yaw, radius, u1)
 		var pn: MeshInstance3D = panels[i]
 		var mid := (q0 + q1) * 0.5
 		pn.global_position = mid + Vector3(0, 1.0, 0)
@@ -248,7 +265,8 @@ func rain_off() -> void:
 	for p in panels + posts: (p as Node3D).visible = false
 	glow.visible = false
 	for f in flames:
-		(f["node"] as Node3D).visible = false; f["foe"] = null
+		(f["node"] as Node3D).visible = false
+		f["foe"] = null
 
 ## Blue burn flames on the foes inside (the anti-heal burn); `foes` is this step's list.
 func burn(foes: Array) -> void:
@@ -275,10 +293,13 @@ func _tick_rain(dt: float) -> void:
 		rain["every"] = 0.035
 		var yaw := atan2(-(rain["dir"] as Vector2).x, -(rain["dir"] as Vector2).y)
 		var half := deg_to_rad(float(rain["deg"])) * 0.5
-		var q := _arc_pt(rain["center"], yaw, float(rain["radius"]) + randf_range(-0.45, 0.45), randf_range(-half, half))
+		var depth := float(rain["radius"]) + randf_range(-0.45, 0.45)
+		var q := _arc_pt(rain["center"], yaw, depth, randf_range(-half, half))
 		for c in streaks:
 			if float(c["t"]) <= 0.0:
-				c["t"] = 0.32; c["to"] = q; c["from"] = q + Vector3(randf_range(-0.8, 0.8), 6.5, randf_range(-0.8, 0.8))
+				c["t"] = 0.32
+				c["to"] = q
+				c["from"] = q + Vector3(randf_range(-0.8, 0.8), 6.5, randf_range(-0.8, 0.8))
 				break
 	for f in flames:
 		var foe: Ent = f["foe"]
@@ -295,7 +316,8 @@ func _tick_streaks(dt: float) -> void:
 			continue
 		c["t"] = float(c["t"]) - dt
 		var u := 1.0 - clampf(float(c["t"]) / 0.32, 0.0, 1.0)
-		var from: Vector3 = c["from"]; var to: Vector3 = c["to"]
+		var from: Vector3 = c["from"]
+		var to: Vector3 = c["to"]
 		var p := from.lerp(to, u * u)
 		n.visible = true
 		n.global_position = p + (from - to).normalized() * 0.6

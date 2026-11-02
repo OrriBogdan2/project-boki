@@ -717,4 +717,147 @@ const MOVES := {
 		[0.3, {"p": -0.12, "y": 0.3, "sq": 0.35, "lift": -0.1, "lw": 1.0, "legs": [0.9, -1.3, -0.4, -0.8]}],
 		[0.5, {"sq": -0.05}],
 		[0.6, {}]]},
+	# ---------------------------------------------------------------- the ultimates on X (10 fps beats: 0.1 s each)
+	# Starpiercer cast: one frame of flash, the bow swept up and across the chest, the chest thrown open
+	"pin_ult_cast": {"keys": [
+		[0.0, {}],
+		[0.1, {"p": -0.2, "lift": 0.1, "sq": -0.18, "y": -0.3, "hw": 1.0, "fl": Vector3(-0.1, 0.5, 0.15), "gp": 0.6}],
+		[0.25, {"p": 0.1, "sq": 0.12, "y": 0.2, "hw": 0.8, "fl": Vector3(0.1, 0.3, 0.1), "lw": 0.6}],
+		[0.45, {}]]},
+	# a Starpiercer nock (0.3 s, held): side-on, low, the string hand pulled straight to the cheek
+	"pin_ult_nock": {"hold": true, "keys": [
+		[0.0, {"y": 0.4, "hw": 0.8, "fl": Vector3(0.12, 0.15, 0.12)}],
+		[
+			0.1,
+			{
+				"p": 0.14,
+				"y": 0.7,
+				"lift": -0.06,
+				"sq": 0.12,
+				"lw": 1.0,
+				"legs": [0.5, -0.7, -0.35, -0.4],
+				"hw": 1.0,
+				"fl": Vector3(0.16, 0.24, 0.24)
+			}
+		],
+		[
+			0.3,
+			{
+				"p": 0.18,
+				"y": 0.74,
+				"lift": -0.08,
+				"sq": 0.16,
+				"lw": 1.0,
+				"legs": [0.55, -0.75, -0.35, -0.45],
+				"hw": 1.0,
+				"fl": Vector3(0.2, 0.25, 0.3)
+			}
+		]]},
+	# a beam loosed: the whole body kicked back one frame, the string hand flung behind, a skid, settle
+	"pin_ult_loose": {"keys": [
+		[0.0, {"p": 0.18, "y": 0.74, "lw": 1.0, "hw": 1.0, "fl": Vector3(0.2, 0.25, 0.3)}],
+		[
+			0.1,
+			{
+				"p": 0.42,
+				"y": 0.4,
+				"lift": 0.05,
+				"sq": -0.2,
+				"lw": 1.0,
+				"legs": [0.1, -0.3, -0.6, -0.5],
+				"hw": 1.0,
+				"fl": Vector3(0.35, 0.22, 0.5),
+				"gp": 0.2
+			}
+		],
+		[0.3, {"p": 0.12, "y": 0.25, "sq": 0.1, "lw": 0.8, "legs": [0.4, -0.6, -0.3, -0.4], "hw": 0.5}],
+		[0.5, {}]]},
+	# the last beam: a bigger kick, both feet off the ground for a frame, a hard landing crouch
+	"pin_ult_final": {"keys": [
+		[0.0, {"p": 0.18, "y": 0.74, "lw": 1.0, "hw": 1.0, "fl": Vector3(0.2, 0.25, 0.3)}],
+		[
+			0.1,
+			{
+				"p": 0.55,
+				"y": 0.45,
+				"lift": 0.18,
+				"sq": -0.28,
+				"lw": 1.0,
+				"legs": [-0.2, -0.4, -0.7, -0.6],
+				"hw": 1.0,
+				"fl": Vector3(0.45, 0.3, 0.6),
+				"gp": 0.35
+			}
+		],
+		[0.25, {"p": 0.05, "lift": -0.12, "sq": 0.3, "lw": 1.0, "legs": [0.9, -1.3, -0.4, -0.8], "hw": 0.6}],
+		[0.65, {}]]},
+	# Faultline wind-up (0.4 s, held): planted wide, the hammer hauled overhead in both hands, leaning back
+	"bul_ult_wind": {"hold": true, "keys": [
+		[0.0, {}],
+		[
+			0.2,
+			{
+				"p": -0.3,
+				"lift": 0.04,
+				"sq": -0.12,
+				"gp": 1.5,
+				"hw": 1.0,
+				"fl": Vector3(0.0, 0.6, -0.05),
+				"lw": 1.0,
+				"legs": [0.6, -0.8, -0.5, -0.6]
+			}
+		],
+		[
+			0.4,
+			{
+				"p": -0.4,
+				"lift": 0.06,
+				"sq": -0.16,
+				"gp": 1.7,
+				"hw": 1.0,
+				"fl": Vector3(0.0, 0.66, -0.1),
+				"lw": 1.0,
+				"legs": [0.7, -0.9, -0.55, -0.7]
+			}
+		]]},
+	# the Faultline slam: one frame from overhead down into the ground, a deep crouch over it, a slow rise
+	"bul_ult_slam": {"keys": [
+		[
+			0.0,
+			{
+				"p": -0.4,
+				"gp": 1.7,
+				"hw": 1.0,
+				"fl": Vector3(0.0, 0.66, -0.1),
+				"lw": 1.0,
+				"legs": [0.7, -0.9, -0.55, -0.7]
+			}
+		],
+		[
+			0.1,
+			{
+				"p": 0.75,
+				"lift": -0.22,
+				"sq": 0.45,
+				"gp": -1.2,
+				"hw": 1.0,
+				"fl": Vector3(0.0, -0.5, 0.45),
+				"lw": 1.0,
+				"legs": [1.2, -1.6, -0.5, -1.0]
+			}
+		],
+		[
+			0.5,
+			{
+				"p": 0.6,
+				"lift": -0.18,
+				"sq": 0.35,
+				"gp": -1.1,
+				"hw": 1.0,
+				"fl": Vector3(0.0, -0.45, 0.4),
+				"lw": 1.0,
+				"legs": [1.1, -1.5, -0.45, -0.9]
+			}
+		],
+		[0.9, {}]]},
 }

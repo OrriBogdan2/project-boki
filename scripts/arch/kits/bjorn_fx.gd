@@ -53,7 +53,8 @@ func _ready() -> void:
 	beacon = KitMeshes.inst(self, KitMeshes.pillar(0.18, 0.42, 7.0), KitShaders.mat("beam", GOLD))
 	glint = KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("star", Color("fff2c0")))
 	flare = KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("star", Color("ffd27a")))
-	crescent = KitMeshes.inst(self, KitMeshes.band(0.9, 2.9, -PI * 0.5, PI * 0.5, 36), KitShaders.mat("crescent", Color(1.0, 0.62, 0.18)))
+	var cres_mesh := KitMeshes.band(0.9, 2.9, -PI * 0.5, PI * 0.5, 36)
+	crescent = KitMeshes.inst(self, cres_mesh, KitShaders.mat("crescent", Color(1.0, 0.62, 0.18)))
 	swirl = KitMeshes.inst(self, KitMeshes.band(1.2, 2.3, 0.0, TAU, 48), KitShaders.mat("swirl", Color("ff4a2a")))
 	swirl.material_override.set_shader_parameter("color2", Color("ffd25a"))
 	aegis = KitMeshes.inst(self, KitMeshes.wall(1.6, -1.05, 1.05, 2.1, 28), KitShaders.mat("aegis", AEGIS))
@@ -154,7 +155,8 @@ func smash_ring(at: Vector3) -> void:
 func aegis_show(w: Dictionary, hurt: float, armed: bool) -> void:
 	var nd: Node3D = w.get("node")
 	if nd and is_instance_valid(nd): nd.visible = false
-	var a: Vector2 = w["a"]; var b: Vector2 = w["b"]
+	var a: Vector2 = w["a"]
+	var b: Vector2 = w["b"]
 	var mid := (a + b) * 0.5
 	var dir := Vector2(mid.x - h.pos.x, mid.y - h.pos.z).normalized()
 	aegis.visible = true

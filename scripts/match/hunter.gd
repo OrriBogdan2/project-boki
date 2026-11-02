@@ -93,7 +93,7 @@ var wid := "rifle"
 var wpn: Dictionary = {}
 var ctrl := "bot"             # local | bot | remote
 var inp := {"move": Vector2.ZERO, "aim": Vector3.ZERO, "fire": false, "dash": false, "jump": false,
-	"throw": false, "skill": false, "sig": false, "interact": false, "reload": false, "tonic": false, "kit": false, "glide": false, "ult": false,
+	"throw": false, "skill": false, "sig": false, "interact": false, "reload": false, "tonic": false, "kit": false, "glide": false, "ult": false, "hunter_ult": false,
 	"sec": false, "sec_hold": false, "crouch": false, "gear1": false, "gear2": false, "swap": false}
 var base_speed := 5.4
 var ammo := 12
@@ -2180,10 +2180,11 @@ func sim(dt: float) -> void:
 	if inp["ult"]:
 		if ak and KinCommand.class_ults(): ak.use_r()
 		else: use_ultimate()
+	if inp["hunter_ult"] and ak: UltSlot.press(ak)
 	trigger(dt)
 	inp["kin_ab"] = false
 	inp["dash"] = false; inp["jump"] = false; inp["sig"] = false; inp["reload"] = false; inp["tonic"] = false; inp["kit"] = false; inp["ult"] = false; inp["sec"] = false; inp["gear1"] = false; inp["gear2"] = false
-	inp["skill"] = false; inp["swap"] = false
+	inp["skill"] = false; inp["swap"] = false; inp["hunter_ult"] = false
 	_physics(dt)
 	var ad := aim_dir()
 	var want := atan2(-ad.x, -ad.y)
