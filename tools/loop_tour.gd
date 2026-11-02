@@ -492,9 +492,14 @@ func _level_up(m) -> void:
 	await mwait(0.8)
 	await shot("level_%d" % P.lvl)
 	# spend the points the way a player does: press a locked ability with a point to spare
+	var spot: Vector3 = P.pos
+	aim_at = spot + _safe_dir(m, P) * 4.0      # (a dash goes toward the cursor: point it at ground, and put the hunter back after each press)
 	for a in ["secondary", "signature", "dash", "kin_ability", "gear1", "ultimate"]:
 		await key(a)
 		await mwait(0.3)
+		if is_instance_valid(m) and (P.pos - spot).length() > 0.5:
+			P.teleport(spot)
+	aim_at = null
 	print("TOUR slots after spending: %s, points left %d" % [str(P.slot_lv), P.skill_pts])
 	await shot("skills_spent")
 
@@ -579,6 +584,9 @@ func _scan(m) -> void:
 			P.teleport(Vector3(to.x, m.world.ground_at(to.x, to.z), to.z))
 		Input.action_press("interact")
 		await mwait(0.6)
+		# (a daze wears off: a player who sees it wake knocks it out again)
+		if is_instance_valid(k) and not k.dead and k.state != "dazed" and Capture.state(P).is_empty():
+			k.hp = 1.0; k._daze()
 		if not caught and Time.get_ticks_msec() - w0 > 600 and Time.get_ticks_msec() - w0 < 2200:   # (the scan runs on its own after 0.4s)
 			await shot("scan_holding")
 		if not is_instance_valid(k) or k.dead or P.caught.size() > caught0:
