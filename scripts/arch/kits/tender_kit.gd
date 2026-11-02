@@ -4,7 +4,8 @@ extends ArchKit
 ## the moves are KMovesCare "mm_" entries.
 ## Passive Bearer: run into a downed teammate to carry them. LMB Lantern Crook embers Kindle foes.
 ## RMB Burrseed sticks, then roots. Shift Relay Step. E Hearthlight heals; press again to toss it.
-## No R: the revive part of the old ultimate lives in Hearthlight's rank 3 flare.
+## X Hearth Call (level 6): a 5 s healing tether to a teammate; a downed one is pulled home and stood up.
+## R is the Boki Merge.
 
 var kind := {}                 # target instance id -> {t: Ent, n: int, left: float}
 var burrs: Array = []          # seeds stuck to foes: {t: Ent, left, total: float, id: int}
@@ -22,7 +23,9 @@ var look: CareLook             # pooled visuals (made on first use)
 var shot_seen := 0             # the hunter's shot counter at the last ember we dressed
 var seed_aim := false          # RMB held: the dotted lane and the coiled pose are up (a hold: dropped on merge)
 var aft_t := 0.0               # next dash after-image
-var stats := {"embers": 0, "emp": 0, "swirls": 0, "flares": 0}   # tests
+var stats := {"embers": 0, "emp": 0, "swirls": 0, "flares": 0, "calls": 0, "rescues": 0, "broken": 0}   # tests
+var call := {}                 # Hearth Call running: {who: Hunter, left, tick, fx} (a channel: dropped on merge)
+var ult_look: UltLook          # the tether (pooled, made on first use)
 
 func _setup() -> void:
 	res = 0.0
@@ -107,6 +110,7 @@ func _tick(dt: float) -> void:
 	_tick_burrs(dt)
 	_tick_hearth(dt)
 	_tick_carry(dt)
+	_tick_call(dt)
 	_tick_look(dt)
 	if h.ctrl == "bot":
 		_bot_idle(dt)
@@ -142,10 +146,14 @@ func _tick_look(dt: float) -> void:
 			aft_t = 0.035
 			lk().burst("aft", h.position, {"col": Color("ffd27a"), "yaw": h.face, "r": float(h.cdat.get("scale", 1.0)), "dur": 0.25})
 	lk().tick(dt)
+	if ult_look != null:
+		ult_look.tick(dt)
 
 ## A Boki merge sets a carried teammate down (unbroken: no stun), ends the Burrseed aim (no throw),
 ## and keeps the key from picking anyone up meanwhile.
 func _drop_holds() -> void:
+	if not call.is_empty():
+		_call_end(false)
 	if seed_aim or rmb_down:
 		seed_aim = false
 		rmb_down = false
@@ -479,11 +487,7 @@ func _hearth_end(flare: bool, word: String) -> void:
 			if Vector2(o.pos.x - c.x, o.pos.z - c.z).length() > rr + o.r:
 				continue
 			if o.downed:
-				if rank("kin") >= 3:
-					if CareUtil.revive(m, o, h):
-						CareUtil.payoff(m, h, o.pos, "UP", col, "revive")
-				else:
-					CareUtil.heal(m, o, amt, float(ed.get("wisp_k", 5.0)))
+				CareUtil.heal(m, o, amt, float(ed.get("wisp_k", 5.0)))
 			else:
 				CareUtil.heal(m, o, amt * (float(ed.get("self_k", 0.33)) if o == h else 1.0))
 	else:
@@ -502,10 +506,194 @@ func in_e() -> bool: return not hearth.is_empty()
 func teardown() -> void:
 	super.teardown()
 	hearth = {}
+	call = {}
 	burrs.clear()
 	if look != null:
 		look.teardown()
 		look = null
+	if ult_look != null:
+		ult_look.teardown()
+		ult_look = null
+
+# ------------------------------------------------------------------ X: Hearth Call
+func ulk() -> UltLook:
+	if ult_look == null:
+		ult_look = UltLook.new(m, h)
+	return ult_look
+
+
+func ult_aims() -> bool:
+	return true
+
+
+func ult_running() -> bool:
+	return not call.is_empty()
+
+
+## X again while it runs does nothing (the source has no early end); the press is swallowed.
+func ult_recast() -> bool:
+	return true
+
+
+## Held X: the gold reach ring round her and a line onto the teammate under the cursor (or a dim line
+## to the cursor when nobody is there).
+func ult_aim_tick() -> void:
+	var xd := x_def()
+	var gold := Color("ffd27a")
+	AimKit.circle(h, "x", {"self": true, "r": float(xd["range"]), "col": gold, "dashed": true})
+	var who := call_target()
+	if who != null and who != h:
+		AimKit.line(h, "x_line", {"from": h.pos, "to": who.pos, "col": Color("fff0f6"), "hot": 0.6})
+		AimKit.circle(h, "x_pick", {"at": who.pos, "r": 0.8, "col": Color("9cf07a"), "ticks": true})
+	else:
+		AimKit.line(h, "x_line", {"col": Color("a2a8bb"), "alpha": 0.5})
+		AimKit.hide(h, "x_pick")
+	if anim_id != "mm_call_aim":
+		play("mm_call_aim")
+
+
+## The teammate under the cursor within reach (standing or downed); with no teammate in the match at
+## all, herself (so the key is never dead in solo play).
+func call_target() -> Hunter:
+	var xd := x_def()
+	var aim_p: Vector3 = h.inp.get("aim", h.pos)
+	var best: Hunter = null
+	var best_d := float(xd["pick_r"])
+	var any_mate := false
+	for o in CareUtil.mates(m, h):
+		any_mate = true
+		if h.flat_dist(o) > float(xd["range"]):
+			continue
+		var dc := Vector2(o.pos.x - aim_p.x, o.pos.z - aim_p.z).length()
+		if dc < best_d:
+			best_d = dc
+			best = o
+	if best == null and not any_mate and bool(xd.get("self_when_solo", true)):
+		return h
+	return best
+
+
+func cast_ult() -> bool:
+	AimKit.hide(h, "x_line")
+	AimKit.hide(h, "x_pick")
+	var who := call_target()
+	if who == null:
+		if h.is_local() and m.hud:
+			m.hud.toast_small("No teammate there", Color("a2a8bb"))
+		if anim_id == "mm_call_aim":
+			anim_id = ""
+		return false
+	call = {"who": who, "left": float(x_def()["time"]), "tick": 0.0, "fx": 0.0}
+	stats["calls"] += 1
+	play("mm_call")
+	m.sfx("tend_call", h.pos, -1.0, 1.0)
+	lk().burst("plus", who.pos + Vector3(0, 1.3, 0), {"r": 1.1, "dur": 0.45})
+	lk().burst("flare", who.pos, {"col": Color("9cf07a"), "rim": Color(1, 1, 1), "r": 1.4, "dur": 0.35, "pattern": 1.0})
+	m.fx.word(h.pos + Vector3(0, 2.8, 0), "HEARTH CALL", col_of(x_def()), true)
+	net_ring(h.pos, float(x_def()["range"]), Color("ffd27a"))
+	net_bolt(h.pos + Vector3(0, 1.6, 0), who.pos + Vector3(0, 1.1, 0), Color("ffe6f0"))
+	return true
+
+
+func _tick_call(dt: float) -> void:
+	if call.is_empty():
+		return
+	var xd := x_def()
+	var who: Hunter = call["who"] if is_instance_valid(call["who"]) else null
+	if who == null or who.out or who.extracted:
+		_call_end(false)
+		return
+	if h.downed or h.out or h.stun_t > 0.0 or h.flat_dist(who) > float(xd["range"]) + who.r:
+		_call_end(false)
+		return
+	call["left"] = float(call["left"]) - dt
+	call["tick"] = float(call["tick"]) + dt
+	var every := float(xd["every"])
+	if float(call["tick"]) >= every:
+		call["tick"] = float(call["tick"]) - every
+		_call_heal(who, float(xd["heal_ps"]) * every)
+	_call_look(who, dt)
+	if anim_id == "" or (anim_id != "mm_call_hold" and m.time - anim_at >= KMovesCare.length(anim_id)):
+		play("mm_call_hold")
+	if float(call["left"]) <= 0.0:
+		_call_end(true)
+
+
+## A tick of the tether's heal: on a standing teammate (or herself in solo); while they are down the
+## healing goes to her instead (the source's rule for a channel on a downed ally).
+func _call_heal(who: Hunter, amount: float) -> void:
+	var amt := amount * LevelGrowth.ap(h)
+	if who.downed or who == h:
+		CareUtil.heal(m, h, amt * (float(e_def().get("self_k", 0.33)) if who == h else 1.0))
+	else:
+		CareUtil.heal(m, who, amt)
+
+
+func _call_look(who: Hunter, dt: float) -> void:
+	var xd := x_def()
+	var gold := Color("ffd27a")
+	AimKit.circle(h, "x", {"self": true, "r": float(xd["range"]), "col": gold, "all": true, "dashed": true})
+	AimKit.circle(h, "x_me", {"self": true, "r": 0.7, "col": Color(1, 1, 1), "all": true})
+	if who != h:
+		AimKit.circle(h, "x_pick", {"at": who.pos, "r": 0.7, "col": Color(1, 1, 1), "all": true})
+		var hand := h.pos + Vector3(0, 1.75, 0)
+		ulk().keep("tether", "tether", hand, {"b": who.pos + Vector3(0, 1.1, 0)})
+	call["fx"] = float(call["fx"]) - dt
+	if float(call["fx"]) <= 0.0:
+		call["fx"] = 0.22
+		var up := who.pos + Vector3(randf_range(-0.4, 0.4), 0.6 + randf() * 0.8, randf_range(-0.4, 0.4))
+		lk().burst("plus", up, {"r": 0.28, "dur": 0.5})
+		m.fx.burst(who.pos + Vector3(0, 0.5, 0), Color("9cf07a"), 4, 1.4, 0.7, -3.0, 0.7, Vector3.UP, 25.0)
+		m.sfx("tend_call_hum", h.pos, -12.0, 1.0)
+
+
+## The end: on time, a downed teammate is pulled to her side and stood up (a rescue), and the bond pays;
+## broken early, nothing pays.
+func _call_end(done: bool) -> void:
+	var who: Hunter = call["who"] if is_instance_valid(call.get("who")) else null
+	call = {}
+	for id_ in ["x", "x_me", "x_pick", "x_line"]:
+		AimKit.hide(h, id_)
+	if ult_look != null:
+		ult_look.drop("tether")
+	if not done or who == null:
+		stats["broken"] += 1
+		m.fx.word(h.pos + Vector3(0, 2.4, 0), "BROKEN", Color("ff8a6a"), false)
+		m.sfx("knock", h.pos, -8.0, 1.5)
+		if anim_id == "mm_call_hold":
+			anim_id = ""
+		return
+	var rescue := who != h and who.downed
+	if rescue:
+		_call_home(who)
+	var bd := HeroUlt.bond_of("tender")
+	HeroUlt.bond(h, float(bd.get("rescue" if rescue else "complete", 0.6)), "rescue" if rescue else "complete")
+	if who != h:
+		HeroUlt.bond(who, float(bd.get("ally", 0.2)), "ally")
+	var at := who.pos if not rescue else h.pos
+	CareUtil.payoff(m, h, at, "HOME" if rescue else "MENDED", Color("9cf07a"), "tend_arrive")
+	lk().burst("flare", at, {"col": Color("9cf07a"), "rim": Color(1, 1, 1), "r": 1.8, "dur": 0.4, "pattern": 1.0})
+	lk().burst("rays", at, {"col": Color("b8ff9a"), "r": 0.9, "dur": 0.45})
+	play("mm_call_end")
+
+
+## Pulls a downed teammate to her side and stands them up. An online teammate rides there on the
+## existing "carry" event, then the "rev" event stands them up a beat later.
+func _call_home(who: Hunter) -> void:
+	stats["rescues"] += 1
+	var side := Vector2(cos(h.face), -sin(h.face)) * float(x_def().get("land_r", 0.9))
+	var to := Vector3(h.pos.x + side.x, h.pos.y, h.pos.z + side.y)
+	lk().burst("plus", who.pos + Vector3(0, 1.2, 0), {"r": 0.8, "dur": 0.3})
+	if who.remote:
+		CareUtil.set_carry(m, who, h.nid)
+		m.later(0.15, func():
+			CareUtil.revive(m, who, h)
+			CareUtil.set_carry(m, who, ""))
+		return
+	who.teleport(to)
+	who.vel = Vector3.ZERO
+	CareUtil.revive(m, who, h)
+
 
 # ------------------------------------------------------------------ bots
 func _bot_idle(dt: float) -> void:
@@ -542,6 +730,7 @@ func _bot_idle(dt: float) -> void:
 			lock_t = 6.0          # now revive them on the spot
 
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
+	_bot_call()
 	if tgt == null or not carrying().is_empty():
 		return
 	# a seed on the nearest rival from mid range
@@ -552,3 +741,16 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if dist < 3.5 and h.dashes >= 1.0 and randf() < 0.2:
 		h.inp["aim"] = h.pos - Vector3(h.dir_to(tgt).x, 0, h.dir_to(tgt).y) * 4.0
 		h.inp["dash"] = true
+
+
+## A bot calls a downed or badly hurt teammate home when it can.
+func _bot_call() -> void:
+	if not call.is_empty() or not HeroUlt.can_cast(h):
+		return
+	for o in CareUtil.mates(m, h, h.pos, float(x_def()["range"]) - 1.0):
+		if o.downed or o.hp < o.max_hp * 0.35:
+			h.inp["aim"] = o.pos + Vector3(0, 0.9, 0)
+			HeroUlt.press(h)
+			if x_aim:
+				HeroUlt.fire(h)
+			return

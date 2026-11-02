@@ -16,11 +16,16 @@ func ok(name: String, cond: bool, info := "") -> void:
 	if not cond: fails += 1
 
 ## A flat strip, the player as `arch` on team T, an ally (bot, idle) 3m behind, a rival dummy `dist` ahead.
-func setup(arch: String, dist := 6.0) -> Array:
+## kin_species gives the player that Boki (the merge checks); otherwise the player has none.
+func setup(arch: String, dist := 6.0, kin_species := "") -> Array:
 	var cls := Arch.weight(arch)
 	var m := Match.new()
 	main.add_child(m)
-	m.start({"training": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true, "cls": cls, "arch": arch, "weapon": Arch.signature(arch)})
+	var opts := {"training": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true,
+		"cls": cls, "arch": arch, "weapon": Arch.signature(arch)}
+	if kin_species != "":
+		opts["demo_kin"] = kin_species
+	m.start(opts)
 	m.set_process(false)
 	var P: Hunter = m.player
 	for mb in m.mobs: mb.queue_free()
@@ -41,7 +46,7 @@ func setup(arch: String, dist := 6.0) -> Array:
 	P.unlock_all()
 	P.lvl = 6
 	P.dashes = P.max_dashes()
-	if P.kin:
+	if P.kin and kin_species == "":
 		var o: Kin = P.kin
 		o.dead = true; m.kins.erase(o); o.queue_free(); P.kin = null
 	var A: Hunter = m.make_hunter("A", P.team, "medium", "Ally", "idle", {}, home + Vector3(-2.5, 0, 1.5), {"arch": "none"})
@@ -76,12 +81,17 @@ func run(mn: Node, md := "all") -> void:
 	Save.no_write = true
 	var combos = load("res://tools/care_combo_check.gd").new()
 	combos.sc = self
+	var ults = load("res://tools/care_ult_check.gd").new()
+	ults.sc = self
 	if mode in ["all", "tender"]:
 		await _tender_support()
 		await combos.tender()
+		await ults.tender()
 	if mode in ["all", "rimewright"]:
 		await _rime_support()
 		await combos.rimewright()
+		await ults.rimewright()
+		await ults.burst_cap()
 	print("SUPPORT DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
@@ -151,12 +161,21 @@ func _tender_support() -> void:
 	ok("Relay Step rank 3: picking up a teammate refreshes the air dash", carried_again and P.ex_cd < 0.01, "ex_cd %.2f" % P.ex_cd)
 	P.stun_t = 0.5; step(m, 0.1)
 	ok("Bearer: a stun drops them and locks pickup", carried_again and not CareUtil.is_carried(A) and K.lock_t > 3.0, "again %s lock %.1f" % [str(carried_again), K.lock_t])
-	# --- revive from the flare at rank 3
-	P.stun_t = 0.0; P.slot_lv["kin"] = 3; K.lock_t = 99.0; K.cd["e"] = 0.0
-	A.teleport(P.pos + Vector3(1.0, 0, 0)); step(m, 0.05)
+	# --- rank 3 flare: the revive went back to Hearth Call (X); the flare tops the bleed-out bar up instead
+	P.stun_t = 0.0
+	P.slot_lv["kin"] = 3
+	K.lock_t = 99.0
+	K.cd["e"] = 0.0
+	A.teleport(P.pos + Vector3(1.0, 0, 0))
+	step(m, 0.05)
 	ok("rank 3: ally is downed before the flare", A.downed)
-	P.inp["sig"] = true; step(m, 0.05); P.inp["sig"] = false; step(m, 3.2)
-	ok("Hearthlight rank 3: the flare stands a downed teammate up", not A.downed and A.hp > 5.0, "hp %.0f" % A.hp)
+	A.down_hp = 10.0
+	P.inp["sig"] = true
+	step(m, 0.05)
+	P.inp["sig"] = false
+	step(m, 3.2)
+	ok("Hearthlight rank 3: the flare no longer revives (Hearth Call does), it heals the downed", A.downed and A.down_hp > 40.0,
+		"down_hp %.0f" % A.down_hp)
 	m.queue_free()
 	# --- the dash through a teammate
 	r = setup("tender"); m = r[0]; P = r[1]; A = r[2]; T = r[3]; K = P.ak

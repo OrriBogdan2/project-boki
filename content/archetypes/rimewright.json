@@ -16,7 +16,8 @@
 		"passive": "Hoarfrost: hits Chill; 8 darts on one foe, or knocking a Chilled foe, Shatters them.",
 		"weapons": {
 			"hoar_fan": "Hold for a stream of slow darts that curve onto the foe at your cursor."
-		}
+		},
+		"x": "Rimelock (X, level 6): sealed in ice, invulnerable and rooted, inside a 7.2m slowing rink; it cracks open at 3.5s (or X late) to stun everyone in it. X early ends it with no stun."
 	},
 	"signature": "hoar_fan",
 	"resource": {
@@ -141,5 +142,24 @@
 		"half": "a frost glow on foes that grows with each dart",
 		"full": "at 8 darts the foe Shatters in ice spikes; a landed spear shows its slow zone and fill to everyone",
 		"dash_spent": "skate blades dark, dash pip dark"
+	},
+	"x": {
+		"name": "Rimelock",
+		"short": "Rime",
+		"icon": "quake",
+		"col": "#7fd8ff",
+		"unlock": 6,
+		"cooldown": 47.0,
+		"radius": 7.2,
+		"snap_t": 0.2,
+		"hold": 3.5,
+		"late": 0.75,
+		"late_k": 0.67,
+		"dmg": 40.0,
+		"stun": 0.75,
+		"slow_base": 0.15,
+		"slow_per_s": 0.12,
+		"slow_max": 0.55,
+		"desc": "Press X: you are sealed in a frost shell, invulnerable and rooted, and a 7.2m (4 body heights) rink snaps out round you. Foes in it are Chilled and slowed more the longer they stay (15% up to 55%). Its cracks glow brighter as it builds; at 3.5s it cracks open: 40 damage and a 0.75s ice-block stun to every foe in the rink you can see. Press X again in the last 0.75s to set it off early at two thirds; any earlier and the shell just breaks with no stun."
 	}
 }

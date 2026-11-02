@@ -1,0 +1,17 @@
+{
+	"desc": "How much of the Boki bond meter (0..1) a hunter's own ultimate (X) pays when it lands. Nothing is paid on the cast alone. HeroUlt.bond pays it through KinBond.add once the main session ships that hook, else Bond.add.",
+	"bond": {
+		"tender": {
+			"complete": 0.6,
+			"rescue": 0.8,
+			"ally": 0.2,
+			"note": "a support ult cannot land on a foe: a completed tether pays complete, one that stood a downed teammate up pays rescue; the tethered teammate's own meter gets ally"
+		},
+		"rimewright": {
+			"per_hunter": 0.4,
+			"per_monster": 0.2,
+			"cap": 0.8,
+			"note": "per foe the crash stuns, up to cap; an early cancel stuns nobody and pays nothing"
+		}
+	}
+}

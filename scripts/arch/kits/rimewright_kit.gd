@@ -7,7 +7,8 @@ extends ArchKit
 ## nearest the cursor; while skating they fly straight and thick and hit 1.6x. RMB Ice Spear: hold to
 ## see the landing ring, let go: it lands at the cursor, leaves a slow zone and detonates 1.8s later.
 ## Shift Skate (hold). E Rink Wall: a 0.2s tell, then a narrow block of ice that slides toward the
-## cursor, widening, shoving foes; E again freezes it. No R (the Boki Merge). Looks: CareLook;
+## cursor, widening, shoving foes; E again freezes it. X Rimelock (level 6): sealed in ice, invulnerable,
+## inside a slowing rink that cracks open into a stun. R is the Boki Merge. Looks: CareLook, UltLook;
 ## moves: KMovesCare "tm_".
 
 var chill := {}                # target instance id -> {t: Ent, left: float}
@@ -25,7 +26,10 @@ var splinter_log := 0          # Shatters fired (tests)
 var look: CareLook
 var chip_t := 0.0
 var aft_t := 0.0
-var stats := {"darts": 0, "beams": 0, "spears": 0, "detonations": 0}   # tests
+var stats := {"darts": 0, "beams": 0, "spears": 0, "detonations": 0, "rimes": 0, "crashes": 0, "cancels": 0}   # tests
+var rime := {}                 # Rimelock running: {t, at, slow: {instance id: seconds in the rink}, creak}
+var last_stunned := 0          # foes the last Rimelock crash stunned (tests)
+var ult_look: UltLook
 
 func _setup() -> void:
 	res = 0.0
@@ -133,14 +137,17 @@ func _tick(dt: float) -> void:
 	_tick_wall_cast(dt)
 	_tick_wall(dt)
 	_tick_zones(dt)
+	_tick_rime(dt)
 	_tick_trails(dt)
 	if h.is_local() and not busy():
 		AimKit.line(h, "aim", {"alpha": 0.7, "col": Color("e8ffff")})     # the thin aim line to the cursor, always up
 	lk().tick(dt)
+	if ult_look != null:
+		ult_look.tick(dt)
 
 # ------------------------------------------------------------------ LMB: Ice Dart
 func lmb_override(held: bool, _dt: float) -> bool:
-	if not h.can_fire():
+	if not h.can_fire() or not rime.is_empty():
 		return true
 	if not held or h.fire_cd > 0.0 or m.time < seq_next:
 		return true
@@ -229,7 +236,7 @@ func fires_in_dash() -> bool:
 	return not rinkrun.is_empty()
 
 func on_dash(use_ex: bool) -> bool:
-	if not rinkrun.is_empty():
+	if not rinkrun.is_empty() or not rime.is_empty():
 		return true
 	var dd := dash_def()
 	if use_ex:
@@ -283,6 +290,8 @@ func _tick_rinkrun(dt: float) -> void:
 ## A Boki merge ends the Skate (its refund is the same as letting go), drops the spear aim and a wall
 ## still in its tell (no wall comes up).
 func _drop_holds() -> void:
+	if not rime.is_empty():
+		_rime_clear()
 	if not rinkrun.is_empty():
 		_rinkrun_end()
 	if spear_aim or rmb_down:
@@ -400,6 +409,8 @@ func _detonate(at: Vector3) -> void:
 # ------------------------------------------------------------------ E: Rink Wall
 ## E: a 0.2 s tell (a sparkle at her feet, and everyone sees the path), then the wall erupts.
 func cast_e() -> bool:
+	if not rime.is_empty():
+		return false
 	var ed := e_def()
 	var dir := h.aim_dir()
 	# it slides until its middle reaches the cursor (clamped to its travel)
@@ -521,14 +532,181 @@ func _e_end() -> void:
 func teardown() -> void:
 	super.teardown()
 	rinkrun = {}
+	rime = {}
 	zones.clear()
 	if look != null:
 		look.teardown()
 		look = null
+	if ult_look != null:
+		ult_look.teardown()
+		ult_look = null
+
+# ------------------------------------------------------------------ X: Rimelock
+func ulk() -> UltLook:
+	if ult_look == null:
+		ult_look = UltLook.new(m, h)
+	return ult_look
+
+
+func ult_running() -> bool:
+	return not rime.is_empty()
+
+
+## Sealed in: invulnerable and rooted, and the rink snaps out round her. Nothing else fires inside.
+func cast_ult() -> bool:
+	if not rinkrun.is_empty():
+		_rinkrun_end()
+	if spear_aim or rmb_down:
+		spear_aim = false
+		rmb_down = false
+		AimKit.hide(h, "rmb")
+	rime = {"t": 0.0, "at": h.pos, "slow": {}, "creak": 0.6}
+	stats["rimes"] += 1
+	_rime_hold_body()
+	play("tm_rime")
+	m.sfx("rime_lock", h.pos, 0.0, 1.0)
+	m.fx.word(h.pos + Vector3(0, 3.0, 0), "RIMELOCK", col_of(x_def()), true)
+	m.fx.burst(h.pos + Vector3(0, 1.0, 0), Color("dffcff"), 24, 4.0, 0.4, 2.0, 1.1)
+	net_ring(h.pos, float(x_def()["radius"]), col_of(x_def()))
+	Feel.shake(m, "cast", h, h.pos)
+	return true
+
+
+func _rime_hold_body() -> void:
+	h.inv_t = maxf(h.inv_t, 0.12)
+	h.root_t = maxf(h.root_t, 0.12)
+	h.vel.x = 0.0
+	h.vel.z = 0.0
+
+
+## X again: in the last `late` seconds it cracks open early at late_k; any earlier the shell just breaks
+## (no damage, no stun, no bond).
+func ult_recast() -> bool:
+	var xd := x_def()
+	if float(rime["t"]) >= float(xd["hold"]) - float(xd["late"]):
+		_rime_crash(float(xd["late_k"]))
+	else:
+		_rime_cancel()
+	return true
+
+
+func _tick_rime(dt: float) -> void:
+	if rime.is_empty():
+		return
+	var xd := x_def()
+	if h.out or h.downed:
+		_rime_clear()
+		return
+	rime["t"] = float(rime["t"]) + dt
+	var t := float(rime["t"])
+	var hold := float(xd["hold"])
+	_rime_hold_body()
+	var at: Vector3 = rime["at"]
+	var radius := float(xd["radius"])
+	_rime_slow(at, radius, dt)
+	_rime_look(at, radius, t / hold, dt)
+	if anim_id == "" or (anim_id != "tm_rime_hold" and m.time - anim_at >= KMovesCare.length(anim_id)):
+		play("tm_rime_hold")
+	if t >= hold:
+		_rime_crash(1.0)
+
+
+## Foes in the rink are Chilled and slowed more the longer they stay (a stacking slow up to slow_max).
+func _rime_slow(at: Vector3, radius: float, dt: float) -> void:
+	var xd := x_def()
+	var slow: Dictionary = rime["slow"]
+	for f in foes_in(at, radius):
+		var key: int = f.get_instance_id()
+		slow[key] = float(slow.get(key, 0.0)) + dt
+		var k := minf(float(xd["slow_max"]), float(xd["slow_base"]) + float(xd["slow_per_s"]) * float(slow[key]))
+		f.slow_k = maxf(f.slow_k if f.slow_t > 0.0 else 0.0, k)
+		f.slow_t = maxf(f.slow_t, 0.2)
+		add_chill(f)
+
+
+func rime_slow_of(f: Ent) -> float:
+	if rime.is_empty():
+		return 0.0
+	return float((rime["slow"] as Dictionary).get(f.get_instance_id(), 0.0))
+
+
+## The rink (snaps out in snap_t, its cracks brighter as it builds), the countdown fill everyone sees,
+## her frost bud and the creaks.
+func _rime_look(at: Vector3, radius: float, k: float, dt: float) -> void:
+	var xd := x_def()
+	var snap := clampf(float(rime["t"]) / float(xd["snap_t"]), 0.0, 1.0)
+	ulk().keep("rink", "rink", at, {"r": radius * lerpf(0.25, 1.0, snap), "crack": k})
+	ulk().keep("bud", "frostbud", h.pos, {"k": clampf(float(rime["t"]) / 0.15, 0.0, 1.0)})
+	AimKit.circle(h, "x", {"at": at, "r": radius, "fill": k, "all": true, "col": col_of(xd), "hot": k})
+	rime["creak"] = float(rime["creak"]) - dt
+	if float(rime["creak"]) <= 0.0:
+		rime["creak"] = lerpf(0.8, 0.35, k)
+		m.sfx("rime_creak", at, -8.0, 0.9 + 0.3 * k)
+		var a := randf() * TAU
+		m.fx.burst(at + Vector3(cos(a) * radius * 0.6, 0.1, sin(a) * radius * 0.6), Color("e8ffff"), 5, 2.0, 0.3, 4.0, 0.7)
+
+
+## The crash: a light pillar comes down on her, the shell bursts into shards, and every foe in the rink
+## she can see takes the damage and an ice-block stun (k < 1: an early crack).
+func _rime_crash(k: float) -> void:
+	var xd := x_def()
+	var at: Vector3 = rime["at"]
+	var radius := float(xd["radius"])
+	var stun := float(xd["stun"]) * k
+	var hunters := 0
+	var monsters := 0
+	for f in foes_in(at, radius):
+		if not m.world.los(at, f.pos, at.y + 0.95):
+			continue
+		f.hurt(float(xd["dmg"]) * power("ult") * k, h, {"src": "abil", "ab": "ult", "stun": stun, "dr": true,
+			"payoff": true, "tags": ["ult", "rimelock"]})
+		add_chill(f)
+		ulk().burst("block", f.pos, {"ent": f, "dur": maxf(0.3, stun)})
+		if f is Hunter:
+			hunters += 1
+		else:
+			monsters += 1
+	last_stunned = hunters + monsters
+	stats["crashes"] += 1
+	var bd := HeroUlt.bond_of("rimewright")
+	var pay := float(bd.get("per_hunter", 0.4)) * hunters + float(bd.get("per_monster", 0.2)) * monsters
+	HeroUlt.bond(h, minf(float(bd.get("cap", 0.8)), pay), "stun")
+	ulk().burst("pillar", h.pos, {"r": 1.4, "dur": 0.5})
+	ulk().burst("spikes", h.pos, {"r": 3.6, "dur": 0.55})
+	ulk().burst("flare", at, {"col": Color("9fe0ff"), "rim": Color(1, 1, 1), "r": radius, "dur": 0.35, "pattern": 4.0})
+	m.fx.spark(h.pos + Vector3(0, 1.0, 0), Vector3.UP, Color("dffcff"), 26, 9.0, 180.0, 0.4, 8.0, 1.2)
+	m.sfx("rime_crash", at, 1.0, 1.0)
+	CareUtil.payoff(m, h, h.pos, "CRASH", col_of(xd), "")
+	play("tm_rime_crash")
+	_rime_clear()
+
+
+func _rime_cancel() -> void:
+	stats["cancels"] += 1
+	ulk().burst("spikes", h.pos, {"r": 1.6, "dur": 0.35})
+	m.sfx("rime_crack", h.pos, -3.0, 1.0)
+	play("tm_rime_break")
+	_rime_clear()
+
+
+func _rime_clear() -> void:
+	rime = {}
+	h.inv_t = minf(h.inv_t, 0.05)
+	h.root_t = 0.0
+	AimKit.hide(h, "x")
+	if ult_look != null:
+		ult_look.drop("rink")
+		ult_look.drop("bud")
+		if anim_id == "tm_rime_hold":
+			anim_id = ""
+
 
 # ------------------------------------------------------------------ bots
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null:
+		return
+	if rime.is_empty() and HeroUlt.can_cast(h) and los and dist < float(x_def()["radius"]) * 0.6 and tgt is Hunter:
+		HeroUlt.press(h)          # sealed in with a rival close: it cracks open on them
 		return
 	if int(h.slot_lv["sec"]) > 0 and rmb_ready() and los and dist < 12.0 and dist > 3.0 and tgt is Hunter:
 		h.inp["aim"] = tgt.pos + Vector3(tgt.vel.x, 0, tgt.vel.z) * 0.6 + Vector3(0, 0.9, 0)

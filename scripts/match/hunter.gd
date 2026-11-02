@@ -2179,6 +2179,9 @@ func sim(dt: float) -> void:
 	if inp["ult"]:
 		if ak and KinCommand.class_ults(): ak.use_r()
 		else: use_ultimate()
+	if inp.get("hult", false):
+		HeroUlt.press(self)      # X: the hunter's own ultimate
+		inp["hult"] = false
 	trigger(dt)
 	inp["kin_ab"] = false
 	inp["dash"] = false; inp["jump"] = false; inp["sig"] = false; inp["reload"] = false; inp["tonic"] = false; inp["kit"] = false; inp["ult"] = false; inp["sec"] = false; inp["gear1"] = false; inp["gear2"] = false

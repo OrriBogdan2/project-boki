@@ -114,4 +114,27 @@ save('rime_freeze', mix(bell(1900, 0.5, 0.14), scale(hiss(0.3, 3000, 8000, 0.002
 save('rime_flip', mix(scale(trem(hiss(0.3, 900, 5000, 0.03, 0.12), 14, 0.6), 0.8), scale(bell(3000, 0.2, 0.06), 0.3)), -22)
 # the frost shield on a teammate: a soft crystalline chime
 save('rime_ward', mix(bell(1568, 0.5, 0.16), scale(at(bell(2093, 0.45, 0.14), 0.05), 0.6), scale(sparkle(3, 0.3, 3000, 5000, 0.05), 0.4)), -21)
+# ---- the ultimates on X (appended last, so the random stream above is unchanged)
+def choir(d, notes, vib=5.0):
+    n = N(d); out = [0.0] * n
+    for f in notes:
+        ph = 0.0
+        for i in range(n):
+            ph += 2 * math.pi * f * (1 + 0.004 * math.sin(2 * math.pi * vib * i / SR)) / SR
+            out[i] += math.sin(ph) + 0.3 * math.sin(2 * ph) + 0.12 * math.sin(3 * ph)
+    return mul(out, env(n, d * 0.35, d * 0.9))
+# Hearth Call cast: a soft rising choir swell under a lantern chime
+save('tend_call', mix(scale(choir(1.1, [392, 494, 587]), 0.5), bell(784, 0.6, 0.22), scale(at(bell(1175, 0.5, 0.18), 0.07), 0.5), scale(rise(0.5, 900, 3500), 0.25)), -18)
+# ... the channel: a low warm hum, replayed under the sparkles
+save('tend_call_hum', mix(scale(trem(choir(0.6, [294, 440]), 4, 0.3), 0.7), scale(sparkle(3, 0.4, 2600, 4200, 0.12), 0.3)), -24)
+# ... the teammate arrives: a bright two-bell chime and a whoosh in
+save('tend_arrive', mix(scale(rise(0.25, 600, 4000), 0.6), at(bell(1046, 0.7, 0.25), 0.18), scale(at(bell(1568, 0.6, 0.2), 0.24), 0.7), scale(at(choir(0.6, [523, 659, 784]), 0.18), 0.35)), -16)
+# Rimelock sealed: a crackling freeze closing in, a glassy ring
+save('rime_lock', mix(*[at(scale(hiss(0.04, 2500, 8000, 0.001, 0.01), rnd.uniform(0.3, 0.9)), i * 0.025 + rnd.uniform(0, 0.02)) for i in range(14)] + [scale(chirp(900, 2200, 0.35, 0.02, 0.2), 0.4), scale(bell(2400, 0.6, 0.2), 0.4)]), -18)
+# ... the hold: ice creaking under strain
+save('rime_creak', mix(scale(trem(mul(bp(noise(0.35), 300, 1400), env(N(0.35), 0.05, 0.2)), 38, 0.8), 0.9), scale(chirp(180, 140, 0.3, 0.05, 0.15), 0.4)), -22)
+# ... the crash: a deep boom and a glassy shatter spraying out
+save('rime_crash', mix(scale(chirp(90, 38, 0.8, 0.003, 0.3), 1.0), mul(hp(noise(0.9), 2200), env(N(0.9), 0.001, 0.22)), scale(bell(1700, 0.9, 0.25), 0.5), scale(at(bell(2500, 0.7, 0.2), 0.04), 0.4), scale(at(sparkle(14, 0.8, 2500, 7000, 0.035), 0.03), 0.6)), -12)
+# ... an early break: one short crack of the shell
+save('rime_crack', mix(mul(hp(noise(0.2), 2000), env(N(0.2), 0.001, 0.05)), scale(chirp(400, 200, 0.12, 0.002, 0.05), 0.5)), -19)
 print('support sounds written')

@@ -9,4 +9,5 @@ const NAMES := [
 	"tend_land", "tend_flare", "tend_hop", "tend_relay", "tend_pickup", "tend_kindled",
 	"rime_shard", "rime_beam", "rime_spear_aim", "rime_lance", "rime_zone", "rime_burst", "rime_splinter", "rime_run",
 	"rime_stop", "rime_wall_tell", "rime_wall", "rime_freeze", "rime_flip", "rime_ward",
+	"tend_call", "tend_call_hum", "tend_arrive", "rime_lock", "rime_creak", "rime_crash", "rime_crack",
 ]

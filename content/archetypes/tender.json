@@ -16,7 +16,8 @@
 		"passive": "Bearer: run into a downed teammate to carry up to 2 behind a shield.",
 		"weapons": {
 			"lantern_crook": "Hold to flick embers that fly past the cursor; each hit on a foe adds Kindle."
-		}
+		},
+		"x": "Hearth Call (X, level 6): tether a teammate for 5s of healing while you walk; a downed one is pulled to you and stood up at the end."
 	},
 	"signature": "lantern_crook",
 	"resource": {
@@ -130,7 +131,7 @@
 	"rank3": {
 		"sec": "the roots last 0.3s longer",
 		"dash": "picking up a teammate refreshes your long air dash",
-		"kin": "the closing flare also stands a downed teammate in the ring back up"
+		"kin": "the thrown light's 50% boost lasts 2s instead of 1s"
 	},
 	"rank2": {
 		"sec": "Rank 2: cooldown 8s -> 7.2s, damage +15%.",
@@ -139,7 +140,7 @@
 	},
 	"rank_next": {
 		"sec": "Rank 3: cooldown 8s -> 6.4s, damage +30%; the roots last 0.3s longer.",
-		"kin": "Rank 3: cooldown 11s -> 8.8s, healing +30%; the closing flare also stands a downed teammate in the ring back up.",
+		"kin": "Rank 3: cooldown 11s -> 8.8s, healing +30%; the thrown light's 50% boost lasts 2s instead of 1s.",
 		"dash": "Rank 3: recharge 7.5s -> 5.3s; picking up a teammate refreshes your long air dash."
 	},
 	"tells": {
@@ -147,5 +148,21 @@
 		"full": "a foe at 5 Kindle burns bright; a stuck Burrseed shows its violet disc under them, filling, for everyone",
 		"dash_spent": "dash pip dark"
 	},
-	"lmb_note": "Lantern Crook"
+	"lmb_note": "Lantern Crook",
+	"x": {
+		"name": "Hearth Call",
+		"short": "Call",
+		"icon": "tether",
+		"col": "#9cf07a",
+		"unlock": 6,
+		"cooldown": 46.0,
+		"time": 5.0,
+		"range": 12.6,
+		"pick_r": 2.5,
+		"heal_ps": 7.0,
+		"every": 0.5,
+		"land_r": 0.9,
+		"self_when_solo": true,
+		"desc": "Hold X over a teammate within 12.6m (7 body heights) and let go: a lantern tether heals them 7 a second for 5s while you keep walking (and casting). A gold ring round you shows the tether's reach. At the end a downed teammate is pulled to your side and stood back up; while they are down the tether's healing goes to you instead. It breaks if you are knocked or stunned, or the teammate leaves the ring. With no teammate in the match it lights on you."
+	}
 }

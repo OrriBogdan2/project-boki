@@ -176,6 +176,64 @@ const MOVES := {
 		[0.06, {"wa": Vector3(0.3, 0, 1.4), "fl": Vector3(0.1, 0.2, -0.35), "hw": 1.0, "y": -0.15, "sq": -0.1}],
 		[0.12, {"wa": Vector3(-0.2, 0, -0.5), "fl": Vector3(0.0, 0.0, 0.1), "hw": 1.0, "y": 0.15, "p": 0.12, "sq": 0.15}],
 		[0.4, {}]]},
+	# ================================================================ ultimates on X (10 fps beats)
+	# Hearth Call held to aim: the lantern hand reaching toward the teammate under the cursor
+	"mm_call_aim": {"hold": true, "keys": [
+		[0.0, {}],
+		[0.1, {"y": 0.2, "p": -0.08, "fl": Vector3(0.1, 0.32, -0.5), "hw": 1.0, "wa": Vector3(0.25, 0, 0)}]]},
+	# cast (f25): the hand pulled back low, then thrust high and out as the plus bursts on the ally,
+	# an overshoot, then into the channel pose
+	"mm_call": {"keys": [
+		[0.0, {"y": 0.2, "p": -0.08, "fl": Vector3(0.1, 0.32, -0.5), "hw": 1.0}],
+		[0.05, {"y": -0.2, "p": 0.15, "sq": 0.18, "fl": Vector3(0.05, -0.15, 0.25), "hw": 1.0}],
+		[0.1, {"y": 0.3, "p": -0.25, "sq": -0.22, "lift": 0.06, "fl": Vector3(0.1, 0.78, -0.3), "hw": 1.0}],
+		[0.2, {"y": 0.22, "p": -0.18, "sq": -0.08, "fl": Vector3(0.08, 0.7, -0.22), "hw": 1.0}],
+		[0.35, {"p": -0.06, "fl": Vector3(0.06, 0.62, -0.12), "hw": 1.0, "wa": Vector3(0.3, 0, 0.2)}]]},
+	# the channel (f26-f73): one hand held high over the tether, the crook tipped back; the legs keep
+	# walking (no leg channel)
+	"mm_call_hold": {"hold": true, "keys": [
+		[0.0, {"p": -0.06, "fl": Vector3(0.06, 0.62, -0.12), "hw": 1.0, "wa": Vector3(0.3, 0, 0.2)}],
+		[0.3, {"p": -0.08, "r": 0.04, "fl": Vector3(0.04, 0.66, -0.1), "hw": 1.0, "wa": Vector3(0.34, 0, 0.18)}]]},
+	# the end (f74-f77): the raised hand swept down to her side, pulling the teammate home, both arms
+	# open on the arrival burst, then settled (recovery is instant in the footage)
+	"mm_call_end": {"keys": [
+		[0.0, {"p": -0.08, "fl": Vector3(0.04, 0.66, -0.1), "hw": 1.0}],
+		[0.07, {"y": -0.3, "p": 0.12, "sq": 0.15, "fl": Vector3(0.45, 0.0, 0.1), "hw": 1.0}],
+		[0.14, {"y": 0.1, "p": -0.15, "sq": -0.12, "lift": 0.04, "fl": Vector3(0.5, 0.35, -0.05), "hw": 1.0}],
+		[0.3, {}]]},
+	# Rimelock cast (f25-f27): a crouch with the arms crossed, then thrown up and out as the rink snaps,
+	# then down into the sealed crouch
+	"tm_rime": {"keys": [
+		[0.0, {}],
+		[0.06, {"p": 0.3, "sq": 0.3, "lift": -0.1, "fl": Vector3(0.25, 0.05, -0.2), "hw": 1.0, "lw": 1.0,
+			"legs": [0.8, -1.2, 0.7, -1.1]}],
+		[0.12, {"p": -0.3, "sq": -0.3, "lift": 0.1, "fl": Vector3(-0.3, 0.7, 0.05), "hw": 1.0, "wa": Vector3(-0.6, 0, 0.8),
+			"lw": 1.0, "legs": [-0.1, -0.2, 0.1, -0.2]}],
+		[0.2, {"p": 0.35, "sq": 0.2, "lift": -0.08, "fl": Vector3(0.28, 0.1, -0.22), "hw": 1.0, "wa": Vector3(0.5, 0, -0.4),
+			"lw": 1.0, "legs": [0.7, -1.1, 0.6, -1.0]}]]},
+	# sealed in (f27-f55): hunched over, arms crossed on the chest, the fan folded in, knees bent
+	"tm_rime_hold": {"hold": true, "keys": [
+		[0.0, {"p": 0.35, "sq": 0.2, "lift": -0.08, "fl": Vector3(0.28, 0.1, -0.22), "hw": 1.0, "wa": Vector3(0.5, 0, -0.4),
+			"lw": 1.0, "legs": [0.7, -1.1, 0.6, -1.0]}],
+		[0.4, {"p": 0.38, "r": 0.03, "sq": 0.24, "lift": -0.1, "fl": Vector3(0.3, 0.08, -0.2), "hw": 1.0,
+			"wa": Vector3(0.55, 0, -0.42), "lw": 1.0, "legs": [0.75, -1.15, 0.65, -1.05]}]]},
+	# the crash (f57): a deeper crouch, then everything flung wide as the shell bursts, an overshoot up
+	# on the toes, settled by recovery (f61)
+	"tm_rime_crash": {"keys": [
+		[0.0, {"p": 0.38, "sq": 0.24, "lift": -0.1, "fl": Vector3(0.3, 0.08, -0.2), "hw": 1.0, "lw": 1.0,
+			"legs": [0.75, -1.15, 0.65, -1.05]}],
+		[0.04, {"p": 0.45, "sq": 0.35, "lift": -0.16, "fl": Vector3(0.2, -0.05, -0.15), "hw": 1.0, "lw": 1.0,
+			"legs": [0.95, -1.4, 0.85, -1.3]}],
+		[0.1, {"p": -0.4, "sq": -0.35, "lift": 0.14, "fl": Vector3(-0.45, 0.65, 0.15), "hw": 1.0, "wa": Vector3(-0.8, 0, 1.2),
+			"lw": 1.0, "legs": [-0.2, -0.15, -0.25, -0.1]}],
+		[0.2, {"p": -0.22, "sq": -0.12, "lift": 0.06, "fl": Vector3(-0.35, 0.5, 0.1), "hw": 0.8, "wa": Vector3(-0.5, 0, 0.8),
+			"lw": 0.8, "legs": [0.1, -0.3, 0.0, -0.3]}],
+		[0.4, {}]]},
+	# an early break: a shrug that pushes the shell off, small and quick
+	"tm_rime_break": {"keys": [
+		[0.0, {"p": 0.35, "sq": 0.2, "fl": Vector3(0.28, 0.1, -0.22), "hw": 1.0}],
+		[0.08, {"p": -0.1, "sq": -0.1, "fl": Vector3(0.1, 0.25, -0.4), "hw": 1.0}],
+		[0.3, {}]]},
 	# the spear going off (payoff): a sharp clench of the free hand
 	"tm_clench": {"keys": [
 		[0.0, {}],

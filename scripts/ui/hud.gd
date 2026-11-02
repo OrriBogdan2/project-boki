@@ -1517,6 +1517,7 @@ func _draw_arch_abilities(sz: Vector2, p: Hunter) -> void:
 	if float(ei.get("up", 0.0)) > 0.0:
 		c.draw_arc(er.get_center(), s * 0.5 + 4.0, -PI / 2, -PI / 2 + TAU * clampf(float(ei["up"]) / maxf(0.1, float(p.ak.e_def().get("time", 5.0))), 0.0, 1.0), 32, Color(ei["col"], 0.9), 3.0, true)
 	x += s + gap
+	x = HeroUltHud.slot(self, p, x, y, s, gap)      # X: the hunter's own ultimate
 	# R: the Merge (the bond meter), a little bigger
 	var us := 58.0
 	var ur := Rect2(Vector2(x, y - (us - s)), Vector2(us, us))
