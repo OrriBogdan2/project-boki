@@ -396,11 +396,8 @@ func _refresh_kin_stats() -> void:
 			for ps in k.ks.carry_passives:
 				out[ps["stat"]] = float(out.get(ps["stat"], 0.0)) + float(ps["amount"])
 	if not merge_st.is_empty():
-		var ms: MergeSpec = merge_st["def"]
-		for ps in ms.passives:
-			var v := float(ps["amount"])
-			if String(KinParts.OWNER_STATS[ps["stat"]][1]) == "float": v *= float(merge_st["k"])
-			out[ps["stat"]] = float(out.get(ps["stat"], 0.0)) + v
+		for ps in KinMerge.passives(self):
+			out[ps["stat"]] = float(out.get(ps["stat"], 0.0)) + float(ps["amount"])
 		out["cooldown"] = float((merge_st.get("form", {}) as Dictionary).get("haste", 0.0))      # the form's faster ability cooldowns (MergeForm)
 	for st in out:
 		var row: Array = KinParts.OWNER_STATS[st]
@@ -502,6 +499,9 @@ func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
 	d *= 1.0 - owner_stat("damage_reduction")
 	if downed:
 		# a wisp can't be shot: it's lost to stomps, an execute, or bleeding out
+		return 0.0
+	d = MergeShell.absorb(self, d)         # a merged form's shell takes the hit first (docs/decisions/0003)
+	if d <= 0.0:
 		return 0.0
 	if shield > 0.0:
 		var a := minf(shield, d)
@@ -1099,6 +1099,7 @@ func do_dash() -> void:
 	if ak:
 		# the archetype's dash shape: it spends its own charge (or the long air dash) itself
 		ak.on_dash(use_ex)
+		MergeForm.on_dash(self)
 		return
 	if use_ex:
 		if ex_cd > 0.0:
@@ -1751,6 +1752,9 @@ func rank_cd_k(slot: String) -> float:
 ## What the HUD needs to draw one ability slot: name, short name, icon, colour, one-line desc,
 ## cooldown left and total, charges. slot: "sec" | "dash" | "gear" | "k1" | "r".
 func slot_info(slot: String) -> Dictionary:
+	var mki := MergeKit.slot_info(self, slot)
+	if not mki.is_empty():
+		return mki                       # merged: the form's slots
 	if ak and (slot in ["sec", "utility", "k1", "e", "kin", "dash", "dodge"] or KinCommand.class_ults()):
 		return ak.slot_info(slot)
 	var out := {"name": "", "short": "", "icon": "", "col": Color.WHITE, "desc": "", "cd": 0.0, "cd_max": 0.0, "charges": 0, "max_charges": 0, "verb": "", "ready": false, "level": ability_level(slot)}
@@ -2093,8 +2097,10 @@ func sim(dt: float) -> void:
 			inp[kk] = false
 		inp["move"] = Vector2.ZERO
 	# inputs
+	MergeKit.route(self)             # merged: LMB, RMB and E are the form's (whatever your slot ranks), C is off
 	for gk in [["dash", "dash", "dash"], ["sec", "sec", "sec"], ["gear1", "gear", "gear0"], ["sig", "kin", "k1"], ["ult", "ult", "r"]]:
 		_gate(gk[0], gk[1], gk[2])
+	KinDowned.commit(self)           # rescuing your Boki: rooted, nothing fires (a dash still cancels it)
 	if dropping and not grounded and ctrl != "bot":
 		for bk in ["sec", "sig", "ult", "tonic", "kit", "gear1", "gear2"]:
 			if inp.get(bk, false):
@@ -2347,6 +2353,8 @@ func _physics(dt: float) -> void:
 			# so you can cross until the heat runs out
 			if over_void() and glide_fuel > 0.001 and vel.y < 0.0 and pos.y + vel.y * dt < lip_y:
 				vel.y = minf(0.0, (lip_y - pos.y) / dt)
+	elif MergeHolds.hovering(self):
+		vel.y = MergeHolds.hover_vy(self, vel.y, dt)      # a merged form's hover (or its ultimate's climb)
 	elif roll_t > 0.0 and not grounded and not dropping:
 		vel.y = 0.0          # a dash in the air holds your height for its length
 	elif not grounded:
@@ -3210,6 +3218,8 @@ func _anim_state(stretch: float) -> void:
 	if ak and ak.anim_id != "":
 		s["kmove"] = ak.anim_id                # the kit's own full-body move (HunterAnim.KMOVES)
 		s["kmove_t"] = m.time - ak.anim_at
+	MergeKit.anim_state(self, s)
+	KinDowned.anim_state(self, s)
 	s["hit_t"] = m.time - hurt_at
 	s["hit_k"] = hit_k
 	if last_hit_by and is_instance_valid(last_hit_by):

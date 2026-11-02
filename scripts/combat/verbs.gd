@@ -99,7 +99,8 @@ static func wall_blocks(list: Array, x: float, z: float, r: float, y: float) -> 
 	return 0.0
 
 # ------------------------------------------------------------------ reflect windows
-func add_mirror(ent: Node, e: Dictionary) -> void:
+## A reflect window; returns it so a held one (the Prism, MergeHolds) can refresh and end it.
+func add_mirror(ent: Node, e: Dictionary) -> Dictionary:
 	var col := Color(String(e.get("color", "#bff6ff")))
 	var arc := float(e.get("arc", -1.0))
 	var r := float(e.get("radius", 1.7))
@@ -120,6 +121,7 @@ func add_mirror(ent: Node, e: Dictionary) -> void:
 	mirrors.append({"ent": ent, "t": float(e.get("time", 0.6)), "t0": float(e.get("time", 0.6)), "r": r, "arc": arc, "team": int(ent.team),
 		"k": minf(float(e.get("dmg_k", 1.25)), KinRules.REFLECT_MAX), "riposte": float(e.get("riposte", 0.0)), "node": n, "col": col, "caught": 0})
 	m.sfx("shield", ent.pos, -3.0, 1.4)
+	return mirrors[-1]
 
 func _mirror_dir(mr: Dictionary) -> Vector2:
 	var ent = mr["ent"]

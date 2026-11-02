@@ -1,8 +1,10 @@
 class_name BokiHud
 extends RefCounted
 ## The Boki command system on the HUD (docs/decisions/0001), drawn through the in-match HUD `H`:
-##   - the R slot is the bond meter: it fills with the bond, says MERGE (or LEAP / SURGE) when ready, and
-##     counts the merge down with the form's tier name while it runs
+##   - the R slot is the bond meter: it fills with the bond, says MERGE (or LEAP / SURGE) when ready, says
+##     RESCUE when the Boki is down (R does nothing), and while merged counts the merge down with the form's
+##     ultimate (its name when ready, the seconds until it is)
+##   - a merged hunter wears the form's name, a draining timer and the shell bar over their head (form_overhead)
 ##   - C and G show where the Boki is and what it is doing: from you / from the Boki, its order (follow, guard,
 ##     chase, return), the G hold ring, DOWN with the seconds until it comes round, and whether its carried
 ##     bonuses are on you (greyed while it is out)
@@ -51,7 +53,12 @@ static func r_slot(H, p: Hunter, ur: Rect2, us: float) -> void:
 		var left := clampf(float(ml["t"]) / maxf(0.1, float(ml["T"])), 0.0, 1.0)
 		H.c.draw_arc(ctr, us * 0.5 + 4.0, -PI / 2, -PI / 2 + TAU * left, 48, Color("fff4c0"), 4.0, true)
 		H._ctext(ctr + Vector2(0, us * 0.5 - 10), "%ds" % int(ceil(float(ml["t"]))), 11, Color("fff4c0"), H.big)
-		_tag(H, ur, String((ml.get("form", {}) as Dictionary).get("tier_name", "MERGED")).to_upper(), col)
+		var ready_ult := bool(ri.get("ready", false)) and String(ri.get("plan", "")) == "ult"
+		if ready_ult:
+			var pl := 0.5 + 0.5 * sin(H.m.time * 8.0)
+			H._rounded(ur.grow(2.0 + pl * 3.0), Color(0, 0, 0, 0), 14, Color(col, 0.5 + 0.4 * pl), 3)
+		var tag := String(ri.get("name", "MERGED")).to_upper() if ready_ult else (("%.1fs" % float(ri["cd"])) if String(ri.get("plan", "")) == "ult" and not bool(ri.get("ulting", false)) else String((ml.get("form", {}) as Dictionary).get("name", "MERGED")).to_upper())
+		_tag(H, ur, tag, col)
 		return
 	# the meter: a fill from the bottom and a ring, in the Boki's colour
 	var bond := clampf(p.ult, 0.0, 1.0)
@@ -65,7 +72,7 @@ static func r_slot(H, p: Hunter, ur: Rect2, us: float) -> void:
 	else:
 		var pulse2 := 0.5 + 0.5 * sin(H.m.time * 6.0)
 		H._rounded(ur.grow(3.0 + pulse2 * 3.0), Color(0, 0, 0, 0), 14, Color(col, 0.55 + 0.4 * pulse2), 3)
-		_tag(H, ur, {"merge": "MERGE", "leap": "LEAP", "surge": "SURGE", "far": "TOO FAR"}.get(plan, "MERGE"), col if plan != "far" else DOWN_COL)
+		_tag(H, ur, {"merge": "MERGE", "leap": "LEAP", "surge": "SURGE", "far": "TOO FAR", "rescue": "RESCUE"}.get(plan, "MERGE"), col if plan not in ["far", "rescue"] else DOWN_COL)
 
 static func _tag(H, ur: Rect2, text: String, col: Color) -> void:
 	var btr := Rect2(Vector2(ur.position.x + 2, ur.position.y - 7), Vector2(ur.size.x - 4, 13))
@@ -150,11 +157,14 @@ static func downed_label(H, k: Kin, sp: Vector2) -> void:
 		return
 	H._ctext(sp + Vector2(0, -42 + bob), "%s is down" % k.rec.get("name", "Your Boki"), 17, col.lerp(Color.WHITE, 0.3), H.big)
 	var mine: bool = k.owner_h == H.m.player
-	H._ctext(sp + Vector2(0, -24 + bob), ("Run into it  ·  or %ds" if mine else "Back in %ds") % int(ceil(k.down_t)), 12, Color(H.INK, 0.9), H.big)
+	H._ctext(sp + Vector2(0, -24 + bob), ("Run into it to pick it up  ·  or %ds" if mine else "Back in %ds") % int(ceil(k.down_t)), 12, Color(H.INK, 0.9), H.big)
 	H.c.draw_colored_polygon(PackedVector2Array([sp + Vector2(-7, -14 + bob), sp + Vector2(7, -14 + bob), sp + Vector2(0, -4 + bob)]), col)
 	H._bar(Rect2(sp + Vector2(-30, 2), Vector2(60, 5)), clampf(k.down_t / maxf(0.1, k.down_total), 0.0, 1.0), Color(col, 0.7))
 	if k.rescue_t > 0.0:
-		H._bar(Rect2(sp + Vector2(-30, 9), Vector2(60, 6)), KinDowned.scoop_k(k), H.GOOD)
+		# the rescue: a ring closing round the Boki (it drains back if you are interrupted)
+		var rc := sp + Vector2(0, 22)
+		H.c.draw_arc(rc, 20.0, 0.0, TAU, 40, Color(0, 0, 0, 0.45), 5.0, true)
+		H.c.draw_arc(rc, 20.0, -PI / 2, -PI / 2 + TAU * KinDowned.scoop_k(k), 40, H.GOOD if k.rescue_on else H.GOOD.darkened(0.3), 4.0, true)
 
 ## The edge-of-screen arrow toward your downed Boki when it is off screen.
 static func downed_arrow(H, k: Kin, sz: Vector2) -> void:
@@ -205,3 +215,37 @@ static func order_tip(H, p: Hunter) -> Array:
 		if ob != "":
 			out.append(["Owner bonus for the run: " + ob, H.GOLD, 13])
 	return out
+
+## Over a merged hunter's head, for everyone: the form's name, its draining timer, and the shell bar in the form's colour.
+## `sp` is the plate's screen anchor (the top of the health bar).
+static func form_overhead(H, sp: Vector2, h: Hunter) -> void:
+	var name := ""
+	var glow := Color.WHITE
+	var left := 0.0
+	var total := 1.0
+	var sh := MergeShell.view(h)
+	if not h.merge_st.is_empty():
+		var f: Dictionary = h.merge_st["form"]
+		if String(h.merge_st.get("phase", "")) != "live":
+			return
+		name = String(f["name"])
+		glow = f["glow"]
+		left = float(h.merge_st["t"])
+		total = float(h.merge_st["T"])
+	elif h.has_meta("mf_name") and float(h.get_meta("mf_left", 0.0)) > 0.0:
+		name = String(h.get_meta("mf_name"))
+		glow = h.get_meta("mf_glow", Color.WHITE)
+		left = float(h.get_meta("mf_left", 0.0))
+		total = maxf(0.1, float(h.get_meta("mf_dur", 10.0)))
+	else:
+		return
+	var w := 54.0
+	var x0 := sp.x - w * 0.5
+	if sh.y > 0.0:
+		var r := Rect2(Vector2(x0, sp.y - 6.0), Vector2(w, 3.0))
+		H.c.draw_rect(r, Color(0.03, 0.03, 0.05, 0.8))
+		H.c.draw_rect(Rect2(r.position, Vector2(w * clampf(sh.x / sh.y, 0.0, 1.0), 3.0)), glow)
+	var tr := Rect2(Vector2(x0, sp.y - 13.0), Vector2(w, 3.0))
+	H.c.draw_rect(tr, Color(0.03, 0.03, 0.05, 0.8))
+	H.c.draw_rect(Rect2(tr.position, Vector2(w * clampf(left / total, 0.0, 1.0), 3.0)), Color(glow, 0.65))
+	H._ctext(Vector2(sp.x, sp.y - 17.0), "%s  %ds" % [name.to_upper(), int(ceil(left))], 10, glow, H.big)

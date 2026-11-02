@@ -46,7 +46,9 @@ var pend_skill := Vector3.INF     # ability to cast when it lands
 var pend_slot := ""
 var down_t := 0.0                 # downed: seconds until it comes round on its own (KinDowned)
 var down_total := 0.0
-var rescue_t := 0.0               # downed: how long you have been standing in it (the scoop)
+var rescue_t := 0.0               # downed: rescue progress in seconds (KinDowned: run into it; drains back after an interrupt)
+var rescue_on := false            # downed: its owner is rescuing it right now (kneeling, rooted)
+var rescue_block := 0.0           # downed: seconds before a rescue can start again (after a dash cancelled one)
 var down_void := false            # downed: it fell into the abyss, only the timer brings it back
 var last_safe := Vector3.INF      # the last solid ground it stood on, where a fall marks it
 var beacon: MeshInstance3D = null # the downed marker pillar (KinDowned.render)
@@ -499,6 +501,17 @@ func merge_out() -> void:
 		_hop_on()
 		settle = 1.0
 		m.fx.burst(pos, sp["color"], 16, 3.0)
+
+## A merge with a form ended: the Boki springs out beside you, following (not downed, never a shoulder hop).
+func merge_pop() -> void:
+	if state != "fused" or owner_h == null or dead:
+		return
+	teleport(owner_h.pos + Vector3(0, 1.0, 0))
+	cmd = "follow"
+	hold_at = Vector3.INF
+	target = null
+	fly = {}
+	KinFollow.leap(self, KinFollow.side_spot(self), "side")
 
 func _sim_fused(_dt: float) -> void:
 	if owner_h == null or owner_h.out:
@@ -990,7 +1003,7 @@ func hurt(d: float, by: Ent, opts := {}) -> float:
 # ------------------------------------------------------------------ visuals
 func render(delta: float, alpha: float) -> void:
 	super.render(delta, alpha)
-	visible = not dead and state != "bench" and state != "away" and not (state == "downed" and down_void) and not (owner_h and (owner_h.out or owner_h.extracted or owner_h.riding))
+	visible = not dead and state != "bench" and state != "away" and not (state == "downed" and down_void) and not (owner_h and (owner_h.out or owner_h.extracted or owner_h.riding)) and not KinMerge.inside(self)
 	KinDowned.render(self, delta)
 	if not model:
 		return
@@ -1021,6 +1034,8 @@ func render(delta: float, alpha: float) -> void:
 	if parts:
 		(parts as CPUParticles3D).emitting = visible and state not in ["shoulder", "bench", "fused"] and not unseen
 	if state == "fused" and owner_h and owner_h.model:
+		if MergeXform.boki_pose(self):
+			return           # (the transformation: it flies in on a spiral)
 		# wrapped around its hunter's back as armor
 		global_position = owner_h.model.global_position + Vector3(0, 1.05, 0) + Vector3(sin(owner_h.face), 0, cos(owner_h.face)) * 0.32
 		model.rotation.y = owner_h.face
