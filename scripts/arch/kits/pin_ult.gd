@@ -15,7 +15,7 @@ extends Node3D
 ## pays nothing.
 
 const TEAL := Color("5affd2")
-const CORE := Color("f4fff8")
+const CORE := Color("c8fff0")          # the beam's pale teal core
 const GOLD := Color("ffe27a")
 const BEAM_T := 0.2            # s a beam ribbon stays up
 const BEAMS := 3               # pooled beam ribbons
@@ -70,7 +70,6 @@ func cast() -> bool:
 	k.m.fx.burst(chest, TEAL, 26, 7.0, 0.45, 1.0, 1.3)
 	k.m.fx.ring(h.pos, 1.8, TEAL, 0.3)
 	k.fx.star(chest, 2.4, TEAL, 0.18, 1.0)
-	k.m.fx.word(h.pos + Vector3(0, 2.8, 0), String(x.get("name", "")).to_upper(), TEAL, true)
 	k.m.sfx("pin_ult_cast", h.pos, -2.0 if h.is_local() else -6.0)
 	k.net_ring(h.pos, 1.8, TEAL)
 	k.play("pin_ult_cast")

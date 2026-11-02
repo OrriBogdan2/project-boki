@@ -213,7 +213,7 @@ const SHOTS := [
 		"ult_pin_impact",
 		"archer",
 		"pin_ult",
-		1.13,
+		1.2,
 		4.0,
 		"Impact: the beam through the target, a white burst cloud and a teal star"
 	],
@@ -221,7 +221,7 @@ const SHOTS := [
 		"ult_pin_final",
 		"archer",
 		"pin_ult_final",
-		1.13,
+		1.2,
 		4.0,
 		"The last beam: a wider beam, a bigger burst, the hard kick"
 	],

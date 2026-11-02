@@ -84,11 +84,11 @@ const ANIM_DEMO := {
 	"bul_short": ["bulwark", "tower_shield", [0.85, 0.92, 0.98, 1.05, 1.15, 1.35]],
 	"bul_mend": ["bulwark", "tower_shield", [0.5, 0.56, 0.64, 0.74, 0.95, 1.25]],
 	"pin_ult_cast": ["archer", "longbow", [0.5, 0.56, 0.62, 0.7, 0.8, 0.95]],
-	"pin_ult_nock": ["archer", "longbow", [0.5, 0.56, 0.62, 0.7, 0.78]],
-	"pin_ult_loose": ["archer", "longbow", [0.76, 0.82, 0.88, 0.96, 1.06, 1.3]],
-	"pin_ult_final": ["archer", "longbow", [0.76, 0.82, 0.88, 0.96, 1.1, 1.45]],
+	"pin_ult_nock": ["archer", "longbow", [0.5, 0.58, 0.66, 0.74, 0.8]],
+	"pin_ult_loose": ["archer", "longbow", [0.8, 0.86, 0.92, 1.0, 1.1, 1.25]],
+	"pin_ult_final": ["archer", "longbow", [0.8, 0.86, 0.92, 1.0, 1.08, 1.25]],
 	"bul_ult_wind": ["bulwark", "tower_shield", [0.5, 0.58, 0.66, 0.76, 0.86]],
-	"bul_ult_slam": ["bulwark", "tower_shield", [0.88, 0.92, 0.98, 1.1, 1.3, 1.7]],
+	"bul_ult_slam": ["bulwark", "tower_shield", [0.86, 0.91, 1.2, 1.5, 1.8]],
 	"bul_guard": ["bulwark", "tower_shield", [0.5, 0.56, 0.62, 0.7, 0.9, 1.2]],
 	"bul_crush": ["bulwark", "tower_shield", [0.5, 0.58, 0.64, 0.72, 0.85, 1.05]],
 	"bul_slamshield": ["bulwark", "tower_shield", [0.5, 0.62, 0.76, 0.84, 0.95, 1.2]],
@@ -608,6 +608,7 @@ static func _anim_hero(A: Arena, P: Hunter, mv: String, t: float, dt: float) -> 
 static func _anim_ult(P: Hunter, mv: String, t: float, dt: float) -> void:
 	var K: ArchKit = P.ak
 	P.lvl = 6
+	K.res = 0.0                # no Focus tell in the strip
 	var cast_at := 0.5 if mv in ["pin_ult_cast", "bul_ult_wind", "bul_ult_slam"] else 0.3
 	if _at(t, dt, cast_at):
 		K.cd["x"] = 0.0

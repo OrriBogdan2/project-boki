@@ -70,7 +70,6 @@ func planted() -> bool:
 
 ## X pressed: plant, raise the hammer, lock the lane toward the cursor.
 func cast() -> bool:
-	var x := xd()
 	dir = h.aim_dir().normalized()
 	origin = h.pos
 	cells = _reach()
@@ -82,7 +81,6 @@ func cast() -> bool:
 	h.vel = Vector3(0, h.vel.y, 0)
 	k.play("bul_ult_wind")
 	k.m.sfx("bjorn_ult_wind", h.pos, -3.0 if h.is_local() else -7.0)
-	k.m.fx.word(h.pos + Vector3(0, 2.8, 0), String(x.get("name", "")).to_upper(), EMBER, true)
 	k.net_ring(origin + Vector3(dir.x, 0, dir.y) * cell_len() * 0.5, cell_len() * 0.5, EMBER)
 	return true
 
