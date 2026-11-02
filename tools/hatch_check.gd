@@ -1,7 +1,7 @@
 extends RefCounted
 ## --hatch-check: hatching is a small, personal moment (docs/POSITIONING.md). An egg (EggHatch)
-## cracks; the Boki inside is curled up asleep, wakes, blinks, looks around, then turns to look at
-## you before it climbs out, and the shell throws no bursts, rings or flashes. The closer look after
+## cracks; the shell shrinks away within a second of the top coming off, and the Boki hops out, looks
+## around, turns to look at you and bounces, all inside 2.5 s after the pop, and the shell throws no bursts, rings or flashes. The closer look after
 ## it (KinReveal) has no flash, rays, fanfare or rarity colours: the Boki finds you and calls to you,
 ## and only then can it be named. A shimmer shows as a faint sparkle on the Boki itself, a rare one
 ## gets a plain provenance line. Never touches the real save.
@@ -41,25 +41,33 @@ func run(m: Node) -> void:
 	var sp := "cindle"
 	var egg := EggHatch.new(sp, spy, 0.32, 0.42, 1.0, {"species": sp})
 	holder.add_child(egg)
-	var seen := {"asleep": false, "woke": false, "popped": false, "done": false, "face_err": 9.0, "looked_away": false}
+	var seen := {"t_pop": -1.0, "t_shell": -1.0, "t_done": -1.0, "ymin": 1e9, "ymax": -1e9, "popped": false, "done": false, "face_err": 9.0, "looked_away": false}
 	egg.popped.connect(func(k: Node3D):
 		seen["popped"] = true
 		var want := EggHatch._yaw_to(k.global_position, cam.global_position)
 		seen["face_err"] = absf(wrapf(k.rotation.y - want, -PI, PI)))
-	egg.done.connect(func(): seen["done"] = true)
+	egg.done.connect(func():
+		seen["done"] = true
+		seen["t_done"] = float(Time.get_ticks_msec()))
 	egg.start()
 	var t0 := Time.get_ticks_msec()
 	while not seen["done"] and Time.get_ticks_msec() - t0 < 30000:
 		await tree.process_frame
 		if is_instance_valid(egg.kin_node):
-			var ks := String(egg.kin_node.get_meta("kstate", ""))
-			if ks == "sleep": seen["asleep"] = true
-			elif seen["asleep"]: seen["woke"] = true
+			if seen["t_pop"] < 0.0: seen["t_pop"] = float(Time.get_ticks_msec())
+			seen["ymin"] = minf(float(seen["ymin"]), egg.kin_node.global_position.y)
+			seen["ymax"] = maxf(float(seen["ymax"]), egg.kin_node.global_position.y)
+			if seen["t_shell"] < 0.0 and egg.cap.scale.x < 0.02 and egg.cup.scale.x < 0.02:
+				seen["t_shell"] = float(Time.get_ticks_msec())
 			if not seen["popped"]:
 				var want2 := EggHatch._yaw_to(egg.kin_node.global_position, cam.global_position)
 				if absf(wrapf(egg.kin_node.rotation.y - want2, -PI, PI)) > 0.8: seen["looked_away"] = true
 	ok(seen["done"], "the egg hatches all the way through (%.1f s)" % ((Time.get_ticks_msec() - t0) / 1000.0))
-	ok(seen["asleep"] and seen["woke"], "the Boki is curled up asleep in the shell, then wakes")
+	var shell_s: float = (float(seen["t_shell"]) - float(seen["t_pop"])) / 1000.0
+	ok(seen["t_shell"] > 0.0 and shell_s < 1.0, "the shell is gone %.2f s after the pop (want under 1 s)" % shell_s)
+	var beat_s: float = (float(seen["t_done"]) - float(seen["t_pop"])) / 1000.0
+	ok(beat_s > 0.0 and beat_s < 2.5, "the whole hop-look-face-bounce beat takes %.2f s (want under 2.5 s)" % beat_s)
+	ok(float(seen["ymax"]) - float(seen["ymin"]) > 0.15, "the Boki hops (%.2f m of height)" % (float(seen["ymax"]) - float(seen["ymin"])))
 	ok(seen["looked_away"], "it looks around before it finds you")
 	ok(seen["popped"] and float(seen["face_err"]) < 0.25, "then it looks right at you (off by %.2f rad)" % float(seen["face_err"]))
 	ok(spy.got_rings == 0, "no ring bursts round the egg (%d)" % spy.got_rings)
