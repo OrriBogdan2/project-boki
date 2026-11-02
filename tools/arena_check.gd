@@ -167,6 +167,7 @@ func _arena() -> void:
 	# kits2: the sparring bot really uses the Thief's and the Juggernaut's kits on you
 	# (neither kit has an R any more: it is the Boki Merge, so the bot's kit is RMB, E and the dash)
 	for ba in ["thief", "juggernaut"]:
+		seed(2024)      # the bot's dice must not depend on how many rolls the earlier sections took (as in main.gd's bot checks)
 		A.set_bot_arch(ba)
 		var B: Hunter = A.bot
 		P.teleport(A.home); B.teleport(A.home + Vector3(5.0, 0, 0))
