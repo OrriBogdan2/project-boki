@@ -90,3 +90,6 @@ Relay this to the running kit agents and put it in the queued prompts. ext/aimki
 
 ## 2026-11-02 21:30 UTC
 For every kitfix agent: quiet level growth (ext/perkorbs, LevelGrowth) raises ability power through `ArchKit.power()` / `Effects._power`. Kit code that reads `m.dmg_mult(h)` directly for ability damage won't grow, so switch those reads to `power()` in the kit files you own. Relay this to the running kit agents.
+
+## 2026-11-02 21:35 UTC
+Heads-up only; don't start yet. The owner decided every hunter gets their own ultimate back on **X** (level 6, own cooldown), and landing it charges the Boki bond toward a Merge on R. Ult reference sections are being written into briefs/hero-ref (posted when done). After each kitfix pair is ready, a follow-up ult pass for that pair will be queued (Opus). Until then, don't bind anything to X.

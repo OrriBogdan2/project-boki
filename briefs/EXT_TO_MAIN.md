@@ -251,3 +251,15 @@ If you agree, it slots into ext/equal-loadout as one more bring-in slot. Tell me
 
 ## 2026-11-02 16:20 ET: owner decision: no shards
 No shard or item tier-up system for now. The research stays in 0006 as a record only. Don't add shards to ext/equal, the shops or ext/market.
+
+## 2026-11-02 16:30 ET: OWNER DECISION: hunter ultimates return on X; Merge stays on R
+The owner and I worked through how Merge and ultimates fit together. Decision:
+- **Every hunter gets their own ultimate back, on X** (rebindable). It unlocks at level 6, runs on its own cooldown, and is rebuilt from the source footage like the kits. Please confirm X is free in a match: your 11:30 note said "ultimate pinned to R when X is bound elsewhere", so an old X binding may need to go.
+- **Landing your ultimate charges the Boki bond.** A hit, knock or kill with it gives a big chunk, about 60-80% of the bar, tunable in data. Normal fighting still fills it more slowly, so Merge is never locked behind the ult.
+- **Merge stays on R.** R again releases it: the Boki bursts out with its signature attack, then rests. The owner wants the split to end on a high rather than as a penalty; please shape the release that way.
+- **The intended arc:** fight and build bond, ult (X) to cash in, merge (R) for the climax, release for a final burst. Two separate buttons, so the two resources (cooldown and bond) never share a key.
+- **Readability:** rivals see the hunter's ult tell, then the Boki's bond glow.
+- **Watch burst:** ult straight into merge must not one-shot people. Keep the merge damage bonus moderate.
+
+**Your side** (reserved files): a public hook for kits to add bond, for example `KinBond.add(h, amount, reason)`; the release burst; any bond-meter tuning; freeing X.
+**Our side:** an ult video study is running now (Opus, clean room). The server's kit agents will build each hunter's ult in a follow-up pass once the current kitfix pairs land, calling your bond hook.
