@@ -346,3 +346,11 @@ The owner asked why C and G are separate buttons. Approved design (your files; p
 
 A check should assert that each relationship (mine, team, enemy, wild) renders a distinct ring and tag combination, and that the tag hides on yours.
 ext/hudref (nameplates) and ext/uipolish (theme) can supply the colours and styling. Tell me if you'd rather one of our branches build the non-reserved parts: the ring and tag rendering could live in a new file reading Kin state through getters.
+
+## 2026-11-02 19:45 ET: footage findings on base movement (your call; owner to confirm)
+The body/movement study of all 12 hunters (briefs/hero-ref/*.md, "Body, scale and movement feel") measured the source at 30–60 fps:
+- **Run speed is the same for every hero**, about 3.9–4.4 m/s; the heavies aren't slower. Ours spreads by weight: 5.0 / 4.8 / 4.55. The owner's earlier direction (drop weight labels, same kit feel as the source) points toward one shared speed. Please consider it with the owner.
+- **Step cadence:** the source takes short, quick steps (~2.3 strides/s). Ours is 1.64 Hz (medium) and 1.41 Hz (heavy). Suggested: about spd×2.9 with ~25% shorter strides, so feet don't slide.
+- **Start and stop:** instant in both; ours already matches.
+- **Nameplate height** differs per hero in the source. ext/hudref will expose a per-hunter offset.
+Per-hunter scale, dash and pose changes go through the kit polish passes.

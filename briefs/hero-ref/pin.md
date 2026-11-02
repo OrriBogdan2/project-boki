@@ -287,3 +287,75 @@ The in-demo card names differ a little from the end summary (`0604`): "Superchar
 **Build notes:**
 - **What to build:** X = a self-buff. The next 3 LMB shots (6 s window) become instant full-charge piercing beams at 1.5× range with armor shred, and the 3rd executes below a threshold.
 - **Bond:** since the cast itself is free, pay only on hits. Each empowered shot that hits at least one hunter adds 0.22, and the final shot hit adds 0.12 extra. All three landing gives about **0.78**; a whiff gives nothing.
+
+## Body, scale and movement feel
+
+Method and units are as in venator.md's section of the same name: the hunter's ground motion comes from tracking the bar plus the camera pan. Distances are in 960 px units, 1 px ≈ 0.0375 m, 1 bh = Ghost's height ≈ 48 px ≈ 1.8 m. Zoom is the same in every clip; the training dummy is an Oath-model hunter, ~107 px tall at 1080p.
+
+### 1. Height and bulk
+- **Myth:** ~95-100 px at 1080p from head to sole standing (0148) and ~80 px in the low draw crouch (0532).
+  - The body is slim, ~50-55 px wide. The bow and its arms spread to ~110 px when drawn.
+  - The bar's cyan line sits ~110 px above the soles (~1.15 bh).
+- **Against Ghost (~96 px, ~55 wide):** **the same height, ~1.0x, and the same slim build.** Against the Oath dummy she is ~0.9x as tall and half as wide.
+- **Ours:** archer is light, scale 0.9 × CLASS_LOOK 0.95 = **0.855x medium**.
+- **Target scale factor ~0.98** (about ×1.15 on what we have now). She should stand as tall as Venator, not a head shorter. Keep the light build (0.84).
+
+### 2. Locomotion
+- **Run speed:**
+  - The median steady run is 113 px/s ≈ 4.25 m/s.
+  - Stretches: 0030-0038 at 111 (1.6 s round the pit), 0046-0050 at 108, 0312-0318 at 120, 0367-0374 at 108, 0411-0416 at 116.
+  - That is the same as Ghost (110) and Oath (117). Ours: light 5.0 against medium 4.8, a +4% the source doesn't show.
+- **Spirit Walk run:** 117-126 px/s (0349-0356), about +5-10% over her normal run. Ours walk_k is 1.15; the source looks closer to 1.1.
+- **Acceleration and stopping:** instant (the same one-frame ramps as the others).
+- **Cadence:** stride cycle ~2.3 Hz (≈4.5 steps/s), quick short steps. Ours: light `spd*2.15` → 1.71 Hz.
+- **Lean and bob:**
+  - She runs fairly upright and tall with the head up (583.8-584.2 s, 0030-0036). The bow is carried low in the leading hand, out from the hip.
+  - Drawing, she walks slowly with the body turned side-on to the cursor (0111-0116).
+  - Spirit Walk changes the carriage: crouched, leaning hard forward, arms trailing (656.05-656.25 s, 0391-0392).
+  - Ours: archer lean 0.0 and "runs tall" (+0.04): correct.
+- **Turning:** the upper body snaps to the cursor and the legs follow the travel direction.
+
+### 3. Idle
+- She stands lightly in a slightly side-on stance with the bow held low (0136-0166 between shots).
+- No loop or fidget can be resolved. Our breath 2.3 is fine.
+
+### 4. Ground dash (Shift: Spirit Walk's dodge roll)
+- **Timing:** 655.55-655.65 s (0388-0389).
+  - A green burst at the start.
+  - The body dives forward, stretched almost flat, for ~0.1-0.15 s (it reads as a quick dive-roll).
+  - She goes straight into the crouched Spirit Walk run, with no landing beat.
+- **Distance and curve:** 79 px ≈ 3.0 m ≈ 1.7 bh over 0.27 s above run speed. The speed rises 147 → 346 → 447 px/s (peak ~17 m/s at +0.13 s), then drops 258 → 125 px/s.
+- **Ours (kitfix-pin-bjorn):** roll 2.6 m in 0.16 s (~16 m/s). `pin_roll` is a full forward roll by 0.16 s, up by 0.42. **This is a close match.** The source is ~0.4 m longer and shows no "standing up": the roll ends already in the crouched spirit run.
+
+### 5. Air dash
+- Not shown clearly. 0051-0053 (588.1 s) is a 62 px (~2.3 m) push over 0.37 s at only ~2x run speed, inside the pit ring, and could be a hop. It isn't a clean air dash.
+
+### 6. Jump and landing
+- Not shown. The passive's double-ledge climb is not demonstrated either.
+
+### 7. Cast and attack body language
+- **Budget:** small and precise.
+  - The draw holds one locked side-on pose.
+  - The release snaps in one frame with little recoil.
+  - The Heavy Shot draw sinks lower.
+  - The Rain of Arrows lob raises the bow high.
+- **Squash and stretch:** the stretch is reserved for the roll. The draw crouch is the only squash.
+- **Timing:** wind-up holds (the draw) are long, and releases are one-frame snaps.
+
+### 8. Build notes
+- **Model scale:** ~0.98 (raise from 0.855). This could be a per-archetype `size` override in Models (CLASS_LOOK is per class).
+- **Collision:** hit_r 0.35 now. Scaled up 15%, her ~0.5 m-wide body would overhang a 0.35 m radius by very little. Raise it to ~0.37 so shots that visibly touch her count; at 0.35 she'd be slightly harder to hit than she looks, which is unfair to the shooter.
+- **Camera and nameplate:** the bar sits ~1.15 bh above the soles, ~2.1 m. With the scale change our shared 2.35 m is fine (or use ~2.3).
+- **KMOVES and locomotion:**
+  - Cadence about `spd*2.9`, with a stride ~25% shorter.
+  - Keep the tall run.
+  - Spirit Walk: lean the pitch forward ~0.25 and trail the arms (`pin_walk` already does this), and the run speed bonus is ~1.1x rather than 1.15x.
+- **Dash curve:** keep the 0.16 s roll, but carry it ~3 m with an ease-out tail (peak at 0.1 s, then decay over the next ~0.15 s into the Spirit Walk speed). End `pin_roll` in the crouched walk pose instead of standing at 0.42.
+- **Sound:**
+  - Footsteps: light, soft and quick (leather, no metal).
+  - Roll: a short cloth whoosh and a soft thud. The spirit run is muffled, almost silent footsteps.
+
+### 9. Unclear
+- Air dash, jump and landing, and the ledge climb. Settle them with a clip of Myth jumping onto a double-height ledge and rolling in the air.
+- Exact cadence. Settle it with a 2 s straight run at 60 fps without drawing.
+- Whether the roll direction follows movement or aim. Settle it with a roll sideways to the cursor.

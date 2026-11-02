@@ -264,3 +264,83 @@ The end-of-segment summary screen (`venator/summary_screen.png`, frames 0260-026
 **Build notes:**
 - **What to build:** X = a cursor-placed artillery strike. Show a 1.6 s readable disc of about 2 bh with a hot centre (+50%), then a 3 s slow and burn zone. The caster stays free to move.
 - **Bond:** the impact adds 0.6 for one enemy hunter caught, or **0.8** for a centre hit or 2 or more enemies. Zone ticks add nothing, so the meter rewards landing the telegraphed hit and not standing in a puddle.
+
+## Body, scale and movement feel
+
+**Method (same for all six sheets).**
+- I tracked the hunter's own overhead bar (the cyan line under the yellow pips) at 30 fps over the whole segment and added the camera pan, found by phase correlation on the background. That gives the hunter's ground motion even while the camera sits still.
+- Distances are in 960 px frame units (the 5 fps frames) unless marked 1080p. Vertical screen distance on the ground is foreshortened by 0.88: the Mini Nuke disc at 0207 is 153 px wide and 135 px tall. I corrected for it.
+- 1 bh (one body height, Ghost) ≈ 48 px at 960 (96 at 1080p) ≈ 1.8 m in our world, the same conversion as the rest of this sheet. So 1 px at 960 ≈ 0.0375 m, and 100 px/s ≈ 3.75 m/s.
+- Zoom is the same in all six clips, with one exception (the Oath ult zooms out, bjorn 0505-0507). Two checks: the UI bar is a fixed size, and the training dummy "Kimic" is an Oath-model hunter that measures the same size in every clip (~107 px tall and ~110-123 px wide at 1080p, standing, `pin 0065`, `venator_ghost 0065`, `juggernaut 0041`, `bjorn 0101`).
+- Ghost is the medium reference for the other five sheets.
+- Scratch tools and data: `/tmp/claude-0/-home-claude/8d7770c0-fbec-571e-85de-44fde799926f/scratchpad/mv/` (`track.py`, `ana.py`, `strip.py`; `<hero>/trk.csv`).
+
+### 1. Height and bulk
+- Ghost standing in the aim crouch measures 93-100 px at 1080p from head to sole (0207, 0223, 0087), so ~48 px at 960. The body is ~55 px wide, and the rifle reaches ~80 px.
+- The overhead bar's cyan line sits ~105-118 px (1080p) above the soles, ~1.15 bh. The head top is ~15-20 px under it.
+- Next to the Oath-model dummy in the same frame (0087), the dummy reads ~1.1x as tall and about 2x as wide.
+- **Ours:** gunslinger is medium. Model root scale = class 1.0 × CLASS_LOOK size 1.0 × race. **Target scale factor 1.0 (no change).** He is the yardstick for the others.
+
+### 2. Locomotion
+- **Run speed:** a steady 110 px/s (0067-0072, about 4.1 m/s in our units). It's the same as the other five hunters within ±10%: Oath 117, Myth 113, Shiv 113, Joule 110, Brall 104. **The source has no visible speed difference by weight class.** Ours: medium 4.8 m/s (measured 5.0), light 5.0, heavy 4.55.
+- **Acceleration and stopping:** both take one 30 fps frame.
+  - Start: 4 → 68 → 120 px/s at 536.30-536.37 s.
+  - Stop: 77 → 27 px/s at 537.35-537.40 s, with no slide.
+  - Ours is already as quick (ground_t95 0.067 s, stop 0.05 s).
+- **Cadence:** short, quick steps. Across the six hunters the stride cycle measures about 2.3 Hz (≈4.5 steps/s), so one stride (two steps) covers about 1 bh. Ghost's own run is too short and too busy firing to measure alone, and I estimate the same. Ours: medium `ph += spd*2.15` → 1.64 Hz at 4.8 m/s (3.3 steps/s), each stride ≈ 2.9 m ≈ 1.6 bh. **Ours takes about 40% fewer, longer steps.**
+- **Lean and bob:**
+  - Running (0067-0072), he stays in the low wide aim crouch with the chest over the front knee and the rifle held level across the body toward the cursor. The upper body keeps aiming while the legs run. The cape trails behind.
+  - No vertical bob shows on the bar. The body bob is small (under ~3 px at 1080p, at the limit of what the footage can show).
+- **Turning:** he turns the upper body at the cursor at once, and the legs follow the travel direction. Strafing and backpedalling while aiming are normal (0007-0023 walk while firing).
+- **Weapon carry:** the rifle is always up at chest height, never lowered to a run carry.
+
+### 3. Idle
+- No idle loop is visible. With no input he holds the aim crouch for 6 s (0191-0222, through the Nuke) with no breathing, sway or fidget the footage can resolve.
+- Our gunslinger idle (breath 2.0, cocked hip) is fine. Keep it subtle.
+
+### 4. Ground dash (Combat Slide, his only dash)
+- **Path:** 0150-0152 (552.75-553.3 s) covers 128 px ≈ 4.8 m ≈ 2.7 bh in 0.47 s above run speed.
+- **Speed curve:** it peaks at 454 px/s (~17 m/s) 0.13 s in, then falls off almost linearly (332 → 454 → 377 → 287 → 213 → 144 → 86 px/s per 1/15 s). It's a front-loaded skid that bleeds off, not a constant-speed burst. The tap at 0117-0118 is shorter (~1-2 bh).
+- **Pose:**
+  - He drops feet-first into a low slide with the torso leaned back and the rifle kept up and aimed off-axis. At 553.0-553.2 s he slides up-left while aiming up-right.
+  - He is upright again by ~0.55-0.6 s after the start.
+- **Trail:** a dust ring at the start and the ribbon trail already noted above.
+- **Recovery:** he stands straight into the aim crouch with no stagger, and he can fire throughout.
+- **Ours:** Slipstep tap is 4.6 m in 0.18 s, a constant ~25 m/s. Hold is 7 m in 0.55 s. `gunslinger_dash` keys run 0.85 s. **Biggest difference: the source tap is a 0.45 s decelerating skid peaking at ~17 m/s. Ours is a snap 0.18 s burst.**
+
+### 5. Air dash
+- Not shown. He never slides or dashes in the air in this clip.
+
+### 6. Jump and landing
+- Not shown. He stands next to the jump pad (0227-0255) but doesn't use it in this window.
+
+### 7. Cast and attack body language
+- **Motion budget:** small. The rifle recoil shows only in the muzzle flash, and the body stays still.
+- **Grenade:** a 0.2 s overhand from the cocked pose. The legs keep walking.
+- **Ion Cannon:**
+  - The beam comes out of a 0.6 s braced stand.
+  - On fire there is one big beat: a ~0.5 bh shove backward in 0.2 s (556.6-556.8 s), the only squash-and-stretch moment in his kit.
+  - Recovery takes ~0.4 s.
+- **Nuke:** the rifle is raised straight up for ~0.2 s.
+- **Overall:** a steady shooter who barely moves except for the Ion recoil and the slide.
+
+### 8. Build notes
+- **Model scale:** 1.0, the reference.
+- **Collision:** hit_r 0.40 matches a ~55 px-wide body. Keep it.
+- **Camera and nameplate:**
+  - The source camera doesn't snap to the hunter. Moves of 1-2 bh happen with the camera still (0007-0015 the camera sits, 0067-0072 it pans), so it acts like a deadzone or cursor-weighted follow. Ours is a tight follow (cam_lag 0.29 m), which is fine as a deliberate choice; note it if the owner wants that looser feel.
+  - Nameplate: ours is a fixed `+2.35 m` for everyone (`ui/hud.gd:416`). The source anchor for Ghost sits ~1.15 bh ≈ 2.1 m above the soles, so 2.35 is fine for him. **Make it per hero** (see the other sheets).
+- **KMOVES and locomotion:**
+  - Raise cadence toward the source: about `spd*2.9` instead of 2.15 (≈2.2 Hz at 4.8 m/s) and shrink `stride` (0.62+0.28·run_k) by ~25% so foot speed still matches ground speed.
+  - Keep the chest low (lean 0.03 → about 0.1 when running with the gun up). Keep the rifle shouldered while running (no run-carry blend for gunslinger).
+- **Dash curves and poses:**
+  - Tap slide: ~4.5 m over ~0.45 s with an ease-out speed curve. Start at about 2.5x the mean speed for the first 0.1 s, then decay linearly to run speed. Hold the `gunslinger_dash` slide key until ~0.4 s and be up by 0.6 s; the 0.85 s keys already fit.
+  - Air: keep `gunslinger_dash_ex` (our own barrel roll). There's no source to match.
+- **Sound:**
+  - Footsteps: light, quick and tight (4-5 per second), more cloth and buckle than boot.
+  - Slide: a gritty scrape that starts loud and tapers over ~0.45 s, with a short boot squeak at the stand-up.
+
+### 9. Unclear
+- The air-dash and jump body language. Settle it with a clip of Ghost sliding off a ledge or after a jump pad (any Ghost gameplay with a pad).
+- Exact step cadence. Settle it with a 2-3 s straight run without firing at 60 fps (e.g. re-record 536-538 s without the trigger held).
+- Short versus long slide. Settle it with a press and a full hold back to back on open ground.

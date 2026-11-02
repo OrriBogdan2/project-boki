@@ -309,3 +309,92 @@ Files:
 **Build notes:**
 - **What to build:** X = a 0.4 s planted wind-up showing a 2.5 × 9 bh lane toward the cursor, then the fissure erupts cell by cell (about 0.15 s per cell), knocking up each enemy once. It leaves a 10 s scar; suggest a mild slow so it has a function.
 - **Bond:** the first hunter hit adds **0.6**, and each extra hunter adds 0.1, capped at 0.8. The long lane is easy to land on a group, so per-target pay keeps it fair.
+
+## Body, scale and movement feel
+
+Method and units are as in venator.md's section of the same name: the hunter's ground motion comes from tracking the bar plus the camera pan. Distances are in 960 px units, 1 px ≈ 0.0375 m, 1 bh = Ghost's height ≈ 48 px ≈ 1.8 m. Zoom is the same in every clip. **Note: the training dummy "Kimic" in every clip is an Oath-model hunter, so Oath's size can be read off the dummy in every segment.**
+
+### 1. Height and bulk
+- **Dummy (Oath, standing neutral):** ~107 px at 1080p from helm to sole and ~110-123 px wide (`pin 0065`, `juggernaut 0041`, `vireo 0050`, `bjorn 0101`).
+- **Bjorn himself:**
+  - ~105 px in the crouched swing stance (0471) and up to ~145 px when walking toward the camera, where the forward lean adds depth (0425).
+  - He is 140-160 px wide across the pauldrons (0471).
+- **Against Ghost (~96 px tall, ~55 wide):** about **1.1-1.15x as tall and about 2x as wide**. Most of the difference is bulk, not height.
+- **Ours:** bulwark is heavy, scale 1.14 × CLASS_LOOK size 1.035 = **1.18x medium**, with build 1.14.
+- **Target scale factor ~1.15**, a hair down from 1.18. Push the width instead: a per-hero build of ~1.35 (pauldrons and torso) so he reads as a wall, not a tall man.
+
+### 2. Locomotion
+- **Run speed:**
+  - The median steady move is 117 px/s ≈ 4.4 m/s.
+  - Stretches vary from 104 to 139 px/s: 0082-0089 at 136, 0110-0115 at 104, 0173-0177 at 134, 0450-0454 at 117, 0487-0491 at 115, 0558-0562 at 139.
+  - That is **no slower than Ghost (110) or the lights (113)**. Ours: heavy 4.55 against medium 4.8 and light 5.0. The source has no heavy slowdown.
+- **Start and stop:** instant, like everyone else.
+  - Start: 6 → 135 px/s in one 30 fps frame at 774.27 s.
+  - Stop: 84 → 39 → 17 px/s at 775.9 s.
+- **Cadence:** the leg-region oscillation measures ~2.5 Hz stride (rough, ±15%), no slower than the lights. The legs are mostly hidden under the bulk from this camera. Ours: heavy `spd*1.95` → 1.41 Hz. **Ours is far slower-stepping than the source.**
+- **Lean:**
+  - At a run he pitches far forward with the shield shoulder leading and the hammer held low and back on the other side (0082-0089, 774.2-775.6 s). The silhouette goes long and low in the travel direction.
+  - The shoulders stay level and square. There is almost no visible shoulder roll or bob.
+  - Ours: bulwark lean 0.0 and shoulders square (yaw ×0.5). The square shoulders are right; **the missing piece is the strong forward pitch when running.**
+- **Turning:** the body turns to the aim almost at once. During the charged swing the player sweeps the cursor and he turns about 1.5 turns in 1.2 s (0102-0108).
+- **Weapon carry:** the hammer is low and trailing, and the shield arm is forward.
+
+### 3. Idle
+- He stands square and wide with the hammer hanging at the side (0463-0479, between casts).
+- No breathing or fidget loop can be seen at this resolution. The idle reads as planted and still.
+- Ours (breath 1.5, wide stance) fits.
+
+### 4. Ground dash (Shift: 360 Smash; there is no separate plain dash in the footage)
+- **Timing:** 831.80-831.90 s and 833.50-833.60 s (frames 0369-0370, 0377-0378).
+  - The dash proper takes ~0.15-0.2 s. The body is stretched forward behind the hammer with a blue spark trail at the hammer head.
+  - Then comes **one full spin in ~0.15-0.2 s** (831.95-832.10, 833.65-833.80), a single yellow crescent ring round him.
+  - Then **~0.4 s of low, crouched recovery** (832.15-832.35 and 833.85-834.25).
+- **Distance and speed:**
+  - Measured travel: 144 px ≈ 5.4 m ≈ 3 bh over 0.33 s (0377-0379), peaking at 530 px/s (~20 m/s) 0.17 s in.
+  - Other casts: 123 px (4.6 m, 0.4 s, 0516-0518) and ~86 px (0369-0370).
+  - He keeps sliding forward through the spin.
+- **Curve:** a fast rise (218 → 495 → 524 px/s over 0.1 s), then a decay through the spin.
+- **Ours (kitfix-pin-bjorn):**
+  - 360 Smash is 4.2 m in 0.28 s at 15 m/s, then the spin.
+  - `bul_whirl` keys: lean-in to 0.26 s, the turn 0.26-0.42, settle by 0.66.
+  - The structure matches. **Difference: the source dash is shorter and harder (~0.17 s at ~20 m/s peak) and keeps carrying through the spin; ours is a slower 0.28 s run-up.**
+
+### 5. Air dash
+- Not shown. He never leaves the ground in the clip apart from ult effects.
+
+### 6. Jump and landing
+- Not shown.
+
+### 7. Cast and attack body language
+- **Budget:** big and slow, with heavy wind-ups.
+  - Throw: the hammer is cocked low behind for one frame, then an overhand throw (see §2 of this sheet).
+  - Charged swing: a long hold, then one crescent in a single frame with the body lunging after it, then ~0.4 s of recovery.
+  - Purify: the hammer is hauled up, then driven down.
+  - Every big move ends in a low crouch.
+- **Squash and stretch:**
+  - Stretch forward on the Smash dash.
+  - Squash into the recovery crouch after the spin and after the swing.
+
+### 8. Build notes
+- **Model scale:** ~1.15x medium, with a per-hero build width of ~1.35.
+- **Collision:** hit_r 0.50 (heavy). His shoulders run ~1.4-1.6x Ghost's width each side, so a 0.5 m radius is still a little inside the pauldrons. That is fair to attackers only if the ring stays a slight undersize, which is our usual bias. Keep 0.5 and don't grow it with the build widening, so a wider model doesn't become an easier target than the kit intends.
+- **Camera and nameplate:**
+  - The dummy's bar sits ~131 px (1080p) above its soles, about 1.35 bh ≈ 2.45 m.
+  - Move his overhead anchor from the shared 2.35 to **~2.6 m** (`ui/hud.gd:416` per-hero offset, or scale it by model scale).
+  - Camera: nothing hero-specific.
+- **KMOVES and locomotion:**
+  - Cadence about `spd*2.9` (drop the heavy 1.95 special case).
+  - Running lean: a forward pitch of ~0.3-0.35 rad at full run on top of the current stance, shield shoulder leading (yaw +0.3), hammer low behind.
+  - Keep the shoulders square (yaw ×0.5) and the bob small (the current `off.y -= |cos ph|*0.025` is fine).
+- **Dash curve:**
+  - 360 Smash: ~0.17 s to ~20 m/s peak, about 3.5 m covered, then the spin with ~1 m of extra glide.
+  - Shorten `bul_whirl`'s run-up key from 0.26 to ~0.17, keep the 0.16 s spin, and add a crouched recovery hold to ~0.55-0.6 s.
+  - `bul_lumber` (our long air dash) has no footage to match. Keep it.
+- **Sound:**
+  - Footsteps: heavy but quick, plate clank on every step, no slow stomp (he steps as fast as the lights).
+  - Smash dash: a short metal scrape and whoosh, a heavy whoom on the spin, and a boot grind on the stop.
+
+### 9. Unclear
+- Jump, landing and air dash. Settle them with a clip of Oath taking a jump pad or dropping off a ledge, ideally Smash cast mid-air.
+- Cadence (the legs are hidden). Settle it with a side-on 60 fps run, or a run past the camera's lower edge.
+- Why some runs are faster (136-139 px/s at 0082-0089 and 0558-0562): a buff, or downhill. Settle it with a plain run with no ability up.

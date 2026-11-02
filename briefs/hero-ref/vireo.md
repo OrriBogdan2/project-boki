@@ -426,3 +426,80 @@ Vireo is not one of the renamed heroes in this pass, so there is nothing to list
 **Build notes:**
 - **What to build:** X = press to leap and become invulnerable (about 2 s max, with an auto-land at the cursor when time runs out), with a camera zoom-out and a range ring of about 8 bh. Press again (or LMB) to slam at the clamped cursor. The slam is an AoE of about 1.5 bh radius, a knockback and +1 Static (our `mage` charge stacks).
 - **Bond:** each enemy hunter hit by the slam adds 0.35 bond, capped at **0.75** per cast (`Bond.add(h, …)`). Landing on 2 or more enemies fills about 75% of the bar, so the Merge on R follows straight after the slam.
+
+## Body, scale and movement feel
+
+Method and units are as in venator.md's section of the same name: the hunter's ground motion comes from tracking the bar plus the camera pan. Distances are in 960 px units, 1 px ≈ 0.0375 m, 1 bh = Ghost's height ≈ 48 px ≈ 1.8 m. Zoom is the same in every clip; the training dummy is an Oath-model hunter, ~107-120 px tall at 1080p (0050, standing on the jump pad).
+
+### 1. Height and bulk
+- **Joule:** ~90-100 px at 1080p from head to sole (0190: 100; 0020: ~90 in a wide-legged stance).
+  - **The upper body is wide**, ~70 px across the shoulders and sleeves, with thin legs below.
+  - The bar's cyan line sits ~100-110 px above the soles (~1.05-1.15 bh).
+- **Against Ghost:** ~0.95-1.0x as tall and ~1.3x as wide at the shoulders. Against the Oath dummy: ~0.85x as tall and ~0.6x as wide.
+- **Ours:** mage is light, 0.855x medium.
+- **Target scale factor ~0.96** (×1.12 on now). Keep the light leg build but give the shoulders/upper body ~1.15 width.
+
+### 2. Locomotion
+- **Run speed:** 110 px/s ≈ 4.1 m/s (0154-0160: 120, 0270-0274: 101), the same as everyone. Ours: light 5.0.
+- **Start and stop:**
+  - Start: 9 → 117 px/s in one 30 fps frame (30.63 s).
+  - Stop: 89 → 29 → 7 px/s (32.0-32.07 s).
+- **Cadence:**
+  - A 30 fps close-up (30.6-31.6 s) shows short, quick steps: a stride cycle of ~0.43 s ≈ 2.3 Hz, ≈4.6 steps/s.
+  - The steps are short, under the body. The legs barely leave the ground.
+  - Ours: light 1.71 Hz.
+- **Lean and bob:**
+  - **Fully upright, no lean.** The arms are held out wide to the sides and a little forward, palms down, the whole time she runs. She glides along with the trailing ribbons swaying (30.6-31.6 s, 0154-0158).
+  - No visible bob.
+  - Ours: mage lean -0.03 and +0.05 when running ("glides upright"), and a hover offset. **Correct, but add the arms-out carriage while running.**
+
+### 3. Idle
+- Upright with the arms a little out and the legs apart (0020, 0190).
+- No visible loop. Our slow sway and half-float idle fits.
+
+### 4. Ground dash (Shift: Surge)
+- **Body (32.10-33.0 s, 0161-0166):**
+  - Hold, ~0.2 s: a crouch with crackling sparks (32.10-32.30).
+  - Release at 32.35 s: the body turns into a golden lightning silhouette (an INVULNERABLE label over her) and streaks.
+  - Arrival at ~32.6 s: an abrupt stop, then a big flash burst at the end point (32.75-33.0 s).
+- **Speed:** **a flat curve with no ease.**
+  - The speed jumps 132 → 631 → 899 px/s in two frames, holds ~770-980 px/s (≈29-37 m/s), and drops to near zero in 1-2 frames at the end.
+  - Covered: ~215 px ≈ 8 m in ~0.3 s (0162-0164); ~150 px ≈ 5.6 m in ~0.2 s (0168-0169, 0288-0289); 396 px ≈ 14.8 m in 0.53 s (0297-0299).
+  - **So the duration grows with the length at a constant ~30-35 m/s.**
+- **Ours (kitfix-vireo-venator):** Wirerun is 4.5-12.6 m in a fixed 0.4 s (11-31 m/s). `mage_dash` holds the crouch, `mage_dash_go` streaks flat, and `mage_dash_land` re-forms in ~0.42 s.
+  - The poses match. **Difference: the source keeps the speed fixed (~32 m/s) and lets the time vary. Ours keeps the time fixed, so a short run is slow.**
+
+### 5. Air dash
+- Not shown. Surge is only cast from the ground in the clip.
+
+### 6. Jump and landing
+- Not shown. She stands on the jump pad around the dummy (0050) but isn't seen using one.
+
+### 7. Cast and attack body language
+- **Budget:** moderate.
+  - Finger bolts: an arm flung straight out, alternating hands.
+  - The spear: an overarm throw with a stretch into the release.
+  - The ult: a lift of the whole body.
+  - Between casts she goes back to the upright arms-out carriage.
+- **Squash and stretch:** most of it is in Surge (crouch, streak, re-form).
+- **Timing:** about 0.2 s per bolt, a 0.2 s Surge hold, and ~0.3-0.4 s of arrival flash.
+
+### 8. Build notes
+- **Model scale:** ~0.96, with a wider upper body.
+- **Collision:** hit_r 0.35. The wider shoulders reach ~0.65 m across at the new scale. Raise to ~0.37 so shots on the sleeves register. That's fair to attackers, and Joule stays a light.
+- **Camera and nameplate:** her anchor is ~1.1 bh ≈ 2.0 m. Use **~2.2 m** instead of 2.35.
+- **KMOVES and locomotion:**
+  - Cadence about `spd*2.9` with a short stride (~60% of ours) and little knee lift.
+  - Arms out to the sides while running (both hands ~45° out, a little forward). No lean.
+- **Dash curve:**
+  - Wirerun: constant ~32 m/s along the lane, time = length / 32 (5 m → 0.16 s, 12.6 m → 0.4 s), with no ease in or out. The stop is a hard cut into `mage_dash_land`.
+  - Keep the 0.2 s pre-crouch.
+  - `mage_dash_ex` (air) has no footage. Keep it.
+- **Sound:**
+  - Footsteps: very soft, almost none, with an electrical hum or crackle on the body instead.
+  - Surge: a sharp electric crack at release, a sizzling zip along the lane, and a thunder pop at the arrival burst.
+
+### 9. Unclear
+- Air Surge and the jump. Settle them with a clip of Surge cast mid-jump or off a pad.
+- Whether the Surge speed really is constant at full length. 0297-0299 shows a slight dip mid-run; settle it with a full-length Surge on open ground.
+- Run cadence at 60 fps on a straight run.

@@ -384,3 +384,90 @@ JSON.
 **Build notes:**
 - **What to build:** X = a self-centred 3 bh ring. It grows for 0.4 s, then auto-fires at every enemy inside for 2 s (up to 5 hits each). The outer 25% band adds bonus damage and Anti-Heal. She moves freely throughout.
 - **Bond:** each blade that hits a hunter adds about 0.06, and an outer-band hit adds about 0.1, capped at **0.7** per cast. Five hits on one target gives about 35%; holding two at the edge gives about 70%. It rewards positioning, not just pressing.
+
+## Body, scale and movement feel
+
+Method and units are as in venator.md's section of the same name: the hunter's ground motion comes from tracking the bar plus the camera pan. Distances are in 960 px units, 1 px ≈ 0.0375 m, 1 bh = Ghost's height ≈ 48 px ≈ 1.8 m. Zoom is the same in every clip; the training dummy is an Oath-model hunter, ~107 px tall at 1080p. Video time t = 278 + (frame-1)/5.
+
+### 1. Height and bulk
+- **Shiv:** ~93-95 px at 1080p from head to sole (0003, 0094). The body is narrow, ~45-55 px wide, and the arms reach ~100 px when spread with the blades out.
+  - The bar's cyan line sits ~100 px above the soles (~1.05 bh): **the lowest anchor of the six, along with Joule's.**
+- **Against Ghost (~96 px):** **~0.95-0.98x as tall, the same slim width.** Against the Oath dummy: ~0.9x as tall, under half as wide.
+  - The earlier "40 px" estimate in this sheet was low. Measured at full resolution she is close to Ghost's height.
+- **Ours:** thief is light, 0.9 × 0.95 = **0.855x medium**.
+- **Target scale factor ~0.95** (about ×1.11 on now). Keep the light build.
+
+### 2. Locomotion
+- **Run speed:**
+  - The median steady move is 113 px/s ≈ 4.2 m/s, the same as the others.
+  - **After a Cartwheel she runs 127-136 px/s for ~1-1.5 s** (0206-0212, 0242-0246, 0390-0395), about +15-20%.
+  - Stretches while she fires the LMB are slower, 77-86 px/s (0006-0015, 0230-0233, 0323-0326). That may be an attack slow, but it isn't confirmed (see §9).
+  - Ours: Vault haste +30% for up to 2 s, and light base 5.0.
+- **Acceleration and stopping:** instant, like the others.
+- **Cadence:** stride cycle ~2.3 Hz (≈4.5 steps/s). Ours: light 1.71 Hz (thief bounce 1.7 on top).
+- **Lean:** the strongest lean of the six.
+  - At a run she pitches far forward, almost horizontal through the torso, the coat streaming out behind, both arms out at the sides holding the blades ready to fire (319.0-319.9 s, 0206-0210).
+  - The silhouette is long and low.
+  - Ours: thief lean 0.22 + 0.12 at a run ≈ 0.34 rad. **The source looks nearer 0.6-0.7 rad.**
+- **Bob:** springy but small. No bar movement is visible, and the body rise per step is under ~3 px.
+- **Turning:** the torso snaps to the cursor while firing with either hand, and the legs keep running.
+
+### 3. Idle
+- She holds a wide, low stance with both arms raised, a blade up in each hand (0094, 334.0-335.2 s, 0281-0287).
+- She stays almost still. No loop or fidget can be resolved at 5 fps or in the 10 fps strip.
+- Ours (bounce 1.7, breath 3.1) is livelier than anything visible. That's acceptable, but keep the arms up rather than at the hips.
+
+### 4. Ground dash (Shift: Cartwheel)
+- **Body (312.9-313.6 s, 0176-0178):**
+  - ~0.05 s of crouch.
+  - The body turns sideways and goes over the top with the legs split wide (313.15-313.30 s), about a 0.25-0.3 s cartwheel.
+  - She lands in a low crouch (313.35-313.45 s) and is up and moving by ~313.5 s.
+  - It runs about 0.45-0.5 s from start to upright.
+- **Distance and curve:**
+  - Ground casts 0176-0204 cover 105-144 px ≈ 3.9-5.4 m ≈ 2.2-3.0 bh, above run speed for 0.37-0.57 s.
+  - Peak 400-440 px/s (15-16.5 m/s) at +0.1-0.27 s, then a steady decay into the faster post-cartwheel run (e.g. 20 → 213 → 415 → 415 → 315 → 211 → 154 → 140 px/s).
+- **Ours (kitfix-dancer-juggernaut):** Vault is 2.4 m in 0.25 s, and the `thf_vault` keys flip by 0.26, land at 0.33 and are up by 0.55. The timing is right. **The distance is short: the source covers ~4.5 m, about twice ours.**
+
+### 5. Air dash (Cartwheel from a jump)
+- **Body (303.8-304.5 s, 0129-0134; also 0153-0156):**
+  - She jumps at 303.8 s; the gold landing marker and a round shadow appear under her.
+  - She cartwheels in the air with the body horizontal and the legs split (304.0-304.25 s).
+  - She lands at ~304.3 s in a low crouch and is back up by 304.45 s.
+- **Distance:** the whole move covers 225 px ≈ 8.4 m ≈ 4.7 bh over ~0.95 s (also 223 px at 0153-0156).
+  - Peak 496 px/s.
+  - **The speed then holds near ~240 px/s (2x run) for ~0.5 s**, where the ground version decays.
+- **Difference from the ground version:** the same flip, but about 1.7x the distance, because the air speed doesn't bleed off until she lands. There is no extra float or hang.
+- **Ours:** `thf_exdash` is a tucked forward tumble (0.45 s), and the light ex-dash is 5 m in 0.2 s. **The source air move is the same sideways cartwheel, not a tumble.**
+
+### 6. Jump and landing
+- The jump at 303.8 s takes ~0.5 s from takeoff to touchdown.
+- The bar-to-shadow gap suggests ~1-1.3 m of lift. Our jump is a 1.28 m apex in 0.55 s, so they match.
+- Landing: a low crouch held ~0.1 s, then up in ~0.05 s. No dust.
+
+### 7. Cast and attack body language
+- **Budget:** large and constant.
+  - Every shot whips one arm out from the wide stance with the torso turned ~30°.
+  - The ult snaps the body side to side while walking.
+- **Squash and stretch:** a stretch through the cartwheel and a squash on every landing.
+- **Timing:** shots are 2-3 frames each, the cartwheel is ~0.3 s, and the landing is ~0.1 s.
+
+### 8. Build notes
+- **Model scale:** ~0.95 (up from 0.855).
+- **Collision:** hit_r 0.35. With the scale up her silhouette stays narrow (~0.45-0.5 m), so 0.35 is still fair. Keep it.
+- **Camera and nameplate:** her bar anchor is the lowest, ~1.05 bh ≈ 1.9-2.0 m. Use **~2.15 m** instead of the shared 2.35 so the plate hugs her head.
+- **KMOVES and locomotion:**
+  - Cadence about `spd*2.9`.
+  - Running pitch toward ~0.6 rad: raise the thief run lean `r1*0.12` → ~0.35.
+  - Arms out to the sides while running, blades forward.
+  - Post-Cartwheel haste of ~1.15-1.2 rather than 1.3.
+- **Dash curves:**
+  - Ground Cartwheel: ~4.5 m. Peak ~16 m/s at ~0.15 s, decaying to the haste run speed by ~0.45 s. Keep the 0.55 s `thf_vault` keys.
+  - Air Cartwheel: reuse the same flip keys. Hold ~2x run speed until landing; don't decay.
+- **Sound:**
+  - Footsteps: very light, quick taps.
+  - Cartwheel: a sharp cloth snap, a whoosh over the top, and a soft two-beat landing (hand, then foot).
+
+### 9. Unclear
+- Whether firing slows her (77-86 px/s while shooting against 113 otherwise). Settle it with a clip of a straight run with and without LMB held.
+- A cartwheel off a ledge (fall plus air carry). Settle it with an air Cartwheel over a gap.
+- Exact cadence at 60 fps on a straight run with no firing.

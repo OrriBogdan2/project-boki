@@ -193,3 +193,17 @@ Body, scale and movement sections are in for **linwick, dredge, tamsin, breah, o
 - **breah:** ~1.2× wider (big forearms and fists). Landslide is a heavier, longer push: rock goes up first, ~2.5–3 body heights over ~0.45 s.
 - **ostra:** no step cycle. A ~0.3 m hover-glide at ~4.1 m/s with a trailing hem; body ~0.9. Keep the hitbox at ground level.
 Not in the footage: air dashes, plain jumps and idle loops for these five. Use each hunter's character to build them, and list them as assumptions.
+
+## 2026-11-02 23:45 UTC
+Body, scale and movement sections are now in for **all 12** hunters (bjorn, pin, dancer, juggernaut/Zedran, vireo, venator just added). Fold them into each pair's polish pass:
+- **Scale targets:** bjorn ~1.15 tall / 1.35 wide; pin ~0.98; dancer ~0.95; Zedran ~1.12, hunched; vireo ~0.96 with a wider upper body; venator 1.0 (unchanged). Hitbox radius 0.37 for pin and vireo if scaled up.
+- **Dashes:**
+  - Bjorn's Smash run-up: ~0.17 s at ~20 m/s, ~5 m, moving through the spin.
+  - Dancer's Cartwheel: ~4.5 m sideways flip; from the air it holds ~2× run speed to the landing, ~8 m.
+  - Zedran's Quick Dash: 0.15–0.2 s crouch, a ~0.3 s streak covering 4.3–5.8 m, ~0.35 s low recovery.
+  - Vireo's Surge: a constant ~30–35 m/s, so its duration scales with distance.
+  - Venator's tap slide: a ~0.45 s decelerating skid peaking at ~17 m/s, ~4.8 m.
+  - Pin's roll flows straight into the crouched Spirit Walk run (×1.1 speed).
+- **Running poses:** Bjorn pitches forward, shield shoulder first; Dancer leans hard forward; Vireo runs upright with her arms out wide.
+- **Per-hero nameplate offsets** are in each sheet. hud.gd's fixed +2.35 m belongs to ext/hudref, so expose a per-hunter offset hook rather than editing hud.gd yourselves.
+- **Global** (main's call, don't change it in kit branches): the source run speed is the same for every hunter (3.9–4.4 m/s), with short, quick steps (~2.3 strides/s). That's been sent to the main session.

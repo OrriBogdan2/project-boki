@@ -225,3 +225,92 @@ Not applicable: Juggernaut is not on the rename list (Dancer, Pin, Bjorn, Venato
 **Build notes:**
 - **What to build:** X = 0.65 s invulnerable guard (planted, gold body glow), then an automatic forward cleave (1 bh × 2 bh) that heals 80% of damage dealt. Optional: if he blocks a hit during the guard, the strike gains +X% damage.
 - **Bond:** landing the counter on a hunter adds **0.6**. Each hit blocked during the guard adds +0.1 (up to +0.2), so a real "retaliation" fills about 80%.
+
+## Body, scale and movement feel
+
+Method and units are as in venator.md's section of the same name: the hunter's ground motion comes from tracking the bar plus the camera pan. Distances are in 960 px units, 1 px ≈ 0.0375 m, 1 bh = Ghost's height ≈ 48 px ≈ 1.8 m. Zoom is the same in every clip; the training dummy is an Oath-model hunter, ~107 px tall and ~115 wide at 1080p.
+
+### 1. Height and bulk
+- **Brall:** ~95 px at 1080p from head to sole in his normal hunched stance (0171) and ~85 px crouched (0257). The body is 55-75 px wide (the big upper arms and shoulders).
+- **His overhead bar sits much higher than his head:** the cyan line is ~135-140 px above the soles (~1.45 bh), with ~40 px of clear space over the hunched head.
+  - Ghost's bar is ~1.15 bh and the Oath dummy's ~1.35 bh. So the game treats Brall as the tallest of the six. He carries that height bent forward, which is why his on-screen silhouette is no taller than Ghost's.
+- **Against Ghost:** the silhouette is ~1.0x as tall, ~1.2-1.4x as wide, and the "true" height ~1.2x (by the bar anchor). Against the Oath dummy: about the same height and narrower.
+- **Ours:** juggernaut is heavy, 1.14 × 1.035 = **1.18x medium**.
+- **Target scale factor ~1.12**, slightly down, with the stature carried as a deep hunch. Keep the heavy build, and stance width (0.25) and knee (0.34) as they are.
+
+### 2. Locomotion
+- **Run speed:**
+  - The median steady move is 104 px/s ≈ 3.9 m/s, **the slowest of the six but only ~6% under Ghost.**
+  - Plain runs reach 113-124 px/s (0012-0017, 0403-0408, 0412-0418).
+  - Slower stretches of 85-95 px/s line up with the Heavy Attack hold (0178-0181, 0198-0208).
+  - Ours: heavy 4.55 against medium 4.8 (-5%). That matches, as long as the hold slow is kept.
+- **Start:** 8 → 58 → 122 px/s in 2 frames at 399.43 s (≈0.07 s). The stop is the same.
+- **Cadence:** stride cycle ~2.26 Hz (≈4.5 steps/s). Ours: heavy 1.41 Hz. **Ours is much slower-stepping than the source.**
+- **Lean:**
+  - He runs hunched, chest well forward over the knees (362.2-363.15 s, 0012-0016).
+  - The greatsword is held out in front, low, in one hand, leading the run.
+  - The shoulders roll a little with the steps.
+  - Ours: lean 0.1, shoulders rolling ±0.06, a footfall drop of 0.035. **Increase the run lean to ~0.35.**
+- **Turning:** quick. The upper body follows the cursor with the blade.
+
+### 3. Idle
+- A low, heavy stance with the blade held low to the side (0169-0175, 0449-0450).
+- No loop is visible beyond a held pose. Ours (breath 1.35, wide planted stance) fits.
+
+### 4. Ground dash (Shift: Quick Dash)
+- **Body (434.40-435.35 s, 0372-0377):**
+  - Wind-up 0.15-0.2 s: he crouches with the blade cocked up and back over the shoulder (434.40-434.60).
+  - Dash ~0.3 s (434.70-434.95): the body goes flat and horizontal and turns into a bright fire-lit streak and afterimage along the path.
+  - Recovery ~0.35 s (435.00-435.35): he stays low with the blade dragging a fire trail behind, then stands.
+  - The whole move takes ~0.9 s.
+- **Distance and curve:**
+  - 116 px ≈ 4.3 m ≈ 2.4 bh over 0.4 s above run speed. Peak 430 px/s (~16 m/s) at +0.1 s, then decay (143 → 365 → 423 → 336 → 266 → 190 → 112 px/s).
+  - A second cast covers 153 px ≈ 5.8 m over 0.57 s (0386-0388).
+- **Heavy Attack lunge, for comparison:** 110 px ≈ 4.1 m in 0.3 s, peak 493 px/s (0219-0220).
+- **Ours (kitfix-dancer-juggernaut):** Rampage is 3.6 m in 0.3 s. The `jug_dash` keys are a shoulder-down drive with the blade levelled, tip out at 0.22, done by 0.65.
+  - **Difference:** the source has a visible ~0.15-0.2 s wind-up crouch before the move and a longer ~0.35 s low recovery. The distance is ~4.3-5.8 m against our 3.6.
+
+### 5. Air dash
+- Not shown as a dash. In the air he uses the Air Slam (§6).
+
+### 6. Jump and landing (Air Slam)
+- **Rise (412.0-412.85 s, 0261-0266; also 410.0-410.6 s):** he leaves the ground at ~412.0 s while the gold landing marker stays on the ground. He rises to the apex by ~412.3 s with a slash at the top.
+- **Drive down:** steep, 412.5-412.8 s, into a purple ground circle.
+- **Impact at ~412.85 s:**
+  - A big white dust cloud ~2 bh across.
+  - The deepest squash of the six: a crouch onto the knees.
+- **Recovery:** ~0.5 s in a low crouch with the blade dragged (413.3-413.9 s).
+- **Airtime:** ~0.85 s, longer than a plain jump because of the slam. No plain jump is shown.
+
+### 7. Cast and attack body language
+- **Budget:** big.
+  - Wind-ups are clear crouches (Quick Dash, Heavy Attack hold).
+  - Slashes step into the swing, about 1 frame of wind-up and 1 frame of swing.
+  - Every heavy move lands in a long low recovery.
+- **Squash and stretch:**
+  - A strong squash on landings and dash recoveries.
+  - A flat stretch during the dash streak.
+- **Timing:** the wind-up beat is 0.15-0.2 s, the action 0.2-0.3 s, and the recovery 0.35-0.5 s.
+
+### 8. Build notes
+- **Model scale:** ~1.12, hunched.
+- **Collision:** hit_r 0.50 against a ~0.6-0.75 m-wide body is generous to attackers. Keep it; it fits a frontline tank. Don't shrink it with the scale change.
+- **Camera and nameplate:** his source anchor is the highest, ~1.45 bh ≈ 2.6 m. Use **~2.75 m** instead of the shared 2.35 so the plate clears his raised blade.
+- **KMOVES and locomotion:**
+  - Cadence about `spd*2.9` (drop the heavy 1.95).
+  - Run lean ~0.35, the blade carried ahead and low.
+  - Keep the shoulder roll and footfall weight.
+- **Dash curve:**
+  - Quick Dash: add a 0.15 s crouched wind-up key (blade cocked high behind) before `jug_dash`'s drive.
+  - The drive covers ~4.5 m in ~0.3 s, peaking at ~16 m/s at 0.1 s into the drive.
+  - Extend the recovery to ~0.35 s low with the blade dragging (end the keys at ~0.85 s).
+  - `jug_exdash` (our air variant) has no footage. Keep it.
+- **Sound:**
+  - Footsteps: heavy, quick, with a leathery thud and a blade scrape every few steps.
+  - Dash: a fire roar whoosh with a crackle tail during the recovery drag.
+  - Slam landing: a deep boom plus a gravel spray.
+
+### 9. Unclear
+- A plain jump and landing with no Air Slam. Settle it with a clip of a plain jump or ledge drop.
+- What happens if Quick Dash is cast in the air. Settle it with a mid-jump Shift.
+- Cadence at 60 fps. Settle it with a straight run without the heavy hold.
