@@ -91,6 +91,11 @@ func _tick(_dt: float) -> void: pass
 ## A Boki merge ends every hold, charge and channel this kit started before R, with no release effect (and keeps them
 ## ended while merged: the form's own kit owns the buttons). Each kit with such state overrides this.
 func _drop_holds() -> void: pass
+## Merge start (and every step while merged): the kit's own holds, then every AimKit telegraph and cursor
+## state this hunter shows. Call this, not _drop_holds, so the shared telegraphs always go with the holds.
+func drop_holds() -> void:
+	_drop_holds()
+	AimKit.clear(h)
 func fire_rmb(_c: Dictionary) -> void: pass        # c: {hold, air, e, r, full, t, variant}
 func rmb_press_extra() -> bool: return false        # a recast that takes the press (Shadow Step); true = handled
 func rmb_hold_tick(_t: float) -> void: pass          # while RMB is held (shields, charge previews)
@@ -130,7 +135,7 @@ func describe_rmb_variant(c: Dictionary) -> String:
 # ------------------------------------------------------------------ per step
 func tick(dt: float) -> void:
 	if KinMerge.active(h):
-		_drop_holds()
+		drop_holds()
 	var rate := 1.0 + h.gear_stat("cdr")
 	for k in cd.keys():
 		cd[k] = maxf(0.0, float(cd[k]) - dt * rate)
@@ -372,7 +377,7 @@ func _fire_r(will_bond: bool) -> void:
 	if bonded:
 		_bond_tell()
 		if KinMerge.cast(h):
-			_drop_holds()
+			drop_holds()
 			Feel.hitstop(m, h, h, 0.0, {"bonded": true})
 			Feel.shake(m, "bonded", h, h.pos)
 			if h.is_local() and m.hud: m.hud.flash(Feel.cat_color("control"), 0.25)
