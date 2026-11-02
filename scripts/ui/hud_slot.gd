@@ -19,7 +19,8 @@ const POP_T := 0.3             # s: the pop when a press lands
 static func cd_text(secs: float) -> String:
 	return str(int(ceil(secs))) if secs >= 1.0 else "%.1f" % secs
 
-static func ab_slot(H, id: String, rect: Rect2, icon: String, key: String, col: Color, cd_frac: float, cd_secs: float, ready: bool, charges := -1, max_ch := 0, label := "") -> void:
+static func ab_slot(H, id: String, rect: Rect2, icon: String, key: String, col: Color, cd_frac: float,
+		cd_secs: float, ready: bool, charges := -1, max_ch := 0, label := "") -> void:
 	var c: CanvasItem = H.c
 	var sfx_d: Dictionary = H.slot_fx.get(id, {})
 	var deny := 0.0
@@ -41,7 +42,8 @@ static func ab_slot(H, id: String, rect: Rect2, icon: String, key: String, col: 
 		H.ready_flash[id] = READY_FLASH
 	H.ready_was[id] = ready
 	var cooling := cd_frac > 0.0 and cd_secs > 0.0 and not ready
-	HudStyle.slot_frame(c, rect, col, "ready" if ready else ("cooling" if cooling else "off"))
+	var frame_state := "cooling" if cooling else "off"
+	HudStyle.slot_frame(c, rect, col, "ready" if ready else frame_state)
 	var icol: Color = col if ready else Color(col.lerp(HudStyle.MUTED, 0.65), 0.45)
 	Icons.draw(c, icon, ctr + Vector2(0, -2), rect.size.x * 0.27, icol)
 	H.slot_text.erase(id)
@@ -52,7 +54,8 @@ static func ab_slot(H, id: String, rect: Rect2, icon: String, key: String, col: 
 		if cooling:
 			var t := cd_text(cd_secs)
 			var fs := int(rect.size.x * (0.46 if t.length() < 3 else 0.38))
-			HudStyle.ctext(c, ctr + Vector2(0, fs * 0.36), t, fs, HudStyle.INK if cd_secs >= 1.0 else HudStyle.COOLING, 6)
+			var tcol := HudStyle.INK if cd_secs >= 1.0 else HudStyle.COOLING
+			HudStyle.ctext(c, ctr + Vector2(0, fs * 0.36), t, fs, tcol, 6)
 			H.slot_text[id] = t
 	if max_ch > 1:
 		var pw := minf(10.0, (rect.size.x - 12.0) / float(max_ch) - 2.0)
@@ -67,7 +70,8 @@ static func ab_slot(H, id: String, rect: Rect2, icon: String, key: String, col: 
 	if deny > 0.0:
 		H._rounded(rect, Color(0.9, 0.15, 0.1, 0.22 * deny), HudStyle.SLOT_RAD, Color(1.0, 0.35, 0.3, deny), 3)
 	if pop > 0.0:
-		H._rounded(rect.grow((1.0 - pop) * 14.0), Color(1, 1, 1, 0.12 * pop), HudStyle.SLOT_RAD + 2, Color(col.lerp(Color.WHITE, 0.5), pop), 3)
+		var pop_edge := Color(col.lerp(Color.WHITE, 0.5), pop)
+		H._rounded(rect.grow((1.0 - pop) * 14.0), Color(1, 1, 1, 0.12 * pop), HudStyle.SLOT_RAD + 2, pop_edge, 3)
 	var fl := float(H.ready_flash.get(id, 0.0))
 	if fl > 0.0:
 		var k := 1.0 - fl / READY_FLASH
@@ -93,7 +97,8 @@ static func sweep(c: CanvasItem, r: Rect2, frac: float, col: Color) -> void:
 
 ## A slot with run levels: locked (padlock; UNLOCK in gold when a point can open it; R says when it
 ## opens), else the ability slot with rank pips above and a gold + while a point can go in.
-static func skill_slot(H, slot: String, id: String, r: Rect2, icon: String, key: String, col: Color, cdf: float, cds: float, ready: bool, ch := -1, mx := 0) -> void:
+static func skill_slot(H, slot: String, id: String, r: Rect2, icon: String, key: String, col: Color, cdf: float,
+		cds: float, ready: bool, ch := -1, mx := 0) -> void:
 	var c: CanvasItem = H.c
 	var p: Hunter = H.m.player
 	var lv := int(p.slot_lv.get(slot, 1))
@@ -107,8 +112,10 @@ static func skill_slot(H, slot: String, id: String, r: Rect2, icon: String, key:
 		var pulse := 0.5 + 0.5 * sin(t * 5.0)
 		HudStyle.slot_frame(c, r, HudStyle.GOLD, "ready" if can else "off")
 		if can:
-			H._rounded(r.grow(2.0 + pulse * 2.0), Color(0, 0, 0, 0), HudStyle.SLOT_RAD + 2, Color(1.0, 0.82, 0.48, 0.25 + 0.4 * pulse), 2)
-		Icons.draw(c, icon, r.get_center() + Vector2(0, -2), r.size.x * 0.25, Color(col.lerp(HudStyle.MUTED, 0.5), 0.45 if can else 0.22))
+			var glow := Color(1.0, 0.82, 0.48, 0.25 + 0.4 * pulse)
+			H._rounded(r.grow(2.0 + pulse * 2.0), Color(0, 0, 0, 0), HudStyle.SLOT_RAD + 2, glow, 2)
+		var icol := Color(col.lerp(HudStyle.MUTED, 0.5), 0.45 if can else 0.22)
+		Icons.draw(c, icon, r.get_center() + Vector2(0, -2), r.size.x * 0.25, icol)
 		# a small padlock
 		var lc := r.get_center() + Vector2(0, 4)
 		var lcol := HudStyle.GOLD if can else Color(HudStyle.MUTED, 0.85)
@@ -128,7 +135,8 @@ static func skill_slot(H, slot: String, id: String, r: Rect2, icon: String, key:
 	ab_slot(H, id, r, icon, key, col, cdf, cds, ready, ch, mx)
 	# rank pips above the slot
 	var mxl := int(Hunter.SLOT_MAX.get(slot, 3))
-	var pw := 9.0; var pg := 3.0
+	var pw := 9.0
+	var pg := 3.0
 	var px := r.get_center().x - (mxl * pw + (mxl - 1) * pg) * 0.5
 	for i in mxl:
 		var pr := Rect2(Vector2(px + i * (pw + pg), r.position.y - 7), Vector2(pw, 3))
@@ -137,7 +145,8 @@ static func skill_slot(H, slot: String, id: String, r: Rect2, icon: String, key:
 	if can:
 		var pulse := 0.5 + 0.5 * sin(t * 5.0)
 		# the frame glows gold while a point can go in; hovering shows the Alt+key to spend it
-		H._rounded(r.grow(2.0 + pulse * 2.0), Color(0, 0, 0, 0), HudStyle.SLOT_RAD + 3, Color(1.0, 0.82, 0.48, 0.3 + 0.45 * pulse), 2)
+		var glow := Color(1.0, 0.82, 0.48, 0.3 + 0.45 * pulse)
+		H._rounded(r.grow(2.0 + pulse * 2.0), Color(0, 0, 0, 0), HudStyle.SLOT_RAD + 3, glow, 2)
 		if H.hover_id == id:
 			HudStyle.ctext(c, Vector2(r.get_center().x, r.position.y - 18), "ALT+" + key, 11, HudStyle.GOLD)
 		var cp := Vector2(r.end.x - 2, r.position.y + 2)

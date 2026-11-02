@@ -46,18 +46,21 @@ static func draw(H, sz: Vector2, p: Hunter) -> void:
 		var aw := HudStyle.BIG.get_string_size(at, HORIZONTAL_ALIGNMENT_LEFT, -1, 15).x
 		HudStyle.text(c, Vector2(x0 + w - aw, y0 + 1), at, 15, p.armor_col())
 		var tn := String(Hunter.ARMOR_TIERS[p.armor_tier][0]).to_upper()
-		HudStyle.text(c, Vector2(x0 + w - aw - 8 - HudStyle.BIG.get_string_size(tn, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x, y0), tn, 10, Color(p.armor_col(), 0.75))
+		var tw := HudStyle.BIG.get_string_size(tn, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x
+		HudStyle.text(c, Vector2(x0 + w - aw - 8 - tw, y0), tn, 10, Color(p.armor_col(), 0.75))
 	# health: thick, segmented, the chip and flash shared with your overhead plate
 	var hr := Rect2(Vector2(x0, y0 + 6), Vector2(w, HP_H))
 	H._rounded(hr.grow(2.0), HudStyle.SHADE, 4)
-	HudStyle.seg_bar(c, hr, p.hp, p.max_hp, hp_col, H._chip_of(p, frac), HudPlate.shield_frac(p), H.plates.flash_of(p) * 0.6)
+	var flash: float = H.plates.flash_of(p) * 0.6
+	HudStyle.seg_bar(c, hr, p.hp, p.max_hp, hp_col, H._chip_of(p, frac), HudPlate.shield_frac(p), flash)
 	# under it: the merged form's shell while merged, else armour (with its own trail as it drops)
 	var ar := Rect2(Vector2(x0, hr.end.y + 3), Vector2(w, AR_H))
 	var shv := MergeShell.view(p)
 	if shv.y > 0.0 and not p.merge_st.is_empty():
 		var fcol: Color = (p.merge_st["form"] as Dictionary)["glow"]
 		BokiHud.shell_bar(H, ar.grow_individual(0, 2, 0, 2), shv.x / shv.y, fcol, BokiHud.shell_flash(H, p))
-		HudStyle.text(c, Vector2(x0 + w - (70 if p.armor <= 0.5 else 170), y0 + 1), "SHELL %d" % int(ceil(shv.x)), 13, fcol)
+		var shell_x := x0 + w - (70 if p.armor <= 0.5 else 170)
+		HudStyle.text(c, Vector2(shell_x, y0 + 1), "SHELL %d" % int(ceil(shv.x)), 13, fcol)
 	else:
 		var fl := BokiHud.shell_flash(H, p)
 		if fl > 0.0:
@@ -80,12 +83,16 @@ static func _hidden_tag(H, sz: Vector2, p: Hunter) -> void:
 	var grass: bool = H.m.world.in_bush(p.pos.x, p.pos.z)
 	if not (grass or p.crouch):
 		return
-	var hid := p.reveal_t <= 0.0
-	var txt := ("HIDDEN" if hid else "SPOTTED") if grass else ("CROUCHED" if hid else "SPOTTED")
-	var fg: Color = (Color("8fe0a0") if grass else Color("c9d2e0")) if hid else HudStyle.HURT
+	var txt := "SPOTTED"
+	var fg: Color = HudStyle.HURT
+	var bg := Color(0.25, 0.06, 0.05, 0.85)
+	if p.reveal_t <= 0.0:
+		txt = "HIDDEN" if grass else "CROUCHED"
+		fg = Color("8fe0a0") if grass else Color("c9d2e0")
+		bg = Color(0.05, 0.12, 0.06, 0.85) if grass else Color(0.08, 0.09, 0.12, 0.85)
 	var tw := HudStyle.BIG.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x
 	var hr := Rect2(Vector2(sz.x * 0.5 - tw * 0.5 - 12, sz.y - 104), Vector2(tw + 24, 20))
-	H._rounded(hr, (Color(0.05, 0.12, 0.06, 0.85) if grass else Color(0.08, 0.09, 0.12, 0.85)) if hid else Color(0.25, 0.06, 0.05, 0.85), 10)
+	H._rounded(hr, bg, 10)
 	HudStyle.text(H.c, hr.position + Vector2(12, 15), txt, 13, fg)
 
 ## The run level on a coin over the portrait's corner, ringed by progress to the next level with a
@@ -111,12 +118,15 @@ static func level_coin(H, pr: Rect2, p: Hunter) -> void:
 	if xf > 0.01 and xf < 0.999:
 		var ha := -PI / 2 + TAU * xf
 		c.draw_circle(bc + Vector2(cos(ha), sin(ha)) * (r - 3.0), 3.6, Color(1.0, 0.97, 0.85))
-	HudStyle.ctext(c, bc + Vector2(0, 9.0 * sc), str(p.lvl), int(26.0 * sc), HudStyle.INK if H.lvl_pop <= 0.0 else HudStyle.INK.lerp(gold, 1.0 - k))
+	var lvl_col := HudStyle.INK if H.lvl_pop <= 0.0 else HudStyle.INK.lerp(gold, 1.0 - k)
+	HudStyle.ctext(c, bc + Vector2(0, 9.0 * sc), str(p.lvl), int(26.0 * sc), lvl_col)
 	if p.skill_pts > 0:
 		var pulse := 0.5 + 0.5 * sin(H.m.time * 5.0)
-		var sp := bc + Vector2(22, -22)
-		c.draw_circle(sp, 10.0 + pulse, gold)
-		HudStyle.ctext(c, sp + Vector2(0, 5), "+%d" % p.skill_pts if p.skill_pts > 1 else "+", 13, Color(0.1, 0.07, 0.02), 0)
+		var pts_at := bc + Vector2(22, -22)
+		c.draw_circle(pts_at, 10.0 + pulse, gold)
+		var pts_txt := "+%d" % p.skill_pts if p.skill_pts > 1 else "+"
+		HudStyle.ctext(c, pts_at + Vector2(0, 5), pts_txt, 13, Color(0.1, 0.07, 0.02), 0)
 	# the archetype's name under the portrait instead of just the class
 	if p.ak:
-		HudStyle.text(c, pr.position + Vector2(36, pr.size.y + 14), Arch.name_of(p.arch).to_upper() + "  ·  " + String(p.cdat["name"]).to_upper(), 10, Color(Arch.color(p.arch), 0.9))
+		var arch_txt := Arch.name_of(p.arch).to_upper() + "  ·  " + String(p.cdat["name"]).to_upper()
+		HudStyle.text(c, pr.position + Vector2(36, pr.size.y + 14), arch_txt, 10, Color(Arch.color(p.arch), 0.9))

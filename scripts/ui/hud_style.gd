@@ -83,11 +83,13 @@ static func seg_count(maxv: float) -> int:
 ## A segmented bar in a handful of draws: the empty track, the chip (the part just lost), the fill,
 ## a top highlight, an optional shield past the end of the fill, then every gap in one multiline.
 ## `chip` and `shield` are fractions of max (chip <= frac draws nothing); `flash` 0..1 whitens it.
-static func seg_bar(c: CanvasItem, r: Rect2, val: float, maxv: float, col: Color, chip := 0.0, shield := 0.0, flash := 0.0, step := -1.0) -> void:
+static func seg_bar(c: CanvasItem, r: Rect2, val: float, maxv: float, col: Color, chip := 0.0, shield := 0.0,
+		flash := 0.0, step := -1.0) -> void:
 	var f := clampf(val / maxf(1.0, maxv), 0.0, 1.0)
 	c.draw_rect(r, Color(col.darkened(0.72), 0.92))
 	if chip > f:
-		c.draw_rect(Rect2(r.position + Vector2(r.size.x * f, 0), Vector2(r.size.x * (minf(chip, 1.0) - f), r.size.y)), CHIP)
+		var chip_w := r.size.x * (minf(chip, 1.0) - f)
+		c.draw_rect(Rect2(r.position + Vector2(r.size.x * f, 0), Vector2(chip_w, r.size.y)), CHIP)
 	if f > 0.0:
 		c.draw_rect(Rect2(r.position, Vector2(r.size.x * f, r.size.y)), col)
 		c.draw_rect(Rect2(r.position, Vector2(r.size.x * f, maxf(1.0, r.size.y * 0.3))), Color(1, 1, 1, 0.22))
@@ -106,7 +108,8 @@ static func seg_bar(c: CanvasItem, r: Rect2, val: float, maxv: float, col: Color
 		for i in range(1, n):
 			var x := r.position.x + r.size.x * (float(i) * st / maxv)
 			if x < r.end.x - 1.0:
-				pts.append(Vector2(x, r.position.y)); pts.append(Vector2(x, r.end.y))
+				pts.append(Vector2(x, r.position.y))
+				pts.append(Vector2(x, r.end.y))
 		if pts.size() > 0:
 			c.draw_multiline(pts, SHADE_EDGE, SEG_GAP)
 
@@ -119,16 +122,21 @@ static func strip(c: CanvasItem, r: Rect2, frac: float, col: Color, back_a := 0.
 ## The dark frame a plate's bars sit in: a soft-cornered backing with a hairline edge in the role
 ## colour (white while `flash` is up).
 static func plate_frame(c: CanvasItem, r: Rect2, edge: Color, flash := 0.0) -> void:
-	var sb := box(SHADE, 3, edge.lerp(Color.WHITE, snappedf(flash, 0.25)), 1)     # (flash in steps: a few cached boxes)
+	var sb := box(SHADE, 3, edge.lerp(Color.WHITE, snappedf(flash, 0.25)), 1)     # in steps: few cached boxes
 	c.draw_style_box(sb, r)
 
 ## An ability or item slot's frame. `state`: "ready" (edge in the slot colour, a faint top gloss),
 ## "cooling" (a dim coral edge), "off" (barely there: locked, empty, or can't be used now).
 static func slot_frame(c: CanvasItem, r: Rect2, col: Color, state := "ready") -> void:
-	var edge := col if state == "ready" else (Color(COOLING, 0.55) if state == "cooling" else Color(1, 1, 1, 0.12))
+	var edge := Color(1, 1, 1, 0.12)
+	if state == "ready":
+		edge = col
+	elif state == "cooling":
+		edge = Color(COOLING, 0.55)
 	c.draw_style_box(box(Color(0.05, 0.06, 0.09, 0.92), SLOT_RAD, edge, 2), r)
 	if state == "ready":
-		c.draw_style_box(box(Color(col, 0.10), SLOT_RAD - 3, Color(0, 0, 0, 0), 0), Rect2(r.position + Vector2(3, 3), Vector2(r.size.x - 6, r.size.y * 0.42)))
+		var gloss := Rect2(r.position + Vector2(3, 3), Vector2(r.size.x - 6, r.size.y * 0.42))
+		c.draw_style_box(box(Color(col, 0.10), SLOT_RAD - 3, Color(0, 0, 0, 0), 0), gloss)
 
 ## The key label under a slot: a dark pill, the key in the slot colour (muted when not ready).
 static func key_pill(c: CanvasItem, center: Vector2, key: String, col: Color) -> void:
@@ -145,15 +153,15 @@ static func count_badge(c: CanvasItem, at: Vector2, n: int, col: Color) -> void:
 	ctext(c, at + Vector2(0, 4.5), s, 11, col)
 
 ## Outlined text, left-aligned at `p` (baseline). `ol` is the outline width in px.
-static func text(c: CanvasItem, p: Vector2, s: String, size: int, col: Color, ol := 4, font: Font = BIG) -> void:
+static func text(c: CanvasItem, p: Vector2, s: String, font_size: int, col: Color, ol := 4, font: Font = BIG) -> void:
 	if ol > 0:
-		c.draw_string_outline(font, p, s, HORIZONTAL_ALIGNMENT_LEFT, -1, size, ol, Color(0, 0, 0, 0.6 * col.a))
-	c.draw_string(font, p, s, HORIZONTAL_ALIGNMENT_LEFT, -1, size, col)
+		c.draw_string_outline(font, p, s, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, ol, Color(0, 0, 0, 0.6 * col.a))
+	c.draw_string(font, p, s, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, col)
 
 ## Outlined text centred on x at baseline `p.y`.
-static func ctext(c: CanvasItem, p: Vector2, s: String, size: int, col: Color, ol := 4, font: Font = BIG) -> void:
-	var w := font.get_string_size(s, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x
-	text(c, Vector2(p.x - w * 0.5, p.y), s, size, col, ol, font)
+static func ctext(c: CanvasItem, p: Vector2, s: String, font_size: int, col: Color, ol := 4, font: Font = BIG) -> void:
+	var w := font.get_string_size(s, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
+	text(c, Vector2(p.x - w * 0.5, p.y), s, font_size, col, ol, font)
 
 ## Floating damage number colour: by who was hit and how (Match picks, Fx draws).
 static func dmg_col(crit: bool, armor_hit: bool, on_you: bool, on_your_kin: bool) -> Color:

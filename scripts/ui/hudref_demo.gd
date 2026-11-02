@@ -10,6 +10,10 @@ extends RefCounted
 const UP_AT := 2.45       # s: ... and the level-up, so its pulse is mid-swell at 2.5s
 const HIT_AT := 2.2       # s of match time: the hit that leaves a chip lands this long before a 2.5s shot
 
+## The match options for `--hudref-demo=<mode>` (Main reads the command line).
+static func opts(arg: String) -> Dictionary:
+	return {"hudref_demo": arg.get_slice("=", 1), "no_drop": true, "teams": 3, "squad": 3}
+
 static func tick(m) -> void:
 	var mode := String(m.opts.get("hudref_demo", ""))
 	if mode == "" or m.player == null or m.time < 0.05:
@@ -19,8 +23,11 @@ static func tick(m) -> void:
 		m.set_meta("hudref_set", true)
 		Settings.set_v("kin_chatter", "quiet", false)
 		if m.cam: m.cam.lead = 0.0
-		for mb in m.mobs: mb.dead = true; mb.visible = false
-		P.lvl = 7; P.skill_pts = 0
+		for mb in m.mobs:
+			mb.dead = true
+			mb.visible = false
+		P.lvl = 7
+		P.skill_pts = 0
 		for s in P.slot_lv: P.slot_lv[s] = 1
 		if mode == "plates": _plates(m, P)
 		else: _fight(m, P)
@@ -38,10 +45,12 @@ static func tick(m) -> void:
 	for k in m.kins:
 		var kn: Kin = k
 		if kn.owner_h == null and not kn.dead:
-			kn.dead = true; kn.visible = false           # no wild Boki wandering into the picture
+			kn.dead = true           # no wild Boki wandering into the picture
+			kn.visible = false
 		elif kn.owner_h and kn.state != "shoulder":
 			kn.stow()                                      # everyone's Boki rides their shoulder, out of the fight
-	m.bubbles.clear(); m.pings.clear()      # (no Boki chatter or callouts over the plates)
+	m.bubbles.clear()      # no Boki chatter or callouts over the plates
+	m.pings.clear()
 	if mode == "fight":
 		P.hp = maxf(P.hp, P.max_hp * 0.4)    # (you stay up for the picture)
 	if mode == "plates":
@@ -62,15 +71,20 @@ static func _stand(m, h: Hunter, at: Vector3) -> void:
 		if not m.world.in_bush(g.x, g.z): break       # (in grass they'd be hidden, plate and all)
 		g = m.world.free_spot_near(at + Vector3(0, 0, 1.2 * float(i + 1)), [], 0.6, 0.5, 3.0)
 	h.teleport(Vector3(g.x, m.world.ground_at(g.x, g.z), g.z))
-	h.ctrl = "idle"; h.vel = Vector3.ZERO
-	h.downed = false; h.hp = h.max_hp; h.armor = h.max_armor * 0.6; h.shield = 0.0
+	h.ctrl = "idle"
+	h.vel = Vector3.ZERO
+	h.downed = false
+	h.hp = h.max_hp
+	h.armor = h.max_armor * 0.6
+	h.shield = 0.0
 
 static func _plates(m, P: Hunter) -> void:
 	var foes: Array = m.hunters.filter(func(x): return x != P)
 	var base: Vector3 = P.pos
 	for i in foes.size():
 		var h: Hunter = foes[i]
-		_stand(m, h, base + (Vector3((float(i) - 2.0) * 2.4, 0, 4.4) if i < 5 else Vector3((float(i) - 6.0) * 3.0, 0, -7.5)))
+		var row := Vector3((float(i) - 2.0) * 2.4, 0, 4.4) if i < 5 else Vector3((float(i) - 6.0) * 3.0, 0, -7.5)
+		_stand(m, h, base + row)
 		h.lvl = 3 + i
 	P.hp = P.max_hp * 0.62
 	P.armor = P.max_armor * 0.5
@@ -81,7 +95,8 @@ static func _plates(m, P: Hunter) -> void:
 	m.set_meta("hudref_up", foes[0])
 	m.set_meta("hudref_hit", foes[1])                                    # hit just before the picture
 	(foes[2] as Hunter).armor = (foes[2] as Hunter).max_armor            # armoured, with a shield
-	(foes[2] as Hunter).shield = 40.0; (foes[2] as Hunter).shield_t = 30.0
+	(foes[2] as Hunter).shield = 40.0
+	(foes[2] as Hunter).shield_t = 30.0
 	(foes[3] as Hunter).hp = (foes[3] as Hunter).max_hp * 0.22           # low, and slowed
 	(foes[3] as Hunter).armor = 0.0
 	m.set_meta("hudref_stun", foes[3])
