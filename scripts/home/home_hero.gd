@@ -89,8 +89,8 @@ static func pick(home: Node, ak: String) -> void:
 		home.fx.burst(home.ppos + Vector3(0, home.py + 0.3, 0), Color.WHITE, 12, 2.5, 0.4)
 	Sfx.play("unlock", null, -6.0, 0.0, 1.15)
 	Sfx.play("whoosh", null, -10.0, 0.0, 1.3)
-	home.player.scale = Vector3(0.6, 1.35, 0.6)
+	var pl: Node3D = home.player
 	var tw: Tween = home.create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	tw.tween_property(home.player, "scale", Vector3.ONE, 0.35)
+	tw.tween_method(func(v: Vector3): if is_instance_valid(pl): pl.set_meta("pop", v), Vector3(0.6, 1.35, 0.6), Vector3.ONE, 0.35)
 	home._toast("Now playing %s (%s). Your expeditions start with it." % [Arch.name_of(ak), String(Data.CLASSES[Arch.weight(ak)]["name"])])
 

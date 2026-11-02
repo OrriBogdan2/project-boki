@@ -1091,9 +1091,8 @@ func _apply_cam_settings(d: float) -> void:
 	var e := cam_zone_k * cam_zone_k * (3.0 - 2.0 * cam_zone_k)
 	cam.dist_mul = lerpf(home_mul, 1.0, e)
 	if player and is_instance_valid(player):
-		if not player.has_meta("base_scale"):
-			player.set_meta("base_scale", player.scale)
-		player.scale = (player.get_meta("base_scale") as Vector3) * lerpf(1.0, Hunter.VIS_SCALE, e)
+		# (the base is always 1: a hero swap's pop rides on top as "pop", so it can't get stuck stretched)
+		player.scale = (player.get_meta("pop", Vector3.ONE) as Vector3) * lerpf(1.0, Hunter.VIS_SCALE, e)
 
 ## Trees between the camera and you (or your active Boki) thin out, as in a match (SeeThrough).
 func _see_through() -> void:
