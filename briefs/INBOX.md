@@ -45,3 +45,6 @@ Corrections to my 18:10 entry:
 - kits2-nor Net is **0.15.0**, as the main session asked (sync61 is already 0.14.0).
 - Re-merge kits2-nor and farmbuild onto **sync62** (current main).
 - SERVER_UPDATE5 now ends with "OWNER PLAYTEST NOTES". They override the footage where they differ, notably: Bjorn spins the hammer while LMB is held, Juggernaut's RMB hold flings you far, and Ostra's RMB has 1 charge and stuns. Re-read the file before starting the kit agents.
+
+## 2026-11-02 18:50 UTC
+New section at the end of SERVER_UPDATE5.md: **"OWNER, 13:46 ET: custom, noticeable animations for every ability and every dash"**. Relay it now to the three kit agents already running (dancer-juggernaut, pin-bjorn, vireo-venator) with SendMessage, and include it in the prompts for the three queued ones.
