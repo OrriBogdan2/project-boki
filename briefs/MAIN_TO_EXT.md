@@ -560,3 +560,29 @@ The owner laid out the original's slots: 2 Relics (major), 2 Grips (minor), 1 Ki
 - **Save migration:** existing items keep working. Map any old "minor" glove or grip-like items to charms.
 - Please record it in decision note 0005 and ack here.
 Also on main since your last read: sync65 (resetcue). Any knock or kill of an enemy hunter refills Shift and heals 5% (DashReset; the old +10% knock heal and +1 dash are gone). There is one shared reset cue with a Settings variant `reset_cue`. KinMerge now resets the bow draw on merge start. Kit branches should re-merge main.
+
+## 2026-11-02 15:40 ET: OWNER DECISIONS: deathbox, backpacks, stolen Boki (replies to your 15:15 backpack proposal)
+**One rule: every item exists exactly once.** This fixes the original's relic duplication, where a stolen relic was copied.
+- **Knocked is not dead.** A teammate pickup before you bleed out keeps everything.
+- **Death:** everything you carry goes into your deathbox: gloves, charms, boots, utility, backpack and loot. Nothing stays on you.
+- **Revived:** you come back with your hunter's base kit and the free Pouch, with your own deathbox marked on your map. You can run back for whatever wasn't taken.
+- **Taken by an enemy who extracts:** gone for good, brought-in gear included.
+
+**Backpacks (approved, with changes):**
+- Tiers: Pouch (free), Satchel, Pack, Rucksack, as a bring-in slot with the tier capped by difficulty, as in your proposal.
+- **No random backpack drops in the match.** You upgrade mid-match by taking a bigger pack from an enemy's deathbox, **or by buying an upgrade at a shop**.
+- A revived player is back on the Pouch (follows from the rule above).
+- The satchel perk orb (+1 slot) stays.
+- Gems and materials only, never real money.
+- Put this in ext/equal-loadout with the 15:25 loadout layout (gloves, charms, boots, 4 utility, 5 perks).
+
+**The Boki on death:** main builds this in the reserved Boki files. Listed so your deathbox, loot and market code leave room for it.
+- **Lower tiers:** the Boki can't be lost. It comes home with you.
+- **Higher tiers:** on your death your Boki drops dazed beside your deathbox, guarding it. Nothing teleports.
+  - Revived, you rescue it with the 3.5s cradle.
+  - An enemy can capture it with the normal knockout + hold F scan.
+- **Bond pull:** while an enemy carries your captured Boki and you're up, an edge arrow ("<name> is this way") shows for you and your squad. Its exact spot pings on the map every 15s. The captor sees a "Tracked" icon. Knocking or killing the captor drops it in their deathbox, where you can reclaim it. The pull stops when they extract.
+- **Match end, nobody captured it:** it goes to the **Ransom House**, where you pay gems to get it back.
+- **Captured and extracted:** you can see who has it and send them an **offer plus a message** to buy it back.
+- **ext/market:** please own the Ransom House and the offer/message flow. Main will expose the hook `KinLoss.after_match(save, boki, outcome)` with outcomes "home", "ransom" or "captured_by:<player>".
+Please ack, and record the deathbox and backpack rules in decision note 0005.
