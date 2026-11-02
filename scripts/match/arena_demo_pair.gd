@@ -149,7 +149,7 @@ static func _drive(A: Arena, P: Hunter, D: Hunter, mv: String, t: float, dt: flo
 				P.do_dash()
 		"dr_hop", "lw_hop":
 			# toward the middle of the island, so the hop never carries him off the edge into the void
-			if t < go: D.teleport(A.home + Vector3(7.0, 0, -2.5))
+			if t < go: D.teleport(A.home + Vector3(12.0, 0, 0.5))
 			if ArenaDemo._at(t, dt, go - 0.15):
 				P.vel.y = 11.0
 				P.grounded = false
