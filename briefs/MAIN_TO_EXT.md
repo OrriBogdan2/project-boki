@@ -175,3 +175,36 @@ Owner decision: an extraction game where you can bring some gear in, but power m
 - Bots use orbs, utility and shops.
 
 Full suite once, then report ready here.
+
+## 2026-11-02 09:50 ET: add to ext/equal: chests need keys, one chest type, the bush-mimic mob
+
+**One chest type**
+- Remove the chest tiers (chest%d tables, tier visuals and text).
+- Every chest is the same chest. What's inside follows the area's drop lean and rarity bonus (biome_run.gd) and the match difficulty tier.
+
+**Chests need keys**
+- A chest is locked; opening it uses one key.
+- Keys drop from monsters, predictably:
+  - In each region (or island, whichever the layout uses), the number of key-carrying monsters equals the number of chests in it. If a region has 5 monsters and 3 chests, 3 of the 5 carry a key.
+  - Which monsters carry them is rolled per match with seeded RNG (its own stream).
+- A key carrier shows a small key glint, so players can choose targets (readability).
+- Keys go into your inventory, drop in your deathbox, and can be picked up from the ground. There's an existing "keys" field on deathboxes; reuse it.
+- Bots know to fight for keys before chests.
+- The HUD shows your key count near the utility belt.
+
+**New monster: a bush mimic** (our own name, e.g. "Shrubling")
+- It sits disguised as an ordinary bush/tall-grass clump (reuse the bush model so it's genuinely hard to spot; give it a tiny tell such as a twitch every few seconds, or two eyes when you're close).
+- When a hunter comes within ~6m, it pops up and sprints away fast (faster than a hunter on foot, slower than a dash), weaving to break line of sight. It dives into the nearest tall grass or bush and re-disguises, then repeats.
+- It always carries a key; some regions' key quota can be filled by a mimic instead of a regular monster.
+- Low health, no attack. Catching it is the challenge: slows, roots, Grounded, grabs and the Boki's Sic should all work.
+- Its sounds: a rustle on reveal, a squeak when hit.
+- Use the existing monster/AI systems (FSM: disguised / alert / flee / hide), steering and the tile A*, and seeded spawns.
+- 1-3 per match, placed in grassy areas.
+- Not capturable (it's a monster, not a Boki); don't touch the reserved Boki files.
+
+**Checks:**
+- Key-carrier count equals chest count per region, and carriers change between seeds.
+- A chest won't open without a key, and opening one uses exactly one key.
+- Keys drop on death and are lootable.
+- Mimic: disguised until approached, flees and re-hides, always drops a key, and can be caught with a root or slow.
+- Bots get keys, then open chests.
