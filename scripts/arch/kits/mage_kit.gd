@@ -82,15 +82,17 @@ func _free_pips(s: Dictionary) -> void:
 func _tick_sparks(dt: float) -> void:
 	for key in sparks.keys():
 		var s: Dictionary = sparks[key]
-		var f: Ent = s["e"]
+		var fv = s["e"]     # untyped first: a freed foe can't be assigned to a typed var
+		var f: Ent = fv if is_instance_valid(fv) else null
 		s["t"] = float(s["t"]) - dt
 		if not is_instance_valid(f) or f.dead or float(s["t"]) <= 0.0 or (f is Hunter and (f as Hunter).downed):
 			_free_pips(s)
 			sparks.erase(key)
 			continue
 		var is_live := int(s["n"]) >= int(res_def()["max"])
-		var node: Node3D = s["node"]
-		if node == null or not is_instance_valid(node):
+		var nv = s["node"]
+		var node: Node3D = nv if is_instance_valid(nv) else null
+		if node == null:
 			node = own_node()
 			var pips: Array = []
 			for i in 4:
@@ -183,6 +185,12 @@ func on_dash(use_ex: bool) -> bool:
 	play("mage_dash")
 	m.sfx("zap", h.pos, -8.0, 0.7)
 	return true
+
+## A Boki merge ends the Wirerun's charge (its lane telegraphs) and the Heavy Coil's hold, with no release.
+func _drop_holds() -> void:
+	_end_wire()
+	rmb_down = false
+	rmb_t = 0.0
 
 func _end_wire() -> void:
 	if wire.is_empty(): return

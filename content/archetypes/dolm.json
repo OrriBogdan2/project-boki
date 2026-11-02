@@ -6,7 +6,7 @@
 	"fantasy": "The quarry-hand. Raises stone out of the ground, then hits it, and hits you.",
 	"silhouette": "the stone shoulder and the heavy fists",
 	"card": {"loop": "Raise rocks with Stone Row or a dash, then punch or slam them into the enemy. A slam that knocks resets itself.", "dash": "Barrel forward and shove a boulder out ahead of you as you land.", "passive": "Sneak to feel enemies in front of you through walls and fog.", "rmb": "Hold to gather, let go to slam: the centre stuns, rocks nearby fly. Kills and knocks reset it.", "e": "Raise a wall of three rocks in front of you. Punch or slam them into foes.", "weapons": {"rubble_fists": "Tap throws a boulder. Hold and let go to punch: it launches foes, stuns them on walls and sends rocks flying."}},
-	"weapons": ["rubble_fists"],
+	"signature": "rubble_fists",
 	"resource": {"id": "rocks", "name": "Rocks", "max": 6, "kind": "count", "col": "#d9a35b"},
 	"passive": {"name": "Tremor Sense", "desc": "While sneaking, every enemy within 16m in a 70 degree cone in front of you shows through walls and fog as a stone ring for half a second, refreshed while you keep sneaking."},
 	"lmb": {"tap": 0.28, "full": 0.9, "boulder": {"dmg": 9.0, "speed": 24.0, "range": 11.0, "rate": 0.6, "size": 0.3, "kb": 1.5}, "punch": {"dmg": [12.0, 24.0], "reach": 2.7, "arc": 120.0, "kb": [6.0, 11.0], "wall_stun": 0.9, "rate": 0.7, "rock_reach": 3.4}},

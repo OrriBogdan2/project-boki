@@ -80,8 +80,9 @@ func _tick(dt: float) -> void:
 	for key in chill.keys():
 		var e: Dictionary = chill[key]
 		e["left"] = float(e["left"]) - dt
-		var t: Ent = e["t"]
-		if float(e["left"]) <= 0.0 or not is_instance_valid(t) or t.dead:
+		var tv = e["t"]     # untyped first: a freed foe can't be assigned to a typed var
+		var t: Ent = tv if is_instance_valid(tv) else null
+		if float(e["left"]) <= 0.0 or t == null or t.dead:
 			chill.erase(key)
 			continue
 		var ck := float(d["passive"].get("chill_slow", 0.15))
@@ -207,6 +208,11 @@ func _tick_rinkrun(dt: float) -> void:
 
 func _ice_bridge() -> void:
 	m.fx.burst(h.pos + Vector3(0, -0.2, 0), res_col(), 4, 1.0, 0.4, 0.0, 1.0)
+
+## A Boki merge ends the Rinkrun (its refund and slide-out are the same as letting go).
+func _drop_holds() -> void:
+	if not rinkrun.is_empty():
+		_rinkrun_end()
 
 func _rinkrun_end() -> void:
 	var dd := dash_def()

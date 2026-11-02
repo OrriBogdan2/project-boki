@@ -63,6 +63,7 @@ func rmb_def() -> Dictionary: return d.get("rmb", {})
 func e_def() -> Dictionary: return d.get("e", {})
 func r_def() -> Dictionary: return d.get("r", {})
 func dash_def() -> Dictionary: return d.get("dash", {})
+func lmb_def() -> Dictionary: return d.get("lmb", {})       # the kit's own attack-key data (kits that run the weapon's attack themselves)
 func res_def() -> Dictionary: return d.get("resource", {})
 func res_max() -> float: return float(res_def().get("max", 100.0))
 func res_col() -> Color: return Color(String(res_def().get("col", "#ffffff")))
@@ -87,6 +88,9 @@ func r_k() -> float: return 1.15 if rank("ult") >= 2 else 1.0
 # ------------------------------------------------------------------ overridable kit
 func _setup() -> void: pass
 func _tick(_dt: float) -> void: pass
+## A Boki merge ends every hold, charge and channel this kit started before R, with no release effect (and keeps them
+## ended while merged: the form's own kit owns the buttons). Each kit with such state overrides this.
+func _drop_holds() -> void: pass
 func fire_rmb(_c: Dictionary) -> void: pass        # c: {hold, air, e, r, full, t, variant}
 func rmb_press_extra() -> bool: return false        # a recast that takes the press (Shadow Step); true = handled
 func rmb_hold_tick(_t: float) -> void: pass          # while RMB is held (shields, charge previews)
@@ -112,6 +116,12 @@ func can_shoot() -> bool: return fire_ok() and fuse.is_empty()
 func res_text() -> String: return "%d" % int(round(res))
 func res_frac() -> float: return clampf(res / maxf(1.0, res_max()), 0.0, 1.0)
 func bot_use(_tgt: Ent, _dist: float, _los: bool) -> void: pass
+## The nearest foe a bot can hit within 12 m (the bot paths of the kits that run their own attack key).
+func _bot_target() -> Ent:
+	var best: Ent = null; var bd := 12.0
+	for f in m.foes_of(h.team):
+		if f.hittable() and h.flat_dist(f) < bd: bd = h.flat_dist(f); best = f
+	return best
 func describe_rmb_variant(c: Dictionary) -> String:
 	for v in ["full", "r", "e", "air", "hold"]:
 		if c.get(v, false): return {"full": "full", "r": "during_r", "e": "during_e", "air": "air", "hold": "hold"}[v]
@@ -119,6 +129,8 @@ func describe_rmb_variant(c: Dictionary) -> String:
 
 # ------------------------------------------------------------------ per step
 func tick(dt: float) -> void:
+	if KinMerge.active(h):
+		_drop_holds()
 	var rate := 1.0 + h.gear_stat("cdr")
 	for k in cd.keys():
 		cd[k] = maxf(0.0, float(cd[k]) - dt * rate)
@@ -360,6 +372,7 @@ func _fire_r(will_bond: bool) -> void:
 	if bonded:
 		_bond_tell()
 		if KinMerge.cast(h):
+			_drop_holds()
 			Feel.hitstop(m, h, h, 0.0, {"bonded": true})
 			Feel.shake(m, "bonded", h, h.pos)
 			if h.is_local() and m.hud: m.hud.flash(Feel.cat_color("control"), 0.25)

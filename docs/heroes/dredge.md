@@ -1,13 +1,11 @@
 # Dredge (archetype `dredge`, heavy)
 
-Internal design doc. Source behaviour: SUPERVIVE hero Kingpin (traceability only; none of its names, text
+Internal design doc. Source behaviour: the hero named in the Inspired-by table in docs/ARCHETYPES.md (traceability only; none of its names, text
 or looks appear in the game). Everything the player sees and hears is ours.
 
 ## Research summary
 Sources (gameplay facts only, written in our own words):
-- https://supervive.wiki.gg/wiki/Kingpin (kit page: passive, LMB, RMB, Shift, Q, R, upgrade lines, patch notes inline)
-- https://deltiasgaming.com/?p=298298 and https://www.breakflip.com/guides/13513.html (role and ability overview)
-- https://www.ludo.guide/guide/supervive/hunters-abilities/hunter-guides/kingpin (ability priority, grab on an ally)
+- The reference hero's public kit page and guides (see the Inspired-by table in docs/ARCHETYPES.md)
 
 Where they disagree: the guides call him a bruiser or an initiator and rank his R first; the wiki lists the numbers.
 The wiki lists no E slot (our E carries the source's Q). Version chosen: the wiki's current page (patches
@@ -15,7 +13,7 @@ The wiki lists no E slot (our E carries the source's Q). Version chosen: the wik
 Only three of the five planned sources had usable detail; patch notes were taken from the wiki page itself.
 
 ## Scaling
-Source Kingpin 1531 HP against our heavy 193 HP: damage x0.13 (Q 196 -> 25), cooldowns about x0.8, distances
+Source hero 1531 HP against our heavy 193 HP: damage x0.13 (Q 196 -> 25), cooldowns about x0.8, distances
 by feel. Cooldown ratios and the source's relative ranges are kept (Grapnel is the longest cooldown, the barge
 the shortest). Rank 2 and 3 use the shared -10%/+15% steps and the per-slot specials below.
 

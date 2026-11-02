@@ -15,9 +15,7 @@
 			"quill_rifle": "A steady auto rifle that loses punch on long strings, and hits Rattled foes harder."
 		}
 	},
-	"weapons": [
-		"quill_rifle"
-	],
+	"signature": "quill_rifle",
 	"resource": {
 		"id": "fever",
 		"name": "Fever",

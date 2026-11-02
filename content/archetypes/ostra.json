@@ -6,7 +6,7 @@
 	"fantasy": "The lamplighter who floats. Pulls the fight to her, then lets it fall in.",
 	"silhouette": "the hovering lantern and the long trailing hem",
 	"card": {"loop": "Damage fills Swell. Swollen, everything you cast is bigger and quicker. Seed, Fan, Trade, then pop it.", "dash": "Lob a lantern and trade places with whatever stands where it lands.", "passive": "Hits fill Swell, ten times faster on hunters. A knock heals you.", "rmb": "Fire a cluster of shards: the first foe is stunned, longer the further it flew.", "e": "Plant a seed that swells for up to 5s. Press again to pop it: bigger and harder the longer it grew.", "weapons": {"tether_lantern": "Slow drifting orbs. Pause 1.4s and the next one is Settled: harder, faster, and it slows."}},
-	"weapons": ["tether_lantern"],
+	"signature": "tether_lantern",
 	"no_hold": true,
 	"resource": {"id": "swell", "name": "Swell", "max": 100, "kind": "meter", "wait": 4.0, "drain": 12.0, "hunter_k": 10.0, "per_dmg": 0.045, "swollen_t": 7.0, "col": "#7fe0d0"},
 	"passive": {"name": "Swell", "desc": "Damage you deal fills Swell (ten times as fast against hunters). Full Swell makes you Swollen for 7s: your seed grows larger and faster, Trade lands sooner, your snap hits 40% harder. A knock heals you 20% of your health."},

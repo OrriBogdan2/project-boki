@@ -1,17 +1,13 @@
 # Vireo (archetype id `mage`, Light)
 
 Internal design note. This file may name the source hero for traceability; nothing in the game does.
-Source behaviour reference: SUPERVIVE hero Joule. Our hero is an original character, the storm-kite
+Source behaviour reference: the hero named in the Inspired-by table in docs/ARCHETYPES.md. Our hero is an original character, the storm-kite
 runner: flight goggles, a cropped jacket, copper coils on both forearms and a copper rod mast flying a
 pennant. Palette: teal and copper. Payoff word: BLOWOUT.
 
 ## Research summary
 Sources (gameplay only):
-- https://supervive.wiki.gg/wiki/Joule (passive, LMB, RMB, Shift, Q, R and rank upgrades)
-- https://supervive.wiki.gg/wiki/Patch_Week_1_Open_Beta and https://supervive.wiki.gg/wiki/Leveling_Rework_%2B_Big_Balance_Patch (timing and rank changes)
-- https://www.destructoid.com/supervive-joule-guide-how-to-play-best-build-powers-and-teams/ (combo order, priorities)
-- https://www.ludo.guide/guide/supervive/hunters-abilities/hunter-guides/joule (ability summary)
-- Steam patch-note listings via search (a later buff to the hero; contents not retrievable).
+- The reference hero's public kit page and guides (see the Inspired-by table in docs/ARCHETYPES.md)
 
 Where they disagreed: the guides rank the Q (lightning strike) and RMB (spear) priorities differently
 (Q first in team fights, spear first in duels); the spear's cast time was raised to 0.33s and the ult's to
@@ -66,7 +62,7 @@ the spear's mote already resets the dash. If Merge later wants a stack-spreading
 | Shift Wirerun (lane growing) | `mage_dash` (held) | sprinter's crouch, both arms back |
 | Shift Wirerun (released) | `mage_dash_go` | flat-out streak, arms trailing, easing to stride |
 | E Skycall | `mage_e` | one hand to the sky, slammed down at the mark |
-Frame strips: `~/shots/heroes-joule-ghost/strip_mage_*.png`.
+Frame strips: `strip_mage_*.png` in the pair's shots folder.
 
 ## Engine notes
 - Grounded and Rattled are `KitStatus` statuses carried by the Net event `["kst", nid, kind, seconds, k]`

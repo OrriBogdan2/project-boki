@@ -1,10 +1,10 @@
 # Bulwark (id `bulwark`, Heavy) - accuracy pass
 
-Behaviour reference: the SUPERVIVE hero Oath (internal note; nothing of the source's names or look ships).
+Behaviour reference: the hero named in the Inspired-by table in docs/ARCHETYPES.md (internal note; nothing of the source's names or look ships).
 
 ## Research summary
 Sources (gameplay only, in our own words):
-- https://supervive.wiki.gg/wiki/Oath (passive, every slot, rank rows; re-read for this finish pass)
+- The reference hero's public kit page and guides (see the Inspired-by table in docs/ARCHETYPES.md)
 - The page's inline patch history: 11.12.24 (wall stun 1s to 0.5s, field heal -20%, no longer repairs a broken shield), 20.11.24 (field heal scales with shield), 05.02.25 (wind-down frames after throw and spin)
 
 What the source does: a thrown hammer that passes through foes and can be recalled (and shows allies the ground around it); a hold-to-charge smash, full at 1.25s; a hold shield that blocks the front, with a bash on the dash key while it is up; a spinning dash that knocks, with a shorter plain dash during a smash; a healing field at the hammer that mends the shield only while it is raised; a travelling, stunning fissure ultimate; a passive where a bash or a full smash that knocks a foe into terrain or another foe stuns briefly and heals.

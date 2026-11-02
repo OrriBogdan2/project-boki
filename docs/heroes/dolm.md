@@ -1,12 +1,12 @@
 # Dolm (archetype id `dolm`, Medium)
 
-Internal note: the behaviour reference is the SUPERVIVE hero Tetra. Nothing below is player-facing; every name, number and
+Internal note: the behaviour reference is the hero named in the Inspired-by table in docs/ARCHETYPES.md. Nothing below is player-facing; every name, number and
 word in the shipped game is our own (renames done in the finish pass: Stonesight -> Tremor Sense, Landslide -> Rubble Rush,
 Rockwave -> Stone Row, which had matched the source names).
 
 ## Research summary
-- Sources read: https://supervive.wiki.gg/wiki/Tetra (ability text, level table; the Patch History section is empty),
-  plus the shared kit conventions in docs/ARCHETYPES.md and docs/DASHES_AND_ABILITY_FEEL.md (Tetra rows: dash and kit cohesion).
+- Sources read: the reference hero's public kit page (ability text, level table; its patch history is empty),
+  plus the shared kit conventions in docs/ARCHETYPES.md and docs/DASHES_AND_ABILITY_FEEL.md (the reference hero's rows: dash and kit cohesion).
   The wiki gives no ranges, stun times or damage numbers for this hero, so ours are derived from our own time-to-kill.
 - Where sources disagree: none. The only mismatch is internal: the page lists the wall under Q and has no E; our kit
   uses E for the wall (ours has no gear-Q conflict because gloves own Q, but the E slot is the kit slot for a tool).
@@ -76,7 +76,7 @@ Stance entry `dolm` in the body-stance table (lean 0.08, wide knees). Strips: `-
 - Rocks and bridges go through `scripts/arch/hero_zones.gd` (HeroZones): solid ground within a step of the caster, no blocker
   tiles, no walls or rocks, no bodies inside, line of sight from the caster, never over the abyss. Bridges only replace abyss tiles
   and restore them. Rocks are Verbs walls (`rock: true`), so they use existing collision.
-- Net 0.10.1: `["zone", ...]` events (rock, rockgo, bridge, seed, pop) through the existing "ev" topic; this is the only sync change.
+- Net 0.14.0: `["zone", ...]` events (rock, rockgo, bridge, seed, pop) through the existing "ev" topic; this is the only sync change.
 - Look: `scripts/match/gear_pair.gd`, `hero_arms.gd`; kit card: `kit_card.gd` shows kits without R.
 - Bot: `bot_use` in the kit (Stone Row when foes close in, punch/slam at range, dash for the boulder).
 - Checks: `--zone-check`, `--dolm-combo-check` (register in main.gd with three lines); screenshots via `scripts/arch/pair_demo.gd`.

@@ -301,6 +301,8 @@ static func infusion_table(ks: KinSpec) -> Array:
 		var ad := def(a)
 		for slot in ["rmb", "e", "r"]:
 			var sd: Dictionary = ad.get(slot, {})
+			if sd.is_empty():
+				continue       # a hero without this slot (no class R: the Merge owns it) has no row
 			var f := fill(sd.get("sockets", {}), inf, slot, String(sd.get("delivery", "projectile" if slot == "rmb" else "burst")))
 			rows.append("%-10s %-3s %-14s %s" % [a, slot.to_upper(), String(sd.get("name", "")), "; ".join(f["notes"])])
 	return rows

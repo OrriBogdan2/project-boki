@@ -92,6 +92,14 @@ func _tick(dt: float) -> void:
 	if h.ctrl == "bot":
 		_bot_idle(dt)
 
+## A Boki merge sets a carried teammate down (unbroken: no stun) and keeps the key from picking anyone up meanwhile.
+func _drop_holds() -> void:
+	if not carrying().is_empty():
+		drop_all(false)
+	carry_t = 0.0
+	setdown_was = false
+	lock_t = maxf(lock_t, 0.3)
+
 # ------------------------------------------------------------------ Bearer (carry)
 func carrying() -> Array:
 	return CareUtil.carried_of(m, h)
@@ -227,9 +235,11 @@ func _stick(e: Ent) -> void:
 
 func _tick_burrs(dt: float) -> void:
 	for b in burrs.duplicate():
-		var t: Ent = b["t"]
-		var n: Node3D = b["node"]
-		if not is_instance_valid(t) or t.dead:
+		var tv = b["t"]     # untyped first: a freed foe or node can't be assigned to a typed var
+		var nv = b["node"]
+		var t: Ent = tv if is_instance_valid(tv) else null
+		var n: Node3D = nv if is_instance_valid(nv) else null
+		if t == null or t.dead:
 			if is_instance_valid(n): n.queue_free()
 			burrs.erase(b)
 			continue

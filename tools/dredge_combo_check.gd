@@ -175,5 +175,29 @@ func _all() -> void:
 	for dz in range(-6, 7):
 		for dx in range(3, 6):
 			W.kind[W.idx(hx + dx, hz + dz)] = World.T_GROUND
+	# --- a Boki merge that starts mid-reel / mid-wind-up ends them: the rope goes, no Anchor slam, no landing hit
+	reset.call()
+	ak.tap(m, P)
+	ak.step(m, 0.3)
+	var reeling: bool = not K.pull.is_empty()
+	ok("merge hold: the reel is under way before the merge", reeling, "pull %s" % reeling)
+	var rope: Node3D = K.pull.get("node")
+	var ar0 := K.arrivals
+	ok("merge hold: a merge is under way", ak.merge_now(P))
+	ak.step(m, 0.1)
+	ok("merge hold: dredge's reel ends with the merge, the rope is freed, nobody lands Grounded", K.pull.is_empty() and (rope == null or not is_instance_valid(rope) or rope.is_queued_for_deletion()) and K.arrivals == ar0 and not KitStatus.grounded(T), "pull %s arrivals %d" % [not K.pull.is_empty(), K.arrivals - ar0])
+	KinMerge.end(P, "test")
+	P.merge_cd = 0.0
+	reset.call()
+	P.hp = P.max_hp
+	K.cd["e"] = 0.0
+	K.cast_e()
+	ak.step(m, 0.1)
+	var winding: bool = K.wind > 0.0
+	var an0 := K.anchors
+	ok("merge hold: the Anchor is winding up before the merge", winding, "wind %.2f" % K.wind)
+	ok("merge hold: a merge is under way", ak.merge_now(P))
+	ak.step(m, 1.2)
+	ok("merge hold: dredge's Anchor wind-up is dropped, no slam mid-merge", K.wind <= 0.0 and K.anchors == an0, "wind %.2f anchors %d" % [K.wind, K.anchors - an0])
 	m.queue_free()
 	await main.get_tree().process_frame

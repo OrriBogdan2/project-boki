@@ -15,9 +15,7 @@
 			"coilcaster": "A copper coil on the forearm that spits bolts which pass through everyone in a line; each hit loads a Spark."
 		}
 	},
-	"weapons": [
-		"coilcaster"
-	],
+	"signature": "coilcaster",
 	"resource": {
 		"id": "sparks",
 		"name": "Sparks",
