@@ -1,0 +1,14 @@
+{
+	"desc": "Capture by scan (docs/decisions/0002). A wild Boki that is knocked out (dazed) can be scanned: hold the interact key for hold_s to commit, then the scan runs by itself for scan_s. Times in seconds, distances in metres.",
+	"hold_s": 0.4,
+	"scan_s": 4.0,
+	"range": 3.5,
+	"cancel_range": 5.0,
+	"box_capacity": 3,
+	"box_capacity_doc": "How many captured Boki (capsules) a hunter can carry in the run box (Hunter.caught). Full: a new scan is blocked until one is released.",
+	"noise_every_s": 0.5,
+	"hear_range": 26.0,
+	"rise_pitch": [0.8, 1.6],
+	"sight_range": 24.0,
+	"sight_places_kept": 3
+}

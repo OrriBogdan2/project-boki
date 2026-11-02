@@ -521,7 +521,11 @@ static func shimmer_col(c: Color) -> Color:
 static func ghost_col(c: Color) -> Color:
 	return c.lerp(Color("cfeff0"), 0.55).lerp(Color("9ff0e0"), 0.12)
 
-## The Kindex: what you've seen, caught and grown.
+## The Field Book entry for a species ({} if never seen).
+static func dex_entry(species: String) -> Dictionary:
+	return (Save.d.get("dex", {}) as Dictionary).get(species, {})
+
+## The Field Book: what you've seen (and where), caught and grown.
 static func dex_mark(species: String, what: String, extra := "") -> void:
 	if not Save.d.has("dex"):
 		Save.d["dex"] = {}
@@ -530,7 +534,13 @@ static func dex_mark(species: String, what: String, extra := "") -> void:
 		dx[species] = {"seen": false, "caught": false, "forms": [], "shimmer": false}
 	var e: Dictionary = dx[species]
 	if not e.has("mutations"): e["mutations"] = []
+	if not e.has("places"): e["places"] = []
 	match what:
+		"place":
+			if extra != "" and not (e["places"] as Array).has(extra):
+				(e["places"] as Array).append(extra)
+				while (e["places"] as Array).size() > int(Content.rules("capture")["sight_places_kept"]):
+					(e["places"] as Array).pop_front()
 		"seen": e["seen"] = true
 		"caught": e["seen"] = true; e["caught"] = true
 		"form":
@@ -539,7 +549,7 @@ static func dex_mark(species: String, what: String, extra := "") -> void:
 		"mutation":
 			if extra != "" and not (e["mutations"] as Array).has(extra): e["mutations"].append(extra)
 
-## Everything already in the roster counts toward the Kindex.
+## Everything already in the roster counts toward the Field Book.
 static func dex_sync() -> void:
 	for rec in Save.d.get("roster", []):
 		dex_mark(rec["species"], "caught")
@@ -548,7 +558,7 @@ static func dex_sync() -> void:
 		if rec.get("shimmer", false): dex_mark(rec["species"], "shimmer")
 		for mid in Mutations.of(rec): dex_mark(rec["species"], "mutation", mid)
 
-## A new kin of yours: caught, seen through to the Kindex, shimmer and mutations noted.
+## A new kin of yours: caught, seen through to the Field Book, shimmer and mutations noted.
 static func dex_got(rec: Dictionary) -> void:
 	dex_mark(rec["species"], "caught")
 	if rec.get("shimmer", false): dex_mark(rec["species"], "shimmer")

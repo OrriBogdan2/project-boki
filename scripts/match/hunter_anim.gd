@@ -1748,7 +1748,7 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 # ---------------------------------------------------------------- interact holds
 ## Holding interact (Hunter.holding(), synced in the snapshot flags): a pose for each thing, looping
 ## for the whole hold, and easing off cleanly when the hold stops or is interrupted.
-##   tame     down on one knee, a calming hand out low, slowly patting the air
+##   scan     down on one knee, a calming hand out low, slowly patting the air
 ##   revive   on one knee, both hands on them, pressing
 ##   chest    squatting, both hands under the lid, heaving it up
 ##   dial     standing at the lectern, both hands on the dial, turning it
@@ -1760,7 +1760,7 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 ##   key      crouched at the hatch, turning a key
 ##   loot     crouched over a deathbox, rummaging
 ##   rune     both palms on the stone
-const ACT_KNEEL := ["tame", "revive", "key", "loot"]
+const ACT_KNEEL := ["scan", "revive", "key", "loot"]
 func _act_tick(dt: float, s: Dictionary, grounded: bool, spd: float) -> void:
 	var want := String(s.get("act", ""))
 	if not grounded or spd > 2.2 or s.get("downed", false) or float(s.get("stomp", -1.0)) >= 0.0:
@@ -1777,7 +1777,7 @@ func _act_tick(dt: float, s: Dictionary, grounded: bool, spd: float) -> void:
 func _act_legs() -> Vector4:
 	var w := sin(act_t * 3.0)
 	match act_kind:
-		"tame", "revive", "key", "loot":
+		"scan", "revive", "key", "loot":
 			return Vector4(1.35, -1.45, -0.15, -1.9)
 		"chest":
 			var heave := 0.5 + 0.5 * sin(act_t * 3.4)
@@ -1795,7 +1795,7 @@ func _act_legs() -> Vector4:
 ## How far forward the body leans into the hold (negative leans back).
 func _act_pitch() -> float:
 	match act_kind:
-		"tame": return 0.25 + 0.04 * sin(act_t * 1.6)
+		"scan": return 0.25 + 0.04 * sin(act_t * 1.6)
 		"revive": return 0.4 + 0.06 * maxf(0.0, sin(act_t * 6.0))
 		"key", "loot": return 0.35
 		"chest": return 0.5 - 0.25 * (0.5 + 0.5 * sin(act_t * 3.4))
@@ -1812,7 +1812,7 @@ func _act_pitch() -> float:
 func _act_hands(sh_l: Vector3, sh_r: Vector3) -> Array:
 	var t := act_t
 	match act_kind:
-		"tame":
+		"scan":
 			var pat := sin(t * 1.8) * 0.05
 			return [sh_l + Vector3(0.1, -0.22 + pat, -0.44), sh_r, 0.0]
 		"revive":

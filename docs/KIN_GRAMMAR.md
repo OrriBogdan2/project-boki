@@ -64,7 +64,7 @@ files (one per kind of mistake) and should always print errors. Phase 3 builds t
   step, medium roll, heavy shoulder charge); the kin adds a **dodge rider** to it.
 - The kin gives **1 player-cast active (E)**, optionally **1 auto active** it casts itself when it's
   out (driven by its personality and the ability's cue), and the **merge** (bond ultimate, R).
-- Throw/recall, the shared bond meter, player-kin combos (`content/combos`), personality-driven kin
+- Sic / Call back and the order wheel, the shared bond meter, player-kin combos (`content/combos`), personality-driven kin
   AI (KinTactics), run levels and slot ranks (`Hunter.slot_lv`) all stay. Ranks grow an ability's numbers
   through a core table per part (today's `Effects` rank table), never through data.
 
@@ -136,7 +136,7 @@ has two damage effects, so presets live on parts.)
 | `id`, `name` | yes | |
 | `animals` | yes | the 1 or 2 real animals it's based on |
 | `theme` | | cosmetic (what used to be its element "type") |
-| `flavor` | | reveal card / Kindex line |
+| `flavor` | | reveal card / Field Book line |
 | `colors` | yes | `body`, `belly`, `glow`, optional `wing` (hex) |
 | `look` | yes | `body` `ears` `tail` `feet` `aura`: core model builder ids (`LOOK`) |
 | `body` | yes | `size` (small, medium, large), `reach`, `mass`, `gait` (`hop_rate`, `hop_height`, `pace`) |

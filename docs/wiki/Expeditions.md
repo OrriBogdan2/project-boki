@@ -121,7 +121,7 @@ Three ways out, each with its own risk:
 | **Uplink outpost** (walled yards) | Hold F at the mast to start it, then hold the yard while it charges (about 40 s alone; two or more of your squad charge it faster). The lift opens when it's done. | Starting it brings monsters. A rival in the yard stalls it, and one who holds it alone for 5 s takes it over. An empty yard drains the charge. |
 
 Extract and everything you carry goes home: weapons and gloves to the Armory, valuables to sell, Boki
-you tamed to your farm.
+you scanned to your farm.
 
 ## Down, dead and back
 
