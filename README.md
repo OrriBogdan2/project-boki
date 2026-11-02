@@ -2,7 +2,7 @@
 
 Review shots for each hero: kit card, each ability, the payoff, animation frame strips and a neutral full-body portrait. PNGs are downscaled to at most 1280 px wide. Captions come from the shot manifests.
 
-Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-tender), [Tamsin](#tamsin-rimewright), [Dredge](#dredge-dredge), [Ashwick](#ashwick-ashwick), [Dolm](#dolm-dolm), [Ostra](#ostra-ostra), [Archer](#archer-archer), [Bulwark](#bulwark-bulwark), [Thief](#thief-thief), [Juggernaut](#juggernaut-juggernaut), [Farm building](#farm-building-farmbuild), [classes](#classes-classes), [aimkit](#aimkit-aimkit), [moosh-moosh/v2](#moosh-moosh/v2-moosh-moosh/v2), [moosh-moosh/v2/anim](#moosh-moosh/v2/anim-moosh-moosh/v2/anim), [tamsin/v2](#tamsin/v2-tamsin/v2), [tamsin/v2/anim](#tamsin/v2/anim-tamsin/v2/anim), [dancer/v2](#dancer/v2-dancer/v2), [dancer/v2/before](#dancer/v2/before-dancer/v2/before), [zedran/v2](#zedran/v2-zedran/v2), [zedran/v2/before](#zedran/v2/before-zedran/v2/before), [dancer/v2/anim](#dancer/v2/anim-dancer/v2/anim), [zedran/v2/anim](#zedran/v2/anim-zedran/v2/anim)
+Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-tender), [Tamsin](#tamsin-rimewright), [Dredge](#dredge-dredge), [Ashwick](#ashwick-ashwick), [Dolm](#dolm-dolm), [Ostra](#ostra-ostra), [Archer](#archer-archer), [Bulwark](#bulwark-bulwark), [Thief](#thief-thief), [Juggernaut](#juggernaut-juggernaut), [Farm building](#farm-building-farmbuild), [classes](#classes-classes), [aimkit](#aimkit-aimkit), [moosh-moosh/v2](#moosh-moosh/v2-moosh-moosh/v2), [moosh-moosh/v2/anim](#moosh-moosh/v2/anim-moosh-moosh/v2/anim), [tamsin/v2](#tamsin/v2-tamsin/v2), [tamsin/v2/anim](#tamsin/v2/anim-tamsin/v2/anim), [dancer/v2](#dancer/v2-dancer/v2), [dancer/v2/before](#dancer/v2/before-dancer/v2/before), [zedran/v2](#zedran/v2-zedran/v2), [zedran/v2/before](#zedran/v2/before-zedran/v2/before), [dancer/v2/anim](#dancer/v2/anim-dancer/v2/anim), [zedran/v2/anim](#zedran/v2/anim-zedran/v2/anim), [linwick/v2](#linwick/v2-linwick/v2), [linwick/v2/anim](#linwick/v2/anim-linwick/v2/anim), [linwick/v2/before](#linwick/v2/before-linwick/v2/before), [linwick/v2/after](#linwick/v2/after-linwick/v2/after), [dredge/v2](#dredge/v2-dredge/v2), [dredge/v2/anim](#dredge/v2/anim-dredge/v2/anim), [dredge/v2/before](#dredge/v2/before-dredge/v2/before), [dredge/v2/after](#dredge/v2/after-dredge/v2/after)
 
 ## Vireo (mage)
 
@@ -1069,3 +1069,267 @@ Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-t
 **Enraged roar (6 frames: anticipation, release, follow-through, recovery)**
 
 ![Enraged roar (6 frames: anticipation, release, follow-through, recovery)](zedran/v2/anim/anim/jug_roar.png)
+
+## linwick/v2 (linwick/v2)
+
+**Linwick full body with the new Torch Lance (bell nozzle, cyan pilot cage, fuel canister, hose)**
+
+![Linwick full body with the new Torch Lance (bell nozzle, cyan pilot cage, fuel canister, hose)](linwick/v2/portrait.png)
+
+**Kit card in the new format: role line, then Shift, passive, LMB, RMB, E**
+
+![Kit card in the new format: role line, then Shift, passive, LMB, RMB, E](linwick/v2/card.png)
+
+**Torch Lance telegraph: the cyan pilot flame flares for 0.2s before the fire**
+
+![Torch Lance telegraph: the cyan pilot flame flares for 0.2s before the fire](linwick/v2/lance_pilot.png)
+
+**Torch Lance key frame: the hose stream, narrow at the nozzle, billowing at 7m past the dummy**
+
+![Torch Lance key frame: the hose stream, narrow at the nozzle, billowing at 7m past the dummy](linwick/v2/lance_stream.png)
+
+**Torch Lance impact: the foe burning, flame pips over its head**
+
+![Torch Lance impact: the foe burning, flame pips over its head](linwick/v2/lance_burning.png)
+
+**Torch Lance sweep: the stream lags and curves behind the swung nozzle (hose, not a cone)**
+
+![Torch Lance sweep: the stream lags and curves behind the swung nozzle (hose, not a cone)](linwick/v2/lance_sweep_bend.png)
+
+**Cinder Shot telegraph: hold RMB, the thin white lane to the cursor with its end ring, gun arm cocked**
+
+![Cinder Shot telegraph: hold RMB, the thin white lane to the cursor with its end ring, gun arm cocked](linwick/v2/cinder_lane.png)
+
+**Cinder Shot key frame: release, the arm thrust, the fireball leaving**
+
+![Cinder Shot key frame: release, the arm thrust, the fireball leaving](linwick/v2/cinder_release.png)
+
+**Cinder Shot impact: red flash, ember spray, ABLAZE on the dummy**
+
+![Cinder Shot impact: red flash, ember spray, ABLAZE on the dummy](linwick/v2/cinder_impact.png)
+
+**Cinder Shot impact, a beat later: embers still rising**
+
+![Cinder Shot impact, a beat later: embers still rising](linwick/v2/cinder_impact_b.png)
+
+**Soot Ram key frame: head first with the flame skull wrapped round his front, ember tails**
+
+![Soot Ram key frame: head first with the flame skull wrapped round his front, ember tails](linwick/v2/ram_skull.png)
+
+**Soot Ram impact: the dash stops on the dummy with a fiery sunburst**
+
+![Soot Ram impact: the dash stops on the dummy with a fiery sunburst](linwick/v2/ram_impact.png)
+
+**Furnace Cloak telegraph: the thin orange edge ring at 4.5m for 0.2s, arms crossed**
+
+![Furnace Cloak telegraph: the thin orange edge ring at 4.5m for 0.2s, arms crossed](linwick/v2/cloak_ring.png)
+
+**Furnace Cloak key frame: the spiky sunburst blast and cracked scorch, arms flung wide**
+
+![Furnace Cloak key frame: the spiky sunburst blast and cracked scorch, arms flung wide](linwick/v2/cloak_blast.png)
+
+**Furnace Cloak impact: the dummy dragged in, the swirling fire shield on Linwick**
+
+![Furnace Cloak impact: the dummy dragged in, the swirling fire shield on Linwick](linwick/v2/cloak_shield.png)
+
+**Flashover passive: three flame pips over a foe that Flashed over (one pip when Ablaze)**
+
+![Flashover passive: three flame pips over a foe that Flashed over (one pip when Ablaze)](linwick/v2/flashover_pips.png)
+
+**Air dash (class air dash, Linwick's variant): the flame-jet tuck**
+
+![Air dash (class air dash, Linwick's variant): the flame-jet tuck](linwick/v2/air_hop.png)
+
+## linwick/v2/anim (linwick/v2/anim)
+
+**Torch Lance strip: set feet, pilot, roar kick, braced hold**
+
+![Torch Lance strip: set feet, pilot, roar kick, braced hold](linwick/v2/anim/lance.png)
+
+**Torch Lance sweep strip: the body tracks the swing, the stream trails**
+
+![Torch Lance sweep strip: the body tracks the swing, the stream trails](linwick/v2/anim/lance_sweep.png)
+
+**Cinder Shot strip: anticipation (cocked, lane), release thrust (overshoot), recoil, settle**
+
+![Cinder Shot strip: anticipation (cocked, lane), release thrust (overshoot), recoil, settle](linwick/v2/anim/cinder.png)
+
+**Soot Ram strip: coil, head-first launch, impact squash, upright recovery**
+
+![Soot Ram strip: coil, head-first launch, impact squash, upright recovery](linwick/v2/anim/ram.png)
+
+**Air dash strip: tuck, jet, settle**
+
+![Air dash strip: tuck, jet, settle](linwick/v2/anim/air_hop.png)
+
+**Furnace Cloak strip: curl in, fling wide on the blast, hold, settle**
+
+![Furnace Cloak strip: curl in, fling wide on the blast, hold, settle](linwick/v2/anim/cloak.png)
+
+**Flashover payoff strip: fist pump, lean back, bounce**
+
+![Flashover payoff strip: fist pump, lean back, bounce](linwick/v2/anim/flashover.png)
+
+## linwick/v2/before (linwick/v2/before)
+
+**BEFORE (origin/main): the rigid instant cone of fire**
+
+![BEFORE (origin/main): the rigid instant cone of fire](linwick/v2/before/lance.png)
+
+**BEFORE (origin/main): Spark Leap passes through the foe, dust trail**
+
+![BEFORE (origin/main): Spark Leap passes through the foe, dust trail](linwick/v2/before/ram.png)
+
+**BEFORE (origin/main): the burn upgrade with no stage marker on the foe**
+
+![BEFORE (origin/main): the burn upgrade with no stage marker on the foe](linwick/v2/before/burn_stage.png)
+
+## linwick/v2/after (linwick/v2/after)
+
+**AFTER: the hose stream from a cyan pilot (gap 1)**
+
+![AFTER: the hose stream from a cyan pilot (gap 1)](linwick/v2/after/lance.png)
+
+**AFTER: Soot Ram stops on the foe, flame skull and impact burst (gaps 2 and 3)**
+
+![AFTER: Soot Ram stops on the foe, flame skull and impact burst (gaps 2 and 3)](linwick/v2/after/ram.png)
+
+**AFTER: burn stage pips over the foe (gap 4)**
+
+![AFTER: burn stage pips over the foe (gap 4)](linwick/v2/after/burn_stage.png)
+
+## dredge/v2 (dredge/v2)
+
+**Dredge full body with the new harbour scattergun (brass bell, rope-wrapped pump, slug drum)**
+
+![Dredge full body with the new harbour scattergun (brass bell, rope-wrapped pump, slug drum)](dredge/v2/portrait.png)
+
+**Kit card in the new format: role line, then Shift, passive, LMB, RMB, E**
+
+![Kit card in the new format: role line, then Shift, passive, LMB, RMB, E](dredge/v2/card.png)
+
+**Scattergun reticle idle: one thin aim line to the cursor**
+
+![Scattergun reticle idle: one thin aim line to the cursor](dredge/v2/gun_idle_line.png)
+
+**Scattergun telegraph and key frame: the spread's two edge lines on the ground, muzzle flash, recoil**
+
+![Scattergun telegraph and key frame: the spread's two edge lines on the ground, muzzle flash, recoil](dredge/v2/gun_cone_fire.png)
+
+**Scattergun impact: slugs stopped at 6.3m hanging as violet dots**
+
+![Scattergun impact: slugs stopped at 6.3m hanging as violet dots](dredge/v2/gun_slugs_hang.png)
+
+**Grapnel telegraph/key frame: the braided rope and brass claw in flight**
+
+![Grapnel telegraph/key frame: the braided rope and brass claw in flight](dredge/v2/grapnel_flight.png)
+
+**Grapnel reel: HOOKED, Dredge GROUNDED with the chain ring, the target stunned on the rope**
+
+![Grapnel reel: HOOKED, Dredge GROUNDED with the chain ring, the target stunned on the rope](dredge/v2/grapnel_reel.png)
+
+**Grapnel impact: HAULED, the foe at his feet, Grounded**
+
+![Grapnel impact: HAULED, the foe at his feet, Grounded](dredge/v2/grapnel_hauled.png)
+
+**Anchor Drop wind-up: the hop forward toward the dummy**
+
+![Anchor Drop wind-up: the hop forward toward the dummy](dredge/v2/anchor_hop.png)
+
+**Anchor Drop key frame: the giant ghost anchor and crescent sweep slam down**
+
+![Anchor Drop key frame: the giant ghost anchor and crescent sweep slam down](dredge/v2/anchor_slam.png)
+
+**Anchor Drop impact: dust, ANCHORED, the stun spiral**
+
+![Anchor Drop impact: dust, ANCHORED, the stun spiral](dredge/v2/anchor_stun.png)
+
+**Anchor Drop in the air, telegraph: the landing ring with ticks while he smashes straight down**
+
+![Anchor Drop in the air, telegraph: the landing ring with ticks while he smashes straight down](dredge/v2/air_ring.png)
+
+**Anchor Drop in the air, impact: the landing ring of damage, sunburst, ANCHORED**
+
+![Anchor Drop in the air, impact: the landing ring of damage, sunburst, ANCHORED](dredge/v2/air_quake.png)
+
+**Anchor Drop in the air, a beat later: the scorch and the ring fading**
+
+![Anchor Drop in the air, a beat later: the scorch and the ring fading](dredge/v2/air_quake_b.png)
+
+**Barge key frame: the red spiky burst at the start point, shoulder-first dash**
+
+![Barge key frame: the red spiky burst at the start point, shoulder-first dash](dredge/v2/barge_burst.png)
+
+**Barge recovery: crouched landing, ember scorch left behind**
+
+![Barge recovery: crouched landing, ember scorch left behind](dredge/v2/barge_land.png)
+
+**Air barge (class air dash, 35% further): arms flung wide**
+
+![Air barge (class air dash, 35% further): arms flung wide](dredge/v2/air_barge.png)
+
+**Salvage stack: the flex and the brass ring**
+
+![Salvage stack: the flex and the brass ring](dredge/v2/salvage_flex.png)
+
+## dredge/v2/anim (dredge/v2/anim)
+
+**Scattergun strip: kick, side-on rock back, swing back to the aim**
+
+![Scattergun strip: kick, side-on rock back, swing back to the aim](dredge/v2/anim/gun.png)
+
+**Grapnel throw strip: coil back, punch out, arm extended**
+
+![Grapnel throw strip: coil back, punch out, arm extended](dredge/v2/anim/grapnel_throw.png)
+
+**Grapnel reel strip: braced side-on, hand over hand**
+
+![Grapnel reel strip: braced side-on, hand over hand](dredge/v2/anim/grapnel_reel.png)
+
+**Anchor Drop strip: fist hauled back, hop, fist driven down, crouch, rebound**
+
+![Anchor Drop strip: fist hauled back, hop, fist driven down, crouch, rebound](dredge/v2/anim/anchor.png)
+
+**Air Anchor strip: fists overhead dropping, the landing squash, heave up**
+
+![Air Anchor strip: fists overhead dropping, the landing squash, heave up](dredge/v2/anim/anchor_air.png)
+
+**Barge strip: coil, shoulder launch, lumbering shove, crouched landing, settle**
+
+![Barge strip: coil, shoulder launch, lumbering shove, crouched landing, settle](dredge/v2/anim/barge.png)
+
+**Air barge strip: arms wide, legs pumping, heavy settle**
+
+![Air barge strip: arms wide, legs pumping, heavy settle](dredge/v2/anim/air_barge.png)
+
+**Salvage strip: chest out, flex, stomp**
+
+![Salvage strip: chest out, flex, stomp](dredge/v2/anim/salvage.png)
+
+## dredge/v2/before (dredge/v2/before)
+
+**BEFORE (origin/main): a thin single glow line, stops at walls, caster free**
+
+![BEFORE (origin/main): a thin single glow line, stops at walls, caster free](dredge/v2/before/grapnel_reel.png)
+
+**BEFORE (origin/main): a 0.22s wind-up in place, plain cone**
+
+![BEFORE (origin/main): a 0.22s wind-up in place, plain cone](dredge/v2/before/anchor.png)
+
+**BEFORE (origin/main): a dust trail only**
+
+![BEFORE (origin/main): a dust trail only](dredge/v2/before/barge.png)
+
+## dredge/v2/after (dredge/v2/after)
+
+**AFTER: braided rope through rocks, the caster Grounded (gaps 1, 5, 8)**
+
+![AFTER: braided rope through rocks, the caster Grounded (gaps 1, 5, 8)](dredge/v2/after/grapnel_reel.png)
+
+**AFTER: the hop forward and the 0.38s slam with the ghost anchor (gaps 6, 7)**
+
+![AFTER: the hop forward and the 0.38s slam with the ghost anchor (gaps 6, 7)](dredge/v2/after/anchor.png)
+
+**AFTER: the start-point burst and scorch (gap 10)**
+
+![AFTER: the start-point burst and scorch (gap 10)](dredge/v2/after/barge.png)
