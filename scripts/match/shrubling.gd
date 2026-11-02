@@ -35,13 +35,14 @@ func init_shrub(match_node: Node, id: String, at: Vector3, tier := 1.0) -> void:
 	_twitch_in = randf_range(float((sr["twitch_s"] as Array)[0]), float((sr["twitch_s"] as Array)[1]))
 	KeyCarry.mark(self)
 	_show_glint(false)
+	ShrublingModel.recolour(model, leaf_colour(m, at))      # the same colour as the grass it hides in
 
-## Built by Models.mob: the grass tinted with the leaf colour of the island it hides on.
 ## True for a Shrubling that is still pretending to be a bush. Anything that PICKS a target for a Boki
 ## (Chase, the engage scan) calls this and skips it, so a Boki does not give a bush away; a hit still lands.
 static func hidden(e: Ent) -> bool:
 	return e is Shrubling and (e as Shrubling).ss == "disguised"
 
+## The colour World gives a tall-grass tile at `at` (its biome's leaf, a third of the way to the top).
 static func leaf_colour(m: Node, at: Vector3) -> Color:
 	var w: World = m.world if m != null and m.get("world") else null
 	if w != null and w.inb(int(floor(at.x)), int(floor(at.z))):
@@ -236,6 +237,7 @@ func _rehide(sr: Dictionary) -> void:
 		return
 	_set_state("disguised")
 	grace = float(sr["grace_s"])
+	ShrublingModel.recolour(model, leaf_colour(m, pos))      # (it may have run onto another island)
 
 ## The same move step as every Mob: ease the velocity toward the wish, never walk off the edge.
 func _move(dt: float, wish: Vector2, spd: float) -> void:

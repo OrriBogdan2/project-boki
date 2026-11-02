@@ -42,8 +42,12 @@ static func frame(m: Match) -> void:
 		m.set_meta("kdemo2", true)
 		var s: Shrubling = m.get_meta("kdemo_s")
 		var to := (s.pos - P.pos); to.y = 0
-		P.teleport(s.pos - to.normalized() * 4.0)
+		P.teleport(s.pos - to.normalized() * 4.5)
 		P.inp["aim"] = s.pos
+	if parts[0] == "glint" and m.has_meta("kdemo_car"):
+		var car: Mob = m.get_meta("kdemo_car")      # (held in place, so it poses beside you, not on you)
+		if is_instance_valid(car) and not car.dead:
+			car.pos = m.get_meta("kdemo_at"); car.vel = Vector3.ZERO
 	if parts[0] == "shrub" and m.has_meta("kdemo_s"):
 		var s2: Shrubling = m.get_meta("kdemo_s")
 		P.inp["aim"] = s2.pos
@@ -91,24 +95,32 @@ static func _chest(m: Match, P: Hunter, keys: int) -> void:
 static func _glint(m: Match, P: Hunter, K: KeyRun) -> void:
 	var car: Mob = null
 	for mb in K.carriers:
-		if mb is Shrubling or mb.dead: continue
+		if mb is Shrubling or mb.dead or mb.mass() > 1.0 or mb.rarity > 0: continue      # (a plain small one reads best)
+		var q: Vector3 = mb.pos + Vector3(3.5, 0, 1.5)
+		if absf(m.world.ground_at(mb.pos.x, mb.pos.z) - mb.pos.y) > 0.6 or m.world.is_block(q.x, q.z) or m.world.is_void(q.x, q.z) \
+				or m.world.island_of(q.x, q.z) != m.world.island_of(mb.pos.x, mb.pos.z) or m.world.biome_at(mb.pos.x, mb.pos.z) == "ember":
+			continue      # (a carrier in the open, with room to stand in front of it)
 		if car == null or mb.pos.distance_to(P.pos) < car.pos.distance_to(P.pos): car = mb
 	if car == null:
 		return
-	P.teleport(car.pos + Vector3(0, 0, 4.2))
+	P.teleport(car.pos + Vector3(3.5, 0, 1.5))
 	m.set_meta("zoom_hold", 0.62)
+	m.set_meta("kdemo_car", car); m.set_meta("kdemo_at", car.pos)
 	P.inp["aim"] = car.pos
 	for mb in m.mobs.duplicate():
 		if mb != car and (mb as Mob).pos.distance_to(car.pos) < 9.0:
 			m.mobs.erase(mb); mb.queue_free()
-	print("KEYSDEMO carrier %s at (%.0f,%.0f)" % [car.kind, car.pos.x, car.pos.z])
+	print("KEYSDEMO carrier %s at (%.0f,%.0f)" % [car.mkind, car.pos.x, car.pos.z])
 
 static func _shrub(m: Match, P: Hunter, K: KeyRun) -> void:
 	if K.shrublings.is_empty():
 		return
 	var s: Shrubling = K.shrublings[0]
 	m.set_meta("kdemo_s", s)
-	var to := Vector3(0, 0, 1)
+	for mb in m.mobs.duplicate():
+		if mb != s and (mb as Mob).pos.distance_to(s.pos) < 20.0:
+			m.mobs.erase(mb); mb.queue_free()      # (just the bush and you in the shot)
+	var to := Vector3(1, 0, 0)      # (from the side: it runs across the screen, clear of the hunter's bars)
 	P.teleport(s.pos + to * 9.0)
 	m.set_meta("zoom_hold", 0.62)
 	P.inp["aim"] = s.pos

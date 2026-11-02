@@ -56,6 +56,15 @@ static func build(col: Color) -> Node3D:
 	root.set_meta("mats", mats)
 	return root
 
+## Re-dresses the tufts in `col` (the leaf colour of the island it hides on), keeping each tuft's shade.
+static func recolour(model: Node3D, col: Color) -> void:
+	if model == null or not model.has_meta("tufts"):
+		return
+	var mm: MultiMesh = model.get_meta("tufts")
+	var r := RandomNumberGenerator.new(); r.seed = int(col.r * 977.0 + col.g * 331.0 + col.b * 59.0) + 5
+	for k in mm.instance_count:
+		mm.set_instance_color(k, col.darkened(r.randf_range(0.0, 0.18)))
+
 ## Poses it: k 0 = disguised grass, 1 = up on its legs; t is the run clock, twitch 0..1 a shiver
 ## through the blades, eyes whether the tell-tale eyes show while it is still disguised.
 static func pose(model: Node3D, k: float, t: float, speed: float, twitch: float, eyes: bool) -> void:
