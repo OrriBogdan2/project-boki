@@ -5,7 +5,7 @@ extends RefCounted
 ##   thicket   you at the edge of the biggest tall-grass patch in the bloom biome, nothing else about
 ##   chest     you beside a locked chest, no key (the padlock and the key count on the HUD); keys=2 gives you two
 ##   glint     you looking at a monster that carries a key, the glint over its head
-##   shrub     a Shrubling 8 m ahead; at 2.0 s you step inside its alert range, so ~2.6 s shows it revealed and fleeing
+##   shrub     you hiding inside a Shrubling; at 2.0 s you hit it, so ~2.4 s shows it bolting and you in the open
 
 static var _what := "?"
 
@@ -41,18 +41,12 @@ static func frame(m: Match) -> void:
 	if parts[0] == "shrub" and m.time >= 2.0 and not m.has_meta("kdemo2"):
 		m.set_meta("kdemo2", true)
 		var s: Shrubling = m.get_meta("kdemo_s")
-		var to := (s.pos - P.pos)
-		to.y = 0
-		P.teleport(s.pos - to.normalized() * 4.5)
-		P.inp["aim"] = s.pos
+		s.hurt(1.0, P, {"src": "shot"})
 	if parts[0] == "glint" and m.has_meta("kdemo_car"):
 		var car: Mob = m.get_meta("kdemo_car")      # (held in place, so it poses beside you, not on you)
 		if is_instance_valid(car) and not car.dead:
 			car.pos = m.get_meta("kdemo_at")
 			car.vel = Vector3.ZERO
-	if parts[0] == "shrub" and m.has_meta("kdemo_s"):
-		var s2: Shrubling = m.get_meta("kdemo_s")
-		P.inp["aim"] = s2.pos
 
 static func _thicket(m: Match, P: Hunter, K: KeyRun) -> void:
 	var W := m.world
@@ -132,8 +126,7 @@ static func _shrub(m: Match, P: Hunter, K: KeyRun) -> void:
 			# (just the bush and you in the shot)
 			m.mobs.erase(mb)
 			mb.queue_free()
-	var to := Vector3(1, 0, 0)      # (from the side: it runs across the screen, clear of the hunter's bars)
-	P.teleport(s.pos + to * 9.0)
+	P.teleport(s.pos + Vector3(0.15, 0, 0.1))
 	m.set_meta("zoom_hold", 0.62)
-	P.inp["aim"] = s.pos
+	P.inp["aim"] = s.pos + Vector3(-4.0, 0, 0)
 	print("KEYSDEMO shrubling at (%.0f,%.0f)" % [s.pos.x, s.pos.z])
