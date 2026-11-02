@@ -1,4 +1,4 @@
-2026-11-02T04:17:34Z
+2026-11-02T04:20:29Z
 
 ext/heroes-joule-ghost | 9ad329d | ready to merge | 0.10.0 (no new sync) | full suite 0 failures on final commit, health/gen_wiki OK
 ext/heroes-elluna-celeste | b658b74 | ready to merge | 0.10.1 (new "carry" event) | full suite 0 failures on final commit, health/gen_wiki OK
@@ -8,9 +8,9 @@ ext/heroes-myth-oath | 1603a44 | running (finish pass) | pending | pending
 ext/kits2-nor | e5f25ec (from main, not pushed yet) | running | pending | pending
 ext/farmbuild | e5f25ec (from main, not pushed yet) | running | pending | pending
 ext/classes | - | queued (after hero finish passes are pushed) | - | -
-ext/hero-shots | - | running (first 4 pairs; myth-oath and kits2-nor added when done) | - | -
+ext/hero-shots | 39453e7 | pushed: 12 heroes, 123 PNGs (myth-oath and kits2-nor shots are interim; rebuilt when they finish); Linnet/Tamsin portraits being re-shot | - | -
 
-Running now: myth-oath finish pass; ext/farmbuild; ext/kits2-nor; ext/hero-shots assembly (4 Sonnet agents)
+Running now: myth-oath finish pass; ext/farmbuild; ext/kits2-nor; Linnet/Tamsin portrait re-shoot (4 Sonnet agents)
 Queued: ext/classes (after myth-oath is pushed); add myth-oath + kits2-nor shots to ext/hero-shots
 Last INBOX entry handled: 2026-11-02 03:20 UTC
 Questions for the owner: (1) Tamsin/rimewright: add real healing, or keep source-accurate ice control plus a wall shield? (2) Myth+Oath: keep our own additions (Archer snare/Focus, Bulwark Guard/Shield Slam)?
