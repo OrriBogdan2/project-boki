@@ -45,7 +45,6 @@ func start() -> bool:
 	var dir := h.aim_dir()
 	var speed := float(x["speed"])
 	h.dash_with({"speed": speed, "time": float(x["time"]), "invuln": 0.0, "dir": dir, "kind": "jet"})
-	h.dash_is_ex = true                 # holding Shift must not stretch the flight like a long dash
 	h.gliding = false
 	flight = {"t": float(x["time"]), "dir": dir, "speed": speed, "last": k.ground(h.pos), "set_v": dir * speed,
 		"knock": h.knock_t}
