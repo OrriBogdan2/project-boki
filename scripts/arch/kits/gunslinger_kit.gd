@@ -358,8 +358,7 @@ func _fire_needle() -> void:
 			if rat:
 				skewers += 1
 				payoff_fx(f.pos, "SKEWERED", col, "", h.dir_to(f), f)
-				m.sfx("crit", f.pos, 0.0, 0.6)
-				m.sfx("pay_called", f.pos, -2.0, 0.7)
+				m.sfx("hero_skewer", f.pos, 0.0)
 	if hits > 0:
 		var maxcd := float(ed["cooldown"]) * cd_k("kin")
 		var n := hits if rank("kin") >= 3 else 1

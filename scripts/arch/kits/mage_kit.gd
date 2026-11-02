@@ -249,9 +249,7 @@ func _blowout(f: Ent) -> void:
 	var col := res_col()
 	m.fx.bolt(f.pos + Vector3(0, 3.4, 0), f.pos + Vector3(0, 0.1, 0), col)
 	payoff_fx(f.pos, "BLOWOUT", col, "", h.dir_to(f), f)
-	m.sfx("zap", f.pos, 0.0, 0.55)           # its own voice: a thunder crack under a rising zap
-	m.sfx("boom", f.pos, -4.0, 1.4)
-	m.later(0.07, func(): m.sfx("zap", f.pos, -3.0, 1.9))
+	m.sfx("hero_blowout", f.pos, 0.0)        # its own voice (tools/gen_hero_sfx.py)
 	if h.is_local(): h._ab_feedback("dash", "ready")
 
 # ------------------------------------------------------------------ RMB: Coilshot
