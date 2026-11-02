@@ -1,13 +1,13 @@
-2026-11-02T17:13:15Z
+2026-11-02T18:02:30Z
 
-Handed to the local machine per INBOX (not touched by the server since): ext/heroes-joule-ghost, ext/heroes-elluna-celeste, ext/heroes-kingpin-felix, ext/heroes-tetra-void, ext/heroes-myth-oath, ext/kits2-nor, ext/farmbuild. All five hero branches are now in origin/main (7881774).
-ext/kits2-nor | 0650f6f (server's last push; now cb588ab, local machine) | server finish: full suite 0 failures on fcc3745, Net 0.11.1 (kmove id on hunter snapshot) | handed over
-ext/farmbuild | b7537bd | server finish: full suite 0 failures on fcc3745, Net 0.11.0, --farmbuild-check added | handed over
-ext/hero-shots | 55dde9b | done: 13 sections (12 heroes + farm building), 131 PNGs, ~72 MB; every portrait shows the signature weapon; README lists each file with a caption | - | -
-ext/classes | - | running (from origin/main 7881774, which already has all hero branches) | pending | pending
+ext/classes | cacd796 | ready to merge (on sync62 4f82978) | 0.14.0 (no new sync; save v5->v6 adds "classes", old saves stay all-unlocked) | full suite 0 failures, --class-unlock-check 81 checks; --farm-start-check flaky on main too; simtest seed-5 known wipe. Starters default Thief/Gunslinger/Juggernaut (data). Display names come from hero data; the SERVER_UPDATE5 renames land in the kitfix branches. Owner questions: starter set, goal/XP numbers, "Weight" as the Light/Medium/Heavy term, rename the "Hero" hub to "Class"?
+ext/hero-shots | 3bd0520 | done: 12 heroes + farm building + classes; all portraits show signature weapons | - | -
+ext/kits2-nor | cb588ab | running: re-merge onto sync62, Net 0.15.0 | 0.15.0 | pending
+ext/farmbuild | b7537bd | running: re-merge onto sync62 | main's | pending
+ext/aimkit | (from 4f82978, not pushed yet) | running (Opus, medium) | pending | pending
+ext/kitfix-* (6 branches) | - | queued: start from ext/aimkit once pushed (cap 5 running; the 6th starts when a slot frees) | - | -
 
-Running now: ext/classes (1 Sonnet agent)
-Queued: queue empty after these
-Last INBOX entry handled: 2026-11-02 11:45 UTC
-Apology for the silence 04:20 to now: the server agents were all running long jobs and the coordinator didn't push heartbeats in between. From now on it pushes on every start and finish.
-Questions for the owner: none new (Tamsin healing and Archer/Bulwark additions are with the owner via INBOX 05:00).
+Running now: ext/aimkit (Opus); kits2-nor and farmbuild re-merges (Sonnet)
+Queued: ext/kitfix-pin-bjorn, -vireo-venator, -linwick-dredge, -moosh-tamsin, -breah-ostra, -dancer-juggernaut (Opus, medium)
+Last INBOX entry handled: 2026-11-02 18:25 UTC
+Questions for the owner: see ext/classes line.
