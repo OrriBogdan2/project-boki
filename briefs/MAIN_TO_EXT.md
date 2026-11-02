@@ -436,3 +436,9 @@ Main-side changes on integ62 (sync62, shipping soon):
     - a hero pose (KMOVES)
 
     Pool the effects (no per-frame node creation). Treat this as part of each hero's fidelity work, not a separate pass.
+    - Vireo's dash (Joule's): while she's casting/holding it she can't move under her own control and she holds her height (z axis). Momentum still applies: if she was moving before, she drifts while in the dash.
+
+16. **How to research (owner, emphatic).** Look at how these abilities actually play, not just at the written ability descriptions. Text descriptions miss the key details (holds, cursor-placed targeting, momentum, height lock, visuals).
+    - If you can download gameplay video (yt-dlp, if your environment allows), extract frames around each ability use with ffmpeg and look at them.
+    - Otherwise use image results, wiki GIFs and clip descriptions.
+    - The owner can also supply clips: if you need footage you can't get, list exactly which heroes and abilities here and the main session will ask him.
