@@ -2,7 +2,7 @@
 
 Review shots for each hero: kit card, each ability, the payoff, animation frame strips and a neutral full-body portrait. PNGs are downscaled to at most 1280 px wide. Captions come from the shot manifests.
 
-Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-tender), [Tamsin](#tamsin-rimewright), [Dredge](#dredge-dredge), [Ashwick](#ashwick-ashwick), [Dolm](#dolm-dolm), [Ostra](#ostra-ostra), [Archer](#archer-archer), [Bulwark](#bulwark-bulwark), [Thief](#thief-thief), [Juggernaut](#juggernaut-juggernaut), [Farm building](#farm-building-farmbuild), [classes](#classes-classes), [aimkit](#aimkit-aimkit), [moosh-moosh/v2](#moosh-moosh/v2-moosh-moosh/v2), [moosh-moosh/v2/anim](#moosh-moosh/v2/anim-moosh-moosh/v2/anim), [tamsin/v2](#tamsin/v2-tamsin/v2), [tamsin/v2/anim](#tamsin/v2/anim-tamsin/v2/anim)
+Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-tender), [Tamsin](#tamsin-rimewright), [Dredge](#dredge-dredge), [Ashwick](#ashwick-ashwick), [Dolm](#dolm-dolm), [Ostra](#ostra-ostra), [Archer](#archer-archer), [Bulwark](#bulwark-bulwark), [Thief](#thief-thief), [Juggernaut](#juggernaut-juggernaut), [Farm building](#farm-building-farmbuild), [classes](#classes-classes), [aimkit](#aimkit-aimkit), [moosh-moosh/v2](#moosh-moosh/v2-moosh-moosh/v2), [moosh-moosh/v2/anim](#moosh-moosh/v2/anim-moosh-moosh/v2/anim), [tamsin/v2](#tamsin/v2-tamsin/v2), [tamsin/v2/anim](#tamsin/v2/anim-tamsin/v2/anim), [dancer/v2](#dancer/v2-dancer/v2), [dancer/v2/before](#dancer/v2/before-dancer/v2/before), [zedran/v2](#zedran/v2-zedran/v2), [zedran/v2/before](#zedran/v2/before-zedran/v2/before), [dancer/v2/anim](#dancer/v2/anim-dancer/v2/anim), [zedran/v2/anim](#zedran/v2/anim-zedran/v2/anim)
 
 ## Vireo (mage)
 
@@ -841,3 +841,231 @@ Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-t
 **tm_shatter: fan snapped shut, fist clenched**
 
 ![tm_shatter: fan snapped shut, fist clenched](tamsin/v2/anim/after/rimewright_payoff_strip.png)
+
+## dancer/v2 (dancer/v2)
+
+**Dancer, neutral full body, holding the Arc Bolts ring blades**
+
+![Dancer, neutral full body, holding the Arc Bolts ring blades](dancer/v2/portrait_thief.png)
+
+**After: ranged Arc Bolts to the cursor**
+
+![After: ranged Arc Bolts to the cursor](dancer/v2/thief.png)
+
+**After: the empowered bolt (3.5x, blue chakram, gold aim line before it)**
+
+![After: the empowered bolt (3.5x, blue chakram, gold aim line before it)](dancer/v2/primed.png)
+
+**After: the 0.4s lane wind-up before the throw**
+
+![After: the 0.4s lane wind-up before the throw](dancer/v2/bola_lane.png)
+
+**RMB impact: the Bola grounds the first dummy and tangles the second (yellow binding rings, TANGLED)**
+
+![RMB impact: the Bola grounds the first dummy and tangles the second (yellow binding rings, TANGLED)](dancer/v2/bola.png)
+
+**RMB: the Bola in flight after the wind-up**
+
+![RMB: the Bola in flight after the wind-up](dancer/v2/rmb_thief.png)
+
+**E telegraph/impact: the dagger stuck in the dummy, the white arrival circle round it**
+
+![E telegraph/impact: the dagger stuck in the dummy, the white arrival circle round it](dancer/v2/e_thief.png)
+
+**E: the arrival circle around the stuck dagger**
+
+![E: the arrival circle around the stuck dagger](dancer/v2/knife_marker.png)
+
+**E recast impact: she has blinked to the dagger in the dummy**
+
+![E recast impact: she has blinked to the dagger in the dummy](dancer/v2/e_thief_recast.png)
+
+**Jackpot telegraph: the cyan ring growing out from her, the dashed rim**
+
+![Jackpot telegraph: the cyan ring growing out from her, the dashed rim](dancer/v2/jackpot_ring.png)
+
+**Jackpot: the fifth Mark opens the ring (MARKED, JACKPOT)**
+
+![Jackpot: the fifth Mark opens the ring (MARKED, JACKPOT)](dancer/v2/jackpot.png)
+
+**Jackpot impact: blades at the dummy, Marks refreshed**
+
+![Jackpot impact: blades at the dummy, Marks refreshed](dancer/v2/jackpotpay.png)
+
+## dancer/v2/before (dancer/v2/before)
+
+**Before (main): Twin Blades melee LMB, no ranged bolt**
+
+![Before (main): Twin Blades melee LMB, no ranged bolt](dancer/v2/before/before/before_dancer_lmb.png)
+
+**Before (main): the Primed hit is a melee hit, white aim line**
+
+![Before (main): the Primed hit is a melee hit, white aim line](dancer/v2/before/before/before_dancer_empowered.png)
+
+**Before (main): the Bola thrown at once, no lane**
+
+![Before (main): the Bola thrown at once, no lane](dancer/v2/before/before/before_dancer_bola.png)
+
+## zedran/v2 (zedran/v2)
+
+**Zedran, neutral full body, holding the greatsword**
+
+![Zedran, neutral full body, holding the greatsword](zedran/v2/portrait_juggernaut.png)
+
+**LMB slashes fill Rage into Enraged**
+
+![LMB slashes fill Rage into Enraged](zedran/v2/juggernaut.png)
+
+**LMB hold telegraph: the ring round the body while the Searing Wave charges**
+
+![LMB hold telegraph: the ring round the body while the Searing Wave charges](zedran/v2/wave_hold.png)
+
+**LMB hold release: the red flame crescent rolling out**
+
+![LMB hold release: the red flame crescent rolling out](zedran/v2/wave.png)
+
+**After: the magenta strike lane everyone sees**
+
+![After: the magenta strike lane everyone sees](zedran/v2/slam_windup.png)
+
+**After: the sweet spot crashes and heals at rank 1**
+
+![After: the sweet spot crashes and heals at rank 1](zedran/v2/sweetspot.png)
+
+**The crash (the old Doomfall) on the heavy dummy: 143, STUNNED**
+
+![The crash (the old Doomfall) on the heavy dummy: 143, STUNNED](zedran/v2/crash.png)
+
+**RMB hold telegraph: the Lunge lane growing with the charge, filling**
+
+![RMB hold telegraph: the Lunge lane growing with the charge, filling](zedran/v2/lunge_lane_mid.png)
+
+**RMB hold key frame: the release, flung forward (LUNGE)**
+
+![RMB hold key frame: the release, flung forward (LUNGE)](zedran/v2/lunge_lane_full.png)
+
+**After: the Lunge lane, magenta at full**
+
+![After: the Lunge lane, magenta at full](zedran/v2/rmb_juggernaut_hold.png)
+
+**RMB hold release: the fling into the dummy, white burst and red slash**
+
+![RMB hold release: the fling into the dummy, white burst and red slash](zedran/v2/rmb_juggernaut.png)
+
+**E: the Warchain hooked on the dummy (link chain)**
+
+![E: the Warchain hooked on the dummy (link chain)](zedran/v2/e_juggernaut.png)
+
+**E recast impact: pulled in to the hooked dummy**
+
+![E recast impact: pulled in to the hooked dummy](zedran/v2/e_juggernaut_recast.png)
+
+## zedran/v2/before (zedran/v2/before)
+
+**Before (main): the sweet spot only resets Doomfall (no payoff without class R)**
+
+![Before (main): the sweet spot only resets Doomfall (no payoff without class R)](zedran/v2/before/before/before_jug_sweetspot.png)
+
+**Before (main): the Lunge charge has no lane**
+
+![Before (main): the Lunge charge has no lane](zedran/v2/before/before/before_jug_lunge.png)
+
+**Before (main): the Finishing Slam wind-up shows only a ring and a "!"**
+
+![Before (main): the Finishing Slam wind-up shows only a ring and a "!"](zedran/v2/before/before/before_jug_slam_windup.png)
+
+## dancer/v2/anim (dancer/v2/anim)
+
+**LMB bolt throw: coil, whip, follow-through, settle (6 frames: anticipation, release, follow-through, recovery)**
+
+![LMB bolt throw: coil, whip, follow-through, settle (6 frames: anticipation, release, follow-through, recovery)](dancer/v2/anim/anim/thf_lmb.png)
+
+**empowered bolt: stretch, recoil (6 frames: anticipation, release, follow-through, recovery)**
+
+![empowered bolt: stretch, recoil (6 frames: anticipation, release, follow-through, recovery)](dancer/v2/anim/anim/thf_primed.png)
+
+**Vault cartwheel and landing (6 frames: anticipation, release, follow-through, recovery)**
+
+![Vault cartwheel and landing (6 frames: anticipation, release, follow-through, recovery)](dancer/v2/anim/anim/thf_vault.png)
+
+**base long dash: a flick into a forward tumble (6 frames: anticipation, release, follow-through, recovery)**
+
+![base long dash: a flick into a forward tumble (6 frames: anticipation, release, follow-through, recovery)](dancer/v2/anim/anim/thf_exdash.png)
+
+**Bola whirl overhead, then the sling (6 frames: anticipation, release, follow-through, recovery)**
+
+![Bola whirl overhead, then the sling (6 frames: anticipation, release, follow-through, recovery)](dancer/v2/anim/anim/thf_bola.png)
+
+**Shadow Knife spin-throw (6 frames: anticipation, release, follow-through, recovery)**
+
+![Shadow Knife spin-throw (6 frames: anticipation, release, follow-through, recovery)](dancer/v2/anim/anim/thf_knife.png)
+
+**blink to the dagger: afterimage chain, the drop-in arrival (6 frames: anticipation, release, follow-through, recovery)**
+
+![blink to the dagger: afterimage chain, the drop-in arrival (6 frames: anticipation, release, follow-through, recovery)](dancer/v2/anim/anim/thf_blink.png)
+
+**Jackpot: the blade-flinging body snaps (6 frames: anticipation, release, follow-through, recovery)**
+
+![Jackpot: the blade-flinging body snaps (6 frames: anticipation, release, follow-through, recovery)](dancer/v2/anim/anim/thf_volley.png)
+
+**VAULT RESET spin flourish (6 frames: anticipation, release, follow-through, recovery)**
+
+![VAULT RESET spin flourish (6 frames: anticipation, release, follow-through, recovery)](dancer/v2/anim/anim/thf_reset.png)
+
+**knock flourish with the heal (6 frames: anticipation, release, follow-through, recovery)**
+
+![knock flourish with the heal (6 frames: anticipation, release, follow-through, recovery)](dancer/v2/anim/anim/thf_flourish.png)
+
+## zedran/v2/anim (zedran/v2/anim)
+
+**greatsword slash body move (6 frames: anticipation, release, follow-through, recovery)**
+
+![greatsword slash body move (6 frames: anticipation, release, follow-through, recovery)](zedran/v2/anim/anim/jug_slash.png)
+
+**Searing Wave wind-up and release (6 frames: anticipation, release, follow-through, recovery)**
+
+![Searing Wave wind-up and release (6 frames: anticipation, release, follow-through, recovery)](zedran/v2/anim/anim/jug_wave.png)
+
+**Finishing Slam: coiled wind-up, strike, settle (6 frames: anticipation, release, follow-through, recovery)**
+
+![Finishing Slam: coiled wind-up, strike, settle (6 frames: anticipation, release, follow-through, recovery)](zedran/v2/anim/anim/jug_slam.png)
+
+**the crash on the sweet spot (6 frames: anticipation, release, follow-through, recovery)**
+
+![the crash on the sweet spot (6 frames: anticipation, release, follow-through, recovery)](zedran/v2/anim/anim/jug_crash.png)
+
+**Lunge: deep crouch, fling, impact (6 frames: anticipation, release, follow-through, recovery)**
+
+![Lunge: deep crouch, fling, impact (6 frames: anticipation, release, follow-through, recovery)](zedran/v2/anim/anim/jug_lunge.png)
+
+**Meteor Drop onto the cursor disc (6 frames: anticipation, release, follow-through, recovery)**
+
+![Meteor Drop onto the cursor disc (6 frames: anticipation, release, follow-through, recovery)](zedran/v2/anim/anim/jug_meteor.png)
+
+**Rampage dash and tip (6 frames: anticipation, release, follow-through, recovery)**
+
+![Rampage dash and tip (6 frames: anticipation, release, follow-through, recovery)](zedran/v2/anim/anim/jug_dash.png)
+
+**base long dash: a lumbering shoulder shove (6 frames: anticipation, release, follow-through, recovery)**
+
+![base long dash: a lumbering shoulder shove (6 frames: anticipation, release, follow-through, recovery)](zedran/v2/anim/anim/jug_exdash.png)
+
+**Warchain throw and pull (6 frames: anticipation, release, follow-through, recovery)**
+
+![Warchain throw and pull (6 frames: anticipation, release, follow-through, recovery)](zedran/v2/anim/anim/jug_chain.png)
+
+**Chain Lunge (6 frames: anticipation, release, follow-through, recovery)**
+
+![Chain Lunge (6 frames: anticipation, release, follow-through, recovery)](zedran/v2/anim/anim/jug_chainlunge.png)
+
+**Haul Slam (6 frames: anticipation, release, follow-through, recovery)**
+
+![Haul Slam (6 frames: anticipation, release, follow-through, recovery)](zedran/v2/anim/anim/jug_haul.png)
+
+**Cinder Spin (6 frames: anticipation, release, follow-through, recovery)**
+
+![Cinder Spin (6 frames: anticipation, release, follow-through, recovery)](zedran/v2/anim/anim/jug_spin.png)
+
+**Enraged roar (6 frames: anticipation, release, follow-through, recovery)**
+
+![Enraged roar (6 frames: anticipation, release, follow-through, recovery)](zedran/v2/anim/anim/jug_roar.png)
