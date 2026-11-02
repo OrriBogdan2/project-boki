@@ -72,7 +72,6 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | RMB | cooldown 7s -> 5.8s, damage +25%. | cooldown 7s -> 4.6s, damage +50%; refunds 25% of the cooldown when it stokes. |
 | Dash (Shift) | recharge 9s -> 8.4s per charge. | recharge 9s -> 7.8s; stokes the foe at once and leaves a 3s fire trail. |
 | E | cooldown 10.5s -> 8.5s, damage and shield +25%. | cooldown 10.5s -> 6.5s, damage and shield +50%; refunds 25% of the cooldown when it stokes. |
-| R (ultimate) |  |  |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > Glove (Q).
 

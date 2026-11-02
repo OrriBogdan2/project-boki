@@ -29,7 +29,7 @@ func _ready() -> void:
 		fade.boot()     # carry on from the boot splash: covered, logo showing, until the first screen is up
 	var args := OS.get_cmdline_user_args()
 	# tooling never touches the real save file: checks, screenshots and --no-save runs play on a copy
-	if "--no-save" in args or "--archetype-check" in args or "--kit-combo-check" in args or "--mage-combo-check" in args or "--gunslinger-combo-check" in args or "--zone-check" in args or "--dolm-combo-check" in args or "--ostra-combo-check" in args or "--arena-check" in args or "--dredge-combo-check" in args or "--ashwick-combo-check" in args or Array(args).any(func(x): return String(x).begins_with("--shot=") or String(x).begins_with("--arena-shot=") or String(x).begins_with("--rolling-shot=")):
+	if "--no-save" in args or "--archetype-check" in args or "--kit-combo-check" in args or "--mage-combo-check" in args or "--gunslinger-combo-check" in args or "--zone-check" in args or "--dolm-combo-check" in args or "--ostra-combo-check" in args or "--hero-combo-check" in args or "--archer-combo-check" in args or "--bulwark-combo-check" in args or "--arena-check" in args or "--dredge-combo-check" in args or "--ashwick-combo-check" in args or Array(args).any(func(x): return String(x).begins_with("--shot=") or String(x).begins_with("--arena-shot=") or String(x).begins_with("--rolling-shot=")):
 		Save.no_write = true
 	var opts := {}
 	for a in args:
@@ -529,6 +529,9 @@ func _ready() -> void:
 	for hc in ["dredge", "ashwick"]:       # the hero combo checks (tools/<id>_combo_check.gd)
 		if "--%s-combo-check" % hc in args:
 			set_meta("hero_check", load("res://tools/%s_combo_check.gd" % hc).new()); get_meta("hero_check").run(self); return
+	if "--archer-combo-check" in args or "--bulwark-combo-check" in args or "--hero-combo-check" in args:
+		load("res://tools/archer_bulwark_combo_check.gd").new().run(self)      # the Archer's and Bulwark's cross-ability interactions
+		return
 	if "--ability-check" in args:
 		_ability_check()
 		return

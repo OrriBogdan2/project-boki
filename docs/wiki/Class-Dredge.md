@@ -72,7 +72,6 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | RMB | cooldown 14s -> 11.5s. | cooldown 14s -> 9s; hitting a foe refunds 33% of it. |
 | Dash (Shift) | recharge 12s -> 10.2s per charge. | recharge 12s -> 8.4s; pellet hits trim 0.25s off the recharge. |
 | E | cooldown 10s -> 8.5s, damage +15%, stun +0.1s. | cooldown 10s -> 7s, damage +30%; cast in the air, up to +75% damage by height. |
-| R (ultimate) |  |  |
 
 **Suggested level-up order** (what bots follow): RMB > E > Dash (Shift) > RMB > E > Dash (Shift) > RMB > E > Dash (Shift) > Glove (Q).
 

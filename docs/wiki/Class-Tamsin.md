@@ -81,7 +81,6 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | RMB | cooldown 4.5s -> 3.9s, damage +15%. | cooldown 4.5s -> 3.4s, damage +30%; the second burst is 45% larger. |
 | Dash (Shift) | recharge 11s -> 9.9s. | recharge 11s -> 8.8s; a Rinkrun over open sky lays a short ice bridge. |
 | E | cooldown 20s -> 18s, wall strength +15%. | cooldown 20s -> 16s, wall strength +30%; +40 wall strength and a doubled frost shield. |
-| R (ultimate) |  |  |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > Glove (Q).
 

@@ -76,7 +76,6 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | RMB | cooldown 9s -> 7.5s, damage +15%. | cooldown 9s -> 6s; resets when you knock a hunter. |
 | Dash (Shift) | recharge 11.5s -> 10s. | recharge 11.5s -> 8.5s; +25% speed for 2s when a slide ends. |
 | E | cooldown 12s -> 10.5s, damage +20%. | cooldown 12s -> 9s, damage +40%; every hunter hit takes 30% off the cooldown. |
-| R (ultimate) |  |  |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > RMB > Dash (Shift) > E.
 

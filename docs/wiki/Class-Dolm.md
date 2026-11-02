@@ -55,7 +55,6 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | RMB | cooldown 10s -> 9s, damage +15%. | cooldown 10s -> 8s, damage +30%; slamming a foe or a rock gives a shield of 18, up to 4 stacks. |
 | Dash (Shift) | recharge 9s -> 7.6s per charge. | recharge 9s -> 6.3s; the barrel runs a third further. |
 | E | cooldown 13s -> 11.7s, rocks hit +15%. | cooldown 13s -> 10.4s; a second row of rocks, and over the abyss a rock bridge. |
-| R (ultimate) |  |  |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > RMB > E > Dash (Shift) > Glove (Q).
 

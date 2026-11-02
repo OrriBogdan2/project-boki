@@ -80,7 +80,6 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | RMB | cooldown 10s -> 9s, damage +15%. | cooldown 10s -> 8s, damage +30%; the roots last 0.3s longer. |
 | Dash (Shift) | recharge 7.5s -> 6.4s per charge. | recharge 7.5s -> 5.3s; picking up a teammate refreshes your long air dash. |
 | E | cooldown 11s -> 9.9s, healing +15%. | cooldown 11s -> 8.8s, healing +30%; the closing flare also stands a downed teammate in the ring back up. |
-| R (ultimate) |  |  |
 
 **Suggested level-up order** (what bots follow): E > RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > RMB > Dash (Shift) > Glove (Q).
 

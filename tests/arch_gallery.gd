@@ -7,7 +7,7 @@ extends Node3D
 ##   --arch-heads    every race's head under every archetype's headgear (fit and ears), close up
 ## Optional: --arch-yaw=<radians> turns everyone.
 
-const WEAPONS := {"thief": "twin_blades", "archer": "sniper", "mage": "coilcaster", "gunslinger": "quill_rifle", "juggernaut": "greatsword", "bulwark": "minigun", "dredge": "shotgun", "ashwick": "flamethrower", "dolm": "rubble_fists", "ostra": "tether_lantern"}
+const WEAPONS := {"thief": "twin_blades", "archer": "longbow", "mage": "coilcaster", "gunslinger": "quill_rifle", "juggernaut": "greatsword", "bulwark": "tower_shield", "dredge": "shotgun", "ashwick": "flamethrower", "dolm": "rubble_fists", "ostra": "tether_lantern"}
 var anims: Array = []
 
 func _arg(prefix: String, def: String) -> String:
@@ -130,13 +130,14 @@ func _heads() -> void:
 ##   --showcase-top    the same hunters from the match camera (Supervive preset: 65°, 25 m, fov 35);
 ##                     --showcase-zoom halves the field of view to inspect what reads at that angle
 ##   --showcase-poses  each archetype frozen in idle, run, attack, RMB cast and ultimate
-## Optional: --showcase-arch=thief|juggernaut (only that one), --showcase-outfit=<index>.
+## Optional: --showcase-arch=thief|juggernaut (only that one), --showcase-one (one look each), --showcase-outfit=<index>.
 var frozen := false
 func _showcase() -> void:
 	var args := OS.get_cmdline_user_args()
 	var only := _arg("--showcase-arch=", "")
 	# --showcase-arch=archer or a list (mage,bulwark); --showcase-six: all six, one look each
 	var six := "--showcase-six" in args
+	var single := six or "--showcase-one" in args      # (--showcase-one: one look per hero, so the whole character reads)
 	var arches: Array = (["thief", "juggernaut"] if only == "" else Array(only.split(","))) if not six else HeroKit.ARCH_ORDER.duplicate()
 	var looks := {
 		"thief": [{"race": 0, "gender": 0, "hair": 1, "hair_col": 0, "skin": 2, "face": 4, "outfit": 1},
@@ -188,12 +189,12 @@ func _showcase() -> void:
 		return
 	var i := 0
 	for arch in arches:
-		for lk0 in ((looks[arch] as Array).slice(0, 1) if six else looks[arch]):
+		for lk0 in ((looks[arch] as Array).slice(0, 1) if single else looks[arch]):
 			var lk: Dictionary = (lk0 as Dictionary).duplicate()
 			lk["hair_v"] = 2; lk["body"] = 1
 			if oo >= 0: lk["outfit"] = oo
 			var h := _hunter(arch, lk, i % 2)
-			var n := arches.size() * (1 if six else 3)
+			var n := arches.size() * (1 if single else 3)
 			h.position = Vector3((i - (n - 1) * 0.5) * 1.55, 0, 0)
 			h.rotation.y = PI * 0.86
 			i += 1
@@ -203,7 +204,7 @@ func _showcase() -> void:
 		cam.position = Vector3(0, sin(p) * 25.0, cos(p) * 25.0); cam.rotation = Vector3(-p, 0, 0)
 		cam.fov = 17.5 if "--showcase-zoom" in args else 35.0
 	else:
-		var nn := arches.size() * (1 if six else 3)
+		var nn := arches.size() * (1 if single else 3)
 		cam.position = Vector3(0, 1.55, 3.8 + 0.6 * nn); cam.rotation = Vector3(-0.1, 0, 0); cam.fov = 40 if nn <= 3 else 46
 	cam.make_current()
 

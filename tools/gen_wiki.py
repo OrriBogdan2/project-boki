@@ -282,6 +282,7 @@ def gen_classes():
         b.append("### Ranks\n\nRank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the special.\n")
         rk = []
         for s in ("sec", "dash", "kin", "ult"):
+            if s == "ult" and "r" not in d: continue
             r2 = d.get("rank2", {}).get(s, "")
             r3 = d.get("rank_next", {}).get(s, "") or ("Rank 3: " + d["rank3"][s] if s in d.get("rank3", {}) and s != "ult" else "")
             rk.append([SLOT_NAMES[s], re.sub(r"^Rank 2:\s*", "", r2), re.sub(r"^Rank 3:\s*", "", r3)])

@@ -390,25 +390,15 @@ func _archer() -> void:
 	P.inp["fire"] = false
 	step(m, 0.5)
 	ok("archer bow: perfect release +25%", K.perfects == pf0 + 1 and dmg(T) >= 74.0, "perfects %d took %.0f" % [K.perfects - pf0, dmg(T)])
-	# E: Arrow Rain: a line of falling arrows; damage over time, slow, blight
+	# E: Hail Wall: a line of falling arrows; damage over time, slow, blight
 	P.teleport(home); fresh(T); T.teleport(home + Vector3(6, 0, 0))
 	P.inp["aim"] = T.pos
 	P.ak.use_e()
-	ok("archer E: Arrow Rain cast", K.in_e())
+	ok("archer E: Hail Wall cast", K.in_e())
 	step(m, 2.0, func(): K.res = 0.0)
-	ok("archer E: Arrow Rain hurts, slows, blights", dmg(T) >= 10.0 and T.slow_t > 0.0 and T.blight_t > 0.0, "took %.0f slow %.2f blight %.2f" % [dmg(T), T.slow_t, T.blight_t])
-	step(m, 2.5)
-	ok("archer E: Arrow Rain ends", not K.in_e())
-	# R: Great Arrows: three empowered shots, no draw, the third hardest
-	P.teleport(home); fresh(T); T.teleport(home + Vector3(-7.0, 0, 0)); aim_at(P, T.pos); K.res = 0.0
-	ult(m, P)
-	ok("archer R: Great Arrows armed", not K.great.is_empty() and int(K.great["left"]) == 3)
-	for i in 3:
-		P.fire_cd = 0.0
-		P.inp["fire"] = true; m.step(DT); P.inp["fire"] = false
-		step(m, 0.45, func(): K.res = 0.0; aim_at(P, T.pos))
-	step(m, 0.3)
-	ok("archer R: three great arrows hit", K.great.is_empty() and dmg(T) >= 95.0, "took %.0f" % dmg(T))
+	ok("archer E: Hail Wall hurts, slows, blights", dmg(T) >= 10.0 and T.slow_t > 0.0 and T.blight_t > 0.0, "took %.0f slow %.2f blight %.2f" % [dmg(T), T.slow_t, T.blight_t])
+	step(m, 3.0)
+	ok("archer E: Hail Wall ends", not K.in_e())
 	await done(m)
 
 # ------------------------------------------------------------------ Mage
@@ -732,14 +722,6 @@ func _bulwark() -> void:
 	var mid := P.hp
 	step(m, 0.8)
 	ok("bulwark E: Mending Ground heals after its delay", mid <= hp0 + 1.0 and P.hp >= hp0 + 20.0, "hp %.0f -> %.0f -> %.0f" % [hp0, mid, P.hp])
-	# R: Fissure: the crack stuns, then the eruption pulses; Guard adds a pulse
-	K.res = 50.0
-	P.teleport(home); T.teleport(home + Vector3(5.0, 0, 0)); fresh(T); aim_at(P, T.pos)
-	ult(m, P)
-	step(m, 0.25)
-	var st0 := T.stun_t
-	step(m, 1.8)
-	ok("bulwark R: Fissure stuns then erupts", st0 > 0.0 and dmg(T) >= 30.0 and T.slow_t > 0.0, "stun %.2f took %.0f" % [st0, dmg(T)])
 	await done(m)
 
 # ------------------------------------------------------------------ levels and the Bonded R
@@ -965,8 +947,8 @@ func _infusion() -> void:
 		var inf := Arch.infusion(KinLib.kin(kid))
 		for a in Arch.ids():
 			for slot in ["rmb", "e", "r"]:
-				if not Arch.def(a).has(slot): continue
-				var sd: Dictionary = Arch.def(a)[slot]
+				var sd: Dictionary = Arch.def(a).get(slot, {})
+				if sd.is_empty(): continue          # (the Archer and Bulwark have no class R)
 				var ff := Arch.fill(sd.get("sockets", {}), inf, slot, String(sd.get("delivery", "burst")))
 				for e in ff["effects"]:
 					var cap: Dictionary = Arch.CAPS[String(sd["sockets"].get("ctrl_cap", "soft"))]
@@ -1004,7 +986,7 @@ func _feel() -> void:
 	ok("feel: Arrow Rain tell >= soft floor", float(Arch.def("archer")["e"]["tell"]) >= Feel.floor_for("soft_cc", "instant"))
 	ok("feel: the Bola and Warchain are projectiles (dodgeable)", String(Arch.def("thief")["rmb"]["delivery"]) == "projectile" and float(Arch.def("thief")["rmb"]["bola"]["speed"]) <= 34.0 and String(Arch.def("juggernaut")["e"]["delivery"]) == "projectile")
 	ok("feel: Wirerun shows its lane while it grows", float(Arch.def("mage")["dash"]["hold"]) >= 0.3)
-	ok("feel: Doomfall / Fissure plant tells (fuse + tell)", float(Arch.def("juggernaut")["r"]["tell"]) + float(Arch.def("juggernaut")["r"]["fuse"]) >= 0.3 and float(Arch.def("bulwark")["r"]["tell"]) >= 0.3)
+	ok("feel: Doomfall plants a tell (fuse + tell)", float(Arch.def("juggernaut")["r"]["tell"]) + float(Arch.def("juggernaut")["r"]["fuse"]) >= 0.3)
 	ok("feel: every R has a fuse of 0.35-0.8s", Arch.ids().filter(func(a): return Arch.def(a).has("r")).all(func(a): return float(Arch.def(a)["r"].get("fuse", 0.0)) >= 0.35 and float(Arch.def(a)["r"].get("fuse", 0.0)) <= 0.8))
 	ok("R cooldowns are big moments (90-120s)", Arch.ids().filter(func(a): return Arch.def(a).has("r")).all(func(a): return float(Arch.def(a)["r"]["cooldown"]) >= 90.0 and float(Arch.def(a)["r"]["cooldown"]) <= 120.0))
 	# hitstop tiers
