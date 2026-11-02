@@ -376,12 +376,25 @@ func _build_rider(kind: String, col: Color, col2: Color) -> Node3D:
 	match kind:
 		"cinder":
 			# Cinder Shot: a red-pink fireball with a yellow core inside a cool violet halo, a smoky comet tail
-			var halo := _mi(_quad_mesh(), _mat(M_ORB, Color("6a5aff"), Color(0, 0, 0, 1), true)); halo.name = "Halo"; halo.scale = Vector3.ONE * 0.85; n.add_child(halo)
-			var head := _mi(_quad_mesh(), _mat(M_ORB, col, col2, true)); head.name = "Head"; head.scale = Vector3.ONE * 0.55; n.add_child(head)
+			n.add_child(_rider_part("Halo", Color("6a5aff"), Color(0, 0, 0, 1), 0.85))
+			n.add_child(_rider_part("Head", col, col2, 0.55))
 		"slug":
-			var head2 := _mi(_quad_mesh(), _mat(M_ORB, col, col2, true)); head2.name = "Head"; head2.scale = Vector3.ONE * 0.2; n.add_child(head2)
-	var tr := _mi(_ribbon_mesh(), _mat(M_COMET, col, Color("3a2a3a") if kind == "cinder" else col2)); tr.name = "Trail"; n.add_child(tr)
+			n.add_child(_rider_part("Head", col, col2, 0.2))
+		"orb":
+			# Brass Broadside: a big glowing teardrop, a soft halo of the wave's colour round a hot core
+			n.add_child(_rider_part("Halo", col, Color(0, 0, 0, 1), 1.25))
+			n.add_child(_rider_part("Head", col2, col, 0.7))
+	var tail_col := Color("3a2a3a") if kind == "cinder" else col2
+	var tr := _mi(_ribbon_mesh(), _mat(M_COMET, col, tail_col))
+	tr.name = "Trail"
+	n.add_child(tr)
 	return n
+
+func _rider_part(part: String, col: Color, col2: Color, scl: float) -> MeshInstance3D:
+	var mi := _mi(_quad_mesh(), _mat(M_ORB, col, col2, true))
+	mi.name = part
+	mi.scale = Vector3.ONE * scl
+	return mi
 
 ## Rides a look on a shot (match.gd's shot dictionary) until it ends. The plain shot node is handed
 ## back to the match's pool, so only this look shows. on_end(at, expired) runs when it ends.
@@ -389,8 +402,11 @@ func ride(sd: Dictionary, kind: String, col: Color, col2: Color, trail := 1.2, w
 	var n := _take("ride_" + kind, func(): return _build_rider(kind, col, col2))
 	for c in n.get_children():
 		var mt := (c as MeshInstance3D).material_override as ShaderMaterial
-		if c.name == "Head": mt.set_shader_parameter("color", col); mt.set_shader_parameter("color2", col2)
-		if c.name == "Trail": mt.set_shader_parameter("color", col)
+		if c.name == "Head":
+			mt.set_shader_parameter("color", col2 if kind == "orb" else col)
+			mt.set_shader_parameter("color2", col if kind == "orb" else col2)
+		if c.name == "Trail" or (c.name == "Halo" and kind == "orb"):
+			mt.set_shader_parameter("color", col)
 	var sn = sd.get("node")
 	if sn is Node3D and is_instance_valid(sn):
 		(sn as Node3D).visible = false

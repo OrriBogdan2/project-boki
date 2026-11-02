@@ -108,4 +108,17 @@ save('dr_dive', mix((env(sine(0.6, 1100, 380), 0.02, 0.4), 0.35), (env(bp(noise(
 save('dr_quake', mix((env(sine(1.2, 70, 30), 0.001, 0.35), 1.0), (env(sine(1.2, 196), 0.002, 0.3), 0.35), (env(sine(1.2, 297), 0.002, 0.25), 0.25), (env(lp(noise(1.2), 500), 0.002, 0.45), 0.8)))
 # Dredge's air hop (the class air dash): a heavy whump of air
 save('dr_hop', mix((env(bp(noise(0.25), 120, 1200), 0.005, 0.08), 0.8), (env(sine(0.25, 90, 60), 0.003, 0.07), 0.6)))
+
+# ---------------------------------------------------------------- ultimates (X)
+# Flue Flight lift-off: a deep whoomp as the bellows light, then a 1.4 s jet roar that thins out, with crackle
+lift = env(sine(0.5, 120, 45), 0.002, 0.15)
+roar = ramp(env(bp(noise(1.6), 300, 3800), 0.03, 0.9), 1.0, 0.4)
+save('lw_jet', mix((lift, 1.0), (pad(roar, 0.04), 0.75), (pad(lp(noise(1.6), 140), 0.04), 0.6), (pad(hp(crackle(1.6, 60, 6.0), 2600), 0.08), 0.35)), 0.8)
+# the landing: a soft boot thud and the jet sputtering out
+save('lw_jet_land', mix((env(sine(0.3, 90, 50), 0.002, 0.07), 0.9), (env(bp(noise(0.35), 400, 2400), 0.005, 0.1), 0.5), (hp(crackle(0.35, 10, 5.0), 2500), 0.3)))
+# Brass Broadside charge: a rising hum with a brass overtone and a tightening rattle, 1.1 s
+hum = [v * (i / n(1.1)) ** 1.5 for i, v in enumerate(mix((saw(1.1, 70, 160), 0.4), (sine(1.1, 140, 320), 0.5), (sine(1.1, 420, 960), 0.12)))]
+save('dr_blast_charge', mix((lp(hum, 1800), 1.0), (ramp(hp(crackle(1.1, 70, 4.0), 3000), 0.1, 1.0), 0.3)), 0.7)
+# a wave: a heavy "thoom", a brass clang on top and a short gust (the kit pitches the second one down)
+save('dr_blast', mix((env(sine(0.7, 85, 32), 0.001, 0.2), 1.0), (env(sine(0.6, 233), 0.002, 0.12), 0.3), (env(sine(0.6, 349), 0.002, 0.09), 0.2), (env(bp(noise(0.5), 200, 1800), 0.001, 0.12), 0.8)))
 print('ok')

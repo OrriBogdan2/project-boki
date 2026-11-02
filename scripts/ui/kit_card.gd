@@ -10,9 +10,10 @@ extends PanelContainer
 const SIZE := Vector2(890, 600)
 const BODY_H := 372.0
 const TILE := Vector2(431, 116)
-const SLOTS := ["dash", "passive", "lmb", "rmb", "e", "r"]
-const KEYS := {"dash": "Shift", "passive": "", "lmb": "LMB", "rmb": "RMB", "e": "E", "r": "R"}
-const LABEL := {"dash": "Dash", "passive": "Passive", "lmb": "Attack", "rmb": "Right click", "e": "Utility", "r": "Ultimate"}
+const SLOTS := ["dash", "passive", "lmb", "rmb", "e", "r", "x"]
+const KEYS := {"dash": "Shift", "passive": "", "lmb": "LMB", "rmb": "RMB", "e": "E", "r": "R", "x": "X"}
+const LABEL := {"dash": "Dash", "passive": "Passive", "lmb": "Attack", "rmb": "Right click", "e": "Utility", "r": "Ultimate",
+	"x": "Ultimate"}
 ## Which looping preview each archetype's abilities get (KitPreview kinds).
 const PREVIEW := {
 	"thief": {"dash": "dash", "passive": "marks", "rmb": "projectile", "e": "knife", "r": "lines"},
@@ -21,8 +22,8 @@ const PREVIEW := {
 	"gunslinger": {"dash": "dash", "passive": "pips", "rmb": "projectile", "e": "lines"},
 	"juggernaut": {"dash": "dash2", "passive": "meter", "rmb": "charge", "e": "grapple", "r": "leap"},
 	"bulwark": {"dash": "charge", "passive": "meter", "rmb": "shield", "e": "zone", "r": "fissure"},
-	"dredge": {"dash": "dash2", "passive": "meter", "rmb": "grapple", "e": "charge"},
-	"ashwick": {"dash": "dash", "passive": "meter", "rmb": "projectile", "e": "zone"},
+	"dredge": {"dash": "dash2", "passive": "meter", "rmb": "grapple", "e": "charge", "x": "shots"},
+	"ashwick": {"dash": "dash", "passive": "meter", "rmb": "projectile", "e": "zone", "x": "steer"},
 	"tender": {"dash": "dash", "passive": "marks", "rmb": "projectile", "e": "zone"},
 	"rimewright": {"dash": "charge", "passive": "marks", "rmb": "projectile", "e": "shield"},
 	"dolm": {"dash": "dash2", "passive": "meter", "rmb": "heavy", "e": "zone"},
@@ -235,9 +236,9 @@ func _kin_strip() -> Control:
 
 # ------------------------------------------------------------------ data → text
 ## Name, icon, colour, a short tag, the one line, and the detail page's paragraphs for one slot.
-## The slots an archetype has (no Ultimate tile for the heroes whose R is the Boki Merge).
+## The slots an archetype has (no R tile for the heroes whose R is the Boki Merge; an X tile for a hero ultimate).
 static func slots_of(a: String) -> Array:
-	return SLOTS.filter(func(s): return s != "r" or Arch.def(a).has("r"))
+	return SLOTS.filter(func(s): return not s in ["r", "x"] or Arch.def(a).has(s))
 
 static func slot_text(a: String, slot: String) -> Dictionary:
 	var d := Arch.def(a)
@@ -286,6 +287,13 @@ static func slot_text(a: String, slot: String) -> Dictionary:
 			out.merge({"name": String(sd["name"]), "icon": String(sd.get("icon", "")), "col": Color(String(sd.get("col", "#ffffff"))),
 				"tag": "%ss" % KinText.n(float(sd.get("cooldown", 14.0))), "line": String(cd.get("e", ""))}, true)
 			out["detail"] = [["", String(sd.get("desc", ""))]] + _ranks(a, "kin")
+		"x":
+			var xd: Dictionary = d["x"]
+			var tag := "level %d · %ss" % [int(xd.get("unlock", 6)), KinText.n(float(xd.get("cooldown", 30.0)))]
+			out.merge({"name": String(xd["name"]), "icon": String(xd.get("icon", "")), "col": Color(String(xd.get("col", "#ffffff"))),
+				"tag": tag, "line": String(cd.get("x", ""))}, true)
+			out["detail"] = [["", String(xd.get("desc", ""))],
+				["Bond", "Landing it on a hunter fills your Boki bond a long way, ready for the Merge on R."]]
 		"r" when not d.has("r"):
 			# no hero ultimate: R is the Boki's Merge (the Boki system owns it)
 			out.merge({"name": "Boki Merge", "icon": "bond", "col": Color("ffd27a"), "tag": "Boki system", "line": "Your Boki fuses with you; its kind decides the form."}, true)

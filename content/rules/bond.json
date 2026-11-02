@@ -9,5 +9,10 @@
 	"kin_required": true,
 	"mob_factor": 0.6,
 	"marked_factor": 2.0,
-	"mark_s": 4.0
+	"mark_s": 4.0,
+	"ult_note": "ult: what landing a hero ultimate on X adds to the meter (HeroUlt.pay_bond), per hero. Only enemy hunters count, and only when the ult lands: never on the cast. ashwick: each distinct hunter the lava touches adds each, up to cap; the Furnace Cloak landing on someone in the lava adds combo once. dredge: each wave that hits a hunter adds wave.",
+	"ult": {
+		"ashwick": {"each": 0.3, "cap": 0.7, "combo": 0.1},
+		"dredge": {"wave": 0.35}
+	}
 }

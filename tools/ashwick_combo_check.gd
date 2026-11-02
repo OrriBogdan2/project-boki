@@ -3,9 +3,9 @@ extends RefCounted
 ## flat strip (docs/heroes/ashwick.md, combinations and small-mechanics tables): the Torch Lance hose (pilot,
 ## full reach past the cursor, lag on a sweep, narrow then billowing, +25% on a burning foe, stops at once,
 ## the 0.35s relight gap), the burn stages and their pips, the Cinder Shot lane and cursor landing, the
-## Soot Ram stopping on the first foe, two quick charges and a knock's single charge back, the rank-3 lava
-## carpet, the Furnace Cloak's 0.2s ring before the blast and its swirling shield, walls, the abyss, Char
-## rules and the merge drops.
+## Soot Ram stopping on the first foe, two quick charges and a knock's single charge back, the rank-3 stoke,
+## the Furnace Cloak's 0.2s ring before the blast and its swirling shield, walls, Char rules, the merge drops,
+## and the X ult, Flue Flight (tools/ashwick_ult_check.gd).
 
 var main: Node
 var fails := 0
@@ -23,6 +23,7 @@ func run(main_node: Node) -> void:
 	ak.main = main
 	await _all()
 	await _growth()
+	await load("res://tools/ashwick_ult_check.gd").new(ak, ok).run()
 	print("ASHCHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
@@ -57,7 +58,7 @@ func _all() -> void:
 		for x in [T, T2]:
 			ak.fresh(x); x.out = false; x.downed = false; x.dead = false; x.burn_t = 0.0; x.blight_t = 0.0
 		T.teleport(home + Vector3(4.0, 0, 0)); T2.teleport(home + Vector3(5.5, 0, 1.5))
-		K.chars = {}; K.ignites = {}; K.trail = []; K.drags = []; K.hose.clear(); K.relight_t = 0.0; K.cloak_t = 0.0; K.bash = {}
+		K.chars = {}; K.ignites = {}; K.drags = []; K.hose.clear(); K.relight_t = 0.0; K.cloak_t = 0.0; K.bash = {}
 		K.cd["rmb"] = 0.0; K.ch_rmb = 1.0; K.cd["e"] = 0.0
 		P.dashes = P.max_dashes(); P.fire_cd = 0.0; P.ammo = int(P.wpn["mag"]); P.reload_t = 0.0
 		P.inp["fire"] = false; P.inp["move"] = Vector2.ZERO
@@ -200,38 +201,14 @@ func _all() -> void:
 	P.dashes = 0.0
 	K.on_knock(T, true)
 	ok("passive: a knock gives back one ram charge, not both", absf(P.dashes - 1.0) < 0.01, "charges %.2f" % P.dashes)
-	# --- rank 3: stokes at once and lays a 4s lava carpet
+	# --- rank 3: stokes at once (the lava carpet is the X ult now, not the ram)
 	reset.call()
 	P.slot_lv["dash"] = 3
 	T.teleport(home + Vector3(4.2, 0, 0))
 	ak.aim_at(P, T.pos)
 	P.ak.on_dash(false)
 	ak.step(m, 0.6)
-	var span := 0.0
-	var left := 0.0
-	if not K.trail.is_empty():
-		span = (K.trail[0]["p"] as Vector3).distance_to(K.trail[-1]["p"])
-		left = float(K.trail[-1]["until"]) - m.time
-	ok("ram rank 3: stokes at once and lays a lava carpet (4s)", K.burning(T) >= 1 and span > 2.0 and left > 3.2, "burning %d trail %d span %.1f left %.1f" % [K.burning(T), K.trail.size(), span, left])
-	var th0: int = K.trail_hits
-	if not K.trail.is_empty(): T.teleport(K.trail[0]["p"])
-	ak.step(m, 0.8)
-	ok("ram rank 3: the carpet burns whoever stands in it", K.trail_hits > th0, "hits %d" % (K.trail_hits - th0))
-	reset.call()
-	for dz in range(-3, 4):
-		for dx in range(2, 4):
-			W.kind[W.idx(hx + dx, hz + dz)] = World.T_VOID
-	K._lay_trail(home)
-	P.teleport(home + Vector3(4.4, 0, 0))
-	K.trail = []
-	K._lay_trail(home)
-	var over_void := false
-	for t in K.trail:
-		if W.ground_at(t["p"].x, t["p"].z) <= World.VOID + 1.0: over_void = true
-	ok("abyss: the carpet never forms over the void", not over_void and K.trail.size() < 7, "points %d" % K.trail.size())
-	for dz in range(-3, 4):
-		for dx in range(2, 4):
-			W.kind[W.idx(hx + dx, hz + dz)] = World.T_GROUND
+	ok("ram rank 3: stokes at once, and lays no carpet", K.burning(T) >= 1 and K.jet.trail.is_empty(), "burning %d" % K.burning(T))
 	P.slot_lv["dash"] = 1
 	# --- Furnace Cloak: a 0.2s ring first, then the blast
 	reset.call()

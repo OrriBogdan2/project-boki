@@ -11,9 +11,10 @@ extends ArchKit
 ## - RMB, Cinder Shot: hold to aim down a lane, release: a cinder that lands at the cursor (max 14m);
 ##   it sets the foe Ablaze; on a burning foe it upgrades and spreads.
 ## - Shift, Soot Ram: two charges of a short head-first dash toward the cursor that STOPS on the
-##   first foe with a fiery impact; rank 3 stokes and lays a 4s lava carpet (the folded Jetpack).
+##   first foe with a fiery impact; rank 3 stokes at once.
 ## - E, Furnace Cloak: a 0.2s edge ring, then the blast: scorch, Char, Anti-Heal, drag foes in (walls block),
 ##   and a swirling shield for what it hit.
+## - X, Flue Flight (level 6): a steerable flight that lays a burning, slowing lava carpet (AshwickJet).
 
 const FLAME_CYAN := Color("6fe8ff")    # the pilot flame: a cool nozzle against warm fire
 const BOLT_COL := Color("ff4a6a")      # Cinder Shot's red-pink body
@@ -25,19 +26,18 @@ const NOZZLE := Vector3(1.3, 0.9, 0.15)  # the nozzle's tip from the feet in the
 var chars := {}                 # foe id -> {e, n, t}
 var ignites := {}               # foe id -> {e, lvl, until}
 var drags: Array = []           # foes being dragged in by the shield blast: {e, left}
-var trail: Array = []           # fire-trail points: {p, until}
 var hose := AshwickHose.new()   # the Torch Lance stream
 var flame_acc := 0.0
 var spool := 0.0                # how long the hose has been held
 var after_t := 0.0              # the slow after letting go
 var relight_t := 0.0            # the lance can't relight until this runs out (0.35s after a release)
 var was_held := false
-var trail_acc := 0.0
 var ember_t := 0.0
 var cloak_t := 0.0              # hold: the Furnace Cloak's 0.2s ring before the blast
-var bash := {}                  # hold: the Soot Ram under way {t, dir, start, hit}
+var bash := {}                  # hold: the Soot Ram under way {t, dir, hit}
 var aiming := false             # hold: Cinder Shot held (the lane shows)
 var fx: LDFx
+var jet: AshwickJet             # X, Flue Flight (its flight is a hold: jet.flight)
 var ignitions := 0              # (tests)
 var upgrades := 0
 var spreads := 0
@@ -45,7 +45,6 @@ var resets := 0
 var cloaks := 0
 var blasts := 0
 var refunds := 0
-var trail_hits := 0
 var pulled := 0
 var flame_ticks := 0
 var bash_hits := 0
@@ -61,6 +60,7 @@ func ready_label() -> String: return "FLASHOVER" if not ignites.is_empty() else 
 func _setup() -> void:
 	fx = LDFx.of(m)
 	LDSfx.ensure()
+	jet = AshwickJet.new(self)
 
 func _best_char() -> float:
 	var b := 0.0
@@ -180,7 +180,7 @@ func _tick(dt: float) -> void:
 			_cloak_blast()
 	if not bash.is_empty(): _tick_bash(dt)
 	if not drags.is_empty(): _tick_drags(dt)
-	if not trail.is_empty(): _tick_trail(dt)
+	jet.tick(dt)
 	if h.shield_t > 0.0 and h.shield > 0.5 and st.get("shield_on", false):
 		if tells_visible():
 			# the Furnace Cloak's shield: a swirling ring of fire hugging Linwick while it holds (about 0.8 bh)
@@ -243,6 +243,7 @@ func _drop_holds() -> void:
 	cloak_t = 0.0
 	bash = {}
 	aiming = false
+	jet.drop()
 
 func move_k() -> float:
 	if was_held and h.wid == "flamethrower": return 0.8
@@ -317,7 +318,7 @@ func _flame_tick(tick: float) -> void:
 # ------------------------------------------------------------------ RMB: Cinder Shot
 ## Held: a thin white lane to the cursor (clamped to 14m) with a small end ring, the gun hand cocked.
 func rmb_hold_tick(_t: float) -> void:
-	if KinMerge.active(h) or not rmb_ready():
+	if KinMerge.active(h) or not rmb_ready() or jet.running():
 		return
 	if not aiming:
 		aiming = true
@@ -334,6 +335,9 @@ func fire_rmb(c: Dictionary) -> void:
 	aiming = false
 	AimKit.hide(h, "rmb")
 	AimKit.hide(h, "rmb_end")
+	if jet.running():
+		h._ab_feedback("sec", "deny")          # both hands on the jet while flying
+		return
 	if not spend_rmb():
 		if was_aiming: play("")
 		return
@@ -403,7 +407,7 @@ func on_dash(use_ex: bool) -> bool:
 		play("lw_hop")
 		m.sfx("lw_hop", h.pos, -3.0, 1.0)
 		fx.sunburst(h.pos + Vector3(0, 0.5, 0), 0.9, Color("ff8a3a"), Color("ffe0a0"), 0.25, true)
-		bash = {"t": float(h.cdat.get("ex_time", 0.21)), "dir": dir, "start": h.pos, "hit": true, "hop": true}
+		bash = {"t": float(h.cdat.get("ex_time", 0.21)), "dir": dir, "hit": true, "hop": true}
 		return true
 	if not spend_dash(false):
 		return true
@@ -413,7 +417,7 @@ func on_dash(use_ex: bool) -> bool:
 	play("as_leap")
 	h.glide_cd = maxf(h.glide_cd, t + 0.35)
 	m.sfx("lw_bash", h.pos, -2.0, 1.0)
-	bash = {"t": t, "dir": dir, "start": h.pos, "hit": false}
+	bash = {"t": t, "dir": dir, "hit": false}
 	return true
 
 ## While the ram flies: the flame skull wraps his front and ember tails stream behind; the first foe it
@@ -438,11 +442,8 @@ func _tick_bash(dt: float) -> void:
 	if float(bash["t"]) <= 0.0:
 		var b := bash
 		bash = {}
-		if not b.get("hop", false):
-			if rank("dash") >= 3:
-				_lay_trail(b["start"])
-			if not b.get("hit", false):
-				m.fx.dust(h.pos, 6)
+		if not b.get("hop", false) and not b.get("hit", false):
+			m.fx.dust(h.pos, 6)
 
 func _bash_impact(f: Ent) -> void:
 	var dd := dash_def()
@@ -464,49 +465,6 @@ func _bash_impact(f: Ent) -> void:
 	Feel.shake(m, "t2", h, f.pos, f)
 	if h.is_local(): Oomph.punch_dir(m, dir, 0.25)
 	net_ring(f.pos, 1.4, SKULL_COL)
-
-func _lay_trail(start: Vector3) -> void:
-	var dd := dash_def()
-	var a := Vector2(start.x, start.z); var b := Vector2(h.pos.x, h.pos.z)
-	var n := maxi(1, int(ceil(a.distance_to(b) / 0.9)))
-	var seg_a := Vector3.INF
-	var seg_b := Vector3.INF
-	for i in n + 1:
-		var p := a.lerp(b, float(i) / float(n))
-		var g: float = m.world.ground_at(p.x, p.y)
-		if g <= World.VOID + 1.0:
-			if seg_a != Vector3.INF and seg_b != Vector3.INF and seg_a.distance_to(seg_b) > 0.3:
-				fx.lava(seg_a, seg_b, float(dd["trail_w"]), float(dd["trail_t"]))
-			seg_a = Vector3.INF
-			continue           # fire never forms over the abyss
-		var q := Vector3(p.x, g, p.y)
-		trail.append({"p": q, "until": m.time + float(dd["trail_t"])})
-		if seg_a == Vector3.INF: seg_a = q
-		seg_b = q
-	if seg_a != Vector3.INF and seg_b != Vector3.INF and seg_a.distance_to(seg_b) > 0.3:
-		fx.lava(seg_a, seg_b, float(dd["trail_w"]), float(dd["trail_t"]))
-		m.sfx("lw_trail", seg_b, -4.0, 1.0)
-	while trail.size() > 14: trail.pop_front()
-
-func _tick_trail(dt: float) -> void:
-	trail = trail.filter(func(t): return float(t["until"]) > m.time)
-	trail_acc += dt
-	if trail_acc < 0.3:
-		return
-	trail_acc = 0.0
-	var dd := dash_def()
-	var rr := float(dd["trail_w"]) * 0.5
-	for t in trail:
-		if randf() < 0.5: m.fx.burst((t["p"] as Vector3) + Vector3(0, 0.2, 0), Color("ff8a3a"), 2, 1.5, 0.4, -3.0, 1.2)
-	for f in m.foes_of(h.team):
-		if not f.hittable():
-			continue
-		for t in trail:
-			if Vector2(f.pos.x - t["p"].x, f.pos.z - t["p"].z).length() < rr + f.r and absf(f.pos.y - t["p"].y) < 1.6:
-				f.hurt(float(dd["trail_dps"]) * 0.3, h, {"src": "flame", "ab": "dodge", "tags": ["flame"], "slow": 0.25, "slow_for": 0.5})
-				add_char(f, 4.0)
-				trail_hits += 1
-				break
 
 # ------------------------------------------------------------------ E: Furnace Cloak
 ## The press: arms crossed, a thin orange ring at full radius for 0.2s (everyone sees it), then the blast.
@@ -541,6 +499,7 @@ func _cloak_blast() -> void:
 		f.hurt(float(ed["dmg"]) * power("kin") * k, h, {"src": "flame", "ab": "k1", "tags": ["flame", "cloak"]})
 		if add_char(f, float(ed["char"])): stoked = true
 		KitStatus.apply(f, "blt", float(ed["blt_t"]))
+		jet.on_cloak_hit(f)
 		m.fx.burst(f.pos + Vector3(0, 1.4, 0), Color("6a4a5a"), 8, 1.5, 0.6, -1.0, 1.6)      # a smoke puff over the target
 		if f.mass() < 6.0 and not f.remote:
 			drags.append({"e": f, "left": 0.45})
@@ -574,11 +533,20 @@ func _tick_drags(dt: float) -> void:
 		if bz == 0.0: e.pos.z = nz
 		if bx != 0.0 and bz != 0.0: drags.erase(dg)
 
+# ------------------------------------------------------------------ X: Flue Flight
+func cast_ult() -> bool: return jet.start()
+func ult_recast() -> bool: return jet.recast()
+func ult_running() -> bool: return jet.running()
+
 # ------------------------------------------------------------------ bots
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null:
 		return
 	var te := tgt as Ent
+	if HeroUlt.unlocked(self) and float(cd["x"]) <= 0.0 and los and dist > 3.0 and dist < 9.0:
+		h.inp["aim"] = tgt.pos
+		h.inp["xult"] = true
+		return
 	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and los and dist < float(e_def()["radius"]) - 0.5:
 		h.inp["aim"] = tgt.pos; h.inp["sig"] = true; return
 	if int(h.slot_lv["sec"]) > 0 and rmb_ready() and los and dist < float(rmb_def()["range"]) - 1.0 and dist > 3.0 and (burning(te) > 0 or randf() < 0.5):

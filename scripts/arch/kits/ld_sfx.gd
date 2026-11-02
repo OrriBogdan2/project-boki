@@ -5,7 +5,9 @@ extends RefCounted
 
 const NAMES := [
 	"lw_pilot", "lw_roar", "lw_bolt", "lw_bolt_hit", "lw_bash", "lw_bash_hit", "lw_shield", "lw_blaze", "lw_trail", "lw_hop",
+	"lw_jet", "lw_jet_land",
 	"dr_shot", "dr_throw", "dr_grab", "dr_reel", "dr_barge", "dr_anchor_wind", "dr_dive", "dr_quake", "dr_hop",
+	"dr_blast_charge", "dr_blast",
 ]
 
 static var _done := false

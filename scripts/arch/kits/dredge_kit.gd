@@ -16,6 +16,8 @@ extends ArchKit
 ##   height adds damage. Just after it the barge turns badly.
 ## - Dash, Barge: a shoulder barge toward the cursor that shoves, with a burst where it sets off; further
 ##   in the air.
+## - X, Brass Broadside (level 6): a planted 1.1s charge behind a growing fan, then two waves of slugs with
+##   Anti-Heal (DredgeBlast).
 
 const ROPE_COL := Color("f0d070")
 const SLUG_COL := Color("ffd9f2")
@@ -39,6 +41,7 @@ var shot_seen := 0              # the last weapon volley the kit dressed
 var shot_at := -9.0
 var stunned: Array = []         # foes the Anchor stunned: {e, until} (the spiral over them)
 var fx: LDFx
+var broadside: DredgeBlast      # X, Brass Broadside (its charge and waves are a hold: broadside.blast)
 var grapples := 0               # (tests) foes reeled in
 var anchors := 0
 var quakes := 0
@@ -56,6 +59,7 @@ func _setup() -> void:
 	st["base_hp"] = h.max_hp
 	fx = LDFx.of(m)
 	LDSfx.ensure()
+	broadside = DredgeBlast.new(self)
 
 func res_text() -> String: return "%d" % int(res)
 func res_frac() -> float: return clampf(res / res_max(), 0.0, 1.0)
@@ -98,7 +102,9 @@ func on_knock(t: Hunter, mine: bool) -> void:
 		h.heal(h.max_hp * float(rd()["heal_knock"]))
 		m.fx.burst(h.pos + Vector3(0, 1.0, 0), Color("7fe08a"), 14, 2.5, 0.5, -2.0)
 
-func outgoing(t: Ent, dmg: float, _o: Dictionary) -> float:
+func outgoing(t: Ent, dmg: float, o: Dictionary) -> float:
+	if String(o.get("ab", "")) == "ult":
+		return dmg               # the Broadside takes no back bonus (it keeps ult into merge under a one-shot)
 	if t is Hunter and ArchKit.behind(t, h):
 		if m.time - _stab_at > 1.2:
 			_stab_at = m.time
@@ -114,9 +120,11 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 		h.dashes = minf(h.max_dashes(), h.dashes + float(dash_def()["cut"]) / maxf(0.5, h.dash_regen()))
 
 func can_shoot() -> bool:
-	return fire_ok() and fuse.is_empty() and pull.is_empty() and dive.is_empty()
+	return fire_ok() and fuse.is_empty() and pull.is_empty() and dive.is_empty() and not broadside.running()
 
 func move_k() -> float:
+	if broadside.running():
+		return 0.0               # planted for the charge and the waves
 	return 0.7 if wind > 0.0 else 1.0
 
 # ------------------------------------------------------------------ tick
@@ -135,6 +143,7 @@ func _tick(dt: float) -> void:
 	if not dive.is_empty(): _tick_dive(dt)
 	if flying: _tick_hook()
 	if not pull.is_empty(): _tick_pull(dt)
+	broadside.tick(dt)
 	_tick_gun()
 	_tick_looks(dt)
 	net_pulse(dt, res >= res_max(), 1.8)
@@ -149,6 +158,7 @@ func _drop_holds() -> void:
 	scoop = []
 	if not pull.is_empty():
 		_end_pull(false)
+	broadside.drop()
 
 ## The scattergun: each new volley rocks the body back, flashes the muzzle and dresses its slugs (pink
 ## streaks that hang as violet dots where they stop). While firing, the spread's two edge lines lie on the
@@ -211,7 +221,7 @@ func _tick_looks(dt: float) -> void:
 func fire_rmb(c: Dictionary) -> void:
 	c["variant"] = "tap"
 	last_variant = "tap"
-	if flying or not pull.is_empty() or wind > 0.0 or not dive.is_empty():
+	if flying or not pull.is_empty() or wind > 0.0 or not dive.is_empty() or broadside.running():
 		h._ab_feedback("sec", "deny")
 		return
 	if not spend_rmb():
@@ -394,7 +404,7 @@ func _end_pull(arrived: bool) -> void:
 
 # ------------------------------------------------------------------ E: Anchor Drop
 func cast_e() -> bool:
-	if wind > 0.0 or not pull.is_empty() or not dive.is_empty():
+	if wind > 0.0 or not pull.is_empty() or not dive.is_empty() or broadside.running():
 		return false
 	var ed := e_def()
 	var gy: float = m.world.ground_at(h.pos.x, h.pos.z)
@@ -530,7 +540,7 @@ func _quake(at: Vector3, fell: float) -> void:
 
 # ------------------------------------------------------------------ dash: Barge
 func on_dash(use_ex: bool) -> bool:
-	if wind > 0.0 or not dive.is_empty():
+	if wind > 0.0 or not dive.is_empty() or broadside.running():
 		return true
 	var dd := dash_def()
 	var dir := h.aim_dir()
@@ -568,11 +578,24 @@ func _barge_burst(dir: Vector2) -> void:
 	fx.scorch(ground(at), 0.9, 1.0, Color("ff8a3a"), Color("3a2018"))
 	m.fx.burst(at + Vector3(0, 0.6, 0), Color("ff6a3a"), 12, 4.0, 0.3, 4.0, 1.0, Vector3(-dir.x, 0.3, -dir.y), 50.0)
 
+# ------------------------------------------------------------------ X: Brass Broadside
+## Only from a free stance: not mid-reel, mid-Anchor or mid-dive.
+func cast_ult() -> bool:
+	if flying or not pull.is_empty() or wind > 0.0 or not dive.is_empty():
+		return false
+	return broadside.start()
+
+func ult_running() -> bool: return broadside.running()
+
 # ------------------------------------------------------------------ bots
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
-	if tgt == null or not pull.is_empty() or wind > 0.0 or not dive.is_empty():
+	if tgt == null or not pull.is_empty() or wind > 0.0 or not dive.is_empty() or broadside.running():
 		return
 	var tf := tgt as Ent
+	if HeroUlt.unlocked(self) and float(cd["x"]) <= 0.0 and los and dist < 3.5:
+		h.inp["aim"] = tgt.pos
+		h.inp["xult"] = true
+		return
 	# the Anchor on a foe that has just landed Grounded, or any foe up close
 	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and dist < float(e_def()["radius"]) + 1.0 and los:
 		h.inp["aim"] = tgt.pos; h.inp["sig"] = true; return
