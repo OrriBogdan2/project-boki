@@ -817,7 +817,7 @@ func _start(o: Dictionary) -> void:
 		duel = Duel.new()
 		duel.setup(self)
 		duel.attach_keys()
-		hud.toast("Duel room  ·  B sets up the bot  ·  X resets", Color("f3eee2"))
+		hud.toast("Duel room  ·  B sets up the bot  ·  Backspace resets", Color("f3eee2"))
 	if player and duel == null and not opts.get("tutorial", false) and (opts.get("arena", false) or opts.get("practice", false)):
 		# the Arena, and the same practice tools on the training island (dummies, swaps, kit card)
 		arena = Arena.new()

@@ -228,7 +228,7 @@ func pick_text(what: String) -> String:
 var keys_node: Node = null
 var menu_layer: CanvasLayer = null
 
-## B opens the setup menu, X resets the round. A little node so keys work even while paused.
+## B opens the setup menu, Backspace resets the round. A little node so keys work even while paused.
 class DuelKeys extends Node:
 	var d: Duel
 	func _init(owner_duel: Duel) -> void:
@@ -295,7 +295,7 @@ func _fill_menu(v: VBoxContainer) -> void:
 	acts.add_child(UI.button("Heal both", func(): heal_both(), 130))
 	acts.add_child(UI.button("Clear stats", func(): _clear_stats(); round_n = 1, 130))
 	v.add_child(acts)
-	v.add_child(UI.label("B opens this menu  ·  X resets the round  ·  Esc leaves the room", 13, UI.MUTED))
+	v.add_child(UI.label("B opens this menu  ·  Backspace resets the round  ·  Esc leaves the room", 13, UI.MUTED))
 
 ## Pick the Boki you duel with: the same list as the Arena menu (yours, or a loaner of any species
 ## that never reaches your roster; the training area has no way out).
