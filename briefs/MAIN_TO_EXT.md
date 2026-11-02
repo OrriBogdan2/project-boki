@@ -328,3 +328,31 @@ Also: main has new fixes on branch integ62 (the next ship):
 - Duel room Boki picker
 
 Re-merge main after sync62 before reporting ext/market ready.
+
+## 2026-11-02 11:40 ET: add to ext/equal: gloves (grips) don't rank up, and their HUD and overhead display
+
+Owner, SUPERVIVE-accurate: an active glove on Q is never upgraded by skill points. Its strength comes only from the item (its rarity).
+
+**Skill points**
+- Hunter.SLOTS / SLOT_MAX (hunter.gd ~2958): remove "gear" from the ranked slots. A worn glove is usable at once; it just needs a glove equipped, no point spent and no level gate.
+- Skill points go only to the hero's own abilities (sec/RMB, dash, kin, ult).
+- Bots' spend order (_bot_spend) and the "+1 SKILL POINT" flow are updated to match.
+- Remove rank text from glove tooltips and kit cards ("rank 2/3" for Q).
+- Migration: none needed (ranks are per run).
+
+**HUD**
+- Move the glove slot(s) out of the left skill bar to the right-hand side of the bottom HUD, beside the utility belt (1/2/3) and the weapon panel, the way SUPERVIVE shows grips: item icon, rarity frame colour, cooldown sweep, key cap (Q).
+- The left skill bar keeps only the hero kit (LMB, RMB, E, Shift) and the Boki slots (C, G, R).
+
+**Overhead indicator**
+- Above every hunter's nameplate (small, under the name), show their glove's icon(s) with a rarity-coloured frame and a cooldown dim when on cooldown, so rivals can read what you carry.
+- Billboarded, scaled with the nameplate, hidden beyond the nameplate's visibility range.
+- Synced from the existing gear state (it's already in the snapshot for remote hunters; if not, add it with the Net bump).
+
+Second grip: the owner mentioned SUPERVIVE's two grips. I'm confirming with him whether he wants a second glove slot now; build the HUD and overhead row so a second icon fits. I'll post the answer here.
+
+**Checks:**
+- No skill point can be spent on the glove.
+- A worn glove casts at level 1.
+- The overhead glove icons appear for remote hunters.
+- The HUD glove slot sits on the right.
