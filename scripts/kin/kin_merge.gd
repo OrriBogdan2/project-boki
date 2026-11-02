@@ -29,7 +29,11 @@ static func active(h: Hunter) -> bool:
 
 ## In the 0.7s transformation (untouchable; whatever the hero had started before R is dropped, nothing fires).
 static func transforming(h: Hunter) -> bool:
-	return active(h) and String(h.merge_st.get("phase", "")) == "xform"
+	if active(h):
+		return String(h.merge_st.get("phase", "")) == "xform"
+	# R pressed with the Boki out: it's leaping back to merge, so the hero's holds are already dropped
+	var k = h.kin if h else null
+	return k != null and is_instance_valid(k) and (k as Kin).state == "flying_home" and bool((k as Kin).fly.get("merge", false))
 
 ## Is the meter full and the slot ready (not counting where the Boki is)?
 static func ready(h: Hunter) -> bool:
@@ -65,7 +69,9 @@ static func press(h: Hunter) -> bool:
 		return (h.merge_st["kit"] as MergeKit).press_ult() if h.merge_st["kit"] != null else false
 	match plan(h):
 		"merge": return cast(h)
-		"leap": return (h.kin as Kin).merge_leap()
+		"leap":
+			if h.ak: h.ak._drop_holds()
+			return (h.kin as Kin).merge_leap()
 		"surge": return surge(h)
 	return false
 
@@ -89,6 +95,7 @@ static func rescue_text(h: Hunter) -> String:
 static func surge(h: Hunter) -> bool:
 	if plan(h) != "surge":
 		return false
+	if h.ak: h.ak._drop_holds()      # whatever the hero had started before R never fires (charges, wind-ups, reels)
 	h.ult = 0.0
 	var ms := MergeForm.surge_spec()
 	var form := MergeForm.surge_form()
@@ -109,6 +116,7 @@ static func cast(h: Hunter) -> bool:
 	if ms == null:
 		return false
 	k.disengaged = false
+	if h.ak: h.ak._drop_holds()      # whatever the hero had started before R never fires (charges, wind-ups, reels)
 	h.ult = 0.0
 	MergeAugment.drop_class_holds(h)
 	for bb in h.m.bubbles.duplicate():
