@@ -277,3 +277,84 @@ Dredge keeps its name; it isn't in the rename list.
 - **What to build:** X = a 1.1 s planted charge with a visible 105° × 3.3 bh fan, then 2 waves 0.6 s apart of 6 projectiles each, with Anti-Heal.
 - **Bond:** each wave that hits a hunter adds 0.35, so both waves land for **0.7**. Make it per wave, not per orb, so point-blank doesn't overfill.
 - **Source check:** this does match Kingpin's kit (Kaiju Grasp, Iron Smash, Kaiju Blast all appear on the cards), so the "Kingpin" guess for this segment is right.
+
+## Body, scale and movement feel
+
+The method and yardsticks match `linwick.md` (same camera zoom; 50 px ≈ 1 m; a medium is about 90 px head to foot; the nameplate sits about 110 px above the ground point for everyone). Frame N = (t - 456) x 5 + 1.
+
+### 1. Height and bulk
+- **Height:** about **105 px** standing (467.2 s / 0057, 3x grid crop). That is **1.17** of a medium.
+- **Width:** about 90 px across the torso (127 px with the big arm out), against a medium's 55-60 px. That makes him about **1.5x as broad**: a barrel torso with one oversized arm.
+- **Nameplate:** his head reaches the bottom of the plate, which sits at the same fixed height as everyone's (plate bottom to feet: 108 px, against Felix's 112).
+- **Ours:** heavy, **1.18**. The height is right; the breadth should be pushed further.
+- **Target:** a scale of **1.17-1.2** (keep it), with race and build bulk of about **1.3** across the shoulders and chest.
+
+### 2. Locomotion
+- **Speed:** no clean straight run is in the footage. He walks between casts in short bursts (494.0-494.9 s / 0191-0196, about 40-60 px/s while strafing and aiming). Short repositioning hops read in the same 220-250 px/s band as the other hunters (512.0 s, 515.6 s). Treat him as **the same run speed** as the others; ours is 4.55.
+- **Gait:** a wide, planted walk with the big arm held forward and out. The gun hand stays up and aimed while walking.
+- **Bob:** none readable.
+- **Turning:** he turns back to the aim within about 0.1 s after a dash (493.45-493.55 s).
+
+### 3. Idle
+- A wide stance, the torso square to the aim, the large arm forward (467.2 s, 512.5-513.5 s).
+- No idle loop can be resolved in the ~1 s still windows.
+
+### 4. Ground dash (Brute Dash)
+- **Distance and time** (493.20-493.32 s, 60 fps / 0187-0188): about **230 px ≈ 4.6 m in about 0.12 s**, roughly **35-40 m/s**. It is close to a blink.
+- **Start:** a large red burst at the start point, with a red smear between start and end over 3-4 frames.
+- **Pose:** hunched forward, head down.
+- **Recovery:** he arrives upright with almost no skid. By 493.45 s he is turning to aim, and by 493.6 s he is aiming and walking.
+- **Camera:** it trails the dash and needs about **0.5 s** to catch up (the pan keeps running at 700 → 300 px/s until about 493.8 s).
+- **Ours** (Barge, kitfix): 4.6 m in **0.34 s**. The same distance, but almost **3x slower**. This is the biggest feel gap for this hero.
+
+### 5. Air dash
+- Not shown. The card says it goes further in the air, and kitfix `air_k` 1.35 already does that.
+- The pose and timing in the air are unknown.
+
+### 6. Jump and landing
+- No plain jump is shown.
+- The **Iron Smash hop** is the only airtime (0221-0223, 0232-0236):
+  - Wind-up with the shoulder turned away: about 0.2 s.
+  - A forward hop of about 1 bh: visibly airborne, with the shadow left behind.
+  - The fist drives down on landing: about 0.4 s from press to impact.
+  - A crouched follow-through: about 0.8 s in total.
+  - The landing raises a large white dust cloud about 1.5 bh across.
+
+### 7. Cast and attack body language
+- **Heavy, few, big beats.** Every move is one clear wind-up, a fast hit and a slow settle.
+- **Shooting:** a small kick per shot. He keeps walking between shots.
+- **Grasp:** the arm thrown forward, the body staying planted while it reels.
+- **Smash:** the 0.2 / 0.2 / 0.4 s beats above.
+- **Squash:** on the smash landing and the dash arrival only.
+
+### 8. Build notes
+- **Model scale:** keep 1.17-1.2. Set the race/build bulk to about 1.3 across the chest and shoulders, with the oversized arm on one side.
+- **Collision:**
+  - The heavy `hit_r` 0.50 suits the height.
+  - The body reads about 0.9 m wide on screen, so the 0.5 radius is honest.
+  - **Fairness:** don't widen the hitbox to match the arm; the arm is silhouette, not body.
+- **Camera and nameplate:**
+  - Plate at the shared fixed height. His head will touch it, as in the source. If that collides with our hat or helmet shapes, raise the plate for everyone rather than for him alone.
+  - Add camera follow lag on blink dashes: about 0.4 s to settle, so the dash reads as a jump cut.
+- **KMOVES and locomotion:**
+  - `ARCH_STANCE["dredge"]`: knee 0.24, width 0.22, lean 0.06, bounce 0, breath 1.5, arm 0.75.
+  - Cadence multiplier about 0.9 (slightly slower, heavier steps), stride 0.7.
+- **Ground dash curve and pose:**
+  - `dist` 4.6, `time` **0.12-0.14**, constant speed. Then a 0.15 s recovery in which turning is allowed and movement resumes.
+  - `dr_barge` (kitfix): compress it.
+    - Crouch key at 0.0.
+    - Drive pose (p -0.7, y 0.6) at 0.03.
+    - Hold it to 0.12.
+    - Land squash (sq 0.35, lift -0.1) at 0.16.
+    - Back to rest by 0.35.
+  - Keep the start burst and add a 3-frame smear or ghost between the endpoints.
+- **Air dash:** the same pose and the same short time with 1.35x distance, so in the air it moves faster rather than for longer.
+- **Sound:**
+  - Footsteps: heavy, slow thuds with a metallic rattle.
+  - Dash: a sharp crack and thump at the start (it is a near-blink, so there is no whoosh body), then a short boot skid on arrival.
+
+### 9. Unclear
+- **Run speed and gait:** needs a 2 s straight run (any match clip of Kingpin rotating between fights).
+- **Air dash distance and pose:** needs a clip of Brute Dash used off a ledge or jump pad.
+- **Idle loop:** needs a 5 s idle close-up.
+- **Footstep cadence:** needs the same straight run at 60 fps.

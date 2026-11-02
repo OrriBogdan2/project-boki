@@ -247,3 +247,72 @@ Ostra is not in the rename list.
 **Build notes:**
 - **What to build:** X = cursor-placed (clamped) 1.0 s dome telegraph, then a 3.5 s pull and stun vortex of about 2 bh (about 2.8 bh when Empowered) with small ticking damage. Ostra is free to act during it.
 - **Bond:** each hunter caught when it opens adds 0.4, capped at **0.8**. A 3.5 s stun is huge, so pay on the catch, not per tick.
+
+## Body, scale and movement feel
+
+The method and yardsticks match `linwick.md` (same camera zoom; 50 px ≈ 1 m; a medium is about 90 px head to foot; the nameplate sits about 110 px above the ground point for everyone). Frame N = (t - 954) x 5 + 1.
+
+### 1. Height and bulk
+- **Height:** about **75 px of body** plus about 15 px of trailing hem tails, so about 90 px in all (961.0 s / 0036, 3x grid crop).
+- **Width:** about 58 px across, which is medium.
+- **She hovers.** There are no feet. Her shadow starts about 10-15 px below the hem, a gap the walking heroes don't have. She floats at about **0.15-0.2 of her height** (roughly 0.25-0.35 m), with a glow disc under her.
+- **Ours:** medium, **1.0**.
+- **Target:** about **0.9 for the body**, lifted by a hover of about 0.3 m, so the total reads 1.0.
+
+### 2. Locomotion
+- **Speed:** steady camera-follow plateaus of **160-260 px/s, averaging ~205 px/s ≈ 4.1 m/s** (970.2-971.2 s / 0082-0087; 974.2-975.0 s / 0102-0106; 988.2-989.2 s / 0172-0177). That is a little slower than Felix and Celeste. Ours (medium) is 4.8.
+- **Gait:** none. She **glides**: no steps or leg cycle are seen at 20-30 fps, and the hem and tails trail behind the motion.
+- **Bob and lean:** no bob readable. She stays upright with no lean into motion; the cloth does the reacting.
+- **Starts and stops:** they look instant, like the others.
+
+### 3. Idle
+- She hovers in place, with the hem tails drifting and the casting hand's orb floating (961.0 s, 982.0 s).
+- No loop timing is readable.
+
+### 4. Ground dash (Swap)
+- **There is no body dash.**
+- **Timeline** (0152-0200):
+  1. She lobs a star-orb with one arm.
+  2. It flies about 1.8 s.
+  3. She then **teleports instantly**: the camera jump-cuts (987.4 s).
+- **During the lob** she stays roughly in place (985.0-987.2 s: almost no camera motion).
+- **Ours** (kitfix): a 1.7 s lob with `ostra_swap` and `ostra_arrive`. That matches.
+
+### 5. Air dash
+- Not shown. The Swap is her only mobility.
+
+### 6. Jump and landing
+- Not shown. As a hoverer she should have no landing squash beyond a small dip of the hover height.
+
+### 7. Cast and attack body language
+- **The smallest body motion of the five.** Casts come from the hand and orb; the body barely shifts.
+  - Orbs: one-hand flicks.
+  - Snap: a forward push.
+  - Swap: an underhand lob.
+  - Black Hole: an arm raised.
+- **Empowered:** a sphere aura surrounds her, but her body doesn't change pose.
+
+### 8. Build notes
+- **Model scale:** body 0.9, with a hover offset of about **0.3 m** on the rig root.
+  - Add a slow hover bob: about ±0.03 m at about 0.6 Hz.
+  - Drop the legs from the run cycle; the hem trails instead.
+- **Collision:**
+  - The medium `hit_r` 0.40, kept **at ground level**. The hover is visual only.
+  - **Fairness:** the hurtbox stays the full height down to the ground, so the hover never dodges low shots.
+  - Show the ring at the real ground point under her.
+- **Camera and nameplate:** the shared plate height; the hover puts her head slightly closer to the plate, which is fine. No camera change.
+- **KMOVES and locomotion:**
+  - `ARCH_STANCE["ostra"]`: knee 0.05, lean 0.0, width 0.05, bounce 0, breath 1.4, arm 0.8.
+  - Locomotion: no stride. Run the legs at about 0.1 of the normal stride and let `_cloth` trail.
+  - Optionally drop speed to about 4.3-4.5 to match the gliding read.
+- **Ground dash:** the kitfix Swap timing (1.7 s, Swollen 1.25 s) matches. Keep `ostra_swap` and `ostra_arrive`.
+- **Air dash:** the class long dash. If used, play it as a smooth drift with no tumble, with the hem streaming.
+- **Sound:**
+  - No footsteps. A soft, low hum or whisper loop while moving.
+  - Swap: a hollow "thoom" on the lob and a bright inverted pop on arrival.
+
+### 9. Unclear
+- **Hover height:** needs a side-on or low-angle shot. The steep camera only shows the shadow gap.
+- **Body motion while gliding:** her aura covers it in 974-975 s. Needs a clean (non-empowered) 2 s run at 60 fps.
+- **Air behaviour:** needs a clip of her crossing a ledge or jump pad.
+- **Idle loop:** needs a 5 s idle.

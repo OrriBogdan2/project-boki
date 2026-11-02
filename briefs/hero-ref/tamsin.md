@@ -253,3 +253,82 @@ Tamsin is not in the rename list; the archetype JSON is already "Tamsin".
 **Build notes:**
 - **What to build:** X = rooted and invulnerable inside a frost shell, with a 4 bh stacking-slow zone. Recast any time to end it. At 3.2 s or later (or automatically at 3.5 s) it releases damage and a stun in the radius, with line of sight checked.
 - **Bond:** each hunter stunned by the release adds 0.4, capped at **0.8**. An early-cancelled (defensive) use gives 0, so the meter only pays for holding your nerve.
+
+## Body, scale and movement feel
+
+The method and yardsticks match `linwick.md` (same camera zoom; 50 px ≈ 1 m; a medium is about 90 px head to foot; the nameplate sits about 110 px above the ground point for everyone). Frame N = (t - 1055) x 5 + 1.
+
+### 1. Height and bulk
+- **Height:** about **110-120 px** head to toe (1073.0 s / 0091, 1074.2 s / 0097, 3x grid crops). Her head sits just under the plate. That is about **1.2x a medium**; the skating lean inflates the number slightly, so take **1.15** as the true height ratio.
+- **Width:** only about 25-30 px across the torso, against a medium's 55-60 px. That is **about half the breadth**: long legs, a narrow body, and the arms often held out to the sides (about 90-100 px fingertip to fingertip).
+- **Ours:** light, 0.9 x 0.95 = **0.855** of a medium. That is too short.
+- **Target:** **1.1-1.15** in height with a slim build (race/build bulk about 0.75), so she reads tall and thin.
+
+### 2. Locomotion
+- **Run speed:** a steady **240 px/s ≈ 4.8 m/s** for 3 s (1105.4-1108.4 s / 0253-0268). She is the fastest of the five on foot. Ours (light) is 5.0, which is fine.
+- **Gait** (60 fps, 1095.2-1095.9 s / 0202-0205):
+  - Long, wide skater's strides: the legs split far apart, then close.
+  - A wide split comes about every **0.17 s**. At this size I could not tell left from right, so a full two-leg cycle is 0.17 or 0.34 s.
+  - The body leans forward and the arms are held out for balance. A long ribbon or scarf streams behind.
+- **Bob:** none readable; she glides more than she bounces.
+- **Stopping and turning:** she turns to face a new direction in about 0.1 s (1095.75-1095.9 s), stepping round rather than spinning.
+
+### 3. Idle
+- A skater's stance: one leg back, arms out, a slight forward lean, facing the aim (1073-1074 s).
+- No loop timing is readable in the short still windows.
+
+### 4. Ground dash (Skate, held)
+- **Speed:** **450-600 px/s ≈ 10-11 m/s**, about **2.2x her run**.
+  - 1102.0-1104.0 s / 0236-0246, about 1.8 s.
+  - 1111.2-1112.8 s / 0282-0290, about 1.6 s.
+  - The earlier 1093.2-1094.5 s run reads lower (about 335 px/s), because the ice trail confused the pan.
+- **Curve:** full speed within about **0.2 s** (the pan goes 124 → 479 px/s in one 0.2 s step), a flat cruise, then a stop on release within about 0.1-0.2 s.
+- **Pose:** low and leaning forward, arms out, legs in long push strides. She turns to face the cursor and fires while skating (0239-0245).
+- **Trail:** a long, thick ribbon of blue ice crystals along the whole path, several bh long.
+- **Edges:** she carries straight on over ledge edges.
+- **Ours:**
+  - main: 11.5 m/s for 1.6 s, which matches the source.
+  - kitfix: **8 m/s for 2.4 s**. That is too slow, and it lasts longer than the longest skate seen (about 2 s).
+
+### 5. Air dash
+- Not shown. The skate carries over ledges but no airborne dash is used.
+- Ours uses the class long dash with `tm_dash_air` (a tumbling side flip). That is our own addition and has no source behind it.
+
+### 6. Jump and landing
+- Not shown.
+
+### 7. Cast and attack body language
+- **Light and flowing:** casts happen while moving, with the arms doing the work.
+  - Darts: thrown from the hands while walking or skating.
+  - Spear: a full overhand throw.
+  - Wall: both hands pushed forward.
+- **Squash:** little. The motion is mostly extension: arms out, long legs.
+
+### 8. Build notes
+- **Model scale:** height **1.1-1.15**, build bulk **0.75**, long-legged (leg length about 1.15x).
+- **Collision:**
+  - Keep the light `hit_r` 0.35. From the top-down camera she looks about 0.5-0.6 m across the body, so this is honest.
+  - **Fairness:** the extra height adds nothing to her top-down target, so don't raise `hit_r` because of it. Do check that her nameplate and shadow don't make her look bigger than she is.
+- **Camera and nameplate:**
+  - Plate at the shared height. Her head will sit right under it, as in the source.
+  - No camera change.
+- **KMOVES and locomotion:**
+  - `ARCH_STANCE["rimewright"]`: knee 0.22, lean 0.14, width 0.1, bounce 0.4 (less springy than now), breath 2.4, arm 1.25 (arms held out).
+  - Cadence about 1.4x with stride about 0.85 (long splits).
+  - Arms out to the sides while running, not swinging.
+- **Ground dash curve and pose:**
+  - `speed` 10.5-11, `max_t` 1.6-1.8.
+  - Ramp: speed ramps to full within 0.2 s.
+  - Stop: within 0.15 s on release.
+  - Pose: `tm_skate` already pushes every 0.28 s, which matches the look; keep it.
+  - `tm_skate_go` (0.16 s push-off) and `tm_skate_stop` (hockey stop) are good.
+- **Air dash:** the class long dash. If there is no source evidence, prefer the stretched skate glide pose over the tumbling flip, so she stays in character.
+- **Sound:**
+  - Footsteps: soft, quick steps with a blade tick.
+  - Skate: a continuous blade hiss and scrape that rises in pitch over the first 0.2 s, with crackling ice along the trail and a hard scrape for the stop.
+
+### 9. Unclear
+- **Left/right step timing:** needs a 60 fps side-on clip of her running 2 s.
+- **Air dash:** needs a clip of Skate off a ledge, or a dash in the air.
+- **Idle loop:** needs a 5 s close idle.
+- **Jump and landing:** not in this video; any match clip with a jump pad would settle it.

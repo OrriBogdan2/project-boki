@@ -234,3 +234,90 @@ The text was read from the in-game cards at full resolution (`linwick/cards_inga
 **Build notes:**
 - **What to build:** X = a 1.4 s steerable flight at about 7 bh/s that follows the cursor with a capped turn rate. It lays a 1 bh lava strip (4 s, slow, Ignite build-up). X again lands early.
 - **Bond:** each distinct enemy hunter that the lava touches adds 0.3, capped at **0.7**. Landing E on someone standing in the lava adds a +0.1 combo bonus, so a full Jetpack→E play fills about 80%.
+
+## Body, scale and movement feel
+
+Method, shared by all five sheets written in this pass:
+- Measured on 1080p frames pulled from `all.mp4`; times are video seconds, frame numbers are this hero's 5 fps frames (N = (t - 214) x 5 + 1).
+- The main video uses one fixed camera zoom for every hero, so pixel sizes compare directly between heroes. Ground scale: about **50 px = 1 m** (the existing sheets' 1 bh = 90 px = 1.8 m).
+- **Height** is the on-screen head-to-foot length of the standing figure (the camera looks steeply down, so this mixes height and depth, but it does so the same way for every hero).
+- **Medium reference:** Ghost and Joule measure about **90 px** (main video 95 s and 20 s).
+- **Nameplate:** the plate sits a fixed ~110 px above the ground point for every hero (Felix 112, Kingpin 108, Void ~114). It does not move with body size.
+- **Speeds** come from camera pan, measured by phase correlation on the ground, plus the hero's own screen drift, so camera lag cancels out. Each is good to about ±10%.
+
+### 1. Height and bulk
+- **Height:** about **80 px** standing (241.5 s / 0138, 223.6 s / 0049). That is 0.89 of a medium hunter.
+- **Width:** about 50 px across the body and pack (74 px including the hose loop). A medium is about 55-60 px.
+- **Bulk:** a small, compact, round body with a big backpack mass. Head top to plate bottom is about 32 px; mediums have only 5-10 px there, so the plate floats well clear of his head.
+- **Ours:** heavy class, 1.14 x 1.035 = **1.18** of a medium (times the race scale).
+- **Target:** about **0.90** overall, a factor of **x0.76** on today's root scale. The tall hat may rise above that line; the body should not.
+
+### 2. Locomotion
+- **Run speed:** steady camera-follow plateaus of **205-230 px/s** (241.4-241.8 s, 251.4-251.8 s). That is about **4.4 m/s**: the same band as Void (~4.1) and a little under Celeste (~4.8). Ours (heavy) is 4.55 m/s, which is fine.
+- **Cadence:** a quick scurry. A trailing foot shows about every **0.15-0.2 s** (60 fps crop, 241.2-241.9 s / 0137-0140), so roughly 5-6 footfalls a second with short strides. Ours takes about 0.35 s per step at heavy speed (`ph += spd*1.95`), so the source cadence is about **2x ours**.
+- **Bob:** small, about 2-4 px (3-5% of height).
+- **Lean:** none readable; he runs upright and compact.
+- **Accelerating, stopping and turning:** all instant at 60 fps. There is no visible slide when he stops, and he turns on the spot within 1-2 frames.
+- **Weapon carry:** the nozzle stays up and forward at the right shoulder with the hose looped behind. It stays raised while running and does not swing.
+
+### 3. Idle
+- He stands square and planted, facing the aim (223-227 s, while firing).
+- No breathing or fidget loop can be resolved at this zoom in the 3-4 s of standing shown.
+
+### 4. Ground dash (Flame Skull Bash, the source's dash slot)
+- **Free dash** (245.53-245.87 s / 0159-0160): about **170 px ≈ 3.4 m in 0.33 s**, an average of ~10 m/s (about 2.3x run).
+- **Speed curve:** front-loaded. Camera speed is about 700 px/s for the first 0.1 s, then 450-500 px/s, then it stops dead.
+- **Pose:** a head-first horizontal lunge, the body compact inside a flame shell, with a long flame tail streaming back about 2-3 body lengths.
+- **Recovery:** he comes out upright with feet apart and the gun already on the aim, at once (245.9 s).
+- **Into a target** (242.5-242.6 s / 0143-0144):
+  - The lunge reaches the dummy in about 0.12 s and stops on contact.
+  - Within about **0.1 s** he is knocked back to roughly where he started (about 1 bh of recoil).
+  - Then he stands while the target burns.
+- **Ours** (Soot Ram, kitfix): 4.4 m in 0.26 s, which is about 17 m/s: **faster and longer** than the source.
+
+### 5. Air dash
+- Not shown. Every use in the footage is on the ground.
+- The closest air move is the R jetpack (259.2-260.8 s / 0227-0235):
+  - A low, upright flight at about **500 px/s ≈ 10 m/s** for about 1.6 s.
+  - No tilt into the flight is readable.
+  - He sets down and walks on with no visible squash.
+
+### 6. Jump and landing
+- No jump is shown.
+- The jetpack set-down has no visible dust or squash at this zoom.
+
+### 7. Cast and attack body language
+- **Small motion budget:** the body barely moves for LMB (he walks while firing, nozzle at hip height) or RMB (a quick forward arm thrust).
+- **E:** arms flung wide for one ~0.2 s beat as the ring flashes, then the blast.
+- **Big moves:** only the bash and the jetpack.
+- **Squash and stretch:** only the stretch into the bash and the snap back on impact.
+
+### 8. Build notes
+- **Model scale:** about 0.90 of medium (today 1.18).
+  - Keep the hat as the tall read above the body.
+  - Keep the body short and round: a race "bulk" of about 1.05 on a short body.
+- **Collision:**
+  - The heavy `hit_r` is 0.50, but a 0.9-scale body would look about 0.42.
+  - **Fairness:** a hitbox larger than the model is a hidden penalty for him. Either give Linwick his own `hit_r` of about 0.44, or keep 0.50 and let the ring under his feet (already drawn at the real size) show it.
+  - Do not shrink the hitbox below what the model shows.
+- **Camera and nameplate:**
+  - No per-hero camera change.
+  - Keep the plate at the shared fixed height (as the source does). At 0.9 scale it floats about a hand above the hat; that is fine and matches the source.
+- **KMOVES and locomotion:**
+  - `ARCH_STANCE["ashwick"]`: knee 0.2, lean 0.02, width 0.12, bounce 0.6, breath 2.4, arm 0.9.
+  - Add a per-arch cadence multiplier of about **1.8**: steps every ~0.19 s at 4.4 m/s, with short strides (stride 0.45 instead of 0.62).
+  - Keep the nozzle carry raised at the shoulder while running, with no arm swing on the gun side.
+- **Ground dash curve and pose:**
+  - `dist` 3.6, `time` 0.32.
+  - Speed curve: 1.4x the average for the first 30%, then 0.85x, and a hard stop with no carry (`DASH_CARRY_GROUND` 0).
+  - `as_leap`: keep the 0.08 s crouch, but hold the stretched pose (p -0.75) through 0.30 and release by 0.42.
+  - On a hit: a 0.1 s recoil of about 1.5 m back along the path (kitfix `recoil` 3.5 is in this range), landing upright with the gun up.
+- **Air dash:** none in the source. Use the class long dash, keeping the same compact head-first pose.
+- **Sound** (the video has no audio; this is the intended character):
+  - Footsteps: light and fast patter with a small metallic clink from the pack on every other step.
+  - Bash: a gas-burner whoosh that ignites on start, a dull fiery thump on contact, and a short scrape on the recoil.
+
+### 9. Unclear
+- **Idle loop and breathing:** needs 5+ s of Felix standing with no input at close zoom, for example a hero-select or lobby idle.
+- **Exact stride count:** needs a 2+ s straight run at 60 fps, moving across the screen rather than toward the camera; 241.2-241.9 s runs up-screen.
+- **Air bash, jump arc and landing squash:** none are in this video. They need a match clip of Felix using the bash off a ledge or jump pad.

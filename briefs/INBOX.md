@@ -184,3 +184,12 @@ briefs/hero-ref/mooshmoosh.md now ends with "Body, scale and movement feel". Bui
 - **Ground dash:** keep 4.2 m in 0.16 s, plus a small hop.
 - **Air dash:** a long, floaty glide (a head-first streak, then a tucked float, then a soft landing). Start at about 8–9 m over about 0.8 s. The owner decides whether to go up to the source's 11–15 m; data-driven, so it's easy to change.
 The other 11 hunters' body sections follow within the hour.
+
+## 2026-11-02 23:20 UTC
+Body, scale and movement sections are in for **linwick, dredge, tamsin, breah, ostra** (end of each briefs/hero-ref/<name>.md). Fold them into each pair's polish pass:
+- **linwick:** smaller (×0.76) and round. His bash is a front-loaded ~3.4 m over 0.33 s that bounces back on a hit, not 4.4 m at 17 m/s. Quicker steps.
+- **dredge:** keep his height but make him ~1.3× wider. His dash is a near-blink, ~4.6 m in ~0.12 s with a burst where it starts and a camera that catches up after it. Our 0.34 s is 3× too slow. (Main tuned that barge on purpose, so flag the change in your report.)
+- **tamsin:** tall and thin (1.1–1.15 height, ~0.75 bulk), with the light hitbox kept. Skate at 10–11 m/s for 1.6–2.0 s, reaching full speed in ~0.2 s. The kitfix branch's 8 m/s for 2.4 s is wrong; match main's 11.5 m/s for 1.6 s.
+- **breah:** ~1.2× wider (big forearms and fists). Landslide is a heavier, longer push: rock goes up first, ~2.5–3 body heights over ~0.45 s.
+- **ostra:** no step cycle. A ~0.3 m hover-glide at ~4.1 m/s with a trailing hem; body ~0.9. Keep the hitbox at ground level.
+Not in the footage: air dashes, plain jumps and idle loops for these five. Use each hunter's character to build them, and list them as assumptions.

@@ -407,3 +407,76 @@ JSON should keep the old name, but changing the JSON is cleaner). No "Dolm" in t
 **Build notes:**
 - **What to build:** X = tap for a wall at the cursor perpendicular to aim, or hold and drag to rotate it. There is a 0.2 s crack telegraph, then rocks rise centre-out over 0.4 s (11 bh, a brief slow, blocking terrain, a bridge over gaps). Our E rank-3 "second row and bridge" fold can go back into being a plain E.
 - **Bond:** the wall deals no damage itself. Pay **0.3** for each hunter slowed by the rise, and **+0.15 per rock launched into a hunter** within 4 s (Quake Punch), capped at 0.8. The ult is built to be cashed in with punches, and that's what fills the bar.
+
+## Body, scale and movement feel
+
+**Method.** Measured on the 1080p guide video. Frame N = t x 4 + 1.
+- The guide's camera zoom changes between sections: the editor zooms in on some clips, and the in-game camera differs from the main video. So pixel sizes are not compared across videos.
+- Instead I use a zoom-free ratio. The nameplate sits a fixed height above every hunter's ground point, so (ground to head top) / (ground to plate bottom) is a height measure. A medium (Ghost, Joule in the main video) scores about **0.90-0.93**.
+
+### 1. Height and bulk
+- **Height ratio** (128.6 s / 0515, standing on the bridge): plate bottom to feet about 74 px at half resolution, head top about 10 px under the plate. That gives **0.86**, about **0.95 of a medium**.
+- **Bulk:** broad and blocky. Big forearms and fists make the silhouette about **1.2x a medium's width** at the hands, and the stance is wide.
+- **Ours:** `dolm`, medium, **1.0**.
+- **Target:** **0.95-1.0** height, bulk about **1.2** (shoulders and forearms). Keep it a short, wide read, not a tall one.
+
+### 2. Locomotion
+- **Speed:** not cleanly measurable. The guide zoom shifts and most walking is short (182.0-184.0 s / 0729-0737; 128.6-128.8 s just before a dash). Nothing suggests she differs from the common run speed.
+- **Gait** (182-184 s, 10 fps): a grounded, wide-legged walk with the fists carried low and forward of the hips. No hop or bounce.
+- **Sneak:** a crouched walk while sneaking (the existing section 2, Stonesight).
+- **Turning:** she faces the cursor at once; the body turns, not the legs.
+
+### 3. Idle
+- She stands wide with the fists low and ready (0730-0736).
+- No loop is resolvable.
+
+### 4. Ground dash (Landslide)
+- **Timeline** (128.8-129.4 s / 0516-0518; bridge clip, measured against the fixed platform edge):
+  1. At 128.8 s a rock spike bursts up just ahead of her.
+  2. She drives forward behind it at a steady **640-690 px/s at this zoom** (about 4.5 hero heights per second, or **9-11 m/s**).
+  3. At about 129.2 s the rock is launched as a fireball and she settles.
+- **Distance:** about **2.5-3 bh in about 0.45 s**.
+- **Pose:** a shoulder-down shove behind the rock, fists forward, low centre of mass.
+- **Recovery:** short; she is upright behind the launched boulder within about 0.15 s.
+- **Ours:** 4.2 m in **0.28 s** (15 m/s). That is shorter in time and faster than the source; the source is a **heavier, longer push**.
+
+### 5. Air dash
+- Not shown as a dash.
+- The airborne moves in the guide are the RMB hop (jump while charging leaps forward; existing section 2, Volcano Crusher) and the dash-into-dunk combo (246-249 s / 0985-0997). Both are too small at that zoom for body detail.
+
+### 6. Jump and landing
+- **Hop:** the RMB release (0258 → 0259) is a short forward hop of about 1-1.5 bh, then a two-fist smash on landing.
+- **Landing:** a big starburst, rock shards and a scorched crater for about 1 s. The landing is the attack; there is no separate landing recovery beyond a crouch.
+
+### 7. Cast and attack body language
+The largest motion budget of the five.
+- **Punch:** a deep crouch and a cocked fist on the hold, then a straight drive.
+- **Slam:** a crouched charge with glowing fists, a hop, then a fold-over smash.
+- **Stone Row:** a stomp.
+- **Squash:** strong on every landing and impact. The holds read as visibly compressed.
+
+### 8. Build notes
+- **Model scale:** about 0.97 height, bulk 1.2, with the forearms and fists the largest parts.
+- **Collision:**
+  - The medium `hit_r` 0.40 fits.
+  - **Fairness:** the fists widen the silhouette but are not body; don't widen the hitbox for them.
+- **Camera and nameplate:** the shared plate height (her head sits a little under it, like a medium); no camera change.
+- **KMOVES and locomotion:**
+  - `ARCH_STANCE["dolm"]` is close: knee 0.3, width 0.2. Set lean 0.1, bounce 0, breath 1.6, arm 0.7.
+  - Fists carried low and forward while running, with a short, heavy arm swing.
+  - Cadence 1.0 (a medium's).
+- **Ground dash curve and pose:**
+  - `time` **0.42-0.45**, `dist` about 4.6 (2.5 bh).
+  - Constant speed after a 0.05 s start.
+  - **Order:** spawn the rock first (by about 0.05 s), then move; launch it at the end.
+  - `breah_dash` (kitfix) already has the shove pose. Stretch its keys to 0.07 / 0.18 / 0.4 / 0.48, then rest by 0.8.
+- **Air dash:** the class long dash using `breah_exdash` (kitfix).
+- **Sound:**
+  - Footsteps: heavy, gritty stomps with gravel.
+  - Dash: a stone crack as the rock bursts up, a grinding roll under the push, then a cannon thump at the launch.
+
+### 9. Unclear
+- **Run speed:** needs a straight 2 s run at a known zoom (the guide's match footage around 1045-1117 frames is the best bet, if a stretch of plain running is found).
+- **Landslide speed curve:** needs a cleaner 60 fps view without the fire covering her (the bridge clip is the best one available).
+- **Air dash and landing squash:** needs a match clip of a jump-pad or ledge dash.
+- **Idle:** needs a 5 s idle.
