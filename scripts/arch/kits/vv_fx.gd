@@ -365,7 +365,12 @@ func _build_marker(max_n: int) -> Node3D:
 	return nd
 
 # ------------------------------------------------------------------ per frame
-func _process(delta: float) -> void:
+var _last_t := -1.0
+func _process(_delta: float) -> void:
+	# effects run on match time (they freeze with the match and replay frame-exact in screenshots)
+	var now := float(m.get("time"))
+	var delta := clampf(now - _last_t, 0.0, 0.1) if _last_t >= 0.0 else 0.0
+	_last_t = now
 	for e in live.duplicate():
 		e["t"] = float(e["t"]) + delta
 		var n: Node3D = e["node"]

@@ -27,9 +27,12 @@ func run(main_node: Node) -> void:
 		if String(a).begins_with("--vv-hero="): who = String(a).substr(10)
 		if String(a).begins_with("--vv-tag="): tag = String(a).substr(9)
 	name_ = "vireo" if who == "mage" else "venator"
+	var fxt := who == "fxtest"
+	if fxt: who = "mage"; tag = "fxtest"
 	DirAccess.make_dir_recursive_absolute(dir)
 	await _setup()
-	if who == "mage": await _vireo()
+	if fxt: await _fxtest()
+	elif who == "mage": await _vireo()
 	else: await _venator()
 	var f := FileAccess.open(dir.path_join("MANIFEST_%s_%s.txt" % [name_, tag]), FileAccess.WRITE)
 	for l in lines: f.store_line(l)
@@ -81,6 +84,9 @@ func _reset(td: float, tz := 0.0) -> void:
 	T.hp = T.max_hp; T.stun_t = 0.0; T.inv_t = 0.0
 	for k in ["fire", "sec_hold", "dash_down"]: P.inp[k] = false
 	P.inp["move"] = Vector2.ZERO
+	var sp = P.ak.get("sparks")
+	if sp is Dictionary: (sp as Dictionary).clear()
+	if T.has_meta("rat_until"): T.set_meta("rat_until", 0.0)
 	P.ak.cd["rmb"] = 0.0; P.ak.cd["e"] = 0.0; P.ak.ch_rmb = float(P.ak.rmb_charges()); P.dashes = P.max_dashes()
 	_aim(T.pos)
 	await _go(0.4)
@@ -113,10 +119,10 @@ func _take(kind: String, file: String, caption: String) -> void:
 		return
 	var cam := main.get_viewport().get_camera_3d()
 	var c := cam.unproject_position(P.position + Vector3(0, 0.9, 0))
-	var sz := Vector2i(150, 170)
+	var sz := Vector2i(120, 140)
 	var rg := Rect2i(Vector2i(int(c.x) - sz.x / 2, int(c.y) - sz.y / 2), sz).intersection(Rect2i(Vector2i.ZERO, img.get_size()))
 	var crop := img.get_region(rg)
-	crop.resize(sz.x * 2, sz.y * 2, Image.INTERPOLATE_BILINEAR)
+	crop.resize(sz.x * 5 / 2, sz.y * 5 / 2, Image.INTERPOLATE_BILINEAR)
 	if not strips.has(kind):
 		strips[kind] = []
 		lines.append("%s/%s/anim|%s|%s" % [name_, tag, kind, caption])
@@ -251,3 +257,12 @@ func _venator() -> void:
 	KitStatus.apply(T, "rat", 3.0)
 	K.use_e()
 	await _go(1.0, Callable(), [[0.72, "full", "skewer.png", "Payoff: Longneedle through a Dazed hunter, SKEWERED"]])
+
+func _fxtest() -> void:
+	var f := VVFx.of(m)
+	f.pillar(home + Vector3(3, 0, -2), Color("ffc95a"), Color.WHITE, 6.0, 0.8, 30.0, false)
+	f.ring(home + Vector3(6, 0, 0), 2.0, Color.WHITE, Color("ffc95a"), 30.0)
+	f.disc(home + Vector3(3, 0, 3), 1.8, Color("3a2d6e"), Color("e08a46"), 30.0)
+	f.fan(home + Vector3(10, 0, 0), Vector2(-1, 0), 5.0, 100.0, Color("ff9a5c"), Color("fff1c8"), 30.0)
+	f.star(home + Vector3(1, 1, 0), Color("ffc95a"), Color.WHITE, 1.0, 30.0)
+	await _go(0.5, Callable(), [[0.4, "full", "fxtest.png", "fx test"]])
