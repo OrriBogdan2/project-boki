@@ -7,21 +7,25 @@ extends RefCounted
 ## says the next two come early. The panel is dark so it reads over the bright set behind it.
 
 const STAGE := Vector2(300, 300)
+const HINT := "Pick 1 Hunter to start. Your next two unlocks come early, any Hunter you like; " \
+		+ "try them all in the Arena."
 
 static func row(on: String, cb: Callable) -> Control:
 	var back := UI.card(Color(0.06, 0.04, 0.11, 0.94), 14, 12)
 	back.set_meta("starter_pick", true)
-	var v := UI.vbox(6); back.add_child(v)
+	var v := UI.vbox(6)
+	back.add_child(v)
 	var head := UI.title("Choose your Hunter", 26, UI.ACCENT)
 	head.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(head)
-	var hint := UI.para("Pick 1 Hunter to start. Your next two unlocks come early, any Hunter you like; try them all in the Arena.", UI.T_SMALL, UI.MUTED)
+	var hint := UI.para(HINT, UI.T_SMALL, UI.MUTED)
 	hint.custom_minimum_size.x = 780
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(hint)
 	var chips := HFlowContainer.new()
 	chips.alignment = FlowContainer.ALIGNMENT_CENTER
-	chips.add_theme_constant_override("h_separation", 6); chips.add_theme_constant_override("v_separation", 6)
+	chips.add_theme_constant_override("h_separation", 6)
+	chips.add_theme_constant_override("v_separation", 6)
 	for a in ClassUnlock.starters():
 		var id: String = a
 		var b := UI.choice(Arch.name_of(id), id == on, func(): cb.call(id), 116)

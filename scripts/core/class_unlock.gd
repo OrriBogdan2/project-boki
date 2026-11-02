@@ -25,7 +25,8 @@ static func rules() -> Dictionary:
 
 ## A new save: no starter chosen yet, the default Hunter open so nothing is ever empty-handed.
 static func fresh() -> Dictionary:
-	return {"all": false, "starter": "", "open": [Arch.default_for("medium")], "early_used": 0, "told": 0, "reveal": [], "seen": [], "xp": 0}
+	return {"all": false, "starter": "", "open": [Arch.default_for("medium")], "early_used": 0, "told": 0,
+			"reveal": [], "seen": [], "xp": 0}
 
 ## Old saves keep everything.
 static func legacy() -> Dictionary:
@@ -71,7 +72,8 @@ static func choose_starter(id: String) -> bool:
 	c["reveal"] = []
 	return true
 
-## An open Hunter of this weight (internal: the Try-on rack and old callers): `want` if it is open and fits, else the first open one, else "".
+## An open Hunter of this weight (internal: the Try-on rack and old callers): `want` if it is open and fits, else the
+## first open one, else "".
 static func fix(want: String, weight: String) -> String:
 	if Arch.exists(want) and Arch.weight(want) == weight and is_open(want):
 		return want
@@ -198,7 +200,8 @@ static func requirement(id: String) -> String:
 	if can_unlock(id): return "Ready: hold to unlock it on the Hunters screen"
 	var gp := goal_progress(id)
 	var lv := level_needed(id)
-	var own := "%s (%d/%d) · account level %d%s" % [goal_text(id), int(gp["have"]), int(gp["need"]), lv, "" if level() >= lv else " (you are %d)" % level()]
+	var own := "%s (%d/%d) · account level %d%s" % [goal_text(id), int(gp["have"]), int(gp["need"]), lv,
+			"" if level() >= lv else " (you are %d)" % level()]
 	var ne := next_early()
 	if not ne.is_empty() and not needs_starter():
 		return "%s (%d/%d) for a free pick, or %s" % [String(ne["text"]), int(ne["have"]), int(ne["need"]), own]
@@ -237,7 +240,8 @@ static func after_match(r: Dictionary) -> Dictionary:
 		var st: Dictionary = Save.d.get("stats", {})
 		st["best_lvl"] = maxi(int(st.get("best_lvl", 0)), int(r["lvl"]))
 		Save.d["stats"] = st
-	return {"xp": gained, "level_before": before, "level_after": level(), "ready": ready_count(), "new": maxi(0, ready_count() - int(state().get("told", 0)))}
+	return {"xp": gained, "level_before": before, "level_after": level(), "ready": ready_count(), "new": maxi(0,
+			ready_count() - int(state().get("told", 0)))}
 
 # ---- the reveal moment
 static func pending_reveal() -> Array:

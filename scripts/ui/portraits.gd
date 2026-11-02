@@ -7,9 +7,10 @@ extends RefCounted
 const SIZE := 96
 
 ## A viewport holding a portrait of this look. Add it to the tree; its texture fills in next frame.
-## `body`: the whole hunter with their weapon, standing (the class reveal), instead of head and shoulders;
+## `body`: the whole hunter with their weapon, standing (the reveal), instead of head and shoulders;
 ## `px`: the viewport's size.
-static func make(cls: String, team_col: Color, wid: String, look: Dictionary, arch := "", body := false, px := SIZE) -> SubViewport:
+static func make(cls: String, team_col: Color, wid: String, look: Dictionary, arch := "", body := false,
+		px := SIZE) -> SubViewport:
 	var vp := SubViewport.new()
 	vp.size = Vector2i(px, px)
 	vp.own_world_3d = true
@@ -50,9 +51,11 @@ static func make(cls: String, team_col: Color, wid: String, look: Dictionary, ar
 	cam.fov = 26.0
 	vp.add_child(cam)
 	if body:
-		cam.transform = Transform3D(Basis(), Vector3(-1.5, 1.5, -4.6) * s).looking_at(Vector3(0, 0.95 * s, 0), Vector3.UP)
+		var eye := Vector3(-1.5, 1.5, -4.6) * s
+		cam.transform = Transform3D(Basis(), eye).looking_at(Vector3(0, 0.95 * s, 0), Vector3.UP)
 	else:
-		cam.transform = Transform3D(Basis(), head + Vector3(-0.45, 0.1, -1.55) * s).looking_at(head + Vector3(0, -0.13 * s, 0), Vector3.UP)
+		var eye := head + Vector3(-0.45, 0.1, -1.55) * s
+		cam.transform = Transform3D(Basis(), eye).looking_at(head + Vector3(0, -0.13 * s, 0), Vector3.UP)
 	cam.current = true
 	return vp
 

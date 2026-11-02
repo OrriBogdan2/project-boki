@@ -14,7 +14,8 @@ extends PanelContainer
 signal slot_changed(slot: String)
 
 const RULES_PATH := "res://content/rules/hunter_viewer.json"
-const SLOT_NAMES := {"dash": "Dash", "passive": "Passive", "lmb": "Attack", "rmb": "Right click", "e": "Utility", "x": "Ultimate", "r": "with your Boki"}
+const SLOT_NAMES := {"dash": "Dash", "passive": "Passive", "lmb": "Attack", "rmb": "Right click", "e": "Utility",
+		"x": "Ultimate", "r": "with your Boki"}
 static var _rules: Dictionary = {}
 
 var id := ""
@@ -56,7 +57,9 @@ static func slot_info(hunter_id: String, slot: String) -> Dictionary:
 		return KitCard.slot_text(hunter_id, slot)
 	var d := Arch.def(hunter_id)
 	var xd: Dictionary = d.get("x", {})
-	return {"name": String(xd.get("name", "")), "icon": String(xd.get("icon", "burst")), "col": Color(String(xd.get("col", "#ffffff"))), "tag": "", "line": String(d.get("card", {}).get("x", xd.get("desc", "")))}
+	return {"name": String(xd.get("name", "")), "icon": String(xd.get("icon", "burst")),
+			"col": Color(String(xd.get("col", "#ffffff"))), "tag": "", "line": String(d.get("card", {}).get("x",
+			xd.get("desc", "")))}
 
 static func rules() -> Dictionary:
 	if _rules.is_empty():
@@ -64,10 +67,10 @@ static func rules() -> Dictionary:
 		_rules = p if typeof(p) == TYPE_DICTIONARY else {}
 	return _rules
 
-static func make(hunter_id: String, size := Vector2(320, 380)) -> HunterViewer:
+static func make(hunter_id: String, stage_px := Vector2(320, 380)) -> HunterViewer:
 	var v := HunterViewer.new()
 	v.id = hunter_id
-	v.stage_size = size
+	v.stage_size = stage_px
 	return v
 
 ## The kit moves a slot plays, from the rules (only ids the animation knows).
@@ -87,7 +90,8 @@ static func stat_line(hunter_id: String) -> String:
 	var cd: Dictionary = Data.CLASSES.get(Arch.weight(hunter_id), {})
 	var w := String(Data.weapon_stats(Arch.signature(hunter_id)).get("name", ""))
 	var dn := int(cd.get("dashes", 1))
-	return "%d health  ·  %d dash%s%s" % [int(cd.get("hp", 0)), dn, "es" if dn > 1 else "", ("  ·  " + w) if w != "" else ""]
+	return "%d health  ·  %d dash%s%s" % [int(cd.get("hp", 0)), dn, "es" if dn > 1 else "",
+			("  ·  " + w) if w != "" else ""]
 
 func _ready() -> void:
 	var col := Arch.color(id)
@@ -164,11 +168,13 @@ func _build_world(col: Color) -> void:
 	vp.add_child(env)
 	var key := DirectionalLight3D.new()
 	key.rotation_degrees = Vector3(-30, 160, 0)
-	key.light_color = Color("fff1dc"); key.light_energy = 1.2
+	key.light_color = Color("fff1dc")
+	key.light_energy = 1.2
 	vp.add_child(key)
 	var rim := DirectionalLight3D.new()
 	rim.rotation_degrees = Vector3(-12, -20, 0)
-	rim.light_color = col.lerp(Color.WHITE, 0.35); rim.light_energy = 0.7
+	rim.light_color = col.lerp(Color.WHITE, 0.35)
+	rim.light_energy = 0.7
 	vp.add_child(rim)
 	pivot = Node3D.new()
 	vp.add_child(pivot)
@@ -178,8 +184,13 @@ func _build_world(col: Color) -> void:
 	pivot.add_child(model)
 	anim = HunterAnim.new(model)
 	var floor_disc := MeshInstance3D.new()      # a low plinth so the feet stand on something
-	var cm := CylinderMesh.new(); cm.top_radius = 0.75; cm.bottom_radius = 0.8; cm.height = 0.06
-	var mat := StandardMaterial3D.new(); mat.albedo_color = col.darkened(0.55); mat.roughness = 0.8
+	var cm := CylinderMesh.new()
+	cm.top_radius = 0.75
+	cm.bottom_radius = 0.8
+	cm.height = 0.06
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = col.darkened(0.55)
+	mat.roughness = 0.8
 	cm.material = mat
 	floor_disc.mesh = cm
 	floor_disc.position.y = -0.03
@@ -210,7 +221,8 @@ func _info(col: Color) -> Control:
 	# the plain-words card, as the L loadout picker shows it
 	var card := UI.card(Color(col, 0.09), 10, 10)
 	card.set_meta("plain_card", true)
-	var cv := UI.vbox(3); card.add_child(cv)
+	var cv := UI.vbox(3)
+	card.add_child(cv)
 	cv.add_child(UI.label("How it plays", 12, Color(col, 0.95), UI.caps))
 	var lp := UI.para(String(Arch.def(id).get("card", {}).get("loop", "")), 13, col.lightened(0.25))
 	lp.custom_minimum_size.x = 370
@@ -236,7 +248,8 @@ func _row(slot: String, i: int, col: Color) -> Button:
 	b.pressed.connect(func(): select(i, true))
 	var r := UI.hbox(8)
 	r.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	r.offset_left = 8; r.offset_right = -8
+	r.offset_left = 8
+	r.offset_right = -8
 	r.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	b.add_child(r)
 	var kc := UI.keycap(_key(slot), 11)
@@ -282,8 +295,13 @@ func select(i: int, held := false) -> void:
 	for j in rows.size():
 		var b: Button = rows[j]
 		var on := j == slot_i
-		b.add_theme_stylebox_override("normal", KitCard._box(Color(col, 0.16) if on else Color(1, 1, 1, 0.03), 8, Color(col, 0.8) if on else Color(0, 0, 0, 0), 1 if on else 0, 4, 2))
-		b.add_theme_stylebox_override("hover", KitCard._box(Color(col, 0.2) if on else Color(1, 1, 1, 0.07), 8, Color(col, 0.6), 1, 4, 2))
+		var normal := KitCard._box(Color(1, 1, 1, 0.03), 8, Color(0, 0, 0, 0), 0, 4, 2)
+		var hover := KitCard._box(Color(1, 1, 1, 0.07), 8, Color(col, 0.6), 1, 4, 2)
+		if on:
+			normal = KitCard._box(Color(col, 0.16), 8, Color(col, 0.8), 1, 4, 2)
+			hover = KitCard._box(Color(col, 0.2), 8, Color(col, 0.6), 1, 4, 2)
+		b.add_theme_stylebox_override("normal", normal)
+		b.add_theme_stylebox_override("hover", hover)
 		b.add_theme_stylebox_override("pressed", b.get_theme_stylebox("hover"))
 	if held: Sfx.play("hover", null, -8.0)
 	slot_changed.emit(slot)
@@ -399,8 +417,10 @@ func _draw_fx(col: Color) -> void:
 		fx.draw_rect(Rect2(Vector2.ZERO, fx.size), Color(1, 1, 1, 0.75 * maxf(0.0, 1.0 - burst_t / 0.25)))
 		for i in 3:
 			var kk := clampf(k - 0.12 * i, 0.0, 1.0)
-			fx.draw_arc(c, 20.0 + fx.size.x * 0.7 * kk, 0, TAU, 72, Color(col.lightened(0.3), (1.0 - kk) * 0.9), 6.0 - i * 1.5, true)
+			fx.draw_arc(c, 20.0 + fx.size.x * 0.7 * kk, 0, TAU, 72, Color(col.lightened(0.3), (1.0 - kk) * 0.9),
+					6.0 - i * 1.5, true)
 		for i in 16:
 			var a := TAU * float(i) / 16.0
 			var r0 := fx.size.x * 0.12 * (1.0 + k * 2.0)
-			fx.draw_line(c + Vector2(cos(a), sin(a)) * r0, c + Vector2(cos(a), sin(a)) * (r0 + 40.0 * (1.0 - k)), Color(Color.WHITE, 1.0 - k), 3.0, true)
+			fx.draw_line(c + Vector2(cos(a), sin(a)) * r0, c + Vector2(cos(a), sin(a)) * (r0 + 40.0 * (1.0 - k)),
+					Color(Color.WHITE, 1.0 - k), 3.0, true)

@@ -14,13 +14,14 @@ static func add(home: Node, parent: Control) -> String:
 	hd.add_child(UI.ghost("All Hunters", func(): HomeClasses.open(home, cur), 0))
 	parent.add_child(hd)
 	var flow := HFlowContainer.new()
-	flow.add_theme_constant_override("h_separation", 6); flow.add_theme_constant_override("v_separation", 6)
+	flow.add_theme_constant_override("h_separation", 6)
+	flow.add_theme_constant_override("v_separation", 6)
 	for a in Arch.ids():
 		var id: String = a
 		var b := UI.choice(Arch.name_of(id), id == cur, func(): _pick(home, id), 104)
-		var adf := Arch.def(id)
 		b.disabled = not ClassUnlock.is_open(id)
-		b.tooltip_text = ("Locked: %s\n" % ClassUnlock.requirement(id) if b.disabled else "") + "%s\nDash: %s  ·  Passive: %s\nRMB: %s  ·  E: %s  ·  R: Boki Merge" % [String(adf.get("fantasy", "")), String(adf["dash"]["name"]), String(adf["passive"]["name"]), String(adf["rmb"]["name"]), String(adf["e"]["name"])]
+		var locked := "Locked: %s\n" % ClassUnlock.requirement(id) if b.disabled else ""
+		b.tooltip_text = locked + ClassCard.kit_tip(id)
 		b.set_meta("arch", id)
 		flow.add_child(b)
 	parent.add_child(flow)

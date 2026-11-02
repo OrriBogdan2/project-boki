@@ -18,7 +18,7 @@ func run(main: Node) -> void:
 	var k := Save.new_kin("zapple", "Pip"); d["roster"].append(k); d["active"] = k["uid"]
 	d["tutorial"] = {"hatched": true, "intro": true, "home": true, "day1_done": true}
 	d["cls"] = "medium"; d["arch"] = "gunslinger"
-	d["classes"] = ClassUnlock.legacy()      # (this check is about the picker itself: an old save, every Hunter open; the locks are --hunter-unlock-check)
+	d["classes"] = ClassUnlock.legacy()      # an old save, every Hunter open (the locks: --hunter-unlock-check)
 	Save.d = d
 	var hm = await main._hb_home()
 	for i in 30: await tree.process_frame
@@ -35,9 +35,11 @@ func run(main: Node) -> void:
 	var grid: GridContainer = hm.get_meta("hero_grid")
 	var cards: Array = grid.get_children()
 	var archs: Array = cards.map(func(c): return String(c.get_meta("arch", "")))
-	ok(cards.size() == Arch.ids().size() and archs.has("thief") and archs.has("bulwark") and archs.has("dolm") and archs.has("tender"), "every Hunter has a tile: %s" % str(archs))
-	ok(cards.all(func(c): return String(c.tooltip_text).contains("Dash:") and not String(c.tooltip_text).contains("weight")), "each shows its kit on hover, with no weight label")
-	ok(Arch.ids().all(func(a): return HeroGrid.unlocked(a)), "an old save has every Hunter open (new saves unlock through play: --hunter-unlock-check)")
+	var named := ["thief", "bulwark", "dolm", "tender"].all(func(a): return archs.has(a))
+	ok(cards.size() == Arch.ids().size() and named, "every Hunter has a tile: %s" % str(archs))
+	var tips_ok := cards.all(func(c): return c.tooltip_text.contains("Dash:") and not c.tooltip_text.contains("weight"))
+	ok(tips_ok, "each shows its kit on hover, with no weight label")
+	ok(Arch.ids().all(func(a): return HeroGrid.unlocked(a)), "an old save has every Hunter open")
 	for i in 20: await tree.process_frame
 	if shot != "": tree.root.get_texture().get_image().save_png(shot + "/hero_panel.png")
 	if shot != "":      # the rest of the grid, scrolled into view

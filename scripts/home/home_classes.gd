@@ -23,7 +23,8 @@ static func open(home: Node, sel := "") -> void:
 	home.set_meta("hunters_sel", sel)
 	home.set_meta("hero_hover", sel)          # (K opens its kit card)
 	var v: VBoxContainer = home._new_panel(TITLE, 1210, true)
-	UI.subtitle(v, "Who you play. New Hunters open as you play; when one is ready, hold to unlock it. K: the full kit card.")
+	UI.subtitle(v,
+			"Who you play. New Hunters open as you play; when one is ready, hold to unlock it. K: the full kit card.")
 	var top := UI.hbox(12)
 	top.add_child(_account_row())
 	var note := _pick_note()
@@ -33,8 +34,10 @@ static func open(home: Node, sel := "") -> void:
 	v.add_child(top)
 	var cols := UI.hbox(16)
 	v.add_child(cols)
-	var grid := GridContainer.new(); grid.columns = 2
-	grid.add_theme_constant_override("h_separation", 8); grid.add_theme_constant_override("v_separation", 8)
+	var grid := GridContainer.new()
+	grid.columns = 2
+	grid.add_theme_constant_override("h_separation", 8)
+	grid.add_theme_constant_override("v_separation", 8)
 	grid.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	cols.add_child(grid)
 	for id in ordered():
@@ -66,13 +69,15 @@ static func _first_ready() -> String:
 static func _tile(home: Node, id: String, on: bool) -> PanelContainer:
 	var st := ClassUnlock.status(id)
 	var col := Arch.color(id)
-	var card := UI.tile_card(on, func(): Sfx.play("hover", null, -6.0); open(home, id), 6, col)
+	var card := UI.tile_card(on, func(): _show(home, id), 6, col)
 	card.custom_minimum_size = Vector2(TILE_W, 0)
 	card.set_meta("arch", id)
 	card.set_meta("class_status", st)
-	var row := UI.hbox(8); card.add_child(row)
+	var row := UI.hbox(8)
+	card.add_child(row)
 	row.add_child(ClassCard.portrait(id, 48.0))
-	var c := UI.vbox(1); c.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var c := UI.vbox(1)
+	c.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	c.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(c)
 	c.add_child(UI.label(Arch.name_of(id), 15, col if st in ["open", "ready"] else UI.FAINT, UI.big))
@@ -82,12 +87,12 @@ static func _tile(home: Node, id: String, on: bool) -> PanelContainer:
 		"ready": c.add_child(UI.label("Ready: hold to unlock", 11, ClassCard.GOAL_COL, UI.semi))
 		_:
 			var gp := ClassUnlock.goal_progress(id)
-			c.add_child(UI.label("%d / %d" % [int(gp["have"]), int(gp["need"])] if st == "progress" else "Locked", 11, ClassCard.GOAL_COL if st == "progress" else UI.FAINT))
+			c.add_child(UI.label("%d / %d" % [int(gp["have"]), int(gp["need"])] if st == "progress" else "Locked", 11,
+					ClassCard.GOAL_COL if st == "progress" else UI.FAINT))
 			var gb := UI.bar(float(gp["frac"]), ClassCard.GOAL_COL, 100.0, 5.0)
 			gb.set_meta("goal_block", id)
 			c.add_child(gb)
-	var adf := Arch.def(id)
-	card.tooltip_text = "%s\nDash: %s  ·  Passive: %s\nRMB: %s  ·  E: %s  ·  R: Boki Merge" % [Arch.name_of(id), String(adf["dash"]["name"]), String(adf["passive"]["name"]), String(adf["rmb"]["name"]), String(adf["e"]["name"])]
+	card.tooltip_text = ClassCard.kit_tip(id)
 	if st != "open": card.tooltip_text = ("Locked: %s\n" % ClassUnlock.requirement(id)) + card.tooltip_text
 	if st == "locked": card.modulate = Color(0.62, 0.62, 0.68, 0.9)
 	elif st == "progress": card.modulate = Color(0.82, 0.82, 0.88, 0.96)
@@ -100,7 +105,8 @@ static func _actions(home: Node, id: String, viewer: HunterViewer) -> Control:
 	match ClassUnlock.status(id):
 		"open":
 			if id == Arch.of_save():
-				var pl := UI.label("You're playing %s. Your expeditions start with it." % Arch.name_of(id), UI.T_SMALL, UI.GOOD, UI.semi)
+				var pl := UI.label("You're playing %s. Your expeditions start with it." % Arch.name_of(id),
+						UI.T_SMALL, UI.GOOD, UI.semi)
 				pl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 				box.add_child(pl)
 			else:
@@ -122,7 +128,8 @@ static func _actions(home: Node, id: String, viewer: HunterViewer) -> Control:
 			box.add_child(gb)
 			var ne := ClassUnlock.next_early()
 			if not ne.is_empty():
-				var el := UI.label("Or: %s (%d/%d) for a free pick of any Hunter." % [String(ne["text"]), int(ne["have"]), int(ne["need"])], 12, UI.MUTED)
+				var el := UI.label("Or: %s (%d/%d) for a free pick of any Hunter." % [String(ne["text"]),
+						int(ne["have"]), int(ne["need"])], 12, UI.MUTED)
 				el.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 				box.add_child(el)
 	return box
@@ -136,13 +143,18 @@ static func _revealed(home: Node, id: String) -> void:
 		var rv := ClassReveal.show_for(home, id)
 		rv.closed.connect(func(played): if not played and is_instance_valid(home): open(home, id)))
 
+static func _show(home: Node, id: String) -> void:
+	Sfx.play("hover", null, -6.0)
+	open(home, id)
+
 ## A line for the free picks: one waiting, or the next early goal.
 static func _pick_note() -> Label:
 	var n := ClassUnlock.free_picks()
 	if ClassUnlock.all_open():
 		return UI.label("" if Game.modding() else "Every Hunter is open on this save.", 13, UI.GOOD)
 	if n > 0:
-		return UI.label("%d free pick%s: hold to unlock any locked Hunter." % [n, "" if n == 1 else "s"], 14, ClassCard.GOAL_COL, UI.semi)
+		return UI.label("%d free pick%s: hold to unlock any locked Hunter." % [n, "" if n == 1 else "s"], 14,
+				ClassCard.GOAL_COL, UI.semi)
 	var ne := ClassUnlock.next_early()
 	if ne.is_empty():
 		return UI.label("Each Hunter opens with its own goal and account level.", 12, UI.MUTED)
@@ -153,7 +165,8 @@ static func _account_row() -> Control:
 	var lv := ClassUnlock.level_of(ClassUnlock.xp())
 	var card := UI.card(Color(ClassCard.GOAL_COL, 0.08), 10, 8)
 	card.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	var row := UI.hbox(12); card.add_child(row)
+	var row := UI.hbox(12)
+	card.add_child(row)
 	row.add_child(UI.label("Account level %d" % int(lv[0]), 16, ClassCard.GOAL_COL, UI.big))
 	row.add_child(UI.bar(float(lv[1]) / float(lv[2]), ClassCard.GOAL_COL, 200.0, 9.0))
 	row.add_child(UI.label("%d / %d XP" % [int(lv[1]), int(lv[2])], 12, UI.MUTED))

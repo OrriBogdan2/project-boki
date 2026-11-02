@@ -55,7 +55,7 @@ static func _card(ak: String, cur: String, on_pick: Callable, on_kit: Callable, 
 	var kitb := UI.ghost("Kit (K)", func(): on_kit.call(ak), 0)
 	kitb.focus_mode = Control.FOCUS_NONE
 	col.add_child(kitb)
-	card.tooltip_text = "%s\nDash: %s  ·  Passive: %s\nRMB: %s  ·  E: %s  ·  R: Boki Merge" % [Arch.name_of(ak), String(adf["dash"]["name"]), String(adf["passive"]["name"]), String(adf["rmb"]["name"]), String(adf["e"]["name"])]
+	card.tooltip_text = ClassCard.kit_tip(ak)
 	card.set_meta("arch", ak)
 	card.set_meta("class_status", ClassUnlock.status(ak))
 	if not open: card.tooltip_text = "Locked: %s\n%s" % [requirement(ak), card.tooltip_text]

@@ -29,7 +29,7 @@ var cam: Camera3D
 var fx: Fx
 var eggs: Array = []          # {node, base, data}
 var chosen := -1
-var stage := "intro"          # intro | class (a new save picks its starting Hunter) | create | pick | warm | hatching | name
+var stage := "intro"          # intro | class (pick 1 Hunter) | create | pick | warm | hatching | name
 var story_i := 0
 var story_lbl: Label
 var story_box: Control
@@ -403,7 +403,9 @@ func _show_class_pick(on := "") -> void:
 	stage = "class"
 	if on == "" or not ClassUnlock.starters().has(on):
 		on = String(ClassUnlock.starters()[0])
-	Save.d["arch"] = on; Save.d["cls"] = Arch.weight(on); Save.d["weapon"] = Arch.signature(on)
+	Save.d["arch"] = on
+	Save.d["cls"] = Arch.weight(on)
+	Save.d["weapon"] = Arch.signature(on)
 	title.text = "Choose your Hunter"
 	top_box.visible = false      # (the pick panel carries its own heading: the viewer needs the height)
 	if sub_lbl: sub_lbl.text = "Who you play in a match. Your Boki comes next."
@@ -411,7 +413,7 @@ func _show_class_pick(on := "") -> void:
 	_clear_bottom()
 	look_at_t = Vector3(0, 0.25, 0.5)
 	cam_to = Vector3(-3.5, 4.2, 9.0)
-	bottom.add_child(ClassPick.row(on, func(id): Sfx.play("hover", null, -6.0); _show_class_pick(id)))
+	bottom.add_child(ClassPick.row(on, _chip_clicked))
 	var go := UI.primary("Start as %s" % Arch.name_of(on), func():
 		ClassUnlock.choose_starter(on)
 		Save.save_game()
@@ -419,6 +421,10 @@ func _show_class_pick(on := "") -> void:
 		if sub_lbl: sub_lbl.text = "Every Boki is different. It will remember how you treat it."
 		_end_class_pick(), 260)
 	bottom.add_child(go)
+
+func _chip_clicked(id: String) -> void:
+	Sfx.play("hover", null, -6.0)
+	_show_class_pick(id)
 
 ## After the Hunter: make your look if you have not, else straight to the eggs.
 func _end_class_pick() -> void:
@@ -462,7 +468,8 @@ func _show_create() -> void:
 	# the open ones are in the stepper (a new save has just its starter)
 	var cur_a := Arch.of_save()
 	var ar := UI.hbox(8)
-	var al := UI.label("Hunter", UI.T_BODY, UI.MUTED); al.custom_minimum_size.x = 120
+	var al := UI.label("Hunter", UI.T_BODY, UI.MUTED)
+	al.custom_minimum_size.x = 120
 	al.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	ar.add_child(al)
 	if ClassUnlock.open_ids().size() > 1:
@@ -475,7 +482,8 @@ func _show_create() -> void:
 		ar.add_child(UI.icon_button("next", func(): _step_arch(1), "Next", 12.0))
 	v.add_child(ar)
 	var ad := Arch.def(cur_a)
-	var adl := UI.label("%s\n%s" % [" / ".join(Arch.weapons(cur_a).map(func(w): return String(Data.weapon_stats(w)["name"]))), String(ad.get("fantasy", ""))], UI.T_SMALL, UI.ACCENT_HI)
+	var wnames := " / ".join(Arch.weapons(cur_a).map(func(w): return String(Data.weapon_stats(w)["name"])))
+	var adl := UI.label("%s\n%s" % [wnames, String(ad.get("fantasy", ""))], UI.T_SMALL, UI.ACCENT_HI)
 	adl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	adl.custom_minimum_size.x = 380
 	var am := MarginContainer.new(); am.add_theme_constant_override("margin_left", 128); am.add_child(adl)

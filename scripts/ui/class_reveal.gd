@@ -41,35 +41,45 @@ static func show_for(home: Node, hunter_id: String) -> ClassReveal:
 	return rv
 
 func _ready() -> void:
-	root = Control.new(); root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	root = Control.new()
+	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	root.theme = UI.theme()
 	root.mouse_filter = Control.MOUSE_FILTER_STOP
 	add_child(root)
-	var dim := ColorRect.new(); dim.color = Color(0.02, 0.01, 0.06, 0.82)
+	var dim := ColorRect.new()
+	dim.color = Color(0.02, 0.01, 0.06, 0.82)
 	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	dim.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(dim)
 	var col := Arch.color(id)
-	var center := CenterContainer.new(); center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var center := CenterContainer.new()
+	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	root.add_child(center)
-	var v := UI.vbox(10); v.alignment = BoxContainer.ALIGNMENT_CENTER
+	var v := UI.vbox(10)
+	v.alignment = BoxContainer.ALIGNMENT_CENTER
 	center.add_child(v)
 	var kick := UI.label("NEW HUNTER", UI.T_HEAD, UI.GOLD, UI.caps)
 	kick.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(kick)
 	# the ring of light, with the Hunter standing in it
-	var stage := Control.new(); stage.custom_minimum_size = Vector2(340, 310)
+	var stage := Control.new()
+	stage.custom_minimum_size = Vector2(340, 310)
 	stage.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	v.add_child(stage)
-	glow = Control.new(); glow.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	glow = Control.new()
+	glow.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	glow.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	glow.draw.connect(_draw_glow.bind(col))
 	stage.add_child(glow)
 	var tex := ClassCard.portrait(id, 280.0, true)
 	tex.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
-	tex.offset_left = -140; tex.offset_right = 140; tex.offset_top = -140; tex.offset_bottom = 140
+	tex.offset_left = -140
+	tex.offset_right = 140
+	tex.offset_top = -140
+	tex.offset_bottom = 140
 	tex.pivot_offset = Vector2(140, 140)
-	tex.scale = Vector2(0.2, 0.2); tex.modulate.a = 0.0
+	tex.scale = Vector2(0.2, 0.2)
+	tex.modulate.a = 0.0
 	stage.add_child(tex)
 	var nm := UI.title(Arch.name_of(id), 54, col)
 	nm.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -85,7 +95,8 @@ func _ready() -> void:
 	loop.custom_minimum_size.x = 520
 	loop.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(loop)
-	var btns := UI.hbox(12); btns.alignment = BoxContainer.ALIGNMENT_CENTER
+	var btns := UI.hbox(12)
+	btns.alignment = BoxContainer.ALIGNMENT_CENTER
 	btns.add_child(UI.ghost("Later", func(): _finish(false), 140))
 	var play := UI.primary("Play %s" % Arch.name_of(id), func(): _finish(true), 220)
 	btns.add_child(play)
@@ -117,7 +128,8 @@ func _draw_glow(col: Color) -> void:
 		glow.draw_circle(c, 40.0 + 260.0 * e, Color(1, 1, 1, 0.5 * maxf(0.0, 1.0 - t / 0.3)))
 		for i in 3:
 			var kk := clampf(e - 0.14 * i, 0.0, 1.0)
-			glow.draw_arc(c, 30.0 + 420.0 * kk, 0, TAU, 80, Color(col.lightened(0.3), 0.9 * (1.0 - kk)), 7.0 - 2.0 * i, true)
+			glow.draw_arc(c, 30.0 + 420.0 * kk, 0, TAU, 80, Color(col.lightened(0.3), 0.9 * (1.0 - kk)),
+					7.0 - 2.0 * i, true)
 	var k := clampf(t / 0.6, 0.0, 1.0)
 	for i in 5:
 		var r := (70.0 + 26.0 * i) * (0.6 + 0.4 * k)

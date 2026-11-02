@@ -476,7 +476,9 @@ func _arch() -> String:
 func apply_try() -> void:
 	var cls := _cls()
 	var ta := String(try.get("arch", ""))
-	var w := Arch.signature(ta) if Arch.exists(ta) else String(Data.CLASSES[cls]["weapon"]); try["weapon"] = w      # one fixed weapon per Hunter (or weight) here
+	# one fixed weapon per Hunter (or per weight, with no Hunter picked) here
+	var w := Arch.signature(ta) if Arch.exists(ta) else String(Data.CLASSES[cls]["weapon"])
+	try["weapon"] = w
 	var at: Vector3 = h.player.position; var rot: Vector3 = h.player.rotation
 	h.player.queue_free()
 	h.player = Models.hunter(cls, Data.TEAM_COLORS[0], w, "", Save.d.get("look", {}), ta)
@@ -508,15 +510,17 @@ func open_tryon() -> void:
 	var v: VBoxContainer = h._new_panel("Try-on rack", 680, true)
 	v.add_child(UI.label("Feel out any build here. It only applies on the Training Grounds.", 14, UI.MUTED))
 	var cr := HFlowContainer.new()
-	cr.add_theme_constant_override("h_separation", 6); cr.add_theme_constant_override("v_separation", 6)
+	cr.add_theme_constant_override("h_separation", 6)
+	cr.add_theme_constant_override("v_separation", 6)
 	var ta := _arch()
 	for a in Arch.ids():
 		var aa: String = a
-		cr.add_child(UI.choice(Arch.name_of(aa), aa == ta, func(): try["arch"] = aa; try["cls"] = Arch.weight(aa); apply_try(); open_tryon(), 104))
+		cr.add_child(UI.choice(Arch.name_of(aa), aa == ta, func(): _try_hunter(aa), 104))
 	v.add_child(cr)
 	var card := UI.card(UI.CARD, 10, 10); var cv := UI.vbox(4); card.add_child(cv)
 	cv.add_child(UI.label(Arch.name_of(ta), 17, Arch.color(ta), UI.big))
-	cv.add_child(UI.label("%s  %s." % [String(Arch.def(ta).get("fantasy", "")), HunterViewer.stat_line(ta)], 13, UI.MUTED))
+	var fan := String(Arch.def(ta).get("fantasy", ""))
+	cv.add_child(UI.label("%s  %s." % [fan, HunterViewer.stat_line(ta)], 13, UI.MUTED))
 	load_kit()
 	var wd: WeaponDef = Content.weapon(String(try.get("weapon", h._weapon())))
 	if wd: _line(cv, "LMB", wd.display_name, String(wd.primary.get("desc", "")))
@@ -565,17 +569,28 @@ func open_tryon() -> void:
 	bot.add_child(UI.button("Take it all off", func(): try = {}; h._refresh_player_model(); load_kit(); _build_hud(); open_tryon(), 170))
 	v.add_child(bot)
 
+## Puts a Hunter on from the rack (its weight follows) and shows the rack again.
+func _try_hunter(id: String) -> void:
+	try["arch"] = id
+	try["cls"] = Arch.weight(id)
+	apply_try()
+	open_tryon()
+
 ## The Hunter you're trying becomes the one you take on expeditions (with its signature weapon).
 func set_my_class() -> void:
 	var cls := _cls()
 	var want := String(try.get("arch", Save.d.get("arch", "")))
 	var open_a := ClassUnlock.fix(want, cls)     # (a locked Hunter can be tried here, not taken on expeditions)
 	if open_a == "" or (Arch.exists(String(try.get("arch", ""))) and open_a != want):
-		h._toast("%s is still locked: %s. Locked Hunters stay playable in the Arena." % [Arch.name_of(want), ClassUnlock.requirement(want)] if Arch.exists(want) and not ClassUnlock.is_open(want) else "No Hunter like that is open yet. Locked Hunters stay playable in the Arena.")
+		var why := "No Hunter like that is open yet."
+		if Arch.exists(want) and not ClassUnlock.is_open(want):
+			why = "%s is still locked: %s." % [Arch.name_of(want), ClassUnlock.requirement(want)]
+		h._toast(why + " Locked Hunters stay playable in the Arena.")
 		return
 	Save.d["cls"] = cls
 	Save.d["arch"] = open_a
 	Save.d["weapon"] = Arch.signature(String(Save.d["arch"]))
 	Save.save_game()
-	h._toast("You're playing %s now, carrying the %s" % [Arch.name_of(open_a), String(Data.weapon_stats(String(Save.d["weapon"])).get("name", "signature weapon"))])
+	var wname := String(Data.weapon_stats(String(Save.d["weapon"])).get("name", "signature weapon"))
+	h._toast("You're playing %s now, carrying the %s" % [Arch.name_of(open_a), wname])
 	h._refresh_top()

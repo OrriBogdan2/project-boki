@@ -8,7 +8,8 @@ const GOAL_COL := Color("ffd27a")
 ## The Hunter's portrait as a TextureRect; the SubViewport that renders it is a child of the rect.
 ## `body`: the whole standing hunter (the reveal) instead of head and shoulders.
 static func portrait(id: String, px := 84.0, body := false) -> TextureRect:
-	var vp := Portraits.make(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), Save.d.get("look", {}), id, body, int(px * 2.0) if body else Portraits.SIZE)
+	var vp := Portraits.make(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), Save.d.get("look", {}), id,
+			body, int(px * 2.0) if body else Portraits.SIZE)
 	var tex := TextureRect.new()
 	tex.texture = vp.get_texture()
 	tex.custom_minimum_size = Vector2(px, px)
@@ -31,12 +32,14 @@ static func goal_block(id: String, width := 190.0) -> VBoxContainer:
 	var g := UI.para(ClassUnlock.goal_text(id), 13, GOAL_COL if float(gp["frac"]) > 0.0 else UI.INK)
 	g.custom_minimum_size.x = width
 	v.add_child(g)
-	var row := UI.hbox(8); row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var row := UI.hbox(8)
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.add_child(UI.bar(float(gp["frac"]), UI.GOOD if bool(gp["done"]) else GOAL_COL, width - 56.0, 8.0))
 	row.add_child(UI.label("%d/%d" % [int(gp["have"]), int(gp["need"])], 12, UI.MUTED))
 	v.add_child(row)
-	var ok := ClassUnlock.level() >= lv
-	v.add_child(UI.label("Account level %d%s" % [lv, " (reached)" if ok else ""], 12, UI.GOOD if ok else UI.MUTED))
+	var reached := ClassUnlock.level() >= lv
+	var lv_col := UI.GOOD if reached else UI.MUTED
+	v.add_child(UI.label("Account level %d%s" % [lv, " (reached)" if reached else ""], 12, lv_col))
 	return v
 
 ## A Hunter card (portrait, name, health and dashes, fantasy). `cb` runs on click.
@@ -51,7 +54,8 @@ static func make(id: String, on: bool, cb: Callable, tag := "", starter := false
 	var row := UI.hbox(10)
 	card.add_child(row)
 	row.add_child(portrait(id))
-	var col := UI.vbox(2); col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var col := UI.vbox(2)
+	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	col.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.add_child(col)
 	col.add_child(UI.label(Arch.name_of(id), 18, Arch.color(id) if open else UI.FAINT, UI.big))
@@ -64,8 +68,17 @@ static func make(id: String, on: bool, cb: Callable, tag := "", starter := false
 	elif not open:
 		col.add_child(goal_block(id, 170.0))
 	if not open:
-		card.modulate = Color(0.62, 0.62, 0.68, 0.9) if ClassUnlock.status(id) == "locked" else Color(0.85, 0.85, 0.9, 0.95)
+		card.modulate = Color(0.62, 0.62, 0.68, 0.9) if ClassUnlock.status(id) == "locked" else Color(0.85, 0.85, 0.9,
+				0.95)
 	return card
+
+## A Hunter's kit in one tooltip: its name, then dash, passive, RMB, E and R.
+static func kit_tip(id: String) -> String:
+	var adf := Arch.def(id)
+	var names := [Arch.name_of(id)]
+	for slot in ["dash", "passive", "rmb", "e"]:
+		names.append(String(adf[slot]["name"]))
+	return "%s\nDash: %s  ·  Passive: %s\nRMB: %s  ·  E: %s  ·  R: Boki Merge" % names
 
 ## The results screen's account line: XP gained, the level bar, and a Hunter unlock that became ready.
 static func results_strip(s: Dictionary) -> Control:
@@ -82,7 +95,8 @@ static func results_strip(s: Dictionary) -> Control:
 		row.add_child(UI.label("Level up!", UI.T_SMALL, UI.GOOD, UI.semi))
 	v.add_child(row)
 	if int(cu.get("new", 0)) > 0:
-		var nl := UI.label("Hunter unlock ready! Hold to unlock it on the Hunters screen at home.", UI.T_SMALL, GOAL_COL, UI.semi)
+		var nl := UI.label("Hunter unlock ready! Hold to unlock it on the Hunters screen at home.", UI.T_SMALL,
+				GOAL_COL, UI.semi)
 		nl.set_meta("hunter_unlock_ready", int(cu["new"]))
 		v.add_child(nl)
 	return v
