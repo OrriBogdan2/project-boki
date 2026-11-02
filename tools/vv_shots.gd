@@ -204,11 +204,22 @@ func _above_target() -> Vector3:
 
 # ------------------------------------------------------------------ Vireo
 func _vireo() -> void:
+	await _vireo_run()
 	await _vireo_lmb()
 	await _vireo_static()
 	await _vireo_rmb()
 	await _vireo_dash()
 	await _vireo_e()
+
+## Her run: upright, both arms held out wide (the body sheet), at her 0.96 scale.
+func _vireo_run() -> void:
+	await _reset(7.0, 6.0)
+	_aim(home + Vector3(12.0, 0, 0))
+	var run := func(_t: float): P.inp["move"] = Vector2(1, 0)
+	var marks := _strip("anim_run", "Run: upright, both arms held out wide, short quick steps", [0.3, 0.42, 0.54, 0.66])
+	marks.append([0.5, "full", "run", "Running at gameplay zoom: arms out wide, 0.96 scale, the wider shoulders"])
+	await _go(0.7, run, marks)
+	P.inp["move"] = Vector2.ZERO
 
 func _vireo_lmb() -> void:
 	await _reset(7.0)
@@ -497,6 +508,14 @@ func _venator_dash() -> void:
 	await _go(0.8, slide, marks)
 	P.inp["dash_down"] = false
 	P.inp["fire"] = false
+	P.inp["move"] = Vector2.ZERO
+	# a tap: the skid that bleeds off over 0.45s
+	await _reset(7.0)
+	P.inp["move"] = Vector2(0, -1)
+	P.do_dash()
+	var tap := _strip("anim_slide_tap", "Shift tap: a 0.45s skid, fast at the start and bleeding off, then up",
+		[0.02, 0.1, 0.2, 0.3, 0.45, 0.6])
+	await _go(0.65, func(_t: float): P.inp["move"] = Vector2(0, -1), tap)
 	P.inp["move"] = Vector2.ZERO
 	# the base air dash (his own variant): a barrel roll with ember after-images in his silhouette
 	await _reset(6.0, 6.0)
