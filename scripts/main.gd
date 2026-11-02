@@ -3529,8 +3529,8 @@ func _drop_check() -> void:
 	t = 0.0
 	while t < 6.0:
 		m.step(Match.DT); t += Match.DT
-		if String(bot.ai.get("goal_kind", "")) == "ping": went = true
-		closest = minf(closest, bot.flat_dist(spot))
+		if mates.any(func(x): return String(x.ai.get("goal_kind", "")) == "ping"): went = true      # (any squad bot: one busy with its downed Boki or a beacon leaves it to the other)
+		closest = minf(closest, mates.map(func(x): return x.flat_dist(spot)).min())
 	var replies: Array = D.events.slice(ev0).filter(func(e): return String(e).begins_with("reply"))
 	print("DCHECK ground ping: %s headed there=%s, %.1fm -> got within %.1fm; replies %s (from %s to %s)" % [bot.pname, went, d0, closest, str(replies), str(bot.pos.snapped(Vector3(0.1, 0.1, 0.1))), str(spot.snapped(Vector3(0.1, 0.1, 0.1)))])
 	if not went or closest > 4.0 or not replies.any(func(r): return String(r).ends_with("omw")): ok = false; print("DCHECK FAIL squad bots ignore pings")

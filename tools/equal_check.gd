@@ -404,12 +404,12 @@ func _gloves() -> void:
 	P.teleport(B.pos + Vector3(5, 0, 0))
 	P.max_hp = 9000.0; P.hp = 9000.0
 	var used := [false, false]
-	for i in 1200:
+	for i in 2400:
 		m.step(Match.DT)
 		for gi in 2:
 			if float(B.gear_cd[gi]) > 0.0: used[gi] = true
 		if used[0] and used[1]: break
-		if P.flat_dist(B) > 9.0: P.teleport(B.pos + Vector3(5, 0, 0))
+		if P.flat_dist(B) > 6.0: P.teleport(B.pos + Vector3(4, 0, 0))      # (inside both gloves' reach: the hook 3-10m, the fissure 7m)
 	ok(used[0] and used[1], "in play, a bot uses both gloves (Q %s, V %s)" % [str(used[0]), str(used[1])])
 	await _drop(m)
 
