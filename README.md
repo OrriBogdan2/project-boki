@@ -2,7 +2,7 @@
 
 Review shots for each hero: kit card, each ability, the payoff, animation frame strips and a neutral full-body portrait. PNGs are downscaled to at most 1280 px wide. Captions come from the shot manifests.
 
-Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-tender), [Tamsin](#tamsin-rimewright), [Dredge](#dredge-dredge), [Ashwick](#ashwick-ashwick), [Dolm](#dolm-dolm), [Ostra](#ostra-ostra), [Archer](#archer-archer), [Bulwark](#bulwark-bulwark), [Thief](#thief-thief), [Juggernaut](#juggernaut-juggernaut), [Farm building](#farm-building-farmbuild), [classes](#classes-classes), [aimkit](#aimkit-aimkit), [moosh-moosh/v2](#moosh-moosh/v2-moosh-moosh/v2), [moosh-moosh/v2/anim](#moosh-moosh/v2/anim-moosh-moosh/v2/anim), [tamsin/v2](#tamsin/v2-tamsin/v2), [tamsin/v2/anim](#tamsin/v2/anim-tamsin/v2/anim), [dancer/v2](#dancer/v2-dancer/v2), [dancer/v2/before](#dancer/v2/before-dancer/v2/before), [zedran/v2](#zedran/v2-zedran/v2), [zedran/v2/before](#zedran/v2/before-zedran/v2/before), [dancer/v2/anim](#dancer/v2/anim-dancer/v2/anim), [zedran/v2/anim](#zedran/v2/anim-zedran/v2/anim), [linwick/v2](#linwick/v2-linwick/v2), [linwick/v2/anim](#linwick/v2/anim-linwick/v2/anim), [linwick/v2/before](#linwick/v2/before-linwick/v2/before), [linwick/v2/after](#linwick/v2/after-linwick/v2/after), [dredge/v2](#dredge/v2-dredge/v2), [dredge/v2/anim](#dredge/v2/anim-dredge/v2/anim), [dredge/v2/before](#dredge/v2/before-dredge/v2/before), [dredge/v2/after](#dredge/v2/after-dredge/v2/after), [pin/v2](#pin/v2-pin/v2), [bjorn/v2](#bjorn/v2-bjorn/v2), [pin/v2/anim](#pin/v2/anim-pin/v2/anim), [bjorn/v2/anim](#bjorn/v2/anim-bjorn/v2/anim), [vireo/v2](#vireo/v2-vireo/v2), [vireo/v2/anim](#vireo/v2/anim-vireo/v2/anim), [venator/v2/anim](#venator/v2/anim-venator/v2/anim), [venator/v2](#venator/v2-venator/v2), [breah/v2](#breah/v2-breah/v2), [ostra/v2](#ostra/v2-ostra/v2), [breah/v2/anim](#breah/v2/anim-breah/v2/anim), [ostra/v2/anim](#ostra/v2/anim-ostra/v2/anim), [linwick/v2/ult](#linwick/v2/ult-linwick/v2/ult), [dredge/v2/ult](#dredge/v2/ult-dredge/v2/ult), [hunters](#hunters-hunters), [pin/v2/ult](#pin/v2/ult-pin/v2/ult), [bjorn/v2/ult](#bjorn/v2/ult-bjorn/v2/ult), [mooshmoosh/v2/ult](#mooshmoosh/v2/ult-mooshmoosh/v2/ult), [tamsin/v2/ult](#tamsin/v2/ult-tamsin/v2/ult)
+Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-tender), [Tamsin](#tamsin-rimewright), [Dredge](#dredge-dredge), [Ashwick](#ashwick-ashwick), [Dolm](#dolm-dolm), [Ostra](#ostra-ostra), [Archer](#archer-archer), [Bulwark](#bulwark-bulwark), [Thief](#thief-thief), [Juggernaut](#juggernaut-juggernaut), [Farm building](#farm-building-farmbuild), [classes](#classes-classes), [aimkit](#aimkit-aimkit), [moosh-moosh/v2](#moosh-moosh/v2-moosh-moosh/v2), [moosh-moosh/v2/anim](#moosh-moosh/v2/anim-moosh-moosh/v2/anim), [tamsin/v2](#tamsin/v2-tamsin/v2), [tamsin/v2/anim](#tamsin/v2/anim-tamsin/v2/anim), [dancer/v2](#dancer/v2-dancer/v2), [dancer/v2/before](#dancer/v2/before-dancer/v2/before), [zedran/v2](#zedran/v2-zedran/v2), [zedran/v2/before](#zedran/v2/before-zedran/v2/before), [dancer/v2/anim](#dancer/v2/anim-dancer/v2/anim), [zedran/v2/anim](#zedran/v2/anim-zedran/v2/anim), [linwick/v2](#linwick/v2-linwick/v2), [linwick/v2/anim](#linwick/v2/anim-linwick/v2/anim), [linwick/v2/before](#linwick/v2/before-linwick/v2/before), [linwick/v2/after](#linwick/v2/after-linwick/v2/after), [dredge/v2](#dredge/v2-dredge/v2), [dredge/v2/anim](#dredge/v2/anim-dredge/v2/anim), [dredge/v2/before](#dredge/v2/before-dredge/v2/before), [dredge/v2/after](#dredge/v2/after-dredge/v2/after), [pin/v2](#pin/v2-pin/v2), [bjorn/v2](#bjorn/v2-bjorn/v2), [pin/v2/anim](#pin/v2/anim-pin/v2/anim), [bjorn/v2/anim](#bjorn/v2/anim-bjorn/v2/anim), [vireo/v2](#vireo/v2-vireo/v2), [vireo/v2/anim](#vireo/v2/anim-vireo/v2/anim), [venator/v2/anim](#venator/v2/anim-venator/v2/anim), [venator/v2](#venator/v2-venator/v2), [breah/v2](#breah/v2-breah/v2), [ostra/v2](#ostra/v2-ostra/v2), [breah/v2/anim](#breah/v2/anim-breah/v2/anim), [ostra/v2/anim](#ostra/v2/anim-ostra/v2/anim), [linwick/v2/ult](#linwick/v2/ult-linwick/v2/ult), [dredge/v2/ult](#dredge/v2/ult-dredge/v2/ult), [hunters](#hunters-hunters), [pin/v2/ult](#pin/v2/ult-pin/v2/ult), [bjorn/v2/ult](#bjorn/v2/ult-bjorn/v2/ult), [mooshmoosh/v2/ult](#mooshmoosh/v2/ult-mooshmoosh/v2/ult), [tamsin/v2/ult](#tamsin/v2/ult-tamsin/v2/ult), [dancer/v2/ult](#dancer/v2/ult-dancer/v2/ult), [zedran/v2/ult](#zedran/v2/ult-zedran/v2/ult)
 
 ## Vireo (mage)
 
@@ -2295,3 +2295,39 @@ Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-t
 **Rimelock crash strip: sealed, the crash, shards, recovery (BOND READY is the main session's cue: the crash filled the meter)**
 
 ![Rimelock crash strip: sealed, the crash, shards, recovery (BOND READY is the main session's cue: the crash filled the meter)](tamsin/v2/ult/rimewright_ult_strip.png)
+
+## dancer/v2/ult (dancer/v2/ult)
+
+**X Encore telegraph: the violet ring growing (to 5.4m, everyone sees it) with the dashed outer band, ENCORE called, the X slot on its 24s cooldown**
+
+![X Encore telegraph: the violet ring growing (to 5.4m, everyone sees it) with the dashed outer band, ENCORE called, the X slot on its 24s cooldown](dancer/v2/ult/dancer_telegraph.png)
+
+**X Encore key frame: the first volley, a blade landing on the dummy in the outer band (15, BLIGHT shown once as it lands)**
+
+![X Encore key frame: the first volley, a blade landing on the dummy in the outer band (15, BLIGHT shown once as it lands)](dancer/v2/ult/dancer_keyframe.png)
+
+**X Encore impact: outer-band blades stacking on the dummy (total 30), blades circling her, she keeps shooting**
+
+![X Encore impact: outer-band blades stacking on the dummy (total 30), blades circling her, she keeps shooting](dancer/v2/ult/dancer_impact.png)
+
+**X Encore animation strip: blades raised as the ring grows, the spin as it opens, the first throw (0.5-0.97s)**
+
+![X Encore animation strip: blades raised as the ring grows, the spin as it opens, the first throw (0.5-0.97s)](dancer/v2/ult/dancer_strip.png)
+
+## zedran/v2/ult (zedran/v2/ult)
+
+**X Gilded Riposte telegraph: the planted guard with the gold glow, the 1.8 x 3.6m strip toward the dummy (everyone sees it)**
+
+![X Gilded Riposte telegraph: the planted guard with the gold glow, the 1.8 x 3.6m strip toward the dummy (everyone sees it)](zedran/v2/ult/zedran_telegraph.png)
+
+**X Gilded Riposte key frame: the lunge and upward gold cleave through the dummy**
+
+![X Gilded Riposte key frame: the lunge and upward gold cleave through the dummy](zedran/v2/ult/zedran_keyframe.png)
+
+**X Gilded Riposte impact: the gold cloud and the 47 hit, the heal on him**
+
+![X Gilded Riposte impact: the gold cloud and the 47 hit, the heal on him](zedran/v2/ult/zedran_impact.png)
+
+**X Gilded Riposte animation strip: guard (blade upright), the drop and lunge, the cleave, the settle (0.6-1.55s)**
+
+![X Gilded Riposte animation strip: guard (blade upright), the drop and lunge, the cleave, the settle (0.6-1.55s)](zedran/v2/ult/zedran_strip.png)
