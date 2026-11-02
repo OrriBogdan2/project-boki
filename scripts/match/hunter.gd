@@ -1773,7 +1773,7 @@ func slot_info(slot: String) -> Dictionary:
 			var dmax := max_dashes()
 			out.merge({"name": d.display_name if d else "Dash", "short": (d.short if d else "Dash"), "icon": d.icon if d else "dash", "col": d.color if d else Color("bfe6ff"),
 				"desc": (d.desc if d else "") + (("  " + String(rd.get("desc", ""))) if not rd.is_empty() else ""), "rider": String(rd.get("name", "")),
-				"cd": (1.0 - fposmod(dashes, 1.0)) * dash_regen() if dashes < 1.0 else 0.0, "cd_max": dash_regen(), "charges": int(floor(dashes)), "max_charges": int(dmax),
+				"cd": (1.0 - fposmod(dashes, 1.0)) * dash_regen() if dashes < dmax - 0.001 else 0.0, "cd_max": dash_regen(), "charges": int(floor(dashes)), "max_charges": int(dmax),
 				"verb": d.verb if d else "dash", "ready": dashes >= 1.0}, true)
 		"gear", "gear0", "q":
 			var g: Dictionary = gear[0]

@@ -104,6 +104,16 @@ Capture by scan (docs/decisions/0002). A wild Boki that is knocked out (dazed) c
 | sight_range | 24 |
 | sight_places_kept | 3 |
 
+## dash_feel (`content/rules/dash_feel.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| doc | Global feel for every hunter's dash (Shift), applied on top of each kit's own numbers in content/archetypes. dist: multiplier on distance. time: multiplier on duration (speed = dist / time). Owner, Nov 2: dashes were too fast and too far in general, Vireo's should go further: its lane is drawn from its own numbers, so its distance is raised in content/archetypes/mage.json (4-7m to 5-8.5m) and only its time is scaled here. |
+| default | {"dist": 0.85, "time": 1.15} |
+| mage | {"dist": 1.0, "time": 1.15} |
+
 ## farm_build (`content/rules/farm_build.json`)
 
 The farm building pass (docs/decisions/0004-farm-building.md). Farm level is points from play; items unlock by farm level or a milestone; new buildings are construction sites that Boki build with materials and labour; buildings upgrade L1 to L3. Units: gems and materials are counts, labour is Boki work swings (one swing is about 6 s at building skill 1).
