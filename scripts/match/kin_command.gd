@@ -37,6 +37,8 @@ static func poll(h: Hunter, dt: float, blocked: bool) -> String:
 			h.inp["g_fired"] = true
 			if h.kin != null and (h.kin as Kin).ready_to_fight():
 				KinWheel.open(h, mouse)
+			elif h.kin != null:
+				say(h, "Your Boki can't take orders right now", Color("ffd89a"))     # (down, away or fused: not a silent swallow)
 		if KinWheel.is_open(h):
 			KinWheel.update(h, mouse, dt)
 			h.inp["fire"] = false           # a flick is not a shot

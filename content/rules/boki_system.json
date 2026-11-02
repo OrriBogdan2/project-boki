@@ -30,6 +30,9 @@
 	"follow": {
 		"separation_r": 1.2,
 		"path_every_s": 0.45,
+		"path_goal_moved": 3,
+		"path_fail_backoff_s": 1.5,
+		"path_lookahead": 8,
 		"path_window": 12,
 		"stuck_s": 1.0,
 		"hop_dur": 0.38,
@@ -45,7 +48,7 @@
 		"guard_leash": 24.0,
 		"chase_leash": 30.0
 	},
-	"follow_doc": "stuck_s: seconds without progress before the hop back. hop_on_air_s: seconds you are off the ground before it hops on (when it cannot walk where you land). hop_off_steady_s: seconds steady on the ground before it hops off again. away_dist: farther than this and a G tap is Call back (else Sic). combat_radius: a foe this close to you or the target means a fight (orders are never refused). path_window: tiles of margin round the trip for the A* search. separation_r: m it keeps from you.",
+	"follow_doc": "stuck_s: seconds without progress before the hop back. hop_on_air_s: seconds you are off the ground before it hops on (when it cannot walk where you land). hop_off_steady_s: seconds steady on the ground before it hops off again. away_dist: farther than this and a G tap is Call back (else Sic). combat_radius: a foe this close to you or the target means a fight (orders are never refused). path_window: tiles of margin round the trip for the A* search. path_every_s: seconds between searches; path_goal_moved: tiles the goal may move before it searches early; path_fail_backoff_s: wait after a search that found nothing; path_lookahead: path tiles checked ahead for a straight line. separation_r: m it keeps from you.",
 	"wheel": {
 		"deadzone_px": 30,
 		"pop_s": 0.14,

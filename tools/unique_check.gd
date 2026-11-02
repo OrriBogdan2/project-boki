@@ -213,7 +213,7 @@ func run(m: Node) -> void:
 	var base := Save.new_kin("cindle", "Mid", 3); base["dna"]["size"] = 0.0
 	var kb := _with_size(base, 2.8); var ksm := _with_size(base, -2.8)
 	var gs := GDScript.new()
-	gs.source_code = "extends Node\nvar opts := {}\nvar tier := 0\n"
+	gs.source_code = "extends Node\nvar opts := {}\nvar tier := 0\nvar seed_val := 0\n"
 	gs.reload()
 	var mn = gs.new()
 	var kins := []

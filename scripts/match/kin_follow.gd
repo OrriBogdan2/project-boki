@@ -97,6 +97,10 @@ static func set_cmd(k: Kin, cmd: String, target: Ent = null) -> bool:
 					leap(k, o.pos + Vector3(0, 1.5, 0), "shoulder")
 				else:
 					k.state = "returning"         # too far to leap: it runs back (and hops when it cannot)
+			elif k.state == "flying_home" and not k.fly.is_empty():
+				k.fly["dest"] = "shoulder"          # already leaping to your side: carry on up onto you
+				k.fly["to"] = o.pos + Vector3(0, 1.5, 0)
+			# (a Sic in the air: it lands, then Kin._sim_active sends it up onto you)
 		_:
 			return false
 	KinNet.event(k.m, "cmd", k, k.pos, cmd)
@@ -241,17 +245,20 @@ static func steer(k: Kin, goal: Vector3, dt: float, spd: float, side := true) ->
 static func _waypoint(k: Kin, goal: Vector3, dt: float) -> Vector2:
 	k.path_t -= dt
 	var gt := Vector2i(int(floor(goal.x)), int(floor(goal.z)))
-	if k.path_goal != gt or k.path_t <= 0.0:
-		k.path_t = _r("path_every_s") + k.rng.randf() * 0.15       # (the jitter spreads the Boki's searches over frames)
+	# a search on the timer, or at once when the goal has moved more than a few tiles; never every step
+	# (a moving player changes the goal tile all the time), and a failed search backs off for a while
+	if k.path_t <= 0.0 or (maxi(absi(k.path_goal.x - gt.x), absi(k.path_goal.y - gt.y)) > int(_r("path_goal_moved")) and k.path_t < _r("path_every_s") * 0.5):
 		k.path_goal = gt
 		k.path = KinPath.find(k.m.world, k.pos, goal, int(_r("path_window")))
+		k.path_t = (_r("path_every_s") + k.rng.randf() * 0.15) if not k.path.is_empty() else _r("path_fail_backoff_s")       # (the jitter spreads the Boki's searches over frames)
+		k.path_searches += 1
 	var from := Vector2(k.pos.x, k.pos.z)
 	while k.path.size() > 1 and from.distance_to(k.path[0]) < 0.6:
 		k.path.pop_front()
 	if k.path.is_empty():
 		return Vector2.INF
 	var pick: Vector2 = k.path[0]
-	for i in range(k.path.size() - 1, -1, -1):
+	for i in range(mini(k.path.size() - 1, int(_r("path_lookahead"))), -1, -1):     # (a bounded look ahead: the far end is rarely in sight)
 		if KinPath.clear_line(k.m.world, from, k.path[i]):
 			pick = k.path[i]
 			break

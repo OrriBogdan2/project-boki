@@ -9,6 +9,8 @@ extends RefCounted
 ##   7. mounts: Return = you ride it, Sic = you come off and it charges, a jump = you come off
 ##   8. in a fight it never refuses an order; out of one, its personality still can
 ##   9. bots use the orders; the net carries the order
+##  10. Return ordered in the air still ends up on you; a giant-form merge from Follow is ridden
+##  11. A* is throttled: an unreachable goal does not search every step
 ## (Merge from Return is instant and from out is a leap: --boki-system-check)
 
 var bad := 0
@@ -93,7 +95,7 @@ func run(mn: Node) -> void:
 	var only := ""
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--bokifollow-only="): only = a.substr(18)
-	for part in ["default", "leash", "traverse", "sic_call", "wheel", "carried", "mount", "no_refusal", "bots", "net"]:
+	for part in ["default", "leash", "traverse", "sic_call", "wheel", "carried", "mount", "no_refusal", "bots", "net", "air_orders", "path_cost"]:
 		if only == "" or only.split(",").has(part):
 			call("_" + part)
 	CombatBus.hit_landed.disconnect(_on_hit)
@@ -402,3 +404,65 @@ func _net() -> void:
 		seen[c] = k.cmd
 	ok(seen == {"guard": "guard", "follow": "follow", "chase": "chase", "return": "return"}, "the order rides the kin snapshot and comes back out %s" % [seen])
 	ok(Net.VERSION == "0.10.0", "Net.VERSION moved to 0.10.0 (%s)" % Net.VERSION)
+
+# ------------------------------------------------------------------ 10. orders in the air, the giant merge
+func _air_orders() -> void:
+	# Return while it is mid-Sic: it lands, then goes up onto you
+	_fresh()
+	var P := m.player
+	var k: Kin = P.kin
+	aim_at(P, P.pos + Vector3(6.0, 0, 0))
+	KinCommand.tap(P)
+	ok(k.state == "flying", "setup: sent out (state %s)" % k.state)
+	ok(KinCommand.order(P, "return"), "Return is accepted mid-flight")
+	run_for(2.5)
+	ok(k.state == "shoulder" and k.cmd == "return" and k.carried(), "...it lands and goes onto you (state %s, order %s)" % [k.state, k.cmd])
+	# Return while it is on a Call back leap
+	_fresh()
+	P = m.player
+	k = P.kin
+	k.cmd = "guard"; k.hold_at = P.pos + Vector3(12.0, 0, 0)
+	k.teleport(k.hold_at)
+	KinCommand.tap(P)
+	ok(k.state == "flying_home", "setup: on a Call back leap")
+	KinCommand.order(P, "return")
+	run_for(2.0)
+	ok(k.state == "shoulder" and k.cmd == "return", "Return on a leap carries on up onto you (state %s)" % k.state)
+	# a giant-form merge started from Follow is ridden
+	_fresh("pebbit")
+	P = m.player
+	k = P.kin
+	ok(k.carry_style() == "mount" and k.cmd == "follow" and k.state == "active", "setup: a mount, following")
+	P.ult = 1.0; P.slot_lv["ult"] = 1
+	ok(KinMerge.press(P), "R with the Boki out starts the merge")
+	run_for(1.5)
+	ok(not P.merge_st.is_empty() and bool(P.merge_st.get("giant", false)) and k.cmd == "return" and P.mounted(), "...the giant form is ridden (order %s, mounted %s)" % [k.cmd, P.mounted()])
+
+# ------------------------------------------------------------------ 11. what the path search costs
+func _path_cost() -> void:
+	_fresh()
+	var P := m.player
+	var k: Kin = P.kin
+	var W = m.world
+	# a goal sealed inside a ring of blocks: the straight line is blocked and no way on foot exists
+	var c := Vector2i(int(floor(P.pos.x)) + 10, int(floor(P.pos.z)))
+	for dz in range(-1, 2):
+		for dx in range(-1, 2):
+			if dx != 0 or dz != 0:
+				W.kind[W.idx(c.x + dx, c.y + dz)] = World.T_BLOCK
+	var goal := Vector3(c.x + 0.5, P.pos.y, c.y + 0.5)
+	k.path_searches = 0
+	k.path_t = 0.0
+	for i in 120:                                     # 2 seconds of steering
+		KinFollow.steer(k, goal, Match.DT, 5.0, false)
+	ok(k.path_searches >= 1 and k.path_searches <= 2, "an unreachable goal searches %d times in 2s (a failed search backs off), not every step" % k.path_searches)
+	# a goal that keeps moving: still a search per timer, not one per tile
+	k.path_searches = 0
+	k.path_t = 0.0
+	for i in 120:
+		var g := Vector3(c.x + 0.5, P.pos.y, c.y + 0.5 + float(i) * 0.1)      # (sliding 12 tiles along the wall)
+		KinFollow.steer(k, g, Match.DT, 5.0, false)
+	ok(k.path_searches <= 10, "a goal sliding 12 tiles in 2s costs %d searches (about one per 0.2s at most, not one per tile)" % k.path_searches)
+	# the heap returns the same path length as before for an open trip
+	var path := KinPath.find(W, P.pos, P.pos + Vector3(-12.0, 0, 5.0))
+	ok(path.size() == 12, "the heap-based A* still finds the shortest path (%d tiles)" % path.size())

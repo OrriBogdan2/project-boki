@@ -61,9 +61,10 @@ static func event(m: Match, kind: String, e: Ent, at := Vector3.INF, extra := ""
 static func on_event(m: Match, x: Array) -> void:
 	if x.size() < 7:
 		return
-	var e: Ent = m.ents_by_id.get(String(x[2]), null)
-	if e == null:
+	var ev = m.ents_by_id.get(String(x[2]), null)       # (untyped first: it may have been freed)
+	if not is_instance_valid(ev):
 		return
+	var e: Ent = ev
 	var at := Vector3(float(x[3]), float(x[4]), float(x[5]))
 	match String(x[1]):
 		"throw":
@@ -74,7 +75,8 @@ static func on_event(m: Match, x: Array) -> void:
 		"cmd":
 			m.fx.ring(at, 1.2, Color((e as Kin).sp["color"], 0.8) if e is Kin else Color.WHITE, 0.3)
 		"scan_start", "scan_stop", "scan_done":
-			Capture.on_net(m, e as Hunter, String(x[1]), String(x[6]))
+			if e is Hunter:
+				Capture.on_net(m, e, String(x[1]), String(x[6]))
 		"down":
 			m.fx.burst(at + Vector3(0, 0.4, 0), (e as Kin).sp["color"] if e is Kin else Color.WHITE, 16, 3.0)
 		"scoop", "round":

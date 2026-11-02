@@ -33,6 +33,7 @@ var chase_target: Ent = null      # chase: what it sticks to
 var path: Array = []              # its A* path (KinPath), recomputed on path_t
 var path_goal := Vector2i.ZERO
 var path_t := 0.0
+var path_searches := 0          # A* searches it has run (a check counts them)
 var stuck_t := 0.0                # seconds without progress (KinFollow.watch_stuck)
 var steady_t := 0.0               # carried by traversal: seconds you have been steady on the ground
 var gap_at := -9.0                # when need_carry last searched for a way across, and what it found
@@ -137,7 +138,7 @@ func init_kin(match_node: Node, id: String, species_id: String, record: Dictiona
 	r = 0.36 * (1.0 + minf(rec.get("forms", []).size() * 0.08, 0.4)) * (1.3 if ks and ks.size == "large" else 1.0) * Unique.hit_scale(rec, norm)
 	state = "active" if owner_h else "wild"       # a Boki walks beside you from the start (KinFollow); the shoulder is the Return order
 	settle = 1.0
-	rng.seed = hash(match_node.get("seed")) * 31 + absi(id.hash())
+	rng.seed = hash(m.seed_val) * 31 + absi(id.hash())
 	runner = KinRunner.new()
 	if ks:
 		runner.set_slot("k1", KinLib.ability(ks.active))
@@ -464,6 +465,9 @@ func merge_in(giant_form: bool) -> void:
 	pend_skill = Vector3.INF
 	if giant_form:
 		state = "shoulder"
+		cmd = "return"         # the giant form is ridden: carried() and mounted() need the Return order
+		chase_target = null
+		hold_at = Vector3.INF
 		settle = 1.0
 		giant = {"scale": 1.8, "t0": m.time}
 		m.shake(0.6, owner_h.pos)
@@ -731,6 +735,9 @@ func walkable_to(p: Vector3) -> bool:
 func _sim_active(dt: float) -> void:
 	if owner_h and (owner_h.out or owner_h.extracted):
 		return
+	if cmd == "return" and owner_h != null:
+		KinFollow.set_cmd(self, "return", null)       # Return was ordered while it was in the air: it lands, then goes onto you
+		return
 	var guard: Ent = _wisp_threat() if owner_h and owner_h.downed else null
 	if guard:
 		# someone's come to stomp or execute your hunter: the kin goes for them first
@@ -745,7 +752,7 @@ func _sim_active(dt: float) -> void:
 		if bark_cd <= 0.0:
 			bark("scared")
 		target = null
-	if chase_target != null and (chase_target.dead or not chase_target.hittable()):
+	if chase_target != null and (not is_instance_valid(chase_target) or chase_target.dead or not chase_target.hittable()):
 		chase_target = null
 		if cmd == "chase":
 			cmd = "follow"

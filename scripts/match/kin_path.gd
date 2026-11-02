@@ -37,17 +37,12 @@ static func find(W: World, a: Vector3, b: Vector3, pad := 12) -> Array:
 	var hi := Vector2i(maxi(s.x, g.x) + pad, maxi(s.y, g.y) + pad)
 	var cost := {s: 0.0}
 	var prev := {s: s}
-	var open: Array = [[_h(s, g), s]]
+	var open: Array = [[_h(s, g), s]]          # a binary min-heap on the first element
 	var closed := {}
 	var n := 0
 	var found := false
 	while not open.is_empty() and n < MAX_NODES:
-		var bi := 0
-		for i in range(1, open.size()):
-			if float(open[i][0]) < float(open[bi][0]):
-				bi = i
-		var cur: Vector2i = open[bi][1]
-		open.remove_at(bi)
+		var cur: Vector2i = _pop(open)
 		if closed.has(cur):
 			continue
 		closed[cur] = true
@@ -71,7 +66,7 @@ static func find(W: World, a: Vector3, b: Vector3, pad := 12) -> Array:
 				if not cost.has(nx) or c < float(cost[nx]):
 					cost[nx] = c
 					prev[nx] = cur
-					open.append([c + _h(nx, g), nx])
+					_push(open, [c + _h(nx, g), nx])
 	if not found:
 		return []
 	var out: Array = []
@@ -80,6 +75,35 @@ static func find(W: World, a: Vector3, b: Vector3, pad := 12) -> Array:
 		out.push_front(Vector2(t.x + 0.5, t.y + 0.5))
 		t = prev[t]
 	return out
+
+static func _push(heap: Array, item: Array) -> void:
+	heap.append(item)
+	var i := heap.size() - 1
+	while i > 0:
+		var up := (i - 1) / 2
+		if float(heap[up][0]) <= float(heap[i][0]):
+			break
+		var t = heap[up]; heap[up] = heap[i]; heap[i] = t
+		i = up
+
+static func _pop(heap: Array) -> Vector2i:
+	var top: Vector2i = heap[0][1]
+	var last = heap.pop_back()
+	if not heap.is_empty():
+		heap[0] = last
+		var i := 0
+		var n := heap.size()
+		while true:
+			var l := i * 2 + 1
+			var r := l + 1
+			var m := i
+			if l < n and float(heap[l][0]) < float(heap[m][0]): m = l
+			if r < n and float(heap[r][0]) < float(heap[m][0]): m = r
+			if m == i:
+				break
+			var t = heap[m]; heap[m] = heap[i]; heap[i] = t
+			i = m
+	return top
 
 static func _h(a: Vector2i, b: Vector2i) -> float:
 	var dx := absi(a.x - b.x)
