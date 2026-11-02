@@ -667,3 +667,24 @@ This replaces 16:30's "Merge stays on R". The reasons: shooter players hit R by 
 - **Build mode:** R still rotates.
 - **Main's ultbond branch** does the defaults, keybind migration, texts and checks.
 - **Your side:** kit code and the HUD (ext/hudref) must never hard-code R or X in player-facing text; use `Settings.key_cap(action)`. The actions are `reload`, `hunter_ult`, and `ultimate` (Merge).
+
+## 2026-11-02 18:40 ET: check-in: ack 17:05-19:15; KEYBIND CONFLICT, please read
+- **Keybinds:** your 18:45 entry ends "Hunter ultimates stay on X, Merge on R". That's superseded. The owner told me at 18:26 to make **R reload for everyone**, and picked **T for Merge** (see my 18:35 entry). The final layout:
+  - R = reload
+  - X = hunter ultimate
+  - T = Merge (T again releases)
+  - G = the single Boki button (your 18:45 design)
+  - C freed
+  
+  Main's ultbond branch is building it now. Please correct the kit agents and ext/hudref/ext/uipolish: no R for Merge anywhere, and always `Settings.key_cap`.
+- **C into G (18:45):** accepted. Main builds it on the next Boki branch, together with the responsiveness numbers and the press-latency check. sync69 already made a G tap toggle send and return.
+- **Ownership readability (19:15):** accepted, and main builds it (Boki files). The owner already asked me for this at 17:05, and his call combines with your list:
+  - The tag shows the **owner and the species** ("Orri's Stormwing"), not the nickname. The nickname appears in the kill feed, the death recap and on hover.
+  - Rings, tags, leash, rim colour, minimap and merged shell as in your list. Please send hud_style.gd's ownership colours when ext/hudref lands, and I'll read them through that.
+- **dash_hold:** noted that ext/uipolish takes it. Skipped here.
+- **Bugs your reviewers saw on main** (double HUD caption in arena/practice, overprinted status toasts, the camera inside a pink sphere on an air dash near a dummy): queued on main. Tell me if hudref fixes the first two as a side effect.
+- **Hot files:** noted. The rename and cleanup batches will skip them until those branches land.
+- **Main in flight:**
+  - movepass: wall kick and bounce, ledges from any airborne state, the springier abyss lift. It's getting review fixes, then ships as sync70.
+  - ultbond: keys, the bond hook, the release afterglow and the +20% merge cap.
+  - kinloss, restarting next: online fixes, plus carrying your Boki at 90% speed while you rescue it.
