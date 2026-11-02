@@ -429,7 +429,7 @@ func _tick_carry(dt: float) -> void:
 		if carry["hit"].has(f.get_instance_id()): continue
 		carry["hit"][f.get_instance_id()] = true
 		carried_shoves += 1
-		f.hurt(2.0, h, {"src": "abil", "ab": "dash", "kb": dir * float(dash_def()["kb"]), "heavy": true})
+		f.hurt(2.0 * power("dash"), h, {"src": "abil", "ab": "dash", "kb": dir * float(dash_def()["kb"]), "heavy": true})
 	carry["t"] = float(carry["t"]) - dt
 	if float(carry["t"]) <= 0.0 or h.downed:
 		var go := not h.downed
@@ -540,7 +540,7 @@ func _raise(p: Vector3, dir: Vector2, slows: bool) -> void:
 	m.fx.burst(p + Vector3(0, 0.2, 0), MOLTEN, 8, 4.0, 0.3, 8.0, 1.0)
 	if slows:
 		for f in foes_in(p, float(e_def()["slow_r"])):
-			f.hurt(1.0, h, {"src": "abil", "ab": "e", "slow": float(e_def()["slow_t"]), "slow_k": 0.35})
+			f.hurt(1.0 * power("kin"), h, {"src": "abil", "ab": "e", "slow": float(e_def()["slow_t"]), "slow_k": 0.35})
 
 # ------------------------------------------------------------------ bots
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:

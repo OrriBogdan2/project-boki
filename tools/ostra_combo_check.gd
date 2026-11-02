@@ -232,6 +232,23 @@ func _ostra() -> void:
 	K.e_recast()
 	step(m, 0.2)
 	ok("combo: Seed > Trade puts the foe inside it", inside and dmg(T) > 10.0, "inside %s took %.1f" % [inside, dmg(T)])
+	# quiet level growth: the pop's damage scales with LevelGrowth.ap (through power())
+	var lv0 := P.lvl
+	var dl := []
+	var aps := []
+	for lv in [1, 10]:
+		P.lvl = lv
+		reset.call()
+		T.teleport(home + Vector3(6.0, 0, 0)); aim_at(P, T.pos)
+		aps.append(LevelGrowth.ap(P))
+		K.cast_e()
+		step(m, 1.0)
+		K.e_recast()
+		step(m, 0.1)
+		dl.append(dmg(T))
+	var apk1: float = aps[0]; var apk: float = aps[1]
+	P.lvl = lv0
+	ok("growth: the seed's pop scales with LevelGrowth.ap", apk > apk1 and absf(float(dl[1]) / maxf(0.01, float(dl[0])) - apk / apk1) < 0.03, "lvl1 %.2f lvl10 %.2f ap %.2f/%.2f" % [float(dl[0]), float(dl[1]), apk1, apk])
 	# knocks heal
 	reset.call()
 	P.hp = P.max_hp * 0.4

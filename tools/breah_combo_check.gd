@@ -229,6 +229,22 @@ func _breah() -> void:
 	hold(m, P, 0.5)
 	step(m, 0.6)
 	ok("combo: Stone Row > slam launches the rocks", K.launches > l1, "launches %d -> %d" % [l1, K.launches])
+	# quiet level growth: ability damage scales with LevelGrowth.ap (through power())
+	var lv0 := P.lvl
+	P.lvl = 1
+	reset.call()
+	T.teleport(home + Vector3(1.3, 0, 0))
+	var apk1 := LevelGrowth.ap(P)      # (the level the hunter is at when it lands: early hits may have levelled it)
+	K._slam(0.0, true)
+	var d_l1 := dmg(T)
+	P.lvl = 10
+	reset.call()
+	T.teleport(home + Vector3(1.3, 0, 0))
+	var apk := LevelGrowth.ap(P)
+	K._slam(0.0, true)
+	var d_l10 := dmg(T)
+	P.lvl = lv0
+	ok("growth: the slam's damage scales with LevelGrowth.ap", apk > apk1 and absf(d_l10 / maxf(0.01, d_l1) - apk / apk1) < 0.02, "lvl1 %.2f lvl10 %.2f ap %.2f/%.2f" % [d_l1, d_l10, apk1, apk])
 	# a knock resets it
 	reset.call()
 	T.teleport(home + Vector3(2.4, 0, 0)); aim_at(P, T.pos)
