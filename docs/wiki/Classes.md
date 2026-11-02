@@ -59,7 +59,7 @@ your class in the Expedition menu, and you can try every class against dummies i
 | [Bulwark](Class-Bulwark.md) | Heavy | Tower Shield & Mace | Guard | Whirl | Shield | Mending Ground | none (Boki Merge) |
 | [Dredge](Class-Dredge.md) | Heavy | Shotgun | Salvage | Barge | Grapnel | Anchor Drop | none (Boki Merge) |
 | [Ashwick](Class-Ashwick.md) | Heavy | Torch Lance | Flashover | Spark Leap | Cinder Shot | Furnace Cloak | none (Boki Merge) |
-| [Moosh Moosh](Class-Moosh-Moosh.md) | Medium | Lantern Crook | Bearer | Relay Step | Burrseed | Hearthlight | none (Boki Merge) |
+| [Moosh Moosh](Class-Moosh-Moosh.md) | Medium | Ember Cast | Bearer | Relay Step | Burrseed | Hearthlight | none (Boki Merge) |
 | [Tamsin](Class-Tamsin.md) | Light | Hoar Fan | Hoarfrost | Skate | Ice Spear | Rink Wall | none (Boki Merge) |
 | [Dolm](Class-Dolm.md) | Medium | Rubble Fists | Tremor Sense | Rubble Rush | Quakefall | Stone Row | none (Boki Merge) |
 | [Ostra](Class-Ostra.md) | Medium | Tether Lantern | Swell | Lantern Trade | Shard Fan | Brimseed | none (Boki Merge) |

@@ -54,8 +54,8 @@
 		"refund": 0.6,
 		"min_t": 0.2,
 		"rink_t": 0.0,
-		"desc": "Hold Shift to skate at 11.5 m/s where you move, for up to 1.6s, steering gently; you carry on over ledges. Let go and you stop; stopping early gives back a share of the cooldown. While skating your darts fly straight and thick and hit 1.6x. In the air this is your usual long dash.",
-		"steer": 2.2,
+		"desc": "Hold Shift to skate at 11.5 m/s where you move, for up to 1.6s, carving curves with the move keys; you carry on over ledges. Let go and you stop; stopping early gives back a share of the cooldown. While skating your darts fly straight and thick and hit 1.6x. In the air this is your usual long dash.",
+		"steer": 3.6,
 		"dart_k": 1.6,
 		"ramp": 0.2,
 		"stop": 0.15

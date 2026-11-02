@@ -98,12 +98,12 @@ func _build(kind: String) -> Node3D:
 	n.name = kind
 	match kind:
 		"ember":
-			# the ember: a 0.36 m teardrop comet head with a hot core, a violet halo and a 1.6 m warm tail
-			var head := Models.sphere(0.18, 12)
-			_off(Models.part(n, head, orb_mat(Color("ffb347", 1.0)), Vector3.ZERO, Vector3(1, 1, 1.7)))
-			_off(Models.part(n, Models.sphere(0.08, 8), orb_mat(Color("fff0c0", 1.0)), Vector3(0, 0, -0.06)))
-			_off(Models.part(n, Models.sphere(0.32, 10), orb_mat(Color("c9a0ff", 0.35)), Vector3.ZERO))
-			_tail(n, 0.26, 1.6, Color("ff9a3c", 0.85))
+			# the ember: a 0.44 m teardrop comet head with a hot core, an orange halo and a 1.6 m warm tail
+			var head := Models.sphere(0.22, 12)
+			_off(Models.part(n, head, orb_mat(Color("ff8a1c", 1.0)), Vector3.ZERO, Vector3(1, 1, 1.7)))
+			_off(Models.part(n, Models.sphere(0.09, 8), orb_mat(Color("ffe08a", 1.0)), Vector3(0, 0, -0.08)))
+			_off(Models.part(n, Models.sphere(0.34, 10), orb_mat(Color("ff6a1c", 0.3)), Vector3.ZERO))
+			_tail(n, 0.32, 1.6, Color("ff7a1c", 0.95))
 		"burr":
 			# a spiky green burr that tumbles, a fluff halo and a pale seed-down tail
 			var sp := Node3D.new()
@@ -256,8 +256,8 @@ func _build_lamp(n: Node3D) -> void:
 	lamp.name = "Lamp"
 	lamp.position = Vector3(0, 1.3, 0)
 	n.add_child(lamp)
-	_off(Models.part(lamp, Models.sphere(0.16, 12), orb_mat(Color("ffd27a", 1.0)), Vector3.ZERO, Vector3(1, 1.3, 1)))
-	_off(Models.part(lamp, Models.sphere(0.42, 12), orb_mat(Color("ffb347", 0.35)), Vector3.ZERO))
+	_off(Models.part(lamp, Models.sphere(0.2, 12), orb_mat(Color("ffe08a", 1.0)), Vector3.ZERO, Vector3(1, 1.3, 1)))
+	_off(Models.part(lamp, Models.sphere(0.5, 12), orb_mat(Color("ffc046", 0.45)), Vector3.ZERO))
 	var cage := Models.toon(Color("5a3d28"))
 	for k in 4:
 		var a := TAU * k / 4.0 + PI * 0.25

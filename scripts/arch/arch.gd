@@ -13,10 +13,15 @@ const DEFAULT := {"light": "thief", "medium": "gunslinger", "heavy": "juggernaut
 static func def(id: String) -> Dictionary:
 	return Content._load("archetypes", id)
 
-## An archetype's body tuning ("body" in its JSON): size (model scale), bulk (width), hit_r, plate
-## (nameplate height, m). Empty when it has none.
+## An archetype's body tuning ("body" in its JSON): size (model scale), bulk (width), hit_r, and the
+## per-hunter overhead hook for the HUD: plate (others' nameplate height, m) and overhead (your own bars).
+## Empty when it has none.
 static func body(id: String) -> Dictionary:
 	return def(id).get("body", {}) if id != "" and exists(id) else {}
+
+## Where the HUD puts a hunter's nameplate (m above the feet): the body's plate, else the shared 2.35.
+static func plate_y(h: Hunter) -> float:
+	return float(body(h.arch).get("plate", 2.35))
 
 ## The hitbox radius of a hunter of this archetype and class (the body's hit_r, else the class's).
 static func hit_r(id: String, cdat: Dictionary) -> float:

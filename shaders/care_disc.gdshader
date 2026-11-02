@@ -65,7 +65,7 @@ void fragment() {
 	// mixed, not added, so a saturated disc keeps its colour on bright grass
 	float inner = body + sg * 0.9;
 	float outer = edge + sw * 1.2;
-	vec3 body_col = pattern > 4.5 ? mix(color.rgb, rim.rgb, r * r) : color.rgb;
+	vec3 body_col = pattern > 4.5 ? mix(color.rgb, rim.rgb, r * r * r) : color.rgb;
 	ALBEDO = (body_col * inner + rim.rgb * outer) / max(inner + outer, 0.001);
 	ALPHA = clamp((body * 1.6 + sg + edge * 1.2 + sw) * color.a, 0.0, 1.0);
 }

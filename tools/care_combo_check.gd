@@ -13,6 +13,60 @@ func step(m: Match, secs: float, each := Callable()) -> void:
 	sc.step(m, secs, each)
 
 
+## The owner's skate: steered into a curve with the move keys, firing the whole way, and a shorter
+## skate gives back more of its cooldown.
+func _skate_feel() -> void:
+	var r: Array = sc.setup("rimewright", 30.0)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var T: Hunter = r[3]
+	var K: RimewrightKit = P.ak
+	sc.aim_at(P, T.pos)
+	var spans := {}
+	for hold_t in [0.3, 1.2]:
+		P.dashes = 1.0
+		P.inp["move"] = Vector2(1, 0)
+		P.inp["dash"] = true
+		P.inp["dash_down"] = true
+		step(m, 0.05)
+		P.inp["dash"] = false
+		step(m, hold_t - 0.05)
+		var before := P.dashes
+		P.inp["dash_down"] = false
+		step(m, 0.05)
+		spans[hold_t] = P.dashes - before
+		step(m, 0.4)
+	ok(
+			"tm Shift: the shorter the skate, the more of the charge comes back",
+			float(spans[0.3]) > float(spans[1.2]) + 0.15,
+			"0.3 s: +%.2f, 1.2 s: +%.2f" % [float(spans[0.3]), float(spans[1.2])])
+	P.dashes = 1.0
+	P.inp["move"] = Vector2(1, 0)
+	P.inp["dash"] = true
+	P.inp["dash_down"] = true
+	P.inp["fire"] = true
+	step(m, 0.05)
+	P.inp["dash"] = false
+	var b0: int = K.stats["beams"]
+	P.inp["move"] = Vector2(0, 1)
+	step(m, 0.1)
+	var early: Vector2 = K.rinkrun.get("dir", Vector2.ZERO)
+	step(m, 0.5)
+	var late: Vector2 = K.rinkrun.get("dir", Vector2.ZERO)
+	var turned := rad_to_deg(absf(Vector2(1, 0).angle_to(late)))
+	ok(
+			"tm Shift: she steers the skate into a curve (not a snap) with ice spraying off the edge",
+			K.rinkrunning() and turned > 60.0 and rad_to_deg(absf(Vector2(1, 0).angle_to(early))) < 40.0
+				and K.lk().live.filter(func(e): return String(e["kind"]) == "chip").size() >= 4,
+			"turned %.0f deg" % turned)
+	ok(
+			"tm Shift: LMB keeps firing (straight beams) the whole skate",
+			int(K.stats["beams"]) - b0 >= 3, "%d beams in 0.6 s" % (int(K.stats["beams"]) - b0))
+	P.inp["fire"] = false
+	P.inp["dash_down"] = false
+	step(m, 0.2)
+	await _free(m)
+
 func _free(m: Match) -> void:
 	m.queue_free()
 	await sc.main.get_tree().process_frame
@@ -431,6 +485,7 @@ func rimewright() -> void:
 			"tm Shift: letting go stops with a hockey stop and refunds part of the charge",
 			not K.rinkrunning() and P.dashes > 0.05 and K.anim_id == "tm_skate_stop", "dashes %.2f" % P.dashes)
 	await _free(m)
+	await _skate_feel()
 	# --- Ice Spear: hold shows the ring at the cursor; it lands there, slows, detonates 1.8 s later
 	r = sc.setup("rimewright", 30.0)
 	m = r[0]

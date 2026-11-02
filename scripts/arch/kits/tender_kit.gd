@@ -287,6 +287,7 @@ func on_dash(use_ex: bool) -> bool:
 	var tt := float(air.get("time", 0.8)) if use_ex else float(dd.get("time", 0.16))
 	var from := h.pos
 	travel(dist, tt, {"invuln": float(dd.get("invuln", 0.12))}, use_ex)
+	h.ghost_t = 0.1          # her ember motes, not the shared after-image (from the first frame)
 	if use_ex:
 		_start_glide(dist, tt)
 	play("mm_dash_air" if use_ex else "mm_dash")

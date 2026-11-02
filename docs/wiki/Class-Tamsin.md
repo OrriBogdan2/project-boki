@@ -66,7 +66,7 @@ What the in-game kit card (K) says.
 
 **Hoarfrost (passive).** Your damaging abilities Chill foes for 4s (a Chilled foe is a little slower and shows frost). Eight darts on the same foe Shatter them: a starburst of ice spikes, 60 damage to everyone within 2.4m. Knocking a Chilled hunter, or felling a Chilled monster, Shatters them 0.4s later: 30 damage to everyone within 3m, plus Chill.
 
-**Skate (dash, Shift, 8.5s cooldown).** Hold Shift to skate at 8 m/s where you move, for up to 2.4s, steering gently; you carry on over ledges. Let go and you stop; stopping early gives back a share of the cooldown. While skating your darts fly straight and thick and hit 1.6x. In the air this is your usual long dash.
+**Skate (dash, Shift, 8.5s cooldown).** Hold Shift to skate at 11.5 m/s where you move, for up to 1.6s, carving curves with the move keys; you carry on over ledges. Let go and you stop; stopping early gives back a share of the cooldown. While skating your darts fly straight and thick and hit 1.6x. In the air this is your usual long dash.
 
 **Ice Spear (RMB, 7s cooldown, 2 charges).**
 

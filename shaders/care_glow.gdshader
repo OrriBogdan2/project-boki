@@ -18,6 +18,6 @@ void fragment() {
 		a = clamp(f * 1.4, 0.0, 1.0);
 		core = f * f;
 	}
-	ALBEDO = mix(color.rgb, vec3(1.0), core * 0.45);
+	ALBEDO = mix(color.rgb, vec3(1.0), core * 0.25);
 	ALPHA = clamp(a * color.a * alpha, 0.0, 1.0);
 }

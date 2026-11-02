@@ -265,6 +265,7 @@ func on_dash(use_ex: bool) -> bool:
 	if use_ex:
 		if not spend_dash(true): return true
 		travel(float(h.cdat.get("ex_dist", 5.0)), float(h.cdat.get("ex_time", 0.2)), {"invuln": 0.1}, true)
+		h.ghost_t = 0.1          # her frost streaks, not the shared after-image (from the first frame)
 		play("tm_dash_air")
 		m.sfx("rime_flip", h.pos, -3.0, 1.0)
 		aft_t = 0.0
@@ -290,13 +291,17 @@ func _tick_rinkrun(dt: float) -> void:
 	if stop:
 		_rinkrun_end()
 		return
-	# steer toward the move keys (a gentle turn rate: the skate carries its line)
+	# steer toward the move keys: she carves a curve (a set turn rate, so the skate keeps its flow), and
+	# a hard carve throws ice off the outside edge
 	var mv: Vector2 = h.inp["move"]
 	var cur: Vector2 = rinkrun["dir"]
-	var steer := float(dd.get("steer", 2.2))
+	var steer := float(dd.get("steer", 3.6))
+	var turn := 0.0
 	if mv.length() > 0.1:
-		cur = cur.rotated(clampf(cur.angle_to(mv.normalized()), -steer * dt, steer * dt))
+		turn = clampf(cur.angle_to(mv.normalized()), -steer * dt, steer * dt)
+		cur = cur.rotated(turn)
 	rinkrun["dir"] = cur
+	_edge_spray(cur, turn / maxf(dt, 0.001), dt)
 	h.roll_dir = cur
 	# full speed within `ramp` s of the push-off
 	h.roll_speed = float(dd.get("speed", 11.5)) * lerpf(0.45, 1.0, clampf(t / float(dd.get("ramp", 0.2)), 0.0, 1.0))
@@ -345,6 +350,21 @@ func _rinkrun_end() -> void:
 		lk().burst("chip", h.position + Vector3(side.x, 0.0, side.y), {"dur": 0.6})
 
 func rinkrunning() -> bool: return not rinkrun.is_empty()
+
+## Carving: a spray of ice and chips off the outside blade, more the harder she turns.
+func _edge_spray(dir: Vector2, turn_rate: float, dt: float) -> void:
+	var hard := clampf(absf(turn_rate) / 3.0, 0.0, 1.0)
+	if hard < 0.25:
+		return
+	rinkrun["spray"] = float(rinkrun.get("spray", 0.0)) - dt
+	if float(rinkrun["spray"]) > 0.0:
+		return
+	rinkrun["spray"] = 0.05
+	var outside := Vector2(dir.y, -dir.x) * signf(turn_rate)
+	m.fx.burst(
+			h.pos + Vector3(outside.x * 0.3, 0.1, outside.y * 0.3), Color("9af0ff"), int(4 + 6 * hard), 3.5, 0.35,
+			6.0, 0.8, Vector3(outside.x, 0.6, outside.y), 35.0)
+	lk().burst("chip", h.position + Vector3(outside.x * 0.4, 0.0, outside.y * 0.4), {"dur": 0.6})
 
 ## The skate's ribbon of ice chips (left blade, right blade) and the air dash's frost streaks, in her
 ## ice colours; her own trail replaces the shared after-image pill.
