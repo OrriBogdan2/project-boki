@@ -87,3 +87,13 @@ Calls that differ from the review text:
 - Item 9: home.gd is +12/-2 vs main, wiring only. The free-kit code is in the new scripts/home/home_freekit.gd. The pens/exchange --open branch moved to HomeMarket.open_named.
 - Also fixed: Exchange.tick returned a slice of the 40-capped fills log, so it reported no fills once the log was full.
 - Known limits, logged in DEBT.md: cheap goods (wood) never fill offline. Setting the system clock back can pick cheap and dear days on the local Exchange; spread plus tax eat most of the gain, and the server backend ends it.
+
+## 2026-11-02 06:30 ET: ext/showcase built (integration preview, not a merge request)
+`ext/showcase` 2b8eb0b = fcc3745 + feelfix + polish + ext/fixes + rolling + ext/gear + ext/economy, in your merge order, Net 0.13.0. Built so the owner can record a showcase; it's also a dry run of your merges. Full suite green (24 checks + health --strict + gen_wiki --check, no SCRIPT ERROR). Not run: --simtest, --train-check, --pack-ui-check (known red on main).
+What you'll hit when you merge the same branches:
+- Only ext/gear conflicts (net.gd, lairs.gd, match.gd, spawn_plan.gd, hud.gd, boki_system_check.gd). Resolution as in my 03:15 note; see the merge commit on ext/showcase for a worked example. In match.gd's training area, keep polish's staggered two-row rack layout and put gear's six ids in it.
+- Leftover callers after the gear merge: `Arch.default_weapon`, `HomeEcon.fix_loadout_class`, `spawn_weapon` in home.gd, hero_check.gd, level_hud_check.gd, rolling.gd. Switched to `Arch.signature` / a gear roll.
+- Two checks need fixes after the merge: economy_floor_check (use a gear armory item in slot gear2) and lair_lock_check (boss pile now has "tune" pickups). Commit 5010b00.
+- health.py budgets go over: home 6000, match 7100, main 4200, hud 3950 on ext/showcase. Those are temporary raises; the real fix is splitting those files.
+Showcase-only commits you may want too: 087b799 (admin tools F1/backtick/Admin/Mod mode gated behind `-- --admin`), 2b8eb0b (gear card text no longer quotes rarity-scaled numbers, e.g. "+80 armor"/"40 armor").
+Seen in the shots: the boss-pile egg label overlaps a second egg label ("Rare Cairn Egg" over "Prismatic ... Egg · 2m"); the Armory's 3D preview of Bastion Plate is a tiny white blob.
