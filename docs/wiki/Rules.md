@@ -136,6 +136,18 @@ How personality traits shape a kin's fighting. aggression, loyalty and caution a
 | recall_cooldown | 1 |
 | swap_cooldown | 3 |
 
+## level_growth (`content/rules/level_growth.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | Quiet growth on every level-up (scripts/match/level_growth.gd). Each level a hunter reaches adds hp (a share of the class's base health) and ap (ability power: a multiplier on ability damage, and on healing and shields from abilities). Levels 2-6 use the full rate; levels 7-10 use half_from's half rate. Nothing pops up for it: the level badge flashes and its tooltip shows the totals. |
+| hp | 0.06 |
+| ap | 0.05 |
+| half_from | 7 |
+| half_k | 0.5 |
+
 ## merge_forms (`content/rules/merge_forms.json`)
 
 How a merge looks and plays (docs/decisions/0003). Forms with a kit live in content/merge_forms/<merge id>.json. This file holds the shared timings, the stat-style fallback every other Boki gets until its form is written (the Boki's type picks its look, rider and dodge burst; the same for everyone, no tiers), and the weak surge.
