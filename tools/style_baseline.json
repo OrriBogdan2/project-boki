@@ -39,11 +39,6 @@
 "semicolon": 5,
 "shadow": 1
 },
-"scripts/arch/kits/ashwick_kit.gd": {
-"long_line": 9,
-"nested_ternary": 1,
-"semicolon": 7
-},
 "scripts/arch/kits/bulwark_kit.gd": {
 "long_line": 20,
 "nested_ternary": 4,
@@ -53,11 +48,6 @@
 "long_line": 9,
 "nested_ternary": 1,
 "semicolon": 2
-},
-"scripts/arch/kits/dredge_kit.gd": {
-"long_line": 7,
-"nested_ternary": 1,
-"semicolon": 5
 },
 "scripts/arch/kits/gunslinger_kit.gd": {
 "long_line": 8,
@@ -163,7 +153,7 @@
 },
 "scripts/core/game.gd": {
 "history_comment": 1,
-"long_line": 13,
+"long_line": 12,
 "nested_ternary": 1,
 "semicolon": 5
 },
@@ -233,7 +223,7 @@
 "semicolon": 1
 },
 "scripts/core/settings.gd": {
-"long_line": 20,
+"long_line": 19,
 "nested_ternary": 1,
 "semicolon": 4
 },
@@ -494,9 +484,6 @@
 "long_line": 20,
 "semicolon": 39
 },
-"scripts/match/arena_demo_pair.gd": {
-"semicolon": 4
-},
 "scripts/match/biome_run.gd": {
 "long_line": 25,
 "semicolon": 60
@@ -616,8 +603,7 @@
 "semicolon": 5
 },
 "scripts/match/hero_gear_pair.gd": {
-"long_line": 25,
-"semicolon": 2
+"long_line": 2
 },
 "scripts/match/hero_hair.gd": {
 "long_line": 20
@@ -698,9 +684,6 @@
 "scripts/match/kin_wheel.gd": {
 "semicolon": 1
 },
-"scripts/match/kmoves_pair.gd": {
-"long_line": 17
-},
 "scripts/match/lairs.gd": {
 "long_line": 49,
 "nested_ternary": 9,
@@ -749,7 +732,7 @@
 "shadow": 1
 },
 "scripts/match/models.gd": {
-"long_line": 293,
+"long_line": 290,
 "nested_ternary": 12,
 "semicolon": 283,
 "shadow": 3
@@ -1067,8 +1050,8 @@
 "shadow": 1
 },
 "tools/ashwick_combo_check.gd": {
-"long_line": 19,
-"semicolon": 17,
+"long_line": 2,
+"semicolon": 9,
 "shadow": 1
 },
 "tools/balloon_check.gd": {
@@ -1099,9 +1082,7 @@
 "long_line": 1
 },
 "tools/dredge_combo_check.gd": {
-"history_comment": 1,
-"long_line": 18,
-"semicolon": 17,
+"long_line": 2,
 "shadow": 1
 },
 "tools/economy_floor_check.gd": {
@@ -1162,7 +1143,7 @@
 "semicolon": 11
 },
 "tools/keybind_check.gd": {
-"long_line": 8,
+"long_line": 7,
 "semicolon": 3
 },
 "tools/kill_reset_check.gd": {
