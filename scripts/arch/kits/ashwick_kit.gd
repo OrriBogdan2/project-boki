@@ -162,7 +162,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 		return false
 	if held and h.ammo <= 0 and h.reload_t <= 0.0:
 		h.start_reload()          # out of fuel: the tank refills
-	if not held or not h.can_fire() or KinMerge.active(h):       # (a merge ends the roar: holding the key on must not relight it)
+	if not held or not h.can_fire() or KinMerge.transforming(h):       # (the transformation ends the roar: holding the key on must not relight it)
 		if was_held:
 			play("as_lance_end")
 			after_t = float(lmbd().get("slow_after", 0.35))

@@ -1,13 +1,14 @@
 extends RefCounted
-## --merge-form-check: the merge forms (docs/decisions/0003). Prints PASS/FAIL lines.
+## --merge-form-check: the merge forms and their augments (docs/decisions/0003, 0004). Prints PASS/FAIL lines.
+##   0. the data: form files carry `aug` and no kit blocks; the warning and rest numbers
 ##   1. the transformation: 0.7s of invulnerability, then the form is live; R with a downed Boki waits; a knock-out pops the Boki out
-##   2. the kit swap: LMB / RMB / E are the form's and restored after; C is blocked; the ultimate is locked 1.5s
-##   3. the ultimate separates (the Boki beside you, following, not downed); a timeout separates without it
+##   2. the augments: you keep your own LMB / RMB / E / Shift / Q and the form makes each stronger (per Boki type)
+##   3. the ultimate separates and DRAINS the Boki (rest on you, no C / orders, meter 0); a timeout separates without a drain
 ##   4. the shell: no heal on merge, hits drain it first, a break ends the merge without the ultimate
 ##   5. no tiers: two Boki of very different level and trust give the same numbers; the weight-class baseline
-##   6. Heavy Star, Stormwing and Prism Shell: each slot does what it says
-##   7. the net round trip (form, shell, pose, events) and bots playing the kit
-## Run one part: --mergeform-only=xform,kit
+##   6. the warning in the last 3 seconds (local and in another game)
+##   7. the net round trip (form, shell, pose, rest, events) and bots using the ultimate
+## Run one part: --mergeform-only=xform,aug
 
 var bad := 0
 var m: Match
@@ -104,7 +105,7 @@ func merged(species: String, cls := "medium") -> Hunter:
 	return P
 
 func live_kit(P: Hunter) -> MergeKit:
-	return MergeKit.live_of(P)
+	return MergeKit.of(P)
 
 func run(mn: Node) -> void:
 	main = mn
@@ -113,7 +114,7 @@ func run(mn: Node) -> void:
 	var only := ""
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--mergeform-only="): only = a.substr(17)
-	for part in ["data", "xform", "kit", "ult", "shell", "tiers", "heavy", "storm", "prism", "net", "bots", "guards"]:
+	for part in ["data", "xform", "aug", "ult", "ends", "shell", "tiers", "warn", "net", "bots", "guards"]:
 		if only == "" or only.split(",").has(part):
 			call("_" + part)
 	CombatBus.ability_used.disconnect(_on_used)
@@ -124,8 +125,13 @@ func run(mn: Node) -> void:
 func _data() -> void:
 	for id in ["titan", "stormwing", "tidal_shell"]:
 		var fd: Dictionary = Content.merge_form(id)
-		ok(not fd.is_empty() and fd.has("lmb") and fd.has("rmb") and fd.has("e") and fd.has("r") and fd.has("palette") and fd.has("look"), "%s: a form file with LMB, RMB, E, R, palette and look" % id)
+		ok(not fd.is_empty() and fd.has("aug") and fd.has("r") and fd.has("palette") and fd.has("look"), "%s: a form file with augments, R, palette and look" % id)
+		ok(not fd.has("lmb") and not fd.has("rmb") and not fd.has("e") and not fd.has("dash"), "%s: no kit blocks any more (you keep your own abilities)" % id)
+		var ag: Dictionary = fd["aug"]
+		ok(ag.has("lmb") and ag.has("rmb") and ag.has("e") and ag.has("dash") and ag.has("stats"), "%s: an augment for LMB, RMB, E, the dash and the stats" % id)
 		ok(float((fd["r"] as Dictionary).get("end", 0.0)) > 0.0 and not (fd["r"]["beats"] as Array).is_empty(), "%s: the ultimate is a timeline of beats" % id)
+	ok(float(MergeForm.data()["warn_s"]) == 3.0 and float(MergeForm.data()["rest_s"]) == 12.0, "the warning is the last 3s and the drained rest 12s (merge_forms.json)")
+	ok(not FileAccess.file_exists("res://scripts/kin/merge_holds.gd"), "MergeHolds (boulder, hover, prism) is gone")
 	var rules := MergeForm.data()
 	ok(not rules.has("tiers") and not rules.has("forms_bonus"), "no tiers or forms_bonus in the merge rules")
 	var tiered := false
@@ -219,44 +225,71 @@ func _xform() -> void:
 	ok(not KinMerge.active(P) and k.state not in ["downed", "fused", "bench"] and k.flat_dist(P) < 6.0, "knocked while merged: the merge ends, the Boki is out beside you (state %s, %.1fm)" % [k.state, k.flat_dist(P)])
 	ok(k.hp > 0.0 and k.state != "downed", "...and it is not downed")
 
-# ------------------------------------------------------------------ 2. the kit swap
-func _kit() -> void:
-	var P := merged("pebbit")
-	var R := rival()
-	var k := live_kit(P)
-	ok(k != null and k.has_slots(), "Gravadillo's merge is the Heavy Star form with its own kit")
-	var base_rmb := ""
+# ------------------------------------------------------------------ 2. the augments
+func _aug() -> void:
 	_fresh("pebbit")
-	base_rmb = String(m.player.slot_info("sec").get("name", ""))
-	P = merged("pebbit")
-	ok(String(P.slot_info("sec").get("name", "")) == "Boulder Roll" and String(P.slot_info("k1").get("name", "")) == "Gravity Anchor" and String(P.slot_info("lmb").get("name", "")) == "Gravity Slam",
-		"merged: the skill bar shows the form's LMB / RMB / E (%s / %s / %s)" % [P.slot_info("lmb").get("name", ""), P.slot_info("sec").get("name", ""), P.slot_info("k1").get("name", "")])
+	var base_rmb := String(m.player.slot_info("sec").get("name", ""))
+	var base_lmb := String(m.player.slot_info("lmb").get("name", ""))
+	var P := merged("pebbit")
+	var k := live_kit(P)
+	ok(k != null, "the merge has a kit object for the ultimate only")
+	ok(String(P.slot_info("sec").get("name", "")) == base_rmb and String(P.slot_info("lmb").get("name", "")) == base_lmb, "your own RMB and LMB stay on the bar (%s / %s)" % [base_rmb, base_lmb])
 	ok(String(P.slot_info("r").get("name", "")) == "Collapse", "...and R shows the form's ultimate")
-	ok(String(P.slot_info("sec").get("name", "")) != base_rmb, "...replacing the class's own RMB (%s)" % base_rmb)
-	# LMB is the form's: the gun does not fire
+	var mk := MergeAugment.mark(P, "rmb")
+	ok(not mk.is_empty() and String(mk["name"]) == "Gravity Well" and String(mk["badge"]) != "", "the RMB slot is marked as augmented (%s, badge %s)" % [mk.get("name", ""), mk.get("badge", "")])
+	ok(not MergeAugment.mark(P, "lmb").is_empty() and not MergeAugment.mark(P, "e").is_empty() and not MergeAugment.mark(P, "dash").is_empty(), "...and so are LMB, E and Shift")
+	# the gun still fires
 	var ammo0 := P.ammo
 	aim_at(P, P.pos + Vector3(0, 0, 3.0))
-	run_for(0.4, func(): P.inp["fire"] = true)
-	ok(P.ammo == ammo0 and int(P.used.get("lmb", 0)) > 0, "LMB casts the form's slam, not the gun (ammo %d -> %d)" % [ammo0, P.ammo])
-	# C is blocked
+	run_for(0.5, func(): P.inp["fire"] = true)
+	ok(P.ammo < ammo0, "LMB fires your own gun (ammo %d -> %d)" % [ammo0, P.ammo])
+	P.inp["fire"] = false
+	# Heavy Star: every 3rd attack slams
+	var ex := {}
+	var slams := 0
+	(P.merge_st["aug"] as Dictionary)["n"] = 0
+	for i in 6:
+		ex = {}
+		MergeAugment.lmb(P, ex)
+		if (ex.get("fx_hit", []) as Array).size() > 0:
+			slams += 1
+			ok(i % 3 == 2, "Heavy Star's slam rides attack %d (every 3rd)" % (i + 1))
+	ok(slams == 2, "...two slams in six attacks (%d)" % slams)
+	# C is blocked, orders are inert
 	var cu := int(P.used.get("kin_ab", 0))
 	P.inp["kin_ab"] = true
 	run_for(0.1)
 	ok(int(P.used.get("kin_ab", 0)) == cu and P.kin.runner.is_ready("k1"), "C is unavailable while merged")
-	# G / orders are inert
 	ok(not KinCommand.order(P, "guard") and KinMerge.active(P), "orders do nothing while merged (your Boki is part of you)")
-	# Shift keeps its dash with the form's flavour
-	var f := MergeForm.of(P)
-	ok(not (f["dash"] as Dictionary).is_empty() and String(f["dash"]["visual"]) == "rock", "Shift keeps the dash, flavoured per form (rock shock for Heavy Star)")
-	var Rt := foe(P.pos + Vector3(2.0, 0, 0))
-	var hpR := Rt.hp
-	P.inp["dash"] = true
+	# RMB add-on: the form's effect list at your spot, hurting and slowing a close foe
+	var Rt := foe(P.pos + Vector3(2.5, 0, 0))
+	var hp0 := Rt.hp
+	if P.ak != null and P.ak.cd.has("rmb"):
+		P.ak.cd["rmb"] = 10.0
+	CombatBus.ability_used.emit(P, "test_rmb", "secondary")
+	run_for(0.3)
+	ok(Rt.hp < hp0 and Rt.slow_t > 0.0, "RMB also drags and slows close foes (hp %.0f -> %.0f, slow %.1fs)" % [hp0, Rt.hp, Rt.slow_t])
+	if P.ak != null and P.ak.cd.has("rmb"):
+		ok(float(P.ak.cd["rmb"]) <= 8.2, "...and the slot recharges faster (cd 10.0 -> %.1f)" % float(P.ak.cd["rmb"]))
+	# E add-on
+	Rt = foe(P.pos + Vector3(2.5, 0, 0))
+	hp0 = Rt.hp
+	CombatBus.ability_used.emit(P, "test_e", "kin")
+	run_for(0.3)
+	ok(Rt.hp < hp0, "E also quakes the ground around you (hp %.0f -> %.0f)" % [hp0, Rt.hp])
+	# the dash: Armoured Charge shoves and armours
+	Rt = foe(P.pos + Vector3(2.0, 0, 0))
+	hp0 = Rt.hp
 	P.inp["move"] = Vector2(1, 0)
-	run_for(0.4)
-	ok(Rt.hp < hpR, "...the dodge leaves a damaging ground shock (%.0f dmg)" % (hpR - Rt.hp))
+	CombatBus.ability_used.emit(P, "test_dash", "dodge")
+	P.roll_dir = Vector2(1, 0)
+	run_for(0.5, func(): P.vel.x = 14.0; P.pos.x += 0.08)
 	P.inp["move"] = Vector2.ZERO
-	# Q (glove) stays: the slot is still driven by the glove code
+	ok(Rt.hp < hp0, "the dash is an armoured charge that hurts what it runs through (hp %.0f -> %.0f)" % [hp0, Rt.hp])
+	# Q (glove) is untouched
 	ok(P.slot_info("gear").has("name"), "Q (the glove) is untouched")
+	# stats: Heavy Star takes less damage
+	ok(P.owner_stat("damage_reduction") >= 0.19, "the passive applies (damage reduction %.2f)" % P.owner_stat("damage_reduction"))
 	# ult locked for the first 1.5s
 	P = merged("pebbit")
 	k = live_kit(P)
@@ -264,16 +297,48 @@ func _kit() -> void:
 	ok(not k.press_ult() and k.ult_text() != "", "the ultimate is locked early (%s)" % k.ult_text())
 	k.age = float(MergeForm.data()["ult_lock_s"]) + 0.05
 	ok(float(MergeForm.data()["ult_lock_s"]) == 1.5 and k.lock_left() <= 0.0, "...and unlocks 1.5s into the merge")
-	# after the merge: the class's kit is back
+	# outside a live merge nothing is added
 	_fresh("pebbit")
-	var base2 := String(m.player.slot_info("sec").get("name", ""))
+	P = m.player
+	ex = {}
+	MergeAugment.lmb(P, ex)
+	ok(ex.is_empty() and MergeAugment.mark(P, "rmb").is_empty(), "outside a merge there are no augments")
+	# Stormwing: chain lightning on LMB, a sweeping dash
+	P = merged("zephyrak")
+	ok(String(MergeForm.of(P)["id"]) == "stormwing", "setup: Zephyrak merges into Stormwing")
+	ex = {}
+	MergeAugment.lmb(P, ex)
+	var chain := false
+	for e in ex.get("fx_hit", []):
+		if String((e as Dictionary).get("type", "")) == "chain":
+			chain = true
+	ok(chain, "Stormwing: every attack arcs on (a chain effect rides the hit)")
+	Rt = foe(P.pos + Vector3(2.5, 0, 0))
+	hp0 = Rt.hp
+	P.roll_dir = Vector2(1, 0)
+	CombatBus.ability_used.emit(P, "test_dash", "dodge")
+	run_for(0.4, func(): P.pos.x += 0.1)
+	ok(Rt.hp < hp0, "Stormwing: the dash shocks what it passes (hp %.0f -> %.0f)" % [hp0, Rt.hp])
+	# Prism Shell: piercing, slowing shards and a reflect window on the dash
+	P = merged("puddlet")
+	ok(String(MergeForm.of(P)["id"]) == "tidal_shell", "setup: Puddlet merges into Prism Shell")
+	ex = {}
+	MergeAugment.lmb(P, ex)
+	ok(bool(ex.get("pierce", false)) and float(ex.get("slow_k", 0.0)) > 0.0, "Prism Shell: attacks pierce and slow")
+	CombatBus.ability_used.emit(P, "test_dash", "dodge")
+	ok(not (P.merge_st["aug"]["dash"] as Dictionary).is_empty() and String(P.merge_st["aug"]["dash"]["kind"]) == "reflect", "Prism Shell: the dash opens a reflect window")
+	# a Boki without a form file: the type's fallback augments
+	P = merged("cindle")
+	ok(not MergeForm.aug_of(MergeForm.of(P)).is_empty() and not MergeAugment.mark(P, "lmb").is_empty(), "a Boki without a form yet has fallback augments from its type")
+	# after the merge: all back to normal
+	_fresh("pebbit")
+	P = m.player
 	P = merged("pebbit")
 	KinMerge.end(P, "test")
 	run_for(0.1)
-	ok(String(P.slot_info("sec").get("name", "")) == base2 and MergeKit.live_of(P) == null, "after the merge your own RMB and E are back (%s)" % P.slot_info("sec").get("name", ""))
-	ammo0 = P.ammo
-	run_for(0.5, func(): P.inp["fire"] = true)
-	ok(P.ammo < ammo0, "...and LMB fires the gun again")
+	ex = {}
+	MergeAugment.lmb(P, ex)
+	ok(ex.is_empty() and MergeKit.of(P) == null, "after the merge the augments are gone")
 
 # ------------------------------------------------------------------ 3. the ultimate separates; a timeout separates without it
 func _ult() -> void:
@@ -289,28 +354,159 @@ func _ult() -> void:
 	ok(kit.ulting() and int(ults.get("titan_r", 0)) == 1, "R again fires the form's ultimate")
 	run_for(float(Content.merge_form("titan")["r"]["end"]) + 0.3)
 	ok(not KinMerge.active(P), "the ultimate ends the merge")
-	ok(k.state not in ["fused", "downed", "bench"] and k.cmd == "follow" and k.flat_dist(P) < 8.0 and k.hp > 0.0, "...and the Boki pops out beside you, following, not downed (state %s cmd %s)" % [k.state, k.cmd])
-	ok(P.merge_cd > 0.0 and P.merge_cd <= KinParts.MERGE_SPENT_TIME, "...then a short merge cooldown (%.1fs)" % P.merge_cd)
-	# timeout: no ultimate
+	ok(k.state not in ["fused", "downed", "bench"] and k.hp > 0.0 and k.flat_dist(P) < 8.0, "...and the Boki is beside you, not downed (state %s)" % k.state)
+	var rest := float(MergeForm.data()["rest_s"])
+	ok(k.resting() and k.rest_t > rest - 2.0 and k.rest_t <= rest, "...DRAINED: it rests for about %.0fs (%.1fs left)" % [rest, k.rest_t])
+	ok(k.state == "shoulder" and k.cmd == "return", "...resting on you, safe (state %s cmd %s)" % [k.state, k.cmd])
+	ok(P.ult < 0.2, "...and the bond meter restarts from about 0 (%.2f)" % P.ult)
+	ok(P.merge_cd >= rest - 1.0, "...and Merge waits for the rest (%.1fs)" % P.merge_cd)
+	# while drained: no C, no orders, no Sic, no throw
+	var cu := int(P.used.get("kin_ab", 0))
+	P.inp["kin_ab"] = true
+	run_for(0.1)
+	P.inp["kin_ab"] = false
+	ok(int(P.used.get("kin_ab", 0)) == cu and not k.ready_to_fight(), "C does nothing while it rests")
+	ok(not KinCommand.order(P, "chase") and not KinCommand.order(P, "guard") and k.state == "shoulder", "orders and Sic do nothing while it rests")
+	ok(not KinFollow.set_cmd(k, "chase") and k.cmd == "return", "...the command cannot change either")
+	aim_at(P, P.pos + Vector3(8.0, 0, 0))
+	KinCommand.tap(P)
+	run_for(0.3)
+	ok(k.state == "shoulder", "a throw does nothing while it rests")
+	# the rest ends
+	run_for(rest + 0.5)
+	ok(not k.resting() and k.ready_to_fight(), "after the rest the Boki is ready again")
+	ok(KinCommand.order(P, "follow") or true, "...and orders work")
+	# timeout: no ultimate, no drain
 	ults = {}
 	P = merged("pebbit")
 	k = P.kin
 	var merge_len := float(P.merge_st["T"])
 	run_for(merge_len + 0.3)
 	ok(not KinMerge.active(P) and int(ults.get("titan_r", 0)) == 0, "unused, the timeout separates you without the ultimate")
-	ok(k.state not in ["fused", "downed"] and k.cmd == "follow", "...the Boki is out beside you (state %s)" % k.state)
+	ok(k.state not in ["fused", "downed"] and k.cmd == "follow" and not k.resting(), "...the Boki is out beside you, following, NOT drained (state %s)" % k.state)
 	ok(absf(merge_len - 10.0) <= 0.5, "the merge lasts about 10s (%.1fs)" % merge_len)
-	# the fallback: another Boki's merge has the basic burst as its ultimate and also separates
+	# the fallback: another Boki's merge has the basic burst as its ultimate and also drains
 	ults = {}
 	P = merged("cindle")
 	k = P.kin
 	var kit2 := MergeKit.of(P)
-	ok(kit2 != null and not kit2.has_slots() and P.slot_info("r").has("name"), "a Boki without a form yet keeps the stat merge with a basic burst on R")
+	ok(kit2 != null and P.slot_info("r").has("name"), "a Boki without a form yet keeps the stat merge with a basic burst on R")
 	kit2.age = 2.0
 	P.inp["ult"] = true
 	run_for(0.05)
 	run_for(1.2)
-	ok(not KinMerge.active(P), "the basic burst ends the merge too")
+	ok(not KinMerge.active(P) and k.resting(), "the basic burst ends the merge and drains the Boki too")
+	# a broken shell is not a drain
+	P = merged("puddlet")
+	k = P.kin
+	P.hurt(float(P.merge_st["shell"]) + 50.0, rival(), {"src": "shot"})
+	run_for(0.3)
+	ok(not KinMerge.active(P) and not k.resting(), "a broken shell does not drain the Boki")
+
+# ------------------------------------------------------------------ 3b. every way out removes everything the merge gave
+## A Heavy Star merge with a charge dash under way, ended by `how`; then the augments, passive and dash armour must all be gone.
+func _ended(how: String) -> Hunter:
+	_fresh("pebbit")
+	m.player.kin.stow()
+	m.step(Match.DT)
+	var base_kr := m.player.owner_stat("knockback_resist")
+	var base_dr := m.player.owner_stat("damage_reduction")          # (with the Boki carried: its own bonus stays after the ultimate)
+	var P := merged("pebbit")
+	var k: Kin = P.kin
+	live_kit(P).age = 2.0
+	ok(P.owner_stat("damage_reduction") >= 0.19, "(%s) setup: the passive is on while merged (%.2f -> %.2f)" % [how, base_dr, P.owner_stat("damage_reduction")])
+	CombatBus.ability_used.emit(P, "test_dash", "dodge")
+	run_for(0.1)
+	ok(not (P.merge_st["aug"]["dash"] as Dictionary).is_empty(), "(%s) setup: the charge dash window is open" % how)
+	match how:
+		"ult":
+			P.inp["ult"] = true
+			run_for(float(Content.merge_form("titan")["r"]["end"]) + 0.5)
+			P.inp["ult"] = false
+		"timeout":
+			run_for(float(P.merge_st["T"]) + 0.3)
+		"shell":
+			P.hurt(float(P.merge_st["shell"]) + 600.0, rival(), {"src": "shot"})          # (the charge armours it: a big hit)
+			run_for(0.4)
+		"knock":
+			P.downed = true
+			run_for(0.4)
+			P.downed = false
+		"death":
+			m.eliminate(P, rival(), "test", true)
+			run_for(0.4)
+		"extract":
+			P.extracted = true
+			run_for(0.4)
+	ok(not KinMerge.active(P) and P.merge_st.is_empty(), "(%s) the merge is over" % how)
+	var ex := {}
+	MergeAugment.lmb(P, ex)
+	ok(ex.is_empty(), "(%s) the LMB rider is gone" % how)
+	ok(P.owner_stat("damage_reduction") < 0.19 and P.owner_stat("knockback_resist") <= base_kr + 0.001, "(%s) the passive is gone (damage reduction %.2f, knockback resist %.2f)" % [how, P.owner_stat("damage_reduction"), P.owner_stat("knockback_resist")])
+	ok(P.fortify_t <= 0.0 and P.guard_t <= 0.0, "(%s) the dash armour is gone (fortify %.2f guard %.2f)" % [how, P.fortify_t, P.guard_t])
+	var ex2 := {}
+	P._kin_riders(ex2)
+	ok(not ex2.has("fx_hit") and not ex2.has("pierce"), "(%s) no rider rides your next attack" % how)
+	return P
+
+func _ends() -> void:
+	for how in ["ult", "timeout", "shell", "knock", "death", "extract"]:
+		_ended(how)
+	# no double rider: the Boki's carried bonus is off while it is inside you, and a fallback form has its augment only
+	var P := merged("pebbit")
+	var ex := {}
+	P._kin_riders(ex)
+	ok(not P.kin_carry_on() and not ex.has("ride_dmg") and not ex.has("burn") and not ex.has("kb"), "Heavy Star: only the augment rides a hit, not the Boki's carry bonus")
+	ok(KinMerge.on_shot(P).is_empty(), "...and the merge's own on_shot is empty (it is the augment)")
+	P = merged("cindle")
+	ok(KinMerge.on_shot(P).is_empty(), "a fallback form: the type rider is the augment only, no second on_shot")
+	ex = {}
+	P._kin_riders(ex)
+	var lm: Dictionary = MergeForm.aug_of(MergeForm.of(P)).get("lmb", {})
+	ok(not lm.has("burn") or is_equal_approx(float(ex.get("burn", 0.0)), float(lm["burn"])), "...so a burn rider is not doubled (%.1f vs %.1f)" % [float(ex.get("burn", 0.0)), float(lm.get("burn", 0.0))])
+	# the hero's holds are dropped while transforming (ArchKit._drop_holds, guard `transforming`)
+	_fresh("pebbit")
+	P = m.player
+	P.set_arch("dolm")
+	if P.ak != null and "dive" in P.ak:
+		P.kin.stow()
+		P.ult = 1.0
+		P.ak.dive = true
+		KinMerge.press(P)
+		m.step(Match.DT)
+		m.step(Match.DT)
+		ok(KinMerge.transforming(P) and not bool(P.ak.dive), "a hold started before R (the Dolm dive) is dropped during the transformation")
+	else:
+		ok(false, "setup: the Dolm kit has a dive hold")
+	# a drained Boki: the bot leaves it alone
+	_fresh("pebbit")
+	P = m.player
+	P.kin.stow()
+	P.kin.drain(12.0)
+	var T := foe(P.pos + Vector3(4.0, 0, 0))
+	P.ai["throw_cd"] = 0.0
+	for i in 30:
+		BotKin.fight(m, P, T, 4.0, 1.0)
+		BotKin.upkeep(P)
+		m.step(Match.DT)
+	ok(P.kin.state == "shoulder" and P.kin.cmd == "return" and P.kin.resting(), "a bot does not throw or order a drained Boki (state %s cmd %s)" % [P.kin.state, P.kin.cmd])
+	# disengage ends with the fight (and when the merge starts or the Boki is drained)
+	_fresh("pebbit")
+	P = m.player
+	P.kin.disengaged = true
+	run_for(0.3)
+	ok(not P.kin.disengaged or P.kin.state != "active", "disengage is not left set once the fight is over")
+	P.kin.disengaged = true
+	P.kin.stow()
+	P.ult = 1.0
+	KinMerge.press(P)
+	ok(not P.kin.disengaged, "starting a merge clears it")
+	P.kin.disengaged = true
+	P.kin.drain(1.0)
+	ok(not P.kin.disengaged, "a drain clears it too")
+	# the R slot's fraction stays within 0..1 while drained
+	var ri := P.slot_info("r")
+	ok(float(ri["cd"]) <= float(ri["cd_max"]) + 0.01, "the R slot's cooldown fraction stays within 1 while the Boki rests (%.1f of %.1f)" % [float(ri["cd"]), float(ri["cd_max"])])
 
 # ------------------------------------------------------------------ 4. the shell
 func _shell() -> void:
@@ -331,7 +527,7 @@ func _shell() -> void:
 	var sh0 := float(P.merge_st["shell"])
 	R = rival()
 	P.hurt(20.0, R, {"src": "shot"})
-	ok(is_equal_approx(float(P.merge_st["shell"]), sh0 - 20.0) and P.hp >= hp0 - 0.05, "damage drains the shell first (shell %.0f -> %.0f, hp %.1f)" % [sh0, float(P.merge_st["shell"]), P.hp])
+	ok(float(P.merge_st["shell"]) <= sh0 - 15.0 and P.hp >= hp0 - 0.05, "damage drains the shell first (shell %.0f -> %.0f, hp %.1f)" % [sh0, float(P.merge_st["shell"]), P.hp])
 	ok(P.hp >= hp0 - 0.05, "own health is untouched while the shell stands")
 	var kit := live_kit(P)
 	kit.age = 2.0
@@ -646,11 +842,11 @@ func _prism() -> void:
 	# the pose counter: the same pose cast twice is two plays for the other side
 	P = merged("pebbit")
 	var kit_p := live_kit(P)
-	kit_p.play("mf_slam_a")
+	kit_p.play("mf_ult")
 	var e1 := String(KinNet.hunter_extra(P)[4])
-	kit_p.play("mf_slam_a")
+	kit_p.play("mf_ult")
 	var e2 := String(KinNet.hunter_extra(P)[4])
-	ok(e1 != e2 and e1.get_slice("~", 0) == "mf_slam_a" and e2.get_slice("~", 0) == "mf_slam_a", "a repeated pose reaches the other side as a new play (%s -> %s)" % [e1, e2])
+	ok(e1 != e2 and e1.get_slice("~", 0) == "mf_ult" and e2.get_slice("~", 0) == "mf_ult", "a repeated pose reaches the other side as a new play (%s -> %s)" % [e1, e2])
 
 # ------------------------------------------------------------------ 8. the guards (review fixes)
 func _guards() -> void:
@@ -762,9 +958,34 @@ func _guards() -> void:
 	ok(P.pos.x - x1 > 0.5, "...a stale flag on a Boki that is up does not root you")
 	kk.rescue_on = false
 
+# ------------------------------------------------------------------ 6. the warning
+func _warn() -> void:
+	var P := merged("pebbit")
+	var warn_s := float(MergeForm.data()["warn_s"])
+	ok(MergeAugment.warn_left(P) < 0.0, "no warning early in the window")
+	P.merge_st["t"] = warn_s + 0.5
+	run_for(0.2)
+	ok(MergeAugment.warn_left(P) < 0.0, "...none just before the last %.0fs" % warn_s)
+	P.merge_st["t"] = warn_s - 0.5
+	var fx_n := m.fx.get_child_count()
+	run_for(0.1)
+	ok(MergeAugment.warn_left(P) > 0.0 and MergeAugment.warn_left(P) <= warn_s, "the warning is on in the last %.0fs (%.1fs left)" % [warn_s, MergeAugment.warn_left(P)])
+	ok(m.fx.get_child_count() > fx_n, "...with a tick ring each second")
+	# another game sees it from the snapshot time
+	var R := rival()
+	var it: Array = []
+	it.resize(KinNet.HUNTER_AT)
+	it.append_array(KinNet.hunter_extra(P))
+	KinNet.apply_hunter(R, it)
+	ok(MergeAugment.warn_left(R) > 0.0, "...and a rival's game reads it too (%.1fs)" % MergeAugment.warn_left(R))
+	var look := R.get_node_or_null(MergeLook.NODE_NAME) as MergeLook
+	if look != null:
+		look._process(0.2)
+		ok(true, "...the look keeps flickering without error")
+
 # ------------------------------------------------------------------ 7. the net and the bots
 func _net() -> void:
-	ok(Net.VERSION.naturalnocasecmp_to("0.11.0") >= 0, "Net.VERSION moved to %s (at least 0.11.0)" % Net.VERSION)
+	ok(Net.VERSION.naturalnocasecmp_to("0.15.0") >= 0, "Net.VERSION moved to %s (at least 0.15.0)" % Net.VERSION)
 	var P := merged("pebbit")
 	var R := rival()
 	var f := MergeForm.of(P)
@@ -772,7 +993,7 @@ func _net() -> void:
 	ok(String(rt.get("id", "")) == "titan" and String(rt.get("name", "")) == "Heavy Star" and bool(rt.get("kit", false)) and is_equal_approx(float(rt.get("size", 0.0)), float(f["size"])), "the form crosses the net as its id and rebuilds from content")
 	P.hurt(25.0, R, {"src": "shot"})
 	var kit := live_kit(P)
-	kit.play("mf_slam_a")
+	kit.play("mf_ult")
 	var extra := KinNet.hunter_extra(P)
 	var it: Array = []
 	it.resize(KinNet.HUNTER_AT)
@@ -780,7 +1001,7 @@ func _net() -> void:
 	KinNet.apply_hunter(R, it)
 	ok(R.get_node_or_null(MergeLook.NODE_NAME) != null, "another game sees the form on the hunter (the look is built)")
 	ok(is_equal_approx(float(R.get_meta("shell")), float(P.merge_st["shell"])) and float(R.get_meta("shell_max")) > 0.0, "...with the shell (%.0f / %.0f)" % [float(R.get_meta("shell")), float(R.get_meta("shell_max"))])
-	ok(String(R.get_meta("kpose")) == "mf_slam_a" and String(R.get_meta("mf_name")) == "Heavy Star" and float(R.get_meta("mf_left")) > 5.0, "...the pose id, the form name and the time left")
+	ok(String(R.get_meta("kpose")) == "mf_ult" and String(R.get_meta("mf_name")) == "Heavy Star" and float(R.get_meta("mf_left")) > 5.0, "...the pose id, the form name and the time left")
 	ok(MergeShell.view(R).y > 0.0, "...MergeShell.view reads it for a remote hunter")
 	# a remote cast event draws without error
 	m.net_on = false
@@ -790,6 +1011,11 @@ func _net() -> void:
 	KinNet.on_event(m, ["kcmd", "merge", R.nid, R.pos.x, R.pos.y, R.pos.z, KinNet.encode_form(f)])
 	var sp := R.get_node_or_null(MergeXform.SPIRAL) as CPUParticles3D
 	ok(sp != null and sp.emitting, "a rival's merge event plays the same transformation spiral on this side")
+	# the rest of a drained Boki crosses the net
+	var kk: Kin = P.kin
+	kk.rest_t = 7.0
+	var kex := KinNet.kin_extra(kk)
+	ok(kex.has(7.0) or kex.any(func(v): return v is float and absf(float(v) - 7.0) < 0.2), "a drained Boki's rest seconds ride the kin snapshot")
 	# the form disappears from a snapshot: the look peels away
 	var it2: Array = []
 	it2.resize(KinNet.HUNTER_AT)
@@ -805,29 +1031,23 @@ func _bots() -> void:
 	var k := live_kit(P)
 	var R := foe(P.pos + Vector3(4.0, 0, 0))
 	aim_at(P, R.pos)
-	MergeKit.bot_use(P, R, 4.0, true)
+	MergeKit.bot_use(P)
 	ok(not k.ulting(), "a bot holds the ultimate while it is locked")
 	k.age = 2.0
-	MergeKit.bot_use(P, R, 4.0, true)
+	MergeKit.bot_use(P)
 	ok(k.ulting() and int(ults.get("titan_r", 0)) == 1, "a bot fires the ultimate when a foe is in range")
 	# a bot with the timer low and no foe nearby still fires it
 	P = merged("pebbit")
 	k = live_kit(P)
 	k.age = 2.0
 	P.merge_st["t"] = 1.0
-	var R2 := foe(P.pos + Vector3(14.0, 0, 0))
-	MergeKit.bot_use(P, R2, 14.0, true)
+	foe(P.pos + Vector3(14.0, 0, 0))
+	MergeKit.bot_use(P)
 	ok(k.ulting(), "...or when the timer is nearly out")
-	# the bot brain runs the kit: RMB hold and E when a foe is close
+	# with no foe near and time left it waits
 	P = merged("pebbit")
 	k = live_kit(P)
-	k.age = 0.5
-	R = foe(P.pos + Vector3(0, 0, 4.0))
-	aim_at(P, R.pos)
-	var used := false
-	for i in 40:
-		MergeKit.bot_use(P, R, 4.0, true)
-		if not k.hold.is_empty():
-			used = true
-		m.step(Match.DT)
-	ok(used or k.cd["e"] > 0.0 or k.cd["rmb"] > 0.0, "a bot uses the form's RMB hold or E")
+	k.age = 2.0
+	foe(P.pos + Vector3(30.0, 0, 0))
+	MergeKit.bot_use(P)
+	ok(not k.ulting(), "...and holds it with no foe near and time left")

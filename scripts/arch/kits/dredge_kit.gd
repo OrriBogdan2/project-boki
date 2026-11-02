@@ -134,7 +134,7 @@ func fire_rmb(c: Dictionary) -> void:
 
 func _grab(f: Ent) -> void:
 	flying = false
-	if KinMerge.active(h):
+	if KinMerge.transforming(h):
 		return
 	var rdf := rmb_def()
 	if f.mass() >= 6.0:
