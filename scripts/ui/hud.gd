@@ -1670,7 +1670,7 @@ func _draw_weapon(sz: Vector2, p: Hunter) -> void:
 	_ab_slot("kit", kr, "anvil", Settings.key_cap("armor_kit"), ARMOR_COL, 0.0, 0.0, p.armor_kits > 0 and p.armor < p.max_armor - 0.5)
 	_ctext(Vector2(kr.get_center().x, kr.position.y - 5), "%d" % p.armor_kits, 12, Color(ARMOR_COL, 0.95), big)
 	x -= s + gap
-	KeyCounter.draw(c, p, Vector2(r.end.x, y - 30.0), big)      # chest keys, over the belt's right end
+	KeyCounter.draw(c, p, Vector2(r.end.x - 16.0, r.position.y + 40.0), big)      # chest keys: on the weapon card, right under the belt
 	# C: throw / recall your kin
 	if k:
 		var kc: Color = Data.KIN[k.species]["color"]

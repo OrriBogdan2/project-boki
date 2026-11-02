@@ -19,10 +19,15 @@ static func what() -> String:
 
 static func frame(m: Match) -> void:
 	var w := what()
+	if w == "":
+		return
+	Settings.v["tips"] = false          # (no tutorial cards over the shot)
 	var P: Hunter = m.player
-	if w == "" or P == null or P.out or m.time < 1.0 or m.keys == null:
+	if P == null or P.out or m.time < 1.0 or m.keys == null:
 		return
 	P.hp = P.max_hp
+	if m.hud:
+		m.hud.guide_hidden = true
 	var parts := w.split(":")
 	var K: KeyRun = m.keys
 	if not m.has_meta("kdemo"):
@@ -76,7 +81,8 @@ static func _chest(m: Match, P: Hunter, keys: int) -> void:
 		if best.is_empty() or (c["pos"] as Vector3).distance_to(P.pos) < (best["pos"] as Vector3).distance_to(P.pos): best = c
 	if best.is_empty():
 		return
-	P.teleport(best["pos"] + Vector3(0.1, 0, 1.6))
+	P.teleport(best["pos"] + Vector3(0.1, 0, 3.2))
+	m.set_meta("zoom_hold", 0.62)
 	P.chest_keys = keys
 	P.inp["aim"] = best["pos"]
 	PolishTools.clear_mobs(m)
@@ -89,7 +95,8 @@ static func _glint(m: Match, P: Hunter, K: KeyRun) -> void:
 		if car == null or mb.pos.distance_to(P.pos) < car.pos.distance_to(P.pos): car = mb
 	if car == null:
 		return
-	P.teleport(car.pos + Vector3(0, 0, 5.5))
+	P.teleport(car.pos + Vector3(0, 0, 4.2))
+	m.set_meta("zoom_hold", 0.62)
 	P.inp["aim"] = car.pos
 	for mb in m.mobs.duplicate():
 		if mb != car and (mb as Mob).pos.distance_to(car.pos) < 9.0:
@@ -103,5 +110,6 @@ static func _shrub(m: Match, P: Hunter, K: KeyRun) -> void:
 	m.set_meta("kdemo_s", s)
 	var to := Vector3(0, 0, 1)
 	P.teleport(s.pos + to * 9.0)
+	m.set_meta("zoom_hold", 0.62)
 	P.inp["aim"] = s.pos
 	print("KEYSDEMO shrubling at (%.0f,%.0f)" % [s.pos.x, s.pos.z])

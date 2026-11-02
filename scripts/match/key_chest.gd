@@ -8,7 +8,19 @@ static func dress(node: Node3D) -> void:
 	if body:
 		var lk := KeyModels.padlock()
 		lk.position = Vector3(0, 0.41, -0.47)
+		lk.scale = Vector3.ONE * 1.5
 		body.add_child(lk)
+	# a brass padlock hanging over the lid that always faces the camera's side, so a locked chest reads from afar
+	var fl := KeyModels.padlock()
+	fl.name = "LockTag"
+	fl.scale = Vector3.ONE * 2.2
+	fl.position = Vector3(0, 1.55, 0)
+	fl.rotation = Vector3(-0.75, PI - node.rotation.y, 0)
+	node.add_child(fl)
+	if node.is_inside_tree():
+		var tw := fl.create_tween().set_loops()
+		tw.tween_property(fl, "position:y", 1.68, 0.9).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+		tw.tween_property(fl, "position:y", 1.55, 0.9).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 
 ## What the interact prompt says and does beside chest `c` for hunter `h`.
 static func prompt(h: Hunter, c: Dictionary) -> Dictionary:
@@ -46,5 +58,8 @@ static func unlock_fx(m: Match, c: Dictionary) -> void:
 	var lk := (c["node"] as Node3D).get_node_or_null("Body/Lock") as Node3D
 	if lk:
 		lk.visible = false
+	var tag := (c["node"] as Node3D).get_node_or_null("LockTag") as Node3D
+	if tag:
+		tag.queue_free()
 	m.sfx("unlock", c["pos"], -2.0, 1.1)
 	m.fx.burst(c["pos"] + Vector3(0, 0.9, 0), KeyModels.BRASS, 10, 3.0, 0.5)

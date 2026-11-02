@@ -37,6 +37,11 @@ func init_shrub(match_node: Node, id: String, at: Vector3, tier := 1.0) -> void:
 	_show_glint(false)
 
 ## Built by Models.mob: the grass tinted with the leaf colour of the island it hides on.
+## True for a Shrubling that is still pretending to be a bush. Anything that PICKS a target for a Boki
+## (Chase, the engage scan) calls this and skips it, so a Boki does not give a bush away; a hit still lands.
+static func hidden(e: Ent) -> bool:
+	return e is Shrubling and (e as Shrubling).ss == "disguised"
+
 static func leaf_colour(m: Node, at: Vector3) -> Color:
 	var w: World = m.world if m != null and m.get("world") else null
 	if w != null and w.inb(int(floor(at.x)), int(floor(at.z))):

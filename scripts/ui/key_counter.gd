@@ -1,8 +1,8 @@
 class_name KeyCounter
 extends RefCounted
 ## The chest-key count on the HUD: a small brass key and a number, right-aligned to `anchor`
-## (the Hud puts it just over the utility belt's right end; move the call, not this file, if the belt
-## moves). Dim at zero, bright and pulsing for a moment when the count goes up.
+## (the Hud puts it on the weapon card, right under the utility belt; move the call, not this file, if
+## the belt moves). Dim at zero, bright and pulsing for a moment when the count goes up.
 
 const COL := Color("f2c84a")
 static var _last := {}      # hunter id -> [count, time it last rose]

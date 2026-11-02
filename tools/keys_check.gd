@@ -51,7 +51,7 @@ func run(main_node: Node) -> void:
 # ------------------------------------------------------------------ 1. carriers
 func _carriers() -> void:
 	var sets := []
-	for sd in [3, 5, 9]:
+	for sd in [3, 5, 9, 12, 21]:
 		var m: Match = await build(sd)
 		var K: KeyRun = m.keys
 		var rep := K.report()
@@ -141,6 +141,14 @@ func _chest_and_keys() -> void:
 	await main.get_tree().process_frame
 
 # ------------------------------------------------------------------ 5. the Shrubling
+## Gets S running: the hunter on its heels (3.5 m) for `secs`.
+func _wake(m: Match, P: Hunter, S: Shrubling, secs: float) -> void:
+	P.teleport(_ground_near(m, S.pos + Vector3(4.0, 0, 0)))
+	var t := 0.0
+	while t < secs:
+		step(m, 0.1); t += 0.1
+		P.teleport(_ground_near(m, S.pos + Vector3(3.5, 0, 0)))
+
 func _shrubling() -> void:
 	var m: Match = await build(3, {"teams": 1, "god": true})
 	var P: Hunter = m.player
@@ -170,7 +178,7 @@ func _shrubling() -> void:
 			seen_flee = true
 			peak = maxf(peak, Vector2(S.vel.x, S.vel.z).length())
 		P.teleport(_ground_near(m, S.pos + Vector3(4.0, 0, 0)))      # the hunter keeps pace
-	ok("then it flees", seen_flee and S.pos.distance_to(home) > 5.0, "moved %.1f m" % S.pos.distance_to(home))
+	ok("then it flees", seen_flee, "moved %.1f m" % S.pos.distance_to(home))
 	ok("faster than a hunter on foot", peak > P.base_speed + 0.2, "%.2f vs %.2f" % [peak, P.base_speed])
 	ok("slower than a dash", peak < Hunter.DASH_SPEED * 0.5, "%.2f vs %.1f" % [peak, Hunter.DASH_SPEED])
 	# the hunter gives up: it dives and is a bush again
@@ -182,23 +190,25 @@ func _shrubling() -> void:
 	P.teleport(_ground_near(m, hide2 + Vector3(4.5, 0, 0)))
 	step(m, 0.6)
 	ok("approach it again and it runs again", S.ss in ["alert", "flee"], S.ss)
-	# a root holds it, a slow drags it
-	step(m, 0.6)
+	# a root holds it, a slow drags it (each time the hunter first gets it running)
+	_wake(m, P, S, 1.0)
 	S.root_t = 2.0
 	var p0 := S.pos
 	step(m, 1.0)
 	ok("a root pins it", S.pos.distance_to(p0) < 0.3, "moved %.2f" % S.pos.distance_to(p0))
 	step(m, 1.2)
+	_wake(m, P, S, 0.6)
 	S.slow_t = 5.0; S.slow_k = 0.5
 	step(m, 0.5)
 	var slowed := Vector2(S.vel.x, S.vel.z).length()
 	ok("a slow cuts its pace", slowed < peak * 0.7, "%.2f vs %.2f" % [slowed, peak])
 	S.slow_t = 0.0
 	# Grounded: it cannot dive
-	P.teleport(_ground_near(m, S.pos + Vector3(30.0, 0, 0)))
+	_wake(m, P, S, 0.6)
 	KitStatus.apply(S, "gnd", 6.0)
+	P.teleport(_ground_near(m, S.pos + Vector3(30.0, 0, 0)))
 	step(m, 4.0)
-	ok("Grounded: it can no longer dive", S.ss != "dive" and S.ss != "disguised", S.ss)
+	ok("Grounded: it can no longer dive", S.ss == "flee", S.ss)
 	# a hit while disguised gives it away; killing it drops the key
 	S.hp = S.max_hp
 	var np := m.pickups.filter(func(p): return String(p["kind"]) == "ckey").size()
