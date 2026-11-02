@@ -199,8 +199,8 @@ func _strip(file: String, caption: String, times: Array) -> Array:
 func _on_target() -> Vector3:
 	return T.position + Vector3(0, 1.0, 0)
 
-func _between() -> Vector3:
-	return (P.position + T.position) * 0.5 + Vector3(0, 0.9, 0)
+func _above_target() -> Vector3:
+	return T.position + Vector3(0, 2.4, 0)
 
 # ------------------------------------------------------------------ Vireo
 func _vireo() -> void:
@@ -401,9 +401,10 @@ func _venator_lmb() -> void:
 	P.inp["fire"] = false
 	await _reset(7.0)
 	KitStatus.apply(T, "rat", 3.0)
+	var burst := func(tt: float): P.inp["fire"] = tt < 0.45
 	await _go(0.75,
-			hold_fire,
-			[0.72, "full", "lmb_dazed", "LMB on a Dazed target: the big gold numbers (+90%) in frame", _on_target]])
+			burst,
+			[[0.62, "full", "lmb_dazed", "LMB on a Dazed target: the big gold numbers (+90%) in frame", _on_target]])
 	P.inp["fire"] = false
 
 ## The passive: a knock gives Slipstep back (last: the target stays down after it).
@@ -529,4 +530,4 @@ func _venator_e() -> void:
 	KitStatus.apply(T, "rat", 3.0)
 	K.use_e()
 	var skewer := "Payoff: Longneedle through a Dazed hunter at the hit: SKEWERED and the number"
-	await _go(0.8, Callable(), [[0.66, "full", "skewer", skewer, _on_target]])
+	await _go(0.8, Callable(), [[0.66, "full", "skewer", skewer, _above_target]])

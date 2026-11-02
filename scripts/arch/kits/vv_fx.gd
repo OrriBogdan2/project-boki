@@ -401,7 +401,7 @@ func marker(id: String, target: Ent, n: int, max_n: int, col: Color, col2: Color
 		var on := i < n
 		var pulse := 1.0 + 0.25 * sin(tm * 14.0 + i) if full else 1.0
 		p.scale = Vector3.ONE * (1.15 * pulse if on else 0.85)
-		p.global_position = nd.global_position + Vector3((i - (max_n - 1) * 0.5) * 0.26, 0, 0) - up * 0.5
+		p.global_position = nd.global_position + Vector3((i - (max_n - 1) * 0.5) * 0.26, 0, 0) + up * 0.5
 		var pm := p.material_override as StandardMaterial3D
 		pm.albedo_color = lit_col if on else Color(0.12, 0.1, 0.2, 0.9)
 	var lbl: Label3D = nd.get_node("Count")
