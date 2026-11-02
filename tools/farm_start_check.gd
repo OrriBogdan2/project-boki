@@ -146,6 +146,13 @@ func run(m: Node) -> void:
 	if st == Vector3.INF:
 		for i in hb.wild_t:
 			if hb.wild_t[i] == "tree" and hg.beside(i, home.spots["house"]) != Vector3.INF: ti = i; st = hg.beside(i, home.spots["house"]); break
+	# (a boulder standing next to the chosen tree is the nearer thing from some spots, on some random seeds:
+	# take a tree whose spot resolves to the tree itself)
+	if hg.find(Vector2(st.x, st.z)).get("i", -1) != ti:
+		for i in hb.wild_t:
+			var bs: Vector3 = hg.beside(i, home.spots["house"])
+			if hb.wild_t[i] == "tree" and bs != Vector3.INF and hg.find(Vector2(bs.x, bs.z)).get("i", -1) == i:
+				ti = i; st = bs; break
 	home.ppos = st; home.player.position = st
 	var it: Dictionary = hg.find(Vector2(st.x, st.z))
 	ok(not it.is_empty() and it["kind"] == "wild" and hg.label(it).begins_with("Needs an axe"), "next to a tree the prompt says you need an axe (%s)" % (hg.label(it) if not it.is_empty() else "nothing"))

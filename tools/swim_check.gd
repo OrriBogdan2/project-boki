@@ -60,6 +60,7 @@ func run(main: Node) -> void:
 				hm._move_player(DT)
 				dash_in_water = hm.dash_t > 0.0; jump_in_water = hm.pvy > 0.0
 				Input.action_release("dash"); Input.action_release("jump")
+				await tree.process_frame      # (a press stays "just pressed" until a frame passes; without it the jump fires on the way out)
 				if shot != "":
 					for f in 4:
 						hm._move_player(DT)
