@@ -252,6 +252,11 @@ func _downed() -> void:
 	P.hurt(5.0, null, {"src": "test"})
 	run_for(0.1)
 	ok(k.rescue_on, "...plain damage does not break it")
+	var Rv := rival()
+	for i in 6:
+		P.hurt(3.0, Rv, {"src": "shot", "kb": Vector2(2.5, 0.0)})          # (bullets: damage and a small shove)
+		run_for(0.1)
+	ok(k.rescue_on and k.rescue_t > 1.5, "...shots during the cradle (damage and the small shove) don't stop it (%.2fs, %s)" % [k.rescue_t, k.rescue_on])
 	P.stun_t = 0.8
 	run_for(0.1)
 	ok(not k.rescue_on and k.rescue_t > 0.5, "...a stun does, and the progress is kept (%.2fs)" % k.rescue_t)
@@ -265,6 +270,28 @@ func _downed() -> void:
 	run_for(0.1, func(): P.inp["dash"] = true)
 	P.inp["dash"] = false
 	ok(not k.rescue_on and k.rescue_block > 0.0, "a dash cancels it too (and it will not restart for a moment)")
+	k.state = "active"; k.fly = {}
+	k.go_down()
+	# a real launch interrupts it; an enemy standing on the Boki blocks the pick-up and pauses the progress
+	P.teleport(k.pos)
+	run_for(1.0)
+	P.impulse(Vector2(14.0, 0.0), 6.0)
+	run_for(0.1)
+	ok(not k.rescue_on, "...a launch (a knock-up) does interrupt it")
+	P.teleport(k.pos)
+	P.vel = Vector3.ZERO
+	run_for(1.0, func(): Rv.teleport(Vector3(k.pos.x + 30.0, k.pos.y, k.pos.z)))
+	ok(k.rescue_on and not KinDowned.contested(k), "setup: a rescue under way with nobody on the Boki")
+	var held2 := k.rescue_t
+	run_for(0.5, func(): Rv.teleport(Vector3(k.pos.x + 0.8, k.pos.y, k.pos.z)))
+	ok(KinDowned.contested(k) and k.rescue_t <= held2 + 0.05, "an enemy on the Boki pauses the progress (%.2fs -> %.2fs)" % [held2, k.rescue_t])
+	k.rescue_on = false
+	k.rescue_t = 0.0
+	run_for(1.0, func(): Rv.teleport(Vector3(k.pos.x + 0.8, k.pos.y, k.pos.z)))
+	ok(not k.rescue_on and k.rescue_t == 0.0 and k.state == "downed", "...and while they stand there you cannot start picking it up")
+	run_for(0.5, func(): Rv.teleport(Vector3(k.pos.x + 30.0, k.pos.y, k.pos.z)))
+	ok(k.rescue_on, "...once they leave, you can")
+	k.rescue_on = false
 	k.state = "active"; k.fly = {}
 	k.go_down()
 

@@ -129,7 +129,7 @@ func describe_rmb_variant(c: Dictionary) -> String:
 
 # ------------------------------------------------------------------ per step
 func tick(dt: float) -> void:
-	if KinMerge.active(h):
+	if KinMerge.transforming(h):
 		_drop_holds()
 	var rate := 1.0 + h.gear_stat("cdr")
 	for k in cd.keys():
