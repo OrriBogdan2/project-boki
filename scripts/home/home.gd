@@ -3637,7 +3637,7 @@ func _open_expedition() -> void:
 			_refresh_player_model()
 			_open_expedition(), 150)
 		var adf := Arch.def(a)
-		ab.tooltip_text = "%s\nDash: %s  ·  Passive: %s\nRMB: %s  ·  E: %s  ·  R: %s (level 6)" % [String(adf.get("fantasy", "")), String(adf["dash"]["name"]), String(adf["passive"]["name"]), String(adf["rmb"]["name"]), String(adf["e"]["name"]), String(adf["r"]["name"])]
+		ab.tooltip_text = "%s\nDash: %s  ·  Passive: %s\nRMB: %s  ·  E: %s  ·  R: %s" % [String(adf.get("fantasy", "")), String(adf["dash"]["name"]), String(adf["passive"]["name"]), String(adf["rmb"]["name"]), String(adf["e"]["name"]), String(adf["r"]["name"]) if adf.has("r") else "Boki Merge"]
 		arow.add_child(ab)
 	left.add_child(arow)
 	# your abilities before a run: the kit card's compact row (click for the full card)
@@ -3787,7 +3787,7 @@ func _open_hero() -> void:
 			var kitb := UI.ghost("Kit (K)", func(): _hero_kit(ak), 0)
 			kitb.focus_mode = Control.FOCUS_NONE
 			col.add_child(kitb)
-			card.tooltip_text = "%s  ·  %s class\nDash: %s  ·  Passive: %s\nRMB: %s  ·  E: %s  ·  R: %s (level 6)" % [Arch.name_of(ak), String(cd["name"]), String(adf["dash"]["name"]), String(adf["passive"]["name"]), String(adf["rmb"]["name"]), String(adf["e"]["name"]), String(adf["r"]["name"])]
+			card.tooltip_text = "%s  ·  %s class\nDash: %s  ·  Passive: %s\nRMB: %s  ·  E: %s  ·  R: %s" % [Arch.name_of(ak), String(cd["name"]), String(adf["dash"]["name"]), String(adf["passive"]["name"]), String(adf["rmb"]["name"]), String(adf["e"]["name"]), String(adf["r"]["name"]) if adf.has("r") else "Boki Merge"]
 			card.set_meta("arch", ak)
 			card.mouse_entered.connect(func(): set_meta("hero_hover", ak))
 			if not unlocked:
