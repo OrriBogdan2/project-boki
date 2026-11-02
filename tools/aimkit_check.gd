@@ -77,7 +77,7 @@ func _aim_modes(m: Match, P: Hunter, _T: Hunter) -> void:
 	ok("per shot: cursor beyond range still stops at range", absf(_shot_dist(m, P) - rng) < 0.05)
 	_aim(P, 5.0)
 	var w0: Dictionary = P.wpn
-	var wb := w0.duplicate(); wb["boom"] = 1.2; wb["boom_kb"] = 2.0
+	var wb := w0.duplicate(); wb["boom"] = 1.2; wb["boom_kb"] = 2.0; wb.erase("aim")      # (the default rule: a weapon with no "aim" of its own)
 	P.wpn = wb
 	ok("default: a boom weapon is cursor-placed", AimMode.mode_of(P) == AimMode.CURSOR)
 	var db := _shot_dist(m, P)
