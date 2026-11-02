@@ -518,6 +518,7 @@ func _draw_world_labels() -> void:
 			BokiHud.downed_label(self, k, sp)
 		elif k.hp < k.max_hp:
 			_bar(Rect2(sp + Vector2(-22, 0), Vector2(44, 5)), k.hp / k.max_hp, Data.TEAM_COLORS[k.team % Data.TEAM_COLORS.size()] if k.owner_h != m.player else GOOD)
+			c.draw_rect(Rect2(sp + Vector2(-22, 0), Vector2(44 * k.hp / k.max_hp, 5)), Color(KinRegen.MOTE_COL, KinRegen.pulse(k, m.time)))
 
 func _draw_bubbles() -> void:
 	var cam := m.cam
@@ -1059,7 +1060,7 @@ var ready_was := {}        # slot id -> was it ready last frame, for the "ready"
 var ready_flash := {}      # slot id -> time left on its flash
 var slot_fx := {}          # slot id -> {kind: "cast"|"deny", t}: a pop when a press lands, a red shake when it can't
 
-## A press on an ability slot: "cast" pops it, "deny" (on cooldown, not ready) shakes it red.
+## A press on an ability slot: "cast" pops it, "deny" (on cooldown, not ready) shakes it red; "reset" (it just came back) swells it with a ring.
 func ability_feedback(id: String, kind: String) -> void:
 	slot_fx[id] = {"kind": kind, "t": 0.0}
 var hurt_dirs: Array = []  # {ang, t}
@@ -1149,6 +1150,8 @@ func _ab_slot(id: String, rect: Rect2, icon: String, key: String, col: Color, cd
 		if sfx_d["kind"] == "deny":
 			deny = clampf(1.0 - ft / 0.35, 0.0, 1.0)
 			rect.position.x += sin(ft * 70.0) * 5.0 * deny
+		elif sfx_d["kind"] == "reset":
+			rect = ResetPop.scaled(rect, ft)
 		else:
 			pop = clampf(1.0 - ft / 0.3, 0.0, 1.0)
 			rect = rect.grow(-rect.size.x * 0.08 * sin(pop * PI))
@@ -1182,6 +1185,8 @@ func _ab_slot(id: String, rect: Rect2, icon: String, key: String, col: Color, cd
 	if fl > 0.0:
 		var k := 1.0 - fl / 0.35
 		_rounded(rect.grow(2.0 + k * 8.0), Color(0, 0, 0, 0), 14, Color(col, 1.0 - k), 3)
+	if sfx_d.get("kind", "") == "reset":
+		ResetPop.draw(c, rect, col, float(sfx_d["t"]))
 
 var guide_hidden := false
 var abyss_pulse := 0.0
@@ -1206,7 +1211,7 @@ func _hud_tick(delta: float) -> void:
 	_h_down = hd
 	for id in slot_fx.keys():
 		slot_fx[id]["t"] = float(slot_fx[id]["t"]) + delta
-		if float(slot_fx[id]["t"]) > 0.4: slot_fx.erase(id)
+		if float(slot_fx[id]["t"]) > ResetPop.LEN: slot_fx.erase(id)
 	for id in ready_flash.keys():
 		ready_flash[id] = float(ready_flash[id]) - delta
 		if float(ready_flash[id]) <= 0.0: ready_flash.erase(id)
