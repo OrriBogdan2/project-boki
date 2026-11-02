@@ -48,7 +48,7 @@ static func fight(m: Match, h: Hunter, tgt: Ent, d: float, abil: float) -> void:
 ## The Merge, once the bond is full and a fight is worth it. With the Boki out it leaps back and merges.
 static func merge(h: Hunter, tgt: Ent, d: float) -> void:
 	var plan := KinMerge.plan(h)
-	if plan in ["", "far"] or tgt == null:
+	if plan in ["", "far", "rescue"] or tgt == null:
 		return
 	var worth: bool = (d < MERGE_NEAR and tgt is Hunter) or (d < 5.0 and tgt is Mob and (tgt as Mob).max_hp > 150.0) or (h.hp < h.max_hp * 0.4 and d < 9.0)
 	if worth:

@@ -5,13 +5,7 @@
 	"flavor": "Mycroll grows into a giant toadstool beast for 8s. Its stomps root everything around it.",
 	"theme": "spore",
 	"duration": 8,
-	"grow_duration": 1.0,
-	"grow_strength": 0.1,
 	"passives": [
-		{
-			"stat": "armor",
-			"amount": 0.3
-		},
 		{
 			"stat": "knockback_resist",
 			"amount": 0.5

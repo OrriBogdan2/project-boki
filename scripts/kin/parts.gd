@@ -350,7 +350,6 @@ const OWNER_STATS := {
 	"armor": ["defence", "float", 0.2, 0.5, "x", "armor durability"],
 	"damage_reduction": ["defence", "float", 0.15, 0.3, "x", "less damage taken"],
 	"knockback_resist": ["defence", "float", 0.5, 0.75, "x", "less knockback"],
-	"shield": ["defence", "float", 0.0, 150.0, "hp", "a shield when the merge starts"],
 	"regen": ["defence", "float", 3.0, 8.0, "hp/s", "health regen"],
 	"damage": ["offence", "float", 0.1, 0.35, "x", "more damage"],
 	"fire_rate": ["offence", "float", 0.2, 0.3, "x", "faster firing"],
@@ -367,9 +366,7 @@ const SHOT := {
 }
 
 const MERGE := {
-	"duration": ["float", 4.0, 10.0, 6.0, "s", "how long the merge lasts at bond and level 1"],
-	"grow_duration": ["float", 0.0, 3.0, 1.0, "s", "extra time at full kin level and bond"],
-	"grow_strength": ["float", 0.0, 0.25, 0.1, "x", "extra strength at full kin level and bond"],
+	"duration": ["float", 4.0, 10.0, 6.0, "s", "how long the merge lasts"],
 }
 const PULSE := {"every": ["float", 0.4, 3.0, 1.0, "s", "how often the pulse fires"]}
 const MERGED_SCALE := [1.0, 1.3]   # merged ability numbers may grow up to 30%

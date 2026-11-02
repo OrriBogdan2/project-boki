@@ -1,33 +1,19 @@
 class_name MergeForm
 extends RefCounted
-## What a merge does to YOU and how it looks, from the Boki's type and power tier (content/rules/
-## merge_forms.json, docs/decisions/0001). Never per hero x Boki pair: every class gets the same
-## kit-agnostic changes. The Boki's own merge (content/merges_v2, KinMerge) still brings its passives,
-## shot riders and merged Boki abilities; this adds, on top:
-##   - the form worn on you (colour and silhouette parts, MergeLook) and the activation moment (style)
-##   - faster cooldowns on every class ability (owner stat "cooldown")
-##   - a rider on every class-ability hit (burn, slow, shove or pull, life steal, an arc to a second foe)
-##   - a burst where each dodge starts and ends
+## What a merge is and how it looks (docs/decisions/0003), the same for everyone. Two kinds:
+##   - a FORM with a kit (content/merge_forms/<merge id>.json): its palette, look, weight-class baseline,
+##     dodge flavour and the four slots LMB / RMB / E / R that replace yours while merged (MergeKit)
+##   - the fallback every other Boki gets until its form is written (docs/DEBT.md): the Boki's own merge
+##     (content/merges_v2) plus a look, a rider on class-ability hits and a dodge burst from its type
+##     (content/rules/merge_forms.json). No tiers, no scaling by level or trust.
 ## The form is a plain Dictionary kept in Hunter.merge_st["form"]:
-##   {type, tier, tier_name, color, glow, parts, style, word, haste, rider, dash, stun, size, k, dur}
+##   {id, kit, name, type, color, glow, accent, parts, style, word, haste, rider, dash, size, ring, dur, surge, def}
+## `def` is the kit's data (empty for the fallback and the surge). The rest crosses the net (KinNet).
 
 const RIDER_RANGE := 5.0     # m: how far an arc jumps from the foe you hit
-const STUN_CD := 3.0         # s: the top tier's stun on an ability hit lands on a foe at most this often
 
 static func data() -> Dictionary:
 	return Content.rules("merge_forms")
-
-## The Boki's power: level and trust (KinMerge.growth) plus a little per evolved form.
-static func power(k: Kin) -> float:
-	return KinMerge.growth(k) + float(data().get("forms_bonus", 0.08)) * float((k.rec.get("forms", []) as Array).size())
-
-## 0..2: the last tier whose `from` the power reaches.
-static func tier_of(p: float) -> int:
-	var t := 0
-	var rows: Array = data().get("tiers", [])
-	for i in rows.size():
-		if p >= float(rows[i]["from"]): t = i
-	return t
 
 static func type_of(k: Kin) -> String:
 	var t := String(k.sp.get("type", "none"))
@@ -35,29 +21,35 @@ static func type_of(k: Kin) -> String:
 
 ## The form this Boki gives you right now.
 static func for_boki(k: Kin) -> Dictionary:
+	var ms := KinMerge.def_for(k)
+	if ms != null and not Content.merge_form(ms.id).is_empty():
+		return kit_form(ms.id)
+	return fallback_form(type_of(k), k.sp["color"], k.sp.get("glow", k.sp["color"]))
+
+## A form with a kit, from its data file.
+static func kit_form(id: String, dur := 0.0) -> Dictionary:
+	var fd: Dictionary = Content.merge_form(id)
+	var pal: Dictionary = fd["palette"]
+	var lk: Dictionary = fd["look"]
+	return {"id": id, "kit": true, "name": String(fd["name"]), "type": "kit", "color": Color(String(pal["body"])), "glow": Color(String(pal["glow"])),
+		"accent": Color(String(pal.get("accent", pal["glow"]))), "parts": lk["parts"], "style": "kit", "word": String(fd["name"]).to_upper(), "haste": 0.0,
+		"rider": {}, "dash": fd.get("dash", {}), "size": float(lk["scale"]), "ring": float(lk.get("ring", 3.0)), "part_k": float(lk.get("part_k", 1.7)), "dur": dur, "surge": false, "def": fd}
+
+## The stat-style look of a Boki with no form yet, from its type.
+static func fallback_form(ty: String, col: Color, glow: Color) -> Dictionary:
 	var d := data()
-	var ty := type_of(k)
-	var td: Dictionary = d["types"][ty]
-	var tier := tier_of(power(k))
-	var tr: Dictionary = (d["tiers"] as Array)[tier]
-	var rk := float(tr["rider"])
-	var rider: Dictionary = {}
-	for key in (td["rider"] as Dictionary):
-		rider[key] = float(td["rider"][key]) * (rk if key in ["burn", "slow_k", "kb", "leech", "chain"] else 1.0)
-	rider["slow_k"] = minf(float(rider.get("slow_k", 0.0)), 0.6)
-	var dash: Dictionary = {}
-	for key in (td["dash"] as Dictionary):
-		dash[key] = float(td["dash"][key]) * (rk if key in ["burst", "burn", "kb", "leech", "chain"] else 1.0)
-	var glow: Color = k.sp.get("glow", k.sp["color"])
-	return {"type": ty, "tier": tier, "tier_name": String(tr["name"]), "color": k.sp["color"], "glow": glow, "parts": (td["parts"] as Array).slice(0, int(tr["parts"])),
-		"style": String(td["style"]), "word": String(td["word"]), "haste": float(tr["haste"]), "rider": rider, "dash": dash, "stun": float(tr["stun"]),
-		"size": float(tr["size"]), "k": float(tr["k"]), "dur": float(tr["dur"]), "surge": false}
+	var td: Dictionary = d["types"][ty if (d["types"] as Dictionary).has(ty) else "none"]
+	var fb: Dictionary = d["fallback"]
+	return {"id": "", "kit": false, "name": String(td["word"]).capitalize(), "type": ty, "color": col, "glow": glow, "accent": glow, "parts": td["parts"], "style": String(td["style"]),
+		"word": String(td["word"]), "haste": float(fb["haste"]), "rider": td["rider"].duplicate(), "dash": td["dash"].duplicate(), "size": float(fb["size"]), "ring": 3.0, "part_k": 1.3, "dur": 0.0,
+		"surge": false, "def": {}}
 
 ## The weak merge you get with no Boki able to fight: no silhouette, a plain light.
 static func surge_form() -> Dictionary:
 	var sd: Dictionary = data()["surge"]
-	return {"type": "none", "tier": 0, "tier_name": String(sd["name"]), "color": Color(String(sd["color"])), "glow": Color(String(sd["color"])), "parts": [], "style": "nova",
-		"word": String(sd["name"]).to_upper(), "haste": float(sd["haste"]), "rider": {}, "dash": {}, "stun": 0.0, "size": 1.0, "k": 1.0, "dur": 0.0, "surge": true}
+	var c := Color(String(sd["color"]))
+	return {"id": "", "kit": false, "name": String(sd["name"]), "type": "none", "color": c, "glow": c, "accent": c, "parts": [], "style": "nova",
+		"word": String(sd["name"]).to_upper(), "haste": float(sd["haste"]), "rider": {}, "dash": {}, "size": 1.0, "ring": 3.0, "part_k": 1.0, "dur": 0.0, "surge": true, "def": {}}
 
 ## The surge as a MergeSpec, so it runs through the same state and tick as a merge.
 static func surge_spec() -> MergeSpec:
@@ -67,51 +59,18 @@ static func surge_spec() -> MergeSpec:
 	ms.display_name = String(sd["name"])
 	ms.flavor = String(sd["flavor"])
 	ms.duration = float(sd["duration"])
-	ms.grow_duration = 0.0
-	ms.grow_strength = 0.0
 	for pr in sd["passives"]:
 		ms.passives.append({"stat": String(pr[0]), "amount": float(pr[1]), "category": String(KinParts.OWNER_STATS[pr[0]][0])})
 	return ms
 
-# ------------------------------------------------------------------ the activation moment
-## The big signature effect when the merge goes off: a style per type, in the Boki's colours, bigger
-## with the tier. Local to this game (other games see it from the "kcmd merge" event, KinNet).
-static func activate(m: Match, at: Vector3, form: Dictionary) -> void:
-	var col: Color = form["glow"]
-	var tier := int(form["tier"])
-	var big := 1.0 + 0.35 * float(tier)
-	m.fx.flash(at + Vector3(0, 1.0, 0), col, 2.4 * big, 0.14)
-	m.fx.ring(at, 3.4 * big, Color(col, 0.95), 0.5)
-	m.fx.ring(at, 1.8 * big, Color(1, 1, 1, 0.9), 0.3)
-	m.fx.burst(at + Vector3(0, 1.0, 0), col, int(34 * big), 7.0, 0.6, 2.0, 1.4)
-	match String(form["style"]):
-		"nova":
-			m.fx.ring(at, 5.0 * big, Color(col, 0.6), 0.7)
-		"spiral":
-			for i in 8:
-				var a := TAU * float(i) / 8.0
-				m.later(0.04 * i, func(): m.fx.burst(at + Vector3(cos(a) * 1.8 * big, 0.4 + 0.25 * i, sin(a) * 1.8 * big), col, 8, 2.5, 0.5, -1.0))
-		"pillar":
-			for i in 6:
-				m.later(0.03 * i, func(): m.fx.burst(at + Vector3(0, 0.5 + 0.7 * i, 0), col, 10, 1.5, 0.6, -3.0, 1.2))
-		"storm":
-			for i in 6:
-				var a := TAU * float(i) / 6.0 + 0.3
-				m.fx.bolt(at + Vector3(0, 1.0, 0), at + Vector3(cos(a) * 5.0 * big, 0.6, sin(a) * 5.0 * big), col)
-		"quake":
-			for i in 3:
-				m.later(0.1 * i, func(): m.fx.ring(at, (2.0 + 1.6 * i) * big, Color(col, 0.8), 0.4))
-			m.fx.dust(at, int(22 * big))
-		"bloom":
-			for i in 8:
-				var a := TAU * float(i) / 8.0
-				m.fx.burst(at + Vector3(cos(a) * 2.2 * big, 0.3, sin(a) * 2.2 * big), col, 7, 2.0, 0.7, -1.5)
-		"prism":
-			for i in 6:
-				var a := TAU * float(i) / 6.0
-				var c2 := Color.from_hsv(fposmod(col.h + 0.08 * i, 1.0), 0.55, 1.0)
-				m.fx.bolt(at + Vector3(0, 1.1, 0), at + Vector3(cos(a) * 4.5 * big, 1.1, sin(a) * 4.5 * big), c2)
-	m.fx.word(at + Vector3(0, 3.0, 0), String(form["word"]), col.lerp(Color.WHITE, 0.25), true)
+## The owner stats a form's weight-class baseline gives (shield hp, run speed): the only scaling a form has.
+static func baseline(f: Dictionary, cls: String) -> Dictionary:
+	var b: Dictionary = (f["def"] as Dictionary).get("baseline", {})
+	return b.get(cls, b.get("medium", {}))
+
+## Is this a form with a kit (not the fallback, not the surge)?
+static func has_kit(f: Dictionary) -> bool:
+	return bool(f.get("kit", false))
 
 # ------------------------------------------------------------------ the changes to your abilities
 ## The form you wear right now ({} when not merged).
@@ -123,9 +82,9 @@ static func on_ability_hit(h: Hunter, target: Ent, dmg: float, opts: Dictionary)
 	var f := of(h)
 	if f.is_empty() or opts.get("form", false) or target.remote or target.dead or target.team == h.team:
 		return
-	_apply(h, target, dmg, f["rider"], float(f["stun"]))
+	_apply(h, target, dmg, f["rider"])
 
-static func _apply(h: Hunter, t: Ent, dmg: float, r: Dictionary, stun: float) -> void:
+static func _apply(h: Hunter, t: Ent, dmg: float, r: Dictionary) -> void:
 	if r.has("burn"):
 		t.burn_t = maxf(t.burn_t, float(r.get("burn_for", 3.0))); t.burn_dps = maxf(t.burn_dps, float(r["burn"])); t.burn_by = h
 	if r.has("slow_k"):
@@ -146,11 +105,6 @@ static func _apply(h: Hunter, t: Ent, dmg: float, r: Dictionary, stun: float) ->
 		if best:
 			h.m.fx.bolt(t.pos + Vector3(0, 1.0, 0), best.pos + Vector3(0, 1.0, 0), Color(1, 1, 1, 0.9))
 			best.hurt(maxf(1.0, dmg * float(r["chain"])), h, {"src": "abil", "ab": "form", "tags": ["form"], "form": true})
-	if stun > 0.0 and h.m.time >= float(t.get_meta("form_stun", -9.0)) + STUN_CD:
-		var s := t.cc_dr("stun", stun)
-		if s > 0.0:
-			t.stun_t = maxf(t.stun_t, s)
-			t.set_meta("form_stun", h.m.time)
 
 ## A dodge while merged: a burst where it starts and where it ends.
 static func on_dash(h: Hunter) -> void:
@@ -166,9 +120,19 @@ static func _burst(h: Hunter, at: Vector3, f: Dictionary) -> void:
 	var rad := float(dd.get("radius", 2.0))
 	h.m.fx.ring(at, rad, Color(f["glow"], 0.8), 0.3)
 	h.m.fx.burst(at + Vector3(0, 0.3, 0), f["glow"], 8, 2.5, 0.35)
+	match String(dd.get("visual", "")):
+		"spark":
+			for i in 3:
+				var a := TAU * (float(i) + randf()) / 3.0
+				h.m.fx.bolt(at + Vector3(0, 0.6, 0), at + Vector3(cos(a) * rad, 0.3, sin(a) * rad), Color(f["glow"]))
+		"rock":
+			h.m.fx.dust(at, 10)
+		"prism":
+			for i in 4:
+				h.m.fx.burst(at + Vector3(0, 0.8, 0), Color.from_hsv(randf(), 0.45, 1.0), 3, 3.0, 0.4)
 	for t in h.m.foes_of(h.team):
 		if t.dead or not t.hittable() or Vector2(t.pos.x - at.x, t.pos.z - at.z).length() > rad + t.r:
 			continue
 		var dmg: float = float(dd.get("burst", 6.0)) * h.m.dmg_mult(h)
 		t.hurt(dmg, h, {"src": "abil", "ab": "form", "tags": ["dodge", "form"], "form": true})
-		_apply(h, t, dmg, dd, 0.0)
+		_apply(h, t, dmg, dd)

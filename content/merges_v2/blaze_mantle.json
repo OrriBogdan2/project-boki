@@ -5,8 +5,6 @@
 	"flavor": "Vespyx fuses onto you as venomous armor for 7s: 30% more damage, and your shots poison and burst.",
 	"theme": "venom",
 	"duration": 7,
-	"grow_duration": 1.0,
-	"grow_strength": 0.1,
 	"passives": [
 		{
 			"stat": "damage",
