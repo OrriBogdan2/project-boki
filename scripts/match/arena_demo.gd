@@ -499,30 +499,30 @@ static func _anim_hero(A: Arena, P: Hunter, mv: String, t: float, dt: float) -> 
 		"arc_heavy_wind":
 			if _at(t, dt, 0.5):
 				K.ch_rmb = 2.0
-			K.cd["rmb"] = 0.0
-			K.bot_hold["rmb"] = 1.6
-			K.press_rmb()
+				K.cd["rmb"] = 0.0
+				K.bot_hold["rmb"] = 1.6
+				K.press_rmb()
 		"arc_heavy":
 			if _at(t, dt, 0.5):
 				K.ch_rmb = 2.0
-			K.cd["rmb"] = 0.0
-			K.bot_hold["rmb"] = 0.9
-			K.press_rmb()
+				K.cd["rmb"] = 0.0
+				K.bot_hold["rmb"] = 0.9
+				K.press_rmb()
 		"arc_snare":
 			if _at(t, dt, 0.5):
 				K.ch_rmb = 2.0
-			K.cd["rmb"] = 0.0
-			P.inp["sec_hold"] = false
-			K.press_rmb()
+				K.cd["rmb"] = 0.0
+				P.inp["sec_hold"] = false
+				K.press_rmb()
 		"arc_hail":
 			if _at(t, dt, 0.5):
 				K.cd["e"] = 0.0
-			K.use_e()
+				K.use_e()
 		"pin_roll":
 			if _at(t, dt, 0.5):
 				P.dashes = P.max_dashes()
-			P.inp["aim"] = P.pos + Vector3(4, 0, 0)
-			P.do_dash()
+				P.inp["aim"] = P.pos + Vector3(4, 0, 0)
+				P.do_dash()
 		"arc_super": fire = t > 0.4 and t < 1.6
 		"arc_plunge":
 			if _at(t, dt, 0.4):
@@ -540,13 +540,13 @@ static func _anim_hero(A: Arena, P: Hunter, mv: String, t: float, dt: float) -> 
 		"bul_bash":
 			if _at(t, dt, 0.5):
 				K.ch_rmb = 1.0
-			K.cd["rmb"] = 0.0
-			P.inp["sec_hold"] = false
-			K.press_rmb()
+				K.cd["rmb"] = 0.0
+				P.inp["sec_hold"] = false
+				K.press_rmb()
 		"bul_whirl":
 			if _at(t, dt, 0.5):
 				P.dashes = P.max_dashes()
-			P.do_dash()
+				P.do_dash()
 		"bul_charge":
 			if _at(t, dt, 0.3):
 				K.ch_rmb = 1.0
@@ -564,20 +564,20 @@ static func _anim_hero(A: Arena, P: Hunter, mv: String, t: float, dt: float) -> 
 		"bul_mend":
 			if _at(t, dt, 0.5):
 				K.cd["e"] = 0.0
-			K.use_e()
+				K.use_e()
 		"arc_tap": fire = t > 0.4 and t < 0.5
 		"arc_perfect": fire = t > 0.35 and t < 0.35 + 0.62
 		"arc_over", "arc_over_loose": fire = t > 0.4 and t < 2.3
 		"pin_walk":
 			if _at(t, dt, 0.5):
 				P.dashes = P.max_dashes()
-			P.inp["aim"] = P.pos + Vector3(4, 0, 0)
-			P.do_dash()
+				P.inp["aim"] = P.pos + Vector3(4, 0, 0)
+				P.do_dash()
 		"pin_flick", "bul_lumber":
 			if _at(t, dt, 0.5):
 				P.dashes = 0.0
-			P.ex_cd = 0.0
-			P.do_dash()
+				P.ex_cd = 0.0
+				P.do_dash()
 		"pin_deadeye", "pin_rundown", "bul_crush", "bul_break", "bul_armed": if _at(t, dt, 0.5): K.play(mv)
 		"bul_guard":
 			P.inp["sec_hold"] = t > 0.45
@@ -589,10 +589,10 @@ static func _anim_hero(A: Arena, P: Hunter, mv: String, t: float, dt: float) -> 
 		"bul_slamshield":
 			if _at(t, dt, 0.5):
 				K.res = 60.0
-			K.ch_rmb = 1.0
-			K.cd["rmb"] = 0.0
-			P.inp["sec_hold"] = false
-			K.press_rmb()
+				K.ch_rmb = 1.0
+				K.cd["rmb"] = 0.0
+				P.inp["sec_hold"] = false
+				K.press_rmb()
 	P.inp["fire"] = fire
 
 ## One frame of the strip: a square round the hunter; the last one writes the strip and quits.
