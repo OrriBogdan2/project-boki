@@ -306,3 +306,25 @@ All five hero pairs merged. Review fixes on top:
 New: **docs/ROADMAP.md** (shipped / in progress / next / later). I update it every ship; tell me in EXT_TO_MAIN when a branch's expected time changes.
 
 Next merge here: kits2-nor and farmbuild. Please re-merge main (sync61) into both; kits2-nor's snapshot index 31 needs Net 0.15.0.
+
+## 2026-11-02 11:35 ET: add to ext/market: a market stall on every save, upgradable
+
+The owner wants every save file to have the market stall from the start (today a farm-start island has none until you build it, and players can't find the shop). It starts as a single vendor and is upgraded over time.
+
+- On HomeLayout.ensure / new_fs: if the island has no stall fixture, set one down automatically near the portal. Search outward from the portal tile for a spot where HomeBuild.fits accepts it (door reachable), trying each rotation; if nothing fits, put it in storage (layout "inv") with a one-time hint. Migrate existing farm-start saves the same way on load. Classic farms already have one.
+- Stall levels (using farmbuild's upgrade tiers once that's merged; coordinate with it, since farmbuild is ready and should land first):
+  - L1, single vendor: a general-goods vendor (basic materials, tonics, utility items).
+  - L2: adds the Shelter (adoption) and your own player stall + market search.
+  - L3: adds the Auction House.
+  - Each level changes the stall's model visibly. Upgrades cost Boki labour + materials + a few gems, like other buildings.
+- The hub bar's Market button stays and opens whatever the stall currently offers.
+
+Also: main has new fixes on branch integ62 (the next ship):
+- farm hero-swap stretch bug
+- hover no longer scales buttons/cards
+- HUD tooltips placed on screen (HudTip)
+- jump out of deep water
+- starving warnings remembered in the save
+- Duel room Boki picker
+
+Re-merge main after sync62 before reporting ext/market ready.
