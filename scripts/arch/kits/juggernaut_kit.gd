@@ -465,7 +465,7 @@ func on_dash(use_ex: bool) -> bool:
 	var pk := power("dash") / maxf(0.01, m.dmg_mult(h))
 	travel(float(dd["dist"]), t,
 			{"invuln": 0.06, "shove": true, "shove_kb": float(dd["hit_kb"]), "shove_dmg": float(dd["hit_dmg"]) * pk,
-					"trail": "dust", "dir": h.aim_dir()})
+					"trail": "dust", "dir": dash_dir()})
 	st["last_dash"] = "rampage"
 	play("jug_dash")
 	for i in 3:      # orange flame streaks behind him
