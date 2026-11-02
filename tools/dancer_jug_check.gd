@@ -449,18 +449,19 @@ func juggernaut(a) -> void:
 	A.ok("juggernaut RMB air: Meteor Drop slows, centre stunned",
 			K.last_variant == "air" and A.dmg(T) >= 24.0 and T.slow_t > 0.0 and T.stun_t > 0.0,
 			"took %.0f slow %.2f stun %.2f" % [A.dmg(T), T.slow_t, T.stun_t])
-	# Rampage (Flame Step): a dash attack the way you face; the tip hits double; rank 3 adds a charge
+	# Rampage (Flame Step): a dash attack, aimed like any dash (ArchKit.dash_dir: WASD by default); the tip
+	# hits double; rank 3 adds a charge
 	A.step(m, 1.0)
 	P.teleport(home)
 	A.fresh(T)
 	T.teleport(home + Vector3(3.5, 0, 0))
 	A.aim_at(P, T.pos)
 	P.dashes = 3.0
-	P.inp["move"] = Vector2(0, 1)        # (moving sideways: it still goes the way you face)
+	P.inp["move"] = Vector2(1, 0)        # (toward the target: the dash follows the dash setting)
 	P.do_dash()
 	A.step(m, 0.5)
 	P.inp["move"] = Vector2.ZERO
-	A.ok("juggernaut dash: Rampage the way you face, tip hits",
+	A.ok("juggernaut dash: Rampage the way you dash, tip hits",
 			K.tips >= 1 and A.dmg(T) >= 14.0 and P.dashes < 2.5,
 			"tips %d took %.0f dashes %.2f" % [K.tips, A.dmg(T), P.dashes])
 	P.slot_lv["dash"] = 3
