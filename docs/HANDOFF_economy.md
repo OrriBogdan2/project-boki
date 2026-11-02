@@ -40,4 +40,4 @@ No edits to scripts/kin/*, kin_merge.gd, kin_companion.gd, kin_command.gd, kin_d
 ## Order done
 1. sync56 and sync57 merged. Logic moved out of match.gd into `follow_demo.gd` and `Follow.finish_later` so health stays inside budget.
 2. Followers rebuilt on KinDowned / KinNet.
-3. Checks, screenshots in `/home/claude/shots/D/`.
+3. Checks, screenshots in `/home/claude/shots/D/` (follower_down_after_sync57.png is the downed follower on the shipped marker).
