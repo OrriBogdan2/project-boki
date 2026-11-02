@@ -32,7 +32,7 @@ over, and hits back harder after every knock.
 
 |  |  |
 |---|---|
-| Weight class | Heavy (193 health, 4.73 m/s, 2 dash charges) |
+| Weight class | Heavy (193 health, 4.55 m/s, 2 dash charges) |
 | Signature weapon | Torch Lance (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The flue sweep. Soaks foes in Char with a torch lance, flashes them over, and hits back harder after every knock. |
 | Silhouette | the tall sooty top hat and the bellows on the back |

@@ -78,7 +78,7 @@ const T := {
 	"cam_settle_t":            ["<=", 0.35, "s", "camera settles on you after a stop"],
 	"cam_glide_lead_m":        [">=", 0.4, "m", "slight lead in glide direction"],
 	"view_across_m":           ["~", [22.0, 25.0], "m", "ground across a 16:9 screen at the focus (camcal: ~17 hunter silhouettes across, as in gameplay frames)"],
-	"hunter_screen_pct":       ["~", [6.4, 7.6], "%", "medium hunter, feet to head straight up, as a share of screen height (camcal: its on-screen silhouette ~10.5%, as in gameplay frames)"],
+	"hunter_screen_pct":       ["~", [5.0, 6.2], "%", "medium hunter, feet to head straight up, as a share of screen height (camcal: its on-screen silhouette ~10.5%, as in gameplay frames; feelfix leans characters back 20 deg toward the camera, which shortens the straight-up measure from ~6.9% to ~5.5%)"],
 	"hunter_feet_below_pct":   ["~", [1.5, 5.0], "%", "feet below the screen centre, as a share of screen height (camcal: ~3% in gameplay frames)"],
 }
 
