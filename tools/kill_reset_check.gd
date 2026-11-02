@@ -43,6 +43,7 @@ func run(main: Node) -> void:
 
 	# (a) a knock: every dash charge, the long-dash cooldown, +5% health, and the cue for the local hunter
 	P.max_hp = 200.0; P.hp = 100.0
+	P.lvl = Hunter.XP_TO.size()      # (at the level cap: a takedown's XP can't level you, so quiet growth stays out of the numbers)
 	_spend(P)
 	m.knock(f1, P, {})
 	ok(f1.downed, "(a) the rival is down")

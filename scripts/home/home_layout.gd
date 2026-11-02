@@ -116,7 +116,7 @@ const FIXTURES := {"house": "house", "farm": "crop_patch", "pot": "cook_pot", "s
 const FS_GEMS := 200
 ## The landing by the portal, kept clear on a farm-start island: you arrive here.
 const LANDING := Vector3(38.5, 0, 35.5)
-const CATS := ["Buildings", "Work", "Fences", "Paths", "Garden", "Lights", "Furniture", "Statues", "Island"]
+const CATS := ["Buildings", "Work", "Fences", "Paths", "Garden", "Lights", "Furniture", "Statues", "Upgrades", "Island"]
 const COLOURS := ["e0607e", "f2c84a", "5ab0f0", "8fd16a", "b48cf2", "f3eee2"]
 
 ## The farm's lamps and flower beds start out as decorations, so they can be moved or put away too.
@@ -141,6 +141,7 @@ static func new_fs(d: Dictionary, seed := -1) -> Dictionary:
 		seed = r.randi_range(1, 2147483646)
 	L["seed"] = seed
 	L["fs"] = 1
+	L["fb"] = 1               # the farm-building pass: unlocks, construction sites, upgrades (FarmUnlocks, FarmSites)
 	L["made"] = true          # no "Make it home" suggestions: you choose where everything goes
 	L["sk"] = fs_scale(seed)
 	d["layout"] = L
@@ -159,7 +160,7 @@ static func fixtures(d: Dictionary, fx: String) -> Array:
 	var id := String(FIXTURES.get(fx, ""))
 	var out: Array = []
 	for e in of(d).get("deco", []):
-		if String(e.get("id", "")) == id: out.append(e)
+		if String(e.get("id", "")) == id and not FarmSites.is_site(e): out.append(e)
 	out.sort_custom(func(a, b): return int(a["u"]) < int(b["u"]))
 	return out
 
@@ -222,6 +223,7 @@ static func ensure(d: Dictionary) -> Dictionary:
 			e["x"] = int(e.get("x", 0)); e["z"] = int(e.get("z", 0)); e["r"] = int(e.get("r", 0)) % 4
 			if not e.has("u"): e["u"] = _next_uid(L)
 			e["u"] = int(e["u"])
+			FarmSites.clean(e)
 			keep.append(e)
 	L["deco"] = keep
 	for b in (L["b"] as Dictionary).keys():
@@ -321,7 +323,7 @@ static func stations(d: Dictionary, el := "") -> Array:
 	var out: Array = []
 	for e in of(d).get("deco", []):
 		var c: Dictionary = CATALOG.get(String(e.get("id", "")), {})
-		if c.has("work") and (el == "" or String(c["work"]) == el):
+		if c.has("work") and (el == "" or String(c["work"]) == el) and not FarmSites.is_site(e):
 			out.append({"e": e, "id": String(e["id"]), "el": String(c["work"])})
 	return out
 
