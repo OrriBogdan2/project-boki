@@ -194,7 +194,7 @@ func _sync() -> void:
 	var rest := PerkOrbs.list(b).filter(func(q): return q["fan"] == fanned[0]["fan"])
 	ok("the rest of the fan stays for the player there", rest.size() == 2 and rest.all(func(q): return PerkOrbs.can_take(b, b.player, q)))
 	ok("but the hunter who took one can't take another there", rest.all(func(q): return PerkOrbs.took_from_fan(b, bot.nid, q)))
-	ok("Net is at 0.14.1", Net.VERSION == "0.14.1", Net.VERSION)
+	ok("Net is at 0.15.2", Net.VERSION == "0.15.2", Net.VERSION)
 	a.net_on = false
 	Net.out_events.clear()
 	a.queue_free()
