@@ -69,7 +69,7 @@ What the in-game kit card (K) says.
 
 ### Abilities in full
 
-**Focus (passive).** Builds while you stand still (full in 1.4s), sneak (2.8s), 50% faster on high ground; a snare or Heavy Shot that hits adds 40 (a wall pin fills it). Drains while running and drops 40 when hit. At 100 your next shot is Supercharged or aimed at once, with +20% range, and if it hits a rooted or stunned foe it is a Deadeye: +18 damage, a crit. Hawk Sense: rivals under half health are seen through cover within 22m. A knock heals 18 and gives a dash charge back.
+**Focus (passive).** Builds while you stand still (full in 1.4s), sneak (2.8s), 50% faster on high ground; a snare or Heavy Shot that hits adds 40 (a wall pin fills it). Drains while running and drops 40 when hit. At 100 your next shot is Supercharged or aimed at once, with +20% range, and if it hits a rooted or stunned foe it is a Deadeye: +18 damage, a crit. Hawk Sense: rivals under half health are seen through cover within 22m. A knock heals 18.
 
 **Spirit Walk (dash, Shift, 6s cooldown).** A quick dodge roll in the direction you move (or aim), then 2.8s as a spirit: rocks, trees, pillars and ability barriers don't stop you (cliffs and ledges still do); you move 15% faster, 35% inside something. Walking into something leaves a spirit orb there for 4s: anyone who touches it walks as a spirit too. Taking damage ends it. If it ends while you're inside something you lose 30 Focus and are put back where you went in.
 
