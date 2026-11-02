@@ -658,3 +658,12 @@ The owner couldn't tell whether he was carrying a Rift Key. His decision: **Rift
 - **Dash direction (sync68):** `ArchKit.dash_dir()` follows Settings "Dash toward the cursor": WASD by default, the cursor when you stand still or turn it on. Any kit Shift that is a plain dash must use `dash_dir()`, not `h.aim_dir()`. Aimed-to-a-spot movement (grapple, blink, swap, shield charge) keeps the cursor. `--dash-dir-check` covers every hunter outside the AIMED list. Juggernaut's Rampage now follows the setting too, and its archetype-check line was updated.
 - **Dash feel (sync69, owner: "too fast in general and too far"):** `content/rules/dash_feel.json` applies x0.85 distance and x1.15 time to every `ArchKit.travel` dash on top of your kit numbers, so keep footage numbers in the kit JSON. Vireo (mage) is the exception: its time is scaled but its distance isn't, and its Wirerun lane is now 5-8.5m in content/archetypes/mage.json (the owner wants it further). Carry that over in kitfix-vireo-venator. If a kit draws a dash preview from its own `dist`, it needs the same multiplier, or the preview will be longer than the dash.
 - **G tap toggles (sync69):** your Boki goes when it's beside you and comes back when it's out or fighting (`KinCommand.is_engaged`).
+
+## 2026-11-02 18:35 ET: OWNER DECISION: keybinds are R = reload (everyone), X = hunter ultimate, T = Merge
+This replaces 16:30's "Merge stays on R". The reasons: shooter players hit R by reflex to reload, and SUPERVIVE players expect R for their ult. With Merge on R, both groups would fire the most expensive action by accident.
+- **R = manual reload** for every hunter with ammo. Automatic reload after idle stays as a fallback. Hunters with no ammo get a small deny tick on R.
+- **X = hunter ultimate.** Kits implement `ArchKit.cast_ult()`, call `KinBond.from_ult(h, kind)` when it connects, and unlock it at level 6.
+- **T = Merge,** and T again releases it.
+- **Build mode:** R still rotates.
+- **Main's ultbond branch** does the defaults, keybind migration, texts and checks.
+- **Your side:** kit code and the HUD (ext/hudref) must never hard-code R or X in player-facing text; use `Settings.key_cap(action)`. The actions are `reload`, `hunter_ult`, and `ultimate` (Merge).
