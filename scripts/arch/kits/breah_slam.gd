@@ -53,15 +53,25 @@ func hold_tick(t: float) -> void:
 		return
 	var c := charge_k(t)
 	if k.anim_id != "breah_crouch" and not leapt: k.play("breah_crouch")
-	AimKit.sweet(h, "rmb", {"at": center(), "r": radius(c), "k": c, "fill": c, "core0": float(sd()["core"][0]), "core1": float(sd()["core"][1]), "all": true, "col": Color("ff5a2a"), "col2": Color("ffd24a")})
+	AimKit.sweet(
+		h, "rmb",
+		{
+			"at": center(), "r": radius(c), "k": c, "fill": c, "core0": float(sd()["core"][0]),
+			"core1": float(sd()["core"][1]), "all": true, "col": Color("ff5a2a"), "col2": Color("ffd24a")
+		}
+	)
 	AimKit.charge(h, c, {"col": DolmKit.MOLTEN, "col2": Color("ffe2a0")})
 	var looks := KitLooks.of(k.m)
 	var dd := h.aim_dir()
 	for side in [-1.0, 1.0]:
 		var at := h.pos + Vector3(dd.x * 0.3 - dd.y * 0.32 * side, 0.75, dd.y * 0.3 + dd.x * 0.32 * side)
-		looks.hold_on("br_slamfist%d" % int(side), "hand", h, at, 0.5 + 0.9 * c, DolmKit.MOLTEN.lerp(Color("fff0b0"), c))
+		looks.hold_on(
+			"br_slamfist%d" % int(side), "hand", h, at, 0.5 + 0.9 * c, DolmKit.MOLTEN.lerp(Color("fff0b0"), c)
+		)
 	if fmod(k.m.time, 0.12) < 1.0 / 60.0:
-		k.m.fx.spark(h.pos + Vector3(0, 0.2, 0), Vector3.UP, DolmKit.MOLTEN, int(2 + 4 * c), 2.0 + 2.0 * c, 70.0, 0.3, -2.0, 0.8)
+		k.m.fx.spark(
+			h.pos + Vector3(0, 0.2, 0), Vector3.UP, DolmKit.MOLTEN, int(2 + 4 * c), 2.0 + 2.0 * c, 70.0, 0.3, -2.0, 0.8
+		)
 	# jump while charging: leap forward, the circle rides along
 	if not leapt and was_ground and not h.grounded and h.vel.y > 0.5:
 		leapt = true
@@ -104,7 +114,10 @@ func fire(c: Dictionary) -> void:
 	k._lunge(float(sd()["reach"]), float(sd()["hop_t"]), h.aim_dir())
 	h.vel.y = maxf(h.vel.y, float(sd()["hop_up"]))
 	h.grounded = false
-	k.m.later(float(sd()["delay"]), func(): if is_instance_valid(h) and not h.downed and not KinMerge.active(h): slam(ck, true))
+	k.m.later(
+		float(sd()["delay"]),
+		func(): if is_instance_valid(h) and not h.downed and not KinMerge.active(h): slam(ck, true)
+	)
 
 ## The air dive's landing.
 func land(ck: float) -> void:
@@ -126,7 +139,9 @@ func slam(c: float, at_feet: bool) -> void:
 	m.fx.ring(at, r, Color("ff5a2a"), 0.35)
 	m.fx.ring(at, cr, Color("ffe0a0"), 0.2)
 	m.fx.burst(at + Vector3(0, 0.3, 0), Color("ff9a3c"), int(16 + 20 * c), 6.0 + 3.0 * c, 0.6, 8.0, 1.2)
-	m.fx.spark(at + Vector3(0, 0.2, 0), Vector3.UP, Color("ffd24a"), int(14 + 14 * c), 9.0 + 4.0 * c, 75.0, 0.35, 14.0, 1.3)
+	m.fx.spark(
+		at + Vector3(0, 0.2, 0), Vector3.UP, Color("ffd24a"), int(14 + 14 * c), 9.0 + 4.0 * c, 75.0, 0.35, 14.0, 1.3
+	)
 	m.fx.spark(at + Vector3(0, 0.2, 0), Vector3.UP, Color("3a2a22"), 10, 7.0, 60.0, 0.45, 16.0, 1.2)
 	m.fx.flash(at + Vector3(0, 0.5, 0), Color("ffd9a0"), 1.2 + c, 0.09)
 	m.fx.dust(at, int(10 + 6 * c))

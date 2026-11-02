@@ -8,12 +8,12 @@ extends RefCounted
 ##   one that stands and watches you, one that strafes, a heavy one by a pillar to slam into; each
 ##   shows its damage per second, last hit and total over its head, and heals up when left alone
 ## - a sparring bot you can switch Off / Idle / Moving / Fighting (N), and give any archetype
-## - a reset (Backspace; X is the ultimate's second key), cooldowns off (O: dash, RMB, E, R and the glove), the ultimate unlocked (U)
+## - a reset (Backspace; X is the hero ultimate), cooldowns off (O: dash, RMB, E, R and the glove), the ultimate unlocked (U)
 ## - a quick swap without leaving: 2-9 pick one of the first eight archetypes (the loadout lists all); L opens the loadout (archetype, weapon,
 ##   Boki, glove, toggles), K the kit card
 ## Nobody dies here: a downed player or bot is back up after a beat.
 
-const KEYS_HINT := "K kit card   ·   L loadout   ·   2-9 first eight archetypes (L: all)   ·   X reset   ·   N bot   ·   O cooldowns   ·   U ultimate"
+const KEYS_HINT := "K kit card   ·   L loadout   ·   2-9 first eight archetypes (L: all)   ·   Backspace reset   ·   N bot   ·   O cooldowns   ·   U ultimate"
 const BOT_MODES := ["off", "idle", "moving", "fighting"]
 const BOT_NAMES := {"off": "Off", "idle": "Idle", "moving": "Moving", "fighting": "Fights back"}
 const DUMMY_HP := 3000.0

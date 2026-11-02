@@ -57,8 +57,10 @@ static func glass_mat(core: Color, rim: Color, a := 1.0) -> ShaderMaterial:
 
 static func lump(r: float) -> SphereMesh:
 	var s := SphereMesh.new()
-	s.radius = r; s.height = r * 1.7
-	s.radial_segments = 7; s.rings = 4
+	s.radius = r
+	s.height = r * 1.7
+	s.radial_segments = 7
+	s.rings = 4
 	return s
 
 func _build(kind: String) -> Node3D:
@@ -68,46 +70,81 @@ func _build(kind: String) -> Node3D:
 		"boulder", "rock", "dashrock":
 			var r := {"boulder": 0.24, "rock": 0.42, "dashrock": 0.5}[kind] as float
 			var heat := {"boulder": 0.55, "rock": 0.95, "dashrock": 0.7}[kind] as float
-			var body := Models.part(n, lump(r), rock_mat(heat, vis_rng.randf() * 10.0), Vector3.ZERO, Vector3.ONE, Vector3(0.3, 0.5, 0.2))
+			var body := Models.part(
+				n, lump(r), rock_mat(heat, vis_rng.randf() * 10.0), Vector3.ZERO, Vector3.ONE, Vector3(0.3, 0.5, 0.2)
+			)
 			body.name = "Spin"
 			Models.part(body, lump(r * 0.55), rock_mat(heat, vis_rng.randf() * 10.0), Vector3(r * 0.55, r * 0.3, 0.0))
-			Models.part(body, lump(r * 0.45), rock_mat(heat, vis_rng.randf() * 10.0), Vector3(-r * 0.4, -r * 0.2, r * 0.45))
-			var halo := Models.part(n, Models.sphere(r * 1.5, 10), Models.glow_mat(Color(1.0, 0.45, 0.12, 0.22 + heat * 0.15)), Vector3.ZERO)
+			Models.part(
+				body, lump(r * 0.45), rock_mat(heat, vis_rng.randf() * 10.0), Vector3(-r * 0.4, -r * 0.2, r * 0.45)
+			)
+			var halo := Models.part(
+				n, Models.sphere(r * 1.5, 10), Models.glow_mat(Color(1.0, 0.45, 0.12, 0.22 + heat * 0.15)), Vector3.ZERO
+			)
 			halo.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		"orb":
-			var o := Models.part(n, Models.sphere(0.16, 10), glass_mat(Color("3a0d5c"), Color("e070ff")), Vector3.ZERO, Vector3(1.0, 1.0, 1.9))
+			var o := Models.part(
+				n, Models.sphere(0.16, 10), glass_mat(Color("3a0d5c"), Color("e070ff")), Vector3.ZERO,
+				Vector3(1.0, 1.0, 1.9)
+			)
 			o.name = "Spin"
 			Models.part(n, Models.sphere(0.07, 8), Models.glow_mat(Color("ffd6ff")), Vector3(0, 0, -0.1))
 		"orb_hot":
-			Models.part(n, Models.sphere(0.13, 10), glass_mat(Color("1c1a6a"), Color("9fb8ff")), Vector3.ZERO, Vector3(1.0, 1.0, 5.2))
-			Models.part(n, Models.sphere(0.06, 8), Models.glow_mat(Color("f2f6ff")), Vector3.ZERO, Vector3(1.0, 1.0, 6.0))
+			Models.part(
+				n, Models.sphere(0.13, 10), glass_mat(Color("1c1a6a"), Color("9fb8ff")), Vector3.ZERO,
+				Vector3(1.0, 1.0, 5.2)
+			)
+			Models.part(
+				n, Models.sphere(0.06, 8), Models.glow_mat(Color("f2f6ff")), Vector3.ZERO, Vector3(1.0, 1.0, 6.0)
+			)
 		"spear":
-			var b := Node3D.new(); b.name = "Spin"; n.add_child(b)
+			var b := Node3D.new()
+			b.name = "Spin"
+			n.add_child(b)
 			for i in 5:
 				var a := TAU * i / 5.0
 				var off := Vector3(cos(a), sin(a), 0.0) * (0.0 if i == 0 else 0.17)
 				var len_ := 2.2 if i == 0 else 1.6
-				var sh := Models.part(b, PrismMesh.new(), glass_mat(Color("240838"), Color("c48cff")), off + Vector3(0, 0, 0.1 * float(i % 2)), Vector3(0.2, len_, 0.2), Vector3(-PI * 0.5, 0, a))
+				var sh := Models.part(
+					b, PrismMesh.new(), glass_mat(Color("240838"), Color("c48cff")),
+					off + Vector3(0, 0, 0.1 * float(i % 2)), Vector3(0.2, len_, 0.2), Vector3(-PI * 0.5, 0, a)
+				)
 				sh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		"aura":
-			Models.part(n, Models.sphere(1.25, 20), glass_mat(Color("2a0020"), Color("ff4fd8"), 0.45), Vector3(0, 1.0, 0))
-			var disc := Models.part(n, Models.cyl(1.3, 1.3, 0.03, 28), Models.glow_mat(Color(1.0, 0.3, 0.85, 0.22)), Vector3(0, 0.05, 0))
+			Models.part(
+				n, Models.sphere(1.25, 20), glass_mat(Color("2a0020"), Color("ff4fd8"), 0.45), Vector3(0, 1.0, 0)
+			)
+			var disc := Models.part(
+				n, Models.cyl(1.3, 1.3, 0.03, 28), Models.glow_mat(Color(1.0, 0.3, 0.85, 0.22)), Vector3(0, 0.05, 0)
+			)
 			disc.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		"crown":
-			var c := Node3D.new(); c.name = "Spin"; n.add_child(c)
+			var c := Node3D.new()
+			c.name = "Spin"
+			n.add_child(c)
 			for i in 3:
 				var a2 := TAU * i / 3.0
-				var st := Models.part(c, Models.box(0.16, 0.16, 0.05), Models.glow_mat(Color("fff27a")), Vector3(cos(a2) * 0.38, 0.0, sin(a2) * 0.38), Vector3.ONE, Vector3(0, a2, PI * 0.25))
+				var st := Models.part(
+					c, Models.box(0.16, 0.16, 0.05), Models.glow_mat(Color("fff27a")),
+					Vector3(cos(a2) * 0.38, 0.0, sin(a2) * 0.38), Vector3.ONE, Vector3(0, a2, PI * 0.25)
+				)
 				st.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			Models.part(n, Models.cyl(0.42, 0.42, 0.02, 20), Models.glow_mat(Color(1.0, 0.95, 0.5, 0.35)), Vector3.ZERO)
 		"scorch":
-			var d := Models.part(n, Models.cyl(1.0, 1.0, 0.02, 24), Models.glow_mat(Color(0.35, 0.05, 0.02, 0.55)), Vector3(0, 0.03, 0))
+			var d := Models.part(
+				n, Models.cyl(1.0, 1.0, 0.02, 24), Models.glow_mat(Color(0.35, 0.05, 0.02, 0.55)), Vector3(0, 0.03, 0)
+			)
 			d.name = "Disc"
 			for i in 6:
 				var a3 := TAU * i / 6.0 + 0.4
-				Models.part(n, Models.box(0.08, 0.02, 0.5), Models.glow_mat(Color(1.0, 0.7, 0.2, 0.75)), Vector3(cos(a3) * 0.55, 0.04, sin(a3) * 0.55), Vector3.ONE, Vector3(0, -a3, 0))
+				Models.part(
+					n, Models.box(0.08, 0.02, 0.5), Models.glow_mat(Color(1.0, 0.7, 0.2, 0.75)),
+					Vector3(cos(a3) * 0.55, 0.04, sin(a3) * 0.55), Vector3.ONE, Vector3(0, -a3, 0)
+				)
 		"column":
-			Models.part(n, Models.cyl(0.35, 0.55, 6.0, 16), glass_mat(Color("20003a"), Color("b06bff"), 0.7), Vector3(0, 3.0, 0))
+			Models.part(
+				n, Models.cyl(0.35, 0.55, 6.0, 16), glass_mat(Color("20003a"), Color("b06bff"), 0.7), Vector3(0, 3.0, 0)
+			)
 		"hand":
 			Models.part(n, Models.sphere(0.16, 12), Models.glow_mat(Color(1, 1, 1, 0.9)), Vector3.ZERO).name = "Core"
 			Models.part(n, Models.sphere(0.3, 12), Models.glow_mat(Color(1, 1, 1, 0.25)), Vector3.ZERO).name = "Halo"
@@ -226,7 +263,9 @@ func _process(delta: float) -> void:
 	for key in held.keys():
 		var hd: Dictionary = held[key]
 		var ent = hd["ent"]
-		if now - float(hd["t"]) > KEEP or not is_instance_valid(ent) or (ent is Hunter and ((ent as Hunter).downed or KinMerge.active(ent))):
+		if now - float(hd["t"]) > KEEP or not is_instance_valid(ent) or (
+			ent is Hunter and ((ent as Hunter).downed or KinMerge.active(ent))
+		):
 			_give(String(hd["kind"]), hd["n"])
 			held.erase(key)
 	for e2 in timed.duplicate():

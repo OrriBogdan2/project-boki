@@ -17,7 +17,8 @@ const LANE_COL := Color("f4ead8")       # the punch lane: pale stone white, as b
 
 var lmb_t := -1.0              # how long the attack key has been down (-1: not pressed)
 var lmb_was := false
-var lmb_auto := false          # the hold punched by itself: keep holding and the next wind-up starts, a release throws nothing
+# the hold punched by itself: keep holding and the next wind-up starts, a release throws nothing
+var lmb_auto := false
 var rid_n := 0
 var slam_hit := {}             # foe instance id -> time our slam hit it (a knock inside 6s resets Quakefall)
 var dive := false              # the air Quakefall: slam on landing
@@ -83,7 +84,10 @@ func _new_rock(p: Vector3, dir: Vector2) -> bool:
 		HeroZones.tx(m, ["zone", "rockgo", String(old.get("rid", ""))])
 	rid_n += 1
 	var rd := rock_def()
-	HeroZones.rock(m, h, p, dir, "%s.r%d" % [h.nid if h.nid != "" else str(h.get_instance_id()), rid_n], float(rd["len"]), float(rd["time"]), float(rd["hp"]))
+	HeroZones.rock(
+		m, h, p, dir, "%s.r%d" % [h.nid if h.nid != "" else str(h.get_instance_id()), rid_n], float(rd["len"]),
+		float(rd["time"]), float(rd["hp"])
+	)
 	rocks_made += 1
 	return true
 
@@ -101,7 +105,13 @@ func launch(w: Dictionary, dir: Vector2, src: String) -> void:
 func _fire_rock(start: Vector3, dir: Vector2, dmg: float, src: String, skin: String, rng: float) -> void:
 	var rd := rock_def()
 	var spd := float(rd["speed"])
-	m.spawn_shot(h, start, dir * spd, dmg, rng / spd, 0.45, Color("ff8a3c"), {"kb": float(rd["kb"]) if src != "dash" else float(dash_def()["kb"]), "tracer": 0.3, "src": "abil", "ab": "rock", "kx": func(s, at, e, why): _rock_end(s, at, e, why, src)})
+	m.spawn_shot(
+		h, start, dir * spd, dmg, rng / spd, 0.45, Color("ff8a3c"),
+		{
+			"kb": float(rd["kb"]) if src != "dash" else float(dash_def()["kb"]), "tracer": 0.3, "src": "abil",
+			"ab": "rock", "kx": func(s, at, e, why): _rock_end(s, at, e, why, src)
+		}
+	)
 	KitLooks.of(m).skin(m.shots[-1], skin)
 	m.sfx("br_launch", start, -3.0, 1.0)
 
@@ -133,7 +143,13 @@ func _rock_end(s: Dictionary, at: Vector3, e: Ent, _why: String, src: String) ->
 			payoff_fx(e.pos, ROCK_PAY, Color("ffb36a"), "pay_rockfall", h.dir_to(e), e)
 	for f in foes_in(at, blast):
 		if f == e: continue
-		f.hurt(float(s["dmg"]) * 0.6 * _repeat_k(f), h, {"src": "abil", "ab": "rock", "slow": slow_t, "slow_k": float(rd["slow_k"]), "kb": Vector2(f.pos.x - at.x, f.pos.z - at.z).normalized() * 4.0})
+		f.hurt(
+			float(s["dmg"]) * 0.6 * _repeat_k(f), h,
+			{
+				"src": "abil", "ab": "rock", "slow": slow_t, "slow_k": float(rd["slow_k"]),
+				"kb": Vector2(f.pos.x - at.x, f.pos.z - at.z).normalized() * 4.0
+			}
+		)
 		KitStatus.apply(f, "vul", float(rd["shred_t"]), float(rd["shred"]))
 
 func _repeat_k(f: Ent) -> float:
@@ -172,7 +188,10 @@ func _tick_sight(dt: float) -> void:
 		sneak_t += dt
 		if h.is_local():
 			var pd: Dictionary = d["passive"]
-			AimKit.cone(h, "sight", {"len": float(pd["len"]), "deg": sight_deg(), "inner": 0.5, "alpha": 0.7, "col": Color("f3e6c8")})
+			AimKit.cone(
+				h, "sight",
+				{"len": float(pd["len"]), "deg": sight_deg(), "inner": 0.5, "alpha": 0.7, "col": Color("f3e6c8")}
+			)
 			sight_t -= dt
 			if sight_t <= 0.0:
 				sight_t = 0.5
@@ -226,14 +245,17 @@ func lmb_override(held: bool, dt: float) -> bool:
 	var ld := lmb_def()
 	var pressed := held and not lmb_was
 	lmb_was = held
-	if not h.can_fire() or KinMerge.transforming(h):       # (a merge ends the hold: letting go of it must not throw a punch mid-transformation)
+	# (a merge ends the hold: letting go of it must not throw a punch mid-transformation)
+	if not h.can_fire() or KinMerge.transforming(h):
 		if lmb_t >= 0.0:
-			lmb_t = -1.0; h.mel_hold = 0.0
+			lmb_t = -1.0
+			h.mel_hold = 0.0
 		return true
 	if slam.charging():
 		if pressed: slam.extend()            # a punch during the Quakefall charge carries her (and the circle) forward
 		if lmb_t >= 0.0:
-			lmb_t = -1.0; h.mel_hold = 0.0
+			lmb_t = -1.0
+			h.mel_hold = 0.0
 		return true
 	if h.ctrl != "local":
 		# a bot: punches up close, throws boulders from range
@@ -262,7 +284,8 @@ func lmb_override(held: bool, dt: float) -> bool:
 		if lmb_t < float(ld["tap"]) and not lmb_auto: _boulder()
 		elif lmb_t >= float(ld["tap"]): _punch(punch_k())
 		else:
-			lmb_t = -1.0; h.mel_hold = 0.0
+			lmb_t = -1.0
+			h.mel_hold = 0.0
 		lmb_auto = false
 	elif pressed:
 		pass
@@ -275,7 +298,13 @@ func _fist_at() -> Vector3:
 ## The held punch's lane: a pale rectangle with chevrons, from her feet toward the cursor.
 func _punch_tele(k: float) -> void:
 	var pd: Dictionary = lmb_def()["punch"]
-	AimKit.lane(h, "punch", {"len": float(pd["len"]), "width": float(pd["width"]), "chevrons": 3, "k": k, "fill": k, "col": LANE_COL, "col_full": Color("ffd08a")})
+	AimKit.lane(
+		h, "punch",
+		{
+			"len": float(pd["len"]), "width": float(pd["width"]), "chevrons": 3, "k": k, "fill": k, "col": LANE_COL,
+			"col_full": Color("ffd08a")
+		}
+	)
 	AimKit.charge(h, k, {"col": MOLTEN})
 
 func _boulder() -> void:
@@ -290,7 +319,10 @@ func _boulder() -> void:
 	var spd := float(bd["speed"])
 	var start := Vector3(h.pos.x + dir.x * 0.6, h.pos.y + 0.95 * float(h.cdat["scale"]), h.pos.z + dir.y * 0.6)
 	var rng := AimMode.dist(h, float(bd["range"]), AimMode.MAX)
-	m.spawn_shot(h, start, dir * spd, float(bd["dmg"]) * m.dmg_mult(h), rng / spd, float(bd["size"]), Color("ff9a3c"), {"kb": float(bd["kb"]), "tracer": 0.4, "kx": func(s, at, e, _why): _boulder_end(s, at, e)})
+	m.spawn_shot(
+		h, start, dir * spd, float(bd["dmg"]) * m.dmg_mult(h), rng / spd, float(bd["size"]), Color("ff9a3c"),
+		{"kb": float(bd["kb"]), "tracer": 0.4, "kx": func(s, at, e, _why): _boulder_end(s, at, e)}
+	)
 	KitLooks.of(m).skin(m.shots[-1], "boulder")
 	m.sfx("br_throw", h.pos, -3.0, 1.0)
 	m.fx.spark(start, Vector3(dir.x, 0.2, dir.y), MOLTEN, 6, 5.0, 25.0, 0.18, 2.0, 0.8)
@@ -324,7 +356,8 @@ func _punch(k: float) -> void:
 	var dir := h.aim_dir()
 	# the step: an impulse, not a roll (a punch is not a dash: it never blocks fire or reads as one)
 	var stepv := float(pd["step_v"]) * (float(pd["air_k"]) if not h.grounded else 1.0)
-	h.vel.x = dir.x * stepv; h.vel.z = dir.y * stepv
+	h.vel.x = dir.x * stepv
+	h.vel.z = dir.y * stepv
 	var dmg: float = lerpf(float(pd["dmg"][0]), float(pd["dmg"][1]), k) * m.dmg_mult(h)
 	var kb := lerpf(float(pd["kb"][0]), float(pd["kb"][1]), k)
 	var fp := h.pos + Vector3(dir.x * 1.3, 1.0, dir.y * 1.3)
@@ -345,7 +378,10 @@ func _punch(k: float) -> void:
 	for f in foes_in(h.pos, float(pd["len"]) + 0.6):
 		if not AimMode.in_lane(h.pos, dir, float(pd["len"]), float(pd["width"]), f.pos, f.r):
 			continue
-		var o := {"src": "abil", "ab": "lmb", "kb": dir * kb, "lift": 2.0, "melee": true, "wallstun": float(pd["wall_stun"]), "heavy": true}
+		var o := {
+			"src": "abil", "ab": "lmb", "kb": dir * kb, "lift": 2.0, "melee": true, "wallstun": float(pd["wall_stun"]),
+			"heavy": true
+		}
 		var hp0: float = f.hp
 		f.hurt(dmg, h, o)
 		if terrain_behind(f, dir, 1.6):
@@ -401,7 +437,9 @@ func on_dash(use_ex: bool) -> bool:
 	if use_ex:
 		if not spend_dash(true): return true
 		play("breah_exdash")
-		travel(float(h.cdat.get("ex_dist", 4.6)), float(h.cdat.get("ex_time", 0.2)), {"invuln": 0.1, "trail": "dust"}, true)
+		travel(
+			float(h.cdat.get("ex_dist", 4.6)), float(h.cdat.get("ex_time", 0.2)), {"invuln": 0.1, "trail": "dust"}, true
+		)
 		m.sfx("br_shove", h.pos, -4.0, 1.0)
 		return true
 	if not spend_dash(false):
@@ -429,7 +467,9 @@ func _tick_carry(dt: float) -> void:
 		if carry["hit"].has(f.get_instance_id()): continue
 		carry["hit"][f.get_instance_id()] = true
 		carried_shoves += 1
-		f.hurt(2.0 * power("dash"), h, {"src": "abil", "ab": "dash", "kb": dir * float(dash_def()["kb"]), "heavy": true})
+		f.hurt(
+			2.0 * power("dash"), h, {"src": "abil", "ab": "dash", "kb": dir * float(dash_def()["kb"]), "heavy": true}
+		)
 	carry["t"] = float(carry["t"]) - dt
 	if float(carry["t"]) <= 0.0 or h.downed:
 		var go := not h.downed
@@ -489,10 +529,14 @@ func row_spots(dir: Vector2) -> Array:
 		if not wk["ok"] or wk["stopped"] == "wall" or wk["stopped"] == "abyss":
 			continue      # a wall or the abyss lies between you and the row
 		for i in [0, -1, 1]:
-			var p := base + Vector3(side.x, 0, side.y) * float(ed["gap"]) * float(i) - Vector3(dir.x, 0, dir.y) * float(ed["curve"]) * absf(float(i))
+			var p := base + Vector3(
+				side.x, 0, side.y
+			) * float(ed["gap"]) * float(i) - Vector3(dir.x, 0, dir.y) * float(ed["curve"]) * absf(float(i))
 			p.y = m.world.ground_at(p.x, p.z)
 			# the rock must be reachable in line from the caster (no building through a wall)
-			if m.world.los(h.pos + Vector3(0, 0.5, 0), p + Vector3(0, 0.5, 0), h.pos.y + 0.5) and HeroZones.fits(m, p, h.pos.y):
+			if m.world.los(
+				h.pos + Vector3(0, 0.5, 0), p + Vector3(0, 0.5, 0), h.pos.y + 0.5
+			) and HeroZones.fits(m, p, h.pos.y):
 				spots.append([p, r])
 	return spots
 
@@ -502,7 +546,9 @@ func cast_e() -> bool:
 	# rank 3 over the abyss: a temporary rock bridge instead of a wall
 	if rank("kin") >= 3:
 		var aimp := aim()
-		if m.world.is_void(aimp.x, aimp.z) or HeroZones.walk(m, h.pos, aimp, float(ed["bridge_len"]))["stopped"] == "abyss":
+		if m.world.is_void(aimp.x, aimp.z) or HeroZones.walk(
+			m, h.pos, aimp, float(ed["bridge_len"])
+		)["stopped"] == "abyss":
 			var pw := HeroZones.walk(m, h.pos, aimp, float(ed["bridge_len"]))
 			var from: Vector3 = pw["pos"] if pw["ok"] else h.pos
 			var n := HeroZones.bridge(m, h, from, dir, float(ed["bridge_len"]), 2.0, float(ed["bridge_t"]))
@@ -521,7 +567,9 @@ func cast_e() -> bool:
 	var tell := float(ed["tell"])
 	for j in spots.size():
 		var p: Vector3 = spots[j][0]
-		AimKit.circle(h, "e_tell%d" % j, {"at": p, "r": 0.75, "fill": 1.0, "col": Color("ff4a1f"), "all": true, "dur": tell})
+		AimKit.circle(
+			h, "e_tell%d" % j, {"at": p, "r": 0.75, "fill": 1.0, "col": Color("ff4a1f"), "all": true, "dur": tell}
+		)
 		m.fx.spark(p + Vector3(0, 0.1, 0), Vector3.UP, MOLTEN, 4, 3.0, 40.0, 0.2, 2.0, 0.8)
 	m.sfx("br_crack", h.pos, -3.0, 1.0)
 	for j in spots.size():
@@ -547,7 +595,8 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null:
 		return
 	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and dist > 4.0 and dist < 9.0 and los and randf() < 0.25:
-		h.inp["sig"] = true; return
+		h.inp["sig"] = true
+		return
 	if int(h.slot_lv["sec"]) > 0 and rmb_ready() and dist < 3.4 and los:
 		h.inp["aim"] = tgt.pos + Vector3(0, 0.9, 0)
 		h.inp["sec"] = true

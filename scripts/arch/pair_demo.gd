@@ -31,7 +31,11 @@ static func at(t: float, dt: float, when: float) -> bool:
 	return ArenaDemo._at(t, dt, when)
 
 static func _rmb_hold(K: ArchKit, t: float, dt: float, from: float, secs: float) -> void:
-	if at(t, dt, from): K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; K.bot_hold["rmb"] = secs; K.press_rmb()
+	if at(t, dt, from):
+		K.ch_rmb = 1.0
+		K.cd["rmb"] = 0.0
+		K.bot_hold["rmb"] = secs
+		K.press_rmb()
 
 ## The scripted input of one strip (called every step).
 static func trigger(P: Hunter, D: Hunter, mv: String, t: float, dt: float) -> void:
@@ -52,15 +56,28 @@ static func trigger(P: Hunter, D: Hunter, mv: String, t: float, dt: float) -> vo
 			_rmb_hold(K, t, dt, 0.5, 1.0)
 			P.inp["fire"] = t > 0.9 and t < 0.96
 		"br_dive":
-			if at(t, dt, 0.45): P.teleport(P.pos + Vector3(0, 3.0, 0)); P.grounded = false; P.vel = Vector3.ZERO
-			if at(t, dt, 0.5): K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; K.press_rmb()
+			if at(t, dt, 0.45):
+				P.teleport(P.pos + Vector3(0, 3.0, 0))
+				P.grounded = false
+				P.vel = Vector3.ZERO
+			if at(t, dt, 0.5):
+				K.ch_rmb = 1.0
+				K.cd["rmb"] = 0.0
+				K.press_rmb()
 		"br_dash":
-			if at(t, dt, 0.5): P.dashes = P.max_dashes(); P.do_dash()
+			if at(t, dt, 0.5):
+				P.dashes = P.max_dashes()
+				P.do_dash()
 		"br_exdash":
-			if at(t, dt, 0.45): P.teleport(P.pos + Vector3(0, 1.4, 0)); P.grounded = false; P.vel = Vector3.ZERO
+			if at(t, dt, 0.45):
+				P.teleport(P.pos + Vector3(0, 1.4, 0))
+				P.grounded = false
+				P.vel = Vector3.ZERO
 			if at(t, dt, 0.5): P.do_dash()
 		"br_raise":
-			if at(t, dt, 0.5): K.cd["e"] = 0.0; K.use_e()
+			if at(t, dt, 0.5):
+				K.cd["e"] = 0.0
+				K.use_e()
 		"br_sense":
 			P.inp["crouch"] = t > 0.4
 		"os_orb":
@@ -69,14 +86,23 @@ static func trigger(P: Hunter, D: Hunter, mv: String, t: float, dt: float) -> vo
 		"os_orb_hot":
 			P.inp["fire"] = t > 1.58 and t < 1.62
 		"os_snap":
-			if at(t, dt, 0.5): K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; K.press_rmb()
+			if at(t, dt, 0.5):
+				K.ch_rmb = 1.0
+				K.cd["rmb"] = 0.0
+				K.press_rmb()
 		"os_swap", "os_arrive":
 			P.inp["dash_down"] = t > 0.5 and t < 0.92
-			if at(t, dt, 0.5): P.dashes = P.max_dashes(); P.do_dash()
+			if at(t, dt, 0.5):
+				P.dashes = P.max_dashes()
+				P.do_dash()
 		"os_seed":
-			if at(t, dt, 0.5): K.cd["e"] = 0.0; K.use_e()
+			if at(t, dt, 0.5):
+				K.cd["e"] = 0.0
+				K.use_e()
 		"os_pop":
-			if at(t, dt, 0.5): K.cd["e"] = 0.0; K.use_e()
+			if at(t, dt, 0.5):
+				K.cd["e"] = 0.0
+				K.use_e()
 			if at(t, dt, 2.0): K.use_e()
 		"os_empower":
 			if at(t, dt, 0.5): (K as OstraKit).add_swell(200.0)
@@ -86,17 +112,24 @@ static func trigger(P: Hunter, D: Hunter, mv: String, t: float, dt: float) -> vo
 ## where the hunter starts (x offset from the dummy)].
 const SHOTS := {
 	"pair_breah_throw_key": ["br_throw", 0.58, -5.0], "pair_breah_throw_hit": ["br_throw", 0.76, -5.0],
-	"pair_breah_punch_tele": ["br_punch", 1.2, -2.4], "pair_breah_punch_key": ["br_punch", 1.5, -2.4], "pair_breah_punch_hit": ["br_punch", 1.58, -2.4],
-	"pair_breah_slam_tele": ["br_slam", 1.75, -2.6], "pair_breah_slam_key": ["br_slam", 1.99, -2.6], "pair_breah_slam_hit": ["br_slam", 2.07, -2.6],
+	"pair_breah_punch_tele": ["br_punch", 1.2, -2.4], "pair_breah_punch_key": ["br_punch", 1.5, -2.4],
+	"pair_breah_punch_hit": ["br_punch", 1.58, -2.4],
+	"pair_breah_slam_tele": ["br_slam", 1.75, -2.6], "pair_breah_slam_key": ["br_slam", 1.99, -2.6],
+	"pair_breah_slam_hit": ["br_slam", 2.07, -2.6],
 	"pair_breah_leap_key": ["br_leap", 1.15, -5.0], "pair_breah_lunge_key": ["br_lunge", 0.98, -5.0],
 	"pair_breah_dash_key": ["br_dash", 0.62, -6.5], "pair_breah_dash_hit": ["br_dash", 0.95, -9.0],
-	"pair_breah_row_tele": ["br_raise", 0.56, -4.2], "pair_breah_row_key": ["br_raise", 0.74, -4.2], "pair_breah_row_hit": ["br_raise", 1.2, -4.2],
+	"pair_breah_row_tele": ["br_raise", 0.56, -4.2], "pair_breah_row_key": ["br_raise", 0.74, -4.2],
+	"pair_breah_row_hit": ["br_raise", 1.2, -4.2],
 	"pair_breah_sense_tele": ["br_sense", 1.4, -6.0], "pair_breah_sense_hit": ["br_sense", 0.75, -6.0],
-	"pair_ostra_aim_tele": ["os_orb", 0.45, -4.5], "pair_ostra_orb_key": ["os_orb", 0.58, -4.5], "pair_ostra_orb_hit": ["os_orb", 0.72, -4.5],
+	"pair_ostra_aim_tele": ["os_orb", 0.45, -4.5], "pair_ostra_orb_key": ["os_orb", 0.58, -4.5],
+	"pair_ostra_orb_hit": ["os_orb", 0.72, -4.5],
 	"pair_ostra_hot_key": ["os_orb_hot", 1.66, -4.5], "pair_ostra_hot_hit": ["os_orb_hot", 1.8, -4.5],
-	"pair_ostra_snap_tele": ["os_snap", 0.6, -4.5], "pair_ostra_snap_key": ["os_snap", 0.73, -4.5], "pair_ostra_snap_hit": ["os_snap", 1.0, -4.5],
-	"pair_ostra_swap_tele": ["os_swap", 0.85, -4.5], "pair_ostra_swap_key": ["os_swap", 1.75, -4.5], "pair_ostra_swap_hit": ["os_arrive", 2.66, -4.5],
-	"pair_ostra_seed_tele": ["os_seed", 1.3, -4.5], "pair_ostra_seed_key": ["os_pop", 1.95, -4.5], "pair_ostra_seed_hit": ["os_pop", 2.1, -4.5],
+	"pair_ostra_snap_tele": ["os_snap", 0.6, -4.5], "pair_ostra_snap_key": ["os_snap", 0.73, -4.5],
+	"pair_ostra_snap_hit": ["os_snap", 1.0, -4.5],
+	"pair_ostra_swap_tele": ["os_swap", 0.85, -4.5], "pair_ostra_swap_key": ["os_swap", 1.75, -4.5],
+	"pair_ostra_swap_hit": ["os_arrive", 2.66, -4.5],
+	"pair_ostra_seed_tele": ["os_seed", 1.3, -4.5], "pair_ostra_seed_key": ["os_pop", 1.95, -4.5],
+	"pair_ostra_seed_hit": ["os_pop", 2.1, -4.5],
 	"pair_ostra_swollen_key": ["os_empower", 0.8, -4.2],
 }
 
@@ -111,7 +144,8 @@ static func tick(A: Arena, P: Hunter, D: Hunter, t: float, dt: float, w: String)
 		if not w.begins_with("pair_card"):
 			P.teleport(D.pos + Vector3(float(sh[2]) if not sh.is_empty() else -4.2, 0, 0))
 			A.home = P.pos
-			D.max_hp = 900.0; D.hp = D.max_hp
+			D.max_hp = 900.0
+			D.hp = D.max_hp
 			A.m.set_meta("zoom_hold", 0.5)
 			if A.m.cam: A.m.cam.zoom = 0.5
 	ArenaDemo._aim(P, D)
@@ -131,28 +165,44 @@ static func tick(A: Arena, P: Hunter, D: Hunter, t: float, dt: float, w: String)
 				ArenaDemo._shot_later(A, 0.7)
 			return 99.0
 		"pair_dolm_rocks":
-			if at(t, dt, 0.3): K.cd["e"] = 0.0; K.use_e()
+			if at(t, dt, 0.3):
+				K.cd["e"] = 0.0
+				K.use_e()
 			at_t = 0.9
 		"pair_dolm_pay":
-			if at(t, dt, 0.3): K.cd["e"] = 0.0; K.use_e()
-			if at(t, dt, 0.8): P.teleport(D.pos + Vector3(-3.0, 0, 0)); ArenaDemo._aim(P, D)
+			if at(t, dt, 0.3):
+				K.cd["e"] = 0.0
+				K.use_e()
+			if at(t, dt, 0.8):
+				P.teleport(D.pos + Vector3(-3.0, 0, 0))
+				ArenaDemo._aim(P, D)
 			P.inp["fire"] = t > 0.9 and t < 1.9
 			if int(K.get("launch_pay")) > 0 and not A.has_meta("pay_at"): A.set_meta("pay_at", t)
 			at_t = float(A.get_meta("pay_at", 9.0)) + 0.1
 		"pair_dolm_slam":
-			if at(t, dt, 0.3): K.ch_rmb = float(K.rmb_charges()); K.bot_hold["rmb"] = 0.9; K.press_rmb()
+			if at(t, dt, 0.3):
+				K.ch_rmb = float(K.rmb_charges())
+				K.bot_hold["rmb"] = 0.9
+				K.press_rmb()
 			at_t = 1.35
 		"pair_ostra_orb":
 			P.inp["fire"] = t > 0.3 and t < 0.36
 			at_t = 0.6
 		"pair_ostra_fan":
-			if at(t, dt, 0.3): K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; K.press_rmb()
+			if at(t, dt, 0.3):
+				K.ch_rmb = 1.0
+				K.cd["rmb"] = 0.0
+				K.press_rmb()
 			at_t = 0.5
 		"pair_ostra_trade":
-			if at(t, dt, 0.3): P.dashes = P.max_dashes(); P.do_dash()
+			if at(t, dt, 0.3):
+				P.dashes = P.max_dashes()
+				P.do_dash()
 			at_t = 1.6
 		"pair_ostra_pay":
-			if at(t, dt, 0.3): K.cd["e"] = 0.0; K.use_e()
+			if at(t, dt, 0.3):
+				K.cd["e"] = 0.0
+				K.use_e()
 			if int(K.get("collapses")) > 0 and not A.has_meta("pay_at"): A.set_meta("pay_at", t)
 			at_t = float(A.get_meta("pay_at", 9.0)) + 0.3
 	return at_t
@@ -165,4 +215,6 @@ static func _climb(P: Hunter, K: DolmKit) -> void:
 	P.set_meta("climbed", true)
 	var w: Dictionary = rs[0]
 	var mid := K.rock_mid(w)
-	P.teleport(Vector3(mid.x, mid.y + float(w["top"]) + 0.05, mid.z)); P.grounded = false; P.vel = Vector3.ZERO
+	P.teleport(Vector3(mid.x, mid.y + float(w["top"]) + 0.05, mid.z))
+	P.grounded = false
+	P.vel = Vector3.ZERO

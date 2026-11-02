@@ -79,7 +79,9 @@ func on_knock(_t: Hunter, mine: bool) -> void:
 
 func outgoing(t: Ent, dmg: float, o: Dictionary) -> float:
 	# a Settled orb slows what it hits
-	if m.time < prime_until and String(o.get("src", "")) == "shot" and not o.has("ab") and t != null and t.team != h.team:
+	if m.time < prime_until and String(
+		o.get("src", "")
+	) == "shot" and not o.has("ab") and t != null and t.team != h.team:
 		prime_until = -9.0
 		o["slow"] = float(lmb_def()["prime_slow_t"])
 		o["slow_k"] = float(lmb_def()["prime_slow"])
@@ -118,7 +120,9 @@ func _reticle() -> void:
 	var sn: Dictionary = rmb_def()["snap"]
 	if not snap.is_empty() or (bool(h.inp.get("sec_hold", false)) and rmb_ready()):
 		AimKit.hide(h, "aim")
-		AimKit.lane(h, "snap", {"len": float(sn["range"]), "width": float(sn["width"]), "rails": true, "col": Color("f2eaff")})
+		AimKit.lane(
+			h, "snap", {"len": float(sn["range"]), "width": float(sn["width"]), "rails": true, "col": Color("f2eaff")}
+		)
 	else:
 		AimKit.line(h, "aim", {"col": Color("f2eaff"), "alpha": 0.8})
 
@@ -159,7 +163,7 @@ func swap_time() -> float:
 
 ## Shift: hold to see both ends (where you are, where the lantern lands at the cursor), let go to lob.
 ## A tap lobs at once. It never travels by itself, so a press in the air or with no charge never sends
-## her off in some other direction: it waits for the next charge (owner, sync61).
+## her off in some other direction: it waits for the next charge.
 func on_dash(_use_ex: bool) -> bool:
 	if not swap.is_empty() or swap_aim >= 0.0:
 		return true
@@ -214,7 +218,13 @@ func _tick_swap(dt: float) -> void:
 	KitLooks.of(m).hold_on("os_star", "hand", h, p, 1.3, Color("5a3cff"))
 	if fmod(m.time, 0.05) < dt:
 		m.fx.spark(p, Vector3.UP, VOID_COL, 2, 1.5, 60.0, 0.3, 0.0, 0.8)
-	AimKit.swap(h, "swap_fly", {"a": from, "b": land, "r": float(dd["radius"]), "fill": u, "all": true, "col": Color("b8f5ea"), "col2": VOID_COL})
+	AimKit.swap(
+		h, "swap_fly",
+		{
+			"a": from, "b": land, "r": float(dd["radius"]), "fill": u, "all": true, "col": Color("b8f5ea"),
+			"col2": VOID_COL
+		}
+	)
 	if h.downed or h.out or h.stun_t > 0.0:
 		_swap_end(false)
 		return
@@ -270,7 +280,9 @@ func _swap_end(go: bool) -> void:
 	if rank("dash") >= 3:
 		# allies who were by her side when she left share in it: a shield
 		for o2 in m.hunters:
-			if o2 != h and o2.team == h.team and not o2.downed and (o2.flat_dist(from) < float(dd["ally_r"]) or o2.flat_dist(h) < float(dd["ally_r"])):
+			if o2 != h and o2.team == h.team and not o2.downed and (
+				o2.flat_dist(from) < float(dd["ally_r"]) or o2.flat_dist(h) < float(dd["ally_r"])
+			):
 				o2.shield = maxf(o2.shield, float(dd["ally_shield"]))
 				o2.shield_t = 3.0
 
@@ -304,7 +316,10 @@ func _snap_release() -> void:
 	var start := Vector3(h.pos.x + dir.x * 0.6, h.pos.y + 0.95 * float(h.cdat["scale"]), h.pos.z + dir.y * 0.6)
 	var spd := float(sn["speed"])
 	var rng := AimMode.dist(h, float(sn["range"]), AimMode.MAX)
-	m.spawn_shot(h, start, dir * spd, float(sn["dmg"]) * k, rng / spd, float(sn["size"]), VOID_COL, {"kb": 1.0, "tracer": 0.2, "src": "abil", "ab": "rmb", "kx": func(s, at, e, _why): _snap_hit(s, at, e)})
+	m.spawn_shot(
+		h, start, dir * spd, float(sn["dmg"]) * k, rng / spd, float(sn["size"]), VOID_COL,
+		{"kb": 1.0, "tracer": 0.2, "src": "abil", "ab": "rmb", "kx": func(s, at, e, _why): _snap_hit(s, at, e)}
+	)
 	KitLooks.of(m).skin(m.shots[-1], "spear")
 	m.sfx("os_snap", h.pos, -2.0, 1.0)
 	m.fx.flash(start, Color("e0b8ff"), 0.9, 0.07)
@@ -342,12 +357,17 @@ func cast_e() -> bool:
 	var grow := float(ed["grow"]) * (float(ed["grow_swollen_k"]) if is_swollen() else 1.0)
 	var rmax := float(ed["rmax_swollen"]) if is_swollen() else float(ed["rmax"])
 	var vis := HeroZones.seed_visual(m, sid, p, rmax, grow, TEAL)
-	seed = {"pos": p, "t": 0.0, "grow": grow, "rmax": rmax, "sid": sid, "vis": vis, "burn": 0.0, "from": _hand(), "col": null}
+	seed = {
+		"pos": p, "t": 0.0, "grow": grow, "rmax": rmax, "sid": sid, "vis": vis, "burn": 0.0, "from": _hand(),
+		"col": null
+	}
 	e_t = grow + float(ed["linger"])
 	play("ostra_seed")
 	m.sfx("os_seed", p, -3.0, 1.0)
 	if (m.net_on or HeroZones.capture) and not h.remote:
-		HeroZones.tx(m, ["zone", "seed", h.nid, sid, m._r(p.x), m._r(p.y), m._r(p.z), snappedf(rmax, 0.1), snappedf(grow, 0.1)])
+		HeroZones.tx(
+			m, ["zone", "seed", h.nid, sid, m._r(p.x), m._r(p.y), m._r(p.z), snappedf(rmax, 0.1), snappedf(grow, 0.1)]
+		)
 	return true
 
 func seed_radius() -> float:
@@ -367,7 +387,13 @@ func _tick_seed(dt: float) -> void:
 		var u := float(seed["t"]) / drop
 		var from: Vector3 = seed["from"]
 		KitLooks.of(m).hold_on("os_drop", "hand", h, from.lerp(p + Vector3(0, 0.3, 0), u * u), 0.8, VOID_COL)
-	AimKit.circle(h, "seed", {"at": p, "r": seed_radius(), "fill": seed_k(), "all": true, "col": TEAL, "col2": VOID_COL, "dashed": seed_k() < 1.0})
+	AimKit.circle(
+		h, "seed",
+		{
+			"at": p, "r": seed_radius(), "fill": seed_k(), "all": true, "col": TEAL, "col2": VOID_COL,
+			"dashed": seed_k() < 1.0
+		}
+	)
 	if seed_k() >= float(ed["tell_k"]) and seed.get("col") == null:
 		seed["col"] = KitLooks.of(m).column(p, 30.0)
 		m.sfx("os_full", p, -6.0, 1.0)
@@ -423,7 +449,12 @@ func _pop(hit: bool) -> void:
 		var rr := rad * (1.0 - 0.3 * i)
 		m.later(0.04 * i, func(): m.fx.ring(p, rr, VOID_COL if i < 2 else Color("f2eaff"), 0.12))
 	m.fx.burst(p + Vector3(0, 0.8, 0), VOID_COL, int(14 + 22 * k), -5.0, 0.35, 0.0, 1.2)
-	m.later(0.12, func(): m.fx.spark(p + Vector3(0, 0.6, 0), Vector3.UP, Color("2a0a3a"), int(10 + 12 * k), 8.0, 90.0, 0.4, 8.0, 1.2))
+	m.later(
+		0.12,
+		func(): m.fx.spark(
+			p + Vector3(0, 0.6, 0), Vector3.UP, Color("2a0a3a"), int(10 + 12 * k), 8.0, 90.0, 0.4, 8.0, 1.2
+		)
+	)
 	m.fx.flash(p + Vector3(0, 0.8, 0), Color("f2eaff"), 1.0 + k, 0.1)
 	m.sfx("os_pop", p, -2.0, 1.0)
 	Feel.shake(m, "t3" if k > 0.6 else "t2", h, p)
@@ -445,7 +476,9 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null:
 		return
 	if not seed.is_empty():
-		var inside := Vector2(tgt.pos.x - float(seed["pos"].x), tgt.pos.z - float(seed["pos"].z)).length() < seed_radius()
+		var inside := Vector2(
+			tgt.pos.x - float(seed["pos"].x), tgt.pos.z - float(seed["pos"].z)
+		).length() < seed_radius()
 		if inside or float(seed["t"]) > float(seed["grow"]) * 0.9:
 			h.inp["sig"] = true
 		return
@@ -457,6 +490,8 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 		h.inp["aim"] = tgt.pos + Vector3(0, 0.9, 0)
 		h.inp["sec"] = true
 		return
-	if int(h.slot_lv["dash"]) > 0 and h.dashes >= 1.0 and swap.is_empty() and dist > 6.0 and dist < 11.0 and los and randf() < 0.15:
+	if int(
+		h.slot_lv["dash"]
+	) > 0 and h.dashes >= 1.0 and swap.is_empty() and dist > 6.0 and dist < 11.0 and los and randf() < 0.15:
 		h.inp["aim"] = tgt.pos
 		h.inp["dash"] = true

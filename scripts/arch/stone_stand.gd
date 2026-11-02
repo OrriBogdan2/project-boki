@@ -1,7 +1,7 @@
 class_name StoneStand
 extends RefCounted
 ## Low walls you can stand on and climb (Breah's rocks; any Verbs wall with a "top" height in metres).
-## The owner's rule (sync61 playtest): raised rocks give verticality. Three pieces, all small:
+## The owner's rule: raised rocks give verticality. Three pieces, all small:
 ##   - Verbs.wall_blocks lets a body whose feet are at the top walk over it (and blocks below it at
 ##     the rock's own height, so the hop and ledge numbers stay honest);
 ##   - Ent.ground() reads top_under(), so a body over a rock lands and stands on it;

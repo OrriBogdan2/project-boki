@@ -12,11 +12,13 @@ extends RefCounted
 ##   ["zone", "bridge", nid, x, y, z, dx, dz, len, width, time]
 ##   ["zone", "seed",   nid, sid, x, y, z, rmax, grow]
 ##   ["zone", "pop",    sid]
-##   ["zone", "tp",     nid, x, y, z]            a body another game owns was moved (Trade, the rank-3 Brimseed pull): its own game moves it
+## ["zone", "tp",     nid, x, y, z]            a body another game owns was moved (Trade, the rank-3 Brimseed pull): its
+## own game moves it
 
 const ROCK_COL := Color("c98d4a")
 const ROCK_R := 0.5                  # a rock's footprint when it asks the world if it fits
-const ROCK_TOP := 1.25               # m: a rock's flat top above its base (StoneStand: you stand on it; a jump clears it)
+# m: a rock's flat top above its base (StoneStand: you stand on it; a jump clears it)
+const ROCK_TOP := 1.25
 const ROCK_TH := 0.42                # m: half its depth (wider than a barrier so a body fits on top)
 const STEP := 0.25                   # the walk along a cast, metres
 
@@ -40,10 +42,14 @@ static func fits(m: Node, p: Vector3, y: float, bodies := true) -> bool:
 		return false
 	if bodies:
 		for e in m.hunters:
-			if is_instance_valid(e) and not e.dead and Vector2(e.pos.x - p.x, e.pos.z - p.z).length() < ROCK_R + e.r + 0.15 and absf(e.pos.y - g) < 2.0:
+			if is_instance_valid(e) and not e.dead and Vector2(
+				e.pos.x - p.x, e.pos.z - p.z
+			).length() < ROCK_R + e.r + 0.15 and absf(e.pos.y - g) < 2.0:
 				return false
 		for mb in m.mobs:
-			if is_instance_valid(mb) and not mb.dead and Vector2(mb.pos.x - p.x, mb.pos.z - p.z).length() < ROCK_R + mb.r + 0.15 and absf(mb.pos.y - g) < 2.0:
+			if is_instance_valid(mb) and not mb.dead and Vector2(
+				mb.pos.x - p.x, mb.pos.z - p.z
+			).length() < ROCK_R + mb.r + 0.15 and absf(mb.pos.y - g) < 2.0:
 				return false
 	return true
 
@@ -54,7 +60,10 @@ static func walk(m: Node, from: Vector3, aim: Vector3, reach: float) -> Dictiona
 	var dv := Vector2(aim.x - from.x, aim.z - from.z)
 	var want := minf(dv.length(), reach)
 	var dir := dv.normalized() if dv.length() > 0.01 else Vector2(0, -1)
-	var out := {"ok": false, "pos": from, "stopped": "reach" if dv.length() > reach else "", "over_abyss": w.is_void(aim.x, aim.z), "dir": dir}
+	var out := {
+		"ok": false, "pos": from, "stopped": "reach" if dv.length() > reach else "",
+		"over_abyss": w.is_void(aim.x, aim.z), "dir": dir
+	}
 	var k := STEP
 	var last := from
 	var y := from.y
@@ -81,19 +90,35 @@ static func walk(m: Node, from: Vector3, aim: Vector3, reach: float) -> Dictiona
 ## No other wall in the game looks like it.
 static func rock_node() -> Node3D:
 	var n := Node3D.new()
-	var cols := [[Vector3(-0.32, 0, 0.05), 0.34, ROCK_TOP], [Vector3(0.12, 0, -0.1), 0.38, ROCK_TOP - 0.06], [Vector3(0.42, 0, 0.12), 0.28, ROCK_TOP - 0.18], [Vector3(-0.02, 0, 0.22), 0.26, ROCK_TOP - 0.3]]
+	var cols := [
+		[Vector3(-0.32, 0, 0.05), 0.34, ROCK_TOP], [Vector3(0.12, 0, -0.1), 0.38, ROCK_TOP - 0.06],
+		[Vector3(0.42, 0, 0.12), 0.28, ROCK_TOP - 0.18], [Vector3(-0.02, 0, 0.22), 0.26, ROCK_TOP - 0.3]
+	]
 	for c in cols:
 		var hgt: float = c[2]
-		var col := Models.part(n, Models.cyl(float(c[1]) * 0.92, float(c[1]), hgt, 6), KitLooks.rock_mat(0.35, KitLooks.vis_rng.randf() * 10.0), (c[0] as Vector3) + Vector3(0, hgt * 0.5, 0), Vector3.ONE, Vector3(0, KitLooks.vis_rng.randf(), 0))
+		var col := Models.part(
+			n, Models.cyl(float(c[1]) * 0.92, float(c[1]), hgt, 6),
+			KitLooks.rock_mat(0.35, KitLooks.vis_rng.randf() * 10.0), (c[0] as Vector3) + Vector3(0, hgt * 0.5, 0),
+			Vector3.ONE, Vector3(0, KitLooks.vis_rng.randf(), 0)
+		)
 		col.name = "Col"
-		Models.part(n, Models.cyl(float(c[1]) * 0.8, float(c[1]) * 0.92, 0.06, 6), Models.toon(Color("6e5444"), false, 0.0), (c[0] as Vector3) + Vector3(0, hgt + 0.02, 0))
-	var base := Models.part(n, Models.cyl(0.78, 0.86, 0.05, 10), Models.glow_mat(Color(1.0, 0.42, 0.12, 0.55)), Vector3(0, 0.03, 0))
+		Models.part(
+			n, Models.cyl(float(c[1]) * 0.8, float(c[1]) * 0.92, 0.06, 6), Models.toon(Color("6e5444"), false, 0.0),
+			(c[0] as Vector3) + Vector3(0, hgt + 0.02, 0)
+		)
+	var base := Models.part(
+		n, Models.cyl(0.78, 0.86, 0.05, 10), Models.glow_mat(Color(1.0, 0.42, 0.12, 0.55)), Vector3(0, 0.03, 0)
+	)
 	base.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	return n
 
 ## Builds a rock (a movement-blocking Verbs wall wearing a rock's look). send: tell the other games.
-static func rock(m: Node, by: Ent, at: Vector3, dir: Vector2, rid: String, len_: float, time_: float, hp: float, send := true) -> Dictionary:
-	var w: Dictionary = m.verbs.add_wall(by, at, dir, {"length": len_, "hp": hp, "time": time_, "block": "enemy", "move": true, "color": "#c98d4a"}, 1.0)
+static func rock(
+	m: Node, by: Ent, at: Vector3, dir: Vector2, rid: String, len_: float, time_: float, hp: float, send := true
+) -> Dictionary:
+	var w: Dictionary = m.verbs.add_wall(
+		by, at, dir, {"length": len_, "hp": hp, "time": time_, "block": "enemy", "move": true, "color": "#c98d4a"}, 1.0
+	)
 	var old: Node3D = w["node"]
 	var n := rock_node()
 	n.scale = Vector3(len_ / 1.15, 1.0, 1.0)
@@ -105,13 +130,21 @@ static func rock(m: Node, by: Ent, at: Vector3, dir: Vector2, rid: String, len_:
 	w["th"] = ROCK_TH
 	m.verbs._place_wall(w, n)
 	n.scale = Vector3(len_ / 1.15, 0.05, 1.0)
-	n.create_tween().tween_property(n, "scale", Vector3(len_ / 1.15, 1.0, 1.0), 0.18).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	n.create_tween().tween_property(
+		n, "scale", Vector3(len_ / 1.15, 1.0, 1.0), 0.18
+	).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	if is_instance_valid(old):
 		old.queue_free()
 	m.fx.burst(at + Vector3(0, 0.3, 0), Color("d9b27a"), 10, 3.0, 0.4, 8.0, 1.0)
 	m.fx.spark(at + Vector3(0, 0.2, 0), Vector3.UP, Color("ff7a2a"), 8, 5.0, 40.0, 0.3, 10.0, 1.0)
 	if send and by != null and (m.net_on or capture) and not by.remote:
-		tx(m, ["zone", "rock", by.nid, rid, m._r(at.x), m._r(at.y), m._r(at.z), snappedf(dir.x, 0.001), snappedf(dir.y, 0.001), snappedf(len_, 0.01), snappedf(time_, 0.1), snappedf(hp, 0.1)])
+		tx(
+			m,
+			[
+				"zone", "rock", by.nid, rid, m._r(at.x), m._r(at.y), m._r(at.z), snappedf(dir.x, 0.001),
+				snappedf(dir.y, 0.001), snappedf(len_, 0.01), snappedf(time_, 0.1), snappedf(hp, 0.1)
+			]
+		)
 	return w
 
 static func find_rock(m: Node, rid: String) -> Dictionary:
@@ -129,10 +162,18 @@ static func remove_rock(m: Node, w: Dictionary, send := true) -> void:
 		tx(m, ["zone", "rockgo", String(w.get("rid", ""))])
 
 ## A temporary rock bridge over the abyss from `from` along `dir`. Returns the tiles turned to ground.
-static func bridge(m: Node, by: Ent, from: Vector3, dir: Vector2, len_: float, width: float, time_: float, send := true) -> int:
+static func bridge(
+	m: Node, by: Ent, from: Vector3, dir: Vector2, len_: float, width: float, time_: float, send := true
+) -> int:
 	var n: int = m.verbs.add_bridge(by, from, dir, {"length": len_, "width": width, "time": time_, "color": "#d9b27a"})
 	if n > 0 and send and by != null and (m.net_on or capture) and not by.remote:
-		tx(m, ["zone", "bridge", by.nid, m._r(from.x), m._r(from.y), m._r(from.z), snappedf(dir.x, 0.001), snappedf(dir.y, 0.001), snappedf(len_, 0.1), snappedf(width, 0.1), snappedf(time_, 0.1)])
+		tx(
+			m,
+			[
+				"zone", "bridge", by.nid, m._r(from.x), m._r(from.y), m._r(from.z), snappedf(dir.x, 0.001),
+				snappedf(dir.y, 0.001), snappedf(len_, 0.1), snappedf(width, 0.1), snappedf(time_, 0.1)
+			]
+		)
 	return n
 
 # ------------------------------------------------------------------ the seed (visual; the caster's game runs the rules)
@@ -189,7 +230,10 @@ static func net_in(m: Node, x: Array) -> void:
 			if x.size() < 12: return
 			var by: Ent = m.ents_by_id.get(String(x[2]), null)
 			if by == null or not find_rock(m, String(x[3])).is_empty(): return
-			rock(m, by, Vector3(x[4], x[5], x[6]), Vector2(x[7], x[8]), String(x[3]), float(x[9]), float(x[10]), float(x[11]), false)
+			rock(
+				m, by, Vector3(x[4], x[5], x[6]), Vector2(x[7], x[8]), String(x[3]), float(x[9]), float(x[10]),
+				float(x[11]), false
+			)
 		"rockgo":
 			var w := find_rock(m, String(x[2]))
 			if not w.is_empty():
@@ -198,7 +242,10 @@ static func net_in(m: Node, x: Array) -> void:
 			if x.size() < 11: return
 			var by2: Ent = m.ents_by_id.get(String(x[2]), null)
 			if by2 != null:
-				bridge(m, by2, Vector3(x[3], x[4], x[5]), Vector2(x[6], x[7]), float(x[8]), float(x[9]), float(x[10]), false)
+				bridge(
+					m, by2, Vector3(x[3], x[4], x[5]), Vector2(x[6], x[7]), float(x[8]), float(x[9]), float(x[10]),
+					false
+				)
 		"seed":
 			if x.size() < 9: return
 			var sid := String(x[3])
