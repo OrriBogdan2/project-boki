@@ -49,10 +49,13 @@ func _process(_d: float) -> void:
 func is_open() -> bool:
 	return page != ""
 
-## Admin tools are for the game's owner. On this showcase build they are off in normal play (no F1 / ` panel, no
-## Admin or Mod mode entries in the menus); launch with `-- --admin` to bring them back.
+## Admin tools are for the game's owner: always on desktop, and on the web for the artifact's owner. They are hidden
+## (no F1 / ` panel, no Admin or Mod mode entries in the menus) only when launched with `-- --showcase`, or while
+## recording mode (F10) is on, so filmed footage never shows them.
 func admin_allowed() -> bool:
-	return OS.get_cmdline_user_args().has("--admin") and (not OS.has_feature("web") or Social.is_owner)
+	if OS.get_cmdline_user_args().has("--showcase") or Record.clean():
+		return false
+	return not OS.has_feature("web") or Social.is_owner
 
 # ------------------------------------------------------------------ input
 func _input(event: InputEvent) -> void:

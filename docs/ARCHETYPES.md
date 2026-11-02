@@ -1185,3 +1185,23 @@ heroes under the same ids: **Vireo** (id `mage`, now Light: Sparks, Wirerun, Coi
 The old Mage and Gunslinger sections above are history. Per-slot tables, research notes and combinations:
 `docs/heroes/mage.md` and `docs/heroes/gunslinger.md`; combos are checked by `--mage-combo-check` and
 `--gunslinger-combo-check`. `Hex` (scripts/arch/hex.gd) is no longer used by a kit.
+
+## Inspired by (per hero)
+
+The one place the hero docs point to for traceability (the per-hero files in `docs/heroes/` do not name other
+games' heroes). Mechanics only: every name, number, text, look and sound in the game is ours.
+
+| Archetype | Hero | Reference hero's public page | Notes |
+|---|---|---|---|
+| `thief` | Thief | [Shiv](https://supervive.wiki.gg/wiki/Shiv) | Ported ability by ability (Kits2 above) |
+| `juggernaut` | Juggernaut | [Brall](https://supervive.wiki.gg/wiki/Brall) | Ported ability by ability (Kits2 above) |
+| `archer` | Archer | [Myth](https://supervive.wiki.gg/wiki/Myth) | Accuracy pass: `docs/heroes/archer.md` |
+| `bulwark` | Bulwark | [Oath](https://supervive.wiki.gg/wiki/Oath) | Accuracy pass: `docs/heroes/bulwark.md` |
+| `mage` | Vireo | [Joule](https://supervive.wiki.gg/wiki/Joule) | `docs/heroes/mage.md` |
+| `gunslinger` | Marlowe | [Ghost](https://supervive.wiki.gg/wiki/Ghost) | `docs/heroes/gunslinger.md` |
+| `ashwick` | Ashwick | [Felix](https://supervive.wiki.gg/wiki/Felix) | `docs/heroes/ashwick.md` |
+| `dredge` | Dredge | [Kingpin](https://supervive.wiki.gg/wiki/Kingpin) | `docs/heroes/dredge.md` |
+| `tender` | Linnet, the Tender | [Elluna](https://supervive.wiki.gg/wiki/Elluna) | `docs/heroes/tender.md` |
+| `rimewright` | Tamsin, the Rimewright | [Celeste](https://supervive.wiki.gg/wiki/Celeste) | `docs/heroes/rimewright.md` |
+| `dolm` | Dolm | [Tetra](https://supervive.wiki.gg/wiki/Tetra) | `docs/heroes/dolm.md` |
+| `ostra` | Ostra | [Void](https://supervive.wiki.gg/wiki/Void) | `docs/heroes/ostra.md` |

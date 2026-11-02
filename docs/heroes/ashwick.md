@@ -1,13 +1,11 @@
 # Ashwick (archetype `ashwick`, heavy)
 
-Internal design doc. Source behaviour: SUPERVIVE hero Felix (traceability only; none of its names, text or looks
+Internal design doc. Source behaviour: the hero named in the Inspired-by table in docs/ARCHETYPES.md (traceability only; none of its names, text or looks
 appear in the game). Everything the player sees and hears is ours.
 
 ## Research summary
 Sources (gameplay facts only, written in our own words):
-- https://supervive.wiki.gg/wiki/Felix (kit page, upgrade lines, patch log inline)
-- https://deltiasgaming.com/?p=298994 (ability guide and the two-charge spread combo)
-- https://www.breakflip.com/guides/13625.html (role overview)
+- The reference hero's public kit page and guides (see the Inspired-by table in docs/ARCHETYPES.md)
 
 Where they disagreed: one guide attributes the pull, Anti-Heal and shield to the bolt; the wiki puts them on the
 shield ability (Q), which is what we follow. Patch changes taken from the wiki: 19.03.25 level-1 burn became
@@ -15,7 +13,7 @@ lethal and the burn lasts 3s; 18.12.24 the bolt no longer knocks back; 20.11.202
 cooldown and self-slow. Latest version chosen. Only three sources were usable.
 
 ## Scaling
-Source Felix 1367 HP against our heavy 193 HP: damage x0.13 (flamethrower 205/s -> 27/s), cooldowns about x0.8.
+Source hero 1367 HP against our heavy 193 HP: damage x0.13 (flamethrower 205/s -> 27/s), cooldowns about x0.8.
 Burn is a share of the foe's health per second (source level 1 = 1.3% plus a scaling term; ours 2% and 4%).
 
 ## Per-slot table

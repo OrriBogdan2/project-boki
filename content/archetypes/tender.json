@@ -17,9 +17,7 @@
 			"lantern_crook": "Embers every 0.4s; Kindled foes take more and wind your Hearthlight back."
 		}
 	},
-	"weapons": [
-		"lantern_crook"
-	],
+	"signature": "lantern_crook",
 	"resource": {
 		"id": "kindle",
 		"name": "Kindle",

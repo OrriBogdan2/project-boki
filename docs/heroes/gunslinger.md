@@ -1,16 +1,13 @@
 # Marlowe (archetype id `gunslinger`, Medium)
 
 Internal design note (may cite the source for traceability; nothing in the game does).
-Source behaviour reference: SUPERVIVE hero Ghost. Our hero is an original character, the burr-and-needle
+Source behaviour reference: the hero named in the Inspired-by table in docs/ARCHETYPES.md. Our hero is an original character, the burr-and-needle
 marksman: a visored cap, a cropped jacket, a long streaming scarf, a bandolier of spiked burr charges,
 one bronze pauldron. Palette: ember orange and bronze. Payoff word: SKEWERED.
 
 ## Research summary
 Sources (gameplay only):
-- https://supervive.wiki.gg/wiki/Ghost (passive, LMB, RMB, Shift, Q, R, rank upgrades)
-- https://supervive.wiki.gg/wiki/Patch_Week_1_Open_Beta and the Leveling Rework patch page (rank and cooldown changes)
-- https://supervive.wiki.gg/wiki/Leveling_Rework_%2B_Big_Balance_Patch
-- Guide listings found by search (esports.gg, gamer-guides) for role and combo order.
+- The reference hero's public kit page and guides (see the Inspired-by table in docs/ARCHETYPES.md)
 
 Where they disagreed: the passive stack bonus is 6% on the current wiki and was 8% before 19 March 2025
 (we took 6%). Rank 4 effects (grenade reset on a knock, railgun cooldown per target) are the late
@@ -58,7 +55,7 @@ and needle, fed by Fever) does not need it. Nothing was folded in.
 | RMB Burr Charge | `gunslinger_rmb` | burr cocked by the ear, then the lob |
 | Shift Slipstep | `gunslinger_dash` | sat back into the skid, arms out for balance |
 | E Longneedle | `gunslinger_e` | braced low behind the barrel for the 0.8s charge, recoil throws the chest back |
-Frame strips: `~/shots/heroes-joule-ghost/strip_gunslinger_*.png`.
+Frame strips: `strip_gunslinger_*.png` in the pair's shots folder.
 
 ## Engine notes
 - Rattled is a `KitStatus` status (Net event `["kst", nid, kind, seconds, k]`, Net 0.7.0, already on main);

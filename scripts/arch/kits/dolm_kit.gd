@@ -31,7 +31,6 @@ var sight_pings := 0
 var bridges := 0
 var landslides := 0
 
-func lmb_def() -> Dictionary: return d.get("lmb", {})
 func rock_def() -> Dictionary: return d.get("rock", {})
 func slam_def() -> Dictionary: return rmb_def()["slam"]
 
@@ -134,6 +133,13 @@ func _tick(dt: float) -> void:
 	else:
 		sight_t = 0.0
 
+## A Boki merge cancels the air Quakefall's dive (no slam on landing) and the Quake Fist's charge.
+func _drop_holds() -> void:
+	dive = false
+	if lmb_t >= 0.0:
+		lmb_t = -1.0
+		h.mel_hold = 0.0
+
 func stonesight() -> int:
 	var dir := h.aim_dir()
 	var n := 0
@@ -185,12 +191,6 @@ func lmb_override(held: bool, dt: float) -> bool:
 	elif pressed:
 		pass
 	return true
-
-func _bot_target() -> Ent:
-	var best: Ent = null; var bd := 12.0
-	for f in m.foes_of(h.team):
-		if f.hittable() and h.flat_dist(f) < bd: bd = h.flat_dist(f); best = f
-	return best
 
 func _boulder() -> void:
 	var bd: Dictionary = lmb_def()["boulder"]

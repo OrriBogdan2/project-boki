@@ -6,7 +6,7 @@
 	"fantasy": "The flue sweep. Soaks foes in Char with a torch lance, flashes them over, and hits back harder after every knock.",
 	"silhouette": "the tall sooty top hat and the bellows on the back",
 	"card": {"loop": "Hold the torch lance to build Char, flash the foe over, then upgrade and spread it with Cinder Shot and Spark Leap. Knocks reset your cloak.", "dash": "Two charges of a leap through the foe: a burst and half a Flashover of Char.", "passive": "Every hit builds Char; at 31 the foe Flashes over (burns 3s). Stoking a foe that already burns upgrades the burn. A knock heals you.", "rmb": "Tap: a cinder shot. On a burning foe it upgrades the burn and spreads it to those around.", "e": "Scorch and drag nearby foes in, and shield up. A knock resets it.", "r": "", "weapons": {"flamethrower": "Hold to roar out a 6m cone of fire; it builds Char fast. 8 seconds of fuel, then a short refill."}},
-	"weapons": ["flamethrower"],
+	"signature": "flamethrower",
 	"resource": {"id": "char", "name": "Char", "max": 31, "kind": "stacks", "col": "#ff9a3a", "ignite_at": 31, "ignite_t": 3.0, "dps1": 0.02, "dps2": 0.04, "expire": 5.0, "heal_knock": 0.16},
 	"passive": {"name": "Flashover", "desc": "Your fire builds Char on foes (it all falls off after 5s). At 31 Char the foe Flashes over: 3s of burning for 2% of their health a second; fed again to full Char it becomes a fiercer burn (4%). Anything that stokes a foe already burning upgrades it. A knock heals you 16% of your health."},
 	"lmb": {"cone_deg": 44.0, "range": 6.0, "tick": 0.1, "dps": 27.0, "char_tick": 3.0, "char_burning": 1.5, "spool": 0.18, "slow_after": 0.35},
