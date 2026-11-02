@@ -1,6 +1,6 @@
 class_name FarmSites
 extends RefCounted
-## Construction on the farm (docs/decisions/0003-farm-building.md). Putting down a new building in
+## Construction on the farm (docs/decisions/0004-farm-building.md). Putting down a new building in
 ## build mode pays gems and materials (wood, stone, Ember Coals, fibre) and leaves a construction
 ## SITE: the deco entry carries e["site"] = {need, got, to, up}. Boki walk over and build it, one
 ## swing at a time (HomeWork job "build", element Craft; any Boki that can work will, a Craft knack

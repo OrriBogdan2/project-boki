@@ -1,6 +1,6 @@
 class_name FarmModels
 extends RefCounted
-## How the farm's construction looks (docs/decisions/0003-farm-building.md): the scaffolded site with
+## How the farm's construction looks (docs/decisions/0004-farm-building.md): the scaffolded site with
 ## a progress bar, and the look of a building at tier 2 and 3 (a stone plinth and a pennant; gold
 ## trim, glowing corner lanterns and a taller pennant). Built from simple parts like the rest of
 ## the farm's models. HomeBuild.make_deco calls site() / dress(); FarmSites.tick keeps the bar current.

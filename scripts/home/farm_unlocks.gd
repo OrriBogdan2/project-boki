@@ -1,6 +1,6 @@
 class_name FarmUnlocks
 extends RefCounted
-## What a farm may build, and when (docs/decisions/0003-farm-building.md). A new farm starts with
+## What a farm may build, and when (docs/decisions/0004-farm-building.md). A new farm starts with
 ## a house, a crop patch and a cooking pot; everything else opens through farm level (points from
 ## play) or a milestone (first extraction, first boss, three Boki scanned). The numbers and the
 ## table are content/rules/farm_build.json. Nothing here is saved: level and milestones are read off

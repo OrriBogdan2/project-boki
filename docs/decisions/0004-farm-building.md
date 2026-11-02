@@ -1,4 +1,4 @@
-# 0003: Farm building pass (unlocks, construction sites, tiers)
+# 0004: Farm building pass (unlocks, construction sites, tiers)
 
 - **Status:** accepted (owner decisions in the main-overflow handoff, section 4)
 - **Date:** 2026-11-02

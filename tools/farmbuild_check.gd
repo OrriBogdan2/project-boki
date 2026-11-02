@@ -1,5 +1,5 @@
 extends RefCounted
-## --farmbuild-check: the farm building pass (docs/decisions/0003-farm-building.md).
+## --farmbuild-check: the farm building pass (docs/decisions/0004-farm-building.md).
 ##   1. unlocks: a new farm opens with a house, crop patch and pot only; farm level and the three
 ##      milestones open the rest; older farms and anything already owned stay open; incubator cradles
 ##   2. build mode: locked entries show their requirement, costs are icons, a locked item can't be

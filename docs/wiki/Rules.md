@@ -105,7 +105,7 @@ Capture by scan (docs/decisions/0002). A wild Boki that is knocked out (dazed) c
 
 ## farm_build (`content/rules/farm_build.json`)
 
-The farm building pass (docs/decisions/0003-farm-building.md). Farm level is points from play; items unlock by farm level or a milestone; new buildings are construction sites that Boki build with materials and labour; buildings upgrade L1 to L3. Units: gems and materials are counts, labour is Boki work swings (one swing is about 6 s at building skill 1).
+The farm building pass (docs/decisions/0004-farm-building.md). Farm level is points from play; items unlock by farm level or a milestone; new buildings are construction sites that Boki build with materials and labour; buildings upgrade L1 to L3. Units: gems and materials are counts, labour is Boki work swings (one swing is about 6 s at building skill 1).
 
 | Setting | Value |
 |---|---|

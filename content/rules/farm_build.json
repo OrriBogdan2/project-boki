@@ -1,5 +1,5 @@
 {
-	"desc": "The farm building pass (docs/decisions/0003-farm-building.md). Farm level is points from play; items unlock by farm level or a milestone; new buildings are construction sites that Boki build with materials and labour; buildings upgrade L1 to L3. Units: gems and materials are counts, labour is Boki work swings (one swing is about 6 s at building skill 1).",
+	"desc": "The farm building pass (docs/decisions/0004-farm-building.md). Farm level is points from play; items unlock by farm level or a milestone; new buildings are construction sites that Boki build with materials and labour; buildings upgrade L1 to L3. Units: gems and materials are counts, labour is Boki work swings (one swing is about 6 s at building skill 1).",
 	"points": {"extracts": 3.0, "bosses": 6.0, "caught": 2.0, "hatched": 2.0, "harvested": 0.25, "built": 2.0, "fb_built": 2.0},
 	"points_doc": "Farm points = sum(stat * weight). 'built' counts the lot buildings you built, 'fb_built' the buildings Boki finished on the farm.",
 	"levels": [0, 6, 16, 30, 48, 70],
