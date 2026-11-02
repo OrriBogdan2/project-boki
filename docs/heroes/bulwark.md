@@ -34,6 +34,27 @@ What the source does: tap throws the hammer to the cursor, where it stays plante
 - Knockout keeps our heal (24) and a 0.5 s stun.
 - The aegis keeps 160 HP, regenerating 20/s after 2 s down, and he walks at 60% behind it.
 - The blue ring on the target before the Smash is the hammer's reveal, not part of the dash.
+- The wind-down is a 0.3 s glider lock after the slam and the 360 spin.
+- "Begin to resurrect" is +0.35 of a downed teammate's revive bar.
+- The 5 m minimum throw beats the cursor when the cursor is closer (source patch note), so a point-blank click lands 5 m out.
+
+## Small mechanics (fine print; source, footage, ours)
+| Mechanic | Source | Footage | Ours | Check |
+|---|---|---|---|---|
+| The throw lands at the cursor, clamped to range | sheet bjorn.md, owner note | confirms (0408, 0024-0029) | built | `bjorn aim: the hammer lands at the cursor` |
+| The hammer flies at least 5 m | [wiki patch 20.11.24](https://supervive.wiki.gg/wiki/Oath) | consistent | built: a close cursor still throws 5 m | `bjorn small: a close cursor still throws 5 m` |
+| A recall can't come within 0.25 s of the throw | [wiki patch 20.11.24](https://supervive.wiki.gg/wiki/Oath) | consistent (0.4 s round trips) | built | `bjorn small: a recall in the first 0.25 s is ignored` |
+| It passes through enemies, hitting out and back for the same damage | [wiki: Magnetic Hammer](https://supervive.wiki.gg/wiki/Oath) | confirms (0041, 0043) | built | `bulwark LMB` lines |
+| Allies get vision round the planted hammer | [wiki](https://supervive.wiki.gg/wiki/Oath) | not visible | built (already ours) | archetype check |
+| No automatic return | sheet | 3.6 s+ planted | built | `bjorn: the planted hammer never comes back by itself` |
+| Wind-down frames after the swing and the spin: no glider straight away, so momentum carries | [wiki patch 05.02.25](https://supervive.wiki.gg/wiki/Oath) | not visible | built: 0.3 s glide lock after the slam and the 360 spin | `bjorn small: wind-down after the slam` |
+| Hammer Smash full at 1.25 s | [wiki](https://supervive.wiki.gg/wiki/Oath) | full by 2.4 s | built | `bjorn LMB held: the full-charge flare at 1.25s` |
+| Shift during a Hammer Smash: a short dash without the spin, reduced cooldown | [wiki: Spin Dash](https://supervive.wiki.gg/wiki/Oath) | not shown | built (already ours: half a charge) | `combo bulwark: hold LMB > Shift` |
+| Shield up + Shift: a bash, briefly invulnerable | [wiki: Shield Bash](https://supervive.wiki.gg/wiki/Oath) | not shown | built: Shield Charge | `combo bulwark: shield up > Shift` |
+| Knock into a wall or another enemy (Shield Bash or full Smash) stuns 0.5 s, heals | [wiki: Valiant Strength](https://supervive.wiki.gg/wiki/Oath) | confirms the stun (0171) | built | `combo bulwark: Bash > wall` |
+| Regen Field: at the hammer, bonus burst after a delay; heals the shield only while it's up; never repairs a broken one | [wiki: Regen Field](https://supervive.wiki.gg/wiki/Oath) | confirms the zone (0414) | built | `bjorn small: Mending Ground doesn't repair a broken aegis` |
+| Allied wisps hit by the burst begin to resurrect | [wiki: Regen Field](https://supervive.wiki.gg/wiki/Oath) | not shown | built: a downed teammate inside gets a third of the revive | `bjorn small: a downed teammate ... starts reviving` |
+| Dash hits refund Shield Bash (rank 4) | [wiki](https://supervive.wiki.gg/wiki/Oath) | - | not built: our ranks stop at 3 | - |
 
 ## Scaling
 Heavy class (193 HP): throw 12 and recall 12; Crushing Blow 36-66 (3x and 5.5x the throw, the source's 3x and 5.6x); 360 Smash 24 (2x the throw); Bash 12, Slam 18; Crushed 8 + stun 0.5 + heal 24; Mending Ground 26. Numbers follow the source's ratios, not its values.

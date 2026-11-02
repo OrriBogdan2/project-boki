@@ -33,8 +33,31 @@ Where the footage and our older doc disagree, the footage (the newer version) wi
 - A tap shot (before Empowered) does 15 and lands at the cursor.
 - The Impaling Shot's wall stun stays 1.2 s and its full charge 1.1 s (the earlier pass).
 - "Cremating" a burning enemy with a knock is flavour, not a mechanic: not built.
-- During Spirit Walk she can still shoot and cast, and moves 15% faster.
+- During Spirit Walk she can still shoot and cast, and moves 15% faster (35% inside something).
+- The spirit orb lasts 4 s and gives anyone who touches it (ally or foe) one 2.8 s Spirit Walk; they get no roll and no snap-back.
+- Cremation is +10 damage and a longer burn on a foe knocked by the Heavy Shot while it stands in her burning Hail Wall.
+- Not built: the double-wall climb (no heightmap equivalent) and Hail Wall damaging wisps (our downed hunters take no ability damage).
 - "Inside something" means a rock, tree or pillar tile, or a movement-blocking ability barrier; terrain cliffs and ledges are never passable.
+
+## Small mechanics (fine print; source, footage, ours)
+| Mechanic | Source | Footage | Ours | Check |
+|---|---|---|---|---|
+| Stage 1 lands at the cursor, stage 2 flies past it | sheet pin.md | confirms (0117, 0168-0169) | built | `pin aim:` lines |
+| A perfect release makes the next charge faster | sheet pin.md (newer kit) | card text only | built, 1.6x to Empowered | `combo pin: perfect > ...` |
+| Perfect shots ease the self-slow of drawing | [wiki: Greenwood Bow](https://supervive.wiki.gg/wiki/Myth) | not visible | built: the draw after a perfect slows you to 0.85, not 0.7 | `pin small: after a perfect...` |
+| Overdraw halves the shot | sheet pin.md | confirms (0252-0256) | built | `pin bow: overdrawn` |
+| Spirit Walk: dodge roll, then 2.8 s through walls and objects, not terrain | [wiki: Phase Walk](https://supervive.wiki.gg/wiki/Myth), sheet | confirms (0360) | built | `combo pin: Spirit Walk passes...` |
+| +50 move speed while inside terrain | [wiki: Phase Walk](https://supervive.wiki.gg/wiki/Myth) | not measurable | built: x1.35 inside (x1.15 elsewhere) | `pin small: faster inside...` |
+| Walking into a wall leaves a phase orb; allies or enemies touching it also phase | [wiki: Phase Walk](https://supervive.wiki.gg/wiki/Myth) | not shown | built: a 4 s spirit orb at the entry; anyone touching it walks as a spirit for 2.8 s | `pin small: anyone touching the orb...` |
+| Taking damage ends it; ending inside a wall costs 30 mana and teleports back | [wiki](https://supervive.wiki.gg/wiki/Myth), sheet | card text | built (30 Focus) | `pin: damage ends...`, `combo pin: ... ending inside a rock` |
+| Knocking an enemy restores a dash charge | [wiki: Phase Walk](https://supervive.wiki.gg/wiki/Myth) | not shown | built (already ours) | `combo archer: knock > heal + dash charge` |
+| Heartpiercer can be held 3 s after cast before it fires | [wiki patch 20.11.24](https://supervive.wiki.gg/wiki/Myth) | not shown | built: auto-release at 3 s | `pin small: the Heavy Shot can be held 3 s` |
+| Short Heartpiercer charges push harder | [wiki patch 20.11.24](https://supervive.wiki.gg/wiki/Myth) | not shown | built: minimum push 6 -> 8 | same |
+| Into terrain: 1.2 s stun and extra damage | [wiki: Heartpiercer](https://supervive.wiki.gg/wiki/Myth) | not clean in footage | built (earlier pass) | `combo archer: Heavy Shot > wall` |
+| Knocking back a burning enemy Cremates it | [wiki: Rain of Arrows](https://supervive.wiki.gg/wiki/Myth), sheet | flavour text | built: a Heavy Shot knock on a foe in the burning wall: +10 and a longer burn, CREMATED | `pin small: Heavy Shot into a foe burning...` |
+| Rain of Arrows: a cone/arc wall, slow and anti-heal | [wiki](https://supervive.wiki.gg/wiki/Myth), sheet | confirms (0457, 0498) | built: 120 degree arc at the cursor distance | `pin E:` lines |
+| Climb double-high walls by jumping while facing them | [wiki: Spectral Hunter](https://supervive.wiki.gg/wiki/Myth) | not shown | not built: our heightmap mantle has no double-wall case (Assumptions) | - |
+| Affects wisps (downed hunters) | [wiki](https://supervive.wiki.gg/wiki/Myth) | not shown | not built: our downed hunters aren't hit by ability damage (Assumptions) | - |
 
 ## Scaling
 Light class, 124 HP: tap 15, Empowered 30, Supercharged 60, overdrawn 30, tap snare 8, full Heavy Shot 30 (+12 wall hit), Hail Wall 5 per 0.5 s, Deadeye +18. Source numbers were used only as ratios (overdraw half of Supercharged, E cooldown about RMB's).
