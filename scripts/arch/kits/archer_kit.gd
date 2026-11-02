@@ -194,6 +194,9 @@ func on_knock(t: Hunter, mine: bool) -> void:
 	h.dashes = minf(h.max_dashes(), h.dashes + float(rd.get("knock_dash", 1.0)))
 	m.fx.burst(h.pos + Vector3(0, 1.0, 0), Color("9fe0a8"), 14, 2.5, 0.5, -2.0)
 	m.fx.word(h.pos + Vector3(0, 2.4, 0), "RUN DOWN", res_col(), true)
+	m.fx.ring(h.pos, 1.6, res_col(), 0.3)
+	m.sfx("ab_ready", h.pos, -3.0, 1.3)
+	net_ring(h.pos, 1.6, res_col())
 
 func _high_ground() -> bool:
 	var gy: float = m.world.ground_at(h.pos.x, h.pos.z)
