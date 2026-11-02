@@ -56,6 +56,8 @@ static func drop(m: Match, h: Hunter, c: Dictionary, from_net: bool) -> void:
 		# a rich area's chest sometimes holds a Rift Key
 		if m.exits and not m.exits.list.is_empty() and bonus >= int(r["rift_key_min_bonus"]) and rng.randf() < float(r["rift_key_odds"]):
 			m.exits.drop_key(at)
+	if c.has("ride") and not from_net:
+		KeyBonus.on_break(m, at, "train_crate")      # a sky-train crate: a rare chest key
 	perk_hook(m, h, c)
 	if h and not h.remote and h.tonics < 5 and randf() < float(r["tonic_odds"]):
 		h.tonics += 1

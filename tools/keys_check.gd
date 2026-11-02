@@ -38,13 +38,14 @@ func build(seed_i: int, extra := {}) -> Match:
 func run(main_node: Node) -> void:
 	main = main_node
 	Save.no_write = true
-	var only := ""      # --keys-part=carriers|chest|shrubling|bots runs one part while iterating
+	var only := ""      # --keys-part=carriers|chest|shrubling|bots|bonus runs one part while iterating
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--keys-part="): only = String(a).substr(12)
 	if only in ["", "carriers"]: await _carriers()
 	if only in ["", "chest"]: await _chest_and_keys()
 	if only in ["", "shrubling"]: await _shrubling()
 	if only in ["", "bots"]: await _bots()
+	if only in ["", "bonus"]: await _bonus()
 	print("KEYCHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit()
 
@@ -141,13 +142,28 @@ func _chest_and_keys() -> void:
 	await main.get_tree().process_frame
 
 # ------------------------------------------------------------------ 5. the Shrubling
-## Gets S running: the hunter on its heels (3.5 m) for `secs`.
+## Gets S running: a light hit, then the hunter on its heels (3.5 m) for `secs`.
 func _wake(m: Match, P: Hunter, S: Shrubling, secs: float) -> void:
 	P.teleport(_ground_near(m, S.pos + Vector3(4.0, 0, 0)))
+	S.hurt(0.5, P, {"src": "shot"})
 	var t := 0.0
 	while t < secs:
 		step(m, 0.1); t += 0.1
 		P.teleport(_ground_near(m, S.pos + Vector3(3.5, 0, 0)))
+
+## Open ground (no grass) near `p` on the same island, or INF.
+func _open_near(m: Match, p: Vector3) -> Vector3:
+	var W := m.world
+	for r in range(2, 12):
+		for k in 16:
+			var a := TAU * k / 16.0
+			var x := p.x + cos(a) * r; var z := p.z + sin(a) * r
+			var ix := int(floor(x)); var iz := int(floor(z))
+			if not W.inb(ix, iz) or W.is_void(x, z) or W.is_block(x, z) or W.bush.has(W.idx(ix, iz)) or W.island_of(x, z) != W.island_of(p.x, p.z):
+				continue
+			if absf(W.ground_at(x, z) - p.y) > 0.3: continue
+			return Vector3(ix + 0.5, W.ground_at(ix + 0.5, iz + 0.5), iz + 0.5)
+	return Vector3.INF
 
 func _shrubling() -> void:
 	var m: Match = await build(3, {"teams": 1, "god": true})
@@ -157,28 +173,54 @@ func _shrubling() -> void:
 	var sr: Dictionary = KeyRun.rules()["shrubling"]
 	for mb in m.mobs:
 		if mb != S and not mb.dead: mb.hp = 0.0; mb.dead = true; mb.visible = false
-	var home := S.pos
 	ok("it always carries a key", KeyCarry.carries(S))
 	ok("it starts as a bush: disguised, standing on grass", S.ss == "disguised" and m.world.in_bush(S.pos.x, S.pos.z))
-	P.teleport(_ground_near(m, home + Vector3(14.0, 0, 0)))
-	step(m, 4.0)
-	ok("far away it stays disguised", S.ss == "disguised")
-	P.teleport(_ground_near(m, home + Vector3(7.5, 0, 0)))
+	# set it on bare ground, so any cover there is the Shrubling's own
+	var bare := _open_near(m, S.pos)
+	S.teleport(bare)
+	step(m, 0.2)
+	var home := S.pos
+	ok("disguised, its tile is cover like any bush", m.world.in_bush(home.x, home.z) and not m.world.bush.has(m.world.idx(int(floor(home.x)), int(floor(home.z)))), str(home))
+	# a hunter steps into it and hides there (no body to bump: it does not push them out); nothing happens
+	P.teleport(home + Vector3(0.2, 0, 0.1))
 	step(m, 3.0)
-	ok("at 7.5 m it still sits tight", S.ss == "disguised")
-	P.teleport(_ground_near(m, home + Vector3(5.0, 0, 0)))
-	step(m, 0.1)
-	ok("inside 6 m it pops up (alert)", S.ss == "alert", S.ss)
-	var peak := 0.0
+	ok("a hunter can stand in it and hide there", P.flat_dist(home) < 0.6 and m.world.in_bush(P.pos.x, P.pos.z), "%.2f m from it" % P.flat_dist(home))
+	ok("standing in it, or next to it, does not wake it", S.ss == "disguised" and S.pos.distance_to(home) < 0.3, S.ss)
+	P.teleport(_ground_near(m, home + Vector3(1.4, 0, 0)))
+	step(m, 4.0)
+	ok("still a bush with a hunter beside it for 4 s", S.ss == "disguised", S.ss)
+	# the tell: every 5 to 10 s, on its own seeded schedule
+	var t0 := S.tells
+	var times: Array = []
+	var last := t0
 	var t := 0.0
+	while t < 32.0:
+		step(m, 0.1); t += 0.1
+		if S.tells != last:
+			last = S.tells; times.append(m.time)
+	var gaps_ok := times.size() >= 3
+	for i in range(1, times.size()):
+		var g: float = times[i] - times[i - 1]
+		if g < float(sr["tell_s"][0]) - 0.15 or g > float(sr["tell_s"][1]) + 0.15: gaps_ok = false
+	ok("the tell fires every 5-10 s", gaps_ok and S.ss == "disguised", "%d tells in 32 s" % times.size())
+	# the hider is in its tile when it is hit: it bolts and they are in the open
+	P.teleport(home)
+	step(m, 0.3)
+	var hid: bool = m.world.in_bush(P.pos.x, P.pos.z)
+	S.hurt(1.0, P, {"src": "shot"})
+	step(m, Match.DT)
+	ok("a hit wakes it", S.ss in ["alert", "flee"], S.ss)
+	ok("a hunter hiding in it is exposed when it bolts", hid and not m.world.in_bush(P.pos.x, P.pos.z) and P.reveal_t > 0.0, "hid %s, reveal %.1f" % [hid, P.reveal_t])
+	var peak := 0.0
 	var seen_flee := false
+	t = 0.0
 	while t < 2.5:
 		step(m, 0.1); t += 0.1
 		if S.ss == "flee":
 			seen_flee = true
 			peak = maxf(peak, Vector2(S.vel.x, S.vel.z).length())
 		P.teleport(_ground_near(m, S.pos + Vector3(4.0, 0, 0)))      # the hunter keeps pace
-	ok("then it flees", seen_flee, "moved %.1f m" % S.pos.distance_to(home))
+	ok("damage makes it flee", seen_flee, "moved %.1f m" % S.pos.distance_to(home))
 	ok("faster than a hunter on foot", peak > P.base_speed + 0.2, "%.2f vs %.2f" % [peak, P.base_speed])
 	ok("slower than a dash", peak < Hunter.DASH_SPEED * 0.5, "%.2f vs %.1f" % [peak, Hunter.DASH_SPEED])
 	# the hunter gives up: it dives and is a bush again
@@ -187,9 +229,13 @@ func _shrubling() -> void:
 	ok("out of sight it dives into grass and hides again", S.ss == "disguised" and m.world.in_bush(S.pos.x, S.pos.z), "%s at %s" % [S.ss, str(S.pos.snapped(Vector3.ONE))])
 	step(m, 2.0)
 	var hide2 := S.pos
-	P.teleport(_ground_near(m, hide2 + Vector3(4.5, 0, 0)))
-	step(m, 0.6)
-	ok("approach it again and it runs again", S.ss in ["alert", "flee"], S.ss)
+	P.teleport(_ground_near(m, hide2 + Vector3(2.0, 0, 0)))
+	step(m, 2.0)
+	ok("walking up to it again does not wake it", S.ss == "disguised", S.ss)
+	S.root_t = 0.6
+	step(m, 0.2)
+	ok("a root counts as a hit: it wakes", S.ss in ["alert", "flee"], S.ss)
+	step(m, 1.5)
 	# a root holds it, a slow drags it (each time the hunter first gets it running)
 	_wake(m, P, S, 1.0)
 	S.root_t = 2.0
@@ -265,3 +311,69 @@ func _bots() -> void:
 	var c2: Dictionary = m.chests.filter(func(x): return not x["open"] and not x.get("ride", false) and not x.get("free", false))[0]
 	ok("a bot without a key has no chest goal", not BotKeys.chest_open_for(B, c2) or B.chest_keys > 0)
 	m.queue_free()
+
+# ------------------------------------------------------------------ 7. bonus keys
+func _ckeys(m: Match) -> int:
+	return m.pickups.filter(func(p): return String(p["kind"]) == "ckey").size()
+
+func _bonus() -> void:
+	# the surplus: expected bonus keys over everything in the world, against the locked chests
+	var shares: Array = []
+	var rolled := 0.0; var chests_n := 0
+	for sd in [3, 5, 9, 12, 21, 33]:
+		var m: Match = await build(sd)
+		var S := KeyBonus.surplus(m)
+		shares.append(float(S["share"]))
+		print("KEYCHECK seed %d bonus keys: expected %.2f over %d chests (+%.0f%%)  sources %s" % [sd, S["expected"], S["chests"], float(S["share"]) * 100.0, str(S["by"])])
+		# and the real dice, every source once, on the keys' own stream
+		var got := 0
+		for mb in m.mobs: got += KeyBonus.roll(m, KeyBonus.mob_source(mb))
+		for b in m.breaks: got += KeyBonus.roll(m, String(b["kind"]))
+		for c in m.chests:
+			if c.has("ride"): got += KeyBonus.roll(m, "train_crate")
+		rolled += got; chests_n += int(S["chests"])
+		m.queue_free()
+		await main.get_tree().process_frame
+	var mean := 0.0
+	for x in shares: mean += float(x)
+	mean /= float(shares.size())
+	ok("bonus keys: +20-30%% keys over chests on average (+%.1f%%)" % (mean * 100.0), mean >= 0.20 and mean <= 0.30)
+	ok("rolled for real: a surplus in the same range (+%.0f%%)" % (rolled / maxf(1.0, chests_n) * 100.0), rolled / maxf(1.0, chests_n) > 0.08 and rolled / maxf(1.0, chests_n) < 0.5)
+	# the sources fire (odds forced to 1 for the test)
+	var m: Match = await build(5, {"teams": 1, "god": true})
+	var R: Dictionary = KeyBonus.rules()
+	var keep := R.duplicate(true)
+	R["monster"] = 1.0; R["pot"] = 1.0; R["boss"] = {"odds": 1.0, "two": 1.0}
+	var mb: Mob = null
+	for x in m.mobs:
+		if not x.dead and KeyBonus.mob_source(x) == "monster" and not KeyCarry.carries(x) and not m.world.is_void(x.pos.x, x.pos.z): mb = x; break
+	var k0 := _ckeys(m)
+	mb.hurt(mb.max_hp * 10.0 + 50.0, m.player, {"src": "shot"})
+	step(m, 0.2)
+	ok("a plain monster can drop a bonus key", _ckeys(m) == k0 + 1, "%d -> %d" % [k0, _ckeys(m)])
+	var pot: Dictionary = {}
+	for b in m.breaks:
+		if b["kind"] == "pot" and not b["dead"]: pot = b; break
+	k0 = _ckeys(m)
+	if not pot.is_empty():
+		m._break(pot, m.player)
+		step(m, 0.2)
+	ok("a pot can drop one", not pot.is_empty() and _ckeys(m) == k0 + 1, "%d -> %d" % [k0, _ckeys(m)])
+	ok("a boss can drop two", KeyBonus.roll(m, "boss") == 2)
+	ok("a Shrubling or the Blight gives no bonus", KeyBonus.mob_source(m.keys.shrublings[0]) == "" if not m.keys.shrublings.is_empty() else true)
+	for k in keep: R[k] = keep[k]
+	# a bonus key on the ground is an ordinary key: walk in and it is yours
+	var p0 := m.player.chest_keys
+	var kp: Dictionary = m.pickups.filter(func(p): return String(p["kind"]) == "ckey")[-1]
+	m.player.teleport(Vector3(kp["pos"].x, m.world.ground_at(kp["pos"].x, kp["pos"].z), kp["pos"].z))
+	step(m, 1.0)
+	ok("a bonus key is picked up like any key", m.player.chest_keys > p0, "%d -> %d" % [p0, m.player.chest_keys])
+	m.queue_free()
+	await main.get_tree().process_frame
+	# never for sale: no shop or stock table anywhere in content lists a chest key
+	var sold: Array = []
+	for f in DirAccess.get_files_at("res://content/rules"):
+		if not String(f).ends_with(".json") or f in ["keys.json", "chest_keys.json"]: continue
+		var txt := FileAccess.get_file_as_string("res://content/rules/" + f)
+		if txt.contains("\"ckey\"") or txt.contains("chest_key"): sold.append(f)
+	ok("keys are never sold in shops", String(KeyBonus.rules()["shops"]) == "never" and sold.is_empty(), ", ".join(sold))

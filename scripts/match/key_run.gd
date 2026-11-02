@@ -29,6 +29,8 @@ var patches: Array = []        # tall-grass patches: {c: Vector2, tiles: Array[V
 var regions := {}              # key -> {chests: int, centre: Vector2, mobs: Array, carriers: Array, shrubs: int, spilled_in: int}
 var shrublings: Array = []
 var carriers: Array = []       # every Mob carrying a key at setup
+var bonus_rng := RandomNumberGenerator.new()      # bonus keys (KeyBonus): a stream of their own
+var bonus_given := 0
 
 func _init(match_node: Match) -> void:
 	m = match_node
@@ -51,6 +53,7 @@ func setup() -> void:
 	if m.net_on and not m.is_host:
 		return
 	rng.seed = int(m.seed_val) * int(rules()["keys"]["seed_mul"]) + int(rules()["keys"]["seed_add"])
+	bonus_rng.seed = int(m.seed_val) * int(rules()["keys"]["seed_mul"]) + int(KeyBonus.rules()["seed_add"])
 	build_patches()
 	_count_chests()
 	_count_mobs()

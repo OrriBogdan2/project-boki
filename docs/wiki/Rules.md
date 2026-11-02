@@ -104,6 +104,22 @@ Capture by scan (docs/decisions/0002). A wild Boki that is knocked out (dazed) c
 | sight_range | 24 |
 | sight_places_kept | 3 |
 
+## chest_keys (`content/rules/chest_keys.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | Bonus chest keys on top of the carrier quota (docs/decisions/0007-keys-and-cover.md; scripts/match/key_bonus.gd). Low odds, so a spare key feels like luck. Rolled on the keys' own seeded stream (seed_add), so no other loot shifts. Target: 20-30% more keys than chests on an average match (--keys-check measures it). Keys are never sold in shops. |
+| seed_add | 977 |
+| boss | {"odds": 0.4, "two": 0.25} |
+| elite | {"odds": 0.25, "two": 0.15} |
+| monster | 0.03 |
+| pot | 0.02 |
+| crate | 0.04 |
+| train_crate | 0.04 |
+| shops | never |
+
 ## gear (`content/rules/gear.json`)
 
 
@@ -127,7 +143,7 @@ Capture by scan (docs/decisions/0002). A wild Boki that is knocked out (dazed) c
 | _doc | Chests, keys and the bush mimic (docs/decisions/0007-keys-and-cover.md; scripts/match/key_run.gd, chest_loot.gd, shrubling.gd). There is one chest type. It is locked: opening it costs one key. Keys come from monsters: in every region the number of key carriers equals the number of chests there. Which monsters carry them is rolled per match on its own seeded stream (seed_mul / seed_add). |
 | chest | {"hold_s": 1.1, "gems": [7, 9], "gem_base": 4, "seed_odds": 0.85, "valuable_odds": 0.7, "valuable_tier": 1, "tonic_odds": 0.7, "table": "chest", "tier_bonus": [0, 0, 1], "rift_key_min_bonus": 2, "rift_key_odds": 0.35, "soul_ember_odds": 0.3} |
 | keys | {"seed_mul": 7717, "seed_add": 31, "no_carry": ["ward", "glimmer", "warden", "sentinel"], "glint_h": 1.9, "pickup_pull": 2.2} |
-| shrubling | {"count": [1, 3], "biomes": ["bloom", "meadow", "gloom", "storm"], "min_patches": 3, "sprint_r": 18.0, "min_gap": 22.0, "landing_clear": 14.0, "exit_clear": 10.0, "hp": 26.0, "tier_hp": 0.5, "alert_r": 6.0, "alert_t": 0.4, "flee_speed": 6.5, "weave_amp": 0.5, "weave_amp_seen": 0.95, "weave_hz": 1.7, "repath_s": 0.7, "hide_clear_r": 8.5, "hide_los_r": 5.0, "dive_t": 0.35, "grace_s": 1.4, "twitch_s": [3.5, 7.0], "eyes_r": 8.5, "grounded_speed": 0.55, "gems": 6} |
+| shrubling | {"count": [1, 3], "biomes": ["bloom", "meadow", "gloom", "storm"], "min_patches": 3, "sprint_r": 18.0, "min_gap": 22.0, "landing_clear": 14.0, "exit_clear": 10.0, "hp": 26.0, "tier_hp": 0.5, "relax_r": 7.0, "alert_t": 0.4, "flee_speed": 6.5, "weave_amp": 0.5, "weave_amp_seen": 0.95, "weave_hz": 1.7, "repath_s": 0.7, "hide_clear_r": 8.5, "hide_los_r": 5.0, "dive_t": 0.35, "expose_s": 1.2, "tell_s": [5.0, 10.0], "grounded_speed": 0.55, "gems": 6} |
 | cover | {"biome_targets": {"bloom": [0.15, 0.2], "meadow": [0.085, 0.12], "gloom": [0.04, 0.075], "storm": [0.02, 0.04], "ember": [0.015, 0.032], "frost": [0.0, 0.01]}} |
 
 ## How Boki fight (`content/rules/kin_ai.json`)

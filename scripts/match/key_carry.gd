@@ -22,6 +22,7 @@ static func glint_of(mb: Mob) -> KeyGlint:
 ## A carrier died: its key drops, even from a Puffbomb that blew itself up or over the edge
 ## (a key that falls into the abyss would leave a chest nobody can open).
 static func on_mob_dead(m: Match, mb: Mob) -> void:
+	KeyBonus.on_mob_dead(m, mb)      # (a bonus key, at low odds, on top of the quota)
 	if not carries(mb):
 		return
 	mb.remove_meta("ckey")

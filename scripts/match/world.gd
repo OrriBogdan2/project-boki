@@ -579,6 +579,7 @@ func _place_stairs() -> void:
 var wall_mat: ShaderMaterial = null   # walls fade where they hide the player
 var walls := {}           # tile index -> true: built stone walls (drawn as walls, not rocks)
 var bush := {}            # tile index -> true: tall grass you can hide in
+var live_bush := {}       # tile index -> count: a disguised Shrubling sits there (cover like any clump)
 var props := {}           # blocker tile index -> what stands there: "ruin" (an old pillar) or "camp" (crates); else a tree or rock
 
 func _wall_at(q: Vector2i, ii: int) -> void:
@@ -587,7 +588,7 @@ func _wall_at(q: Vector2i, ii: int) -> void:
 		walls[idx(q.x, q.y)] = true
 
 func _place_blockers() -> void:
-	walls.clear(); bush.clear()
+	walls.clear(); bush.clear(); live_bush.clear()
 	for ii in islands.size():
 		var isl: Dictionary = islands[ii]
 		var cells: Array = isl["cells"]
@@ -645,7 +646,7 @@ func vis_texture() -> ImageTexture:
 
 func in_bush(x: float, z: float) -> bool:
 	var ix := int(floor(x)); var iz := int(floor(z))
-	return inb(ix, iz) and bush.has(idx(ix, iz)) and kind[idx(ix, iz)] == T_GROUND
+	return inb(ix, iz) and (bush.has(idx(ix, iz)) or live_bush.has(idx(ix, iz))) and kind[idx(ix, iz)] == T_GROUND
 
 func _edge_cell_toward(isl: int, target: Vector2, avoid: Array = [], spacing := PAD_SPACING) -> Vector2i:
 	var best := Vector2i(-1, -1); var bd := 1e9

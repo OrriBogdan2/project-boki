@@ -1,9 +1,12 @@
 class_name Shrubling
 extends Mob
-## The bush mimic. It sits disguised as a clump of tall grass (ShrublingModel). When a hunter comes
-## within about 6 m it pops up (alert, a rustle), then runs: faster than a hunter on foot, slower
-## than a dash, weaving to break line of sight, along a tile A* (KinPath) to a grass patch away from
-## the hunter, where it dives in and is a bush again. It always carries a chest key and counts toward
+## The bush mimic. It sits disguised as a clump of tall grass (ShrublingModel), and while it does it
+## IS a bush: its tile is cover (World.live_bush), hunters walk into it and hide in it like any clump,
+## and being close gives nothing away. Only a hit wakes it (any damage, or a root, slow, stun, shove or
+## grab): it pops up (alert, a rustle), and anyone hiding in it is suddenly in the open. Then it runs:
+## faster than a hunter on foot, slower than a dash, weaving to break line of sight, along a tile A*
+## (KinPath) to a grass patch away from the hunter, where it dives in and is a bush again. The tell:
+## every 5 to 10 s (seeded per Shrubling) its blades wobble and the leaves shimmer for a moment. It always carries a chest key and counts toward
 ## its region's quota (KeyRun). Low health, no attack. Slows, roots, stuns, Grounded (it can no
 ## longer dive, and runs slower) and pulls all work on it, because it is an ordinary Mob.
 ## States (ss): disguised | alert | flee | dive. Net: ss rides in the monster snapshot (KeyCarry).
@@ -12,7 +15,6 @@ const STATES := ["disguised", "alert", "flee", "dive"]
 
 var ss := "disguised"
 var ss_t := 0.0
-var grace := 0.0                  # after diving: no popping up again for a moment
 var threat: Hunter = null
 var hide_at := Vector3.INF
 var path: Array = []
@@ -22,7 +24,11 @@ var weave_ph := 0.0
 var _pose := 0.0
 var _clock := 0.0
 var _twitch := 0.0
-var _twitch_in := 4.0
+var next_tell := 0.0              # match time of the next tell (sim side, so every game agrees)
+var tells := 0                    # how many tells it has given (the check counts them)
+var _trng := RandomNumberGenerator.new()
+var _held_last := 0.0             # root + stun + slow seconds last tick: a fresh one is a hit
+var _bush_tile := -1              # the World.live_bush tile it is holding, or -1
 
 func init_shrub(match_node: Node, id: String, at: Vector3, tier := 1.0) -> void:
 	var sr: Dictionary = KeyRun.rules()["shrubling"]
@@ -32,7 +38,8 @@ func init_shrub(match_node: Node, id: String, at: Vector3, tier := 1.0) -> void:
 	camp = at
 	face = randf() * TAU
 	weave_ph = randf() * TAU
-	_twitch_in = randf_range(float((sr["twitch_s"] as Array)[0]), float((sr["twitch_s"] as Array)[1]))
+	_trng.seed = hash(id) ^ int(KeyRun.rules()["keys"]["seed_mul"])
+	next_tell = m.time + _tell_gap()
 	KeyCarry.mark(self)
 	_show_glint(false)
 	ShrublingModel.recolour(model, leaf_colour(m, at))      # the same colour as the grass it hides in
@@ -53,6 +60,26 @@ static func leaf_colour(m: Node, at: Vector3) -> Color:
 func mass() -> float:
 	return 1.0
 
+## Seconds to the next tell: 5 to 10, from its own seeded stream.
+func _tell_gap() -> float:
+	var tw: Array = KeyRun.rules()["shrubling"]["tell_s"]
+	return _trng.randf_range(float(tw[0]), float(tw[1]))
+
+## Disguised, its tile is cover like any grass clump; up and running, it is not.
+func _sync_bush() -> void:
+	var want := -1
+	if not dead and ss == "disguised" and m.world.inb(int(floor(pos.x)), int(floor(pos.z))):
+		want = m.world.idx(int(floor(pos.x)), int(floor(pos.z)))
+	if want == _bush_tile:
+		return
+	if _bush_tile >= 0:
+		var n := int(m.world.live_bush.get(_bush_tile, 0)) - 1
+		if n <= 0: m.world.live_bush.erase(_bush_tile)
+		else: m.world.live_bush[_bush_tile] = n
+	_bush_tile = want
+	if want >= 0:
+		m.world.live_bush[want] = int(m.world.live_bush.get(want, 0)) + 1
+
 func _show_glint(on: bool) -> void:
 	var g := KeyCarry.glint_of(self)
 	if g: g.visible = on
@@ -60,22 +87,28 @@ func _show_glint(on: bool) -> void:
 # ------------------------------------------------------------------ the brain (the game that owns it)
 func sim(dt: float) -> void:
 	prev = pos
+	_sync_bush()
 	if dead:
 		return
 	tick_status(dt)
+	if ss == "disguised" and m.time >= next_tell:
+		_twitch = 1.0
+		tells += 1
+		next_tell = m.time + _tell_gap()
 	if remote:
 		net_follow(dt)
 		return
 	st = "idle"
 	var sr: Dictionary = KeyRun.rules()["shrubling"]
 	ss_t -= dt
-	grace = maxf(0.0, grace - dt)
 	var wish := Vector2.ZERO
+	var held_now := root_t + stun_t + slow_t
 	match ss:
 		"disguised":
-			var h := _nearest_hunter(float(sr["alert_r"]))
-			if h != null and grace <= 0.0:
-				_reveal(h)
+			# nothing but a hit wakes it: a root, slow, stun, shove or grab counts as one
+			var held := root_t + stun_t + slow_t
+			if held > _held_last + 0.01 or m.time - kb_time < 0.2 or _dragged():
+				_reveal(_nearest_hunter(40.0))
 		"alert":
 			if ss_t <= 0.0:
 				_set_state("flee")
@@ -85,6 +118,7 @@ func sim(dt: float) -> void:
 		"dive":
 			if ss_t <= 0.0:
 				_rehide(sr)
+	_held_last = held_now
 	var spd: float = float(sr["flee_speed"]) * slow_mult(0.55)
 	if KitStatus.grounded(self):
 		spd *= float(sr["grounded_speed"])
@@ -95,6 +129,7 @@ func sim(dt: float) -> void:
 func _set_state(s: String) -> void:
 	ss = s
 	_show_glint(s != "disguised")
+	_sync_bush()
 
 ## A hunter within `r` m (flat) and about level with it, or null.
 func _nearest_hunter(r: float) -> Hunter:
@@ -107,9 +142,18 @@ func _nearest_hunter(r: float) -> Hunter:
 			bd = d; best = h
 	return best
 
+## True while a grab or pull (Verbs.yank) is carrying it.
+func _dragged() -> bool:
+	if m.verbs == null:
+		return false
+	for dg in m.verbs.drags:
+		if dg["ent"] == self: return true
+	return false
+
 func _reveal(by: Ent) -> void:
 	if ss != "disguised":
 		return
+	_expose_hiders()
 	_set_state("alert")
 	ss_t = float(KeyRun.rules()["shrubling"]["alert_t"])
 	threat = by as Hunter if by is Hunter else _nearest_hunter(40.0)
@@ -121,12 +165,24 @@ func _reveal(by: Ent) -> void:
 		var away := -dir_to(threat)
 		face = atan2(-away.x, -away.y)
 
+## Anyone hiding in it when it bolts is in the open at once: no more cover, and seen for a moment.
+func _expose_hiders() -> void:
+	var t := int(floor(pos.x)); var z := int(floor(pos.z))
+	for h in m.hunters:
+		if h.out or h.extracted or absf(h.pos.y - pos.y) > 1.5:
+			continue
+		if (int(floor(h.pos.x)) == t and int(floor(h.pos.z)) == z) or flat_dist(h) < 0.9:
+			h.reveal_t = maxf(h.reveal_t, float(KeyRun.rules()["shrubling"]["expose_s"]))
+			if h == m.player and m.hud:
+				m.hud.toast_small("Your bush ran off!", Color("f2c84a"))
+	_set_state(ss)      # (drops the cover tile now, not next tick)
+
 func hurt(d: float, by: Ent, opts := {}) -> float:
 	var dealt := super.hurt(d, by, opts)
-	if dealt > 0.0 and not dead:
-		m.sfx("squeak", pos, -2.0, randf_range(0.9, 1.2))
+	if not dead and (dealt > 0.0 or d > 0.0):
+		if dealt > 0.0: m.sfx("squeak", pos, -2.0, randf_range(0.9, 1.2))
 		if ss == "disguised" and not remote:
-			_reveal(by)
+			_reveal(by if by is Hunter else _nearest_hunter(40.0))      # any hit wakes it, a Boki's too
 	return dealt
 
 # ------------------------------------------------------------------ running and hiding
@@ -143,7 +199,7 @@ func _flee(dt: float, sr: Dictionary) -> Vector2:
 		var d := flat_dist(threat)
 		var seen: bool = m.world.los(threat.pos, pos, pos.y + 0.8)
 		var relaxed := flee_t > 12.0
-		if on_bush and not KitStatus.grounded(self) and (d >= float(sr["hide_clear_r"]) or (not seen and d >= float(sr["hide_los_r"])) or (relaxed and d >= float(sr["alert_r"]) + 1.0)):
+		if on_bush and not KitStatus.grounded(self) and (d >= float(sr["hide_clear_r"]) or (not seen and d >= float(sr["hide_los_r"])) or (relaxed and d >= float(sr["relax_r"]))):
 			_dive(sr)
 			return Vector2.ZERO
 	repath -= dt
@@ -225,18 +281,12 @@ func _dive(sr: Dictionary) -> void:
 	m.sfx("rustle", pos, -6.0, randf_range(0.75, 0.9))
 	m.fx.burst(pos + Vector3(0, 0.3, 0), Color(md["color"]).lightened(0.1), 10, 2.5, 0.4, 5.0)
 
-func _rehide(sr: Dictionary) -> void:
+func _rehide(_sr: Dictionary) -> void:
 	camp = pos
 	hide_at = Vector3.INF
 	path = []
-	var h := _nearest_hunter(float(sr["alert_r"]) * 0.75)
-	if h != null:
-		_set_state("alert")
-		ss_t = float(sr["alert_t"]) * 0.5
-		threat = h
-		return
 	_set_state("disguised")
-	grace = float(sr["grace_s"])
+	next_tell = m.time + _tell_gap()
 	ShrublingModel.recolour(model, leaf_colour(m, pos))      # (it may have run onto another island)
 
 ## The same move step as every Mob: ease the velocity toward the wish, never walk off the edge.
@@ -263,16 +313,10 @@ func render(delta: float, alpha: float) -> void:
 	_clock += delta
 	var want := 0.0 if ss in ["disguised", "dive"] else 1.0
 	_pose = move_toward(_pose, want, delta * (7.0 if ss != "dive" else 3.0))
-	_twitch_in -= delta
-	if _twitch_in <= 0.0 and ss == "disguised":
-		_twitch = 1.0
-		var tw: Array = KeyRun.rules()["shrubling"]["twitch_s"]
-		_twitch_in = randf_range(float(tw[0]), float(tw[1]))
-	_twitch = maxf(0.0, _twitch - delta * 3.0)
+	_twitch = maxf(0.0, _twitch - delta * 2.0)      # (a tell lasts about half a second)
 	if ss == "alert":
 		_twitch = 0.8
-	var near: bool = m.player != null and not m.player.out and flat_dist(m.player) < float(KeyRun.rules()["shrubling"]["eyes_r"])
-	ShrublingModel.pose(model, _pose, _clock, Vector2(vel.x, vel.z).length(), _twitch, ss == "disguised" and near)
+	ShrublingModel.pose(model, _pose, _clock, Vector2(vel.x, vel.z).length(), _twitch)
 	if ss == "disguised":
 		_show_glint(false)
 	elif _pose > 0.3:

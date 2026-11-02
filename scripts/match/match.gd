@@ -1913,6 +1913,7 @@ func _break(b: Dictionary, by: Ent, from_net := false) -> void:
 	fx.burst(at + Vector3(0, 0.4, 0), col, 16, 4.0, 0.5, 9.0, 0.8)
 	sfx("knock" if kind_s == "crate" else "hit", at, -4.0, 0.7 if kind_s == "crate" else 1.3)
 	var loot := float(T["loot"])
+	if not from_net: KeyBonus.on_break(self, at, kind_s)      # a rare chest key
 	match kind_s:
 		"pot":
 			for i in randi_range(1, 2):
@@ -4595,7 +4596,7 @@ func _separate() -> void:
 	for h in hunters:
 		if h.hittable() and h.grap.is_empty(): bodies.append(h)
 	for mb in mobs:
-		if not mb.dead: bodies.append(mb)
+		if not mb.dead and not Shrubling.hidden(mb): bodies.append(mb)      # (you walk into a disguised Shrubling like any bush)
 	for k in kins:
 		if k.state in ["active", "wild", "dazed", "returning"] and not k.dead: bodies.append(k)
 	# only bodies in the same or a neighbouring 4m cell can touch (radii are well under 2m): a grid
