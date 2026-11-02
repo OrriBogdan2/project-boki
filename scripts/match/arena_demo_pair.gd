@@ -111,7 +111,7 @@ static func _drive(A: Arena, P: Hunter, D: Hunter, mv: String, t: float, dt: flo
 				var a := clampf((t - 0.9) * 2.2, 0.0, 1.4)
 				P.inp["aim"] = P.pos + Vector3(cos(a) * 5.0, 0.9, -sin(a) * 5.0)
 		"as_shot":
-			if t < go: D.teleport(A.home + Vector3(9.0, 0, 0))
+			if t < go: D.teleport(A.home + Vector3(7.0, 0, 0))
 			if ArenaDemo._at(t, dt, go):
 				P.ak.bot_hold["rmb"] = 0.42; P.ak.press_rmb()      # held 0.42s (the lane), then released
 		"as_cloak":

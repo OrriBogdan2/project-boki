@@ -214,11 +214,11 @@ func _tick_tells(dt: float) -> void:
 		if not is_instance_valid(f):
 			continue
 		var lvl := int(e["lvl"])
-		var top := f.pos + Vector3(0, 2.55, 0)
+		var top := f.pos + Vector3(0, 3.0, 0)
 		var n := 1 if lvl < 2 else 3
 		for i in n:
-			var off := Vector3((i - (n - 1) * 0.5) * 0.32, (0.06 if i == 1 else 0.0) if n == 3 else 0.0, 0)
-			fx.place("pip%d_%d" % [key, i], "pip", top + off, PIP_COL if lvl < 2 else Color("ff5a2a"), Color("fff0a0"), 0.2 if lvl < 2 else 0.24)
+			var off := Vector3((i - (n - 1) * 0.5) * 0.42, (0.06 if i == 1 else 0.0) if n == 3 else 0.0, 0)
+			fx.place("pip%d_%d" % [key, i], "pip", top + off, PIP_COL if lvl < 2 else Color("ff5a2a"), Color("fff0a0"), 0.28 if lvl < 2 else 0.32)
 		if lvl >= 2:
 			fx.place("pipg%d" % key, "glow", top + Vector3(0, -0.05, 0), Color("ff4a1a"), Color("ff9a3a"), 0.75 + 0.08 * sin(m.time * 9.0))
 

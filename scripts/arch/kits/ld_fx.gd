@@ -284,7 +284,7 @@ func orb(at: Vector3, col: Color, col2: Color, size := 0.6, dur := 0.15) -> void
 func dot(at: Vector3, col: Color, size := 0.16, dur := HANG_T) -> void:
 	var n := _fx("dot", M_DOT, _quad_mesh(), true)
 	n.global_position = at
-	_play(n, "dot", col, Color(1, 1, 1, 1), dur, Vector3.ONE * size, n.material_override)
+	_play(n, "dot", col, col.lightened(0.35), dur, Vector3.ONE * size, n.material_override)
 
 ## A molten strip from a to b on the ground (the rank-3 fire trail), lasting `dur`.
 func lava(a: Vector3, b: Vector3, width: float, dur: float) -> void:
