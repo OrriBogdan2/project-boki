@@ -208,6 +208,11 @@ func _tick_rinkrun(dt: float) -> void:
 func _ice_bridge() -> void:
 	m.fx.burst(h.pos + Vector3(0, -0.2, 0), res_col(), 4, 1.0, 0.4, 0.0, 1.0)
 
+## A Boki merge ends the Rinkrun (its refund and slide-out are the same as letting go).
+func _drop_holds() -> void:
+	if not rinkrun.is_empty():
+		_rinkrun_end()
+
 func _rinkrun_end() -> void:
 	var dd := dash_def()
 	var t := float(rinkrun.get("t", 0.0))

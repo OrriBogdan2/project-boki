@@ -288,6 +288,13 @@ func cast_e() -> bool:
 func rmb_hold_tick(_t: float) -> void:
 	pass
 
+## A Boki merge ends the Longneedle's charge with no shot and cuts a Slipstep short (no refund, no speed buff).
+func _drop_holds() -> void:
+	_end_needle()
+	if not slide.is_empty():
+		slide = {}
+		h.roll_t = 0.0
+
 func _end_needle() -> void:
 	if needle.is_empty(): return
 	var tele = needle.get("tele")

@@ -144,5 +144,18 @@ func _all() -> void:
 	K.add_char(T2, 10.0)
 	ak.step(m, 5.4)
 	ok("passive: Char falls off all at once after 5s", K.char_of(T2) == 0.0 and K.burning(T) == 0, "char %.1f" % K.char_of(T2))
+	# --- a Boki merge that starts mid-lance ends the roar: no flame, no spool, no slow-after, no fuel burnt mid-merge
+	reset.call()
+	P.ammo = 60; P.reload_t = 0.0
+	ak.step(m, 0.8, func(): P.inp["fire"] = true; ak.aim_at(P, T.pos))
+	ok("merge hold: the lance is roaring before the merge", K.was_held and K.spool > 0.3 and P.mel_hold > 0.0, "held %s spool %.2f" % [K.was_held, K.spool])
+	ok("merge hold: a merge is under way", ak.merge_now(P))
+	ak.step(m, 0.1)
+	var took: float = ak.dmg(T)
+	var ammo: int = P.ammo
+	ak.step(m, 1.0, func(): P.inp["fire"] = true)
+	P.inp["fire"] = false
+	ak.step(m, 0.3)
+	ok("merge hold: ashwick's Torch Lance is dropped, no flame mid-merge", not K.was_held and K.spool == 0.0 and K.flame_acc == 0.0 and K.after_t <= 0.0 and P.mel_hold == 0.0 and ak.dmg(T) == took and P.ammo >= ammo, "held %s spool %.2f took %.0f -> %.0f ammo %d -> %d" % [K.was_held, K.spool, took, ak.dmg(T), ammo, P.ammo])
 	m.queue_free()
 	await main.get_tree().process_frame

@@ -238,6 +238,12 @@ func lmb_def() -> Dictionary:
 func _wk() -> float:
 	return h.wup_dmg * m.dmg_mult(h)
 
+## A Boki merge ends the greatsword's charge with no wave.
+func _drop_holds() -> void:
+	if lmb_t >= 0.0:
+		lmb_t = -1.0
+		h.mel_hold = 0.0
+
 func wave_k() -> float:
 	var ld := lmb_def()
 	return clampf((lmb_t - float(ld["tap"])) / maxf(0.05, float(ld["full"]) - float(ld["tap"])), 0.0, 1.0)
@@ -248,7 +254,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 	var ld := lmb_def()
 	var pressed := held and not lmb_was
 	lmb_was = held
-	if not h.can_fire():
+	if not h.can_fire() or KinMerge.active(h):       # (a merge ends the charge: letting go of it must not swing a wave mid-transformation)
 		if lmb_t >= 0.0:
 			lmb_t = -1.0; h.mel_hold = 0.0
 		return true

@@ -59,8 +59,6 @@ func on_block(dmg: float, _by) -> void:
 	add_guard(dmg * float(res_def().get("per_hp", 0.5)))
 
 func _tick(dt: float) -> void:
-	if KinMerge.active(h):
-		_drop_holds()
 	if res_wait <= 0.0:
 		add_res(-float(res_def().get("decay", 5.0)) * dt)
 	lock_t = maxf(0.0, lock_t - dt)

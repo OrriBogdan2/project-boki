@@ -134,6 +134,13 @@ func _tick(dt: float) -> void:
 	else:
 		sight_t = 0.0
 
+## A Boki merge cancels the air Quakefall's dive (no slam on landing) and the Quake Fist's charge.
+func _drop_holds() -> void:
+	dive = false
+	if lmb_t >= 0.0:
+		lmb_t = -1.0
+		h.mel_hold = 0.0
+
 func stonesight() -> int:
 	var dir := h.aim_dir()
 	var n := 0

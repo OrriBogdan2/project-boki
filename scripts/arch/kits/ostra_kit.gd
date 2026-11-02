@@ -155,6 +155,16 @@ func _tick_swap(dt: float) -> void:
 	if float(swap["t"]) <= 0.0:
 		_swap_end(true)
 
+## A Boki merge ends the Trade in flight (nobody moves) and the Settled orb's prime.
+func _drop_holds() -> void:
+	if not swap.is_empty():
+		_swap_end(false)
+	if primed:
+		primed = false
+		if not base_wpn.is_empty(): h.wpn = base_wpn
+	last_shot_t = m.time
+	prime_until = -9.0
+
 func _swap_end(go: bool) -> void:
 	var dd := dash_def()
 	var land: Vector3 = swap.get("land", h.pos)

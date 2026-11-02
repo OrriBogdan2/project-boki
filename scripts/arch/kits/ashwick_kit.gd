@@ -138,6 +138,14 @@ func _tick(dt: float) -> void:
 	tell = "full" if _best_char() >= 22.0 else ("half" if _best_char() >= 12.0 else "")
 	net_pulse(dt, not ignites.is_empty(), 1.3)
 
+## A Boki merge ends the Torch Lance's roar and its slow, with nothing fired.
+func _drop_holds() -> void:
+	spool = 0.0
+	was_held = false
+	after_t = 0.0
+	flame_acc = 0.0
+	h.mel_hold = 0.0
+
 func move_k() -> float:
 	if was_held and flame_acc >= 0.0 and h.wid == "flamethrower": return 0.8
 	return 0.6 if after_t > 0.0 else 1.0

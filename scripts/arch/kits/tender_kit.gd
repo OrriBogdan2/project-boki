@@ -92,6 +92,14 @@ func _tick(dt: float) -> void:
 	if h.ctrl == "bot":
 		_bot_idle(dt)
 
+## A Boki merge sets a carried teammate down (unbroken: no stun) and keeps the key from picking anyone up meanwhile.
+func _drop_holds() -> void:
+	if not carrying().is_empty():
+		drop_all(false)
+	carry_t = 0.0
+	setdown_was = false
+	lock_t = maxf(lock_t, 0.3)
+
 # ------------------------------------------------------------------ Bearer (carry)
 func carrying() -> Array:
 	return CareUtil.carried_of(m, h)

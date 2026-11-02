@@ -184,6 +184,12 @@ func on_dash(use_ex: bool) -> bool:
 	m.sfx("zap", h.pos, -8.0, 0.7)
 	return true
 
+## A Boki merge ends the Wirerun's charge (its lane telegraphs) and the Heavy Coil's hold, with no release.
+func _drop_holds() -> void:
+	_end_wire()
+	rmb_down = false
+	rmb_t = 0.0
+
 func _end_wire() -> void:
 	if wire.is_empty(): return
 	for k in ["tele", "end"]:

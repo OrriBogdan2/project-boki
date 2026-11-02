@@ -108,6 +108,13 @@ func run(main_node: Node) -> void:
 		print("PAIRCHECK ostra DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
+## Starts a Boki merge on `h` the way R does (the full merge when it has a Boki to merge with, else the surge).
+func _merge(h: Hunter) -> bool:
+	h.ult = 1.0
+	if not KinMerge.cast(h):
+		KinMerge.surge(h)
+	return KinMerge.active(h)
+
 func done(m: Match) -> void:
 	m.queue_free()
 	await main.get_tree().process_frame
@@ -546,4 +553,26 @@ func _ostra() -> void:
 	K.e_recast()
 	step(m, 0.2)
 	ok("rank 3: the pop pulls foes at the rim to the middle", Vector2(T.pos.x - sp.x, T.pos.z - sp.z).length() < 1.5 and dmg(T) > 0.0, "off %.1f" % Vector2(T.pos.x - sp.x, T.pos.z - sp.z).length())
+	# a Boki merge that starts mid-Trade ends it: nobody moves, no slow; and it unprimes the Settled orb
+	P.slot_lv["kin"] = 1
+	reset.call()
+	T.teleport(home + Vector3(8.0, 0, 0)); aim_at(P, T.pos)
+	P.ak.on_dash(false)
+	step(m, 0.2)
+	var trading: bool = not K.swap.is_empty()
+	var swaps0 := K.swaps
+	ok("merge hold: the Trade is in flight before the merge", trading, "swap %s" % trading)
+	ok("merge hold: a merge is under way", _merge(P))
+	step(m, 1.5)
+	ok("merge hold: ostra's Trade is dropped, nobody moves mid-merge", K.swap.is_empty() and K.swaps == swaps0 and absf(P.pos.x - home.x) < 1.5 and T.pos.x - home.x > 6.0 and T.slow_t <= 0.0, "me %.1f foe %.1f swaps %d" % [P.pos.x - home.x, T.pos.x - home.x, K.swaps - swaps0])
+	await done(m)
+	r = setup("ostra", 6.0)
+	m = r[0]; P = r[1]; T = r[2]; home = r[3]
+	K = P.ak
+	step(m, 1.6)
+	var was_primed: bool = K.primed
+	ok("merge hold: the orb is Settled before the merge", was_primed)
+	ok("merge hold: a merge is under way", _merge(P))
+	step(m, 0.2)
+	ok("merge hold: ostra's prime is dropped with the merge", not K.primed and K.prime_until < 0.0, "primed %s" % K.primed)
 	await done(m)
