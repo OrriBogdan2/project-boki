@@ -69,7 +69,8 @@ static func start(h: Hunter, i: int, id: String) -> bool:
 			m.fx.ring(h.pos, SCAN_RANGE, Color(col, 0.6), 0.8)
 			m.sfx("ping", h.pos, 0.0, 0.8)
 		_:
-			Effects.run((d.get("effects", []) as Array).duplicate(true), h, {"slot": "utility", "ability": id, "level": 1})
+			Effects.run((d.get("effects", []) as Array).duplicate(true), h,
+					{"slot": "utility", "ability": id, "level": 1})
 			m.sfx("skill", h.pos, -4.0, 1.0)
 	# the instant ones are spent now; the channelled ones when they finish (tick)
 	h.reveal_t = maxf(h.reveal_t, 0.6)

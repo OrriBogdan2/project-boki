@@ -1148,7 +1148,8 @@ func _economy_check() -> void:
 	Save.d["roster"] = [Save.new_kin("cindle", "Pip")]
 	Save.d["active"] = Save.d["roster"][0]["uid"]
 	var haul := Pack.haul(P)
-	var n_arm := haul.filter(func(it): return String(it["t"]) != "val" and not Equal.salvages(it)).size()      # armor salvages on arrival
+	# armor salvages on arrival
+	var n_arm := haul.filter(func(it): return String(it["t"]) != "val" and not Equal.salvages(it)).size()
 	var out := Game.apply_result({"extracted": true, "haul": haul, "tier": 0, "gems": 5, "kin_runs": []})
 	ok.call(Econ.armory().size() == n_arm and int(Save.d["valuables"].get("crown_shard", 0)) == 1, "extract: %d pieces of gear in the armory, treasure in the vault %s" % [Econ.armory().size(), str(Save.d["valuables"])])
 	ok.call((out.get("haul", []) as Array).size() == haul.size(), "results list what came home (%d)" % (out.get("haul", []) as Array).size())
@@ -1162,7 +1163,8 @@ func _economy_check() -> void:
 	Equal.take_loadout(2)
 	Game.apply_result({"extracted": false, "why": "knocked out", "lost_items": [best_w], "tier": 0, "kin_runs": []})
 	ok.call(Econ.find(String(best_w["uid"])).is_empty() and Econ.loadout(Econ.gear_slot(best_w)).is_empty(), "dying loses the loadout gear")
-	if Econ.armory().size() < 2: Save.d["armory"].append(Loot.gear("skylark_boots", 2))      # armor salvages on arrival now; make sure two pieces are left
+	# armor salvages on arrival now; make sure two pieces are left
+	if Econ.armory().size() < 2: Save.d["armory"].append(Loot.gear("skylark_boots", 2))
 	var sold := Econ.sell(String(Econ.armory()[0]["uid"]))
 	var scrap := Econ.salvage(String(Econ.armory()[0]["uid"]))
 	ok.call(sold > 0 and scrap > 0, "sell (%d gems) and salvage (%d scrap)" % [sold, scrap])
@@ -1219,7 +1221,8 @@ func _economy_check() -> void:
 	ok.call(not back.is_empty() and back["ghost"] and String(back["title"]) != "" and int(back["level"]) == 4 and tdiff > 0.05 and Save.d["roster"].has(back) and not Econ.graves().has(g) and Econ.embers() == 0, "revived kin comes back changed")
 	# an old save (from before the armory and feeders) loads and gets them filled in
 	var old := Save.fresh()
-	for k in ["armory", "raid_out", "loadout", "valuables", "feeders", "graves", "arm_lvl", "scrap", "feeder_inv", "feeder_given"]:
+	for k in ["armory", "raid_out", "loadout", "valuables", "feeders", "graves", "arm_lvl", "scrap", "feeder_inv",
+			"feeder_given"]:
 		old.erase(k)
 	var orec := Save.new_kin("zapple", "Oldie")
 	orec.erase("starve")
@@ -1227,7 +1230,10 @@ func _economy_check() -> void:
 	Save.d = old
 	Econ.ensure()
 	Care.catch_up(orec)
-	ok.call(Econ.armory().is_empty() and Econ.feeders().size() == 1 and Econ.graves().is_empty() and Econ.pack_cap() == Equal.base_pack() and Care.starve_stage(orec) == "" and Equal.take_loadout(0).is_empty(), "an old save loads: a first trough, empty armory, %d-slot backpack" % Econ.pack_cap())
+	ok.call(Econ.armory().is_empty() and Econ.feeders().size() == 1 and Econ.graves().is_empty()
+			and Econ.pack_cap() == Equal.base_pack() and Care.starve_stage(orec) == ""
+			and Equal.take_loadout(0).is_empty(),
+			"an old save loads: a first trough, empty armory, %d-slot backpack" % Econ.pack_cap())
 	print("ECON DONE failures: %d" % bad[0])
 	get_tree().quit()
 
@@ -1679,10 +1685,14 @@ func _ability_check() -> void:
 	_ac_glove(P, "barrier")
 	var hp1: float = m.verbs.walls[-1]["hp"] if not m.verbs.walls.is_empty() else 0.0
 	var cd1: float = P.gear_cd[0]
-	P.lvl = 9; P.skill_pts = 5; P._bot_spend()
+	P.lvl = 9
+	P.skill_pts = 5
+	P._bot_spend()
 	_ac_glove(P, "barrier")
 	var hp3: float = m.verbs.walls[-1]["hp"] if not m.verbs.walls.is_empty() else 0.0
-	_ac("a glove is as strong at level 9 as at level 1 (no ranks)", absf(hp3 - hp1) < 0.01 and absf(float(P.gear_cd[0]) - cd1) < 0.01 and not P.slot_lv.has("gear"), "wall hp %.0f -> %.0f, cooldown %.1f -> %.1f" % [hp1, hp3, cd1, float(P.gear_cd[0])])
+	_ac("a glove is as strong at level 9 as at level 1 (no ranks)", absf(hp3 - hp1) < 0.01
+			and absf(float(P.gear_cd[0]) - cd1) < 0.01 and not P.slot_lv.has("gear"),
+			"wall hp %.0f -> %.0f, cooldown %.1f -> %.1f" % [hp1, hp3, cd1, float(P.gear_cd[0])])
 	P.runner.set_slot("utility", Content.ability("leash_bolt"))
 	P.slot_lv["sec"] = 3
 	P.inp["aim"] = T.pos + Vector3(0, 0.9, 0)
@@ -3528,7 +3538,8 @@ func _drop_check() -> void:
 	t = 0.0
 	while t < 6.0:
 		m.step(Match.DT); t += Match.DT
-		if mates.any(func(x): return String(x.ai.get("goal_kind", "")) == "ping"): went = true      # (any squad bot: one busy with its downed Boki or a beacon leaves it to the other)
+		# any squad bot: one busy with its downed Boki or a beacon leaves it to the other
+		if mates.any(func(x): return String(x.ai.get("goal_kind", "")) == "ping"): went = true
 		closest = minf(closest, mates.map(func(x): return x.flat_dist(spot)).min())
 	var replies: Array = D.events.slice(ev0).filter(func(e): return String(e).begins_with("reply"))
 	print("DCHECK ground ping: %s headed there=%s, %.1fm -> got within %.1fm; replies %s (from %s to %s)" % [bot.pname, went, d0, closest, str(replies), str(bot.pos.snapped(Vector3(0.1, 0.1, 0.1))), str(spot.snapped(Vector3(0.1, 0.1, 0.1)))])

@@ -15,7 +15,8 @@ static func bar(hud, p: Hunter, x0: float, y0: float, w: float) -> void:
 		var aw: float = hud.big.get_string_size(at, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x
 		var tier_txt := String(Hunter.ARMOR_TIERS[p.armor_tier][0]).to_upper()
 		hud._text(Vector2(x0 + w - aw, y0 - 2), at, 13, p.armor_col(), hud.big)
-		hud._text(Vector2(x0 + w - aw - 8 - hud.big.get_string_size(tier_txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x, y0 - 3), tier_txt, 10, Color(p.armor_col(), 0.75), hud.big)
+		hud._text(Vector2(x0 + w - aw - 8 - hud.big.get_string_size(tier_txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x,
+				y0 - 3), tier_txt, 10, Color(p.armor_col(), 0.75), hud.big)
 	if p.armor_tier < Hunter.ARMOR_TIERS.size() - 1:
 		var nxt: Color = Hunter.ARMOR_TIERS[p.armor_tier + 1][1]
 		c.draw_rect(Rect2(Vector2(x0, y0 + 3), Vector2(w, 2)), Color(0, 0, 0, 0.35))
@@ -39,7 +40,9 @@ static func badge(hud, pr: Rect2, p: Hunter) -> void:
 		hud._rounded(pr.grow(4.0 + k * 18.0), Color(0, 0, 0, 0), 16, Color(col, 1.0 - k), 4)
 	c.draw_circle(bc, r, Color(0.03, 0.03, 0.05, 0.97))
 	c.draw_arc(bc, r - 2.5, 0, TAU, 40, Color(1, 1, 1, 0.12), 3.0, true)
-	c.draw_arc(bc, r - 2.5, -PI / 2, -PI / 2 + TAU * p.armor_frac(), 40, col if p.armor_tier >= Hunter.ARMOR_TIERS.size() - 1 else Hunter.ARMOR_TIERS[p.armor_tier + 1][1], 3.0, true)
+	c.draw_arc(bc, r - 2.5, -PI / 2, -PI / 2 + TAU * p.armor_frac(), 40,
+			col if p.armor_tier >= Hunter.ARMOR_TIERS.size() - 1 else Hunter.ARMOR_TIERS[p.armor_tier + 1][1], 3.0,
+			true)
 	Icons.draw(c, "brightshield", bc + Vector2(0, -1), 8.0 * sc, col)
 	hud.hover_spots.append([Rect2(bc - Vector2(r, r), Vector2(r, r) * 2.0), "armor_level"])
 
@@ -47,10 +50,13 @@ static func tip(p: Hunter) -> Array:
 	var out: Array = []
 	var last: bool = p.armor_tier >= Hunter.ARMOR_TIERS.size() - 1
 	out.append(["Armor  ·  %s" % String(Hunter.ARMOR_TIERS[p.armor_tier][0]), p.armor_col()])
-	out.append(["Everyone starts on the same armor. Deal damage to rival hunters to level it up (monsters count a third, a knock a lot).", Color("f3eee2"), 14])
+	var how := "Everyone starts on the same armor. Deal damage to rival hunters to level it up "
+	how += "(monsters count a third, a knock a lot)."
+	out.append([how, Color("f3eee2"), 14])
 	if last:
 		out.append(["Top level: %d armor." % int(p.max_armor), Color("a9b0bf"), 13])
 	else:
 		var nx: Array = Hunter.ARMOR_TIERS[p.armor_tier + 1]
-		out.append(["Next: %s  ·  %d of %d  ·  +%d%% plates" % [nx[0], int(p.armor_xp), int(nx[2]), int(Hunter.ARMOR_TIER_BONUS * 100.0)], nx[1], 13])
+		out.append(["Next: %s  ·  %d of %d  ·  +%d%% plates" % [nx[0], int(p.armor_xp), int(nx[2]),
+				int(Hunter.ARMOR_TIER_BONUS * 100.0)], nx[1], 13])
 	return out

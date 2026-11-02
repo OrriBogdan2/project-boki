@@ -13,7 +13,8 @@ const MAX_MEMORY := 40
 const SLOTS := 6
 const LOG_CAP := 200
 ## Upgrades, oldest first: MIGRATIONS[n] turns a version-n save into version n + 1.
-const MIGRATIONS := {1: "_migrate_1_to_2", 2: "_migrate_2_to_3", 3: "_migrate_3_to_4", 4: "_migrate_4_to_5", 5: "_migrate_5_to_6"}
+const MIGRATIONS := {1: "_migrate_1_to_2", 2: "_migrate_2_to_3", 3: "_migrate_3_to_4", 4: "_migrate_4_to_5",
+		5: "_migrate_5_to_6"}
 
 var d: Dictionary = {}
 var slot := 1                 # which save file is in play
@@ -92,7 +93,7 @@ func fresh() -> Dictionary:
 		"ransom_log": [],     # what happened at the Ransom House, newest last
 		"armory": [],         # gear brought home (Loot items); see Econ
 		"arm_lvl": 0, "scrap": 0,
-		"belt_pick": ["tonic", "armor_kit", ""],   # the utility you take on the next expedition, one item per belt slot (Equal)
+		"belt_pick": ["tonic", "armor_kit", ""],   # the utility for the next expedition, one item per belt slot (Equal)
 		"raid_belt": {},      # utility charges out on an expedition right now (put back if it never ended)
 		"loadout": {},        # what you take on the next expedition: slot -> armory uid
 		"valuables": {},      # treasure to sell, and Soul Embers

@@ -105,7 +105,8 @@ static func swap(m, h, i: int, wp: Dictionary) -> void:
 
 ## Puts a piece of gear on; returns the one it replaced as an item ({} if the slot was empty).
 static func _wear(m, h, it: Dictionary) -> Dictionary:
-	var slot := Gear.slot_on(h, String(it["id"]))      # a glove: the same glove's slot, an empty one, or the weaker one (Gloves)
+	# a glove: the same glove's slot, an empty one, or the weaker one (Gloves)
+	var slot := Gear.slot_on(h, String(it["id"]))
 	var old: Dictionary = h.gear[slot]
 	h.gear[slot] = {"id": it["id"], "rar": int(it["rar"])}
 	h.gear_cd[slot] = 0.0

@@ -26,7 +26,8 @@ static func draw(hud, p: Hunter, x: float, y: float) -> float:
 			var cd: float = float(s.get("cd", 0.0))
 			var cd_max: float = maxf(0.01, float(UtilityBelt.def(id).get("cd", 1.0)))
 			var ready := UtilityUse.can_use(p, id) and cd <= 0.0 and not p.downed
-			hud._ab_slot(key, r, UtilityBelt.icon_of(id), Settings.key_cap(key), col, cd / cd_max if cd > 0.0 else 0.0, cd, ready)
+			hud._ab_slot(key, r, UtilityBelt.icon_of(id), Settings.key_cap(key), col, cd / cd_max if cd > 0.0 else 0.0,
+					cd, ready)
 			hud._ctext(Vector2(r.get_center().x, r.position.y - 5), "%d" % int(s["n"]), 12, Color(col, 0.95), hud.big)
 		x -= SLOT + GAP
 	return x

@@ -1,7 +1,8 @@
 class_name GearDrops
 extends RefCounted
 ## What falls out of chests, crates, guards, the Blight and bosses: gear for the four slots (Gear),
-## utility items for the belt (UtilityBelt, odds in content/rules/equal.json) and weapon tunings (WeaponUps), rolled from the tables in content/rules/gear.json. There are no
+## utility items for the belt (UtilityBelt, odds in content/rules/equal.json) and weapon tunings (WeaponUps), rolled from
+## the tables in content/rules/gear.json. There are no
 ## weapon drops any more (every hunter carries one fixed signature weapon), so this replaces them
 ## and the archetype-family weapon logic (DropFamily) with gear and upgrades.
 
@@ -91,7 +92,7 @@ static func run_table(m, name: String, at: Vector3, rng: RandomNumberGenerator, 
 static func bot_start(h, rng: RandomNumberGenerator, diff: String) -> void:
 	var cfg: Dictionary = (rules().get("bot_start", {}) as Dictionary).get(diff, {})
 	UtilityDrops.bot_start(h, rng, diff)
-	var n := int(cfg.get("slots", 0))       # boots first, then up to two different active gloves (bots use both: Gloves)
+	var n := int(cfg.get("slots", 0))  # boots first, then up to two different active gloves (bots use both: Gloves)
 	if n > 0:
 		var b := roll_gear(rng, int(cfg.get("bonus", 0)), 0, 3)
 		h.gear[3] = {"id": b["id"], "rar": b["rar"]}
@@ -107,7 +108,8 @@ static func bot_wants(h, gid: String, rar: int) -> bool:
 ## upgrades taken, and a boss's drop plus a chest's lying around their feet.
 static func demo(m) -> void:
 	var P = m.player
-	P.gear = [{"id": "blink", "rar": 3}, {"id": "focus", "rar": 1}, {"id": "bastion_plate", "rar": 2}, {"id": "skylark_boots", "rar": 4}]
+	P.gear = [{"id": "blink", "rar": 3}, {"id": "focus", "rar": 1}, {"id": "bastion_plate", "rar": 2},
+			{"id": "skylark_boots", "rar": 4}]
 	P.refresh_gear()
 	for pk in ["hotload", "hotload", "quickfeed", "longreach", "brand_fire"]:
 		P.add_perk(pk)

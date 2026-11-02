@@ -10,7 +10,9 @@ static func toast_stray(home: Node, events: Array) -> void:
 			var srec: Dictionary = fe["rec"]
 			home.get_tree().create_timer(1.0).timeout.connect(func():
 				if is_instance_valid(home) and home.is_inside_tree():
-					home._show_when_free(["A stray %s wandered onto the farm. With no Boki of your own, it's decided to stay with you." % Data.KIN[String(srec["species"])]["name"],
+					var species_name := String(Data.KIN[String(srec["species"])]["name"])
+					home._show_when_free(["A stray %s wandered onto the farm. With no Boki of your own, " % species_name
+						+ "it's decided to stay with you.",
 						"You can also buy a Boki at %s's Drift Pens." % BokiPens.MERCHANT]))
 
 ## The one-time list of what the save migration converted: shown once, then forgotten.

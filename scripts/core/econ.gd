@@ -178,7 +178,8 @@ static func fits_slot(it: Dictionary, slot: String) -> bool:
 	if not slot in ["gear0", "gear1"]:
 		return false
 	var other := loadout("gear1" if slot == "gear0" else "gear0")
-	return other.is_empty() or (String(other.get("uid", "")) != String(it.get("uid", "")) and String(other.get("id", "")) != id)
+	return other.is_empty() \
+			or (String(other.get("uid", "")) != String(it.get("uid", "")) and String(other.get("id", "")) != id)
 
 ## Back from an expedition: what you carried goes into the armory (sold if it's full), what you
 ## lost is gone. Fills out["haul"], out["lost_items"], out["arm_sold"].
@@ -193,7 +194,8 @@ static func after_raid(r: Dictionary, out: Dictionary) -> void:
 			var item: Dictionary = (it as Dictionary).duplicate(true)
 			if not item.has("uid"): item["uid"] = Loot._uid()
 			if Equal.salvages(item):
-				# armor is found in matches, never kept or brought: it salvages into gems (and the usual materials, below)
+				# armor is found in matches, never kept or brought: it salvages into gems (and the usual materials,
+				# below)
 				var sg: int = EqualMigrate.rate(int(item.get("rar", 0)))["gems"]
 				Save.d["gems"] = int(Save.d["gems"]) + sg
 				out["salvage_gems"] = int(out.get("salvage_gems", 0)) + sg

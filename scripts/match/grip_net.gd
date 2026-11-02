@@ -23,6 +23,7 @@ static func apply_hunter(h: Hunter, it: Array) -> void:
 	for i in Gloves.SLOTS:
 		var s := String(it[AT + i])
 		var bits := s.split(":")
-		h.gear[i] = {} if s == "" or not Gear.ALL.has(bits[0]) else {"id": bits[0], "rar": int(bits[1]) if bits.size() > 1 else 0}
+		h.gear[i] = {} if s == "" \
+				or not Gear.ALL.has(bits[0]) else {"id": bits[0], "rar": int(bits[1]) if bits.size() > 1 else 0}
 		h.gear_cd[i] = float(it[AT + 2 + i])
 	h.ult = float(it[AT + 4])

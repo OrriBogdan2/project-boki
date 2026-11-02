@@ -48,17 +48,27 @@ static func draw(hud, sz: Vector2, p: Hunter) -> void:
 static func _empty_icon(i: int) -> String:
 	return ["glove", "glove", "fortify", "dash"][i]
 
+## The second hover line: the slot name, or for a glove whether it is active (and its key) or passive.
+static func _kind_line(i: int, gid: String) -> String:
+	if i >= 2:
+		return Gear.WORN_NAMES[i]
+	if Gear.active(gid):
+		return "Active glove  ·  %s" % Gloves.key_cap(i)
+	return "Passive glove  ·  always on"
+
 ## Hover text for slot i: [[line, colour, size?]...]
 static func tip(p: Hunter, i: int) -> Array:
 	var g: Dictionary = p.gear[i]
 	var out: Array = []
 	if g.is_empty() or not Gear.ALL.has(String(g["id"])):
 		out.append([Gear.WORN_NAMES[i] + " (empty)", Color("a2a8bb")])
-		out.append(["Find %s in chests, vaults, on guards and bosses, or bring it from your armory." % ("a glove" if i < 2 else Gear.SLOT_NAMES[i].to_lower()), Color("a2a8bb"), 13])
+		var what: String = "a glove" if i < 2 else Gear.SLOT_NAMES[i].to_lower()
+		var where := "Find %s in chests, vaults, on guards and bosses, or bring it from your armory." % what
+		out.append([where, Color("a2a8bb"), 13])
 		return out
 	var it := Loot.gear(String(g["id"]), int(g["rar"]))
 	out.append([Loot.name_of(it), Loot.col_of(it)])
-	out.append([Gear.WORN_NAMES[i] if i >= 2 else "%s glove  ·  %s" % ["Active" if Gear.active(String(g["id"])) else "Passive", Gloves.key_cap(i) if Gear.active(String(g["id"])) else "always on"], Color("a2a8bb"), 12])
+	out.append([_kind_line(i, String(g["id"])), Color("a2a8bb"), 12])
 	out.append([Gear.desc_of(String(g["id"]), int(g["rar"])), Color("eef1f8"), 14])
 	out.append([Gear.stat_text(String(g["id"]), int(g["rar"])), Color("a2a8bb"), 13])
 	return out

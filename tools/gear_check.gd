@@ -38,7 +38,8 @@ func _data() -> void:
 	ok("the six archetypes have six different signatures", seen.size() == Arch.ids().size(), "%d" % seen.size())
 	for s in Gear.SLOTS.size():
 		ok("slot %d (%s) has gear to find" % [s, Gear.SLOTS[s]], not Gear.ids_for(s).is_empty())
-	ok("armor and boots pieces exist beyond the old gloves (the kit slot is the utility belt now)", Gear.ids_for(2).size() >= 2 and Gear.ids_for(3).size() >= 2 and Gear.SLOTS.size() == 4)
+	ok("armor and boots pieces exist beyond the old gloves (the kit slot is the utility belt now)",
+			Gear.ids_for(2).size() >= 2 and Gear.ids_for(3).size() >= 2 and Gear.SLOTS.size() == 4)
 	var wup := 0
 	var brands := 0
 	for k in Data.PERKS:
@@ -50,7 +51,8 @@ func _data() -> void:
 	var lo_ok := true
 	for k in ["gear0", "gear1", "gear3"]:
 		if not Econ.LOADOUT_SLOTS.has(k): lo_ok = false
-	ok("the loadout has three slots: gloves and boots (armor and kit are not brought in)", lo_ok and Econ.LOADOUT_SLOTS.size() == 3)
+	ok("the loadout has three slots: gloves and boots (armor and kit are not brought in)", lo_ok
+			and Econ.LOADOUT_SLOTS.size() == 3)
 
 func _rolls() -> void:
 	var rng := RandomNumberGenerator.new()
@@ -249,10 +251,13 @@ func _match() -> void:
 ## throws them up at once; each glove keeps its own cooldown; a passive glove sits in either slot.
 func _glove_combos() -> void:
 	var r: Array = main._ac_setup(7.0)
-	var m: Match = r[0]; var P: Hunter = r[1]; var T: Hunter = r[2]
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var T: Hunter = r[2]
 	P.gear[0] = {"id": "grapple", "rar": 1}
 	P.gear[1] = {"id": "quake", "rar": 1}
-	P.gear_cd[0] = 0.0; P.gear_cd[1] = 0.0
+	P.gear_cd[0] = 0.0
+	P.gear_cd[1] = 0.0
 	var d0 := P.flat_dist(T)
 	P.inp["gear1"] = true
 	_glove_run(m, 0.8)
@@ -261,15 +266,19 @@ func _glove_combos() -> void:
 	var hp0 := T.hp
 	var y0 := T.pos.y
 	var rose := [false]
-	P.inp["aim"] = T.pos + Vector3(0, 0.9, 0); P.inp["aim_y"] = T.pos.y
+	P.inp["aim"] = T.pos + Vector3(0, 0.9, 0)
+	P.inp["aim_y"] = T.pos.y
 	P.inp["gear2"] = true
 	_glove_run(m, 0.6, func(): if T.pos.y > y0 + 0.3: rose[0] = true)
-	ok("combo: V's fissure right after the hook throws the hooked foe up and hurts it", rose[0] and T.hp < hp0, "hp %.0f -> %.0f, rose %s" % [hp0, T.hp, str(rose[0])])
-	ok("combo: both gloves now cool down on their own clocks", P.gear_cd[0] > 0.0 and P.gear_cd[1] > 0.0 and absf(P.gear_cd[0] - P.gear_cd[1]) > 0.2, "Q %.1f, V %.1f" % [P.gear_cd[0], P.gear_cd[1]])
+	ok("combo: V's fissure right after the hook throws the hooked foe up and hurts it", rose[0] and T.hp < hp0,
+			"hp %.0f -> %.0f, rose %s" % [hp0, T.hp, str(rose[0])])
+	ok("combo: both gloves now cool down on their own clocks", P.gear_cd[0] > 0.0 and P.gear_cd[1] > 0.0
+			and absf(P.gear_cd[0] - P.gear_cd[1]) > 0.2, "Q %.1f, V %.1f" % [P.gear_cd[0], P.gear_cd[1]])
 	# a passive glove in the Q slot gives its stats and casts nothing; the active one on V still fires
 	P.gear[0] = {"id": "focus", "rar": 2}
 	P.gear[1] = {"id": "grapple", "rar": 1}
-	P.gear_cd[0] = 0.0; P.gear_cd[1] = 0.0
+	P.gear_cd[0] = 0.0
+	P.gear_cd[1] = 0.0
 	P.refresh_gear()
 	P.inp["gear1"] = true
 	m.step(Match.DT)
@@ -277,14 +286,17 @@ func _glove_combos() -> void:
 	P.inp["aim"] = T.pos + Vector3(0, 0.9, 0)
 	P.inp["gear2"] = true
 	m.step(Match.DT)
-	ok("a passive glove on Q casts nothing; the hook on V fires", q_quiet and P.gear_cd[1] > 0.0 and P.gear_stat("cdr") > 0.0, "Q cd %.1f, V cd %.1f" % [P.gear_cd[0], P.gear_cd[1]])
+	ok("a passive glove on Q casts nothing; the hook on V fires", q_quiet and P.gear_cd[1] > 0.0
+			and P.gear_stat("cdr") > 0.0, "Q cd %.1f, V cd %.1f" % [P.gear_cd[0], P.gear_cd[1]])
 	# two of the same glove can't be worn: a second hook replaces the first
 	P.gear = Gear.empty_slots()
 	m.spawn_gear("grapple", 1, P.pos, "", false)
 	m.take_pick(P, m.wpicks[m.wpicks.size() - 1])
 	m.spawn_gear("grapple", 3, P.pos, "", false)
 	m.take_pick(P, m.wpicks[m.wpicks.size() - 1])
-	ok("two of the same glove can't be worn: the better hook replaces the first", String(P.gear[0].get("id", "")) == "grapple" and int(P.gear[0]["rar"]) == 3 and (P.gear[1] as Dictionary).is_empty(), str(P.gear))
+	ok("two of the same glove can't be worn: the better hook replaces the first",
+			String(P.gear[0].get("id", "")) == "grapple" and int(P.gear[0]["rar"]) == 3
+			and (P.gear[1] as Dictionary).is_empty(), str(P.gear))
 	m.spawn_gear("quake", 1, P.pos, "", false)
 	m.take_pick(P, m.wpicks[m.wpicks.size() - 1])
 	ok("a different glove goes in the free slot (V)", String(P.gear[1].get("id", "")) == "quake", str(P.gear))
@@ -294,4 +306,5 @@ func _glove_run(m: Match, secs: float, each := Callable()) -> void:
 	var t := 0.0
 	while t < secs:
 		if each.is_valid(): each.call()
-		m.step(Match.DT); t += Match.DT
+		m.step(Match.DT)
+		t += Match.DT

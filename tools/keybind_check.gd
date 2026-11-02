@@ -26,7 +26,8 @@ func run(main: Node) -> void:
 	ok(xs.is_empty(), "nothing else rebindable is on X (%s)" % str(xs))
 	# a second key: set, saved, cleared
 	S.rebind("util1", _key(KEY_KP_1), 1)
-	ok(S.slots("util1") == ["key:%d" % KEY_1, "key:%d" % KEY_KP_1] and InputMap.action_get_events("util1").size() == 2, "a second key for utility slot 1 works (%s)" % S.binding_text("util1"))
+	ok(S.slots("util1") == ["key:%d" % KEY_1, "key:%d" % KEY_KP_1] and InputMap.action_get_events("util1").size() == 2,
+			"a second key for utility slot 1 works (%s)" % S.binding_text("util1"))
 	ok((S.v["keys"]["util1"] as Array).size() == 2, "and is saved")
 	S.clear_bind("util1", 1)
 	ok(S.slots("util1") == ["key:%d" % KEY_1, ""], "and clears")
@@ -34,13 +35,16 @@ func run(main: Node) -> void:
 	ok(S.slots("util1") == ["", ""] and S.binding_text("util1") == "unbound", "clearing the main key leaves it unbound")
 	var mb := InputEventMouseButton.new(); mb.button_index = MOUSE_BUTTON_XBUTTON1; mb.pressed = true
 	S.rebind("util1", mb, 1)
-	ok(S.slots("util1") == ["", "mouse:%d" % MOUSE_BUTTON_XBUTTON1], "a mouse button works as a second key (%s)" % S.binding_text("util1"))
+	ok(S.slots("util1") == ["", "mouse:%d" % MOUSE_BUTTON_XBUTTON1],
+			"a mouse button works as a second key (%s)" % S.binding_text("util1"))
 	S.reset_all()
 	# V: glove 2 in a match, play fetch at home. Different places, so they share it on purpose
-	ok(S.slots("gear2")[0] == "key:%d" % KEY_V and S.slots("play")[0] == "key:%d" % KEY_V, "glove 2 ships on V, and V still plays fetch at home")
+	ok(S.slots("gear2")[0] == "key:%d" % KEY_V and S.slots("play")[0] == "key:%d" % KEY_V,
+			"glove 2 ships on V, and V still plays fetch at home")
 	var vg: Array = S.conflicts(_key(KEY_V), "gear2")
 	var vp: Array = S.conflicts(_key(KEY_V), "play")
-	ok(vg.is_empty() and vp.is_empty(), "glove 2 (match) and play (home) are separate contexts: no clash between them (%s %s)" % [str(vg), str(vp)])
+	ok(vg.is_empty() and vp.is_empty(),
+			"glove 2 (match) and play (home) are separate contexts: no clash between them (%s %s)" % [str(vg), str(vp)])
 	var vd: Array = S.conflicts(_key(KEY_V), "dash")
 	ok(vd.any(func(x): return x[0] == "gear2") and vd.any(func(x): return x[0] == "play"), "giving another action V still warns about both (%s)" % str(vd))
 	# clashes: F is interact's

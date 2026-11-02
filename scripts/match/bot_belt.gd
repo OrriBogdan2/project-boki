@@ -28,7 +28,8 @@ static func think(m, h: Hunter, a: Dictionary, inp: Dictionary) -> void:
 		return
 	if frac < 0.4 and near and _press(h, inp, "smoke"):
 		return
-	if near and tgt != null and h.flat_dist(tgt) < 10.0 and frac < 0.8 and h.shield <= 0.0 and _press(h, inp, "shield_cell"):
+	if near and tgt != null and h.flat_dist(tgt) < 10.0 and frac < 0.8 and h.shield <= 0.0 \
+			and _press(h, inp, "shield_cell"):
 		return
 	if near and frac < 0.5 and _press(h, inp, "stim"):
 		return

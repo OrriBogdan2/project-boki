@@ -116,9 +116,9 @@ static func can_take(h, kind: String) -> bool:
 	var id := item_of(kind)
 	return not is_item(id) or has_room(h, id)
 
-## Puts charges on the belt: onto the same item's slot, else the first empty one. `free` marks them as
+## Puts charges on the belt: onto the same item's slot, else the first empty one. `issued` marks them as
 ## issued (used first, never taken home). Returns how many went on (0 when the belt is full).
-static func grant(h, id: String, n := 1, free := false) -> int:
+static func grant(h, id: String, n := 1, issued := false) -> int:
 	var put := mini(n, room_for(h, id))
 	if put <= 0:
 		return 0
@@ -130,14 +130,14 @@ static func grant(h, id: String, n := 1, free := false) -> int:
 				break
 		h.belt[i] = {"id": id, "n": 0, "cd": 0.0}
 	h.belt[i]["n"] = int(h.belt[i]["n"]) + put
-	if free:
+	if issued:
 		h.belt_free[id] = int(h.belt_free.get(id, 0)) + put
 	return put
 
-## Fills one slot outright (the match start): n charges, `free` of them the everyday issue.
-static func set_slot(h, i: int, id: String, n: int, free := 0) -> void:
+## Fills one slot outright (the match start): n charges, `issued` of them the everyday issue.
+static func set_slot(h, i: int, id: String, n: int, issued := 0) -> void:
 	h.belt[i] = {"id": id, "n": mini(n, max_of(id)), "cd": 0.0}
-	h.belt_free[id] = mini(free, mini(n, max_of(id)))
+	h.belt_free[id] = mini(issued, mini(n, max_of(id)))
 
 ## A pickup from the ground: onto the belt, with a small toast for the local player.
 static func pickup(h, id: String, n := 1) -> void:

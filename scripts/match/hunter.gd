@@ -276,7 +276,9 @@ func init_hunter(match_node: Node, id: String, team_id: int, class_id: String, n
 		bot_look = Models.random_look()
 	max_hp = cdat["hp"]; hp = max_hp
 	max_armor = round(max_hp * ARMOR_DUR); armor = max_armor; base_armor = max_armor
-	UtilityBelt.issue(self); pack_cap = Equal.base_pack()      # the belt issue and the equal pack size (Equal.pack_slots)
+	# the belt issue and the equal pack size (Equal.pack_slots)
+	UtilityBelt.issue(self)
+	pack_cap = Equal.base_pack()
 	glide_max = GLIDE_TIME * float(cdat.get("glide_cap", 1.0))
 	base_speed = cdat["speed"]
 	runner = AbilityRunner.new(self)
@@ -2038,17 +2040,20 @@ func sim(dt: float) -> void:
 	# bringing a teammate back at their deathbox: kneeling over it, locked in place (let go of
 	# interact to stop)
 	if box_reviving():
-		for kk in ["dash", "jump", "sig", "skill", "sec", "ult", "swap", "reload", "util1", "util2", "util3", "gear1", "gear2", "fire", "throw", "kin_ab"]:
+		for kk in ["dash", "jump", "sig", "skill", "sec", "ult", "swap", "reload", "util1", "util2", "util3", "gear1",
+				"gear2", "fire", "throw", "kin_ab"]:
 			inp[kk] = false
 		inp["move"] = Vector2.ZERO
 	# mid-stomp you're committed: none of your own buttons do anything until it ends
 	if not stomp.is_empty():
-		for kk in ["dash", "jump", "sig", "skill", "sec", "ult", "swap", "reload", "util1", "util2", "util3", "gear1", "gear2", "fire", "throw", "kin_ab"]:
+		for kk in ["dash", "jump", "sig", "skill", "sec", "ult", "swap", "reload", "util1", "util2", "util3", "gear1",
+				"gear2", "fire", "throw", "kin_ab"]:
 			inp[kk] = false
 		inp["move"] = Vector2.ZERO
 	# inputs
 	MergeAugment.route(self)         # merging: nothing fires mid-transformation; merged in a form, C is off
-	for gk in [["dash", "dash", "dash"], ["sec", "sec", "sec"], ["sig", "kin", "k1"], ["ult", "ult", "r"]]:      # (gloves need no point: Gloves)
+	# gloves need no point: Gloves
+	for gk in [["dash", "dash", "dash"], ["sec", "sec", "sec"], ["sig", "kin", "k1"], ["ult", "ult", "r"]]:
 		_gate(gk[0], gk[1], gk[2])
 	KinDowned.commit(self)           # rescuing your Boki: rooted, nothing fires (a dash still cancels it)
 	if dropping and not grounded and ctrl != "bot":
@@ -2116,8 +2121,8 @@ func sim(dt: float) -> void:
 		else: use_ultimate()
 	trigger(dt)
 	inp["kin_ab"] = false
-	inp["dash"] = false; inp["jump"] = false; inp["sig"] = false; inp["reload"] = false; inp["util1"] = false; inp["util2"] = false; inp["util3"] = false; inp["ult"] = false; inp["sec"] = false; inp["gear1"] = false; inp["gear2"] = false
-	inp["skill"] = false; inp["swap"] = false
+	for k in ["dash", "jump", "sig", "reload", "util1", "util2", "util3", "ult", "sec", "gear1", "gear2", "skill", "swap"]:
+		inp[k] = false
 	_physics(dt)
 	var ad := aim_dir()
 	var want := atan2(-ad.x, -ad.y)

@@ -29,8 +29,8 @@ static func _set_pick(i: int, id: String) -> void:
 static func slot_text(id: String, tier: int) -> String:
 	if id == "":
 		return "empty"
-	var free := int((Equal.rules().get("issue", {}) as Dictionary).get(id, 0))
-	var n := free + clampi(UtilityBelt.bring_cap(id, tier) - free, 0, Equal.stash_of(id))
+	var issued := int((Equal.rules().get("issue", {}) as Dictionary).get(id, 0))
+	var n := issued + clampi(UtilityBelt.bring_cap(id, tier) - issued, 0, Equal.stash_of(id))
 	return "%s ×%d" % [UtilityBelt.name_of(id), n]
 
 ## "Utility belt" rows for the expedition panel: one per slot, ‹ › to change what it holds.
@@ -40,13 +40,16 @@ static func rows(parent: VBoxContainer, reopen: Callable, tier: int) -> void:
 	for i in UtilityBelt.SLOTS:
 		var id := _pick_at(i)
 		var card := UI.card(UI.CARD, 6, 10)
-		var row := UI.hbox(8); card.add_child(row)
+		var row := UI.hbox(8)
+		card.add_child(row)
 		if id != "":
 			row.add_child(Icons.Glyph.new(UtilityBelt.icon_of(id), UtilityBelt.col_of(id), 22.0))
-		var nm := UI.label("%d:  %s" % [i + 1, slot_text(id, tier)], 14, UtilityBelt.col_of(id) if id != "" else UI.MUTED, UI.semi)
+		var nm := UI.label("%d:  %s" % [i + 1, slot_text(id, tier)], 14,
+				UtilityBelt.col_of(id) if id != "" else UI.MUTED, UI.semi)
 		nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		nm.clip_text = true
-		nm.tooltip_text = String(UtilityBelt.def(id).get("desc", "")) if id != "" else "Leave this slot for something you find"
+		nm.tooltip_text = String(UtilityBelt.def(id).get("desc",
+				"")) if id != "" else "Leave this slot for something you find"
 		nm.mouse_filter = Control.MOUSE_FILTER_PASS
 		row.add_child(nm)
 		var at := maxi(0, ch.find(id))
@@ -59,20 +62,25 @@ static func rows(parent: VBoxContainer, reopen: Callable, tier: int) -> void:
 			b.disabled = ch.size() <= 1
 			row.add_child(b)
 		parent.add_child(card)
-	var note := UI.label("You can bring up to %s on this difficulty; what you bring is lost if you go down." % _cap_text(tier), 12, UI.MUTED)
+	var cap_line := "You can bring up to %s on this difficulty; " % _cap_text(tier)
+	cap_line += "what you bring is lost if you go down."
+	var note := UI.label(cap_line, 12, UI.MUTED)
 	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	parent.add_child(note)
 
 static func _cap_text(tier: int) -> String:
-	return "%d tonics and %d armor kits" % [UtilityBelt.bring_cap("tonic", tier), UtilityBelt.bring_cap("armor_kit", tier)]
+	return "%d tonics and %d armor kits" % [UtilityBelt.bring_cap("tonic", tier),
+			UtilityBelt.bring_cap("armor_kit", tier)]
 
 ## The armory's Utility tab: your stash, and the most each item can be brought at each difficulty.
 static func stash(v: VBoxContainer) -> void:
 	for id in UtilityBelt.ids():
 		var r := UI.hbox(10)
 		r.add_child(Icons.Glyph.new(UtilityBelt.icon_of(id), UtilityBelt.col_of(id), 26.0))
-		var info := UI.vbox(1); info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		info.add_child(UI.label("%s  ×%d" % [UtilityBelt.name_of(id), Equal.stash_of(id)], 16, UtilityBelt.col_of(id), UI.semi))
+		var info := UI.vbox(1)
+		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		info.add_child(UI.label("%s  ×%d" % [UtilityBelt.name_of(id), Equal.stash_of(id)], 16, UtilityBelt.col_of(id),
+				UI.semi))
 		var d := UI.label(String(UtilityBelt.def(id).get("desc", "")), 12, UI.MUTED)
 		d.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		info.add_child(d)
@@ -82,5 +90,7 @@ static func stash(v: VBoxContainer) -> void:
 			caps.append(str(UtilityBelt.bring_cap(id, t)))
 		r.add_child(UI.label("brings up to " + " / ".join(caps), 12, UI.FAINT))
 		v.add_child(r)
-	var tip := UI.para("Pick what goes on keys 1 2 3 on the expedition board. Buy more at the market; what you find and bring home is kept.", 12, UI.FAINT)
+	var tip_text := "Pick what goes on keys 1 2 3 on the expedition board. Buy more at the market; what you find "
+	tip_text += "and bring home is kept."
+	var tip := UI.para(tip_text, 12, UI.FAINT)
 	v.add_child(tip)

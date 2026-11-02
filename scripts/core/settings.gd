@@ -427,7 +427,8 @@ func conflicts(ev: InputEvent, except := "") -> Array:
 	return out
 
 ## Pairs of actions that share keys on purpose (they never apply in the same place: at home vs in a match).
-const SHARED_OK := [["talk", "emote"], ["details", "kin_ability"], ["build", "base"], ["rotate", "ultimate"], ["play", "gear2"]]
+const SHARED_OK := [["talk", "emote"], ["details", "kin_ability"], ["build", "base"], ["rotate", "ultimate"],
+		["play", "gear2"]]
 func _shared_ok(a: String, b: String) -> bool:
 	for p in SHARED_OK:
 		if (p[0] == a and p[1] == b) or (p[0] == b and p[1] == a): return true

@@ -15,9 +15,10 @@ extends RefCounted
 const KIT_IDS := ["field_kit", "magpie", "satchel", "spyglass", "tinker_roll"]
 const MOVED_IDS := ["smoke", "jump_pad", "scanner", "medkit"]       # gloves that became utility items
 const GEAR_VALUE := [3, 8, 18, 36, 70]                               # Loot.GEAR_VALUE, as it was
-const PACK_REFUND := [[120, 4], [260, 10], [450, 20]]                # what the three backpack upgrades cost [gems, scrap]
-const OLD_NAMES := {"field_kit": "Field Surgeon's Kit", "magpie": "Magpie Pouch", "satchel": "Wayfarer's Satchel", "spyglass": "Brass Spyglass",
-	"tinker_roll": "Tinker's Roll", "smoke": "Smoke Glove", "jump_pad": "Springpad Glove", "scanner": "Seeker Glove", "medkit": "Mending Glove"}
+const PACK_REFUND := [[120, 4], [260, 10], [450, 20]]  # what the three backpack upgrades cost [gems, scrap]
+const OLD_NAMES := {"field_kit": "Field Surgeon's Kit", "magpie": "Magpie Pouch", "satchel": "Wayfarer's Satchel",
+	"spyglass": "Brass Spyglass", "tinker_roll": "Tinker's Roll", "smoke": "Smoke Glove", "jump_pad": "Springpad Glove",
+	"scanner": "Seeker Glove", "medkit": "Mending Glove"}
 const MAX_LISTED := 8
 
 ## What a stored piece is for the update: "armor", "kit", "moved" (a glove that became a utility item)
@@ -74,7 +75,8 @@ static func migrate(data: Dictionary) -> Array:
 				"moved":
 					var ch: Array = (Equal.rules().get("migration", {}) as Dictionary).get("moved_gloves_charges", [1])
 					moved[id] = int(moved.get(id, 0)) + int(ch[clampi(rar, 0, ch.size() - 1)])
-					listed.append("%s -> %s x%d" % [name_of(id), id.replace("_", " "), int(ch[clampi(rar, 0, ch.size() - 1)])])
+					listed.append("%s -> %s x%d" % [name_of(id), id.replace("_", " "),
+							int(ch[clampi(rar, 0, ch.size() - 1)])])
 					gone[String(it.get("uid", ""))] = true
 				_:
 					keep.append(it)
@@ -119,7 +121,8 @@ static func migrate(data: Dictionary) -> Array:
 		lines.append("Matches changed: everyone drops on equal footing now.")
 		lines.append("You keep your gloves and boots. Nothing was deleted:")
 		if n_armor + n_kit > 0:
-			lines.append("%d armor and %d kit piece%s became %d gems, %d wood, %d stone, %d scrap." % [n_armor, n_kit, "" if n_armor + n_kit == 1 else "s", tot["gems"], tot["wood"], tot["stone"], tot["scrap"]])
+			lines.append("%d armor and %d kit piece%s became %d gems, %d wood, %d stone, %d scrap." % [n_armor, n_kit,
+					"" if n_armor + n_kit == 1 else "s", tot["gems"], tot["wood"], tot["stone"], tot["scrap"]])
 		if not moved.is_empty():
 			var bits: Array = []
 			for id in moved:
@@ -131,7 +134,8 @@ static func migrate(data: Dictionary) -> Array:
 			lines.append("  " + String(listed[i]))
 		if listed.size() > MAX_LISTED:
 			lines.append("  and %d more" % (listed.size() - MAX_LISTED))
-		lines.append("New: a second glove slot on V. Pick a glove for it in the armory%s." % (" (your passive glove is still there)" if had_g1 else ""))
+		var still := " (your passive glove is still there)" if had_g1 else ""
+		lines.append("New: a second glove slot on V. Pick a glove for it in the armory%s." % still)
 		lines.append("Armor, perks and bigger packs are found in the match now.")
 	data["equal_notice"] = lines
 	return lines
@@ -154,7 +158,8 @@ static func demo() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 5
 	var arm: Array = []
-	for t in [["vest", 2], ["quilted_coat", 3], ["bastion_plate", 4], ["tinker_roll", 2], ["satchel", 4], ["field_kit", 1], ["magpie", 3], ["smoke", 2], ["scanner", 3]]:
+	for t in [["vest", 2], ["quilted_coat", 3], ["bastion_plate", 4], ["tinker_roll", 2], ["satchel", 4],
+			["field_kit", 1], ["magpie", 3], ["smoke", 2], ["scanner", 3]]:
 		arm.append(Loot.gear(String(t[0]), int(t[1])))
 	for t in [["boots", 1], ["windstep_boots", 3], ["quickstep_boots", 2]]:
 		arm.append(Loot.gear(String(t[0]), int(t[1])))

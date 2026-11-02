@@ -91,7 +91,7 @@ func run(main: Node) -> void:
 	var kill_t := _kill(F, P, C)
 	var gems_new: Array = dropped.filter(func(p): return String(p["kind"]) == "gem")
 	# (a utility item from the boss table is loot now, on the 1/2/3 belt: ext/equal, UtilityDrops)
-	var other_new: Array = dropped.filter(func(p): return String(p["kind"]) != "gem" and String(p["kind"]) != "key" and not UtilityBelt.is_item(String(p["kind"])))
+	var other_new: Array = dropped.filter(func(p): return not _is_loot_kind(String(p["kind"])))
 	var gem_total := 0
 	for p in gems_new: gem_total += int(p["v"])
 	ok(gems_new.size() <= Match.BOSS_GEM_DROPS and gem_total >= int(Data.MOBS["colossus"]["gems"]) * 2 and other_new.is_empty(),
@@ -197,3 +197,7 @@ func run(main: Node) -> void:
 		ok(m.lairs.sealed_lair(P) == H and H.get("victory", false), "after the third kill you're locked in %s, the victory banner up" % String(H["name"]))
 	print("LAIR LOCK CHECK DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+## Gems, keys and utility items are loot from a boss table, not stray junk.
+func _is_loot_kind(kind: String) -> bool:
+	return kind in ["gem", "key"] or UtilityBelt.is_item(kind)

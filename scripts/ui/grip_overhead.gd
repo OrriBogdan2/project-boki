@@ -29,11 +29,13 @@ static func row(h) -> Array:
 		if g.is_empty() or not Gear.ALL.has(String(g["id"])):
 			out.append({"kind": "glove", "id": "", "col": EMPTY, "dim": true, "glow": false})
 		else:
-			out.append({"kind": "glove", "id": String(g["id"]), "col": GripHud.rar_col(g), "icol": Gear.ALL[String(g["id"])]["col"],
+			var gid := String(g["id"])
+			out.append({"kind": "glove", "id": gid, "col": GripHud.rar_col(g), "icol": Gear.ALL[gid]["col"],
 				"dim": float(h.gear_cd[i]) > 0.0, "glow": false})
 	var k = h.kin
 	if k != null and is_instance_valid(k):
-		out.append({"kind": "boki", "id": DexView.type_of(String(k.species)), "col": DexView.type_col(DexView.type_of(String(k.species))),
+		var kin_type := DexView.type_of(String(k.species))
+		out.append({"kind": "boki", "id": kin_type, "col": DexView.type_col(kin_type),
 			"dim": String(k.state) == "downed", "glow": h.ult >= 1.0})
 	else:
 		out.append({"kind": "boki", "id": "", "col": EMPTY, "dim": true, "glow": false})

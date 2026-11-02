@@ -8,7 +8,7 @@ extends RefCounted
 ## What you bring is at risk: die and it is in your deathbox like everything else.
 ## The workshop and guild-project perks, the bigger home backpack and armor from the armory are gone.
 
-const BRING_SLOTS := [0, 1, 3]             # gear KINDS that may come from home (Gear.slot_of): active glove, passive glove, boots
+const BRING_SLOTS := [0, 1, 3]  # gear KINDS that may come from home (Gear.slot_of): active glove, passive glove, boots
 
 static var _rules: Dictionary = {}
 
@@ -50,14 +50,16 @@ static func may_bring(it: Dictionary, tier: int) -> bool:
 
 ## Does this piece salvage on arrival instead of being stored? Armor: it is found, not kept.
 static func salvages(it: Dictionary) -> bool:
-	return String(it.get("t", "")) == "gear" and Gear.ALL.has(String(it.get("id", ""))) and Gear.slot_of(String(it["id"])) == 2
+	return String(it.get("t", "")) == "gear" and Gear.ALL.has(String(it.get("id", ""))) \
+			and Gear.slot_of(String(it["id"])) == 2
 
 ## Why a piece can't come, for the expedition panel ("" when it can).
 static func why_not(it: Dictionary, tier: int) -> String:
 	if may_bring(it, tier):
 		return ""
 	if int(it.get("rar", 0)) > rarity_cap(tier):
-		return "%s or lower at %s" % [Data.RARITY[rarity_cap(tier)]["name"], Data.TIERS[clampi(tier, 0, Data.TIERS.size() - 1)]["name"]]
+		return "%s or lower at %s" % [Data.RARITY[rarity_cap(tier)]["name"],
+				Data.TIERS[clampi(tier, 0, Data.TIERS.size() - 1)]["name"]]
 	return "Not allowed in matches"
 
 # ------------------------------------------------------------------ setting out (the farm side)
@@ -90,12 +92,12 @@ static func take_belt(tier: int) -> Array:
 		if not UtilityBelt.is_item(id) or gone.has(id):
 			out.append({"id": "", "n": 0, "free": 0})
 			continue
-		var free := int(iss.get(id, 0))
+		var issued := int(iss.get(id, 0))
 		var stash := stash_of(id)
-		var took := clampi(UtilityBelt.bring_cap(id, tier) - free, 0, stash)
+		var took := clampi(UtilityBelt.bring_cap(id, tier) - issued, 0, stash)
 		Save.d["items"][id] = stash - took
 		gone[id] = took
-		out.append({"id": id, "n": free + took, "free": free})
+		out.append({"id": id, "n": issued + took, "free": issued})
 	Save.d["raid_belt"] = gone
 	return out
 
@@ -117,13 +119,16 @@ static func start(m, h) -> void:
 	h.pack_cap = pack_slots(h)
 	h.set_meta("gear_pack", pack_bonus(h))       # (Gear.apply_worn counts changes from here)
 	if "--equal-demo" in OS.get_cmdline_user_args():
-		m.opts["equal_demo"] = true; m.opts["no_drop"] = true      # screenshots: read here, not in main.gd (its budget)
+		# screenshots: read here, not in main.gd (its budget)
+		m.opts["equal_demo"] = true
+		m.opts["no_drop"] = true
 	if m.opts.get("training", false) or m.opts.get("tutorial", false) or m.opts.get("duel", false):
 		return
 	var tier: int = m.tier
 	for it in m.opts.get("kit_items", []):
 		if may_bring(it, tier):
-			h.gear[Gear.slot_on(h, String(it["id"]))] = {"id": it["id"], "rar": int(it["rar"])}      # gloves: Q first, then V
+			# gloves: Q first, then V
+			h.gear[Gear.slot_on(h, String(it["id"]))] = {"id": it["id"], "rar": int(it["rar"])}
 	# the belt: what you picked, in the order you picked it (slots 1 2 3)
 	if m.opts.has("belt_items"):
 		h.belt = UtilityBelt.empty()
@@ -162,7 +167,10 @@ static func _demo_late(m, h) -> void:
 		return
 	Settings.v["tips"] = false          # (a clean frame: no tip card, no level-up choice, no monsters close by)
 	for mb in m.mobs:
-		if is_instance_valid(mb) and not mb.dead and mb.flat_dist(h) < 30.0: mb.hp = 0.0; mb.dead = true; mb.visible = false
+		if is_instance_valid(mb) and not mb.dead and mb.flat_dist(h) < 30.0:
+			mb.hp = 0.0
+			mb.dead = true
+			mb.visible = false
 	h.gear_cd[1] = 9.0
 	h.ult = 0.7
 	h.hp = maxf(h.hp, h.max_hp * 0.62)
