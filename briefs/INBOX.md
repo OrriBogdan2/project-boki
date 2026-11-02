@@ -162,3 +162,13 @@ The owner wants Pin's draw readout to work the way the source does, **but not as
 
 ## 2026-11-02 22:45 UTC
 Owner: the "Hold Shift for the long dash" setting (`dash_hold`) is being removed by the main session. Hold-to-extend dashes are per hunter, only where the source does it (for example Tamsin's Rinkrun). Kit and polish passes must not read `Settings.dash_hold` or depend on it. If a kit branch references it, remove the reference. Relay this to the running kit agents.
+
+## 2026-11-02 22:40 UTC: OWNER on Moosh Moosh (tender). Add to the moosh-tamsin polish pass; high priority
+The owner says she "doesn't feel or look like Elluna at all".
+1. **Very small.** She becomes a very small hunter. A body/scale/movement study is being written now and will be appended to briefs/hero-ref/mooshmoosh.md as "Body, scale and movement feel", with a target scale factor, collision size, bob and cadence, and the dash curve. Wait for it (about an hour) before tuning scale and movement; start on item 2 now.
+2. **No weapon.** Remove the crook/staff prop. She attacks with her hands: casting her shots from the hand or fingertip (a finger-gun or palm cast, like Vireo's new finger gun), with a punch-like push on the cast.
+   - Give each hand an alternating cast pose with anticipation, a release snap and recoil, plus a fingertip glow and muzzle burst in her colours.
+   - The projectiles and their trails keep her own look.
+   - Remove the weapon-hold logic that was freezing her poses (REVIEW_mooshmoosh.md item 1), and make sure the moves drive the arms.
+3. **Feel:** light, quick and bouncy; a small support who darts around.
+4. **Clean room:** match the source's scale, motion and attack style, but her look stays our own original design. Don't recreate the source character's outfit, hair, colours or silhouette.
