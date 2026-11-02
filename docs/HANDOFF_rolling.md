@@ -15,6 +15,14 @@ default. Net.VERSION is unchanged (0.8.0): rolling adds no sync, so the 0.8.3 sl
 - **Health budgets:** the merge pushed `match.gd` and `world.gd` over budget. The wide-map builder moved to
   `scripts/match/wide_layout.gd` (`class_name WideLayout`), `bot_time_left` / `bot_past` / `board()` moved into
   `rolling.gd`. Net effect against main: `match.gd` -20 lines, `world.gd` 0. `health.py --strict` is OK.
+- **sync57 (e85193d, Net 0.9.0) merged too**, cleanly. Net.VERSION stays 0.9.0 (no sync change; the 0.9.3 slot is
+  unused). `match.gd` is 6943 / 6950 lines.
+- **Checks on the sync57 tree** (all 0 failures, no SCRIPT ERROR): rolling (61), check, mantle, drop, extract, boss,
+  duel, revive, economy, home-build, arena, archetype, airheal, record, obstacle, bot-sanity, blight, raid, teammate,
+  farm-start, abyss, kit-combo, life, title, boki-system; `gen_wiki.py --check` (15 unchanged); `health.py --strict` OK.
+- **`--simtest --seed=5`:** now ends at 30 s, "team wiped". The old 205 s hatch-extract baseline no longer holds, but
+  that is main, not rolling: pristine `origin/main` gives the identical result (30 s, team wiped; Hollow Crown default
+  map and the Boki system changed the run). Rolling is off in the simtest, so the two match exactly.
 - `rolling-check` fixes for the new world: the default-match assertion follows `World.layout_for_tier`; the bounty
   test clears the rival's cooldown (a bot fight before it can claim one off them); camp respawn counts >= 1; a
   player already finished off by the autopilot is the match result at 30:00.
@@ -183,7 +191,7 @@ Fixed along the way:
 |---|---|---|
 | `--check` | 0 | |
 | `--rolling-check` | 0 | 61 checks (2 new: the POP_MODE reading, and the "total" mode's 24-40 over a session: 27-39 over 20 seeds) |
-| `--simtest --seed=5` | n/a | extracted by hatch at 205 s, same as the baseline before the rolling changes |
+| `--simtest --seed=5` | n/a | old tree: hatch at 205 s. After sync56/57: team wiped at 30 s, identical to pristine main |
 | `--rolling-sim --seed=5` | 0 | full 30 minutes, see above |
 | mantle, drop, extract, boss, duel, revive, economy, home-build, arena, archetype, airheal, record, obstacle, bot-sanity, blight, raid, farm-start, abyss | 0 each | no SCRIPT ERROR |
 
