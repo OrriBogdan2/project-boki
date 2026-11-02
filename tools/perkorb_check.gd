@@ -125,6 +125,22 @@ func _drops() -> void:
 		ok("killing the Warden drops a fan of three", PerkOrbs.list(m).size() == k3 + 3, str(PerkOrbs.list(m).size() - k3))
 	else:
 		ok("killing the Warden drops a fan of three", false, "no warden")
+	# the old kit passives keep their kit numbers and work as perks
+	for id in ["field_kit", "magpie", "satchel", "spyglass", "tinker_roll"]:
+		var g = JSON.parse_string(FileAccess.get_file_as_string("res://content/gear/%s.json" % id)) if FileAccess.file_exists("res://content/gear/%s.json" % id) else null
+		if g is Dictionary:
+			var same := true
+			for k in (g.get("stats", {}) as Dictionary):
+				if not is_equal_approx(float(Data.PERKS[id]["stats"].get(k, 0.0)), float(g["stats"][k])): same = false
+			ok("perk %s has the kit's numbers" % id, same, str(g.get("stats", {})))
+	var cap0: int = P.pack_cap
+	var gm0 := PerkOrbs.gem_mult(P)
+	var s0: float = P.gear_stat("sight") + P.gear_stat("reload") + P.gear_stat("tonic")
+	for id in ["field_kit", "magpie", "satchel", "spyglass", "tinker_roll"]:
+		PerkOrbs.grant(P, id)
+	ok("the satchel perk adds a backpack slot", P.pack_cap == cap0 + 1, "%d -> %d" % [cap0, P.pack_cap])
+	ok("the magpie perk makes gems worth 25% more", is_equal_approx(PerkOrbs.gem_mult(P), gm0 + 0.25))
+	ok("the spyglass, tinker's roll and field kit perks add their stats", is_equal_approx(P.gear_stat("sight") + P.gear_stat("reload") + P.gear_stat("tonic") - s0, 0.12 + 0.15 + 0.35))
 	m.queue_free()
 
 # ------------------------------------------------------------------ 4. fan: fade for you only
