@@ -61,20 +61,20 @@ save('lw_pilot', mix((env(hp(noise(0.04), 3000), 0.0005, 0.01), 0.6), (pad(env(l
 # the hose roar: a broad, breathy jet with a low rumble and fine crackle (one 0.5 s take the kit re-triggers)
 jet = ramp(bp(noise(0.55), 250, 3200), 0.6, 1.0)
 save('lw_roar', mix((jet, 0.8), (lp(noise(0.55), 160), 0.9), (hp(crackle(0.55, 22, 8.0), 2500), 0.35)), 0.7)
-# Fire Bolt release: a tight whoosh that climbs, with a cough of flame
+# Cinder Shot release: a tight whoosh that climbs, with a cough of flame
 save('lw_bolt', mix((env(bp(noise(0.35), 600, 4000), 0.01, 0.12), 0.8), (env(sine(0.3, 180, 520), 0.004, 0.09), 0.45), (env(lp(noise(0.08), 700), 0.001, 0.02), 0.7)))
-# Fire Bolt hit: a bright crack, then embers fizzling away
+# Cinder Shot hit: a bright crack, then embers fizzling away
 save('lw_bolt_hit', mix((env(hp(noise(0.08), 1800), 0.0005, 0.02), 0.9), (env(sine(0.4, 140, 60), 0.002, 0.1), 0.6), (pad(env(hp(crackle(0.6, 30, 6.0), 3000), 0.01, 0.25), 0.04), 0.5)))
-# Flame Skull Bash: a rushing roar into a heavy fiery thud
+# Soot Ram: a rushing roar into a heavy fiery thud
 rush = ramp(bp(noise(0.22), 300, 2500), 0.2, 1.0)
 save('lw_bash', mix((rush + [0.0] * n(0.3), 0.7), (pad(env(sine(0.4, 110, 45), 0.002, 0.14), 0.2), 0.9), (pad(env(lp(noise(0.3), 1200), 0.002, 0.1), 0.2), 0.6)))
 save('lw_bash_hit', mix((env(sine(0.5, 95, 40), 0.001, 0.16), 1.0), (env(bp(noise(0.4), 200, 2000), 0.001, 0.12), 0.7), (pad(env(hp(crackle(0.5, 20, 7.0), 2200), 0.01, 0.2), 0.05), 0.4)))
-# Flame Shield: a 0.2 s inhale (rising hiss), then the sunburst boom, then a low swirling hum for the shield
+# Furnace Cloak: a 0.2 s inhale (rising hiss), then the sunburst boom, then a low swirling hum for the shield
 inhale = [v * (i / n(0.2)) ** 2 for i, v in enumerate(bp(noise(0.2), 800, 5000))]
 boom = env(sine(0.7, 85, 38), 0.002, 0.22)
 hum = env(mix((sine(1.2, 150), 0.5), (sine(1.2, 151.7), 0.5)), 0.08, 0.5)
 save('lw_shield', mix((inhale + [0.0] * n(1.4), 0.6), (pad(boom, 0.2), 1.0), (pad(env(lp(noise(0.5), 2200), 0.002, 0.14), 0.2), 0.7), (pad(hum, 0.3), 0.25)))
-# Blazing: a burn upgrades - a deep whump with a hiss that swells
+# Flashover: a burn upgrades - a deep whump with a hiss that swells
 save('lw_blaze', mix((env(sine(0.6, 130, 50), 0.003, 0.2), 0.9), (ramp(env(bp(noise(0.6), 900, 4000), 0.05, 0.3), 1.0, 0.3), 0.5), (hp(crackle(0.6, 28, 7.0), 2000), 0.4)))
 # the fire trail lays down: a sizzle like water on a hot plate
 save('lw_trail', mix((env(hp(noise(0.7), 2500), 0.03, 0.3), 0.7), (hp(crackle(0.7, 50, 4.0), 3500), 0.5)), 0.6)
@@ -82,7 +82,7 @@ save('lw_trail', mix((env(hp(noise(0.7), 2500), 0.03, 0.3), 0.7), (hp(crackle(0.
 save('lw_hop', mix((env(bp(noise(0.25), 400, 3000), 0.005, 0.07), 0.8), (env(sine(0.2, 260, 120), 0.003, 0.05), 0.4)))
 
 # ---------------------------------------------------------------- Dredge
-# Buckshot: a fat low boom with a metal ring and a slug rattle
+# scattergun: a fat low boom with a metal ring and a slug rattle
 save('dr_shot', mix((env(sine(0.4, 120, 55), 0.0005, 0.08), 1.0), (env(lp(noise(0.25), 2400), 0.0005, 0.05), 0.9), (env(sine(0.4, 1460), 0.001, 0.06), 0.12), (pad(env(hp(crackle(0.2, 8, 5.0), 3000), 0.002, 0.05), 0.06), 0.25)))
 # Grapnel throw: rope whirring off the drum (a ratchet), a whip of air
 rat = [0.0] * n(0.4)
@@ -98,9 +98,9 @@ for k in range(12):
     i = n(0.02 + k * 0.08)
     for j in range(500): rr[i + j] += (math.sin(j * 0.32) + 0.4 * math.sin(j * 0.71)) * math.exp(-j / 90.0)
 save('dr_reel', mix((rr, 0.6), (lp(saw(1.0, 70, 82), 400), 0.25)))
-# Brute Dash: a shove of air into a meaty shoulder thud
+# Barge: a shove of air into a meaty shoulder thud
 save('dr_barge', mix((ramp(bp(noise(0.2), 150, 1500), 1.0, 0.2), 0.7), (env(sine(0.4, 75, 40), 0.002, 0.12), 1.0), (env(lp(noise(0.12), 700), 0.001, 0.04), 0.6)))
-# Iron Smash wind-up: a creaking heave (rising saw through a low pass)
+# Anchor Drop wind-up: a creaking heave (rising saw through a low pass)
 save('dr_anchor_wind', mix((env(lp(saw(0.4, 55, 110), 600), 0.08, 0.3), 0.6), (env(bp(noise(0.4), 300, 1200), 0.1, 0.2), 0.4)))
 # the dive: a falling whistle
 save('dr_dive', mix((env(sine(0.6, 1100, 380), 0.02, 0.4), 0.35), (env(bp(noise(0.6), 600, 2400), 0.05, 0.4), 0.5)))

@@ -4,8 +4,8 @@ extends Node3D
 ## and reused; nothing is created per frame. One shader (shaders/ld_fx.gdshader, a mode per look) plus
 ## the see-through rope shader (shaders/ld_rope.gdshader).
 ##
-## - flame(id, parts)      the Flamethrower hose: one MultiMesh of puffs the kit simulates (immediate style)
-## - ride(sd, kind, ...)   a projectile look riding on a shot: "cinder" (Fire Bolt), "slug" (Buckshot), "claw" (Grapnel head)
+## - flame(id, parts)      the Torch Lance hose: one MultiMesh of puffs the kit simulates (immediate style)
+## - ride(sd, kind, ...)   a projectile look riding on a shot: "cinder" (Cinder Shot), "slug" (scattergun), "claw" (Grapnel head)
 ## - place(id, kind, ...)  immediate-style looks the kit refreshes every step: "skull", "swirl", "chain",
 ##                         "pip", "spiral", "pilot", "anchor", "glow"; stop calling and they hide
 ## - rope(id, a, b)        the braided Grapnel rope, drawn through walls
@@ -29,7 +29,7 @@ const M_DOT := 12
 const POOL_CAP := 24           # nodes per kind at most; past it the oldest is taken back
 const KEEP := 0.1              # s an immediate-style look stays without a refresh
 const FLAME_CAP := 64          # hose puffs drawn at most (the kit keeps fewer)
-const HANG_T := 0.3            # s a Buckshot slug hangs as a dot at its stop line
+const HANG_T := 0.3            # s a scattergun slug hangs as a dot at its stop line
 
 var m: Node
 var pools := {}                # kind -> Array of nodes made for it
@@ -281,7 +281,7 @@ func orb(at: Vector3, col: Color, col2: Color, size := 0.6, dur := 0.15) -> void
 	var e := _play(n, "orb", col, col2, dur, Vector3.ONE * size, n.material_override)
 	e["grow"] = 0.5
 
-## A soft dot left hanging in the air (a Buckshot slug at its stop line).
+## A soft dot left hanging in the air (a scattergun slug at its stop line).
 func dot(at: Vector3, col: Color, size := 0.16, dur := HANG_T) -> void:
 	var n := _fx("dot", M_DOT, _quad_mesh(), true)
 	n.global_position = at
@@ -308,7 +308,7 @@ func anchor_drop(at: Vector3, dir: Vector2, col: Color, dur := 0.5, scl := 1.0) 
 	((n.get_meta("mat")) as ShaderMaterial).set_shader_parameter("color", Color(col, 0.55))
 	live.append({"node": n, "t": 0.0, "dur": dur, "kind": "anchor", "s0": n.scale, "mat": n.get_meta("mat"), "at": at, "col": col})
 
-## Embers sprayed up and out of a spot for `dur` (Fire Bolt's impact).
+## Embers sprayed up and out of a spot for `dur` (Cinder Shot's impact).
 func embers(at: Vector3, dur := 0.6, col := Color("ff5a3a")) -> void:
 	emitters.append({"at": at, "t": 0.0, "dur": dur, "acc": 0.0, "col": col})
 
@@ -376,7 +376,7 @@ func _build_rider(kind: String, col: Color, col2: Color) -> Node3D:
 	var n := Node3D.new()
 	match kind:
 		"cinder":
-			# Fire Bolt: a red-pink fireball with a yellow core inside a cool violet halo, a smoky comet tail
+			# Cinder Shot: a red-pink fireball with a yellow core inside a cool violet halo, a smoky comet tail
 			var halo := _mi(_quad_mesh(), _mat(M_ORB, Color("6a5aff"), Color(0, 0, 0, 1), true)); halo.name = "Halo"; halo.scale = Vector3.ONE * 0.85; n.add_child(halo)
 			var head := _mi(_quad_mesh(), _mat(M_ORB, col, col2, true)); head.name = "Head"; head.scale = Vector3.ONE * 0.55; n.add_child(head)
 		"slug":
@@ -443,7 +443,7 @@ func rope(id: String, a: Vector3, b: Vector3, col: Color, thick := 0.22) -> void
 		im2.surface_begin(Mesh.PRIMITIVE_TRIANGLE_STRIP)
 		for i in n + 1:
 			var k := float(i) / n
-			var ph := k * length * 4.2 + TAU * s / 3.0 - m.time * 3.0
+			var ph: float = k * length * 4.2 + TAU * s / 3.0 - float(m.time) * 3.0
 			var c := a.lerp(b, k) + (side * cos(ph) + up * sin(ph)) * thick * 0.32
 			im2.surface_set_uv(Vector2(k * length, 0)); im2.surface_add_vertex(c - up * w)
 			im2.surface_set_uv(Vector2(k * length, 1)); im2.surface_add_vertex(c + up * w)
