@@ -457,20 +457,8 @@ func _draw_world_labels() -> void:
 			continue
 		var sp := cam.unproject_position(k.position + Vector3(0, 1.05, 0))
 		if k.is_wild():
-			if k.state == "dazed" and k.lost_from != "":
-				# a Boki left behind by a hunter who went out: the hook of the game, so it reads from afar
-				var mine: bool = k.lost_from == "you"
-				var lc: Color = GOLD if mine else Color("ffb36a")
-				var bob := sin(m.time * 3.0) * 2.0
-				_ctext(sp + Vector2(0, -30 + bob), ("Your %s was left here" % String(k.rec.get("name", "Boki"))) if mine else "A lost Boki: tame it", 18, lc, big)
-				_ctext(sp + Vector2(0, -12 + bob), ("Hold %s to take it back" % Settings.key_cap("interact")) if mine else ("Hold %s  ·  slower to tame: it was %s's" % [Settings.key_cap("interact"), k.lost_from]), 12, Color(INK, 0.9), big)
-				c.draw_colored_polygon(PackedVector2Array([sp + Vector2(-7, -2 + bob), sp + Vector2(7, -2 + bob), sp + Vector2(0, 8 + bob)]), lc)
-				if k.catch_prog > 0.0:
-					_bar(Rect2(sp + Vector2(-40, 14), Vector2(80, 7)), k.catch_prog, lc)
-			elif k.state == "dazed":
-				_ctext(sp + Vector2(0, -8), "Dazed!  %s to tame" % Settings.key_cap("interact"), 17, GOLD, big)
-				if k.catch_prog > 0.0:
-					_arc(sp + Vector2(0, 10), 9, k.catch_prog, GOLD, 3.0)
+			if k.state == "dazed":
+				CaptureHud.dazed_label(self, k, sp)       # knocked out: how to scan it, and the scan filling
 			else:
 				_ctext(sp + Vector2(0, -10), "Wild %s" % Data.KIN[k.species]["name"], 16, Color("bfe9ff"), big)
 				_bar(Rect2(sp + Vector2(-24, -2), Vector2(48, 5)), k.hp / k.max_hp, Color("bfe9ff"))
@@ -1574,11 +1562,11 @@ func _draw_kin_card(sz: Vector2, p: Hunter) -> void:
 	var st := ""
 	match k.state:
 		"shoulder":
-			st = {"mount": "riding", "perch": "perched"}.get(k.carry_style(), "on shoulder") if k.settle >= 1.0 else "settling"
+			st = ({"mount": "riding", "perch": "perched"}.get(k.carry_style(), "on shoulder") if k.cmd == "return" else "carried") if k.settle >= 1.0 else "settling"
 			if not k.giant.is_empty(): st = "GIANT"
 			elif k.carry_style() == "mount" and p.gliding: st = "curled up"
 		"flying", "flying_home": st = "in the air"
-		"active": st = "fighting" if k.target else "out"
+		"active": st = "fighting" if k.target else String(KinFollow.NAMES.get(k.cmd, "Follow")).to_lower()
 		"returning": st = "coming back"
 		"downed": st = "down"
 		"reviving": st = "reviving you!"
@@ -1651,7 +1639,7 @@ func _draw_weapon(sz: Vector2, p: Hunter) -> void:
 	var gx := r.position.x + 4.0
 	Icons.draw(c, "gem", Vector2(gx + 8, y + s - 10), 7.0, GOLD)
 	_text(Vector2(gx + 20, y + s - 4), "%d" % p.gems, 18, GOLD if p.gems > 0 else MUTED, big)
-	_text(Vector2(gx + 2, y + 14), "%d seeds · %d Boki" % [seeds, p.caught.size()], 10, MUTED, big)
+	_text(Vector2(gx + 2, y + 14), "%d seeds · %s" % [seeds, CaptureHud.box_text(p)], 10, CaptureHud.box_col(p, MUTED), big)
 	if not m.opts.get("training", false):
 		# the backpack: slots used (red when full); the key opens it
 		var full := p.pack.size() >= p.pack_cap
@@ -2232,7 +2220,7 @@ func _draw_kit(sz: Vector2, p: Hunter) -> void:
 		var kcol: Color = Data.KIN[k.species]["color"]
 		var kd1: AbilitySpec = k.runner.def_of("k1")
 		if kd1: lines.append([Settings.key_cap("kin_ability"), kd1.display_name + " (" + String(k.rec.get("name", "your Boki")) + ")", KinText.ability(k.effective("k1")), KinText.color(kd1)])
-		lines.append([Settings.key_cap("throw"), ("Throw (a dive) / recall " if k.carry_style() == "perch" else "Throw / recall ") + String(k.rec.get("name", "your Boki")), "Tap: throw to the cursor (it staggers what it lands on), tap again to call it back. Hold: hold the spot or follow & fight.", kcol])
+		lines.append([Settings.key_cap("throw"), "Orders for " + String(k.rec.get("name", "your Boki")), "Tap: Sic at the cursor (it staggers what it lands on), or call it back when it is away. Hold and flick: Chase, Guard, Return, Follow.", kcol])
 	elif p.kin:
 		var k: Kin = p.kin
 		var kcol: Color = Data.KIN[k.species]["color"]
@@ -2240,7 +2228,7 @@ func _draw_kit(sz: Vector2, p: Hunter) -> void:
 		if kd1: lines.append([Settings.key_cap("signature"), kd1.display_name, KinText.ability(k.effective("k1")), KinText.color(kd1)])
 		var ud := KinMerge.def_for(k)
 		if ud: lines.append([Settings.key_cap("ultimate"), ud.display_name + " (merge)", " ".join(KinText.merge(ud, k.carry_style() == "mount")) + " Merge: needs a full bond meter. Unlocks at level %d." % int(Hunter.ULT_AT[0]), GOLD])
-		lines.append([Settings.key_cap("throw"), ("Throw (a dive) / recall " if k.carry_style() == "perch" else "Throw / recall ") + String(k.rec.get("name", "your Boki")), "Tap: throw to the cursor (it staggers what it lands on), tap again to call it back. Hold: hold the spot or follow & fight.", kcol])
+		lines.append([Settings.key_cap("throw"), "Orders for " + String(k.rec.get("name", "your Boki")), "Tap: Sic at the cursor (it staggers what it lands on), or call it back when it is away. Hold and flick: Chase, Guard, Return, Follow.", kcol])
 	var dsi := p.slot_info("dash")
 	lines.append([Settings.key_cap("dash"), String(dsi["name"]) + ((" + " + String(dsi["rider"])) if String(dsi.get("rider", "")) != "" else ""), String(dsi["desc"]), dsi["col"]])
 	var g0: Dictionary = p.gear[0]
@@ -2351,7 +2339,7 @@ func _draw_prompt(sz: Vector2, p: Hunter) -> void:
 			"stomping": prog = float(p.stomp.get("t", 0.0)) / Life.R["stomp_time"]
 			"boxrev": prog = p.box_t / Life.R["box_revive_time"]
 			"loot": prog = p.box_t / Life.R["loot_time"]
-			"catch": prog = it["ent"].catch_prog
+			"catch": prog = CaptureHud.progress(p)
 			"chest": prog = it["chest"]["prog"]
 			"exit": prog = float(it["x"]["hold"].get(p.nid, 0.0)) / float(it["need"]) if it.has("need") else 0.0
 			"lair": prog = float(it["rune"]["prog"]) if it.has("rune") else 0.0
@@ -2451,14 +2439,14 @@ func _draw_dead(sz: Vector2, p: Hunter) -> void:
 	var y0 := sz.y * 0.62
 	var b := Life.box_of(m, p)
 	var lines: Array = []
-	# your Boki left on the map, still there for anyone to tame (the game's hook: say it plainly)
+	# your Boki left on the map, still there for anyone to scan (the game's hook: say it plainly)
 	var left_line := ""
 	for L in m.player_lost:
 		var lk = L.get("kin")
 		var lb: Dictionary = L.get("box", {})
 		var kn := String((L.get("rec", {}) as Dictionary).get("name", "Your Boki"))
 		if lk != null and is_instance_valid(lk) and not (lk as Kin).dead and (lk as Kin).is_wild():
-			left_line = "%s was left behind: rivals can tame it" % kn
+			left_line = "%s was left behind: rivals can scan it" % kn
 		elif not lb.is_empty() and (lb.get("kin", []) as Array).any(func(r): return String(r.get("uid", "")) == String(L.get("uid", ""))):
 			left_line = "%s is in your deathbox: a rival who loots it takes it" % kn
 	if left_line != "":
@@ -2631,7 +2619,7 @@ func _arch_tip(id: String, p: Hunter) -> Array:
 		"throw":
 			if k == null: return []
 			out.append(["Send / recall", Color("cfe8ff")])
-			out.append(["%s  ·  tap: throw %s to the cursor, tap again to call it back (it hits what it passes). Hold: it holds its spot, or follows and fights. A downed Boki stays where it fell: run into it to bring it back." % [Settings.key_cap("throw"), k.rec.get("name", "your Boki")], INK, 13])
+			out.append(["%s  ·  tap: Sic %s at the cursor, or Call it back when it is away (it hits what it passes). Hold: Chase, Guard, Return or Follow. A downed Boki stays where it fell: run into it to bring it back." % [Settings.key_cap("throw"), k.rec.get("name", "your Boki")], INK, 13])
 			return out
 	var si := p.slot_info(id)
 	var slot_name: String = {"sec": "Right click", "k1": "Utility (E)", "r": "Ultimate (R)", "dash": "Dash"}[id]
@@ -2732,20 +2720,7 @@ func _tip_lines(id: String, p: Hunter) -> Array:
 			out.append(["Active glove  ·  %s" % Settings.key_cap("gear1") if int(id.substr(4)) == 0 else "Passive glove", MUTED, 12])
 			out.append([Gear.desc_of(String(g["id"]), int(g.get("rar", 1))), INK, 14])
 			out.append([Gear.stat_text(String(g["id"]), int(g.get("rar", 1))), MUTED, 13])
-		"throw":
-			var k: Kin = p.kin
-			if k == null: return []
-			var sp: Dictionary = Data.KIN[k.species]
-			out.append(["Throw %s" % k.rec.get("name", "your Boki"), sp["color"]])
-			out.append(["Boki  ·  %s" % Settings.key_cap("throw"), MUTED, 12])
-			out.append([("Your Boki dives on the cursor from above." if k.carry_style() == "perch" else "Throws your Boki at the cursor.") + " Whatever it hits is stunned, and your shots crit stunned foes. Press again to call it back.", INK, 14])
-			if k.ks and not k.ks.throw_effects.is_empty():
-				out.append(["Its throw also: " + KinText.effects(k.ks.throw_effects), KinRules.effects_color(k.ks.throw_effects), 13])
-			if k.ks:
-				out.append([KinText.carry(k.ks), KinRules.cat_color("sustain"), 13])
-				var ob := KinText.owner_bonus(p.kin_bonus)
-				if ob != "":
-					out.append(["Owner bonus for the run: " + ob, GOLD, 13])
+		"throw": return BokiHud.order_tip(self, p)
 		"dash":
 			var dd: AbilityDef = p.dodge_def
 			out.append([dd.display_name if dd else "Dash", dd.color if dd else Color("bfe6ff")])
@@ -2878,9 +2853,9 @@ func _draw_world_hover(sz: Vector2, p: Hunter) -> void:
 		lines.append(["%s type  ·  level %d  ·  %d / %d health" % [String(sp["type"]).capitalize(), int(k.rec.get("level", 1)), int(ceil(k.hp)), int(k.max_hp)], MUTED])
 		if k.is_wild():
 			if k.state == "dazed":
-				lines.append(["Dazed. Hold %s next to it to win it over." % Settings.key_cap("interact"), GOLD])
+				lines.append(["Knocked out. Hold %s next to it to scan it." % Settings.key_cap("interact"), GOLD])
 			else:
-				lines.append(["Knock its health down to daze it, then hold %s to tame it." % Settings.key_cap("interact"), INK])
+				lines.append(["Knock its health down to knock it out, then hold %s beside it to scan it." % Settings.key_cap("interact"), INK])
 			if k.rec.get("shimmer", false):
 				lines.append(["A shimmering one. Rare.", INK])
 			for mid in Mutations.of(k.rec):
@@ -3367,7 +3342,7 @@ func close_pack() -> void:
 	pack_panel = null
 
 func _pack_state(p: Hunter) -> String:
-	return str(p.pack.map(func(it): return it.get("uid", ""))) + p.wid + str(p.wrar) + p.welem + str(p.gear) + str(p.pack_cap)
+	return str(p.pack.map(func(it): return it.get("uid", ""))) + p.wid + str(p.wrar) + p.welem + str(p.gear) + str(p.pack_cap) + str(p.caught.size())
 
 func _build_pack() -> void:
 	if pack_panel and is_instance_valid(pack_panel):
@@ -3404,6 +3379,7 @@ func _build_pack() -> void:
 		empty.custom_minimum_size.y = 30
 		empty.add_child(UI.label("empty slot", 12, Color(MUTED, 0.6)))
 		rows.add_child(empty)
+	CaptureHud.pack_section(self, v, p, func(): _build_pack())       # the capsules in your box, with Release
 	var hint := UI.label("%s or Esc to close  ·  bigger backpacks at your armory" % Settings.key_cap("inventory"), 12, MUTED)
 	v.add_child(hint)
 	add_child(pc)
