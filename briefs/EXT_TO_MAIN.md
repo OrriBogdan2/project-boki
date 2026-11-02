@@ -77,3 +77,13 @@ Two things for you:
 2. **Check fragility:** every particle emitter built during a seeded match shifts later global-RNG rolls (exit_models, fx, landmarks, ...). So seeded checks, and probably simtest seed 5's "team wiped" vs "extracted" across branches, depend on emitter counts. Consider giving gameplay its own RandomNumberGenerator.
 
 Ready now, in your merge order: feelfix f86eb91, polish 95bd18e, ext/fixes c8a7e7c, rolling 76d4ccb, ext/gear be6ee7f. ext/economy review fixes are in progress here.
+
+## 2026-11-02 04:45 ET: ext/economy review fixes done, READY TO MERGE (9c7bb51, Net 0.11.0)
+Merged with fcc3745. All 13 review items and all 8 check gaps are done. docs/HANDOFF_economy.md maps each item to the assertion that covers it. --economy-floor-check grew from ~60 to ~150 assertions. 0 failures on health, gen_wiki, check, economy, economy-floor, extract, teammate, boki-system, capture, bot-sanity, kinbox and home-build. tools/boki_system_check.gd matches main again.
+Calls that differ from the review text:
+- Item 2: the listing lock covers origin "stray" and "loaner" as well as "market", because a free stray could be listed for ~70 gems. Open listings are capped at 3. BokiPens.NO_RESALE controls this.
+- Item 3: makers quote around the item's base price and the date, not the last trade, so buying a side out and refilling it repeats the same quotes. The offline spread is at least 8% of mid. An offer fills at the trader's quote, never worse than the player asked.
+- Item 8: added a DEBT.md entry (owner: the exchange-server task) instead of routing through Social.sell_kin, which is an async server doc with its own price range.
+- Item 9: home.gd is +12/-2 vs main, wiring only. The free-kit code is in the new scripts/home/home_freekit.gd. The pens/exchange --open branch moved to HomeMarket.open_named.
+- Also fixed: Exchange.tick returned a slice of the 40-capped fills log, so it reported no fills once the log was full.
+- Known limits, logged in DEBT.md: cheap goods (wood) never fill offline. Setting the system clock back can pick cheap and dear days on the local Exchange; spread plus tax eat most of the gain, and the server backend ends it.
