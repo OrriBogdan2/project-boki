@@ -7,11 +7,11 @@ extends RefCounted
 const CELL := 38.0
 const GAP := 6.0
 
-## Rect of slot i for a screen size (right-aligned over the weapon card).
+## Rect of slot i for a screen size (right-aligned, above the weapon card and its row of tonic / kit / throw slots).
 static func cell_rect(sz: Vector2, i: int) -> Rect2:
 	var total := Gear.SLOTS.size() * CELL + (Gear.SLOTS.size() - 1) * GAP
 	var x := sz.x - 18.0 - 270.0 + (270.0 - total)
-	return Rect2(Vector2(x + i * (CELL + GAP), sz.y - 18.0 - 62.0 - 10.0 - CELL), Vector2(CELL, CELL))
+	return Rect2(Vector2(x + i * (CELL + GAP), sz.y - 18.0 - 62.0 - 66.0 - 22.0 - CELL), Vector2(CELL, CELL))
 
 static func draw(hud, sz: Vector2, p: Hunter) -> void:
 	for i in Gear.SLOTS.size():
@@ -32,7 +32,11 @@ static func draw(hud, sz: Vector2, p: Hunter) -> void:
 	var ups := WeaponUps.summary(p)
 	if ups != "":
 		var r0 := cell_rect(sz, 0)
-		hud._text(Vector2(r0.position.x, r0.position.y - 6.0), ups, 11, Color(hud.GOOD, 0.9), hud.body)
+		var right := cell_rect(sz, Gear.SLOTS.size() - 1).end.x
+		while ups.length() > 8 and hud.body.get_string_size(ups, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x > 330.0:
+			ups = ups.substr(0, ups.length() - 4).strip_edges().trim_suffix(",") + "..."
+		var w: float = hud.body.get_string_size(ups, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x
+		hud._text(Vector2(right - w, r0.position.y - 6.0), ups, 11, Color(hud.GOOD, 0.9), hud.body)
 
 static func _empty_icon(i: int) -> String:
 	return ["glove", "glove", "fortify", "dash", "satchel"][i]

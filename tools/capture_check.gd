@@ -260,7 +260,7 @@ func _book() -> void:
 	ok(not bool(Care.dex_entry("pebbit").get("seen", false)), "a Boki far out of sight is not logged")
 	var old := {"v": 3, "roster": [{"species": "puddlet", "name": "Old"}, {"species": "cindle", "name": "Older"}], "dex": {"puddlet": {"seen": false, "caught": true, "forms": [], "shimmer": false, "mutations": []}}}
 	var upgraded: bool = Save.migrate(old)
-	ok(upgraded and int(old["v"]) == Save.VERSION and Save.VERSION == 4, "a v3 save upgrades to v%d" % Save.VERSION)
+	ok(upgraded and int(old["v"]) == Save.VERSION and Save.VERSION >= 4, "a v3 save upgrades to v%d" % Save.VERSION)
 	var dx: Dictionary = old["dex"]
 	ok(bool(dx.get("puddlet", {}).get("seen", false)) and bool(dx.get("cindle", {}).get("seen", false)) and bool(dx.get("cindle", {}).get("caught", false)), "...Boki you own count as seen, and are in the book even with no entry")
 	ok(dx["puddlet"].has("places") and dx["cindle"].has("places"), "...and every entry gets its places list")

@@ -2310,6 +2310,7 @@ func _extract_check() -> void:
 	YB.teleport(o["pos"] + Vector3(9.0, 0, 0) if not m.world.is_void(o["pos"].x + 9.0, o["pos"].z) else o["pos"] + Vector3(0, 0, 9.0))
 	var yb_in := 0.0
 	var tyb := 0.0
+	seed(2024)      # the bot's random choices should not depend on how many rolls the map and loot took
 	while tyb < 16.0:
 		run.call(m, 0.25, calm.bind(m)); tyb += 0.25
 		if m.exits.in_yard(o, YB): yb_in += 0.25
