@@ -97,3 +97,27 @@ What you'll hit when you merge the same branches:
 - health.py budgets go over: home 6000, match 7100, main 4200, hud 3950 on ext/showcase. Those are temporary raises; the real fix is splitting those files.
 Showcase-only commits you may want too: 087b799 (admin tools F1/backtick/Admin/Mod mode gated behind `-- --admin`), 2b8eb0b (gear card text no longer quotes rarity-scaled numbers, e.g. "+80 armor"/"40 armor").
 Seen in the shots: the boss-pile egg label overlaps a second egg label ("Rare Cairn Egg" over "Prismatic ... Egg · 2m"); the Armory's 3D preview of Bastion Plate is a tiny white blob.
+
+## 2026-11-02 07:00 ET: four hero branches ready to merge (on sync59)
+All merged fcc3745, suite 0 failures, no SCRIPT ERROR, health --strict / gen_wiki --check OK. No reserved file edited.
+| Branch | Commit | Net |
+|---|---|---|
+| ext/heroes-joule-ghost (Vireo, Marlowe) | 2a5e15c | 0.11.0 |
+| ext/heroes-kingpin-felix (Ashwick, Dredge) | de9f660 | 0.11.0 |
+| ext/heroes-elluna-celeste (Tender, Rimewright) | 2ca705e | 0.12.0 ("carry") |
+| ext/heroes-tetra-void (Dolm, Ostra) | 9e7e2a8 | 0.12.1 ("zone") |
+Conflicts you'll see: joule-ghost DEBT.md (keep both); kingpin-felix hunter_anim.gd km_sample now chains KMOVES -> KMovesPair.MOVES -> MergeMoves.MOVES; elluna-celeste and tetra-void both touch net.gd and the exact `Net.VERSION == "0.11.0"` asserts in boki_follow_check, boki_system_check, capture_check and merge_form_check.gd:767 (all changed to `naturalnocasecmp_to("0.11.0") >= 0`; merge_form_check is yours, a one-line change).
+Two rule fixes: Tender's carry set-down was on `interact` (F), moved to crouch via `TenderKit.SETDOWN` (one line to change). Dolm's LMB hold threw a punch when a merge started; `DolmKit.lmb_override` now clears it when `KinMerge.active(h)`, asserted in hero_pair_check.
+
+### Hold state for MergeKit.drop_class_holds (none cleared today)
+- Vireo `MageKit`: `wire` (Wirerun, has telegraph nodes: call `_end_wire()`, don't just set `{}`), `ak.rmb_t` (Coilshot).
+- Marlowe `GunslingerKit`: `needle`, `e_t` (Longneedle charge; `_end_needle()`), `slide` (Slipstep; also drives `roll_dir`/`roll_speed`).
+- Ashwick `AshwickKit`: `spool`, `was_held`, `after_t`, `flame_acc` (Torch Lance; also drives `h.mel_hold`).
+- Dredge `DredgeKit`: `wind`, `flying`, `pull` (has a rope node).
+- Tender `TenderKit`: `setdown_was`, `carry_t`; a carried teammate (`CareUtil` meta `carried_by`): suggest dropping the carry on merge (untested).
+- Rimewright `RimewrightKit`: `rinkrun`.
+- Dolm `DolmKit`: `lmb_t`, `lmb_was` (already self-clearing), `dive`.
+- Ostra `OstraKit`: `swap`, `primed`, `prime_until`. A swap finishing mid-merge teleports the hunter: clear via `_swap_end(false)`.
+Capture.hunter_stop not used: every channel is either the dash itself or already stun-cancels (covered by the combo checks). Your call whether to add more.
+Flake note: elluna-celeste --bot-sanity-check flagged a Juggernaut airborne 3.0 s at seed 9 once (limit 3.0 s); seed 9 alone and a re-run were clean. Existing hero, not branch code.
+Joule-ghost DEBT: remove hex.gd and the "hex" Net event at the next Net bump (yours when elluna/tetra land).
