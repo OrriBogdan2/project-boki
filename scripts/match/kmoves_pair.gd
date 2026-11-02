@@ -207,8 +207,8 @@ const MOVES := {
 			"p": -0.22, "lift": -0.06, "fr": Vector3(0.12, -0.3, -0.45), "rw": 1.0, "fl": Vector3(0.0, -0.12, -0.62),
 			"hw": 1.0, "lw": 1.0, "legs": [0.65, -0.95, -0.55, -0.4], "gp": -0.05
 		}]]},
-	# Flashover mid-roar: the nozzle stays on the foe while the off fist punches up over his head and he
-	# bounces on his heels, then he settles back into the braced, bucking hold
+	# Flashover mid-roar: the off fist punches up over his head, the nozzle bucks up once and he bounces on his
+	# heels, then he settles back into the braced, bucking hold
 	"lw_stoke_lance": {"hold": true, "loop": 0.5, "keys": [
 		[0.0, {
 			"p": -0.22, "lift": -0.06, "fr": Vector3(0.12, -0.3, -0.45), "rw": 1.0, "fl": Vector3(0.0, -0.12, -0.62),
@@ -216,7 +216,7 @@ const MOVES := {
 		}],
 		[0.1, {
 			"p": 0.35, "sq": -0.25, "lift": 0.2, "fr": Vector3(0.12, -0.3, -0.45), "rw": 1.0,
-			"fl": Vector3(-0.05, 1.05, -0.05), "hw": 1.0, "lw": 1.0, "legs": [0.4, -0.6, -0.3, -0.3]
+			"fl": Vector3(-0.05, 1.05, -0.05), "hw": 1.0, "lw": 1.0, "legs": [0.4, -0.6, -0.3, -0.3], "gp": 0.45
 		}],
 		[0.22, {
 			"p": 0.2, "sq": 0.2, "lift": -0.05, "fr": Vector3(0.12, -0.3, -0.45), "rw": 1.0,
@@ -330,15 +330,15 @@ const MOVES := {
 			"fr": Vector3(0.55, 0.25, -0.2), "rw": 0.5, "lw": 1.0, "legs": [-0.4, -0.25, 0.45, -0.35]
 		}],
 		[0.7, {"fx": -6.283}]]},
-	# Flashover payoff (a foe Flashes over, or a knock): the off fist punches up over his head, a lean back
-	# and a bounce on his heels
+	# Flashover payoff (a foe Flashes over, or a knock): the off fist punches up over his head and the flamer
+	# swings up with it (the arm alone hides under the hat from the match camera), a lean back and a bounce
 	"lw_stoke": {"keys": [
 		[0.0, {}],
 		[0.1, {
-			"p": 0.35, "sq": -0.25, "lift": 0.2, "fl": Vector3(-0.05, 1.05, -0.05), "hw": 1.0, "lw": 1.0,
+			"p": 0.35, "sq": -0.25, "lift": 0.2, "fl": Vector3(-0.05, 1.05, -0.05), "hw": 1.0, "lw": 1.0, "gp": 1.1,
 			"legs": [0.4, -0.6, -0.3, -0.3]
 		}],
-		[0.22, {"p": 0.2, "sq": 0.2, "lift": -0.05, "fl": Vector3(-0.05, 0.95, -0.05), "hw": 1.0}],
+		[0.22, {"p": 0.2, "sq": 0.2, "lift": -0.05, "fl": Vector3(-0.05, 0.95, -0.05), "hw": 1.0, "gp": 0.9}],
 		[0.5, {}]]},
 	# Flue Flight (X, held for the 1.4s flight): a quick crouch as the ember ring bursts (0.08s), then he springs
 	# up and leans into the jet, the free arm swept back to the bellows strap, the nozzle held low, legs trailing

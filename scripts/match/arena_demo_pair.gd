@@ -20,7 +20,7 @@ const MOVES := {
 	"dr_anchor": ["dredge", "shotgun", [0.5, 0.64, 0.76, 0.88, 1.1, 1.4]],
 	"dr_dive": ["dredge", "shotgun", [0.5, 0.56, 0.64, 0.72, 0.85, 1.2]],
 	"dr_barge": ["dredge", "shotgun", [0.5, 0.53, 0.58, 0.64, 0.72, 0.9]],
-	"dr_barge_run": ["dredge", "shotgun", [0.55, 0.62, 0.95, 1.02, 1.35, 1.42], 1.0],
+	"dr_barge_run": ["dredge", "shotgun", [0.53, 0.6, 0.98, 1.05, 1.43, 1.5], 1.0],
 	"dr_hop": ["dredge", "shotgun", [0.5, 0.53, 0.58, 0.66, 0.74, 0.92]],
 	"dr_flex": ["dredge", "shotgun", [0.5, 0.6, 0.68, 0.8, 1.0]],
 	"as_lance": ["ashwick", "flamethrower", [0.5, 0.6, 0.7, 0.78, 0.9, 1.2], 1.0],
@@ -137,11 +137,11 @@ static func _drive(A: Arena, P: Hunter, D: Hunter, mv: String, t: float, dt: flo
 			if ArenaDemo._at(t, dt, go): P.ak.use_e()
 		"dr_barge_run":
 			# three barges in a row, a beat apart
-			if t < go: D.teleport(A.home + Vector3(0, 0, -7.0))
+			if t < go: D.teleport(A.home + Vector3(3.0, 0, 3.5))
 			P.inp["aim"] = A.home + Vector3(14.0, 0.9, 0)
 			if ArenaDemo._at(t, dt, go): P.dashes = P.max_dashes()
 			for k in 3:
-				if ArenaDemo._at(t, dt, go + 0.4 * k): P.do_dash()
+				if ArenaDemo._at(t, dt, go + 0.45 * k): P.do_dash()
 		"dr_barge", "as_leap":
 			if t < go: D.teleport(A.home + Vector3(3.6, 0, 0))
 			if ArenaDemo._at(t, dt, go):
