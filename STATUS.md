@@ -1,4 +1,4 @@
-2026-11-02T21:49:06Z
+2026-11-02T21:50:24Z
 
 ext/classes | cacd796 | REOPENED per INBOX 19:10 (Hunters wording, pick 1 + 2 early unlocks, no weight labels, hunter viewer, hold-to-unlock); rework queued on Opus medium | 0.14.0 | -
 ext/hero-shots | 3bd0520 | done: 12 heroes + farm building + classes; all portraits show signature weapons | - | -
@@ -12,9 +12,9 @@ ext/kitfix-linwick-dredge | a5590a1 (merged main + power() assertion; was 9560b9
 ext/kitfix-moosh-tamsin | f793887 (merged main + power() pass; was 6bd7d71) | READY FOR LOCAL SCREENSHOT REVIEW (aimkit 577412e + main 9700dec) | 0.15.0 (no new sync) | full suite 0 failures; tender combo 37, rimewright combo 29, support 66, aimkit 55; simtest ran to end. Shots: ext/hero-shots moosh-moosh/v2, tamsin/v2 (+anim, before/after). Gaps left: Kindle damage-number tint (shared code), Tamsin rank-3 ice bridge (no terrain editing). Tamsin squad shield removed per owner. Owner Qs: Burrseed area sticks to foe or ground? footage 0.7s/1.6x vs wiki 2s/2x OK? Spear 2 charges/7s + 0.5s freeze? Rink Wall stop at cursor or fixed distance?
 ext/kitfix-breah-ostra | c26758e | READY FOR LOCAL SCREENSHOT REVIEW (main a7ed228 sync66 incl. LevelGrowth + aimkit 6bc1c25) | 0.16.0 (no new sync) | full suite 0 failures; dolm combo 65, ostra combo 60, zone 24, aimkit 55, shot-vertical OK; simtest extracted. Breah (renamed from Dolm): standable/climbable 1.25 m rocks, punch launches lined-up rocks, hold LMB, slam hop with sweet-spot telegraph. Ostra: Shift hold-to-aim/release (never random dash, keeps height), RMB 1 charge with visible STUNNED. power() applied. Shared-file changes: verbs.gd standable walls, ent.gd ground() reads StoneStand, hunter.gd 1 line, arena_check seed(2024) before sparring-bot test. Shots: ext/hero-shots breah/v2, ostra/v2. Owner Qs: Ostra Shift hold-to-aim OK? enemies can stand on Breah rocks? tap boulder stop at cursor? charged orb pierce terrain like source? Trade swaps allies too?
 
-Running now: ext/classes rework (Opus)
-Queued: none. Ult pass (X) waits for hero-ref ult sections.
-Last INBOX entry handled: 2026-11-02 21:35 UTC (X-key ult heads-up noted; nothing started; running agents told to keep X free)
+Running now: ext/classes rework; ult passes on kitfix-dancer-juggernaut, kitfix-moosh-tamsin, kitfix-linwick-dredge, kitfix-pin-bjorn (all Opus medium, SERVER_UPDATE6)
+Queued: ult passes on kitfix-vireo-venator and kitfix-breah-ostra (start as slots free)
+Last INBOX entry handled: 2026-11-02 22:05 UTC (SERVER_UPDATE6 ult pass started; KinBond.add hook not on main yet, so ult agents use a guarded stub)
 Watcher: received 19:06 UTC entry
 Questions for the owner: see ext/classes line.
 Net note: main is now 0.15.0, which kits2-nor also uses (0.15.0, kit move id on the snapshot); main session to reconcile. Kitfix branches that need a bump use 0.15.2 (dancer-juggernaut), .3 (pin-bjorn), .4 (vireo-venator), .5 (linwick-dredge), .6 (moosh-tamsin), .7 (breah-ostra).
@@ -30,7 +30,7 @@ Hold state for MergeKit.drop_class_holds:
 - bulwark (Bjorn): nothing new on Hunter (lmb_t, mel_hold existing); spin and glint cleared in _drop_holds
 - mage (Vireo): wire (refunded on drop), rmb_down\/rmb_t + rod prop, strikes entries with phase "flick"
 - gunslinger (Venator): needle, slide, rmb_down\/rmb_t (held grenade aim)
-Ult pass (X, level 6): waiting for the hero-ref ult sections; one Opus follow-up per kitfix pair once each pair is ready and the refs are posted.
+Ult pass (X, level 6): running per SERVER_UPDATE6 on the kitfix branches (same branch, new commits). Note: kitfix branch commits listed above will move again when each ult pass lands; the kit-pass commits remain the review baseline.
 power() pass (INBOX 21:30): all 5 finished kitfix branches merged current main (Net 0.16.0) and pushed green (core suite + combo + aimkit + shot-vertical + kill-reset + merge-form + simtest). Each asserts ability damage x1.35 from level 1 to 10. Open: Linwick Torch Lance hose (ashwick_kit.gd:312) and lava trail (:506) use neither dmg_mult nor power(), so they do not scale; Tamsin darts and other signature-weapon shots stay on the weapon path; Dancer docs may still say 25% knock heal (now 20% with main takedown reset).
 - dolm (Breah): lmb_t, lmb_auto, dive, dive_k, carry, slam.leapt, slam.lunges
 - ostra: swap_aim, snap, plus swap, primed, prime_until
