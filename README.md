@@ -2,7 +2,7 @@
 
 Review shots for each hero: kit card, each ability, the payoff, animation frame strips and a neutral full-body portrait. PNGs are downscaled to at most 1280 px wide. Captions come from the shot manifests.
 
-Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-tender), [Tamsin](#tamsin-rimewright), [Dredge](#dredge-dredge), [Ashwick](#ashwick-ashwick), [Dolm](#dolm-dolm), [Ostra](#ostra-ostra), [Archer](#archer-archer), [Bulwark](#bulwark-bulwark), [Thief](#thief-thief), [Juggernaut](#juggernaut-juggernaut)
+Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-tender), [Tamsin](#tamsin-rimewright), [Dredge](#dredge-dredge), [Ashwick](#ashwick-ashwick), [Dolm](#dolm-dolm), [Ostra](#ostra-ostra), [Archer](#archer-archer), [Bulwark](#bulwark-bulwark), [Thief](#thief-thief), [Juggernaut](#juggernaut-juggernaut), [Farm building](#farm-building-farmbuild)
 
 ## Vireo (mage)
 
@@ -519,3 +519,37 @@ Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-t
 **Juggernaut full body, neutral pose, three looks**
 
 ![Juggernaut full body, neutral pose, three looks](juggernaut/juggernaut_portrait.png)
+
+## Farm building (farmbuild)
+
+**Build mode, Work tab on a level 2 farm: Job Board, Lumber Camp, Quarry and Storage Chest are open, the Hearth Oven, Workbench and Spark Mill show what unlocks them; prices are material icons; the farm level chip sits by Undo**
+
+![Build mode, Work tab on a level 2 farm: Job Board, Lumber Camp, Quarry and Storage Chest are open, the Hearth Oven, Workbench and Spark Mill show what unlocks them; prices are material icons; the farm level chip sits by Undo](farmbuild/01_build_mode.png)
+
+**Placement preview, valid spot: green footprint outline, snapping grid round the ghost, Lumber Camp ghost on the meadow**
+
+![Placement preview, valid spot: green footprint outline, snapping grid round the ghost, Lumber Camp ghost on the meadow](farmbuild/02_preview_valid.png)
+
+**Placement preview, invalid spot (over the house): red outline, the reason floating over it and in the hint line**
+
+![Placement preview, invalid spot (over the house): red outline, the reason floating over it and in the hint line](farmbuild/03_preview_invalid.png)
+
+**Boki building the Lumber Camp site: scaffolding, rising walls, progress bar over the site, "Site marked out" toast**
+
+![Boki building the Lumber Camp site: scaffolding, rising walls, progress bar over the site, "Site marked out" toast](farmbuild/04_boki_building.png)
+
+**The finished tier 1 Lumber Camp (stump, log pile), working**
+
+![The finished tier 1 Lumber Camp (stump, log pile), working](farmbuild/05_finished_build.png)
+
+**Build mode, Upgrades tab: House, Crop patch, Cooking pot and Lumber Camp with tier 2 costs as icons, and the "New to build" toast on a farm level up**
+
+![Build mode, Upgrades tab: House, Crop patch, Cooking pot and Lumber Camp with tier 2 costs as icons, and the "New to build" toast on a farm level up](farmbuild/06_upgrades_tab.png)
+
+**Upgrading the working Lumber Camp to tier 2: scaffolding goes up round it with its bar while a Boki hammers**
+
+![Upgrading the working Lumber Camp to tier 2: scaffolding goes up round it with its bar while a Boki hammers](farmbuild/07_upgrade_in_progress.png)
+
+**A tier 3 Lumber Camp (gold plinth, tall pennant, glowing corner lanterns) beside a plain tier 1 Quarry**
+
+![A tier 3 Lumber Camp (gold plinth, tall pennant, glowing corner lanterns) beside a plain tier 1 Quarry](farmbuild/08_tier3_beside_tier1.png)
