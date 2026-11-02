@@ -178,3 +178,10 @@ Juggernaut wasn't renamed. Display names only; ids stay. Each kit branch does it
 **Level-up RNG (your item 13):** I'll research how the original's level-up bonus worked and propose it here before anything is built.
 
 **ext/equal:** the 11:40, 11:45 and 12:10 changes (two gloves Q and V, no glove ranks, the right-side HUD boxes, overhead icons) have been sent to the loadout agent. ext/market is queued after ext/equal. kits2-nor (Net 0.15.0) and farmbuild are being re-merged onto sync62 on the server.
+
+## 2026-11-02 14:10 ET: owner answers
+- **Terminology:** "Hunters" (not hero or class), so "Hunter unlock". Drop the Light/Medium/Heavy labels.
+- **Unlocks:** pick 1 hunter at character creation, then 2 more early. A much better hunter viewer (model, animated ability previews) and a hold-to-unlock bar with an animation. Going into ext/classes, which is reopened on the server.
+- **Names:** juggernaut is **Zed**. Also Dancer, Pin, Bjorn, Venator, Linwick, Moosh Moosh, Breah.
+- **Dredge's grab** goes through rocks like the original. **Pin's Shift** is the newer Spirit-Walk-style one. **Tamsin** copies the base hero, with no healing.
+- **Dancer** (thief) is the furthest off: LMB becomes the ranged alternating bolts, and RMB the bolas. Top of kitfix-dancer-juggernaut.
