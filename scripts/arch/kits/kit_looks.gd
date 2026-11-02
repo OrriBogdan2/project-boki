@@ -231,7 +231,7 @@ func _process(delta: float) -> void:
 		var n2: Node3D = e2["n"]
 		var u := float(e2["t"]) / maxf(0.01, float(e2["dur"]))
 		var ent2 = e2.get("ent")
-		if u >= 1.0 or (ent2 != null and not is_instance_valid(ent2)):
+		if u >= 1.0 or (bool(e2.get("follows", false)) and not is_instance_valid(ent2)):
 			timed.erase(e2)
 			_give(String(e2["kind"]), n2)
 			continue
@@ -269,13 +269,13 @@ func holding(key: String) -> bool:
 ## Stun stars circling over a head until the stun ends (or `secs`).
 func crown(e: Ent, secs: float) -> void:
 	for t in timed:
-		if t["kind"] == "crown" and t["ent"] == e:
+		if t["kind"] == "crown" and is_instance_valid(t["ent"]) and t["ent"] == e:
 			t["dur"] = maxf(float(t["dur"]), float(t["t"]) + secs)
 			return
-	timed.append({"n": _take("crown"), "kind": "crown", "t": 0.0, "dur": secs, "ent": e})
+	timed.append({"n": _take("crown"), "kind": "crown", "t": 0.0, "dur": secs, "ent": e, "follows": true})
 
 func crowned(e: Ent) -> bool:
-	return timed.any(func(t): return t["kind"] == "crown" and t["ent"] == e)
+	return timed.any(func(t): return t["kind"] == "crown" and is_instance_valid(t["ent"]) and t["ent"] == e)
 
 ## Breah's slam crater: a dark red scorch with gold flecks, fading over `secs`.
 func scorch(at: Vector3, r: float, secs := 1.0) -> void:
