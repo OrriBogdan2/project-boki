@@ -234,7 +234,7 @@ def gen_classes():
     lv = []
     for i, t in enumerate(xp):
         lv.append([str(i + 1), num(t), "R unlocks" if (i + 1) in ult_at[:1] else ("R rank 2" if (i + 1) in ult_at[1:] else "")])
-    body = "### The eight classes\n\n" + table(["Class", "Weight", "Weapons", "Passive", "Dash", "RMB", "E", "R"], rows)
+    body = "### All %d classes\n\n" % len(rows) + table(["Class", "Weight", "Weapons", "Passive", "Dash", "RMB", "E", "R"], rows)
     body += "\n\n### Weight classes\n\nThe weight class sets health, speed, mass and dash charges; the class kit sits on top.\n\n"
     body += table(["Weight", "Health", "Speed (m/s)", "Dash charges", "Mass", "Glide cap", "Classes", "In short"], wc)
     body += "\n\n### Run levels\n\nEvery expedition starts at level 1 with one skill point and every ability locked. "
