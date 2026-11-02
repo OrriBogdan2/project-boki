@@ -8,6 +8,7 @@ extends RefCounted
 ##   --arena-demo=pr_payoff_dr / pr_payoff_as   the payoff moments
 ##   moves: dr_shot dr_throw dr_reel dr_anchor dr_dive dr_barge dr_hop dr_flex
 ##          as_lance as_sweep as_shot as_leap lw_hop as_cloak lw_stoke
+##          lw_jet dr_blast (the X ultimates)
 
 const MOVES := {
 	"dr_shot": ["dredge", "shotgun", [0.5, 0.53, 0.56, 0.62, 0.7, 0.86]],
@@ -25,6 +26,8 @@ const MOVES := {
 	"lw_hop": ["ashwick", "flamethrower", [0.5, 0.55, 0.62, 0.72, 0.86, 1.05]],
 	"as_cloak": ["ashwick", "flamethrower", [0.5, 0.62, 0.7, 0.78, 1.0, 1.35]],
 	"lw_stoke": ["ashwick", "flamethrower", [0.5, 0.6, 0.7, 0.8, 1.0]],
+	"lw_jet": ["ashwick", "flamethrower", [0.5, 0.56, 0.62, 1.1, 1.92, 2.15]],
+	"dr_blast": ["dredge", "shotgun", [0.5, 1.0, 1.55, 1.62, 2.22, 2.6]],
 }
 
 ## Returns the time to save the single frame at (99: not a single-frame demo).
@@ -134,11 +137,25 @@ static func _drive(A: Arena, P: Hunter, D: Hunter, mv: String, t: float, dt: flo
 			if ArenaDemo._at(t, dt, go):
 				D.teleport(P.pos + Vector3(3.6, 0, 0))
 				P.ak.use_e()
+		"lw_jet":
+			# fly past the dummy, then steer off to the side so the carpet curves
+			if t < go: D.teleport(A.home + Vector3(6.0, 0, 0.4))
+			if t > 1.0: P.inp["aim"] = P.pos + Vector3(4.0, 0.9, 6.0)
+			if ArenaDemo._at(t, dt, go): _ult(P)
+		"dr_blast":
+			if t <= go: P.teleport(D.pos - Vector3(1.8, 0, 0))       # point blank, where every slug lands
+			if ArenaDemo._at(t, dt, go): _ult(P)
 		"lw_stoke":
 			if ArenaDemo._at(t, dt, go):
 				var K := P.ak as AshwickKit
 				K.stoke(D)
 				K.stoke(D)
+
+## X at level 6 with the cooldown cleared.
+static func _ult(P: Hunter) -> void:
+	P.lvl = maxi(P.lvl, 6)
+	P.ak.cd["x"] = 0.0
+	P.ak.use_x()
 
 static func _payoff(A: Arena, P: Hunter, D: Hunter, mv: String, t: float, dt: float) -> float:
 	if mv == "dr":

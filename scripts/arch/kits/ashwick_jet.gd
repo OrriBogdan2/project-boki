@@ -7,6 +7,7 @@ extends RefCounted
 ## kills) fills the Boki bond (HeroUlt.landed).
 
 const LAY_STEP := 1.0           # m between two carpet pieces (each one is a pooled LDFx lava strip)
+const OVERLAP := 0.45           # m each piece reaches back over the last, so the carpet reads as one strip
 const NET_EVERY := 3            # carpet pieces between two rings sent to other players' games
 const STEER_LEAD := 1.0         # m the heading lane runs past where the flight will end
 const LAVA_DY := 1.6            # m above the carpet a body still stands in it
@@ -153,7 +154,8 @@ func _lay(a: Vector3, b: Vector3) -> void:
 		return
 	var x := xd()
 	trail.append({"a": a, "b": b, "until": m.time + float(x["trail_t"])})
-	k.fx.lava(a, b, float(x["trail_w"]), float(x["trail_t"]))
+	var along := (b - a).normalized()
+	k.fx.lava(a - along * OVERLAP, b, float(x["trail_w"]), float(x["trail_t"]))
 	laid += 1
 	if laid % NET_EVERY == 0:
 		k.net_ring(b, float(x["trail_w"]) * 0.6, k.col_of(x))
