@@ -103,15 +103,14 @@ void fragment() {
 render_mode unshaded, blend_add, depth_draw_never, cull_disabled, shadows_disabled;
 uniform vec4 color : source_color = vec4(1.0, 0.55, 0.15, 1.0);
 uniform float life = 1.0;      // 1 -> 0
-uniform float power = 1.0;
+uniform float power = 2.4;
 void fragment() {
 	float across = 1.0 - abs(UV.y * 2.0 - 1.0);
-	float along = smoothstep(0.0, 0.25, UV.x) * (1.0 - smoothstep(0.8, 1.0, UV.x));
-	float burn = smoothstep(1.0 - life * 1.2, 1.0 - life * 1.2 + 0.25, UV.x);
-	float lick = 0.75 + 0.25 * sin(UV.x * 40.0 + TIME * 30.0 + UV.y * 9.0);
-	float a = pow(across, 1.2) * along * burn * lick * power;
-	vec3 hot = mix(vec3(0.9, 0.12, 0.05), color.rgb, smoothstep(0.1, 0.55, across));
-	hot = mix(hot, vec3(1.0, 0.96, 0.7), smoothstep(0.65, 0.95, across));
+	float along = sin(clamp(UV.x, 0.0, 1.0) * 3.14159);
+	float lick = 0.8 + 0.2 * sin(UV.x * 40.0 + TIME * 30.0 + UV.y * 9.0);
+	float a = pow(across, 1.2) * along * lick * clamp(life * 1.5, 0.0, 1.0) * power;
+	vec3 hot = mix(vec3(0.9, 0.12, 0.05), color.rgb, clamp((across - 0.1) / 0.45, 0.0, 1.0));
+	hot = mix(hot, vec3(1.0, 0.96, 0.7), clamp((across - 0.65) / 0.3, 0.0, 1.0));
 	ALBEDO = hot * a * 1.6;
 	ALPHA = clamp(a, 0.0, 1.0);
 }
