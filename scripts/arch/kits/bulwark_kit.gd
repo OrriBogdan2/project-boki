@@ -59,6 +59,8 @@ func on_block(dmg: float, _by) -> void:
 	add_guard(dmg * float(res_def().get("per_hp", 0.5)))
 
 func _tick(dt: float) -> void:
+	if KinMerge.active(h):
+		_drop_holds()
 	if res_wait <= 0.0:
 		add_res(-float(res_def().get("decay", 5.0)) * dt)
 	lock_t = maxf(0.0, lock_t - dt)
@@ -184,6 +186,9 @@ func lmb_override(held: bool, dt: float) -> bool:
 		return false
 	var pressed := held and not lmb_was
 	lmb_was = held
+	if KinMerge.active(h):       # a merge ends the Crushing Blow's charge: letting go of it must not swing mid-transformation
+		_drop_holds()
+		return true
 	if not h.can_fire() or h.fire_cd > 0.0:
 		if lmb_t >= 0.0 and not h.can_fire() and m.time > short_until:
 			lmb_t = -1.0; h.mel_hold = 0.0
@@ -392,6 +397,18 @@ func _raise() -> void:
 	last_variant = "air" if rmb_ctx.get("air", false) else "hold"
 
 var short_until := 0.0         # a short dash out of a Crushing Blow is under way: the wind-up waits, it isn't cancelled
+
+## A Boki merge ends every hold of this kit with no release effect: the Crushing Blow's charge (lmb_t) and the raised
+## shield (it keeps its hit points and starts its regen). The mace in flight and Mending Ground's pending burst are casts, not holds.
+func _drop_holds() -> void:
+	if lmb_t >= 0.0:
+		lmb_t = -1.0
+		h.mel_hold = 0.0
+	if not wall.is_empty():
+		_lower()
+	rmb_down = false
+	if anim_id == "bul_smash_wind":
+		anim_id = ""
 
 func _lower() -> void:
 	if wall.is_empty():

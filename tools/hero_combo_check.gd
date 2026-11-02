@@ -13,6 +13,13 @@ func run(main_node: Node) -> void:
 	print("AKCHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
+## Starts a Boki merge on `h` the way R does (the full merge when it has a Boki to merge with, else the surge).
+func _merge(h: Hunter) -> void:
+	h.ult = 1.0
+	if not KinMerge.cast(h):
+		KinMerge.surge(h)
+	ok("merge hold: a merge is under way", KinMerge.active(h))
+
 ## A raised block of terrain `dx` east of `at` (so a knock east runs into it).
 func _wall_at(m: Match, at: Vector3, lv: int, dx0: int) -> void:
 	var W: World = m.world
@@ -101,6 +108,31 @@ func _archer_combos() -> void:
 	P.ak.press_rmb()
 	ok("archer anim: plunge plays arc_plunge", K.anim_id == "arc_plunge", K.anim_id)
 	ok("archer: no class R", not K.d.has("r") and K.r_def().is_empty())
+	# a Boki merge that starts mid-hold ends the hold: no arrow, no Heavy Shot, no lane telegraph left behind
+	step(m, 5.0); fresh(T); K.ch_rmb = 2.0; K.cd["rmb"] = 0.0; K.res = 0.0; P.fire_cd = 0.0; P.ammo = maxi(P.ammo, 3); P.reload_t = 0.0
+	P.teleport(home); T.teleport(home + Vector3(7, 0, 0)); aim_at(P, T.pos)
+	step(m, 0.5, func(): P.inp["fire"] = true; P.inp["sec_hold"] = false; aim_at(P, T.pos))
+	var hurt0 := dmg(T); var ammo0 := P.ammo
+	ok("merge hold: the bow is drawn before the merge", P.draw_t > 0.2, "draw_t %.2f" % P.draw_t)
+	_merge(P)
+	P.inp["fire"] = false
+	step(m, 0.5)
+	ok("merge hold: archer's bow draw is dropped with no arrow loosed", P.draw_t < 0.0 and dmg(T) == hurt0 and P.ammo == ammo0, "draw_t %.2f took %.0f ammo %d -> %d" % [P.draw_t, dmg(T) - hurt0, ammo0, P.ammo])
+	await done(m)
+	var r2 := setup("archer", 7.0, "", true)
+	m = r2[0]; P = r2[1]; T = r2[2]; home = r2[4]
+	K = P.ak
+	K.ch_rmb = 2.0; K.cd["rmb"] = 0.0; K.res = 0.0
+	aim_at(P, T.pos)
+	P.inp["sec_hold"] = true
+	P.ak.press_rmb()
+	step(m, 0.6, func(): P.inp["sec_hold"] = true; aim_at(P, T.pos))
+	ok("merge hold: the Heavy Shot is held before the merge", K.rmb_down and K.pin_tele != null, "rmb_down %s tele %s" % [K.rmb_down, K.pin_tele])
+	var ch0 := K.ch_rmb
+	_merge(P)
+	P.inp["sec_hold"] = false
+	step(m, 0.4)
+	ok("merge hold: archer's Heavy Shot hold, lane telegraph and draw pose are dropped, no shot spent", not K.rmb_down and K.pin_tele == null and K.ch_rmb == ch0 and K.anim_id != "arc_heavy_wind" and dmg(T) == 0.0, "rmb_down %s tele %s charges %.1f -> %.1f anim %s took %.0f" % [K.rmb_down, K.pin_tele, ch0, K.ch_rmb, K.anim_id, dmg(T)])
 	await done(m)
 
 func _bulwark_combos() -> void:
@@ -192,4 +224,28 @@ func _bulwark_combos() -> void:
 	P.ak.use_e()
 	ok("combo bulwark: mace thrown > E blooms where it lies", String(K.mace.get("st", "")) == "ground" and Vector2(K.mend["pos"].x - lie.x, K.mend["pos"].z - lie.z).length() < 1.5, "mend %s mace %s" % [str(K.mend.get("pos")), str(lie)])
 	ok("bulwark: no class R", not K.d.has("r") and K.r_def().is_empty())
+	# a Boki merge that starts mid-hold ends the holds: no Crushing Blow when LMB is let go, the raised shield comes down
+	step(m, 1.0); reset.call()
+	c0 = K.crushes
+	step(m, 1.0, func(): P.inp["fire"] = true; aim_at(P, T.pos))
+	ok("merge hold: the Crushing Blow is charging before the merge", K.lmb_t > 0.5, "lmb_t %.2f" % K.lmb_t)
+	_merge(P)
+	var burst := dmg(T)          # (the merge's own burst has landed by now; the release must add nothing)
+	P.inp["fire"] = false
+	step(m, 0.4)
+	ok("merge hold: bulwark's Crushing Blow charge is dropped, the release swings nothing", K.lmb_t < 0.0 and P.mel_hold == 0.0 and dmg(T) == burst and K.crushes == c0 and K.anim_id != "bul_smash", "lmb_t %.2f took %.0f (merge burst %.0f) anim %s" % [K.lmb_t, dmg(T), burst, K.anim_id])
+	await done(m)
+	var r2 := setup("bulwark", 2.2)
+	m = r2[0]; P = r2[1]; T = r2[2]; home = r2[4]
+	K = P.ak
+	K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; K.lock_t = 0.0
+	P.inp["sec_hold"] = true
+	P.ak.press_rmb()
+	step(m, 0.5, func(): P.inp["sec_hold"] = true)
+	ok("merge hold: the shield is raised before the merge", not K.wall.is_empty() and K.rmb_down)
+	var hp0 := float(K.wall.get("hp", 0.0))
+	_merge(P)
+	P.inp["sec_hold"] = false
+	step(m, 0.3)
+	ok("merge hold: bulwark's raised shield comes down with the merge (hit points kept)", K.wall.is_empty() and not K.rmb_down and K.shield_hp >= hp0 - 1.0 and not m.verbs.walls.any(func(w): return w.get("by") == P), "wall %s rmb_down %s hp %.0f -> %.0f" % [not K.wall.is_empty(), K.rmb_down, hp0, K.shield_hp])
 	await done(m)

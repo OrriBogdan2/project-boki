@@ -89,6 +89,8 @@ func _deadeye(t: Ent) -> void:
 	CombatBus.ability_used.emit(h, "deadeye", "secondary")
 
 func _tick(dt: float) -> void:
+	if KinMerge.active(h):
+		_drop_holds()
 	var rd := res_def()
 	high_t -= dt
 	if high_t <= 0.0:
@@ -378,6 +380,15 @@ func heavy_k() -> float:
 
 func rmb_auto_t() -> float:
 	return float(rmb_def()["pin"]["full"]) + 0.5
+
+## A Boki merge ends the bow draw and the Heavy Shot's hold with no shot (Hunter.draw_t and rmb_down are cleared by
+## MergeKit.drop_class_holds; the lane telegraph and the draw pose are this kit's).
+func _drop_holds() -> void:
+	rmb_down = false
+	if pin_tele != null:
+		_drop_tele()
+	if anim_id in ["arc_draw", "arc_heavy_wind"]:
+		anim_id = ""
 
 func _drop_tele() -> void:
 	if pin_tele and is_instance_valid(pin_tele):
