@@ -2,7 +2,7 @@
 
 Review shots for each hero: kit card, each ability, the payoff, animation frame strips and a neutral full-body portrait. PNGs are downscaled to at most 1280 px wide. Captions come from the shot manifests.
 
-Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-tender), [Tamsin](#tamsin-rimewright), [Dredge](#dredge-dredge), [Ashwick](#ashwick-ashwick), [Dolm](#dolm-dolm), [Ostra](#ostra-ostra), [Archer](#archer-archer), [Bulwark](#bulwark-bulwark), [Thief](#thief-thief), [Juggernaut](#juggernaut-juggernaut), [Farm building](#farm-building-farmbuild), [classes](#classes-classes), [aimkit](#aimkit-aimkit), [moosh-moosh/v2](#moosh-moosh/v2-moosh-moosh/v2), [moosh-moosh/v2/anim](#moosh-moosh/v2/anim-moosh-moosh/v2/anim), [tamsin/v2](#tamsin/v2-tamsin/v2), [tamsin/v2/anim](#tamsin/v2/anim-tamsin/v2/anim), [dancer/v2](#dancer/v2-dancer/v2), [dancer/v2/before](#dancer/v2/before-dancer/v2/before), [zedran/v2](#zedran/v2-zedran/v2), [zedran/v2/before](#zedran/v2/before-zedran/v2/before), [dancer/v2/anim](#dancer/v2/anim-dancer/v2/anim), [zedran/v2/anim](#zedran/v2/anim-zedran/v2/anim), [linwick/v2](#linwick/v2-linwick/v2), [linwick/v2/anim](#linwick/v2/anim-linwick/v2/anim), [linwick/v2/before](#linwick/v2/before-linwick/v2/before), [linwick/v2/after](#linwick/v2/after-linwick/v2/after), [dredge/v2](#dredge/v2-dredge/v2), [dredge/v2/anim](#dredge/v2/anim-dredge/v2/anim), [dredge/v2/before](#dredge/v2/before-dredge/v2/before), [dredge/v2/after](#dredge/v2/after-dredge/v2/after), [pin/v2](#pin/v2-pin/v2), [bjorn/v2](#bjorn/v2-bjorn/v2), [pin/v2/anim](#pin/v2/anim-pin/v2/anim), [bjorn/v2/anim](#bjorn/v2/anim-bjorn/v2/anim)
+Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-tender), [Tamsin](#tamsin-rimewright), [Dredge](#dredge-dredge), [Ashwick](#ashwick-ashwick), [Dolm](#dolm-dolm), [Ostra](#ostra-ostra), [Archer](#archer-archer), [Bulwark](#bulwark-bulwark), [Thief](#thief-thief), [Juggernaut](#juggernaut-juggernaut), [Farm building](#farm-building-farmbuild), [classes](#classes-classes), [aimkit](#aimkit-aimkit), [moosh-moosh/v2](#moosh-moosh/v2-moosh-moosh/v2), [moosh-moosh/v2/anim](#moosh-moosh/v2/anim-moosh-moosh/v2/anim), [tamsin/v2](#tamsin/v2-tamsin/v2), [tamsin/v2/anim](#tamsin/v2/anim-tamsin/v2/anim), [dancer/v2](#dancer/v2-dancer/v2), [dancer/v2/before](#dancer/v2/before-dancer/v2/before), [zedran/v2](#zedran/v2-zedran/v2), [zedran/v2/before](#zedran/v2/before-zedran/v2/before), [dancer/v2/anim](#dancer/v2/anim-dancer/v2/anim), [zedran/v2/anim](#zedran/v2/anim-zedran/v2/anim), [linwick/v2](#linwick/v2-linwick/v2), [linwick/v2/anim](#linwick/v2/anim-linwick/v2/anim), [linwick/v2/before](#linwick/v2/before-linwick/v2/before), [linwick/v2/after](#linwick/v2/after-linwick/v2/after), [dredge/v2](#dredge/v2-dredge/v2), [dredge/v2/anim](#dredge/v2/anim-dredge/v2/anim), [dredge/v2/before](#dredge/v2/before-dredge/v2/before), [dredge/v2/after](#dredge/v2/after-dredge/v2/after), [pin/v2](#pin/v2-pin/v2), [bjorn/v2](#bjorn/v2-bjorn/v2), [pin/v2/anim](#pin/v2/anim-pin/v2/anim), [bjorn/v2/anim](#bjorn/v2/anim-bjorn/v2/anim), [vireo/v2](#vireo/v2-vireo/v2), [vireo/v2/anim](#vireo/v2/anim-vireo/v2/anim), [venator/v2/anim](#venator/v2/anim-venator/v2/anim), [venator/v2](#venator/v2-venator/v2)
 
 ## Vireo (mage)
 
@@ -1657,3 +1657,199 @@ Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-t
 **Guard pip: a shrug of the shield (6-frame strip: anticipation, release, follow-through, recovery)**
 
 ![Guard pip: a shrug of the shield (6-frame strip: anticipation, release, follow-through, recovery)](bjorn/v2/anim/anim_bul_armed.png)
+
+## vireo/v2 (vireo/v2)
+
+**AFTER Gap 3 LMB aim: before, the line stops at the cursor; after, it runs past it to full range with an arrow tick**
+
+![AFTER Gap 3 LMB aim: before, the line stops at the cursor; after, it runs past it to full range with an arrow tick](vireo/v2/vireo/lmb_aim.png)
+
+**LMB: a jagged bolt from the fingertip (no gun), crackle at the hand**
+
+![LMB: a jagged bolt from the fingertip (no gun), crackle at the hand](vireo/v2/vireo/lmb_bolt.png)
+
+**LMB impact: splinters spray back toward her; the Static marker over the head**
+
+![LMB impact: splinters spray back toward her; the Static marker over the head](vireo/v2/vireo/lmb_impact.png)
+
+**Static: 2 stacks, the marker's count and sparks on the body**
+
+![Static: 2 stacks, the marker's count and sparks on the body](vireo/v2/vireo/static_2.png)
+
+**Static: the 4th stack calls a sky bolt, they're Live**
+
+![Static: the 4th stack calls a sky bolt, they're Live](vireo/v2/vireo/static_live.png)
+
+**RMB held: the rod in the hand and a fixed double-rail lane to full range**
+
+![RMB held: the rod in the hand and a fixed double-rail lane to full range](vireo/v2/vireo/rmb_aim.png)
+
+**RMB full: the white body flash**
+
+![RMB full: the white body flash](vireo/v2/vireo/rmb_full.png)
+
+**AFTER Gap 1 orbs: before, no orb at the impact; after, an orb the moment the rod hits (any foe)**
+
+![AFTER Gap 1 orbs: before, no orb at the impact; after, an orb the moment the rod hits (any foe)](vireo/v2/vireo/rmb_impact.png)
+
+**The charge orb zapping the target with Static**
+
+![The charge orb zapping the target with Static](vireo/v2/vireo/rmb_orb.png)
+
+**Shift held: rails out to max, the ticked end ring partway (short of nothing: the cursor plays no part)**
+
+![Shift held: rails out to max, the ticked end ring partway (short of nothing: the cursor plays no part)](vireo/v2/vireo/dash_aim_mid.png)
+
+**AFTER Gap 2/7 Wirerun: before, a small end ring and no charge on the press; after, the big ticked end ring and the Shift slot on cooldown from the press**
+
+![AFTER Gap 2/7 Wirerun: before, a small end ring and no charge on the press; after, the big ticked end ring and the Shift slot on cooldown from the press](vireo/v2/vireo/dash_aim_full.png)
+
+**Shift released: a lightning streak, the body a silhouette**
+
+![Shift released: a lightning streak, the body a silhouette](vireo/v2/vireo/dash_run.png)
+
+**Shift arrival: a ring burst with spark needles**
+
+![Shift arrival: a ring burst with spark needles](vireo/v2/vireo/dash_arrive.png)
+
+**Payoff: Wirerun through a Live foe, BLOWOUT, the copper refund columns on her**
+
+![Payoff: Wirerun through a Live foe, BLOWOUT, the copper refund columns on her](vireo/v2/vireo/blowout.png)
+
+**E: the circle at the cursor, the flick sets the drag arrow and the rim chevron (toward her: a pull)**
+
+![E: the circle at the cursor, the flick sets the drag arrow and the rim chevron (toward her: a pull)](vireo/v2/vireo/e_aim.png)
+
+**E countdown: dark disc, crackling copper rim, a pillar of light narrowing**
+
+![E countdown: dark disc, crackling copper rim, a pillar of light narrowing](vireo/v2/vireo/e_count.png)
+
+**E strike: lightning, the target dragged toward her, Grounded with shackle rings**
+
+![E strike: lightning, the target dragged toward her, Grounded with shackle rings](vireo/v2/vireo/e_strike.png)
+
+**Full-body neutral portrait with the signature weapon (no gun: the copper wrist coils)**
+
+![Full-body neutral portrait with the signature weapon (no gun: the copper wrist coils)](vireo/v2/vireo/portrait.png)
+
+**BEFORE (origin/main) Gap 3 LMB aim: before, the line stops at the cursor; after, it runs past it to full range with an arrow tick**
+
+![BEFORE (origin/main) Gap 3 LMB aim: before, the line stops at the cursor; after, it runs past it to full range with an arrow tick](vireo/v2/before/vireo/lmb_aim.png)
+
+**BEFORE (origin/main) Gap 1 orbs: before, no orb at the impact; after, an orb the moment the rod hits (any foe)**
+
+![BEFORE (origin/main) Gap 1 orbs: before, no orb at the impact; after, an orb the moment the rod hits (any foe)](vireo/v2/before/vireo/rmb_impact.png)
+
+**BEFORE (origin/main) Gap 2/7 Wirerun: before, a small end ring and no charge on the press; after, the big ticked end ring and the Shift slot on cooldown from the press**
+
+![BEFORE (origin/main) Gap 2/7 Wirerun: before, a small end ring and no charge on the press; after, the big ticked end ring and the Shift slot on cooldown from the press](vireo/v2/before/vireo/dash_aim_full.png)
+
+## vireo/v2/anim (vireo/v2/anim)
+
+**LMB finger bolts: twist, arm flung out, snap, settle; left then right**
+
+![LMB finger bolts: twist, arm flung out, snap, settle; left then right](vireo/v2/anim/vireo/anim_lmb.png)
+
+**RMB summon and hold: the rod raised by the shoulder, side-on**
+
+![RMB summon and hold: the rod raised by the shoulder, side-on](vireo/v2/anim/vireo/anim_rmb_hold.png)
+
+**RMB throw: overarm whip, stretch, follow-through, recover**
+
+![RMB throw: overarm whip, stretch, follow-through, recover](vireo/v2/anim/vireo/anim_rmb_throw.png)
+
+**Shift: the charging crouch, then the streak and re-forming on arrival**
+
+![Shift: the charging crouch, then the streak and re-forming on arrival](vireo/v2/anim/vireo/anim_dash.png)
+
+**E: a one-arm sweep toward the spot, the hand snapped down**
+
+![E: a one-arm sweep toward the spot, the hand snapped down](vireo/v2/anim/vireo/anim_e.png)
+
+## venator/v2/anim (venator/v2/anim)
+
+**LMB: the shoulder takes each kick, head on the sights**
+
+![LMB: the shoulder takes each kick, head on the sights](venator/v2/anim/venator/anim_lmb.png)
+
+**RMB: cocked over the shoulder while aiming, the overhand throw, follow-through**
+
+![RMB: cocked over the shoulder while aiming, the overhand throw, follow-through](venator/v2/anim/venator/anim_rmb.png)
+
+**Shift: dropped feet-first, leaning back, rifle up and firing; the stand-up**
+
+![Shift: dropped feet-first, leaning back, rifle up and firing; the stand-up](venator/v2/anim/venator/anim_dash.png)
+
+**E: braced through the 0.6s cast, the recoil throws the chest back, settle**
+
+![E: braced through the 0.6s cast, the recoil throws the chest back, settle](venator/v2/anim/venator/anim_e.png)
+
+## venator/v2 (venator/v2)
+
+**LMB: ember tracers through a near cursor out to full range, the muzzle star**
+
+![LMB: ember tracers through a near cursor out to full range, the muzzle star](venator/v2/venator/lmb_aim.png)
+
+**AFTER Gap 1 Daze payoff: before, +28% in plain numbers; after, +90% in big gold numbers**
+
+![AFTER Gap 1 Daze payoff: before, +28% in plain numbers; after, +90% in big gold numbers](venator/v2/venator/lmb_dazed.png)
+
+**AFTER Gap 4 RMB aim lane: before, thrown on the press with no lane; after, a held lane with an arrow tip and the foe in it marked**
+
+![AFTER Gap 4 RMB aim lane: before, thrown on the press with no lane; after, a held lane with an arrow tip and the foe in it marked](venator/v2/venator/rmb_aim.png)
+
+**RMB: the spiked charge flies past the person, on to the lane's end**
+
+![RMB: the spiked charge flies past the person, on to the lane's end](venator/v2/venator/rmb_flight.png)
+
+**AFTER Gap 2 wall/ground cone: before, no cone before the blast (and it stuck to people); after, the cone shows back toward him for the fuse**
+
+![AFTER Gap 2 wall/ground cone: before, no cone before the blast (and it stuck to people); after, the cone shows back toward him for the fuse](venator/v2/venator/rmb_cone.png)
+
+**RMB blast: the cone front, the target shoved toward him and Dazed (swirl)**
+
+![RMB blast: the cone front, the target shoved toward him and Dazed (swirl)](venator/v2/venator/rmb_blast.png)
+
+**RMB on a wall: stuck, the cone back out toward him**
+
+![RMB on a wall: stuck, the cone back out toward him](venator/v2/venator/rmb_wall_cone.png)
+
+**RMB wall blast**
+
+![RMB wall blast](venator/v2/venator/rmb_wall_blast.png)
+
+**Shift: sliding one way while shooting another; the ember afterimage and ring at the start**
+
+![Shift: sliding one way while shooting another; the ember afterimage and ring at the start](venator/v2/venator/dash.png)
+
+**E cast start: a wide bright line full length**
+
+![E cast start: a wide bright line full length](venator/v2/venator/e_aim_start.png)
+
+**E cast end: narrowed to a thin core**
+
+![E cast end: narrowed to a thin core](venator/v2/venator/e_aim_end.png)
+
+**E fire: the beam, muzzle orb and flare, the smoke ring and recoil**
+
+![E fire: the beam, muzzle orb and flare, the smoke ring and recoil](venator/v2/venator/e_fire.png)
+
+**Payoff: Longneedle through a Dazed hunter, SKEWERED**
+
+![Payoff: Longneedle through a Dazed hunter, SKEWERED](venator/v2/venator/skewer.png)
+
+**Full-body neutral portrait with the signature weapon (the long-shrouded Quill Rifle)**
+
+![Full-body neutral portrait with the signature weapon (the long-shrouded Quill Rifle)](venator/v2/venator/portrait.png)
+
+**BEFORE (origin/main) Gap 1 Daze payoff: before, +28% in plain numbers; after, +90% in big gold numbers**
+
+![BEFORE (origin/main) Gap 1 Daze payoff: before, +28% in plain numbers; after, +90% in big gold numbers](venator/v2/before/venator/lmb_dazed.png)
+
+**BEFORE (origin/main) Gap 2 wall/ground cone: before, no cone before the blast (and it stuck to people); after, the cone shows back toward him for the fuse**
+
+![BEFORE (origin/main) Gap 2 wall/ground cone: before, no cone before the blast (and it stuck to people); after, the cone shows back toward him for the fuse](venator/v2/before/venator/rmb_cone.png)
+
+**BEFORE (origin/main) Gap 4 RMB aim lane: before, thrown on the press with no lane; after, a held lane with an arrow tip and the foe in it marked**
+
+![BEFORE (origin/main) Gap 4 RMB aim lane: before, thrown on the press with no lane; after, a held lane with an arrow tip and the foe in it marked](venator/v2/before/venator/rmb_aim.png)
