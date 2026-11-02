@@ -153,7 +153,7 @@ func draw(H, sp: Vector2, h: Hunter, show_name: bool) -> void:
 	if viewer and h.flat_dist(viewer) < 14.0:
 		var dm := int(h.max_dashes())
 		for i in dm:
-			c.draw_rect(Rect2(Vector2(x0 + 1.0 + i * 8.0, frame.end.y + 1.0), Vector2(6, 2)), H.STAMINA_COL if float(i) < floor(h.dashes) else Color(1, 1, 1, 0.2))
+			c.draw_rect(Rect2(Vector2(x0 + 12.0 + i * 8.0, frame.end.y + 1.0), Vector2(6, 2)), H.STAMINA_COL if float(i) < floor(h.dashes) else Color(1, 1, 1, 0.2))
 	# an archetype's resource tell, readable from the other side (glow at half, bright at full)
 	if h.ak and h.ak.tell != "":
 		var rc: Color = h.ak.res_col()

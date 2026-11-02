@@ -7,6 +7,7 @@ extends RefCounted
 ##           cooling down. Everyone else stands still.
 ##   fight:  every hunter bunched up around you; after 4s they fight, so many plates overlap.
 
+const UP_AT := 2.45       # s: ... and the level-up, so its pulse is mid-swell at 2.5s
 const HIT_AT := 2.2       # s of match time: the hit that leaves a chip lands this long before a 2.5s shot
 
 static func tick(m) -> void:
@@ -48,8 +49,10 @@ static func tick(m) -> void:
 		if hit and m.time >= HIT_AT and not m.has_meta("hudref_hit_done"):
 			m.set_meta("hudref_hit_done", true)
 			hit.hurt(46.0, P)
-			var up: Hunter = m.get_meta("hudref_up", null)
-			if up: up.lvl += 1                     # a rival levels up just before the picture (the badge pulse)
+		var up: Hunter = m.get_meta("hudref_up", null)
+		if up and m.time >= UP_AT and not m.has_meta("hudref_up_done"):
+			m.set_meta("hudref_up_done", true)
+			up.lvl += 1                            # someone levels up just before the picture (the badge pulse)
 		var st: Hunter = m.get_meta("hudref_stun", null)
 		if st: st.slow_t = maxf(st.slow_t, 1.0)
 
