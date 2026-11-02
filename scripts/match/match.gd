@@ -1608,7 +1608,7 @@ func _take_gear(h: Hunter, wp: Dictionary, from_net := false) -> void:
 		return
 	if net_on:
 		net_event(["wtake", wp["id"], h.nid])
-	var slot := Gear.slot_of(String(wp["gear"]))
+	var slot := Gear.slot_on(h, String(wp["gear"]))      # a glove: its twin's slot, a free one, or the weaker (Gloves)
 	var old: Dictionary = h.gear[slot]
 	h.gear[slot] = {"id": wp["gear"], "rar": int(wp["rar"])}
 	h.gear_cd[slot] = 0.0
@@ -1792,7 +1792,7 @@ func _pickup_label(h: Hunter, wp: Dictionary) -> String:
 	var nm := Loot.name_of(it)
 	var fill := "%d/%d" % [h.pack.size(), h.pack_cap]
 	var gid := String(it.get("id", ""))
-	var cur: Dictionary = h.gear[Gear.slot_of(gid)] if Gear.ALL.has(gid) else {}
+	var cur: Dictionary = h.gear[Gear.slot_on(h, gid)] if Gear.ALL.has(gid) else {}
 	var into_hand := Gear.ALL.has(gid) and (cur.is_empty() or Loot.value(it) > Loot.value(Loot.gear(String(cur["id"]), int(cur["rar"]))) or not Pack.wants(h, it))
 	if opts.get("training", false):
 		return "Press %s to take %s  ·  %s" % [k, nm, Loot.sub_of(it)]
@@ -4061,7 +4061,7 @@ func step(dt: float) -> void:
 		player.pack_cap = 6
 		var gk: Array = Gear.ALL.keys()
 		player.pack = [Loot.gear("skylark_boots", 2), Loot.valuable("sky_pearl"), Loot.gear(String(gk[1 % gk.size()]), 2), Loot.gear("tinker_roll", 1), Loot.valuable("old_coin"), Loot.valuable("kin_idol")]
-		player.gear[Gear.slot_of(String(gk[0]))] = {"id": String(gk[0]), "rar": 3}
+		player.gear[Gear.slot_on(player, String(gk[0]))] = {"id": String(gk[0]), "rar": 3}
 		player.refresh_gear()
 		var pat := world.free_spot_near(player.pos + Vector3(1.0, 0, 0.6), [player.pos], 0.6)
 		spawn_val(Loot.valuable("crown_shard"), Vector3(pat.x, world.ground_at(pat.x, pat.z), pat.z))

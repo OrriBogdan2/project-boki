@@ -2,76 +2,80 @@
 
 - **Status:** accepted
 - **Date:** 2026-11-02
-- **Area:** match flow / save / combat / farm / UI
+- **Area:** match flow / save / combat / net / farm / UI
 
 ## Problem
 Power in a match came from home: worn armour, a bigger pack, workshop and guild-project perks, a
 loaner kit. A player with a rich farm started stronger than a new one. The owner wants an extraction
 game where you can bring a little in, but power mostly comes from the match: everyone drops with the
-same body, then finds, buys and earns the rest. The only lasting edge is your Boki.
+same body, then finds, buys and earns the rest. Your Boki is the one lasting difference.
 
 ## Options
-1. Pure equal start (bring nothing, like a battle royale). Simple and fair, but there is no reason to
-   keep gear on the farm and no extraction fantasy.
-2. Bring everything, balance with tiers. Keeps the farm loop, but the power gap stays.
-3. Bring a small, capped, at-risk set (gloves, boots, utility) and nothing else. Keeps a reason to
-   farm, bounded by difficulty tier, and dying costs it.
+1. Pure equal start (bring nothing). Fair, but nothing to keep on the farm and no extraction stakes.
+2. Bring everything and balance with tiers. Keeps the farm loop, keeps the power gap.
+3. Bring a small, capped, at-risk set (two gloves, boots, utility) and nothing else.
 
 ## Decision
-Option 3.
+Option 3. The whole ext/equal design, by part:
 
-**Brought in (at risk: it drops in your deathbox):**
-- gloves (Q active, passive) and boots, with their rarity capped by difficulty tier;
-- utility items on the belt (below), with stack caps by tier.
+**Bring-in (ext/equal-loadout).** From home: the two gloves, boots and up to three utility items.
+Everything brought is at risk (it drops in your deathbox). Rarity is capped by difficulty tier
+(`content/rules/equal.json` `rarity_cap_by_tier`: Rare, Epic, Legendary for The Meadow, Dusk Isles,
+The Hollow); utility stacks are capped per item per tier (`content/utility/*.json` `bring`). Not
+brought: armour (everyone has the same base armour; better armour is found, and armour levels up by
+damaging rival hunters, `Hunter.armor_gain`, shown by `ArmorHud`), perks, the workshop and guild
+project perks, and pack size (one `Equal.BASE_PACK` for all).
 
-The caps are data in `content/rules/equal.json`: rarity cap [Rare, Epic, Legendary] for The Meadow,
-Dusk Isles and The Hollow, and a stack-size cap per item per tier in `content/utility/*.json`.
+**Two gloves, no ranks.** Glove 1 on Q, glove 2 on V. Either slot holds an active or a passive glove,
+never two of the same (`Gloves.slot_for`). Gloves never rank: "gear" is gone from `Hunter.SLOTS` and
+`SLOT_MAX`; skill points go to the hero's own abilities only (bots too). A glove's strength is its
+rarity. Gloves chain with each other and with hero kits (a hook into a fissure). V also plays fetch
+at home; the two never apply in the same place (`Settings.SHARED_OK`).
 
-**Not brought in:** armour (everyone starts on the same base armour; better plates are found, and
-armour levels up by damaging rival hunters, `Hunter.armor_gain`, now shown on the HUD), perks (in the
-match only), the workshop and guild-project perks, and a bigger pack (pack size is one number for all).
-The Boki you raise is the one persistent difference.
+**HUD and overhead.** The right of the bottom HUD has three boxes: Q glove, V glove, C Boki (type
+badge, C cooldown, a bond ring, a down mark) in `GripHud`. Over every other hunter's nameplate, three
+small icons: two gloves (rarity frame, dim on cooldown) and the Boki type (soft glow on a full bond),
+in `GripOverhead`; remote hunters' gloves, cooldowns and bond ride in the snapshot (`GripNet`).
 
-**The utility belt (replaces the "kit" gear slot):** three slots on keys 1, 2 and 3. A slot holds one
-item with charges. Items: tonic (heal), armour kit (repair), and smoke, jump pad, scanner and mending
-kit (moved from gloves), plus a swift draught and a shield cell. Everyone is issued two tonics and two
-armour kits; more can be brought (from the farm stash, capped by tier), found and bought. The whole
-belt is lost on death (it goes into the deathbox). Public API: `UtilityBelt.grant(h, id, n)`,
-`count`, `take`, `use`, `belt_of`. The old kit passives (field_kit, magpie, satchel, spyglass,
-tinker_roll) leave gear and come back as perk orbs (ext/perkorbs).
+**Utility belt on 1/2/3.** Replaces the "kit" gear slot and the heal / armour-kit keys. Each slot
+holds one item with charges: tonic, armour kit, and smoke, jump pad, scanner and medkit (moved from
+gloves), plus a swift draught and a shield cell. Everyone is issued two tonics and two armour kits;
+more are brought (capped), found and bought. The whole belt goes in the deathbox. API:
+`UtilityBelt.grant(h, id, n)` (returns how many fit), `count`, `take`, `has_room`, `use_id`.
 
-**Removed:** the free-kit loaner run, its extract-minimum top-up, text and checks (everyone is on
-equal footing, so there is nothing to lend). The economy floor (a stray common Boki when you have none)
-and the last-Boki guard stay.
+**Removed.** The free-kit loaner, its extract-minimum top-up, text and checks. The economy floor (a
+stray common Boki) and the last-Boki guard stay.
 
-**Save migration (v5 to v6):** armour and kit pieces in the armory convert to farm materials and gems
-(full item value in gems plus the extraction materials for its rarity). The four glove-turned-utility
-pieces (smoke, jump pad, scanner, mending) become utility charges in the stash. Bought backpack levels
-are refunded. Gloves and boots stay. A one-time notice lists everything that converted.
+**Save v5 to v6** (`EqualMigrate`). Armour and kit pieces become gems (full item value: 3, 8, 18,
+36, 70 by rarity) plus the extraction materials for their rarity; the four gloves that became
+utility items become stash charges (1, 2, 2, 3, 4 by rarity); bought backpack levels are refunded.
+Gloves and boots stay; the V glove slot starts empty. A one-time farm notice lists every conversion.
 
-## The split of ext/equal
-Three parallel branches, merged into ext/equal afterwards, then a shop/legend pass.
-- **ext/equal-loadout (this note):** bring-in rules, no armour from home, armour-level HUD, the
-  utility belt and its API, loaner removal, save migration.
-- **ext/perkorbs:** perks as orbs from chests, shrines and bosses (no 1/2/3 prompt), the boss fan,
-  bot orb pickup, orb sync, the old kit passives as perks, the fixed per-hero weapon path
-  (note 0006).
-- **ext/keys-cover:** one chest type, keys and key carriers, the bush mimic, hiding cover on The
-  Hollow Crown (note 0007).
-- **Later:** in-match shops (they sell armour and repairs, boots, utility via `UtilityBelt.grant`,
-  weapon perks) and the full-map legend for shop themes and area leans.
+**Perk orbs (ext/perkorbs, note 0006).** Chests, shrines and bosses drop perk orbs you walk into (no
+1/2/3 prompt); bosses drop a fan of three that fades for you only; bots walk to orbs; orbs sync like
+wpicks; the old kit passives (field_kit, magpie, satchel, spyglass, tinker_roll) become perks; a
+fixed per-hero weapon path on even levels.
 
-Where parts meet: this branch owns utility definitions and the belt API; perkorbs owns the perk pool
-and frees keys 1/2/3 by deleting the perk prompt; keys-cover owns keys and chests.
+**Keys and cover (ext/keys-cover, note 0007).** One chest type opened by keys; key carriers per region
+with a seeded stream; the bush mimic; hiding cover on The Hollow Crown by biome.
+
+**Later (one pass after the parts).** In-match shops at fixed landmarks (armour and repairs, boots,
+utility via `UtilityBelt.grant` and `UtilityBelt.price_of`, weapon perks) and the full-map legend.
+
+## The split and where parts meet
+- loadout owns utility definitions (`content/utility/`, `UtilityBelt`, `UtilityUse`), bring-in
+  (`Equal`), gloves (`Gloves`, `GripHud`, `GripOverhead`, `GripNet`) and the migration.
+- perkorbs owns the perk pool; it frees keys 1/2/3 by deleting the perk prompt (until then the belt
+  keys yield to an open prompt, `Match._gather_input`).
+- keys-cover owns keys, chests and cover; its key count sits beside the belt on the HUD.
+- the shop pass calls `UtilityBelt.grant` / `price_of` and reads `Equal.rules()`.
 
 ## Consequences
-- Save version 5 to 6 (`EqualMigrate`). No Net sync change in this part (the belt is local state, like
-  tonics were), so no Net.VERSION bump.
-- New: `UtilityBelt`, `UtilityUse`, `Equal` (bring-in rules), `BeltHud`, `ArmorHud`, `HomeBelt`,
-  `EqualMigrate`, `content/utility/`, `content/rules/equal.json`, `--equal-check`,
-  `--equal-migrate-check`.
-- Removed: `Loaner`, `HomeFreeKit`, the "kit" gear slot and its five pieces, four utility gloves'
-  gear files, `Econ` pack upgrades, workshop/forge/lighthouse match perks.
-- Settings: the heal and armour-kit actions become `util1`, `util2`, `util3` (keys 1, 2, 3); old
-  custom bindings for the two move across.
-- Debt: the armory is now gloves, boots and utility only; a salvage/trophy log is not built.
+- Save version 6. Net.VERSION 0.15.1 (the hunter snapshot gains GripNet's five fields).
+- New: `Equal`, `UtilityBelt`, `UtilityUse`, `UtilityDrops`, `BotBelt`, `Gloves`, `GripHud`,
+  `GripOverhead`, `GripNet`, `BeltHud`, `ArmorHud`, `HomeBelt`, `HomeNotices`, `EqualMigrate`,
+  `--equal-check`, `--equal-migrate-check`.
+- Removed: `Loaner`, `HomeFreeKit`, the "kit" gear slot and its five pieces, the four utility gloves'
+  gear files, `Econ` pack upgrades, the workshop/forge/lighthouse match perks, glove ranks.
+- Reserved-file hook for the main session: the left bar still draws C through
+  `BokiHud.cg_slots` (C and G together); split it so the left bar draws G only.

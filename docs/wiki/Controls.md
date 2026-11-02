@@ -66,8 +66,10 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | E | Archetype utility (E) | `signature` | yes |
 | C | Boki ability (cast from where your Boki is) | `kin_ability` | yes |
 | F | Use, scan, revive, pet | `interact` | yes |
-| 2 | Repair armor (armor kit) | `armor_kit` | yes |
-| Q | Glove active | `gear1` | yes |
+| 2 | Utility belt slot 2 (an armor kit to start) | `util2` | yes |
+| 3 | Utility belt slot 3 | `util3` | yes |
+| Q | Glove 1 | `gear1` | yes |
+| V | Glove 2 (in a match; V plays fetch at home) | `gear2` | yes |
 | Ctrl | Sneak | `crouch` | yes |
 | G / Middle mouse | Boki orders: tap to Sic or Call back, hold for the order wheel | `throw` | yes |
 | B | Base to a teammate (squads) | `base` | yes |
@@ -75,7 +77,7 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | Space | Jump (hold to glide) | `jump` | yes |
 | Mouse 5 / Mouse 4 | Glide (hold in the air) | `glide` | yes |
 | R / X | Merge with your Boki (needs a full bond meter) | `ultimate` | yes |
-| 1 | Heal (tonic, or armor kit when health is full) | `tonic` | yes |
+| 1 | Utility belt slot 1 (a tonic to start) | `util1` | yes |
 | Tab | Scoreboard | `scores` | yes |
 | Esc | Menu | `menu` | no |
 | V | Play fetch with a Boki | `play` | yes |

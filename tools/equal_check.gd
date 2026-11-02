@@ -23,6 +23,7 @@ func run(host: Node, which := "all") -> void:
 		await _belt()
 		await _armor_levels()
 		await _bots()
+		await _gloves()
 		_drops()
 	_migration()
 	print("EQUAL DONE, failures: %d" % bad)
@@ -111,7 +112,7 @@ func _equal_base() -> void:
 		if tier == 2:
 			ok(String(P.gear[3].get("id", "")) == "skylark_boots" and int(P.gear[3]["rar"]) == 4 and String(P.gear[0].get("id", "")) == "blink", "tier 2: Legendary boots and an Epic glove come (no cap)")
 		else:
-			ok((P.gear[3] as Dictionary).is_empty() and (P.gear[0] as Dictionary).is_empty() and String(P.gear[1].get("id", "")) == "focus", "tier 0: boots and glove above Rare stay home, the Fine passive comes")
+			ok((P.gear[3] as Dictionary).is_empty() and String(P.gear[0].get("id", "")) == "focus" and (P.gear[1] as Dictionary).is_empty(), "tier 0: boots and glove above Rare stay home, the Fine passive comes (on Q, the first glove slot)")
 			ok(Econ.find("a2").size() > 0 and Econ.find("a3").size() > 0, "...and they are still in the armory, not lost")
 		ok(armory_before - Econ.armory().size() == worn.size(), "what is brought leaves the armory (%d out)" % worn.size())
 		var b := _belt_ids(P)
@@ -326,6 +327,89 @@ func _bots() -> void:
 	ok(not armor_any and spare == 40, "bots start without armor, with a spare utility item on hard (%d of 40)" % spare)
 	await _drop(m)
 
+# ------------------------------------------------------------------ two gloves (Q, V)
+func _gloves() -> void:
+	_farm(false)
+	var m := _start(1, 9005)
+	var P := m.player
+	for mb in m.mobs:
+		mb.dead = true; mb.visible = false
+	var B: Hunter = m.hunters.filter(func(x): return x != P)[0]
+	B.ctrl = "idle"
+	# skill points: never on a glove
+	ok(not Hunter.SLOTS.has("gear") and not Hunter.SLOT_MAX.has("gear") and not P.slot_lv.has("gear"), "gloves are not a ranked slot (%s)" % str(Hunter.SLOTS))
+	var pts := P.skill_pts
+	ok(not P.can_level("gear") and not P.level_slot("gear") and P.skill_pts == pts, "no skill point can be spent on a glove")
+	# a worn glove casts at once: level 1, no point spent, on either key
+	ok(P.lvl == 1 and P.slot_lv.values().all(func(v): return int(v) == 0), "a fresh hunter: level 1, nothing ranked")
+	P.gear[0] = {"id": "grapple", "rar": 1}; P.gear[1] = {"id": "quake", "rar": 1}
+	P.gear_cd[0] = 0.0; P.gear_cd[1] = 0.0
+	P.inp["aim"] = B.pos + Vector3(0, 0.9, 0)
+	P.inp["gear1"] = true
+	m.step(Match.DT)
+	ok(P.gear_cd[0] > 0.0 and P.skill_pts == pts, "a worn glove casts on Q at level 1 with no point spent (cd %.1f)" % P.gear_cd[0])
+	P.inp["gear2"] = true
+	m.step(Match.DT)
+	ok(P.gear_cd[1] > 0.0 and P.skill_pts == pts, "the second glove casts on V (cd %.1f)" % P.gear_cd[1])
+	ok(absf(P.gear_cd[0] - Gear.cd_of("grapple", 1)) < 0.1, "its cooldown is the glove's own: no rank shortens it")
+	var evs := InputMap.action_get_events("gear2")
+	ok(evs.any(func(ev): return ev is InputEventKey and (ev as InputEventKey).physical_keycode == KEY_V) and Settings.conflicts(evs[0], "gear2").is_empty(), "glove 2 is on V, shared on purpose with play at home")
+	# bots: points go to the hero's own abilities only
+	B.skill_pts = 8; B.lvl = 9
+	B._bot_spend()
+	ok(B.skill_pts < 8 and not B.slot_lv.has("gear"), "a bot spends its points on its hero's abilities (%s)" % str(B.slot_lv))
+	# the HUD: Q, V and C sit on the right (GripHud), not on the left bar
+	m.hud.c.queue_redraw()
+	for i in 3: await main.get_tree().process_frame
+	var sz: Vector2 = m.hud.c.size
+	var spots: Array = m.hud.hover_spots.filter(func(hs): return String(hs[1]) in ["gear0", "gear1"])
+	ok(spots.size() == 2 and spots.all(func(hs): return (hs[0] as Rect2).position.x > sz.x * 0.5), "the HUD's two glove boxes sit on the right (%s)" % str(spots.map(func(hs): return (hs[0] as Rect2).position)))
+	ok(not P.slot_info("gear1").is_empty() and String(P.slot_info("gear1")["name"]) == String(Gear.ALL["quake"]["name"]), "the V glove has its own slot info")
+	# overhead: two gloves and the Boki type, read from the net snapshot for a remote hunter
+	B.gear[0] = {"id": "blink", "rar": 4}; B.gear[1] = {"id": "barrier", "rar": 1}
+	B.gear_cd[0] = 0.0; B.gear_cd[1] = 7.0; B.ult = 1.0
+	var R: Hunter = m.make_hunter("R9", 3, "medium", "Remote", "remote", {}, P.pos + Vector3(5, 0, 0))
+	R.remote = true
+	var snap: Array = m._ser(B)
+	snap[1] = R.nid
+	m._net_apply(R, snap)
+	var row := GripOverhead.row(R)
+	ok(String(row[0]["id"]) == "blink" and String(row[1]["id"]) == "barrier" and row[0]["col"] == Data.RARITY[4]["color"], "a remote hunter's two gloves come over the net with their rarity (%s, %s)" % [row[0]["id"], row[1]["id"]])
+	ok(not row[0]["dim"] and row[1]["dim"] and R.ult >= 1.0, "the glove on cooldown is dimmed, the ready one is not; the full bond comes too")
+	var kb: Kin = P.kin
+	if kb != null:
+		R.kin = kb
+		var rk := GripOverhead.row(R)
+		ok(String(rk[2]["id"]) == DexView.type_of(kb.species) and rk[2]["glow"], "the third icon is the Boki's type, glowing on a full bond (%s)" % String(rk[2]["id"]))
+		R.kin = null
+	var cs := GripOverhead.centres(Vector2(400, 300), true)
+	ok(cs.size() == 3 and cs.all(func(c): return (c as Vector2).y < 300.0 - 12.0), "the three icons sit above the nameplate")
+	# bots wear two different active gloves and use both
+	var two := 0
+	for i in 20:
+		var bb := Hunter.new()
+		var rg := RandomNumberGenerator.new(); rg.seed = 100 + i
+		GearDrops.bot_start(bb, rg, "hard")
+		var g0: Dictionary = bb.gear[0]; var g1: Dictionary = bb.gear[1]
+		if not g0.is_empty() and not g1.is_empty() and g0["id"] != g1["id"] and Gear.active(String(g0["id"])) and Gear.active(String(g1["id"])): two += 1
+		bb.free()
+	ok(two >= 18, "a hard bot starts with two different active gloves (%d of 20)" % two)
+	B.ctrl = "bot"; B.skill_pts = 0
+	B.gear[0] = {"id": "grapple", "rar": 2}; B.gear[1] = {"id": "quake", "rar": 2}
+	B.gear_cd[0] = 0.0; B.gear_cd[1] = 0.0
+	P.ctrl = "idle"
+	P.teleport(B.pos + Vector3(5, 0, 0))
+	P.max_hp = 9000.0; P.hp = 9000.0
+	var used := [false, false]
+	for i in 1200:
+		m.step(Match.DT)
+		for gi in 2:
+			if float(B.gear_cd[gi]) > 0.0: used[gi] = true
+		if used[0] and used[1]: break
+		if P.flat_dist(B) > 9.0: P.teleport(B.pos + Vector3(5, 0, 0))
+	ok(used[0] and used[1], "in play, a bot uses both gloves (Q %s, V %s)" % [str(used[0]), str(used[1])])
+	await _drop(m)
+
 # ------------------------------------------------------------------ drops
 func _drops() -> void:
 	ok(UtilityDrops.chance("boss") > 0.5 and UtilityDrops.chance("ground") == 0.0 and UtilityDrops.chance("nonsense") == UtilityDrops.chance("_default"), "drop odds come from content/rules/equal.json (boss %.2f)" % UtilityDrops.chance("boss"))
@@ -349,9 +433,10 @@ func _migration() -> void:
 		{"uid": "u4", "t": "gear", "id": "smoke", "rar": 3},
 		{"uid": "u5", "t": "gear", "id": "blink", "rar": 3},
 		{"uid": "u6", "t": "gear", "id": "skylark_boots", "rar": 4},
-		{"uid": "u7", "t": "val", "id": "old_coin"}]
+		{"uid": "u7", "t": "val", "id": "old_coin"},
+		{"uid": "u9", "t": "gear", "id": "focus", "rar": 1}]
 	d["raid_out"] = [{"uid": "u8", "t": "gear", "id": "satchel", "rar": 0}]
-	d["loadout"] = {"gear2": "u1", "gear3": "u6", "gear4": "u2", "gear0": "u5"}
+	d["loadout"] = {"gear2": "u1", "gear3": "u6", "gear4": "u2", "gear0": "u5", "gear1": "u9"}
 	d["items"]["tonic"] = 4
 	var before_n := (d["armory"] as Array).size() + (d["raid_out"] as Array).size()
 	ok(Save.VERSION == 6, "the save version is 6")
@@ -368,9 +453,10 @@ func _migration() -> void:
 	ok(int(d["scrap"]) == 3 + 14, "scrap: %d (want 17: 3 from the plate, 14 refunded)" % int(d["scrap"]))
 	ok(int(d["items"].get("smoke", 0)) == 3 and int(d["items"]["tonic"]) == 4, "the smoke glove became 3 smoke bombs in the stash")
 	ok(not d.has("pack_lvl") and d["loadout"] == {"gear3": "u6", "gear0": "u5"}, "bought backpack levels are gone (refunded) and the loadout keeps only gloves and boots")
+	ok(not d["loadout"].has("gear1") and ids.has("focus"), "the second glove slot (V) starts empty; the old passive glove stays in the armory")
 	var lines: Array = d.get("equal_notice", [])
 	var text := " ".join(lines.map(func(l): return String(l)))
-	ok(not lines.is_empty() and text.contains("Brace Plate") and text.contains("Bastion") and text.contains("Magpie") and text.contains("Smoke Glove") and text.contains("refunded"), "the notice lists what converted (%d lines)" % lines.size())
+	ok(not lines.is_empty() and text.contains("Brace Plate") and text.contains("Bastion") and text.contains("Magpie") and text.contains("Smoke Glove") and text.contains("refunded") and text.contains("second glove slot on V"), "the notice lists what converted (%d lines)" % lines.size())
 	ok(before_n - (d["armory"] as Array).size() - (d["raid_out"] as Array).size() == 5, "five pieces converted, none deleted without a line in the notice")
 	# a clean old save gets no notice and still upgrades
 	var d2 := Save.fresh()

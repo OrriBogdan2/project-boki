@@ -103,18 +103,33 @@ Capture by scan (docs/decisions/0002). A wild Boki that is knocked out (dazed) c
 | sight_range | 24 |
 | sight_places_kept | 3 |
 
+## equal (`content/rules/equal.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | Equal footing in matches (docs/decisions/0005-equal-footing.md; scripts/match/equal.gd). What a hunter may bring from home: gloves, boots and utility. rarity_cap_by_tier: the highest rarity (0 Common .. 4 Legendary) a brought piece keeps, by difficulty tier (Data.TIERS: The Meadow, Dusk Isles, The Hollow). issue: the belt charges every hunter is given. util_drops: chance that a table (GearDrops tables, by name; _default for any other) also drops one utility item, and how many charges. migration: the v5 to v6 save conversion of armour and kit pieces (gems = item value x gem_k; materials = gear.json extract_mats by rarity), and pack upgrades refunded. |
+| rarity_cap_by_tier | [2, 3, 4] |
+| issue | {"tonic": 2, "armor_kit": 2} |
+| belt_slots | 3 |
+| util_drops | {"_default": 0.0, "ground": 0.0, "crate": 0.18, "cache": 0.5, "chest0": 0.35, "chest1": 0.5, "chest2": 0.65, "brute": 0.4, "sentinel": 0.4, "warden": 0.6, "glimmer": 0.3, "boss": 0.9, "chest": 0.5} |
+| util_weights | {"tonic": 5, "armor_kit": 4, "medkit": 2, "smoke": 2, "jump_pad": 1.5, "scanner": 1, "stim": 2, "shield_cell": 2} |
+| migration | {"gem_k": 1.0, "moved_gloves_charges": [1, 2, 2, 3, 4], "pack_refund": true} |
+| bot_util | {"easy": 0, "medium": 1, "hard": 1, "expert": 1} |
+
 ## gear (`content/rules/gear.json`)
 
 
 
 | Setting | Value |
 |---|---|
-| _doc | Drop tables for gear and weapon tunings (scripts/match/gear_drops.gd). Each table is a list of rolls: kind gear (a piece for one of the five slots) or tune (a weapon upgrade pickup, brand = an element one). chance = odds the roll happens; bonus = rarity steps up; min_rar = the lowest rarity it can be (0 Common .. 4 Legendary); slot = force a slot (glove, passive, armor, boots, kit). Bosses drop fewer, higher-value items. extract_mats: farm materials an extracted piece of gear also gives, by rarity (Common..Legendary). |
+| _doc | bot_start.slots: boots first, then up to two different active gloves (Gloves.bot_fill). Drop tables for gear and weapon tunings (scripts/match/gear_drops.gd). Each table is a list of rolls: kind gear (a piece for one of the five slots) or tune (a weapon upgrade pickup, brand = an element one). chance = odds the roll happens; bonus = rarity steps up; min_rar = the lowest rarity it can be (0 Common .. 4 Legendary); slot = force a slot (glove, passive, armor, boots). Bosses drop fewer, higher-value items. extract_mats: farm materials an extracted piece of gear also gives, by rarity (Common..Legendary). |
 | rarity_weights | [30, 36, 22, 9, 3] |
-| slot_weights | {"glove": 3.0, "passive": 1.5, "armor": 2.0, "boots": 2.0, "kit": 1.5} |
+| slot_weights | {"glove": 3.0, "passive": 1.5, "armor": 2.0, "boots": 2.0} |
 | ground_spacing | 1.25 |
 | tables | {"ground": [{"kind": "gear", "chance": 1.0}], "cache": [{"kind": "gear", "chance": 1.0, "bonus": 1, "min_rar": 2}], "crate": [{"kind": "gear", "chance": 0.12}, {"kind": "tune", "chance": 0.08}], "chest0": [{"kind": "gear", "chance": 0.55}, {"kind": "tune", "chance": 0.3}], "chest1": [{"kind": "gear", "chance": 0.9, "bonus": 1}, {"kind": "gear", "chance": 0.3}, {"kind": "tune", "chance": 0.55}], "chest2": [{"kind": "gear", "chance": 1.0, "bonus": 1, "min_rar": 2}, {"kind": "gear", "chance": 0.5, "bonus": 1}, {"kind": "tune", "chance": 0.9}, {"kind": "tune", "chance": 0.35, "brand": true}], "brute": [{"kind": "gear", "chance": 0.4}, {"kind": "tune", "chance": 0.3}], "sentinel": [{"kind": "gear", "chance": 0.4}, {"kind": "tune", "chance": 0.2}], "warden": [{"kind": "gear", "chance": 1.0, "bonus": 2, "min_rar": 2}, {"kind": "tune", "chance": 1.0, "brand": true}], "glimmer": [{"kind": "gear", "chance": 1.0, "bonus": 1, "min_rar": 2}, {"kind": "tune", "chance": 0.7}], "bl_skitter": [{"kind": "tune", "chance": 0.07}, {"kind": "gear", "chance": 0.05}], "bl_warden": [{"kind": "gear", "chance": 0.55, "bonus": 1}, {"kind": "tune", "chance": 0.7}], "boss": [{"kind": "gear", "chance": 1.0, "min_rar": 3, "legendary": 0.3}, {"kind": "tune", "chance": 1.0, "brand": true}]} |
-| bot_start | {"easy": {"slots": 0, "bonus": 0}, "medium": {"slots": 1, "bonus": 0}, "hard": {"slots": 2, "bonus": 0}, "expert": {"slots": 3, "bonus": 1}} |
+| bot_start | {"easy": {"slots": 0, "bonus": 0}, "medium": {"slots": 1, "bonus": 0}, "hard": {"slots": 3, "bonus": 0}, "expert": {"slots": 3, "bonus": 1}} |
 | extract_mats | [{"wood": 1}, {"wood": 1}, {"wood": 1, "stone": 1}, {"stone": 2, "scrap": 1}, {"stone": 3, "scrap": 3}] |
 
 ## How Boki fight (`content/rules/kin_ai.json`)

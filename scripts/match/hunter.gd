@@ -2930,7 +2930,7 @@ func xp_frac() -> float:
 	return clampf((xp - a) / (b - a), 0.0, 1.0)
 
 func can_level(slot: String) -> bool:
-	if skill_pts <= 0 or int(slot_lv.get(slot, 0)) >= int(SLOT_MAX.get(slot, 3)):
+	if skill_pts <= 0 or not SLOT_MAX.has(slot) or int(slot_lv.get(slot, 0)) >= int(SLOT_MAX[slot]):
 		return false
 	if slot == "ult":
 		return lvl >= int(ULT_AT[mini(int(slot_lv["ult"]), ULT_AT.size() - 1)])
