@@ -2,7 +2,7 @@
 
 Review shots for each hero: kit card, each ability, the payoff, animation frame strips and a neutral full-body portrait. PNGs are downscaled to at most 1280 px wide. Captions come from the shot manifests.
 
-Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-tender), [Tamsin](#tamsin-rimewright), [Dredge](#dredge-dredge), [Ashwick](#ashwick-ashwick), [Dolm](#dolm-dolm), [Ostra](#ostra-ostra), [Archer](#archer-archer), [Bulwark](#bulwark-bulwark), [Thief](#thief-thief), [Juggernaut](#juggernaut-juggernaut), [Farm building](#farm-building-farmbuild), [classes](#classes-classes)
+Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-tender), [Tamsin](#tamsin-rimewright), [Dredge](#dredge-dredge), [Ashwick](#ashwick-ashwick), [Dolm](#dolm-dolm), [Ostra](#ostra-ostra), [Archer](#archer-archer), [Bulwark](#bulwark-bulwark), [Thief](#thief-thief), [Juggernaut](#juggernaut-juggernaut), [Farm building](#farm-building-farmbuild), [classes](#classes-classes), [aimkit](#aimkit-aimkit)
 
 ## Vireo (mage)
 
@@ -575,3 +575,101 @@ Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-t
 **The farm's Hero picker: locked classes greyed out with their goal and progress, open ones in full colour, and a Classes and goals button**
 
 ![The farm's Hero picker: locked classes greyed out with their goal and progress, open ones in full colour, and a Classes and goals button](classes/farm_picker.png)
+
+## aimkit (aimkit)
+
+**Fixed lane with an arrow tip, past the cursor (Venator RMB grenade aim, gunslinger colour)**
+
+![Fixed lane with an arrow tip, past the cursor (Venator RMB grenade aim, gunslinger colour)](aimkit/aimkit_lane_fixed.png)
+
+**Growing lane mid-charge, k 0.45 (Juggernaut RMB Charge Dash)**
+
+![Growing lane mid-charge, k 0.45 (Juggernaut RMB Charge Dash)](aimkit/aimkit_lane_growing.png)
+
+**The same lane at full charge: full length, hot, col_full magenta**
+
+![The same lane at full charge: full length, hot, col_full magenta](aimkit/aimkit_lane_full.png)
+
+**Lane narrowing while charging, k 0.7 (Venator E Ion Cannon cast)**
+
+![Lane narrowing while charging, k 0.7 (Venator E Ion Cannon cast)](aimkit/aimkit_lane_narrow.png)
+
+**Rails lane with chevrons, end circle with ticks and a glint sliding out with the charge (Vireo Shift Surge)**
+
+![Rails lane with chevrons, end circle with ticks and a glint sliding out with the charge (Vireo Shift Surge)](aimkit/aimkit_lane_rails.png)
+
+**Placed circle with ticks, a rim chevron and an arrow lane for the drag direction (Vireo E)**
+
+![Placed circle with ticks, a rim chevron and an arrow lane for the drag direction (Vireo E)](aimkit/aimkit_circle_pointer.png)
+
+**Chevron lane with an end cap (Dancer RMB Trickshot cast window, thief colour)**
+
+![Chevron lane with an end cap (Dancer RMB Trickshot cast window, thief colour)](aimkit/aimkit_lane_chevrons.png)
+
+**Draw V opening 25 degrees at k 0.3, a glint riding the line (Pin LMB draw toward Empowered)**
+
+![Draw V opening 25 degrees at k 0.3, a glint riding the line (Pin LMB draw toward Empowered)](aimkit/aimkit_vee_open.png)
+
+**Draw V closed into one bright line at k 1 (Pin Empowered ready)**
+
+![Draw V closed into one bright line at k 1 (Pin Empowered ready)](aimkit/aimkit_vee_closed.png)
+
+**Filled cone from a stuck point back out, filling over its fuse, seen by all (Venator wall cone)**
+
+![Filled cone from a stuck point back out, filling over its fuse, seen by all (Venator wall cone)](aimkit/aimkit_cone_fill.png)
+
+**Cone edges only: a 30 degree spread out to the slug range (Dredge LMB Buckshot)**
+
+![Cone edges only: a 30 degree spread out to the slug range (Dredge LMB Buckshot)](aimkit/aimkit_cone_edges.png)
+
+**Landing circle at the cursor with four ticks, plus the thin aim line (Venator R Mini Nuke placement)**
+
+![Landing circle at the cursor with four ticks, plus the thin aim line (Venator R Mini Nuke placement)](aimkit/aimkit_circle_landing.png)
+
+**Slam circle a hop ahead with the inner sweet-spot ring growing, k 0.5 (Breah RMB Volcano Crusher)**
+
+![Slam circle a hop ahead with the inner sweet-spot ring growing, k 0.5 (Breah RMB Volcano Crusher)](aimkit/aimkit_sweet_spot.png)
+
+**Curved arc wall at the cursor distance, 120 degrees in 7 panels (Pin E Rain of Arrows)**
+
+![Curved arc wall at the cursor distance, 120 degrees in 7 panels (Pin E Rain of Arrows)](aimkit/aimkit_arc_wall.png)
+
+**Dotted lane to max range, past the cursor (Moosh Moosh RMB seed)**
+
+![Dotted lane to max range, past the cursor (Moosh Moosh RMB seed)](aimkit/aimkit_dotted.png)
+
+**Two-end swap marker: origin ring, destination ring with its sigil filling, a link with arrows both ways (Ostra Shift)**
+
+![Two-end swap marker: origin ring, destination ring with its sigil filling, a link with arrows both ways (Ostra Shift)](aimkit/aimkit_swap.png)
+
+**Gold aim line to the cursor with an arrow tick (Dancer empowered LMB) and a long span with inward chevrons (Breah R)**
+
+![Gold aim line to the cursor with an arrow tick (Dancer empowered LMB) and a long span with inward chevrons (Breah R)](aimkit/aimkit_line_span.png)
+
+**A foe's "all" telegraph tinted hostile (their slam ring); their own aim lane is not drawn for you**
+
+![A foe's "all" telegraph tinted hostile (their slam ring); their own aim lane is not drawn for you](aimkit/aimkit_foe_view.png)
+
+**Cursor charge ring at 60%, hero colour**
+
+![Cursor charge ring at 60%, hero colour](aimkit/aimkit_reticle_charge.png)
+
+**Cursor charge ring at 60%, hero colour (3x crop round the cursor)**
+
+![Cursor charge ring at 60%, hero colour (3x crop round the cursor)](aimkit/aimkit_reticle_charge_zoom.png)
+
+**Cursor full-charge flare: a ring snapping out and a glint**
+
+![Cursor full-charge flare: a ring snapping out and a glint](aimkit/aimkit_reticle_flare.png)
+
+**Cursor full-charge flare: a ring snapping out and a glint (3x crop round the cursor)**
+
+![Cursor full-charge flare: a ring snapping out and a glint (3x crop round the cursor)](aimkit/aimkit_reticle_flare_zoom.png)
+
+**Cursor perfect-window star flash, gold, 0.12 s**
+
+![Cursor perfect-window star flash, gold, 0.12 s](aimkit/aimkit_reticle_perfect.png)
+
+**Cursor perfect-window star flash, gold, 0.12 s (3x crop round the cursor)**
+
+![Cursor perfect-window star flash, gold, 0.12 s (3x crop round the cursor)](aimkit/aimkit_reticle_perfect_zoom.png)
