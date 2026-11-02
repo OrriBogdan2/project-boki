@@ -28,6 +28,17 @@ Perks were chosen from a "Pick a perk: 1/2/3" prompt after a chest, shrine, boss
 - Net.VERSION 0.15.2. No save change (perks are never saved).
 - Left: chest and boss gear tables in `content/rules/gear.json` still also drop weapon tunings on the ground; the shop part decides whether to thin them.
 
+## Level-up growth (built, owner-approved)
+The owner approved parts 1 and 2 of the proposal below and turned down part 3.
+- **Quiet growth** (`LevelGrowth`, `scripts/match/level_growth.gd`; numbers in `content/rules/level_growth.json`). Every level adds 6% of the class's base max health and 5% ability power for levels 2-6, and half that for levels 7-10 (a total of +42% health and +35% ability power at level 10).
+  - Ability power multiplies ability damage (`ArchKit.power`, `Effects._power`) and ability heals and shields (`Effects._heal_k`). It does not touch the weapon, whose growth is the weapon path.
+  - A Boki's own heals don't grow with its hunter's level.
+  - Kit code that reads `m.dmg_mult(h)` directly instead of `power()` doesn't grow yet. The hero-kit owners can switch it over.
+  - The new health is added to the bar. A class change in practice keeps it (`LevelGrowth.reset`).
+- **No banner on odd levels.** Every level flashes the level badge and plays the chime. Only even levels, where the weapon takes its path step, show the `LevelPop` banner and the gold wash.
+- The vitals tooltip on the portrait and level badge gives the totals: "Level N · From levels: +X% max health, +Y% ability power".
+- Max health was never synced and still isn't (the same as gear health and Tough Skin), so Net is unchanged.
+
 ## Proposal: level-up bonus
 Research only, nothing built. The owner asked (11:55 ET, item 13) about a bonus or random roll on level-up that the original game had and that never showed up on screen the way ours does.
 
@@ -52,3 +63,63 @@ Questions for the owner: build 1 and 2? Is 3 wanted? Should bots get the same gr
 - Players on per-level gains ("~6% base hp increase and +10 ability power per level"): https://steamcommunity.com/app/1283700/discussions/0/603021563739010834/
 - Steam announcements (rank-4 upgrades, level 15 caps): https://steamcommunity.com/app/1283700/announcements/
 - Powers by rarity, area-specific: https://dignitas.gg/articles/how-to-thrive-in-supervive-a-general-introduction
+
+## Weapon tier-up (shards)
+Research only, nothing built. The owner corrected the memory above: the random choice was on weapon tier-ups, not level-ups.
+
+**What the original did:**
+- **Name.** The random fourth option is a **Warped evolution** ("Warped equipment"). It arrived in the Season Zero update ("Beebo's Warped Tour").
+- **Currency.** Equipment, including the weapon slot, is upgraded with gold or with shards ("Power Shards" or "Upgrade Shards"; the wiki uses both names for one page).
+  - Shards are loot from hunter deaths. One guide also says they come from killing creeps.
+  - The wiki says a shard can "fully upgrade a piece of Equipment without having to visit a shop and spend gold".
+  - Duplicates of an item you pick up also upgrade it.
+- **Where and when.** At first, upgrades were bought with gold at any shop or basecamp. From Season Zero you can upgrade anywhere, any time, with ALT + 1-4 (one key per equipment slot), and normal shops stopped selling equipment.
+- **Tiers.** Items climb the rarity tiers (white, green, blue, purple, legendary). The starter weapon (a Blade or a Helmet) evolves at Common into a choice of evolved items. At Blue (Rare) you get the big evolution choice, and that is where the item gains its passive (the guide calls Blue "a crucial breakpoint in power").
+  - **Not found:** the shard or gold cost per tier. No wiki page, guide or patch note I could reach gives the numbers.
+- **The three fixed options.** These are per item, not per hero and not random: each item has its own three evolutions. Players "often choose the same evolves, over and over", which is why Warped was added.
+- **The fourth, rolled option (Warped).** It keeps the item's base stats and rolls one random passive:
+  - 75%: a passive from any other blue item.
+  - 20%: that passive plus extra stats from the evolution it came from. This is the owner's "+HP and +damage together".
+  - 5%: one of three unique "legendary" passives.
+  - Its rarity shows as stars on the item icon's corner.
+  - No source mentions a reroll.
+- **On screen.** An evolution picker shows the options as item cards side by side, with the Warped card starred. It only opens when you upgrade, not on a level-up.
+
+**Proposal for us: shards and a 3 + 1 weapon tier-up (would replace the fixed even-level weapon path):**
+1. **Shards** are a new match currency (it isn't saved and is lost on death, dropping in your deathbox like keys).
+   - Monster camps and brutes drop 1, bosses 3, and a downed rival hunter drops everything they carried.
+   - Bots pick them up like gems.
+2. **Tier up any time** with a hold-to-confirm key, outside combat for 2 seconds. Alt+1 doesn't fit us because 1/2/3 are the utility belt; T looks free (nothing binds KEY_T today).
+   - Five tiers to match our five path steps, costing 2 / 3 / 4 / 5 / 6 shards.
+   - The level-up stays quiet growth plus skill points, with no weapon step.
+3. **The choice:** a small four-card strip above the weapon box. You pick with the mouse or the T key, and the game never pauses. Bots auto-pick by `bot_want`.
+   - **Three fixed cards** come from the hero's own content list for that tier (`content/rules/weapon_tiers.json`, three WeaponUps steps per tier per hero). The current per-hero path becomes card 1, so each hero keeps its identity.
+   - **The fourth card, "Wild" (our own name),** is rolled with its own seeded stream:
+     - 75%: one random weapon perk the hunter doesn't have (a brand, magazine and so on).
+     - 20%: a mixed pair, two plain upgrades at about 70% strength each (for example damage and health, or rate and range). This is the "+HP and +damage" feel.
+     - 5%: a rare "wild" passive (two or three new ones, such as lifesteal on hit, or a dash reload).
+     - The card shows its odds tier with 1-3 stars and is rolled once per tier-up, with no reroll (the same as the original). A shrine could later offer a paid reroll.
+4. **Sync:** a "wtier" event (hunter, tier, pick, rolled payload) and a Net bump.
+5. **Checks:**
+   - shards drop and are lost on death
+   - each tier's cost
+   - three fixed cards for every hero at every tier
+   - the Wild odds over many seeds
+   - no pause
+   - bots tier up
+   - sync
+
+Questions for the owner:
+- Replace the fixed weapon path with this, or keep the path as the fallback card 1? (The proposal keeps it as card 1.)
+- Should shards also come from chests, or only from fights?
+- Is T the right key?
+
+**Sources (tier-up):**
+- Weapons, SUPERVIVE Wiki (Common and Rare evolutions, the Warped fourth option and its odds): https://supervive.wiki.gg/wiki/Weapons and https://supervive.wiki.gg/wiki/Weapon
+- Season Zero Arc 1 "Beebo's Warped Tour" patch (Warped as the 4th Blue choice, ALT + 1-4 upgrades anywhere): https://supervive.wiki.gg/wiki/Season_Zero_Arc_1_Beebos_Warped_Tour
+- PCGamesN on the Season Zero update (why Warped exists, the odds): https://www.pcgamesn.com/supervive/season-zero-launch
+- Power Shard, SUPERVIVE Wiki (loot from player deaths, upgrade without a shop): https://supervive.wiki.gg/wiki/Power_Shard
+- Items, SUPERVIVE Wiki (duplicates and power shards upgrade equipment): https://supervive.wiki.gg/wiki/Items
+- Equipment, SUPERVIVE Wiki (gold prices by rarity): https://supervive.wiki.gg/wiki/Equipment
+- GameLeap equipment list (Upgrade Shards from creeps and hunters, three evolutions per weapon): https://www.gameleap.com/articles/all-supervive-equipment-in-the-open-beta
+- Dignitas intro (a Blue-tier evolution gives a passive of your choosing; shards from killed players): https://dignitas.gg/articles/how-to-thrive-in-supervive-a-general-introduction

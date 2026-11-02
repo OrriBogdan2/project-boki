@@ -1299,9 +1299,10 @@ var lvl_seen := -1
 var lvl_note: Dictionary = {}      # the level-up banner (LevelPop)
 ## A level just went up (Hunter.gain_xp): the badge pops, the portrait bursts gold and the banner names what improved.
 func level_up(lv: int, info := {}) -> void:
-	lvl_pop = 0.35
-	LevelPop.start(self, lv, info)
-	flash(Color("ffd27a"), 0.16)      # a soft gold wash over the whole screen
+	lvl_pop = 0.35      # every level: the badge flashes (the growth itself is quiet, LevelGrowth)
+	if lv % 2 == 0:      # only even levels, where the weapon takes its step, get the banner and the gold wash
+		LevelPop.start(self, lv, info)
+		flash(Color("ffd27a"), 0.16)
 
 func _level_badge(pr: Rect2, p: Hunter) -> void:
 	var gold := Color("ffd27a")
@@ -2782,6 +2783,7 @@ func _tip_lines(id: String, p: Hunter) -> Array:
 			out.append(["%s class" % String(p.cls).capitalize(), hc])
 			out.append(["Speed %.1f  ·  %s" % [p.base_speed, String(p.cdat.get("desc", ""))], MUTED, 12])
 			out.append(["Health %d / %d   ·   Armor %d / %d" % [int(ceil(p.hp)), int(p.max_hp), int(ceil(p.armor)), int(p.max_armor)], INK, 14])
+			out.append(["Level %d  ·  %s" % [p.lvl, LevelGrowth.tip(p)], GOLD, 13])
 			out.append(["Armor takes 20% off every hit until it wears out. Neither armor nor health comes back on its own: use armor kits and tonics.", MUTED, 13])
 			if p.lives < 50:
 				out.append(["Lives left: %d" % p.lives, Color("ff7a8a"), 13])

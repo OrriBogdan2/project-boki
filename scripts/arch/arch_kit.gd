@@ -72,9 +72,10 @@ func col_of(sd: Dictionary) -> Color: return Color(String(sd.get("col", "#ffffff
 func rank(slot: String) -> int:
 	return h.ability_level(slot)
 
-## +15% damage per rank (Effects.level_k) on top of the hunter's own damage multiplier.
+## +15% damage per rank (Effects.level_k) on top of the hunter's own damage multiplier and the
+## ability power their level gives (LevelGrowth.ap).
 func power(slot: String) -> float:
-	return m.dmg_mult(h) * Effects.level_k({"level": rank(slot)})
+	return m.dmg_mult(h) * Effects.level_k({"level": rank(slot)}) * LevelGrowth.ap(h)
 
 func cd_k(slot: String) -> float:
 	return h.rank_cd_k(slot)
