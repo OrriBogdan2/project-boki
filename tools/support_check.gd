@@ -20,7 +20,7 @@ func setup(arch: String, dist := 6.0) -> Array:
 	var cls := Arch.weight(arch)
 	var m := Match.new()
 	main.add_child(m)
-	m.start({"training": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true, "cls": cls, "arch": arch, "weapon": Arch.default_weapon(arch)})
+	m.start({"training": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true, "cls": cls, "arch": arch, "weapon": Arch.signature(arch)})
 	m.set_process(false)
 	var P: Hunter = m.player
 	for mb in m.mobs: mb.queue_free()
