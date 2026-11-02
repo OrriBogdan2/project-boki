@@ -22,8 +22,8 @@ const AIR_ACCEL := 40.0          # a jump steers almost like the ground (was 22)
 const AIR_DECEL := 9.0           # let go in a jump and you mostly stop (was 3: drifted ~2.5m)
 const AIR_OVERSPEED := 3.0       # but momentum above run speed (a dash, a pad) still carries
 const GLIDE_ACCEL := 26.0        # up to cruise speed (6.5) in ~0.25s (was 10)
-const GLIDE_DECEL := 2.0         # let go of the keys and the glider drifts on
-const GLIDE_OVERSPEED := 1.5     # extra glide momentum bleeds off slowly: a dash into a glide carries for seconds
+const GLIDE_DECEL := 1.4         # let go of the keys and the glider drifts on, a long soft coast
+const GLIDE_OVERSPEED := 1.1     # extra glide momentum bleeds off slowly: a dash into a glide carries for seconds
 const GLIDE_TURN := 420.0        # deg/s the glider turns at cruise speed (90 degrees in ~0.2s); wider arcs when fast
 const GLIDE_TURN_FAST := 0.45    # ...down to this share of GLIDE_TURN at the boost cap
 const GLIDE_BRAKE := 36.0        # steering more than GLIDE_BRAKE_DEG against your heading brakes this hard
@@ -41,6 +41,10 @@ const ABYSS_LIFT_MAX_PER_M := 1.7  # [est] ...plus this per metre deeper (12m do
 const ABYSS_LIFT_CAP := 26.0
 const ABYSS_BRAKE_DIST := 2.5    # ...that brakes near ground level (let go just before to keep the height)
 const ABYSS_BRAKE := 60.0
+const ABYSS_OPEN_KICK := 6.0     # [est] m/s of spring when the glider opens deeper than ABYSS_BRAKE_DIST under the lip
+const ABYSS_LIP_VY := 3.5        # [est] m/s still rising as the lift reaches the lip: it floats up past it
+const ABYSS_HANG_GRAV := 0.35    # [est] share of GLIDE_GRAV while the lift's float lasts: a soft hang at the top
+const ABYSS_HANG_T := 0.9        # [est] s after a lift that the float lasts
 const ABYSS_BRAKE_GAIN := 3.5    # (movefeel) rise speed per metre left in the brake zone (was 2: the last metre crawled)
 const MANTLE_REACH := 1.5        # near a jump's apex, ledges this far above you pop you up
 const MANTLE_REACH_ABYSS := 4.5  # below an island's lip over the abyss, its side catches you this far down (movefeel: was 3.5)
@@ -58,6 +62,7 @@ const DASH_TIME := 0.19       # s
 const DASH_REGEN := 2.2
 const LEDGE_REACH := 2.8
 const LEDGE_CD := 0.45
+const LEDGE_AIR_T := 0.5        # s in the air after which a ledge higher than where you last stood is yours to catch
 const FLOAT_SPEED := 12.0
 const GLIDE_FALL := 1.7
 const GLIDE_SPEED := 6.5       # (movefeel, owner: "feels weaker than SUPERVIVE") between [footage] ~5-5.5 and
@@ -191,6 +196,7 @@ var reveal_t := 0.0           # seen through bushes and around walls for a momen
 var wall_touch_t := 0.0       # touching a wall in the air: a jump kicks off it
 var wall_n := Vector2.ZERO
 var wall_kicks := 1
+var wm := WallMoves.new()      # wall kick and wall bounce
 var wslam_t := 0.0
 var wallstun := 0.0           # how long the next wall slam stuns (Haymaker makes it longer)
 var land_t := 0.0
@@ -799,6 +805,8 @@ func do_jump() -> void:
 		m.fx.burst(pos + Vector3(0, 0.2, 0), Color("f3eee2"), 10, 3.0, 0.3, 0.0)
 		m.sfx("jump", pos, -4.0, 1.2)
 		return
+	if wm.try_kick(self):
+		return
 	# against a wall in the air: kick off it
 	var mvk: Vector2 = inp.get("move", Vector2.ZERO)
 	if wall_touch_t > 0.0 and wall_kicks > 0 and wall_n.length() > 0.1 and mvk.length() > 0.3 and mvk.normalized().dot(wall_n) > 0.4:
@@ -883,6 +891,7 @@ const FEATHER_MIN := 0.05      # [est] the glider reopens with this much heat ro
 const FEATHER_TAP := 0.3       # [est] an abyss lift's first this-many seconds are its quick impulse...
 const FEATHER_TAP_HEAT := 0.4  # [est] ...heating like a level glide; held past it, the full 4x
 var glide_off_t := 9.0         # seconds since the glider closed in the air (9 = long ago / on the ground)
+var lift_hang_t := 0.0          # seconds left of the soft float at the top of an abyss lift
 var lift_t := 0.0              # seconds of the current abyss lift (feathering taps stay in the cheap part)
 
 ## The glider's vertical speed this step below an island's lip over the abyss, `depth` metres under
@@ -897,11 +906,16 @@ static func abyss_lift_vy(vy: float, depth: float, dt: float) -> float:
 		if vy < 0.0:
 			vy = move_toward(vy, 0.0, (acc + GLIDE_CATCH) * dt)
 		return minf(vy + acc * dt, maxf(top, vy))
-	return move_toward(vy, maxf(depth * ABYSS_BRAKE_GAIN, 1.5), ABYSS_BRAKE * dt)
+	return move_toward(vy, maxf(depth * ABYSS_BRAKE_GAIN, ABYSS_LIP_VY), ABYSS_BRAKE * dt)
 
 func can_glide() -> bool:
 	return not grounded and roll_t <= 0.0 and fly_t <= 0.0 and glide_cd <= 0.0 and not downed and stun_t <= 0.0 \
 		and m.time - kb_t > 0.4 and glide_fuel > FEATHER_MIN and not dropping and charge.is_empty() and not KitStatus.grounded(self)
+
+## Opening the glider well below an island's lip springs you upward before the lift builds.
+func _abyss_open_kick() -> void:
+	if below_lip and lip_y - pos.y > ABYSS_BRAKE_DIST and not dropping:
+		vel.y = maxf(vel.y, 0.0) + ABYSS_OPEN_KICK
 
 func _open_glider() -> void:
 	gliding = true
@@ -917,6 +931,7 @@ func _open_glider() -> void:
 	_glider_sfx("open")
 	m.fx.burst(pos + Vector3(0, 1.7, 0), Color("f3eee2"), 8, 2.0, 0.35, 0.0)
 	_take_glide_handoff()
+	_abyss_open_kick()
 
 # ---------------------------------------------------------------- dash -> glide momentum (movefeel)
 ## [wiki] "Gliding right after a lateral Impulse in the same direction keeps some momentum and
@@ -2335,6 +2350,7 @@ func _physics(dt: float) -> void:
 				hv = accel2(hv, mv * spd, AIR_ACCEL, AIR_DECEL, AIR_OVERSPEED, dt)
 	vel.x = hv.x; vel.z = hv.y
 	update_lip()
+	wm.carry(self, mv, dt)
 	_update_glide(dt)
 	if not lfloat.is_empty() and _ledge_rise(dt, mv):
 		pass   # rising up a ledge's face (sets vel.y; your keys steer as in any jump)
@@ -2344,6 +2360,7 @@ func _physics(dt: float) -> void:
 		# below ground level over the abyss the glider lifts you hard, then brakes near the top.
 		# Let go just before ground level to carry the lift up as height (feathering)
 		vel.y = abyss_lift_vy(vel.y, lip_y - pos.y, dt)
+		lift_hang_t = ABYSS_HANG_T
 	elif gliding:
 		var sink := (DIVE_FALL if diving else DROP_FALL) if dropping else (5.0 if glide_fuel <= 0.001 else glide_fall(Vector2(vel.x, vel.z).length()))
 		if dropping:
@@ -2354,7 +2371,7 @@ func _physics(dt: float) -> void:
 			if vel.y < -sink:
 				vel.y = move_toward(vel.y, -sink, GLIDE_CATCH * dt)    # the canopy catches you over a beat
 			else:
-				vel.y = maxf(vel.y - GLIDE_GRAV * dt, -sink)
+				vel.y = maxf(vel.y - GLIDE_GRAV * (ABYSS_HANG_GRAV if lift_hang_t > 0.0 else 1.0) * dt, -sink)
 			# [footage] over the abyss a glider holds at island level instead of sinking below it,
 			# so you can cross until the heat runs out
 			if over_void() and glide_fuel > 0.001 and vel.y < 0.0 and pos.y + vel.y * dt < lip_y:
@@ -2452,9 +2469,10 @@ func _physics(dt: float) -> void:
 		wall_hit_v = rock_v
 	if (b1 > 0.0 or b2 > 0.0 or rock_v.length() > 0.01) and blk > pos.y + 0.6:
 		# against a wall: in the air you can kick off it; knocked into it hard, you're stunned
-		if not grounded:
+		if not grounded or roll_t > 0.0:
 			wall_touch_t = 0.2
 			wall_n = Vector2(-signf(pre_v.x) if b1 > 0.0 else 0.0, -signf(pre_v.y) if b2 > 0.0 else 0.0).normalized() if (b1 > 0.0 or b2 > 0.0) else block_n
+			wm.hit(self, pre_v, blk)
 		if m.time - kb_t < 0.6 and pre_v.length() > 8.0 and wslam_t <= 0.0 and not remote:
 			wslam_t = 1.2
 			var st := maxf(0.9, wallstun)
@@ -2464,6 +2482,7 @@ func _physics(dt: float) -> void:
 			hurt(10.0, last_hit_by, {"src": "wall"})
 	if grounded:
 		wall_kicks = 2 if cls == "light" else 1
+		wm.land()
 	wall_touch_t = maxf(0.0, wall_touch_t - dt)
 	wslam_t = maxf(0.0, wslam_t - dt)
 	# a hop onto a rock only when you meant it: you jumped (still rising) and you're pushing into it.
@@ -2644,6 +2663,7 @@ func _interrupt_consume() -> void:
 var air_t := 0.0                # time since you left the ground
 func _update_glide(dt: float) -> void:
 	air_t = 0.0 if grounded else air_t + dt
+	lift_hang_t = maxf(0.0, lift_hang_t - dt)
 	if dropping:
 		# the opening drop: the glider stays open until you land, or until you sink below the islands
 		gliding = not grounded
@@ -2711,6 +2731,7 @@ func _update_glide(dt: float) -> void:
 			add_stat("feathers")
 		_glider_sfx("open")
 		m.fx.burst(pos + Vector3(0, 1.7, 0), Color("f3eee2"), 8, 2.0, 0.35, 0.0)
+		_abyss_open_kick()
 
 # Ledge float: touch the side of any ground above you while you're still alive and you float
 # back up onto it, the way Supervive does it. Walking into a step up a few terraces high does
@@ -2742,12 +2763,13 @@ func _try_ledge_grab(dt: float) -> void:
 	else:
 		push_t = 0.0
 		# a hard launch carries you a moment before you can catch anything
-		if vel.y > 2.0 or grap_cd > 0.0 or (m.time - kb_t < 0.3 and Vector2(vel.x, vel.z).length() > 8.0):
+		if grap_cd > 0.0 or (m.time - kb_t < 0.3 and Vector2(vel.x, vel.z).length() > 8.0):
 			return
 		# no magnet: you have to be below the edge, right up against the cliff, and pushing into it
 		# (or, over the abyss, thrown into its side: the shove counts as the push)
 		if mv.length() < 0.3:
-			if not over_void() or wall_hit_v.length() < 2.0:
+			var shoved := over_void() or gliding or glide_off_t < FEATHER_KEEP     # thrown or glided into the face
+			if not shoved or wall_hit_v.length() < 2.0:
 				return
 			mv = wall_hit_v.normalized()
 		reach = r + 0.4
@@ -2794,7 +2816,11 @@ func _try_ledge_grab(dt: float) -> void:
 			if not grounded and not void_here:
 				# off the void, only a wall you're heading into and that rises above where you last stood:
 				# hopping down a terrace must not float you back up it
-				if gz <= last_gy + World.STEP or (toward.dot(mv) <= 0.0 and toward.dot(Vector2(vel.x, vel.z)) <= 0.0):
+				# and one that shares an edge with your tile: the tile ahead along a wall isn't the wall you press
+				if absi(x - int(floor(pos.x))) + absi(z - int(floor(pos.z))) > 1:
+					continue
+				var stepping_back := gz <= last_gy + World.STEP and not _airborne_long()
+				if stepping_back or (toward.dot(mv) <= 0.0 and toward.dot(Vector2(vel.x, vel.z)) <= 0.0):
 					continue
 			if d < bd and d < reach:
 				bd = d
@@ -2821,6 +2847,10 @@ func _try_ledge_grab(dt: float) -> void:
 	m.sfx("grab", pos, -8.0, 1.2)
 	m.fx.burst(pos + Vector3(0, 0.6, 0), Color("cfeaff"), 6, 2.0, 0.3, 0.0)
 	m.on_ledge_grab(self)
+
+## Airborne long enough (or gliding) that pressing into a wall means climbing it, not stepping back up a terrace.
+func _airborne_long() -> bool:
+	return gliding or glide_off_t < FEATHER_KEEP or air_t > LEDGE_AIR_T
 
 ## (ledge rise) One step of rising up a ledge: sets vel.y and returns true while it lasts. Your
 ## horizontal speed is the ordinary air steering (_physics): keys and momentum work the whole way,
