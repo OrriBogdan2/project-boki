@@ -464,3 +464,4 @@ The owner changed his mind after thinking about it: powers combining was a big d
 - **Combos:** make sure glove actives can combo with each other and with hero kits (e.g. a grapple into a ground-pound glove). Add a few glove-glove combo assertions to the gear check.
 - **Save migration:** today's loadout has one glove; the second slot starts empty.
 - **Bots:** they wear and use two gloves.
+- Note: V is bound to "play" (fetch with a Boki) at home only (game.gd:89). Gloves are match-only, so it can share V; make sure the keybind check treats them as different contexts.
