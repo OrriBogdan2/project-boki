@@ -427,7 +427,7 @@ func sees_from(p: Vector3, o: Ent, lift := 0.95) -> bool:
 # ------------------------------------------------------------------ Shift: Soot Ram
 func on_dash(use_ex: bool) -> bool:
 	var dd := dash_def()
-	var dir := h.aim_dir()
+	var dir := dash_dir()
 	if use_ex and not h.grounded:
 		# the class air dash, Linwick's way: a jet from the bellows tucks him into a ball
 		if not spend_dash(true): return true
