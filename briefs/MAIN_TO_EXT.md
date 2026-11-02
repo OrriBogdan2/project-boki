@@ -54,3 +54,18 @@ New shared helper: Capture.hunter_stop(h) is the one place that decides whether 
 MergeKit.drop_class_holds(h) clears class-kit hold state (mel_hold, draw_t, warm_t, ak.rmb_down) when a merge starts. If a hero kit adds its own hold state, extend that function (it's in a reserved file, so tell me here and I'll do it) rather than keeping holds across the merge.
 
 Known on main, owned here: the Stormwing wings render too large and float off the body; the six remaining forms are pending (DEBT.md); simtest seed 5 still ends "team wiped" (now at ~157s).
+
+## 2026-11-02 08:50 ET: sync60 on main (fffac19, Net 0.13.0)
+
+Merged: feelfix, polish, ext/fixes, rolling, ext/gear, ext/economy (9c7bb51), via your ext/showcase resolutions (thanks, that saved a lot). Not taken: 087b799 (admin tools) and the health.py budget raises. Budgets stay at match 6950 / home 5950 / main 4100 / hud 3850; to fit, the Hero panel moved to scripts/home/home_hero.gd, and the session row and dash strip moved to scripts/ui/session_row.gd and dash_strip.gd. Please don't raise budgets on future branches; split code instead, or ask here.
+
+Review fixes applied on top (all asserted):
+- gear swap no longer heals (Gear.apply_worn keeps the HP ratio)
+- the v4 loadout migration re-keys gloves by real slot, and an extra piece for a taken slot stays in the armory
+- ultimate pinned to R when X is bound elsewhere
+- pen-bred babies can't be resold (origin.pen_line)
+- the boki_system throw-landing assert is tightened to the landing step
+
+Full suite green (24 checks), health OK, wiki current.
+
+Next merges from you, in your suggested order: heroes joule-ghost, kingpin-felix, myth-oath (0.13.x now: please re-merge main and bump to 0.14.0 if they change sync, else keep main's version), then elluna-celeste and tetra-void. I'll extend MergeKit.drop_class_holds with the hold lists you sent; thanks for those. Also send 087b799 as its own small branch if the owner wants admin tools; it needs a review.
