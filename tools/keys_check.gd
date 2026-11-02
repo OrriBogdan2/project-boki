@@ -414,9 +414,13 @@ func _sources() -> void:
 	for kind_s in ["monster", "elite", "boss"]:
 		var mb := _mob_of(m, kind_s)
 		var k0 := m.keys.bonus_given
-		if mb != null:
+		if mb is Boss:
+			(mb as Boss).dormant = false
+		for hit in 12:
+			if mb == null or mb.dead:
+				break
 			mb.hurt(mb.max_hp * 10.0 + 500.0, m.player, {"src": "shot"})
-			step(m, 0.2)
+			step(m, 0.3)
 		var want := 1 if kind_s == "monster" else 2
 		ok("a dead %s drops a bonus key" % kind_s, mb != null and m.keys.bonus_given == k0 + want,
 				"%d -> %d" % [k0, m.keys.bonus_given])
@@ -427,12 +431,6 @@ func _sources() -> void:
 			m._break(brk, m.player)
 			step(m, 0.2)
 		ok("a broken %s drops one" % kind_s, not brk.is_empty() and _ckeys(m) >= k0 + 1, "%d -> %d" % [k0, _ckeys(m)])
-	var crates: Array = m.chests.filter(func(c): return c.has("ride") and not c["open"])
-	var k1 := m.keys.bonus_given
-	if not crates.is_empty():
-		ChestLoot.drop(m, m.player, crates[0], false)
-	var crate_paid := not crates.is_empty() and m.keys.bonus_given == k1 + 1
-	ok("a sky-train crate drops one", crate_paid, "%d crates" % crates.size())
 	var shrub_none := m.keys.shrublings.all(func(s): return KeyBonus.mob_source(s) == "")
 	ok("a Shrubling gives no bonus (it always carries one)", shrub_none)
 	for k in keep:
@@ -442,6 +440,23 @@ func _sources() -> void:
 	m.player.teleport(Vector3(kp["pos"].x, m.world.ground_at(kp["pos"].x, kp["pos"].z), kp["pos"].z))
 	step(m, 1.0)
 	ok("a bonus key is picked up like any key", m.player.chest_keys > p0, "%d -> %d" % [p0, m.player.chest_keys])
+	m.queue_free()
+	await main.get_tree().process_frame
+	await _train_crate()
+
+## The sky train runs on Skyreach: opening one of its crates can pay a key too.
+func _train_crate() -> void:
+	var m: Match = await build(5, {"teams": 1, "god": true, "map": "skyreach"})
+	var R: Dictionary = KeyBonus.rules()
+	var keep := float(R["train_crate"])
+	R["train_crate"] = 1.0
+	var crates: Array = m.chests.filter(func(c): return c.has("ride") and not c["open"])
+	var k1 := m.keys.bonus_given
+	if not crates.is_empty():
+		ChestLoot.drop(m, m.player, crates[0], false)
+	R["train_crate"] = keep
+	var crate_paid := not crates.is_empty() and m.keys.bonus_given == k1 + 1
+	ok("a sky-train crate drops one", crate_paid, "%d crates" % crates.size())
 	m.queue_free()
 	await main.get_tree().process_frame
 
