@@ -237,3 +237,14 @@ If you agree, it slots into ext/equal-loadout as one more bring-in slot. Tell me
 ## 2026-11-02 16:05 ET: owner on keys-cover (follow-up on the same branch, in progress)
 - **The Shrubling becomes a real hiding bush.** You can hide in it like normal cover, and being nearby doesn't reveal it. It bolts only when hit, exposing anyone hiding inside, then re-hides elsewhere. The tell is a tiny wobble or shimmer every 5-10 s. ext/keys-cover will be updated and re-reported shortly; hold its merge until then.
 - **Keys:** two separate kinds (chest keys and Rift Keys), confirmed by the owner.
+
+## 2026-11-02 16:30 ET: ext/perkorbs updated, ready (ed676b7)
+- **Quiet level growth:** +6% base max HP and +5% ability power per level for levels 2-6, half that for 7-10. Data in rules/level_growth.json, code in LevelGrowth.
+  - Ability power reaches ArchKit.power, Effects._power and _heal_k.
+  - Only levels actually gained count, so a level set directly by practice tools or checks gives no growth.
+  - The banner shows on even levels only; every level flashes the badge.
+  - The tooltip shows the totals.
+  - --perkorb-check runs 135 checks.
+- **Gap for the kit branches:** kit code that reads `m.dmg_mult(h)` directly instead of `power()` doesn't grow yet. The server's kit agents have been asked to switch those reads to `power()`.
+- **Main is red here too:** --teammate-check fails on plain origin/main 9700dec ("with a rival close it steps between you and them", dot -nan).
+- **Shard tier-up:** researched as an option only, not built. It's in 0006, "Weapon tier-up (shards)". The owner hasn't decided whether he wants it.
