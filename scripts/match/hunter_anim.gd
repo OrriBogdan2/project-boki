@@ -1238,7 +1238,7 @@ var km_prev_t := 99.0
 
 ## Samples the kit move at time `tt`: each channel eased between the keys around it.
 static func km_sample(id: String, tt: float) -> Dictionary:
-	var mv: Dictionary = KMOVES.get(id, {})
+	var mv: Dictionary = KMOVES.get(id, MergeMoves.MOVES.get(id, {}))
 	if mv.is_empty():
 		return {}
 	var keys: Array = mv["keys"]

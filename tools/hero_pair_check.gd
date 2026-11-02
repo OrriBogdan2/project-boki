@@ -313,6 +313,16 @@ func _dolm() -> void:
 	P.inp["fire"] = false
 	step(m, 0.4)
 	ok("lmb: hold + release = punch, knocks back", K.punches == 1 and dmg(T) >= 20.0 and T.pos.x - home.x > 2.2, "punches %d took %.1f dx %.1f" % [K.punches, dmg(T), T.pos.x - home.x])
+	# a merge in the middle of the hold ends it: letting go must not throw a punch mid-transformation
+	reset.call()
+	P.inp["fire"] = true
+	step(m, 0.95, func(): P.inp["fire"] = true)
+	var punches0 := K.punches
+	P.merge_st = {"phase": "xform"}
+	K.lmb_override(false, DT)
+	P.merge_st = {}
+	P.inp["fire"] = false
+	ok("lmb: a merge ends the hold with no punch", K.punches == punches0 and K.lmb_t < 0.0 and P.mel_hold == 0.0, "punches %d -> %d lmb_t %.2f mel_hold %.2f" % [punches0, K.punches, K.lmb_t, P.mel_hold])
 	# punch into a wall: stunned
 	reset.call()
 	var W: World = m.world

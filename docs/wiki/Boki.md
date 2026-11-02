@@ -30,14 +30,21 @@ You bring **one Boki** per expedition. It walks beside you and fights with you; 
   long drop it hops onto you and hops off again once you are steady. In a fight it never turns down an
   order, though a Wary one may think about it for a moment.
 - **A downed Boki** stays where it fell, marked on your screen and the minimap. Run into it to
-  scoop it up (about half a second) and it is back with a good chunk of health; left alone it comes
-  round after 15 to 20 seconds at low health. While it is down you have no C, no Merge and no shoulder
-  perks. Rivals can't take it while you are still in the map.
+  pick it up: you kneel, then cradle it, for 3.5 seconds, rooted and unable to attack. A dash, a stun, a
+  root or a knockback stops it (damage alone does not), and the progress drains back over about two
+  seconds instead of vanishing. It comes back with 60% health. Left alone it comes round after 15 to 20
+  seconds at low health. While it is down you have no C, no shoulder perks, and R only says "Rescue
+  (name) to merge"; the meter keeps filling. Rivals can't take it while you are still in the map.
 - **Your dash** carries a little of it too (a spore puff, a venom trail, a moon blink...).
 - **The bond meter.** Your hits, its hits, combos and its knockouts fill a shared meter. Press **R**
-  with a full meter and your Boki **merges** with you for a while: you take its colour and silhouette
-  (rivals can read it), and every ability you have changes for the merge by its type and power tier.
-  With the Boki out, it leaps back to you and merges you mid-air. With no Boki (downed or lost) R is
+  with a full meter and you **transform** (about 0.7 seconds, you cannot be hurt): the Boki leaps into
+  you and you become its form for about ten seconds, the same for everyone. Rivals see and hear it, and
+  your name plate shows the form and what is left. A form has a shell of extra health on top of your own,
+  and replaces left click, right click (a hold) and E with its own kit; Shift is flavoured, Q stays and C
+  is off. Press **R** again to fire the form's ultimate (it unlocks a moment in) and split apart, or let
+  the timer run out. If the shell breaks, or you are knocked out of it, the Boki pops out and the merge
+  ends. Heavy Star (Pebbit), Stormwing (Zephyrak) and Prism Shell (Puddlet) have full kits; the other
+  Boki merge for a plain stat boost and a basic burst on the second R for now. With no Boki at all R is
   only a weak three second surge. Hits on foes your Boki marked fill the meter faster.
 - **Combos.** Your Boki stuns or roots a foe and your next hit on it lands a COMBO. You stun or slow a
   foe and your Boki's next hit POUNCES. Its ability on a burning foe FLARES. See [Rules](Rules.md#combos).
