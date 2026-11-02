@@ -79,7 +79,7 @@ func hammer_fly(p: Vector3, dir: Vector2, spin_rate: float) -> void:
 ## Planted: tilted in the ground, the beacon ray standing over it.
 func hammer_plant(p: Vector3, yaw: float) -> void:
 	hammer.visible = true
-	hammer.global_position = p + Vector3(0, 0.3, 0)
+	hammer.global_position = p + Vector3(0, 0.75, 0)
 	hammer.rotation = Vector3(-2.3, yaw, 0.25)
 	hammer_glow.visible = false
 	trail.visible = false
@@ -117,7 +117,13 @@ func hold_end() -> void:
 func _pivot() -> Node3D:
 	if h.model == null:
 		return null
-	return h.model.find_child("Hammer", true, false) as Node3D
+	var gun := h.model.find_child("Gun", true, false)
+	if gun == null:
+		return null
+	for c in gun.get_children():
+		if c.has_meta("hammer_pivot") and not c.is_queued_for_deletion():
+			return c as Node3D
+	return null
 
 func _head_world() -> Vector3:
 	var pv := _pivot()
@@ -136,7 +142,7 @@ func slam(at: Vector3, dir: Vector2, k: float) -> void:
 	crescent.global_position = at + Vector3(0, 0.55, 0)
 	crescent.rotation = Vector3(0, atan2(-dir.x, -dir.y), 0)
 	crescent.scale = Vector3.ONE * lerpf(0.8, 1.05, k)
-	cres_t = 0.2
+	cres_t = 0.26
 
 func smash_ring(at: Vector3) -> void:
 	swirl.visible = true
@@ -190,7 +196,8 @@ func purify_burst(at: Vector3, r: float) -> void:
 	disc.scale = Vector3.ONE * r * 0.4
 	disc_t = 0.9
 
-func _process(delta: float) -> void:
+func _process(delta_in: float) -> void:
+	var delta := minf(delta_in, 1.0 / 30.0)      # long frames are clamped (a hitch never skips a whole effect)
 	if not is_instance_valid(h):
 		return
 	var pv := _pivot()
@@ -214,7 +221,7 @@ func _process(delta: float) -> void:
 		flare.visible = false
 	if cres_t > 0.0:
 		cres_t -= delta
-		crescent.material_override.set_shader_parameter("life", clampf(cres_t / 0.2, 0.0, 1.0))
+		crescent.material_override.set_shader_parameter("life", clampf(cres_t / 0.26, 0.0, 1.0))
 		crescent.visible = cres_t > 0.0
 	if swirl_t > 0.0:
 		swirl_t -= delta

@@ -265,6 +265,12 @@ func _shot(s: Array, pair: bool) -> void:
 	await main.get_tree().process_frame
 	if "--shots-debug" in OS.get_cmdline_user_args():
 		print("SHOT %s dash=%s grounded=%s dashes=%.1f ex_cd=%.1f e_cd=%.1f in_e=%s anim=%s pos=%s" % [stem, str(P.ak.st.get("last_dash")), P.grounded, P.dashes, P.ex_cd, float(P.ak.cd["e"]), P.ak.in_e(), P.ak.anim_id, str(P.pos - home)])
+	if "--shots-debug" in OS.get_cmdline_user_args() and P.ak.get("fx") != null:
+		var fxn: Node3D = P.ak.get("fx")
+		var vis := []
+		for c in fxn.get_children():
+			if c is Node3D and (c as Node3D).visible: vis.append("%s@%s tree=%s" % [c.name, str((c as Node3D).global_position - home), (c as Node3D).is_visible_in_tree()])
+		print("  FX in_tree=%s vis=%s visible_nodes=%s" % [fxn.is_inside_tree(), fxn.is_visible_in_tree(), str(vis)])
 	if DisplayServer.get_name() == "headless":
 		return
 	var img := main.get_viewport().get_texture().get_image()

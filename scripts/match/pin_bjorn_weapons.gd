@@ -43,6 +43,7 @@ static func _longbow(gun: Node3D, m_dark: Material, m_acc: Material) -> void:
 static func _hammer_and_shield(gun: Node3D, m_dark: Material, m_acc: Material) -> void:
 	var pv := Node3D.new()
 	pv.name = "Hammer"
+	pv.set_meta("hammer_pivot", true)       # (found by meta: a re-equip renames it while the old one is freed)
 	gun.add_child(pv)
 	hammer(pv, 1.0, m_dark)
 	var steel := Models.shiny(Color("b8c0d0"), 0.55)

@@ -319,7 +319,8 @@ func tint_to(k: float) -> void:
 		tint.material = KitShaders.mat("tint", Color(0.04, 0.08, 0.3))
 		cl.add_child(tint)
 
-func _process(delta: float) -> void:
+func _process(delta_in: float) -> void:
+	var delta := minf(delta_in, 1.0 / 30.0)      # long frames are clamped (a hitch never skips a whole effect)
 	if not is_instance_valid(h) or h.m == null:
 		return
 	for s in stars:
