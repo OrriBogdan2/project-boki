@@ -122,7 +122,7 @@ func _dress(n: Node3D, kind: String) -> void:
 
 # ------------------------------------------------------------------ stars
 ## A star flash at `at`: size m across, held `dur` s (it pops in and fades), with an optional ring.
-func star(at: Vector3, size: float, col: Color, dur := 0.12, ring := 0.0, rot := 0.0) -> void:
+func star(at: Vector3, size: float, col: Color, dur := 0.12, ring := 0.0, rot := 0.0, power := 1.6) -> void:
 	var s: Dictionary = stars[0]
 	for c in stars:
 		if float(c["t"]) >= float(c["dur"]):
@@ -133,7 +133,7 @@ func star(at: Vector3, size: float, col: Color, dur := 0.12, ring := 0.0, rot :=
 	n.material_override.set_shader_parameter("color", col)
 	n.material_override.set_shader_parameter("ring", ring)
 	n.material_override.set_shader_parameter("rot", rot)
-	s["t"] = 0.0; s["dur"] = dur; s["size"] = size
+	s["t"] = 0.0; s["dur"] = dur; s["size"] = size; s["pow"] = power
 
 ## The white star held at the bow while Supercharged (k 0 = off); dim when overdrawn.
 func hold_bow_star(at: Vector3, k: float) -> void:
@@ -330,7 +330,7 @@ func _process(delta: float) -> void:
 		s["t"] = float(s["t"]) + delta
 		var u := clampf(float(s["t"]) / maxf(0.01, float(s["dur"])), 0.0, 1.0)
 		n.scale = Vector3.ONE * float(s["size"]) * (0.6 + 0.6 * sin(minf(u * 2.2, 1.0) * PI * 0.5))
-		n.material_override.set_shader_parameter("power", 1.6 * (1.0 - u * u))
+		n.material_override.set_shader_parameter("power", float(s.get("pow", 1.6)) * (1.0 - u * u))
 	for c in spent:
 		if float(c["t"]) > 0.0:
 			c["t"] = float(c["t"]) - delta

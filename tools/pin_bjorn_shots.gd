@@ -22,8 +22,8 @@ const SHOTS := [
 	["pin_draw_super", "archer", "draw_tgt", 1.3, 4.0, "Supercharged: a thick white line past the cursor to max range, the white star at the bow, the dummy ringed at its feet"],
 	["pin_overdraw", "archer", "draw_tgt", 1.85, 4.0, "Overdrawn: the line and the star dim, the draw arm shakes"],
 	["pin_perfect", "archer", "perfect", 0.68, 2.5, "Perfect release: the gold four-point star with its ring beside the bow hand, the cursor star"],
-	["pin_arrow_flight", "archer", "empowered_miss", 0.72, 3.0, "Empowered arrow in flight: a green bolt with a teal head and a green trail, heading for the cursor"],
-	["pin_spent_arrow", "archer", "empowered_miss", 1.4, 3.0, "No target: the arrow stuck in the ground at the cursor, glowing teal"],
+	["pin_arrow_flight", "archer", "empowered_miss", 0.87, 3.0, "Empowered arrow in flight: a green bolt with a teal head and a green trail, heading for the cursor"],
+	["pin_spent_arrow", "archer", "empowered_miss", 1.6, 3.0, "No target: the arrow stuck in the ground at the cursor, glowing teal"],
 	["pin_super_flight", "archer", "super_shot", 1.33, 4.0, "Supercharged arrow: a wide white-teal beam past the cursor"],
 	["pin_super_hit", "archer", "super_shot", 1.43, 5.0, "Supercharged hit: the teal X-star burst on the dummy"],
 	["pin_heavy_hold", "archer", "heavy", 1.0, 3.0, "Heavy Shot held: the V in gold and a gold bar growing from the bow"],
@@ -54,7 +54,7 @@ const SHOTS := [
 ]
 ## The before/after pairs (top 3 gaps per hero), run on this build and, with --before, on an older one.
 const PAIRS := [
-	["gap1_cursor_landing", "archer", "empowered_miss", 0.85, 3.0, "Gap 1 (aim): an Empowered arrow with the cursor at 5 m"],
+	["gap1_cursor_landing", "archer", "empowered_miss", 0.95, 3.0, "Gap 1 (aim): an Empowered arrow with the cursor at 5 m"],
 	["gap2_draw_reticle", "archer", "draw", 0.45, 3.0, "Gap 2 (reticle): the bow mid-draw"],
 	["gap3_perfect", "archer", "perfect", 0.68, 2.5, "Gap 3 (perfect release): the frame after letting go on the stage"],
 	["gap1_throw_cursor", "bulwark", "throw", 1.4, 3.0, "Gap 1 (aim): the hammer thrown with the cursor at 4 m"],
@@ -140,10 +140,11 @@ func _aim(at: Vector3) -> void:
 	P.inp["aim"] = at + Vector3(0, 0.9, 0); P.inp["aim_y"] = at.y
 
 func _reset(hero: String) -> void:
-	if P.arch != hero:
-		P.set_arch(hero)
-		P.unlock_all()
-		P.equip(Arch.signature(hero), 0)
+	if P.arch != hero or P.wid != Arch.signature(hero):
+		if m.arena: m.arena.set_arch(hero, Arch.signature(hero))
+		else:
+			P.reclass(Arch.weight(hero), hero, Arch.signature(hero)); P.unlock_all()
+		if m.arena and m.arena.card_layer: m.arena.card_layer.visible = false
 	P.lvl = 6
 	P.teleport(home); P.vel = Vector3.ZERO; P.hp = P.max_hp
 	P.dashes = P.max_dashes(); P.fire_cd = 0.0; P.ammo = maxi(P.ammo, 1); P.reload_t = 0.0
@@ -152,6 +153,7 @@ func _reset(hero: String) -> void:
 	var K = P.ak
 	if K:
 		K.cd["rmb"] = 0.0; K.cd["e"] = 0.0; K.ch_rmb = 2.0; K.res = 0.0
+		if K.get("draw") != null: K.get("draw").quick = false
 		if K.get("mace") != null and not (K.get("mace") as Dictionary).is_empty() and K.has_method("_catch"):
 			K.call("_catch", true)
 	AimKit.clear(P)
@@ -160,7 +162,7 @@ func _reset(hero: String) -> void:
 ## The scripted input for one moment at time t (s since the shot started).
 func _input(what: String, t: float) -> void:
 	var K = P.ak
-	var at := func(x: float) -> bool: return t >= x and t < x + DT * 0.99
+	var at := func(x: float) -> bool: return t >= x - DT * 0.5 and t < x + DT * 0.5
 	match what:
 		"draw":
 			P.inp["fire"] = t >= 0.0; K.res = 0.0
@@ -170,7 +172,7 @@ func _input(what: String, t: float) -> void:
 			P.inp["fire"] = t < 0.62; K.res = 0.0
 		"empowered_miss":
 			T.teleport(home + Vector3(0, 0, 8.0)); _aim(home + Vector3(5.0, 0, 0))
-			P.inp["fire"] = t >= 0.0 and t < 0.7; K.res = 0.0
+			P.inp["fire"] = t >= 0.0 and t < 0.82; K.res = 0.0
 		"super_shot":
 			_aim(home + Vector3(4.0, 0, 0)); T.teleport(home + Vector3(10.0, 0, 0))
 			P.inp["fire"] = t < 1.3; K.res = 0.0
@@ -247,6 +249,10 @@ func _shot(s: Array, pair: bool) -> void:
 		for h in m.hunters: h.render(DT, 1.0)
 		await main.get_tree().process_frame
 	await main.get_tree().process_frame
+	if "--shots-debug" in OS.get_cmdline_user_args():
+		print("SHOT %s dash=%s grounded=%s dashes=%.1f ex_cd=%.1f e_cd=%.1f in_e=%s anim=%s pos=%s" % [stem, str(P.ak.st.get("last_dash")), P.grounded, P.dashes, P.ex_cd, float(P.ak.cd["e"]), P.ak.in_e(), P.ak.anim_id, str(P.pos - home)])
+	if DisplayServer.get_name() == "headless":
+		return
 	var img := main.get_viewport().get_texture().get_image()
 	var nm := "pin" if hero == "archer" else "bjorn"
 	var file := ("before_" if before else ("after_" if pair else "")) + stem + ".png"

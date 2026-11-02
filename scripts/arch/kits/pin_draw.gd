@@ -93,7 +93,7 @@ func _perfect() -> void:
 	var d := h.aim_dir()
 	var side := Vector2(-d.y, d.x)
 	var at := h.pos + Vector3(d.x * 0.45 + side.x * 0.35, 1.15 * _sc(), d.y * 0.45 + side.y * 0.35)
-	k.fx.star(at, 1.1, PinFx.GOLD, 0.18, 1.0)
+	k.fx.star(at, 1.3, PinFx.GOLD, 0.22, 1.0, 0.0, 0.8)
 	AimKit.perfect(h)
 	k.m.sfx("pin_perfect", h.pos, -3.0 if h.is_local() else -8.0)
 	if h.is_local(): Oomph.punch_dir(k.m, d, 0.2)
