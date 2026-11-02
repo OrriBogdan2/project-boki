@@ -11,22 +11,23 @@ extends ArchKit
 ##   are stunned with bonus damage.
 ## - E, Shadow Knife (Farstep Dagger): a dagger that sticks to a foe (slows) or a surface; recast to step
 ##   to it, or you step there when it runs out.
-## - R, Jackpot (Fusillade): after a fuse, 2s of knives at everyone near (5 each), harder with
-##   anti-heal at the rim, each one refreshing every Mark; two quick weaker Vaults; you keep firing.
+## - Jackpot (a Mark trigger, not a key): the fifth Mark on a foe releases a short burst of knives at
+##   them, each one refreshing every Mark, and gives one free Vault. No R: that key is the Boki Merge.
 
 var primed_t := 0.0            # Vault primed the next weapon hit
 var haste_t := 0.0             # Vault's burst of speed (ends on the Primed hit)
-var quick := 0                 # Jackpot's free quick Vaults
+var quick := 0                 # Jackpot's free Vaults left
 var quick_t := 0.0
 var mark_gap := {}             # target id -> time of its last Mark from us (one per 0.3s)
 var pips := {}                 # target instance id -> {node, t: Ent}: the Mark pips over their head
 var knife := {}                # the stuck Shadow Knife: {target, pos, node}
 var bola2 := {}                # the Bola flying on after its first foe: {pos, dir, left, first, node}
-var fus := {}                  # the running Jackpot: {t, next, n}
+var jp_cd := 0.0               # Jackpot is resting (seconds)
 var glint: Node3D = null       # the Primed tell: a gold glint at the weapon hand
 var primed_hits := 0           # (tests, demo)
 var bola_pairs := 0
-var jackpot_hits := 0
+var jackpot_hits := 0          # knives landed
+var jackpots := 0              # bursts released
 
 func _setup() -> void:
 	res = 0.0
@@ -54,12 +55,18 @@ func add_mark(t: Ent, n := 1, force := false) -> void:
 	t.set_meta("marks", mk)
 	t.set_meta("marks_t", now)
 	_pip_pop(t, c)
-	if c >= mark_max() and had < mark_max():
-		m.sfx("pickup", t.pos, -2.0, 1.9)       # the victim hears a coin jingle at full Marks
-		m.sfx("unlock", t.pos, -6.0, 1.7)
-		m.fx.word(t.pos + Vector3(0, 2.5, 0), "MARKED", res_col(), true)
-		m.fx.ring(t.pos, 1.3, res_col(), 0.3)
-		net_ring(t.pos, 1.3, res_col())
+	_full_marks(t, had, c)
+
+## The fifth Mark lands: the coin jingle, MARKED, and Jackpot goes off.
+func _full_marks(t: Ent, had: int, c: int) -> void:
+	if c < mark_max() or had >= mark_max():
+		return
+	m.sfx("pickup", t.pos, -2.0, 1.9)       # the victim hears a coin jingle at full Marks
+	m.sfx("unlock", t.pos, -6.0, 1.7)
+	m.fx.word(t.pos + Vector3(0, 2.5, 0), "MARKED", res_col(), true)
+	m.fx.ring(t.pos, 1.3, res_col(), 0.3)
+	net_ring(t.pos, 1.3, res_col())
+	_jackpot(t)
 
 func clear_marks(t: Ent) -> void:
 	var mk: Dictionary = t.get_meta("marks", {})
@@ -74,11 +81,14 @@ func set_marks(t: Ent, n: int) -> void:
 	if t == null or not is_instance_valid(t) or t.dead:
 		return
 	var mk: Dictionary = t.get_meta("marks", {})
+	var e: Array = mk.get(h.nid, [0, 0.0])
+	var had := int(e[0]) if float(e[1]) > 0.0 else 0
 	mk[h.nid] = [mini(mark_max(), n), float(res_def().get("dur", 4.0))]
 	t.set_meta("marks", mk)
 	_pip_pop(t, n)
+	_full_marks(t, had, mini(mark_max(), n))
 
-## Every Mark we have on anyone back to its full time (Jackpot).
+## Every Mark we have on anyone back to its full time (each Jackpot knife).
 func refresh_marks() -> void:
 	for f in m.foes_of(h.team):
 		var mk: Dictionary = f.get_meta("marks", {}) if f.has_meta("marks") else {}
@@ -167,6 +177,7 @@ func slot_info(slot: String) -> Dictionary:
 
 func _tick(dt: float) -> void:
 	haste_t = maxf(0.0, haste_t - dt)
+	jp_cd = maxf(0.0, jp_cd - dt)
 	if primed_t > 0.0:
 		primed_t -= dt
 		if primed_t <= 0.0:
@@ -185,9 +196,7 @@ func _tick(dt: float) -> void:
 			if float(e[1]) <= 0.0: mk.erase(h.nid)
 	_tick_knife()
 	if not bola2.is_empty(): _tick_bola2(dt)
-	if not fus.is_empty(): _tick_fus(dt)
 	_tick_glint()
-	_tick_jackpot_tele()
 	net_pulse(dt, full_ready())
 
 ## The Primed tell: a gold glint and a light at the weapon hand (everyone sees it).
@@ -219,7 +228,7 @@ func move_k() -> float:
 func on_dash(use_ex: bool) -> bool:
 	var dd := dash_def()
 	if quick > 0 and quick_t > 0.0:
-		# Jackpot's quick Vaults: shorter, free
+		# Jackpot's free Vault: a little shorter, costs no charge
 		quick -= 1
 		travel(float(dd["quick_dist"]), float(dd["quick_time"]), {"invuln": 0.08, "phase": 0.2, "trail": "ghost"})
 		_vaulted(true)
@@ -532,92 +541,48 @@ func _shadow_step(tgt: Ent) -> void:
 		Oomph.punch_dir(m, Vector2(at.x - from.x, at.z - from.z), 0.25)
 		if m.cam: m.cam.punch(0.03)
 
-# ------------------------------------------------------------------ R: Jackpot (Fusillade)
-func _jackpot_targets() -> Array:
-	return foes_in(h.pos, float(r_def()["reach"])).filter(func(f): return sees(f) and not (f is Kin))
+# ------------------------------------------------------------------ Jackpot (the fifth Mark)
+func jackpot_def() -> Dictionary:
+	return d.get("jackpot", {})
 
-func r_can_cast() -> bool:
-	return not _jackpot_targets().is_empty()
-
-func r_no_target_text() -> String: return "No one within 8.5m to rob"
-
-## The fuse: crouched, gathering the knives.
-func _fuse_start(bond: bool) -> void:
-	super._fuse_start(bond)
-	play("thf_volley_wind")
-
-## The fuse and the volleys don't plant you or stop your weapon: keep shooting through them.
-func can_shoot() -> bool:
-	return fire_ok()
-
-func pace() -> float:
-	return move_k() * (0.75 if fusing() else 1.0)
-
-## While the fuse runs, everyone sees the two rings: the knife reach and the rim.
-func _tick_jackpot_tele() -> void:
-	if fusing() and not st.has("jp_tele"):
-		var rd := r_def()
-		st["jp_tele"] = true
-		tele_circle(h.pos, float(rd["reach"]), res_col(), fuse_time())
-		tele_circle(h.pos, float(rd["inner"]), Color(res_col(), 0.6), fuse_time())
-		net_ring(h.pos, float(rd["reach"]), res_col())
-	elif not fusing():
-		st.erase("jp_tele")
-
-func cast_r() -> bool:
-	var rd := r_def()
-	if _jackpot_targets().is_empty():
-		return false
-	var dur := float(rd["time"])
-	fus = {"t": dur, "next": 0.0, "n": int(rd["shots"])}
-	play("thf_volley")
-	quick = int(rd["quick"])
-	quick_t = dur + 0.4
-	r_t = dur
-	m.fx.word(h.pos + Vector3(0, 2.9, 0), "JACKPOT", res_col(), true)
-	m.fx.ring(h.pos, float(rd["reach"]), res_col(), 0.4)
-	m.fx.ring(h.pos, float(rd["inner"]), Color(1, 1, 1, 0.7), 0.3)
-	m.sfx("pickup", h.pos, -4.0, 1.1)
-	return true
-
-## One volley every 0.4s: a knife at every foe in reach and sight (they're picked again each time).
-func _tick_fus(dt: float) -> void:
-	fus["t"] = float(fus["t"]) - dt
-	fus["next"] = float(fus["next"]) - dt
-	if float(fus["next"]) <= 0.0 and int(fus["n"]) > 0:
-		var rd := r_def()
-		fus["n"] = int(fus["n"]) - 1
-		fus["next"] = float(rd["time"]) / float(rd["shots"])
-		var gold := res_col()
-		for f in _jackpot_targets():
-			var dist: float = h.flat_dist(f)
-			var rim := dist > float(rd["inner"])
-			var from := h.pos + Vector3(0, 1.0, 0)
-			m.fx.bolt(from, f.pos + Vector3(0, 1.0, 0), Color(gold, 0.9) if rim else Color(Color("c8f0ff"), 0.9))
-			net_bolt(from, f.pos + Vector3(0, 1.0, 0), gold)
-			m.later(dist / 45.0, func(): _jackpot_hit(f, rim))
-		m.sfx("ab_throw", h.pos, -5.0, 1.5)
-		for i in 8:
-			var a: float = TAU * i / 8.0 + m.time
-			m.fx.burst(h.pos + Vector3(cos(a) * 0.6, 1.0, sin(a) * 0.6), gold, 2, 8.0, 0.25, 0.0, 0.6, Vector3(cos(a), 0.05, sin(a)), 8.0)
-	if float(fus["t"]) <= 0.0:
-		fus = {}
-
-func _jackpot_hit(f: Ent, rim: bool) -> void:
-	if not is_instance_valid(f) or f.dead or not is_instance_valid(h):
+## Five Marks on a foe: a short burst of knives at them (each refreshes every Mark of ours) and one
+## free Vault. It rests a few seconds so a long fight can't chain it. The payoff: T4, pay_cashin.
+func _jackpot(t: Ent) -> void:
+	var jd := jackpot_def()
+	if jp_cd > 0.0 or t is Kin or h.downed or Hex.active(h):
 		return
-	var rd := r_def()
-	var stg := stage("r", {"delivery": {"type": "burst", "origin": "here", "radius": 0.0}, "effects": [{"type": "damage", "amount": float(rd["dmg"]) * r_k()}]})
-	var c := cx("r", "jackpot", f.pos, {"at": f.pos})
-	KinExec.apply_foe(stg.effects, f, c, f.pos, stg)
+	jp_cd = float(jd["cd"])
+	jackpots += 1
+	var n := int(jd["shots"])
+	var gap := float(jd["time"]) / float(n)
+	play("thf_volley")
+	quick = int(jd["vaults"])
+	quick_t = float(jd["vault_t"])
+	var merged0 := KinMerge.active(h)
+	for i in n:
+		# (a Boki merge starting mid-burst ends it: nothing the Thief was doing carries into the merge)
+		m.later(0.05 + gap * float(i), func(): if is_instance_valid(h) and (merged0 or not KinMerge.active(h)): _jackpot_knife(t, i == n - 1))
+	m.fx.word(h.pos + Vector3(0, 2.9, 0), "JACKPOT", res_col(), true)
+	m.sfx("pickup", h.pos, -4.0, 1.1)
+	h._ab_feedback("dash", "ready")
+
+## One knife: from the hand to the marked foe if it is still in reach and sight.
+func _jackpot_knife(f: Ent, last: bool) -> void:
+	if not is_instance_valid(h) or not is_instance_valid(f) or f.dead or not f.hittable():
+		return
+	var jd := jackpot_def()
+	if h.flat_dist(f) > float(jd["reach"]) or not sees(f):
+		return
+	var from := h.pos + Vector3(0, 1.0, 0)
+	m.fx.bolt(from, f.pos + Vector3(0, 1.0, 0), Color(res_col(), 0.9))
+	net_bolt(from, f.pos + Vector3(0, 1.0, 0), res_col())
+	f.hurt(float(jd["dmg"]) * m.dmg_mult(h), h, {"src": "abil", "ab": "mark", "tags": ["jackpot"], "crit": true})
 	jackpot_hits += 1
-	refresh_marks()            # every knife refreshes all your Marks
-	if is_instance_valid(f) and not f.dead and rim:
-		f.hurt(float(rd["rim_dmg"]) * r_k() * m.dmg_mult(h), h, {"src": "abil", "ab": "ult", "tags": ["ult", "jackpot_rim"], "crit": true})
-		if f.blight_t <= 0.0: m.fx.word(f.pos + Vector3(0, 2.2, 0), "BLIGHTED", Color("b0e070"), false)
-		KitStatus.apply(f, "blt", float(rd["blight"]))
+	refresh_marks()
 	m.sfx("slash_hit", f.pos, -6.0, 1.3)
 	m.fx.burst(f.pos + Vector3(0, 1.0, 0), res_col(), 6, 3.0, 0.25)
+	if last and is_instance_valid(f) and not f.dead:
+		payoff_fx(f.pos, "JACKPOT", res_col(), "pay_cashin", h.dir_to(f), f)
 
 # ------------------------------------------------------------------ bots
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
@@ -627,8 +592,11 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if not knife.is_empty() and knife.get("target") != null and randf() < 0.6:
 		h.inp["sig"] = true
 		return
-	if int(h.slot_lv["ult"]) > 0 and float(cd["r"]) <= 0.0 and los and dist < float(r_def()["reach"]) - 0.5 and (tgt is Hunter or randf() < 0.3) and randf() < 0.45:
-		h.inp["ult"] = true
+	# a free Vault from Jackpot: spend it on a Primed hit while they are in reach
+	if quick > 0 and primed_t <= 0.0 and los and dist < 6.0 and randf() < 0.5:
+		h.ai["dash_dir"] = h.dir_to(tgt)
+		h.inp["move"] = h.dir_to(tgt)
+		h.inp["dash"] = true
 		return
 	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and knife.is_empty() and los and dist > 1.5 and dist < float(e_def()["range"]) - 1.0 and randf() < 0.35:
 		h.inp["aim"] = tgt.pos + Vector3(0, 0.9, 0)
