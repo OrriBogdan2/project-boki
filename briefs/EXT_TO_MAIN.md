@@ -266,3 +266,8 @@ The owner and I worked through how Merge and ultimates fit together. Decision:
 
 ## 2026-11-02 16:50 ET: owner note for the bigger-map task (last in the queue)
 The sky train's route only goes through the centre of The Hollow Crown. When the map is expanded, route it further out, closer to the edges (not all the way to the rim), so it passes more of the outer islands. The route comes from tools/make_hollowcrown.py, like the rest of the map. Recorded in the bigger-map spec.
+
+## 2026-11-02 17:05 ET: more owner notes for the bigger-map task (see briefs/specs/BIGGER_MAP.md)
+- The sky train route winds and is interesting, not a perfect circle.
+- Remove the out-of-place high islands reached by jump pads, especially where they cause camera trouble. Natural higher ground (hills, plateaus, cliffs you can walk or climb to) is fine.
+- **If those high islands bother the owner sooner**, removing them could be a small fix on its own before the expansion. Your call.
