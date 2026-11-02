@@ -684,7 +684,7 @@ func slot_info(slot: String) -> Dictionary:
 			var sd := dash_def()
 			var dmax := h.max_dashes()
 			out.merge({"name": String(sd.get("name", "")), "short": String(sd.get("name", "")).split(" ")[0], "icon": String(sd.get("icon", "dash")), "col": col_of(sd), "desc": String(sd.get("desc", "")),
-				"cd": (1.0 - fposmod(h.dashes, 1.0)) * h.dash_regen() if h.dashes < 1.0 else 0.0, "cd_max": h.dash_regen(), "charges": int(floor(h.dashes)), "max_charges": int(dmax), "verb": "dash", "ready": h.dashes >= 1.0, "full": dash_payoff_ready()}, true)
+				"cd": (1.0 - fposmod(h.dashes, 1.0)) * h.dash_regen() if h.dashes < dmax - 0.001 else 0.0, "cd_max": h.dash_regen(), "charges": int(floor(h.dashes)), "max_charges": int(dmax), "verb": "dash", "ready": h.dashes >= 1.0, "full": dash_payoff_ready()}, true)
 	return out
 
 func e_recastable() -> bool: return false
