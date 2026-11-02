@@ -31,35 +31,35 @@ Gear is found on expeditions: in chests, on the ground, from the Blight and from
 
 | Piece | What it does | Stats |
 |---|---|---|
-| Glider Glove | Glide 20% faster and longer. | glide_speed +0.2, heat +0.2 |
-| Focus Glove | Abilities recharge 18% faster. | cdr +0.18 |
-| Cooling Glove | Your glider holds 45% more heat. | heat +0.45 |
-| Power Glove | 12% more damage. | dmg +0.12 |
+| Glider Glove | Glide faster and longer. | glide_speed +0.2, heat +0.2 |
+| Focus Glove | Abilities recharge faster. | cdr +0.18 |
+| Cooling Glove | Your glider holds more heat. | heat +0.45 |
+| Power Glove | More damage. | dmg +0.12 |
 
 ## Armor
 
 | Piece | What it does | Stats |
 |---|---|---|
-| Bastion Plate | Heavy plate: 40 armor, a little slower on foot. | armor +40, speed +-0.04 |
-| Gale Mantle | A light cloak that catches the wind: 14 armor and a faster glide. | armor +14, glide_speed +0.08 |
-| Quilted Coat | Padded and warm: 22 more health and 12 armor. | armor +12, hp +22 |
-| Brace Plate | A bolted breastplate: 25 more armor. | armor +25 |
+| Bastion Plate | Heavy plate: lots of armor, a little slower on foot. | armor +40, speed +-0.04 |
+| Gale Mantle | A light cloak that catches the wind: some armor and a faster glide. | armor +14, glide_speed +0.08 |
+| Quilted Coat | Padded and warm: more health and some armor. | armor +12, hp +22 |
+| Brace Plate | A bolted breastplate: extra armor. | armor +25 |
 
 ## Boots
 
 | Piece | What it does | Stats |
 |---|---|---|
-| Springheel Boots | Sprung soles: 8% faster on foot. | speed +0.08 |
-| Quickstep Boots | Spring-loaded heels: dashes come back 15% sooner and a touch more speed. | dodge +0.15, speed +0.03 |
-| Skylark Boots | Feathered cuffs: your glider lasts 35% longer. | heat +0.35 |
+| Springheel Boots | Sprung soles: faster on foot. | speed +0.08 |
+| Quickstep Boots | Spring-loaded heels: dashes come back sooner and a touch more speed. | dodge +0.15, speed +0.03 |
+| Skylark Boots | Feathered cuffs: your glider lasts longer. | heat +0.35 |
 | Windstep Boots | Light soles for the air: a faster glide that runs hot later. | glide_speed +0.1, heat +0.15 |
 
 ## Utility kits
 
 | Piece | What it does | Stats |
 |---|---|---|
-| Field Surgeon's Kit | Needle and thread: tonics heal 35% more. | tonic +0.35 |
-| Magpie Pouch | Shiny things stick: gems you pick up are worth 25% more. | gems +0.25 |
+| Field Surgeon's Kit | Needle and thread: tonics heal more. | tonic +0.35 |
+| Magpie Pouch | Shiny things stick: gems you pick up are worth more. | gems +0.25 |
 | Wayfarer's Satchel | A deep bag: one more backpack slot (two from Epic). | pack +1 |
-| Brass Spyglass | See 12% further through grass and gloom. | sight +0.12 |
-| Tinker's Roll | A roll of small tools: reloads 15% faster. | reload +0.15 |
+| Brass Spyglass | See further through grass and gloom. | sight +0.12 |
+| Tinker's Roll | A roll of small tools: reloads faster. | reload +0.15 |

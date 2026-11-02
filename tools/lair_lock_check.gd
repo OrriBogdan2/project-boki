@@ -60,12 +60,17 @@ func _kill(L: Dictionary, P: Hunter, C: Hunter) -> float:
 	return m.time - 0.2
 
 func run(main: Node) -> void:
+	main.set_meta("lair_lock_check", self)      # (a RefCounted that awaits frames must be kept alive, as the swim check does)
 	Save.no_write = true
 	Save.d = Save.fresh()
 	Econ.ensure()
+	var sd := ""      # --shots-dir=<dir> (under a real renderer, with a dummy --shot=): a screenshot of the lock-in banner, in recording mode
+	for a in OS.get_cmdline_user_args():
+		if String(a).begins_with("--shots-dir="): sd = String(a).substr(12)
+	if sd != "": Record.set_level(1)
 	m = Match.new()
 	main.add_child(m)
-	m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 21, "no_drop": true})
+	m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1500.0 if sd != "" else 1e9, "seed": 21, "no_drop": true})
 	m.set_process(false)
 	var P: Hunter = m.player
 	P.set_arch("")      # (boss weapons come from the killer's class: the classic kit, as --boss-check)
@@ -119,6 +124,14 @@ func run(main: Node) -> void:
 	# ---------------------------------------------------------------- 2. locked in after the kill; campers locked out
 	ok(F.get("victory", false) and F.get("locked", false) and _gate_shut(F) and m.lairs.victory_left(F) > Lairs.VICTORY_T - 0.5,
 		"the kill locks the lair: gate shut, opens in %s" % Lairs.clock(m.lairs.victory_left(F)))
+	if sd != "":
+		for i in 3:
+			await main.get_tree().process_frame      # (the check ran in one long frame: let the frame time settle first)
+		m.set_process(true)
+		for i in 45:      # (the camera eases over to you)
+			await main.get_tree().process_frame
+		main.get_tree().root.get_texture().get_image().save_png(sd + "/lair_locked_in.png")
+		m.set_process(false)
 	var outv := Vector2(F["out"].x, F["out"].y)
 	var outL := Vector3(outv.x, 0, outv.y)
 	# a rival camping the gate tries to walk in
