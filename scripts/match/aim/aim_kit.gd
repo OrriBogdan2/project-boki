@@ -7,7 +7,9 @@ extends RefCounted
 ## stopping the calls hides it; `hide` drops it at once, and a `"dur": secs` param keeps a one-off (a
 ## placed ring, a stuck grenade's cone) up that long without more calls. A second call with the same
 ## id replaces the first. Everything draws through one pooled ImmediateMesh per match (AimDraw): no
-## node is made per call or per frame. ArchKit.drop_holds() clears a hunter's set on merge start.
+## node is made per call or per frame. A Boki merge clears a hunter's set and keeps it clear: AimDraw
+## drops every entry of a merged or transforming hunter (whichever path started the merge), and
+## ArchKit.drop_holds() clears it on the spot.
 ##
 ## Common params (every shape):
 ##   col     Color   the hero colour (default: the archetype's "color")
@@ -27,6 +29,10 @@ static func layer(m: Node) -> AimDraw:
 		d = AimDraw.new(m)
 		m.add_child(d)
 	return d
+
+## Merged, or mid-transformation, or leaping home to merge: the form owns the buttons, nothing shows.
+static func blocked(h: Hunter) -> bool:
+	return KinMerge.active(h) or KinMerge.transforming(h)
 
 static func hero_col(h: Hunter) -> Color:
 	if h.ak != null:
@@ -198,6 +204,8 @@ static func entry(h: Hunter, id: String) -> Dictionary:
 ## The charge ring on the cursor, k 0..1, called each step while charging. Crossing 1 fires the flare.
 ## p: col (hero colour), flare (true: flare on reaching full)
 static func charge(h: Hunter, k: float, p := {}) -> void:
+	if blocked(h):
+		return
 	var r := layer(h.m).ret_of(h)
 	var was := float(r["k"]) if float(h.m.time) - float(r["t"]) <= AimDraw.KEEP else -1.0
 	r["k"] = k; r["t"] = float(h.m.time)
@@ -207,12 +215,16 @@ static func charge(h: Hunter, k: float, p := {}) -> void:
 
 ## The full-charge flare on the cursor now. p: col (the accent colour)
 static func flare(h: Hunter, p := {}) -> void:
+	if blocked(h):
+		return
 	var r := layer(h.m).ret_of(h)
 	r["flare"] = AimReticle.FLARE_T
 	r["fcol"] = p.get("col2", p.get("col", accent_col(h)))
 
 ## The perfect-window star flash on the cursor (released on the ready frame). p: col (gold)
 static func perfect(h: Hunter, p := {}) -> void:
+	if blocked(h):
+		return
 	var r := layer(h.m).ret_of(h)
 	r["perfect"] = AimReticle.PERFECT_T
 	r["pcol"] = p.get("col", Color("ffd25a"))
@@ -261,6 +273,6 @@ static func _disc(h: Hunter, e: Dictionary, p: Dictionary) -> void:
 	e["pointer"] = pd.normalized() if pd.length() > 0.01 else Vector2.ZERO
 
 static func _put(h: Hunter, id: String, e: Dictionary) -> void:
-	if h == null or h.m == null:
+	if h == null or h.m == null or blocked(h):
 		return
 	layer(h.m).put(h, id, e)
