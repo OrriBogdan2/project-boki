@@ -1061,7 +1061,7 @@ var ready_flash := {}      # slot id -> time left on its flash
 var slot_text := {}        # slot id -> the countdown it shows now (HudSlot; checks read it)
 var slot_fx := {}          # slot id -> {kind: "cast"|"deny", t}: a pop when a press lands, a red shake when it can't
 
-## A press on an ability slot: "cast" pops it, "deny" (on cooldown, not ready) shakes it red.
+## A press on an ability slot: "cast" pops it, "deny" (on cooldown, not ready) shakes it red; "reset" (it just came back) swells it with a ring.
 func ability_feedback(id: String, kind: String) -> void:
 	slot_fx[id] = {"kind": kind, "t": 0.0}
 var hurt_dirs: Array = []  # {ang, t}
@@ -1115,7 +1115,7 @@ func _hud_tick(delta: float) -> void:
 	_h_down = hd
 	for id in slot_fx.keys():
 		slot_fx[id]["t"] = float(slot_fx[id]["t"]) + delta
-		if float(slot_fx[id]["t"]) > 0.4: slot_fx.erase(id)
+		if float(slot_fx[id]["t"]) > ResetPop.LEN: slot_fx.erase(id)
 	for id in ready_flash.keys():
 		ready_flash[id] = float(ready_flash[id]) - delta
 		if float(ready_flash[id]) <= 0.0: ready_flash.erase(id)

@@ -3,7 +3,8 @@ extends RefCounted
 ## One ability or item slot on the bottom bar: the frame (HudStyle.slot_frame), the icon, and while
 ## it isn't ready a dimmed icon, a dark sweep over the part still cooling (clipped to the slot) and
 ## a big countdown in the middle; charge pips along the bottom edge, the key on a pill under it, a
-## pop when a press lands, a red shake when it can't, and a ring when it comes back. skill_slot adds
+## pop when a press lands, a red shake when it can't, a ring when it comes back, and ResetPop's swell
+## when a reset hands it straight back. skill_slot adds
 ## run levels on top: locked (padlock, UNLOCK when a point can open it, LV 6 on R), rank pips over
 ## it, and a gold + to spend a point. Hud._ab_slot / Hud._skill_slot call these (the Boki slots in
 ## BokiHud go through the same two, so every slot on the bar looks alike).
@@ -28,6 +29,8 @@ static func ab_slot(H, id: String, rect: Rect2, icon: String, key: String, col: 
 		if sfx_d["kind"] == "deny":
 			deny = clampf(1.0 - ft / DENY_T, 0.0, 1.0)
 			rect.position.x += sin(ft * 70.0) * 5.0 * deny
+		elif sfx_d["kind"] == "reset":
+			rect = ResetPop.scaled(rect, ft)
 		else:
 			pop = clampf(1.0 - ft / POP_T, 0.0, 1.0)
 			rect = rect.grow(-rect.size.x * 0.08 * sin(pop * PI))
@@ -67,6 +70,8 @@ static func ab_slot(H, id: String, rect: Rect2, icon: String, key: String, col: 
 	if fl > 0.0:
 		var k := 1.0 - fl / READY_FLASH
 		H._rounded(rect.grow(2.0 + k * 8.0), Color(0, 0, 0, 0), HudStyle.SLOT_RAD + 2, Color(col, 1.0 - k), 3)
+	if sfx_d.get("kind", "") == "reset":
+		ResetPop.draw(c, rect, col, float(sfx_d["t"]))
 
 ## The part of a slot still cooling: a slice from 12 o'clock, clockwise, cut to the slot's square so
 ## it never spills past the frame.
