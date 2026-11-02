@@ -25,7 +25,8 @@ const SLUG_REST := Color("8a7aff")     # a slug hanging at its stop line
 const ANCHOR_COL := Color("ffcf70")
 const IDLE_T := 0.7                    # s after the last shot the spread cone folds back to one aim line
 const SWING := 6.0                     # 1/s: how fast a reeled body turns onto its new heading (lower swings wider)
-const CLIFF := 1.2                     # m: a rise a reeled body can't be dragged up (a cliff face; rocks are hauled over)
+# m: a rise a reeled body can't be dragged up (a cliff face; rocks are hauled over)
+const CLIFF := 1.2
 
 var pull := {}                  # hold: the reel {t (the foe), left}
 var flying := false             # hold: the hook is in the air
@@ -137,7 +138,11 @@ func _tick(dt: float) -> void:
 			add_stack(-1)
 	elif not h.downed:
 		_down_seen = false
-	tell = "full" if res >= res_max() else ("half" if res >= 5.0 else "")
+	tell = ""
+	if res >= res_max():
+		tell = "full"
+	elif res >= 5.0:
+		tell = "half"
 	self_pips(int(res_max()), int(res), res >= res_max(), dt)
 	if wind > 0.0: _tick_wind(dt)
 	if not dive.is_empty(): _tick_dive(dt)
@@ -175,7 +180,13 @@ func _tick_gun() -> void:
 		return
 	var w: Dictionary = h.wpn
 	if m.time - shot_at < IDLE_T or bool(h.inp.get("fire", false)):
-		AimKit.cone(h, "spread", {"len": float(w["range"]), "deg": float(w.get("fan_deg", 30.0)) + h.wbloom, "edges": true, "inner": 0.6, "col": Color("fff0f6"), "alpha": 0.8})
+		AimKit.cone(
+			h, "spread",
+			{
+				"len": float(w["range"]), "deg": float(w.get("fan_deg", 30.0)) + h.wbloom, "edges": true, "inner": 0.6,
+				"col": Color("fff0f6"), "alpha": 0.8
+			}
+		)
 	else:
 		AimKit.line(h, "spread_idle", {"col": Color("fff0f6"), "alpha": 0.7})
 
@@ -206,7 +217,9 @@ func _tick_looks(dt: float) -> void:
 	var id := h.get_instance_id()
 	if not pull.is_empty():
 		# Grounded while he reels: a chain ring at his feet
-		fx.place("chain%d" % id, "chain", h.pos + Vector3(0, 0.08, 0), Color("f4f0e0"), Color("8a8070"), 0.95, m.time * 0.6)
+		fx.place(
+			"chain%d" % id, "chain", h.pos + Vector3(0, 0.08, 0), Color("f4f0e0"), Color("8a8070"), 0.95, m.time * 0.6
+		)
 	if barge_t > 0.0:
 		barge_t -= dt
 		var d2 := h.aim_dir()
@@ -214,8 +227,12 @@ func _tick_looks(dt: float) -> void:
 	for s in stunned.duplicate():
 		var f = s["e"]
 		if not is_instance_valid(f) or (f as Ent).dead or m.time > float(s["until"]):
-			stunned.erase(s); continue
-		fx.place("spiral%d" % (f as Ent).get_instance_id(), "spiral", (f as Ent).pos + Vector3(0, 2.4, 0), Color("ffe0a0"), Color("8a6aff"), 0.45)
+			stunned.erase(s)
+			continue
+		fx.place(
+			"spiral%d" % (f as Ent).get_instance_id(), "spiral", (f as Ent).pos + Vector3(0, 2.4, 0), Color("ffe0a0"),
+			Color("8a6aff"), 0.45
+		)
 
 # ------------------------------------------------------------------ RMB: Grapnel
 func fire_rmb(c: Dictionary) -> void:
@@ -230,7 +247,8 @@ func fire_rmb(c: Dictionary) -> void:
 	flying = true
 	scoop = []
 	play("dr_throw")
-	var stg := stage("rmb", {"delivery": {"type": "projectile", "speed": float(rdf["speed"]), "range": float(rdf["range"]), "size": 0.24},
+	var hook := {"type": "projectile", "speed": float(rdf["speed"]), "range": float(rdf["range"]), "size": 0.24}
+	var stg := stage("rmb", {"delivery": hook,
 		"effects": [{"type": "damage", "amount": float(rdf["dmg"])}]})
 	var n0: int = m.shots.size()
 	run(stg, cx("rmb", "grapnel", aim(), {
@@ -244,7 +262,8 @@ func fire_rmb(c: Dictionary) -> void:
 				m.fx.word(at + Vector3(0, 1.2, 0), "SNAGGED" if why == "wall" else "MISS", Color("c0b0a0"), false)}))
 	if m.shots.size() > n0:
 		hook_sd = m.shots[-1]
-		(hook_sd["x"] as Dictionary)["rocks"] = true      # the hook flies over rocks and props (cliff faces still stop it)
+		# the hook flies over rocks and props (cliff faces still stop it)
+		(hook_sd["x"] as Dictionary)["rocks"] = true
 		var sn = hook_sd.get("node")
 		if sn is Node3D and is_instance_valid(sn):
 			(sn as Node3D).visible = false          # the claw and the rope are drawn by the kit
@@ -295,7 +314,9 @@ func _grab(f: Ent, ally := false) -> void:
 	KitStatus.apply(h, "gnd", float(rdf["pull_max"]))      # the caster is Grounded while he reels (sheet gap 5)
 	st["self_gnd"] = true
 	if not ally: f.stun_t = maxf(f.stun_t, 0.3)
-	m.fx.word(f.pos + Vector3(0, 2.4, 0), "SCOOPED" if wisp else ("HOOKED" if not ally else "HOLD ON"), col_of(rdf), true)
+	m.fx.word(
+		f.pos + Vector3(0, 2.4, 0), _grab_word(wisp, ally), col_of(rdf), true
+	)
 	fx.orb(f.pos + Vector3(0, 1.0, 0), ROPE_COL, Color.WHITE, 1.1, 0.15)
 	m.sfx("dr_grab", f.pos, -1.0, 1.0)
 	m.sfx("dr_reel", h.pos, -5.0, 1.0)
@@ -303,12 +324,19 @@ func _grab(f: Ent, ally := false) -> void:
 	if f.remote:
 		_end_pull(not ally)           # their body belongs to another game: the hit and Grounded still land
 
+func _grab_word(wisp: bool, ally: bool) -> String:
+	if wisp:
+		return "SCOOPED"
+	return "HOLD ON" if ally else "HOOKED"
+
 ## The reel: the body is hauled toward wherever Dredge is now, with weight (it carries its sideways speed and
 ## eases into the new heading), so walking sideways while reeling swings it round you (the source's physics
 ## pull). It is dragged over rocks and props; a cliff face or a placed wall stops it; the abyss takes it.
 func _tick_pull(dt: float) -> void:
 	var f = pull["t"]
-	if not is_instance_valid(f) or (f as Ent).dead or ((f is Hunter) and (f as Hunter).downed != bool(pull.get("wisp", false))) or h.stun_t > 0.0 or h.downed:
+	var gone: bool = not is_instance_valid(f) or (f as Ent).dead
+	var state_changed: bool = not gone and f is Hunter and (f as Hunter).downed != bool(pull.get("wisp", false))
+	if gone or state_changed or h.stun_t > 0.0 or h.downed:
 		_end_pull(false)
 		return
 	var fe := f as Ent
@@ -342,7 +370,8 @@ func _tick_pull(dt: float) -> void:
 		_end_pull(false)
 	for w in scoop.duplicate():
 		if not is_instance_valid(w) or not (w as Hunter).downed or (w as Hunter).out:
-			scoop.erase(w); continue
+			scoop.erase(w)
+			continue
 		var tw := Vector2(h.pos.x - w.pos.x, h.pos.z - w.pos.z)
 		if tw.length() > gap: _drag(w, tw.normalized(), minf(float(rdf["pull_speed"]) * dt, tw.length() - gap))
 
@@ -353,7 +382,8 @@ func _drag(fe: Ent, dir: Vector2, dist: float) -> float:
 	var W = m.world
 	while moved < dist - 0.001:
 		var s := minf(0.2, dist - moved)
-		var nx := fe.pos.x + dir.x * s; var nz := fe.pos.z + dir.y * s
+		var nx := fe.pos.x + dir.x * s
+		var nz := fe.pos.z + dir.y * s
 		var gy: float = W.ground_at(nx, nz)
 		var wall: bool = not W.dyn_walls.is_empty() and Verbs.wall_blocks(W.dyn_walls, nx, nz, fe.r, fe.pos.y) > 0.0
 		if wall or (gy > World.VOID + 1.0 and gy - fe.pos.y > CLIFF):
@@ -364,11 +394,13 @@ func _drag(fe: Ent, dir: Vector2, dist: float) -> float:
 			var clear := false
 			while k < 5.0:
 				k += 0.2
-				var qx := fe.pos.x + dir.x * k; var qz := fe.pos.z + dir.y * k
+				var qx := fe.pos.x + dir.x * k
+				var qz := fe.pos.z + dir.y * k
 				var qy: float = W.ground_at(qx, qz)
 				if qy - fe.pos.y > CLIFF: break
 				if W.occupy(qx, qz, fe.r, maxf(fe.pos.y, qy), false) == 0.0:
-					fe.pos.x = qx; fe.pos.z = qz
+					fe.pos.x = qx
+					fe.pos.z = qz
 					fe.pos.y = maxf(fe.pos.y, qy) + 0.5
 					fe.vel.y = maxf(fe.vel.y, 5.0)      # a little toss as it clears the top
 					clear = true
@@ -378,7 +410,8 @@ func _drag(fe: Ent, dir: Vector2, dist: float) -> float:
 			hauled += 1
 			moved += k
 			continue
-		fe.pos.x = nx; fe.pos.z = nz
+		fe.pos.x = nx
+		fe.pos.z = nz
 		moved += s
 	return moved
 
@@ -395,7 +428,8 @@ func _end_pull(arrived: bool) -> void:
 	if arrived and is_instance_valid(f) and not (f as Ent).dead:
 		arrivals += 1
 		var rdf := rmb_def()
-		(f as Ent).vel.x = 0.0; (f as Ent).vel.z = 0.0
+		(f as Ent).vel.x = 0.0
+		(f as Ent).vel.z = 0.0
 		if ally:
 			if not wisp: m.fx.word((f as Ent).pos + Vector3(0, 2.4, 0), "SAVED", col_of(rdf), true)
 			return
@@ -435,10 +469,13 @@ func _tick_wind(dt: float) -> void:
 		return
 	if t0 >= 0.14 and t0 < 0.32:
 		var step := float(ed["hop"]) / 0.18 * dt
-		var nx := h.pos.x + hop_dir.x * step; var nz := h.pos.z + hop_dir.y * step
+		var nx := h.pos.x + hop_dir.x * step
+		var nz := h.pos.z + hop_dir.y * step
 		var gy: float = m.world.ground_at(nx, nz)
 		if gy > World.VOID + 1.0 and m.world.occupy(nx, nz, h.r, h.pos.y, false) == 0.0:
-			h.pos.x = nx; h.pos.z = nz           # never hops off into the abyss or into a wall
+			# never hops off into the abyss or into a wall
+			h.pos.x = nx
+			h.pos.z = nz
 	if wind <= 0.0:
 		wind = 0.0
 		_anchor()
@@ -453,12 +490,22 @@ func _anchor() -> void:
 	var stun := float(ed["stun"]) + 0.1 * float(maxi(0, rank("kin") - 1))
 	var stg := stage("e", {"delivery": {"type": "cone", "radius": float(ed["radius"]), "angle": float(ed["angle"])},
 		"effects": [{"type": "damage", "amount": amt}, {"type": "stun", "duration": stun}]})
-	run(stg, cx("e", "anchor_drop", aim(), {"no_floor": true, "on_foe": func(f: Ent, _c: Dictionary): _slammed(f, stun)}))
+	var on_foe := func(f: Ent, _c: Dictionary): _slammed(f, stun)
+	run(stg, cx("e", "anchor_drop", aim(), {"no_floor": true, "on_foe": on_foe}))
 	var at := h.pos + Vector3(dd.x, 0, dd.y) * 1.7
 	fx.anchor_drop(ground(at), dd, ANCHOR_COL, 0.6, 0.8)
-	fx.crescent(h.pos + Vector3(0, 0.25, 0), dd, float(ed["angle"]), float(ed["radius"]), Color("ffe0a0"), Color("d89040"), 0.25)
-	AimKit.cone(h, "e_hit", {"len": float(ed["radius"]), "deg": float(ed["angle"]), "edges": true, "all": true, "dur": 0.2, "col": Color("ffffff"), "alpha": 0.7})
-	m.later(0.08, func(): if is_instance_valid(h): m.fx.dust(at, 26); fx.wave(ground(at), 1.8, Color("fff4e0"), 0.35))
+	fx.crescent(
+		h.pos + Vector3(0, 0.25, 0), dd, float(ed["angle"]), float(ed["radius"]), Color("ffe0a0"), Color("d89040"),
+		0.25
+	)
+	AimKit.cone(
+		h, "e_hit",
+		{
+			"len": float(ed["radius"]), "deg": float(ed["angle"]), "edges": true, "all": true, "dur": 0.2,
+			"col": Color("ffffff"), "alpha": 0.7
+		}
+	)
+	m.later(0.08, _anchor_dust.bind(at))
 	m.sfx("dr_anchor", h.pos, -1.0, 1.0)
 	Feel.shake(m, "t3", h, h.pos)
 	if h.is_local(): Oomph.punch_dir(m, dd, 0.25)
@@ -468,6 +515,13 @@ func _anchor() -> void:
 	st["dive_vy"] = h.vel.y               # (tests) what the Anchor left your fall speed at
 	lock_until = m.time + float(dash_def()["lock_t"])
 	net_ring(h.pos, float(ed["radius"]), col_of(ed))
+
+## The dust cloud and ring a beat after the anchor lands.
+func _anchor_dust(at: Vector3) -> void:
+	if not is_instance_valid(h):
+		return
+	m.fx.dust(at, 26)
+	fx.wave(ground(at), 1.8, Color("fff4e0"), 0.35)
 
 func _slammed(f: Ent, stun: float) -> void:
 	var ed := e_def()
@@ -494,7 +548,8 @@ func _tick_dive(dt: float) -> void:
 	if h.stun_t > 0.0 or h.downed:
 		dive = {}
 		return
-	h.vel.x = 0.0; h.vel.z = 0.0
+	h.vel.x = 0.0
+	h.vel.z = 0.0
 	h.vel.y = minf(h.vel.y, -float(ed["dive"]))
 	h.gliding = false
 	var gy: float = m.world.ground_at(h.pos.x, h.pos.z)
@@ -502,10 +557,19 @@ func _tick_dive(dt: float) -> void:
 		dive = {}                 # drifted over the abyss: no smash, no push
 		return
 	var land := Vector3(h.pos.x, gy, h.pos.z)
-	AimKit.circle(h, "e_land", {"at": land, "r": float(ed["quake_r"]), "all": true, "fill": clampf(float(dive["t"]) / 0.4, 0.0, 1.0), "ticks": true, "col": ANCHOR_COL})
+	AimKit.circle(
+		h, "e_land",
+		{
+			"at": land, "r": float(ed["quake_r"]), "all": true, "fill": clampf(float(dive["t"]) / 0.4, 0.0, 1.0),
+			"ticks": true, "col": ANCHOR_COL
+		}
+	)
 	if tells_visible():
 		var d2 := h.aim_dir()
-		fx.place("dive_anchor%d" % h.get_instance_id(), "anchor", h.pos + Vector3(d2.x, 0, d2.y) * 0.9 + Vector3(0, -0.4, 0), ANCHOR_COL, Color.WHITE, 0.55, atan2(-d2.x, -d2.y) + PI / 2.0)
+		fx.place(
+			"dive_anchor%d" % h.get_instance_id(), "anchor", h.pos + Vector3(d2.x, 0, d2.y) * 0.9 + Vector3(0, -0.4, 0),
+			ANCHOR_COL, Color.WHITE, 0.55, atan2(-d2.x, -d2.y) + PI / 2.0
+		)
 	if h.grounded or h.pos.y - gy < 0.12 or float(dive["t"]) > 2.0:
 		var fell := maxf(float(dive["h0"]), float(dive["y0"]) - gy)
 		dive = {}
@@ -522,7 +586,8 @@ func _quake(at: Vector3, fell: float) -> void:
 	var r := float(ed["quake_r"])
 	var stg := stage("e", {"delivery": {"type": "burst", "radius": r},
 		"effects": [{"type": "damage", "amount": float(ed["dmg"]) * last_quake_k}, {"type": "stun", "duration": stun}]})
-	run(stg, cx("e", "anchor_drop", at, {"at_fixed": at, "no_floor": true, "on_foe": func(f: Ent, _c: Dictionary): _slammed(f, stun)}))
+	var on_foe := func(f: Ent, _c: Dictionary): _slammed(f, stun)
+	run(stg, cx("e", "anchor_drop", at, {"at_fixed": at, "no_floor": true, "on_foe": on_foe}))
 	var d2 := h.aim_dir()
 	fx.anchor_drop(at + Vector3(d2.x, 0, d2.y) * 0.9, d2, ANCHOR_COL, 0.45, 0.62)
 	fx.wave(at, r, ANCHOR_COL, 0.45, Color("fff0c0"))
@@ -555,7 +620,10 @@ func on_dash(use_ex: bool) -> bool:
 	if use_ex and not h.grounded:
 		# the class air dash, further when airborne (sheet: Barge)
 		if not spend_dash(true): return true
-		travel(float(h.cdat.get("ex_dist", 4.2)) * float(dd["air_k"]), float(h.cdat.get("ex_time", 0.21)) * 1.15, {"invuln": 0.08, "trail": "", "dir": dir}, true)
+		travel(
+			float(h.cdat.get("ex_dist", 4.2)) * float(dd["air_k"]), float(h.cdat.get("ex_time", 0.21)) * 1.15,
+			{"invuln": 0.08, "trail": "", "dir": dir}, true
+		)
 		play("dr_hop")
 		m.sfx("dr_hop", h.pos, -3.0, 1.0)
 		barge_t = 0.25
@@ -563,7 +631,13 @@ func on_dash(use_ex: bool) -> bool:
 	if not spend_dash(false):
 		return true
 	var pk := power("dash") / maxf(0.01, m.dmg_mult(h))
-	travel(float(dd["dist"]), float(dd["time"]), {"invuln": 0.06, "shove": true, "shove_kb": float(dd["hit_kb"]), "shove_dmg": float(dd["hit_dmg"]) * pk, "trail": "", "dir": dir})
+	travel(
+		float(dd["dist"]), float(dd["time"]),
+		{
+			"invuln": 0.06, "shove": true, "shove_kb": float(dd["hit_kb"]), "shove_dmg": float(dd["hit_dmg"]) * pk,
+			"trail": "", "dir": dir
+		}
+	)
 	st["last_dash"] = "barge"
 	play("dr_barge")
 	barge_t = float(dd["time"])
@@ -598,9 +672,14 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 		return
 	# the Anchor on a foe that has just landed Grounded, or any foe up close
 	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and dist < float(e_def()["radius"]) + 1.0 and los:
-		h.inp["aim"] = tgt.pos; h.inp["sig"] = true; return
-	if int(h.slot_lv["sec"]) > 0 and rmb_ready() and not flying and los and dist > 4.5 and dist < float(rmb_def()["range"]) - 1.0 and (tf.mass() < 6.0):
-		h.inp["aim"] = tgt.pos + Vector3(0, 0.9, 0); h.inp["sec"] = true; return
+		h.inp["aim"] = tgt.pos
+		h.inp["sig"] = true
+		return
+	var in_reach := dist > 4.5 and dist < float(rmb_def()["range"]) - 1.0
+	if int(h.slot_lv["sec"]) > 0 and rmb_ready() and not flying and los and in_reach and tf.mass() < 6.0:
+		h.inp["aim"] = tgt.pos + Vector3(0, 0.9, 0)
+		h.inp["sec"] = true
+		return
 	if int(h.slot_lv["dash"]) > 0 and h.dashes >= 1.0 and los and dist > 3.0 and dist < 6.0 and randf() < 0.2:
 		h.inp["aim"] = tgt.pos
 		h.ai["dash_dir"] = h.dir_to(tgt)

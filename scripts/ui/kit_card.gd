@@ -290,7 +290,8 @@ static func slot_text(a: String, slot: String) -> Dictionary:
 		"x":
 			var xd: Dictionary = d["x"]
 			var tag := "level %d · %ss" % [int(xd.get("unlock", 6)), KinText.n(float(xd.get("cooldown", 30.0)))]
-			out.merge({"name": String(xd["name"]), "icon": String(xd.get("icon", "")), "col": Color(String(xd.get("col", "#ffffff"))),
+			var xcol := Color(String(xd.get("col", "#ffffff")))
+			out.merge({"name": String(xd["name"]), "icon": String(xd.get("icon", "")), "col": xcol,
 				"tag": tag, "line": String(cd.get("x", ""))}, true)
 			out["detail"] = [["", String(xd.get("desc", ""))],
 				["Bond", "Landing it on a hunter fills your Boki bond a long way, ready for the Merge on R."]]

@@ -20,7 +20,8 @@ func emit(nozzle: Vector3, dir: Vector2, carry: Vector3, feet_y: float, speed: f
 	while acc >= EMIT_DT:
 		acc -= EMIT_DT
 		var v := Vector3(dir.x, 0.0, dir.y) * speed + Vector3(carry.x, 0.0, carry.z) * INHERIT
-		puffs.append({"p": nozzle, "v": v, "age": acc, "life": reach / speed, "life0": reach / speed, "fy": feet_y, "seed": randf()})
+		var life := reach / speed
+		puffs.append({"p": nozzle, "v": v, "age": acc, "life": life, "life0": life, "fy": feet_y, "seed": randf()})
 		emitted += 1
 
 func snuff() -> void:

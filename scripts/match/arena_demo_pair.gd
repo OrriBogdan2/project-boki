@@ -63,7 +63,9 @@ static func tick(A: Arena, w: String, t: float, dt: float) -> float:
 	ArenaDemo._aim(P, D)
 	P.inp["move"] = Vector2.ZERO
 	P.hp = P.max_hp
-	P.ak.cd["rmb"] = 0.0; P.ak.ch_rmb = float(P.ak.rmb_charges()); P.ak.cd["e"] = 0.0
+	P.ak.cd["rmb"] = 0.0
+	P.ak.ch_rmb = float(P.ak.rmb_charges())
+	P.ak.cd["e"] = 0.0
 	if payoff:
 		return _payoff(A, P, D, mv, t, dt)
 	_drive(A, P, D, mv, t, dt)
@@ -87,19 +89,31 @@ static func _drive(A: Arena, P: Hunter, D: Hunter, mv: String, t: float, dt: flo
 			if ArenaDemo._at(t, dt, go): P.ak.press_rmb()
 		"dr_anchor":
 			if ArenaDemo._at(t, dt, go):
-				D.teleport(P.pos + Vector3(3.2, 0, 0)); P.ak.use_e()
+				D.teleport(P.pos + Vector3(3.2, 0, 0))
+				P.ak.use_e()
 		"dr_dive":
 			if ArenaDemo._at(t, dt, go - 0.2):
-				D.teleport(A.home + Vector3(1.6, 0, 0)); P.teleport(A.home + Vector3(0, 6.0, 0)); P.grounded = false; P.vel = Vector3.ZERO
-			if t > go - 0.2 and t < go: P.vel = Vector3.ZERO; P.pos.y = A.home.y + 6.0
+				D.teleport(A.home + Vector3(1.6, 0, 0))
+				P.teleport(A.home + Vector3(0, 6.0, 0))
+				P.grounded = false
+				P.vel = Vector3.ZERO
+			if t > go - 0.2 and t < go:
+				P.vel = Vector3.ZERO
+				P.pos.y = A.home.y + 6.0
 			if ArenaDemo._at(t, dt, go): P.ak.use_e()
 		"dr_barge", "as_leap":
 			if t < go: D.teleport(A.home + Vector3(3.6, 0, 0))
-			if ArenaDemo._at(t, dt, go): P.dashes = P.max_dashes(); P.do_dash()
+			if ArenaDemo._at(t, dt, go):
+				P.dashes = P.max_dashes()
+				P.do_dash()
 		"dr_hop", "lw_hop":
 			if t < go: D.teleport(A.home + Vector3(0, 0, 7.0))
-			if ArenaDemo._at(t, dt, go - 0.15): P.vel.y = 11.0; P.grounded = false
-			if ArenaDemo._at(t, dt, go): P.ex_cd = 0.0; P.do_dash()
+			if ArenaDemo._at(t, dt, go - 0.15):
+				P.vel.y = 11.0
+				P.grounded = false
+			if ArenaDemo._at(t, dt, go):
+				P.ex_cd = 0.0
+				P.do_dash()
 		"dr_flex":
 			if ArenaDemo._at(t, dt, go): (P.ak as DredgeKit).add_stack(1)
 		"as_lance":
@@ -113,14 +127,18 @@ static func _drive(A: Arena, P: Hunter, D: Hunter, mv: String, t: float, dt: flo
 		"as_shot":
 			if t < go: D.teleport(A.home + Vector3(7.0, 0, 0))
 			if ArenaDemo._at(t, dt, go):
-				P.ak.bot_hold["rmb"] = 0.42; P.ak.press_rmb()      # held 0.42s (the lane), then released
+				# held 0.42s (the lane), then released
+				P.ak.bot_hold["rmb"] = 0.42
+				P.ak.press_rmb()
 		"as_cloak":
 			if ArenaDemo._at(t, dt, go):
-				D.teleport(P.pos + Vector3(3.6, 0, 0)); P.ak.use_e()
+				D.teleport(P.pos + Vector3(3.6, 0, 0))
+				P.ak.use_e()
 		"lw_stoke":
 			if ArenaDemo._at(t, dt, go):
 				var K := P.ak as AshwickKit
-				K.stoke(D); K.stoke(D)
+				K.stoke(D)
+				K.stoke(D)
 
 static func _payoff(A: Arena, P: Hunter, D: Hunter, mv: String, t: float, dt: float) -> float:
 	if mv == "dr":

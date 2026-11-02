@@ -117,7 +117,9 @@ func _ignite(f: Ent, lvl: int, was: int) -> void:
 	if f.remote:
 		f.hurt(0.01, h, {"src": "flame", "burn": dps, "burn_for": float(rd()["ignite_t"])})
 	else:
-		f.burn_t = maxf(f.burn_t, float(rd()["ignite_t"])); f.burn_dps = dps; f.burn_by = h
+		f.burn_t = maxf(f.burn_t, float(rd()["ignite_t"]))
+		f.burn_dps = dps
+		f.burn_by = h
 	var col := res_col()
 	if lvl == 2 and was < 2:
 		payoff_fx(f.pos, "FLASHOVER", Color("ffe0a0"), "lw_blaze", h.aim_dir(), f)
@@ -184,11 +186,21 @@ func _tick(dt: float) -> void:
 	if h.shield_t > 0.0 and h.shield > 0.5 and st.get("shield_on", false):
 		if tells_visible():
 			# the Furnace Cloak's shield: a swirling ring of fire hugging Linwick while it holds (about 0.8 bh)
-			fx.place("swirl%d" % h.get_instance_id(), "swirl", h.pos + Vector3(0, 0.55, 0), Color("ffb040"), Color("fff0b0"), 1.8, m.time * 2.0, 1.0)
-			fx.place("swirl2%d" % h.get_instance_id(), "swirl", h.pos + Vector3(0, 1.25, 0), Color("ff7a2a"), Color("ffd890"), 1.45, -m.time * 2.6, 0.7)
+			fx.place(
+				"swirl%d" % h.get_instance_id(), "swirl", h.pos + Vector3(0, 0.55, 0), Color("ffb040"), Color("fff0b0"),
+				1.8, m.time * 2.0, 1.0
+			)
+			fx.place(
+				"swirl2%d" % h.get_instance_id(), "swirl", h.pos + Vector3(0, 1.25, 0), Color("ff7a2a"),
+				Color("ffd890"), 1.45, -m.time * 2.6, 0.7
+			)
 	else:
 		st["shield_on"] = false
-	tell = "full" if _best_char() >= 22.0 else ("half" if _best_char() >= 12.0 else "")
+	tell = ""
+	if _best_char() >= 22.0:
+		tell = "full"
+	elif _best_char() >= 12.0:
+		tell = "half"
 	net_pulse(dt, not ignites.is_empty(), 1.3)
 
 ## The pilot flame at the nozzle, embers over a heavily charred foe, and the burn stage over each burning
@@ -217,10 +229,17 @@ func _tick_tells(dt: float) -> void:
 		var top := f.pos + Vector3(0, 3.7, 0)
 		var n := 1 if lvl < 2 else 3
 		for i in n:
-			var off := Vector3((i - (n - 1) * 0.5) * 0.6, (0.06 if i == 1 else 0.0) if n == 3 else 0.0, 0)
-			fx.place("pip%d_%d" % [key, i], "pip", top + off, PIP_COL if lvl < 2 else Color("ff5a2a"), Color("fff0a0"), 0.4 if lvl < 2 else 0.44)
+			var rise := 0.06 if n == 3 and i == 1 else 0.0       # the middle of three pips sits a little higher
+			var off := Vector3((i - (n - 1) * 0.5) * 0.6, rise, 0)
+			fx.place(
+				"pip%d_%d" % [key, i], "pip", top + off, PIP_COL if lvl < 2 else Color("ff5a2a"), Color("fff0a0"),
+				0.4 if lvl < 2 else 0.44
+			)
 		if lvl >= 2:
-			fx.place("pipg%d" % key, "glow", top + Vector3(0, -0.05, 0), Color("ff4a1a"), Color("ff9a3a"), 0.75 + 0.08 * sin(m.time * 9.0))
+			fx.place(
+				"pipg%d" % key, "glow", top + Vector3(0, -0.05, 0), Color("ff4a1a"), Color("ff9a3a"),
+				0.75 + 0.08 * sin(m.time * 9.0)
+			)
 
 ## Shown burn stage over a foe: 0, 1 (Ablaze, one pip) or 3 (Flashover, three pips) (tests).
 func pips_on(f: Ent) -> int:
@@ -255,7 +274,9 @@ func lmb_override(held: bool, dt: float) -> bool:
 		return false
 	if held and h.ammo <= 0 and h.reload_t <= 0.0:
 		h.start_reload()          # out of fuel: the tank refills
-	if not held or not h.can_fire() or KinMerge.transforming(h) or KinMerge.active(h) or (relight_t > 0.0 and not was_held):       # (a merge ends the roar: holding the key on must not relight it)
+	# a merge ends the roar: holding the key on must not relight it
+	var merging := KinMerge.transforming(h) or KinMerge.active(h)
+	if not held or not h.can_fire() or merging or (relight_t > 0.0 and not was_held):
 		if was_held:
 			play("as_lance_end")
 			after_t = float(lmbd().get("slow_after", 0.35))
@@ -301,7 +322,8 @@ func _flame_tick(tick: float) -> void:
 	flame_ticks += 1
 	if flame_ticks % 4 == 1:
 		m.sfx("lw_roar", h.pos, -6.0, 0.95 + randf() * 0.1)
-	var w0 := float(ld["w0"]); var w1 := float(ld["w1"])
+	var w0 := float(ld["w0"])
+	var w1 := float(ld["w1"])
 	for f in m.foes_of(h.team):
 		if not f.hittable():
 			continue
@@ -313,7 +335,10 @@ func _flame_tick(tick: float) -> void:
 		f.hurt(dmg, h, {"src": "flame", "ab": "primary", "tags": ["flame"], "melee": false})
 		add_char(f, float(ld["char_burning"] if hot else ld["char_tick"]))
 		if flame_ticks % 2 == 0 and tells_visible():
-			m.fx.spark(f.pos + Vector3(0, 1.0, 0), Vector3(randf_range(-0.4, 0.4), 1.0, randf_range(-0.4, 0.4)), Color("ffb04a"), 4, 4.0, 70.0, 0.3)
+			m.fx.spark(
+				f.pos + Vector3(0, 1.0, 0), Vector3(randf_range(-0.4, 0.4), 1.0, randf_range(-0.4, 0.4)),
+				Color("ffb04a"), 4, 4.0, 70.0, 0.3
+			)
 
 # ------------------------------------------------------------------ RMB: Cinder Shot
 ## Held: a thin white lane to the cursor (clamped to 14m) with a small end ring, the gun hand cocked.
@@ -325,7 +350,9 @@ func rmb_hold_tick(_t: float) -> void:
 		play("as_aim")
 	var rdf := rmb_def()
 	var ln := AimMode.dist(h, float(rdf["range"]))
-	AimKit.lane(h, "rmb", {"len": ln, "width": 0.42, "col": Color("fff4e6"), "col2": BOLT_COL, "alpha": 0.9, "tip": true})
+	AimKit.lane(
+		h, "rmb", {"len": ln, "width": 0.42, "col": Color("fff4e6"), "col2": BOLT_COL, "alpha": 0.9, "tip": true}
+	)
 	AimKit.circle(h, "rmb_end", {"at": h.pos + _fwd() * ln, "r": 0.55, "col": Color("bfe0ff")})
 
 func fire_rmb(c: Dictionary) -> void:
@@ -345,7 +372,8 @@ func fire_rmb(c: Dictionary) -> void:
 	play("as_shot")
 	var amt := float(rdf["dmg"]) * (1.6 if rank("sec") >= 3 else 1.0)
 	var rng := AimMode.dist(h, float(rdf["range"]))      # lands at the cursor, 14m at most (sheet 0133)
-	var stg := stage("rmb", {"delivery": {"type": "projectile", "speed": float(rdf["speed"]), "range": rng, "size": float(rdf["size"])},
+	var shot := {"type": "projectile", "speed": float(rdf["speed"]), "range": rng, "size": float(rdf["size"])}
+	var stg := stage("rmb", {"delivery": shot,
 		"effects": [{"type": "damage", "amount": amt}]})
 	var n0: int = m.shots.size()
 	run(stg, cx("rmb", "cinder_shot", aim(), {"on_foe": func(f: Ent, _c: Dictionary): _cinder_hit(f)}))
@@ -403,7 +431,10 @@ func on_dash(use_ex: bool) -> bool:
 	if use_ex and not h.grounded:
 		# the class air dash, Linwick's way: a jet from the bellows tucks him into a ball
 		if not spend_dash(true): return true
-		travel(float(h.cdat.get("ex_dist", 4.2)), float(h.cdat.get("ex_time", 0.21)), {"invuln": 0.08, "trail": "", "dir": dir}, true)
+		travel(
+			float(h.cdat.get("ex_dist", 4.2)), float(h.cdat.get("ex_time", 0.21)),
+			{"invuln": 0.08, "trail": "", "dir": dir}, true
+		)
 		play("lw_hop")
 		m.sfx("lw_hop", h.pos, -3.0, 1.0)
 		fx.sunburst(h.pos + Vector3(0, 0.5, 0), 0.9, Color("ff8a3a"), Color("ffe0a0"), 0.25, true)
@@ -430,7 +461,10 @@ func _tick_bash(dt: float) -> void:
 		if bash.get("hop", false):
 			fx.orb(h.pos + Vector3(0, 0.7, 0) - f3 * 0.4, Color("ff8a3a"), Color("ffe0a0"), 0.5, 0.25)
 		elif not bash.get("hit", false):
-			fx.place("skull%d" % h.get_instance_id(), "skull", h.pos + Vector3(0, 0.95, 0) + f3 * 0.35, SKULL_COL, Color("ffe08a"), 1.0, atan2(-dir.x, -dir.y))
+			fx.place(
+				"skull%d" % h.get_instance_id(), "skull", h.pos + Vector3(0, 0.95, 0) + f3 * 0.35, SKULL_COL,
+				Color("ffe08a"), 1.0, atan2(-dir.x, -dir.y)
+			)
 	if not bash.get("hit", true):
 		for f in m.foes_of(h.team):
 			if not f.hittable() or absf(f.pos.y - h.pos.y) > 1.8:
@@ -451,8 +485,13 @@ func _bash_impact(f: Ent) -> void:
 	bash_hits += 1
 	h.roll_t = 0.0                  # the dash stops on the foe
 	var dir: Vector2 = bash["dir"]
-	h.vel.x = -dir.x * float(dd["recoil"]); h.vel.z = -dir.y * float(dd["recoil"])     # and he bounces back a little off them
-	f.hurt(float(dd["dmg"]) * power("dash"), h, {"src": "flame", "ab": "dodge", "tags": ["flame"], "melee": true, "kb": dir * float(dd["kb"])})
+	# and he bounces back a little off them
+	h.vel.x = -dir.x * float(dd["recoil"])
+	h.vel.z = -dir.y * float(dd["recoil"])
+	f.hurt(
+		float(dd["dmg"]) * power("dash"), h,
+		{"src": "flame", "ab": "dodge", "tags": ["flame"], "melee": true, "kb": dir * float(dd["kb"])}
+	)
 	add_char(f, float(dd["char"]))
 	if rank("dash") >= 3:
 		stoke(f)
@@ -475,7 +514,10 @@ func cast_e() -> bool:
 	cloaks += 1
 	cloak_t = float(ed["tele"])
 	play("as_cloak")
-	AimKit.circle(h, "e_ring", {"self": true, "r": float(ed["radius"]), "all": true, "dur": float(ed["tele"]), "col": col_of(ed), "hot": 0.3})
+	AimKit.circle(
+		h, "e_ring",
+		{"self": true, "r": float(ed["radius"]), "all": true, "dur": float(ed["tele"]), "col": col_of(ed), "hot": 0.3}
+	)
 	m.sfx("lw_shield", h.pos, -1.0, 1.0)
 	return true
 
@@ -499,7 +541,10 @@ func _cloak_blast() -> void:
 		f.hurt(float(ed["dmg"]) * power("kin") * k, h, {"src": "flame", "ab": "k1", "tags": ["flame", "cloak"]})
 		if add_char(f, float(ed["char"])): stoked = true
 		KitStatus.apply(f, "blt", float(ed["blt_t"]))
-		m.fx.burst(f.pos + Vector3(0, 1.4, 0), Color("6a4a5a"), 8, 1.5, 0.6, -1.0, 1.6)      # a smoke puff over the target
+		# a smoke puff over the target
+		m.fx.burst(
+			f.pos + Vector3(0, 1.4, 0), Color("6a4a5a"), 8, 1.5, 0.6, -1.0, 1.6
+		)
 		if f.mass() < 6.0 and not f.remote:
 			drags.append({"e": f, "left": 0.45})
 			pulled += 1
@@ -517,15 +562,18 @@ func _tick_drags(dt: float) -> void:
 		var fe = dg["e"]
 		dg["left"] = float(dg["left"]) - dt
 		if not is_instance_valid(fe) or (fe as Ent).dead or float(dg["left"]) <= 0.0:
-			drags.erase(dg); continue
+			drags.erase(dg)
+			continue
 		var e := fe as Ent
 		var to := Vector2(h.pos.x - e.pos.x, h.pos.z - e.pos.z)
 		var dist := to.length()
 		if dist <= float(ed["gap"]):
-			drags.erase(dg); continue
+			drags.erase(dg)
+			continue
 		var step := minf(float(ed["pull_speed"]) * dt, dist - float(ed["gap"]))
 		var dir := to / dist
-		var nx := e.pos.x + dir.x * step; var nz := e.pos.z + dir.y * step
+		var nx := e.pos.x + dir.x * step
+		var nz := e.pos.z + dir.y * step
 		var bx: float = m.world.occupy(nx, e.pos.z, e.r, e.pos.y, false)
 		var bz: float = m.world.occupy(e.pos.x, nz, e.r, e.pos.y, false)
 		if bx == 0.0: e.pos.x = nx
@@ -547,9 +595,14 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 		h.inp["xult"] = true
 		return
 	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and los and dist < float(e_def()["radius"]) - 0.5:
-		h.inp["aim"] = tgt.pos; h.inp["sig"] = true; return
-	if int(h.slot_lv["sec"]) > 0 and rmb_ready() and los and dist < float(rmb_def()["range"]) - 1.0 and dist > 3.0 and (burning(te) > 0 or randf() < 0.5):
-		h.inp["aim"] = tgt.pos + Vector3(0, 0.9, 0); h.inp["sec"] = true; return
+		h.inp["aim"] = tgt.pos
+		h.inp["sig"] = true
+		return
+	var in_reach := dist < float(rmb_def()["range"]) - 1.0 and dist > 3.0
+	if int(h.slot_lv["sec"]) > 0 and rmb_ready() and los and in_reach and (burning(te) > 0 or randf() < 0.5):
+		h.inp["aim"] = tgt.pos + Vector3(0, 0.9, 0)
+		h.inp["sec"] = true
+		return
 	if int(h.slot_lv["dash"]) > 0 and h.dashes >= 1.0 and los and dist > 2.5 and dist < 5.0 and randf() < 0.2:
 		h.inp["aim"] = tgt.pos
 		h.ai["dash_dir"] = h.dir_to(tgt)

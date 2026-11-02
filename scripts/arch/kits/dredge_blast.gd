@@ -92,7 +92,8 @@ func _stop() -> void:
 func _charge_looks(kc: float) -> void:
 	var x := xd()
 	var grow := 1.0 - pow(1.0 - kc, 2.0)
-	AimKit.cone(h, "x_fan", {"dir": blast["dir"], "len": maxf(0.6, float(x["range"]) * grow), "deg": float(x["fan_deg"]),
+	var reach := maxf(0.6, float(x["range"]) * grow)
+	AimKit.cone(h, "x_fan", {"dir": blast["dir"], "len": reach, "deg": float(x["fan_deg"]),
 		"fill": kc, "all": true, "col": FAN_COL, "col2": k.col_of(x), "alpha": 1.1, "hot": 0.4 * kc})
 	if not k.tells_visible() or randf() > 0.5:
 		return
@@ -144,9 +145,12 @@ func _slug_hit(wave: int, e: Ent, why: String, dmg: float) -> void:
 func _wave_fx(i: int, at: Vector3, dir: Vector2) -> void:
 	var x := xd()
 	k.fx.sunburst(at, 1.3, WAVE_COL[i % 2], WAVE_CORE[i % 2], 0.18, true)
-	k.fx.crescent(h.pos + Vector3(0, 0.3, 0), dir, float(x["fan_deg"]), float(x["range"]), WAVE_CORE[i % 2], WAVE_COL[i % 2], 0.22)
-	AimKit.cone(h, "x_fan", {"dir": dir, "len": float(x["range"]), "deg": float(x["fan_deg"]), "edges": true, "all": true,
-		"col": FAN_COL, "alpha": 0.8, "dur": 0.25})
+	k.fx.crescent(
+		h.pos + Vector3(0, 0.3, 0), dir, float(x["fan_deg"]), float(x["range"]), WAVE_CORE[i % 2], WAVE_COL[i % 2],
+		0.22
+	)
+	AimKit.cone(h, "x_fan", {"dir": dir, "len": float(x["range"]), "deg": float(x["fan_deg"]), "edges": true,
+		"all": true, "col": FAN_COL, "alpha": 0.8, "dur": 0.25})
 	m.sfx("dr_blast", h.pos, 0.0, WAVE_PITCH[i % 2])
 	Feel.shake(m, "t3", h, h.pos)
 	if h.is_local():

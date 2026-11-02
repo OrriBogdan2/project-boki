@@ -48,19 +48,36 @@ func _charge_and_waves() -> void:
 	var paid0 := HeroUlt.paid_total
 	var shots0: int = m.shot_n
 	_cast(P, home + Vector3(4, 0, 0))
-	ok("ult cast: planted, the charge move plays, its own cooldown starts (21s)", B.charging() and K.anim_id == "dr_blast" and absf(float(K.cd["x"]) - 21.0) < 0.2, "cd %.1f" % float(K.cd["x"]))
+	ok(
+		"ult cast: planted, the charge move plays, its own cooldown starts (21s)",
+		B.charging() and K.anim_id == "dr_blast" and absf(float(K.cd["x"]) - 21.0) < 0.2, "cd %.1f" % float(K.cd["x"])
+	)
 	ak.step(m, 0.3, func(): P.inp["move"] = Vector2(0, 1))
 	var fan: Dictionary = AimKit.entry(P, "x_fan")
 	var len_a := float(fan.get("len", 0.0))
 	var p0 := P.pos
 	ak.step(m, 0.6, func(): P.inp["move"] = Vector2(0, 1))
 	var len_b := float(AimKit.entry(P, "x_fan").get("len", 0.0))
-	ok("ult telegraph: a 105 degree fan everyone sees, growing over the charge", bool(fan.get("all", false)) and absf(float(fan.get("deg", 0.0)) - 105.0) < 0.5 and len_b > len_a + 0.5, "len %.1f -> %.1f" % [len_a, len_b])
-	ok("ult: planted through the charge (walking does nothing)", P.pos.distance_to(p0) < 0.05 and B.waves == 0, "moved %.2f" % P.pos.distance_to(p0))
+	ok(
+		"ult telegraph: a 105 degree fan everyone sees, growing over the charge",
+		bool(fan.get("all", false)) and absf(float(fan.get("deg", 0.0)) - 105.0) < 0.5 and len_b > len_a + 0.5,
+		"len %.1f -> %.1f" % [len_a, len_b]
+	)
+	ok(
+		"ult: planted through the charge (walking does nothing)", P.pos.distance_to(p0) < 0.05 and B.waves == 0,
+		"moved %.2f" % P.pos.distance_to(p0)
+	)
 	P.inp["move"] = Vector2.ZERO
 	ak.step(m, 1.3)
-	ok("ult: one press, two waves of six slugs through spawn_shot", B.waves == 2 and m.shot_n - shots0 >= 12 and not B.running(), "waves %d shots %d" % [B.waves, m.shot_n - shots0])
-	ok("ult bond: nothing for waves that hit nobody", HeroUlt.paid_total == paid0 and P.ult >= 0.0, "paid %.2f" % (HeroUlt.paid_total - paid0))
+	ok(
+		"ult: one press, two waves of six slugs through spawn_shot",
+		B.waves == 2 and m.shot_n - shots0 >= 12 and not B.running(),
+		"waves %d shots %d" % [B.waves, m.shot_n - shots0]
+	)
+	ok(
+		"ult bond: nothing for waves that hit nobody", HeroUlt.paid_total == paid0 and P.ult >= 0.0,
+		"paid %.2f" % (HeroUlt.paid_total - paid0)
+	)
 	P.ak.use_x()
 	ok("ult: the cooldown denies a new cast", not B.running() and B.casts == 1, "cd %.1f" % float(K.cd["x"]))
 	# point blank: every slug of both waves lands, with Anti-Heal; the waves 0.6s apart
@@ -79,19 +96,36 @@ func _charge_and_waves() -> void:
 			w = B.waves
 			times.append(t)
 	var hits: Array = B.last_wave_hits
-	ok("ult beats: wave 1 at the end of the 1.1s charge, wave 2 0.6s later", times.size() == 2 and absf(float(times[0]) - 1.1) < 0.05 and absf(float(times[1]) - float(times[0]) - 0.6) < 0.05, str(times))
-	ok("ult payoff: point blank, all six slugs of each wave land", hits.size() == 2 and int(hits[0]) == 6 and int(hits[1]) == 6, str(hits))
+	ok(
+		"ult beats: wave 1 at the end of the 1.1s charge, wave 2 0.6s later",
+		times.size() == 2 and absf(float(times[0]) - 1.1) < 0.05
+			and absf(float(times[1]) - float(times[0]) - 0.6) < 0.05,
+		str(times)
+	)
+	ok(
+		"ult payoff: point blank, all six slugs of each wave land",
+		hits.size() == 2 and int(hits[0]) == 6 and int(hits[1]) == 6, str(hits)
+	)
 	var per := float(K.x_def()["dmg"]) * K.power("x")
-	ok("ult payoff: 4 a slug, no back bonus (12 slugs, target facing away)", absf(ak.dmg(T) - per * 12.0) < 0.6, "dmg %.1f expected %.1f" % [ak.dmg(T), per * 12.0])
+	ok(
+		"ult payoff: 4 a slug, no back bonus (12 slugs, target facing away)", absf(ak.dmg(T) - per * 12.0) < 0.6,
+		"dmg %.1f expected %.1f" % [ak.dmg(T), per * 12.0]
+	)
 	ok("ult payoff: the slugs leave Anti-Heal", T.blight_t > 0.0, "%.1fs" % T.blight_t)
-	ok("ult bond: 12 slugs land, the cast still counts once (a hit: 0.6)", absf(HeroUlt.paid_total - paid0 - 0.6) < 0.001, "paid %.2f" % (HeroUlt.paid_total - paid0))
+	ok(
+		"ult bond: 12 slugs land, the cast still counts once (a hit: 0.6)",
+		absf(HeroUlt.paid_total - paid0 - 0.6) < 0.001, "paid %.2f" % (HeroUlt.paid_total - paid0)
+	)
 	# further out only the middle slugs reach
 	ak.fresh(T)
 	T.teleport(home + Vector3(4.6, 0, 0))
 	_cast(P, T.pos)
 	ak.step(m, 2.2)
 	hits = B.last_wave_hits
-	ok("ult payoff: at 4.6m fewer slugs land (a shotgun fan, not a wall)", hits.size() == 2 and int(hits[0]) > 0 and int(hits[0]) < 6, str(hits))
+	ok(
+		"ult payoff: at 4.6m fewer slugs land (a shotgun fan, not a wall)",
+		hits.size() == 2 and int(hits[0]) > 0 and int(hits[0]) < 6, str(hits)
+	)
 	await _reel_combo(m, P, T, home)
 	await ak.done(m)
 
@@ -132,10 +166,16 @@ func _guards() -> void:
 	var x0 := P.pos.x
 	P.ak.on_dash(false)
 	ak.step(m, 0.1)
-	ok("ult: RMB, E and the barge are locked while planted", K.ch_rmb == ch0 and K.grapples == g0 and K.wind <= 0.0 and absf(P.pos.x - x0) < 0.05)
+	ok(
+		"ult: RMB, E and the barge are locked while planted",
+		K.ch_rmb == ch0 and K.grapples == g0 and K.wind <= 0.0 and absf(P.pos.x - x0) < 0.05
+	)
 	P.stun_t = 0.5
 	ak.step(m, 0.05)
-	ok("ult: a stun in the charge stops it, back in 8s", not B.running() and B.waves == 0 and float(K.cd["x"]) <= 8.0 and B.stopped == 1, "cd %.1f" % float(K.cd["x"]))
+	ok(
+		"ult: a stun in the charge stops it, back in 8s",
+		not B.running() and B.waves == 0 and float(K.cd["x"]) <= 8.0 and B.stopped == 1, "cd %.1f" % float(K.cd["x"])
+	)
 	P.stun_t = 0.0
 	ak.step(m, 0.6)
 	_cast(P, T.pos)
@@ -143,7 +183,10 @@ func _guards() -> void:
 	ok("merge hold: the Broadside is charging before the merge", B.charging())
 	ok("merge hold: a merge is under way", ak.merge_now(P))
 	ak.step(m, 1.8)
-	ok("merge hold: dredge's Broadside is dropped, no wave mid-merge", not B.running() and B.waves == 0, "waves %d" % B.waves)
+	ok(
+		"merge hold: dredge's Broadside is dropped, no wave mid-merge", not B.running() and B.waves == 0,
+		"waves %d" % B.waves
+	)
 	KinMerge.end(P, "test")
 	await ak.done(m)
 
@@ -153,4 +196,7 @@ func _burst() -> void:
 		_cast(P, T.pos)
 		ak.step(m, 2.2))
 	var info := "ult %.0f, ult + merge %.0f of %d" % [res["ult"], res["total"], int(Data.CLASSES["light"]["hp"])]
-	ok("burst: Brass Broadside then the merge never one-shots a full-health light hunter", bool(res["merged"]) and bool(res["alive"]), info)
+	ok(
+		"burst: Brass Broadside then the merge never one-shots a full-health light hunter",
+		bool(res["merged"]) and bool(res["alive"]), info
+	)

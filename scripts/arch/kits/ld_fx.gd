@@ -5,7 +5,8 @@ extends Node3D
 ## the see-through rope shader (shaders/ld_rope.gdshader).
 ##
 ## - flame(id, parts)      the Torch Lance hose: pooled camera-facing puffs the kit simulates (immediate style)
-## - ride(sd, kind, ...)   a projectile look riding on a shot: "cinder" (Cinder Shot), "slug" (scattergun), "claw" (Grapnel head)
+## - ride(sd, kind, ...)   a projectile look riding on a shot: "cinder" (Cinder Shot), "slug" (scattergun), "claw"
+## (Grapnel head)
 ## - place(id, kind, ...)  immediate-style looks the kit refreshes every step: "skull", "swirl", "chain",
 ##                         "pip", "spiral", "pilot", "anchor", "glow"; stop calling and they hide
 ## - rope(id, a, b)        the braided Grapnel rope, drawn through walls
@@ -92,22 +93,30 @@ func _take(kind: String, build: Callable) -> Node3D:
 	var old: Node3D = arr.pop_front()
 	arr.append(old)
 	for e in live:
-		if e["node"] == old: live.erase(e); break
+		if e["node"] == old:
+			live.erase(e)
+			break
 	for r in riders:
-		if r["node"] == old: riders.erase(r); break
+		if r["node"] == old:
+			riders.erase(r)
+			break
 	for id in placed.keys():
-		if placed[id]["node"] == old: placed.erase(id); break
+		if placed[id]["node"] == old:
+			placed.erase(id)
+			break
 	return old
 
 # ------------------------------------------------------------------ meshes
 func _quad_mesh() -> QuadMesh:
 	if _quad == null:
-		_quad = QuadMesh.new(); _quad.size = Vector2(2, 2)
+		_quad = QuadMesh.new()
+		_quad.size = Vector2(2, 2)
 	return _quad
 
 func _plane_mesh() -> PlaneMesh:
 	if _plane == null:
-		_plane = PlaneMesh.new(); _plane.size = Vector2(2, 2)
+		_plane = PlaneMesh.new()
+		_plane.size = Vector2(2, 2)
 	return _plane
 
 ## Two crossed strips along +Z from the head (z 0, UV.x 0) to the tail (z 1).
@@ -118,12 +127,18 @@ func _ribbon_mesh() -> ArrayMesh:
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	for ax in [Vector3.RIGHT, Vector3.UP]:
 		var w: Vector3 = ax * 0.5
-		st.set_uv(Vector2(0, 0)); st.add_vertex(-w)
-		st.set_uv(Vector2(0, 1)); st.add_vertex(w)
-		st.set_uv(Vector2(1, 1)); st.add_vertex(w + Vector3(0, 0, 1))
-		st.set_uv(Vector2(0, 0)); st.add_vertex(-w)
-		st.set_uv(Vector2(1, 1)); st.add_vertex(w + Vector3(0, 0, 1))
-		st.set_uv(Vector2(1, 0)); st.add_vertex(-w + Vector3(0, 0, 1))
+		st.set_uv(Vector2(0, 0))
+		st.add_vertex(-w)
+		st.set_uv(Vector2(0, 1))
+		st.add_vertex(w)
+		st.set_uv(Vector2(1, 1))
+		st.add_vertex(w + Vector3(0, 0, 1))
+		st.set_uv(Vector2(0, 0))
+		st.add_vertex(-w)
+		st.set_uv(Vector2(1, 1))
+		st.add_vertex(w + Vector3(0, 0, 1))
+		st.set_uv(Vector2(1, 0))
+		st.add_vertex(-w + Vector3(0, 0, 1))
 	_ribbon = st.commit()
 	return _ribbon
 
@@ -137,13 +152,28 @@ func _crescent_mesh(arc_deg: float) -> ArrayMesh:
 	var n := 18
 	var arc := deg_to_rad(arc_deg)
 	for i in n:
-		var u0 := -arc * 0.5 + arc * float(i) / n; var u1 := -arc * 0.5 + arc * float(i + 1) / n
-		var w0 := sin(PI * float(i) / n); var w1 := sin(PI * float(i + 1) / n)
-		var o0 := Vector3(sin(u0), 0, -cos(u0)); var o1 := Vector3(sin(u1), 0, -cos(u1))
-		var c := o1 * lerpf(1.0, 0.45, w1); var d := o0 * lerpf(1.0, 0.45, w0)
-		var ua := float(i) / n; var ub := float(i + 1) / n
-		st.set_uv(Vector2(ua, 0)); st.add_vertex(o0); st.set_uv(Vector2(ub, 0)); st.add_vertex(o1); st.set_uv(Vector2(ub, 1)); st.add_vertex(c)
-		st.set_uv(Vector2(ua, 0)); st.add_vertex(o0); st.set_uv(Vector2(ub, 1)); st.add_vertex(c); st.set_uv(Vector2(ua, 1)); st.add_vertex(d)
+		var u0 := -arc * 0.5 + arc * float(i) / n
+		var u1 := -arc * 0.5 + arc * float(i + 1) / n
+		var w0 := sin(PI * float(i) / n)
+		var w1 := sin(PI * float(i + 1) / n)
+		var o0 := Vector3(sin(u0), 0, -cos(u0))
+		var o1 := Vector3(sin(u1), 0, -cos(u1))
+		var c := o1 * lerpf(1.0, 0.45, w1)
+		var d := o0 * lerpf(1.0, 0.45, w0)
+		var ua := float(i) / n
+		var ub := float(i + 1) / n
+		st.set_uv(Vector2(ua, 0))
+		st.add_vertex(o0)
+		st.set_uv(Vector2(ub, 0))
+		st.add_vertex(o1)
+		st.set_uv(Vector2(ub, 1))
+		st.add_vertex(c)
+		st.set_uv(Vector2(ua, 0))
+		st.add_vertex(o0)
+		st.set_uv(Vector2(ub, 1))
+		st.add_vertex(c)
+		st.set_uv(Vector2(ua, 1))
+		st.add_vertex(d)
 	var mesh := st.commit()
 	_cres[key] = mesh
 	return mesh
@@ -154,7 +184,10 @@ func _anchor_node(col: Color) -> Node3D:
 	var mt := Models.glow_mat(Color(col, 0.7))
 	n.set_meta("mat", mt)
 	var add := func(mesh: Mesh, pos: Vector3, rot := Vector3.ZERO) -> void:
-		var p := _mi(mesh, mt); p.position = pos; p.rotation = rot; n.add_child(p)
+		var p := _mi(mesh, mt)
+		p.position = pos
+		p.rotation = rot
+		n.add_child(p)
 	add.call(Models.box(0.36, 2.6, 0.3), Vector3(0, 1.6, 0))
 	add.call(Models.box(1.7, 0.3, 0.3), Vector3(0, 2.6, 0))
 	add.call(Models.cyl(0.4, 0.4, 0.22, 16), Vector3(0, 3.15, 0), Vector3(PI / 2, 0, 0))
@@ -172,7 +205,10 @@ func _claw_node(col: Color) -> Node3D:
 	mt.set_shader_parameter("color2", Color(1, 1, 1, 1))
 	mt.set_shader_parameter("twist", 0.0)
 	var add := func(mesh: Mesh, pos: Vector3, rot := Vector3.ZERO) -> void:
-		var p := _mi(mesh, mt); p.position = pos; p.rotation = rot; n.add_child(p)
+		var p := _mi(mesh, mt)
+		p.position = pos
+		p.rotation = rot
+		n.add_child(p)
 	add.call(Models.box(0.2, 0.2, 0.34), Vector3(0, 0, 0.05))
 	for k in 3:
 		var a := TAU * k / 3.0
@@ -239,7 +275,9 @@ func _play(n: Node3D, kind: String, col: Color, col2: Color, dur: float, s0: Vec
 	live.append(e)
 	return e
 
-func _flat(kind: String, mode: int, at: Vector3, r: float, col: Color, col2: Color, dur: float, yaw := 0.0) -> Dictionary:
+func _flat(
+	kind: String, mode: int, at: Vector3, r: float, col: Color, col2: Color, dur: float, yaw := 0.0
+) -> Dictionary:
 	var n := _fx(kind, mode, _plane_mesh(), false)
 	n.global_position = at + Vector3(0, 0.06, 0)
 	n.rotation = Vector3(0, yaw, 0)
@@ -263,7 +301,9 @@ func wave(at: Vector3, r: float, col: Color, dur := 0.35, col2 := Color(0, 0, 0,
 	_flat("wave", M_WAVE, at, r, col, col2, dur)
 
 ## A blade arc in front of `at` facing `dir`, swept over `dur`. tilt PI/2: standing up.
-func crescent(at: Vector3, dir: Vector2, arc_deg: float, reach: float, col: Color, col2: Color, dur := 0.25, tilt := 0.0) -> void:
+func crescent(
+	at: Vector3, dir: Vector2, arc_deg: float, reach: float, col: Color, col2: Color, dur := 0.25, tilt := 0.0
+) -> void:
 	var key := "cres%d" % int(round(arc_deg))
 	var n := _take(key, func(): return _mi(_crescent_mesh(arc_deg), _mat(M_CRESCENT, col, col2))) as MeshInstance3D
 	n.global_position = at
@@ -274,17 +314,17 @@ func crescent(at: Vector3, dir: Vector2, arc_deg: float, reach: float, col: Colo
 	e["sweep"] = true
 
 ## A camera-facing glow (a hit flash, the pilot flare).
-func orb(at: Vector3, col: Color, col2: Color, size := 0.6, dur := 0.15) -> void:
+func orb(at: Vector3, col: Color, col2: Color, scl := 0.6, dur := 0.15) -> void:
 	var n := _fx("orb", M_ORB, _quad_mesh(), true)
 	n.global_position = at
-	var e := _play(n, "orb", col, col2, dur, Vector3.ONE * size, n.material_override)
+	var e := _play(n, "orb", col, col2, dur, Vector3.ONE * scl, n.material_override)
 	e["grow"] = 0.5
 
 ## A soft dot left hanging in the air (a scattergun slug at its stop line).
-func dot(at: Vector3, col: Color, size := 0.16, dur := HANG_T) -> void:
+func dot(at: Vector3, col: Color, scl := 0.16, dur := HANG_T) -> void:
 	var n := _fx("dot", M_DOT, _quad_mesh(), true)
 	n.global_position = at
-	_play(n, "dot", col, col.lightened(0.35), dur, Vector3.ONE * size, n.material_override)
+	_play(n, "dot", col, col.lightened(0.35), dur, Vector3.ONE * scl, n.material_override)
 
 ## A molten strip from a to b on the ground (the rank-3 fire trail), lasting `dur`.
 func lava(a: Vector3, b: Vector3, width: float, dur: float) -> void:
@@ -294,7 +334,9 @@ func lava(a: Vector3, b: Vector3, width: float, dur: float) -> void:
 	var n := _fx("lava", M_LAVA, _plane_mesh(), false)
 	n.global_position = (a + b) * 0.5 + Vector3(0, 0.07, 0)
 	n.rotation = Vector3(0, atan2(-(b.z - a.z), b.x - a.x), 0)
-	var e := _play(n, "lava", Color("ff8a2a"), Color("4a1238"), dur, Vector3(ln * 0.5, 1, width * 0.5), n.material_override)
+	var e := _play(
+		n, "lava", Color("ff8a2a"), Color("4a1238"), dur, Vector3(ln * 0.5, 1, width * 0.5), n.material_override
+	)
 	(n.material_override as ShaderMaterial).set_shader_parameter("progress", ln)
 	e["keep_progress"] = true
 
@@ -305,7 +347,9 @@ func anchor_drop(at: Vector3, dir: Vector2, col: Color, dur := 0.5, scl := 1.0) 
 	n.rotation = Vector3(0, atan2(-dir.x, -dir.y) + PI / 2.0, 0)
 	n.scale = Vector3.ONE * scl
 	((n.get_meta("mat")) as ShaderMaterial).set_shader_parameter("color", Color(col, 0.7))
-	live.append({"node": n, "t": 0.0, "dur": dur, "kind": "anchor", "s0": n.scale, "mat": n.get_meta("mat"), "at": at, "col": col})
+	live.append({
+		"node": n, "t": 0.0, "dur": dur, "kind": "anchor", "s0": n.scale, "mat": n.get_meta("mat"), "at": at, "col": col
+	})
 
 ## Embers sprayed up and out of a spot for `dur` (Cinder Shot's impact).
 func embers(at: Vector3, dur := 0.6, col := Color("ff5a3a")) -> void:
@@ -324,27 +368,38 @@ func _build_place(kind: String, col: Color, col2: Color) -> Node3D:
 		"skull":
 			# the Flame Skull: a standing crescent of fire wrapped round the front, a hot glow inside it
 			var n := Node3D.new()
-			var cr := _mi(_crescent_mesh(150.0), _mat(M_CRESCENT, col, col2)); cr.name = "Cres"
+			var cr := _mi(_crescent_mesh(150.0), _mat(M_CRESCENT, col, col2))
+			cr.name = "Cres"
 			(cr.material_override as ShaderMaterial).set_shader_parameter("progress", 1.0)
 			cr.rotation = Vector3(0, 0, PI / 2.0)
 			n.add_child(cr)
-			var cr2 := _mi(_crescent_mesh(110.0), _mat(M_CRESCENT, col2, col)); cr2.name = "Cres2"
+			var cr2 := _mi(_crescent_mesh(110.0), _mat(M_CRESCENT, col2, col))
+			cr2.name = "Cres2"
 			(cr2.material_override as ShaderMaterial).set_shader_parameter("progress", 1.0)
-			cr2.position = Vector3(0, 0, 0.12); cr2.scale = Vector3.ONE * 0.75
+			cr2.position = Vector3(0, 0, 0.12)
+			cr2.scale = Vector3.ONE * 0.75
 			n.add_child(cr2)
-			var g := _mi(_quad_mesh(), _mat(M_ORB, col, col2, true)); g.name = "Glow"; g.position = Vector3(0, 0, -0.55); g.scale = Vector3.ONE * 0.55
+			var g := _mi(_quad_mesh(), _mat(M_ORB, col, col2, true))
+			g.name = "Glow"
+			g.position = Vector3(0, 0, -0.55)
+			g.scale = Vector3.ONE * 0.55
 			n.add_child(g)
 			for i in 3:
-				var tr := _mi(_ribbon_mesh(), _mat(M_COMET, col, Color("3a1a2a"))); tr.name = "Tail%d" % i
-				tr.position = Vector3((i - 1) * 0.32, 0.15 * (1 - absi(i - 1)), 0.1); tr.scale = Vector3(0.28, 0.28, 1.6)
+				var tr := _mi(_ribbon_mesh(), _mat(M_COMET, col, Color("3a1a2a")))
+				tr.name = "Tail%d" % i
+				tr.position = Vector3((i - 1) * 0.32, 0.15 * (1 - absi(i - 1)), 0.1)
+				tr.scale = Vector3(0.28, 0.28, 1.6)
 				n.add_child(tr)
 			return n
 	return Node3D.new()
 
 ## Shows an immediate look this step. `basis` orients it (flat looks lie on XZ), scl scales it.
-func place(id: String, kind: String, at: Vector3, col: Color, col2: Color, scl := 1.0, yaw := 0.0, strength := 1.0) -> Node3D:
+func place(
+	id: String, kind: String, at: Vector3, col: Color, col2: Color, scl := 1.0, yaw := 0.0, strength := 1.0
+) -> Node3D:
 	var e: Dictionary = placed.get(id, {})
-	if e.is_empty() or not is_instance_valid(e["node"]) or String(e["kind"]) != kind or not (e["node"] as Node3D).visible:
+	var stale: bool = e.is_empty() or not is_instance_valid(e["node"]) or String(e["kind"]) != kind
+	if stale or not (e["node"] as Node3D).visible:
 		e = {"node": _take("pl_" + kind, func(): return _build_place(kind, col, col2)), "kind": kind}
 		placed[id] = e
 	e["t"] = m.time
@@ -398,7 +453,9 @@ func _rider_part(part: String, col: Color, col2: Color, scl: float) -> MeshInsta
 
 ## Rides a look on a shot (match.gd's shot dictionary) until it ends. The plain shot node is handed
 ## back to the match's pool, so only this look shows. on_end(at, expired) runs when it ends.
-func ride(sd: Dictionary, kind: String, col: Color, col2: Color, trail := 1.2, width := 0.3, on_end := Callable()) -> void:
+func ride(
+	sd: Dictionary, kind: String, col: Color, col2: Color, trail := 1.2, width := 0.3, on_end := Callable()
+) -> void:
 	var n := _take("ride_" + kind, func(): return _build_rider(kind, col, col2))
 	for c in n.get_children():
 		var mt := (c as MeshInstance3D).material_override as ShaderMaterial
@@ -411,7 +468,9 @@ func ride(sd: Dictionary, kind: String, col: Color, col2: Color, trail := 1.2, w
 	if sn is Node3D and is_instance_valid(sn):
 		(sn as Node3D).visible = false
 		sd["node"] = null
-	riders.append({"node": n, "sd": sd, "kind": kind, "trail": trail, "width": width, "on_end": on_end, "last": sd["pos"]})
+	riders.append({
+		"node": n, "sd": sd, "kind": kind, "trail": trail, "width": width, "on_end": on_end, "last": sd["pos"]
+	})
 	_pose(n, sd["pos"], sd["vel"], trail, width)
 
 func _pose(n: Node3D, at: Vector3, vel: Vector2, trail: float, width: float) -> void:
@@ -460,8 +519,10 @@ func rope(id: String, a: Vector3, b: Vector3, col: Color, thick := 0.22) -> void
 			var k := float(i) / n
 			var ph: float = k * length * 4.2 + TAU * s / 3.0 - float(m.time) * 3.0
 			var c := a.lerp(b, k) + (side * cos(ph) + up * sin(ph)) * thick * 0.32
-			im2.surface_set_uv(Vector2(k * length, 0)); im2.surface_add_vertex(c - up * w)
-			im2.surface_set_uv(Vector2(k * length, 1)); im2.surface_add_vertex(c + up * w)
+			im2.surface_set_uv(Vector2(k * length, 0))
+			im2.surface_add_vertex(c - up * w)
+			im2.surface_set_uv(Vector2(k * length, 1))
+			im2.surface_add_vertex(c + up * w)
 		im2.surface_end()
 
 func rope_shown(id: String) -> bool:
@@ -497,7 +558,8 @@ func _process(delta: float) -> void:
 	for e in live.duplicate():
 		var n: Node3D = e["node"]
 		if not is_instance_valid(n):
-			live.erase(e); continue
+			live.erase(e)
+			continue
 		e["t"] = float(e["t"]) + delta
 		var u := clampf(float(e["t"]) / float(e["dur"]), 0.0, 1.0)
 		var mt: ShaderMaterial = e["mat"]
@@ -520,7 +582,10 @@ func _process(delta: float) -> void:
 		em["acc"] = float(em["acc"]) + delta
 		if float(em["acc"]) >= 0.07 and m.get("fx") != null:
 			em["acc"] = 0.0
-			m.fx.spark((em["at"] as Vector3) + Vector3(0, 0.9, 0), Vector3(randf_range(-0.3, 0.3), 1.0, randf_range(-0.3, 0.3)), em["col"], 6, 5.0, 60.0, 0.45, 9.0, 1.3)
+			m.fx.spark(
+				(em["at"] as Vector3) + Vector3(0, 0.9, 0),
+				Vector3(randf_range(-0.3, 0.3), 1.0, randf_range(-0.3, 0.3)), em["col"], 6, 5.0, 60.0, 0.45, 9.0, 1.3
+			)
 		if float(em["t"]) >= float(em["dur"]):
 			emitters.erase(em)
 	track()

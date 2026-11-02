@@ -169,7 +169,9 @@ func _burn(dt: float) -> void:
 		return
 	tick_acc -= every
 	var dmg := float(x["trail_dps"]) * every * k.power("x")
-	var opts := {"src": "flame", "ab": "ult", "tags": ["flame", "ult"], "slow": float(x["slow_for"]), "slow_k": float(x["slow"])}
+	var opts := {
+		"src": "flame", "ab": "ult", "tags": ["flame", "ult"], "slow": float(x["slow_for"]), "slow_k": float(x["slow"])
+	}
 	for f in m.foes_of(h.team):
 		if not f.hittable() or _lava_at(f) == null:
 			continue
