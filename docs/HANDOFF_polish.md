@@ -30,6 +30,10 @@ merged, then the commits below. Godot runs go through `/home/claude/gq`; my runn
 - New `--polish-check` (`tools/polish_check.gd`): drop families, every stair tile in a flight, chest footprint and tier colours.
 - Net.VERSION untouched (polish changes no sync shape; drop families use the earner's own archetype, online ground rolls unchanged).
 
+## After merging sync57 (e85193d, Net 0.9.0)
+
+Merged cleanly (one trivial conflict in the `main.gd` check hooks). Standard suite 0 failures except two things that are the same on plain main: `--teammate-check` "it leads you to (or gets to) the chest and the outpost" (the tutorial now leads on shoot/kin1/throw/goexit/uplink/defend, no "chest"), and `--simtest --seed=5` ends "team wiped" (main: sim 30 s; polish: 63 s) instead of extracting. Both belong to the Boki-system merge.
+
 ## Left
 
 Nothing. Before shots are missing for items 6 (fade) and 7 (after only).
