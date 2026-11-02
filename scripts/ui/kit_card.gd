@@ -322,7 +322,8 @@ static func infusion_lines(a: String, ks: KinSpec) -> Array:
 	var d := Arch.def(a)
 	for slot in ["rmb", "e", "r"]:
 		var sd: Dictionary = d.get(slot, {})
-		if sd.is_empty(): continue
+		if sd.is_empty() or not sd.has("sockets"):
+			continue          # (the X ultimates have no sockets: a Boki doesn't infuse them)
 		var f := Arch.fill(sd.get("sockets", {}), inf, slot, String(sd.get("delivery", "projectile" if slot == "rmb" else "burst")))
 		var notes: Array = (f.get("notes", []) as Array).filter(func(x): return not String(x).contains("fallback")).map(func(x):
 			var s := String(x)

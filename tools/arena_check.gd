@@ -244,7 +244,7 @@ func _cards() -> void:
 				ok("kit card text %s.%s" % [a, s], false)
 		c.queue_free()
 	var inf := KitCard.infusion_lines("thief", KinLib.kin("cindle"))
-	ok("kit card: Boki infusion lines (RMB and E: the Thief has no R)", inf.size() == 2, " | ".join(inf))
+	ok("kit card: Boki infusion lines (RMB and E; her ultimate on X isn't infused)", inf.size() == 2, " | ".join(inf))
 	host.queue_free()
 
 func _loadout() -> void:
@@ -254,7 +254,7 @@ func _loadout() -> void:
 	var tiles := 0
 	for ch in (st.get_child(0) as HBoxContainer).get_children():
 		if ch is Button: tiles += 1
-	ok("loadout strip: five kit tiles (the Juggernaut has no class R)", tiles == 5)
+	ok("loadout strip: six kit tiles (the Juggernaut's ultimate on X included)", tiles == 6, str(tiles))
 	st.queue_free()
 	# the real expedition panel at home carries the strip
 	var Home = load("res://scripts/home/home.gd")

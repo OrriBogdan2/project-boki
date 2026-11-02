@@ -551,13 +551,14 @@ func juggernaut(a) -> void:
 	A.tap(m, P)
 	A.step(m, 0.9)
 	T.hp = 4.0
+	P.hp = 1.0
 	T.hurt(10.0, P, {"src": "shot"})
 	A.step(m, 0.1)
 	A.ok("juggernaut Smash small mechanic: a knock after the sweet spot resets the Gilded Riposte",
 			T.downed and K.slam_resets == 1 and float(K.cd["r"]) <= 0.0 and K.knock_healed > 0.0,
 			"x cd %.1f resets %d" % [float(K.cd["r"]), K.slam_resets])
 	A.ok("juggernaut passive: a knock heals 20% of their health",
-			K.knock_healed >= 0.19 * T.max_hp, "healed %.0f of %.0f" % [K.knock_healed, T.max_hp])
+			K.knock_healed >= minf(0.19 * T.max_hp, P.max_hp - 2.0), "healed %.0f of %.0f" % [K.knock_healed, T.max_hp])
 	await A.done(m)
 	await ULT.new().zedran(A)
 

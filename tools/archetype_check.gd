@@ -205,6 +205,11 @@ func _data() -> void:
 func _thief() -> void:
 	await _dj().thief(self)
 
+## An ultimate's data: no generic fuse, a 15-40s cooldown, opening at level 6.
+func _ult_shaped(rd: Dictionary) -> bool:
+	var cd := float(rd["cooldown"])
+	return float(rd.get("fuse", 0.0)) <= 0.0 and cd >= 15.0 and cd <= 40.0 and int(rd.get("unlock", 0)) == 6
+
 ## The hero has its own ultimate on X: "r" data opening at level 6, and a card line for it.
 func _has_ult(arch: String) -> bool:
 	var d := Arch.def(arch)
@@ -630,8 +635,10 @@ func _feel() -> void:
 	ok("feel: the Bola and Warchain are projectiles (dodgeable)", String(Arch.def("thief")["rmb"]["delivery"]) == "projectile" and float(Arch.def("thief")["rmb"]["bola"]["speed"]) <= 34.0 and String(Arch.def("juggernaut")["e"]["delivery"]) == "projectile")
 	ok("feel: Wirerun shows its lane while it grows", float(Arch.def("mage")["dash"]["hold"]) >= 0.3)
 	ok("feel: the Finishing Slam lands after a 0.5s wind-up", float(Arch.def("juggernaut")["rmb"]["windup"]) >= 0.3)
-	ok("feel: every R has a fuse of 0.35-0.8s", Arch.ids().filter(func(a): return Arch.def(a).has("r")).all(func(a): return float(Arch.def(a)["r"].get("fuse", 0.0)) >= 0.35 and float(Arch.def(a)["r"].get("fuse", 0.0)) <= 0.8))
-	ok("R cooldowns are big moments (90-120s)", Arch.ids().filter(func(a): return Arch.def(a).has("r")).all(func(a): return float(Arch.def(a)["r"]["cooldown"]) >= 90.0 and float(Arch.def(a)["r"]["cooldown"]) <= 120.0))
+	# the hero ultimates on X run their own wind-ups (a growing ring, a guard), on the source's cooldown ratios
+	var ults: Array = Arch.ids().filter(func(a): return Arch.def(a).has("r"))
+	ok("feel: every X ultimate has its own wind-up (no generic fuse) and a 15-40s cooldown",
+			ults.all(func(a): return _ult_shaped(Arch.def(a)["r"])))
 	# hitstop tiers
 	var dummy := Hunter.new(); dummy.max_hp = 145.0
 	ok("feel: chip hit T1", Feel.tier(dummy, 4.0, {"src": "shot"}) == 1)
