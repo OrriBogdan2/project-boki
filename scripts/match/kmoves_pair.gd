@@ -174,11 +174,11 @@ const MOVES := {
 		[0.0, {}],
 		[0.1, {
 			"p": 0.35, "sq": -0.25, "lift": 0.2, "fl": Vector3(-0.45, 0.75, -0.05), "hw": 1.0,
-			"fr": Vector3(0.45, 0.75, -0.05), "rw": 0.8, "gp": -0.4
+			"fr": Vector3(0.45, 0.75, -0.05), "rw": 0.8, "gp": 1.0
 		}],
 		[0.22, {
 			"p": 0.25, "sq": 0.35, "lift": -0.1, "fl": Vector3(-0.42, 0.65, -0.05), "hw": 1.0,
-			"fr": Vector3(0.42, 0.65, -0.05), "rw": 0.8, "gp": -0.3, "lw": 1.0, "legs": [0.7, -1.1, 0.6, -1.0]
+			"fr": Vector3(0.42, 0.65, -0.05), "rw": 0.8, "gp": 0.9, "lw": 1.0, "legs": [0.7, -1.1, 0.6, -1.0]
 		}],
 		[0.55, {}]]},
 	# ================================================================= Linwick
@@ -288,24 +288,24 @@ const MOVES := {
 		[0.42, {"p": 0.12, "sq": -0.1, "lift": 0.04}],
 		[0.55, {}]]},
 	# Furnace Cloak (E): 0.2 s curled in, arms crossed over the chest (the ring shows), then the flamer swings
-	# down on its strap and both arms fling wide with the blast (an overshoot up on the toes), held wide while
+	# up over his shoulder on its strap (a long gun pointed down would hit the ground) and both arms fling wide with the blast (an overshoot up on the toes), held wide while
 	# the heat rolls out, and a settle back onto the grip
 	"as_cloak": {"keys": [
 		[0.0, {}],
 		[0.12, {
 			"p": -0.4, "sq": 0.42, "lift": -0.14, "fr": Vector3(-0.25, 0.15, -0.25), "rw": 1.0,
-			"fl": Vector3(0.25, 0.15, -0.25), "hw": 1.0, "lw": 1.0, "legs": [0.8, -1.3, 0.7, -1.2], "gp": -0.6
+			"fl": Vector3(0.25, 0.15, -0.25), "hw": 1.0, "lw": 1.0, "legs": [0.8, -1.3, 0.7, -1.2], "gp": 0.5
 		}],
 		[0.2, {
 			"p": 0.4, "sq": -0.4, "lift": 0.22, "fr": Vector3(0.8, 0.5, 0.1), "rw": 1.0,
-			"fl": Vector3(-0.8, 0.5, 0.1), "hw": 1.0, "lw": 1.0, "legs": [-0.1, -0.2, -0.1, -0.2], "gp": -1.3
+			"fl": Vector3(-0.8, 0.5, 0.1), "hw": 1.0, "lw": 1.0, "legs": [-0.1, -0.2, -0.1, -0.2], "gp": 1.45
 		}],
 		[0.34, {
 			"p": 0.25, "sq": -0.12, "lift": 0.08, "fr": Vector3(0.72, 0.45, 0.05), "rw": 1.0,
-			"fl": Vector3(-0.72, 0.45, 0.05), "hw": 1.0, "gp": -1.2
+			"fl": Vector3(-0.72, 0.45, 0.05), "hw": 1.0, "gp": 1.4
 		}],
 		[0.6, {
-			"p": 0.12, "fr": Vector3(0.5, 0.3, 0.0), "rw": 0.9, "fl": Vector3(-0.5, 0.3, 0.0), "hw": 0.9, "gp": -0.8
+			"p": 0.12, "fr": Vector3(0.5, 0.3, 0.0), "rw": 0.9, "fl": Vector3(-0.5, 0.3, 0.0), "hw": 0.9, "gp": 0.9
 		}],
 		[0.8, {}]]},
 	# Linwick's air hop (the class air dash): a jet of flame from the bellows tucks him into a ball that rolls

@@ -44,7 +44,7 @@ const ANCHOR_RIM := Color("5cffd8")     # seafoam: "harbour", and it stands off 
 const ANCHOR_DROP := 3.2       # m the anchor falls from (times its scale)
 const ANCHOR_HOLD := 0.25      # s it stays planted after it lands, before it fades
 const ANCHOR_FADE := 0.3
-const ANCHOR_LEAN := 0.75      # rad the anchor leans back toward the camera, so it reads as an anchor from above
+const ANCHOR_LEAN := -0.9      # rad the anchor leans away from the camera, so its face turns to the view
 
 var m: Node
 var pools := {}                # kind -> Array of nodes made for it
@@ -479,8 +479,8 @@ func _build_rider(kind: String, col: Color, col2: Color) -> Node3D:
 	match kind:
 		"cinder":
 			# Cinder Shot: a red-pink fireball with a yellow core inside a violet halo, a dark smoke tail
-			n.add_child(_rider_part("Halo", CINDER_HALO, CINDER_HALO, 0.95, 0.6))
-			n.add_child(_rider_part("Head", col, col2, 0.5, 1.0))
+			n.add_child(_rider_part("Halo", CINDER_HALO, CINDER_HALO, 1.15, 0.6))
+			n.add_child(_rider_part("Head", col, col2, 0.62, 1.0))
 			tail_col = Color(Color("3a2a3a"), 0.7)
 		"slug":
 			n.add_child(_rider_part("Head", col, col2, 0.3, 1.0))
@@ -585,6 +585,7 @@ func rope_shown(id: String) -> bool:
 
 # ------------------------------------------------------------------ per step
 var _tracked_at := -1.0
+var _drawn_at := 0.0
 
 ## Follows the shots the looks ride on, on the match step (the kits call it from _tick, once per step
 ## whoever calls first): records where each is, and when one ends runs its on_end(at, expired).
@@ -621,7 +622,11 @@ func _alive(sd: Dictionary) -> bool:
 		if is_same(s, sd): return true
 	return false
 
-func _process(delta: float) -> void:
+## Effects age on the match clock, so they stay in step with the kit moves they dress (a slow frame or a
+## hitstop holds them just as it holds the fight).
+func _process(_delta: float) -> void:
+	var delta := clampf(float(m.time) - _drawn_at, 0.0, 0.25)
+	_drawn_at = float(m.time)
 	for e in live.duplicate():
 		var n: Node3D = e["node"]
 		if not is_instance_valid(n):

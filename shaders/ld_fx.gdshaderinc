@@ -77,7 +77,7 @@ void ld_look(vec2 uv01, out vec3 body, out float alpha, out vec3 glow) {
 		float smoke = smoothstep(0.2, 0.9, along) * (1.0 - along) * smoothstep(0.0, 0.9, across) * smoke_n;
 		float smoke_w = smoke * 2.0 / (head * head * flick + smoke * 2.0 + 0.001);
 		body = mix(color.rgb, color2.rgb, smoke_w);
-		alpha = clamp(head * head * flick * 1.4 + smoke * 1.6 * color2.a, 0.0, 1.0) * k;
+		alpha = clamp(head * head * flick * 1.4 + smoke * 2.4 * color2.a, 0.0, 1.0) * k;
 		glow = color.rgb * pow(head, 3.0) * 0.35 * k;
 	} else if (mode == 3) {
 		float behind = progress * 1.3 - uv01.x;

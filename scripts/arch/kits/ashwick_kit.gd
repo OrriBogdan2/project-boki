@@ -27,6 +27,7 @@ const RAM_FRONT := 0.3                 # share of the ram spent at its burst spe
 const RAM_FRONT_K := 1.4               # the burst speed against the average (front-loaded, hero-ref)
 const RAM_BACK_K := 0.85
 const EMBER_EVERY := 0.035             # s between the ember puffs a ram or hop leaves behind
+const CLOAK_POSE_T := 0.7             # s the Furnace Cloak pose holds the flamer up off the aim (as_cloak)
 const SKULL_TILT := 0.6                # rad the skull's front edge lifts toward the camera
 const NOZZLE := Vector3(1.3, 0.9, 0.15)  # the nozzle's tip from the feet in the aim pose: forward, up, right (m)
 
@@ -220,7 +221,8 @@ func _tick(dt: float) -> void:
 ## foe: one flame pip for Ablaze, three and a glow for Flashover (sheet gap 4b).
 func _tick_tells(dt: float) -> void:
 	var vis := tells_visible()
-	if vis and h.wid == "flamethrower" and not h.downed and not KinMerge.active(h):
+	var flamer_up := anim_id == "as_cloak" and m.time - anim_at < CLOAK_POSE_T      # swung up on its strap
+	if vis and h.wid == "flamethrower" and not h.downed and not KinMerge.active(h) and not flamer_up:
 		var fl := 0.85 + 0.15 * sin(m.time * 37.0)
 		var big := 1.0 + (1.2 if was_held and spool < float(lmbd()["spool"]) else 0.0)
 		fx.place("pilot%d" % h.get_instance_id(), "pilot", nozzle(), FLAME_CYAN, PILOT_CORE, 0.4 * fl * big)

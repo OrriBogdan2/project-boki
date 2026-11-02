@@ -9,21 +9,23 @@ extends RefCounted
 ##   --arena-demo=pr_payoff_dr / pr_payoff_as   the payoff moments
 ##   moves: dr_shot dr_throw dr_reel dr_anchor dr_dive dr_barge dr_hop dr_flex
 ##          as_lance as_sweep as_shot as_leap lw_hop as_cloak lw_stoke
-##          lw_jet dr_blast (the X ultimates)
+##          lw_jet dr_blast (the X ultimates), dr_rock (the Grapnel hauling a foe over a rock)
+## A move's optional fourth entry is its strip zoom (the hose and the rope need the wider gameplay view).
 
 const MOVES := {
 	"dr_shot": ["dredge", "shotgun", [0.5, 0.53, 0.56, 0.62, 0.7, 0.86]],
 	"dr_throw": ["dredge", "shotgun", [0.5, 0.58, 0.64, 0.72, 0.84, 1.0]],
 	"dr_reel": ["dredge", "shotgun", [0.9, 1.05, 1.2, 1.35, 1.5, 1.7]],
+	"dr_rock": ["dredge", "shotgun", [0.55, 0.75, 0.95, 1.15, 1.4, 1.7], 1.0],
 	"dr_anchor": ["dredge", "shotgun", [0.5, 0.64, 0.76, 0.88, 1.1, 1.4]],
 	"dr_dive": ["dredge", "shotgun", [0.5, 0.56, 0.64, 0.72, 0.85, 1.2]],
-	"dr_barge": ["dredge", "shotgun", [0.5, 0.56, 0.66, 0.84, 0.94, 1.15]],
-	"dr_hop": ["dredge", "shotgun", [0.5, 0.56, 0.66, 0.78, 0.92, 1.1]],
+	"dr_barge": ["dredge", "shotgun", [0.5, 0.53, 0.58, 0.64, 0.72, 0.9]],
+	"dr_hop": ["dredge", "shotgun", [0.5, 0.53, 0.58, 0.66, 0.74, 0.92]],
 	"dr_flex": ["dredge", "shotgun", [0.5, 0.6, 0.68, 0.8, 1.0]],
-	"as_lance": ["ashwick", "flamethrower", [0.5, 0.6, 0.7, 0.85, 1.2, 1.7]],
-	"as_sweep": ["ashwick", "flamethrower", [0.9, 1.0, 1.1, 1.2, 1.3, 1.45]],
+	"as_lance": ["ashwick", "flamethrower", [0.5, 0.6, 0.7, 0.78, 0.9, 1.2], 1.0],
+	"as_sweep": ["ashwick", "flamethrower", [0.9, 1.0, 1.1, 1.2, 1.3, 1.45], 1.0],
 	"as_shot": ["ashwick", "flamethrower", [0.5, 0.65, 0.92, 0.96, 1.05, 1.3]],
-	"as_leap": ["ashwick", "flamethrower", [0.5, 0.55, 0.62, 0.72, 0.85, 1.1]],
+	"as_leap": ["ashwick", "flamethrower", [0.5, 0.56, 0.66, 0.78, 0.88, 1.05]],
 	"lw_hop": ["ashwick", "flamethrower", [0.5, 0.55, 0.62, 0.72, 0.86, 1.05]],
 	"as_cloak": ["ashwick", "flamethrower", [0.5, 0.62, 0.7, 0.78, 1.0, 1.35]],
 	"lw_stoke": ["ashwick", "flamethrower", [0.5, 0.6, 0.7, 0.8, 1.0]],
@@ -32,6 +34,9 @@ const MOVES := {
 }
 
 const GAME_ZOOM := 1.0         # the camera's default gameplay zoom
+# the scene runs slowed, so a slow render frame steps only a sliver of the match and the saved frame lands on
+# the moment it was asked for (the shot is saved two frames after its time comes)
+const DEMO_TIME_SCALE := 0.3
 
 ## Returns the time to save the single frame at (99: not a single-frame demo).
 static func tick(A: Arena, w: String, t: float, dt: float) -> float:
@@ -74,7 +79,10 @@ static func _tick_move(A: Arena, w: String, t: float, dt: float) -> float:
 	if payoff:
 		spec = ["dredge", "shotgun", []] if mv == "dr" else ["ashwick", "flamethrower", []]
 	var zoom := 0.62 if close or not full else GAME_ZOOM
+	if not full and spec.size() > 3: zoom = float(spec[3])
 	if t < 0.05:
+		Engine.time_scale = DEMO_TIME_SCALE
+		_warm_looks(m, D.pos)
 		if P.arch != String(spec[0]) or P.wid != String(spec[1]): A.set_arch(String(spec[0]), String(spec[1]))
 		A.set_kin("")
 		P.teleport(D.pos + Vector3(-4.0, 0, 0))
@@ -105,6 +113,9 @@ static func _drive(A: Arena, P: Hunter, D: Hunter, mv: String, t: float, dt: flo
 	match mv:
 		"dr_shot":
 			P.inp["fire"] = t > go and t < go + 0.08
+		"dr_rock":
+			if t < go: _behind_rock(A, D)
+			if ArenaDemo._at(t, dt, go): P.ak.press_rmb()
 		"dr_throw", "dr_reel":
 			if t < go: D.teleport(A.home + Vector3(8.0, 0, 0))
 			if ArenaDemo._at(t, dt, go): P.ak.press_rmb()
@@ -169,6 +180,43 @@ static func _drive(A: Arena, P: Hunter, D: Hunter, mv: String, t: float, dt: flo
 				var K := P.ak as AshwickKit
 				K.stoke(D)
 				K.stoke(D)
+
+## Shows each effect shader once, tiny, before the move, so their first-use compile hitch can't jump the clock
+## of the frames that matter.
+static func _warm_looks(m: Node, at: Vector3) -> void:
+	var fx := LDFx.of(m)
+	fx.anchor_drop(at, 0.0, 0.05)
+	fx.orb(at, Color.BLACK, Color.BLACK, 0.01, 0.05)
+	fx.wave(at, 0.01, Color.BLACK, 0.05)
+
+## Puts the dummy behind the nearest rock or prop round the hunter, on the far side along the same line,
+## so the Grapnel has to fly over it and drag the dummy back across it.
+static func _behind_rock(A: Arena, D: Hunter) -> void:
+	var W = A.m.world
+	for ring in range(3, 10):
+		for k in 24:
+			var ang := TAU * float(k) / 24.0
+			var q := A.home + Vector3(cos(ang), 0, sin(ang)) * float(ring)
+			if W.occupy(q.x, q.z, 0.3, A.home.y, false) == 0.0 or W.is_void(q.x, q.z):
+				continue
+			var mid := _rock_middle(W, q, A.home.y)
+			var dir := Vector3(mid.x - A.home.x, 0, mid.z - A.home.z).normalized()
+			var spot := mid + dir * 3.5
+			if not W.is_void(spot.x, spot.z) and W.occupy(spot.x, spot.z, 0.4, A.home.y, false) == 0.0:
+				D.teleport(Vector3(spot.x, A.home.y, spot.z))
+				return
+
+## The middle of the blocked cells round q (a rock's footprint).
+static func _rock_middle(W, q: Vector3, y: float) -> Vector3:
+	var sum := Vector3.ZERO
+	var n := 0
+	for ix in range(-6, 7):
+		for iz in range(-6, 7):
+			var p := q + Vector3(ix, 0, iz) * 0.25
+			if W.occupy(p.x, p.z, 0.05, y, false) != 0.0:
+				sum += p
+				n += 1
+	return sum / maxf(1.0, n)
 
 ## X at level 6 with the cooldown cleared.
 static func _ult(P: Hunter) -> void:
