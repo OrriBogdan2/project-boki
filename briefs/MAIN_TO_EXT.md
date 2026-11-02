@@ -370,3 +370,52 @@ Left bar: LMB, RMB, E, Shift, plus G and R as they are now.
 - Their Boki's type: type colour. It glows softly when their bond meter is full, so rivals can see a Merge is coming. That's a deliberate readability tell; keep it subtle.
 
 **Reserved-file note:** the C/G/R slot drawing lives in scripts/ui/boki_hud.gd (reserved). Draw the new right-side Boki box and the overhead Boki icon in your own new file(s), reading the Boki state through existing getters (Kin.runner cd, KinMerge.ready, Kin.state). Remove only the C slot call from the left bar's layout code; if that needs a change inside boki_hud.gd, write it up here and I'll make it.
+
+## 2026-11-02 11:55 ET: OWNER PLAYTEST (sync61), hero fidelity pass. HIGH PRIORITY, start now on its own branch ext/fidelity
+
+After playing sync61 the owner says several ports "missed key details" and asks that each hero be copied much more precisely from how the original actually plays. Research properly before changing anything:
+- watch gameplay (YouTube: hero guides, ability showcases, pro play; read the transcripts or descriptions if you can't view frames)
+- the game's wiki ability pages and patch notes
+- docs/heroes/*.md and docs/ARCHETYPES.md for what we already know
+
+For every ability write down the input (tap/hold/release/air), the targeting (cursor-placed vs max range), the visual and the interactions, then fix ours to match. Names, art and text stay our own. Mechanics only.
+
+Specific owner notes (ours -> original):
+1. **Juggernaut (Brall).** Close, but RMB hold must read much clearer: big wind-up pose, rising sound, a fill, a "full" flash. You must be able to jump while holding it. On release it flings you far forward.
+2. **Bulwark (Oath).**
+   - The hammer throw lands where the cursor is (anywhere in range), not always at max distance.
+   - Holding LMB shows him spinning the hammer; on release it's a strong slam that also gives him forward momentum.
+   - His shield/wall must look unique to him.
+3. **Archer (Myth).**
+   - The LMB perfect-timing window is good, but show a visible wind-up and a clear flash at the perfect moment.
+   - Her projectiles go where the cursor is (aim close or far), not a fixed range.
+4. **Dolm (Tetra).**
+   - Raising rocks is key, and the rocks give verticality: you can stand and climb on them.
+   - You can punch rocks to send them flying.
+   - LMB is a hold.
+5. **Ostra (Void).**
+   - Spamming Shift makes him dash in random directions: must not.
+   - Shift should keep his height (z/vertical position) during it.
+   - RMB should have 1 charge, not 3, and it must actually stun (it says so, but the owner sees no stun in the training area).
+6. **Marlowe (Ghost).** The grenade explodes in a cone when it hits a wall or the ground, with a visible cone. It does NOT explode on hitting a person.
+7. **Rimewright (Celeste).**
+   - Her shots look like ice shards, come out slowly and auto-aim (home onto targets).
+   - Her ice wall must look unique to her.
+8. **Dredge.** E in the air = he smashes straight down to the ground and the Anchor lands with him (a ring at the landing; height adds damage). Today it slams mid-air and then pushes you down.
+9. **Every hero's projectiles/bullets must look distinct.** Many look the same now: give each a signature shape, colour, trail and impact.
+10. **Every wall/barrier must look unique to its owner.** Bulwark's shield, Rimewright's ice, Dolm's rock and so on; no shared generic wall model.
+11. **Names.** Thief and Archer (and Juggernaut and Bulwark) still use class words as names while everyone else has a hero name. Give all four original hero names in our own style; propose them here first and the owner will approve.
+12. **Arena loadout picker (L).** Each hero's explanation is inconsistent and confusing. Rewrite every hero's card/blurb in one consistent format: role line, then one short line each for LMB, RMB, E, Shift, passive, in plain words.
+13. **Level-ups.** Confirming: the "press 1/2/3 to pick a bonus" prompt goes away (already in ext/equal). The owner recalls the original had a bonus/RNG mechanic on level-up that never popped up on screen like ours. Research exactly how it worked and propose the closest equivalent here before building.
+
+Keep every merge-hold rule (ArchKit._drop_holds) and the G/C/R/F reservation. Add or extend each hero's combo check for every change. Report ready per hero pair if that's faster, so I can ship in pieces.
+
+Main-side changes on integ62 (sync62, shipping soon):
+- base move speed slightly slower (5.0 / 4.8 / 4.55)
+- base dash 19 m/s for 0.19s
+- heavier dashes are slower (barge 0.34s, Rampage 0.3s, Dolm 0.28s, Ashwick 0.26s)
+- new "Dash toward the cursor" setting, default off = WASD
+- practice areas get a bottom bar with a hero picker (HubBar, HeroGrid, Practice)
+- user wheel zoom in practice areas
+- scene-change audio reset
+- the other fixes listed earlier
