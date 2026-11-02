@@ -191,7 +191,6 @@ static func owner_stat(stat: String, v: float) -> String:
 		"armor": return "armor wears %s slower" % pct(v)
 		"damage_reduction": return "-%s damage taken" % pct(v)
 		"knockback_resist": return "half knockback" if is_equal_approx(v, 0.5) else "-%s knockback" % pct(v)
-		"shield": return "%s shield" % n(v)
 		"regen": return "%s hp/s regen" % n(v)
 		"damage": return "+%s damage" % pct(v)
 		"fire_rate": return "+%s fire rate" % pct(v)
@@ -275,6 +274,9 @@ static func rider(ks: KinSpec) -> String:
 static func merge(ms: MergeSpec, giant := false) -> Array:
 	if ms == null:
 		return []
+	var fd: Dictionary = Content.merge_form(ms.id)
+	if not fd.is_empty():
+		return form_lines(ms, fd)
 	var out: Array = []
 	var head := "%ss: %s" % [n(ms.duration), passives(ms.passives)]
 	if giant: head = "Your mount grows huge for " + head
@@ -284,12 +286,25 @@ static func merge(ms: MergeSpec, giant := false) -> Array:
 	if os != "": out.append(os.substr(0, 1).to_upper() + os.substr(1))
 	for st in ms.on_start: out.append("As it starts: " + stage(st))
 	for pl in ms.pulses: out.append("Every %ss: %s" % [n(float(pl["every"])), stage(pl["stage"])])
+	out.append("R again: a basic burst that ends the merge.")
 	for slot in ms.merged:
 		var pt: Dictionary = ms.merged[slot]
 		var bits := PackedStringArray()
 		for k in pt.get("scale", {}): bits.append("%s x%s" % [k, n(float(pt["scale"][k]))])
 		for mp in pt.get("add_modifiers", []): bits.append(modifier(mp))
 		out.append("Merged %s: %s" % ["E" if slot == "active" else "auto ability", ", ".join(bits)])
+	return out
+
+## A merge with a form (content/merge_forms): what you become, its shell, and the four slots (the same for everyone).
+static func form_lines(ms: MergeSpec, fd: Dictionary) -> Array:
+	var f := MergeForm.kit_form(ms.id)
+	var out: Array = []
+	out.append("You become %s for %ss. A shell (%s hp by weight class) takes damage first; if it breaks, the merge ends." % [fd["name"], n(ms.duration), "/".join([n(MergeShell.size_for("light", f)), n(MergeShell.size_for("medium", f)), n(MergeShell.size_for("heavy", f))])])
+	out.append("Left click, %s: %s" % [fd["lmb"]["name"], fd["lmb"]["desc"]])
+	out.append("Right click (hold), %s: %s" % [fd["rmb"]["name"], fd["rmb"]["desc"]])
+	out.append("E, %s: %s" % [fd["e"]["name"], fd["e"]["desc"]])
+	out.append("R again, %s: %s It ends the merge. Ready %ss in." % [fd["r"]["name"], fd["r"]["desc"], n(float(MergeForm.data()["ult_lock_s"]))])
+	out.append("Shift dashes with a flourish; Q still works; C is off. Your Boki is part of you until it ends.")
 	return out
 
 ## The aiming shape shown while E is held (Match._update_indicators): [kind, reach, size(, "front")].

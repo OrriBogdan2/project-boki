@@ -244,6 +244,13 @@ static func draw(c: Control, id: String, at: Vector2, s: float, col: Color) -> v
 		# ---- kin abilities, bond ultimates, gear
 		"charge":
 			F.call([[0.15, -0.85], [-0.45, 0.1], [-0.02, 0.1], [-0.2, 0.85], [0.45, -0.15], [0.02, -0.15]])
+		"roll":
+			# a boulder mid-roll: a rough ring with chips, speed lines trailing behind
+			A.call(0.25, 0.0, 0.52, 0.0, TAU)
+			L.call([[0.05, -0.2], [0.3, 0.05], [0.15, 0.3]], maxf(1.5, s * 0.08))
+			for i in 3:
+				var y := -0.4 + i * 0.4
+				L.call([[-0.95, y], [-0.5 - 0.1 * (i % 2), y]], maxf(1.5, s * 0.08))
 		"updraft":
 			for i in 3:
 				var x := -0.45 + i * 0.45

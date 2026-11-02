@@ -403,7 +403,7 @@ func _net() -> void:
 		KinNet.apply_kin(k, arr)
 		seen[c] = k.cmd
 	ok(seen == {"guard": "guard", "follow": "follow", "chase": "chase", "return": "return"}, "the order rides the kin snapshot and comes back out %s" % [seen])
-	ok(Net.VERSION == "0.10.0", "Net.VERSION moved to 0.10.0 (%s)" % Net.VERSION)
+	ok(Net.VERSION == "0.11.0", "Net.VERSION is 0.11.0 (merge forms moved it past 0.10.0) (%s)" % Net.VERSION)
 
 # ------------------------------------------------------------------ 10. orders in the air, the giant merge
 func _air_orders() -> void:
@@ -428,8 +428,8 @@ func _air_orders() -> void:
 	KinCommand.order(P, "return")
 	run_for(2.0)
 	ok(k.state == "shoulder" and k.cmd == "return", "Return on a leap carries on up onto you (state %s)" % k.state)
-	# a giant-form merge started from Follow is ridden
-	_fresh("pebbit")
+	# a giant-form stat merge started from Follow is ridden (Cairnback has no form of its own yet; Pebbit's Heavy Star hides the Boki inside you)
+	_fresh("cairnback")
 	P = m.player
 	k = P.kin
 	ok(k.carry_style() == "mount" and k.cmd == "follow" and k.state == "active", "setup: a mount, following")
