@@ -2,7 +2,7 @@
 
 Review shots for each hero: kit card, each ability, the payoff, animation frame strips and a neutral full-body portrait. PNGs are downscaled to at most 1280 px wide. Captions come from the shot manifests.
 
-Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-tender), [Tamsin](#tamsin-rimewright), [Dredge](#dredge-dredge), [Ashwick](#ashwick-ashwick), [Dolm](#dolm-dolm), [Ostra](#ostra-ostra), [Archer](#archer-archer), [Bulwark](#bulwark-bulwark), [Thief](#thief-thief), [Juggernaut](#juggernaut-juggernaut), [Farm building](#farm-building-farmbuild), [classes](#classes-classes), [aimkit](#aimkit-aimkit), [moosh-moosh/v2](#moosh-moosh/v2-moosh-moosh/v2), [moosh-moosh/v2/anim](#moosh-moosh/v2/anim-moosh-moosh/v2/anim), [tamsin/v2](#tamsin/v2-tamsin/v2), [tamsin/v2/anim](#tamsin/v2/anim-tamsin/v2/anim), [dancer/v2](#dancer/v2-dancer/v2), [dancer/v2/before](#dancer/v2/before-dancer/v2/before), [zedran/v2](#zedran/v2-zedran/v2), [zedran/v2/before](#zedran/v2/before-zedran/v2/before), [dancer/v2/anim](#dancer/v2/anim-dancer/v2/anim), [zedran/v2/anim](#zedran/v2/anim-zedran/v2/anim), [linwick/v2](#linwick/v2-linwick/v2), [linwick/v2/anim](#linwick/v2/anim-linwick/v2/anim), [linwick/v2/before](#linwick/v2/before-linwick/v2/before), [linwick/v2/after](#linwick/v2/after-linwick/v2/after), [dredge/v2](#dredge/v2-dredge/v2), [dredge/v2/anim](#dredge/v2/anim-dredge/v2/anim), [dredge/v2/before](#dredge/v2/before-dredge/v2/before), [dredge/v2/after](#dredge/v2/after-dredge/v2/after), [pin/v2](#pin/v2-pin/v2), [bjorn/v2](#bjorn/v2-bjorn/v2), [pin/v2/anim](#pin/v2/anim-pin/v2/anim), [bjorn/v2/anim](#bjorn/v2/anim-bjorn/v2/anim), [vireo/v2](#vireo/v2-vireo/v2), [vireo/v2/anim](#vireo/v2/anim-vireo/v2/anim), [venator/v2/anim](#venator/v2/anim-venator/v2/anim), [venator/v2](#venator/v2-venator/v2), [breah/v2](#breah/v2-breah/v2), [ostra/v2](#ostra/v2-ostra/v2), [breah/v2/anim](#breah/v2/anim-breah/v2/anim), [ostra/v2/anim](#ostra/v2/anim-ostra/v2/anim), [linwick/v2/ult](#linwick/v2/ult-linwick/v2/ult), [dredge/v2/ult](#dredge/v2/ult-dredge/v2/ult), [hunters](#hunters-hunters), [pin/v2/ult](#pin/v2/ult-pin/v2/ult), [bjorn/v2/ult](#bjorn/v2/ult-bjorn/v2/ult)
+Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-tender), [Tamsin](#tamsin-rimewright), [Dredge](#dredge-dredge), [Ashwick](#ashwick-ashwick), [Dolm](#dolm-dolm), [Ostra](#ostra-ostra), [Archer](#archer-archer), [Bulwark](#bulwark-bulwark), [Thief](#thief-thief), [Juggernaut](#juggernaut-juggernaut), [Farm building](#farm-building-farmbuild), [classes](#classes-classes), [aimkit](#aimkit-aimkit), [moosh-moosh/v2](#moosh-moosh/v2-moosh-moosh/v2), [moosh-moosh/v2/anim](#moosh-moosh/v2/anim-moosh-moosh/v2/anim), [tamsin/v2](#tamsin/v2-tamsin/v2), [tamsin/v2/anim](#tamsin/v2/anim-tamsin/v2/anim), [dancer/v2](#dancer/v2-dancer/v2), [dancer/v2/before](#dancer/v2/before-dancer/v2/before), [zedran/v2](#zedran/v2-zedran/v2), [zedran/v2/before](#zedran/v2/before-zedran/v2/before), [dancer/v2/anim](#dancer/v2/anim-dancer/v2/anim), [zedran/v2/anim](#zedran/v2/anim-zedran/v2/anim), [linwick/v2](#linwick/v2-linwick/v2), [linwick/v2/anim](#linwick/v2/anim-linwick/v2/anim), [linwick/v2/before](#linwick/v2/before-linwick/v2/before), [linwick/v2/after](#linwick/v2/after-linwick/v2/after), [dredge/v2](#dredge/v2-dredge/v2), [dredge/v2/anim](#dredge/v2/anim-dredge/v2/anim), [dredge/v2/before](#dredge/v2/before-dredge/v2/before), [dredge/v2/after](#dredge/v2/after-dredge/v2/after), [pin/v2](#pin/v2-pin/v2), [bjorn/v2](#bjorn/v2-bjorn/v2), [pin/v2/anim](#pin/v2/anim-pin/v2/anim), [bjorn/v2/anim](#bjorn/v2/anim-bjorn/v2/anim), [vireo/v2](#vireo/v2-vireo/v2), [vireo/v2/anim](#vireo/v2/anim-vireo/v2/anim), [venator/v2/anim](#venator/v2/anim-venator/v2/anim), [venator/v2](#venator/v2-venator/v2), [breah/v2](#breah/v2-breah/v2), [ostra/v2](#ostra/v2-ostra/v2), [breah/v2/anim](#breah/v2/anim-breah/v2/anim), [ostra/v2/anim](#ostra/v2/anim-ostra/v2/anim), [linwick/v2/ult](#linwick/v2/ult-linwick/v2/ult), [dredge/v2/ult](#dredge/v2/ult-dredge/v2/ult), [hunters](#hunters-hunters), [pin/v2/ult](#pin/v2/ult-pin/v2/ult), [bjorn/v2/ult](#bjorn/v2/ult-bjorn/v2/ult), [mooshmoosh/v2/ult](#mooshmoosh/v2/ult-mooshmoosh/v2/ult), [tamsin/v2/ult](#tamsin/v2/ult-tamsin/v2/ult)
 
 ## Vireo (mage)
 
@@ -2243,3 +2243,55 @@ Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-t
 **Strip, the slam: one frame down into the ground, the deep crouch, spikes heaving up, the slow rise**
 
 ![Strip, the slam: one frame down into the ground, the deep crouch, spikes heaving up, the slow rise](bjorn/v2/ult/strip_bul_ult_slam.png)
+
+## mooshmoosh/v2/ult (mooshmoosh/v2/ult)
+
+**Hearth Call aim telegraph: ready, cursor on the teammate: the gold line onto them and the green pick ring (the 7 bh reach ring is drawn round her)**
+
+![Hearth Call aim telegraph: ready, cursor on the teammate: the gold line onto them and the green pick ring (the 7 bh reach ring is drawn round her)](mooshmoosh/v2/ult/tender_ultaim.png)
+
+**Hearth Call aim strip: the preview while the cursor rests on the teammate**
+
+![Hearth Call aim strip: the preview while the cursor rests on the teammate](mooshmoosh/v2/ult/tender_ultaim_strip.png)
+
+**Hearth Call key frame: mid-channel, walking with the lantern raised, the lantern-gold tether back to the downed teammate**
+
+![Hearth Call key frame: mid-channel, walking with the lantern raised, the lantern-gold tether back to the downed teammate](mooshmoosh/v2/ult/tender_ultkey.png)
+
+**Hearth Call cast strip (f25 beats): coil, thrust up as the plus bursts on the teammate, overshoot, into the channel pose**
+
+![Hearth Call cast strip (f25 beats): coil, thrust up as the plus bursts on the teammate, overshoot, into the channel pose](mooshmoosh/v2/ult/tender_ultkey_strip.png)
+
+**Hearth Call impact: the downed teammate arrives at her side and stands up (ALLY REVIVED), green arrival burst, bond meter jumps**
+
+![Hearth Call impact: the downed teammate arrives at her side and stands up (ALLY REVIVED), green arrival burst, bond meter jumps](mooshmoosh/v2/ult/tender_ultimpact.png)
+
+**Hearth Call 6-frame strip: walking in the channel, late channel, the pull home, arrival burst, settle**
+
+![Hearth Call 6-frame strip: walking in the channel, late channel, the pull home, arrival burst, settle](mooshmoosh/v2/ult/tender_ult_strip.png)
+
+## tamsin/v2/ult (tamsin/v2/ult)
+
+**Rimelock telegraph: the 4 bh rink with its ragged edge and crack network, shown to everyone, filling as it builds**
+
+![Rimelock telegraph: the 4 bh rink with its ragged edge and crack network, shown to everyone, filling as it builds](tamsin/v2/ult/rimewright_ultaim.png)
+
+**Rimelock seal strip: crouch, arms out as the rink snaps, the frost bud closing over her**
+
+![Rimelock seal strip: crouch, arms out as the rink snaps, the frost bud closing over her](tamsin/v2/ult/rimewright_ultaim_strip.png)
+
+**Rimelock key frame: sealed in her frost bud, the cracks bright just before the crash**
+
+![Rimelock key frame: sealed in her frost bud, the cracks bright just before the crash](tamsin/v2/ult/rimewright_ultkey.png)
+
+**Rimelock cast strip at 10 fps beats (f25 seal, f27 full rink, the hold)**
+
+![Rimelock cast strip at 10 fps beats (f25 seal, f27 full rink, the hold)](tamsin/v2/ult/rimewright_ultkey_strip.png)
+
+**Rimelock impact: light pillar on her, shards flung out, both dummies in the rink encased in ice blocks (STUNNED)**
+
+![Rimelock impact: light pillar on her, shards flung out, both dummies in the rink encased in ice blocks (STUNNED)](tamsin/v2/ult/rimewright_ultimpact.png)
+
+**Rimelock crash strip: sealed, the crash, shards, recovery (BOND READY is the main session's cue: the crash filled the meter)**
+
+![Rimelock crash strip: sealed, the crash, shards, recovery (BOND READY is the main session's cue: the crash filled the meter)](tamsin/v2/ult/rimewright_ult_strip.png)
