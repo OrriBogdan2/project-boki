@@ -68,6 +68,10 @@ func _sim(home, hw: HomeWork, secs: float, until: Callable = Callable()) -> void
 
 func run(m: Node) -> void:
 	main = m
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--farmbuild-shots="):
+			await load("res://tools/farmbuild_shots.gd").new().run(m, a.substr(18))
+			return
 	Save.no_write = true
 	# ---------------------------------------------------------------- 1. unlocks
 	Save.d = _new_save()
@@ -100,10 +104,12 @@ func run(m: Node) -> void:
 	_stats()
 	ok(FarmUnlocks.cradle_lock(6) != "" and FarmUnlocks.cradle_lock(8) != "", "the 6th and 8th incubator cradles are locked at level 1 ('%s')" % FarmUnlocks.cradle_lock(6))
 	Save.d["gems"] = 5000
+	Incubator.ensure()
 	ok(Incubator.expand() == FarmUnlocks.cradle_lock(6) and Incubator.slots() == Incubator.SLOTS, "buying a cradle is refused with the reason, no gems spent")
 	_stats(10, 3, 6, 100, 3)
-	ok(Incubator.expand() == "" and Incubator.slots() == Incubator.SLOTS + 1, "at a high enough farm level the cradle can be bought")
-	Save.d["incubator"]["slots"] = Incubator.SLOTS
+	var why_cr := Incubator.expand()
+	ok(why_cr == "" and Incubator.slots() == Incubator.SLOTS + 1, "at a high enough farm level the cradle can be bought ('%s')" % why_cr)
+	if Save.d.has("incubator"): Save.d["incubator"]["slots"] = Incubator.SLOTS
 	_stats()
 	# an old farm and owned items
 	var legacy := Save.fresh()
@@ -119,11 +125,11 @@ func run(m: Node) -> void:
 	# ---------------------------------------------------------------- 2. build mode
 	Save.d = _new_save()
 	Save.d["gems"] = 600
-	var rk := Save.new_kin("pebbit", "Rocky"); rk["level"] = 5
+	var rk := Save.new_kin("wisplet", "Wisp"); rk["level"] = 5
 	var ash := Save.new_kin("cindle", "Ash"); ash["level"] = 5
 	for r in [rk, ash]:
 		Care.ensure(r)
-		Save.d["roster"].append(r)
+		for nd in Care.NEEDS: r["needs"][nd] = 100.0
 	_stats()
 	_mats(0, 0, 0, 0)
 	var home = await main._hb_home()
@@ -162,6 +168,17 @@ func run(m: Node) -> void:
 	ok(_put(hb, pc) and home.plots.size() == 4, "so does the crop patch")
 	hb.take("cook_pot")
 	ok(_put(hb, _spot(hb, home.spots["house"] + Vector3(4, 0, 3))), "and the cooking pot")
+	# the rest of the crew arrives once there is a house to gather round (they would have nowhere to stand before)
+	hb.toggle()
+	for r in [rk, ash]: Save.d["roster"].append(r)
+	home.queue_free()
+	await main.get_tree().process_frame
+	home = await main._hb_home()
+	hb = home.hb
+	hw = home.hw
+	home._close_panel()
+	L = HomeLayout.of(Save.d)
+	hb.toggle()
 	# unlock the Lumber Camp by level, then try to buy it with nothing
 	_stats(0, 0, 0, 24)
 	hb.take("lumber_camp")
@@ -177,10 +194,10 @@ func run(m: Node) -> void:
 	ok(int(Save.d["gems"]) == g0 and Work.mat("wood") == 10, "refused placements cost nothing")
 	var cc := _spot(hb, home.spots["house"] + Vector3(-6, 0, 4))
 	hb.cells = cc; hb._check_cells(); hb._draw_cells()
-	var outline := hb.ghost_cells.get_node_or_null("Outline") != null and hb.ghost_cells.find_children("Grid", "MeshInstance3D", true, false).size() >= 4
+	var outline := FarmBuildUi.count(hb.ghost_cells, "outline") == 4 and FarmBuildUi.count(hb.ghost_cells, "grid") >= 4
 	ok(hb.ghost_ok and outline, "a good spot is accepted and shows the footprint outline and the snapping grid")
 	hb.cells = [Vector2i(1, 1)]; hb._check_cells(); hb._draw_cells()
-	ok(not hb.ghost_ok and hb.ghost_cells.get_node_or_null("Note") != null, "a bad spot floats its reason over the footprint")
+	ok(not hb.ghost_ok and FarmBuildUi.count(hb.ghost_cells, "note") == 1, "a bad spot floats its reason over the footprint")
 	hb.cells = cc; hb._check_cells()
 	ok(hb.place_held(), "placed")
 	var camp := _entry(L, "lumber_camp")
@@ -216,6 +233,7 @@ func run(m: Node) -> void:
 	var f0 := Work.mat("fibre"); var gg := int(Save.d["gems"])
 	ok(_put(hb, stc) and Work.mat("fibre") == f0 - int(st_cost["fibre"]), "the Market stall site paid fibre as well (%s)" % FarmSites.cost_text(st_cost))
 	hb.undo_last()
+	L = HomeLayout.of(Save.d)      # (undo puts the saved layout back)
 	ok(Work.mat("fibre") == f0 and int(Save.d["gems"]) == gg and _entry(L, "market_stall").is_empty(), "undo takes the site back and returns gems, wood and fibre")
 	hb.toggle()
 	# ---------------------------------------------------------------- 4. Boki build it
@@ -229,25 +247,25 @@ func run(m: Node) -> void:
 	hb.toggle()
 	camp = _entry(L, "lumber_camp")
 	var cu := int(camp["u"])
+	var need_camp := int(camp["site"]["need"])
 	hw.scan_t = 0.0
 	hw.scan()
 	ok(hw.jobs.any(func(j): return String(j["kind"]) == "build" and int(j["u"]) == cu), "the farm has a build job for it")
 	ok(hw.jobs.filter(func(j): return String(j["kind"]) == "build").size() == 2, "two Boki at most work one site at once")
 	var lv_seen := {}
-	var started := Time.get_ticks_msec()
 	var ping := func() -> bool:
 		for k in home.kins:
 			if k.has("job") and String(k["job"]["kind"]) == "build" and String(k["job"]["phase"]) == "work":
 				lv_seen[String(k["rec"]["name"])] = [int(k["job"]["lv"]), float(k["job"]["dur"])]
 		return not FarmSites.is_site(_entry(L, "lumber_camp"))
-	var got_mid := -1
-	await _sim(home, hw, 40.0, func() -> bool:
+	var gm := [-1]      # (a lambda sees a copy of plain numbers: keep the count in an array)
+	await _sim(home, hw, 300.0, func() -> bool:
 		var e := _entry(L, "lumber_camp")
-		if FarmSites.is_site(e) and int(e["site"]["got"]) >= 1 and got_mid < 0:
-			got_mid = int(e["site"]["got"])
+		if FarmSites.is_site(e) and int(e["site"]["got"]) >= 1 and int(gm[0]) < 0:
+			gm[0] = int(e["site"]["got"])
+			print("FARMBUILD  first swing landed: %d of %d, bar %.0f%%" % [int(gm[0]), need_camp, FarmSites.progress(e) * 100.0])
 		return ping.call())
-	ok(got_mid >= 1, "Boki walked over and landed swings (progress %d of %d seen mid-build)" % [got_mid, int(camp["site"]["need"])])
-	await _sim(home, hw, 240.0, ping)
+	ok(int(gm[0]) >= 1, "Boki walked over and landed swings (progress %d of %d seen mid-build)" % [int(gm[0]), need_camp])
 	camp = _entry(L, "lumber_camp")
 	ok(not camp.is_empty() and not FarmSites.has_site(camp) and FarmSites.tier(camp) == 1, "the last swing finishes it: it is a tier 1 Lumber Camp")
 	ok(Progress.stat("fb_built") == 1 and hw.has_station("lumber_camp"), "it counts toward farm level and is a working station now")
@@ -261,7 +279,9 @@ func run(m: Node) -> void:
 		for b in lvs:
 			if int(a[0]) > int(b[0]) and float(a[1]) >= float(b[1]) - 0.001: sorted_ok = false
 	ok(lvs.size() >= 1 and sorted_ok, "a higher building skill makes a swing quicker (%d builders seen)" % lvs.size())
-	ok(Work.speed(4) > Work.speed(1) * 2.0 and FarmSites.level({"kind": "craft", "x": 1}, {"kind": "build", "el": "craft"}) >= 1, "a Boki with no Craft knack still builds at skill 1")
+	var bj := {"kind": "build", "el": "craft", "u": cu}
+	ok(Work.level(rk, "craft") == 2 and Work.level(Save.d["roster"][0], "craft") == 0 and FarmSites.level(Save.d["roster"][0], bj) == 1 and FarmSites.level(rk, bj) == 2 and Work.speed(2) > Work.speed(1),
+		"a Boki with no Craft knack still builds at skill 1; a Craft 2 Boki builds at 2, which is quicker (x%.2f)" % (Work.speed(2) / Work.speed(1)))
 	# a site whose builders are not allowed (Craft Off on the Job Board): nobody builds it
 	Work.set_prio("craft", 0)
 	var j_off := {"kind": "build", "el": "craft", "u": cu}
@@ -363,7 +383,7 @@ func run(m: Node) -> void:
 	var home4 = await main._hb_home()
 	var wb := _entry(HomeLayout.of(Save.d), "workbench")
 	ok(not FarmUnlocks.gated() and not wb.is_empty() and not FarmSites.has_site(wb) and FarmSites.tier(wb) == 1 and home4.hw.has_station("workbench") and FarmUnlocks.open("cold_store"), "an old save keeps its workbench as a plain tier 1 station and everything open")
-	var old_cost := home4.hb._site_cost("kiln")
+	var old_cost: Dictionary = home4.hb._site_cost("kiln")
 	ok(old_cost.is_empty(), "and its new buildings still go up at once")
 	home4.queue_free()
 	await main.get_tree().process_frame

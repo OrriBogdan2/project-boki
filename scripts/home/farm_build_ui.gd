@@ -6,6 +6,13 @@ extends RefCounted
 
 const GRID_R := 3                         # tiles of snapping grid shown round the ghost
 
+## How many of the ghost's extras of one kind ("outline", "grid", "note") are live (tooling).
+static func count(root: Node3D, kind: String) -> int:
+	var n := 0
+	for c in root.get_children():
+		if c.get_meta("fbui", "") == kind and not c.is_queued_for_deletion(): n += 1
+	return n
+
 ## Thin box edges round the footprint (green when it fits, red when not) and a faint grid round it.
 static func outline(root: Node3D, cells: Array, ok: bool) -> void:
 	if cells.is_empty() or not is_instance_valid(root):
@@ -27,7 +34,7 @@ static func outline(root: Node3D, cells: Array, ok: bool) -> void:
 		mi.mesh = bm; mi.material_override = line
 		mi.position = Vector3((seg[0] + seg[2]) * 0.5, 0.09, (seg[1] + seg[3]) * 0.5)
 		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		mi.name = "Outline"
+		mi.set_meta("fbui", "outline")
 		root.add_child(mi)
 	# the snapping grid: tile edges a few tiles out from the footprint, fading with distance
 	var gm := StandardMaterial3D.new()
@@ -40,7 +47,7 @@ static func outline(root: Node3D, cells: Array, ok: bool) -> void:
 		m1.mesh = b1; m1.material_override = gm
 		m1.position = Vector3(gx, 0.055, (z0 - GRID_R + z1 + 1 + GRID_R) * 0.5)
 		m1.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		m1.name = "Grid"
+		m1.set_meta("fbui", "grid")
 		root.add_child(m1)
 	for gz in range(z0 - GRID_R, z1 + GRID_R + 2):
 		var m2 := MeshInstance3D.new()
@@ -48,19 +55,19 @@ static func outline(root: Node3D, cells: Array, ok: bool) -> void:
 		m2.mesh = b2; m2.material_override = gm
 		m2.position = Vector3((x0 - GRID_R + x1 + 1 + GRID_R) * 0.5, 0.055, gz)
 		m2.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		m2.name = "Grid"
+		m2.set_meta("fbui", "grid")
 		root.add_child(m2)
 
 ## The reason a spot is refused, floating above the footprint. "" removes it.
 static func note(root: Node3D, cells: Array, text: String) -> void:
 	if not is_instance_valid(root):
 		return
-	var old := root.get_node_or_null("Note")
-	if old: old.queue_free()
+	for old in root.get_children():
+		if old.get_meta("fbui", "") == "note": old.queue_free()
 	if text == "" or cells.is_empty():
 		return
 	var l := Label3D.new()
-	l.name = "Note"
+	l.set_meta("fbui", "note")
 	l.text = text
 	l.font_size = 40
 	l.pixel_size = 0.009

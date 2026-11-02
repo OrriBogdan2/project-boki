@@ -128,6 +128,9 @@ func run(m: Node) -> void:
 	# ---------------------------------------------------------------- 3. wood and stone pay for buildings
 	Save.d["gems"] = 2000
 	Save.d["mats"] = {"wood": 0, "stone": 0}
+	# (the building pass's unlocks and construction sites have their own check, --farmbuild-check; this one covers the
+	# instant, ungated placement older farms keep, so the pass is switched off for the rest of it)
+	L.erase("fb")
 	hb.take("nesting_nook")
 	ok(hb.held.is_empty(), "the Nesting Nook needs wood: with none, it can't be picked up")
 	Save.d["mats"] = {"wood": 20, "stone": 20}

@@ -375,8 +375,10 @@ func _ready() -> void:
 		set_meta("farm_start_check", fsc)
 		fsc.run(self)
 		return
-	if "--farmbuild-check" in args:
-		load("res://tools/farmbuild_check.gd").new().run(self)      # the farm building pass: unlocks, build mode, Boki-built sites, tiers, save and load
+	if Array(args).any(func(a): return String(a).begins_with("--farmbuild")):
+		var fbc = load("res://tools/farmbuild_check.gd").new()      # the farm building pass: --farmbuild-check, or --farmbuild-shots=<dir> for screenshots
+		set_meta("farmbuild_check", fbc)
+		fbc.run(self)
 		return
 	if "--work-check" in args:
 		var wkc = load("res://tools/work_check.gd").new()      # kin at work: jobs, stations, priorities, shimmer odds
