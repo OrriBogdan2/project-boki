@@ -31,7 +31,7 @@ const SHOTS := [
 	["pin_heavy_hit", "archer", "heavy", 1.4, 5.0, "Heavy Shot impact: red-white burst, dust as the dummy is driven back, the white ring"],
 	["pin_snare", "archer", "snare", 0.62, 4.0, "Snare tap: the snare arrow flying"],
 	["pin_spirit_roll", "archer", "spirit", 0.6, 2.0, "Spirit Walk: the dodge roll and its green burst"],
-	["pin_spirit_inside", "archer", "spirit_rock", 1.25, 1.0, "Spirit Walk inside a rock: the green shell, her screen tinted dark blue"],
+	["pin_spirit_inside", "archer", "spirit_rock", 1.15, 1.0, "Spirit Walk inside a rock: the green shell, her screen tinted dark blue"],
 	["pin_hail_tell", "archer", "hail", 0.6, 3.0, "Hail Wall cast: the curved arc at the cursor distance (everyone sees it for the 0.35 s tell)"],
 	["pin_hail_rain", "archer", "hail", 1.8, 3.0, "Hail Wall: seven green panels with fletch posts, arrows streaking down, blue burn flames on the dummy"],
 	# ------------------------------------------------ Bjorn
@@ -96,6 +96,10 @@ func take(main_node: Node, out: String) -> void:
 		if x != P and x != T: x.teleport(home + Vector3(-30, 0, 30))
 	if m.hud: m.hud.visible = false
 	var list: Array = PAIRS if before else SHOTS + PAIRS
+	for a in OS.get_cmdline_user_args():
+		if String(a).begins_with("--only="):
+			var want := String(a).substr(7).split(",")
+			list = list.filter(func(e): return String(e[0]) in want)
 	for s in list:
 		await _shot(s, PAIRS.has(s))
 	var f := FileAccess.open(dir.path_join("MANIFEST.txt"), FileAccess.WRITE)
@@ -150,6 +154,13 @@ func _reset(hero: String) -> void:
 	P.dashes = P.max_dashes(); P.fire_cd = 0.0; P.ammo = maxi(P.ammo, 1); P.reload_t = 0.0
 	P.inp["fire"] = false; P.inp["sec_hold"] = false; P.inp["move"] = Vector2.ZERO
 	T.teleport(home + Vector3(7.0, 0, 0)); T.hp = T.max_hp; T.vel = Vector3.ZERO; T.stun_t = 0.0; T.root_t = 0.0
+	if m.arena:
+		var i := 0
+		for dm in m.arena.dummies:
+			i += 1
+			dm["at"] = home + Vector3(-14.0 - 3.0 * i, 0, -14.0)
+			(dm["h"] as Hunter).teleport(dm["at"])
+		if m.arena.get("bot") != null and is_instance_valid(m.arena.bot): (m.arena.bot as Hunter).teleport(home + Vector3(-20, 0, 14))
 	var K = P.ak
 	if K:
 		K.cd["rmb"] = 0.0; K.cd["e"] = 0.0; K.ch_rmb = 2.0; K.res = 0.0
@@ -192,8 +203,11 @@ func _input(what: String, t: float) -> void:
 				if rk != Vector3.INF:
 					P.teleport(rk - Vector3(2.5, 0, 0))
 					_aim(rk + Vector3(3, 0, 0))
-			P.inp["move"] = Vector2(1, 0) if t > 0.45 else Vector2.ZERO
+			P.inp["move"] = Vector2(1, 0) if t > 0.45 and t < 0.8 else Vector2.ZERO
 			if at.call(0.5): P.do_dash()
+			if at.call(0.85):
+				var rk2 := _rock_near(home)
+				if rk2 != Vector3.INF: P.teleport(rk2); P.vel = Vector3.ZERO
 		"hail":
 			K.res = 0.0
 			_aim(home + Vector3(5.0, 0, 0)); T.teleport(home + Vector3(5.0, 0, 0).rotated(Vector3.UP, 0.4))

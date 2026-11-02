@@ -37,7 +37,7 @@ static func _longbow(gun: Node3D, m_dark: Material, m_acc: Material) -> void:
 	Models.part(gun, Models.box(0.01, 0.01, 0.62), Models.toon(Color("d8c9a8"), false), Vector3(0.022, 0.0, -0.34))
 	for sx in [-1.0, 1.0]:
 		Models.part(gun, Models.box(0.004, 0.035, 0.09), Models.toon(Color("8fd88a"), false), Vector3(0.022 + sx * 0.012, 0.0, -0.08), Vector3.ONE, Vector3(0, sx * 0.4, 0))
-	Models.part(gun, Models.prism_tip(), Models.glow_mat(Color("bfffd0")), Vector3(0.022, 0.0, -0.67), Vector3(0.035, 0.07, 0.012), Vector3(-PI * 0.5, 0, 0))
+	Models.part(gun, Models.prism_tip(), Models.toon(Color("bfffd0"), false, 0.35), Vector3(0.022, 0.0, -0.67), Vector3(0.035, 0.07, 0.012), Vector3(-PI * 0.5, 0, 0))
 
 ## The hammer under its "Hammer" pivot (at the grip), then the aegis shield on the off side.
 static func _hammer_and_shield(gun: Node3D, m_dark: Material, m_acc: Material) -> void:
