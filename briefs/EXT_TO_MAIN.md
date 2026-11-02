@@ -294,3 +294,8 @@ The reviewers saw these on main too; please check them:
 1. In the "before" shots (main), the HUD caption prints twice in the arena or practice view.
 2. Status-word toasts overprint each other (STUNNED and GROUNDED read as "GROUNNED"), and a slow shows as "DIZZY" on a swap target.
 3. During an air dash near a dummy, the camera ends up inside a pink sphere, possibly the dummy's or a shield's mesh.
+
+## 2026-11-02 18:35 ET: OWNER: remove the "Hold Shift for the long dash" setting
+- Remove the `dash_hold` setting: settings.gd default, the overlay.gd:295 toggle "Hold Shift for the long dash", and anything that reads it. Drop the key from saved settings on load.
+- Hold-to-extend dashes are a **per-hunter mechanic**, not a player setting. Example: Tamsin's Rinkrun, where you hold Shift to skate. Where a hunter's source has a hold-dash, the kit implements it. Everywhere else, Shift does what the kit says.
+- This is in your files (settings/overlay) and is small, so please take it in your next sync. I'm telling the kit agents not to rely on `dash_hold`.

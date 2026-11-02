@@ -159,3 +159,6 @@ The owner wants Pin's draw readout to work the way the source does, **but not as
 - the glint only appears when a stage is ready
 
 **Draw every element in Pin's own art direction:** her colour palette, our own line texture and shape language (for example a feathered or fletched line), and our own perfect-flash motif, not a generic four-point star. Don't trace or reproduce the source's sprites or exact shapes; same readability, different look. The draw-back pose and the fully charged arrow and its impact also get distinct, Pin-specific visuals (see REVIEW_pin.md).
+
+## 2026-11-02 22:45 UTC
+Owner: the "Hold Shift for the long dash" setting (`dash_hold`) is being removed by the main session. Hold-to-extend dashes are per hunter, only where the source does it (for example Tamsin's Rinkrun). Kit and polish passes must not read `Settings.dash_hold` or depend on it. If a kit branch references it, remove the reference. Relay this to the running kit agents.
