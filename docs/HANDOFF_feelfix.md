@@ -1,6 +1,6 @@
 # Handoff: feelfix (branch `feelfix`, based on `integ36`)
 
-Pushed to origin/feelfix, merged with main at sync56 (c7e2e01), ready for the main session to merge. Godot runs go through the `godot` queue wrapper (fresh temp XDG_DATA_HOME).
+Pushed to origin/feelfix, merged with main at sync57 (e85193d), ready for the main session to merge. Godot runs go through the `godot` queue wrapper (fresh temp XDG_DATA_HOME).
 For screenshot checks (`--hero-check`, `--keybind-check`, `--swim-check`) pass
 `--shot=/tmp/x.png --frames=99999 --shots-dir=<dir>`. The dummy `--shot` turns off the boot splash,
 and `--shots-dir` is where the check writes its images. Screenshots are in /home/claude/shots/feelfix/.
@@ -31,8 +31,8 @@ and `--shots-dir` is where the check writes its images. Screenshots are in /home
 - 10: Traced at seed 5 with a temporary damage log. Damage came from a brute camp and skitters next to the landing spot, from the rival bot "Waekri" (provoked when your Boki hit it), and from one unsourced hit. After the fix, a run to t=155 shows no damage until t=155, well after the 60 s grace. The handmap branch was not merged or tested; Net.VERSION was not touched.
 
 ## Final state
-- Merged origin/main (sync56, c7e2e01). `python3 tools/health.py --strict` passes (home.gd 5938 / 5950). `tools/gen_wiki.py` regenerated Controls.md (R / X ultimate, J, Z).
+- Merged origin/main (sync57, e85193d, Net 0.9.0). Net.VERSION unchanged by this branch (no sync shape change; reserved number 0.9.4 unused).
+- `python3 tools/health.py --strict` passes (home.gd 5938 / 5950, hud.gd 3754 / 3850). `tools/gen_wiki.py` regenerated Controls.md (R / X ultimate, J, Z).
 - --arena-check now also presses X (must not reset) and Backspace (resets). --record-check never used the reset key and needed no change.
-- Net.VERSION unchanged (no sync shape change).
-- Full check results are in the final report to the main session.
-- The earlier flaky --farm-start-check seed was not reproduced in the final runs.
+- Check assumptions fixed after "walking off an island is allowed now" (assertions unchanged): --drop-check scouting brings the player back first, --boss-check walks out for 1.5 s not 3 s, --obstacle-check skips clusters whose way out is over the edge, --farm-start-check picks a tree whose own spot resolves to it (a boulder beside it could win), --swim-check waits a frame after its no-jump press, --home-build-check treats ponds as wadeable.
+- The Hunter edge guard is bots-only; anything new that walks a person near an edge in a check must expect a fall.
