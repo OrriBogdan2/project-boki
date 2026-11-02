@@ -19,6 +19,9 @@ extends Node3D
 
 const ROCK_SH := preload("res://shaders/molten_rock.gdshader")
 const GLASS_SH := preload("res://shaders/void_glass.gdshader")
+## Looks draw their variety from their own generator, never the global one (bots and rolls share it,
+## so a rock's crack pattern must not change what a bot decides).
+static var vis_rng := RandomNumberGenerator.new()
 const KEEP := 0.12            # s: a refreshed effect (hand, aura) stays this long without a refresh
 
 var m: Node
@@ -65,10 +68,10 @@ func _build(kind: String) -> Node3D:
 		"boulder", "rock", "dashrock":
 			var r := {"boulder": 0.24, "rock": 0.42, "dashrock": 0.5}[kind] as float
 			var heat := {"boulder": 0.55, "rock": 0.95, "dashrock": 0.7}[kind] as float
-			var body := Models.part(n, lump(r), rock_mat(heat, randf() * 10.0), Vector3.ZERO, Vector3.ONE, Vector3(0.3, 0.5, 0.2))
+			var body := Models.part(n, lump(r), rock_mat(heat, vis_rng.randf() * 10.0), Vector3.ZERO, Vector3.ONE, Vector3(0.3, 0.5, 0.2))
 			body.name = "Spin"
-			Models.part(body, lump(r * 0.55), rock_mat(heat, randf() * 10.0), Vector3(r * 0.55, r * 0.3, 0.0))
-			Models.part(body, lump(r * 0.45), rock_mat(heat, randf() * 10.0), Vector3(-r * 0.4, -r * 0.2, r * 0.45))
+			Models.part(body, lump(r * 0.55), rock_mat(heat, vis_rng.randf() * 10.0), Vector3(r * 0.55, r * 0.3, 0.0))
+			Models.part(body, lump(r * 0.45), rock_mat(heat, vis_rng.randf() * 10.0), Vector3(-r * 0.4, -r * 0.2, r * 0.45))
 			var halo := Models.part(n, Models.sphere(r * 1.5, 10), Models.glow_mat(Color(1.0, 0.45, 0.12, 0.22 + heat * 0.15)), Vector3.ZERO)
 			halo.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		"orb":

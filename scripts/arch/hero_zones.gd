@@ -84,7 +84,7 @@ static func rock_node() -> Node3D:
 	var cols := [[Vector3(-0.32, 0, 0.05), 0.34, ROCK_TOP], [Vector3(0.12, 0, -0.1), 0.38, ROCK_TOP - 0.06], [Vector3(0.42, 0, 0.12), 0.28, ROCK_TOP - 0.18], [Vector3(-0.02, 0, 0.22), 0.26, ROCK_TOP - 0.3]]
 	for c in cols:
 		var hgt: float = c[2]
-		var col := Models.part(n, Models.cyl(float(c[1]) * 0.92, float(c[1]), hgt, 6), KitLooks.rock_mat(0.35, randf() * 10.0), (c[0] as Vector3) + Vector3(0, hgt * 0.5, 0), Vector3.ONE, Vector3(0, randf() * 1.0, 0))
+		var col := Models.part(n, Models.cyl(float(c[1]) * 0.92, float(c[1]), hgt, 6), KitLooks.rock_mat(0.35, KitLooks.vis_rng.randf() * 10.0), (c[0] as Vector3) + Vector3(0, hgt * 0.5, 0), Vector3.ONE, Vector3(0, KitLooks.vis_rng.randf(), 0))
 		col.name = "Col"
 		Models.part(n, Models.cyl(float(c[1]) * 0.8, float(c[1]) * 0.92, 0.06, 6), Models.toon(Color("6e5444"), false, 0.0), (c[0] as Vector3) + Vector3(0, hgt + 0.02, 0))
 	var base := Models.part(n, Models.cyl(0.78, 0.86, 0.05, 10), Models.glow_mat(Color(1.0, 0.42, 0.12, 0.55)), Vector3(0, 0.03, 0))
