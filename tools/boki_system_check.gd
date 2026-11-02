@@ -7,7 +7,7 @@ extends RefCounted
 ##   5. a downed Boki: stays where it fell, no C / merge while down, the owner rescues it by touch,
 ##      else it comes round alone after 15-20s at low health; a fall into the abyss only has the timer
 ##   6. nobody steals or hurts a downed Boki while its owner is in the map
-##   7. the Merge: gated by the bond meter, changes your look (form) by Boki type and tier, leaps
+##   7. the Merge: gated by the bond meter, changes your look (form) by Boki type (no tiers), leaps
 ##      back from out and merges mid-air, and without a Boki it is only a weak surge
 ##   8. the net version moved for the new snapshot shape
 
@@ -228,9 +228,42 @@ func _downed() -> void:
 	# rescue by touch
 	P.teleport(Vector3(spot.x, spot.y, spot.z))
 	run_for(0.25)
-	ok(k.state == "downed" and k.rescue_t > 0.0, "standing in it starts the scoop (%.2fs)" % k.rescue_t)
-	run_for(0.6)
-	ok(k.state != "downed" and k.hp >= k.max_hp * 0.55, "...and 0.5s later it is back with a good chunk of health (%s, %.0f%%)" % [k.state, 100.0 * k.hp / k.max_hp])
+	ok(k.state == "downed" and k.rescue_t > 0.0 and k.rescue_on, "running into it starts the rescue (%.2fs, no key)" % k.rescue_t)
+	ok(float(KinDowned.rules()["rescue_s"]) == 3.5, "the rescue takes 3.5s (data: rescue_s)")
+	run_for(1.5)
+	ok(k.state == "downed" and k.rescue_t > 1.0, "...it is not a scoop: 1.7s in it is still going (%.2fs)" % k.rescue_t)
+	run_for(2.2)
+	ok(k.state != "downed" and k.hp >= k.max_hp * 0.55, "...and at 3.5s it is back with a good chunk of health (%s, %.0f%%)" % [k.state, 100.0 * k.hp / k.max_hp])
+	# the rescue is interrupted by crowd control and by a dash, not by plain damage; progress drains back instead of resetting
+	k.pos = P.pos + Vector3(9.0, 0, 0); k.state = "active"; k.fly = {}
+	k.go_down()
+	P.teleport(Vector3(k.pos.x, k.pos.y, k.pos.z))
+	run_for(1.5)
+	ok(k.rescue_on and k.rescue_t > 1.0, "a second rescue is under way (%.2fs)" % k.rescue_t)
+	ok(KinDowned.rescue_pose(P) == "rs_cradle", "...the rescuer cradles it (pose %s)" % KinDowned.rescue_pose(P))
+	P.inp["move"] = Vector2(1, 0); P.inp["fire"] = true; P.inp["sig"] = true
+	var x0 := P.pos.x
+	run_for(0.3, func(): P.inp["move"] = Vector2(1, 0); P.inp["fire"] = true)
+	ok(absf(P.pos.x - x0) < 0.1 and not P.used.has("fire"), "...you are rooted and can't attack while you do it")
+	P.hurt(5.0, null, {"src": "test"})
+	run_for(0.1)
+	ok(k.rescue_on, "...plain damage does not break it")
+	P.stun_t = 0.8
+	run_for(0.1)
+	ok(not k.rescue_on and k.rescue_t > 0.5, "...a stun does, and the progress is kept (%.2fs)" % k.rescue_t)
+	var held := k.rescue_t
+	run_for(0.5, func(): P.stun_t = 0.8)
+	ok(k.rescue_t < held and k.rescue_t > 0.0, "...it drains back over ~2s rather than resetting (%.2f -> %.2f)" % [held, k.rescue_t])
+	P.stun_t = 0.0
+	run_for(0.3)
+	ok(k.rescue_on, "...running into it again picks it up where it was")
+	P.inp["dash"] = true
+	run_for(0.1, func(): P.inp["dash"] = true)
+	P.inp["dash"] = false
+	ok(not k.rescue_on and k.rescue_block > 0.0, "a dash cancels it too (and it will not restart for a moment)")
+	k.state = "active"; k.fly = {}
+	k.go_down()
+
 	# self-recovery
 	k.pos = P.pos + Vector3(9.0, 0, 0); k.state = "active"; k.fly = {}
 	k.go_down()
@@ -275,7 +308,7 @@ func _merge() -> void:
 	var pressed := KinMerge.press(P)
 	ok(pressed and KinMerge.active(P) and P.ult < 0.25, "R merges and spends the meter (bond %.2f)" % P.ult)
 	var form: Dictionary = P.merge_st.get("form", {})
-	ok(not form.is_empty() and String(form.get("tier_name", "")) != "", "the merge has a form: a look and a tier (%s)" % String(form.get("tier_name", "?")))
+	ok(not form.is_empty() and String(form.get("name", "")) != "", "the merge has a form: a look and a name, no tiers (%s)" % String(form.get("name", "?")))
 	var looks := {}
 	for sp in ["cindle", "puddlet", "mossel"]:
 		if not Data.KIN.has(sp):
@@ -296,9 +329,10 @@ func _merge() -> void:
 	KinMerge.press(m.player)
 	ok(_cdr(m.player) > base_cdr, "merged: your abilities cool down faster (cooldown stat %.2f -> %.2f)" % [base_cdr, _cdr(m.player)])
 	var torso: Node3D = m.player.model.get_node_or_null("Rig/Torso") if m.player.model else null
+	run_for(float(MergeForm.data()["xform_s"]) + 0.1)       # (the silhouette pops in when the Boki lands in you, 0.45s into the transformation)
 	if torso:
 		ok(torso.get_node_or_null(MergeLook.PARTS_NAME) != null, "merged: the form's silhouette parts ride the torso")
-	run_for(float(m.player.merge_st.get("T", 10.0)) + 1.0)
+	run_for(float(m.player.merge_st.get("T", 10.0)) + float(MergeForm.data()["xform_s"]) + 1.0)
 	if torso:
 		ok(torso.get_node_or_null(MergeLook.PARTS_NAME) == null or torso.get_node(MergeLook.PARTS_NAME).is_queued_for_deletion(), "the merge's parts are removed when it ends (no leftovers stacking up)")
 	ok(not KinMerge.active(m.player) and m.player.kin.state == "shoulder", "the merge ends and the Boki is back on the shoulder (state %s)" % m.player.kin.state)
@@ -334,7 +368,7 @@ func _leap() -> void:
 	P.ult = 1.0
 	ok(KinMerge.plan(P) == "far" and not KinMerge.press(P), "a Boki too far away must be called back first")
 
-# ------------------------------------------------------------------ 7. no Boki: a weak surge
+# ------------------------------------------------------------------ 7. a downed Boki: R waits. No Boki at all: a weak surge
 func _surge() -> void:
 	_fresh()
 	var P := m.player
@@ -342,11 +376,21 @@ func _surge() -> void:
 	k.pos = P.pos + Vector3(8.0, 0, 0); k.state = "active"; k.fly = {}
 	k.go_down()
 	P.ult = 1.0
-	ok(KinMerge.plan(P) == "surge", "with the Boki down, R is a surge (plan '%s')" % KinMerge.plan(P))
+	ok(KinMerge.plan(P) == "rescue", "with the Boki down, R does nothing but say so (plan '%s')" % KinMerge.plan(P))
+	ok(not KinMerge.press(P) and not KinMerge.active(P) and P.ult >= 1.0, "...the full meter is kept (%.2f)" % P.ult)
+	ok(KinMerge.deny_text(P).begins_with("Rescue "), "...and says what to do ('%s')" % KinMerge.deny_text(P))
+	run_for(2.0)
+	ok(P.ult >= 1.0 and k.state == "downed", "the meter stays full while it is down")
+	# no Boki with you at all (benched): the weak surge
+	_fresh()
+	P = m.player
+	k = P.kin
+	k.state = "bench"
+	P.ult = 1.0
+	ok(KinMerge.plan(P) == "surge", "with no Boki at all, R is a surge (plan '%s')" % KinMerge.plan(P))
 	ok(KinMerge.press(P) and KinMerge.active(P) and bool(P.merge_st.get("surge", false)), "R fires the basic surge")
 	ok(float(P.merge_st["T"]) <= 4.0, "...which is short and weak (%.1fs)" % float(P.merge_st["T"]))
-	ok(k.state == "downed", "the downed Boki is not pulled into it")
 
 # ------------------------------------------------------------------ 8. net
 func _net() -> void:
-	ok(Net.VERSION.naturalnocasecmp_to("0.10.0") >= 0, "the net version moved for the new snapshot shape (%s)" % Net.VERSION)
+	ok(Net.VERSION == "0.11.0", "the net version moved for the new snapshot shape (%s)" % Net.VERSION)

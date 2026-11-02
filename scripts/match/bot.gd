@@ -197,7 +197,9 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		a["abil_t"] = float(a.get("abil_t", 0.0)) - dt
 		if a["abil_t"] <= 0.0 and a["react_t"] <= 0.0:
 			a["abil_t"] = randf_range(0.4, 1.0) * (1.0 + (1.0 - abil) * 4.0)
-			if h.ak:
+			if MergeKit.is_live(h):
+				MergeKit.bot_use(h, tgt, d, los)       # merged: the form's own kit (holds, E, the ultimate)
+			elif h.ak:
 				# the archetype's kit: dash, RMB variants, E and R (each kit knows its own moments)
 				h.ak.bot_use(tgt, d, los)
 				if not KinCommand.class_ults(): inp["ult"] = false      # R is the Merge: BotKin decides
