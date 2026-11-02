@@ -9,6 +9,7 @@ shader_type spatial;
 //   5 TRACER  a ribbon: a hot needle head and a tail that thins and cools (the rifle rounds)
 //   6 FAN     a flat sector (UV.x across the sector, UV.y from the apex 0 to the rim 1): a blast front
 //   7 SWIRL   a flat quad: spinning comma arcs (the Dazed mark)
+//   8 BEAM    a ribbon: a white core and a wide soft body with flickering bands, thinning with life
 render_mode unshaded, shadows_disabled, depth_draw_never, blend_add, cull_disabled, fog_disabled;
 uniform int mode = 0;
 uniform vec4 color : source_color = vec4(0.4, 0.9, 0.8, 1.0);
@@ -94,6 +95,14 @@ void fragment() {
 		float edge = 1.0 - smoothstep(0.0, 0.04, min(uv.x, 1.0 - uv.x));
 		c = color.rgb * (band + fill + edge * 0.5) + color2.rgb * spikes * 1.5;
 		a = (band + fill + spikes + edge * 0.5 * (1.0 - smoothstep(front, front + 0.02, uv.y))) * k;
+	} else if (mode == 8) {
+		float d = abs(uv.y - 0.5) * 2.0;
+		float w = mix(1.0, 0.25, life);
+		float body = 1.0 - smoothstep(w * 0.4, w, d);
+		float core = 1.0 - smoothstep(0.0, 0.18 * w, d);
+		float bands = 0.75 + 0.25 * sin(uv.x * 60.0 - TIME * 40.0);
+		c = color.rgb * body * bands + color2.rgb * core * 1.5;
+		a = (body * 0.7 + core) * k;
 	} else {
 		vec2 p = uv * 2.0 - 1.0;
 		float r = length(p);

@@ -8,7 +8,7 @@ Last updated: 2026-11-02, sync61.
 
 | Build | Date | What landed |
 |---|---|---|
-| sync61 | Nov 2 | Five hero pairs: Vireo, Marlowe, Ashwick, Dredge, Tender, Rimewright, Dolm, Ostra, plus an accuracy pass on Archer and Bulwark. Every hero drops its holds when you merge. New check registry (tools/check_registry.gd). Net 0.14.0. |
+| sync61 | Nov 2 | Five hero pairs: Vireo, Venator, Ashwick, Dredge, Tender, Rimewright, Dolm, Ostra, plus an accuracy pass on Archer and Bulwark. Every hero drops its holds when you merge. New check registry (tools/check_registry.gd). Net 0.14.0. |
 | sync60 | Nov 2 | Feel fixes (walk off ledges, dash pips, characters lean back, Orchid Isle bridge, swimming, safe Demo landing, class switch on the farm, secondary keybinds). Gear: one signature weapon per hero, rarity on armour, boots, gloves and utility, in-run weapon upgrades. Economy: Drift Pens, Tradewind Exchange, economy floor. Rolling sessions. Polish. Net 0.13.0. |
 | sync59 | Nov 1 | The Merge reworked: a 0.7s transformation, then a form with its own kit. Heavy Star, Stormwing and Prism Shell so far. R again fires the form's ultimate and separates you. Shell health while merged, no tiers, R keeps your meter while your Boki is down. Rescue is a 3.5s cradle. Net 0.11.0. |
 | sync58 | Nov 1 | Your Boki follows you by default. G sends it at the cursor or calls it back; hold G for the order wheel (Chase, Guard, Return, Follow). Capture by scan replaces taming: knock it out, hold F, then a 4s scan into your box. Field Book. Net 0.10.0. |

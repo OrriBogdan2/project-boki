@@ -11,7 +11,7 @@ extends RefCounted
 ##   ult         the Juggernaut's R fuse (wind-up) a moment before Avalanche fires
 ##   archer      a snare roots the dummy, full Focus: the lens glint, the aim line, crosshairs over it
 ##   deadeye     the same, ending on the Deadeye payoff
-##   hero_<id>_<move>   Vireo (mage) and Marlowe (gunslinger) moments, see scripts/arch/hero_demo.gd
+##   hero_<id>_<move>   Vireo (mage) and Venator (gunslinger) moments, see scripts/arch/hero_demo.gd
 ##   bulwark     the shield raised and burning gold, Guard pips full (Shield Slam armed)
 ##   crushed     the same, then letting go: a Shield Slam into the pillar, Crushed
 ##   e_<a> / r_<a> / rmb_<a>   any archetype's E, R or RMB on the still dummy (--e-recast: press E again)
@@ -196,7 +196,7 @@ static func tick(A: Arena, dt: float) -> void:
 				if P.ak.get("deadeyes") and int(P.ak.get("deadeyes")) > 0 and not A.has_meta("de_at"): A.set_meta("de_at", t)
 				at_t = float(A.get_meta("de_at", 9.0)) + 0.06
 		_ when w.begins_with("hero_"):
-			at_t = HeroDemo.tick(A, P, D, t, dt, w)         # Vireo and Marlowe (scripts/arch/hero_demo.gd)
+			at_t = HeroDemo.tick(A, P, D, t, dt, w)         # Vireo and Venator (scripts/arch/hero_demo.gd)
 		_ when w.begins_with("e_") or w.begins_with("r_") or w.begins_with("rmb_"):
 			# any archetype's E, R or RMB on the still dummy: e_<arch>, r_<arch>, rmb_<arch> (rmb holds 0.9s)
 			var ar := w.split("_")[1]

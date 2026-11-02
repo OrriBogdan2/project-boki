@@ -24,6 +24,7 @@ const M_STAR := 4
 const M_TRACER := 5
 const M_FAN := 6
 const M_SWIRL := 7
+const M_BEAM := 8
 const POOL_CAP := 28           # nodes per kind at most; past it the oldest is taken back
 const KEEP := 0.12             # s a marker stays without a refresh
 
@@ -88,7 +89,7 @@ func _take(kind: String, build: Callable) -> Node3D:
 		if r["node"] == old: riders.erase(r); break
 	return old
 
-func _set(n: Node3D, col: Color, col2: Color, life := 0.0) -> ShaderMaterial:
+func _look(n: Node3D, col: Color, col2: Color, life := 0.0) -> ShaderMaterial:
 	var mt := (n as MeshInstance3D).material_override as ShaderMaterial
 	mt.set_shader_parameter("color", col)
 	mt.set_shader_parameter("color2", col2)
@@ -178,14 +179,21 @@ static func _lay(n: Node3D, a: Vector3, b: Vector3, width: float) -> void:
 ## A jagged lightning ribbon from a to b (re-strikes on its own), gone over `dur`.
 func arc(a: Vector3, b: Vector3, col: Color, col2 := Color.WHITE, width := 0.5, dur := 0.16) -> void:
 	var n := _take("arc", func(): return _mi(_ribbon_mesh(), _mat(M_ARC)))
-	_set(n, col, col2)
+	_look(n, col, col2)
 	_lay(n, a, b, width)
 	_play(n, "arc", dur)
+
+## A straight beam from a to b, `width` wide, thinning and fading over `dur` (Longneedle).
+func beam(a: Vector3, b: Vector3, col: Color, col2 := Color.WHITE, width := 0.9, dur := 0.75) -> void:
+	var n := _take("beam", func(): return _mi(_ribbon_mesh(), _mat(M_BEAM)))
+	_look(n, col, col2)
+	_lay(n, a, b, width)
+	_play(n, "beam", dur)
 
 ## A column of light at `at`, `height` tall, narrowing from `radius` to a thread over `dur` (a countdown).
 func pillar(at: Vector3, col: Color, col2: Color, height := 6.0, radius := 0.9, dur := 0.8, narrow := true) -> void:
 	var n := _take("pillar", func(): return _mi(_column(), _mat(M_PILLAR)))
-	_set(n, col, col2)
+	_look(n, col, col2)
 	n.global_position = at
 	n.scale = Vector3(radius, height, radius)
 	_play(n, "pillar", dur, {"narrow": narrow})
@@ -193,7 +201,7 @@ func pillar(at: Vector3, col: Color, col2: Color, height := 6.0, radius := 0.9, 
 ## An expanding ring with spark needles, flat on the ground at `at`, out to radius `r`.
 func ring(at: Vector3, r: float, col: Color, col2 := Color.WHITE, dur := 0.35) -> void:
 	var n := _take("ring", func(): return _mi(_quad_mesh(), _mat(M_RING)))
-	_set(n, col, col2)
+	_look(n, col, col2)
 	n.global_position = at + Vector3(0, 0.09, 0)
 	n.scale = Vector3(r, 1.0, r)
 	_play(n, "ring", dur)
@@ -201,7 +209,7 @@ func ring(at: Vector3, r: float, col: Color, col2 := Color.WHITE, dur := 0.35) -
 ## A dark disc with a crackling rim on the ground (the scorch, a placed area), radius r.
 func disc(at: Vector3, r: float, col: Color, col2: Color, dur := 0.5) -> void:
 	var n := _take("disc", func(): return _mi(_quad_mesh(), _mat(M_DISC)))
-	_set(n, col, col2)
+	_look(n, col, col2)
 	n.global_position = at + Vector3(0, 0.08, 0)
 	n.scale = Vector3(r, 1.0, r)
 	_play(n, "disc", dur)
@@ -209,7 +217,7 @@ func disc(at: Vector3, r: float, col: Color, col2: Color, dur := 0.5) -> void:
 ## A camera-facing 4-point crackle.
 func star(at: Vector3, col: Color, col2 := Color.WHITE, size := 0.4, dur := 0.12) -> void:
 	var n := _take("star", func(): return _mi(_quad_mesh(), _mat(M_STAR, true)))
-	_set(n, col, col2)
+	_look(n, col, col2)
 	n.global_position = at
 	n.scale = Vector3.ONE * size
 	n.rotation = Vector3(PI * 0.5, 0, 0)
@@ -218,7 +226,7 @@ func star(at: Vector3, col: Color, col2 := Color.WHITE, size := 0.4, dur := 0.12
 ## A flat blast sector from `at` along `dir`, `len` long and `deg` wide; the front runs out over `dur`.
 func fan(at: Vector3, dir: Vector2, length: float, deg: float, col: Color, col2: Color, dur := 0.3) -> void:
 	var n := _take("fan%d" % int(round(deg)), func(): return _mi(_fan_mesh(deg), _mat(M_FAN)))
-	_set(n, col, col2)
+	_look(n, col, col2)
 	n.global_position = at + Vector3(0, 0.12, 0)
 	n.rotation = Vector3(0, atan2(-dir.x, -dir.y), 0)
 	n.scale = Vector3(length, 1.0, length)
@@ -227,7 +235,7 @@ func fan(at: Vector3, dir: Vector2, length: float, deg: float, col: Color, col2:
 ## Spinning comma arcs on the ground round a target, for `dur` (Dazed).
 func swirl(target: Ent, col: Color, col2: Color, dur := 1.2, r := 0.9) -> void:
 	var n := _take("swirl", func(): return _mi(_quad_mesh(), _mat(M_SWIRL)))
-	_set(n, col, col2)
+	_look(n, col, col2)
 	n.scale = Vector3(r, 1.0, r)
 	n.global_position = target.position + Vector3(0, 0.12, 0)
 	_play(n, "swirl", dur, {"follow": target, "oy": 0.12})
@@ -238,7 +246,7 @@ func shackle(target: Ent, col: Color, col2: Color, dur := 1.5) -> void:
 		var n := _take("shackle", func():
 			var tm := TorusMesh.new(); tm.inner_radius = 0.92; tm.outer_radius = 1.0; tm.rings = 28; tm.ring_segments = 6
 			return _mi(tm, _mat(M_ARC)))
-		_set(n, col, col2)
+		_look(n, col, col2)
 		n.scale = Vector3.ONE * 0.62
 		_play(n, "shackle", dur, {"follow": target, "oy": 0.55 + 0.5 * i, "spin": 6.0 if i == 0 else -7.5, "tilt": 0.35 if i == 0 else -0.3})
 
@@ -267,7 +275,7 @@ func ride(sd: Dictionary, kind: String, col: Color, col2: Color, length := 1.2, 
 		n = _take("tracer", func(): return _mi(_ribbon_mesh(), _mat(M_TRACER)))
 	else:
 		n = _take("arc", func(): return _mi(_ribbon_mesh(), _mat(M_ARC)))
-	_set(n, col, col2)
+	_look(n, col, col2)
 	var mi := sd.get("node") as Node3D
 	if mi != null and is_instance_valid(mi):
 		mi.visible = false            # the stock orb goes: this look is the round

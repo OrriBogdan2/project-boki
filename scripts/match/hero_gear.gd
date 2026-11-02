@@ -365,7 +365,7 @@ static func _mage(c: Dictionary) -> void:
 		_p(e2, Models.sphere(0.04, 8), m["glow"], Vector3(0, -0.27, 0))
 
 # ------------------------------------------------------------------------------------------ gunslinger
-## Marlowe, the burr-and-needle marksman: a snug visored cap, a cropped open jacket over a vest, a
+## Venator, the burr-and-needle marksman: a snug visored cap, a cropped open jacket over a vest, a
 ## long streaming scarf in the team colour, a bandolier of spiked burr charges and one big bronze
 ## pauldron. No hat brim, no serape, no duster.
 static func _gunslinger(c: Dictionary) -> void:

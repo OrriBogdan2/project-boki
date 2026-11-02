@@ -1,50 +1,50 @@
 {
 	"id": "gunslinger",
-	"name": "Marlowe",
+	"name": "Venator",
 	"weight": "medium",
 	"color": "#ff9a5c",
-	"fantasy": "The burr-and-needle marksman. Tags a foe with a clinging charge, lets the rifle and one long needle of light do the rest, and lives off every hit that lands.",
-	"silhouette": "the scarf streaming behind and the bandolier of burr charges across the chest",
+	"fantasy": "The ember-rifle skirmisher. Bounces a spiked charge off the wall so its blast throws a foe back into his rifle, slides around while still shooting, and finishes with one long needle of light.",
+	"silhouette": "the long scarf streaming behind, the bandolier of spiked charges across the chest and the long-shrouded rifle",
 	"card": {
-		"loop": "Burr Charge sticks and goes off, leaving a foe Rattled: slowed, and your rifle and Longneedle hit harder. Every ability you land builds Fever, a lifesteal your rifle then feeds.",
-		"dash": "Slipstep: tap to skid 3.4m, hold to slide 6m and keep shooting; let go early and you get part of it back.",
-		"passive": "Fever: each ability that lands adds a stack of lifesteal for 3.5s. A knock heals you and refreshes Slipstep.",
-		"rmb": "Burr Charge: it sticks to what it hits. On a foe it pops with a Rattle; on a wall it blasts a cone back at them.",
-		"e": "Longneedle: stand and charge, then fire a long piercing needle that ignores cover. Hitting a hunter shortens its cooldown.",
+		"loop": "Mid-range rifleman: Daze a foe with the grenade's cone, then shred them while it lasts.",
+		"dash": "Slipstep: tap to skid, hold to slide further; you can shoot the whole time and it goes where you move, not where you aim.",
+		"passive": "Hot Streak: knocking a hunter down gives Slipstep back and heals you. Abilities that land add a little lifesteal.",
+		"rmb": "Burr Charge: hold to see its lane, let go to throw. It flies past people and blasts a cone back at you where it hits a wall or the ground, Dazing everyone in it.",
+		"e": "Longneedle: stand still 0.6s while the line narrows, then fire a long beam through walls and everything in it.",
 		"weapons": {
-			"quill_rifle": "A steady auto rifle that loses punch on long strings, and hits Rattled foes harder."
+			"quill_rifle": "Full-auto rifle out to full range. Long strings lose punch; Dazed foes take 90% more (big gold numbers)."
 		}
 	},
 	"signature": "quill_rifle",
 	"resource": {
 		"id": "fever",
 		"name": "Fever",
-		"max": 8,
+		"max": 4,
 		"kind": "count",
-		"vamp": 0.06,
+		"vamp": 0.05,
 		"wait": 3.5,
 		"knock_heal": 0.25,
-		"rattle_k": 0.28,
+		"rattle_k": 0.9,
 		"col": "#ff9a5c"
 	},
 	"passive": {
-		"name": "Fever",
-		"desc": "Each ability that lands (Burr Charge, its blast, Longneedle) adds a stack, up to 8, lasting 3.5s. Every stack makes your damage heal you for 6%, rifle included. A Burr Charge counts twice, once when it sticks and once when it goes off. Knocking a hunter down heals a quarter of your health and refreshes Slipstep."
+		"name": "Hot Streak",
+		"desc": "Knocking a hunter down gives Slipstep back at once and heals a quarter of your health. Each ability that lands (a Burr Charge blast, Longneedle) also adds a stack of Fever, up to 4, lasting 3.5s: every stack makes your damage heal you for 5%, rifle included. Your rifle does 90% more to a Dazed foe (the numbers turn big and gold), and a string on a Dazed foe doesn't lose its punch."
 	},
 	"dash": {
 		"id": "slipstep",
 		"name": "Slipstep",
 		"icon": "dash",
 		"col": "#ffc89a",
-		"cd": 11.5,
+		"cd": 8.5,
 		"tap_t": 0.18,
-		"roll": 3.4,
-		"roll_t": 0.15,
+		"roll": 4.6,
+		"roll_t": 0.18,
 		"invuln": 0.1,
-		"slide": 6.0,
-		"slide_t": 0.5,
+		"slide": 7.0,
+		"slide_t": 0.55,
 		"refund": 0.3,
-		"desc": "Tap: a quick 3.4m skid. Hold: a 6m low slide you can shoot from; let go early and part of the cooldown comes back. A knock refreshes it."
+		"desc": "Tap: a quick 4.6m skid the way you're moving (not where you aim). Hold: a 7m low slide. You keep shooting through either, and the body keeps aiming. Let go early and part of the cooldown comes back. A knock gives it back."
 	},
 	"rmb": {
 		"delivery": "projectile",
@@ -52,35 +52,33 @@
 		"short": "Burr",
 		"icon": "skypierce",
 		"col": "#ffb36a",
-		"cooldown": 9.0,
+		"cooldown": 6.5,
 		"charges": 1,
-		"hold": 0.0,
+		"hold": 0.5,
 		"burr": {
 			"speed": 26.0,
-			"range": 11.0,
-			"fuse": 0.7,
-			"attach_dmg": 2.0,
-			"dmg": 13.0,
-			"radius": 1.9,
-			"rattle": 1.2,
-			"cone_len": 3.8,
+			"range": 10.5,
+			"lane_w": 0.72,
+			"fuse": 0.9,
+			"cone_len": 6.0,
 			"cone_deg": 100.0,
-			"cone_dmg": 10.0,
-			"cone_rattle": 2.0,
-			"push": 7.5,
+			"cone_dmg": 16.0,
+			"cone_rattle": 1.4,
+			"push": 11.0,
 			"wall_stun": 0.7,
 			"shave": 0.4
 		},
 		"variants": {
-			"tap": "Lob a burr 11m. On a hunter or monster it sticks, then pops after 0.7s: 13 damage in 1.9m and Rattled for 1.2s.",
-			"full": "On a wall it blasts a cone back out: 10 damage, a hard shove, Rattled for 2s; a hunter shoved into more terrain is stunned, and the Burr Charge's cooldown drops 40%."
+			"tap": "Hold RMB: a 10.5m lane with an arrow tip shows (foes in it are marked); let go to throw. The charge flies the whole lane, past the cursor and straight past people.",
+			"full": "Where it hits a wall, or the ground at the end of the lane, it sticks and a 6m, 100° cone shows back toward you for 0.9s. Then it blasts: 16 damage, a big shove along the cone, Dazed 1.4s. A hunter shoved into more terrain is stunned 0.7s and the cooldown drops 40%."
 		},
 		"sockets": {
 			"hit": "add",
 			"ctrl": "add",
 			"ctrl_cap": "soft",
 			"mod": "add"
-		}
+		},
+		"auto": 4.0
 	},
 	"e": {
 		"delivery": "burst",
@@ -88,21 +86,23 @@
 		"short": "Needle",
 		"icon": "haymaker",
 		"col": "#ffe0a0",
-		"cooldown": 12.0,
-		"charge": 0.8,
-		"self_slow": 0.55,
-		"range": 14.0,
+		"cooldown": 11.5,
+		"charge": 0.6,
+		"self_slow": 1.0,
+		"range": 18.0,
 		"width": 0.5,
 		"dmg": 36.0,
 		"rattle_k": 0.2,
 		"shave": 0.3,
-		"desc": "Stand and charge for 0.8s (slowed, a lane shows), then fire a needle of light 14m that passes through cover and everything in its line: 36 damage, 20% more on a Rattled foe, and a Rattled hunter hit is Skewered. Hitting a hunter takes 30% off its cooldown.",
+		"desc": "Stand still and charge for 0.6s: a wide line out to 18m narrows to a thin core. Then the beam fires through cover and everything in its line: 36 damage, 20% more on a Dazed foe, and a Dazed hunter hit is Skewered. The recoil shoves you back a step. Hitting a hunter takes 30% off its cooldown.",
 		"sockets": {
 			"hit": "add",
 			"ctrl": "add",
 			"ctrl_cap": "soft",
 			"guard": "add"
-		}
+		},
+		"linger": 0.75,
+		"recoil": 6.0
 	},
 	"order": [
 		"sec",
@@ -121,18 +121,18 @@
 		"kin": "every hunter hit takes 30% off the cooldown"
 	},
 	"rank2": {
-		"sec": "Rank 2: cooldown 9s -> 7.5s, damage +15%.",
-		"dash": "Rank 2: recharge 11.5s -> 10s.",
-		"kin": "Rank 2: cooldown 12s -> 10.5s, damage +20%."
+		"sec": "Rank 2: cooldown 6.5s -> 5.9s, damage +15%.",
+		"dash": "Rank 2: recharge 8.5s -> 7.7s.",
+		"kin": "Rank 2: cooldown 11.5s -> 10.4s, damage +20%."
 	},
 	"rank_next": {
-		"sec": "Rank 3: cooldown 9s -> 6s; resets when you knock a hunter.",
-		"dash": "Rank 3: recharge 11.5s -> 8.5s; +25% speed for 2s when a slide ends.",
-		"kin": "Rank 3: cooldown 12s -> 9s, damage +40%; every hunter hit takes 30% off the cooldown."
+		"sec": "Rank 3: cooldown 6.5s -> 5.2s; resets when you knock a hunter.",
+		"dash": "Rank 3: recharge 8.5s -> 6.8s; +25% speed for 2s when a slide ends.",
+		"kin": "Rank 3: cooldown 11.5s -> 9.2s, damage +40%; every hunter hit takes 30% off the cooldown."
 	},
 	"tells": {
-		"half": "a ring of Fever pips over the hat",
-		"full": "a full ring of eight pips and a heat shimmer",
-		"dash_spent": "a dust streak"
+		"half": "a ring of Fever pips over the cap",
+		"full": "four bright pips and a heat shimmer",
+		"dash_spent": "an ember afterimage and a ring where the slide began"
 	}
 }
