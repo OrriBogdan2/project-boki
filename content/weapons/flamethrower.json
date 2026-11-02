@@ -1,0 +1,20 @@
+{
+	"id": "flamethrower",
+	"name": "Torch Lance",
+	"classes": ["heavy"],
+	"primary": {
+		"dmg": 2.7,
+		"rate": 0.1,
+		"speed": 30,
+		"mag": 80,
+		"reload": 1.6,
+		"kb": 0.0,
+		"spread": 0.0,
+		"range": 6.0,
+		"size": 0.2,
+		"color": "#ffb04a",
+		"sfx": "smg",
+		"desc": "Hold to roar out a cone of fire 6m long: 8 seconds of fuel, then a short refill. It builds Char; at full Char the foe ignites."
+	},
+	"utility": ""
+}

@@ -21,9 +21,9 @@ const T := {
 	"ground_stop_dist":        ["<=", 0.20, "m", "[spec] no floaty slide"],
 	"ground_reverse_t":        ["<=", 0.12, "s", "[spec] crisp direction change"],
 	"ground_turn90_t":         ["<=", 0.09, "s", "[spec] crisp direction change"],
-	"speed_light":             ["~", [5.15, 5.25], "m/s", "class data (wiki band 4.15-4.9 m/s +- class spread)"],
-	"speed_medium":            ["~", [4.95, 5.05], "m/s", "class data"],
-	"speed_heavy":             ["~", [4.68, 4.78], "m/s", "class data"],
+	"speed_light":             ["~", [4.95, 5.05], "m/s", "class data (owner Nov 2: a little slower than before; wiki band 4.15-4.9 m/s +- class spread)"],
+	"speed_medium":            ["~", [4.75, 4.85], "m/s", "class data"],
+	"speed_heavy":             ["~", [4.5, 4.6], "m/s", "class data"],
 	"jump_input_frames":       ["<=", 1.0, "frames", "press to lift-off, same sim step"],
 	"jump_apex":               ["~", [1.2, 1.6], "m", "[est] one terrace (World.LEVEL) + mantle reach"],
 	"jump_airtime":            ["<=", 0.60, "s", "[est] tight arc (FeelConfig jump ~0.6s)"],
@@ -50,6 +50,7 @@ const T := {
 	"abyss_tint_lip":          ["<=", 0.02, "", "no tint gliding at island level"],
 	"abyss_tint_half":         [">=", 0.6, "", "[footage] tint deepens as you sink; owner: unmistakable early"],
 	"abyss_tint_end":          [">=", 0.95, "", "full dark/red right before the point of no return"],
+	"abyss_tint_rising":       ["<=", 0.02, "", "[footage D1] off while the glider lifts you back up, even below the lip"],
 	"feather_toggle_frames":   ["<=", 1.0, "frames", "feathering: glider closes and reopens the step you let go / press again, no toggle penalty"],
 	"feather_hold_m":          [">=", 0.0, "m", "holding glide over the abyss until the heat runs out (reference)"],
 	"feather_m":               [">=", 0.0, "m", "tap-feathering over the abyss (lift taps, coast the gaps) until the heat runs out"],
@@ -77,7 +78,7 @@ const T := {
 	"cam_settle_t":            ["<=", 0.35, "s", "camera settles on you after a stop"],
 	"cam_glide_lead_m":        [">=", 0.4, "m", "slight lead in glide direction"],
 	"view_across_m":           ["~", [22.0, 25.0], "m", "ground across a 16:9 screen at the focus (camcal: ~17 hunter silhouettes across, as in gameplay frames)"],
-	"hunter_screen_pct":       ["~", [6.4, 7.6], "%", "medium hunter, feet to head straight up, as a share of screen height (camcal: its on-screen silhouette ~10.5%, as in gameplay frames)"],
+	"hunter_screen_pct":       ["~", [5.0, 6.2], "%", "medium hunter, feet to head straight up, as a share of screen height (camcal: its on-screen silhouette ~10.5%, as in gameplay frames; feelfix leans characters back 20 deg toward the camera, which shortens the straight-up measure from ~6.9% to ~5.5%)"],
 	"hunter_feet_below_pct":   ["~", [1.5, 5.0], "%", "feet below the screen centre, as a share of screen height (camcal: ~3% in gameplay frames)"],
 }
 
@@ -509,6 +510,9 @@ func _abyss_depths(g: Vector3, d: Vector2) -> void:
 	rec("abyss_tint_half", FX.danger(P))
 	P.pos.y = kill + 0.5
 	rec("abyss_tint_end", FX.danger(P))
+	P.pos.y = lerpf(lip - 0.5, kill, 0.5); P.vel.y = 4.0
+	rec("abyss_tint_rising", FX.danger(P))
+	P.vel.y = 0.0
 
 # ---------------------------------------------------------------- feathering
 ## Far out over the open abyss (off the map's edge), heading further out at the island-level line

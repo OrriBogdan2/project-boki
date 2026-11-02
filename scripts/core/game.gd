@@ -82,7 +82,7 @@ func _setup_input() -> void:
 	_key("glide", [], MOUSE_BUTTON_XBUTTON2)  # hold Mouse 5 (the front side button) in the air to glide, like holding Space; never jumps
 	_key("glide", [], MOUSE_BUTTON_XBUTTON1)  # Mouse 4 glides too (not advertised)
 	_key("reload", [])                        # reloading is automatic
-	_key("ultimate", [KEY_R])                 # the archetype's ultimate (level 6); bonded when the bond meter is full
+	_key("ultimate", [KEY_R, KEY_X])          # (X: its default second key) the archetype's ultimate (level 6); bonded when the bond meter is full
 	_key("tonic", [KEY_1])
 	_key("scores", [KEY_TAB])
 	_key("menu", [KEY_ESCAPE])
@@ -90,6 +90,7 @@ func _setup_input() -> void:
 	_key("talk", [KEY_T])                     # at home: talk to a kin
 	_key("details", [KEY_C])                  # at home: a kin's details
 	_key("whistle", [KEY_H])                  # at home: whistle, and your kin come running
+	_key("hero", [KEY_J])                     # at home: change hero (class and archetype) right there
 	_key("inventory", [KEY_I])                # your things
 	_key("build", [KEY_B])                    # at home: build mode (lay out the island); indoors: decorate
 	_key("rotate", [KEY_R])                   # build mode: turn what you're holding
@@ -98,7 +99,7 @@ func _setup_input() -> void:
 	_key("pass_lead", [KEY_P])                # riding in / dropping: pass the drop lead to a squadmate
 	_key("record", [KEY_F10])                 # recording mode (Record): clean HUD, then no HUD
 	_key("record_orbit", [KEY_F9])            # recording mode, HUD hidden: slow camera orbit
-	_key("separate", [KEY_X])                 # riding in / dropping behind the leader: break away and drop solo
+	_key("separate", [KEY_Z])                 # (was X, now the ultimate's second key) riding in / dropping behind the leader: break away and drop solo
 
 func goto(screen: String, opts := {}) -> void:
 	match_opts = opts
@@ -122,6 +123,11 @@ func apply_result(r: Dictionary) -> Dictionary:
 	var d := Save.d
 	var out := {"gems": 0, "seeds": {}, "caught": [], "kin_lines": [], "levelup": false, "crops_ready": 0}
 	d["matches"] = int(d["matches"]) + 1
+	# a free-kit run (Loaner): the stipend on an extract; the loaner itself never touches the save
+	out["stipend"] = Loaner.settle(r)
+	if r.get("loaner", false):
+		out["loaner"] = true
+		r["kin_runs"] = []; r.erase("kin_events"); r.erase("kin_trust"); r.erase("lost_kin")
 	var won: bool = r.get("extracted", false)
 	# lifetime counts for challenges
 	var ms: Dictionary = r.get("stats", {})
@@ -180,10 +186,11 @@ func apply_result(r: Dictionary) -> Dictionary:
 	if r.has("rift_keys"):
 		d["items"]["rift_key"] = int(r["rift_keys"])     # carried keys come home with you, or stay in your deathbox
 	var treat: String = d.get("treat", "")
-	d["treat"] = ""
+	if not r.get("loaner", false):
+		d["treat"] = ""      # (a free-kit run never used it, so it keeps)
 	# every kin you brought remembers the match
 	var runs: Array = r.get("kin_runs", [])
-	if runs.is_empty() and not Save.active_kin().is_empty():
+	if runs.is_empty() and not Save.active_kin().is_empty() and not r.get("loaner", false):
 		runs = [{"uid": Save.active_kin()["uid"], "events": r.get("kin_events", []), "trust": r.get("kin_trust", Save.active_kin()["trust"]), "stats": r.get("kin_stats", {})}]
 	var k := Save.active_kin()
 	var brought: Array = []
@@ -205,6 +212,9 @@ func apply_result(r: Dictionary) -> Dictionary:
 			out["caught"].erase(back)
 	# time passes for kin already lost: prices drift, unclaimed ones get sold, rivals ask for theirs back
 	out["ransom_news"] = Ransom.tick(r.get("rivals", []))
+	# Boki you listed at the Drift Pens may have sold, and Exchange offers fill (offline turnover)
+	out["pens_sold"] = BokiPens.tick()
+	out["exchange_fills"] = Exchange.tick()
 	# going down leaves your kin behind; where they end up was settled in the match
 	var lost_news: Array = []
 	if not won and r.get("why", "") != "left":
@@ -281,6 +291,8 @@ func apply_result(r: Dictionary) -> Dictionary:
 				p["wet"] = 0
 			if int(p["stage"]) == grow:
 				out["crops_ready"] += 1
+	# the floor: nobody is left with no Boki and no way to play (Lifeline)
+	out["floor"] = Lifeline.check()
 	Save.save_game()
 	return out
 

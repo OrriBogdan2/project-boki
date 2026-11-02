@@ -1,0 +1,24 @@
+{
+	"id": "lantern_crook",
+	"name": "Lantern Crook",
+	"classes": [
+		"medium"
+	],
+	"primary": {
+		"dmg": 8.0,
+		"rate": 0.4,
+		"speed": 30,
+		"mag": 18,
+		"reload": 1.3,
+		"kb": 1.0,
+		"spread": 0.0,
+		"range": 9.0,
+		"size": 0.22,
+		"color": "#ffbf5e",
+		"sfx": "tend_ember",
+		"fire_slow": 0.85,
+		"desc": "A shepherd's crook with a lantern on its hook: it flicks an ember every 0.4s, 9m. Embers Kindle what they hit (up to 5); hold fire for a second and the next one flies 40% further.",
+		"kick": 0.06
+	},
+	"utility": ""
+}

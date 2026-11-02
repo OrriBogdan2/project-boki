@@ -39,8 +39,8 @@ shot. Holds high ground and grapples onto ledges.
 
 |  |  |
 |---|---|
-| Weight class | Light (124 health, 5.2 m/s, 1 dash charge) |
-| Weapons | Longbow, Sniper (first is the default) |
+| Weight class | Light (124 health, 5 m/s, 1 dash charge) |
+| Signature weapon | Longbow (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The warden of high ground. Climbs, reads the field, pins people to walls. |
 | Silhouette | the long weapon over the shoulder |
 | Resource | Focus (max 100) |
@@ -51,32 +51,28 @@ What the in-game kit card (K) says.
 
 | Slot | Card text |
 |---|---|
-| Loop | Snares root and feed Focus; full Focus makes your next shot into a rooted foe a Deadeye. |
-| Passive: Focus | Focus fills standing still and when a snare roots; full = Deadeye ready (+18, crit). |
-| Dash: Grapple Arrow | Fire a grapple line: zip up to a ledge (Focus builds faster up high), or hop back. |
-| RMB: Snare | Tap: a rooting snare. Hold: a charged Heavy Shot that pierces, knocks back and stuns into a wall. |
-| E: Arrow Rain | Arrow Rain: a wall of falling arrows across their path (damage, slow, healing blighted). |
-| R: Great Arrows | Great Arrows: your next 3 shots need no draw, fly far, pierce and knock back; the third hits hardest. |
-| Weapon: Longbow | Hold to draw in stages: 30, then 60 at full; let go right at full draw (PERFECT) for +25%. |
-| Weapon: Sniper | A visible aim laser, then one heavy round. |
+| Loop | Snares root and feed Focus; full Focus makes your next shot into a rooted foe a Deadeye. Run foes down to heal and dash again. |
+| Passive: Focus | Focus builds standing still or on a snare; full = Deadeye. Hurt foes show through cover; a knock heals. |
+| Dash: Grapple Arrow | Fire a grapple line: zip up a ledge, or hop back. A knock gives a charge back. |
+| RMB: Snare | Tap: a rooting snare. Hold: a Heavy Shot; into a wall it hits again and pins. |
+| E: Hail Wall | A wall of falling arrows across their path for 4.5s: damage, slow, blight. |
+| Weapon: Longbow | Hold to draw in stages: 30, then 60 at full; let go right at a stage (PERFECT) for a bonus. |
 
 ### Abilities in full
 
-**Focus (passive).** Builds while you stand still (full in 1.4s), sneak (2.8s), 50% faster on high ground; a snare or Pinning Shot that hits adds 40 (a Pin into a wall fills it). Drains while running and drops 40 when hit. At 100 your next shot is fully drawn or aimed at once, with +20% range, and if it hits a rooted or stunned foe it is a Deadeye: +18 damage, a crit.
+**Focus (passive).** Builds while you stand still (full in 1.4s), sneak (2.8s), 50% faster on high ground; a snare or Heavy Shot that hits adds 40 (a wall pin fills it). Drains while running and drops 40 when hit. At 100 your next shot is fully drawn or aimed at once, with +20% range, and if it hits a rooted or stunned foe it is a Deadeye: +18 damage, a crit. Hawk Sense: rivals under half health are seen through cover within 22m. A knock heals 18 and gives a dash charge back.
 
 **Grapple Arrow (dash, Shift, 7s cooldown).** A line arrow at the cursor (9m). If it bites a wall, rock or ledge you zip to it and climb on top; if it bites nothing you hop 3.2m back. Works from a glide and cools it.
 
 **Snare (RMB, 9s cooldown, 2 charges).**
 
 - *Tap:* A snare arrow 11m: 8 damage and root 0.6 on a foe; on the ground it plants a Tripwire (root 1.2, reveal 3s).
-- *Hold:* Heavy Shot: charge 0.5s -> full at 1.1s (rising creak, a ring, a ping at full): 16 -> 30 damage, push 6 -> 12, pierces 2; driven into a wall within 3m it stuns 0.8 (PINNED).
+- *Hold:* Heavy Shot: charge 0.5s -> full at 1.1s (rising creak, a ring, a ping at full): 16 -> 30 damage, push 6 -> 12, pierces 2; driven into a wall within 3m it hits again (up to 12) and stuns 1.2 (PINNED).
 - *In the air:* Plunge: shoot straight down, push 8 around you, lift yourself 3m, cool the glider.
-- *During E:* With your Arrow Rain falling the tap snare roots 1.0.
+- *During E:* With your Hail Wall falling the tap snare roots 1.0.
 - *Resource full:* At 100 Focus the tap roots 1.0.
 
-**Arrow Rain (E, 15s cooldown).** Lob a volley up to 9m: 0.35s later a wall of arrows rains along a 6m line across your aim for 3.75s. Foes inside take 5 every 0.5s, are slowed 35% and blighted (healing barely takes).
-
-**Great Arrows (R, 100s cooldown).** A 0.5s fuse, then for 6s your next 3 shots need no draw: great arrows that fly 22m, pierce everyone, knock back and hit for 28, 28 and 44 (the third a payoff hit that stuns 1.0 into a wall).
+**Hail Wall (E, 15s cooldown).** Lob a volley up to 9m: 0.35s later a wall of arrows falls along a 6m line across your aim for 4.5s. Foes inside take 5 every 0.5s, are slowed 35% and blighted (healing barely takes).
 
 ### Ranks
 
@@ -86,10 +82,9 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 |---|---|---|
 | RMB | cooldown 9s -> 8.1s, damage +15%. | cooldown 9s -> 7.2s, damage +30%; max 3 live Tripwires. |
 | Dash (Shift) | recharge 7s -> 6s per charge. | recharge 7s -> 4.9s; the backward hop refunds 40%. |
-| E | cooldown 15s -> 13.5s, damage +15%. | cooldown 15s -> 12s, damage +30%; the Arrow Rain is 1m longer. |
-| R (ultimate) | Rank 2 (level 9): cooldown 100s -> 85s, +30% duration, +15% damage; the window lasts 7.8s. |  |
+| E | cooldown 15s -> 13.5s, damage +15%. | cooldown 15s -> 12s, damage +30%; the Hail Wall is 30% wider. |
 
-**Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > E > R (ultimate) > RMB > Dash (Shift) > R (ultimate) > E.
+**Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > E > RMB > Dash (Shift) > E.
 
 ### What enemies can read
 

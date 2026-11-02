@@ -44,7 +44,7 @@ const CAM_LOOK := Vector3(1.25, 1.95, -9.4)
 const WIND := Vector3(2.2, 0.15, 0.35)            # the storm blows left to right
 ## Each archetype's weapon on the title (the arch_gallery set).
 const DISCORD := "https://discord.gg/nbeBaU7xt"        # the playtest server (never expires)
-const WEAPONS := {"thief": "twin_blades", "archer": "sniper", "mage": "longsword", "gunslinger": "rifle", "juggernaut": "greatsword", "bulwark": "minigun"}
+const WEAPONS := {"thief": "twin_blades", "archer": "longbow", "mage": "coilcaster", "gunslinger": "quill_rifle", "juggernaut": "greatsword", "bulwark": "tower_shield", "dredge": "shotgun", "ashwick": "flamethrower", "tender": "lantern_crook", "rimewright": "hoar_fan", "dolm": "rubble_fists", "ostra": "tether_lantern"}
 
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
@@ -167,6 +167,7 @@ func _squad() -> void:
 	var order: Array = [my_arch]
 	for a in ["juggernaut", "archer", "mage", "bulwark", "thief", "gunslinger"]:
 		if not order.has(a): order.append(a)
+	order = order.slice(0, 6)         # (the squad has six places; a newer archetype of yours takes the first)
 	var to_cam := func(p: Vector3, off := 0.0) -> float:
 		var d := CAM_AT - p
 		return atan2(-d.x, -d.z) + off
@@ -200,7 +201,7 @@ func _squad() -> void:
 		var weapon := String(WEAPONS[arch])
 		if i == 0 and Save.d.has("look"):
 			lk = Save.d["look"]          # you lead the squad, as you look
-			weapon = Data.weapon_for(Data.class_of_save(), String(Save.d.get("weapon", "")))
+			weapon = Arch.weapon_for(Arch.of_save(), Data.class_of_save(), String(Save.d.get("weapon", "")))
 			cls = Data.class_of_save()
 		var h := Models.hunter(cls, Data.TEAM_COLORS[0], weapon, "", lk, arch)
 		var sl: Array = slots[i]

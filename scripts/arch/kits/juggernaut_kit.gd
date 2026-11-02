@@ -160,19 +160,7 @@ func _tick_look(dt: float) -> void:
 			for sx in [-0.42, 0.42]:
 				m.fx.burst(h.pos + Vector3(sx, 1.7, 0), res_col(), 1, 1.0, 0.45, -3.0, 0.7)
 
-## A Boki merge starting (KinMerge.cast) drops everything held or wound up: the Searing Wave charge, the
-## Finishing Slam's wind-up and an armed Haul Slam. (The held Smash is the base kit's rmb_down, which the
-## merge already clears.) Nothing fires and nothing is left over for when the merge ends.
-func _drop_for_merge() -> void:
-	lmb_t = -1.0
-	lmb_buf = 0.0
-	h.mel_hold = 0.0
-	slam_w = {}
-	haul = {}
-
 func _tick(dt: float) -> void:
-	if KinMerge.active(h):
-		_drop_for_merge()
 	_tick_look(dt)
 	var rd := res_def()
 	if enraged_t > 0.0:
@@ -248,11 +236,17 @@ func _reset_crash() -> void:
 	net_ring(h.pos, 2.0, col_of(rmb_def()))
 
 # ------------------------------------------------------------------ LMB: Greatsword (slashes / Searing Wave)
-func lmb_def() -> Dictionary:
-	return d.get("lmb", {})
-
 func _wk() -> float:
-	return float(Data.RARITY[clampi(h.wrar, 0, Data.RARITY.size() - 1)]["dmg"]) * m.dmg_mult(h)
+	return h.wup_dmg * m.dmg_mult(h)
+
+## A Boki merge starting (ArchKit's single cleanup hook) drops everything held or wound up: the Searing
+## Wave charge, the Finishing Slam's wind-up and an armed Haul Slam. Nothing fires and nothing is left over.
+func _drop_holds() -> void:
+	lmb_t = -1.0
+	lmb_buf = 0.0
+	h.mel_hold = 0.0
+	slam_w = {}
+	haul = {}
 
 func wave_k() -> float:
 	var ld := lmb_def()
@@ -262,13 +256,12 @@ func lmb_override(held: bool, dt: float) -> bool:
 	if h.wid != "greatsword":
 		return false
 	if KinMerge.active(h):          # merged: the form owns the attack key, a charge from before it must not go off
-		_drop_for_merge()
 		lmb_was = false
 		return true
 	var ld := lmb_def()
 	var pressed := held and not lmb_was
 	lmb_was = held
-	if not h.can_fire():
+	if not h.can_fire() or KinMerge.active(h):       # (a merge ends the charge: letting go of it must not swing a wave mid-transformation)
 		if lmb_t >= 0.0:
 			lmb_t = -1.0; h.mel_hold = 0.0
 		return true
@@ -303,12 +296,6 @@ func lmb_override(held: bool, dt: float) -> bool:
 		lmb_buf = 0.0
 		_slash()
 	return true
-
-func _bot_target() -> Ent:
-	var best: Ent = null; var bd := 12.0
-	for f in m.foes_of(h.team):
-		if f.hittable() and h.flat_dist(f) < bd: bd = h.flat_dist(f); best = f
-	return best
 
 ## A quick slash: a cone, twice as hard on the tip (the sweet spot at the far end of the swing).
 func _slash() -> void:

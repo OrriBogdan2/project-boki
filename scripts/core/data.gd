@@ -10,19 +10,19 @@ const MATCH_PLAYERS := 20
 
 const CLASSES := {
 	"light": {
-		"name": "Light", "color": Color("c9bcff"), "hp": 124, "speed": 5.2, "dashes": 1, "mass": 0.85, "scale": 0.9, "hit_r": 0.35,
+		"name": "Light", "color": Color("c9bcff"), "hp": 124, "speed": 5.0, "dashes": 1, "mass": 0.85, "scale": 0.9, "hit_r": 0.35,
 		"ex_dist": 5.0, "ex_time": 0.2, "ex_cd": 12.0, "glide_cap": 1.2,
-		"weapon": "smg", "weapons": ["smg", "sniper", "twin_blades", "longbow"],
+		"weapon": "smg", "weapons": ["smg", "sniper", "twin_blades", "longbow", "coilcaster"],
 		"desc": "Fast and fragile. The fastest dash, the longest glide, and hits throw you furthest.",
 	},
 	"medium": {
-		"name": "Medium", "color": Color("9ee2a0"), "hp": 145, "speed": 5.0, "dashes": 1, "mass": 1.0, "scale": 1.0, "hit_r": 0.40,
+		"name": "Medium", "color": Color("9ee2a0"), "hp": 145, "speed": 4.8, "dashes": 1, "mass": 1.0, "scale": 1.0, "hit_r": 0.40,
 		"ex_dist": 4.6, "ex_time": 0.2, "ex_cd": 13.0, "glide_cap": 1.0,
-		"weapon": "rifle", "weapons": ["rifle", "burst_rifle", "longsword", "spellstaff"],
+		"weapon": "rifle", "weapons": ["rifle", "burst_rifle", "longsword", "spellstaff", "quill_rifle"],
 		"desc": "The all-rounder: middle health, speed, dash and glide.",
 	},
 	"heavy": {
-		"name": "Heavy", "color": Color("e6dbc4"), "hp": 193, "speed": 4.73, "dashes": 2, "mass": 1.35, "scale": 1.14, "hit_r": 0.50,
+		"name": "Heavy", "color": Color("e6dbc4"), "hp": 193, "speed": 4.55, "dashes": 2, "mass": 1.35, "scale": 1.14, "hit_r": 0.50,
 		"ex_dist": 4.2, "ex_time": 0.21, "ex_cd": 15.0, "glide_cap": 0.85,
 		"weapon": "shotgun", "weapons": ["shotgun", "minigun", "greatsword", "tower_shield"],
 		"desc": "Slow and tough. Two short dashes, the most health, and very hard to push off a ledge.",
@@ -35,50 +35,31 @@ const WEAPONS := {
 		"kb": 0.8, "spread": 0.035, "range": 9.5, "sfx": "rifle", "color": Color("d9ff66"), "size": 0.12},
 }
 
-## Weapons found out on the islands: any weapon with a rarity on top, always better than what you
-## brought, and only yours until the expedition ends.
+## Rarity tiers, Common to Legendary: the names and colours gear is sold, shown and sorted by
+## (Gear.mult has the numbers; GearDrops has the odds). Weapons have no rarity: each hunter carries
+## one fixed signature weapon and grows it with upgrades (WeaponUps).
 const RARITY := [
-	{"name": "Common", "color": Color("d6d2c8"), "dmg": 1.0, "mag": 1.0, "reload": 1.0, "rate": 1.0},
-	{"name": "Fine", "color": Color("8fe0a0"), "dmg": 1.15, "mag": 1.15, "reload": 0.92, "rate": 0.95},
-	{"name": "Rare", "color": Color("6ab8ff"), "dmg": 1.3, "mag": 1.3, "reload": 0.85, "rate": 0.9},
-	{"name": "Epic", "color": Color("c08aff"), "dmg": 1.38, "mag": 1.4, "reload": 0.78, "rate": 0.9},
-	{"name": "Legendary", "color": Color("ffb64a"), "dmg": 1.5, "mag": 1.5, "reload": 0.7, "rate": 0.86},
+	{"name": "Common", "color": Color("d6d2c8")},
+	{"name": "Fine", "color": Color("8fe0a0")},
+	{"name": "Rare", "color": Color("6ab8ff")},
+	{"name": "Epic", "color": Color("c08aff")},
+	{"name": "Legendary", "color": Color("ffb64a")},
 ]
 
-## A weapon's stats at a rarity. "short" is the plain name for the ability bar.
 ## Every weapon: the ones in content/weapons (the source of truth), plus any only defined here.
 func weapon_ids() -> Array:
-	var ids: Array = Content.ids("weapons")
+	# a hero's fixed signature weapon ("hero_only" in its JSON) never drops as loot
+	var ids: Array = Content.ids("weapons").filter(func(w): return not bool(Content._load("weapons", String(w)).get("hero_only", false)))
 	for k in WEAPONS:
 		if not ids.has(k): ids.append(k)
 	return ids
 
-func weapon_stats(wid: String, rar := 0) -> Dictionary:
+## A weapon's plain stats. "short" is the plain name for the ability bar.
+func weapon_stats(wid: String) -> Dictionary:
 	var wd := Content.weapon(wid)
 	var w: Dictionary = wd.primary.duplicate() if wd else WEAPONS.get(wid, WEAPONS["rifle"]).duplicate()
-	var r: Dictionary = RARITY[clampi(rar, 0, RARITY.size() - 1)]
 	w["short"] = String(w["name"]).split(" ")[0]
-	if rar > 0:
-		w["name"] = "%s %s" % [r["name"], w["name"]]
-	w["dmg"] = float(w["dmg"]) * float(r["dmg"])
-	if w.has("combo_dmg"):
-		w["combo_dmg"] = (w["combo_dmg"] as Array).map(func(x): return float(x) * float(r["dmg"]))
-	if w.has("charged_dmg"):
-		w["charged_dmg"] = float(w["charged_dmg"]) * float(r["dmg"])
-	w["mag"] = maxi(int(w["mag"]) + (1 if rar > 0 else 0), int(round(int(w["mag"]) * float(r["mag"]))))
-	w["reload"] = float(w["reload"]) * float(r["reload"])
-	w["rate"] = float(w["rate"]) * float(r["rate"])
-	w["rar"] = rar
 	return w
-
-## Rarity of a found weapon. Better places and harder tiers lean higher.
-func roll_rarity(r: RandomNumberGenerator, bonus := 0) -> int:
-	var x := r.randf()
-	var rar := 1
-	if x > 0.6: rar = 2
-	if x > 0.88: rar = 3
-	if x > 0.98: rar = 4
-	return clampi(rar + bonus, 1, RARITY.size() - 1)
 
 ## The class you play and the weapon you carry are your whole loadout: left and right click come
 ## from the weapon, Q, E and R from the kin you bring.
@@ -126,6 +107,16 @@ const PERKS := {
 	"focus": {"name": "Clear Mind", "desc": "Abilities recharge 12% faster.", "icon": "pulse", "col": Color("d07aff"), "max": 2, "stats": {"cdr": 0.12}},
 	"tailwind": {"name": "Tailwind", "desc": "Glide 15% faster.", "icon": "gust", "col": Color("9fe8ff"), "max": 1, "stats": {"glide_speed": 0.15}},
 	"remedy": {"name": "Remedy", "desc": "Tonics heal 40% more.", "icon": "tonic", "col": Color("8fe0a0"), "max": 1},
+	# weapon upgrades (WeaponUps): they grow the one signature weapon you carry. Level-ups offer these.
+	"hotload": {"name": "Hotload", "desc": "Your weapon hits 10% harder.", "icon": "burst", "col": Color("ff8a6a"), "max": 4, "wup": {"dmg": 0.10}},
+	"deepmag": {"name": "Deep Magazine", "desc": "20% more rounds before a reload.", "icon": "satchel", "col": Color("ffd27a"), "max": 3, "wup": {"mag": 0.20}},
+	"quickfeed": {"name": "Quick Feed", "desc": "Your weapon fires 7% faster.", "icon": "pulse", "col": Color("d07aff"), "max": 3, "wup": {"rate": -0.07}},
+	"longreach": {"name": "Long Reach", "desc": "12% more range (and reach, for blades).", "icon": "gust", "col": Color("9fe8ff"), "max": 2, "wup": {"range": 0.12}},
+	"brand_fire": {"name": "Ember Brand", "desc": "Your hits burn: 5 damage a second for 3s.", "icon": "fireball", "col": Color("ff8a3a"), "max": 1, "wup": {"brand": "fire"}},
+	"brand_frost": {"name": "Rime Brand", "desc": "Your hits chill, and every 5th freezes.", "icon": "snare", "col": Color("bff0ff"), "max": 1, "wup": {"brand": "frost"}},
+	"brand_storm": {"name": "Storm Brand", "desc": "Every 4th hit arcs to 2 more foes.", "icon": "chain", "col": Color("fff27a"), "max": 1, "wup": {"brand": "storm"}},
+	"brand_venom": {"name": "Venom Brand", "desc": "Your hits poison and slow.", "icon": "burst", "col": Color("9aff6a"), "max": 1, "wup": {"brand": "venom"}},
+	"brand_void": {"name": "Hollow Brand", "desc": "Your hits heal you for 8% of the damage.", "icon": "shadowstep", "col": Color("b08aff"), "max": 1, "wup": {"brand": "void"}},
 }
 
 ## Bot hunter difficulty. "auto" (the default) picks one from the run tier and how experienced you

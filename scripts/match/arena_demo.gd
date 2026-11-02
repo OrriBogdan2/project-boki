@@ -14,11 +14,7 @@ extends RefCounted
 ##   wave        the greatsword held into a Searing Wave (--hold-shot: at full charge)
 ##   archer      a snare roots the dummy, full Focus: the lens glint, the aim line, crosshairs over it
 ##   deadeye     the same, ending on the Deadeye payoff
-##   mage        a Guided Bolt Runes the dummy; Overcharged: white-hot runes orbiting the Mage
-##   flashpoint  the same, then a second bolt detonates the Rune: the Flashpoint payoff
-##   hex         the Hex turning the dummy into a critter
-##   gunslinger  rifle hits fill the gold cylinder over the hat; at 6 the gun glows (Called Shot armed)
-##   calledshot  the same, ending on the Called Shot payoff
+##   hero_<id>_<move>   Vireo (mage) and Marlowe (gunslinger) moments, see scripts/arch/hero_demo.gd
 ##   bulwark     the shield raised and burning gold, Guard pips full (Shield Slam armed)
 ##   crushed     the same, then letting go: a Shield Slam into the pillar, Crushed
 ##   e_<a> / r_<a> / rmb_<a>   any archetype's E, R or RMB on the still dummy (--e-recast: press E again)
@@ -26,7 +22,7 @@ extends RefCounted
 ##   menu        the loadout panel (L)
 ##   anim_<move> a strip of frames of one kit move (ANIM_DEMO: thf_shot thf_blades thf_vault thf_primed
 ##               thf_bola thf_knife thf_volley jug_slash jug_wave jug_slam jug_lunge jug_meteor jug_dash
-##               jug_chain jug_chainlunge jug_haul jug_spin)
+##               jug_chain jug_chainlunge jug_haul jug_spin arc_* and bul_* for the Archer and Bulwark)
 ##   smg         the SMG firing at the dummy; add --legacy-shots for the old look and numbers (before)
 
 const OLD_SMG := {"dmg": 2.76, "rate": 0.07, "speed": 55.0, "mag": 36, "kb": 0.5, "size": 0.1, "kick": 0.0, "tracer": 0.5}
@@ -35,13 +31,13 @@ const OLD_SMG := {"dmg": 2.76, "rate": 0.07, "speed": 55.0, "mag": 36, "kb": 0.5
 ## --arena-demo=anim_<move>: a strip of frames of one kit move, cropped round the hunter, side by side
 ## (the frame times are in seconds of the demo; the move is triggered at 0.5 unless noted).
 const ANIM_DEMO := {
-	"thf_shot": ["thief", "smg", [0.62, 0.66, 0.7, 0.74, 0.78, 0.82]],
+	"thf_shot": ["thief", "twin_blades", [0.62, 0.66, 0.7, 0.74, 0.78, 0.82]],
 	"thf_blades": ["thief", "twin_blades", [0.52, 0.58, 0.64, 0.84, 0.9, 0.96]],
-	"thf_vault": ["thief", "smg", [0.5, 0.56, 0.62, 0.68, 0.76, 0.86, 1.0]],
-	"thf_primed": ["thief", "smg", [0.5, 0.6, 0.78, 0.81, 0.85, 0.95]],
-	"thf_bola": ["thief", "smg", [0.5, 0.55, 0.6, 0.65, 0.7, 0.85]],
+	"thf_vault": ["thief", "twin_blades", [0.5, 0.56, 0.62, 0.68, 0.76, 0.86, 1.0]],
+	"thf_primed": ["thief", "twin_blades", [0.5, 0.6, 0.78, 0.81, 0.85, 0.95]],
+	"thf_bola": ["thief", "twin_blades", [0.5, 0.55, 0.6, 0.65, 0.7, 0.85]],
 	"thf_knife": ["thief", "twin_blades", [0.5, 0.57, 0.63, 0.7, 0.96, 1.02, 1.15]],
-	"thf_volley": ["thief", "smg", [0.5, 0.56, 0.62, 0.68, 0.76, 0.86, 1.0]],
+	"thf_volley": ["thief", "twin_blades", [0.5, 0.56, 0.62, 0.68, 0.76, 0.86, 1.0]],
 	"jug_slash": ["juggernaut", "greatsword", [0.42, 0.48, 0.56, 0.78, 0.84, 0.92]],
 	"jug_wave": ["juggernaut", "greatsword", [0.4, 0.8, 1.3, 1.46, 1.52, 1.62, 1.85]],
 	"jug_slam": ["juggernaut", "greatsword", [0.55, 0.75, 0.92, 0.98, 1.02, 1.15, 1.45]],
@@ -52,6 +48,24 @@ const ANIM_DEMO := {
 	"jug_chainlunge": ["juggernaut", "greatsword", [1.0, 1.5, 1.78, 1.84, 1.9, 2.05, 2.3]],
 	"jug_haul": ["juggernaut", "greatsword", [1.0, 1.24, 1.32, 1.42, 1.52, 1.62, 1.9]],
 	"jug_spin": ["juggernaut", "greatsword", [0.88, 0.92, 0.98, 1.04, 1.1, 1.18, 1.35]],
+	"arc_draw": ["archer", "longbow", [0.5, 0.7, 0.9, 1.1, 1.3, 1.6]],
+	"arc_loose": ["archer", "longbow", [0.8, 0.88, 0.94, 1.0, 1.12, 1.3]],
+	"arc_heavy_wind": ["archer", "longbow", [0.55, 0.7, 0.9, 1.1, 1.3, 1.6]],
+	"arc_heavy": ["archer", "longbow", [1.2, 1.35, 1.42, 1.48, 1.58, 1.8]],
+	"arc_snare": ["archer", "longbow", [0.5, 0.54, 0.58, 0.64, 0.74, 0.9]],
+	"arc_hail": ["archer", "longbow", [0.5, 0.56, 0.64, 0.74, 0.95, 1.2]],
+	"arc_zip": ["archer", "longbow", [0.5, 0.56, 0.62, 0.7, 0.85, 1.1]],
+	"arc_hop": ["archer", "longbow", [0.5, 0.56, 0.62, 0.7, 0.85, 1.1]],
+	"arc_plunge": ["archer", "longbow", [0.5, 0.56, 0.62, 0.68, 0.8, 1.0]],
+	"bul_throw": ["bulwark", "tower_shield", [0.5, 0.54, 0.58, 0.64, 0.72, 0.9]],
+	"bul_recall": ["bulwark", "tower_shield", [0.98, 1.05, 1.12, 1.2, 1.3, 1.5]],
+	"bul_smash_wind": ["bulwark", "tower_shield", [0.5, 0.7, 0.9, 1.1, 1.4, 1.7]],
+	"bul_smash": ["bulwark", "tower_shield", [1.1, 1.2, 1.25, 1.3, 1.4, 1.65]],
+	"bul_bash": ["bulwark", "tower_shield", [0.5, 0.54, 0.58, 0.64, 0.76, 0.95]],
+	"bul_whirl": ["bulwark", "tower_shield", [0.5, 0.55, 0.6, 0.66, 0.75, 0.95]],
+	"bul_charge": ["bulwark", "tower_shield", [0.7, 0.75, 0.82, 0.9, 1.0, 1.2]],
+	"bul_short": ["bulwark", "tower_shield", [0.85, 0.92, 0.98, 1.05, 1.15, 1.35]],
+	"bul_mend": ["bulwark", "tower_shield", [0.5, 0.56, 0.64, 0.74, 0.95, 1.25]],
 }
 
 static func what() -> String:
@@ -80,13 +94,18 @@ static func tick(A: Arena, dt: float) -> void:
 	if m.cam and not w.begins_with("card") and w != "menu" and not m.has_meta("zoom_hold"):
 		m.set_meta("zoom_hold", 0.6)      # close enough to read the hits
 		m.cam.zoom = 0.6
+	if w.begins_with("care_"):
+		CareDemo.tick(A, dt, w)          # the support pair (care_demo.gd)
+		return
 	P.hp = P.max_hp
 	match w:
+		_ when w.begins_with("pr_") or w in ["card_dredge", "card_ashwick"]:
+			at_t = ArenaDemoPair.tick(A, w, t, dt)      # Dredge and Ashwick (arena_demo_pair.gd)
 		"thief", "primed":
 			# kits2: SMG hits on the dummy stack Marks (gold diamonds, one per Mark), Vault Primes the next
 			# hit (the gold glint, PRIMED), then (primed) the Primed hit lands: VAULT RESET
 			if t < 0.05:
-				if P.arch != "thief" or P.wid != "smg": A.set_arch("thief", "smg")
+				if P.arch != "thief" or P.wid != "twin_blades": A.set_arch("thief", "twin_blades")
 				A.set_kin("puddlet")
 				P.teleport(D.pos + Vector3(1.6, 0, 1.9))
 				A.home = P.pos
@@ -106,7 +125,7 @@ static func tick(A: Arena, dt: float) -> void:
 			# the Bola wraps the dummy and the heavy dummy beside it: both Grounded, TANGLED, stunned
 			var H: Hunter = A.dummies[2]["h"]
 			if t < 0.05:
-				if P.arch != "thief": A.set_arch("thief", "smg")
+				if P.arch != "thief": A.set_arch("thief", "twin_blades")
 				A.set_kin("puddlet")
 				P.teleport(D.pos + Vector3(-3.4, 0, 0.2))
 				A.home = P.pos
@@ -157,7 +176,7 @@ static func tick(A: Arena, dt: float) -> void:
 			# kits2-nor: the Thief's fifth Mark on the dummy releases Jackpot: a burst of knives, Marks
 			# refreshed, one free Vault; (jackpotpay) the last knife lands and the payoff goes off
 			if t < 0.05:
-				if P.arch != "thief" or P.wid != "smg": A.set_arch("thief", "smg")
+				if P.arch != "thief" or P.wid != "twin_blades": A.set_arch("thief", "twin_blades")
 				A.set_kin("puddlet")
 				P.teleport(D.pos + Vector3(-3.4, 0, 1.4))
 				A.home = P.pos
@@ -187,44 +206,8 @@ static func tick(A: Arena, dt: float) -> void:
 				if _at(t, dt, 1.8): P.inp["fire"] = false
 				if P.ak.get("deadeyes") and int(P.ak.get("deadeyes")) > 0 and not A.has_meta("de_at"): A.set_meta("de_at", t)
 				at_t = float(A.get_meta("de_at", 9.0)) + 0.06
-		"mage", "flashpoint", "hex":
-			if t < 0.05:
-				if P.arch != "mage": A.set_arch("mage", "spellstaff")
-				A.set_kin("cindle")
-				P.teleport(D.pos + Vector3(-3.6, 0, -1.2))
-				A.home = P.pos
-			_aim(P, D)
-			P.inp["move"] = Vector2.ZERO
-			if w == "hex":
-				if _at(t, dt, 0.4): P.ak.cd["e"] = 0.0; P.ak.use_e()
-				if Hex.active(D) and not A.has_meta("hx_at"): A.set_meta("hx_at", t)
-				at_t = float(A.get_meta("hx_at", 9.0)) + 0.35
-			else:
-				if _at(t, dt, 0.3): P.ak.ch_rmb = 1.0; P.ak.bot_hold["rmb"] = 0.3; P.ak.press_rmb()     # a Guided Bolt Runes the dummy
-				if t > 0.7 and t < 1.5: P.ak.res = maxf(P.ak.res, 82.0); P.ak.res_wait = 1.0        # ride it Overcharged
-				if w == "mage":
-					at_t = 1.45
-				else:
-					if _at(t, dt, 1.5): P.ak.ch_rmb = 1.0; P.ak.cd["rmb"] = 0.0; P.ak.res = 74.0; P.ak.press_rmb()   # the second spell: Flashpoint
-					if int(P.ak.get("flashpoints")) > 0 and not A.has_meta("fp_at"): A.set_meta("fp_at", t)
-					at_t = float(A.get_meta("fp_at", 9.0)) + 0.06
-		"gunslinger", "calledshot":
-			if t < 0.05:
-				if P.arch != "gunslinger": A.set_arch("gunslinger", "rifle")
-				A.set_kin("puddlet")
-				P.teleport(D.pos + Vector3(-3.6, 0, -1.0))
-				A.home = P.pos
-			_aim(P, D)
-			P.inp["move"] = Vector2.ZERO
-			P.inp["fire"] = t > 0.2 and t < 1.0                                            # hits load the cylinder
-			if t > 0.2 and t < 1.0: P.ak.res_wait = 4.0
-			if _at(t, dt, 1.05) and P.ak.res < 6.0: P.ak.res = 5.0; P.ak.load_at = -9.0; P.ak.load_chambers(1, true)
-			if w == "gunslinger":
-				at_t = 1.7
-			else:
-				if _at(t, dt, 1.7): P.ak.ch_rmb = 1.0; P.ak.cd["rmb"] = 0.0; P.inp["sec_hold"] = false; P.ak.press_rmb()
-				if int(P.ak.get("called_shots")) > 0 and not A.has_meta("cs_at"): A.set_meta("cs_at", t)
-				at_t = float(A.get_meta("cs_at", 9.0)) + 0.06
+		_ when w.begins_with("hero_"):
+			at_t = HeroDemo.tick(A, P, D, t, dt, w)         # Vireo and Marlowe (scripts/arch/hero_demo.gd)
 		_ when w.begins_with("e_") or w.begins_with("r_") or w.begins_with("rmb_"):
 			# any archetype's E, R or RMB on the still dummy: e_<arch>, r_<arch>, rmb_<arch> (rmb holds 0.9s)
 			var ar := w.split("_")[1]
@@ -249,9 +232,11 @@ static func tick(A: Arena, dt: float) -> void:
 			else:
 				if _at(t, dt, go): P.ak.ch_rmb = float(P.ak.rmb_charges()); P.ak.bot_hold["rmb"] = 0.9; P.ak.press_rmb()
 				at_t = go + 0.7 if "--hold-shot" in OS.get_cmdline_user_args() else go + 1.05
+		_ when w.begins_with("pair_"):
+			at_t = PairDemo.tick(A, P, D, t, dt, w)          # Dolm and Ostra (scripts/arch/pair_demo.gd)
 		_ when w.begins_with("anim_"):
 			var mv := w.substr(5)
-			var spec: Array = ANIM_DEMO.get(mv, ["thief", "smg", [1.0]])
+			var spec: Array = ANIM_DEMO.get(mv, PairDemo.ANIM.get(mv, ["thief", "twin_blades", [1.0]]))
 			if t < 0.05:
 				if P.arch != String(spec[0]) or P.wid != String(spec[1]): A.set_arch(String(spec[0]), String(spec[1]))
 				A.set_kin("")
@@ -285,11 +270,11 @@ static func tick(A: Arena, dt: float) -> void:
 			else:
 				if int(P.ak.get("crushes")) > 0 and not A.has_meta("cr_at"): A.set_meta("cr_at", t)
 				at_t = float(A.get_meta("cr_at", 9.0)) + 0.06
-		"card", "card_juggernaut", "card_detail", "card_detail_passive", "card_archer", "card_mage", "card_gunslinger", "card_bulwark":
+		"card", "card_juggernaut", "card_detail", "card_detail_passive", "card_archer", "card_mage", "card_gunslinger", "card_bulwark", "card_tender", "card_rimewright":
 			if t < 0.05:
-				var ca: String = {"card_juggernaut": "juggernaut", "card_archer": "archer", "card_mage": "mage", "card_gunslinger": "gunslinger", "card_bulwark": "bulwark"}.get(w, "thief")
+				var ca: String = {"card_juggernaut": "juggernaut", "card_archer": "archer", "card_mage": "mage", "card_gunslinger": "gunslinger", "card_bulwark": "bulwark", "card_tender": "tender", "card_rimewright": "rimewright"}.get(w, "thief")
 				A.set_arch(ca)
-				A.set_kin("cindle" if ca in ["juggernaut", "mage", "bulwark"] else "puddlet")
+				A.set_kin("cindle" if ca in ["juggernaut", "mage", "bulwark", "tender"] else "puddlet")
 			if _at(t, dt, 0.3):
 				A.toggle_card()
 				if w == "card_detail" or w == "card_detail_passive":
@@ -306,7 +291,7 @@ static func tick(A: Arena, dt: float) -> void:
 		"smg":
 			if not A.has_meta("demo_set"):
 				A.set_meta("demo_set", true)
-				A.set_arch("thief", "smg")
+				A.set_arch("thief", "twin_blades")
 				P.teleport(D.pos + Vector3(-4.0, 0, 2.5))
 				A.home = P.pos
 				if legacy:
@@ -329,6 +314,9 @@ static func tick(A: Arena, dt: float) -> void:
 ## The scripted input for each kit move's strip.
 static func _anim_trigger(A: Arena, P: Hunter, D: Hunter, mv: String, t: float, dt: float) -> void:
 	var K: ArchKit = P.ak
+	if PairDemo.ANIM.has(mv):
+		PairDemo.trigger(P, D, mv, t, dt)
+		return
 	match mv:
 		"thf_shot":
 			P.inp["fire"] = t > 0.55 and t < 0.9
@@ -381,6 +369,39 @@ static func _anim_trigger(A: Arena, P: Hunter, D: Hunter, mv: String, t: float, 
 			if _at(t, dt, 0.5): K.cd["e"] = 0.0; K.use_e()
 			if _at(t, dt, 0.84): K.use_e()
 			if _at(t, dt, 0.88): K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; P.inp["sec_hold"] = false; K.press_rmb()
+		"arc_draw", "arc_loose", "arc_heavy_wind", "arc_heavy", "arc_snare", "arc_hail", "arc_zip", "arc_hop", "arc_plunge", "bul_throw", "bul_recall", "bul_smash_wind", "bul_smash", "bul_bash", "bul_whirl", "bul_charge", "bul_short", "bul_mend":
+			_anim_hero(A, P, mv, t, dt)
+
+## The scripted input for the Archer's and Bulwark's kit moves (the accuracy pass).
+static func _anim_hero(A: Arena, P: Hunter, mv: String, t: float, dt: float) -> void:
+	var K: ArchKit = P.ak
+	var fire := false
+	match mv:
+		"arc_draw": fire = t > 0.4 and t < 1.7
+		"arc_loose": fire = t > 0.4 and t < 0.9
+		"arc_heavy_wind": if _at(t, dt, 0.5): K.ch_rmb = 2.0; K.cd["rmb"] = 0.0; K.bot_hold["rmb"] = 1.6; K.press_rmb()
+		"arc_heavy": if _at(t, dt, 0.5): K.ch_rmb = 2.0; K.cd["rmb"] = 0.0; K.bot_hold["rmb"] = 0.9; K.press_rmb()
+		"arc_snare": if _at(t, dt, 0.5): K.ch_rmb = 2.0; K.cd["rmb"] = 0.0; P.inp["sec_hold"] = false; K.press_rmb()
+		"arc_hail": if _at(t, dt, 0.5): K.cd["e"] = 0.0; K.use_e()
+		"arc_zip": if _at(t, dt, 0.5): K.play("arc_zip")          # (the arena is flat: nothing for the line to bite, so the move is played directly)
+		"arc_hop": if _at(t, dt, 0.5): P.dashes = P.max_dashes(); P.inp["aim"] = P.pos - Vector3(4, 0, 0); P.do_dash()
+		"arc_plunge":
+			if _at(t, dt, 0.4): P.teleport(P.pos + Vector3(0, 3.0, 0)); P.grounded = false; P.vel = Vector3.ZERO
+			if _at(t, dt, 0.5): K.ch_rmb = 2.0; K.cd["rmb"] = 0.0; K.press_rmb()
+		"bul_throw": fire = t > 0.5 and t < 0.53
+		"bul_recall": fire = (t > 0.4 and t < 0.43) or (t > 1.0 and t < 1.03)
+		"bul_smash_wind": fire = t > 0.4 and t < 2.0
+		"bul_smash": fire = t > 0.4 and t < 1.2
+		"bul_bash": if _at(t, dt, 0.5): K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; P.inp["sec_hold"] = false; K.press_rmb()
+		"bul_whirl": if _at(t, dt, 0.5): P.dashes = P.max_dashes(); P.do_dash()
+		"bul_charge":
+			if _at(t, dt, 0.3): K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; K.bot_hold["rmb"] = 3.0; K.press_rmb()
+			if _at(t, dt, 0.7): P.dashes = P.max_dashes(); P.do_dash()
+		"bul_short":
+			fire = t > 0.4 and t < 1.6
+			if _at(t, dt, 0.9): P.dashes = P.max_dashes(); P.do_dash()
+		"bul_mend": if _at(t, dt, 0.5): K.cd["e"] = 0.0; K.use_e()
+	P.inp["fire"] = fire
 
 ## One frame of the strip: a square round the hunter; the last one writes the strip and quits.
 static func _grab(A: Arena, P: Hunter, last: bool) -> void:

@@ -1,0 +1,14 @@
+{
+ "id": "tinker_roll",
+ "name": "Tinker's Roll",
+ "short": "Tinker",
+ "verb": "",
+ "cd": 0,
+ "slot": "kit",
+ "col": "ffb86a",
+ "stats": {
+  "reload": 0.15
+ },
+ "icon": "medkit",
+ "desc": "A roll of small tools: reloads faster."
+}

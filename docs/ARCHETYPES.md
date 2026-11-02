@@ -22,7 +22,7 @@ and passive build-ups.
 | **Archetype** (2 per weight) | silhouette, **weapon family (LMB + RMB)**, **passive** (and its resource, if any), **E**, **R**, **dash shape** | new core data `content/archetypes/<id>.json` (reviewed, not community-authored) |
 | **Weapon** (2 per archetype) | LMB firing pattern, and the RMB's flavour within the archetype's verb | `content/weapons/*.json` (+ a `archetype` field) |
 | **Kin** | **modifies** archetype abilities through sockets (§4), plus its own throw (C), owner bonus, carry mode (shoulder, perch, mount), auto ability, dodge rider and **merge** | `content/kin_v2/*.json` (+ an optional `infusion` field) |
-| **Glove** (loot) | Q active, or passive stats | `content/gloves` (unchanged) |
+| **Glove** (loot) | Q active, or passive stats | `content/gear` (unchanged) |
 
 | Weight | Archetypes | Charges / recharge (from the class) |
 |---|---|---|
@@ -900,8 +900,8 @@ three empowered arrows on R. Mechanics only; names, numbers and art are ours.
 | RMB | **tap: Snare** (8, root 0.6; on the ground a Tripwire). **Hold: Heavy Shot**, charged 0.5s -> full at 1.1s: 16 -> 30, push 6 -> 12, pierces 2, a bigger arrow; driven into a wall within 3m it stuns 0.8 ("PINNED"). In the air: Plunge |
 | Dash | Grapple Arrow (unchanged) |
 | Passive | **Focus** -> **Deadeye** (below) |
-| E | **Arrow Rain**: lob a volley up to 9m; 0.35s later (the strip fills, soft-CC floor) a 6m x 2.2m line of arrows rains across your aim for 3.75s: 5 every 0.5s, slow 35%, blight 1s (healing barely takes). A steady patter while it falls. During it the tap snare roots 1.0 |
-| R | **Great Arrows** (0.5s fuse): for 6s your next 3 shots need no draw: great arrows that fly 22m, pierce everyone, knock back and hit 28 / 28 / 44 (the third a payoff hit, T4, stun 1.0 into a wall). Heavy twang and boom, recoil, a big flash |
+| E | **Hail Wall**: lob a volley up to 9m; 0.35s later (the strip fills, soft-CC floor) a 6m x 2.2m line of arrows rains across your aim for 3.75s: 5 every 0.5s, slow 35%, blight 1s (healing barely takes). A steady patter while it falls. During it the tap snare roots 1.0 |
+| R | (removed in the accuracy pass, see docs/heroes/archer.md) **Great Arrows** (0.5s fuse): for 6s your next 3 shots need no draw: great arrows that fly 22m, pierce everyone, knock back and hit 28 / 28 / 44 (the third a payoff hit, T4, stun 1.0 into a wall). Heavy twang and boom, recoil, a big flash |
 
 Snares (tap, Tripwire, Heavy Shot, the Great Arrow's wall stun) root or stun people; a snare or
 Heavy Shot that hits adds 40 Focus (driven into a wall fills it). At 100 Focus the **Deadeye is
@@ -915,9 +915,9 @@ stunned, or within 0.8s of it), a gold second hit lands: +18 damage, a crit, T4.
 - Numbers: Longbow Focus shot 60 + 18 = 78 into a rooted target. Note the existing combo system
   (`Combos.payoff`) also boosts a hit on a stunned target, so a Deadeye on a wall-PINNED foe reads
   about 108; it needs a full Heavy Shot into a wall first. Great Arrows 100 if all three land
-  (Volley was 30 + a root over 2s, but area); Arrow Rain ~35 over its life plus the slow and blight.
+  (Volley was 30 + a root over 2s, but area); Hail Wall ~35 over its life plus the slow and blight.
 - Bots: snare first when the target isn't pinned; loose the Deadeye when armed and they're pinned;
-  Arrow Rain across a target's path from 3-10m; Great Arrows at a rival in a long clear line, then
+  Hail Wall across a target's path from 3-10m; Great Arrows at a rival in a long clear line, then
   fire them through.
 - Retired: Flare Arrow (E), Skyfall Volley (R).
 
@@ -978,7 +978,7 @@ above is superseded by this:
 | Dash | **Whirl**: a 3.6m spinning dash, foes along it knocked aside (6, push 7). **Shield up: Shield Charge**: 4.2m behind the shield, invulnerable for its length, 10 and push 11 |
 | Passive | **Guard**: blocked damage becomes Guard (1 per 2). **Crushed** (the payoff): a Bash, Shield Charge or full Crushing Blow that knocks a foe into terrain or another foe (within 1.5m behind them) stuns it 0.8 (+8 damage, T4), stuns the foe it hit 0.5, and heals you 14 |
 | E | **Mending Ground**: marks ground up to 7m away, or where the mace lies; 1s later it bursts: allies inside heal 26, your shield mends 60, foes inside are slowed |
-| R | **Fissure** (0.5s unstoppable fuse): a crack runs 14m forward at 40 m/s (walls, rocks and rises stop it): 8 and stun 0.6 to everyone it passes; 0.35s later the line erupts in 3 pulses 0.3s apart (9 + slow 0.45 each). All Guard goes in: +1 pulse per 50 |
+| R | (removed in the accuracy pass, see docs/heroes/bulwark.md) **Fissure** (0.5s unstoppable fuse): a crack runs 14m forward at 40 m/s (walls, rocks and rises stop it): 8 and stun 0.6 to everyone it passes; 0.35s later the line erupts in 3 pulses 0.3s apart (9 + slow 0.45 each). All Guard goes in: +1 pulse per 50 |
 
 - Loop: raise the shield into their fire (Guard) -> Shield Charge or Slam them into a wall or into
   their teammate -> Crushed (stun, heal) -> a full Crushing Blow or the Fissure on the stunned.
@@ -1120,7 +1120,7 @@ uses `jug_slam`). Thief: SMG recoil and the twin blades' arcs as before, `thf_va
 the dash's direction), `thf_primed`, `thf_bola` (whirled, then slung: the Bola leaves the hand 0.14s
 in), `thf_knife` (cocked by the ear; the knife leaves 0.12s in), `thf_arrive`, `thf_volley` (0.7s, the
 Jackpot burst). Strips: `--arena-demo=anim_<move>` (see `ArenaDemo.ANIM_DEMO`). Kit moves play on the
-hunter's own game and bots, and since Net 0.11.1 on remote players too: the move id and its age ride the
+hunter's own game and bots, and since Net 0.15.0 on remote players too: the move id and its age ride the
 hunter snapshot (indices 31-32, `ArchKit.net_move` / `apply_net_move`).
 
 Ranks: Smash rank 3 +20% on every Smash and the sweet-spot crash (levels 2-3, and Volcanic Rebuke); Rampage
@@ -1168,7 +1168,7 @@ rank 3 a third charge (level 2); Warchain rank 3 refunds 33% when it hooks a foe
 - The wiki gives no Malice stack cap or duration (ours: 5 and 4s) and no Blazing Spirit duration
   (ours: 6s Enraged). Online, Grounded, blight and Shred go through Net event `["kst", nid, kind,
   seconds, k]` (`KitStatus`); **Net.VERSION 0.6.0 -> 0.7.0**. The kit move id rides the hunter snapshot
-  from **Net.VERSION 0.11.1**.
+  from **Net.VERSION 0.15.0**.
 
 ### Numbers against the other four (TTK)
 
@@ -1196,3 +1196,32 @@ theirs. Rather than drop the wiki's ultimates, each is folded into the kit where
 `docs/heroes/thief.md` and `docs/heroes/juggernaut.md` carry the per-slot tables and the checks that
 assert each combination. The class-ultimate framework (`ArchKit.use_r`, `class_ults`) stays for the
 other four kits; a kit with no `"r"` in its JSON refuses the press.
+
+## Hero rebuild: Vireo (mage) and Marlowe (gunslinger), Nov 1
+
+The Mage (medium, Hex/Runes) and the Gunslinger (Chambers/Called Shot) kits are replaced by two new
+heroes under the same ids: **Vireo** (id `mage`, now Light: Sparks, Wirerun, Coilshot, Skycall) and **Marlowe**
+(id `gunslinger`, Medium: Fever, Slipstep, Burr Charge, Longneedle). Neither has an R (the Boki Merge owns it).
+The old Mage and Gunslinger sections above are history. Per-slot tables, research notes and combinations:
+`docs/heroes/mage.md` and `docs/heroes/gunslinger.md`; combos are checked by `--mage-combo-check` and
+`--gunslinger-combo-check`. `Hex` (scripts/arch/hex.gd) is no longer used by a kit.
+
+## Inspired by (per hero)
+
+The one place the hero docs point to for traceability (the per-hero files in `docs/heroes/` do not name other
+games' heroes). Mechanics only: every name, number, text, look and sound in the game is ours.
+
+| Archetype | Hero | Reference hero's public page | Notes |
+|---|---|---|---|
+| `thief` | Thief | [Shiv](https://supervive.wiki.gg/wiki/Shiv) | Ported ability by ability (Kits2 above) |
+| `juggernaut` | Juggernaut | [Brall](https://supervive.wiki.gg/wiki/Brall) | Ported ability by ability (Kits2 above) |
+| `archer` | Archer | [Myth](https://supervive.wiki.gg/wiki/Myth) | Accuracy pass: `docs/heroes/archer.md` |
+| `bulwark` | Bulwark | [Oath](https://supervive.wiki.gg/wiki/Oath) | Accuracy pass: `docs/heroes/bulwark.md` |
+| `mage` | Vireo | [Joule](https://supervive.wiki.gg/wiki/Joule) | `docs/heroes/mage.md` |
+| `gunslinger` | Marlowe | [Ghost](https://supervive.wiki.gg/wiki/Ghost) | `docs/heroes/gunslinger.md` |
+| `ashwick` | Ashwick | [Felix](https://supervive.wiki.gg/wiki/Felix) | `docs/heroes/ashwick.md` |
+| `dredge` | Dredge | [Kingpin](https://supervive.wiki.gg/wiki/Kingpin) | `docs/heroes/dredge.md` |
+| `tender` | Linnet, the Tender | [Elluna](https://supervive.wiki.gg/wiki/Elluna) | `docs/heroes/tender.md` |
+| `rimewright` | Tamsin, the Rimewright | [Celeste](https://supervive.wiki.gg/wiki/Celeste) | `docs/heroes/rimewright.md` |
+| `dolm` | Dolm | [Tetra](https://supervive.wiki.gg/wiki/Tetra) | `docs/heroes/dolm.md` |
+| `ostra` | Ostra | [Void](https://supervive.wiki.gg/wiki/Void) | `docs/heroes/ostra.md` |

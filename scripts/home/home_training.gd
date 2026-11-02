@@ -470,9 +470,7 @@ func _cls() -> String:
 ## Puts on what's picked: your hunter's build and weapon change on the spot, and the kit with them.
 func apply_try() -> void:
 	var cls := _cls()
-	var w := String(try.get("weapon", ""))
-	if w == "" or not (Data.CLASSES[cls]["weapons"] as Array).has(w):
-		w = String(Data.CLASSES[cls]["weapon"]); try["weapon"] = w
+	var w := String(Data.CLASSES[cls]["weapon"]); try["weapon"] = w      # one fixed weapon per class here
 	var at: Vector3 = h.player.position; var rot: Vector3 = h.player.rotation
 	h.player.queue_free()
 	h.player = Models.hunter(cls, Data.TEAM_COLORS[0], w, "", Save.d.get("look", {}))
@@ -506,7 +504,7 @@ func open_tryon() -> void:
 	var cr := UI.hbox(8)
 	for c in ["light", "medium", "heavy"]:
 		var cc: String = c
-		cr.add_child(UI.choice(String(Data.CLASSES[c]["name"]), c == cls, func(): try["cls"] = cc; try.erase("weapon"); apply_try(); open_tryon(), 120))
+		cr.add_child(UI.choice(String(Data.CLASSES[c]["name"]), c == cls, func(): try["cls"] = cc; apply_try(); open_tryon(), 120))
 	v.add_child(cr)
 	var cd: Dictionary = Data.CLASSES[cls]
 	var card := UI.card(UI.CARD, 10, 10); var cv := UI.vbox(4); card.add_child(cv)
@@ -528,17 +526,8 @@ func open_tryon() -> void:
 		if kd:
 			var sd := KinLib.ability(kd.active)
 			if sd: _line(cv, Settings.key_cap("signature"), "%s (%s)" % [sd.display_name, kd.display_name], KinText.ability(sd))
-	if kit.has("ultimate"): _line(cv, Settings.key_cap("ultimate"), String(kit["ultimate"]["name"]), "the bond ultimate (on a 20s timer here)")
+	if kit.has("ultimate"): _line(cv, Settings.key_caps("ultimate"), String(kit["ultimate"]["name"]), "the bond ultimate (on a 20s timer here)")
 	v.add_child(card)
-	v.add_child(UI.section("Weapon"))
-	var wr := UI.hbox(8)
-	for w in cd["weapons"]:
-		var ww: String = w
-		var wdd: WeaponDef = Content.weapon(w)
-		var b := UI.choice(wdd.display_name if wdd else String(w).capitalize(), String(try.get("weapon", h._weapon())) == w, func(): try["cls"] = cls; try["weapon"] = ww; apply_try(); open_tryon(), 150)
-		if wdd: b.tooltip_text = String(wdd.primary.get("desc", ""))
-		wr.add_child(b)
-	v.add_child(wr)
 	v.add_child(UI.section("Glove"))
 	var gf := HFlowContainer.new(); gf.add_theme_constant_override("h_separation", 6); gf.add_theme_constant_override("v_separation", 6)
 	for g in Gear.ALL:
@@ -569,11 +558,12 @@ func open_tryon() -> void:
 	bot.add_child(UI.button("Take it all off", func(): try = {}; h._refresh_player_model(); load_kit(); _build_hud(); open_tryon(), 170))
 	v.add_child(bot)
 
-## The class (and weapon) you're trying becomes the one you take on expeditions.
+## The class you're trying becomes the one you take on expeditions (with its archetype's signature weapon).
 func set_my_class() -> void:
 	var cls := _cls()
 	Save.d["cls"] = cls
-	if try.has("weapon"): Save.d["weapon"] = String(try["weapon"])
+	Save.d["arch"] = Arch.fix(String(Save.d.get("arch", "")), cls)
+	Save.d["weapon"] = Arch.signature(String(Save.d["arch"]))
 	Save.save_game()
-	h._toast("You're a %s now, with the %s" % [Data.CLASSES[cls]["name"], Content.weapon(String(Save.d.get("weapon", ""))).display_name if Content.weapon(String(Save.d.get("weapon", ""))) else "class weapon"])
+	h._toast("You're a %s now, carrying the %s" % [Data.CLASSES[cls]["name"], String(Data.weapon_stats(String(Save.d["weapon"])).get("name", "class weapon"))])
 	h._refresh_top()

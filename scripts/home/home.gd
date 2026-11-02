@@ -44,7 +44,6 @@ var chat_log: Array = []       # [{role, content}]
 var chat_kin: Dictionary = {}
 var chat_input: LineEdit
 var chat_busy := false
-var chat_offline_noted := false
 var emote_labels: Array = []
 var pet_done := {}
 
@@ -53,10 +52,12 @@ var visit: Dictionary = {}     # when visiting someone: their island snapshot (s
 var visit_id := ""
 var petted := {}
 var hecon: HomeEcon = null       # the armory, feeders, starving, graveyard and Soul Shrine (home_econ.gd)
+var water := HomeWater.new(self)      # the ponds you wade and swim in (home_water.gd)
 var hb: HomeBuild = null         # build mode and the island's layout (home_build.gd, home_layout.gd)
 var training: HomeTraining = null  # the Training Grounds isle, where your combat kit works (home_training.gd)
 var hw: HomeWork = null            # kin at work: jobs, stations and the Job Board (home_work.gd, Work)
 var hinc: HomeIncubator = null     # the Incubator by the Nesting Nook, where Rare Eggs hatch (home_incubator.gd, Incubator)
+var hmk: HomeMarket = null         # the Drift Pens (Boki market) and the Tradewind Exchange (home_market.gd)
 ## A farm-start island (HomeLayout.fs): the house, crop patches, pot, stall, Nook, Burrow, training
 ## post and graveyard are things you place in build mode, so where they are comes from the layout
 ## (_sync_fixtures); one you haven't placed is FAR away (nothing finds it, nothing walks to it).
@@ -107,10 +108,10 @@ func _ready() -> void:
 	var dbg := OS.get_cmdline_user_args()
 	for a in dbg:
 		if a.begins_with("--home-weapon="):
-			# test: wear a given weapon at home (and the class that carries it)
+			# test: wear a given weapon at home (as the archetype whose signature it is)
 			var wk := a.substr(14)
-			for ck in Data.CLASSES:
-				if (Data.CLASSES[ck]["weapons"] as Array).has(wk): Save.d["cls"] = ck
+			for ak0 in Arch.archetypes_of(wk):
+				Save.d["cls"] = Arch.weight(String(ak0)); Save.d["arch"] = ak0
 			Save.d["weapon"] = wk
 			Save.d.erase("loadout")
 			Save.no_write = true
@@ -141,6 +142,7 @@ func _ready() -> void:
 		get_viewport().disable_3d = true
 		PerfLog.frame_drawn()
 	hecon = HomeEcon.new(self)
+	hmk = HomeMarket.new(self, _spawn_kin)
 	if visit.is_empty():
 		HomeLayout.ensure(Save.d)     # first: a brand new farm-start island keeps its first trough in storage
 		Econ.ensure()
@@ -197,7 +199,10 @@ func _classic_layout(path_col: Color) -> void:
 	for z in range(30, 38):
 		for x in range(43, 48):
 			world.paint_tile(x, z, Color("6b4a33"))
-	world.set_block_rect(32, 36, 34, 38)   # pond
+	# the pond: water you can wade into and swim in (HomeWater), nothing grows in it
+	for z in range(36, 39):
+		for x in range(32, 35):
+			world.no_deco[world.idx(x, z)] = true
 
 # ------------------------------------------------------------------ a farm-start island's fixtures
 func _fx1(fx: String) -> Dictionary:
@@ -324,7 +329,7 @@ func _ready_rest() -> void:
 		keep_clear.append([rc[0] - 1, rc[1] - 1, rc[2] + 1, rc[3] + 2])
 	keep_clear.append([BURROW_RECT[0] - 1, BURROW_RECT[1] - 1, BURROW_RECT[2] + 1, BURROW_RECT[3] + 2])
 	for k in Data.ISLES:
-		var rc: Array = Data.ISLES[k]["bridge"]
+		var rc: Array = HomeLayout.isle_bridge(world, k)["rect"]
 		keep_clear.append([rc[0] - 2, rc[1] - 2, rc[2] + 2, rc[3] + 2])
 	for rc in keep_clear:
 		for z in range(rc[1], rc[3] + 1):
@@ -333,7 +338,7 @@ func _ready_rest() -> void:
 					world.kind[world.idx(x, z)] = World.T_GROUND
 	# bridges: work out which tiles they cover before any are opened
 	for k in Data.ISLES:
-		bridges[k] = {"tiles": world.bridge_tiles(Data.ISLES[k]["bridge"]), "built": _has_br(k)}
+		bridges[k] = {"tiles": world.bridge_tiles(HomeLayout.isle_bridge(world, k)["rect"]), "built": _has_br(k)}
 		if bridges[k]["built"]:
 			world.open_bridge(bridges[k]["tiles"])
 	training.prepare()
@@ -377,6 +382,7 @@ func _ready_rest() -> void:
 	(portal.get_node("Beam") as CPUParticles3D).emitting = true
 	if not fs:
 		var pond := Models.pond(1.9, 1.5); pond.position = Vector3(33.5, 0, 37.5); add_child(pond)
+		(pond.get_child(0) as MeshInstance3D).material_override = HomeBuild.water_mat()      # animated water
 		for fp in [[Vector3(45.4, 0, 29.4), 0.0, 5.0], [Vector3(45.4, 0, 37.6), 0.0, 5.0], [Vector3(47.8, 0, 33.5), PI / 2, 8.0], [Vector3(42.4, 0, 35.6), PI / 2, 4.0]]:
 			var f := Models.fence(fp[2]); f.position = fp[0]; f.rotation.y = fp[1]; add_child(f)
 	# (the farm's lamps and flower beds are decorations now: see HomeLayout.STOCK)
@@ -579,6 +585,7 @@ func _ready_rest() -> void:
 					_open_kin(Save.active_kin())
 				elif which == "burrow" or which == "kinbox": _open_burrow()
 				elif which == "shop": _open_shop()
+				elif hmk.open_named(which): pass      # "pens", "exchange[:item]"
 				elif which == "challenges": _open_challenges()
 				elif which.begins_with("ransom"):
 					if ":" in which: ransom_tab = which.split(":")[1]
@@ -731,7 +738,8 @@ func _build_bridges() -> void:
 		var br: Dictionary = bridges[k]
 		var node := Node3D.new(); add_child(node)
 		br["node"] = node
-		var sg := Models.signpost([isd["name"]]); sg.position = Vector3(isd["sign"].x, 0, isd["sign"].y); add_child(sg)
+		var sgp: Vector2 = HomeLayout.isle_bridge(world, k)["sign"]
+		var sg := Models.signpost([isd["name"]]); sg.position = Vector3(sgp.x, 0, sgp.y); add_child(sg)
 		br["sign"] = sg
 		if br["built"]:
 			_lay_planks(k, false)
@@ -749,7 +757,7 @@ func _build_bridges() -> void:
 		br["label"] = lbl
 
 func _bridge_axis(k: String) -> Dictionary:
-	var rc: Array = Data.ISLES[k]["bridge"]
+	var rc: Array = HomeLayout.isle_bridge(world, k)["rect"]
 	var horiz: bool = rc[2] - rc[0] > rc[3] - rc[1]
 	return {"horiz": horiz, "width": (rc[3] - rc[1] + 1.0) if horiz else (rc[2] - rc[0] + 1.0),
 		"mid": (rc[1] + rc[3] + 1) * 0.5 if horiz else (rc[0] + rc[2] + 1) * 0.5}
@@ -1029,6 +1037,7 @@ func _process(delta: float) -> void:
 	if training: training.tick(d)
 	_apply_cam_settings(d)
 	cam.follow(Vector3(ppos.x, minf(py, 0.0), ppos.z), d, panel_open == "" and train.is_empty())
+	_see_through()
 	_abyss_tint(d)
 	_find_interact()
 	if hb and hb.active:
@@ -1082,9 +1091,33 @@ func _apply_cam_settings(d: float) -> void:
 	var e := cam_zone_k * cam_zone_k * (3.0 - 2.0 * cam_zone_k)
 	cam.dist_mul = lerpf(home_mul, 1.0, e)
 	if player and is_instance_valid(player):
-		if not player.has_meta("base_scale"):
-			player.set_meta("base_scale", player.scale)
-		player.scale = (player.get_meta("base_scale") as Vector3) * lerpf(1.0, Hunter.VIS_SCALE, e)
+		# (the base is always 1: a hero swap's pop rides on top as "pop", so it can't get stuck stretched)
+		player.scale = (player.get_meta("pop", Vector3.ONE) as Vector3) * lerpf(1.0, Hunter.VIS_SCALE, e)
+
+## Trees between the camera and you (or your active Boki) thin out, as in a match (SeeThrough).
+func _see_through() -> void:
+	if player == null or not is_instance_valid(player) or not player.visible:
+		SeeThrough.off()
+		return
+	var b = null
+	var act := String(_d().get("active", ""))
+	for k in kins:
+		var n = k.get("node")
+		if String(k["rec"].get("uid", "")) == act and n is Node3D and is_instance_valid(n) and (n as Node3D).visible and (n as Node3D).is_inside_tree():
+			b = (n as Node3D).global_position
+	SeeThrough.update(cam, player.global_position, b)
+
+func _exit_tree() -> void:
+	SeeThrough.off()
+
+## Boki on the farm are drawn bigger than in a match: the farm's camera sits much further back than the
+## expedition's (HOME_ACROSS_REF framing at HOME_ZOOM), and at match size a Boki was a speck beside
+## your hunter there. Presentation only (the farm has no hitboxes; a match's Boki keep their size);
+## back to match size on the Training Grounds, where the view eases to the expedition's framing.
+const FARM_BOKI_SCALE := 1.7
+func _farm_boki_k() -> float:
+	var e := cam_zone_k * cam_zone_k * (3.0 - 2.0 * cam_zone_k)
+	return lerpf(FARM_BOKI_SCALE, 1.0, e)
 
 var climb := {}                # (unused since the ledge float; kept for anything that clears it)
 ## Floating up a ledge, as in a match (Hunter._ledge_float): {lip, n (into the wall), t, at, g0}.
@@ -1204,9 +1237,11 @@ func _move_player(d: float) -> void:
 	else:
 		crouch_on = can_act and Input.is_action_pressed("crouch")
 	if has_meta("crouch_test"): crouch_on = true
-	var crouching := crouch_on and not air and dash_t <= 0.0 and not gliding
+	var wdep := water.depth(ppos.x, ppos.z) if py < 0.4 else 0
+	water.step(wdep, d, mv, air)
+	var crouching := crouch_on and not air and dash_t <= 0.0 and not gliding and wdep == 0
 	p_crouch_k = move_toward(p_crouch_k, 1.0 if crouching else 0.0, d * 8.0)
-	if can_act and Input.is_action_just_pressed("dash") and dash_t <= 0.0:
+	if can_act and Input.is_action_just_pressed("dash") and dash_t <= 0.0 and not water.swimming:
 		try_dash(mv, air)
 	_mv = mv
 	var hv := Vector2(pvel.x, pvel.z)
@@ -1215,10 +1250,10 @@ func _move_player(d: float) -> void:
 		hv = dash_v
 		if dash_t <= 0.0: hv = dash_v * (Hunter.DASH_CARRY_AIR if air else Hunter.DASH_CARRY_GROUND)
 	else:
-		var spd := Hunter.GLIDE_SPEED * 1.15 if gliding else SPEED * (CROUCH_SPEED if crouching else 1.0)
+		var spd := Hunter.GLIDE_SPEED * 1.15 if gliding else SPEED * (CROUCH_SPEED if crouching else 1.0) * water.speed_mul(wdep, air)
 		hv += (mv * spd - hv) * (1.0 - exp(-(14.0 if not air else (4.0 if gliding else 6.0)) * d))
-	# on the ground the island's edge stops you; in the air (a jump, a glide) you can sail out past it
-	var guard := not air
+	# the island's edge doesn't hold you: walk off it and you fall (glide back, or the abyss returns you)
+	var guard := false
 	var p0 := ppos
 	var nx := ppos.x + hv.x * d
 	var ox := world.occupy(nx, ppos.z, 0.38, py, guard)
@@ -1253,7 +1288,7 @@ func _move_player(d: float) -> void:
 	# jump; in the air, a second press (or holding Space, or the glide key) opens the glider
 	var jump_now := can_act and Input.is_action_just_pressed("jump")
 	if jump_now and not air:
-		pvy = JUMP_V
+		pvy = water.breach(JUMP_V) if water.swimming else JUMP_V      # from deep water: a kick up and out
 		air = true
 		glide_hold = 0.0
 		Sfx.play("jump", null, -12.0)
@@ -1294,7 +1329,7 @@ func _move_player(d: float) -> void:
 		if gh > World.VOID + 1.0 and world.kind[world.idx(int(floor(ppos.x)), int(floor(ppos.z)))] == World.T_GROUND:
 			safe_at = ppos
 	_glider_look()
-	player.position = ppos + Vector3(0, py, 0)
+	player.position = ppos + Vector3(0, py - water.drop_y(), 0)
 	# face the mouse; with the mouse outside the window, face where you're walking
 	var vp := get_viewport()
 	var mp := vp.get_mouse_position()
@@ -1308,11 +1343,12 @@ func _move_player(d: float) -> void:
 		want = atan2(-hv.x, -hv.y)
 	if hg and hg.busy(): want = hg.face()      # chopping: face the tree
 	pface = lerp_angle(pface, want, minf(1.0, d * 14.0))
-	player.rotation.y = pface
+	player.basis = cam.char_basis(pface, player.scale)     # leaned toward the camera, as in a match
+	player.basis = water.tilt(player.basis, hv.length())      # swimming: tipped into a stroke
 	if p_anim == null or p_anim.model != player:
 		p_anim = HunterAnim.new(player)
 	p_fired += d
-	var ps := {"vel": Vector3(hv.x, pvy if air else 0.0, hv.y), "face": pface, "grounded": not air, "gliding": gliding, "rolling": dash_t > 0.0, "dash_dir": dash_v, "fired": p_fired,
+	var ps := {"vel": Vector3(hv.x, pvy if air else 0.0, hv.y), "face": pface, "grounded": not air, "gliding": gliding or water.k > 0.5, "rolling": dash_t > 0.0, "dash_dir": dash_v, "fired": p_fired,
 		"swing_n": p_swing_n, "combo": maxi(0, p_swing_n - 1) % 3, "crouch": p_crouch_k}
 	if air and not gliding and gh > World.VOID + 1.0:
 		ps["air_h"] = clampf(py - gh, 0.0, 30.0)
@@ -1459,6 +1495,7 @@ func _move_kin(d: float) -> void:
 		k["pos"] = pos
 		var n: Node3D = k["node"]
 		n.position = pos
+		water.paddle(k, pos, n, d)
 		if k.get("going_in", false) and Vector2(pos.x - _house_door().x, pos.z - _house_door().z).length() < 0.6:
 			k.erase("going_in")
 			var night_now := sin((day_t - 0.25) * TAU) < -0.2
@@ -1482,7 +1519,7 @@ func _move_kin(d: float) -> void:
 		if k.has("say"):
 			k["say_t"] = float(k.get("say_t", 0.0)) - d
 			(k["say"] as Label3D).visible = k["say_t"] > 0.0
-		n.scale = Vector3.ONE * (1.05 if rec["uid"] == _d().get("active", "") else 0.9) * float(n.get_meta("evo_scale", 1.0))
+		n.scale = Vector3.ONE * (1.05 if rec["uid"] == _d().get("active", "") else 0.9) * float(n.get_meta("evo_scale", 1.0)) * _farm_boki_k()
 		if k["emote_t"] > 0.0:
 			k["emote_t"] -= d
 			var lbl: Label3D = k["emote"]
@@ -1604,11 +1641,11 @@ var abyss_fx: CanvasLayer = null
 var abyss_k := 0.0
 func _abyss_tint(d: float) -> void:
 	var want := 0.0
-	if world.is_void(ppos.x, ppos.z) and climb.is_empty():
+	if world.is_void(ppos.x, ppos.z) and climb.is_empty() and pvy <= ABYSS_FX.RISE_OFF:     # (rising back up: no tint)
 		var top := _abyss_lip() - 0.5
 		var kill: float = world.abyss_floor(ppos.x, ppos.z) - Hunter.ABYSS_EXTRA - (Hunter.ABYSS_GLIDE_ROOM if gliding else 0.0)
 		want = ABYSS_FX.danger_depth(top - py, top - kill)
-	abyss_k = want if want < abyss_k else lerpf(abyss_k, want, 1.0 - exp(-12.0 * d))     # snaps back as you come up
+	abyss_k = lerpf(abyss_k, want, 1.0 - exp(-(12.0 if want > abyss_k else 9.0) * d))     # in fast, out over a few frames
 	if abyss_fx == null and abyss_k > 0.004:
 		abyss_fx = ABYSS_FX.new()
 		add_child(abyss_fx)
@@ -1997,7 +2034,7 @@ func _find_interact() -> void:
 	for k in bridges:
 		if bridges[k]["built"]:
 			continue
-		var sg: Vector2 = Data.ISLES[k]["sign"]
+		var sg: Vector2 = HomeLayout.isle_bridge(world, k)["sign"]
 		var d := p2.distance_to(sg)
 		if d < 2.4 and d < bd + 0.4: bd = d; best = {"kind": "bridge", "isle": k}
 	for k in kins:
@@ -2248,6 +2285,15 @@ func _unhandled_input(event: InputEvent) -> void:
 			return
 		if event.button_index == MOUSE_BUTTON_WHEEL_UP: cam.zoom_to = clampf(cam.zoom_to - 0.08, 0.55, 1.6)
 		if event.button_index == MOUSE_BUTTON_WHEEL_DOWN: cam.zoom_to = clampf(cam.zoom_to + 0.08, 0.55, 1.6)
+	if panel_open == "Hero" and event is InputEventKey and event.pressed and not event.echo and (event as InputEventKey).physical_keycode == KEY_K and has_meta("hero_hover"):
+		HomeHero.kit(self, String(get_meta("hero_hover")))      # K over a hero: its full kit card
+		get_viewport().set_input_as_handled()
+		return
+	if event.is_action_pressed("hero") and visit.is_empty() and not chat_open and not Overlay.is_open() and not building_now and (panel_open == "" or panel_open == "Hero"):
+		if panel_open == "Hero": _close_panel()
+		else: HomeHero.open(self)
+		get_viewport().set_input_as_handled()
+		return
 	if event.is_action_pressed("whistle") and panel_open == "" and not chat_open and visit.is_empty() and train.is_empty() and not Overlay.is_open():
 		_whistle()
 		get_viewport().set_input_as_handled()
@@ -2347,38 +2393,11 @@ func hub_items() -> Array:
 	if has_method("open_build"):
 		items.append(["build", "Build", "hammer", func(): call("open_build")])
 	items.append(["settings", "Settings", "gear", func(): Overlay.ctx = "home"; Overlay.open_settings()])
+	items.append(["hero", "Hero", "swap", func(): HomeHero.open(self)])
 	return items
 
 func _build_hub() -> void:
-	hub = UI.glass(6, 16)
-	hub.mouse_filter = Control.MOUSE_FILTER_STOP
-	var row := UI.hbox(4); hub.add_child(row)
-	var items := hub_items()
-	for i in items.size():
-		var it: Array = items[i]
-		var cb: Callable = it[3]
-		var b := UI.button("", func(): _hub_go(cb, String(it[0])))
-		b.theme_type_variation = "Ghost"
-		b.focus_mode = Control.FOCUS_NONE
-		b.custom_minimum_size = Vector2(62, 58)
-		b.tooltip_text = "%s  (%d)" % [it[1], i + 1]
-		var ic := UI.IconDot.new(String(it[2]), UI.INK, 22.0)
-		ic.position = Vector2(23, 9)
-		b.add_child(ic)
-		var lb := UI.label(String(it[1]), 11, UI.MUTED, UI.semi)
-		lb.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		lb.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
-		lb.offset_top = -19; lb.offset_bottom = -4
-		lb.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		b.add_child(lb)
-		var kc := UI.keycap(str(i + 1), 10)
-		kc.position = Vector2(2, 2)
-		kc.modulate.a = 0.75
-		b.add_child(kc)
-		b.mouse_entered.connect(func(): ic.col = UI.ACCENT_HI; ic.queue_redraw(); lb.add_theme_color_override("font_color", UI.INK))
-		b.mouse_exited.connect(func(): ic.col = UI.INK; ic.queue_redraw(); lb.add_theme_color_override("font_color", UI.MUTED))
-		hub_btns[String(it[0])] = b
-		row.add_child(b)
+	hub = HubBar.build(hub_items(), _hub_go, hub_btns)
 	root_ui.add_child(hub)
 	hub.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT, Control.PRESET_MODE_MINSIZE, 14)
 	hub.grow_vertical = Control.GROW_DIRECTION_BEGIN
@@ -2803,7 +2822,9 @@ func _open_shop() -> void:
 	UI.hold(v, SHOP_H)          # every tab the same size
 	UI.subtitle(v, "Seeds, food, things to wear and things for the farm")
 	UI.head_extra(v).add_child(UI.chip("gem", str(int(Save.d["gems"])), UI.GOLD, "Your gems"))
-	UI.shell_tabs(v, ["Seeds", "Kin food", "Wear", "Home", "Farm", "Sell"], shop_tab, func(t):
+	UI.shell_tabs(v, ["Seeds", "Kin food", "Wear", "Home", "Farm", "Sell", "Boki", "Exchange"], shop_tab, func(t):
+		if t == "Boki": hmk.open_pens(); return
+		if t == "Exchange": hmk.open_exchange(); return
 		shop_tab = t; shop_page = 0; UI._page_of.erase("Market stall"); _open_shop())
 	if shop_tab == "Sell":
 		_shop_sell(v)
@@ -3185,7 +3206,7 @@ func _kin_match_rows(rec: Dictionary, c2: Control, compact: bool) -> void:
 		ab_row.call(Settings.key_cap("signature") if ai == 0 else "auto", ad.display_name, (KinText.ability(eff) if ai == 0 else KinText.when(ad) + ": " + KinText.ability(eff)), KinText.color(ad).lerp(UI.INK, 0.3))
 	var ud := KinLib.merge(String(sp.get("ultimate", "")))
 	if ud:
-		ab_row.call(Settings.key_cap("ultimate"), "Merge: " + ud.display_name, " ".join(KinText.merge(ud, kspec != null and kspec.carry_style == "mount")), Color("ffd84a").lerp(UI.INK, 0.3))
+		ab_row.call(Settings.key_caps("ultimate"), "Merge: " + ud.display_name, " ".join(KinText.merge(ud, kspec != null and kspec.carry_style == "mount")), Color("ffd84a").lerp(UI.INK, 0.3))
 	if kspec == null:
 		return
 	var lines: Array = [[KinText.carry(kspec), KinRules.cat_color("sustain").lerp(UI.INK, 0.35)]]
@@ -3522,9 +3543,6 @@ func _send_chat() -> void:
 			_say(k, reply, clampf(3.0 + reply.length() * 0.06, 4.0, 10.0))
 		if chat_kin.get("uid", "") == rec["uid"]:
 			_chat_bubble("assistant", reply)
-			if offline and not chat_offline_noted and is_instance_valid(chat_hist):
-				chat_offline_noted = true
-				_toast(_offline_reason())
 		var loves_chat: bool = rec["likes"]["play"] == "chat"
 		Care.change(rec, "joy", 6.0 if loves_chat else 2.0)
 		if loves_chat and Care.discover(rec, "play"): _toast("%s loves chatting with you" % rec["name"])
@@ -3535,13 +3553,6 @@ func _send_chat() -> void:
 			Save.save_game()
 			if Bridge.ai_ok and rec["uid"] == Save.d.get("active", "") and not rec.has("lines"):
 				Bridge.refresh_lines(rec), "default")
-
-func _offline_reason() -> String:
-	match Bridge.last_err:
-		"no_page": return "%s answers on their own here. In the web version they talk through Claude." % chat_kin.get("name", "Your Boki")
-		"not_granted": return "Claude isn't allowed on this page yet, so %s answers on their own." % chat_kin.get("name", "Your Boki")
-		"rate_limited": return "Claude is busy for a moment, so %s answered on their own." % chat_kin.get("name", "Your Boki")
-	return "Couldn't reach Claude, so %s answered on their own." % chat_kin.get("name", "Your Boki")
 
 # ---- expedition
 var exp_cls := ""
@@ -3571,9 +3582,7 @@ func _open_expedition() -> void:
 		var ck: String = cname_of[nm]
 		Save.d["cls"] = ck
 		Save.d["arch"] = Arch.fix(String(Save.d.get("arch", "")), ck)
-		Save.d["weapon"] = Arch.default_weapon(String(Save.d["arch"]))
-		# weapons are class-locked: an armory weapon for another class drops back to the class weapon
-		if HomeEcon.fix_loadout_class(): _toast("Your armory weapon is for another class: taking the %s instead" % Data.weapon_stats(Data.CLASSES[ck]["weapon"])["name"])
+		Save.d["weapon"] = Arch.signature(String(Save.d["arch"]))
 		Save.save_game()
 		_refresh_player_model()
 		_open_expedition(), {}, 120)
@@ -3586,7 +3595,7 @@ func _open_expedition() -> void:
 	cl.autowrap_mode = TextServer.AUTOWRAP_OFF
 	left.add_child(cl)
 	left.add_child(UI.spacer(2))
-	# the archetype: two per class, each with its own kit and weapon family (docs/ARCHETYPES.md)
+	# the archetype: two per class, each with its own kit and signature weapon (docs/ARCHETYPES.md)
 	left.add_child(UI.section("Archetype"))
 	var arow := UI.hbox(8)
 	var cur_a := Arch.of_save()
@@ -3594,33 +3603,22 @@ func _open_expedition() -> void:
 		var ak: String = a
 		var ab := UI.choice(Arch.name_of(a), a == cur_a, func():
 			Save.d["arch"] = ak
-			Save.d["weapon"] = Arch.default_weapon(ak)
+			Save.d["weapon"] = Arch.signature(ak)
 			Save.save_game()
 			_refresh_player_model()
 			_open_expedition(), 150)
 		var adf := Arch.def(a)
-		ab.tooltip_text = "%s\nDash: %s  ·  Passive: %s\nRMB: %s  ·  E: %s  ·  R: %s (level 6)" % [String(adf.get("fantasy", "")), String(adf["dash"]["name"]), String(adf["passive"]["name"]), String(adf["rmb"]["name"]), String(adf["e"]["name"]), String(adf["r"]["name"])]
+		ab.tooltip_text = "%s\nDash: %s  ·  Passive: %s\nRMB: %s  ·  E: %s  ·  R: Boki Merge" % [String(adf.get("fantasy", "")), String(adf["dash"]["name"]), String(adf["passive"]["name"]), String(adf["rmb"]["name"]), String(adf["e"]["name"])]
 		arow.add_child(ab)
 	left.add_child(arow)
 	# your abilities before a run: the kit card's compact row (click for the full card)
 	left.add_child(KitCard.strip(cur_a, _open_kit_card))
 	left.add_child(UI.spacer(2))
-	left.add_child(UI.section("Weapon"))
-	var wr := UI.hbox(8)
-	var cur_w := _weapon()
-	for w in Arch.weapons(cur_a):
-		var wd: Dictionary = Data.weapon_stats(w)
-		var wk: String = w
-		var wb := UI.choice(String(wd["name"]), w == cur_w, func():
-			Save.d["weapon"] = wk
-			Save.save_game()
-			_refresh_player_model()
-			_open_expedition(), 128, wk)
-		var stat_s := ("Melee: %s damage per hit, reach %.1f" % [str(snappedf(float(wd["dmg"]), 0.1)), float(wd["range"])]) if wd.get("melee", false) else ("%s damage%s, %d per mag, range %d" % [str(snappedf(float(wd["dmg"]), 0.1)), (" x%d" % int(wd["pellets"])) if wd.has("pellets") else "", int(wd["mag"]), int(wd["range"])])
-		# (no "Right click:" line: with an archetype, right click is the archetype's ability, shown above)
-		wb.tooltip_text = (String(wd.get("desc", "")) + "\n" if wd.has("desc") else "") + stat_s
-		wr.add_child(wb)
-	left.add_child(wr)
+	left.add_child(UI.section("Signature weapon"))
+	var wd: Dictionary = Data.weapon_stats(Arch.signature(cur_a))
+	var wb := UI.choice(String(wd["name"]), true, func(): pass, 200, Arch.signature(cur_a))
+	wb.tooltip_text = (String(wd.get("desc", "")) + "\n" if wd.has("desc") else "") + "The one weapon you carry. It grows during a run: level-ups, chests and tunings upgrade it."
+	left.add_child(wb)
 	var ak := Save.active_kin()
 	if not ak.is_empty():
 		left.add_child(UI.spacer(2))
@@ -3661,6 +3659,7 @@ func _open_expedition() -> void:
 		elif exp_tier == i:
 			tv.add_child(UI.para(String(td["desc"]), UI.T_SMALL, Color("ffb3a8") if td["risk_kin"] else UI.MUTED))
 		right.add_child(tc)
+	HomeFreeKit.card(right)      # the free-kit run (home_freekit.gd)
 	right.add_child(UI.spacer(2))
 	right.add_child(UI.section("Match"))
 	var mode_names := {"solo": "Solo", "duo": "Duos", "trio": "Trios"}
@@ -3670,6 +3669,14 @@ func _open_expedition() -> void:
 		tb.tooltip_text = {"solo": "20 hunters, every one for themselves", "duo": "10 squads of two", "trio": "7 squads of three"}[mode_keys[String(tb.get_meta("tab"))]]
 	right.add_child(mtabs)
 	right.add_child(UI.label({"solo": "20 hunters, every one for themselves", "duo": "10 squads of two", "trio": "7 squads of three"}[exp_mode], UI.T_SMALL, UI.MUTED))
+	# the session: today's fixed match, or a rolling 30-minute session you join part-way through
+	# (scripts/match/rolling.gd; the fixed match stays the default until the owner switches it)
+	var rolling_on: bool = Save.d.get("exp_rolling", false)
+	var stabs := UI.tabs(["Fixed match", "Rolling session"], "Rolling session" if rolling_on else "Fixed match", func(nm): Save.d["exp_rolling"] = nm == "Rolling session"; _open_expedition(), {}, 150)
+	for tb in stabs.get_child(0).get_children():
+		tb.tooltip_text = "Everyone drops together; the islands fall after about 10 minutes" if String(tb.get_meta("tab")) == "Fixed match" else "A 30-minute session already under way: you drop in with the next wave, wherever it's at"
+	right.add_child(stabs)
+	right.add_child(UI.label("30 minutes, waves every 2-3 minutes; late arrivals start at a higher level" if rolling_on else "Everyone drops together; about 10 minutes", UI.T_SMALL, UI.MUTED))
 	# the raid condition this drop will have (rolled with the match's seed: RaidLook)
 	if exp_seed == 0: exp_seed = randi() | 1
 	var rc := RaidLook.pick(Settings.demo_opts({}), exp_seed)
@@ -3686,6 +3693,7 @@ func _open_expedition() -> void:
 	fl.add_child(UI.ghost("Duel room", _start_duel, 0, "knock"))
 	if Net.available():
 		fl.add_child(UI.ghost("Play online", func(): Game.goto("lobby", {"cls": Data.class_of_save(), "tier": exp_tier}), 0, "bond"))
+	if HomeFreeKit.buttons(fl, v, self, ak.is_empty()): return      # (no Boki of your own: only the free-kit run)
 	var start_b := UI.footer_primary(v, "Start expedition", _confirm_start, 250, "portal")
 	start_b.grab_focus.call_deferred()
 
@@ -3938,6 +3946,8 @@ func _start_match() -> void:
 		"duo": o = {"teams": Data.MATCH_PLAYERS / 2, "squad": 2}
 		"trio": o = {"teams": int(ceil(Data.MATCH_PLAYERS / 3.0)), "squad": 3}
 	o["total"] = Data.MATCH_PLAYERS
+	if Save.d.get("exp_rolling", false):
+		o["rolling"] = true      # the session sizes its own waves (Rolling.plan)
 	o["tier"] = exp_tier
 	o["kit_items"] = Econ.begin_raid()      # the armory loadout rides with you
 	if exp_seed != 0: o["seed"] = exp_seed  # the conditions the panel showed
@@ -4314,7 +4324,7 @@ func _show_when_free(lines: Array) -> void:
 func _open_ferry() -> void:
 	var v := _new_panel("Ferry", 520)
 	if not Social.available():
-		v.add_child(UI.label("The ferry connects you with other players: the town, guilds and friends' islands. It runs in the web version of Project Boki.", 15))
+		v.add_child(UI.label("The ferry will connect you with other players: the town, guilds and friends' islands. It isn't running yet. Check back in a later update.", 15))
 		return
 	v.add_child(UI.label("Where to?", 14, UI.MUTED))
 	v.add_child(UI.button("The town: market, notice board and guilds", func(): Game.goto("town", {"mode": "hub"}), 440))
@@ -4448,8 +4458,11 @@ func _setup_care() -> void:
 		return
 	# the time you were away: needs drift, kin eat from the feeders, and hungry ones may starve
 	hecon.away = Econ.catch_up_all()
-	if hecon.away.any(func(e): return e["kind"] == "died"):
+	# nobody is left with no Boki: a stray turns up (Lifeline; the toast is in home_freekit.gd)
+	var floor_ev := Lifeline.check()
+	if hecon.away.any(func(e): return e["kind"] == "died") or not floor_ev.is_empty():
 		_spawn_kin()
+	HomeFreeKit.toast_stray(self, floor_ev)
 	# what Boki assigned to stations made while you were away (Work.catch_up)
 	away_work = Work.catch_up()
 	if not away_work.is_empty():
@@ -5753,15 +5766,15 @@ func _econ_tests(dbg) -> void:
 	if "--armory-test" in dbg:
 		if not Save.d["buildings"].has("armory"): Save.d["buildings"].append("armory")
 		Save.d["armory"] = []
-		for t in [["rifle", 2, "fire", ""], ["sniper", 3, "frost", ""], ["", 0, "", "thunderclap"], ["smg", 1, "", ""], ["shotgun", 4, "venom", ""],
-				["longsword", 2, "storm", ""], ["burst_rifle", 3, "", ""], ["greatsword", 2, "void", ""]]:
-			Save.d["armory"].append(Loot.weapon(String(t[0]), int(t[1]), String(t[2]), String(t[3])))
-		var gk: Array = Gear.ALL.keys()
+		for t in [["vest", 2], ["quilted_coat", 3], ["bastion_plate", 4], ["boots", 1], ["windstep_boots", 3], ["quickstep_boots", 2],
+				["tinker_roll", 2], ["satchel", 4], ["field_kit", 1], ["magpie", 3]]:
+			Save.d["armory"].append(Loot.gear(String(t[0]), int(t[1])))
+		var gk: Array = Gear.ids_for(0) + Gear.ids_for(1)
 		for i in mini(4, gk.size()):
-			Save.d["armory"].append(Loot.glove(String(gk[i]), 1 + i % 4))
+			Save.d["armory"].append(Loot.gear(String(gk[i]), 1 + i % 4))
 		Save.d["valuables"] = {"old_coin": 3, "sky_pearl": 1, "kin_idol": 1, "soul_ember": 1}
 		Save.d["scrap"] = 9
-		Save.d["loadout"] = {"weapon": Save.d["armory"][2]["uid"]}
+		Save.d["loadout"] = {"gear2": Save.d["armory"][2]["uid"], "gear3": Save.d["armory"][4]["uid"]}
 		get_tree().create_timer(0.4).timeout.connect(func():
 			hecon.arm_pick = String(Save.d["armory"][2]["uid"])
 			hecon.open_armory())

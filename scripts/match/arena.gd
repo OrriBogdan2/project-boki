@@ -8,12 +8,12 @@ extends RefCounted
 ##   one that stands and watches you, one that strafes, a heavy one by a pillar to slam into; each
 ##   shows its damage per second, last hit and total over its head, and heals up when left alone
 ## - a sparring bot you can switch Off / Idle / Moving / Fighting (N), and give any archetype
-## - a reset (X), cooldowns off (O: dash, RMB, E, R and the glove), the ultimate unlocked (U)
-## - a quick swap without leaving: 2-7 picks an archetype; L opens the loadout (archetype, weapon,
+## - a reset (Backspace; X is the ultimate's second key), cooldowns off (O: dash, RMB, E, R and the glove), the ultimate unlocked (U)
+## - a quick swap without leaving: 2-9 pick one of the first eight archetypes (the loadout lists all); L opens the loadout (archetype, weapon,
 ##   Boki, glove, toggles), K the kit card
 ## Nobody dies here: a downed player or bot is back up after a beat.
 
-const KEYS_HINT := "K kit card   ·   L loadout   ·   2-7 archetype   ·   X reset   ·   N bot   ·   O cooldowns   ·   U ultimate"
+const KEYS_HINT := "K kit card   ·   L loadout   ·   2-9 first eight archetypes (L: all)   ·   X reset   ·   N bot   ·   O cooldowns   ·   U ultimate"
 const BOT_MODES := ["off", "idle", "moving", "fighting"]
 const BOT_NAMES := {"off": "Off", "idle": "Idle", "moving": "Moving", "fighting": "Fights back"}
 const DUMMY_HP := 3000.0
@@ -68,7 +68,7 @@ func setup(match_node: Match, which: String) -> void:
 	m.add_child(keys_node)
 	if m.hud:
 		m.hud.guide_hidden = true
-		m.hud.toast(("Arena" if layout == "arena" else "Training") + "  ·  K kit card  ·  L loadout  ·  2-7 archetype", Color("f3eee2"))
+		m.hud.toast(("Arena" if layout == "arena" else "Training") + "  ·  K kit card  ·  L loadout  ·  2-9 first eight archetypes", Color("f3eee2"))
 
 func teardown() -> void:
 	if _cb.is_valid() and CombatBus.hit_landed.is_connected(_cb):
@@ -278,12 +278,6 @@ func set_arch(a: String, w := "") -> void:
 	if m.hud: m.hud.toast("%s  ·  %s" % [Arch.name_of(a), String(Arch.def(a).get("card", {}).get("loop", ""))], Arch.color(a))
 	if card_layer: _open_card()
 
-func set_weapon(w: String) -> void:
-	var P: Hunter = m.player
-	if P.ak and Arch.weapon_ok(P.arch, w):
-		P.equip(w, 0)
-		m.sfx("pickup", null, -6.0, 1.0)
-
 ## Bring another Boki (one of yours, or a loaner of any kind); "" for none.
 func set_kin(sp: String) -> void:
 	var P: Hunter = m.player
@@ -335,7 +329,7 @@ func _spawn_bot() -> void:
 	if bot_mode == "off":
 		return
 	var diff := "medium"
-	bot = m.make_hunter(m.next_id("spar"), TEAM, Arch.weight(bot_arch), "Sparring " + Arch.name_of(bot_arch), "bot", m.bot_kin_record(), bot_at, {"arch": bot_arch, "weapon": Arch.default_weapon(bot_arch)})
+	bot = m.make_hunter(m.next_id("spar"), TEAM, Arch.weight(bot_arch), "Sparring " + Arch.name_of(bot_arch), "bot", m.bot_kin_record(), bot_at, {"arch": bot_arch, "weapon": Arch.signature(bot_arch)})
 	bot.ai = m.bot_brain.new_mind(m.rng, float(Data.BOT_DIFF[diff]["skill"]), Data.BOT_DIFF[diff])
 	bot.lives = 99
 	bot.tonics = 0
@@ -488,7 +482,7 @@ func _fill_menu(v: VBoxContainer) -> void:
 	left.add_theme_constant_override("separation", 8)
 	left.custom_minimum_size = Vector2(470, 0)
 	cols.add_child(left)
-	left.add_child(UI.section("Archetype  (2-7)"))
+	left.add_child(UI.section("Archetype  (keys 2-9 pick the first eight)"))
 	var ag := GridContainer.new(); ag.columns = 3
 	ag.add_theme_constant_override("h_separation", 6); ag.add_theme_constant_override("v_separation", 6)
 	for a in Arch.ids():
@@ -501,12 +495,6 @@ func _fill_menu(v: VBoxContainer) -> void:
 	ll.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	ll.custom_minimum_size = Vector2(460, 36)
 	left.add_child(ll)
-	left.add_child(UI.section("Weapon"))
-	var wr := HBoxContainer.new(); wr.add_theme_constant_override("separation", 6)
-	for w in Arch.weapons(P.arch):
-		var ww: String = w
-		wr.add_child(UI.choice(String(Data.weapon_stats(w).get("name", w)), P.wid == w, func(): set_weapon(ww); _fill_menu(v), 140, w))
-	left.add_child(wr)
 	left.add_child(UI.section("Boki"))
 	var kg := GridContainer.new(); kg.columns = 3
 	kg.add_theme_constant_override("h_separation", 6); kg.add_theme_constant_override("v_separation", 6)
@@ -546,7 +534,7 @@ func _fill_menu(v: VBoxContainer) -> void:
 	var tr := HBoxContainer.new(); tr.add_theme_constant_override("separation", 6)
 	tr.add_child(UI.choice("Cooldowns off  (O)", cd_off, func(): toggle_cd(); _fill_menu(v), 170))
 	tr.add_child(UI.choice("Ultimate unlocked  (U)", ult_on, func(): toggle_ult(); _fill_menu(v), 200))
-	tr.add_child(UI.button("Reset  (X)", func(): reset(), 110))
+	tr.add_child(UI.button("Reset  (Backspace)", func(): reset(), 110))
 	right.add_child(tr)
 	var br := HBoxContainer.new(); br.add_theme_constant_override("separation", 6)
 	br.add_child(UI.label("Bot (N)", 14, UI.MUTED))
@@ -577,8 +565,7 @@ func _kin_choices() -> Array:
 		if sp != "" and not out.has(sp) and KinLib.kin(sp): out.append(sp)
 	for sp in KinLib.kin_ids():
 		if not out.has(sp) and Data.KIN.has(sp): out.append(sp)
-	out = out.slice(0, 11)
-	out.append("")
+	out.append("")      # every species, however many there are (the grid scrolls with the menu)
 	return out
 
 func close_menu() -> void:
@@ -609,12 +596,12 @@ class ArenaKeys extends Node:
 				if a.card_layer: a._close_card()
 				elif a.menu_layer: a.close_menu()
 				else: handled = false
-			KEY_X:
+			KEY_BACKSPACE:
 				if not a.m.paused: a.reset()
 			KEY_N: a.cycle_bot()
 			KEY_O: a.toggle_cd()
 			KEY_U: a.toggle_ult()
-			KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7:
+			KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9:
 				var ids := Arch.ids()
 				var i := int(k - KEY_2)
 				if i < ids.size(): a.set_arch(String(ids[i]))

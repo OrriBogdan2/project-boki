@@ -39,8 +39,8 @@ primes a heavier hit, and landing that hit gives the flip straight back.
 
 |  |  |
 |---|---|
-| Weight class | Light (124 health, 5.2 m/s, 1 dash charge) |
-| Weapons | Twin Blades, SMG (first is the default) |
+| Weight class | Light (124 health, 5 m/s, 1 dash charge) |
+| Signature weapon | Twin Blades (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The cutpurse duelist. Sticks to one mark, flips past them, never lets go. |
 | Silhouette | the hood tail and cape |
 | Resource | Marks (max 5) |
@@ -58,7 +58,6 @@ What the in-game kit card (K) says.
 | E: Shadow Knife | Throw a dagger that sticks to a foe or a wall; recast (or wait) to step to it. |
 | R: Boki Merge | Press R with a full bond meter to merge with your Boki. |
 | Weapon: Twin Blades | Quick 3-hit combo; hold for a spin. Every hit Marks the target. |
-| Weapon: SMG | Hold to spray; a stream on one target stacks Marks fast. |
 
 ### Abilities in full
 

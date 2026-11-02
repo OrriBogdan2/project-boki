@@ -43,6 +43,12 @@ static func make(hunter: Hunter, arch_id: String) -> ArchKit:
 		"gunslinger": k = GunslingerKit.new()
 		"juggernaut": k = JuggernautKit.new()
 		"bulwark": k = BulwarkKit.new()
+		"dredge": k = DredgeKit.new()
+		"ashwick": k = AshwickKit.new()
+		"tender": k = TenderKit.new()
+		"rimewright": k = RimewrightKit.new()
+		"dolm": k = DolmKit.new()
+		"ostra": k = OstraKit.new()
 		_: return null
 	k.h = hunter
 	k.m = hunter.m
@@ -57,6 +63,7 @@ func rmb_def() -> Dictionary: return d.get("rmb", {})
 func e_def() -> Dictionary: return d.get("e", {})
 func r_def() -> Dictionary: return d.get("r", {})
 func dash_def() -> Dictionary: return d.get("dash", {})
+func lmb_def() -> Dictionary: return d.get("lmb", {})       # the kit's own attack-key data (kits that run the weapon's attack themselves)
 func res_def() -> Dictionary: return d.get("resource", {})
 func res_max() -> float: return float(res_def().get("max", 100.0))
 func res_col() -> Color: return Color(String(res_def().get("col", "#ffffff")))
@@ -81,6 +88,9 @@ func r_k() -> float: return 1.15 if rank("ult") >= 2 else 1.0
 # ------------------------------------------------------------------ overridable kit
 func _setup() -> void: pass
 func _tick(_dt: float) -> void: pass
+## A Boki merge ends every hold, charge and channel this kit started before R, with no release effect (and keeps them
+## ended while merged: the form's own kit owns the buttons). Each kit with such state overrides this.
+func _drop_holds() -> void: pass
 func fire_rmb(_c: Dictionary) -> void: pass        # c: {hold, air, e, r, full, t, variant}
 func rmb_press_extra() -> bool: return false        # a recast that takes the press (Shadow Step); true = handled
 func rmb_hold_tick(_t: float) -> void: pass          # while RMB is held (shields, charge previews)
@@ -106,6 +116,12 @@ func can_shoot() -> bool: return fire_ok() and fuse.is_empty()
 func res_text() -> String: return "%d" % int(round(res))
 func res_frac() -> float: return clampf(res / maxf(1.0, res_max()), 0.0, 1.0)
 func bot_use(_tgt: Ent, _dist: float, _los: bool) -> void: pass
+## The nearest foe a bot can hit within 12 m (the bot paths of the kits that run their own attack key).
+func _bot_target() -> Ent:
+	var best: Ent = null; var bd := 12.0
+	for f in m.foes_of(h.team):
+		if f.hittable() and h.flat_dist(f) < bd: bd = h.flat_dist(f); best = f
+	return best
 func describe_rmb_variant(c: Dictionary) -> String:
 	for v in ["full", "r", "e", "air", "hold"]:
 		if c.get(v, false): return {"full": "full", "r": "during_r", "e": "during_e", "air": "air", "hold": "hold"}[v]
@@ -113,6 +129,8 @@ func describe_rmb_variant(c: Dictionary) -> String:
 
 # ------------------------------------------------------------------ per step
 func tick(dt: float) -> void:
+	if KinMerge.active(h):
+		_drop_holds()
 	var rate := 1.0 + h.gear_stat("cdr")
 	for k in cd.keys():
 		cd[k] = maxf(0.0, float(cd[k]) - dt * rate)
@@ -233,9 +251,8 @@ func use_e() -> void:
 ## R: the archetype's ultimate. With the bond meter full the cast is Bonded (§5 option C): the ult's
 ## own tell, then 0.2s later the kin merges (its on_start), one T5 moment for the caster.
 func use_r() -> void:
-	if r_def().is_empty():          # a kit with no R of its own (Thief, Juggernaut): the key is the Merge
-		h._ab_feedback("r", "deny")
-		return
+	if r_def().is_empty():
+		return          # heroes without an R (the support pair)
 	if busy():
 		h._ab_feedback("r", "deny")
 		return
@@ -355,6 +372,7 @@ func _fire_r(will_bond: bool) -> void:
 	if bonded:
 		_bond_tell()
 		if KinMerge.cast(h):
+			_drop_holds()
 			Feel.hitstop(m, h, h, 0.0, {"bonded": true})
 			Feel.shake(m, "bonded", h, h.pos)
 			if h.is_local() and m.hud: m.hud.flash(Feel.cat_color("control"), 0.25)
@@ -666,7 +684,7 @@ func e_recastable() -> bool: return false
 var anim_id := ""              # the kit move playing on the hunter (HunterAnim.KMOVES), its start
 var anim_at := -9.0
 
-## The kit's full-body move on the wire (Net 0.11.1): the move id and its age in seconds, after the
+## The kit's full-body move on the wire (Net 0.15.0): the move id and its age in seconds, after the
 ## state array after KinNet.hunter_extra (26-30), at index NET_MOVE_AT. Empty id: nothing playing (an expired move is not sent).
 const NET_MOVE_AT := 31
 const NET_MOVE_LIFE := 3.0     # seconds a move is still worth sending (the longest is about 2.5s)
@@ -894,7 +912,7 @@ static func solid_mat(c: Color) -> StandardMaterial3D:
 ## [sound, pitch at 0, pitch at full] of each archetype's wind-up.
 const CHARGE_VOICE := {
 	"thief": ["swipe", 1.3, 2.3], "archer": ["click", 0.8, 2.0], "mage": ["zap", 0.7, 1.9],
-	"gunslinger": ["reload", 0.8, 1.8], "juggernaut": ["thump", 0.55, 1.3], "bulwark": ["shield", 0.55, 1.2],
+	"gunslinger": ["reload", 0.8, 1.8], "juggernaut": ["thump", 0.55, 1.3], "bulwark": ["shield", 0.55, 1.2], "dolm": ["thump", 0.5, 1.2], "ostra": ["hover", 0.8, 1.9],
 }
 var chg := {}                  # the hold being charged: {src, k, full, tick, ring, glow}
 var charge_last := 0.0         # how far the last hold got when it was let go (tests)
@@ -1015,3 +1033,4 @@ func terrain_behind(t: Ent, dir: Vector2, reach: float) -> bool:
 			return true
 		k += 0.3
 	return false
+

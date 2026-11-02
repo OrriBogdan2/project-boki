@@ -1,0 +1,14 @@
+{
+ "id": "skylark_boots",
+ "name": "Skylark Boots",
+ "short": "Skylark",
+ "verb": "",
+ "cd": 0,
+ "slot": "boots",
+ "col": "c9b8ff",
+ "stats": {
+  "heat": 0.35
+ },
+ "icon": "gust",
+ "desc": "Feathered cuffs: your glider lasts longer."
+}

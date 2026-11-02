@@ -118,7 +118,7 @@ func show_result(r: Dictionary) -> void:
 		hf.add_theme_constant_override("h_separation", 8); hf.add_theme_constant_override("v_separation", 8)
 		for i in haul.size():
 			var it: Dictionary = haul[i]
-			hf.add_child(_chip(Loot.icon_of(it), Loot.name_of(it) + ("  (sold)" if it.get("sold", false) else ""), Loot.el_col(it), 0.9 + i * 0.1))
+			hf.add_child(_chip(Loot.icon_of(it), Loot.name_of(it) + ("  (sold)" if it.get("sold", false) else ""), Loot.col_of(it), 0.9 + i * 0.1))
 		v.add_child(hf)
 		if int(s.get("arm_sold", 0)) > 0:
 			v.add_child(_note("Your armory was full: what didn't fit sold for %d gems." % int(s["arm_sold"]), UI.GOLD))
@@ -150,6 +150,17 @@ func show_result(r: Dictionary) -> void:
 		v.add_child(lc)
 	for nw in s.get("ransom_news", []):
 		v.add_child(_note(String(nw), Color("ffd58a")))
+	if s.get("loaner", false):
+		v.add_child(_note("Free-kit run: the loaner Boki went back to %s. Nothing of yours was at risk." % BokiPens.MERCHANT, Color("bfe9ff")))
+	if int(s.get("stipend", 0)) > 0:
+		v.add_child(_note("%s topped up your take by %d gems for making it out." % [BokiPens.MERCHANT, int(s["stipend"])], UI.GOLD))
+	for ps in s.get("pens_sold", []):
+		v.add_child(_note("%s sold at the Drift Pens: +%d gems." % [String(ps["rec"].get("name", "A Boki")), int(ps["paid"])], UI.GOLD))
+	if not (s.get("exchange_fills", []) as Array).is_empty():
+		v.add_child(_note("%d of your Exchange offers filled while you were out." % (s["exchange_fills"] as Array).size(), UI.GOLD))
+	for fe in s.get("floor", []):
+		if String(fe.get("kind", "")) == "stray":
+			v.add_child(_note("A stray %s is waiting on your farm. It's yours." % Data.KIN[String(fe["rec"]["species"])]["name"], UI.GOOD))
 	if s.get("kin_stranded", false):
 		v.add_child(_note("With no Boki left at home, %s let one of yours go on credit. It waited a long time and trusts you less now." % Ransom.BROKER, UI.BAD))
 	if int(s.get("vault_gems", 0)) > 0:
@@ -296,7 +307,7 @@ func _stage(r: Dictionary, s: Dictionary) -> void:
 	w3.add_child(isl)
 	var tr := Models.tree(rng, Color("5a9a4f"), "round"); tr.position = Vector3(-1.4, 0, -1.2); w3.add_child(tr)
 	var rk := Models.rock(rng, 0.7); rk.position = Vector3(1.5, 0, -0.9); w3.add_child(rk)
-	hunter_node = Models.hunter(Data.class_of_save(), Data.TEAM_COLORS[0], Data.weapon_for(Data.class_of_save(), String(Save.d.get("weapon", ""))), "", Save.d.get("look", {}), Arch.of_save())
+	hunter_node = Models.hunter(Data.class_of_save(), Data.TEAM_COLORS[0], Arch.weapon_for(Arch.of_save(), Data.class_of_save(), String(Save.d.get("weapon", ""))), "", Save.d.get("look", {}), Arch.of_save())
 	hunter_node.position = Vector3(-0.3, 0, 0.3); hunter_node.rotation.y = PI + 0.5
 	var ring := hunter_node.get_node_or_null("TeamRing") as Node3D
 	if ring: ring.visible = false

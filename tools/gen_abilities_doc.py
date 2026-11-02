@@ -5,15 +5,15 @@ def ab(i): return j(f"content/abilities/{i}.json")
 out = []
 w = out.append
 w("# Project Boki abilities\n")
-w("Every ability in an expedition, by slot. All of them are data. Hunter abilities: `content/abilities/*.json` (class dashes, weapon RMBs) and `content/gloves/*.json` (Q gloves), built from the effect verbs in `scripts/combat/effects.gd` and the world verbs in `scripts/combat/verbs.gd` (walls, mirrors, tethers, traps, bridges, yanks, decoys). Kin abilities, dodge riders and merges (E, its auto active, the Shift rider and R) are the kin grammar: `content/kin_v2`, `content/abilities_v2`, `content/merges_v2`, run by `scripts/kin/kin_exec.gd` (see docs/KIN_GRAMMAR.md). A new ability is a new JSON file either way.\n")
+w("Every ability in an expedition, by slot. All of them are data. Hunter abilities: `content/abilities/*.json` (class dashes, weapon RMBs) and `content/gear/*.json` (Q gloves), built from the effect verbs in `scripts/combat/effects.gd` and the world verbs in `scripts/combat/verbs.gd` (walls, mirrors, tethers, traps, bridges, yanks, decoys). Kin abilities, dodge riders and merges (E, its auto active, the Shift rider and R) are the kin grammar: `content/kin_v2`, `content/abilities_v2`, `content/merges_v2`, run by `scripts/kin/kin_exec.gd` (see docs/KIN_GRAMMAR.md). A new ability is a new JSON file either way.\n")
 w("This file is generated from the JSON by a script; the descriptions are the one-liners players see in the kit panel (K) and on hover.\n")
 w("## Archetypes (the kit you play)\n")
 w("Every hunter plays one of six archetypes (`content/archetypes/*.json`, run by `scripts/arch/arch_kit.gd` and `scripts/arch/kits/*`; design in docs/ARCHETYPES.md). The archetype owns RMB (with contextual variants), Shift (its dash shape), E (utility), R (ultimate, run level 6, rank 2 at 9) and a passive with its resource; the weapon owns LMB; Q is the glove; C is the kin's own ability (it hops out, casts, hops back) and G or middle mouse sends / recalls the kin. With a full bond meter, R is Bonded: the kin merges 0.2s after the ult. The kin's typing fills each ability's sockets (docs/ARCHETYPES.md §4).\n")
 w("| Archetype | Weight | Weapons | Dash | Passive | RMB | E | R |\n|---|---|---|---|---|---|---|---|")
 for a in ["thief", "archer", "mage", "gunslinger", "juggernaut", "bulwark"]:
     d = j(f"content/archetypes/{a}.json")
-    wn = " / ".join(j(f"content/weapons/{x}.json")["name"] for x in d["weapons"])
-    w(f"| **{d['name']}** | {d['weight']} | {wn} | {d['dash']['name']} | {d['passive']['name']} | {d['rmb']['name']} | {d['e']['name']} ({d['e']['cooldown']:g}s) | {d['r']['name']} ({d['r']['cooldown']:g}s) |")
+    wn = j(f"content/weapons/{d['signature'] if 'signature' in d else d['weapons'][0]}.json")["name"]
+    w(f"| **{d['name']}** | {d['weight']} | {wn} | {d['dash']['name']} | {d['passive']['name']} | {d['rmb']['name']} | {d['e']['name']} ({d['e']['cooldown']:g}s) | {(d['r']['name'] + ' (%gs)' % d['r']['cooldown']) if 'r' in d else 'none (R is the Merge)'} |")
 for a in ["thief", "archer", "mage", "gunslinger", "juggernaut", "bulwark"]:
     d = j(f"content/archetypes/{a}.json")
     w(f"\n### {d['name']} ({d['weight']})\n")
@@ -25,7 +25,7 @@ for a in ["thief", "archer", "mage", "gunslinger", "juggernaut", "bulwark"]:
     for v, lab in [("tap", "tap"), ("hold", "hold"), ("air", "in the air"), ("during_e", "with E"), ("full", "resource full")]:
         if v in r["variants"]: w(f"  - {lab}: {r['variants'][v]}")
     w(f"- **E: {d['e']['name']}** ({d['e']['cooldown']:g}s). {d['e']['desc']}")
-    w(f"- **R: {d['r']['name']}** ({d['r']['cooldown']:g}s, level 6). {d['r']['desc']}")
+    if "r" in d: w(f"- **R: {d['r']['name']}** ({d['r']['cooldown']:g}s, level 6). {d['r']['desc']}")
     w("- Level-up order (bots too): " + ", ".join({"sec": "RMB", "dash": "Dash", "kin": "E", "ult": "R", "gear": "Q"}[x] for x in d["order"]))
 w("")
 w("The old class dashes and weapon RMBs below are kept as data (the verbs return as gloves and other content); a hunter with no archetype still uses them.\n")
@@ -87,8 +87,8 @@ w("\n## Q: active gloves\n")
 w("Gloves drop in runs. Rarer gloves keep the same verb with bigger numbers: damage, wall health, heals and shields x1 / x1.3 / x1.6 / x2 (common to legendary), durations and pull strength by half as much, cooldown 8% shorter per step. Rank (skill points into Q) stacks on top.\n")
 w("| Glove | Verb | Cooldown | What it does |\n|---|---|---|---|")
 pas = []
-for f in sorted(os.listdir(os.path.join(R, "content/gloves"))):
-    g = j("content/gloves/" + f)
+for f in sorted(os.listdir(os.path.join(R, "content/gear"))):
+    g = j("content/gear/" + f)
     if float(g.get("cd", 0)) > 0:
         w(f"| **{g['name']}** | {g.get('verb','')} | {g['cd']}s | {g['desc']} |")
     else:

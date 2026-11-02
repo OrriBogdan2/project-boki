@@ -7,7 +7,7 @@ extends RefCounted
 ## charges. ArchKit runs one hunter's kit; this file is the data side: lookups, weapon families,
 ## and the kin's infusion (how a kin's typing fills an archetype ability's sockets, ARCHETYPES §4).
 
-const ORDER := ["thief", "archer", "mage", "gunslinger", "juggernaut", "bulwark"]
+const ORDER := ["thief", "archer", "mage", "gunslinger", "juggernaut", "bulwark", "dredge", "ashwick", "tender", "rimewright", "dolm", "ostra"]
 const DEFAULT := {"light": "thief", "medium": "gunslinger", "heavy": "juggernaut"}
 
 static func def(id: String) -> Dictionary:
@@ -63,7 +63,6 @@ static func pick(cls: String, rng: RandomNumberGenerator) -> String:
 	return String(opts[rng.randi_range(0, opts.size() - 1)])
 
 # ------------------------------------------------------------------ weapon families
-## The weapons an archetype can hold (its family). The first is the default.
 ## The rank previews for one slot ("sec", "dash", "kin", "ult"), from the rank you have: always the
 ## NEXT rank's concrete change first (rank 2 when you're rank 1), then rank 3's special after it.
 ## cur 0 (or -1: no context, e.g. the kit card) lists every rank to come. [[label, text]...]
@@ -79,24 +78,32 @@ static func next_ranks(id: String, slot: String, cur: int) -> Array:
 		out.append(["Rank 3", String(r3[slot]).trim_prefix("Rank 3: ")])
 	return out
 
-static func weapons(id: String) -> Array:
-	return def(id).get("weapons", [])
-
-static func default_weapon(id: String) -> String:
-	var w := weapons(id)
+## The archetype's one signature weapon: a hunter carries it for the whole run and never swaps it
+## (it grows through WeaponUps instead). An archetype names it with "signature": "<weapon id>" in
+## its JSON (the weapon itself lives in content/weapons). The old "weapons" list still loads: its first
+## entry is taken, so a hero file written before the gear model keeps working.
+static func signature(id: String) -> String:
+	var d := def(id)
+	if d.has("signature"):
+		return String(d["signature"])
+	var w: Array = d.get("weapons", [])
 	return String(w[0]) if not w.is_empty() else ""
 
-static func weapon_ok(id: String, wid: String) -> bool:
-	return weapons(id).has(wid)
+## Kept as a list for callers that iterate the weapon (always exactly one).
+static func weapons(id: String) -> Array:
+	var sg := signature(id)
+	return [sg] if sg != "" else []
 
-## The weapon a hunter of this archetype carries: the asked-for one if it's in the family, else
-## the family's default (and with no archetype, the class rule).
+static func weapon_ok(id: String, wid: String) -> bool:
+	return wid == signature(id)
+
+## The weapon a hunter of this archetype carries: always its signature (with no archetype, the class rule).
 static func weapon_for(id: String, cls: String, wid: String) -> String:
 	if not exists(id):
 		return Data.weapon_for(cls, wid)
-	return wid if weapon_ok(id, wid) else default_weapon(id)
+	return signature(id)
 
-## Which archetypes can hold a weapon.
+## Which archetypes carry a weapon as their signature.
 static func archetypes_of(wid: String) -> Array:
 	return ids().filter(func(a): return weapon_ok(a, wid))
 
@@ -295,7 +302,7 @@ static func infusion_table(ks: KinSpec) -> Array:
 		for slot in ["rmb", "e", "r"]:
 			var sd: Dictionary = ad.get(slot, {})
 			if sd.is_empty():
-				continue
+				continue       # a hero without this slot (no class R: the Merge owns it) has no row
 			var f := fill(sd.get("sockets", {}), inf, slot, String(sd.get("delivery", "projectile" if slot == "rmb" else "burst")))
 			rows.append("%-10s %-3s %-14s %s" % [a, slot.to_upper(), String(sd.get("name", "")), "; ".join(f["notes"])])
 	return rows
