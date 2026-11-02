@@ -527,3 +527,5 @@ Owner-approved. This is a core system (match start), so write a design note in d
 2. ext/equal (loot): already in progress.
 3. ext/drop: after both of those.
 4. ext/market.
+
+- ext/drop timing (owner): aim for about 20s from leaving the ship to landing (not 30); 18-22s is the target band in --drop-check.
