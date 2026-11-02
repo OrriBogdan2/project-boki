@@ -119,6 +119,28 @@ func tender() -> void:
 	P.inp["sec"] = false; P.inp["sec_hold"] = false; step(m, 0.2)
 	ok("mm merge: drop_holds ends the Burrseed aim without a throw", aiming and not K.seed_aim and not K.rmb_down and not AimKit.shown(P, "rmb") and _mine(m, P).size() == n1 and K.ch_rmb >= 1.0)
 	await _free(m)
+	await growth()
+
+## Burrseed's burst damage on the first foe, with the hunter at level `lvl`.
+func _seed_burst(lvl: int) -> float:
+	var r: Array = sc.setup("tender", 6.0)
+	var m: Match = r[0]; var P: Hunter = r[1]; var T: Hunter = r[3]; var K: TenderKit = P.ak
+	P.lvl = lvl
+	sc.aim_at(P, T.pos)
+	K.ch_rmb = 1.0; K.cd["rmb"] = 0.0
+	var h0 := T.hp
+	P.inp["sec"] = true; P.inp["sec_hold"] = true; step(m, 0.3)
+	P.inp["sec"] = false; P.inp["sec_hold"] = false
+	step(m, 1.2)
+	var dmg := h0 - T.hp
+	await _free(m)
+	return dmg
+
+## Ability damage reads ArchKit.power(), so quiet level growth (LevelGrowth.ap) raises it.
+func growth() -> void:
+	var d1: float = await _seed_burst(1)
+	var d10: float = await _seed_burst(10)
+	ok("mm RMB: Burrseed's burst grows with level (LevelGrowth.ap 1.0 -> %.2f)" % (1.0 + LevelGrowth.ap_pct(10)), d1 > 25.0 and d10 > d1 * 1.15, "L1 %.1f L10 %.1f" % [d1, d10])
 
 # ================================================================== Tamsin
 func rimewright() -> void:

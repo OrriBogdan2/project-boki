@@ -102,7 +102,7 @@ func splinter(at: Vector3, dmg: float, r: float, skip: Ent = null) -> void:
 	for f in foes_in(at, r):
 		if f == skip and f.hp <= 0.0:
 			continue
-		f.hurt(dmg * m.dmg_mult(h), h, {"src": "splinter", "ab": "passive", "slow": 1.2, "slow_k": 0.3, "tags": ["passive", "splinter"], "payoff": true})
+		f.hurt(dmg * power("passive"), h, {"src": "splinter", "ab": "passive", "slow": 1.2, "slow_k": 0.3, "tags": ["passive", "splinter"], "payoff": true})
 		add_chill(f)
 
 func _tick(dt: float) -> void:
