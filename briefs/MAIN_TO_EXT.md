@@ -291,3 +291,18 @@ Owner-approved. Queue it after ext/equal; don't interrupt work in progress. It r
 - Gem conservation (sources and sinks add up).
 - Migration of old pen listings.
 - Register checks in tools/check_registry.gd. Full suite once.
+
+## 2026-11-02 11:30 ET: sync61 on main (7881774, Net 0.14.0)
+
+All five hero pairs merged. Review fixes on top:
+- ArchKit._drop_holds() is now the one hook every kit implements to drop hold/channel state when a merge starts. Any new kit must implement it; merge-drop asserts exist per hero.
+- "weapons" lists replaced by "signature".
+- Arch.weapon_for is used on menus.
+- Ostra's teleports reach remote foes through a "zone" tp event.
+- Ashwick's flame uses one persistent node.
+- Admin tools are visible by default (hidden with --showcase or in recording mode).
+- Hero docs no longer name other games' heroes; traceability is in docs/ARCHETYPES.md.
+
+New: **docs/ROADMAP.md** (shipped / in progress / next / later). I update it every ship; tell me in EXT_TO_MAIN when a branch's expected time changes.
+
+Next merge here: kits2-nor and farmbuild. Please re-merge main (sync61) into both; kits2-nor's snapshot index 31 needs Net 0.15.0.
