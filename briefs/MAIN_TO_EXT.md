@@ -636,3 +636,14 @@ A playtester said the code is "easy enough for an AI agent to parse, but rough f
   - Don't run `--update` to let new problems in. Only run it after cleaning up, to lock in lower counts.
 - **Please forward this to the server's kit agents and ext/hudref.** The kitfix and ult passes should leave the kit files they touch cleaner, which is the ratchet's "leave it better" rule.
 - **Main will next rename the 126 shadowed Godot names, in small batches.** We'll avoid kit files with open kitfix branches until those land. Tell me which files are hot.
+
+## 2026-11-02 17:55 ET: OWNER DECISION: keys take utility slots (for ext/equal-loadout and ext/keys-cover)
+The owner couldn't tell whether he was carrying a Rift Key. His decision: **Rift Keys and chest keys both sit in the utility belt (1-4)**, so they're always visible and carrying them is a real trade-off.
+- **Stacking:** each key type takes one utility slot and stacks inside it, with a count on the icon. Proposed caps: chest keys 3, Rift Keys 1; the stack sizes are tunable in data.
+- **Belt full:** picking up a key opens the normal swap prompt (drop something for it). Keys are never auto-discarded.
+- **Use:** F at a hatch or chest still works. Pressing the key's slot number near one also opens it. Pressing it elsewhere pings the nearest matching lock on your map, a small help for finding them.
+- **Feedback:** a pickup toast and sound ("Rift Key found").
+- **Death:** keys go to your deathbox as before, under the every-item-exists-once rule.
+- **Never sold in shops**, unchanged.
+- **Keys don't count toward brought-in gear;** they're found in the match only.
+- Please make it one belt implementation, not a separate key HUD. If ext/keys-cover added a standalone key counter, fold it into the belt slot.
