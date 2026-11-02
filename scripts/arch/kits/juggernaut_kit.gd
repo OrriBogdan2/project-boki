@@ -384,7 +384,7 @@ func on_dash(use_ex: bool) -> bool:
 	var dd := dash_def()
 	var t := float(dd["time"])
 	var pk := power("dash") / maxf(0.01, m.dmg_mult(h))
-	travel(float(dd["dist"]), t, {"invuln": 0.06, "shove": true, "shove_kb": float(dd["hit_kb"]), "shove_dmg": float(dd["hit_dmg"]) * pk, "trail": "dust", "dir": h.aim_dir()})
+	travel(float(dd["dist"]), t, {"invuln": 0.06, "shove": true, "shove_kb": float(dd["hit_kb"]), "shove_dmg": float(dd["hit_dmg"]) * pk, "trail": "dust", "dir": dash_dir()})
 	st["last_dash"] = "rampage"
 	play("jug_dash")
 	h.glide_cd = maxf(h.glide_cd, t + 0.35)    # the dash's wind-down: no glider straight out of it

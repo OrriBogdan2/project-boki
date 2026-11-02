@@ -263,8 +263,7 @@ func on_dash(use_ex: bool) -> bool:
 		aft_t = 0.0
 		return true
 	if not spend_dash(false): return true
-	var dir := h.inp["move"] as Vector2
-	if dir.length() < 0.1: dir = h.aim_dir()
+	var dir := dash_dir()
 	rinkrun = {"t": 0.0, "dir": dir.normalized(), "loop": 0.16}
 	play("tm_skate_go")
 	m.sfx("rime_run", h.pos, -3.0, 1.0)
