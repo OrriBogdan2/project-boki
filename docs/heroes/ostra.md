@@ -71,6 +71,6 @@ Stance entry `ostra` (slight back lean, narrow stance). Strips: `--arena-demo=an
 ## Engine notes
 - Kit: `scripts/arch/kits/ostra_kit.gd`, data `content/archetypes/ostra.json`, weapon `tether_lantern.json`; `no_hold: true`
   (no hold input on the kit card).
-- The seed uses HeroZones for ground and wall legality; `["zone", "seed" | "pop", ...]` events (Net 0.14.0) so a second game
+- The seed uses HeroZones for ground and wall legality; `["zone", "seed" | "pop" | "tp", ...]` events (tp: Trade and the rank-3 pull move a foe another game owns by asking that game) (Net 0.14.0) so a second game
   rebuilds the same growth. Disoriented (the Trade slow) is a KitStatus effect `dsr` with a DIZZY word and teal ring.
 - Look: `scripts/match/gear_pair.gd`, `hero_arms.gd`. Sound: tools/gen_pair_sfx.py. Bot logic in the kit's `bot_use`.

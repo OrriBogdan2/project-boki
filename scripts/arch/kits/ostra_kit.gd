@@ -182,8 +182,7 @@ func _swap_end(go: bool) -> void:
 	m.fx.burst(here + Vector3(0, 1.0, 0), TEAL, 16, 4.0, 0.4, -2.0, 1.0)
 	for f in foes_in(land, float(dd["radius"])):
 		swapped_foes += 1
-		if not f.remote:
-			f.teleport(Vector3(from.x, m.world.ground_at(from.x, from.z), from.z))
+		HeroZones.move_body(m, f, Vector3(from.x, m.world.ground_at(from.x, from.z), from.z))
 		KitStatus.apply(f, "dsr", float(dd["slow_t"]), float(dd["slow"]))
 	h.teleport(Vector3(land.x, m.world.ground_at(land.x, land.z), land.z))
 	h.vel.y = 0.0
@@ -310,8 +309,8 @@ func _pop(hit: bool) -> void:
 	var catch_r := rad * (1.3 if rank("kin") >= 3 else 1.0)
 	var caught_hunter: Ent = null
 	for f in foes_in(p, catch_r):
-		if rank("kin") >= 3 and not f.remote and Vector2(f.pos.x - p.x, f.pos.z - p.z).length() > rad * 0.3:
-			f.teleport(Vector3(p.x, m.world.ground_at(p.x, p.z), p.z))
+		if rank("kin") >= 3 and Vector2(f.pos.x - p.x, f.pos.z - p.z).length() > rad * 0.3:
+			HeroZones.move_body(m, f, Vector3(p.x, m.world.ground_at(p.x, p.z), p.z))
 		f.hurt(dmg, h, {"src": "abil", "ab": "e", "payoff": k >= 0.99 and f is Hunter})
 		KitStatus.apply(f, "gnd", float(ed["ground"]))
 		if f is Hunter: caught_hunter = f

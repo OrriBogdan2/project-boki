@@ -12,6 +12,7 @@ extends RefCounted
 ##   ["zone", "bridge", nid, x, y, z, dx, dz, len, width, time]
 ##   ["zone", "seed",   nid, sid, x, y, z, rmax, grow]
 ##   ["zone", "pop",    sid]
+##   ["zone", "tp",     nid, x, y, z]            a body another game owns was moved (Trade, the rank-3 Brimseed pull): its own game moves it
 
 const ROCK_COL := Color("c98d4a")
 const ROCK_R := 0.5                  # a rock's footprint when it asks the world if it fits
@@ -159,6 +160,15 @@ static func seed_pop(m: Node, sid: String, col: Color) -> void:
 		m.fx.ring(n.global_position - Vector3(0, 0.9, 0), n.scale.x * 0.7, col, 0.3)
 		n.queue_free()
 
+# ------------------------------------------------------------------ moving a body
+## Moves `e` to `p`. A body this game owns moves now; one another game owns (e.remote) is asked to move through
+## Net, and its own game applies it (a remote body's position here is only what its owner last told us).
+static func move_body(m: Node, e: Ent, p: Vector3) -> void:
+	if not e.remote:
+		e.teleport(p)
+	elif e.nid != "" and (m.net_on or capture):
+		tx(m, ["zone", "tp", e.nid, m._r(p.x), m._r(p.y), m._r(p.z)])
+
 # ------------------------------------------------------------------ Net in
 static func net_in(m: Node, x: Array) -> void:
 	if x.size() < 3:
@@ -185,3 +195,8 @@ static func net_in(m: Node, x: Array) -> void:
 				seed_visual(m, sid, Vector3(x[4], x[5], x[6]), float(x[7]), float(x[8]), Color("6fd0c6"))
 		"pop":
 			seed_pop(m, String(x[2]), Color("6fd0c6"))
+		"tp":
+			if x.size() < 6: return
+			var body: Ent = m.ents_by_id.get(String(x[2]), null)
+			if body != null and not body.remote and not body.dead:
+				body.teleport(Vector3(x[3], x[4], x[5]))

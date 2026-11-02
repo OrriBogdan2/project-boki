@@ -292,6 +292,29 @@ func _zones() -> void:
 	step(m, 1.2)
 	ok("swap: stops before a rock in the way", P.pos.x < home.x + 4.0, "x %.1f" % (P.pos.x - home.x))
 	await done(m)
+	# ---- Net: a Trade on a body another game owns is sent, and that body's own game moves it
+	ok("net: Net.VERSION is at least 0.14.0 (carry and zone events)", int(Net.VERSION.split(".")[0]) > 0 or int(Net.VERSION.split(".")[1]) >= 14, Net.VERSION)
+	r = setup("ostra", 6.0)
+	m = r[0]; P = r[1]; T = r[2]; home = r[3]
+	T.nid = "t1"
+	m.ents_by_id["t1"] = T
+	T.remote = true
+	T.teleport(home + Vector3(8.0, 0, 0)); aim_at(P, T.pos)
+	HeroZones.sent.clear()
+	P.ak.on_dash(false)
+	step(m, 1.2)
+	var tev: Array = HeroZones.sent.filter(func(e): return e[1] == "tp")
+	ok("net: Trade tells the game that owns the foe to move it", tev.size() == 1 and String(tev[0][2]) == "t1" and float(tev[0][3]) < home.x + 2.0 and T.pos.x - home.x > 6.0, str(tev))
+	r2 = setup("ostra", 6.0)
+	m2 = r2[0]
+	var owned: Hunter = r2[2]
+	owned.nid = "t1"
+	m2.ents_by_id["t1"] = owned
+	owned.teleport(r2[3] + Vector3(8.0, 0, 0))
+	for e in tev: HeroZones.net_in(m2, e)
+	ok("net: the owning game moves the foe to where the trader stood", owned.pos.x - float(r2[3].x) < 2.0, "x %.1f" % (owned.pos.x - float(r2[3].x)))
+	await done(m2)
+	await done(m)
 	HeroZones.capture = false
 
 # ------------------------------------------------------------------ Dolm
