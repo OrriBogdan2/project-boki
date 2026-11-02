@@ -13,6 +13,7 @@
 	},
 	"look": {
 		"scale": 1.25,
+		"part_k": 1.9,
 		"ring": 4.6,
 		"parts": [
 			"storm_wings",

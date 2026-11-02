@@ -8,5 +8,5 @@ void fragment() {
 	float rim = pow(1.0 - clamp(abs(dot(NORMAL, VIEW)), 0.0, 1.0), 2.0);
 	float pulse = 0.9 + 0.1 * sin(TIME * 5.0);
 	ALBEDO = color.rgb;
-	ALPHA = clamp((0.2 + rim * 0.75) * strength * color.a * pulse, 0.0, 1.0);
+	ALPHA = clamp((0.34 + rim * 0.8) * strength * color.a * pulse, 0.0, 1.0);
 }

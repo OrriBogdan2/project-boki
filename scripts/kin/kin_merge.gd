@@ -105,6 +105,9 @@ static func cast(h: Hunter) -> bool:
 		return false
 	h.ult = 0.0
 	MergeKit.drop_class_holds(h)
+	for bb in h.m.bubbles.duplicate():
+		if bb["ent"] == k:
+			h.m.bubbles.erase(bb)          # (a line it said a moment ago does not hang over the merge)
 	var form := MergeForm.for_boki(k)
 	var giant := k.carry_style() == "mount" and not MergeForm.has_kit(form)
 	var timers: Array = []

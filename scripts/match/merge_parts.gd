@@ -42,7 +42,7 @@ static func build(parent: Node3D, form: Dictionary, base: Vector3) -> Dictionary
 
 # ------------------------------------------------------------------ Heavy Star
 static func _rock_plates(parent: Node3D, _rec_: Dictionary, col: Color, glow: Color, acc: Color, base: Vector3) -> void:
-	var rock := Models.toon(col, true, 0.0)
+	var rock := Models.toon(col.lerp(glow, 0.38), true, 0.25)
 	var seam := Models.glow_mat(Color(acc, 0.9))
 	for s in [-1.0, 1.0]:
 		var pl := Models.part(parent, Models.box(0.4, 0.24, 0.46), rock, base + Vector3(0.4 * s, 0.94, 0.0), Vector3.ONE, Vector3(0, 0, 0.45 * s), "Pauldron")
@@ -83,10 +83,10 @@ static func _storm_wings(parent: Node3D, rec: Dictionary, col: Color, glow: Colo
 	var edge := Models.glow_mat(Color(acc, 0.95))
 	for s in [-1.0, 1.0]:
 		var w := Node3D.new()
-		w.position = base + Vector3(0.14 * s, 0.74, 0.2)
+		w.position = base + Vector3(0.14 * s, 1.0, 0.2)
 		parent.add_child(w)
 		for i in 5:
-			var len_ := 0.9 - 0.11 * float(i)
+			var len_ := 1.25 - 0.15 * float(i)
 			var f := Models.part(w, Models.box(len_, 0.035, 0.15), feather, Vector3(0.5 * s * len_ + 0.08 * s, 0.12 * float(i) - 0.1, 0.05 * float(i)), Vector3.ONE, Vector3(0, 0.18 * s * float(i), (0.4 - 0.09 * float(i)) * s))
 			f.name = "Feather"
 			Models.part(w, Models.box(len_ * 0.96, 0.02, 0.025), edge, Vector3(0.5 * s * len_ + 0.08 * s, 0.12 * float(i) - 0.08, 0.05 * float(i) - 0.08), Vector3.ONE, Vector3(0, 0.18 * s * float(i), (0.4 - 0.09 * float(i)) * s))

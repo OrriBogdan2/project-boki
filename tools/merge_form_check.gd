@@ -113,7 +113,7 @@ func run(mn: Node) -> void:
 	var only := ""
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--mergeform-only="): only = a.substr(17)
-	for part in ["data", "xform", "kit", "ult", "shell", "tiers", "heavy", "storm", "prism", "net", "bots"]:
+	for part in ["data", "xform", "kit", "ult", "shell", "tiers", "heavy", "storm", "prism", "net", "bots", "guards"]:
 		if only == "" or only.split(",").has(part):
 			call("_" + part)
 	CombatBus.ability_used.disconnect(_on_used)
@@ -229,7 +229,7 @@ func _kit() -> void:
 	_fresh("pebbit")
 	base_rmb = String(m.player.slot_info("sec").get("name", ""))
 	P = merged("pebbit")
-	ok(String(P.slot_info("sec").get("name", "")) == "Bulldoze" and String(P.slot_info("k1").get("name", "")) == "Gravity Anchor" and String(P.slot_info("lmb").get("name", "")) == "Gravity Slam",
+	ok(String(P.slot_info("sec").get("name", "")) == "Boulder Roll" and String(P.slot_info("k1").get("name", "")) == "Gravity Anchor" and String(P.slot_info("lmb").get("name", "")) == "Gravity Slam",
 		"merged: the skill bar shows the form's LMB / RMB / E (%s / %s / %s)" % [P.slot_info("lmb").get("name", ""), P.slot_info("sec").get("name", ""), P.slot_info("k1").get("name", "")])
 	ok(String(P.slot_info("r").get("name", "")) == "Collapse", "...and R shows the form's ultimate")
 	ok(String(P.slot_info("sec").get("name", "")) != base_rmb, "...replacing the class's own RMB (%s)" % base_rmb)
@@ -295,10 +295,11 @@ func _ult() -> void:
 	ults = {}
 	P = merged("pebbit")
 	k = P.kin
-	run_for(float(P.merge_st["T"]) + 0.3)
+	var merge_len := float(P.merge_st["T"])
+	run_for(merge_len + 0.3)
 	ok(not KinMerge.active(P) and int(ults.get("titan_r", 0)) == 0, "unused, the timeout separates you without the ultimate")
 	ok(k.state not in ["fused", "downed"] and k.cmd == "follow", "...the Boki is out beside you (state %s)" % k.state)
-	ok(is_equal_approx(float(Content.merge_form("titan").get("duration", 10.0)), 10.0) or float(KinMerge.def_for(k).duration) == 10.0, "the merge lasts about 10s")
+	ok(absf(merge_len - 10.0) <= 0.5, "the merge lasts about 10s (%.1fs)" % merge_len)
 	# the fallback: another Boki's merge has the basic burst as its ultimate and also separates
 	ults = {}
 	P = merged("cindle")
@@ -330,8 +331,8 @@ func _shell() -> void:
 	var sh0 := float(P.merge_st["shell"])
 	R = rival()
 	P.hurt(20.0, R, {"src": "shot"})
-	ok(is_equal_approx(float(P.merge_st["shell"]), sh0 - 20.0) and P.hp >= hp0 - 0.01, "damage drains the shell first (shell %.0f -> %.0f, hp %.1f)" % [sh0, float(P.merge_st["shell"]), P.hp])
-	ok(P.hp >= hp0 - 0.01, "own health is untouched while the shell stands")
+	ok(is_equal_approx(float(P.merge_st["shell"]), sh0 - 20.0) and P.hp >= hp0 - 0.05, "damage drains the shell first (shell %.0f -> %.0f, hp %.1f)" % [sh0, float(P.merge_st["shell"]), P.hp])
+	ok(P.hp >= hp0 - 0.05, "own health is untouched while the shell stands")
 	var kit := live_kit(P)
 	kit.age = 2.0
 	ults = {}
@@ -339,7 +340,7 @@ func _shell() -> void:
 	P.hurt(float(P.merge_st["shell"]) + 50.0, R, {"src": "shot"})
 	ok(not KinMerge.active(P), "a hit that breaks the shell ends the merge early")
 	ok(int(ults.get("tidal_shell_r", 0)) == 0, "...with no ultimate")
-	ok(P.hp >= hp0 - 0.01, "...the breaking hit is swallowed (hp %.1f)" % P.hp)
+	ok(P.hp >= hp0 - 0.05, "...the breaking hit is swallowed (hp %.2f of %.2f; a soaked hit costs a token 0.01)" % [P.hp, hp0])
 	run_for(0.2)
 	ok(k.state not in ["downed", "fused"] and k.hp > 0.0 and k.flat_dist(P) < 6.0, "...and the Boki pops out beside you, not downed (state %s)" % k.state)
 	ok(P.merge_cd > 0.0 and P.merge_cd <= KinParts.MERGE_SPENT_TIME, "...with the normal merge cooldown (%.1fs)" % P.merge_cd)
@@ -399,7 +400,7 @@ func _heavy() -> void:
 	P.inp["sig"] = true
 	run_for(0.5)
 	ok(R.flat_dist(P) < d0 - 1.0, "Gravity Anchor pulls foes in (%.1fm -> %.1fm)" % [d0, R.flat_dist(P)])
-	# RMB: bulldoze - armoured roll that carries foes and resists knockback
+	# RMB: boulder - armoured roll that carries foes and resists knockback
 	R = foe(P.pos + Vector3(0, 0, -2.2))
 	P.teleport(P.pos)
 	aim_at(P, P.pos + Vector3(0, 0, -6.0))
@@ -409,7 +410,7 @@ func _heavy() -> void:
 	var rz0 := R.pos.z
 	var hp1 := R.hp
 	run_for(1.3, func(): P.inp["sec_hold"] = true; P.inp["move"] = Vector2(0, -1); if k.hold.is_empty(): P.inp["sec"] = true)
-	ok(not k.hold.is_empty() and String(k.hold["kind"]) == "bulldoze", "RMB (held) starts the bulldoze")
+	ok(not k.hold.is_empty() and String(k.hold["kind"]) == "boulder", "RMB (held) starts the boulder")
 	ok(absf(P.pos.z - z0) > 6.0, "...an armoured roll at speed (%.1fm in 1.3s)" % absf(P.pos.z - z0))
 	ok(R.pos.z < rz0 - 3.0 and R.hp < hp1, "...carrying the foe along and hurting it (moved %.1fm, -%.0f hp)" % [rz0 - R.pos.z, hp1 - R.hp])
 	var vx0 := P.vel.x
@@ -432,9 +433,10 @@ func _heavy() -> void:
 	aim_at(P, land)
 	var a_hp := A.hp
 	var d_before := A.flat_dist(land)
+	var p0 := P.pos
 	P.inp["ult"] = true
 	run_for(0.3)
-	ok(k.ulting() and P.pos.x > P.pos.x - 1.0 and not P.grounded, "Collapse: the leap starts at once, airborne")
+	ok(k.ulting() and Vector2(P.pos.x - p0.x, P.pos.z - p0.z).length() > 1.0 and not P.grounded, "Collapse: the leap starts at once, airborne and already moving toward the mark (%.1fm)" % Vector2(P.pos.x - p0.x, P.pos.z - p0.z).length())
 	var pulled := false
 	var launched := false
 	var hit_at := -1.0
@@ -619,6 +621,146 @@ func _prism() -> void:
 	run_for(0.6)
 	ok(R.hp < h0 - 30.0, "...then bursts: foes take %.0f" % (h0 - R.hp))
 	ok(P.shield > 30.0, "...and allies get a shield (%.0f)" % P.shield)
+	# another game: a remote wearer holding the prism (its pose in the snapshot) turns MY shot too
+	_fresh("pebbit")
+	P = m.player
+	R = foe(P.pos + Vector3(0, 0, 8.0))
+	R.remote = true
+	R.face = 0.0
+	R.set_meta("mf_kit", true); R.set_meta("mf_id", "tidal_shell"); R.set_meta("mf_glow", Color("9ff3ff")); R.set_meta("kpose", "mf_prism")
+	run_for(0.1)
+	ok(not m.verbs.mirrors.is_empty(), "a remote hunter holding the Prism has a reflect window on this side")
+	m.spawn_shot(P, P.pos + Vector3(0, 0.9, 6.0), Vector2(0, 20.0), 10.0, 1.5, 0.15, Color.RED)
+	var rs: Dictionary = m.shots[-1]
+	ok(int(rs["team"]) == P.team, "setup: my shot flies at the prism")
+	var turned := {"v": false}
+	run_for(0.6, func():
+		for s2 in m.shots:
+			if int(s2["team"]) == R.team and (s2["vel"] as Vector2).y < 0.0:
+				turned["v"] = true)
+	ok(turned["v"], "...and my shot is turned back at me, now theirs")
+	R.set_meta("kpose", "")
+	run_for(0.5)
+	ok(m.verbs.mirrors.is_empty(), "...the window goes when the pose ends")
+	R.remote = false
+	# the pose counter: the same pose cast twice is two plays for the other side
+	P = merged("pebbit")
+	var kit_p := live_kit(P)
+	kit_p.play("mf_slam_a")
+	var e1 := String(KinNet.hunter_extra(P)[4])
+	kit_p.play("mf_slam_a")
+	var e2 := String(KinNet.hunter_extra(P)[4])
+	ok(e1 != e2 and e1.get_slice("~", 0) == "mf_slam_a" and e2.get_slice("~", 0) == "mf_slam_a", "a repeated pose reaches the other side as a new play (%s -> %s)" % [e1, e2])
+
+# ------------------------------------------------------------------ 8. the guards (review fixes)
+func _guards() -> void:
+	# shell order: the shell takes the hit before shield, armor and the Boki's shield; nothing else is touched
+	var P := merged("puddlet")
+	var R := rival()
+	P.shield = 20.0; P.armor = 50.0; P.max_armor = 100.0; P.kin_shield = 10.0
+	var hp0 := P.hp
+	var o := {"src": "shot"}
+	P.hurt(10.0, R, o)
+	ok(P.shield == 20.0 and P.armor == 50.0 and P.kin_shield == 10.0 and P.hp >= hp0 - 0.05, "the shell is hit first: shield, armor and the Boki's shield are untouched (%.0f / %.0f / %.0f)" % [P.shield, P.armor, P.kin_shield])
+	# a soaked hit still counts as a hit (extraction interrupt), like a kin shield
+	P.extract_prog = 0.5
+	P.hurt(5.0, R, {"src": "shot"})
+	ok(P.extract_prog == 0.0, "a hit the shell soaks still interrupts extraction")
+	# falls and heat go through the shell
+	var sh := float(P.merge_st["shell"])
+	P.hurt(6.0, null, {"src": "fall"})
+	ok(float(P.merge_st["shell"]) == sh and (P.hp < hp0 - 1.0 or P.armor < 50.0 or P.shield < 20.0 or P.kin_shield < 10.0), "a fall goes past the shell")
+	var sh2 := float(P.merge_st["shell"])
+	var hp1 := P.hp
+	var sh_a := P.shield; var ar_a := P.armor; var ks_a := P.kin_shield
+	P.hurt(4.0, null, {"src": "heat"})
+	ok(float(P.merge_st["shell"]) == sh2 and (P.hp < hp1 or P.shield < sh_a or P.armor < ar_a or P.kin_shield < ks_a), "heat goes past the shell too")
+	# the shell breaks once
+	P.hurt(float(P.merge_st["shell"]) + 40.0, R, {"src": "shot"})
+	var t_break := float(P.get_meta("shell_break_at", -1.0))
+	ok(not KinMerge.active(P) and t_break >= 0.0, "a breaking hit ends the merge and stamps the break (once)")
+	var cd1 := P.merge_cd
+	P.hurt(5.0, R, {"src": "shot"})
+	ok(float(P.get_meta("shell_break_at", -1.0)) == t_break and P.merge_cd == cd1, "...a later hit does not break it again")
+	# G and orders mid-transformation do not end the merge
+	_fresh("pebbit")
+	P = m.player
+	P.kin.stow()
+	P.ult = 1.0
+	KinMerge.press(P)
+	run_for(0.2)
+	ok(String(P.merge_st.get("phase", "")) == "xform", "setup: mid-transformation")
+	KinCommand.tap(P)
+	KinCommand.order(P, "chase")
+	KinCommand.order(P, "follow")
+	run_for(0.1)
+	ok(KinMerge.active(P) and P.merge_st["form"]["id"] == "titan", "G and orders mid-transformation do nothing (the merge goes on)")
+	# the Boki does not speak while it is inside you
+	var bubbles0: int = m.bubbles.size()
+	P.kin.bark_cd = 0.0
+	P.kin.bark("revive")
+	P.kin.bark("callout", "x")
+	ok(m.bubbles.size() == bubbles0, "the Boki says nothing while it is inside you")
+	# eliminated mid-merge: everything goes
+	P = merged("pebbit")
+	var k := live_kit(P)
+	ok(k != null, "setup: a live form")
+	m.eliminate(P, rival(), "test", true)
+	m.step(Match.DT)
+	var ex := KinNet.hunter_extra(P)
+	ok(P.merge_st.is_empty() and MergeKit.of(P) == null and String(ex[0]) == "" and P.get_node_or_null(MergeLook.NODE_NAME) == null, "eliminated mid-merge: no form, kit or look is left (snapshot form '%s')" % String(ex[0]))
+	# a lost life (with lives left) drops you back in: the form does not follow
+	P = merged("pebbit")
+	P.lives = 3
+	m.eliminate(P, rival(), "test", false)
+	m.step(Match.DT)
+	m.step(Match.DT)
+	ok(P.merge_st.is_empty() and String(KinNet.hunter_extra(P)[0]) == "", "a lost life mid-merge ends the form (lives left: %d)" % P.lives)
+	# extracted mid-merge: same
+	P = merged("zephyrak")
+	P.extracted = true
+	m.step(Match.DT)
+	ok(P.merge_st.is_empty() and MergeKit.of(P) == null and String(KinNet.hunter_extra(P)[0]) == "", "extracted mid-merge: the form goes with you")
+	# a class kit's charge, bow draw or held RMB started before R does not fire mid-merge
+	_fresh("pebbit", "heavy")
+	P = m.player
+	P.kin.stow()
+	P.ult = 1.0
+	P.draw_t = 0.8
+	P.mel_hold = 0.6
+	P.warm_t = 0.3
+	if P.ak != null:
+		P.ak.rmb_down = true
+	P.inp["sec_hold"] = true
+	KinMerge.press(P)
+	var leaked := false
+	for i in 90:
+		P.inp["sec_hold"] = true
+		m.step(Match.DT)
+		if P.draw_t >= 0.0 or P.mel_hold > 0.0 or P.warm_t > 0.0 or (P.ak != null and P.ak.rmb_down):
+			leaked = true
+	ok(not leaked, "a charge, draw or held RMB from before R is dropped, through the transformation and after")
+	# rescue: the Boki's own recovery mid-rescue frees you
+	_fresh("pebbit")
+	P = m.player
+	var kk: Kin = P.kin
+	kk.pos = P.pos + Vector3(2.0, 0, 0); kk.state = "active"; kk.fly = {}
+	kk.go_down()
+	P.teleport(kk.pos)
+	run_for(0.6)
+	ok(kk.rescue_on, "setup: a rescue is under way")
+	kk.down_t = 0.01
+	run_for(0.1)
+	ok(kk.state != "downed" and not kk.rescue_on and kk.rescue_block == 0.0, "its own recovery mid-rescue ends the rescue flag")
+	P.inp["move"] = Vector2(1, 0)
+	var x0 := P.pos.x
+	run_for(0.4, func(): P.inp["move"] = Vector2(1, 0))
+	ok(P.pos.x - x0 > 0.5, "...and you can move again (no stuck root, %.1fm)" % (P.pos.x - x0))
+	kk.rescue_on = true          # (a stale flag, as the old bug left it) must not root or disarm you either
+	var x1 := P.pos.x
+	run_for(0.4, func(): P.inp["move"] = Vector2(1, 0))
+	ok(P.pos.x - x1 > 0.5, "...a stale flag on a Boki that is up does not root you")
+	kk.rescue_on = false
 
 # ------------------------------------------------------------------ 7. the net and the bots
 func _net() -> void:
@@ -627,7 +769,7 @@ func _net() -> void:
 	var R := rival()
 	var f := MergeForm.of(P)
 	var rt := KinNet.decode_form(KinNet.encode_form(f))
-	ok(String(rt.get("id", "")) == "titan" and String(rt.get("name", "")) == "Heavy Star" and bool(rt.get("kit", false)) and is_equal_approx(float(rt.get("size", 0.0)), 1.3), "the form crosses the net as its id and rebuilds from content")
+	ok(String(rt.get("id", "")) == "titan" and String(rt.get("name", "")) == "Heavy Star" and bool(rt.get("kit", false)) and is_equal_approx(float(rt.get("size", 0.0)), float(f["size"])), "the form crosses the net as its id and rebuilds from content")
 	P.hurt(25.0, R, {"src": "shot"})
 	var kit := live_kit(P)
 	kit.play("mf_slam_a")
@@ -642,16 +784,20 @@ func _net() -> void:
 	ok(MergeShell.view(R).y > 0.0, "...MergeShell.view reads it for a remote hunter")
 	# a remote cast event draws without error
 	m.net_on = false
-	KinNet.on_event(m, ["kcmd", "mcast", P.nid, P.pos.x, P.pos.y, P.pos.z, "ult|%.1f|%.1f|7.0|1.2" % [P.pos.x, P.pos.z]])
-	KinNet.on_event(m, ["kcmd", "merge", P.nid, P.pos.x, P.pos.y, P.pos.z, KinNet.encode_form(f)])
-	ok(true, "the merge and cast events play on the other side")
+	var fx_n := m.fx.get_child_count()
+	KinNet.on_event(m, ["kcmd", "mcast", R.nid, R.pos.x, R.pos.y, R.pos.z, "ult|%.1f|%.1f|7.0|1.2" % [R.pos.x + 3.0, R.pos.z]])
+	ok(m.fx.get_child_count() > fx_n, "a remote ultimate draws its ground marker on this side (%d new fx nodes)" % (m.fx.get_child_count() - fx_n))
+	KinNet.on_event(m, ["kcmd", "merge", R.nid, R.pos.x, R.pos.y, R.pos.z, KinNet.encode_form(f)])
+	var sp := R.get_node_or_null(MergeXform.SPIRAL) as CPUParticles3D
+	ok(sp != null and sp.emitting, "a rival's merge event plays the same transformation spiral on this side")
 	# the form disappears from a snapshot: the look peels away
 	var it2: Array = []
 	it2.resize(KinNet.HUNTER_AT)
 	it2.append_array(["", 0.0, 0.0, 0.0, ""])
 	KinNet.apply_hunter(R, it2)
-	run_for(0.1)
-	ok(R.get_node_or_null(MergeLook.NODE_NAME) == null and not bool(R.get_meta("mf_kit")), "...and goes when the merge ends")
+	ok(R.get_node_or_null(MergeLook.NODE_NAME) == null and R.get_node_or_null("MergeLookLeaving") != null and not bool(R.get_meta("mf_kit")), "...and the look starts peeling off when the merge ends")
+	(R.get_node("MergeLookLeaving") as MergeLook)._process(MergeLook.PEEL_S + 0.05)          # (headless: nothing renders, so play the peel by hand)
+	ok(not R.has_node("Rig/Torso/MergePartsLeaving") and not R.has_node("Rig/Torso/" + MergeLook.PARTS_NAME), "...and the parts are gone from the torso when the peel finishes")
 
 func _bots() -> void:
 	ults = {}

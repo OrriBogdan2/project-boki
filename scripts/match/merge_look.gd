@@ -73,9 +73,9 @@ static func _free_orphan_parts(hunter: Hunter) -> void:
 		box.queue_free()
 
 func _restore() -> void:
-	for mi in _wash:
-		if is_instance_valid(mi):
-			(mi as MeshInstance3D).material_overlay = null
+	for pr in _wash:
+		if is_instance_valid(pr[0]):
+			(pr[0] as MeshInstance3D).material_overlay = pr[1]          # (back to whatever it wore: the outline)
 	_wash.clear()
 	if _model != null and is_instance_valid(_model):
 		_model.scale = _base_scale
@@ -129,10 +129,6 @@ func build() -> void:
 
 ## A colour wash and bright rim in the form's colour over every mesh of the hunter (one shared overlay material).
 func _wash_model(root: Node, glow: Color) -> void:
-	var mat := ShaderMaterial.new()
-	mat.shader = WASH
-	mat.set_shader_parameter("color", Color(glow, 1.0))
-	mat.set_shader_parameter("strength", 0.9)
 	var stack: Array = [root]
 	while not stack.is_empty():
 		var n: Node = stack.pop_back()
@@ -140,9 +136,16 @@ func _wash_model(root: Node, glow: Color) -> void:
 			if String(c.name).begins_with("Merge"):
 				continue
 			stack.append(c)
-		if n is MeshInstance3D and (n as MeshInstance3D).visible and (n as MeshInstance3D).material_overlay == null:
-			(n as MeshInstance3D).material_overlay = mat
-			_wash.append(n)
+		if n is MeshInstance3D and (n as MeshInstance3D).visible:
+			var mi := n as MeshInstance3D
+			var mat := ShaderMaterial.new()
+			mat.shader = WASH
+			mat.set_shader_parameter("color", Color(glow, 1.0))
+			mat.set_shader_parameter("strength", 1.0)
+			var old := mi.material_overlay
+			mat.next_pass = old          # (the outline some meshes already wear still draws after the wash)
+			_wash.append([mi, old])
+			mi.material_overlay = mat
 
 static func _ease_back(u: float) -> float:
 	var c3 := OVERSHOOT + 1.0

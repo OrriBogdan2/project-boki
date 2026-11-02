@@ -13,6 +13,7 @@
 	},
 	"look": {
 		"scale": 1.45,
+		"part_k": 1.4,
 		"ring": 5.0,
 		"parts": [
 			"rock_plates",
