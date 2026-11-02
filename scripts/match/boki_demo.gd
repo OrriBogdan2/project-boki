@@ -63,6 +63,7 @@ static func frame(m: Match) -> void:
 		"merge":
 			if t >= 1.5 and step == "":
 				m.set_meta("bdemo_step", "merge")
+				k.state = "shoulder"; k.fly = {}; k.settle = 1.0; k.cmd = "return"     # on you: the instant merge (Follow would leap it back first)
 				P.ult = 1.0
 				KinMerge.press(P)
 			if step == "merge":

@@ -383,6 +383,9 @@ func _ready() -> void:
 	if "--boki-system-check" in args:
 		load("res://tools/boki_system_check.gd").new().run(self)      # Boki commands (throw, recall, hold/follow, C), the downed Boki, the Merge
 		return
+	if "--merge-form-check" in args:
+		load("res://tools/merge_form_check.gd").new().run(self)      # merge forms: transformation, kit swap, ultimates, shell, no tiers, net, bots
+		return
 	if "--boki-follow-check" in args:
 		load("res://tools/boki_follow_check.gd").new().run(self)      # the Boki follows you: leash, glide hops, Sic / Call back, the wheel, mounts
 		return
@@ -1992,9 +1995,9 @@ func _grammar_runtime_check() -> void:
 	var ok_cast := KinMerge.cast(P)
 	var dur := float(P.merge_st.get("T", 0.0))
 	var ms := KinMerge.def_for(k)
-	_grt("merge casts: fused, timed, passives on", ok_cast and k.state == "fused" and dur >= ms.duration and dur <= ms.duration + ms.grow_duration + 0.01 and P.owner_stat("damage") > 0.29,
+	_grt("merge casts: fused, timed, passives on", ok_cast and k.state == "fused" and is_equal_approx(dur, ms.duration) and P.owner_stat("damage") > 0.29,
 		"%.1fs, damage +%.2f" % [dur, P.owner_stat("damage")])
-	_ac_run(m, dur + 0.2)
+	_ac_run(m, dur + float(MergeForm.data()["xform_s"]) + 0.3)       # (the transformation comes first, then the timer; no tiers: the length is fixed)
 	_grt("merge ends on its timer, then cooldown", not KinMerge.active(P) and P.merge_cd > 0.0 and k.state == "shoulder" and not KinMerge.can_cast(P), "cd %.1f" % P.merge_cd)
 	P.ult = 1.0
 	var blocked := not KinMerge.can_cast(P)
@@ -2005,14 +2008,14 @@ func _grammar_runtime_check() -> void:
 	_ac_run(m, 0.05)
 	_grt("throwing ends the merge (throw still works)", not KinMerge.active(P) and k.state in ["flying", "active"], "Boki %s" % k.state)
 	_ac_run(m, 1.0)
-	k = _grt_kin(m, P, "pebbit")
+	k = _grt_kin(m, P, "cairnback")        # (a mount without a form of its own yet: the stat merge grows it giant; Gravadillo has the Heavy Star form)
 	P.teleport(home); T.teleport(home + Vector3(2.0, 0, 0)); _grt_reset(T)
 	P.ult = 1.0; P.merge_cd = 0.0
 	KinMerge.cast(P)
-	_grt("mount merge: giant under you", KinMerge.active(P) and not k.giant.is_empty() and k.state == "shoulder" and P.owner_stat("armor") > 0.49, "armor %.2f shield %.0f" % [P.owner_stat("armor"), P.shield])
+	_grt("mount merge: giant under you", KinMerge.active(P) and not k.giant.is_empty() and k.state == "shoulder" and P.owner_stat("knockback_resist") > 0.49, "knockback resist %.2f" % P.owner_stat("knockback_resist"))
 	_ac_run(m, 0.2)
 	var ph := T.hp
-	_ac_run(m, 1.6, func(): T.teleport(home + Vector3(2.0, 0, 0)); T.vel = Vector3.ZERO)
+	_ac_run(m, 2.4, func(): T.teleport(home + Vector3(2.0, 0, 0)); T.vel = Vector3.ZERO)
 	_grt("merge pulses stomp around you", T.hp < ph, "took %.0f" % (ph - T.hp))
 	KinMerge.end(P, "test")
 	# IVs ride on top of the budget: final hp/damage/speed and the merge meter's fill (sizes are
