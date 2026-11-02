@@ -330,3 +330,19 @@ The owner asked why C and G are separate buttons. Approved design (your files; p
 - **Kits and feel:** mechanics, timing, aiming, movement and readability match the source as the baseline. That's what the kitfix, polish, ult and body/dash passes are doing.
 - **Characters:** each hunter gets a clearly original design, with its own species or concept, silhouette, palette and theme, chosen to fit the kit's role but not resembling the source character. The owner's example: Moosh Moosh as a small fire fox.
 - **Next (after the kits pass review):** a design-concept pass proposes an original concept for each of the 12 hunters (species or archetype, silhouette, palette, signature props, effect colours). The owner approves them, then the models and effects are rebuilt. I'll post the concepts here first.
+
+## 2026-11-02 19:15 ET: PLAYTESTER FEEDBACK (via owner): you can't tell whose Boki is whose
+"It's confusing which pets are theirs vs yours vs teammates." The Boki visuals are in your files, so here's a proposed fix for you to take (or adjust). The goal: answer "mine / my team's / enemy / wild" in under a second, even in a messy fight.
+1. **Ownership ring under every owned Boki,** in the same visual language as hunter rings (ext/hudref's hud_style.gd colours):
+   - **Yours:** a bright ring in your own colour, plus a small chevron or pip above it. It's the only one with the chevron.
+   - **Teammates':** the team colour (blue/green), a thinner ring.
+   - **Enemies':** red/orange, a thin ring.
+   - **Wild Boki:** no ring, a neutral yellow-white "?" or paw pip, as now when capturable.
+2. **A small owner tag** above owned Boki: the owner's name in small text, or their portrait dot. Show it for teammates' and enemies' Boki at mid range. Hide it on yours; the chevron is enough. Fade it with distance like nameplates.
+3. **A leash line on hover or when far away:** a faint line from a Boki to its owner when you hover it or when it's more than about 8 m from its owner. You can also always show yours while you're aiming a G command.
+4. **Colour echo:** the Boki's outline or rim light takes its ring colour, so ownership reads even when the ring is hidden by grass or a crowd. Keep it subtle enough not to fight the Boki's type colour.
+5. **Minimap:** Boki dots in the same ownership colours; yours slightly larger.
+6. **Merged form:** the merged shell keeps the owner's ring and tag, so an enemy merge reads red.
+
+A check should assert that each relationship (mine, team, enemy, wild) renders a distinct ring and tag combination, and that the tag hides on yours.
+ext/hudref (nameplates) and ext/uipolish (theme) can supply the colours and styling. Tell me if you'd rather one of our branches build the non-reserved parts: the ring and tag rendering could live in a new file reading Kin state through getters.
