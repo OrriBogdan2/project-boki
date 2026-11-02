@@ -558,8 +558,10 @@ func _jackpot(t: Ent) -> void:
 	play("thf_volley")
 	quick = int(jd["vaults"])
 	quick_t = float(jd["vault_t"])
+	var merged0 := KinMerge.active(h)
 	for i in n:
-		m.later(0.05 + gap * float(i), func(): _jackpot_knife(t, i == n - 1))
+		# (a Boki merge starting mid-burst ends it: nothing the Thief was doing carries into the merge)
+		m.later(0.05 + gap * float(i), func(): if is_instance_valid(h) and (merged0 or not KinMerge.active(h)): _jackpot_knife(t, i == n - 1))
 	m.fx.word(h.pos + Vector3(0, 2.9, 0), "JACKPOT", res_col(), true)
 	m.sfx("pickup", h.pos, -4.0, 1.1)
 	h._ab_feedback("dash", "ready")

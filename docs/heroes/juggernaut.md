@@ -86,3 +86,10 @@ Finishing Slam and the Cinder Spin everywhere the player can read them (content,
 - No `"r"` in the JSON: `ArchKit.use_r` refuses the press, the kit card's R page is the Merge, and the wiki
   generator shows "Boki Merge" for the R slot.
 - Net: the kit move id rides the hunter snapshot from Net 0.11.1, so remote players see the slams and lunges.
+
+## Starting a Boki merge
+
+Pressing R to merge drops everything the Juggernaut was holding or winding up, and none of it fires or is
+left over when the merge ends: the Searing Wave charge (`lmb_t`, `lmb_buf`, `mel_hold`), the Finishing Slam's
+wind-up (`slam_w`), an armed Haul Slam (`haul`) and the held Smash (`rmb_down`, cleared by the merge itself).
+Scripted in `--kit-combo-check` as the `merge hold jug:` checks.

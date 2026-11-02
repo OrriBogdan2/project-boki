@@ -1012,6 +1012,75 @@ func _combos() -> void:
 	TK.on_deal(T, 5.0, {"src": "shot"})
 	ok("combo thief: Jackpot > free Vault > hit = Vault reset", TK.primed_hits == ph + 1 and TK.primed_t <= 0.0 and P.dashes >= P.max_dashes() - 0.01)
 	await done(m)
+	await _merge_holds()
+
+## A Boki merge starting mid-hold: nothing the hunter was holding or winding up fires, and none of it is left
+## behind for when the merge ends (KinMerge.cast clears the generic weapon holds, the kits clear their own).
+func _merge_holds() -> void:
+	# ---- Juggernaut: the Searing Wave charge (LMB held)
+	var r := setup("juggernaut", 6.0, "cindle")
+	var m: Match = r[0]; var P: Hunter = r[1]; var T: Hunter = r[2]
+	var K: JuggernautKit = P.ak
+	P.ult = 1.0; P.merge_cd = 0.0
+	step(m, 0.7, func(): P.inp["fire"] = true)
+	ok("merge hold jug: the Searing Wave is charging", K.lmb_t > 0.3 and P.mel_hold > 0.0, "lmb_t %.2f" % K.lmb_t)
+	var w0 := K.waves
+	ok("merge hold jug: the merge starts", KinMerge.cast(P) and KinMerge.active(P))
+	step(m, 0.6, func(): P.inp["fire"] = false)
+	ok("merge hold jug: the charged wave does not fire", K.waves == w0 and dmg(T) <= 0.0, "waves %d took %.0f" % [K.waves - w0, dmg(T)])
+	ok("merge hold jug: no charge left behind", K.lmb_t < 0.0 and K.lmb_buf <= 0.0 and P.mel_hold <= 0.0, "lmb_t %.2f" % K.lmb_t)
+	await done(m)
+	# the Finishing Slam winding up
+	# (a control first: what the merge's own transformation does to a foe this close, with no slam)
+	r = setup("juggernaut", 2.6, "cindle")
+	m = r[0]; P = r[1]; T = r[2]
+	P.ult = 1.0; P.merge_cd = 0.0
+	KinMerge.cast(P)
+	step(m, 1.0)
+	var ctl := dmg(T)
+	await done(m)
+	r = setup("juggernaut", 2.6, "cindle")
+	m = r[0]; P = r[1]; T = r[2]
+	K = P.ak
+	P.ult = 1.0; P.merge_cd = 0.0
+	aim_at(P, T.pos)
+	tap(m, P)
+	ok("merge hold jug: the Finishing Slam is winding up", not K.slam_w.is_empty())
+	KinMerge.cast(P)
+	step(m, 1.0)
+	ok("merge hold jug: the wound-up slam does not land", K.slam_w.is_empty() and K.sweet_spots == 0 and dmg(T) <= ctl + 0.5, "took %.0f (merge alone %.0f)" % [dmg(T), ctl])
+	await done(m)
+	# the Smash held (the Lunge charge), and a Haul Slam armed for the end of a pull
+	r = setup("juggernaut", 6.0, "cindle")
+	m = r[0]; P = r[1]; T = r[2]
+	K = P.ak
+	P.ult = 1.0; P.merge_cd = 0.0
+	aim_at(P, T.pos)
+	P.inp["sec_hold"] = true
+	P.ak.press_rmb()
+	step(m, 0.6, func(): P.inp["sec_hold"] = true)
+	ok("merge hold jug: the Lunge is charging", K.rmb_down and K.rmb_t > 0.3)
+	K.haul = {"k": 1.0}
+	var chg := K.ch_rmb
+	KinMerge.cast(P)
+	P.inp["sec_hold"] = false
+	step(m, 0.6)
+	ok("merge hold jug: the charged Lunge does not go and no Smash charge is spent", K.lunge.is_empty() and not K.rmb_down and K.ch_rmb >= chg, "charges %.1f of %.1f" % [K.ch_rmb, chg])
+	ok("merge hold jug: an armed Haul Slam is dropped", K.haul.is_empty() and K.haul_slams == 0)
+	await done(m)
+	# ---- Thief: no hold of its own; the Jackpot burst already in the air stops when a merge starts
+	r = setup("thief", 4.0, "cindle")
+	m = r[0]; P = r[1]; T = r[2]
+	var TK: ThiefKit = P.ak
+	P.ult = 1.0; P.merge_cd = 0.0
+	TK.jp_cd = 0.0
+	TK.add_mark(T, 5, true)
+	step(m, 0.08)
+	KinMerge.cast(P)
+	var jh := TK.jackpot_hits
+	step(m, 0.8)
+	ok("merge hold thief: Jackpot's burst in the air does not finish", TK.jackpots == 1 and TK.jackpot_hits == jh and KinMerge.active(P), "knives after %d" % (TK.jackpot_hits - jh))
+	await done(m)
 
 # ------------------------------------------------------------------ the kin's own ability on C
 func _kin_ability() -> void:

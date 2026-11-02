@@ -160,7 +160,19 @@ func _tick_look(dt: float) -> void:
 			for sx in [-0.42, 0.42]:
 				m.fx.burst(h.pos + Vector3(sx, 1.7, 0), res_col(), 1, 1.0, 0.45, -3.0, 0.7)
 
+## A Boki merge starting (KinMerge.cast) drops everything held or wound up: the Searing Wave charge, the
+## Finishing Slam's wind-up and an armed Haul Slam. (The held Smash is the base kit's rmb_down, which the
+## merge already clears.) Nothing fires and nothing is left over for when the merge ends.
+func _drop_for_merge() -> void:
+	lmb_t = -1.0
+	lmb_buf = 0.0
+	h.mel_hold = 0.0
+	slam_w = {}
+	haul = {}
+
 func _tick(dt: float) -> void:
+	if KinMerge.active(h):
+		_drop_for_merge()
 	_tick_look(dt)
 	var rd := res_def()
 	if enraged_t > 0.0:
@@ -249,6 +261,10 @@ func wave_k() -> float:
 func lmb_override(held: bool, dt: float) -> bool:
 	if h.wid != "greatsword":
 		return false
+	if KinMerge.active(h):          # merged: the form owns the attack key, a charge from before it must not go off
+		_drop_for_merge()
+		lmb_was = false
+		return true
 	var ld := lmb_def()
 	var pressed := held and not lmb_was
 	lmb_was = held

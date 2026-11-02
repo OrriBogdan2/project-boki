@@ -75,3 +75,8 @@ snapping round). `thf_volley_wind` went with the R. Strips: `--arena-demo=anim_<
 - No `"r"` in the JSON: `ArchKit.use_r` refuses the press, the kit card's R page is the Merge, and the wiki
   generator shows "Boki Merge" for the R slot.
 - Net: the kit move id rides the hunter snapshot from Net 0.11.1, so remote players see the flips and the burst pose.
+
+## Starting a Boki merge
+
+The Thief holds nothing, but a Jackpot burst already in the air stops when a merge starts (the knives are
+timed releases that check for it). Scripted in `--kit-combo-check` as `merge hold thief:`.
