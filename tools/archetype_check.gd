@@ -993,7 +993,8 @@ func _infusion() -> void:
 		var inf := Arch.infusion(KinLib.kin(kid))
 		for a in Arch.ids():
 			for slot in ["rmb", "e", "r"]:
-				var sd: Dictionary = Arch.def(a)[slot]
+				var sd: Dictionary = Arch.def(a).get(slot, {})
+				if sd.is_empty(): continue          # (the Archer and Bulwark have no class R)
 				var ff := Arch.fill(sd.get("sockets", {}), inf, slot, String(sd.get("delivery", "burst")))
 				for e in ff["effects"]:
 					var cap: Dictionary = Arch.CAPS[String(sd["sockets"].get("ctrl_cap", "soft"))]
@@ -1031,9 +1032,9 @@ func _feel() -> void:
 	ok("feel: Hail Wall tell >= soft floor", float(Arch.def("archer")["e"]["tell"]) >= Feel.floor_for("soft_cc", "instant"))
 	ok("feel: the Bola and Warchain are projectiles (dodgeable)", String(Arch.def("thief")["rmb"]["delivery"]) == "projectile" and float(Arch.def("thief")["rmb"]["bola"]["speed"]) <= 34.0 and String(Arch.def("juggernaut")["e"]["delivery"]) == "projectile")
 	ok("feel: Blink windup shows the landing", float(Arch.def("mage")["dash"]["windup"]) >= 0.1)
-	ok("feel: Doomfall / Fissure plant tells (fuse + tell)", float(Arch.def("juggernaut")["r"]["tell"]) + float(Arch.def("juggernaut")["r"]["fuse"]) >= 0.3 and float(Arch.def("bulwark")["r"]["tell"]) >= 0.3)
-	ok("feel: every R has a fuse of 0.35-0.8s", Arch.ids().all(func(a): return float(Arch.def(a)["r"].get("fuse", 0.0)) >= 0.35 and float(Arch.def(a)["r"].get("fuse", 0.0)) <= 0.8))
-	ok("R cooldowns are big moments (90-120s)", Arch.ids().all(func(a): return float(Arch.def(a)["r"]["cooldown"]) >= 90.0 and float(Arch.def(a)["r"]["cooldown"]) <= 120.0))
+	ok("feel: Doomfall plants a tell (fuse + tell)", float(Arch.def("juggernaut")["r"]["tell"]) + float(Arch.def("juggernaut")["r"]["fuse"]) >= 0.3)
+	ok("feel: every R has a fuse of 0.35-0.8s", Arch.ids().all(func(a): return not Arch.def(a).has("r") or (float(Arch.def(a)["r"].get("fuse", 0.0)) >= 0.35 and float(Arch.def(a)["r"].get("fuse", 0.0)) <= 0.8)))
+	ok("R cooldowns are big moments (90-120s)", Arch.ids().all(func(a): return not Arch.def(a).has("r") or (float(Arch.def(a)["r"]["cooldown"]) >= 90.0 and float(Arch.def(a)["r"]["cooldown"]) <= 120.0)))
 	# hitstop tiers
 	var dummy := Hunter.new(); dummy.max_hp = 145.0
 	ok("feel: chip hit T1", Feel.tier(dummy, 4.0, {"src": "shot"}) == 1)
