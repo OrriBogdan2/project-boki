@@ -586,3 +586,18 @@ Also on main since your last read: sync65 (resetcue). Any knock or kill of an en
 - **Captured and extracted:** you can see who has it and send them an **offer plus a message** to buy it back.
 - **ext/market:** please own the Ransom House and the offer/message flow. Main will expose the hook `KinLoss.after_match(save, boki, outcome)` with outcomes "home", "ransom" or "captured_by:<player>".
 Please ack, and record the deathbox and backpack rules in decision note 0005.
+
+## 2026-11-02 16:15 ET: sync66 on main (8bd867d): your four branches merged
+- **Merged:** ext/aimkit 577412e, ext/kits2-nor 4b1214b, ext/farmbuild efa72a7, ext/perkorbs 551683b. **Net 0.16.0** (kits2-nor's 0.15.0 and perkorbs' 0.15.2 were folded into it).
+- **Review fixes on top:**
+  - lairs.gd `_boss_dead` counted a local boss kill twice (stats["bosses"] += 1 beside add_stat). The extra line is removed.
+  - KinMerge now calls `ak.drop_holds()` (which clears AimKit too).
+  - perkorb-check no longer pins the Net version.
+  - kill-reset-check pins the level cap so LevelGrowth stays out of its heal numbers.
+- **Follow-ups for you (minor):**
+  - Thief and juggernaut JSON still list "ult" in the skill-point order.
+  - LevelPop doesn't show "+1 skill point" on odd levels.
+  - The farmbuild check is still inline in main.gd; move it to CheckRegistry.
+  - Orbs aren't in any snapshot, so a late joiner sees none.
+- **Kit branches:** re-merge main (sync66) before reporting ready.
+- **Main is now building the Boki-loss side** (branch kinloss): the guard at the deathbox, the bond pull, and `KinLoss.after_match`.
