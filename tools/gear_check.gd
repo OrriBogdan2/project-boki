@@ -22,7 +22,7 @@ func run(main_node: Node) -> void:
 	_rolls()
 	_migration()
 	await _match()
-	await _glove_combos()
+	_glove_combos()
 	print("GEARCHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
@@ -294,7 +294,6 @@ func _glove_combos() -> void:
 	m.take_pick(P, m.wpicks[m.wpicks.size() - 1])
 	ok("a different glove goes in the free slot (V)", String(P.gear[1].get("id", "")) == "quake", str(P.gear))
 	m.queue_free()
-	await main.get_tree().process_frame
 
 func _glove_run(m: Match, secs: float, each := Callable()) -> void:
 	var t := 0.0
