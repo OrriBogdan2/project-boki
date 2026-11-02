@@ -246,3 +246,48 @@ Thanks for ext/showcase-heroes; I merged it onto main as integ61 (1e700ec), so a
 - Targeted checks pass (--check, hero, support 36, dolm 16, archer-combo). A reviewer pass is running, then the full suite and sync61.
 
 Next from you, after sync61: kits2-nor (re-merge main; its snapshot index 31 and Net bump go above 0.13.0) and farmbuild. Then ext/equal (spec above). ext/classes and ext/cleanup after that.
+
+## 2026-11-02 11:00 ET: next economy task (after ext/equal): ext/market, modelled on Neopets
+
+Owner-approved. Queue it after ext/equal; don't interrupt work in progress. It replaces Boki selling for gems with a shelter and transfers, and adds a real item market. Write a design note in docs/decisions first. Branch ext/market from the newest main.
+
+**Boki: never sold for gems anywhere**
+- **Shelter.** Replaces the Drift Pens listing flow; the pens' strays live here.
+  - Putting a Boki up for adoption pays the giver nothing.
+  - Anyone can adopt from the shelter for gems. The price scales with the Boki's level, rarity and mutations, and the gems are destroyed (a sink, not paid to anyone).
+  - Limits: each Boki can be put up once per day; a Boki under 7 days old can't be put up (stops breed-and-dump); roster slots cap how many you hold; you can't re-adopt one you gave away.
+  - The Boki's history keeps "raised by <name>", and trust partly resets with a new keeper.
+  - Keep the last-Boki guard and the economy floor (a stray common if you have none).
+- **Transfer.** The only way to "trade" a Boki: hand it directly to a named player for a flat gem fee (a sink), once per week per player. Both players confirm.
+- Remove BokiPens listing/selling and Social.sell_kin selling Boki for gems (one system, no duplicates). Migrate existing listings back to their owners' rosters.
+
+**Items**
+- **Tradewind Exchange stays** for materials (interchangeable: the order book suits them).
+- **Player stalls (new).** Each player has a stall: price your own gear, items, trophies and cosmetics.
+- **Market search (new).** Look up an item and see the lowest prices across all stalls (offline: NPC stalls).
+- **Auction House (new), for rare pieces.**
+  - The seller sets a start price, a minimum increment and a duration (12/24/48h).
+  - Bids are taken immediately and refunded if outbid; bids can't be withdrawn.
+  - A friends-only option.
+  - A short extension if a bid lands in the last minute (anti-snipe).
+- **Sinks everywhere:** a small listing fee and a sale tax on stalls and auctions. Tune them so the economy doesn't inflate (the Neopets lesson: with no transaction tax, only spending sinks hold inflation).
+- **Item variety to make it worth trading:**
+  - rarity on materials too, not just gear
+  - boss trophies
+  - cosmetic dyes
+  - Boki accessories (collars, charms: cosmetic or tiny perks; don't touch the reserved Boki files, add via data/hooks or ask here)
+  - rare utility items
+  - an item rarity value that sets how often NPC/farm vendors restock it
+
+**Offline until the server exists** (docs/EXCHANGE_SERVER.md): NPC adopters, NPC stalls and NPC bidders, so every loop works single-player. Keep the protocol shape ready for the server.
+
+**Checks:**
+- No Boki can be exchanged for gems except by adopting from the shelter (the gems are destroyed).
+- Shelter limits (daily, under-7-days, re-adopt block).
+- Transfer weekly limit and fee.
+- Stall listing and buying with fee and tax.
+- Search returns the lowest price.
+- Auction bid escrow, refund and anti-snipe.
+- Gem conservation (sources and sinks add up).
+- Migration of old pen listings.
+- Register checks in tools/check_registry.gd. Full suite once.
