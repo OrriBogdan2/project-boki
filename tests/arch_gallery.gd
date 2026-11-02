@@ -7,7 +7,7 @@ extends Node3D
 ##   --arch-heads    every race's head under every archetype's headgear (fit and ears), close up
 ## Optional: --arch-yaw=<radians> turns everyone.
 
-const WEAPONS := {"thief": "twin_blades", "archer": "sniper", "mage": "coilcaster", "gunslinger": "quill_rifle", "juggernaut": "greatsword", "bulwark": "minigun"}
+const WEAPONS := {"thief": "twin_blades", "archer": "sniper", "mage": "coilcaster", "gunslinger": "quill_rifle", "juggernaut": "greatsword", "bulwark": "minigun", "dredge": "shotgun", "ashwick": "flamethrower"}
 var anims: Array = []
 
 func _arg(prefix: String, def: String) -> String:
@@ -157,6 +157,7 @@ func _showcase() -> void:
 			{"race": 2, "gender": 1, "hair": 1, "hair_col": 10, "skin": 19, "face": 1, "outfit": 0},
 			{"race": 5, "gender": 0, "hair": 0, "hair_col": 8, "skin": 2, "face": 0, "outfit": 2}],
 	}
+	for a0 in arches: looks[a0] = looks.get(a0, looks["bulwark"])     # newer archetypes borrow the Bulwark look set
 	var oo := int(_arg("--showcase-outfit=", "-1"))
 	var cam := Camera3D.new()
 	add_child(cam)

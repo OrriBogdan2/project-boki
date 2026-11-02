@@ -107,6 +107,8 @@ func _arena() -> void:
 		P.teleport(A.home); P.inp["aim"] = D.pos + Vector3(0, 0.9, 0); P.inp["aim_y"] = D.pos.y
 		P.ak.cd["rmb"] = 0.0; P.ak.ch_rmb = float(P.ak.rmb_charges()); P.fire_cd = 0.0
 		step(m, 0.1)
+		if float(P.ak.rmb_def().get("hold", 0.0)) <= 0.0:
+			continue            # no RMB hold variant (Dredge, Ashwick: their hold is the lance, see --ashwick-combo-check)
 		var f0: int = P.ak.charge_fulls
 		var mid := -1.0
 		var ring_ok := false

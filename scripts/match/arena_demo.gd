@@ -76,6 +76,8 @@ static func tick(A: Arena, dt: float) -> void:
 		m.cam.zoom = 0.6
 	P.hp = P.max_hp
 	match w:
+		_ when w.begins_with("pr_") or w in ["card_dredge", "card_ashwick"]:
+			at_t = ArenaDemoPair.tick(A, w, t, dt)      # Dredge and Ashwick (arena_demo_pair.gd)
 		"thief", "primed":
 			# kits2: SMG hits on the dummy stack Marks (gold diamonds, one per Mark), Vault Primes the next
 			# hit (the gold glint, PRIMED), then (primed) the Primed hit lands: VAULT RESET

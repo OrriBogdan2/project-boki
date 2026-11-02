@@ -685,7 +685,7 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 	var boot_k := float(CLASS_LOOK.get(cls, {}).get("boots", 1.0))
 	var gender := int(lk["gender"])
 	var fem := gender == 0
-	var heavy_gear := arch in ["juggernaut", "bulwark"]
+	var heavy_gear := arch in ["juggernaut", "bulwark", "dredge", "ashwick"]
 	# legs swing from the hip: a tapered thigh, a knee guard, and a boot in one piece hanging from
 	# the knee (so the leg can bend), with a cuff that overlaps the trousers
 	var knees := {}
@@ -1635,6 +1635,7 @@ static func gun_parts(gun: Node3D, weapon: String, m_gun: Material, m_dark: Mate
 			for k in 3:
 				part(gun, cyl(0.041, 0.041, 0.02, 10), m_acc, Vector3(0, 0, 0.0 + k * 0.08), Vector3.ONE, Vector3(PI / 2, 0, 0))
 			part(gun, sphere(0.06, 12), dark, Vector3(0, 0, 0.27))
+		"flamethrower": HeroGearPair.flamer(gun, m_gun, m_dark, m_acc)
 		"minigun":
 			# a spinning bundle of six barrels on a chunky drum
 			part(gun, box(0.22, 0.22, 0.36), m_gun, Vector3(0, 0, -0.06))

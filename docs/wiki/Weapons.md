@@ -11,6 +11,7 @@ Numbers are per shot or swing before any upgrades. Class kits that run their own
 |---|---|---|---|---|---|---|---|---|
 | Burst Rifle | none | medium | 7 | 0.45s | 27 | 1.5s | 10.5m | Three rounds per pull. Accurate at range. |
 | Coilcaster | none | light | 8 | 0.42s | 12 | 1.3s | 9m | A copper coil worn on the forearm. Each bolt crackles through everyone in a line. |
+| Torch Lance | none | heavy | 2.7 | 0.1s | 80 | 1.6s | 6m | Hold to roar out a cone of fire 6m long: 8 seconds of fuel, then a short refill. It builds Char; at full Char the foe ignites. |
 | Greatsword | Juggernaut | heavy | 11 | 0.5s | 1 | 0.1s | 3.4m | A slow, huge 3-hit combo, strongest on the tip. Hold 1s for a slam that stuns and throws people far. |
 | Longbow | Archer | light | 30 | 0.35s | 1 | 0.25s | 12m | Hold to draw, let go to loose. 0.4s: 30 damage, 12m. 0.9s: 60 damage, 15m. Let go early for 15. You walk slower while drawing. |
 | Longsword | none | medium | 8.2 | 0.36s | 1 | 0.1s | 2.7m | A wide 3-hit combo, stronger on the tip of the blade. Hold 0.8s for a long-reaching thrust. |

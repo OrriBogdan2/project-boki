@@ -21,6 +21,8 @@ const PREVIEW := {
 	"gunslinger": {"dash": "dash", "passive": "pips", "rmb": "projectile", "e": "lines"},
 	"juggernaut": {"dash": "dash2", "passive": "meter", "rmb": "charge", "e": "grapple", "r": "leap"},
 	"bulwark": {"dash": "charge", "passive": "meter", "rmb": "shield", "e": "zone", "r": "fissure"},
+	"dredge": {"dash": "dash2", "passive": "meter", "rmb": "grapple", "e": "charge"},
+	"ashwick": {"dash": "dash", "passive": "meter", "rmb": "projectile", "e": "zone"},
 }
 
 var arch := ""
@@ -90,10 +92,6 @@ func _show_grid() -> void:
 	body.add_child(grid)
 	for s in slots_of(arch):
 		grid.add_child(_tile(s))
-
-## The slots this archetype has (Vireo and Marlowe have no R: the Boki Merge owns it).
-static func slots_of(a: String) -> Array:
-	return SLOTS if Arch.def(a).has("r") else SLOTS.filter(func(x): return x != "r")
 
 ## One ability: icon and key, name and a short tag, one line, a looping preview. Click: details.
 func _tile(slot: String) -> Control:
@@ -233,6 +231,10 @@ func _kin_strip() -> Control:
 
 # ------------------------------------------------------------------ data → text
 ## Name, icon, colour, a short tag, the one line, and the detail page's paragraphs for one slot.
+## The slots an archetype has (no Ultimate tile for the heroes whose R is the Boki Merge).
+static func slots_of(a: String) -> Array:
+	return SLOTS.filter(func(s): return s != "r" or Arch.def(a).has("r"))
+
 static func slot_text(a: String, slot: String) -> Dictionary:
 	var d := Arch.def(a)
 	var cd: Dictionary = d.get("card", {})

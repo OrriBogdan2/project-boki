@@ -29,7 +29,7 @@ static func _tp(c: Dictionary, key: String, u0: float, u1: float, v0: float, v1:
 static func cover(arch: String, bare: bool) -> String:
 	if bare:
 		return ""
-	return {"thief": "hood", "archer": "", "mage": "", "gunslinger": "hat", "juggernaut": "helm", "bulwark": "helm"}.get(arch, "")
+	return {"thief": "hood", "archer": "", "mage": "", "gunslinger": "hat", "juggernaut": "helm", "bulwark": "helm", "dredge": "helm", "ashwick": "hat"}.get(arch, "")
 
 static func dress(arch: String, c: Dictionary) -> void:
 	_belt(c, arch)
@@ -40,6 +40,7 @@ static func dress(arch: String, c: Dictionary) -> void:
 		"gunslinger": _gunslinger(c)
 		"juggernaut": _juggernaut(c)
 		"bulwark": _bulwark(c)
+		"dredge", "ashwick": HeroGearPair.dress(arch, c)
 	if not bool(c["bare"]):
 		_ear_cuffs(c, arch)
 
@@ -70,7 +71,7 @@ static func _deep_acc(m: Dictionary) -> ShaderMaterial:
 static func _belt(c: Dictionary, arch: String) -> void:
 	var m: Dictionary = c["m"]
 	var bw: float = c["bw"]; var cw: float = c["cw"]
-	var heavy := arch in ["juggernaut", "bulwark"]
+	var heavy := arch in ["juggernaut", "bulwark", "dredge", "ashwick"]
 	var h := 0.1 if heavy else 0.065
 	var rx := 0.222 * maxf(cw, bw) + 0.01; var rz := 0.214 * bw + 0.008
 	_p(c["torso"], HeroKit.band("belt|%.3f|%.3f|%.3f" % [rx, rz, h], rx, rz, h, 0.016), m["leather"], Vector3(0, 0.1, 0))

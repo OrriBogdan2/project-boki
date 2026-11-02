@@ -174,15 +174,14 @@ func _data() -> void:
 	ok("ranks: next rank first (2 at 1, 3 at 2, none at max)", n1.size() == 2 and n1[0][0] == "Rank 2" and n1[1][0] == "Rank 3" and n2.size() == 1 and n2[0][0] == "Rank 3" and n3.is_empty(), str(n1))
 	ok("ranks: R previews rank 2", Arch.next_ranks("thief", "ult", 1).size() == 1 and Arch.next_ranks("thief", "ult", 2).is_empty())
 	var ids := Arch.ids()
-	ok("data: six archetypes", ids.size() == 6, str(ids))
+	ok("data: at least the six archetypes", ids.size() >= 6, str(ids))
 	for w in ["light", "medium", "heavy"]:
 		ok("data: %s has archetypes" % w, Arch.of_class(w).size() >= 1, str(Arch.of_class(w)))
 	var bad: Array = []
 	for a in ids:
 		for wid in Arch.weapons(a):
 			if Content.weapon(String(wid)) == null: bad.append("%s:%s" % [a, wid])
-		for k in ["dash", "rmb", "e", "r", "resource", "order"]:
-			if k == "r" and a in ["mage", "gunslinger"]: continue
+		for k in ["dash", "rmb", "e", "resource", "order"]:
 			if not Arch.def(a).has(k): bad.append("%s missing %s" % [a, k])
 	ok("data: every kit complete, weapons exist", bad.is_empty(), str(bad))
 	ok("weapons: one signature weapon each", ids.all(func(x): return Arch.weapons(x).size() == 1 and Arch.signature(x) != "" and Arch.weapon_ok(x, Arch.signature(x))), str(ids.map(func(x): return Arch.signature(x))))

@@ -44,7 +44,7 @@ const CAM_LOOK := Vector3(1.25, 1.95, -9.4)
 const WIND := Vector3(2.2, 0.15, 0.35)            # the storm blows left to right
 ## Each archetype's weapon on the title (the arch_gallery set).
 const DISCORD := "https://discord.gg/nbeBaU7xt"        # the playtest server (never expires)
-const WEAPONS := {"thief": "twin_blades", "archer": "sniper", "mage": "coilcaster", "gunslinger": "quill_rifle", "juggernaut": "greatsword", "bulwark": "minigun"}
+const WEAPONS := {"thief": "twin_blades", "archer": "sniper", "mage": "coilcaster", "gunslinger": "quill_rifle", "juggernaut": "greatsword", "bulwark": "minigun", "dredge": "shotgun", "ashwick": "flamethrower"}
 
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
@@ -167,6 +167,7 @@ func _squad() -> void:
 	var order: Array = [my_arch]
 	for a in ["juggernaut", "archer", "mage", "bulwark", "thief", "gunslinger"]:
 		if not order.has(a): order.append(a)
+	order = order.slice(0, 6)         # (the squad has six places; a newer archetype of yours takes the first)
 	var to_cam := func(p: Vector3, off := 0.0) -> float:
 		var d := CAM_AT - p
 		return atan2(-d.x, -d.z) + off
