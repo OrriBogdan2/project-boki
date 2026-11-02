@@ -4,7 +4,7 @@
 - [Getting started](Getting-Started.md)
 - [Controls](Controls.md)
 - [Classes](Classes.md)
-  - [Thief](Class-Thief.md)
+  - [Dancer](Class-Dancer.md)
   - [Archer](Class-Archer.md)
   - [Vireo](Class-Vireo.md)
   - [Marlowe](Class-Marlowe.md)

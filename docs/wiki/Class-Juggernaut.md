@@ -55,27 +55,27 @@ What the in-game kit card (K) says.
 
 | Slot | Card text |
 |---|---|
-| Loop | Deal damage to fill Rage; full, you're Enraged: more damage, faster dashes and cooldowns. |
-| Passive: Rage | Damage fills Rage; full = Enraged (damage, dash and ability haste). Knocks heal you. |
-| Dash: Rampage | Two charges of a dash attack the way you face; its tip hits twice as hard. |
-| RMB: Smash | Tap: a wound-up slam (+50% to the wounded; rank 3: its sweet spot crashes and heals). Hold: a lunge. Air: a slam down. |
-| E: Warchain | Chain a foe (blighted) or a wall; press E again to pull yourself to it. Smash during the pull to spin. |
-| Weapon: Greatsword | Quick slashes, double at the tip; hold to charge a Searing Wave. |
+| Loop | Melee bruiser: get in, chain them close, and finish the wounded. |
+| Passive: Rage | Damage fills Rage. Full, you're Enraged: more damage, faster dashes and cooldowns. Knocks heal you. |
+| Dash: Rampage | Three charges of a short dash attack the way you face. Its tip hits twice as hard. |
+| RMB: Smash | Tap: a heavy slam, harder on the wounded; its sweet spot crashes and heals you. Hold: charge, then fling yourself forward. In the air: slam down at your cursor. |
+| E: Warchain | Throw a chain at a foe or a wall. Press E again to pull yourself to it. |
+| Weapon: Greatsword | Wide slashes, double at the tip. Hold to throw a Searing Wave. |
 
 ### Abilities in full
 
 **Rage (passive).** Damage you deal fills Rage (a Searing Wave fills it three times as fast); it cools after 3s out of a fight. Full, you're Enraged for 6s: +15% damage, +12% dash recharge and +20% cooldown speed, with the red shell and the hunter swelling. Knocking a hunter heals you 20% of their health (killing a monster, 20% of its).
 
-**Rampage (dash, Shift, 9s cooldown).** A 4.4m dash attack the way you face (2 charges): 7 to foes along it; the tip at its end hits twice as hard, 14 and a big knock (stun 0.8 into a wall). A knock gives a charge back.
+**Rampage (dash, Shift, 9s cooldown).** A 3.6m dash attack the way you face (3 charges): 7 to foes along it; the tip at its end hits twice as hard, 14 and a big knock (stun 0.8 into a wall). A knock gives a charge back.
 
-**Smash (RMB, 3s cooldown).**
+**Smash (RMB, 2s cooldown).**
 
-- *Tap:* Finishing Slam: a 0.5s wind-up you aim freely (a warning shows over you), then a 3.2m cone: 26 and push 6; foes under 35% take +50%. Landing its sweet spot (the far tip, dead ahead) is a SWEET SPOT payoff; at rank 3 it also brings a 3m crash down on the foe (24, push 7, heals you 60% of the damage it deals; rests 12s, and a knock on anyone it hit within 2s makes it ready at once).
-- *Hold:* Lunge: charge 0.3 -> full at 0.9s, then a 3 -> 7m dash attack into the first foe: 14 -> 22. Strike nothing and the cooldown doubles.
-- *In the air:* Meteor Drop: slam straight down, a 2.6m burst: 18 and slow 40% for 1.5s; the centre (1.2m) takes +50% and is stunned 0.8.
+- *Tap:* Finishing Slam: a 0.6s wind-up you aim freely (everyone sees the strike lane), then a 4m strike ahead: 26 and push 6; foes under 35% (outlined in red while the Smash is ready) take +50%. Landing its sweet spot (the far tip, dead ahead) brings a 3m crash down on the foe: 24, push 7, and you heal 60% of the damage it deals. The crash rests 12s; a knock on anyone it hit within 2s makes it ready at once.
+- *Hold:* Lunge: a crouched wind-up (the lane grows ahead of you, magenta and flashing at full, 0.8s), then release to fling yourself 4.5 -> 7.5m forward into the first foe: 14 -> 20. You can jump while you charge. Strike nothing and the cooldown doubles.
+- *In the air:* Meteor Drop: a disc shows under your cursor (5m at most); you dive onto it, a 2.6m burst: 18 and slow 40% for 1.5s; the centre (1.2m) takes +50% and is stunned 0.8.
 - *During E:* With the Warchain: tap while it pulls you for a Cinder Spin (2.6m, 18, blights 4s); hold while it pulls you, or hold and then pull, for a Haul Slam where you arrive (2.8m, 16 -> 30, stun 0.25 -> 0.6); hold while it's attached and let go for a Chain Lunge along it (x1.25 and a short stun).
 
-**Warchain (E, 13s cooldown).** Throw a chain 10m: it hooks the first foe (8 damage, blighted while tethered: healing barely takes) or bites a wall, for 4s. Press E again to pull yourself to it. The cooldown starts when you pull or the chain breaks (a stun breaks it); you can't throw it while rooted or grounded.
+**Warchain (E, 9.5s cooldown).** Throw a chain 10m: it hooks the first foe (8 damage, blighted while tethered: healing barely takes) or bites a wall, for 4s. Press E again to pull yourself to it. The cooldown starts when you pull or the chain breaks (a stun breaks it); you can't throw it while rooted or grounded.
 
 ### Ranks
 
@@ -83,18 +83,18 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 
 | Slot | Rank 2 | Rank 3 |
 |---|---|---|
-| RMB | cooldown 3s -> 2.7s, damage +15%. | cooldown 3s -> 2.4s, damage +30%; +20% damage on every Smash, and its sweet spot also crashes (24 in 3m) and heals you 60% of the damage it deals; a knock resets the crash. |
-| Dash (Shift) | recharge 9s -> 7.6s per charge. | recharge 9s -> 6.3s; a third charge. |
-| E | cooldown 13s -> 11.7s, damage +15%. | cooldown 13s -> 10.4s, damage +30%; hooking a foe refunds 33% of the cooldown. |
+| RMB | cooldown 2s -> 1.8s, damage +15%. | cooldown 2s -> 1.6s, damage +30%; +20% damage on every Smash, and the crash rests 8s. |
+| Dash (Shift) | recharge 9s -> 7.6s per charge. | recharge 9s -> 6.3s; the tip hits +25% harder. |
+| E | cooldown 9.5s -> 8.6s, damage +15%. | cooldown 9.5s -> 7.6s, damage +30%; hooking a foe refunds 33% of the cooldown. |
 
-**Suggested level-up order** (what bots follow): Dash (Shift) > RMB > E > RMB > Dash (Shift) > R (ultimate) > RMB > E > R (ultimate) > Glove (Q).
+**Suggested level-up order** (what bots follow): Dash (Shift) > RMB > E > RMB > Dash (Shift) > E > RMB > E > Dash (Shift) > Glove (Q).
 
 ### What enemies can read
 
 | Moment | Tell |
 |---|---|
 | Building up | red heat glowing through the pauldrons as Rage fills, steam from half |
-| Armed / full | Enraged: a red shell, the hunter swells, a roar within 25m; a red warning over the head while a Smash winds up |
+| Armed / full | Enraged: a red shell, the hunter swells, a roar within 25m; a magenta strike lane while a Smash winds up; a red outline on anyone wounded enough to finish |
 | Dash spent | dash pips dark |
 
 <!-- /gen:kit -->

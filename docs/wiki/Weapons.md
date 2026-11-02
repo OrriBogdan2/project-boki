@@ -9,6 +9,7 @@ Numbers are per shot or swing before any upgrades. Class kits that run their own
 
 | Weapon | Carried by | Weight | Damage | Fire interval | Magazine | Reload | Range | Notes |
 |---|---|---|---|---|---|---|---|---|
+| Arc Bolts | Dancer | light | 9 | 0.45s | 99 | 0.5s | 12m | A spinning bolt from alternating hands every 0.45s. It flies to your cursor (12m at most) and fizzles there if it hits nothing. |
 | Burst Rifle | none | medium | 7 | 0.45s | 27 | 1.5s | 10.5m | Three rounds per pull. Accurate at range. |
 | Coilcaster | Vireo | light | 8 | 0.42s | 12 | 1.3s | 9m | A copper coil worn on the forearm. Each bolt crackles through everyone in a line. |
 | Torch Lance | Ashwick | heavy | 2.7 | 0.1s | 80 | 1.6s | 6m | Hold to roar out a cone of fire 6m long: 8 seconds of fuel, then a short refill. It builds Char; at full Char the foe ignites. |
@@ -27,7 +28,7 @@ Numbers are per shot or swing before any upgrades. Class kits that run their own
 | Spellstaff | none | medium | 9.5 | 0.55s | 12 | 1.4s | 10m | An orb bolt every 0.45s, 10m. Every 4th bolt hits 50% harder. |
 | Tether Lantern | Ostra | medium | 9 | 0.6s | 12 | 1.5s | 14m | A slow drifting orb every 0.6s, 14m. Pause for 1.4s and the next one is Settled: harder, faster and it slows. |
 | Tower Shield & Mace | Bulwark | heavy | 11 | 0.55s | 1 | 0.1s | 2.4m | Tap to throw the mace: it passes through foes, lies where it lands (your team sees foes near it) and comes back when you tap again, hitting on the way. Hold to wind up a Crushing Blow (full at 1.25s: 34 damage, a big knock, stun 0.4) that carries you forward. Right click raises the tower shield. |
-| Twin Blades | Thief | light | 7 | 0.3s | 1 | 0.1s | 2.3m | Tap for a quick 3-hit combo. Hold 0.5s for a spinning double slash all around you. Right click to knife and step behind the target. |
+| Twin Blades | none | light | 7 | 0.3s | 1 | 0.1s | 2.3m | Tap for a quick 3-hit combo. Hold 0.5s for a spinning double slash all around you. |
 
 ## Weapon upgrades
 
@@ -113,5 +114,5 @@ Every player and bot now plays a class, whose kit owns Shift and right click. A 
 | Rifle | Rail Charge | 8s | Hold to charge for up to 1s, let go to fire a rail that pierces everyone in its line: 10 to 34 damage, 9 to 17m, full charge stuns. |
 | SMG | Razor Disc | 7s | Throw a spinning disc 8m that cuts everything it passes, then flies back to you and cuts them again. |
 | Longsword | Riposte | 8s | Raise your blade for 0.7s: shots hitting your front fly back at the shooter (+30%), and a sword or claw that hits it is parried and stunned 1s. |
-| Twin Blades | Shadow Step | 8s | Throw a knife 9m. If it hits, you appear behind that foe and your next hits for 1.5s crit. |
+| Arc Bolts, Twin Blades | Shadow Step | 8s | Throw a knife 9m. If it hits, you appear behind that foe and your next hits for 1.5s crit. |
 | Sniper | Tripwire Mine | 10s | Plant a mine up to 8m away (2 charges). The first rival to step on it is rooted 1.4s, revealed for 3s and takes 14. |
