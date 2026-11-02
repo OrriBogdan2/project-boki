@@ -6850,7 +6850,7 @@ func _update_aim(alpha: float) -> void:
 					aim_ring.visible = true
 					aim_ring.global_position = Vector3(from_p.x + t2.x, g2 + 0.06, from_p.z + t2.y)
 					aim_ring.scale = Vector3.ONE * maxf(0.6, float(spec[2]) / 0.6)
-					aim_ring.material_override.set_shader_parameter("color", Color(kd.color, 0.35 if clamped else 0.22))
+					aim_ring.material_override.set_shader_parameter("color", Color(KinText.color(kd), 0.35 if clamped else 0.22))
 	if not (k and k.state == "active"):
 		aim_ring.scale = Vector3.ONE
 	if p.muzzle_t > 0.0:
