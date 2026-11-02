@@ -409,6 +409,9 @@ func _draw_world_labels() -> void:
 		if cam.is_position_behind(h.position):
 			continue
 		_nameplate(sp, h)
+		BokiHud.form_overhead(self, sp, h)
+	if m.player and not m.player.out and m.player.model and not cam.is_position_behind(m.player.position):
+		BokiHud.form_overhead(self, cam.unproject_position(m.player.position + Vector3(0, 2.35, 0)), m.player)
 	# someone basing to a teammate: a ring filling round them, and a marker on where they'll appear
 	for h in m.hunters:
 		if h.base_t <= 0.0 or h.out or (h.unseen and h != m.player) or cam.is_position_behind(h.position):
@@ -1223,7 +1226,17 @@ func _draw_vitals(sz: Vector2, p: Hunter) -> void:
 		var nxt: Color = Hunter.ARMOR_TIERS[p.armor_tier + 1][1]
 		c.draw_rect(Rect2(Vector2(x0, y0 + 3), Vector2(w, 2)), Color(0, 0, 0, 0.35))
 		c.draw_rect(Rect2(Vector2(x0, y0 + 3), Vector2(w * p.armor_frac(), 2)), Color(nxt, 0.9))
-	_seg_bar(Rect2(Vector2(x0, y0 + 7), Vector2(w, 7)), p.armor, p.max_armor, armor_lerp, p.armor_col(), 100.0)
+	var shv := MergeShell.view(p)
+	if shv.y > 0.0 and not p.merge_st.is_empty():
+		# the merged form's shell: its own bright bar in the form's colour, above the health bar, with the number on the right
+		var fcol: Color = (p.merge_st["form"] as Dictionary)["glow"]
+		BokiHud.shell_bar(self, Rect2(Vector2(x0, y0 + 5), Vector2(w, 9)), shv.x / shv.y, fcol, BokiHud.shell_flash(self, p))
+		_text(Vector2(x0 + w - (70 if p.armor <= 0.5 else 170), y0 - 2), "SHELL %d" % int(ceil(shv.x)), 13, fcol, big)
+	else:
+		var fl := BokiHud.shell_flash(self, p)
+		if fl > 0.0:
+			BokiHud.shell_bar(self, Rect2(Vector2(x0, y0 + 5), Vector2(w, 9)), 0.0, p.get_meta("shell_break_col", Color.WHITE), fl)
+		_seg_bar(Rect2(Vector2(x0, y0 + 7), Vector2(w, 7)), p.armor, p.max_armor, armor_lerp, p.armor_col(), 100.0)
 	var hcol := HP_LOW.lerp(Color.WHITE, 0.25 * (0.5 + 0.5 * sin(m.time * 9.0))) if low else HP_COL
 	_seg_bar(Rect2(Vector2(x0, y0 + 17), Vector2(w, 13)), p.hp, p.max_hp, bar_lerp, hcol, 25.0)
 	if p.shield > 0.0:
@@ -1341,8 +1354,8 @@ func _draw_glider_heat(p: Hunter) -> void:
 ## one starts the run locked; rank pips sit above each, a gold border means a point can unlock it
 ## (just press its key), and a gold + means Alt + its key will rank it up.
 func _draw_abilities(sz: Vector2, p: Hunter) -> void:
-	if p.ak:
-		_draw_arch_abilities(sz, p)
+	if p.ak or MergeKit.live_of(p) != null:
+		_draw_arch_abilities(sz, p)          # (a merged form's slots are drawn like an archetype's)
 		return
 	var o := _hud_origin(sz)
 	var s := 50.0
@@ -1419,7 +1432,10 @@ func _draw_arch_abilities(sz: Vector2, p: Hunter) -> void:
 	if info.get("full", false) and int(p.slot_lv["sec"]) > 0:
 		# the resource-full variant is ready (Cash In, Called Shot, Shield Slam...): a gold dot
 		c.draw_circle(sr.position + Vector2(s - 6, 6), 5.0 + sin(m.time * 8.0), Color("ffd23f"))
-	if p.ak.rmb_down and p.ak.rmb_t > 0.05:
+	if float(info.get("hold", -1.0)) >= 0.0:
+		# a merged form's RMB hold: the fill ring, bright once it is full
+		c.draw_arc(sr.get_center(), s * 0.5 + 4.0, -PI / 2, -PI / 2 + TAU * clampf(float(info["hold"]), 0.0, 1.0), 32, Color(info["col"], 1.0 if info.get("full", false) else 0.8), 3.0, true)
+	if p.ak and p.ak.rmb_down and p.ak.rmb_t > 0.05:
 		var hfull: float = p.ak.rmb_charge_full() if p.ak.rmb_charge_full() > float(p.ak.rmb_def().get("hold", 0.3)) else float(p.ak.rmb_def().get("hold", 0.3))
 		var hk := clampf(p.ak.rmb_t / maxf(0.05, hfull), 0.0, 1.0)
 		c.draw_arc(sr.get_center(), s * 0.5 + 4.0, -PI / 2, -PI / 2 + TAU * hk, 32, Color(info["col"], 0.9), 3.0, true)
