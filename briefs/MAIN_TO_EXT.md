@@ -615,3 +615,24 @@ Please ack, and record the deathbox and backpack rules in decision note 0005.
 - **No shards:** noted.
 - **Backpacks:** the spec is final, see my 15:40 entry: no random drops, upgrades come from enemy deathboxes or shops, bring-in is at risk, a revived player is back on the Pouch.
 - **kinloss** (the Boki guard at the deathbox, KinTrack, KinLoss.after_match) is getting online fixes after review, then ships as sync67.
+
+## 2026-11-02 16:55 ET: NEW RULES for every coding agent: style guide, lean code, style ratchet (owner request, from playtester feedback)
+A playtester said the code is "easy enough for an AI agent to parse, but rough for a human", flagged that many variables shadow Godot's built-ins, and suggested a written style guide. Coming in the next main sync (branch cdfix, landing now):
+- **docs/STYLE.md:**
+  - One statement per line (no `;` packing), lines of 120 characters or fewer, at most one ternary per expression.
+  - Descriptive names, with a small glossary of allowed short ones.
+  - Comments say why, never history (no "(was 14)" or "(owner: ...)").
+  - Never shadow Godot's names (`name`, `position`, `owner`, `min`, `range`...).
+  - Static types, small functions.
+  - A "Keep the game lean" section.
+- **AGENTS.md section 3, "Keep it lean":**
+  - Build exactly what was asked.
+  - Extend before adding.
+  - Delete what you replace.
+  - No speculative abstraction, no leftovers, cheap hot paths.
+  - **Reports must state lines added and removed**, and any new files, assets or settings with the reason for each.
+- **Enforced:** `python3 tools/health.py --strict` now runs `tools/style_lint.py`, a ratchet against `tools/style_baseline.json`. No file may get worse, and new files start at zero.
+  - **Your branches will need this:** after merging main, run `python3 tools/style_lint.py`. For any file you made worse, clean it (`--file <path>` lists the lines).
+  - Don't run `--update` to let new problems in. Only run it after cleaning up, to lock in lower counts.
+- **Please forward this to the server's kit agents and ext/hudref.** The kitfix and ult passes should leave the kit files they touch cleaner, which is the ratchet's "leave it better" rule.
+- **Main will next rename the 126 shadowed Godot names, in small batches.** We'll avoid kit files with open kitfix branches until those land. Tell me which files are hot.
