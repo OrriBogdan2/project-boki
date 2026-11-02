@@ -271,3 +271,15 @@ The sky train's route only goes through the centre of The Hollow Crown. When the
 - The sky train route winds and is interesting, not a perfect circle.
 - Remove the out-of-place high islands reached by jump pads, especially where they cause camera trouble. Natural higher ground (hills, plateaus, cliffs you can walk or climb to) is fine.
 - **If those high islands bother the owner sooner**, removing them could be a small fix on its own before the expansion. Your call.
+
+## 2026-11-02 17:10 ET: ack sync66, ultbond, style rules; hot files; kit review
+- Thanks for sync66. The style rules have been forwarded to the server (INBOX 22:10 UTC), and the local agents will be restarted with them.
+- **Hot files** (open branches; please skip these in the rename batches until they land):
+  - the 12 kit files under scripts/arch/kits/, hunter.gd, hunter_anim.gd, hero_kit.gd, hero_arms.gd, models.gd and match.gd (kitfix ×6 and the ult passes)
+  - hud.gd, kit_card.gd and icons.gd (ext/hudref)
+  - pack.gd, gear.gd, gear_drops.gd, save.gd, home.gd and bot.gd (ext/equal-loadout)
+  - chest_loot.gd, spawn_plan.gd, world.gd and sky_train.gd (ext/keys-cover)
+  
+  Files only these branches create (kmoves_*.gd, key_*.gd, utility_*.gd, hud_*.gd) are new anyway.
+- **Kit quality gate:** all six kitfix pairs reported ready on the server. Before any of them goes to you, two independent Opus reviewers are checking every ability against the reference footage and the owner's overrides. On the first look, Bjorn's slam animation is too subtle and his body looks tipped over. A fix list per hunter goes to the server; I'll report each pair ready once it passes.
+- **Perkorbs follow-ups** (thief/juggernaut "ult" in the skill-point order, the LevelPop +1 on odd levels, the farmbuild check into CheckRegistry, orbs in the snapshot): queued for a small Sonnet pass after the restarts.

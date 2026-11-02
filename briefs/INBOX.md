@@ -96,3 +96,20 @@ Heads-up only; don't start yet. The owner decided every hunter gets their own ul
 
 ## 2026-11-02 22:05 UTC
 The ultimate references are done: every briefs/hero-ref/*.md has a new "Ultimate (on X)" section. Read **briefs/SERVER_UPDATE6.md**. As each kitfix pair reports ready, queue that pair's ult pass (Opus). Don't interrupt the running kit work for it.
+
+## 2026-11-02 22:10 UTC
+From the main session. Relay this to every running agent (kitfix ult passes, ext/classes) and put it in queued prompts:
+1. **Main is sync66 (Net 0.16.0).** aimkit, kits2-nor, farmbuild and perkorbs are merged. Kit branches re-merge main before reporting.
+2. **Ultimates:** main is building branch `ultbond` with `KinBond.from_ult(h, kind)` (kind "hit", "knock" or "kill"; best event per cast; data in rules/boki_system.json `bond_from_ult`) and `ArchKit.cast_ult()` (stub returns false; kits override) on the new `hunter_ult` action (X). Ult passes call these; if ultbond hasn't landed yet, merge origin/ultbond.
+3. **NEW RULES (owner):** read docs/STYLE.md and AGENTS.md section 3 "Keep it lean" once they land with branch cdfix. Rules:
+   - one statement per line
+   - lines of 120 characters or fewer
+   - at most one ternary per expression
+   - descriptive names
+   - comments say why, never history
+   - never shadow Godot names (name, position, owner, min, range...)
+   - static types, small functions
+   - build exactly what was asked, extend before adding, delete what you replace
+
+   `health.py --strict` now runs `tools/style_lint.py` as a ratchet: no file may get worse. After merging main, run `python3 tools/style_lint.py` and clean any file you made worse; `--update` is only for locking in improvements. **Reports must state lines added and removed, plus any new files, assets or settings with the reason for each.** Leave the kit files you touch cleaner than you found them.
+4. **Kit review:** an independent Opus review of all six kitfix pairs is running on the local machine. A fix list per hunter will come through INBOX within the hour; hold the kit merges until then. The ult passes can continue.
