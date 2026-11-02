@@ -303,7 +303,7 @@ func set_kin(sp: String) -> void:
 		rec["trust"] = 90.0
 		rec["level"] = 8
 	var k: Kin = m.give_kin(P, rec)
-	k.state = "shoulder"; k.settle = 1.0
+	k.stow()
 	if card_layer: _open_card()
 
 ## Wear any glove (actives on Q); cooldowns-off covers it too.

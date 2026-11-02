@@ -48,7 +48,7 @@ func setup(arch: String, dist: float, kin_sp := "", second := false) -> Array:
 	if kin_sp != "":
 		var rec := Save.new_kin(kin_sp); rec["trust"] = 95.0
 		var k: Kin = m.give_kin(P, rec)
-		k.state = "shoulder"; k.settle = 1.0; k.brain.think_t = 1e9
+		k.stow(); k.brain.think_t = 1e9
 	P.ult = 0.0
 	var T: Hunter = m.make_hunter("T", 5, "medium", "Target", "idle", {}, home + Vector3(dist, 0, 0), {"arch": "none"})
 	T.max_hp = 10000.0; T.hp = T.max_hp; T.armor = 0.0; T.max_armor = 0.0
