@@ -601,13 +601,13 @@ func _juggernaut() -> void:
 	step(m, 0.6)
 	ok("juggernaut LMB hold: Searing Wave (ranged, fills Rage fast)", K.waves == 1 and midk > 0.2 and dmg(T) >= 20.0 and T.slow_t > 0.0 and K.res > 45.0, "mid %.2f took %.0f rage %.0f" % [midk, dmg(T), K.res])
 	K.res = 0.0
-	# RMB tap: the Execution Slam winds up (aim it), then hits; +50% under 35%; its sweet spot is the payoff
+	# RMB tap: the Finishing Slam winds up (aim it), then hits; +50% under 35%; its sweet spot is the payoff
 	P.teleport(home); fresh(T); T.teleport(home + Vector3(2.6, 0, 0)); aim_at(P, T.pos); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0
 	tap(m, P)
 	var early := dmg(T)
 	var winding := not K.slam_w.is_empty()
 	step(m, 0.6)
-	ok("juggernaut RMB tap: Execution Slam winds up, then lands", winding and early <= 0.0 and dmg(T) >= 24.0 and K.last_variant == "tap", "took %.0f" % dmg(T))
+	ok("juggernaut RMB tap: Finishing Slam winds up, then lands", winding and early <= 0.0 and dmg(T) >= 24.0 and K.last_variant == "tap", "took %.0f" % dmg(T))
 	ok("juggernaut RMB: the sweet spot is the payoff (rank 1: no crash yet)", K.sweet_spots == 1 and K.crashes == 0, "spots %d crashes %d" % [K.sweet_spots, K.crashes])
 	P.teleport(home); fresh(T); T.teleport(home + Vector3(1.2, 0, 0)); aim_at(P, T.pos); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0
 	T.hp = T.max_hp * 0.3
@@ -655,7 +655,7 @@ func _juggernaut() -> void:
 	K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; aim_at(P, T.pos)
 	tap(m, P)
 	step(m, 0.2)
-	ok("juggernaut RMB during the pull: Scorching Spin (blight)", K.spins == 1 and K.last_variant == "during_e" and dmg(T) >= 20.0, "spins %d variant %s took %.0f" % [K.spins, K.last_variant, dmg(T)])
+	ok("juggernaut RMB during the pull: Cinder Spin (blight)", K.spins == 1 and K.last_variant == "during_e" and dmg(T) >= 20.0, "spins %d variant %s took %.0f" % [K.spins, K.last_variant, dmg(T)])
 	# rooted: no chain; a stun breaks a chain
 	step(m, 0.5)
 	K.cd["e"] = 0.0; P.root_t = 1.0
@@ -857,13 +857,13 @@ func _combos() -> void:
 		K.cd["e"] = 0.0; K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; K.haul = {}
 		P.ak.use_e()
 		step(m, 0.3)
-	# E, E, then RMB tap in the pull: Scorching Spin
+	# E, E, then RMB tap in the pull: Cinder Spin
 	hook.call()
 	P.ak.use_e()
 	step(m, 0.06)
 	tap(m, P)
 	step(m, 0.3)
-	ok("combo jug: E > E > RMB tap = Scorching Spin", K.spins == 1 and K.last_variant == "during_e" and T.blight_t > 0.0, "spins %d variant %s" % [K.spins, K.last_variant])
+	ok("combo jug: E > E > RMB tap = Cinder Spin", K.spins == 1 and K.last_variant == "during_e" and T.blight_t > 0.0, "spins %d variant %s" % [K.spins, K.last_variant])
 	# E, then RMB held and let go while attached: Chain Lunge along it
 	step(m, 1.0)
 	hook.call()
@@ -893,13 +893,13 @@ func _combos() -> void:
 	P.inp["sec_hold"] = false
 	step(m, 0.3)
 	ok("combo jug: E > E > hold RMB = Haul Slam", K.haul_slams == 2, "slams %d" % K.haul_slams)
-	# E attached, RMB tapped (not pulling): a normal Execution Slam
+	# E attached, RMB tapped (not pulling): a normal Finishing Slam
 	step(m, 1.0)
 	hook.call()
 	tap(m, P)
-	ok("combo jug: E > RMB tap = Execution Slam", not K.slam_w.is_empty() and K.last_variant == "tap")
+	ok("combo jug: E > RMB tap = Finishing Slam", not K.slam_w.is_empty() and K.last_variant == "tap")
 	step(m, 0.8)
-	# Execution Slam's sweet spot below rank 3 is the payoff only; at rank 3 it also crashes
+	# Finishing Slam's sweet spot below rank 3 is the payoff only; at rank 3 it also crashes
 	P.teleport(home); fresh(T); T.teleport(home + Vector3(2.6, 0, 0)); aim_at(P, T.pos); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; K.crash_cd = 0.0
 	var cs := K.crashes
 	tap(m, P)

@@ -259,7 +259,7 @@ def gen_classes():
         b.append("\n### Kit card\n\nWhat the in-game kit card (K) says.\n")
         rows = [["Loop", c.get("loop", "")], ["Passive: " + d["passive"]["name"], c.get("passive", "")], ["Dash: " + d["dash"]["name"], c.get("dash", "")]]
         if c.get("lmb"): rows.append(["LMB", c["lmb"]])
-        rows += [["RMB: " + d["rmb"]["name"], c.get("rmb", "")], ["E: " + d["e"]["name"], c.get("e", "")], ["R: " + d.get("r", {}).get("name", "Boki Merge"), c.get("r", "")]]
+        rows += [["RMB: " + d["rmb"]["name"], c.get("rmb", "")], ["E: " + d["e"]["name"], c.get("e", "")], ["R: " + d.get("r", {}).get("name", "Boki Merge"), c.get("r", "Press R with a full bond meter to merge with your Boki.")]]
         for w, t in c.get("weapons", {}).items():
             rows.append(["Weapon: " + wname(w), t])
         b.append(table(["Slot", "Card text"], rows))

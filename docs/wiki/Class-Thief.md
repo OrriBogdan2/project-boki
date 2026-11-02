@@ -9,8 +9,8 @@ primes a heavier hit, and landing that hit gives the flip straight back.
 2. **Vault** (Shift) past them. Your next weapon hit is **Primed**: extra damage, two Marks and Shred.
 3. Land it and Vault resets. Flip again. Keep the chain going and the Marks never drop.
 4. Use the **Bola** when two of them stand close: the first is grounded, the second catch stuns both.
-5. **Jackpot** (R) when several are near: knives at everyone in reach for 2s, every knife refreshing
-   your Marks, while you keep firing and get two free short Vaults.
+5. The fifth Mark on a foe pays out **Jackpot**: four knives at them, every knife refreshing your
+   Marks, and one free Vault. R is the Boki Merge, not a class ultimate.
 
 ## Combos and interactions
 
@@ -21,7 +21,8 @@ primes a heavier hit, and landing that hit gives the flip straight back.
 | Bola catches a second foe | Both stunned 0.9s and +13 damage (TANGLED). At rank 3 their Marks pool |
 | Shadow Knife, then E again (or wait 5s) | You step to the knife, wherever it stuck |
 | Shadow Knife sticks in a foe (rank 3) | Vault resets and half the Knife's cooldown comes back (a quarter in a wall) |
-| Jackpot running | You keep shooting, every knife refreshes all Marks, and you get 2 free quick Vaults that also Prime |
+| The fifth Mark on a foe | **Jackpot**: 4 knives at them (every knife refreshes all your Marks) and one free Vault that also Primes; it rests 8s |
+| A Primed hit on 3 Marks | It lands the fourth and fifth, so it sets Jackpot off by itself |
 | Knock or assist | You heal (a quarter of your health in all on a knock) |
 
 ## Tips
@@ -50,18 +51,20 @@ What the in-game kit card (K) says.
 
 | Slot | Card text |
 |---|---|
-| Loop | Keep hitting one target to stack Marks. Vault primes your next hit; land it and Vault resets. |
-| Passive: Marks | Every weapon hit Marks the target (+8% damage from you per Mark, up to 5). Knocks and assists heal you. |
+| Loop | Keep hitting one target to stack Marks. Vault primes your next hit; land it and Vault resets. Five Marks: Jackpot. |
+| Passive: Marks | Hits Mark the target: +8% damage per Mark, up to 5. The fifth Mark pays out Jackpot. Knocks heal you. |
 | Dash: Vault | A quick flip and a burst of speed. Your next hit is Primed; land it and Vault comes straight back. |
 | RMB: Bola | Grounds the first foe it wraps, then flies on; catch a second and both are stunned. |
 | E: Shadow Knife | Throw a dagger that sticks to a foe or a wall; recast (or wait) to step to it. |
-| R: Jackpot | Volleys of knives at everyone around you for 2s, harder at the rim; Marks refresh, 2 free quick Vaults. |
+| R: Boki Merge | Press R with a full bond meter to merge with your Boki. |
 | Weapon: Twin Blades | Quick 3-hit combo; hold for a spin. Every hit Marks the target. |
 | Weapon: SMG | Hold to spray; a stream on one target stacks Marks fast. |
 
 ### Abilities in full
 
-**Marks (passive).** Every weapon hit puts a Mark on the target (one per 0.3s, up to 5, each lasting 4s and refreshed by the next): your weapon hits on them deal +8% per Mark. A Primed hit adds 2, the Bola 1. A knock heals you 15% of your health on top of the usual knock heal (25% in all); an assist heals 25%.
+**Marks (passive).** Every weapon hit puts a Mark on the target (one per 0.3s, up to 5, each lasting 4s and refreshed by the next): your weapon hits on them deal +8% per Mark. A Primed hit adds 2, the Bola 1. The fifth Mark pays out Jackpot (below). A knock heals you 15% of your health on top of the usual knock heal (25% in all); an assist heals 25%.
+
+**Jackpot (Mark trigger).** Landing the fifth Mark on a foe releases a burst of 4 knives at them over 0.45s (4.5 each, in sight within 14m). Every knife refreshes all your Marks, and you get one free Vault for 4s. Then it rests 8s.
 
 **Vault (dash, Shift, 6.5s cooldown).** A 3.4m flip (shots pass through it) and +30% speed until your next hit (2s at most). Your next weapon hit within 3s is Primed: +10 damage, 2 Marks and Shred (+15% damage taken for 3s). Landing it resets Vault.
 
@@ -72,7 +75,7 @@ What the in-game kit card (K) says.
 
 **Shadow Knife (E, 18s cooldown).** Throw a dagger 12m that sticks in the first foe (8 damage, slowed 50% for 2.5s) or in a wall or the ground where it stops. Press E again to step to it at once; after 5s you step to it anyway.
 
-**Jackpot (R, 95s cooldown).** A 0.45s fuse you can keep shooting through, then for 2s a knife every 0.4s at every foe within 8.5m in sight (5 each): 4.5 a knife, and past 5m (the rim) +3 and blight 4s (healing barely takes). Every knife refreshes all your Marks. While it runs you have 2 free quick Vaults (2.2m) and can keep firing.
+**Boki Merge (R).** This kit has no ultimate of its own: R is the Boki Merge.
 
 ### Ranks
 
@@ -83,7 +86,6 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | RMB | cooldown 12s -> 10.8s, damage +15%. | cooldown 12s -> 9.6s, damage +30%; flies 1m further after the first foe, and two foes caught pool their Marks. |
 | Dash (Shift) | recharge 6.5s -> 5.5s per charge. | recharge 6.5s -> 4.6s; Primed hits +20%, and a Shadow Knife that sticks in a foe resets Vault. |
 | E | cooldown 18s -> 16.2s, damage +15%. | cooldown 18s -> 14.4s, damage +30%; sticking refunds 25% of the cooldown (50% in a foe). |
-| R (ultimate) | Rank 2 (level 9): cooldown 95s -> 80.8s, +15% damage. |  |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > Dash (Shift) > R (ultimate) > RMB > E > R (ultimate) > Glove (Q).
 

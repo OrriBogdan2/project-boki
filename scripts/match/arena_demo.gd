@@ -6,7 +6,7 @@ extends RefCounted
 ##   primed      the same, ending on the Primed hit landing (VAULT RESET, the payoff)
 ##   bola        the Thief's Bola catching two dummies: Grounded, TANGLED
 ##   juggernaut  greatsword slashes fill Rage (the shoulder glow), the Enraged form
-##   sweetspot   then a rank-3 Execution Slam winds up and lands its sweet spot (--hold-shot: the wind-up);
+##   sweetspot   then a rank-3 Finishing Slam winds up and lands its sweet spot (--hold-shot: the wind-up);
 ##               it also brings the crash down and heals
 ##   crash       the same, framed on the crash and the heal that follows the slam
 ##   jackpot     the Thief's fifth Mark releases the knife burst (the knives in flight)
@@ -118,7 +118,7 @@ static func tick(A: Arena, dt: float) -> void:
 			at_t = float(A.get_meta("bp_at", 9.0)) + 0.12
 		"juggernaut", "sweetspot", "crash":
 			# greatsword slashes fill Rage (the shoulder glow) into the Enraged form; (sweetspot) then an
-			# Execution Slam (rank 3) winds up (the warning) and lands its sweet spot: the crash comes down and heals
+			# Finishing Slam (rank 3) winds up (the warning) and lands its sweet spot: the crash comes down and heals
 			if t < 0.05:
 				if P.arch != "juggernaut" or P.wid != "greatsword": A.set_arch("juggernaut", "greatsword")
 				A.set_kin("cindle")
@@ -164,8 +164,8 @@ static func tick(A: Arena, dt: float) -> void:
 			_aim(P, D)
 			P.inp["move"] = Vector2.ZERO
 			var JT := P.ak as ThiefKit
-			if _at(t, dt, 0.3): JT.add_mark(D, 4, true)
-			P.inp["fire"] = t > 0.35 and t < 0.6
+			if _at(t, dt, 0.1): JT.add_mark(D, 4, true)
+			P.inp["fire"] = t > 0.5 and t < 0.8
 			if P.ammo < 3: P.ammo = int(P.wpn["mag"])
 			if JT.jackpots > 0 and not A.has_meta("jp_at"): A.set_meta("jp_at", t)
 			at_t = float(A.get_meta("jp_at", 9.0)) + (0.2 if w == "jackpot" else 0.46)
@@ -348,7 +348,7 @@ static func _anim_trigger(A: Arena, P: Hunter, D: Hunter, mv: String, t: float, 
 			if _at(t, dt, 0.5): K.cd["e"] = 0.0; K.use_e()
 			if _at(t, dt, 0.95): K.use_e()
 		"thf_volley":
-			if _at(t, dt, 0.4): (K as ThiefKit).add_mark(D, 4, true)
+			if _at(t, dt, 0.1): (K as ThiefKit).add_mark(D, 4, true)
 			P.inp["fire"] = t > 0.45 and t < 0.6
 			if P.ammo < 3: P.ammo = int(P.wpn["mag"])
 		"jug_slash":

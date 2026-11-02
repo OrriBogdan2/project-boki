@@ -998,7 +998,7 @@ above is superseded by this:
 | Archer | hold to charge, release | a heavy piercing arrow, knockback grows with the charge (0.5s -> 1.1s); tap drops a root snare | a creak rising to a ping, then a string-snap and a sniper boom | into a wall within 3m: PINNED (stun); feeds Focus for the Deadeye |
 | Mage | press to fire, hold to steer | a slow glowing bolt that bends toward your cursor round cover, harder the longer it flies | a hum that rises with travel time | Runes the target; the next spell detonates it |
 | Gunslinger | tap (hold = Rail) | a ricochet round off up to 2 walls and on to a second foe | a revolver crack, a hammer click, a ricochet whine | at 6 Chambers a Called Shot (stun, crit, reload) |
-| Juggernaut | tap (wound up) / hold / air / in the pull | an Execution Slam cone after a 0.5s aimed wind-up; hold a Lunge; air a Meteor Drop; in the chain pull a Scorching Spin | a charge hum, a cleave and a slam | the sweet spot is the payoff; at rank 3 it also crashes and heals |
+| Juggernaut | tap (wound up) / hold / air / in the pull | a Finishing Slam cone after a 0.5s aimed wind-up; hold a Lunge; air a Meteor Drop; in the chain pull a Scorching Spin | a charge hum, a cleave and a slam | the sweet spot is the payoff; at rank 3 it also crashes and heals |
 | Bulwark | hold to block, release to bash | a frontal shield wall (its own HP), then a forward bash cone you step into | a shield clang, then a plate slam | into a wall or another foe: Crushed (stun + heal) |
 
 ### Holds and charges: the wind-up feel (shared, every archetype)
@@ -1085,11 +1085,11 @@ pose, sound and VFX.
 
 | Hero | Sequence | Result | Source |
 |---|---|---|---|
-| Juggernaut | E (hooked) -> E (pull) -> RMB tap | **Scorching Spin**: 2.6m spin, 18, blight 4s; a full-body double spin, orange slash rings, a whirr and blast | wiki |
+| Juggernaut | E (hooked) -> E (pull) -> RMB tap | **Cinder Spin**: 2.6m spin, 18, blight 4s; a full-body double spin, orange slash rings, a whirr and blast | wiki |
 | Juggernaut | E (hooked or anchored) -> hold RMB -> let go | **Chain Lunge**: the Lunge runs along the chain to its end (x1.25, a 0.35 stun, RUN THROUGH); the chain hand hauls back, gold chain flash, a tether snap and a rising charge; the chain is spent | owner |
 | Juggernaut | E -> hold RMB -> E while holding | **Haul Slam**: pulled in with the charge, a crash where you arrive (2.8m, 16 -> 30 by charge, stun 0.25 -> 0.6); the blade cocked high through the pull, then the drop; gold ring, dust, slam and boom | owner |
 | Juggernaut | E -> E (pull) -> hold RMB | **Haul Slam** on arrival (or at once if the pull is over) | owner |
-| Juggernaut | E attached -> RMB tap | the normal **Execution Slam** (wound up, aimed) | wiki |
+| Juggernaut | E attached -> RMB tap | the normal **Finishing Slam** (wound up, aimed) | wiki |
 | Juggernaut | RMB tap, sweet spot (rank 1-2) | the SWEET SPOT payoff (T4) | wiki |
 | Juggernaut | RMB tap, sweet spot (rank 3) | the payoff **and a crash** on the foe (3m, 24) that heals you 60% of its damage; it rests 12s | wiki (Volcanic Rebuke, folded in) |
 | Juggernaut | the crash, then a knock on someone it hit (2s) | **the crash is ready again**; the knock also heals 20% of their health and gives a Rampage charge | wiki |
@@ -1127,7 +1127,7 @@ Ranks: Smash rank 3 +20% on every Smash and the sweet-spot crash (levels 2-3, an
 rank 3 a third charge (level 2); Warchain rank 3 refunds 33% when it hooks a foe (level 4).
 
 - Loop: slash and wave into Rage -> Enraged (everything comes back faster) -> chain them, pull in and
-  spin -> Rampage tip -> an Execution Slam's sweet spot (rank 3: the crash and its heal) -> the knock
+  spin -> Rampage tip -> an Finishing Slam's sweet spot (rank 3: the crash and its heal) -> the knock
   makes the crash ready again.
 - Tells: red heat at the pauldrons that grows with Rage; the Enraged shell, swell and roar; the red "!"
   over the head while a Smash winds up; crosshair "ENRAGED" / "SMASH · aim it".

@@ -1039,7 +1039,7 @@ const KMOVES := {
 		[0.1, {"blade": Vector3(0.0, -0.9, 0.0), "bw": 1.0, "rad": 0.6, "p": -0.5, "lw": 1.0, "legs": [1.0, -1.0, -0.6, -0.3], "sq": 0.2}],
 		[0.32, {"blade": Vector3(0.0, -0.8, 0.0), "bw": 0.8, "p": -0.35, "lw": 0.8, "legs": [0.8, -0.9, -0.5, -0.3]}],
 		[0.6, {}]]},
-	# Execution Slam: 0.5s of wind-up (rearing back, rising, the blade high behind the head), the
+	# Finishing Slam: 0.5s of wind-up (rearing back, rising, the blade high behind the head), the
 	# crash at 0.5 (the hit), then a heavy recovery
 	"jug_slam": {"keys": [
 		[0.0, {}],
@@ -1084,7 +1084,7 @@ const KMOVES := {
 		[0.08, {"fl": Vector3(0.12, 0.15, -0.52), "hw": 1.0, "p": -0.55, "lift": 0.08, "lw": 1.0, "legs": [-0.2, -0.6, -0.7, -0.3], "sq": -0.2}],
 		[0.4, {"fl": Vector3(0.12, 0.15, -0.5), "hw": 1.0, "p": -0.5, "lift": 0.05, "lw": 1.0, "legs": [-0.1, -0.7, -0.6, -0.4]}],
 		[0.65, {}]]},
-	# Scorching Spin: blade out wide, the whole body turns twice
+	# Cinder Spin: blade out wide, the whole body turns twice
 	"jug_spin": {"keys": [
 		[0.0, {"blade": Vector3(-1.5, 0.0, 1.5), "bw": 1.0, "rad": 0.55, "lw": 1.0, "legs": [0.6, -1.0, 0.5, -0.9], "lift": -0.06}],
 		[0.36, {"blade": Vector3(-1.5, 0.0, 1.5), "bw": 1.0, "rad": 0.55, "fy": -12.566, "lw": 1.0, "legs": [0.6, -1.0, 0.5, -0.9], "lift": -0.06}],

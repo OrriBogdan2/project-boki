@@ -32,10 +32,10 @@ specials.
 |---|---|---|---|---|
 | Passive, Rage | none | Damage fills Rage (a Searing Wave 3x as fast); full = Enraged 6s: +15% damage, +12% dash recharge, +20% cooldown speed. A knock heals 20% of the knocked hunter's max health | Blazing Spirit | Duration is ours (the wiki gives none) |
 | LMB, Greatsword | tap, hold | Slashes of 8 every 0.34s, double at the tip; hold to charge a Searing Wave (6 to 10m, 12 to 28) | Quick melee, tip bonus; hold: a charged ranged fireblast | Shotgun and minigun stay as the other weapons |
-| RMB, Smash | tap | A 0.5s aimed wind-up (a red "!"), then a 3.2m cone: 26, +50% under 35%; its sweet spot (the far tip, 1.9 to 3.4m within 22 degrees) is the SWEET SPOT payoff. **Rank 3: it also brings a crash down on the foe (3m, 24, push 7) that heals you 60% of the damage it deals; it rests 12s, and a knock on anyone it hit within 2s makes it ready at once** | Execution Slam (sweet spot resets R) | The R's crash and reset rule moved into the sweet spot (see "Ult choice") |
+| RMB, Smash | tap | A 0.5s aimed wind-up (a red "!"), then a 3.2m cone: 26, +50% under 35%; its sweet spot (the far tip, 1.9 to 3.4m within 22 degrees) is the SWEET SPOT payoff. **Rank 3: it also brings a crash down on the foe (3m, 24, push 7) that heals you 60% of the damage it deals; it rests 12s, and a knock on anyone it hit within 2s makes it ready at once** | Execution Slam (sweet spot resets R) | Our name is Finishing Slam (the source's name matched ours by accident). The R's crash and reset rule moved into the sweet spot (see "Ult choice") |
 | RMB hold | hold, release | Lunge: charge 0.3 to 0.9s, a 3 to 7m dash attack, 14 to 22; striking nothing doubles the cooldown | Fiery Lunge | As the source |
 | RMB air | in the air | Meteor Drop: 2.6m, 18, slow 40%; the centre 1.2m takes +50% and is stunned 0.8s | Obsidian Slam | As the source |
-| RMB in the pull | during E | Scorching Spin 2.6m, 18, blight 4s (plus owner combos, below) | Scorching Spin | As the source |
+| RMB in the pull | during E | Cinder Spin 2.6m, 18, blight 4s (plus owner combos, below) | Scorching Spin | As the source; renamed because the source name matched ours by accident |
 | Dash, Rampage | Shift | 2 charges, 4.4m: 7 along it, the tip 14 and a big knock; a knock gives a charge back; rank 3 a third charge | Flame Step | As the source |
 | E, Warchain | tap, recast | 10m, hooks a foe (8, blighted while tethered) or a wall, 4s; recast to pull yourself; a stun breaks it; not while rooted or Grounded | Feysteel Chain | As the source |
 | R | none | None. Press R for the Boki Merge | Volcanic Rebuke | See "Ult choice" |
@@ -52,11 +52,11 @@ All are scripted in `--kit-combo-check` (which also runs inside `--archetype-che
 
 | Sequence | Result | Check |
 |---|---|---|
-| E (hooked), E (pull), RMB tap | Scorching Spin | `combo jug: E > E > RMB tap = Scorching Spin` |
+| E (hooked), E (pull), RMB tap | Cinder Spin | `combo jug: E > E > RMB tap = Cinder Spin` |
 | E, hold RMB, let go | Chain Lunge along the chain | `combo jug: E > hold RMB = Chain Lunge` |
 | E, hold RMB, E while holding | Haul Slam on arrival | `combo jug: E > hold RMB > E = Haul Slam on arrival` |
 | E, E, hold RMB | Haul Slam where you land | `combo jug: E > E > hold RMB = Haul Slam` |
-| E attached, RMB tap | the normal Execution Slam | `combo jug: E > RMB tap = Execution Slam` |
+| E attached, RMB tap | the normal Finishing Slam | `combo jug: E > RMB tap = Finishing Slam` |
 | RMB sweet spot at rank 1 or 2 | the payoff only, no crash | `combo jug: RMB sweet spot (rank 1) = payoff, no crash` |
 | RMB sweet spot at rank 3 | the payoff and the crash; you heal 60% of its damage | `combo jug: RMB sweet spot (rank 3) = crash + heal` and `juggernaut Smash rank 3: the sweet spot also crashes, and it rests` (--archetype-check) |
 | The crash, then a knock on a foe it hit (2s) | the crash is ready again; the knock heals 20% and gives a Rampage charge | `combo jug: crash > knock = crash reset + heal + a dash` |
@@ -72,6 +72,11 @@ All are scripted in `--kit-combo-check` (which also runs inside `--archetype-che
 rank-3 crash), `jug_lunge_wind` / `jug_lunge`, `jug_meteor`, `jug_dash`, `jug_chain` / `jug_reel`, `jug_spin`,
 `jug_chainlunge`, `jug_haul_wind` / `jug_haulslam`. `jug_doom` went with the R. Strips:
 `--arena-demo=anim_<move>`.
+
+## Originality
+
+Two of our names (Execution Slam, Scorching Spin) had matched the source hero's exactly; they are now the
+Finishing Slam and the Cinder Spin everywhere the player can read them (content, UI, fx words, wiki).
 
 ## Engine notes
 

@@ -8,10 +8,10 @@ extends ArchKit
 ##   knocked hunter's health (a monster kill, of the monster's).
 ## - LMB (Greatsword): quick slashes that hit twice as hard at the tip; hold for a Searing Wave (it
 ##   fills Rage fast).
-## - RMB, Smash (Adaptive Strike): tap a wound-up Execution Slam (more to the wounded; its sweet spot is
+## - RMB, Smash (Adaptive Strike): tap a wound-up Finishing Slam (more to the wounded; its sweet spot is
 ##   the payoff, T4, pay_rage, and at rank 3 it also crashes: a burst that heals you, reset by a knock),
 ##   hold a charged Lunge (a miss doubles the cooldown), in the air a Meteor Drop (slows; the centre
-##   stunned), during the Warchain's pull a Scorching Spin.
+##   stunned), during the Warchain's pull a Cinder Spin.
 ## - Dash, Rampage (Flame Step): 2 charges of a dash attack the way you face, the tip hits double.
 ## - E, Warchain (Feysteel Chain): a chain to a foe (blighted) or a wall; recast to pull yourself in.
 ## No R: that key is the Boki Merge. The old ultimate lives on as the Smash's rank-3 crash.
@@ -26,11 +26,11 @@ var lmb_buf := 0.0
 var bot_wave_t := 0.0
 var slash_n := 0
 var slash_at := -9.0
-var slam_w := {}               # the Execution Slam winding up: {t, warn}
+var slam_w := {}               # the Finishing Slam winding up: {t, warn}
 var lunge := {}                # the running Lunge: {end, dir, k, hit}
 var chain := {}                # the Warchain: {target, pos, node}
 var chain_flying := false
-var reel_t := 0.0              # the Warchain's pull is carrying you (a Smash now is a Scorching Spin)
+var reel_t := 0.0              # the Warchain's pull is carrying you (a Smash now is a Cinder Spin)
 var crash_cd := 0.0            # the rank-3 crash is resting (seconds)
 var crash_hit := {}            # foe id -> when the crash hit them (a knock within 2s resets it)
 var sweet_spots := 0           # (tests, demo)
@@ -437,7 +437,7 @@ func fire_rmb(c: Dictionary) -> void:
 		return
 	if not spend_rmb(): return
 	if c.get("e", false):
-		# pressed while the Warchain pulls you: a tap spins (Scorching Spin), a held one slams on arrival
+		# pressed while the Warchain pulls you: a tap spins (Cinder Spin), a held one slams on arrival
 		if c.get("hold", false): _haul_slam(lunge_k(float(c.get("t", 0.0))))
 		else: _spin()
 	elif not chain.is_empty() and c.get("hold", false) and not c.get("air", false):
@@ -447,7 +447,7 @@ func fire_rmb(c: Dictionary) -> void:
 	elif c.get("hold", false):
 		_lunge(lunge_k(float(c.get("t", 0.0))))
 	else:
-		# the Execution Slam winds up first (you keep aiming); everyone sees the warning over you
+		# the Finishing Slam winds up first (you keep aiming); everyone sees the warning over you
 		slam_w = {"t": float(rmb_def()["windup"])}
 		play("jug_slam")                # keyed to the wind-up: the crash lands at 0.5s
 		m.fx.word(h.pos + Vector3(0, 2.9, 0), "!", Color("ff5a3a"), true)
@@ -465,7 +465,7 @@ func _tick_slam(dt: float) -> void:
 		slam_w = {}
 		_slam()
 
-## The Execution Slam: a heavy cone; the wounded (under 35%) take +50%; a foe in the sweet spot (the far
+## The Finishing Slam: a heavy cone; the wounded (under 35%) take +50%; a foe in the sweet spot (the far
 ## tip, dead ahead) is the payoff; at rank 3 it also crashes (_crash).
 func _slam() -> void:
 	var sd := rmb_def()
@@ -475,7 +475,7 @@ func _slam() -> void:
 	var stg := stage("rmb", {"delivery": {"type": "cone", "radius": float(sl["radius"]), "angle": float(sl["angle"])}, "effects": effs})
 	var from := h.pos
 	var paid := {}
-	run(stg, cx("rmb", "execution_slam", aim(), {"no_floor": true, "on_foe": func(f: Ent, _c: Dictionary):
+	run(stg, cx("rmb", "finishing_slam", aim(), {"no_floor": true, "on_foe": func(f: Ent, _c: Dictionary):
 		if not is_instance_valid(f): return
 		if not f.dead and f.max_hp > 0.0 and f.hp / f.max_hp < float(sl["low"]):
 			f.hurt(float(sl["dmg"]) * smash_k() * float(sl["low_k"]) * power("sec"), h, {"src": "abil", "ab": "utility", "tags": ["utility", "execute"], "crit": true, "melee": true})
@@ -625,18 +625,18 @@ func _spin() -> void:
 	spins += 1
 	play("jug_spin")
 	var stg := stage("rmb", {"delivery": {"type": "burst", "origin": "caster", "radius": float(sp["radius"])}, "effects": [{"type": "damage", "amount": float(sp["dmg"]) * smash_k()}]})
-	run(stg, cx("rmb", "scorching_spin", h.pos, {"no_floor": true, "on_foe": func(f: Ent, _c: Dictionary):
+	run(stg, cx("rmb", "cinder_spin", h.pos, {"no_floor": true, "on_foe": func(f: Ent, _c: Dictionary):
 		if is_instance_valid(f) and not f.dead: KitStatus.apply(f, "blt", float(sp["blight"]))}))
 	for i in 3:
 		m.later(0.06 * i, func(): if is_instance_valid(h): m.fx.slash(h.pos + Vector3(0, 0.9, 0), m.time * 11.0, TAU, float(sp["radius"]), Color("ff7a3a"), i == 2))
 	m.fx.ring(h.pos, float(sp["radius"]), Color("ff7a3a"), 0.3)
-	m.fx.word(h.pos + Vector3(0, 2.4, 0), "SCORCHING SPIN", Color("ff7a3a"), false)
+	m.fx.word(h.pos + Vector3(0, 2.4, 0), "CINDER SPIN", Color("ff7a3a"), false)
 	m.sfx("ab_whirr", h.pos, -2.0, 0.9)
 	m.sfx("ab_blast", h.pos, -6.0, 1.0)
 	net_ring(h.pos, float(sp["radius"]), Color("ff7a3a"))
 
 # ------------------------------------------------------------------ E: Warchain (Feysteel Chain)
-## "During E" for the Smash is the pull itself (the Scorching Spin).
+## "During E" for the Smash is the pull itself (the Cinder Spin).
 func in_e() -> bool:
 	return reel_t > 0.0
 
@@ -742,7 +742,7 @@ func _e_end() -> void:
 	if not chain.is_empty():
 		_drop_chain()
 
-## Press E again: pull yourself along the chain to its end (a Smash on the way is a Scorching Spin).
+## Press E again: pull yourself along the chain to its end (a Smash on the way is a Cinder Spin).
 func e_recast() -> bool:
 	if chain.is_empty():
 		return false
@@ -837,7 +837,7 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 		if not h.grounded and dist < 3.0:
 			h.inp["aim"] = tgt.pos; h.inp["sec"] = true
 		elif dist < 3.2:
-			h.inp["aim"] = tgt.pos; h.inp["sec"] = true      # the Execution Slam (best on the wounded)
+			h.inp["aim"] = tgt.pos; h.inp["sec"] = true      # the Finishing Slam (best on the wounded)
 		elif dist < 7.0 and randf() < 0.45:
 			h.inp["aim"] = tgt.pos; h.inp["sec"] = true
 			bot_hold["rmb"] = float(rmb_def()["hold"]) + (float(rmb_def()["full_t"]) - float(rmb_def()["hold"])) * clampf((dist - 3.0) / 4.0, 0.0, 1.0) + 0.05
