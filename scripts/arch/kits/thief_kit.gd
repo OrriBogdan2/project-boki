@@ -348,7 +348,13 @@ func on_dash(use_ex: bool) -> bool:
 	if not spend_dash(use_ex):
 		return true
 	if use_ex:
-		travel(float(h.cdat.get("ex_dist", 5.0)), float(h.cdat.get("ex_time", 0.2)), {"invuln": 0.1, "trail": "ghost"}, true)
+		# the shared long dash, her way: a flick into a forward tumble with a violet streak
+		travel(float(h.cdat.get("ex_dist", 5.0)), float(h.cdat.get("ex_time", 0.2)), {"invuln": 0.1}, true)
+		play("thf_exdash")
+		for i in 3:
+			m.later(0.05 * i, func(): if is_instance_valid(h): m.fx.spark(h.pos + Vector3(0, 0.9, 0), Vector3(-h.roll_dir.x, 0.1, -h.roll_dir.y), Arch.color(id), 8, 8.0, 25.0, 0.22, 0.0, 1.2))
+		m.later(float(h.cdat.get("ex_time", 0.2)), func(): if is_instance_valid(h): m.fx.ring(h.pos, 0.8, Arch.color(id), 0.18))
+		return true
 	else:
 		travel(float(dd["dist"]), float(dd["time"]), {"invuln": float(dd["invuln"]), "phase": 0.3})
 	_vaulted()
@@ -407,6 +413,7 @@ func _primed_hit(t: Ent) -> void:
 	if is_instance_valid(t) and not t.dead:
 		KitStatus.apply(t, "vul", float(dd["shred_t"]), float(dd["shred"]))
 	payoff_fx(t.pos, "VAULT RESET", res_col(), "pay_cashin", dir, t)
+	m.later(0.1, func(): if is_instance_valid(h) and anim_id != "thf_vault_r" and anim_id != "thf_vault_l": play("thf_reset"))
 	h.dashes = h.max_dashes()
 	h._ab_feedback("dash", "ready")
 
@@ -420,6 +427,7 @@ func on_knock(t: Hunter, mine: bool) -> void:
 		fx().star(t.pos + Vector3(0, 1.2, 0), KNOCK_STAR, 3.0 if mine else 2.0, 0.55, Color(1, 0.9, 0.9))
 		clear_marks(t)
 	fx().pillar(h.pos, Color("5ae07a"), 3.4, 0.6, 0.7)
+	play("thf_flourish")
 	m.fx.word(h.pos + Vector3(0, 2.6, 0), "+%d" % int(round(got)) if got >= 1.0 else ("TAKEN" if mine else "ASSIST"), Color("7fe08a"), true)
 	m.sfx("dj_heal", h.pos, -4.0, 1.0)
 

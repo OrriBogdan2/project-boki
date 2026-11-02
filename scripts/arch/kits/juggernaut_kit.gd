@@ -95,6 +95,7 @@ func extra_dashes() -> float:
 
 func _enrage_fx() -> void:
 	var rc := res_col()
+	if lunge.is_empty() and slam_w.is_empty() and not rmb_down: play("jug_roar")
 	m.sfx("knock", h.pos, 0.0, 0.6)          # the roar, audible within 25m
 	m.sfx("charge", h.pos, -3.0, 0.45)
 	m.fx.word(h.pos + Vector3(0, 2.8, 0), "ENRAGED", rc, true)
@@ -197,6 +198,9 @@ func _tick(dt: float) -> void:
 	if not chain.is_empty(): _tick_chain(dt)
 	crash_cd = maxf(0.0, crash_cd - dt)
 	if not drop.is_empty(): _tick_drop(dt)
+	# a held pose ends with its hold (a charge dropped without a release must not freeze the body)
+	if (anim_id == "jug_wave_wind" and lmb_t < 0.0) or (anim_id == "jug_lunge_wind" and not rmb_down):
+		anim_id = ""
 	if chain_flying: _tick_chain_flight()
 	_tick_tells()
 	if st.has("bot_haul_at") and m.time >= float(st["bot_haul_at"]):
@@ -314,7 +318,9 @@ func lmb_override(held: bool, dt: float) -> bool:
 				return true
 			lmb_t = 0.0
 		lmb_t += dt
-		if lmb_t > float(ld["tap"]): h.mel_hold = wave_k()
+		if lmb_t > float(ld["tap"]):
+			h.mel_hold = wave_k()
+			if anim_id != "jug_wave_wind": play("jug_wave_wind")
 		if lmb_t >= float(ld["full"]) + 0.5: _wave()      # held well past full: it goes by itself
 	elif lmb_t >= 0.0:
 		if lmb_t < float(ld["tap"]): _slash()
@@ -334,6 +340,7 @@ func _slash() -> void:
 	if m.time - slash_at > 0.8: slash_n = 0
 	slash_at = m.time
 	h.combo_i = slash_n % 2 + 1
+	play("jug_slash_r" if slash_n % 2 == 0 else "jug_slash_l")
 	slash_n += 1
 	var keep := h.wpn
 	h.wpn = h.wpn.duplicate()
@@ -405,7 +412,10 @@ func on_dash(use_ex: bool) -> bool:
 		return true
 	if use_ex and not h.grounded:
 		if not spend_dash(true): return true
-		travel(float(h.cdat.get("ex_dist", 4.2)), float(h.cdat.get("ex_time", 0.21)), {"invuln": 0.08, "trail": "dust"}, true)
+		travel(float(h.cdat.get("ex_dist", 4.2)), float(h.cdat.get("ex_time", 0.21)), {"invuln": 0.08, "trail": "dust", "shove": true, "shove_kb": 4.0, "shove_dmg": 0.0}, true)
+		play("jug_exdash")         # the shared long dash, his way: a lumbering shoulder-first shove
+		m.fx.spark(h.pos + Vector3(0, 0.9, 0), Vector3(-h.aim_dir().x, 0.1, -h.aim_dir().y), Arch.color(id), 12, 7.0, 30.0, 0.3, 0.0, 1.4)
+		m.later(float(h.cdat.get("ex_time", 0.21)), func(): if is_instance_valid(h): m.fx.dust(h.pos, 14); m.fx.ring(h.pos, 1.2, Arch.color(id), 0.2))
 		return true
 	if not spend_dash(false):
 		return true

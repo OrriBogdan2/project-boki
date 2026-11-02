@@ -95,14 +95,16 @@ const MOVES := {
 	# itself is the twin-hold swing (combo 0 right, 1 left); this is the body: a coil, the release at
 	# 0.08, the follow-through to 0.22, back by 0.42
 	"thf_lmb_r": {"keys": [
-		[0.0, {"y": 0.2, "lw": 0.5, "legs": [0.45, -0.85, -0.35, -0.6], "lift": -0.04}],
-		[0.08, {"y": -0.52, "p": -0.18, "sq": -0.08, "lw": 0.5, "legs": [0.5, -0.9, -0.4, -0.6], "lift": -0.06}],
-		[0.22, {"y": -0.45, "p": -0.12, "lw": 0.4, "legs": [0.45, -0.85, -0.35, -0.6], "lift": -0.05}],
+		[0.0, {"y": 0.30, "p": 0.08, "sq": 0.12, "lw": 0.6, "legs": [0.5, -0.95, -0.4, -0.65], "lift": -0.07}],
+		[0.08, {"y": -0.75, "p": -0.24, "sq": -0.16, "lw": 0.6, "legs": [0.6, -0.9, -0.5, -0.55], "lift": -0.03}],
+		[0.16, {"y": -0.62, "p": -0.2, "sq": -0.05, "lw": 0.5, "legs": [0.55, -0.9, -0.45, -0.6], "lift": -0.05}],
+		[0.28, {"y": -0.40, "p": -0.1, "sq": 0.04, "lw": 0.4, "legs": [0.45, -0.85, -0.35, -0.6], "lift": -0.05}],
 		[0.42, {}]]},
 	"thf_lmb_l": {"keys": [
-		[0.0, {"y": -0.2, "lw": 0.5, "legs": [0.45, -0.85, -0.35, -0.6], "lift": -0.04}],
-		[0.08, {"y": 0.52, "p": -0.18, "sq": -0.08, "lw": 0.5, "legs": [0.5, -0.9, -0.4, -0.6], "lift": -0.06}],
-		[0.22, {"y": 0.45, "p": -0.12, "lw": 0.4, "legs": [0.45, -0.85, -0.35, -0.6], "lift": -0.05}],
+		[0.0, {"y": -0.30, "p": 0.08, "sq": 0.12, "lw": 0.6, "legs": [0.5, -0.95, -0.4, -0.65], "lift": -0.07}],
+		[0.08, {"y": 0.75, "p": -0.24, "sq": -0.16, "lw": 0.6, "legs": [0.6, -0.9, -0.5, -0.55], "lift": -0.03}],
+		[0.16, {"y": 0.62, "p": -0.2, "sq": -0.05, "lw": 0.5, "legs": [0.55, -0.9, -0.45, -0.6], "lift": -0.05}],
+		[0.28, {"y": 0.40, "p": -0.1, "sq": 0.04, "lw": 0.4, "legs": [0.45, -0.85, -0.35, -0.6], "lift": -0.05}],
 		[0.42, {}]]},
 	# the empowered bolt (0143): planted and stretched into it, then a hard recoil back on the heels
 	"thf_primed": {"keys": [
@@ -149,4 +151,56 @@ const MOVES := {
 		[1.2, {"y": -0.55, "fl": Vector3(-0.45, 0.15, -0.1), "hw": 1.0}],
 		[1.4, {"y": 0.55, "fl": Vector3(0.1, 0.15, -0.5), "hw": 1.0}],
 		[1.6, {}]]},
+	# ---------------------------------------------------------------- per-hero base dash (the long air dash)
+	# Dancer flicks into a forward tumble, tucked, then opens out to land light
+	"thf_exdash": {"keys": [
+		[0.0, {"sq": -0.2, "p": -0.3, "lw": 0.8, "legs": [0.9, -0.4, -0.6, -0.3]}],
+		[0.05, {"fx": -1.5, "lift": 0.15, "sq": 0.15, "lw": 1.0, "legs": [1.6, -2.1, 1.5, -2.0]}],
+		[0.2, {"fx": -6.283, "lift": 0.1, "lw": 1.0, "legs": [1.6, -2.1, 1.5, -2.0]}],
+		[0.28, {"fx": -6.283, "sq": 0.3, "lw": 0.9, "legs": [0.8, -1.3, 0.5, -1.0]}],
+		[0.45, {"fx": -6.283}]]},
+	# Juggernaut lumbers: head down, shoulder driven forward, a heavy stamp and settle at the end
+	"jug_exdash": {"keys": [
+		[0.0, {"p": -0.2, "sq": 0.2, "lw": 0.8, "legs": [0.6, -1.0, -0.4, -0.6], "lift": -0.06}],
+		[0.06, {"p": -0.55, "y": 0.55, "sq": -0.15, "lw": 1.0, "legs": [1.1, -0.6, -0.8, -0.2], "blade": Vector3(-0.6, -0.3, 1.2), "bw": 0.8}],
+		[0.2, {"p": -0.5, "y": 0.5, "lw": 1.0, "legs": [1.0, -0.7, -0.7, -0.3], "blade": Vector3(-0.6, -0.3, 1.2), "bw": 0.8}],
+		[0.26, {"p": -0.15, "sq": 0.35, "lift": -0.12, "lw": 1.0, "legs": [0.9, -1.4, -0.4, -0.9]}],
+		[0.5, {}]]},
+	# ---------------------------------------------------------------- payoffs and passive procs
+	# Dancer, VAULT RESET: a spin on the heel with the arms flung wide, then a snap back to aim
+	"thf_reset": {"keys": [
+		[0.0, {"sq": 0.15, "lift": -0.05}],
+		[0.08, {"fy": -3.14, "sq": -0.15, "lift": 0.08, "fl": Vector3(-0.45, 0.25, 0.0), "hw": 1.0}],
+		[0.18, {"fy": -6.283, "sq": 0.1, "fl": Vector3(-0.45, 0.2, 0.0), "hw": 0.8}],
+		[0.4, {"fy": -6.283}]]},
+	# Dancer, a knock: a flourish, chin up, one blade raised, the heal rising through her
+	"thf_flourish": {"keys": [
+		[0.0, {}],
+		[0.1, {"p": 0.25, "lift": 0.1, "sq": -0.2, "fl": Vector3(-0.1, 0.55, -0.05), "hw": 1.0}],
+		[0.45, {"p": 0.18, "lift": 0.05, "fl": Vector3(-0.1, 0.5, -0.05), "hw": 0.8}],
+		[0.75, {}]]},
+	# Juggernaut, Enraged (and a knock): a roar, chest thrown up and out, arms wide, then hunched and swelling
+	"jug_roar": {"keys": [
+		[0.0, {"p": -0.3, "sq": 0.2, "lift": -0.08, "lw": 1.0, "legs": [0.7, -1.1, 0.5, -1.0]}],
+		[0.12, {"p": 0.45, "sq": -0.25, "lift": 0.1, "fl": Vector3(-0.5, 0.35, 0.05), "hw": 1.0, "blade": Vector3(0.0, 2.6, 0.0), "bw": 0.7, "lw": 1.0, "legs": [0.4, -0.6, 0.3, -0.5]}],
+		[0.5, {"p": 0.35, "sq": -0.15, "fl": Vector3(-0.5, 0.3, 0.05), "hw": 1.0, "blade": Vector3(0.0, 2.6, 0.0), "bw": 0.7}],
+		[0.75, {"p": -0.15, "sq": 0.15}],
+		[1.0, {}]]},
+	# Juggernaut slashes: the body for each swing (the blade is the greatsword swing): a step into it,
+	# the hips turning through, the follow-through dragging the weight round
+	"jug_slash_r": {"keys": [
+		[0.0, {"y": 0.35, "sq": 0.1, "lw": 0.8, "legs": [0.7, -1.0, -0.4, -0.5], "lift": -0.05}],
+		[0.1, {"y": -0.6, "p": -0.25, "sq": -0.12, "lw": 0.9, "legs": [0.95, -0.7, -0.6, -0.3]}],
+		[0.24, {"y": -0.5, "p": -0.15, "lw": 0.7, "legs": [0.85, -0.8, -0.5, -0.35]}],
+		[0.45, {}]]},
+	"jug_slash_l": {"keys": [
+		[0.0, {"y": -0.35, "sq": 0.1, "lw": 0.8, "legs": [0.7, -1.0, -0.4, -0.5], "lift": -0.05}],
+		[0.1, {"y": 0.6, "p": -0.25, "sq": -0.12, "lw": 0.9, "legs": [0.95, -0.7, -0.6, -0.3]}],
+		[0.24, {"y": 0.5, "p": -0.15, "lw": 0.7, "legs": [0.85, -0.8, -0.5, -0.35]}],
+		[0.45, {}]]},
+	# the Searing Wave held: the blade dragged up behind the head, the body leaning back, coiling
+	"jug_wave_wind": {"hold": true, "keys": [
+		[0.0, {}],
+		[0.25, {"blade": Vector3(0.0, 2.4, 0.0), "bw": 1.0, "p": 0.3, "sq": 0.18, "lift": -0.06, "lw": 1.0, "legs": [0.7, -1.2, -0.4, -0.7]}],
+		[0.7, {"blade": Vector3(0.0, 2.7, 0.0), "bw": 1.0, "p": 0.38, "sq": 0.25, "lift": -0.1, "lw": 1.0, "legs": [0.8, -1.3, -0.45, -0.8]}]]},
 }
