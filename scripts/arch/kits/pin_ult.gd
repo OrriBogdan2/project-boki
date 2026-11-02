@@ -46,7 +46,9 @@ func _ready() -> void:
 		core.material_override.set_shader_parameter("tail", 0.0)
 		_beams.append({"node": rib, "core": core, "t": 0.0})
 	for i in 3:
-		_pips.append(KitMeshes.inst(self, KitMeshes.quad(0.3, 0.3), KitShaders.mat("star", TEAL)))
+		var pip := KitMeshes.inst(self, KitMeshes.quad(0.7, 0.7), KitShaders.mat("star", TEAL))
+		pip.material_override.set_shader_parameter("power", 2.4)
+		_pips.append(pip)
 	_bow = KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("star", TEAL))
 
 func xd() -> Dictionary:
