@@ -57,7 +57,7 @@ const PAIRS := [
 	["gap1_cursor_landing", "archer", "empowered_miss", 0.95, 3.0, "Gap 1 (aim): an Empowered arrow with the cursor at 5 m"],
 	["gap2_draw_reticle", "archer", "draw", 0.45, 3.0, "Gap 2 (reticle): the bow mid-draw"],
 	["gap3_perfect", "archer", "perfect", 0.68, 2.5, "Gap 3 (perfect release): the frame after letting go on the stage"],
-	["gap1_throw_cursor", "bulwark", "throw", 1.4, 3.0, "Gap 1 (aim): the hammer thrown with the cursor at 4 m"],
+	["gap1_throw_cursor", "bulwark", "throw", 1.4, 3.0, "Gap 1 (aim): the hammer thrown with the cursor at 6 m"],
 	["gap2_slam_numbers", "bulwark", "slam", 2.1, 2.5, "Gap 2 (numbers) and 4 (swing VFX): a full swing on the dummy"],
 	["gap3_hold_glint", "bulwark", "spin", 1.25, 1.5, "Gap 3 (hold): the swing held 0.9 s"],
 ]
@@ -199,7 +199,7 @@ func _input(what: String, t: float) -> void:
 			_aim(home + Vector3(5.0, 0, 0)); T.teleport(home + Vector3(5.0, 0, 0).rotated(Vector3.UP, 0.4))
 			if at.call(0.5): K.use_e()
 		"throw":
-			T.teleport(home + Vector3(0, 0, 7.0)); _aim(home + Vector3(4.0, 0, 0))
+			T.teleport(home + Vector3(0, 0, 7.0)); _aim(home + Vector3(6.0, 0, 0))
 			P.inp["fire"] = at.call(0.5)
 		"recall":
 			T.teleport(home + Vector3(0, 0, 7.0)); _aim(home + Vector3(5.0, 0, 0))
