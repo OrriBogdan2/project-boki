@@ -716,16 +716,21 @@ func _extract(m) -> void:
 	print("TOUR uplink state %s" % best["state"])
 	if best["state"] != "charging": note_bad("the uplink didn't start (%s, '%s')" % [best["state"], String(m.interact.get("label", ""))])
 	var i := 0
+	var ticks := 0
 	var w0 := Time.get_ticks_msec()
 	while is_instance_valid(m) and best["state"] in ["charging", "fizzling"] and Time.get_ticks_msec() - w0 < 600000:
 		# (rivals parked in the yard contest it and it never charges: send them elsewhere)
 		for o in m.hunters:
 			if is_instance_valid(o) and o != P and not o.out and o.team != P.team and o.flat_dist(cp) < 12.0:
 				o.teleport(m.world.spawns[(m.hunters.find(o) * 3) % m.world.spawns.size()])
-		await mwait(8.0)
-		i += 1
-		if i <= 3: await shot("uplink_charging_%d" % i)
-		if P.flat_dist(cp) > 3.0:
+		# (the monster waves knock the hunter out of the 3.6 m yard, and an empty yard drains the charge: look every
+		# second and step back in, which is what a player does)
+		await mwait(1.0)
+		ticks += 1
+		if ticks % 8 == 0 and i < 3:
+			i += 1
+			await shot("uplink_charging_%d" % i)
+		if not m.exits.in_yard(best, P):
 			P.teleport(Vector3(at.x, m.world.ground_at(at.x, at.z), at.z))
 	print("TOUR uplink now %s" % best["state"])
 	await shot("uplink_open")
