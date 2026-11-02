@@ -1,4 +1,4 @@
-2026-11-02T21:50:24Z
+2026-11-02T22:10:42Z
 
 ext/classes | cacd796 | REOPENED per INBOX 19:10 (Hunters wording, pick 1 + 2 early unlocks, no weight labels, hunter viewer, hold-to-unlock); rework queued on Opus medium | 0.14.0 | -
 ext/hero-shots | 3bd0520 | done: 12 heroes + farm building + classes; all portraits show signature weapons | - | -
@@ -14,7 +14,7 @@ ext/kitfix-breah-ostra | c26758e | READY FOR LOCAL SCREENSHOT REVIEW (main a7ed2
 
 Running now: ext/classes rework; ult passes on kitfix-dancer-juggernaut, kitfix-moosh-tamsin, kitfix-linwick-dredge, kitfix-pin-bjorn (all Opus medium, SERVER_UPDATE6)
 Queued: ult passes on kitfix-vireo-venator and kitfix-breah-ostra (start as slots free)
-Last INBOX entry handled: 2026-11-02 22:05 UTC (SERVER_UPDATE6 ult pass started; KinBond.add hook not on main yet, so ult agents use a guarded stub)
+Last INBOX entry handled: 2026-11-02 22:10 UTC (relayed to the 4 running ult agents and the classes rework; added to the 2 queued ult prompts. ultbond is not on origin yet, so ult agents keep a guarded stub using the exact names KinBond.from_ult / ArchKit.cast_ult / hunter_ult. Kit merges on hold until the local review fix list arrives.)
 Watcher: received 19:06 UTC entry
 Questions for the owner: see ext/classes line.
 Net note: main is now 0.15.0, which kits2-nor also uses (0.15.0, kit move id on the snapshot); main session to reconcile. Kitfix branches that need a bump use 0.15.2 (dancer-juggernaut), .3 (pin-bjorn), .4 (vireo-venator), .5 (linwick-dredge), .6 (moosh-tamsin), .7 (breah-ostra).
@@ -35,3 +35,4 @@ power() pass (INBOX 21:30): all 5 finished kitfix branches merged current main (
 - dolm (Breah): lmb_t, lmb_auto, dive, dive_k, carry, slam.leapt, slam.lunges
 - ostra: swap_aim, snap, plus swap, primed, prime_until
 All six kitfix pairs are now ready for the local screenshot review.
+Kit merges: HOLD until the local Opus review fix list (INBOX 22:10 item 4). Fix lists will be applied per pair as they arrive.
