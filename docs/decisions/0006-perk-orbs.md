@@ -35,6 +35,7 @@ The owner approved parts 1 and 2 of the proposal below and turned down part 3.
   - A Boki's own heals don't grow with its hunter's level.
   - Kit code that reads `m.dmg_mult(h)` directly instead of `power()` doesn't grow yet. The hero-kit owners can switch it over.
   - The new health is added to the bar. A class change in practice keeps it (`LevelGrowth.reset`).
+  - Only levels actually gained grow you. A level set straight on a hunter (practice tools, checks) grows nothing, so fixtures that jump to level 6 keep their numbers.
 - **No banner on odd levels.** Every level flashes the level badge and plays the chime. Only even levels, where the weapon takes its path step, show the `LevelPop` banner and the gold wash.
 - The vitals tooltip on the portrait and level badge gives the totals: "Level N · From levels: +X% max health, +Y% ability power".
 - Max health was never synced and still isn't (the same as gear health and Tough Skin), so Net is unchanged.
