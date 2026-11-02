@@ -622,7 +622,8 @@ func cast_ult() -> bool:
 	play("mm_call")
 	m.sfx("tend_call", h.pos, -1.0, 1.0)
 	lk().burst("plus", who.pos + Vector3(0, 1.3, 0), {"r": 1.1, "dur": 0.45})
-	lk().burst("flare", who.pos, {"col": Color("9cf07a"), "rim": Color("ffd27a"), "r": 1.4, "dur": 0.35, "pattern": 1.0})
+	var cast_flare := {"col": Color("9cf07a"), "rim": Color("ffd27a"), "r": 1.4, "dur": 0.35, "pattern": 1.0}
+	lk().burst("flare", who.pos, cast_flare)
 	m.fx.word(h.pos + Vector3(0, 2.8, 0), "HEARTH CALL", col_of(x_def()), true)
 	net_ring(h.pos, float(x_def()["range"]), Color("ffd27a"))
 	net_bolt(h.pos + Vector3(0, 1.6, 0), who.pos + Vector3(0, 1.1, 0), Color("ffe6f0"))

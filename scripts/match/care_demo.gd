@@ -180,7 +180,8 @@ static func _ult(A: Arena, ally: Hunter, arch: String, what: String, t: float, d
 	P.lvl = maxi(P.lvl, 6)
 	if t < 0.1:
 		P.ult = 0.0      # the bond starts empty, so the frames show what the ult itself pays
-		A.m.get_viewport().warp_mouse(Vector2(640, 250))      # above the hero, off every hover spot: no tooltip in the frames
+		# above the hero, off every hover spot: no tooltip in the frames
+		A.m.get_viewport().warp_mouse(Vector2(640, 250))
 	if t < 0.3:
 		P.ak.cd["x"] = 0.0
 	if arch == "tender":
