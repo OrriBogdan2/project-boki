@@ -149,3 +149,13 @@ Same polish pass as the 22:40 entry: Opus, per pair (linwick-dredge, moosh-tamsi
 - **Status words must not overprint each other.** Stack or offset them, for example STUNNED plus GROUNDED. The text must match the real effect: a slow is not "DIZZY".
 - **Air dash after-images:** each hero gets its own, not the shared generic pill.
 - **Camera:** the air-dash strips end with the camera inside a pink sphere near a dummy. Find out why.
+
+## 2026-11-02 22:35 UTC: owner on Pin's charged shot (relay to the pin-bjorn polish pass)
+The owner wants Pin's draw readout to work the way the source does, **but not as a copy**. Match the *behaviour and the information it gives*:
+- two lines from the bow converge on the cursor as the draw charges
+- they merge into one bright line when a stage is ready
+- at full draw the line strengthens and extends past the cursor, to the full shot's range
+- a perfect release gives an unmistakable, very brief flash at the bow hand
+- the glint only appears when a stage is ready
+
+**Draw every element in Pin's own art direction:** her colour palette, our own line texture and shape language (for example a feathered or fletched line), and our own perfect-flash motif, not a generic four-point star. Don't trace or reproduce the source's sprites or exact shapes; same readability, different look. The draw-back pose and the fully charged arrow and its impact also get distinct, Pin-specific visuals (see REVIEW_pin.md).
