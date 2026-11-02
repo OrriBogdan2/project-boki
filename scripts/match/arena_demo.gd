@@ -52,8 +52,8 @@ const ANIM_DEMO := {
 	"arc_heavy": ["archer", "longbow", [1.2, 1.35, 1.42, 1.48, 1.58, 1.8]],
 	"arc_snare": ["archer", "longbow", [0.5, 0.54, 0.58, 0.64, 0.74, 0.9]],
 	"arc_hail": ["archer", "longbow", [0.5, 0.56, 0.64, 0.74, 0.95, 1.2]],
-	"arc_zip": ["archer", "longbow", [0.5, 0.56, 0.62, 0.7, 0.85, 1.1]],
-	"arc_hop": ["archer", "longbow", [0.5, 0.56, 0.62, 0.7, 0.85, 1.1]],
+	"pin_roll": ["archer", "longbow", [0.5, 0.53, 0.56, 0.6, 0.66, 0.8]],
+	"arc_super": ["archer", "longbow", [1.6, 1.66, 1.7, 1.75, 1.85, 2.1]],
 	"arc_plunge": ["archer", "longbow", [0.5, 0.56, 0.62, 0.68, 0.8, 1.0]],
 	"bul_throw": ["bulwark", "tower_shield", [0.5, 0.54, 0.58, 0.64, 0.72, 0.9]],
 	"bul_recall": ["bulwark", "tower_shield", [0.98, 1.05, 1.12, 1.2, 1.3, 1.5]],
@@ -357,7 +357,7 @@ static func _anim_trigger(A: Arena, P: Hunter, D: Hunter, mv: String, t: float, 
 			if _at(t, dt, 0.88): K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; P.inp["sec_hold"] = false; K.press_rmb()
 		"jug_doom":
 			if _at(t, dt, 0.5): K.cd["r"] = 0.0; K.use_r()
-		"arc_draw", "arc_loose", "arc_heavy_wind", "arc_heavy", "arc_snare", "arc_hail", "arc_zip", "arc_hop", "arc_plunge", "bul_throw", "bul_recall", "bul_smash_wind", "bul_smash", "bul_bash", "bul_whirl", "bul_charge", "bul_short", "bul_mend":
+		"arc_draw", "arc_loose", "arc_heavy_wind", "arc_heavy", "arc_snare", "arc_hail", "pin_roll", "arc_super", "arc_plunge", "bul_throw", "bul_recall", "bul_smash_wind", "bul_smash", "bul_bash", "bul_whirl", "bul_charge", "bul_short", "bul_mend":
 			_anim_hero(A, P, mv, t, dt)
 
 ## The scripted input for the Archer's and Bulwark's kit moves (the accuracy pass).
@@ -371,8 +371,8 @@ static func _anim_hero(A: Arena, P: Hunter, mv: String, t: float, dt: float) -> 
 		"arc_heavy": if _at(t, dt, 0.5): K.ch_rmb = 2.0; K.cd["rmb"] = 0.0; K.bot_hold["rmb"] = 0.9; K.press_rmb()
 		"arc_snare": if _at(t, dt, 0.5): K.ch_rmb = 2.0; K.cd["rmb"] = 0.0; P.inp["sec_hold"] = false; K.press_rmb()
 		"arc_hail": if _at(t, dt, 0.5): K.cd["e"] = 0.0; K.use_e()
-		"arc_zip": if _at(t, dt, 0.5): K.play("arc_zip")          # (the arena is flat: nothing for the line to bite, so the move is played directly)
-		"arc_hop": if _at(t, dt, 0.5): P.dashes = P.max_dashes(); P.inp["aim"] = P.pos - Vector3(4, 0, 0); P.do_dash()
+		"pin_roll": if _at(t, dt, 0.5): P.dashes = P.max_dashes(); P.inp["aim"] = P.pos + Vector3(4, 0, 0); P.do_dash()
+		"arc_super": fire = t > 0.4 and t < 1.6
 		"arc_plunge":
 			if _at(t, dt, 0.4): P.teleport(P.pos + Vector3(0, 3.0, 0)); P.grounded = false; P.vel = Vector3.ZERO
 			if _at(t, dt, 0.5): K.ch_rmb = 2.0; K.cd["rmb"] = 0.0; K.press_rmb()

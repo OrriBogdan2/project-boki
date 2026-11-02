@@ -192,7 +192,7 @@ func _data() -> void:
 			if not Arch.def(a).has(k): bad.append("%s missing %s" % [a, k])
 	ok("data: every kit complete, weapons exist", bad.is_empty(), str(bad))
 	ok("weapons: one signature weapon each", ids.all(func(x): return Arch.weapons(x).size() == 1 and Arch.signature(x) != "" and Arch.weapon_ok(x, Arch.signature(x))), str(ids.map(func(x): return Arch.signature(x))))
-	ok("weapons: Thief blades / Archer bow / Vireo coil / Bulwark shield", Arch.signature("thief") == "twin_blades" and Arch.signature("archer") == "longbow" and Arch.signature("mage") == "coilcaster" and Arch.signature("bulwark") == "tower_shield")
+	ok("weapons: Thief blades / Pin bow / Vireo coil / Bjorn hammer and aegis", Arch.signature("thief") == "twin_blades" and Arch.signature("archer") == "longbow" and Arch.signature("mage") == "coilcaster" and Arch.signature("bulwark") == "tower_shield")
 	ok("weapons: another archetype's weapon is not yours", not Arch.weapon_ok("bulwark", "greatsword") and not Arch.weapon_ok("thief", "smg"))
 	ok("weapons: asking for another weapon gives the signature", Arch.weapon_for("gunslinger", "medium", "longsword") == "quill_rifle")
 	var sup_ok := true
@@ -369,37 +369,33 @@ func _archer() -> void:
 	P.inp["fire"] = true; m.step(DT); P.inp["fire"] = false
 	step(m, 0.5)
 	ok("archer Deadeye: none without a pin", K.deadeyes == de0 and dmg(T) >= 50.0, "dealt %.0f" % dmg(T))
-	# Grapple Arrow: bites the ledge and climbs on top
+	# Spirit Walk: a dodge roll, then walking through a rock column (terrain still blocks)
 	P.teleport(home); P.vel = Vector3.ZERO; P.dashes = P.max_dashes()
-	for dz in range(-3, 4):
-		for dx in range(3, 6):
-			W.level[W.idx(int(home.x) + dx, int(home.z) + dz)] = lv + 2
-	P.inp["aim"] = home + Vector3(5.0, 0, 0)
+	P.inp["move"] = Vector2(0, 1)
 	P.do_dash()
-	step(m, 0.7)
-	ok("archer dash: Grapple zips onto a ledge", P.pos.y > home.y + 1.2 and K.st.get("last_grapple") == "zip", "y %.1f -> %.1f" % [home.y, P.pos.y])
-	P.teleport(home); P.dashes = P.max_dashes()
-	P.inp["aim"] = home + Vector3(0, 0, 6.0)
-	P.do_dash()
-	step(m, 0.4)
-	ok("archer dash: no bite hops back", K.st.get("last_grapple") == "hop" and P.pos.z < home.z - 1.5, "z %.1f" % (P.pos.z - home.z))
+	ok("archer dash: Spirit Walk", K.st.get("last_dash") == "spirit" and K.spirit.active() and P.spirit_t > 2.0, "dash %s ghost %.2f" % [str(K.st.get("last_dash")), P.spirit_t])
+	step(m, 0.3)
+	ok("archer dash: the roll moves you", P.pos.z > home.z + 1.5, "z %.1f" % (P.pos.z - home.z))
+	step(m, 3.0)
+	P.inp["move"] = Vector2.ZERO
+	ok("archer dash: Spirit Walk ends after 2.8s", not K.spirit.active() and P.spirit_t <= 0.0)
 	# Plunge from the air
 	P.teleport(home + Vector3(0, 3.0, 0)); P.grounded = false; P.vel = Vector3(0, -2, 0); K.ch_rmb = 2.0; K.cd["rmb"] = 0.0
 	K.res = 0.0     # (Focus filled while standing on the ledge after the zip: a full Focus shot outranks the air variant)
 	P.ak.press_rmb()
 	ok("archer RMB air: Plunge lifts you", K.last_variant == "air" and P.vel.y > 5.0, "vy %.1f" % P.vel.y)
 	step(m, 1.2)
-	# the bow's perfect window: let go right at full draw for +25%
+	# the bow's perfect window: let go right as Supercharged comes up: no extra damage, the next draw is faster
 	P.teleport(home); P.vel = Vector3.ZERO; fresh(T); T.teleport(home + Vector3(-6.5, 0, 0)); aim_at(P, T.pos)    # (clear of the test walls east)
 	P.equip("longbow"); step(m, 0.4)
 	var pf0 := K.perfects
-	step(m, 0.95, func(): P.inp["fire"] = true; K.res = 0.0; aim_at(P, T.pos))
+	step(m, 1.2, func(): P.inp["fire"] = true; K.res = 0.0; aim_at(P, T.pos))
 	P.inp["fire"] = false
 	step(m, 0.5)
-	ok("archer bow: perfect release +25%", K.perfects == pf0 + 1 and dmg(T) >= 74.0, "perfects %d took %.0f" % [K.perfects - pf0, dmg(T)])
+	ok("archer bow: perfect release, Supercharged damage, a quick next draw", K.perfects == pf0 + 1 and dmg(T) >= 55.0 and dmg(T) <= 66.0 and K.draw.quick, "perfects %d took %.0f quick %s" % [K.perfects - pf0, dmg(T), K.draw.quick])
 	# E: Hail Wall: a line of falling arrows; damage over time, slow, blight
 	P.teleport(home); fresh(T); T.teleport(home + Vector3(6, 0, 0))
-	P.inp["aim"] = T.pos
+	aim_at(P, T.pos)
 	P.ak.use_e()
 	ok("archer E: Hail Wall cast", K.in_e())
 	step(m, 2.0, func(): K.res = 0.0)
@@ -636,7 +632,7 @@ func _bulwark() -> void:
 	var m: Match = r[0]; var P: Hunter = r[1]; var T: Hunter = r[2]
 	var home: Vector3 = r[4]
 	var K: BulwarkKit = P.ak
-	ok("bulwark: Tower Shield & Mace", P.wid == "tower_shield")
+	ok("bulwark: War Hammer & Aegis", P.wid == "tower_shield")
 	# hold: raise the shield; blocked shots become Guard
 	K.res = 0.0
 	P.inp["sec_hold"] = true
@@ -688,13 +684,13 @@ func _bulwark() -> void:
 		for dx in range(0, 3):
 			wl[W.idx(int(home.x) + 3 + dx, int(home.z) + dz)] = lv
 	W.level = wl
-	# LMB tap: the mace flies through, lies there, comes back on a second tap
-	T.teleport(home + Vector3(4.0, 0, 0)); fresh(T); P.teleport(home); aim_at(P, T.pos); P.fire_cd = 0.0
+	# LMB tap: the hammer flies to the cursor (through the foe in front), stays planted, comes back on a second tap
+	T.teleport(home + Vector3(4.0, 0, 0)); fresh(T); P.teleport(home); aim_at(P, T.pos + Vector3(1.0, 0, 0)); P.fire_cd = 0.0
 	P.inp["fire"] = true; m.step(DT); P.inp["fire"] = false; m.step(DT)
-	ok("bulwark LMB tap: mace thrown", not K.mace.is_empty())
+	ok("bulwark LMB tap: hammer thrown", not K.mace.is_empty())
 	step(m, 0.6)
 	var thrown := dmg(T)
-	ok("bulwark LMB: mace hits and lies", thrown >= 14.0 and String(K.mace.get("st", "")) == "ground", "took %.0f state %s" % [thrown, String(K.mace.get("st", ""))])
+	ok("bulwark LMB: hammer hits and stays planted", thrown >= 10.0 and String(K.mace.get("st", "")) == "ground", "took %.0f state %s" % [thrown, String(K.mace.get("st", ""))])
 	P.fire_cd = 0.0
 	P.inp["fire"] = true; m.step(DT); P.inp["fire"] = false
 	step(m, 0.8)

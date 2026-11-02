@@ -242,6 +242,7 @@ var ak: ArchKit = null        # the archetype's kit at run time
 var shot_range_k := 1.0       # the next shot's range (a full Focus: +20%)
 var shot_aim := ""            # the next shot's aim mode (AimMode.CURSOR / MAX); "" = the weapon's own
 var draw_t := -1.0            # a bow being drawn: how long (-1: not drawing)
+var spirit_t := 0.0           # Spirit Walk (PinSpirit): rocks, trees and barriers don't stop you while > 0
 var nth_n := 0                # shots since the weapon's "every Nth" bonus
 
 
@@ -1208,7 +1209,7 @@ var wedged_t := 0.0
 func _occ(x: float, z: float, guard: bool) -> float:
 	var st: SkyTrain = m.skytrain
 	if st == null:
-		return m.world.occupy(x, z, r, pos.y, guard)
+		return m.world.occupy(x, z, r, pos.y, guard, spirit_t > 0.0)
 	var sw := st.solid_at(x, z, pos.y, r)
 	if sw > 0.0:
 		return sw
@@ -1376,11 +1377,11 @@ func trigger(dt: float) -> void:
 			if draw_t < 0.0:
 				draw_t = 0.0
 				m.sfx("charge", pos, -12.0 if is_local() else -16.0, 1.6)
-			draw_t += dt
+			draw_t += dt * (ak.draw_rate() if ak else 1.0)
 			if ak and ak.has_method("take_focus_shot") and draw_t < 0.85 and ak.take_focus_shot():
 				draw_t = 9.0; shot_range_k = 1.2
 				_loose()
-			elif ctrl != "local" and draw_t >= 0.95:
+			elif ctrl != "local" and draw_t >= float((wpn["draw"][-1] as Array)[0]) + 0.05:
 				_loose()
 		elif draw_t >= 0.0:
 			_loose()
@@ -1411,8 +1412,8 @@ func _loose() -> void:
 	for stg in stages:
 		if t >= float(stg[0]):
 			dmg = float(stg[1]); rng = float(stg[2]); spd = float(stg[3])
-	if ak and ak.has_method("draw_bonus") and t < 5.0:
-		dmg *= float(ak.draw_bonus(t))       # let go right at full draw (the perfect window)
+	if ak and ak.has_method("draw_bonus"):
+		dmg *= float(ak.draw_bonus(t))       # the kit's stage rules (Pin: the perfect window, overdraw, where it lands)
 	var keep := wpn
 	wpn = wpn.duplicate()
 	wpn["dmg"] = dmg * wup_dmg; wpn["range"] = rng; wpn["speed"] = spd
@@ -2382,7 +2383,7 @@ func _physics(dt: float) -> void:
 	# it overlaps, and the part of your speed going into it is dropped (no bounce, no catch on a
 	# corner); the axis moves below then only meet terrain, edges and walls.
 	var tgt := Vector2(pos.x + vel.x * dt, pos.z + vel.z * dt)
-	var po: Vector2 = m.world.push_out_blocks(tgt.x, tgt.y, r, pos.y)
+	var po: Vector2 = tgt if spirit_t > 0.0 else m.world.push_out_blocks(tgt.x, tgt.y, r, pos.y)
 	var block_n := Vector2.ZERO     # out of the rock you met this step (its face's normal)
 	var rock_b := 0.0               # ...and its top, standing in for occupy()'s answer below
 	if po.distance_squared_to(tgt) > 1e-10:

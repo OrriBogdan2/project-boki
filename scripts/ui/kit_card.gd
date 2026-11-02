@@ -16,7 +16,7 @@ const LABEL := {"dash": "Dash", "passive": "Passive", "lmb": "Attack", "rmb": "R
 ## Which looping preview each archetype's abilities get (KitPreview kinds).
 const PREVIEW := {
 	"thief": {"dash": "dash", "passive": "marks", "rmb": "projectile", "e": "knife", "r": "lines"},
-	"archer": {"dash": "grapple", "passive": "meter", "rmb": "heavy", "e": "rainwall", "r": "arrows3"},
+	"archer": {"dash": "dash2", "passive": "meter", "rmb": "heavy", "e": "rainwall", "r": "arrows3"},
 	"mage": {"dash": "dash2", "passive": "marks", "rmb": "heavy", "e": "zone"},
 	"gunslinger": {"dash": "dash", "passive": "pips", "rmb": "projectile", "e": "lines"},
 	"juggernaut": {"dash": "dash2", "passive": "meter", "rmb": "charge", "e": "grapple", "r": "leap"},

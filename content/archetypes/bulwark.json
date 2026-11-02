@@ -1,21 +1,183 @@
 {
 	"id": "bulwark",
-	"name": "Bulwark",
+	"name": "Bjorn",
 	"weight": "heavy",
 	"color": "#8fd0ff",
-	"fantasy": "The squad's shield. Holds the line, plants a banner, leaps in to save an ally at the edge.",
+	"fantasy": "The squad's shield. Holds the line with his aegis, plants his hammer where the fight is, and heals the spot.",
 	"silhouette": "the shield shape and the banner",
-	"card": {"loop": "Block to build Guard, then bash, charge or smash foes into walls or each other: Crushed stuns them and heals you.", "dash": "A spinning dash that knocks foes aside. Shield up: a Shield Charge. Mid-smash: a short hop.", "passive": "Guard from blocking (50 = Shield Slam); knock a foe into a wall or a foe: Crushed (stun, heal).", "lmb": "Tap: throw the mace (passes through, recall it); hold: a Crushing Blow that carries you on.", "rmb": "Hold to raise the shield and block; let go (or tap) to Bash.", "e": "A healing burst at the lying mace (or your aim) after 1s; mends the shield only while raised.", "weapons": {"tower_shield": "Throw the mace and call it back; hold for a Crushing Blow."}},
+	"card": {
+		"loop": "Frontline tank: block with your aegis, then knock foes into walls with your hammer to stun them and heal.",
+		"role": "Frontline tank: block with your aegis, then knock foes into walls with your hammer to stun them and heal.",
+		"lmb": "Tap to throw the hammer to the cursor and tap again to call it back; hold to spin it, let go to slam forward.",
+		"rmb": "Hold to raise your aegis and block shots from the front; let go or tap to Bash.",
+		"e": "A green light comes down on your planted hammer (or on you), then heals allies there.",
+		"dash": "360 Smash: a short dash that ends in one spinning hit around you; with the aegis up, a Shield Charge.",
+		"passive": "Blocking builds Guard (50 = Shield Slam); knocking a foe into a wall or a foe stuns it and heals you.",
+		"weapons": {
+			"tower_shield": "Tap to throw the hammer to the cursor and tap again to call it back; hold to spin it, let go to slam forward."
+		}
+	},
 	"signature": "tower_shield",
-	"resource": {"id": "guard", "name": "Guard", "max": 100, "kind": "meter", "per_hp": 0.5, "decay": 5.0, "wait": 3.0, "slam": 50.0, "crush_reach": 1.5, "crush_stun": 0.5, "crush_dmg": 8.0, "crush_heal": 24.0, "col": "#fff1b8"},
-	"passive": {"name": "Guard", "desc": "Damage your shield blocks becomes Guard (1 per 2 blocked, max 100); at 50 your Bash is a Shield Slam (push 12, stun 0.6, spends 50). Crushed: a Bash, Shield Charge or full Crushing Blow that knocks a foe into a wall or another foe stuns it 0.5 (8 damage) and heals you 24."},
-	"lmb": {"tap": 0.2, "full": 1.25, "throw_dmg": 16.0, "throw_range": 9.0, "throw_speed": 24.0, "throw_rate": 0.55, "recall_dmg": 10.0, "recall_speed": 30.0, "lie_t": 6.0, "vision_r": 4.5, "smash_dmg": [14.0, 34.0], "smash_kb": [4.0, 12.0], "smash_reach": 2.8, "smash_arc": 130.0, "smash_stun": 0.4, "smash_rate": 0.7},
-	"dash": {"id": "whirl", "name": "Whirl", "icon": "brightshield", "col": "#cfe8ff", "cd": 10.0, "whirl": 3.6, "whirl_speed": 17.0, "whirl_kb": 7.0, "whirl_dmg": 6.0, "charge": 4.2, "charge_speed": 18.0, "charge_kb": 11.0, "charge_dmg": 10.0, "desc": "Whirl: a 3.6m spinning dash that knocks foes aside (6 damage, push 7). With the shield raised it's a Shield Charge: 4.2m behind the shield, invulnerable for its length, 10 damage and push 11 (into a wall or a foe: Crushed). Shift while winding up a Crushing Blow: a short plain dash that costs half a charge.", "short": 2.6},
-	"rmb": {"delivery": "cone", "name": "Shield", "short": "Shield", "icon": "wall", "col": "#9ad8ff", "cooldown": 6.0, "charges": 1, "hold": 0.2, "shield": {"hp": 160.0, "regen": 20.0, "wait": 2.0, "lock": 3.0, "len": 3.0, "arc": 140.0, "slow": 0.6}, "bash": {"radius": 2.6, "angle": 100.0, "dmg": 12.0, "push": 9.0}, "slam": {"push": 12.0, "stun": 0.6, "tell": 0.3, "dmg": 18.0}, "surf_heat": 1.25, "variants": {"hold": "Raise the shield: 160 HP, regenerating; it blocks from the front and you walk slower.", "tap": "Bash: a 2.6m cone, 12 damage, push 9 (into a wall or a foe: Crushed). Letting go after a block bashes too.", "air": "Shield Surf: hold to block from the front while gliding.", "full": "Guard 50+: Shield Slam, 18 damage, push 12 and stun 0.6 (spends 50)."}, "sockets": {"hit": "add", "ctrl": "add", "ctrl_cap": "soft", "guard": "add", "mod": "add"}},
-	"e": {"delivery": "burst", "name": "Mending Ground", "short": "Mend", "icon": "dome", "col": "#8fe3c8", "cooldown": 16.0, "reach": 7.0, "radius": 3.5, "delay": 1.0, "heal": 26.0, "shield": 60.0, "slow": 0.25, "desc": "Mark ground up to 7m away (or where your thrown mace lies): 1s later it bursts, healing allies inside 26; if your shield is raised it mends 60. Foes inside are slowed.", "sockets": {"guard": "add", "ctrl": "swap", "ctrl_cap": "soft", "util": "add", "hit": "add"}},
-	"order": ["sec", "dash", "kin", "sec", "kin", "sec", "dash", "gear"],
-	"rank3": {"sec": "shield HP +60", "dash": "Whirl and Shield Charge +1m", "kin": "Mending Ground +0.5m and heals 10 more"},
-	"rank2": {"sec": "Rank 2: cooldown 6s -> 5.4s, damage +15%.", "dash": "Rank 2: recharge 10s -> 8.5s per charge.", "kin": "Rank 2: cooldown 16s -> 14.4s, healing +25%."},
-	"rank_next": {"sec": "Rank 3: cooldown 6s -> 4.8s, damage +30%; shield HP +60.", "kin": "Rank 3: cooldown 16s -> 12.8s, healing +25%; Mending Ground +0.5m and heals 10 more.", "dash": "Rank 3: recharge 10s -> 7s; Whirl and Shield Charge +1m."},
-	"tells": {"half": "three rune pips over the helm light at 33 / 66 / 100 Guard", "full": "a gold crest light and a gold shield; a 0.3s shield flare before a Slam", "dash_spent": "dash pips dark"}
+	"resource": {
+		"id": "guard",
+		"name": "Guard",
+		"max": 100,
+		"kind": "meter",
+		"per_hp": 0.5,
+		"decay": 5.0,
+		"wait": 3.0,
+		"slam": 50.0,
+		"crush_reach": 1.5,
+		"crush_stun": 0.5,
+		"crush_dmg": 8.0,
+		"crush_heal": 24.0,
+		"col": "#fff1b8"
+	},
+	"passive": {
+		"name": "Guard",
+		"desc": "Damage your aegis blocks becomes Guard (1 per 2 blocked, max 100); at 50 your Bash is a Shield Slam (push 12, stun 0.6, spends 50). Crushed: a Bash, Shield Charge or full Crushing Blow that knocks a foe into a wall or another foe stuns it 0.5 (8 damage) and heals you 24."
+	},
+	"lmb": {
+		"tap": 0.2,
+		"full": 1.25,
+		"throw_dmg": 12.0,
+		"throw_range": 9.0,
+		"throw_speed": 24.0,
+		"throw_rate": 0.55,
+		"recall_dmg": 12.0,
+		"recall_speed": 30.0,
+		"lie_t": 0.0,
+		"vision_r": 4.5,
+		"smash_dmg": [
+			36.0,
+			66.0
+		],
+		"smash_kb": [
+			5.0,
+			13.0
+		],
+		"smash_reach": 2.8,
+		"smash_arc": 180.0,
+		"smash_stun": 0.4,
+		"smash_rate": 0.7,
+		"carry": [
+			6.0,
+			13.0
+		]
+	},
+	"dash": {
+		"id": "smash360",
+		"name": "360 Smash",
+		"icon": "cleave",
+		"col": "#cfe8ff",
+		"cd": 9.0,
+		"whirl": 4.2,
+		"whirl_speed": 18.0,
+		"whirl_kb": 7.0,
+		"whirl_dmg": 24.0,
+		"charge": 4.2,
+		"charge_speed": 18.0,
+		"charge_kb": 11.0,
+		"charge_dmg": 10.0,
+		"desc": "360 Smash: a 4.2m dash, then one full spin of the hammer around you (2.2m): 24 damage, push 7. With the aegis raised it's a Shield Charge: 4.2m behind the aegis, invulnerable for its length, 10 damage and push 11 (into a wall or a foe: Crushed). Shift while spinning up a Crushing Blow: a short plain dash that costs half a charge.",
+		"short": 2.6,
+		"spin_r": 2.2
+	},
+	"rmb": {
+		"delivery": "cone",
+		"name": "Aegis",
+		"short": "Aegis",
+		"icon": "wall",
+		"col": "#9ad8ff",
+		"cooldown": 6.0,
+		"charges": 1,
+		"hold": 0.2,
+		"shield": {
+			"hp": 160.0,
+			"regen": 20.0,
+			"wait": 2.0,
+			"lock": 3.0,
+			"len": 3.0,
+			"arc": 140.0,
+			"slow": 0.6
+		},
+		"bash": {
+			"radius": 2.6,
+			"angle": 100.0,
+			"dmg": 12.0,
+			"push": 9.0
+		},
+		"slam": {
+			"push": 12.0,
+			"stun": 0.6,
+			"tell": 0.3,
+			"dmg": 18.0
+		},
+		"surf_heat": 1.25,
+		"variants": {
+			"hold": "Raise the aegis: a curved gold shield with 160 HP that regenerates; it blocks shots from the front and you walk slower.",
+			"tap": "Bash: a 2.6m cone, 12 damage, push 9 (into a wall or a foe: Crushed). Letting go after a block bashes too.",
+			"air": "Shield Surf: hold to block from the front while gliding.",
+			"full": "Guard 50+: Shield Slam, 18 damage, push 12 and stun 0.6 (spends 50)."
+		},
+		"sockets": {
+			"hit": "add",
+			"ctrl": "add",
+			"ctrl_cap": "soft",
+			"guard": "add",
+			"mod": "add"
+		}
+	},
+	"e": {
+		"delivery": "burst",
+		"name": "Mending Ground",
+		"short": "Mend",
+		"icon": "dome",
+		"col": "#8fe3c8",
+		"cooldown": 16.0,
+		"reach": 0.0,
+		"radius": 3.5,
+		"delay": 1.0,
+		"heal": 26.0,
+		"shield": 60.0,
+		"slow": 0.25,
+		"desc": "A green light column comes down for 1s on your planted hammer (on you with the hammer in hand), then it heals allies inside 26; if your aegis is raised it mends 60. Foes inside are slowed.",
+		"sockets": {
+			"guard": "add",
+			"ctrl": "swap",
+			"ctrl_cap": "soft",
+			"util": "add",
+			"hit": "add"
+		}
+	},
+	"order": [
+		"sec",
+		"dash",
+		"kin",
+		"sec",
+		"kin",
+		"sec",
+		"dash",
+		"gear"
+	],
+	"rank3": {
+		"sec": "shield HP +60",
+		"dash": "360 Smash and Shield Charge +1m",
+		"kin": "Mending Ground +0.5m and heals 10 more"
+	},
+	"rank2": {
+		"sec": "Rank 2: cooldown 6s -> 5.4s, damage +15%.",
+		"dash": "Rank 2: recharge 9s -> 7.7s per charge.",
+		"kin": "Rank 2: cooldown 16s -> 14.4s, healing +25%."
+	},
+	"rank_next": {
+		"sec": "Rank 3: cooldown 6s -> 4.8s, damage +30%; shield HP +60.",
+		"kin": "Rank 3: cooldown 16s -> 12.8s, healing +25%; Mending Ground +0.5m and heals 10 more.",
+		"dash": "Rank 3: recharge 9s -> 6.3s; 360 Smash and Shield Charge +1m."
+	},
+	"tells": {
+		"half": "three rune pips over the helm light at 33 / 66 / 100 Guard",
+		"full": "a gold crest light and a hotter aegis; a 0.3s flare before a Slam",
+		"dash_spent": "dash pips dark"
+	}
 }

@@ -346,7 +346,7 @@ func _voice(pos) -> AudioStreamPlayer:
 ## pos: world position, or null for UI sounds. Repeats of one sound within 30ms are merged, and a
 ## burst of the same sound is capped and stacked quieter.
 func play(sname: String, pos = null, vol_db := 0.0, pitch_var := 0.07, pitch := 1.0) -> void:
-	if not streams.has(sname):
+	if not streams.has(sname) and not _lazy(sname):
 		return
 	var now := Time.get_ticks_msec()
 	var gap: int = 260 if sname.begins_with("v_") else int(MIN_GAP.get(sname, 30))
@@ -453,3 +453,16 @@ func play_stream(st: AudioStream, pos = null, vol_db := 0.0, pitch_var := 0.05) 
 	p.volume_db = v
 	p.pitch_scale = 1.0 + rng.randf_range(-pitch_var, pitch_var)
 	p.play()
+
+## A kit sound not in NAMES (each hero branch adds its own, e.g. pin_* and bjorn_*): loaded from
+## audio/<name>.wav the first time it plays, so new kit sounds need no edit to the shared list.
+var _lazy_miss := {}
+func _lazy(sname: String) -> bool:
+	if _lazy_miss.has(sname):
+		return false
+	var path := "res://audio/%s.wav" % sname
+	if not ResourceLoader.exists(path):
+		_lazy_miss[sname] = true
+		return false
+	streams[sname] = load(path)
+	return true

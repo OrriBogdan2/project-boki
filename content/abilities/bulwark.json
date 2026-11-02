@@ -1,7 +1,7 @@
 {
 	"id": "bulwark",
-	"name": "Bulwark",
-	"short": "Bulwark",
+	"name": "Bracewall",
+	"short": "Brace",
 	"verb": "shield wall",
 	"icon": "wall",
 	"color": "#ffcf8a",
