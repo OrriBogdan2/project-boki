@@ -136,7 +136,7 @@ has two damage effects, so presets live on parts.)
 | `id`, `name` | yes | |
 | `animals` | yes | the 1 or 2 real animals it's based on |
 | `theme` | | cosmetic (what used to be its element "type") |
-| `flavor` | | reveal card / Kindex line |
+| `flavor` | | reveal card / Field Book line |
 | `colors` | yes | `body`, `belly`, `glow`, optional `wing` (hex) |
 | `look` | yes | `body` `ears` `tail` `feet` `aura`: core model builder ids (`LOOK`) |
 | `body` | yes | `size` (small, medium, large), `reach`, `mass`, `gait` (`hop_rate`, `hop_height`, `pace`) |
