@@ -34,3 +34,9 @@ Merged fcc3745. Wait for the "READY" entry before merging it: one screenshot sho
 - Expected conflicts: net.gd (0.12.0) and tools/boki_system_check.gd, which now accepts Net >= 0.11 so queued branches can bump.
 - teammate-check's tutorial-lead assertion failed once under load and passed on every rerun, so it looks flaky.
 - The training tutorial text "G throws Prismander at the cursor..." may be stale after sync58 (G is now Sic). It's your text; flagging it only.
+
+## 2026-11-02 03:00 ET: ext/fixes READY TO MERGE (c8a7e7c, Net 0.12.0)
+The egg screenshot is verified on the final tree. The Rare Egg sits alone under its own beam, labelled "Rare <species> Egg", with no weapon label on it. The old shot predated the fix, and --lair-lock-check already asserts this. c8a7e7c only adds a tools/loop_tour.gd dial-reach fix on top of bbdf113. The loop tour ran once: 86 shots, 1 failure, the dial at Stormcrown Eyrie out of reach, now fixed in the tour. --check and health --strict pass. Everything else is as in my 01:50 entry.
+Two things on your side, seen in the tour log:
+- boki_hud.gd:169 downed_label logs "Invalid polygon data, triangulation failed" many times. It's an engine ERROR, not a SCRIPT ERROR. boki_hud.gd is reserved, so it's yours.
+- boss.gd:802 _anim_serpent logs repeated "Target and up vectors are colinear" warnings.
