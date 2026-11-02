@@ -15,8 +15,8 @@ const SIC_REACH := 9.0        # m: how far a Sic can reach (Kin throw range)
 static func fight(m: Match, h: Hunter, tgt: Ent, d: float, abil: float) -> void:
 	var k: Kin = h.kin
 	var a := h.ai
-	if k == null or k.dead:
-		return
+	if k == null or k.dead or k.resting():
+		return          # (a drained Boki rests on you: nothing to throw or order)
 	if float(a["throw_cd"]) > 0.0:
 		return
 	if randf() > abil:
@@ -65,7 +65,7 @@ static func rescue_goal(h: Hunter) -> Vector3:
 ## Out of a fight: a Boki that wandered off is called back, and a returned Boki comes out again once both are healthy.
 static func upkeep(h: Hunter) -> void:
 	var k: Kin = h.kin
-	if k == null or k.dead:
+	if k == null or k.dead or k.resting():
 		return
 	if k.state == "active" and k.flat_dist(h) > 6.0 and KinCommand.can_recall(h):
 		k.recall()

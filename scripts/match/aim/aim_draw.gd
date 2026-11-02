@@ -60,7 +60,7 @@ func drop_all(h: Node) -> void:
 
 func live(e: Dictionary) -> bool:
 	var h = e["h"]
-	if not is_instance_valid(h) or (h as Hunter).out:
+	if not is_instance_valid(h) or (h as Hunter).out or AimKit.blocked(h):
 		return false
 	return float(m.time) - float(e["t"]) <= float(e["keep"])
 
@@ -74,7 +74,7 @@ func tick_reticle(delta: float) -> void:
 		var r: Dictionary = ret[k]
 		r["flare"] = maxf(0.0, float(r["flare"]) - delta)
 		r["perfect"] = maxf(0.0, float(r["perfect"]) - delta)
-		if not is_instance_valid(r["h"]) or (float(m.time) - float(r["t"]) > KEEP and r["flare"] <= 0.0 and r["perfect"] <= 0.0):
+		if not is_instance_valid(r["h"]) or AimKit.blocked(r["h"]) or (float(m.time) - float(r["t"]) > KEEP and r["flare"] <= 0.0 and r["perfect"] <= 0.0):
 			ret.erase(k)
 	reticle.queue_redraw()
 

@@ -13,7 +13,7 @@
 	},
 	"look": {
 		"scale": 1.45,
-		"part_k": 1.4,
+		"part_k": 1.15,
 		"ring": 5.0,
 		"parts": [
 			"rock_plates",
@@ -35,107 +35,6 @@
 			"move_speed": 0.03
 		},
 		"why": "run-speed bonus by weight class (a light hero keeps the most speed; merge cap +40%)"
-	},
-	"dash": {
-		"burst": 10.0,
-		"radius": 2.4,
-		"kb": -3.5,
-		"visual": "rock",
-		"why": "a dash is a short ground shock that tugs foes toward you"
-	},
-	"lmb": {
-		"name": "Gravity Slam",
-		"icon": "slam",
-		"cooldown": 0.5,
-		"range": 3.6,
-		"pose": [
-			"mf_slam_a",
-			"mf_slam_b"
-		],
-		"desc": "Slam the ground in a short cone. Knocks foes back. Left and right swings alternate.",
-		"why": "0.5s cadence, 3.6m cone: close and committed",
-		"seq": [
-			[
-				{
-					"type": "cone",
-					"radius": 3.6,
-					"arc": 0.45,
-					"dmg": 22,
-					"kb": 8.0,
-					"color": "#b48cff"
-				}
-			],
-			[
-				{
-					"type": "cone",
-					"radius": 3.8,
-					"arc": 0.4,
-					"dmg": 26,
-					"kb": 11.0,
-					"lift": 2.0,
-					"color": "#d6bcff"
-				}
-			]
-		]
-	},
-	"rmb": {
-		"kind": "boulder",
-		"name": "Boulder Roll",
-		"icon": "roll",
-		"cooldown": 3.0,
-		"range": 3.0,
-		"desc": "Hold to roll armoured through foes, carrying them along. Knockback cannot move you. Let go to slam.",
-		"speed": 9.5,
-		"turn": 5.5,
-		"max_s": 3.2,
-		"fill_s": 1.2,
-		"carry": 0.85,
-		"tick_dmg": 5.0,
-		"tick_every": 0.3,
-		"guard": 0.5,
-		"why": "9.5 m/s roll, steering 5.5 rad/s, up to 3.2s; the slam on release grows to full at 1.2s; 50% less damage while rolling",
-		"release": [
-			{
-				"type": "area",
-				"at": "self",
-				"radius": 3.2,
-				"charged": {
-					"dmg": [
-						16,
-						38
-					]
-				},
-				"kb": 10.0,
-				"lift": 4.0,
-				"color": "#d6bcff"
-			}
-		]
-	},
-	"e": {
-		"name": "Gravity Anchor",
-		"icon": "anchor",
-		"cooldown": 7.0,
-		"range": 5.0,
-		"desc": "Drag every foe within 5m toward you and slow them.",
-		"why": "5m pull, 7s",
-		"effects": [
-			{
-				"type": "pull",
-				"at": "self",
-				"radius": 5.2,
-				"strength": 13.0,
-				"color": "#b48cff"
-			},
-			{
-				"type": "area",
-				"at": "self",
-				"radius": 5.2,
-				"dmg": 8,
-				"slow": 1.5,
-				"slow_k": 0.35,
-				"color": "#b48cff"
-			}
-		]
 	},
 	"r": {
 		"name": "Collapse",
@@ -180,5 +79,79 @@
 				]
 			}
 		]
-	}
+	},
+	"aug": {
+		"lmb": {
+			"name": "Star Slam",
+			"icon": "slam",
+			"desc": "Every 3rd attack slams the ground where it lands: a small knockback.",
+			"every": 3,
+			"slam": {
+				"type": "area",
+				"at": "here",
+				"radius": 2.6,
+				"dmg": 14,
+				"kb": 8.0,
+				"color": "#b48cff"
+			}
+		},
+		"rmb": {
+			"name": "Gravity Well",
+			"icon": "anchor",
+			"desc": "Your right click also drags nearby foes in and slows them. Recharges 20% faster.",
+			"cd_k": 0.8,
+			"effects": [
+				{
+					"type": "pull",
+					"at": "self",
+					"radius": 5.0,
+					"strength": 10.0,
+					"color": "#b48cff"
+				},
+				{
+					"type": "area",
+					"at": "self",
+					"radius": 4.5,
+					"dmg": 6,
+					"slow": 1.5,
+					"slow_k": 0.35,
+					"color": "#b48cff"
+				}
+			]
+		},
+		"e": {
+			"name": "Quake",
+			"icon": "quake",
+			"desc": "Your E also quakes the ground around you: damage and a hard shove. Recharges 20% faster.",
+			"cd_k": 0.8,
+			"effects": [
+				{
+					"type": "area",
+					"at": "self",
+					"radius": 4.2,
+					"dmg": 12,
+					"kb": 9.0,
+					"lift": 2.0,
+					"color": "#d6bcff"
+				}
+			]
+		},
+		"dash": {
+			"kind": "charge",
+			"name": "Armoured Charge",
+			"icon": "roll",
+			"desc": "Your dash is armoured and shoves everything it runs through.",
+			"dmg": 8,
+			"shove": 9.0,
+			"width": 1.5,
+			"window": 0.45,
+			"guard": 0.5,
+			"color": "#b48cff"
+		},
+		"stats": {
+			"damage_reduction": 0.2,
+			"knockback_resist": 0.5
+		}
+	},
+	"aug_why": "the augment set of this Boki type, identical for every hero: LMB rider, RMB and E add-on effects, the form dash and a modest passive"
 }

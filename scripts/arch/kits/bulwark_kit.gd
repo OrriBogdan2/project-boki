@@ -184,7 +184,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 		return false
 	var pressed := held and not lmb_was
 	lmb_was = held
-	if KinMerge.active(h):       # a merge ends the Crushing Blow's charge: letting go of it must not swing mid-transformation
+	if KinMerge.transforming(h):       # a merge ends the Crushing Blow's charge: letting go of it must not swing mid-transformation
 		drop_holds()
 		return true
 	if not h.can_fire() or h.fire_cd > 0.0:
