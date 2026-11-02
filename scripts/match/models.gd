@@ -1584,15 +1584,7 @@ static func gun_parts(gun: Node3D, weapon: String, m_gun: Material, m_dark: Mate
 			part(gun, cyl(0.04, 0.036, 0.04, 10), glow.call(Color("d6a8ff")), Vector3(0, 0.02, -0.49), Vector3.ONE, Vector3(PI / 2, 0, 0))
 			grip.call(-0.02, 0.14)
 			stock.call(0.09, 0.18, 0.1, 0.05)
-		"shotgun":
-			part(gun, box(0.13, 0.14, 0.4), m_gun, Vector3(0, 0, -0.12))
-			for sx in [-0.038, 0.038]:
-				part(gun, cyl(0.04, 0.042, 0.36, 12), m_dark, Vector3(sx, 0.03, -0.5), Vector3.ONE, Vector3(PI / 2, 0, 0))
-				part(gun, cyl(0.05, 0.046, 0.05, 12), m_gun, Vector3(sx, 0.03, -0.68), Vector3.ONE, Vector3(PI / 2, 0, 0))
-			part(gun, HeroKit.loft("pump", [Vector3(0, 0, -0.3), Vector3(0, 0, -0.38), Vector3(0, 0, -0.46)], [Vector2(0.075, 0.05), Vector2(0.08, 0.055), Vector2(0.075, 0.05)], 14, Vector3.UP, 0.9), m_acc, Vector3(0, -0.06, 0))
-			part(gun, box(0.02, 0.03, 0.22), glow.call(Color("ffb070")), Vector3(0.068, 0.03, -0.14))
-			grip.call(0.0, 0.16)
-			stock.call(0.08, 0.28, 0.14, 0.07)
+		"shotgun": HeroGearPair.scattergun(gun, m_gun, m_dark, m_acc)      # Dredge's harbour scattergun
 		"slugger":
 			part(gun, cyl(0.1, 0.12, 0.78, 14), m_gun, Vector3(0, 0, -0.26), Vector3.ONE, Vector3(PI / 2, 0, 0))
 			part(gun, cyl(0.15, 0.15, 0.1, 14), m_acc, Vector3(0, 0, -0.64), Vector3.ONE, Vector3(PI / 2, 0, 0))

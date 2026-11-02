@@ -1,6 +1,6 @@
 class_name ArenaDemoPair
 extends RefCounted
-## Arena screenshot demos for Dredge and Ashwick (ArenaDemo hands over every "pr_*" demo and the two
+## Arena screenshot demos for Dredge and Linwick (id ashwick) (ArenaDemo hands over every "pr_*" demo and the two
 ## kit cards): --arena-demo=pr_<move> makes a strip of frames of one kit move (the ability, its
 ## anticipation, impact and follow-through), pr_payoff_dr / pr_payoff_as the payoff moments.
 ##   moves: dr_throw dr_reel dr_anchor dr_barge as_lance as_shot as_leap as_cloak

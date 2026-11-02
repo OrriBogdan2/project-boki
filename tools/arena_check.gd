@@ -110,7 +110,7 @@ func _arena() -> void:
 		P.ak.cd["rmb"] = 0.0; P.ak.ch_rmb = float(P.ak.rmb_charges()); P.fire_cd = 0.0
 		step(m, 0.1)
 		if float(P.ak.rmb_def().get("hold", 0.0)) <= 0.0:
-			continue            # no RMB hold variant (Dredge, Ashwick: their hold is the lance, see --ashwick-combo-check)
+			continue            # no RMB hold variant (Dredge, Linwick: their hold is the lance, see --ashwick-combo-check)
 		var f0: int = P.ak.charge_fulls
 		var mid := -1.0
 		var ring_ok := false
