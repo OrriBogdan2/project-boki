@@ -574,6 +574,8 @@ func _ready_rest() -> void:
 			print("RANSOM lost_news=%d news=%s lost=%d offers=%d" % [res["lost_news"].size(), str(res["ransom_news"]), Save.d["lost_kin"].size(), Save.d["offers"].size()])
 			if Save.d["offers"].is_empty():
 				Save.d["offers"].append({"uid": kc["uid"], "from": "Moss", "gems": 90, "m": 0})
+		if a.begins_with("--ui-tour="):
+			UiTour.run(self, a.substr(10))
 		if a.begins_with("--open="):
 			var which := a.substr(7)
 			get_tree().create_timer(0.2).timeout.connect(func():

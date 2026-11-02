@@ -99,6 +99,45 @@ func _input(event: InputEvent) -> void:
 		back()
 		get_viewport().set_input_as_handled()
 
+## Screenshots (--overlay=<which>[:arg]): opens one menu, or a confirm box, tooltip or toast over it.
+func shot_demo(which: PackedStringArray) -> void:
+	ctx = ctx_now()
+	var arg := which[1] if which.size() > 1 else ""
+	match which[0]:
+		"pause":
+			open_pause(ctx)
+		"settings":
+			if arg != "":
+				tab = arg
+			open_settings()
+		"admin":
+			open_admin()
+		"saves":
+			open_saves()
+		"inventory":
+			if arg != "":
+				inv_tab = arg
+			open_inventory()
+		"dex":
+			inv_tab = "Field Book"
+			open_inventory()
+			open_dex(arg if arg != "" else "cindle")
+		"confirm":
+			open_pause(ctx)
+			UI.confirm(root, "Leave the match?", "You lose everything you carry, and any Boki you brought is left behind.",
+				"Leave", close)
+		"tooltip":
+			tab = "Controls"
+			open_settings()
+			var tip := PanelContainer.new()
+			tip.add_theme_stylebox_override("panel", root.theme.get_stylebox("panel", "TooltipPanel"))
+			var tl := Label.new()
+			tl.text = "Main key: click, then press a key or mouse button"
+			tl.theme_type_variation = "TooltipLabel"
+			tip.add_child(tl)
+			tip.position = Vector2(700, 300)
+			root.add_child(tip)
+
 func ctx_now() -> String:
 	var s = Game.main.screen_node() if Game.main else null
 	if s == null: return "title"
