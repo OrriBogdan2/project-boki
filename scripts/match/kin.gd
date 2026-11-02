@@ -30,6 +30,7 @@ var chase_stall := 0.0          # seconds spent chasing a target without getting
 var hold_at := Vector3.INF
 var cmd := "follow"               # its standing order (KinFollow): follow | guard | chase | return. State "shoulder" is "return" or a short traversal carry
 var chase_target: Ent = null      # chase: what it sticks to
+var disengaged := false           # an explicit Follow / Call back in a fight: it stays at your side until you attack, it or you are hit up close, or you Sic/Chase (KinFollow.disengage)
 var path: Array = []              # its A* path (KinPath), recomputed on path_t
 var path_goal := Vector2i.ZERO
 var path_t := 0.0
@@ -287,6 +288,7 @@ func _order_sic(p: Vector3, from_shoulder := false) -> void:
 
 func _launch(p: Vector3) -> void:
 	st_throws += 1
+	disengaged = false
 	var dive := carry_style() == "perch"
 	# a perched kin is thrown as a dive: up off your pack, then straight down onto the spot
 	var start := owner_h.pos + Vector3(0, 3.4 if dive else 1.5, 0)
@@ -333,6 +335,8 @@ func recall() -> void:
 		hold_at = Vector3.INF
 		if cmd == "guard" or cmd == "chase":
 			cmd = "follow"; chase_target = null
+		if cmd == "follow":
+			KinFollow.disengage(self)       # Call back in a fight: it stays with you
 		m.sfx("recall", pos, -6.0)
 		KinNet.event(m, "recall", self)
 		CombatBus.kin_recalled.emit(self, owner_h)
@@ -775,7 +779,9 @@ func _sim_active(dt: float) -> void:
 		state = "returning"      # wandered off after a fight: run back (a hop when it cannot walk)
 		return
 	if guard == null and not hang_back:
-		if cmd == "chase" and chase_target != null:
+		if KinFollow.is_disengaged(self):
+			target = null          # told to come back: it does not pick a fight on its own until a reason ends that
+		elif cmd == "chase" and chase_target != null:
 			target = chase_target
 		elif target == null or target.dead or not target.hittable() or (target is Hunter and target.downed) or flat_dist(target) > brain.chase_range() + 3.0 or rng.randf() < dt * 0.5:
 			target = brain.pick_target()

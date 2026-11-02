@@ -2263,6 +2263,7 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 		tags = [String(o.get("src", "primary")) if o.get("src", "") != "" else "primary"]
 	if o.get("stun", 0.0) > 0.0: tags = tags + ["stun"]
 	CombatBus.hit_landed.emit(by, target, d, tags)
+	KinFollow.on_damage(target, by, d)
 	var crit: bool = o.get("crit", false)
 	var src: String = o.get("src", "")
 	Oomph.react(self, target, by, d, o)     # flinch, stagger, hit-shake (the gameplay side of oomph)

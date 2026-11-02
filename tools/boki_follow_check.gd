@@ -11,6 +11,8 @@ extends RefCounted
 ##   9. bots use the orders; the net carries the order
 ##  10. Return ordered in the air still ends up on you; a giant-form merge from Follow is ridden
 ##  11. A* is throttled: an unreachable goal does not search every step
+##  12. an explicit Follow in a fight sticks (disengage): it stays at your side with a foe 8m off, and goes back in only when
+##      you hit something, a foe hits it or you from within 4m, or you Sic/Chase; out of a fight nothing changes
 ## (Merge from Return is instant and from out is a leap: --boki-system-check)
 
 var bad := 0
@@ -95,7 +97,7 @@ func run(mn: Node) -> void:
 	var only := ""
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--bokifollow-only="): only = a.substr(18)
-	for part in ["default", "leash", "traverse", "sic_call", "wheel", "carried", "mount", "no_refusal", "bots", "net", "air_orders", "path_cost"]:
+	for part in ["default", "leash", "traverse", "sic_call", "wheel", "carried", "mount", "no_refusal", "bots", "net", "air_orders", "path_cost", "disengage"]:
 		if only == "" or only.split(",").has(part):
 			call("_" + part)
 	CombatBus.hit_landed.disconnect(_on_hit)
@@ -466,3 +468,81 @@ func _path_cost() -> void:
 	# the heap returns the same path length as before for an open trip
 	var path := KinPath.find(W, P.pos, P.pos + Vector3(-12.0, 0, 5.0))
 	ok(path.size() == 12, "the heap-based A* still finds the shortest path (%d tiles)" % path.size())
+
+# ------------------------------------------------------------------ 12. Follow sticks in a fight
+## A brute held 8m from you (it is pinned each step so only the Boki's choices matter) and the Boki beside it.
+func _hold_brute(P: Hunter, k: Kin) -> Mob:
+	var mb := mob_at("brute", P.pos + Vector3(8.0, 0, 0))
+	k.teleport(mb.pos - Vector3(1.8, 0, 0))
+	return mb
+
+func _pin(mb: Mob, at: Vector3) -> void:
+	mb.teleport(at)
+	mb.vel = Vector3.ZERO
+
+func _disengage() -> void:
+	# control: with no order it fights what is near (the behaviour Follow used to have in a fight)
+	_fresh()
+	var P := m.player
+	var k: Kin = P.kin
+	var mb := _hold_brute(P, k)
+	var at := mb.pos
+	run_for(2.0, func(): _pin(mb, at))
+	ok(not k.disengaged and (mb.hp < mb.max_hp or k.flat_dist(mb) < 3.0), "control: with no order it goes for the foe (foe %.0f/%.0f hp, %.1fm from it)" % [mb.hp, mb.max_hp, k.flat_dist(mb)])
+	# the order, mid-fight: back to your side and it stays for 5s with the foe 8m away
+	_fresh()
+	P = m.player
+	k = P.kin
+	mb = _hold_brute(P, k)
+	at = mb.pos
+	aim_at(P, mb.pos)
+	ok(KinCommand.order(P, "follow") and k.disengaged and KinFollow.is_disengaged(k), "Follow in a fight disengages it")
+	run_for(2.0, func(): _pin(mb, at))
+	var st := {"worst": 0.0}
+	run_for(5.0, func():
+		_pin(mb, at)
+		st["worst"] = maxf(float(st["worst"]), k.flat_dist(P)))
+	ok(float(st["worst"]) < 3.0 and k.state == "active" and k.target == null and mb.hp >= mb.max_hp, "...and for 5s it stays within 3m of you with the foe 8m away (worst %.1fm, foe hp %.0f/%.0f)" % [float(st["worst"]), mb.hp, mb.max_hp])
+	# (a) you hit the foe: it joins you
+	mb.hurt(3.0, P, {"src": "primary"})
+	ok(not k.disengaged, "(a) you deal damage: it is free to fight again")
+	run_for(2.5, func(): _pin(mb, at))
+	ok(mb.hp < mb.max_hp - 3.0 or k.flat_dist(mb) < 3.0, "...and it joins your target (foe %.0f/%.0f hp, %.1fm from it)" % [mb.hp, mb.max_hp, k.flat_dist(mb)])
+	# (b) a hit up close, not one from afar
+	_fresh()
+	P = m.player
+	k = P.kin
+	mb = _hold_brute(P, k)
+	KinCommand.order(P, "follow")
+	var far := mob_at("skitter", P.pos + Vector3(-8.0, 0, 0))
+	k.hurt(2.0, far, {"src": "mob"})
+	P.hurt(2.0, far, {"src": "mob"})
+	ok(k.disengaged, "(b) a hit on it or you from 8m (ranged) does not end it")
+	mb.teleport(k.pos + Vector3(2.5, 0, 0))
+	k.hurt(2.0, mb, {"src": "mob"})
+	ok(not k.disengaged, "(b) a foe hits it from 2.5m: it fights back")
+	k.disengaged = true
+	mb.teleport(P.pos + Vector3(3.0, 0, 0))
+	P.hurt(2.0, mb, {"src": "mob"})
+	ok(not k.disengaged, "(b) a foe hits you from 3m: it fights back")
+	# (c) Sic and Chase
+	k.disengaged = true
+	aim_at(P, mb.pos)
+	KinFollow.sic(k, mb.pos)
+	ok(not k.disengaged, "(c) Sic ends it")
+	k.disengaged = true
+	k.state = "active"; k.fly = {}
+	ok(KinCommand.order(P, "chase") and not k.disengaged, "(c) Chase ends it")
+	# Call back in a fight is the same order; out of a fight nothing changes
+	_fresh()
+	P = m.player
+	k = P.kin
+	mb = _hold_brute(P, k)
+	k.cmd = "guard"; k.hold_at = k.pos
+	KinCommand.call_back(P)
+	ok(k.disengaged, "Call back in a fight disengages it too")
+	_fresh()
+	P = m.player
+	k = P.kin
+	KinCommand.order(P, "follow")
+	ok(not k.disengaged, "out of a fight a plain Follow changes nothing")
