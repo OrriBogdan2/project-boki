@@ -30,7 +30,7 @@ Dagger 15), Encore 24s (Death Blossom 23.1, about 3.5 Trickshots).
 | Dash, Vault | Shift | A 2.4m cartwheel (0.25s) the way you move, a white arc traced by hands and feet; +30% speed until the next hit; the next bolt within 3s is empowered: a big blue chakram in a gold lightning streak, 3.5x, 2 Marks, Shred; landing it gives the Vault back | Cartwheel: a short sideways cartwheel, the next LMB empowered, a hit resets it | As the source |
 | RMB, Bola | tap | A 0.4s wind-up (whirled overhead) with a chevron lane showing (1.4m wide, 10.8m long) that follows your aim, then the Bola flies 7m: 5 and a Mark, the first foe Grounded 1.5s with yellow binding rings, and it flies on 3.8m; it bounces once off a wall; a second foe: both stunned 0.9 and +13 | Trickshot: the lane for 0.4-0.6s, Grounded on the first, Stunned on two, bounces off terrain | As the source |
 | E, Shadow Knife | tap, recast | A dagger to the cursor (14m at most): it sticks in the first foe on the way (8, slowed 50% for 2.5s) or lands where you aimed; a white circle marks it; recast blinks you there through 5 cyan afterimages; after 6s you step anyway | Phantom Dagger: sticks or lands, recast teleports with a ghost chain | As the source |
-| X, Encore | tap (level 6, rank 2 at 9) | A violet ring grows round her from 2.3m to 5.4m (3 bh) over 0.4s, everyone sees it, then rides with her for 2s: every 0.4s a blade flies at each foe inside (5 at most each): 8, and 12 from the outer band (past 75% of the radius), which also blights 6s. She keeps walking, shooting and dashing; casting it gives the Vault back; every blade refreshes her Marks; three blades circle her while it runs; a plain fade at the end. 24s cooldown (20.4s at rank 2). Landing blades on a rival hunter fills the bond once, as the cast ends | Death Blossom: the ring grows 1.3 to 3 bh in 0.4s, up to 5 shots at each enemy over 2s, the outer band hits harder and Anti-Heals 6s | As the source; the look (her violet ring with a gold outer band, violet blades) is ours |
+| X, Encore | tap (level 6) | A violet ring grows round her from 2.3m to 5.4m (3 bh) over 0.4s, everyone sees it, then rides with her for 2s: every 0.4s a blade flies at each foe inside (5 at most each): 8, and 12 from the outer band (past 75% of the radius), which also blights 6s. She keeps walking, shooting and dashing; casting it gives the Vault back; every blade refreshes her Marks; three blades circle her while it runs; a plain fade at the end. 24s cooldown. A blade landing on a rival hunter fills the bond (the best event of the cast counts) | Death Blossom: the ring grows 1.3 to 3 bh in 0.4s, up to 5 shots at each enemy over 2s, the outer band hits harder and Anti-Heals 6s | As the source; the look (her violet ring with a gold outer band, violet blades) is ours |
 | R | tap | The Boki Merge | (n/a) | R is the Merge for every hero |
 
 ## Assumptions (where the footage is silent; easy to change in content/archetypes/thief.json)
@@ -49,7 +49,7 @@ Dagger 15), Encore 24s (Death Blossom 23.1, about 3.5 Trickshots).
 12. **Encore needs line of sight:** a blade isn't thrown at a foe behind a wall, even inside the ring.
 13. **Encore on a merge or a knock:** it ends at once (no more blades); what landed still pays the bond.
 14. **Encore targets:** foes only (hunters and monsters, not Boki); allies are untouched.
-15. **The bond:** paid once per cast as it ends, for the best thing a blade did to a rival hunter (a hit, a knock or a kill), through the main session's `KinBond.from_ult`; nothing when no blade landed on a hunter.
+15. **The bond:** paid as blades land on a rival hunter, topped up to the best event of the cast (a hit, a knock or a kill) by `HeroUlt.landed`, which calls the main session's `KinBond.from_ult` once it exists; nothing when no blade landed on a hunter.
 
 ## Small mechanics
 
@@ -75,7 +75,7 @@ and asserted in `--dancer-combo-check` / `--kit-combo-check`.
 | Every ult shot refreshes all stacks | wiki R | n/a | Built; asserted |
 | LMB keeps firing during the ult, and she moves freely with the ring attached | wiki R, gamerblurb | yes (ult f41-f47) | Built; asserted |
 | The ult resets Cartwheel (the wiki: dashes while active) | in-game card, wiki R | yes (0193) | Built as the Vault back on the cast; asserted |
-| The ult's numbers grow with rank (rank 2: damage, cooldown) | wiki R levels | n/a | Built: rank 2 at level 9, +15% damage, 15% shorter cooldown |
+| The ult's numbers grow with rank (rank 2: damage, cooldown) | wiki R levels | n/a | Not built: the X ultimates have no ranks (HeroUlt); its damage grows with level through ability power |
 | A knock or assist heals 25% | wiki passive | yes (0063) | Built; asserted |
 
 ## Combinations
@@ -123,7 +123,7 @@ as one arm flings a blade out; no leg keys, so she walks).
 - The Bola is kit-run (it flies on through its first foe and bounces), with the stage's effects applied on the wrap.
 - Holds cleared by `_drop_holds()` on a merge: `bola_cast`, `encore.st` (Encore, `ThiefUlt.drop`).
 - Encore lives in `scripts/arch/kits/thief_ult.gd` (`ThiefUlt`, owned by the kit); X reaches it through
-  `ArchKit.cast_ult()` on the `hunter_ult` action. Its numbers are `r` in content/archetypes/thief.json.
+  `ArchKit.cast_ult()` on the `hunter_ult` action. Its numbers are `x` in content/archetypes/thief.json; the shared X base (gate, cooldown `cd["x"]`, HUD slot, bond) is `HeroUlt` (scripts/arch/hero_ult.gd).
   Sounds: `dj_encore` (the ring opening), `dj_encore_whirr` (the 2s it runs), `dj_encore_hit` (a blade landing).
 - The Jackpot fold (the fifth Mark set off a short Death Blossom) is gone: with Encore on X it duplicated the
   ultimate, so the passive is back to the source's (Marks ramp the bolts, knocks heal).

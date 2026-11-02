@@ -44,7 +44,7 @@ Updated by ext/kitfix-dancer-juggernaut (server update 5) against the footage re
 | RMB in the pull | during E | Cinder Spin, Haul Slam, Chain Lunge (below) | Anti-Heal Spin | As before |
 | Dash, Rampage | Shift | 3 charges from rank 1, 3.6m in 0.3s: 7 along it, the tip 14 and a big knock, orange flame streaks; rank 3: the tip +25% | Quick Dash: 3 charges, about 2 bh | As the source; sync62's slower heavy dash kept (0.3s) |
 | E, Warchain | tap, recast | 10m (9.5s cooldown): a barbed hook on a wavy orange chain; hooked (foe, blighted) or a wall: a straight striped link chain that stays on as you walk, 4s; recast pulls you | Tether Chain: wavy in flight, striped links attached, 9.4s | As the source |
-| X, Gilded Riposte | tap (level 6, rank 2 at 9) | A 0.65s guard: planted (no walk, jump or other button), blade upright, a gold glow and sparks; no damage and no crowd control get through, and each hit blocked (two at most, a metallic ting each) makes the answer 20% harder. A 1.8m x 3.6m strip ahead (it follows the aim) shows to everyone through the guard. Then he lunges 1.8m and cleaves up through it (an upward crescent in his gold, run hot at the edge, and a gold cloud): 34, he heals 80% of what it deals (less while blighted); a knock with it makes it ready at once. About 1.1s in all; 22s (18.7s at rank 2). Landing it on a rival hunter fills the bond | Retaliation: 0.65s invulnerable, then a heavy strike in a rectangle ahead (about 1 x 2 bh), heals 80%, reusable on a kill | As the source; our look (gold guard, upward gold cleave) replaces its red crescent |
+| X, Gilded Riposte | tap (level 6) | A 0.65s guard: planted (no walk, jump or other button), blade upright, a gold glow and sparks; no damage and no crowd control get through, and each hit blocked (two at most, a metallic ting each) makes the answer 20% harder. A 1.8m x 3.6m strip ahead (it follows the aim) shows to everyone through the guard. Then he lunges 1.8m and cleaves up through it (an upward crescent in his gold, run hot at the edge, and a gold cloud): 34, he heals 80% of what it deals (less while blighted); a knock with it makes it ready at once. About 1.1s in all; 22s cooldown. Landing it on a rival hunter fills the bond | Retaliation: 0.65s invulnerable, then a heavy strike in a rectangle ahead (about 1 x 2 bh), heals 80%, reusable on a kill | As the source; our look (gold guard, upward gold cleave) replaces its red crescent |
 | R | tap | The Boki Merge | (n/a) | R is the Merge for every hero |
 
 ## Ult choice
@@ -68,8 +68,8 @@ ultimate (now the X cooldown).
 9. **The guard is committed:** no dash or other button cancels it; the strip follows the aim until the strike.
 10. **The reset** counts a knock (down) on a rival hunter with the cleave; monsters don't reset it.
 11. **Invulnerable means everything but the abyss:** a fall still counts; damage over time is blocked too.
-12. **The bond:** paid once when the cleave lands on a rival hunter, for the best of it (a hit, a knock or a kill),
-    through the main session's `KinBond.from_ult`; a miss or a monster pays nothing.
+12. **The bond:** paid when the cleave lands on a rival hunter (a hit, a knock or a kill, the best of the cast) by
+    `HeroUlt.landed`, which calls the main session's `KinBond.from_ult` once it exists; a miss or a monster pays nothing.
 
 ## Small mechanics
 
@@ -155,8 +155,8 @@ Finishing Slam and the Cinder Spin everywhere the player can read them (content,
 ## Engine notes
 
 - The Gilded Riposte lives in `scripts/arch/kits/juggernaut_ult.gd` (`JuggernautUlt`, owned by the kit); X
-  reaches it through `ArchKit.cast_ult()` on the `hunter_ult` action. Numbers: `r` in
-  content/archetypes/juggernaut.json. Sounds: `jug_guard`, `jug_ting` (a blocked hit), `jug_riposte` (the cleave).
+  reaches it through `ArchKit.cast_ult()` on the `hunter_ult` action. Numbers: `x` in
+  content/archetypes/juggernaut.json; the shared X base (gate, cooldown `cd["x"]`, HUD slot, bond) is `HeroUlt`. Sounds: `jug_guard`, `jug_ting` (a blocked hit), `jug_riposte` (the cleave).
 - The guard is `JuggernautKit.incoming` (every hit blocked while guarding), `move_k` (planted) and `busy`.
 - Net: the kit move id rides the hunter snapshot from Net 0.15.0, so remote players see the slams and lunges.
 

@@ -257,26 +257,24 @@ func on_knock(t: Hunter, mine: bool) -> void:
 
 ## The Slam's sweet spot then a knock: the Gilded Riposte (X) is ready again (once it is unlocked).
 func _reset_riposte() -> void:
-	if float(cd["r"]) <= 0.0 or not r_unlocked():
+	if float(cd["x"]) <= 0.0 or not HeroUlt.unlocked(self):
 		return
-	cd["r"] = 0.0
+	cd["x"] = 0.0
 	slam_resets += 1
-	m.fx.word(h.pos + Vector3(0, 2.8, 0), "RIPOSTE READY", col_of(r_def()), true)
-	m.fx.ring(h.pos, 2.0, col_of(r_def()), 0.35)
+	m.fx.word(h.pos + Vector3(0, 2.8, 0), "RIPOSTE READY", col_of(x_def()), true)
+	m.fx.ring(h.pos, 2.0, col_of(x_def()), 0.35)
 	m.sfx("ab_ready", h.pos, -2.0, 0.8)
 	if h.is_local(): h._ab_feedback("x", "ready")
-	net_ring(h.pos, 2.0, col_of(r_def()))
+	net_ring(h.pos, 2.0, col_of(x_def()))
 
 # ------------------------------------------------------------------ X: Gilded Riposte (JuggernautUlt)
+## X (HeroUlt gates it: level 6, its own cooldown in cd["x"]).
 func cast_ult() -> bool:
-	if not ult_ready():
-		return false
 	riposte.start()
-	ult_spent()
 	return true
 
-func ult_running() -> float:
-	return riposte.left_k()
+func ult_running() -> bool:
+	return riposte.running()
 
 ## Planted in the guard and the cleave: no other button does anything.
 func busy() -> bool:
@@ -994,9 +992,9 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null:
 		return
 	# the Gilded Riposte up close: the guard eats what they throw, then the cleave answers
-	if r_unlocked() and float(cd["r"]) <= 0.0 and los and dist < float(r_def()["len"]):
+	if HeroUlt.unlocked(self) and float(cd["x"]) <= 0.0 and los and dist < float(x_def()["len"]):
 		h.inp["aim"] = tgt.pos + Vector3(0, 0.9, 0)
-		h.inp["hult"] = true
+		h.inp["xult"] = true
 		return
 	# pulled along the chain: spin as you arrive
 	if reel_t > 0.0 and rmb_ready() and int(h.slot_lv["sec"]) > 0:

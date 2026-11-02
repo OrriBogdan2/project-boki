@@ -1,12 +1,12 @@
 class_name JuggernautUlt
 extends RefCounted
-## Zedran's ultimate on X, Gilded Riposte (his "r" data in content/archetypes/juggernaut.json; the source's
+## Zedran's ultimate on X, Gilded Riposte (his "x" data in content/archetypes/juggernaut.json; the source's
 ## Retaliation, briefs/hero-ref/juggernaut.md "Ultimate (on X)"). Press: he plants in a guard for 0.65s,
 ## blade upright and his body flaring gold, taking no damage and no crowd control (each hit he blocks rings
 ## out and makes the answer harder, up to two). Then he lunges 1.8m and cleaves up through the strip ahead
 ## (1.8m wide, 3.6m long, shown to everyone through the guard): he heals 80% of what it deals, and knocking a
-## hunter with it makes it ready again at once. Landing it on a rival hunter fills the bond meter once (a hit, a
-## knock or a kill, the best of the cleave; ArchKit.ult_bond). Owned by JuggernautKit.
+## hunter with it makes it ready again at once. Landing it on a rival hunter fills the bond meter
+## (HeroUlt.landed: a hit, a knock or a kill, the best of the cast). Owned by JuggernautKit.
 
 const GOLD := Color("ffc94a")          # the guard's glow and the cleave's outer edge (the source's is red)
 const HOT := Color("ffe39a")           # the cleave's inner fill and the impact cloud: his gold, run hot
@@ -22,13 +22,12 @@ var blocked := 0                       # hits blocked over the run
 var resets := 0                        # knocks that made it ready again
 var last_dealt := 0.0
 var last_healed := 0.0
-var bond_kind := ""                    # what the last cast paid the bond for ("" for nothing)
 
 func _init(kit: JuggernautKit) -> void:
 	k = kit
 
 func data() -> Dictionary:
-	return k.r_def()
+	return k.x_def()
 
 func running() -> bool:
 	return not st.is_empty()
@@ -43,20 +42,11 @@ func move_k() -> float:
 		"recover": return 0.5
 	return 1.0
 
-## 0..1 of the cast left (the HUD's ring round the X slot).
-func left_k() -> float:
-	if st.is_empty():
-		return 0.0
-	var d := data()
-	var total := float(d["guard"]) + float(d["strike_t"]) + float(d["recover"])
-	return clampf(1.0 - float(st["elapsed"]) / total, 0.0, 1.0)
-
 ## X pressed: the guard goes up at once.
 func start() -> void:
 	var h := k.h
 	casts += 1
-	bond_kind = ""
-	st = {"phase": "guard", "t": 0.0, "elapsed": 0.0, "dir": h.aim_dir(), "blocks": 0, "last_block": -9.0}
+	st = {"phase": "guard", "t": 0.0, "dir": h.aim_dir(), "blocks": 0, "last_block": -9.0}
 	k.play("jug_guard")
 	_show_glow(true)
 	k.m.fx.word(h.pos + Vector3(0, 3.6, 0), String(data()["name"]).to_upper(), GOLD, true)
@@ -79,7 +69,6 @@ func tick(dt: float) -> void:
 		return
 	var d := data()
 	st["t"] = float(st["t"]) + dt
-	st["elapsed"] = float(st["elapsed"]) + dt
 	match String(st["phase"]):
 		"guard":
 			_tick_guard(d)
@@ -129,10 +118,9 @@ func _land(d: Dictionary) -> void:
 	st["t"] = 0.0
 	h.roll_t = 0.0
 	var blocks := int(st["blocks"])
-	var dmg := float(d["dmg"]) * (1.0 + float(d["block_k"]) * float(blocks)) * k.power("ult")
+	var dmg := float(d["dmg"]) * (1.0 + float(d["block_k"]) * float(blocks)) * k.power("x")
 	var mid := from + Vector3(dir.x, 0, dir.y) * float(d["len"]) * 0.55
 	k.fx().crescent(mid + Vector3(0, 1.0, 0), dir, 150.0, float(d["len"]) * 0.6, GOLD, HOT, 0.24, PI * 0.5)
-	var best := ""
 	last_dealt = 0.0
 	for f in k.m.foes_of(h.team):
 		if not f.hittable() or absf(f.pos.y - from.y) > 2.0:
@@ -145,12 +133,9 @@ func _land(d: Dictionary) -> void:
 			continue
 		last_dealt += dealt
 		_impact(f, dir, dealt)
-		if f is Hunter and f.team != h.team:
-			var kind := ThiefUlt.landed_kind(f as Hunter)
-			if kind != "hit":
-				_reset()
-			if ThiefUlt.BOND_RANK[kind] > ThiefUlt.BOND_RANK[best]:
-				best = kind
+		if f is Hunter and ((f as Hunter).downed or f.hp <= 0.0):
+			_reset()
+		HeroUlt.landed(k, f)
 	if last_dealt > 0.0:
 		strikes += 1
 		var hp0 := h.hp
@@ -158,11 +143,8 @@ func _land(d: Dictionary) -> void:
 		last_healed = h.hp - hp0
 		if last_healed >= 1.0:
 			k.fx().pillar(h.pos, Color("ffd27a"), 2.6, 0.5, 0.5)
-	if best != "":
-		bond_kind = best
-		k.ult_bond(best)
 
-## On someone hit: the white impact cloud, the hit-stop and a heavy shake.
+## On someone hit: the gold impact cloud, the hit-stop and a heavy shake.
 func _impact(f: Ent, dir: Vector2, dealt: float) -> void:
 	var h := k.h
 	k.fx().star(f.pos + Vector3(0, 1.2, 0), GOLD, 2.4, 0.3, HOT)
@@ -176,7 +158,7 @@ func _impact(f: Ent, dir: Vector2, dealt: float) -> void:
 ## A hunter knocked by the cleave: it is ready again at once.
 func _reset() -> void:
 	resets += 1
-	k.cd["r"] = 0.0
+	k.cd["x"] = 0.0
 	k.m.fx.word(k.h.pos + Vector3(0, 2.6, 0), "RIPOSTE READY", GOLD, true)
 	k.m.sfx("unlock", k.h.pos, -4.0, 1.4)
 

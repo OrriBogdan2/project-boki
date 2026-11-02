@@ -5,7 +5,7 @@
 	"color": "#ff8a6a",
 	"fantasy": "The wrecking ball. Burns hotter with every hit, chains you in, and finishes it.",
 	"silhouette": "the horned pauldrons",
-	"card": {"loop": "Melee bruiser: get in, chain them close, and finish the wounded.", "dash": "Three charges of a short dash attack the way you face. Its tip hits twice as hard.", "passive": "Damage fills Rage. Full, you're Enraged: more damage, faster dashes and cooldowns. Knocks heal you.", "ult": "Guard for 0.65s, taking nothing, then lunge into a cleave that heals you; a knock with it resets it.", "rmb": "Tap: a heavy slam, harder on the wounded; a knock after its sweet spot resets your ultimate. Hold: charge, then fling yourself forward. In the air: slam down at your cursor.", "e": "Throw a chain at a foe or a wall. Press E again to pull yourself to it.", "weapons": {"greatsword": "Wide slashes, double at the tip. Hold to throw a Searing Wave."}},
+	"card": {"loop": "Melee bruiser: get in, chain them close, and finish the wounded.", "dash": "Three charges of a short dash attack the way you face. Its tip hits twice as hard.", "passive": "Damage fills Rage. Full, you're Enraged: more damage, faster dashes and cooldowns. Knocks heal you.", "x": "Guard for 0.65s, taking nothing, then lunge into a cleave that heals you; a knock with it resets it.", "rmb": "Tap: a heavy slam, harder on the wounded; a knock after its sweet spot resets your ultimate. Hold: charge, then fling yourself forward. In the air: slam down at your cursor.", "e": "Throw a chain at a foe or a wall. Press E again to pull yourself to it.", "weapons": {"greatsword": "Wide slashes, double at the tip. Hold to throw a Searing Wave."}},
 	"signature": "greatsword",
 	"lmb": {"tap": 0.22, "full": 0.95, "rate": 0.34, "dmg": 8.0, "tip": 1.0, "reach": 3.1, "arc": 175.0, "kb": 2.6,
 		"wave_dmg": [12.0, 28.0], "wave_range": [6.0, 10.0], "wave_size": [0.55, 0.95], "wave_speed": 20.0, "wave_burn": 4.0, "wave_slow": 0.3, "wave_rate": 0.6, "wave_rage": 3.0},
@@ -25,12 +25,12 @@
 	"e": {"delivery": "projectile", "name": "Warchain", "short": "Chain", "icon": "hook", "col": "#d8c0a0", "cooldown": 9.5, "range": 10.0, "speed": 34.0, "dmg": 8.0, "time": 4.0, "reel_speed": 22.0, "refund_foe": 0.33,
 		"desc": "Throw a chain 10m: it hooks the first foe (8 damage, blighted while tethered: healing barely takes) or bites a wall, for 4s. Press E again to pull yourself to it. The cooldown starts when you pull or the chain breaks (a stun breaks it); you can't throw it while rooted or grounded.",
 		"sockets": {"hit": "add", "ctrl": "add", "ctrl_cap": "soft", "util": "add"}},
-	"r": {"name": "Gilded Riposte", "short": "Riposte", "icon": "cleave", "col": "#ffc94a", "cooldown": 22.0, "unlock": 6, "fuse": 0.0,
+	"x": {"name": "Gilded Riposte", "short": "Riposte", "icon": "cleave", "col": "#ffc94a", "cooldown": 22.0, "unlock": 6,
 		"guard": 0.65, "strike_t": 0.1, "recover": 0.35, "lunge": 1.8, "len": 3.6, "width": 1.8, "dmg": 34.0, "block_k": 0.2, "blocks_max": 2, "heal": 0.8,
 		"desc": "Plant in a gold guard for 0.65s: nothing hurts or stuns you, and each hit you block (two at most) makes the answer 20% harder. Then you lunge 1.8m and cleave up through the 1.8m x 3.6m strip ahead (everyone sees it through the guard): 34, and you heal 80% of what it deals (less while blighted). Knock a hunter with it and it is ready again at once."},
 	"order": ["dash", "sec", "kin", "sec", "dash", "ult", "sec", "kin", "ult", "gear"],
 	"rank3": {"dash": "the tip hits +25% harder", "sec": "+20% damage on every Smash", "kin": "hooking a foe refunds 33% of the cooldown"},
-	"rank2": {"ult": "Rank 2 (level 9): cooldown 22s -> 18.7s, damage +15%.", "sec": "Rank 2: cooldown 2s -> 1.8s, damage +15%.", "dash": "Rank 2: recharge 9s -> 7.6s per charge.", "kin": "Rank 2: cooldown 9.5s -> 8.6s, damage +15%."},
+	"rank2": {"sec": "Rank 2: cooldown 2s -> 1.8s, damage +15%.", "dash": "Rank 2: recharge 9s -> 7.6s per charge.", "kin": "Rank 2: cooldown 9.5s -> 8.6s, damage +15%."},
 	"rank_next": {"sec": "Rank 3: cooldown 2s -> 1.6s, damage +30%; +20% damage on every Smash.", "kin": "Rank 3: cooldown 9.5s -> 7.6s, damage +30%; hooking a foe refunds 33% of the cooldown.", "dash": "Rank 3: recharge 9s -> 6.3s; the tip hits +25% harder."},
 	"tells": {"half": "red heat glowing through the pauldrons as Rage fills, steam from half", "full": "Enraged: a red shell, the hunter swells, a roar within 25m; a magenta strike lane while a Smash winds up; a red outline on anyone wounded enough to finish; a gold glow and a white strip ahead of him while he guards", "dash_spent": "dash pips dark"}
 }

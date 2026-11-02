@@ -1518,12 +1518,12 @@ func _draw_arch_abilities(sz: Vector2, p: Hunter) -> void:
 	if float(ei.get("up", 0.0)) > 0.0:
 		c.draw_arc(er.get_center(), s * 0.5 + 4.0, -PI / 2, -PI / 2 + TAU * clampf(float(ei["up"]) / maxf(0.1, float(p.ak.e_def().get("time", 5.0))), 0.0, 1.0), 32, Color(ei["col"], 0.9), 3.0, true)
 	x += s + gap
+	x = UltSlot.draw(self, p, x, y, s, gap)        # X: the hero ultimate
 	# R: the Merge (the bond meter), a little bigger
 	var us := 58.0
 	var ur := Rect2(Vector2(x, y - (us - s)), Vector2(us, us))
 	BokiHud.r_slot(self, p, ur, us)
 	x += us + gap + 4.0
-	x = HeroUltHud.draw(self, p, x, y, s)      # X: the hero's own ultimate
 	# C: the Boki's own ability, G: throw / recall (hold: hold the spot or follow)
 	x = BokiHud.cg_slots(self, p, x, y, s)
 	if not g1.is_empty() and Gear.ALL.has(String(g1["id"])):
@@ -2679,8 +2679,6 @@ func _tip_lines(id: String, p: Hunter) -> Array:
 		return out
 	if id.begins_with("gslot:"):
 		return GearPanel.tip(p, int(id.substr(6)))
-	if p.ak and id == "x":
-		return HeroUltHud.tip(self, p)
 	if p.ak and id in ["sec", "k1", "r", "dash", "kin_ab", "throw"]:
 		return _arch_tip(id, p)
 	match id:

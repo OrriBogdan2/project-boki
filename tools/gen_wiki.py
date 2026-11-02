@@ -203,7 +203,7 @@ KIN1 = content("kin")
 AB2 = content("abilities_v2")
 MERGE = content("merges_v2")
 EVO = content("evolution_v2")
-SLOT_NAMES = {"sec": "RMB", "dash": "Dash (Shift)", "kin": "E", "ult": "X (ultimate)", "gear": "Glove (Q)"}
+SLOT_NAMES = {"sec": "RMB", "dash": "Dash (Shift)", "kin": "E", "ult": "R (ultimate)", "gear": "Glove (Q)"}
 
 def wname(wid):
     return WEAPONS.get(wid, {}).get("name", wid.replace("_", " ").title())
@@ -224,7 +224,7 @@ def gen_classes():
         d = ARCH.get(aid)
         if not d: continue
         rows.append([link(class_page_name(aid), d["name"]), d["weight"].title(), wname(d["signature"] if "signature" in d else d["weapons"][0]),
-                     d["passive"]["name"], d["dash"]["name"], d["rmb"]["name"], d["e"]["name"], d["r"]["name"] if "r" in d else "none yet"])
+                     d["passive"]["name"], d["dash"]["name"], d["rmb"]["name"], d["e"]["name"], d["r"]["name"] if "r" in d else "none (Boki Merge)"])
     wc = []
     for cid in ("light", "medium", "heavy"):
         c = CLASSES.get(cid)
@@ -233,8 +233,8 @@ def gen_classes():
                    ", ".join(ARCH[a]["name"] for a in ARCH_ORDER if a in ARCH and ARCH[a]["weight"] == cid), c.get("desc", "")])
     lv = []
     for i, t in enumerate(xp):
-        lv.append([str(i + 1), num(t), "X and the Merge unlock" if (i + 1) in ult_at[:1] else ("X rank 2" if (i + 1) in ult_at[1:] else "")])
-    body = "### All %d classes\n\n" % len(rows) + table(["Class", "Weight", "Weapons", "Passive", "Dash", "RMB", "E", "X (ultimate; R is the Boki Merge)"], rows)
+        lv.append([str(i + 1), num(t), "R unlocks" if (i + 1) in ult_at[:1] else ("R rank 2" if (i + 1) in ult_at[1:] else "")])
+    body = "### All %d classes\n\n" % len(rows) + table(["Class", "Weight", "Weapons", "Passive", "Dash", "RMB", "E", "R"], rows)
     body += "\n\n### Weight classes\n\nThe weight class sets health, speed, mass and dash charges; the class kit sits on top.\n\n"
     body += table(["Weight", "Health", "Speed (m/s)", "Dash charges", "Mass", "Glide cap", "Classes", "In short"], wc)
     body += "\n\n### Run levels\n\nEvery expedition starts at level 1 with one skill point and every ability locked. "
@@ -259,12 +259,16 @@ def gen_classes():
         b.append("\n### Kit card\n\nWhat the in-game kit card (K) says.\n")
         rows = [["Loop", c.get("loop", "")], ["Passive: " + d["passive"]["name"], c.get("passive", "")], ["Dash: " + d["dash"]["name"], c.get("dash", "")]]
         if c.get("lmb"): rows.append(["LMB", c["lmb"]])
-        rows += [["RMB: " + d["rmb"]["name"], c.get("rmb", "")], ["E: " + d["e"]["name"], c.get("e", "")]] + ([["X: " + d["r"]["name"], c.get("ult", "")]] if "r" in d else [])
+        rows += [["RMB: " + d["rmb"]["name"], c.get("rmb", "")], ["E: " + d["e"]["name"], c.get("e", "")]] + ([["R: " + d["r"]["name"], c.get("r", "")]] if "r" in d else [])
+        if "x" in d:
+            rows.append(["X: " + d["x"]["name"], c.get("x", "")])
         for w, t in c.get("weapons", {}).items():
             rows.append(["Weapon: " + wname(w), t])
         b.append(table(["Slot", "Card text"], rows))
         b.append("\n### Abilities in full\n")
         b.append("**%s (passive).** %s\n" % (d["passive"]["name"], d["passive"].get("desc", "")))
+        if d.get("jackpot"):
+            b.append("**%s (Mark trigger).** %s\n" % (d["jackpot"]["name"], d["jackpot"].get("desc", "")))
         dd = d["dash"]
         b.append("**%s (dash, Shift, %s cooldown).** %s\n" % (dd["name"], secs(dd.get("cd")), dd.get("desc", "")))
         r = d["rmb"]
@@ -274,11 +278,15 @@ def gen_classes():
         for k, t in r.get("variants", {}).items():
             b.append("- *%s:* %s" % (names.get(k, k), t))
         b.append("")
-        for slot, label in (("e", "E"), ("r", "X, level 6")):
+        for slot, label in (("e", "E"), ("r", "R")):
             if slot not in d:
                 continue
             x = d[slot]
             b.append("**%s (%s, %s cooldown).** %s\n" % (x["name"], label, secs(x.get("cooldown")), x.get("desc", "")))
+        if "x" in d:
+            xu = d["x"]
+            b.append("**%s (X, hero ultimate from level %s, %s cooldown).** %s\n" % (
+                xu["name"], num(xu.get("unlock", 6)), secs(xu.get("cooldown")), xu.get("desc", "")))
         b.append("### Ranks\n\nRank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the special.\n")
         rk = []
         for s in ("sec", "dash", "kin", "ult"):

@@ -547,7 +547,7 @@ func juggernaut(a) -> void:
 	A.aim_at(P, T.pos)
 	K.ch_rmb = 1.0
 	K.cd["rmb"] = 0.0
-	K.cd["r"] = 15.0
+	K.cd["x"] = 15.0
 	A.tap(m, P)
 	A.step(m, 0.9)
 	T.hp = 4.0
@@ -555,8 +555,8 @@ func juggernaut(a) -> void:
 	T.hurt(10.0, P, {"src": "shot"})
 	A.step(m, 0.1)
 	A.ok("juggernaut Smash small mechanic: a knock after the sweet spot resets the Gilded Riposte",
-			T.downed and K.slam_resets == 1 and float(K.cd["r"]) <= 0.0 and K.knock_healed > 0.0,
-			"x cd %.1f resets %d" % [float(K.cd["r"]), K.slam_resets])
+			T.downed and K.slam_resets == 1 and float(K.cd["x"]) <= 0.0 and K.knock_healed > 0.0,
+			"x cd %.1f resets %d" % [float(K.cd["x"]), K.slam_resets])
 	A.ok("juggernaut passive: a knock heals 20% of their health",
 			K.knock_healed >= minf(0.19 * T.max_hp, 0.9 * P.max_hp), "healed %.0f of %.0f" % [K.knock_healed, T.max_hp])
 	await A.done(m)
@@ -648,7 +648,7 @@ func combos(a) -> void:
 	A.aim_at(P, T.pos)
 	K.ch_rmb = 1.0
 	K.cd["rmb"] = 0.0
-	K.cd["r"] = 15.0
+	K.cd["x"] = 15.0
 	A.tap(m, P)
 	A.step(m, 0.8)
 	P.dashes = 0.0
@@ -657,7 +657,7 @@ func combos(a) -> void:
 	T.hurt(10.0, P, {"src": "shot"})
 	A.step(m, 0.05)
 	A.ok("combo jug: RMB sweet spot > knock = Riposte reset + heal + a dash",
-			K.slam_resets == rs + 1 and float(K.cd["r"]) <= 0.0 and K.knock_healed > 0.0 and P.dashes >= 0.99,
+			K.slam_resets == rs + 1 and float(K.cd["x"]) <= 0.0 and K.knock_healed > 0.0 and P.dashes >= 0.99,
 			"dashes %.2f" % P.dashes)
 	await A.done(m)
 	r = A.setup("juggernaut", 6.0)

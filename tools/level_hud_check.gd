@@ -54,7 +54,7 @@ func run(main: Node) -> void:
 	P.lvl = 5; P.xp = float(Hunter.XP_TO[4]); P.skill_pts = 2
 	ok(not P.can_level("ult") and int(P.slot_lv["ult"]) == 0, "level 5: R can't be unlocked yet")
 	P.ult = 1.0
-	P.ak.cast_ult()
+	P.ak.use_r()
 	ok(P.ak.r_t <= 0.0 and float(P.ak.cd["r"]) <= 0.0, "pressing R at level 5 casts nothing")
 	ok(hud.r_lock_text(P) == "LV %d" % int(Hunter.ULT_AT[0]), "the R slot says when it opens: '%s'" % hud.r_lock_text(P))
 	P.gain_xp(float(Hunter.XP_TO[5]) - P.xp + 1.0)

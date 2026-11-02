@@ -213,7 +213,7 @@ func _ult_shaped(rd: Dictionary) -> bool:
 ## The hero has its own ultimate on X: "r" data opening at level 6, and a card line for it.
 func _has_ult(arch: String) -> bool:
 	var d := Arch.def(arch)
-	return int(d.get("r", {}).get("unlock", 0)) == 6 and d["card"].has("ult") and not d["card"].has("r")
+	return int(d.get("x", {}).get("unlock", 0)) == 6 and d["card"].has("x") and not d["card"].has("r")
 
 func _dj() -> RefCounted:
 	return load("res://tools/dancer_jug_check.gd").new()
@@ -533,7 +533,7 @@ func _levels_and_bond() -> void:
 	P.lvl = 1; P.xp = 0.0; P.skill_pts = 1
 	for s in Hunter.SLOTS: P.slot_lv[s] = 0
 	ok("R: locked at level 1", not P.can_level("ult"))
-	P.ak.cast_ult()
+	P.ak.use_r()
 	ok("R: can't cast while locked", float(P.ak.cd["r"]) <= 0.0 and P.ak.r_t <= 0.0)
 	P.gain_xp(float(Hunter.XP_TO[5]) + 1.0)
 	ok("R: level 6 opens it", P.lvl >= 6 and P.can_level("ult"), "lvl %d" % P.lvl)
@@ -546,11 +546,11 @@ func _levels_and_bond() -> void:
 	# X is the hero's own ultimate: it casts at level 6 and, even with the bond full, never merges (R does)
 	P.ult = 1.0
 	P.merge_cd = 0.0
-	P.ak.cd["r"] = 0.0
-	P.ak.cast_ult()
+	P.ak.cd["x"] = 0.0
+	P.ak.use_x()
 	step(m, 0.5)
 	ok("X: the hero ultimate casts and never merges (R is the Merge)",
-			float(P.ak.cd["r"]) > 10.0 and not P.ak.bonded and not KinMerge.active(P))
+			float(P.ak.cd["x"]) > 10.0 and not P.ak.bonded and not KinMerge.active(P))
 	await done(m)
 
 # ------------------------------------------------------------------ cross-ability combinations (--kit-combo-check)
@@ -636,9 +636,9 @@ func _feel() -> void:
 	ok("feel: Wirerun shows its lane while it grows", float(Arch.def("mage")["dash"]["hold"]) >= 0.3)
 	ok("feel: the Finishing Slam lands after a 0.5s wind-up", float(Arch.def("juggernaut")["rmb"]["windup"]) >= 0.3)
 	# the hero ultimates on X run their own wind-ups (a growing ring, a guard), on the source's cooldown ratios
-	var ults: Array = Arch.ids().filter(func(a): return Arch.def(a).has("r"))
+	var ults: Array = Arch.ids().filter(func(a): return Arch.def(a).has("x"))
 	ok("feel: every X ultimate has its own wind-up (no generic fuse) and a 15-40s cooldown",
-			ults.all(func(a): return _ult_shaped(Arch.def(a)["r"])))
+			ults.all(func(a): return _ult_shaped(Arch.def(a)["x"])))
 	# hitstop tiers
 	var dummy := Hunter.new(); dummy.max_hp = 145.0
 	ok("feel: chip hit T1", Feel.tier(dummy, 4.0, {"src": "shot"}) == 1)

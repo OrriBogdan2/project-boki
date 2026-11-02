@@ -152,9 +152,8 @@ static func trigger(P: Hunter, D: Hunter, mv: String, t: float, dt: float) -> vo
 				P.inp["sec_hold"] = false
 				K.press_rmb()
 
-## X with the ultimate open (level 6, a point in it) and off cooldown.
+## X with the ultimate open (level 6) and off cooldown.
 static func cast_ult(P: Hunter) -> void:
-	P.lvl = maxi(P.lvl, int(Hunter.ULT_AT[0]))
-	P.slot_lv["ult"] = maxi(1, int(P.slot_lv["ult"]))
-	P.ak.cd["r"] = 0.0
-	P.ak.cast_ult()
+	P.lvl = maxi(P.lvl, HeroUlt.unlock_level(P.ak))
+	P.ak.cd["x"] = 0.0
+	P.ak.use_x()

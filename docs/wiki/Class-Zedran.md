@@ -82,7 +82,7 @@ What the in-game kit card (K) says.
 
 **Warchain (E, 9.5s cooldown).** Throw a chain 10m: it hooks the first foe (8 damage, blighted while tethered: healing barely takes) or bites a wall, for 4s. Press E again to pull yourself to it. The cooldown starts when you pull or the chain breaks (a stun breaks it); you can't throw it while rooted or grounded.
 
-**Gilded Riposte (X, level 6, 22s cooldown).** Plant in a gold guard for 0.65s: nothing hurts or stuns you, and each hit you block (two at most) makes the answer 20% harder. Then you lunge 1.8m and cleave up through the 1.8m x 3.6m strip ahead (everyone sees it through the guard): 34, and you heal 80% of what it deals (less while blighted). Knock a hunter with it and it is ready again at once.
+**Gilded Riposte (X, hero ultimate from level 6, 22s cooldown).** Plant in a gold guard for 0.65s: nothing hurts or stuns you, and each hit you block (two at most) makes the answer 20% harder. Then you lunge 1.8m and cleave up through the 1.8m x 3.6m strip ahead (everyone sees it through the guard): 34, and you heal 80% of what it deals (less while blighted). Knock a hunter with it and it is ready again at once.
 
 ### Ranks
 
@@ -93,9 +93,8 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | RMB | cooldown 2s -> 1.8s, damage +15%. | cooldown 2s -> 1.6s, damage +30%; +20% damage on every Smash. |
 | Dash (Shift) | recharge 9s -> 7.6s per charge. | recharge 9s -> 6.3s; the tip hits +25% harder. |
 | E | cooldown 9.5s -> 8.6s, damage +15%. | cooldown 9.5s -> 7.6s, damage +30%; hooking a foe refunds 33% of the cooldown. |
-| X (ultimate) | Rank 2 (level 9): cooldown 22s -> 18.7s, damage +15%. |  |
 
-**Suggested level-up order** (what bots follow): Dash (Shift) > RMB > E > RMB > Dash (Shift) > X (ultimate) > RMB > E > X (ultimate) > Glove (Q).
+**Suggested level-up order** (what bots follow): Dash (Shift) > RMB > E > RMB > Dash (Shift) > R (ultimate) > RMB > E > R (ultimate) > Glove (Q).
 
 ### What enemies can read
 

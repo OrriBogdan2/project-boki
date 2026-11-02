@@ -1,12 +1,12 @@
 class_name ThiefUlt
 extends RefCounted
-## Dancer's ultimate on X, Encore (her "r" data in content/archetypes/thief.json; the source's Death Blossom,
+## Dancer's ultimate on X, Encore (her "x" data in content/archetypes/thief.json; the source's Death Blossom,
 ## briefs/hero-ref/dancer.md "Ultimate (on X)"). A violet ring grows out from her over 0.4s (the short delay),
 ## then rides with her for 2s while a blade flies from her at every foe inside it every 0.4s (up to 5 each).
 ## Blades from the outer band of the ring (past 75% of its radius) hit harder and blight (healing barely
 ## takes) for 6s. She keeps moving, shooting and dashing; the cast gives her Vault back, and every blade
-## refreshes her Marks. Landing blades on a rival hunter fills the bond meter once per cast, for the best of
-## it (a hit, a knock or a kill; ArchKit.ult_bond), never the cast alone. Owned by ThiefKit (cast_ult, _tick,
+## refreshes her Marks. A blade landing on a rival hunter fills the bond meter (HeroUlt.landed: the best of
+## the cast counts, a hit, a knock or a kill), never the cast alone. Owned by ThiefKit (cast_ult, _tick,
 ## _drop_holds).
 
 const RING_COL := Color("c9a0ff")      # the ring and the blades: her violet (the source's is cyan)
@@ -16,30 +16,21 @@ const HIT_COL := Color("e070ff")       # the flash a blade leaves on what it hit
 const BLADE_SPEED := 30.0              # m/s: the cosmetic blade's flight (the hit lands when it arrives)
 const ORBITERS := 3                    # blades circling her while it runs
 const ORBIT_R := 0.9                   # m
-const BOND_RANK := {"": 0, "hit": 1, "knock": 2, "kill": 3}
 
 var k: ThiefKit
-var st := {}                           # running: {t, next, n, bond, hits: {foe id: blades landed}}
+var st := {}                           # running: {t, next, n, hits: {foe id: blades landed}}
 var casts := 0                         # (tests, demo)
 var blades := 0                        # blades landed
 var rim_blades := 0                    # of which from the outer band
-var bond_kind := ""                    # what the last cast paid the bond for ("" for nothing)
 
 func _init(kit: ThiefKit) -> void:
 	k = kit
 
 func data() -> Dictionary:
-	return k.r_def()
+	return k.x_def()
 
 func running() -> bool:
 	return not st.is_empty()
-
-## 0..1 of the cast left (the HUD's ring round the X slot).
-func left_k() -> float:
-	if st.is_empty():
-		return 0.0
-	var total := float(data()["grow"]) + float(data()["time"])
-	return clampf(1.0 - float(st["t"]) / total, 0.0, 1.0)
 
 ## The ring's radius now: it grows from r0 to reach over `grow`, then holds.
 func radius() -> float:
@@ -51,8 +42,7 @@ func radius() -> float:
 func start() -> void:
 	var d := data()
 	casts += 1
-	bond_kind = ""
-	st = {"t": 0.0, "next": float(d["grow"]), "n": int(d["shots"]), "hits": {}, "best": ""}
+	st = {"t": 0.0, "next": float(d["grow"]), "n": int(d["shots"]), "hits": {}}
 	var h := k.h
 	k.play("thf_encore")
 	k.m.fx.word(h.pos + Vector3(0, 3.6, 0), String(d["name"]).to_upper(), RING_COL, true)
@@ -62,12 +52,8 @@ func start() -> void:
 	h.dashes = h.max_dashes()             # the source's info card: it resets the cartwheel
 	DashReset.cue(h)
 
-## The cast ends (its time ran out, a merge, a knock): nothing more flies, and the bond is paid for the best
-## thing its blades did to a rival hunter.
+## The cast ends (its time ran out, a merge, a knock): nothing more flies.
 func drop() -> void:
-	if not st.is_empty() and String(st["best"]) != "":
-		bond_kind = String(st["best"])
-		k.ult_bond(bond_kind)
 	st = {}
 	AimKit.hide(k.h, "ult")
 	AimKit.hide(k.h, "ult_rim")
@@ -157,7 +143,7 @@ func _hit(f: Ent, rim: bool) -> void:
 	if rim:
 		o["blight"] = float(d["rim_blight"])
 	var was_blighted := f.blight_t > 0.0
-	var dealt := f.hurt(dmg * k.power("ult"), h, o)
+	var dealt := f.hurt(dmg * k.power("x"), h, o)
 	if dealt <= 0.0:
 		return
 	blades += 1
@@ -170,13 +156,4 @@ func _hit(f: Ent, rim: bool) -> void:
 	k.fx().star(f.pos + Vector3(0, 1.0, 0), HIT_COL, 0.8 if rim else 0.55, 0.16)
 	k.m.sfx("dj_encore_hit", f.pos, -8.0, randf_range(0.9, 1.15) * (0.85 if rim else 1.0))
 	k.refresh_marks()
-	if f is Hunter and f.team != h.team and not st.is_empty():
-		var kind := ThiefUlt.landed_kind(f as Hunter)
-		if int(BOND_RANK[kind]) > int(BOND_RANK[String(st["best"])]):
-			st["best"] = kind
-
-## What landing on a rival hunter counts as for the bond: a kill (out), a knock (down) or a hit.
-static func landed_kind(t: Hunter) -> String:
-	if t.out or t.dead:
-		return "kill"
-	return "knock" if t.downed or t.hp <= 0.0 else "hit"
+	HeroUlt.landed(k, f)

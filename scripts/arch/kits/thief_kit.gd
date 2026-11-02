@@ -61,15 +61,13 @@ func _drop_holds() -> void:
 	encore.drop()
 
 # ------------------------------------------------------------------ X: Encore (ThiefUlt)
+## X (HeroUlt gates it: level 6, its own cooldown in cd["x"]).
 func cast_ult() -> bool:
-	if not ult_ready():
-		return false
 	encore.start()
-	ult_spent()
 	return true
 
-func ult_running() -> float:
-	return encore.left_k()
+func ult_running() -> bool:
+	return encore.running()
 
 # ---- Marks live on the targets: meta "marks" {dancer nid: [count, time left]} ----
 func marks_on(t: Ent) -> int:
@@ -739,8 +737,8 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null:
 		return
 	# Encore once a foe is well inside the ring's reach (it rides with her, so she can chase them)
-	if r_unlocked() and float(cd["r"]) <= 0.0 and los and dist < float(r_def()["reach"]) * 0.7:
-		h.inp["hult"] = true
+	if HeroUlt.unlocked(self) and float(cd["x"]) <= 0.0 and los and dist < float(x_def()["reach"]) * 0.7:
+		h.inp["xult"] = true
 	# the dagger is stuck in them: step to them
 	if not knife.is_empty() and knife.get("target") != null and randf() < 0.6:
 		h.inp["sig"] = true
