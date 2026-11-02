@@ -62,8 +62,8 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | A / Left | Move left | `left` | yes |
 | D / Right | Move right | `right` | yes |
 | Left click | Weapon attack | `fire` | yes |
-| Right click | Class ability (right click) | `secondary` | yes |
-| E | Class utility (E) | `signature` | yes |
+| Right click | Hunter ability (right click) | `secondary` | yes |
+| E | Hunter utility (E) | `signature` | yes |
 | C | Boki ability (cast from where your Boki is) | `kin_ability` | yes |
 | F | Use, scan, revive, pet | `interact` | yes |
 | 2 | Repair armor (armor kit) | `armor_kit` | yes |
@@ -71,7 +71,7 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | Ctrl | Sneak | `crouch` | yes |
 | G / Middle mouse | Boki orders: tap to Sic or Call back, hold for the order wheel | `throw` | yes |
 | B | Base to a teammate (squads) | `base` | yes |
-| Shift | Class dash | `dash` | yes |
+| Shift | Hunter dash | `dash` | yes |
 | Space | Jump (hold to glide) | `jump` | yes |
 | Mouse 5 / Mouse 4 | Glide (hold in the air) | `glide` | yes |
 | R / X | Merge with your Boki (needs a full bond meter) | `ultimate` | yes |
@@ -82,7 +82,7 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | T | Talk to a Boki | `talk` | yes |
 | C | A Boki's details | `details` | yes |
 | H | Whistle | `whistle` | no |
-| J | Change hero (at home and in practice areas) | `hero` | yes |
+| J | Hunters: change Hunter (at home and in practice areas) | `hero` | yes |
 | I | Inventory | `inventory` | yes |
 | B | Build mode at home / decorate indoors | `build` | yes |
 | R | Turn a piece (build mode) | `rotate` | yes |

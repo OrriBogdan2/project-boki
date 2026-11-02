@@ -3,7 +3,7 @@
 **Players**
 - [Getting started](Getting-Started.md)
 - [Controls](Controls.md)
-- [Classes](Classes.md)
+- [Hunters](Classes.md)
   - [Thief](Class-Thief.md)
   - [Archer](Class-Archer.md)
   - [Vireo](Class-Vireo.md)

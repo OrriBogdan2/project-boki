@@ -223,14 +223,9 @@ def gen_classes():
     for aid in ARCH_ORDER:
         d = ARCH.get(aid)
         if not d: continue
-        rows.append([link(class_page_name(aid), d["name"]), d["weight"].title(), wname(d["signature"] if "signature" in d else d["weapons"][0]),
+        cs = CLASSES.get(d["weight"], {})
+        rows.append([link(class_page_name(aid), d["name"]), "%s / %s" % (num(cs.get("hp", "?")), num(cs.get("dashes", "?"))), wname(d["signature"] if "signature" in d else d["weapons"][0]),
                      d["passive"]["name"], d["dash"]["name"], d["rmb"]["name"], d["e"]["name"], d["r"]["name"] if "r" in d else "none (Boki Merge)"])
-    wc = []
-    for cid in ("light", "medium", "heavy"):
-        c = CLASSES.get(cid)
-        if not c: continue
-        wc.append([c["name"], num(c["hp"]), num(c["speed"]), num(c["dashes"]), num(c["mass"]), num(c.get("glide_cap", "")),
-                   ", ".join(ARCH[a]["name"] for a in ARCH_ORDER if a in ARCH and ARCH[a]["weight"] == cid), c.get("desc", "")])
     cu = json.load(open(os.path.join(ROOT, "content", "rules", "class_unlock.json"), encoding="utf-8"))
     cu_rows = []
     for aid in ARCH_ORDER:
@@ -238,18 +233,20 @@ def gen_classes():
         if not e or aid not in ARCH: continue
         cu_rows.append([link(class_page_name(aid), ARCH[aid]["name"]), "pick at the start" if aid in cu["starters"] else "play", e["goal"]["text"], num(e["goal"]["target"]), str(e["level"])])
     xpr = cu["xp"]
-    unlock = "### How classes unlock\n\nA new save picks one starting class from %s. Every other class opens when its goal is done and the account has reached its level. " % ", ".join(ARCH[a]["name"] for a in cu["starters"])
+    early = cu.get("early", [])
+    unlock = "### How Hunters unlock\n\nAt character creation you pick 1 starting Hunter (%s). " % ("any of the %d" % len(cu["starters"]) if len(cu["starters"]) >= len(ARCH_ORDER) else ", ".join(ARCH[a]["name"] for a in cu["starters"]))
+    if early:
+        unlock += "The next %d unlocks come early: %s; each one done is a free pick of any locked Hunter. " % (len(early), ", then ".join(e["text"].lower() for e in early))
+    unlock += "After that, every Hunter opens when its own goal is done and the account has reached its level. An unlock is never automatic: when one is ready you hold the button on the Hunters screen for %s, and letting go early cancels it. " % secs(cu.get("hold_s", 1.6))
     unlock += "Account XP comes from expeditions: %s for playing one, %s more for getting out, %s per monster (up to %s), %s per hunter knocked down (up to %s), %s per lair boss and %s per Boki brought home. " % (
         num(xpr["match"]), num(xpr["extract"]), num(xpr["mob"]), num(xpr["mob_cap"]), num(xpr["knock"]), num(xpr["knock_cap"]), num(xpr["boss"]), num(xpr["caught"]))
-    unlock += "Level L to L+1 costs %s + %s x (L - 1) XP, up to level %s. Locked classes stay playable in the Arena and the Training Grounds, and saves from before class unlocks keep every class open.\n\n" % (num(xpr["level_base"]), num(xpr["level_step"]), num(xpr["max_level"]))
-    unlock += table(["Class", "Starter", "Goal", "Target", "Account level"], cu_rows)
+    unlock += "Level L to L+1 costs %s + %s x (L - 1) XP, up to level %s. Locked Hunters stay playable in the Arena and the Training Grounds, and saves from before Hunter unlocks keep every Hunter open.\n\n" % (num(xpr["level_base"]), num(xpr["level_step"]), num(xpr["max_level"]))
+    unlock += table(["Hunter", "Starter", "Own goal", "Target", "Account level"], cu_rows)
     lv = []
     for i, t in enumerate(xp):
         lv.append([str(i + 1), num(t), "R unlocks" if (i + 1) in ult_at[:1] else ("R rank 2" if (i + 1) in ult_at[1:] else "")])
-    body = "### All %d classes\n\n" % len(rows) + table(["Class", "Weight", "Weapons", "Passive", "Dash", "RMB", "E", "R"], rows)
+    body = "### All %d Hunters\n\n" % len(rows) + table(["Hunter", "Health / dashes", "Weapons", "Passive", "Dash", "RMB", "E", "R"], rows)
     body += "\n\n" + unlock
-    body += "\n\n### Weights\n\nThe weight (Light, Medium or Heavy) sets health, speed, mass and dash charges; the class kit sits on top.\n\n"
-    body += table(["Weight", "Health", "Speed (m/s)", "Dash charges", "Mass", "Glide cap", "Classes", "In short"], wc)
     body += "\n\n### Run levels\n\nEvery expedition starts at level 1 with one skill point and every ability locked. "
     body += "Each level gives a point. Ranks per slot: %s. The ultimate opens at level %s (rank 2 at %s).\n\n" % (
         ", ".join("%s %s" % (SLOT_NAMES.get(k, k), v) for k, v in slot_max.items()), num(ult_at[0]) if ult_at else "?", num(ult_at[1]) if len(ult_at) > 1 else "?")
@@ -263,7 +260,7 @@ def gen_classes():
         cs = CLASSES.get(d["weight"], {})
         b = []
         b.append(table(["", ""], [
-            ["Weight", "%s (%s health, %s m/s, %s dash charge%s)" % (d["weight"].title(), num(cs.get("hp", "?")), num(cs.get("speed", "?")), num(cs.get("dashes", "?")), "" if cs.get("dashes") == 1 else "s")],
+            ["Body", "%s health, %s m/s, %s dash charge%s" % (num(cs.get("hp", "?")), num(cs.get("speed", "?")), num(cs.get("dashes", "?")), "" if cs.get("dashes") == 1 else "s")],
             ["Signature weapon", wname(d["signature"] if "signature" in d else d["weapons"][0]) + " (the only weapon this hunter carries; it grows through upgrades, never swaps)"],
             ["Fantasy", d.get("fantasy", "")],
             ["Silhouette", d.get("silhouette", "")],

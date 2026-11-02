@@ -1,11 +1,13 @@
 class_name ClassReveal
 extends CanvasLayer
-## The reveal moment when a class opens: the screen dims, the class steps into a ring of its own
-## colour with a short chime, and says what it is. One class at a time; "Play it" switches your
-## hunter to it (HomeHero.pick), "Later" keeps your current class. Both mark the reveal as seen
-## (ClassUnlock.reveal_done), so it never plays twice.
+## The reveal moment when a Hunter unlocks (the end of the hold, HoldUnlock): a white flash and a
+## shockwave of its colour burst out, the screen dims, the Hunter steps into a ring of light with a
+## chime, and says what it is. "Play it" switches your hunter to it (HomeHero.pick), "Later" keeps
+## the one you have. Both mark it seen (ClassUnlock.reveal_done), so it never plays twice.
 ##
-##   ClassReveal.maybe_show(home)    # on the farm: plays for the first class waiting, then the next
+##   ClassReveal.show_for(home, id)  # right after a hold
+##   ClassReveal.maybe_show(home)    # arriving on the farm: a reveal still queued (older saves), or a
+##                                   # toast when an unlock became ready
 
 signal closed(played: bool)
 
@@ -15,13 +17,24 @@ var root: Control
 var glow: Control
 var t := 0.0
 
-## Shows the reveal for the first waiting class, if any. Returns the overlay (or null).
+## Shows the reveal for the first waiting Hunter, if any. Returns the overlay (or null). With none
+## waiting, a Hunter unlock that became ready since you were last told gets a toast instead.
 static func maybe_show(home: Node) -> ClassReveal:
-	var waiting := ClassUnlock.pending_reveal()
-	if waiting.is_empty() or home == null or not home.is_inside_tree():
+	if home == null or not home.is_inside_tree():
 		return null
+	var waiting := ClassUnlock.pending_reveal()
+	if waiting.is_empty():
+		var news := ClassUnlock.take_news()
+		if news > 0 and home.has_method("_toast"):
+			home._toast("A Hunter unlock is ready. Open Hunters (%s) and hold to unlock it." % Settings.key_cap("hero"))
+			Save.save_game()
+		return null
+	return show_for(home, String(waiting[0]))
+
+## The reveal for one Hunter, over `home`.
+static func show_for(home: Node, hunter_id: String) -> ClassReveal:
 	var rv := ClassReveal.new()
-	rv.id = String(waiting[0])
+	rv.id = hunter_id
 	rv.host = home
 	rv.layer = 60
 	home.add_child(rv)
@@ -41,10 +54,10 @@ func _ready() -> void:
 	root.add_child(center)
 	var v := UI.vbox(10); v.alignment = BoxContainer.ALIGNMENT_CENTER
 	center.add_child(v)
-	var kick := UI.label("NEW CLASS", UI.T_HEAD, UI.GOLD, UI.caps)
+	var kick := UI.label("NEW HUNTER", UI.T_HEAD, UI.GOLD, UI.caps)
 	kick.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(kick)
-	# the ring of light, with the class standing in it
+	# the ring of light, with the Hunter standing in it
 	var stage := Control.new(); stage.custom_minimum_size = Vector2(340, 310)
 	stage.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	v.add_child(stage)
@@ -61,7 +74,7 @@ func _ready() -> void:
 	var nm := UI.title(Arch.name_of(id), 54, col)
 	nm.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(nm)
-	var wl := UI.label(ClassCard.weight_line(id), UI.T_SMALL, UI.MUTED)
+	var wl := UI.label(HunterViewer.stat_line(id), UI.T_SMALL, UI.MUTED)
 	wl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(wl)
 	var fan := UI.para(String(Arch.def(id).get("fantasy", "")), UI.T_BODY, UI.INK)
@@ -78,7 +91,7 @@ func _ready() -> void:
 	btns.add_child(play)
 	v.add_child(btns)
 	root.set_meta("class_id", id)
-	# the moment: chime, the class pops into the ring, text eases in
+	# the moment: the burst, a chime, the Hunter pops into the ring, text eases in
 	Sfx.play("unlock", null, -4.0, 0.0, 1.0)
 	Sfx.play("whoosh", null, -9.0, 0.0, 0.8)
 	var tw := create_tween().set_parallel(true)
@@ -94,9 +107,17 @@ func _process(dt: float) -> void:
 	if glow:
 		glow.queue_redraw()
 
-## Soft rings and slow rays in the class's colour behind the portrait.
+## Soft rings and slow rays in the Hunter's colour behind the portrait; first the burst (a white flash
+## and three shockwave rings racing out).
 func _draw_glow(col: Color) -> void:
 	var c := glow.size * 0.5
+	if t < 0.9:
+		var bk := clampf(t / 0.8, 0.0, 1.0)
+		var e := 1.0 - pow(1.0 - bk, 3.0)
+		glow.draw_circle(c, 40.0 + 260.0 * e, Color(1, 1, 1, 0.5 * maxf(0.0, 1.0 - t / 0.3)))
+		for i in 3:
+			var kk := clampf(e - 0.14 * i, 0.0, 1.0)
+			glow.draw_arc(c, 30.0 + 420.0 * kk, 0, TAU, 80, Color(col.lightened(0.3), 0.9 * (1.0 - kk)), 7.0 - 2.0 * i, true)
 	var k := clampf(t / 0.6, 0.0, 1.0)
 	for i in 5:
 		var r := (70.0 + 26.0 * i) * (0.6 + 0.4 * k)

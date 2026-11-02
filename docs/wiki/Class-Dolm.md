@@ -13,7 +13,7 @@ The quarry-hand. Raise rocks out of the ground with Stone Row or a dash, then pu
 
 |  |  |
 |---|---|
-| Weight | Medium (145 health, 4.8 m/s, 1 dash charge) |
+| Body | 145 health, 4.8 m/s, 1 dash charge |
 | Signature weapon | Rubble Fists (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The quarry-hand. Raises stone out of the ground, then hits it, and hits you. |
 | Silhouette | the stone shoulder and the heavy fists |

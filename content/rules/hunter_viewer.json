@@ -1,0 +1,21 @@
+{
+	"desc": "The Hunter viewer (HunterViewer: the Hunters screen and character creation). Each ability is shown in turn for slot_s seconds, its move looped on the real model. `moves`: per Hunter and slot, the kit moves (HunterAnim.KMOVES / KMovesPair) played back to back, the same ids the kits play. A slot with no entry falls back to the weapon swing or shot (lmb), the class dodge (dash), a cast pose (rmb, e, r) or an idle with its glow (passive). --hunter-unlock-check fails on an id that no longer exists, so a kit rename shows up here.",
+	"slot_s": 3.2,
+	"gap_s": 0.35,
+	"turn_rate": 0.45,
+	"turn_rate_desc": "rad/s the turntable spins while nothing plays; it slows to a third during a move",
+	"moves": {
+		"thief": {"dash": ["thf_vault_f"], "passive": ["thf_primed"], "rmb": ["thf_bola"], "e": ["thf_knife", "thf_arrive"], "r": ["thf_volley_wind", "thf_volley"]},
+		"archer": {"dash": ["arc_zip"], "lmb": ["arc_draw", "arc_loose"], "rmb": ["arc_heavy_wind", "arc_heavy"], "e": ["arc_hail"], "passive": ["arc_hop"]},
+		"mage": {"dash": ["mage_dash", "mage_dash_go"], "rmb": ["mage_rmb"], "e": ["mage_e"]},
+		"gunslinger": {"dash": ["gunslinger_dash"], "rmb": ["gunslinger_rmb"], "e": ["gunslinger_e"]},
+		"juggernaut": {"dash": ["jug_dash"], "lmb": ["jug_wave"], "rmb": ["jug_lunge_wind", "jug_lunge"], "e": ["jug_chain", "jug_reel"], "r": ["jug_doom"], "passive": ["jug_slam"]},
+		"bulwark": {"dash": ["bul_charge"], "lmb": ["bul_smash_wind", "bul_smash"], "rmb": ["bul_bash"], "e": ["bul_mend"], "passive": ["bul_whirl"]},
+		"dredge": {"dash": ["dr_barge"], "rmb": ["dr_throw", "dr_reel", "dr_pullend"], "e": ["dr_anchor"]},
+		"ashwick": {"dash": ["as_leap"], "lmb": ["as_lance", "as_lance_end"], "rmb": ["as_shot"], "e": ["as_cloak"]},
+		"tender": {"rmb": ["tend_seed"], "e": ["tend_hearth"]},
+		"rimewright": {"rmb": ["rime_javelin"], "e": ["rime_slam"]},
+		"dolm": {"dash": ["dolm_dash"], "lmb": ["dolm_wind", "dolm_lmb"], "rmb": ["dolm_rmb_wind", "dolm_rmb"], "e": ["dolm_e"], "passive": ["dolm_punch"]},
+		"ostra": {"dash": ["ostra_dash"], "rmb": ["ostra_rmb"], "e": ["ostra_e"]}
+	}
+}

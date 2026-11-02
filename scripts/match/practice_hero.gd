@@ -1,18 +1,18 @@
 class_name PracticeHero
 extends RefCounted
-## The hero picker in the practice areas (J or the bar's Hero button, or Change hero in the Esc menu):
-## the same cards as the farm's Hero panel (HeroGrid) in a panel over the paused game. Every class can be
-## picked here, locked ones included. Picking swaps your hunter in place (Hunter.reclass; the Arena's own
+## The Hunter picker in the practice areas (J or the bar's Hunters button, or Change Hunter in the Esc
+## menu): Hunter cards (HeroGrid) in a panel over the paused game. Every Hunter can be picked here,
+## locked ones included. Picking swaps your hunter in place (Hunter.reclass; the Arena's own
 ## swap when it has one), keeps your Boki, opens every rank, and saves the pick as your expedition class
-## like the farm does (unless that class is still locked).
+## like the farm does (unless that Hunter is still locked).
 
 static func toggle(p: Practice) -> void:
 	if p.picker != null: close(p)
 	else: open(p)
 
 static func open(p: Practice) -> void:
-	var body := _show(p, "Hero", 860, func(): close(p), "Done", "heroes")
-	UI.subtitle(body, "Who you play here and on expeditions. Your Boki stays. Hover a hero for its kit, K for the full kit card.")
+	var body := _show(p, "Hunters", 860, func(): close(p), "Done", "heroes")
+	UI.subtitle(body, "Who you play here and on expeditions. Your Boki stays. Hover a Hunter for its kit, K for the full kit card.")
 	var grid := HeroGrid.build(body, func(ak: String): pick(p, ak), func(ak: String): kit(p, ak), func(ak: String): p.hover_arch = ak, false)
 	p.picker.set_meta("grid", grid)
 
@@ -37,7 +37,7 @@ static func close(p: Practice) -> void:
 static func pick(p: Practice, ak: String) -> void:
 	if not Arch.exists(ak):
 		return
-	var saved := HeroGrid.save_pick(ak)      # (a class that is still locked is tried here, not saved as your expedition class)
+	var saved := HeroGrid.save_pick(ak)      # (a Hunter that is still locked is tried here, not saved as your expedition Hunter)
 	var P: Hunter = p.m.player
 	if P != null and ak != P.arch:
 		if p.m.arena:

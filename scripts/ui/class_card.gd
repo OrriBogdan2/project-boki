@@ -1,16 +1,11 @@
 class_name ClassCard
 extends RefCounted
-## Shared pieces for the class screens: the starter pick, the Classes screen and the farm picker.
-## One look for "a class and where it stands": portrait, name, weight line, its goal and progress.
+## Shared pieces for the Hunter screens: the Hunters screen, the practice picker and the results line.
+## One look for "a Hunter and where it stands": portrait, name, health and dashes, its goal and progress.
 
 const GOAL_COL := Color("ffd27a")
 
-## "Light weight · 124 health · 1 dash" for a class.
-static func weight_line(id: String) -> String:
-	var cd: Dictionary = Data.CLASSES[Arch.weight(id)]
-	return "%s weight  ·  %d health  ·  %d dash%s" % [String(cd["name"]), int(cd["hp"]), int(cd["dashes"]), "es" if int(cd["dashes"]) > 1 else ""]
-
-## The class's portrait as a TextureRect; the SubViewport that renders it is a child of the rect.
+## The Hunter's portrait as a TextureRect; the SubViewport that renders it is a child of the rect.
 ## `body`: the whole standing hunter (the reveal) instead of head and shoulders.
 static func portrait(id: String, px := 84.0, body := false) -> TextureRect:
 	var vp := Portraits.make(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), Save.d.get("look", {}), id, body, int(px * 2.0) if body else Portraits.SIZE)
@@ -24,7 +19,7 @@ static func portrait(id: String, px := 84.0, body := false) -> TextureRect:
 	tex.add_child(vp)
 	return tex
 
-## The goal block for a class that is not open yet: the goal, a progress bar with its count, and the
+## The goal block for a Hunter that is not open yet: the goal, a progress bar with its count, and the
 ## account level it also needs. Returns a VBox (tagged "goal_block" with the progress as meta "frac").
 static func goal_block(id: String, width := 190.0) -> VBoxContainer:
 	var gp := ClassUnlock.goal_progress(id)
@@ -44,9 +39,9 @@ static func goal_block(id: String, width := 190.0) -> VBoxContainer:
 	v.add_child(UI.label("Account level %d%s" % [lv, " (reached)" if ok else ""], 12, UI.GOOD if ok else UI.MUTED))
 	return v
 
-## A class card for the Classes screen and the starter pick. `cb` runs on click.
+## A Hunter card (portrait, name, health and dashes, fantasy). `cb` runs on click.
 ## Dim when locked; shows the goal when it is not open.
-## `starter`: the starter pick, where every card is a live choice (no lock look, no goal).
+## `starter`: a pick where every card is a live choice (no lock look, no goal).
 static func make(id: String, on: bool, cb: Callable, tag := "", starter := false) -> PanelContainer:
 	var open := ClassUnlock.is_open(id) or starter
 	var card := UI.tile_card(on, cb, 10, Arch.color(id))
@@ -60,7 +55,7 @@ static func make(id: String, on: bool, cb: Callable, tag := "", starter := false
 	col.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.add_child(col)
 	col.add_child(UI.label(Arch.name_of(id), 18, Arch.color(id) if open else UI.FAINT, UI.big))
-	col.add_child(UI.label(weight_line(id), 12, UI.MUTED))
+	col.add_child(UI.label(HunterViewer.stat_line(id), 12, UI.MUTED))
 	var fan := UI.para(String(Arch.def(id).get("fantasy", "")), 12, UI.INK if open else UI.FAINT)
 	fan.custom_minimum_size.x = 160
 	col.add_child(fan)
@@ -72,7 +67,7 @@ static func make(id: String, on: bool, cb: Callable, tag := "", starter := false
 		card.modulate = Color(0.62, 0.62, 0.68, 0.9) if ClassUnlock.status(id) == "locked" else Color(0.85, 0.85, 0.9, 0.95)
 	return card
 
-## The results screen's account line: XP gained, the level bar, and any class this run opened.
+## The results screen's account line: XP gained, the level bar, and a Hunter unlock that became ready.
 static func results_strip(s: Dictionary) -> Control:
 	var cu: Dictionary = s.get("class_unlock", {})
 	var v := UI.vbox(4)
@@ -86,6 +81,8 @@ static func results_strip(s: Dictionary) -> Control:
 	if int(cu.get("level_after", 1)) > int(cu.get("level_before", 1)):
 		row.add_child(UI.label("Level up!", UI.T_SMALL, UI.GOOD, UI.semi))
 	v.add_child(row)
-	for id in cu.get("unlocked", []):
-		v.add_child(UI.label("New class: %s. Pick it under Hero on the farm." % Arch.name_of(String(id)), UI.T_SMALL, Arch.color(String(id)), UI.semi))
+	if int(cu.get("new", 0)) > 0:
+		var nl := UI.label("Hunter unlock ready! Hold to unlock it on the Hunters screen at home.", UI.T_SMALL, GOAL_COL, UI.semi)
+		nl.set_meta("hunter_unlock_ready", int(cu["new"]))
+		v.add_child(nl)
 	return v

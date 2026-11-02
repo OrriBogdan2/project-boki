@@ -1,12 +1,21 @@
 {
-	"desc": "Class unlocks (docs/decisions/0004). A new save picks one starter class from `starters`; every other class opens when its goal is done AND the account has reached its level. Account XP is earned from expeditions. Saves that predate this system keep every class open. Locked classes stay playable in the Arena and the Training Grounds.",
-	"starters": ["thief", "gunslinger", "juggernaut"],
+	"desc": "Hunter unlocks (docs/decisions/0005). A new save picks 1 starting Hunter from `starters` at character creation. The next unlocks come early: each `early` goal, done in order, lets you pick any locked Hunter. After those, every Hunter opens when its own goal is done AND the account has reached its level. An unlock is never automatic: once it is ready, the player holds the button on the Hunters screen for `hold_s` seconds. Account XP is earned from expeditions. Saves that predate this system keep every Hunter open. Locked Hunters stay playable in the Arena and the Training Grounds.",
+	"starters": ["thief", "archer", "mage", "gunslinger", "juggernaut", "bulwark", "dredge", "ashwick", "tender", "rimewright", "dolm", "ostra"],
+	"early_desc": "Placeholder goals (cheap, early) until the owner sets the numbers. Each one done gives one free pick: any locked Hunter, unlocked by holding.",
+	"early": [
+		{"stat": "matches", "target": 1, "text": "Play 1 expedition"},
+		{"stat": "extracts", "target": 1, "text": "Make it out of 1 expedition"}
+	],
+	"hold_desc": "Seconds the unlock button must be held. Letting go early cancels it.",
+	"hold_s": 1.6,
 	"xp": {
 		"desc": "Account XP per expedition. Per-kind caps keep one huge run from skipping a level. Level L to L+1 costs level_base + level_step * (L - 1).",
 		"match": 15,
 		"extract": 50,
-		"mob": 1, "mob_cap": 30,
-		"knock": 6, "knock_cap": 30,
+		"mob": 1,
+		"mob_cap": 30,
+		"knock": 6,
+		"knock_cap": 30,
 		"boss": 80,
 		"caught": 25,
 		"level_base": 100,
@@ -22,7 +31,8 @@
 		"caught": "wild Boki brought home",
 		"staggers": "monsters staggered with abilities",
 		"slams": "enemies wall-slammed",
-		"best_lvl": "best level reached in a match"
+		"best_lvl": "best level reached in a match",
+		"matches": "expeditions played"
 	},
 	"classes": {
 		"thief": {"level": 2, "goal": {"stat": "mobs", "target": 15, "text": "Defeat 15 monsters"}},

@@ -29,7 +29,7 @@ var cam: Camera3D
 var fx: Fx
 var eggs: Array = []          # {node, base, data}
 var chosen := -1
-var stage := "intro"          # intro | class (a new save picks its starter class) | create | pick | warm | hatching | name
+var stage := "intro"          # intro | class (a new save picks its starting Hunter) | create | pick | warm | hatching | name
 var story_i := 0
 var story_lbl: Label
 var story_box: Control
@@ -398,13 +398,14 @@ func _clear_bottom() -> void:
 	for ch in bottom.get_children():
 		ch.queue_free()
 
-# ---- your class (a new save picks one of the starters; ClassUnlock, ClassPick)
+# ---- your Hunter (a new save picks 1 of the starters in the Hunter viewer; ClassUnlock, ClassPick)
 func _show_class_pick(on := "") -> void:
 	stage = "class"
 	if on == "" or not ClassUnlock.starters().has(on):
 		on = String(ClassUnlock.starters()[0])
 	Save.d["arch"] = on; Save.d["cls"] = Arch.weight(on); Save.d["weapon"] = Arch.signature(on)
-	title.text = "Choose your class"
+	title.text = "Choose your Hunter"
+	top_box.visible = false      # (the pick panel carries its own heading: the viewer needs the height)
 	if sub_lbl: sub_lbl.text = "Who you play in a match. Your Boki comes next."
 	_top_over(0.5)
 	_clear_bottom()
@@ -419,8 +420,9 @@ func _show_class_pick(on := "") -> void:
 		_end_class_pick(), 260)
 	bottom.add_child(go)
 
-## After the class: make your hunter if you have not, else straight to the eggs.
+## After the Hunter: make your look if you have not, else straight to the eggs.
 func _end_class_pick() -> void:
+	top_box.visible = true
 	if not Save.d.has("look") or "--create" in OS.get_cmdline_user_args():
 		_show_create()
 	else:
@@ -456,11 +458,11 @@ func _show_create() -> void:
 	card.custom_minimum_size = Vector2(500, 0)
 	create_box = card
 	var v := UI.vbox(8); card.add_child(v)
-	# the class: who you are in a match (its silhouette, gear and weapon family always read true). Only
+	# the Hunter: who you are in a match (its silhouette, gear and weapon family always read true). Only
 	# the open ones are in the stepper (a new save has just its starter)
 	var cur_a := Arch.of_save()
 	var ar := UI.hbox(8)
-	var al := UI.label("Class", UI.T_BODY, UI.MUTED); al.custom_minimum_size.x = 120
+	var al := UI.label("Hunter", UI.T_BODY, UI.MUTED); al.custom_minimum_size.x = 120
 	al.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	ar.add_child(al)
 	if ClassUnlock.open_ids().size() > 1:
@@ -473,7 +475,7 @@ func _show_create() -> void:
 		ar.add_child(UI.icon_button("next", func(): _step_arch(1), "Next", 12.0))
 	v.add_child(ar)
 	var ad := Arch.def(cur_a)
-	var adl := UI.label("%s  ·  %s\n%s" % [String(Data.CLASSES[Arch.weight(cur_a)]["name"]), " / ".join(Arch.weapons(cur_a).map(func(w): return String(Data.weapon_stats(w)["name"]))), String(ad.get("fantasy", ""))], UI.T_SMALL, UI.ACCENT_HI)
+	var adl := UI.label("%s\n%s" % [" / ".join(Arch.weapons(cur_a).map(func(w): return String(Data.weapon_stats(w)["name"]))), String(ad.get("fantasy", ""))], UI.T_SMALL, UI.ACCENT_HI)
 	adl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	adl.custom_minimum_size.x = 380
 	var am := MarginContainer.new(); am.add_theme_constant_override("margin_left", 128); am.add_child(adl)
@@ -562,7 +564,7 @@ func _top_over(x_frac: float) -> void:
 		top_box.anchor_left = x_frac
 		top_box.anchor_right = x_frac
 
-## Steps through the open classes; the weight and weapon follow it.
+## Steps through the open Hunters; the weight and weapon follow it.
 func _step_arch(d: int) -> void:
 	var ids := ClassUnlock.open_ids()
 	var i := posmod(ids.find(Arch.of_save()) + d, ids.size())

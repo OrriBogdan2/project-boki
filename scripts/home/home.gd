@@ -667,7 +667,7 @@ func _ready_rest() -> void:
 			"Boki in the burrow sleep: they don't get hungry and don't need looking after. Swap them out whenever you like, or expand the cottages for more room."])
 	if visit.is_empty():
 		hecon.show_away()
-		ClassReveal.maybe_show(self)     # a class this run opened steps into the light (ClassUnlock)
+		ClassReveal.maybe_show(self)     # a Hunter unlock that became ready: a toast (ClassUnlock)
 	if not visit.is_empty():
 		pass
 	elif hb.needs_making():
@@ -2201,7 +2201,7 @@ func _label_for(it: Dictionary) -> String:
 			return "Spend time with %s" % rec["name"]
 		"egg": return ("Help the %s hatch!" if _egg_ready() else "Warm the %s") % _egg_label()
 		"yard": return "Train your partner"
-		"tryon": return "Try on a class, weapon, glove or Boki"
+		"tryon": return "Try on a Hunter, weapon, glove or Boki"
 		"nook": return "Pair two Boki for an egg"
 		"incubator": return hinc.prompt()
 		"burrow": return "Open the Boki Burrow (%d asleep inside)" % KinBox.boxed().size()
@@ -2286,12 +2286,12 @@ func _unhandled_input(event: InputEvent) -> void:
 			return
 		if event.button_index == MOUSE_BUTTON_WHEEL_UP: cam.zoom_to = clampf(cam.zoom_to - 0.08, 0.55, 1.6)
 		if event.button_index == MOUSE_BUTTON_WHEEL_DOWN: cam.zoom_to = clampf(cam.zoom_to + 0.08, 0.55, 1.6)
-	if panel_open == "Hero" and event is InputEventKey and event.pressed and not event.echo and (event as InputEventKey).physical_keycode == KEY_K and has_meta("hero_hover"):
-		HomeHero.kit(self, String(get_meta("hero_hover")))      # K over a hero: its full kit card
+	if panel_open == HomeClasses.TITLE and event is InputEventKey and event.pressed and not event.echo and (event as InputEventKey).physical_keycode == KEY_K and has_meta("hero_hover"):
+		HomeHero.kit(self, String(get_meta("hero_hover")))      # K on the Hunters screen: its full kit card
 		get_viewport().set_input_as_handled()
 		return
-	if event.is_action_pressed("hero") and visit.is_empty() and not chat_open and not Overlay.is_open() and not building_now and (panel_open == "" or panel_open == "Hero"):
-		if panel_open == "Hero": _close_panel()
+	if event.is_action_pressed("hero") and visit.is_empty() and not chat_open and not Overlay.is_open() and not building_now and (panel_open == "" or panel_open == HomeClasses.TITLE):
+		if panel_open == HomeClasses.TITLE: _close_panel()
 		else: HomeHero.open(self)
 		get_viewport().set_input_as_handled()
 		return
@@ -2394,7 +2394,7 @@ func hub_items() -> Array:
 	if has_method("open_build"):
 		items.append(["build", "Build", "hammer", func(): call("open_build")])
 	items.append(["settings", "Settings", "gear", func(): Overlay.ctx = "home"; Overlay.open_settings()])
-	items.append(["hero", "Hero", "swap", func(): HomeHero.open(self)])
+	items.append(["hero", "Hunters", "swap", func(): HomeHero.open(self)])
 	return items
 
 func _build_hub() -> void:
@@ -3568,56 +3568,12 @@ func _open_expedition() -> void:
 	_day1("portal")
 	var v := _new_panel("Expedition", 940, true)
 	UI.subtitle(v, "Pick your kit and where to drop. Everything here is saved as you change it.")
-	var cur_c := Data.class_of_save()
 	var cols := UI.hbox(UI.GAP_BIG + 8)
 	v.add_child(cols)
-	# left: who you are (weight, class, weapon, kin)
+	# left: who you are (your Hunter, its weapon, your Boki); locked Hunters are greyed (HunterPickRow)
 	var left := UI.vbox(10); left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	cols.add_child(left)
-	left.add_child(UI.section("Weight"))
-	var cnames: Array = []
-	var cname_of := {}
-	for c in ["light", "medium", "heavy"]:
-		cnames.append(String(Data.CLASSES[c]["name"])); cname_of[String(Data.CLASSES[c]["name"])] = c
-	var ctabs := UI.tabs(cnames, String(Data.CLASSES[cur_c]["name"]), func(nm):
-		var ck: String = cname_of[nm]
-		var open_a := ClassUnlock.fix(String(Save.d.get("arch", "")), ck)      # (only a class that is open)
-		if open_a == "":
-			_toast("No %s weight class is open yet. See Hero, then Classes and goals." % String(Data.CLASSES[ck]["name"]).to_lower())
-			return
-		Save.d["cls"] = ck
-		Save.d["arch"] = open_a
-		Save.d["weapon"] = Arch.signature(String(Save.d["arch"]))
-		Save.save_game()
-		_refresh_player_model()
-		_open_expedition(), {}, 120)
-	for tb in ctabs.get_child(0).get_children():
-		var cd: Dictionary = Data.CLASSES[cname_of[String(tb.get_meta("tab"))]]
-		tb.tooltip_text = "%d health  ·  %d dash%s\n%s" % [cd["hp"], cd["dashes"], "es" if cd["dashes"] > 1 else "", cd["desc"]]
-	left.add_child(ctabs)
-	var ccd: Dictionary = Data.CLASSES[cur_c]
-	var cl := UI.label("%d health  ·  %d dash%s  ·  %s" % [ccd["hp"], ccd["dashes"], "es" if ccd["dashes"] > 1 else "", "light frame" if cur_c == "light" else ("hard to push" if cur_c == "heavy" else "all-rounder")], UI.T_SMALL, ccd["color"])
-	cl.autowrap_mode = TextServer.AUTOWRAP_OFF
-	left.add_child(cl)
-	left.add_child(UI.spacer(2))
-	# the class: four per weight, each with its own kit and signature weapon (docs/ARCHETYPES.md); locked ones are greyed
-	left.add_child(UI.section("Class"))
-	var arow := UI.hbox(8)
-	var cur_a := Arch.of_save()
-	for a in Arch.of_class(cur_c):
-		var ak: String = a
-		var ab := UI.choice(Arch.name_of(a), a == cur_a, func():
-			Save.d["arch"] = ak
-			Save.d["weapon"] = Arch.signature(ak)
-			Save.save_game()
-			_refresh_player_model()
-			_open_expedition(), 150)
-		if not ClassUnlock.is_open(ak):
-			ab.disabled = true
-		var adf := Arch.def(a)
-		ab.tooltip_text = ("Locked: %s\n" % ClassUnlock.requirement(ak) if ab.disabled else "") + "%s\nDash: %s  ·  Passive: %s\nRMB: %s  ·  E: %s  ·  R: Boki Merge" % [String(adf.get("fantasy", "")), String(adf["dash"]["name"]), String(adf["passive"]["name"]), String(adf["rmb"]["name"]), String(adf["e"]["name"])]
-		arow.add_child(ab)
-	left.add_child(arow)
+	var cur_a := HunterPickRow.add(self, left)
 	# your abilities before a run: the kit card's compact row (click for the full card)
 	left.add_child(KitCard.strip(cur_a, _open_kit_card))
 	left.add_child(UI.spacer(2))

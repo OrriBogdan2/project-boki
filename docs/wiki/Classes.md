@@ -1,15 +1,15 @@
-# Classes
+# Hunters
 
-A class is a whole character: its own dash, a passive with a resource it builds, a weapon (left
-click), a right-click ability with several variants, a utility on E and an ultimate on R. There are
-twelve, four in each weight class:
+A Hunter is a whole character: its own dash, a passive with a resource it builds, a weapon (left
+click), a right-click ability with several variants, a utility on E, and R, the Merge with your Boki.
+There are twelve; the table at the bottom of this page lists them all, each with its own page:
 
-- **Light:** [Thief](Class-Thief.md) (stick to one target, flip and reset), [Archer](Class-Archer.md) (pin people, then the big shot), [Vireo](Class-Vireo.md) (load Sparks, then Wirerun through them) and [Tamsin](Class-Tamsin.md) (chill foes, shelter the squad behind ice).
-- **Medium:** [Marlowe](Class-Marlowe.md) (burr charges and one long needle), [Linnet](Class-Linnet.md) (heal, carry the downed), [Dolm](Class-Dolm.md) (raise rocks, punch them into the fight) and [Ostra](Class-Ostra.md) (swell, plant a seed, trade places).
-- **Heavy:** [Juggernaut](Class-Juggernaut.md) (rage, chain in, crush), [Bulwark](Class-Bulwark.md) (block, then smash them into walls), [Dredge](Class-Dredge.md) (haul a foe in, drop the anchor) and [Ashwick](Class-Ashwick.md) (build Char, flash foes over).
+- [Thief](Class-Thief.md) (stick to one target, flip and reset), [Archer](Class-Archer.md) (pin people, then the big shot), [Vireo](Class-Vireo.md) (load Sparks, then Wirerun through them), [Tamsin](Class-Tamsin.md) (chill foes, shelter the squad behind ice).
+- [Marlowe](Class-Marlowe.md) (burr charges and one long needle), [Linnet](Class-Linnet.md) (heal, carry the downed), [Dolm](Class-Dolm.md) (raise rocks, punch them into the fight), [Ostra](Class-Ostra.md) (swell, plant a seed, trade places).
+- [Juggernaut](Class-Juggernaut.md) (rage, chain in, crush), [Bulwark](Class-Bulwark.md) (block, then smash them into walls), [Dredge](Class-Dredge.md) (haul a foe in, drop the anchor), [Ashwick](Class-Ashwick.md) (build Char, flash foes over).
 
-The weight class sets health, speed, mass (how far hits push you) and how many dash charges you get.
-Everything else comes from the class kit.
+Each Hunter has its own health, speed, mass (how far hits push you) and number of dash charges, on
+top of its kit.
 
 ## Levels and ranks
 
@@ -20,78 +20,71 @@ fighting (damage, knocks) and slowly over time; each level gives a point.
   ability you already have.
 - RMB, dash, E and your glove each go to **rank 3**; the ultimate opens at **level 6** and takes rank 2
   at **level 9**.
-- **Rank 2** is the same shape for every class: a shorter cooldown (10 to 15%) and +15% damage.
-  **Rank 3** adds a special (an extra bounce, a third charge, a refund...). Your class page lists them.
+- **Rank 2** is the same shape for every Hunter: a shorter cooldown (10 to 15%) and +15% damage.
+  **Rank 3** adds a special (an extra bounce, a third charge, a refund...). Your Hunter's page lists them.
 - Your level shows on the HUD; a gold ring flashes on you when you level, and everyone nearby sees it.
 
-## Your Boki and your class
+## Your Boki and your Hunter
 
-Your Boki doesn't replace any of your class abilities. It brings its own ability (C), fights on its
-own when you send it out (G), and adds a little of its type to your kit: each class ability has
+Your Boki doesn't replace any of your Hunter's abilities. It brings its own ability (C), fights on its
+own when you send it out (G), and adds a little of its type to your kit: each Hunter ability has
 **sockets** (hit, control, guard, utility, modifier) and your Boki's parts fill them at a fraction of
 their strength (35% on RMB, 30% on E and the dash, 50% on R). Hard control from a socket is capped. An
 empty socket gives +10% to that ability's main number instead.
 
-**R is the Merge** for every class. When your **bond meter** is full, press it and you and your Boki
+**R is the Merge** for every Hunter. When your **bond meter** is full, press it and you and your Boki
 become one for a while: you wear its look, and your abilities change by its type and power (its merge
-form, see [Boki species](Boki-Species.md)). The class's own ultimate is held back for now.
+form, see [Boki species](Boki-Species.md)). A Hunter's own ultimate is held back for now.
 
 ## Choosing
 
-Each weight class has a default: Thief (light), Marlowe (medium) and Juggernaut (heavy). You pick
-your class in the Expedition menu, and you can try every class against dummies in the
-[Arena](Arena-and-Training.md) at any time.
+At character creation you pick 1 Hunter in the Hunter viewer, which shows each one's model playing
+its abilities in turn with their keys. Your next two unlocks come early, then the rest open through
+play (see "How Hunters unlock" below). On the farm, **J** (or the Hunters button) opens the Hunters
+screen: every Hunter, open, ready, in progress or locked, the same viewer, and **hold to unlock** for
+one that is ready. You can try every Hunter against dummies in the [Arena](Arena-and-Training.md) at
+any time.
 
 ## At a glance
 
 <!-- gen:classes -->
 <!-- Generated by tools/gen_wiki.py from the game's data. Don't edit by hand: change the data and rerun it. -->
 
-### All 12 classes
+### All 12 Hunters
 
-| Class | Weight | Weapons | Passive | Dash | RMB | E | R |
+| Hunter | Health / dashes | Weapons | Passive | Dash | RMB | E | R |
 |---|---|---|---|---|---|---|---|
-| [Thief](Class-Thief.md) | Light | Twin Blades | Marks | Vault | Bola | Shadow Knife | Jackpot |
-| [Archer](Class-Archer.md) | Light | Longbow | Focus | Grapple Arrow | Snare | Hail Wall | none (Boki Merge) |
-| [Vireo](Class-Vireo.md) | Light | Coilcaster | Sparks | Wirerun | Coilshot | Skycall | none (Boki Merge) |
-| [Marlowe](Class-Marlowe.md) | Medium | Quill Rifle | Fever | Slipstep | Burr Charge | Longneedle | none (Boki Merge) |
-| [Juggernaut](Class-Juggernaut.md) | Heavy | Greatsword | Rage | Rampage | Smash | Warchain | Doomfall |
-| [Bulwark](Class-Bulwark.md) | Heavy | Tower Shield & Mace | Guard | Whirl | Shield | Mending Ground | none (Boki Merge) |
-| [Dredge](Class-Dredge.md) | Heavy | Shotgun | Salvage | Barge | Grapnel | Anchor Drop | none (Boki Merge) |
-| [Ashwick](Class-Ashwick.md) | Heavy | Torch Lance | Flashover | Spark Leap | Cinder Shot | Furnace Cloak | none (Boki Merge) |
-| [Linnet](Class-Linnet.md) | Medium | Lantern Crook | Bearer | Relay Step | Burrseed | Hearthlight | none (Boki Merge) |
-| [Tamsin](Class-Tamsin.md) | Light | Hoar Fan | Hoarfrost | Rinkrun | Sleet Lance | Rink Wall | none (Boki Merge) |
-| [Dolm](Class-Dolm.md) | Medium | Rubble Fists | Tremor Sense | Rubble Rush | Quakefall | Stone Row | none (Boki Merge) |
-| [Ostra](Class-Ostra.md) | Medium | Tether Lantern | Swell | Lantern Trade | Shard Fan | Brimseed | none (Boki Merge) |
+| [Thief](Class-Thief.md) | 124 / 1 | Twin Blades | Marks | Vault | Bola | Shadow Knife | Jackpot |
+| [Archer](Class-Archer.md) | 124 / 1 | Longbow | Focus | Grapple Arrow | Snare | Hail Wall | none (Boki Merge) |
+| [Vireo](Class-Vireo.md) | 124 / 1 | Coilcaster | Sparks | Wirerun | Coilshot | Skycall | none (Boki Merge) |
+| [Marlowe](Class-Marlowe.md) | 145 / 1 | Quill Rifle | Fever | Slipstep | Burr Charge | Longneedle | none (Boki Merge) |
+| [Juggernaut](Class-Juggernaut.md) | 193 / 2 | Greatsword | Rage | Rampage | Smash | Warchain | Doomfall |
+| [Bulwark](Class-Bulwark.md) | 193 / 2 | Tower Shield & Mace | Guard | Whirl | Shield | Mending Ground | none (Boki Merge) |
+| [Dredge](Class-Dredge.md) | 193 / 2 | Shotgun | Salvage | Barge | Grapnel | Anchor Drop | none (Boki Merge) |
+| [Ashwick](Class-Ashwick.md) | 193 / 2 | Torch Lance | Flashover | Spark Leap | Cinder Shot | Furnace Cloak | none (Boki Merge) |
+| [Linnet](Class-Linnet.md) | 145 / 1 | Lantern Crook | Bearer | Relay Step | Burrseed | Hearthlight | none (Boki Merge) |
+| [Tamsin](Class-Tamsin.md) | 124 / 1 | Hoar Fan | Hoarfrost | Rinkrun | Sleet Lance | Rink Wall | none (Boki Merge) |
+| [Dolm](Class-Dolm.md) | 145 / 1 | Rubble Fists | Tremor Sense | Rubble Rush | Quakefall | Stone Row | none (Boki Merge) |
+| [Ostra](Class-Ostra.md) | 145 / 1 | Tether Lantern | Swell | Lantern Trade | Shard Fan | Brimseed | none (Boki Merge) |
 
-### How classes unlock
+### How Hunters unlock
 
-A new save picks one starting class from Thief, Marlowe, Juggernaut. Every other class opens when its goal is done and the account has reached its level. Account XP comes from expeditions: 15 for playing one, 50 more for getting out, 1 per monster (up to 30), 6 per hunter knocked down (up to 30), 80 per lair boss and 25 per Boki brought home. Level L to L+1 costs 100 + 50 x (L - 1) XP, up to level 20. Locked classes stay playable in the Arena and the Training Grounds, and saves from before class unlocks keep every class open.
+At character creation you pick 1 starting Hunter (any of the 12). The next 2 unlocks come early: play 1 expedition, then make it out of 1 expedition; each one done is a free pick of any locked Hunter. After that, every Hunter opens when its own goal is done and the account has reached its level. An unlock is never automatic: when one is ready you hold the button on the Hunters screen for 1.6s, and letting go early cancels it. Account XP comes from expeditions: 15 for playing one, 50 more for getting out, 1 per monster (up to 30), 6 per hunter knocked down (up to 30), 80 per lair boss and 25 per Boki brought home. Level L to L+1 costs 100 + 50 x (L - 1) XP, up to level 20. Locked Hunters stay playable in the Arena and the Training Grounds, and saves from before Hunter unlocks keep every Hunter open.
 
-| Class | Starter | Goal | Target | Account level |
+| Hunter | Starter | Own goal | Target | Account level |
 |---|---|---|---|---|
 | [Thief](Class-Thief.md) | pick at the start | Defeat 15 monsters | 15 | 2 |
-| [Archer](Class-Archer.md) | play | Make it out of 3 expeditions | 3 | 3 |
-| [Vireo](Class-Vireo.md) | play | Defeat 40 monsters | 40 | 3 |
+| [Archer](Class-Archer.md) | pick at the start | Make it out of 3 expeditions | 3 | 3 |
+| [Vireo](Class-Vireo.md) | pick at the start | Defeat 40 monsters | 40 | 3 |
 | [Marlowe](Class-Marlowe.md) | pick at the start | Make it out of an expedition | 1 | 2 |
 | [Juggernaut](Class-Juggernaut.md) | pick at the start | Knock down 2 hunters | 2 | 2 |
-| [Bulwark](Class-Bulwark.md) | play | Knock down 5 hunters | 5 | 3 |
-| [Dredge](Class-Dredge.md) | play | Make it out of 5 expeditions | 5 | 4 |
-| [Ashwick](Class-Ashwick.md) | play | Defeat a lair boss | 1 | 6 |
-| [Linnet](Class-Linnet.md) | play | Scan a wild Boki and bring it home | 1 | 2 |
-| [Tamsin](Class-Tamsin.md) | play | Stagger 10 monsters with abilities | 10 | 5 |
-| [Dolm](Class-Dolm.md) | play | Wall-slam 5 enemies | 5 | 4 |
-| [Ostra](Class-Ostra.md) | play | Reach level 6 in a match | 6 | 4 |
-
-### Weights
-
-The weight (Light, Medium or Heavy) sets health, speed, mass and dash charges; the class kit sits on top.
-
-| Weight | Health | Speed (m/s) | Dash charges | Mass | Glide cap | Classes | In short |
-|---|---|---|---|---|---|---|---|
-| Light | 124 | 5 | 1 | 0.85 | 1.2 | Thief, Archer, Vireo, Tamsin | Fast and fragile. The fastest dash, the longest glide, and hits throw you furthest. |
-| Medium | 145 | 4.8 | 1 | 1 | 1 | Marlowe, Linnet, Dolm, Ostra | The all-rounder: middle health, speed, dash and glide. |
-| Heavy | 193 | 4.55 | 2 | 1.35 | 0.85 | Juggernaut, Bulwark, Dredge, Ashwick | Slow and tough. Two short dashes, the most health, and very hard to push off a ledge. |
+| [Bulwark](Class-Bulwark.md) | pick at the start | Knock down 5 hunters | 5 | 3 |
+| [Dredge](Class-Dredge.md) | pick at the start | Make it out of 5 expeditions | 5 | 4 |
+| [Ashwick](Class-Ashwick.md) | pick at the start | Defeat a lair boss | 1 | 6 |
+| [Linnet](Class-Linnet.md) | pick at the start | Scan a wild Boki and bring it home | 1 | 2 |
+| [Tamsin](Class-Tamsin.md) | pick at the start | Stagger 10 monsters with abilities | 10 | 5 |
+| [Dolm](Class-Dolm.md) | pick at the start | Wall-slam 5 enemies | 5 | 4 |
+| [Ostra](Class-Ostra.md) | pick at the start | Reach level 6 in a match | 6 | 4 |
 
 ### Run levels
 

@@ -35,7 +35,7 @@ of light do the rest, while every landed ability feeds a lifesteal.
 
 |  |  |
 |---|---|
-| Weight | Medium (145 health, 4.8 m/s, 1 dash charge) |
+| Body | 145 health, 4.8 m/s, 1 dash charge |
 | Signature weapon | Quill Rifle (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The burr-and-needle marksman. Tags a foe with a clinging charge, lets the rifle and one long needle of light do the rest, and lives off every hit that lands. |
 | Silhouette | the scarf streaming behind and the bandolier of burr charges across the chest |

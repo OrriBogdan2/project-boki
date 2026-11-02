@@ -29,7 +29,7 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--archetype-check` | Every class kit in a flat arena: each dash, passive and resource, RMB variants, E, R (locked until level 6), the bonded R, controls, weapon locks, Boki infusion, feel |
 | `--kit-combo-check` | The cross-ability interactions (E + RMB chains, resets, refunds); also runs inside `--archetype-check` |
 | `--arena-check` | The Arena boots with its tools, dummies take and show damage, reset and swaps work, the kit card builds for every class, the training area works |
-| `--class-unlock-check` | Class unlocks: the starter pick on a new save, goal and account-level progress and the unlock, the reveal, locked classes staying playable in the Arena and practice picker, an old save migrating with every class open, the farm picker greying out locked classes |
+| `--hunter-unlock-check` (alias `--class-unlock-check`) | Hunter unlocks: pick 1 at character creation in the Hunter viewer, the two early free picks, each Hunter's goal and account level, hold to unlock (a partial hold cancels, a full hold unlocks and plays the reveal), the viewer cycling abilities on the real model, no Light/Medium/Heavy or weight labels and the Hunter wording on screen, locked Hunters staying playable in the Arena and practice picker, an old save migrating with every Hunter open |
 | `--weapon-check[=<id>]` | Every weapon against a standing target at a few ranges (taps and charges), printing the DPS it really lands |
 | `--weapon-clip-check` | No held weapon dips into the ground in any pose, on any class |
 | `--pickup-check` | A picked-up weapon arrives with a full magazine and no reload running, from any source |
@@ -54,7 +54,7 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--revive-check` | A bot squadmate reaches a downed player and finishes the revive in time, round walls and edges |
 | `--base-check` | Basing to a teammate: a clean channel arrives weakened; a hit interrupts it |
 | `--truce-check` | Truce offers and answers, no targeting during a truce, betrayal breaks and marks, shared uplink yards |
-| `--duel-check` | The duel room: autopilot against the sparring bot through class, behaviour, glove and difficulty changes |
+| `--duel-check` | The duel room: autopilot against the sparring bot through Hunter, behaviour, glove and difficulty changes |
 | `--blight-check` | The Blight's strength curve, Warden posts, the landing grace period, noise drawing Skitters, a level-1 hunter can win early |
 | `--raid-check` | Raid conditions roll fairly and repeatably, practice modes stay clear, sight shrinks, the armor kit key works |
 | `--bot-sanity-check` | Over seeded matches, no bot spins, spams jump or dash, or hangs in the air |
