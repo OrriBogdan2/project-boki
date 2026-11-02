@@ -2623,9 +2623,7 @@ func _draw_hover_tip(sz: Vector2, p: Hunter) -> void:
 	for i in range(1, lines.size()):
 		h += _wrapped_h(String(lines[i][0]), w - 28, int(lines[i][2])) + 4.0
 	var anchor: Rect2 = hit[0]
-	var pos := Vector2(anchor.get_center().x - w * 0.5, anchor.position.y - h - 14)
-	pos.x = clampf(pos.x, 8, sz.x - w - 8)
-	pos.y = maxf(8, pos.y)
+	var pos := HudTip.place(anchor, Vector2(w, h), sz)      # above if it fits, else beside; always on screen, never over the slot
 	var a := clampf((hover_t - 0.25) / 0.12, 0.0, 1.0)
 	var box := Rect2(pos, Vector2(w, h))
 	_rounded(box, Color(0.05, 0.06, 0.09, 0.95 * a), 12, Color(head[1], 0.6 * a), 2)
