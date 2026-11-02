@@ -119,29 +119,29 @@ static func strip(c: CanvasItem, r: Rect2, frac: float, col: Color, back_a := 0.
 ## The dark frame a plate's bars sit in: a soft-cornered backing with a hairline edge in the role
 ## colour (white while `flash` is up).
 static func plate_frame(c: CanvasItem, r: Rect2, edge: Color, flash := 0.0) -> void:
-	var sb := _sb(SHADE, 3, edge.lerp(Color.WHITE, snappedf(flash, 0.25)), 1)     # (flash in steps: a few cached boxes)
+	var sb := box(SHADE, 3, edge.lerp(Color.WHITE, snappedf(flash, 0.25)), 1)     # (flash in steps: a few cached boxes)
 	c.draw_style_box(sb, r)
 
 ## An ability or item slot's frame. `state`: "ready" (edge in the slot colour, a faint top gloss),
 ## "cooling" (a dim coral edge), "off" (barely there: locked, empty, or can't be used now).
 static func slot_frame(c: CanvasItem, r: Rect2, col: Color, state := "ready") -> void:
 	var edge := col if state == "ready" else (Color(COOLING, 0.55) if state == "cooling" else Color(1, 1, 1, 0.12))
-	c.draw_style_box(_sb(Color(0.05, 0.06, 0.09, 0.92), SLOT_RAD, edge, 2), r)
+	c.draw_style_box(box(Color(0.05, 0.06, 0.09, 0.92), SLOT_RAD, edge, 2), r)
 	if state == "ready":
-		c.draw_style_box(_sb(Color(col, 0.10), SLOT_RAD - 3, Color(0, 0, 0, 0), 0), Rect2(r.position + Vector2(3, 3), Vector2(r.size.x - 6, r.size.y * 0.42)))
+		c.draw_style_box(box(Color(col, 0.10), SLOT_RAD - 3, Color(0, 0, 0, 0), 0), Rect2(r.position + Vector2(3, 3), Vector2(r.size.x - 6, r.size.y * 0.42)))
 
 ## The key label under a slot: a dark pill, the key in the slot colour (muted when not ready).
 static func key_pill(c: CanvasItem, center: Vector2, key: String, col: Color) -> void:
 	var kw := BIG.get_string_size(key, HORIZONTAL_ALIGNMENT_LEFT, -1, KEY_FS).x
 	var kr := Rect2(center - Vector2(kw * 0.5 + 6, 9), Vector2(kw + 12, 18))
-	c.draw_style_box(_sb(KEY_BG, 9, Color(col, 0.8), 1), kr)
+	c.draw_style_box(box(KEY_BG, 9, Color(col, 0.8), 1), kr)
 	c.draw_string(BIG, Vector2(kr.position.x + 6, kr.position.y + 14), key, HORIZONTAL_ALIGNMENT_LEFT, -1, KEY_FS, col)
 
 ## A small count badge (charges, stack sizes) centred on `at`.
 static func count_badge(c: CanvasItem, at: Vector2, n: int, col: Color) -> void:
 	var s := str(n)
 	var w := maxf(16.0, BIG.get_string_size(s, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x + 8.0)
-	c.draw_style_box(_sb(KEY_BG, 8, Color(col, 0.9), 1), Rect2(at - Vector2(w * 0.5, 8), Vector2(w, 16)))
+	c.draw_style_box(box(KEY_BG, 8, Color(col, 0.9), 1), Rect2(at - Vector2(w * 0.5, 8), Vector2(w, 16)))
 	ctext(c, at + Vector2(0, 4.5), s, 11, col)
 
 ## Outlined text, left-aligned at `p` (baseline). `ol` is the outline width in px.
@@ -164,7 +164,8 @@ static func dmg_col(crit: bool, armor_hit: bool, on_you: bool, on_your_kin: bool
 
 # style boxes are made once per look and reused (dozens of frames are drawn every frame)
 static var _boxes := {}
-static func _sb(bg: Color, rad: int, border: Color, bw: int) -> StyleBoxFlat:
+## A cached rounded style box (bg, corner radius, border colour and width): for widgets drawing their own shapes.
+static func box(bg: Color, rad: int, border: Color, bw: int) -> StyleBoxFlat:
 	var key := [bg, rad, border, bw]
 	var sb: StyleBoxFlat = _boxes.get(key)
 	if sb == null:

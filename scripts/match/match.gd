@@ -6196,7 +6196,7 @@ func _ser(e: Ent) -> Array:
 	if e is Hunter:
 		var h: Hunter = e
 		return ["h", h.nid, _r(h.pos.x), _r(h.pos.y), _r(h.pos.z), _r(h.vel.x), _r(h.vel.y), _r(h.vel.z), _r(h.face), _r(h.hp), h.max_hp, _flags(h),
-			_r(h.down_hp), _r(h.revive), h.team, h.cls, h.pname, _r(h.shield), _r(h.extract_prog), h.kills, h.knocks, int(h.dmg_done), _r(h.armor), h.max_armor, h.arch, h.wid] + KinNet.hunter_extra(h)
+			_r(h.down_hp), _r(h.revive), h.team, h.cls, h.pname, _r(h.shield), _r(h.extract_prog), h.kills, h.knocks, int(h.dmg_done), _r(h.armor), h.max_armor, h.arch, h.wid] + KinNet.hunter_extra(h) + HunterNet.extra(h)
 	if e is Kin:
 		var k: Kin = e
 		return ["k", k.nid, _r(k.pos.x), _r(k.pos.y), _r(k.pos.z), _r(k.face), _r(k.hp), _r(k.max_hp), KIN_STATES.find(k.state), k.species,
@@ -6340,6 +6340,7 @@ func _net_apply(e: Ent, it: Array) -> void:
 			if it.size() > 23:
 				h.armor = float(it[22]); h.max_armor = float(it[23])
 			KinNet.apply_hunter(h, it)
+			HunterNet.apply(h, it)
 		"k":
 			var k: Kin = e
 			k.face = it[5]; k.hp = it[6]; k.max_hp = it[7]

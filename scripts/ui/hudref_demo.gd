@@ -17,14 +17,15 @@ static func tick(m) -> void:
 	if not m.has_meta("hudref_set"):
 		m.set_meta("hudref_set", true)
 		Settings.set_v("kin_chatter", "quiet", false)
+		if m.cam: m.cam.lead = 0.0
 		for mb in m.mobs: mb.dead = true; mb.visible = false
 		P.lvl = 7; P.skill_pts = 0
 		for s in P.slot_lv: P.slot_lv[s] = 1
 		if mode == "plates": _plates(m, P)
 		else: _fight(m, P)
-	# (the pointer rests on open ground above you: the camera doesn't lead and no hover card shows)
+	# (the pointer rests at the bottom edge so you face the row, below everyone; the camera doesn't lead)
 	var vp: Viewport = m.get_viewport()
-	if vp: vp.warp_mouse(vp.get_visible_rect().size * 0.5 + Vector2(0, -220))
+	if vp: vp.warp_mouse(Vector2(vp.get_visible_rect().size.x * 0.5, vp.get_visible_rect().size.y - 6.0))
 	for h in m.hunters:
 		if h == P: continue
 		if mode == "plates" or m.time < 4.0:
@@ -47,11 +48,16 @@ static func tick(m) -> void:
 		if hit and m.time >= HIT_AT and not m.has_meta("hudref_hit_done"):
 			m.set_meta("hudref_hit_done", true)
 			hit.hurt(46.0, P)
+			var up: Hunter = m.get_meta("hudref_up", null)
+			if up: up.lvl += 1                     # a rival levels up just before the picture (the badge pulse)
 		var st: Hunter = m.get_meta("hudref_stun", null)
 		if st: st.slow_t = maxf(st.slow_t, 1.0)
 
 static func _stand(m, h: Hunter, at: Vector3) -> void:
 	var g: Vector3 = m.world.free_spot_near(at, [], 0.6, 0.5, 3.0)
+	for i in 8:
+		if not m.world.in_bush(g.x, g.z): break       # (in grass they'd be hidden, plate and all)
+		g = m.world.free_spot_near(at + Vector3(0, 0, 1.2 * float(i + 1)), [], 0.6, 0.5, 3.0)
 	h.teleport(Vector3(g.x, m.world.ground_at(g.x, g.z), g.z))
 	h.ctrl = "idle"; h.vel = Vector3.ZERO
 	h.downed = false; h.hp = h.max_hp; h.armor = h.max_armor * 0.6; h.shield = 0.0
@@ -61,7 +67,7 @@ static func _plates(m, P: Hunter) -> void:
 	var base: Vector3 = P.pos
 	for i in foes.size():
 		var h: Hunter = foes[i]
-		_stand(m, h, base + (Vector3((float(i) - 2.0) * 3.0, 0, 3.4) if i < 5 else Vector3((float(i) - 6.0) * 3.0, 0, -7.5)))
+		_stand(m, h, base + (Vector3((float(i) - 2.0) * 2.4, 0, 4.4) if i < 5 else Vector3((float(i) - 6.0) * 3.0, 0, -7.5)))
 		h.lvl = 3 + i
 	P.hp = P.max_hp * 0.62
 	P.armor = P.max_armor * 0.5
@@ -69,6 +75,7 @@ static func _plates(m, P: Hunter) -> void:
 	if foes.size() < 5:
 		return
 	(foes[0] as Hunter).armor = 0.0                                      # full health, no armour
+	m.set_meta("hudref_up", foes[0])
 	m.set_meta("hudref_hit", foes[1])                                    # hit just before the picture
 	(foes[2] as Hunter).armor = (foes[2] as Hunter).max_armor            # armoured, with a shield
 	(foes[2] as Hunter).shield = 40.0; (foes[2] as Hunter).shield_t = 30.0

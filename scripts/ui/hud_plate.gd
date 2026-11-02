@@ -17,6 +17,7 @@ const CHIP_DRAIN := 1.6        # of the bar per second once it drains (plus an e
 const FLASH_T := 0.14          # s the frame flashes white when struck
 const BREAK_T := 0.45          # s of the armour-break crack
 const BURST_T := 1.1           # s of the knock burst over someone who just went down
+const LVL_POP_T := 0.7        # s of the pulse on a plate's level badge when that hunter levels up
 const PRUNE_T := 5.0           # s unseen before a hunter's plate state is dropped
 
 ## nid -> {chip, hold, frac, armor, flash, brk, down, burst, seen}
@@ -38,7 +39,7 @@ func tick(dt: float) -> void:
 func _state(e: Ent) -> Dictionary:
 	var s: Dictionary = st.get(e.nid, {})
 	if s.is_empty():
-		s = {"chip": 1.0, "hold": 0.0, "frac": -1.0, "armor": -1.0, "flash": 0.0, "brk": 0.0, "down": false, "burst": 0.0, "seen": now}
+		s = {"chip": 1.0, "hold": 0.0, "frac": -1.0, "armor": -1.0, "flash": 0.0, "brk": 0.0, "down": false, "burst": 0.0, "lvl": -1, "lvl_pop": 0.0, "seen": now}
 		st[e.nid] = s
 	return s
 
@@ -81,6 +82,10 @@ func _watch(h: Hunter, dt: float) -> Dictionary:
 		s["burst"] = BURST_T
 	s["down"] = h.downed
 	s["burst"] = maxf(0.0, float(s["burst"]) - dt)
+	if int(s["lvl"]) >= 0 and h.lvl > int(s["lvl"]):
+		s["lvl_pop"] = LVL_POP_T
+	s["lvl"] = h.lvl
+	s["lvl_pop"] = maxf(0.0, float(s["lvl_pop"]) - dt)
 	return s
 
 ## What's happening to someone, as [icon, colour, word, seconds left (or -1)], worst first.
@@ -132,7 +137,7 @@ func draw(H, sp: Vector2, h: Hunter, show_name: bool) -> void:
 	var hr := Rect2(Vector2(x0, sp.y + HudStyle.PLATE_PAD), Vector2(w, HudStyle.PLATE_HP_H))
 	HudStyle.seg_bar(c, hr, h.hp, h.max_hp, HudStyle.hp_fill(role, frac, H.m.time), ch, shield_frac(h), fl * 0.6)
 	var has_ar := _armor(c, h, Rect2(Vector2(x0, hr.end.y + 1.0), Vector2(w, HudStyle.PLATE_AR_H)), s)
-	_level_coin(H, c, Vector2(x0 - 3.0, frame.get_center().y), h, role)
+	level_badge(c, Vector2(frame.position.x + 2.0, frame.end.y - 1.0), h.lvl, role, float(s["lvl_pop"]) / LVL_POP_T)
 	# the name, or what's being done to them (stunned, rooted ...) in its colour
 	var sts := statuses(h)
 	var word := ""
@@ -154,7 +159,7 @@ func draw(H, sp: Vector2, h: Hunter, show_name: bool) -> void:
 		var rc: Color = h.ak.res_col()
 		var tk := 0.5 + 0.5 * sin(H.m.time * (8.0 if h.ak.tell == "full" else 3.0))
 		c.draw_circle(Vector2(x0 + w + 5.0, frame.position.y - 3.0), 3.0 + (1.5 * tk if h.ak.tell == "full" else 0.0), Color(rc, 0.5 + 0.4 * tk if h.ak.tell == "full" else 0.45))
-	shown[h.nid] = {"segs": HudStyle.seg_count(h.max_hp), "armor": has_ar, "shield": h.shield > 0.0, "downed": false, "word": word, "chip": ch}
+	shown[h.nid] = {"segs": HudStyle.seg_count(h.max_hp), "armor": has_ar, "shield": h.shield > 0.0, "downed": false, "word": word, "chip": ch, "lvl": h.lvl, "lvl_pop": float(s["lvl_pop"])}
 
 ## Your own plate over your head: wider, with your health number and the dash strip under it.
 func draw_self(H, sp: Vector2, p: Hunter) -> void:
@@ -172,6 +177,7 @@ func draw_self(H, sp: Vector2, p: Hunter) -> void:
 	HudStyle.seg_bar(c, hr, p.hp, p.max_hp, HudStyle.hp_fill(HudStyle.SELF, frac, H.m.time), ch, shield_frac(p), fl * 0.6)
 	var has_ar := _armor(c, p, Rect2(Vector2(x0, hr.end.y + 1.0), Vector2(w, HudStyle.PLATE_AR_H)), s)
 	HudStyle.text(c, Vector2(frame.end.x + 5.0, hr.end.y + 1.0), str(int(ceil(p.hp))), 13, Color(1, 1, 1, 0.92))
+	level_badge(c, Vector2(frame.position.x + 2.0, frame.end.y - 1.0), p.lvl, HudStyle.SELF, float(s["lvl_pop"]) / LVL_POP_T)
 	DashStrip.draw(H, Rect2(Vector2(x0, frame.end.y + 3.0), Vector2(w, 4)), p)
 	var sts := statuses(p)
 	if not sts.is_empty():
@@ -204,15 +210,28 @@ func _armor(c: CanvasItem, h: Hunter, r: Rect2, s: Dictionary) -> bool:
 		c.draw_multiline(pts, Color(col.lerp(Color.WHITE, 0.5), b), 2.0)
 	return true
 
-## The run level on a coin hanging off the left of the frame, gold-rimmed once their ultimate is
-## open (level 6+).
-func _level_coin(H, c: CanvasItem, at: Vector2, h: Hunter, role: Color) -> void:
-	var ult_open := h.lvl >= int(Hunter.ULT_AT[0])
-	var r := 9.0
-	c.draw_circle(at, r + 1.5, HudStyle.SHADE_EDGE)
-	c.draw_circle(at, r, Color(role.darkened(0.6), 0.97))
-	c.draw_arc(at, r, 0, TAU, 20, HudStyle.GOLD if ult_open else Color(role, 0.95), 2.0 if ult_open else 1.5, true)
-	HudStyle.ctext(c, at + Vector2(0, 4.5), str(h.lvl), 12, HudStyle.GOLD if ult_open else HudStyle.INK, 3)
+## Every hunter's run level, rivals included, on a badge pinned to the lower-left corner of their
+## frame (over where the bars start, so it reads with the health). A rounded tab in the hunter's
+## role colour with the number in our display font; it grows into a wider pill at 10+, takes a gold
+## rim once their ultimate is open (level 6+), and when they level up it swells, flashes gold and
+## throws a gold ring (`pop` 1 -> 0 over LVL_POP_T).
+static func level_badge(c: CanvasItem, corner: Vector2, lvl: int, role: Color, pop := 0.0) -> void:
+	var ult_open := lvl >= int(Hunter.ULT_AT[0])
+	var txt := str(lvl)
+	var k := 1.0 - pop
+	var sc := 1.0 + 0.45 * sin(k * PI) if pop > 0.0 else 1.0
+	var h := 15.0 * sc
+	var w := maxf(h, (HudStyle.BIG.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x + 7.0) * sc)
+	var ctr := corner + Vector2(-w * 0.5 + 6.0, -2.0)
+	var r := Rect2(ctr - Vector2(w, h) * 0.5, Vector2(w, h))
+	var rim: Color = HudStyle.GOLD if ult_open else role
+	if pop > 0.0:
+		c.draw_arc(ctr, 9.0 + 22.0 * k, 0, TAU, 28, Color(HudStyle.GOLD, 0.9 * pop), 2.5, true)
+		rim = rim.lerp(HudStyle.GOLD, snappedf(pop, 0.25))     # (in steps: a few cached boxes)
+	c.draw_style_box(HudStyle.box(HudStyle.SHADE_EDGE, 6, HudStyle.SHADE_EDGE, 0), r.grow(1.5))
+	c.draw_style_box(HudStyle.box(Color(role.darkened(0.62), 0.98), 5, rim, 2 if ult_open or pop > 0.0 else 1), r)
+	var tcol: Color = (HudStyle.GOLD if ult_open else HudStyle.INK).lerp(HudStyle.GOLD, pop)
+	HudStyle.ctext(c, ctr + Vector2(0, 4.5 * sc), txt, int(12.0 * sc), tcol, 3)
 
 ## A downed hunter's plate: the bleed-out bar (amber, red while being finished), revive progress
 ## filling over it in green, a cross in place of the level, and what's happening under it. The
@@ -229,11 +248,7 @@ func _downed(H, c: CanvasItem, sp: Vector2, h: Hunter, frame: Rect2, s: Dictiona
 	HudStyle.seg_bar(c, br, h.down_hp, dmax, bcol, 0.0, 0.0, 0.0, HudStyle.HP_PER_SEG)
 	if h.revive > 0.0:
 		c.draw_rect(Rect2(br.position + Vector2(0, br.size.y - 4.0), Vector2(w * clampf(h.revive, 0.0, 1.0), 4.0)), HudStyle.REVIVE)
-	# a cross on the coin
-	var cc := Vector2(frame.position.x - 1.0, frame.get_center().y)
-	c.draw_circle(cc, 10.5, HudStyle.SHADE_EDGE)
-	c.draw_circle(cc, 9.0, Color(bcol.darkened(0.55), 0.97))
-	c.draw_multiline(PackedVector2Array([cc + Vector2(-4, -4), cc + Vector2(4, 4), cc + Vector2(4, -4), cc + Vector2(-4, 4)]), bcol, 2.5)
+	level_badge(c, Vector2(frame.position.x + 2.0, frame.end.y - 1.0), h.lvl, role, float(s["lvl_pop"]) / LVL_POP_T)
 	HudStyle.ctext(c, Vector2(sp.x, sp.y - 6), h.pname.substr(0, 14), HudStyle.PLATE_NAME_FS, Color(role.lerp(Color.WHITE, 0.4), 0.9))
 	var revs: Array = h.get_meta("revivers", [])
 	var line := "DOWN"
@@ -246,7 +261,7 @@ func _downed(H, c: CanvasItem, sp: Vector2, h: Hunter, frame: Rect2, s: Dictiona
 		lcol = HudStyle.REVIVE
 	HudStyle.ctext(c, Vector2(sp.x, frame.end.y + 13.0), line, 11, lcol, 3)
 	_burst(c, sp + Vector2(0, -26), float(s["burst"]), bcol)
-	shown[h.nid] = {"segs": HudStyle.seg_count(dmax), "armor": false, "shield": false, "downed": true, "word": line, "chip": 0.0}
+	shown[h.nid] = {"segs": HudStyle.seg_count(dmax), "armor": false, "shield": false, "downed": true, "word": line, "chip": 0.0, "lvl": h.lvl, "lvl_pop": float(s["lvl_pop"])}
 
 ## The knock burst: rays flung outward from a ring, and the word popping in big then settling.
 static func _burst(c: CanvasItem, at: Vector2, t: float, col: Color) -> void:

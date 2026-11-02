@@ -86,10 +86,41 @@ func run(main_node: Node) -> void:
 	var ds: Dictionary = hud.plates.shown.get(dn.nid, {})
 	ok(dn.downed and bool(ds.get("downed", false)) and String(ds.get("word", "")).begins_with("DOWN"), "a downed rival shows the downed plate ('%s')" % String(ds.get("word", "")))
 	var sl: Hunter = foes[3]
-	ok(String((hud.plates.shown.get(sl.nid, {}) as Dictionary).get("word", "")) == "SLOWED", "a slowed rival's plate says SLOWED over the bar")
+	sl.reveal_t = 3.0       # (seen however the headless camera faces)
+	await main.get_tree().process_frame
+	await main.get_tree().process_frame
+	var sw := String((hud.plates.shown.get(sl.nid, {}) as Dictionary).get("word", ""))
+	ok(sw == "SLOWED", "a slowed rival's plate says SLOWED over the bar ('%s', slow %.2f, downed %s, unseen %s, model %s)" % [sw, sl.slow_t, sl.downed, sl.unseen, sl.model.visible])
 	m.knock(foes[0], P, {})
 	await main.get_tree().process_frame
 	ok(float((hud.plates.st.get(foes[0].nid, {}) as Dictionary).get("burst", 0.0)) > 0.0, "going down pops the knock burst over them")
+	# ---------------------------------------------------------------- 4b. everyone's level, rivals included
+	var lv_ok := true
+	var seen := 0
+	for f in foes:
+		if (f as Hunter).unseen: continue     # (hidden in grass: no plate for anyone, by design)
+		seen += 1
+		var fs: Dictionary = hud.plates.shown.get((f as Hunter).nid, {})
+		if not fs.is_empty() and int(fs.get("lvl", -1)) != (f as Hunter).lvl:
+			lv_ok = false
+			print("  level mismatch %s: shown %d, is %d, unseen %s" % [f.pname, int(fs.get("lvl", -1)), f.lvl, f.unseen])
+	var missing := foes.filter(func(f): return not f.unseen and not hud.plates.shown.has((f as Hunter).nid)).map(func(f): return "%s(unseen %s, model %s, out %s)" % [f.pname, f.unseen, f.model.visible if f.model else false, f.out])
+	ok(lv_ok and missing.is_empty() and seen >= 5, "every visible hunter's plate (%d), rivals and the downed included, shows their level %s" % [seen, str(missing)])
+	# a hunter from another machine: their level comes in the snapshot, the badge updates and pulses
+	var R: Hunter = foes[2]
+	R.lvl = 9
+	var row: Array = m._ser(R)
+	R.lvl = 4
+	R.remote = true
+	await main.get_tree().process_frame
+	ok(int((hud.plates.shown.get(R.nid, {}) as Dictionary).get("lvl", -1)) == 4, "a remote rival's plate shows level 4")
+	m._net_apply(R, row)
+	ok(R.lvl == 9, "their snapshot carries the run level (now %d)" % R.lvl)
+	await main.get_tree().process_frame
+	var rs: Dictionary = hud.plates.shown.get(R.nid, {})
+	ok(int(rs.get("lvl", -1)) == 9 and float(rs.get("lvl_pop", 0.0)) > 0.0, "the plate updates to 9 and the badge pulses (%.2fs)" % float(rs.get("lvl_pop", 0.0)))
+	await frames_until(m, m.time + HudPlate.LVL_POP_T + 0.2)
+	ok(float((hud.plates.shown.get(R.nid, {}) as Dictionary).get("lvl_pop", 1.0)) == 0.0, "... and the pulse settles")
 	# ---------------------------------------------------------------- 5. cooldown text
 	P.slot_lv["kin"] = 1
 	P.ak.cd["e"] = 6.4
