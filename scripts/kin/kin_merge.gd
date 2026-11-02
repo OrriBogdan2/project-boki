@@ -87,7 +87,7 @@ static func surge(h: Hunter) -> bool:
 	h.ult = 0.0
 	var ms := MergeForm.surge_spec()
 	var form := MergeForm.surge_form()
-	h.merge_st = {"def": ms, "t": ms.duration, "T": ms.duration, "k": 1.0, "giant": false, "pulse": [], "form": form, "surge": true, "phase": "live", "xt": 0.0, "kit": null, "contact": true}
+	h.merge_st = {"def": ms, "t": ms.duration, "T": ms.duration, "giant": false, "pulse": [], "form": form, "surge": true, "phase": "live", "xt": 0.0, "kit": null, "contact": true}
 	h._refresh_kin_stats()
 	MergeLook.attach(h, form)
 	MergeXform.flash_only(h.m, h.pos, form)
@@ -104,13 +104,14 @@ static func cast(h: Hunter) -> bool:
 	if ms == null:
 		return false
 	h.ult = 0.0
+	MergeKit.drop_class_holds(h)
 	var form := MergeForm.for_boki(k)
 	var giant := k.carry_style() == "mount" and not MergeForm.has_kit(form)
 	var timers: Array = []
 	for pl in ms.pulses:
 		timers.append(float(pl["every"]))
 	var xs := float(MergeForm.data()["xform_s"])
-	h.merge_st = {"def": ms, "t": ms.duration, "T": ms.duration, "k": 1.0, "giant": giant, "pulse": timers, "form": form, "surge": false,
+	h.merge_st = {"def": ms, "t": ms.duration, "T": ms.duration, "giant": giant, "pulse": timers, "form": form, "surge": false,
 		"phase": "xform", "xt": xs, "kit": MergeKit.new(h, form), "contact": false, "from": k.pos}
 	k.merge_in(giant)
 	h._refresh_kin_stats()
@@ -143,6 +144,12 @@ static func kit_form(h: Hunter) -> bool:
 		return bool(h.get_meta("mf_kit", false))          # (other games: set from the snapshot, KinNet)
 	return active(h) and MergeForm.has_kit(MergeForm.of(h)) and h.merge_st.get("phase", "") == "live"
 
+## Wearing (or turning into) a form with a kit: the transformation counts, so a G or an order mid-leap cannot end the merge.
+static func in_form(h: Hunter) -> bool:
+	if h.remote:
+		return bool(h.get_meta("mf_kit", false))
+	return active(h) and MergeForm.has_kit(MergeForm.of(h))
+
 ## Is the Boki hidden inside you (a live form with a kit)? The Boki's render asks.
 static func inside(k: Kin) -> bool:
 	return k.state == "fused" and k.owner_h != null and kit_form(k.owner_h)
@@ -166,8 +173,8 @@ static func tick(h: Hunter, dt: float) -> void:
 		return
 	var k: Kin = h.kin
 	var surge_on: bool = h.merge_st.get("surge", false)
-	if h.downed or h.out or h.extracted or (not surge_on and (k == null or k.dead or k.state in ["downed", "bench", "away"])):
-		end(h, "knocked" if h.downed else "broken")
+	if h.downed or h.out or h.extracted or h.dropping or (not surge_on and (k == null or k.dead or k.state in ["downed", "bench", "away"])):
+		end(h, "knocked" if h.downed else "broken")          # (also: a lost life drops you back in)
 		return
 	var st: Dictionary = h.merge_st
 	if st["phase"] == "xform":
@@ -220,7 +227,7 @@ static func end(h: Hunter, why := "time") -> void:
 	if k and is_instance_valid(k) and not k.dead and not st.get("surge", false):
 		if not h.downed and not h.out:
 			KinExec.run_stages(ms.on_end, _cx(h, k, ms))
-		if k.state == "fused" and MergeForm.has_kit(form):
+		if k.state == "fused" and MergeForm.has_kit(form) and not h.out and not h.extracted:
 			k.merge_pop()
 		else:
 			k.merge_out()
@@ -233,13 +240,11 @@ static func patch(h: Hunter, slot: String) -> Dictionary:
 	var ms: MergeSpec = h.merge_st["def"]
 	return ms.merged.get("active" if slot == "k1" else "auto", {})
 
-## The merge's riders on every shot, scaled by its strength: {effects, splash, chain, k}.
+## The merge's riders on every shot, {effects, splash, chain} (the same for everyone: no tiers).
 static func on_shot(h: Hunter) -> Dictionary:
 	if not active(h):
 		return {}
 	var ms: MergeSpec = h.merge_st["def"]
 	if ms.on_shot.is_empty():
 		return {}
-	var out: Dictionary = ms.on_shot.duplicate()
-	out["k"] = float(h.merge_st["k"])
-	return out
+	return ms.on_shot.duplicate()

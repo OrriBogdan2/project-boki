@@ -4,7 +4,7 @@ extends RefCounted
 ## the transformation ends. While live, LMB, RMB and E are the form's (content/merge_forms/<id>.json) and
 ## C is off; Shift, Q and the bar stay. The slot grammar is the same for every form:
 ##   LMB  the main attack            (Effects, alternating `seq` lists)
-##   RMB  a HOLD mechanic            (MergeHolds: bulldoze, hover, prism; a rising sound, a fill, a "full" tick)
+##   RMB  a HOLD mechanic            (MergeHolds: boulder, hover, prism; a rising sound, a fill, a "full" tick)
 ##   E    movement or utility        (Effects, or MergeHolds.blink)
 ##   R    the ultimate, which ends the merge: a timeline of `beats` (ops and Effects) after a tell
 ## A Boki without a form has no slots: only R, a basic burst.
@@ -23,6 +23,7 @@ var charges := 0.0                       # E charges (a blink has two)
 var recharge := 0.0                      # seconds to the next charge
 var ult: Dictionary = {}                 # the ultimate running: {t, done, r}
 var rise: Dictionary = {}                # the ultimate's climb into the air: {base, h}
+var anim_n := 0                          # counts plays, so the same pose twice in a row is a new play for other games
 var anim_id := ""                        # the keyed pose playing on the hunter (MergeMoves)
 var anim_at := -9.0
 var bot_rmb := 0.0                       # seconds a bot keeps RMB held
@@ -80,6 +81,7 @@ func _ctx(slot: String, reach := 0.0) -> Dictionary:
 
 func play(move: String) -> void:
 	anim_id = move
+	anim_n += 1          # (a repeat of the same pose still replays in other games, KinNet)
 	anim_at = m.time
 
 ## A cast for the other games to see (Net event "mcast"): slot, where it was aimed, a radius and a time for tells.
@@ -89,7 +91,18 @@ func announce(slot: String, at := Vector3.INF, radius := 0.0, secs := 0.0) -> vo
 
 # ------------------------------------------------------------------ inputs
 ## Hunter._tick: this step's presses. LMB, RMB and E go to the form; C is dropped; R stays with KinMerge.press.
+## Whatever the class kit or weapon had started before R (a charge, a bow draw, a held RMB) is dropped, and stays dropped
+## while merged: the form's own kit owns the buttons (the pattern Hex uses for a hexed hunter).
+static func drop_class_holds(hunter: Hunter) -> void:
+	hunter.mel_hold = 0.0
+	hunter.draw_t = -1.0
+	hunter.warm_t = 0.0
+	if hunter.ak != null and hunter.ak.rmb_down:
+		hunter.ak.rmb_down = false
+
 static func route(hunter: Hunter) -> void:
+	if KinMerge.active(hunter):
+		drop_class_holds(hunter)
 	var k := live_of(hunter)
 	if k != null:
 		k.inputs()
@@ -113,7 +126,7 @@ func inputs() -> void:
 		press_e()
 	if r_press:
 		press_rmb()
-	if fire and cd["lmb"] <= 0.0 and not busy() and (hold.is_empty() or String(hold["kind"]) != "bulldoze"):
+	if fire and cd["lmb"] <= 0.0 and not busy() and (hold.is_empty() or String(hold["kind"]) != "boulder"):
 		fire_lmb()
 
 func fire_lmb() -> void:
@@ -378,7 +391,7 @@ func bot_think(tgt: Ent, dist: float, los: bool) -> void:
 	if hold.is_empty() and cd["rmb"] <= 0.0 and los:
 		var kind := String(rm["kind"])
 		var near := dist < 4.5
-		if (kind == "bulldoze" and dist < 9.0 and dist > 2.0) or (kind == "prism" and dist < 12.0 and randf() < 0.5) or (kind == "hover" and near and randf() < 0.3):
+		if (kind == "boulder" and dist < 9.0 and dist > 2.0) or (kind == "prism" and dist < 12.0 and randf() < 0.5) or (kind == "hover" and near and randf() < 0.3):
 			bot_rmb = minf(float(rm.get("max_s", rm.get("drain_s", 2.0))) * 0.6, 1.4)
 			press_rmb()
 	var e: Dictionary = fd["e"]

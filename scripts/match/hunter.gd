@@ -159,7 +159,7 @@ var rift_keys := 0               # Rift Keys carried: each opens a rift hatch on
 var kin: Ent = null             # the active kin: its abilities are on Q and V, its ultimate on R
 var kin2: Ent = null            # the benched kin, swapped in with X
 var swap_cd := 0.0
-var merge_st: Dictionary = {}   # the merge (bond ultimate) while it runs: {def, t, T, k, giant, pulse} (KinMerge)
+var merge_st: Dictionary = {}   # the merge (bond ultimate) while it runs: {def, t, T, giant, pulse, form, phase, kit, shell...} (KinMerge)
 var merge_cd := 0.0             # the spent window after a merge ends
 var merge_free := true          # the first time the ult slot opens this run, the bond meter fills
 var kin_bonus: Dictionary = {}  # owner bonuses from your kin's stat points (KinLib.owner_bonus), applied for the run
@@ -383,8 +383,7 @@ func mounted() -> bool:
 	return kin_carry_on() and (kin as Kin).carry_style() == "mount"
 
 ## An owner stat (KinParts.OWNER_STATS) from your kin: its carry passives while it rides with you,
-## plus the merge's passives (times the merge's strength) while merged, capped at the carry or merge
-## maximum. Refreshed every step (_refresh_kin_stats).
+## plus the merge's passives while merged, capped at the carry or merge maximum. Refreshed every step (_refresh_kin_stats).
 func owner_stat(stat: String) -> float:
 	return float(_kst.get(stat, 0.0))
 
@@ -500,10 +499,15 @@ func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
 	if downed:
 		# a wisp can't be shot: it's lost to stomps, an execute, or bleeding out
 		return 0.0
-	d = MergeShell.absorb(self, d)         # a merged form's shell takes the hit first (docs/decisions/0003)
+	var d_in := d
+	d = MergeShell.absorb(self, d, opts)         # a merged form's shell takes the hit first (docs/decisions/0003)
+	var shelled := false
 	if d <= 0.0:
-		return 0.0
-	if shield > 0.0:
+		if d_in <= 0.0:
+			return 0.0
+		shelled = true          # the shell took all of it: a token hit that skips the other defences but still counts
+		d = 0.01
+	if shield > 0.0 and not shelled:
 		var a := minf(shield, d)
 		shield -= a; d -= a
 		if d <= 0.0:
@@ -517,7 +521,7 @@ func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
 		# drinking or repairing leaves you open: any real hit spills it (you keep the tonic or kit)
 		if d >= 1.0 and opts.get("src", "") != "heat":
 			_interrupt_consume()
-	if armor > 0.0 and opts.get("src", "") not in ["fall", "burn", "heat"]:
+	if armor > 0.0 and not shelled and opts.get("src", "") not in ["fall", "burn", "heat"]:
 		d *= 1.0 - ARMOR_DR
 		# your kin's armor stats make it wear more slowly
 		armor = maxf(0.0, armor - d * (1.0 - minf(0.6, owner_stat("armor") + kin_pt("owner_armor"))))
@@ -532,7 +536,7 @@ func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
 		if src is Hunter and src.team != team:
 			extract_prog = 0.0
 			if is_local() and m.hud: m.hud.toast("Extraction interrupted", Color("ff9a8a"))
-	if kin_shield > 0.0 and d > 0.0 and opts.get("src", "") not in ["fall", "heat"]:
+	if kin_shield > 0.0 and d > 0.0 and not shelled and opts.get("src", "") not in ["fall", "heat"]:
 		# your kin's owner shield soaks last; a fully soaked hit still counts as a hit (truces, interrupts)
 		var ks0 := minf(kin_shield, d)
 		kin_shield -= ks0
@@ -1873,7 +1877,7 @@ func _kin_riders(extra: Dictionary) -> void:
 		lists.append([k.ks.carry_on_shot, 1.0])
 	var mo := KinMerge.on_shot(self)
 	if not mo.is_empty():
-		lists.append([mo, float(mo["k"])])
+		lists.append([mo, 1.0])
 	for pair in lists:
 		var os: Dictionary = pair[0]
 		var kk: float = pair[1]
@@ -2015,6 +2019,8 @@ func sim(dt: float) -> void:
 	Hex.tick(self, dt)
 	prev = pos
 	if out or extracted:
+		if not merge_st.is_empty():
+			KinMerge.end(self, "broken")      # (eliminated or extracted mid-merge: the form goes with you)
 		return
 	if riding:
 		# aboard the skyship: you go where it goes until you jump
@@ -2068,6 +2074,7 @@ func sim(dt: float) -> void:
 	bloom = lerpf(bloom, want_bloom, 1.0 - exp(-(10.0 if want_bloom > bloom else 4.0) * dt))
 	if remote:
 		net_follow(dt)
+		MergeHolds.remote_prism(self)
 		return
 	if not downed and not dropping:
 		Bond.passive(self, dt)

@@ -68,7 +68,7 @@ static func tap(h: Hunter) -> void:
 	var k: Kin = h.kin
 	if k == null or h.downed or h.dropping or h.riding:
 		return
-	if KinMerge.kit_form(h):
+	if KinMerge.in_form(h):
 		say(h, "%s is part of you while you are merged" % k.rec.get("name", "Your Boki"), Color("a2a8bb"))
 		return
 	if KinMerge.active(h) and not h.merge_st.get("surge", false):
@@ -107,7 +107,7 @@ static func order(h: Hunter, id: String) -> bool:
 	var k: Kin = h.kin
 	if k == null or h.downed or h.dropping or h.riding:
 		return false
-	if KinMerge.kit_form(h):
+	if KinMerge.in_form(h):
 		return false          # (merged with a form: your Boki is part of you, orders wait)
 	var tgt: Ent = chase_pick(h) if id == "chase" else null
 	if id == "chase" and tgt == null:

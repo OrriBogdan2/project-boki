@@ -238,6 +238,8 @@ func note(kindk: String, text: String, trust_d := 0.0) -> void:
 	trust = clampf(trust + trust_d, 0.0, 100.0)
 
 func bark(cat: String, extra := "") -> void:
+	if state == "fused" and owner_h != null and KinMerge.in_form(owner_h):
+		return          # (inside you: it says nothing)
 	if bark_cd > 0.0 and cat not in ["refuse", "hesitate", "revive", "callout"]:
 		return
 	bark_cd = 3.0
