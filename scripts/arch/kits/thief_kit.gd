@@ -24,6 +24,7 @@ const FIZZLE := Color("8a7aff")    # a bolt running out at the cursor: a blue-vi
 const EMP_BLUE := Color("4ab8ff")  # the empowered shot's chakram
 const GHOST := Color("7af0ff")     # the blink's afterimages
 const KNOCK_STAR := Color("ff2a48")
+const EMP_RANGE_K := 1.12          # the empowered bolt flies 12% further (the source: 850 -> 950 units)
 
 var primed_t := 0.0            # Vault empowered the next bolt
 var haste_t := 0.0             # Vault's burst of speed (ends on the empowered hit)
@@ -41,6 +42,7 @@ var _primed_on: Ent = null     # the empowered bolt just reached this foe (its e
 var primed_hits := 0           # (tests, demo)
 var bola_pairs := 0
 var bola_bounces := 0
+var bola_breaks := 0
 var jackpot_hits := 0          # blades landed
 var jackpots := 0              # bursts opened
 var bolts := 0                 # bolts thrown
@@ -235,7 +237,7 @@ func _tick(dt: float) -> void:
 func _tick_aim_line() -> void:
 	if not h.is_local() or h.wid != "arc_bolts" or busy() or KinMerge.active(h):
 		return
-	var to := AimMode.point(h, float(h.wpn.get("range", 12.0)))
+	var to := AimMode.point(h, float(h.wpn.get("range", 12.0)) * (EMP_RANGE_K if primed_t > 0.0 else 1.0))
 	if primed_t > 0.0:
 		AimKit.line(h, "aim", {"to": to, "col": Color("ffd25a"), "hot": 0.6, "alpha": 1.3, "lw": 0.06})
 	else:
@@ -295,7 +297,7 @@ func _bolt() -> void:
 	var right := Vector2(-d.y, d.x)
 	var off := right * HAND_OFF * (1.0 if hand == 1 else -1.0)
 	var start: Vector3 = (sd["pos"] as Vector3) + Vector3(off.x, 0, off.y)
-	var rng := float(h.wpn.get("range", 12.0))
+	var rng := float(h.wpn.get("range", 12.0)) * (EMP_RANGE_K if emp else 1.0)
 	var to := AimMode.point(h, rng)
 	var v := Vector2(to.x - start.x, to.z - start.z)
 	var spd := (sd["vel"] as Vector2).length()
@@ -494,6 +496,8 @@ func _jackpot_hit(f: Ent, rim: bool) -> void:
 	var jd := jackpot_def()
 	var dmg := float(jd["dmg"]) + (float(jd["rim_dmg"]) if rim else 0.0)
 	f.hurt(dmg * m.dmg_mult(h), h, {"src": "abil", "ab": "mark", "tags": ["jackpot"], "crit": rim})
+	if rim and is_instance_valid(f) and not f.dead:
+		KitStatus.apply(f, "blt", float(jd.get("rim_blight", 4.0)))      # the rim also cuts healing (the source's outer ring)
 	jackpot_hits += 1
 	refresh_marks()
 	fx().star(f.pos + Vector3(0, 1.0, 0), col_of(jd) if not rim else Color("ff5a6a"), 0.9 if rim else 0.6, 0.18)
@@ -565,6 +569,15 @@ func _tick_bola(dt: float) -> void:
 		p = q
 		bola["left"] = float(bola["left"]) - step
 		var first = bola["first"]
+		if first == null and not bola.get("broke", false):
+			# a crate or barrel counts as the first catch: the Bola breaks on it and flies on
+			for b in m.breaks:
+				if not b["dead"] and Vector2(b["pos"].x - p.x, b["pos"].z - p.z).length() < 0.7:
+					m.hit_break(b, float(bd["dmg"]) * 3.0, h)
+					bola["broke"] = true
+					bola["left"] = float(bd["after"]) + (float(bd["after_r3"]) if rank("sec") >= 3 else 0.0)
+					bola_breaks += 1
+					break
 		for o in m.foes_of(h.team):
 			if o == first or not o.hittable(): continue
 			if Vector2(o.pos.x - p.x, o.pos.z - p.z).length() < o.r + 0.45 and absf(o.pos.y + 0.9 - p.y) < 1.6:

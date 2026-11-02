@@ -25,6 +25,7 @@ const LUNGE_RED := Color("ff4a3a")     # the Lunge lane while charging
 const LUNGE_FULL := Color("ff3df0")    # ... at full
 const DROP_PURPLE := Color("b06aff")   # the Meteor Drop's landing disc
 const EXEC_RED := Color("ff2a2a")      # the wounded-enough-to-finish outline
+const REEL_STEER := 0.5                # the Warchain pull bends this far sideways (tan of the angle) with A/D held across it
 
 var enraged_t := 0.0
 var aura: Node3D = null        # the Enraged look: a red shell, a glow, the hunter grown bigger
@@ -193,6 +194,7 @@ func _tick(dt: float) -> void:
 		add_res(-float(rd.get("decay", 9.0)) * dt)
 	if lmb_buf > 0.0: lmb_buf -= dt
 	reel_t = maxf(0.0, reel_t - dt)
+	_steer_reel()
 	if not slam_w.is_empty(): _tick_slam(dt)
 	if not lunge.is_empty(): _tick_lunge()
 	if not chain.is_empty(): _tick_chain(dt)
@@ -723,6 +725,16 @@ func _drop_hit(at: Vector3) -> void:
 	Feel.shake(m, "leap", h, at)
 	net_ring(at, float(dd["radius"]), DROP_PURPLE)
 
+## Small mechanic (the owner's example): while the Warchain pulls you, movement held across the pull
+## bends it to that side, so you arrive beside the anchor rather than on it.
+func _steer_reel() -> void:
+	if reel_t <= 0.0 or h.roll_t <= 0.0 or not st.has("reel_dir") or not lunge.is_empty():
+		return
+	var base: Vector2 = st["reel_dir"]
+	var mv: Vector2 = h.inp.get("move", Vector2.ZERO)
+	var side := Vector2(-base.y, base.x)
+	h.roll_dir = (base + side * clampf(mv.dot(side), -1.0, 1.0) * REEL_STEER).normalized()
+
 ## The reads that aren't a key press: the wounded outlined red while the Smash is ready (yours only),
 ## the landing disc under the cursor while you're in the air with it ready, and the ring round the body
 ## while the Searing Wave charges.
@@ -895,6 +907,7 @@ func e_recast() -> bool:
 	m.later(t + 0.02, func():
 		if is_instance_valid(h) and not haul.is_empty() and not h.downed: _haul_land(float(haul["k"])))
 	travel(dist, t, {"invuln": 0.0, "trail": "dust", "dir": dv.normalized()})
+	st["reel_dir"] = dv.normalized()
 	reel_t = t + 0.15
 	m.fx.bolt(h.pos + Vector3(0, 1.0, 0), dest + Vector3(0, 1.0, 0), col_of(ed))
 	m.sfx("ab_whirr", h.pos, -3.0, 0.6)

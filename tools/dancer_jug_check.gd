@@ -53,6 +53,13 @@ func thief(a) -> void:
 	P.inp["fire"] = true; m.step(A.DT); P.inp["fire"] = false
 	A.step(m, 0.6)
 	A.ok("dancer LMB: clamped to 12m", absf(Vector2(K.last_bolt_end.x - P.pos.x, K.last_bolt_end.z - P.pos.z).length() - 12.0) < 0.8, "%.1f m" % Vector2(K.last_bolt_end.x - P.pos.x, K.last_bolt_end.z - P.pos.z).length())
+	P.dashes = P.max_dashes(); P.inp["move"] = Vector2(0, 1); P.do_dash(); A.step(m, 0.3); P.inp["move"] = Vector2.ZERO
+	A.aim_at(P, P.pos + Vector3(-30.0, 0, 0)); P.fire_cd = 0.0
+	P.inp["fire"] = true; m.step(A.DT); P.inp["fire"] = false
+	var haste_after := K.haste_t
+	A.step(m, 0.6)
+	var ed := Vector2(K.last_bolt_end.x - P.pos.x, K.last_bolt_end.z - P.pos.z).length()
+	A.ok("dancer small mechanics: the empowered bolt flies 12% further (13.4m); firing it ends the speed", K.last_bolt_emp and absf(ed - 13.44) < 0.9 and haste_after <= 0.0, "%.1f m haste %.2f" % [ed, haste_after])
 	A.ok("dancer LMB: each bolt has its own pooled look", DJFx.of(m).free_pools.has("ride_chakram") and DJFx.of(m).free_pools.has("puff"))
 	# Marks: +12% per Mark on bolts only, up to 8
 	A.fresh(T); K.mark_gap = {}
@@ -88,6 +95,7 @@ func thief(a) -> void:
 	A.step(m, 1.9)
 	A.ok("dancer Jackpot: 1.2s of blades at each foe in the ring, harder at the rim, Marks refreshed", K.jackpot_hits >= 10 and A.dmg(T) >= 25.0 and A.dmg(T2) > A.dmg(T) and K.marks_on(T) == 5 and K.jp.is_empty(),
 		"blades %d inner %.0f rim %.0f marks %d" % [K.jackpot_hits, A.dmg(T), A.dmg(T2), K.marks_on(T)])
+	A.ok("dancer Jackpot small mechanic: the rim blights (healing cut), the inside doesn't", T2.blight_t > 0.0 and T.blight_t <= 0.0, "rim %.1f inner %.1f" % [T2.blight_t, T.blight_t])
 	# RMB: a 0.4s wind-up with the lane showing, then the Bola grounds the first, flies on, tangles a second
 	A.fresh(T); A.fresh(T2); T.teleport(home + Vector3(4.0, 0, 0)); T2.teleport(home + Vector3(7.0, 0, 0)); P.teleport(home); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; A.aim_at(P, T.pos); K.jp_cd = 99.0
 	A.tap(m, P)
@@ -114,6 +122,13 @@ func thief(a) -> void:
 	A.tap(m, P)
 	A.step(m, 0.9)
 	A.ok("dancer Bola: bounces off a wall", K.bola_bounces == 1, "bounces %d" % K.bola_bounces)
+	# small mechanic: a crate counts as the Bola's first catch (it breaks and flies on its after-distance)
+	A.step(m, 1.0)
+	P.teleport(home); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; A.aim_at(P, home + Vector3(0, 0, -6.0))
+	m._add_break("crate", home + Vector3(0, 0, -2.5))
+	A.tap(m, P)
+	A.step(m, 0.6)
+	A.ok("dancer Bola small mechanic: a crate counts as the first catch, it flies on", K.bola_breaks == 1, "breaks %d" % K.bola_breaks)
 	# E: the dagger to the cursor (no foe on the way), the arrival circle, recast blinks through afterimages
 	A.fresh(T); T.teleport(home + Vector3(4.0, 0, 3.0)); P.teleport(home); K.cd["e"] = 0.0
 	var kspot := home + Vector3(5.0, 0, -2.0)
@@ -289,6 +304,17 @@ func juggernaut(a) -> void:
 	P.ak.use_e()
 	A.step(m, 0.45)
 	A.ok("juggernaut E: chain a wall, pull yourself to it", anchored and P.flat_dist(home) > 4.0, "anchored %s moved %.1f" % [anchored, P.flat_dist(home)])
+	var straight := P.pos
+	# small mechanic (the owner's example): sideways input steers the pull, the arrival moves aside
+	A.step(m, 0.5)
+	P.teleport(home); K.cd["e"] = 0.0; A.aim_at(P, home + Vector3(8.0, 0, 0))
+	P.ak.use_e()
+	A.step(m, 0.35)
+	P.ak.use_e()
+	A.step(m, 0.45, func(): P.inp["move"] = Vector2(0, 1))
+	P.inp["move"] = Vector2.ZERO
+	var side_off := absf(P.pos.z - straight.z)
+	A.ok("juggernaut Warchain small mechanic: sideways input shifts the arrival by at least 1.5m", side_off >= 1.5, "%.2f m aside" % side_off)
 	# Smash rank 3 (the old Doomfall): the sweet spot also crashes (3m) and heals 60% of what it deals; it
 	# rests, and a knock on a foe it hit makes it ready again
 	P.slot_lv["sec"] = 3

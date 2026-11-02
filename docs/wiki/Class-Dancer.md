@@ -66,13 +66,13 @@ What the in-game kit card (K) says.
 
 **Marks (passive).** Every bolt that hits puts a Mark on the target (up to 8, each lasting 4s and refreshed by the next): your bolts on them deal +12% per Mark. The empowered shot adds 2, the Bola 1. The fifth Mark sets off Jackpot (below). A knock heals you 15% of your health on top of the usual knock heal (25% in all) and bursts a crimson star on them; an assist heals 25%.
 
-**Jackpot (Mark trigger).** The fifth Mark on a foe opens Jackpot: a cyan ring of 6.3m grows out from you (0.4s), then for 1.2s a blade flies every 0.2s at each foe inside it: 5 each, +4 past 4m (the rim). Every blade refreshes all your Marks, and Jackpot gives you the Vault back. You keep moving and shooting. Then it rests 10s.
+**Jackpot (Mark trigger).** The fifth Mark on a foe opens Jackpot: a cyan ring of 6.3m grows out from you (0.4s), then for 1.2s a blade flies every 0.2s at each foe inside it: 5 each, +4 past 4m (the rim), where it also blights for 4s (healing barely takes). Every blade refreshes all your Marks, and Jackpot gives you the Vault back. You keep moving and shooting. Then it rests 10s.
 
-**Vault (dash, Shift, 4.5s cooldown).** A 2.4m cartwheel the way you move (shots pass through it) and +30% speed until your next hit (2s at most). Your next bolt within 3s is empowered: 3.5 times the damage, 2 Marks and Shred (+15% damage taken for 3s). Landing it gives the Vault back.
+**Vault (dash, Shift, 4.5s cooldown).** A 2.4m cartwheel the way you move (shots pass through it) and +30% speed until your next hit (2s at most). Your next bolt within 3s is empowered: it flies 12% further for 3.5 times the damage, 2 Marks and Shred; firing it ends the speed (+15% damage taken for 3s). Landing it gives the Vault back.
 
 **Bola (RMB, 7s cooldown).**
 
-- *Tap:* A 0.4s wind-up with the lane showing (you keep aiming), then the Bola flies 7m: 5 damage and a Mark; the first foe it wraps is Grounded for 1.5s (no dash, jump or glide; slowed 25%) and the Bola flies on 3.8m. It bounces once off a wall. If it catches a second foe, both are stunned 0.9 and take +13 (TANGLED).
+- *Tap:* A 0.4s wind-up with the lane showing (you keep aiming), then the Bola flies 7m: 5 damage and a Mark; the first foe it wraps is Grounded for 1.5s (no dash, jump or glide; slowed 25%) and the Bola flies on 3.8m (a crate it breaks counts as that first catch). It bounces once off a wall. If it catches a second foe, both are stunned 0.9 and take +13 (TANGLED).
 - *In the air:* Thrown from the air the same way.
 
 **Shadow Knife (E, 15s cooldown).** Throw a dagger to your cursor (14m at most): it sticks in the first foe on the way (8 damage, slowed 50% for 2.5s) or lands where you aimed. Press E again to blink to it at once, leaving a trail of afterimages; after 6s you step to it anyway.

@@ -1,6 +1,6 @@
-# Juggernaut (heavy)
+# Zedran (heavy)
 
-A heavy brawler who burns hotter the longer the fight goes. Chains in, slams down, and heals off
+Zedran is a heavy brawler who burns hotter the longer the fight goes. Chains in, slams down, and heals off
 every knock.
 
 ## How it plays

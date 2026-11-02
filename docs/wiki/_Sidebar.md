@@ -8,7 +8,7 @@
   - [Archer](Class-Archer.md)
   - [Vireo](Class-Vireo.md)
   - [Marlowe](Class-Marlowe.md)
-  - [Juggernaut](Class-Juggernaut.md)
+  - [Zedran](Class-Zedran.md)
   - [Bulwark](Class-Bulwark.md)
   - [Linnet](Class-Linnet.md)
   - [Tamsin](Class-Tamsin.md)

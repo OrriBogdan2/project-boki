@@ -1,4 +1,6 @@
-# Juggernaut (archetype id `juggernaut`, heavy)
+# Zedran (archetype id `juggernaut`, heavy)
+
+Display name Zedran (owner, Nov 2); the id, file names and code names stay `juggernaut`.
 
 Branch history: kits2 ported the kit from the source hero, kits2-nor (Nov 2) removed its R, ext/kitfix-dancer-juggernaut matched it to the footage. Player-facing
 names and text are ours; the source is named only in this research section, in docs/ARCHETYPES.md and in
@@ -59,6 +61,32 @@ Retaliation stance itself is not ported.
 4. **Empowered** is our Enraged (6s, the numbers above); the hold-blast range is 6 to 10m.
 5. **Lunge length:** grows 4.5 to 7.5m with the charge (owner: release flings you far), against the footage's fixed 5m.
 6. **Jumping while charging** keeps the charge, and the release lunges from the air along your aim.
+
+## Small mechanics
+
+From the wiki's ability page and patch notes (https://supervive.wiki.gg/wiki/Brall) and the owner's notes.
+"Built" means it is in the kit and asserted in `--juggernaut-combo-check` / `--kit-combo-check`.
+
+| Mechanic | Source | Footage | Ours |
+|---|---|---|---|
+| The tether pull can be steered sideways while you're pulled in | owner's playtest note | not visible | Built: movement held across the pull bends it (up to about 27 degrees); asserted "sideways input shifts the arrival by at least 1.5m" |
+| Chain cooldown starts on the pull or when the chain breaks, not on the throw | wiki patch 07.01.25 | n/a | Built (kits2), asserted |
+| A stun on Brall breaks the tether; it can't be thrown rooted or Grounded | wiki patch 05.02.25 | n/a | Built (kits2), asserted |
+| Hooking an enemy at the top rank refunds 33% of the chain cooldown | wiki Q level 4 | n/a | Built at rank 3 |
+| The tether stays attached while you walk (about 2.5s+) | footage 0305-0317 | yes | Built (4s), drawn as a link chain |
+| The Fiery Lunge doubles its cooldown if nothing is struck | wiki RMB | n/a | Built, asserted |
+| The Execution Slam aims freely during its cast, with a warning over the head | wiki patch 05.02.25 | yes (lane at 0157) | Built: free aim, and a strike lane everyone sees |
+| Execution: x1.5 under 35% | wiki patch 05.02.25 | yes (red outline 0154) | Built, plus the red outline while the Smash is ready |
+| The dash has wind-down frames: no glide straight out of it | wiki patch 05.02.25 | n/a | Built (kits2), asserted |
+| A knock restores one dash charge (not all) | wiki Shift | n/a | Built |
+| Flame Step's tip deals double | wiki Shift | yes (0401) | Built |
+| Obsidian Slam's centre ring stuns and deals +50% | wiki RMB | yes | Built |
+| The slam lands where you aim in the air | footage 0263, 0286 | yes | Built (5m reach), asserted |
+| Brall climbs double-height walls by jumping while facing them | wiki passive | no | Not built: it needs a change to the shared movement (hunter.gd mantle); listed for the main session |
+| Dodging shots during the dash builds Empowered (top rank) | wiki Shift level 4 | no | Not built: our dodge has no "shot dodged" event yet |
+| Turning is restricted when the dash follows an RMB | wiki patch 05.02.25 | no | Not built (a turn lock reads as lag in our camera); Assumption 7 |
+
+Assumption 7: the dash after an RMB turns freely; the pull carries no extra momentum out (you stop at the anchor).
 
 ## Combinations
 

@@ -42,6 +42,31 @@ Bola 7s (Trickshot 6.7), Shadow Knife 15s (Phantom Dagger 15).
 6. **Phantom Dagger timer:** 6s, then you step to it anyway (the wiki's rule); no target: it lands at the cursor.
 7. **Death Blossom (Jackpot) and Marks:** its blades refresh Marks but do not add them, and do not count as bolt hits.
 8. **An empowered bolt that misses** is spent (no Vault reset).
+9. **Malice** has no stack cap or duration in any source; ours are 8 and 4s (see 4).
+
+## Small mechanics
+
+From the wiki's ability page and patch notes (https://supervive.wiki.gg/wiki/Shiv), two guides
+(https://gamerblurb.com/articles/supervive-how-to-play-shiv) and the footage sheet. "Built" means it is in the kit
+and asserted in `--dancer-combo-check` / `--kit-combo-check`.
+
+| Mechanic | Source | Footage | Ours |
+|---|---|---|---|
+| The empowered shot flies further than a normal bolt (850 -> 950 units) | wiki patch 26.11.2024 | yes (0143, long streak) | Built: 12% further; asserted at 13.4m |
+| The speed boost ends when the empowered shot is used (fired, not landed) | wiki Shift | n/a | Built; asserted |
+| Landing the empowered shot resets Quickflip | wiki Shift | yes (0187-0193) | Built; asserted (and the loop twice) |
+| The bolas fly on after hitting an enemy **or a destructible** | wiki RMB | n/a | Built: a crate counts as the first catch; asserted |
+| Two targets caught: both stunned, bonus damage; top rank pools their stacks | wiki RMB | yes (0117) | Built; asserted |
+| The bolas bounce off terrain | footage 0103-0105 | yes | Built (once); asserted |
+| The dagger sticks to any surface or character, and to shields and barricades | wiki patch 20.11.2024 | yes | Built for hunters, monsters and the ground; shields: not yet (our walls are terrain) |
+| After 6s she teleports to the dagger anyway; recast to go early | wiki Q | yes (0237) | Built; asserted |
+| A dagger in an enemy slows them 50% | wiki Q | yes (0258) | Built (2.5s, our TTK) |
+| A dagger in an enemy at the top rank resets Quickflip; terrain refunds 25%, characters 50% | wiki Q levels 3-4 | n/a | Built at rank 3; asserted |
+| The ult's outer ring deals bonus damage and anti-heals | wiki R | yes (0344, numbers) | Built on Jackpot's rim (blight 4s); asserted |
+| Every ult shot refreshes all stacks | wiki R | n/a | Built; asserted |
+| LMB keeps firing during the ult | wiki R, gamerblurb | yes (0299-0302) | Built (Jackpot doesn't stop the bolts) |
+| The ult grants dashes while active | wiki R | yes (0193) | Built as a Vault reset on Jackpot |
+| A knock or assist heals 25% | wiki passive | yes (0063) | Built; asserted |
 
 ## Combinations
 

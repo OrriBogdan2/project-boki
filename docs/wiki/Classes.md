@@ -6,7 +6,7 @@ twelve, four in each weight class:
 
 - **Light:** [Dancer](Class-Dancer.md) (stay on one target from range, cartwheel and reset), [Archer](Class-Archer.md) (pin people, then the big shot), [Vireo](Class-Vireo.md) (load Sparks, then Wirerun through them) and [Tamsin](Class-Tamsin.md) (chill foes, shelter the squad behind ice).
 - **Medium:** [Marlowe](Class-Marlowe.md) (burr charges and one long needle), [Linnet](Class-Linnet.md) (heal, carry the downed), [Dolm](Class-Dolm.md) (raise rocks, punch them into the fight) and [Ostra](Class-Ostra.md) (swell, plant a seed, trade places).
-- **Heavy:** [Juggernaut](Class-Juggernaut.md) (rage, chain in, crush), [Bulwark](Class-Bulwark.md) (block, then smash them into walls), [Dredge](Class-Dredge.md) (haul a foe in, drop the anchor) and [Ashwick](Class-Ashwick.md) (build Char, flash foes over).
+- **Heavy:** [Zedran](Class-Zedran.md) (rage, chain in, crush), [Bulwark](Class-Bulwark.md) (block, then smash them into walls), [Dredge](Class-Dredge.md) (haul a foe in, drop the anchor) and [Ashwick](Class-Ashwick.md) (build Char, flash foes over).
 
 The weight class sets health, speed, mass (how far hits push you) and how many dash charges you get.
 Everything else comes from the class kit.
@@ -38,7 +38,7 @@ form, see [Boki species](Boki-Species.md)). The class's own ultimate is held bac
 
 ## Choosing
 
-Each weight class has a default: Dancer (light), Marlowe (medium) and Juggernaut (heavy). You pick
+Each weight class has a default: Dancer (light), Marlowe (medium) and Zedran (heavy). You pick
 your class in the Expedition menu, and you can try every class against dummies in the
 [Arena](Arena-and-Training.md) at any time.
 
@@ -55,7 +55,7 @@ your class in the Expedition menu, and you can try every class against dummies i
 | [Archer](Class-Archer.md) | Light | Longbow | Focus | Grapple Arrow | Snare | Hail Wall | none (Boki Merge) |
 | [Vireo](Class-Vireo.md) | Light | Coilcaster | Sparks | Wirerun | Coilshot | Skycall | none (Boki Merge) |
 | [Marlowe](Class-Marlowe.md) | Medium | Quill Rifle | Fever | Slipstep | Burr Charge | Longneedle | none (Boki Merge) |
-| [Juggernaut](Class-Juggernaut.md) | Heavy | Greatsword | Rage | Rampage | Smash | Warchain | none (Boki Merge) |
+| [Zedran](Class-Zedran.md) | Heavy | Greatsword | Rage | Rampage | Smash | Warchain | none (Boki Merge) |
 | [Bulwark](Class-Bulwark.md) | Heavy | Tower Shield & Mace | Guard | Whirl | Shield | Mending Ground | none (Boki Merge) |
 | [Dredge](Class-Dredge.md) | Heavy | Shotgun | Salvage | Barge | Grapnel | Anchor Drop | none (Boki Merge) |
 | [Ashwick](Class-Ashwick.md) | Heavy | Torch Lance | Flashover | Spark Leap | Cinder Shot | Furnace Cloak | none (Boki Merge) |
@@ -72,7 +72,7 @@ The weight class sets health, speed, mass and dash charges; the class kit sits o
 |---|---|---|---|---|---|---|---|
 | Light | 124 | 5 | 1 | 0.85 | 1.2 | Dancer, Archer, Vireo, Tamsin | Fast and fragile. The fastest dash, the longest glide, and hits throw you furthest. |
 | Medium | 145 | 4.8 | 1 | 1 | 1 | Marlowe, Linnet, Dolm, Ostra | The all-rounder: middle health, speed, dash and glide. |
-| Heavy | 193 | 4.55 | 2 | 1.35 | 0.85 | Juggernaut, Bulwark, Dredge, Ashwick | Slow and tough. Two short dashes, the most health, and very hard to push off a ledge. |
+| Heavy | 193 | 4.55 | 2 | 1.35 | 0.85 | Zedran, Bulwark, Dredge, Ashwick | Slow and tough. Two short dashes, the most health, and very hard to push off a ledge. |
 
 ### Run levels
 
