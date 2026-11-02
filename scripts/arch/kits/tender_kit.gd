@@ -577,7 +577,7 @@ func ult_aim_tick() -> void:
 	AimKit.circle(h, "x", {"self": true, "r": float(xd["range"]), "col": gold, "dashed": true})
 	var who := call_target()
 	if who != null and who != h:
-		AimKit.line(h, "x_line", {"from": h.pos, "to": who.pos, "col": Color("fff0f6"), "hot": 0.6})
+		AimKit.line(h, "x_line", {"from": h.pos, "to": who.pos, "col": Color("ffd27a"), "hot": 0.4})
 		AimKit.circle(h, "x_pick", {"at": who.pos, "r": 0.8, "col": Color("9cf07a"), "ticks": true})
 	else:
 		AimKit.line(h, "x_line", {"col": Color("a2a8bb"), "alpha": 0.5})
@@ -622,7 +622,7 @@ func cast_ult() -> bool:
 	play("mm_call")
 	m.sfx("tend_call", h.pos, -1.0, 1.0)
 	lk().burst("plus", who.pos + Vector3(0, 1.3, 0), {"r": 1.1, "dur": 0.45})
-	lk().burst("flare", who.pos, {"col": Color("9cf07a"), "rim": Color(1, 1, 1), "r": 1.4, "dur": 0.35, "pattern": 1.0})
+	lk().burst("flare", who.pos, {"col": Color("9cf07a"), "rim": Color("ffd27a"), "r": 1.4, "dur": 0.35, "pattern": 1.0})
 	m.fx.word(h.pos + Vector3(0, 2.8, 0), "HEARTH CALL", col_of(x_def()), true)
 	net_ring(h.pos, float(x_def()["range"]), Color("ffd27a"))
 	net_bolt(h.pos + Vector3(0, 1.6, 0), who.pos + Vector3(0, 1.1, 0), Color("ffe6f0"))
@@ -667,9 +667,9 @@ func _call_look(who: Hunter, dt: float) -> void:
 	var xd := x_def()
 	var gold := Color("ffd27a")
 	AimKit.circle(h, "x", {"self": true, "r": float(xd["range"]), "col": gold, "all": true, "dashed": true})
-	AimKit.circle(h, "x_me", {"self": true, "r": 0.7, "col": Color(1, 1, 1), "all": true})
+	AimKit.circle(h, "x_me", {"self": true, "r": 0.7, "col": Color("ffc46a"), "all": true})
 	if who != h:
-		AimKit.circle(h, "x_pick", {"at": who.pos, "r": 0.7, "col": Color(1, 1, 1), "all": true})
+		AimKit.circle(h, "x_pick", {"at": who.pos, "r": 0.7, "col": Color("9cf07a"), "all": true})
 		var hand := h.pos + Vector3(0, 1.75, 0)
 		ulk().keep("tether", "tether", hand, {"b": who.pos + Vector3(0, 1.1, 0)})
 	hearth_call["fx"] = float(hearth_call["fx"]) - dt
@@ -703,8 +703,9 @@ func _call_end(done: bool) -> void:
 	# a support ult lands on a teammate: a completed tether counts as a hit, a rescue as the top event
 	HeroUlt.bond(h, "kill" if rescue else "hit")
 	var at := who.pos if not rescue else h.pos
-	CareUtil.payoff(m, h, at, "HOME" if rescue else "MENDED", Color("9cf07a"), "tend_arrive")
-	lk().burst("flare", at, {"col": Color("9cf07a"), "rim": Color(1, 1, 1), "r": 1.8, "dur": 0.4, "pattern": 1.0})
+	# a rescue has its own revive banner, and the bond word lands on her now: no third word there
+	CareUtil.payoff(m, h, at, "" if rescue else "MENDED", Color("9cf07a"), "tend_arrive")
+	lk().burst("flare", at, {"col": Color("9cf07a"), "rim": Color("ffd27a"), "r": 1.8, "dur": 0.4, "pattern": 1.0})
 	lk().burst("rays", at, {"col": Color("b8ff9a"), "r": 0.9, "dur": 0.45})
 	play("mm_call_end")
 

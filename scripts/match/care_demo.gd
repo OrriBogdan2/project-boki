@@ -1,7 +1,7 @@
 class_name CareDemo
 extends RefCounted
 ## Screenshot and frame-strip tooling for the support pair (Arena). Hooked from ArenaDemo with one line.
-##   --arena-demo=care_<tender|rimewright>_<lmb|emp|rmb|e|dash|air|skatefire|carry|payoff|pose|ultaim|ultkey|ult>
+##   --arena-demo=care_<tender|rimewright>_<lmb|...|pose|ultaim|ultkey|ult|ultimpact>
 ##   --arena-shot=<png>
 ## Saves <png> (the last frame) and <png without .png>_strip.png: crops of the hero at the times in
 ## TIMES, side by side (anticipation, impact, follow-through).
@@ -22,12 +22,14 @@ const TIMES := {
 	"payoff": [0.4, 0.8, 1.2, 1.6, 2.0, 2.5],
 	"tender_payoff": [2.6, 2.75, 2.82, 2.9, 3.0, 3.2],
 	"pose": [0.5, 0.5, 0.5, 0.5],
-	"tender_ultaim": [0.4, 0.6, 0.8, 1.0],
-	"tender_ultkey": [0.55, 0.8, 1.2, 2.0],
-	"tender_ult": [0.55, 1.5, 3.0, 5.42, 5.5, 5.7],
-	"rimewright_ultaim": [0.35, 0.6, 1.2, 2.0],
-	"rimewright_ultkey": [0.33, 0.4, 0.5, 3.0],
-	"rimewright_ult": [0.33, 0.45, 2.0, 3.82, 3.9, 4.05],
+	"tender_ultaim": [0.28, 0.33, 0.37, 0.42, 0.6],
+	"tender_ultkey": [0.5, 0.55, 0.6, 0.7, 0.9, 1.5],
+	"tender_ult": [1.5, 5.4, 5.56, 5.62, 5.72, 5.9],
+	"tender_ultimpact": [0.5, 1.5, 3.0, 5.36],
+	"rimewright_ultaim": [0.32, 0.36, 0.42, 0.5, 1.5],
+	"rimewright_ultkey": [0.33, 0.37, 0.42, 0.5, 2.0, 3.0],
+	"rimewright_ult": [3.6, 3.81, 3.85, 3.91, 4.0, 4.25],
+	"rimewright_ultimpact": [0.5, 1.5, 2.5, 3.66],
 }
 
 static func tick(A: Arena, dt: float, w: String) -> void:
@@ -43,10 +45,14 @@ static func tick(A: Arena, dt: float, w: String) -> void:
 	if m.cam:
 		# (the carry wants the pair in frame, the portrait the hero close)
 		var zm: float = {"carry": 0.3, "pose": 0.3}.get(what, 0.3)
+		if what.begins_with("ult"):
+			zm = 0.42      # the whole body and the effect round it
 		m.cam.zoom = zm
 		if what in ["carry", "pose"]: m.cam.zoom_to = zm
 		m.cam.pitch = deg_to_rad(24.0)          # a low three-quarter view so the poses read
 		m.cam.yaw = 2.5 if what not in ["pose", "carry"] else 0.5
+		if arch == "tender" and what.begins_with("ult"):
+			m.cam.yaw = 2.5 + PI      # she walks away from the teammate: look at her from the front
 		m.cam.yaw_to = m.cam.yaw
 		# the last (full) frame looks down the aim from behind and wider, so the telegraph or impact shows
 		var tl: Array = TIMES.get(arch + "_" + what, TIMES.get(what, TIMES["rmb"]))
@@ -72,7 +78,7 @@ static func tick(A: Arena, dt: float, w: String) -> void:
 		Al.max_hp = 145.0
 		Al.hp = 60.0
 		A.set_meta("care_ally", Al)
-		if what in ["carry", "ult", "ultkey"] and (what == "carry" or arch == "tender"):
+		if what in ["carry", "ult", "ultkey", "ultimpact"] and (what == "carry" or arch == "tender"):
 			m.knock(Al, null, {})
 			Al.ctrl = "idle"
 			Al.down_hp = 80.0
@@ -143,7 +149,7 @@ static func tick(A: Arena, dt: float, w: String) -> void:
 					K.use_e()
 		"pose":
 			pass
-		"ultaim", "ultkey", "ult":
+		"ultaim", "ultkey", "ult", "ultimpact":
 			_ult(A, Al, arch, what, t, dt)
 	# capture the strip
 	var times: Array = TIMES.get(arch + "_" + what, TIMES.get(what, TIMES["rmb"]))
@@ -172,6 +178,9 @@ static func tick(A: Arena, dt: float, w: String) -> void:
 static func _ult(A: Arena, ally: Hunter, arch: String, what: String, t: float, dt: float) -> void:
 	var P: Hunter = A.m.player
 	P.lvl = maxi(P.lvl, 6)
+	if t < 0.1:
+		P.ult = 0.0      # the bond starts empty, so the frames show what the ult itself pays
+		A.m.get_viewport().warp_mouse(Vector2(640, 250))      # above the hero, off every hover spot: no tooltip in the frames
 	if t < 0.3:
 		P.ak.cd["x"] = 0.0
 	if arch == "tender":
@@ -184,6 +193,8 @@ static func _ult(A: Arena, ally: Hunter, arch: String, what: String, t: float, d
 		P.inp["move"] = Vector2(0.3, -1.0).normalized() if walking else Vector2.ZERO
 		return
 	var D: Hunter = A.dummies[0]["h"]
+	if t < 3.75:
+		P.ult = 0.0      # no BOND READY word over the crash frames (the meter is the main session's)
 	if t < 0.3:
 		P.teleport(D.pos + Vector3(-1.0, 0, 3.5))
 	if _at(t, dt, 0.3):

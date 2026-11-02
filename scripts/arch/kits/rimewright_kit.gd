@@ -732,10 +732,10 @@ func _rime_crash(k: float) -> void:
 		HeroUlt.bond(h, best)
 	ulk().burst("pillar", h.pos, {"r": 1.4, "dur": 0.5})
 	ulk().burst("spikes", h.pos, {"r": 3.6, "dur": 0.55})
-	ulk().burst("flare", at, {"col": Color("9fe0ff"), "rim": Color(1, 1, 1), "r": radius, "dur": 0.35, "pattern": 4.0})
+	ulk().burst("flare", at, {"col": Color("9fe0ff"), "rim": Color("bff7ef"), "r": radius, "dur": 0.35, "pattern": 4.0})
 	m.fx.spark(h.pos + Vector3(0, 1.0, 0), Vector3.UP, Color("dffcff"), 26, 9.0, 180.0, 0.4, 8.0, 1.2)
 	m.sfx("rime_crash", at, 1.0, 1.0)
-	CareUtil.payoff(m, h, h.pos, "CRASH", col_of(xd), "")
+	CareUtil.payoff(m, h, h.pos, "", col_of(xd), "")      # the words go on the frozen foes; hers is the bond's
 	play("tm_rime_crash")
 	_rime_clear()
 

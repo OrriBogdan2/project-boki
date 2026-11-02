@@ -1,7 +1,7 @@
 class_name UltLook
 extends CareLook
 ## Pooled looks of the support pair's ultimates on X, on top of CareLook's (same pool, burst and keep):
-##   Moosh Moosh, Hearth Call: the lantern tether, a braid of warm light with two twisting strands.
+##   Moosh Moosh, Hearth Call: the lantern tether, a braid of warm lantern-gold light with two twisting strands.
 ##   Tamsin, Rimelock: the rink (a ragged sheet of ice whose cracks glow as it builds, a fringe of
 ##   crystals on its edge), her frost bud (six curved ice petals closing over her, not a star), the
 ##   light pillar of the crash and the ice block on each stunned foe.
@@ -28,7 +28,7 @@ func _build(kind: String) -> Node3D:
 		"pillar":
 			var col := Models.cyl(1.0, 1.0, 1.0, 16)
 			_off(Models.part(n, col, glow_mat(Color("bfeaff", 0.75), 1.0), Vector3(0, 0.5, 0)))
-			_off(Models.part(n, col, glow_mat(Color(1, 1, 1, 0.9), 1.0), Vector3(0, 0.5, 0), Vector3(0.35, 1, 0.35)))
+			_off(Models.part(n, col, glow_mat(Color("dff6ff", 0.9), 1.0), Vector3(0, 0.5, 0), Vector3(0.35, 1, 0.35)))
 		"block":
 			_off(Models.part(n, Models.box(1.0, 2.0, 1.0), ice_mat(Color("bfeeff"), 0.55, 0.35), Vector3(0, 1.0, 0)))
 			var cap := _off(Models.part(
@@ -40,9 +40,9 @@ func _build(kind: String) -> Node3D:
 
 ## Two strands of lantern light twisting round a soft core, 1 m long along -Z (scaled to the gap).
 func _build_tether(n: Node3D) -> void:
-	var core := _off(Models.part(n, Models.box(0.09, 0.09, 1.0), glow_mat(Color("fff2f6", 0.95)), Vector3(0, 0, -0.5)))
+	var core := _off(Models.part(n, Models.box(0.09, 0.09, 1.0), glow_mat(Color("ffe2b0", 0.95)), Vector3(0, 0, -0.5)))
 	core.name = "Core"
-	var halo := _off(Models.part(n, Models.box(0.32, 0.32, 1.0), glow_mat(Color("ffc8dc", 0.22)), Vector3(0, 0, -0.5)))
+	var halo := _off(Models.part(n, Models.box(0.32, 0.32, 1.0), glow_mat(Color("ffc46a", 0.22)), Vector3(0, 0, -0.5)))
 	halo.name = "Halo"
 	var twist := Node3D.new()
 	twist.name = "Twist"
