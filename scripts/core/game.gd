@@ -123,6 +123,11 @@ func apply_result(r: Dictionary) -> Dictionary:
 	var d := Save.d
 	var out := {"gems": 0, "seeds": {}, "caught": [], "kin_lines": [], "levelup": false, "crops_ready": 0}
 	d["matches"] = int(d["matches"]) + 1
+	# a free-kit run (Loaner): the stipend on an extract; the loaner itself never touches the save
+	out["stipend"] = Loaner.settle(r)
+	if r.get("loaner", false):
+		out["loaner"] = true
+		r["kin_runs"] = []; r.erase("kin_events"); r.erase("kin_trust"); r.erase("lost_kin")
 	var won: bool = r.get("extracted", false)
 	# lifetime counts for challenges
 	var ms: Dictionary = r.get("stats", {})
@@ -181,10 +186,11 @@ func apply_result(r: Dictionary) -> Dictionary:
 	if r.has("rift_keys"):
 		d["items"]["rift_key"] = int(r["rift_keys"])     # carried keys come home with you, or stay in your deathbox
 	var treat: String = d.get("treat", "")
-	d["treat"] = ""
+	if not r.get("loaner", false):
+		d["treat"] = ""      # (a free-kit run never used it, so it keeps)
 	# every kin you brought remembers the match
 	var runs: Array = r.get("kin_runs", [])
-	if runs.is_empty() and not Save.active_kin().is_empty():
+	if runs.is_empty() and not Save.active_kin().is_empty() and not r.get("loaner", false):
 		runs = [{"uid": Save.active_kin()["uid"], "events": r.get("kin_events", []), "trust": r.get("kin_trust", Save.active_kin()["trust"]), "stats": r.get("kin_stats", {})}]
 	var k := Save.active_kin()
 	var brought: Array = []
@@ -206,6 +212,9 @@ func apply_result(r: Dictionary) -> Dictionary:
 			out["caught"].erase(back)
 	# time passes for kin already lost: prices drift, unclaimed ones get sold, rivals ask for theirs back
 	out["ransom_news"] = Ransom.tick(r.get("rivals", []))
+	# Boki you listed at the Drift Pens may have sold, and Exchange offers fill (offline turnover)
+	out["pens_sold"] = BokiPens.tick()
+	out["exchange_fills"] = Exchange.tick()
 	# going down leaves your kin behind; where they end up was settled in the match
 	var lost_news: Array = []
 	if not won and r.get("why", "") != "left":
@@ -282,6 +291,8 @@ func apply_result(r: Dictionary) -> Dictionary:
 				p["wet"] = 0
 			if int(p["stage"]) == grow:
 				out["crops_ready"] += 1
+	# the floor: nobody is left with no Boki and no way to play (Lifeline)
+	out["floor"] = Lifeline.check()
 	Save.save_game()
 	return out
 

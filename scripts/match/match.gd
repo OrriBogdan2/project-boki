@@ -1101,6 +1101,10 @@ func _spawn_hunters() -> void:
 			if t == 0 and s == 0 and not opts.get("spectate", false):
 				var rec: Dictionary = Save.active_kin()
 				var rec2: Dictionary = Save.second_kin()
+				if opts.get("loaner", false):
+					# a free-kit run: a loaner Boki, nothing of yours comes (Loaner)
+					rec = opts["loaner_rec"] if typeof(opts.get("loaner_rec", null)) == TYPE_DICTIONARY else Loaner.roll(kin_seed("loaner"))
+					rec2 = {}
 				if opts.has("demo_kin"):
 					var ids: Array = Data.common_kin()
 					var sp0 := String(opts["demo_kin"])
@@ -1124,11 +1128,14 @@ func _spawn_hunters() -> void:
 				if opts.has("zoom_hold"): set_meta("zoom_hold", float(opts["zoom_hold"]))
 				player.teleport(at)
 				player.tonics = mini(TONIC_CARRY, int(Save.d["items"].get("tonic", 0)) + 2); player.free_tonics = 2; tonic_stash_left = maxi(0, int(Save.d["items"].get("tonic", 0)) - (player.tonics - 2))     # everyone sets out with a couple, at most TONIC_CARRY in all; the rest stays home
-				if not opts.get("tutorial", false) and not opts.get("training", false):
+				if opts.get("loaner", false):
+					# the free kit: two free tonics, no keys, no treat; your stash stays home untouched
+					player.tonics = 2; player.free_tonics = 2; tonic_stash_left = int(Save.d["items"].get("tonic", 0))
+				elif not opts.get("tutorial", false) and not opts.get("training", false):
 					player.rift_keys = int(Save.d["items"].get("rift_key", 0))     # your Rift Keys come with you (and go in your box if you die)
 				_apply_home_perks(player)
 				_apply_armory_kit(player)
-				if player.kin:
+				if player.kin and not opts.get("loaner", false):
 					_apply_treat(player.kin)
 				_start_drop(player, at)
 				continue
@@ -2871,7 +2878,7 @@ func _update_tracking(dt: float) -> void:
 ## Kin left behind where a hunter went down. They wait, dazed, for someone to collect them.
 func _leave_kin(h: Hunter) -> void:
 	for kk in [h.kin, h.kin2]:
-		if kk == null:
+		if kk == null or not is_instance_valid(kk) or Loaner.is_loaner((kk as Kin).rec):
 			continue
 		_leave_one_kin(h, kk)
 
@@ -6020,6 +6027,7 @@ func _finish() -> void:
 	var r := result.duplicate()
 	r["time"] = time
 	r["tier"] = tier
+	if opts.get("loaner", false): r["loaner"] = true
 	if opts.get("tutorial", false):
 		Save.d["tutorial"]["match"] = true
 		r["tutorial"] = true
@@ -6037,7 +6045,7 @@ func _finish() -> void:
 		r["revives"] = player.revives
 		r["armor_tier"] = player.armor_tier
 		r["tonics"] = maxi(0, player.tonics - player.free_tonics) + tonic_stash_left
-		if not opts.get("tutorial", false):
+		if not opts.get("tutorial", false) and not opts.get("loaner", false):
 			r["rift_keys"] = player.rift_keys if result.get("extracted", false) else 0
 		r["stats"] = player.stats.duplicate()
 		# weapons, gloves and treasure: home to the armory if you made it out, else what stayed behind
@@ -6054,18 +6062,18 @@ func _finish() -> void:
 		# what each kin you brought did, for its memories and growth
 		r["kin_runs"] = []
 		for kk in [player.kin, player.kin2]:
-			if kk == null: continue
+			if kk == null or not is_instance_valid(kk) or Loaner.is_loaner((kk as Kin).rec): continue
 			var k: Kin = kk
 			r["kin_runs"].append({"uid": String(k.rec.get("uid", "")), "events": k.events.duplicate(true), "trust": k.trust,
 				"stats": {"hits": k.st_hits, "kos": k.st_kos, "throws": k.st_throws, "skills": k.st_skills,
 				"revives": k.events.filter(func(e): return e["kind"] == "revived").size(), "caught": player.caught.size(),
 				"won": 1 if result.get("extracted", false) else 0}})
-		if player.kin:
+		if is_instance_valid(player.kin) and not Loaner.is_loaner((player.kin as Kin).rec):
 			var k0: Kin = player.kin
 			r["kin_events"] = k0.events.duplicate(true)
 			r["kin_trust"] = k0.trust
 		if not player_lost.is_empty() and not result.get("extracted", false):
-			r["lost_kin"] = _resolve_lost()
+			r["lost_kin"] = (_resolve_lost() as Array).filter(func(L): return not Loaner.is_loaner(L.get("rec", {})))
 		r["rivals"] = hunters.filter(func(x): return x.ctrl == "bot" and x.team != player.team).map(func(x): return x.pname)
 	var placed := 1
 	for h in hunters:

@@ -475,6 +475,9 @@ static func kin_on_death(m: Match, h: Hunter, b: Dictionary) -> void:
 			continue
 		var k: Kin = kk
 		m.giant_free(k)
+		if Loaner.is_loaner(k.rec):
+			k.state = "away"      # a loaner is never at risk: it keeps out of sight, then goes home to Wenna
+			continue
 		var on_you: bool = k.state in ["shoulder", "bench", "away"] or k.with_owner()
 		if not training and on_you and bool(m.T.get("kin_drop", false)):
 			var rec: Dictionary = k.rec.duplicate(true)

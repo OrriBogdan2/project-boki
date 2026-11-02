@@ -427,6 +427,16 @@ func _ready() -> void:
 		set_meta("hatch_check", htc)
 		htc.run(self)
 		return
+	if "--economy-floor-check" in args:
+		var efc_s: GDScript = load("res://tools/economy_floor_check.gd")
+		if efc_s == null or not efc_s.can_instantiate():
+			print("ECONOMY_FLOOR CHECK failed to load, failures: 1")
+			get_tree().quit(1)
+			return
+		var efc = efc_s.new()      # never stuck: strays, the pens, free-kit runs, the Exchange, saves
+		set_meta("economy_floor_check", efc)
+		efc.run(self)
+		return
 	if "--economy-check" in args:
 		_economy_check()
 		return

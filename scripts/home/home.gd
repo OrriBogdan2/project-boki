@@ -57,6 +57,7 @@ var hb: HomeBuild = null         # build mode and the island's layout (home_buil
 var training: HomeTraining = null  # the Training Grounds isle, where your combat kit works (home_training.gd)
 var hw: HomeWork = null            # kin at work: jobs, stations and the Job Board (home_work.gd, Work)
 var hinc: HomeIncubator = null     # the Incubator by the Nesting Nook, where Rare Eggs hatch (home_incubator.gd, Incubator)
+var hmk: HomeMarket = null         # the Drift Pens (Boki market) and the Tradewind Exchange (home_market.gd)
 ## A farm-start island (HomeLayout.fs): the house, crop patches, pot, stall, Nook, Burrow, training
 ## post and graveyard are things you place in build mode, so where they are comes from the layout
 ## (_sync_fixtures); one you haven't placed is FAR away (nothing finds it, nothing walks to it).
@@ -141,6 +142,7 @@ func _ready() -> void:
 		get_viewport().disable_3d = true
 		PerfLog.frame_drawn()
 	hecon = HomeEcon.new(self)
+	hmk = HomeMarket.new(self, _spawn_kin)
 	if visit.is_empty():
 		HomeLayout.ensure(Save.d)     # first: a brand new farm-start island keeps its first trough in storage
 		Econ.ensure()
@@ -583,6 +585,7 @@ func _ready_rest() -> void:
 					_open_kin(Save.active_kin())
 				elif which == "burrow" or which == "kinbox": _open_burrow()
 				elif which == "shop": _open_shop()
+				elif hmk.open_named(which): pass      # "pens", "exchange[:item]"
 				elif which == "challenges": _open_challenges()
 				elif which.begins_with("ransom"):
 					if ":" in which: ransom_tab = which.split(":")[1]
@@ -2848,7 +2851,9 @@ func _open_shop() -> void:
 	UI.hold(v, SHOP_H)          # every tab the same size
 	UI.subtitle(v, "Seeds, food, things to wear and things for the farm")
 	UI.head_extra(v).add_child(UI.chip("gem", str(int(Save.d["gems"])), UI.GOLD, "Your gems"))
-	UI.shell_tabs(v, ["Seeds", "Kin food", "Wear", "Home", "Farm", "Sell"], shop_tab, func(t):
+	UI.shell_tabs(v, ["Seeds", "Kin food", "Wear", "Home", "Farm", "Sell", "Boki", "Exchange"], shop_tab, func(t):
+		if t == "Boki": hmk.open_pens(); return
+		if t == "Exchange": hmk.open_exchange(); return
 		shop_tab = t; shop_page = 0; UI._page_of.erase("Market stall"); _open_shop())
 	if shop_tab == "Sell":
 		_shop_sell(v)
@@ -3683,6 +3688,7 @@ func _open_expedition() -> void:
 		elif exp_tier == i:
 			tv.add_child(UI.para(String(td["desc"]), UI.T_SMALL, Color("ffb3a8") if td["risk_kin"] else UI.MUTED))
 		right.add_child(tc)
+	HomeFreeKit.card(right)      # the free-kit run (home_freekit.gd)
 	right.add_child(UI.spacer(2))
 	right.add_child(UI.section("Match"))
 	var mode_names := {"solo": "Solo", "duo": "Duos", "trio": "Trios"}
@@ -3716,6 +3722,7 @@ func _open_expedition() -> void:
 	fl.add_child(UI.ghost("Duel room", _start_duel, 0, "knock"))
 	if Net.available():
 		fl.add_child(UI.ghost("Play online", func(): Game.goto("lobby", {"cls": Data.class_of_save(), "tier": exp_tier}), 0, "bond"))
+	if HomeFreeKit.buttons(fl, v, self, ak.is_empty()): return      # (no Boki of your own: only the free-kit run)
 	var start_b := UI.footer_primary(v, "Start expedition", _confirm_start, 250, "portal")
 	start_b.grab_focus.call_deferred()
 
@@ -4572,8 +4579,11 @@ func _setup_care() -> void:
 		return
 	# the time you were away: needs drift, kin eat from the feeders, and hungry ones may starve
 	hecon.away = Econ.catch_up_all()
-	if hecon.away.any(func(e): return e["kind"] == "died"):
+	# nobody is left with no Boki: a stray turns up (Lifeline; the toast is in home_freekit.gd)
+	var floor_ev := Lifeline.check()
+	if hecon.away.any(func(e): return e["kind"] == "died") or not floor_ev.is_empty():
 		_spawn_kin()
+	HomeFreeKit.toast_stray(self, floor_ev)
 	# what Boki assigned to stations made while you were away (Work.catch_up)
 	away_work = Work.catch_up()
 	if not away_work.is_empty():
