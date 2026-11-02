@@ -1,8 +1,8 @@
 class_name BokiHud
 extends RefCounted
 ## The Boki command system on the HUD (docs/decisions/0001), drawn through the in-match HUD `H`:
-##   - the R slot is the bond meter: it fills with the bond, says MERGE (or LEAP / SURGE) when ready, says
-##     RESCUE when the Boki is down (R does nothing), and while merged counts the merge down with the form's
+##   - the R slot is the bond meter and always the Merge: it fills with the bond, says MERGE (SURGE with no Boki) when
+##     ready, RESCUE when the Boki is down (R does nothing), and while merged counts the merge down with the form's
 ##     ultimate (its name when ready, the seconds until it is)
 ##   - a merged hunter wears the form's name, a draining timer and the shell bar over their head (form_overhead)
 ##   - C and G show where the Boki is and what it is doing: from you / from the Boki, its order (follow, guard,
@@ -25,59 +25,110 @@ static func squad_downed(m) -> Array:
 			out.append(k)
 	return out
 
-## The R slot: the bond meter / Merge. `ur` is its rect, `us` its size.
+## The R slot: the bond meter / Merge. `ur` is its rect, `us` its size. Every element has its own place so
+## nothing overlaps (checked at 1280x720 and 1920x1080):
+##   inside the square   the icon and, on a cooldown, its seconds (the shared slot art); the bond fill behind them;
+##                       the rank badge in the top-right corner
+##   round the square    one ring along the outline: bond while filling, time left while merged (it pulses when R is ready)
+##   under the square    the key cap (shared slot art)
+##   above the square    one chip: the bond %, "MERGE" when ready, then while merged the ultimate's unlock seconds / its name / the form
+## The slot is always the Merge. A Boki that is out leaps back first; that is in the tooltip, not on the slot.
+const RING_GROW := 4.0       # px: the ring sits this far outside the slot's edge
+const CHIP_LIFT := 22.0      # px: the chip's top edge above the slot (clear of the rank pips at 7px and the "UNLOCK" tag)
+
 static func r_slot(H, p: Hunter, ur: Rect2, us: float) -> void:
 	var ri := p.slot_info("r")
 	var ulv := int(p.slot_lv["ult"])
 	var col: Color = ri["col"]
-	var form: Dictionary = ri.get("form", {})
-	H._skill_slot("ult", "r", ur, "bond", Settings.key_cap("ultimate"), col, float(ri["cd"]) / maxf(0.01, float(ri["cd_max"])) if float(ri["cd"]) > 0.0 else 0.0, float(ri["cd"]), bool(ri["ready"]))
+	var merged := KinMerge.active(p)
+	var cd_left := float(ri["cd"])
+	# (while merged the unlock seconds go in the chip, not as a second number over the icon)
+	var sweep := 0.0 if merged else (cd_left / maxf(0.01, float(ri["cd_max"])) if cd_left > 0.0 else 0.0)
+	H._skill_slot("ult", "r", ur, "bond", Settings.key_cap("ultimate"), col, sweep, 0.0 if merged else cd_left, bool(ri["ready"]))
 	var ult_at := int(Hunter.ULT_AT[0])
 	if ulv <= 0:
 		if p.lvl < ult_at:
 			if p.lvl == ult_at - 1:
 				var fh: float = ur.size.y * p.xp_frac()
 				H._rounded(Rect2(Vector2(ur.position.x, ur.end.y - fh), Vector2(ur.size.x, fh)), Color(1.0, 0.82, 0.48, 0.28), 10)
-			H._ctext(ur.get_center() + Vector2(0, 14), str(ult_at), 34, Color(H.INK, 0.85), H.big)
 		elif p.can_level("ult"):
 			var pulse := 0.5 + 0.5 * sin(H.m.time * 9.0)
 			H._rounded(ur.grow(3.0 + pulse * 4.0), Color(1.0, 0.82, 0.48, 0.15 * pulse), 14, Color("ffd27a"), 3)
 		return
 	if ulv < Hunter.SLOT_MAX["ult"]:
-		var tr := Rect2(ur.end - Vector2(18, 18), Vector2(16, 16))
+		var tr := Rect2(Vector2(ur.end.x - 16, ur.position.y + 2), Vector2(14, 14))
 		H._rounded(tr, Color(0.03, 0.03, 0.05, 0.9), 5, Color(H.MUTED, 0.6), 1)
-		H._ctext(tr.get_center() + Vector2(0, 4.5), str(int(Hunter.ULT_AT[1])), 11, H.MUTED, H.big)
-	var ctr := ur.get_center()
-	if KinMerge.active(p):
+		H._ctext(tr.get_center() + Vector2(0, 4), str(int(Hunter.ULT_AT[1])), 10, H.MUTED, H.big)
+	if merged:
 		var ml: Dictionary = p.merge_st
 		var left := clampf(float(ml["t"]) / maxf(0.1, float(ml["T"])), 0.0, 1.0)
-		H.c.draw_arc(ctr, us * 0.5 + 4.0, -PI / 2, -PI / 2 + TAU * left, 48, Color("fff4c0"), 4.0, true)
-		H._ctext(ctr + Vector2(0, us * 0.5 - 10), "%ds" % int(ceil(float(ml["t"]))), 11, Color("fff4c0"), H.big)
 		var ready_ult := bool(ri.get("ready", false)) and String(ri.get("plan", "")) == "ult"
+		var pl := 0.5 + 0.5 * sin(H.m.time * 8.0)
+		_ring(H, ur.grow(RING_GROW), left, Color("fff4c0").lerp(col, pl * 0.6) if ready_ult else Color("fff4c0"), 4.0 if ready_ult else 3.0)
+		var form_name := String((ml.get("form", {}) as Dictionary).get("name", "MERGED")).to_upper()
+		var chip := form_name
 		if ready_ult:
-			var pl := 0.5 + 0.5 * sin(H.m.time * 8.0)
-			H._rounded(ur.grow(2.0 + pl * 3.0), Color(0, 0, 0, 0), 14, Color(col, 0.5 + 0.4 * pl), 3)
-		var tag := String(ri.get("name", "MERGED")).to_upper() if ready_ult else (("%.1fs" % float(ri["cd"])) if String(ri.get("plan", "")) == "ult" and not bool(ri.get("ulting", false)) else String((ml.get("form", {}) as Dictionary).get("name", "MERGED")).to_upper())
-		_tag(H, ur, tag, col)
+			chip = String(ri.get("name", "ULT")).to_upper()
+		elif String(ri.get("plan", "")) == "ult" and not bool(ri.get("ulting", false)):
+			chip = "ULT %.1fs" % cd_left
+		_chip(H, ur, chip, col)
 		return
-	# the meter: a fill from the bottom and a ring, in the Boki's colour
+	# the meter: a fill from the bottom and a ring along the outline, in the Boki's colour
 	var bond := clampf(p.ult, 0.0, 1.0)
 	var fh2: float = (ur.size.y - 6.0) * bond
 	if fh2 > 0.0:
 		H._rounded(Rect2(Vector2(ur.position.x + 3, ur.end.y - 3 - fh2), Vector2(ur.size.x - 6, fh2)), Color(col, 0.30 if bond < 1.0 else 0.45), 9)
-	H.c.draw_arc(ctr, us * 0.5 + 3.0, -PI / 2, -PI / 2 + TAU * bond, 48, col, 3.0, true)
 	var plan := String(ri.get("plan", ""))
 	if bond < 1.0:
-		H._ctext(ctr + Vector2(0, us * 0.5 - 10), "%d%%" % int(bond * 100.0), 11, Color(col, 0.95), H.big)
+		_ring(H, ur.grow(RING_GROW), bond, col, 3.0)
+		if cd_left <= 0.0:
+			_chip(H, ur, "%d%%" % int(bond * 100.0), Color(col, 0.95))
 	else:
 		var pulse2 := 0.5 + 0.5 * sin(H.m.time * 6.0)
-		H._rounded(ur.grow(3.0 + pulse2 * 3.0), Color(0, 0, 0, 0), 14, Color(col, 0.55 + 0.4 * pulse2), 3)
-		_tag(H, ur, {"merge": "MERGE", "leap": "LEAP", "surge": "SURGE", "far": "TOO FAR", "rescue": "RESCUE"}.get(plan, "MERGE"), col if plan not in ["far", "rescue"] else DOWN_COL)
+		_ring(H, ur.grow(RING_GROW), 1.0, Color(col, 0.55 + 0.45 * pulse2), 3.0 + pulse2)
+		if cd_left <= 0.0:
+			_chip(H, ur, {"merge": "MERGE", "leap": "MERGE", "surge": "SURGE", "far": "TOO FAR", "rescue": "RESCUE"}.get(plan, "MERGE"), col if plan not in ["far", "rescue"] else DOWN_COL)
 
-static func _tag(H, ur: Rect2, text: String, col: Color) -> void:
-	var btr := Rect2(Vector2(ur.position.x + 2, ur.position.y - 7), Vector2(ur.size.x - 4, 13))
+## A progress ring that follows the slot's outline (a rounded square), from the top centre clockwise.
+static func _ring(H, r: Rect2, frac: float, col: Color, width: float) -> void:
+	if frac <= 0.0:
+		return
+	var rad := 15.0
+	var pts := PackedVector2Array()
+	var c0 := r.position + Vector2(rad, rad)
+	var c1 := Vector2(r.end.x - rad, r.position.y + rad)
+	var c2 := r.end - Vector2(rad, rad)
+	var c3 := Vector2(r.position.x + rad, r.end.y - rad)
+	pts.append(Vector2(r.get_center().x, r.position.y))
+	for corner in [[c1, -PI / 2], [c2, 0.0], [c3, PI / 2], [c0, PI]]:
+		var cc: Vector2 = corner[0]
+		var a0: float = corner[1]
+		for j in 7:
+			var a: float = a0 + (PI / 2.0) * float(j) / 6.0
+			pts.append(cc + Vector2(cos(a), sin(a)) * rad)
+	pts.append(Vector2(r.get_center().x, r.position.y))
+	var total := 0.0
+	for i in range(1, pts.size()):
+		total += pts[i].distance_to(pts[i - 1])
+	var want := total * clampf(frac, 0.0, 1.0)
+	var out := PackedVector2Array([pts[0]])
+	var run := 0.0
+	for i in range(1, pts.size()):
+		var seg := pts[i].distance_to(pts[i - 1])
+		if run + seg >= want:
+			out.append(pts[i - 1].lerp(pts[i], (want - run) / maxf(seg, 0.001)))
+			break
+		out.append(pts[i])
+		run += seg
+	if out.size() >= 2:
+		H.c.draw_polyline(out, col, width, true)
+
+## The one line of text over the R slot (bond %, MERGE, the ultimate's name, the form), centred above it.
+static func _chip(H, ur: Rect2, text: String, col: Color) -> void:
+	var tw: float = H.big.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x + 12.0
+	var btr := Rect2(Vector2(ur.get_center().x - tw * 0.5, ur.position.y - CHIP_LIFT), Vector2(tw, 14))
 	H._rounded(btr, Color(0.03, 0.03, 0.05, 0.95), 5, Color(col, 0.9), 1)
-	H._ctext(btr.get_center() + Vector2(0, 4), text, 9, col, H.big)
+	H._ctext(btr.get_center() + Vector2(0, 4), text, 10, col, H.big)
 
 ## C and G, the small badges after R. Returns the x where the next badge starts.
 static func cg_slots(H, p: Hunter, x: float, y: float, s: float) -> float:
@@ -96,7 +147,7 @@ static func cg_slots(H, p: Hunter, x: float, y: float, s: float) -> float:
 	if in_form:
 		from_txt = "MERGED"
 	H._ctext(Vector2(cr.get_center().x, cr.position.y - 5), from_txt, 8, DOWN_COL if down else Color(H.INK, 0.5 if in_form else 0.7), H.big)
-	x += 46.0
+	x += 50.0
 	var gr := Rect2(Vector2(x, y + s - 34.0), Vector2(34, 34))
 	var out := k.state in ["active", "flying", "returning", "flying_home"]
 	var away := out and KinCommand.is_away(p, k)
@@ -108,7 +159,7 @@ static func cg_slots(H, p: Hunter, x: float, y: float, s: float) -> float:
 	if k.ks and (not k.ks.carry_passives.is_empty() or not k.ks.carry_on_shot.is_empty()):
 		# its carried bonuses: on while it is on you, greyed while it is out beside you
 		var on := p.kin_carry_on()
-		H._ctext(Vector2(gr.get_center().x, gr.end.y + 9), "CARRY ON" if on else "CARRY OFF", 8, Color(k.sp["color"], 0.95) if on else Color(H.INK, 0.4), H.big)
+		H._ctext(Vector2(gr.get_center().x, gr.position.y - 17.0), "CARRY ON" if on else "CARRY OFF", 8, Color(k.sp["color"], 0.95) if on else Color(H.INK, 0.4), H.big)
 	if down:
 		H._rounded(gr, Color(0.3, 0.02, 0.02, 0.5), 12)
 		H._ctext(gr.get_center() + Vector2(0, 4), str(int(ceil(k.down_t))), 14, DOWN_COL, H.big)
