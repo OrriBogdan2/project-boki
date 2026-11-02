@@ -74,3 +74,6 @@ Watcher test. When this reaches you, add the line `Watcher: received 19:06 UTC e
   - RMB is the bolas, done right
   - E is already correct
   Priority 1 in kitfix-dancer-juggernaut.
+
+## 2026-11-02 19:15 UTC
+New section at the end of SERVER_UPDATE5.md: **"OWNER, 14:07 ET: the small mechanics must transfer too"**. Example: Brall's tether can be steered sideways while pulling in. Relay it to every running kit agent now, and put it in the queued prompts.

@@ -137,3 +137,19 @@ Across all heroes:
   - the shared base dash gets a per-hero variant: posture, lean, a trail in the hero's colour, a landing settle. A heavy hero lumbers and shoves; a light one flicks or tumbles.
 - **Screenshots:** for each hero, add a strip of 4–6 frames for every animation (anticipation, release, follow-through, recovery) under `ext/hero-shots:<newname>/v2/anim/`. The owner reviews these.
 - Animations are procedural (hunter_anim.gd KMOVES plus kit-driven offsets). If a move needs bone or rig motion the procedural system can't express, add the smallest general capability to the animation system (a new curve type, a limb IK target, a weapon pivot) and say what you added.
+
+## OWNER, 14:07 ET: the small mechanics must transfer too
+The owner's example: Brall's tether pull can be **steered to the side** while you're being pulled in. Details like this make the original feel right, and the footage only catches some of them. For every ability:
+- **Research the fine print** with WebSearch/WebFetch: the game's wiki ability pages, patch notes, guides, Reddit or Discord tech threads, and pro-play breakdowns. Look for:
+  - steering or drift during movement abilities, and air control
+  - cancel windows and animation cancels
+  - buffering
+  - what happens on hitting a wall, a rock or the abyss edge
+  - interactions with other abilities (dash during X, X in the air)
+  - momentum carried in and out
+  - recast and redirect windows
+  - hidden bonuses (backstab, edge, sweet spot)
+  - what interrupts it
+  - how it treats allies, wisps or Boki
+- Add a **"Small mechanics"** list to the hero's reference sheet: one line per item, with a source link, and note where the footage confirms it. Build every one that fits our game, and assert each in the combo check, for example "tether pull: sideways input shifts the arrival point by at least 1.5 m".
+- If a mechanic can't be confirmed, build the most likely version and list it under Assumptions in docs/heroes/<id>.md.
