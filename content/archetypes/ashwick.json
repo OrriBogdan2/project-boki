@@ -11,7 +11,7 @@
 	"passive": {"name": "Flashover", "desc": "Your fire builds Char on foes (it all falls off after 5s). At 31 Char the foe Flashes over: 3s of burning for 2% of their health a second; fed again to full Char it becomes a fiercer burn (4%). Anything that stokes a foe already burning upgrades it. A knock heals you 16% of your health."},
 	"lmb": {"cone_deg": 44.0, "range": 6.0, "tick": 0.1, "dps": 27.0, "char_tick": 3.0, "char_burning": 1.5, "spool": 0.18, "slow_after": 0.35},
 	"dash": {"id": "spark_leap", "name": "Spark Leap", "icon": "ram", "col": "#ffc060", "cd": 9.0,
-		"dist": 4.4, "time": 0.2, "dmg": 13.0, "kb": 3.0, "char": 17.0, "trail_t": 3.0, "trail_dps": 12.0,
+		"dist": 4.4, "time": 0.26, "dmg": 13.0, "kb": 3.0, "char": 17.0, "trail_t": 3.0, "trail_dps": 12.0,
 		"desc": "A 4.4m leap through the first foe: 13 damage, a nudge and 17 Char (half a Flashover). A knock restores one charge only."},
 	"rmb": {"delivery": "projectile", "name": "Cinder Shot", "short": "Cinder", "icon": "bolt", "col": "#ffb04a", "cooldown": 7.0, "charges": 1, "hold": 0.0,
 		"range": 14.0, "speed": 30.0, "dmg": 14.0, "size": 0.3, "spread_r": 4.0, "refund": 0.25,

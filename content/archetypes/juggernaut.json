@@ -12,7 +12,7 @@
 	"resource": {"id": "rage", "name": "Rage", "max": 100, "kind": "meter", "per_dmg": 0.7, "min_hit": 2.0, "decay": 9.0, "wait": 3.0, "enraged_t": 6.0, "enraged_dmg": 0.15, "dash_haste": 0.12, "ab_haste": 0.2, "heal_knock": 0.2, "heal_creep": 0.2, "col": "#ff4a3a"},
 	"passive": {"name": "Rage", "desc": "Damage you deal fills Rage (a Searing Wave fills it three times as fast); it cools after 3s out of a fight. Full, you're Enraged for 6s: +15% damage, +12% dash recharge and +20% cooldown speed, with the red shell and the hunter swelling. Knocking a hunter heals you 20% of their health (killing a monster, 20% of its)."},
 	"dash": {"id": "rampage", "name": "Rampage", "icon": "ram", "col": "#ffb070", "cd": 9.0,
-		"dist": 4.4, "time": 0.22, "hit_dmg": 7.0, "hit_kb": 5.0, "tip_r": 1.4, "tip_dmg": 14.0, "tip_kb": 9.0, "tip_stun": 0.8,
+		"dist": 4.4, "time": 0.3, "hit_dmg": 7.0, "hit_kb": 5.0, "tip_r": 1.4, "tip_dmg": 14.0, "tip_kb": 9.0, "tip_stun": 0.8,
 		"desc": "A 4.4m dash attack the way you face (2 charges): 7 to foes along it; the tip at its end hits twice as hard, 14 and a big knock (stun 0.8 into a wall). A knock gives a charge back."},
 	"rmb": {"delivery": "cone", "name": "Smash", "short": "Smash", "icon": "quake", "col": "#ffb070", "cooldown": 3.0, "charges": 1, "hold": 0.3, "full_t": 0.9, "windup": 0.5,
 		"slam": {"radius": 3.2, "angle": 100.0, "dmg": 26.0, "push": 6.0, "low": 0.35, "low_k": 0.5, "sweet": [1.9, 3.4], "sweet_deg": 22.0},
