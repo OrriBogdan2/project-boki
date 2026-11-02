@@ -2,6 +2,7 @@
 	"id": "tether_lantern",
 	"name": "Tether Lantern",
 	"classes": ["medium"],
+	"hero_only": true,
 	"primary": {
 		"dmg": 9.0,
 		"rate": 0.6,

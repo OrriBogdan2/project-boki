@@ -48,7 +48,8 @@ const RARITY := [
 ## A weapon's stats at a rarity. "short" is the plain name for the ability bar.
 ## Every weapon: the ones in content/weapons (the source of truth), plus any only defined here.
 func weapon_ids() -> Array:
-	var ids: Array = Content.ids("weapons")
+	# a hero's fixed signature weapon ("hero_only" in its JSON) never drops as loot
+	var ids: Array = Content.ids("weapons").filter(func(w): return not bool(Content._load("weapons", String(w)).get("hero_only", false)))
 	for k in WEAPONS:
 		if not ids.has(k): ids.append(k)
 	return ids

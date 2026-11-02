@@ -2,6 +2,7 @@
 	"id": "rubble_fists",
 	"name": "Rubble Fists",
 	"classes": ["medium"],
+	"hero_only": true,
 	"primary": {
 		"melee": true,
 		"dmg": 9.0,
