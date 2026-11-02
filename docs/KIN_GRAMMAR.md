@@ -64,7 +64,7 @@ files (one per kind of mistake) and should always print errors. Phase 3 builds t
   step, medium roll, heavy shoulder charge); the kin adds a **dodge rider** to it.
 - The kin gives **1 player-cast active (E)**, optionally **1 auto active** it casts itself when it's
   out (driven by its personality and the ability's cue), and the **merge** (bond ultimate, R).
-- Throw/recall, the shared bond meter, player-kin combos (`content/combos`), personality-driven kin
+- Sic / Call back and the order wheel, the shared bond meter, player-kin combos (`content/combos`), personality-driven kin
   AI (KinTactics), run levels and slot ranks (`Hunter.slot_lv`) all stay. Ranks grow an ability's numbers
   through a core table per part (today's `Effects` rank table), never through data.
 
