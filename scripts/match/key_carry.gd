@@ -2,7 +2,7 @@ class_name KeyCarry
 extends RefCounted
 ## Monsters that carry a chest key: the mark (meta "ckey" plus a glint over the head), the key they
 ## drop when they die, and the two numbers the host adds to a monster's Net snapshot so every game
-## shows the glint and a Shrubling's pose (Net 0.14.2).
+## shows the glint and a Shrubling's pose (Net 0.15.3).
 
 static func carries(mb: Mob) -> bool:
 	return mb != null and mb.has_meta("ckey")

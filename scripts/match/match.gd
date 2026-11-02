@@ -6162,7 +6162,7 @@ func _ser(e: Ent) -> Array:
 		var bb: Blight = mb
 		ms.append_array([_r(bb.cone_a), _r(bb.spot), _r(bb.lvl), 1 if bb.tgt != null else 0])
 	else:
-		ms.append_array(KeyCarry.mob_extra(mb))      # key carrier flag, Shrubling pose (Net 0.14.2)
+		ms.append_array(KeyCarry.mob_extra(mb))      # key carrier flag, Shrubling pose (Net 0.15.3)
 	return ms
 
 ## Snapshot of what this game owns: its player (mine=true), or the host's world (mine=false).
