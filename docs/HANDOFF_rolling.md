@@ -6,10 +6,11 @@ default. Net.VERSION is unchanged (0.8.0): rolling adds no sync, so the 0.8.3 sl
 
 ## After the sync58 merge (e5f25ec, Net 0.10.0)
 
-- Merged `origin/main` with no conflicts. Net.VERSION stays 0.10.0 (rolling adds no sync; main's shape kept).
+- Merged `origin/main` with no conflicts, first sync58 (e5f25ec), then sync59 (fcc3745, mergeforms, Net 0.11.0). Net.VERSION stays 0.11.0 (rolling adds no sync; main's shape kept). No reserved file touched.
 - Late joiners need nothing extra: `Rolling.populate_before` and the wave landings go through `Match.make_bot` / `make_hunter`, and `Kin` now starts `state = "active"`, `cmd = "follow"` for every owned Boki. New assertion in `--rolling-check` ("late joiners and the earlier arrivals start with their active Boki following, none on a shoulder", 35 Boki) pins it, so a regression to shoulder-start shows up here.
 - Checks (all 0 failures, no SCRIPT ERROR): `--rolling-check` (62 assertions), `--check`, `--teammate-check`, `--boki-system-check`, `--bot-sanity-check`; `health.py --strict` OK; `gen_wiki.py --check` 15 unchanged.
-- `--simtest --seed=5`: "team wiped" at sim 56 s. Plain sync58 (e5f25ec) gives the identical result (56 s, team wiped), so it is main, not rolling (rolling is off in the simtest).
+- Re-run on the sync59 tree: rolling-check, check, teammate, boki-system, bot-sanity all 0 failures, no SCRIPT ERROR.
+- `--simtest --seed=5`: "team wiped" (sim 157 s on sync59; 56 s on sync58). Plain sync58 gave the identical 56 s result, and "team wiped" is the known main result, so it is main, not rolling (rolling is off in the simtest).
 
 ## After the sync56 merge
 
