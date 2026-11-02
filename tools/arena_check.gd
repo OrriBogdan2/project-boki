@@ -144,12 +144,9 @@ func _arena() -> void:
 		JK.on_deal(D, 16.0, {"src": "shot"})
 	step(m, 0.3)
 	ok("juggernaut: Rage fills to Enraged, the form grows", JK.enraged_t > 0.0 and JK.aura != null and P.model.scale.x > 1.05, "enraged %.1f scale %.2f" % [JK.enraged_t, P.model.scale.x])
-	# R fuse: winds up first, then fires
-	P.ak.cd["r"] = 0.0
+	# no class ultimate (kits2-nor): R is the Merge, so the kit's own R press is refused and does nothing
 	P.ak.use_r()
-	ok("R: fuse first", P.ak.fusing() and float(P.ak.cd["r"]) > 60.0)
-	step(m, P.ak.fuse_time() + 0.1)
-	ok("R: then Doomfall", not P.ak.fusing() and (P.ak as JuggernautKit).dooms == 1)
+	ok("juggernaut: no R of its own (the press is refused)", Arch.def("juggernaut").get("r") == null and not P.ak.fusing() and float(P.ak.cd["r"]) <= 0.0)
 	# the sparring bot
 	A.cycle_bot()
 	ok("bot: idle", A.bot != null and A.bot_mode == "idle")
@@ -157,13 +154,10 @@ func _arena() -> void:
 	step(m, 0.5)
 	ok("bot: fights as a thief", A.bot != null and A.bot.arch == "thief")
 	# kits2: the sparring bot really uses the Thief's and the Juggernaut's kits on you
-	# (R is the Merge now; the class ultimates stay reachable behind boki_system.json class_ults, and this
-	# check turns that flag on to keep the kits' R honest until the hero-port work folds them in)
-	KinCommand.rules()["class_ults"] = true
+	# (neither kit has an R any more: it is the Boki Merge, so the bot's kit is RMB, E and the dash)
 	for ba in ["thief", "juggernaut"]:
 		A.set_bot_arch(ba)
 		var B: Hunter = A.bot
-		B.slot_lv["ult"] = 1; B.lvl = maxi(B.lvl, 6)
 		P.teleport(A.home); B.teleport(A.home + Vector3(5.0, 0, 0))
 		var seen := {"dash": false}
 		var tb := 0.0
@@ -176,11 +170,10 @@ func _arena() -> void:
 			m.step(DT); tb += DT
 			if B.ak is ThiefKit and float((B.ak as ThiefKit).primed_t) > 0.0: seen["dash"] = true
 			if B.ak is JuggernautKit and String(B.ak.st.get("last_dash", "")) == "rampage": seen["dash"] = true
-			if tb > 18.0 and seen["dash"] and int(B.used.get("utility", 0)) > 0 and int(B.used.get("k1", 0)) + int(B.used.get("r", 0)) > 0: break
+			if tb > 18.0 and seen["dash"] and int(B.used.get("utility", 0)) > 0 and int(B.used.get("k1", 0)) > 0: break
 		var u: Dictionary = B.used
-		ok("bot uses the %s kit (RMB, E or R, dash)" % ba, int(u.get("utility", 0)) > 0 and int(u.get("k1", 0)) + int(u.get("r", 0)) > 0 and bool(seen["dash"]),
-			"rmb %d e %d r %d dash %s" % [int(u.get("utility", 0)), int(u.get("k1", 0)), int(u.get("r", 0)), seen["dash"]])
-	KinCommand.rules()["class_ults"] = false
+		ok("bot uses the %s kit (RMB, E, dash)" % ba, int(u.get("utility", 0)) > 0 and int(u.get("k1", 0)) > 0 and bool(seen["dash"]),
+			"rmb %d e %d dash %s" % [int(u.get("utility", 0)), int(u.get("k1", 0)), seen["dash"]])
 	A.bot_mode = "off"; A._spawn_bot()
 	ok("bot: off", A.bot == null)
 	# the panels build
@@ -241,7 +234,7 @@ func _cards() -> void:
 				ok("kit card text %s.%s" % [a, s], false)
 		c.queue_free()
 	var inf := KitCard.infusion_lines("thief", KinLib.kin("cindle"))
-	ok("kit card: Boki infusion lines", inf.size() == 3, " | ".join(inf))
+	ok("kit card: Boki infusion lines (RMB and E: the Thief has no R)", inf.size() == 2, " | ".join(inf))
 	host.queue_free()
 
 func _loadout() -> void:

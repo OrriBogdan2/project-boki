@@ -294,6 +294,8 @@ static func infusion_table(ks: KinSpec) -> Array:
 		var ad := def(a)
 		for slot in ["rmb", "e", "r"]:
 			var sd: Dictionary = ad.get(slot, {})
+			if sd.is_empty():
+				continue
 			var f := fill(sd.get("sockets", {}), inf, slot, String(sd.get("delivery", "projectile" if slot == "rmb" else "burst")))
 			rows.append("%-10s %-3s %-14s %s" % [a, slot.to_upper(), String(sd.get("name", "")), "; ".join(f["notes"])])
 	return rows

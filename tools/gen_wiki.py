@@ -224,7 +224,7 @@ def gen_classes():
         d = ARCH.get(aid)
         if not d: continue
         rows.append([link(class_page_name(aid), d["name"]), d["weight"].title(), ", ".join(wname(w) for w in d["weapons"]),
-                     d["passive"]["name"], d["dash"]["name"], d["rmb"]["name"], d["e"]["name"], d["r"]["name"]])
+                     d["passive"]["name"], d["dash"]["name"], d["rmb"]["name"], d["e"]["name"], d.get("r", {}).get("name", "Boki Merge")])
     wc = []
     for cid in ("light", "medium", "heavy"):
         c = CLASSES.get(cid)
@@ -259,12 +259,14 @@ def gen_classes():
         b.append("\n### Kit card\n\nWhat the in-game kit card (K) says.\n")
         rows = [["Loop", c.get("loop", "")], ["Passive: " + d["passive"]["name"], c.get("passive", "")], ["Dash: " + d["dash"]["name"], c.get("dash", "")]]
         if c.get("lmb"): rows.append(["LMB", c["lmb"]])
-        rows += [["RMB: " + d["rmb"]["name"], c.get("rmb", "")], ["E: " + d["e"]["name"], c.get("e", "")], ["R: " + d["r"]["name"], c.get("r", "")]]
+        rows += [["RMB: " + d["rmb"]["name"], c.get("rmb", "")], ["E: " + d["e"]["name"], c.get("e", "")], ["R: " + d.get("r", {}).get("name", "Boki Merge"), c.get("r", "")]]
         for w, t in c.get("weapons", {}).items():
             rows.append(["Weapon: " + wname(w), t])
         b.append(table(["Slot", "Card text"], rows))
         b.append("\n### Abilities in full\n")
         b.append("**%s (passive).** %s\n" % (d["passive"]["name"], d["passive"].get("desc", "")))
+        if d.get("jackpot"):
+            b.append("**%s (Mark trigger).** %s\n" % (d["jackpot"]["name"], d["jackpot"].get("desc", "")))
         dd = d["dash"]
         b.append("**%s (dash, Shift, %s cooldown).** %s\n" % (dd["name"], secs(dd.get("cd")), dd.get("desc", "")))
         r = d["rmb"]
@@ -275,14 +277,18 @@ def gen_classes():
             b.append("- *%s:* %s" % (names.get(k, k), t))
         b.append("")
         for slot, label in (("e", "E"), ("r", "R")):
-            x = d[slot]
+            x = d.get(slot)
+            if x is None:
+                b.append("**Boki Merge (R).** This kit has no ultimate of its own: R is the Boki Merge.\n")
+                continue
             b.append("**%s (%s, %s cooldown).** %s\n" % (x["name"], label, secs(x.get("cooldown")), x.get("desc", "")))
         b.append("### Ranks\n\nRank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the special.\n")
         rk = []
         for s in ("sec", "dash", "kin", "ult"):
             r2 = d.get("rank2", {}).get(s, "")
             r3 = d.get("rank_next", {}).get(s, "") or ("Rank 3: " + d["rank3"][s] if s in d.get("rank3", {}) and s != "ult" else "")
-            rk.append([SLOT_NAMES[s], re.sub(r"^Rank 2:\s*", "", r2), re.sub(r"^Rank 3:\s*", "", r3)])
+            if r2 or r3:
+                rk.append([SLOT_NAMES[s], re.sub(r"^Rank 2:\s*", "", r2), re.sub(r"^Rank 3:\s*", "", r3)])
         b.append(table(["Slot", "Rank 2", "Rank 3"], rk))
         order = d.get("order", [])
         b.append("\n**Suggested level-up order** (what bots follow): " + " > ".join(SLOT_NAMES.get(s, s) for s in order) + ".\n")

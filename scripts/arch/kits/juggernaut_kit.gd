@@ -8,12 +8,13 @@ extends ArchKit
 ##   knocked hunter's health (a monster kill, of the monster's).
 ## - LMB (Greatsword): quick slashes that hit twice as hard at the tip; hold for a Searing Wave (it
 ##   fills Rage fast).
-## - RMB, Smash (Adaptive Strike): tap a wound-up Execution Slam (more to the wounded; its sweet spot
-##   resets Doomfall: the payoff, T4, pay_rage), hold a charged Lunge (a miss doubles the cooldown), in
-##   the air a Meteor Drop (slows; the centre stunned), during the Warchain's pull a Scorching Spin.
+## - RMB, Smash (Adaptive Strike): tap a wound-up Execution Slam (more to the wounded; its sweet spot is
+##   the payoff, T4, pay_rage, and at rank 3 it also crashes: a burst that heals you, reset by a knock),
+##   hold a charged Lunge (a miss doubles the cooldown), in the air a Meteor Drop (slows; the centre
+##   stunned), during the Warchain's pull a Scorching Spin.
 ## - Dash, Rampage (Flame Step): 2 charges of a dash attack the way you face, the tip hits double.
 ## - E, Warchain (Feysteel Chain): a chain to a foe (blighted) or a wall; recast to pull yourself in.
-## - R, Doomfall (Volcanic Rebuke): invulnerable, then a crushing strike that heals; a knock resets it.
+## No R: that key is the Boki Merge. The old ultimate lives on as the Smash's rank-3 crash.
 
 var enraged_t := 0.0
 var aura: Node3D = null        # the Enraged look: a red shell, a glow, the hunter grown bigger
@@ -30,13 +31,13 @@ var lunge := {}                # the running Lunge: {end, dir, k, hit}
 var chain := {}                # the Warchain: {target, pos, node}
 var chain_flying := false
 var reel_t := 0.0              # the Warchain's pull is carrying you (a Smash now is a Scorching Spin)
-var doom := {}                 # Doomfall's wind-up: {from, land}
-var doom_hit := {}             # foe id -> when Doomfall hit them (a knock within 2s resets it)
+var crash_cd := 0.0            # the rank-3 crash is resting (seconds)
+var crash_hit := {}            # foe id -> when the crash hit them (a knock within 2s resets it)
 var sweet_spots := 0           # (tests, demo)
 var waves := 0
 var tips := 0
-var dooms := 0
-var doom_resets := 0
+var crashes := 0
+var crash_resets := 0
 var reels := 0
 var spins := 0
 var chain_lunges := 0
@@ -179,7 +180,7 @@ func _tick(dt: float) -> void:
 	if not slam_w.is_empty(): _tick_slam(dt)
 	if not lunge.is_empty(): _tick_lunge()
 	if not chain.is_empty(): _tick_chain(dt)
-	if not doom.is_empty(): _tick_doom()
+	crash_cd = maxf(0.0, crash_cd - dt)
 	if st.has("bot_haul_at") and m.time >= float(st["bot_haul_at"]):
 		st.erase("bot_haul_at")
 		if rmb_down and not chain.is_empty(): e_recast()     # a bot pulling in with the Smash charged
@@ -207,7 +208,7 @@ func move_k() -> float:
 	return 0.55 if lmb_t > float(lmb_def().get("tap", 0.22)) else 1.0
 
 ## A knock (ours, or one we helped with): ours heals a share of the knocked hunter's health; either
-## way, if Doomfall hit them in the last 2s its cooldown resets.
+## way, if the crash hit them in the last 2s it is ready again.
 func on_knock(t: Hunter, mine: bool) -> void:
 	var rd := res_def()
 	if mine and is_instance_valid(t):
@@ -216,20 +217,23 @@ func on_knock(t: Hunter, mine: bool) -> void:
 		knock_healed += h.hp - hp0
 		m.fx.burst(h.pos + Vector3(0, 1.0, 0), Color("7fe08a"), 16, 2.5, 0.5, -2.0)
 	var key := t.get_instance_id() if is_instance_valid(t) else -1
-	if doom_hit.has(key) and m.time - float(doom_hit[key]) <= float(r_def().get("reset_t", 2.0)):
-		doom_hit.erase(key)
-		_reset_doom()
+	if crash_hit.has(key) and m.time - float(crash_hit[key]) <= float(crash_def().get("reset_t", 2.0)):
+		crash_hit.erase(key)
+		_reset_crash()
 
-func _reset_doom() -> void:
-	if float(cd["r"]) <= 0.0:
+func crash_def() -> Dictionary:
+	return rmb_def().get("crash", {})
+
+func _reset_crash() -> void:
+	if crash_cd <= 0.0:
 		return
-	cd["r"] = 0.0
-	doom_resets += 1
-	m.fx.word(h.pos + Vector3(0, 2.8, 0), "DOOMFALL RESET", col_of(r_def()), true)
-	m.fx.ring(h.pos, 2.0, col_of(r_def()), 0.35)
+	crash_cd = 0.0
+	crash_resets += 1
+	m.fx.word(h.pos + Vector3(0, 2.8, 0), "CRASH RESET", col_of(rmb_def()), true)
+	m.fx.ring(h.pos, 2.0, col_of(rmb_def()), 0.35)
 	m.sfx("ab_ready", h.pos, -2.0, 0.8)
-	if h.is_local(): h._ab_feedback("r", "ready")
-	net_ring(h.pos, 2.0, col_of(r_def()))
+	if h.is_local(): h._ab_feedback("sec", "ready")
+	net_ring(h.pos, 2.0, col_of(rmb_def()))
 
 # ------------------------------------------------------------------ LMB: Greatsword (slashes / Searing Wave)
 func lmb_def() -> Dictionary:
@@ -366,7 +370,7 @@ func _wave() -> void:
 
 # ------------------------------------------------------------------ dash: Rampage
 func on_dash(use_ex: bool) -> bool:
-	if not lunge.is_empty() or not doom.is_empty():
+	if not lunge.is_empty():
 		return true
 	if use_ex and not h.grounded:
 		if not spend_dash(true): return true
@@ -462,7 +466,7 @@ func _tick_slam(dt: float) -> void:
 		_slam()
 
 ## The Execution Slam: a heavy cone; the wounded (under 35%) take +50%; a foe in the sweet spot (the far
-## tip, dead ahead) resets Doomfall (the payoff).
+## tip, dead ahead) is the payoff; at rank 3 it also crashes (_crash).
 func _slam() -> void:
 	var sd := rmb_def()
 	var sl: Dictionary = sd["slam"]
@@ -484,7 +488,9 @@ func _slam() -> void:
 			paid["x"] = true
 			sweet_spots += 1
 			payoff_fx(f.pos, "SWEET SPOT", res_col(), "pay_rage", dd, f)
-			_reset_doom()}))
+			if rank("sec") >= int(crash_def().get("rank", 3)) and crash_cd <= 0.0:
+				var at := f.pos
+				m.later(0.08, func(): if is_instance_valid(h): _crash(at))}))
 	m.fx.cone(h.pos + Vector3(0, 0.1, 0), dd, float(sl["radius"]), col_of(sd))
 	m.fx.slash(h.pos + Vector3(0, 0.9, 0), atan2(dd.y, dd.x), deg_to_rad(110.0), float(sl["radius"]), col_of(sd), true)
 	m.fx.dust(h.pos + Vector3(dd.x, 0, dd.y) * 2.4, 12)
@@ -772,72 +778,41 @@ func e_recast() -> bool:
 	last_e = "reel"
 	return true
 
-# ------------------------------------------------------------------ R: Doomfall
-## The wind-up: you rise with the blade overhead, invulnerable, toward the landing everyone sees.
-func _fuse_start(bond: bool) -> void:
-	super._fuse_start(bond)
-	var rd := r_def()
-	var land := aim_at(float(rd["reach"]))
-	if m.world.is_void(land.x, land.z) or m.world.is_block(land.x, land.z):
-		land = h.pos
-	land = ground(land)
-	doom = {"from": h.pos, "land": land}
-	play("jug_doom")                    # the brace, the rise, the crash at the end of the fuse
-	tele_circle(land, float(rd["radius"]), col_of(rd), fuse_time())
-	net_ring(land, float(rd["radius"]), col_of(rd))
-	h.vel.y = 7.0
-	h.grounded = false
-	m.sfx("whoosh", h.pos, -2.0, 0.6)
-
-func _tick_doom() -> void:
-	if fusing():
-		h.inv_t = maxf(h.inv_t, 0.08)        # invulnerable while it winds up
-		var k := 1.0 - float(fuse["t"]) / maxf(0.01, float(fuse["T"]))
-		var from: Vector3 = doom["from"]; var land: Vector3 = doom["land"]
-		h.pos.x = lerpf(from.x, land.x, k); h.pos.z = lerpf(from.z, land.z, k)
-		var dv := Vector2(land.x - from.x, land.z - from.z)
-		if dv.length() > 0.3: h.face = atan2(-dv.x, -dv.y)
-		if randf() < 0.5: m.fx.burst(h.pos + Vector3(0, 1.8, 0), col_of(r_def()), 2, 1.5, 0.3, 2.0, 0.9)
-	elif not doom.has("struck"):
-		doom = {}          # interrupted or done
-
-func cast_r() -> bool:
-	var rd := r_def()
-	var land: Vector3 = doom.get("land", ground(aim_at(float(rd["reach"]))))
-	doom = {}
-	h.teleport(land)
-	h.vel = Vector3.ZERO
-	dooms += 1
-	var r := float(rd["radius"])
+# ------------------------------------------------------------------ Smash rank 3: the crash
+## The sweet spot at rank 3 brings the old Doomfall down on the foe: a 3m crash that hits everyone
+## (not just the sweet-spot foe) and heals you 60% of what it dealt. It rests 12s; a knock on
+## anyone it hit within 2s makes it ready at once.
+func _crash(land: Vector3) -> void:
+	var cr := crash_def()
+	crash_cd = float(cr["cd"])
+	crashes += 1
+	play("jug_slam")
+	var r := float(cr["radius"])
 	var before := {}
 	for f in foes_in(land, r):
 		before[f.get_instance_id()] = f.hp
 	var healed := {"hp": 0.0}
-	var heal_k := float(rd["heal"])
-	var stg := stage("r", {"delivery": {"type": "burst", "origin": "caster", "radius": r},
-		"effects": [{"type": "damage", "amount": float(rd["dmg"]) * r_k()}, {"type": "push", "strength": float(rd["push"])}]})
-	var paid := {}
-	run(stg, cx("r", "doomfall", land, {"no_floor": true, "on_foe": func(f: Ent, _c: Dictionary):
+	var stg := stage("rmb", {"delivery": {"type": "burst", "origin": "here", "radius": r},
+		"effects": [{"type": "damage", "amount": float(cr["dmg"]) * smash_k()}, {"type": "push", "strength": float(cr["push"]), "from": "caster"}]})
+	run(stg, cx("rmb", "crash", land, {"at": land, "no_floor": true, "on_foe": func(f: Ent, _c: Dictionary):
 		if not is_instance_valid(f): return
 		var key := f.get_instance_id()
-		doom_hit[key] = m.time
+		crash_hit[key] = m.time
 		var lostp := maxf(0.0, float(before.get(key, f.hp)) - f.hp) if not f.dead or f.hp <= 0.0 else 0.0
 		healed["hp"] = float(healed["hp"]) + lostp * (1.0 if f is Hunter else 0.5)
-		Feel.hitstop(m, h, f, 40.0, {"melee": true, "payoff": true, "heavy": true})
-		if not paid.has("x"):
-			paid["x"] = true
-			payoff_fx(f.pos, "DOOMFALL", col_of(rd), "", h.aim_dir(), f)}))
-	var amt := float(healed["hp"]) * heal_k
+		Feel.hitstop(m, h, f, 40.0, {"melee": true, "payoff": true, "heavy": true})}))
+	var amt := float(healed["hp"]) * float(cr["heal"])
 	if amt > 0.5:
 		h.heal(amt)
 		m.fx.word(h.pos + Vector3(0, 2.2, 0), "+%d" % int(round(amt)), Color("7fe08a"), true)
 		m.fx.burst(h.pos + Vector3(0, 1.0, 0), Color("7fe08a"), 18, 3.0, 0.6, -2.0)
-	m.fx.ring(land, r, col_of(rd), 0.4)
+	m.fx.word(land + Vector3(0, 3.1, 0), "CRASH", col_of(rmb_def()), true)
+	m.fx.ring(land, r, col_of(rmb_def()), 0.4)
 	m.fx.dust(land, 20)
 	m.sfx("ab_slam", land, 0.0, 0.6)
 	m.sfx("boom", land, -2.0, 0.7)
 	Feel.shake(m, "t4", h, land)
-	return true
+	net_ring(land, r, col_of(rmb_def()))
 
 # ------------------------------------------------------------------ bots
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
@@ -846,8 +821,6 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	# pulled along the chain: spin as you arrive
 	if reel_t > 0.0 and rmb_ready() and int(h.slot_lv["sec"]) > 0:
 		h.inp["sec"] = true; return
-	if int(h.slot_lv["ult"]) > 0 and float(cd["r"]) <= 0.0 and los and dist < float(r_def()["reach"]) + 2.0 and (tgt.hp < tgt.max_hp * 0.55 or randf() < 0.25) and randf() < 0.45:
-		h.inp["aim"] = tgt.pos; h.inp["ult"] = true; return
 	# chained to them: run a Chain Lunge down it, wind up a Smash and pull into a Haul Slam, or just pull
 	if not chain.is_empty() and chain.get("target") != null and dist > 3.5 and not rmb_down:
 		var roll := randf()
@@ -858,7 +831,7 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 			st["bot_haul_at"] = m.time + 0.45; return
 		if roll < 0.8:
 			h.inp["sig"] = true; return
-	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and chain.is_empty() and not chain_flying and los and dist > 3.0 and dist < float(e_def()["range"]) - 0.5 and randf() < 0.4:
+	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and chain.is_empty() and not chain_flying and los and (dist > 3.0 or (not rmb_ready() and dist > 1.2)) and dist < float(e_def()["range"]) - 0.5 and randf() < 0.4:
 		h.inp["aim"] = tgt.pos + Vector3(0, 0.9, 0); h.inp["sig"] = true; return
 	if int(h.slot_lv["sec"]) > 0 and rmb_ready() and los and slam_w.is_empty():
 		if not h.grounded and dist < 3.0:

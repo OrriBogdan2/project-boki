@@ -246,6 +246,8 @@ static func slot_text(a: String, slot: String) -> Dictionary:
 				"tag": "no key · builds as you fight", "line": String(cd.get("passive", ""))}, true)
 			var tl: Dictionary = d.get("tells", {})
 			out["detail"] = [["", String(d["passive"]["desc"])], ["What enemies see", "%s; full: %s." % [String(tl.get("half", "")), String(tl.get("full", ""))]]]
+			if d.has("jackpot"):
+				out["detail"].append([String(d["jackpot"]["name"]), String(d["jackpot"]["desc"])])
 		"lmb":
 			var wl: Dictionary = cd.get("weapons", {})
 			var ws: Array = Arch.weapons(a)
@@ -277,14 +279,16 @@ static func slot_text(a: String, slot: String) -> Dictionary:
 		"r":
 			# R is the Merge for every class (docs/decisions/0001); the class's own ultimate is held back behind
 			# boki_system.json class_ults until the hero-port work folds it into the kits
-			var sd: Dictionary = d["r"]
-			var on := KinCommand.class_ults()
-			out.merge({"name": String(sd["name"]) if on else "Merge", "icon": String(sd.get("icon", "")) if on else "bond", "col": Color(String(sd.get("col", "#ffffff"))) if on else Color("ffd27a"),
+			var sd: Dictionary = d.get("r", {})
+			var on := KinCommand.class_ults() and not sd.is_empty()
+			out.merge({"name": String(sd.get("name", "")) if on else "Merge", "icon": String(sd.get("icon", "")) if on else "bond", "col": Color(String(sd.get("col", "#ffffff"))) if on else Color("ffd27a"),
 				"tag": ("level 6 · %ss · %ss fuse" % [KinText.n(float(sd.get("cooldown", 100.0))), KinText.n(float(sd.get("fuse", 0.45)))]) if on else "level 6 · full bond meter", "line": String(cd.get("r", "")) if on else "You and your Boki become one: its colour, its type, your abilities changed."}, true)
 			out["detail"] = [["Merge", "Press R with a full bond meter (it fills as your Boki lands hits, as you hit what it marked, and on combos). You take the Boki's colour and silhouette, and every ability of yours changes for the merge by its type and power."],
 				["Boki out?", "It leaps back through anything in its way and merges you in mid-air."],
-				["No Boki", "A downed or lost Boki: only a weak 3 second surge."],
-				["Held back", "%s: %s (the class ultimate, off while R is the Merge)" % [String(sd["name"]), String(sd.get("desc", ""))]]] + _ranks(a, "ult")
+				["No Boki", "A downed or lost Boki: only a weak 3 second surge."]]
+			if not sd.is_empty():
+				out["detail"].append(["Held back", "%s: %s (the class ultimate, off while R is the Merge)" % [String(sd["name"]), String(sd.get("desc", ""))]])
+			out["detail"].append_array(_ranks(a, "ult"))
 	return out
 
 ## The ranks to come, in order (rank 2's concrete change first, then rank 3's special), as one row
@@ -310,6 +314,8 @@ static func infusion_lines(a: String, ks: KinSpec) -> Array:
 	var d := Arch.def(a)
 	for slot in ["rmb", "e", "r"]:
 		var sd: Dictionary = d.get(slot, {})
+		if sd.is_empty():
+			continue                 # (no class ultimate: Thief and Juggernaut have no R)
 		var f := Arch.fill(sd.get("sockets", {}), inf, slot, String(sd.get("delivery", "projectile" if slot == "rmb" else "burst")))
 		var notes: Array = (f.get("notes", []) as Array).filter(func(x): return not String(x).contains("fallback")).map(func(x):
 			var s := String(x)

@@ -233,6 +233,9 @@ func use_e() -> void:
 ## R: the archetype's ultimate. With the bond meter full the cast is Bonded (§5 option C): the ult's
 ## own tell, then 0.2s later the kin merges (its on_start), one T5 moment for the caster.
 func use_r() -> void:
+	if r_def().is_empty():          # a kit with no R of its own (Thief, Juggernaut): the key is the Merge
+		h._ab_feedback("r", "deny")
+		return
 	if busy():
 		h._ab_feedback("r", "deny")
 		return
@@ -664,6 +667,31 @@ var anim_id := ""              # the kit move playing on the hunter (HunterAnim.
 var anim_at := -9.0
 
 ## Plays one of the kit's full-body moves on the hunter (anticipation, key pose, recovery).
+## The kit's full-body move on the wire (Net 0.10.1): the move id and its age in seconds, after the
+## state array's Boki fields (index NET_MOVE_AT). Empty id: nothing playing (an expired move is not sent).
+const NET_MOVE_AT := 28
+const NET_MOVE_LIFE := 3.0     # seconds a move is still worth sending (the longest is about 2.5s)
+
+static func net_move(h: Hunter) -> Array:
+	var k: ArchKit = h.ak
+	if k == null or k.anim_id == "" or h.m.time - k.anim_at > NET_MOVE_LIFE:
+		return ["", 0.0]
+	return [k.anim_id, snappedf(h.m.time - k.anim_at, 0.05)]
+
+## A remote hunter's move starts when the id changes (or the sender's clock says it restarted), then plays
+## on locally like any kit move; old hosts send nothing and the hunter just keeps its weapon poses.
+static func apply_net_move(h: Hunter, it: Array) -> void:
+	if h.ak == null or it.size() <= NET_MOVE_AT + 1:
+		return
+	var id := String(it[NET_MOVE_AT])
+	if id == "":
+		return
+	var age := float(it[NET_MOVE_AT + 1])
+	var k: ArchKit = h.ak
+	if k.anim_id != id or absf((h.m.time - k.anim_at) - age) > 0.3:
+		k.anim_id = id
+		k.anim_at = h.m.time - age
+
 func play(move: String) -> void:
 	anim_id = move
 	anim_at = m.time

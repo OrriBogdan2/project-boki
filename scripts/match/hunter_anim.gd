@@ -1105,15 +1105,6 @@ const KMOVES := {
 		[0.06, {"blade": Vector3(0.0, -1.4, 0.0), "bw": 1.0, "rad": 0.6, "p": -0.8, "lift": -0.2, "sq": 0.55, "lw": 1.0, "legs": [1.25, -1.8, -0.45, -1.2]}],
 		[0.35, {"blade": Vector3(0.0, -1.3, 0.0), "bw": 0.9, "rad": 0.55, "p": -0.6, "lift": -0.14, "sq": 0.25, "lw": 1.0, "legs": [1.1, -1.6, -0.4, -1.0]}],
 		[0.7, {}]]},
-	# Doomfall: braced and rising, the blade held high in both hands (the invulnerable wind-up, 0.6s),
-	# then the crash at 0.6 and a slow, heavy rise
-	"jug_doom": {"keys": [
-		[0.0, {}],
-		[0.2, {"blade": Vector3(0.0, 2.2, 0.0), "bw": 1.0, "p": 0.1, "lift": -0.06, "lw": 1.0, "legs": [0.8, -1.3, 0.6, -1.2], "sq": 0.25}],
-		[0.55, {"blade": Vector3(0.0, 3.05, 0.0), "bw": 1.0, "p": 0.45, "lift": 0.35, "sq": -0.3, "lw": 1.0, "legs": [0.3, -0.8, 0.1, -0.6]}],
-		[0.62, {"blade": Vector3(0.0, -1.4, 0.0), "bw": 1.0, "rad": 0.6, "p": -0.8, "lift": -0.22, "sq": 0.55, "lw": 1.0, "legs": [1.2, -1.7, -0.5, -1.3]}],
-		[0.95, {"blade": Vector3(0.0, -1.3, 0.0), "bw": 1.0, "rad": 0.55, "p": -0.7, "lift": -0.18, "sq": 0.3, "lw": 1.0, "legs": [1.1, -1.6, -0.45, -1.2]}],
-		[1.3, {}]]},
 	# ---------------------------------------------------------------- Thief
 	# Vault: a real flip, tucked, over the dash (forward, back, or a side flip by its direction)
 	"thf_vault_f": {"keys": [[0.0, {"sq": 0.2, "lw": 0.6, "legs": [0.6, -1.0, 0.5, -0.9]}], [0.04, {"lift": 0.2, "lw": 1.0, "legs": [1.6, -2.1, 1.5, -2.0], "fl": Vector3(-0.1, -0.3, -0.28), "hw": 1.0}],
@@ -1148,24 +1139,13 @@ const KMOVES := {
 		[0.07, {"lift": -0.14, "p": -0.45, "sq": 0.45, "lw": 1.0, "legs": [1.25, -2.0, -0.2, -1.6], "fl": Vector3(-0.4, -0.25, 0.0), "hw": 1.0}],
 		[0.3, {"lift": -0.1, "p": -0.35, "sq": 0.2, "lw": 1.0, "legs": [1.15, -1.8, -0.15, -1.4], "fl": Vector3(-0.38, -0.2, 0.0), "hw": 1.0}],
 		[0.6, {}]]},
-	# Jackpot: the fuse gathers the knives (crouched, arms crossed over the chest) ...
-	"thf_volley_wind": {"keys": [
-		[0.0, {}],
-		[0.3, {"p": -0.35, "lift": -0.08, "lw": 1.0, "legs": [0.9, -1.4, 0.8, -1.3], "fl": Vector3(0.3, 0.0, -0.18), "hw": 1.0, "sq": 0.2}],
-		[0.45, {"p": -0.4, "lift": -0.1, "lw": 1.0, "legs": [0.95, -1.5, 0.85, -1.4], "fl": Vector3(0.32, -0.02, -0.16), "hw": 1.0, "sq": 0.25}]]},
-	# ... then 2s of flinging: the free hand slings knives out, the body snapping round side to side
+	# Jackpot: the fifth Mark lands and the free hand slings a short burst of knives, the body snapping round
 	"thf_volley": {"keys": [
 		[0.0, {"p": 0.15, "lift": 0.08, "sq": -0.25, "fl": Vector3(-0.38, 0.12, -0.1), "hw": 1.0}],
-		[0.2, {"y": 0.6, "fl": Vector3(0.1, 0.15, -0.5), "hw": 1.0, "lw": 0.6, "legs": [0.6, -0.8, -0.3, -0.3]}],
-		[0.4, {"y": -0.6, "fl": Vector3(-0.42, 0.1, -0.1), "hw": 1.0, "lw": 0.6, "legs": [-0.3, -0.3, 0.6, -0.8]}],
-		[0.6, {"y": 0.6, "fl": Vector3(0.1, 0.15, -0.5), "hw": 1.0, "lw": 0.6, "legs": [0.6, -0.8, -0.3, -0.3]}],
-		[0.8, {"y": -0.6, "fl": Vector3(-0.42, 0.1, -0.1), "hw": 1.0, "lw": 0.6, "legs": [-0.3, -0.3, 0.6, -0.8]}],
-		[1.0, {"y": 0.6, "fl": Vector3(0.1, 0.15, -0.5), "hw": 1.0, "lw": 0.6, "legs": [0.6, -0.8, -0.3, -0.3]}],
-		[1.2, {"y": -0.6, "fl": Vector3(-0.42, 0.1, -0.1), "hw": 1.0, "lw": 0.6, "legs": [-0.3, -0.3, 0.6, -0.8]}],
-		[1.4, {"y": 0.6, "fl": Vector3(0.1, 0.15, -0.5), "hw": 1.0, "lw": 0.6, "legs": [0.6, -0.8, -0.3, -0.3]}],
-		[1.6, {"y": -0.6, "fl": Vector3(-0.42, 0.1, -0.1), "hw": 1.0, "lw": 0.6, "legs": [-0.3, -0.3, 0.6, -0.8]}],
-		[1.8, {"y": 0.5, "fl": Vector3(0.1, 0.15, -0.5), "hw": 1.0, "lw": 0.5, "legs": [0.5, -0.7, -0.3, -0.3]}],
-		[2.2, {}]]},
+		[0.12, {"y": 0.6, "fl": Vector3(0.1, 0.15, -0.5), "hw": 1.0, "lw": 0.6, "legs": [0.6, -0.8, -0.3, -0.3]}],
+		[0.24, {"y": -0.6, "fl": Vector3(-0.42, 0.1, -0.1), "hw": 1.0, "lw": 0.6, "legs": [-0.3, -0.3, 0.6, -0.8]}],
+		[0.36, {"y": 0.5, "fl": Vector3(0.1, 0.15, -0.5), "hw": 1.0, "lw": 0.5, "legs": [0.5, -0.7, -0.3, -0.3]}],
+		[0.7, {}]]},
 }
 const KM_CH := ["p", "y", "r", "lift", "fx", "fz", "fy", "sq", "lw", "hw", "rw", "bw", "rad", "gp"]
 var km := {}                   # the kit move's channels this frame (empty: none)
