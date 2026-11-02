@@ -85,34 +85,39 @@ Research only, nothing built. The owner corrected the memory above: the random c
   - No source mentions a reroll.
 - **On screen.** An evolution picker shows the options as item cards side by side, with the Warped card starred. It only opens when you upgrade, not on a level-up.
 
-**Proposal for us: shards and a 3 + 1 weapon tier-up (would replace the fixed even-level weapon path):**
-1. **Shards** are a new match currency (it isn't saved and is lost on death, dropping in your deathbox like keys).
-   - Monster camps and brutes drop 1, bosses 3, and a downed rival hunter drops everything they carried.
-   - Bots pick them up like gems.
-2. **Tier up any time** with a hold-to-confirm key, outside combat for 2 seconds. Alt+1 doesn't fit us because 1/2/3 are the utility belt; T looks free (nothing binds KEY_T today).
-   - Five tiers to match our five path steps, costing 2 / 3 / 4 / 5 / 6 shards.
-   - The level-up stays quiet growth plus skill points, with no weapon step.
-3. **The choice:** a small four-card strip above the weapon box. You pick with the mouse or the T key, and the game never pauses. Bots auto-pick by `bot_want`.
-   - **Three fixed cards** come from the hero's own content list for that tier (`content/rules/weapon_tiers.json`, three WeaponUps steps per tier per hero). The current per-hero path becomes card 1, so each hero keeps its identity.
-   - **The fourth card, "Wild" (our own name),** is rolled with its own seeded stream:
-     - 75%: one random weapon perk the hunter doesn't have (a brand, magazine and so on).
-     - 20%: a mixed pair, two plain upgrades at about 70% strength each (for example damage and health, or rate and range). This is the "+HP and +damage" feel.
-     - 5%: a rare "wild" passive (two or three new ones, such as lifesteal on hit, or a dash reload).
-     - The card shows its odds tier with 1-3 stars and is rolled once per tier-up, with no reroll (the same as the original). A shrine could later offer a paid reroll.
-4. **Sync:** a "wtier" event (hunter, tier, pick, rolled payload) and a Net bump.
-5. **Checks:**
-   - shards drop and are lost on death
-   - each tier's cost
-   - three fixed cards for every hero at every tier
-   - the Wild odds over many seeds
-   - no pause
-   - bots tier up
-   - sync
+**How the original did it, in short:**
+- The upgrade is per item. Each equipment item (weapon, glove, boots and so on) has its own level-up button: an upgrade arrow on the item's slot, or ALT + its slot number. It costs gold or a shard.
+- It doesn't use skill points and isn't tied to the hunter's level.
+- At the big tier (Blue), the item offers its own 3 fixed evolutions plus 1 rolled Warped option.
 
-Questions for the owner:
-- Replace the fixed weapon path with this, or keep the path as the fallback card 1? (The proposal keeps it as card 1.)
-- Should shards also come from chests, or only from fights?
-- Is T the right key?
+**Does it fit us?** Partly. Our power in a match already grows on three tracks:
+- perk orbs (random, found)
+- the fixed weapon path on even levels
+- quiet level growth
+
+Gloves are deliberately flat: the owner asked that they never rank up with skill points (11:40 ET). A shard tier-up would be a fourth track, and on gloves it would change that rule. It wouldn't use skill points, but gloves would grow in the match.
+
+Pros:
+- It gives a reason to fight for shards, and a downed rival drops theirs.
+- It's a real choice, and the rolled fourth card keeps builds from repeating.
+- It fits the "power comes from the match" decision. Gloves brought in at a capped rarity could climb during the run.
+- The button on the item is easy to read: you see what you're upgrading.
+
+Cons:
+- It adds another currency and another UI next to gems, keys and orbs.
+- It overlaps with perk orbs, which are already random power, and with in-match shops.
+- It loosens the "gloves don't rank up" rule and the equal-footing tier caps. A glove can pass the cap in the match.
+- It's one more thing for bots to learn, and it needs sync.
+
+**One lightweight version, if wanted (not recommended over what we have, just an option):**
+- Shards are a match-only currency (from rivals, bosses and brutes; lost in your deathbox).
+- Hovering a glove box (Q or V) shows a small upgrade arrow when you have enough shards (2 / 4 / 6 per rarity step). Click it to tier the glove up one rarity.
+- The step to Rare and up shows 4 small cards without pausing:
+  - 3 fixed options from that glove's own content list (stronger, faster cooldown, a side effect)
+  - 1 rolled "Wild" card: a mixed pair such as +health and +damage, or a passive from another glove. It's rolled once, with no reroll.
+- The signature weapon keeps its fixed path; this only touches gloves.
+
+Not built. The owner and the main session decide.
 
 **Sources (tier-up):**
 - Weapons, SUPERVIVE Wiki (Common and Rare evolutions, the Warped fourth option and its odds): https://supervive.wiki.gg/wiki/Weapons and https://supervive.wiki.gg/wiki/Weapon
