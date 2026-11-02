@@ -267,7 +267,7 @@ func on_dash(use_ex: bool) -> bool:
 	if wind > 0.0:
 		return true
 	var dd := dash_def()
-	var dir := h.aim_dir()
+	var dir := dash_dir()
 	if m.time < lock_until:
 		# just after the Anchor the barge can't turn far from where you face
 		var fwd := Vector2(-sin(h.face), -cos(h.face))
