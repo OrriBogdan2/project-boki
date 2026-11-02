@@ -282,6 +282,8 @@ static func tick(A: Arena, dt: float) -> void:
 			P.inp["fire"] = t > 0.3
 			if P.ammo < 3: P.ammo = int(P.wpn["mag"])
 			at_t = 1.05
+	for a in OS.get_cmdline_user_args():
+		if String(a).begins_with("--shot-at=") and not w.begins_with("anim_"): at_t = float(String(a).substr(10))     # (any moment, in demo seconds)
 	if t >= at_t and not A.has_meta("demo_shot"):
 		A.set_meta("demo_shot", true)
 		var path := shot_path()
