@@ -135,7 +135,7 @@ _Armadillo + Rhino beetle_ (`pebbit`). An armadillo with a rhino beetle's horn. 
 - E ability: **Gravity Slam** (9s cooldown, range 7m). Gravadillo drops onto the spot like a meteor: everything within 3.5m is sucked into the crater and flung up; anyone already airborne is spiked.
 - Auto ability (it casts this on its own): **Mass Guard** (12s cooldown). When you're under fire, Gravadillo curls into a heavy plate in front of you for 3s that stops enemy shots (120 HP).
 - On your dash: **Gravity Wake**
-- Bond ultimate (merge): **Heavy Star** (10s). Gravadillo folds into you as a heavy star for 10s. Slam with the left button, roll through foes with the right, drag them in with E, then R brings the whole sky down.
+- Bond ultimate (merge): **Heavy Star** (10s). Gravadillo folds into you as a heavy star for 10s. Slam with the left button, roll through foes with the right, drag them in with E, then Merge again brings the whole sky down.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast > Dense Plate; Curious: Curious; Swift: Swift
 
 ## Prismander
@@ -156,7 +156,7 @@ _Axolotl_ (`puddlet`). An axolotl whose frills grew into living crystal. It bend
 - E ability: **Prism Wall** (10s cooldown, range 7m). Prismander raises a 4m crystal wall at the spot: enemy shots that hit it bounce back at them. Lasts 4.5s or 140 damage.
 - Auto ability (it casts this on its own): **Refraction** (12s cooldown). When you're hurt, Prismander wraps you in a 1s mirror shell: shots that reach you fly back at the shooter, and you get a 20 shield.
 - On your dash: **Prism Decoy**
-- Bond ultimate (merge): **Prism Shell** (10s). Prismander grows a crystal shell around you for 10s. Piercing shards, a prism that throws shots back, a healing crystal wall, and R shatters the shell outward.
+- Bond ultimate (merge): **Prism Shell** (10s). Prismander grows a crystal shell around you for 10s. Piercing shards, a prism that throws shots back, a healing crystal wall, and Merge again shatters the shell outward.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast > Wide Prism; Curious: Curious; Swift: Swift
 
 ## Lunowl
@@ -219,5 +219,5 @@ _Moray eel + Swift_ (`zephyrak`). A little sky serpent: a moray eel's long body 
 
 - E ability: **Gale Lance** (8s cooldown, range 8m). Zephyrak spears 8m through the air, shocking everything it passes, then bursts in a ring of wind that throws foes back and arcs lightning to two more.
 - Auto ability (it casts this on its own): **Storm Arc** (10s cooldown, range 7m). On its own, Zephyrak crackles a bolt at the nearest foe that jumps to two more.
-- Bond ultimate (merge): **Stormwing** (10s). Zephyrak wraps you in a living storm for 10s. Chaining bolts, a hover over any gap, a double storm blink, and R calls a thunderhead down on everyone near.
+- Bond ultimate (merge): **Stormwing** (10s). Zephyrak wraps you in a living storm for 10s. Chaining bolts, a hover over any gap, a double storm blink, and Merge again calls a thunderhead down on everyone near.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift

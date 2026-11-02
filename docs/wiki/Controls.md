@@ -2,8 +2,8 @@
 
 Every key can be rebound in **Settings > Controls**. Some keys mean different things at home and in a
 match: **B** is build mode at home and "base to a teammate" in a squad; **T** talks to a Boki at home
-and holds the emote wheel in a match; **C** opens a Boki's details at home and casts your Boki's
-ability in a match; **R** turns a piece in build mode and is your ultimate in a match.
+is Merge in a match (the emote wheel is **Y**); **C** opens a Boki's details at home and casts your Boki's
+ability in a match; **R** turns a piece in build mode and reloads in a match.
 
 ## In a match
 
@@ -18,7 +18,9 @@ ability in a match; **R** turns a piece in build mode and is your ultimate in a 
 | Mouse 5 | Glide at once, without jumping (Mouse 4 works too) |
 | Q | Your active glove |
 | E | Your class's utility |
-| R | Your class's ultimate (from level 6). With a full bond meter it's a **bonded** ultimate: your Boki merges with you as it fires |
+| R | Reload (it also reloads on its own after a short idle) |
+| X | Your hunter's own ultimate (from level 6; no hero has one yet) |
+| T | Merge with your Boki (level 6, full bond meter). Press T again to fire the form's ultimate and release: a 3s afterglow (faster, with a small shield) and your Boki rests 6s beside you |
 | C | Your Boki's own ability: it hops off, casts and hops back |
 | G or middle mouse | Tap: Sic your Boki at the cursor, or Call it back if it is away. Hold: the order wheel (Chase, Guard, Return, Follow) |
 | F | Use: open, pick up, scan a knocked-out wild Boki (hold), revive a teammate, loot a deathbox, finish a downed rival |
@@ -26,9 +28,9 @@ ability in a match; **R** turns a piece in build mode and is your ultimate in a 
 | Alt + an ability key | Put a skill point into that ability (pressing a locked ability unlocks it) |
 | Ctrl | Sneak: slower and quieter, steadier aim, harder to spot |
 | B | Base to a teammate (squads): a 3s channel; moving, attacking or any hit breaks it; you arrive weakened for 3s; 40s cooldown |
-| T (hold) | Emote wheel, including the truce offer |
+| Y (hold) | Emote wheel, including the truce offer |
 | M | Full map; click to ping |
-| P / X | During the drop: pass the drop lead / separate from your squad |
+| P / Z | During the drop: pass the drop lead / separate from your squad |
 | Tab | Scoreboard |
 | I | Inventory and backpack |
 | Esc | Menu: settings, controls, save files |

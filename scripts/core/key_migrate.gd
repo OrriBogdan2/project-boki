@@ -4,7 +4,8 @@ extends RefCounted
 ## keys2_v, keys3_v). Genuine custom bindings are kept; only the old defaults move.
 ##   step 1  "Separate from the drop" leaves X for Z.
 ##   step 2  Merge was R and X: it is T now. R reloads and X is the hunter's ultimate, unless the player had put
-##           R or X on something else (then that action keeps it and the new action starts unbound).
+##           R or X on something else (then that action keeps it and the new action starts unbound). The Emote wheel
+##           moved from T to Y, and Merge/Emote start unbound the same way if T/Y is already someone's custom key.
 
 static func _code(k: int) -> String:
 	return "key:%d" % k
@@ -43,4 +44,15 @@ static func run(s: Dictionary) -> void:
 		ks["reload"] = []
 	if not ks.has("hunter_ult") and _used_elsewhere(ks, _code(KEY_X), skip):
 		ks["hunter_ult"] = []
+	_emote_and_merge_keys(ks)
 	s["keys3_v"] = 1
+
+## Emote moved T -> Y and Merge took T: a default that lands on a key another saved action uses starts unbound.
+static func _emote_and_merge_keys(ks: Dictionary) -> void:
+	if ks.get("emote", []) == [_code(KEY_T)]:
+		ks.erase("emote")          # the old default, saved: it moves to the new one
+	var merge_keys: Array = ks.get("ultimate", [_code(KEY_T)])
+	if not ks.has("emote") and (merge_keys.has(_code(KEY_Y)) or _used_elsewhere(ks, _code(KEY_Y), ["emote"])):
+		ks["emote"] = []
+	if not ks.has("ultimate") and _used_elsewhere(ks, _code(KEY_T), ["ultimate", "talk", "emote"]):
+		ks["ultimate"] = []
