@@ -265,6 +265,8 @@ def gen_classes():
         b.append(table(["Slot", "Card text"], rows))
         b.append("\n### Abilities in full\n")
         b.append("**%s (passive).** %s\n" % (d["passive"]["name"], d["passive"].get("desc", "")))
+        if d.get("jackpot"):
+            b.append("**%s (Mark trigger).** %s\n" % (d["jackpot"]["name"], d["jackpot"].get("desc", "")))
         dd = d["dash"]
         b.append("**%s (dash, Shift, %s cooldown).** %s\n" % (dd["name"], secs(dd.get("cd")), dd.get("desc", "")))
         r = d["rmb"]
@@ -285,7 +287,8 @@ def gen_classes():
             if s == "ult" and "r" not in d: continue
             r2 = d.get("rank2", {}).get(s, "")
             r3 = d.get("rank_next", {}).get(s, "") or ("Rank 3: " + d["rank3"][s] if s in d.get("rank3", {}) and s != "ult" else "")
-            rk.append([SLOT_NAMES[s], re.sub(r"^Rank 2:\s*", "", r2), re.sub(r"^Rank 3:\s*", "", r3)])
+            if r2 or r3:
+                rk.append([SLOT_NAMES[s], re.sub(r"^Rank 2:\s*", "", r2), re.sub(r"^Rank 3:\s*", "", r3)])
         b.append(table(["Slot", "Rank 2", "Rank 3"], rk))
         order = d.get("order", [])
         b.append("\n**Suggested level-up order** (what bots follow): " + " > ".join(SLOT_NAMES.get(s, s) for s in order) + ".\n")
@@ -422,7 +425,7 @@ def gen_gear():
         rows.append([w.get("name", wid), ", ".join(users) or "none", ", ".join(w.get("classes", [])), num(p.get("dmg", "")), secs(p.get("rate", "")), num(p.get("mag", "")), secs(p.get("reload", "")), "%sm" % num(p.get("range", "")), p.get("desc", "")])
     body = "## Weapons\n\nNumbers are per shot or swing before any upgrades. Class kits that run their own weapon (the Juggernaut's greatsword, the Bulwark's shield and mace) take their numbers from the class file instead.\n\n"
     body += table(["Weapon", "Carried by", "Weight", "Damage", "Fire interval", "Magazine", "Reload", "Range", "Notes"], rows)
-    body += "\n\n## Weapon upgrades\n\nNo weapon is ever found or swapped: every hunter carries one signature weapon. It grows through upgrade perks (level-ups on even levels, chests, shrines, bosses and tuning pickups on the ground). They last the expedition.\n\n"
+    body += "\n\n## Weapon upgrades\n\nNo weapon is ever found or swapped: every hunter carries one signature weapon. It grows through upgrade perks (each hero's fixed weapon path on even levels, perk orbs from chests, shrines and bosses, and tuning pickups on the ground). They last the expedition.\n\n"
     pk0 = gd_const("core/data.gd", "PERKS") or {}
     body += table(["Upgrade", "Effect", "Stacks"], [[v["name"], v["desc"], num(v.get("max", 1))] for v in pk0.values() if "wup" in v])
     el = gd_const("core/loot.gd", "ELEMENTS") or {}
@@ -433,7 +436,7 @@ def gen_gear():
         body += "\n\n## Valuables\n\n" + table(["Item", "Worth (gems)", "Notes"], [[v["name"], num(v["value"]), v.get("desc", "")] for v in va.values()])
     pk = gd_const("core/data.gd", "PERKS") or {}
     if pk:
-        body += "\n\n## Run perks\n\nOffered three at a time during an expedition (pick with 1, 2 or 3). They last the run.\n\n"
+        body += "\n\n## Run perks\n\nFound as glowing perk orbs during an expedition: walk into one to take it. Chests drop one, shrines one or two, and bosses a fan of three (taking one fades the other two for you only). Shrines favour stat perks; chests and bosses favour weapon perks. They last the run.\n\n"
         body += table(["Perk", "Effect", "Stacks"], [[v["name"], v["desc"], num(v.get("max", 1))] for v in pk.values()])
     ut, dg = [], []
     for aid, a in ABIL1.items():

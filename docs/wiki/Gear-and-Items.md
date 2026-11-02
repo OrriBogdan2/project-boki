@@ -24,8 +24,9 @@ Full numbers: [Weapons](Weapons.md) and [Gloves](Gloves.md).
   the Soul Shrine needs.
 - **Rare Eggs** from lair bosses.
 - **Gems** from monsters, chests and meteor stars.
-- **Run perks.** Pick one of three when offered (1, 2 or 3): faster reloads, an extra dash, a longer
-  glide, more health or armor, faster cooldowns and so on. They last the run.
+- **Perk orbs.** Glowing orbs from chests (one), shrines (one or two) and bosses (a fan of three): walk into one
+  to take it. Faster reloads, an extra dash, a longer glide, more health or armor, weapon upgrades and so on.
+  They last the run.
 
 ## The backpack
 

@@ -245,6 +245,7 @@ var lives := 1                # comes back this many times minus one before it's
 var arch := ""                # the archetype (docs/ARCHETYPES.md); "" = the old class kit (weapon RMB, class dodge)
 var ak: ArchKit = null        # the archetype's kit at run time
 var shot_range_k := 1.0       # the next shot's range (a full Focus: +20%)
+var shot_aim := ""            # the next shot's aim mode (AimMode.CURSOR / MAX); "" = the weapon's own
 var draw_t := -1.0            # a bow being drawn: how long (-1: not drawing)
 var nth_n := 0                # shots since the weapon's "every Nth" bonus
 
@@ -308,6 +309,7 @@ func reclass(c: String, a: String, w := "") -> void:
 	cdat = Data.CLASSES[cls]
 	if KinMerge.active(self): KinMerge.end(self, "broken")
 	max_hp = float(cdat["hp"]) + kin_hp_added; hp = max_hp
+	LevelGrowth.reset(self)      # your levels' health comes along to the new class
 	max_armor = round(float(cdat["hp"]) * ARMOR_DUR); armor = max_armor; base_armor = max_armor
 	glide_max = GLIDE_TIME * float(cdat.get("glide_cap", 1.0))
 	base_speed = cdat["speed"]
@@ -1659,10 +1661,9 @@ func _emit_shot() -> void:
 		extra["near"] = [float(wpn["close_mult"]), rng * 0.5]
 	if wpn.has("far_mult"):
 		extra["farf"] = [rng * float(wpn.get("far_start", 0.6)), float(wpn["far_mult"]), rng]
+	if AimMode.take(self) == AimMode.CURSOR:
+		life = AimMode.dist(self, rng) / spd      # lands at the cursor, clamped to range (scripts/match/aim/aim_mode.gd)
 	if wpn.has("boom"):
-		var aim: Vector3 = inp["aim"]
-		var dist := clampf(Vector2(aim.x - pos.x, aim.z - pos.z).length(), 1.5, rng)
-		life = dist / spd
 		extra["boom"] = wpn["boom"]; extra["boom_kb"] = wpn["boom_kb"]
 	if crit_t > 0.0:
 		extra["crit"] = true
@@ -1778,7 +1779,7 @@ func slot_info(slot: String) -> Dictionary:
 			var dmax := max_dashes()
 			out.merge({"name": d.display_name if d else "Dash", "short": (d.short if d else "Dash"), "icon": d.icon if d else "dash", "col": d.color if d else Color("bfe6ff"),
 				"desc": (d.desc if d else "") + (("  " + String(rd.get("desc", ""))) if not rd.is_empty() else ""), "rider": String(rd.get("name", "")),
-				"cd": (1.0 - fposmod(dashes, 1.0)) * dash_regen() if dashes < 1.0 else 0.0, "cd_max": dash_regen(), "charges": int(floor(dashes)), "max_charges": int(dmax),
+				"cd": (1.0 - fposmod(dashes, 1.0)) * dash_regen() if dashes < dmax - 0.001 else 0.0, "cd_max": dash_regen(), "charges": int(floor(dashes)), "max_charges": int(dmax),
 				"verb": d.verb if d else "dash", "ready": dashes >= 1.0}, true)
 		"gear", "gear0", "q", "gear1", "v":
 			var gi := 1 if slot in ["gear1", "v"] else 0      # glove 1 (Q) or glove 2 (V); gloves never rank (Gloves)
@@ -2909,15 +2910,16 @@ func gain_xp(x: float) -> void:
 	while lvl < XP_TO.size() and xp >= float(XP_TO[lvl]):
 		lvl += 1
 		skill_pts += 1
+		var wstep := {}
 		if lvl % 2 == 0 and m and not remote:
-			m.offer_perks(self, "level")      # every other level: a weapon upgrade to choose (WeaponUps)
+			wstep = WeaponPath.on_level(self, lvl)      # every other level: the next step of this hero's fixed weapon path
+		if m and not remote: LevelGrowth.apply(self)      # every level: a little more health and ability power, quietly
 		# a gold ring pulse on the hunter that everyone nearby sees
 		if m and m.fx and visible and not unseen:
 			m.fx.ring(pos, 2.0, Color("ffd27a"), 0.4)
 			m.fx.burst(pos + Vector3(0, 1.2, 0), Color("ffd27a"), 12, 2.5, 0.5, -2.0)
 		if is_local() and m and m.hud:
-			m.hud.toast("LEVEL %d  ·  +1 SKILL POINT%s" % [lvl, "  ·  ULTIMATE READY TO UNLOCK" if lvl == int(ULT_AT[0]) else ""], Color("ffd27a"))
-			if m.hud.has_method("level_up"): m.hud.level_up(lvl)
+			m.hud.level_up(lvl, wstep)
 			# the level-up chime: its own rising bell run over a warm swell (tools/gen_level_sfx.py)
 			m.sfx("level_up", null, -2.0, 1.0)
 			level_ups += 1

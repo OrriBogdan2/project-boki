@@ -72,9 +72,10 @@ func col_of(sd: Dictionary) -> Color: return Color(String(sd.get("col", "#ffffff
 func rank(slot: String) -> int:
 	return h.ability_level(slot)
 
-## +15% damage per rank (Effects.level_k) on top of the hunter's own damage multiplier.
+## +15% damage per rank (Effects.level_k) on top of the hunter's own damage multiplier and the
+## ability power their level gives (LevelGrowth.ap).
 func power(slot: String) -> float:
-	return m.dmg_mult(h) * Effects.level_k({"level": rank(slot)})
+	return m.dmg_mult(h) * Effects.level_k({"level": rank(slot)}) * LevelGrowth.ap(h)
 
 func cd_k(slot: String) -> float:
 	return h.rank_cd_k(slot)
@@ -91,6 +92,11 @@ func _tick(_dt: float) -> void: pass
 ## A Boki merge ends every hold, charge and channel this kit started before R, with no release effect (and keeps them
 ## ended while merged: the form's own kit owns the buttons). Each kit with such state overrides this.
 func _drop_holds() -> void: pass
+## Merge start (and every step while merged): the kit's own holds, then every AimKit telegraph and cursor
+## state this hunter shows. Call this, not _drop_holds, so the shared telegraphs always go with the holds.
+func drop_holds() -> void:
+	_drop_holds()
+	AimKit.clear(h)
 func fire_rmb(_c: Dictionary) -> void: pass        # c: {hold, air, e, r, full, t, variant}
 func rmb_press_extra() -> bool: return false        # a recast that takes the press (Shadow Step); true = handled
 func rmb_hold_tick(_t: float) -> void: pass          # while RMB is held (shields, charge previews)
@@ -130,7 +136,7 @@ func describe_rmb_variant(c: Dictionary) -> String:
 # ------------------------------------------------------------------ per step
 func tick(dt: float) -> void:
 	if KinMerge.transforming(h):
-		_drop_holds()
+		drop_holds()
 	var rate := 1.0 + h.gear_stat("cdr")
 	for k in cd.keys():
 		cd[k] = maxf(0.0, float(cd[k]) - dt * rate)
@@ -372,7 +378,7 @@ func _fire_r(will_bond: bool) -> void:
 	if bonded:
 		_bond_tell()
 		if KinMerge.cast(h):
-			_drop_holds()
+			drop_holds()
 			Feel.hitstop(m, h, h, 0.0, {"bonded": true})
 			Feel.shake(m, "bonded", h, h.pos)
 			if h.is_local() and m.hud: m.hud.flash(Feel.cat_color("control"), 0.25)
@@ -677,12 +683,37 @@ func slot_info(slot: String) -> Dictionary:
 			var sd := dash_def()
 			var dmax := h.max_dashes()
 			out.merge({"name": String(sd.get("name", "")), "short": String(sd.get("name", "")).split(" ")[0], "icon": String(sd.get("icon", "dash")), "col": col_of(sd), "desc": String(sd.get("desc", "")),
-				"cd": (1.0 - fposmod(h.dashes, 1.0)) * h.dash_regen() if h.dashes < 1.0 else 0.0, "cd_max": h.dash_regen(), "charges": int(floor(h.dashes)), "max_charges": int(dmax), "verb": "dash", "ready": h.dashes >= 1.0, "full": dash_payoff_ready()}, true)
+				"cd": (1.0 - fposmod(h.dashes, 1.0)) * h.dash_regen() if h.dashes < dmax - 0.001 else 0.0, "cd_max": h.dash_regen(), "charges": int(floor(h.dashes)), "max_charges": int(dmax), "verb": "dash", "ready": h.dashes >= 1.0, "full": dash_payoff_ready()}, true)
 	return out
 
 func e_recastable() -> bool: return false
 var anim_id := ""              # the kit move playing on the hunter (HunterAnim.KMOVES), its start
 var anim_at := -9.0
+
+## The kit's full-body move on the wire (Net 0.16.0): the move id and its age in seconds, after the
+## state array after KinNet.hunter_extra (26-30), at index NET_MOVE_AT. Empty id: nothing playing (an expired move is not sent).
+const NET_MOVE_AT := 31
+const NET_MOVE_LIFE := 3.0     # seconds a move is still worth sending (the longest is about 2.5s)
+
+static func net_move(h: Hunter) -> Array:
+	var k: ArchKit = h.ak
+	if k == null or k.anim_id == "" or h.m.time - k.anim_at > NET_MOVE_LIFE:
+		return ["", 0.0]
+	return [k.anim_id, snappedf(h.m.time - k.anim_at, 0.05)]
+
+## A remote hunter's move starts when the id changes (or the sender's clock says it restarted), then plays
+## on locally like any kit move; old hosts send nothing and the hunter just keeps its weapon poses.
+static func apply_net_move(h: Hunter, it: Array) -> void:
+	if h.ak == null or it.size() <= NET_MOVE_AT + 1:
+		return
+	var id := String(it[NET_MOVE_AT])
+	if id == "":
+		return
+	var age := float(it[NET_MOVE_AT + 1])
+	var k: ArchKit = h.ak
+	if k.anim_id != id or absf((h.m.time - k.anim_at) - age) > 0.3:
+		k.anim_id = id
+		k.anim_at = h.m.time - age
 
 ## Plays one of the kit's full-body moves on the hunter (anticipation, key pose, recovery).
 func play(move: String) -> void:

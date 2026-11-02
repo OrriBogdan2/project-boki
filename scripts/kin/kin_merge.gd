@@ -70,7 +70,8 @@ static func press(h: Hunter) -> bool:
 	match plan(h):
 		"merge": return cast(h)
 		"leap":
-			if h.ak: h.ak._drop_holds()
+			MergeAugment.drop_class_holds(h)
+			if h.ak: h.ak.drop_holds()
 			return (h.kin as Kin).merge_leap()
 		"surge": return surge(h)
 	return false
@@ -95,7 +96,8 @@ static func rescue_text(h: Hunter) -> String:
 static func surge(h: Hunter) -> bool:
 	if plan(h) != "surge":
 		return false
-	if h.ak: h.ak._drop_holds()      # whatever the hero had started before R never fires (charges, wind-ups, reels)
+	MergeAugment.drop_class_holds(h)
+	if h.ak: h.ak.drop_holds()      # whatever the hero had started before R never fires (charges, wind-ups, reels)
 	h.ult = 0.0
 	var ms := MergeForm.surge_spec()
 	var form := MergeForm.surge_form()
@@ -116,7 +118,7 @@ static func cast(h: Hunter) -> bool:
 	if ms == null:
 		return false
 	k.disengaged = false
-	if h.ak: h.ak._drop_holds()      # whatever the hero had started before R never fires (charges, wind-ups, reels)
+	if h.ak: h.ak.drop_holds()      # whatever the hero had started before R never fires (charges, wind-ups, reels)
 	h.ult = 0.0
 	MergeAugment.drop_class_holds(h)
 	for bb in h.m.bubbles.duplicate():

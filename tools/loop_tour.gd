@@ -677,10 +677,12 @@ func _lair(m) -> void:
 	await shot("boss_dead")
 	await mwait(1.5)
 	await shot("boss_loot")
-	if not m.perk_offer.is_empty():
-		await key_event(KEY_1)       # take the boss's first perk
+	var orbs := PerkOrbs.list(m)
+	if not orbs.is_empty():
+		var op: Vector3 = orbs[0]["pos"]
+		P.teleport(Vector3(op.x, m.world.ground_at(op.x, op.z), op.z))       # walk into the boss's first perk orb
 		await mwait(0.6)
-		print("TOUR perk taken, offer open: %s" % (not m.perk_offer.is_empty()))
+		print("TOUR perk orbs left after taking one: %d" % PerkOrbs.list(m).size())
 	var egg: Dictionary = L.get("egg_wp", {})
 	if not egg.is_empty():
 		var ep: Vector3 = egg["pos"]

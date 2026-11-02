@@ -297,6 +297,7 @@ func _show_settings() -> void:
 			_toggle(v, "Quick cast", "cast_on_press", "Abilities fire the moment you press them. Off: hold to aim, release to cast")
 			_toggle(v, "Tap to crouch", "crouch_toggle", "Instead of holding the crouch key")
 			_toggle(v, "Damage numbers", "damage_numbers")
+			_choice(v, "Reset cue sound", "reset_cue", [["a", "A: rising bell pair"], ["b", "B: bell with a glide and sparkle"], ["c", "C: soft whoomp and a crystal ping"]], func(): Sfx.play_reset_cue())
 			_toggle(v, "Tips during matches", "tips")
 			_group(v, "Kin")
 			_toggle(v, "Boki also use your E ability on their own", "kin_auto", "They can spend cooldowns you wanted (their own auto ability is always on)")

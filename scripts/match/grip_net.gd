@@ -1,10 +1,10 @@
 class_name GripNet
 extends RefCounted
 ## What a remote hunter's overhead row needs (GripOverhead), carried in the hunter's "h" snapshot
-## after KinNet's fields (Net.VERSION 0.15.1): both gloves as "id:rar" ("" for none), each glove's
+## after KinNet's fields (Net.VERSION 0.16.1): both gloves as "id:rar" ("" for none), each glove's
 ## cooldown left (s), and the bond meter (0..1, full = a Merge is ready).
 
-const AT := KinNet.HUNTER_AT + 5          # KinNet.hunter_extra adds 5 fields
+const AT := ArchKit.NET_MOVE_AT + 2     # after KinNet.hunter_extra (5 fields) and ArchKit.net_move (2)
 const N := 5
 
 static func hunter_extra(h: Hunter) -> Array:

@@ -161,7 +161,6 @@ static func _demo_late(m, h) -> void:
 	if not is_instance_valid(h):
 		return
 	Settings.v["tips"] = false          # (a clean frame: no tip card, no level-up choice, no monsters close by)
-	m.perk_offer.clear()
 	for mb in m.mobs:
 		if is_instance_valid(mb) and not mb.dead and mb.flat_dist(h) < 30.0: mb.hp = 0.0; mb.dead = true; mb.visible = false
 	h.gear_cd[1] = 9.0
