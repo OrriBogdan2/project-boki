@@ -164,6 +164,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 		m.fx.ring(h.pos + Vector3(dd0.x, 1.05, dd0.y) * 0.9, 0.7, Color("ffb04a"), float(lmbd()["spool"]))      # the pilot flame swelling before the roar
 		m.fx.flash(h.pos + Vector3(dd0.x, 1.05, dd0.y) * 0.9, Color("ffd890"), 0.5, 0.12)
 	was_held = true
+	h.idle_fire = 0.0              # firing: no auto-reload mid-roar
 	spool += dt
 	h.mel_hold = minf(spool, float(lmbd()["spool"]))
 	flame_acc += dt

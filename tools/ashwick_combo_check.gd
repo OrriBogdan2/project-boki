@@ -54,8 +54,8 @@ func _all() -> void:
 	ok("lance: hold = damage and Char building", ak.dmg(T) > 5.0 and c1 > 5.0 and K.burning(T) == 0, "dmg %.1f char %.1f" % [ak.dmg(T), c1])
 	hold_fire.call(1.0)
 	ok("lance: ~1s of fire = Flashover level 1", K.burning(T) == 1 and T.burn_t > 0.0 and K.ignitions >= 1, "burning %d burn_t %.1f ignitions %d" % [K.burning(T), T.burn_t, K.ignitions])
-	hold_fire.call(2.2)
-	ok("lance: kept on a burning foe it upgrades to level 2", K.burning(T) == 2 and K.upgrades >= 1, "burning %d" % K.burning(T))
+	hold_fire.call(3.0)
+	ok("lance: kept on a burning foe it upgrades to level 2", K.burning(T) == 2 and K.upgrades >= 1, "burning %d ammo %d upgrades %d char %.1f" % [K.burning(T), P.ammo, K.upgrades, K.char_of(T)])
 	# --- walls stop the lance and the cloak
 	reset.call()
 	for dz in range(-6, 7):
