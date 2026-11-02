@@ -8,7 +8,7 @@ extends RefCounted
 ##   fight:  every hunter bunched up around you; after 4s they fight, so many plates overlap.
 
 const UP_AT := 2.45       # s: ... and the level-up, so its pulse is mid-swell at 2.5s
-const HIT_AT := 2.2       # s of match time: the hit that leaves a chip lands this long before a 2.5s shot
+const HIT_AT := 2.35      # s of match time: close enough to a 2.5s shot that the chip still holds on slow frames
 
 ## The match options for `--hudref-demo=<mode>` (Main reads the command line).
 static func opts(arg: String) -> Dictionary:
