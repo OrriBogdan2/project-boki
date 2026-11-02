@@ -75,7 +75,7 @@ func _archer_combos() -> void:
 	# where the arrows go: Empowered lands at the cursor, Supercharged flies past it to its range, a tap at the cursor
 	T.teleport(home + Vector3(0, 0, 9.0)); T2.teleport(home + Vector3(0, 0, -9.0))
 	var cur := home + Vector3(6.0, 0, 0)
-	var e1 := _loose_after(m, P, K, 0.75, cur)
+	var e1 := _loose_after(m, P, K, 0.85, cur)
 	ok("pin aim: an Empowered arrow lands at the cursor (6m)", absf(e1 - 6.0) < 0.9 and K.draw.last_kind == "arrow", "reach %.1f kind %s" % [e1, K.draw.last_kind])
 	ok("pin anim: an Empowered release plays arc_loose", K.anim_id == "arc_loose", K.anim_id)
 	var pl0 := K.fx.planted
