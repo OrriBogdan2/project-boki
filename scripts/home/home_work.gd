@@ -38,15 +38,15 @@ const KILN_T := 70.0                    # seconds between firings at the Kiln (a
 
 ## Base seconds for each kind of job at level 1 (a level 4 kin takes under half).
 const TIME := {"grow": 8.0, "fire": 9.0, "water": 3.0, "plant": 4.0, "tend": 4.5, "harvest": 3.5, "chop": 9.0, "break": 9.0, "log": 6.5, "ore": 7.0,
-	"bake": 7.0, "craft": 11.0, "power": 5.0, "chill": 5.0, "carry": 1.2, "stock": 1.5, "mend": 3.5, "brew": 14.0, "ranch": 22.0, "warm": 30.0}
+	"bake": 7.0, "craft": 11.0, "build": 6.0, "power": 5.0, "chill": 5.0, "carry": 1.2, "stock": 1.5, "mend": 3.5, "brew": 14.0, "ranch": 22.0, "warm": 30.0}
 ## What each job is called on the hover card and the Job Board.
 const VERB := {"grow": "Raising seedlings", "fire": "Firing the kiln", "water": "Watering the %s", "plant": "Sowing a plot", "tend": "Tending the %s", "harvest": "Picking the %s",
 	"chop": "Felling a tree", "break": "Breaking a boulder", "log": "Splitting logs", "ore": "Mining rock", "bake": "Baking kibble",
-	"craft": "Crafting scrap", "power": "Cranking the Spark Mill", "chill": "Chilling the Cold Store", "carry": "Hauling %s to the chest",
+	"craft": "Crafting scrap", "build": "Building the %s", "power": "Cranking the Spark Mill", "chill": "Chilling the Cold Store", "carry": "Hauling %s to the chest",
 	"stock": "Filling a feeder", "mend": "Looking after %s", "brew": "Brewing a tonic", "ranch": "Ranching", "warm": "Warming the incubator"}
 ## The animation each job plays.
 const ANIM := {"grow": "dip", "fire": "shimmy", "water": "dip", "plant": "dip", "tend": "dip", "harvest": "dip", "chop": "hammer", "break": "hammer", "log": "hammer",
-	"ore": "hammer", "bake": "shimmy", "craft": "hammer", "power": "crank", "chill": "shimmy", "carry": "lift", "stock": "lift",
+	"ore": "hammer", "bake": "shimmy", "craft": "hammer", "build": "hammer", "power": "crank", "chill": "shimmy", "carry": "lift", "stock": "lift",
 	"mend": "sway", "brew": "sway", "ranch": "lounge", "warm": "sway"}
 
 func _init(home) -> void:
@@ -76,6 +76,7 @@ func tick(d: float) -> void:
 		Work.seen_now()      # the farm is being looked at: away time starts from here
 		scan()
 	_feed_tick(d)
+	FarmModels.tick_bars(self)
 
 ## What needs doing, from the state of the farm right now.
 func scan() -> void:
@@ -93,6 +94,7 @@ func scan() -> void:
 	_haul_jobs()
 	_mend_jobs()
 	_warm_jobs()
+	FarmSites.scan(self)
 	# forget claims nobody is working on any more
 	var live := {}
 	for k in h.kins:
@@ -455,7 +457,7 @@ func best_job(k: Dictionary) -> Dictionary:
 		if not takes_job(rec, j): continue
 		var at: Vector3 = j["at"]
 		if _isle(at) != here and mine < 0: continue      # (an assigned kin goes over to its station)
-		var sc := Work.score(Work.level(rec, el), maxi(Work.prio(el), 2) if mine >= 0 else Work.prio(el), Vector2(at.x - k["pos"].x, at.z - k["pos"].z).length())
+		var sc := Work.score(FarmSites.level(rec, j), maxi(Work.prio(el), 2) if mine >= 0 else Work.prio(el), Vector2(at.x - k["pos"].x, at.z - k["pos"].z).length())
 		if sc > bs: bs = sc; best = j
 	return best
 
@@ -463,6 +465,8 @@ func best_job(k: Dictionary) -> Dictionary:
 ## Job Board says); the rest take any job they're suited to, but not the ones only assigned kin do.
 func takes_job(rec: Dictionary, j: Dictionary) -> bool:
 	var mine := Work.assigned(rec)
+	if String(j.get("kind", "")) == "build":
+		return mine == int(j.get("u", -1)) or (mine < 0 and FarmSites.takes(rec, j))
 	if mine >= 0:
 		return int(j.get("u", -1)) == mine and Work.can_work(rec) and Work.level(rec, String(j["el"])) > 0
 	if j.get("need", false):
@@ -514,6 +518,8 @@ func _valid(J: Dictionary) -> bool:
 			return not h._kin_entry(Save.kin(String(J["who"]))).is_empty()
 		"warm":
 			return h.hinc != null and Incubator.any_warming()
+		"build":
+			return FarmSites.valid(J)
 	if J.has("u"):
 		for s in HomeLayout.stations(h._d()):
 			if int(s["e"]["u"]) == int(J["u"]): return true
@@ -527,7 +533,7 @@ func powered() -> bool:
 	return false
 
 func _boost(J: Dictionary) -> float:
-	return 1.5 if String(J["kind"]) in ["bake", "craft", "brew"] and powered() else 1.0
+	return (1.5 if String(J["kind"]) in ["bake", "craft", "brew"] and powered() else 1.0) * FarmSites.speed(J)
 
 # ------------------------------------------------------------------ working
 ## Every frame for a kin with a job. home.gd skips its wandering while this has it.
@@ -696,6 +702,8 @@ func _finish(k: Dictionary, J: Dictionary) -> bool:
 	var nm := String(rec["name"])
 	rec["trust"] = minf(100.0, float(rec["trust"]) + 0.15)
 	match String(J["kind"]):
+		"build":
+			FarmSites.swing(self, k, J)
 		"water":
 			h._water(String(J["arr"]), int(J["i"]), "kin")
 			h.fx.burst(at + Vector3(0, 0.6, 0), Color("7ac8ff"), 12, 2.0)
@@ -720,6 +728,7 @@ func _finish(k: Dictionary, J: Dictionary) -> bool:
 		"harvest":
 			var got: int = h._harvest(String(J["arr"]), int(J["i"]), "kin")
 			if got > 0:
+				FarmSites.on_harvest(got)
 				var cname := String(J.get("what", "crop"))
 				produced(at, "+%d %s · %s" % [got, cname, nm], "forage", "")
 		"chop", "break":

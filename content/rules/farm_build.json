@@ -1,0 +1,59 @@
+{
+	"desc": "The farm building pass (docs/decisions/0004-farm-building.md). Farm level is points from play; items unlock by farm level or a milestone; new buildings are construction sites that Boki build with materials and labour; buildings upgrade L1 to L3. Units: gems and materials are counts, labour is Boki work swings (one swing is about 6 s at building skill 1).",
+	"points": {"extracts": 3.0, "bosses": 6.0, "caught": 2.0, "hatched": 2.0, "harvested": 0.25, "built": 2.0, "fb_built": 2.0},
+	"points_doc": "Farm points = sum(stat * weight). 'built' counts the lot buildings you built, 'fb_built' the buildings Boki finished on the farm.",
+	"levels": [0, 6, 16, 30, 48, 70],
+	"levels_doc": "Points needed for farm level 1..6 (index 0 is level 1).",
+	"milestones": {
+		"first_extract": {"name": "First extraction", "stat": "extracts", "n": 1, "text": "Make it out of an expedition once"},
+		"first_boss": {"name": "First boss", "stat": "bosses", "n": 1, "text": "Defeat a boss in a lair"},
+		"scan3": {"name": "Three scanned", "stat": "caught", "n": 3, "text": "Scan and bring home 3 wild Boki"}
+	},
+	"starter": ["house", "crop_patch", "cook_pot"],
+	"starter_doc": "Placed at once, no site: a new farm has no builders yet.",
+	"unlock": {
+		"picket": {"level": 2}, "stone_wall": {"level": 3}, "hedge": {"level": 3},
+		"path_stone": {"level": 2}, "path_wood": {"level": 3}, "water": {"level": 4},
+		"bush": {"level": 2}, "tree": {"level": 2}, "pine": {"level": 3}, "blossom_tree": {"milestone": "scan3"},
+		"lantern": {"level": 2}, "lamp_post": {"level": 3},
+		"bench": {"level": 2}, "kin_bed": {"level": 2}, "rug": {"level": 3}, "rug_long": {"level": 4},
+		"banner": {"level": 3}, "pillar": {"level": 4}, "kin_statue": {"milestone": "scan3"}, "fountain": {"milestone": "first_boss"},
+		"job_board": {"level": 2}, "lumber_camp": {"level": 2}, "quarry": {"level": 2}, "storage_chest": {"level": 2},
+		"hearth_oven": {"level": 3}, "workbench": {"level": 3}, "seed_garden": {"level": 3},
+		"kiln": {"level": 4}, "spark_mill": {"level": 4}, "ranch_pen": {"level": 4}, "infirmary": {"level": 4}, "cold_store": {"level": 5},
+		"market_stall": {"level": 2}, "boki_burrow": {"level": 2}, "training_post": {"level": 2}, "nesting_nook": {"level": 3}, "graveyard": {"level": 3},
+		"workshop": {"level": 2}, "cottage": {"level": 3}, "armory": {"milestone": "first_extract"}, "shrine": {"milestone": "first_boss"}
+	},
+	"cradles": {"6": 4, "7": 5, "8": 6},
+	"cradles_doc": "Incubator cradle number -> farm level that lets you buy it.",
+	"build": {
+		"market_stall": {"gems": 10, "wood": 6, "fibre": 4, "labour": 4},
+		"nesting_nook": {"gems": 15, "wood": 10, "fibre": 6, "labour": 6},
+		"boki_burrow": {"gems": 12, "wood": 8, "stone": 5, "fibre": 4, "labour": 6},
+		"training_post": {"gems": 10, "wood": 8, "stone": 2, "labour": 4},
+		"graveyard": {"gems": 8, "stone": 10, "fibre": 2, "labour": 5},
+		"job_board": {"gems": 5, "wood": 4, "labour": 3},
+		"lumber_camp": {"gems": 8, "wood": 4, "stone": 2, "labour": 4},
+		"quarry": {"gems": 8, "wood": 4, "stone": 2, "labour": 4},
+		"storage_chest": {"gems": 5, "wood": 5, "fibre": 2, "labour": 3},
+		"hearth_oven": {"gems": 12, "wood": 6, "stone": 6, "labour": 5},
+		"workbench": {"gems": 10, "wood": 8, "fibre": 2, "labour": 5},
+		"spark_mill": {"gems": 16, "wood": 8, "stone": 6, "coals": 1, "labour": 7},
+		"cold_store": {"gems": 14, "wood": 4, "stone": 8, "fibre": 3, "labour": 6},
+		"ranch_pen": {"gems": 12, "wood": 10, "fibre": 6, "labour": 6},
+		"infirmary": {"gems": 14, "wood": 6, "stone": 6, "fibre": 4, "labour": 6},
+		"seed_garden": {"gems": 8, "wood": 4, "fibre": 4, "labour": 4},
+		"kiln": {"gems": 10, "stone": 8, "wood": 2, "labour": 5}
+	},
+	"upgrade": {
+		"2": {"gems": 20, "wood": 8, "stone": 6, "fibre": 4, "labour": 6, "level": 3},
+		"3": {"gems": 45, "wood": 14, "stone": 12, "coals": 2, "fibre": 8, "labour": 10, "level": 5}
+	},
+	"upgrade_doc": "Cost to reach tier 2 and tier 3. 'level' is the farm level it needs. Work stations work 25% / 50% faster at L2 / L3.",
+	"tier_speed": [1.0, 1.25, 1.5],
+	"tier_names": ["", "Sturdy", "Fine"],
+	"upgradable": ["house", "crop_patch", "cook_pot", "market_stall", "nesting_nook", "boki_burrow", "training_post", "graveyard", "job_board", "lumber_camp", "quarry", "storage_chest", "hearth_oven", "workbench", "spark_mill", "cold_store", "ranch_pen", "infirmary", "seed_garden", "kiln"],
+	"house_upgrade": {"2": {"gems": 40, "wood": 10, "stone": 6, "fibre": 6, "labour": 8, "level": 3}, "3": {"gems": 80, "wood": 18, "stone": 14, "coals": 2, "fibre": 10, "labour": 12, "level": 5}},
+	"swing_s": 6.0,
+	"crew_slots": 2
+}
