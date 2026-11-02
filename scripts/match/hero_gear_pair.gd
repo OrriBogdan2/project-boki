@@ -13,12 +13,20 @@ const HC := Vector3(0, 0.86, 0)
 
 ## Each hero's body against the class: Linwick small and round (0.76 of a heavy, a little broad), Dredge
 ## as tall as a heavy but 1.3x as broad across the chest and shoulders (hero-ref body sections).
-const BODY := {"ashwick": {"size": 0.76, "bulk": 1.05}, "dredge": {"size": 1.0, "bulk": 1.3}}
-const PLAIN_BODY := {"size": 1.0, "bulk": 1.0}
+## plate: metres the overhead nameplate sits above the shared height; both sheets measure the shared ~2.2 m
+## (the plate floats clear of Linwick's hat and touches Dredge's helm, as in the source), so 0 for both.
+const BODY := {
+	"ashwick": {"size": 0.76, "bulk": 1.05, "plate": 0.0}, "dredge": {"size": 1.0, "bulk": 1.3, "plate": 0.0}
+}
+const PLAIN_BODY := {"size": 1.0, "bulk": 1.0, "plate": 0.0}
 
 ## The body size and breadth multipliers for an archetype (1.0 for heroes outside this pair).
 static func body(arch: String) -> Dictionary:
 	return BODY.get(arch, PLAIN_BODY)
+
+## The per-hunter nameplate offset hook (m above the shared plate height) for the HUD to read.
+static func plate_lift(arch: String) -> float:
+	return float(body(arch)["plate"])
 
 static func dress(arch: String, c: Dictionary) -> void:
 	if arch == "dredge": _dredge(c)

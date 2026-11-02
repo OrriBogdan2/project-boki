@@ -140,35 +140,35 @@ const MOVES := {
 		}],
 		[0.55, {"p": 0.12, "sq": -0.12, "lift": 0.06}],
 		[0.75, {}]]},
-	# Barge (Shift, a near-blink 0.12 s): hunched forward, head down, shoulder first through the whole dash,
-	# a squash on arrival (0.16 s) and back to rest by 0.35 s, turning back to the aim as he settles
+	# Barge (Shift, one fast 0.18 s shove of a run of them): hunched forward, head down, shoulder first through the
+	# dash, a squash on arrival and a quick recovery so the next barge can follow a beat later
 	"dr_barge": {"keys": [
 		[0.0, {"p": 0.15, "y": -0.3, "sq": 0.35, "lift": -0.08, "lw": 1.0, "legs": [0.9, -1.4, 0.6, -1.2]}],
-		[0.03, {
+		[0.04, {
 			"p": -0.7, "y": 0.6, "sq": -0.3, "fr": Vector3(0.25, 0.0, 0.45), "rw": 0.9, "fl": Vector3(0.1, 0.1, -0.15),
 			"hw": 0.9, "lw": 1.0, "legs": [1.15, -0.6, -0.85, -0.15]
 		}],
-		[0.12, {
+		[0.18, {
 			"p": -0.7, "y": 0.6, "sq": -0.25, "fr": Vector3(0.25, 0.0, 0.45), "rw": 0.9, "fl": Vector3(0.1, 0.1, -0.15),
 			"hw": 0.9, "lw": 1.0, "legs": [0.6, -1.0, -0.4, -0.6]
 		}],
-		[0.16, {"p": -0.15, "y": 0.15, "sq": 0.35, "lift": -0.1, "lw": 1.0, "legs": [1.1, -1.7, 0.9, -1.6]}],
-		[0.26, {"p": 0.08, "sq": -0.08, "lift": 0.03}],
-		[0.35, {}]]},
-	# Dredge's air barge (the same near-blink, 35% further in the air): arms flung wide, legs pumping, a heavy
+		[0.23, {"p": -0.15, "y": 0.15, "sq": 0.35, "lift": -0.1, "lw": 1.0, "legs": [1.1, -1.7, 0.9, -1.6]}],
+		[0.32, {"p": 0.08, "sq": -0.08, "lift": 0.03}],
+		[0.42, {}]]},
+	# Dredge's air barge (the same quick shove, 35% further in the air): arms flung wide, legs pumping, a heavy
 	# drop onto his feet
 	"dr_hop": {"keys": [
 		[0.0, {"sq": 0.3, "p": 0.1, "lw": 1.0, "legs": [1.0, -1.5, 0.9, -1.4]}],
-		[0.03, {
+		[0.04, {
 			"sq": -0.3, "p": -0.55, "fl": Vector3(-0.5, 0.25, 0.25), "hw": 1.0, "fr": Vector3(0.5, 0.25, 0.25),
 			"rw": 0.6, "lw": 1.0, "legs": [-0.3, -0.3, 0.8, -1.2]
 		}],
-		[0.12, {
+		[0.18, {
 			"sq": -0.2, "p": -0.5, "fl": Vector3(-0.5, 0.25, 0.3), "hw": 1.0, "fr": Vector3(0.5, 0.25, 0.3), "rw": 0.6,
 			"lw": 1.0, "legs": [0.8, -1.2, -0.3, -0.3]
 		}],
-		[0.2, {"sq": 0.3, "p": -0.05, "lift": -0.08, "lw": 1.0, "legs": [1.0, -1.5, 0.9, -1.4]}],
-		[0.38, {}]]},
+		[0.26, {"sq": 0.3, "p": -0.05, "lift": -0.08, "lw": 1.0, "legs": [1.0, -1.5, 0.9, -1.4]}],
+		[0.45, {}]]},
 	# Salvage (passive): a stack gained - chest out, both fists flexed high above the shoulders, a stomp
 	"dr_flex": {"keys": [
 		[0.0, {}],
@@ -309,20 +309,27 @@ const MOVES := {
 			"p": 0.12, "fr": Vector3(0.5, 0.3, 0.0), "rw": 0.9, "fl": Vector3(-0.5, 0.3, 0.0), "hw": 0.9, "gp": 0.9
 		}],
 		[0.8, {}]]},
-	# Linwick's air hop (the class air dash): a jet of flame from the bellows tucks him into a ball that rolls
-	# once forward through the air, then he opens out and lands on his feet
+	# Linwick's air poof (the air dash): balled up in the burst, one fast roll forward, then he sails out
+	# spread-eagled on the launch, arms and legs wide and the nozzle held out, until the speed bleeds off
 	"lw_hop": {"keys": [
-		[0.0, {"sq": 0.3, "lift": -0.06, "lw": 1.0, "legs": [0.9, -1.4, 0.8, -1.3]}],
-		[0.05, {
-			"p": -0.7, "sq": -0.4, "fx": -1.2, "fr": Vector3(0.15, -0.1, 0.25), "rw": 0.8,
+		[0.0, {"sq": 0.35, "lift": -0.06, "lw": 1.0, "legs": [1.4, -2.1, 1.3, -2.1]}],
+		[0.04, {
+			"p": -0.7, "sq": -0.4, "fx": -1.5, "fr": Vector3(0.15, -0.1, 0.25), "rw": 0.8,
 			"fl": Vector3(-0.15, -0.1, 0.25), "hw": 1.0, "lw": 1.0, "legs": [1.5, -2.2, 1.4, -2.2]
 		}],
-		[0.22, {
-			"p": -0.5, "sq": -0.25, "fx": -4.6, "fl": Vector3(-0.15, -0.1, 0.25), "hw": 1.0, "lw": 1.0,
-			"legs": [1.5, -2.2, 1.4, -2.2]
+		[0.16, {
+			"p": -0.6, "sq": -0.3, "fx": -6.283, "fl": Vector3(-0.15, -0.1, 0.25), "hw": 1.0, "lw": 1.0,
+			"legs": [1.4, -2.0, 1.3, -2.0]
 		}],
-		[0.34, {"sq": 0.25, "p": 0.1, "fx": -6.283, "lw": 1.0, "legs": [0.8, -1.2, 0.7, -1.1]}],
-		[0.5, {"fx": -6.283}]]},
+		[0.24, {
+			"p": -0.55, "sq": -0.2, "fx": -6.283, "fl": Vector3(-0.7, 0.35, 0.1), "hw": 1.0,
+			"fr": Vector3(0.6, 0.3, -0.2), "rw": 0.6, "lw": 1.0, "legs": [-0.5, -0.2, 0.5, -0.3]
+		}],
+		[0.5, {
+			"p": -0.45, "sq": -0.1, "fx": -6.283, "fl": Vector3(-0.65, 0.3, 0.1), "hw": 1.0,
+			"fr": Vector3(0.55, 0.25, -0.2), "rw": 0.5, "lw": 1.0, "legs": [-0.4, -0.25, 0.45, -0.35]
+		}],
+		[0.7, {"fx": -6.283}]]},
 	# Flashover payoff (a foe Flashes over, or a knock): the off fist punches up over his head, a lean back
 	# and a bounce on his heels
 	"lw_stoke": {"keys": [

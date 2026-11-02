@@ -62,7 +62,7 @@ func _all() -> void:
 		P.fire_cd = 0.0
 		ak.aim_at(P, T.pos)
 	ok(
-		"dredge: heavy, shotgun, 2 barge charges", P.wid == "shotgun" and P.cls == "heavy" and P.max_dashes() >= 2.0,
+		"dredge: heavy, shotgun, 3 barge charges", P.wid == "shotgun" and P.cls == "heavy" and P.max_dashes() >= 3.0,
 		"%s %s" % [P.wid, P.cls]
 	)
 	# --- the scattergun: a shot every 0.5s, a tight fan, the spread's edge lines while firing, one line idle
@@ -365,14 +365,36 @@ func _all() -> void:
 	T.teleport(home + Vector3(0, 0, 9.0))
 	ak.aim_at(P, home + Vector3(9.0, 0, 0))
 	P.ak.on_dash(false)
-	ak.step(m, 0.15)
-	var blink_d := P.pos.x - home.x
-	ak.step(m, 0.35)
+	var feel: Dictionary = K.dash_feel()
+	var one: float = float(K.dash_def()["dist"]) * float(feel["dist"])
+	var dash_t: float = float(K.dash_def()["time"]) * float(feel["time"])
+	ak.step(m, dash_t * 0.5)
+	var half_d := P.pos.x - home.x
+	ak.step(m, 0.4)
 	var ground_d := P.pos.x - home.x
 	ok(
-		"barge: a near-blink, about 4.6m within 0.15s, then he stops",
-		blink_d > 4.0 and ground_d < 5.6 and float(K.dash_def()["time"]) <= 0.14,
-		"at 0.15s %.1f, at 0.5s %.1f" % [blink_d, ground_d]
+		"barge: a short, fast shove you see travel (about half way at half its time), then he stops",
+		half_d > one * 0.3 and half_d < one * 0.8 and absf(ground_d - one) < 0.6 and dash_t < 0.25,
+		"at %.2fs %.1f, settled %.1f of %.1f" % [dash_t * 0.5, half_d, ground_d, one]
+	)
+	# a run of barges: three charges, a short gap between them
+	reset.call()
+	T.teleport(home + Vector3(0, 0, 9.0))
+	ak.aim_at(P, home + Vector3(12.0, 0, 0))
+	var charges0 := P.dashes
+	P.ak.on_dash(false)
+	ak.step(m, 0.05)
+	P.ak.on_dash(false)
+	var in_gap := charges0 - P.dashes
+	ak.step(m, dash_t + float(K.dash_def()["gap"]))
+	P.ak.on_dash(false)
+	ak.step(m, dash_t + float(K.dash_def()["gap"]))
+	P.ak.on_dash(false)
+	ak.step(m, 0.5)
+	ok(
+		"barge: three in a row, a short gap between (a press inside the gap does nothing)",
+		absf(in_gap - 1.0) < 0.01 and P.dashes < 0.5 and P.pos.x - home.x > one * 2.6,
+		"used in gap %.1f left %.2f went %.1f" % [in_gap, P.dashes, P.pos.x - home.x]
 	)
 	reset.call()
 	T.teleport(home + Vector3(0, 0, 9.0))
@@ -382,16 +404,16 @@ func _all() -> void:
 	P.ex_cd = 0.0
 	ak.aim_at(P, home + Vector3(9.0, 0, 0))
 	P.ak.on_dash(true)
-	ak.step(m, 0.15)
-	var air_blink := P.pos.x - home.x
-	ak.step(m, 0.25)
+	ak.step(m, dash_t + 0.02)
+	var air_quick := P.pos.x - home.x
+	ak.step(m, 0.3)
 	var air_d := P.pos.x - home.x
 	ok(
-		"barge: in the air the same blink time, 35% further", air_blink > ground_d * 1.15 and ground_d > 3.5,
-		"air at 0.15s %.1f, ground %.1f" % [air_blink, ground_d]
+		"barge: in the air the same quick time, 35% further", air_quick > one * 1.2,
+		"air after %.2fs %.1f, ground %.1f" % [dash_t, air_quick, one]
 	)
 	ok(
-		"barge: further in the air than on the ground", air_d > ground_d * 1.15 and ground_d > 3.5,
+		"barge: further in the air than on the ground", air_d > ground_d * 1.15 and ground_d > 2.0,
 		"ground %.1f air %.1f" % [ground_d, air_d]
 	)
 	# --- Salvage: knocks stack, +2.5% health each, a knock heals, losing one when downed

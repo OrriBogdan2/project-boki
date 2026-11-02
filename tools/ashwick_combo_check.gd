@@ -307,21 +307,43 @@ func _all() -> void:
 	T2.teleport(home + Vector3(0, 0, -9.0))
 	ak.aim_at(P, home + Vector3(8.0, 0, 0))
 	P.ak.on_dash(false)
-	ak.step(m, 0.1)
+	var feel: Dictionary = K.dash_feel()
+	var ram_d: float = float(K.dash_def()["dist"]) * float(feel["dist"])
+	var ram_t: float = float(K.dash_def()["time"]) * float(feel["time"])
+	ak.step(m, ram_t * 0.3)
 	var d_front := P.pos.x - home.x
-	ak.step(m, 0.26)
+	ak.step(m, ram_t * 0.7 + 0.05)
 	var d1 := P.pos.x - home.x
 	ok(
-		"ram: about 3.4m in 0.33s, front-loaded (over 40% of it in the first 30%)",
-		d_front > 1.25 and d1 > 3.0 and d1 < 3.9,
-		"after 0.1s %.2f, after 0.36s %.2f" % [d_front, d1]
+		"ram: quick and short, front-loaded (over 37% of it in the first 30%)",
+		d_front > ram_d * 0.37 and absf(d1 - ram_d) < 0.5 and ram_t < 0.4,
+		"after %.2fs %.2f, at the end %.2f of %.2f" % [ram_t * 0.3, d_front, d1, ram_d]
 	)
 	P.ak.on_dash(false)
 	ak.step(m, 0.45)
 	ok(
 		"ram: toward the cursor, two charges chain",
-		P.pos.x - home.x > d1 + 2.8 and P.dashes < 0.5,
+		P.pos.x - home.x > d1 + ram_d * 0.8 and P.dashes < 0.5,
 		"first %.1f both %.1f charges %.2f" % [d1, P.pos.x - home.x, P.dashes]
+	)
+	# the air poof: long and fast, and he keeps a share of the speed after it
+	reset.call()
+	T.teleport(home + Vector3(0, 0, 9.0))
+	T2.teleport(home + Vector3(0, 0, -9.0))
+	P.teleport(home + Vector3(0, 4.0, 0))
+	P.grounded = false
+	P.vel = Vector3.ZERO
+	P.ex_cd = 0.0
+	ak.aim_at(P, home + Vector3(12.0, 0, 0))
+	P.ak.on_dash(true)
+	var poof_t: float = float(K.dash_def()["air_time"]) * float(feel["time"])
+	ak.step(m, poof_t + 0.06)
+	var poof_d := P.pos.x - home.x
+	var kept := Vector2(P.vel.x, P.vel.z).length()
+	ok(
+		"air poof: launches him far and fast (over twice the ground dash), momentum kept after it",
+		poof_d > ram_d * 2.0 and poof_t < 0.35 and kept > 8.0,
+		"poof %.1f m in %.2fs, ground %.1f, speed kept %.1f m/s" % [poof_d, poof_t, ram_d, kept]
 	)
 	P.dashes = 0.0
 	K.on_knock(T, true)

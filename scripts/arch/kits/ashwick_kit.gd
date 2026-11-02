@@ -26,7 +26,8 @@ const SHIELD_COL := Color("ff5a1a")    # the cloak's fire shield: a deep orange 
 const RAM_FRONT := 0.3                 # share of the ram spent at its burst speed, then it slows
 const RAM_FRONT_K := 1.4               # the burst speed against the average (front-loaded, hero-ref)
 const RAM_BACK_K := 0.85
-const EMBER_EVERY := 0.035             # s between the ember puffs a ram or hop leaves behind
+const EMBER_EVERY := 0.035
+const POOF_PUFFS := 8                  # smoke puffs in the ring where the air poof goes off             # s between the ember puffs a ram or hop leaves behind
 const CLOAK_POSE_T := 0.7             # s the Furnace Cloak pose holds the flamer up off the aim (as_cloak)
 const SKULL_TILT := 0.6                # rad the skull's front edge lifts toward the camera
 const NOZZLE := Vector3(1.3, 0.9, 0.15)  # the nozzle's tip from the feet in the aim pose: forward, up, right (m)
@@ -445,33 +446,44 @@ func on_dash(use_ex: bool) -> bool:
 	var dd := dash_def()
 	var dir := dash_dir()
 	if use_ex and not h.grounded:
-		# the class air dash, Linwick's way: a jet from the bellows tucks him into a ball
 		if not spend_dash(true): return true
-		travel(
-			float(h.cdat.get("ex_dist", 4.2)), float(h.cdat.get("ex_time", 0.21)),
-			{"invuln": 0.08, "trail": "", "dir": dir}, true
-		)
-		play("lw_hop")
-		m.sfx("lw_hop", h.pos, -3.0, 1.0)
-		fx.sunburst(h.pos + Vector3(0, 0.5, 0), 0.9, Color("ff8a3a"), Color("ffe0a0"), 0.25, true)
-		bash = {"t": float(h.cdat.get("ex_time", 0.21)), "dir": dir, "hit": true, "hop": true}
+		_poof(dd, dir)
 		return true
 	if not spend_dash(false):
 		return true
-	var t := float(dd["time"])
-	travel(float(dd["dist"]), t, {"invuln": 0.06, "trail": "", "dir": dir})
+	travel(float(dd["dist"]), float(dd["time"]), {"invuln": 0.06, "trail": "", "dir": dir})
 	st["last_dash"] = "soot_ram"
 	play("as_leap")
-	h.glide_cd = maxf(h.glide_cd, t + 0.35)
+	h.glide_cd = maxf(h.glide_cd, h.roll_t + 0.35)
 	m.sfx("lw_bash", h.pos, -2.0, 1.0)
-	bash = {"t": t, "t0": t, "speed": float(dd["dist"]) / t, "dir": dir, "hit": false}
+	bash = {"t": h.roll_t, "t0": h.roll_t, "speed": h.roll_speed, "dir": dir, "hit": false}
 	return true
+
+## The air dash, Linwick's way: a "poof" from the bellows that launches him far and fast (a ring of smoke and
+## flame where it goes off), and he keeps a share of the speed after it (the class long dash is replaced).
+func _poof(dd: Dictionary, dir: Vector2) -> void:
+	var feel := dash_feel()
+	var air_t := float(dd["air_time"]) * float(feel["time"])
+	var air_dist := float(dd["air_dist"]) * float(feel["dist"])
+	travel(air_dist, air_t, {"invuln": 0.08, "trail": "", "dir": dir}, true)
+	h.roll_t = air_t
+	h.roll_speed = air_dist / air_t
+	play("lw_hop")
+	m.sfx("lw_hop", h.pos, -3.0, 1.0)
+	var at := h.pos + Vector3(0, 0.6, 0)
+	fx.sunburst(at, 1.3, Color("ff5a1a"), Color("ffc040"), 0.28, true)
+	for i in POOF_PUFFS:
+		var ang := TAU * float(i) / POOF_PUFFS
+		var off := Vector3(cos(ang), sin(ang) * 0.5, sin(ang)) * 0.8
+		fx.puff(at + off, LDFx.M_ORB, Color("3a2a2a"), Color("ff7a2a"), 0.9, 0.5)
+	# held a step past the burst, so the kept speed lands after the class's own small carry
+	bash = {"t": air_t + 0.04, "dir": dir, "hit": true, "hop": true, "speed": h.roll_speed}
 
 ## While the ram flies: the flame skull wraps his front and ember tails stream behind; the first foe it
 ## meets stops the dash with the impact (sheet gap 2).
 func _tick_bash(dt: float) -> void:
 	var dir: Vector2 = bash["dir"]
-	if bash.has("speed") and not bash.get("hit", false) and h.roll_t > 0.0:
+	if bash.has("t0") and not bash.get("hit", false) and h.roll_t > 0.0:
 		var into := float(bash["t0"]) - float(bash["t"])
 		h.roll_speed = float(bash["speed"]) * (RAM_FRONT_K if into < RAM_FRONT * float(bash["t0"]) else RAM_BACK_K)
 	bash["t"] = float(bash["t"]) - dt
@@ -488,8 +500,16 @@ func _tick_bash(dt: float) -> void:
 	if float(bash["t"]) <= 0.0:
 		var b := bash
 		bash = {}
-		if not b.get("hop", false) and not b.get("hit", false):
+		if b.get("hop", false):
+			_keep_poof(b)
+		elif not b.get("hit", false):
 			m.fx.dust(h.pos, 6)
+
+## Out of the poof he sails on with a share of its speed (momentum kept), not the class's small carry.
+func _keep_poof(b: Dictionary) -> void:
+	var keep := (b["dir"] as Vector2) * float(b["speed"]) * float(dash_def()["air_keep"])
+	h.vel.x = keep.x
+	h.vel.z = keep.y
 
 ## The ram's looks: the flame skull round his front (flat, so it reads from above) and Linwick's own
 ## after-images, ember puffs that burn out through the fire ramp behind him (the hop leaves them too).

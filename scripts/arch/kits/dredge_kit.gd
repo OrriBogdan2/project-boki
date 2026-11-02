@@ -27,8 +27,7 @@ const SLUG_COL := Color("ff4fa8")      # a hot pink streak in flight
 const SLUG_CORE := Color("ffd0ec")
 const SLUG_REST := Color("7a4aff")     # a slug hanging at its stop line: solid violet, dark core
 const ANCHOR_COL := LDFx.ANCHOR_RIM    # seafoam: the anchor's rim, its ring and its stun
-const CAM_TRAIL := 0.4                 # s the camera trails a barge, so the near-blink reads as a jump cut
-const BLINK_CARRY := 3.0               # m/s at most kept out of the near-blink (the class carry would slide him on)
+const STOP_CARRY := 3.0                # m/s at most kept out of a barge
 const HAUL_T := 0.26                   # s per hand-over-hand haul (dr_reel); the rope snaps taut on each
 const DIVE_ANCHOR_UP := 3.4            # m from the anchor's base to its ring: the ring rides at his feet
 const IDLE_T := 0.7                    # s after the last shot the spread cone folds back to one aim line
@@ -47,7 +46,8 @@ var dive := {}                  # hold: the air smash falling {h0, t}
 var lock_until := -9.0          # the barge can't turn much until then (just after the Anchor)
 var barge_t := 0.0              # the barge's trail is showing
 var trail_t := 0.0              # the next barge after-image
-var blink_t := 0.0              # the barge under way; when it ends he stops, keeping almost none of its speed
+var stop_t := 0.0               # the barge under way; when it ends he stops, keeping almost none of its speed
+var next_barge := -9.0          # the short gap between barges in a run
 var drop_fx := {}               # the anchor falling through the wind-up (LDFx.anchor_drop's entry)
 var shot_seen := 0              # the last weapon volley the kit dressed
 var shot_at := -9.0
@@ -131,6 +131,9 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 	if rank("dash") >= 3 and h.dashes < h.max_dashes():
 		h.dashes = minf(h.max_dashes(), h.dashes + float(dash_def()["cut"]) / maxf(0.5, h.dash_regen()))
 
+## A third barge charge: he chains several short, fast shoves in a row.
+func extra_dashes() -> float: return 1.0
+
 func can_shoot() -> bool:
 	return fire_ok() and fuse.is_empty() and pull.is_empty() and dive.is_empty() and not broadside.running()
 
@@ -155,7 +158,7 @@ func _tick(dt: float) -> void:
 	elif res >= 5.0:
 		tell = "half"
 	self_pips(int(res_max()), int(res), res >= res_max(), dt)
-	if blink_t > 0.0: _tick_blink(dt)
+	if stop_t > 0.0: _tick_stop(dt)
 	if wind > 0.0: _tick_wind(dt)
 	if not dive.is_empty(): _tick_dive(dt)
 	if flying: _tick_hook()
@@ -634,7 +637,7 @@ func _quake(at: Vector3, fell: float) -> void:
 
 # ------------------------------------------------------------------ dash: Barge
 func on_dash(use_ex: bool) -> bool:
-	if wind > 0.0 or not dive.is_empty() or broadside.running():
+	if wind > 0.0 or not dive.is_empty() or broadside.running() or m.time < next_barge:
 		return true
 	var dd := dash_def()
 	var dir := dash_dir()
@@ -645,48 +648,47 @@ func on_dash(use_ex: bool) -> bool:
 		var ang := fwd.angle_to(dir)
 		if absf(ang) > lim:
 			dir = fwd.rotated(clampf(ang, -lim, lim))
-	_barge_burst(dir)
 	if use_ex and not h.grounded:
-		# the class air dash, further when airborne (sheet: Barge)
 		if not spend_dash(true): return true
-		# the same near-blink as on foot, 35% further: in the air it is faster, not longer (the class long dash
-		# would otherwise take over its distance and time)
-		var air_dist := float(dd["dist"]) * float(dd["air_k"])
-		travel(air_dist, float(dd["time"]), {"invuln": 0.08, "trail": "", "dir": dir}, true)
-		h.roll_t = float(dd["time"])
-		h.roll_speed = air_dist / h.roll_t
-		play("dr_hop")
-		m.sfx("dr_hop", h.pos, -3.0, 1.0)
-		barge_t = float(dd["time"])
-		blink_t = float(dd["time"]) + 0.02
-		if h.is_local() and m.cam: m.cam.trail(CAM_TRAIL)
-		return true
-	if not spend_dash(false):
-		return true
-	var pk := power("dash") / maxf(0.01, m.dmg_mult(h))
-	travel(
-		float(dd["dist"]), float(dd["time"]),
-		{
+		_air_barge(dd, dir)
+	else:
+		if not spend_dash(false):
+			return true
+		var pk := power("dash") / maxf(0.01, m.dmg_mult(h))
+		var shove := {
 			"invuln": 0.06, "shove": true, "shove_kb": float(dd["hit_kb"]), "shove_dmg": float(dd["hit_dmg"]) * pk,
 			"trail": "", "dir": dir
 		}
-	)
-	st["last_dash"] = "barge"
-	play("dr_barge")
-	barge_t = float(dd["time"])
-	blink_t = float(dd["time"]) + 0.02
-	if h.is_local() and m.cam: m.cam.trail(CAM_TRAIL)
-	h.glide_cd = maxf(h.glide_cd, float(dd["time"]) + 0.35)
-	m.sfx("dr_barge", h.pos, -2.0, 1.0)
+		travel(float(dd["dist"]), float(dd["time"]), shove)
+		st["last_dash"] = "barge"
+		play("dr_barge")
+		h.glide_cd = maxf(h.glide_cd, h.roll_t + 0.35)
+		m.sfx("dr_barge", h.pos, -2.0, 1.0)
+	_barge_burst(dir)
+	barge_t = h.roll_t
+	stop_t = h.roll_t + 0.02
+	next_barge = m.time + h.roll_t + float(dd["gap"])
 	return true
 
-## The barge's end: he arrives almost dead still, as in the source (a near-blink with no slide).
-func _tick_blink(dt: float) -> void:
-	blink_t -= dt
-	if blink_t > 0.0 or h.roll_t > 0.0:
+## In the air (the class air dash slot): the same quick shove 35% further, so it is faster, not longer (the
+## class long dash would otherwise take over its distance and time).
+func _air_barge(dd: Dictionary, dir: Vector2) -> void:
+	var feel := dash_feel()
+	var air_t := float(dd["time"]) * float(feel["time"])
+	var air_dist := float(dd["dist"]) * float(dd["air_k"]) * float(feel["dist"])
+	travel(air_dist, air_t, {"invuln": 0.08, "trail": "", "dir": dir}, true)
+	h.roll_t = air_t
+	h.roll_speed = air_dist / air_t
+	play("dr_hop")
+	m.sfx("dr_hop", h.pos, -3.0, 1.0)
+
+## The barge's end: he arrives planted (the class carry would slide a heavy on after each quick shove).
+func _tick_stop(dt: float) -> void:
+	stop_t -= dt
+	if stop_t > 0.0 or h.roll_t > 0.0:
 		return
-	blink_t = 0.0
-	var flat := Vector2(h.vel.x, h.vel.z).limit_length(BLINK_CARRY)
+	stop_t = 0.0
+	var flat := Vector2(h.vel.x, h.vel.z).limit_length(STOP_CARRY)
 	h.vel.x = flat.x
 	h.vel.z = flat.y
 
