@@ -879,7 +879,7 @@ const FEATHER_COOL := 0.04     # [est] heat (fuel share) cooled per second with 
 const FEATHER_KEEP := 0.6      # [est] seconds after closing the glider that its speed and steering carry
 const FEATHER_MIN := 0.05      # [est] the glider reopens with this much heat room left (was 0.15)
 const FEATHER_TAP := 0.3       # [est] an abyss lift's first this-many seconds are its quick impulse...
-const FEATHER_TAP_HEAT := 1.0  # [est] ...heating like a level glide; held past it, the full 4x
+const FEATHER_TAP_HEAT := 0.4  # [est] ...heating like a level glide; held past it, the full 4x
 var glide_off_t := 9.0         # seconds since the glider closed in the air (9 = long ago / on the ground)
 var lift_t := 0.0              # seconds of the current abyss lift (feathering taps stay in the cheap part)
 
