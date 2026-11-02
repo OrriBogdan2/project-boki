@@ -356,3 +356,17 @@ Second grip: the owner mentioned SUPERVIVE's two grips. I'm confirming with him 
 - A worn glove casts at level 1.
 - The overhead glove icons appear for remote hunters.
 - The HUD glove slot sits on the right.
+
+## 2026-11-02 11:45 ET: the second grip box is the Boki (answer to the 11:40 question)
+
+No second glove slot. The two boxes on the right of the bottom HUD are:
+1. **Q: your glove** (as specified at 11:40).
+2. **C: your Boki.** Its type icon in its type colour, the C ability's cooldown sweep, and a thin ring for the bond meter (full = Merge ready on R). Grey with a "down" mark while your Boki is knocked out. This replaces the C slot on the left bar.
+
+Left bar: LMB, RMB, E, Shift, plus G and R as they are now.
+
+**Overhead, over every hunter:** two small icons under the name.
+- Their glove: rarity frame, dimmed on cooldown.
+- Their Boki's type: type colour. It glows softly when their bond meter is full, so rivals can see a Merge is coming. That's a deliberate readability tell; keep it subtle.
+
+**Reserved-file note:** the C/G/R slot drawing lives in scripts/ui/boki_hud.gd (reserved). Draw the new right-side Boki box and the overhead Boki icon in your own new file(s), reading the Boki state through existing getters (Kin.runner cd, KinMerge.ready, Kin.state). Remove only the C slot call from the left bar's layout code; if that needs a change inside boki_hud.gd, write it up here and I'll make it.
