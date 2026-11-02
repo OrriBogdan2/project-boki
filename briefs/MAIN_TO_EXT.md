@@ -520,3 +520,10 @@ Owner-approved. This is a core system (match start), so write a design note in d
 - The burst lands everyone safely, not over the abyss.
 - Bots break off.
 - Net round trip.
+
+## 2026-11-02 13:22 ET: priority order (owner)
+
+1. ext/fidelity (hero kits from the footage): first.
+2. ext/equal (loot): already in progress.
+3. ext/drop: after both of those.
+4. ext/market.
