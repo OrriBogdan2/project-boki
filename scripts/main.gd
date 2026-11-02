@@ -3988,7 +3988,7 @@ func _home_build_check() -> void:
 	tr.apply_try()
 	tr.open_tryon()
 	ok.call(String(tr.kit["fire"]["name"]) == Content.weapon(String(Data.CLASSES["heavy"]["weapon"])).display_name and mv.panel_open == "Try-on rack", "the Try-on rack puts a heavy's weapon in your hands (%s)" % tr.kit["fire"]["name"])
-	tr.set_my_class()
+	Save.d["classes"] = ClassUnlock.legacy(); tr.set_my_class()      # (an old save: every class open; a new save's locks are in --class-unlock-check)
 	ok.call(String(Save.d["cls"]) == "heavy" and String(Save.d["weapon"]) == Arch.signature(String(Save.d["arch"])), "Set as my class makes it your expedition class")
 	mv._close_panel()
 	# the climbing wall: walk up to it, jump, and you're stood on top

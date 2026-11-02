@@ -331,8 +331,17 @@ func _home(tree: SceneTree) -> void:
 	HomeClasses._click(hm, "gunslinger")
 	await tree.process_frame
 	ok(Arch.of_save() == "gunslinger" and hm.player != old_model and is_instance_valid(hm.player), "an open class can be picked from the Classes screen, and the farm hunter turns into it")
-	# training yard "set as my class" refuses a weight with nothing open
+	# the Try-on rack's "Set as my class" refuses a weight with nothing open (the class stays as it was)
 	Save.d["classes"]["open"] = ["thief"]
+	Save.d["cls"] = "light"; Save.d["arch"] = "thief"
+	var tr: HomeTraining = hm.training
+	tr.try = {"cls": "heavy"}
+	tr.set_my_class()
+	ok(String(Save.d["cls"]) == "light" and String(Save.d["arch"]) == "thief", "'Set as my class' on the Try-on rack refuses a weight with no open class")
+	tr.try = {"cls": "light"}
+	tr.set_my_class()
+	ok(String(Save.d["cls"]) == "light" and String(Save.d["arch"]) == "thief", "and keeps an open one (%s)" % Save.d["arch"])
+	tr.try = {}
 	# a reveal waiting when you arrive home
 	ClassUnlock.state()["reveal"] = ["gunslinger"]
 	var rv := ClassReveal.maybe_show(hm)
