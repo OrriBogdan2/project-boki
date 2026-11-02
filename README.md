@@ -2,7 +2,7 @@
 
 Review shots for each hero: kit card, each ability, the payoff, animation frame strips and a neutral full-body portrait. PNGs are downscaled to at most 1280 px wide. Captions come from the shot manifests.
 
-Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-tender), [Tamsin](#tamsin-rimewright), [Dredge](#dredge-dredge), [Ashwick](#ashwick-ashwick), [Dolm](#dolm-dolm), [Ostra](#ostra-ostra), [Archer](#archer-archer), [Bulwark](#bulwark-bulwark), [Thief](#thief-thief), [Juggernaut](#juggernaut-juggernaut), [Farm building](#farm-building-farmbuild)
+Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-tender), [Tamsin](#tamsin-rimewright), [Dredge](#dredge-dredge), [Ashwick](#ashwick-ashwick), [Dolm](#dolm-dolm), [Ostra](#ostra-ostra), [Archer](#archer-archer), [Bulwark](#bulwark-bulwark), [Thief](#thief-thief), [Juggernaut](#juggernaut-juggernaut), [Farm building](#farm-building-farmbuild), [classes](#classes-classes)
 
 ## Vireo (mage)
 
@@ -553,3 +553,25 @@ Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-t
 **A tier 3 Lumber Camp (gold plinth, tall pennant, glowing corner lanterns) beside a plain tier 1 Quarry**
 
 ![A tier 3 Lumber Camp (gold plinth, tall pennant, glowing corner lanterns) beside a plain tier 1 Quarry](farmbuild/08_tier3_beside_tier1.png)
+
+## classes (classes)
+
+**The starter class pick on a new save: Thief, Marlowe and Juggernaut (one per weight), with the rest opening through play**
+
+![The starter class pick on a new save: Thief, Marlowe and Juggernaut (one per weight), with the rest opening through play](classes/starter_pick.png)
+
+**The Classes screen: account level and XP bar, an open class (Thief, playing), another open one (Marlowe), and an in-progress one (Archer 1/3, Juggernaut 1/2) with goals**
+
+![The Classes screen: account level and XP bar, an open class (Thief, playing), another open one (Marlowe), and an in-progress one (Archer 1/3, Juggernaut 1/2) with goals](classes/classes_screen.png)
+
+**The Classes screen scrolled down: locked classes with their goal, 0 progress and the account level each needs**
+
+![The Classes screen scrolled down: locked classes with their goal, 0 progress and the account level each needs](classes/classes_screen_locked.png)
+
+**The unlock reveal: Marlowe steps into a ring of light, with Later and Play buttons**
+
+![The unlock reveal: Marlowe steps into a ring of light, with Later and Play buttons](classes/unlock_reveal.png)
+
+**The farm's Hero picker: locked classes greyed out with their goal and progress, open ones in full colour, and a Classes and goals button**
+
+![The farm's Hero picker: locked classes greyed out with their goal and progress, open ones in full colour, and a Classes and goals button](classes/farm_picker.png)
