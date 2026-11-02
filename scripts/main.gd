@@ -1228,7 +1228,7 @@ func _economy_check() -> void:
 	Save.d = old
 	Econ.ensure()
 	Care.catch_up(orec)
-	ok.call(Econ.armory().is_empty() and Econ.feeders().size() == 1 and Econ.graves().is_empty() and Econ.pack_cap() == Equal.BASE_PACK and Care.starve_stage(orec) == "" and Equal.take_loadout(0).is_empty(), "an old save loads: a first trough, empty armory, %d-slot backpack" % Econ.pack_cap())
+	ok.call(Econ.armory().is_empty() and Econ.feeders().size() == 1 and Econ.graves().is_empty() and Econ.pack_cap() == Equal.base_pack() and Care.starve_stage(orec) == "" and Equal.take_loadout(0).is_empty(), "an old save loads: a first trough, empty armory, %d-slot backpack" % Econ.pack_cap())
 	print("ECON DONE failures: %d" % bad[0])
 	get_tree().quit()
 

@@ -152,7 +152,7 @@ func _match() -> void:
 		P.refresh_gear()
 		ok("and taking it off again does not heal (round %d)" % round_i, P.hp <= hp_hurt + 0.01 and absf(P.hp / P.max_hp - share0) < 0.001, "%.1f / %.1f" % [P.hp, P.max_hp])
 	var cap0 := P.pack_cap
-	ok("the pack is the same size for everyone", cap0 == Equal.BASE_PACK, str(cap0))
+	ok("the pack is the same size for everyone", cap0 == Equal.base_pack(), str(cap0))
 	P.gear[3] = {"id": "windstep_boots", "rar": 1}
 	ok("boots give their movement perk", P.gear_stat("glide_speed") > 0.0)
 	P.gear[3] = {}

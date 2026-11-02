@@ -110,7 +110,8 @@ Capture by scan (docs/decisions/0002). A wild Boki that is knocked out (dazed) c
 
 | Setting | Value |
 |---|---|
-| _doc | Equal footing in matches (docs/decisions/0005-equal-footing.md; scripts/match/equal.gd). What a hunter may bring from home: gloves, boots and utility. rarity_cap_by_tier: the highest rarity (0 Common .. 4 Legendary) a brought piece keeps, by difficulty tier (Data.TIERS: The Meadow, Dusk Isles, The Hollow). issue: the belt charges every hunter is given. util_drops: chance that a table (GearDrops tables, by name; _default for any other) also drops one utility item, and how many charges. migration: the v5 to v6 save conversion of armour and kit pieces (gems = item value x gem_k; materials = gear.json extract_mats by rarity), and pack upgrades refunded. |
+| _doc | Equal footing in matches (docs/decisions/0005-equal-footing.md; scripts/match/equal.gd). What a hunter may bring from home: gloves, boots and utility. rarity_cap_by_tier: the highest rarity (0 Common .. 4 Legendary) a brought piece keeps, by difficulty tier (Data.TIERS: The Meadow, Dusk Isles, The Hollow). issue: the belt charges every hunter is given. util_drops: chance that a table (GearDrops tables, by name; _default for any other) also drops one utility item, and how many charges. migration: the v5 to v6 save conversion of armour and kit pieces (gems = item value x gem_k; materials = gear.json extract_mats by rarity), and pack upgrades refunded. base_pack: backpack slots every hunter starts with (Equal.pack_slots adds a brought backpack, none yet, and gear/perk "pack" stats). |
+| base_pack | 6 |
 | rarity_cap_by_tier | [2, 3, 4] |
 | issue | {"tonic": 2, "armor_kit": 2} |
 | belt_slots | 3 |

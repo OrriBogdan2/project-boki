@@ -275,7 +275,7 @@ func init_hunter(match_node: Node, id: String, team_id: int, class_id: String, n
 		bot_look = Models.random_look()
 	max_hp = cdat["hp"]; hp = max_hp
 	max_armor = round(max_hp * ARMOR_DUR); armor = max_armor; base_armor = max_armor
-	UtilityBelt.issue(self)
+	UtilityBelt.issue(self); pack_cap = Equal.base_pack()      # the belt issue and the equal pack size (Equal.pack_slots)
 	glide_max = GLIDE_TIME * float(cdat.get("glide_cap", 1.0))
 	base_speed = cdat["speed"]
 	runner = AbilityRunner.new(self)

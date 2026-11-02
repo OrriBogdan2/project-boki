@@ -8,7 +8,6 @@ extends RefCounted
 ## What you bring is at risk: die and it is in your deathbox like everything else.
 ## The workshop and guild-project perks, the bigger home backpack and armor from the armory are gone.
 
-const BASE_PACK := 6                       # backpack slots for every hunter (any more comes from a pickup in the match)
 const BRING_SLOTS := [0, 1, 3]             # gear KINDS that may come from home (Gear.slot_of): active glove, passive glove, boots
 
 static var _rules: Dictionary = {}
@@ -18,6 +17,25 @@ static func rules() -> Dictionary:
 		var d = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/equal.json"))
 		_rules = d if d is Dictionary else {}
 	return _rules
+
+# ------------------------------------------------------------------ backpack size (one place)
+## Backpack slots every hunter starts with (content/rules/equal.json base_pack): the same for all.
+static func base_pack() -> int:
+	return int(rules().get("base_pack", 6))
+
+## Slots a brought backpack adds. None can be brought yet (equal pack size); a backpack bring-in
+## slot, if it comes, adds its slots here and nothing else needs to change.
+static func backpack_bonus(_h) -> int:
+	return 0
+
+## Slots on top of the base: a brought backpack plus every "pack" stat from worn gear and perks
+## (the satchel perk's +1 is a perk with stats {"pack": 1}). Gear.apply_worn keeps h.pack_cap in step.
+static func pack_bonus(h) -> int:
+	return backpack_bonus(h) + int(round(h.gear_stat("pack")))
+
+## A hunter's backpack size: base + brought backpack + gear and perk bonuses.
+static func pack_slots(h) -> int:
+	return base_pack() + pack_bonus(h)
 
 ## The highest rarity (0 Common .. 4 Legendary) that may be brought at a difficulty tier.
 static func rarity_cap(tier: int) -> int:
@@ -96,7 +114,8 @@ static func picks() -> Array:
 ## Applies what you brought to the local player at the start of a match. Everything else about the
 ## hunter is already the same for everyone (Hunter.init_hunter).
 static func start(m, h) -> void:
-	h.pack_cap = BASE_PACK
+	h.pack_cap = pack_slots(h)
+	h.set_meta("gear_pack", pack_bonus(h))       # (Gear.apply_worn counts changes from here)
 	if "--equal-demo" in OS.get_cmdline_user_args():
 		m.opts["equal_demo"] = true; m.opts["no_drop"] = true      # screenshots: read here, not in main.gd (its budget)
 	if m.opts.get("training", false) or m.opts.get("tutorial", false) or m.opts.get("duel", false):

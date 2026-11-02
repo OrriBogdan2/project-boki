@@ -170,7 +170,7 @@ static func apply_worn(h) -> void:
 		h.max_hp += hp_new - hp_old
 		h.hp = clampf(h.hp * h.max_hp / maxf(old_max, 1.0), 1.0, h.max_hp)      # the same share of the bar, so swapping armor never heals
 		h.set_meta("gear_hp", hp_new)
-	var pk_new := int(round(h.gear_stat("pack")))
+	var pk_new := Equal.pack_bonus(h)          # gear and perk "pack" stats plus a brought backpack (Equal.pack_slots)
 	var pk_old := int(h.get_meta("gear_pack", 0))
 	if pk_new != pk_old:
 		h.pack_cap += pk_new - pk_old

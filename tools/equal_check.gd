@@ -104,7 +104,7 @@ func _equal_base() -> void:
 				same = false
 				print("EQUAL   differs: %s  %s vs %s" % [k, str(poor[k]), str(rich[k])])
 		ok(same, "tier %d: two very different farms start with identical armor, perks, health, pack and stats" % tier)
-		ok(int(rich["pack"]) == Equal.BASE_PACK and int(rich["tier"]) == 0 and (rich["perks"] as Array).is_empty() and bool(rich["armor_gear"]), "tier %d: base pack %d, armor level 0, no perks, no armor piece" % [tier, Equal.BASE_PACK])
+		ok(int(rich["pack"]) == Equal.base_pack() and int(rich["tier"]) == 0 and (rich["perks"] as Array).is_empty() and bool(rich["armor_gear"]), "tier %d: base pack %d, armor level 0, no perks, no armor piece" % [tier, Equal.base_pack()])
 		ok(poor_gear.all(func(g): return (g as Dictionary).is_empty()) and poor_belt == ["tonic", "armor_kit", ""], "tier %d: the poor farm brings nothing but the everyday issue (%s)" % [tier, str(poor_belt)])
 		var worn: Array = P.gear.filter(func(g): return not (g as Dictionary).is_empty())
 		ok(worn.all(func(g): return int(g["rar"]) <= Equal.rarity_cap(tier)), "tier %d: every brought piece is within the rarity cap (%s)" % [tier, str(worn.map(func(g): return "%s r%d" % [g["id"], g["rar"]]))])
@@ -121,6 +121,9 @@ func _equal_base() -> void:
 		ok(int(Save.d["items"]["tonic"]) == 9 - (UtilityBelt.bring_cap("tonic", tier) - 2) and int(Save.d["items"]["smoke"]) == 3 - UtilityBelt.bring_cap("smoke", tier), "tier %d: what is brought leaves the stash" % tier)
 		await _drop(m2)
 	ok(cap0 == 2, "(the easiest tier caps at Rare)")
+	# the backpack size comes from one place: base (content/rules) + a brought backpack (none yet) + gear and perk "pack" stats
+	ok(Equal.base_pack() == int(Equal.rules().get("base_pack", -1)) and Econ.pack_cap() == Equal.base_pack(), "the base backpack size is data (%d slots, content/rules/equal.json)" % Equal.base_pack())
+	ok(Equal.pack_slots(PackStub.new(0.0)) == Equal.base_pack() and Equal.pack_slots(PackStub.new(1.0)) == Equal.base_pack() + 1, "pack_slots adds a +1 pack stat (the satchel perk) to the base")
 	# the workshop and guild perks are gone from the match
 	_farm(true)
 	var m3 := _start(1)
@@ -477,3 +480,11 @@ func _migration() -> void:
 	Econ.after_raid({"extracted": true, "haul": [{"t": "gear", "id": "vest", "rar": 3, "uid": "z1"}, {"t": "gear", "id": "blink", "rar": 1, "uid": "z2"}]}, out)
 	ok(Econ.armory().size() == 1 and int(Save.d["gems"]) == g0 + 36 and int(out.get("salvage_gems", 0)) == 36, "armor found in a match salvages for gems on arrival (+36), the glove is stored")
 	Save.d = Save.fresh()
+
+## A stand-in hunter for Equal.pack_slots: only its "pack" stat matters (a perk's stats count there).
+class PackStub extends RefCounted:
+	var pack := 0.0
+	func _init(p: float) -> void:
+		pack = p
+	func gear_stat(k: String) -> float:
+		return pack if k == "pack" else 0.0
