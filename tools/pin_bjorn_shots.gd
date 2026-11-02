@@ -45,7 +45,7 @@ const SHOTS := [
 	["bjorn_slam_hit", "bulwark", "slam", 1.98, 2.5, "Slam impact: white dust on the dummy, the debris trail as it flies"],
 	["bjorn_aegis", "bulwark", "aegis", 0.9, 1.5, "RMB held: his aegis, a curved gold slab with ribs and a hammer sigil"],
 	["bjorn_aegis_block", "bulwark", "aegis_block", 1.02, 1.5, "Aegis blocking: the flash and yellow sparks"],
-	["bjorn_aegis_break", "bulwark", "aegis_break", 1.05, 1.5, "Aegis broken: gold shards, SHIELD BROKEN"],
+	["bjorn_aegis_break", "bulwark", "aegis_break", 1.2, 1.5, "Aegis broken: gold shards, SHIELD BROKEN"],
 	["bjorn_smash_dash", "bulwark", "smash", 0.6, 3.0, "360 Smash: the short dash"],
 	["bjorn_smash_spin", "bulwark", "smash", 0.78, 3.5, "360 Smash: the one spin hit on arrival, the red-gold swirl ring"],
 	["bjorn_purify_column", "bulwark", "purify", 1.05, 1.0, "Mending Ground with the hammer in hand: the green column coming down on him, the ring filling"],
