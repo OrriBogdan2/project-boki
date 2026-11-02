@@ -1,4 +1,4 @@
-2026-11-02T22:10:42Z
+2026-11-02T22:20:34Z
 
 ext/classes | cacd796 | REOPENED per INBOX 19:10 (Hunters wording, pick 1 + 2 early unlocks, no weight labels, hunter viewer, hold-to-unlock); rework queued on Opus medium | 0.14.0 | -
 ext/hero-shots | 3bd0520 | done: 12 heroes + farm building + classes; all portraits show signature weapons | - | -
@@ -13,8 +13,8 @@ ext/kitfix-moosh-tamsin | f793887 (merged main + power() pass; was 6bd7d71) | RE
 ext/kitfix-breah-ostra | c26758e | READY FOR LOCAL SCREENSHOT REVIEW (main a7ed228 sync66 incl. LevelGrowth + aimkit 6bc1c25) | 0.16.0 (no new sync) | full suite 0 failures; dolm combo 65, ostra combo 60, zone 24, aimkit 55, shot-vertical OK; simtest extracted. Breah (renamed from Dolm): standable/climbable 1.25 m rocks, punch launches lined-up rocks, hold LMB, slam hop with sweet-spot telegraph. Ostra: Shift hold-to-aim/release (never random dash, keeps height), RMB 1 charge with visible STUNNED. power() applied. Shared-file changes: verbs.gd standable walls, ent.gd ground() reads StoneStand, hunter.gd 1 line, arena_check seed(2024) before sparring-bot test. Shots: ext/hero-shots breah/v2, ostra/v2. Owner Qs: Ostra Shift hold-to-aim OK? enemies can stand on Breah rocks? tap boulder stop at cursor? charged orb pierce terrain like source? Trade swaps allies too?
 
 Running now: ext/classes rework; ult passes on kitfix-dancer-juggernaut, kitfix-moosh-tamsin, kitfix-linwick-dredge, kitfix-pin-bjorn (all Opus medium, SERVER_UPDATE6)
-Queued: ult passes on kitfix-vireo-venator and kitfix-breah-ostra (start as slots free)
-Last INBOX entry handled: 2026-11-02 22:10 UTC (relayed to the 4 running ult agents and the classes rework; added to the 2 queued ult prompts. ultbond is not on origin yet, so ult agents keep a guarded stub using the exact names KinBond.from_ult / ArchKit.cast_ult / hunter_ult. Kit merges on hold until the local review fix list arrives.)
+Queued (in order, one agent per branch at a time): polish vireo-venator (Opus), ult breah-ostra, then polish pin-bjorn and polish dancer-juggernaut after their ult passes finish, then ult vireo-venator after its polish. Polish passes for linwick-dredge, moosh-tamsin, breah-ostra will be queued when their reviews arrive.
+Last INBOX entry handled: 2026-11-02 22:40 UTC (kit review round 1: polish passes queued per pair; Bjorn REWORK visuals; Pin, Dancer, Zedran, Vireo, Venator PASS WITH FIXES)
 Watcher: received 19:06 UTC entry
 Questions for the owner: see ext/classes line.
 Net note: main is now 0.15.0, which kits2-nor also uses (0.15.0, kit move id on the snapshot); main session to reconcile. Kitfix branches that need a bump use 0.15.2 (dancer-juggernaut), .3 (pin-bjorn), .4 (vireo-venator), .5 (linwick-dredge), .6 (moosh-tamsin), .7 (breah-ostra).
