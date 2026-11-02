@@ -317,6 +317,8 @@ approved "giant merge only for mount kin"); any other kin fuses onto you as armo
 time runs out, early if you're knocked or you throw the kin (throwing still works and ends it),
 then 3 s (`MERGE_SPENT_TIME`) before it can go again, and the meter starts from empty.
 
+> **Superseded by docs/decisions/0001:** R is the Merge for every class (a form by the Boki's type and power tier from `content/rules/merge_forms.json`, kit-agnostic ability changes, a leap-merge from out, a weak surge with no Boki). The paragraph below describes the old Bonded R, which runs only with `class_ults` on.
+
 **With archetypes (docs/ARCHETYPES.md §5, option C, built):** R is the archetype's ultimate. When the
 bond meter is full the next R is *Bonded*: the ult casts with its own tell, its kin sockets run at
 the bonded budget (x1.3, `KinParts.MERGED_SCALE`), and 0.2 s later `KinMerge.cast` starts the merge

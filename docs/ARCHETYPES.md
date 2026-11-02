@@ -213,6 +213,10 @@ The six kin today:
 
 ## 5. Merge vs R: resolving the conflict
 
+> **Superseded (docs/decisions/0001-boki-merge-and-commands.md):** R is the Merge for every class. The
+> options below are kept for the record; the class's own R stays reachable behind
+> `content/rules/boki_system.json` `class_ults` until the hero-port work folds it into the kits.
+
 Today the merge **is** R (the bond ultimate, unlocking at run level 6). The new kit gives R to the
 archetype. Options:
 
