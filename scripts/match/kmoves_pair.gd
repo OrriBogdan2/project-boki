@@ -18,8 +18,8 @@ static func air_moves(k: ArchKit, jump_id: String, land_id: String) -> void:
 	k.st["on_ground"] = h.grounded
 	if was_grounded == h.grounded or h.roll_t > 0.0:
 		return
-	var free: bool = k.anim_id in ["", jump_id] or k.m.time - k.anim_at > KIT_MOVE_LIFE
-	if not free:
+	var body_free: bool = k.anim_id in ["", jump_id] or k.m.time - k.anim_at > KIT_MOVE_LIFE
+	if not body_free:
 		return
 	if not h.grounded and h.vel.y > JUMP_UP:
 		k.play(jump_id)
@@ -288,8 +288,9 @@ const MOVES := {
 		[0.42, {"p": 0.12, "sq": -0.1, "lift": 0.04}],
 		[0.55, {}]]},
 	# Furnace Cloak (E): 0.2 s curled in, arms crossed over the chest (the ring shows), then the flamer swings
-	# up over his shoulder on its strap (a long gun pointed down would hit the ground) and both arms fling wide with the blast (an overshoot up on the toes), held wide while
-	# the heat rolls out, and a settle back onto the grip
+	# up over his shoulder on its strap (a long gun pointed down would hit the ground) and both arms fling wide
+	# with the blast (an overshoot up on the toes), held wide while the heat rolls out, and a settle back onto
+	# the grip
 	"as_cloak": {"keys": [
 		[0.0, {}],
 		[0.12, {

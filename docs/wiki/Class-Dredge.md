@@ -59,7 +59,7 @@ What the in-game kit card (K) says.
 
 **Salvage (passive).** Each knock or assist adds a Salvage stack (+2.5% health, 10 at most); being downed costs one. Hits on a hunter's back deal 50% more. Knocking a hunter heals you 16% of your health.
 
-**Barge (dash, Shift, 10s cooldown).** A 4.6m shoulder barge toward the cursor (2 charges): a burst where you set off, and it shoves foes along it for 5. In the air it goes 35% further. It is usable while reeling someone in. Just after the Anchor your turn is limited to 35 degrees.
+**Barge (dash, Shift, 10s cooldown).** A near-instant 4.6m shoulder barge toward the cursor (2 charges): a burst where you set off, and it shoves foes along it for 5. In the air it goes 35% further. It is usable while reeling someone in. Just after the Anchor your turn is limited to 35 degrees.
 
 **Grapnel (RMB, 12s cooldown).**
 

@@ -22,7 +22,7 @@ ability damages keep the source's ratios to each other: bolt : ram : cloak = 248
 | Passive, Flashover | none | Every hit builds Char; at 31 the foe is Ablaze (3s, 2% of their health a second, one flame pip over the head); fed to 31 again they Flash over (4%, three pips and a glow). Anything that stokes a burning foe upgrades it. Char falls off all at once after 5s. A knock heals 16%, resets the cloak and gives back one ram charge | two burn levels, 3s, 31 stacks, refresh on any source, excess discarded, knock heal, knock restores 1 dash charge | food removing the burn not reproduced |
 | LMB, Torch Lance | hold | a hose of fire 7m long (it doesn't stop at the cursor): a cyan pilot flame for 0.2s, then puffs leave the nozzle and keep their own velocity, so a sweep bends the stream; 0.5m wide at the nozzle, 2.2m at the end; walls stop it; 27 damage a second, +25% on a burning foe; Char 30/s (half on a burning foe); the fire stops at once on release; 0.35s before it can relight and a 0.35s self-slow | hold flamethrower, 2 burns every 65ms (half on an Ignited foe), 0.35s between uses, 0.35s self-slow after release; the stream lags like a hose (footage) | own weapon (`flamethrower`); 8s of fuel kept (the source shows none) |
 | RMB, Cinder Shot | hold to aim, release | a thin lane to the cursor while held, then a red-pink fireball that lands at the cursor (14m at most) and fizzles there on a miss; 14 damage, sets the foe Ablaze; on a burning foe it upgrades the burn and spreads it (at the old level) to foes within 4m. 7s | bolt applies Ignite; on an Ignited foe it spreads (initial level) and upgrades; no knockback | cursor landing from one footage sample (see Assumptions) |
-| Shift, Soot Ram | tap, 2 charges | a short head-first dash toward the cursor (up to 4.4m) that stops on the first foe: 16 damage, a shove, 17 Char, and Linwick bounces back a little. Two charges chain right away. Rank 3: stokes at once | dash in flames, knocks struck targets back and the hero slightly back, 17 burns, 2 charges, rank 4 upgrades the burn | none (the folded lava carpet went back to the ult on X) |
+| Shift, Soot Ram | tap, 2 charges | a short head-first dash toward the cursor (up to 3.4m in 0.33s, fastest at the start) that stops on the first foe: 16 damage, a shove, 17 Char, and Linwick bounces back a little. Two charges chain right away. Rank 3: stokes at once | dash in flames, knocks struck targets back and the hero slightly back, 17 burns, 2 charges, rank 4 upgrades the burn | none (the folded lava carpet went back to the ult on X) |
 | E, Furnace Cloak | tap | a thin ring at 4.5m for 0.2s (everyone sees it, arms crossed), then the blast: 7 damage, 16 Char, Anti-Heal 3s, foes in sight dragged to you (walls stop them), a swirling 3s fire shield of 6.4% + 5.1% per foe hit. A knock resets it. 10.5s | spin: damage, Anti-Heal, pull, shield by foes hit, knock reset, blocked by line of sight; a 0.2s edge ring before it (footage) | none |
 | X, Flue Flight (ult, level 6) | tap; X again lands | a ring of embers (2.2m, everyone sees it), then 1.4s of low flight (12.6 m/s, about 17.6m) toward the cursor that steers with the aim at up to 120 degrees a second. A 1.8m molten carpet forms under him and lasts 4s (the oldest end fades first): 4.5 damage a second, a 30% slow and 4 Char every 0.3s (Ablaze in about 2.4s). The Furnace Cloak works mid-flight; a knockback speeds the flight up; a stun ends it; the carpet never forms over the abyss. 32s | flight forward that steers, a fire trail that slows and builds Ignite (4 stacks every 0.3s), 4s, recast ends it, Heat Shield castable mid-flight, impulses speed it up, no trail over abyss | no flamethrower or Cinder Shot mid-flight (see Assumptions) |
 | R | | the Boki Merge (not a hero ability) | | |
@@ -86,6 +86,11 @@ Where the footage and the wiki are silent, we picked the most likely behaviour (
 - The flight's telegraph for the player is a heading lane with chevrons as long as the flight still has to go; foes see only the
   ember ring and the carpet, as in the footage.
 - Only enemy hunters count for the bond (the carpet still burns monsters and Boki).
+- Body and movement (hero-ref "Body, scale and movement feel"): 0.76 of a heavy's size and a little broad, the tall hat kept;
+  quick short steps (1.8x the step rate, stride 0.45); the hitbox stays the heavy 0.5 (the ring under him shows it).
+- Not in the footage, built from his character: the air dash is the class long dash as a tucked forward roll in a jet of flame;
+  a plain jump is a quick crouch and a springy tuck, landing on a light squash (`lw_land`); the idle fidgets are a restless
+  bounce, a bob and a check of the nozzle. His dashes leave ember puffs that burn out behind him instead of the shared pill.
 
 ## Combinations (all scripted in `--ashwick-combo-check`)
 | Do this | You get | Asserted by (check line) |
@@ -128,20 +133,22 @@ Keyed full-body moves live in `scripts/match/kmoves_pair.gd` (`KMovesPair.MOVES`
 to the sheet's beats: anticipation, release (with an overshoot key), follow-through, recovery.
 | Ability | KMOVES ids | Pose idea |
 |---|---|---|
-| Torch Lance (LMB, held) | `as_lance` (hold), `as_lance_end` | sets his feet and drops the nozzle to the right hip during the 0.2s pilot, kicked back as the roar starts, then braced leaning in; a little recoil off the hose on release |
+| Torch Lance (LMB, held) | `as_lance` (hold, looped), `as_lance_end` | sets his feet and drops the nozzle to the right hip during the 0.2s pilot, kicked back hard as the roar starts, then braced leaning in with the hose bucking (an 8 Hz loop); a little recoil off the hose on release |
 | Cinder Shot (RMB) | `as_aim` (hold), `as_shot` | gun hand cocked at the shoulder sighting down the lane; release: the arm thrusts out (overshoot), the body kicked back by the shot |
 | Soot Ram (Shift) | `as_leap` | a coil, then head first like a battering ram, arms swept back, legs trailing; squashes on impact, springs upright |
-| Air dash (the class air dash) | `lw_hop` | a jet of flame from the bellows tucks him into a forward ball, then a settle |
-| Furnace Cloak (E) | `as_cloak` | 0.2s curled in, arms crossed (the ring shows), flung wide with the blast up on his toes, held, settle |
-| Flashover payoff, a knock | `lw_stoke` | the off fist pumps up, a lean back, a bounce |
+| Air dash (the class air dash) | `lw_hop` | a jet of flame from the bellows tucks him into a ball that rolls once forward, then he lands on his feet |
+| Furnace Cloak (E) | `as_cloak` | 0.2s curled in, arms crossed (the ring shows), the flamer swung up on its strap and the arms flung wide with the blast up on his toes, held, settle |
+| Flashover payoff, a knock | `lw_stoke`, `lw_stoke_lance` (mid-roar) | the off fist punches up over his head, a lean back, a bounce; mid-roar the nozzle stays on the foe and the hold goes on |
+| Plain jump / landing | `lw_jump`, `lw_land` | a quick crouch and a springy tuck; a light squash |
 | Flue Flight (X) | `lw_jet` (held), `lw_land` | a crouch as the ember ring bursts (0.08s), then he springs up and leans into the jet, the free arm swept back to the bellows strap, the nozzle held low (the gun hand stays on it), legs trailing; on landing a squash onto his feet |
 
 ## Look and sound
-- Effects: `scripts/arch/kits/ld_fx.gd` (pooled, `shaders/ld_fx.gdshader`): the hose as one MultiMesh of fire puffs (white-hot to
-  yellow to orange to a sooty violet fringe), the cyan pilot, the Cinder Shot fireball (red-pink body, yellow core, cool violet halo,
-  smoky comet tail; an ember spray and red flash on hit, a blue-white fizzle ring on a miss), the flame skull with ember tails on the
-  ram, the sunburst and cracked scorch of the cloak, the swirling two-ring fire shield, the molten carpet with violet scorched edges,
-  and the flame pips over burning foes.
+- Effects: `scripts/arch/kits/ld_fx.gd` (pooled; `shaders/ld_fx.gdshader` draws each look's body alpha-blended so colour and
+  soot hold on bright grass, `ld_fx_glow.gdshader` adds only the hot cores): the hose as pooled fire puffs (an orange body with a
+  deep red band and a sooty rim, a white-hot core near the nozzle), the big cyan pilot, the Cinder Shot fireball (red-pink body,
+  yellow core, violet halo, dark smoke tail; a red jagged flash, red orb and embers on hit, a violet fizzle ring on a miss), the
+  flat flame skull with long ember tails on the ram and ember-puff after-images, the jagged 14-ray sunburst and cracked scorch of
+  the cloak, the deep orange two-ring fire shield, the molten carpet with charred edges, and the flame pips over burning foes.
 - Weapon: `HeroGearPair.flamer`: ribbed brass barrel, flared bell nozzle with a pilot cage, fuel canister, hose to the pack.
 - Sounds (tools/sfx_linwick_dredge.py): `lw_pilot`, `lw_roar`, `lw_bolt`, `lw_bolt_hit`, `lw_bash`, `lw_bash_hit`, `lw_shield`,
   `lw_blaze`, `lw_trail`, `lw_hop`, `lw_jet` (lift-off whoomp and jet roar), `lw_jet_land` (plus the older `as_ignite`).

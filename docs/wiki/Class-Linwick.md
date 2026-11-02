@@ -59,7 +59,7 @@ What the in-game kit card (K) says.
 
 **Flashover (passive).** Your fire builds Char on foes (it all falls off after 5s). At 31 Char the foe is Ablaze: 3s of burning for 2% of their health a second, one flame over their head. Fed again to full Char they Flash over: a fiercer burn (4%), three flames and a glow. Anything that stokes a foe already burning upgrades it. A knock heals you 16% of your health.
 
-**Soot Ram (dash, Shift, 9s cooldown).** A short head-first dash (up to 4.4m) toward the cursor that stops on the first foe: 16 damage, a shove (you bounce back a little) and 17 Char (half a Flashover). Two charges. A knock restores one charge only.
+**Soot Ram (dash, Shift, 9s cooldown).** A short head-first dash (up to 3.4m, fastest at the start) toward the cursor that stops on the first foe: 16 damage, a shove (you bounce back a little) and 17 Char (half a Flashover). Two charges. A knock restores one charge only.
 
 **Cinder Shot (RMB, 7s cooldown).**
 

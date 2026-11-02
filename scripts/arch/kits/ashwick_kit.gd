@@ -221,7 +221,7 @@ func _tick(dt: float) -> void:
 ## foe: one flame pip for Ablaze, three and a glow for Flashover (sheet gap 4b).
 func _tick_tells(dt: float) -> void:
 	var vis := tells_visible()
-	var flamer_up := anim_id == "as_cloak" and m.time - anim_at < CLOAK_POSE_T      # swung up on its strap
+	var flamer_up: bool = anim_id == "as_cloak" and m.time - anim_at < CLOAK_POSE_T      # swung up on its strap
 	if vis and h.wid == "flamethrower" and not h.downed and not KinMerge.active(h) and not flamer_up:
 		var fl := 0.85 + 0.15 * sin(m.time * 37.0)
 		var big := 1.0 + (1.2 if was_held and spool < float(lmbd()["spool"]) else 0.0)

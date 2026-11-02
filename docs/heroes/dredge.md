@@ -22,7 +22,7 @@ Source hero 1531 HP against our heavy 193 HP: damage about x0.13. Numbers follow
 | Passive, Salvage | none | Knocks and assists stack Salvage (+2.5% health each, max 10); being downed costs one; hits on a hunter's back +50%; a knock heals 16% | stacks of max health per knock/assist, lose one on death, +50% backstab, heal on knock | heal as a share of health |
 | LMB, scattergun | hold/tap | 7 slugs in a 30 degree fan (bloom to +15) that stop at 6.3m and hang there as violet dots for 0.3s; a shot every 0.5s; while firing the spread's two edge lines lie on the ground, idle one aim line to the cursor; the body rocks back each shot; the barge resets the bloom | 7 slugs, sharp bloom, a fixed stop range, cone edge lines and an idle aim line (footage), 0.5s | the no-spread armour bonus is not reproduced |
 | RMB, Grapnel | tap | a braided rope-hook 11.5m to the first foe: it flies over rocks and props and drags the foe over them (a cliff face or a placed wall still stops it); the foe is stunned and reeled to your feet (11 m/s, up to 3s) with weight, so strafing swings them round you; you are Grounded while you reel (no jump or glide, the barge still works); they land Grounded 1s. It also catches an ally (reeled in to safety) and scoops up wisps on the way. 12s | the arm pierces terrain, grabs the first target (enemy or ally), physics pull that swings, grounds on arrival, scoops wisps, only dash castable | heavy bodies (wardens) can't be pulled; cliffs stop it (see Assumptions) |
-| Shift, Barge | tap | a shoulder barge toward the cursor (4.6m, 2 charges at 10s): a red spiky burst and an ember scorch where it sets off, shoves for 5; in the air (the class air dash) it goes 35% further; turn limited to 35 degrees for 0.8s after the Anchor | ground and air dash with separate cooldowns, further in the air, turn limit after the slam | one pool of ground charges plus the class air dash |
+| Shift, Barge | tap | a near-blink shoulder barge toward the cursor (4.6m in 0.12s, 2 charges at 10s; the camera trails it and catches up over 0.4s): a red spiky burst and an ember scorch where it sets off, shoves for 5; in the air (the class air dash) it goes 35% further; turn limited to 35 degrees for 0.8s after the Anchor | ground and air dash with separate cooldowns, further in the air, turn limit after the slam | one pool of ground charges plus the class air dash |
 | E, Anchor Drop | tap | on the ground: the fist hauled back, a hop a body length forward, the slam at 0.38s: a giant ghost anchor drops on the 3m cone in front, a crescent sweep, dust: 25 damage, stun 1.1s, slammed down and Grounded. In the air: you smash straight down at once with the anchor falling beside you, a landing ring shows, and the 3.2m ring hits at the landing with up to +50% damage by the height fallen (+75% at rank 3). 7s | fist slam: damage, stun, ground slam, pushes you down (not over the abyss), rank 4 height damage | owner note: the air cast is a straight-down smash |
 | X, Brass Broadside (ult, level 6) | tap | planted for a 1.1s charge while a 105 degree, 5.9m fan grows on the ground in front (everyone sees it; it is the exact area, locked at the press), then two waves 0.6s apart of six heavy brass slugs each (real shots): 4 a slug and Anti-Heal 3s. Point blank all twelve land, at 4.6m two a wave. A stun in the charge stops it (back in 8s). 21s | one press, two waves 0.6s apart, 6 slugs each with Anti-Heal, a fan telegraph, planted | 4 a slug, no back bonus: the burst cap (see Ult) |
 | R | | the Boki Merge (not a hero ability) | | |
@@ -76,12 +76,18 @@ Where the footage and the wiki are silent, we picked the most likely behaviour (
 - The grab's hitbox is the hook's own size; with no target it flies its full 11.5m.
 - An ally caught by the hook is neither damaged, stunned nor Grounded; a wisp is pulled like an ally.
 - The air smash needs at least 1.2m of height; lower casts use the ground slam (with the old small downward push).
-- The air dash distance is 35% more than the class air dash (the footage doesn't show it).
+- The air barge is the same 0.12s near-blink as on foot with 35% more distance (faster, not longer); the footage doesn't
+  show it. Out of either he keeps at most 3 m/s, so he arrives almost still.
 - The scattergun keeps a magazine (12 rounds, 6s of fire) and reload; the source spends mana instead.
 - Backstab and Salvage values follow the wiki; the footage doesn't show them separately.
 - Brass Broadside: the aim locks at the press (the fan doesn't turn after). A stun in the charge stops it with a short cooldown
   (8s); a stun between the waves stops the second. The second wave is a different colour (violet) like the footage's bluer one.
 - Only enemy hunters count for the bond (the slugs still hit monsters and Boki).
+- Body and movement (hero-ref "Body, scale and movement feel"): a heavy's height, 1.3x as broad across the chest and shoulders;
+  slower, longer, planted steps (0.9x the step rate, stride 0.7).
+- Not in the footage, built from his character: a plain jump is a deep heave off planted feet with the arms out, landing on a
+  heavy squash (`dr_land`); the idle fidgets are a shoulder roll, a neck crack and a stretch. His barge leaves dark iron
+  after-images with a brass rim instead of the shared pill.
 
 ## Combinations (all scripted in `--dredge-combo-check`)
 | Do this | You get | Asserted by (check line) |
@@ -100,7 +106,8 @@ Where the footage and the wiki are silent, we picked the most likely behaviour (
 | Hook a wisp | it is scooped up and reeled in | "wisp: a downed hunter the hook passes is scooped up with the catch" |
 | Anchor Drop in the air | straight down, the landing ring and the falling anchor, a ring of damage and stun, height adds damage | "air smash: straight down at once"; "air smash: the landing ring shows while you fall, the anchor falls with you"; "air smash: it lands where you land, a ring of damage and stun"; "air smash: height adds damage (6m: about +50%)"; "air smash rank 3: up to +75% by height" |
 | Anchor over the abyss | no downward push, no smash | "abyss: the Anchor never pushes you down over the void" |
-| Barge in the air | 35% further | "barge: further in the air than on the ground" |
+| Barge timing | 4.6m within 0.15s, then he stops | "barge: a near-blink, about 4.6m within 0.15s, then he stops" |
+| Barge in the air | the same blink time, 35% further | "barge: in the air the same blink time, 35% further" |
 | A hit from behind | +50% | "passive: from behind +50%, from the front none" |
 | Knock or assist | +1 Salvage (+2.5% health); a knock also heals | "passive: a knock = 1 stack, +2.5% health, a heal"; "passive: an assist stacks but does not heal"; "passive: capped at 10 stacks (+25%)" |
 | Downed | -1 Salvage | "passive: being downed costs a stack" |
@@ -122,7 +129,8 @@ Keyed full-body moves live in `scripts/match/kmoves_pair.gd` (`KMovesPair.MOVES`
 |---|---|---|
 | Scattergun (LMB, each shot) | `dr_shot` | the barrel kicks up, the torso rocks back and turns side-on, back to the aim in about 0.2s |
 | Grapnel (RMB) | `dr_throw`, `dr_reel`, `dr_pullend` | the gun to the off side, the free arm coils back then punches out; side-on and braced, hauling hand over hand while reeling (held up to 3s); a last yank and a settle |
-| Barge (Shift) | `dr_barge` | sink and coil, shoulder-first launch with the gun trailing, a crouched landing and a turn back to the aim |
+| Barge (Shift) | `dr_barge` | hunched shoulder-first through the 0.12s blink, a squash on arrival at 0.16s, back to rest by 0.35s |
+| Plain jump / landing | `dr_jump`, `dr_land` | a deep heave with the arms out; a heavy squash onto bent knees |
 | Air dash (the class air dash) | `dr_hop` | arms flung wide, legs pumping, a heavy settle |
 | Anchor Drop (E) | `dr_anchor` | fist hauled back, the hop up and forward, the fist driven down (0.38s), crouched follow-through, a small rebound |
 | Anchor Drop in the air | `dr_dive` (hold), `dr_quake` | both fists locked overhead dropping like a stone; a huge squash on landing, a heave back up |
@@ -130,10 +138,13 @@ Keyed full-body moves live in `scripts/match/kmoves_pair.gd` (`KMovesPair.MOVES`
 | Brass Broadside (X) | `dr_blast` | hunched over the gun and his free fist through the 1.1s charge (deeper at the end), a shove with overshoot and a barrel kick at wave 1, a short rewind, the second shove at 1.7s, then he straightens up (2.1s) |
 
 ## Look and sound
-- Effects (`scripts/arch/kits/ld_fx.gd`, `shaders/ld_fx.gdshader`, `shaders/ld_rope.gdshader`): pink-white slug streaks that hang as
-  violet dots; a white-hot muzzle star; the braided golden rope with a brass three-pronged claw, drawn through rocks; the chain ring
-  at his feet while Grounded; the giant translucent ghost anchor, a crescent sweep, the dust cloud and stun spirals; the landing ring,
-  sunburst and scorch of the air smash; the red spiky burst and ember scorch where the barge sets off.
+- Effects (`scripts/arch/kits/ld_fx.gd`; `shaders/ld_fx.gdshader` alpha-blended bodies with `ld_fx_glow.gdshader` glow cores,
+  `ld_anchor.gdshader`, `ld_rope.gdshader`): hot pink slug streaks that hang as solid violet dots with dark cores; a brass muzzle
+  flash; the braided rope (a darker tarred strand, swelling taut on each haul) with a big brass claw, drawn through rocks; the brass
+  and iron chain ring at his feet while he reels; the giant solid iron anchor with a seafoam rim, falling through the wind-up and
+  planted for 0.25s; a seafoam crescent sweep, the dust cloud and seafoam stun spirals; the chain landing ring, brass sunburst and
+  scorch of the air smash (he rides the anchor down); the red spiky burst and ember scorch where the barge sets off, iron and brass
+  after-images along it.
 - Weapon: `HeroGearPair.scattergun`: a fat iron barrel with a flared brass bell, a rope-wrapped pump, a slug drum, a glowing seam.
 - Sounds (tools/sfx_linwick_dredge.py): `dr_shot`, `dr_throw`, `dr_grab`, `dr_reel`, `dr_barge`, `dr_anchor_wind`, `dr_dive`,
   `dr_quake`, `dr_hop`, `dr_blast_charge` (a rising brass hum), `dr_blast` (a heavy thump, pitched down for wave 2) (plus the older

@@ -8,7 +8,7 @@ extends RefCounted
 ##                                   (telegraph, key frame, impact); pr_c_<move>@<t> the same as a close-up
 ##   --arena-demo=pr_payoff_dr / pr_payoff_as   the payoff moments
 ##   moves: dr_shot dr_throw dr_reel dr_anchor dr_dive dr_barge dr_hop dr_flex
-##          as_lance as_sweep as_shot as_leap lw_hop as_cloak lw_stoke
+##          as_lance as_sweep as_shot as_leap lw_hop as_cloak lw_stoke lw_stoke_lance
 ##          lw_jet dr_blast (the X ultimates), dr_rock (the Grapnel hauling a foe over a rock)
 ## A move's optional fourth entry is its strip zoom (the hose and the rope need the wider gameplay view).
 
@@ -29,6 +29,7 @@ const MOVES := {
 	"lw_hop": ["ashwick", "flamethrower", [0.5, 0.55, 0.62, 0.72, 0.86, 1.05]],
 	"as_cloak": ["ashwick", "flamethrower", [0.5, 0.62, 0.7, 0.78, 1.0, 1.35]],
 	"lw_stoke": ["ashwick", "flamethrower", [0.5, 0.6, 0.7, 0.8, 1.0]],
+	"lw_stoke_lance": ["ashwick", "flamethrower", [0.98, 1.06, 1.12, 1.2, 1.32, 1.5], 1.0],
 	"lw_jet": ["ashwick", "flamethrower", [0.5, 0.56, 0.62, 1.1, 1.92, 2.15]],
 	"dr_blast": ["dredge", "shotgun", [0.5, 1.0, 1.55, 1.62, 2.22, 2.6]],
 }
@@ -175,6 +176,13 @@ static func _drive(A: Arena, P: Hunter, D: Hunter, mv: String, t: float, dt: flo
 		"dr_blast":
 			if t <= go: P.teleport(D.pos - Vector3(1.8, 0, 0))       # point blank, where every slug lands
 			if ArenaDemo._at(t, dt, go): _ult(P)
+		"lw_stoke_lance":
+			# a Flashover mid-roar: the fist pump plays over the braced hose
+			P.inp["fire"] = t > go and t < 1.8
+			if t < go: D.teleport(A.home + Vector3(3.5, 0, 0))
+			if ArenaDemo._at(t, dt, go + 0.45):
+				(P.ak as AshwickKit).stoke(D)
+				(P.ak as AshwickKit).stoke(D)
 		"lw_stoke":
 			if ArenaDemo._at(t, dt, go):
 				var K := P.ak as AshwickKit
