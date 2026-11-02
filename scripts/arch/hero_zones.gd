@@ -5,7 +5,7 @@ extends RefCounted
 ## stand on: not in the abyss, not inside rocks, trees, cliffs or other walls, not through a wall from
 ## where the caster stands. Rock bridges only replace abyss tiles (Verbs.add_bridge).
 ##
-## Net (Net.VERSION 0.10.1): ["zone", kind, ...] events through the existing "ev" topic. The caster's
+## Net (Net.VERSION 0.14.0): ["zone", kind, ...] events through the existing "ev" topic. The caster's
 ## game sends them; every other game builds the same thing, so a rock stops a remote body the same way.
 ##   ["zone", "rock",   nid, rid, x, y, z, dx, dz, len, time, hp]
 ##   ["zone", "rockgo", rid]                     a rock was launched or crumbled: remove it

@@ -51,5 +51,5 @@ Full-body cast moves are `HunterAnim.KMOVES` entries, played by the kit with `pl
 - Kit: `scripts/arch/kits/rimewright_kit.gd` plus `care_util.gd`; look in `scripts/match/hero_gear_care.gd`; data in `content/archetypes/rimewright.json` and `content/weapons/hoar_fan.json`; sounds `audio/rime_*.wav` (`tools/gen_care_sfx.py`).
 - The wall is the shared `Verbs.add_wall` system; the frost shield for teammates goes through `CareUtil` (a "heal" event for online squadmates).
 - The Rinkrun sets `move_kind = "rinkrun"`, which `hunter.gd` maps to the rush dash animation.
-- No R in the data (see tender.md engine notes). Net is 0.10.1 because of the carry event of the pair.
+- No R in the data (see tender.md engine notes). Net is 0.14.0 because of the carry event of the pair.
 - Open: the rank-3 ice bridge is a puff only (no terrain editing). Checks: `--support-check`, `--rimewright-combo-check`.

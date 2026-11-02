@@ -59,6 +59,6 @@ Strips: `tender_rmb_strip`, `tender_e_strip` and the others in the shots folder 
 ## Engine notes
 - Kit: `scripts/arch/kits/tender_kit.gd`, shared helpers in `care_util.gd` (heals that reach bots and online squadmates, revive hook, carry). Gear and look: `scripts/match/hero_gear_care.gd`. Data: `content/archetypes/tender.json`, `content/weapons/lantern_crook.json`. Sounds: `audio/tend_*.wav` (made by `tools/gen_care_sfx.py`).
 - No R in the data: `ArchKit` skips the ult path, the kit card shows the Boki Merge tile, `--archetype-check` skips R rows for the pair.
-- Net: carrying adds one "carry" event (`["carry", target nid, carrier nid]`, handled in `match.gd` by `CareUtil.set_carry`), so Net.VERSION is 0.10.1. Heals and revives reuse "heal" and "rev".
+- Net: carrying adds one "carry" event (`["carry", target nid, carrier nid]`, handled in `match.gd` by `CareUtil.set_carry`), so Net.VERSION is 0.14.0. Heals and revives reuse "heal" and "rev".
 - `life.gd` asks `CareUtil.carried_tick` so a carried teammate neither bleeds nor can be stomped.
 - Checks: `--support-check` (all), `--tender-combo-check`.
