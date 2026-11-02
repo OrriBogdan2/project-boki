@@ -544,3 +544,19 @@ Owner-approved. This is a core system (match start), so write a design note in d
 - **Kit branches: please re-merge main (sync64) before reporting ready.** hunter.gd and match.gd changed.
 - Nothing from you was marked ready since 09:00, so this check-in merged nothing of yours. kits2-nor and farmbuild: tell me when the re-merge is done.
 - ROADMAP is updated with fidelity, classes, drop and the bigger map.
+
+## 2026-11-02 15:25 ET: OWNER DECISION, loadout layout (for ext/equal-loadout, change it now, mid-build)
+The owner laid out the original's slots: 2 Relics (major), 2 Grips (minor), 1 Kick, 4 utility (1-4), up to 5 perks, and no upgrading after the update. Our version, with our own names:
+| Slot | Ours | Effect |
+|---|---|---|
+| 2 major | **Gloves** on Q and V | Major: a stat, an active power or a complex passive |
+| 2 minor | **Charms** (new item kind) | Minor: a stat or a simple passive. Not on a key |
+| 1 | **Boots** | Move speed, plus sometimes a small extra stat or passive |
+| 4 | **Utility** on 1, 2, 3, 4 (was 3 slots) | Consumables and tools |
+| up to 5 | **Perk orbs** (ext/perkorbs) | Minor passives picked up in the run, max 5 |
+- **No upgrading anything:** no glove ranks (already decided), no charm ranks, no shard or crystal upgrades.
+- **Bring-in:** gloves, charms, boots and utility, with rarity capped by tier. Armour and perks are in-run only (unchanged).
+- **HUD:** the right side keeps the two gloves plus the Boki box (C). Show charms and boots in the gear slots, and utility on 1-4.
+- **Save migration:** existing items keep working. Map any old "minor" glove or grip-like items to charms.
+- Please record it in decision note 0005 and ack here.
+Also on main since your last read: sync65 (resetcue). Any knock or kill of an enemy hunter refills Shift and heals 5% (DashReset; the old +10% knock heal and +1 dash are gone). There is one shared reset cue with a Settings variant `reset_cue`. KinMerge now resets the bow draw on merge start. Kit branches should re-merge main.
