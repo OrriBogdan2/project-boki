@@ -726,12 +726,15 @@ func _shot_down() -> void:
 ## stack with whatever you were doing), you slide for a fixed moment without control, and it never
 ## pops you into the air unless the attack says so.
 var knock_t := 0.0
+var launched_at := -9.0        # when a hard shove or a launch last hit you (Capture.controlled: it interrupts a rescue or a scan)
 var knock_steer := 0.3         # how much WASD bends a knockback (the attack decides: 0.3 to 0.5)
 func impulse(kbv: Vector2, lift := -1.0) -> void:
 	if fortify_t > 0.0:
 		return
 	var k := kbv * (1.0 - owner_stat("knockback_resist"))
 	var s := k.length() / mass()
+	if s >= Capture.HARD_KNOCK or (lift >= 0.0 and lift / mass() >= 3.0):
+		launched_at = m.time
 	if s < 0.05:
 		if lift >= 0.0:
 			# a straight-up lift (a slam's crater, an eruption) with no sideways push

@@ -29,6 +29,7 @@
 		"rescue_drain_s": 2.0,
 		"rescue_block_s": 0.6,
 		"rescue_slack": 0.7,
+		"contest_r": 1.2,
 		"rescue_kneel_frac": 0.12,
 		"rescue_done_s": 0.45
 	},

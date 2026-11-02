@@ -216,6 +216,8 @@ static func downed_label(H, k: Kin, sp: Vector2) -> void:
 		return
 	H._ctext(sp + Vector2(0, -42 + bob), "%s is down" % k.rec.get("name", "Your Boki"), 17, col.lerp(Color.WHITE, 0.3), H.big)
 	var mine: bool = k.owner_h == H.m.player
+	if KinDowned.contested(k):
+		H._ctext(sp + Vector2(0, -62 + bob), "CONTESTED", 15, DOWN_COL, H.big)       # (an enemy stands on it: no pick-up until they leave)
 	H._ctext(sp + Vector2(0, -24 + bob), ("Run into it to pick it up  ·  or %ds" if mine else "Back in %ds") % int(ceil(k.down_t)), 12, Color(H.INK, 0.9), H.big)
 	H.c.draw_colored_polygon(PackedVector2Array([sp + Vector2(-7, -14 + bob), sp + Vector2(7, -14 + bob), sp + Vector2(0, -4 + bob)]), col)
 	H._bar(Rect2(sp + Vector2(-30, 2), Vector2(60, 5)), clampf(k.down_t / maxf(0.1, k.down_total), 0.0, 1.0), Color(col, 0.7))

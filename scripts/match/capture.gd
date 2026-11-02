@@ -136,10 +136,13 @@ static func _tick_scan(m, h: Hunter, st: Dictionary, dt: float) -> void:
 	if frac >= 1.0:
 		complete(m, h, k)
 
-## Crowd control on a hunter: stun, root, a knockback, Grounded, a hex, a grapple or a pad flight. It interrupts
-## a scan here and a rescue (KinDowned); plain damage does not.
+const HARD_KNOCK := 8.0       # m/s: a shove this fast (about 1.5m of slide) or a launch counts as being knocked away; a bullet's nudge does not
+const LAUNCH_AGE := 0.4       # s: how long after the launch it still counts
+
+## Hard crowd control on a hunter: stun, root, a real knock or a launch, Grounded, a hex, a grapple or a pad flight. It
+## interrupts a scan here and a rescue (KinDowned); plain damage and the small shove most hits carry do not.
 static func controlled(h: Hunter) -> bool:
-	return h.stun_t > 0.0 or h.root_t > 0.0 or h.knock_t > 0.0 or h.m.time - h.kb_time < 0.2 or KitStatus.grounded(h) or Hex.active(h) or not h.grap.is_empty() or not h.pad.is_empty()
+	return h.stun_t > 0.0 or h.root_t > 0.0 or h.m.time - h.launched_at < LAUNCH_AGE or KitStatus.grounded(h) or Hex.active(h) or not h.grap.is_empty() or not h.pad.is_empty()
 
 ## What stops any channel on the hunter (a scan, a rescue): "dash" (your choice) or "cc" (crowd control). "" = neither.
 static func hunter_stop(h: Hunter) -> String:
