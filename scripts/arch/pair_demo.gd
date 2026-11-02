@@ -26,7 +26,7 @@ const ANIM := {
 	"os_pop": ["ostra", "tether_lantern", [2.0, 2.06, 2.12, 2.2, 2.4, 2.65]],
 	"os_empower": ["ostra", "tether_lantern", [0.5, 0.6, 0.75, 0.9, 1.05, 1.35]],
 	"br_spine": ["dolm", "rubble_fists", [0.6, 0.78, 0.83, 1.1, 1.43, 1.8]],
-	"os_well": ["ostra", "tether_lantern", [0.5, 0.53, 0.56, 0.9, 1.53, 1.62]],
+	"os_well": ["ostra", "tether_lantern", [0.5, 0.56, 0.62, 0.95, 1.53, 1.62]],
 }
 
 static func at(t: float, dt: float, when: float) -> bool:

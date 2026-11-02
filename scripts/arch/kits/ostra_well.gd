@@ -107,22 +107,25 @@ func _tick_open(dt: float) -> void:
 	if left <= 0.0:
 		_close()
 
-## Every 0.1s: anyone inside (in sight of the centre) is caught, stunned until the well closes and nicked.
+## Every 0.1s: anyone inside (in sight of the centre) is nicked; the first time, caught and stunned until the
+## well closes (one stun, so the status word shows once).
 func _tick_catch(left: float) -> void:
 	ticks += 1
 	var dmg := float(xd()["tick_dmg"]) * k.power("x")
 	for f in k.foes_in(center, radius):
 		if not k.m.world.los(center + Vector3(0, 0.6, 0), f.pos + Vector3(0, 0.6, 0), center.y + 0.6):
 			continue
+		var hit := {"src": "abil", "ab": "x"}
 		var first := not caught.has(f.get_instance_id())
+		if first:
+			hit["stun"] = maxf(left, TICK)
 		caught[f.get_instance_id()] = f
-		f.hurt(dmg, k.h, {"src": "abil", "ab": "x", "stun": maxf(left, TICK)})
+		f.hurt(dmg, k.h, hit)
 		if first:
 			_on_catch(f)
 
 func _on_catch(f: Ent) -> void:
 	KitLooks.of(k.m).crown(f, float(xd()["time"]))
-	k.m.fx.word(f.pos + Vector3(0, 2.3, 0), "STUNNED", Color("fff27a"), false)
 	if f.remote:
 		HeroZones.move_body(k.m, f, _floor(center))
 	if f is Hunter:
