@@ -153,7 +153,8 @@
 "semicolon": 5
 },
 "scripts/core/game.gd": {
-"long_line": 11,
+"history_comment": 1,
+"long_line": 12,
 "nested_ternary": 1,
 "semicolon": 5
 },

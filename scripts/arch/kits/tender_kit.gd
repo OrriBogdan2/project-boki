@@ -112,6 +112,7 @@ func _tick(dt: float) -> void:
 	_tick_hearth(dt)
 	_tick_carry(dt)
 	_tick_call(dt)
+	_call_preview()
 	_tick_look(dt)
 	if h.ctrl == "bot":
 		_bot_idle(dt)
@@ -556,10 +557,6 @@ func ulk() -> UltLook:
 	return ult_look
 
 
-func ult_aims() -> bool:
-	return true
-
-
 func ult_running() -> bool:
 	return not hearth_call.is_empty()
 
@@ -569,21 +566,23 @@ func ult_recast() -> bool:
 	return true
 
 
-## Held X: the gold reach ring round her and a line onto the teammate under the cursor (or a dim line
-## to the cursor when nobody is there).
-func ult_aim_tick() -> void:
-	var xd := x_def()
-	var gold := Color("ffd27a")
-	AimKit.circle(h, "x", {"self": true, "r": float(xd["range"]), "col": gold, "dashed": true})
+## The aim telegraph (local only): while Hearth Call is ready and the cursor rests on a teammate in
+## reach, the gold reach ring round her, a line onto them and a pick ring under them. X casts on it.
+func _call_preview() -> void:
+	if not hearth_call.is_empty() or not h.is_local() or not _x_ready():
+		return
 	var who := call_target()
-	if who != null and who != h:
-		AimKit.line(h, "x_line", {"from": h.pos, "to": who.pos, "col": Color("ffd27a"), "hot": 0.4})
-		AimKit.circle(h, "x_pick", {"at": who.pos, "r": 0.8, "col": Color("9cf07a"), "ticks": true})
-	else:
-		AimKit.line(h, "x_line", {"col": Color("a2a8bb"), "alpha": 0.5})
-		AimKit.hide(h, "x_pick")
-	if anim_id != "mm_call_aim":
-		play("mm_call_aim")
+	if who == null or who == h:
+		return
+	var xd := x_def()
+	AimKit.circle(h, "x", {"self": true, "r": float(xd["range"]), "col": Color("ffd27a"), "dashed": true, "alpha": 0.7})
+	AimKit.line(h, "x_line", {"from": h.pos, "to": who.pos, "col": Color("ffd27a"), "hot": 0.4})
+	AimKit.circle(h, "x_pick", {"at": who.pos, "r": 0.8, "col": Color("9cf07a"), "ticks": true})
+
+
+## X is open (level) and off cooldown, and she is free to cast.
+func _x_ready() -> bool:
+	return HeroUlt.unlocked(self) and float(cd["x"]) <= 0.0 and not busy()
 
 
 ## The teammate under the cursor within reach (standing or downed); with no teammate in the match at
@@ -614,8 +613,6 @@ func cast_ult() -> bool:
 	if who == null:
 		if h.is_local() and m.hud:
 			m.hud.toast_small("No teammate there", Color("a2a8bb"))
-		if anim_id == "mm_call_aim":
-			anim_id = ""
 		return false
 	hearth_call = {"who": who, "left": float(x_def()["time"]), "tick": 0.0, "fx": 0.0}
 	stats["calls"] += 1
@@ -702,7 +699,7 @@ func _call_end(done: bool) -> void:
 	if rescue:
 		_call_home(who)
 	# a support ult lands on a teammate: a completed tether counts as a hit, a rescue as the top event
-	HeroUlt.bond(h, "kill" if rescue else "hit")
+	HeroUlt.from_ult(self, "kill" if rescue else "hit")
 	var at := who.pos if not rescue else h.pos
 	# a rescue has its own revive banner, and the bond word lands on her now: no third word there
 	CareUtil.payoff(m, h, at, "" if rescue else "MENDED", Color("9cf07a"), "tend_arrive")
@@ -786,12 +783,10 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 
 ## A bot calls a downed or badly hurt teammate home when it can.
 func _bot_call() -> void:
-	if not hearth_call.is_empty() or not HeroUlt.can_cast(h):
+	if not hearth_call.is_empty() or not _x_ready():
 		return
 	for o in CareUtil.mates(m, h, h.pos, float(x_def()["range"]) - 1.0):
 		if o.downed or o.hp < o.max_hp * 0.35:
 			h.inp["aim"] = o.pos + Vector3(0, 0.9, 0)
-			HeroUlt.press(h)
-			if x_aim:
-				HeroUlt.fire(h)
+			use_x()
 			return

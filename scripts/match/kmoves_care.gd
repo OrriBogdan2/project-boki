@@ -338,10 +338,6 @@ const MOVES := {
 					"sq": 0.15}],
 		[0.4, {}]]},
 	# ================================================================ ultimates on X (10 fps beats)
-	# Hearth Call held to aim: the lantern hand reaching toward the teammate under the cursor
-	"mm_call_aim": {"hold": true, "keys": [
-		[0.0, {}],
-		[0.1, {"y": 0.2, "p": -0.08, "fl": Vector3(0.1, 0.32, -0.5), "hw": 1.0, "wa": Vector3(0.25, 0, 0)}]]},
 	# cast (f25): the hand pulled back low, then thrust high and out as the plus bursts on the ally,
 	# an overshoot, then into the channel pose
 	"mm_call": {"keys": [

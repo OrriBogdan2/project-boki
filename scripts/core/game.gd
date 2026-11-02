@@ -82,8 +82,7 @@ func _setup_input() -> void:
 	_key("glide", [], MOUSE_BUTTON_XBUTTON2)  # hold Mouse 5 (the front side button) in the air to glide, like holding Space; never jumps
 	_key("glide", [], MOUSE_BUTTON_XBUTTON1)  # Mouse 4 glides too (not advertised)
 	_key("reload", [])                        # reloading is automatic
-	_key("ultimate", [KEY_R])                 # the Merge with your Boki (a full bond meter)
-	_key("hunter_ult", [KEY_X])               # the hunter's own ultimate (level 6, its own cooldown)
+	_key("ultimate", [KEY_R])                 # the Boki Merge (needs a full bond meter)
 	_key("tonic", [KEY_1])
 	_key("scores", [KEY_TAB])
 	_key("menu", [KEY_ESCAPE])
@@ -100,7 +99,8 @@ func _setup_input() -> void:
 	_key("pass_lead", [KEY_P])                # riding in / dropping: pass the drop lead to a squadmate
 	_key("record", [KEY_F10])                 # recording mode (Record): clean HUD, then no HUD
 	_key("record_orbit", [KEY_F9])            # recording mode, HUD hidden: slow camera orbit
-	_key("separate", [KEY_Z])                 # riding in / dropping behind the leader: break away and drop solo
+	_key("separate", [KEY_Z])                 # (was X, now the ultimate's second key) riding in / dropping behind the leader: break away and drop solo
+	_key("hunter_ult", [KEY_X])               # the hero's own ultimate (unlocks at level 6, its own cooldown)
 
 func goto(screen: String, opts := {}) -> void:
 	match_opts = opts

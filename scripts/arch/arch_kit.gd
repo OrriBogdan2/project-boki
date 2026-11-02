@@ -33,9 +33,6 @@ var tell := ""                 # "" | "half" | "full": the resource tell enemies
 var bonded_glow := false
 var fuse := {}                 # the R's fuse (wind-up) running: {t, T, bond, guard}
 var cd_off := false            # practice toggle (Arena): cooldowns don't run down, they're skipped
-var x_aim := false             # X held to aim the hunter's ultimate (HeroUlt; kits whose ult picks a target)
-var x_aim_t := 0.0
-var x_bond_kind := ""          # the event the last landed X paid the bond for: hit, knock or kill (checks)
 
 static func make(hunter: Hunter, arch_id: String) -> ArchKit:
 	var k: ArchKit
@@ -65,7 +62,7 @@ static func make(hunter: Hunter, arch_id: String) -> ArchKit:
 func rmb_def() -> Dictionary: return d.get("rmb", {})
 func e_def() -> Dictionary: return d.get("e", {})
 func r_def() -> Dictionary: return d.get("r", {})
-func x_def() -> Dictionary: return d.get("x", {})     # the hunter's own ultimate on X (HeroUlt)
+func x_def() -> Dictionary: return d.get("x", {})          # the hero ultimate on X (HeroUlt)
 func dash_def() -> Dictionary: return d.get("dash", {})
 func lmb_def() -> Dictionary: return d.get("lmb", {})       # the kit's own attack-key data (kits that run the weapon's attack themselves)
 func res_def() -> Dictionary: return d.get("resource", {})
@@ -100,7 +97,6 @@ func _drop_holds() -> void: pass
 ## state this hunter shows. Call this, not _drop_holds, so the shared telegraphs always go with the holds.
 func drop_holds() -> void:
 	_drop_holds()
-	x_aim = false
 	AimKit.clear(h)
 func fire_rmb(_c: Dictionary) -> void: pass        # c: {hold, air, e, r, full, t, variant}
 func rmb_press_extra() -> bool: return false        # a recast that takes the press (Shadow Step); true = handled
@@ -111,12 +107,14 @@ func cast_e() -> bool: return false
 func e_recast() -> bool: return false                # E pressed while it's up (Sigil detonation)
 func cast_r() -> bool: return false
 func r_recast() -> bool: return false                # R pressed while it runs (Last Round release)
-## X, the hunter's own ultimate (HeroUlt routes the key, checks the level and owns the cooldown).
-func cast_ult() -> bool: return false                # true = it went off (the cooldown starts)
-func ult_recast() -> bool: return false              # X pressed while it runs
+## X, the hero ultimate (HeroUlt): start it (true = it went off and the cooldown starts).
+func cast_ult() -> bool: return false
+## X pressed while the ult runs (true = handled, e.g. an early landing).
+func ult_recast() -> bool: return false
 func ult_running() -> bool: return false
-func ult_aims() -> bool: return false                # true = hold X to aim, cast on the release
-func ult_aim_tick() -> void: pass                    # the preview while X is held
+## The X press (Hunter.tick, "hunter_ult"): the level gate, the cooldown and the kit's cast.
+func use_x() -> void:
+	HeroUlt.use(self)
 func on_dash(_ex: bool) -> bool: return false        # true = the archetype handled the dash
 func on_deal(_t: Ent, _dmg: float, _o: Dictionary) -> void: pass
 func on_take(_by: Ent, _dmg: float, _o: Dictionary) -> void: pass
@@ -156,8 +154,6 @@ func tick(dt: float) -> void:
 		ch_rmb = float(rmb_charges())
 	if not fuse.is_empty():
 		_tick_fuse(dt)
-	if x_aim:
-		HeroUlt.aim_tick(self, dt)
 	var mx := float(rmb_charges())
 	if ch_rmb < mx and float(cd["rmb"]) <= 0.0:
 		ch_rmb = minf(mx, ch_rmb + 1.0)
@@ -692,6 +688,8 @@ func slot_info(slot: String) -> Dictionary:
 			out.merge({"name": String(sd.get("name", "")), "short": String(sd.get("short", "")), "icon": String(sd.get("icon", "")), "col": col_of(sd), "desc": String(sd.get("desc", "")),
 				"cd": float(cd["r"]), "cd_max": r_cooldown(), "charges": 1 if float(cd["r"]) <= 0.0 else 0, "max_charges": 1, "verb": "r",
 				"ready": float(cd["r"]) <= 0.0 and int(h.slot_lv.get("ult", 0)) > 0, "bonded": bonded_glow, "up": r_t, "fuse": float(fuse.get("t", 0.0))}, true)
+		"x":
+			return HeroUlt.slot_info(self)
 		"dash", "dodge":
 			var sd := dash_def()
 			var dmax := h.max_dashes()

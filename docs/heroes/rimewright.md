@@ -48,7 +48,7 @@ Scaling: light, HP 124. Ratios kept from the footage: dart 35 -> 4, Shatter 529 
 - **Skate:** 2.4s at most; it goes on over a ledge (and over the abyss it falls once it ends); rank 3's ice bridge stays a visual (no terrain editing).
 - **No squad shield or heal** (owner).
 - **Rimelock:** the stun is 0.75s (the dummy stayed encased about 0.5s; the wiki gives no number). The slow ramp (15% + 12% a second, cap 55%) is ours; the wiki only says it stacks for 3.5s. Line of sight is checked from the rink's centre at chest height. The cooldown starts on the cast. Merging while sealed ends it with no crash.
-- **Rimelock and the bond:** one `KinBond.from_ult` call per crash with its best event ("hit", "knock" if a hunter went down, "kill" if one was eliminated). The sheet's 0.4 per hunter up to 0.8 is replaced by the main session's per-cast amounts (boki_system.json). An early break pays nothing.
+- **Rimelock and the bond:** `HeroUlt.landed` for each hunter the crash stuns; the cast pays once, for its best event ("hit", "knock" if a hunter went down, "kill" if one was eliminated), through `KinBond.from_ult` once ultbond lands. Monsters pay nothing (the shared base counts hunters only). The sheet's 0.4 per hunter up to 0.8 is replaced by the main session's per-cast amounts (boki_system.json). An early break pays nothing.
 
 ## Combinations
 | Interaction | Check (`--rimewright-combo-check` unless noted) |
@@ -100,7 +100,7 @@ Strips: `--arena=thief --arena-demo=care_rimewright_<lmb|skatefire|rmb|e|dash|ai
 
 ## Engine notes
 - Kit: `scripts/arch/kits/rimewright_kit.gd`; data: `content/archetypes/rimewright.json`, `content/weapons/hoar_fan.json`.
-- Merge-start hold fields: `rinkrun` (the skate), `spear_aim` and `rmb_down` (the spear aim), `wall_cast` (the wall's tell), `rime` (the X seal) and `x_aim` (ArchKit).
-- X: `HeroUlt` routes the `hunter_ult` key; the kit overrides `cast_ult`, `ult_running`, `ult_recast`. Numbers are under `"x"` in `content/archetypes/rimewright.json`. Invulnerability is the hunter's `inv_t`, the root its `root_t`.
+- Merge-start hold fields: `rinkrun` (the skate), `spear_aim` and `rmb_down` (the spear aim), `wall_cast` (the wall's tell) and `rime` (the X seal).
+- X: the shared ult base `HeroUlt` routes the `hunter_ult` key; the kit overrides `cast_ult`, `ult_running`, `ult_recast`. Numbers are under `"x"` in `content/archetypes/rimewright.json`. Invulnerability is the hunter's `inv_t`, the root its `root_t`.
 - The wall is the shared `Verbs.add_wall` (blocking, the touch shove); the kit grows it, slides it, carries foes on its face and draws it.
 - Net: unchanged (0.16.0, main's); the ult adds no sync shape. Checks: `--support-check`, `--rimewright-combo-check`.

@@ -173,7 +173,7 @@ static func tick(A: Arena, dt: float, w: String) -> void:
 					print("ARENASHOT ", path)
 				m.get_tree().quit(), CONNECT_ONE_SHOT), CONNECT_ONE_SHOT)
 
-## The X ultimates: Moosh Moosh holds X over the (downed) teammate, lets go and walks while it
+## The X ultimates: Moosh Moosh puts the cursor on the (downed) teammate, presses X and walks while it
 ## channels; Tamsin seals in beside the dummy and lets the rink crack open.
 static func _ult(A: Arena, ally: Hunter, arch: String, what: String, t: float, dt: float) -> void:
 	var P: Hunter = A.m.player
@@ -186,10 +186,8 @@ static func _ult(A: Arena, ally: Hunter, arch: String, what: String, t: float, d
 		P.ak.cd["x"] = 0.0
 	if arch == "tender":
 		P.inp["aim"] = ally.pos + Vector3(0, 0.9, 0)
-		var hold_x := what == "ultaim" or t < 0.5
-		P.inp["hult_down"] = hold_x
-		if _at(t, dt, 0.3):
-			P.inp["hult"] = true
+		if what != "ultaim" and _at(t, dt, 0.5):
+			P.inp["xult"] = true      # the aim shot keeps the cursor on the teammate: the preview telegraph
 		var walking := what != "ultaim" and t > 0.8 and t < 2.3
 		P.inp["move"] = Vector2(0.3, -1.0).normalized() if walking else Vector2.ZERO
 		return
@@ -199,7 +197,7 @@ static func _ult(A: Arena, ally: Hunter, arch: String, what: String, t: float, d
 	if t < 0.3:
 		P.teleport(D.pos + Vector3(-1.0, 0, 3.5))
 	if _at(t, dt, 0.3):
-		P.inp["hult"] = true
+		P.inp["xult"] = true
 
 
 static func _at(t: float, dt: float, when: float) -> bool:

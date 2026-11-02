@@ -74,7 +74,7 @@ What the in-game kit card (K) says.
 
 **Rink Wall (E, 17s cooldown).** A 0.2s sparkle at your feet, then a narrow block of ice erupts just ahead and slides toward the cursor (3 to 10.8m), widening from 1.8m to 4.5m, stopping enemy shots and shoving foes it touches. It stands 3s. Press E again while it slides to freeze it in place for 6s.
 
-**Rimelock (X, level 6, 47s cooldown).** Press X: you are sealed in a frost shell, invulnerable and rooted, and a 7.2m (4 body heights) rink snaps out round you. Foes in it are Chilled and slowed more the longer they stay (15% up to 55%). Its cracks glow brighter as it builds; at 3.5s it cracks open: 40 damage and a 0.75s ice-block stun to every foe in the rink you can see. Press X again in the last 0.75s to set it off early at two thirds; any earlier and the shell just breaks with no stun.
+**Rimelock (X, hero ultimate from level 6, 47s cooldown).** Press X: you are sealed in a frost shell, invulnerable and rooted, and a 7.2m (4 body heights) rink snaps out round you. Foes in it are Chilled and slowed more the longer they stay (15% up to 55%). Its cracks glow brighter as it builds; at 3.5s it cracks open: 40 damage and a 0.75s ice-block stun to every foe in the rink you can see. Press X again in the last 0.75s to set it off early at two thirds; any earlier and the shell just breaks with no stun.
 
 ### Ranks
 

@@ -75,7 +75,6 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | Space | Jump (hold to glide) | `jump` | yes |
 | Mouse 5 / Mouse 4 | Glide (hold in the air) | `glide` | yes |
 | R | Merge with your Boki (needs a full bond meter) | `ultimate` | yes |
-| X | Hunter ultimate (level 6) | `hunter_ult` | yes |
 | 1 | Heal (tonic, or armor kit when health is full) | `tonic` | yes |
 | Tab | Scoreboard | `scores` | yes |
 | Esc | Menu | `menu` | no |
@@ -93,5 +92,6 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | F10 | Recording mode (again: hide the HUD) | `record` | yes |
 | F9 | Recording: slow camera orbit | `record_orbit` | yes |
 | Z | Separate from the drop | `separate` | yes |
+| X | Hero ultimate (unlocks at level 6) | `hunter_ult` | yes |
 
 <!-- /gen:keys -->

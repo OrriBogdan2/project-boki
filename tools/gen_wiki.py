@@ -278,11 +278,15 @@ def gen_classes():
         for k, t in r.get("variants", {}).items():
             b.append("- *%s:* %s" % (names.get(k, k), t))
         b.append("")
-        for slot, label in (("e", "E"), ("x", "X, level %s" % d.get("x", {}).get("unlock", 6)), ("r", "R")):
+        for slot, label in (("e", "E"), ("r", "R")):
             if slot not in d:
                 continue
             x = d[slot]
             b.append("**%s (%s, %s cooldown).** %s\n" % (x["name"], label, secs(x.get("cooldown")), x.get("desc", "")))
+        if "x" in d:
+            xu = d["x"]
+            b.append("**%s (X, hero ultimate from level %s, %s cooldown).** %s\n" % (
+                xu["name"], num(xu.get("unlock", 6)), secs(xu.get("cooldown")), xu.get("desc", "")))
         b.append("### Ranks\n\nRank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the special.\n")
         rk = []
         for s in ("sec", "dash", "kin", "ult"):

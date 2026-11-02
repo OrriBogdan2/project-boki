@@ -20,16 +20,19 @@ func _free(m: Match) -> void:
 	await sc.main.get_tree().process_frame
 
 
-## Presses X (held while `hold` is true, as the match does for the local player).
-func _press(P: Hunter, m: Match, hold: bool) -> void:
-	P.inp["hult"] = true
-	P.inp["hult_down"] = hold
+## Presses X (the match's "hunter_ult" press).
+func _press(P: Hunter, m: Match) -> void:
+	P.inp["xult"] = true
 	step(m, 1.0 / 60.0)
 
 
-func _release(P: Hunter, m: Match) -> void:
-	P.inp["hult_down"] = false
-	step(m, 1.0 / 60.0)
+## The bond event the kit's last X cast paid for (HeroUlt's stub: hit 0.6, knock 0.7, kill 0.8), "" for none.
+func _bond_kind(K: ArchKit) -> String:
+	var best := float(K.st.get("ult_bond_best", 0.0))
+	for kind in HeroUlt.STUB_FROM_ULT:
+		if absf(float(HeroUlt.STUB_FROM_ULT[kind]) - best) < 0.001:
+			return kind
+	return ""
 
 
 # ================================================================== Moosh Moosh: Hearth Call
@@ -45,26 +48,24 @@ func tender() -> void:
 	sc.aim_at(P, A.pos)
 	# --- the level gate: nothing below level 6
 	P.lvl = 5
-	_press(P, m, true)
-	_release(P, m)
-	ok("mm X: below level 6 it does nothing", K.hearth_call.is_empty() and not K.x_aim and float(K.cd["x"]) <= 0.0)
+	_press(P, m)
+	ok("mm X: below level 6 it does nothing", K.hearth_call.is_empty() and float(K.cd["x"]) <= 0.0)
 	P.lvl = 6
-	# --- held: the gold reach ring and a line onto the teammate under the cursor; nothing cast yet
+	# --- the aim telegraph: ready, the cursor on a teammate in reach: the reach ring, a line, a pick ring
 	A.hp = A.max_hp * 0.4
 	var a_hp0 := A.hp
-	_press(P, m, true)
 	step(m, 0.1)
 	var ring: Dictionary = AimKit.entry(P, "x")
-	var aiming := K.x_aim and K.hearth_call.is_empty() and AimKit.shown(P, "x_line") and AimKit.shown(P, "x_pick")
-	ok("mm X: held, the 7 bh reach ring and a line onto the teammate, the reach-out pose", aiming
-		and absf(float(ring.get("r", 0.0)) - 12.6) < 0.05 and K.anim_id == "mm_call_aim", K.anim_id)
-	# --- released: the tether starts, cooldown runs, the cast move; no bond for the cast alone
-	_release(P, m)
-	ok("mm X: let go, the tether starts on that teammate with the cast move", not K.hearth_call.is_empty()
+	var aiming := K.hearth_call.is_empty() and AimKit.shown(P, "x_line") and AimKit.shown(P, "x_pick")
+	ok("mm X: with the cursor on a teammate, the 7 bh reach ring and a line onto them", aiming
+		and absf(float(ring.get("r", 0.0)) - 12.6) < 0.05)
+	# --- X: the tether starts, cooldown runs, the cast move; no bond for the cast alone
+	_press(P, m)
+	ok("mm X: X starts the tether on that teammate with the cast move", not K.hearth_call.is_empty()
 		and K.hearth_call["who"] == A and K.anim_id == "mm_call", K.anim_id)
-	ok("mm X: its own cooldown (46 s) starts on the cast", absf(float(K.cd["x"]) - HeroUlt.cooldown(P)) < 0.2
-		and HeroUlt.cooldown(P) == 46.0, "cd %.1f" % float(K.cd["x"]))
-	ok("mm X: no bond is paid for the cast alone", K.x_bond_kind == "", K.x_bond_kind)
+	ok("mm X: its own cooldown (46 s) starts on the cast", absf(float(K.cd["x"]) - HeroUlt.cooldown(K)) < 0.2
+		and HeroUlt.cooldown(K) == 46.0, "cd %.1f" % float(K.cd["x"]))
+	ok("mm X: no bond is paid for the cast alone", _bond_kind(K) == "", _bond_kind(K))
 	# --- the channel: she walks, the tether shows, the ring is shown to everyone, the teammate heals
 	var p0 := P.pos
 	P.inp["move"] = Vector2(-1, 0)
@@ -84,17 +85,16 @@ func tender() -> void:
 	ok("mm X: other abilities still cast during the channel (small mechanic)", both_up)
 	K.cd["e"] = 0.0
 	# --- X again while it runs is swallowed
-	_press(P, m, false)
+	_press(P, m)
 	ok("mm X: X again does not end or restart it", not K.hearth_call.is_empty())
 	# --- the end: completed, the bond pays the complete share, the teammate's own meter a little
 	step(m, 3.6)
 	ok("mm X: a completed channel pays the bond as a hit (KinBond.from_ult)",
-		K.hearth_call.is_empty() and K.x_bond_kind == "hit",
-		K.x_bond_kind)
+		K.hearth_call.is_empty() and _bond_kind(K) == "hit",
+		_bond_kind(K))
 	ok("mm X: the end plays its own move", K.anim_id == "mm_call_end", K.anim_id)
 	# --- on cooldown: X does nothing
-	_press(P, m, true)
-	_release(P, m)
+	_press(P, m)
 	ok("mm X: on cooldown it does nothing", K.hearth_call.is_empty() and float(K.cd["x"]) > 30.0)
 	await _free(m)
 	await _tender_rescue()
@@ -115,8 +115,7 @@ func _tender_rescue() -> void:
 	P.hp = P.max_hp * 0.5
 	var p_hp0 := P.hp
 	sc.aim_at(P, A.pos)
-	_press(P, m, true)
-	_release(P, m)
+	_press(P, m)
 	ok("mm X: it can be cast on a downed teammate", not K.hearth_call.is_empty() and A.downed)
 	step(m, 2.0)
 	ok("mm X: while they are down the tether heals her instead (small mechanic)", P.hp > p_hp0 + 5.0,
@@ -125,7 +124,7 @@ func _tender_rescue() -> void:
 	var gap := P.flat_dist(A)
 	ok("mm X: at the end a downed teammate is pulled to her side and stood up", not A.downed and gap < 1.6
 		and int(K.stats["rescues"]) == 1, "downed %s gap %.1f" % [str(A.downed), gap])
-	ok("mm X: a rescue pays the bond's top event (kill)", K.x_bond_kind == "kill", K.x_bond_kind)
+	ok("mm X: a rescue pays the bond's top event (kill)", _bond_kind(K) == "kill", _bond_kind(K))
 	await _free(m)
 
 
@@ -138,30 +137,27 @@ func _tender_breaks() -> void:
 	var A: Hunter = r[2]
 	var K: TenderKit = P.ak
 	sc.aim_at(P, P.pos + Vector3(6.0, 0, -6.0))
-	_press(P, m, true)
-	_release(P, m)
+	_press(P, m)
 	ok("mm X: with nobody under the cursor nothing is cast and the cooldown is kept", K.hearth_call.is_empty()
 		and float(K.cd["x"]) <= 0.0)
 	sc.aim_at(P, A.pos)
-	_press(P, m, true)
-	_release(P, m)
+	_press(P, m)
 	step(m, 0.5)
 	A.teleport(P.pos + Vector3(-16.0, 0, 0))
 	step(m, 0.1)
 	ok("mm X: it breaks when the teammate leaves the ring, and pays nothing", K.hearth_call.is_empty()
-		and int(K.stats["broken"]) == 1 and K.x_bond_kind == "", K.x_bond_kind)
+		and int(K.stats["broken"]) == 1 and _bond_kind(K) == "", _bond_kind(K))
 	K.cd["x"] = 0.0
 	A.teleport(P.pos + Vector3(-2.5, 0, 1.5))
 	sc.aim_at(P, A.pos)
 	step(m, 0.05)
-	_press(P, m, true)
-	_release(P, m)
+	_press(P, m)
 	step(m, 0.3)
 	var up := not K.hearth_call.is_empty()
 	K.drop_holds()
 	step(m, 0.1)
 	ok("mm merge: drop_holds ends Hearth Call (no pull, no bond)", up and K.hearth_call.is_empty()
-		and not K.ulk().showing("tether") and not AimKit.shown(P, "x") and K.x_bond_kind == "")
+		and not K.ulk().showing("tether") and not AimKit.shown(P, "x") and _bond_kind(K) == "")
 	await _free(m)
 
 
@@ -176,19 +172,19 @@ func rimewright() -> void:
 	ok("tm X: Rimelock is in the kit data, sounds load", String(xd.get("name", "")) == "Rimelock"
 		and Sfx.streams.has("rime_lock") and Sfx.streams.has("rime_crash"))
 	P.lvl = 5
-	_press(P, m, false)
+	_press(P, m)
 	ok("tm X: below level 6 it does nothing", K.rime.is_empty() and float(K.cd["x"]) <= 0.0)
 	P.lvl = 6
 	var meter0 := P.ult
 	var h0 := T.hp
-	_press(P, m, false)
+	_press(P, m)
 	step(m, 0.25)
 	var ring: Dictionary = AimKit.entry(P, "x")
 	ok("tm X: sealed in, the 4 bh rink shown to everyone, the cast move", not K.rime.is_empty()
 		and bool(ring.get("all", false)) and absf(float(ring.get("r", 0.0)) - 7.2) < 0.05
 		and K.ulk().showing("rink") and K.ulk().showing("bud") and K.anim_id in ["tm_rime", "tm_rime_hold"], K.anim_id)
 	ok("tm X: its own cooldown (47 s) starts on the cast, no bond for the cast", absf(float(K.cd["x"]) - 47.0) < 0.5
-		and K.x_bond_kind == "")
+		and _bond_kind(K) == "")
 	var php := P.hp
 	P.hurt(30.0, T, {"src": "shot"})
 	var p0 := P.pos
@@ -215,9 +211,9 @@ func rimewright() -> void:
 		"dmg %.0f stun %.2f" % [h0 - T.hp, T.stun_t])
 	ok("tm X: the crash plays its own move", K.anim_id == "tm_rime_crash", K.anim_id)
 	ok("tm X: the crash pays the bond as a hit and the meter fills by 0.6",
-		K.x_bond_kind == "hit" and P.ult - meter0 > 0.59,
-		"%s +%.2f" % [K.x_bond_kind, P.ult - meter0])
-	_press(P, m, false)
+		_bond_kind(K) == "hit" and P.ult - meter0 > 0.59,
+		"%s +%.2f" % [_bond_kind(K), P.ult - meter0])
+	_press(P, m)
 	ok("tm X: on cooldown it does nothing", K.rime.is_empty() and int(K.stats["rimes"]) == 1)
 	await _free(m)
 	await _rime_recasts()
@@ -232,21 +228,21 @@ func _rime_recasts() -> void:
 	var T: Hunter = r[3]
 	var K: RimewrightKit = P.ak
 	var h0 := T.hp
-	_press(P, m, false)
+	_press(P, m)
 	step(m, 1.0)
-	_press(P, m, false)
+	_press(P, m)
 	step(m, 0.1)
 	ok("tm X: X early ends it with no damage, no stun and no bond (small mechanic)", K.rime.is_empty()
-		and int(K.stats["cancels"]) == 1 and T.hp >= h0 - 6.0 and T.stun_t <= 0.0 and K.x_bond_kind == ""
+		and int(K.stats["cancels"]) == 1 and T.hp >= h0 - 6.0 and T.stun_t <= 0.0 and _bond_kind(K) == ""
 		and K.anim_id == "tm_rime_break")
 	ok("tm X: after the early break she is free (not rooted or invulnerable)", P.root_t <= 0.0 and P.inv_t <= 0.06)
 	K.cd["x"] = 0.0
 	step(m, 1.0)
 	T.hp = T.max_hp
 	h0 = T.hp
-	_press(P, m, false)
+	_press(P, m)
 	step(m, 3.0)
-	_press(P, m, false)
+	_press(P, m)
 	var dealt := h0 - T.hp
 	var full := float(K.x_def()["dmg"]) * K.power("ult")
 	ok("tm X: X in the last 0.75 s cracks it open early at two thirds (small mechanic)", K.rime.is_empty()
@@ -254,7 +250,7 @@ func _rime_recasts() -> void:
 		"dealt %.0f of %.0f stun %.2f" % [dealt, full, T.stun_t])
 	K.cd["x"] = 0.0
 	step(m, 1.0)
-	_press(P, m, false)
+	_press(P, m)
 	step(m, 0.3)
 	var up := not K.rime.is_empty()
 	K.drop_holds()
@@ -278,13 +274,15 @@ func _rime_sight_and_cap() -> void:
 	var others: Array = [
 			_dummy(m, T.team, P.pos + Vector3(-3.0, 0, 0), "B"), _dummy(m, T.team, P.pos + Vector3(0, 0, -3.0), "C")]
 	step(m, 0.05)
-	_press(P, m, false)
+	var paid0 := HeroUlt.paid_total
+	_press(P, m)
 	step(m, 3.7)
 	ok("tm X: a foe behind a rock is not hit (line of sight)",
 		hidden.hp >= hidden.max_hp - 0.01 and hidden.stun_t <= 0.0
 		and K.last_stunned == 3, "stunned %d" % K.last_stunned)
-	ok("tm X: three hunters stunned pay one event for the cast (the best one)", K.x_bond_kind == "hit"
-		and others.size() == 2, K.x_bond_kind)
+	var paid := HeroUlt.paid_total - paid0
+	ok("tm X: three hunters stunned pay one event for the cast (the best one)", _bond_kind(K) == "hit"
+		and absf(paid - 0.6) < 0.001 and others.size() == 2, "%s %.2f" % [_bond_kind(K), paid])
 	await _free(m)
 
 
@@ -316,7 +314,7 @@ func burst_cap() -> void:
 	var start_hp := T.hp
 	P.kin.stow()      # the Boki rides on you until the merge: only the ult and the merge count
 	sc.aim_at(P, T.pos)
-	_press(P, m, false)
+	_press(P, m)
 	step(m, 3.6)
 	var after_ult := start_hp - T.hp
 	P.ult = 1.0

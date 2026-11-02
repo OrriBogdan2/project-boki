@@ -716,7 +716,6 @@ func _rime_crash(k: float) -> void:
 	var radius := float(xd["radius"])
 	var stun := float(xd["stun"]) * k
 	var stunned := 0
-	var best := ""
 	for f in foes_in(at, radius):
 		if not m.world.los(at, f.pos, at.y + 0.95):
 			continue
@@ -725,11 +724,9 @@ func _rime_crash(k: float) -> void:
 		add_chill(f)
 		ulk().burst("block", f.pos, {"ent": f, "dur": maxf(0.3, stun)})
 		stunned += 1
-		best = _better_event(best, f)
+		HeroUlt.landed(self, f)      # the cast's best event (hit, knock, kill) pays the bond once
 	last_stunned = stunned
 	stats["crashes"] += 1
-	if best != "":
-		HeroUlt.bond(h, best)
 	ulk().burst("pillar", h.pos, {"r": 1.4, "dur": 0.5})
 	ulk().burst("spikes", h.pos, {"r": 3.6, "dur": 0.55})
 	ulk().burst("flare", at, {"col": Color("9fe0ff"), "rim": Color("bff7ef"), "r": radius, "dur": 0.35, "pattern": 4.0})
@@ -738,20 +735,6 @@ func _rime_crash(k: float) -> void:
 	CareUtil.payoff(m, h, h.pos, "", col_of(xd), "")      # the words go on the frozen foes; hers is the bond's
 	play("tm_rime_crash")
 	_rime_clear()
-
-
-## The best bond event of a crash so far: a kill beats a knock beats a hit.
-func _better_event(best: String, f: Ent) -> String:
-	var ev := "hit"
-	if f is Hunter:
-		if (f as Hunter).out:
-			ev = "kill"
-		elif (f as Hunter).downed:
-			ev = "knock"
-	elif f.dead or f.hp <= 0.0:
-		ev = "kill"
-	var rank_of := {"": 0, "hit": 1, "knock": 2, "kill": 3}
-	return ev if int(rank_of[ev]) > int(rank_of[best]) else best
 
 
 func _rime_cancel() -> void:
@@ -778,8 +761,9 @@ func _rime_clear() -> void:
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null:
 		return
-	if rime.is_empty() and HeroUlt.can_cast(h) and los and dist < float(x_def()["radius"]) * 0.6 and tgt is Hunter:
-		HeroUlt.press(h)          # sealed in with a rival close: it cracks open on them
+	var x_ready := HeroUlt.unlocked(self) and float(cd["x"]) <= 0.0
+	if rime.is_empty() and x_ready and los and dist < float(x_def()["radius"]) * 0.6 and tgt is Hunter:
+		use_x()          # sealed in with a rival close: it cracks open on them
 		return
 	if int(h.slot_lv["sec"]) > 0 and rmb_ready() and los and dist < 12.0 and dist > 3.0 and tgt is Hunter:
 		h.inp["aim"] = tgt.pos + Vector3(tgt.vel.x, 0, tgt.vel.z) * 0.6 + Vector3(0, 0.9, 0)
