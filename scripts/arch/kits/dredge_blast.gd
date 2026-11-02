@@ -12,7 +12,7 @@ const RECOVER := 0.3                # s he stays planted after the last wave
 const WAVE_COL := [Color("ffb85a"), Color("a07aff")]     # wave 1 brass gold, wave 2 violet
 const WAVE_CORE := [Color("fff0c0"), Color("ffe0a0")]
 const WAVE_PITCH := [1.0, 0.82]
-const FAN_COL := Color("fff0f6")
+const FAN_COL := Color("ffcf70")          # Dredge's brass, the anchor's colour
 
 var k: DredgeKit
 var h: Hunter
@@ -94,7 +94,7 @@ func _charge_looks(kc: float) -> void:
 	var grow := 1.0 - pow(1.0 - kc, 2.0)
 	var reach := maxf(0.6, float(x["range"]) * grow)
 	AimKit.cone(h, "x_fan", {"dir": blast["dir"], "len": reach, "deg": float(x["fan_deg"]),
-		"fill": kc, "all": true, "col": FAN_COL, "col2": k.col_of(x), "alpha": 1.1, "hot": 0.4 * kc})
+		"fill": kc, "all": true, "col": FAN_COL, "col2": WAVE_COL[1], "alpha": 1.1, "hot": 0.4 * kc})
 	if not k.tells_visible() or randf() > 0.5:
 		return
 	var hand_l := _hand(-1.0)
@@ -136,7 +136,7 @@ func _slug_hit(wave: int, e: Ent, why: String, dmg: float) -> void:
 	last_wave_hits[wave] = int(last_wave_hits[wave]) + 1
 	e.hurt(dmg, h, {"src": "abil", "ab": "ult", "tags": ["ult", "slug"]})
 	KitStatus.apply(e, "blt", float(xd()["blt_t"]))
-	k.fx.orb(e.pos + Vector3(0, 1.0, 0), WAVE_COL[wave % 2], Color.WHITE, 0.9, 0.1)
+	k.fx.orb(e.pos + Vector3(0, 1.0, 0), WAVE_COL[wave % 2], WAVE_CORE[wave % 2], 0.9, 0.1)
 	m.fx.burst(e.pos + Vector3(0, 0.6, 0), Color("b48aff"), 4, 2.0, 0.5, -4.0, 0.8, Vector3.UP, 20.0)
 	HeroUlt.landed(k, e)
 

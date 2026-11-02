@@ -127,7 +127,7 @@ Keyed full-body moves live in `scripts/match/kmoves_pair.gd` (`KMovesPair.MOVES`
 | Anchor Drop (E) | `dr_anchor` | fist hauled back, the hop up and forward, the fist driven down (0.38s), crouched follow-through, a small rebound |
 | Anchor Drop in the air | `dr_dive` (hold), `dr_quake` | both fists locked overhead dropping like a stone; a huge squash on landing, a heave back up |
 | Salvage stack | `dr_flex` | chest out, both fists flexed, a stomp |
-| Brass Broadside (X) | `dr_blast` | hunched over both fists through the 1.1s charge (deeper at the end), a two-fisted shove with overshoot at wave 1, a short rewind, the second shove at 1.7s, then he straightens up (2.1s) |
+| Brass Broadside (X) | `dr_blast` | hunched over the gun and his free fist through the 1.1s charge (deeper at the end), a shove with overshoot and a barrel kick at wave 1, a short rewind, the second shove at 1.7s, then he straightens up (2.1s) |
 
 ## Look and sound
 - Effects (`scripts/arch/kits/ld_fx.gd`, `shaders/ld_fx.gdshader`, `shaders/ld_rope.gdshader`): pink-white slug streaks that hang as

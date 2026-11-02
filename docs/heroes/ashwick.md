@@ -134,7 +134,7 @@ to the sheet's beats: anticipation, release (with an overshoot key), follow-thro
 | Air dash (the class air dash) | `lw_hop` | a jet of flame from the bellows tucks him into a forward ball, then a settle |
 | Furnace Cloak (E) | `as_cloak` | 0.2s curled in, arms crossed (the ring shows), flung wide with the blast up on his toes, held, settle |
 | Flashover payoff, a knock | `lw_stoke` | the off fist pumps up, a lean back, a bounce |
-| Flue Flight (X) | `lw_jet` (held), `lw_land` | a crouch as the ember ring bursts (0.08s), then he springs up and leans into the jet, arms swept back to the bellows straps, legs trailing, a slight bob; on landing a squash onto his feet |
+| Flue Flight (X) | `lw_jet` (held), `lw_land` | a crouch as the ember ring bursts (0.08s), then he springs up and leans into the jet, the free arm swept back to the bellows strap, the nozzle held low (the gun hand stays on it), legs trailing; on landing a squash onto his feet |
 
 ## Look and sound
 - Effects: `scripts/arch/kits/ld_fx.gd` (pooled, `shaders/ld_fx.gdshader`): the hose as one MultiMesh of fire puffs (white-hot to
@@ -146,7 +146,8 @@ to the sheet's beats: anticipation, release (with an overshoot key), follow-thro
 - Sounds (tools/sfx_linwick_dredge.py): `lw_pilot`, `lw_roar`, `lw_bolt`, `lw_bolt_hit`, `lw_bash`, `lw_bash_hit`, `lw_shield`,
   `lw_blaze`, `lw_trail`, `lw_hop`, `lw_jet` (lift-off whoomp and jet roar), `lw_jet_land` (plus the older `as_ignite`).
 - Flue Flight (`scripts/arch/kits/ashwick_jet.gd`): the ember ring, scorch and sunburst at lift-off, a hot core and embers blown
-  out of the bellows while flying, and the carpet as pooled LDFx lava strips.
+  out of the bellows while flying, and the carpet as pooled LDFx lava strips drawn with their own alpha-blended shader
+  (`shaders/ld_lava.gdshader`), so the charred rim stays dark on bright ground.
 
 ## Engine notes
 The hose is simulated on the match step (`scripts/arch/kits/ashwick_hose.gd`); a puff stops at a wall (`World.occupy`) and hurts

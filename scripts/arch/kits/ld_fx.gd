@@ -14,6 +14,7 @@ extends Node3D
 
 const SHADER: Shader = preload("res://shaders/ld_fx.gdshader")
 const ROPE_SHADER: Shader = preload("res://shaders/ld_rope.gdshader")
+const LAVA_SHADER: Shader = preload("res://shaders/ld_lava.gdshader")     # alpha-blended: dark rims stay dark
 const M_FLAME := 0
 const M_ORB := 1
 const M_COMET := 2
@@ -60,7 +61,7 @@ static func of(match_node: Node) -> LDFx:
 
 func _mat(mode: int, col: Color, col2: Color, bb := false) -> ShaderMaterial:
 	var mt := ShaderMaterial.new()
-	mt.shader = SHADER
+	mt.shader = LAVA_SHADER if mode == M_LAVA else SHADER
 	mt.set_shader_parameter("mode", mode)
 	mt.set_shader_parameter("color", col)
 	mt.set_shader_parameter("color2", col2)
