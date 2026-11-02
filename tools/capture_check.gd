@@ -174,7 +174,7 @@ func _interrupts() -> void:
 			"root": P.root_t = 0.4
 			"dash": P.inp["dash"] = true
 			"damage": P.hurt(8.0, m.hunters[1])
-			"knock": P.knock_t = 0.3
+			"knock": P.impulse(Vector2(Capture.HARD_KNOCK + 4.0, 0) * P.mass())
 		run_for(0.1)
 		P.inp["dash"] = false
 		if why == "damage":
