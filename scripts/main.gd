@@ -418,16 +418,6 @@ func _ready() -> void:
 		set_meta("incubator_check", icc)
 		icc.run(self)
 		return
-	if "--title-check" in args:
-		var ttc = load("res://tools/title_check.gd").new()      # the title: menu, key art, frame budget
-		set_meta("title_check", ttc)
-		ttc.run(self)
-		return
-	if "--hatch-check" in args:
-		var htc = load("res://tools/hatch_check.gd").new()      # the hatch: a quiet, personal moment
-		set_meta("hatch_check", htc)
-		htc.run(self)
-		return
 	if "--economy-floor-check" in args:
 		var efc_s: GDScript = load("res://tools/economy_floor_check.gd")
 		if efc_s == null or not efc_s.can_instantiate():
