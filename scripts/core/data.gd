@@ -12,13 +12,13 @@ const CLASSES := {
 	"light": {
 		"name": "Light", "color": Color("c9bcff"), "hp": 124, "speed": 5.2, "dashes": 1, "mass": 0.85, "scale": 0.9, "hit_r": 0.35,
 		"ex_dist": 5.0, "ex_time": 0.2, "ex_cd": 12.0, "glide_cap": 1.2,
-		"weapon": "smg", "weapons": ["smg", "sniper", "twin_blades", "longbow"],
+		"weapon": "smg", "weapons": ["smg", "sniper", "twin_blades", "longbow", "coilcaster"],
 		"desc": "Fast and fragile. The fastest dash, the longest glide, and hits throw you furthest.",
 	},
 	"medium": {
 		"name": "Medium", "color": Color("9ee2a0"), "hp": 145, "speed": 5.0, "dashes": 1, "mass": 1.0, "scale": 1.0, "hit_r": 0.40,
 		"ex_dist": 4.6, "ex_time": 0.2, "ex_cd": 13.0, "glide_cap": 1.0,
-		"weapon": "rifle", "weapons": ["rifle", "burst_rifle", "longsword", "spellstaff"],
+		"weapon": "rifle", "weapons": ["rifle", "burst_rifle", "longsword", "spellstaff", "quill_rifle"],
 		"desc": "The all-rounder: middle health, speed, dash and glide.",
 	},
 	"heavy": {

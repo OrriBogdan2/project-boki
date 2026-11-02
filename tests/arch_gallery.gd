@@ -7,7 +7,7 @@ extends Node3D
 ##   --arch-heads    every race's head under every archetype's headgear (fit and ears), close up
 ## Optional: --arch-yaw=<radians> turns everyone.
 
-const WEAPONS := {"thief": "twin_blades", "archer": "sniper", "mage": "longsword", "gunslinger": "rifle", "juggernaut": "greatsword", "bulwark": "minigun"}
+const WEAPONS := {"thief": "twin_blades", "archer": "sniper", "mage": "coilcaster", "gunslinger": "quill_rifle", "juggernaut": "greatsword", "bulwark": "minigun"}
 var anims: Array = []
 
 func _arg(prefix: String, def: String) -> String:

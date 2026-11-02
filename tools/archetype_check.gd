@@ -108,6 +108,11 @@ func run(main_node: Node) -> void:
 	var only := ""
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--ak-only="): only = String(a).substr(10)
+	for who in ["mage", "gunslinger"]:
+		if "--%s-combo-check" % who in OS.get_cmdline_user_args():
+			var hc = load("res://tools/hero_combo_check.gd").new()      # Vireo's and Marlowe's cross-ability interactions
+			await hc.run(main_node, who)
+			return
 	if "--kit-combo-check" in OS.get_cmdline_user_args():
 		await _combos()
 		print("AKCHECK DONE, %d checks, failures: %d" % [n, fails])
@@ -161,27 +166,29 @@ func _data() -> void:
 	var rk_ok := true
 	for a in Arch.ids():
 		for sl in ["sec", "dash", "kin", "ult"]:
+			if sl == "ult" and not Arch.def(a).has("r"): continue      # Vireo and Marlowe have no R (Boki Merge owns it)
 			var r2 := String(Arch.def(a).get("rank2", {}).get(sl, ""))
 			if not (r2.contains("->") and r2.length() > 20): rk_ok = false
 	ok("ranks: every ability has a concrete rank 2", rk_ok)
 	var n1 := Arch.next_ranks("archer", "sec", 1); var n2 := Arch.next_ranks("archer", "sec", 2); var n3 := Arch.next_ranks("archer", "sec", 3)
 	ok("ranks: next rank first (2 at 1, 3 at 2, none at max)", n1.size() == 2 and n1[0][0] == "Rank 2" and n1[1][0] == "Rank 3" and n2.size() == 1 and n2[0][0] == "Rank 3" and n3.is_empty(), str(n1))
-	ok("ranks: R previews rank 2", Arch.next_ranks("mage", "ult", 1).size() == 1 and Arch.next_ranks("mage", "ult", 2).is_empty())
+	ok("ranks: R previews rank 2", Arch.next_ranks("thief", "ult", 1).size() == 1 and Arch.next_ranks("thief", "ult", 2).is_empty())
 	var ids := Arch.ids()
 	ok("data: six archetypes", ids.size() == 6, str(ids))
 	for w in ["light", "medium", "heavy"]:
-		ok("data: two %s archetypes" % w, Arch.of_class(w).size() == 2, str(Arch.of_class(w)))
+		ok("data: %s has archetypes" % w, Arch.of_class(w).size() >= 1, str(Arch.of_class(w)))
 	var bad: Array = []
 	for a in ids:
 		for wid in Arch.weapons(a):
 			if Content.weapon(String(wid)) == null: bad.append("%s:%s" % [a, wid])
 		for k in ["dash", "rmb", "e", "r", "resource", "order"]:
+			if k == "r" and a in ["mage", "gunslinger"]: continue
 			if not Arch.def(a).has(k): bad.append("%s missing %s" % [a, k])
 	ok("data: every kit complete, weapons exist", bad.is_empty(), str(bad))
 	ok("weapons: one signature weapon each", ids.all(func(x): return Arch.weapons(x).size() == 1 and Arch.signature(x) != "" and Arch.weapon_ok(x, Arch.signature(x))), str(ids.map(func(x): return Arch.signature(x))))
-	ok("weapons: Thief blades / Archer bow / Mage staff / Bulwark shield", Arch.signature("thief") == "twin_blades" and Arch.signature("archer") == "longbow" and Arch.signature("mage") == "spellstaff" and Arch.signature("bulwark") == "tower_shield")
+	ok("weapons: Thief blades / Archer bow / Vireo coil / Bulwark shield", Arch.signature("thief") == "twin_blades" and Arch.signature("archer") == "longbow" and Arch.signature("mage") == "coilcaster" and Arch.signature("bulwark") == "tower_shield")
 	ok("weapons: another archetype's weapon is not yours", not Arch.weapon_ok("bulwark", "greatsword") and not Arch.weapon_ok("thief", "smg"))
-	ok("weapons: asking for another weapon gives the signature", Arch.weapon_for("gunslinger", "medium", "longsword") == "rifle")
+	ok("weapons: asking for another weapon gives the signature", Arch.weapon_for("gunslinger", "medium", "longsword") == "quill_rifle")
 	ok("weapons: fix keeps the class", Arch.fix("thief", "heavy") == "juggernaut" and Arch.fix("bulwark", "heavy") == "bulwark")
 
 # ------------------------------------------------------------------ Thief (kits2: a port of SUPERVIVE's Shiv)
@@ -399,146 +406,91 @@ func _archer() -> void:
 
 # ------------------------------------------------------------------ Mage
 func _mage() -> void:
-	var r := setup("mage", 7.0, "", true)
+	var r := setup("mage", 5.0, "", true)
 	var m: Match = r[0]; var P: Hunter = r[1]; var T: Hunter = r[2]; var T2: Hunter = r[3]
 	var home: Vector3 = r[4]
 	var K: MageKit = P.ak
-	ok("mage: Spellstaff in hand", P.wid == "spellstaff")
-	# Guided Bolt: fires on the press, Runes what it hits, +15 Heat
-	tap(m, P)
-	step(m, 0.8)
-	ok("mage RMB: Guided Bolt hits + Runes", dmg(T) >= 9.0 and K.runed(T) and K.res >= 10.0, "took %.0f heat %.0f" % [dmg(T), K.res])
-	# a second spell on the Runed foe detonates it: a Runeburst (root)
-	var d0 := dmg(T); var det0 := K.detonations
-	K.res = 0.0; K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; T.root_t = 0.0
-	tap(m, P)
-	step(m, 0.8)
-	ok("mage passive: second spell detonates the Rune", K.detonations == det0 + 1 and dmg(T) - d0 >= 24.0 and T.root_t > 0.0 and not K.runed(T), "dealt %.0f root %.2f" % [dmg(T) - d0, T.root_t])
-	# held: the bolt bends toward the cursor (round a corner onto a target off to the side)
-	fresh(T); T.teleport(home + Vector3(6.0, 0, 2.5)); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; K.res = 0.0
-	P.inp["aim"] = home + Vector3(7.0, 0.9, -1.5)
-	P.inp["sec_hold"] = true
-	P.ak.press_rmb()
-	step(m, 0.2, func(): P.inp["sec_hold"] = true; P.inp["aim"] = home + Vector3(7.0, 0.9, -1.5))
-	step(m, 1.4, func(): P.inp["sec_hold"] = true; P.inp["aim"] = T.pos + Vector3(0, 0.9, 0))
-	P.inp["sec_hold"] = false
-	step(m, 0.2)
-	ok("mage RMB hold: the bolt steers onto them", dmg(T) >= 12.0, "took %.0f (longer flight hits harder)" % dmg(T))
-	T.teleport(home + Vector3(7.0, 0, 0)); fresh(T); aim_at(P, T.pos)
-	for key in K.runes.keys(): K._clear_rune(key)
-	step(m, 0.3)
-	# Overcharged: a detonation is a Flashpoint (all the Heat, splash, the Bolt back)
-	K.ch_rmb = 1.0; K.cd["rmb"] = 0.0
-	tap(m, P); step(m, 0.8)
-	K.res = 72.0; K.ch_rmb = 1.0; K.cd["rmb"] = 0.0
-	ok("mage resource full: Overcharged + Runed", K.full_ready() and K.ready_label().contains("FLASHPOINT"))
-	var f0 := K.flashpoints; d0 = dmg(T); var t2d := dmg(T2)
-	tap(m, P); step(m, 0.8)
-	ok("mage Flashpoint: all the Heat, a burst", K.flashpoints == f0 + 1 and dmg(T) - d0 >= 35.0 and dmg(T2) > t2d and K.res < 25.0 and K.vent.is_empty(), "dealt %.0f splash %.0f heat %.0f" % [dmg(T) - d0, dmg(T2) - t2d, K.res])
-	# E: Hex turns a hunter into a critter: no attacks, half speed
-	fresh(T); aim_at(P, T.pos); K.res = 0.0
+	ok("vireo: Coilcaster in hand, light weight", P.wid == "coilcaster" and Arch.weight("mage") == "light" and not Arch.def("mage").has("r"))
+	# Sparks: weapon hits load one each, four make a Live foe
+	K.on_deal(T, 4.0, {"src": "shot"})
+	ok("vireo passive: a weapon hit loads a Spark", K.spark_n(T) == 1)
+	K.add_spark(T, 3)
+	ok("vireo passive: four Sparks = Live", K.live(T) and K.full_ready() and K.res_text() == "4/4")
+	# Wirerun held through a Live foe: Blowout, dash back at once
+	P.teleport(home); aim_at(P, T.pos); P.dashes = P.max_dashes(); fresh(T)
+	P.inp["dash_down"] = true
+	P.do_dash()
+	ok("vireo dash: press starts the lane", not K.wire.is_empty() and P.dashes >= 1.0)
+	step(m, 0.5, func(): P.inp["dash_down"] = true; aim_at(P, T.pos))
+	P.inp["dash_down"] = false
+	step(m, 0.5)
+	ok("vireo Wirerun through Live: Blowout + dash back", K.blowouts == 1 and not K.live(T) and P.dashes >= 1.0 and dmg(T) >= 17.0, "blowouts %d took %.0f dashes %.1f" % [K.blowouts, dmg(T), P.dashes])
+	# a knock heals 15%
+	P.hp = 20.0
+	var kt := P.hp
+	T2.hp = 1.0
+	K.on_deal(T2, 5.0, {"src": "shot"}); T2.hp = 0.0
+	K.on_deal(T2, 5.0, {"src": "shot"})
+	ok("vireo passive: a knock heals", P.hp > kt + 10.0, "hp %.0f" % P.hp)
+	T2.hp = T2.max_hp
+	# Coilshot hold: damage, a throw, a mote that gives the dash back
+	P.teleport(home); fresh(T); fresh(T2); T2.teleport(home + Vector3(12, 0, 0)); step(m, 0.2); aim_at(P, T.pos); P.dashes = 0.0
+	hold(m, P, 1.0)
+	step(m, 0.9)
+	ok("vireo RMB hold: Coilshot hits + Sparks", K.last_variant == "hold" and dmg(T) >= 12.0 and K.spark_n(T) >= 1, "took %.0f" % dmg(T))
+	ok("vireo RMB: a hunter hit drops a mote", K.motes.size() >= 1, str(K.motes.size()))
+	if not K.motes.is_empty():
+		P.teleport(K.motes[0]["pos"]); step(m, 0.2)
+	ok("vireo mote: picking it up gives Wirerun back", K.mote_pickups == 1 and P.dashes >= 1.0)
+	# Skycall: lightning flings and grounds
+	P.teleport(home); fresh(T); T.teleport(home + Vector3(5, 0, 0)); step(m, 0.2); aim_at(P, T.pos); K.cd["e"] = 0.0
+	var x0 := T.pos.x
 	P.ak.use_e()
-	step(m, 0.6)
-	ok("mage E: Hex lands", Hex.active(T) and K.hexes >= 1 and not T.can_fire() and T.get_node_or_null("HexCritter") != null, "hexed %s" % str(Hex.active(T)))
-	step(m, 1.2)
-	ok("mage E: Hex wears off", not Hex.active(T) and T.model.visible and T.get_node_or_null("HexCritter") == null)
-	# Overcharged at 70; the Vent at 100
-	K.res = 75.0
-	ok("mage resource: Overcharged at 70", K.full_ready())
-	K.res = 92.0; K.ch_rmb = 1.0; K.cd["rmb"] = 0.0
-	tap(m, P)
-	step(m, 0.6)
-	ok("mage passive: Vent at 100 resets + locks", K.res < 1.0 and K.lock_t > 0.0, "heat %.0f lock %.2f" % [K.res, K.lock_t])
-	step(m, 1.2)
-	# Blink: a 0.12s windup, then up to 5.5m; dash again to snap back
-	P.teleport(home); P.dashes = P.max_dashes()
-	P.inp["aim"] = home + Vector3(0, 0, 8.0)
-	P.do_dash()
-	var mid := P.flat_dist(home)
-	step(m, 0.2)
-	ok("mage dash: Blink after its windup", mid < 0.3 and P.flat_dist(home) > 4.5 and P.flat_dist(home) < 6.0, "at windup %.1f, then %.1fm" % [mid, P.flat_dist(home)])
-	var dl := P.dashes
-	P.do_dash()
-	step(m, 0.1)
-	ok("mage dash again: snap back to the sigil", P.flat_dist(home) < 1.0 and K.st.get("last_dash") == "back" and P.dashes >= dl - 0.01, "%.1fm from start" % P.flat_dist(home))
-	# R: Encore: mirrors recast the last spell (a Bolt) at once, then echo
-	P.teleport(home); fresh(T); fresh(T2); T.teleport(home + Vector3(7, 0, 0)); aim_at(P, T.pos); K.last_spell = "bolt"
-	for key in K.runes.keys(): K._clear_rune(key)
-	ult(m, P)
-	step(m, 1.2)
-	ok("mage R: Encore mirrors recast", not K.encore.is_empty() and dmg(T) >= 10.0, "took %.0f" % dmg(T))
+	step(m, 0.9)
+	ok("vireo E: Skycall damages, flings, Sparks", dmg(T) >= 12.0 and T.pos.x > x0 + 1.0 and K.spark_n(T) >= 1, "took %.0f moved %.1f" % [dmg(T), T.pos.x - x0])
+	ok("vireo E: Grounded (no dashing)", KitStatus.grounded(T))
+	var d0 := T.dashes
+	T.do_dash()
+	ok("vireo E: a Grounded foe can't dash", is_equal_approx(T.dashes, d0))
 	await done(m)
 
-# ------------------------------------------------------------------ Gunslinger
 func _gunslinger() -> void:
-	var r := setup("gunslinger", 6.0, "", true)
+	var r := setup("gunslinger", 5.0, "", true)
 	var m: Match = r[0]; var P: Hunter = r[1]; var T: Hunter = r[2]; var T2: Hunter = r[3]
 	var home: Vector3 = r[4]
 	var K: GunslingerKit = P.ak
-	# Slide Reload tap: a roll that reloads and loads 2 chambers
-	P.ammo = 0; K.res = 0.0
-	P.inp["move"] = Vector2(0, 1); P.inp["dash_down"] = false
-	P.do_dash()
-	step(m, 0.3)
-	ok("gunslinger dash tap: roll reloads +2 chambers", P.ammo > 0 and K.res >= 2.0 and K.st.get("last_dash") == "roll", "ammo %d chambers %.0f" % [P.ammo, K.res])
-	# held: the slide goes further and reloads fully
-	P.teleport(home); P.ammo = 0; P.dashes = P.max_dashes(); P.reload_t = 0.0
-	P.inp["dash_down"] = true
-	P.do_dash()
-	step(m, 0.75, func(): P.inp["dash_down"] = true)
-	P.inp["dash_down"] = false
-	step(m, 0.1)
-	P.inp["move"] = Vector2.ZERO
-	ok("gunslinger dash hold: slide + full reload", K.st.get("last_dash") == "slide" and P.ammo == int(P.wpn["mag"]) and P.flat_dist(home) > 4.0, "moved %.1f ammo %d" % [P.flat_dist(home), P.ammo])
-	# chambers load from weapon hits
-	K.res = 0.0; K.load_at = -9.0
-	K.on_deal(T, 4.0, {"src": "shot"})
-	ok("gunslinger passive: a weapon hit loads", K.res >= 1.0)
-	# Trick Shot tap
-	P.teleport(home); step(m, 0.15); fresh(T); aim_at(P, T.pos); K.res = 0.0
-	if OS.get_cmdline_user_args().has("--ak-debug"): print("  pre trick: P %s T %s ch %.1f hp %.1f" % [P.pos, T.pos, K.ch_rmb, T.hp])
+	ok("marlowe: Quill Rifle in hand, medium, no R", P.wid == "quill_rifle" and Arch.weight("gunslinger") == "medium" and not Arch.def("gunslinger").has("r"))
+	# Fever: abilities stack lifesteal
+	P.hp = 60.0
+	K.on_deal(T, 10.0, {"src": "abil", "ab": "utility"})
+	K.on_deal(T, 10.0, {"src": "abil", "ab": "k1"})
+	ok("marlowe passive: abilities build Fever", K.res >= 2.0)
+	var hp0 := P.hp
+	K.on_deal(T, 100.0, {"src": "shot"})
+	ok("marlowe passive: Fever heals off damage", P.hp > hp0 + 10.0, "healed %.1f" % (P.hp - hp0))
+	K.res = 0.0
+	# Burr Charge on a foe: sticks (2 hits' worth), pops, Rattles
+	fresh(T); T2.teleport(home + Vector3(12, 0, 0)); step(m, 0.2); aim_at(P, T.pos); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0
 	tap(m, P)
-	step(m, 0.3)
-	if OS.get_cmdline_user_args().has("--ak-debug"): print("  post trick: hp %.1f variant %s ch %.1f T2 %.1f" % [T.hp, K.last_variant, K.ch_rmb, T2.hp])
-	ok("gunslinger RMB tap: Trick Shot", dmg(T) >= 11.0, "took %.0f" % dmg(T))
-	# Called Shot at 6: armed, then a stunning crit that reloads the magazine
-	fresh(T); K.res = 5.0; K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; K.load_at = -9.0
-	K.load_chambers(1, true)
-	ok("gunslinger resource full: Called Shot armed", K.full_ready() and K.ready_label() != "" and K.res_text() == "6/6")
-	P.ammo = 1
-	var cs0 := K.called_shots
-	tap(m, P)
-	step(m, 0.3)
-	ok("gunslinger RMB full: Called Shot stuns", K.last_variant == "full" and T.stun_t > 0.0 and dmg(T) >= 20.0 and K.res < 1.0, "took %.0f stun %.2f" % [dmg(T), T.stun_t])
-	ok("gunslinger Called Shot: payoff + reload", K.called_shots == cs0 + 1 and P.ammo == int(P.wpn["mag"]), "payoffs %d ammo %d" % [K.called_shots - cs0, P.ammo])
-	# Rail Charge: a full hold pierces and stuns
-	fresh(T); fresh(T2); T.cc_immune_t = 0.0; K.ch_rmb = 1.0; K.cd["rmb"] = 0.0
-	step(m, 1.0)
-	fresh(T); fresh(T2)
-	hold(m, P, 1.3)
-	step(m, 0.3)
-	ok("gunslinger RMB hold: Rail pierces", K.last_variant == "hold" and dmg(T) >= 30.0 and dmg(T2) >= 30.0, "%.0f / %.0f stun %.2f" % [dmg(T), dmg(T2), T.stun_t])
-	# Recoil Shot in the air
-	P.teleport(home + Vector3(0, 2.5, 0)); P.grounded = false; K.ch_rmb = 1.0; K.cd["rmb"] = 0.0
-	P.ak.press_rmb()
-	ok("gunslinger RMB air: Recoil kicks you up", K.last_variant == "air" and P.vel.y > 5.0)
-	step(m, 1.0)
-	# Quickdraw: instant reload, a dash charge, and the doubled Trick Shot
-	P.teleport(home); P.ammo = 0; P.dashes = 0.0
+	step(m, 1.3)
+	ok("marlowe RMB: Burr Charge sticks, pops, Rattles", dmg(T) >= 12.0 and KitStatus.rattled(T) and K.rattles >= 1, "took %.0f" % dmg(T))
+	ok("marlowe RMB: attach + blast both fed Fever", K.res >= 2.0, "fever %.0f" % K.res)
+	# a Rattled foe takes more from the rifle
+	var base := K.outgoing(T, 10.0, {"src": "shot"})
+	ok("marlowe Rattled: rifle +28%", is_equal_approx(base, 12.8), "%.1f" % base)
+	# Longneedle: charge, then a piercing beam
+	fresh(T); KitStatus.clear_rattled(T); K.cd["e"] = 0.0; aim_at(P, T.pos)
 	P.ak.use_e()
-	ok("gunslinger E: Quickdraw reload + dash", P.ammo == int(P.wpn["mag"]) and P.dashes >= 1.0 and P.buff("fire_rate") > 0.0)
-	fresh(T); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; aim_at(P, T.pos)
-	tap(m, P)
-	step(m, 0.4)
-	ok("gunslinger RMB in Quickdraw: two rounds", K.last_variant == "during_e" and dmg(T) >= 17.0, "took %.0f" % dmg(T))
-	# R: Last Round locks and fires after the channel
-	fresh(T); step(m, 3.2)
-	fresh(T)
-	ult(m, P)
+	ok("marlowe E: Longneedle winds up slowed", not K.needle.is_empty() and K.move_k() < 1.0)
 	step(m, 0.5)
 	var early := dmg(T)
-	step(m, 1.2)
-	ok("gunslinger R: Last Round lock then rounds", early < 0.5 and dmg(T) >= 25.0 and T.stun_t > 0.0, "early %.0f took %.0f stun %.2f" % [early, dmg(T), T.stun_t])
+	step(m, 0.6)
+	ok("marlowe E: needle fires after the charge, shaves its cooldown", early < 0.5 and dmg(T) >= 30.0 and float(K.cd["e"]) < 12.0 * 0.75, "early %.0f took %.0f cd %.1f" % [early, dmg(T), float(K.cd["e"])])
+	# Slipstep: tap skids, hold slides, early release refunds
+	P.teleport(home); P.dashes = P.max_dashes(); P.inp["move"] = Vector2(0, 1)
+	P.do_dash(); step(m, 0.4)
+	ok("marlowe dash tap: Slipstep skid", K.last_dash_kind == "step" and P.flat_dist(home) > 1.8, "moved %.1f" % P.flat_dist(home))
+	P.inp["move"] = Vector2.ZERO
 	await done(m)
 
 # ------------------------------------------------------------------ Juggernaut (kits2: a port of SUPERVIVE's Brall)
@@ -785,7 +737,7 @@ func _bulwark() -> void:
 
 # ------------------------------------------------------------------ levels and the Bonded R
 func _levels_and_bond() -> void:
-	var r := setup("gunslinger", 6.0, "cindle")
+	var r := setup("thief", 6.0, "cindle")      # (a kit with an R: Vireo and Marlowe have none)
 	var m: Match = r[0]; var P: Hunter = r[1]; var T: Hunter = r[2]
 	# a fresh run: R locked until level 6
 	P.lvl = 1; P.xp = 0.0; P.skill_pts = 1
@@ -996,7 +948,7 @@ func _infusion() -> void:
 	var poison: bool = (f["effects"] as Array).any(func(e): return String(e["type"]) == "damage" and float(e.get("over", 0.0)) > 0.0)
 	ok("infusion: Vespyx poisons the Thief's Bola", poison, "; ".join(f["notes"]))
 	var fm := Arch.fill(Arch.def("mage")["rmb"]["sockets"], Arch.infusion(KinLib.kin("pebbit")), "rmb", "projectile")
-	ok("infusion: Gravadillo swaps the Mage bolt's control", fm["swap"] and (fm["effects"] as Array).any(func(e): return KinParts.category(String(e["type"])) == "control"), "; ".join(fm["notes"]))
+	ok("infusion: Gravadillo adds a control to Vireo's Coilshot", (fm["effects"] as Array).any(func(e): return KinParts.category(String(e["type"])) == "control"), "; ".join(fm["notes"]))
 	var fj := Arch.fill(Arch.def("juggernaut")["rmb"]["sockets"], Arch.infusion(KinLib.kin("pebbit")), "rmb", "cone")
 	ok("infusion: Gravadillo lifts on a cone", (fj["effects"] as Array).any(func(e): return String(e["type"]) == "lift"), "; ".join(fj["notes"]))
 	var fz := Arch.fill(Arch.def("gunslinger")["rmb"]["sockets"], Arch.infusion(KinLib.kin("zapple")), "rmb", "projectile")
@@ -1006,6 +958,7 @@ func _infusion() -> void:
 		var inf := Arch.infusion(KinLib.kin(kid))
 		for a in Arch.ids():
 			for slot in ["rmb", "e", "r"]:
+				if not Arch.def(a).has(slot): continue
 				var sd: Dictionary = Arch.def(a)[slot]
 				var ff := Arch.fill(sd.get("sockets", {}), inf, slot, String(sd.get("delivery", "burst")))
 				for e in ff["effects"]:
@@ -1020,11 +973,11 @@ func _infusion() -> void:
 	step(m, 0.3)
 	ok("infusion runtime: Bola + poison", T.burn_t > 0.0, "burn %.1f" % T.burn_t)
 	await done(m)
-	r = setup("mage", 6.0, "puddlet")
+	r = setup("mage", 5.0, "puddlet")
 	m = r[0]; P = r[1]; T = r[2]
-	tap(m, P)
-	step(m, 0.4)
-	ok("infusion runtime: Prismander prism bolt", T.slow_t > 0.0 and dmg(T) > 0.0, "slow %.2f k %.2f" % [T.slow_t, T.slow_k])
+	hold(m, P, 0.5)
+	step(m, 0.6)
+	ok("infusion runtime: a Boki's type rides Vireo's Coilshot", dmg(T) > 0.0 and (T.slow_t > 0.0 or T.burn_t > 0.0 or T.stun_t > 0.0 or T.root_t > 0.0), "slow %.2f burn %.2f stun %.2f" % [T.slow_t, T.burn_t, T.stun_t])
 	await done(m)
 
 # ------------------------------------------------------------------ feel
@@ -1040,13 +993,13 @@ func _feel() -> void:
 	var st3 := StageSpec.parse({"delivery": {"type": "leap", "range": 7, "time": 0.5}}, "", GrammarReport.new())
 	ok("feel: leap flight counts", Feel.missing_windup(st3) <= 0.0)
 	# archetype tells meet the floors
-	ok("feel: Hex is a projectile (dodgeable)", String(Arch.def("mage")["e"]["delivery"]) == "projectile" and float(Arch.def("mage")["e"]["speed"]) <= 24.0)
+	ok("feel: Skycall and Longneedle show a lane or ring before they land", float(Arch.def("mage")["e"]["delay"]) >= 0.5 and float(Arch.def("gunslinger")["e"]["charge"]) >= 0.5)
 	ok("feel: Arrow Rain tell >= soft floor", float(Arch.def("archer")["e"]["tell"]) >= Feel.floor_for("soft_cc", "instant"))
 	ok("feel: the Bola and Warchain are projectiles (dodgeable)", String(Arch.def("thief")["rmb"]["delivery"]) == "projectile" and float(Arch.def("thief")["rmb"]["bola"]["speed"]) <= 34.0 and String(Arch.def("juggernaut")["e"]["delivery"]) == "projectile")
-	ok("feel: Blink windup shows the landing", float(Arch.def("mage")["dash"]["windup"]) >= 0.1)
+	ok("feel: Wirerun shows its lane while it grows", float(Arch.def("mage")["dash"]["hold"]) >= 0.3)
 	ok("feel: Doomfall / Fissure plant tells (fuse + tell)", float(Arch.def("juggernaut")["r"]["tell"]) + float(Arch.def("juggernaut")["r"]["fuse"]) >= 0.3 and float(Arch.def("bulwark")["r"]["tell"]) >= 0.3)
-	ok("feel: every R has a fuse of 0.35-0.8s", Arch.ids().all(func(a): return float(Arch.def(a)["r"].get("fuse", 0.0)) >= 0.35 and float(Arch.def(a)["r"].get("fuse", 0.0)) <= 0.8))
-	ok("R cooldowns are big moments (90-120s)", Arch.ids().all(func(a): return float(Arch.def(a)["r"]["cooldown"]) >= 90.0 and float(Arch.def(a)["r"]["cooldown"]) <= 120.0))
+	ok("feel: every R has a fuse of 0.35-0.8s", Arch.ids().filter(func(a): return Arch.def(a).has("r")).all(func(a): return float(Arch.def(a)["r"].get("fuse", 0.0)) >= 0.35 and float(Arch.def(a)["r"].get("fuse", 0.0)) <= 0.8))
+	ok("R cooldowns are big moments (90-120s)", Arch.ids().filter(func(a): return Arch.def(a).has("r")).all(func(a): return float(Arch.def(a)["r"]["cooldown"]) >= 90.0 and float(Arch.def(a)["r"]["cooldown"]) <= 120.0))
 	# hitstop tiers
 	var dummy := Hunter.new(); dummy.max_hp = 145.0
 	ok("feel: chip hit T1", Feel.tier(dummy, 4.0, {"src": "shot"}) == 1)

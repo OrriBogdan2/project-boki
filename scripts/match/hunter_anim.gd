@@ -1166,6 +1166,52 @@ const KMOVES := {
 		[1.6, {"y": -0.6, "fl": Vector3(-0.42, 0.1, -0.1), "hw": 1.0, "lw": 0.6, "legs": [-0.3, -0.3, 0.6, -0.8]}],
 		[1.8, {"y": 0.5, "fl": Vector3(0.1, 0.15, -0.5), "hw": 1.0, "lw": 0.5, "legs": [0.5, -0.7, -0.3, -0.3]}],
 		[2.2, {}]]},
+	# ---------------------------------------------------------------- Vireo (mage) and Marlowe (gunslinger)
+	# Coilshot: the coil drawn back with the shoulders turned, then the lunge and palm thrust on release
+	"mage_rmb": {"keys": [
+		[0.00, {}],
+		[0.18, {"p": 0.28, "y": 0.45, "legs": [0.20, -0.41, 0.17, -0.36], "lw": 1.0, "fl": Vector3(0.12, 0.12, 0.20), "hw": 1.00}],
+		[0.33, {"p": -0.38, "y": -0.35, "legs": [0.34, -0.65, 0.27, -0.58], "lw": 1.0, "fl": Vector3(0.00, 0.06, -0.58), "hw": 1.00, "sq": 0.12}],
+		[0.55, {"p": -0.12, "y": -0.10, "legs": [0.12, -0.24, 0.10, -0.22], "lw": 1.0, "fl": Vector3(0.05, 0.00, -0.40), "hw": 0.60}],
+		[0.95, {}]]},
+	# Wirerun held: a sprinter's crouch, both arms back while the lane grows
+	"mage_dash": {"hold": true, "keys": [
+		[0.00, {}],
+		[0.14, {"p": -0.32, "legs": [0.58, -1.12, 0.48, -0.99], "lw": 1.0, "fl": Vector3(-0.22, 0.00, 0.32), "hw": 1.00, "fr": Vector3(0.22, 0.00, 0.32), "rw": 1.00}]]},
+	# Wirerun let go: flat out, stretched, arms trailing, easing back to stride
+	"mage_dash_go": {"keys": [
+		[0.00, {"p": -0.32, "legs": [0.58, -1.12, 0.48, -0.99], "lw": 1.0, "fl": Vector3(-0.22, 0.00, 0.32), "hw": 1.00, "fr": Vector3(0.22, 0.00, 0.32), "rw": 1.00}],
+		[0.08, {"p": -0.62, "legs": [0.32, -0.61, 0.26, -0.54], "lw": 1.0, "fl": Vector3(-0.30, -0.10, 0.45), "hw": 1.00, "fr": Vector3(0.30, -0.10, 0.45), "rw": 1.00, "sq": -0.2}],
+		[0.30, {"p": -0.35, "legs": [0.15, -0.31, 0.12, -0.27], "lw": 1.0, "fl": Vector3(-0.28, 0.00, 0.30), "hw": 0.70, "fr": Vector3(0.28, 0.00, 0.30), "rw": 0.70}],
+		[0.70, {}]]},
+	# Skycall: one hand to the sky, then slammed down at the mark
+	"mage_e": {"keys": [
+		[0.00, {}],
+		[0.22, {"p": 0.30, "fl": Vector3(-0.04, 0.58, -0.04), "hw": 1.00}],
+		[0.34, {"p": -0.30, "legs": [0.32, -0.61, 0.26, -0.54], "lw": 1.0, "fl": Vector3(0.06, -0.12, -0.50), "hw": 1.00, "sq": 0.15}],
+		[0.62, {"p": -0.10, "legs": [0.12, -0.24, 0.10, -0.22], "lw": 1.0, "fl": Vector3(0.05, 0.00, -0.30), "hw": 0.50}],
+		[1.00, {}]]},
+	# Burr Charge: the burr cocked by the ear, then the lob
+	"gunslinger_rmb": {"keys": [
+		[0.00, {}],
+		[0.14, {"p": 0.12, "y": 0.55, "legs": [0.10, -0.20, 0.09, -0.19], "lw": 1.0, "fl": Vector3(-0.08, 0.30, 0.16), "hw": 1.00}],
+		[0.22, {"p": -0.22, "y": -0.42, "legs": [0.19, -0.37, 0.15, -0.32], "lw": 1.0, "fl": Vector3(0.10, 0.10, -0.55), "hw": 1.00}],
+		[0.40, {"p": -0.06, "y": -0.10, "legs": [0.05, -0.10, 0.05, -0.09], "lw": 1.0, "fl": Vector3(0.05, 0.00, -0.30), "hw": 0.50}],
+		[0.70, {}]]},
+	# Longneedle: braced low behind the barrel for the 0.8s charge, the recoil throws the chest back on the shot
+	"gunslinger_e": {"keys": [
+		[0.00, {}],
+		[0.22, {"p": -0.12, "y": 0.30, "legs": [0.42, -0.82, 0.34, -0.71], "lw": 1.0, "fl": Vector3(0.05, 0.05, -0.46), "hw": 0.85}],
+		[0.78, {"p": -0.16, "y": 0.30, "legs": [0.48, -0.92, 0.39, -0.80], "lw": 1.0, "fl": Vector3(0.05, 0.05, -0.46), "hw": 0.85}],
+		[0.86, {"p": 0.48, "y": 0.20, "legs": [0.12, -0.24, 0.10, -0.22], "lw": 1.0, "fl": Vector3(0.10, 0.00, -0.30), "hw": 0.60, "sq": -0.1}],
+		[1.20, {"p": 0.12, "y": 0.05, "legs": [0.05, -0.10, 0.05, -0.09], "lw": 1.0}],
+		[1.50, {}]]},
+	# Slipstep: sat back into the skid, arms out for balance
+	"gunslinger_dash": {"keys": [
+		[0.00, {}],
+		[0.10, {"p": 0.40, "legs": [0.65, -1.26, 0.53, -1.10], "lw": 1.0, "fl": Vector3(-0.30, 0.05, -0.08), "hw": 0.80, "fr": Vector3(0.30, 0.05, -0.08), "rw": 0.50}],
+		[0.55, {"p": 0.30, "legs": [0.53, -1.02, 0.42, -0.90], "lw": 1.0, "fl": Vector3(-0.30, 0.05, -0.08), "hw": 0.80, "fr": Vector3(0.30, 0.05, -0.08), "rw": 0.50}],
+		[0.90, {}]]},
 }
 const KM_CH := ["p", "y", "r", "lift", "fx", "fz", "fy", "sq", "lw", "hw", "rw", "bw", "rad", "gp"]
 var km := {}                   # the kit move's channels this frame (empty: none)

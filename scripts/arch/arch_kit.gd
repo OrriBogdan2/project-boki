@@ -987,3 +987,4 @@ func terrain_behind(t: Ent, dir: Vector2, reach: float) -> bool:
 			return true
 		k += 0.3
 	return false
+

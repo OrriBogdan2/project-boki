@@ -53,8 +53,8 @@ your class in the Expedition menu, and you can try every class against dummies i
 |---|---|---|---|---|---|---|---|
 | [Thief](Class-Thief.md) | Light | Twin Blades | Marks | Vault | Bola | Shadow Knife | Jackpot |
 | [Archer](Class-Archer.md) | Light | Longbow | Focus | Grapple Arrow | Snare | Arrow Rain | Great Arrows |
-| [Mage](Class-Mage.md) | Medium | Spellstaff | Runes and Heat | Blink | Guided Bolt | Hex | Encore |
-| [Gunslinger](Class-Gunslinger.md) | Medium | Rifle | Six Chambers | Slide Reload | Trick Shot | Quickdraw | Last Round |
+| [Vireo](Class-Vireo.md) | Light | Coilcaster | Sparks | Wirerun | Coilshot | Skycall | none (Boki Merge) |
+| [Marlowe](Class-Marlowe.md) | Medium | Quill Rifle | Fever | Slipstep | Burr Charge | Longneedle | none (Boki Merge) |
 | [Juggernaut](Class-Juggernaut.md) | Heavy | Greatsword | Rage | Rampage | Smash | Warchain | Doomfall |
 | [Bulwark](Class-Bulwark.md) | Heavy | Tower Shield & Mace | Guard | Whirl | Shield | Mending Ground | Fissure |
 
@@ -64,8 +64,8 @@ The weight class sets health, speed, mass and dash charges; the class kit sits o
 
 | Weight | Health | Speed (m/s) | Dash charges | Mass | Glide cap | Classes | In short |
 |---|---|---|---|---|---|---|---|
-| Light | 124 | 5.2 | 1 | 0.85 | 1.2 | Thief, Archer | Fast and fragile. The fastest dash, the longest glide, and hits throw you furthest. |
-| Medium | 145 | 5 | 1 | 1 | 1 | Mage, Gunslinger | The all-rounder: middle health, speed, dash and glide. |
+| Light | 124 | 5.2 | 1 | 0.85 | 1.2 | Thief, Archer, Vireo | Fast and fragile. The fastest dash, the longest glide, and hits throw you furthest. |
+| Medium | 145 | 5 | 1 | 1 | 1 | Marlowe | The all-rounder: middle health, speed, dash and glide. |
 | Heavy | 193 | 4.73 | 2 | 1.35 | 0.85 | Juggernaut, Bulwark | Slow and tough. Two short dashes, the most health, and very hard to push off a ledge. |
 
 ### Run levels

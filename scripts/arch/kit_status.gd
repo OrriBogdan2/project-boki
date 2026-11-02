@@ -4,10 +4,23 @@ extends RefCounted
 ##   gnd  Grounded (the Thief's Bola): no dash, jump or glide; the hunter's legs show the tangled cords
 ##   blt  Blight (the Juggernaut's Warchain, the Thief's Jackpot rim): healing on the body is cut
 ##   vul  Shred (the Thief's Primed shot): the body takes `k` more damage
+##   rat  Rattled (Marlowe's Burr Charge): slowed, and her rifle and Longneedle hit harder; stars over the head
 ## The game that owns the body runs the rules; the caster's game sends the Net event
 ## ["kst", nid, kind, seconds, k] for a remote body (Net.VERSION 0.7.0), every game shows it.
 
 const GROUND_COL := Color("d8b878")
+const RATTLE_COL := Color("ffb36a")
+const RATTLE_SLOW := 0.35        # how much speed Rattled takes away
+
+static func rattled(e: Ent) -> bool:
+	return e != null and is_instance_valid(e) and e.has_meta("rat_until") and e.m != null and float(e.m.time) < float(e.get_meta("rat_until"))
+
+static func rattled_left(e: Ent) -> float:
+	return maxf(0.0, float(e.get_meta("rat_until")) - float(e.m.time)) if rattled(e) else 0.0
+
+static func clear_rattled(e: Ent) -> void:
+	if e != null and is_instance_valid(e) and e.has_meta("rat_until"):
+		e.set_meta("rat_until", 0.0)
 
 static func grounded(e: Ent) -> bool:
 	return e != null and is_instance_valid(e) and e.has_meta("gnd_until") and e.m != null and float(e.m.time) < float(e.get_meta("gnd_until"))
@@ -35,6 +48,12 @@ static func apply(e: Ent, kind: String, secs: float, k := 0.0, send := true) -> 
 		"blt":
 			e.blight_t = maxf(e.blight_t, secs)
 			e.blight_k = maxf(0.6, k) if k > 0.0 else 0.6
+		"rat":
+			var was_r := rattled(e)
+			e.set_meta("rat_until", maxf(float(e.get_meta("rat_until", 0.0)), float(m.time) + secs))
+			e.slow_k = maxf(e.slow_k if e.slow_t > 0.0 else 0.0, RATTLE_SLOW)
+			e.slow_t = maxf(e.slow_t, secs)
+			if not was_r: _show(e, kind, secs)
 		"vul":
 			e.vuln_k = maxf(e.vuln_k if e.vuln_t > 0.0 else 0.0, k)
 			e.vuln_t = maxf(e.vuln_t, secs)
@@ -63,6 +82,25 @@ static func _show(e: Ent, kind: String, secs: float) -> void:
 			m.fx.word(e.pos + Vector3(0, 2.0, 0), "GROUNDED", GROUND_COL, false)
 			m.fx.ring(e.pos, 1.1, GROUND_COL, 0.3)
 			if e == m.get("player") and m.hud: m.hud.toast_small("GROUNDED  ·  no dash, jump or glide", GROUND_COL)
+		"rat":
+			var old2 := e.get_node_or_null("Rattled")
+			if old2: old2.queue_free(); old2.name = "RattledGone"
+			var rn := Node3D.new()
+			rn.name = "Rattled"
+			var top := 2.35 * (float((e as Hunter).cdat.get("scale", 1.0)) if e is Hunter else 0.8)
+			var rmat := Models.glow_mat(Color(RATTLE_COL, 1.0))
+			for i in 4:
+				var st := MeshInstance3D.new()
+				st.mesh = Models.crystal(0.07, 0.1, 4)
+				st.material_override = rmat
+				st.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+				var a := TAU * i / 4.0
+				st.position = Vector3(cos(a) * 0.38, top, sin(a) * 0.38)
+				rn.add_child(st)
+			e.add_child(rn)
+			m.later(secs, func(): if is_instance_valid(rn): rn.queue_free())
+			m.fx.word(e.pos + Vector3(0, 2.3, 0), "RATTLED", RATTLE_COL, false)
+			m.fx.ring(e.pos, 1.1, RATTLE_COL, 0.25)
 		"vul":
 			m.fx.word(e.pos + Vector3(0, 2.0, 0), "SHRED", Color("ff7a5a"), false)
 			m.fx.ring(e.pos, 0.9, Color("ff7a5a"), 0.25)
