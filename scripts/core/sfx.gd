@@ -244,6 +244,18 @@ func set_layers(want: Dictionary) -> void:
 	for st in want:
 		layer_want[st] = clampf(float(want[st]), 0.0, 1.0)
 
+## Leaving a match for any other screen (Main.show_screen): the layered score and the abyss / ruins
+## beds belong to the match, so they fade out with the screen change. Without this they outlived it,
+## because the title asks for the "match" wind that is already the current ambience (an early
+## return) and so never cleared the beds. The single tracks and the main ambience are left to the
+## next screen's play_music / play_ambience, which crossfade them.
+func reset_scene_audio(fade := 1.2) -> void:
+	if not layers.is_empty():
+		_stop_layers(fade)
+		music_name = ""
+	if not amb_layers.is_empty():
+		clear_amb_layers(fade)
+
 func _stop_layers(fade: float) -> void:
 	for st in layers:
 		var p: AudioStreamPlayer = layers[st]
@@ -270,11 +282,11 @@ func amb_layer(name: String, level: float) -> void:
 		amb_layers[name] = {"p": p, "want": 0.0}
 	amb_layers[name]["want"] = clampf(level, 0.0, 1.0)
 
-func clear_amb_layers() -> void:
+func clear_amb_layers(fade := 1.0) -> void:
 	for n in amb_layers:
 		var p: AudioStreamPlayer = amb_layers[n]["p"]
 		var tw := create_tween()
-		tw.tween_property(p, "volume_db", -60.0, 1.0)
+		tw.tween_property(p, "volume_db", -60.0, fade)
 		tw.tween_callback(p.queue_free)
 	amb_layers = {}
 
