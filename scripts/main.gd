@@ -2713,7 +2713,7 @@ func _boss_check() -> void:
 	spot.call(P, F["dial"])
 	walk.call(P, -outv, 6.0, func(): return m.lairs.inside(F, P.pos, 0.3))
 	var in_gateway: bool = m.lairs.inside(F, P.pos, 0.3) and F["state"] == "open"
-	walk.call(P, outv, 3.0)
+	walk.call(P, outv, 1.5)      # (1.5 s: 3 s walked off the island edge, which is allowed now)
 	ok.call(in_gateway and F["state"] == "open" and fb.dormant and not F.get("locked", false) and not m.lairs.inside(F, P.pos, 0.5) and gate_free.call(F),
 		"before the fight: into the gateway and back out, the boss still asleep (%.1fm out)" % P.flat_dist(F["c"]))
 	# step in: it wakes and the gate seals behind you, the ward lit
@@ -3546,6 +3546,7 @@ func _drop_check() -> void:
 	if not hidden.is_empty():
 		var hc: Dictionary = hidden[0]
 		var before := sp.state_for(hc, P.team)
+		if P.out or P.downed: Life.bring_back(m, P, hc["pos"], 1.0, false)      # (walking off an island is allowed now: the player may have gone over the edge during the checks above; same bring-back as the ground half)
 		P.teleport(hc["pos"] + Vector3(1.5, 0, 0))
 		for i in 30: m.step(Match.DT)
 		print("DCHECK scouting %s: %s -> %s" % [hc["id"], before, sp.state_for(hc, P.team)])
