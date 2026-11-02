@@ -672,6 +672,8 @@ func _boss_dead(L: Dictionary, b: Boss, credit: Ent) -> void:
 	var killer: Hunter = (credit as Kin).owner_h if credit is Kin and (credit as Kin).owner_h else (credit as Hunter if credit is Hunter else null)
 	L["state"] = "cleared"
 	L["cleared_by"] = killer.pname if killer else ""
+	if killer and killer.ctrl == "local":
+		killer.stats["bosses"] = int(killer.stats.get("bosses", 0)) + 1      # lifetime count: opens farm unlocks (FarmUnlocks)
 	# everyone's Boki who fought it cheers (and remembers it)
 	for hh in m.hunters:
 		if hh.kin and hh.kin.comp and not hh.out and (hh == killer or hh.flat_dist(b) < 22.0) and hh.kin.state != "downed":
