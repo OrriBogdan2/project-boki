@@ -690,7 +690,7 @@ func e_recastable() -> bool: return false
 var anim_id := ""              # the kit move playing on the hunter (HunterAnim.KMOVES), its start
 var anim_at := -9.0
 
-## The kit's full-body move on the wire (Net 0.15.0): the move id and its age in seconds, after the
+## The kit's full-body move on the wire (Net 0.16.0): the move id and its age in seconds, after the
 ## state array after KinNet.hunter_extra (26-30), at index NET_MOVE_AT. Empty id: nothing playing (an expired move is not sent).
 const NET_MOVE_AT := 31
 const NET_MOVE_LIFE := 3.0     # seconds a move is still worth sending (the longest is about 2.5s)
