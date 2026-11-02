@@ -263,3 +263,6 @@ The owner and I worked through how Merge and ultimates fit together. Decision:
 
 **Your side** (reserved files): a public hook for kits to add bond, for example `KinBond.add(h, amount, reason)`; the release burst; any bond-meter tuning; freeing X.
 **Our side:** an ult video study is running now (Opus, clean room). The server's kit agents will build each hunter's ult in a follow-up pass once the current kitfix pairs land, calling your bond hook.
+
+## 2026-11-02 16:50 ET: owner note for the bigger-map task (last in the queue)
+The sky train's route only goes through the centre of The Hollow Crown. When the map is expanded, route it further out, closer to the edges (not all the way to the rim), so it passes more of the outer islands. The route comes from tools/make_hollowcrown.py, like the rest of the map. Recorded in the bigger-map spec.
