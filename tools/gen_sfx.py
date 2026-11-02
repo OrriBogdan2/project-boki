@@ -415,3 +415,12 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import sfx_combat
 sfx_combat.build()
 print('combat sounds written')
+
+# ================================================================== capture
+# scan_pop: the capsule closing at the end of a scan: a quick rising shimmer, then a bright two-note pop
+# (added last, so the sounds above keep the same random stream).
+d = 0.75; n = N(d)
+save('scan_pop', mix(tone(500, 1500, 0.3, (1.0, 0.15)) * swell(N(0.3), 0.25, 0.1) * 0.35,
+                     at(bell(988, 0.5, 0.004, 0.14), 0.28), at(bell(1318, 0.6, 0.004, 0.2), 0.34) * 0.8,
+                     at(bpf(noise(0.12), 1500, 5000) * env(N(0.12), 0.002, 0.03), 0.28) * 0.5), rms_db=-19, lp=5000)
+print('capture sounds written')

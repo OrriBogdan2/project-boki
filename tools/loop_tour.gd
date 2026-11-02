@@ -428,7 +428,7 @@ func _expedition() -> void:
 	if _gone(m): return
 	await _cast_round(m, "exp", true)
 	if _gone(m): return
-	await _tame(m)
+	await _scan(m)
 	if _gone(m): return
 	await _lair(m)
 	if _gone(m): return
@@ -550,12 +550,12 @@ func _cast_round(m, tag: String, wait_cd: bool) -> void:
 	await mwait(0.2)
 	await shot("%s_rmb_air" % tag)
 	await mwait(1.0)
-	if Input.is_action_pressed("throw") == false and P.kin and String(P.kin.get("state")) != "shoulder":
+	if Input.is_action_pressed("throw") == false and P.kin and KinCommand.is_away(P, P.kin):
 		await key("throw")      # call the Boki back
 	aim_at = null
 	print("TOUR %s casts done, kstat %s" % [tag, str(m.kstat)])
 
-func _tame(m) -> void:
+func _scan(m) -> void:
 	var P: Hunter = m.player
 	var rec := Save.new_kin("puddlet", "", 77)
 	rec["level"] = 3
@@ -568,7 +568,7 @@ func _tame(m) -> void:
 	var at: Vector3 = m.world.free_spot_near(P.pos + Vector3(2.2, 0, 1.0), [], 0.8, 0.4, 6.0)
 	var k = m.spawn_wild(rec, Vector3(at.x, m.world.ground_at(at.x, at.z), at.z), true)
 	await mwait(0.8)
-	await shot("tame_dazed")
+	await shot("scan_dazed")
 	var w0 := Time.get_ticks_msec()
 	var caught := false
 	var caught0: int = P.caught.size()
@@ -579,15 +579,15 @@ func _tame(m) -> void:
 			P.teleport(Vector3(to.x, m.world.ground_at(to.x, to.z), to.z))
 		Input.action_press("interact")
 		await mwait(0.6)
-		if not caught and Time.get_ticks_msec() - w0 > 600 and Time.get_ticks_msec() - w0 < 2200:
-			await shot("tame_holding")
+		if not caught and Time.get_ticks_msec() - w0 > 600 and Time.get_ticks_msec() - w0 < 2200:   # (the scan runs on its own after 0.4s)
+			await shot("scan_holding")
 		if not is_instance_valid(k) or k.dead or P.caught.size() > caught0:
 			caught = true; break
 	Input.action_release("interact")
-	print("TOUR tame caught=%s interact='%s'" % [caught, String(m.interact.get("label", ""))])
-	if not caught: note_bad("couldn't tame the dazed Boki")
+	print("TOUR scan caught=%s interact='%s'" % [caught, String(m.interact.get("label", ""))])
+	if not caught: note_bad("couldn't scan the dazed Boki")
 	await mwait(1.0)
-	await shot("tame_done")
+	await shot("scan_done")
 
 func _lair(m) -> void:
 	var P: Hunter = m.player

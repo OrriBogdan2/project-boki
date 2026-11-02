@@ -20,8 +20,8 @@ ability in a match; **R** turns a piece in build mode and is your ultimate in a 
 | E | Your class's utility |
 | R | Your class's ultimate (from level 6). With a full bond meter it's a **bonded** ultimate: your Boki merges with you as it fires |
 | C | Your Boki's own ability: it hops off, casts and hops back |
-| G or middle mouse | Send your Boki out to fight on its own, or recall it |
-| F | Use: open, pick up, tame a dazed Boki, revive a teammate, loot a deathbox, finish a downed rival |
+| G or middle mouse | Tap: Sic your Boki at the cursor, or Call it back if it is away. Hold: the order wheel (Chase, Guard, Return, Follow) |
+| F | Use: open, pick up, scan a knocked-out wild Boki (hold), revive a teammate, loot a deathbox, finish a downed rival |
 | 1 / 2 | Tonic (heal) / armor kit. With full health, 1 uses an armor kit. While a perk choice is open, 1-3 pick a perk |
 | Alt + an ability key | Put a skill point into that ability (pressing a locked ability unlocks it) |
 | Ctrl | Sneak: slower and quieter, steadier aim, harder to spot |
@@ -65,11 +65,11 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | Right click | Archetype ability (right click) | `secondary` | yes |
 | E | Archetype utility (E) | `signature` | yes |
 | C | Boki ability (cast from where your Boki is) | `kin_ability` | yes |
-| F | Use, tame, revive, pet | `interact` | yes |
+| F | Use, scan, revive, pet | `interact` | yes |
 | 2 | Repair armor (armor kit) | `armor_kit` | yes |
 | Q | Glove active | `gear1` | yes |
 | Ctrl | Sneak | `crouch` | yes |
-| G / Middle mouse | Throw / recall Boki (hold: hold the spot or follow) | `throw` | yes |
+| G / Middle mouse | Boki orders: tap to Sic or Call back, hold for the order wheel | `throw` | yes |
 | B | Base to a teammate (squads) | `base` | yes |
 | Shift | Archetype dash | `dash` | yes |
 | Space | Jump (hold to glide) | `jump` | yes |

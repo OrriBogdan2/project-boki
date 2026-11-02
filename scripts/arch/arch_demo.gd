@@ -104,7 +104,7 @@ static func _setup(m: Match, P: Hunter, what: String) -> void:
 	if P.kin == null:
 		var rec := Save.new_kin("wisplet" if what == "bonded" else "puddlet"); rec["trust"] = 90.0
 		var k: Kin = m.give_kin(P, rec)
-		k.state = "shoulder"; k.settle = 1.0
+		k.stow()
 	if m.hud: m.hud.guide_hidden = true
 	P.unlock_all()
 	P.lvl = 7; P.xp = float(Hunter.XP_TO[6]) + 120.0; P.slot_lv["ult"] = 1; P.skill_pts = 0

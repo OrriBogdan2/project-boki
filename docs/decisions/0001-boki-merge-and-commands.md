@@ -1,6 +1,6 @@
 # 0001: Boki commands, the downed Boki and R = Merge
 
-- **Status:** accepted (owner decisions of Nov 1 2026)
+- **Status:** accepted (owner decisions of Nov 1 2026); the G commands and the shoulder default are superseded by [0002](0002-boki-follow-and-capture.md)
 - **Date:** 2026-11-01
 - **Area:** combat / networking / UI (Boki behaviour, the R slot, Net)
 
