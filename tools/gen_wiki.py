@@ -265,6 +265,8 @@ def gen_classes():
         b.append(table(["Slot", "Card text"], rows))
         b.append("\n### Abilities in full\n")
         b.append("**%s (passive).** %s\n" % (d["passive"]["name"], d["passive"].get("desc", "")))
+        if d.get("jackpot"):
+            b.append("**%s (Mark trigger).** %s\n" % (d["jackpot"]["name"], d["jackpot"].get("desc", "")))
         dd = d["dash"]
         b.append("**%s (dash, Shift, %s cooldown).** %s\n" % (dd["name"], secs(dd.get("cd")), dd.get("desc", "")))
         r = d["rmb"]
@@ -285,7 +287,8 @@ def gen_classes():
             if s == "ult" and "r" not in d: continue
             r2 = d.get("rank2", {}).get(s, "")
             r3 = d.get("rank_next", {}).get(s, "") or ("Rank 3: " + d["rank3"][s] if s in d.get("rank3", {}) and s != "ult" else "")
-            rk.append([SLOT_NAMES[s], re.sub(r"^Rank 2:\s*", "", r2), re.sub(r"^Rank 3:\s*", "", r3)])
+            if r2 or r3:
+                rk.append([SLOT_NAMES[s], re.sub(r"^Rank 2:\s*", "", r2), re.sub(r"^Rank 3:\s*", "", r3)])
         b.append(table(["Slot", "Rank 2", "Rank 3"], rk))
         order = d.get("order", [])
         b.append("\n**Suggested level-up order** (what bots follow): " + " > ".join(SLOT_NAMES.get(s, s) for s in order) + ".\n")
