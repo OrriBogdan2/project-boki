@@ -150,7 +150,7 @@ func _process(_d: float) -> void:
 
 func _fake_save() -> void:
 	Save.d["look"] = Models.default_look()
-	Save.d["arch"] = arch; Save.d["cls"] = Arch.weight(arch); Save.d["weapon"] = Arch.default_weapon(arch)
+	Save.d["arch"] = arch; Save.d["cls"] = Arch.weight(arch); Save.d["weapon"] = Arch.signature(arch)
 	var rec := Save.new_kin("cindle", "Ember")
 	rec["trust"] = 55.0; rec["starter"] = true
 	Save.d["roster"] = [rec]; Save.d["active"] = rec["uid"]
@@ -313,7 +313,7 @@ func _expedition() -> void:
 		Game.goto("home")
 		await _wait_home()
 		h = cur()
-	Save.d["arch"] = arch; Save.d["cls"] = Arch.weight(arch); Save.d["weapon"] = Arch.default_weapon(arch)
+	Save.d["arch"] = arch; Save.d["cls"] = Arch.weight(arch); Save.d["weapon"] = Arch.signature(arch)
 	h._open_expedition()
 	await wait(1.0)
 	await shot("exp_loadout")

@@ -42,7 +42,7 @@ into each other. Heals the squad from where its mace lands.
 |  |  |
 |---|---|
 | Weight class | Heavy (193 health, 4.73 m/s, 2 dash charges) |
-| Weapons | Tower Shield & Mace, Minigun (first is the default) |
+| Signature weapon | Tower Shield & Mace (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The squad's shield. Holds the line, plants a banner, leaps in to save an ally at the edge. |
 | Silhouette | the shield shape and the banner |
 | Resource | Guard (max 100) |
@@ -61,7 +61,6 @@ What the in-game kit card (K) says.
 | E: Mending Ground | Mending Ground: a healing burst at the lying mace (or your aim) after 1s. |
 | R: Fissure | Fissure: a crack runs forward and stuns, then the ground erupts and slows. |
 | Weapon: Tower Shield & Mace | Throw the mace and call it back; hold for a Crushing Blow. |
-| Weapon: Minigun | Spin up, then a hose of rounds. |
 
 ### Abilities in full
 

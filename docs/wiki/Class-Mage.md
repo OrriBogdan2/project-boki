@@ -39,7 +39,7 @@ spell, turns people into harmless critters, and blinks in and back out.
 |  |  |
 |---|---|
 | Weight class | Medium (145 health, 5 m/s, 1 dash charge) |
-| Weapons | Spellstaff, Longsword (first is the default) |
+| Signature weapon | Spellstaff (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The spell duelist. Runes you, hexes you into a critter, blinks away and snaps back. |
 | Silhouette | the hat and robe flare |
 | Resource | Heat (max 100) |
@@ -57,7 +57,6 @@ What the in-game kit card (K) says.
 | E: Hex | Hex: a dodgeable bolt that turns a hunter into a harmless critter for 1.3s. |
 | R: Encore | Encore: two mirror images recast your last spell, then echo every Bolt and Hex for 4s. |
 | Weapon: Spellstaff | Slow, heavy magic orbs; every 4th hits harder. |
-| Weapon: Longsword | A reaching 3-hit combo; hold for a thrust. |
 
 ### Abilities in full
 

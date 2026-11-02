@@ -223,7 +223,7 @@ def gen_classes():
     for aid in ARCH_ORDER:
         d = ARCH.get(aid)
         if not d: continue
-        rows.append([link(class_page_name(aid), d["name"]), d["weight"].title(), ", ".join(wname(w) for w in d["weapons"]),
+        rows.append([link(class_page_name(aid), d["name"]), d["weight"].title(), wname(d["signature"]),
                      d["passive"]["name"], d["dash"]["name"], d["rmb"]["name"], d["e"]["name"], d["r"]["name"]])
     wc = []
     for cid in ("light", "medium", "heavy"):
@@ -251,7 +251,7 @@ def gen_classes():
         b = []
         b.append(table(["", ""], [
             ["Weight class", "%s (%s health, %s m/s, %s dash charge%s)" % (d["weight"].title(), num(cs.get("hp", "?")), num(cs.get("speed", "?")), num(cs.get("dashes", "?")), "" if cs.get("dashes") == 1 else "s")],
-            ["Weapons", ", ".join(wname(w) for w in d["weapons"]) + " (first is the default)"],
+            ["Signature weapon", wname(d["signature"]) + " (the only weapon this hunter carries; it grows through upgrades, never swaps)"],
             ["Fantasy", d.get("fantasy", "")],
             ["Silhouette", d.get("silhouette", "")],
             ["Resource", "%s (max %s)" % (d["resource"]["name"], num(d["resource"].get("max", "")))] if d.get("resource") else ["Resource", "none"],
@@ -395,36 +395,36 @@ def gen_boki():
 
 # ------------------------------------------------------------------ gear
 def gen_gear():
-    gl = content("gloves")
-    act, pas = [], []
+    gl = content("gear")
+    slot_names = {"glove": "Active gloves (Q)", "passive": "Passive gloves", "armor": "Armor", "boots": "Boots", "kit": "Utility kits"}
+    groups = {k: [] for k in slot_names}
     for gid, g in gl.items():
         stats = ", ".join("%s +%s" % (k, num(v)) for k, v in g.get("stats", {}).items())
-        if g.get("cd"):
-            act.append([g["name"], secs(g["cd"]), g.get("desc", ""), stats])
+        sl = g.get("slot") or ("glove" if g.get("cd") else "passive")
+        if sl == "glove":
+            groups[sl].append([g["name"], secs(g["cd"]), g.get("desc", ""), stats])
         else:
-            pas.append([g["name"], g.get("desc", ""), stats])
-    body = "Gloves are found on expeditions. One active glove (Q) and one passive glove at a time; a new one replaces the one in its slot.\n\n"
-    body += "## Active gloves (Q)\n\n" + table(["Glove", "Cooldown", "What it does", "Also gives"], act)
-    body += "\n\n## Passive gloves\n\n" + table(["Glove", "What it does", "Stats"], pas)
-    page("Gloves.md", "Gloves", body, ["content/gloves"])
+            groups[sl].append([g["name"], g.get("desc", ""), stats])
+    body = "Gear is found on expeditions: in chests, on the ground, from the Blight and from bosses. Five slots: an active glove (Q), a passive glove, armor, boots and a utility kit. A new piece replaces the one in its slot (the old one drops at your feet). Every piece has a rarity, Common to Legendary, that scales its numbers (x1, x1, x1.3, x1.6, x2). Extracted gear also breaks down into farm materials.\n\n"
+    for sl, nm in slot_names.items():
+        hdr = ["Glove", "Cooldown", "What it does", "Also gives"] if sl == "glove" else ["Piece", "What it does", "Stats"]
+        body += "## %s\n\n%s\n\n" % (nm, table(hdr, groups[sl]))
+    page("Gloves.md", "Gear", body, ["content/gear", "content/rules/gear.json"])
 
     rar = gd_const("core/data.gd", "RARITY") or []
     rows = []
     for wid, w in WEAPONS.items():
         p = w.get("primary", {})
-        users = [ARCH[a]["name"] for a in ARCH_ORDER if a in ARCH and wid in ARCH[a]["weapons"]]
+        users = [ARCH[a]["name"] for a in ARCH_ORDER if a in ARCH and wid == ARCH[a].get("signature")]
         rows.append([w.get("name", wid), ", ".join(users) or "none", ", ".join(w.get("classes", [])), num(p.get("dmg", "")), secs(p.get("rate", "")), num(p.get("mag", "")), secs(p.get("reload", "")), "%sm" % num(p.get("range", "")), p.get("desc", "")])
-    body = "## Weapons\n\nNumbers are per shot or swing at Common rarity. Class kits that run their own weapon (the Juggernaut's greatsword, the Bulwark's shield and mace) take their numbers from the class file instead.\n\n"
+    body = "## Weapons\n\nNumbers are per shot or swing before any upgrades. Class kits that run their own weapon (the Juggernaut's greatsword, the Bulwark's shield and mace) take their numbers from the class file instead.\n\n"
     body += table(["Weapon", "Carried by", "Weight", "Damage", "Fire interval", "Magazine", "Reload", "Range", "Notes"], rows)
-    body += "\n\n## Found-weapon rarity\n\nWeapons found on the islands come with a rarity on top, and last until the expedition ends.\n\n"
-    body += table(["Rarity", "Damage", "Magazine", "Reload time", "Fire interval"], [[r["name"], "x" + num(r["dmg"]), "x" + num(r["mag"]), "x" + num(r["reload"]), "x" + num(r["rate"])] for r in rar])
+    body += "\n\n## Weapon upgrades\n\nNo weapon is ever found or swapped: every hunter carries one signature weapon. It grows through upgrade perks (level-ups on even levels, chests, shrines, bosses and tuning pickups on the ground). They last the expedition.\n\n"
+    pk0 = gd_const("core/data.gd", "PERKS") or {}
+    body += table(["Upgrade", "Effect", "Stacks"], [[v["name"], v["desc"], num(v.get("max", 1))] for v in pk0.values() if "wup" in v])
     el = gd_const("core/loot.gd", "ELEMENTS") or {}
     if el:
         body += "\n\n## Weapon elements\n\n" + table(["Element", "On hit"], [[v["name"], v.get("rider", "")] for v in el.values()])
-    un = gd_const("core/loot.gd", "UNIQUES") or {}
-    if un:
-        body += "\n\n## Named weapons\n\nAlways Legendary and elemental, with a perk and 10% more damage. Wardens and vaults drop them, rarely.\n\n"
-        body += table(["Name", "Weapon", "Element", "Perk"], [[v["name"], wname(v["wid"]), el.get(v["el"], {}).get("name", v["el"].title()), v["perk"]] for v in un.values()])
     va = gd_const("core/loot.gd", "VALUABLES") or {}
     if va:
         body += "\n\n## Valuables\n\n" + table(["Item", "Worth (gems)", "Notes"], [[v["name"], num(v["value"]), v.get("desc", "")] for v in va.values()])
@@ -441,7 +441,7 @@ def gen_gear():
         elif users: ut.append([", ".join(users)] + row)
     body += "\n\n## Without a class kit\n\nEvery player and bot now plays a class, whose kit owns Shift and right click. A hunter without one falls back to these: the weight class's dodge and the weapon's own right-click utility.\n\n"
     body += table(["Weight", "Dodge", "Cooldown", "What it does"], dg) + "\n\n" + table(["Weapon", "Right click", "Cooldown", "What it does"], ut)
-    page("Weapons.md", "Weapons, rarity and run perks", body, ["content/weapons", "content/abilities", "content/classes", "scripts/core/data.gd", "scripts/core/loot.gd"])
+    page("Weapons.md", "Weapons, upgrades and run perks", body, ["content/weapons", "content/abilities", "content/classes", "scripts/core/data.gd", "scripts/core/loot.gd", "scripts/match/weapon_ups.gd"])
 
 # ------------------------------------------------------------------ maps
 def gen_maps():

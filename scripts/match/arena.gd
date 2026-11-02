@@ -278,12 +278,6 @@ func set_arch(a: String, w := "") -> void:
 	if m.hud: m.hud.toast("%s  ·  %s" % [Arch.name_of(a), String(Arch.def(a).get("card", {}).get("loop", ""))], Arch.color(a))
 	if card_layer: _open_card()
 
-func set_weapon(w: String) -> void:
-	var P: Hunter = m.player
-	if P.ak and Arch.weapon_ok(P.arch, w):
-		P.equip(w, 0)
-		m.sfx("pickup", null, -6.0, 1.0)
-
 ## Bring another Boki (one of yours, or a loaner of any kind); "" for none.
 func set_kin(sp: String) -> void:
 	var P: Hunter = m.player
@@ -335,7 +329,7 @@ func _spawn_bot() -> void:
 	if bot_mode == "off":
 		return
 	var diff := "medium"
-	bot = m.make_hunter(m.next_id("spar"), TEAM, Arch.weight(bot_arch), "Sparring " + Arch.name_of(bot_arch), "bot", m.bot_kin_record(), bot_at, {"arch": bot_arch, "weapon": Arch.default_weapon(bot_arch)})
+	bot = m.make_hunter(m.next_id("spar"), TEAM, Arch.weight(bot_arch), "Sparring " + Arch.name_of(bot_arch), "bot", m.bot_kin_record(), bot_at, {"arch": bot_arch, "weapon": Arch.signature(bot_arch)})
 	bot.ai = m.bot_brain.new_mind(m.rng, float(Data.BOT_DIFF[diff]["skill"]), Data.BOT_DIFF[diff])
 	bot.lives = 99
 	bot.tonics = 0
@@ -501,12 +495,6 @@ func _fill_menu(v: VBoxContainer) -> void:
 	ll.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	ll.custom_minimum_size = Vector2(460, 36)
 	left.add_child(ll)
-	left.add_child(UI.section("Weapon"))
-	var wr := HBoxContainer.new(); wr.add_theme_constant_override("separation", 6)
-	for w in Arch.weapons(P.arch):
-		var ww: String = w
-		wr.add_child(UI.choice(String(Data.weapon_stats(w).get("name", w)), P.wid == w, func(): set_weapon(ww); _fill_menu(v), 140, w))
-	left.add_child(wr)
 	left.add_child(UI.section("Boki"))
 	var kg := GridContainer.new(); kg.columns = 3
 	kg.add_theme_constant_override("h_separation", 6); kg.add_theme_constant_override("v_separation", 6)

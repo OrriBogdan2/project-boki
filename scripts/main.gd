@@ -78,6 +78,7 @@ func _ready() -> void:
 		if a.begins_with("--balloon-demo="): opts["balloon_demo"] = a.substr(15); opts["no_drop"] = true; opts["god"] = true; opts["squad"] = 2; opts["teams"] = 2
 		if a == "--loot-demo": opts["loot_demo"] = true
 		if a == "--pack-demo": opts["pack_demo"] = true; opts["no_drop"] = true
+		if a == "--gear-demo": opts["gear_demo"] = true; opts["no_drop"] = true
 		if a == "--bag-demo": opts["bag_demo"] = true; opts["no_drop"] = true
 		if a == "--stomp-demo": opts["stomp_demo"] = true
 		if a == "--ring-demo": opts["ring_demo"] = true; opts["no_drop"] = true
@@ -92,20 +93,20 @@ func _ready() -> void:
 		if a.begins_with("--class="): Save.d["cls"] = a.substr(8); Save.d["weapon"] = ""
 		if a.begins_with("--weapon="):
 			Save.d["weapon"] = a.substr(9)
-			for c in Data.CLASSES:
-				if (Data.CLASSES[c]["weapons"] as Array).has(a.substr(9)): Save.d["cls"] = c
+			for ak0 in Arch.archetypes_of(a.substr(9)):
+				Save.d["cls"] = Arch.weight(String(ak0)); Save.d["arch"] = ak0      # (a weapon is some archetype's signature)
 		if a == "--ability-demo": opts["ability_demo"] = true
 		if a.begins_with("--arch-demo="):
 			# screenshots: an archetype mid-ability (scripts/arch/arch_demo.gd)
 			var ad := a.substr(12).split(":")
 			opts["arch_demo"] = a.substr(12); opts["no_drop"] = true; opts["training"] = true; opts["unlocked"] = true
-			opts["arch"] = ad[0]; opts["cls"] = Arch.weight(ad[0]); opts["weapon"] = Arch.default_weapon(ad[0])
+			opts["arch"] = ad[0]; opts["cls"] = Arch.weight(ad[0]); opts["weapon"] = Arch.signature(ad[0])
 			if ad.size() > 2: opts["weapon"] = ad[2]
 		if a.begins_with("--boki-demo="):
 			# screenshots: the Boki commands and the Merge (scripts/match/boki_demo.gd), --boki-demo=throw|recall|downed|merge[:species]
 			var bd := a.substr(12).split(":")
 			opts["boki_demo"] = a.substr(12); opts["arch_demo"] = "gunslinger:rmb"; opts["no_drop"] = true; opts["training"] = true; opts["unlocked"] = true
-			opts["arch"] = "gunslinger"; opts["cls"] = Arch.weight("gunslinger"); opts["weapon"] = Arch.default_weapon("gunslinger")
+			opts["arch"] = "gunslinger"; opts["cls"] = Arch.weight("gunslinger"); opts["weapon"] = Arch.signature("gunslinger")
 			if bd.size() > 1: opts["demo_kin"] = bd[1]
 		if a == "--normalize-size": Unique.normalize = true      # kin size changes no stats or hitboxes (Unique)
 		if a == "--fresh": Save.d = Save.fresh()
@@ -416,8 +417,8 @@ func _ready() -> void:
 	if "--economy-check" in args:
 		_economy_check()
 		return
-	if "--pickup-check" in args:
-		load("res://tools/pickup_check.gd").new().run(self)      # picked-up weapons come ready to fire
+	if "--gear-check" in args:
+		load("res://tools/gear_check.gd").new().run(self)      # signature weapons, gear, tunings, drop tables, save migration
 		return
 	if "--pack-ui-check" in args:
 		var puc = load("res://tools/pack_ui_check.gd").new()      # the backpack windows take real mouse clicks
@@ -1017,7 +1018,7 @@ func _life_check() -> void:
 		if gid != "": (lb["gear"] as Array).append({"id": gid, "rar": 3})
 		lb["gems"] = int(lb.get("gems", 0)) + 15
 		var looter: Hunter = C
-		looter.gear = [{}, {}]; looter.refresh_gear()
+		looter.gear = Gear.empty_slots(); looter.refresh_gear()
 		var its: Array = Life.box_items(m, looter, lb)
 		var g0 := looter.gems
 		var first: Dictionary = its[0]
@@ -1046,7 +1047,7 @@ func _economy_check() -> void:
 	var at := P.pos + Vector3(0.6, 0, 0)
 	# 1. a full backpack asks what to drop
 	P.pack_cap = 2
-	P.pack = [Loot.valuable("old_coin"), Loot.weapon("smg", 1)]
+	P.pack = [Loot.valuable("old_coin"), Loot.gear("tinker_roll", 1)]
 	m.spawn_val(Loot.valuable("kin_idol"), at)
 	var wp: Dictionary = m.wpicks[m.wpicks.size() - 1]
 	Pack.take_ground(m, P, wp)
@@ -1055,11 +1056,13 @@ func _economy_check() -> void:
 	var ids: Array = P.pack.map(func(it): return String(it.get("id", it.get("wid", ""))))
 	ok.call(ids.has("kin_idol") and not ids.has("old_coin") and m.wpicks.any(func(w): return String(w.get("val", "")) == "old_coin"), "swap drops the coin on the ground and packs the idol: %s" % str(ids))
 	m.hud.close_swap()
-	# a better weapon on the ground goes in your hands, with its element
+	# better armor on the ground goes on, and the old piece goes in the pack
 	P.pack_cap = 4
-	m.spawn_weapon("rifle", 3, at, "", false, -1, Loot.weapon("rifle", 3, "fire"))
+	P.gear[2] = {"id": "vest", "rar": 1}
+	m.spawn_gear("bastion_plate", 3, at, "", false)
 	Pack.take_ground(m, P, m.wpicks[m.wpicks.size() - 1])
-	ok.call(P.welem == "fire" and P.wrar == 3 and String(P.wpn["name"]) == "Epic Ember Rifle", "better weapon equipped: %s" % P.wpn["name"])
+	ok.call(String(P.gear[2]["id"]) == "bastion_plate" and P.pack.any(func(it): return String(it.get("id", "")) == "vest"), "better armor goes on, the old piece into the pack: %s" % str(P.gear[2]))
+	P.welem = "fire"
 	var ex := {}
 	Loot.rider(P, ex, 10.0)
 	ok.call(float(ex.get("burn", 0.0)) >= 5.0, "fire rider burns (%s)" % str(ex))
@@ -1068,23 +1071,22 @@ func _economy_check() -> void:
 	Loot.rider(P, ex2, 10.0)
 	ok.call(ex2.has("fx_hit"), "storm rider arcs on the 4th attack")
 	P.welem = "fire"
-	# 2. smart loot: hands first, then the pack, best first, never worse for better
+	# 2. smart loot: gear on you first, then the pack, best first, never worse for better
 	var gid: String = Gear.ALL.keys()[0]
 	var b := {"owner": Q, "team": Q.team, "pos": P.pos, "gems": 10, "seeds": {"tidebloom": 2}, "caught": [], "tonics": 0, "kits": 0, "soul_until": 0.0,
-		"prog": {}, "node": null, "empty": false, "gear": [{"id": gid, "rar": 4}], "weapon": Loot.weapon(String(Data.CLASSES[P.cls]["weapons"][1]), 4, "frost"),
-		"pack": [Loot.valuable("old_coin"), Loot.valuable("crown_shard"), Loot.weapon("smg", 1), Loot.weapon("shotgun", 2, "venom"), Loot.valuable("sky_pearl")]}
+		"prog": {}, "node": null, "empty": false, "gear": [{"id": gid, "rar": 4}, {"id": "gale_mantle", "rar": 4}],
+		"pack": [Loot.valuable("old_coin"), Loot.valuable("crown_shard"), Loot.gear("magpie", 1), Loot.gear("windstep_boots", 2), Loot.valuable("sky_pearl")]}
 	P.pack = [Loot.valuable("kin_idol")]
 	P.pack_cap = 3
-	P.gear = [{}, {}]; P.refresh_gear()
+	P.gear = Gear.empty_slots(); P.refresh_gear()
 	var g0 := P.gems
 	var got := Life.smart_loot(m, P, b)
 	var pv: Array = P.pack.map(func(it): return Loot.value(it))
 	var left: Array = Pack._box_things(b).map(func(c): return Loot.value(c["it"]))
 	var minp: int = pv.min() if not pv.is_empty() else 0
 	var maxl: int = left.max() if not left.is_empty() else 0
-	print("ECON  smart loot took %d: hand=%s gloves=%s pack=%s values=%s left in box=%s" % [got, P.wpn["name"], str(P.gear), str(P.pack.map(func(it): return Loot.name_of(it))), str(pv), str(left)])
-	ok.call(P.wid == String(Data.CLASSES[P.cls]["weapons"][1]) and P.welem == "frost", "smart loot: the best weapon for your class goes in your hands")
-	ok.call(not (P.gear[Gear.slot_of(gid)] as Dictionary).is_empty(), "smart loot: the glove goes on")
+	print("ECON  smart loot took %d: weapon=%s gear=%s pack=%s values=%s left in box=%s" % [got, P.wpn["name"], str(P.gear), str(P.pack.map(func(it): return Loot.name_of(it))), str(pv), str(left)])
+	ok.call(String(P.gear[2].get("id", "")) == "gale_mantle" and not (P.gear[Gear.slot_of(gid)] as Dictionary).is_empty(), "smart loot: the best gear goes on (armor %s)" % str(P.gear[2]))
 	ok.call(P.pack.size() == 3 and minp >= maxl, "smart loot: pack holds the most valuable (min %d >= best left %d)" % [minp, maxl])
 	ok.call(P.gems == g0 + 10 and int(P.seeds.get("tidebloom", 0)) >= 2, "smart loot: gems and seeds taken too")
 	# 3. extracting brings it all home to the armory; the loadout goes out and comes back
@@ -1093,17 +1095,18 @@ func _economy_check() -> void:
 	var haul := Pack.haul(P)
 	var n_arm := haul.filter(func(it): return String(it["t"]) != "val").size()
 	var out := Game.apply_result({"extracted": true, "haul": haul, "tier": 0, "gems": 5, "kin_runs": []})
-	ok.call(Econ.armory().size() == n_arm and int(Save.d["valuables"].get("crown_shard", 0)) == 1, "extract: %d weapons/gloves in the armory, treasure in the vault %s" % [Econ.armory().size(), str(Save.d["valuables"])])
+	ok.call(Econ.armory().size() == n_arm and int(Save.d["valuables"].get("crown_shard", 0)) == 1, "extract: %d pieces of gear in the armory, treasure in the vault %s" % [Econ.armory().size(), str(Save.d["valuables"])])
 	ok.call((out.get("haul", []) as Array).size() == haul.size(), "results list what came home (%d)" % (out.get("haul", []) as Array).size())
-	var best_w: Dictionary = Econ.armory().filter(func(it): return String(it["t"]) == "weapon")[0]
-	Econ.set_loadout("weapon", String(best_w["uid"]))
+	ok.call(int((out.get("mats", {}) as Dictionary).get("wood", 0)) > 0 and Work.mat("wood") > 0, "extract: the haul also gives farm materials %s" % str(out.get("mats", {})))
+	var best_w: Dictionary = Econ.armory().filter(func(it): return String(it["t"]) == "gear")[0]
+	Econ.set_loadout(Econ.gear_slot(best_w), String(best_w["uid"]))
 	var kit := Econ.begin_raid()
 	ok.call(kit.size() == 1 and Econ.find(String(best_w["uid"])).is_empty() and (Save.d["raid_out"] as Array).size() == 1, "loadout leaves the armory for the expedition")
 	Game.apply_result({"extracted": true, "haul": kit, "tier": 0, "kin_runs": []})
-	ok.call(not Econ.find(String(best_w["uid"])).is_empty() and not Econ.loadout("weapon").is_empty(), "extracting brings the loadout weapon back, still picked")
+	ok.call(not Econ.find(String(best_w["uid"])).is_empty() and not Econ.loadout(Econ.gear_slot(best_w)).is_empty(), "extracting brings the loadout gear back, still picked")
 	Econ.begin_raid()
 	Game.apply_result({"extracted": false, "why": "knocked out", "lost_items": [best_w], "tier": 0, "kin_runs": []})
-	ok.call(Econ.find(String(best_w["uid"])).is_empty() and Econ.loadout("weapon").is_empty(), "dying loses the loadout weapon")
+	ok.call(Econ.find(String(best_w["uid"])).is_empty() and Econ.loadout(Econ.gear_slot(best_w)).is_empty(), "dying loses the loadout gear")
 	var sold := Econ.sell(String(Econ.armory()[0]["uid"]))
 	var scrap := Econ.salvage(String(Econ.armory()[0]["uid"]))
 	ok.call(sold > 0 and scrap > 0, "sell (%d gems) and salvage (%d scrap)" % [sold, scrap])
@@ -1158,26 +1161,6 @@ func _economy_check() -> void:
 	for t in before["traits"]: tdiff += absf(float(before["traits"][t]) - float(back["traits"].get(t, 0.0)))
 	print("ECON  revived %s %s: level %d -> %d, trust %d -> %d, traits moved %.2f, memories %d -> %d, ghost=%s, likes %s -> %s" % [back["name"], back["title"], int(before["level"]), int(back["level"]), int(before["trust"]), int(back["trust"]), tdiff, (before["memory"] as Array).size(), (back["memory"] as Array).size(), back.get("ghost", false), str(before.get("likes", {}).get("food", "")), str(back["likes"]["food"])])
 	ok.call(not back.is_empty() and back["ghost"] and String(back["title"]) != "" and int(back["level"]) == 4 and tdiff > 0.05 and Save.d["roster"].has(back) and not Econ.graves().has(g) and Econ.embers() == 0, "revived kin comes back changed")
-	# weapons found in a region lean to its element (the meadow has none of its own)
-	var erng := RandomNumberGenerator.new(); erng.seed = 77
-	var by_biome := {}
-	for bi in ["ember", "frost", "storm", "bloom", "gloom", "meadow"]:
-		var cnt := {}
-		for n in 400:
-			var e := Loot.roll_element(erng, bi)
-			cnt[e] = int(cnt.get(e, 0)) + 1
-		by_biome[bi] = cnt
-	var home_el := func(bi: String) -> String:
-		for el in Loot.ELEMENTS:
-			if String(Loot.ELEMENTS[el]["biome"]) == bi: return el
-		return ""
-	var lean := true
-	for bi in ["ember", "frost", "storm", "bloom", "gloom"]:
-		var mine := int(by_biome[bi].get(home_el.call(bi), 0))
-		for el in by_biome[bi]:
-			if el != "" and el != home_el.call(bi) and int(by_biome[bi][el]) >= mine: lean = false
-	print("ECON  elements by biome (of 400): %s" % str(by_biome))
-	ok.call(lean and int(by_biome["meadow"].get("", 0)) > 300, "each region's weapons lean to its own element")
 	# an old save (from before the armory and feeders) loads and gets them filled in
 	var old := Save.fresh()
 	for k in ["armory", "raid_out", "loadout", "valuables", "feeders", "graves", "arm_lvl", "pack_lvl", "scrap", "feeder_inv", "feeder_given"]:
@@ -1198,21 +1181,18 @@ func _weapon_check() -> void:
 	var only := ""
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--weapon-check="): only = a.substr(15)
-	for wid in Data.weapon_ids():
+	for ad in Arch.ids():
+		var wid := Arch.signature(String(ad))
 		if only != "" and wid != only:
 			continue
-		var cls := ""
-		for c in Data.CLASSES:
-			if Data.CLASSES[c]["weapons"].has(wid): cls = c
-		if cls == "":
-			continue
+		var cls := Arch.weight(String(ad))
 		var wd: Dictionary = Data.weapon_stats(wid)
 		var modes: Array = ["tap", "charge"] if wd.has("charge_time") else ["hold"]
 		for mode in modes:
 			for dist in ([1.6] if wd.get("melee", false) else ([1.5, 3.0] if wd.has("pellets") else [3.0, float(wd["range"]) * 0.8])):
 				var m := Match.new()
 				add_child(m)
-				m.start({"training": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true, "weapon": wid, "cls": cls})
+				m.start({"training": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true, "weapon": wid, "cls": cls, "arch": ad})
 				m.set_process(false)
 				var P: Hunter = m.player
 				var T: Hunter = null
@@ -2811,7 +2791,7 @@ func _boss_check() -> void:
 		var ew = L.get("egg_wp")
 		var egg_shown: bool = m.lairs.egg_pings.size() > 0
 		var egg_ok: bool = ew != null and m.wpicks.has(ew) and Loot.is_rare_egg(Pack.ground_item(ew)) and Data.is_rare(String(Pack.ground_item(ew)["sp"]))
-		var strong: bool = m.wpicks.slice(w0).any(func(wp): return not wp.has("val") and not wp.has("gear") and int(wp["rar"]) >= 3)
+		var strong: bool = m.wpicks.slice(w0).any(func(wp): return wp.has("gear") and int(wp["rar"]) >= 3)
 		var kill_t := m.time - 0.2
 		for a in L["adds"]: if is_instance_valid(a) and not a.dead: a.dead = true; a.visible = false     # (the brood scatters; here it'd only shove the test hunters about)
 		var lvn: Node3D = L["nodes"]["lever"]
@@ -2826,13 +2806,13 @@ func _boss_check() -> void:
 		spot.call(P, L["c"] + Vector3(L["out"].x, 0, L["out"].y) * 3.0)
 		# a small pile, all of it good, and the egg on its own spot a few steps away
 		var pile: Array = m.wpicks.slice(w0).filter(func(wp): return not wp.get("egg", false))
-		var usable: bool = pile.any(func(wp): return not wp.has("val") and not wp.has("gear") and Loot.usable(P, Pack.ground_item(wp)) and int(wp["rar"]) >= 3)
+		var usable: bool = pile.any(func(wp): return wp.has("gear") and int(wp["rar"]) >= 3) and pile.any(func(wp): return wp.has("tune"))
 		var good: bool = pile.all(func(wp): return int(wp["rar"]) >= 3 if not wp.has("val") else Loot.value(Pack.ground_item(wp)) >= 40)
 		var apart := 99.0
 		if ew != null:
 			for wp in pile: apart = minf(apart, Vector2(wp["pos"].x - ew["pos"].x, wp["pos"].z - ew["pos"].z).length())
 		ok.call(pile.size() <= 4 and usable and good and apart >= 2.0 and m.lairs.inside(L, ew["pos"], 0.0),
-			"%s's loot: %d things, all good (%s), an Epic+ %s weapon, the egg %.1fm from the pile" % [b.md["name"], pile.size(), str(pile.map(func(wp): return "%s %d" % [Loot.name_of(Pack.ground_item(wp)), Loot.value(Pack.ground_item(wp))])), P.cls, apart])
+			"%s's loot: %d things, all good (%s), an Epic+ piece of gear and a Brand upgrade, the egg %.1fm from the pile" % [b.md["name"], pile.size(), str(pile.map(func(wp): return String(wp["gear"]) + " " + str(wp["rar"]) if wp.has("gear") else (String(wp["tune"]) if wp.has("tune") else Loot.name_of(Pack.ground_item(wp))))), apart])
 		var outL := Vector3(L["out"].x, 0, L["out"].y)
 		var vic: bool = L.get("victory", false)
 		if L == F:
@@ -3610,8 +3590,8 @@ func _simtest(opts: Dictionary) -> void:
 	var nb := 0
 	for b in m.breaks: nb += int(b["dead"])
 	var wr: Array = []
-	for h in m.hunters: wr.append(h.wrar)
-	print("SIMSTAT breaks %d/%d weapons left %d rarities %s staggers %d rings %d pads %d" % [nb, m.breaks.size(), m.wpicks.size(), str(wr), m.stag_n, m.ring_n, m.world.pads.size()])
+	for h in m.hunters: wr.append(h.gear.filter(func(g): return not g.is_empty()).size())
+	print("SIMSTAT breaks %d/%d pickups left %d gear worn %s staggers %d rings %d pads %d" % [nb, m.breaks.size(), m.wpicks.size(), str(wr), m.stag_n, m.ring_n, m.world.pads.size()])
 	print("SIMTEST done in %dms, sim time %d, result %s" % [Time.get_ticks_msec() - t0, m.time, str(m.result)])
 	print("SIMKIN %s lost=%s" % [str(m.kstat), str(m._resolve_lost().map(func(L): return [L["fate"], L["holder"]]))])
 	if m.blight:
@@ -3942,12 +3922,12 @@ func _home_build_check() -> void:
 	mv.ppos = HomeTraining.PAD; tr.pad_t = 0.0; tr.tick(0.05)
 	ok.call(tr.cds.values().all(func(v): return float(v) <= 0.05), "the pad resets cooldowns")
 	mv.ppos = HomeTraining.RACK + Vector3(0, 0, 1.0); tr.tick(0.05)
-	tr.try = {"cls": "heavy", "weapon": "greatsword"}
+	tr.try = {"cls": "heavy"}
 	tr.apply_try()
 	tr.open_tryon()
-	ok.call(String(tr.kit["fire"]["name"]) == Content.weapon("greatsword").display_name and mv.panel_open == "Try-on rack", "the Try-on rack puts a heavy's greatsword in your hands (%s)" % tr.kit["fire"]["name"])
+	ok.call(String(tr.kit["fire"]["name"]) == Content.weapon(String(Data.CLASSES["heavy"]["weapon"])).display_name and mv.panel_open == "Try-on rack", "the Try-on rack puts a heavy's weapon in your hands (%s)" % tr.kit["fire"]["name"])
 	tr.set_my_class()
-	ok.call(String(Save.d["cls"]) == "heavy" and String(Save.d["weapon"]) == "greatsword", "Set as my class makes it your expedition class")
+	ok.call(String(Save.d["cls"]) == "heavy" and String(Save.d["weapon"]) == Arch.signature(String(Save.d["arch"])), "Set as my class makes it your expedition class")
 	mv._close_panel()
 	# the climbing wall: walk up to it, jump, and you're stood on top
 	await get_tree().process_frame      # (a fresh frame: the glide test's Space press above still counts as "just pressed" in this one)

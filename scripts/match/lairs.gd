@@ -680,8 +680,8 @@ func _boss_dead(L: Dictionary, b: Boss, credit: Ent) -> void:
 		_victory(L, b)      # the gate stays shut a moment: the lever, the updraft, or wait it out
 	else:
 		unlock(L)
-	# a small pile, all of it worth having (an Epic or Legendary weapon its killer can use, a strong
-	# glove, one treasure, sometimes a Rift Key), and the Rare Egg on its own spot a few steps away,
+	# a small pile, all of it worth having (one Epic or Legendary piece of gear, a Brand upgrade for
+	# its killer's weapon, one treasure, sometimes a Rift Key), and the Rare Egg on its own spot a few steps away,
 	# under its own beam, so it's never lost in the pile
 	var at := _floor_spot(L, b.pos, 0.0)
 	var to_mid := Vector2(float(L["c"].x) - at.x, float(L["c"].z) - at.z)
@@ -692,14 +692,8 @@ func _boss_dead(L: Dictionary, b: Boss, credit: Ent) -> void:
 	var sp := String(b.md.get("egg", ""))
 	if Data.KIN.has(sp):
 		drop_egg(L, Loot.rare_egg(sp, b.mkind), egg_at)
-	var cls := String(killer.cls) if killer else String(Data.CLASSES.keys()[m.rng.randi() % Data.CLASSES.size()])
-	var keys: Array = Data.CLASSES[cls]["weapons"] if Data.CLASSES.has(cls) else Data.weapon_ids()
-	if killer and String(killer.arch) != "" and not Arch.weapons(String(killer.arch)).is_empty():
-		keys = Arch.weapons(String(killer.arch))     # an archetype can only hold its own family: drop one it can use
-	var wit := m.found_weapon(at, String(keys[m.rng.randi() % keys.size()]), 4 if m.rng.randf() < 0.3 else 3)
-	# (1.5 m either side: at 0.9 their names ran into each other)
-	m.spawn_weapon(String(wit["wid"]), int(wit["rar"]), at + Vector3(-1.5, 0, 0.4), "", true, -1, wit)
-	m.spawn_gear(Gear.roll(m.rng), 4 if m.rng.randf() < 0.3 else 3, at + Vector3(1.5, 0, 0.4))
+	# (1.6 m out: at 0.9 their names ran into each other)
+	GearDrops.run_table(m, "boss", at, m.rng, {"r": 1.6, "h": killer, "bonus": m.biomes.rarity_bonus_at(at) if m.biomes else 0})
 	m.spawn_val(Loot.valuable("crown_shard" if m.rng.randf() < 0.5 else "kin_idol"), at + Vector3(0, 0, -0.8))
 	if m.exits and not m.exits.list.is_empty() and m.rng.randf() < 0.5:
 		m.exits.drop_key(at + Vector3(0, 0, 1.1))

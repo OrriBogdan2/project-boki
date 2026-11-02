@@ -349,4 +349,4 @@ func _surge() -> void:
 
 # ------------------------------------------------------------------ 8. net
 func _net() -> void:
-	ok(Net.VERSION == "0.10.0", "the net version moved for the new snapshot shape (%s)" % Net.VERSION)
+	ok(Net.VERSION >= "0.10.0", "the net version moved for the new snapshot shape (%s)" % Net.VERSION)

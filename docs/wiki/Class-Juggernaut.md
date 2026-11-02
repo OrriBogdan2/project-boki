@@ -43,7 +43,7 @@ every knock.
 |  |  |
 |---|---|
 | Weight class | Heavy (193 health, 4.73 m/s, 2 dash charges) |
-| Weapons | Greatsword, Shotgun, Minigun (first is the default) |
+| Signature weapon | Greatsword (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The wrecking ball. Burns hotter with every hit, chains you in, and finishes it. |
 | Silhouette | the horned pauldrons |
 | Resource | Rage (max 100) |
@@ -61,8 +61,6 @@ What the in-game kit card (K) says.
 | E: Warchain | Chain a foe (blighted) or a wall; press E again to pull yourself to it. Smash during the pull to spin. |
 | R: Doomfall | Invulnerable as you rise, then a crushing strike that heals you; a knock resets it. |
 | Weapon: Greatsword | Quick slashes, double at the tip; hold to charge a Searing Wave. |
-| Weapon: Shotgun | Seven slugs that stop at 5m. |
-| Weapon: Minigun | Spin up, then a hose of rounds. |
 
 ### Abilities in full
 

@@ -164,7 +164,7 @@ func run(m: Node) -> void:
 	ok(String(data["egg"]["a"]) == String(by_name["Pip"]["uid"]) and String(data["egg"]["b"]) == String(by_name["Drip"]["uid"]), "the nest egg's parents point at the new ids")
 	ok(String(data["offers"][0]["uid"]) == String(by_name["Drip"]["uid"]), "a rival's buy-back offer points at the new id")
 	ok(String(data["graves"][0]["uid"]).begins_with("b") and String(data["graves"][0]["uid"]) == String(data["graves"][0]["rec"]["uid"]) and String(data["graves"][0]["legacy_uid"]) == "k424242", "a grave and its record share the new id")
-	ok(String(data["armory"][0]["uid"]) == "i1234567" and String(data["loadout"]["weapon"]) == "i1234567", "item ids are left alone")
+	ok((data["armory"] as Array).is_empty() and int(data["scrap"]) >= 1 and not (data["loadout"] as Dictionary).has("weapon"), "the old stored weapon becomes scrap and the loadout drops it")
 	var kept := true
 	for nm in by_name:
 		var r: Dictionary = by_name[nm]

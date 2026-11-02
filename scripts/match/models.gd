@@ -1688,21 +1688,6 @@ static func gun_parts(gun: Node3D, weapon: String, m_gun: Material, m_dark: Mate
 			part(gun, cyl(0.15, 0.14, 0.1, 14), m_acc, Vector3(0, 0, -0.52), Vector3.ONE, Vector3(PI / 2, 0, 0))
 			grip.call(-0.02, 0.18)
 
-## A found weapon floating over the ground, with a light pillar in its rarity's colour.
-static func weapon_drop(weapon: String, rar: int) -> Node3D:
-	var root := Node3D.new()
-	var col: Color = Data.RARITY[rar]["color"]
-	var spin := Node3D.new(); spin.name = "Spin"; spin.position = Vector3(0, 0.7, 0); root.add_child(spin)
-	var gun := Node3D.new(); gun.scale = Vector3.ONE * 2.3; gun.rotation.z = 0.25; spin.add_child(gun)
-	gun_parts(gun, weapon, toon(Color("4a4d5c")), toon(Color("2b2a33")), toon(col, true, 0.5))
-	var beam := part(root, cyl(0.14, 0.26, 5.0, 10), glow_mat(Color(col, 0.34)), Vector3(0, 2.5, 0))
-	beam.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	var ring := MeshInstance3D.new(); ring.mesh = flat_quad(1.3)
-	var rm := ring_mat(col, 0.12); rm.set_shader_parameter("fill", 0.12)
-	ring.material_override = rm; ring.position.y = 0.05
-	root.add_child(ring)
-	return root
-
 ## A piece of gear lying on the ground: a glowing gem-like token with a light beam.
 static func gear_drop(col: Color, rar: int) -> Node3D:
 	var root := Node3D.new()

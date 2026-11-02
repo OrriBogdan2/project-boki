@@ -236,7 +236,7 @@ func lmb_def() -> Dictionary:
 	return d.get("lmb", {})
 
 func _wk() -> float:
-	return float(Data.RARITY[clampi(h.wrar, 0, Data.RARITY.size() - 1)]["dmg"]) * m.dmg_mult(h)
+	return h.wup_dmg * m.dmg_mult(h)
 
 func wave_k() -> float:
 	var ld := lmb_def()

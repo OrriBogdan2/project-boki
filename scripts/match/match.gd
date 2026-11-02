@@ -25,7 +25,7 @@ var breaks: Array = []      # {i, pos, kind, hp, node, dead}
 var ring_n := 0
 var pellet_hits := {}        # shotgun volley + target -> slugs landed
 var air_rings: Array = []   # {pos, dir, node, cd: {hunter nid: time}}
-var wpicks: Array = []      # found weapons on the ground {id, pos, wid, rar, node}
+var wpicks: Array = []      # pickups on the ground: gear {gear}, tunings {tune}, treasure {val}, each with id, pos, rar, node
 var wdrop_n := 0
 var warden_done := false
 var meteor_at := -1.0       # when the meteor shower starts
@@ -745,8 +745,8 @@ func _start(o: Dictionary) -> void:
 		for b in breaks:
 			if b["kind"] == "barrel": b0 = b["pos"]; break
 		player.teleport(b0 + Vector3(2.2, 0, 0.6))
-		spawn_weapon("sniper", 3, b0 + Vector3(1.6, 0, 1.8), "", false)
-		spawn_weapon("smg", 4, b0 + Vector3(3.0, 0, 1.6), "", false)
+		spawn_gear("quickstep_boots", 3, b0 + Vector3(1.6, 0, 1.8), "", false)
+		spawn_gear("bastion_plate", 4, b0 + Vector3(3.0, 0, 1.6), "", false)
 	if not opts.get("duel", false) and not opts.get("arena", false):
 		await _spawn_wild()
 	await _slice()
@@ -923,6 +923,9 @@ func make_hunter(id: String, team: int, cls: String, pname: String, ctrl: String
 	h.lives = 99 if (opts.get("tutorial", false) or opts.get("training", false)) else int(T.get("lives", 2))
 	if opts.get("tutorial", false) or opts.get("training", false) or opts.get("duel", false) or opts.get("sandbox", false) or opts.get("unlocked", false):
 		h.unlock_all()        # practice modes (and the sim's scripted player) start with the whole kit
+	elif ctrl == "bot":
+		var gr := RandomNumberGenerator.new(); gr.seed = hash("%s|%s|gear" % [id, str(seed_val)])      # (its own stream: the match's rolls stay put)
+		GearDrops.bot_start(h, gr, bot_diff)       # bots start with some gear, more of it on harder settings
 	add_child(h)
 	h.teleport(at)
 	hunters.append(h)
@@ -1290,21 +1293,15 @@ func _apply_home_perks(h: Hunter) -> void:
 		h.tonics += 1
 		h.free_tonics += 1
 
-## What you took from the armory: the weapon in your hands and the gloves you wear (at risk: die and
-## they're in your deathbox like everything else), and your backpack's size.
+## What you took from the armory: the gear you wear (at risk: die and it's in your deathbox like
+## everything else), and your backpack's size.
 func _apply_armory_kit(h: Hunter) -> void:
 	if opts.get("training", false) or opts.get("tutorial", false) or opts.get("duel", false):
 		return
 	h.pack_cap = Econ.pack_cap()
 	for it in opts.get("kit_items", []):
-		match String(it.get("t", "")):
-			"weapon":
-				if Loot.usable(h, it): Loot.equip(h, it)
-				elif h == player and hud:
-					hud.toast("%s is a %s weapon  ·  using your class weapon" % [Loot.name_of(it), String(Data.CLASSES[Loot.class_of(it)]["name"])], Color("a2a8bb"))
-			"glove":
-				if Gear.ALL.has(String(it["id"])):
-					h.gear[Gear.slot_of(String(it["id"]))] = {"id": it["id"], "rar": int(it["rar"])}
+		if String(it.get("t", "")) == "gear" and Gear.ALL.has(String(it["id"])):
+			h.gear[Gear.slot_of(String(it["id"]))] = {"id": it["id"], "rar": int(it["rar"])}
 	h.refresh_gear()
 
 func _apply_treat(k: Kin) -> void:
@@ -1450,17 +1447,16 @@ func _spawn_breakables() -> void:
 		await _slice()
 		_add_break(String(b["kind"]), b["pos"])
 	if opts.get("training", false) and player:
-		# something to smash and something to pick up right where you start
-		for t in [[Vector3(-2.0, 0, 1.2), "crate"], [Vector3(-2.6, 0, 2.2), "pot"], [Vector3(2.2, 0, 1.0), "weapon"]]:
+		# something to smash right where you start
+		for t in [[Vector3(-2.0, 0, 1.2), "crate"], [Vector3(-2.6, 0, 2.2), "pot"]]:
 			var q: Vector3 = player.pos + t[0]
 			if world.is_void(q.x, q.z) or world.is_block(q.x, q.z):
 				continue
 			q.y = world.ground_at(q.x, q.z)
-			if t[1] == "weapon": spawn_weapon("sniper", 2, q, "", false)
-			else: _add_break(t[1], q)
-		# a glove rack: a row of gloves to try (actives go in your Q slot, passives in the other)
+			_add_break(t[1], q)
+		# a gear rack: a row of gear to try (an active glove goes in your Q slot, the rest in theirs)
 		var gi := 0
-		for gid in ["blink", "quake", "bubble", "grapple", "frost", "power_core"]:
+		for gid in ["blink", "quake", "bubble", "bastion_plate", "windstep_boots", "tinker_roll"]:
 			var q2: Vector3 = player.pos + Vector3(-4.5 + gi * 1.8, 0, -2.6)
 			gi += 1
 			if world.is_void(q2.x, q2.z) or world.is_block(q2.x, q2.z):
@@ -1485,14 +1481,12 @@ func _spawn_breakables() -> void:
 				lbl.position = dq + Vector3(0, 2.0, 0)
 				add_child(lbl)
 				break
-	# the weapons lying in the open are the same for everyone in an online match
+	# the gear lying in the open is the same for everyone in an online match
 	var wr := RandomNumberGenerator.new(); wr.seed = seed_val * 31 + 7
-	var keys: Array = Data.weapon_ids()
 	for i in world.weapon_spots.size():
-		var wk0 := String(keys[wr.randi() % keys.size()])
-		var wr0 := Data.roll_rarity(wr, 1 if tier >= 2 else 0)
 		var wsp: Vector3 = world.weapon_spots[i]
-		spawn_weapon(wk0, wr0, wsp, "ws%d" % i, false, -1, Loot.weapon(wk0, wr0, Loot.roll_element(wr, world.biome_at(wsp.x, wsp.z))))
+		var gg := GearDrops.roll_gear(wr, 1 if tier >= 2 else 0, 0, -1, biomes.slot_lean_at(wsp) if biomes else {})
+		spawn_gear(String(gg["id"]), int(gg["rar"]), wsp, "ws%d" % i, false)
 
 func _add_break(kind_s: String, at: Vector3) -> void:
 	var n := Models.breakable(kind_s)
@@ -1501,23 +1495,7 @@ func _add_break(kind_s: String, at: Vector3) -> void:
 	add_child(n)
 	breaks.append({"i": breaks.size(), "pos": at, "kind": kind_s, "hp": BREAK_HP[kind_s], "node": n, "dead": false})
 
-func spawn_weapon(w: String, rar: int, at: Vector3, id := "", send := true, ammo := -1, item := {}) -> void:
-	if id == "":
-		wdrop_n += 1
-		id = "w%s_%d" % [player.nid if player else "x", wdrop_n]
-	var n := Models.weapon_drop(w, rar)
-	n.position = at
-	add_child(n)
-	var wp := {"id": id, "pos": at, "wid": w, "rar": rar, "node": n, "ammo": ammo}
-	if not item.is_empty():
-		wp["item"] = item
-		if String(item.get("el", "")) != "":
-			_element_motes(n, Loot.ELEMENTS[String(item["el"])]["col"], String(item.get("uq", "")) != "")
-	wpicks.append(wp)
-	if net_on and send:
-		net_event(["wdrop", id, w, rar, _r(at.x), _r(at.y), _r(at.z), ammo, String(item.get("el", "")), String(item.get("uq", ""))])
-
-## A found weapon with an element (or a named one) glows its colour, so you can spot it from afar.
+## Motes drifting off a pickup in a colour (a Brand tuning, a Soul Ember), so you can spot it from afar.
 func _element_motes(n: Node3D, col: Color, unique: bool) -> void:
 	var p := CPUParticles3D.new()
 	p.amount = 18 if unique else 10
@@ -1545,28 +1523,48 @@ func spawn_val(item: Dictionary, at: Vector3) -> void:
 		_element_motes(n, Color("9ff0e0"), true)
 	wpicks.append({"id": "v%d" % wdrop_n, "pos": at, "val": String(item.get("id", "")), "item": item, "rar": int(vd.get("rar", 1)), "node": n, "wid": "", "ammo": -1})
 
-## A weapon found at a spot: the region's element sometimes, and now and then a named unique.
-func found_weapon(at: Vector3, wid: String, rar: int, unique_chance := 0.0) -> Dictionary:
-	if unique_chance > 0.0 and rng.randf() < unique_chance:
-		return Loot.weapon("", 0, "", Loot.roll_unique(rng))
-	return Loot.weapon(wid, rar, Loot.roll_element(rng, world.biome_at(at.x, at.z)))
-
 # ------------------------------------------------------------------ gear
 var gpads: Array = []        # pocket jump pads {pos, t, node}
 var smokes: Array = []       # smoke clouds {pos, r, t, node}
 var plats: Array = []        # emergency platforms {tiles, t, node}
 
-func spawn_gear(gid: String, rar: int, at: Vector3) -> void:
-	wdrop_n += 1
-	var n := Models.gear_drop(Gear.ALL[gid]["col"], rar)
+## A piece of gear on the ground. Online, whoever drops it tells the others (id "wdrop"; the fixed
+## ground spots pass their own ids and send nothing: every client rolls the same ones).
+func spawn_gear(gid: String, rar: int, at: Vector3, id := "", send := true) -> void:
+	if id == "":
+		wdrop_n += 1
+		id = "g%s_%d" % [player.nid if player else "x", wdrop_n]
+	var n := GearModels.drop(Gear.slot_of(gid), Gear.ALL[gid]["col"], rar)
 	n.position = at
 	add_child(n)
-	wpicks.append({"id": "g%d" % wdrop_n, "pos": at, "gear": gid, "rar": rar, "node": n, "wid": "", "ammo": -1})
+	wpicks.append({"id": id, "pos": at, "gear": gid, "rar": rar, "node": n, "wid": "", "ammo": -1})
+	if net_on and send:
+		net_event(["wdrop", id, "gear", rar, _r(at.x), _r(at.y), _r(at.z), gid])
 
-func _take_gear(h: Hunter, wp: Dictionary) -> void:
+## A weapon tuning on the ground (WeaponUps): walk over it and the upgrade is yours for the run.
+func spawn_tune(pid: String, at: Vector3, id := "", send := true) -> void:
+	if id == "":
+		wdrop_n += 1
+		id = "t%s_%d" % [player.nid if player else "x", wdrop_n]
+	var pd: Dictionary = Data.PERKS[pid]
+	var n := GearModels.tuning(pd["col"], (pd["wup"] as Dictionary).has("brand"))
+	n.position = at
+	add_child(n)
+	if (pd["wup"] as Dictionary).has("brand"):
+		_element_motes(n, pd["col"], true)
+	wpicks.append({"id": id, "pos": at, "tune": pid, "rar": 3 if (pd["wup"] as Dictionary).has("brand") else 2, "node": n, "wid": "", "ammo": -1})
+	if net_on and send:
+		net_event(["wdrop", id, "tune", 2, _r(at.x), _r(at.y), _r(at.z), pid])
+
+## Takes a piece of gear off the ground into its slot; what was in the slot drops at your feet.
+func _take_gear(h: Hunter, wp: Dictionary, from_net := false) -> void:
 	wpicks.erase(wp)
 	(wp["node"] as Node3D).queue_free()
-	var slot := Gear.slot_of(String(wp["gear"]))      # actives go in the Q slot, passives in the other
+	if from_net:
+		return
+	if net_on:
+		net_event(["wtake", wp["id"], h.nid])
+	var slot := Gear.slot_of(String(wp["gear"]))
 	var old: Dictionary = h.gear[slot]
 	h.gear[slot] = {"id": wp["gear"], "rar": int(wp["rar"])}
 	h.gear_cd[slot] = 0.0
@@ -1574,12 +1572,30 @@ func _take_gear(h: Hunter, wp: Dictionary) -> void:
 	if not old.is_empty():
 		var ba := randf() * TAU
 		spawn_gear(String(old["id"]), int(old["rar"]), Vector3(h.pos.x + cos(ba) * 0.9, h.ground(), h.pos.z + sin(ba) * 0.9))
-	var col: Color = Gear.ALL[wp["gear"]]["col"]
+	var col: Color = Data.RARITY[clampi(int(wp["rar"]), 0, Data.RARITY.size() - 1)]["color"]
 	sfx("pickup", h.pos, 0.0, 0.9)
 	fx.ring(h.pos, 1.4, col, 0.35)
 	if h == player and hud:
-		var g: Dictionary = Gear.ALL[wp["gear"]]
-		hud.toast("%s  ·  %s%s" % [g["name"], Gear.stat_text(wp["gear"], int(wp["rar"])), ("  ·  " + Settings.key_cap("gear1")) if Gear.active(wp["gear"]) else "  ·  passive"], col)
+		hud.toast(Loot.name_of(Loot.gear(String(wp["gear"]), int(wp["rar"]))) + "  ·  " + Loot.sub_of(Loot.gear(String(wp["gear"]), int(wp["rar"]))), col)
+
+## Walking over a tuning applies it (to bots too); one you've maxed stays on the ground.
+func _take_tune(h: Hunter, wp: Dictionary, from_net := false) -> void:
+	var pid := String(wp["tune"])
+	if not from_net and not h.perk_open(pid):
+		return
+	wpicks.erase(wp)
+	(wp["node"] as Node3D).queue_free()
+	if from_net:
+		return
+	if net_on:
+		net_event(["wtake", wp["id"], h.nid])
+	h.add_perk(pid)
+	var pd: Dictionary = Data.PERKS[pid]
+	sfx("bond", h.pos, -4.0, 1.3)
+	fx.ring(h.pos, 1.6, pd["col"], 0.35)
+	fx.burst(h.pos + Vector3(0, 1.0, 0), pd["col"], 14, 3.0, 0.5, -2.0)
+	if h == player and hud:
+		hud.toast("%s  ·  %s" % [pd["name"], pd["desc"]], pd["col"])
 
 ## Fire the active on a gear slot.
 func use_gear(h: Hunter, slot: int) -> void:
@@ -1744,39 +1760,14 @@ func in_smoke(p: Vector3) -> bool:
 			return true
 	return false
 
-func _take_weapon(h: Hunter, wp: Dictionary, from_net := false, keep_old := false) -> void:
-	if wp.has("gear"):
-		_take_gear(h, wp)
-		return
+## Takes a ground pickup for a hunter: gear into its slot, a tuning onto the weapon.
+func take_pick(h: Hunter, wp: Dictionary, from_net := false) -> void:
 	if wp.has("val"):
 		return
-	wpicks.erase(wp)
-	(wp["node"] as Node3D).queue_free()
-	if from_net:
-		return
-	if net_on:
-		net_event(["wtake", wp["id"], h.nid, wp["wid"], wp["rar"]])
-	var old_it := Loot.of_hand(h)
-	var old_ammo := h.ammo      # a reload under way is dropped with the gun: it keeps what was in it
-	# a picked-up gun comes full and ready (no reload), unless it was put down under 2s ago (Loot.REPICK_T)
-	var am := -1
-	if wp.has("left_at") and time - float(wp["left_at"]) < Loot.REPICK_T:
-		am = int(wp.get("ammo", -1))
-	Loot.equip(h, Pack.ground_item(wp), am)
-	if not keep_old:
-		# the old one is put down where you stand (with the backpack, the player's goes in it instead)
-		var ba := randf() * TAU
-		var back := Vector3(cos(ba), 0, sin(ba)) * 0.9
-		spawn_weapon(String(old_it["wid"]), int(old_it["rar"]), Vector3(h.pos.x + back.x, h.ground(), h.pos.z + back.z), "", true, old_ammo, Loot.clean(old_it) if Loot.keepable(old_it) else {})
-		wpicks[wpicks.size() - 1]["left_at"] = time
-	var col: Color = Data.RARITY[int(wp["rar"])]["color"]
-	sfx("pickup", h.pos, 0.0, 0.8)
-	fx.ring(h.pos, 1.4, col, 0.35)
-	fx.burst(h.pos + Vector3(0, 0.9, 0), col, 14, 3.0, 0.5)
-	if h == player:
-		train["_weapon"] = true
-		var r: Dictionary = Data.RARITY[int(wp["rar"])]
-		hud.toast("%s  ·  +%d%% damage" % [h.wpn["name"], int(round((float(r["dmg"]) - 1.0) * 100.0))] if int(wp["rar"]) > 0 else String(h.wpn["name"]), col)
+	if wp.has("tune"):
+		_take_tune(h, wp, from_net)
+	else:
+		_take_gear(h, wp, from_net)
 
 ## What pressing interact on a ground item will do, for the prompt.
 func _pickup_label(h: Hunter, wp: Dictionary) -> String:
@@ -1784,21 +1775,14 @@ func _pickup_label(h: Hunter, wp: Dictionary) -> String:
 	var k := Settings.key_cap("interact")
 	var nm := Loot.name_of(it)
 	var fill := "%d/%d" % [h.pack.size(), h.pack_cap]
-	var into_hand := false
-	match String(it.get("t", "")):
-		"weapon":
-			if not Loot.usable(h, it):
-				return "%s  ·  %s weapon: press %s to pack it (%s)" % [nm, String(Data.CLASSES[Loot.class_of(it)]["name"]), k, fill]
-			into_hand = Loot.value(it) > Loot.value(Loot.of_hand(h)) or not Pack.wants(h, it)
-		"glove":
-			var cur: Dictionary = h.gear[Gear.slot_of(String(it["id"]))]
-			into_hand = cur.is_empty() or Loot.value(it) > Loot.value({"t": "glove", "id": cur["id"], "rar": cur["rar"]}) or not Pack.wants(h, it)
+	var gid := String(it.get("id", ""))
+	var cur: Dictionary = h.gear[Gear.slot_of(gid)] if Gear.ALL.has(gid) else {}
+	var into_hand := Gear.ALL.has(gid) and (cur.is_empty() or Loot.value(it) > Loot.value(Loot.gear(String(cur["id"]), int(cur["rar"]))) or not Pack.wants(h, it))
 	if opts.get("training", false):
 		return "Press %s to take %s  ·  %s" % [k, nm, Loot.sub_of(it)]
 	if into_hand:
-		var old := Loot.of_hand(h) if String(it["t"]) == "weapon" else {}
-		var to_pack := ("  ·  yours goes in your pack (%s)" % fill) if Loot.keepable(old) else ""
-		return "Press %s to equip %s  ·  %s%s" % [k, nm, Loot.sub_of(it), to_pack]
+		var swap_txt := ("  ·  yours goes in your pack (%s)" % fill) if not cur.is_empty() else ""
+		return "Press %s to wear %s  ·  %s%s" % [k, nm, Loot.sub_of(it), swap_txt]
 	if Pack.room(h):
 		return "Press %s to pack %s  (%s)  ·  %s" % [k, nm, fill, Loot.sub_of(it)]
 	return "Backpack full (%s)  ·  %s to swap something out for %s" % [fill, k, nm]
@@ -1809,20 +1793,18 @@ func _update_wpicks(dt: float) -> void:
 		var sp: Node3D = n.get_node("Spin")
 		sp.rotation.y += dt * 1.6
 		sp.position.y = 0.7 + sin(time * 2.4 + float(wp["pos"].x)) * 0.08
-	# bots grab anything better that they walk past
+	# tunings are taken by walking over them; bots also grab gear that beats what they wear
 	for h in hunters:
-		if h.ctrl != "bot" or h.out or h.downed or h.dropping or h.riding or h.remote:
+		if h.out or h.downed or h.dropping or h.riding or h.remote:
 			continue
 		for wp in wpicks:
-			if wp.has("val"):
+			if wp.has("val") or h.flat_dist(wp["pos"]) >= 1.4 or absf(h.pos.y - float(wp["pos"].y)) >= 1.0:
 				continue
-			if wp.has("gear"):
-				if (h.gear[0].is_empty() or h.gear[1].is_empty()) and h.flat_dist(wp["pos"]) < 1.4 and absf(h.pos.y - float(wp["pos"].y)) < 1.0:
-					_take_gear(h, wp)
-					break
-				continue
-			if int(wp["rar"]) > h.wrar and Loot.usable(h, Pack.ground_item(wp)) and h.flat_dist(wp["pos"]) < 1.4 and absf(h.pos.y - float(wp["pos"].y)) < 1.0:
-				_take_weapon(h, wp)
+			if wp.has("tune") and (h.flat_dist(wp["pos"]) < 1.1 or h.ctrl == "bot"):
+				take_pick(h, wp)
+				break
+			if wp.has("gear") and h.ctrl == "bot" and GearDrops.bot_wants(h, String(wp["gear"]), int(wp["rar"])):
+				take_pick(h, wp)
 				break
 
 ## Damage a crate, pot or barrel. Breaking it is shared online; whoever broke it rolls for a weapon.
@@ -1864,9 +1846,8 @@ func _break(b: Dictionary, by: Ent, from_net := false) -> void:
 				drop("tonic", at + Vector3(0, 0.5, 0), 1)
 			if randf() < 0.4:
 				drop("armor", at + Vector3(0, 0.5, 0), 25)
-			if not from_net and randf() < 0.16:
-				var keys: Array = Data.weapon_ids()
-				spawn_weapon(String(keys[randi() % keys.size()]), Data.roll_rarity(rng), at)
+			if not from_net:
+				GearDrops.run_table(self, "crate", at, rng, {"h": by if by is Hunter else null})
 		"barrel":
 			_barrel_boom(at, by, from_net)
 
@@ -2681,22 +2662,16 @@ func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
 			drop("gem", mb.pos + Vector3(0, 0.6, 0), int(round(3 * float(T["loot"]))))
 		if mb.md.get("stag", false) and rng.randf() < 0.6:
 			drop("armor", mb.pos + Vector3(0, 0.6, 0), 25)
-		if mb.mkind in ["brute", "warden", "sentinel"] and rng.randf() < (1.0 if mb.mkind == "warden" else 0.4):
-			spawn_gear(Gear.roll(rng), Data.roll_rarity(rng, 2 if mb.mkind == "warden" else 0), mb.pos + Vector3(0.8, 0, 0.4))
+		# guards, the Warden, the Glimmerkin and the Blight drop gear and weapon tunings (content/rules/gear.json)
+		GearDrops.run_table(self, mb.mkind, mb.pos + Vector3(0, 0, 0.4), rng, {"h": credit if credit is Hunter else null, "bonus": biomes.rarity_bonus_at(mb.pos) if biomes else 0})
 		if mb.mkind == "warden":
-			# the Warden guards the best things: a weapon (sometimes a named one), treasure, maybe a Soul Ember
-			var wkeys: Array = Data.weapon_ids()
-			var wit := found_weapon(mb.pos, String(wkeys[randi() % wkeys.size()]), Data.roll_rarity(rng, 2), 0.2)
-			spawn_weapon(String(wit["wid"]), int(wit["rar"]), mb.pos + Vector3(-0.8, 0, 0.4), "", true, -1, wit)
+			# the Warden guards the best things: treasure, maybe a Soul Ember
 			spawn_val(Loot.valuable(Loot.roll_valuable(rng, 2)), mb.pos + Vector3(0, 0, -0.9))
 			if rng.randf() < 0.5:
 				spawn_val(Loot.valuable("soul_ember"), mb.pos + Vector3(0.9, 0, -0.6))
 		elif mb.mkind == "brute" and rng.randf() < 0.25:
 			spawn_val(Loot.valuable(Loot.roll_valuable(rng, 0 if tier == 0 else 1)), mb.pos + Vector3(0, 0, -0.8))
 		if mb.mkind == "glimmer":
-			var keys: Array = Data.weapon_ids()
-			var git := found_weapon(mb.pos, String(keys[randi() % keys.size()]), Data.roll_rarity(rng, 1))
-			spawn_weapon(String(git["wid"]), int(git["rar"]), mb.pos, "", true, -1, git)
 			if credit is Hunter: add_feed("%s caught the Glimmerkin's treasure" % credit.pname)
 		if mb.mkind == "bl_warden":
 			# a Warden's lamp holds something worth the risk: armor, often a tonic
@@ -4066,19 +4041,20 @@ func step(dt: float) -> void:
 		set_meta("pack_demo_done", true)
 		player.pack_cap = 6
 		var gk: Array = Gear.ALL.keys()
-		player.pack = [Loot.weapon("smg", 2, "venom"), Loot.valuable("sky_pearl"), Loot.glove(String(gk[1 % gk.size()]), 2), Loot.weapon("shotgun", 1), Loot.valuable("old_coin"), Loot.valuable("kin_idol")]
-		Loot.equip(player, Loot.weapon("", 0, "", "thunderclap"))
+		player.pack = [Loot.gear("skylark_boots", 2), Loot.valuable("sky_pearl"), Loot.gear(String(gk[1 % gk.size()]), 2), Loot.gear("tinker_roll", 1), Loot.valuable("old_coin"), Loot.valuable("kin_idol")]
 		player.gear[Gear.slot_of(String(gk[0]))] = {"id": String(gk[0]), "rar": 3}
 		player.refresh_gear()
 		var pat := world.free_spot_near(player.pos + Vector3(1.0, 0, 0.6), [player.pos], 0.6)
 		spawn_val(Loot.valuable("crown_shard"), Vector3(pat.x, world.ground_at(pat.x, pat.z), pat.z))
 		var pat2 := world.free_spot_near(player.pos + Vector3(-1.4, 0, 1.0), [player.pos, pat], 0.6)
-		var fw := Loot.weapon("sniper", 3, "frost")
-		spawn_weapon("sniper", 3, Vector3(pat2.x, world.ground_at(pat2.x, pat2.z), pat2.z), "", false, -1, fw)
+		spawn_gear("gale_mantle", 3, Vector3(pat2.x, world.ground_at(pat2.x, pat2.z), pat2.z), "", false)
 		if opts.get("pack_demo", false):
 			Pack.take_ground(self, player, wpicks[wpicks.size() - 2])
 		else:
 			hud.toggle_pack()
+	if opts.get("gear_demo", false) and player and time > 1.0 and not has_meta("gear_demo_done") and hud:
+		set_meta("gear_demo_done", true)
+		GearDrops.demo(self)
 	if opts.get("mates_demo", false) and player:
 		# test: the squad UI. One teammate gets knocked, one dies into a deathbox, and the first is
 		# picked back up a few seconds later (frames under the minimap and the ally alerts up top)
@@ -4112,9 +4088,8 @@ func step(dt: float) -> void:
 					if ids.size() > 1:
 						(lb["gear"] as Array).append({"id": String(ids[0]), "rar": 3})
 						(lb["gear"] as Array).append({"id": String(ids[1]), "rar": 1})
-					lb["weapon"] = Loot.weapon("sniper", 2, "frost")
-					lb["pack"] = [Loot.valuable("crown_shard"), Loot.weapon("smg", 3, "venom"), Loot.valuable("old_coin"), Loot.valuable("soul_ember")]
-					player.pack = [Loot.valuable("sky_pearl"), Loot.weapon("shotgun", 1), Loot.valuable("kin_idol"), Loot.weapon("rifle", 2), Loot.valuable("old_coin")]
+					lb["pack"] = [Loot.valuable("crown_shard"), Loot.gear("quilted_coat", 3), Loot.valuable("old_coin"), Loot.valuable("soul_ember")]
+					player.pack = [Loot.valuable("sky_pearl"), Loot.gear("magpie", 1), Loot.valuable("kin_idol"), Loot.gear("windstep_boots", 2), Loot.valuable("old_coin")]
 					lb["gems"] = int(lb.get("gems", 0)) + 25
 					lb["empty"] = false
 					player.teleport(lb["pos"] + Vector3(0.8, 0, 0.6))
@@ -4774,31 +4749,17 @@ func _update_interact(dt: float) -> void:
 				if k.state == "dazed" and not k.dead and h.flat_dist(k) < float(Capture.rules()["range"]):
 					best = {"kind": "catch", "ent": k, "label": CaptureHud.prompt(h, k)}
 					break
-		# 3. swap to a weapon on the ground
+		# 3. wear gear lying on the ground (tunings are taken by walking over them)
 		if best.is_empty():
 			var bd := 1.5
 			for wp in wpicks:
 				var d: float = h.flat_dist(wp["pos"])
-				if d < bd and absf(h.pos.y - float(wp["pos"].y)) < 1.2 and h == player:
-					# the player: equip it if it's better, else into the backpack (full: choose what to drop)
+				if d < bd and absf(h.pos.y - float(wp["pos"].y)) < 1.2 and wp.has("gear"):
 					bd = d
 					best = {"kind": "weapon", "wp": wp, "label": _pickup_label(h, wp), "col": Loot.col_of(Pack.ground_item(wp))}
-				elif d < bd and absf(h.pos.y - float(wp["pos"].y)) < 1.2 and wp.has("val"):
-					continue
-				elif d < bd and absf(h.pos.y - float(wp["pos"].y)) < 1.2 and wp.has("gear"):
+				elif d < bd and absf(h.pos.y - float(wp["pos"].y)) < 1.2 and wp.has("val") and h == player:
 					bd = d
-					var gd: Dictionary = Gear.ALL[wp["gear"]]
-					var rn: String = String(Data.RARITY[int(wp["rar"])]["name"]) + " " if int(wp["rar"]) > 1 else ""
-					var gslot := Gear.slot_of(String(wp["gear"]))
-					var cur: Dictionary = h.gear[gslot]
-					var swap_txt := ("  ·  replaces " + String(Gear.ALL[String(cur["id"])]["name"])) if not cur.is_empty() and Gear.ALL.has(String(cur["id"])) else ""
-					best = {"kind": "weapon", "wp": wp, "label": "Press %s to take %s%s  (%s glove%s: %s)%s" % [Settings.key_cap("interact"), rn, gd["name"], "active" if gslot == 0 else "passive", ("  ·  " + Settings.key_cap("gear1")) if gslot == 0 else "", Gear.stat_text(wp["gear"], int(wp["rar"])), swap_txt], "col": gd["col"]}
-				elif d < bd and absf(h.pos.y - float(wp["pos"].y)) < 1.2:
-					bd = d
-					var r: Dictionary = Data.RARITY[int(wp["rar"])]
-					var nm: String = Data.weapon_stats(String(wp["wid"]), int(wp["rar"]))["name"]
-					var extra := "  (+%d%% damage)" % int(round((float(r["dmg"]) - 1.0) * 100.0)) if int(wp["rar"]) > 0 else ""
-					best = {"kind": "weapon", "wp": wp, "label": "Press %s to take %s%s" % [Settings.key_cap("interact"), nm, extra], "col": r["color"]}
+					best = {"kind": "weapon", "wp": wp, "label": _pickup_label(h, wp), "col": Loot.col_of(Pack.ground_item(wp))}
 		# 4. open a chest
 		if best.is_empty():
 			for c in chests:
@@ -4831,7 +4792,7 @@ func _update_interact(dt: float) -> void:
 					if h == player and not opts.get("training", false):
 						Pack.take_ground(self, h, best["wp"])
 					else:
-						_take_weapon(h, best["wp"])
+						take_pick(h, best["wp"])
 			"finish":
 				# a short hold commits you to the stomp (Life.start_stomp): no cancelling after that
 				var o: Hunter = best["ent"]
@@ -4975,22 +4936,15 @@ func _open_chest(h: Hunter, c: Dictionary, from_net := false) -> void:
 	var seeds_n: int = [1 if randf() < 0.6 else 0, 1, 2][t]
 	for i in seeds_n:
 		drop("seed", c["pos"] + Vector3(0, 0.8, 0), randi_range(1, 2), Data.pick_seed(), "", soft)
-	if not from_net and randf() < [0.25, 0.6, 1.0][t]:
-		var keys: Array = Data.weapon_ids()
-		var a := randf() * TAU
-		var wk: String = biomes.weapon_at(c["pos"], keys) if biomes else String(keys[randi() % keys.size()])
-		var wrc := mini(Data.RARITY.size() - 1, Data.roll_rarity(rng, maxi(0, t - 1) + (biomes.rarity_bonus_at(c["pos"]) if biomes else 0)))
-		var wit := found_weapon(c["pos"], wk, wrc, [0.0, 0.02, 0.08][t])
-		spawn_weapon(String(wit["wid"]), int(wit["rar"]), c["pos"] + Vector3(cos(a) * 1.1, 0, sin(a) * 1.1), "", true, -1, wit)
+	if not from_net:
+		# gear and weapon tunings (content/rules/gear.json), leaning toward what this region is known for
+		GearDrops.run_table(self, "chest%d" % t, c["pos"], rng, {"h": h, "bonus": biomes.rarity_bonus_at(c["pos"]) if biomes else 0, "lean": biomes.slot_lean_at(c["pos"]) if biomes else {}})
 	if not from_net and randf() < [0.3, 0.7, 1.0][t]:
 		# treasure for the backpack; the vault sometimes holds a Soul Ember
 		var a3 := randf() * TAU
 		spawn_val(Loot.valuable(Loot.roll_valuable(rng, t)), c["pos"] + Vector3(cos(a3) * 1.0, 0, sin(a3) * 1.0))
 		if t == 2 and rng.randf() < 0.3:
 			spawn_val(Loot.valuable("soul_ember"), c["pos"] + Vector3(-cos(a3) * 1.0, 0, -sin(a3) * 1.0))
-	if not from_net and randf() < [0.35, 0.65, 1.0][t]:
-		var a2 := randf() * TAU
-		spawn_gear(Gear.roll(rng), Data.roll_rarity(rng, t), c["pos"] + Vector3(cos(a2) * 1.2, 0, sin(a2) * 1.2))
 	# vaults sometimes hold a Rift Key
 	if not from_net and exits and not exits.list.is_empty() and t == 2 and rng.randf() < 0.35:
 		exits.drop_key(c["pos"])
@@ -5013,7 +4967,8 @@ var perk_queue: Array = []         # more offers waiting behind it
 
 ## Three perks to choose one from (fewer if you've maxed most). Bots just take one.
 func offer_perks(h: Hunter, src: String) -> void:
-	var pool: Array = Data.PERKS.keys().filter(func(k): return h.perk_open(k))
+	# level-ups offer weapon upgrades only (WeaponUps); chests, shrines and bosses offer anything
+	var pool: Array = Data.PERKS.keys().filter(func(k): return h.perk_open(k) and (src != "level" or Data.PERKS[k].has("wup")))
 	if pool.is_empty():
 		return
 	for i in range(pool.size() - 1, 0, -1):
@@ -5120,7 +5075,7 @@ static func demo_opts() -> Dictionary:
 static func arena_opts(arch_id := "") -> Dictionary:
 	var o := {"arena": true, "training": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 6262, "no_drop": true}
 	if Arch.exists(arch_id):
-		o["arch"] = arch_id; o["cls"] = Arch.weight(arch_id); o["weapon"] = Arch.default_weapon(arch_id)
+		o["arch"] = arch_id; o["cls"] = Arch.weight(arch_id); o["weapon"] = Arch.signature(arch_id)
 	return o
 
 ## The training pad that takes you to the duel room.
@@ -6459,18 +6414,14 @@ func _net_ev(x, from: String) -> void:
 			for wp in wpicks:
 				if wp["id"] == String(x[1]): seen = true
 			if not seen:
-				var nit := {}
-				if x.size() > 9 and (String(x[8]) != "" or String(x[9]) != ""):
-					nit = Loot.weapon(String(x[2]), int(x[3]), String(x[8]), String(x[9]))
-				spawn_weapon(String(x[2]), int(x[3]), Vector3(x[4], x[5], x[6]), String(x[1]), false, int(x[7]) if x.size() > 7 else -1, nit)
+				var wat := Vector3(x[4], x[5], x[6])
+				if String(x[2]) == "tune" and Data.PERKS.has(String(x[7])): spawn_tune(String(x[7]), wat, String(x[1]), false)
+				elif String(x[2]) == "gear" and Gear.ALL.has(String(x[7])): spawn_gear(String(x[7]), int(x[3]), wat, String(x[1]), false)
 		"wtake":
 			for wp in wpicks:
 				if wp["id"] == String(x[1]):
-					_take_weapon(ents_by_id.get(String(x[2]), null), wp, true)
+					take_pick(ents_by_id.get(String(x[2]), null), wp, true)
 					break
-			var wh: Ent = ents_by_id.get(String(x[2]), null)
-			if wh is Hunter and wh.remote and x.size() > 4:
-				(wh as Hunter).equip(String(x[3]), int(x[4]))
 		"zone":
 			var zo: Ent = ents_by_id.get(String(x[8]), null)
 			if zo is Hunter:

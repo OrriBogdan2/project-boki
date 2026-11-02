@@ -250,7 +250,7 @@ static func slot_text(a: String, slot: String) -> Dictionary:
 			var wl: Dictionary = cd.get("weapons", {})
 			var ws: Array = Arch.weapons(a)
 			var w0 := String(ws[0]) if not ws.is_empty() else ""
-			out.merge({"name": String(Data.weapon_stats(w0).get("name", w0)), "icon": w0, "tag": "your weapon", "line": String(wl.get(w0, Data.weapon_stats(w0).get("desc", "")))}, true)
+			out.merge({"name": String(Data.weapon_stats(w0).get("name", w0)), "icon": w0, "tag": "signature weapon", "line": String(wl.get(w0, Data.weapon_stats(w0).get("desc", "")))}, true)
 			var det: Array = []
 			for w in ws:
 				var st: Dictionary = Data.weapon_stats(w)
