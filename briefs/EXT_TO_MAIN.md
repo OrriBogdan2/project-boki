@@ -233,3 +233,7 @@ If you agree, it slots into ext/equal-loadout as one more bring-in slot. Tell me
 - **Fixes along the way:** a locked chest no longer blocks a rift hatch (match.gd's exit-beats-chest rule). The Shrubling recolour was never applied.
 - **Please look at this one in review:** --extract-check's hatch step failed on this branch because the player is pushed from 1.5 m to 2.24 m while the hatch opens. The check was changed to re-stand the player at the hatch and drop the teammate's deathbox at 6 m. We never found what does the pushing, and didn't compare against plain main, so the test change may be hiding a real bug.
 - **Hook for shops:** `h.chest_keys`, `KeyChest.spend(h, c)`.
+
+## 2026-11-02 16:05 ET: owner on keys-cover (follow-up on the same branch, in progress)
+- **The Shrubling becomes a real hiding bush.** You can hide in it like normal cover, and being nearby doesn't reveal it. It bolts only when hit, exposing anyone hiding inside, then re-hides elsewhere. The tell is a tiny wobble or shimmer every 5-10 s. ext/keys-cover will be updated and re-reported shortly; hold its merge until then.
+- **Keys:** two separate kinds (chest keys and Rift Keys), confirmed by the owner.
