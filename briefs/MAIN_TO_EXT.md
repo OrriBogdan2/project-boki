@@ -208,3 +208,31 @@ Full suite once, then report ready here.
 - Keys drop on death and are lootable.
 - Mimic: disguised until approached, flees and re-hides, always drops a key, and can be caught with a root or slow.
 - Bots get keys, then open chests.
+
+## 2026-11-02 10:00 ET: add to ext/equal: hiding cover on The Hollow Crown
+
+Today the map has 17 bush clumps, under 1% of walkable ground; most islands have 1-2 and the gaols have none. The owner wants hiding cover that varies a lot by biome. Edit tools/make_hollowcrown.py (the map is generated from it; regenerate content/maps/hollowcrown.json, never hand-edit the JSON).
+
+Target share of walkable ground in bushes/tall grass, by biome:
+- bloom (Thorn Nest, Saltmere): a LOT, ~15-20%. Big connected thickets you can move through unseen; ambush country.
+- meadow (Lark Landing): medium-high, ~10%; long grass bands along the paths.
+- gloom (Crown heart, Shard Perch): medium, ~6%; patches around the heart's approaches and pillars. Shard Perch stays bare (it's a perch).
+- ember (Cinder, Gaol SW): a little, ~2-3%; scorched scrub clumps only.
+- storm (Storm shrine, Duskmoor, Gaol NE): a little, ~3%; wind-bent grass in sheltered spots.
+- frost (Frostgate, Highwatch): almost none, <1%; open ice, nowhere to hide.
+
+Placement rules, deliberate, not scattered:
+- Patches of 3-6 clumps, not singles.
+- Along flanking lanes between landmarks.
+- Beside chests and camps (ambush play).
+- At cliff edges and bridge heads (escapes, glide take-offs).
+- In the bush biomes, at least one patch in sight of every extraction point.
+- Never on ramps, stairs, bridge spans, landings' drop circles, or blocking a path's width.
+
+Each bush mimic must have 3+ patches within sprinting range, so place mimics only in bloom/meadow/gloom/storm.
+
+Check:
+- Per-biome cover share within the targets: print it, and assert the order bloom > meadow > gloom > storm/ember > frost.
+- Paths and drop-check/extract-check still pass.
+- Bots still path (bot-sanity).
+- No bush on stairs or bridges.
