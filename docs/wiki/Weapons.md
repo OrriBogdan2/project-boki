@@ -5,7 +5,7 @@ _Generated from `content/weapons`, `content/abilities`, `content/classes`, `scri
 
 ## Weapons
 
-Numbers are per shot or swing before any upgrades. Class kits that run their own weapon (the Juggernaut's greatsword, Bjorn's war hammer and aegis) take their numbers from the class file instead.
+Numbers are per shot or swing before any upgrades. Class kits that run their own weapon (the Juggernaut's greatsword, the Bulwark's shield and mace) take their numbers from the class file instead.
 
 | Weapon | Carried by | Weight | Damage | Fire interval | Magazine | Reload | Range | Notes |
 |---|---|---|---|---|---|---|---|---|

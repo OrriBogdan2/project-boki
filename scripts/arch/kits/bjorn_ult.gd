@@ -10,7 +10,7 @@ extends Node3D
 ##
 ## Look (pooled): gold light flooding the near cell on the slam, an ember streak racing down the lane,
 ## a basalt slab with molten seams heaving up in each cell, then a flickering ember crack along the
-## centre line. Bond: every hunter it hits calls UltSlot.on_land; the best event of the cast pays.
+## centre line. Bond: every hunter it hits goes to HeroUlt.landed; the best event of the cast pays.
 
 const EMBER := Color("ff9a3a")
 const GOLD := Color("ffd25a")
@@ -173,7 +173,7 @@ func _slam() -> void:
 		f.hurt(strike, h, {"src": "abil", "ab": "ultimate", "stun": float(x.get("strike_stun", 0.3)), "dr": true,
 			"tags": ["ultimate"]})
 		if f is Hunter:
-			UltSlot.on_land(h, f as Hunter)
+			HeroUlt.landed(k, f)
 	var c0 := _cell_mid(0)
 	_flood_t = 0.3
 	_place_flat(_flood, c0 + Vector3(0, 0.08, 0), Vector2(cell_len(), float(x.get("width", 4.0))))
@@ -205,7 +205,7 @@ func _erupt(i: int) -> void:
 		k.m.fx.burst(f.pos + Vector3(0, 1.0, 0), Color("ff5a3a"), 10, 5.0, 0.3, 2.0, 1.0)
 		if f is Hunter:
 			hunters += 1
-			UltSlot.on_land(h, f as Hunter)
+			HeroUlt.landed(k, f)
 
 func _cell_mid(i: int) -> Vector3:
 	var a: Vector3 = cells[i]

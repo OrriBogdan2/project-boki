@@ -161,6 +161,9 @@ func cast_ult() -> bool:
 	_drop_holds()
 	return ult.cast()
 
+func ult_running() -> bool:
+	return ult.phase != ""
+
 ## The Shield Charge's front guard: hits from the front 140° are blocked (and become Guard).
 func incoming(by: Ent, dmg: float, o: Dictionary) -> Array:
 	if front_t > 0.0 and by != null and is_instance_valid(by):

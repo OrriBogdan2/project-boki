@@ -11,8 +11,8 @@ extends Node3D
 ## feet while empowered, the cursor ring filling through each nock. Everyone sees three pips over her
 ## and her glowing bow. Look (all pooled): the empower burst, a flat beam ribbon with a white core per
 ## shot that lasts 0.2 s, a white burst cloud and a star on each hit, a bigger burst on the last beam.
-## Bond: a beam that hits a hunter calls UltSlot.on_land (a hit, or a knock or kill it causes); a miss
-## pays nothing.
+## Bond: a beam that hits a hunter goes to HeroUlt.landed once the hit has landed (a hit, or the knock or
+## kill it caused); a miss pays nothing.
 
 const TEAL := Color("5affd2")
 const CORE := Color("c8fff0")          # the beam's pale teal core
@@ -165,7 +165,7 @@ func _hit(e: Ent, beam: Dictionary) -> void:
 	if e is Hunter:
 		var foe := e as Hunter
 		foe.armor = maxf(0.0, foe.armor - float(x.get("shred", 10.0)))
-		UltSlot.on_land(h, foe)
+		k.m.later(0.05, func(): if is_instance_valid(foe): HeroUlt.landed(k, foe))
 	var big := bool(beam["last"])
 	var bits := 22 if big else 14
 	k.m.fx.burst(at, CORE, bits, 6.5, 0.45, 1.5, lerpf(1.1, 1.4, float(big)))
@@ -184,6 +184,7 @@ func _execute(foe: Hunter) -> void:
 	executes += 1
 	var opts := {"src": "abil", "ab": "ultimate", "tags": ["ultimate", "execute"], "payoff": true}
 	foe.hurt(foe.hp * 4.0 + foe.armor * 4.0, h, opts)
+	HeroUlt.landed(k, foe)
 	k.payoff_fx(foe.pos, "EXECUTED", GOLD, "pay_deadeye", h.dir_to(foe), foe)
 
 ## How far the beam's ribbon reaches before a wall stops it (the shot itself stops there too).

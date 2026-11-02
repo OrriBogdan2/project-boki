@@ -12,18 +12,18 @@ const BODY_H := 372.0
 const TILE := Vector2(431, 116)
 const SLOTS := ["dash", "passive", "lmb", "rmb", "e", "r", "x"]
 const KEYS := {"dash": "Shift", "passive": "", "lmb": "LMB", "rmb": "RMB", "e": "E", "r": "R", "x": "X"}
-const LABEL := {"dash": "Dash", "passive": "Passive", "lmb": "Attack", "rmb": "Right click", "e": "Utility",
-	"r": "Ultimate", "x": "Ultimate"}
+const LABEL := {"dash": "Dash", "passive": "Passive", "lmb": "Attack", "rmb": "Right click", "e": "Utility", "r": "Ultimate",
+	"x": "Ultimate"}
 ## Which looping preview each archetype's abilities get (KitPreview kinds).
 const PREVIEW := {
 	"thief": {"dash": "dash", "passive": "marks", "rmb": "projectile", "e": "knife", "r": "lines"},
-	"archer": {"dash": "dash2", "passive": "meter", "rmb": "heavy", "e": "rainwall", "r": "arrows3"},
+	"archer": {"dash": "grapple", "passive": "meter", "rmb": "heavy", "e": "rainwall", "r": "arrows3"},
 	"mage": {"dash": "dash2", "passive": "marks", "rmb": "heavy", "e": "zone"},
 	"gunslinger": {"dash": "dash", "passive": "pips", "rmb": "projectile", "e": "lines"},
 	"juggernaut": {"dash": "dash2", "passive": "meter", "rmb": "charge", "e": "grapple", "r": "leap"},
 	"bulwark": {"dash": "charge", "passive": "meter", "rmb": "shield", "e": "zone", "r": "fissure"},
-	"dredge": {"dash": "dash2", "passive": "meter", "rmb": "grapple", "e": "charge"},
-	"ashwick": {"dash": "dash", "passive": "meter", "rmb": "projectile", "e": "zone"},
+	"dredge": {"dash": "dash2", "passive": "meter", "rmb": "grapple", "e": "charge", "x": "shots"},
+	"ashwick": {"dash": "dash", "passive": "meter", "rmb": "projectile", "e": "zone", "x": "steer"},
 	"tender": {"dash": "dash", "passive": "marks", "rmb": "projectile", "e": "zone"},
 	"rimewright": {"dash": "charge", "passive": "marks", "rmb": "projectile", "e": "shield"},
 	"dolm": {"dash": "dash2", "passive": "meter", "rmb": "heavy", "e": "zone"},
@@ -128,7 +128,7 @@ func _tile(slot: String) -> Control:
 	dot.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	ic.add_child(dot)
 	if String(KEYS[slot]) != "":
-		var kc := UI.keycap(key_of(slot), 11)
+		var kc := UI.keycap(String(KEYS[slot]), 11)
 		kc.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		kc.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		ic.add_child(kc)
@@ -188,7 +188,7 @@ func _show_detail(slot: String) -> void:
 	top.add_child(UI.IconDot.new(String(info["icon"]), col, 30.0))
 	top.add_child(UI.label(String(info["name"]), 24, UI.INK, UI.big))
 	if String(KEYS[slot]) != "":
-		var kc := UI.keycap(key_of(slot), 13)
+		var kc := UI.keycap(String(KEYS[slot]), 13)
 		kc.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		top.add_child(kc)
 	v.add_child(top)
@@ -236,16 +236,9 @@ func _kin_strip() -> Control:
 
 # ------------------------------------------------------------------ data → text
 ## Name, icon, colour, a short tag, the one line, and the detail page's paragraphs for one slot.
-## The slots an archetype has (no R tile for the heroes whose R is the Boki Merge, an X tile for a hero
-## with its own ultimate on X).
+## The slots an archetype has (no R tile for the heroes whose R is the Boki Merge; an X tile for a hero ultimate).
 static func slots_of(a: String) -> Array:
-	return SLOTS.filter(func(s): return s not in ["r", "x"] or Arch.def(a).has(s))
-
-## The key a slot shows: the player's binding for X, the fixed label for the rest.
-static func key_of(slot: String) -> String:
-	if slot == "x":
-		return Settings.key_cap("hunter_ult")
-	return String(KEYS[slot])
+	return SLOTS.filter(func(s): return not s in ["r", "x"] or Arch.def(a).has(s))
 
 static func slot_text(a: String, slot: String) -> Dictionary:
 	var d := Arch.def(a)
@@ -295,14 +288,13 @@ static func slot_text(a: String, slot: String) -> Dictionary:
 				"tag": "%ss" % KinText.n(float(sd.get("cooldown", 14.0))), "line": String(cd.get("e", ""))}, true)
 			out["detail"] = [["", String(sd.get("desc", ""))]] + _ranks(a, "kin")
 		"x":
-			var sd: Dictionary = d["x"]
-			out.merge({"name": String(sd["name"]), "icon": String(sd.get("icon", "")),
-				"col": Color(String(sd.get("col", "#ffffff"))),
-				"tag": "level %d · %ss" % [int(sd.get("unlock", 6)), KinText.n(float(sd.get("cooldown", 36.0)))],
-				"line": String(cd.get("x", ""))}, true)
-			out["detail"] = [["", String(sd.get("desc", ""))],
-				["Bond", "Landing it fills your Boki bond meter by a big chunk; the cast alone gives nothing."],
-				["Merge", "R stays the Boki Merge."]]
+			var xd: Dictionary = d["x"]
+			var tag := "level %d · %ss" % [int(xd.get("unlock", 6)), KinText.n(float(xd.get("cooldown", 30.0)))]
+			var xcol := Color(String(xd.get("col", "#ffffff")))
+			out.merge({"name": String(xd["name"]), "icon": String(xd.get("icon", "")), "col": xcol,
+				"tag": tag, "line": String(cd.get("x", ""))}, true)
+			out["detail"] = [["", String(xd.get("desc", ""))],
+				["Bond", "Landing it on a hunter fills your Boki bond a long way, ready for the Merge on R."]]
 		"r" when not d.has("r"):
 			# no hero ultimate: R is the Boki's Merge (the Boki system owns it)
 			out.merge({"name": "Boki Merge", "icon": "bond", "col": Color("ffd27a"), "tag": "Boki system", "line": "Your Boki fuses with you; its kind decides the form."}, true)
@@ -334,8 +326,7 @@ static func preview_kind(a: String, slot: String) -> String:
 	if slot == "lmb":
 		var ws: Array = Arch.weapons(a)
 		return "melee" if not ws.is_empty() and Data.weapon_stats(String(ws[0])).get("melee", false) else "shots"
-	var key := "r" if slot == "x" else slot
-	return String(PREVIEW.get(a, {}).get(key, "projectile"))
+	return String(PREVIEW.get(a, {}).get(slot, "projectile"))
 
 ## What a Boki's type does to this archetype's RMB, E and R, one short phrase each.
 static func infusion_lines(a: String, ks: KinSpec) -> Array:
@@ -406,7 +397,7 @@ static func strip(a: String, open_cb: Callable) -> Control:
 		var dot := UI.IconDot.new(String(info["icon"]), info["col"], 26.0)
 		dot.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		bv.add_child(dot)
-		var k := key_of(s) if String(KEYS[s]) != "" else "passive"
+		var k := String(KEYS[s]) if String(KEYS[s]) != "" else "passive"
 		var kl := UI.label(k, 10, UI.MUTED, UI.big)
 		kl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		kl.mouse_filter = Control.MOUSE_FILTER_IGNORE

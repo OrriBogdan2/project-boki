@@ -1,8 +1,8 @@
 extends RefCounted
-## --keybind-check: two keys per action (Settings > Controls). The Merge ships on R and the hero's
+## --keybind-check: two keys per action (Settings > Controls). The Merge ships on R and the hero
 ## ultimate on X; a second key can be set, cleared and saved; a key already in use is caught and can be
-## swapped; old custom bindings give X up to the hero's ultimate; nothing else is on X in a match (the
-## arena/duel reset is Backspace, separating from the drop is Z). With --shots-dir=<dir>, screenshots of
+## swapped; old custom bindings lose X from the Merge; nothing else is on X in a match (the arena/duel
+## reset is Backspace, separating from the drop is Z). With --shots-dir=<dir>, screenshots of
 ## the Controls page and of the clash warning.
 
 var bad := 0
@@ -19,8 +19,8 @@ func run(main: Node) -> void:
 	var tree := main.get_tree()
 	var S = Settings
 	S.reset_all()
-	ok(S.slots("ultimate") == ["key:%d" % KEY_R, ""], "the Merge ships on R (%s)" % str(S.slots("ultimate")))
-	ok(S.slots("hunter_ult")[0] == "key:%d" % KEY_X, "the hero's ultimate ships on X (%s)" % S.key_caps("hunter_ult"))
+	ok(S.slots("ultimate")[0] == "key:%d" % KEY_R and S.slots("ultimate")[1] == "", "the Merge ships on R alone (%s)" % str(S.slots("ultimate")))
+	ok(S.slots("hunter_ult")[0] == "key:%d" % KEY_X, "the hero ultimate ships on X (%s)" % S.key_caps("hunter_ult"))
 	ok(S.slots("separate")[0] == "key:%d" % KEY_Z, "separating from the drop moved to Z")
 	var xs: Array = S.conflicts(_key(KEY_X), "hunter_ult")
 	ok(xs.is_empty(), "nothing else rebindable is on X (%s)" % str(xs))
@@ -37,24 +37,28 @@ func run(main: Node) -> void:
 	ok(S.slots("tonic") == ["", "mouse:%d" % MOUSE_BUTTON_XBUTTON1], "a mouse button works as a second key (%s)" % S.binding_text("tonic"))
 	S.reset_all()
 	# clashes: F is interact's
-	var cf: Array = S.conflicts(_key(KEY_F), "ultimate")
-	ok(cf.size() == 1 and cf[0][0] == "interact", "giving the ultimate F is caught: it's Interact's (%s)" % str(cf))
-	S.swap_bind("ultimate", 0, _key(KEY_F), "interact", 0)
-	ok(S.slots("ultimate")[0] == "key:%d" % KEY_F and S.slots("interact")[0] == "key:%d" % KEY_R, "swapping gives Interact the ultimate's old key (ult %s, interact %s)" % [S.binding_text("ultimate"), S.binding_text("interact")])
+	var cf: Array = S.conflicts(_key(KEY_F), "hunter_ult")
+	ok(cf.size() == 1 and cf[0][0] == "interact", "giving the hero ultimate F is caught: it's Interact's (%s)" % str(cf))
+	S.swap_bind("hunter_ult", 0, _key(KEY_F), "interact", 0)
+	var ult_keys := S.binding_text("hunter_ult")
+	var use_keys := S.binding_text("interact")
+	var swapped: bool = S.slots("hunter_ult")[0] == "key:%d" % KEY_F and S.slots("interact")[0] == "key:%d" % KEY_X
+	ok(swapped, "swapping gives Interact the hero ultimate's old key (ult %s, interact %s)" % [ult_keys, use_keys])
 	S.reset_all()
-	# the migrations for someone with their own bindings
-	S.v["keys"] = {"ultimate": ["key:%d" % KEY_R], "separate": ["key:%d" % KEY_X]}
-	S.v["keys2_v"] = 0
+	# the migration for someone with their own bindings (keys2_v below 2)
+	S.v["keys"] = {"ultimate": ["key:%d" % KEY_R, "key:%d" % KEY_X], "separate": ["key:%d" % KEY_X]}
+	S.v["keys2_v"] = 1
 	S._migrate_keys2()
-	ok(S.v["keys"]["separate"] == ["key:%d" % KEY_Z], "old custom bindings: separate moved to Z (%s)" % str(S.v["keys"]))
-	S.v["keys"] = {"ultimate": ["key:%d" % KEY_R, "key:%d" % KEY_X]}
-	S.v["keys3_v"] = 0
-	S._migrate_keys3()
-	ok(S.v["keys"]["ultimate"] == ["key:%d" % KEY_R], "a saved Merge binding gives X up to the hero's ultimate (%s)" % str(S.v["keys"]))
+	var mk: Dictionary = S.v["keys"]
+	ok(mk["ultimate"] == ["key:%d" % KEY_R] and mk["separate"] == ["key:%d" % KEY_Z], "old custom bindings: X leaves the Merge, separate moves to Z (%s)" % str(mk))
 	S.v["keys"] = {"ultimate": ["key:%d" % KEY_R, "key:%d" % KEY_T]}
-	S.v["keys3_v"] = 0
-	S._migrate_keys3()
+	S.v["keys2_v"] = 1
+	S._migrate_keys2()
 	ok(S.v["keys"]["ultimate"] == ["key:%d" % KEY_R, "key:%d" % KEY_T], "a second key someone already chose is kept")
+	S.v["keys"] = {"ultimate": ["key:%d" % KEY_X]}
+	S.v["keys2_v"] = 1
+	S._migrate_keys2()
+	ok(S.v["keys"]["ultimate"] == ["key:%d" % KEY_R], "a Merge bound only to X goes back to R (%s)" % str(S.v["keys"]))
 	S.reset_all()
 	# the arena and duel resets are on Backspace now
 	var ar := FileAccess.get_file_as_string("res://scripts/match/arena.gd")

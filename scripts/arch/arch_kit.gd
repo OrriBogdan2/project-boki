@@ -62,6 +62,7 @@ static func make(hunter: Hunter, arch_id: String) -> ArchKit:
 func rmb_def() -> Dictionary: return d.get("rmb", {})
 func e_def() -> Dictionary: return d.get("e", {})
 func r_def() -> Dictionary: return d.get("r", {})
+func x_def() -> Dictionary: return d.get("x", {})          # the hero ultimate on X (HeroUlt)
 func dash_def() -> Dictionary: return d.get("dash", {})
 func lmb_def() -> Dictionary: return d.get("lmb", {})       # the kit's own attack-key data (kits that run the weapon's attack themselves)
 func res_def() -> Dictionary: return d.get("resource", {})
@@ -106,8 +107,14 @@ func cast_e() -> bool: return false
 func e_recast() -> bool: return false                # E pressed while it's up (Sigil detonation)
 func cast_r() -> bool: return false
 func r_recast() -> bool: return false                # R pressed while it runs (Last Round release)
-## X, the hero's own ultimate: start it now (UltSlot.press has checked the level and cooldown). True = cast.
+## X, the hero ultimate (HeroUlt): start it (true = it went off and the cooldown starts).
 func cast_ult() -> bool: return false
+## X pressed while the ult runs (true = handled, e.g. an early landing).
+func ult_recast() -> bool: return false
+func ult_running() -> bool: return false
+## The X press (Hunter.tick, "hunter_ult"): the level gate, the cooldown and the kit's cast.
+func use_x() -> void:
+	HeroUlt.use(self)
 func on_dash(_ex: bool) -> bool: return false        # true = the archetype handled the dash
 func on_deal(_t: Ent, _dmg: float, _o: Dictionary) -> void: pass
 func on_take(_by: Ent, _dmg: float, _o: Dictionary) -> void: pass
@@ -682,6 +689,8 @@ func slot_info(slot: String) -> Dictionary:
 			out.merge({"name": String(sd.get("name", "")), "short": String(sd.get("short", "")), "icon": String(sd.get("icon", "")), "col": col_of(sd), "desc": String(sd.get("desc", "")),
 				"cd": float(cd["r"]), "cd_max": r_cooldown(), "charges": 1 if float(cd["r"]) <= 0.0 else 0, "max_charges": 1, "verb": "r",
 				"ready": float(cd["r"]) <= 0.0 and int(h.slot_lv.get("ult", 0)) > 0, "bonded": bonded_glow, "up": r_t, "fuse": float(fuse.get("t", 0.0))}, true)
+		"x":
+			return HeroUlt.slot_info(self)
 		"dash", "dodge":
 			var sd := dash_def()
 			var dmax := h.max_dashes()

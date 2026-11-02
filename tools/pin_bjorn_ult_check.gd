@@ -14,15 +14,12 @@ func hold_fire(m: Match, P: Hunter, at: Vector3, secs: float) -> void:
 		P.inp["fire"] = true
 		aim_at(P, at))
 
-## The bond events this cast has sent (UltSlot.from_ult) and the best one paid so far.
-func events(P: Hunter) -> Array:
-	return P.ak.st.get("ult_events", [])
-
+## The best bond event this cast has paid (HeroUlt's stand-in for KinBond.from_ult).
 func best(P: Hunter) -> float:
-	return float(P.ak.st.get("ult_bond", 0.0))
+	return float(P.ak.st.get("ult_bond_best", 0.0))
 
 func press_x(m: Match, P: Hunter) -> void:
-	P.inp["hunter_ult"] = true
+	P.inp["xult"] = true
 	m.step(DT)
 
 ## Holds LMB until one more beam has gone (or `cap` s pass).
@@ -68,7 +65,7 @@ func pin() -> void:
 		absf(float(K.cd["x"]) - float(xd["cooldown"])) < 0.1,
 		"%.1f" % float(K.cd["x"]))
 	ok("pin ult anim: the cast plays pin_ult_cast", K.anim_id == "pin_ult_cast", K.anim_id)
-	ok("pin ult bond: nothing for the cast alone", events(P).is_empty() and P.ult < 0.01, "%.3f" % P.ult)
+	ok("pin ult bond: nothing for the cast alone", best(P) <= 0.0 and P.ult < 0.01, "%.3f" % P.ult)
 	step(m, 0.1)
 	var lane := AimKit.entry(P, "x")
 	ok("pin ult telegraph: the beam's lane out to 18m and the crosshair ring at her feet",
@@ -94,16 +91,15 @@ func pin() -> void:
 		T.armor <= 30.0 - float(xd["shred"]) + 0.01,
 		"armor %.1f" % T.armor)
 	ok("pin ult bond: a beam that hits a hunter sends from_ult hit (0.6 into the meter)",
-		events(P).has("hit") and absf(best(P) - 0.6) < 0.001 and P.ult >= 0.6,
-		"%s meter %.3f" % [str(events(P)), P.ult])
+		absf(best(P) - 0.6) < 0.001 and P.ult >= 0.6, "best %.2f meter %.3f" % [best(P), P.ult])
 	ok("pin ult anim: the beam plays pin_ult_loose", K.anim_id == "pin_ult_loose", K.anim_id)
 	ok("pin ult small: the beam knocks back", T.vel.x > 0.5 or T.pos.x > home.x + 7.05, "vel %.2f" % T.vel.x)
 	# a miss pays nothing
-	var b0 := events(P).size()
+	var b0 := HeroUlt.paid_total
 	beam(m, P, K, home + Vector3(0, 0, 12))
 	step(m, 0.2)
-	ok("pin ult bond: a beam that misses pays nothing", events(P).size() == b0 and K.ult.fired == 2,
-		str(events(P)))
+	ok("pin ult bond: a beam that misses pays nothing", HeroUlt.paid_total == b0 and K.ult.fired == 2,
+		"paid %.2f -> %.2f" % [b0, HeroUlt.paid_total])
 	ok("pin ult small: she can move between shots", K.move_k() > 0.9, "move_k %.2f" % K.move_k())
 	# the last beam executes a hunter it leaves under 12%
 	T.max_hp = 150.0
@@ -117,7 +113,7 @@ func pin() -> void:
 		K.ult.executes == 1 and (T.downed or T.dead or T.hp <= 0.0),
 		"executes %d hp %.0f downed %s" % [K.ult.executes, T.hp, T.downed])
 	ok("pin ult bond: the execute's knock is the cast's best event (0.7, not added per hit)",
-		events(P).has("knock") and absf(best(P) - 0.7) < 0.001, "%s best %.2f" % [str(events(P)), best(P)])
+		absf(best(P) - 0.7) < 0.001, "best %.2f" % best(P))
 	ok("pin ult ends after the third shot, the telegraph goes",
 		not K.ult.active() and not AimKit.shown(P, "x"), "left %d" % K.ult.left)
 	await done(m)
@@ -215,6 +211,7 @@ func bjorn() -> void:
 	T.teleport(home + Vector3(7, 0, 0))
 	T2.teleport(home + Vector3(10, 0, 1.0))
 	aim_at(P, T.pos)
+	var paid0 := HeroUlt.paid_total
 	press_x(m, P)
 	step(m, 0.1)
 	ok("bjorn ult cast: planted, hammer up (bul_ult_wind)",
@@ -228,7 +225,7 @@ func bjorn() -> void:
 	ok("bjorn ult cooldown: 33s from the cast",
 		absf(float(K.cd["x"]) - float(xd["cooldown"])) < 0.2,
 		"%.1f" % float(K.cd["x"]))
-	ok("bjorn ult bond: nothing for the cast alone", events(P).is_empty() and P.ult < 0.05, "%.3f" % P.ult)
+	ok("bjorn ult bond: nothing for the cast alone", best(P) <= 0.0 and P.ult < 0.05, "%.3f" % P.ult)
 	P.inp["fire"] = true
 	step(m, 0.05)
 	P.inp["fire"] = false
@@ -242,9 +239,9 @@ func bjorn() -> void:
 	ok("bjorn ult payoff: each foe on the lane thrown once (18, a stun, a heavy slow)",
 		hit_t and absf(dmg(T) - want) < want * 0.35 and dmg(T2) > want * 0.6,
 		"took %.0f / %.0f (want %.0f) stunned %s" % [dmg(T), dmg(T2), want, hit_t])
-	ok("bjorn ult bond: from_ult hit for each hunter thrown, the cast pays its best once (0.6)",
-		events(P).count("hit") >= 2 and absf(best(P) - 0.6) < 0.001 and P.ult >= 0.6,
-		"%s meter %.3f" % [str(events(P)), P.ult])
+	ok("bjorn ult bond: two hunters thrown, the cast pays its best event once (hit, 0.6)",
+		absf(best(P) - 0.6) < 0.001 and absf(HeroUlt.paid_total - paid0 - 0.6) < 0.001 and P.ult >= 0.6,
+		"best %.2f paid %.2f meter %.3f" % [best(P), HeroUlt.paid_total - paid0, P.ult])
 	step(m, 0.4)
 	ok("bjorn ult small: a scar stays on the lane and slows a foe on it",
 		not K.ult.scar.is_empty() and K.ult.phase == "", "scar %s" % str(K.ult.scar.keys()))
@@ -272,11 +269,12 @@ func _bjorn_more() -> void:
 	step(m, 0.3)
 	P.ult = 0.0
 	aim_at(P, home + Vector3(0, 0, -6))
+	var paid_miss := HeroUlt.paid_total
 	press_x(m, P)
 	step(m, 1.4)
 	ok("bjorn ult bond: a Faultline that hits nobody pays nothing",
-		K.ult.slams == 1 and events(P).is_empty(),
-		str(events(P)))
+		K.ult.slams == 1 and HeroUlt.paid_total == paid_miss,
+		"paid %.2f -> %.2f" % [paid_miss, HeroUlt.paid_total])
 	press_x(m, P)
 	ok("bjorn ult cooldown: no recast while it recharges", K.ult.phase == "")
 	# a raised ledge 6 m out stops the fissure: the foe beyond is safe

@@ -116,7 +116,7 @@ Strips: `--arena-demo=anim_<id> --arena-shot=<png>` (scripts/match/arena_demo.gd
 - Telegraphs are AimKit: `draw_rest` (line), `draw` (vee, then line), `draw_tgt` (circle), `rmb_v` + `rmb_bar`, `e` (arc_wall, all, for the tell). Cursor: `AimKit.charge`, `flare`, `perfect`.
 - Sounds: `tools/gen_pin_bjorn_sfx.py` writes `audio/pin_*.wav` (Sfx loads them on first use).
 - Merge: `_drop_holds()` clears the draw (`h.draw_t`), the Heavy Shot hold (`rmb_down`, `pin_aim`), Spirit Walk (`h.spirit_t`), and Starpiercer (`PinUlt.left`, `PinUlt.nock_t`, `window`).
-- Ult on X: `scripts/arch/ult_slot.gd` (UltSlot: the `hunter_ult` press, the level gate, the cooldown in `ArchKit.cd["x"]`, the bond hook), `scripts/arch/kits/pin_ult.gd` (PinUlt: the window, nock, beams, execute, pooled ribbons and pips). Data: `content/archetypes/archer.json` `x`. Sounds: `pin_ult_cast`, `pin_ult_nock`, `pin_ult_beam`, `pin_ult_final`. Bond: `UltSlot.on_land` sends `KinBond.from_ult(h, "hit" / "knock" / "kill")` (a stand-in with the same amounts until the hook lands on main).
+- Ult on X: `scripts/arch/hero_ult.gd` (HeroUlt, the shared X base: the `hunter_ult` press, the level gate, the cooldown in `ArchKit.cd["x"]`, the bond hook; the HUD slot is `scripts/ui/ult_slot.gd`), `scripts/arch/kits/pin_ult.gd` (PinUlt: the window, nock, beams, execute, pooled ribbons and pips). Data: `content/archetypes/archer.json` `x`. Sounds: `pin_ult_cast`, `pin_ult_nock`, `pin_ult_beam`, `pin_ult_final`. Bond: `HeroUlt.landed` sends `KinBond.from_ult(h, "hit" / "knock" / "kill")`, the best event of a cast (a stand-in with the same amounts until the hook lands on main).
 - No Net shape change: remote players see the shots and the existing fx events (rings, bolts).
 
 ## Payoff

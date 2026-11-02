@@ -163,6 +163,9 @@ func _tick(dt: float) -> void:
 func cast_ult() -> bool:
 	return ult.cast()
 
+func ult_running() -> bool:
+	return ult.active()
+
 ## While Starpiercer is up the bow is the ult's: nock, then a beam (PinUlt.lmb).
 func lmb_override(held: bool, dt: float) -> bool:
 	return ult.lmb(held, dt)

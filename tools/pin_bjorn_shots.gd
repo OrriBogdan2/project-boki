@@ -505,7 +505,7 @@ func _input(what: String, t: float) -> void:
 			_aim(T.pos)
 			if at.call(0.3):
 				K.cd["x"] = 0.0
-				UltSlot.press(K)
+				K.use_x()
 				if what == "pin_ult_final":
 					K.ult.left = 1
 			P.inp["fire"] = t > 0.8 and t < 0.85
@@ -515,7 +515,7 @@ func _input(what: String, t: float) -> void:
 			_aim(home + Vector3(7.0, 0, 0))
 			if at.call(0.3):
 				K.cd["x"] = 0.0
-				UltSlot.press(K)
+				K.use_x()
 		"bash":
 			T.teleport(home + Vector3(2.0, 0, 0))
 			_aim(T.pos)

@@ -80,7 +80,7 @@ What the in-game kit card (K) says.
 
 **Mending Ground (E, 16s cooldown).** A green light column comes down for 1s on your planted hammer (on you with the hammer in hand), then it heals allies inside 26; if your aegis is raised it mends 60. Foes inside are slowed. A downed teammate inside is a third of the way back up.
 
-**Faultline (X, from level 6, 33s cooldown).** Plant and raise the hammer (0.4s, the 16m lane shows to everyone), then slam: the near cell is struck (4, a brief stun) and the ground erupts cell by cell to the far end, throwing each foe up once (18, stun 0.5, slowed 50% for 1.5s). A wall or a drop stops it. A glowing scar stays 10s and slows foes on it 20%.
+**Faultline (X, hero ultimate from level 6, 33s cooldown).** Plant and raise the hammer (0.4s, the 16m lane shows to everyone), then slam: the near cell is struck (4, a brief stun) and the ground erupts cell by cell to the far end, throwing each foe up once (18, stun 0.5, slowed 50% for 1.5s). A wall or a drop stops it. A glowing scar stays 10s and slows foes on it 20%.
 
 ### Ranks
 
