@@ -22,6 +22,7 @@ const CHECKS := {
 	"--kin-regen-check": ["res://tools/kin_regen_check.gd", "kin_regen_check", null],
 	"--kill-reset-check": ["res://tools/kill_reset_check.gd", "kill_reset_check", null],
 	"--hero-combo-check": ["res://tools/archer_bulwark_combo_check.gd", "hero_check", null],
+	"--aimkit-check": ["res://tools/aimkit_check.gd", "aimkit_check", null],
 }
 
 ## Runs the registered check named in args, if any. Returns true when one started (Main stops there).

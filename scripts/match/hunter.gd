@@ -240,6 +240,7 @@ var lives := 1                # comes back this many times minus one before it's
 var arch := ""                # the archetype (docs/ARCHETYPES.md); "" = the old class kit (weapon RMB, class dodge)
 var ak: ArchKit = null        # the archetype's kit at run time
 var shot_range_k := 1.0       # the next shot's range (a full Focus: +20%)
+var shot_aim := ""            # the next shot's aim mode (AimMode.CURSOR / MAX); "" = the weapon's own
 var draw_t := -1.0            # a bow being drawn: how long (-1: not drawing)
 var nth_n := 0                # shots since the weapon's "every Nth" bonus
 
@@ -1653,10 +1654,9 @@ func _emit_shot() -> void:
 		extra["near"] = [float(wpn["close_mult"]), rng * 0.5]
 	if wpn.has("far_mult"):
 		extra["farf"] = [rng * float(wpn.get("far_start", 0.6)), float(wpn["far_mult"]), rng]
+	if AimMode.take(self) == AimMode.CURSOR:
+		life = AimMode.dist(self, rng) / spd      # lands at the cursor, clamped to range (scripts/match/aim/aim_mode.gd)
 	if wpn.has("boom"):
-		var aim: Vector3 = inp["aim"]
-		var dist := clampf(Vector2(aim.x - pos.x, aim.z - pos.z).length(), 1.5, rng)
-		life = dist / spd
 		extra["boom"] = wpn["boom"]; extra["boom_kb"] = wpn["boom_kb"]
 	if crit_t > 0.0:
 		extra["crit"] = true
