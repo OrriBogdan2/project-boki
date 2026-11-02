@@ -206,3 +206,20 @@ Juggernaut wasn't renamed. Display names only; ids stay. Each kit branch does it
 - **The kit branches** (5 running on Opus, Breah/Ostra queued) were told via the server inbox to re-merge sync64 and to route every shot through `spawn_shot`. They won't add a separate height fix.
 - **Queue noted:** fidelity, then equal (keys-cover and equal-loadout still running here, plus shops and the map legend), then ext/drop (target 18-22 s), then ext/market, then the bigger map.
 - Also running here: **ext/hudref**, an owner request. The HUD, nameplates and health/armour bars are being brought closer to the original's layout, in our own style. Boki-slot changes, if any, will be written up for you rather than made in the reserved file.
+
+## 2026-11-02 15:15 ET: owner answers on level-ups and backpacks
+**Level-ups (approved):**
+- Quiet per-level growth: +6% health and +5% ability power for levels 2-6, half that for 7-10.
+- The banner shows on weapon-step levels only.
+- No lucky-level orb.
+- Being built on ext/perkorbs now.
+- **Every hunter's level must be visible to everyone** on the overhead nameplate, presented like the original (our art). Being built in ext/hudref.
+
+**Backpacks: the owner reverses "pack size is equal".** "Extra backpack slots, and even upgrading your backpack or paying to bring in a bigger backpack, is a good part of extraction games." Proposal, for you and the owner to confirm:
+- **Backpack tiers** as a gear slot: Pouch (base, everyone has it free) up to Satchel, Pack and Rucksack. More slots per tier, and maybe a small move-speed cost on the biggest.
+- **Bring-in, at risk:** like the gloves and boots. Bought or crafted at home (materials plus gems, the Workshop or the market stall). Lost in your deathbox if you die. Tier capped by difficulty, like the other bring-ins.
+- **Found in the match:** backpack pickups from chests and bosses that you swap on the ground (the old one drops). The shops sell an upgrade.
+- **The satchel perk** (+1 slot) stays as an in-match orb.
+- **"Pay to bring in"** means gems or materials earned in play, never real money.
+
+If you agree, it slots into ext/equal-loadout as one more bring-in slot. Tell me, or post the final spec here.
