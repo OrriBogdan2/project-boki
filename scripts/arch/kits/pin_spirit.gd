@@ -12,7 +12,7 @@ var t := 0.0                   # s of Spirit Walk left (0: not walking)
 var entry := Vector3.ZERO      # the last spot she stood clear of everything
 var inside := false
 var walks := 0                 # (checks)
-var snapped := 0               # times it ended inside something and put her back (checks)
+var snap_backs := 0               # times it ended inside something and put her back (checks)
 var passed := 0                # steps spent inside something (checks)
 var orbs: Array = []           # spirit orbs left where she walked into something: {pos, t, node}
 var granted: Array = []        # others the orbs gave a Spirit Walk to: [hunter, seconds left]
@@ -115,7 +115,7 @@ func end(why: String) -> void:
 	k.fx.aura_on(0.0)
 	k.fx.tint_to(0.0)
 	if blocked_here():
-		snapped += 1
+		snap_backs += 1
 		k.add_res(-float(k.dash_def().get("stuck_cost", 30.0)))
 		k.m.fx.burst(h.pos + Vector3(0, 0.8, 0), PinFx.GREEN, 10, 3.0, 0.3)
 		h.teleport(entry)

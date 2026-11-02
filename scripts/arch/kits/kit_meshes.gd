@@ -15,13 +15,17 @@ static func band(r0: float, r1: float, a0: float, a1: float, seg := 32) -> Array
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	for i in seg:
-		var u0 := float(i) / seg; var u1 := float(i + 1) / seg
-		var b0 := lerpf(a0, a1, u0); var b1 := lerpf(a0, a1, u1)
+		var u0 := float(i) / seg
+		var u1 := float(i + 1) / seg
+		var b0 := lerpf(a0, a1, u0)
+		var b1 := lerpf(a0, a1, u1)
 		var p := [Vector3(sin(b0) * r0, 0, -cos(b0) * r0), Vector3(sin(b0) * r1, 0, -cos(b0) * r1),
 			Vector3(sin(b1) * r1, 0, -cos(b1) * r1), Vector3(sin(b1) * r0, 0, -cos(b1) * r0)]
 		var uv := [Vector2(u0, 0), Vector2(u0, 1), Vector2(u1, 1), Vector2(u1, 0)]
 		for k in [0, 1, 2, 0, 2, 3]:
-			st.set_normal(Vector3.UP); st.set_uv(uv[k]); st.add_vertex(p[k])
+			st.set_normal(Vector3.UP)
+			st.set_uv(uv[k])
+			st.add_vertex(p[k])
 	var mesh := st.commit()
 	_cache[key] = mesh
 	return mesh
@@ -34,14 +38,19 @@ static func wall(r: float, a0: float, a1: float, hgt: float, seg := 24) -> Array
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	for i in seg:
-		var u0 := float(i) / seg; var u1 := float(i + 1) / seg
-		var b0 := lerpf(a0, a1, u0); var b1 := lerpf(a0, a1, u1)
-		var q0 := Vector3(sin(b0) * r, 0, -cos(b0) * r); var q1 := Vector3(sin(b1) * r, 0, -cos(b1) * r)
+		var u0 := float(i) / seg
+		var u1 := float(i + 1) / seg
+		var b0 := lerpf(a0, a1, u0)
+		var b1 := lerpf(a0, a1, u1)
+		var q0 := Vector3(sin(b0) * r, 0, -cos(b0) * r)
+		var q1 := Vector3(sin(b1) * r, 0, -cos(b1) * r)
 		var p := [q0 + Vector3(0, hgt, 0), q0, q1, q1 + Vector3(0, hgt, 0)]
 		var uv := [Vector2(u0, 0), Vector2(u0, 1), Vector2(u1, 1), Vector2(u1, 0)]
 		var n := Vector3(sin((b0 + b1) * 0.5), 0, -cos((b0 + b1) * 0.5))
 		for k in [0, 1, 2, 0, 2, 3]:
-			st.set_normal(n); st.set_uv(uv[k]); st.add_vertex(p[k])
+			st.set_normal(n)
+			st.set_uv(uv[k])
+			st.add_vertex(p[k])
 	var mesh := st.commit()
 	_cache[key] = mesh
 	return mesh
@@ -54,14 +63,23 @@ static func pillar(r_top: float, r_foot: float, hgt: float, seg := 18) -> ArrayM
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	for i in seg:
-		var u0 := float(i) / seg; var u1 := float(i + 1) / seg
-		var b0 := TAU * u0; var b1 := TAU * u1
+		var u0 := float(i) / seg
+		var u1 := float(i + 1) / seg
+		var b0 := TAU * u0
+		var b1 := TAU * u1
 		var p := [Vector3(cos(b0) * r_top, hgt, sin(b0) * r_top), Vector3(cos(b0) * r_foot, 0, sin(b0) * r_foot),
 			Vector3(cos(b1) * r_foot, 0, sin(b1) * r_foot), Vector3(cos(b1) * r_top, hgt, sin(b1) * r_top)]
 		var uv := [Vector2(u0, 0), Vector2(u0, 1), Vector2(u1, 1), Vector2(u1, 0)]
-		var ns := [Vector3(cos(b0), 0, sin(b0)), Vector3(cos(b0), 0, sin(b0)), Vector3(cos(b1), 0, sin(b1)), Vector3(cos(b1), 0, sin(b1))]
+		var ns := [
+			Vector3(cos(b0), 0, sin(b0)),
+			Vector3(cos(b0), 0, sin(b0)),
+			Vector3(cos(b1), 0, sin(b1)),
+			Vector3(cos(b1), 0, sin(b1))
+		]
 		for k in [0, 1, 2, 0, 2, 3]:
-			st.set_normal(ns[k]); st.set_uv(uv[k]); st.add_vertex(p[k])
+			st.set_normal(ns[k])
+			st.set_uv(uv[k])
+			st.add_vertex(p[k])
 	var mesh := st.commit()
 	_cache[key] = mesh
 	return mesh

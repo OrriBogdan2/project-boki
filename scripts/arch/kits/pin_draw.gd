@@ -70,17 +70,21 @@ func bonus(t: float) -> float:
 	if t >= 5.0:
 		# a full Focus shot: drawn at once, the Supercharged line
 		h.shot_aim = AimMode.MAX
-		pending = "super"; last_kind = "super"; supers += 1
+		pending = "super"
+		last_kind = "super"
+		supers += 1
 		return 1.0
 	var kind := "tap"
 	if t >= s.y: kind = "super"
 	elif t >= s.x: kind = "arrow"
 	var f := 1.0
 	if t > over_t():
-		kind = "over"; overdraws += 1
+		kind = "over"
+		overdraws += 1
 		f = float(h.wpn.get("overdraw_k", 0.5))
 	h.shot_aim = AimMode.MAX if kind in ["super", "over"] else AimMode.CURSOR
-	pending = kind; last_kind = kind
+	pending = kind
+	last_kind = kind
 	if kind == "super": supers += 1
 	if (t >= s.x and t <= s.x + pt) or (t >= s.y and t <= s.y + pt):
 		_perfect()
@@ -135,7 +139,8 @@ func tick() -> void:
 		k.m.sfx("pin_draw", h.pos, -9.0 if h.is_local() else -13.0)
 	elif not drawing and was >= 0.0 and was < 5.0 and k.anim_id in ["arc_draw", "arc_over"]:
 		k.play(release_move())
-		k.m.sfx("pin_loose_super" if last_kind == "super" else "pin_loose", h.pos, -3.0 if h.is_local() else -7.0)
+		var loose_sfx := "pin_loose_super" if last_kind == "super" else "pin_loose"
+		k.m.sfx(loose_sfx, h.pos, -3.0 if h.is_local() else -7.0)
 	was = t
 
 ## Each release has its own move: a tap's snap, Empowered's loose, Supercharged's kick, a perfect's
@@ -143,7 +148,12 @@ func tick() -> void:
 func release_move() -> String:
 	if perfect_now:
 		return "arc_perfect"
-	return {"tap": "arc_tap", "arrow": "arc_loose", "super": "arc_super", "over": "arc_over_loose"}.get(last_kind, "arc_loose")
+	return {
+		"tap": "arc_tap",
+		"arrow": "arc_loose",
+		"super": "arc_super",
+		"over": "arc_over_loose"
+	}.get(last_kind, "arc_loose")
 
 func _reticle(t: float, s: Vector2, col: Color) -> void:
 	AimKit.charge(h, clampf(t / s.y, 0.0, 1.0), {"col": col, "flare": false})
@@ -163,7 +173,17 @@ func _reticle(t: float, s: Vector2, col: Color) -> void:
 	# Supercharged: the thick white line to max range (dims once overdrawn)
 	var over := t > over_t()
 	var rng := float((wpn_draw()[-1] as Array)[2]) if not wpn_draw().is_empty() else 16.0
-	AimKit.line(h, "draw", {"len": rng, "col": SUPER_COL if not over else Color("9fb8a0"), "lw": 0.03 if over else 0.075, "hot": 0.0 if over else 0.8, "alpha": 0.45 if over else 1.25})
+	AimKit.line(
+		h,
+		"draw",
+		{
+			"len": rng,
+			"col": SUPER_COL if not over else Color("9fb8a0"),
+			"lw": 0.03 if over else 0.075,
+			"hot": 0.0 if over else 0.8,
+			"alpha": 0.45 if over else 1.25
+		}
+	)
 	k.fx.hold_bow_star(bow_at() + Vector3(0, 0.05, 0), 0.35 if over else 1.0)
 	tgt = _under_line(rng)
 	if tgt != null and not over:
@@ -178,7 +198,9 @@ func _under_line(rng: float) -> Ent:
 		if not f.hittable() or not AimMode.in_lane(h.pos, d, rng, 1.0, f.pos, f.r):
 			continue
 		var dd := h.flat_dist(f)
-		if dd < bd: bd = dd; best = f
+		if dd < bd:
+			bd = dd
+			best = f
 	return best
 
 ## A merge (or any hold drop) ends the draw: the reticle goes, the quick draw stays banked.

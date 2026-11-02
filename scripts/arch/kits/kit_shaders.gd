@@ -17,7 +17,12 @@ static func mat(kind: String, col := Color.WHITE) -> ShaderMaterial:
 	return m
 
 const _BILLBOARD := """
-	MODELVIEW_MATRIX = VIEW_MATRIX * mat4(INV_VIEW_MATRIX[0] * length(MODEL_MATRIX[0].xyz), INV_VIEW_MATRIX[1] * length(MODEL_MATRIX[1].xyz), INV_VIEW_MATRIX[2] * length(MODEL_MATRIX[2].xyz), MODEL_MATRIX[3]);
+	MODELVIEW_MATRIX = VIEW_MATRIX * mat4(
+		INV_VIEW_MATRIX[0] * length(MODEL_MATRIX[0].xyz),
+		INV_VIEW_MATRIX[1] * length(MODEL_MATRIX[1].xyz),
+		INV_VIEW_MATRIX[2] * length(MODEL_MATRIX[2].xyz),
+		MODEL_MATRIX[3]
+	);
 """
 
 static func _code(kind: String) -> String:
@@ -27,18 +32,24 @@ static func _code(kind: String) -> String:
 			return """shader_type spatial;
 render_mode unshaded, blend_add, depth_draw_never, cull_disabled, shadows_disabled;
 uniform vec4 color : source_color = vec4(1.0);
-uniform float power = 1.0;     // overall strength 0..
-uniform float ring = 0.0;      // ring strength
-uniform float ring_r = 0.62;   // ring radius (uv units)
-uniform float rot = 0.0;       // radians (0.785 = an X)
-uniform float thin = 28.0;     // ray sharpness
+// overall strength 0..
+uniform float power = 1.0;
+// ring strength
+uniform float ring = 0.0;
+// ring radius (uv units)
+uniform float ring_r = 0.62;
+// radians (0.785 = an X)
+uniform float rot = 0.0;
+// ray sharpness
+uniform float thin = 28.0;
 void vertex() {""" + _BILLBOARD + """}
 void fragment() {
 	vec2 uv = UV * 2.0 - 1.0;
 	float c = cos(rot), s = sin(rot);
 	uv = vec2(c * uv.x - s * uv.y, s * uv.x + c * uv.y);
 	float r = length(uv);
-	float rays = exp(-abs(uv.y) * thin) * max(0.0, 1.0 - abs(uv.x)) + exp(-abs(uv.x) * thin) * max(0.0, 1.0 - abs(uv.y));
+	float rays = exp(-abs(uv.y) * thin) * max(0.0, 1.0 - abs(uv.x))
+		+ exp(-abs(uv.x) * thin) * max(0.0, 1.0 - abs(uv.y));
 	float core = exp(-r * 7.0);
 	float rg = ring * exp(-pow((r - ring_r) * 18.0, 2.0));
 	float a = clamp((rays + core * 1.4 + rg) * power, 0.0, 1.5) * (1.0 - smoothstep(0.85, 1.0, r));
@@ -52,7 +63,8 @@ void fragment() {
 render_mode unshaded, blend_add, depth_draw_never, cull_disabled, shadows_disabled;
 uniform vec4 color : source_color = vec4(1.0);
 uniform float power = 1.0;
-uniform float tail = 1.0;      // 1 = fades to nothing at uv.x = 0
+// 1 = fades to nothing at uv.x = 0
+uniform float tail = 1.0;
 void fragment() {
 	float across = 1.0 - abs(UV.y * 2.0 - 1.0);
 	float a = pow(across, 1.6) * mix(1.0, UV.x, tail) * power;
@@ -102,7 +114,8 @@ void fragment() {
 			return """shader_type spatial;
 render_mode unshaded, blend_add, depth_draw_never, cull_disabled, shadows_disabled;
 uniform vec4 color : source_color = vec4(1.0, 0.55, 0.15, 1.0);
-uniform float life = 1.0;      // 1 -> 0
+// 1 -> 0
+uniform float life = 1.0;
 uniform float power = 2.4;
 void fragment() {
 	float across = 1.0 - abs(UV.y * 2.0 - 1.0);
@@ -129,7 +142,8 @@ void vertex() {
 	rim = 1.0 - abs(n.z);
 }
 void fragment() {
-	float up = UV.y;   // 0 at the top, 1 at the foot
+	// 0 at the top, 1 at the foot
+	float up = UV.y;
 	float ch = fract(up * bands + TIME * speed + abs(UV.x - 0.5) * 1.2);
 	float chev = smoothstep(0.0, 0.08, ch) * (1.0 - smoothstep(0.12, 0.24, ch));
 	float fade = smoothstep(0.0, 0.5, up);
@@ -163,12 +177,16 @@ void fragment() {
 render_mode unshaded, blend_add, depth_draw_never, cull_disabled, shadows_disabled;
 uniform vec4 color : source_color = vec4(1.0, 0.85, 0.45, 1.0);
 uniform float power = 1.0;
-uniform float hit = 0.0;       // 1 on a block, fades
-uniform float hurt = 0.0;      // 0 whole .. 1 nearly broken
-uniform float armed = 0.0;     // a Shield Slam is armed: it burns hotter
+// 1 on a block, fades
+uniform float hit = 0.0;
+// 0 whole .. 1 nearly broken
+uniform float hurt = 0.0;
+// a Shield Slam is armed: it burns hotter
+uniform float armed = 0.0;
 void fragment() {
 	vec2 uv = UV;
-	float rim = max((1.0 - smoothstep(0.0, 0.06, uv.y)), smoothstep(0.9, 1.0, uv.y)) + max((1.0 - smoothstep(0.0, 0.035, uv.x)), smoothstep(0.965, 1.0, uv.x));
+	float rim = max((1.0 - smoothstep(0.0, 0.06, uv.y)), smoothstep(0.9, 1.0, uv.y))
+		+ max((1.0 - smoothstep(0.0, 0.035, uv.x)), smoothstep(0.965, 1.0, uv.x));
 	float ribs = smoothstep(0.88, 1.0, abs(sin(uv.x * 3.14159 * 9.0))) * 0.35;
 	vec2 c = vec2((uv.x - 0.5) * 2.6, (uv.y - 0.45) * 1.0);
 	float head = step(abs(c.x), 0.32) * step(abs(c.y + 0.16), 0.09);

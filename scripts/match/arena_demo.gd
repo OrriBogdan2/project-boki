@@ -25,7 +25,16 @@ extends RefCounted
 ##               jug_chain jug_chainlunge jug_haul jug_spin arc_* and bul_* for the Archer and Bulwark)
 ##   smg         the SMG firing at the dummy; add --legacy-shots for the old look and numbers (before)
 
-const OLD_SMG := {"dmg": 2.76, "rate": 0.07, "speed": 55.0, "mag": 36, "kb": 0.5, "size": 0.1, "kick": 0.0, "tracer": 0.5}
+const OLD_SMG := {
+	"dmg": 2.76,
+	"rate": 0.07,
+	"speed": 55.0,
+	"mag": 36,
+	"kb": 0.5,
+	"size": 0.1,
+	"kick": 0.0,
+	"tracer": 0.5
+}
 
 
 ## --arena-demo=anim_<move>: a strip of frames of one kit move, cropped round the hunter, side by side
@@ -128,7 +137,10 @@ static func tick(A: Arena, dt: float) -> void:
 			P.inp["fire"] = t > 0.2 and t < 1.2
 			if P.ammo < 3: P.ammo = int(P.wpn["mag"])
 			var TK := P.ak as ThiefKit
-			if _at(t, dt, 1.3): P.dashes = P.max_dashes(); P.inp["move"] = Vector2(-1, 0); P.do_dash()
+			if _at(t, dt, 1.3):
+				P.dashes = P.max_dashes()
+				P.inp["move"] = Vector2(-1, 0)
+				P.do_dash()
 			if w == "thief":
 				at_t = 1.62
 			else:
@@ -143,10 +155,14 @@ static func tick(A: Arena, dt: float) -> void:
 				A.set_kin("puddlet")
 				P.teleport(D.pos + Vector3(-3.4, 0, 0.2))
 				A.home = P.pos
-			if t < 0.6: H.teleport(D.pos + (D.pos - P.pos).normalized() * 2.6); H.vel = Vector3.ZERO     # behind the dummy, along the throw
+			if t < 0.6: # behind the dummy, along the throw
+				H.teleport(D.pos + (D.pos - P.pos).normalized() * 2.6)
+				H.vel = Vector3.ZERO
 			_aim(P, D)
 			P.inp["move"] = Vector2.ZERO
-			if _at(t, dt, 0.4): P.ak.ch_rmb = 1.0; P.ak.press_rmb()
+			if _at(t, dt, 0.4):
+				P.ak.ch_rmb = 1.0
+				P.ak.press_rmb()
 			if (P.ak as ThiefKit).bola_pairs > 0 and not A.has_meta("bp_at"): A.set_meta("bp_at", t)
 			at_t = float(A.get_meta("bp_at", 9.0)) + 0.12
 		"juggernaut", "sweetspot", "crash":
@@ -169,8 +185,14 @@ static func tick(A: Arena, dt: float) -> void:
 			if w == "juggernaut":
 				at_t = 1.45
 			else:
-				if _at(t, dt, 1.2): P.teleport(H2.pos - Vector3(H2.pos.x - P.pos.x, 0, H2.pos.z - P.pos.z).normalized() * 2.5)
-				if _at(t, dt, 1.25): P.hp = P.max_hp * 0.6; P.ak.ch_rmb = 1.0; P.ak.cd["rmb"] = 0.0; P.inp["sec_hold"] = false; P.ak.press_rmb()
+				if _at(t, dt, 1.2):
+					P.teleport(H2.pos - Vector3(H2.pos.x - P.pos.x, 0, H2.pos.z - P.pos.z).normalized() * 2.5)
+				if _at(t, dt, 1.25):
+					P.hp = P.max_hp * 0.6
+					P.ak.ch_rmb = 1.0
+					P.ak.cd["rmb"] = 0.0
+					P.inp["sec_hold"] = false
+					P.ak.press_rmb()
 				if w == "sweetspot" and "--hold-shot" in OS.get_cmdline_user_args(): at_t = 1.5
 				else:
 					if JK.crashes > 0 and not A.has_meta("ss_at"): A.set_meta("ss_at", t)
@@ -210,15 +232,24 @@ static func tick(A: Arena, dt: float) -> void:
 				A.home = P.pos
 			_aim(P, D)
 			P.inp["move"] = Vector2.ZERO
-			if _at(t, dt, 0.3): P.inp["sec_hold"] = false; P.ak.ch_rmb = 2.0; P.ak.press_rmb()       # the snare roots it
-			if t > 0.35 and t < 2.0: D.root_t = maxf(D.root_t, 0.8)                                  # (keep it pinned for the frame)
+			if _at(t, dt, 0.3): # the snare roots it
+				P.inp["sec_hold"] = false
+				P.ak.ch_rmb = 2.0
+				P.ak.press_rmb()
+			# (keep it pinned for the frame)
+			if t > 0.35 and t < 2.0: D.root_t = maxf(D.root_t, 0.8)
 			if w == "archer":
 				if t > 0.9: P.ak.res = P.ak.res_max()
 				at_t = 1.9
 			else:
-				if _at(t, dt, 1.75): P.ak.res = P.ak.res_max(); P.fire_cd = 0.0; P.ammo = maxi(P.ammo, 1); P.inp["fire"] = true
+				if _at(t, dt, 1.75):
+					P.ak.res = P.ak.res_max()
+					P.fire_cd = 0.0
+					P.ammo = maxi(P.ammo, 1)
+					P.inp["fire"] = true
 				if _at(t, dt, 1.8): P.inp["fire"] = false
-				if P.ak.get("deadeyes") and int(P.ak.get("deadeyes")) > 0 and not A.has_meta("de_at"): A.set_meta("de_at", t)
+				if P.ak.get("deadeyes") and int(P.ak.get("deadeyes")) > 0 and not A.has_meta("de_at"):
+					A.set_meta("de_at", t)
 				at_t = float(A.get_meta("de_at", 9.0)) + 0.06
 		_ when w.begins_with("hero_"):
 			at_t = HeroDemo.tick(A, P, D, t, dt, w)         # Vireo and Marlowe (scripts/arch/hero_demo.gd)
@@ -234,17 +265,30 @@ static func tick(A: Arena, dt: float) -> void:
 			P.inp["move"] = Vector2.ZERO
 			var go := 0.5
 			if w.begins_with("e_"):
-				if _at(t, dt, go): P.ak.cd["e"] = 0.0; P.ak.use_e()
-				if "--e-recast" in OS.get_cmdline_user_args() and _at(t, dt, go + 0.45): P.ak.use_e()   # (the Shadow Step / the haul)
-				at_t = go + float(A.get_meta("e_shot_after", 0.9 if "--e-recast" not in OS.get_cmdline_user_args() else 0.62))
+				if _at(t, dt, go):
+					P.ak.cd["e"] = 0.0
+					P.ak.use_e()
+				# (the Shadow Step / the haul)
+				if "--e-recast" in OS.get_cmdline_user_args() and _at(t, dt, go + 0.45): P.ak.use_e()
+				at_t = go + float(
+					A.get_meta("e_shot_after", 0.9 if "--e-recast" not in OS.get_cmdline_user_args() else 0.62)
+				)
 			elif w.begins_with("r_"):
-				if _at(t, dt, go): P.ak.cd["r"] = 0.0; P.ak.use_r()
-				if t > go + P.ak.fuse_time() + 0.1 and t < go + P.ak.fuse_time() + 1.2: P.inp["fire"] = true   # (an empowered-shot ult fires through)
+				if _at(t, dt, go):
+					P.ak.cd["r"] = 0.0
+					P.ak.use_r()
+				# (an empowered-shot ult fires through)
+				if t > go + P.ak.fuse_time() + 0.1 and t < go + P.ak.fuse_time() + 1.2: P.inp["fire"] = true
 				at_t = go + P.ak.fuse_time() + (1.3 if "--late-shot" in OS.get_cmdline_user_args() else 0.75)
-				if "--fuse-shot" in OS.get_cmdline_user_args(): at_t = go + P.ak.fuse_time() * 0.7     # (before: the wind-up)
-				if "--impact-shot" in OS.get_cmdline_user_args(): at_t = go + P.ak.fuse_time() + 0.1  # (the moment it lands)
+				# (before: the wind-up)
+				if "--fuse-shot" in OS.get_cmdline_user_args(): at_t = go + P.ak.fuse_time() * 0.7
+				# (the moment it lands)
+				if "--impact-shot" in OS.get_cmdline_user_args(): at_t = go + P.ak.fuse_time() + 0.1
 			else:
-				if _at(t, dt, go): P.ak.ch_rmb = float(P.ak.rmb_charges()); P.ak.bot_hold["rmb"] = 0.9; P.ak.press_rmb()
+				if _at(t, dt, go):
+					P.ak.ch_rmb = float(P.ak.rmb_charges())
+					P.ak.bot_hold["rmb"] = 0.9
+					P.ak.press_rmb()
 				at_t = go + 0.7 if "--hold-shot" in OS.get_cmdline_user_args() else go + 1.05
 		_ when w.begins_with("pair_"):
 			at_t = PairDemo.tick(A, P, D, t, dt, w)          # Dolm and Ostra (scripts/arch/pair_demo.gd)
@@ -277,8 +321,11 @@ static func tick(A: Arena, dt: float) -> void:
 				A.home = P.pos
 			_aim(P, H)
 			P.inp["move"] = Vector2.ZERO
-			if _at(t, dt, 0.25): P.ak.bot_hold["rmb"] = 0.95 if w == "crushed" else 3.0; P.ak.press_rmb()   # raise the shield
-			if t > 0.3 and t < 1.2: P.ak.add_guard(dt * 70.0)                                    # (blocked fire becomes Guard)
+			if _at(t, dt, 0.25): # raise the shield
+				P.ak.bot_hold["rmb"] = 0.95 if w == "crushed" else 3.0
+				P.ak.press_rmb()
+			# (blocked fire becomes Guard)
+			if t > 0.3 and t < 1.2: P.ak.add_guard(dt * 70.0)
 			if w == "bulwark":
 				at_t = 1.6
 			else:
@@ -286,7 +333,15 @@ static func tick(A: Arena, dt: float) -> void:
 				at_t = float(A.get_meta("cr_at", 9.0)) + 0.06
 		"card", "card_juggernaut", "card_detail", "card_detail_passive", "card_archer", "card_mage", "card_gunslinger", "card_bulwark", "card_tender", "card_rimewright":
 			if t < 0.05:
-				var ca: String = {"card_juggernaut": "juggernaut", "card_archer": "archer", "card_mage": "mage", "card_gunslinger": "gunslinger", "card_bulwark": "bulwark", "card_tender": "tender", "card_rimewright": "rimewright"}.get(w, "thief")
+				var ca: String = {
+					"card_juggernaut": "juggernaut",
+					"card_archer": "archer",
+					"card_mage": "mage",
+					"card_gunslinger": "gunslinger",
+					"card_bulwark": "bulwark",
+					"card_tender": "tender",
+					"card_rimewright": "rimewright"
+				}.get(w, "thief")
 				A.set_arch(ca)
 				A.set_kin("cindle" if ca in ["juggernaut", "mage", "bulwark", "tender"] else "puddlet")
 			if _at(t, dt, 0.3):
@@ -339,15 +394,27 @@ static func _anim_trigger(A: Arena, P: Hunter, D: Hunter, mv: String, t: float, 
 			if t < 0.45: P.teleport(Vector3(D.pos.x - 1.9, P.pos.y, D.pos.z))
 			P.inp["fire"] = (t > 0.5 and t < 0.53) or (t > 0.82 and t < 0.85)
 		"thf_vault":
-			if _at(t, dt, 0.5): P.dashes = P.max_dashes(); P.inp["move"] = Vector2(0, 1); P.do_dash()
+			if _at(t, dt, 0.5):
+				P.dashes = P.max_dashes()
+				P.inp["move"] = Vector2(0, 1)
+				P.do_dash()
 		"thf_primed":
-			if _at(t, dt, 0.5): P.dashes = P.max_dashes(); P.inp["move"] = Vector2(0, 1); P.do_dash()
+			if _at(t, dt, 0.5):
+				P.dashes = P.max_dashes()
+				P.inp["move"] = Vector2(0, 1)
+				P.do_dash()
 			P.inp["fire"] = t > 0.76 and t < 0.8
 			if P.ammo < 3: P.ammo = int(P.wpn["mag"])
 		"thf_bola":
-			if _at(t, dt, 0.5): K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; P.inp["sec_hold"] = false; K.press_rmb()
+			if _at(t, dt, 0.5):
+				K.ch_rmb = 1.0
+				K.cd["rmb"] = 0.0
+				P.inp["sec_hold"] = false
+				K.press_rmb()
 		"thf_knife":
-			if _at(t, dt, 0.5): K.cd["e"] = 0.0; K.use_e()
+			if _at(t, dt, 0.5):
+				K.cd["e"] = 0.0
+				K.use_e()
 			if _at(t, dt, 0.95): K.use_e()
 		"thf_volley":
 			if _at(t, dt, 0.1): (K as ThiefKit).add_mark(D, 4, true)
@@ -361,28 +428,64 @@ static func _anim_trigger(A: Arena, P: Hunter, D: Hunter, mv: String, t: float, 
 		"jug_slam":
 			P.slot_lv["sec"] = 3          # rank 3: the sweet spot (2.6m out) also crashes
 			if t < 0.45: P.teleport(Vector3(D.pos.x - 2.6, P.pos.y, D.pos.z))
-			if _at(t, dt, 0.5): K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; P.inp["sec_hold"] = false; K.press_rmb()
+			if _at(t, dt, 0.5):
+				K.ch_rmb = 1.0
+				K.cd["rmb"] = 0.0
+				P.inp["sec_hold"] = false
+				K.press_rmb()
 		"jug_lunge":
-			if _at(t, dt, 0.5): K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; K.bot_hold["rmb"] = 1.0; K.press_rmb()
+			if _at(t, dt, 0.5):
+				K.ch_rmb = 1.0
+				K.cd["rmb"] = 0.0
+				K.bot_hold["rmb"] = 1.0
+				K.press_rmb()
 		"jug_meteor":
-			if _at(t, dt, 0.4): P.teleport(Vector3(D.pos.x - 1.2, P.pos.y + 3.0, D.pos.z)); P.grounded = false; P.vel = Vector3.ZERO
-			if _at(t, dt, 0.5): K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; K.press_rmb()
+			if _at(t, dt, 0.4):
+				P.teleport(Vector3(D.pos.x - 1.2, P.pos.y + 3.0, D.pos.z))
+				P.grounded = false
+				P.vel = Vector3.ZERO
+			if _at(t, dt, 0.5):
+				K.ch_rmb = 1.0
+				K.cd["rmb"] = 0.0
+				K.press_rmb()
 		"jug_dash":
-			if _at(t, dt, 0.5): P.dashes = P.max_dashes(); P.do_dash()
+			if _at(t, dt, 0.5):
+				P.dashes = P.max_dashes()
+				P.do_dash()
 		"jug_chain":
-			if _at(t, dt, 0.5): K.cd["e"] = 0.0; K.use_e()
+			if _at(t, dt, 0.5):
+				K.cd["e"] = 0.0
+				K.use_e()
 			if _at(t, dt, 0.9): K.use_e()
 		"jug_chainlunge":
-			if _at(t, dt, 0.5): K.cd["e"] = 0.0; K.use_e()
-			if _at(t, dt, 0.8): K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; K.bot_hold["rmb"] = 1.0; K.press_rmb()
+			if _at(t, dt, 0.5):
+				K.cd["e"] = 0.0
+				K.use_e()
+			if _at(t, dt, 0.8):
+				K.ch_rmb = 1.0
+				K.cd["rmb"] = 0.0
+				K.bot_hold["rmb"] = 1.0
+				K.press_rmb()
 		"jug_haul":
-			if _at(t, dt, 0.5): K.cd["e"] = 0.0; K.use_e()
-			if _at(t, dt, 0.8): K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; K.bot_hold["rmb"] = 1.5; K.press_rmb()
+			if _at(t, dt, 0.5):
+				K.cd["e"] = 0.0
+				K.use_e()
+			if _at(t, dt, 0.8):
+				K.ch_rmb = 1.0
+				K.cd["rmb"] = 0.0
+				K.bot_hold["rmb"] = 1.5
+				K.press_rmb()
 			if _at(t, dt, 1.2): K.use_e()
 		"jug_spin":
-			if _at(t, dt, 0.5): K.cd["e"] = 0.0; K.use_e()
+			if _at(t, dt, 0.5):
+				K.cd["e"] = 0.0
+				K.use_e()
 			if _at(t, dt, 0.84): K.use_e()
-			if _at(t, dt, 0.88): K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; P.inp["sec_hold"] = false; K.press_rmb()
+			if _at(t, dt, 0.88):
+				K.ch_rmb = 1.0
+				K.cd["rmb"] = 0.0
+				P.inp["sec_hold"] = false
+				K.press_rmb()
 		"arc_draw", "arc_loose", "arc_heavy_wind", "arc_heavy", "arc_snare", "arc_hail", "pin_roll", "arc_super", "arc_plunge", "arc_tap", "arc_perfect", "arc_over", "arc_over_loose", "pin_walk", "pin_flick", "pin_deadeye", "pin_rundown", "bul_guard", "bul_crush", "bul_slamshield", "bul_break", "bul_armed", "bul_lumber", "bul_throw", "bul_recall", "bul_smash_wind", "bul_smash", "bul_bash", "bul_whirl", "bul_charge", "bul_short", "bul_mend":
 			_anim_hero(A, P, mv, t, dt)
 
@@ -393,38 +496,103 @@ static func _anim_hero(A: Arena, P: Hunter, mv: String, t: float, dt: float) -> 
 	match mv:
 		"arc_draw": fire = t > 0.4 and t < 1.7
 		"arc_loose": fire = t > 0.4 and t < 0.9
-		"arc_heavy_wind": if _at(t, dt, 0.5): K.ch_rmb = 2.0; K.cd["rmb"] = 0.0; K.bot_hold["rmb"] = 1.6; K.press_rmb()
-		"arc_heavy": if _at(t, dt, 0.5): K.ch_rmb = 2.0; K.cd["rmb"] = 0.0; K.bot_hold["rmb"] = 0.9; K.press_rmb()
-		"arc_snare": if _at(t, dt, 0.5): K.ch_rmb = 2.0; K.cd["rmb"] = 0.0; P.inp["sec_hold"] = false; K.press_rmb()
-		"arc_hail": if _at(t, dt, 0.5): K.cd["e"] = 0.0; K.use_e()
-		"pin_roll": if _at(t, dt, 0.5): P.dashes = P.max_dashes(); P.inp["aim"] = P.pos + Vector3(4, 0, 0); P.do_dash()
+		"arc_heavy_wind":
+			if _at(t, dt, 0.5):
+				K.ch_rmb = 2.0
+			K.cd["rmb"] = 0.0
+			K.bot_hold["rmb"] = 1.6
+			K.press_rmb()
+		"arc_heavy":
+			if _at(t, dt, 0.5):
+				K.ch_rmb = 2.0
+			K.cd["rmb"] = 0.0
+			K.bot_hold["rmb"] = 0.9
+			K.press_rmb()
+		"arc_snare":
+			if _at(t, dt, 0.5):
+				K.ch_rmb = 2.0
+			K.cd["rmb"] = 0.0
+			P.inp["sec_hold"] = false
+			K.press_rmb()
+		"arc_hail":
+			if _at(t, dt, 0.5):
+				K.cd["e"] = 0.0
+			K.use_e()
+		"pin_roll":
+			if _at(t, dt, 0.5):
+				P.dashes = P.max_dashes()
+			P.inp["aim"] = P.pos + Vector3(4, 0, 0)
+			P.do_dash()
 		"arc_super": fire = t > 0.4 and t < 1.6
 		"arc_plunge":
-			if _at(t, dt, 0.4): P.teleport(P.pos + Vector3(0, 3.0, 0)); P.grounded = false; P.vel = Vector3.ZERO
-			if _at(t, dt, 0.5): K.ch_rmb = 2.0; K.cd["rmb"] = 0.0; K.press_rmb()
+			if _at(t, dt, 0.4):
+				P.teleport(P.pos + Vector3(0, 3.0, 0))
+				P.grounded = false
+				P.vel = Vector3.ZERO
+			if _at(t, dt, 0.5):
+				K.ch_rmb = 2.0
+				K.cd["rmb"] = 0.0
+				K.press_rmb()
 		"bul_throw": fire = t > 0.5 and t < 0.53
 		"bul_recall": fire = (t > 0.4 and t < 0.43) or (t > 1.0 and t < 1.03)
 		"bul_smash_wind": fire = t > 0.4 and t < 2.0
 		"bul_smash": fire = t > 0.4 and t < 1.2
-		"bul_bash": if _at(t, dt, 0.5): K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; P.inp["sec_hold"] = false; K.press_rmb()
-		"bul_whirl": if _at(t, dt, 0.5): P.dashes = P.max_dashes(); P.do_dash()
+		"bul_bash":
+			if _at(t, dt, 0.5):
+				K.ch_rmb = 1.0
+			K.cd["rmb"] = 0.0
+			P.inp["sec_hold"] = false
+			K.press_rmb()
+		"bul_whirl":
+			if _at(t, dt, 0.5):
+				P.dashes = P.max_dashes()
+			P.do_dash()
 		"bul_charge":
-			if _at(t, dt, 0.3): K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; K.bot_hold["rmb"] = 3.0; K.press_rmb()
-			if _at(t, dt, 0.7): P.dashes = P.max_dashes(); P.do_dash()
+			if _at(t, dt, 0.3):
+				K.ch_rmb = 1.0
+				K.cd["rmb"] = 0.0
+				K.bot_hold["rmb"] = 3.0
+				K.press_rmb()
+			if _at(t, dt, 0.7):
+				P.dashes = P.max_dashes()
+				P.do_dash()
 		"bul_short":
 			fire = t > 0.4 and t < 1.6
-			if _at(t, dt, 0.9): P.dashes = P.max_dashes(); P.do_dash()
-		"bul_mend": if _at(t, dt, 0.5): K.cd["e"] = 0.0; K.use_e()
+			if _at(t, dt, 0.9):
+				P.dashes = P.max_dashes()
+				P.do_dash()
+		"bul_mend":
+			if _at(t, dt, 0.5):
+				K.cd["e"] = 0.0
+			K.use_e()
 		"arc_tap": fire = t > 0.4 and t < 0.5
 		"arc_perfect": fire = t > 0.35 and t < 0.35 + 0.62
 		"arc_over", "arc_over_loose": fire = t > 0.4 and t < 2.3
-		"pin_walk": if _at(t, dt, 0.5): P.dashes = P.max_dashes(); P.inp["aim"] = P.pos + Vector3(4, 0, 0); P.do_dash()
-		"pin_flick", "bul_lumber": if _at(t, dt, 0.5): P.dashes = 0.0; P.ex_cd = 0.0; P.do_dash()
+		"pin_walk":
+			if _at(t, dt, 0.5):
+				P.dashes = P.max_dashes()
+			P.inp["aim"] = P.pos + Vector3(4, 0, 0)
+			P.do_dash()
+		"pin_flick", "bul_lumber":
+			if _at(t, dt, 0.5):
+				P.dashes = 0.0
+			P.ex_cd = 0.0
+			P.do_dash()
 		"pin_deadeye", "pin_rundown", "bul_crush", "bul_break", "bul_armed": if _at(t, dt, 0.5): K.play(mv)
 		"bul_guard":
 			P.inp["sec_hold"] = t > 0.45
-			if _at(t, dt, 0.5): K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; K.set("lock_t", 0.0); K.press_rmb()
-		"bul_slamshield": if _at(t, dt, 0.5): K.res = 60.0; K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; P.inp["sec_hold"] = false; K.press_rmb()
+			if _at(t, dt, 0.5):
+				K.ch_rmb = 1.0
+				K.cd["rmb"] = 0.0
+				K.set("lock_t", 0.0)
+				K.press_rmb()
+		"bul_slamshield":
+			if _at(t, dt, 0.5):
+				K.res = 60.0
+			K.ch_rmb = 1.0
+			K.cd["rmb"] = 0.0
+			P.inp["sec_hold"] = false
+			K.press_rmb()
 	P.inp["fire"] = fire
 
 ## One frame of the strip: a square round the hunter; the last one writes the strip and quits.
