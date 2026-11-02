@@ -312,7 +312,7 @@ func _draw_all() -> void:
 			_draw_kin_card(sz, p)
 			_draw_squad(sz, p)
 			_draw_perks(sz, p)
-			_draw_perk_offer(sz)
+			LevelPop.draw(self, sz)
 		if not p.riding:
 			_draw_kit(sz, p)
 		elif not map_open():
@@ -343,7 +343,7 @@ func _draw_all() -> void:
 		_draw_wheel()
 	if p and not p.out and not p.extracted and not map_open():
 		_draw_hover_tip(sz, p)
-		if hover_id == "" and m.perk_offer.is_empty():
+		if hover_id == "":
 			_draw_world_hover(sz, p)
 	if map_open():
 		full_map.draw(sz)
@@ -1133,10 +1133,13 @@ func _hud_origin(sz: Vector2) -> Vector2:
 
 var lvl_pop := 0.0
 var lvl_seen := -1
-## A level just went up (Hunter.gain_xp): the badge pops and the portrait bursts gold.
-func level_up(_lv: int) -> void:
-	lvl_pop = 0.35
-	flash(Color("ffd27a"), 0.16)      # a soft gold wash over the whole screen
+var lvl_note: Dictionary = {}      # the level-up banner (LevelPop)
+## A level just went up (Hunter.gain_xp): the badge pops, the portrait bursts gold and the banner names what improved.
+func level_up(lv: int, info := {}) -> void:
+	lvl_pop = 0.35      # every level: the badge flashes (the growth itself is quiet, LevelGrowth)
+	if lv % 2 == 0:      # only even levels, where the weapon takes its step, get the banner and the gold wash
+		LevelPop.start(self, lv, info)
+		flash(Color("ffd27a"), 0.16)
 
 ## The archetype resource under the health bar, with its name and tells (ARCHETYPES §3.2).
 func _draw_res_bar(x0: float, y: float, w: float, p: Hunter) -> void:
@@ -1231,8 +1234,8 @@ func _draw_abilities(sz: Vector2, p: Hunter) -> void:
 	x += s + gap
 	# Shift: your dash
 	var dmax := p.max_dashes()
-	var dcd := (1.0 - fposmod(p.dashes, 1.0)) if p.dashes < dmax else 0.0
-	_skill_slot("dash", "dash", Rect2(Vector2(x, y), Vector2(s, s)), "dash", Settings.key_cap("dash"), Color("bfe6ff"), dcd if p.dashes < 1.0 else 0.0, (1.0 - fposmod(p.dashes, 1.0)) * p.dash_regen() if p.dashes < 1.0 else 0.0, p.dashes >= 1.0, int(floor(p.dashes)), int(dmax))
+	var dcd := (1.0 - fposmod(p.dashes, 1.0)) if p.dashes < dmax - 0.001 else 0.0
+	_skill_slot("dash", "dash", Rect2(Vector2(x, y), Vector2(s, s)), "dash", Settings.key_cap("dash"), Color("bfe6ff"), dcd, dcd * p.dash_regen(), p.dashes >= 1.0, int(floor(p.dashes)), int(dmax))
 	x += s + gap
 	# E: your kin's ability
 	var er := Rect2(Vector2(x, y), Vector2(s, s))
@@ -1937,7 +1940,7 @@ func _draw_squad_pings(p: Hunter) -> void:
 
 ## For the first seconds of every match: what each of your buttons does.
 func _draw_kit(sz: Vector2, p: Hunter) -> void:
-	if not Settings.get_v("tips") or Record.clean() or m.opts.get("tutorial", false) or p.out or guide_hidden or not m.perk_offer.is_empty():
+	if not Settings.get_v("tips") or Record.clean() or m.opts.get("tutorial", false) or p.out or guide_hidden:
 		return
 	var show_t := 14.0 if not m.opts.get("training", false) else 1e9
 	var t := m.time - kit_t0
@@ -2046,38 +2049,9 @@ func _draw_perks(sz: Vector2, p: Hunter) -> void:
 			_text(r.position + Vector2(bs - 7, bs + 1), str(n), 11, INK, big)
 		x += bs + 6.0
 
-## An open perk choice: three cards over the ability bar, picked with 1, 2 or 3.
-func _draw_perk_offer(sz: Vector2) -> void:
-	var off: Dictionary = m.perk_offer
-	if off.is_empty():
-		return
-	var ids: Array = off["ids"]
-	var cw := 196.0; var ch := 70.0; var gap := 10.0
-	var total := ids.size() * cw + (ids.size() - 1) * gap
-	var x := sz.x * 0.5 - total * 0.5
-	var y := sz.y - 290.0         # below your hunter, above your perk badges and bars
-	var head: String = {"shrine": "THE SHRINE OFFERS A PERK", "chest": "SOMETHING ELSE IN THE CHEST", "boss": "A BOSS'S POWER", "brute": "SPOILS OF THE BRUTE", "level": "LEVEL UP: UPGRADE YOUR WEAPON"}.get(String(off.get("src", "")), "PICK A PERK")
-	_ctext(Vector2(sz.x * 0.5, y - 12), String(head) + "  ·  lasts this expedition", 13, Color(GOLD, 0.95), big)
-	var pulse := 0.5 + 0.5 * sin(m.time * 4.0)
-	for i in ids.size():
-		var pd: Dictionary = Data.PERKS[ids[i]]
-		var col: Color = pd["col"]
-		var r := Rect2(Vector2(x, y), Vector2(cw, ch))
-		_rounded(r, Color(0.05, 0.06, 0.1, 0.94), 12, Color(col, 0.55 + 0.35 * pulse), 2)
-		Icons.draw(c, String(pd["icon"]), r.position + Vector2(22, 22), 11.0, col)
-		_text(r.position + Vector2(40, 28), String(pd["name"]), 16, INK, big)
-		c.draw_multiline_string(body, r.position + Vector2(12, 47), String(pd["desc"]), HORIZONTAL_ALIGNMENT_LEFT, cw - 24, 12, 2, MUTED)
-		_keycap(Vector2(r.get_center().x, r.end.y), str(i + 1), col)
-		var n: int = m.player.perk_n(String(ids[i])) if m.player else 0
-		if n > 0:
-			_text(r.position + Vector2(cw - 34, 22), "x%d" % (n + 1), 12, GOLD, big)
-		x += cw + gap
-
 func _draw_prompt(sz: Vector2, p: Hunter) -> void:
 	var it := m.interact
 	var y := sz.y - 222.0
-	if not m.perk_offer.is_empty():
-		y = sz.y - 186.0     # under a perk choice's cards (they sit where the prompt goes), above your bars
 	if not it.is_empty():
 		var prog := 0.0
 		match it["kind"]:
@@ -2501,6 +2475,7 @@ func _tip_lines(id: String, p: Hunter) -> Array:
 			out.append(["%s class" % String(p.cls).capitalize(), hc])
 			out.append(["Speed %.1f  ·  %s" % [p.base_speed, String(p.cdat.get("desc", ""))], MUTED, 12])
 			out.append(["Health %d / %d   ·   Armor %d / %d" % [int(ceil(p.hp)), int(p.max_hp), int(ceil(p.armor)), int(p.max_armor)], INK, 14])
+			out.append(["Level %d  ·  %s" % [p.lvl, LevelGrowth.tip(p)], GOLD, 13])
 			out.append(["Armor takes 20% off every hit until it wears out. Neither armor nor health comes back on its own: use armor kits and tonics.", MUTED, 13])
 			if p.lives < 50:
 				out.append(["Lives left: %d" % p.lives, Color("ff7a8a"), 13])

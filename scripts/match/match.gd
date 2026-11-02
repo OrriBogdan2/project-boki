@@ -2760,7 +2760,7 @@ func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
 			exits.drop_key(mb.pos)
 	# the big ones are worth a perk to whoever brought them down
 	if mb.mkind in ["warden", "brute"] and credit is Hunter and not (credit as Hunter).remote and (mb.mkind == "warden" or rng.randf() < 0.5):
-		offer_perks(credit as Hunter, "boss" if mb.mkind == "warden" else "brute")
+		PerkOrbs.drop(self, "boss" if mb.mkind == "warden" else "brute", mb.pos, 0, credit as Hunter)      # the Warden: a fan of three
 	if credit == player and player.kin and randf() < 0.15:
 		player.kin.bark("kill")
 
@@ -3136,7 +3136,6 @@ func sees(team_i: int, p: Vector3, crouched := false, revealed := false) -> bool
 
 var _vis_t := 0.0
 var crouch_on := false
-var _perk_keys_down := {}
 var tonic_stash_left := 0     # tonics left in your stash at home this run (added back to what you carry out)
 const TONIC_CARRY := 5        # tonics you can bring into a run (two free + up to three from your stash)
 var _vis_tex_done := false
@@ -3270,7 +3269,7 @@ func _collect(h: Hunter, p: Dictionary) -> void:
 	if net_on:
 		net_event(["take", p["id"]])
 	match p["kind"]:
-		"gem": h.gems += int(round(float(p["v"]) * (1.0 + 0.25 * h.perk_n("scavenger"))))
+		"gem": h.gems += int(round(float(p["v"]) * PerkOrbs.gem_mult(h)))
 		"seed": h.seeds[p["key"]] = int(h.seeds.get(p["key"], 0)) + int(p["v"])
 		"tonic":
 			h.tonics = mini(5, h.tonics + 1)
@@ -3963,25 +3962,12 @@ func _gather_input() -> void:
 	else:
 		crouch_on = Input.is_action_pressed("crouch") and not paused
 	player.inp["crouch"] = crouch_on
-	if not paused:
-		# 1-3 pick a perk while a choice is open. A key that picked one stays "used" until it's let
-		# go, so the same press doesn't also drink. (The release has to be noticed even after the
-		# choice closes: before, a pick left the key marked forever and the heal key stopped working.)
-		for pi in 3:
-			var down := Input.is_physical_key_pressed(KEY_1 + pi)
-			if not down:
-				_perk_keys_down.erase(pi)
-			elif not perk_offer.is_empty() and not _perk_keys_down.has(pi):
-				_perk_keys_down[pi] = true
-				choose_perk(pi)
 	# the kit: Q glove, E kin ability, C throw kin, R bond, 1 heal, 2 armor kit (the second kin
 	# ability and kin swap are retired)
 	if Input.is_action_just_pressed("base") and not paused and duel == null and not opts.get("arena", false):
 		pending_input["base"] = true
 	var slot_of := {"dash": "dash", "secondary": "sec", "gear1": "gear", "signature": "kin", "ultimate": "ult"}
 	for a in [["dash", "dash"], ["jump", "jump"], ["signature", "sig"], ["reload", "reload"], ["tonic", "tonic"], ["armor_kit", "kit"], ["ultimate", "ult"], ["secondary", "sec"], ["gear1", "gear1"], ["kin_ability", "kin_ab"]]:
-		if a[0] in ["tonic", "armor_kit"] and (not perk_offer.is_empty() or not _perk_keys_down.is_empty()):
-			continue       # 1, 2 and 3 pick a perk while a choice is open
 		if a[0] == "armor_kit" and arena != null:
 			continue       # the Arena's 2-7 swap archetypes (and nothing wears out there)
 		if (map_up or on_panel) and a[0] in ["secondary", "throw"]:
@@ -4506,6 +4492,7 @@ func step(dt: float) -> void:
 	_prof("shots")
 	_update_pickups(dt)
 	_update_wpicks(dt)
+	PerkOrbs.update(self, dt)
 	_update_gear_fx(dt)
 	_update_pads(dt)
 	_prof("pickups")
@@ -4520,9 +4507,7 @@ func step(dt: float) -> void:
 	_update_box_hums()
 	_prof("interact")
 	if opts.get("perk_demo", false) and player and time > 0.5 and time - dt <= 0.5:
-		# test: a couple of perks already taken and a choice open
-		player.add_perk("keen"); player.add_perk("keen"); player.add_perk("toughskin")
-		offer_perks(player, "shrine")
+		PerkOrbs.demo(self)      # test: a couple of perks taken and a boss's fan of orbs ahead
 		if hud: hud.ability_feedback("sec", "deny")
 	Life.tick_wisps(self, dt)
 	Life.tick_stomps(self, dt)
@@ -5028,8 +5013,8 @@ func _open_chest(h: Hunter, c: Dictionary, from_net := false) -> void:
 	fx.burst(c["pos"] + Vector3(0, 0.6, 0), cc[1], 20 + t * 10, 4.0 + t, 0.6)
 	if t >= 1:
 		fx.ring(c["pos"], 2.0 + t, Color(cc[1], 0.9), 0.4)
-	if t >= 1 and h and not h.remote:
-		offer_perks(h, "chest")
+	if not from_net:
+		PerkOrbs.drop(self, "chest", c["pos"], 1, h)      # one perk orb beside the chest
 	var n_gems: int = [randi_range(4, 6), randi_range(7, 9), randi_range(11, 14)][t]
 	var n_pick := pickups.size(); var n_w := wpicks.size()
 	# a crate on the sky train pops its loot gently, so it lands on the car and rides along
@@ -5064,45 +5049,6 @@ func _open_chest(h: Hunter, c: Dictionary, from_net := false) -> void:
 			wp["pos"] = t3 * off; wp["ride"] = int(c["ride"])
 			(wp["node"] as Node3D).position = wp["pos"]
 
-# ------------------------------------------------------------------ perks found on the run
-var perk_offer: Dictionary = {}    # the local player's open choice: {ids, src}
-var perk_queue: Array = []         # more offers waiting behind it
-
-## Three perks to choose one from (fewer if you've maxed most). Bots just take one.
-func offer_perks(h: Hunter, src: String) -> void:
-	# level-ups offer weapon upgrades only (WeaponUps); chests, shrines and bosses offer anything
-	var pool: Array = Data.PERKS.keys().filter(func(k): return h.perk_open(k) and (src != "level" or Data.PERKS[k].has("wup")))
-	if pool.is_empty():
-		return
-	for i in range(pool.size() - 1, 0, -1):
-		var j := rng.randi_range(0, i)
-		var tmp = pool[i]; pool[i] = pool[j]; pool[j] = tmp
-	var picks: Array = pool.slice(0, mini(3, pool.size()))
-	if h != player:
-		h.add_perk(String(picks[0]))
-		return
-	if not perk_offer.is_empty():
-		perk_queue.append({"src": src})
-		return
-	perk_offer = {"ids": picks, "src": src}
-	sfx("unlock", null, -4.0, 1.1)
-	if hud: hud.toast("Pick a perk: %s" % " / ".join(PackedStringArray(["1", "2", "3"].slice(0, picks.size()))), Color("ffd23f"))
-
-## Takes perk i (0..2) of the open offer.
-func choose_perk(i: int) -> void:
-	if perk_offer.is_empty() or i < 0 or i >= (perk_offer["ids"] as Array).size():
-		return
-	var id: String = perk_offer["ids"][i]
-	player.add_perk(id)
-	var pd: Dictionary = Data.PERKS[id]
-	fx.word(player.pos + Vector3(0, 2.4, 0), String(pd["name"]).to_upper(), pd["col"], true)
-	fx.burst(player.pos + Vector3(0, 1.4, 0), pd["col"], 18, 3.5, 0.5, -2.0)
-	sfx("bond", null, -6.0, 1.2)
-	perk_offer = {}
-	if not perk_queue.is_empty():
-		var nx: Dictionary = perk_queue.pop_front()
-		offer_perks(player, String(nx["src"]))
-
 func _use_shrine(h: Hunter, sh: Dictionary, from_net := false) -> void:
 	if sh["used"]:
 		return
@@ -5122,7 +5068,7 @@ func _use_shrine(h: Hunter, sh: Dictionary, from_net := false) -> void:
 			h.kin.hp = h.kin.max_hp
 		if h == player:
 			hud.toast("Healed and blessed: +25% damage for 20s", Color("8fe3c8"))
-		offer_perks(h, "shrine")
+		PerkOrbs.drop(self, "shrine", sh["pos"], 0, h)      # one or two perk orbs by the shrine
 
 ## Midway through, the Warden wakes on the heart island and guards it until someone brings it down.
 ## The guided first match. [id, text]: %K is the key for that step, %s your kin's name, %A an
@@ -6193,7 +6139,7 @@ func _ser(e: Ent) -> Array:
 	if e is Hunter:
 		var h: Hunter = e
 		return ["h", h.nid, _r(h.pos.x), _r(h.pos.y), _r(h.pos.z), _r(h.vel.x), _r(h.vel.y), _r(h.vel.z), _r(h.face), _r(h.hp), h.max_hp, _flags(h),
-			_r(h.down_hp), _r(h.revive), h.team, h.cls, h.pname, _r(h.shield), _r(h.extract_prog), h.kills, h.knocks, int(h.dmg_done), _r(h.armor), h.max_armor, h.arch, h.wid] + KinNet.hunter_extra(h) + HunterNet.extra(h)
+			_r(h.down_hp), _r(h.revive), h.team, h.cls, h.pname, _r(h.shield), _r(h.extract_prog), h.kills, h.knocks, int(h.dmg_done), _r(h.armor), h.max_armor, h.arch, h.wid] + KinNet.hunter_extra(h) + ArchKit.net_move(h) + HunterNet.extra(h)
 	if e is Kin:
 		var k: Kin = e
 		return ["k", k.nid, _r(k.pos.x), _r(k.pos.y), _r(k.pos.z), _r(k.face), _r(k.hp), _r(k.max_hp), KIN_STATES.find(k.state), k.species,
@@ -6337,6 +6283,7 @@ func _net_apply(e: Ent, it: Array) -> void:
 			if it.size() > 23:
 				h.armor = float(it[22]); h.max_armor = float(it[23])
 			KinNet.apply_hunter(h, it)
+			ArchKit.apply_net_move(h, it)
 			HunterNet.apply(h, it)
 		"k":
 			var k: Kin = e
@@ -6546,6 +6493,8 @@ func _net_ev(x, from: String) -> void:
 				var wat := Vector3(x[4], x[5], x[6])
 				if String(x[2]) == "tune" and Data.PERKS.has(String(x[7])): spawn_tune(String(x[7]), wat, String(x[1]), false)
 				elif String(x[2]) == "gear" and Gear.ALL.has(String(x[7])): spawn_gear(String(x[7]), int(x[3]), wat, String(x[1]), false)
+		"odrop", "otake":
+			PerkOrbs.on_net(self, x)
 		"wtake":
 			for wp in wpicks:
 				if wp["id"] == String(x[1]):

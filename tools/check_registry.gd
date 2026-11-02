@@ -23,6 +23,8 @@ const CHECKS := {
 	"--kill-reset-check": ["res://tools/kill_reset_check.gd", "kill_reset_check", null],
 	"--hero-combo-check": ["res://tools/archer_bulwark_combo_check.gd", "hero_check", null],
 	"--hudref-check": ["res://tools/hudref_check.gd", "hudref_check", null],
+	"--aimkit-check": ["res://tools/aimkit_check.gd", "aimkit_check", null],
+	"--perkorb-check": ["res://tools/perkorb_check.gd", "perkorb_check", null],      # perk orbs, the boss fan, the fixed weapon path
 }
 
 ## Runs the registered check named in args, if any. Returns true when one started (Main stops there).

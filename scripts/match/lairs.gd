@@ -713,7 +713,7 @@ func _boss_dead(L: Dictionary, b: Boss, credit: Ent) -> void:
 		h.gain_xp(260.0 * share)
 	if killer and not killer.remote:
 		killer.add_stat("bosses")
-		m.offer_perks(killer, "boss")
+		PerkOrbs.drop(m, "boss", b.pos, 0, killer)      # a fan of three perk orbs
 	# the boss's brood scatters
 	for a in L["adds"]:
 		if is_instance_valid(a) and not a.dead: a.camp = a.pos

@@ -40,14 +40,16 @@ static func ab_slot(H, id: String, rect: Rect2, icon: String, key: String, col: 
 	if ready and not was:
 		H.ready_flash[id] = READY_FLASH
 	H.ready_was[id] = ready
-	var cooling := cd_frac > 0.0 and cd_secs > 0.0
+	var cooling := cd_frac > 0.0 and cd_secs > 0.0 and not ready
 	HudStyle.slot_frame(c, rect, col, "ready" if ready else ("cooling" if cooling else "off"))
 	var icol: Color = col if ready else Color(col.lerp(HudStyle.MUTED, 0.65), 0.45)
 	Icons.draw(c, icon, ctr + Vector2(0, -2), rect.size.x * 0.27, icol)
 	H.slot_text.erase(id)
 	if cd_frac > 0.0:
-		sweep(c, rect.grow(-2.0), cd_frac, Color(0.0, 0.0, 0.02, 0.62))
-		if cd_secs > 0.0:
+		# a charge coming back while another is ready (dashes): a light sweep and no number, so it never reads as locked
+		var shade := 0.22 if ready else 0.62
+		sweep(c, rect.grow(-2.0), cd_frac, Color(0.0, 0.0, 0.02, shade))
+		if cooling:
 			var t := cd_text(cd_secs)
 			var fs := int(rect.size.x * (0.46 if t.length() < 3 else 0.38))
 			HudStyle.ctext(c, ctr + Vector2(0, fs * 0.36), t, fs, HudStyle.INK if cd_secs >= 1.0 else HudStyle.COOLING, 6)
