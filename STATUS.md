@@ -1,18 +1,13 @@
-2026-11-02T04:20:29Z
+2026-11-02T17:06:28Z
 
-ext/heroes-joule-ghost | 9ad329d | ready to merge | 0.10.0 (no new sync) | full suite 0 failures on final commit, health/gen_wiki OK
-ext/heroes-elluna-celeste | b658b74 | ready to merge | 0.10.1 (new "carry" event) | full suite 0 failures on final commit, health/gen_wiki OK
-ext/heroes-kingpin-felix | a6c29a1 | ready to merge | 0.10.0 (no new sync) | full suite 0 failures on final commit, health/gen_wiki OK
-ext/heroes-tetra-void | da15c32 | ready to merge (vs sync58 e5f25ec; main now fcc3745, re-merge needed) | 0.10.1 (new "zone" event) | full suite 0 failures on final commit, health/gen_wiki OK
-ext/heroes-myth-oath | 1603a44 | running (finish pass) | pending | pending
-ext/kits2-nor | e5f25ec (from main, not pushed yet) | running | pending | pending
-ext/farmbuild | e5f25ec (from main, not pushed yet) | running | pending | pending
-ext/classes | - | queued (after hero finish passes are pushed) | - | -
-ext/hero-shots | 39453e7 | pushed: 12 heroes, 123 PNGs (myth-oath and kits2-nor shots are interim; rebuilt when they finish); Linnet/Tamsin portraits being re-shot | - | -
+Handed to the local machine per INBOX (not touched by the server since): ext/heroes-joule-ghost, ext/heroes-elluna-celeste, ext/heroes-kingpin-felix, ext/heroes-tetra-void, ext/heroes-myth-oath, ext/kits2-nor, ext/farmbuild. All five hero branches are now in origin/main (7881774).
+ext/kits2-nor | 0650f6f (server's last push; now cb588ab, local machine) | server finish: full suite 0 failures on fcc3745, Net 0.11.1 (kmove id on hunter snapshot) | handed over
+ext/farmbuild | b7537bd | server finish: full suite 0 failures on fcc3745, Net 0.11.0, --farmbuild-check added | handed over
+ext/hero-shots | b4e3d0f | running: rebuild with final archer/bulwark, thief/juggernaut and farmbuild shots; fix Linnet/Tamsin portraits (they show a longsword, not their signature weapons) | - | -
+ext/classes | - | running (from origin/main 7881774, which already has all hero branches) | pending | pending
 
-Running now: myth-oath finish pass; ext/farmbuild; ext/kits2-nor; Linnet/Tamsin portrait re-shoot (4 Sonnet agents)
-Queued: ext/classes (after myth-oath is pushed); add myth-oath + kits2-nor shots to ext/hero-shots
-Last INBOX entry handled: 2026-11-02 03:20 UTC
-Questions for the owner: (1) Tamsin/rimewright: add real healing, or keep source-accurate ice control plus a wall shield? (2) Myth+Oath: keep our own additions (Archer snare/Focus, Bulwark Guard/Shield Slam)?
-Merge notes: hero branches each append to Sfx.NAMES, Arch.ORDER, KMOVES and the arena swap keys; keep both sides when resolving.
-Note: origin/main moved to fcc3745 after the hero finish passes merged sync58 e5f25ec; the hero branches merge cleanly against sync58 and need a re-merge with fcc3745 (tetra-void dry run: 4 conflict hunks).
+Running now: ext/classes; ext/hero-shots fixes and rebuild (2 Sonnet agents)
+Queued: queue empty after these
+Last INBOX entry handled: 2026-11-02 11:45 UTC
+Apology for the silence 04:20 to now: the server agents were all running long jobs and the coordinator didn't push heartbeats in between. From now on it pushes on every start and finish.
+Questions for the owner: none new (Tamsin healing and Archer/Bulwark additions are with the owner via INBOX 05:00).
