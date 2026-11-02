@@ -49,9 +49,10 @@ func _process(_d: float) -> void:
 func is_open() -> bool:
 	return page != ""
 
-## Admin tools are for the game's owner: always on desktop, and on the web for the artifact's owner.
+## Admin tools are for the game's owner. On this showcase build they are off in normal play (no F1 / ` panel, no
+## Admin or Mod mode entries in the menus); launch with `-- --admin` to bring them back.
 func admin_allowed() -> bool:
-	return not OS.has_feature("web") or Social.is_owner
+	return OS.get_cmdline_user_args().has("--admin") and (not OS.has_feature("web") or Social.is_owner)
 
 # ------------------------------------------------------------------ input
 func _input(event: InputEvent) -> void:
