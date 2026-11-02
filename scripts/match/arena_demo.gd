@@ -83,6 +83,12 @@ const ANIM_DEMO := {
 	"bul_charge": ["bulwark", "tower_shield", [0.7, 0.75, 0.82, 0.9, 1.0, 1.2]],
 	"bul_short": ["bulwark", "tower_shield", [0.85, 0.92, 0.98, 1.05, 1.15, 1.35]],
 	"bul_mend": ["bulwark", "tower_shield", [0.5, 0.56, 0.64, 0.74, 0.95, 1.25]],
+	"pin_ult_cast": ["archer", "longbow", [0.5, 0.56, 0.62, 0.7, 0.8, 0.95]],
+	"pin_ult_nock": ["archer", "longbow", [0.5, 0.56, 0.62, 0.7, 0.78]],
+	"pin_ult_loose": ["archer", "longbow", [0.76, 0.82, 0.88, 0.96, 1.06, 1.3]],
+	"pin_ult_final": ["archer", "longbow", [0.76, 0.82, 0.88, 0.96, 1.1, 1.45]],
+	"bul_ult_wind": ["bulwark", "tower_shield", [0.5, 0.58, 0.66, 0.76, 0.86]],
+	"bul_ult_slam": ["bulwark", "tower_shield", [0.88, 0.92, 0.98, 1.1, 1.3, 1.7]],
 	"bul_guard": ["bulwark", "tower_shield", [0.5, 0.56, 0.62, 0.7, 0.9, 1.2]],
 	"bul_crush": ["bulwark", "tower_shield", [0.5, 0.58, 0.64, 0.72, 0.85, 1.05]],
 	"bul_slamshield": ["bulwark", "tower_shield", [0.5, 0.62, 0.76, 0.84, 0.95, 1.2]],
@@ -488,6 +494,8 @@ static func _anim_trigger(A: Arena, P: Hunter, D: Hunter, mv: String, t: float, 
 				K.press_rmb()
 		"arc_draw", "arc_loose", "arc_heavy_wind", "arc_heavy", "arc_snare", "arc_hail", "pin_roll", "arc_super", "arc_plunge", "arc_tap", "arc_perfect", "arc_over", "arc_over_loose", "pin_walk", "pin_flick", "pin_deadeye", "pin_rundown", "bul_guard", "bul_crush", "bul_slamshield", "bul_break", "bul_armed", "bul_lumber", "bul_throw", "bul_recall", "bul_smash_wind", "bul_smash", "bul_bash", "bul_whirl", "bul_charge", "bul_short", "bul_mend":
 			_anim_hero(A, P, mv, t, dt)
+		"pin_ult_cast", "pin_ult_nock", "pin_ult_loose", "pin_ult_final", "bul_ult_wind", "bul_ult_slam":
+			_anim_ult(P, mv, t, dt)
 
 ## The scripted input for the Archer's and Bulwark's kit moves (the accuracy pass).
 static func _anim_hero(A: Arena, P: Hunter, mv: String, t: float, dt: float) -> void:
@@ -594,6 +602,19 @@ static func _anim_hero(A: Arena, P: Hunter, mv: String, t: float, dt: float) -> 
 				P.inp["sec_hold"] = false
 				K.press_rmb()
 	P.inp["fire"] = fire
+
+## The X ultimates' strips: Starpiercer cast at 0.5 (its beams from a press at 0.5 after a cast at 0.3, the
+## last one with a single shot left), Faultline cast at 0.5.
+static func _anim_ult(P: Hunter, mv: String, t: float, dt: float) -> void:
+	var K: ArchKit = P.ak
+	P.lvl = 6
+	var cast_at := 0.5 if mv in ["pin_ult_cast", "bul_ult_wind", "bul_ult_slam"] else 0.3
+	if _at(t, dt, cast_at):
+		K.cd["x"] = 0.0
+		UltSlot.press(K)
+		if mv == "pin_ult_final":
+			(K as ArcherKit).ult.left = 1
+	P.inp["fire"] = mv.begins_with("pin_ult_") and mv != "pin_ult_cast" and t > 0.5 and t < 0.6
 
 ## One frame of the strip: a square round the hunter; the last one writes the strip and quits.
 static func _grab(A: Arena, P: Hunter, last: bool) -> void:

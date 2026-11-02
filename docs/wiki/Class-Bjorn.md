@@ -62,6 +62,7 @@ What the in-game kit card (K) says.
 | LMB | Tap to throw the hammer to the cursor and tap again to call it back; hold to spin it, let go to slam forward. |
 | RMB: Aegis | Hold to raise your aegis and block shots from the front; let go or tap to Bash. |
 | E: Mending Ground | A green light comes down on your planted hammer (or on you), then heals allies there. |
+| X: Faultline | Faultline (level 6): plant, slam, and the ground erupts down a long lane, throwing every foe on it up. |
 | Weapon: War Hammer & Aegis | Tap to throw the hammer to the cursor and tap again to call it back; hold to spin it, let go to slam forward. |
 
 ### Abilities in full
@@ -78,6 +79,8 @@ What the in-game kit card (K) says.
 - *Resource full:* Guard 50+: Shield Slam, 18 damage, push 12 and stun 0.6 (spends 50).
 
 **Mending Ground (E, 16s cooldown).** A green light column comes down for 1s on your planted hammer (on you with the hammer in hand), then it heals allies inside 26; if your aegis is raised it mends 60. Foes inside are slowed. A downed teammate inside is a third of the way back up.
+
+**Faultline (X, from level 6, 33s cooldown).** Plant and raise the hammer (0.4s, the 16m lane shows to everyone), then slam: the near cell is struck (4, a brief stun) and the ground erupts cell by cell to the far end, throwing each foe up once (18, stun 0.5, slowed 50% for 1.5s). A wall or a drop stops it. A glowing scar stays 10s and slows foes on it 20%.
 
 ### Ranks
 

@@ -16,6 +16,10 @@ const EMBER := Color("ff9a3a")
 const GOLD := Color("ffd25a")
 const ROCK := Color("5a4a42")
 const MAX_CELLS := 6           # pooled slabs
+const SHARDS := 4              # basalt spikes per cell
+## Each spike's place in its cell (along, across as shares of the cell), its lean and its height.
+const SHARD_AT := [Vector4(-0.22, -0.28, 0.35, 1.5), Vector4(0.18, 0.22, -0.3, 1.9), Vector4(0.3, -0.1, 0.2, 1.2),
+	Vector4(-0.3, 0.3, -0.25, 1.1)]
 
 var k: BulwarkKit
 var h: Hunter
@@ -30,7 +34,7 @@ var hunters := 0               # (checks) hunters thrown this cast, casts that s
 var slams := 0
 var interrupts := 0
 var scar := {}                 # the scar: {t, a, len}
-var _slabs: Array = []         # {rock, seam, t}
+var _slabs: Array = []         # one per cell: {shards (SHARDS basalt spikes), seam, t, at}
 var _streak: MeshInstance3D
 var _streak_t := 0.0
 var _flood: MeshInstance3D
@@ -44,11 +48,14 @@ func _init(kit: BulwarkKit) -> void:
 	name = "BjornUlt"
 
 func _ready() -> void:
+	var rock_mat := Models.toon(ROCK, true, 0.2)
 	for i in MAX_CELLS:
-		var rock := KitMeshes.inst(self, Models.box(1.0, 1.0, 1.0), Models.toon(ROCK, true, 0.2))
+		var shards: Array = []
+		for j in SHARDS:
+			shards.append(KitMeshes.inst(self, Models.crystal(0.55, 1.0, 5), rock_mat))
 		var seam := KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("streak", EMBER))
 		seam.material_override.set_shader_parameter("tail", 0.0)
-		_slabs.append({"rock": rock, "seam": seam, "t": 0.0, "h": 1.0})
+		_slabs.append({"shards": shards, "seam": seam, "t": 0.0})
 	_streak = KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("streak", Color(1.0, 0.75, 0.35)))
 	_flood = KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("panel", GOLD))
 	_scar = KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("streak", EMBER))
@@ -273,23 +280,31 @@ func _process(delta_in: float) -> void:
 		var fade := clampf(float(scar["t"]), 0.0, 1.0)
 		_scar.material_override.set_shader_parameter("power", (1.0 + 0.35 * sin(Time.get_ticks_msec() * 0.012)) * fade)
 
-## Each slab heaves up out of the ground fast, hangs, then sinks back; its seams glow then cool.
+## Each cell's basalt spikes heave up out of the ground fast, hang, then sink back; the molten seam under
+## them glows then cools.
 func _tick_slabs(delta: float) -> void:
 	var w := float(xd().get("width", 4.0))
+	var along := Vector3(dir.x, 0, dir.y)
+	var across := Vector3(-dir.y, 0, dir.x)
 	for s in _slabs:
-		var rock: MeshInstance3D = s["rock"]
 		var seam: MeshInstance3D = s["seam"]
-		if float(s["t"]) <= 0.0:
-			rock.visible = false
-			seam.visible = false
+		var live := float(s["t"]) > 0.0
+		seam.visible = live
+		for shard in s["shards"]:
+			(shard as MeshInstance3D).visible = live
+		if not live:
 			continue
 		s["t"] = float(s["t"]) - delta
 		var age := 0.9 - float(s["t"])
 		var rise := clampf(age / 0.12, 0.0, 1.0) * clampf(float(s["t"]) / 0.35, 0.0, 1.0)
 		var at: Vector3 = s["at"]
-		rock.visible = true
-		rock.global_position = at + Vector3(0, lerpf(-0.8, 0.35, rise), 0)
-		rock.rotation = Vector3(0.18 * rise, atan2(-dir.y, dir.x), 0.12 * rise)
-		rock.scale = Vector3(cell_len() * 0.82, 0.9 + 0.5 * rise, w * 0.7)
+		for j in SHARDS:
+			var shard: MeshInstance3D = s["shards"][j]
+			var spot: Vector4 = SHARD_AT[j]
+			var tall := spot.w * (0.4 + 0.6 * rise)
+			var foot := at + along * spot.x * cell_len() + across * spot.y * w
+			shard.global_position = foot + Vector3(0, tall * 0.5 - 0.3, 0)
+			shard.rotation = Vector3(spot.z * rise, atan2(-dir.y, dir.x) + j, -spot.z * 0.6 * rise)
+			shard.scale = Vector3(1.0, tall, 1.0)
 		_place_flat(seam, at + Vector3(0, 0.1, 0), Vector2(cell_len() * 0.95, w * 0.85))
 		seam.material_override.set_shader_parameter("power", 2.2 * clampf(float(s["t"]) / 0.9, 0.0, 1.0))

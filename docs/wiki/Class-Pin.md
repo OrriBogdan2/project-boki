@@ -65,6 +65,7 @@ What the in-game kit card (K) says.
 | LMB | Hold to draw: Empowered lands at the cursor, Supercharged flies past it; let go right on the flash for a faster next draw. |
 | RMB: Snare | Tap a rooting snare; hold for a Heavy Shot that knocks back and pins foes to walls. |
 | E: Hail Wall | Rain arrows on a curved wall at the cursor distance: damage, slow and a burn that blocks healing. |
+| X: Starpiercer | Starpiercer (level 6): your next 3 shots need no draw and fly as piercing beams; the third can finish a foe. |
 | Weapon: Longbow | Hold to draw: Empowered lands at the cursor, Supercharged flies past it; let go right on the flash for a faster next draw. |
 
 ### Abilities in full
@@ -82,6 +83,8 @@ What the in-game kit card (K) says.
 - *Resource full:* At 100 Focus the tap roots 1.0.
 
 **Hail Wall (E, 9s cooldown).** Lob a volley: 0.35s later arrows rain for 4.4s on a curved wall 120 degrees wide round you, at the cursor distance (2-9m). Foes inside take 5 every 0.5s, are slowed 35% and burn blue (healing barely takes). A Heavy Shot that knocks a burning foe Cremates them: +10 and a longer burn.
+
+**Starpiercer (X, from level 6, 36s cooldown).** Tap: your next 3 bow shots within 6s need no draw. Each press nocks for 0.3s and looses a beam to 18m that pierces every foe, knocks back and strips 10 armor; the third hits harder and finishes a hunter it leaves under 12% health.
 
 ### Ranks
 

@@ -49,20 +49,20 @@ your class in the Expedition menu, and you can try every class against dummies i
 
 ### All 12 classes
 
-| Class | Weight | Weapons | Passive | Dash | RMB | E | R |
-|---|---|---|---|---|---|---|---|
-| [Thief](Class-Thief.md) | Light | Twin Blades | Marks | Vault | Bola | Shadow Knife | none (Boki Merge) |
-| [Pin](Class-Pin.md) | Light | Longbow | Focus | Spirit Walk | Snare | Hail Wall | none (Boki Merge) |
-| [Vireo](Class-Vireo.md) | Light | Coilcaster | Sparks | Wirerun | Coilshot | Skycall | none (Boki Merge) |
-| [Marlowe](Class-Marlowe.md) | Medium | Quill Rifle | Fever | Slipstep | Burr Charge | Longneedle | none (Boki Merge) |
-| [Juggernaut](Class-Juggernaut.md) | Heavy | Greatsword | Rage | Rampage | Smash | Warchain | none (Boki Merge) |
-| [Bjorn](Class-Bjorn.md) | Heavy | War Hammer & Aegis | Guard | 360 Smash | Aegis | Mending Ground | none (Boki Merge) |
-| [Dredge](Class-Dredge.md) | Heavy | Shotgun | Salvage | Barge | Grapnel | Anchor Drop | none (Boki Merge) |
-| [Ashwick](Class-Ashwick.md) | Heavy | Torch Lance | Flashover | Spark Leap | Cinder Shot | Furnace Cloak | none (Boki Merge) |
-| [Linnet](Class-Linnet.md) | Medium | Lantern Crook | Bearer | Relay Step | Burrseed | Hearthlight | none (Boki Merge) |
-| [Tamsin](Class-Tamsin.md) | Light | Hoar Fan | Hoarfrost | Rinkrun | Sleet Lance | Rink Wall | none (Boki Merge) |
-| [Dolm](Class-Dolm.md) | Medium | Rubble Fists | Tremor Sense | Rubble Rush | Quakefall | Stone Row | none (Boki Merge) |
-| [Ostra](Class-Ostra.md) | Medium | Tether Lantern | Swell | Lantern Trade | Shard Fan | Brimseed | none (Boki Merge) |
+| Class | Weight | Weapons | Passive | Dash | RMB | E | R | X (level 6) |
+|---|---|---|---|---|---|---|---|---|
+| [Thief](Class-Thief.md) | Light | Twin Blades | Marks | Vault | Bola | Shadow Knife | none (Boki Merge) |  |
+| [Pin](Class-Pin.md) | Light | Longbow | Focus | Spirit Walk | Snare | Hail Wall | none (Boki Merge) | Starpiercer |
+| [Vireo](Class-Vireo.md) | Light | Coilcaster | Sparks | Wirerun | Coilshot | Skycall | none (Boki Merge) |  |
+| [Marlowe](Class-Marlowe.md) | Medium | Quill Rifle | Fever | Slipstep | Burr Charge | Longneedle | none (Boki Merge) |  |
+| [Juggernaut](Class-Juggernaut.md) | Heavy | Greatsword | Rage | Rampage | Smash | Warchain | none (Boki Merge) |  |
+| [Bjorn](Class-Bjorn.md) | Heavy | War Hammer & Aegis | Guard | 360 Smash | Aegis | Mending Ground | none (Boki Merge) | Faultline |
+| [Dredge](Class-Dredge.md) | Heavy | Shotgun | Salvage | Barge | Grapnel | Anchor Drop | none (Boki Merge) |  |
+| [Ashwick](Class-Ashwick.md) | Heavy | Torch Lance | Flashover | Spark Leap | Cinder Shot | Furnace Cloak | none (Boki Merge) |  |
+| [Linnet](Class-Linnet.md) | Medium | Lantern Crook | Bearer | Relay Step | Burrseed | Hearthlight | none (Boki Merge) |  |
+| [Tamsin](Class-Tamsin.md) | Light | Hoar Fan | Hoarfrost | Rinkrun | Sleet Lance | Rink Wall | none (Boki Merge) |  |
+| [Dolm](Class-Dolm.md) | Medium | Rubble Fists | Tremor Sense | Rubble Rush | Quakefall | Stone Row | none (Boki Merge) |  |
+| [Ostra](Class-Ostra.md) | Medium | Tether Lantern | Swell | Lantern Trade | Shard Fan | Brimseed | none (Boki Merge) |  |
 
 ### Weight classes
 

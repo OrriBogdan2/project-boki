@@ -24,7 +24,8 @@ What the source does: tap throws the hammer to the cursor, where it stays plante
 | Shift | LMB held | a short plain dash, half a charge, the spin keeps charging | - | Our extension, kept |
 | Shift | long dash | In the air or out of charges: a lumbering shoulder shove (`bul_lumber`), shoving foes aside | (base dash) | Our per-hero base dash variant |
 | E | tap | Mending Ground: at the planted hammer, or on himself with the hammer in hand; a green light column comes down over 1 s with a filling ring everyone sees, then a green ring bloom: heals allies inside 26 (mends the aegis 60 while raised), slows foes | Purify Zone at the hammer or on himself | Matches |
-| R | - | none (R is the Merge) | Earthshatter | Folded away: the loop is block, knock into walls, heal |
+| X | tap (level 6) | Faultline: planted 0.4 s with the hammer overhead while a 16 m lane of four 4 x 4 m cells shows to everyone; the slam strikes the near cell (4, stun 0.3), then the ground erupts cell by cell (0.15 s apart) and throws each foe once (18, stun 0.5, slowed 50% for 1.5 s). A wall, ledge or drop stops it. A glowing scar stays 10 s and slows foes on it 20%. A stun in the wind-up interrupts it (cooldown back to 8 s). Cooldown 33 s | Earthshatter / Abyssalbreaker: a fissure down a lane, a small first hit with a brief stun, cascading eruptions with a heavy slow, blocked by walls, a lingering crack | Lane 2.2 bh wide and 8.9 bh long (sheet 2.5 x 8-9 bh). Eruption 1.5x the throw (source 1.2x) |
+| R | - | the Boki Merge | - | R is the Merge for every hero. No slot held a folded Earthshatter, so nothing is unfolded |
 
 ## Assumptions (the footage is silent; the owner can correct these)
 - He can walk while spinning the hammer (55% speed), as before; the footage only shows him standing.
@@ -36,6 +37,11 @@ What the source does: tap throws the hammer to the cursor, where it stays plante
 - The blue ring on the target before the Smash is the hammer's reveal, not part of the dash.
 - The wind-down is a 0.3 s glider lock after the slam and the 360 spin.
 - "Begin to resurrect" is +0.35 of a downed teammate's revive bar.
+- Faultline: the lane's direction is locked on the press; he can't move, swing, block or dash while planted (0.4 s wind-up and 0.2 s after the slam).
+- Faultline: "knocked up" is a 0.5 s stun with a lift; the lingering crack (function unknown in the footage) slows foes on it 20% for its 10 s.
+- Faultline: a stun, a knock or going down in the wind-up interrupts it, and the cooldown comes back to 8 s (as the old R fuse did).
+- Faultline: a raised ledge, a wall tile or a drop stops the fissure at that cell (wiki: blocked by walls); the near cell always strikes.
+- Faultline hits each foe once per cast (the near cell's strike, then one eruption).
 - The 5 m minimum throw beats the cursor when the cursor is closer (source patch note), so a point-blank click lands 5 m out.
 
 ## Small mechanics (fine print; source, footage, ours)
@@ -54,10 +60,16 @@ What the source does: tap throws the hammer to the cursor, where it stays plante
 | Knock into a wall or another enemy (Shield Bash or full Smash) stuns 0.5 s, heals | [wiki: Valiant Strength](https://supervive.wiki.gg/wiki/Oath) | confirms the stun (0171) | built | `combo bulwark: Bash > wall` |
 | Regen Field: at the hammer, bonus burst after a delay; heals the shield only while it's up; never repairs a broken one | [wiki: Regen Field](https://supervive.wiki.gg/wiki/Oath) | confirms the zone (0414) | built | `bjorn small: Mending Ground doesn't repair a broken aegis` |
 | Allied wisps hit by the burst begin to resurrect | [wiki: Regen Field](https://supervive.wiki.gg/wiki/Oath) | not shown | built: a downed teammate inside gets a third of the revive | `bjorn small: a downed teammate ... starts reviving` |
+| Ult: a fissure that travels forward from him | [wiki: Abyssalbreaker](https://supervive.wiki.gg/wiki/Oath), sheet | confirms (f29-f39) | built: 4 cells near to far, 0.15 s apart | `bjorn ult payoff` |
+| Ult: the first strike is small and briefly stuns; the eruptions hit hard and slow heavily | [wiki](https://supervive.wiki.gg/wiki/Oath) | not legible | built: 4 + stun 0.3, then 18 + stun 0.5 + slow 50% | same |
+| Ult: blocked by walls | [wiki](https://supervive.wiki.gg/wiki/Oath) | not shown | built | `bjorn ult small: a wall stops the fissure` |
+| Ult: planted for the wind-up and slam, the lane shown first | sheet | confirms (f25-f31) | built | `bjorn ult cast: planted`, `bjorn ult telegraph` |
+| Ult: a crack stays about 10 s | sheet | confirms (f43-f71) | built: slows 20% | `bjorn ult small: the scar ...` |
+| Ult: interrupted by a stun in the wind-up | ours | - | built | `bjorn ult small: a stun in the wind-up interrupts it` |
 | Dash hits refund Shield Bash (rank 4) | [wiki](https://supervive.wiki.gg/wiki/Oath) | - | not built: our ranks stop at 3 | - |
 
 ## Scaling
-Heavy class (193 HP): throw 12 and recall 12; Crushing Blow 36-66 (3x and 5.5x the throw, the source's 3x and 5.6x); 360 Smash 24 (2x the throw); Bash 12, Slam 18; Crushed 8 + stun 0.5 + heal 24; Mending Ground 26. Numbers follow the source's ratios, not its values.
+Heavy class (193 HP): throw 12 and recall 12; Crushing Blow 36-66 (3x and 5.5x the throw, the source's 3x and 5.6x); 360 Smash 24 (2x the throw); Bash 12, Slam 18; Crushed 8 + stun 0.5 + heal 24; Mending Ground 26; Faultline 4 strike + 18 eruption (33 s cooldown, about 3.6x the 360 Smash as in the source). Numbers follow the source's ratios, not its values.
 
 ## Cross-ability interactions (combos)
 | Combination | Result | Check |
@@ -74,6 +86,11 @@ Heavy class (193 HP): throw 12 and recall 12; Crushing Blow 36-66 (3x and 5.5x t
 | Hold LMB, Shift | Short dash for half a charge, still charging | same |
 | E with the aegis down / raised | Heals / heals and mends it | same |
 | A Boki merge mid spin / aegis | The charge drops with no swing; the aegis comes down keeping its HP | same |
+| Aegis up, then Faultline | The aegis comes down as he plants | `--bulwark-combo-check` |
+| Faultline down a line of foes | Each thrown once; the bond pays the cast's best event once | same |
+| Faultline toward a ledge | Stops at the ledge | same |
+| A merge in the Faultline wind-up | No slam; a fissure already running finishes | same |
+| Faultline then a merge on a full-health light hunter | Standing (burst cap) | same |
 
 ## Animations (KMovesPinBjorn ids per ability; timed to 5 fps footage frames)
 | Ability | Move id(s) | Notes |
@@ -89,6 +106,7 @@ Heavy class (193 HP): throw 12 and recall 12; Crushing Blow 36-66 (3x and 5.5x t
 | Shift aegis up / LMB held / long dash | `bul_charge`, `bul_short`, `bul_lumber` | |
 | E (Mending Ground) | `bul_mend` | hammer hauled to the sky, driven down |
 | Payoffs / procs | `bul_crush`, `bul_armed` | the hammer raised in triumph; a Guard pip shrug |
+| X (Faultline), 10 fps beats | `bul_ult_wind` (held), `bul_ult_slam` | planted wide, the hammer hauled overhead and leaning back (0.4 s); one frame down into the ground, a deep crouch, a slow rise |
 Strips: `--arena-demo=anim_<id> --arena-shot=<png>`.
 
 ## Engine notes
@@ -97,7 +115,8 @@ Strips: `--arena-demo=anim_<id> --arena-shot=<png>`.
 - The aegis draws over the verbs wall (its plain node hidden); the wall still does the blocking.
 - Telegraphs and cursor: `AimKit.charge` / `flare` during the spin, `AimKit.circle` "e" (all) while Mending Ground comes down.
 - Sounds: `tools/gen_pin_bjorn_sfx.py` writes `audio/bjorn_*.wav`.
-- Merge: `_drop_holds()` drops the spin (`lmb_t`, `h.mel_hold`, the spinning hammer and glint), lowers the aegis.
+- Merge: `_drop_holds()` drops the spin (`lmb_t`, `h.mel_hold`, the spinning hammer and glint), lowers the aegis, and drops the Faultline wind-up (`BjornUlt.phase == "wind"`).
+- Ult on X: `scripts/arch/ult_slot.gd` (UltSlot), `scripts/arch/kits/bjorn_ult.gd` (BjornUlt: the lane, the slam, the eruptions, the scar, pooled basalt spikes, seams, streak and scar). Data: `content/archetypes/bulwark.json` `x`. Sounds: `bjorn_ult_wind`, `bjorn_ult_slam`, `bjorn_ult_rumble`, `bjorn_ult_crackle`. Telegraph: one AimKit `lane` per cell (`x0`..`x3`, `all`).
 - No Net shape change.
 
 ## Payoff

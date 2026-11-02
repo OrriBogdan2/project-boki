@@ -192,6 +192,64 @@ const SHOTS := [
 	],
 	["bjorn_purify_burst", "bulwark", "purify", 1.62, 1.0, "Mending Ground lands: the green ring bloom"],
 	["bjorn_bash", "bulwark", "bash", 0.58, 2.0, "Bash: the shield shove"],
+	# ------------------------------------------------ the ultimates on X (MANIFEST under <hero>/v2/ult)
+	[
+		"ult_pin_telegraph",
+		"archer",
+		"pin_ult",
+		0.7,
+		4.0,
+		"Starpiercer up: the beam's lane to 18 m, the ticked ring at her feet, three pips"
+	],
+	[
+		"ult_pin_nock",
+		"archer",
+		"pin_ult",
+		0.98,
+		4.0,
+		"Key frame: the 0.3 s nock, string to the cheek, the bow glowing, the lane filling"
+	],
+	[
+		"ult_pin_impact",
+		"archer",
+		"pin_ult",
+		1.13,
+		4.0,
+		"Impact: the beam through the target, a white burst cloud and a teal star"
+	],
+	[
+		"ult_pin_final",
+		"archer",
+		"pin_ult_final",
+		1.13,
+		4.0,
+		"The last beam: a wider beam, a bigger burst, the hard kick"
+	],
+	[
+		"ult_bjorn_telegraph",
+		"bulwark",
+		"bjorn_ult",
+		0.55,
+		6.0,
+		"Faultline wind-up: four cells to 16 m shown to everyone, the hammer overhead"
+	],
+	[
+		"ult_bjorn_slam",
+		"bulwark",
+		"bjorn_ult",
+		0.73,
+		6.0,
+		"Key frame: the slam, gold light flooding the near cell, the streak setting off"
+	],
+	["ult_bjorn_impact", "bulwark", "bjorn_ult", 1.25, 6.0, "Impact: slabs heaving up cell by cell, the target thrown"],
+	[
+		"ult_bjorn_scar",
+		"bulwark",
+		"bjorn_ult",
+		2.4,
+		6.0,
+		"After: the ember scar along the lane (10 s, slows foes on it)"
+	],
 ]
 ## The before/after pairs (top 3 gaps per hero), run on this build and, with --before, on an older one.
 const PAIRS := [
@@ -442,6 +500,22 @@ func _input(what: String, t: float) -> void:
 		"purify":
 			P.hp = P.max_hp * 0.6
 			if at.call(0.95): K.use_e()
+		"pin_ult", "pin_ult_final":
+			T.teleport(home + Vector3(7.0, 0, 0))
+			_aim(T.pos)
+			if at.call(0.3):
+				K.cd["x"] = 0.0
+				UltSlot.press(K)
+				if what == "pin_ult_final":
+					K.ult.left = 1
+			P.inp["fire"] = t > 0.8 and t < 0.85
+		"bjorn_ult":
+			if t < 0.8:
+				T.teleport(home + Vector3(7.0, 0, 0))
+			_aim(home + Vector3(7.0, 0, 0))
+			if at.call(0.3):
+				K.cd["x"] = 0.0
+				UltSlot.press(K)
 		"bash":
 			T.teleport(home + Vector3(2.0, 0, 0))
 			_aim(T.pos)
@@ -514,7 +588,8 @@ func _shot(s: Array, pair: bool) -> void:
 		caption_prefix = "After: "
 	var file := prefix + stem + ".png"
 	img.save_png(dir.path_join(file))
-	lines.append("%s/v2|%s|%s%s" % [nm, file, caption_prefix, caption])
+	var sub := "/ult" if stem.begins_with("ult_") else ""
+	lines.append("%s/v2%s|%s|%s%s" % [nm, sub, file, caption_prefix, caption])
 	P.inp["fire"] = false
 	P.inp["sec_hold"] = false
 	P.inp["move"] = Vector2.ZERO
