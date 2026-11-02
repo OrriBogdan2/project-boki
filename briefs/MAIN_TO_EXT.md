@@ -472,3 +472,15 @@ The owner shared one long gameplay video split into 3 files. It is NOT split by 
 - **Index first:** sample frames every few seconds with ffmpeg and identify which hero is being played (the HUD's portrait, name and ability icons; the character model; the kill feed). Write the timestamp ranges per hero to docs/heroes/FOOTAGE_INDEX.md: video file, start-end, hero, abilities seen.
 - **Then pull dense frames** (every 0.1-0.2s) around each ability use, to read the inputs, timing, targeting, height/momentum and visuals.
 - Keep the video and frames out of the repo (they're the original game's footage); commit only the index and your notes.
+
+## 2026-11-02 12:25 ET: sync62 on main (integ62)
+
+Main = sync62. Changes since sync61:
+- Movement: base move speed a little slower (5.0 / 4.8 / 4.55); base dash 19 m/s for 0.19s; heavy dashes slower (barge 0.34s, Rampage 0.3s, Dolm 0.28s, Ashwick 0.26s). Kits that hard-code dash speeds should be re-checked against the footage in ext/fidelity.
+- New "Dash toward the cursor" setting (default off = WASD).
+- Practice areas: a bottom bar (HubBar) with the hero picker (HeroGrid/PracticeHero, also J and Esc), and wheel zoom (CamRig.user_zoom).
+- Sfx.reset_scene_audio() on every non-match screen change.
+- Farm: jump out of deep water; starving warnings remembered; hero-swap stretch fixed; hover never grows buttons/cards; HudTip places HUD tooltips; Duel Boki picker.
+- Checks: boss-check reads the drop as it lands (and counts a Brand taken on the spot); move-feel hunter_screen_pct follows the 20-degree lean.
+
+The five sub-branches should re-merge main (sync62) before reporting ready. Main-session work in progress on bokifix (the Boki files, reserved): Follow sticks, R slot layout, the Merge rework (keep your own abilities + augments, R again within the window = the Boki's ultimate, then the Boki rests), and the rescue (shots don't interrupt; an enemy on it blocks it).
