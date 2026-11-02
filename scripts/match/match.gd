@@ -2327,7 +2327,6 @@ func cancel_abilities(h: Hunter) -> void:
 	h.mel_hold = 0.0
 	h.strike_at_end = {}
 
-const KNOCK_HEAL := 0.10     # of the knocker's max health, only for whoever landed the knock
 func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 	if h.downed or h.out:
 		return
@@ -2353,15 +2352,11 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 		killcam_text = ("Knocked down by %s" % credit.pname) if credit is Hunter and credit != h else "You're down"
 	if credit is Hunter and credit != h:
 		credit.knocks += 1
-		# the Supervive 1.0 knock reward: a small heal and a dash back
+		# the knock reward: a dash back (all charges) and a small heal (DashReset), armor and XP
 		if not credit.downed and credit.team != h.team:
-			var healed := minf(credit.max_hp - credit.hp, credit.max_hp * KNOCK_HEAL)
-			credit.hp += healed
-			if healed > 0.5: fx.word(credit.pos + Vector3(0, 2.1, 0), "+%d" % int(round(healed)), Color("7fe08a"), false)
+			DashReset.takedown(credit, h)
 			if credit.armor_gain(Hunter.ARMOR_KNOCK_XP) >= 0: _armor_up(credit)
 			credit.gain_xp(90.0)
-			credit.dashes = minf(credit.max_dashes(), floorf(credit.dashes) + 1.0)
-			credit.ex_cd = 0.0 if credit.max_dashes() <= 1.0 else credit.ex_cd
 		add_feed("%s knocked %s" % [credit.pname, h.pname])
 		if credit.kin and credit.kin.comp and credit.kin.state != "downed":
 			credit.kin.comp.on_knock(h.pos)
@@ -2487,6 +2482,7 @@ func eliminate(h: Hunter, by: Ent, why: String, final := false) -> void:
 		credit = by.owner_h
 	if credit is Hunter and credit != h and credit.team != h.team:
 		credit.kills += 1
+		DashReset.takedown(credit, h)
 	add_feed(out_text(h.pname, why))
 	if why != "abyss": Juice.kill(self, h, credit)
 	h.set_meta("died_why", why)
@@ -2602,6 +2598,7 @@ func _lose_life(h: Hunter, by: Ent, why: String) -> void:
 	var credit: Ent = by.owner_h if by is Kin and by.owner_h else by
 	if credit is Hunter and credit != h and credit.team != h.team:
 		credit.kills += 1
+		DashReset.takedown(credit, h)
 	if h.lives < 50:
 		add_feed("%s lost a life (%d left)" % [h.pname, h.lives])
 	h.downed = false
@@ -6428,6 +6425,7 @@ func _net_ev(x, from: String) -> void:
 				add_feed("%s knocked %s" % [by.pname, who.pname] if by is Hunter else "%s went down" % who.pname)
 				if by == player:
 					player.knocks += 1
+					DashReset.takedown(player, who)
 					_reward_moment(who.pos)
 				_check_team(player.team if player else -9)
 		"out":
@@ -6437,6 +6435,7 @@ func _net_ev(x, from: String) -> void:
 				who.out = true
 				if by == player:
 					player.kills += 1
+					DashReset.takedown(player, who)
 				add_feed(out_text(who.pname, String(x[3])))
 				if who.kin:
 					who.kin.dead = true

@@ -12,7 +12,7 @@ const DEFAULTS := {
 	"fullscreen": false, "vsync": true, "max_fps": 0, "msaa": 4, "video_v": 2, "shadows": true, "ui_scale": 1.0, "show_fps": false,
 	"quality": "auto", "quality_found": "",
 	# gameplay
-	"shake": 1.0, "cam_lead": 1.0, "cam_style": "supervive", "cam_follow": "supervive", "dash_hold": false, "dash_to_cursor": false, "damage_numbers": true, "tips": true, "cast_on_press": true, "crouch_toggle": false, "mod_mode": false, "kin_auto": false, "kin_chatter": "normal", "bot_diff": "auto",
+	"shake": 1.0, "cam_lead": 1.0, "cam_style": "supervive", "cam_follow": "supervive", "dash_hold": false, "dash_to_cursor": false, "damage_numbers": true, "reset_cue": "a", "tips": true, "cast_on_press": true, "crouch_toggle": false, "mod_mode": false, "kin_auto": false, "kin_chatter": "normal", "bot_diff": "auto",
 	# accessibility
 	"reduce_flashes": false, "hud_opacity": 1.0,
 	# demo / recording (Settings > Demo): for filming a match, offline only (online matches use the host's rules)
