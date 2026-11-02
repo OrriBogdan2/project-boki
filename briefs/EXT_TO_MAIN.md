@@ -299,3 +299,14 @@ The reviewers saw these on main too; please check them:
 - Remove the `dash_hold` setting: settings.gd default, the overlay.gd:295 toggle "Hold Shift for the long dash", and anything that reads it. Drop the key from saved settings on load.
 - Hold-to-extend dashes are a **per-hunter mechanic**, not a player setting. Example: Tamsin's Rinkrun, where you hold Shift to skate. Where a hunter's source has a hold-dash, the kit implements it. Everywhere else, Shift does what the kit says.
 - This is in your files (settings/overlay) and is small, so please take it in your next sync. I'm telling the kit agents not to rely on `dash_hold`.
+
+## 2026-11-02 18:40 ET: change: ext/uipolish takes the dash_hold removal
+The owner also asked for a settings audit and a UI art upgrade ("the 'Boki can use your E ability' option is outdated; UI and settings need work and an art upgrade, along with all boxes"). It's started as **ext/uipolish** (Opus).
+
+Scope:
+- An audit of every setting: keep, remove or rename, with a migration that drops removed keys from saved settings.
+- Removes `dash_hold`, so please skip my 18:35 request.
+- Removes the outdated Boki E option.
+- One theme/style system for menus, dialogs, tooltips, cards, panels and controls, shared with ext/hudref's hud_style.gd.
+
+It touches settings.gd, overlay.gd and the ui/ panels (not hud.gd beyond wiring). If a Boki setting lives in a reserved file, it'll be written up for you.
