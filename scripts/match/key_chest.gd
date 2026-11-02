@@ -26,8 +26,12 @@ static func dress(node: Node3D) -> void:
 static func prompt(h: Hunter, c: Dictionary) -> Dictionary:
 	var k := Settings.key_cap("interact")
 	if bool(c.get("free", false)) or h.chest_keys > 0:
-		return {"kind": "chest", "chest": c, "label": "Hold %s to open%s" % [k, "" if bool(c.get("free", false)) else "  ·  uses 1 key"]}
-	return {"kind": "locked", "chest": c, "label": "Locked  ·  needs a key  ·  monsters with a key glint carry them", "col": Color("ffb0a0")}
+		return {
+				"kind": "chest", "chest": c,
+				"label": "Hold %s to open%s" % [k, "" if bool(c.get("free", false)) else "  ·  uses 1 key"]}
+	return {
+			"kind": "locked", "chest": c, "label": "Locked  ·  needs a key  ·  monsters with a key glint carry them",
+			"col": Color("ffb0a0")}
 
 ## Takes the key for opening `c`. False (and nothing changes) when the hunter has none.
 static func spend(h: Hunter, c: Dictionary) -> bool:

@@ -727,6 +727,11 @@ func _choose(m: Match, h: Hunter) -> void:
 		for b in m.boxes:
 			if not b["empty"] and h.flat_dist(b["pos"]) < 14.0 + (GOAL_KEEP if b["pos"] == cur else 0.0) and not (b["owner"].team == h.team and Life.soul_here(m, b)):
 				goal = b["pos"]; gk = "box"; break
+	# a perk orb we want lying close by: walk into it
+	if goal == Vector3.INF:
+		var og := PerkOrbs.bot_goal(m, h, cur)
+		if og != Vector3.INF:
+			goal = og; gk = "orb"
 	# someone asked us to follow them (a Follow me emote from a teammate or truce partner)
 	if goal == Vector3.INF and a.has("follow"):
 		var fw: Dictionary = a["follow"]
@@ -777,7 +782,8 @@ func _choose(m: Match, h: Hunter) -> void:
 	if goal == Vector3.INF:
 		var kg := BotKeys.goal(m, h, cur)      # no key yet: fight for one first
 		if not kg.is_empty():
-			goal = kg[0]; gk = String(kg[1])
+			goal = kg[0]
+			gk = String(kg[1])
 	if goal == Vector3.INF:
 		var bd := BotKeys.chest_range(h)       # a key in hand: now a chest
 		for c in m.chests:

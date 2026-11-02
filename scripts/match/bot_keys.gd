@@ -25,14 +25,18 @@ static func _chests_left(m: Match) -> int:
 static func goal(m: Match, h: Hunter, cur: Vector3) -> Array:
 	if h.chest_keys >= _chests_left(m):
 		return []
-	var best := Vector3.INF; var bd := SEE_KEY; var kind := "loot"
+	var best := Vector3.INF
+	var bd := SEE_KEY
+	var kind := "loot"
 	for p in m.pickups:
 		if String(p["kind"]) != "ckey" or m.world.is_void(p["pos"].x, p["pos"].z):
 			continue
 		if m.lairs and m.lairs.walled_off(h, p["pos"]):
 			continue
 		var d := h.flat_dist(p["pos"])
-		if d < bd: bd = d; best = p["pos"]
+		if d < bd:
+			bd = d
+			best = p["pos"]
 	for mb in m.mobs:
 		if mb.dead or not KeyCarry.carries(mb) or (mb is Shrubling and (mb as Shrubling).ss == "disguised"):
 			continue
@@ -40,5 +44,7 @@ static func goal(m: Match, h: Hunter, cur: Vector3) -> Array:
 			continue
 		var d2 := h.flat_dist(mb) - (4.0 if mb.pos.distance_to(cur) < 3.0 else 0.0)
 		if d2 < minf(bd, SEE_CARRIER):
-			bd = d2; best = mb.pos; kind = "keyhunt"
+			bd = d2
+			best = mb.pos
+			kind = "keyhunt"
 	return [best, kind] if best != Vector3.INF else []

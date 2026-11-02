@@ -20,24 +20,38 @@ static func glint_of(mb: Mob) -> KeyGlint:
 	return mb.get_node_or_null("KeyGlint") as KeyGlint
 
 ## A carrier died: its key drops, even from a Puffbomb that blew itself up or over the edge
-## (a key that falls into the abyss would leave a chest nobody can open).
+## (a key that falls into the abyss would leave a chest nobody can open). A bonus key may follow.
 static func on_mob_dead(m: Match, mb: Mob) -> void:
-	KeyBonus.on_mob_dead(m, mb)      # (a bonus key, at low odds, on top of the quota)
+	KeyBonus.on_mob_dead(m, mb)
 	if not carries(mb):
 		return
 	mb.remove_meta("ckey")
-	var at := mb.pos + Vector3(0, 0.6, 0)
-	if m.world.is_void(mb.pos.x, mb.pos.z):
-		var q := m.world.free_spot_near(mb.camp, [], 0.6, 0.4, 30.0)
-		at = Vector3(q.x, m.world.ground_at(q.x, q.z) + 0.6, q.z)
-	m.drop("ckey", at, 1, "", "", Vector3(randf_range(-1.2, 1.2), randf_range(4.5, 6.0), randf_range(-1.2, 1.2)))
+	drop_keys(m, drop_spot(m, mb), 1)
+
+## Where a dead monster's key lands: where it fell, or back by its camp if it fell into the void.
+static func drop_spot(m: Match, mb: Mob) -> Vector3:
+	if not m.world.is_void(mb.pos.x, mb.pos.z):
+		return mb.pos + Vector3(0, 0.6, 0)
+	var q := m.world.free_spot_near(mb.camp, [], 0.6, 0.4, 30.0)
+	return Vector3(q.x, m.world.ground_at(q.x, q.z) + 0.6, q.z)
+
+## Pops `n` chest keys out at `at`, with the glint burst. They lie on the ground for anyone (bots too).
+static func drop_keys(m: Match, at: Vector3, n: int) -> void:
+	if n <= 0:
+		return
+	for i in n:
+		var pop := Vector3(randf_range(-1.2, 1.2), randf_range(4.5, 6.0), randf_range(-1.2, 1.2))
+		m.drop("ckey", at, 1, "", "", pop)
 	m.fx.burst(at, KeyModels.BRASS, 12, 3.5, 0.5)
-	m.fx.word(at + Vector3(0, 0.6, 0), "KEY", KeyModels.BRASS, false)
+	m.fx.word(at + Vector3(0, 0.6, 0), "KEY" if n == 1 else "%d KEYS" % n, KeyModels.BRASS, false)
 
 # ------------------------------------------------------------------ Net: the monster snapshot extra
 ## Appended to a non-Blight monster's snapshot: [carries a key, the Shrubling's state index (-1 for others)].
 static func mob_extra(mb: Mob) -> Array:
-	return [1 if carries(mb) else 0, Shrubling.STATES.find((mb as Shrubling).ss) if mb is Shrubling else -1]
+	var shrub_state := -1
+	if mb is Shrubling:
+		shrub_state = Shrubling.STATES.find((mb as Shrubling).ss)
+	return [1 if carries(mb) else 0, shrub_state]
 
 static func apply_mob(mb: Mob, it: Array) -> void:
 	if int(it[17]) == 1:

@@ -6,7 +6,8 @@ extends Mob
 ## grab): it pops up (alert, a rustle), and anyone hiding in it is suddenly in the open. Then it runs:
 ## faster than a hunter on foot, slower than a dash, weaving to break line of sight, along a tile A*
 ## (KinPath) to a grass patch away from the hunter, where it dives in and is a bush again. The tell:
-## every 5 to 10 s (seeded per Shrubling) its blades wobble and the leaves shimmer for a moment. It always carries a chest key and counts toward
+## every 5 to 10 s (seeded per Shrubling) its blades wobble and the leaves shimmer for a moment.
+## It always carries a chest key and counts toward
 ## its region's quota (KeyRun). Low health, no attack. Slows, roots, stuns, Grounded (it can no
 ## longer dive, and runs slower) and pulls all work on it, because it is an ordinary Mob.
 ## States (ss): disguised | alert | flee | dive. Net: ss rides in the monster snapshot (KeyCarry).
@@ -72,10 +73,14 @@ func _sync_bush() -> void:
 		want = m.world.idx(int(floor(pos.x)), int(floor(pos.z)))
 	if want == _bush_tile:
 		return
+	if _bush_tile >= 0 and want < 0 and not dead:
+		_expose_hiders()
 	if _bush_tile >= 0:
-		var n := int(m.world.live_bush.get(_bush_tile, 0)) - 1
-		if n <= 0: m.world.live_bush.erase(_bush_tile)
-		else: m.world.live_bush[_bush_tile] = n
+		var left := int(m.world.live_bush.get(_bush_tile, 0)) - 1
+		if left <= 0:
+			m.world.live_bush.erase(_bush_tile)
+		else:
+			m.world.live_bush[_bush_tile] = left
 	_bush_tile = want
 	if want >= 0:
 		m.world.live_bush[want] = int(m.world.live_bush.get(want, 0)) + 1
@@ -105,9 +110,8 @@ func sim(dt: float) -> void:
 	var held_now := root_t + stun_t + slow_t
 	match ss:
 		"disguised":
-			# nothing but a hit wakes it: a root, slow, stun, shove or grab counts as one
-			var held := root_t + stun_t + slow_t
-			if held > _held_last + 0.01 or m.time - kb_time < 0.2 or _dragged():
+			# nothing but a hit wakes it: a fresh root, slow or stun, a shove or a grab counts as one
+			if held_now > _held_last + 0.01 or m.time - kb_time < 0.2 or _dragged():
 				_reveal(_nearest_hunter(40.0))
 		"alert":
 			if ss_t <= 0.0:
@@ -133,13 +137,15 @@ func _set_state(s: String) -> void:
 
 ## A hunter within `r` m (flat) and about level with it, or null.
 func _nearest_hunter(r: float) -> Hunter:
-	var best: Hunter = null; var bd := r
+	var best: Hunter = null
+	var bd := r
 	for h in m.hunters:
 		if h.out or h.extracted or not h.targetable() or m.demo_shielded(h):
 			continue
 		var d := flat_dist(h)
 		if d < bd and absf(h.pos.y - pos.y) < 2.5:
-			bd = d; best = h
+			bd = d
+			best = h
 	return best
 
 ## True while a grab or pull (Verbs.yank) is carrying it.
@@ -153,7 +159,6 @@ func _dragged() -> bool:
 func _reveal(by: Ent) -> void:
 	if ss != "disguised":
 		return
-	_expose_hiders()
 	_set_state("alert")
 	ss_t = float(KeyRun.rules()["shrubling"]["alert_t"])
 	threat = by as Hunter if by is Hunter else _nearest_hunter(40.0)
@@ -166,16 +171,17 @@ func _reveal(by: Ent) -> void:
 		face = atan2(-away.x, -away.y)
 
 ## Anyone hiding in it when it bolts is in the open at once: no more cover, and seen for a moment.
+## Each game exposes the hunters it owns, so a hider on another machine is caught too.
 func _expose_hiders() -> void:
-	var t := int(floor(pos.x)); var z := int(floor(pos.z))
+	var t := int(floor(pos.x))
+	var z := int(floor(pos.z))
 	for h in m.hunters:
-		if h.out or h.extracted or absf(h.pos.y - pos.y) > 1.5:
+		if h.remote or h.out or h.extracted or absf(h.pos.y - pos.y) > 1.5:
 			continue
 		if (int(floor(h.pos.x)) == t and int(floor(h.pos.z)) == z) or flat_dist(h) < 0.9:
 			h.reveal_t = maxf(h.reveal_t, float(KeyRun.rules()["shrubling"]["expose_s"]))
 			if h == m.player and m.hud:
 				m.hud.toast_small("Your bush ran off!", Color("f2c84a"))
-	_set_state(ss)      # (drops the cover tile now, not next tick)
 
 func hurt(d: float, by: Ent, opts := {}) -> float:
 	var dealt := super.hurt(d, by, opts)
@@ -199,7 +205,10 @@ func _flee(dt: float, sr: Dictionary) -> Vector2:
 		var d := flat_dist(threat)
 		var seen: bool = m.world.los(threat.pos, pos, pos.y + 0.8)
 		var relaxed := flee_t > 12.0
-		if on_bush and not KitStatus.grounded(self) and (d >= float(sr["hide_clear_r"]) or (not seen and d >= float(sr["hide_los_r"])) or (relaxed and d >= float(sr["relax_r"]))):
+		var safe_far := d >= float(sr["hide_clear_r"])
+		var safe_unseen := not seen and d >= float(sr["hide_los_r"])
+		var safe_relaxed := relaxed and d >= float(sr["relax_r"])
+		if on_bush and not KitStatus.grounded(self) and (safe_far or safe_unseen or safe_relaxed):
 			_dive(sr)
 			return Vector2.ZERO
 	repath -= dt
@@ -244,13 +253,21 @@ func _pick_hide() -> void:
 		if dme > 34.0 or dme < 1.5 or int(pt["island"]) < 0:
 			continue
 		# the patch tile farthest from the hunter
-		var bt := Vector2i.ZERO; var bd := -1.0
+		var bt := Vector2i.ZERO
+		var bd := -1.0
 		for t in pt["tiles"]:
 			var dd := Vector2(t.x + 0.5, t.y + 0.5).distance_to(tp)
-			if dd > bd: bd = dd; bt = t
+			if dd > bd:
+				bd = dd
+				bt = t
 		var tile := Vector3(bt.x + 0.5, m.world.ground_at(bt.x + 0.5, bt.y + 0.5), bt.y + 0.5)
 		var away := (c - from).normalized().dot((from - tp).normalized())
-		var s := bd - dme * 0.45 + (6.0 if threat != null and not m.world.los(threat.pos, tile, tile.y + 0.8) else 0.0) - (14.0 if away < -0.2 else 0.0)
+		var hidden_from_threat := threat != null and not m.world.los(threat.pos, tile, tile.y + 0.8)
+		var s := bd - dme * 0.45
+		if hidden_from_threat:
+			s += 6.0
+		if away < -0.2:
+			s -= 14.0
 		scored.append([s, tile])
 	scored.sort_custom(func(a, b): return float(a[0]) > float(b[0]))
 	for i in mini(3, scored.size()):
@@ -270,14 +287,16 @@ func _follow_path() -> Vector2:
 	var pick: Vector2 = path[0]
 	for i in range(mini(path.size() - 1, 3), 0, -1):
 		if KinPath.clear_line(m.world, from, path[i]):
-			pick = path[i]; break
+			pick = path[i]
+			break
 	var d := pick - from
 	return d.normalized() if d.length() > 0.05 else Vector2.ZERO
 
 func _dive(sr: Dictionary) -> void:
 	_set_state("dive")
 	ss_t = float(sr["dive_t"])
-	vel.x = 0.0; vel.z = 0.0
+	vel.x = 0.0
+	vel.z = 0.0
 	m.sfx("rustle", pos, -6.0, randf_range(0.75, 0.9))
 	m.fx.burst(pos + Vector3(0, 0.3, 0), Color(md["color"]).lightened(0.1), 10, 2.5, 0.4, 5.0)
 
@@ -292,14 +311,17 @@ func _rehide(_sr: Dictionary) -> void:
 ## The same move step as every Mob: ease the velocity toward the wish, never walk off the edge.
 func _move(dt: float, wish: Vector2, spd: float) -> void:
 	if (root_t > 0.0 or stun_t > 0.0) and m.time - kb_time > 0.3:
-		vel.x = 0.0; vel.z = 0.0      # pinned: a root or stun stops it dead (a shove still carries it)
+		# pinned: a root or stun stops it dead (a shove still carries it)
+		vel.x = 0.0
+		vel.z = 0.0
 	var hv := Vector2(vel.x, vel.z)
 	var k := 10.0 if hv.length() <= spd * 1.3 + 0.5 else 2.5
 	hv += (wish - hv) * (1.0 - exp(-k * dt))
 	var ahead := Vector2(pos.x, pos.z) + hv.normalized() * (r + 0.3)
 	if grounded and hv.length() > 0.1 and m.world.is_void(ahead.x, ahead.y):
 		hv = Vector2.ZERO
-	vel.x = hv.x; vel.z = hv.y
+	vel.x = hv.x
+	vel.z = hv.y
 	slide(dt)
 	body_vertical(dt)
 	if hv.length() > 0.3:

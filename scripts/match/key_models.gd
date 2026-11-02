@@ -7,9 +7,12 @@ const BRASS := Color("f2c84a")
 const BRASS_DARK := Color("b8892a")
 
 ## A brass key lying or hovering: a round bow with a hole, a shaft and two teeth, with a soft halo.
-static func key(scale := 1.0, halo := true) -> Node3D:
+static func key(size_k := 1.0, halo := true) -> Node3D:
 	var root := Node3D.new()
-	var body := Node3D.new(); body.name = "Key"; body.scale = Vector3.ONE * scale; root.add_child(body)
+	var body := Node3D.new()
+	body.name = "Key"
+	body.scale = Vector3.ONE * size_k
+	root.add_child(body)
 	var gold := Models.toon(BRASS, true, 0.7)
 	var dark := Models.toon(BRASS_DARK, true, 0.2)
 	var hole := Models.toon(Color("2a2020"), false, 0.0)
@@ -19,8 +22,10 @@ static func key(scale := 1.0, halo := true) -> Node3D:
 	Models.part(body, Models.box(0.12, 0.05, 0.05), dark, Vector3(0.07, -0.04, 0))
 	Models.part(body, Models.box(0.09, 0.05, 0.05), dark, Vector3(0.055, 0.05, 0))
 	if halo:
-		var h := MeshInstance3D.new(); h.mesh = Models.flat_quad(0.8)
-		h.material_override = Models.ring_mat(Color(BRASS, 0.75), 0.12); h.position.y = -0.05
+		var h := MeshInstance3D.new()
+		h.mesh = Models.flat_quad(0.8)
+		h.material_override = Models.ring_mat(Color(BRASS, 0.75), 0.12)
+		h.position.y = -0.05
 		h.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		root.add_child(h)
 		root.add_child(Models.icon_badge("ckey", 0.95, 0.5))
@@ -32,7 +37,8 @@ static func pickup() -> Node3D:
 
 ## A padlock on a chest's front: big enough to read from the camera, hidden when the chest opens.
 static func padlock() -> Node3D:
-	var root := Node3D.new(); root.name = "Lock"
+	var root := Node3D.new()
+	root.name = "Lock"
 	var gold := Models.toon(BRASS, true, 0.5)
 	var dark := Models.toon(BRASS_DARK, true, 0.1)
 	var hole := Models.toon(Color("1c1618"), false, 0.0)

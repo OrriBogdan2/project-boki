@@ -26,7 +26,8 @@ static func on_pickup(m: Match, h: Hunter) -> void:
 var m: Match
 var rng := RandomNumberGenerator.new()
 var patches: Array = []        # tall-grass patches: {c: Vector2, tiles: Array[Vector2i], island: int}
-var regions := {}              # key -> {chests: int, centre: Vector2, mobs: Array, carriers: Array, shrubs: int, spilled_in: int}
+# key -> {chests: int, centre: Vector2, mobs: Array, carriers: Array, shrubs: int, spilled_in: int}
+var regions := {}
 var shrublings: Array = []
 var carriers: Array = []       # every Mob carrying a key at setup
 var bonus_rng := RandomNumberGenerator.new()      # bonus keys (KeyBonus): a stream of their own
@@ -45,7 +46,9 @@ func region_of(p: Vector3) -> String:
 
 func _reg(key: String) -> Dictionary:
 	if not regions.has(key):
-		regions[key] = {"chests": 0, "centre": Vector2.ZERO, "mobs": [], "carriers": [], "shrubs": 0, "spilled_in": 0, "spilled_out": 0}
+		regions[key] = {
+				"chests": 0, "centre": Vector2.ZERO, "mobs": [], "carriers": [], "shrubs": 0, "spilled_in": 0,
+				"spilled_out": 0}
 	return regions[key]
 
 ## Host (or an offline game) only: spawns the Shrublings and rolls the carriers.
@@ -77,7 +80,8 @@ func build_patches() -> void:
 			tiles.append(Vector2i(cur % w.w, cur / w.w))
 			for dz in [-1, 0, 1]:
 				for dx in [-1, 0, 1]:
-					var nx: int = cur % w.w + dx; var nz: int = cur / w.w + dz
+					var nx: int = cur % w.w + dx
+					var nz: int = cur / w.w + dz
 					if not w.inb(nx, nz):
 						continue
 					var ni := w.idx(nx, nz)
@@ -89,7 +93,8 @@ func build_patches() -> void:
 		var c := Vector2.ZERO
 		for t in tiles: c += Vector2(t.x + 0.5, t.y + 0.5)
 		c /= float(tiles.size())
-		patches.append({"c": c, "tiles": tiles, "island": w.island[w.idx((tiles[0] as Vector2i).x, (tiles[0] as Vector2i).y)]})
+		patches.append({
+				"c": c, "tiles": tiles, "island": w.island[w.idx((tiles[0] as Vector2i).x, (tiles[0] as Vector2i).y)]})
 
 ## How many patches have their middle within `r` metres of p.
 func patches_near(p: Vector3, r: float) -> int:
@@ -159,7 +164,8 @@ func _shrub_spots() -> Array:
 			continue
 		var tiles: Array = pt["tiles"]
 		# an interior tile if there is one (all 8 neighbours grass), nearest the middle
-		var best := Vector2i(-1, -1); var bd := 1e9
+		var best := Vector2i(-1, -1)
+		var bd := 1e9
 		for t in tiles:
 			var inner := true
 			for dz in [-1, 0, 1]:
@@ -167,7 +173,8 @@ func _shrub_spots() -> Array:
 					if not w.bush.has(w.idx(t.x + dx, t.y + dz)): inner = false
 			var d := Vector2(t.x + 0.5, t.y + 0.5).distance_to(pt["c"])
 			if (inner or best.x < 0) and d < bd:
-				bd = d; best = t
+				bd = d
+				best = t
 		var p := Vector3(best.x + 0.5, w.level[w.idx(best.x, best.y)] * World.LEVEL, best.y + 0.5)
 		if patches_near(p, float(sr["sprint_r"])) < int(sr["min_patches"]):
 			continue
@@ -188,7 +195,8 @@ func _near_any(p: Vector3, list: Array, r: float) -> bool:
 ## One spot: regions short of monsters first (weight 3), then regions with spare quota (1).
 func _pick_spot(spots: Array) -> Dictionary:
 	var gap := float(rules()["shrubling"]["min_gap"])
-	var pool: Array = []; var wts: Array = []
+	var pool: Array = []
+	var wts: Array = []
 	for s in spots:
 		var rg: Dictionary = regions[s["region"]]
 		if int(rg["shrubs"]) >= int(rg["chests"]):
@@ -232,7 +240,7 @@ func assign_carriers() -> void:
 	for k in keys:
 		var from: Vector2 = regions[k]["centre"]
 		var order: Array = regions.keys().filter(func(o): return o != k)
-		order.sort_custom(func(a, b): return (regions[a]["centre"] as Vector2).distance_to(from) < (regions[b]["centre"] as Vector2).distance_to(from))
+		order.sort_custom(func(a, b): return _centre_dist(a, from) < _centre_dist(b, from))
 		for o in order:
 			if int(deficits[k]) <= 0:
 				break
@@ -255,13 +263,25 @@ func _carry(mb: Mob, rg: Dictionary, own: bool) -> void:
 func _shuffle(a: Array) -> void:
 	for i in range(a.size() - 1, 0, -1):
 		var j := rng.randi_range(0, i)
-		var t = a[i]; a[i] = a[j]; a[j] = t
+		var t = a[i]
+		a[i] = a[j]
+		a[j] = t
 
-## For checks and the full map: per region {chests, monsters, shrublings, carriers (for its own chests), spilled_in, spilled_out}.
+## For checks and the full map: per region {chests, monsters, shrublings, carriers (for its own chests),
+## spilled_in, spilled_out}.
 func report() -> Dictionary:
 	var out := {}
 	for k in regions:
 		var rg: Dictionary = regions[k]
-		out[k] = {"chests": int(rg["chests"]), "monsters": (rg["mobs"] as Array).size(), "shrublings": int(rg["shrubs"]),
-			"carriers": (rg["carriers"] as Array).size() + int(rg["shrubs"]), "spilled_in": int(rg["spilled_in"]), "spilled_out": int(rg["spilled_out"])}
+		out[k] = {
+			"chests": int(rg["chests"]),
+			"monsters": (rg["mobs"] as Array).size(),
+			"shrublings": int(rg["shrubs"]),
+			"carriers": (rg["carriers"] as Array).size() + int(rg["shrubs"]),
+			"spilled_in": int(rg["spilled_in"]),
+			"spilled_out": int(rg["spilled_out"]),
+		}
 	return out
+
+func _centre_dist(region_key, from: Vector2) -> float:
+	return (regions[region_key]["centre"] as Vector2).distance_to(from)

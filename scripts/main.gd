@@ -381,10 +381,9 @@ func _ready() -> void:
 		wcc.run(self)
 		return
 	if "--farm-start-check" in args:
-		var fsc = load("res://tools/farm_start_check.gd").new()      # a new farm: empty island, placing, chopping, stations, old saves
-		set_meta("farm_start_check", fsc)
-		fsc.run(self)
-		return
+		set_meta("farm_start_check", load("res://tools/farm_start_check.gd").new()); get_meta("farm_start_check").run(self); return      # a new farm: empty island, placing, chopping, stations, old saves (kept in meta: the check awaits, so it must stay referenced)
+	if Array(args).any(func(a): return String(a).begins_with("--farmbuild")):
+		set_meta("farmbuild_check", load("res://tools/farmbuild_check.gd").new()); get_meta("farmbuild_check").run(self); return      # the farm building pass: --farmbuild-check, or --farmbuild-shots=<dir> for screenshots (kept in meta: the check awaits, so it must stay referenced)
 	if "--work-check" in args:
 		var wkc = load("res://tools/work_check.gd").new()      # kin at work: jobs, stations, priorities, shimmer odds
 		set_meta("work_check", wkc)
@@ -2215,7 +2214,8 @@ func _extract_check() -> void:
 	# a key in a deathbox: the teammate dies carrying one, the player loots it
 	mate.rift_keys = 1
 	mate.lives = 1
-	mate.teleport(m.world.free_spot_near(hp + Vector3(6.0, 0, 0), [], 0.5, 0.4, 6.0))      # (its box clear of the hatch: a revive prompt there would beat the hatch's)
+	# its box lands clear of the hatch: a revive prompt there would beat the hatch's
+	mate.teleport(m.world.free_spot_near(hp + Vector3(6.0, 0, 0), [], 0.5, 0.4, 6.0))
 	m.eliminate(mate, R, "knocked out", true)
 	var bx := Life.box_of(m, mate)
 	print("EXCHECK hatch: teammate died with a key: their keys=%d box keys=%d" % [mate.rift_keys, int(bx.get("keys", -1))])

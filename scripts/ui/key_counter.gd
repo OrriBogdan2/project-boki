@@ -9,7 +9,10 @@ static var _last := {}      # hunter id -> [count, time it last rose]
 
 static func draw(c: Control, p: Hunter, anchor: Vector2, font: Font) -> void:
 	var m = p.m
-	if m == null or not m.get("chests") or (p.chest_keys == 0 and not (m.chests as Array).any(func(ch): return not ch["open"] and not ch.get("free", false))):
+	if m == null or not m.get("chests"):
+		return
+	var any_locked := (m.chests as Array).any(func(ch): return not ch["open"] and not ch.get("free", false))
+	if p.chest_keys == 0 and not any_locked:
 		return
 	var rec: Array = _last.get(p.nid, [0, -9.0])
 	if p.chest_keys > int(rec[0]):

@@ -2461,7 +2461,7 @@ func _refresh_top() -> void:
 	top_chips.add_child(_top_chip("tonic", str(int(Save.d["items"].get("tonic", 0))), Color("ff8a9a"), "Tonics: drink one (1) on an expedition to heal"))
 	top_chips.add_child(_top_chip("seed", str(crops), UI.GOOD, "Crops you've harvested"))
 	if fs or Work.mat("wood") > 0 or Work.mat("stone") > 0:
-		top_chips.add_child(_top_chip("dash", "%d wood · %d stone" % [Work.mat("wood"), Work.mat("stone")], Color("d8b07a"), "Wood and stone: chop and mine the wild (an axe and a pickaxe from the market), or have Boki work a Lumber Camp and a Quarry. They pay for buildings and stations."))
+		top_chips.add_child(_top_chip("dash", FarmSites.mats_text(), Color("d8b07a"), "Building materials: wood and stone from the wild (an axe and a pickaxe from the market) or a Lumber Camp and a Quarry, fibre from harvests and clearing the wild, Ember Coals from a Kiln. They pay for buildings and upgrades."))
 	if treat != "":
 		top_chips.add_child(_top_chip("heart", "Treat: " + _treat_name(treat), Color("ffb0d0"), "A treat is ready to give to a Boki"))
 
@@ -2741,6 +2741,7 @@ func _harvest(arr: String, i: int, who := "you") -> int:
 	var n := 2 + (1 if care * 2 >= grow else 0)
 	Save.d["crops"][d["crop"]] = int(Save.d["crops"].get(d["crop"], 0)) + n
 	Progress.add("harvested", n)
+	FarmSites.on_harvest(n)
 	var extra := ""
 	# a fully tended common crop sometimes drops a seed (rare ones never do)
 	if care >= grow and float(cd.get("weight", 1.0)) >= 1.0 and randf() < 0.5:

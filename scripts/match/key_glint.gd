@@ -12,9 +12,11 @@ func _init() -> void:
 	name = "KeyGlint"
 	_key = KeyModels.key(0.7, false)
 	add_child(_key)
-	var halo := MeshInstance3D.new(); halo.mesh = Models.flat_quad(0.9)
+	var halo := MeshInstance3D.new()
+	halo.mesh = Models.flat_quad(0.9)
 	halo.material_override = Models.ring_mat(Color(KeyModels.BRASS, 0.8), 0.1)
-	halo.position.y = 0.2; halo.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	halo.position.y = 0.2
+	halo.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(halo)
 	_star = Models.icon_badge("ckey", 0.28, 0.55)
 	add_child(_star)

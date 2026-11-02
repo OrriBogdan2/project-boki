@@ -90,8 +90,8 @@ const MUSIC := {
 }
 
 ## One perk per loadout.
-## Perks are found during an expedition, never brought from home: a shrine, a rare chest or a
-## boss offers you three and you keep one (Match.offer_perks). They stack up to "max" and last
+## Perks are found during an expedition, never brought from home: chests, shrines and bosses drop
+## perk orbs you walk into (PerkOrbs, content/rules/perk_orbs.json). They stack up to "max" and last
 ## until the expedition ends, extracted or not. stats feed Hunter.gear_stat like gear does
 ## (speed, dmg, armor, cdr, heat, glide_speed); the rest are read by name with Hunter.perk_n().
 const PERKS := {
@@ -107,7 +107,13 @@ const PERKS := {
 	"focus": {"name": "Clear Mind", "desc": "Abilities recharge 12% faster.", "icon": "pulse", "col": Color("d07aff"), "max": 2, "stats": {"cdr": 0.12}},
 	"tailwind": {"name": "Tailwind", "desc": "Glide 15% faster.", "icon": "gust", "col": Color("9fe8ff"), "max": 1, "stats": {"glide_speed": 0.15}},
 	"remedy": {"name": "Remedy", "desc": "Tonics heal 40% more.", "icon": "tonic", "col": Color("8fe0a0"), "max": 1},
-	# weapon upgrades (WeaponUps): they grow the one signature weapon you carry. Level-ups offer these.
+	# the old kit passives, now found as orbs (the same numbers they had as kit gear)
+	"field_kit": {"name": "Field Surgeon", "desc": "Needle and thread: tonics heal 35% more.", "icon": "tonic", "col": Color("8fe0a0"), "max": 1, "stats": {"tonic": 0.35}},
+	"magpie": {"name": "Magpie Pouch", "desc": "Shiny things stick: gems you pick up are worth 25% more.", "icon": "gem", "col": Color("f2c84a"), "max": 1, "stats": {"gems": 0.25}},
+	"satchel": {"name": "Wayfarer's Satchel", "desc": "A deep bag: one more backpack slot.", "icon": "satchel", "col": Color("d9b27a"), "max": 2, "stats": {"pack": 1.0}},
+	"spyglass": {"name": "Brass Spyglass", "desc": "See 12% further through grass and gloom.", "icon": "scanner", "col": Color("ffe08a"), "max": 1, "stats": {"sight": 0.12}},
+	"tinker_roll": {"name": "Tinker's Roll", "desc": "A roll of small tools: reloads 15% faster.", "icon": "medkit", "col": Color("ffb86a"), "max": 1, "stats": {"reload": 0.15}},
+	# weapon upgrades (WeaponUps): they grow the one signature weapon you carry. Even levels take them in a fixed order (WeaponPath); orbs drop the rest.
 	"hotload": {"name": "Hotload", "desc": "Your weapon hits 10% harder.", "icon": "burst", "col": Color("ff8a6a"), "max": 4, "wup": {"dmg": 0.10}},
 	"deepmag": {"name": "Deep Magazine", "desc": "20% more rounds before a reload.", "icon": "satchel", "col": Color("ffd27a"), "max": 3, "wup": {"mag": 0.20}},
 	"quickfeed": {"name": "Quick Feed", "desc": "Your weapon fires 7% faster.", "icon": "pulse", "col": Color("d07aff"), "max": 3, "wup": {"rate": -0.07}},
@@ -221,7 +227,8 @@ const MOBS := {
 		"r": 0.55, "gems": 4, "color": Color("5ab0c8"), "attack": "volley", "stag": true},
 	"glimmer": {"name": "Glimmerkin", "hp": 110.0, "speed": 5.9, "dmg": 0.0, "range": 0.0, "windup": 1.0, "cd": 99.0,
 		"r": 0.45, "gems": 22, "color": Color("ffd25a"), "attack": "none", "flee": true, "stag": true},
-	# the bush mimic (scripts/match/shrubling.gd): looks like a clump of tall grass, runs from hunters, always carries a chest key
+	# the bush mimic (scripts/match/shrubling.gd): a clump of tall grass you can hide in; hit it and it runs.
+	# It always carries a chest key.
 	"shrubling": {"name": "Shrubling", "hp": 26.0, "speed": 6.5, "dmg": 0.0, "range": 0.0, "windup": 1.0, "cd": 99.0,
 		"r": 0.4, "gems": 6, "color": Color("5f9a46"), "attack": "none", "mimic": true},
 	"warden": {"name": "The Warden", "hp": 820.0, "speed": 3.3, "dmg": 30.0, "range": 2.8, "windup": 0.95, "cd": 2.1,

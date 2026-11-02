@@ -4,20 +4,24 @@ extends RefCounted
 ## the map's grass patches use (Models.grass_mesh / grass_material, tinted with the island's leaf
 ## colour), scattered over one tile exactly as World lays out a grass tile, so it is another clump
 ## of grass. The tell: every 5 to 10 s its blades wobble and the leaves shimmer for a moment (no eyes
-## while it hides: being close gives nothing away). Revealed, the tufts bunch into a leafy ball on two stubby legs with big eyes.
+## while it hides: being close gives nothing away). Revealed, the tufts bunch into a leafy ball on two
+## stubby legs with big eyes.
 
 const TUFTS := 6          # four are the disguise, two more appear when it is up
 const EYES_R := 0.075
 
 static func build(col: Color) -> Node3D:
 	var root := Node3D.new()
-	var body := Node3D.new(); body.name = "Body"; root.add_child(body)
+	var body := Node3D.new()
+	body.name = "Body"
+	root.add_child(body)
 	var mm := MultiMesh.new()
 	mm.transform_format = MultiMesh.TRANSFORM_3D
 	mm.use_colors = true
 	mm.mesh = Models.grass_mesh(true)
 	mm.instance_count = TUFTS
-	var r := RandomNumberGenerator.new(); r.seed = int(col.r * 977.0 + col.g * 331.0 + col.b * 59.0) + 5
+	var r := RandomNumberGenerator.new()
+	r.seed = int(col.r * 977.0 + col.g * 331.0 + col.b * 59.0) + 5
 	var layouts: Array = []
 	for k in TUFTS:
 		var hidden := k >= 4
@@ -27,15 +31,22 @@ static func build(col: Color) -> Node3D:
 		var ya := r.randf() * TAU
 		var a := TAU * k / float(TUFTS)
 		var bunch := Vector3(cos(a) * 0.17, 0.2, sin(a) * 0.17)
-		layouts.append({"sp": sp, "sc": sc, "ya": ya, "bunch": bunch, "hidden": hidden, "col": col.darkened(r.randf_range(0.0, 0.18))})
+		layouts.append({
+				"sp": sp, "sc": sc, "ya": ya, "bunch": bunch, "hidden": hidden,
+				"col": col.darkened(r.randf_range(0.0, 0.18))})
 		mm.set_instance_color(k, layouts[k]["col"])
-	var mi := MultiMeshInstance3D.new(); mi.name = "Tufts"; mi.multimesh = mm
+	var mi := MultiMeshInstance3D.new()
+	mi.name = "Tufts"
+	mi.multimesh = mm
 	mi.material_override = Models.grass_material(0.16)
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	body.add_child(mi)
 	var mats: Array = []
 	# eyes: white with a dark pupil, on the front (-z)
-	var eyes := Node3D.new(); eyes.name = "Eyes"; eyes.position = Vector3(0, 0.5, -0.3); body.add_child(eyes)
+	var eyes := Node3D.new()
+	eyes.name = "Eyes"
+	eyes.position = Vector3(0, 0.5, -0.3)
+	body.add_child(eyes)
 	var white := Models.toon(Color("fff8e0"), false, 0.9)
 	var pupil := Models.toon(Color("1a1410"), false, 0.0)
 	mats.append(white)
@@ -46,7 +57,8 @@ static func build(col: Color) -> Node3D:
 	var wood := Models.toon(Color("6b4a2e"))
 	mats.append(wood)
 	for sd in ["L", "R"]:
-		var pivot := Node3D.new(); pivot.name = "Leg" + sd
+		var pivot := Node3D.new()
+		pivot.name = "Leg" + sd
 		pivot.position = Vector3((-0.15 if sd == "L" else 0.15), 0.22, 0.0)
 		body.add_child(pivot)
 		Models.part(pivot, Models.cyl(0.05, 0.075, 0.26, 7), wood, Vector3(0, -0.1, 0))
@@ -61,7 +73,8 @@ static func recolour(model: Node3D, col: Color) -> void:
 	if model == null or not model.has_meta("tufts"):
 		return
 	var mm: MultiMesh = model.get_meta("tufts")
-	var r := RandomNumberGenerator.new(); r.seed = int(col.r * 977.0 + col.g * 331.0 + col.b * 59.0) + 5
+	var r := RandomNumberGenerator.new()
+	r.seed = int(col.r * 977.0 + col.g * 331.0 + col.b * 59.0) + 5
 	var layouts: Array = model.get_meta("layouts")
 	for k in mm.instance_count:
 		var c := col.darkened(r.randf_range(0.0, 0.18))
@@ -86,7 +99,8 @@ static func pose(model: Node3D, k: float, t: float, speed: float, twitch: float)
 		var ang := float(L["ya"]) + sin(t * 40.0 + i) * 0.25 * twitch
 		var b := Basis(Vector3.UP, ang).scaled(Vector3(sc, sc * lerpf(1.0, 0.8, up), sc))
 		b = Basis(Vector3(1, 0, 0), sin(t * 33.0 + i * 2.0) * 0.22 * twitch) * b
-		mm.set_instance_transform(i, Transform3D(b, p + Vector3(0, absf(sin(t * 9.0)) * 0.09 * up * clampf(speed / 6.0, 0.0, 1.0), 0)))
+		mm.set_instance_transform(
+				i, Transform3D(b, p + Vector3(0, absf(sin(t * 9.0)) * 0.09 * up * clampf(speed / 6.0, 0.0, 1.0), 0)))
 		# the shimmer: the leaves catch the light for a moment with the tell
 		var sh := twitch * (1.0 - up) * (0.5 + 0.5 * sin(t * 25.0 + i * 1.7))
 		mm.set_instance_color(i, (L["col"] as Color).lightened(0.28 * sh))
