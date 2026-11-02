@@ -293,6 +293,7 @@ func _show_settings() -> void:
 			_slider(v, "Lean toward the cursor", "cam_lead", 0.0, 1.5)
 			_group(v, "Combat")
 			_toggle(v, "Hold Shift for the long dash", "dash_hold", "Tap Shift for the short one")
+			_toggle(v, "Dash toward the cursor", "dash_to_cursor", "Off: you dash the way you're moving (WASD), or toward the cursor when standing still")
 			_toggle(v, "Quick cast", "cast_on_press", "Abilities fire the moment you press them. Off: hold to aim, release to cast")
 			_toggle(v, "Tap to crouch", "crouch_toggle", "Instead of holding the crouch key")
 			_toggle(v, "Damage numbers", "damage_numbers")
