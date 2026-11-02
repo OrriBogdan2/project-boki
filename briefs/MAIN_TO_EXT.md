@@ -112,3 +112,66 @@ Design note in docs/decisions first (core systems). Full suite once, then report
 ## 2026-11-02 09:40 ET: HOLD ext/equal
 
 The owner is reconsidering the bring-in question (this is an extraction game, not a BR). Don't start ext/equal yet. If you already started, pause it. I'll post the final spec here once the owner decides. The perks-as-pickups part (point 4: orbs, no 1/2/3 prompt) and point 5 (level-ups need no choice) will stay whatever the decision; you can start those two on their own branch ext/perkorbs if you have a free slot.
+
+## 2026-11-02 09:45 ET: ext/equal FINAL SPEC (replaces the 09:35 entry; the hold is lifted)
+
+Owner decision: an extraction game where you can bring some gear in, but power mostly comes from the match. Build on ext/equal from current main (fffac19 or newer). Don't touch the reserved Boki files. Write a design note in docs/decisions first.
+
+**What you can bring in** (at risk: dying drops it in your deathbox)
+- Gloves (the Q active or passive glove).
+- Boots.
+- Utility items on the 1 / 2 / 3 keys (see below).
+- Brought items keep their rarity, capped by difficulty tier (e.g. Rare max on the easiest tier, no cap on the hardest; put the numbers in content/rules).
+
+**What you can't bring in**
+- **Armour.** Everyone drops with the same base armour. Better armour is found in the match, and armour levels up by dealing damage to rival hunters; hunter.gd already has this (base_armor and "armor evolves through a run"), so keep and surface it. Shops sell repairs and upgrades.
+- **Perks.** In-match only.
+- **Workshop and guild-project perks.** match.gd ~1340: remove.
+- **Pack size from home.** Pack size is equal; the satchel kit is gone (see utility).
+
+**Utility becomes consumables on 1 / 2 / 3** (SUPERVIVE-style)
+- The "kit" gear slot is replaced by a 3-slot utility belt of usable items with charges/stacks: tonic (heal), armour kit (repair), plus throwable/deployable utilities. Move smoke, jump_pad, scanner and medkit from gloves to utility items with charges. Add a couple more if cheap.
+- Utility items can be brought in (stack caps by tier) and are found and bought in the match.
+- The old kit passives (field_kit, magpie, satchel, spyglass, tinker_roll) become perk orbs / shop perks instead.
+- Keys 1/2/3 are free because the perk prompt is gone.
+
+**Perks as pickups, no prompt**
+- Chests, shrines and bosses drop perk orbs: a floating icon and name in the perk's colour, with a bob and motes. Walk in to take one.
+- Bosses drop 3 in a fan; taking one fades the others for you only.
+- Shrines lean to flat stats, chests and bosses to weapon perks.
+- Bots walk to the orb they want.
+- Orbs are synced like wpicks.
+- Remove offer_perks / choose_perk / perk_offer / the "Pick a perk: 1/2/3" toast.
+
+**Level-ups**
+- Keep skill points and ability ranks as they are (RMB and the rest rank up; the ultimate unlocks at 6).
+- Replace the even-level weapon-upgrade choice with an automatic, fixed per-hero weapon path in content (using the WeaponUps steps), with a clear level-up pop naming what improved.
+
+**Shops and areas**
+- 3-4 vendors at fixed landmarks on The Hollow Crown, each with its own stock theme: armour and repairs, movement (boots), utility items, weapon perks. Some may also sell Boki care, but don't touch reserved Boki files; add new items through existing hooks or ask here.
+- They sell for gems picked up this run. Stock is rolled per match with a seeded RNG, 3-5 items each.
+- Show shop themes and area drop leans (biome_run.gd slot_lean_at / rarity_bonus_at) on the full map with a short legend.
+
+**Remove**
+- The free-kit loaner and its extract-minimum top-up, and their text and checks.
+- Keep the economy floor (a stray common Boki) and the last-Boki guard.
+
+**Save migration**
+- Armour and kit items in the armory convert to farm materials/gems at a fair rate; report the rate.
+- Gloves and boots stay.
+- Nothing is silently deleted.
+
+**Net:** bump to the next version above main when you report it ready.
+
+**Checks:**
+- Equal base: two saves with very different farms start with identical armour, perks and stats; only brought gloves, boots and utility differ, within the tier cap.
+- No perk prompt exists.
+- Perk orbs, the boss fan, fade-for-you-only.
+- The fixed weapon path.
+- Utility on 1/2/3 with charges, brought in and lost on death.
+- Shop buy and seeding.
+- Armour levelling.
+- The migration.
+- Bots use orbs, utility and shops.
+
+Full suite once, then report ready here.
