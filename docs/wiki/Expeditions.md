@@ -84,7 +84,18 @@ The layout of a map never changes. What's live is rolled each match:
 - **Events:** a meteor shower about a quarter of the way in (the stars leave gems), the Warden waking
   in the middle, and halfway through a Glimmerkin that runs: bring it down before it gets away.
 - **Loot:** crates, pots and red barrels break when you shoot or dash through them (barrels explode).
-  Chests take a moment to open. See [Gear and items](Gear-and-Items.md).
+  See [Gear and items](Gear-and-Items.md).
+- **Chests and keys.** There is one kind of chest and it is locked: holding F opens it for one key.
+  Keys are carried by monsters (glinting gold), as many as there are chests in each region; kill one and
+  the key drops. Keys ride in your pack and your deathbox and can be picked up off the ground; the count
+  sits by your belt. Bots fight for keys before chests. What a chest holds follows its area and the
+  expedition tier.
+- **Shrublings.** A bush that is not a bush: it rustles, then bolts when you come close, faster than you
+  walk but slower than a dash, weaving, and dives into the nearest tall grass to hide again. It never
+  attacks, always carries a key, and a slow, a root or a grab stops it. They live only in the
+  tall-grass biomes (bloom, meadow, gloom, storm), one to three per match.
+- **Tall grass** hides you. It varies by biome: a lot in bloom thickets, some in meadow bands, little in
+  gloom, storm and ember, and almost none on frost ice.
 
 Each map and what it rolls is on [Maps and biomes](Maps.md).
 

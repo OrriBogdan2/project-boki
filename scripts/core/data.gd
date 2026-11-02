@@ -221,6 +221,9 @@ const MOBS := {
 		"r": 0.55, "gems": 4, "color": Color("5ab0c8"), "attack": "volley", "stag": true},
 	"glimmer": {"name": "Glimmerkin", "hp": 110.0, "speed": 5.9, "dmg": 0.0, "range": 0.0, "windup": 1.0, "cd": 99.0,
 		"r": 0.45, "gems": 22, "color": Color("ffd25a"), "attack": "none", "flee": true, "stag": true},
+	# the bush mimic (scripts/match/shrubling.gd): looks like a clump of tall grass, runs from hunters, always carries a chest key
+	"shrubling": {"name": "Shrubling", "hp": 26.0, "speed": 6.5, "dmg": 0.0, "range": 0.0, "windup": 1.0, "cd": 99.0,
+		"r": 0.4, "gems": 6, "color": Color("5f9a46"), "attack": "none", "mimic": true},
 	"warden": {"name": "The Warden", "hp": 820.0, "speed": 3.3, "dmg": 30.0, "range": 2.8, "windup": 0.95, "cd": 2.1,
 		"r": 1.3, "gems": 30, "color": Color("5a4a7a"), "attack": "slam", "slam_r": 3.3, "stag": true},
 	# lair bosses (scripts/match/boss.gd runs them; Lairs wakes them): each drops a Rare Egg of its own kin

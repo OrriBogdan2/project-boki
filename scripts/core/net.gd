@@ -5,7 +5,7 @@ extends Node
 ## On desktop the same messages go through the Project Boki relay server instead (net_enet.gd,
 ## scripts/server/relay.gd). The launcher passes `-- --server=host:port --token=<discord token>`.
 
-const VERSION := "0.13.0"        # online play only matches players on the same version; bump on network changes (0.12.0: fixes, 0.13.0: gear wdrop carries kind/rarity/id, carry and zone events)
+const VERSION := "0.14.2"        # online play only matches players on the same version; bump on network changes (0.12.0: fixes, 0.13.0: gear wdrop carries kind/rarity/id, carry and zone events, 0.14.2: monster snapshot carries the key-carrier flag and the Shrubling pose)
 
 signal peers_changed
 signal message(topic: String, data, from: String)

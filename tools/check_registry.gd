@@ -17,6 +17,8 @@ const CHECKS := {
 	"--archer-combo-check": ["res://tools/archer_bulwark_combo_check.gd", "hero_check", null],
 	"--bulwark-combo-check": ["res://tools/archer_bulwark_combo_check.gd", "hero_check", null],
 	"--hero-combo-check": ["res://tools/archer_bulwark_combo_check.gd", "hero_check", null],
+	"--keys-check": ["res://tools/keys_check.gd", "keys_check", null],
+	"--cover-check": ["res://tools/cover_check.gd", "cover_check", null],
 }
 
 ## Runs the registered check named in args, if any. Returns true when one started (Main stops there).

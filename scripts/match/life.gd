@@ -206,9 +206,10 @@ static func drop_box(m: Match, h: Hunter, why: String) -> Dictionary:
 	var at := box_spot(m, h, why)
 	var b := {"owner": h, "team": h.team, "pos": at, "gems": h.gems, "seeds": h.seeds.duplicate(), "caught": h.caught.duplicate(true),
 		"tonics": maxi(0, h.tonics - h.free_tonics), "kits": h.armor_kits, "soul_until": m.time + R["soul_time"], "prog": {}, "node": null, "empty": false,
-		"gear": [], "pack": h.pack.duplicate(true), "keys": h.rift_keys}
+		"gear": [], "pack": h.pack.duplicate(true), "keys": h.rift_keys, "chest_keys": h.chest_keys}
 	h.pack = []
 	h.rift_keys = 0
+	h.chest_keys = 0
 	h.tonics = mini(h.tonics, h.free_tonics)
 	h.armor_kits = 0
 	# the gear you wear goes in the box too (Supervive: the box holds everything); your weapon stays with you
@@ -256,6 +257,8 @@ static func box_items(m: Match, h: Hunter, b: Dictionary) -> Array:
 		out.append({"key": "tonics", "name": "%d tonic%s" % [int(b["tonics"]), "" if int(b["tonics"]) == 1 else "s"], "sub": "Heals", "icon": "tonic", "col": Color("ff8a9a"), "upgrade": true})
 	if int(b.get("keys", 0)) > 0:
 		out.append({"key": "keys", "name": "%d Rift Key%s" % [int(b["keys"]), "" if int(b["keys"]) == 1 else "s"], "sub": "Opens a rift hatch", "icon": "gem", "col": ExitModels.HATCH, "upgrade": true})
+	if int(b.get("chest_keys", 0)) > 0:
+		out.append({"key": "chest_keys", "name": "%d key%s" % [int(b["chest_keys"]), "" if int(b["chest_keys"]) == 1 else "s"], "sub": "Opens one chest each", "icon": "key", "col": KeyModels.BRASS, "upgrade": true})
 	if int(b["kits"]) > 0:
 		out.append({"key": "kits", "name": "%d armor kit%s" % [int(b["kits"]), "" if int(b["kits"]) == 1 else "s"], "sub": "Repairs armor", "icon": "medkit", "col": Color("9ad0ff"), "upgrade": true})
 	for i in (b.get("gear", []) as Array).size():
@@ -305,6 +308,8 @@ static func take_item(m: Match, h: Hunter, b: Dictionary, it: Dictionary) -> voi
 			h.armor_kits += int(b["kits"]); b["kits"] = 0
 		"keys":
 			h.rift_keys += int(b.get("keys", 0)); b["keys"] = 0
+		"chest_keys":
+			h.chest_keys += int(b.get("chest_keys", 0)); b["chest_keys"] = 0
 		"gear":
 			var gi := int(it["i"])
 			if gi < (b["gear"] as Array).size():
@@ -343,7 +348,7 @@ static func smart_loot(m: Match, h: Hunter, b: Dictionary) -> int:
 
 static func _settle_box(b: Dictionary) -> void:
 	b["empty"] = int(b["gems"]) <= 0 and (b["seeds"] as Dictionary).is_empty() and (b["caught"] as Array).is_empty() \
-		and int(b["tonics"]) <= 0 and int(b["kits"]) <= 0 and int(b.get("keys", 0)) <= 0 and (b.get("gear", []) as Array).is_empty() \
+		and int(b["tonics"]) <= 0 and int(b["kits"]) <= 0 and int(b.get("keys", 0)) <= 0 and int(b.get("chest_keys", 0)) <= 0 and (b.get("gear", []) as Array).is_empty() \
 		and (b.get("pack", []) as Array).is_empty() and (b.get("kin", []) as Array).is_empty()
 	_refresh_box(b)
 
@@ -390,9 +395,10 @@ static func loot_box(m: Match, h: Hunter, b: Dictionary) -> void:
 	h.tonics += int(b["tonics"])
 	h.armor_kits += int(b["kits"])
 	h.rift_keys += int(b.get("keys", 0))
+	h.chest_keys += int(b.get("chest_keys", 0))
 	_kin_from_box(m, h, b)
 	var got := int(b["gems"])
-	b["gems"] = 0; b["seeds"] = {}; b["tonics"] = 0; b["kits"] = 0; b["keys"] = 0
+	b["gems"] = 0; b["seeds"] = {}; b["tonics"] = 0; b["kits"] = 0; b["keys"] = 0; b["chest_keys"] = 0
 	_settle_box(b)
 	m.sfx("pickup", b["pos"], -2.0, 0.9)
 	m.fx.burst(b["pos"] + Vector3(0, 0.6, 0), Color("ffd36a"), 14, 3.0, 0.4)

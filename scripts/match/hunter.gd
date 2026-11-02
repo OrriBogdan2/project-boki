@@ -156,6 +156,7 @@ func set_hold(kind: String, dur := 0.15) -> void:
 func holding() -> String:
 	return hold_kind if m.time < hold_until else ""
 var rift_keys := 0               # Rift Keys carried: each opens a rift hatch once (see Exits); they go in your deathbox
+var chest_keys := 0              # chest keys carried: each opens one chest (KeyChest); they go in your deathbox
 var kin: Ent = null             # the active kin: its abilities are on Q and V, its ultimate on R
 var kin2: Ent = null            # the benched kin, swapped in with X
 var swap_cd := 0.0
