@@ -156,7 +156,7 @@ static func _ult(A: Arena, ally: Hunter, arch: String, what: String, t: float, d
 		if _at(t, dt, 0.3):
 			P.inp["hult"] = true
 		var walking := what != "ultaim" and t > 0.8 and t < 2.3
-		P.inp["move"] = Vector2(-0.7, 0.7) if walking else Vector2.ZERO
+		P.inp["move"] = Vector2(0.3, -1.0).normalized() if walking else Vector2.ZERO
 		return
 	var D: Hunter = A.dummies[0]["h"]
 	if t < 0.3:
