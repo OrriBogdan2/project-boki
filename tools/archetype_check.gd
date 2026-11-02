@@ -188,6 +188,14 @@ func _data() -> void:
 	ok("weapons: Thief blades / Archer bow / Vireo coil / Bulwark shield", Arch.signature("thief") == "twin_blades" and Arch.signature("archer") == "longbow" and Arch.signature("mage") == "coilcaster" and Arch.signature("bulwark") == "tower_shield")
 	ok("weapons: another archetype's weapon is not yours", not Arch.weapon_ok("bulwark", "greatsword") and not Arch.weapon_ok("thief", "smg"))
 	ok("weapons: asking for another weapon gives the signature", Arch.weapon_for("gunslinger", "medium", "longsword") == "quill_rifle")
+	var sup_ok := true
+	for a in ["tender", "rimewright"]:
+		var sd2 := Arch.def(a)
+		for k in ["card", "passive", "dash", "rmb", "e", "rank2", "rank3", "rank_next", "tells"]:
+			if not sd2.has(k): sup_ok = false
+		if sd2.has("r") or (sd2["card"] as Dictionary).has("r"): sup_ok = false          # no R for the support pair
+		if (sd2["rmb"] as Dictionary).get("variants", {}).is_empty() or String(sd2["e"].get("desc", "")).length() < 40: sup_ok = false
+	ok("data: support heroes complete, no R", sup_ok)
 	ok("weapons: fix keeps the class", Arch.fix("thief", "heavy") == "juggernaut" and Arch.fix("bulwark", "heavy") == "bulwark")
 
 # ------------------------------------------------------------------ Thief (kits2: a port of SUPERVIVE's Shiv)

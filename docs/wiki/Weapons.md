@@ -13,6 +13,8 @@ Numbers are per shot or swing before any upgrades. Class kits that run their own
 | Coilcaster | none | light | 8 | 0.42s | 12 | 1.3s | 9m | A copper coil worn on the forearm. Each bolt crackles through everyone in a line. |
 | Torch Lance | none | heavy | 2.7 | 0.1s | 80 | 1.6s | 6m | Hold to roar out a cone of fire 6m long: 8 seconds of fuel, then a short refill. It builds Char; at full Char the foe ignites. |
 | Greatsword | Juggernaut | heavy | 11 | 0.5s | 1 | 0.1s | 3.4m | A slow, huge 3-hit combo, strongest on the tip. Hold 1s for a slam that stuns and throws people far. |
+| Hoar Fan | none | light | 3.4 | 0.5s | 99 | 1s | 10m | A folding fan of ice slats. Hold to throw a flurry of 4 homing shards, then 3 heavy ones that fly faster and further. Eight shards on one foe Splinter them. Double damage during a Rinkrun. |
+| Lantern Crook | none | medium | 8 | 0.4s | 18 | 1.3s | 9m | A shepherd's crook with a lantern on its hook: it flicks an ember every 0.4s, 9m. Embers Kindle what they hit (up to 5); hold fire for a second and the next one flies 40% further. |
 | Longbow | Archer | light | 30 | 0.35s | 1 | 0.25s | 12m | Hold to draw, let go to loose. 0.4s: 30 damage, 12m. 0.9s: 60 damage, 15m. Let go early for 15. You walk slower while drawing. |
 | Longsword | none | medium | 8.2 | 0.36s | 1 | 0.1s | 2.7m | A wide 3-hit combo, stronger on the tip of the blade. Hold 0.8s for a long-reaching thrust. |
 | Minigun | none | heavy | 3.8 | 0.1s | 90 | 3s | 10m | Spins up for 0.7s, then fires a stream that tightens the longer you hold it. Slows you while firing. |

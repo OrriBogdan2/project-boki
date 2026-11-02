@@ -3204,7 +3204,7 @@ func _anim_state(stretch: float) -> void:
 	s["diving"] = diving
 	s["rolling"] = roll_t > 0.0
 	s["dash_dir"] = roll_dir
-	s["dash_kind"] = "lunge" if not strike_at_end.is_empty() else ("rush" if move_kind == "rush" else String(DODGE_ANIM.get(cls, "roll")))
+	s["dash_kind"] = "lunge" if not strike_at_end.is_empty() else ("rush" if move_kind in ["rush", "rinkrun"] else String(DODGE_ANIM.get(cls, "roll")))
 	s["crouch"] = crouch_k
 	s["downed"] = downed
 	s["ledge"] = grap.size() > 0

@@ -74,6 +74,9 @@ static func tick(A: Arena, dt: float) -> void:
 	if m.cam and not w.begins_with("card") and w != "menu" and not m.has_meta("zoom_hold"):
 		m.set_meta("zoom_hold", 0.6)      # close enough to read the hits
 		m.cam.zoom = 0.6
+	if w.begins_with("care_"):
+		CareDemo.tick(A, dt, w)          # the support pair (care_demo.gd)
+		return
 	P.hp = P.max_hp
 	match w:
 		_ when w.begins_with("pr_") or w in ["card_dredge", "card_ashwick"]:
@@ -236,11 +239,11 @@ static func tick(A: Arena, dt: float) -> void:
 			else:
 				if int(P.ak.get("crushes")) > 0 and not A.has_meta("cr_at"): A.set_meta("cr_at", t)
 				at_t = float(A.get_meta("cr_at", 9.0)) + 0.06
-		"card", "card_juggernaut", "card_detail", "card_archer", "card_mage", "card_gunslinger", "card_bulwark":
+		"card", "card_juggernaut", "card_detail", "card_archer", "card_mage", "card_gunslinger", "card_bulwark", "card_tender", "card_rimewright":
 			if t < 0.05:
-				var ca: String = {"card_juggernaut": "juggernaut", "card_archer": "archer", "card_mage": "mage", "card_gunslinger": "gunslinger", "card_bulwark": "bulwark"}.get(w, "thief")
+				var ca: String = {"card_juggernaut": "juggernaut", "card_archer": "archer", "card_mage": "mage", "card_gunslinger": "gunslinger", "card_bulwark": "bulwark", "card_tender": "tender", "card_rimewright": "rimewright"}.get(w, "thief")
 				A.set_arch(ca)
-				A.set_kin("cindle" if ca in ["juggernaut", "mage", "bulwark"] else "puddlet")
+				A.set_kin("cindle" if ca in ["juggernaut", "mage", "bulwark", "tender"] else "puddlet")
 			if _at(t, dt, 0.3):
 				A.toggle_card()
 				if w == "card_detail":

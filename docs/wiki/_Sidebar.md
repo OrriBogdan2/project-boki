@@ -10,6 +10,8 @@
   - [Marlowe](Class-Marlowe.md)
   - [Juggernaut](Class-Juggernaut.md)
   - [Bulwark](Class-Bulwark.md)
+  - [Linnet](Class-Linnet.md)
+  - [Tamsin](Class-Tamsin.md)
 - [Boki](Boki.md)
   - [Species](Boki-Species.md)
   - [Growth](Boki-Growth.md)

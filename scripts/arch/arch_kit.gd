@@ -45,6 +45,8 @@ static func make(hunter: Hunter, arch_id: String) -> ArchKit:
 		"bulwark": k = BulwarkKit.new()
 		"dredge": k = DredgeKit.new()
 		"ashwick": k = AshwickKit.new()
+		"tender": k = TenderKit.new()
+		"rimewright": k = RimewrightKit.new()
 		_: return null
 	k.h = hunter
 	k.m = hunter.m
@@ -235,6 +237,8 @@ func use_e() -> void:
 ## R: the archetype's ultimate. With the bond meter full the cast is Bonded (§5 option C): the ult's
 ## own tell, then 0.2s later the kin merges (its on_start), one T5 moment for the caster.
 func use_r() -> void:
+	if r_def().is_empty():
+		return          # heroes without an R (the support pair)
 	if busy():
 		h._ab_feedback("r", "deny")
 		return

@@ -23,6 +23,8 @@ const PREVIEW := {
 	"bulwark": {"dash": "charge", "passive": "meter", "rmb": "shield", "e": "zone", "r": "fissure"},
 	"dredge": {"dash": "dash2", "passive": "meter", "rmb": "grapple", "e": "charge"},
 	"ashwick": {"dash": "dash", "passive": "meter", "rmb": "projectile", "e": "zone"},
+	"tender": {"dash": "dash", "passive": "marks", "rmb": "projectile", "e": "zone"},
+	"rimewright": {"dash": "charge", "passive": "marks", "rmb": "projectile", "e": "shield"},
 }
 
 var arch := ""
@@ -280,6 +282,10 @@ static func slot_text(a: String, slot: String) -> Dictionary:
 			out.merge({"name": String(sd["name"]), "icon": String(sd.get("icon", "")), "col": Color(String(sd.get("col", "#ffffff"))),
 				"tag": "%ss" % KinText.n(float(sd.get("cooldown", 14.0))), "line": String(cd.get("e", ""))}, true)
 			out["detail"] = [["", String(sd.get("desc", ""))]] + _ranks(a, "kin")
+		"r" when not d.has("r"):
+			# no hero ultimate: R is the Boki's Merge (the Boki system owns it)
+			out.merge({"name": "Boki Merge", "icon": "bond", "col": Color("ffd27a"), "tag": "Boki system", "line": "Your Boki fuses with you; its kind decides the form."}, true)
+			out["detail"] = [["", "R is not a hero ability here: it is the Boki Merge. Your Boki fuses with you and its kind sets the merged form."]]
 		"r":
 			# R is the Merge for every class (docs/decisions/0001); the class's own ultimate is held back behind
 			# boki_system.json class_ults until the hero-port work folds it into the kits

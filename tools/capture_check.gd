@@ -287,7 +287,7 @@ func _net() -> void:
 	run_for(Capture.HOLD_OVER + 0.5)
 	ok(not Capture.active(rival) and k.scan_by == null, "a scan nobody confirms times out, so the Boki can wake up again")
 	ok(BlightDir.LOUD.has("scan"), "the scan is a sound rivals and the Blight react to")
-	ok(Net.VERSION >= "0.11.0", "Net.VERSION is %s (merge forms: 0.11.0)" % Net.VERSION)
+	ok(Net.VERSION.naturalnocasecmp_to("0.11.0") >= 0, "Net.VERSION is %s (at least merge forms' 0.11.0)" % Net.VERSION)
 
 # ------------------------------------------------------------------ 9. bots
 func _bots() -> void:

@@ -65,6 +65,8 @@ const ARCH_STANCE := {
 	"gunslinger": {"lean": 0.03, "width": 0.13, "knee": 0.2, "breath": 2.0},
 	"juggernaut": {"lean": 0.1, "width": 0.25, "knee": 0.34, "breath": 1.35, "arm": 0.7},
 	"bulwark": {"lean": 0.0, "width": 0.24, "knee": 0.3, "breath": 1.5, "arm": 0.7},
+	"tender": {"lean": 0.04, "knee": 0.14, "width": 0.08, "breath": 2.2, "arm": 0.9},
+	"rimewright": {"knee": 0.3, "lean": 0.12, "width": 0.07, "bounce": 1.3, "breath": 2.8, "arm": 1.15},
 }
 ## How far the shoulder pieces turn with the arm (the rest is left behind, so a raised arm slides
 ## under the plate instead of through it).
@@ -1212,6 +1214,41 @@ const KMOVES := {
 		[0.10, {"p": 0.40, "legs": [0.65, -1.26, 0.53, -1.10], "lw": 1.0, "fl": Vector3(-0.30, 0.05, -0.08), "hw": 0.80, "fr": Vector3(0.30, 0.05, -0.08), "rw": 0.50}],
 		[0.55, {"p": 0.30, "legs": [0.53, -1.02, 0.42, -0.90], "lw": 1.0, "fl": Vector3(-0.30, 0.05, -0.08), "hw": 0.80, "fr": Vector3(0.30, 0.05, -0.08), "rw": 0.50}],
 		[0.90, {}]]},
+	# ---------------------------------------------------------------- Linnet (tender) and Tamsin (rimewright)
+	# Burrseed: wound back with the seed cupped by the ear, then a flick forward
+	"tend_seed": {"keys": [
+		[0.0, {}],
+		[0.09, {"p": 0.14, "y": -0.3, "r": -0.06, "fl": Vector3(-0.1, 0.3, 0.15), "hw": 1.0}],
+		[0.12, {"p": 0.1, "y": -0.2, "r": -0.04, "fl": Vector3(-0.1, 0.3, 0.15), "hw": 1.0}],
+		[0.17, {"p": -0.38, "y": 0.35, "r": 0.05, "fl": Vector3(0.08, 0.12, -0.52), "hw": 1.0}],
+		[0.2, {"p": -0.38, "y": 0.35, "r": 0.05, "fl": Vector3(0.08, 0.12, -0.52), "hw": 1.0}],
+		[0.4, {"p": -0.15, "y": 0.15, "fl": Vector3(0.08, 0.12, -0.52), "hw": 0.6}],
+		[0.6, {}]]},
+	# Hearthlight: a crouch to gather the light, then up with the lantern hand lifted high
+	"tend_hearth": {"keys": [
+		[0.0, {}],
+		[0.1, {"p": -0.2, "fl": Vector3(0.05, 0.0, -0.15), "hw": 1.0}],
+		[0.14, {"p": -0.2, "fl": Vector3(0.05, 0.0, -0.15), "hw": 1.0}],
+		[0.24, {"p": 0.22, "y": 0.05, "fl": Vector3(0.02, 0.58, -0.1), "hw": 1.0}],
+		[0.34, {"p": 0.22, "y": 0.05, "fl": Vector3(0.02, 0.58, -0.1), "hw": 1.0}],
+		[0.6, {}]]},
+	# Rime Javelin: shoulders wound back, then whipped through into the throw
+	"rime_javelin": {"keys": [
+		[0.0, {}],
+		[0.1, {"p": 0.08, "y": -0.55, "r": -0.1, "fl": Vector3(0.12, 0.15, 0.35), "hw": 1.0}],
+		[0.12, {"p": 0.08, "y": -0.55, "r": -0.1, "fl": Vector3(0.12, 0.15, 0.35), "hw": 1.0}],
+		[0.19, {"p": -0.3, "y": 0.65, "r": 0.1, "fl": Vector3(0.06, 0.1, -0.55), "hw": 1.0}],
+		[0.22, {"p": -0.3, "y": 0.65, "r": 0.1, "fl": Vector3(0.06, 0.1, -0.55), "hw": 1.0}],
+		[0.5, {"p": -0.05, "y": 0.1, "fl": Vector3(0.06, 0.1, -0.55), "hw": 0.5}],
+		[0.6, {}]]},
+	# Ice slam: hands together low, then both pushed out and down onto the ice
+	"rime_slam": {"keys": [
+		[0.0, {}],
+		[0.12, {"p": -0.15, "fl": Vector3(0.0, -0.1, -0.2), "hw": 1.0}],
+		[0.15, {"p": -0.15, "fl": Vector3(0.0, -0.1, -0.2), "hw": 1.0}],
+		[0.22, {"p": -0.42, "fl": Vector3(0.02, -0.12, -0.55), "hw": 1.0}],
+		[0.3, {"p": -0.42, "fl": Vector3(0.02, -0.12, -0.55), "hw": 1.0}],
+		[0.6, {}]]},
 }
 const KM_CH := ["p", "y", "r", "lift", "fx", "fz", "fy", "sq", "lw", "hw", "rw", "bw", "rad", "gp"]
 var km := {}                   # the kit move's channels this frame (empty: none)

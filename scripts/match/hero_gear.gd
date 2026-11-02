@@ -29,7 +29,7 @@ static func _tp(c: Dictionary, key: String, u0: float, u1: float, v0: float, v1:
 static func cover(arch: String, bare: bool) -> String:
 	if bare:
 		return ""
-	return {"thief": "hood", "archer": "", "mage": "", "gunslinger": "hat", "juggernaut": "helm", "bulwark": "helm", "dredge": "helm", "ashwick": "hat"}.get(arch, "")
+	return {"thief": "hood", "archer": "", "mage": "", "gunslinger": "hat", "juggernaut": "helm", "bulwark": "helm", "dredge": "helm", "ashwick": "hat", "tender": "hat", "rimewright": "hat"}.get(arch, "")
 
 static func dress(arch: String, c: Dictionary) -> void:
 	_belt(c, arch)
@@ -41,6 +41,7 @@ static func dress(arch: String, c: Dictionary) -> void:
 		"juggernaut": _juggernaut(c)
 		"bulwark": _bulwark(c)
 		"dredge", "ashwick": HeroGearPair.dress(arch, c)
+		"tender", "rimewright": HeroGearCare.dress(arch, c)
 	if not bool(c["bare"]):
 		_ear_cuffs(c, arch)
 

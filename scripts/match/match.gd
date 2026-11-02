@@ -6466,6 +6466,10 @@ func _net_ev(x, from: String) -> void:
 			who = ents_by_id.get(String(x[1]), null)
 			if who is Hunter and not who.remote:
 				who.heal(float(x[2]))
+		"carry":
+			who = ents_by_id.get(String(x[1]), null)
+			if who is Hunter and not who.remote:
+				CareUtil.set_carry(self, who, String(x[2]))
 		"rev":
 			who = ents_by_id.get(String(x[1]), null)
 			if who is Hunter and not who.remote and who.downed:

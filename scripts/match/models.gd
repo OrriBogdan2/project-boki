@@ -1680,6 +1680,8 @@ static func gun_parts(gun: Node3D, weapon: String, m_gun: Material, m_dark: Mate
 			part(gun, box(0.016, 0.03, 0.3), glow.call(Color("ffb36a")), Vector3(0.056, 0.0, -0.16))
 			grip.call(-0.02, 0.15)
 			stock.call(0.07, 0.2, 0.08, 0.05)
+		"lantern_crook", "hoar_fan":
+			HeroGearCare.weapon(gun, weapon, m_gun, m_dark, m_acc)
 		"spellstaff":
 			# the Mage's staff: a long rune-carved rod with a glowing focus caught in a ring
 			var wood2 := toon(Color("5a4636"))
