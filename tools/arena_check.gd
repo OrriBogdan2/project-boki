@@ -255,7 +255,7 @@ func _loadout() -> void:
 	var tiles := 0
 	for ch in (st.get_child(0) as HBoxContainer).get_children():
 		if ch is Button: tiles += 1
-	ok("loadout strip: six kit tiles", tiles == 6)
+	ok("loadout strip: five kit tiles (the Juggernaut has no class R)", tiles == 5)
 	st.queue_free()
 	# the real expedition panel at home carries the strip
 	var Home = load("res://scripts/home/home.gd")

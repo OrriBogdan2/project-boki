@@ -80,12 +80,6 @@ func dmg(T: Hunter) -> float:
 	return T.max_hp - T.hp
 
 ## Taps RMB (press, released next frame).
-## Presses R and runs its fuse (the wind-up before the ult goes off), so timings after it read as before.
-func ult(m: Match, P: Hunter) -> void:
-	P.ak.use_r()
-	ok("%s R: fuse winds up first" % P.arch, P.ak.fusing() or P.ak.fuse_time() <= 0.0 or float(P.ak.cd["r"]) > 0.0)
-	step(m, P.ak.fuse_time() + DT)
-
 func tap(m: Match, P: Hunter) -> void:
 	P.inp["sec_hold"] = false
 	P.ak.press_rmb()
@@ -179,7 +173,6 @@ func _data() -> void:
 	ok("ranks: every ability has a concrete rank 2", rk_ok)
 	var n1 := Arch.next_ranks("archer", "sec", 1); var n2 := Arch.next_ranks("archer", "sec", 2); var n3 := Arch.next_ranks("archer", "sec", 3)
 	ok("ranks: next rank first (2 at 1, 3 at 2, none at max)", n1.size() == 2 and n1[0][0] == "Rank 2" and n1[1][0] == "Rank 3" and n2.size() == 1 and n2[0][0] == "Rank 3" and n3.is_empty(), str(n1))
-	ok("ranks: R previews rank 2", Arch.next_ranks("thief", "ult", 1).size() == 1 and Arch.next_ranks("thief", "ult", 2).is_empty())
 	var ids := Arch.ids()
 	ok("data: at least the six archetypes", ids.size() >= 6, str(ids))
 	for w in ["light", "medium", "heavy"]:
@@ -764,20 +757,11 @@ func _levels_and_bond() -> void:
 	P.skill_pts = maxi(P.skill_pts, 1)
 	ok("R: rank 2 at level 9", P.lvl >= 9 and P.can_level("ult"), "lvl %d" % P.lvl)
 	P.skill_pts = 0
-	# the Bonded R: the ult casts and the kin merges 0.2s later
+	# no class ultimate (the Thief and Juggernaut lost theirs): pressing R through the kit does nothing, the Merge owns the key
 	P.ult = 1.0; P.merge_cd = 0.0; P.ak.cd["r"] = 0.0
-	ok("Bonded R: ready glow", P.ak.slot_info("r").get("bonded", false) or true)
 	P.ak.use_r()
-	var during := KinMerge.active(P)
-	step(m, P.ak.fuse_time() + 0.1)
-	ok("Bonded R: ult then merge (0.2s)", P.ak.bonded and not during and KinMerge.active(P) and P.ult < 0.5 and float(P.ak.cd["r"]) > 0.0, "merged %s" % KinMerge.active(P))
-	ok("Bonded R: merged budget x1.3", is_equal_approx(P.ak.budget_k("rmb"), 1.3))
-	# without a full bond, R is just the ult
-	step(m, 12.0)
-	P.ult = 0.2; P.ak.cd["r"] = 0.0
-	ult(m, P)
-	step(m, 0.3)
-	ok("R without bond: no merge", not P.ak.bonded and not KinMerge.active(P))
+	step(m, 0.5)
+	ok("R: no class ultimate, the kit's press does nothing", float(P.ak.cd["r"]) <= 0.0 and not P.ak.fusing() and not P.ak.bonded and not KinMerge.active(P))
 	await done(m)
 
 # ------------------------------------------------------------------ cross-ability combinations (--kit-combo-check)
