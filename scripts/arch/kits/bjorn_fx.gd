@@ -196,8 +196,8 @@ func _process(delta: float) -> void:
 	var pv := _pivot()
 	if spin_on:
 		spin += spin_v * delta
-		if pv: pv.rotation = Vector3(spin, 0, 0)
-	elif pv and absf(pv.rotation.x) > 0.001:
+		if pv: pv.rotation = Vector3(0, spin, 0)      # round the grip, flat: reads from the top-down camera
+	elif pv and absf(pv.rotation.y) > 0.001:
 		spin = 0.0
 		pv.rotation = Vector3.ZERO
 	if flare_t > 0.0:
