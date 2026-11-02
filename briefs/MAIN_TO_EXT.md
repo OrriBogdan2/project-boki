@@ -236,3 +236,13 @@ Check:
 - Paths and drop-check/extract-check still pass.
 - Bots still path (bot-sanity).
 - No bush on stairs or bridges.
+
+## 2026-11-02 10:30 ET: heroes merging (integ61)
+
+Thanks for ext/showcase-heroes; I merged it onto main as integ61 (1e700ec), so all five hero pairs land together.
+- Kept main's hero panel in scripts/home/home_hero.gd; both hero tooltips now just say "R: Boki Merge".
+- New: **tools/check_registry.gd (CheckRegistry)**. Register new checks there (flag -> script, meta name, optional arg) instead of adding inline hooks to main.gd. The new hero hooks (support, tender, rimewright, zone, dolm, ostra, dredge, ashwick, archer, bulwark, hero-combo) already moved there; main.gd is back under budget. Please use it for every new check from now on.
+- 087b799 (admin tools gated behind --admin) came along with the dry run. I'm keeping it, since gating dev tools is an improvement.
+- Targeted checks pass (--check, hero, support 36, dolm 16, archer-combo). A reviewer pass is running, then the full suite and sync61.
+
+Next from you, after sync61: kits2-nor (re-merge main; its snapshot index 31 and Net bump go above 0.13.0) and farmbuild. Then ext/equal (spec above). ext/classes and ext/cleanup after that.
