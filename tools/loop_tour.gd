@@ -609,8 +609,19 @@ func _lair(m) -> void:
 	var L: Dictionary = LS[0]
 	print("TOUR lair %s (%s)" % [L["name"], L["boss"]])
 	var dp: Vector3 = L["dial"]
-	var at: Vector3 = dp + Vector3(L["out"].x, 0, L["out"].y) * 0.9
-	P.teleport(Vector3(at.x, m.world.ground_at(at.x, at.z), at.z))
+	# stand within reach of the dial (Lairs.DIAL_R): the lectern and the lair wall are solid, so a spot
+	# that lands inside one gets pushed out beyond reach (seen: 2.6 m away, the dial never started)
+	var o3 := Vector3(L["out"].x, 0, L["out"].y)
+	var s3 := Vector3(-L["out"].y, 0, L["out"].x)
+	var in_reach := false
+	for off in [o3 * 0.9, s3 * 0.9, -s3 * 0.9, -o3 * 0.9, o3 * 1.2 + s3 * 0.6, o3 * 0.6]:
+		var at: Vector3 = dp + off
+		P.teleport(Vector3(at.x, m.world.ground_at(at.x, at.z), at.z))
+		await frames(3)
+		if P.flat_dist(dp) < Lairs.DIAL_R - 0.3 and absf(P.pos.y - dp.y) < 1.2:
+			in_reach = true; break
+	print("TOUR dial reach: %.2f m, dy %.2f, in reach %s" % [P.flat_dist(dp), P.pos.y - dp.y, in_reach])
+	if not in_reach: note_bad("no standable spot within reach of the dial (%.1f m away)" % P.flat_dist(dp))
 	m.cam.snap(P.pos)
 	for g in L["guards"]: if is_instance_valid(g): g.dead = true; g.visible = false
 	await mwait(1.0)
@@ -632,7 +643,7 @@ func _lair(m) -> void:
 			if shots_dial < 2: shots_dial += 1; await shot("lair_dial_%d" % shots_dial)
 		else:
 			await get_tree().process_frame
-	print("TOUR dial: state %s lock %d fails %d" % [L["state"], int(L["lock"]), int(L["fails"])])
+	print("TOUR dial: state %s lock %d fails %d (%.1f m from the dial, user %s)" % [L["state"], int(L["lock"]), int(L["fails"]), P.flat_dist(dp), str(L["user"].pname) if L["user"] != null else "none"])
 	if L["state"] == "sealed":
 		note_bad("couldn't open the dial in 40 s (fails %d) - opening it" % int(L["fails"]))
 		m.lairs.open(L, P, "dial")
