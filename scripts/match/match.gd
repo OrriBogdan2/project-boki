@@ -2740,18 +2740,14 @@ func on_bond_ready(h: Hunter) -> void:
 
 func on_merge(h: Hunter, k: Kin, u: MergeSpec) -> void:
 	kstat["ult"] += 1
-	var col: Color = (h.merge_st["form"] as Dictionary)["glow"]
-	sfx("ult", h.pos, 0.0)
-	shake(0.55, h.pos)
+	var form: Dictionary = h.merge_st["form"]
 	KinNet.event(self, "merge", h, h.pos)
-	if h.team != (player.team if player else -1) and player and h.flat_dist(player) < 22.0:
-		add_feed("%s merged with %s: %s" % [h.pname, k.rec.get("name", "their Boki") if k else "no Boki", u.display_name])
+	if h != player and player and h.flat_dist(player) < 40.0:
+		add_feed("%s became %s" % [h.pname, form["name"]])
 	if h == player:
 		player.add_stat("ults")
-		_slow(0.35, 0.4)
-		cam.punch(0.14)
 		if hud:
-			hud.flash(col, 0.25)
+			hud.toast_small("%s  ·  R again for %s" % [String(form["name"]).to_upper(), String(MergeKit.of(h).ult_def()["name"]) if MergeKit.of(h) else "the burst"], form["glow"])
 
 func on_merge_end(h: Hunter, why: String) -> void:
 	if h == player and hud and why in ["time", "throw"]:
@@ -6805,7 +6801,7 @@ func _update_aim(alpha: float) -> void:
 					aim_ring.visible = true
 					aim_ring.global_position = Vector3(from_p.x + t2.x, g2 + 0.06, from_p.z + t2.y)
 					aim_ring.scale = Vector3.ONE * maxf(0.6, float(spec[2]) / 0.6)
-					aim_ring.material_override.set_shader_parameter("color", Color(kd.color, 0.35 if clamped else 0.22))
+					aim_ring.material_override.set_shader_parameter("color", Color(KinText.color(kd), 0.35 if clamped else 0.22))
 	if not (k and k.state == "active"):
 		aim_ring.scale = Vector3.ONE
 	if p.muzzle_t > 0.0:
