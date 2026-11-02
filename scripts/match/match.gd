@@ -2722,6 +2722,7 @@ func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
 		player.kin.bark("kill")
 
 func on_kin_down(k: Kin) -> void:
+	if k.role == "follow": Follow.on_down(k)
 	if k.owner_h == player:
 		add_feed("%s is down" % k.rec.get("name", "Your Boki"))
 		if hud:

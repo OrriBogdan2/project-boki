@@ -886,7 +886,6 @@ func go_down(fell := false) -> void:
 	KinDowned.begin(self, fell)
 	if owner_h:
 		note("fainted", "went down in a fight" if not fell else "fell off the island", -0.5)
-	if role == "follow": Follow.on_down(self)
 	m.on_kin_down(self)
 
 func _on_zero(_by: Ent, _opts: Dictionary) -> void:
