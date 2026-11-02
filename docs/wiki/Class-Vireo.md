@@ -1,33 +1,33 @@
 # Vireo (Light)
 
-The storm-kite runner. Every hit loads a Spark onto your target; at four they are Live, and a Wirerun
-straight through them is a Blowout that gives your dash back at once.
+The storm-kite runner. Finger bolts load Static onto a foe; at four a sky bolt marks them Live, and a
+Wirerun straight through them hits double and gives the dash back at once.
 
 ## How it plays
 
-1. **Coilcaster** (LMB) spits bolts that pass through everyone in a line. Each hit loads a Spark.
-2. At four Sparks (4.5s, refreshed by every hit) the foe is **Live**: crackling pips over them that everyone sees.
-3. **Wirerun** (Shift): hold to stretch the lane from 4 to 7m, let go to streak. Shots pass through you and every foe you cross takes a hit. Through a Live foe it is a **Blowout** and the dash resets.
-4. **Coilshot** (RMB): hold to charge a heavy round that throws the first foe back. Into a wall or another foe, they are stunned. A hit on a hunter drops a charge mote; pick it up for your dash back.
-5. **Skycall** (E): mark a spot, and a moment later lightning flings everyone there along your aim and grounds them (no dashing). It steals a rival's mote too.
-6. A knock heals you for 15% of your health. There is no R: the Boki Merge takes that key.
+1. **Coilcaster** (LMB): no gun. She points and a jagged bolt cracks from her fingertip every 0.8s, left hand then right, out to full range and through everyone in line. Each hit adds 1 Static.
+2. **Static** (passive): up to 4 on a foe (4.5s, refreshed by every hit), shown by a marker over their head with sparks that grow per stack. The 4th calls a sky bolt: they are **Live**. A knock heals you 15%.
+3. **Wirerun** (Shift): the charge is spent on the press. Hold: a lane and a big end ring grow out to 12.6m; you can't steer, you keep your height and any speed you had keeps drifting you. Let go: a lightning streak (shots pass through you). Every foe crossed takes a hit; a Live foe takes double, a **Blowout**, and Wirerun comes straight back. Nothing else gives it back.
+4. **Storm Rod** (RMB): hold to summon a copper rod (a fixed 13m lane; your body flashes when it's full), let go to throw it. It knocks the first foe back about a body length, stuns them against a wall or another foe, and leaves a charge orb that zaps nearby foes with Static. A Wirerun through the orb bursts it for 2 Static.
+5. **Skycall** (E): drop a circle at your cursor, then flick the mouse to set the drag: toward you pulls them in, away throws them out. 0.8s later lightning drags everyone inside along the ground, adds 2 Static and grounds them (no dashing). It flings orbs too, stealing a rival's.
+6. There is no R: the Boki Merge takes that key.
 
 ## Combos and interactions
 
 | Do this | And you get |
 |---|---|
-| Three bolts, then Coilshot | The fourth Spark: a Live foe |
-| Wirerun through a Live foe | Blowout, Sparks spent, Wirerun back |
-| Coilshot into a wall or another foe | A 0.8s stun (both foes for a collision) |
-| Coilshot a hunter, collect the mote | Wirerun back |
-| Skycall over a rival's mote | The mote flies off and becomes yours |
-| Skycall on a foe with three Sparks, then Wirerun | The chain: Live, then Blowout |
+| Three bolts, then Storm Rod or Skycall | The 4th Static: a sky bolt, a Live foe |
+| Wirerun through a Live foe | Double hit + Blowout, Static spent, Wirerun back |
+| Storm Rod into a wall or another foe | A 0.8s stun (both foes for a collision) |
+| Storm Rod, then let the orb zap them | Static without spending a bolt |
+| Skycall flicked toward you | The crowd pulled in and grounded |
+| Skycall over a rival's orb | The orb flies off and becomes yours |
 
 ## Tips
 
-- Bolts first, Wirerun last: the blowout is worth four hits.
-- Grounded stops dashes, including yours: keep out of enemy Skycalls.
-- A held Wirerun shows its lane to everyone. Let go early on a short gap.
+- Bolts first, Wirerun last: only a Live foe gives the dash back.
+- Charge Wirerun standing still if you want it straight: moving before you press drifts the run.
+- The Skycall flick is quick: place, flick, done.
 
 ## Kit
 
@@ -38,9 +38,9 @@ straight through them is a Blowout that gives your dash back at once.
 |---|---|
 | Weight class | Light (124 health, 5 m/s, 1 dash charge) |
 | Signature weapon | Coilcaster (the only weapon this hunter carries; it grows through upgrades, never swaps) |
-| Fantasy | The storm-kite runner. Charges you up shot by shot, then runs straight through you and comes out the other side with the dash back. |
+| Fantasy | The storm-kite runner. Points and crackles bolts from her fingertip until a foe is fully charged, then runs straight through them as a streak of lightning and comes out with the dash back. |
 | Silhouette | the copper rod mast and kite pennant on the back |
-| Resource | Sparks (max 4) |
+| Resource | Static (max 4) |
 
 ### Kit card
 
@@ -48,25 +48,25 @@ What the in-game kit card (K) says.
 
 | Slot | Card text |
 |---|---|
-| Loop | Every hit loads a Spark onto the target; at 4 they're Live. Wirerun through a Live foe for a Blowout: big damage and your dash back at once. |
-| Passive: Sparks | Sparks: your hits stack up to 4 on a foe (Live). Wirerun through a Live foe: Blowout, and the dash resets. A knock heals you. |
-| Dash: Wirerun | Wirerun: hold to stretch it (4 to 7m), let go to streak forward; shots pass through you and anyone you cross takes a hit. |
-| RMB: Coilshot | Coilshot: hold to charge a heavy round that throws the first foe back; slammed into a wall or another foe, they're stunned. |
-| E: Skycall | Skycall: mark a spot; a moment later lightning flings everyone there along your aim and pins them to the ground (no dashing). |
-| Weapon: Coilcaster | A copper coil on the forearm that spits bolts which pass through everyone in a line; each hit loads a Spark. |
+| Loop | Ranged lightning skirmisher: charge one foe to 4 Static, then Wirerun through them. |
+| Passive: Static | Static: every hit adds a stack (4 max, shown over their head). The 4th calls a sky bolt and makes them Live. |
+| Dash: Wirerun | Wirerun: hold to charge a lane (length grows with the hold), let go to streak; through a 4-Static foe it hits double and comes back at once. |
+| RMB: Storm Rod | Storm Rod: hold to summon a copper rod, let go to throw it to full range. It knocks the first foe back, stuns them on a wall and leaves a charge orb. |
+| E: Skycall | Skycall: drop a circle at your cursor, then flick the mouse to pick the drag. 0.8s later lightning drags everyone inside that way and grounds them. |
+| Weapon: Coilcaster | Finger bolts every 0.8s, left hand then right, out to full range through everyone in line. Each hit adds 1 Static. |
 
 ### Abilities in full
 
-**Sparks (passive).** Your bolts, Coilshot and Skycall each load a Spark onto what they hit (up to 4, 4.5s, refreshed by every hit). At 4 the foe is Live: a ring of crackling pips over them that everyone sees. Wirerun through a Live foe for a Blowout: 8 damage plus 15% of their health, a T4 hit, their Sparks spent and your dash recharged on the spot. Knocking a hunter down heals you for 15% of your health.
+**Static (passive).** Your finger bolts, Storm Rod and Skycall each add Static to what they hit (Skycall adds 2; up to 4, 4.5s, refreshed by every hit). A marker over their head shows the count, with sparks on them that grow with every stack. The 4th stack calls a sky bolt onto them: they are Live. Wirerun through a Live foe for a Blowout: the run hits double, plus 16 damage and 18% of their health, their Static is spent and Wirerun is back at once. Nothing else gives Wirerun back. Knocking a hunter down heals you for 15% of your health.
 
-**Wirerun (dash, Shift, 9s cooldown).** Press and hold: a lane grows from 4 to 7m over 0.45s for everyone to see; let go and you streak along it. Shots pass straight through you for the whole run, and every foe you cross takes 10. Crossing a Live foe is a Blowout and gives the dash straight back. Picking up a charge mote also gives it back.
+**Wirerun (dash, Shift, 8s cooldown).** Press and hold: the run is charged at once (its cooldown starts on the press). A lane grows 4.5 to 12.6m over 0.6s, its end marked by a big ring; you can't steer yourself while you hold it, you keep your height, and any speed you had keeps drifting you. Let go and you streak along it as lightning (shots pass through you), carrying that drift. Every foe you cross takes 10. A foe at 4 Static takes double, a Blowout, and Wirerun is back at once: the only way it comes back early.
 
-**Coilshot (RMB, 10s cooldown).**
+**Storm Rod (RMB, 8s cooldown).**
 
-- *Tap:* A quick Coilshot (it still takes 0.33s to wind): 9 damage, 6m, a short throw.
-- *Hold:* Hold up to 1s: up to 15 damage, 13m and a big throw. A foe thrown into a wall or into another foe is stunned 0.8s (so is the one they hit). Hitting a hunter drops a charge mote 0.5s later: pick it up for your dash back.
+- *Tap:* Let go early (it still takes 0.3s to summon): 18 damage and a short knock, flying the full 13m lane.
+- *Hold:* Hold to 1s (your body flashes when it's full; at 1.2s it throws itself): 30 damage and about 1.8m of knockback. Thrown into a wall or another foe they're stunned 0.8s. Every foe hit leaves a charge orb at the impact that zaps nearby foes with Static; Wirerun through the orb bursts it for 2 Static on everyone near it.
 
-**Skycall (E, 12s cooldown).** Mark a spot up to 9m away (a filling ring everyone sees); 0.55s later lightning strikes it: 14 damage, a Spark, and everyone inside is flung along your aim and Grounded for 1.2s (no dashing). It also flings any charge mote it catches, so you can steal a rival's.
+**Skycall (E, 10.5s cooldown).** Press to drop a circle at your cursor (up to 11m), then flick the mouse within 0.3s to set the drag: toward you pulls them in, away throws them out (no flick: away from you). A pillar of light narrows over it for 0.8s, then lightning strikes: 20 damage, 2 Static, and everyone inside is dragged along the ground about 7m that way and Grounded for 1.5s (no dashing). Charge orbs it catches are flung the same way and become yours.
 
 ### Ranks
 
@@ -74,9 +74,9 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 
 | Slot | Rank 2 | Rank 3 |
 |---|---|---|
-| RMB | cooldown 10s -> 9s, damage +15%. | cooldown 10s -> 8s, damage +30%; +20% damage on top. |
-| Dash (Shift) | recharge 9s -> 7.6s. | recharge 9s -> 6.3s; the run's own hit deals double. |
-| E | cooldown 12s -> 10.8s, damage +15%. | cooldown 12s -> 6.6s (3s off), damage +30%. |
+| RMB | cooldown 8s -> 7.2s, damage +15%. | cooldown 8s -> 6.4s, damage +30%; +20% damage on top. |
+| Dash (Shift) | recharge 8s -> 7.2s. | recharge 8s -> 6.4s; the run's own hit deals +50%. |
+| E | cooldown 10.5s -> 9.5s, damage +15%. | cooldown 10.5s -> 5.4s (3s off), damage +30%. |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > RMB > Dash (Shift) > E.
 
@@ -84,8 +84,8 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 
 | Moment | Tell |
 |---|---|
-| Building up | crackling pips over every target with Sparks, one per Spark |
-| Armed / full | a Live foe: four bright pips spinning in a ring, a hum and arcs to the ground |
-| Dash spent | a fading wire streak where the run went |
+| Building up | a marker over every foe with Static: one pip per stack and the count, sparks on them that grow |
+| Armed / full | a Live foe: a sky bolt lands on them, four bright pips spin fast and gold sparks crackle |
+| Dash spent | a fading lightning streak where the run went |
 
 <!-- /gen:kit -->

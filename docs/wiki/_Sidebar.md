@@ -7,7 +7,7 @@
   - [Thief](Class-Thief.md)
   - [Archer](Class-Archer.md)
   - [Vireo](Class-Vireo.md)
-  - [Marlowe](Class-Marlowe.md)
+  - [Venator](Class-Venator.md)
   - [Juggernaut](Class-Juggernaut.md)
   - [Bulwark](Class-Bulwark.md)
   - [Linnet](Class-Linnet.md)
