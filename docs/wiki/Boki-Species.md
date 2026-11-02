@@ -93,7 +93,7 @@ _Fox + Scorpion_ (`cindle`). A sly fox with a scorpion's curled tail. Its sting 
 - E ability: **Stinger Hook** (8s cooldown, range 8m). Vespyx lashes its tail 8m: the first foe it stings is dragged back to it, poisoned, blighted (healing halved) and stunned 0.3s.
 - Auto ability (it casts this on its own): **Stinger Dash** (9s cooldown, range 7m). On its own, Vespyx lunges 7m tail first, poisoning everything it passes through.
 - On your dash: **Venom Trail**
-- Bond ultimate (merge): **Venom Mantle** (7s). Vespyx fuses onto you as venomous armor for 7s: 30% more damage, and your shots poison and burst.
+- Bond ultimate (merge): **Venom Mantle** (7s). Vespyx fuses onto you as venomous armor for 7s: 20% more damage, and your shots poison and burst.
 - Evolution paths: Fierce: Fierce > Barbed Tail; Steadfast: Steadfast; Curious: Curious; Swift: Swift
 
 ## Hivara
@@ -114,7 +114,7 @@ _Honeybee + Praying mantis_ (`hivara`). A honeybee with a praying mantis's folde
 
 - E ability: **Hive Swarm** (9s cooldown, range 6m). Hivara looses a buzzing swarm in a 5m cone: stung, poisoned and slowed. The swarm then hangs over the spot for 3s, stinging anyone inside.
 - Auto ability (it casts this on its own): **Spore Patch** (11s cooldown, range 7m). On its own, when foes bunch up, Mycroll puffs a 4s spore cloud on them: slowed and taking damage while inside.
-- Bond ultimate (merge): **Hive Crown** (7s). Hivara crowns you with its hive for 7s: 30% more damage, and every shot stings, poisons and slows.
+- Bond ultimate (merge): **Hive Crown** (7s). Hivara crowns you with its hive for 7s: 20% more damage, and every shot stings, poisons and slows.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
 
 ## Gravadillo

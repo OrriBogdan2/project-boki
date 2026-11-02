@@ -154,7 +154,8 @@ func _has_mouse(action: String, b: int) -> bool:
 
 func _controls() -> void:
 	ok("keys: E archetype utility", _has_key("signature", KEY_E))
-	ok("keys: R archetype ultimate", _has_key("ultimate", KEY_R))
+	ok("keys: T merge, R reload, X hunter ultimate",
+		_has_key("ultimate", KEY_T) and _has_key("reload", KEY_R) and _has_key("hunter_ult", KEY_X))
 	ok("keys: C kin ability", _has_key("kin_ability", KEY_C))
 	ok("keys: G send/recall + MMB alt", _has_key("throw", KEY_G) and _has_mouse("throw", MOUSE_BUTTON_MIDDLE))
 	ok("keys: Q glove, Shift dash, RMB", _has_key("gear1", KEY_Q) and _has_key("dash", KEY_SHIFT) and _has_mouse("secondary", MOUSE_BUTTON_RIGHT))

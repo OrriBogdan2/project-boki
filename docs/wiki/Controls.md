@@ -74,7 +74,9 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | Shift | Archetype dash | `dash` | yes |
 | Space | Jump (hold to glide) | `jump` | yes |
 | Mouse 5 / Mouse 4 | Glide (hold in the air) | `glide` | yes |
-| R / X | Merge with your Boki (needs a full bond meter) | `ultimate` | yes |
+| R | Reload | `reload` | yes |
+| X | Hunter ultimate | `hunter_ult` | yes |
+| T | Merge with your Boki (needs a full bond meter) | `ultimate` | yes |
 | 1 | Heal (tonic, or armor kit when health is full) | `tonic` | yes |
 | Tab | Scoreboard | `scores` | yes |
 | Esc | Menu | `menu` | no |
@@ -86,7 +88,7 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | I | Inventory | `inventory` | yes |
 | B | Build mode at home / decorate indoors | `build` | yes |
 | R | Turn a piece (build mode) | `rotate` | yes |
-| T | Emote wheel (hold, in a match) | `emote` | yes |
+| Y | Emote wheel (hold, in a match) | `emote` | yes |
 | M | Full map (click to ping) | `map` | yes |
 | P | Pass the drop lead | `pass_lead` | yes |
 | F10 | Recording mode (again: hide the HUD) | `record` | yes |
