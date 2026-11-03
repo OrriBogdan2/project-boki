@@ -23,7 +23,7 @@ const STRIP := [
 		[-0.2, "end: the isles sinking, rocks falling past"]],
 	[[1.0, "start: a hunter at sunrise, the first Boki out of the grass"],
 		[2.4, "beat: the lead Boki greets him, he kneels"],
-		[3.6, "middle: cut side-on, it noses the relic in his hand and it wakes"],
+		[3.9, "middle: cut side-on, it rears up to nose the relic in his hands and it wakes"],
 		[5.4, "beat: the woken relic hangs glowing in Venator's colour between them"],
 		[-0.2, "end: the Boki jump for joy, the Mantle rising off him"]],
 	[[1.0, "start: behind the hunters gliding for the Heart"], [2.8, "beat: the Heart's beam ahead"],

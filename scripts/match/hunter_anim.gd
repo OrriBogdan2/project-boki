@@ -1610,7 +1610,8 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 ##   key      crouched at the hatch, turning a key
 ##   loot     crouched over a deathbox, rummaging
 ##   rune     both palms on the stone
-const ACT_KNEEL := ["scan", "revive", "key", "loot"]
+##   offer    down on one knee, both hands held out together at the chest (the prologue's relic)
+const ACT_KNEEL := ["scan", "revive", "key", "loot", "offer"]
 func _act_tick(dt: float, s: Dictionary, grounded: bool, spd: float) -> void:
 	var want := String(s.get("act", ""))
 	if not grounded or spd > 2.2 or s.get("downed", false) or float(s.get("stomp", -1.0)) >= 0.0:
@@ -1627,7 +1628,7 @@ func _act_tick(dt: float, s: Dictionary, grounded: bool, spd: float) -> void:
 func _act_legs() -> Vector4:
 	var w := sin(act_t * 3.0)
 	match act_kind:
-		"scan", "revive", "key", "loot":
+		"scan", "revive", "key", "loot", "offer":
 			return Vector4(1.35, -1.45, -0.15, -1.9)
 		"chest":
 			var heave := 0.5 + 0.5 * sin(act_t * 3.4)
@@ -1695,6 +1696,8 @@ func _act_hands(sh_l: Vector3, sh_r: Vector3) -> Array:
 			return [sh_l + Vector3(0.08, -0.46 + maxf(0.0, r1), -0.34), sh_r + Vector3(-0.08, -0.46 + maxf(0.0, -r1), -0.34), 1.0]
 		"rune":
 			return [sh_l + Vector3(0.12, -0.06, -0.42), sh_r + Vector3(-0.12, -0.06, -0.42), 1.0]
+		"offer":
+			return [sh_l + Vector3(0.1, -0.1, -0.36), sh_r + Vector3(-0.1, -0.1, -0.36), 1.0]
 	return [sh_l, sh_r, 0.0]
 
 ## A support hand that can't reach its grip slides back along the weapon toward the trigger hand.
