@@ -21,7 +21,7 @@ Numbers are per shot or swing before any upgrades. Class kits that run their own
 | Quill Rifle | Marlowe | medium | 6 | 0.12s | 24 | 1.7s | 9.5m | A steady auto rifle fed from a drum. Long strings of fire lose half their punch after ten rounds, and Rattled foes take more. |
 | Rifle | none | medium | 6 | 0.13s | 20 | 1.8s | 9.5m | Steady and accurate. Long strings of fire lose some damage, so fire in bursts. |
 | Rubble Fists | Dolm | medium | 9 | 0.6s | 1 | 0.1s | 11m | Tap to hurl a boulder 11m. Hold and let go to punch: it throws foes back, stuns them against a wall and sends rocks flying. |
-| Shotgun | Dredge | heavy | 2 | 0.5s | 12 | 1.8s | 6.3m | Seven slugs in a tight fan that slow and stop at 6.3m, a shot every half second. One slug landing still hurts. Spread grows with each shot; dashing resets it. |
+| Shotgun | Dredge | heavy | 2 | 0.5s | 12 | 1.8s | 6.3m | Seven slugs in a tight fan that slow and stop at 6.3m, a shot every half second. One slug landing still hurts. Spread grows with each shot and settles when you stop. |
 | SMG | none | light | 4.6 | 0.12s | 22 | 1.4s | 7m | Fast and loose. Spread grows the longer you hold it, and damage drops off at the far end. |
 | Sniper | none | light | 36 | 1.5s | 5 | 2.2s | 16m | Winds up for 0.6s with a laser showing, then hits hard. Weak point-blank, full damage from half range. |
 | Spellstaff | none | medium | 9.5 | 0.55s | 12 | 1.4s | 10m | An orb bolt every 0.45s, 10m. Every 4th bolt hits 50% harder. |

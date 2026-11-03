@@ -50,20 +50,20 @@ What the in-game kit card (K) says.
 | Loop | Close-range burner: soak foes in fire until they blaze, then finish them in the flames. |
 | Passive: Flashover | Flashover: your fire sets foes Ablaze, then Flashes them over. A knock heals you and readies the cloak. |
 | Dash: Soot Ram | Ram head first toward the cursor; you stop on the first foe with a fiery hit. 2 charges. |
-| RMB: Cinder Shot | Hold to aim, release: a cinder that lands at your cursor and spreads the burn. |
+| RMB: Cinder Shot | Hold to aim, release: a cinder that lands at your cursor, slows the foe and spreads the burn. |
 | E: Furnace Cloak | A ring flashes, then a blast of heat drags nearby foes in and wraps you in a fire shield. |
 | X: Flue Flight | Flue Flight (level 6): fly toward the cursor and steer, laying a lava carpet that slows and burns; press it again to land. |
-| Weapon: Torch Lance | Hold to hose fire 7m ahead; the stream trails behind a sweep and hits harder on a burning foe. |
+| Weapon: Torch Lance | Hold to hose fire 7m ahead; the stream trails behind a sweep and hits harder on a burning foe and chips its health. |
 
 ### Abilities in full
 
-**Flashover (passive).** Your fire builds Char on foes (it all falls off after 5s). At 31 Char the foe is Ablaze: 3s of burning for 2% of their health a second, one flame over their head. Fed again to full Char they Flash over: a fiercer burn (4%), three flames and a glow. Anything that stokes a foe already burning upgrades it. A knock heals you 16% of your health.
+**Flashover (passive).** Your fire builds Char on foes (it all falls off after 5s). At 31 Char the foe is Ablaze: 3s of burning for 2% of their health a second, one flame over their head. Fed again to full Char they Flash over: a fiercer burn (4%), three flames and a glow. Anything that stokes a foe already burning upgrades it. A burning foe takes 25% more from the stream and the cinder (40% once Flashed over), and the stream also takes 1.5% (2.5%) of their health a second. A knock heals you 16% of your health.
 
-**Soot Ram (dash, Shift, 9s cooldown).** A quick, short head-first dash (fastest at the start) toward the cursor that stops on the first foe: 16 damage, a shove (you bounce back a little) and 17 Char (half a Flashover). Two charges. A knock restores one charge only. In the air it is a long, fast poof that launches you far and keeps your speed.
+**Soot Ram (dash, Shift, 9s cooldown).** A quick, short head-first dash (fastest at the start) toward the cursor that stops on the first foe: 16 damage, a heavy shove (you bounce back a little) and 17 Char (half a Flashover). Two charges. A knock restores one charge only. In the air it is a long, fast poof that launches you far and keeps your speed.
 
 **Cinder Shot (RMB, 7s cooldown).**
 
-- *Tap:* Hold to aim down a lane, release: a cinder that lands at your cursor (14m at most): 14 damage and it sets the foe Ablaze. On a foe that is already burning it upgrades the burn and spreads the burn to foes within 4m. A miss fizzles at the cursor.
+- *Tap:* Hold to aim down a lane, release: a cinder that lands at your cursor (14m at most): 14 damage, a 30% slow for 1.5s, and it sets the foe Ablaze. On a foe that is already burning it hits 25% harder (40% on a Flashed-over one), upgrades the burn and spreads the burn to foes within 4m. A miss fizzles at the cursor.
 
 **Furnace Cloak (E, 10.5s cooldown).** A thin ring flashes at 4.5m for 0.2s, then a blast of heat: 7 damage, 16 Char and Anti-Heal for 3s, and foes in sight are dragged toward you (walls stop them). Hit anyone and you wear a swirling 3s shield of 6.4% health plus 5.1% per foe. A knock resets it.
 
@@ -75,9 +75,9 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 
 | Slot | Rank 2 | Rank 3 |
 |---|---|---|
-| RMB | cooldown 7s -> 5.8s, damage +25%. | cooldown 7s -> 4.6s, damage +50%; refunds 25% of the cooldown when it stokes. |
-| Dash (Shift) | recharge 9s -> 8.4s per charge. | recharge 9s -> 7.8s; stokes the foe at once. |
-| E | cooldown 10.5s -> 8.5s, damage and shield +25%. | cooldown 10.5s -> 6.5s, damage and shield +50%; refunds 25% of the cooldown when it stokes. |
+| RMB | cooldown 7s -> 6.3s, damage +15%. | cooldown 7s -> 5.6s, damage +30%; a second charge. |
+| Dash (Shift) | recharge 9s -> 7.65s per charge. | recharge 9s -> 6.3s, damage +30% and +4.3; a hit gives +16% speed and a shield of 11.6% health for 2s. |
+| E | cooldown 10.5s -> 9.45s, damage and shield +15%. | cooldown 10.5s -> 8.4s, damage and shield +30%, and the shield +30% more. |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > Glove (Q).
 

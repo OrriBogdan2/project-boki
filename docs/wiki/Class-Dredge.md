@@ -50,7 +50,7 @@ What the in-game kit card (K) says.
 | Loop | Brawler who reels you in: hook a foe to your feet, smash them, finish them up close. |
 | Passive: Salvage | Salvage: knocks and assists add health, up to 10 stacks. A knock heals you. |
 | Dash: Barge | A short shoulder barge toward the cursor, further in the air. It works while you reel. |
-| RMB: Grapnel | Throw a rope-hook over rocks at the first foe and reel them to your feet, stunned. Strafe to swing them. |
+| RMB: Grapnel | Throw a rope-hook through rocks and cliffs at the first body it meets and reel it to your feet, stunned. Strafe to swing them. |
 | E: Anchor Drop | Hop forward and drop the anchor in front of you: damage and a long stun. In the air you smash straight down. |
 | X: Brass Broadside | Brass Broadside (level 6): plant and charge a fan, then two waves of heavy brass slugs with Anti-Heal. |
 | Weapon: Shotgun | Seven slugs in a tight fan that stop 6m out, a shot every half second. Hits from behind hurt more. |
@@ -59,13 +59,13 @@ What the in-game kit card (K) says.
 
 **Salvage (passive).** Each knock or assist adds a Salvage stack (+2.5% health, 10 at most); being downed costs one. Hits on a hunter's back deal 50% more. Knocking a hunter heals you 16% of your health.
 
-**Barge (dash, Shift, 10s cooldown).** A quick, short shoulder barge toward the cursor; three charges chain a beat apart: a burst where you set off, and it shoves foes along it for 5. In the air it goes 35% further. It is usable while reeling someone in. Just after the Anchor your turn is limited to 35 degrees.
+**Barge (dash, Shift, 10s cooldown).** A quick, short shoulder barge toward the cursor; three charges chain a beat apart: a burst where you set off, and it shoves foes along it (no damage). In the air it goes 35% further. It is usable while reeling someone in. Just after the Anchor your turn is limited to 35 degrees.
 
 **Grapnel (RMB, 12s cooldown).**
 
-- *Tap:* Throw a rope-hook 11.5m over rocks and props to the first foe (a cliff face stops it). The foe is reeled to you, stunned, dragged over rocks (until it arrives or 3s pass), and lands Grounded for 1s; strafe and the body swings round you. You are Grounded while you reel (no jump or glide; the barge still works). It also pulls an ally to safety and scoops up wisps on the way. The abyss takes whoever is pulled over it.
+- *Tap:* Throw a rope-hook 11.5m through rocks, props and cliff faces at the first body it meets (a placed wall stops it). The foe is reeled to you, stunned, dragged over rocks and cliffs (until it arrives or 3s pass); strafe and the body swings round you. You are Grounded while you reel (no jump or glide; the barge still works). It also pulls an ally to safety and scoops up wisps on the way. Rank 3: a foe it hits takes half the cooldown off. The abyss takes whoever is pulled over it.
 
-**Anchor Drop (E, 7s cooldown).** Hop a body length forward (0.38s), then the anchor smashes down in a 3m cone: 25 damage, stun 1.1s, slammed to the ground and Grounded. In the air you smash straight down and the anchor lands with you: a 3.2m ring, up to +50% damage by height. Over the abyss it slams where you are instead.
+**Anchor Drop (E, 7s cooldown).** Hop a body length forward (0.38s), then the anchor smashes down in a 3m cone: 25 damage, stun 1.1s, slammed to the ground and Grounded. In the air you smash straight down and the anchor lands with you: a 3.2m ring, up to +50% damage by height. Over the abyss it slams where you are instead. Rank 3: double damage on a foe over the abyss and +0.2s stun.
 
 **Brass Broadside (X, hero ultimate from level 6, 21s cooldown).** Plant your feet and charge for 1.1s while a 105 degree fan grows on the ground ahead (everyone sees it: it is the exact area). Then two waves 0.6s apart, six heavy brass slugs each, out to 5.9m: 4 damage a slug and Anti-Heal for 3s. Up close every slug lands. A stun during the charge stops it (back in 8s). 21s.
 
@@ -75,9 +75,9 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 
 | Slot | Rank 2 | Rank 3 |
 |---|---|---|
-| RMB | cooldown 12s -> 10.8s. | cooldown 12s -> 9.6s; hitting a foe refunds 33% of it. |
-| Dash (Shift) | recharge 10s -> 8.5s per charge. | recharge 10s -> 7s; pellet hits trim 0.25s off the recharge. |
-| E | cooldown 7s -> 6.3s, damage +15%, stun +0.1s. | cooldown 7s -> 5.6s, damage +30%; the air smash adds up to +75% damage by height. |
+| RMB | cooldown 12s -> 10.8s. | cooldown 12s -> 9.6s; hitting a foe takes half of it off. |
+| Dash (Shift) | recharge 10s -> 8.5s per charge. | recharge 10s -> 7s; pellet hits trim 0.25s off the recharge, and a dash resets the gun's spread. |
+| E | cooldown 7s -> 6.3s, damage +15%, stun +0.1s. | cooldown 7s -> 5.6s, damage +30%, stun +0.2s; double damage on a foe over the abyss and +0.2s stun more. |
 
 **Suggested level-up order** (what bots follow): RMB > E > Dash (Shift) > RMB > E > Dash (Shift) > RMB > E > Dash (Shift) > Glove (Q).
 
