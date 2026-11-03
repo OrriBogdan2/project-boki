@@ -129,6 +129,9 @@ func _ready_up(m: Match) -> void:
 		if not busy and hunter.roll_t <= 0.0 and k.dash_left() <= 0.0 and hunter.grounded and i > 30:
 			break
 		m.step(Match.DT)
+	if k.e_t > 0.0:
+		# an E that waits for its recast (Ostra's seed) would turn the next E press into that recast: a new kit
+		hunter.set_arch(hunter.arch)
 	for wall in m.verbs.walls.duplicate():
 		m.verbs._break_wall(wall)          # (the last trial's rocks and barriers would block this one's)
 	hunter.teleport(get_meta("home"))

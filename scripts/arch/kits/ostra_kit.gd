@@ -199,6 +199,12 @@ func _tick_weapon() -> void:
 		h.wpn = w
 		m.sfx("os_prime", h.pos, -12.0, 1.0)
 
+## A seed now waits for its recast, so a kit swapped out (practice, the Arena) takes its seed with it.
+func teardown() -> void:
+	if not seed.is_empty():
+		_pop(false)
+	super.teardown()
+
 ## The Settled bolt goes through terrain (the source's data: "goes through terrain").
 func _pierce_last() -> void:
 	for i in range(m.shots.size() - 1, -1, -1):
