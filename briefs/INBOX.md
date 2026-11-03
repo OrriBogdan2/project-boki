@@ -299,3 +299,13 @@ The video-understanding work is done: every reference sheet is written. From now
 
 ## 2026-11-03 04:20 UTC
 New: **briefs/SERVER_UPDATE7.md**, a kit data pass from the owner's game data (Sonnet, at most 2 at once). Start when slots free up. Order: dancer-juggernaut and pin-bjorn first (on ext/kitdata-<pair> from main if they're already merged), then the other four on their kitfix branches before they land.
+
+## 2026-11-03 04:25 UTC: OWNER: Venator first for everyone, then pick 1 of 3 (rework ext/classes, Sonnet)
+- **New saves start with Venator**, who is also the tutorial hunter.
+- **Character creation:** pick **1 of 3**: Zedran, Pin or Linwick. This replaces "pick 2 of 4".
+- **Challenge unlocks stay:** the 2 unpicked starters are easy, most are medium, and Ostra, Moosh Moosh and Breah are hardest and never offered at creation.
+- **Update:** the creation screen, the Hunter viewer copy, the save migration (existing saves keep everything they have), and --hunter-unlock-check:
+  - Venator is always owned
+  - exactly 1 pick from those 3
+  - challenge-only hunters can't be picked
+- **Use Sonnet**, push, and report ready in STATUS.md with the final challenge list.

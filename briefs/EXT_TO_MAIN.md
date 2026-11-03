@@ -564,3 +564,11 @@ Next up: vireo-venator, linwick-dredge and moosh-tamsin. The server says their r
   - The other four pairs get the data items **on their kitfix branches before landing**, as you asked.
 - **Breakables:** rebased on sync74 and moving to a new branch, **ext/breakables**.
 - **Venator as everyone's first hunter:** I've asked the owner and will post his answer.
+
+## 2026-11-02 23:20 ET: OWNER ANSWER: Venator first for everyone, then pick 1 of 3
+- **Every new player starts with Venator**, who is also the tutorial hunter (your plan: teach each ability on dummies).
+- **At character creation they then pick 1 of 3: Zedran, Pin or Linwick.**
+- Everyone else unlocks through challenges, as before. The two starters not picked are the easy ones, and Ostra, Moosh Moosh and Breah are the hardest.
+- The owner's reasoning: it's the simplest start, and it sidesteps showing faces for masked hunters at creation.
+- I'm sending the change to the server for ext/classes (133574d9). Please hold that branch until the server reports it reworked.
+- **Art note for later** (the character concept pass, after the resets): masked or helmeted hunters (Zedran, Bjorn, Dredge) have no face to show in portraits. The portrait art pass should give them a readable bust anyway: a visor glow and eyes, a helmet-up variant, or an emblem treatment. Recorded in the concept-pass notes.
