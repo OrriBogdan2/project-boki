@@ -156,50 +156,36 @@ const MOVES := {
 		[0.45, {}]]},
 	# ---------------------------------------------------------------- Dancer (thief)
 	# Arc Bolts, one per hand (footage 0028-0039: 2-3 frames a shot, one arm whipped forward from a wide
-	# low stance, the torso turned about 30 degrees into it; running, the legs keep running): the bolt leaves
-	# as the move starts, so the throwing arm starts cocked behind the shoulder (the last throw's recovery
-	# drew it back) and is whipped to full reach by 0.04 with the torso twisting into it, an overshoot at
-	# 0.12, settled by 0.26; by 0.45 (the next bolt) the other arm is cocked and the torso wound toward it,
-	# which is where the next throw starts; with no next bolt she lowers it by 0.7. The legs are a stance.
-	"thf_lmb_r": {"stance": true, "keys": [
-		[0.0, {"y": 0.5, "p": 0.12, "sq": 0.16, "lift": -0.1, "lw": 1.0, "legs": [0.85, -1.2, -0.75, -0.9],
-				"fr": Vector3(0.22, 0.14, 0.30), "rw": 1.0, "fl": Vector3(-0.42, 0.14, 0.00), "hw": 0.9}],
-		[0.04, {"y": -0.5, "p": -0.3, "sq": -0.2, "lift": -0.04, "lw": 1.0, "legs": [0.95, -1.0, -0.8, -0.6],
-				"fr": Vector3(0.02, 0.08, -0.60), "rw": 1.0, "fl": Vector3(-0.47, 0.10, 0.20), "hw": 0.9}],
-		[0.12, {"y": -0.62, "p": -0.34, "sq": -0.08, "lift": -0.05, "lw": 1.0, "legs": [0.95, -1.05, -0.8, -0.65],
-				"fr": Vector3(-0.04, 0.04, -0.68), "rw": 1.0, "fl": Vector3(-0.42, 0.10, 0.18), "hw": 0.8}],
-		[0.26, {"y": -0.2, "p": -0.04, "sq": 0.05, "lift": -0.07, "lw": 1.0, "legs": [0.8, -1.1, -0.7, -0.85],
-				"fr": Vector3(0.12, 0.06, -0.25), "rw": 0.8, "fl": Vector3(-0.30, 0.10, 0.12), "hw": 0.8}],
-		[0.45, {"y": -0.5, "p": 0.12, "sq": 0.16, "lift": -0.1, "lw": 1.0, "legs": [0.85, -1.2, -0.75, -0.9],
-				"fr": Vector3(0.42, 0.14, 0.00), "rw": 0.9, "fl": Vector3(-0.22, 0.14, 0.30), "hw": 1.0}],
+	# low stance, the torso turned about 30 degrees into it; running, the legs keep running). The body for
+	# each throw; the blade and the hand on it are whipped by the swing (HunterAnim.SWINGS "arc_bolts": from
+	# cocked out wide and high to straight ahead at reach, about 0.05s). The bolt leaves as the move starts, so
+	# it starts wound toward the throwing side (the last throw's recovery wound it there), unwinds through
+	# the throw by 0.04, overshoots at 0.12, settles by 0.26, and by 0.45 (the next bolt) is wound toward the
+	# other hand, where the next throw starts; with no next bolt she lets it go by 0.7. The legs are a stance.
+	"thf_lmb_r": {"stance": true, "swing": 0, "keys": [
+		[0.0, {"y": 0.5, "p": 0.12, "sq": 0.16, "lift": -0.1, "lw": 1.0, "legs": [0.85, -1.2, -0.75, -0.9]}],
+		[0.04, {"y": -0.5, "p": -0.3, "sq": -0.2, "lift": -0.04, "lw": 1.0, "legs": [0.95, -1.0, -0.8, -0.6]}],
+		[0.12, {"y": -0.62, "p": -0.34, "sq": -0.08, "lift": -0.05, "lw": 1.0, "legs": [0.95, -1.05, -0.8, -0.65]}],
+		[0.26, {"y": -0.2, "p": -0.04, "sq": 0.05, "lift": -0.07, "lw": 1.0, "legs": [0.8, -1.1, -0.7, -0.85]}],
+		[0.45, {"y": -0.5, "p": 0.12, "sq": 0.16, "lift": -0.1, "lw": 1.0, "legs": [0.85, -1.2, -0.75, -0.9]}],
 		[0.7, {}]]},
-	"thf_lmb_l": {"stance": true, "keys": [
-		[0.0, {"y": -0.5, "p": 0.12, "sq": 0.16, "lift": -0.1, "lw": 1.0, "legs": [0.85, -1.2, -0.75, -0.9],
-				"fr": Vector3(0.42, 0.14, 0.00), "rw": 0.9, "fl": Vector3(-0.22, 0.14, 0.30), "hw": 1.0}],
-		[0.04, {"y": 0.5, "p": -0.3, "sq": -0.2, "lift": -0.04, "lw": 1.0, "legs": [0.95, -1.0, -0.8, -0.6],
-				"fr": Vector3(0.47, 0.10, 0.20), "rw": 0.9, "fl": Vector3(-0.02, 0.08, -0.60), "hw": 1.0}],
-		[0.12, {"y": 0.62, "p": -0.34, "sq": -0.08, "lift": -0.05, "lw": 1.0, "legs": [0.95, -1.05, -0.8, -0.65],
-				"fr": Vector3(0.42, 0.10, 0.18), "rw": 0.8, "fl": Vector3(0.04, 0.04, -0.68), "hw": 1.0}],
-		[0.26, {"y": 0.2, "p": -0.04, "sq": 0.05, "lift": -0.07, "lw": 1.0, "legs": [0.8, -1.1, -0.7, -0.85],
-				"fr": Vector3(0.30, 0.10, 0.12), "rw": 0.8, "fl": Vector3(-0.12, 0.06, -0.25), "hw": 0.8}],
-		[0.45, {"y": 0.5, "p": 0.12, "sq": 0.16, "lift": -0.1, "lw": 1.0, "legs": [0.85, -1.2, -0.75, -0.9],
-				"fr": Vector3(0.22, 0.14, 0.30), "rw": 1.0, "fl": Vector3(-0.42, 0.14, 0.00), "hw": 0.9}],
+	"thf_lmb_l": {"stance": true, "swing": 1, "keys": [
+		[0.0, {"y": -0.5, "p": 0.12, "sq": 0.16, "lift": -0.1, "lw": 1.0, "legs": [0.85, -1.2, -0.75, -0.9]}],
+		[0.04, {"y": 0.5, "p": -0.3, "sq": -0.2, "lift": -0.04, "lw": 1.0, "legs": [0.95, -1.0, -0.8, -0.6]}],
+		[0.12, {"y": 0.62, "p": -0.34, "sq": -0.08, "lift": -0.05, "lw": 1.0, "legs": [0.95, -1.05, -0.8, -0.65]}],
+		[0.26, {"y": 0.2, "p": -0.04, "sq": 0.05, "lift": -0.07, "lw": 1.0, "legs": [0.8, -1.1, -0.7, -0.85]}],
+		[0.45, {"y": 0.5, "p": 0.12, "sq": 0.16, "lift": -0.1, "lw": 1.0, "legs": [0.85, -1.2, -0.75, -0.9]}],
 		[0.7, {}]]},
 	# the empowered bolt (0143: a big streak, a vertical blade flash at her hands), thrown with both blades at
-	# once: she is caught coiled (both blades swept wide behind the shoulders, sunk low), drives them out
-	# together in a V at 0.04 with a long lunge, holds the reach through 0.12, recoils back onto her heels by 0.24 with
-	# the arms snapping back, and settles by 0.55 (the next bolt's whip takes over at 0.45)
-	"thf_primed": {"keys": [
-		[0.0, {"p": 0.16, "sq": 0.22, "lift": -0.1, "lw": 1.0, "legs": [0.85, -1.25, -0.7, -0.95],
-				"fr": Vector3(0.46, 0.34, 0.42), "rw": 1.0, "fl": Vector3(-0.46, 0.34, 0.42), "hw": 1.0}],
-		[0.04, {"p": -0.46, "sq": -0.26, "lift": -0.02, "lw": 1.0, "legs": [1.05, -0.9, -0.9, -0.5],
-				"fr": Vector3(0.20, 0.16, -0.76), "rw": 1.0, "fl": Vector3(-0.20, 0.16, -0.76), "hw": 1.0}],
-		[0.12, {"p": -0.52, "sq": -0.18, "lift": -0.03, "lw": 1.0, "legs": [1.1, -0.95, -0.95, -0.5],
-				"fr": Vector3(0.18, 0.14, -0.80), "rw": 1.0, "fl": Vector3(-0.18, 0.14, -0.80), "hw": 1.0}],
-		[0.24, {"p": 0.24, "sq": 0.14, "lift": -0.06, "lw": 0.9, "legs": [0.5, -0.7, -0.3, -0.55],
-				"fr": Vector3(0.28, 0.16, -0.18), "rw": 0.8, "fl": Vector3(-0.28, 0.16, -0.18), "hw": 0.8}],
-		[0.38, {"p": 0.06, "sq": 0.04, "lw": 0.5, "legs": [0.7, -0.95, -0.55, -0.7], "lift": -0.05,
-				"fr": Vector3(0.40, 0.12, -0.02), "rw": 0.4, "fl": Vector3(-0.40, 0.12, -0.02), "hw": 0.4}],
+	# once (the swing drives both out in a V, HunterAnim.SWINGS "arc_bolts" step 2): she is caught coiled and
+	# sunk low, lunges into it at 0.04, holds the reach through 0.12, recoils back onto her heels by 0.24 and
+	# settles by 0.55 (the next bolt's throw takes over at 0.45)
+	"thf_primed": {"swing": 2, "keys": [
+		[0.0, {"p": 0.16, "sq": 0.22, "lift": -0.1, "lw": 1.0, "legs": [0.85, -1.25, -0.7, -0.95]}],
+		[0.04, {"p": -0.46, "sq": -0.26, "lift": -0.02, "lw": 1.0, "legs": [1.05, -0.9, -0.9, -0.5]}],
+		[0.12, {"p": -0.52, "sq": -0.18, "lift": -0.03, "lw": 1.0, "legs": [1.1, -0.95, -0.95, -0.5]}],
+		[0.24, {"p": 0.24, "sq": 0.14, "lift": -0.06, "lw": 0.9, "legs": [0.5, -0.7, -0.3, -0.55]}],
+		[0.38, {"p": 0.06, "sq": 0.04, "lw": 0.5, "legs": [0.7, -0.95, -0.55, -0.7], "lift": -0.05}],
 		[0.55, {}]]},
 	# Vault, the ground Cartwheel (sheet: body 0176-0178, 0134-0137), inside the 0.48s dash: a 0.05s crouch with
 	# the arms swung up and the body leaning into the side, a push-off into a star (legs split, arms wide), one

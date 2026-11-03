@@ -374,9 +374,9 @@ func _bolt() -> void:
 	sd["life0"] = sd["life"]
 	var x: Dictionary = sd["x"]
 	x["kx"] = func(s: Dictionary, at: Vector3, e: Ent, why: String) -> void: _bolt_end(s, at, e, why, emp)
-	# the throw: the cocked arm whips forward as the bolt leaves, the torso turns into it, and the other arm
-	# cocks for the next bolt (KMovesDJ thf_lmb_r / thf_lmb_l); the empowered one is both blades driven out
-	# together (thf_primed)
+	# the throw: the torso unwinds into it and winds toward the other hand for the next bolt (KMovesDJ
+	# thf_lmb_r / thf_lmb_l) while the swing whips that hand's blade out (HunterAnim.SWINGS "arc_bolts"); the
+	# empowered one is both blades driven out together (thf_primed)
 	var throw := "thf_lmb_r" if hand == 1 else "thf_lmb_l"
 	play("thf_primed" if emp else throw)
 	h.swing_n += 1

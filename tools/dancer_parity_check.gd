@@ -6,8 +6,9 @@ extends RefCounted
 ## docs/heroes/thief.md, "Parity pass".
 
 const RATE := 0.45           # s between bolts held (the card's 0.45s; footage: a hit every 2-3 frames)
-const REACH_BY := 0.05       # s: the arm is out this soon after the bolt leaves (a frame at 30 fps) ...
-const REACH_SHARE := 0.85    # ... this share of its furthest reach (the follow-through overshoots it)
+const REACH_BY := 0.06       # s: the blade is out this soon after the bolt leaves (under 2 frames at 30 fps) ...
+const REACH_SHARE := 0.85    # ... this share of the way along its arc
+const TWIN_SWING_S := 0.3    # s: a twin-hold swing (HunterAnim's base swing time for the hold)
 const TWIST := [0.4, 0.65]   # rad: the torso turned into the throw (footage: about 30 degrees)
 const TURN_180 := 0.2        # s: the body turns 180 degrees to a new cursor (source 1280 deg/s: 0.14s)
 const RUN_KEEP := 0.85       # share of her run kept while she throws
@@ -23,25 +24,36 @@ func run(a, m: Match, P: Hunter, K: ThiefKit, T: Hunter, home: Vector3) -> void:
 	P.inp["move"] = Vector2.ZERO
 	A.step(m, 0.6)
 
-## The throw's keys: the arm at full reach within a frame of the bolt, the torso turned into it, the other arm
-## cocked when the next bolt is due (where the next throw starts), and the legs a stance only.
+## The throw: the blade (with the hand on it) whipped from cocked to straight at the aim within a few hundredths of a
+## second of the bolt, the right, the left, both for the empowered one; the torso turned ~30 degrees into it and
+## wound toward the other hand by the next bolt (where the next throw starts); the legs a stance only.
 func _beats() -> void:
-	var far := 0.0
-	for t in range(0, 46):
-		far = maxf(far, -(HunterAnim.km_sample("thf_lmb_r", t / 100.0)["fr"] as Vector3).z)
 	var reach_t := 1.0
-	for t in range(0, 46):
-		if -(HunterAnim.km_sample("thf_lmb_r", t / 100.0)["fr"] as Vector3).z >= far * REACH_SHARE:
-			reach_t = minf(reach_t, t / 100.0)
+	for i in 101:
+		if HunterAnim.swing_ease(i / 100.0) >= REACH_SHARE:
+			reach_t = minf(reach_t, i / 100.0 * TWIN_SWING_S)
+	var throws := ["thf_lmb_r", "thf_lmb_l", "thf_primed"]
+	var arcs: Array = HunterAnim.SWINGS["arc_bolts"]
+	var whips := true
+	for i in arcs.size():
+		var cocked: Vector3 = arcs[i]["a"]
+		var torso: float = HunterAnim.km_sample(throws[i], 0.06)["y"]
+		whips = whips and absf(cocked.x) > 0.8 and cocked.y > 0.3 and absf((arcs[i]["b"] as Vector3).x + torso) < 0.2
+	var steps := [0, 1, 2] == throws.map(func(mv: String) -> int: return int(KMovesDJ.MOVES[mv].get("swing", -1)))
+	var on_blades := throws.all(func(mv: String) -> bool:
+		return (KMovesDJ.MOVES[mv]["keys"] as Array).all(func(k: Array) -> bool:
+			return not (k[1] as Dictionary).has("fr") and not (k[1] as Dictionary).has("fl")))
 	var at_reach := HunterAnim.km_sample("thf_lmb_r", 0.04)
-	var end_r := HunterAnim.km_sample("thf_lmb_r", RATE)
-	var start_l := HunterAnim.km_sample("thf_lmb_l", 0.0)
-	var flows := (end_r["fl"] as Vector3).is_equal_approx(start_l["fl"]) \
-			and (end_r["fr"] as Vector3).is_equal_approx(start_l["fr"]) and is_equal_approx(end_r["y"], start_l["y"])
-	A.ok("dancer parity LMB: the arm whips to full reach within a frame of the bolt, the torso turned ~30 degrees",
-			reach_t <= REACH_BY and absf(float(at_reach["y"])) >= TWIST[0] and absf(float(at_reach["y"])) <= TWIST[1],
-			"reach at %.2f s, twist %.2f rad" % [reach_t, at_reach["y"]])
-	A.ok("dancer parity LMB: by the next bolt the other arm is cocked, where the next throw starts", flows)
+	A.ok("dancer parity LMB: the blade whips from cocked to the aim by 0.06s, right, left, both when empowered",
+			reach_t <= REACH_BY and whips and steps and on_blades,
+			"reach at %.3f s, arcs %s steps %s hands on the blades %s" % [reach_t, whips, steps, on_blades])
+	A.ok("dancer parity LMB: the torso turned ~30 degrees into the throw",
+			absf(float(at_reach["y"])) >= TWIST[0] and absf(float(at_reach["y"])) <= TWIST[1],
+			"%.2f rad" % at_reach["y"])
+	var wound: float = HunterAnim.km_sample("thf_lmb_r", RATE)["y"]
+	var flows := is_equal_approx(wound, HunterAnim.km_sample("thf_lmb_l", 0.0)["y"])
+	A.ok("dancer parity LMB: by the next bolt the torso is wound toward the other hand, where the next throw starts",
+			flows)
 	var stance := ["thf_lmb_r", "thf_lmb_l", "thf_bola"].all(
 			func(mv: String) -> bool: return bool(KMovesDJ.MOVES[mv].get("stance", false)))
 	A.ok("dancer parity: the throws' and the Bola wind-up's legs are a stance, dropped at a run (legs keep running)",
