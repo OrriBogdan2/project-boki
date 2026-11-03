@@ -13,8 +13,8 @@ extends ArchKit
 ## - Dash: 360 Smash, a short dash that ends in one full spin hit around him; with the aegis raised it's
 ##   the Shield Charge (the Bash: invulnerable for its length, a heavier knock) on the RMB slot's own cooldown.
 ## - Passive, Guard: damage the aegis blocks becomes Guard; at 50 the Shield Charge ends in a Shield Slam.
-##   Payoff, Crushed: any knock of his (Crushing Blow, 360 Smash, Shield Charge, Slam) that drives a foe into a
-##   wall or another foe stuns them (T4, pay_slam).
+##   Payoff, Crushed: any knock of his (the hammer thrown or called back, Crushing Blow, 360 Smash, Shield
+##   Charge, Slam) that drives a foe into a wall stuns them (T4, pay_slam).
 ## - E, Mending Ground: a green column comes down for 1 s, then a zone round the hammer (on you when the hammer
 ##   is in hand) heals a little every 0.5 s for 4 s and ends in a burst that also mends a raised aegis.
 ## - X, Faultline (level 6, BjornUlt): planted, a slam, and the ground erupts cell by cell down a lane.
@@ -107,7 +107,6 @@ func add_guard(v: float) -> void:
 	touch_res()
 	for step in [33.0, 66.0, 100.0]:
 		if was < step and res >= step:
-			m.fx.ring(h.pos, 1.0 + step / 100.0, res_col(), 0.25)      # the shield runes light in steps
 			if anim_id == "": play("bul_armed")
 	if was < float(res_def().get("slam", 50.0)) and full_ready():
 		armed_fx("SLAM READY", "sec")
@@ -280,6 +279,10 @@ func ult_running() -> bool:
 
 ## The Shield Charge's front guard: hits from the front 140° are blocked (and become Guard).
 func incoming(by: Ent, dmg: float, o: Dictionary) -> Array:
+	if _aegis_takes(by, o):
+		m.verbs.absorb(wall, dmg)          # it takes the hit (and turns it into Guard) as it does a shot
+		o = o.duplicate(); o.erase("kb"); o.erase("lift")
+		return [0.0, o]
 	if front_t > 0.0 and by != null and is_instance_valid(by):
 		var to := Vector2(by.pos.x - h.pos.x, by.pos.z - h.pos.z)
 		var fwd := Vector2(-sin(h.face), -cos(h.face))
@@ -289,6 +292,17 @@ func incoming(by: Ent, dmg: float, o: Dictionary) -> Array:
 			o = o.duplicate(); o.erase("kb"); o.erase("lift")
 			return [0.0, o]
 	return [dmg, o]
+
+## The raised aegis blocks all damage from the front (data: Brightshield), melee and abilities as well as the
+## shots the wall itself stops: a hit from a foe inside its arc, facing the cursor. Damage over time isn't a hit.
+func _aegis_takes(by: Ent, o: Dictionary) -> bool:
+	if wall.is_empty() or by == null or not is_instance_valid(by) or o.get("tick", false):
+		return false
+	if String(o.get("src", "")) in ["burn", "fall", "heat"]:
+		return false
+	var to := Vector2(by.pos.x - h.pos.x, by.pos.z - h.pos.z)
+	var half := deg_to_rad(float(rmb_def()["shield"].get("arc", 140.0)) * 0.5)
+	return to.length() > 0.1 and h.aim_dir().dot(to.normalized()) > cos(half)
 
 ## A Shield Charge counts as being in the fight up front (the dash's own "during E" stand-in).
 func in_e() -> bool:
@@ -303,22 +317,12 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 		return
 	_try_crush(t, Vector2(t.pos.x - h.pos.x, t.pos.z - h.pos.z).normalized())
 
-func _foe_behind(t: Ent, dir: Vector2, reach: float) -> Ent:
-	for f in m.foes_of(h.team):
-		if f == t or not f.hittable(): continue
-		var to := Vector2(f.pos.x - t.pos.x, f.pos.z - t.pos.z)
-		var ahead := to.length() > 0.05 and to.normalized().dot(dir) > 0.5
-		if to.length() < reach + f.r and ahead and absf(f.pos.y - t.pos.y) < 1.4:
-			return f
-	return null
-
 func _try_crush(t: Ent, dir: Vector2) -> void:
 	if dir.length() < 0.1:
 		dir = h.aim_dir()
 	if m.time - float(crushed_at.get(t.get_instance_id(), -9.0)) < 0.6:
 		return
-	var other := _foe_behind(t, dir, 1.6)
-	if other == null and not terrain_behind(t, dir, float(res_def().get("crush_reach", 1.5))):
+	if not terrain_behind(t, dir, float(res_def().get("crush_reach", 1.5))):
 		return
 	crushed_at[t.get_instance_id()] = m.time
 	var rd := res_def()
@@ -330,10 +334,6 @@ func _try_crush(t: Ent, dir: Vector2) -> void:
 		var crush_stun := float(rd.get("crush_stun", 0.8))
 		tgt.hurt(crush_dmg, h, {"src": "abil", "ab": "utility", "tags": ["utility", "crushed"], "payoff": true,
 			"stun": crush_stun, "dr": true})
-		if other and is_instance_valid(other) and not other.dead:
-			crushed_at[other.get_instance_id()] = m.time
-			other.hurt(crush_dmg, h, {"src": "abil", "ab": "utility", "tags": ["utility", "crushed"],
-				"stun": crush_stun * 0.6, "dr": true})
 		payoff_fx(tgt.pos, "CRUSHED", res_col(), "pay_slam", dir, tgt)
 		if not anim_id in ["bul_smash", "bul_charge"]: play("bul_crush")
 		m.fx.dust(tgt.pos, 14))
@@ -400,8 +400,6 @@ func lmb_override(held: bool, dt: float) -> bool:
 		h.mel_hold = lmb_t
 		_hold_tell()
 		_resume_wind()
-		if lmb_t >= float(md["full"]) + 0.4:
-			_smash()           # held well past full: it goes off by itself
 	elif lmb_t >= 0.0:
 		if lmb_t < float(md["tap"]): _throw()
 		else: _smash()
@@ -546,6 +544,7 @@ func _recall() -> void:
 	CombatBus.ability_used.emit(h, id + "_recall", "primary")       # a press with the hammer out is the recall
 
 func _mace_hit(f: Ent, dmg: float, dir: Vector2) -> void:
+	knock_until = m.time + 0.25       # its knock into a wall Crushes too (data: any knock into a wall)
 	f.hurt(dmg * _wk(), h, {"src": "abil", "ab": "primary", "tags": ["primary", "mace"], "kb": dir * 3.0, "melee": true})
 
 func _tick_mace(dt: float) -> void:
@@ -587,9 +586,7 @@ func _tick_mace(dt: float) -> void:
 					throw_d = Vector2(p.x - h.pos.x, p.z - h.pos.z).length()
 					fx.hammer_plant(Vector3(p.x, gy, p.z), atan2(-dir.x, -dir.y))
 					m.fx.dust(p, 8)
-					m.fx.ring(Vector3(p.x, gy, p.z), 1.0, BjornFx.GOLD, 0.25)
 					m.sfx("bjorn_plant", p, -3.0)
-					net_ring(p, 1.2, Color("ffd27a"))
 		"ground":
 			mace["t"] = float(mace["t"]) + dt
 			# it shows foes near it to your team (vision where it stands)
@@ -743,7 +740,6 @@ func on_dash(use_ex: bool) -> bool:
 		if full_ready():
 			res -= float(res_def().get("slam", 50.0))
 			m.fx.flash(h.pos + Vector3(h.aim_dir().x * 0.8, 1.0, h.aim_dir().y * 0.8), res_col(), 0.9, t_felt)
-			net_ring(h.pos, 1.6, res_col())
 			m.later(t_felt, func(): if is_instance_valid(h) and not h.downed and not KinMerge.active(h): _shield_slam())
 		st["last_dash"] = "charge"
 		play("bul_charge")
@@ -759,7 +755,7 @@ func on_dash(use_ex: bool) -> bool:
 		st["last_dash"] = "lumber"
 		play("bul_lumber")
 		for i in 4:
-			m.later(0.07 * i, func(): if is_instance_valid(h): m.fx.dust(h.pos, 5); m.fx.burst(h.pos + Vector3(0, 0.6, 0), BjornFx.GOLD, 3, 1.2, 0.3, 0.0, 1.2))
+			m.later(0.07 * i, func(): if is_instance_valid(h): m.fx.dust(h.pos, 5))
 		return true
 	# 360 Smash: a short fixed dash in the aim (or move) direction, then ONE full spin hit around him
 	var dist2 := float(dd["whirl"]) + (1.0 if rank("dash") >= 3 else 0.0)
@@ -769,7 +765,6 @@ func on_dash(use_ex: bool) -> bool:
 	t2 *= float(dash_feel()["time"])          # the spin lands when the (feel-scaled) dash arrives
 	st["last_dash"] = "whirl"
 	play("bul_whirl")
-	m.fx.burst(h.pos + Vector3(0, 0.2, 0), BjornFx.GOLD, 8, 3.0, 0.2, 2.0, 0.8)
 	m.later(t2, func():
 		if is_instance_valid(h) and not h.downed and not KinMerge.active(h) and not ult.planted(): _spin_hit(wd))
 	return true

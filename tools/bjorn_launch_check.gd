@@ -18,6 +18,7 @@ func bjorn() -> void:
 	await _launch_glide()
 	await _combo_moves()
 	await _lmb_parity()
+	await _audit()
 
 func _planar(P: Hunter) -> float:
 	return Vector2(P.vel.x, P.vel.z).length()
@@ -138,11 +139,13 @@ func _window() -> void:
 		"opens at %.2f flash %s hot %s" % [opened, flash_ringless, hot])
 	ok("bjorn #49 window: it shuts %.2f s after full" % win, absf(shut - (full + win)) < 0.03,
 		"shuts at %.2f (want %.2f)" % [shut, full + win])
+	step(m, 2.0, press_at.bind(P, home + Vector3(9.0, 0, 0)))
+	var held_on := K.slams == 0 and K.lmb_t > full + 2.0
 	P.inp["fire"] = false
 	step(m, 0.5)
-	ok("bjorn #49 window: held past it, the swing goes off on its own as a normal one",
-		K.lmb_t < 0.0 and K.launch.launches == 0 and K.slams == 1,
-		"launches %d slams %d" % [K.launch.launches, K.slams])
+	ok("bjorn #49 window: held past it nothing goes off by itself (sheet: a 2.6 s hold); let go, a normal swing",
+		held_on and K.lmb_t < 0.0 and K.launch.launches == 0 and K.slams == 1,
+		"held on %s launches %d slams %d" % [held_on, K.launch.launches, K.slams])
 	await done(m)
 
 ## #49 on flat ground: in the window he launches >= 3.5 m (feet up, bul_launch) with a bigger knock, a heavier
@@ -453,3 +456,73 @@ func _rmb_parity(m: Match, P: Hunter, K: BulwarkKit, home: Vector3) -> void:
 	ok("bjorn parity RMB: the aegis faces a sweeping cursor at once (within 10 deg)",
 		not K.wall.is_empty() and worst <= deg_to_rad(10.0), "worst %.1f deg" % rad_to_deg(worst))
 	step(m, 0.3)
+
+# ------------------------------------------------------------------ kit audit (Nov 3 23:40)
+## The audit's fixes: the thrown hammer's knock into a wall Crushes (data: any knock into a wall), a knock
+## into another foe doesn't (data: walls only), and the raised aegis takes any blow from the front, melee
+## included (data: Brightshield blocks all damage from the front), not one from behind.
+func _audit() -> void:
+	var r := setup("bulwark", 5.0, "", true)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var T: Hunter = r[2]
+	var T2: Hunter = r[3]
+	var home: Vector3 = r[4]
+	var lv: int = r[5]
+	var K: BulwarkKit = P.ak
+	T2.teleport(home + Vector3(-20.0, 0, 8.0))
+	_wall_at(m, T.pos, lv, 1)
+	step(m, 0.3)
+	K.mace = {}
+	P.fire_cd = 0.0
+	var c0 := K.crushes
+	press_at(P, T.pos)
+	m.step(DT)
+	P.inp["fire"] = false
+	step(m, 0.6)
+	ok("bjorn audit: the thrown hammer knocking a foe into a wall Crushes it (stun)",
+		K.crushes == c0 + 1 and T.stun_t > 0.0, "crushes %d stun %.2f" % [K.crushes - c0, T.stun_t])
+	_clear_wall(m, T.pos, lv, 1)
+	step(m, 1.5)
+	await done(m)
+	r = setup("bulwark", 2.4, "", true)
+	m = r[0]
+	P = r[1]
+	T = r[2]
+	T2 = r[3]
+	home = r[4]
+	K = P.ak
+	T2.teleport(T.pos + Vector3(1.4, 0, 0))
+	step(m, 0.3)
+	c0 = K.crushes
+	step(m, float(K.lmb_def()["full"]) + 0.3, press_at.bind(P, T.pos))
+	P.inp["fire"] = false
+	step(m, 0.6)
+	ok("bjorn audit: a blow that knocks a foe into another foe (no wall) doesn't Crush (data: walls only)",
+		K.crushes == c0 and dmg(T) > 0.0, "crushes %d took %.0f" % [K.crushes - c0, dmg(T)])
+	# the aegis: a melee blow from the front lands on it, one from behind lands on him
+	step(m, 1.0)
+	P.teleport(home)
+	T.teleport(home + Vector3(1.6, 0, 0))
+	T2.teleport(home + Vector3(-1.6, 0, 0))
+	fresh(T)
+	K.lock_t = 0.0
+	K.ch_rmb = 1.0
+	K.cd["rmb"] = 0.0
+	K.shield_hp = K.shield_max()
+	aim_at(P, T.pos)
+	P.inp["sec_hold"] = true
+	K.press_rmb()
+	step(m, 0.3, rmb_at.bind(P, T.pos))
+	var hp0 := P.hp
+	var w0 := float(K.wall.get("hp", 0.0))
+	P.hurt(20.0, T, {"src": "melee", "melee": true, "kb": Vector2(-4, 0)})
+	var front_ok := P.hp == hp0 and float(K.wall.get("hp", 0.0)) <= w0 - 19.0
+	P.hurt(20.0, T2, {"src": "melee", "melee": true})
+	ok("bjorn audit: the raised aegis takes a melee blow from the front (data: all damage from the front)",
+		not K.wall.is_empty() and front_ok, "hp %.0f -> %.0f wall %.0f -> %.0f" % [hp0, P.hp, w0,
+				float(K.wall.get("hp", 0.0))])
+	ok("bjorn audit: a blow from behind still lands on him", P.hp < hp0, "hp %.0f -> %.0f" % [hp0, P.hp])
+	P.inp["sec_hold"] = false
+	step(m, 0.3)
+	await done(m)
