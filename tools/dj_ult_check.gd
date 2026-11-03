@@ -257,8 +257,8 @@ func _chain_riposte() -> void:
 	P.hurt(25.0, T, {"src": "shot"})
 	A.step(m, 0.9)
 	A.ok("combo jug: E > E > X = pulled in, a hit blocked, the cleave lands",
-			K.reels >= 1 and K.riposte.blocked == 1 and K.riposte.strikes == 1 and A.dmg(T) > 20.0,
-			"reels %d blocked %d took %.0f" % [K.reels, K.riposte.blocked, A.dmg(T)])
+			K.warchain.reels >= 1 and K.riposte.blocked == 1 and K.riposte.strikes == 1 and A.dmg(T) > 20.0,
+			"reels %d blocked %d took %.0f" % [K.warchain.reels, K.riposte.blocked, A.dmg(T)])
 	await A.done(m)
 
 ## A merge starting mid-ultimate ends it: no blade or cleave fires after, the telegraphs go.

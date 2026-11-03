@@ -529,8 +529,7 @@ func update(dt: float, s: Dictionary) -> void:
 	stepped = false
 	slammed = false
 	_check_weapon(s)
-	km_id = String(s.get("kmove", ""))
-	km = km_sample(km_id, float(s.get("kmove_t", 99.0))) if km_id != "" else {}
+	_update_km(String(s.get("kmove", "")), float(s.get("kmove_t", 99.0)), dt)
 	var vel: Vector3 = s.get("vel", Vector3.ZERO)
 	var face: float = s.get("face", model.rotation.y)
 	var grounded: bool = s.get("grounded", true)
@@ -1091,6 +1090,42 @@ const KM_CH := ["p", "y", "r", "lift", "fx", "fz", "fy", "sq", "lw", "hw", "rw",
 var km := {}                   # the kit move's channels this frame (empty: none)
 var km_id := ""
 var km_prev_t := 99.0
+var km_from := {}              # the pose the last kit move left the body in, eased out over KM_BLEND
+var km_blend := KM_BLEND
+const KM_BLEND := 0.08         # s: one kit move eases into the next (or back to none), so no pose pops
+
+## The kit move's channels this frame; a new move (or the same one restarted) blends in from the last pose.
+func _update_km(id: String, tt: float, dt: float) -> void:
+	if id != km_id or tt < km_prev_t - 0.001:
+		km_from = km
+		km_blend = 0.0
+	km_id = id
+	km_prev_t = tt
+	var now := km_sample(id, tt) if id != "" else {}
+	km_blend += dt
+	km = now if km_blend >= KM_BLEND or km_from.is_empty() else km_mix(km_from, now, km_blend / KM_BLEND)
+
+## Two kit-move poses mixed (u = 0: `a`, 1: `b`); a side without a channel counts as the rest pose, and the
+## whole-body turns take the short way round.
+static func km_mix(a: Dictionary, b: Dictionary, u: float) -> Dictionary:
+	if a.is_empty() and b.is_empty():
+		return {}
+	u = u * u * (3.0 - 2.0 * u)
+	var out := {}
+	for c in KM_CH:
+		var va := float(a.get(c, 0.0))
+		var vb := float(b.get(c, 0.0))
+		out[c] = lerp_angle(va, vb, u) if c in ["fx", "fy", "fz"] else lerpf(va, vb, u)
+	var la: Array = a.get("legs", b.get("legs", []))
+	var lb: Array = b.get("legs", la)
+	if not la.is_empty():
+		out["legs"] = [lerpf(la[0], lb[0], u), lerpf(la[1], lb[1], u), lerpf(la[2], lb[2], u), lerpf(la[3], lb[3], u)]
+	for c in ["fl", "fr", "blade", "wa", "wo"]:
+		if a.has(c) or b.has(c):
+			var va2: Vector3 = a.get(c, b.get(c))
+			var vb2: Vector3 = b.get(c, a.get(c))
+			out[c] = va2.lerp(vb2, u)
+	return out
 
 ## A kit move's keys, from whichever pair's table has it (scripts/match/kmoves_*.gd); empty if none.
 static func km_def(id: String) -> Dictionary:
