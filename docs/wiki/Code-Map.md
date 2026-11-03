@@ -58,7 +58,10 @@ comment that says more. Line counts are rough sizes, to warn you before you open
 | `blight.gd`, `blight_dir.gd`, `blight_models.gd` | The Blight and its director |
 | `mob.gd`, `mob_models.gd` | Monsters |
 | `spawn_plan.gd` | What's live on a fixed map each match |
-| `drop_squad.gd` | Planning phase, the skyship, squad drop formation |
+| `drop_squad.gd` | Planning phase, drop leaders, passing the lead and breaking away |
+| `drop_comet.gd` | The squad comet: riders, break-aways, the burst landing |
+| `sky_fall.gd` | The freefall (dive, float, brake), the glider opening, the landing kick, bot and assist steering |
+| `drop_fx.gd` | The drop's look: comet orb and trails, contrails, cloud layer, speed lines, wind, the freefall camera |
 | `raid_look.gd` | Raid conditions: light, weather, sight |
 | `truce.gd` | Emotes and truces |
 | `pack.gd` | The backpack |
