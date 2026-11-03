@@ -64,8 +64,10 @@ pitch, `blade`/`wa`/`wo` the weapon's swing), so a .glb that follows these bones
 ## Nodes the game keeps from the procedural rig (do not model these into the body)
 - `Rig/Torso/Aim/Gun` and its children: the held weapon (`Models.gun_parts`, `PinBjornWeapons`), its `Muzzle`
   (shots leave from it), `Mag` (reload anim), Bjorn's `Hammer` pivot (meta `hammer_pivot`; BjornFx finds the
-  head at (0, 0, -0.62) in its space), the twin blades' `Offhand`. A weapon may later come from the .glb as a
-  separate mesh named `weapon`, parented to `Gun` by the loader; until then the procedural weapon stays.
+  head at (0, 0, -0.62) in its space), the twin blades' `Offhand`. A .glb may carry its weapon as a separate,
+  unskinned mesh named `weapon`, modelled in the Gun node's space (forward -Z, the Muzzle where shots leave),
+  with its magazine as a child `weapon_mag`: the loader puts it under `Gun`, hides the procedural weapon and
+  makes the magazine the Gun's `Mag` (Vex does).
 - `Rig/Torso/ArmLPivot/Elbow/Hand/Shield`: Bjorn's prow rides his left hand.
 - `Rig/Torso/Glider` (the paraglider; `meta skin`), `Rig/Torso/Shoulder` (a Boki's perch), `Rig/Torso/Halo`,
   `Rig/Torso/Focus`, `TeamRing` (the hit ring), and the root metas `cls`, `arch`, `race`, `wid`, `hip_y`, `mats`.
@@ -118,7 +120,8 @@ The armature and its meshes sit at the .glb's origin (no offset on the scene roo
   table retargets exactly and each keyed channel moves its bones, the anchors ride bone attachments, every
   surface is on the hero toon shader with the atlas, the hit ring is unchanged, the budget holds, and the
   setting turns it procedural and back.
-- `--warden-build --warden=<id>`: until Blender is on the box, builds an INTERIM .glb from the turnaround sheet in
-  Godot (tools/warden_build.gd; Vex first, see art/wardens/vex/IMPORT.md). The Blender export replaces the file.
+- The Blender builds: `godot --headless -- --warden-rig-json --warden=<id>` writes the armature and landmarks
+  (art/wardens/src/<name>_rig.json); `blender -b --factory-startup --python tools/blender/<name>.py` builds,
+  bakes and exports (shared helpers in tools/blender/warden_kit.py; Vex first, see art/wardens/vex/IMPORT.md).
 - `--warden-model-check` then applies as for the procedural Wardens: anchors, every keyed move, hitbox, height
   on the sheet's scale, MantleLook extremes, the portrait.
