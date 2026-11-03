@@ -395,3 +395,19 @@ The owner is reviewing the build now and will add more. Start the two items ther
    - [EXT] item 45 says "extend the new-game name card into the creator", but ext/classes (on main) removed the creator and moved the name to the Boki card. Tell the mantle-look agent.
    - [EXT] S2 branches review-tamsin-dredge and review-linwick-moosh already contain the kitdata merges. Fine if main merges the same commits; flag it at merge time.
    - [EXT] S2 timestamps run ~1 h ahead of the git clock (its STATUS "08:50 UTC" was committed 07:41 UTC). Use git time when citing hours.
+
+## 2026-11-03 04:05 ET (09:05 UTC) ORCH check-in
+- [MAIN] ext/portrait a6189f21 has waited ~5 h (reported 22:50 ET); still not in main. Merge it or say why it's held.
+- [OWNER] Still open: the new-feature hold (S2 has already pushed ext/concepts; mantle-look is queued), the dash-flow Qs ("buffer held to the dash end, never expiring: OK?", "make kit post-dash recovery cancellable per row?"), and base names Sable/Cinder/Tarek. New: "Nightwell locks Ostra the full 4.5 s as asked, but footage shows Void free during the pull: keep the lock?"
+1. Shipped: integ77 is on main (16dd7faf): equal-loadout, breakables, all kitdata passes (vireo-venator at 3c1c79a), item 3 X tile + one Merge slot, item 8 form dash is a trail, dash cues without bursts. [MAIN] post the sync number in MAIN_TO_EXT. Main hasn't written there since 01:00 ET.
+2. Ready, not merged (waited):
+   - [MAIN] Merge first: ext/dash-flow-base 4edc562 (S2: hero branches depend on it).
+   - [MAIN] S1: airdash-glide 411a591, mapclean 2082d0d (1 h); kitdata-vireo-venator tip ab5fd36 and kitdata-pin-bjorn tip 7dede8e (both re-reported READY at the tip; the 02:50 "take 3c1c79a" caution is superseded).
+   - [MAIN] Older: shops 794264bf (2 h; equal-loadout is in now); prologue5 54f8304 (1.5 h).
+   - [MAIN] S2 READY: review-zedran-bjorn 7a682bf (Zedran only); review-linwick-moosh 6634dbb (contains review-tamsin-dredge d778c03, so take one); prologue-polish (on prologue5).
+   - Supersets coming: review-bjorn (= kitdata-pin-bjorn tip + DashFlow) and review-dancer (Dancer + Zedran). Prefer them over their parts when they report.
+3. Not ready: [EXT] review-breah-ostra: Breah/Ostra are done, but --work-check regressed ("a hungry kin downs tools and heads to a feeder", 2/7 runs). Bisecting; it needs to land by 21:00 UTC.
+4. Answerable from the briefs: [EXT] S2 asks whether the Void Jester is "he" or "she": item 39 says M, so use "he".
+5. Conflicts:
+   - [EXT] Two dash tables. S1's vireo-venator adds content/rules/dash_interactions.json + DashRules; S2's DashFlow (content/dash_flow/) already holds rows for 10 heroes and replaced S1's Pin/Bjorn copy on review-bjorn. Suggest: converge on DashFlow and port the Vireo/Venator rows before main merges both. S1 proposed the opposite, so decide now.
+   - [EXT] S2's Hunter.dash_with change also strips the dash ring from Dancer, Venator and Vireo (good under item 8). S1: rebase onto it, don't re-add the ring.
