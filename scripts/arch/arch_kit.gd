@@ -755,6 +755,12 @@ func play(move: String) -> void:
 	anim_id = move
 	anim_at = m.time
 
+## True when the kit draws its own dash after-images; the hunter then skips the shared team-colour pill.
+func own_dash_trail() -> bool: return false
+
+## True when the kit draws its own aim line; the shared pale weapon line then stays hidden.
+func own_aim_line() -> bool: return false
+
 ## The Vault-style flip that matches a dash direction: forward, back, or a side flip.
 func flip_for(dir: Vector2, base: String) -> String:
 	var fwd := Vector2(-sin(h.face), -cos(h.face))
@@ -826,6 +832,17 @@ func teardown() -> void:
 		if is_instance_valid(n): (n as Node).queue_free()
 	self_nodes.clear()
 	spips = {}
+
+## Where the hunter's right (or left) hand is in the world (the model's hand bone; shoulder height ahead
+## of them when there is no model, as in headless checks).
+func hand_pos(right: bool) -> Vector3:
+	var hand: Node3D = null
+	if h.anim != null:
+		hand = h.anim.hand_r if right else h.anim.hand_l
+	if hand != null and is_instance_valid(hand) and hand.is_inside_tree():
+		return hand.global_position
+	var d := h.aim_dir()
+	return h.pos + Vector3(d.x * 0.4, 1.3 * float(h.cdat.get("scale", 1.0)), d.y * 0.4)
 
 ## A node that follows the hunter in world space (top_level child, so it dies with the hunter).
 func own_node() -> Node3D:

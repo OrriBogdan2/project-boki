@@ -13,7 +13,7 @@ extends RefCounted
 ##   Boki, glove, toggles), K the kit card
 ## Nobody dies here: a downed player or bot is back up after a beat.
 
-const KEYS_HINT := "K kit card   ·   L loadout   ·   2-9 first eight archetypes (L: all)   ·   X reset   ·   N bot   ·   O cooldowns   ·   U ultimate"
+const KEYS_HINT := "K kit card   ·   L loadout   ·   2-9 first eight archetypes (L: all)   ·   Backspace reset   ·   N bot   ·   O cooldowns   ·   U ultimate"
 const BOT_MODES := ["off", "idle", "moving", "fighting"]
 const BOT_NAMES := {"off": "Off", "idle": "Idle", "moving": "Moving", "fighting": "Fights back"}
 const DUMMY_HP := 3000.0

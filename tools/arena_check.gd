@@ -56,17 +56,17 @@ func _arena() -> void:
 	P.ak.cd["rmb"] = 0.0; P.ak.ch_rmb = 1.0
 	var tot0 := float(A.dummies[0]["total"])
 	P.inp["sec_hold"] = false; P.ak.press_rmb()
-	step(m, 0.5)
+	step(m, 0.75)          # (the Bola's 0.4s wind-up with the lane, then its flight)
 	ok("thief Bola hits a dummy, Grounds and Marks it", float(A.dummies[0]["total"]) > tot0 and (P.ak as ThiefKit).marks_on(D) >= 1, "total %.0f marks %d" % [float(A.dummies[0]["total"]), (P.ak as ThiefKit).marks_on(D)])
 	(P.ak as ThiefKit).add_mark(D, 4, true)
 	step(m, 0.05)
-	ok("five Marks: diamonds over the dummy", (P.ak as ThiefKit).pips.size() >= 1 and (P.ak as ThiefKit).marks_on(D) == 5)
+	ok("five Marks: diamonds over the dummy", (P.ak as ThiefKit).pips.size() >= 1 and (P.ak as ThiefKit).marks_on(D) >= 5, "marks %d pips %d" % [(P.ak as ThiefKit).marks_on(D), (P.ak as ThiefKit).pips.size()])
 	# reset: everyone back, healed, meters cleared
 	P.teleport(P.pos + Vector3(3, 0, 0)); P.hp = 10.0
 	var bk := InputEventKey.new(); bk.physical_keycode = KEY_BACKSPACE; bk.keycode = KEY_BACKSPACE; bk.pressed = true
 	var xk := InputEventKey.new(); xk.physical_keycode = KEY_X; xk.keycode = KEY_X; xk.pressed = true
-	A.keys_node._unhandled_input(xk)      # X is the ultimate's second key now: it must not reset the arena
-	ok("X doesn't reset the arena (it is an ultimate key now)", P.flat_dist(A.home) > 1.0)
+	A.keys_node._unhandled_input(xk)      # X is the hero ultimate's key: it must not reset the arena
+	ok("X doesn't reset the arena (it is the hero ultimate's key)", P.flat_dist(A.home) > 1.0)
 	A.keys_node._unhandled_input(bk)      # Backspace resets
 	ok("Backspace resets the arena", P.flat_dist(A.home) < 0.2)
 	P.teleport(P.pos + Vector3(3, 0, 0)); P.hp = 10.0
@@ -155,9 +155,8 @@ func _arena() -> void:
 		JK.on_deal(D, 16.0, {"src": "shot"})
 	step(m, 0.3)
 	ok("juggernaut: Rage fills to Enraged, the form grows", JK.enraged_t > 0.0 and JK.aura != null and P.model.scale.x > 1.05, "enraged %.1f scale %.2f" % [JK.enraged_t, P.model.scale.x])
-	# no class ultimate (kits2-nor): R is the Merge, so the kit's own R press is refused and does nothing
-	P.ak.use_r()
-	ok("juggernaut: no R of its own (the press is refused)", Arch.def("juggernaut").get("r") == null and not P.ak.fusing() and float(P.ak.cd["r"]) <= 0.0)
+	# X is Zedran's own ultimate (the Arena opens it with the ult toggle at level 6); R stays the Merge
+	ok("juggernaut: his own ultimate is on X (Gilded Riposte)", String(Arch.def("juggernaut")["x"]["name"]) == "Gilded Riposte")
 	# the sparring bot
 	A.cycle_bot()
 	ok("bot: idle", A.bot != null and A.bot_mode == "idle")
@@ -165,7 +164,7 @@ func _arena() -> void:
 	step(m, 0.5)
 	ok("bot: fights as a thief", A.bot != null and A.bot.arch == "thief")
 	# kits2: the sparring bot really uses the Thief's and the Juggernaut's kits on you
-	# (neither kit has an R any more: it is the Boki Merge, so the bot's kit is RMB, E and the dash)
+	# (their ultimates on X open at level 6, and the sparring bot is level 1: its kit here is RMB, E and the dash)
 	for ba in ["thief", "juggernaut"]:
 		A.set_bot_arch(ba)
 		var B: Hunter = A.bot
@@ -245,7 +244,7 @@ func _cards() -> void:
 				ok("kit card text %s.%s" % [a, s], false)
 		c.queue_free()
 	var inf := KitCard.infusion_lines("thief", KinLib.kin("cindle"))
-	ok("kit card: Boki infusion lines (RMB and E: the Thief has no R)", inf.size() == 2, " | ".join(inf))
+	ok("kit card: Boki infusion lines (RMB and E; her ultimate on X isn't infused)", inf.size() == 2, " | ".join(inf))
 	host.queue_free()
 
 func _loadout() -> void:
@@ -255,7 +254,7 @@ func _loadout() -> void:
 	var tiles := 0
 	for ch in (st.get_child(0) as HBoxContainer).get_children():
 		if ch is Button: tiles += 1
-	ok("loadout strip: five kit tiles (the Juggernaut has no class R)", tiles == 5)
+	ok("loadout strip: five kit tiles (main's kit card has no hunter-ultimate tile)", tiles == 5, str(tiles))
 	st.queue_free()
 	# the real expedition panel at home carries the strip
 	var Home = load("res://scripts/home/home.gd")

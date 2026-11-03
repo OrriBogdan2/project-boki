@@ -821,7 +821,7 @@ func _start(o: Dictionary) -> void:
 		duel = Duel.new()
 		duel.setup(self)
 		duel.attach_keys()
-		hud.toast("Duel room  ·  B sets up the bot  ·  X resets", Color("f3eee2"))
+		hud.toast("Duel room  ·  B sets up the bot  ·  Backspace resets", Color("f3eee2"))
 	if player and duel == null and not opts.get("tutorial", false) and (opts.get("arena", false) or opts.get("practice", false)):
 		# the Arena, and the same practice tools on the training island (dummies, swaps, kit card)
 		arena = Arena.new()
@@ -6740,6 +6740,8 @@ func _update_aim(alpha: float) -> void:
 		return
 	var p := player
 	var show := p != null and not p.out and not p.extracted and not p.downed and not paused
+	if show and p.ak != null and p.ak.own_aim_line():
+		show = false          # the kit draws its own (two lines read as two aims)
 	aim_line.visible = show
 	aim_ring.visible = false
 	muzzle_light.light_energy = 0.0

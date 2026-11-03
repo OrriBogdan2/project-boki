@@ -2,14 +2,14 @@ class_name KitStatus
 extends RefCounted
 ## Statuses the archetype kits put on a body that a plain hit can't carry over the network (kits2):
 ##   gnd  Grounded (the Thief's Bola): no dash, jump or glide; the hunter's legs show the tangled cords
-##   blt  Blight (the Juggernaut's Warchain, the Thief's Jackpot rim): healing on the body is cut
+##   blt  Blight (the Juggernaut's Warchain, Dancer's Encore rim): healing on the body is cut
 ##   vul  Shred (the Thief's Primed shot): the body takes `k` more damage
 ##   rat  Rattled (Marlowe's Burr Charge): slowed, and her rifle and Longneedle hit harder; stars over the head
 ##   dsr  Disoriented (Ostra's Trade): slowed by `k`; a DIZZY word and a teal ring
 ## The game that owns the body runs the rules; the caster's game sends the Net event
 ## ["kst", nid, kind, seconds, k] for a remote body (Net.VERSION 0.7.0), every game shows it.
 
-const GROUND_COL := Color("d8b878")
+const GROUND_COL := Color("e0a03a")
 const RATTLE_COL := Color("ffb36a")
 const RATTLE_SLOW := 0.35        # how much speed Rattled takes away
 
@@ -75,7 +75,7 @@ static func _show(e: Ent, kind: String, secs: float) -> void:
 			if old: old.queue_free(); old.name = "GroundedGone"
 			var n := Node3D.new()
 			n.name = "Grounded"
-			var mat := Models.glow_mat(Color(GROUND_COL, 0.95))
+			var mat := DJFx.solid(GROUND_COL)          # solid: an additive glow washes out to white on grass
 			for i in 3:
 				var c := MeshInstance3D.new()
 				c.mesh = Models.cyl(0.42 - 0.05 * i, 0.42 - 0.05 * i, 0.06, 16)
