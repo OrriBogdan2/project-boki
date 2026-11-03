@@ -142,7 +142,9 @@ func _stray_match() -> void:
 	var P := m.player
 	var k: Kin = P.kin
 	ok(k != null and String(k.rec["uid"]) == String(Save.d["roster"][0]["uid"]), "the stray goes with you like any other Boki")
-	ok(P.tonics == 5 and P.armor_kits == 2 and P.rift_keys == 2, "tonics from the stash (cap 5 on the Hollow) and the issued kits (%d, %d)" % [P.tonics, P.armor_kits])
+	ok(P.tonics == 5 and P.armor_kits == 2 and P.rift_keys == 0,
+			"tonics from the stash (cap 5 on the Hollow) and the issued kits (%d, %d); keys never come from home" % [P.tonics,
+			P.armor_kits])
 	P.lives = 1
 	m.eliminate(P, null, "knocked out", true)
 	m.result = {"extracted": false, "why": "knocked out"}

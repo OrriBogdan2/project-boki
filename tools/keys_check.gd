@@ -171,7 +171,7 @@ func _cap_and_belt(m: Match, P: Hunter, R: Hunter) -> void:
 	R.inp["move"] = Vector2.ZERO
 	R.chest_keys = cap
 	var np := m.pickups.size()
-	m.drop("ckey", R.pos + Vector3(0.2, 0.6, 0), 1)
+	m.drop("ckey", R.pos + Vector3(0.2, 0.6, 0), 1, "", "", Vector3.ZERO)      # (no random toss: it stays in reach)
 	step(m, 1.5)
 	var still_there := m.pickups.size() == np + 1
 	var held := R.chest_keys
@@ -179,6 +179,7 @@ func _cap_and_belt(m: Match, P: Hunter, R: Hunter) -> void:
 	ok("belt adapter: count", KeyChest.count(R, "chest") == cap and KeyChest.count(R, "rift") == R.rift_keys)
 	ok("belt adapter: take spends keys", KeyChest.take(R, "chest", 2) == 2 and R.chest_keys == cap - 2)
 	ok("belt adapter: take never goes below zero", KeyChest.take(R, "chest", 9) == cap - 2 and R.chest_keys == 0)
+	R.belt = UtilityBelt.empty()      # a free belt slot too: a key type takes one (BeltKeys)
 	step(m, 1.5)
 	ok("with room again it picks the key up", R.chest_keys == 1 and m.pickups.size() == np, "keys %d" % R.chest_keys)
 	P.chest_keys = 0
