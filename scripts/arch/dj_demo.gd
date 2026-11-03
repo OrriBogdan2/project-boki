@@ -8,8 +8,8 @@ extends RefCounted
 const ANIM := {
 	"thf_lmb": ["thief", "arc_bolts", [0.48, 0.52, 0.57, 0.62, 0.68, 0.85]],
 	"thf_primed": ["thief", "arc_bolts", [0.86, 0.89, 0.93, 1.0, 1.12, 1.35]],
-	"thf_vault": ["thief", "arc_bolts", [0.5, 0.55, 0.6, 0.66, 0.76, 1.0]],
-	"thf_exdash": ["thief", "arc_bolts", [0.5, 0.56, 0.7, 0.9, 1.45, 1.75]],
+	"thf_vault": ["thief", "arc_bolts", [0.55, 0.62, 0.69, 0.86, 0.98]],
+	"thf_exdash": ["thief", "arc_bolts", [0.55, 0.7, 0.95, 1.4, 1.7]],
 	"thf_bola": ["thief", "arc_bolts", [0.5, 0.6, 0.7, 0.8, 0.92, 1.05]],
 	"thf_knife": ["thief", "arc_bolts", [0.5, 0.54, 0.58, 0.62, 0.72, 0.92]],
 	"thf_blink": ["thief", "arc_bolts", [0.99, 1.01, 1.04, 1.1, 1.25, 1.5]],
@@ -39,12 +39,15 @@ const STILLS := {
 	"bola": ["thief", Vector3(-3.4, 0, 0.2)], "knife": ["thief", Vector3(-6.0, 0, 0)],
 	"blink": ["thief", Vector3(-6.0, 0, 0)], "knock": ["thief", Vector3(-3.0, 0, 0)],
 	"exdash": ["thief", Vector3(-10.0, 0, 3.0)], "vault": ["thief", Vector3(-5.0, 0, 0)],
+	"glint": ["thief", Vector3(-5.0, 0, 0)],
 	"slash": ["juggernaut", Vector3(-2.6, 0, 0)], "wave": ["juggernaut", Vector3(-8.0, 0, 0)],
 	"chain_fly": ["juggernaut", Vector3(-9.5, 0, 0)], "chain": ["juggernaut", Vector3(-7.0, 0, 0)],
 	"rampage": ["juggernaut", Vector3(-6.5, 0, 0)], "enraged": ["juggernaut", Vector3(-3.0, 0, 1.5)],
 	"sweet": ["juggernaut", Vector3(-3.3, 0, 0)], "lunge_air": ["juggernaut", Vector3(-7.5, 0, 0)],
 	"exec": ["juggernaut", Vector3(-3.0, 0, 0)],
 }
+
+const DANCER_DASH_SLOW := 0.15     # Engine.time_scale while Dancer's dash strips play (no frame skipped)
 
 static func at(t: float, dt: float, when: float) -> bool:
 	return ArenaDemo._at(t, dt, when)
@@ -63,6 +66,7 @@ static func trigger(P: Hunter, D: Hunter, mv: String, t: float, dt: float) -> vo
 				P.do_dash()
 			P.inp["fire"] = t > 0.85 and t < 0.88
 		"thf_vault":
+			Engine.time_scale = DANCER_DASH_SLOW
 			if at(t, dt, 0.5):
 				P.dashes = P.max_dashes()
 				P.inp["move"] = Vector2(0, 1)
@@ -71,6 +75,7 @@ static func trigger(P: Hunter, D: Hunter, mv: String, t: float, dt: float) -> vo
 		"thf_exdash":
 			# sideways, away from the dummy (toward it the hunter ends up inside its model, which filled
 			# the old strips' last frames with a big pink blur)
+			Engine.time_scale = DANCER_DASH_SLOW
 			if at(t, dt, 0.38): P.do_jump()
 			if at(t, dt, 0.5):
 				P.ex_cd = 0.0
@@ -221,12 +226,12 @@ static func _still_dancer(A: Arena, P: Hunter, D: Hunter, K: ThiefKit, w: String
 				if K.fizzles > 0 and not A.has_meta("fz_at"): A.set_meta("fz_at", t)
 				return float(A.get_meta("fz_at", 9.0)) + 0.05
 			return float(A.get_meta("b_at", 9.0)) + 0.02
-		"primed", "vault":
+		"primed", "vault", "glint":
 			if at(t, dt, 0.4):
 				P.dashes = P.max_dashes()
 				P.inp["move"] = Vector2(0, 1)
 				P.do_dash()
-			return 0.62 if w == "vault" else 1.05
+			return {"vault": 0.62, "glint": 0.84}.get(w, 1.05)       # glint: the flare as she lands
 		"bola_whirl", "bola":
 			if w == "bola" and t < 0.6:
 				var H: Hunter = A.dummies[2]["h"]

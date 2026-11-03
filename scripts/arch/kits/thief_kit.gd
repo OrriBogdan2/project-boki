@@ -23,6 +23,7 @@ const BOLT_GOLD := Color("ffc04a")
 const BOLT_CORE := Color("fff2c0")
 const FIZZLE := Color("6a48ff")    # a bolt running out at the cursor: a blue-violet puff
 const EMP_BLUE := Color("4ab8ff")  # the empowered shot's chakram
+const GLINT_EDGE := Color("2a1450")    # the dark violet edge round the hand glint
 const GHOST := Color("7af0ff")     # the blink's afterimages
 const KNOCK_STAR := Color("ff2a48")
 const EMP_LINE := Color("ffc23a")      # the aim line while the next bolt is empowered
@@ -277,16 +278,18 @@ func own_aim_line() -> bool:
 func _tick_glint(dt: float) -> void:
 	if glint == null or not is_instance_valid(glint):
 		glint = own_node()
-		glint.add_child(_glint_part(Models.sphere(0.07, 8), BOLT_CORE))
-		var star := _glint_part(DJFx.star_mesh(4, 0.2), Color(EMP_LINE, 0.9))
-		star.scale = Vector3.ONE * 0.3
-		glint.add_child(star)
+		for layer in [[GLINT_EDGE, 0.22, -0.01], [EMP_LINE, 0.17, 0.0]]:      # a dark edge so it reads on grass
+			var star := _glint_part(DJFx.star_mesh(4, 0.14), layer[0])
+			star.scale = Vector3.ONE * float(layer[1])
+			star.position.y = float(layer[2])
+			glint.add_child(star)
+		glint.add_child(_glint_part(Models.sphere(0.045, 8), BOLT_CORE))
 	glint.visible = primed_t > 0.0 and tells_visible()
 	glint_pop = maxf(0.0, glint_pop - dt / GLINT_POP_S)
 	if glint.visible:
 		glint.global_position = hand_pos(hand == 0)
 		glint.rotation.y = m.time * 5.0
-		glint.scale = Vector3.ONE * (1.0 + 0.12 * sin(m.time * 14.0) + 1.6 * glint_pop * glint_pop)
+		glint.scale = Vector3.ONE * (1.0 + 0.12 * sin(m.time * 14.0) + 0.5 * glint_pop * glint_pop)
 
 func _glint_part(mesh: Mesh, col: Color) -> MeshInstance3D:
 	var part := MeshInstance3D.new()
