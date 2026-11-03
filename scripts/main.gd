@@ -2199,12 +2199,13 @@ func _extract_check() -> void:
 	mate.teleport(hp + Vector3(3.0, 0, 0))
 	m.eliminate(mate, R, "knocked out", true)
 	var bx := Life.box_of(m, mate)
-	print("EXCHECK hatch: teammate died with a key: their keys=%d box keys=%d" % [mate.rift_keys, int(bx.get("keys", -1))])
-	if mate.rift_keys != 0 or int(bx.get("keys", 0)) != 1: ok = false; print("EXCHECK FAIL key not in the box")
+	var box_keys := (bx.get("belt", []) as Array).filter(func(st): return st["id"] == "rift_key").size()      # keys ride the belt
+	print("EXCHECK hatch: teammate died with a key: their keys=%d box keys=%d" % [mate.rift_keys, box_keys])
+	if mate.rift_keys != 0 or box_keys != 1: ok = false; print("EXCHECK FAIL key not in the box")
 	P.rift_keys = 0
 	var got_key := false
 	for it in Life.box_items(m, P, bx):
-		if it["key"] == "keys": Life.take_item(m, P, bx, it); got_key = true
+		if it.get("id", "") == "rift_key": Life.take_item(m, P, bx, it); got_key = true
 	print("EXCHECK hatch: looted the box: player keys=%d" % P.rift_keys)
 	if not got_key or P.rift_keys != 1: ok = false; print("EXCHECK FAIL couldn't loot the key")
 	var pings0 := m.pings.size()

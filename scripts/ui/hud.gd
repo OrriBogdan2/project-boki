@@ -1643,20 +1643,22 @@ func _draw_weapon(sz: Vector2, p: Hunter) -> void:
 	# what you're carrying home, as a counter
 	var seeds := 0
 	for sd in p.seeds: seeds += int(p.seeds[sd])
-	var gx := r.position.x + 4.0
-	Icons.draw(c, "gem", Vector2(gx + 8, y + s - 10), 7.0, GOLD)
-	_text(Vector2(gx + 20, y + s - 4), "%d" % p.gems, 18, GOLD if p.gems > 0 else MUTED, big)
-	_text(Vector2(gx + 2, y + 14), "%d seeds · %s" % [seeds, CaptureHud.box_text(p)], 10, CaptureHud.box_col(p, MUTED), big)
+	# (inside the weapon card on the right: the slot row above is full with the four-slot belt)
+	var gx := r.end.x - 112.0
+	var cy := r.position.y + 6.0
+	Icons.draw(c, "gem", Vector2(gx + 8, cy + s - 10), 7.0, GOLD)
+	_text(Vector2(gx + 20, cy + s - 4), "%d" % p.gems, 18, GOLD if p.gems > 0 else MUTED, big)
+	_text(Vector2(gx + 2, cy + 14), "%d seeds · %s" % [seeds, CaptureHud.box_text(p)], 10, CaptureHud.box_col(p, MUTED), big)
 	if not m.opts.get("training", false):
 		# the backpack: slots used (red when full); the key opens it
 		var full := p.pack.size() >= p.pack_cap
 		var pcol := Color("ffb0a0") if full else (INK if p.pack.size() > 0 else MUTED)
 		var gw := big.get_string_size("%d" % p.gems, HORIZONTAL_ALIGNMENT_LEFT, -1, 18).x
 		var px := gx + 30.0 + gw
-		Icons.draw(c, "satchel", Vector2(px + 8, y + s - 10), 8.0, pcol)
-		_text(Vector2(px + 20, y + s - 4), "%d/%d" % [p.pack.size(), p.pack_cap], 14, pcol, big)
+		Icons.draw(c, "satchel", Vector2(px + 8, cy + s - 10), 8.0, pcol)
+		_text(Vector2(px + 20, cy + s - 4), "%d/%d" % [p.pack.size(), p.pack_cap], 14, pcol, big)
 		var pw := big.get_string_size("%d/%d" % [p.pack.size(), p.pack_cap], HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x
-		hover_spots.append([Rect2(Vector2(px, y + s - 22), Vector2(24 + pw, 24)), "pack"])
+		hover_spots.append([Rect2(Vector2(px, cy + s - 22), Vector2(24 + pw, 24)), "pack"])
 
 ## Your squadmates down the left side.
 ## A teammate's state, for the squad frames, markers and arrows: [label, colour, where to point,
