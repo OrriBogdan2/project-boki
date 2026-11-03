@@ -62,7 +62,6 @@ func _build() -> void:
 	root = Control.new()
 	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	root.mouse_filter = Control.MOUSE_FILTER_STOP
-	root.theme = UI.theme()
 	add_child(root)
 	# the world behind stays there, just dimmed: this is a closer look, not another place
 	bg = ColorRect.new()

@@ -2333,6 +2333,7 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 	cancel_abilities(h)
 	h.downed = true
 	h.downs += 1
+	KinTrack.drop_carried(self, h, h.pos)
 	if by is Blight: kstat["bl_knock"] = int(kstat.get("bl_knock", 0)) + 1      # (tests: what the Blight did)
 	h.down_hp = Data.MATCH["down_hp"]
 	h.hp = 0.0
@@ -2488,6 +2489,7 @@ func eliminate(h: Hunter, by: Ent, why: String, final := false) -> void:
 	h.set_meta("died_why", why)
 	h.set_meta("died_at", time)
 	var waiting := false
+	if net_on: KinTrack.drop_carried(self, h, h.pos)       # (offline, Life.drop_box does it at the box)
 	if not net_on and not h.remote:
 		# everything they carried goes into a deathbox where they fell. While a teammate is still
 		# in the fight they can bring them back at it (or at a revive beacon)
@@ -2872,47 +2874,12 @@ func _update_tracking(dt: float) -> void:
 		note_sound(null, at, "kin")
 		add_feed("You sense %s %s. %s has it." % [k.rec.get("name", "your Boki"), direction_word(player.pos, at), h.pname])
 
-## Kin left behind where a hunter went down. They wait, dazed, for someone to collect them.
+## Online: the Boki a hunter brought stay behind (KinLoss: safe tiers send them home, the others drop them to guard).
 func _leave_kin(h: Hunter) -> void:
 	for kk in [h.kin, h.kin2]:
 		if kk == null or not is_instance_valid(kk) or Loaner.is_loaner((kk as Kin).rec):
 			continue
-		_leave_one_kin(h, kk)
-
-## One kin left behind where it was, dazed, for anyone to capture.
-func _leave_one_kin(h: Hunter, k: Kin) -> void:
-	if true:
-		giant_free(k)
-		var at: Vector3 = k.pos if k.state in ["active", "downed", "returning", "reviving"] else h.pos
-		var bx := Life.box_of(self, h)
-		if k.state == "away" and not bx.is_empty() and bx["pos"] != Vector3.INF:
-			at = bx["pos"]
-		var leave: bool = not h.remote and not opts.get("training", false) and not opts.get("tutorial", false)
-		if leave:
-			if world.is_void(at.x, at.z):
-				# it flutters to the nearest solid ground
-				at = world.free_spot_near(at, [], 1.0, 0.4, 40.0)
-			if not world.is_void(at.x, at.z):
-				var rec: Dictionary = k.rec.duplicate(true)
-				var w := spawn_wild(rec, at + Vector3(rng.randf_range(-0.6, 0.6), 0, rng.randf_range(-0.6, 0.6)), true)
-				# whose it really is: yours (even if a rival was carrying it), or the hunter who brought it
-				w.lost_from = "you" if (h == player or k.lost_from == "you") else h.pname
-				w.lost_uid = String(rec.get("uid", ""))
-				w.lost_owner = h
-				w.dazed_t = 1e9
-				kstat["left"] += 1
-				if h == player:
-					player_lost.append({"uid": w.lost_uid, "kin": w, "holder": null, "rec": rec})
-					add_feed("%s was left behind" % rec.get("name", "Your Boki"))
-				elif k.lost_from == "you" and player and not player.out:
-					add_feed("%s dropped %s! Get to it and extract to bring it home." % [h.pname, rec.get("name", "your Boki")])
-					ping(w.pos, Color("ffd23f"))
-				elif player and not player.out and player.flat_dist(w.pos) < 40.0:
-					# a rival's Boki left near you: the chance the game is built round, so call it out
-					add_feed("%s's %s was left behind. Tame it before someone else does." % [h.pname, rec.get("name", "Boki")])
-					ping(w.pos, Color("ffb36a"))
-		k.dead = true
-		k.visible = false
+		KinLoss.on_owner_out(self, h, kk, Vector3.INF)
 
 ## The Demo match (title screen): your bot squadmate leads the drop and picks the spot between a
 ## live boss lair and the nearest outpost uplink, so you glide down in formation and land right by both.
@@ -2951,7 +2918,7 @@ func giant_free(k: Kin) -> bool:
 ## shoulder, or onto the bench if you already have one out.
 func give_kin(h: Hunter, rec: Dictionary) -> Kin:
 	var k := Kin.new()
-	k.init_kin(self, next_id(h.nid + "k"), rec["species"], rec, h)
+	k.init_kin(self, KinLoss.kin_id(self, h), rec["species"], rec, h)
 	add_child(k)
 	k.teleport(h.pos + Vector3(1.0, 0, 0.7))
 	kins.append(k)
@@ -2976,13 +2943,9 @@ func kin_stolen(thief: Hunter, rec: Dictionary) -> void:
 	if hud:
 		hud.toast("%s took %s! Chase them down: they're marked, and you're faster heading their way" % [thief.pname, rec.get("name", "your Boki")], Color("ffd23f"))
 
-## Who has one of your kin right now (a rival still in the match), or null.
+## Who has one of your squad's Boki right now (an enemy still in the match), or null (KinTrack).
 func kin_thief() -> Hunter:
-	for L in player_lost:
-		var hh = L.get("holder")
-		if hh is Hunter and (hh as Hunter).team != player.team and not (hh as Hunter).out and not (hh as Hunter).extracted:
-			return hh
-	return null
+	return KinTrack.captor_for(self, player.team) if player else null
 
 func _tick_chase() -> void:
 	if player == null:
@@ -2990,54 +2953,12 @@ func _tick_chase() -> void:
 	var th := kin_thief()
 	player.chase = th
 	if th:
-		# the thief can't hide: always visible, and pinged on the map every few seconds
-		th.reveal_t = maxf(th.reveal_t, 0.5)
-		if int(time * 60.0) % 240 == 0:
-			pings.append({"pos": th.pos, "col": Color("ffd23f"), "t": 0.0})
+		th.reveal_t = maxf(th.reveal_t, 0.5)     # the captor can't hide (their map spot pings every bond_ping_s: KinTrack.tick)
+	KinTrack.tick(self, Match.DT)
 
-## Where each of your lost kin ends up when the match is over.
+## Where each of your lost kin ends up when the match is over (KinLoss.resolve).
 func _resolve_lost() -> Array:
-	var out: Array = []
-	for L in player_lost:
-		var w: Kin = L["kin"]
-		var holder = L.get("holder")
-		if w == null:
-			# still in your deathbox (nobody looted it): it ends up at the Ransom House
-			var fate0 := "ransom"; var who0 := ""
-			if holder is Hunter:
-				var hh0: Hunter = holder
-				if hh0 == player: fate0 = "self"
-				elif hh0.team == player.team: fate0 = "squad" if not hh0.out else "ransom"; who0 = hh0.pname
-				elif not hh0.out: fate0 = "rival"; who0 = hh0.pname
-			out.append({"uid": L["uid"], "fate": fate0, "holder": who0, "rec": L["rec"]})
-			continue
-		var fate := "ransom"
-		var who := ""
-		if holder is Hunter:
-			var hh: Hunter = holder
-			if hh == player:
-				fate = "self"
-			elif hh.team == player.team:
-				fate = "squad" if not hh.out else "ransom"
-				who = hh.pname
-			elif not hh.out:
-				fate = "rival"; who = hh.pname
-		elif not w.dead:
-			# nobody grabbed it before the match ended for you: maybe someone close by will
-			var best: Hunter = null; var bd := 26.0
-			for o in hunters:
-				if o.out or o == player: continue
-				var d: float = o.flat_dist(w)
-				if d < bd: bd = d; best = o
-			if best and rng.randf() < 0.75 * (1.0 - bd / 26.0) + 0.15:
-				if best.team == player.team:
-					fate = "squad"
-				else:
-					fate = "rival"
-				who = best.pname
-		out.append({"uid": L["uid"], "fate": fate, "holder": who, "rec": L["rec"]})
-	return out
-
+	return KinLoss.resolve(self)
 
 func on_wild_dazed(k: Kin) -> void:
 	if player and k.flat_dist(player) < 10.0:
@@ -4576,7 +4497,7 @@ func _separate() -> void:
 	for mb in mobs:
 		if not mb.dead: bodies.append(mb)
 	for k in kins:
-		if k.state in ["active", "wild", "dazed", "returning"] and not k.dead: bodies.append(k)
+		if k.state in ["active", "wild", "dazed", "returning"] and not k.dead and not KinLoss.cradled(k): bodies.append(k)
 	# only bodies in the same or a neighbouring 4m cell can touch (radii are well under 2m): a grid
 	# instead of every pair, in the same pair order as before
 	var grid := {}
@@ -4840,7 +4761,7 @@ func _update_interact(dt: float) -> void:
 		# 2. scan a knocked-out wild kin (Capture; not in training: practice kin go home with nobody)
 		if best.is_empty() and not opts.get("training", false):
 			for k in kins:
-				if k.state == "dazed" and not k.dead and h.flat_dist(k) < float(Capture.rules()["range"]):
+				if KinLoss.scannable_by(h, k) and h.flat_dist(k) < float(Capture.rules()["range"]):
 					best = {"kind": "catch", "ent": k, "label": CaptureHud.prompt(h, k)}
 					break
 		# 3. wear gear lying on the ground (tunings are taken by walking over them)
@@ -4967,8 +4888,6 @@ func _catch(h: Hunter, k: Kin) -> void:
 			k.catch_prog = 5.0
 			net_event(["catch", k.nid, h.nid])
 		return
-	if net_on:
-		net_event(["caught", k.nid, h.nid, k.rec])
 	k.dead = true
 	k.visible = false
 	var rec: Dictionary = k.rec.duplicate(true)
@@ -4989,6 +4908,9 @@ func _catch(h: Hunter, k: Kin) -> void:
 		rec["trust"] = 20.0
 		rec["memory"] = []
 	h.caught.append(rec)
+	if net_on:
+		net_event(["caught", k.nid, h.nid, rec, (k.lost_owner as Hunter).nid if k.lost_owner is Hunter else ""])
+	KinTrack.on_caught(self, h, k, rec)
 	if h == player:
 		add_feed("%s is in your box (%d/%d). Extract to bring it home." % [Data.KIN[k.species]["name"], h.caught.size(), Capture.box_cap()])
 		if player.kin and player.kin.state != "downed":
@@ -6036,7 +5958,7 @@ func _finish() -> void:
 			var k0: Kin = player.kin
 			r["kin_events"] = k0.events.duplicate(true)
 			r["kin_trust"] = k0.trust
-		if not player_lost.is_empty() and not result.get("extracted", false):
+		if not player_lost.is_empty():
 			r["lost_kin"] = (_resolve_lost() as Array).filter(func(L): return not Loaner.is_loaner(L.get("rec", {})))
 		r["rivals"] = hunters.filter(func(x): return x.ctrl == "bot" and x.team != player.team).map(func(x): return x.pname)
 	var placed := 1
@@ -6240,6 +6162,7 @@ func _net_make(it: Array) -> Ent:
 			if owner and owner.kin == null:
 				owner.kin = k
 			_net_seen_rec[nid] = rec
+			KinLoss.apply_pending(self, k)
 			return k
 		"m":
 			var mk := String(it[9])
@@ -6300,6 +6223,8 @@ func _net_apply(e: Ent, it: Array) -> void:
 			var st: int = int(it[8])
 			if st >= 0 and st < KIN_STATES.size():
 				k.state = KIN_STATES[st]
+			if k.dead:
+				k.catch_prog = 0.0       # (it stood up again: a new scan may be asked for)
 			k.catch_prog = maxf(k.catch_prog, float(it[13])) if k.catch_prog >= 5.0 else float(it[13])
 			k.net_vel = Vector3(it[14], 0, it[15])
 			k.dead = false
@@ -6537,7 +6462,7 @@ func _net_ev(x, from: String) -> void:
 			if is_host:
 				var k: Kin = ents_by_id.get(String(x[1]), null)
 				var h: Hunter = ents_by_id.get(String(x[2]), null)
-				if k and h and not k.dead and k.state == "dazed":
+				if k and h and not k.dead and KinLoss.scannable_by(h, k) and not KinLoss.cradled(k):
 					_catch(h, k)
 		"caught":
 			var k: Kin = ents_by_id.get(String(x[1]), null)
@@ -6549,6 +6474,14 @@ func _net_ev(x, from: String) -> void:
 				player.caught.append(rec)
 				sfx("scan_pop", player.pos, 0.0)
 				add_feed("%s is in your box (%d/%d). Extract to bring it home." % [Data.KIN.get(String(rec.get("species", "cindle")), Data.KIN["cindle"])["name"], mini(player.caught.size(), Capture.box_cap()), Capture.box_cap()])
+			var cap = ents_by_id.get(String(x[2]), null)
+			var own = ents_by_id.get(String(x[4]), null) if x.size() > 4 else null
+			if cap is Hunter and own is Hunter and typeof(x[3]) == TYPE_DICTIONARY:
+				KinTrack.on_caught_net(self, cap, x[3], own)      # the captor and the owner learn of the bond
+		"guard":
+			KinLoss.on_guard_net(self, x)
+		"gdrop":
+			KinLoss.on_gdrop(self, String(x[1]), x[5], Vector3(x[2], x[3], x[4]))      # a captor fell: its Boki stands up again (owner's game)
 
 func _process_net_revives() -> void:
 	if _rev_out.is_empty():
