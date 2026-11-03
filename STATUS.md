@@ -1,4 +1,4 @@
-2026-11-03T06:55:54Z
+2026-11-03T07:00:20Z
 
 ext/classes | 98d4027 | READY TO MERGE (Venator owned by every new save + tutorial hunter; pick 1 of Zedran/Pin/Linwick; new-game flow intro -> one card -> egg pick -> hunter pick -> hatch/name -> tutorial or farm; the 3 story screens and the creator are gone from the new-save path, name moved to the Boki-naming card, look editing stays in the farm menu) | main 0.17.0, no new sync | full suite 0 failures, --hunter-unlock-check 138 incl. new-game "egg pick is screen 2". Display names come from hero data, so Venator/Pin/Zedran show once the kitfix renames merge.
 ext/hero-shots | 3bd0520 | done: 12 heroes + farm building + classes; all portraits show signature weapons | - | -
@@ -14,7 +14,7 @@ ext/kitfix-breah-ostra | d1a7bdb (polish pass on main 5c2a630, ult base v2; ult 
 
 Running now (Sonnet): owner fixes Pin+Bjorn (#5 #6 #10 #29 #30) and Vireo+Venator (#9 #9b).
 Queued: owner review items per pair (see OWNER_REVIEW_1103 progress), 2 at a time.
-Last INBOX entry handled: 2026-11-03 06:25 UTC (06:20 airdash glide started; farm plans on hold per 06:20; bigger map noted as a separate higher-tier map; owner review items 1, 2, 4 started, 5+6 queued). Merge state seen: kitfix-* merged to main for all but pin-bjorn; kitdata-dancer-juggernaut merged.
+Last INBOX entry handled: 2026-11-03 07:00 UTC (items 32/35 done per pair; #22 on Opus; #39 rename on hold; #40 Ostra RMB added to the Breah+Ostra pass)
 Watcher: received 19:06 UTC entry
 Questions for the owner: see ext/classes line.
 Net note: main is now 0.15.0, which kits2-nor also uses (0.15.0, kit move id on the snapshot); main session to reconcile. Kitfix branches that need a bump use 0.15.2 (dancer-juggernaut), .3 (pin-bjorn), .4 (vireo-venator), .5 (linwick-dredge), .6 (moosh-tamsin), .7 (breah-ostra).
@@ -67,8 +67,8 @@ OWNER_REVIEW_1103 progress (the list is at 38 items and growing; worked per hero
 - #1 + #4 Venator: DONE on ext/kitdata-vireo-venator @ ca1d7e5 (direct grenade hit = 22 dmg + Dazed, wall/ground cone Dazes everyone hit, grenade now leaves along the shown lane (was 1 m off), slide rings/disc removed, faint skid streaks). Full suite 0 failures. Owner Qs: direct hit 22 (cone is 16) OK? knockback on direct hit?
 - #2 one-block walls: DONE, READY TO MERGE on ext/mapclean @ 2082d0d (new --wall-size-check, N=3 tiles, covers training, arena, duel room, tutorial, Hollow Crown x2 seeds; main had 19/4/26/46 undersized pieces; generated maps pruned via new block_prune.gd + 1 line in world.gd; arena pillars -> 2x2 blocks; Hollow Crown via generator: Crown pillars -> 3-tile ruin walls, small rocks/crates grown to 3, lone trees -> 3 Thornwood groves; boki_system_check landing-test skitter moved 1.3 -> 1.6 m because the map change shifted bot rolls). Full suite + drop/extract/cover 0 failures. Shots: ext/hero-shots mapclean/. Owner Qs: crates/pots/barrels are entities not tiles (same rule?); Thornwood now 3 groves (denser drops bloom below 15%); arena ring wall builds no tiles (separate issue).
 - #5 #6 #10 #29 #30 Pin + Bjorn: running on ext/kitdata-pin-bjorn.
-- Next, by pair: vireo-venator #9/#9b; linwick-dredge #11 #19 #20 #31 #33 #36; moosh-tamsin #12 #13 #23 #24 #27 #28; breah-ostra #14 #15 #16 #17 #25 #26 (#18 is art); dancer-juggernaut #8 (Dancer) #21 #22.
-- Not this server (MAIN or later/notes): #3 HUD, #7, #34, #37; cross-hero #32 #35 and rename decision #38 wait for direction on who runs them.
+- Next, by pair (each pair also does cross-hero #32 dash-into-ability flow and #35 per-hero dash animations for its two heroes): linwick-dredge #11 #19 #20 #31 #33 #36; moosh-tamsin #12 #13 #23 #24 #27 #28; breah-ostra #14 #15 #16 #17 #25 #26 #40 (#18 is art); dancer-juggernaut #8 (Dancer) #21, plus #22 Zedran feel pass on Opus.
+- Not this server (MAIN or later/notes): #3 HUD, #7, #34, #37; #38/#39 rename is ON HOLD (INBOX 07:00); #34/#37 and #39 looks go to the later concept pass.
 CHALLENGE LIST (final for this round; placeholders for the owner to tune; full list with mastery and gliders: ext/hero-shots:hunters/CHALLENGES.md)
 - Venator: none, owned from the start (old far-hits feat lives on as a mastery goal)
 - Zedran (easy if unpicked): knock 3 enemies into walls
