@@ -331,3 +331,12 @@ The owner saw an explosion with Moosh Moosh and isn't sure whether it comes from
 - Source behaviour (owner): Shift is castable **anywhere within range**: at the cursor, including over the abyss or on any ground. If the cursor is beyond max range, it casts at **max range along the cursor direction**. It never snaps the target back near him, and no ground or walkable check limits the target.
 - Today it ends up near him or refuses far targets. Find the clamp/ground check that causes it and remove it. Keep item 17's behaviour for him during the flight (slowed movement, z held over the abyss).
 - Assert: cursor at 0.5× range over the abyss → target at the cursor; cursor at 2× range → target at exactly max range in that direction; an abyss target is accepted.
+
+## 43. Lore and prologue (owner, 07:00 UTC). Lore doc: https://claude.ai/artifact/JbNFft2zZD5okc2mtumx9T (owner's Lore Bible; ext keeps it in sync)
+- Story spine: the Wyrm (an all-powerful dragon that takes human shape) ruled from the Crown as an ageless sovereign, sleeping on its hoard. The Wyrmheart at the bottom of the hoard grants one world-changing wish. A thief reached it, the Wyrm woke and broke the land (the existing prologue's Sundering). Fallen Wardens' powers scattered as Mantles; players are Bearers who take up a Mantle ("<name> the <title>"). Everyone races for the Wyrmheart: Menders (repair the world), Claimants (rule it), Free blades. Open-ended roster: new Mantles keep surfacing = new classes.
+- **Prologue is too long (owner).** Proposal (pending owner OK; main owns scripts/ui/prologue.gd, so it lands as a small branch after the OK): 7 slides (~54 s) down to 5 (~35 s), reusing the existing scenes:
+  1. BEFORE THE FALL: "Once, the sky held one great land, ruled from the Crown by a sovereign who never aged."
+  2. THE WAKING: "The sovereign was the Wyrm in human shape, asleep on its hoard. The night a thief reached its heart, it woke."
+  3. THE SUNDERING (land breaking + ships fleeing): "It broke the land into a thousand isles. The Wardens who stood against it fell, and their power scattered."
+  4. THE BOKI (Boki + homestead): "On the broken isles, survivors found the Boki, and started over."
+  5. THE RACE (hunters gliding in): "Somewhere in the ruins lies the Wyrmheart: one wish to remake the world, or rule it. Every hunter wants it. So does the Wyrm."
