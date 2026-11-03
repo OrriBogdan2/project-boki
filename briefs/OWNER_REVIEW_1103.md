@@ -130,3 +130,6 @@ The owner sees Breah move forward in an animation on RMB, and thinks it creates 
 ## 19. Linwick's RMB (Cinder Shot) always flies to max range (kit fix)
 - The shot ignores cursor distance and always travels its full length in the aim direction. Remove any cursor clamp (AimKit "at cursor" mode); use the "max range in aim direction" mode. The aim lane shows the full fixed length.
 - **Assert:** casting with the cursor at 2 m and at 20 m gives the same travel distance, the max.
+
+## 20. Linwick's ultimate (X, Flue Flight) lasts a bit longer (kit tuning)
+- Extend the flight, and with it the molten trail, by about 25–35%, or to the source's duration if the game data has it. Keep his steering and the trail's damage per second, and lengthen the trail's linger to match. Keep it in data, and update the ult assert.
