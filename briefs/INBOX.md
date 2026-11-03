@@ -373,3 +373,25 @@ The owner is reviewing the build now and will add more. Start the two items ther
 ## 2026-11-03 07:30 UTC: S1 slims down to save this account's budget
 - S2 (fresh account) now also owns Pin + Venator and Vireo + Dancer. S1 keeps only: the airdash-glide fix, item 2 mapclean, the farm tutorial (waiting on owner answers; don't build past the plan). If you already have a Pin/Venator or Vireo/Dancer branch in progress, finish that one and note it in STATUS so S2 skips it.
 - Max 1-2 agents on S1 from now; Sonnet only. One full suite per branch, targeted checks otherwise.
+
+## 2026-11-03 02:50 ET (07:50 UTC) ORCH check-in
+- [OWNER] DECISION: concept pass phase 1 (INBOX_S2 07:55) and Mantle look + creator (item 45, 08:10) are new features queued on S2 now; your standing rule is "hold new features until the resets, land finished work first". Keep them queued for after the demo, or hold them until Fri 11am?
+- [MAIN] ext/portrait a6189f21 has waited ~4 h (reported 22:50 ET). No main entry since SYNC75 (01:00 ET, ~2 h): please ack and start merging; demo merge window is 21:00-23:00 UTC.
+1. Shipped: nothing since sync75 (main 801bfbff, ~00:55 ET). ext/classes 98d4027e and kitdata-dancer-juggernaut 1b41236e are in it.
+2. Ready, not merged: portrait a6189f21 (~4 h); equal-loadout 97b77860 (~2.5 h); breakables 61f8772b (~1.8 h); kitdata pin-bjorn 93e9640 / linwick-dredge 90c7138 / moosh-tamsin c6932ae / breah-ostra d0d045e (~1.5 h); shops 794264bf (needs equal-loadout first, ~1 h); prologue5 54f83040 (demo-visible, small).
+   - [MAIN] merge kitdata-vireo-venator at the reported 3c1c79a only: its tip (ab5fd36d) now carries in-progress items 1 and 9 work. Same risk on kitdata-pin-bjorn (S1 is adding Pin fixes there).
+   - [EXT] ext/mapclean 2082d0d8 (item 2) and ext/airdash-glide 411a5918 look done but aren't reported READY in S1 STATUS or EXT_TO_MAIN. Report them or say what's left.
+3. Owner items with no owner or no movement:
+   - [MAIN] item 3 (Merge shows R, no X ult tile; most demo-visible) and item 8 (merge form dash "burst"): no ack from main.
+   - [EXT] Bjorn items 10/29/30: S1 "started, wrapping up for S2"; S2 waits for S1's push. Nobody clearly owns finishing them. Pick one.
+   - [EXT] Pin/Vireo/Venator (items 1, 4, 5, 6, 9/9b + their 32/35 rows): INBOX 07:30 gave them to S2, but S1 still runs them on 1-2 Sonnet agents (S2 STATUS: "stay with S1"). At S1's budget, will they land whole by 21:00 UTC? Confirm in the ~15:00 UTC report.
+   - [EXT] item 23 part 3 (Boki-passive explosion) may need a main write-up; nobody has it yet.
+4. Waiting on the owner:
+   - item 39 base names Sable / Cinder / Tarek, and "go" for the class-titles rename (ext/class-titles de196566 is on hold).
+   - dash-flow (S2): "buffer = held to the dash end, never expiring; OK?" and "make kit post-dash recovery cancellable per row?"
+   - farm builder plan: 6 questions (EXT_TO_MAIN 00:53 UTC).
+   - item 45: does the player look like their own person at home? (default yes)
+5. Conflicts:
+   - [EXT] item 45 says "extend the new-game name card into the creator", but ext/classes (on main) removed the creator and moved the name to the Boki card. Tell the mantle-look agent.
+   - [EXT] S2 branches review-tamsin-dredge and review-linwick-moosh already contain the kitdata merges. Fine if main merges the same commits; flag it at merge time.
+   - [EXT] S2 timestamps run ~1 h ahead of the git clock (its STATUS "08:50 UTC" was committed 07:41 UTC). Use git time when citing hours.
