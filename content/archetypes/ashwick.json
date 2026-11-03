@@ -5,6 +5,7 @@
 	"gender": "female",
 	"personality": "A slim salamander-folk alchemist with ember-speckled scales, a frilled crest that flares when she casts and a long tail.\nShe wears cracked goggles, an apron and bandoliers of flasks, and she is delighted by every fire she starts.",
 	"weight": "heavy",
+	"body": {"hit_r": 0.376},
 	"color": "#ff9a3a",
 	"fantasy": "The flue sweep. Hoses foes down with fire until they blaze, rams them head first, and hits back harder after every knock.",
 	"silhouette": "the tall sooty top hat and the bellows on the back",

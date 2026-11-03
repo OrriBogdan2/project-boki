@@ -8,7 +8,8 @@
 	"weight": "light",
 	"body": {
 		"size": 1.3,
-		"bulk": 0.78
+		"bulk": 0.78,
+		"hit_r": 0.38
 	},
 	"color": "#5fd6c4",
 	"fantasy": "A rink-keeper from the high frosts. She runs the fight on the ice: homing darts, a spear that freezes where it lands, and a sliding wall of ice that shoves foes where she wants them.",

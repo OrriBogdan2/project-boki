@@ -35,7 +35,7 @@ Dagger 15), Encore 24s (Death Blossom 23.1, about 3.5 Trickshots).
 
 ## Body and movement (hero sheet "Body, scale and movement feel")
 
-- Model about 0.95 of a medium (`body.size` 1.11 on the light build); hit radius unchanged (0.35).
+- Model about 0.95 of a medium (`body.size` 1.11 on the light build); hit radius 0.384 (`body.hit_r`, docs/HITBOX_SIZE.md).
 - Nameplate height 2.15 m (`body.plate`; read by the HUD through `Arch.plate_y`).
 - Runs pitched far forward (about 0.57 rad at a run).
 - Ground Cartwheel: 4.5 m with the measured speed curve; the long (air) dash is the same sideways cartwheel

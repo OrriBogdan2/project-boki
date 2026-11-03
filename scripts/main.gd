@@ -1410,7 +1410,7 @@ func _ability_check() -> void:
 	# 7. Tripwire Mine roots whoever steps on it
 	r = _ac_setup(4.0); m = r[0]; P = r[1]; T = r[2]
 	P.runner.set_slot("utility", Content.ability("tripwire_mine"))
-	P.inp["aim"] = T.pos + Vector3(-1.5, 0, 0)
+	P.inp["aim"] = T.pos + Vector3(-2.0, 0, 0)      # clear of the target's hitbox (item 46 sizes)
 	P.runner.use("utility", {})
 	_ac_run(m, 1.0)
 	var before_root := T.root_t
