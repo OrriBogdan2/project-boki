@@ -11,6 +11,7 @@ extends RefCounted
 ##      a button, every panel shell wears its section emblem, tabs carry icons, kit card keycaps
 ##      come from Settings.key_cap, "Fewer flashes" turns motion into plain fades, and the
 ##      interface size setting scales the menus and keeps a panel inside the window
+##      and the in-match HUD's HudStyle shares the ink, backing and brass trim tokens
 ##   6. more screens in the look: the armory, the market, the hero picker, the kit card, the
 ##      results screen and the loading screen
 
@@ -40,6 +41,7 @@ func run(main_node: Node) -> void:
 	_static_styles(src)
 	_contrast()
 	_steady_hover()
+	_hud_tokens()
 	await _screens()
 	await _motion()
 	await _scaling()
@@ -242,6 +244,13 @@ func _contrast() -> void:
 	ok("danger button text meets AA", bad_btn >= AA, "%.2f" % bad_btn)
 	var title_on_panel := UiSkin.contrast(UI.BRASS, UI.SURFACE)
 	ok("brass eyebrows read on a panel (large/caps: 3:1)", title_on_panel >= AA_LARGE, "%.2f" % title_on_panel)
+
+## The match HUD shares the field kit through HudStyle's tokens (it keeps its own widgets).
+func _hud_tokens() -> void:
+	var same_rgb := func(a: Color, b: Color) -> bool: return Color(a, 1.0).is_equal_approx(Color(b, 1.0))
+	var shared: bool = HudStyle.INK == UI.INK and same_rgb.call(HudStyle.TRIM, UI.BRASS)
+	shared = shared and same_rgb.call(HudStyle.SHADE, UI.RIM) and same_rgb.call(HudStyle.SLOT_BG, UI.RIM)
+	ok("HUD tokens: ink, frame backing and brass trim are the menus' own", shared)
 
 ## Every button tier's states have the same content margins and minimum size: hover and press
 ## light or sink a button, they never resize it.

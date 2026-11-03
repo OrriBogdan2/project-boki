@@ -106,10 +106,8 @@ GOLD TEAL INFO DARK_INK`, `R_PANEL R_CARD R_CTRL R_SMALL R_PILL`,
 Fonts: `UI.big` (Lilita One), `UI.body` (Rubik), `UI.semi` (Rubik 560), `UI.caps` (Rubik 700),
 `UI.num` (Rubik 560, tabular figures). Section colours and tab icons live in `UiSkin`.
 
-**The in-match HUD** keeps its own widgets (`HudStyle`, ext/hudref) and matches the menus through
-shared tokens: the same INK and the two fonts, and for frames the field-kit tokens `UI.BRASS`
-(slot and plate trims), `UI.STITCH` and `UI.SURFACE`/`UI.RIM` (frame backing and outline).
-HudStyle should read these rather than copy them, the way it already shares INK (see §5).
+**The in-match HUD** keeps its own widgets and matches the menus through HudStyle's tokens, which
+read these (§5).
 
 ### Text
 - `title(text, size=34, col=INK)` - Lilita One, one line.
@@ -182,15 +180,10 @@ UI.footer_primary(v, "Buy", buy, 160, "gem")      # primary + Enter keycap; UI.p
   owns the bottom of the screen.
 - New home panels: `var v := _new_panel("Kin Box", 900)` then fill `v` with the helpers above.
 
-## 5. Hand-off: HudStyle (ext/hudref)
+## 5. The in-match HUD (HudStyle)
 
-ext/hudref isn't merged yet, so this pass doesn't touch its widgets. When it lands, extend its
-tokens to point at the menu's (no widget restyling):
-```gdscript
-const INK := UI.INK
-const TRIM := Color(UI.BRASS, 0.55)      # new: a 1 px brass line inside slot_frame and plate_frame
-const KEY_BG := Color(UI.SURFACE, 0.95)  # keycap pills on the leather tone
-```
-and draw `TRIM` one pixel inside the existing `slot_frame` and `plate_frame` edges. MUTED stays
-HUD-cool (it reads over the world, not on leather).
-
+The match HUD keeps its own widgets (HudPlate, HudVitals, HudSlot) and shares the field kit through
+HudStyle's tokens, which point at the menu's: `INK` is `UI.INK`, the frame backing `SHADE`, the
+slot face `SLOT_BG` and the key pills' `KEY_BG` are the menus' dark leather edge (`UI.RIM`), and
+`TRIM` (`UI.BRASS`) is the brass line `slot_frame` draws just inside a live slot's edge, as the menus'
+buttons carry. MUTED stays HUD-cool: it reads over the world, not on leather.
