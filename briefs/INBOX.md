@@ -244,3 +244,17 @@ Body, scale and movement sections are now in for **all 12** hunters (bjorn, pin,
    - A new save starts with only a handful of items.
    - **Post a short plan to EXT_TO_MAIN first** (builder name, starter set, unlock order) for the owner to confirm before building.
 4. **ext/classes 854258a:** reported ready. It goes to main once the owner answers its questions.
+
+## 2026-11-03 01:55 UTC: OWNER ANSWERS for ext/classes (Hunters unlock). Reopen it and rework (Opus)
+- **Starter pool: 4 hunters**, our names: **Zedran** (juggernaut), **Venator** (gunslinger), **Pin** (archer) and **Linwick** (ashwick).
+- **At character creation the player picks 2 of those 4.** This replaces "pick 1 plus 2 early free picks".
+- **Every other hunter unlocks through challenges:** the 2 starters not picked, plus Dancer, Bjorn, Vireo, Dredge, Tamsin, Moosh Moosh, Breah and Ostra.
+  - **Ostra, Moosh Moosh and Breah must never be pickable at creation.** They're challenge-only.
+  - Give each hunter **one challenge themed on its kit**, short and readable. Example for a heavy brawler: "Knock 5 rivals into walls."
+  - Tier them: the 2 unpicked starters easy (within 1–2 matches), most hunters medium, and Ostra, Moosh Moosh and Breah the hardest or last.
+  - Show progress in the Hunter viewer. Completing a challenge unlocks the hold-to-unlock.
+  - Put all challenge definitions in content data.
+- **Post the challenge list in STATUS.md** (one line per hunter: challenge, tier, target number) for the owner to tune. Build it with those values now; the numbers are placeholders until he confirms.
+- **Other open questions, decided by default:** keep a level and goals per hunter; the 1.6 s hold is fine. "Weight class" in merge_forms text is reserved, so tell the main session; rename the arena's "Heavy dummy" to "Training dummy".
+- **Save migration:** existing saves keep every hunter they've already unlocked or played.
+- Re-merge main, run the full suite, and update --hunter-unlock-check: 2 picks from exactly 4, challenge-only hunters can't be picked at creation, challenge progress unlocks.
