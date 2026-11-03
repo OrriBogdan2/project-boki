@@ -253,6 +253,7 @@ func _knock_stun_merge(m: Match, P: Hunter, K: AshwickKit, home: Vector3) -> voi
 		"speed %.1f -> %.1f" % [sp0, float(J.flight.get("speed", 0.0))]
 	)
 	ak.step(m, 1.8)
+	await _shift_and_jump(m, P, K, home)
 	P.teleport(home)
 	_cast(P, home + Vector3(16, 0, 0))
 	ak.step(m, 0.3)
@@ -272,6 +273,45 @@ func _knock_stun_merge(m: Match, P: Hunter, K: AshwickKit, home: Vector3) -> voi
 		not J.running() and J.laid == laid and P.roll_t <= 0.0, "laid +%d" % (J.laid - laid)
 	)
 	KinMerge.end(P, "test")
+
+## Item 51: Shift in the flight is a poof that feeds it (the air dash spent, faster, bent its way, still flying);
+## a jump leaps off it at once, keeping a share of its speed into the air.
+func _shift_and_jump(m: Match, P: Hunter, K: AshwickKit, home: Vector3) -> void:
+	var J := K.jet
+	var at := home + Vector3(16, 0, 0)
+	P.teleport(home)
+	P.ex_cd = 0.0
+	_cast(P, at)
+	ak.step(m, 0.3, func(): ak.aim_at(P, at))
+	var sp0 := float(J.flight["speed"])
+	P.inp["move"] = Vector2(0, 1)
+	P.inp["dash"] = true
+	ak.step(m, 0.05, func(): ak.aim_at(P, at))
+	P.inp["dash"] = false
+	P.inp["move"] = Vector2.ZERO
+	var dir: Vector2 = J.flight.get("dir", Vector2.ZERO)
+	ok(
+		"ult: Shift in the flight is a poof that feeds it: the air dash spent, faster, bent its way (item 51)",
+		J.running() and P.ex_cd > 0.0 and float(J.flight["speed"]) > sp0 + 3.0 and dir.y > 0.1,
+		"speed %.1f -> %.1f, heading %s" % [sp0, float(J.flight.get("speed", 0.0)), dir]
+	)
+	ak.step(m, 2.0)
+	P.teleport(home)
+	_cast(P, at)
+	ak.step(m, 0.3, func(): ak.aim_at(P, at))
+	var sp := float(J.flight["speed"])
+	var y0 := P.pos.y
+	P.inp["jump"] = true
+	ak.step(m, 0.1)
+	P.inp["jump"] = false
+	var flat := Vector2(P.vel.x, P.vel.z).length()
+	ok(
+		"ult: a jump in the flight leaps off it within 0.1s, keeping its speed into the air (item 51)",
+		not J.running() and J.leaps >= 1 and P.pos.y > y0 + 0.2 and P.vel.y > 0.0
+				and flat >= sp * Hunter.DASH_JUMP_CARRY * 0.9,
+		"rose %.2f m, %.1f m/s of %.1f" % [P.pos.y - y0, flat, sp]
+	)
+	ak.step(m, 1.5)
 
 func _burst() -> void:
 	var res: Dictionary = await BURST.run(ak, "ashwick", 4.0, func(m: Match, P: Hunter, T: Hunter):

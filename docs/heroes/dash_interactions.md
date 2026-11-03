@@ -216,10 +216,10 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 | Linwick | air dash -> E | Data (wiki): Heat Shield can be cast mid-flight in the jetpack, his one air move. Ours: likewise mid-poof. | fires mid-dash |
 | Linwick | air dash -> ult (X) | Data: knockback impulses speed the flight up. Ours: X ends the poof and the flight takes over. | cancels the dash; dash momentum carries |
 | Linwick | air dash -> Q glove | No source glove; it goes off from the poof. | fires mid-dash |
-| Linwick | LMB -> dash | Data: the flamethrower is a hold with a 0.35s gap between uses. Footage: he walks while firing; no dash out of the hose shown. Ours: Shift rams at once and the stream stops (hold again to relight after the gap). | the dash goes, the ability keeps running |
+| Linwick | LMB -> dash | Data: the flamethrower is a hold with a 0.35s gap between uses. Footage: he walks while firing; no dash out of the hose shown. Ours: Shift rams at once; the stream goes out for the ram and, still held, roars again the step it ends (hold.lmb). | the dash goes, the ability keeps running |
 | Linwick | RMB -> dash | Footage: the aim lane shows about 0.4s while he keeps moving. Ours: Shift while aiming rams; the bolt still goes on release. | the dash goes, the ability keeps running |
 | Linwick | E -> dash | Heat Shield is instant (owner item 11): there is no wind-up to dash out of. | the dash goes, the ability keeps running |
-| Linwick | ult (X) -> dash | Data: the flight is his movement; reactivating lands. Footage: no dash during the flight. Ours (measured): Shift in the flight spends the air dash at once and the flight carries on. | the dash goes, the ability keeps running |
+| Linwick | ult (X) -> dash | Data: the flight is his movement; knockback impulses speed it up; reactivating lands. Footage: no dash during the flight. Ours: Shift in the flight is a poof from the bellows that feeds it like a knockback (it spends the air dash; the flight's speed grows up to its cap and bends toward the dash) and the flight carries on. | the dash goes, the ability keeps running |
 | Linwick | Q glove -> dash | No source glove. | the dash goes, the ability keeps running |
 | Linwick | jump -> LMB |  | fires mid-jump (default) |
 | Linwick | jump -> RMB |  | fires mid-jump (default) |
@@ -229,8 +229,11 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 | Linwick | LMB -> jump |  | the move goes at once, the ability keeps running (default) |
 | Linwick | RMB -> jump |  | the move goes at once, the ability keeps running (default) |
 | Linwick | E -> jump |  | the move goes at once, the ability keeps running (default) |
-| Linwick | ult (X) -> jump | Data: the flight is his movement; reactivating lands. Ours today (measured by --dash-flow-check): no jump in the flight (it holds his height). | **exception:** the move is refused while it runs (today's behaviour, to review) |
+| Linwick | ult (X) -> jump | Data: reactivating ends the flight early (the source's way out of it); the flight holds him low. Ours: a jump in the flight leaps off it at once: the flight ends (the carpet laid stays), he keeps a jump-out-of-a-dash share of its speed and hands it on to a glide (Hunter.glide_handoff). | the move cancels it at once |
 | Linwick | Q glove -> jump |  | the move goes at once, the ability keeps running (default) |
+| Linwick | hold LMB through a ground dash | Data: the flamethrower is a hold, the 0.35s gap is between uses; Pyro Pounce: no fire during it. Footage (0159-0161): upright out of the bash with the nozzle already on the aim. Ours: held through the ram (or the flight) the stream goes out and roars again the step it ends: no pilot, no relight gap. | the hold carries through and lets go there |
+| Linwick | hold LMB through an air dash | As on the ground: held through the poof, the stream is back the step it ends. | the hold carries through and lets go there |
+| Linwick | hold LMB through a jump | Ours: the hose keeps burning through a jump. | the hold carries through and lets go there |
 | Linwick | hold RMB through a ground dash |  | the hold carries through and lets go there |
 | Linwick | hold RMB through an air dash |  | the hold carries through and lets go there |
 | Linwick | hold RMB through a jump |  | the hold carries through and lets go there |

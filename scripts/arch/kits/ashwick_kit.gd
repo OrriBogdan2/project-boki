@@ -44,6 +44,7 @@ var after_t := 0.0              # the slow after letting go
 var boost_until := -9.0         # the Soot Ram's rank-3 speed boost runs until then
 var relight_t := 0.0            # the lance can't relight until this runs out (0.35s after a release)
 var was_held := false
+var hose_paused := false        # the lance held through a dash: the stream is out, it roars again as the dash ends
 var ember_t := 0.0
 var trail_t := 0.0              # the next dash after-image puff
 var bash := {}                  # hold: the Soot Ram under way {t, dir, hit}
@@ -292,18 +293,26 @@ func lmb_override(held: bool, dt: float) -> bool:
 		h.start_reload()          # out of fuel: the tank refills
 	# a merge ends the roar: holding the key on must not relight it
 	var merging := KinMerge.transforming(h) or KinMerge.active(h)
+	if held and was_held and not merging and flow.pauses_hold("lmb"):
+		_pause_hose()
+		return true
 	if not held or not h.can_fire() or merging or (relight_t > 0.0 and not was_held):
-		if was_held:
+		if was_held and not hose_paused:
 			play("as_lance_end")
+		if was_held:
 			after_t = float(lmbd().get("slow_after", 0.35))
 			relight_t = float(lmbd().get("relight", 0.35))      # a short gap before the lance can roar again
 			h.mel_hold = 0.0
 			hose.snuff()
 		was_held = false
+		hose_paused = false
 		spool = 0.0
 		flame_acc = 0.0
 		return true
 	var ld := lmbd()
+	if hose_paused:
+		hose_paused = false
+		play("as_lance")              # out of the dash, nozzle already on the aim: the roar is back at once
 	if not was_held:
 		play("as_lance")
 		m.sfx("lw_pilot", h.pos, -3.0, 1.0)
@@ -444,10 +453,25 @@ func _cinder_hit(f: Ent) -> void:
 func sees_from(p: Vector3, o: Ent, lift := 0.95) -> bool:
 	return m.world.los(p, o.pos, p.y + lift)
 
+## The lance held through a ram, a poof or the flight: the stream goes out (no fire comes from the dash) but the
+## hold carries, so it roars again the step the dash ends, with no pilot and no relight gap (that gap is after a
+## release).
+func _pause_hose() -> void:
+	if not hose_paused:
+		hose_paused = true
+		hose.snuff()
+		flame_acc = 0.0
+
 # ------------------------------------------------------------------ Shift: Soot Ram
 func on_dash(use_ex: bool) -> bool:
 	var dd := dash_def()
 	var dir := dash_dir()
+	if jet.running():
+		# in the flight (AshwickJet passes Shift on) a poof from the bellows feeds it and the flight goes on
+		if spend_dash(true):
+			jet.poof(dir)
+			_poof_cloud(dir)
+		return true
 	if use_ex and not h.grounded:
 		if not spend_dash(true): return true
 		_poof(dd, dir)
@@ -473,13 +497,7 @@ func _poof(dd: Dictionary, dir: Vector2) -> void:
 	h.roll_t = air_t
 	h.roll_speed = air_dist / air_t
 	play("lw_hop")
-	m.sfx("lw_hop", h.pos, -3.0, 1.0)
-	var back := -Vector3(dir.x, 0, dir.y)
-	var side := Vector3(dir.y, 0, -dir.x)
-	for i in POOF_PUFFS:
-		var spread := float(i) / (POOF_PUFFS - 1) - 0.5
-		var at := h.pos + Vector3(0, 0.9 + 0.25 * absf(spread), 0) + back * (0.5 + 0.25 * i) + side * spread * 0.7
-		fx.puff(at, LDFx.M_ORB, Color("3a2a2a"), Color("ff7a2a"), 0.6 + 0.08 * i, 0.45)
+	_poof_cloud(dir)
 	# held a step past the burst, so the kept speed lands after the class's own small carry
 	bash = {"t": air_t + 0.04, "dir": dir, "hit": true, "hop": true, "speed": h.roll_speed}
 
@@ -508,6 +526,16 @@ func _tick_bash(dt: float) -> void:
 			_keep_poof(b)
 		elif not b.get("hit", false):
 			m.fx.dust(h.pos, 6)
+
+## The poof's cloud of smoke and flame blown out behind him along `dir` (no blast), and its sound.
+func _poof_cloud(dir: Vector2) -> void:
+	m.sfx("lw_hop", h.pos, -3.0, 1.0)
+	var back := -Vector3(dir.x, 0, dir.y)
+	var side := Vector3(dir.y, 0, -dir.x)
+	for i in POOF_PUFFS:
+		var spread := float(i) / (POOF_PUFFS - 1) - 0.5
+		var at := h.pos + Vector3(0, 0.9 + 0.25 * absf(spread), 0) + back * (0.5 + 0.25 * i) + side * spread * 0.7
+		fx.puff(at, LDFx.M_ORB, Color("3a2a2a"), Color("ff7a2a"), 0.6 + 0.08 * i, 0.45)
 
 ## Out of the poof he sails on with a share of its speed (momentum kept), not the class's small carry.
 func _keep_poof(b: Dictionary) -> void:

@@ -25,10 +25,53 @@ func run(main_node: Node) -> void:
 	ak = load("res://tools/archetype_check.gd").new()
 	ak.main = main
 	await _all()
+	await _lance_combos()
 	await _growth()
 	await load("res://tools/ashwick_ult_check.gd").new(ak, ok).run()
+	var rows_bad: int = await load("res://tools/dash_flow_check.gd").new().check_hero(main, "ashwick")
+	ok("item 51: every slot casts mid-jump, holds through moves, a jump or Shift moves him out of it in 0.1s",
+			rows_bad == 0, "%d failures" % rows_bad)
 	print("ASHCHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
+
+## Item 51: the lance held through a ram goes out and roars again the step it ends (no pilot, no relight gap), and
+## keeps burning through a jump.
+func _lance_combos() -> void:
+	var r: Array = ak.setup("ashwick", 4.0, "", false)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var T: Hunter = r[2]
+	var K: AshwickKit = P.ak
+	T.teleport(T.pos + Vector3(0, 0, 6.0))      # (off the ram's line: it would stop on him)
+	var keep_fire := func():
+		P.inp["fire"] = true
+		ak.aim_at(P, T.pos)
+	ak.step(m, 0.4, keep_fire)
+	P.dashes = P.max_dashes()
+	P.do_dash()
+	ak.step(m, 0.05, keep_fire)
+	var em1: int = K.hose.emitted
+	var out_t := 0.0
+	while P.roll_t > 0.0 and out_t < 1.0:
+		keep_fire.call()
+		m.step(ak.DT)
+		out_t += ak.DT
+	var dark: bool = K.hose.emitted == em1 and K.was_held
+	ak.step(m, 0.1, keep_fire)
+	ok(
+		"lance: held through a ram it goes out, then roars again within 0.1s of its end (item 51)",
+		dark and K.hose.emitted > em1 and K.anim_id == "as_lance", "dark %s emitted +%d" % [dark, K.hose.emitted - em1]
+	)
+	ak.step(m, 0.3, keep_fire)
+	var y0 := P.pos.y
+	P.do_jump()
+	var em2: int = K.hose.emitted
+	ak.step(m, 0.2, keep_fire)
+	var high := P.pos.y - y0
+	ok("lance: it keeps burning through a jump", K.hose.emitted > em2 + 4 and high > 0.3,
+			"emitted +%d, %.2f m up" % [K.hose.emitted - em2, high])
+	P.inp["fire"] = false
+	await ak.done(m)
 
 ## Soot Ram's hit on the first foe with the hunter at level `lvl`.
 func _ram(lvl: int) -> float:
