@@ -651,29 +651,58 @@ func rimewright() -> void:
 				and K.lk().showing("spear_prop"))
 	P.inp["sec"] = false
 	P.inp["sec_hold"] = false
-	step(m, 0.02)
-	ok("tm RMB: the held spear leaves her hand on release", not K.lk().showing("spear_prop"))
-	step(m, 0.33)
+	step(m, 0.05)
+	ok(
+			"tm RMB: let go, she draws back first: the spear is still in her hand, nothing at the target",
+			K.lk().showing("spear_prop") and _mine(m, P).is_empty() and K.zones.is_empty() and K.anim_id == "tm_spear")
+	var thrown := {}
+	var hand := Vector3.ZERO
+	var waited := 0.05
+	while thrown.is_empty() and waited < 0.5:
+		hand = CareUtil.hand_at(P, false)
+		step(m, 1.0 / 60.0)
+		waited += 1.0 / 60.0
+		var mine := _mine(m, P)
+		if not mine.is_empty():
+			thrown = mine[0]
+	var ld: Dictionary = K.rmb_def()["lance"]
+	var from: Vector3 = thrown.get("start", Vector3.INF)
+	var spd := (thrown.get("vel", Vector2.ZERO) as Vector2).length()
+	ok(
+			"tm RMB: the throw: it leaves her hand on the whip, slower and heavier (18 m/s)",
+			not thrown.is_empty() and absf(waited - RimewrightKit.THROW_T) < 0.04 and from.distance_to(hand) < 0.35
+				and absf(spd - float(ld["speed"])) < 0.01 and float(ld["speed"]) <= 20.0
+				and not K.lk().showing("spear_prop"),
+			"after %.2f s, %.2f m from the hand, %.1f m/s" % [waited, from.distance_to(hand), spd])
+	var flight := 0.0
+	while K.zones.is_empty() and flight < 1.5:
+		step(m, 1.0 / 60.0)
+		flight += 1.0 / 60.0
+	var want_flight := Vector2(cur.x - from.x, cur.z - from.z).length() / float(ld["speed"])
+	ok(
+			"tm RMB: it travels to the target, landing on arrival (not at the cast)",
+			flight > 0.25 and absf(flight - want_flight) < 0.06, "flight %.2f s, want %.2f" % [flight, want_flight])
 	var zat: Vector3 = K.zones[0]["at"] if not K.zones.is_empty() else Vector3.INF
 	ok(
 			"tm RMB: the spear lands at the cursor and leaves a slow zone",
-			not K.zones.is_empty() and Vector2(zat.x - cur.x, zat.z - cur.z).length() < 1.0 and K.anim_id == "tm_spear",
+			not K.zones.is_empty() and Vector2(zat.x - cur.x, zat.z - cur.z).length() < 1.0,
 			"off %.2f" % Vector2(zat.x - cur.x, zat.z - cur.z).length())
 	step(m, 0.2)
 	ok(
 			"tm RMB: two charges on a 10.2 s cooldown",
-			K.rmb_charges() == 2 and K.cd["rmb"] > 9.4 and K.cd["rmb"] <= 10.2, "cd %.2f" % K.cd["rmb"])
+			K.rmb_charges() == 2 and K.cd["rmb"] > 9.0 and K.cd["rmb"] <= 10.2, "cd %.2f" % K.cd["rmb"])
 	ok(
 			"tm RMB: a foe in the zone is slowed and Chilled", T.slow_t > 0.0 and T.slow_k >= 0.34 and K.chilled(T),
 			"slow %.2f" % T.slow_k)
 	var hb := T.hp
-	step(m, 1.0)
-	var early := hb - T.hp
-	step(m, 0.6)
+	var since := 0.2
+	while int(K.stats["detonations"]) == 0 and since < 3.0:
+		step(m, 1.0 / 60.0)
+		since += 1.0 / 60.0
 	ok(
-			"tm RMB: it detonates about 1.8 s after landing: the big hit and a freeze",
-			early < 10.0 and hb - T.hp > 50.0 and T.root_t > 0.0 and K.stats["detonations"] >= 1,
-			"early %.0f total %.0f root %.2f" % [early, hb - T.hp, T.root_t])
+			"tm RMB: it detonates 1.8 s after landing: the big hit and a freeze",
+			absf(since - float(ld["delay"])) < 0.05 and hb - T.hp > 50.0 and T.root_t > 0.0,
+			"at %.2f s, %.0f damage, root %.2f" % [since, hb - T.hp, T.root_t])
 	await _free(m)
 	# --- Rink Wall: a 0.2 s tell, narrow just ahead, widening as it slides, stops at the cursor
 	r = sc.setup("rimewright", 30.0)
@@ -719,6 +748,30 @@ func rimewright() -> void:
 	ok(
 			"tm E: it stops at the cursor", not bool(K.wall["sliding"]) and absf(mid1.x - cur.x) < 0.8,
 			"mid at %.1f, cursor %.1f" % [mid1.x - P.pos.x, cur.x - P.pos.x])
+	await _free(m)
+	# aimed far past its reach, it slides its full travel (4.5 m/s, 16.2 m) and still stands after
+	r = sc.setup("rimewright", 30.0)
+	m = r[0]
+	P = r[1]
+	K = P.ak
+	sc.aim_at(P, P.pos + Vector3(24.0, 0, 0))
+	P.inp["sig"] = true
+	step(m, 0.05)
+	P.inp["sig"] = false
+	step(m, 0.3)
+	var wf: Dictionary = K.wall["w"]
+	var start_x: float = P.pos.x + float(K.e_def()["reach"])
+	var slid := 0.3
+	while bool(K.wall.get("sliding", false)) and slid < 6.0:
+		step(m, 0.05)
+		slid += 0.05
+	var end_x := ((wf["a"] as Vector2) + (wf["b"] as Vector2)).x * 0.5
+	var ed: Dictionary = K.e_def()
+	ok(
+			"tm E: it travels 16.2 m at most (+50%), about 3.6 s, and still stands at the end",
+			absf(end_x - start_x - float(ed["travel"])) < 0.6 and float(ed["travel"]) >= 16.0 and slid > 3.3
+				and not K.wall.is_empty() and float(wf["len"]) > 4.4,
+			"travelled %.1f m in %.2f s" % [end_x - start_x, slid])
 	await _free(m)
 	r = sc.setup("rimewright", 30.0)
 	m = r[0]

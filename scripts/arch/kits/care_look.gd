@@ -139,19 +139,19 @@ func _build(kind: String) -> Node3D:
 			# the Ice Spear: an ice-blue shaft and four-point star head with dark teal edges, so it reads blue
 			# on grass at gameplay zoom; white is kept to the tip glint and a short frost streak
 			var spear_ice := ice_mat(Color("9af0ff"), 0.95, 0.2, Color("1f8a96"))
-			var sh := _off(Models.part(n, Models.crystal(0.07, 1.1, 4), spear_ice, Vector3(0, 0, 0.2)))
+			var sh := _off(Models.part(n, Models.crystal(0.12, 1.7, 4), spear_ice, Vector3(0, 0, 0.35)))
 			sh.rotation = Vector3(-PI * 0.5, 0, 0)
 			var st := Node3D.new()
 			st.name = "Spin"
-			st.position = Vector3(0, 0, -0.35)
+			st.position = Vector3(0, 0, -0.55)
 			n.add_child(st)
 			for i in 4:
 				var a2 := TAU * i / 4.0
-				var point_at := Vector3(cos(a2), sin(a2), 0) * 0.16
-				var pt := _off(Models.part(st, Models.crystal(0.06, 0.36, 4), spear_ice, point_at))
+				var point_at := Vector3(cos(a2), sin(a2), 0) * 0.24
+				var pt := _off(Models.part(st, Models.crystal(0.09, 0.5, 4), spear_ice, point_at))
 				pt.rotation = Vector3(0, 0, a2 - PI * 0.5)
-			_off(Models.part(n, Models.sphere(0.07, 8), orb_mat(Color("f2ffff", 0.95)), Vector3(0, 0, -0.42)))
-			var spear_tail := _tail(n, 0.2, 3.2, Color("4fc8ec", 0.85))
+			_off(Models.part(n, Models.sphere(0.1, 8), orb_mat(Color("f2ffff", 0.95)), Vector3(0, 0, -0.66)))
+			var spear_tail := _tail(n, 0.34, 4.0, Color("4fc8ec", 0.85))
 			# the short white frost streak rides on the tail, so it is hidden with it while the spear is held
 			var streak_mat := orb_mat(Color("e8ffff", 0.8))
 			_off(Models.part(spear_tail, Models.box(0.04, 0.04, 0.5), streak_mat, Vector3(0, 0, 0.6)))
@@ -313,15 +313,16 @@ func _give(kind: String, n: Node3D) -> void:
 	free_pool[kind] = fl
 
 # ------------------------------------------------------------------ shots
-## Rides a pooled look on a shot (the shared round shrinks to nothing, its hit radius stays).
-func skin(s: Dictionary, kind: String) -> void:
+## Rides a pooled look on a shot (the shared round shrinks to nothing, its hit radius stays). `lob`: the look
+## arcs from the shot's height down to lob.y over lob.dist metres (a thrown spear), peaking lob.h above the line.
+func skin(s: Dictionary, kind: String, lob := {}) -> void:
 	s["vr"] = 0.001
 	var n := _take(kind)
 	n.scale = Vector3.ONE
 	n.global_position = s["pos"]
 	var tail := n.get_node_or_null("Tail") as Node3D
 	if tail: tail.visible = true
-	skins.append({"s": s, "n": n, "kind": kind, "last": s["pos"]})
+	skins.append({"s": s, "n": n, "kind": kind, "last": s["pos"], "lob": lob})
 
 ## The shot dictionary spawned last by this hunter (spawn_shot appends it).
 func last_shot() -> Dictionary:
@@ -344,10 +345,16 @@ func _tick_skins(dt: float) -> void:
 		sk["last"] = p
 		if not is_instance_valid(n):
 			continue
-		n.global_position = p
 		var v: Vector2 = s["vel"]
+		var slope := 0.0
+		if not (sk["lob"] as Dictionary).is_empty():
+			var arc := _lob_at(sk["lob"], s)
+			p.y = arc.x
+			slope = arc.y
+			sk["last"] = p
+		n.global_position = p
 		if v.length() > 0.5:
-			n.look_at(p + Vector3(v.x, 0, v.y), Vector3.UP)
+			n.look_at(p + Vector3(v.x, v.length() * slope, v.y), Vector3.UP)
 		var sp := n.get_node_or_null("Spin") as Node3D
 		if sp and kind == "spear":
 			sp.rotate_z(dt * 14.0)
@@ -358,6 +365,17 @@ func _tick_skins(dt: float) -> void:
 		if tl:
 			var gone := Vector2(p.x - (s["start"] as Vector3).x, p.z - (s["start"] as Vector3).z).length()
 			tl.scale = Vector3(1, 1, clampf(gone / 2.0, 0.15, 1.0))
+
+## A lobbed look's height and slope (dy per metre) where its shot is now, from the throw's start.
+func _lob_at(lob: Dictionary, s: Dictionary) -> Vector2:
+	var start: Vector3 = s["start"]
+	var p: Vector3 = s["pos"]
+	var dist := maxf(0.5, float(lob["dist"]))
+	var u := clampf(Vector2(p.x - start.x, p.z - start.z).length() / dist, 0.0, 1.0)
+	var top := float(lob["h"])
+	var y := lerpf(start.y, float(lob["y"]), u) + sin(u * PI) * top
+	var slope := (float(lob["y"]) - start.y + cos(u * PI) * PI * top) / dist
+	return Vector2(y, slope)
 
 ## The kind's own impact where the shot stopped.
 func impact(kind: String, at: Vector3, s: Dictionary) -> void:

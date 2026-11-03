@@ -30,12 +30,13 @@ const SPEC := {
 		"strip": [1.0, 1.6, 2.02, 2.12, 2.24, 2.4], "keys": {"stacks": 1.6, "shell": 1.98, "shatter": 2.2}},
 	"rimewright_payoff": {"strip": [0.5, 0.7, 0.9, 1.1, 1.3, 1.5], "keys": {"payoff": 1.3}},
 	"rimewright_rmb": {
-		"strip": [0.5, 0.7, 0.82, 0.86, 0.92, 1.1],
-		"keys": {"rmb_aim": 0.7, "rmb_fly": 0.84, "rmb_zone": 1.5, "rmb_boom": 2.8}},
+		"strip": [0.7, 0.88, 1.0, 1.14, 1.32], "side": 560,
+		"keys": {"rmb_aim": 0.7, "rmb_fly": 1.12, "rmb_land": 1.32, "rmb_boom": 3.12}},
 	"rimewright_dash": {"strip": [0.32, 0.45, 0.62, 0.8, 1.06], "keys": {"dash": 0.7, "dash_stop": 1.06}},
 	"rimewright_skatefire": {"strip": [0.5, 0.58, 0.64, 0.7, 0.8, 0.9], "keys": {"skatefire": 0.66}},
 	"rimewright_air": {"strip": [0.3, 0.5, 0.7, 0.9, 1.1], "keys": {"air": 0.5, "air_land": 0.9}},
-	"rimewright_e": {"strip": [0.34, 0.42, 0.5, 0.55, 0.62, 0.9], "keys": {"e": 0.56, "e_slide": 1.3}},
+	"rimewright_e": {
+		"strip": [0.34, 0.42, 0.5, 0.55, 0.62, 0.9], "keys": {"e": 0.56, "e_slide": 1.3, "e_full": 2.6}},
 	"rimewright_walk": {"strip": [0.6, 0.68, 0.76, 0.84, 0.92, 1.0], "keys": {"walk": 0.8}},
 	"rimewright_pose": {"strip": [0.5, 0.56, 0.62, 0.68], "keys": {"pose": 0.6}, "yaw": 3.3},
 	"rimewright_ultaim": {"strip": [0.32, 0.36, 0.42, 0.5, 1.5], "keys": {"ultaim": 0.36}},
@@ -161,6 +162,10 @@ static func _script(
 		"e":
 			if _at(t, dt, go):
 				K.cd["e"] = 0.0
+				if arch == "rimewright":
+					# aimed 11m out across the screen, so the frames show the long slide out
+					var side: Vector2 = A.get_meta("care_right", Vector2(1, 0))
+					P.inp["aim"] = P.pos + Vector3(side.x * 11.0, 0.9, side.y * 11.0)
 				K.use_e()
 			if arch == "tender" and _at(t, dt, 1.0):
 				P.inp["aim"] = P.pos + Vector3(-4.0, 0.9, -2.0)
@@ -263,7 +268,7 @@ static func _capture(A: Arena, spec: Dictionary, arch: String, what: String, t: 
 		if _at(t, dt, float(strip[i])):
 			_grab(A, func(img: Image):
 				var fr: Array = A.get_meta("care_frames", [])
-				fr.append(_crop(m, img))
+				fr.append(_crop(m, img, int(spec.get("side", 0))))
 				A.set_meta("care_frames", fr))
 	for k in keys:
 		last = maxf(last, float(keys[k]))
@@ -283,15 +288,17 @@ static func _grab(A: Arena, use: Callable) -> void:
 	var m := A.m
 	m.get_tree().process_frame.connect(func(): use.call(m.get_viewport().get_texture().get_image()), CONNECT_ONE_SHOT)
 
-## A square crop round the hero's middle on screen (360 px close up, 240 px at the gameplay zoom),
-## scaled to 360 px.
-static func _crop(m: Match, img: Image) -> Image:
+## A square crop round the hero's middle on screen (360 px close up, 240 px at the gameplay zoom, or the
+## spec's own `side` for a move that reaches further), scaled to 360 px.
+static func _crop(m: Match, img: Image, side_px := 0) -> Image:
 	var cam := m.get_viewport().get_camera_3d()
 	var P: Hunter = m.player
 	var c := Vector2(img.get_width() * 0.5, img.get_height() * 0.56)
 	if cam and P:
 		c = cam.unproject_position(P.position + Vector3(0, 0.8, 0))
 	var side := 360 if close() else 240
+	if side_px > 0:
+		side = side_px
 	var x0 := clampi(int(c.x) - side / 2, 0, img.get_width() - side)
 	var y0 := clampi(int(c.y) - side / 2, 0, img.get_height() - side)
 	var crop := img.get_region(Rect2i(x0, y0, side, side))
