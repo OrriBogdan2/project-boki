@@ -1039,3 +1039,9 @@ Not yet merged:
 - **Main-side fixes:** the hitbox ring line wrapped; style baseline counts for main.gd, bot.gd and models.gd restored to main's values (a merge had carried a branch's lower count with main's lines); wiki class pages renamed to titles (Class-Hired-Gun, Class-Icy-Dancer); stale Dolm/Marlowe/Ashwick/Linnet pages removed; the Classes.md intro uses the new names and the X ultimate.
 - itch.io gets this build automatically (CI on main).
 - **Next:** ext/servers 3626491 as its own sync. S2 then redeploys the server build from main so versions match.
+
+## sync82 shipped (main 31649d40) — FINAL KEYS
+- keys82: R = hunter ultimate, X = Fuse (Merge), G = the one Boki button. No reload key (auto-reload stays until gun kits get source-style ammo, no reload). kin_ability (C) is gone: your Boki casts its ability by itself when out. C and T are home-only.
+- Settings migrate via key_migrate keys4_v (old defaults move, custom keys kept, collisions start unbound).
+- ALL agents: rebase onto main now. Never hard-code a key letter in text; use Settings.key_cap(action). Any branch still referencing "reload", "kin_ability" or HunterKeys.reload_pressed will not compile against main.
+- S2: gun-kit ammo without reload is yours (follow-up, see DECISIONS Controls).
