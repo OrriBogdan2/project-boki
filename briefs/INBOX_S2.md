@@ -99,3 +99,5 @@ Keep up to 6 agents. Don't start anything that touches the demo branches until m
 ## 2026-11-03 16:20 UTC: concepts 1b: real height and build variety
 - Owner: the Wardens should be clearly different heights and builds. Today most stand the same height. Spread them on one scale, e.g. Moosh Moosh ~0.6 of a standard hunter, Tarek and Sable lean and average, Tamsin slight and tall-ish, Cinder low and hunched with a long tail, Zedran and Venator broad, Bjorn and Dredge the biggest (Dredge hulking, Bjorn tallest-widest), Ostra tall and thin, floating. Show it in the lineup with a height scale. Gameplay hitboxes stay per class; this is visual.
 - Owner wants the quality much higher, aiming at top-MOBA level. Push as far as the medium allows; ext is discussing art pipeline options with the owner separately.
+
+## 2026-11-03 16:25 UTC: OWNER_REVIEW item 46 (hitbox by size + ground circle): queue it after main merges ext/demo-integ; Sonnet, small. Set the hit_r values together with the concept heights (1b).

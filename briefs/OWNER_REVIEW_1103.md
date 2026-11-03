@@ -358,3 +358,8 @@ The owner saw an explosion with Moosh Moosh and isn't sure whether it comes from
 - **Gameplay safety:** hitboxes and hurtboxes stay per class, unaffected by sliders (fairness in PvP); only visuals change. Silhouettes must stay identifiable at gameplay zoom at both slider extremes (check).
 - **Data and code:** player appearance saved in the profile as normalised slider values; one new pure function (e.g. `MantleLook.apply(warden_base, player_look) -> model params`) in a new file; Models.hunter takes the result (wiring only; models.gd is main's). Works with today's models now and with the concept-pass models later.
 - **Checks:** sliders at min/max for every class stay within the clamp, hitbox unchanged, save/load round trip, silhouettes distinct at extremes; screenshots: one class at 5 slider settings side by side, and one player's look across 4 classes.
+
+## 46. Hitboxes follow size, compressed; a ground circle shows each hunter's hitbox (owner, 16:15 UTC)
+- Hitboxes differ by Warden size, but compressed toward the middle so small hunters aren't much harder to hit (the source game didn't make them exactly equal either). Default mapping: hit radius = standard × (0.85 to 1.15), scaled from the Warden's visual size (Moosh Moosh at the low end, Bjorn/Dredge at the high end). Values live in each archetype's existing `hit_r` (Arch.hit_r()); the creator's sliders (item 45) never change it.
+- Every hunter has a ground circle under them whose radius equals their hitbox, in team colour (it's gameplay info, so it fits the ground-shape rule). Reuse the existing under-hunter ring; just drive its size from hit_r.
+- Assert: every archetype's hit_r is within the 0.85–1.15 band; the drawn circle radius equals hit_r; hit tests use hit_r.
