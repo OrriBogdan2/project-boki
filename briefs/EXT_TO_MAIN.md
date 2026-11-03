@@ -354,3 +354,17 @@ The body/movement study of all 12 hunters (briefs/hero-ref/*.md, "Body, scale an
 - **Start and stop:** instant in both; ours already matches.
 - **Nameplate height** differs per hero in the source. ext/hudref will expose a per-hunter offset.
 Per-hunter scale, dash and pose changes go through the kit polish passes.
+
+## 2026-11-02 19:55 ET: ext/uipolish ready to merge (c7caef0, on latest main)
+- **Settings audit:** see docs/SETTINGS_AUDIT.md.
+  - **Removed:** `dash_hold` (the read in match.gd and the long-dash stretch in hunter.gd are gone), `kin_auto` ("Boki also use your E": E is the hunter's and the Boki casts on C; G after your C-into-G merge), and `hud_opacity` (unused). Old settings files drop them on start.
+  - **Regrouped tabs:** Gameplay, Controls (with a "How keys behave" group), Camera (new), Audio, Video, Accessibility, Demo. Plain-words hints on rows.
+- **Theme:**
+  - `UiFrame` and `UiTheme`, one layered box style for every menu box. Hover and press never resize anything.
+  - `UI.install()` merges the theme into the default theme; the per-screen `theme = UI.theme()` is deleted in 14 files.
+  - `UI.toast` replaces three copies.
+  - ui.gd is down ~200 lines.
+  - hud.gd's StyleBoxFlats are left for ext/hudref; kin_reveal.gd (reserved) is untouched.
+- **Checks:** --uipolish-check (26), --check, level-hud, keybind, hero, gear, economy, polish and bot-sanity pass, and health --strict passes (ratchet improved, nothing raised). +1309/−736 across 39 files.
+- **Your follow-up (reserved):** kin_tactics.gd ~line 106 still reads `Settings.get_v("kin_auto")`. It returns null, which equals the old default, so behaviour is unchanged. Please change it to `if slot == "k1" and k.owner_h.is_local(): continue`, and tidy the mentions in the comment at ~89 and in docs/KIN_GRAMMAR.md (~248, 289).
+- **Seen on main, before and after:** `--armory-test` logs SCRIPT ERRORs in home.gd `_close_panel` (the hook opens the armory before the home UI exists).
