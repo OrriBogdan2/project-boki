@@ -1344,7 +1344,7 @@ var strike_at_end := {}        # a charged lunge's hit, which lands where the lu
 
 ## Called every frame with the attack key's state; decides what that means for this weapon.
 func trigger(dt: float) -> void:
-	var held: bool = DashFlow.held(self, inp["fire"], dt)
+	var held: bool = inp["fire"]
 	if ak and ak.lmb_override(held, dt):
 		return          # the archetype runs this weapon's attack itself (the Bulwark's mace: throw / smash)
 	if wpn.get("melee", false):
@@ -2146,6 +2146,7 @@ func sim(dt: float) -> void:
 	_tick_base(dt)
 	if base_t > 0.0:
 		inp["fire"] = false        # channeling: no attacks while you base
+	if ak: ak.flow.route(dt)       # presses during a dash: fire, held to its end, or cancel it (DashFlow)
 	if inp["dash"]: do_dash()
 	if dash_buf > 0.0 and roll_t <= 0.0 and grap.is_empty() and pad.is_empty() and not inp["dash"]:
 		dash_buf = 0.0

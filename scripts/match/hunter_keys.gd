@@ -29,6 +29,8 @@ static func _channeling(h: Hunter) -> bool:
 static func ult_pressed(h: Hunter) -> bool:
 	if h == null or h.downed or h.out:
 		return false
+	if h.ak != null and h.ak.flow.take_x():
+		return true          # pressed mid-dash: DashFlow plays it when the dash ends
 	if h.lvl < int(Hunter.ULT_AT[0]):
 		_deny(h)
 		if h.is_local() and h.m.hud and _toast_due(h):
