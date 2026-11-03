@@ -92,7 +92,7 @@
 		"charge_speed": 18.0,
 		"charge_kb": 11.0,
 		"charge_dmg": 10.0,
-		"desc": "360 Smash: a hard 3.5m dash (0.17s) that slides on through one full spin of the hammer around you (2.2m): 24 damage, push 7. With the aegis raised it's a Shield Charge on its own 6s cooldown (it spends no dash charge): 4.2m behind the aegis, invulnerable for its length, 10 damage and push 11 (into a wall or a foe: Crushed). Shift while spinning up a Crushing Blow: a short plain dash that costs half a charge.",
+		"desc": "360 Smash: a hard 3.5m dash (0.17s) that slides on through one full spin of the hammer around you (2.2m): 24 damage, push 7. With the aegis raised it's a Shield Charge on its own 6s cooldown (it spends no dash charge): 4.2m behind the aegis, invulnerable for its length, 10 damage and push 11 (into a wall or a foe: Crushed). Shift while winding up a Crushing Blow: a short plain dash, the blow still charging.",
 		"short": 2.6,
 		"spin_r": 2.2
 	},
@@ -105,7 +105,7 @@
 		"cooldown": 6.0,
 		"cd_per_rank": 1.5,
 		"charges": 1,
-		"hold": 0.2,
+		"hold": 0.1,
 		"shield": {
 			"hp": 160.0,
 			"hp_rank": 0.25,

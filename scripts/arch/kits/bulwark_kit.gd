@@ -4,10 +4,11 @@ extends ArchKit
 ##
 ## - LMB (War Hammer): tap throws the hammer to the cursor (clamped to its range; it passes through foes
 ##   and stays planted under a gold beacon, showing foes near it to your team, until you tap again to
-##   call it back, hitting on the way). Hold spins the hammer in his hand (faster as it charges, a glint
-##   on its head from 0.6 s); at full (1.25 s) he hauls it back, a flash on its head and a click open the
-##   perfect window. Let go and it's a Crushing Blow: a flaming 180 degree crescent in front that steps him
-##   forward with it; let go in the window and it's the perfect swing, a leaping launch (BjornLaunch).
+##   call it back, hitting on the way). Hold drags the hammer back low behind him, side-on and crouched,
+##   turning with the cursor (a glint on its head from 0.6 s); at full (1.25 s) he coils deepest, and a flash
+##   on its head and a click open the perfect window. Let go and it's a Crushing Blow: a flaming 180 degree
+##   crescent in front that steps him forward with it; let go in the window and it's the perfect swing, a
+##   leaping launch (BjornLaunch).
 ## - RMB: hold to raise his aegis (its own HP, regenerates); letting go only lowers it.
 ## - Dash: 360 Smash, a short dash that ends in one full spin hit around him; with the aegis raised it's
 ##   the Shield Charge (the Bash: invulnerable for its length, a heavier knock) on the RMB slot's own cooldown.
@@ -433,18 +434,16 @@ func cancel_hold() -> void:
 			anim_id = ""
 	hold_blocked = bool(h.inp.get("fire", false))
 
-## The swing held: the hammer spins in his hand (a whoosh each turn), the glint from 0.6 s; at full he hauls
-## it back and the perfect window opens with a flash on its head, a click and the cursor ring's flare (the
-## glint burns hot until the window shuts); the body keeps facing the cursor (Hunter faces its aim).
+## The swing held: the hammer dragged back behind him (BjornFx, one whoosh as it goes back), the glint from
+## 0.6 s; at full he coils deepest and the perfect window opens with a flash on its head, a click and the
+## cursor ring's flare (the glint burns hot until the window shuts); the body keeps facing the cursor (Hunter
+## faces its aim).
 func _hold_tell() -> void:
 	if lmb_t < float(lmb_def()["tap"]):
 		return
 	var k := smash_k()
 	fx.hold(lmb_t, k, launch.in_window(lmb_t))
 	AimKit.charge(h, k, {"col": Color("ffc94a"), "col2": Color("fff1c0"), "flare": false})
-	var turn := fmod(lmb_t * lerpf(1.4, 3.5, k), 1.0)
-	if turn < fmod((lmb_t - Match.DT) * lerpf(1.4, 3.5, k), 1.0):
-		m.sfx("bjorn_spin", h.pos, -9.0 if h.is_local() else -13.0, lerpf(0.9, 1.25, k))
 	if k >= 0.99 and not flared:
 		flared = true
 		fx.full_flare()
@@ -494,7 +493,6 @@ func _smash() -> void:
 		if perfect:
 			Feel.hitstop(m, h, f, dmg, {"melee": true, "heavy": true, "payoff": true})
 	var heavier := 1.0 if perfect else 0.0
-	if h.is_local(): Oomph.punch_dir(m, dv, 0.15 + 0.25 * k + 0.15 * heavier)
 	m.sfx("bjorn_slam", h.pos, lerpf(-4.0, 0.0, k) + 2.0 * heavier, lerpf(1.1, 0.85, k) - 0.1 * heavier)
 
 ## The normal swing's step: "carry" m (more with the charge) over CARRY_T, on the ground only, then a short
@@ -517,6 +515,10 @@ func _impact_trail(f: Ent, dv: Vector2, k: float) -> void:
 			if is_instance_valid(f) and not f.dead:
 				m.fx.burst(f.pos + Vector3(0, 0.4, 0), Color("c86a4a"), 4, 2.0 + k * 2.0, 0.35, 8.0, 0.8, Vector3(-dv.x, 0.6, -dv.y), 50.0))
 
+## s the hammer stays in his hand after the throw starts (sheet 0033-0034: about one frame of wind-up; with
+## the step it's queued on it leaves ~0.12 s after the press, as the arm comes through in bul_throw)
+const THROW_WIND := 0.08
+
 func _throw() -> void:
 	play("bul_throw")
 	var md := lmb_def()
@@ -528,10 +530,9 @@ func _throw() -> void:
 	# it lands at the cursor, clamped to its range
 	var dist := AimMode.dist(h, float(md["throw_range"]), AimMode.CURSOR, float(md.get("throw_min", 2.5)))
 	throw_at = m.time
-	mace = {"st": "fly", "pos": at, "dir": h.aim_dir(), "d": 0.0, "to": dist, "hit": {}, "t": 0.0}
+	mace = {"st": "wind", "pos": at, "dir": h.aim_dir(), "d": 0.0, "to": dist, "hit": {}, "t": 0.0}
 	throws += 1
 	h.swing_t = 0.18; h.swing_n += 1
-	fx.in_hand(false)
 	m.sfx("bjorn_throw", h.pos, -2.0)
 	Oomph.on_fire(h, true)
 	net_bolt(at, at + Vector3(mace["dir"].x, 0, mace["dir"].y) * dist, Color("ffd27a"))
@@ -556,6 +557,13 @@ func _tick_mace(dt: float) -> void:
 		return
 	var p: Vector3 = mace["pos"]
 	match String(mace["st"]):
+		"wind":
+			# still in his hand while the arm comes through: it leaves THROW_WIND s after the press
+			p = h.pos + Vector3(0, 1.0, 0)
+			mace["t"] = float(mace["t"]) + dt
+			if float(mace["t"]) >= THROW_WIND:
+				mace["st"] = "fly"
+				fx.in_hand(false)
 		"fly":
 			var dir: Vector2 = mace["dir"]
 			var step := float(md["throw_speed"]) * dt
@@ -713,10 +721,9 @@ func on_dash(use_ex: bool) -> bool:
 		cancel_hold()
 		winding = false
 	if winding and h.grounded and mace.is_empty():
-		# Shift while winding up the Crushing Blow: a short plain dash (no spin: the hammer is busy) for half a
+		# Shift while winding up the Crushing Blow: a short plain dash (no spin: the hammer is busy) on a full
 		# charge, the swing still charging through it (hold.lmb.ground)
 		if not spend_dash(false): return true
-		h.dashes = minf(h.max_dashes(), h.dashes + 0.5)       # (half the charge comes back: the reduced cooldown)
 		var sd2 := float(dd.get("short", 2.6))
 		travel(sd2, sd2 / float(dd["whirl_speed"]), {"invuln": 0.0, "trail": "dust", "dir": dash_dir()})
 		st["last_dash"] = "short"

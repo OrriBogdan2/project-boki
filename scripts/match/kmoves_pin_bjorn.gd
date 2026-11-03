@@ -301,57 +301,58 @@ const MOVES := {
 			}
 		]]},
 	# ---------------------------------------------------------------- Bjorn (bulwark; hero sheet bjorn.md)
-	# the hammer thrown: cocked far back and low for one frame, leaning away, then an overhand throw that
-	# overshoots past the front before it settles
+	# the hammer thrown (sheet 0033-0034): cocked far back and low for one frame, leaning away, then an
+	# overhand throw (the hammer leaves the hand ~0.12 s after the press, as the arm comes through)
+	# that overshoots past the front before it settles
 	"bul_throw": {"keys": [
 		[0, {}],
-		[0.088, {"y": 1.1, "p": 0.3, "gp": 1.2, "sq": -0.1, "lw": 1.0, "legs": [0.2, -0.5, -0.35, -0.3]}],
-		[0.176, {"y": -0.7, "p": -0.42, "gp": -0.6, "sq": 0.15, "lw": 1.0, "legs": [0.85, -0.7, -0.5, -0.3]}],
-		[0.246, {"y": -0.95, "p": -0.48, "gp": -0.95, "sq": 0.2, "lw": 1.0, "legs": [0.9, -0.75, -0.55, -0.3]}],
-		[0.37, {"y": -0.3, "p": -0.15, "gp": -0.2, "lw": 0.6}],
-		[0.546, {}]]},
+		[0.07, {"y": 1.1, "p": 0.3, "gp": 1.2, "sq": -0.1, "lw": 1.0, "legs": [0.2, -0.5, -0.35, -0.3]}],
+		[0.14, {"y": -0.7, "p": -0.42, "gp": -0.6, "sq": 0.15, "lw": 1.0, "legs": [0.85, -0.7, -0.5, -0.3]}],
+		[0.21, {"y": -0.95, "p": -0.48, "gp": -0.95, "sq": 0.2, "lw": 1.0, "legs": [0.9, -0.75, -0.55, -0.3]}],
+		[0.34, {"y": -0.3, "p": -0.15, "gp": -0.2, "lw": 0.6}],
+		[0.5, {}]]},
 	# the hammer called back: the free hand reaches out, then draws in and catches
 	"bul_recall": {"keys": [
 		[0, {"hw": 1.0, "fl": Vector3(0.05, 0.1, -0.55), "p": -0.1}],
 		[0.176, {"hw": 1.0, "fl": Vector3(0.05, 0.1, -0.6), "p": -0.15}],
 		[0.299, {"hw": 1.0, "fl": Vector3(-0.05, -0.05, -0.15), "p": 0.1, "sq": 0.12}],
 		[0.484, {}]]},
-	# LMB held: spinning the hammer, side-on and crouched, the hammer arm out to the side, the
-	# shield arm forward; the hammer turns in the hand (BjornFx) while the body keeps facing the cursor.
-	# At full (1.05 s into the move, 1.25 s held) he coils: twisted hard away, sunk low, the hammer hauled
-	# back behind him (BUL_COIL), the perfect window's pose
+	# LMB held (sheet 0133-0145): side-on and crouched, the hammer dragged back low behind him (BjornFx cocks
+	# it in the hand), the shield arm forward, the body turning with the cursor; the coil deepens as it
+	# charges, and at full (1.05 s into the move, 1.25 s held) he is twisted hardest away and sunk lowest
+	# (BUL_COIL), the perfect window's pose
 	"bul_smash_wind": {"hold": true, "keys": [
 		[0.0, {}],
 		[
-			0.2,
+			0.15,
 			{
-				"y": 0.75,
-				"p": 0.12,
-				"lift": -0.06,
-				"sq": 0.1,
-				"gp": 0.25,
+				"y": 0.8,
+				"p": 0.18,
+				"lift": -0.08,
+				"sq": 0.12,
+				"gp": 0.4,
 				"lw": 1.0,
-				"legs": [0.55, -0.85, -0.45, -0.5],
+				"legs": [0.6, -0.9, -0.5, -0.55],
 				"hw": 1.0,
-				"fl": Vector3(-0.05, 0.12, -0.42),
+				"fl": Vector3(-0.05, 0.12, -0.45),
 				"rw": 1.0,
-				"fr": Vector3(0.42, 0.38, 0.05)
+				"fr": Vector3(0.3, 0.0, 0.36)
 			}
 		],
 		[
 			0.95,
 			{
-				"y": 0.85,
-				"p": 0.18,
-				"lift": -0.1,
-				"sq": 0.16,
-				"gp": 0.3,
+				"y": 0.98,
+				"p": 0.24,
+				"lift": -0.12,
+				"sq": 0.18,
+				"gp": 0.45,
 				"lw": 1.0,
-				"legs": [0.65, -0.95, -0.5, -0.55],
+				"legs": [0.75, -1.1, -0.55, -0.65],
 				"hw": 1.0,
-				"fl": Vector3(-0.05, 0.14, -0.45),
+				"fl": Vector3(-0.05, 0.11, -0.48),
 				"rw": 1.0,
-				"fr": Vector3(0.45, 0.42, 0.05)
+				"fr": Vector3(0.3, -0.03, 0.4)
 			}
 		],
 		[1.05, BUL_COIL]]},

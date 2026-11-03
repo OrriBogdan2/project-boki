@@ -5,9 +5,9 @@ extends Node3D
 ## colour on bright grass.
 ## - the thrown hammer (tumbling, a gold-orange glow and trail), planted head-down in the ground under an
 ##   upright gold beacon with rising chevrons
-## - the held swing: the hammer whirled round over his shoulder in a wide circle with a gold-orange trail,
-##   a gold glint on its head from 0.6 s that grows; at full charge it is hauled back low behind him with a
-##   short ring-free flash on its head, the glint burning white-hot while the perfect window is open
+## - the held swing: the hammer dragged back low behind him (the source's wind-up: no spin), a gold glint on
+##   its head from 0.6 s that grows; at full charge a short ring-free flash on its head, the glint burning
+##   white-hot while the perfect window is open
 ## - the slam's flaming 180 degree crescent in front, the 360 Smash's red-orange-gold spiral ring
 ## - the Bash's gold fan of force, the dash's gold chevron wake (his own after-image)
 ## - his aegis: a wall of forged plates (two rows, riveted, ribbed, a rim and a hammer boss) leaning out
@@ -23,10 +23,10 @@ const GREEN := Color("7dffb0")
 const STAR_GOLD := Color("ffd25a")
 ## s the full-charge flare shows (the sheet: one bright frame)
 const FLARE_T := 0.12
-## The hammer hauled back at full charge (its pivot in the hand's space): the head behind him and low.
+## The hammer hauled back through the hold (its pivot in the hand's space): the head behind him and low.
 const COCK_BASIS := Vector3(-2.35, 0.35, 0.0)
 const COCK_AT := Vector3(0.05, 0.05, 0.12)
-const COCK_IN := 0.08          # s to haul it back from the whirl
+const COCK_IN := 0.15          # s to drag it back as the hold starts (the wind-up's anticipation)
 ## s the slam's crescent stays at full strength, then s it burns away over
 const CRES_HOLD := 0.1
 const CRES_FADE := 0.2
@@ -43,20 +43,6 @@ const WAKE_POOL := 6
 const WAKE_EVERY := 0.06
 ## the Bash's gold fan: half its angle (rad) and its reach scale over the Bash's radius
 const BASH_HALF := 0.6
-## the whirled hammer: its size over the one in the hand, how far above the hand the circle runs (m), and
-## its turn rate (rad/s) from the start of the hold to full charge (2.5 to 4 turns a second)
-const ORBIT_SCALE := 1.6
-const ORBIT_RISE := 0.45
-const SPIN_SLOW := 15.7
-const SPIN_FAST := 25.1
-## the whirl's trail ribbon: inner and outer radius (m, before the orbit's scale), how far it reaches back
-## behind the head (rad; the arc runs from there to the head, so the streak's bright end rides the hammer),
-## its colour and its strength at the slowest turn rate
-const ORBIT_IN := 0.3
-const ORBIT_OUT := 1.35
-const ORBIT_ARC := 3.4
-const ORBIT_COL := Color(1.0, 0.56, 0.1)
-const ORBIT_POWER := 3.4
 ## the planted hammer's size, and its lean off vertical (rad)
 const PLANT_SCALE := 1.9
 const PLANT_LEAN := 0.25
@@ -83,7 +69,6 @@ var beacon: MeshInstance3D
 var glint: MeshInstance3D
 var flare: MeshInstance3D
 var flare_t := 0.0
-var orbit_trail: MeshInstance3D
 var crescent: MeshInstance3D
 var cres_t := 0.0
 var swirl: MeshInstance3D
@@ -103,10 +88,8 @@ var column: MeshInstance3D
 var disc: MeshInstance3D
 var disc_t := 0.0
 var disc_r := 1.0
-var spin := 0.0               # the whirled hammer's angle (rad) and its turn rate
-var spin_v := 0.0
-var spin_on := false
-var cock_k := 0.0              # 0..1 how far the hammer is hauled back (full charge)
+var held := false              # the swing is being held: the hammer is dragged back
+var cock_k := 0.0              # 0..1 how far the hammer is dragged back
 var hot := false               # the perfect window is open: the glint burns white-hot
 var glint_k := -1.0            # the glint's size 0..1 while it shows (-1: not yet)
 var fx_clock := 0.0            # the match time effects last advanced to
@@ -129,8 +112,6 @@ func _ready() -> void:
 	flare = KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("star", STAR_GOLD, true))
 	for star in [hammer_glow, glint, flare]:
 		KitShaders.param(star, "white", 0.25)
-	var orbit_mesh := KitMeshes.band(ORBIT_IN, ORBIT_OUT, ORBIT_ARC, 0.0, 36)
-	orbit_trail = KitMeshes.inst(self, orbit_mesh, KitShaders.mat("streak", ORBIT_COL, true))
 	var cres_mesh := KitMeshes.band(CRES_IN, CRES_OUT, -PI * 0.5, PI * 0.5, 40)
 	crescent = KitMeshes.inst(self, cres_mesh, KitShaders.mat("crescent", Color(1.0, 0.6, 0.12), true))
 	var swirl_mesh := KitMeshes.band(1.0, 2.4, 0.0, TAU, 48)
@@ -234,28 +215,24 @@ func hammer_hide() -> void:
 	beacon.visible = false
 
 # ------------------------------------------------------------------ the held swing
-## While LMB is held (k = the charge 0..1): the hammer whirls round faster as it charges, then at full it is
-## hauled back; the glint on its head shows from 0.6 s and grows, white-hot while `window` (perfect) is open.
+## While LMB is held (k = the charge 0..1): the hammer is dragged back low behind him; the glint on its head
+## shows from 0.6 s and grows, white-hot while `window` (perfect) is open.
 func hold(held_t: float, k: float, window: bool) -> void:
-	spin_on = true
-	spin_v = lerpf(SPIN_SLOW, SPIN_FAST, k)
+	held = true
 	glint_k = k if held_t >= 0.6 else -1.0
 	glint.visible = glint_k >= 0.0
 	hot = window
-	if k < 0.99:
-		cock_k = 0.0
 
 ## Full charge: the big gold star on the hammer head.
 func full_flare() -> void:
 	flare_t = FLARE_T
 
 func hold_end() -> void:
-	spin_on = false
+	held = false
 	cock_k = 0.0
 	hot = false
 	glint_k = -1.0
 	glint.visible = false
-	orbit_trail.visible = false
 
 ## The hand's hammer pivot on the hunter's weapon model (PinBjornWeapons builds it), or null.
 func _pivot() -> Node3D:
@@ -281,27 +258,11 @@ func in_hand(on: bool) -> void:
 	if pv:
 		pv.visible = on
 
-## The whirl: the hammer swings round flat over his shoulder, its head on a wide circle, the trail ribbon
-## following the head.
-func _whirl(pv: Node3D) -> void:
-	var gun := pv.get_parent() as Node3D
-	var orbit_size := gun.global_basis.get_scale().x * ORBIT_SCALE
-	var centre := gun.global_position + Vector3(0, ORBIT_RISE, 0)
-	var turn := Basis(Vector3.UP, spin)
-	pv.global_transform = Transform3D(turn * Basis(Vector3.RIGHT, 0.12).scaled(Vector3.ONE * orbit_size), centre)
-	orbit_trail.visible = true
-	orbit_trail.global_position = centre
-	orbit_trail.rotation = Vector3(0, spin, 0)
-	orbit_trail.scale = Vector3.ONE * orbit_size / ORBIT_SCALE
-	KitShaders.param(orbit_trail, "power", ORBIT_POWER * clampf(spin_v / SPIN_SLOW, 1.0, 1.4))
-	_place_glint(pv)
-
-## Full charge: the hammer hauled back from the whirl to low behind him (COCK_IN s), the trail gone.
+## The hammer dragged back low behind him over COCK_IN s, held there through the charge.
 func _cock(pv: Node3D, delta: float) -> void:
 	cock_k = minf(1.0, cock_k + delta / COCK_IN)
 	var cocked := Transform3D(Basis.from_euler(COCK_BASIS), COCK_AT)
-	pv.transform = pv.transform.interpolate_with(cocked, cock_k)
-	orbit_trail.visible = false
+	pv.transform = Transform3D.IDENTITY.interpolate_with(cocked, cock_k)
 	_place_glint(pv)
 
 ## The glint on the hammer head: it grows with the charge, and in the perfect window it burns bigger,
@@ -465,7 +426,7 @@ func _process(_delta: float) -> void:
 	# effects run on match time (a slow frame or a screenshot never skips them), long steps clamped
 	var delta := clampf(float(h.m.time) - fx_clock, 0.0, 1.0 / 30.0)
 	fx_clock = float(h.m.time)
-	_tick_spin(delta)
+	_tick_hold(delta)
 	_tick_flare(delta)
 	_tick_slam(delta)
 	if aegis_hit > 0.0:
@@ -495,17 +456,13 @@ func _tick_wakes(delta: float) -> void:
 		wakes[i].scale = Vector3.ONE * wakes[i].scale.x * (1.0 + delta * 1.5)
 		wakes[i].visible = wake_life[i] > 0.0
 
-func _tick_spin(delta: float) -> void:
+func _tick_hold(delta: float) -> void:
 	var pv := _pivot()
 	if pv == null:
 		return
-	if spin_on and glint_k >= 0.99:
+	if held:
 		_cock(pv, delta)
-	elif spin_on:
-		spin += spin_v * delta
-		_whirl(pv)
 	elif pv.transform != Transform3D.IDENTITY:
-		spin = 0.0
 		pv.transform = Transform3D.IDENTITY
 
 func _tick_flare(delta: float) -> void:

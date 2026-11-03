@@ -2,7 +2,9 @@ extends "res://tools/pin_bjorn_owner_check.gd"
 ## Owner items #48, #49 and #51 for Bjorn (briefs/OWNER_REVIEW_1103.md), run from --bulwark-combo-check
 ## (tools/archer_bulwark_combo_check.gd adds the counts): the Faultline plants him only for the wind-up and
 ## the slam, the held swing's perfect window launches him, into a glide off a ledge, and the hold pairs with a
-## jump and a Shift dash (a perfect release out of either still launches). Prints AKCHECK lines.
+## jump and a Shift dash (a perfect release out of either still launches); plus the LMB parity pass with the
+## source (hero sheet bjorn.md): tracking in the hold, the throw's wind-up, the swing's timing. Prints AKCHECK
+## lines.
 
 const FAR := Vector3(30.0, 0, 6.0)      # the dummy parked out of the way
 ## s after the plant ends from which he must be at 90% of his run speed: a frame for the plant to lift, then
@@ -15,6 +17,7 @@ func bjorn() -> void:
 	await _launch_flat()
 	await _launch_glide()
 	await _combo_moves()
+	await _lmb_parity()
 
 func _planar(P: Hunter) -> float:
 	return Vector2(P.vel.x, P.vel.z).length()
@@ -342,3 +345,111 @@ func _combo_moves() -> void:
 					"perfect launch" if perfect else "swing's step", ACT_S],
 				stepping and took > 0.0 and took <= ACT_S + 0.001, "in it %s took %.2f s" % [stepping, took])
 	await done(m)
+
+# ------------------------------------------------------------------ LMB parity with the source (bjorn.md)
+## rad/s the cursor sweeps round him in the hold (sheet 0102-0108: about 1.5 turns in 1.2 s)
+const SWEEP := 7.85
+## rad: the most his facing may trail a cursor sweeping at SWEEP (he "turns with it")
+const TRACK_LAG := deg_to_rad(25.0)
+
+## The hold tracks the cursor (standing and walking), and the swing goes where the cursor is on the release,
+## even straight behind him; the throw leaves the hand after one frame of wind-up; the swing lands on the
+## release step and recovers in about 0.6 s (one frame of sweep plus ~0.4 s of recovery in the sheet).
+func _lmb_parity() -> void:
+	var r := setup("bulwark", 7.0)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var T: Hunter = r[2]
+	var home: Vector3 = r[4]
+	var K: BulwarkKit = P.ak
+	for walking in [false, true]:
+		_ready_swing(m, P, T, home)
+		step(m, 0.3, press_at.bind(P, home + Vector3(6.0, 0, 0)))
+		var worst := 0.0
+		var a := 0.0
+		for i in int(0.7 / DT):
+			a += SWEEP * DT
+			P.inp["move"] = Vector2(0, 1) if walking else Vector2.ZERO
+			press_at(P, P.pos + Vector3(cos(a), 0, sin(a)) * 5.0)
+			m.step(DT)
+			if i >= 9:
+				var ad := P.aim_dir()
+				worst = maxf(worst, absf(angle_difference(P.face, atan2(-ad.x, -ad.y))))
+		P.inp["move"] = Vector2.ZERO
+		ok("bjorn parity LMB: in the hold he turns with a cursor sweeping 1.25 turns a second%s (trails <= 25 deg)" %
+				(", walking" if walking else ""),
+			worst <= TRACK_LAG and K.lmb_t > 0.5 and not K.launch.in_window(K.lmb_t),
+			"worst %.0f deg hold %.2f" % [rad_to_deg(worst), K.lmb_t])
+	# let go with the cursor straight behind him: the swing goes there, on the release step
+	T.teleport(P.pos + Vector3(-2.2, 0, 0))
+	fresh(T)
+	press_at(P, T.pos)
+	m.step(DT)
+	var s0 := K.slams
+	P.inp["fire"] = false
+	m.step(DT)
+	var swung := K.slams == s0 + 1
+	var recover := P.fire_cd
+	step(m, 0.1)
+	var hit_at_once := dmg(T) > 0.0 and swung
+	ok("bjorn parity LMB: let go, the swing goes on the release step at the cursor (behind him), the hit within 0.1 s",
+		hit_at_once and K.anim_id == "bul_smash", "took %.0f anim %s" % [dmg(T), K.anim_id])
+	ok("bjorn parity LMB: the swing recovers in ~0.6 s (sheet: one frame of sweep, ~0.4 s of recovery)",
+		absf(recover - float(K.lmb_def()["smash_rate"])) < 0.03 and recover >= 0.5 and recover <= 0.7,
+		"fire_cd %.2f" % recover)
+	# the throw: the arm cocks back, the hammer leaves the hand THROW_WIND s after the press
+	_ready_swing(m, P, T, home)
+	K.mace = {}
+	P.fire_cd = 0.0
+	press_at(P, home + Vector3(6.0, 0, 0))
+	var t0: float = m.time
+	m.step(DT)
+	P.inp["fire"] = false
+	var left_at := -1.0
+	for i in 20:
+		m.step(DT)
+		if left_at < 0.0 and String(K.mace.get("st", "")) == "fly":
+			left_at = m.time - t0
+	var wind := BulwarkKit.THROW_WIND
+	ok("bjorn parity LMB: the throw's wind-up, the hammer leaves his hand %.2f-0.15 s after the press (one frame)" %
+			wind, left_at >= wind and left_at <= 0.15 + 0.001 and K.anim_id == "bul_throw",
+		"left at %.3f anim %s" % [left_at, K.anim_id])
+	await _rmb_parity(m, P, K, home)
+	await done(m)
+
+## RMB (sheet 0179-0200, data Brightshield 0.1 s): the aegis is up 0.1 s into the hold and sweeps round with
+## the cursor at once.
+func _rmb_parity(m: Match, P: Hunter, K: BulwarkKit, home: Vector3) -> void:
+	step(m, 1.0)
+	P.teleport(home)
+	K.lock_t = 0.0
+	K.ch_rmb = 1.0
+	K.cd["rmb"] = 0.0
+	var up_at := -1.0
+	var t := 0.0
+	P.inp["sec_hold"] = true
+	P.ak.press_rmb()
+	while t < 0.4 and up_at < 0.0:
+		P.inp["sec_hold"] = true
+		m.step(DT)
+		t += DT
+		if not K.wall.is_empty():
+			up_at = t
+	ok("bjorn parity RMB: the aegis is up 0.1 s into the hold (data: a 0.1 s cast)",
+		up_at > 0.0 and up_at <= 0.1 + 2.0 * DT,
+		"up at %.2f" % up_at)
+	var worst := 0.0
+	var a := 0.0
+	for i in 30:
+		a += SWEEP * DT
+		P.inp["sec_hold"] = true
+		aim_at(P, P.pos + Vector3(cos(a), 0, sin(a)) * 5.0)
+		m.step(DT)
+		if K.wall.is_empty():
+			break
+		var mid: Vector2 = ((K.wall["a"] as Vector2) + (K.wall["b"] as Vector2)) * 0.5 - Vector2(P.pos.x, P.pos.z)
+		worst = maxf(worst, absf(angle_difference(mid.angle(), P.aim_dir().angle())))
+	P.inp["sec_hold"] = false
+	ok("bjorn parity RMB: the aegis faces a sweeping cursor at once (within 10 deg)",
+		not K.wall.is_empty() and worst <= deg_to_rad(10.0), "worst %.1f deg" % rad_to_deg(worst))
+	step(m, 0.3)
