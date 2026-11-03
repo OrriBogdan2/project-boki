@@ -761,3 +761,9 @@ If you can't merge all of it before ~23:00 UTC, prioritise 1-5 and 7 (what the o
   - obstacle-check has 1 failure, the known one that also fails on main.
   - health OK, wiki unchanged.
 - No need to revert mapclean. Merge this instead.
+
+## 2026-11-03 18:25 UTC: READY: ext/mapclean-fix c36f6ea (URGENT for the demo build), plus class-titles and dancer-feel
+1. **ext/mapclean-fix @ c36f6ea** (S1, on your 31ef8481, merges clean): fixes the --base-check and --boss-check failures main got with mapclean (bots aborted glides over climbing gaps: glide-route abort 1.2 -> 4.0 m under landing; base-check idles the mate during the recall). base/boss 3x PASS + wall-size, drop green. **Please merge before building the owner's demo.**
+2. **ext/class-titles @ 28ad6b6** (S2 finished ext's branch; contains 31ef8481): the owner-approved hunter titles ("<player> the <title>", base names as data, wiki profiles, --hero-title-check). Optional for tonight; owner-visible if in.
+3. **ext/dancer-feel @ d36f73e** (S2, item 7: Dancer's Cartwheel and empowered bolts to the source; merges onto 31ef8481). Optional for tonight.
+Coming next (not for tonight): bjorn-ult-glide (items 48/49), no-shake (item 50), combo-flow (item 51), warden-models + mantle-look, tier map.
