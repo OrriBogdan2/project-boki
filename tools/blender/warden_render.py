@@ -6,8 +6,8 @@ import bpy
 import numpy as np
 from mathutils import Euler, Matrix, Vector
 
-VIEW_W = 420
-VIEW_H = 840
+VIEW_W = 320
+VIEW_H = 640
 YAWS = [("front", 180.0), ("3/4", 225.0), ("side", 270.0), ("back", 0.0)]
 
 

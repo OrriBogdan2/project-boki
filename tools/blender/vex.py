@@ -39,7 +39,7 @@ VEST = K.hexcol("6a7c94")
 PLATE = K.hexcol("7a8ea8")
 BOOT = K.hexcol("54402f")
 BELT = K.hexcol("74523a")
-GUNMETAL = K.hexcol("666c78")
+GUNMETAL = K.hexcol("4e5462")
 GLOVE = K.hexcol("43444e")
 WOOD = K.hexcol("6a3f28")
 PAPER = K.hexcol("efe4c8")
@@ -122,7 +122,7 @@ def legs(J):
                  ((x * 1.04, 0.0, top.z - 0.17), 0.074, 0.08), ((x * 1.04, 0.01, knee + 0.04), 0.06, 0.065),
                  ((x * 1.03, 0.012, knee - 0.03), 0.058, 0.062), ((x, 0.0, knee - 0.15), 0.052, 0.058),
                  ((x, -0.005, 0.2), 0.05, 0.054)]
-        pants = K.loft("pants" + sd, rings, 14)
+        pants = K.loft("pants" + sd, rings, 12)
         K.subsurf(pants, 1)
         K.folds(pants, 0.006, 0.04)
         out.append(K.weigh(K.paint(pants, "cloth", PANTS, grad=0.22), leg_w))
@@ -167,7 +167,7 @@ def torso(J):
              ((0, 0.005, hz + 0.28), 0.145, 0.105), ((0, 0.01, hz + 0.38), 0.16, 0.112),
              ((0, 0.0, sz - 0.03), sw + 0.01, 0.11), ((0, -0.005, sz + 0.05), sw - 0.04, 0.095),
              ((0, 0.0, nz - 0.07), 0.09, 0.07), ((0, 0.0, nz - 0.03), 0.055, 0.05)]
-    trunk = K.loft("trunk", rings, 18)
+    trunk = K.loft("trunk", rings, 16)
     K.subsurf(trunk, 1, smooth=2)
     K.folds(trunk, 0.004, 0.05)
     out.append(K.weigh(K.paint(trunk, "cloth", SHIRT, grad=0.2), tw))
@@ -175,7 +175,7 @@ def torso(J):
     vrings = [((0, -0.002, hz + 0.12), 0.148, 0.106), ((0, 0.004, hz + 0.24), 0.16, 0.118),
               ((0, 0.012, hz + 0.36), 0.176, 0.128), ((0, 0.006, sz - 0.04), 0.17, 0.12),
               ((0, 0.0, sz + 0.02), 0.13, 0.1)]
-    vest = K.loft("vest", vrings, 24, cap=False)
+    vest = K.loft("vest", vrings, 20, cap=False)
     sol = vest.modifiers.new("solid", "SOLIDIFY")
     sol.thickness = 0.016
     K.apply_mods(vest)
@@ -385,49 +385,76 @@ def head(J, crown):
         if -0.07 < dz < 0.0 and p.y > hc.y + 0.05:
             p.x *= 1.04            # cheeks
     out.append(K.weigh(K.paint(sk, "skin", SKIN, grad=0.2, ao=0.5), hw))
-    fy = hc.y + 0.125
-    nose = K.loft("nose", [((0, fy - 0.005, hc.z - 0.005), 0.012, 0.01), ((0, fy + 0.012, hc.z - 0.045), 0.016, 0.014),
-                           ((0, fy + 0.006, hc.z - 0.058), 0.012, 0.008)], 8)
+    R = (0.118, 0.13, 0.16)
+
+    def face(x, z, out_by=0.0):
+        """A point on the front of the skull at (x, z), pushed out_by along the face."""
+        dz = z - hc.z
+        jaw = 1.0 - min(1.0, max(0.0, -dz) / 0.16) * 0.32
+        u = (x / (R[0] * jaw)) ** 2 + (dz / R[2]) ** 2
+        y = R[1] * math.sqrt(max(0.0, 1.0 - u))
+        if dz < 0:
+            y *= 1.0 - min(1.0, -dz / 0.16) * 0.12
+        return Vector((x, hc.y + y + out_by, z))
+
+    nose = K.loft("nose", [(face(0, hc.z - 0.0, -0.004), 0.011, 0.008), (face(0, hc.z - 0.04, 0.012), 0.014, 0.012),
+                           (face(0, hc.z - 0.052, 0.006), 0.012, 0.008)], 8)
     K.subsurf(nose, 1)
     out.append(K.weigh(K.paint(nose, "skin", SKIN, grad=0.1, ao=0.3), hh))
     for sx in (-1, 1):
-        ear = K.ellipsoid("ear%d" % sx, (sx * 0.112, hc.y - 0.01, hc.z - 0.01), (0.014, 0.024, 0.034), 8, 6)
+        ear = K.ellipsoid("ear%d" % sx, (sx * 0.112, hc.y - 0.008, hc.z - 0.012), (0.011, 0.02, 0.028), 8, 6)
         out.append(K.weigh(K.paint(ear, "skin", SKIN, grad=0.1, ao=0.5), hh))
-    # her left eye: human, wide open (a little too wide)
-    le = Vector((-0.045, fy - 0.024, hc.z + 0.01))
-    white = K.ellipsoid("eyeWhite", le, (0.022, 0.012, 0.019), 12, 8)
-    iris = K.ellipsoid("iris", le + Vector((0, 0.01, 0)), (0.011, 0.005, 0.011), 10, 6)
-    pupil = K.ellipsoid("pupil", le + Vector((0, 0.0135, 0)), (0.005, 0.003, 0.005), 8, 4)
+    ez = hc.z + 0.005
+    # her left eye: human, big and wide open (a little too wide), an upper lid line and lashes
+    le = face(-0.046, ez, -0.008)
+    white = K.ellipsoid("eyeWhite", le, (0.026, 0.012, 0.022), 14, 8, rot=(0, 0, -12))
+    iris = K.ellipsoid("iris", le + Vector((0.002, 0.009, 0)), (0.013, 0.006, 0.014), 12, 6)
+    pupil = K.ellipsoid("pupil", le + Vector((0.002, 0.0135, 0)), (0.006, 0.003, 0.007), 8, 4)
+    glint = K.ellipsoid("glint", le + Vector((0.006, 0.0155, 0.006)), (0.003, 0.002, 0.003), 6, 4)
     out.append(K.weigh(K.paint(white, "eyes", WHITE, grad=0.05, ao=0.2, noise=0.02), hh))
     out.append(K.weigh(K.paint(iris, "eyes", IRIS, grad=0.05, ao=0.1, noise=0.02), hh))
     out.append(K.weigh(K.paint(pupil, "eyes", DARK, grad=0.0, ao=0.0, noise=0.0), hh))
+    out.append(K.weigh(K.paint(glint, "eyes", WHITE, grad=0.0, ao=0.0, noise=0.0), hh))
+    lid = K.loft("lidL", [(le + Vector((0.026, 0.004, 0.006)), 0.0035, 0.003), (le + Vector((0.0, 0.012, 0.021)), 0.0045, 0.004),
+                          (le + Vector((-0.028, 0.002, 0.01)), 0.004, 0.003), (le + Vector((-0.036, -0.002, 0.016)), 0.002, 0.002)], 6)
+    out.append(K.weigh(K.paint(lid, "hair", DARK, grad=0.0, ao=0.0, noise=0.0), hh))
     # her right eye: the brass-rimmed mechanical lens glowing orange, on a riveted gunmetal patch
-    re = Vector((0.046, fy - 0.022, hc.z + 0.01))
-    patch = K.ellipsoid("eyePatch", re + Vector((0.006, -0.012, 0.0)), (0.042, 0.02, 0.04), 12, 8)
+    re = face(0.048, ez, -0.004)
+    patch = K.ellipsoid("eyePatch", re + Vector((0.004, -0.008, 0.0)), (0.04, 0.016, 0.04), 14, 8)
     out.append(K.weigh(K.paint(patch, "metal", GUNMETAL, grad=0.2, edge=0.5), hh))
-    rim = K.torus("lensRim", re + Vector((0, 0.008, 0)), 0.021, 0.0065, axis=(0, 1, 0), segs=16, tube=5)
+    rim = K.torus("lensRim", re + Vector((0, 0.008, 0)), 0.022, 0.007, axis=(0, 1, 0), segs=16, tube=5)
     out.append(K.weigh(K.paint(rim, "metal", BRASS, grad=0.1, edge=0.7), hh))
-    lens = K.ellipsoid("lens", re + Vector((0, 0.006, 0)), (0.016, 0.008, 0.016), 12, 6)
+    lens = K.ellipsoid("lens", re + Vector((0, 0.008, 0)), (0.017, 0.008, 0.017), 12, 6)
     out.append(K.weigh(K.paint(lens, "glow", EMBER, grad=0.0, ao=0.0, noise=0.03), hh))
     for i in range(4):
         a = math.radians(45 + 90 * i)
-        rv = K.ellipsoid("rivet%d" % i, re + Vector((math.cos(a) * 0.034, 0.0, math.sin(a) * 0.032)), (0.004,) * 3, 6, 4)
+        rv = K.ellipsoid("rivet%d" % i, re + Vector((math.cos(a) * 0.033, 0.006, math.sin(a) * 0.032)), (0.004,) * 3, 6, 4)
         out.append(K.weigh(K.paint(rv, "metal", BRASS, edge=0.5), hh))
-    # brows (her left nicked), a calm faint smile, a scar under the lens
-    for sx, nick in ((-1, True), (1, False)):
-        segs = [(0.022, 0.012), (0.0, 0.0)] if not nick else [(0.026, 0.012), (0.004, 0.0)]
-        bx = sx * 0.048
-        brow = K.cyl("brow%d" % sx, (bx - sx * segs[0][0], fy - 0.012, hc.z + 0.04),
-                     (bx + sx * 0.022, fy - 0.018, hc.z + 0.045 - segs[0][1] * 0.2), 0.0045, 0.0035, 6)
+    # brows: dark, strong, her left one nicked; the right raised over the lens
+    for sx in (-1, 1):
+        b0 = face(sx * 0.018, ez + 0.036, 0.0)
+        b1 = face(sx * 0.05, ez + 0.044 + (0.006 if sx > 0 else 0.0), 0.0)
+        b2 = face(sx * 0.075, ez + 0.036, -0.004)
+        brow = K.loft("brow%d" % sx, [(b0, 0.004, 0.003), (b1, 0.006, 0.004), (b2, 0.0035, 0.003)], 6)
         out.append(K.weigh(K.paint(brow, "hair", HAIR, grad=0.0, ao=0.0), hh))
-    mouth = K.loft("mouth", [((-0.024, fy - 0.012, hc.z - 0.082), 0.003, 0.002), ((0, fy - 0.004, hc.z - 0.088), 0.0035, 0.0025),
-                             ((0.026, fy - 0.012, hc.z - 0.079), 0.003, 0.002)], 6)
-    out.append(K.weigh(K.paint(mouth, "skin", K.hexcol("8a4a3a"), grad=0.0, ao=0.0), hh))
+    nick = K.box("browNick", face(-0.055, ez + 0.044, 0.004), (0.004, 0.006, 0.012))
+    out.append(K.weigh(K.paint(nick, "skin", SKIN, grad=0.0, ao=0.0), hh))
+    # lips: a calm, faint smile
+    mz = hc.z - 0.088
+    upper = K.loft("lipUpper", [(face(-0.026, mz + 0.002, -0.002), 0.002, 0.002), (face(-0.01, mz + 0.006, 0.002), 0.005, 0.004),
+                                (face(0.01, mz + 0.006, 0.002), 0.005, 0.004), (face(0.027, mz + 0.004, -0.002), 0.002, 0.002)], 6)
+    lower = K.loft("lipLower", [(face(-0.018, mz - 0.003, 0.0), 0.003, 0.003), (face(0, mz - 0.008, 0.003), 0.007, 0.005),
+                                (face(0.019, mz - 0.002, 0.0), 0.003, 0.003)], 6)
+    for ob in (upper, lower):
+        out.append(K.weigh(K.paint(ob, "skin", K.hexcol("a05a48"), grad=0.1, ao=0.0), hh))
+    # a scar from the lens patch down her cheek
+    scar = K.loft("scar", [(face(0.06, ez - 0.03, 0.0), 0.0025, 0.002), (face(0.07, ez - 0.07, 0.0), 0.002, 0.002)], 5)
+    out.append(K.weigh(K.paint(scar, "skin", K.hexcol("8a5640"), grad=0.0, ao=0.0), hh))
     # hair: a dark cap under the beret, swept back, and a short tied braid
     hair = K.ellipsoid("hair", hc + Vector((0, -0.012, 0.025)), (0.124, 0.134, 0.15), 20, 12, cut=-0.25)
     for v in hair.data.vertices:
-        if v.co.y > hc.y + 0.06 and v.co.z < hc.z + 0.06:
-            v.co.y -= 0.04          # clear of the brow and face
+        if v.co.y > hc.y + 0.02 and v.co.z < hc.z + 0.09:
+            v.co.y = hc.y + 0.02 - (v.co.y - hc.y - 0.02) * 0.2      # clear of the brow and face: hair at the sides and back
     out.append(K.weigh(K.paint(hair, "hair", HAIR, grad=0.25, ao=0.4), hh))
     for i in range(5):
         c = (0.0, hc.y - 0.13 - i * 0.008, hc.z - 0.04 - i * 0.032)
@@ -437,16 +464,20 @@ def head(J, crown):
     tie = K.torus("braidTie", (0.0, hc.y - 0.135, hc.z - 0.105), 0.016, 0.005, segs=10, tube=4)
     out.append(K.weigh(K.paint(tie, "cloth", SCARF), hh))
     # the beret, tilted to her right, a darker band, the brass badge with the eye sigil at the front left
-    bc = hc + Vector((0.025, 0.0, 0.135))
-    beret = K.ellipsoid("beret", bc, (0.15, 0.148, 0.06), 24, 10, rot=(4, -14, 0))
+    bc = hc + Vector((0.03, -0.005, 0.13))
+    beret = K.ellipsoid("beret", bc, (0.165, 0.158, 0.065), 30, 14, rot=(5, -20, 0))
     for v in beret.data.vertices:
-        if v.co.z < bc.z - 0.02:
-            v.co.z = bc.z - 0.02 + (v.co.z - (bc.z - 0.02)) * 0.4
-    K.folds(beret, 0.004, 0.06)
+        p = v.co
+        if p.z < bc.z - 0.015:
+            p.z = bc.z - 0.015 + (p.z - (bc.z - 0.015)) * 0.45
+        # the soft crown slumps over to her right
+        side = max(0.0, (p.x - bc.x) / 0.165)
+        p.z -= side * side * 0.03
+    K.folds(beret, 0.005, 0.05)
     out.append(K.weigh(K.paint(beret, "cloth", BERET, grad=0.3, ao=0.4), hh))
-    band = K.torus("beretBand", hc + Vector((0.008, 0.0, 0.1)), 1.0, 0.012, segs=22, tube=5, scale=(0.122, 0.135, 1.0))
-    out.append(K.weigh(K.paint(band, "cloth", K.hexcol("252c58"), grad=0.1, ao=0.3), hh))
-    badge = K.ellipsoid("badge", hc + Vector((-0.05, 0.128, 0.115)), (0.016, 0.006, 0.02), 10, 6, rot=(0, 0, -20))
+    band = K.torus("beretBand", hc + Vector((0.006, 0.0, 0.098)), 1.0, 0.008, segs=24, tube=4, scale=(0.121, 0.134, 1.0))
+    out.append(K.weigh(K.paint(band, "cloth", K.hexcol("283066"), grad=0.1, ao=0.3), hh))
+    badge = K.ellipsoid("badge", hc + Vector((-0.045, 0.13, 0.112)), (0.016, 0.006, 0.02), 10, 6, rot=(0, 0, -20))
     out.append(K.weigh(K.paint(badge, "metal", BRASS, edge=0.7), hh))
     return out
 
