@@ -303,9 +303,10 @@ func _tow_in(body: Ent, x: Array) -> void:
 		by = m.ents_by_id.get(String(x[3]), null)
 		if by == null:
 			return
-	elif not p.has("to"):
+	var along := String(p.get("mode", "")) in ["push", "slide"]
+	if not p.has("dur") or not p.has("mode") or not p.has("dir" if along else "spd"):
 		return
-	if not p.has("mode") or not p.has("dur"):
+	if not along and by == null and not p.has("to"):
 		return
 	p["dur"] = clampf(float(p["dur"]), 0.0, MAX_T)
 	if p.has("spd"):
