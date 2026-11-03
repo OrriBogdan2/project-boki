@@ -18,10 +18,10 @@ The practice arena: one round floor ringed by low ruin walls with four gates, fo
 
 ### Islands
 
-| Island | Role | Biome | Danger | Named spots |
-|---|---|---|---|---|
-| The Arena | grove | Meadow | quiet |  |
-| Bench | grove | Meadow | quiet |  |
+| Island | Role | Biome | Danger | Tall grass clumps | Named spots |
+|---|---|---|---|---|---|
+| The Arena | grove | Meadow | quiet | 2 |  |
+| Bench | grove | Meadow | quiet | 0 |  |
 
 **Getting around:** 1 bridges.
 
@@ -47,20 +47,20 @@ Hand-made expedition map (tools/make_hollowcrown.py; the format is described the
 
 ### Islands
 
-| Island | Role | Biome | Danger | Named spots |
-|---|---|---|---|---|
-| The Crown | heart | Gloom | dangerous |  |
-| Stormcrown Gaol | camp | Storm | dangerous |  |
-| Ashen Gaol | camp | Ember | dangerous |  |
-| Frostgate | camp | Frost | contested | Frostgate Keep, Rimefield |
-| Cinder Steps | camp | Ember | contested | The Kilns, Forge Yard |
-| Stormbreak | shrine | Storm | contested |  |
-| Thornwood | nest | Bloom | contested |  |
-| Larkhollow | landing | Meadow | quiet | Lark Stones |
-| Highwatch | landing | Frost | quiet |  |
-| Duskmoor | landing | Storm | quiet |  |
-| Saltmere | landing | Bloom | quiet |  |
-| Shardfall | perch | Gloom | dangerous |  |
+| Island | Role | Biome | Danger | Tall grass clumps | Named spots |
+|---|---|---|---|---|---|
+| The Crown | heart | Gloom | dangerous | 29 |  |
+| Stormcrown Gaol | camp | Storm | dangerous | 4 |  |
+| Ashen Gaol | camp | Ember | dangerous | 6 |  |
+| Frostgate | camp | Frost | contested | 6 | Frostgate Keep, Rimefield |
+| Cinder Steps | camp | Ember | contested | 15 | The Kilns, Forge Yard |
+| Stormbreak | shrine | Storm | contested | 13 |  |
+| Thornwood | nest | Bloom | contested | 30 |  |
+| Larkhollow | landing | Meadow | quiet | 20 | Lark Stones |
+| Highwatch | landing | Frost | quiet | 3 |  |
+| Duskmoor | landing | Storm | quiet | 11 |  |
+| Saltmere | landing | Bloom | quiet | 9 |  |
+| Shardfall | perch | Gloom | dangerous | 0 |  |
 
 ### Boss lairs
 
@@ -90,25 +90,25 @@ Hand-made expedition map. Big walkable regions: the Heart in the middle, four la
 
 ### Islands
 
-| Island | Role | Biome | Danger | Named spots |
-|---|---|---|---|---|
-| The Heart | heart | Gloom | dangerous |  |
-| Frostkeep | camp | Frost | contested |  |
-| Bloomwild | nest | Bloom | contested |  |
-| Ember Quarry | camp | Ember | contested |  |
-| Stormreach | shrine | Storm | contested |  |
-| Lantern Hollow | grove | Ember | quiet |  |
-| Gullcrest | camp | Frost | quiet |  |
-| Mossmere | grove | Bloom | quiet |  |
-| Stillwater | nest | Storm | quiet |  |
-| Skyport | landing | Frost | quiet |  |
-| Dawnrest | landing | Bloom | quiet |  |
-| Ironfall | landing | Ember | quiet |  |
-| Fernway | landing | Storm | quiet |  |
-| Stormspire | perch | Storm | dangerous |  |
-| Frost Needle | perch | Frost | dangerous |  |
-| Ember Spire | perch | Ember | dangerous |  |
-| Gloom Eye | perch | Gloom | dangerous |  |
+| Island | Role | Biome | Danger | Tall grass clumps | Named spots |
+|---|---|---|---|---|---|
+| The Heart | heart | Gloom | dangerous | 4 |  |
+| Frostkeep | camp | Frost | contested | 2 |  |
+| Bloomwild | nest | Bloom | contested | 4 |  |
+| Ember Quarry | camp | Ember | contested | 2 |  |
+| Stormreach | shrine | Storm | contested | 2 |  |
+| Lantern Hollow | grove | Ember | quiet | 1 |  |
+| Gullcrest | camp | Frost | quiet | 1 |  |
+| Mossmere | grove | Bloom | quiet | 1 |  |
+| Stillwater | nest | Storm | quiet | 1 |  |
+| Skyport | landing | Frost | quiet | 0 |  |
+| Dawnrest | landing | Bloom | quiet | 0 |  |
+| Ironfall | landing | Ember | quiet | 0 |  |
+| Fernway | landing | Storm | quiet | 0 |  |
+| Stormspire | perch | Storm | dangerous | 0 |  |
+| Frost Needle | perch | Frost | dangerous | 0 |  |
+| Ember Spire | perch | Ember | dangerous | 0 |  |
+| Gloom Eye | perch | Gloom | dangerous | 0 |  |
 
 ### Boss lairs
 
@@ -140,11 +140,11 @@ The tutorial island group: a flat starter meadow, a low rise across a wide bridg
 
 ### Islands
 
-| Island | Role | Biome | Danger | Named spots |
-|---|---|---|---|---|
-| Lookout Rise | grove | Meadow | quiet |  |
-| Starter Meadow | grove | Meadow | quiet |  |
-| Gate Isle | grove | Meadow | quiet |  |
+| Island | Role | Biome | Danger | Tall grass clumps | Named spots |
+|---|---|---|---|---|---|
+| Lookout Rise | grove | Meadow | quiet | 1 |  |
+| Starter Meadow | grove | Meadow | quiet | 1 |  |
+| Gate Isle | grove | Meadow | quiet | 0 |  |
 
 **Exits:** 1 uplink outposts.
 

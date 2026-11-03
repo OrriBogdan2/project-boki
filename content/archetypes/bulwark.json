@@ -5,9 +5,9 @@
 	"color": "#8fd0ff",
 	"body": {
 		"size": 0.975,
-		"build": 1.18,
-		"plate": 2.6
+		"build": 1.18
 	},
+	"plate_offset": 2.6,
 	"fantasy": "The squad's shield. Holds the line with his aegis, plants his hammer where the fight is, and heals the spot.",
 	"silhouette": "the shield shape and the banner",
 	"card": {

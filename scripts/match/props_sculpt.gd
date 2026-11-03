@@ -1,20 +1,18 @@
 class_name PropSculpt
-## Sculpted, hand-painted loot props (all original): chests in three rarities and the breakables
+## Sculpted, hand-painted loot props (all original): the one chest and the breakables
 ## (crates, powder kegs, clay pots). Rounded planks with dark seams, iron or gold bands with rivets,
-## and on the rarer chests a trim that glows and light leaking from under the lid. Painted like the
+## and on the chest a trim that glows and light leaking from under the lid. Painted like the
 ## characters (part gradients, creases, rim light) and merged to a few draw calls each.
 ## Same named nodes as the primitive versions: chest > Body > Lid (hinged, opens on rotation.x),
 ## Beacon; keg > Fuse. meta "mats" = [wood, metal, ...] (the deathbox repaints the first two).
 
-## Chest bodies are lacquered, never plain wood, so even a common chest can't pass for a crate:
-## common wine red, rare blue, epic purple, all with bright gold-toned trim. (The common chest was
-## brown wood, the same family as the crates; the owner asked for chests in their own colour.)
-const WOOD := [Color("8e2a34"), Color("3f6fb0"), Color("6a3fa8")]
-const TRIM := [Color("f0bf4a"), Color("dfe8f2"), Color("f2c84a")]
-const SEAM := [Color("ffd890"), Color("8fd8ff"), Color("ffb84a")]
-## Loot reads as loot: every chest wears gold-ish trim and stands in a pool of its rarity colour
-## (common gold, rare blue, epic purple) with a light pillar; breakables never glow.
-const RARITY_COL := [Color("ffd36a"), Color("6ab8ff"), Color("c08aff")]
+## The chest body is lacquered, never plain wood, so it can't pass for a crate: wine red with
+## bright gold-toned trim. Loot reads as loot: the chest wears gold trim and stands in a pool of gold
+## light with a pillar; breakables never glow.
+const WOOD := Color("8e2a34")
+const TRIM := Color("f0bf4a")
+const SEAM := Color("ffd890")
+const RARITY_COL := Color("ffd36a")
 
 static func _mat(c: Color, surf := 2, gloss := 0.0, glow := 0.0) -> ShaderMaterial:
 	var m := Models.toon(c, true, glow)
@@ -59,17 +57,16 @@ static func _finish(root: Node3D) -> void:
 ## A treasure chest: wide and chunky (about twice a crate's footprint) on four gold claw feet, with
 ## a tall domed lid, thick glowing gold-toned bands, big corner brackets, a crest along the lid and a
 ## jewelled lock plate, light leaking from under the lid, and (in "Beacon", hidden once it's opened)
-## a soft halo, a few rising sparks, a light pillar and a glowing ring in its rarity colour.
+## a soft halo, a few rising sparks, a light pillar and a glowing ring in gold.
 ## Breakables are the opposite on every count: small, boxy or round, matte, dusty, never glowing.
-static func chest(tier := 0) -> Node3D:
-	tier = clampi(tier, 0, 2)
+static func chest() -> Node3D:
 	var root := Node3D.new()
-	var mw := _mat(WOOD[tier], 2, 0.45)
+	var mw := _mat(WOOD, 2, 0.45)
 	mw.set_shader_parameter("rim_amount", 0.7)
-	mw.set_shader_parameter("rim_color", Color(TRIM[tier]).lightened(0.3))
-	var mwd := _mat(Color(WOOD[tier]).darkened(0.45), 2)
-	var mg := _mat(TRIM[tier], 3, 0.75, 0.32 + 0.08 * tier)
-	var mgd := _mat(Color(TRIM[tier]).darkened(0.3), 3, 0.4)
+	mw.set_shader_parameter("rim_color", Color(TRIM).lightened(0.3))
+	var mwd := _mat(Color(WOOD).darkened(0.45), 2)
+	var mg := _mat(TRIM, 3, 0.75, 0.4)
+	var mgd := _mat(Color(TRIM).darkened(0.3), 3, 0.4)
 	mg.set_shader_parameter("rim_amount", 0.9)
 	var body := Node3D.new(); body.name = "Body"; root.add_child(body)
 	var W := 1.16; var H := 0.56; var D := 0.8
@@ -118,43 +115,39 @@ static func chest(tier := 0) -> Node3D:
 	Models.part(lid, bx(0.2, 0.16, 0.05), mg, lc + Vector3(0, 0.0, -D * 0.5 - 0.02))
 	Models.part(body, bx(0.26, 0.24, 0.05), mg, Vector3(0, H - 0.13, -D * 0.5 - 0.016))
 	Models.part(body, bx(0.18, 0.16, 0.03), mgd, Vector3(0, H - 0.13, -D * 0.5 - 0.04))
-	var gem := Models.toon(Color(SEAM[tier]).lightened(0.15) if tier > 0 else Color("e8503a"), false, 0.8 + 0.3 * tier)
+	var gem := Models.toon(Color(SEAM).lightened(0.15), false, 1.1)
 	gem.set_shader_parameter("gloss", 0.85)
 	Models.part(body, Models.crystal(0.06, 0.12, 6), gem, Vector3(0, H - 0.12, -D * 0.5 - 0.06), Vector3(1, 1, 0.6), Vector3(PI / 2, 0, 0))
 	var mats: Array = [mw, mg, mwd, mgd, gem]
 	# light leaking out round the lid (a warm crack on a common chest, brighter on rare ones)
-	var seam := Models.glow_mat(Color(SEAM[tier], 0.55 + 0.2 * tier))
+	var seam := Models.glow_mat(Color(SEAM, 0.75))
 	Models.part(body, bx(W - 0.08, 0.035, D - 0.08), seam, Vector3(0, H + 0.004, 0))
 	# every chest: a gold crest along the top of the lid with a knob at each end
 	Models.part(lid, bx(0.09, 0.07, D * 0.82), mg, lc + Vector3(0, D * 0.5 * dome + 0.005, 0))
 	for z in [-1.0, 1.0]:
 		Models.part(lid, Models.sphere(0.06, 8), mg, lc + Vector3(0, D * 0.5 * dome * 0.86, z * D * 0.38))
-	if tier >= 1:
-		# gem studs on the corners and finials on the lid
-		for x in [-1.0, 1.0]:
-			Models.part(lid, Models.sphere(0.065, 8), mg, lc + Vector3(x * 0.33, D * 0.5 * dome + 0.03, 0))
-			for z in [-1.0, 1.0]:
-				Models.part(body, Models.crystal(0.04, 0.08, 5), gem, Vector3(x * (W * 0.5 - 0.03), H + 0.04, z * (D * 0.5 - 0.03)))
-		if tier == 2:
-			# a big jewel on the crest
-			Models.part(lid, Models.crystal(0.09, 0.2, 6), gem, lc + Vector3(0, D * 0.5 * dome + 0.09, -0.05))
-	body.scale = Vector3.ONE * (1.0 + tier * 0.1)
+	# gem studs on the corners and finials on the lid
+	for x in [-1.0, 1.0]:
+		Models.part(lid, Models.sphere(0.065, 8), mg, lc + Vector3(x * 0.33, D * 0.5 * dome + 0.03, 0))
+		for z in [-1.0, 1.0]:
+			Models.part(body, Models.crystal(0.04, 0.08, 5), gem, Vector3(x * (W * 0.5 - 0.03), H + 0.04, z * (D * 0.5 - 0.03)))
+	body.scale = Vector3.ONE * 1.1
 	body.rotation.y = PI   # lock facing the camera
 	# the rarity marks: a light pillar you can see from other islands and a glowing pool round it
-	var rc: Color = RARITY_COL[tier]
+	var rc: Color = RARITY_COL
 	var bcn := Node3D.new(); bcn.name = "Beacon"; root.add_child(bcn)
-	var bh: float = [3.2, 9.0, 11.0][tier]
-	var beam := Models.part(bcn, Models.cyl(0.14 + 0.03 * tier, 0.3 + 0.05 * tier, bh, 10), Models.glow_mat(Color(rc, [0.13, 0.22, 0.28][tier])), Vector3(0, bh * 0.5, 0))
+	var bh := 6.0
+	var beam := Models.part(bcn, Models.cyl(0.16, 0.33, bh, 10), Models.glow_mat(Color(rc, 0.2)), Vector3(0, bh * 0.5, 0))
 	beam.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	# the glow: a soft halo round the chest and a few sparks drifting up off the lid
-	var halo := Models.part(bcn, Models.sphere(1.0, 14), Models.glow_mat(Color(rc, 0.16 + 0.04 * tier)), Vector3(0, 0.45, 0), Vector3(1.05, 0.62, 0.85) * (1.0 + tier * 0.1), Vector3.ZERO, "Halo")
+	var halo := Models.part(bcn, Models.sphere(1.0, 14), Models.glow_mat(Color(rc, 0.2)), Vector3(0, 0.45, 0), Vector3(1.05, 0.62, 0.85) * 1.1, Vector3.ZERO, "Halo")
 	halo.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	# (a multimesh and a shader, not a particle system: making a CPUParticles3D draws a seed from the
 	# match's seeded global random stream, so every chest moved every later roll - where the squad's
 	# bots land and what they do - and a GPUParticles3D does the same)
 	var sm := SphereMesh.new(); sm.radius = 1.0; sm.height = 2.0; sm.radial_segments = 6; sm.rings = 3
 	var smm := MultiMesh.new(); smm.transform_format = MultiMesh.TRANSFORM_3D
-	smm.mesh = sm; smm.instance_count = 6 + 2 * tier
+	smm.mesh = sm; smm.instance_count = 8
 	for k in smm.instance_count: smm.set_instance_transform(k, Transform3D.IDENTITY)
 	var sp := MultiMeshInstance3D.new(); sp.name = "Sparks"; sp.multimesh = smm
 	var spm := ShaderMaterial.new(); spm.shader = load("res://shaders/chest_sparks.gdshader")
@@ -165,9 +158,9 @@ static func chest(tier := 0) -> Node3D:
 	sp.position = Vector3(0, H + 0.35, 0)
 	sp.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	bcn.add_child(sp)
-	var ring := MeshInstance3D.new(); ring.name = "Ring"; ring.mesh = Models.flat_quad(2.3 + 0.3 * tier)
+	var ring := MeshInstance3D.new(); ring.name = "Ring"; ring.mesh = Models.flat_quad(2.6)
 	var rm := Models.ring_mat(Color(rc, 0.95), 0.1)
-	rm.set_shader_parameter("fill", 0.2 + 0.05 * tier)
+	rm.set_shader_parameter("fill", 0.25)
 	ring.material_override = rm; ring.position.y = 0.03
 	ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	bcn.add_child(ring)

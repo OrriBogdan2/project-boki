@@ -47,7 +47,7 @@ target eats the big shot. Spirit Walk carries her through rocks and barriers.
 
 |  |  |
 |---|---|
-| Weight class | Light (124 health, 5 m/s, 1 dash charge) |
+| Weight class | Light (124 health, 4.4 m/s, 1 dash charge) |
 | Signature weapon | Longbow (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The warden of high ground. Climbs, reads the field, pins people to walls. |
 | Silhouette | the long weapon over the shoulder |

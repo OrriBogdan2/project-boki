@@ -580,6 +580,7 @@ func _place_stairs() -> void:
 var wall_mat: ShaderMaterial = null   # walls fade where they hide the player
 var walls := {}           # tile index -> true: built stone walls (drawn as walls, not rocks)
 var bush := {}            # tile index -> true: tall grass you can hide in
+var live_bush := {}       # tile index -> count: a disguised Shrubling sits there (cover like any clump)
 var props := {}           # blocker tile index -> what stands there: "ruin" (an old pillar) or "camp" (crates); else a tree or rock
 
 func _wall_at(q: Vector2i, ii: int) -> void:
@@ -588,7 +589,7 @@ func _wall_at(q: Vector2i, ii: int) -> void:
 		walls[idx(q.x, q.y)] = true
 
 func _place_blockers() -> void:
-	walls.clear(); bush.clear()
+	walls.clear(); bush.clear(); live_bush.clear()
 	for ii in islands.size():
 		var isl: Dictionary = islands[ii]
 		var cells: Array = isl["cells"]
@@ -646,7 +647,7 @@ func vis_texture() -> ImageTexture:
 
 func in_bush(x: float, z: float) -> bool:
 	var ix := int(floor(x)); var iz := int(floor(z))
-	return inb(ix, iz) and bush.has(idx(ix, iz)) and kind[idx(ix, iz)] == T_GROUND
+	return inb(ix, iz) and (bush.has(idx(ix, iz)) or live_bush.has(idx(ix, iz))) and kind[idx(ix, iz)] == T_GROUND
 
 func _edge_cell_toward(isl: int, target: Vector2, avoid: Array = [], spacing := PAD_SPACING) -> Vector2i:
 	var best := Vector2i(-1, -1); var bd := 1e9
@@ -926,41 +927,41 @@ func _near(p: Vector3, dist: float, ang: float, isl: int, taken: Dictionary) -> 
 func _dress_poi(ii: int, role: String, poi: Vector3, toward_mid: float, taken: Dictionary) -> void:
 	match role:
 		"heart":
-			# the vault: the best chest in the middle, ringed by rocks, two guard camps
+			# the vault: a chest in the middle, ringed by rocks, two guard camps
 			heart_spot = poi
-			chest_spots.append({"pos": poi, "tier": 2})
+			chest_spots.append({"pos": poi})
 			_pillars(poi, [Vector2(3.2, 3.2), Vector2(-3.2, 3.2), Vector2(3.2, -3.2), Vector2(-3.2, -3.2)], "ruin")
 			for k in 2:
 				var cp := _near(poi, 4.5, a0_of(ii) + PI * k, ii, taken)
 				if cp != Vector3.INF: camp_spots.append({"pos": cp, "island": ii, "kind": "heavy"})
 			var side := _near(poi, 6.0, a0_of(ii) + PI * 0.5, ii, taken)
-			if side != Vector3.INF: chest_spots.append({"pos": side, "tier": 1})
+			if side != Vector3.INF: chest_spots.append({"pos": side})
 		"camp":
-			# a rare chest with the monsters standing between it and the middle of the map
-			chest_spots.append({"pos": poi, "tier": 1})
+			# a chest with the monsters standing between it and the middle of the map
+			chest_spots.append({"pos": poi})
 			var cp := _near(poi, 2.6, toward_mid, ii, taken)
 			if cp != Vector3.INF: camp_spots.append({"pos": cp, "island": ii, "kind": "normal"})
 			_pillars(poi, [Vector2(cos(toward_mid + 1.3), sin(toward_mid + 1.3)) * 2.2, Vector2(cos(toward_mid - 1.3), sin(toward_mid - 1.3)) * 2.2], "camp")
 		"nest":
-			# wild kin around a nest, a small guard, a plain chest off to the side
+			# wild kin around a nest, a small guard, a chest off to the side
 			for k in 2:
 				var wp := _near(poi, 1.8, toward_mid + PI * k, ii, taken)
 				if wp != Vector3.INF: wild_spots.append(wp)
 			var cp := _near(poi, 3.5, toward_mid + PI * 0.5, ii, taken)
 			if cp != Vector3.INF: camp_spots.append({"pos": cp, "island": ii, "kind": "light"})
 			var ch := _near(poi, 3.5, toward_mid - PI * 0.5, ii, taken)
-			if ch != Vector3.INF: chest_spots.append({"pos": ch, "tier": 0})
+			if ch != Vector3.INF: chest_spots.append({"pos": ch})
 			islands[ii]["nest"] = poi
 		"landing":
 			# an outer landing where squads come down and gates open: two chests, no monsters
 			for k in 2:
 				var ch := _near(poi, 2.8, toward_mid + PI * (0.5 + k), ii, taken)
-				if ch != Vector3.INF: chest_spots.append({"pos": ch, "tier": 0})
+				if ch != Vector3.INF: chest_spots.append({"pos": ch})
 		"grove":
-			# quiet: two plain chests and a light camp
+			# quiet: two chests and a light camp
 			for k in 2:
 				var ch := _near(poi, 2.8, toward_mid + PI * (0.5 + k), ii, taken)
-				if ch != Vector3.INF: chest_spots.append({"pos": ch, "tier": 0})
+				if ch != Vector3.INF: chest_spots.append({"pos": ch})
 			var cp := _near(poi, 1.0, toward_mid, ii, taken)
 			if cp != Vector3.INF: camp_spots.append({"pos": cp, "island": ii, "kind": "light"})
 			if rng.randf() < 0.5:
@@ -970,7 +971,7 @@ func _dress_poi(ii: int, role: String, poi: Vector3, toward_mid: float, taken: D
 			shrine_spots.append(poi)
 			_pillars(poi, [Vector2(2.2, 0), Vector2(-2.2, 0), Vector2(0, 2.2), Vector2(0, -2.2)], "ruin")
 			var ch := _near(poi, 3.6, toward_mid + PI, ii, taken)
-			if ch != Vector3.INF: chest_spots.append({"pos": ch, "tier": 0})
+			if ch != Vector3.INF: chest_spots.append({"pos": ch})
 
 func _place_spots() -> void:
 	shrine_spots.clear()
@@ -1030,7 +1031,7 @@ func _place_spots() -> void:
 			var p2 := _near(poi, 9.5, away, ii, taken)
 			if p2 == Vector3.INF:
 				continue
-			chest_spots.append({"pos": p2, "tier": 0})
+			chest_spots.append({"pos": p2})
 			var cp2 := _near(p2, 2.6, away + PI * 0.5, ii, taken)
 			if cp2 != Vector3.INF: camp_spots.append({"pos": cp2, "island": ii, "kind": "light"})
 	# authored maps put their exits exactly where the layout says, in the order they open
@@ -2480,7 +2481,7 @@ func generate_authored(L: Dictionary, seed_val: int) -> void:
 			var cx := int(ch[0]); var cz := int(ch[1])
 			if inb(cx, cz) and kind[idx(cx, cz)] != T_VOID:
 				kind[idx(cx, cz)] = T_GROUND
-				chest_spots.append({"pos": Vector3(cx + 0.5, level[idx(cx, cz)] * LEVEL, cz + 0.5), "tier": int(ch[2])})
+				chest_spots.append({"pos": Vector3(cx + 0.5, level[idx(cx, cz)] * LEVEL, cz + 0.5)})
 		if D2.has("weapon"):
 			var wx := int(D2["weapon"][0]); var wz := int(D2["weapon"][1])
 			if inb(wx, wz) and kind[idx(wx, wz)] == T_GROUND:

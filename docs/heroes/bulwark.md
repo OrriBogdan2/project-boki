@@ -49,7 +49,7 @@ What the source does: tap throws the hammer to the cursor, where it stays plante
 - About 1.15 of a medium tall (content `body.size` 0.975 over the heavy look) and ~1.35 wide (`body.build` 1.18 over the heavy build); the hit radius stays 0.5 so the wider model isn't an easier target.
 - Runs pitched far forward (~0.32 rad at a full run), the shield shoulder leading, shoulders square; quick steps at `spd*2.9` (HunterAnim.STRIDE), as fast as the lights.
 - His dash after-image is his own: a gold chevron wake at chest height (BjornFx.afterimage), not the shared ghost.
-- Nameplate at 2.6 m (`body.plate`, ArchKit.plate_height for the HUD branch to read).
+- Nameplate at 2.6 m (`plate_offset` in the archetype JSON, read by `HudPlate.plate_offset(h)`).
 
 ## Small mechanics (fine print; source, footage, ours)
 | Mechanic | Source | Footage | Ours | Check |

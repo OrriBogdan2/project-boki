@@ -14,6 +14,10 @@ static func rules() -> Dictionary:
 static func rest_s() -> float:
 	return float(MergeForm.data().get("release_rest_s", 6.0))
 
+## The Boki's rest after a merge that ran out of time (no release): longer than after a release.
+static func timeout_rest_s() -> float:
+	return float(MergeForm.data().get("timeout_rest_s", 10.0))
+
 ## The hunter's side of a release: the speed and the shield, with a flash and a sound.
 static func afterglow(h: Hunter) -> void:
 	var r := rules()
