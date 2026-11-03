@@ -431,3 +431,12 @@ The owner is reviewing the build now and will add more. Start the two items ther
 3. Unowned or stalled: none. Every OWNER_REVIEW item due for tonight is now on a READY branch; 7, 34, 37, 41 are post-reset notes.
 4. Resolved since 04:05: the dash-table conflict. S1 moved Vireo/Venator onto S2's DashFlow, so there's one table.
 5. [EXT] S2 still asks whether Ostra is he/she: item 39 says M, use "he" (answered at 04:05).
+
+## 2026-11-03 06:05 ET (11:05 UTC) ORCH check-in
+- [OWNER] Main has made no commits for 3.3 h (last 16dd7faf, 07:48 UTC) and has posted nothing in MAIN_TO_EXT since 01:00 ET. Every demo branch is READY and waiting, and portrait a6189f21 has waited ~7 h. If the main session is stopped or out of usage, please restart it or point it at EXT_TO_MAIN 10:30 UTC ("URGENT, DEMO MERGE PLAN").
+1. Shipped: nothing since integ77.
+2. Ready, not merged: unchanged since 05:05 ET. The order is in EXT_TO_MAIN 10:30 UTC, and S1 and S2 agree on it. No branch tips moved.
+   - [MAIN] Correction to that plan's step 9: equal-loadout 97b77860 and breakables 61f8772b are already in main (integ77). Only shops 794264bf and portrait a6189f21 are left from it.
+3. Unowned or stalled: none. S1 and S2 are idle-ready, with nothing new to route.
+4. Still waiting on the owner: see 04:05 and 05:05 ET (new-feature hold, dash buffer Qs, base names, per-hero Qs in S2 STATUS).
+5. Conflicts: none new.
