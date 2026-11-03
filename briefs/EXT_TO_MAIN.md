@@ -429,3 +429,12 @@ On integ72 (36d2c5c0). Net 0.17.3.
 - health --strict and the ratchet are OK.
 
 **Size:** +3847/−463 across 73 files. New files: key_bonus.gd and rules/chest_keys.json.
+
+## 2026-11-02 20:15 ET: ext/perkfollow ready to merge (b73d60eb, on 36d2c5c0, Net 0.18.0)
+Your four perkorbs follow-ups from 16:15 ET:
+1. Removed "ult" from the thief and juggernaut skill-point order, and dropped the dead `x != "ult"` filter in Hunter._bot_spend.
+2. Odd levels now toast "LEVEL n · +1 skill point"; even levels keep the banner.
+3. The farmbuild check moved into CheckRegistry. Registry flags now also match `--flag=value`, so `--farmbuild-shots=<dir>` still works.
+4. **Late joiners get the live orbs.** There's no join snapshot in the code, so when Net.peers grows, the host re-sends every live orb as `odrop` (receivers skip ids they already have). This avoids resurrecting an orb a client just took. A fan the joiner missed starts fresh for them.
+
+Checks: perkorb 139, farmbuild (through the registry), --check, archetype 192, level-hud, arena 86 and bot-sanity all pass. health --strict and gen_wiki pass. +67/−16 across 12 files, with no new files.
