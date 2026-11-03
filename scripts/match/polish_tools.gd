@@ -81,7 +81,7 @@ static func chest_row(m) -> void:
 			if flat.call(c):
 				base = c; found = true; break
 		if found: break
-	var row := ["crate", "chest", "pot", "chest", "barrel"]
+	var row := ["crate", "chest", "pot", "chest", "keg"]
 	for k in row.size():
 		var q: Vector3 = base + Vector3((k - 2) * 1.7, 0, 0)
 		match String(row[k]):

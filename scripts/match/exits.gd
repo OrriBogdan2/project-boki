@@ -45,8 +45,6 @@ const LIFT_T := 15.0
 const UPLINK_CD := 30.0
 const STEAL_T := 5.0          # holding someone else's uplink alone this long makes it yours
 const WAVE_CAP := 7           # monsters a single exit's waves can have alive at once
-const KEY_PRICE := 140        # at the market stall
-const KEYS_PER_DAY := 2
 
 var m: Match
 var list: Array = []          # every exit, see _add_*
@@ -266,7 +264,7 @@ func interact_for(h: Hunter) -> Dictionary:
 						if h.rift_keys > 0:
 							best = {"act": "open", "need": KEY_HOLD, "label": "%s: Unlock with Rift Key  ·  opens in %ds, 3 can drop through (you have %d key%s)" % [key, int(HATCH_UNLOCK_T), h.rift_keys, "" if h.rift_keys == 1 else "s"]}
 						else:
-							best = {"label": "Needs a Rift Key  ·  vaults, bosses, elite monsters, the market"}
+							best = {"label": "Needs a Rift Key  ·  vaults, bosses, elite monsters"}
 					"unlocking":
 						best = {"label": "The hatch is opening  ·  %ds  ·  hold out" % int(ceil(float(x["t"])))}
 					"open":
@@ -951,23 +949,6 @@ func bot_contest(h: Hunter, reach: float) -> Array:
 ## A Rift Key dropped as loot (vaults, bosses, elite monsters).
 func drop_key(at: Vector3) -> void:
 	m.drop("key", at + Vector3(0, 0.6, 0), 1)
-
-## The market stall's daily limit: how many keys you can still buy today.
-static func keys_left_today() -> int:
-	var today := Time.get_date_string_from_system()
-	var kb: Dictionary = Save.d.get("key_buys", {})
-	if String(kb.get("date", "")) != today:
-		return KEYS_PER_DAY
-	return maxi(0, KEYS_PER_DAY - int(kb.get("n", 0)))
-
-static func buy_key() -> void:
-	var today := Time.get_date_string_from_system()
-	var kb: Dictionary = Save.d.get("key_buys", {})
-	if String(kb.get("date", "")) != today:
-		kb = {"date": today, "n": 0}
-	kb["n"] = int(kb.get("n", 0)) + 1
-	Save.d["key_buys"] = kb
-	Save.add_item("rift_key", 1)
 
 # ------------------------------------------------------------------ screenshots
 ## Test hook (--exit-demo=<mode>): sets up one exit in action next to the player for a screenshot.

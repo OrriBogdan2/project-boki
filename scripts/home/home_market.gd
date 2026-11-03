@@ -66,8 +66,6 @@ func open_pens() -> void:
 	var v: VBoxContainer = h._new_panel("Drift Pens", 860, true)
 	UI.subtitle(v, "%s's pens: ordinary Boki looking for a hunter, restocked every morning. Boki you list wait here too." % BokiPens.MERCHANT)
 	UI.head_extra(v).add_child(UI.chip("gem", str(int(Save.d["gems"])), UI.GOLD, "Your gems"))
-	if Lifeline.boki_count() == 0:
-		v.add_child(_banner("No Boki of your own? Take a free-kit run from the expedition board (a loaner Boki, nothing at risk): one extract pays at least %d gems, enough for any Boki here." % Loaner.MIN_PAY, UI.GOLD))
 	# filters
 	var fr := UI.hbox(8)
 	fr.add_child(UI.label("Show", 13, UI.MUTED))

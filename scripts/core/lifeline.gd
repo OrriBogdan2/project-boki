@@ -1,19 +1,15 @@
 class_name Lifeline
 ## The economy floor (owner decision, ROADMAP §2 "Nobody can be locked out"): a player must never sit
 ## at zero Boki and zero gems with no way to play. The floors, cheapest first:
-##   1. the free-kit run (Loaner): a basic loadout and a loaner Boki, nothing at risk. Always open
-##      once you've hatched your first Boki, so there is always a way to earn.
-##   2. the Drift Pens (BokiPens, a stall on the farm): common Boki priced within what one free-kit
-##      run earns (PEN_PRICE_MIN..MAX gems), restocked daily.
-##   3. a stray: with no Boki at all on your roster (lost, starved, at the Ransom House), a stray
+##   1. the Drift Pens (BokiPens, a stall on the farm): common Boki at a low fixed price
+##      (PEN_PRICE_MIN..MAX gems), restocked daily.
+##   2. a stray: with no Boki at all on your roster (lost, starved, at the Ransom House), a stray
 ##      common Boki turns up at the farm. You can't empty your roster on purpose (your last Boki can't
 ##      be released or listed), so the only way to a stray is losing one: no gems are made from it.
 ## Scarce, rare and limited-edition Boki are never part of the floor: only commons.
 ##
 ## On the save (optional; an older save without it reads as "never used"):
 ##   Save.d["floor"] = {strays: n, last_m: matches at the last stray}
-
-const FREE_RUN_MIN := Loaner.MIN_PAY      # a free-kit run that extracts pays at least this
 
 static func _st() -> Dictionary:
 	if typeof(Save.d.get("floor", null)) != TYPE_DICTIONARY:
@@ -32,9 +28,9 @@ static func gems() -> int:
 static func can_play_own() -> bool:
 	return boki_count() > 0
 
-## Can this save play at all? (Its own Boki, or the free-kit run, which needs nothing.)
+## Can this save play at all? (A save with no Boki gets a stray at the farm, see check.)
 static func can_play() -> bool:
-	return can_play_own() or Loaner.available()
+	return can_play_own()
 
 ## Is this save at the floor: no Boki and no gems to buy one?
 static func stuck() -> bool:

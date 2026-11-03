@@ -767,14 +767,15 @@ func open_shrine_lot() -> void:
 		v.add_child(UI.label(why, 13, Color("ffb0a0")))
 
 # ------------------------------------------------------------------ the Armory
-## The armory's tabs: gear by slot (Gear.SLOTS indexes), gloves covering both glove slots.
-const ARM_TABS := {"Armor": [2], "Boots": [3], "Gloves": [0, 1], "Kits": [4]}
+## The armory's tabs: gear by slot (Gear.SLOTS indexes), gloves covering both glove slots, then the
+## utility stash and treasure. (Armor is found in the match, not stored: Equal.)
+const ARM_TABS := {"Gloves": [0, 1], "Boots": [3]}
 
 func open_armory() -> void:
 	var v: VBoxContainer = h._new_panel("Armory", 960, true)
 	var items: Array = Econ.armory().duplicate()
 	items.sort_custom(func(a, b): return Loot.value(a) > Loot.value(b))
-	var counts := {"Treasure": _treasure_n()}
+	var counts := {"Treasure": _treasure_n(), "Utility": _utility_n(), "Backpacks": HomeBackpacks.count()}
 	for tn in ARM_TABS:
 		counts[tn] = items.filter(func(it): return String(it.get("t", "")) == "gear" and (ARM_TABS[tn] as Array).has(Gear.slot_of(String(it.get("id", ""))))).size()
 	UI.subtitle(v, "Next expedition: %s" % _loadout_line())
@@ -786,11 +787,17 @@ func open_armory() -> void:
 	top.add_child(_chip("bond", "%d" % Econ.embers(), Color("9ff0e0"), "Soul Embers, for the Soul Shrine"))
 	var fl := UI.footer_left(v)
 	fl.add_child(_upgrade_btn("arm", "Storage", Econ.arm_cap(), Econ.ARM_CAPS))
-	fl.add_child(_upgrade_btn("pack", "Backpack", Econ.pack_cap(), Econ.PACK_CAPS))
-	if not ARM_TABS.has(arm_tab) and arm_tab != "Treasure": arm_tab = "Armor"
-	UI.shell_tabs(v, ARM_TABS.keys() + ["Treasure"], arm_tab, func(t): arm_tab = t; arm_pick = ""; open_armory(), counts)
+	if not ARM_TABS.has(arm_tab) and arm_tab not in ["Treasure", "Utility", "Backpacks"]:
+		arm_tab = "Gloves"
+	UI.shell_tabs(v, ARM_TABS.keys() + ["Utility", "Backpacks", "Treasure"], arm_tab, func(t): arm_tab = t; arm_pick = ""; open_armory(), counts)
 	if arm_tab == "Treasure":
 		_treasure(v)
+		return
+	if arm_tab == "Backpacks":
+		HomeBackpacks.tab(v, _reopen_armory)
+		return
+	if arm_tab == "Utility":
+		HomeBelt.stash(v)
 		return
 	var list: Array = items.filter(func(it): return String(it.get("t", "")) == "gear" and (ARM_TABS[arm_tab] as Array).has(Gear.slot_of(String(it.get("id", "")))))
 	if list.is_empty():
@@ -810,12 +817,17 @@ func open_armory() -> void:
 		grid.add_child(_tile(x))
 	cols.add_child(grid)
 
+## After a purchase: the gem count up top, then the armory again.
+func _reopen_armory() -> void:
+	h._refresh_top()
+	open_armory()
+
 func _chip(icon: String, txt: String, col: Color, tip: String) -> Control:
 	return UI.chip(icon, txt, col, tip, 14)
 
 func _upgrade_btn(which: String, what: String, now: int, caps: Array) -> Control:
 	var lvl := int(Save.d.get(which + "_lvl", 0))
-	var costs: Array = Econ.ARM_UPGRADE if which == "arm" else Econ.PACK_UPGRADE
+	var costs: Array = Econ.ARM_UPGRADE
 	if lvl >= costs.size():
 		var l := UI.label("%s %d (max)" % [what, now], 13, UI.MUTED)
 		l.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -829,7 +841,7 @@ func _upgrade_btn(which: String, what: String, now: int, caps: Array) -> Control
 		h._refresh_top()
 		open_armory(), 0, "plus")
 	b.disabled = int(Save.d["gems"]) < int(c[0]) or int(Save.d.get("scrap", 0)) < int(c[1])
-	b.tooltip_text = "%s: %d gems and %d scrap" % ["More room in the armory" if which == "arm" else "More backpack slots on expeditions", int(c[0]), int(c[1])]
+	b.tooltip_text = "More room in the armory: %d gems and %d scrap" % [int(c[0]), int(c[1])]
 	return b
 
 func _loadout_line() -> String:
@@ -892,8 +904,13 @@ func _detail(it: Dictionary) -> Control:
 		var lb := UI.button("Taking it", func(): Econ.set_loadout(slot, ""); Save.save_game(); open_armory(), 170, "check")
 		lb.tooltip_text = "Picked for your next expedition. Click to leave it at home"
 		row.add_child(lb)
-	else:
+	elif Equal.may_bring(it, h.exp_tier):
 		row.add_child(UI.primary("Take it next time", func(): Econ.set_loadout(slot, uid); Sfx.play("pickup"); Save.save_game(); open_armory(), 170))
+	else:
+		var nb := UI.button("Can't bring it here", func(): pass, 170)
+		nb.disabled = true
+		nb.tooltip_text = "Only %s can come" % Equal.why_not(it, h.exp_tier)
+		row.add_child(nb)
 	var precious := Loot.rar_of(it) >= 3
 	var do_sell := func():
 		var g := Econ.sell(uid)
@@ -931,6 +948,11 @@ func _preview(it: Dictionary) -> Control:
 	var ticker := Timer.new(); ticker.wait_time = 0.033; ticker.autostart = true; svc.add_child(ticker)
 	ticker.timeout.connect(func(): if is_instance_valid(holder): holder.rotation.y = Time.get_ticks_msec() / 1200.0)
 	return svc
+
+func _utility_n() -> int:
+	var n := 0
+	for id in UtilityBelt.stock_ids(): n += Equal.stash_of(id)
+	return n
 
 func _treasure_n() -> int:
 	var n := 0
@@ -972,12 +994,17 @@ func _treasure(v: VBoxContainer) -> void:
 # ------------------------------------------------------------------ the expedition panel
 ## "From your armory" rows for the expedition panel: the five gear slots, ‹ › to cycle what's stored.
 func loadout_rows(parent: VBoxContainer, reopen: Callable) -> void:
+	HomeBelt.rows(parent, reopen, h.exp_tier)
+	HomeBackpacks.row(parent, reopen, h.exp_tier)
 	if not Save.has_building("armory") and Econ.armory().is_empty():
 		return
-	parent.add_child(UI.section("From your armory"))
+	parent.add_child(UI.section("From your armory  (gloves and boots)"))
+	var held := 0
 	for slot in Econ.LOADOUT_SLOTS:
 		var si := int(String(slot).substr(4))
-		var pool: Array = Econ.armory().filter(func(it): return String(it.get("t", "")) == "gear" and Econ.gear_slot(it) == slot)
+		var all_here: Array = Econ.armory().filter(func(it): return Econ.fits_slot(it, slot))
+		var pool: Array = all_here.filter(func(it): return Equal.may_bring(it, h.exp_tier))
+		if slot != "gear1": held += all_here.size() - pool.size()      # (gloves are listed under both glove slots: count them once)
 		if pool.is_empty():
 			continue
 		pool.sort_custom(func(a, b): return Loot.value(a) > Loot.value(b))
@@ -986,7 +1013,7 @@ func loadout_rows(parent: VBoxContainer, reopen: Callable) -> void:
 		var at := maxi(0, ids.find(String(cur.get("uid", ""))))
 		var card := UI.card(UI.CARD, 6, 10)
 		var row := UI.hbox(8); card.add_child(row)
-		var nm := UI.label("%s:  %s" % [Gear.SLOT_NAMES[si], Loot.name_of(cur) if not cur.is_empty() else "none"], 14, Loot.col_of(cur) if not cur.is_empty() else UI.MUTED, UI.semi)
+		var nm := UI.label("%s:  %s" % [Gear.WORN_NAMES[si], Loot.name_of(cur) if not cur.is_empty() else "none"], 14, Loot.col_of(cur) if not cur.is_empty() else UI.MUTED, UI.semi)
 		nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		nm.clip_text = true
 		nm.tooltip_text = Loot.sub_of(cur) if not cur.is_empty() else ""
@@ -1002,6 +1029,5 @@ func loadout_rows(parent: VBoxContainer, reopen: Callable) -> void:
 			b.disabled = ids.size() <= 1
 			row.add_child(b)
 		parent.add_child(card)
-	var pl := UI.label("Backpack: %d slots  ·  what you take can be lost if you go down" % Econ.pack_cap(), 12, UI.MUTED)
-	pl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	parent.add_child(pl)
+	if held > 0:
+		parent.add_child(UI.label("%d piece%s too rare for this difficulty stay home." % [held, "" if held == 1 else "s"], 12, UI.MUTED))

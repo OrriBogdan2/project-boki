@@ -9,7 +9,7 @@
 	"card": {
 		"loop": "Mid-range rifleman: Daze a foe with the grenade's cone, then shred them while it lasts.",
 		"dash": "Slipstep: tap to skid, hold to slide further; you can shoot the whole time and it goes where you move, not where you aim.",
-		"passive": "Hot Streak: knocking a hunter down gives Slipstep back and heals you. Abilities that land add a little lifesteal.",
+		"passive": "Hot Streak: knocking a hunter down gives Slipstep back. An ability that lands gives you a little lifesteal for a few seconds.",
 		"rmb": "Burr Charge: hold to see its lane, let go to throw. It flies past people and blasts a cone back at you where it hits a wall or the ground, Dazing everyone in it.",
 		"e": "Longneedle: stand still 0.6s while the line narrows, then fire a long beam through walls and everything in it.",
 		"x": "Cinderfall (ultimate, level 6): a shell lands at your cursor 1.6s after the tap, hardest in the centre, and leaves a burning, slowing patch. Everyone can see where it will fall.",
@@ -21,17 +21,16 @@
 	"resource": {
 		"id": "fever",
 		"name": "Fever",
-		"max": 4,
+		"max": 1,
 		"kind": "count",
-		"vamp": 0.05,
+		"vamp": 0.06,
 		"wait": 3.5,
-		"knock_heal": 0.25,
 		"rattle_k": 0.9,
 		"col": "#ff9a5c"
 	},
 	"passive": {
 		"name": "Hot Streak",
-		"desc": "Knocking a hunter down gives Slipstep back at once and heals a quarter of your health. Each ability that lands (a Burr Charge blast, Longneedle) also adds a stack of Fever, up to 4, lasting 3.5s: every stack makes your damage heal you for 5%, rifle included. Your rifle does 90% more to a Dazed foe (the numbers turn big and gold), and a string on a Dazed foe doesn't lose its punch."
+		"desc": "Knocking a hunter down gives Slipstep back at once. Each ability that lands (a Burr Charge blast, Longneedle) lights Fever for 3.5s, one flat level however many foes it hits: while it burns your damage heals you for 6%, rifle included. Your rifle does 90% more to a Dazed foe (the numbers turn big and gold), and a string on a Dazed foe doesn't lose its punch."
 	},
 	"dash": {
 		"id": "slipstep",
@@ -45,8 +44,8 @@
 		"invuln": 0.1,
 		"slide": 7.0,
 		"slide_t": 0.55,
-		"refund": 0.3,
-		"desc": "Tap: a 4.8m skid that bleeds off over 0.45s, the way you're moving (not where you aim). Hold: a 7m low slide. You keep shooting through either, and the body keeps aiming. Let go early and part of the cooldown comes back. A knock gives it back. In the air a tap slides 2/3 of the full hold's distance (4.7m) and still spends a charge.",
+		"hold_cost": 0.4,
+		"desc": "Tap: a 4.8m skid that bleeds off over 0.45s, the way you're moving (not where you aim). Hold: a 7m low slide that takes 40% longer to come back, with no refund for letting go early. You keep shooting through either, and the body keeps aiming. A knock gives it back. In the air a tap slides 2/3 of the full hold's distance (4.7m) and still spends a charge.",
 		"air_k": 0.667
 	},
 	"rmb": {
@@ -68,12 +67,11 @@
 			"cone_dmg": 16.0,
 			"cone_rattle": 1.4,
 			"push": 11.0,
-			"wall_stun": 0.7,
-			"shave": 0.4
+			"wall_stun": 0.7
 		},
 		"variants": {
 			"tap": "Hold RMB: a 10.5m lane with an arrow tip shows (foes in it are marked); let go to throw. The charge flies the whole lane, past the cursor and straight past people.",
-			"full": "Where it hits a wall, or the ground at the end of the lane, it sticks and a 6m, 100° cone shows back toward you for 0.9s. Then it blasts: 16 damage, a big shove along the cone, Dazed 1.4s. A hunter shoved into more terrain is stunned 0.7s and the cooldown drops 40%."
+			"full": "Where it hits a wall, or the ground at the end of the lane, it sticks and a 6m, 100° cone shows back toward you for 0.9s. Then it blasts: 16 damage, a big shove along the cone, Dazed 1.4s. A hunter shoved into more terrain is stunned 0.7s."
 		},
 		"sockets": {
 			"hit": "add",
@@ -96,8 +94,9 @@
 		"width": 0.5,
 		"dmg": 36.0,
 		"rattle_k": 0.2,
-		"shave": 0.3,
-		"desc": "Stand still and charge for 0.6s: a wide line out to 18m narrows to a thin core. Then the beam fires through cover and everything in its line: 36 damage, 20% more on a Dazed foe, and a Dazed hunter hit is Skewered. The recoil shoves you back a step. Hitting a hunter takes 30% off its cooldown.",
+		"shave": 0.2,
+		"shave_rank3": 0.3,
+		"desc": "Stand still and charge for 0.6s: a wide line out to 18m narrows to a thin core. Then the beam fires through cover and everything in its line: 36 damage, 20% more on a Dazed foe, and a Dazed hunter hit is Skewered. The recoil shoves you back a step. Hitting a hunter takes 20% off its cooldown (30% per hunter hit at rank 3).",
 		"sockets": {
 			"hit": "add",
 			"ctrl": "add",
@@ -153,8 +152,8 @@
 		"kin": "Rank 3: cooldown 11.5s -> 9.2s, damage +40%; every hunter hit takes 30% off the cooldown."
 	},
 	"tells": {
-		"half": "a ring of Fever pips over the cap",
-		"full": "four bright pips and a heat shimmer",
+		"half": "a lit Fever pip over the bar while the lifesteal runs",
+		"full": "the same lit pip and a heat shimmer",
 		"dash_spent": "an ember afterimage and a ring where the slide began"
 	}
 }

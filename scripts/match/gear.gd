@@ -1,10 +1,11 @@
 class_name Gear
-## Gear found on expeditions. Five slots (SLOTS): an ACTIVE glove you fire with Q, a PASSIVE glove,
-## armor, boots and a utility kit. Rarity (Common to Legendary) lives here, not on weapons: a hunter
+## Gear found on expeditions. A hunter wears four pieces: two gloves (Q and V; each can be an active
+## or a passive glove, never two of the same: Gloves), armor and boots. (Utility items are not gear:
+## they live on the three-slot belt, UtilityBelt.) Rarity (Common to Legendary) lives here, not on weapons: a hunter
 ## carries one fixed signature weapon and grows it with weapon upgrades (WeaponUps). Every piece gives
 ## stats; a glove with a cooldown is the active one. Picking up a piece replaces the one in its slot
 ## (the old one drops). Gear lasts one expedition, like perks.
-## Defined in content/gear/*.json: name, slot ("armor", "boots" or "kit"; gloves leave it out and go
+## Defined in content/gear/*.json: name, slot ("armor" or "boots"; gloves leave it out and go
 ## by cooldown), cd, col, icon, stats, desc, and for most active gloves an "effects" list run through
 ## Effects (the same building blocks abilities use).
 
@@ -33,12 +34,22 @@ static func _load() -> void:
 		d["cd"] = float(d.get("cd", 0.0))
 		ALL[id] = d
 
-## Slot index: 0 active glove (Q), 1 passive glove, 2 armor, 3 boots, 4 utility kit.
-const SLOTS := ["glove", "passive", "armor", "boots", "kit"]
-const SLOT_NAMES := ["Active glove", "Passive glove", "Armor", "Boots", "Utility kit"]
+## A piece's KIND (slot_of, drop tables, the armory tabs): 0 active glove, 1 passive glove, 2 armor,
+## 3 boots. Where a hunter WEARS it (h.gear index, slot_on): 0 glove on Q, 1 glove on V, 2 armor,
+## 3 boots; either kind of glove fits either glove slot.
+const SLOTS := ["glove", "passive", "armor", "boots"]
+const SLOT_NAMES := ["Active glove", "Passive glove", "Armor", "Boots"]
+const WORN_NAMES := ["Glove 1", "Glove 2", "Armor", "Boots"]
+
+static func is_glove(id: String) -> bool:
+	return ALL.has(id) and slot_of(id) < 2
+
+## The h.gear index this piece goes in on this hunter (gloves: Gloves.slot_for).
+static func slot_on(h, id: String) -> int:
+	return Gloves.slot_for(h, id) if is_glove(id) else slot_of(id)
 
 static func empty_slots() -> Array:
-	return [{}, {}, {}, {}, {}]
+	return [{}, {}, {}, {}]
 
 static func active(id: String) -> bool:
 	return float(ALL.get(id, {}).get("cd", 0.0)) > 0.0
@@ -159,7 +170,7 @@ static func apply_worn(h) -> void:
 		h.max_hp += hp_new - hp_old
 		h.hp = clampf(h.hp * h.max_hp / maxf(old_max, 1.0), 1.0, h.max_hp)      # the same share of the bar, so swapping armor never heals
 		h.set_meta("gear_hp", hp_new)
-	var pk_new := int(round(h.gear_stat("pack")))
+	var pk_new := Equal.pack_bonus(h)          # gear and perk "pack" stats plus a brought backpack (Equal.pack_slots)
 	var pk_old := int(h.get_meta("gear_pack", 0))
 	if pk_new != pk_old:
 		h.pack_cap += pk_new - pk_old

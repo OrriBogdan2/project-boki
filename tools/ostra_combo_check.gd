@@ -172,11 +172,20 @@ func _ostra() -> void:
 	aim_at(P, T.pos)
 	tap(m, P)
 	step(m, 0.5)
-	ok("combo: Swollen Snap hits 40% harder", dmg(T) > d_near * 1.25, "plain %.1f swollen %.1f" % [d_near, dmg(T)])
+	ok("combo: Swollen Snap hits 44% harder", dmg(T) > d_near * 1.35, "plain %.1f swollen %.1f" % [d_near, dmg(T)])
+	var snap_k := float(sn["dmg"]) / float(Data.weapon_stats("tether_lantern")["dmg"])
+	ok("data: the Snap hits about 1.05x an orb (277 vs 263)", absf(snap_k - 277.0 / 263.0) < 0.03, "%.3f" % snap_k)
 	ok(
-		"numbers: the Snap hits about 1.4x an orb",
-		float(sn["dmg"]) / float(Data.weapon_stats("tether_lantern")["dmg"]) > 1.3
+		"data: the Snap rests 10s; the Trade 9.5s; the seed 10s",
+		absf(float(sn["cooldown"] if sn.has("cooldown") else K.rmb_def()["cooldown"]) - 10.0) < 0.01 and absf(
+			float(dd["cd"]) - 9.5
+		) < 0.01 and absf(float(K.e_def()["cooldown"]) - 10.0) < 0.01
 	)
+	ok(
+		"data: a Settled orb is 34% harder (353 vs 263)",
+		absf(float(K.lmb_def()["prime_dmg"]) - (353.0 / 263.0 - 1.0)) < 0.01
+	)
+	ok("data: no speed burst before rank 3", K.boost_t <= 0.0 and absf(K.move_k() - 1.0) < 0.01)
 	# ---- Shift: hold to see both ends, let go to lob; the foe at the landing goes to where she was
 	reset.call()
 	T.teleport(home + Vector3(8.0, 0, 0))
@@ -301,7 +310,7 @@ func _ostra() -> void:
 		"e: a full pop hits up to 3.5x an early one", late > early * 2.5 and K.pops >= 2,
 		"early %.1f late %.1f" % [early, late]
 	)
-	ok("e: the pop grounds what it catches", KitStatus.grounded(T))
+	ok("data: the pop does not ground what it catches", not KitStatus.grounded(T))
 	ok("anim: the pop plays ostra_pop", K.anim_id == "ostra_pop")
 	# left alone it pops by itself: the Collapse
 	reset.call()
@@ -368,12 +377,22 @@ func _ostra() -> void:
 		apk > apk1 and absf(float(dl[1]) / maxf(0.01, float(dl[0])) - apk / apk1) < 0.03,
 		"lvl1 %.2f lvl10 %.2f ap %.2f/%.2f" % [float(dl[0]), float(dl[1]), apk1, apk]
 	)
-	# knocks heal
+	# data: a knock no longer heals; she floats clear of ground hazards (but not a sky strike)
 	reset.call()
 	P.hp = P.max_hp * 0.4
 	var h0 := P.hp
 	K.on_knock(T, true)
-	ok("passive: a knock heals 20%", P.hp - h0 >= P.max_hp * 0.19, "healed %.1f" % (P.hp - h0))
+	ok("data: a knock does not heal her", absf(P.hp - h0) < 0.01, "healed %.1f" % (P.hp - h0))
+	for tag in ["hazard", "lava", "spore", "toxic", "molten"]:
+		var hz0 := P.hp
+		P.hurt(10.0, null, {"src": "hazard", "tags": ["zone", tag], "burn": 2.0, "slow": 1.0})
+		ok("data: a %s hit passes her by" % tag, absf(P.hp - hz0) < 0.01 and P.slow_t <= 0.0 and P.burn_t <= 0.0)
+	var sky0 := P.hp
+	P.hurt(10.0, null, {"src": "hazard", "tags": ["mut", "hazard"], "sky": true})
+	ok("data: a sky strike still hits her", P.hp < sky0 - 5.0, "took %.1f" % (sky0 - P.hp))
+	var plain0 := P.hp
+	P.hurt(5.0, null, {"src": "mob"})
+	ok("data: a plain hit still lands", P.hp < plain0 - 1.0)
 	# rank 3: the growing seed burns; the pop no longer pulls (the pull is Nightwell's, on X)
 	P.slot_lv["kin"] = 3
 	reset.call()
@@ -381,7 +400,11 @@ func _ostra() -> void:
 	aim_at(P, T.pos)
 	K.cast_e()
 	step(m, 1.2)
-	ok("rank 3: the growing seed burns a foe inside it", dmg(T) > 0.0, "dmg %.1f" % dmg(T))
+	ok(
+		"rank 3: the growing seed burns a foe inside it, about 8 a second (250 vs a 365 bomb of 12.5)",
+		dmg(T) / K.power("kin") > 11.0 and dmg(T) / K.power("kin") < 14.0,
+		"dmg %.1f over 1.2s (power %.2f)" % [dmg(T), K.power("kin")]
+	)
 	step(m, 4.8)
 	var sp: Vector3 = K.seed["pos"] if not K.seed.is_empty() else T.pos
 	var rim := K.seed_radius()
@@ -391,6 +414,45 @@ func _ostra() -> void:
 	var off := Vector2(T.pos.x - sp.x, T.pos.z - sp.z).length()
 	ok("rank 3: the pop leaves a foe outside its rim where it stands", off > rim, "off %.1f rim %.1f" % [off, rim])
 	P.slot_lv["kin"] = 1
+	# ---- data pass, Snap rank 3: a speed burst on the cast (11%), a bigger one on the hit (22%), for 2s
+	P.slot_lv["sec"] = 3
+	reset.call()
+	T.teleport(home + Vector3(2.5, 0, 0))
+	aim_at(P, T.pos)
+	tap(m, P)
+	var cast_k := [0.0]
+	var hit_k := [0.0]
+	step(m, 0.8, func():
+		if K.boost_t > 0.0:
+			if T.stun_t > 0.0: hit_k[0] = maxf(hit_k[0], K.boost_k)
+			elif K.snaps > 0: cast_k[0] = maxf(cast_k[0], K.boost_k))
+	ok(
+		"data rank 3: Snap speeds her up 11% on the cast and 22% on a hit",
+		absf(cast_k[0] - 0.108) < 0.01 and absf(hit_k[0] - 0.215) < 0.01 and absf(K.move_k() - 1.215) < 0.01,
+		"cast %.3f hit %.3f now %.3f" % [cast_k[0], hit_k[0], K.move_k()]
+	)
+	step(m, 2.2)
+	ok("data rank 3: the burst ends after 2s", K.boost_t <= 0.0 and absf(K.move_k() - 1.0) < 0.01)
+	P.slot_lv["sec"] = 1
+	# ---- data pass, Trade rank 3: allies beside her get a 26 shield (375 of a 2074-hp hunter, on 145 hp)
+	P.slot_lv["dash"] = 3
+	reset.call()
+	var A: Hunter = m.make_hunter(
+		"Ally", P.team, "medium", "Ally", "idle", {}, home + Vector3(1.2, 0, 1.0), {"arch": "none"}
+	)
+	A.max_hp = 10000.0
+	A.hp = A.max_hp
+	T.teleport(home + Vector3(10.0, 0, 0))
+	aim_at(P, T.pos)
+	P.ak.on_dash(false)
+	step(m, 2.2)
+	ok(
+		"data rank 3: an ally beside her gets a 26 shield for 3s", A.shield >= 25.5 and A.shield < 27.0,
+		"shield %.1f" % A.shield
+	)
+	A.queue_free()
+	m.hunters.erase(A)
+	P.slot_lv["dash"] = 1
 	# ---- merge start drops every hold
 	reset.call()
 	T.teleport(home + Vector3(8.0, 0, 0))

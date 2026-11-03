@@ -1,6 +1,6 @@
 extends RefCounted
 ## --economy-floor-check: nobody is ever left with no Boki, no gems and no way to play (Lifeline),
-## the Drift Pens (BokiPens), the free-kit run with a loaner Boki (Loaner), the Exchange order book
+## the Drift Pens (BokiPens), the stray and the pens, the Exchange order book
 ## (Exchange), and save/load for all of it (old saves too).
 ## Prints FLOOR ok/FAIL lines and "FLOOR DONE, failures: N".
 
@@ -20,8 +20,8 @@ func run(host: Node) -> void:
 	_pens_restock()
 	_pens_no_mint()
 	_pens_gems()
-	await _loaner_match()
-	_loaner_result()
+	await _stray_match()
+	_zero_run()
 	_exchange()
 	_exchange_book()
 	_exchange_walk()
@@ -45,8 +45,7 @@ func _zero_zero() -> void:
 	Save.d["gems"] = 0
 	Save.d["active"] = ""
 	ok(Lifeline.stuck(), "zero Boki and zero gems is the stuck state")
-	ok(Lifeline.can_play() and Loaner.available(), "even then you can play: the free-kit run is open")
-	ok(BokiPens.cheapest() <= Loaner.MIN_PAY, "the cheapest pen Boki (%d) costs no more than one free-kit extract pays (%d)" % [BokiPens.cheapest(), Loaner.MIN_PAY])
+	ok(BokiPens.cheapest() <= BokiPens.PEN_PRICE_MAX, "the cheapest pen Boki (%d) is in the floor price band" % BokiPens.cheapest())
 	var ev := Lifeline.check()
 	ok(ev.size() == 1 and String(ev[0]["kind"]) == "stray" and Save.d["roster"].size() == 1, "a stray Boki turns up at the farm")
 	var st: Dictionary = Save.d["roster"][0]
@@ -129,40 +128,28 @@ func _pen_listing() -> void:
 	ok(Save.kin(String(a["uid"])).is_empty(), "and it's gone for good")
 	ok(not BokiPens.list_mine(String(b["uid"]), 60)["ok"], "your only Boki can't be listed")
 
-func _loaner_match() -> void:
+## A stray's run: the basic belt goes out with nobody, and a freed Boki node doesn't break leaving.
+func _stray_match() -> void:
 	_started_save()
-	var mine := Save.new_kin("cindle", "Pip")
-	Save.d["roster"] = [mine]; Save.d["active"] = mine["uid"]
-	Save.d["items"]["tonic"] = 5; Save.d["items"]["rift_key"] = 2; Save.d["treat"] = "treat_power"
-	var arm_w := {"uid": "arm_w", "t": "gear", "rar": 2, "id": "bastion_plate"}
-	Save.d["armory"] = [arm_w]; Save.d["loadout"] = {"gear2": "arm_w"}
+	Save.d["roster"] = []; Save.d["active"] = ""; Save.d["gems"] = 0
+	Lifeline.check()
+	ok(Save.d["roster"].size() == 1, "with no Boki, a stray turns up and is the one you play with")
+	Save.d["items"]["tonic"] = 5; Save.d["items"]["rift_key"] = 2
 	var m := Match.new()
 	main.add_child(m)
-	var o := Loaner.opts({"teams": 2, "squad": 1, "tier": 2, "length": 1e9, "seed": 12, "no_drop": true}, 4)
-	m.start(o)
+	m.start({"teams": 2, "squad": 1, "tier": 2, "length": 1e9, "seed": 12, "no_drop": true, "belt_items": Equal.take_belt(2)})
 	m.set_process(false)
 	var P := m.player
 	var k: Kin = P.kin
-	ok(k != null and Loaner.is_loaner(k.rec) and String(k.rec["uid"]) != String(mine["uid"]), "a free-kit run brings a loaner Boki, not yours (%s)" % (k.species if k else "none"))
-	ok(P.kin2 == null and k != null and k.owner_h == P and k.cmd == "follow", "the loaner is the one active Boki and follows like any other (%s)" % (k.cmd if k else "none"))
-	ok(k != null and k.species in Loaner.STARTERS and int(k.rec["level"]) == 1, "a starter egg's species, level 1")
-	ok(P.rift_keys == 0 and P.tonics == 2, "the basic kit: two free tonics, no keys (%d, %d)" % [P.tonics, P.rift_keys])
-	ok(P.gear.all(func(g): return (g as Dictionary).is_empty()), "no armory gear: the plain kit")
-	ok(Save.d["armory"] == [arm_w] and Save.d["loadout"] == {"gear2": "arm_w"} and Save.d["raid_out"].is_empty(), "your armory and loadout stay home (nothing left the armory)")
-	# die in the Hollow: the loaner never drops into the box or is left behind
+	ok(k != null and String(k.rec["uid"]) == String(Save.d["roster"][0]["uid"]), "the stray goes with you like any other Boki")
+	ok(P.tonics == 5 and P.armor_kits == 2 and P.rift_keys == 0,
+			"tonics from the stash (cap 5 on the Hollow) and the issued kits (%d, %d); keys never come from home" % [P.tonics,
+			P.armor_kits])
 	P.lives = 1
 	m.eliminate(P, null, "knocked out", true)
-	ok(k != null and k.state == "away" and not KinLoss.guarding(k) and m.player_lost.is_empty(),
-		"dying in the Hollow, the loaner doesn't drop to guard or get left behind")
-	ok(not m.kins.any(func(w): return w.state == "dazed" and not w.dead and Loaner.is_loaner(w.rec)),
-		"and nobody can scan it")
 	m.result = {"extracted": false, "why": "knocked out"}
-	P.tonics += 3      # three tonics found on the run
 	var r := _result_of(m)
-	ok(r.get("loaner", false) and (r.get("kin_runs", []) as Array).is_empty() and not r.has("lost_kin"), "the result carries no loaner Boki")
-	ok(int(r.get("tonics", -1)) == 5 + 3, "the tonics found on a free-kit run come home with the stash (%d, want 8)" % int(r.get("tonics", -1)))
-	ok(not r.has("rift_keys"), "no Rift Keys in a free-kit result")
-	# a freed Boki node (a loaner that was removed from the match) doesn't break leaving or finishing
+	ok((r.get("belt", {}) as Dictionary).is_empty(), "dying, the belt stays in your deathbox: nothing comes home")
 	if k != null and is_instance_valid(k):
 		k.free()      # P.kin now points at a freed node
 		m._leave_kin(P)
@@ -183,51 +170,23 @@ func _result_of(m: Match) -> Dictionary:
 	Game.main = g
 	return captured
 
-func _loaner_result() -> void:
-	_started_save()
-	var mine := Save.new_kin("cindle", "Pip")
-	mine["trust"] = 50.0
-	Save.d["roster"] = [mine]; Save.d["active"] = mine["uid"]
-	Save.d["items"]["tonic"] = 5; Save.d["items"]["rift_key"] = 2; Save.d["gems"] = 0; Save.d["treat"] = "treat_power"
-	var arm_w := {"uid": "arm_w", "t": "gear", "rar": 2, "id": "bastion_plate"}
-	Save.d["armory"] = [arm_w]; Save.d["loadout"] = {"gear2": "arm_w"}
-	var trust0 := float(mine["trust"]); var xp0 := int(mine.get("xp", 0)); var m0 := int(mine.get("matches", 0))
-	# extracted with a little: the stipend tops it up to MIN_PAY
-	var out := Game.apply_result({"extracted": true, "loaner": true, "tier": 0, "gems": 12, "tonics": 5, "kin_runs": [], "caught": []})
-	ok(int(Save.d["gems"]) == Loaner.MIN_PAY and int(out["stipend"]) == Loaner.MIN_PAY - 12, "an extract pays at least %d gems (stipend %d)" % [Loaner.MIN_PAY, int(out["stipend"])])
-	ok(float(mine["trust"]) == trust0 and int(mine.get("xp", 0)) == xp0 and int(mine.get("matches", 0)) == m0, "your own Boki is untouched (it stayed home)")
-	ok(Save.d["roster"].size() == 1 and not Save.d["roster"].any(func(r): return Loaner.is_loaner(r)), "the loaner is never kept")
-	ok(int(Save.d["items"]["tonic"]) == 5 and int(Save.d["items"]["rift_key"]) == 2, "your tonics and keys are untouched")
-	ok(String(Save.d["treat"]) == "treat_power", "your treat is kept on a free-kit run (it was never used)")
-	ok(Save.d["armory"] == [arm_w] and Save.d["loadout"] == {"gear2": "arm_w"}, "your armory and loadout are untouched")
-	# died: nothing of yours lost, no ransom
-	out = Game.apply_result({"extracted": false, "why": "knocked out", "loaner": true, "tier": 2, "gems": 30, "lost_gems": 30, "tonics": 5, "kin_runs": [],
-		"lost_kin": [{"uid": "x", "fate": "rival", "holder": "Vexa", "rec": Loaner.roll(3)}]})
-	ok(Save.d["roster"].size() == 1 and (Save.d["lost_kin"] as Array).is_empty() and int(out["stipend"]) == 0, "dying on a free-kit run loses nothing of yours")
-	ok(String(Save.d["treat"]) == "treat_power" and Save.d["armory"] == [arm_w] and Save.d["loadout"] == {"gear2": "arm_w"}, "...nor your treat, armory or loadout")
-	# the stipend is a floor, not a bonus: nothing is topped up at MIN_PAY or more
-	for g in [Loaner.MIN_PAY, Loaner.MIN_PAY + 1, 200]:
-		var rr := {"extracted": true, "loaner": true, "gems": g}
-		ok(Loaner.settle(rr) == 0 and int(rr["gems"]) == g, "an extract of %d gems isn't topped up" % g)
-	var rl := {"extracted": true, "loaner": true, "gems": Loaner.MIN_PAY - 1}
-	ok(Loaner.settle(rl) == 1 and int(rl["gems"]) == Loaner.MIN_PAY, "one gem short is topped up by one")
-	_started_save()
-	var g45 := Save.new_kin("cindle", "Pip")
-	Save.d["roster"] = [g45]; Save.d["active"] = g45["uid"]; Save.d["gems"] = 10; Save.d["treat"] = "treat_power"
-	out = Game.apply_result({"extracted": true, "loaner": true, "tier": 0, "gems": Loaner.MIN_PAY + 5, "kin_runs": [], "caught": []})
-	ok(int(out["stipend"]) == 0 and int(Save.d["gems"]) == 10 + Loaner.MIN_PAY + 5, "through apply_result too: %d gems in, no top-up" % (Loaner.MIN_PAY + 5))
-	# (and a normal run does use up the treat)
-	Game.apply_result({"extracted": false, "why": "left", "tier": 0, "gems": 0, "kin_runs": [], "caught": []})
-	ok(String(Save.d["treat"]) == "", "a normal run uses the treat up")
-	# the zero-zero player: one free-kit run buys a pen Boki
+## The zero-zero player: a stray, and the pens' cheapest Boki is within reach of one extract.
+func _zero_run() -> void:
 	_started_save()
 	Save.d["roster"] = []; Save.d["gems"] = 0; Save.d["active"] = ""
 	Save.d["floor"] = {"strays": 0, "last_m": -1}
-	Game.apply_result({"extracted": true, "loaner": true, "tier": 0, "gems": 0, "kin_runs": [], "caught": []})
+	Lifeline.check()
+	Game.apply_result({"extracted": true, "tier": 0, "gems": BokiPens.PEN_PRICE_MAX, "kin_runs": [], "caught": []})
 	var have: int = Save.d["roster"].size()
 	var cheap: Dictionary = BokiPens.listings().reduce(func(a, L): return L if a.is_empty() or int(L["price"]) < int(a["price"]) else a, {})
 	var r := BokiPens.buy(String(cheap["id"]))
-	ok(r["ok"] and Save.d["roster"].size() == have + 1, "from zero: one free-kit extract buys a Boki at the pens (%d gems)" % int(cheap["price"]))
+	ok(r["ok"] and Save.d["roster"].size() == have + 1, "from zero: a stray, then one extract buys a Boki at the pens (%d gems)" % int(cheap["price"]))
+	# and a normal run uses the treat up
+	_started_save()
+	var g45 := Save.new_kin("cindle", "Pip")
+	Save.d["roster"] = [g45]; Save.d["active"] = g45["uid"]; Save.d["treat"] = "treat_power"
+	Game.apply_result({"extracted": false, "why": "left", "tier": 0, "gems": 0, "kin_runs": [], "caught": []})
+	ok(String(Save.d["treat"]) == "", "a run uses the treat up")
 
 func _exchange() -> void:
 	_started_save()

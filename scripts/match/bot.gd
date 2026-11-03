@@ -212,15 +212,8 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 			else:
 				_use_sig(m, h, tgt)
 				_use_sec(m, h, tgt)
-			# the active glove (Q) when its moment comes (hook in range, wall when shot at...)
-			if h.gear_cd[0] <= 0.0 and not (h.gear[0] as Dictionary).is_empty() and Gear.active(String(h.gear[0]["id"])) and randf() < 0.3 + abil * 0.6:
-				var gdf := Gear.def_of(String(h.gear[0]["id"]))
-				var ga := ability_aim(m, h, gdf, tgt)
-				if ga == Vector3.INF and gdf.bot.is_empty() and randf() < abil * 0.3:
-					ga = tgt.pos        # an old glove with no hints: now and then, at the target
-				if ga != Vector3.INF:
-					h.inp["aim"] = ga
-					inp["gear1"] = true
+			# both gloves (Q and V), each when its moment comes (hook in range, wall when shot at...)
+			Gloves.bot_use(h, tgt, abil, inp, func(gdf, t): return ability_aim(m, h, gdf, t))
 	else:
 		a["tgt"] = null
 		var goal: Vector3 = a["goal"]
@@ -259,10 +252,8 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		# (heals fold the glider now, so a bot only drinks with ground under it, never over the void
 		# or mid-drop)
 		var heal_ok: bool = h.grounded or (not h.gliding and not h.dropping and not h.over_void())
-		if heal_ok and h.hp < h.max_hp * 0.45 and h.tonics > 0:
-			inp["tonic"] = true
-		elif heal_ok and h.armor < h.max_armor * 0.3 and h.armor_kits > 0:
-			inp["kit"] = true
+		if heal_ok:
+			BotBelt.think(m, h, a, inp)       # tonic, armor kit and the rest of the belt (bot_belt.gd)
 		# swap a fainted kin out for the other one
 		if h.kin and (h.kin as Kin).state == "downed" and h.kin2 and (h.kin2 as Kin).hp > 0.0:
 			inp["swap"] = true
@@ -289,6 +280,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		if dp < 1.8 and move.length() > 0.1:
 			move += -h.dir_to(pd["pos"]) * (1.8 - dp) * 1.5
 	a.erase("pad_at")
+	move = Breakables.bot_steer(m, h, move)
 	# (heading for a downed squadmate near an edge, only look as far as them)
 	var look := 1.2 if rv.is_empty() else clampf(h.flat_dist(rv["o"]) - 0.2, 0.4, 1.2)
 	if move.length() > 0.01:
@@ -361,7 +353,7 @@ func _ease_aim(h: Hunter, dt: float) -> void:
 	if dv.length() < 0.05:
 		return
 	var want := atan2(dv.y, dv.x)
-	var acting: bool = inp.get("fire", false) or inp.get("sig", false) or inp.get("sec", false) or inp.get("gear1", false) \
+	var acting: bool = inp.get("fire", false) or inp.get("sig", false) or inp.get("sec", false) or inp.get("gear1", false) or inp.get("gear2", false) \
 		or inp.get("ult", false) or inp.get("dash", false) or inp.get("interact", false)
 	if acting:
 		return

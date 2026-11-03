@@ -7,14 +7,14 @@ extends ArchKit
 ##   call it back, hitting on the way). Hold spins the hammer in his hand (faster as it charges, a glint
 ##   on its head from 0.6 s, a flare at full, 1.25 s); let go and it's a Crushing Blow: a flaming 180
 ##   degree crescent in front that carries him forward with it.
-## - RMB: hold to raise his aegis (its own HP, regenerates); tap, or let go after a hold, to Bash.
+## - RMB: hold to raise his aegis (its own HP, regenerates); letting go only lowers it.
 ## - Dash: 360 Smash, a short dash that ends in one full spin hit around him; with the aegis raised it's
-##   a Shield Charge (invulnerable for its length, a heavier knock).
-## - Passive, Guard: damage the aegis blocks becomes Guard; at 50 a Bash is a Shield Slam (stun).
-##   Payoff, Crushed: a Bash, Shield Charge or full Crushing Blow that knocks a foe into a wall or
-##   another foe stuns them and heals you (T4, pay_slam).
-## - E, Mending Ground: a green column comes down for 1 s, then heals at the planted hammer (on you when
-##   the hammer is in hand); it also mends the aegis while it's raised.
+##   the Shield Charge (the Bash: invulnerable for its length, a heavier knock) on the RMB slot's own cooldown.
+## - Passive, Guard: damage the aegis blocks becomes Guard; at 50 the Shield Charge ends in a Shield Slam.
+##   Payoff, Crushed: any knock of his (Crushing Blow, 360 Smash, Shield Charge, Slam) that drives a foe into a
+##   wall or another foe stuns them (T4, pay_slam).
+## - E, Mending Ground: a green column comes down for 1 s, then a zone round the hammer (on you when the hammer
+##   is in hand) heals a little every 0.5 s for 4 s and ends in a burst that also mends a raised aegis.
 ## - X, Faultline (level 6, BjornUlt): planted, a slam, and the ground erupts cell by cell down a lane.
 
 var wall: Dictionary = {}      # the raised shield (a following verbs wall)
@@ -27,7 +27,7 @@ var mace := {}                 # the thrown mace: {} in hand, else {st: fly|grou
 var lmb_t := -1.0              # how long the attack key has been held with the mace in hand (-1: not)
 var lmb_was := false
 var bot_smash_t := 0.0
-var knock_until := 0.0         # a knock that can Crush is landing (bash, charge, full blow) until this time
+var knock_until := 0.0         # a knock that can Crush is landing (blow, spin, charge, slam) until this time
 var crushed_at := {}           # foe id -> last Crush (one per 0.6s each)
 var crushes := 0               # Crushes landed (tests, demo)
 var crest: Node3D = null       # the gold crest light while a Shield Slam is armed
@@ -40,6 +40,8 @@ var slams := 0                 # (checks) Crushing Blows let go, the last one's 
 var slam_k := 0.0
 var spins := 0                 # (checks) 360 Smash spin hits
 var kickstarts := 0             # (checks) downed teammates Mending Ground started reviving
+var ticks_healed := 0           # (checks) heals the zone's ticks gave
+var shield_slams := 0           # (checks) Shield Slams the Shield Charge ended in
 var throw_at := -9.0           # when the hammer last left his hand (the recall lockout)
 ## s after a slam or a spin hit before he can open the glider (wiki: wind-down frames keep the momentum)
 const WINDDOWN := 0.3
@@ -53,8 +55,31 @@ func _setup() -> void:
 	h.add_child(ult)
 	self_nodes.append(ult)
 
+## The aegis grows by "hp_rank" of its base HP for every rank past the first (rank 2: +25%, rank 3: +50%).
 func shield_max() -> float:
-	return float(rmb_def()["shield"]["hp"]) + (60.0 if rank("sec") >= 3 else 0.0)
+	var sd: Dictionary = rmb_def()["shield"]
+	return float(sd["hp"]) * (1.0 + float(sd["hp_rank"]) * float(rank("sec") - 1))
+
+## One of the aegis's repair numbers; rank 3 swaps in the faster "<key>_rank3" value.
+func _shield_stat(key: String) -> float:
+	var sd: Dictionary = rmb_def()["shield"]
+	if rank("sec") >= 3 and sd.has(key + "_rank3"):
+		return float(sd[key + "_rank3"])
+	return float(sd[key])
+
+## The Shield Charge's own cooldown drops by "cd_per_rank" seconds for every dash rank past the first, and
+## Mending Ground's drops to its rank-3 time; the shared rule keeps the other slots.
+func cd_k(slot: String) -> float:
+	if slot == "sec":
+		var cut := float(rmb_def().get("cd_per_rank", 1.5)) * float(rank("dash") - 1)
+		return 1.0 - cut / float(rmb_def()["cooldown"])
+	if slot == "kin":
+		return float(e_def()["cooldown_rank3"]) / float(e_def()["cooldown"]) if rank("kin") >= 3 else 1.0
+	return super.cd_k(slot)
+
+## Mending Ground heals 25% more at rank 2 and another 25% at rank 3.
+func heal_k() -> float:
+	return 1.0 + 0.25 * float(rank("kin") - 1)
 
 func full_ready() -> bool:
 	return res >= float(res_def().get("slam", 50.0))
@@ -97,7 +122,7 @@ func _tick(dt: float) -> void:
 			# broken: locked out for 3s
 			wall = {}
 			shield_hp = 0.0
-			lock_t = float(sd["lock"])
+			lock_t = _shield_stat("lock")
 			down_t = 0.0
 			m.fx.word(h.pos + Vector3(0, 2.2, 0), "SHIELD BROKEN", Feel.cat_color("damage"), false)
 			var d0 := h.aim_dir()
@@ -114,17 +139,12 @@ func _tick(dt: float) -> void:
 	else:
 		fx.aegis_hide()
 		down_t += dt
-		if down_t >= float(sd["wait"]) and lock_t <= 0.0:
-			shield_hp = minf(shield_max(), shield_hp + float(sd["regen"]) * dt)
+		if down_t >= _shield_stat("wait") and lock_t <= 0.0:
+			shield_hp = minf(shield_max(), shield_hp + _shield_stat("regen") * dt)
 	_tick_mace(dt)
 	ult.tick(dt)
 	if not mend.is_empty():
-		mend["t"] = float(mend["t"]) - dt
-		var u := 1.0 - clampf(float(mend["t"]) / float(e_def()["delay"]), 0.0, 1.0)
-		fx.purify(mend["pos"], float(mend["r"]), u)
-		AimKit.circle(h, "e", {"at": mend["pos"], "r": float(mend["r"]), "fill": u, "ticks": true, "all": true,
-			"col": BjornFx.GREEN})
-		if float(mend["t"]) <= 0.0: _mend_burst()
+		_tick_mend(dt)
 	# Guard: three rune pips over the helm (33 / 66 / 100), a gold crest light when a Slam is armed
 	self_pips(3, int(res / 33.0 + 0.01), full_ready(), dt)
 	_tick_crest()
@@ -196,7 +216,7 @@ func in_e() -> bool:
 	return not mend.is_empty()
 
 # ------------------------------------------------------------------ Crushed (the payoff)
-## A knock that drives a foe into terrain, or into another foe, Crushes it: a stun, a heal for you.
+## A knock that drives a foe into terrain, or into another foe, Crushes it: a stun.
 func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 	if t == null or t.team == h.team or t.dead or m.time > knock_until:
 		return
@@ -235,7 +255,6 @@ func _try_crush(t: Ent, dir: Vector2) -> void:
 			crushed_at[other.get_instance_id()] = m.time
 			other.hurt(crush_dmg, h, {"src": "abil", "ab": "utility", "tags": ["utility", "crushed"],
 				"stun": crush_stun * 0.6, "dr": true})
-		h.heal(float(rd.get("crush_heal", 24.0)))
 		payoff_fx(tgt.pos, "CRUSHED", res_col(), "pay_slam", dir, tgt)
 		if not anim_id in ["bul_smash", "bul_charge"]: play("bul_crush")
 		m.fx.dust(tgt.pos, 14))
@@ -339,7 +358,7 @@ func _smash() -> void:
 	slams += 1
 	slam_k = k
 	h.glide_cd = maxf(h.glide_cd, WINDDOWN)
-	if full: knock_until = m.time + 0.25
+	knock_until = m.time + 0.25
 	h._strike(dmg / m.dmg_mult(h), float(md["smash_reach"]), float(md["smash_arc"]), kb, {"heavy": true, "charged": true, "stun": float(md["smash_stun"]) if full else 0.0})
 	var dv := h.aim_dir()
 	# the slam carries him forward (a jump out of it still glides)
@@ -465,7 +484,7 @@ func _catch(quiet := false) -> void:
 	m.fx.burst(h.pos + Vector3(0, 1.0, 0), Color("ffb04a"), 8, 2.5, 0.25)
 	m.fx.flash(h.pos + Vector3(0, 1.0, 0), Color("ffb04a"), 0.5, 0.06)
 
-# ------------------------------------------------------------------ RMB: Shield (hold to block, release or tap to Bash)
+# ------------------------------------------------------------------ RMB: Shield (hold to block)
 ## The shield is a block, not a charge (the Crushing Blow on LMB is the Bulwark's charge).
 func rmb_charge_full() -> float:
 	return 0.0
@@ -525,46 +544,28 @@ func _lower() -> void:
 	fx.aegis_hide()
 	if anim_id == "bul_guard": anim_id = ""
 
+## Letting go of the RMB only lowers the aegis: the Bash lives on Shift behind a raised shield (the Shield Charge).
 func fire_rmb(c: Dictionary) -> void:
 	var was_up := not wall.is_empty()
 	_lower()
-	if c.get("air", false) and was_up:
-		return                    # a Shield Surf just ends
-	if not rmb_ready():
-		if not was_up: h._ab_feedback("sec", "deny")
-		return
-	# a tap, or letting go after a block: the Bash (a Shield Slam with 50 Guard)
-	c = c.duplicate()
-	c["full"] = full_ready()
-	last_variant = "full" if c["full"] else ("hold" if was_up else String(c["variant"]))
-	if not spend_rmb(): return
-	var bd: Dictionary = rmb_def()["bash"]
-	var slam: bool = c["full"]
-	var go := func():
-		if not is_instance_valid(h) or h.downed: return
-		if not slam: play("bul_bash")
-		var effs: Array = [{"type": "damage", "amount": float(rmb_def()["slam"]["dmg"]) if slam else float(bd["dmg"])}, {"type": "push", "strength": float(rmb_def()["slam"]["push"]) if slam else float(bd["push"]), "from": "caster"}]
-		if slam: effs.append({"type": "stun", "duration": float(rmb_def()["slam"]["stun"])})
-		knock_until = m.time + 0.2
-		var stg := stage("rmb", {"delivery": {"type": "cone", "radius": float(bd["radius"]), "angle": float(bd["angle"])}, "effects": effs})
-		run(stg, cx("rmb", "shield_slam" if slam else "bash", aim(), {"no_floor": true, "hit_extra": {"heavy": true}}))
-		var dv := h.aim_dir()
-		fx.bash(h.pos, dv, float(bd["radius"]), slam)
-		m.sfx("bjorn_bash", h.pos, -1.0, 0.85 if slam else 1.0)
-		Feel.shake(m, "t3" if slam else "t2", h, h.pos)
-		if h.is_local(): Oomph.punch_dir(m, dv, 0.3 if slam else 0.18)
-		if h.grounded:
-			h.vel.x += dv.x * 4.0; h.vel.z += dv.y * 4.0         # you step into it
-	if slam:
-		# Shield Slam spends 50 Guard; a 0.3s shield flare is the tell (its own wind-up and drive)
-		res -= float(res_def().get("slam", 50.0))
-		play("bul_slamshield")
-		m.fx.flash(h.pos + Vector3(h.aim_dir().x * 0.8, 1.0, h.aim_dir().y * 0.8), res_col(), 0.9, float(rmb_def()["slam"]["tell"]))
-		tele_lane(h.pos, h.aim_dir(), float(bd["radius"]), 2.0, Feel.cat_color("control"), float(rmb_def()["slam"]["tell"]))
-		net_ring(h.pos, 1.6, res_col())
-		m.later(float(rmb_def()["slam"]["tell"]), go)
-	else:
-		go.call()
+	last_variant = "air" if c.get("air", false) and was_up else ("hold" if was_up else "tap")
+
+## Guard at 50: the Shield Charge ends in a Shield Slam, a short cone that knocks back hard and stuns.
+func _shield_slam() -> void:
+	var sl: Dictionary = rmb_def()["slam"]
+	var dv := h.aim_dir()
+	shield_slams += 1
+	play("bul_slamshield")
+	var effs: Array = [{"type": "damage", "amount": float(sl["dmg"])},
+		{"type": "push", "strength": float(sl["push"]), "from": "caster"},
+		{"type": "stun", "duration": float(sl["stun"])}]
+	knock_until = m.time + 0.2
+	var stg := stage("rmb", {"delivery": {"type": "cone", "radius": float(sl["radius"]), "angle": float(sl["angle"])}, "effects": effs})
+	run(stg, cx("rmb", "shield_slam", aim(), {"no_floor": true, "hit_extra": {"heavy": true}}))
+	fx.bash(h.pos, dv, float(sl["radius"]), true)
+	m.sfx("bjorn_bash", h.pos, -1.0, 0.85)
+	Feel.shake(m, "t3", h, h.pos)
+	if h.is_local(): Oomph.punch_dir(m, dv, 0.3)
 
 func fire_ok_rmb() -> bool:
 	return lock_t <= 0.0
@@ -586,14 +587,20 @@ func on_dash(use_ex: bool) -> bool:
 		m.sfx("ab_whirr", h.pos, -6.0, 0.9)
 		return true
 	if not wall.is_empty() and h.grounded:
-		# Shield Charge: behind the raised shield, invulnerable for its length, a heavier knock
-		if not spend_dash(false): return true
+		# Shield Charge: behind the raised shield, on its own cooldown (the RMB slot's), invulnerable for its
+		# length, a heavier knock; with 50 Guard it ends in a Shield Slam
+		if not spend_rmb(): return true
 		var dist := float(dd["charge"]) + (1.0 if rank("dash") >= 3 else 0.0)
 		var t := dist / float(dd["charge_speed"])
 		var t_felt := t * float(dash_feel()["time"])
 		travel(dist, t, {"invuln": t_felt + 0.08, "shove": true, "shove_kb": float(dd["charge_kb"]), "shove_dmg": float(dd["charge_dmg"]), "trail": "dust", "dir": h.aim_dir()})
 		front_t = t_felt + 0.15
 		knock_until = m.time + t_felt + 0.1
+		if full_ready():
+			res -= float(res_def().get("slam", 50.0))
+			m.fx.flash(h.pos + Vector3(h.aim_dir().x * 0.8, 1.0, h.aim_dir().y * 0.8), res_col(), 0.9, t_felt)
+			net_ring(h.pos, 1.6, res_col())
+			m.later(t_felt, func(): if is_instance_valid(h) and not h.downed and not KinMerge.active(h): _shield_slam())
 		st["last_dash"] = "charge"
 		play("bul_charge")
 		m.fx.word(h.pos + Vector3(0, 2.3, 0), "SHIELD CHARGE", col_of(dd), false)
@@ -635,6 +642,10 @@ func _spin_hit(wd: Vector2) -> void:
 	var dd := dash_def()
 	var r := float(dd.get("spin_r", 2.2))
 	spins += 1
+	knock_until = m.time + 0.25
+	if rank("dash") >= 3 and not foes_in(h.pos, r).is_empty():
+		ch_rmb = float(rmb_charges())          # rank 3: hitting foes with the dash refunds the Shield Charge
+		cd["rmb"] = 0.0
 	h.glide_cd = maxf(h.glide_cd, WINDDOWN)
 	h._strike(float(dd["whirl_dmg"]) * h.wup_dmg * power("dash") / maxf(0.01, m.dmg_mult(h)), r, 360.0, float(dd["whirl_kb"]), {"heavy": true})
 	fx.smash_ring(h.pos)
@@ -644,41 +655,87 @@ func _spin_hit(wd: Vector2) -> void:
 	net_ring(h.pos, r, Color("ff7a3a"))
 
 # ------------------------------------------------------------------ E: Mending Ground
+## Where the zone sits: round the hammer wherever it is (planted, flying out or back), else round him.
+func _zone_anchor() -> Vector3:
+	if not mace.is_empty():
+		return ground(mace["pos"])
+	return ground(h.pos)
+
 func cast_e() -> bool:
 	var ed := e_def()
-	var at := ground(h.pos)                   # with the hammer in hand it comes down on you
-	if not mace.is_empty() and String(mace["st"]) == "ground":
-		at = ground(mace["pos"])          # ...else where the hammer stands
-	var r := float(ed["radius"]) + (0.5 if rank("kin") >= 3 else 0.0)
+	var at := _zone_anchor()
+	var r := float(ed["radius"])
 	play("bul_mend")
-	mend = {"pos": at, "t": float(ed["delay"]), "r": r}
-	e_t = float(ed["delay"])
+	mend = {"pos": at, "t": float(ed["delay"]), "r": r, "zone": -1.0, "tick": 0.0}
+	e_t = float(ed["delay"]) + float(ed["time"])
 	fx.purify(at, r, 0.0)
 	m.sfx("bjorn_purify", at, -2.0)
 	net_ring(at, r, Feel.cat_color("sustain"))
 	return true
+
+## The light column comes down ("delay"), then the zone heals everyone inside a little every "every" s for
+## "time" s (following the hammer) and ends in a burst.
+func _tick_mend(dt: float) -> void:
+	var ed := e_def()
+	var r := float(mend["r"])
+	mend["pos"] = _zone_anchor()
+	if float(mend["zone"]) < 0.0:
+		mend["t"] = float(mend["t"]) - dt
+		var u := 1.0 - clampf(float(mend["t"]) / float(ed["delay"]), 0.0, 1.0)
+		fx.purify(mend["pos"], r, u)
+		AimKit.circle(h, "e", {"at": mend["pos"], "r": r, "fill": u, "ticks": true, "all": true, "col": BjornFx.GREEN})
+		if float(mend["t"]) <= 0.0:
+			mend["zone"] = float(ed["time"])
+			mend["tick"] = float(ed["every"])
+			m.fx.ring(mend["pos"], r, BjornFx.GREEN, 0.4)
+		return
+	mend["zone"] = float(mend["zone"]) - dt
+	mend["tick"] = float(mend["tick"]) - dt
+	fx.purify_hold(mend["pos"], r)
+	AimKit.circle(h, "e", {"at": mend["pos"], "r": r, "fill": float(mend["zone"]) / float(ed["time"]), "all": true,
+		"col": BjornFx.GREEN})
+	if float(mend["tick"]) <= 0.0:
+		mend["tick"] = float(mend["tick"]) + float(ed["every"])
+		_mend_tick()
+	if float(mend["zone"]) <= 0.0:
+		_mend_burst()
+
+func _allies_in(at: Vector3, r: float) -> Array:
+	var out: Array = []
+	for o in m.hunters:
+		if o.team == h.team and not o.out and Vector2(o.pos.x - at.x, o.pos.z - at.z).length() < r:
+			out.append(o)
+	return out
+
+func _mend_tick() -> void:
+	var heal := float(e_def()["tick_heal"]) * heal_k()
+	for o in _allies_in(mend["pos"], float(mend["r"])):
+		if o.downed:
+			continue
+		ticks_healed += 1
+		o.heal(heal)
+		m.fx.burst(o.pos + Vector3(0, 1.0, 0), Feel.cat_color("sustain"), 4, 1.5, 0.35, -3.0)
 
 func _mend_burst() -> void:
 	var ed := e_def()
 	var at: Vector3 = mend["pos"]
 	var r: float = mend["r"]
 	mend = {}
-	var heal := float(ed["heal"]) + (10.0 if rank("kin") >= 3 else 0.0)
+	var heal := float(ed["heal"]) * heal_k()
 	# a downed teammate inside starts coming back (wiki: allied wisps hit by the burst begin to resurrect)
-	for o in m.hunters:
-		if o != h and o.team == h.team and o.downed and not o.out and Vector2(o.pos.x - at.x, o.pos.z - at.z).length() < r:
+	for o in _allies_in(at, r):
+		if o != h and o.downed:
 			o.revive = minf(0.95, o.revive + float(ed.get("revive", 0.35)))
 			kickstarts += 1
 			m.fx.burst(o.pos + Vector3(0, 0.8, 0), BjornFx.GREEN, 14, 3.0, 0.5, -3.0)
-	for o in m.hunters:
-		if o.team == h.team and not o.out and not o.downed and Vector2(o.pos.x - at.x, o.pos.z - at.z).length() < r:
-			o.heal(heal * (1.25 if rank("kin") >= 2 else 1.0))
+		elif not o.downed:
+			o.heal(heal)
 			m.fx.burst(o.pos + Vector3(0, 1.0, 0), Feel.cat_color("sustain"), 12, 2.5, 0.5, -3.0)
 			if o == h and not wall.is_empty():
 				shield_hp = minf(shield_max(), shield_hp + float(ed["shield"]))
 				if m.verbs.walls.has(wall): wall["max_hp"] = shield_max(); wall["hp"] = minf(shield_max(), float(wall["hp"]) + float(ed["shield"]))
 	# the kin's typing rides the burst (a cleanse, a shield, a slow on foes...)
-	var stg := stage("e", {"delivery": {"type": "burst", "origin": "aim", "radius": r}, "effects": [{"type": "slow", "duration": 1.0, "strength": float(ed["slow"])}]})
+	var stg := stage("e", {"delivery": {"type": "burst", "origin": "aim", "radius": r}, "effects": []})
 	run(stg, cx("e", "mending_ground", at, {"no_floor": true}))
 	fx.purify_burst(at, r)
 	m.fx.ring(at, r, BjornFx.GREEN, 0.45)
@@ -699,8 +756,9 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 			h.inp["aim"] = tgt.pos
 			if not rmb_down: h.inp["sec"] = true
 			bot_hold["rmb"] = 1.0
-		elif dist < 2.6 and rmb_ready():
+		elif dist < 4.5 and rmb_ready() and not rmb_down:
 			h.inp["aim"] = tgt.pos; h.inp["sec"] = true
+			bot_hold["rmb"] = 0.6
 	# close in: a Shield Charge from behind the shield, else a Whirl
 	if int(h.slot_lv["dash"]) > 0 and h.dashes >= 1.0 and los and dist < 4.5 and dist > 1.5 and randf() < 0.3:
 		h.inp["aim"] = tgt.pos

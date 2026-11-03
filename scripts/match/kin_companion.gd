@@ -361,8 +361,7 @@ func _care_low_hp() -> void:
 	# once a run, a Boki that trusts you turns up a tonic it sniffed out (only when it's calm enough to look)
 	if not tonic_given and not o.remote and k.trust >= 60.0 and (threat == null or o.flat_dist(threat) > 9.0):
 		tonic_given = true
-		o.tonics += 1
-		o.free_tonics += 1       # a found one: used first, never taken home
+		UtilityBelt.grant(o, "tonic", 1, true)       # a found one: used first, never taken home
 		history.append({"t": m.time, "cat": "tonic", "pri": 0})
 		pose = "nudge"; pose_t = 2.0
 		if m.fx: m.fx.burst(o.pos + Vector3(0, 1.0, 0), Color("ff9be0"), 10, 2.0, 0.5)
