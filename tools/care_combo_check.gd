@@ -317,6 +317,7 @@ func _seed_burst(lvl: int) -> float:
 	var T: Hunter = r[3]
 	var K: TenderKit = P.ak
 	P.lvl = lvl
+	LevelGrowth.apply(P)          # growth follows levels gained (a level set straight grows nothing)
 	sc.aim_at(P, T.pos)
 	K.ch_rmb = 1.0
 	K.cd["rmb"] = 0.0
