@@ -211,9 +211,7 @@ func shrine_glyph(c: Control, pv: Vector2, s: float, used := false) -> void:
 	c.draw_colored_polygon(pts, col)
 
 func _map_title() -> String:
-	if m.world.layout_id == "skyreach": return "SKYREACH"
-	if m.world.layout_id == "hollowcrown": return "THE HOLLOW CROWN"
-	return "THE ISLANDS"
+	return m.map_name.to_upper() if m.map_name != "" else "THE ISLANDS"
 
 func _exit_word(x: Dictionary) -> String:
 	match String(x["state"]):

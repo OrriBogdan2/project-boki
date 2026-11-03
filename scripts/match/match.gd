@@ -691,6 +691,7 @@ func _start(o: Dictionary) -> void:
 	elif o.get("arena", false):
 		layout = World.load_layout("arena")     # the practice arena (scripts/match/arena.gd)
 	map_name = String(layout.get("name", ""))
+	T = MapThreat.apply(T, layout)      # a harder map's own threat on top of the tier (map_threat.gd)
 	if _stage_cb.is_valid(): world.stage_cb = _world_step
 	if not layout.is_empty():
 		await world.generate_authored(layout, seed_val)
