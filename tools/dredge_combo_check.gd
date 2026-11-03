@@ -1,6 +1,6 @@
 extends RefCounted
 ## --dredge-combo-check: Dredge's abilities and their interactions, scripted one by one in the
-## archetype check's flat training strip (docs/heroes/dredge.md, combinations table): the Grapnel
+## archetype check's flat training strip (docs/heroes/dredge.md, combinations table): the Abyssal Hand
 ## reel, only the barge during it, reel into the Anchor Drop, terrain the hook pierces, the abyss, the Salvage
 ## passive, the back hit, the barge's turn lock after the Anchor, the rank-3 specials, and the X ult,
 ## Brass Broadside (tools/dredge_ult_check.gd).
@@ -388,13 +388,13 @@ func _all() -> void:
 	ok("gun: idle, the cone folds into one aim line", AimKit.shown(P, "spread_idle") and not AimKit.shown(P, "spread"))
 	P.ammo = int(P.wpn["mag"])
 	P.reload_t = 0.0
-	# --- Grapnel reels a foe in
+	# --- Abyssal Hand reels a foe in
 	reset.call()
 	ak.tap(m, P)
 	ak.step(m, 0.3)
 	var d0 := P.flat_dist(T)
 	ok(
-		"grapnel: hooks the first foe, reel begins",
+		"abyssal hand: hooks the first foe, reel begins",
 		K.grapples == 1 and not K.pull.is_empty() and ak.dmg(T) >= 5.0 and float(K.cd["rmb"]) > 8.0,
 		"grapples %d took %.1f cd %.1f" % [K.grapples, ak.dmg(T), float(K.cd["rmb"])]
 	)
@@ -409,7 +409,7 @@ func _all() -> void:
 	K.ch_rmb = 1.0
 	K.cd["rmb"] = 0.0
 	ak.tap(m, P)
-	ok("reel: a second Grapnel is denied", K.grapples == 1)
+	ok("reel: a second Abyssal Hand is denied", K.grapples == 1)
 	K.cd["e"] = 0.0
 	P.ak.use_e()
 	ok("reel: E is denied while reeling", K.anchors == 0 and K.wind <= 0.0)
@@ -428,7 +428,7 @@ func _all() -> void:
 		ak.step(m, 0.05)
 		tw += 0.05
 	ok(
-		"grapnel: foe arrives at your feet and does not land Grounded",
+		"abyssal hand: foe arrives at your feet and does not land Grounded",
 		K.arrivals == 1 and K.pull.is_empty() and not KitStatus.grounded(T) and P.flat_dist(T) < 3.6,
 		"arrivals %d dist %.1f (was %.1f)" % [K.arrivals, P.flat_dist(T), d0]
 	)
@@ -535,12 +535,13 @@ func _all() -> void:
 		var tp := Vector2(T.pos.x, T.pos.z)
 		dev = maxf(dev, tp.distance_to(Geometry2D.get_closest_point_to_segment(tp, a2, b2)))
 	P.inp["move"] = Vector2.ZERO
+	var shuffle := P.flat_dist(p_start) / maxf(tw2, 0.01)
 	ok(
-		"reel: strafing sideways shifts the arrival point by 1.5m or more",
-		absf(T.pos.z - start.z) >= 1.5 and K.arrivals >= 1,
-		"arrival shift %.1f m (Dredge moved %.1f)" % [absf(T.pos.z - start.z), P.flat_dist(p_start)]
+		"reel audit: braced, he shuffles at a fifth of his walk (not full speed), and that still swings the arrival",
+		shuffle <= P.base_speed * 0.4 and absf(T.pos.z - start.z) >= 0.25 and K.arrivals >= 1,
+		"arrival shift %.1f m, Dredge %.2f m/s" % [absf(T.pos.z - start.z), shuffle]
 	)
-	ok("reel: the body swings on an arc, not a straight line", dev > 0.3, "off the straight line by %.2f m" % dev)
+	ok("reel: the body still swings on an arc, not a straight line", dev > 0.2, "off the straight line by %.2f m" % dev)
 	# --- an ally in the hook's path is reeled to safety (no damage, no stun); a wisp on the way is scooped up
 	reset.call()
 	var t2team := T2.team
@@ -727,17 +728,19 @@ func _all() -> void:
 		absf(in_gap - 1.0) < 0.01 and P.dashes < 0.5 and P.pos.x - home.x > one * 2.6,
 		"used in gap %.1f left %.2f went %.1f" % [in_gap, P.dashes, P.pos.x - home.x]
 	)
-	# no damage from the shove; the gun's bloom resets only from rank 3
+	# audit: the barge touches nobody (Brute Dash hits nobody); the gun's bloom resets only from rank 3
 	reset.call()
 	T.teleport(home + Vector3(1.8, 0, 0))
+	T.knock_t = 0.0
 	ak.aim_at(P, T.pos)
 	P.wbloom = 10.0
 	P.idle_fire = 0.0
 	P.ak.on_dash(false)
 	ak.step(m, 0.1)
 	ok(
-		"barge: the shove does no damage, and rank 1 keeps the gun's spread",
-		ak.dmg(T) < 0.5 and P.wbloom > 5.0, "dmg %.2f bloom %.1f" % [ak.dmg(T), P.wbloom]
+		"barge: it shoves and hurts nobody (the source's Brute Dash), and rank 1 keeps the gun's spread",
+		ak.dmg(T) < 0.5 and T.knock_t <= 0.0 and P.wbloom > 5.0,
+		"dmg %.2f knock %.2f bloom %.1f" % [ak.dmg(T), T.knock_t, P.wbloom]
 	)
 	reset.call()
 	K.next_barge = -9.0
@@ -803,14 +806,14 @@ func _all() -> void:
 		"passive: from behind +50%, from the front none", absf(behind - 15.0) < 0.01 and absf(front - 10.0) < 0.01,
 		"behind %.1f front %.1f" % [behind, front]
 	)
-	# --- rank 3: the grapnel refunds on a hit, pellet hits trim the barge recharge
+	# --- rank 3: the Abyssal Hand refunds on a hit, pellet hits trim the barge recharge
 	reset.call()
 	P.slot_lv["sec"] = 3
 	P.slot_lv["dash"] = 3
 	ak.tap(m, P)
 	ak.step(m, 0.3)
 	ok(
-		"grapnel rank 3: a hit takes half the cooldown off (12s -> 9.6s -> 4.8s)",
+		"abyssal hand rank 3: a hit takes half the cooldown off (12s -> 9.6s -> 4.8s)",
 		float(K.cd["rmb"]) < 9.6 * 0.5 + 0.5 and K.grapples >= 1, "cd %.1f" % float(K.cd["rmb"])
 	)
 	P.dashes = 0.0

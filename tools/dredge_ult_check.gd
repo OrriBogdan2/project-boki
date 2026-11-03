@@ -155,7 +155,7 @@ func _charge_and_waves() -> void:
 	await _reel_combo(m, P, T, home)
 	await ak.done(m)
 
-## Grapnel, the foe hauled to your feet stunned, then the Broadside: every slug lands.
+## Abyssal Hand, the foe hauled to your feet stunned, then the Broadside: every slug lands.
 func _reel_combo(m: Match, P: Hunter, T: Hunter, home: Vector3) -> void:
 	var K: DredgeKit = P.ak
 	ak.fresh(T)

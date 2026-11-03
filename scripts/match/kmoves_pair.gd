@@ -39,7 +39,7 @@ const MOVES := {
 		[0.14, {"p": 0.18, "y": 0.55, "gp": 0.35, "sq": 0.06, "lw": 0.7, "legs": [0.4, -0.7, -0.5, -0.3]}],
 		[0.24, {"p": -0.05, "y": -0.06, "gp": -0.05, "sq": -0.03}],
 		[0.36, {}]]},
-	# Grapnel throw (RMB): the gun swings to the off side, the free arm coils back (0.08 s), then punches
+	# Abyssal Hand throw (RMB): the gun swings to the off side, the free arm coils back (0.08 s), then punches
 	# out along the aim and stays out while the arm flies (0.4 s to full reach)
 	"dr_throw": {"keys": [
 		[0.0, {}],

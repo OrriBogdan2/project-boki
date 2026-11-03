@@ -49,11 +49,38 @@ Source (Felix) vs ours per slot, LMB first. [D] game data (supervive_kits.md, th
 | LMB | animation | [F] 0021-0047: a one-frame cyan pilot at the nozzle, then the roar; the body barely moves, nozzle at the hip; the fire stops at once on release, the pilot staying | `as_lance`: braced at the hip, kicked back by the roar, bucking at 8 Hz while held; the cyan pilot for 0.2 s first; the stream snuffs within 0.08 s on release, `as_lance_end` recoils off the hose | matches |
 | LMB | tracking | [F] 0016: the stream lags a sweep and curves (puffs keep their own velocity) | puffs leave along the aim every 0.033 s and keep their velocity (half of his own carried), so a sweep bends the stream | matches |
 | LMB | cadence / reach | [F] ~4 bh past a close cursor; narrow at the nozzle, billowing at the end; [D] a hold, 0.35 s between uses | 7 m past any cursor, 0.5 -> 2.2 m wide, 10 ticks a second, 0.35 s relight after a release (not after a dash: item 51) | matches |
-| LMB | walk | [F] no slow visible at 5 fps; [D] the wiki's self-slow | 0.8 while firing, 0.6 for 0.35 s after | kept ([D] over [F]) |
+| LMB | walk | [F] no slow visible at 5 fps; the wiki has only a 0.35 s slow after release | full walk while firing, 0.6 for 0.35 s after | matches (the 0.8 while firing was ours: removed in the audit) |
 | RMB | all | [F] a white aim lane ~0.4 s, a quick forward arm thrust; [O] item 19: always flies its full range | `as_aim` / `as_shot`, the 14 m lane, always 14 m | matches the owner note |
 | E | all | [F] arms flung wide ~0.2 s, then the blast; [O] item 11: instant, centred on him | instant, centred, `as_cloak` arms flung wide | matches the owner note |
 | Dash | all | [F] head-first ~3.4 m in 0.33 s, stops on the first foe | 3.4 m in 0.28 s, stops on the first foe, flame skull | matches |
 | X | all | [F] f25-f139: low steerable flight ~7 bh/s, lava behind, recast lands; [O] item 20: a bit longer | 12.6 m/s for 1.8 s, steering 120 deg/s, carpet 5.2 s, recast lands | matches |
+
+## Audit (Nov 3 23:40)
+
+Every Cinder row of briefs/specs/kit-audit/cinder_dredge_moosh.md (it audited main 200effce): (a) already done on
+this branch, (b) fixed now, (c) not applicable or we disagree. Checks are `--ashwick-combo-check`.
+
+| Row | Sev | Verdict | Where / why |
+|---|---|---|---|
+| E pull online (`remote`) | HIGH | (c) | owned by ext/online-displace (all kits); not touched here |
+| Knock reset ring | MED | (b) | the "CLOAK READY" reset keeps its word, sound and HUD ready flash; no ground ring, no net ring |
+| LMB fuel (8 s, 1.6 s refill) | MED | (b) | no fuel: the data's Flamethrower is a plain hold. "lance audit: 10 s of roaring with no fuel to run out ..." |
+| LMB self-slow while firing | MED | (b) | full walk while firing; only the wiki's 0.6 for 0.35 s after release. Same assert |
+| RMB cooldown, input | LOW / ok | (c) | fine per the audit (0.78x, the kit's scale) |
+| Shift distance / time | LOW | (c) | DECISIONS: dashes slower and shorter |
+| Shift direction text | LOW | (b) | the card and the dash text say the way you move (DECISIONS: WASD by default) |
+| Shift hit ring | LOW | (b) | the ram's impact keeps its flash on the foe; no ground ring |
+| Shift / E / lift-off self-shake | MED | (c) | ext/no-shake; none added |
+| Air poof | ok | (c) | owner-requested |
+| E cooldown | ok | (c) | fine |
+| E pose length | LOW | (b) | CLOAK_POSE_T 0.25 s (item 11's 0.15-0.25 s) |
+| X cooldown | LOW | (b) | 36 s (the data's 45 s at the kit's 0.8x). "ult cast: its own cooldown starts (36s ...)" |
+| X casting in flight | MED | (b) | the lance and the Cinder Shot work mid-flight (item 51; the flight pose is kept). "ult: the Cinder Shot goes mid-flight ...", "ult: the lance roars mid-flight" |
+| X lift-off ring | LOW | (b) | the ember puffs and wave stay (footage f25); the AimKit disc shown to everyone is gone (it hit nothing). "ult cast: lifts off in its ember puffs, no aim disc" |
+| X aim / recast | ok | (c) | matches |
+| Passive Flashover | ok | (c) | matches |
+| Passive knock heal and ram charge | LOW | (c) | wiki-only (no tooltip line); kept, flagged as ours in "Assumptions" |
+| Dash -> ability rows | MED | (a) | the hose keeps its hold through the ram (item 51, 15ca4857); the ground dash -> LMB buffer text corrected per ext/dash-buffer-source (26bcd138) |
 
 ## Ultimate on X: Flue Flight
 The source's flight is back as its own ultimate on X (owner decision, SERVER_UPDATE6), so the rank-3 Soot Ram no longer lays the
