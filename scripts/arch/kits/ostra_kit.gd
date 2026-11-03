@@ -203,11 +203,16 @@ func swap_time() -> float:
 	var dd := dash_def()
 	return float(dd["time_swollen"]) if is_swollen() else float(dd["time"])
 
+## Her dash, as DashFlow sees it: the Trade's flight (content/dash_flow/ostra.json routes presses made during it).
+func in_dash() -> bool:
+	return super.in_dash() or not swap.is_empty()
+
 ## Shift: hold to see both ends (where you are, where the lantern lands at the cursor), let go to lob.
 ## A tap lobs at once. It never travels by itself, so a press in the air or with no charge never sends
 ## her off in some other direction: it waits for the next charge.
 func on_dash(_use_ex: bool) -> bool:
 	if well.locked:
+		well.press_dash()
 		return true
 	if not swap.is_empty() or swap_aim >= 0.0:
 		return true
@@ -302,7 +307,7 @@ func dash_afterimage() -> bool:
 ## A Boki merge ends the Trade in flight (nobody is sent), its aim, the Snap's wind-up and the Settled
 ## orb's prime.
 func _drop_holds() -> void:
-	well.unlock()
+	well.unlock(false)
 	swap_aim = -1.0
 	snap = {}
 	snap_rec = 0.0

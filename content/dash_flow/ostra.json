@@ -1,9 +1,71 @@
 {
 	"doc": "Dash -> ability rows (DashFlow, docs/decisions/0010-dash-ability-flow.md). dash.<ground|air>.<lmb|rmb|e|x|q>: {mode: fire (mid-dash) | buffer (to the dash's end; the default for a missing row) | cancel (ends the dash), carry: dash momentum kept into it, variant: a dash-variant name the kit reads, source: what the source hero does}. into_dash.<slot>: the same for Shift pressed during that ability's wind-up or recovery. kit_owns: the dashes (ground, air) the kit runs in its own state, out of DashFlow's sight until it overrides ArchKit.in_dash().",
-	"kit_owns": ["ground", "air"],
 	"dash": {
-		"ground": {},
-		"air": {}
+		"ground": {
+			"lmb": {
+				"mode": "fire",
+				"source": "Swap is a lobbed projectile, not a movement (data: 'lob a projectile that swaps you'); while it flies (~1.8 s, footage 0158-0167) Void stays roughly in place and nothing in the data or footage locks her, so Gravity Orbs keep firing."
+			},
+			"rmb": {
+				"mode": "fire",
+				"source": "Swap is a lobbed projectile, not a movement (data: 'lob a projectile that swaps you'); while it flies (~1.8 s, footage 0158-0167) Void stays roughly in place and nothing in the data or footage locks her, so Void Snap casts during the flight."
+			},
+			"e": {
+				"mode": "fire",
+				"source": "Swap is a lobbed projectile, not a movement (data: 'lob a projectile that swaps you'); while it flies (~1.8 s, footage 0158-0167) Void stays roughly in place and nothing in the data or footage locks her, so Unstable Anomaly plants during the flight."
+			},
+			"x": {
+				"mode": "fire",
+				"source": "Swap is a lobbed projectile, not a movement (data: 'lob a projectile that swaps you'); while it flies (~1.8 s, footage 0158-0167) Void stays roughly in place and nothing in the data or footage locks her, so Black Hole casts during the flight (ours then locks her in its pose, owner item 16, while the Trade still resolves)."
+			},
+			"q": {
+				"mode": "fire",
+				"source": "Swap is a lobbed projectile, not a movement (data: 'lob a projectile that swaps you'); while it flies (~1.8 s, footage 0158-0167) Void stays roughly in place and nothing in the data or footage locks her; a glove is an item, unaffected."
+			}
+		},
+		"air": {
+			"lmb": {
+				"mode": "fire",
+				"source": "Swap is a lobbed projectile, not a movement (data: 'lob a projectile that swaps you'); while it flies (~1.8 s, footage 0158-0167) Void stays roughly in place and nothing in the data or footage locks her, so Gravity Orbs keep firing. Not shown from the air in the footage; the same rule."
+			},
+			"rmb": {
+				"mode": "fire",
+				"source": "Swap is a lobbed projectile, not a movement (data: 'lob a projectile that swaps you'); while it flies (~1.8 s, footage 0158-0167) Void stays roughly in place and nothing in the data or footage locks her, so Void Snap casts during the flight. Not shown from the air in the footage; the same rule."
+			},
+			"e": {
+				"mode": "fire",
+				"source": "Swap is a lobbed projectile, not a movement (data: 'lob a projectile that swaps you'); while it flies (~1.8 s, footage 0158-0167) Void stays roughly in place and nothing in the data or footage locks her, so Unstable Anomaly plants during the flight. Not shown from the air in the footage; the same rule."
+			},
+			"x": {
+				"mode": "fire",
+				"source": "Swap is a lobbed projectile, not a movement (data: 'lob a projectile that swaps you'); while it flies (~1.8 s, footage 0158-0167) Void stays roughly in place and nothing in the data or footage locks her, so Black Hole casts during the flight (ours then locks her in its pose, owner item 16, while the Trade still resolves). Not shown from the air in the footage; the same rule."
+			},
+			"q": {
+				"mode": "fire",
+				"source": "Swap is a lobbed projectile, not a movement (data: 'lob a projectile that swaps you'); while it flies (~1.8 s, footage 0158-0167) Void stays roughly in place and nothing in the data or footage locks her; a glove is an item, unaffected. Not shown from the air in the footage; the same rule."
+			}
+		}
 	},
-	"into_dash": {}
+	"into_dash": {
+		"lmb": {
+			"mode": "fire",
+			"source": "Gravity Orb is an instant shot with no wind-up to wait on (footage 0031-0034); Swap goes at once."
+		},
+		"rmb": {
+			"mode": "fire",
+			"source": "Void Snap slows Void while casting (patch notes), so she keeps acting through its short wind-up; nothing in the data or footage blocks Swap then: the lob goes and the Snap still releases."
+		},
+		"e": {
+			"mode": "fire",
+			"source": "Unstable Anomaly is a quick plant (footage 0352) with no recovery; Swap goes at once."
+		},
+		"x": {
+			"mode": "buffer",
+			"source": "Void acts freely while Black Hole holds (footage f50), but the owner (item 16) locks Ostra in the cast pose until it closes: Shift is refused with the deny cue, and one pressed in the lock's last 0.15 s goes the step she is freed."
+		},
+		"q": {
+			"mode": "fire",
+			"source": "Gloves are instant items; Swap goes at once."
+		}
+	}
 }

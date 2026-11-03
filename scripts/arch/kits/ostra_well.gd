@@ -29,6 +29,7 @@ var caught := {}                        # instance id -> the body, for this cast
 var locked := false                     # Ostra is held in the cast pose
 var aim_lock := Vector2.ZERO            # the facing kept after the wind-up (ZERO until then)
 var lock_t := 0.0                       # s since the press
+var dash_held := false                  # Shift pressed in the lock's last DashFlow.BUFFER_S: it goes when she is freed
 # counters for the checks
 var casts := 0
 var opens := 0
@@ -102,8 +103,22 @@ func _hand_looks() -> void:
 		looks.release("os_well_gather")
 		looks.hold_on("os_well_pull", "mote", k.h, k._hand(PULL_Y), 1.4, DISC_COL)
 
-## Frees Ostra from the cast pose (the well stays); a merge, a CC or the close ends it.
-func unlock() -> void:
+## Shift during the lock (content/dash_flow/ostra.json into_dash.x, "buffer"): pressed in its last
+## DashFlow.BUFFER_S it is held for the step she is freed; earlier it is refused with the deny cue.
+func press_dash() -> void:
+	if lock_left() <= DashFlow.BUFFER_S:
+		dash_held = true
+	else:
+		k.h._ab_feedback("dash", "deny")
+
+## s until the well closes and frees her.
+func lock_left() -> float:
+	var open_t := float(xd()["time"])
+	return float(xd()["tell"]) - phase_t + open_t if phase == "tell" else open_t - phase_t
+
+## Frees Ostra from the cast pose (the well stays); a merge, a CC or the close ends it. A Shift held for the
+## close goes now (a merge drops it: `go_dash` false).
+func unlock(go_dash := true) -> void:
 	if not locked:
 		return
 	locked = false
@@ -111,6 +126,10 @@ func unlock() -> void:
 	k.play("ostra_well_end")
 	KitLooks.of(k.m).release("os_well_gather")
 	KitLooks.of(k.m).release("os_well_pull")
+	var go := dash_held and go_dash
+	dash_held = false
+	if go:
+		k.on_dash(false)
 
 ## The dome: everyone sees the well's exact size filling over the 1.0s before it opens.
 func _tick_tell(dt: float) -> void:

@@ -172,18 +172,18 @@ One row per hero and pair, read from `content/dash_flow/<hero>.json` by `DashFlo
 | Breah | E -> dash |  | the kit's own handling (no row yet) |
 | Breah | ult (X) -> dash |  | the kit's own handling (no row yet) |
 | Breah | Q glove -> dash |  | the kit's own handling (no row yet) |
-| Ostra | ground dash -> LMB |  | the kit's own dash state: not routed yet |
-| Ostra | ground dash -> RMB |  | the kit's own dash state: not routed yet |
-| Ostra | ground dash -> E |  | the kit's own dash state: not routed yet |
-| Ostra | ground dash -> ult (X) |  | the kit's own dash state: not routed yet |
-| Ostra | ground dash -> Q glove |  | the kit's own dash state: not routed yet |
-| Ostra | air dash -> LMB |  | the kit's own dash state: not routed yet |
-| Ostra | air dash -> RMB |  | the kit's own dash state: not routed yet |
-| Ostra | air dash -> E |  | the kit's own dash state: not routed yet |
-| Ostra | air dash -> ult (X) |  | the kit's own dash state: not routed yet |
-| Ostra | air dash -> Q glove |  | the kit's own dash state: not routed yet |
-| Ostra | LMB -> dash |  | the kit's own handling (no row yet) |
-| Ostra | RMB -> dash |  | the kit's own handling (no row yet) |
-| Ostra | E -> dash |  | the kit's own handling (no row yet) |
-| Ostra | ult (X) -> dash |  | the kit's own handling (no row yet) |
-| Ostra | Q glove -> dash |  | the kit's own handling (no row yet) |
+| Ostra | ground dash -> LMB | Swap is a lobbed projectile, not a movement (data: 'lob a projectile that swaps you'); while it flies (~1.8 s, footage 0158-0167) Void stays roughly in place and nothing in the data or footage locks her, so Gravity Orbs keep firing. | fires mid-dash |
+| Ostra | ground dash -> RMB | Swap is a lobbed projectile, not a movement (data: 'lob a projectile that swaps you'); while it flies (~1.8 s, footage 0158-0167) Void stays roughly in place and nothing in the data or footage locks her, so Void Snap casts during the flight. | fires mid-dash |
+| Ostra | ground dash -> E | Swap is a lobbed projectile, not a movement (data: 'lob a projectile that swaps you'); while it flies (~1.8 s, footage 0158-0167) Void stays roughly in place and nothing in the data or footage locks her, so Unstable Anomaly plants during the flight. | fires mid-dash |
+| Ostra | ground dash -> ult (X) | Swap is a lobbed projectile, not a movement (data: 'lob a projectile that swaps you'); while it flies (~1.8 s, footage 0158-0167) Void stays roughly in place and nothing in the data or footage locks her, so Black Hole casts during the flight (ours then locks her in its pose, owner item 16, while the Trade still resolves). | fires mid-dash |
+| Ostra | ground dash -> Q glove | Swap is a lobbed projectile, not a movement (data: 'lob a projectile that swaps you'); while it flies (~1.8 s, footage 0158-0167) Void stays roughly in place and nothing in the data or footage locks her; a glove is an item, unaffected. | fires mid-dash |
+| Ostra | air dash -> LMB | Swap is a lobbed projectile, not a movement (data: 'lob a projectile that swaps you'); while it flies (~1.8 s, footage 0158-0167) Void stays roughly in place and nothing in the data or footage locks her, so Gravity Orbs keep firing. Not shown from the air in the footage; the same rule. | fires mid-dash |
+| Ostra | air dash -> RMB | Swap is a lobbed projectile, not a movement (data: 'lob a projectile that swaps you'); while it flies (~1.8 s, footage 0158-0167) Void stays roughly in place and nothing in the data or footage locks her, so Void Snap casts during the flight. Not shown from the air in the footage; the same rule. | fires mid-dash |
+| Ostra | air dash -> E | Swap is a lobbed projectile, not a movement (data: 'lob a projectile that swaps you'); while it flies (~1.8 s, footage 0158-0167) Void stays roughly in place and nothing in the data or footage locks her, so Unstable Anomaly plants during the flight. Not shown from the air in the footage; the same rule. | fires mid-dash |
+| Ostra | air dash -> ult (X) | Swap is a lobbed projectile, not a movement (data: 'lob a projectile that swaps you'); while it flies (~1.8 s, footage 0158-0167) Void stays roughly in place and nothing in the data or footage locks her, so Black Hole casts during the flight (ours then locks her in its pose, owner item 16, while the Trade still resolves). Not shown from the air in the footage; the same rule. | fires mid-dash |
+| Ostra | air dash -> Q glove | Swap is a lobbed projectile, not a movement (data: 'lob a projectile that swaps you'); while it flies (~1.8 s, footage 0158-0167) Void stays roughly in place and nothing in the data or footage locks her; a glove is an item, unaffected. Not shown from the air in the footage; the same rule. | fires mid-dash |
+| Ostra | LMB -> dash | Gravity Orb is an instant shot with no wind-up to wait on (footage 0031-0034); Swap goes at once. | the dash goes, the ability keeps running |
+| Ostra | RMB -> dash | Void Snap slows Void while casting (patch notes), so she keeps acting through its short wind-up; nothing in the data or footage blocks Swap then: the lob goes and the Snap still releases. | the dash goes, the ability keeps running |
+| Ostra | E -> dash | Unstable Anomaly is a quick plant (footage 0352) with no recovery; Swap goes at once. | the dash goes, the ability keeps running |
+| Ostra | ult (X) -> dash | Void acts freely while Black Hole holds (footage f50), but the owner (item 16) locks Ostra in the cast pose until it closes: Shift is refused with the deny cue, and one pressed in the lock's last 0.15 s goes the step she is freed. | the dash waits for the ability |
+| Ostra | Q glove -> dash | Gloves are instant items; Swap goes at once. | the dash goes, the ability keeps running |

@@ -78,6 +78,7 @@ level-4 bonus.
 | Nightwell, then Seed on the middle, then pop | everyone caught sits stunned at the centre for the seed to grow on them | `ult open: ...`, `ult: the caught foe is drawn to the middle` |
 | Nightwell, then anything | she is locked in the cast pose until it closes, then free; a stun or a knock frees her early | `lock: ...` (ult check) |
 | Shard Snap timing | the press, a 0.32s wind-up, the release, the flight; the damage on the impact | `item 40: ...` |
+| Trade in flight, then any ability (item 32) | the Trade's flight is her dash for DashFlow (`in_dash`); LMB, RMB, E, X and the glove fire mid-flight, ground or air (content/dash_flow/ostra.json, docs/heroes/dash_interactions.md); Shift during the Nightwell lock is refused, or held for the step she is freed when pressed in its last 0.15s | `--dash-flow-check`, `dash flow: ...` (ult check) |
 | Trade, ground or air | her own dash move each (`ostra_swap`, `ostra_swap_air`), ids no other hero uses, inside the 1.25s Swollen Trade | `item 35: ...` |
 | Swollen, then Nightwell | the bigger 5.1m well | `ult Swollen: ...` |
 | Nightwell, then the merge | the target lives (burst cap) | `ult burst: the well, merge and its ultimate leave a full-health light hunter standing` |

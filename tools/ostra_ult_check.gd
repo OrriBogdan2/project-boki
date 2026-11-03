@@ -251,8 +251,16 @@ func _lock_asserts(m: Match, P: Hunter, K: OstraKit, W: OstraWell, home: Vector3
 	ok("lock: the cast pose is held (ostra_well_snap while it pulls)", K.anim_id == "ostra_well_snap")
 	P.inp["move"] = Vector2.ZERO
 	var left := float(W.xd()["time"]) - W.phase_t
-	step(m, maxf(left, 0.0) + 0.02)
+	step(m, maxf(left - 0.08, 0.0))
+	P.dashes = P.max_dashes()
+	K.on_dash(false)
+	ok("dash flow: Shift in the lock's last 0.15s is held (no Trade yet)", W.locked and K.swap_aim < 0.0)
+	step(m, 0.1)
 	ok("lock: free again when the well closes", not W.running() and not W.locked and not K.busy())
+	ok(
+		"dash flow: ... and goes the step she is freed (into_dash.x buffer)",
+		K.swap_aim >= 0.0 or not K.swap.is_empty()
+	)
 	step(m, 0.3)
 	aim_at(P, home + Vector3(0, 0, -6))
 	tap(m, P)
