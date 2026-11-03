@@ -314,6 +314,53 @@ static func _form_rec(spk: String, fname: String) -> Dictionary:
 				return rec
 	return rec
 
+## A type badge drawn on any canvas (the Field Book's TypeIcon, the HUD's Boki box and overhead row):
+## a disc in the type's colour with its glyph, centred at `c`, radius `r`.
+static func draw_type(ci: CanvasItem, t: String, c: Vector2, r: float, alpha := 1.0) -> void:
+	var col := DexView.type_col(t)
+	col.a = alpha
+	ci.draw_circle(c, r, Color(col.darkened(0.45), alpha))
+	ci.draw_circle(c, r - 1.2, Color(col.darkened(0.15), alpha))
+	var s := r * 0.62
+	var ink := Color(1, 1, 1, 0.95 * alpha)
+	var P := func(x: float, y: float) -> Vector2: return c + Vector2(x, y) * s
+	var w := maxf(1.2, r * 0.16)
+	match t:
+		"spore":       # a toadstool
+			ci.draw_colored_polygon(PackedVector2Array([P.call(-0.9, 0.0), P.call(-0.6, -0.6), P.call(0.0, -0.85), P.call(0.6, -0.6), P.call(0.9, 0.0)]), ink)
+			ci.draw_rect(Rect2(P.call(-0.22, 0.0), Vector2(0.44, 0.8) * s), ink)
+		"titan":       # a peak
+			ci.draw_colored_polygon(PackedVector2Array([P.call(-0.95, 0.75), P.call(-0.15, -0.8), P.call(0.25, -0.1), P.call(0.45, -0.4), P.call(0.95, 0.75)]), ink)
+		"venom":       # a drop
+			var pts := PackedVector2Array()
+			for i in 16:
+				var a := PI * i / 15.0
+				pts.append(P.call(cos(a) * 0.6, 0.25 + sin(a) * 0.6))
+			pts.append(P.call(0.0, -0.9))
+			ci.draw_colored_polygon(pts, ink)
+		"swarm":       # a honeycomb cell
+			var hx := PackedVector2Array()
+			for i in 6:
+				var a := TAU * i / 6.0 + PI / 6.0
+				hx.append(P.call(cos(a) * 0.82, sin(a) * 0.82))
+			ci.draw_colored_polygon(hx, ink)
+		"gravity":     # a weight pressing down
+			ci.draw_line(P.call(0.0, -0.9), P.call(0.0, 0.2), ink, w, true)
+			ci.draw_colored_polygon(PackedVector2Array([P.call(-0.45, 0.0), P.call(0.45, 0.0), P.call(0.0, 0.55)]), ink)
+			ci.draw_line(P.call(-0.8, 0.8), P.call(0.8, 0.8), ink, w, true)
+		"prism":       # a cut gem
+			ci.draw_colored_polygon(PackedVector2Array([P.call(0.0, -0.95), P.call(0.75, 0.0), P.call(0.0, 0.95), P.call(-0.75, 0.0)]), ink)
+		"lunar":       # a crescent
+			ci.draw_circle(P.call(0.0, 0.0), s * 0.82, ink)
+			ci.draw_circle(P.call(0.35, -0.25), s * 0.68, Color(col.darkened(0.15), alpha))
+		"echo":        # rings of sound
+			for k in 3:
+				ci.draw_arc(P.call(-0.55, 0.0), s * (0.35 + k * 0.42), -0.9, 0.9, 10, ink, w, true)
+		"tempest":     # a bolt
+			ci.draw_colored_polygon(PackedVector2Array([P.call(0.25, -0.95), P.call(-0.55, 0.15), P.call(-0.05, 0.15), P.call(-0.3, 0.95), P.call(0.55, -0.2), P.call(0.05, -0.2)]), ink)
+		_:
+			ci.draw_circle(c, s * 0.45, ink)
+
 # ------------------------------------------------------------------ widgets
 ## A type badge: a disc in the type's colour with its glyph.
 class TypeIcon extends Control:
@@ -325,50 +372,7 @@ class TypeIcon extends Control:
 		size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		tooltip_text = "%s type" % DexView.type_name(type_id)
 	func _draw() -> void:
-		var c := size * 0.5
-		var r := minf(size.x, size.y) * 0.5
-		var col := DexView.type_col(t)
-		draw_circle(c, r, col.darkened(0.45))
-		draw_circle(c, r - 1.2, col.darkened(0.15))
-		var s := r * 0.62
-		var ink := Color(1, 1, 1, 0.95)
-		var P := func(x: float, y: float) -> Vector2: return c + Vector2(x, y) * s
-		var w := maxf(1.2, r * 0.16)
-		match t:
-			"spore":       # a toadstool
-				draw_colored_polygon(PackedVector2Array([P.call(-0.9, 0.0), P.call(-0.6, -0.6), P.call(0.0, -0.85), P.call(0.6, -0.6), P.call(0.9, 0.0)]), ink)
-				draw_rect(Rect2(P.call(-0.22, 0.0), Vector2(0.44, 0.8) * s), ink)
-			"titan":       # a peak
-				draw_colored_polygon(PackedVector2Array([P.call(-0.95, 0.75), P.call(-0.15, -0.8), P.call(0.25, -0.1), P.call(0.45, -0.4), P.call(0.95, 0.75)]), ink)
-			"venom":       # a drop
-				var pts := PackedVector2Array()
-				for i in 16:
-					var a := PI * i / 15.0
-					pts.append(P.call(cos(a) * 0.6, 0.25 + sin(a) * 0.6))
-				pts.append(P.call(0.0, -0.9))
-				draw_colored_polygon(pts, ink)
-			"swarm":       # a honeycomb cell
-				var hx := PackedVector2Array()
-				for i in 6:
-					var a := TAU * i / 6.0 + PI / 6.0
-					hx.append(P.call(cos(a) * 0.82, sin(a) * 0.82))
-				draw_colored_polygon(hx, ink)
-			"gravity":     # a weight pressing down
-				draw_line(P.call(0.0, -0.9), P.call(0.0, 0.2), ink, w, true)
-				draw_colored_polygon(PackedVector2Array([P.call(-0.45, 0.0), P.call(0.45, 0.0), P.call(0.0, 0.55)]), ink)
-				draw_line(P.call(-0.8, 0.8), P.call(0.8, 0.8), ink, w, true)
-			"prism":       # a cut gem
-				draw_colored_polygon(PackedVector2Array([P.call(0.0, -0.95), P.call(0.75, 0.0), P.call(0.0, 0.95), P.call(-0.75, 0.0)]), ink)
-			"lunar":       # a crescent
-				draw_circle(P.call(0.0, 0.0), s * 0.82, ink)
-				draw_circle(P.call(0.35, -0.25), s * 0.68, col.darkened(0.15))
-			"echo":        # rings of sound
-				for k in 3:
-					draw_arc(P.call(-0.55, 0.0), s * (0.35 + k * 0.42), -0.9, 0.9, 10, ink, w, true)
-			"tempest":     # a bolt
-				draw_colored_polygon(PackedVector2Array([P.call(0.25, -0.95), P.call(-0.55, 0.15), P.call(-0.05, 0.15), P.call(-0.3, 0.95), P.call(0.55, -0.2), P.call(0.05, -0.2)]), ink)
-			_:
-				draw_circle(c, s * 0.45, ink)
+		DexView.draw_type(self, t, size * 0.5, minf(size.x, size.y) * 0.5)
 
 ## A soft twinkle over a portrait: the shimmer form has been found.
 class Sparkle extends Control:

@@ -11,8 +11,7 @@ built yet.
 |---|---|---|
 | Tradewind Exchange | `Exchange` (`scripts/core/exchange.gd`) | Order book for wood, stone, scrap, crops, kibble, tonics. Price-time matching, partial fills, 4% tax on the seller's gems, price history. Tradewind's market makers stand in for other players: standing offers round today's price, rebuilt daily; resting player offers fill a little each expedition (`Exchange.tick`). |
 | Drift Pens | `BokiPens` (`scripts/core/boki_pens.gd`) | The Boki market. Wenna's daily stock of ordinary commons at 30-45 gems (the economy floor), plus your own listings (5% listing fee, 5% sale tax), filtered by species, size, IVs, special rolls, provenance. Offline, your listings sell to Wenna's regulars now and then (`BokiPens.tick`). |
-| Free-kit runs | `Loaner` (`scripts/core/loaner.gd`) | A loaner Boki (a starter reroll) and the basic kit; nothing at risk; an extract pays at least 45 gems. |
-| The floor | `Lifeline` (`scripts/core/lifeline.gd`) | A stray common turns up on a farm with no Boki. Combined with free-kit runs and pen prices, nobody is ever stuck. |
+| The floor | `Lifeline` (`scripts/core/lifeline.gd`) | A stray common turns up on a farm with no Boki. Combined with pen prices, nobody is ever stuck. |
 
 Every function the UI calls returns a plain dictionary (`{ok, why, ...}`) and never assumes the
 result is immediate, so the same calls can become requests to the backend without changing
@@ -23,7 +22,7 @@ result is immediate, so the same calls can become requests to the backend withou
 Following `ARCHITECTURE_PLAN.md` §2 (principles) and §3 (public/private split):
 
 - **Private backend** (`project-boki-backend`): accounts, the inventory ledger (gems, materials,
-  Boki ownership), the order book, Boki listings, trades, the free-kit stipend, the stray grant,
+  Boki ownership), the order book, Boki listings, trades, the stray grant,
   history. Postgres; one small service.
 - **Public match server** (headless Godot, this repo): runs matches, then commits the match result
   (what each player extracted) to the backend with its server key. It never touches the order book.
@@ -94,7 +93,7 @@ pen_stock(day, slot, boki_uid, price)          -- Wenna's daily commons, minted 
 | Request | Validation | Effect |
 |---|---|---|
 | `listings {filter}` | none | paged, filtered by species, size, IV total, mutation/shimmer, provenance, edition |
-| `list {uid, price}` | the caller owns it; not their only Boki; not pinned (partner/starter); not a loaner; price in the fair range (from `Ransom.value`, ported) | take the 5% fee; lock the Boki (it leaves the roster while listed) |
+| `list {uid, price}` | the caller owns it; not their only Boki; not pinned (partner/starter); price in the fair range (from `Ransom.value`, ported) | take the 5% fee; lock the Boki (it leaves the roster while listed) |
 | `unlist {id}` | the caller's, open | unlock it (fee not refunded) |
 | `buy {id}` | open; not the caller's; enough gems; the buyer's box has room | one transaction: gems buyer -> seller less 5% tax; ownership moves; provenance appends a `traded` event with both trainers |
 
@@ -107,9 +106,6 @@ parties confirm a two-sided offer; one transaction) use the same `boki` and `led
 
 ## The floor on the server
 
-- **Free-kit runs**: the match server marks the match `loaner`; the backend never writes the loaner
-  Boki anywhere. The stipend (top-up to 45 gems on an extract) is a backend rule applied when the
-  match result is committed, capped per account per day (e.g. 3 stipends) so it can't be farmed.
 - **Strays**: a backend rule on login: an account with zero Boki gets one ordinary common
   (`origin.how = "stray"`). Accounts can't release or list their last Boki, so this only follows a
   real loss, and it mints no gems.
@@ -130,5 +126,4 @@ parties confirm a two-sided offer; one transaction) use the same `boki` and `led
 
 - Exchange tax 4% and pen fees 5%/5%: fine as starting numbers?
 - Should Wenna's daily pen buys be capped online (proposed: 2 a day)?
-- Free-kit stipend 45 gems on an extract, capped at 3 a day online: right amount?
 - Online market makers (a metered Tradewind account) for a thin playtest book, or no makers at all?

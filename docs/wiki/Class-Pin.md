@@ -1,6 +1,6 @@
 # Pin (light)
 
-A light marksman who controls space. Every bow draw is timed, snares pin people in place, and a pinned
+A light marksman who controls space. Every bow draw is timed, Heavy Shots pin people to walls, and a pinned
 target eats the big shot. Spirit Walk carries her through rocks and barriers.
 
 ## How it plays
@@ -11,9 +11,9 @@ target eats the big shot. Spirit Walk carries her through rocks and barriers.
 2. Let go right as a stage flashes for a **perfect release** (a gold star by your bow hand): your next
    draw reaches Empowered 60% faster. Hold more than 0.5s past Supercharged and the arrow is
    **overdrawn**: half damage.
-3. **Tap RMB** for a snare: it roots a foe, or plants a Tripwire on the ground. **Hold RMB** for a
-   Heavy Shot (a gold V and a gold bar grow from the bow) that pierces and, driven into a wall, stuns (PINNED).
-4. Snares and Heavy Shots that hit build **Focus**. At 100 your next shot is Supercharged at once with
+3. **Hold RMB** for a Heavy Shot (a gold V and a gold bar grow from the bow) and let go to loose it: it
+   pierces and, driven into a wall, stuns (PINNED). One charge, a long cooldown; a tap does nothing.
+4. Heavy Shots that hit build **Focus**. At 100 your next shot is Supercharged at once with
    more range, and if it hits a rooted or stunned foe it's a **Deadeye**: a gold crit for +18.
 5. **Hail Wall** (E): arrows rain for 4.4s on a curved wall around you at the cursor distance; it slows
    and blights (a blue burn: healing barely takes) everyone inside.
@@ -25,11 +25,10 @@ target eats the big shot. Spirit Walk carries her through rocks and barriers.
 | Do this | And you get |
 |---|---|
 | Release right on a stage's flash | The next draw is 60% faster to Empowered |
-| Snare, then a full-Focus shot on the rooted foe | Deadeye (+18, crit) |
+| Heavy Shot wall pin, then a full-Focus shot on the pinned foe | Deadeye (+18, crit) |
 | Heavy Shot that pushes a foe into a wall within 3m | Stunned 1.2 (PINNED); fills Focus |
-| Tap snare while your Hail Wall is falling | It roots 1.0s instead of 0.6s |
-| Tap snare at 100 Focus | Roots 1.0s |
-| RMB in the air (Plunge) | Shoots straight down, pushes foes, lifts you 3m and cools your glider |
+| Heavy Shot into a wall at rank 3 | The stun also gives you a dash charge |
+| Spirit Walk at rank 3 | Allies within 6m walk through walls with you |
 | Spirit Walk through a rock | Out the other side where they can't follow |
 
 ## Tips
@@ -59,28 +58,24 @@ What the in-game kit card (K) says.
 
 | Slot | Card text |
 |---|---|
-| Loop | Ranged marksman: time each bow draw, root foes with snares, then cash a full Focus in as a Deadeye. |
-| Passive: Focus | Focus fills while you stand still or land snares; at full your next shot is a Deadeye. Hurt foes show through cover. |
+| Loop | Ranged marksman: time each bow draw, pin foes to walls with Heavy Shots, then cash a full Focus in as a Deadeye. |
+| Passive: Focus | Focus fills while you stand still or pin a foe; at full your next shot is a Deadeye. Hurt foes show through cover. |
 | Dash: Spirit Walk | Spirit Walk: a dodge roll, then 2.8s walking through rocks, trees and barriers. |
 | LMB | Hold to draw: Empowered lands at the cursor, Supercharged flies past it; let go right on the flash for a faster next draw. |
-| RMB: Snare | Tap a rooting snare; hold for a Heavy Shot that knocks back and pins foes to walls. |
+| RMB: Heavy Shot | Hold to draw a Heavy Shot, let go to loose it: it knocks back and pins foes to walls. |
 | E: Hail Wall | Rain arrows on a curved wall at the cursor distance: damage, slow and a burn that blocks healing. |
 | Hunter ultimate: Starpiercer | Starpiercer (level 6): your next 3 shots need no draw and fly as piercing beams; the third can finish a foe. |
 | Weapon: Longbow | Hold to draw: Empowered lands at the cursor, Supercharged flies past it; let go right on the flash for a faster next draw. |
 
 ### Abilities in full
 
-**Focus (passive).** Builds while you stand still (full in 1.4s), sneak (2.8s), 50% faster on high ground; a snare or Heavy Shot that hits adds 40 (a wall pin fills it). Drains while running and drops 40 when hit. At 100 your next shot is Supercharged or aimed at once, with +20% range, and if it hits a rooted or stunned foe it is a Deadeye: +18 damage, a crit. Hawk Sense: rivals under half health are seen through cover within 22m. A knock heals 18.
+**Focus (passive).** Builds while you stand still (full in 1.4s), sneak (2.8s), 50% faster on high ground; a Heavy Shot that hits adds 40 (a wall pin fills it). Drains while running and drops 40 when hit. At 100 your next shot is Supercharged or aimed at once, with +20% range, and if it hits a rooted or stunned foe it is a Deadeye: +18 damage, a crit. Hawk Sense: rivals under half health are seen through cover within 22m. A knock heals 18.
 
-**Spirit Walk (dash, Shift, 6s cooldown).** A quick dodge roll in the direction you move (or aim), then 2.8s as a spirit: rocks, trees, pillars and ability barriers don't stop you (cliffs and ledges still do); you move 10% faster, 35% inside something. Walking into something leaves a spirit orb there for 4s: anyone who touches it walks as a spirit too. Taking damage ends it. If it ends while you're inside something you lose 30 Focus and are put back where you went in.
+**Spirit Walk (dash, Shift, 6s cooldown).** A quick dodge roll in the direction you move (or aim), then 2.8s as a spirit: rocks, trees, pillars and ability barriers don't stop you (cliffs and ledges still do); you move 10% faster. Walking into something leaves a spirit orb there for 4s: anyone who touches it walks as a spirit too. Taking damage ends it. If it ends while you're inside something you lose 30 Focus and are put back where you went in.
 
-**Snare (RMB, 9s cooldown, 2 charges).**
+**Heavy Shot (RMB, 16s cooldown).**
 
-- *Tap:* A snare arrow 11m: 8 damage and root 0.6 on a foe; on the ground it plants a Tripwire (root 1.2, reveal 3s).
-- *Hold:* Heavy Shot: charge 0.5s -> full at 1.1s (rising creak, a ring, a ping at full): 16 -> 30 damage, push 6 -> 12, pierces 2; driven into a wall within 3m it hits again (up to 12) and stuns 1.2 (PINNED).
-- *In the air:* Plunge: shoot straight down, push 8 around you, lift yourself 3m, cool the glider.
-- *During E:* With your Hail Wall falling the tap snare roots 1.0.
-- *Resource full:* At 100 Focus the tap roots 1.0.
+- *Hold:* Heavy Shot: hold to draw (0.5s to start, full at 1.1s, a rising creak, a ring, a ping at full) and let go to loose it: 16 -> 30 damage, push 6 -> 12, pierces 2; driven into a wall within 3m it hits again (up to 12) and stuns 1.2 (PINNED). A quick tap does nothing and costs nothing.
 
 **Hail Wall (E, 9s cooldown).** Lob a volley: 0.35s later arrows rain for 4.4s on a curved wall 120 degrees wide round you, at the cursor distance (2-9m). Foes inside take 5 every 0.5s, are slowed 35% and burn blue (healing barely takes). A Heavy Shot that knocks a burning foe Cremates them: +10 and a longer burn.
 
@@ -92,8 +87,8 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 
 | Slot | Rank 2 | Rank 3 |
 |---|---|---|
-| RMB | cooldown 9s -> 8.1s, damage +15%. | cooldown 9s -> 7.2s, damage +30%; max 3 live Tripwires. |
-| Dash (Shift) | recharge 6s -> 5.1s per charge. | recharge 6s -> 4.2s; Spirit Walk lasts 0.6s longer. |
+| RMB | cooldown 16s -> 13s, damage +15%. | cooldown 16s -> 10s, damage +30%; flies 3m farther and a wall stun gives a dash charge. |
+| Dash (Shift) | recharge 6s -> 5.1s per charge. | recharge 6s -> 4.2s; Spirit Walk lasts 0.5s longer, is 33% faster inside something (fading), allies within 6m walk too. |
 | E | cooldown 9s -> 8.1s, damage +15%. | cooldown 9s -> 7.2s, damage +30%; the Hail Wall is 30% wider. |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > E > RMB > Dash (Shift) > E.

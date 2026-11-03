@@ -8,7 +8,7 @@ Branch `ext/economy`, merged with main sync59 (fcc3745, Net 0.11.0). Review fixe
 |---|---|---|---|
 | Economy floor (stray common on the farm when you have no Boki; last Boki can't be released or listed) | `scripts/core/lifeline.gd`, wiring in game.gd / home.gd / results.gd | `--economy-floor-check` | done |
 | Cheap Boki market (Drift Pens) | `scripts/core/boki_pens.gd`, `scripts/home/home_market.gd` | `--economy-floor-check` | done |
-| Free-kit loaner Boki | `scripts/core/loaner.gd`, wiring in game.gd / match.gd / results.gd / home.gd | `--economy-floor-check` | done |
+| Free-kit loaner Boki | (was `scripts/core/loaner.gd`) | | removed in ext/equal (docs/decisions/0005-equal-footing.md); the sections below about it are history |
 | Tradewind Exchange (order book) + server design | `scripts/core/exchange.gd`, `docs/EXCHANGE_SERVER.md` | `--economy-floor-check` | local version done; server is a design doc |
 | `--economy-floor-check` | `tools/economy_floor_check.gd` | | registered inline in main.gd (the registry does not exist on this tree; move it when it lands) |
 
