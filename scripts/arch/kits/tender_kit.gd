@@ -177,7 +177,7 @@ func _tick_dash_look(dt: float) -> void:
 	_tick_glide(dt)
 	if h.roll_t <= 0.0 or h.move_kind != "dash":
 		return
-	h.ghost_t = 0.1          # her own trail instead of the shared after-image pill
+	h.ghost_t = 0.3          # her own trail instead of the shared after-image pill
 	aft_t -= dt
 	if aft_t > 0.0:
 		return
@@ -287,7 +287,7 @@ func on_dash(use_ex: bool) -> bool:
 	var tt := float(air.get("time", 0.8)) if use_ex else float(dd.get("time", 0.16))
 	var from := h.pos
 	travel(dist, tt, {"invuln": float(dd.get("invuln", 0.12)), "dir": dash_dir()}, use_ex)
-	h.ghost_t = 0.1          # her ember motes, not the shared after-image (from the first frame)
+	h.ghost_t = 0.3          # her ember motes, not the shared after-image (from the first frame)
 	# travel applies the global dash feel; the glide and the relay line use the same scaled numbers
 	var feel := dash_feel()
 	dist *= float(feel["dist"])

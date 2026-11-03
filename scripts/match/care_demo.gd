@@ -27,7 +27,7 @@ const SPEC := {
 	"tender_ult": {"strip": [1.5, 5.4, 5.56, 5.62, 5.72, 5.9], "keys": {"ult_end": 5.62}},
 	"rimewright_lmb": {"strip": [0.42, 0.45, 0.5, 0.56, 0.62, 0.7], "keys": {"lmb": 0.45, "lmb_fly": 0.8}},
 	"rimewright_shatter": {
-		"strip": [1.0, 1.6, 2.02, 2.12, 2.24, 2.4], "keys": {"stacks": 1.6, "shell": 2.12, "shatter": 2.26}},
+		"strip": [1.0, 1.6, 2.02, 2.12, 2.24, 2.4], "keys": {"stacks": 1.6, "shell": 1.98, "shatter": 2.2}},
 	"rimewright_payoff": {"strip": [0.5, 0.7, 0.9, 1.1, 1.3, 1.5], "keys": {"payoff": 1.3}},
 	"rimewright_rmb": {
 		"strip": [0.5, 0.7, 0.82, 0.86, 0.92, 1.1],
@@ -71,7 +71,7 @@ static func tick(A: Arena, dt: float, w: String) -> void:
 	P.hp = P.max_hp
 	# far below full, so a payoff this step can't fill it: no BOND READY word or toast over the frames
 	P.ult = -100.0
-	for k in m.kins:
+	for k in m.kins + m.mobs:
 		if is_instance_valid(k): (k as Node3D).visible = false
 	var Al: Hunter = (A.get_meta("care_ally") if A.has_meta("care_ally") else null)
 	if Al == null:
@@ -112,7 +112,7 @@ static func _axes(m: Match) -> Array:
 ## her and the camera.
 static func _place_ally(A: Arena, P: Hunter, Al: Hunter, what: String) -> void:
 	var ax := _axes(A.m)
-	var right: Vector3 = ax[0]
+	var right: Vector3 = -(ax[0] as Vector3)      # travel goes screen left: the open side of the arena spot
 	var fwd: Vector3 = ax[1]
 	A.set_meta("care_right", Vector2(right.x, right.z))
 	A.set_meta("care_fwd", Vector2(fwd.x, fwd.z))

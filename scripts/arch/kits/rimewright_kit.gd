@@ -265,7 +265,7 @@ func on_dash(use_ex: bool) -> bool:
 	if use_ex:
 		if not spend_dash(true): return true
 		travel(float(h.cdat.get("ex_dist", 5.0)), float(h.cdat.get("ex_time", 0.2)), {"invuln": 0.1}, true)
-		h.ghost_t = 0.1          # her frost streaks, not the shared after-image (from the first frame)
+		h.ghost_t = 0.3          # her frost streaks, not the shared after-image (from the first frame)
 		play("tm_dash_air")
 		m.sfx("rime_flip", h.pos, -3.0, 1.0)
 		aft_t = 0.0
@@ -370,7 +370,7 @@ func _edge_spray(dir: Vector2, turn_rate: float, dt: float) -> void:
 ## ice colours; her own trail replaces the shared after-image pill.
 func _tick_trails(dt: float) -> void:
 	if h.roll_t > 0.0:
-		h.ghost_t = 0.1
+		h.ghost_t = 0.3
 	if not rinkrun.is_empty():
 		chip_t -= dt
 		if chip_t <= 0.0:
