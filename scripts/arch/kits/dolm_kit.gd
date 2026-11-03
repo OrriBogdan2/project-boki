@@ -20,8 +20,6 @@ const LEAP_ROCK_UP := 1.6      # m: how high the rock arcs after her
 
 var lmb_t := -1.0              # how long the attack key has been down (-1: not pressed)
 var lmb_was := false
-# the hold punched by itself: keep holding and the next wind-up starts, a release throws nothing
-var lmb_auto := false
 var rid_n := 0
 var dive := false              # a Quakefall in the air (the hop, a leap, an air press): slam on landing
 var dive_k := 0.0              # ...with this much charge
@@ -279,7 +277,6 @@ func _drop_holds() -> void:
 	if lmb_t >= 0.0:
 		lmb_t = -1.0
 		h.mel_hold = 0.0
-	lmb_auto = false
 
 func stonesight() -> int:
 	var dir := h.aim_dir()
@@ -342,23 +339,17 @@ func lmb_override(held: bool, dt: float) -> bool:
 				return true
 			lmb_t = 0.0
 		lmb_t += dt
-		if lmb_t > float(ld["tap"]) or lmb_auto:
+		if lmb_t > float(ld["tap"]):
 			var k := punch_k()
 			h.mel_hold = k
 			if anim_id != "breah_wind" or m.time - anim_at > 3.0: play("breah_wind")
 			_punch_tele(k)
 			if not KitLooks.of(m).holding("br_fist"): m.sfx("br_wind", h.pos, -6.0, 1.0)
 			KitLooks.of(m).hold_on("br_fist", "mote", h, _fist_at(), 0.9 + 1.0 * k, MOLTEN.lerp(Color("ffc23a"), k))
-		if lmb_t >= float(ld["full"]) + float(ld["auto"]):
-			_punch(punch_k())
-			lmb_auto = true
 	elif lmb_t >= 0.0:
-		if lmb_t < float(ld["tap"]) and not lmb_auto: _boulder()
-		elif lmb_t >= float(ld["tap"]): _punch(punch_k())
-		else:
-			lmb_t = -1.0
-			h.mel_hold = 0.0
-		lmb_auto = false
+		# held as long as you like (the data: hold and release; no timeout), full stays full
+		if lmb_t < float(ld["tap"]): _boulder()
+		else: _punch(punch_k())
 	elif pressed:
 		pass
 	return true
@@ -441,7 +432,7 @@ func _punch(k: float) -> void:
 	var swept := sweep_rocks(dir)
 	last_sweep = swept.size()
 	if swept.size() >= 2: sweeps += 1
-	if not swept.is_empty():
+	if swept.any(func(w): return w.get("by") == h):      # (the data: hitting *your* rocks; an ally's still fly)
 		guard_punches += 1
 		guard_stack()
 	for i in swept.size():

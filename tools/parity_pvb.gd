@@ -230,4 +230,36 @@ func breah() -> void:
 		stepped > 0.4 and stepped < 1.4, "%.2f m" % stepped)
 	var bp := beats("breah_punch")
 	ok("parity breah: the punch drives out at once from the cocked pose (out by 0.06s)", bp.x <= 0.06, "%.2f s" % bp.x)
+	_tarek_audit(m, P, K, home)
 	await done(m)
+
+## The audit (Nov 3 23:40): cooldowns from the data, the hunter viewer's moves, and Molten Guard only from a
+## punch into your OWN rocks (an ally Tarek's rocks still fly, no shield).
+func _tarek_audit(m: Match, P: Hunter, K: DolmKit, home: Vector3) -> void:
+	var view: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/hunter_viewer.json"))
+	var dv: Dictionary = (view.get("moves", view) as Dictionary).get("dolm", {})
+	ok("audit tarek: cooldowns from the data (Volcano Crusher 11s, Rockwave 12.5s)",
+		float(K.rmb_def()["cooldown"]) == 11.0 and float(K.e_def()["cooldown"]) == 12.5)
+	ok("audit tarek: the hunter viewer plays his own RMB and X moves",
+		dv.get("rmb", []) == ["breah_crouch", "breah_slam"] and dv.get("x", []) == ["breah_spine_aim", "breah_spine"],
+		str(dv))
+	P.teleport(home)
+	aim_at(P, home + Vector3(8, 0, 0))
+	step(m, 0.3)
+	K.cd["e"] = 0.0
+	K.use_e()
+	step(m, 0.5)
+	var ally: Hunter = m.make_hunter("A", P.team, "medium", "Ally", "idle", {}, home + Vector3(0, 0, -8), {"arch": "none"})
+	for w in K.my_rocks():
+		w["by"] = ally
+	K.shield_stacks = 0
+	P.shield = 0.0
+	P.fire_cd = 0.0
+	P.inp["fire"] = true
+	step(m, 0.6, func(): P.inp["fire"] = true)
+	P.inp["fire"] = false
+	step(m, 0.2)
+	ok("audit tarek: a punch into an ally's rocks launches them but gives no Molten Guard (data: your Rocks)",
+		K.last_sweep >= 1 and K.shield_stacks == 0, "swept %d stacks %d" % [K.last_sweep, K.shield_stacks])
+	ally.queue_free()
+	m.hunters.erase(ally)
