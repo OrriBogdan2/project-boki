@@ -1,5 +1,5 @@
 # S2 status (second server session)
-Updated: 2026-11-03 08:58 UTC (git/server clock). Last INBOX_S2 handled: 08:00 (git time) ownership.
+Updated: 2026-11-03 09:02 UTC (git/server clock). Last INBOX_S2 handled: 08:00 (git time) ownership.
 
 ## Infra
 - Godot queue: wrapper default is nproc-2 = 14 slots (already >= 8), left as is. S1: no change needed.
@@ -64,5 +64,9 @@ Updated: 2026-11-03 08:58 UTC (git/server clock). Last INBOX_S2 handled: 08:00 (
 - Honest quality read: a clear step up and consistent (line weight, gradient shading, rim light, cast shadows), but clean vector concept art, not painted hero-shooter splash art; good for approving silhouettes/costumes/palettes/relics. Weakest: Sable, Venator, Zedran front poses (static; Zedran's arms thin), simple 3/4 noses.
 - Owner Qs (concepts): item 39 says 6F/5M/1 robot but Cinder as a woman gives 7F/4M/1 robot: confirm or who changes? Moosh Moosh drawn as full fox-folk (CONCEPT_PASS "small fire fox"): OK? Relic names are ours (Drowned Bell, Last Pin, Champion's Torc, Ember Phial, Hollow Bell, Split Geode, Moonsilver Key, Stormglass, Paid-Up Tags, Leaking Heart, Hearth Acorn, Rink Blade): OK / fit the Lore Bible? If approved, archetype JSON silhouette notes change later (Cinder no top hat/bellows, Sable no hood/cape, Ostra no hem, Dredge blunderbuss arm).
 
-## Mantle look + creator (item 45, INBOX 08:10): IN PROGRESS
-- Branch `ext/mantle-look` from origin/main 16dd7fa, Opus. Creator as its own step after the Boki card (per 08:00 conflict note), Randomise + defaults, save migration, MantleLook.apply pure function, --mantle-look-check. Not for tonight.
+## Mantle look + creator (item 45): built, full suite running, ext/mantle-look @ fcc0f1d (on main 16dd7fa; not for tonight)
+- MantleLook.apply (scripts/match/mantle_look.gd, pure) + content/rules/mantle_look.json (per-Warden gender/folk/palette, clamps 7-14% body / 5% face, HSV tints with locks: signature colours stay); bots/remotes = Warden + random 20%; hitbox unchanged (asserted at every extreme); at home you are your own person (1.8x range, own colours). Creator: its own step right after the Boki naming card (name stays there), also from the farm's "Change your look"; Body/Face/Colours tabs, Randomise, Yourself/In a Mantle preview; old hatch.gd arrow creator deleted. models.gd shrinks (look helpers to scripts/core/player_look.gd), hunter_anim.gd +3.
+- **Save v7 -> v8** (PlayerLook.migrate: 11 neutral sliders + eye colour, old 'body' pick dropped; old and look-less saves load). Integrator: renumber if another branch bumps the save. Decision doc renumbered to 0011 (0010 = dash flow). No Net change (local-only; design for sharing nudges in 0011).
+- --mantle-look-check 27/27; hunter-unlock 137/0, title, hatch, equal-migrate, unique, capture, gear 87/0, economy-floor, weapon-clip PASS, health OK. Shots: /home/boki/shots-s2/mantle/ (to ext/hero-shots-s2).
+- Note: every Hunter now wears its class colour instead of the player's outfit colour, so other branches' screenshots will differ after this merges.
+- Owner Qs (Mantle): voice pitch slider deferred until hunters have voices: OK? existing players keep their picks with neutral sliders (not a full reset): OK? Warden genders/folk/colours are first drafts (item 39 genders; class colour as palette, so Pin stays green until the concept pass): OK? at home your own person carries your Hunter's weapon: put it away? should other players see your nudges (Net bump, ~15 bytes in the join kit)?
