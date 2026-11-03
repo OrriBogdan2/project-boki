@@ -27,11 +27,12 @@ const SPEC := {
 	"tender_ultkey": {"strip": [0.5, 0.56, 0.62, 0.7, 0.9, 1.5], "keys": {"ultkey": 1.5}},
 	"tender_ult": {"strip": [1.5, 5.4, 5.56, 5.62, 5.72, 5.9], "keys": {"ult_end": 5.62}},
 	"rimewright_lmb": {"strip": [0.42, 0.45, 0.5, 0.56, 0.62, 0.7], "keys": {"lmb": 0.45, "lmb_fly": 0.8}},
+	"rimewright_heavy": {"strip": [0.98, 1.02, 1.06, 1.1, 1.2], "keys": {"heavy": 1.06}},
 	"rimewright_shatter": {
 		"strip": [1.0, 1.6, 2.02, 2.12, 2.24, 2.4], "keys": {"stacks": 1.6, "shell": 1.98, "shatter": 2.2}},
 	"rimewright_payoff": {"strip": [0.5, 0.7, 0.9, 1.1, 1.3, 1.5], "keys": {"payoff": 1.3}},
 	"rimewright_rmb": {
-		"strip": [0.7, 0.88, 1.0, 1.14, 1.32], "side": 560,
+		"strip": [0.7, 0.84, 0.92, 1.05, 1.32], "side": 560,
 		"keys": {"rmb_aim": 0.7, "rmb_fly": 1.12, "rmb_land": 1.32, "rmb_boom": 3.12}},
 	"rimewright_dash": {"strip": [0.32, 0.45, 0.62, 0.8, 1.06], "keys": {"dash": 0.7, "dash_stop": 1.06}},
 	"rimewright_skatefire": {"strip": [0.5, 0.58, 0.64, 0.7, 0.8, 0.9], "keys": {"skatefire": 0.66}},
@@ -160,7 +161,7 @@ static func _script(
 		A: Arena, P: Hunter, D: Hunter, Al: Hunter, arch: String, what: String, t: float, dt: float) -> void:
 	var K: ArchKit = P.ak
 	var go := 0.3
-	if t < 0.2 and (what == "skateult" or (arch == "tender" and what in ["dash", "air"])):
+	if t < 0.2 and (what in ["skateult", "skatefire"] or (arch == "tender" and what in ["dash", "air"])):
 		_open_lane(A, P, Al)
 	match what:
 		"rmb":
@@ -195,7 +196,7 @@ static func _script(
 				P.ex_cd = 0.0
 				P.dashes = P.max_dashes()
 				K.on_dash(true)
-		"lmb":
+		"lmb", "heavy":
 			P.inp["fire"] = t > 0.3 and t < 1.5
 		"shatter":
 			P.inp["fire"] = t > 0.3 and t < 1.75

@@ -43,7 +43,7 @@ const SLAB_LIFE := 1.2         # s a plate stays before it fades
 const SHATTER_R := 2.7         # m, the Shatter's spike starburst (about 1.5 body heights)
 const PUSH_T := 0.1           # s from letting go of RMB to the release: both palms drive forward (tm_spear)
 const SPEAR_ARC := 0.25        # m the driven spear's low flight bows above the line from her palms to the ground
-const SPEAR_AHEAD := 0.55      # m in front of her chest where the spear forms between her palms
+const SPEAR_AHEAD := 0.9       # m in front of her chest of the spear's head end; its shaft runs back to her palms
 const SPEAR_Y := 1.05          # m: the height of her palms at the chest
 const SPEAR_FORM_T := 0.3      # s of holding RMB for the spear to grow to full size between her palms
 const LAND_KICK_R := 7.0       # m: a landing this close to her gives her camera a small kick
@@ -513,7 +513,7 @@ func rmb_hold_tick(t: float) -> void:
 		spear_aim = true
 		play("tm_spear_aim")
 		m.sfx("rime_spear_aim", h.pos, -6.0, 1.0)
-	_hold_spear(lerpf(0.45, 1.0, clampf(t / SPEAR_FORM_T, 0.0, 1.0)), 0.0)
+	_hold_spear(lerpf(0.45, 1.0, clampf(t / SPEAR_FORM_T, 0.0, 1.0)), -0.25)
 
 ## The ice spear between her palms at `grown` of its size, `ahead` m further out than her chest (the push
 ## drives it out), along the aim.
@@ -521,7 +521,7 @@ func _hold_spear(grown: float, ahead: float) -> void:
 	var dir := h.aim_dir()
 	var at := _spear_at(ahead)
 	var facing := Basis.looking_at(Vector3(dir.x, 0.0, dir.y), Vector3.UP)
-	var xf := Transform3D(facing.scaled(Vector3.ONE * 1.4 * grown), at)
+	var xf := Transform3D(facing.scaled(Vector3.ONE * grown), at)
 	lk().keep("spear_prop", "spear", at, {"xf": xf})
 
 ## Where the spear sits in front of her chest, `ahead` m further along the aim.
@@ -551,7 +551,7 @@ func _tick_throw(dt: float) -> void:
 		_drop_throw()
 		return
 	throw_t -= dt
-	_hold_spear(1.0, 0.25 * (1.0 - throw_t / PUSH_T))
+	_hold_spear(1.0, -0.25 * throw_t / PUSH_T)
 	if throw_t <= 0.0:
 		throw_t = -1.0
 		_release_spear()
@@ -567,7 +567,7 @@ func _release_spear() -> void:
 	lk().drop("spear_prop")
 	var ld: Dictionary = rmb_def()["lance"]
 	var dir := h.aim_dir()
-	var start := _spear_at(0.25)
+	var start := _spear_at(0.0)
 	var spd := float(ld["speed"])
 	var dist := AimMode.dist(h, float(ld["range"]))
 	var on_land := func(_s: Dictionary, at: Vector3, _e: Ent, _why: String): _spear_land(at)
