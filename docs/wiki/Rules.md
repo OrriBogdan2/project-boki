@@ -126,7 +126,6 @@ Capture by scan (docs/decisions/0002). A wild Boki that is knocked out (dazed) c
 | base_pack | 6 |
 | rarity_cap_by_tier | [2, 3, 4] |
 | issue | {"tonic": 2, "armor_kit": 2} |
-| belt_slots | 3 |
 | util_drops | {"_default": 0.0, "ground": 0.0, "crate": 0.18, "cache": 0.5, "chest0": 0.35, "chest1": 0.5, "chest2": 0.65, "brute": 0.4, "sentinel": 0.4, "warden": 0.6, "glimmer": 0.3, "boss": 0.9, "chest": 0.5} |
 | util_weights | {"tonic": 5, "armor_kit": 4, "medkit": 2, "smoke": 2, "jump_pad": 1.5, "scanner": 1, "stim": 2, "shield_cell": 2} |
 | migration | {"gem_k": 1.0, "moved_gloves_charges": [1, 2, 2, 3, 4]} |

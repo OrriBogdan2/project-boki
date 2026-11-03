@@ -18,7 +18,7 @@ same body, then finds, buys and earns the rest. Your Boki is the one lasting dif
 ## Decision
 Option 3. The whole ext/equal design, by part:
 
-**Bring-in (ext/equal-loadout).** From home: the two gloves, boots, up to three utility items and a backpack.
+**Bring-in (ext/equal-loadout).** From home: the two gloves, boots, up to four utility items and a backpack.
 Everything brought is at risk (it drops in your deathbox). Rarity is capped by difficulty tier
 (`content/rules/equal.json` `rarity_cap_by_tier`: Rare, Epic, Legendary for The Meadow, Dusk Isles,
 The Hollow); utility stacks are capped per item per tier (`content/utility/*.json` `bring`). Not
@@ -50,11 +50,21 @@ badge, C cooldown, a bond ring, a down mark) in `GripHud`. Over every other hunt
 small icons: two gloves (rarity frame, dim on cooldown) and the Boki type (soft glow on a full bond),
 in `GripOverhead`; remote hunters' gloves, cooldowns and bond ride in the snapshot (`GripNet`).
 
-**Utility belt on 1/2/3.** Replaces the "kit" gear slot and the heal / armour-kit keys. Each slot
+**Utility belt on 1-4.** Replaces the "kit" gear slot and the heal / armour-kit keys. Each slot
 holds one item with charges: tonic, armour kit, and smoke, jump pad, scanner and medkit (moved from
 gloves), plus a swift draught and a shield cell. Everyone is issued two tonics and two armour kits;
 more are brought (capped), found and bought. The whole belt goes in the deathbox. API:
 `UtilityBelt.grant(h, id, n)` (returns how many fit), `count`, `take`, `has_room`, `use_id`.
+
+**Keys on the belt (owner, 17:55).** Rift Keys and chest keys are belt items (`rift_key`, `chest_key`),
+one slot per type, stacked up to their "max" (1 and 3, in `content/utility/`), so you always see
+whether you carry one and carrying one costs a slot. A full belt leaves the key on the ground and
+prompts a swap: pressing a slot's key drops that slot's items and takes the key (bots drop their
+cheapest stack); nothing is thrown away. F at a hatch or chest still opens it; the key's own slot
+opens the lock beside you, or elsewhere pings the nearest matching lock on your map (`BeltKeys`).
+Keys go in the deathbox, and are never brought in, sold or taken home, so the market's Rift Key is
+gone (stash keys in an old save are refunded at its price, 140 gems). `h.rift_keys` and
+`h.chest_keys` read and write the belt.
 
 **Removed.** The free-kit loaner, its extract-minimum top-up, text and checks. The economy floor (a
 stray common Boki) and the last-Boki guard stay.
@@ -78,15 +88,17 @@ utility via `UtilityBelt.grant` and `UtilityBelt.price_of`, weapon perks) and th
 
 **Loadout layout (owner, 15:25).** The full layout is: 2 gloves (Q, V), 2 charms (a new minor item
 kind, not on a key), boots, 4 utility slots (1-4), up to 5 perk orbs, and no upgrading of anything.
-Built so far: gloves, boots, the belt on 1/2/3, backpacks, no ranks. Not built yet: charms and the
-fourth utility slot (a follow-up; old minor glove-like items map to charms then).
+Built so far: gloves, boots, the belt on 1-4, backpacks, no ranks. Not built yet: charms (a follow-up;
+old minor glove-like items map to charms then).
 
 ## The split and where parts meet
 - loadout owns utility definitions (`content/utility/`, `UtilityBelt`, `UtilityUse`), bring-in
   (`Equal`), gloves (`Gloves`, `GripHud`, `GripOverhead`, `GripNet`) and the migration.
 - perkorbs owns the perk pool; it frees keys 1/2/3 by deleting the perk prompt (until then the belt
   keys yield to an open prompt, `Match._gather_input`).
-- keys-cover owns keys, chests and cover; its key count sits beside the belt on the HUD.
+- keys-cover owns chests, key carriers and cover. Its chest keys live on the belt: it reads and writes
+  `h.chest_keys`, drops pickups of kind "chest_key", and registers its chests with
+  `BeltKeys.register_lock("chest_key", near, open, spots, col)`; its own key counter goes.
 - the shop pass calls `UtilityBelt.grant` / `price_of`, `Backpacks.shop_price(h)` / `shop_upgrade(h)`,
   and reads `Equal.rules()`.
 

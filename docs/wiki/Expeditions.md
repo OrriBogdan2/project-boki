@@ -117,7 +117,7 @@ Three ways out, each with its own risk:
 | Exit | How | The catch |
 |---|---|---|
 | **Skiff dock** (on the outer landings) | Hold F at the horn beacon to call a sky-skiff. It arrives after about 45 s and holds at the pier for a 12 s boarding window. | The horn and a flare tell the whole map; monsters come at the dock in waves; the skiff leaves with whoever is on deck, rivals included. Docks close one by one late in the match. |
-| **Rift hatch** (all over the map) | Bring a **Rift Key** (rare loot) and press F: the hatch grinds open over 10 s. | Anyone nearby can see and hear it. Three people can drop through before it seals, and they don't have to be yours. A key you carry goes to your deathbox if you die. |
+| **Rift hatch** (all over the map) | Find a **Rift Key** (rare loot, it sits on your belt) and press F or its belt key: the hatch grinds open over 10 s. | Anyone nearby can see and hear it. Three people can drop through before it seals, and they don't have to be yours. A key you carry goes to your deathbox if you die. |
 | **Uplink outpost** (walled yards) | Hold F at the mast to start it, then hold the yard while it charges (about 40 s alone; two or more of your squad charge it faster). The lift opens when it's done. | Starting it brings monsters. A rival in the yard stalls it, and one who holds it alone for 5 s takes it over. An empty yard drains the charge. |
 
 Extract and everything you carry goes home: weapons and gloves to the Armory, valuables to sell, Boki

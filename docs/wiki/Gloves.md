@@ -3,7 +3,7 @@
 
 _Generated from `content/gear`, `content/rules/gear.json`._
 
-Gear is found on expeditions: in chests, on the ground, from the Blight and from bosses. You wear two gloves (glove 1 on Q, glove 2 on V; each can be an active or a passive glove, never two of the same), armor and boots. Gloves never rank up: their rarity is their strength. A new piece replaces the one in its slot (a glove takes a free glove slot, else the weaker glove's; the old one drops at your feet). Gloves and boots can be brought from home (rarity capped by difficulty); armor is only found. Utility items (tonics, armor kits, smoke...) sit on the 1/2/3 belt, not in a gear slot. Every piece has a rarity, Common to Legendary, that scales its numbers (x1, x1, x1.3, x1.6, x2). Extracted gear also breaks down into farm materials.
+Gear is found on expeditions: in chests, on the ground, from the Blight and from bosses. You wear two gloves (glove 1 on Q, glove 2 on V; each can be an active or a passive glove, never two of the same), armor and boots. Gloves never rank up: their rarity is their strength. A new piece replaces the one in its slot (a glove takes a free glove slot, else the weaker glove's; the old one drops at your feet). Gloves and boots can be brought from home (rarity capped by difficulty); armor is only found. Utility items (tonics, armor kits, smoke...) sit on the 1-4 belt, not in a gear slot. Every piece has a rarity, Common to Legendary, that scales its numbers (x1, x1, x1.3, x1.6, x2). Extracted gear also breaks down into farm materials.
 
 ## Active gloves (Q or V)
 
