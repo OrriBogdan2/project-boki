@@ -156,7 +156,8 @@ func _breah_climb() -> void:
 	await _go(1.1, walk, marks)
 	P.inp["move"] = Vector2.ZERO
 
-## Quakefall out of a glide (owner 23:00): gliding, the press folds the glider, the plunge, the slam on landing.
+## Quakefall out of a glide (the owner's 23:00 answer): gliding, the press folds the glider, the plunge, the
+## slam on landing.
 func _breah_glide() -> void:
 	await _reset(9.0)
 	P.pos.y += 8.0
@@ -167,7 +168,7 @@ func _breah_glide() -> void:
 			P.ak.press_rmb()
 	var marks := _strip(
 		"glide_slam_strip",
-		"Quakefall out of a glide (owner 23:00, per the source): gliding; the press folds the glider at once; the"
+		"Quakefall out of a glide (per the source and the owner): gliding; the press folds the glider at once; the"
 			+ " plunge at the glider's dive speed (32.5 m/s); the two-fist slam where she lands; the crater",
 		[0.4, 0.62, 0.68, 0.75, 0.85, 1.2]
 	)
