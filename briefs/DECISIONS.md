@@ -7,7 +7,7 @@ Main keeps this file current; anyone can propose a line in EXT_TO_MAIN tagged "D
 
 ## Identity and Mantle
 - Our own names, art and text. SUPERVIVE is a reference only.
-- Hunter names: **Venator is now Vex**. **Tamsin is now Claire** (rimewright; owner, Nov 3). Use "Claire" everywhere: display names, kit text, docs and the wiki.
+- Hunter names (art pass, Nov 3): **Venator is Vex, Tamsin is Claire, Breah is Tarek, Linwick is Cinder, Dancer is Sable**. Unchanged: Zedran, Dredge, Ostra, Pin, Vireo, Moosh Moosh, Bjorn. Titles are in docs/art/gen/index.md (e.g. Tarek, Rock Elementalist). **Tamsin is now Claire** (rimewright; owner, Nov 3). Use "Claire" everywhere: display names, kit text, docs and the wiki.
 - Hunters are Wardens' **Mantles**. You take one up for the hunt.
   - On the farm you are yourself (no Mantle, fully customisable).
   - Match look: about 90–100% Mantle (silhouette, weapon, signature colour, VFX locked).

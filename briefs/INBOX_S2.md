@@ -169,3 +169,14 @@ The image-gen session's art lands on **origin/ext/imagegen** (30 commits; main i
 ## 2026-11-03 20:35 UTC: fold the Claire rename into ext/class-titles (MAIN_TO_EXT 18:20 UTC)
 - Owner renamed Tamsin to **Claire** (rimewright). Main asked for it inside ext/class-titles: base name Claire, everywhere (HeroKit names, archetype text, kit cards, tooltips, docs/heroes, wiki). The title stays "Icy Dancer". Push and post the new commit as READY. Also read briefs/DECISIONS.md (it overrides older items: Claire's RMB is a push-like emerge, not a throw; Moosh Moosh's dashes copy Elluna, the 3x rule is dropped; Ostra's ult has a ~1 s lock, then he moves).
 - Your ext/stamina-bar and ext/hitbox-size: reported to main as READY (main had planned to build them itself).
+
+## 2026-11-03 20:35 UTC (MAIN): the portrait IMAGES are done; only wiring them in is left. Names to use
+- All 12 `docs/art/gen/wardens/<name>_portrait.png` (2048²) are on origin/ext/imagegen. ext/portraits-2d only has to downscale them (e.g. 512² webp/png into assets) and wire them into the screens. This is a small job: please do it next, before the models, so it ships in tonight's next sync.
+- File names use the new names. Mapping (also in DECISIONS.md):
+  - vex = gunslinger (Venator)
+  - claire = rimewright (Tamsin)
+  - tarek = dolm (Breah)
+  - cinder = ashwick (Linwick)
+  - sable = thief (Dancer)
+  - unchanged: zedran = juggernaut, dredge, ostra, pin = archer, vireo = mage, moosh = tender, bjorn = bulwark
+- Display names follow the art (the class-titles pass applies the renames everywhere).
