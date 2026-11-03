@@ -26,6 +26,7 @@ var rid_n := 0
 var dive := false              # a Quakefall in the air (the hop, a leap, an air press): slam on landing
 var dive_k := 0.0              # ...with this much charge
 var dive_fall := false         # ...plunging straight down (pressed in the air), not riding an arc
+var dive_glide := false        # ...pressed in a glide: the glider folded and stays shut until she lands
 var sight_t := 0.0
 var sneak_t := 0.0             # how long she has been sneaking (the cone widens)
 var shield_stacks := 0         # Molten Guard stacks
@@ -215,21 +216,32 @@ func _tick(dt: float) -> void:
 	spine.tick(dt)
 	_tick_sight(dt)
 
-## The pending air slam: it lands with her, or plunges if pressed in the air. The glider always wins:
-## holding glide (or the glider opening) drops the slam and hands the arc over, never dragging her down.
+## The pending air slam: it lands with her, or plunges if pressed in the air. After a hop, a leap or an air
+## press the glider wins (item 26): holding glide drops the slam and hands the arc over, never dragging her
+## down. Pressed in a glide (the source's slam out of a glide), the dive is committed: the glider stays shut.
 func _tick_dive() -> void:
+	if dive_glide:
+		h.glide_cd = maxf(h.glide_cd, 0.1)
 	if h.downed:
 		dive = false
-	elif h.gliding or bool(h.inp.get("glide", false)):
+		dive_glide = false
+	elif (h.gliding or bool(h.inp.get("glide", false))) and not dive_glide:
 		dive = false
 		h.fly_t = 0.0
 		if dive_fall:
 			h.vel.y = maxf(h.vel.y, 0.0)      # the canopy takes the plunge's speed at once
 	elif h.grounded:
 		dive = false
+		dive_glide = false
 		slam.land(dive_k)
 	elif dive_fall:
-		h.vel.y = minf(h.vel.y, -float(slam_def()["dive_speed"]))
+		h.vel.y = minf(h.vel.y, -dive_speed())
+
+## The air Quakefall's plunge (m/s down): the glider's dive speed out of a glide, its own otherwise.
+func dive_speed() -> float:
+	if not dive or not dive_fall:
+		return 0.0
+	return float(slam_def()["glide_dive_speed" if dive_glide else "dive_speed"])
 
 ## Tremor Sense: sneaking shows a narrow cone ahead that widens the longer you sneak, and the foes in
 ## it through walls and fog.
@@ -260,6 +272,7 @@ func _drop_holds() -> void:
 	dive = false
 	dive_k = 0.0
 	dive_fall = false
+	dive_glide = false
 	leap = {}
 	if slam: slam.drop()
 	if spine: spine.drop()
