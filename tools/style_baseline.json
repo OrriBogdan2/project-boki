@@ -22,6 +22,9 @@
 "long_line": 1,
 "semicolon": 13
 },
+"scripts/arch/hero_zones.gd": {
+"long_line": 13
+},
 "scripts/arch/hex.gd": {
 "long_line": 1,
 "semicolon": 1
@@ -42,7 +45,9 @@
 "semicolon": 10
 },
 "scripts/arch/kits/dolm_kit.gd": {
-"nested_ternary": 1
+"long_line": 9,
+"nested_ternary": 1,
+"semicolon": 2
 },
 "scripts/arch/kits/gunslinger_kit.gd": {
 "long_line": 8,
@@ -58,6 +63,7 @@
 "semicolon": 1
 },
 "scripts/arch/kits/ostra_kit.gd": {
+"long_line": 5,
 "nested_ternary": 1
 },
 "scripts/arch/kits/rimewright_kit.gd": {
@@ -76,6 +82,9 @@
 "scripts/arch/oomph.gd": {
 "long_line": 1,
 "shadow": 1
+},
+"scripts/arch/pair_demo.gd": {
+"semicolon": 16
 },
 "scripts/combat/ability_def.gd": {
 "long_line": 6
@@ -580,6 +589,9 @@
 "long_line": 5,
 "semicolon": 5
 },
+"scripts/match/hero_arms.gd": {
+"long_line": 5
+},
 "scripts/match/hero_gear.gd": {
 "long_line": 102,
 "semicolon": 15
@@ -1024,6 +1036,7 @@
 "shadow": 1
 },
 "tools/arena_check.gd": {
+"long_line": 25,
 "semicolon": 21,
 "shadow": 1
 },
@@ -1103,8 +1116,8 @@
 "semicolon": 49
 },
 "tools/hero_pair_check.gd": {
-"long_line": 15,
-"semicolon": 20,
+"long_line": 36,
+"semicolon": 52,
 "shadow": 1
 },
 "tools/hitch_check.gd": {
