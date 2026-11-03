@@ -62,6 +62,9 @@ const ANIM_DEMO := {
 	"bul_launch": ["bulwark", "tower_shield", [1.68, 1.74, 1.8, 1.88, 1.98, 2.15]],
 	"bul_launch_glide": ["bulwark", "tower_shield", [1.68, 1.76, 1.86, 1.98, 2.15, 2.5]],
 	"bul_ult_walk": ["bulwark", "tower_shield", [0.75, 0.92, 1.25, 1.45, 1.65]],
+	"bul_jump_swing": ["bulwark", "tower_shield", [0.95, 1.08, 1.2, 1.28, 1.36, 1.6]],
+	"bul_dash_hold": ["bulwark", "tower_shield", [0.88, 0.95, 1.05, 1.2, 1.43, 1.62]],
+	"bul_jump_launch": ["bulwark", "tower_shield", [1.45, 1.6, 1.7, 1.76, 1.88, 2.1]],
 	"bul_whirl": ["bulwark", "tower_shield", [0.5, 0.58, 0.7, 0.76, 0.84, 1.0]],
 	"bul_charge": ["bulwark", "tower_shield", [0.7, 0.75, 0.82, 0.9, 1.0, 1.2]],
 	"bul_short": ["bulwark", "tower_shield", [0.85, 0.92, 0.98, 1.05, 1.15, 1.35]],
@@ -401,7 +404,8 @@ static func _anim_trigger(A: Arena, P: Hunter, D: Hunter, mv: String, t: float, 
 			_anim_hero(A, P, mv, t, dt)
 		"pin_ult_cast", "pin_ult_nock", "pin_ult_loose", "pin_ult_final", "bul_ult_wind", "bul_ult_slam":
 			_anim_ult(P, mv, t, dt)
-		"bul_smash_late", "bul_launch", "bul_launch_glide", "bul_ult_walk":
+		"bul_smash_late", "bul_launch", "bul_launch_glide", "bul_ult_walk", "bul_jump_swing", "bul_dash_hold", \
+				"bul_jump_launch":
 			_anim_bjorn(A, P, mv, t, dt)
 
 ## The scripted input for the Archer's and Bulwark's kit moves (the accuracy pass).
@@ -509,12 +513,13 @@ static func _anim_ult(P: Hunter, mv: String, t: float, dt: float) -> void:
 			(K as ArcherKit).ult.left = 1
 	P.inp["fire"] = mv.begins_with("pin_ult_") and mv != "pin_ult_cast" and t > 0.5 and t < 0.6
 
-## Bjorn's owner-review strips (#48, #49): a full swing let go after the perfect window, one let go in it, one
-## in it at an island's edge (it carries him over and he glides), and Faultline cast with him walking off
-## across the lane after the plant.
+## Bjorn's owner-review strips (#48, #49, #51): a full swing let go after the perfect window, one let go in it,
+## one in it at an island's edge (it carries him over and he glides), Faultline cast with him walking off
+## across the lane after the plant; the hold through a jump let go in the air, through a Shift dash let go
+## after it, and through a jump let go in the window (the launch from the air).
 static func _anim_bjorn(A: Arena, P: Hunter, mv: String, t: float, dt: float) -> void:
 	P.ak.res = 0.0
-	if mv in ["bul_smash_late", "bul_launch"]:
+	if mv in ["bul_smash_late", "bul_launch", "bul_jump_swing", "bul_dash_hold", "bul_jump_launch"]:
 		if _at(t, dt, 0.1):
 			P.teleport(P.pos + Vector3(-1.0, 0, 3.0))      # a lane south of the dummy: the travel reads clear of it
 			A.home = P.pos
@@ -531,6 +536,18 @@ static func _anim_bjorn(A: Arena, P: Hunter, mv: String, t: float, dt: float) ->
 		"bul_ult_walk":
 			_anim_ult(P, "bul_ult_wind", t, dt)
 			P.inp["move"] = Vector2(0, 1) if t > 0.5 else Vector2.ZERO
+		"bul_jump_swing":
+			P.inp["move"] = Vector2(1, 0) if t > 0.6 else Vector2.ZERO
+			P.inp["fire"] = t > 0.4 and t < 1.25
+			P.inp["jump"] = _at(t, dt, 1.0)
+		"bul_dash_hold":
+			P.inp["fire"] = t > 0.4 and t < 1.4
+			if _at(t, dt, 0.9):
+				P.dashes = P.max_dashes()
+				P.do_dash()
+		"bul_jump_launch":
+			P.inp["fire"] = t > 0.4 and t < 1.71
+			P.inp["jump"] = _at(t, dt, 1.45)
 
 ## A spot 2.5 m back from an island's east edge (flat ground behind, the abyss in front), nearest `near`.
 static func _edge_spot(m: Match, near: Vector3) -> Vector3:
