@@ -82,6 +82,7 @@ func fresh() -> Dictionary:
 		"extracts": 0,
 		"settings": {"volume": 0.8, "shake": 1.0, "cam_lead": 1.0},
 		"tutorial": {},
+		"farm_builder": 1,    # Hob and the farm tutorial are known to this save (FarmBuilder.migrate)
 		"buildings": [],
 		"music": [],
 		"guild_perks": [],
@@ -417,6 +418,7 @@ func load_from(p: String) -> void:
 			if bak: bak.store_string(text)
 		if not migrate(parsed):
 			return
+	FarmBuilder.migrate(parsed)      # keyed by its own field: holds if another branch also took v8
 	for k in parsed:
 		d[k] = parsed[k]
 	# JSON numbers come back as floats; plots and roster are fine with that.

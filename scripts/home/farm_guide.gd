@@ -58,6 +58,8 @@ func _poll() -> void:
 		FarmTutorial.detect()
 		if FarmTutorial.current() == "feed":
 			FarmTutorial.give_food()
+		if FarmTutorial.current() == "axe" and FarmTutorial.give_axe():
+			h._toast(String(FarmTutorial.rules()["axe_toast"]))
 	var st := FarmTutorial.state()
 	if bool(st["done"]) and not was_done and not bool(st["skipped"]):
 		var gems := str(int(FarmTutorial.option("end_gems")))
@@ -70,6 +72,9 @@ func _poll() -> void:
 		_refresh_hint()
 
 # ------------------------------------------------------------------ the hint line
+func hint_visible() -> bool:
+	return is_instance_valid(hint_box)
+
 func _refresh_hint() -> void:
 	var id := FarmTutorial.current()
 	if id == "":

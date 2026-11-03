@@ -30,7 +30,12 @@ static func state() -> Dictionary:
 
 ## Save migration v7 -> v8: a save with a Boki has played, so it skips the tutorial and Hob hands
 ## it the blueprints it already had (the legacy marker, resolved on the first look).
+## Keyed by its own field (data.farm_builder), not the save version, so it holds however the version
+## numbers end up; it runs from the v7 -> v8 step and again at load for any save that lacks the field.
 static func migrate(data: Dictionary) -> void:
+	if data.has("farm_builder"):
+		return
+	data["farm_builder"] = 1
 	if (data.get("roster", []) as Array).is_empty():
 		return
 	if typeof(data.get("tutorial")) != TYPE_DICTIONARY:

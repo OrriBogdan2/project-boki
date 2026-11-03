@@ -5,11 +5,12 @@
 		"player_swing": true,
 		"swing_cooldown_s": 2.0,
 		"end_gems": 30,
+		"axe_free": true,
 		"skippable": false,
 		"house_cost_in": "farm_build.json build.house (a little wood and 8 swings of labour)",
 		"free_order": true
 	},
-	"options_doc": "tracker_replaces_day1: the top-right card is the Goals tracker. player_swing: the interact key near a site swings a hammer (one swing per swing_cooldown_s), so one Boki is enough. end_gems: the one reward at the end (the old +5 each and +30). free_order: after the house is down feed, crop and meet-Hob can come in any order (false: strictly in the listed order). skippable: shows a Skip button (the owner says the farm tutorial cannot be skipped on a new save).",
+	"options_doc": "tracker_replaces_day1: the top-right card is the Goals tracker. player_swing: the interact key near a site swings a hammer (one swing per swing_cooldown_s), so one Boki is enough. end_gems: the one reward at the end (the old +5 each and +30). free_order: after the house is down feed, crop and meet-Hob can come in any order (false: strictly in the listed order). skippable: shows a Skip button (the owner says the farm tutorial cannot be skipped on a new save). axe_free: the tutorial hands over the axe (the Market still sells it later).",
 	"house_spot": {
 		"from": "landing",
 		"x": 0.0,
@@ -160,5 +161,6 @@
 			"level": 1
 		},
 		"per_source_doc": "At most this many rows from each source, so the top five are not all Hunter challenges. Order inside a source: closest to done first; ready-to-claim rows lead everything."
-	}
+	},
+	"axe_toast": "Someone left a spare axe by the house: it is yours"
 }

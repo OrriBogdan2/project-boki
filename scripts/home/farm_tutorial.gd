@@ -168,6 +168,13 @@ static func skip() -> void:
 	st["skipped"] = true
 	Save.save_game()
 
+## The tutorial's axe, handed over once when the option is on (the Market still sells it later).
+static func give_axe() -> bool:
+	if not bool(option("axe_free")) or HomeGather.has_tool("axe"):
+		return false
+	HomeGather.give_tool("axe")
+	return true
+
 ## Starter food for the trough, once, when the tutorial's feeding step is reached.
 static func give_food() -> void:
 	var st := state()

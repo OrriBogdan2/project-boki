@@ -4091,7 +4091,7 @@ func _build_bridge_now(k: String) -> void:
 		_toast("%s is open" % Data.ISLES[k]["name"]))
 
 func _toast(txt: String) -> void:
-	UI.toast(root_ui, txt)
+	UI.toast(root_ui, txt, UI.GOLD, 100.0 + (52.0 if guide and guide.hint_visible() else 0.0))
 
 func _open_hall() -> void:
 	var v := _new_panel("Trophy Hall", 560)

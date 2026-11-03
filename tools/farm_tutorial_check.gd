@@ -98,6 +98,7 @@ func _hob_rules() -> void:
 	# a v7 save: finished play keeps every blueprint it could already build, and skips the tutorial
 	var old := _new_save()
 	old["v"] = 7
+	old.erase("farm_builder")      # a real v7 save has no such field
 	old["layout"] = HomeLayout.fresh()
 	old["layout"]["fs"] = 1
 	old["layout"]["fb"] = 1
@@ -113,6 +114,13 @@ func _hob_rules() -> void:
 	ok(FarmUnlocks.level() >= 3 and kept,
 			"its first look hands over everything it could already build (level %d)" % FarmUnlocks.level())
 	ok(FarmBuilder.pending().is_empty() and not FarmTutorial.active(), "nothing is pending, and no tutorial")
+	var other_v8 := {"v": 8, "roster": [{}], "tutorial": {}}
+	FarmBuilder.migrate(other_v8)
+	ok(other_v8["farm_builder"] == 1 and other_v8["tutorial"]["ft"]["done"],
+			"a v8 save from elsewhere without the field is migrated by the field, not the version")
+	FarmBuilder.migrate(other_v8)
+	ok(other_v8["tutorial"]["ft"]["done"] and Save.fresh().has("farm_builder"),
+			"it runs once, and a new save carries the field")
 	var blank := {"roster": [], "tutorial": {}}
 	FarmBuilder.migrate(blank)
 	ok(not blank["tutorial"].has("ft"), "a save with no Boki yet keeps the tutorial for later")
@@ -126,7 +134,8 @@ func _tutorial_rules() -> void:
 	ok(not FarmTutorial.available("house") and not FarmTutorial.available("expedition"),
 			"the house waits for the wood, the last step for all")
 	var g0 := int(Save.d["gems"])
-	HomeGather.give_tool("axe")
+	ok(FarmTutorial.give_axe() and HomeGather.has_tool("axe") and not FarmTutorial.give_axe(),
+			"the tutorial hands over the axe once (axe_free)")
 	FarmTutorial.detect()
 	ok(FarmTutorial.did("axe") and FarmTutorial.current() == "chop", "owning an axe finishes step 1: chop a tree")
 	Work.add_mat("wood", int(FarmSites.build_cost("house")["wood"]))
