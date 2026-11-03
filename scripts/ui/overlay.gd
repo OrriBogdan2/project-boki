@@ -322,7 +322,10 @@ func _tab_controls(v: VBoxContainer) -> void:
 	_toggle(v, "Tap to sneak", "crouch_toggle", "Tap the sneak key to start and stop, instead of holding it")
 	UI.subtitle(v, "Two keys per action: click one, then press the new key or mouse button (Esc cancels, x clears it).")
 	var groups := [["Moving", ["up", "down", "left", "right", "jump", "glide", "dash", "crouch"]],
-		["Fighting", ["fire", "reload", "secondary", "gear1", "signature", "throw", "ultimate", "hunter_ult", "tonic", "armor_kit", "base"]],
+		["Fighting", [
+			"fire", "reload", "secondary", "gear1", "signature", "throw", "ultimate", "hunter_ult",
+			"tonic", "armor_kit", "base",
+		]],
 		["Squad and map", ["map", "scores", "emote", "pass_lead", "separate"]],
 		["At home", ["interact", "play", "talk", "details", "inventory", "hero"]]]
 	var named := {}
