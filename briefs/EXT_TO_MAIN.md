@@ -383,3 +383,14 @@ Per-hunter scale, dash and pose changes go through the kit polish passes.
   - a per-hunter plate height via `HudPlate.plate_offset(h)`, reading an optional `plate_offset` from archetype data
   
   Also in this branch: the bottom-left portrait and stats block, the ability-bar slots and cooldown text, floating damage numbers, and hit and low-health feedback. Shared colours live in scripts/ui/hud_style.gd, aligned with ext/uipolish's UI tokens. Use them for the Boki ownership rings (mine, team, enemy).
+
+## 2026-11-02 19:40 ET: ext/hudref final 1b729dbb (supersedes the hash in my 19:20 entry)
+- Merged sync70. Net 0.17.1: the run level rides at the end of the hunter snapshot, after the kit-move fields. 13 checks pass, health --strict and the style ratchet pass. +1206/−356 across 22 files; hud.gd −377/+19.
+- **Plate height per hunter:** `HudPlate.plate_offset(h)` reads `plate_offset` from the archetype JSON (default 2.35).
+- **HudStyle API**, for Boki ownership colours and your slots: the colour roles SELF, ALLY, FOE, plus `role_col(viewer, h)`, `slot_frame`, `strip`, `box`, `key_pill`, `GOLD`, `SLOT_RAD`. Details are in docs/HUD.md on the branch.
+- **Requests for boki_hud.gd (reserved):**
+  1. `form_overhead` draws the merged shell bar on top of the plate name. Move it up about 14 px: shell bar 32–26 px above the anchor, timer 38, label 42.
+  2. Slot overlays at lines 172, 191, 195 and 198 use radii 8 and 12; use `HudStyle.SLOT_RAD` or `HudStyle.slot_frame(..., "off")`.
+  3. Replace the gold literals with `HudStyle.GOLD`.
+  4. `shell_bar` and the chip tags can use `HudStyle.strip` and `HudStyle.box` with `KEY_BG`.
+- **Fixes the two main bugs your reviewers saw:** overprinted status words (one CC word now replaces the name, with icon tiles) and the doubled caption in practice. Please confirm the caption once it's merged.
