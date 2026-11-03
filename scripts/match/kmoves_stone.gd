@@ -444,38 +444,46 @@ const MOVES := {
 		],
 		[0.22, {"gp": 0.7, "p": 0.18, "y": 0.3, "lift": 0.1, "fr": Vector3(0.0, 0.35, -0.7), "rw": 1.0}],
 		[0.50, {}]]},
-	# the Snap's wind-up: both hands drawn in to the chest round the dark orb, leaning back (it holds)
+	# the Snap's wind-up (0.32s, it holds): she sinks and draws both hands in round the dark orb as it forms
+	# (0.12), then coils, rising and leaning far back with the orb cupped at the chest (0.30, loaded)
 	"ostra_snap_wind": {"hold": true, "keys": [
 		[0.00, {}],
 		[
-			0.18,
+			0.12,
 			{
-				"gp": -0.5, "p": 0.34, "y": -0.3, "lift": 0.08, "sq": 0.12, "legs": [0.16, -0.3, 0.14, -0.28],
-				"lw": 1.0, "fl": Vector3(-0.04, 0.22, -0.12), "hw": 1.0, "fr": Vector3(0.06, 0.24, -0.1), "rw": 1.0
+				"gp": -0.4, "p": 0.12, "y": -0.2, "lift": -0.03, "sq": 0.14, "fl": Vector3(-0.3, 0.12, -0.3),
+				"hw": 1.0, "fr": Vector3(0.3, 0.12, -0.3), "rw": 1.0
+			}
+		],
+		[
+			0.30,
+			{
+				"gp": -0.7, "p": 0.5, "y": -0.65, "lift": 0.14, "sq": -0.1, "legs": [0.2, -0.35, 0.16, -0.3],
+				"lw": 1.0, "fl": Vector3(-0.12, 0.3, -0.18), "hw": 1.0, "fr": Vector3(0.12, 0.32, -0.16), "rw": 1.0
 			}
 		]]},
-	# ... released: the right palm thrust out flat, stretched on the release (0.05), then the recoil
-	# throws her back and up (0.15) and she drifts down to her hover
+	# ... released (the hit frame is the release): both palms shoved out flat as she pitches forward into it,
+	# stretched long (0.05); the bundle's kick throws her back and up (0.16); she floats down to her hover
 	"ostra_snap": {"keys": [
 		[
 			0.00,
 			{
-				"gp": -0.5, "p": 0.34, "y": -0.3, "lift": 0.08, "sq": 0.12, "fl": Vector3(-0.04, 0.22, -0.12),
-				"hw": 1.0, "fr": Vector3(0.06, 0.24, -0.1), "rw": 1.0
+				"gp": -0.7, "p": 0.5, "y": -0.65, "lift": 0.14, "sq": -0.1, "fl": Vector3(-0.12, 0.3, -0.18),
+				"hw": 1.0, "fr": Vector3(0.12, 0.32, -0.16), "rw": 1.0
 			}
 		],
 		[
 			0.05,
 			{
-				"gp": 0.1, "p": -0.5, "y": 0.4, "sq": -0.16, "fr": Vector3(0.0, 0.18, -0.95), "rw": 1.0,
-				"fl": Vector3(-0.35, 0.05, 0.25), "hw": 1.0
+				"gp": 0.2, "p": -0.6, "y": 0.45, "lift": 0.02, "sq": -0.22, "fr": Vector3(0.1, 0.2, -1.0),
+				"rw": 1.0, "fl": Vector3(-0.1, 0.18, -0.95), "hw": 1.0
 			}
 		],
 		[
-			0.15,
+			0.16,
 			{
-				"gp": 0.8, "p": 0.28, "y": 0.25, "lift": 0.16, "sq": 0.06, "fr": Vector3(0.0, 0.3, -0.7), "rw": 1.0,
-				"fl": Vector3(-0.35, 0.1, 0.25), "hw": 0.8
+				"gp": 0.8, "p": 0.3, "y": 0.15, "lift": 0.18, "sq": 0.1, "fr": Vector3(0.05, 0.3, -0.7),
+				"rw": 0.9, "fl": Vector3(-0.3, 0.1, -0.4), "hw": 0.7
 			}
 		],
 		[0.50, {}]]},

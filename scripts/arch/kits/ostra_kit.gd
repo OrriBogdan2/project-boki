@@ -27,7 +27,8 @@ var seed: Dictionary = {}      # {pos, t, grow, rmax, sid, vis, burn, col}
 var sid_n := 0
 var swap: Dictionary = {}      # in flight: {t, T, land, cast, from (where she is now), hold (CastHold)}
 var swap_aim := -1.0           # Shift held to aim the Trade (-1: not aiming)
-var snap: Dictionary = {}      # the Snap's wind-up: {t, k}
+var snap: Dictionary = {}      # the Snap's wind-up: {t, T}
+var snap_rec := 0.0            # s of recovery left after a release (still slowed)
 var well: OstraWell            # X: Nightwell
 # counters for the checks
 var swells := 0
@@ -117,7 +118,8 @@ func move_k() -> float:
 		return 0.0
 	if not swap.is_empty():
 		return (swap["hold"] as CastHold).slow_k
-	var k := 1.0 - float(rmb_def()["snap"]["cast_slow"]) if not snap.is_empty() else 1.0
+	var casting := not snap.is_empty() or snap_rec > 0.0
+	var k := 1.0 - float(rmb_def()["snap"]["cast_slow"]) if casting else 1.0
 	return k * (1.0 + boost_k if boost_t > 0.0 else 1.0)
 
 ## Snap rank 3: a burst of speed on the cast, a bigger one when it hits (the later one replaces it).
@@ -130,6 +132,7 @@ func _boost(k: float) -> void:
 # ------------------------------------------------------------------ per step
 func _tick(dt: float) -> void:
 	boost_t = maxf(0.0, boost_t - dt)
+	snap_rec = maxf(0.0, snap_rec - dt)
 	if is_swollen():
 		swollen_t = maxf(0.0, swollen_t - dt)
 		res = res_max() * swollen_t / float(res_def()["swollen_t"])
@@ -183,7 +186,7 @@ func _tick_weapon() -> void:
 			if not base_wpn.is_empty(): h.wpn = base_wpn
 			m.fx.ring(h.pos, 1.0, Color("6f7cff"), 0.2)
 			m.fx.burst(_hand(), Color(0.45, 0.5, 1.0, 0.9), 8, 3.0, 0.2, 0.0, 1.0)
-	if primed and not h.downed:
+	if primed and not h.downed and snap.is_empty():
 		KitLooks.of(m).hold_on("os_charge", "mote", h, _hand(), 1.1, Color("6f7cff"))
 	if not primed and m.time - last_shot_t >= float(lmb_def()["idle"]) and not h.downed:
 		primed = true
@@ -298,6 +301,7 @@ func _drop_holds() -> void:
 	well.unlock()
 	swap_aim = -1.0
 	snap = {}
+	snap_rec = 0.0
 	if not swap.is_empty():
 		_swap_end(false)
 	if primed:
@@ -389,14 +393,16 @@ func fire_rmb(c: Dictionary) -> void:
 	if not snap.is_empty():
 		return
 	if not spend_rmb(): return
-	# a 0.2s wind-up: a black orb with a bright rim gathers at her hand, she slows while casting
-	snap = {"t": float(rmb_def()["snap"]["wind"])}
+	# the wind-up: a black orb with a bright rim gathers and swells at her hand, she slows while casting
+	var wind := float(rmb_def()["snap"]["wind"])
+	snap = {"t": wind, "T": wind}
 	play("ostra_snap_wind")
 	m.sfx("os_snap_wind", h.pos, -5.0, 1.0)
 
 func _tick_snap(dt: float) -> void:
 	snap["t"] = float(snap["t"]) - dt
-	KitLooks.of(m).hold_on("os_snaporb", "dark", h, _hand(), 1.2)
+	var grown := 1.0 - clampf(float(snap["t"]) / float(snap["T"]), 0.0, 1.0)
+	KitLooks.of(m).hold_on("os_snaporb", "dark", h, _hand(), lerpf(0.5, 1.3, grown))
 	if h.downed or h.stun_t > 0.0:
 		snap = {}
 		return
@@ -407,6 +413,7 @@ func _tick_snap(dt: float) -> void:
 func _snap_release() -> void:
 	var sn: Dictionary = rmb_def()["snap"]
 	snaps += 1
+	snap_rec = float(sn["recover"])
 	KitLooks.of(m).release("os_snaporb")
 	play("ostra_snap")
 	var k := power("sec") * (1.0 + float(sn["swollen_k"]) if is_swollen() else 1.0)

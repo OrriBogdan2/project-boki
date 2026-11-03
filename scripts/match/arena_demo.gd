@@ -34,6 +34,8 @@ const OLD_SMG := {
 }
 
 
+## px: the widest strip PNG written (the owner's review shots stay at most this wide)
+const STRIP_MAX_W := 1280
 ## --arena-demo=anim_<move>: a strip of frames of one kit move, cropped round the hunter, side by side
 ## (the frame times are in seconds of the demo; the move is triggered at 0.5 unless noted).
 const ANIM_DEMO := {
@@ -526,7 +528,9 @@ static func _anim_ult(P: Hunter, mv: String, t: float, dt: float) -> void:
 			(K as ArcherKit).ult.left = 1
 	P.inp["fire"] = mv.begins_with("pin_ult_") and mv != "pin_ult_cast" and t > 0.5 and t < 0.6
 
-## One frame of the strip: a square round the hunter; the last one writes the strip and quits.
+## One frame of the strip: a square round the hunter (--strip-w=<px> widens it toward the dummy, east, so a
+## shot's flight and impact fit, and the frames then stack top to bottom); the last one writes the strip, at
+## most STRIP_MAX_W wide, and quits.
 static func _grab(A: Arena, P: Hunter, last: bool) -> void:
 	var m := A.m
 	var img := m.get_viewport().get_texture().get_image()
@@ -534,20 +538,30 @@ static func _grab(A: Arena, P: Hunter, last: bool) -> void:
 	var c := Vector2(img.get_width() * 0.5, img.get_height() * 0.5)
 	if cam: c = cam.unproject_position(P.position + Vector3(0, 0.9, 0))
 	var S := 300
-	var r := Rect2i(Vector2i(int(c.x) - S / 2, int(c.y) - S / 2), Vector2i(S, S))
-	r.position.x = clampi(r.position.x, 0, img.get_width() - S)
+	var wide := S
+	for a in OS.get_cmdline_user_args():
+		if String(a).begins_with("--strip-w="): wide = maxi(S, int(String(a).substr(10)))
+	var r := Rect2i(Vector2i(int(c.x) - S / 2, int(c.y) - S / 2), Vector2i(wide, S))
+	r.position.x = clampi(r.position.x, 0, img.get_width() - wide)
 	r.position.y = clampi(r.position.y, 0, img.get_height() - S)
 	var frames: Array = A.get_meta("strip", [])
 	frames.append(img.get_region(r))
 	A.set_meta("strip", frames)
 	if not last:
 		return
-	var out := Image.create(S * frames.size() + 4 * (frames.size() - 1), S, false, Image.FORMAT_RGBA8)
+	# wide frames stack top to bottom, square ones side by side
+	var down := wide > S
+	var n := frames.size()
+	var out_w := wide if down else wide * n + 4 * (n - 1)
+	var out := Image.create(out_w, S * n + 4 * (n - 1) if down else S, false, Image.FORMAT_RGBA8)
 	out.fill(Color(0.06, 0.06, 0.08))
-	for i in frames.size():
+	for i in n:
 		var f: Image = frames[i]
 		f.convert(Image.FORMAT_RGBA8)
-		out.blit_rect(f, Rect2i(Vector2i.ZERO, Vector2i(S, S)), Vector2i(i * (S + 4), 0))
+		var at := Vector2i(0, i * (S + 4)) if down else Vector2i(i * (wide + 4), 0)
+		out.blit_rect(f, Rect2i(Vector2i.ZERO, Vector2i(wide, S)), at)
+	if out.get_width() > STRIP_MAX_W:
+		out.resize(STRIP_MAX_W, out.get_height() * STRIP_MAX_W / out.get_width(), Image.INTERPOLATE_LANCZOS)
 	var path := shot_path()
 	if path != "":
 		out.save_png(path)

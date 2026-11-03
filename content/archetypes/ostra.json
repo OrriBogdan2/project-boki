@@ -75,11 +75,12 @@
 		"hold": 0.0,
 		"snap": {
 			"range": 13.0,
-			"speed": 38.0,
+			"speed": 29.5,
 			"dmg": 9.5,
 			"size": 0.35,
 			"width": 0.7,
-			"wind": 0.2,
+			"wind": 0.32,
+			"recover": 0.15,
 			"cast_slow": 0.25,
 			"stun": [
 				0.8,
@@ -93,7 +94,7 @@
 			}
 		},
 		"variants": {
-			"tap": "A 0.2s wind-up, then one tight bundle of shards to 13m. It stuns the first foe it hits, from 0.8s up to 1.8s the further it flew. Swollen: +44% damage. Rank 3: you speed up 11% on the cast and 22% on a hit, for 2s."
+			"tap": "A 0.32s wind-up, then one tight bundle of shards to 13m. It stuns the first foe it hits, from 0.8s up to 1.8s the further it flew. Swollen: +44% damage. Rank 3: you speed up 11% on the cast and 22% on a hit, for 2s."
 		},
 		"sockets": {
 			"hit": "add",

@@ -109,6 +109,7 @@ static func trigger(P: Hunter, D: Hunter, mv: String, t: float, dt: float) -> vo
 		"os_orb_hot":
 			P.inp["fire"] = t > 1.58 and t < 1.62
 		"os_snap":
+			if t < 0.45: P.teleport(Vector3(D.pos.x - 4.5, P.pos.y, D.pos.z))
 			if at(t, dt, 0.5):
 				K.ch_rmb = 1.0
 				K.cd["rmb"] = 0.0

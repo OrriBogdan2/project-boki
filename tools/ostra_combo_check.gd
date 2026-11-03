@@ -132,19 +132,47 @@ func _ostra() -> void:
 	P.ak.press_rmb()
 	m.step(DT)
 	ok(
-		"rmb: a 0.2s wind-up first (dark orb at the hand, nothing fired yet)",
+		"rmb: a wind-up first (dark orb at the hand, nothing fired yet)",
 		K.snaps == 0 and not K.snap.is_empty() and KitLooks.of(m).holding("os_snaporb"), "snaps %d" % K.snaps
 	)
 	ok("small: she slows 25% while casting the Snap", absf(K.move_k() - 0.75) < 0.01, "%.2f" % K.move_k())
 	ok("anim: the wind-up plays ostra_snap_wind", K.anim_id == "ostra_snap_wind")
 	P.inp["sec_hold"] = false
-	step(m, 0.22)
-	var bundles: Array = m.shots.filter(
-		func(s): return s["by"] == P and String((s["x"] as Dictionary).get("ab", "")) == "rmb"
+	var wind := float(sn["wind"])
+	var t_press := m.time - DT
+	var rel := [0.0]
+	var hit_t := [0.0]
+	var seen := [0, 0]
+	T.teleport(home + Vector3(6.0, 0, 0))
+	aim_at(P, T.pos)
+	step(m, wind - 0.1)
+	ok("item 40: nothing is fired or hurt before the release", K.snaps == 0 and dmg(T) == 0.0, "snaps %d" % K.snaps)
+	step(m, 0.2, func():
+		if K.snaps == 1 and rel[0] == 0.0:
+			rel[0] = m.time
+			seen[0] = m.shots.filter(
+				func(s): return s["by"] == P and String((s["x"] as Dictionary).get("ab", "")) == "rmb"
+			).size()
+			seen[1] = KitLooks.of(m).skins_live("spear")
+		if dmg(T) > 0.0 and hit_t[0] == 0.0:
+			hit_t[0] = m.time)
+	ok(
+		"item 40: the release is at the data's wind-up (0.32s), +40% over the old 0.2s",
+		absf(rel[0] - t_press - wind) < 0.05 and wind >= 0.2 * 1.4 - 0.01, "wind %.2f" % (rel[0] - t_press)
 	)
+	step(m, 0.3, func(): if dmg(T) > 0.0 and hit_t[0] == 0.0: hit_t[0] = m.time)
+	var travel := 6.0 / float(sn["speed"])
+	ok(
+		"item 40: damage lands on the impact (release + travel), not at the press or release",
+		hit_t[0] > rel[0] + travel * 0.6 and absf(hit_t[0] - t_press - wind - travel) < 0.1 and dmg(T) > 0.0,
+		"hit at %.2f (release %.2f travel %.2f)" % [hit_t[0] - t_press, rel[0] - t_press, travel]
+	)
+	var total := wind + 13.0 / float(sn["speed"])
+	ok("item 40: total cast time is about 40% over the old 0.54s", absf(total / 0.54 - 1.4) < 0.1, "%.2f" % total)
+	ok("item 40: a short recovery keeps her slowed after the release", float(sn["recover"]) > 0.0)
 	ok(
 		"rmb: then one tight bundle (a single projectile, crystal-spear skin)",
-		K.snaps == 1 and bundles.size() == 1 and KitLooks.of(m).skins_live("spear") == 1, "bundles %d" % bundles.size()
+		K.snaps == 1 and seen[0] == 1 and seen[1] == 1, "bundles %d" % seen[0]
 	)
 	ok("rmb: the ability is spent (no second cast)", K.ch_rmb < 1.0 and not K.rmb_ready())
 	# the stun: near vs far, and visible on the training dummy
@@ -329,7 +357,7 @@ func _ostra() -> void:
 	T.teleport(home + Vector3(6.0, 0, 0))
 	aim_at(P, T.pos)
 	tap(m, P)
-	step(m, 0.4)
+	step(m, 0.56)
 	var stun_in := T.stun_t
 	K.cast_e()
 	step(m, 0.5)
@@ -482,7 +510,7 @@ func _ostra() -> void:
 	step(m, 1.6)
 	ok("merge hold: the orb is Settled before the merge", K.primed)
 	K.swap_aim = 0.2
-	K.snap = {"t": 0.1}
+	K.snap = {"t": 0.1, "T": 0.32}
 	ok("merge hold: a merge is under way", _merge(P))
 	step(m, 0.2)
 	ok(
