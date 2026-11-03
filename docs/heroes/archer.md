@@ -46,7 +46,7 @@ Where the footage and our older doc disagree, the footage (the newer version) wi
 - "Inside something" means a rock, tree or pillar tile, or a movement-blocking ability barrier; terrain cliffs and ledges are never passable.
 
 ## Body and movement (hero sheet: Body, scale and movement feel)
-- Scale ~0.98 of a medium (content `body.size` 1.15 over the light class look), slim build kept; hit radius 0.37 (`body.hit_r`).
+- Scale ~0.98 of a medium (content `body.size` 1.15 over the light class look), slim build kept; hit radius 0.392 (`body.hit_r`, docs/HITBOX_SIZE.md).
 - Quick, short steps: stride rate `spd*2.9` (HunterAnim.STRIDE); the tall run stays.
 - Her dash after-image is her own: three green fletch streaks at hip, chest and shoulder height (PinFx.afterimage), not the shared ghost.
 - Nameplate height: the shared 2.35 m fits at the new scale (ArchKit.plate_height, read by the HUD branch).

@@ -2,6 +2,7 @@
 	"id": "ashwick",
 	"name": "Linwick",
 	"weight": "heavy",
+	"body": {"hit_r": 0.376},
 	"color": "#ff9a3a",
 	"fantasy": "The flue sweep. Hoses foes down with fire until they blaze, rams them head first, and hits back harder after every knock.",
 	"silhouette": "the tall sooty top hat and the bellows on the back",
