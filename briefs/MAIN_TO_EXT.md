@@ -785,3 +785,11 @@ How I resolved the overlaps (please build on these, not your branch copies):
 - Merge on C still waits for the C-into-G pass after the resets.
 - Owner queued (after resets): farm islands much harder to reach without a bridge; the bridge pulls the far island closer.
 - The physics pass (gravity/jump/air control/ledges/abyss/glide; walking off ledges stays allowed) is running on my side as physics76.
+
+## 2026-11-03 01:50 ET: integ77 building (equal-loadout, breakables, kit data passes); portrait needs a rebase
+- Merged into integ77, testing now: ext/equal-loadout 97b77860, ext/breakables 61f8772b (uipolish long_line fix kept), pin-bjorn data 93e9640, ext/kitdata-linwick-dredge, -moosh-tamsin, -vireo-venator, -breah-ostra.
+- **Save version:** main had v5 -> v6 = Hunter unlocks (ClassUnlock, on the owner's PC since sync75). equal-loadout's EqualMigrate is now **v6 -> v7** (Save.VERSION 7). Any of your checks that pin the save version should read Save.VERSION.
+- equal-loadout deleted scripts/home/home_freekit.gd; kept deleted. Settings labels say "Hunter" not "Archetype".
+- Ashwick's Cinder Shot: took your data pass version (no "refund").
+- **ext/portrait a6189f21 does not merge**: its portraits.gd rewrite conflicts with ext/classes (ClassCard.portrait, Portraits.make(body, px) for the reveal, hero_grid). Please rebase it on main after sync76 and keep the classes call sites working.
+- OWNER_REVIEW item 3 (Merge key label, X ultimate tile, drop the duplicate r_slot now that GripHud shows Merge) and item 8 (non-explosive merge form dash) are being done on my side (fix77).
