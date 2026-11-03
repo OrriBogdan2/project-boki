@@ -41,6 +41,7 @@ const SHATTER_R := 2.7         # m, the Shatter's spike starburst (about 1.5 bod
 const THROW_T := 0.16          # s from letting go of RMB to the release: the arm draws back, then whips (tm_spear)
 const SPEAR_ARC := 0.9         # m the thrown spear's flight bows above the straight line from hand to ground
 const LAND_KICK_R := 7.0       # m: a landing this close to her gives her camera a small kick
+const BUD_CLOSE_T := 0.15     # s the frost bud takes to close over her when cast standing
 const CARRY_T := 0.5           # s a skate out of Rimelock holds its push-off speed before easing to the skate's
 
 func _setup() -> void:
@@ -777,18 +778,22 @@ func cast_ult() -> bool: return HeroUlt.press(self, _start_rime)
 func has_ult() -> bool: return true
 
 
-## Sealed in: invulnerable and rooted, and the rink snaps out round her. Nothing else fires inside.
+## Sealed in: invulnerable and rooted, and the rink snaps out round her. Nothing else fires inside. Cast from
+## a skate, her momentum carries her on as the shell closes (x.carry_t, slowing evenly from the skate's speed
+## to a stop, so she travels speed * carry_t / 2), the rink riding with her; then she is rooted.
 func _start_rime() -> bool:
+	var carry := {}
 	if not rinkrun.is_empty():
+		carry = {"v": h.roll_speed, "dir": rinkrun["dir"]}
 		_rinkrun_end()
 	if spear_aim or rmb_down:
 		spear_aim = false
 		rmb_down = false
 		AimKit.hide(h, "rmb")
-	rime = {"t": 0.0, "at": h.pos, "slow": {}, "creak": 0.6}
+	rime = {"t": 0.0, "at": h.pos, "slow": {}, "creak": 0.6, "carry": carry}
 	stats["rimes"] += 1
 	_rime_hold_body()
-	play("tm_rime")
+	play("tm_rime" if carry.is_empty() else "tm_rime_carry")
 	m.sfx("rime_lock", h.pos, 0.0, 1.0)
 	m.fx.word(h.pos + Vector3(0, 3.0, 0), "RIMELOCK", col_of(x_def()), true)
 	m.fx.burst(h.pos + Vector3(0, 1.0, 0), Color("dffcff"), 24, 4.0, 0.4, 2.0, 1.1)
@@ -800,8 +805,21 @@ func _start_rime() -> bool:
 func _rime_hold_body() -> void:
 	h.inv_t = maxf(h.inv_t, 0.12)
 	h.root_t = maxf(h.root_t, 0.12)
+	if _rime_carrying():
+		var carry: Dictionary = rime["carry"]
+		h.roll_dir = carry["dir"]
+		h.roll_speed = float(carry["v"]) * (1.0 - float(rime["t"]) / float(x_def()["carry_t"]))
+		h.roll_t = 0.1
+		rime["at"] = h.pos
+		return
+	h.roll_t = 0.0
 	h.vel.x = 0.0
 	h.vel.z = 0.0
+
+
+## Still sliding on the skate's momentum as the shell closes.
+func _rime_carrying() -> bool:
+	return not (rime["carry"] as Dictionary).is_empty() and float(rime["t"]) < float(x_def()["carry_t"])
 
 
 ## X again: in the last `late` seconds it cracks open early at late_k; any earlier the shell just breaks
@@ -893,7 +911,8 @@ func _rime_look(at: Vector3, radius: float, k: float, dt: float) -> void:
 	var xd := x_def()
 	var snap := clampf(float(rime["t"]) / float(xd["snap_t"]), 0.0, 1.0)
 	ulk().keep("rink", "rink", at, {"r": radius * lerpf(0.25, 1.0, snap), "crack": k})
-	ulk().keep("bud", "frostbud", h.pos, {"k": clampf(float(rime["t"]) / 0.15, 0.0, 1.0)})
+	var close_t := float(xd["carry_t"]) if not (rime["carry"] as Dictionary).is_empty() else BUD_CLOSE_T
+	ulk().keep("bud", "frostbud", h.pos, {"k": clampf(float(rime["t"]) / close_t, 0.0, 1.0)})
 	AimKit.circle(h, "x", {"at": at, "r": radius, "fill": k, "all": true, "col": col_of(xd), "hot": k})
 	rime["creak"] = float(rime["creak"]) - dt
 	if float(rime["creak"]) <= 0.0:

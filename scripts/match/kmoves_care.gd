@@ -461,6 +461,20 @@ const MOVES := {
 		[0.2, {"p": 0.35, "sq": 0.2, "lift": -0.08, "fl": Vector3(0.28, 0.1, -0.22), "hw": 1.0,
 			"wa": Vector3(0.5, 0, -0.4), "wf": 1.0,
 			"lw": 1.0, "legs": [0.7, -1.1, 0.6, -1.0]}]]},
+	# skated into the seal (x.carry_t): the momentum carries her as the shell closes. She whips side-on into a
+	# braced hockey stop, leaning back hard over the blades with the arms flung out as the rink snaps (0.08),
+	# grinds on low with the arms swinging in (0.28), and sinks into the sealed crouch as she stops (0.5)
+	"tm_rime_carry": {"keys": [
+		[0.0, {"p": -0.45, "lw": 1.0, "legs": [0.85, -1.4, -0.6, -0.3]}],
+		[0.08, {"y": 1.15, "r": 0.5, "p": 0.15, "sq": 0.3, "lift": -0.16, "lw": 1.0,
+			"legs": [0.9, -1.35, 0.35, -0.85], "fl": Vector3(-0.45, 0.6, 0.05), "hw": 1.0,
+			"wa": Vector3(-0.6, 0, 0.9), "wf": 1.0}],
+		[0.28, {"y": 0.8, "r": 0.32, "p": 0.3, "sq": 0.28, "lift": -0.14, "lw": 1.0,
+			"legs": [0.85, -1.3, 0.55, -1.0], "fl": Vector3(0.1, 0.3, -0.25), "hw": 1.0,
+			"wa": Vector3(0.2, 0, 0.1), "wf": 1.0}],
+		[0.5, {"p": 0.35, "sq": 0.2, "lift": -0.08, "fl": Vector3(0.28, 0.1, -0.22), "hw": 1.0,
+			"wa": Vector3(0.5, 0, -0.4), "wf": 1.0,
+			"lw": 1.0, "legs": [0.7, -1.1, 0.6, -1.0]}]]},
 	# sealed in (f27-f55): hunched over, arms crossed on the chest, the fan folded in, knees bent
 	"tm_rime_hold": {"hold": true, "keys": [
 		[0.0, {"p": 0.35, "sq": 0.2, "lift": -0.08, "fl": Vector3(0.28, 0.1, -0.22), "hw": 1.0,

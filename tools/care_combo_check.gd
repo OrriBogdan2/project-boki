@@ -191,6 +191,58 @@ func _rime_glide_skate() -> void:
 	P.inp["dash_down"] = false
 	await _free(m)
 
+## Skating into Rimelock: the skate's momentum carries her on as the shell closes (x.carry_t, easing to a stop:
+## skate speed * carry_t / 2), the rink riding with her; then she is rooted (no slide on the ice) until it ends,
+## and an early recast frees her.
+func _rime_skate_in() -> void:
+	var r: Array = sc.setup("rimewright", 30.0)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var K: RimewrightKit = P.ak
+	P.lvl = 6
+	K.cd["x"] = 0.0
+	P.dashes = P.max_dashes()
+	P.inp["move"] = Vector2(1, 0)
+	P.inp["dash"] = true
+	P.inp["dash_down"] = true
+	step(m, 1.0 / 60.0)
+	P.inp["dash"] = false
+	step(m, 0.4)
+	var v := P.roll_speed
+	var p0 := P.pos
+	HunterKeys.ult_pressed(P)
+	P.inp["dash_down"] = false
+	var sealed := K.ult_running() and not K.rinkrunning() and K.anim_id == "tm_rime_carry"
+	var carry_t := float(K.x_def()["carry_t"])
+	step(m, carry_t + 0.1)
+	var carried := Vector2(P.pos.x - p0.x, P.pos.z - p0.z).length()
+	var want := v * carry_t * 0.5
+	ok(
+			"tm X: skating into it carries her on as the shell closes (skate speed x carry_t / 2)",
+			sealed and absf(carried - want) < want * 0.15 and carried > 2.0,
+			"%.2f m (want %.2f from %.1f m/s over %.1fs)" % [carried, want, v, carry_t])
+	var rink_at: Vector3 = K.rime["at"]
+	ok(
+			"tm X: the rink rode with her and sits where she stopped",
+			Vector2(rink_at.x - P.pos.x, rink_at.z - P.pos.z).length() < 0.05)
+	var p1 := P.pos
+	var fastest := 0.0
+	for i in 60:
+		step(m, 1.0 / 60.0)
+		fastest = maxf(fastest, Vector2(P.vel.x, P.vel.z).length())
+	ok(
+			"tm X: then encased and rooted: zero planar speed with the move key held, no slide on the ice",
+			K.ult_running() and fastest < 0.01 and Vector2(P.pos.x - p1.x, P.pos.z - p1.z).length() < 0.01,
+			"fastest %.3f m/s" % fastest)
+	HunterKeys.ult_pressed(P)
+	step(m, 0.4)
+	ok(
+			"tm X: an early recast frees her: she walks off",
+			not K.ult_running() and P.root_t <= 0.0 and Vector2(P.pos.x - p1.x, P.pos.z - p1.z).length() > 0.5,
+			"moved %.2f" % Vector2(P.pos.x - p1.x, P.pos.z - p1.z).length())
+	P.inp["move"] = Vector2.ZERO
+	await _free(m)
+
 ## Rank 3 Skate over the Abyss lays ice underfoot that holds a while and then goes; below rank 3 she gets none.
 func _skate_ice() -> void:
 	var laid := {}
@@ -828,6 +880,7 @@ func rimewright() -> void:
 	await _skate_feel()
 	await _skate_only()
 	await _rime_glide_skate()
+	await _rime_skate_in()
 	await _skate_ice()
 	await _spear_rank3()
 	# --- Ice Spear: hold shows the ring at the cursor; it lands there, slows, detonates 1.8 s later

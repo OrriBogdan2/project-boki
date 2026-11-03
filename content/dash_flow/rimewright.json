@@ -6,7 +6,7 @@
 			"lmb": {"mode": "fire", "carry": true, "variant": "beam", "source": "Data: Skate is a held mode, released to stop. Footage (0239-0245, 0285-0290): she fires the whole skate and the darts become straight thick beams. Ours: darts fly as beams at normal damage (data pass); the skate goes on."},
 			"rmb": {"mode": "fire", "carry": true, "source": "Data: nothing stops a cast during the held Skate. Footage: not shown. Ours: the spear aim and throw go on while she keeps skating."},
 			"e": {"mode": "fire", "carry": true, "source": "Data: nothing stops a cast during the held Skate. Footage: not shown. Ours: the Rink Wall's tell and slide start while she keeps skating."},
-			"x": {"mode": "cancel", "carry": false, "source": "Data: the ult makes her invulnerable inside a slowing zone; footage (ult f25-f55): she is rooted in the crystal. Ours: Rimelock ends the skate and roots her at once."},
+			"x": {"mode": "cancel", "carry": true, "source": "Data: the ult makes her invulnerable inside a slowing zone; footage (ult f25-f55): she is rooted in the crystal. Owner (18:20): skating into it keeps her momentum. Ours: Rimelock ends the skate and the skate's speed carries her on as the shell closes (x.carry_t 0.5 s, easing to a stop: 11.5 m/s gives 2.9 m), then she is rooted."},
 			"q": {"mode": "fire", "carry": true, "source": "No source glove; the skate is a held move, so a glove goes off from it like her abilities."}
 		},
 		"air": {
