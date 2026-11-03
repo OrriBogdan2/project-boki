@@ -199,3 +199,26 @@ Portrait:
 
 Turnaround:
 > Character turnaround reference sheet for a 3D modeller: the same character shown three times side by side at the same scale on one sheet, left to right: FRONT view, SIDE view (profile), BACK view. Neutral relaxed A-pose standing straight, arms held slightly away from the body, full body head to toe in every view, all three figures exactly the same height and aligned on one ground line. Flat even studio lighting, no dramatic shadows, plain flat light grey background, no scenery. Any held weapon hangs down beside the leg in the same hand in every view and is visible in all three views. The torn sleeve and the glowing lightning scars are on the same arm in every view; the copper mast and banner on her back in every view. No text, no labels, no logos.
+
+### Cinder (ashwick), Mad Pyromancer
+Owner direction: salamander-folk woman, unmistakable and cool; lore: an alchemist trying to bottle the Wyrm's fire.
+
+Warden block:
+> Redesign the character from the first two reference images at full production quality, keeping her design (salamander-folk: wide rounded amphibian snout with a lipless grin, no human nose or ears, lidless bulging eyes with slit pupils under cracked brass goggles, scaled charcoal skin with fire-salamander ember blotches that glow, six feathery glowing gill-frills around the jaw, a newt crest, a long thick tail, four-fingered padded hands, scorched apron, bandoliers of flasks, a copper flame-lance fed from a still on her back), and make her more striking, cool and epic than the reference: Cinder, the Mad Pyromancer, an alchemist trying to bottle the Wyrm's own fire, gleeful and slightly unhinged. Low and hunched, about 1.4 metres in her crouch, knees bent wide, a thick tail longer than she is tall balancing the lean, a slim wiry body. Unmistakably a salamander woman, not a human and not a dragon: glossy charcoal-black skin with bright orange-red blotches that glow like embers, a pale orange throat, the gill-frills flaring like a burning ruff. Bubbling flasks of green and orange liquid fire on her bandoliers; one glowing green flask held up gleefully. A sly, gleeful toothy grin.
+
+| File | Size | Studio image | Notes |
+|---|---|---|---|
+| `wardens/cinder_splash.png` | 2752x1536 | 83e20219 | |
+| `wardens/cinder_portrait.png` | 2048x2048 | a5ed2d40 | |
+| `wardens/cinder_turnaround.png` | 3168x1344 | 02589bed | |
+
+All take 1. Known issue: the turnaround drew the flame-lance with a forked tip; S2 should follow the splash (a copper lance with a flared nozzle).
+
+Splash:
+> Splash art, 16:9 widescreen: her cluttered alchemy lab carved into a cliff, glassware, copper pipes and a big bubbling still, mid-explosion; Cinder leaps out of the blast laughing, tail lashing, gill-frills flared and blazing, the copper flame-lance spraying a roaring jet of green-and-orange fire, flasks flying off her bandolier, goggles cracked and glinting, sparks and glass shards everywhere, full figure, dynamic. Hot orange and acid-green firelight against dark smoky shadows. Palette: charcoal skin, ember orange blotches, pale orange throat, glowing gill frills, scorched apron brown, goggle brass, green flask glow. No text, no logos.
+
+Portrait:
+> Portrait bust, square 1:1, for a game hero picker: head and shoulders, three-quarter view, the wide salamander head with a gleeful toothy grin, bulging slit-pupil eyes under cracked brass goggles pushed up on the head, the six glowing gill-frills flared, ember blotches glowing on charcoal skin, a bubbling green flask held up beside her face. Exactly six gill-frills, three on each side. Simple smoky dark-orange gradient background, strong rim light. Palette: charcoal, ember orange, brass, green flask glow. No text, no logos.
+
+Turnaround:
+> Character turnaround reference sheet for a 3D modeller: the same character shown three times side by side at the same scale on one sheet, left to right: FRONT view, SIDE view (profile), BACK view. Neutral relaxed A-pose standing straight, arms held slightly away from the body, full body head to toe in every view, all three figures exactly the same height and aligned on one ground line. Flat even studio lighting, no dramatic shadows, plain flat light grey background, no scenery. Any held weapon hangs down beside the leg in the same hand in every view and is visible in all three views. In her usual low crouch in every view, the long tail fully visible in the side and back views, the still on her back, the flame-lance in the same hand in every view. No text, no labels, no logos.
