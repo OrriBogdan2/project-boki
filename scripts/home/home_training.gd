@@ -106,7 +106,6 @@ func build() -> void:
 		var cc: Color = Data.CLASSES[["light", "medium", "heavy"][k]]["color"]
 		Models.part(rk, Models.box(0.36, 0.5 + k * 0.15, 0.08), Models.toon(cc), Vector3(-0.55 + k * 0.55, 1.1 - k * 0.05, 0.08))
 	_label(rk, "Try-on rack", Vector3(0, 2.2, 0), UI.GOLD, 34)
-	h.world.set_block_rect(int(RACK.x), int(RACK.z), int(RACK.x), int(RACK.z))
 	_dummy(STILL, "still")
 	_dummy(MOVER, "move")
 	_dummy(SHOOTER, "shoot")
