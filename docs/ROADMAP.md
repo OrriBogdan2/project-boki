@@ -35,7 +35,7 @@ Last updated: 2026-11-02 18:40 ET, sync69.
 | ext/drop | other session (queued) | Higher drop (~20s), Fortnite-style dive and float, squad comet with a jumpmaster | after ext/equal |
 | ext/market | other session (queued) | Neopets-style: Shelter (adopt Boki for gems, which are destroyed; rehoming pays nothing), weekly Boki transfer, player stalls with search, Auction House, more item variety, fees and taxes as sinks | late tonight or tomorrow |
 
-| Bigger map | other session (queued last) | The Hollow Crown ~2-3x in area, streamed so load and frame time stay flat | after ext/market |
+| Bigger map (ext/tier-map) | other session | The Hollow Crown stays the beginner map (tiers 0-1); the Hollow gets the Riven Wilds, 2.4x the area, harder monsters, a winding sky train, far monsters asleep (docs/decisions/0014-tier-map.md) | built, waiting on review |
 
 ## Next (main session)
 

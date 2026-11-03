@@ -339,7 +339,7 @@ func _strike() -> void:
 
 func render(delta: float, alpha: float) -> void:
 	super.render(delta, alpha)
-	visible = not dead
+	visible = not dead and not asleep      # (asleep: 48 m from everyone, out of sight; MobSleep)
 	if stag_ring:
 		stag_ring.visible = stag_open > 0.0 and stagger_t <= 0.0
 		if stag_ring.visible:

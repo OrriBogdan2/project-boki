@@ -692,7 +692,7 @@ func _start(o: Dictionary) -> void:
 		layout = World.load_layout("arena")     # the practice arena (scripts/match/arena.gd)
 	map_name = String(layout.get("name", ""))
 	T = MapThreat.apply(T, layout)      # a harder map's own threat on top of the tier (map_threat.gd)
-	mob_sleep = MobSleep.new(layout)    # far idle monsters sleep on a streamed map (mob_sleep.gd)
+	mob_sleep = MobSleep.new(layout)    # far idle monsters and wild Boki sleep on a streamed map (mob_sleep.gd)
 	if _stage_cb.is_valid(): world.stage_cb = _world_step
 	if not layout.is_empty():
 		await world.generate_authored(layout, seed_val)
@@ -4284,7 +4284,7 @@ func step(dt: float) -> void:
 			h.set_meta("hist", hist)
 	if skydrop: skydrop.tick(dt)
 	_prof("drop")
-	for k in kins: k.sim(dt)
+	mob_sleep.sim_kins(self, dt)
 	_prof("kins")
 	mob_sleep.sim_all(self, dt)
 	if blight: blight.tick(dt)

@@ -36,11 +36,12 @@ func _ready() -> void:
 		m.material_override = Models.glow_mat(Color("8fe3c8")); m.position = p + Vector3(0, 3, 0)
 		add_child(m)
 	var cam := Camera3D.new()
+	var mid := w.w * 0.5
 	if "--map-angle" in OS.get_cmdline_user_args():
-		cam.position = Vector3(112, 24, 141); cam.rotation = Vector3(-0.95, 0, 0); cam.fov = 42
+		cam.position = Vector3(mid + 4, 24, mid + 33); cam.rotation = Vector3(-0.95, 0, 0); cam.fov = 42
 	else:
-		cam.projection = Camera3D.PROJECTION_ORTHOGONAL; cam.size = 222.0
-		cam.position = Vector3(108, 120, 108); cam.rotation = Vector3(-PI / 2, 0, 0)
+		cam.projection = Camera3D.PROJECTION_ORTHOGONAL; cam.size = w.w + 6.0
+		cam.position = Vector3(mid, 120, mid); cam.rotation = Vector3(-PI / 2, 0, 0)
 	cam.far = 400.0
 	add_child(cam)
 	cam.make_current()
