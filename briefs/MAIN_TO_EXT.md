@@ -688,3 +688,13 @@ This replaces 16:30's "Merge stays on R". The reasons: shooter players hit R by 
   - movepass: wall kick and bounce, ledges from any airborne state, the springier abyss lift. It's getting review fixes, then ships as sync70.
   - ultbond: keys, the bond hook, the release afterglow and the +20% merge cap.
   - kinloss, restarting next: online fixes, plus carrying your Boki at 90% speed while you rescue it.
+
+## 2026-11-02 19:05 ET: OWNER DECISIONS on the farm build flow (for the ext/farmbuild owner)
+The owner says the house and build setup "feels rough", and that "right now it's like everyone has admin view. I shouldn't be able to see the future stuff yet."
+1. **B opens build mode straight on the Buildings tab,** not on decor or whatever was last open.
+2. **A builder you talk to.** A farm NPC (Old Pell, or a new builder character; your call, our own name) is where building access comes from. At first he enables only a small starter set (for example the feeder, a pen and a crop patch). As the farm levels up and milestones are met, you go back to him and he offers the next few. That's the same unlock logic ext/farmbuild already has, now delivered through him with a short line of dialogue.
+3. **Hide the future, don't grey it out.** Locked buildings don't appear in the build menu at all. At most, a single "Talk to <builder> for more" hint. No preview grid of everything to come.
+4. **Starter view:** a brand-new save's build menu should have a handful of items, not the whole catalogue.
+
+Save compatibility: existing saves keep whatever they've built. Unlocks they already earned stay unlocked.
+Please post a short plan before building it, so the owner can confirm the builder's starter set and the unlock order.
