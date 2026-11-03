@@ -227,21 +227,24 @@ def gen_classes():
         rows.append([link(class_page_name(aid), d["name"]), "%s / %s" % (num(cs.get("hp", "?")), num(cs.get("dashes", "?"))), wname(d["signature"] if "signature" in d else d["weapons"][0]),
                      d["passive"]["name"], d["dash"]["name"], d["rmb"]["name"], d["e"]["name"], d["r"]["name"] if "r" in d else "none (Boki Merge)"])
     cu = json.load(open(os.path.join(ROOT, "content", "rules", "class_unlock.json"), encoding="utf-8"))
+    kinds = cu["reward_kinds"]
     cu_rows = []
+    m_rows = []
     for aid in ARCH_ORDER:
-        e = cu["classes"].get(aid)
-        if not e or aid not in ARCH: continue
-        cu_rows.append([link(class_page_name(aid), ARCH[aid]["name"]), "pick at the start" if aid in cu["starters"] else "play", e["goal"]["text"], num(e["goal"]["target"]), str(e["level"])])
-    xpr = cu["xp"]
-    early = cu.get("early", [])
-    unlock = "### How Hunters unlock\n\nAt character creation you pick 1 starting Hunter (%s). " % ("any of the %d" % len(cu["starters"]) if len(cu["starters"]) >= len(ARCH_ORDER) else ", ".join(ARCH[a]["name"] for a in cu["starters"]))
-    if early:
-        unlock += "The next %d unlocks come early: %s; each one done is a free pick of any locked Hunter. " % (len(early), ", then ".join(e["text"].lower() for e in early))
-    unlock += "After that, every Hunter opens when its own goal is done and the account has reached its level. An unlock is never automatic: when one is ready you hold the button on the Hunters screen for %s, and letting go early cancels it. " % secs(cu.get("hold_s", 1.6))
-    unlock += "Account XP comes from expeditions: %s for playing one, %s more for getting out, %s per monster (up to %s), %s per hunter knocked down (up to %s), %s per lair boss and %s per Boki brought home. " % (
-        num(xpr["match"]), num(xpr["extract"]), num(xpr["mob"]), num(xpr["mob_cap"]), num(xpr["knock"]), num(xpr["knock_cap"]), num(xpr["boss"]), num(xpr["caught"]))
-    unlock += "Level L to L+1 costs %s + %s x (L - 1) XP, up to level %s. Locked Hunters stay playable in the Arena and the Training Grounds, and saves from before Hunter unlocks keep every Hunter open.\n\n" % (num(xpr["level_base"]), num(xpr["level_step"]), num(xpr["max_level"]))
-    unlock += table(["Hunter", "Starter", "Own goal", "Target", "Account level"], cu_rows)
+        if aid not in ARCH: continue
+        ch = cu["unlock"].get(aid, {})
+        when = "pick at the start, else " if aid in cu["starters"] else ""
+        after = ", once %d Hunters are open" % ch["after"] if ch.get("after") else ""
+        cu_rows.append([link(class_page_name(aid), ARCH[aid]["name"]), when + ch.get("tier", "?"), ch.get("text", "") + after, num(ch.get("target", "?"))])
+        for g in cu["mastery"].get(aid, []):
+            m_rows.append([ARCH[aid]["name"], g["text"], num(g["target"]), "%s: %s" % (kinds.get(g["reward"]["kind"], g["reward"]["kind"]), g["reward"]["name"])])
+    starters = ", ".join(ARCH[a]["name"] for a in cu["starters"] if a in ARCH)
+    unlock = "### How Hunters unlock\n\nAt character creation you pick %d of the %d starting Hunters (%s). " % (cu["starter_picks"], len(cu["starters"]), starters)
+    unlock += "Every other Hunter opens through its own challenge, counted across all your expeditions whoever you play. A done challenge never opens a Hunter by itself: you hold the button on the Hunters screen for %s, and letting go early cancels it. " % secs(cu.get("hold_s", 1.6))
+    unlock += "Tiers: easy is %s, medium %s, hard %s. Locked Hunters stay playable in the Arena and the Training Grounds, and saves from before Hunter unlocks keep every Hunter they had.\n\n" % (cu["tiers"]["easy"], cu["tiers"]["medium"], cu["tiers"]["hard"])
+    unlock += table(["Hunter", "Tier", "Challenge", "Target"], cu_rows)
+    unlock += "\n\n### Mastery\n\nEach Hunter has its own mastery goals, counted only in expeditions played as that Hunter. Each one done is a mastery level and a cosmetic reward; playing a Hunter longer never gives power.\n\n"
+    unlock += table(["Hunter", "Goal", "Target", "Reward"], m_rows)
     lv = []
     for i, t in enumerate(xp):
         lv.append([str(i + 1), num(t), "R unlocks" if (i + 1) in ult_at[:1] else ("R rank 2" if (i + 1) in ult_at[1:] else "")])

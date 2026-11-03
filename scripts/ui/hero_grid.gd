@@ -49,7 +49,7 @@ static func _card(ak: String, cur: String, on_pick: Callable, on_kit: Callable, 
 		col.add_child(UI.label("Playing", 12, UI.GOOD, UI.semi))
 	elif not open and gated:
 		col.add_child(UI.label("Locked", 12, UI.FAINT, UI.semi))
-		col.add_child(ClassCard.goal_block(ak, 150.0))
+		col.add_child(ClassCard.challenge_block(ak, 150.0))
 	elif not open:
 		col.add_child(UI.label("Try only: not open for expeditions yet", 12, ClassCard.GOAL_COL, UI.semi))
 	var kitb := UI.ghost("Kit (K)", func(): on_kit.call(ak), 0)

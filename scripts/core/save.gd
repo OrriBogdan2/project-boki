@@ -69,7 +69,7 @@ func fresh() -> Dictionary:
 		"name": "Hunter",
 		"gems": 60,
 		"cls": "medium",
-		"classes": ClassUnlock.fresh(),   # which classes are open, the starter pick, account XP (ClassUnlock)
+		"classes": ClassUnlock.fresh(),   # which Hunters are open, the creation pick, challenges and mastery
 		"active": "",
 		"roster": [],
 		"seeds": {"tidebloom": 2, "emberberry": 1},
@@ -266,7 +266,7 @@ func migrate(data: Dictionary) -> bool:
 		data["v"] = v
 	return true
 
-## v5 -> v6: class unlocks. A save that predates them keeps every class open (ClassUnlock).
+## v5 -> v6: Hunter unlocks. A save that predates them had every Hunter, so it keeps them all (ClassUnlock).
 func _migrate_5_to_6(data: Dictionary) -> void:
 	ClassUnlock.migrate(data)
 

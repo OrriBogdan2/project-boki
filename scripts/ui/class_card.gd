@@ -1,7 +1,7 @@
 class_name ClassCard
 extends RefCounted
 ## Shared pieces for the Hunter screens: the Hunters screen, the practice picker and the results line.
-## One look for "a Hunter and where it stands": portrait, name, health and dashes, its goal and progress.
+## One look for "a Hunter and where it stands": portrait, its unlock challenge and its mastery goals.
 
 const GOAL_COL := Color("ffd27a")
 
@@ -20,16 +20,15 @@ static func portrait(id: String, px := 84.0, body := false) -> TextureRect:
 	tex.add_child(vp)
 	return tex
 
-## The goal block for a Hunter that is not open yet: the goal, a progress bar with its count, and the
-## account level it also needs. Returns a VBox (tagged "goal_block" with the progress as meta "frac").
-static func goal_block(id: String, width := 190.0) -> VBoxContainer:
-	var gp := ClassUnlock.goal_progress(id)
-	var lv := ClassUnlock.level_needed(id)
+## The challenge block for a Hunter that is not open yet: the challenge, a progress bar with its count, and
+## its tier. Returns a VBox (tagged "challenge_block" with the progress as meta "frac").
+static func challenge_block(id: String, width := 190.0) -> VBoxContainer:
+	var gp := ClassUnlock.challenge_progress(id)
 	var v := UI.vbox(3)
 	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	v.set_meta("goal_block", id)
+	v.set_meta("challenge_block", id)
 	v.set_meta("frac", float(gp["frac"]))
-	var g := UI.para(ClassUnlock.goal_text(id), 13, GOAL_COL if float(gp["frac"]) > 0.0 else UI.INK)
+	var g := UI.para(ClassUnlock.challenge_text(id), 13, GOAL_COL if float(gp["frac"]) > 0.0 else UI.INK)
 	g.custom_minimum_size.x = width
 	v.add_child(g)
 	var row := UI.hbox(8)
@@ -37,40 +36,49 @@ static func goal_block(id: String, width := 190.0) -> VBoxContainer:
 	row.add_child(UI.bar(float(gp["frac"]), UI.GOOD if bool(gp["done"]) else GOAL_COL, width - 56.0, 8.0))
 	row.add_child(UI.label("%d/%d" % [int(gp["have"]), int(gp["need"])], 12, UI.MUTED))
 	v.add_child(row)
-	var reached := ClassUnlock.level() >= lv
-	var lv_col := UI.GOOD if reached else UI.MUTED
-	v.add_child(UI.label("Account level %d%s" % [lv, " (reached)" if reached else ""], 12, lv_col))
+	var needed := ClassUnlock.open_needed(id)
+	var tier_line := "%s challenge" % ClassUnlock.tier(id).capitalize()
+	if needed > ClassUnlock.open_ids().size():
+		tier_line += "  ·  opens once %d Hunters are open" % needed
+	v.add_child(UI.label(tier_line, 12, UI.MUTED))
 	return v
 
-## A Hunter card (portrait, name, health and dashes, fantasy). `cb` runs on click.
-## Dim when locked; shows the goal when it is not open.
-## `starter`: a pick where every card is a live choice (no lock look, no goal).
-static func make(id: String, on: bool, cb: Callable, tag := "", starter := false) -> PanelContainer:
-	var open := ClassUnlock.is_open(id) or starter
-	var card := UI.tile_card(on, cb, 10, Arch.color(id))
-	card.custom_minimum_size = Vector2(262, 0)
-	card.set_meta("arch", id)
-	card.set_meta("class_status", ClassUnlock.status(id))
-	var row := UI.hbox(10)
-	card.add_child(row)
-	row.add_child(portrait(id))
-	var col := UI.vbox(2)
-	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	col.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	row.add_child(col)
-	col.add_child(UI.label(Arch.name_of(id), 18, Arch.color(id) if open else UI.FAINT, UI.big))
-	col.add_child(UI.label(HunterViewer.stat_line(id), 12, UI.MUTED))
-	var fan := UI.para(String(Arch.def(id).get("fantasy", "")), 12, UI.INK if open else UI.FAINT)
-	fan.custom_minimum_size.x = 160
-	col.add_child(fan)
-	if tag != "":
-		col.add_child(UI.label(tag, 12, UI.GOOD, UI.semi))
-	elif not open:
-		col.add_child(goal_block(id, 170.0))
-	if not open:
-		card.modulate = Color(0.62, 0.62, 0.68, 0.9) if ClassUnlock.status(id) == "locked" else Color(0.85, 0.85, 0.9,
-				0.95)
-	return card
+## A Hunter's mastery: its level, then each goal with its counter and the cosmetic it gives. Tagged
+## "mastery_list" (meta "level").
+static func mastery_list(id: String, width := 330.0) -> VBoxContainer:
+	var goals := ClassUnlock.mastery(id)
+	var v := UI.vbox(3)
+	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	v.set_meta("mastery_list", id)
+	v.set_meta("level", ClassUnlock.mastery_level(id))
+	var head := UI.hbox(8)
+	head.add_child(UI.label("Mastery", 12, UI.MUTED, UI.caps))
+	head.add_child(UI.label("level %d / %d" % [ClassUnlock.mastery_level(id), goals.size()], 12, GOAL_COL, UI.semi))
+	v.add_child(head)
+	for i in goals.size():
+		v.add_child(_mastery_row(id, i, width))
+	return v
+
+static func _mastery_row(id: String, i: int, width: float) -> Control:
+	var g: Dictionary = ClassUnlock.mastery(id)[i]
+	var gp := ClassUnlock.mastery_progress(id, i)
+	var done := bool(gp["done"])
+	var row := UI.hbox(6)
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.set_meta("mastery_goal", i)
+	var gl := UI.label(String(g["text"]), 12, UI.GOOD if done else UI.INK)
+	gl.custom_minimum_size.x = width * 0.5
+	gl.clip_text = true
+	row.add_child(gl)
+	row.add_child(UI.label("%d/%d" % [int(gp["have"]), int(gp["need"])], 11, UI.MUTED))
+	var rw: Dictionary = g["reward"]
+	var reward := "%s: %s" % [ClassUnlock.reward_kind_name(String(rw["kind"])), String(rw["name"])]
+	var reward_label := UI.label(reward, 11, GOAL_COL if done else UI.FAINT)
+	if done:
+		reward_label.add_theme_font_override("font", UI.semi)
+	row.add_child(reward_label)
+	row.tooltip_text = "%s\nReward: %s%s" % [String(g["text"]), reward, " (earned)" if done else ""]
+	return row
 
 ## A Hunter's kit in one tooltip: its name, then dash, passive, RMB, E and R.
 static func kit_tip(id: String) -> String:
@@ -81,22 +89,19 @@ static func kit_tip(id: String) -> String:
 	names.append(Settings.key_cap("ultimate"))
 	return "%s\nDash: %s  ·  Passive: %s\nRMB: %s  ·  E: %s  ·  %s: Boki Merge" % names
 
-## The results screen's account line: XP gained, the level bar, and a Hunter unlock that became ready.
+## The results screen's Hunter line: mastery goals this expedition finished, and a Hunter unlock that
+## became ready.
 static func results_strip(s: Dictionary) -> Control:
 	var cu: Dictionary = s.get("class_unlock", {})
 	var v := UI.vbox(4)
-	if cu.is_empty():
-		return v
-	var lv := ClassUnlock.level_of(ClassUnlock.xp())
-	var row := UI.hbox(10)
-	row.add_child(UI.label("Account  +%d XP" % int(cu.get("xp", 0)), UI.T_SMALL, UI.MUTED))
-	row.add_child(UI.label("Level %d" % int(lv[0]), UI.T_SMALL, UI.INK, UI.semi))
-	row.add_child(UI.bar(float(lv[1]) / float(lv[2]), GOAL_COL, 120.0, 8.0))
-	if int(cu.get("level_after", 1)) > int(cu.get("level_before", 1)):
-		row.add_child(UI.label("Level up!", UI.T_SMALL, UI.GOOD, UI.semi))
-	v.add_child(row)
+	for m in cu.get("mastered", []):
+		var rw: Dictionary = m["reward"]
+		var ml := UI.label("%s mastery: %s  ·  %s %s" % [Arch.name_of(String(m["id"])), String(m["text"]),
+				ClassUnlock.reward_kind_name(String(rw["kind"])), String(rw["name"])], UI.T_SMALL, GOAL_COL, UI.semi)
+		ml.set_meta("mastery_done", String(m["id"]))
+		v.add_child(ml)
 	if int(cu.get("new", 0)) > 0:
-		var nl := UI.label("Hunter unlock ready! Hold to unlock it on the Hunters screen at home.", UI.T_SMALL,
+		var nl := UI.label("Hunter challenge done! Hold to unlock it on the Hunters screen at home.", UI.T_SMALL,
 				GOAL_COL, UI.semi)
 		nl.set_meta("hunter_unlock_ready", int(cu["new"]))
 		v.add_child(nl)

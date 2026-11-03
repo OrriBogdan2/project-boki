@@ -93,7 +93,7 @@ func _spawn_dummies() -> void:
 	for sp in spots:
 		var at: Vector3 = sp[1]
 		at = _arena_point(at) if layout == "arena" else _free_near(at)
-		var D: Hunter = m.make_hunter(m.next_id("dummy"), TEAM, String(sp[2]), {"still": "Dummy", "strafe": "Strafer", "heavy": "Heavy dummy"}[sp[0]], "idle", {}, at, {"arch": "none"})
+		var D: Hunter = m.make_hunter(m.next_id("dummy"), TEAM, String(sp[2]), {"still": "Dummy", "strafe": "Strafer", "heavy": "Training dummy"}[sp[0]], "idle", {}, at, {"arch": "none"})
 		D.max_hp = DUMMY_HP; D.hp = DUMMY_HP
 		D.armor = 0.0; D.max_armor = 0.0
 		D.lives = 99
@@ -188,7 +188,7 @@ func tick(dt: float) -> void:
 			hs.pop_front()
 		var lb: Label3D = dm["label"]
 		var dps := dps_of(hs, m.time)
-		lb.text = "DPS %d   ·   last %d\ntotal %d" % [int(round(dps)), int(round(float(dm["last"]))), int(round(float(dm["total"])))] if float(dm["total"]) > 0.0 else {"still": "DUMMY", "strafe": "STRAFER", "heavy": "HEAVY  ·  slam me into the pillar"}[dm["kind"]]
+		lb.text = "DPS %d   ·   last %d\ntotal %d" % [int(round(dps)), int(round(float(dm["last"]))), int(round(float(dm["total"])))] if float(dm["total"]) > 0.0 else {"still": "DUMMY", "strafe": "STRAFER", "heavy": "TRAINING DUMMY  ·  slam me into the pillar"}[dm["kind"]]
 	while not hits_all.is_empty() and m.time - float(hits_all[0][0]) > 6.0:
 		hits_all.pop_front()
 	# the sparring bot and you always see each other (the view cone never hides a sparring partner)

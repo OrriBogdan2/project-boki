@@ -29,7 +29,7 @@ var cam: Camera3D
 var fx: Fx
 var eggs: Array = []          # {node, base, data}
 var chosen := -1
-var stage := "intro"          # intro | class (pick 1 Hunter) | create | pick | warm | hatching | name
+var stage := "intro"          # intro | class (pick 2 Hunters) | create | pick | warm | hatching | name
 var story_i := 0
 var story_lbl: Label
 var story_box: Control
@@ -357,7 +357,7 @@ func _end_intro() -> void:
 		if c: c.queue_free()
 	if story_box: story_box.queue_free()
 	title.get_parent().visible = true
-	if ClassUnlock.needs_starter() and not edit_only:
+	if ClassUnlock.needs_starters() and not edit_only:
 		_show_class_pick()
 	elif not Save.d.has("look") or edit_only or "--create" in OS.get_cmdline_user_args():
 		_show_create()
@@ -399,7 +399,9 @@ func _clear_bottom() -> void:
 	for ch in bottom.get_children():
 		ch.queue_free()
 
-# ---- your Hunter (a new save picks 1 of the starters in the Hunter viewer; ClassUnlock, ClassPick)
+# ---- your Hunters (a new save picks 2 of the 4 starters in the Hunter viewer; ClassUnlock, ClassPick)
+var starter_picks: Array = []
+
 func _show_class_pick(on := "") -> void:
 	stage = "class"
 	if on == "" or not ClassUnlock.starters().has(on):
@@ -407,24 +409,38 @@ func _show_class_pick(on := "") -> void:
 	Save.d["arch"] = on
 	Save.d["cls"] = Arch.weight(on)
 	Save.d["weapon"] = Arch.signature(on)
-	title.text = "Choose your Hunter"
+	title.text = "Choose your Hunters"
 	top_box.visible = false      # (the pick panel carries its own heading: the viewer needs the height)
 	if sub_lbl: sub_lbl.text = "Who you play in a match. Your Boki comes next."
 	_top_over(0.5)
 	_clear_bottom()
 	look_at_t = Vector3(0, 0.25, 0.5)
 	cam_to = Vector3(-3.5, 4.2, 9.0)
-	bottom.add_child(ClassPick.row(on, _chip_clicked))
-	var go := UI.primary("Start as %s" % Arch.name_of(on), func():
-		ClassUnlock.choose_starter(on)
-		Save.save_game()
-		Sfx.play("click")
-		if sub_lbl: sub_lbl.text = "Every Boki is different. It will remember how you treat it."
-		_end_class_pick(), 260)
+	bottom.add_child(ClassPick.row(on, starter_picks, _chip_clicked))
+	var go := UI.primary(_start_text(), _confirm_starters, 300)
+	go.disabled = starter_picks.size() != ClassUnlock.picks_needed()
 	bottom.add_child(go)
+
+func _start_text() -> String:
+	if starter_picks.size() != ClassUnlock.picks_needed():
+		return "Pick %d Hunters" % ClassUnlock.picks_needed()
+	return "Start with %s" % " and ".join(starter_picks.map(func(a): return Arch.name_of(String(a))))
+
+func _confirm_starters() -> void:
+	if not ClassUnlock.choose_starters(starter_picks):
+		return
+	var first := String(starter_picks[0])
+	Save.d["arch"] = first
+	Save.d["cls"] = Arch.weight(first)
+	Save.d["weapon"] = Arch.signature(first)
+	Save.save_game()
+	Sfx.play("click")
+	if sub_lbl: sub_lbl.text = "Every Boki is different. It will remember how you treat it."
+	_end_class_pick()
 
 func _chip_clicked(id: String) -> void:
 	Sfx.play("hover", null, -6.0)
+	starter_picks = ClassPick.toggle(starter_picks, id)
 	_show_class_pick(id)
 
 ## After the Hunter: make your look if you have not, else straight to the eggs.

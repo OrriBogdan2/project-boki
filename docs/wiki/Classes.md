@@ -38,11 +38,12 @@ form, see [Boki species](Boki-Species.md)). A Hunter's own ultimate is held back
 
 ## Choosing
 
-At character creation you pick 1 Hunter in the Hunter viewer, which shows each one's model playing
-its abilities in turn with their keys. Your next two unlocks come early, then the rest open through
-play (see "How Hunters unlock" below). On the farm, **J** (or the Hunters button) opens the Hunters
-screen: every Hunter, open, ready, in progress or locked, the same viewer, and **hold to unlock** for
-one that is ready. You can try every Hunter against dummies in the [Arena](Arena-and-Training.md) at
+At character creation you pick 2 of the 4 starting Hunters in the Hunter viewer, which shows each
+one's model playing its abilities in turn with their keys. Every other Hunter opens through its own
+challenge (see "How Hunters unlock" below). On the farm, **J** (or the Hunters button) opens the
+Hunters screen: every Hunter, open, ready, in progress or locked, with its challenge's progress, its
+mastery goals and rewards, your glider, the same viewer, and **hold to unlock** for one whose challenge
+is done. You can try every Hunter against dummies in the [Arena](Arena-and-Training.md) at
 any time.
 
 ## At a glance
@@ -69,22 +70,79 @@ any time.
 
 ### How Hunters unlock
 
-At character creation you pick 1 starting Hunter (any of the 12). The next 2 unlocks come early: play 1 expedition, then make it out of 1 expedition; each one done is a free pick of any locked Hunter. After that, every Hunter opens when its own goal is done and the account has reached its level. An unlock is never automatic: when one is ready you hold the button on the Hunters screen for 1.6s, and letting go early cancels it. Account XP comes from expeditions: 15 for playing one, 50 more for getting out, 1 per monster (up to 30), 6 per hunter knocked down (up to 30), 80 per lair boss and 25 per Boki brought home. Level L to L+1 costs 100 + 50 x (L - 1) XP, up to level 20. Locked Hunters stay playable in the Arena and the Training Grounds, and saves from before Hunter unlocks keep every Hunter open.
+At character creation you pick 2 of the 4 starting Hunters (Juggernaut, Marlowe, Archer, Ashwick). Every other Hunter opens through its own challenge, counted across all your expeditions whoever you play. A done challenge never opens a Hunter by itself: you hold the button on the Hunters screen for 1.6s, and letting go early cancels it. Tiers: easy is about 1-2 expeditions, medium a handful of expeditions, hard real effort, once other Hunters are open. Locked Hunters stay playable in the Arena and the Training Grounds, and saves from before Hunter unlocks keep every Hunter they had.
 
-| Hunter | Starter | Own goal | Target | Account level |
-|---|---|---|---|---|
-| [Thief](Class-Thief.md) | pick at the start | Defeat 15 monsters | 15 | 2 |
-| [Archer](Class-Archer.md) | pick at the start | Make it out of 3 expeditions | 3 | 3 |
-| [Vireo](Class-Vireo.md) | pick at the start | Defeat 40 monsters | 40 | 3 |
-| [Marlowe](Class-Marlowe.md) | pick at the start | Make it out of an expedition | 1 | 2 |
-| [Juggernaut](Class-Juggernaut.md) | pick at the start | Knock down 2 hunters | 2 | 2 |
-| [Bulwark](Class-Bulwark.md) | pick at the start | Knock down 5 hunters | 5 | 3 |
-| [Dredge](Class-Dredge.md) | pick at the start | Make it out of 5 expeditions | 5 | 4 |
-| [Ashwick](Class-Ashwick.md) | pick at the start | Defeat a lair boss | 1 | 6 |
-| [Linnet](Class-Linnet.md) | pick at the start | Scan a wild Boki and bring it home | 1 | 2 |
-| [Tamsin](Class-Tamsin.md) | pick at the start | Stagger 10 monsters with abilities | 10 | 5 |
-| [Dolm](Class-Dolm.md) | pick at the start | Wall-slam 5 enemies | 5 | 4 |
-| [Ostra](Class-Ostra.md) | pick at the start | Reach level 6 in a match | 6 | 4 |
+| Hunter | Tier | Challenge | Target |
+|---|---|---|---|
+| [Thief](Class-Thief.md) | medium | Land 12 hits while in the air | 12 |
+| [Archer](Class-Archer.md) | pick at the start, else easy | Stun 4 enemies | 4 |
+| [Vireo](Class-Vireo.md) | medium | Stagger 6 monsters with abilities | 6 |
+| [Marlowe](Class-Marlowe.md) | pick at the start, else easy | Land 8 hits from 12 m or more | 8 |
+| [Juggernaut](Class-Juggernaut.md) | pick at the start, else easy | Knock 3 enemies into walls | 3 |
+| [Bulwark](Class-Bulwark.md) | medium | Knock down 2 hunters while under half health | 2 |
+| [Dredge](Class-Dredge.md) | medium | Make it out carrying 8 items | 8 |
+| [Ashwick](Class-Ashwick.md) | pick at the start, else easy | Hit 3 enemies at once with one ability | 1 |
+| [Linnet](Class-Linnet.md) | hard | Revive 4 teammates, once 6 Hunters are open | 4 |
+| [Tamsin](Class-Tamsin.md) | medium | Slow 20 enemies | 20 |
+| [Dolm](Class-Dolm.md) | hard | Hit 3 enemies at once with one ability, 5 times, once 6 Hunters are open | 5 |
+| [Ostra](Class-Ostra.md) | hard | Knock down 3 hunters while merged with your Boki, once 8 Hunters are open | 3 |
+
+### Mastery
+
+Each Hunter has its own mastery goals, counted only in expeditions played as that Hunter. Each one done is a mastery level and a cosmetic reward; playing a Hunter longer never gives power.
+
+| Hunter | Goal | Target | Reward |
+|---|---|---|---|
+| Thief | Land 25 hits while in the air | 25 | Colourway: Midnight Silk |
+| Thief | Stun 6 enemies | 6 | Emote: Twirl |
+| Thief | Make it out carrying 6 items | 6 | Title: Light Fingers |
+| Thief | Knock down a hunter while merged | 1 | Glider: Dusk Moth |
+| Archer | Stun 12 enemies | 12 | Colourway: Fletcher Green |
+| Archer | Your Boki lands 40 hits | 40 | Emote: Quiver Spin |
+| Archer | Fly through 8 air rings | 8 | Glider: Paper Crane |
+| Archer | Make it out after being knocked down | 1 | Title: Last Arrow |
+| Vireo | Stagger 10 monsters with abilities | 10 | Colourway: Storm Violet |
+| Vireo | Land 15 hits while in the air | 15 | Trail: Static |
+| Vireo | Fly through 12 air rings | 12 | Banner: Thunderhead |
+| Vireo | Your Boki lands 50 hits | 50 | Title: Live Wire |
+| Marlowe | Land 30 hits from 12 m or more | 30 | Colourway: Dust Rider |
+| Marlowe | Revive 2 teammates | 2 | Emote: Hat Tip |
+| Marlowe | Fly through 10 air rings | 10 | Trail: Spent Brass |
+| Marlowe | Make it out of 3 expeditions | 3 | Title: Long Shot |
+| Juggernaut | Knock 10 enemies into walls | 10 | Colourway: Forge Red |
+| Juggernaut | Knock down 2 hunters while merged | 2 | Emote: Chest Thump |
+| Juggernaut | Open 8 chests | 8 | Banner: Broken Chain |
+| Juggernaut | Make it out after being knocked down | 1 | Title: the Unbowed |
+| Bulwark | Revive 3 teammates | 3 | Colourway: Oathsteel |
+| Bulwark | Knock 8 enemies into walls | 8 | Emote: Shield Rap |
+| Bulwark | Make it out after being knocked down | 1 | Title: Still Standing |
+| Bulwark | Open 6 chests | 6 | Banner: Iron Oath |
+| Dredge | Make it out carrying 10 items | 10 | Glider: Patchwork Wing |
+| Dredge | Stun 10 enemies | 10 | Colourway: Rust and Brine |
+| Dredge | Open 10 chests | 10 | Title: Salvager |
+| Dredge | Bring 2 wild Boki home | 2 | Emote: Heave Ho |
+| Ashwick | Set 25 enemies burning | 25 | Colourway: Coal and Cinder |
+| Ashwick | Hit 3 enemies at once with one ability, 3 times | 3 | Trail: Ash Drift |
+| Ashwick | Open 6 chests | 6 | Banner: Lantern Flame |
+| Ashwick | Scan a wild Boki and bring it home | 1 | Glider: Ember Leaf |
+| Linnet | Revive 5 teammates | 5 | Skin: Moonbeam |
+| Linnet | Root 10 enemies | 10 | Emote: Big Hug |
+| Linnet | Bring 3 wild Boki home | 3 | Glider: Puffball Wings |
+| Linnet | Make it out of 5 expeditions | 5 | Title: Wisp Keeper |
+| Linnet | Open 8 chests | 8 | Banner: Moon Lantern |
+| Tamsin | Slow 40 enemies | 40 | Colourway: Hoarfrost |
+| Tamsin | Fly through 10 air rings | 10 | Glider: Frost Kite |
+| Tamsin | Revive 2 teammates | 2 | Emote: Snow Angel |
+| Tamsin | Make it out of 3 expeditions | 3 | Title: Rinkmaster |
+| Dolm | Hit 3 enemies at once with one ability, 5 times | 5 | Skin: Slate and Moss |
+| Dolm | Knock 12 enemies into walls | 12 | Emote: Ground Pound |
+| Dolm | Open 10 chests | 10 | Glider: Slate Kite |
+| Dolm | Make it out after being knocked down, twice | 2 | Title: Bedrock |
+| Ostra | Knock down 4 hunters while merged | 4 | Skin: Void Bloom |
+| Ostra | Stun 15 enemies | 15 | Trail: Lantern Motes |
+| Ostra | Make it out carrying 8 items | 8 | Title: Swapkeeper |
+| Ostra | Fly through 15 air rings | 15 | Glider: Lantern Moth |
+| Ostra | Revive 3 teammates | 3 | Banner: Tidelight |
 
 ### Run levels
 

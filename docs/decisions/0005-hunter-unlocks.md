@@ -1,29 +1,28 @@
-# 0005: Hunter unlocks, the Hunter viewer and hold to unlock
+# 0005: Hunter unlocks, mastery, the Hunter viewer and hold to unlock
 
-- **Status:** accepted (owner answers, 2026-11-02 19:10 UTC; was 0004-class-unlocks, renumbered because main took 0004 for merge augments)
-- **Date:** 2026-11-02
+- **Status:** accepted (owner answers 2026-11-03 01:55 and 02:00 UTC; replaces the 1-starter, free-pick and account-XP flow)
+- **Date:** 2026-11-03
 - **Area:** save / UI / progression
 
 ## Problem
-All twelve playable characters were open from the first minute: a new player met a wall of choices and had no long-term goal beyond gear. The first pass (pick 1 of 3 starters, auto-unlocks, "class" wording, Light/Medium/Heavy shown) was reopened by the owner: they are **Hunters**, the weight labels go, the pick needs a proper viewer, and an unlock is something you do by holding a button.
+All twelve Hunters were open from the first minute: a new player met a wall of choices and had no long-term goal beyond gear. The owner wants a small start (2 of 4), every other Hunter earned through a short feat that shows off its kit, and per-Hunter goals that reward looks only, never power.
 
 ## Options
-1. Auto-unlock when a goal is met (the first pass): no moment, no choice.
-2. Free picks only: fast, but no long-term goals.
-3. Both (decided): a free pick for each early goal, then a goal and account level per Hunter, every unlock taken by holding.
+1. Free picks plus account level gates (the first pass): fast, but unlocks felt like a grind and had nothing to do with the Hunter.
+2. One challenge per Hunter, tiered (decided): easy for the two unpicked starters, medium for most, hard and last for Ostra, Moosh Moosh and Breah.
 
 ## Decision
-- **Starting Hunter:** at character creation (hatch.gd's first stage) the player picks 1 Hunter from `starters` in `content/rules/class_unlock.json` (all twelve for now) in the Hunter viewer.
-- **Early unlocks:** `early` holds two cheap goals (play 1 expedition, then make it out of 1). Each one done, in order, is a free pick of any locked Hunter. The numbers are placeholders until the owner sets them.
-- **After that:** a Hunter is ready when its own goal is done and the account level is reached (`classes` in the same file). Account XP comes from every expedition, with caps per kind.
-- **Hold to unlock:** nothing opens by itself. A ready Hunter shows "Hold to unlock" on the Hunters screen (`HoldUnlock`): a bar slides out and fills over `hold_s` while the Hunter powers up in the viewer; letting go early cancels; full unlocks it (`ClassUnlock.unlock`, spending a free pick only when its own goal isn't met) and plays the reveal burst (`ClassReveal.show_for`).
-- **The viewer** (`HunterViewer`): the real model on a turntable in a SubViewport, playing each ability in turn with the kit's own moves (`content/rules/hunter_viewer.json`, ids from `HunterAnim.KMOVES`), the key and plain line under it, and the L picker's plain-words card. Used on the Hunters screen (J on the farm, `HomeClasses`) and at character creation (`ClassPick`).
-- **Wording:** player-facing text says Hunter / Hunters everywhere; no Light/Medium/Heavy or "weight" in the UI (health and dash counts instead). Internal ids, file names and the save key `classes` keep their names. Display names come from hero data, so the kitfix renames carry through.
-- **Save:** v6, `classes` = `{all, starter, open, early_used, told, reveal, seen, xp}`. Missing keys read as 0 / [], so earlier v6 test saves load; v5 saves migrate with everything open.
-- Locked Hunters stay playable in the Arena, the Training Grounds and the practice picker, but are never saved as the expedition Hunter.
+- **Creation:** hatch.gd's first stage picks exactly `starter_picks` (2) of `starters` (Zedran, Venator, Pin, Linwick by id) in the Hunter viewer (`ClassPick`). Nothing else is offered or accepted there.
+- **Challenges:** `unlock` in `content/rules/class_unlock.json`, one per Hunter: a stat, a target, a tier and one line of text. They count across every expedition, whoever you play. `after` makes a hard one wait until that many Hunters are open.
+- **Hold to unlock:** a done challenge never opens a Hunter by itself. The Hunters screen shows "Hold to unlock" (`HoldUnlock`, 1.6 s); letting go early cancels; full plays the reveal (`ClassReveal`).
+- **Mastery:** `mastery` holds 3-5 goals per Hunter, counted only in expeditions played as it, mixing kit feats, team play, exploration, extraction and Boki goals. Each one done is a mastery level and a cosmetic reward (glider, skin, colourway, emote, title, banner or trail). No stat, ability or perk reward exists.
+- **Measuring:** `ClassUnlock.match_counts` reads one expedition's result; `HunterFeats` (a child of the match) records the feats from `CombatBus` (statuses, multi-hits, far and air hits, Boki hits, knocks while merged or under half health) into the hunter's match stats. Chests opened are one line in `Match._open_chest`.
+- **Gliders:** looks, trail and sound only (`Gliders.SKIN_KEYS`); new designs (paper crane, Boki wings, cloth and leaf variants) come from mastery or account-wide challenges. The Hunters screen has a glider pick; the rack by the portal still works.
+- **Save:** v6, `classes` = `{all, picks, open, told, reveal, seen, stats, hunters}`. v5 saves had every Hunter, so they keep them all. A v6 save from the first flow keeps every Hunter it had open or was playing, and drops the old keys (`ClassUnlock.upgrade_early_v6`).
+- Locked Hunters stay playable in the Arena, the Training Grounds and the practice picker, but are never saved as the expedition Hunter. Display names come from hero data; everything keys on ids.
 
 ## Consequences
-- New: `hunter_viewer.gd`, `hold_unlock.gd`, `hunter_pick_row.gd`, `content/rules/hunter_viewer.json`. Reworked: `class_unlock.gd`, `class_pick.gd`, `class_reveal.gd`, `home_classes.gd` (the Hunters screen), `home_hero.gd`, the Try-on rack and the duel bot (pick a Hunter, not a weight). `home.gd` and `hud.gd` only changed lines in place.
-- `--hunter-unlock-check` (alias `--class-unlock-check`) covers the flow; `--hero-check` and the practice picker check use the new wording.
-- `Net.VERSION` unchanged: nothing here syncs.
-- Owner questions: the starter set, the early goals, every goal number and the hold time are data only.
+- New: `scripts/match/hunter_feats.gd`. Reworked: `class_unlock.gd`, `class_pick.gd`, `class_card.gd`, `home_classes.gd`, `gliders.gd` (new shapes and unlocks), `synth.gd` (two glider sounds), `hatch.gd`. `match.gd` gains two wiring lines, `home.gd` none.
+- `--hunter-unlock-check` covers the flow, the data rules (cosmetic only, no glide numbers in skins) and the migration.
+- `Net.VERSION` unchanged: nothing here syncs (the feats are counted where each hunter's stats already live).
+- Other cosmetic kinds (skins, colourways, emotes, titles, banners, trails) are earned and listed; showing them in game is a follow-up.

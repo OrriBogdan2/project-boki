@@ -115,9 +115,9 @@ func _draw_bar() -> void:
 	var w := BAR_W * e
 	var x0 := (BAR_W - w) * 0.5
 	var r := Rect2(Vector2(x0, 0), Vector2(w, track.size.y))
-	track.draw_style_box(KitCard._box(Color(0, 0, 0, 0.55), 6, Color(col, 0.6), 1, 0, 0), r)
+	track.draw_style_box(UI.frame(Color(0, 0, 0, 0.55), 6, Color(col, 0.6), 1, 0, 0), r)
 	if k > 0.0:
 		var fr := Rect2(r.position + Vector2(2, 2), Vector2(maxf(0.0, (w - 4.0) * k), r.size.y - 4.0))
-		track.draw_style_box(KitCard._box(col.lerp(Color.WHITE, 0.25 * k), 4), fr)
+		track.draw_style_box(UI.frame(col.lerp(Color.WHITE, 0.25 * k), 4, Color(0, 0, 0, 0), 0), fr)
 		if k >= 1.0:
-			track.draw_style_box(KitCard._box(Color(1, 1, 1, 0.6), 4), fr)
+			track.draw_style_box(UI.frame(Color(1, 1, 1, 0.6), 4, Color(0, 0, 0, 0), 0), fr)

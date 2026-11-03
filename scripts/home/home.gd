@@ -1776,8 +1776,7 @@ func _open_rack() -> void:
 		else:
 			UI.footer_primary(v, "Equip", func(): _rack_equip(rack_pick), 140, "check")
 	elif g.has("unlock"):
-		var p := String(g["unlock"]).split(":")
-		var lk := UI.label("Earned at %s %s  (%d/%s)" % [p[1], p[0], Progress.stat(p[0]), p[1]], UI.T_SMALL, UI.ACCENT_HI)
+		var lk := UI.label(Gliders.how(rack_pick), UI.T_SMALL, UI.ACCENT_HI)
 		lk.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		UI.footer(v).add_child(lk)
 	else:
@@ -1807,8 +1806,7 @@ func _rack_buy(id: String) -> void:
 	_rack_equip(id)
 
 func _rack_equip(id: String) -> void:
-	if not Save.d.has("look"): Save.d["look"] = Models.default_look()
-	Save.d["look"]["glider"] = id
+	Gliders.equip(id)
 	Save.save_game()
 	_rack_sound(id)
 	if is_instance_valid(rack_node):

@@ -16,6 +16,9 @@ signal slot_changed(slot: String)
 const RULES_PATH := "res://content/rules/hunter_viewer.json"
 const SLOT_NAMES := {"dash": "Dash", "passive": "Passive", "lmb": "Attack", "rmb": "Right click", "e": "Utility",
 		"x": "Ultimate", "r": "with your Boki"}
+## The input action behind each slot, so the key caps follow the player's bindings.
+const SLOT_ACTIONS := {"dash": "dash", "lmb": "fire", "rmb": "secondary", "e": "signature", "x": "hunter_ult",
+		"r": "ultimate"}
 static var _rules: Dictionary = {}
 
 var id := ""
@@ -95,7 +98,7 @@ static func stat_line(hunter_id: String) -> String:
 
 func _ready() -> void:
 	var col := Arch.color(id)
-	add_theme_stylebox_override("panel", KitCard._box(Color(0.05, 0.045, 0.08, 0.96), 14, Color(col, 0.45), 1, 14, 12))
+	add_theme_stylebox_override("panel", UI.frame(Color(0.05, 0.045, 0.08, 0.96), 14, Color(col, 0.45), 1, 14, 12))
 	set_meta("hunter_viewer", id)
 	slots = slots_for(id)
 	var w: Dictionary = Data.weapon_stats(Arch.signature(id))
@@ -266,9 +269,11 @@ func _row(slot: String, i: int, col: Color) -> Button:
 	r.add_child(tg)
 	return b
 
+## The key a slot is on, from the player's own bindings ("auto" for the passive).
 func _key(slot: String) -> String:
-	var k := "X" if slot == "x" else String(KitCard.KEYS.get(slot, ""))
-	return k if k != "" else "auto"
+	if not SLOT_ACTIONS.has(slot):
+		return "auto"
+	return Settings.key_cap(String(SLOT_ACTIONS[slot]))
 
 ## Shows ability `i` (wraps). `held`: a click, so it stays a full turn before the cycle moves on.
 func select(i: int, held := false) -> void:
@@ -295,11 +300,11 @@ func select(i: int, held := false) -> void:
 	for j in rows.size():
 		var b: Button = rows[j]
 		var on := j == slot_i
-		var normal := KitCard._box(Color(1, 1, 1, 0.03), 8, Color(0, 0, 0, 0), 0, 4, 2)
-		var hover := KitCard._box(Color(1, 1, 1, 0.07), 8, Color(col, 0.6), 1, 4, 2)
+		var normal := UI.frame(Color(1, 1, 1, 0.03), 8, Color(0, 0, 0, 0), 0, 4, 2)
+		var hover := UI.frame(Color(1, 1, 1, 0.07), 8, Color(col, 0.6), 1, 4, 2)
 		if on:
-			normal = KitCard._box(Color(col, 0.16), 8, Color(col, 0.8), 1, 4, 2)
-			hover = KitCard._box(Color(col, 0.2), 8, Color(col, 0.6), 1, 4, 2)
+			normal = UI.frame(Color(col, 0.16), 8, Color(col, 0.8), 1, 4, 2)
+			hover = UI.frame(Color(col, 0.2), 8, Color(col, 0.6), 1, 4, 2)
 		b.add_theme_stylebox_override("normal", normal)
 		b.add_theme_stylebox_override("hover", hover)
 		b.add_theme_stylebox_override("pressed", b.get_theme_stylebox("hover"))
