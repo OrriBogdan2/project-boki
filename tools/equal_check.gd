@@ -454,8 +454,10 @@ func _gloves() -> void:
 	var spot_at: Array = spots.map(func(hs): return (hs[0] as Rect2).position)
 	var right := spots.all(func(hs): return (hs[0] as Rect2).position.x > sz.x * 0.5)
 	ok(spots.size() == 2 and right, "the HUD's two glove boxes sit on the right (%s)" % str(spot_at))
-	var merge_right: bool = m.hud.hover_spots.any(func(hs): return String(hs[1]) == "r"
-			and (hs[0] as Rect2).position.x > sz.x * 0.5)
+	var merge_right := false
+	for hs in m.hud.hover_spots:
+		if String(hs[1]) == "r" and (hs[0] as Rect2).position.x > sz.x * 0.5:
+			merge_right = true
 	ok(P.kin == null or merge_right, "the Boki box beside them is the Merge's (its key and tip: \"ultimate\")")
 	ok(not P.slot_info("gear1").is_empty()
 			and String(P.slot_info("gear1")["name"]) == String(Gear.ALL["quake"]["name"]),
