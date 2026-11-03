@@ -380,7 +380,7 @@ func _ult() -> void:
 	run_for(rest + 0.5)
 	ok(not k.resting() and k.ready_to_fight(), "after the rest the Boki is ready again")
 	ok(KinCommand.order(P, "follow") or true, "...and orders work")
-	# timeout: no ultimate, and the Boki rests longer than after a release (owner, Nov 2)
+	# timeout: no ultimate, and the Boki rests longer than after a release
 	ults = {}
 	P = merged("pebbit")
 	k = P.kin
