@@ -46,7 +46,9 @@ static func stage(m: Node, t: float) -> void:
 		return
 	Record.set_level(maxi(Record.level, 1))
 	if m.hud: m.hud.toasts.clear()
-	var z := float(m.opts.get("zoom_hold", 0.0))
+	var z := 0.0
+	for a in OS.get_cmdline_user_args():
+		if String(a).begins_with("--zoom="): z = float(String(a).substr(7))
 	if z > 0.0 and m.cam:
 		m.set_meta("zoom_hold", z)
 		m.cam.zoom = z
@@ -157,12 +159,12 @@ const SHOTS := {
 	"pair_breah_leap_key": ["br_leap", 1.15, -5.0], "pair_breah_lunge_key": ["br_lunge", 0.98, -5.0],
 	"pair_breah_dash_tele": ["br_dash", 0.62, -6.0], "pair_breah_dash_key": ["br_dash", 0.82, -6.0],
 	"pair_breah_dash_hit": ["br_dash", 1.12, -6.0], "pair_breah_dash_rock": ["br_dash", 1.3, -6.0],
-	"pair_breah_row_tele": ["br_raise", 0.56, -4.2], "pair_breah_row_key": ["br_raise", 0.74, -4.2],
-	"pair_breah_row_hit": ["br_raise", 1.2, -4.2],
+	"pair_breah_row_tele": ["br_raise", 0.6, -6.0], "pair_breah_row_key": ["br_raise", 0.78, -6.0],
+	"pair_breah_row_hit": ["br_raise", 1.2, -6.0],
 	"pair_breah_sense_tele": ["br_sense", 1.4, -6.0], "pair_breah_sense_hit": ["br_sense", 0.75, -6.0],
-	"pair_ostra_aim_tele": ["os_orb", 0.45, -4.5], "pair_ostra_orb_key": ["os_orb", 0.58, -4.5],
-	"pair_ostra_orb_hit": ["os_orb", 0.72, -4.5],
-	"pair_ostra_hot_key": ["os_orb_hot", 1.66, -4.5], "pair_ostra_hot_hit": ["os_orb_hot", 1.8, -4.5],
+	"pair_ostra_aim_tele": ["os_orb", 0.45, -4.5], "pair_ostra_orb_key": ["os_orb", 0.52, -9.0],
+	"pair_ostra_orb_hit": ["os_orb", 0.62, -9.0],
+	"pair_ostra_hot_key": ["os_orb_hot", 1.66, -7.0], "pair_ostra_hot_hit": ["os_orb_hot", 1.72, -7.0],
 	"pair_ostra_snap_tele": ["os_snap", 0.6, -4.5], "pair_ostra_snap_key": ["os_snap", 0.73, -4.5],
 	"pair_ostra_snap_hit": ["os_snap", 1.0, -4.5],
 	"pair_ostra_swap_tele": ["os_swap", 0.85, -4.5], "pair_ostra_swap_key": ["os_swap", 1.75, -4.5],
@@ -170,6 +172,7 @@ const SHOTS := {
 	"pair_ostra_seed_tele": ["os_seed", 1.3, -4.5], "pair_ostra_seed_key": ["os_pop", 1.95, -4.5],
 	"pair_ostra_seed_hit": ["os_pop", 2.1, -4.5],
 	"pair_ostra_swollen_key": ["os_empower", 0.8, -4.2],
+	"pair_ostra_seed_full": ["os_seed", 5.2, -4.5], "pair_ostra_seed_collapse": ["os_seed", 7.56, -4.5],
 	"pair_breah_spine_tele": ["br_spine", 0.58, -3.0], "pair_breah_spine_key": ["br_spine", 0.82, -3.0],
 	"pair_breah_spine_hit": ["br_spine", 1.45, -3.0],
 	"pair_ostra_well_tele": ["os_well", 1.0, -2.5], "pair_ostra_well_key": ["os_well", 1.56, -2.5],

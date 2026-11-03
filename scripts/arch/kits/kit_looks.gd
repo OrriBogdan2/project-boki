@@ -154,11 +154,12 @@ func _build_void_shot(n: Node3D, kind: String) -> void:
 			_tail(n, 0.22, 1.2, Color(0.88, 0.25, 0.85, 0.55))
 		"orb_hot":
 			Models.part(
-				n, Models.sphere(0.15, 10), glass_mat(Color("1c1a6a"), Color("9fb8ff"), 1.0, 0.8), Vector3.ZERO,
-				Vector3(1.0, 1.0, 5.4)
+				n, Models.sphere(0.18, 10), glass_mat(Color("23208a"), Color("6f7cff"), 1.0, 0.9), Vector3.ZERO,
+				Vector3(1.0, 1.0, 4.5)
 			)
-			Models.part(n, Models.sphere(0.06, 8), Models.glow_mat(Color("f2f6ff")), Vector3.ZERO, Vector3(1, 1, 9.0))
-			_tail(n, 0.13, 1.0, Color(0.45, 0.5, 1.0, 0.5))
+			var core := Models.glow_mat(Color(0.9, 0.92, 1.0, 0.8))
+			Models.part(n, Models.sphere(0.04, 8), core, Vector3.ZERO, Vector3(1, 1, 9.0))
+			_tail(n, 0.16, 1.2, Color(0.35, 0.4, 1.0, 0.6))
 		"spear":
 			var b := Node3D.new()
 			b.name = "Spin"
@@ -272,7 +273,7 @@ func _build_well(n: Node3D) -> void:
 	var spin := Node3D.new()
 	spin.name = "Spin"
 	n.add_child(spin)
-	var arm_mat := Models.glow_mat(Color(0.72, 0.3, 1.0, 0.95))
+	var arm_mat := shade_mat(Color(0.7, 0.36, 1.0, 0.95))
 	for arm in 4:
 		for j in 6:
 			var u := float(j + 1) / 6.0
