@@ -3,7 +3,7 @@ Every agent reads this before building. If a brief, spec or older note disagrees
 Main keeps this file current; anyone can propose a line in EXT_TO_MAIN tagged "DECISION?". Newest decisions at the bottom of each section.
 
 ## Priorities
-- Order: briefs/PRIORITIES.md. P0 land and stabilise, P1 onboarding, P2 one great match (Boki as the star), P3 cohesion and look (art bible, style pass, then the AI 3D prototype), P4 breadth. Frozen: farm-builder depth, Black Market extras, maps beyond tier 2.
+- Order: briefs/PRIORITIES.md. P0 land and stabilise, P1 onboarding, P2 one great match (Boki as the star), P3 cohesion and look (art bible, style pass, then the AI 3D prototype), P4 breadth. Frozen: farm-builder depth, maps beyond tier 2. (Black Market extras unfrozen Nov 3.)
 
 ## Identity and Mantle
 - Our own names, art and text. SUPERVIVE is a reference only.
@@ -37,6 +37,10 @@ Main keeps this file current; anyone can propose a line in EXT_TO_MAIN tagged "D
   - Zedran: RMB held indefinitely, with a perfect release; LMB hold scales.
   - Dancer: reset only on an empowered hit.
   - Claire: skate with an ice path; her LMB tracks while she skates. RMB: the ice spear emerges from her and travels to the target point (travel time grows with distance), with a push-like animation, not a throw. Ult: skating into it carries her forward a decent distance, then she's encased in ice and rooted until it ends or she cancels.
+  - Zedran's Warchain: not super long, but the tether stays attached as he moves back, letting it extend (up to a max). How it pulls him depends on where he's facing and how he's moving. The source's Brall chain (data and footage) is the reference for every state.
+  - Tarek can use RMB/slam out of a glide, as the source does. The glider never blocks it. General rule: the source decides these interactions.
+  - Allies can jump over friendly Tarek rocks (per the data). Enemies stay blocked. Tarek walks up his own.
+  - Claire's LMB darts home in toward the end of their flight, as in the source (also while skating).
   - Ostra ult: about a 1 s cast lock (like the source), then he moves freely while Nightwell runs.
   - Moosh Moosh's dashes copy the source's Elluna (ground dash and air glide distance and timing). The 3x rule is dropped.
   - Animation and ability parity with the source for all 12 hunters, LMB first. Our own art, same motion.
@@ -52,6 +56,8 @@ Main keeps this file current; anyone can propose a line in EXT_TO_MAIN tagged "D
 
 ## Loadout, loot, world
 - 2 gloves, 2 charms, boots, 4 utility slots, 5 perk orbs. No upgrading. Every item exists once in a deathbox. Backpacks come from enemy deathboxes, home and shops, not random drops. Keys sit in utility slots.
+- Black Market extras are UNFROZEN (owner, Nov 3); ext/market merges in the economy step.
+- In-match shops (ext/shops) count as map work, not economy. Queue them low, with the expedition and map work.
 - Chests: 1–3 fixed, learnable groups per map, sparse, a mini objective.
 - Breakables break in one hit. Kegs explode.
 - The Hollow Crown is the beginner map. Harder tiers get their own maps, with apex threats (sound and sight hunting) and stealth.
@@ -75,7 +81,9 @@ Main keeps this file current; anyone can propose a line in EXT_TO_MAIN tagged "D
 
 ## Hosting and distribution (owner, Nov 3)
 - Stage 1 (testers and early players): our own authoritative headless Godot servers on small VPS **in EU and NA from day one** (Hetzner EU and US: Ashburn/Hillsboro; Edgegap only if more regions are needed), plus a small matchmaker (self-hosted Nakama or a custom one). **Distribution: the itch.io desktop app** installs the native Windows/Mac build and auto-patches via butler. NOT a browser game.
-- Stage 2 (public launch): Steam (GodotSteam) as the launcher; servers stay authoritative.
+- Steam: not now (owner, Nov 3). itch.io stays the launcher until a public launch is planned.
+- Modes ship with an online launcher and an easy install: one download that installs, auto-patches and opens straight into the online modes (Duel matchmaking, Arena 4v4, extraction trios). Spec it with Duel/Arena (owner OK first).
+- Servers are live (S2, Nov 3): matchmakers EU http://2.31.98.197:8080 and US http://5.161.241.179:8080; EU runs 3 matches at once, US 2. boki-1 (5.161.240.47) stays until the launcher's 'Play with friends' relay moves.
 - itch.io page: https://projectboki.itch.io/project-boki (butler target `projectboki/project-boki:windows`). Uploads are automatic: `.github/workflows/itch.yml` builds Windows and macOS on every push to main and runs butler (repo secret BUTLER_API_KEY, set by the owner). Channels: windows, mac. Game servers go on the **existing Hetzner account** (new small EU and US servers, separate from the agent box).
 - The owner is creating the accounts (itch.io, Hetzner, later Steamworks). Agents never sign up or pay.
 

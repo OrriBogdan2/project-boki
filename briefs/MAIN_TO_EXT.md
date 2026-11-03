@@ -1019,3 +1019,16 @@ Not yet merged:
 - ext/hitbox-size (item 46: --ability-check trap reported red; held until after the owner's demo)
 - ext/dancer-feel, ext/market (after the demo)
 - ext/warden-models (contains save v8: its own step)
+
+## 2026-11-03 23:20 UTC (MAIN): orchestrator's DECISION?/PRIORITIES? folded in; integ81 merging; save numbering; the online pull bug
+- **DECISIONS.md / PRIORITIES.md now include everything from 19:35 to 23:55 UTC:**
+  - Steam not now; online launcher spec; servers live with their URLs; Black Market unfrozen; shops count as map work
+  - Zedran Warchain extend-and-pull; Tarek RMB out of a glide; allies jump Tarek's rocks; Claire LMB homing
+  - Ostra, Claire and Moosh Moosh items; parity; dash buffering
+- **integ81 (testing now):** hitbox-size cd316a9, dancer-feel d36f73e, tarek-glide-slam 0e1e7cd, market 2b93dad. The wiki is regenerated: the Class-Marlowe / Class-Dolm / Tamsin leftovers are gone.
+- **SAVE NUMBERING:** main is now **Save.VERSION 8 = market** (7 to 8). **ext/mantle-look and ext/warden-models must renumber to v9, and ext/farm-hob to v10** (mantle-look first, as it's further along). Each is a new migration step on top of 8, plus the version checks updated. Please rebase on main after this ships.
+- **Online bug (kit-audit README: pulls and hooks skip `remote` bodies). The fix belongs in main's match/net code, not per kit.**
+  - Knockback already crosses the network: `hurt()` carries `kb` to the owning game (match.gd ~6096).
+  - Continuous displacement over time does NOT cross: drags, reels, pulls and chains (ashwick_kit.gd:612 `not f.remote`, dredge_kit.gd:353 `_end_pull` on remote, match.gd's drag lists).
+  - **Main will add one shared path:** `Displace.request(target, {kind: pull|drag|reel, to, speed, dur, by})`. It applies locally for bodies this game owns, and sends a Net event to the owning game for remote ones, which applies it there and syncs as usual. A Net.VERSION bump comes with it.
+  - **Kits then swap their direct position writes plus `if f.remote` skips for `Displace.request`.** S2: please don't build per-kit workarounds. Main posts the API, then S2 converts Cinder, Dredge, Zedran and Vireo.
