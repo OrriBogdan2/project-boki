@@ -378,6 +378,77 @@ func tender() -> void:
 	await _free(m)
 	await growth()
 	await burr_ranks()
+	await _no_blasts()
+
+## Owner item 23: no cosmetic burst or ring on her hop or glide, her Hearthlight's last heal blooms without a
+## ring, blast or shake, and the explosion sounds sit under the agreed peak.
+func _no_blasts() -> void:
+	var r: Array = sc.setup("tender", 20.0)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var A: Hunter = r[2]
+	var K: TenderKit = P.ak
+	var rings := {"made": 0, "seen": m.fx.rings.size()}      # rings spawned (a lambda keeps a dict by reference)
+	var each := func():
+		rings["made"] = int(rings["made"]) + maxi(0, m.fx.rings.size() - int(rings["seen"]))
+		rings["seen"] = m.fx.rings.size()
+	var bi0: int = m.fx.bi
+	P.inp["move"] = Vector2(1, 0)
+	P.dashes = P.max_dashes()
+	P.inp["dash"] = true
+	step(m, 1.0 / 60.0, each)
+	P.inp["dash"] = false
+	step(m, 0.5, each)
+	P.teleport(P.pos + Vector3(0, 3.0, 0))
+	P.ex_cd = 0.0
+	K.on_dash(true)
+	step(m, 1.1, each)
+	P.inp["move"] = Vector2.ZERO
+	var emitted := posmod(m.fx.bi - bi0, m.fx.bursts.size())
+	var loud := K.lk().live.filter(func(e): return String(e["fx"]) in ["flare", "rays", "column"]).size()
+	ok(
+			"mm dashes: no ring or burst on her hop or glide (two tiny dust puffs, soft motes)",
+			int(rings["made"]) == 0 and emitted <= 2 and loud == 0,
+			"rings %d emitters %d flares %d" % [int(rings["made"]), emitted, loud])
+	A.teleport(P.pos + Vector3(0.8, 0, 0))
+	A.hp = A.max_hp * 0.5
+	K.cd["e"] = 0.0
+	P.inp["sig"] = true
+	step(m, 1.0 / 60.0)
+	P.inp["sig"] = false
+	step(m, float(K.e_def()["time"]) - 0.1)
+	var hp0 := A.hp
+	rings["made"] = 0
+	rings["seen"] = m.fx.rings.size()
+	var trauma0: float = m.cam.trauma if m.cam else 0.0
+	step(m, 0.2, each)
+	ok(
+			"mm E: the light's last heal blooms (heals, no ring, blast or shake; a quiet chime)",
+			not K.in_e() and A.hp > hp0 + 5.0 and int(rings["made"]) == 0
+				and (m.cam == null or m.cam.trauma <= trauma0) and TenderKit.BLOOM_DB <= -6.0,
+			"healed %.1f rings %d" % [A.hp - hp0, int(rings["made"])])
+	var worst := -99.0
+	for sn in Sfx.BLAST:
+		worst = maxf(worst, wav_peak_db("res://audio/%s.wav" % sn) + Sfx.BLAST_DB)
+	ok(
+			"audio: the explosion category peaks under the agreed level", worst <= Sfx.BLAST_PEAK_DB and worst > -40.0,
+			"%.1f dBFS (ceiling %.1f)" % [worst, Sfx.BLAST_PEAK_DB])
+	await _free(m)
+
+## The peak of a 16-bit PCM wav file in dBFS (-99 if it can't be read).
+static func wav_peak_db(path: String) -> float:
+	var bytes := FileAccess.get_file_as_bytes(path)
+	var at := 12
+	while at + 8 <= bytes.size():
+		var tag := bytes.slice(at, at + 4).get_string_from_ascii()
+		var n := bytes.decode_u32(at + 4)
+		if tag == "data":
+			var peak := 0
+			for i in range(at + 8, mini(bytes.size() - 1, at + 8 + n), 2):
+				peak = maxi(peak, absi(bytes.decode_s16(i)))
+			return linear_to_db(maxf(peak, 1) / 32768.0)
+		at += 8 + n + (n % 2)
+	return -99.0
 
 ## Burrseed's burst damage on the first foe, with the hunter at level `lvl`.
 func _seed_burst(lvl: int) -> float:

@@ -9,6 +9,7 @@ extends ArchKit
 ## R is the Boki Merge.
 
 const THRUST_T := 0.08         # s into mm_shot_r / _l when the arm is straight out (the hand flashes then)
+const BLOOM_DB := -8.0         # dB: the Hearthlight's closing chime sits well under the fight
 
 var kind := {}                 # target instance id -> {t: Ent, n: int, left: float}
 var burrs: Array = []          # seeds stuck to foes: {t: Ent, left, total: float, id: int}
@@ -176,7 +177,6 @@ func _tick_dash_look(dt: float) -> void:
 	_tick_glide(dt)
 	if h.roll_t <= 0.0 or h.move_kind != "dash":
 		return
-	h.ghost_t = 0.3          # her own trail instead of the shared after-image pill
 	aft_t -= dt
 	if aft_t > 0.0:
 		return
@@ -185,6 +185,9 @@ func _tick_dash_look(dt: float) -> void:
 	for i in 2:
 		var off := Vector3(randf_range(-0.25, 0.25), randf_range(0.25, 0.9), randf_range(-0.25, 0.25))
 		lk().burst("mote", h.position + off, {"r": randf_range(0.8, 1.3), "dur": 0.4, "dir": dv})
+
+## Her own dash look (the motes): no shared after-image pill, burst or ring.
+func own_dash_trail() -> bool: return true
 
 ## A Boki merge sets a carried teammate down (unbroken: no stun), ends the Burrseed aim (no throw),
 ## and keeps the key from picking anyone up meanwhile.
@@ -280,7 +283,6 @@ func on_dash(use_ex: bool) -> bool:
 	var dist := float(air.get("dist", 8.5)) if use_ex else float(dd.get("dist", 4.2))
 	var tt := float(air.get("time", 0.8)) if use_ex else float(dd.get("time", 0.16))
 	travel(dist, tt, {"invuln": float(dd.get("invuln", 0.12)), "dir": dash_dir()}, use_ex)
-	h.ghost_t = 0.3          # her ember motes, not the shared after-image (from the first frame)
 	# travel applies the global dash feel to the time; the glide's length is the source's measured 11-15 m
 	# and so skips the global shortening
 	if use_ex:
@@ -554,12 +556,7 @@ func _hearth_end(flare: bool, word: String) -> void:
 	var rr := hearth_r()
 	if flare:
 		var amt := float(ed["burst"]) * heal_k()
-		var col := col_of(ed)
-		CareUtil.payoff(m, h, c, "HEARTH", col, "tend_flare")
-		lk().burst(
-				"flare", c,
-				{"col": Color("ffd27a"), "rim": Color("3fd8d0"), "r": rr * 1.15, "dur": 0.4, "pattern": 5.0})
-		lk().burst("rays", c, {"col": Color("ffe6a0"), "r": rr * 0.6, "dur": 0.4})
+		_bloom(c, rr)
 		play_soft("mm_flare")
 		for o in m.hunters:
 			if o.team != h.team or o.out or o.extracted:
@@ -576,6 +573,18 @@ func _hearth_end(flare: bool, word: String) -> void:
 	lk().drop("hearth")
 	hearth = {}
 	e_t = 0.0
+
+## The light's last heal reads as a heal, not a blast: the warm disc swells to its own edge (no wider), light
+## rises off it with the lantern plus over the middle and a few slow motes, a soft chime; no ring, burst or shake.
+func _bloom(c: Vector3, rr: float) -> void:
+	var ed := e_def()
+	m.fx.word(c + Vector3(0, 2.4, 0), "HEARTH", col_of(ed), false)
+	lk().burst("flare", c, {"col": Color("ffd27a"), "rim": Color("3fd8d0"), "r": rr, "dur": 0.5, "pattern": 5.0})
+	lk().burst("rays", c, {"col": Color("ffe6a0"), "r": rr * 0.6, "dur": 0.6})
+	lk().burst("plus", c + Vector3(0, 1.6, 0), {"r": 0.8, "dur": 0.5})
+	m.fx.burst(c + Vector3(0, 0.3, 0), Color("ffc46a"), 10, rr * 0.4, 1.0, -2.0, 0.8, Vector3.UP, 30.0)
+	m.sfx("tend_flare", c, BLOOM_DB, 1.0)
+	net_ring(c, rr, col_of(ed))
 
 func _e_end() -> void:
 	if not hearth.is_empty():
