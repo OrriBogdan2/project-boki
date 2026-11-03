@@ -245,3 +245,26 @@ Portrait:
 
 Turnaround:
 > Character turnaround reference sheet for a 3D modeller: the same character shown three times side by side at the same scale on one sheet, left to right: FRONT view, SIDE view (profile), BACK view. Neutral relaxed A-pose standing straight, arms held slightly away from the body, full body head to toe in every view, all three figures exactly the same height and aligned on one ground line. Flat even studio lighting, no dramatic shadows, plain flat light grey background, no scenery. Any held weapon hangs down beside the leg in the same hand in every view and is visible in all three views. She is very small and round, about three and a half heads tall, in every view; the lantern crook in the same hand in every view; the big tail fully visible in the side and back views. No text, no labels, no logos.
+
+### Sable (thief), Silver Thief
+Owner direction: moth-folk (silver wing-like cloak scales, large dark eyes); lore: the thief who reached the Wyrmheart and woke the Wyrm.
+
+Warden block:
+> Redesign the character from the first two reference images at full production quality, keeping her design (silver domino mask, single long white braid bound in silver rings, cropped dusk-violet tailcoat with long split tails and plum lining, twin hand crossbows firing arcing bolts, belt of picks and keys), and make her moth-folk, more striking and epic than the reference: Sable, the Silver Thief, the thief who reached the Wyrmheart and woke the Wyrm, cocky and quick. About seven and a half heads tall, slim, long-legged and agile with an acrobat's build. Moth-folk at a glance: large glossy all-dark eyes with a faint silver sheen visible through the domino mask; two soft feathery silver antennae sweeping back from her brow; a fine pale silvery fuzz along her jaw and collar; her coat-tails and a short mantle on her shoulders are made of overlapping iridescent silver-grey moth-wing scales with soft eye-spot patterns, shimmering like a folded pair of wings. Dusky lilac-grey skin. Her white braid swings behind her. A sly, confident smirk. The two hand crossbows are compact and silver-limbed with violet glowing bolts. Nothing hooded, no cape hood.
+
+| File | Size | Studio image | Notes |
+|---|---|---|---|
+| `wardens/sable_splash.png` | 2752x1536 | 530c9ebe | |
+| `wardens/sable_portrait.png` | 2048x2048 | 300c1816 | |
+| `wardens/sable_turnaround.png` | 3168x1344 | 3349e407 | |
+
+Splash is take 2: take 1 (2ea4b66d) was an upside-down backflip with a doubled braid; the retry asks for an upright leap and counts braid, antennae, arms and legs. The moth wings came out as real wings on her back in the splash and as wing-scale coat-tails in the turnaround; the owner can pick which reading to model.
+
+Splash:
+> Splash art, 16:9 widescreen: inside the Wyrm's vast dark treasure vault, mountains of gold coins and jewels, the scaled coil of an enormous sleeping dragon and one huge eye just opening in the gloom behind her; Sable sprints and leaps upright across the top of the hoard toward the viewer, head up, body upright and clearly readable, one leg forward, her single white braid streaming behind her, a glowing crimson crystal heart tucked under one arm, the other arm aiming a hand crossbow back over her shoulder firing an arcing violet bolt, her moth-wing-scale coat-tails spread wide behind her like moth wings, coins spraying from her feet, a cocky grin. Exactly one braid, two antennae, two arms, two legs. Warm gold light from the hoard against cool violet moonlight from a hole in the roof. Palette: dusk violet, silver, white braid, plum, dark gloves and boots, lilac-grey skin, violet bolt glow. No text, no logos.
+
+Portrait:
+> Portrait bust, square 1:1, for a game hero picker: head and shoulders, three-quarter view, a sly smirk, large glossy dark moth eyes behind the silver domino mask, the feathery silver antennae sweeping back, the white braid with silver rings over one shoulder, the shimmering wing-scale mantle on her shoulders, one hand crossbow raised beside her cheek. Exactly two antennae. Simple dusk-violet gradient background, strong silver rim light. Palette: dusk violet, silver, white, plum, lilac-grey skin. No text, no logos.
+
+Turnaround:
+> Character turnaround reference sheet for a 3D modeller: the same character shown three times side by side at the same scale on one sheet, left to right: FRONT view, SIDE view (profile), BACK view. Neutral relaxed A-pose standing straight, arms held slightly away from the body, full body head to toe in every view, all three figures exactly the same height and aligned on one ground line. Flat even studio lighting, no dramatic shadows, plain flat light grey background, no scenery. Any held weapon hangs down beside the leg in the same hand in every view and is visible in all three views. One hand crossbow in each hand, hanging down, in every view; the braid and wing-scale coat-tails clearly visible in the back view. No text, no labels, no logos.
