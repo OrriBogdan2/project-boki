@@ -23,14 +23,20 @@ about 14, held lower for the same cap) and slows 30%. Its cooldown follows the s
 1 bh = 1.8 m: rifle 11 m, grenade lane 10.5 m (about 6 bh), cone 6 m (3.5 bh), Longneedle 18 m (10 bh),
 slide tap 4.6 m and hold 7 m.
 
+## Ranks (kit data pass)
+Rank 2 is the shared step (cooldown -10%, damage +15%). Rank 3 is the hero's own and matches the source's rank IV:
+Burr Charge resets on a knock, Slipstep gives a speed burst when a slide ends, Longneedle takes 30% off its cooldown
+for every hunter it hits (the base is 20% once). The source's earlier upgrades (-1.5s twice on the grenade and the
+slide, +20% twice on the beam) collapse into the shared step.
+
 ## Per-slot table
 | Slot | Input | Aim | What it does | Telegraph / reticle | Move (KMovesVV) | Sound |
 |---|---|---|---|---|---|---|
 | LMB Quill Rifle | hold | max range (11 m) past the cursor, `"aim": "max"` | auto rifle; a string loses half its punch over 10 rounds; a Dazed foe takes +90% in big gold numbers and the string doesn't decay | the aim line runs to full range; ember tracers with a cooling tail, a bronze muzzle star | `gunslinger_lmb` (shoulder kick per round) | `vn_rifle` |
-| RMB Burr Charge | hold to aim, release to throw | max range, a fixed 10.5 m lane | flies the whole lane, **past people** (owner), and sticks to a wall or the ground at the lane's end; a 6 m, 100° cone back toward you for 0.9s, then the blast: 16, a big shove along the cone, Dazed 1.4s; a hunter shoved into more terrain is stunned 0.7s and the cooldown drops 40% | while held: a white lane with an arrow tip, foes inside it marked with a magenta ring; when stuck: the filling cone (everyone sees it); the blast front and a Dazed swirl | `gunslinger_rmb_hold` (cocked overhead), `gunslinger_rmb` (overhand) | `vn_cock`, `vn_throw`, `vn_stick`, `vn_blast` |
-| Shift Slipstep | tap / hold | where you move, not the aim | tap 4.6 m skid, hold 7 m slide; you shoot through either; early release refunds 30%; an air tap slides 2/3 of the hold distance | none (a white ring and an ember afterimage at the start) | `gunslinger_dash` (feet first, leaning back, rifle up); with no charge in the air `gunslinger_dash_ex` | `vn_slide` |
-| E Longneedle | press, stand still 0.6s | direction, a fixed 18 m line through terrain | a beam through everything in line: 36, +20% on a Dazed foe, a Dazed hunter is Skewered (payoff); a hunter hit takes 30% off the cooldown; the recoil shoves you back a step | a wide bright line narrowing to a thin core over the cast (everyone sees it); cursor charge ring; muzzle orb, flat flare, smoke ring | `gunslinger_e` (brace, recoil overshoot, settle) | `vn_ion_charge`, `vn_ion_fire`, `hero_skewer` |
-| Passive Hot Streak | | | a knock gives Slipstep back and heals 25%; abilities that land add Fever (4 x 5% lifesteal, 3.5s, all at once) | pips over the cap; a column and ring on a knock | `gunslinger_knock` (rifle spun up) | `vn_stim` |
+| RMB Burr Charge | hold to aim, release to throw | max range, a fixed 10.5 m lane | flies the whole lane, **past people** (owner), and sticks to a wall or the ground at the lane's end; a 6 m, 100° cone back toward you for 0.9s, then the blast: 16, a big shove along the cone, Dazed 1.4s; a hunter shoved into more terrain is stunned 0.7s | while held: a white lane with an arrow tip, foes inside it marked with a magenta ring; when stuck: the filling cone (everyone sees it); the blast front and a Dazed swirl | `gunslinger_rmb_hold` (cocked overhead), `gunslinger_rmb` (overhand) | `vn_cock`, `vn_throw`, `vn_stick`, `vn_blast` |
+| Shift Slipstep | tap / hold | where you move, not the aim | tap 4.8 m skid, hold 7 m slide that is owed 40% more cooldown (the kit-data pass: no refund for releasing early); you shoot through either; an air tap slides 2/3 of the hold distance | none (a white ring and an ember afterimage at the start) | `gunslinger_dash` (feet first, leaning back, rifle up); with no charge in the air `gunslinger_dash_ex` | `vn_slide` |
+| E Longneedle | press, stand still 0.6s | direction, a fixed 18 m line through terrain | a beam through everything in line: 36, +20% on a Dazed foe, a Dazed hunter is Skewered (payoff); a hunter hit takes 20% off the cooldown (rank 3: 30% for every hunter hit); the recoil shoves you back a step | a wide bright line narrowing to a thin core over the cast (everyone sees it); cursor charge ring; muzzle orb, flat flare, smoke ring | `gunslinger_e` (brace, recoil overshoot, settle) | `vn_ion_charge`, `vn_ion_fire`, `hero_skewer` |
+| Passive Hot Streak | | | a knock gives Slipstep back (the takedown heal is DashReset's 5%, the kit adds none); an ability that lands lights Fever (one flat 6% lifesteal, 3.5s) | one pip over the bar; a column and ring on a knock | `gunslinger_knock` (rifle spun up) | `vn_stim` |
 | X Cinderfall (ultimate, level 6) | tap | at the cursor, clamped to 14 m; lands exactly there (no tracking) | the rifle snaps straight up and fires; 1.6 s later the shell lands: 24 to everyone within 3.4 m, +50% within 1.2 m of the centre; then the patch burns 3 s, 3 every 0.5 s and a 30% slow; he moves and shoots freely; 42 s cooldown | a 3.4 m ground disc with ticks that fills toward the impact, its hot red centre ring and a bronze rivet ring closing in (everyone sees all of it), a dark scorched disc, an ember light column; the shell (a big spiked charge) falls through the column for the last 0.8 s; impact: a white-hot column, ember shock rings, an ember spray, "DEAD CENTRE" on a centre hit; the patch: a scorched disc with a lit ember rim and flickering flames | `gunslinger_x` (rifle straight up, kick, back down by 0.6 s) | `vn_nuke_fire`, `vn_nuke_fall`, `vn_nuke_boom`, `vn_nuke_burn` |
 | R / T | | | the Boki Merge (the Boki system's key) | | | |
 
@@ -40,10 +46,10 @@ slide tap 4.6 m and hold 7 m.
 | Grenade past a foe, ground cone back over them | Dazed, shoved toward you | `--gunslinger-combo-check` |
 | Dazed foe + rifle | +90%, gold numbers, no decay | `--gunslinger-combo-check` |
 | Dazed foe + Longneedle | +20%, Skewered on a hunter | `--gunslinger-combo-check` |
-| Grenade on a wall, foe shoved into terrain | stun + cooldown -40% | `--gunslinger-combo-check` |
-| Longneedle hit on a hunter | cooldown -30% | `--gunslinger-combo-check` |
+| Grenade on a wall, foe shoved into terrain | stun, the cooldown is untouched | `--gunslinger-combo-check` |
+| Longneedle hit on a hunter | cooldown -20%; rank 3 -30% per hunter hit | `--gunslinger-combo-check` |
 | Slipstep while firing | rounds keep going, the slide follows the keys | `--gunslinger-combo-check` |
-| Knock | Slipstep back, heal; rank 3 resets the grenade | `--gunslinger-combo-check` |
+| Knock | Slipstep back, no kit heal; rank 3 resets the grenade | `--gunslinger-combo-check` |
 | Stun during the Longneedle cast, or a Boki merge | cast cancelled, nothing fires | `--gunslinger-combo-check` |
 | Burr Charge cone (Dazed, shoved toward you), then Cinderfall on them | a slowed foe in the disc is hard to get out in 1.6 s | `--gunslinger-combo-check` (disc, impact, slow) |
 | Cinderfall on an enemy hunter, then the Merge | the impact fills the bond (KinBond.from_ult, a hit); the merge straight after never one-shots a full-health light hunter | `--gunslinger-combo-check` (burst) |
@@ -54,11 +60,11 @@ slide tap 4.6 m and hold 7 m.
 |---|---|---|---|
 | Rifle damage decays over the first 10 rounds to 50% | [wiki: Ghost](https://supervive.wiki.gg/wiki/Ghost) (rifle) | numbers 60 to 30 | yes: data asserted |
 | Bonus damage to Dazed targets | [wiki](https://supervive.wiki.gg/wiki/Ghost) | 1.9x yellow numbers | yes: "+90%", gold numbers |
-| Wall blast: cone, knockback, launched into terrain = stun, cooldown -40% | [wiki](https://supervive.wiki.gg/wiki/Ghost) (Spike Grenade) | cone shown | yes |
+| Wall blast: cone, knockback, launched into terrain = stun | [wiki](https://supervive.wiki.gg/wiki/Ghost) (Spike Grenade) | cone shown | yes |
 | Combat Slide: tapped in the air for 2/3 of the full-hold distance | [wiki](https://supervive.wiki.gg/wiki/Ghost) patch 05.03.25 | not shown | yes: "an air tap slides 2/3 of the full hold" |
-| Released early on the ground: cooldown reduced | [wiki](https://supervive.wiki.gg/wiki/Ghost) | not shown | yes: "let go early, part of it comes back" |
+| Hold = a longer dash on a longer cooldown, no refund | kit data (SERVER_UPDATE7) | not separable | yes: "a held slide is owed a longer cooldown and letting go early refunds nothing" |
 | Knocks reset the slide | [wiki](https://supervive.wiki.gg/wiki/Ghost) | not shown | yes |
-| The omnivamp stacks wear off all at once | [wiki](https://supervive.wiki.gg/wiki/Ghost) patch 05.03.25 | not shown | yes: "Fever wears off all at once" |
+| The omnivamp stacks wear off all at once | [wiki](https://supervive.wiki.gg/wiki/Ghost) patch 05.03.25 | not shown | yes: "Fever wears off all at once"; "one flat level of 6%" |
 | Railgun pierces terrain and every target | [wiki](https://supervive.wiki.gg/wiki/Ghost) | crosses a chasm | yes: through a wall, two targets |
 | The grenade sticks to dynamic objects (shields, barricades) | [wiki](https://supervive.wiki.gg/wiki/Ghost) patch 20.11.24 | not shown | partly: it sticks to terrain blocks; other heroes' walls that are blocks count |
 | Mini Nuke: lands where the cursor was at cast, 1.6 s after, no tracking | reference sheet (both casts) | f29 to f45 | yes: "it lands exactly at the cursor", "nothing lands before 1.6s" |
@@ -70,7 +76,7 @@ slide tap 4.6 m and hold 7 m.
 - **Owner rule:** the grenade never goes off on a person: it flies past people and sticks to a wall or the ground at the lane's end. The ground cone, like the wall cone, points back toward the thrower.
 - The throw comes on release of RMB (hold to aim); in the air it throws on the press.
 - Dazed is our Rattled status (slow plus the damage window); it now applies to the training dummy too.
-- Fever is toned down (4 stacks of 5%) rather than dropped: the footage build only had the knock reset, the later source keeps the omnivamp.
+- Fever follows the kit data: a flat +6% omnivamp for 3.5s from any ability hit (no stacks). The footage build only had the knock reset.
 - The Longneedle has no movement while charging (self_slow 1.0) and its recoil is a short shove.
 - A slide in the air spends a charge and stops short instead of carrying.
 - Cinderfall: the range is 14 m (the footage only shows 5 bh in range); the disc is 3.4 m (about 1.9 bh) with a
