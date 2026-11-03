@@ -18,6 +18,8 @@ const BRONZE := Color("b9732f")
 const SMOKE := Color("d9c2a8")       # the Longneedle's recoil smoke ring: warm, not white
 const SCRAPE := Color("6b4a2e")      # the slide's dust scrape under him
 const ECHO_GAP := 0.05               # s between his after-images on a slide or the air dash
+const ECHO_ALPHA := 0.35             # see-through, so the trail never covers his live body
+const ECHO_BACK := 0.35              # m behind him along his travel: the echoes trail, not overlap
 const PIP_LIFT := 0.9                # m up the screen the Fever pips sit, clear of his cap and face
 
 var slide := {}                # {t, held, dir} while a Slipstep runs
@@ -103,6 +105,10 @@ func _tick_trail() -> void:
 	if hand != null:
 		fx().trail("vn%d" % h.get_instance_id(), hand.global_position, EMBER, HOT, 0.24)
 
+## His after-image colour: a deeper ember, so the trail reads apart from his warm live body.
+static func echo_col() -> Color:
+	return EMBER.lerp(DEEP, 0.5)
+
 ## His own after-images on Slipstep and the air dash: his silhouette in ember, cooling to deep red.
 func _tick_echo(dt: float) -> void:
 	if h.roll_t <= 0.0 and slide.is_empty():
@@ -112,7 +118,7 @@ func _tick_echo(dt: float) -> void:
 	if echo_t > 0.0:
 		return
 	echo_t = ECHO_GAP
-	fx().echo(h, EMBER.lerp(DEEP, 0.3), 0.4)
+	fx().echo(h, echo_col(), 0.4, ECHO_ALPHA, ECHO_BACK)
 	if h.grounded:
 		fx().disc(ground(h.pos), 0.7, SCRAPE, Color.BLACK, 0.35, SCRAPE.lightened(0.25))
 
@@ -203,7 +209,7 @@ func on_dash(use_ex: bool) -> bool:
 		travel(ad, air_t, {"invuln": float(dd["invuln"])})
 		slide = {"t": 0.0, "held": false, "dir": h.roll_dir, "fx": 0.0, "air": true, "len_t": air_t}
 		play("gunslinger_dash")
-		fx().echo(h, EMBER, 0.5)
+		fx().echo(h, echo_col(), 0.5, ECHO_ALPHA, ECHO_BACK)
 		m.sfx("vn_slide", h.pos, -4.0, 1.2)
 		last_dash_kind = "air_slide"
 		return true
@@ -212,7 +218,7 @@ func on_dash(use_ex: bool) -> bool:
 			return true
 		travel(float(h.cdat.get("ex_dist", 4.6)) * 0.9, float(h.cdat.get("ex_time", 0.2)), {"invuln": 0.08}, true)
 		play("gunslinger_dash_ex")
-		fx().echo(h, EMBER, 0.45)
+		fx().echo(h, echo_col(), 0.45, ECHO_ALPHA, ECHO_BACK)
 		last_dash_kind = "air"
 		return true
 	if not spend_dash(false):
@@ -223,7 +229,7 @@ func on_dash(use_ex: bool) -> bool:
 	play("gunslinger_dash")
 	# where it began: his ember after-image standing there (0.6 s), a bright cream ring with an ember
 	# one inside it, and a scrape of dust under him
-	fx().echo(h, EMBER, 0.6)
+	fx().echo(h, echo_col(), 0.6, ECHO_ALPHA, ECHO_BACK)
 	fx().ring(ground(start), 1.7, HOT, EMBER, 0.5)
 	fx().ring(ground(start), 1.0, EMBER, HOT, 0.4)
 	fx().disc(ground(start), 1.0, SCRAPE, Color.BLACK, 0.5, SCRAPE.lightened(0.25))

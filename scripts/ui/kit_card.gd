@@ -2,7 +2,7 @@ class_name KitCard
 extends PanelContainer
 ## One archetype's whole kit on one page (docs/ARCHETYPES.md): dash, passive and its resource, LMB,
 ## RMB (with its variants), E and R, each with an icon, its key, a one-line description and a tiny
-## looping preview; a one-line "how the kit fits together"; and the Boki's own C ability and what its
+## looping preview; a one-line "how the kit fits together"; and the Boki's own ability (its key) and what its
 ## type does to the kit (infusion). Clicking a tile opens that ability's detail page in the same
 ## frame (no pagination, no resizing: the card is always SIZE). Used in the Arena / training (K) and
 ## on the expedition loadout (KitCard.strip, a compact row that opens the full card).
@@ -209,7 +209,7 @@ func _show_detail(slot: String) -> void:
 		p.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		v.add_child(p)
 
-## The Boki strip: its own C ability and how its type changes this kit.
+## The Boki strip: its own ability and how its type changes this kit.
 func _kin_strip() -> Control:
 	var p := PanelContainer.new()
 	p.add_theme_stylebox_override("panel", UI.frame(Color(1, 1, 1, 0.04), UI.R_CTRL, Color(1, 1, 1, 0.08), 1, 12, 8))
@@ -219,7 +219,8 @@ func _kin_strip() -> Control:
 	v.add_theme_constant_override("separation", 4)
 	p.add_child(v)
 	if ks == null:
-		v.add_child(UI.label("No Boki: bring one and its type infuses this kit (and gives you its own C ability).", 14, UI.MUTED))
+		var no_boki := "No Boki: bring one and its type infuses this kit (and gives you its own %s ability)."
+		v.add_child(UI.label(no_boki % Settings.key_cap("kin_ability"), 14, UI.MUTED))
 		return p
 	var kc: Color = Data.KIN.get(kin_sp, {}).get("color", Color.WHITE)
 	var top := HBoxContainer.new()

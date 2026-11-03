@@ -5,7 +5,8 @@ extends RefCounted
 ## 4-6 frame strip cropped round the hero (anticipation, release, follow-through, recovery). Files go
 ## straight into <dir> as <hero>_<name>.png, and <dir>/MANIFEST_<hero>.txt gets one line per file:
 ## "<hero>/<tag>|<file>|<caption>". Uses only long-standing match and kit calls. With --vv-ult only the
-## ultimate's shots are taken (tools/vv_ult_shots.gd).
+## ultimate's shots are taken (tools/vv_ult_shots.gd); with --vv-only=<part> only that part (for example
+## dash or lmb: _<hero>_<part>), to retake one move.
 
 const DT := 1.0 / 60.0
 const STRIP_CROP := Vector2i(120, 140)       # px round the hero for a strip frame (scaled 2.5x)
@@ -23,6 +24,7 @@ var home := Vector3.ZERO
 var lines: Array = []
 var strips := {}               # strip file -> Array of Image
 var ult_only := false
+var only_part := ""
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -36,11 +38,15 @@ func run(main_node: Node) -> void:
 			tag = arg.substr(9)
 		if arg == "--vv-ult":
 			ult_only = true
+		if arg.begins_with("--vv-only="):
+			only_part = arg.substr(10)
 	hero_name = "vireo" if who == "mage" else "venator"
 	DirAccess.make_dir_recursive_absolute(dir)
 	await _setup()
 	if ult_only:
 		await load("res://tools/vv_ult_shots.gd").new(self).run_for(who)
+	elif only_part != "":
+		await Callable(self, "_%s_%s" % [hero_name, only_part]).call()
 	elif who == "mage":
 		await _vireo()
 	else:

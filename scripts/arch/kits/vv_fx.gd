@@ -30,6 +30,8 @@ const M_FAN := 6
 const M_SWIRL := 7
 const M_BEAM := 8
 const POOL_CAP := 28           # nodes per kind at most; past it the oldest is taken back
+const ECHO_PUSH := 0.4          # m a see-through echo sits behind the live body, along the camera ray
+const ECHO_CLEAR := 1.4         # m he must be off a trailing echo before it shows fully
 const ECHO_CAP := 10           # after-images per hunter at most (each copies the whole model)
 const KEEP := 0.12             # s a marker or a trail stays without a refresh
 const MARK_RAISE := 1.0        # m the marker rides up the screen past the HP bar
@@ -310,22 +312,65 @@ func shackle(target: Ent, col: Color, col2: Color, dur := 1.5) -> void:
 
 ## A fading after-image of `who` in its pose right now, flat in `col`: the hero's own silhouette
 ## (its visible meshes, copied once into a pooled node per hunter), even while the model is hidden.
-func echo(who: Hunter, col: Color, dur := 0.35) -> void:
+## alpha: its starting opacity. back: metres it sits behind him along his travel. A see-through echo
+## (alpha under 0.5) writes no depth, so stacked echoes stay a soft trail and the live body hides them.
+func echo(who: Hunter, col: Color, dur := 0.35, alpha := 0.75, back := 0.0) -> void:
 	var model: Node3D = who.model
 	if model == null or not is_instance_valid(model):
 		return
 	var n := _take("echo%d" % who.get_instance_id(), _build_echo.bind(model), ECHO_CAP)
 	if n.get_meta("model") != model:
 		_fill_echo(n, model)          # the model was rebuilt (a new weapon, a respawn): copy it again
+	var shift := _behind(who) * back
+	var soft := alpha < 0.5
+	var push := _push_back(who, shift) if soft else Transform3D.IDENTITY
 	for pair in n.get_meta("pairs") as Array:
 		var src: MeshInstance3D = pair[0]
 		var dst: MeshInstance3D = pair[1]
 		dst.visible = is_instance_valid(src) and _shown_under(src, model)
 		if dst.visible:
-			dst.global_transform = src.global_transform
+			dst.global_transform = push * src.global_transform.translated(shift)
 	var mat: StandardMaterial3D = n.get_meta("mat")
-	mat.albedo_color = Color(col, 0.75)
-	_play(n, "echo", dur, {"col": col})
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA if soft else BaseMaterial3D.TRANSPARENCY_ALPHA_DEPTH_PRE_PASS
+	mat.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_DISABLED if soft else BaseMaterial3D.DEPTH_DRAW_OPAQUE_ONLY
+	mat.render_priority = -1 if soft else 0
+	mat.albedo_color = Color(col, 0.0 if soft else alpha)
+	var trail := {"col": col, "a0": alpha}
+	if soft:
+		trail["who"] = who                  # a soft echo shows only once he has moved off it
+		trail["at"] = who.global_position + shift
+	_play(n, "echo", dur, trail)
+
+## Scales the echo about the camera so it lands ECHO_PUSH m deeper with the same outline on screen: the
+## live body is then always in front of it and hides it, whichever way he slides.
+func _push_back(who: Hunter, shift: Vector3) -> Transform3D:
+	var cam := who.get_viewport().get_camera_3d() if who.is_inside_tree() else null
+	if cam == null:
+		return Transform3D.IDENTITY
+	var eye := cam.global_position
+	var depth := eye.distance_to(who.global_position + shift + Vector3(0, 1.0, 0))
+	if depth < 0.5:
+		return Transform3D.IDENTITY
+	var k := (depth + ECHO_PUSH) / depth
+	return Transform3D(Basis.from_scale(Vector3.ONE * k), eye * (1.0 - k))
+
+## 0 while a trailing echo still sits on its hunter, 1 once he is ECHO_CLEAR m away: it never covers him.
+static func _clear_of(e: Dictionary) -> float:
+	var who = e.get("who")
+	if who == null or not is_instance_valid(who):
+		return 1.0
+	var at: Vector3 = e["at"]
+	var away := Vector2(at.x - (who as Hunter).global_position.x, at.z - (who as Hunter).global_position.z).length()
+	return smoothstep(ECHO_CLEAR * 0.6, ECHO_CLEAR, away)
+
+## The flat direction opposite to where `who` is going (its travel, else its dash, else its facing).
+static func _behind(who: Hunter) -> Vector3:
+	var flat := Vector3(who.vel.x, 0.0, who.vel.z)
+	if flat.length() < 0.5:
+		flat = Vector3(who.roll_dir.x, 0.0, who.roll_dir.y)
+	if flat.length() < 0.1:
+		return Vector3.ZERO
+	return -flat.normalized()
 
 func _build_echo(model: Node3D) -> Node3D:
 	var root := Node3D.new()
@@ -546,7 +591,7 @@ func _tick_effect(e: Dictionary, delta: float) -> void:
 	var kind := String(e["kind"])
 	if kind == "echo":
 		var em: StandardMaterial3D = n.get_meta("mat")
-		em.albedo_color = Color(e["col"], 0.75 * (1.0 - u) * (1.0 - u))
+		em.albedo_color = Color(e["col"], float(e.get("a0", 0.75)) * (1.0 - u) * (1.0 - u) * _clear_of(e))
 		return
 	var mt := (n as MeshInstance3D).material_override as ShaderMaterial
 	mt.set_shader_parameter("life", u)

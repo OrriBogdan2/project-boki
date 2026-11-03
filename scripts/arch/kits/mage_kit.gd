@@ -41,6 +41,21 @@ var ult: MageUlt               # Kitefall, her ultimate on X
 
 func _setup() -> void:
 	ult = MageUlt.new(self)
+	# her round is fired after this kit's tick, so its stock orb would draw one frame as a white ball at
+	# her hand before _tick_lmb skins it: hide it just before that frame is drawn
+	RenderingServer.frame_pre_draw.connect(_hide_fresh_round)
+
+## Hides the stock orb of the round she just fired (the kit's jagged bolt is the round's look).
+func _hide_fresh_round() -> void:
+	if h == null or not is_instance_valid(h) or h.shot_n == last_shot:
+		return
+	var shots: Array = m.get("shots")
+	for i in range(shots.size() - 1, -1, -1):
+		if shots[i]["by"] == h and not (shots[i]["x"] as Dictionary).has("src"):
+			var orb := shots[i].get("node") as Node3D
+			if orb != null and is_instance_valid(orb):
+				orb.visible = false
+			return
 
 func fx() -> VVFx:
 	return VVFx.of(m)
@@ -195,6 +210,8 @@ func _tick_echo(dt: float) -> void:
 
 func teardown() -> void:
 	super.teardown()
+	if RenderingServer.frame_pre_draw.is_connected(_hide_fresh_round):
+		RenderingServer.frame_pre_draw.disconnect(_hide_fresh_round)
 	for k in sparks.keys():
 		fx().unmark("vs%d" % k)
 	sparks.clear()
