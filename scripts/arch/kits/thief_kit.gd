@@ -374,8 +374,9 @@ func _bolt() -> void:
 	sd["life0"] = sd["life"]
 	var x: Dictionary = sd["x"]
 	x["kx"] = func(s: Dictionary, at: Vector3, e: Ent, why: String) -> void: _bolt_end(s, at, e, why, emp)
-	# the throw: the firing arm whips forward, the torso turns into it (KMovesDJ thf_lmb_r / thf_lmb_l); the
-	# empowered one is both blades driven out together (thf_primed)
+	# the throw: the cocked arm whips forward as the bolt leaves, the torso turns into it, and the other arm
+	# cocks for the next bolt (KMovesDJ thf_lmb_r / thf_lmb_l); the empowered one is both blades driven out
+	# together (thf_primed)
 	var throw := "thf_lmb_r" if hand == 1 else "thf_lmb_l"
 	play("thf_primed" if emp else throw)
 	h.swing_n += 1
@@ -390,7 +391,6 @@ func _bolt() -> void:
 		fx().ride(sd, "chakram_big", Color("ffd84a"), EMP_BLUE, 2.6, 0.55)
 		fx().star(muzzle, EMP_BLUE, 0.9, 0.16)
 		m.sfx("dj_bolt_emp", h.pos, -1.0 if h.is_local() else -5.0, 1.0)
-		if h.is_local() and m.cam: m.cam.add_trauma(0.12)
 	else:
 		fx().ride(sd, "chakram", BOLT_TAIL, BOLT_GOLD, 0.9, 0.3)
 		fx().star(muzzle, BOLT_GOLD, 0.6, 0.1, BOLT_CORE)        # the gold muzzle star at the throwing hand

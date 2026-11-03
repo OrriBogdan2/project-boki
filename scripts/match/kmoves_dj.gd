@@ -156,35 +156,35 @@ const MOVES := {
 		[0.45, {}]]},
 	# ---------------------------------------------------------------- Dancer (thief)
 	# Arc Bolts, one per hand (footage 0028-0039: 2-3 frames a shot, one arm whipped forward from a wide
-	# low stance, the torso turned about 30 degrees into it, the legs keeping their stance): the throwing
-	# arm cocked back past the shoulder at 0.03, whipped to full reach at 0.08 with the torso twisting
-	# into it, an overshoot at 0.15, settled by 0.35; the other blade held out wide to the side
-	"thf_lmb_r": {"keys": [
-		[0.0, {"y": 0.25, "p": 0.06, "sq": 0.1, "lw": 0.9, "legs": [0.75, -1.1, -0.65, -0.8], "lift": -0.08,
-				"fr": Vector3(0.18, 0.08, 0.12), "rw": 1.0, "fl": Vector3(-0.42, 0.12, -0.05), "hw": 0.8}],
-		[0.03, {"y": 0.50, "p": 0.12, "sq": 0.16, "lw": 1.0, "legs": [0.85, -1.2, -0.75, -0.9], "lift": -0.1,
+	# low stance, the torso turned about 30 degrees into it; running, the legs keep running): the bolt leaves
+	# as the move starts, so the throwing arm starts cocked behind the shoulder (the last throw's recovery
+	# drew it back) and is whipped to full reach by 0.04 with the torso twisting into it, an overshoot at
+	# 0.12, settled by 0.26; by 0.45 (the next bolt) the other arm is cocked and the torso wound toward it,
+	# which is where the next throw starts; with no next bolt she lowers it by 0.7. The legs are a stance.
+	"thf_lmb_r": {"stance": true, "keys": [
+		[0.0, {"y": 0.5, "p": 0.12, "sq": 0.16, "lift": -0.1, "lw": 1.0, "legs": [0.85, -1.2, -0.75, -0.9],
 				"fr": Vector3(0.22, 0.14, 0.30), "rw": 1.0, "fl": Vector3(-0.42, 0.14, 0.00), "hw": 0.9}],
-		[0.08, {"y": -0.50, "p": -0.3, "sq": -0.2, "lw": 1.0, "legs": [0.95, -1.0, -0.8, -0.6], "lift": -0.04,
+		[0.04, {"y": -0.5, "p": -0.3, "sq": -0.2, "lift": -0.04, "lw": 1.0, "legs": [0.95, -1.0, -0.8, -0.6],
 				"fr": Vector3(0.02, 0.08, -0.60), "rw": 1.0, "fl": Vector3(-0.47, 0.10, 0.20), "hw": 0.9}],
-		[0.15, {"y": -0.62, "p": -0.34, "sq": -0.08, "lw": 1.0, "legs": [0.95, -1.05, -0.8, -0.65],
-				"lift": -0.05, "fr": Vector3(-0.04, 0.04, -0.68), "rw": 1.0, "fl": Vector3(-0.42, 0.10, 0.18),
-						"hw": 0.8}],
-		[0.35, {"y": -0.10, "p": -0.06, "lw": 0.6, "legs": [0.75, -1.0, -0.6, -0.75], "lift": -0.06,
-				"fr": Vector3(0.10, 0.04, -0.30), "rw": 0.4, "fl": Vector3(-0.42, 0.10, 0.00), "hw": 0.4}],
-		[0.45, {}]]},
-	"thf_lmb_l": {"keys": [
-		[0.0, {"y": -0.25, "p": 0.06, "sq": 0.1, "lw": 0.9, "legs": [0.75, -1.1, -0.65, -0.8], "lift": -0.08,
-				"fl": Vector3(-0.18, 0.08, 0.12), "hw": 1.0, "fr": Vector3(0.42, 0.12, -0.05), "rw": 0.8}],
-		[0.03, {"y": -0.50, "p": 0.12, "sq": 0.16, "lw": 1.0, "legs": [0.85, -1.2, -0.75, -0.9], "lift": -0.1,
-				"fl": Vector3(-0.22, 0.14, 0.30), "hw": 1.0, "fr": Vector3(0.42, 0.14, 0.00), "rw": 0.9}],
-		[0.08, {"y": 0.50, "p": -0.3, "sq": -0.2, "lw": 1.0, "legs": [0.95, -1.0, -0.8, -0.6], "lift": -0.04,
-				"fl": Vector3(-0.02, 0.08, -0.60), "hw": 1.0, "fr": Vector3(0.47, 0.10, 0.20), "rw": 0.9}],
-		[0.15, {"y": 0.62, "p": -0.34, "sq": -0.08, "lw": 1.0, "legs": [0.95, -1.05, -0.8, -0.65],
-				"lift": -0.05, "fl": Vector3(0.04, 0.04, -0.68), "hw": 1.0, "fr": Vector3(0.42, 0.10, 0.18),
-						"rw": 0.8}],
-		[0.35, {"y": 0.10, "p": -0.06, "lw": 0.6, "legs": [0.75, -1.0, -0.6, -0.75], "lift": -0.06,
-				"fl": Vector3(-0.10, 0.04, -0.30), "hw": 0.4, "fr": Vector3(0.42, 0.10, 0.00), "rw": 0.4}],
-		[0.45, {}]]},
+		[0.12, {"y": -0.62, "p": -0.34, "sq": -0.08, "lift": -0.05, "lw": 1.0, "legs": [0.95, -1.05, -0.8, -0.65],
+				"fr": Vector3(-0.04, 0.04, -0.68), "rw": 1.0, "fl": Vector3(-0.42, 0.10, 0.18), "hw": 0.8}],
+		[0.26, {"y": -0.2, "p": -0.04, "sq": 0.05, "lift": -0.07, "lw": 1.0, "legs": [0.8, -1.1, -0.7, -0.85],
+				"fr": Vector3(0.12, 0.06, -0.25), "rw": 0.8, "fl": Vector3(-0.30, 0.10, 0.12), "hw": 0.8}],
+		[0.45, {"y": -0.5, "p": 0.12, "sq": 0.16, "lift": -0.1, "lw": 1.0, "legs": [0.85, -1.2, -0.75, -0.9],
+				"fr": Vector3(0.42, 0.14, 0.00), "rw": 0.9, "fl": Vector3(-0.22, 0.14, 0.30), "hw": 1.0}],
+		[0.7, {}]]},
+	"thf_lmb_l": {"stance": true, "keys": [
+		[0.0, {"y": -0.5, "p": 0.12, "sq": 0.16, "lift": -0.1, "lw": 1.0, "legs": [0.85, -1.2, -0.75, -0.9],
+				"fr": Vector3(0.42, 0.14, 0.00), "rw": 0.9, "fl": Vector3(-0.22, 0.14, 0.30), "hw": 1.0}],
+		[0.04, {"y": 0.5, "p": -0.3, "sq": -0.2, "lift": -0.04, "lw": 1.0, "legs": [0.95, -1.0, -0.8, -0.6],
+				"fr": Vector3(0.47, 0.10, 0.20), "rw": 0.9, "fl": Vector3(-0.02, 0.08, -0.60), "hw": 1.0}],
+		[0.12, {"y": 0.62, "p": -0.34, "sq": -0.08, "lift": -0.05, "lw": 1.0, "legs": [0.95, -1.05, -0.8, -0.65],
+				"fr": Vector3(0.42, 0.10, 0.18), "rw": 0.8, "fl": Vector3(0.04, 0.04, -0.68), "hw": 1.0}],
+		[0.26, {"y": 0.2, "p": -0.04, "sq": 0.05, "lift": -0.07, "lw": 1.0, "legs": [0.8, -1.1, -0.7, -0.85],
+				"fr": Vector3(0.30, 0.10, 0.12), "rw": 0.8, "fl": Vector3(-0.12, 0.06, -0.25), "hw": 0.8}],
+		[0.45, {"y": 0.5, "p": 0.12, "sq": 0.16, "lift": -0.1, "lw": 1.0, "legs": [0.85, -1.2, -0.75, -0.9],
+				"fr": Vector3(0.22, 0.14, 0.30), "rw": 1.0, "fl": Vector3(-0.42, 0.14, 0.00), "hw": 0.9}],
+		[0.7, {}]]},
 	# the empowered bolt (0143: a big streak, a vertical blade flash at her hands), thrown with both blades at
 	# once: she is caught coiled (both blades swept wide behind the shoulders, sunk low), drives them out
 	# together in a V at 0.04 with a long lunge, holds the reach through 0.12, recoils back onto her heels by 0.24 with
@@ -227,8 +227,9 @@ const MOVES := {
 				"fl": Vector3(-0.5, 0.0, 0.15), "hw": 1.0, "fr": Vector3(0.5, 0.0, 0.15), "rw": 1.0}],
 		[0.48, {"fz": 6.283}]]},
 	# the Bola (0100-0102): the right hand raised over the head and circled (three points every 0.13s)
-	# through the 0.4s lane, the weights whirling round it (DJFx), then slung with a long forward lunge
-	"thf_bola": {"keys": [
+	# through the 0.4s lane, the weights whirling round it (DJFx), then slung with a long forward lunge; the
+	# legs are a stance, so walking through the wind-up she keeps walking
+	"thf_bola": {"stance": true, "keys": [
 		[0.0, {}],
 		[0.05, {"fr": Vector3(0.1, 0.62, 0.05), "rw": 1.0, "y": -0.25, "p": 0.14, "lw": 0.8,
 				"legs": [0.6, -1.0, -0.5, -0.7]}],

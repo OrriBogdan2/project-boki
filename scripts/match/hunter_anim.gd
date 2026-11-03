@@ -804,7 +804,7 @@ func update(dt: float, s: Dictionary) -> void:
 	# a kit move's legs
 	if not km.is_empty() and km.has("legs") and float(km["lw"]) > 0.0:
 		var kl4: Array = km["legs"]
-		var lw := clampf(float(km["lw"]), 0.0, 1.0)
+		var lw := clampf(float(km["lw"]), 0.0, 1.0) * stance_leg_k(km_stance, run_k)
 		hl = lerpf(hl, kl4[0], lw); kl = lerpf(kl, kl4[1], lw)
 		hr = lerpf(hr, kl4[2], lw); kr = lerpf(kr, kl4[3], lw)
 	# pulling up a ledge or vaulting: one knee comes up onto it
@@ -1079,7 +1079,8 @@ func update(dt: float, s: Dictionary) -> void:
 ## blade (the greatsword's yaw, pitch, roll, like SWINGS) with bw, rad (the blade's reach), gp (a
 ## gun's extra pitch), wa / wo (a held weapon's extra pitch, yaw, roll and offset).
 ## A move with "hold": true stays on its last key until another replaces it; with
-## "loop": t as well it cycles from t to the last key instead (a recoil wobble, hand over hand).
+## "loop": t as well it cycles from t to the last key instead (a recoil wobble, hand over hand). A move with
+## "stance": true keys its legs as a planted stance, used only standing (stance_leg_k).
 const KMOVES := {
 }
 ## Stride rate (walk phase per metre) of heroes whose step differs from their class: quick, short steps
@@ -1092,6 +1093,7 @@ var km_id := ""
 var km_prev_t := 99.0
 var km_from := {}              # the pose the last kit move left the body in, eased out over KM_BLEND
 var km_blend := KM_BLEND
+var km_stance := false         # the move's legs are a standing stance: running, the legs keep running
 const KM_BLEND := 0.08         # s: one kit move eases into the next (or back to none), so no pose pops
 
 ## The kit move's channels this frame; a new move (or the same one restarted) blends in from the last pose.
@@ -1099,11 +1101,18 @@ func _update_km(id: String, tt: float, dt: float) -> void:
 	if id != km_id or tt < km_prev_t - 0.001:
 		km_from = km
 		km_blend = 0.0
+	if id != km_id:
+		km_stance = bool(km_def(id).get("stance", false))
 	km_id = id
 	km_prev_t = tt
 	var now := km_sample(id, tt) if id != "" else {}
 	km_blend += dt
 	km = now if km_blend >= KM_BLEND or km_from.is_empty() else km_mix(km_from, now, km_blend / KM_BLEND)
+
+## How much of a kit move's legs to use: all of them, or for a move keyed "stance": true (a throw or a shot
+## from a planted stance) none at a run, so the legs keep running while the arms and torso play the move.
+static func stance_leg_k(stance: bool, run: float) -> float:
+	return 1.0 - clampf(run, 0.0, 1.0) if stance else 1.0
 
 ## Two kit-move poses mixed (u = 0: `a`, 1: `b`); a side without a channel counts as the rest pose, and the
 ## whole-body turns take the short way round.

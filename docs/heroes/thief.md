@@ -47,6 +47,26 @@ briefs/hero-ref/dancer.md (5 fps, a frame is 0.2s; px at 1 px = 0.0375 m). Asser
 | Speed boost | Quickflip gives one (rank IV makes it +50% bigger) [game data]; +15-20% for about 1-1.5s after a Cartwheel [footage] | +18% for 2s at most, ended by firing the empowered bolt | unchanged |
 | Dash -> shot rhythm | 0193: the Cartwheel and the empowered shot leave on the same frame (mid-flip); 0137 -> 0143: up after the flip, the gold line, the shot about 1s later; the loop about 1.4s (0187 -> 0194) [footage] | fires mid-flip (row `fire`); a click while the last bolt still cooled was lost | the same, and a click while the bolt cools (mid-flip too) is kept for one bolt's interval and goes the moment it can; two empowered hits fit inside 1.4s with LMB held |
 
+## Parity pass (LMB first)
+
+The owner's parity request (INBOX 13:45 ET): the attack animations, how the aim tracks, and the cadence, slot by
+slot against the source. [game data] is briefs/supervive-data (Shiv; the shared rotation rate from
+supervive_physics.md); [footage] is briefs/hero-ref/dancer.md (5 fps). Asserted in `--dancer-combo-check`
+(tools/dancer_parity_check.gd, lines `dancer parity ...`); the Cartwheel and the empowered bolt are the feel
+pass above.
+
+| Slot | Beat | Source | Ours before | Ours now |
+|---|---|---|---|---|
+| LMB | throw | one arm whipped forward from a wide low stance, the torso turned ~30 degrees into it, 2-3 frames a shot, left then right [footage 0028-0039] | the bolt left at 0.0 while the arm was still being cocked; full reach at 0.08 | the arm starts cocked (the last throw's recovery drew it back) and is out by 0.04; overshoot 0.12, settled 0.26 |
+| LMB | anticipation | each throw starts from the other's follow-through [footage] | each throw cocked its own arm after the bolt had left | by 0.45 (the next bolt) the other arm is cocked and the torso wound toward it; no next bolt: lowered by 0.7 |
+| LMB | legs | wide low stance standing; running, "the torso snaps to the cursor while firing with either hand, and the legs keep running" [footage] | the throw's legs at full weight for 0.35s of every 0.45s, running or not (the feet froze mid-run) | the legs are a stance (`"stance": true`): full standing, none at a run, so the legs keep running |
+| LMB | tracking | the bolt flies to the cursor point; the body faces the cursor, yaw 1280 deg/s [footage, game data] | the same | unchanged; asserted: a bolt swung behind her leaves on the new cursor, the body turns 180 degrees in 0.13s |
+| LMB | cadence | 0.45s [footage card] | 0.45s | unchanged; asserted held (a bolt every 0.45s, hands alternating) |
+| LMB | move while firing | 77-86 px/s firing against 113 (unconfirmed) [footage] | 90% of the run | unchanged (90%); asserted she keeps 85% or more |
+| LMB | the empowered bolt's own kick | a big streak and a blade flash at her hands [footage 0143] | a screen shake on your own camera | no screen shake (owner rule 50); the streak, the flash and the sound carry it |
+| RMB | wind-up | the bolas whirled overhead through the 0.4-0.6s lane [footage 0100-0101] | the whirl, the legs locked through it | the legs are a stance (walking, she keeps walking) |
+| Shift, E, X | | see the feel pass, the per-slot table and the small mechanics | | unchanged (already at the source's beats) |
+
 ## Per-slot table
 
 | Slot | Input | What it does (ours) | Source behaviour | Difference and why |
@@ -142,8 +162,9 @@ All are scripted in `--kit-combo-check` (also inside `--archetype-check`) and `-
 
 ## Animation moves
 
-`KMovesDJ` (scripts/match/kmoves_dj.gd): `thf_lmb_r` / `thf_lmb_l` (the body for each throw: release at
-0.08s, follow-through to 0.22, back by 0.42; the arm is the twin-hold swing), `thf_primed` (the empowered
+`KMovesDJ` (scripts/match/kmoves_dj.gd): `thf_lmb_r` / `thf_lmb_l` (each throw starts cocked, out by
+0.04s as the bolt leaves, overshoot at 0.12, settled by 0.26, the other arm cocked by 0.45 where the next throw
+starts, lowered by 0.7 with no next bolt; the legs a stance), `thf_primed` (the empowered
 throw: both blades cocked behind the shoulders, driven out together at 0.04, a recoil onto the heels by 0.24, settled
 by 0.55), `thf_vault_r` /
 `thf_vault_l` (the ground Cartwheel inside the 0.48s dash: a 0.05s crouch with the arms swung up, a push-off
