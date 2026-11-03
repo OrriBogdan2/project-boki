@@ -1,5 +1,5 @@
 {
-	"doc": "Dash -> ability rows (DashFlow, docs/decisions/0010-dash-ability-flow.md). dash.<ground|air>.<lmb|rmb|e|x|q>: {mode: fire (mid-dash) | buffer (to the dash's end; the default for a missing row) | cancel (ends the dash), carry: dash momentum kept into it, variant: a dash-variant name the kit reads, source: what the source hero does}. into_dash.<slot>: the same for Shift pressed during that ability's wind-up or recovery. kit_owns: the dashes (ground, air) the kit runs in its own state, out of DashFlow's sight until it overrides ArchKit.in_dash(). Dredge's into_dash buffer rows are held by DredgeKit (dash_held) and barge the step the slam or the Broadside ends.",
+	"doc": "Dash -> ability rows (DashFlow, docs/decisions/0010-dash-ability-flow.md). dash.<ground|air>.<lmb|rmb|e|x|q>: {mode: fire (mid-dash) | buffer (to the dash's end; the default for a missing row) | cancel (ends the dash), carry: dash momentum kept into it, variant: a dash-variant name the kit reads, source: what the source hero does}. into_dash.<slot>: the same for Shift pressed during that ability's wind-up or recovery. kit_owns: the dashes (ground, air) the kit runs in its own state, out of DashFlow's sight until it overrides ArchKit.in_dash(). Dredge's into_dash buffer rows are held by DredgeKit (dash_held) and barge the step the slam or the Broadside ends. Combo rows (docs/decisions/0015-combo-flow.md): jump.<slot> (a press mid-jump: fire | buffer to the landing), into_jump.<slot> (a jump in the ability's wind-up or recovery: fire | cancel | buffer | lock; into_dash takes the same modes and an optional air sub-row), hold.<slot>.<ground|air|jump|mantle> (a held slot through that move: keep | cancel). A missing row combines; any other row is an exception and carries a reason and a source.",
 	"dash": {
 		"ground": {
 			"lmb": {"mode": "buffer", "source": "Data: Brute Dash is a plain dash. Footage (493.2-493.6 s): a near-blink of about 0.12 s; he lands, turns back to the aim within 1 frame and fires and walks by 493.6 s. Ours: the shot goes the step the 0.18 s lunge ends."},
@@ -19,8 +19,11 @@
 	"into_dash": {
 		"lmb": {"mode": "fire", "source": "Footage: he walks and dashes between shots (0.5 s apart). Ours: the barge goes between shots."},
 		"rmb": {"mode": "fire", "source": "Wiki fine print: only the dash and the air dash can be used while Abyssal Grasp pulls; data: the arm pierces terrain. Ours: the barge goes during the hook's flight and the reel, and the reel continues."},
-		"e": {"mode": "buffer", "source": "Footage (0221-0236): the slam is one committed 0.4 s beat, no dash out of it. Ours: Shift in the planted wind-up (or the air smash) is held and the barge goes the step the slam lands."},
-		"x": {"mode": "buffer", "source": "Footage (ult f22-f43): he stands through the charge and both waves, no dash out of it. Ours: Shift is held and the barge goes when the Broadside ends."},
+		"e": {"mode": "buffer", "source": "Footage (0221-0236): the slam is one committed 0.4 s beat, no dash out of it. Ours: Shift in the planted wind-up (or the air smash) is held and the barge goes the step the slam lands.", "reason": "today's behaviour, to review"},
+		"x": {"mode": "buffer", "source": "Footage (ult f22-f43): he stands through the charge and both waves, no dash out of it. Ours: Shift is held and the barge goes when the Broadside ends.", "reason": "today's behaviour, to review"},
 		"q": {"mode": "fire", "source": "No source glove; the barge goes and the glove's effect stays."}
+	},
+	"into_jump": {
+		"rmb": {"mode": "lock", "reason": "today's behaviour, to review", "source": "Wiki fine print: only the dash and the air dash can be used while Abyssal Grasp pulls. Ours today (measured by --dash-flow-check): no jump while the hook reels (KitStatus grounded: 'reeling: no jump or glide')."}
 	}
 }
