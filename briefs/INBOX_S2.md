@@ -69,3 +69,6 @@
 
 ## 2026-11-03 08:02 UTC: known-red checks, don't chase
 - `--pack-ui-check`, `--simtest` and `--train-check` are known red/flaky on main (see COMMON rules); `--teammate-check` flakes under load. Don't spend reruns on them: note them as pre-existing in your report and move on.
+
+## 2026-11-03 14:10 UTC (orchestrator): re-check your READY branches on main's physics pass
+- Main landed physics76 (4d39c623: new gravity, ~0.9 s jump hang, ledge top-out). Your six READY branches sit on 16dd7fa, before it. Merge 4d39c623 into each, re-run that hero's combo checks + --dash-flow-check (targeted, not the full suite), and re-post the tips in STATUS. Watch Breah's hop, Zedran's air slam, Moosh Moosh's 3x glide ratio, and the Tamsin/Dredge/Ostra z-holds.
