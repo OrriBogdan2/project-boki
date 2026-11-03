@@ -329,16 +329,33 @@ func _breah() -> void:
 		float(AimKit.reticle(P)["flare"]) > 0.0 or float(AimKit.reticle(P)["charge"]) >= 0.99
 	)
 	var hx := P.pos.x
+	var walls0: int = m.verbs.walls.size()
 	P.inp["sec_hold"] = false
-	step(m, 0.28)
+	var hop := _hop(m, P, K)
 	var looks := KitLooks.of(m)
 	var slam_looks := ["burst", "shard", "crater"].all(
 		func(kind): return looks.timed.any(func(e): return e["kind"] == kind)
 	)
-	step(m, 0.32)
+	step(m, 0.3)
 	ok(
-		"rmb: let go = a hop forward into the circle, then the slam", P.pos.x - hx > 0.9 and K.slams == 1,
-		"hop %.2f slams %d" % [P.pos.x - hx, K.slams]
+		"rmb (item 14): let go = a short hop, 1-1.5 body heights (1.8-2.7m) forward, off the ground, slam on landing",
+		hop["x"] - hx >= 1.8 and hop["x"] - hx <= 2.7 and hop["peak"] > 0.3 and hop["peak"] < 0.9 and K.slams == 1
+			and hop["t"] > 0.25 and hop["t"] < 0.45,
+		"hop %.2fm up %.2fm in %.2fs slams %d" % [hop["x"] - hx, hop["peak"], hop["t"], K.slams]
+	)
+	var hit_key := 0.0
+	var deepest := -9.0
+	for key in KMovesStone.MOVES["breah_slam"]["keys"]:
+		if float((key[1] as Dictionary).get("sq", 0.0)) > deepest:
+			deepest = float((key[1] as Dictionary).get("sq", 0.0))
+			hit_key = float(key[0])
+	ok(
+		"anim (item 14): breah_slam smashes down (its deepest squash) on the hop's landing frame",
+		absf(hit_key - float(hop["t"])) < 0.05, "key %.2f landing %.2f" % [hit_key, float(hop["t"])]
+	)
+	ok(
+		"rmb (item 14): no rock comes from Quakefall (rocks come from E, the dash and X)",
+		m.verbs.walls.size() == walls0 and rocks(m).is_empty(), "walls %d -> %d" % [walls0, m.verbs.walls.size()]
 	)
 	ok(
 		"rmb: a full charge in the centre stuns, with stars", T.stun_t > 0.0 and KitLooks.of(m).crowned(T),
@@ -360,6 +377,18 @@ func _breah() -> void:
 		"took %.1f stun %.2f" % [d_tap, T.stun_t]
 	)
 	ok("rmb: a full charge hits harder", d_full > d_tap + 8.0, "tap %.1f full %.1f" % [d_tap, d_full])
+	ok("rmb (item 14): the tap's slam raises no rock either", rocks(m).is_empty())
+	# the sweet spot: a foe in the ring but outside the centre is hit, not stunned
+	reset.call()
+	T.teleport(home + Vector3(5.2, 0, 0))
+	aim_at(P, home + Vector3(8, 0, 0))
+	hold(m, P, 1.4)
+	step(m, 0.6)
+	ok(
+		"rmb (item 14): only the sweet spot stuns (a foe 3.2m from the centre takes the outer hit, no stun)",
+		dmg(T) >= 13.0 and T.stun_t <= 0.0,
+		"took %.1f stun %.2f" % [dmg(T), T.stun_t]
+	)
 	# jump while charging: she leaps forward, the circle with her
 	reset.call()
 	aim_at(P, home + Vector3(10, 0, 0))
@@ -619,6 +648,18 @@ func _breah() -> void:
 		str(snd.filter(func(s): return not Sfx.has(s)))
 	)
 	await done(m)
+
+## Steps until the slam lands: where she came down, the hop's peak above the take-off and its time.
+func _hop(m: Match, P: Hunter, K: DolmKit) -> Dictionary:
+	var y0 := P.pos.y
+	var out := {"x": P.pos.x, "peak": 0.0, "t": 0.0}
+	var s0 := K.slams
+	while K.slams == s0 and float(out["t"]) < 1.0:
+		m.step(DT)
+		out["t"] = float(out["t"]) + DT
+		out["peak"] = maxf(float(out["peak"]), P.pos.y - y0)
+	out["x"] = P.pos.x
+	return out
 
 ## Item 26: Quakefall then the glider. Glide held from the hop, or pressed after a charge leap or an air
 ## press: the glider opens, she never drops below where she took off (for the first 0.3s), and it sinks

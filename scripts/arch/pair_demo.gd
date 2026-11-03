@@ -9,7 +9,7 @@ extends RefCounted
 const ANIM := {
 	"br_throw": ["dolm", "rubble_fists", [0.5, 0.56, 0.62, 0.7, 0.85, 1.0]],
 	"br_punch": ["dolm", "rubble_fists", [0.7, 1.2, 1.44, 1.47, 1.52, 1.75]],
-	"br_slam": ["dolm", "rubble_fists", [0.8, 1.7, 1.96, 2.04, 2.12, 2.5]],
+	"br_slam": ["dolm", "rubble_fists", [0.8, 1.4, 1.52, 1.66, 1.81, 2.2]],
 	"br_leap": ["dolm", "rubble_fists", [0.85, 1.0, 1.12, 1.28, 1.5, 1.9]],
 	"br_lunge": ["dolm", "rubble_fists", [0.85, 0.93, 0.98, 1.06, 1.25]],
 	"br_dive": ["dolm", "rubble_fists", [0.5, 0.62, 0.75, 0.9, 1.05, 1.4]],
@@ -156,7 +156,7 @@ const SHOTS := {
 	"pair_breah_throw_key": ["br_throw", 0.58, -5.0], "pair_breah_throw_hit": ["br_throw", 0.76, -5.0],
 	"pair_breah_punch_tele": ["br_punch", 1.2, -2.4], "pair_breah_punch_key": ["br_punch", 1.45, -2.4],
 	"pair_breah_punch_hit": ["br_punch", 1.49, -2.4],
-	"pair_breah_slam_tele": ["br_slam", 1.75, -3.6], "pair_breah_slam_key": ["br_slam", 1.99, -3.6],
+	"pair_breah_slam_tele": ["br_slam", 1.4, -3.6], "pair_breah_slam_key": ["br_slam", 1.81, -3.6],
 	"pair_breah_slam_hit": ["br_slam", 2.07, -3.6],
 	"pair_breah_leap_key": ["br_leap", 1.15, -5.0], "pair_breah_lunge_key": ["br_lunge", 0.98, -5.0],
 	"pair_breah_dash_tele": ["br_dash", 0.62, -6.0], "pair_breah_dash_key": ["br_dash", 0.82, -6.0],

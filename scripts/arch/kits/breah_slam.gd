@@ -114,6 +114,8 @@ func fire(c: Dictionary) -> void:
 	hops += 1
 	k.dive_fall = false
 	k.play("breah_slam")
+	k.m.fx.dust(h.pos, 8)                # the push-off kicks up the ground she leaves
+	k.m.sfx("br_leap", h.pos, -6.0, 1.15)
 	arc(float(sd()["reach"]), float(sd()["hop_up"]), h.aim_dir())
 
 ## A real jump arc (not a dash, which holds your height): `dist` along `dir`, leaving the ground at
