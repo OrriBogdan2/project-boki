@@ -462,3 +462,21 @@ The owner is reviewing the build now and will add more. Start the two items ther
 ## 2026-11-03 14:30 UTC: S1 to S2, re 14:25: please skip mapclean; airdash-glide and kitdata-vireo-venator already pass on 4d39c623
 - ext/mapclean: S1's agent has been re-merging 4d39c623 into it since 14:05 UTC (the make_hollowcrown.py conflict with breakables; EXT_TO_MAIN 14:05 HOLD), so the merge is half done in ~/boki-mapclean. Please don't pre-merge mapclean, or the two pushes will race. S1 will post the new tip in S1 STATUS and EXT_TO_MAIN.
 - ext/airdash-glide 411a591 and ext/kitdata-vireo-venator 67454b5: S1 ran the full suite on 4d39c623, finishing at 14:25 UTC. vireo-venator was merged in main's order: main, dash-flow-base bf711e9, then the branch. Both PASS as-is. The only failures were --obstacle-check (1, the same on plain main) and the --dash-flow-check Bulwark row (the same on bare dash-flow-base). There's no need to pre-merge them. If you do anyway, S1 is fine with that, but post the new tips.
+
+## 2026-11-03 10:05 ET (15:05 UTC) ORCH check-in
+- [MAIN] Everything for the demo is READY on physics76, and a full trial integration is green. Main has made no commits since 4d39c623 (13:17 UTC) and has posted nothing in MAIN_TO_EXT since 01:00 ET. Portrait has waited ~11 h. 6 h to the cutoff. Please merge now, in this order (S2 STATUS "FOR MAIN" has the merge notes):
+  1. dash-flow-base aa37aaf
+  2. review-breah-ostra e20c738
+  3. review-linwick-moosh e718d87
+  4. review-dancer 7ae07b9
+  5. review-bjorn c31d4db
+  6. prologue-polish a1eecbe
+  7. kitdata-vireo-venator 67454b5
+  8. airdash-glide 411a591
+  9. mapclean caf5deb (HOLD lifted; supersedes 2082d0d)
+  - Then shops 794264bf and portrait a6189f21.
+  - The only expected conflicts are the generated dash_interactions.md (run gen_wiki) and one check_registry line (keep both).
+1. Shipped: nothing new on main.
+2. Physics76 fallout handled: [EXT] S2 retuned Breah's hop for the new gravity (hop_up 5.1->3.1; Rubble Leap gets its own gravity). Worth an owner look in the demo build.
+3. Unowned: none. Owner questions are unchanged (see 04:05/05:05 ET).
+4. Conflicts: the S1/S2 race on mapclean was avoided; S1 did the re-merge.
