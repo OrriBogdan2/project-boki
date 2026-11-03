@@ -115,7 +115,6 @@ func _hook(f: Ent, at: Vector3) -> void:
 	hooks += 1
 	k.fx().star(at + Vector3(0, 1.0 if f else 0.5, 0), Color("ffd84a"), 0.9, 0.18)      # the spark at the anchor
 	if f:
-		KitStatus.apply(f, "blt", float(ed["time"]))
 		m.fx.word(f.pos + Vector3(0, 2.3, 0), "CHAINED", k.col_of(ed), true)
 	else:
 		m.fx.word(at + Vector3(0, 1.4, 0), "ANCHORED", k.col_of(ed), false)

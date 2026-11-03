@@ -180,7 +180,7 @@ func chain_states() -> void:
 	A.fresh(T)
 	_hook(m, P, K, T.pos)
 	A.ok("jug chain: Ready > E > Throwing > Hooked to a foe 12m away (range 13m, from the footage's 7 bh)",
-			absf(float(ed["range"]) - 13.0) < 0.01 and W.hooked() and W.target == T and T.blight_t > 0.0,
+			absf(float(ed["range"]) - 13.0) < 0.01 and W.hooked() and W.target == T,
 			"state %s" % W.state)
 	_settle(m, P, K, home)
 	T.teleport(home + Vector3(0, 0, 5.5))

@@ -52,8 +52,6 @@ func start() -> void:
 	_show_glow(true)
 	k.m.fx.word(h.pos + Vector3(0, 2.7, 0), String(data()["short"]).to_upper(), GOLD, false)
 	k.m.sfx("jug_guard", h.pos, -2.0 if h.is_local() else -5.0, 1.0)
-	k.m.fx.ring(h.pos, 1.3, Color(GOLD, 0.9), 0.3)
-	k.net_ring(h.pos, 1.3, GOLD)
 
 ## A merge or a knock ends it at once, with no strike.
 func drop() -> void:
