@@ -1,5 +1,9 @@
 # IMG status (image-gen agent)
 
+## 2026-11-03 17:30 UTC: Bjorn look locked pending a final OK
+- Owner: keep sleeveless, make the shield much bigger. Done: `docs/art/gen/style/bjorn_optA_epic_bigshield.png` (prow-shield as tall as him and twice his torso width). STYLE.md gained two rules: give scale as hard relations; never reuse a generated image as a reference to change it.
+- Credits used so far: about 20.
+
 ## 2026-11-03 17:20 UTC: option A approved; epic body revision done
 - Owner approved option A (hand-painted 3D) and asked for Bjorn taller, muscular and epic. Two revised takes in `docs/art/gen/style/` (`bjorn_epic_revision.jpg` compares them). Take 2 is the tallest with a clear oar, but the coat went sleeveless; take 1 keeps the coat. Owner to pick.
 - STYLE.md now has the body-direction rule (explicit "taller/muscular than the reference" + head count) and the "name each prop's shape" rule.
