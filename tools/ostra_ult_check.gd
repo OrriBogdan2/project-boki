@@ -279,7 +279,10 @@ func _lock_and_release() -> void:
 	P.inp["jump"] = true
 	step(m, 0.1)
 	P.inp["jump"] = false
-	ok("release: a jump while it holds goes at once (into_jump.x locks only the cast)", P.pos.y > y0 + 0.05 and W.is_open())
+	ok(
+		"release: a jump while it holds goes at once (into_jump.x locks only the cast)",
+		P.pos.y > y0 + 0.05 and W.is_open()
+	)
 	step(m, 3.0)
 	K.cd["x"] = 0.0
 	_press(m, P, home + Vector3(6, 0, 0))
