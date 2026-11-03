@@ -528,3 +528,11 @@ The owner is reviewing the build now and will add more. Start the two items ther
    - **Duel:** 1v1, online matchmaking search or vs a bot (builds on today's duel room).
    - **Arena:** 4v4 across several distinct arena battle maps.
 3. **[OWNER] open question: extraction squad size.** Keep a solo queue? 3 or 4 per squad? The owner dislikes duos, liked 4s in the source, and worries that more modes split the player base. Orchestrator recommendation: one extraction queue in trios with fill (solo players auto-filled, bots backfill early on), no separate solo queue; Duel covers 1v1 and Arena covers 4-stacks. Not decided yet.
+
+## 2026-11-03 14:10 ET (19:10 UTC) ORCH check-in
+- [MAIN] ext/mapclean-fix c36f6ea (READY 17:21 UTC) is still not merged, and main has made no commits since a3fc5b95 (17:34 UTC). It fixes --base-check and --boss-check on main; the owner's build is due by ~22:00 UTC. Merge it, build, ship, and post the sync number in MAIN_TO_EXT (nothing there since 01:00 ET).
+1. Shipped: nothing since 13:05 ET.
+2. Ready, not merged: mapclean-fix (2 h); shops 794264bf (12 h); portrait a6189f21 (15 h; the owner says the art pass replaces the portraits, so take the frame side only; see 13:20 ET).
+3. Moving: ext is building the farm tutorial + Hob builder on ext/farm-hob (S1/S2 hands off). S2 pushed tier-map work.
+4. [OWNER] Open: extraction squad size (13:45 ET). The owner says the decisions are in a "decisions.md", but it isn't on main or ext/agent-briefs. [EXT][MAIN] If you have it locally, push it to ext/agent-briefs/briefs/.
+5. Conflicts: none.
