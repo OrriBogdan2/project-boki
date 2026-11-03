@@ -59,7 +59,7 @@ What the in-game kit card (K) says.
 |---|---|
 | Loop | Ranged duelist: stay on one foe, cartwheel, and land the big shot. |
 | Passive: Marks | Each hit on the same foe adds a Mark: +10% damage, with no cap. Knocks heal you. |
-| Dash: Vault | Cartwheel a short way. Your next bolt is a big empowered shot; land it and you get the Vault back. |
+| Dash: Vault | Cartwheel a short way (much further from a jump). Your next bolt is empowered, a gold glint in your throwing hand: a big shot that, if it lands, gives you the Vault back. |
 | RMB: Bola | A short wind-up, then a Bola down the lane: it grounds the first foe and flies on. Catch a second and both are stunned. |
 | E: Shadow Knife | Throw a dagger to your cursor or into a foe. Press E again to blink to it. |
 | Hunter ultimate: Encore | A ring opens round you: for 2s blades fly at every foe in it, harder and blighting from its edge. |
@@ -69,7 +69,7 @@ What the in-game kit card (K) says.
 
 **Marks (passive).** Every bolt that hits puts a Mark on the target (no cap, each lasting 4s and refreshed by the next): your bolts on them deal +10% per Mark. The empowered shot adds 2, the Bola 1. A knock heals you 15% of your health on top of the usual knock heal (25% in all) and bursts a crimson star on them; an assist heals 25%.
 
-**Vault (dash, Shift, 4.5s cooldown).** A sideways cartwheel of about 4m the way you move (about 7m from a jump, its speed carried to the landing; shots pass through it) and +18% speed until your next hit (2s at most; half as much again at rank 3). Your next bolt within 3s is empowered: it flies 12% further for 3.5 times the damage, 2 Marks and Shred; firing it ends the speed (+15% damage taken for 3s). Landing it gives the Vault back. Rank 2: empowered shots +20%; rank 3: +40%.
+**Vault (dash, Shift, 4.5s cooldown).** A sideways cartwheel of about 4m the way you move (about 7m from a jump, its speed carried to the landing; shots pass through it; you can shoot mid-flip) and +18% speed until your next hit (2s at most; half as much again at rank 3). Your next bolt within 3s is empowered (a gold glint in your throwing hand, flaring as you land): it flies 12% further for 3.5 times the damage, 2 Marks and Shred; firing it ends the speed (+15% damage taken for 3s). Landing it gives the Vault back. Rank 2: empowered shots +20%; rank 3: +40%.
 
 **Bola (RMB, 7s cooldown).**
 

@@ -7,21 +7,21 @@ One row per hero and pair, read from `content/dash_flow/<hero>.json` by `DashFlo
 
 | Hero | Pair | Source | Ours |
 |---|---|---|---|
-| Dancer | ground dash -> LMB |  | buffered to the dash's end |
-| Dancer | ground dash -> RMB |  | fires mid-dash |
-| Dancer | ground dash -> E |  | fires mid-dash |
-| Dancer | ground dash -> ult (X) |  | fires mid-dash |
-| Dancer | ground dash -> Q glove |  | fires mid-dash |
-| Dancer | air dash -> LMB |  | buffered to the dash's end |
-| Dancer | air dash -> RMB |  | fires mid-dash |
-| Dancer | air dash -> E |  | fires mid-dash |
-| Dancer | air dash -> ult (X) |  | fires mid-dash |
-| Dancer | air dash -> Q glove |  | fires mid-dash |
-| Dancer | LMB -> dash |  | the kit's own handling (no row yet) |
-| Dancer | RMB -> dash |  | the kit's own handling (no row yet) |
-| Dancer | E -> dash |  | the kit's own handling (no row yet) |
-| Dancer | ult (X) -> dash |  | the kit's own handling (no row yet) |
-| Dancer | Q glove -> dash |  | the kit's own handling (no row yet) |
+| Dancer | ground dash -> LMB | Data: Quickflip dashes and empowers the next Arcslinger (+214 damage); landing it resets Quickflip. Footage 0193: the Cartwheel and the empowered shot leave on the same frame, so the bolt goes mid-flip. | fires mid-dash; variant: empowered |
+| Dancer | ground dash -> RMB | Data says nothing on casting during Quickflip. Footage never shows Trickshot mid-flip; kept firing: the 0.4s lane starts mid-flip and the throw lands after it. | fires mid-dash |
+| Dancer | ground dash -> E | Data: Farstep Dagger has no dash rule. Footage never shows it mid-flip. Ours: the throw goes mid-flip; the recast blink ends the cartwheel (she arrives standing). | fires mid-dash |
+| Dancer | ground dash -> ult (X) | Data: Fusillade resets Quickflip; footage (0296-0303): she walks and fires freely through it; nothing shows it locked out by a dash. | fires mid-dash |
+| Dancer | ground dash -> Q glove | Not in the data or footage (gloves are ours); fires like her other actives. | fires mid-dash |
+| Dancer | air dash -> LMB | Data: Quickflip is the same from a jump (empowers the next Arcslinger). Footage 0129-0134 air Cartwheel, then the gold empowered aim line at 0139-0142 and the big shot at 0143. | fires mid-dash; variant: empowered |
+| Dancer | air dash -> RMB | Not shown in the data or footage; same as on the ground. | fires mid-dash |
+| Dancer | air dash -> E | Not shown in the data or footage; same as on the ground (the recast blink ends the cartwheel). | fires mid-dash |
+| Dancer | air dash -> ult (X) | Not shown from the air; same as on the ground. | fires mid-dash |
+| Dancer | air dash -> Q glove | Not in the source; same as her other actives. | fires mid-dash |
+| Dancer | LMB -> dash | Footage 0187 -> 0193: the empowered hit lands and the next Cartwheel follows at once; a bolt in flight keeps going. | the dash goes, the ability keeps running |
+| Dancer | RMB -> dash | Not shown in the data or footage. Ours: Shift in the Bola's 0.4s wind-up cartwheels and the Bola still goes at the end of the wind-up. | the dash goes, the ability keeps running |
+| Dancer | E -> dash | Not shown. Ours: the dagger thrown 0.12s into the throw still flies if she cartwheels; a stuck dagger stays to blink to. | the dash goes, the ability keeps running |
+| Dancer | ult (X) -> dash | Footage (0296-0350): she moves and acts freely through Fusillade, which also gives Quickflip back. | the dash goes, the ability keeps running |
+| Dancer | Q glove -> dash | Not in the source; the glove keeps running. | the dash goes, the ability keeps running |
 | Pin | ground dash -> LMB |  | buffered to the dash's end |
 | Pin | ground dash -> RMB |  | fires mid-dash |
 | Pin | ground dash -> E |  | fires mid-dash |
