@@ -4,7 +4,7 @@ extends RefCounted
 ## (0..1, 0.5 = neutral; the keys are content/rules/mantle_look.json "sliders") and picks (gender,
 ## folk, expression, skin, hair style and colour, eye colour, markings, outfit colour, glider).
 ## Purely visual. MantleLook turns it into a model: the player at home, or a Bearer of a Mantle in a
-## match. See docs/decisions/0010-mantle-look.md.
+## match. See docs/decisions/0011-mantle-look.md.
 
 ## Eye colours a player can pick (new entries only ever go on the end, so saved looks keep theirs).
 const EYES := [Color("4a3a2a"), Color("6a4a2a"), Color("5a6a3a"), Color("2a6a4a"), Color("3a5a8a"), Color("5a7a9a"),

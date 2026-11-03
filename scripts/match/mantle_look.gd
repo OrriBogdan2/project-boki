@@ -1,6 +1,6 @@
 class_name MantleLook
 extends RefCounted
-## The Mantle look (docs/decisions/0010-mantle-look.md): in a match a Bearer looks like their
+## The Mantle look (docs/decisions/0011-mantle-look.md): in a match a Bearer looks like their
 ## class's original Warden (gender, folk, face, hair and the class's palette: the 80%), nudged by
 ## the player's own person (PlayerLook: the 20%). At home, with no Mantle on, the player is their own
 ## person. Data in, model params out: Models.hunter builds from the params. Every range lives in

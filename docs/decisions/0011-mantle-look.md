@@ -1,4 +1,4 @@
-# 0010: The Mantle look (80% the Warden, 20% you) and the character creator
+# 0011: The Mantle look (80% the Warden, 20% you) and the character creator
 
 - **Status:** proposed (OWNER_REVIEW item 45, owner 07:31 UTC; item 44 for the lore)
 - **Date:** 2026-11-03

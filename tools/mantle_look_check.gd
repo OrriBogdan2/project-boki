@@ -1,5 +1,5 @@
 extends RefCounted
-## --mantle-look-check (OWNER_REVIEW item 45, docs/decisions/0010-mantle-look.md): in a match a
+## --mantle-look-check (OWNER_REVIEW item 45, docs/decisions/0011-mantle-look.md): in a match a
 ## Bearer is the class's original Warden nudged by the player. For every Hunter, every slider at its
 ## ends stays inside the Warden's clamp and every colour pick inside its tint range; gender, folk and
 ## face come from the Warden; the hitbox (Hunter.r and the ring that shows it) never changes; the

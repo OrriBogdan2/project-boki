@@ -279,7 +279,7 @@ func _migrate_6_to_7(data: Dictionary) -> void:
 	EqualMigrate.migrate(data)
 
 ## v7 -> v8: the Mantle look. The saved look gets its body and face sliders, all neutral, and keeps
-## its picks (PlayerLook; docs/decisions/0010-mantle-look.md).
+## its picks (PlayerLook; docs/decisions/0011-mantle-look.md).
 func _migrate_7_to_8(data: Dictionary) -> void:
 	PlayerLook.migrate(data)
 
