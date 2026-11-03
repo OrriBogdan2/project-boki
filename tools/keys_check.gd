@@ -441,7 +441,7 @@ func _sources() -> void:
 	var m: Match = await build(5, {"teams": 1, "god": true})
 	var R: Dictionary = KeyBonus.rules()
 	var keep := R.duplicate(true)
-	for k in ["monster", "pot", "crate", "barrel", "train_crate"]:
+	for k in ["monster", "pot", "crate", "barrel", "keg", "train_crate"]:
 		R[k] = 1.0
 	for k in ["boss", "elite"]:
 		R[k] = {"odds": 1.0, "two": 1.0}
@@ -458,11 +458,11 @@ func _sources() -> void:
 		var want := 1 if kind_s == "monster" else 2
 		ok("a dead %s drops a bonus key" % kind_s, mb != null and m.keys.bonus_given == k0 + want,
 				"%d -> %d" % [k0, m.keys.bonus_given])
-	for kind_s in ["pot", "crate", "barrel"]:
+	for kind_s in ["pot", "crate", "barrel", "keg"]:
 		var brk := _break_of(m, kind_s)
 		var k0 := _ckeys(m)
 		if not brk.is_empty():
-			m._break(brk, m.player)
+			m.brk.smash(brk, m.player)
 			step(m, 0.2)
 		ok("a broken %s drops one" % kind_s, not brk.is_empty() and _ckeys(m) >= k0 + 1, "%d -> %d" % [k0, _ckeys(m)])
 	var shrub_none := m.keys.shrublings.all(func(s): return KeyBonus.mob_source(s) == "")

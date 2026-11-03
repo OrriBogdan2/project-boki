@@ -280,6 +280,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		if dp < 1.8 and move.length() > 0.1:
 			move += -h.dir_to(pd["pos"]) * (1.8 - dp) * 1.5
 	a.erase("pad_at")
+	move = Breakables.bot_steer(m, h, move)
 	# (heading for a downed squadmate near an edge, only look as far as them)
 	var look := 1.2 if rv.is_empty() else clampf(h.flat_dist(rv["o"]) - 0.2, 0.4, 1.2)
 	if move.length() > 0.01:
