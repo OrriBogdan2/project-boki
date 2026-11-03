@@ -1,6 +1,6 @@
 # 0010: Dash -> ability flow
 
-- **Status:** accepted
+- **Status:** accepted; amended by 0015 (combo flow: jump and hold rows, owner item 51)
 - **Date:** 2026-11-03
 - **Area:** movement / combat
 

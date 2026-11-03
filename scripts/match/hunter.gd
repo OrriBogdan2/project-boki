@@ -1413,6 +1413,8 @@ func trigger(dt: float) -> void:
 func _trigger_bow(held: bool, dt: float) -> void:
 	if draw_t < 0.0:
 		focus_draw = false
+	if draw_t >= 0.0 and not can_fire() and ak and ak.flow.pauses_hold("lmb"):
+		return          # a dash whose row keeps the draw: it waits, and a release in it looses when it ends
 	var can_draw: bool = can_fire() and ammo > 0
 	if draw_t >= 0.0 and not held:
 		_loose()
