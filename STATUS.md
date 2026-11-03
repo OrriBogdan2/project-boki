@@ -1,14 +1,11 @@
 # S2 status (second server session)
-Updated: 2026-11-03 16:30 UTC (git/server clock). Last INBOX_S2 handled: 16:20 (concepts 1b notes; queue starts now).
+Updated: 2026-11-03 17:10 UTC (git/server clock). Last INBOX_S2 handled: 17:00 (item 47).
 
 
-## FOR MAIN: ONE BRANCH. Recommended: `ext/demo-integ-core` @ 70df4da (everything except mapclean). `ext/demo-integ` @ ba7e542 adds mapclean, which breaks 2 checks.
-- `ext/demo-integ-core` @ 70df4da = origin/main 4d39c623 + in plan order: ext/dash-flow-base aa37aaf, ext/review-breah-ostra e20c738, ext/review-linwick-moosh e718d87, ext/review-dancer 7ae07b9, ext/review-bjorn c31d4db, ext/prologue-polish a1eecbe, S1's ext/airdash-glide 411a591, ext/kitdata-vireo-venator 67454b5. Generated files regenerated, health --strict OK. Targeted: every check 0 failures (airdash-glide, dash-flow, move-feel, dash-dir, zone, keys, archetype, class-unlock, hero-combo, all 12 hero combo checks, prologue, title). --base-check and --boss-check 0 failures. Its own full suite: RUNNING (16:30 UTC).
-- `ext/demo-integ` @ ba7e542 = demo-integ-core + S1's ext/mapclean caf5deb (merges clean, --wall-size-check 0 failures). **Full suite done: every failure also fails on main 4d39c623 (abyss 1, blight 1, grammar-runtime 5 (same 5 on main), hitch/load timing, obstacle 1 (same on main), pack-ui 4, perch 4, train 1; farm-start 2 was a flake: 0 on 2 reruns) EXCEPT two caused by mapclean:**
-  - `--base-check` FAIL (balloon check: "BCHECK clean: arrived=false" then BCHECK FAIL), 3 of 3 runs; 0 on main, 0 on demo-integ-core.
-  - `--boss-check` FAIL "a bot walked up and opened Stormcrown Eyrie in 150s (0 misses)", 3 of 3 runs; 0 on main, 0 on demo-integ-core.
-  - Both also fail on **plain ext/mapclean caf5deb alone** (fresh import, fresh XDG). S1's STATUS says caf5deb's full suite was 0 failures: **S1 please re-run --base-check and --boss-check on caf5deb.** Logs /home/boki/suite-s2/bis-mapclean-*.log, /home/boki/suite-s2/s2-integ/.
-- Main can merge demo-integ-core now; mapclean can follow on its own once fixed (it merged clean on top here).
+## FOR MAIN: demo-integ is in main (31ef8481 contains ba7e542). Two checks main now fails, from S1's mapclean caf5deb:
+- `--base-check` (balloon: "BCHECK clean: arrived=false" then FAIL) and `--boss-check` ("a bot walked up and opened Stormcrown Eyrie in 150s") fail on main 31ef8481, 0 on 4d39c623 and on demo-integ-core; they also fail on plain caf5deb. **S1/main: please look at mapclean's map change vs these two checks.**
+- Side note: `--truce-check` fails 3 (partners still targeted, breaking) on demo-integ-core (3/3 runs) but passes on demo-integ and main 31ef8481: map-dependent, latent. Not chased.
+- demo-integ-core's full suite otherwise matched main (blight, grammar-runtime 5, hitch/load timing, obstacle 1, pack-ui, perch 4, train 1).
 
 ## FOR MAIN: S2 merge plan (all READY, ALL NOW CONTAIN MAIN 4d39c623 / physics76; demo cutoff 21:00 UTC; every S2 pair made it)
 Re-verified at 14:36 UTC on physics76. Each branch below has origin/main 4d39c623 merged in, conflicts resolved, and was re-checked (that hero's combo checks, --dash-flow-check, --move-feel-check, --dash-dir-check, --hero-combo-check, --zone-check, --class-unlock-check, --archetype-check, --keys-check, health --strict): all 0 failures except the known Bjorn row of --dash-flow-check on branches 1-4 (fixed by branch 5).
@@ -23,13 +20,15 @@ The only conflict seen merging them all is the generated `docs/heroes/dash_inter
 Not for tonight: `ext/concepts` 87c121b (concept sheets, for ext/owner review), `ext/mantle-look` @ d6558b6 READY (post-demo; save v8; not yet re-merged on physics76).
 Shots: `ext/hero-shots-s2` (README with captions).
 
-## NEW QUEUE (INBOX 16:10-16:20), started 16:35 UTC, 4 agents
-- Concepts 1b (Opus) on ext/concepts: polish all 12, Ostra menacing, Moosh Moosh cuter, Cinder salamander-folk, Tamsin young pro skater, height/build scale in the lineup.
-- Warden models phase 2 (Opus) on ext/warden-models, cut from ext/demo-integ-core 70df4da (not bare main, so the models match tonight's kits; nothing pushed to the demo branches): merges ext/mantle-look first, then Bjorn, Pin, Zedran.
-- Dancer feel pass, item 7: DONE, pushed `ext/dancer-feel` @ 2335d20 (on ext/demo-integ-core; merge after it). Cartwheel to the source (4.5m/0.48s ground, 8.4m/0.95s from a jump, off the global dash feel like Vireo), empowered bolt per game data (bolt + 1.34 = 2.34x, Marks flat +10% each, 1 Mark, no Shred), her own reset flash (no rings/burst), a click while the bolt cools is buffered one interval, stale empowered-target bug fixed, new two-blade thf_primed throw. New tools/dancer_feel_check.gd inside --dancer-combo-check (101/0). dash-flow 0, archetype 308/0, juggernaut 135/0, hero-combo 221/0, airdash-glide 0, move-feel 0, keys 84/0, health OK. Full suite RUNNING. Shots /home/boki/shots-s2/dancer-feel/. Owner Qs: (1) Dancer off the global dash feel (source distances) OK? (2) empowered bolt now 2.34x (was 3.5x), Shred and 2nd Mark gone, per source: accept? (3) cd stays 4.5s (data 5s, footage card 4.2s): pick one? (4) 3s empower window has no source number: yours?
-- ext/class-titles finish (Sonnet): merge main, screenshots, full suite; also trial-merges against demo-integ-core.
-- Queued after these: ext/drop, ext/market, higher-tier map (one agent each, in that order).
-
+## NEW QUEUE (INBOX 16:10-17:00), 6 agents
+- Concepts 1b (Opus) on ext/concepts: first pass DONE (all 12 redrawn, lineup with a height scale, 15 commits, not pushed yet); now a second round against the full 16:15/16:20 notes (Cinder slit pupils/four fingers, Tamsin ~19-20, Bjorn tallest).
+- Warden models: **switched to the Blender pipeline per 16:30**. Blender 4.5.15 LTS install into ~/tools is BLOCKED on this box's permission check (download of external code); asked the user. Meanwhile the agent (ext/warden-models, from demo-integ-core) commits the ext/mantle-look merge, writes docs/art/wardens/RIG_CONTRACT.md (bones/anchors/materials the .glb must meet) and a .glb loader stub with procedural fallback.
+- Dancer feel pass (item 7): DONE, `ext/dancer-feel` @ 2335d20 (see below); full suite running.
+- ext/class-titles finish (Sonnet): running.
+- ext/drop (Opus, from demo-integ-core): running; design note first; Net bump left as a TODO for main/S1 to number.
+- Item 46 hitbox by size + ground circle (Sonnet) on ext/hitbox-size from main 31ef8481: running.
+- Item 47 stamina fill-up bar (Sonnet) on ext/stamina-bar from main 31ef8481: running.
+- Queued: ext/market, then the higher-tier map.
 ## Infra
 - Godot queue: wrapper default is nproc-2 = 14 slots (already >= 8), left as is. S1: no change needed.
 - Agents (6 max per 07:30): ALL hero agents on Opus 5.5 medium per 08:00 (the Sonnet Breah/Ostra/Tamsin+Dredge agents were stopped at ~07:20 real UTC and replaced by Opus agents continuing from their commits), Breah, Ostra, Tamsin+Dredge, Zedran 21/22/35 (Opus 5.5 medium per owner), prologue-polish (Opus 5.5 medium, allowed by 07:45), dash-flow base (Opus 5.5 medium: shared core movement/combat helper for item 32 that all 12 heroes and both sessions build on; a mistake there multiplies).
