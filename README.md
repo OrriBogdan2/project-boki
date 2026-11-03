@@ -2,7 +2,7 @@
 
 Review shots for each hero: kit card, each ability, the payoff, animation frame strips and a neutral full-body portrait. PNGs are downscaled to at most 1280 px wide. Captions come from the shot manifests.
 
-Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-tender), [Tamsin](#tamsin-rimewright), [Dredge](#dredge-dredge), [Ashwick](#ashwick-ashwick), [Dolm](#dolm-dolm), [Ostra](#ostra-ostra), [Archer](#archer-archer), [Bulwark](#bulwark-bulwark), [Thief](#thief-thief), [Juggernaut](#juggernaut-juggernaut), [Farm building](#farm-building-farmbuild), [classes](#classes-classes), [aimkit](#aimkit-aimkit), [moosh-moosh/v2](#moosh-moosh/v2-moosh-moosh/v2), [moosh-moosh/v2/anim](#moosh-moosh/v2/anim-moosh-moosh/v2/anim), [tamsin/v2](#tamsin/v2-tamsin/v2), [tamsin/v2/anim](#tamsin/v2/anim-tamsin/v2/anim), [dancer/v2](#dancer/v2-dancer/v2), [dancer/v2/before](#dancer/v2/before-dancer/v2/before), [zedran/v2](#zedran/v2-zedran/v2), [zedran/v2/before](#zedran/v2/before-zedran/v2/before), [dancer/v2/anim](#dancer/v2/anim-dancer/v2/anim), [zedran/v2/anim](#zedran/v2/anim-zedran/v2/anim), [linwick/v2](#linwick/v2-linwick/v2), [linwick/v2/anim](#linwick/v2/anim-linwick/v2/anim), [linwick/v2/before](#linwick/v2/before-linwick/v2/before), [linwick/v2/after](#linwick/v2/after-linwick/v2/after), [dredge/v2](#dredge/v2-dredge/v2), [dredge/v2/anim](#dredge/v2/anim-dredge/v2/anim), [dredge/v2/before](#dredge/v2/before-dredge/v2/before), [dredge/v2/after](#dredge/v2/after-dredge/v2/after), [pin/v2](#pin/v2-pin/v2), [bjorn/v2](#bjorn/v2-bjorn/v2), [pin/v2/anim](#pin/v2/anim-pin/v2/anim), [bjorn/v2/anim](#bjorn/v2/anim-bjorn/v2/anim), [vireo/v2](#vireo/v2-vireo/v2), [vireo/v2/anim](#vireo/v2/anim-vireo/v2/anim), [venator/v2/anim](#venator/v2/anim-venator/v2/anim), [venator/v2](#venator/v2-venator/v2), [breah/v2](#breah/v2-breah/v2), [ostra/v2](#ostra/v2-ostra/v2), [breah/v2/anim](#breah/v2/anim-breah/v2/anim), [ostra/v2/anim](#ostra/v2/anim-ostra/v2/anim), [linwick/v2/ult](#linwick/v2/ult-linwick/v2/ult), [dredge/v2/ult](#dredge/v2/ult-dredge/v2/ult), [hunters](#hunters-hunters), [pin/v2/ult](#pin/v2/ult-pin/v2/ult), [bjorn/v2/ult](#bjorn/v2/ult-bjorn/v2/ult), [mooshmoosh/v2/ult](#mooshmoosh/v2/ult-mooshmoosh/v2/ult), [tamsin/v2/ult](#tamsin/v2/ult-tamsin/v2/ult), [dancer/v2/ult](#dancer/v2/ult-dancer/v2/ult), [zedran/v2/ult](#zedran/v2/ult-zedran/v2/ult)
+Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-tender), [Tamsin](#tamsin-rimewright), [Dredge](#dredge-dredge), [Ashwick](#ashwick-ashwick), [Dolm](#dolm-dolm), [Ostra](#ostra-ostra), [Archer](#archer-archer), [Bulwark](#bulwark-bulwark), [Thief](#thief-thief), [Juggernaut](#juggernaut-juggernaut), [Farm building](#farm-building-farmbuild), [classes](#classes-classes), [aimkit](#aimkit-aimkit), [moosh-moosh/v2](#moosh-moosh/v2-moosh-moosh/v2), [moosh-moosh/v2/anim](#moosh-moosh/v2/anim-moosh-moosh/v2/anim), [tamsin/v2](#tamsin/v2-tamsin/v2), [tamsin/v2/anim](#tamsin/v2/anim-tamsin/v2/anim), [dancer/v2](#dancer/v2-dancer/v2), [dancer/v2/before](#dancer/v2/before-dancer/v2/before), [zedran/v2](#zedran/v2-zedran/v2), [zedran/v2/before](#zedran/v2/before-zedran/v2/before), [dancer/v2/anim](#dancer/v2/anim-dancer/v2/anim), [zedran/v2/anim](#zedran/v2/anim-zedran/v2/anim), [linwick/v2](#linwick/v2-linwick/v2), [linwick/v2/anim](#linwick/v2/anim-linwick/v2/anim), [linwick/v2/before](#linwick/v2/before-linwick/v2/before), [linwick/v2/after](#linwick/v2/after-linwick/v2/after), [dredge/v2](#dredge/v2-dredge/v2), [dredge/v2/anim](#dredge/v2/anim-dredge/v2/anim), [dredge/v2/before](#dredge/v2/before-dredge/v2/before), [dredge/v2/after](#dredge/v2/after-dredge/v2/after), [pin/v2](#pin/v2-pin/v2), [bjorn/v2](#bjorn/v2-bjorn/v2), [pin/v2/anim](#pin/v2/anim-pin/v2/anim), [bjorn/v2/anim](#bjorn/v2/anim-bjorn/v2/anim), [vireo/v2](#vireo/v2-vireo/v2), [vireo/v2/anim](#vireo/v2/anim-vireo/v2/anim), [venator/v2/anim](#venator/v2/anim-venator/v2/anim), [venator/v2](#venator/v2-venator/v2), [breah/v2](#breah/v2-breah/v2), [ostra/v2](#ostra/v2-ostra/v2), [breah/v2/anim](#breah/v2/anim-breah/v2/anim), [ostra/v2/anim](#ostra/v2/anim-ostra/v2/anim), [linwick/v2/ult](#linwick/v2/ult-linwick/v2/ult), [dredge/v2/ult](#dredge/v2/ult-dredge/v2/ult), [hunters](#hunters-hunters), [pin/v2/ult](#pin/v2/ult-pin/v2/ult), [bjorn/v2/ult](#bjorn/v2/ult-bjorn/v2/ult), [mooshmoosh/v2/ult](#mooshmoosh/v2/ult-mooshmoosh/v2/ult), [tamsin/v2/ult](#tamsin/v2/ult-tamsin/v2/ult), [dancer/v2/ult](#dancer/v2/ult-dancer/v2/ult), [zedran/v2/ult](#zedran/v2/ult-zedran/v2/ult), [tamsin/v2/polish](#tamsin/v2/polish-tamsin/v2/polish), [moosh-moosh/v2/polish](#moosh-moosh/v2/polish-moosh-moosh/v2/polish)
 
 ## Vireo (mage)
 
@@ -2331,3 +2331,535 @@ Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-t
 **X Gilded Riposte animation strip: guard (blade upright), the drop and lunge, the cleave, the settle (0.6-1.55s)**
 
 ![X Gilded Riposte animation strip: guard (blade upright), the drop and lunge, the cleave, the settle (0.6-1.55s)](zedran/v2/ult/zedran_strip.png)
+
+## tamsin/v2/polish (tamsin/v2/polish)
+
+**Air dash: the stretched skater glide with frost streaks (no tumble, no pill) (close-up)**
+
+![Air dash: the stretched skater glide with frost streaks (no tumble, no pill) (close-up)](tamsin/v2/polish/rimewright_air_close.png)
+
+**Air dash: the stretched skater glide with frost streaks (no tumble, no pill) (gameplay zoom)**
+
+![Air dash: the stretched skater glide with frost streaks (no tumble, no pill) (gameplay zoom)](tamsin/v2/polish/rimewright_air_game.png)
+
+**tm_dash_air glide and landing (close-up)**
+
+![tm_dash_air glide and landing (close-up)](tamsin/v2/polish/rimewright_air_strip_close.png)
+
+**tm_dash_air glide and landing (gameplay zoom)**
+
+![tm_dash_air glide and landing (gameplay zoom)](tamsin/v2/polish/rimewright_air_strip_game.png)
+
+**Skate at 11.5 m/s: low lean, ribbon of ice chips, carving into a curve (close-up)**
+
+![Skate at 11.5 m/s: low lean, ribbon of ice chips, carving into a curve (close-up)](tamsin/v2/polish/rimewright_dash_close.png)
+
+**Skate at 11.5 m/s: low lean, ribbon of ice chips, carving into a curve (gameplay zoom)**
+
+![Skate at 11.5 m/s: low lean, ribbon of ice chips, carving into a curve (gameplay zoom)](tamsin/v2/polish/rimewright_dash_game.png)
+
+**Skate hockey stop: side-on, braced, ice spray (close-up)**
+
+![Skate hockey stop: side-on, braced, ice spray (close-up)](tamsin/v2/polish/rimewright_dash_stop_close.png)
+
+**Skate hockey stop: side-on, braced, ice spray (gameplay zoom)**
+
+![Skate hockey stop: side-on, braced, ice spray (gameplay zoom)](tamsin/v2/polish/rimewright_dash_stop_game.png)
+
+**tm_skate_go, tm_skate strides, the carve, tm_skate_stop (close-up)**
+
+![tm_skate_go, tm_skate strides, the carve, tm_skate_stop (close-up)](tamsin/v2/polish/rimewright_dash_strip_close.png)
+
+**tm_skate_go, tm_skate strides, the carve, tm_skate_stop (gameplay zoom)**
+
+![tm_skate_go, tm_skate strides, the carve, tm_skate_stop (gameplay zoom)](tamsin/v2/polish/rimewright_dash_strip_game.png)
+
+**Rink Wall erupting 1 bh ahead after the 0.2 s tell, the lane shown (close-up)**
+
+![Rink Wall erupting 1 bh ahead after the 0.2 s tell, the lane shown (close-up)](tamsin/v2/polish/rimewright_e_close.png)
+
+**Rink Wall erupting 1 bh ahead after the 0.2 s tell, the lane shown (gameplay zoom)**
+
+![Rink Wall erupting 1 bh ahead after the 0.2 s tell, the lane shown (gameplay zoom)](tamsin/v2/polish/rimewright_e_game.png)
+
+**Rink Wall sliding and widening toward the cursor (close-up)**
+
+![Rink Wall sliding and widening toward the cursor (close-up)](tamsin/v2/polish/rimewright_e_slide_close.png)
+
+**Rink Wall sliding and widening toward the cursor (gameplay zoom)**
+
+![Rink Wall sliding and widening toward the cursor (gameplay zoom)](tamsin/v2/polish/rimewright_e_slide_game.png)
+
+**tm_wall: deep crouch over the feet, then both arms flung up and out at the erupt (close-up)**
+
+![tm_wall: deep crouch over the feet, then both arms flung up and out at the erupt (close-up)](tamsin/v2/polish/rimewright_e_strip_close.png)
+
+**tm_wall: deep crouch over the feet, then both arms flung up and out at the erupt (gameplay zoom)**
+
+![tm_wall: deep crouch over the feet, then both arms flung up and out at the erupt (gameplay zoom)](tamsin/v2/polish/rimewright_e_strip_game.png)
+
+**Ice Dart: the fan whipped out at the cursor with the torso (close-up)**
+
+![Ice Dart: the fan whipped out at the cursor with the torso (close-up)](tamsin/v2/polish/rimewright_lmb_close.png)
+
+**Ice Dart: bigger ice-blue shards with dark teal edges, bowed 32 deg, homing (close-up)**
+
+![Ice Dart: bigger ice-blue shards with dark teal edges, bowed 32 deg, homing (close-up)](tamsin/v2/polish/rimewright_lmb_fly_close.png)
+
+**Ice Dart: bigger ice-blue shards with dark teal edges, bowed 32 deg, homing (gameplay zoom)**
+
+![Ice Dart: bigger ice-blue shards with dark teal edges, bowed 32 deg, homing (gameplay zoom)](tamsin/v2/polish/rimewright_lmb_fly_game.png)
+
+**Ice Dart: the fan whipped out at the cursor with the torso (gameplay zoom)**
+
+![Ice Dart: the fan whipped out at the cursor with the torso (gameplay zoom)](tamsin/v2/polish/rimewright_lmb_game.png)
+
+**tm_dart_r / tm_dart_l alternating: fan whip and free-hand flick, with the darts leaving (close-up)**
+
+![tm_dart_r / tm_dart_l alternating: fan whip and free-hand flick, with the darts leaving (close-up)](tamsin/v2/polish/rimewright_lmb_strip_close.png)
+
+**tm_dart_r / tm_dart_l alternating: fan whip and free-hand flick, with the darts leaving (gameplay zoom)**
+
+![tm_dart_r / tm_dart_l alternating: fan whip and free-hand flick, with the darts leaving (gameplay zoom)](tamsin/v2/polish/rimewright_lmb_strip_game.png)
+
+**Knock-Shatter on a Chilled dummy (close-up)**
+
+![Knock-Shatter on a Chilled dummy (close-up)](tamsin/v2/polish/rimewright_payoff_close.png)
+
+**Knock-Shatter on a Chilled dummy (gameplay zoom)**
+
+![Knock-Shatter on a Chilled dummy (gameplay zoom)](tamsin/v2/polish/rimewright_payoff_game.png)
+
+**Knock-Shatter sequence with tm_shatter (close-up)**
+
+![Knock-Shatter sequence with tm_shatter (close-up)](tamsin/v2/polish/rimewright_payoff_strip_close.png)
+
+**Knock-Shatter sequence with tm_shatter (gameplay zoom)**
+
+![Knock-Shatter sequence with tm_shatter (gameplay zoom)](tamsin/v2/polish/rimewright_payoff_strip_game.png)
+
+**Body: Tamsin tall and thin (about 1.11 of a medium in height, about 0.75 bulk) beside a medium teammate (close-up)**
+
+![Body: Tamsin tall and thin (about 1.11 of a medium in height, about 0.75 bulk) beside a medium teammate (close-up)](tamsin/v2/polish/rimewright_pose_close.png)
+
+**Body: Tamsin tall and thin (about 1.11 of a medium in height, about 0.75 bulk) beside a medium teammate (gameplay zoom)**
+
+![Body: Tamsin tall and thin (about 1.11 of a medium in height, about 0.75 bulk) beside a medium teammate (gameplay zoom)](tamsin/v2/polish/rimewright_pose_game.png)
+
+**Idle skater stance (close-up)**
+
+![Idle skater stance (close-up)](tamsin/v2/polish/rimewright_pose_strip_close.png)
+
+**Idle skater stance (gameplay zoom)**
+
+![Idle skater stance (gameplay zoom)](tamsin/v2/polish/rimewright_pose_strip_game.png)
+
+**Ice Spear held: the landing ring at the cursor, the ice spear in her raised hand (close-up)**
+
+![Ice Spear held: the landing ring at the cursor, the ice spear in her raised hand (close-up)](tamsin/v2/polish/rimewright_rmb_aim_close.png)
+
+**Ice Spear held: the landing ring at the cursor, the ice spear in her raised hand (gameplay zoom)**
+
+![Ice Spear held: the landing ring at the cursor, the ice spear in her raised hand (gameplay zoom)](tamsin/v2/polish/rimewright_rmb_aim_game.png)
+
+**Ice Spear detonation at 1.8 s: dome, spikes, ice shell on the dummy (close-up)**
+
+![Ice Spear detonation at 1.8 s: dome, spikes, ice shell on the dummy (close-up)](tamsin/v2/polish/rimewright_rmb_boom_close.png)
+
+**Ice Spear detonation at 1.8 s: dome, spikes, ice shell on the dummy (gameplay zoom)**
+
+![Ice Spear detonation at 1.8 s: dome, spikes, ice shell on the dummy (gameplay zoom)](tamsin/v2/polish/rimewright_rmb_boom_game.png)
+
+**Ice Spear in flight: the star head and pale-cyan trail (close-up)**
+
+![Ice Spear in flight: the star head and pale-cyan trail (close-up)](tamsin/v2/polish/rimewright_rmb_fly_close.png)
+
+**Ice Spear in flight: the star head and pale-cyan trail (gameplay zoom)**
+
+![Ice Spear in flight: the star head and pale-cyan trail (gameplay zoom)](tamsin/v2/polish/rimewright_rmb_fly_game.png)
+
+**tm_spear_aim with the spear held high, then the whip and lunge (the spear leaves the hand) (close-up)**
+
+![tm_spear_aim with the spear held high, then the whip and lunge (the spear leaves the hand) (close-up)](tamsin/v2/polish/rimewright_rmb_strip_close.png)
+
+**tm_spear_aim with the spear held high, then the whip and lunge (the spear leaves the hand) (gameplay zoom)**
+
+![tm_spear_aim with the spear held high, then the whip and lunge (the spear leaves the hand) (gameplay zoom)](tamsin/v2/polish/rimewright_rmb_strip_game.png)
+
+**Ice Spear landed: the slow-zone flake with its spinning crystal, filling (close-up)**
+
+![Ice Spear landed: the slow-zone flake with its spinning crystal, filling (close-up)](tamsin/v2/polish/rimewright_rmb_zone_close.png)
+
+**Ice Spear landed: the slow-zone flake with its spinning crystal, filling (gameplay zoom)**
+
+![Ice Spear landed: the slow-zone flake with its spinning crystal, filling (gameplay zoom)](tamsin/v2/polish/rimewright_rmb_zone_game.png)
+
+**8-dart Shatter: the 2.7 m starburst of opaque ice-cyan spikes and SHATTER (close-up)**
+
+![8-dart Shatter: the 2.7 m starburst of opaque ice-cyan spikes and SHATTER (close-up)](tamsin/v2/polish/rimewright_shatter_close.png)
+
+**8-dart Shatter: the 2.7 m starburst of opaque ice-cyan spikes and SHATTER (gameplay zoom)**
+
+![8-dart Shatter: the 2.7 m starburst of opaque ice-cyan spikes and SHATTER (gameplay zoom)](tamsin/v2/polish/rimewright_shatter_game.png)
+
+**Stacks, shell, burst (the gameplay-camera strip shows the scale) (close-up)**
+
+![Stacks, shell, burst (the gameplay-camera strip shows the scale) (close-up)](tamsin/v2/polish/rimewright_shatter_strip_close.png)
+
+**Stacks, shell, burst (the gameplay-camera strip shows the scale) (gameplay zoom)**
+
+![Stacks, shell, burst (the gameplay-camera strip shows the scale) (gameplay zoom)](tamsin/v2/polish/rimewright_shatter_strip_game.png)
+
+**8-dart Shatter: the 0.15 s icy shell closing over the dummy (close-up)**
+
+![8-dart Shatter: the 0.15 s icy shell closing over the dummy (close-up)](tamsin/v2/polish/rimewright_shell_close.png)
+
+**8-dart Shatter: the 0.15 s icy shell closing over the dummy (gameplay zoom)**
+
+![8-dart Shatter: the 0.15 s icy shell closing over the dummy (gameplay zoom)](tamsin/v2/polish/rimewright_shell_game.png)
+
+**Firing while skating: the thick cyan beams, both hands driven out (close-up)**
+
+![Firing while skating: the thick cyan beams, both hands driven out (close-up)](tamsin/v2/polish/rimewright_skatefire_close.png)
+
+**Firing while skating: the thick cyan beams, both hands driven out (gameplay zoom)**
+
+![Firing while skating: the thick cyan beams, both hands driven out (gameplay zoom)](tamsin/v2/polish/rimewright_skatefire_game.png)
+
+**tm_beam while skating (close-up)**
+
+![tm_beam while skating (close-up)](tamsin/v2/polish/rimewright_skatefire_strip_close.png)
+
+**tm_beam while skating (gameplay zoom)**
+
+![tm_beam while skating (gameplay zoom)](tamsin/v2/polish/rimewright_skatefire_strip_game.png)
+
+**Hoarfrost: the frost glow on the dummy growing with the dart stacks (close-up)**
+
+![Hoarfrost: the frost glow on the dummy growing with the dart stacks (close-up)](tamsin/v2/polish/rimewright_stacks_close.png)
+
+**Hoarfrost: the frost glow on the dummy growing with the dart stacks (gameplay zoom)**
+
+![Hoarfrost: the frost glow on the dummy growing with the dart stacks (gameplay zoom)](tamsin/v2/polish/rimewright_stacks_game.png)
+
+**Rimelock crash: the pillar and shard burst, no BOND READY word over it (close-up)**
+
+![Rimelock crash: the pillar and shard burst, no BOND READY word over it (close-up)](tamsin/v2/polish/rimewright_ult_crash_close.png)
+
+**Rimelock crash: the pillar and shard burst, no BOND READY word over it (gameplay zoom)**
+
+![Rimelock crash: the pillar and shard burst, no BOND READY word over it (gameplay zoom)](tamsin/v2/polish/rimewright_ult_crash_game.png)
+
+**tm_rime_crash, with no bond word or toast in the frames (close-up)**
+
+![tm_rime_crash, with no bond word or toast in the frames (close-up)](tamsin/v2/polish/rimewright_ult_strip_close.png)
+
+**tm_rime_crash, with no bond word or toast in the frames (gameplay zoom)**
+
+![tm_rime_crash, with no bond word or toast in the frames (gameplay zoom)](tamsin/v2/polish/rimewright_ult_strip_game.png)
+
+**Rimelock cast: the rink snapping out (close-up)**
+
+![Rimelock cast: the rink snapping out (close-up)](tamsin/v2/polish/rimewright_ultaim_close.png)
+
+**Rimelock cast: the rink snapping out (gameplay zoom)**
+
+![Rimelock cast: the rink snapping out (gameplay zoom)](tamsin/v2/polish/rimewright_ultaim_game.png)
+
+**tm_rime cast (close-up)**
+
+![tm_rime cast (close-up)](tamsin/v2/polish/rimewright_ultaim_strip_close.png)
+
+**tm_rime cast (gameplay zoom)**
+
+![tm_rime cast (gameplay zoom)](tamsin/v2/polish/rimewright_ultaim_strip_game.png)
+
+**Rimelock hold: the rink with brightening cracks, her frost bud (close-up)**
+
+![Rimelock hold: the rink with brightening cracks, her frost bud (close-up)](tamsin/v2/polish/rimewright_ultkey_close.png)
+
+**Rimelock hold: the rink with brightening cracks, her frost bud (gameplay zoom)**
+
+![Rimelock hold: the rink with brightening cracks, her frost bud (gameplay zoom)](tamsin/v2/polish/rimewright_ultkey_game.png)
+
+**tm_rime_hold (close-up)**
+
+![tm_rime_hold (close-up)](tamsin/v2/polish/rimewright_ultkey_strip_close.png)
+
+**tm_rime_hold (gameplay zoom)**
+
+![tm_rime_hold (gameplay zoom)](tamsin/v2/polish/rimewright_ultkey_strip_game.png)
+
+**Locomotion: the tall, thin skater with long strides, arms out (close-up)**
+
+![Locomotion: the tall, thin skater with long strides, arms out (close-up)](tamsin/v2/polish/rimewright_walk_close.png)
+
+**Locomotion: the tall, thin skater with long strides, arms out (gameplay zoom)**
+
+![Locomotion: the tall, thin skater with long strides, arms out (gameplay zoom)](tamsin/v2/polish/rimewright_walk_game.png)
+
+**Walk cycle at 1.4x cadence (close-up)**
+
+![Walk cycle at 1.4x cadence (close-up)](tamsin/v2/polish/rimewright_walk_strip_close.png)
+
+**Walk cycle at 1.4x cadence (gameplay zoom)**
+
+![Walk cycle at 1.4x cadence (gameplay zoom)](tamsin/v2/polish/rimewright_walk_strip_game.png)
+
+## moosh-moosh/v2/polish (moosh-moosh/v2/polish)
+
+**Air glide: the head-first streak with ember motes (close-up)**
+
+![Air glide: the head-first streak with ember motes (close-up)](moosh-moosh/v2/polish/tender_air_close.png)
+
+**Air glide: the seated, knees-tucked float with arms out wide (close-up)**
+
+![Air glide: the seated, knees-tucked float with arms out wide (close-up)](moosh-moosh/v2/polish/tender_air_float_close.png)
+
+**Air glide: the seated, knees-tucked float with arms out wide (gameplay zoom)**
+
+![Air glide: the seated, knees-tucked float with arms out wide (gameplay zoom)](moosh-moosh/v2/polish/tender_air_float_game.png)
+
+**Air glide: the head-first streak with ember motes (gameplay zoom)**
+
+![Air glide: the head-first streak with ember motes (gameplay zoom)](moosh-moosh/v2/polish/tender_air_game.png)
+
+**mm_dash_air: streak, float, soft touchdown (close-up)**
+
+![mm_dash_air: streak, float, soft touchdown (close-up)](moosh-moosh/v2/polish/tender_air_strip_close.png)
+
+**mm_dash_air: streak, float, soft touchdown (gameplay zoom)**
+
+![mm_dash_air: streak, float, soft touchdown (gameplay zoom)](moosh-moosh/v2/polish/tender_air_strip_game.png)
+
+**Bearer: carrying a downed teammate (close-up)**
+
+![Bearer: carrying a downed teammate (close-up)](moosh-moosh/v2/polish/tender_carry_close.png)
+
+**Bearer: carrying a downed teammate (gameplay zoom)**
+
+![Bearer: carrying a downed teammate (gameplay zoom)](moosh-moosh/v2/polish/tender_carry_game.png)
+
+**Bearer: scoop (mm_pickup) and the carry walk (close-up)**
+
+![Bearer: scoop (mm_pickup) and the carry walk (close-up)](moosh-moosh/v2/polish/tender_carry_strip_close.png)
+
+**Bearer: scoop (mm_pickup) and the carry walk (gameplay zoom)**
+
+![Bearer: scoop (mm_pickup) and the carry walk (gameplay zoom)](moosh-moosh/v2/polish/tender_carry_strip_game.png)
+
+**Relay Step mid-hop through the teammate: ember motes, no shared after-image pill (close-up)**
+
+![Relay Step mid-hop through the teammate: ember motes, no shared after-image pill (close-up)](moosh-moosh/v2/polish/tender_dash_close.png)
+
+**Relay Step mid-hop through the teammate: ember motes, no shared after-image pill (gameplay zoom)**
+
+![Relay Step mid-hop through the teammate: ember motes, no shared after-image pill (gameplay zoom)](moosh-moosh/v2/polish/tender_dash_game.png)
+
+**mm_dash / mm_relay: crouch, stretched hop with arms swept back, landing squash (close-up)**
+
+![mm_dash / mm_relay: crouch, stretched hop with arms swept back, landing squash (close-up)](moosh-moosh/v2/polish/tender_dash_strip_close.png)
+
+**mm_dash / mm_relay: crouch, stretched hop with arms swept back, landing squash (gameplay zoom)**
+
+![mm_dash / mm_relay: crouch, stretched hop with arms swept back, landing squash (gameplay zoom)](moosh-moosh/v2/polish/tender_dash_strip_game.png)
+
+**Hearthlight lit: both arms straight up overhead, green plus and rising rays (close-up)**
+
+![Hearthlight lit: both arms straight up overhead, green plus and rising rays (close-up)](moosh-moosh/v2/polish/tender_e_close.png)
+
+**Hearthlight lit: both arms straight up overhead, green plus and rising rays (gameplay zoom)**
+
+![Hearthlight lit: both arms straight up overhead, green plus and rising rays (gameplay zoom)](moosh-moosh/v2/polish/tender_e_game.png)
+
+**mm_hearth crouch and both-arms-up, then mm_toss underhand fling (close-up)**
+
+![mm_hearth crouch and both-arms-up, then mm_toss underhand fling (close-up)](moosh-moosh/v2/polish/tender_e_strip_close.png)
+
+**mm_hearth crouch and both-arms-up, then mm_toss underhand fling (gameplay zoom)**
+
+![mm_hearth crouch and both-arms-up, then mm_toss underhand fling (gameplay zoom)](moosh-moosh/v2/polish/tender_e_strip_game.png)
+
+**Hearthlight thrown: the filled amber-to-teal disc with its bright rim and floating lantern (no floor plus) (close-up)**
+
+![Hearthlight thrown: the filled amber-to-teal disc with its bright rim and floating lantern (no floor plus) (close-up)](moosh-moosh/v2/polish/tender_e_thrown_close.png)
+
+**Hearthlight thrown: the filled amber-to-teal disc with its bright rim and floating lantern (no floor plus) (gameplay zoom)**
+
+![Hearthlight thrown: the filled amber-to-teal disc with its bright rim and floating lantern (no floor plus) (gameplay zoom)](moosh-moosh/v2/polish/tender_e_thrown_game.png)
+
+**Empowered ember: up on the toes, two-handed push, free arm flung back (close-up)**
+
+![Empowered ember: up on the toes, two-handed push, free arm flung back (close-up)](moosh-moosh/v2/polish/tender_emp_close.png)
+
+**Empowered ember in flight (40% further) (close-up)**
+
+![Empowered ember in flight (40% further) (close-up)](moosh-moosh/v2/polish/tender_emp_fly_close.png)
+
+**Empowered ember in flight (40% further) (gameplay zoom)**
+
+![Empowered ember in flight (40% further) (gameplay zoom)](moosh-moosh/v2/polish/tender_emp_fly_game.png)
+
+**Empowered ember: up on the toes, two-handed push, free arm flung back (gameplay zoom)**
+
+![Empowered ember: up on the toes, two-handed push, free arm flung back (gameplay zoom)](moosh-moosh/v2/polish/tender_emp_game.png)
+
+**mm_shot_emp: coil, tiptoe two-handed push, hold, settle (close-up)**
+
+![mm_shot_emp: coil, tiptoe two-handed push, hold, settle (close-up)](moosh-moosh/v2/polish/tender_emp_strip_close.png)
+
+**mm_shot_emp: coil, tiptoe two-handed push, hold, settle (gameplay zoom)**
+
+![mm_shot_emp: coil, tiptoe two-handed push, hold, settle (gameplay zoom)](moosh-moosh/v2/polish/tender_emp_strip_game.png)
+
+**Ember Cast: the straight-arm punch-push from the right hand at the thrust, swirl and flash at that hand (close-up)**
+
+![Ember Cast: the straight-arm punch-push from the right hand at the thrust, swirl and flash at that hand (close-up)](moosh-moosh/v2/polish/tender_lmb_close.png)
+
+**Ember Cast: the 0.44 m amber ember comet in flight toward the cursor (flies on to 12 m) (close-up)**
+
+![Ember Cast: the 0.44 m amber ember comet in flight toward the cursor (flies on to 12 m) (close-up)](moosh-moosh/v2/polish/tender_lmb_fly_close.png)
+
+**Ember Cast: the 0.44 m amber ember comet in flight toward the cursor (flies on to 12 m) (gameplay zoom)**
+
+![Ember Cast: the 0.44 m amber ember comet in flight toward the cursor (flies on to 12 m) (gameplay zoom)](moosh-moosh/v2/polish/tender_lmb_fly_game.png)
+
+**Ember Cast: the straight-arm punch-push from the right hand at the thrust, swirl and flash at that hand (gameplay zoom)**
+
+![Ember Cast: the straight-arm punch-push from the right hand at the thrust, swirl and flash at that hand (gameplay zoom)](moosh-moosh/v2/polish/tender_lmb_game.png)
+
+**mm_shot_r / mm_shot_l: wind (fist at hip, body twisted away), thrust with the whole body turning, hold, recover, the other hand (close-up)**
+
+![mm_shot_r / mm_shot_l: wind (fist at hip, body twisted away), thrust with the whole body turning, hold, recover, the other hand (close-up)](moosh-moosh/v2/polish/tender_lmb_strip_close.png)
+
+**mm_shot_r / mm_shot_l: wind (fist at hip, body twisted away), thrust with the whole body turning, hold, recover, the other hand (gameplay zoom)**
+
+![mm_shot_r / mm_shot_l: wind (fist at hip, body twisted away), thrust with the whole body turning, hold, recover, the other hand (gameplay zoom)](moosh-moosh/v2/polish/tender_lmb_strip_game.png)
+
+**Hearthlight flare payoff: amber/teal flare, both arms flung up (close-up)**
+
+![Hearthlight flare payoff: amber/teal flare, both arms flung up (close-up)](moosh-moosh/v2/polish/tender_payoff_close.png)
+
+**Hearthlight flare payoff: amber/teal flare, both arms flung up (gameplay zoom)**
+
+![Hearthlight flare payoff: amber/teal flare, both arms flung up (gameplay zoom)](moosh-moosh/v2/polish/tender_payoff_game.png)
+
+**mm_flare at the Hearthlight flare (close-up)**
+
+![mm_flare at the Hearthlight flare (close-up)](moosh-moosh/v2/polish/tender_payoff_strip_close.png)
+
+**mm_flare at the Hearthlight flare (gameplay zoom)**
+
+![mm_flare at the Hearthlight flare (gameplay zoom)](moosh-moosh/v2/polish/tender_payoff_strip_game.png)
+
+**Body: Moosh Moosh at 0.74 of a medium beside a medium teammate, no weapon, no pack-frame or lantern above the head (close-up)**
+
+![Body: Moosh Moosh at 0.74 of a medium beside a medium teammate, no weapon, no pack-frame or lantern above the head (close-up)](moosh-moosh/v2/polish/tender_pose_close.png)
+
+**Body: Moosh Moosh at 0.74 of a medium beside a medium teammate, no weapon, no pack-frame or lantern above the head (gameplay zoom)**
+
+![Body: Moosh Moosh at 0.74 of a medium beside a medium teammate, no weapon, no pack-frame or lantern above the head (gameplay zoom)](moosh-moosh/v2/polish/tender_pose_game.png)
+
+**Idle with arms out (close-up)**
+
+![Idle with arms out (close-up)](moosh-moosh/v2/polish/tender_pose_strip_close.png)
+
+**Idle with arms out (gameplay zoom)**
+
+![Idle with arms out (gameplay zoom)](moosh-moosh/v2/polish/tender_pose_strip_game.png)
+
+**Burrseed held: the dotted lane to the full 14 m and the side-on aim pose (close-up)**
+
+![Burrseed held: the dotted lane to the full 14 m and the side-on aim pose (close-up)](moosh-moosh/v2/polish/tender_rmb_aim_close.png)
+
+**Burrseed held: the dotted lane to the full 14 m and the side-on aim pose (gameplay zoom)**
+
+![Burrseed held: the dotted lane to the full 14 m and the side-on aim pose (gameplay zoom)](moosh-moosh/v2/polish/tender_rmb_aim_game.png)
+
+**Burrseed stuck: the saturated violet thorn disc filling under the dummy, the violet light column (close-up)**
+
+![Burrseed stuck: the saturated violet thorn disc filling under the dummy, the violet light column (close-up)](moosh-moosh/v2/polish/tender_rmb_disc_close.png)
+
+**Burrseed stuck: the saturated violet thorn disc filling under the dummy, the violet light column (gameplay zoom)**
+
+![Burrseed stuck: the saturated violet thorn disc filling under the dummy, the violet light column (gameplay zoom)](moosh-moosh/v2/polish/tender_rmb_disc_game.png)
+
+**Burrseed root at 0.7 s: the violet flare, root beam and ROOTED (close-up)**
+
+![Burrseed root at 0.7 s: the violet flare, root beam and ROOTED (close-up)](moosh-moosh/v2/polish/tender_rmb_root_close.png)
+
+**Burrseed root at 0.7 s: the violet flare, root beam and ROOTED (gameplay zoom)**
+
+![Burrseed root at 0.7 s: the violet flare, root beam and ROOTED (gameplay zoom)](moosh-moosh/v2/polish/tender_rmb_root_game.png)
+
+**mm_seed_aim held, then mm_seed: coil, small hop with a two-handed push and the violet/amber cast flare, landing (close-up)**
+
+![mm_seed_aim held, then mm_seed: coil, small hop with a two-handed push and the violet/amber cast flare, landing (close-up)](moosh-moosh/v2/polish/tender_rmb_strip_close.png)
+
+**mm_seed_aim held, then mm_seed: coil, small hop with a two-handed push and the violet/amber cast flare, landing (gameplay zoom)**
+
+![mm_seed_aim held, then mm_seed: coil, small hop with a two-handed push and the violet/amber cast flare, landing (gameplay zoom)](moosh-moosh/v2/polish/tender_rmb_strip_game.png)
+
+**Hearth Call end: the teammate pulled home and stood up (arrival burst) (close-up)**
+
+![Hearth Call end: the teammate pulled home and stood up (arrival burst) (close-up)](moosh-moosh/v2/polish/tender_ult_end_close.png)
+
+**Hearth Call end: the teammate pulled home and stood up (arrival burst) (gameplay zoom)**
+
+![Hearth Call end: the teammate pulled home and stood up (arrival burst) (gameplay zoom)](moosh-moosh/v2/polish/tender_ult_end_game.png)
+
+**Channel, then mm_call_end sweep and the arrival (close-up)**
+
+![Channel, then mm_call_end sweep and the arrival (close-up)](moosh-moosh/v2/polish/tender_ult_strip_close.png)
+
+**Channel, then mm_call_end sweep and the arrival (gameplay zoom)**
+
+![Channel, then mm_call_end sweep and the arrival (gameplay zoom)](moosh-moosh/v2/polish/tender_ult_strip_game.png)
+
+**Hearth Call aim: the stronger amber line, green pick ring and a faint tether preview onto the teammate (close-up)**
+
+![Hearth Call aim: the stronger amber line, green pick ring and a faint tether preview onto the teammate (close-up)](moosh-moosh/v2/polish/tender_ultaim_close.png)
+
+**Hearth Call aim: the stronger amber line, green pick ring and a faint tether preview onto the teammate (gameplay zoom)**
+
+![Hearth Call aim: the stronger amber line, green pick ring and a faint tether preview onto the teammate (gameplay zoom)](moosh-moosh/v2/polish/tender_ultaim_game.png)
+
+**Hearth Call aim telegraph while the cursor rests on the teammate (close-up)**
+
+![Hearth Call aim telegraph while the cursor rests on the teammate (close-up)](moosh-moosh/v2/polish/tender_ultaim_strip_close.png)
+
+**Hearth Call aim telegraph while the cursor rests on the teammate (gameplay zoom)**
+
+![Hearth Call aim telegraph while the cursor rests on the teammate (gameplay zoom)](moosh-moosh/v2/polish/tender_ultaim_strip_game.png)
+
+**Hearth Call mid-channel: walking away with the tether, seen side-on (close-up)**
+
+![Hearth Call mid-channel: walking away with the tether, seen side-on (close-up)](moosh-moosh/v2/polish/tender_ultkey_close.png)
+
+**Hearth Call mid-channel: walking away with the tether, seen side-on (gameplay zoom)**
+
+![Hearth Call mid-channel: walking away with the tether, seen side-on (gameplay zoom)](moosh-moosh/v2/polish/tender_ultkey_game.png)
+
+**mm_call cast and mm_call_hold channel while walking, side-on (close-up)**
+
+![mm_call cast and mm_call_hold channel while walking, side-on (close-up)](moosh-moosh/v2/polish/tender_ultkey_strip_close.png)
+
+**mm_call cast and mm_call_hold channel while walking, side-on (gameplay zoom)**
+
+![mm_call cast and mm_call_hold channel while walking, side-on (gameplay zoom)](moosh-moosh/v2/polish/tender_ultkey_strip_game.png)
+
+**Locomotion: the small, low, forward-leaning scurry with the tail swinging (strafing, body on the aim) (close-up)**
+
+![Locomotion: the small, low, forward-leaning scurry with the tail swinging (strafing, body on the aim) (close-up)](moosh-moosh/v2/polish/tender_walk_close.png)
+
+**Locomotion: the small, low, forward-leaning scurry with the tail swinging (strafing, body on the aim) (gameplay zoom)**
+
+![Locomotion: the small, low, forward-leaning scurry with the tail swinging (strafing, body on the aim) (gameplay zoom)](moosh-moosh/v2/polish/tender_walk_game.png)
+
+**Walk cycle at 1.25x cadence: per-step bob and tail swing (close-up)**
+
+![Walk cycle at 1.25x cadence: per-step bob and tail swing (close-up)](moosh-moosh/v2/polish/tender_walk_strip_close.png)
+
+**Walk cycle at 1.25x cadence: per-step bob and tail swing (gameplay zoom)**
+
+![Walk cycle at 1.25x cadence: per-step bob and tail swing (gameplay zoom)](moosh-moosh/v2/polish/tender_walk_strip_game.png)
