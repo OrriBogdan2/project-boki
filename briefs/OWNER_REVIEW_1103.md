@@ -288,4 +288,29 @@ The owner saw an explosion with Moosh Moosh and isn't sure whether it comes from
   | ostra | Ostra | Void Jester |
 
 - Scope once confirmed: every player-facing string (archetype JSON display names, hero picker, HUD, kit cards, tooltips, gen_wiki output, docs/heroes pages, new-game flow text). Internal ids stay. The player's chosen name labels their hunter in a match; the title shows in the picker and on cards. Save migration isn't needed (ids unchanged). Assert: no old personal name remains in any player-facing string (grep check in tools/).
-- Hold the rename until the owner confirms the titles; it's cheap and doesn't block the kit items.
+- **SUPERSEDED by item 39** (owner's final titles and the base-character naming model).
+
+## 39. DECISION (final): class titles, base characters, and new looks for every class
+**The naming model (owner):** each class is a slot with a fixed title (e.g. "Dark Archer"). Each class also has a canonical **base character**: a name, male/female, a written personality and our own art. That's our IP, and it lives in the wiki and the class-introduction screens ("the original Dark Archer is known as Pin"). When a player picks a class, their hunter is shown as **"<player name> the <title>"** (e.g. "Orri the Dark Archer"). Hero picker and cards show the title, with the base character's name and portrait in the class intro.
+
+**Final titles and base characters** (names marked *new* are proposals for the owner to OK; genders are proposals to balance the roster 6 F / 5 M / 1 robot):
+
+| id | title (final) | base name | gender | look / personality (owner) |
+|---|---|---|---|---|
+| thief | Silver Thief | *Sable* (new: "Dancer" now clashes with Icy Dancer) | F | (no change requested; concept pass gives a strong look) |
+| archer | Dark Archer | Pin | F | assassin-like archer cloak with some red; a cool-looking character |
+| juggernaut | Arena King | Zedran | M | spartan look: shirtless or very little clothing |
+| bulwark | Frozen Bulwark | Bjorn | M | ice themed; a massive shield; a big man dressed for the cold, frozen outfit |
+| mage | Storm Slayer | Vireo | F | badass and revolutionary: tattoos, shows skin, leather jacket, jewellery |
+| gunslinger | Hired Gun | Venator | F | marine-like, but a cool marine |
+| ashwick | Mad Pyromancer | Linwick | M | chemist-looking outfit (goggles, apron, flasks) |
+| dredge | Broken Abomination | Dredge | robot | a broken robot with corruption and evil energy leaking out; creepy, haunted machine |
+| tender | Fox Cub | Moosh Moosh | F | small and fiery like a fox; if another race, a small version of it with red markings and fox features (ears, tail) |
+| rimewright | Icy Dancer | Tamsin | F | (no change requested beyond the ice-skater theme) |
+| dolm | Rock Elementalist | *Tarek* (new: Breah becomes a man) | M | a young, nimble, darker-skinned rock elementalist with a bandana tied over his eyes |
+| ostra | Void Jester | Ostra | M | more menacing, a sinister and grinning jester (builds on item 18) |
+
+**Originality guard (applies to the whole concept pass):** the owner named some outside characters as mood references (a famous animated young elemental monk, a horror-game haunted animatronic, a famous comic-book clown villain). Use them only for mood. Every design must be clearly our own and must **not** carry those characters' signature features: no arrow head or body tattoos, no monk robes in that character's colour scheme, no cartoon animal-mascot robot with a hat and bow tie, no green hair, purple suit or painted scar-smile. If a draft could be mistaken for any of them, redesign it.
+
+**Scope now (small, server, Sonnet; branch ext/class-titles):** change every player-facing string to the titles above, add the "<player> the <title>" label in matches and on the end screen, and add base name + gender + a 2–3 line personality to each content/archetypes/<id>.json and the wiki (gen_wiki). Internal ids stay; no save migration. Add a grep check that no old title/name is used as a player-facing hero label. Display strings only, so it doesn't collide with the kit branches; rebase onto them at merge.
+**Scope later (concept pass, after resets):** the looks in the table, items 18, 34 and 37, and portraits. Concepts go to the owner for approval before any modelling.
