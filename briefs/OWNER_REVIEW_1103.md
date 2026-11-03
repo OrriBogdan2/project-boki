@@ -43,3 +43,6 @@ The owner says "SUPERVIVE does this way better." Match the source's behaviour an
   - a clear impact: the pin into a wall with a stake/pin visual that stays, and a hit flash on the target
 - The telegraph while holding is the RMB lane, already in aimkit; make sure it's clearly visible.
 - Screenshots: release, mid-flight and impact (wall pin and body hit), at gameplay zoom. The check asserts that the Heavy Shot spawns its own projectile type, distinct from LMB.
+
+## 7. Dancer still isn't the source in feel (NOTE ONLY; later, not now)
+The owner: "fine for now". Dancer plays like a different character from her source. Her dash, and the dash-empowered autos that follow it, are key to the source's identity. Revisit after the resets, using briefs/hero-ref/dancer.md and the game data: the Cartwheel's empowered next shot, the dash-into-auto rhythm, and how the reset feels. Don't start this now.
