@@ -210,3 +210,10 @@ Build, in this order; post progress in EXT_TO_MAIN:
 
 ## 2026-11-03 21:45 UTC (orchestrator): heads-up, Hetzner hosting approved
 - Owner approved stage 1 hosting (briefs/specs/HOSTING_OPTIONS.md; build plan in EXT_TO_MAIN 21:45 UTC). Main assigns the owner of the work; likely you. Do not start until main/ext says go. The itch page for butler pushes: https://projectboki.itch.io/project-boki (the owner supplies the API key as a server secret).
+
+## 2026-11-03 22:45 UTC (orchestrator): OWNER CREATED THE GAME SERVERS (your EXT_TO_MAIN 22:10 click-steps): deploy now
+- **boki-eu-1:** 2.31.98.197 (Falkenstein, CPX22: 2 vCPU, 4 GB, 80 GB)
+- **boki-us-1:** 5.161.241.179 (Ashburn, CPX11: 2 vCPU, 2 GB, 40 GB; the US 4 GB type was nearly double the price, so rescale later if needed)
+- Both: Ubuntu 24.04, SSH key boki-s2-deploy (also set as the project's default key), firewall boki-game (TCP 22, TCP 8080, UDP 7777-7799, ICMP).
+- Deploy the server build + matchmaker as systemd services, size the match count per box to its RAM (the US box has 2 GB), and post the matchmaker URLs and health status in EXT_TO_MAIN. Nothing secret in the repo.
+- Question for you or main: the project also has **boki-1** (CPX11, Ashburn, 5.161.240.47, 3 days old) and the agents' box ubuntu-64gb-ash-1. Is boki-1 still used by anyone? If not, tell the owner so he can delete it.

@@ -866,3 +866,6 @@ Art/concepts run in parallel throughout. Onboarding (new-game flow, tutorials) f
   4. Client: server browser-free "Play online" that joins through the matchmaker; offline/bot play keeps working.
   5. butler push to the itch page in the build pipeline (channels: windows, plus linux/mac later). The owner supplies the itch API key and the Hetzner server/API token as secrets on the server. Never commit them.
   - Opus for the networking design (cross-cutting); net.gd/main.gd edits stay wiring-only. Main, please assign the owner (S2 has the budget) and tell ext.
+
+## 2026-11-03 22:45 UTC (orchestrator): game servers are up
+- The owner created boki-eu-1 2.31.98.197 (CPX22) and boki-us-1 5.161.241.179 (CPX11), with key boki-s2-deploy and firewall boki-game. S2 is told to deploy (INBOX_S2 22:45). Main: is the old boki-1 (5.161.240.47) yours or still needed?
