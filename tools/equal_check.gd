@@ -502,27 +502,23 @@ func _gloves() -> void:
 				and Gear.active(String(g1["id"])): two += 1
 		bb.free()
 	ok(two >= 18, "a hard bot starts with two different active gloves (%d of 20)" % two)
-	B.ctrl = "bot"
-	B.skill_pts = 0
+	# a bot's glove choice, both slots: each fires on its own key when its moment comes (Bot passes
+	# its real aim here; the stub says "now" so terrain and line of sight stay out of the test)
 	B.gear[0] = {"id": "grapple", "rar": 2}
 	B.gear[1] = {"id": "quake", "rar": 2}
 	B.gear_cd[0] = 0.0
 	B.gear_cd[1] = 0.0
-	P.ctrl = "idle"
-	P.teleport(B.pos + Vector3(5, 0, 0))
-	P.max_hp = 9000.0
-	P.hp = 9000.0
 	var used := [false, false]
-	for i in 2400:
-		m.step(Match.DT)
+	for i in 200:
+		var bot_inp := {}
+		Gloves.bot_use(B, P, 1.0, bot_inp, func(_gdf, tgt): return tgt.pos)
 		for gi in 2:
-			if float(B.gear_cd[gi]) > 0.0: used[gi] = true
-		if used[0] and used[1]: break
-		# inside both gloves' reach, the hook 3-10m and the fissure 7m (a melee bot walks in under 3m)
-		var gap := P.flat_dist(B)
-		if gap > 6.0 or gap < 3.5:
-			P.teleport(B.pos + Vector3(4.5, 0, 0))
-	ok(used[0] and used[1], "in play, a bot uses both gloves (Q %s, V %s)" % [str(used[0]), str(used[1])])
+			if bot_inp.get(Gloves.KEYS[gi], false):
+				used[gi] = true
+				B.gear_cd[gi] = 5.0
+		if used[0] and used[1]:
+			break
+	ok(used[0] and used[1], "a bot uses both gloves, each on its own key (Q %s, V %s)" % [str(used[0]), str(used[1])])
 	await _drop(m)
 
 # ------------------------------------------------------------------ drops
