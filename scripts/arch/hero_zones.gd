@@ -1,6 +1,6 @@
 class_name HeroZones
 extends RefCounted
-## Placement of what Breah (dolm) and Ostra leave in the world (rocks, rock bridges, the seed): one legality
+## Placement of what Tarek (dolm) and Ostra leave in the world (rocks, rock bridges, the seed): one legality
 ## rule for all of it, and the Net side. A rock or seed only goes on solid ground that a body could
 ## stand on: not in the abyss, not inside rocks, trees, cliffs or other walls, not through a wall from
 ## where the caster stands. Rock bridges only replace abyss tiles (Verbs.add_bridge).
@@ -86,7 +86,7 @@ static func walk(m: Node, from: Vector3, aim: Vector3, reach: float) -> Dictiona
 	return out
 
 # ------------------------------------------------------------------ rocks
-## Breah's rock: a cluster of jagged basalt columns, tapering to broken tops and leaning apart, with
+## Tarek's rock: a cluster of jagged basalt columns, tapering to broken tops and leaning apart, with
 ## molten cracks in the stone (shaders/molten_rock.gdshader) and thin glowing cracks in the ground at
 ## its foot that cool off over CRACK_T. The tallest column tops out at ROCK_TOP (you stand there).
 ## No other wall in the game looks like it.

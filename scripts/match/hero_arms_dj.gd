@@ -1,6 +1,6 @@
 class_name HeroArmsDJ
 extends RefCounted
-## Dancer's signature weapon, Arc Bolts, built on the gun node (HeroArms.build asks first). Two ring
+## Sable's signature weapon, Arc Bolts, built on the gun node (HeroArms.build asks first). Two ring
 ## blades, one per hand: a dark steel hoop with four swept spikes, a gold glowing inner edge (where the
 ## bolt forms) and a wrapped grip bar across the back of the hoop. The left one sits at x < -0.04 so
 ## HunterAnim's twin hold hands it to the left hand.

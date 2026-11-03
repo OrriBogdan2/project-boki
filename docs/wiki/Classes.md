@@ -4,7 +4,7 @@ A class is a whole character: its own dash, a passive with a resource it builds,
 click), a right-click ability with several variants, a utility on E and an ultimate on R. There are
 twelve, four in each weight class:
 
-- **Light:** [Dancer](Class-Dancer.md) (stay on one target from range, cartwheel and reset), [Archer](Class-Archer.md) (pin people, then the big shot), [Vireo](Class-Vireo.md) (load Sparks, then Wirerun through them) and [Claire](Class-Claire.md) (chill foes, shelter the squad behind ice).
+- **Light:** [Sable](Class-Silver-Thief.md) (stay on one target from range, cartwheel and reset), [Archer](Class-Archer.md) (pin people, then the big shot), [Vireo](Class-Vireo.md) (load Sparks, then Wirerun through them) and [Claire](Class-Claire.md) (chill foes, shelter the squad behind ice).
 - **Medium:** [Marlowe](Class-Marlowe.md) (burr charges and one long needle), [Linnet](Class-Linnet.md) (heal, carry the downed), [Dolm](Class-Dolm.md) (raise rocks, punch them into the fight) and [Ostra](Class-Ostra.md) (swell, plant a seed, trade places).
 - **Heavy:** [Zedran](Class-Zedran.md) (rage, chain in, crush), [Bulwark](Class-Bulwark.md) (block, then smash them into walls), [Dredge](Class-Dredge.md) (haul a foe in, drop the anchor) and [Ashwick](Class-Ashwick.md) (build Char, flash foes over).
 
@@ -38,7 +38,7 @@ form, see [Boki species](Boki-Species.md)). The class's own ultimate is held bac
 
 ## Choosing
 
-Each weight class has a default: Dancer (light), Marlowe (medium) and Zedran (heavy). You pick
+Each weight class has a default: Sable (light), Marlowe (medium) and Zedran (heavy). You pick
 your class in the Expedition menu, and you can try every class against dummies in the
 [Arena](Arena-and-Training.md) at any time.
 

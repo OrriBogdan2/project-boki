@@ -2,8 +2,8 @@ extends RefCounted
 ## --hero-title-check: every class has a title, a base character (name, gender) and a personality, and
 ## no old personal name is a player-facing hero label (the base_name field is the one place it lives).
 
-const OLD_NAMES := ["Dancer", "Zedran", "Pin", "Bjorn", "Vireo", "Venator", "Linwick", "Dredge", "Moosh Moosh",
-	"Tamsin", "Breah", "Ostra"]
+const OLD_NAMES := ["Dancer", "Zedran", "Pin", "Bjorn", "Vireo", "Venator", "Tamsin", "Linwick", "Dredge",
+	"Moosh Moosh", "Breah", "Ostra"]
 const GENDERS := ["male", "female", "robot"]
 
 var bad := 0

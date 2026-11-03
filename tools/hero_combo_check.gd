@@ -1,5 +1,5 @@
 extends RefCounted
-## --mage-combo-check / --gunslinger-combo-check: Vireo's and Venator's kits against their reference
+## --mage-combo-check / --gunslinger-combo-check: Vireo's and Vex's kits against their reference
 ## sheets and the owner notes (docs/heroes/mage.md and gunslinger.md, "Combinations"): where every shot
 ## and placement lands (max range vs cursor), the telegraph shown while aiming or holding (AimKit), the
 ## charge timings, and each payoff. Prints HCHECK PASS/FAIL and a DONE line.
@@ -534,7 +534,7 @@ func _mage() -> void:
 	await ac.done(m)
 	fails += ac.fails
 
-# ------------------------------------------------------------------ Venator
+# ------------------------------------------------------------------ Vex
 func _gunslinger() -> void:
 	var r: Array = ac.setup("gunslinger", 5.0, "", true)
 	var m: Match = r[0]

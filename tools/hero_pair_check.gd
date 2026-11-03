@@ -1,5 +1,5 @@
 extends RefCounted
-## --zone-check: Breah (dolm) and Ostra placement (docs/heroes/dolm.md, ostra.md). The combo checks extend
+## --zone-check: Tarek (dolm) and Ostra placement (docs/heroes/dolm.md, ostra.md). The combo checks extend
 ## this file: tools/breah_combo_check.gd (--dolm-combo-check), tools/ostra_combo_check.gd (--ostra-combo-check).
 ##   zone: where rocks, the seed and Trade may land: collision, walls, bodies, abyss edges (the Basalt
 ##         Spine clipped there, no walkway), and the Net placement events
@@ -88,7 +88,7 @@ func hold(m: Match, P: Hunter, t: float) -> void:
 func rocks(m: Match) -> Array:
 	return m.verbs.walls.filter(func(w): return w.get("rock", false))
 
-## Breah's Basalt Spine laid along the aim across the abyss strip: X held at a centre over the gap, the
+## Tarek's Basalt Spine laid along the aim across the abyss strip: X held at a centre over the gap, the
 ## cursor dragged on along the aim, let go; returns once the cracks are done.
 func spine_across(m: Match, P: Hunter, home: Vector3) -> void:
 	P.ak.cd["x"] = 0.0

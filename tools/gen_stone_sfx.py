@@ -1,9 +1,9 @@
-"""Synthesizes Breah's (dolm) and Ostra's ability sounds into audio/*.wav (mono, 22.05kHz, 16-bit).
+"""Synthesizes Tarek's (dolm) and Ostra's ability sounds into audio/*.wav (mono, 22.05kHz, 16-bit).
 
     python3 tools/gen_stone_sfx.py           (then: godot --headless --import)
 
 Pure Python (wave, math, random; the helpers are tools/gen_pair_sfx.py's): no numpy. Every sound is
-original. Breah is stone and magma (low thumps, cracks, rubble grains, a molten hiss); Ostra is void glass
+original. Tarek is stone and magma (low thumps, cracks, rubble grains, a molten hiss); Ostra is void glass
 (sine sweeps pulled down, glassy partials, a soft hum). Names are in scripts/core/sfx_kits.gd.
 """
 import math, os, sys
@@ -44,7 +44,7 @@ def hiss(d, tau, hz=3500):
     return env(highpass(lowpass(noise(d), hz + 2500), hz), tau)
 
 
-# ---------------------------------------------------------------- Breah
+# ---------------------------------------------------------------- Tarek
 def br_throw():
     T = 0.4
     whoosh = env(ramp_in(lowpass(noise(0.18), 1400), 1.5), 0.08)

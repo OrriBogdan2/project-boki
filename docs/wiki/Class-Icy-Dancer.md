@@ -10,7 +10,7 @@ R is your Boki's Merge.
 |  |  |
 |---|---|
 | Class title | Icy Dancer |
-| Base character | Tamsin, female |
+| Base character | Claire, female |
 | Personality | A graceful ice skater who glides where others walk and leaves frost behind her. Elegant and playful, with a cold edge when crossed. |
 
 <!-- /gen:profile -->

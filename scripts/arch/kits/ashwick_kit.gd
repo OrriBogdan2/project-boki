@@ -1,6 +1,6 @@
 class_name AshwickKit
 extends ArchKit
-## Linwick (id ashwick, heavy). Gameplay follows the "everything builds toward a burn" brief and the
+## Cinder (id ashwick, heavy). Gameplay follows the "everything builds toward a burn" brief and the
 ## reference sheet (docs/heroes/ashwick.md); names, art, sounds and text are ours.
 ##
 ## - Passive, Flashover: every hit builds Char on a foe (31 = Ablaze: 3s of burning for a share of their
@@ -13,7 +13,7 @@ extends ArchKit
 ##   it slows the foe and sets it Ablaze; on a burning foe it upgrades and spreads. Rank 3: a second charge.
 ## - Shift, Soot Ram: two charges of a short head-first dash toward the cursor that STOPS on the
 ##   first foe with a fiery impact and shoves it; rank 3: more damage, a speed boost and a shield on a hit.
-## - E, Furnace Cloak: on the press, a blast round Linwick (a ring at its exact radius): scorch, Char,
+## - E, Furnace Cloak: on the press, a blast round Cinder (a ring at its exact radius): scorch, Char,
 ##   Anti-Heal, drag foes in (walls block), and a swirling shield for what it hit.
 ## - X, Flue Flight (level 6): a steerable flight that lays a burning, slowing lava carpet (AshwickJet).
 
@@ -187,7 +187,7 @@ func _tick(dt: float) -> void:
 	KMovesPair.air_moves(self, "lw_jump", "lw_land")
 	if h.shield_t > 0.0 and h.shield > 0.5 and st.get("shield_on", false):
 		if tells_visible():
-			# the Furnace Cloak's shield: a swirling ring of fire hugging Linwick while it holds (about 0.8 bh)
+			# the Furnace Cloak's shield: a swirling ring of fire hugging Cinder while it holds (about 0.8 bh)
 			fx.place(
 				"swirl%d" % h.get_instance_id(), "swirl", h.pos + Vector3(0, 0.55, 0), SHIELD_COL, Color("ffc040"),
 				1.8, m.time * 2.0, 1.0
@@ -462,7 +462,7 @@ func on_dash(use_ex: bool) -> bool:
 	bash = {"t": h.roll_t, "t0": h.roll_t, "speed": h.roll_speed, "dir": dir, "hit": false}
 	return true
 
-## The air dash, Linwick's way: a "poof" from the bellows that launches him far and fast (a cloud of smoke and
+## The air dash, Cinder's way: a "poof" from the bellows that launches him far and fast (a cloud of smoke and
 ## flame blown out behind him, no blast), and he keeps a share of the speed after it (the class long dash is
 ## replaced).
 func _poof(dd: Dictionary, dir: Vector2) -> void:
@@ -515,7 +515,7 @@ func _keep_poof(b: Dictionary) -> void:
 	h.vel.x = keep.x
 	h.vel.z = keep.y
 
-## The ram's looks: the flame skull round his front (flat, so it reads from above) and Linwick's own
+## The ram's looks: the flame skull round his front (flat, so it reads from above) and Cinder's own
 ## after-images, ember puffs that burn out through the fire ramp behind him (the hop leaves them too).
 func _ram_looks(dir: Vector2, dt: float) -> void:
 	var f3 := Vector3(dir.x, 0, dir.y)
@@ -563,7 +563,7 @@ func _bash_impact(f: Ent) -> void:
 	if h.is_local(): Oomph.punch_dir(m, dir, 0.25)
 	net_ring(f.pos, 1.4, SKULL_COL)
 
-## Rank 3: a clean ram hit speeds Linwick up and wraps him in a short shield.
+## Rank 3: a clean ram hit speeds Cinder up and wraps him in a short shield.
 func _ram_reward() -> void:
 	var dd := dash_def()
 	boost_until = m.time + float(dd["rank3_boost_t"])
@@ -572,7 +572,7 @@ func _ram_reward() -> void:
 	m.fx.word(h.pos + Vector3(0, 2.8, 0), "SPEED + SHIELD", col_of(dd), true)
 
 # ------------------------------------------------------------------ E: Furnace Cloak
-## The press: the blast goes off at once round Linwick (never at the cursor), with a quick arms-out flare
+## The press: the blast goes off at once round Cinder (never at the cursor), with a quick arms-out flare
 ## and a thin ring at the blast's exact radius that everyone sees.
 func cast_e() -> bool:
 	var ed := e_def()

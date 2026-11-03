@@ -54,7 +54,7 @@ func _slot(m: Match, hero: String, slot: String) -> void:
 				ok(owned == (got == "n/a"), "%s: %s, kit_owns %s" % [what, got, "lists it" if owned else "doesn't"])
 				continue
 			# on the dash's last step a cancel can't be told from a fire: the dash ends there either way; nor can a
-			# fire from a press that goes off on the very next step (a tap that fires on its release, like Breah's)
+			# fire from a press that goes off on the very next step (a tap that fires on its release, like Tarek's)
 			var next_step: bool = got == "buffer" and wait_s < Match.DT * 0.5
 			var at_end_same: bool = late and (got in ["fire", "cancel"] or next_step) and want in ["fire", "cancel"]
 			var waited := " %.2fs after the dash" % wait_s if got == "buffer" else ""

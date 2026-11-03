@@ -1,6 +1,6 @@
 class_name KMovesDJ
 extends RefCounted
-## Keyed full-body moves of Dancer (thief) and Juggernaut (same format and channels as
+## Keyed full-body moves of Sable (thief) and Juggernaut (same format and channels as
 ## HunterAnim.KMOVES; HunterAnim.km_sample looks here after KMOVES, KMovesPair and MergeMoves). Each is
 ## anticipation -> a key pose on the hit -> follow-through and recovery, keyed to the kit's own timing
 ## and to the footage frame counts in briefs/hero-ref/dancer.md and juggernaut.md (5 fps: a frame is 0.2s).
@@ -154,7 +154,7 @@ const MOVES := {
 		[0.3, {"blade": Vector3(0.0, 1.6, 0.0), "bw": 0.8, "rad": 0.45, "p": -0.1, "sq": 0.12, "lw": 0.8,
 				"legs": [0.9, -0.8, -0.5, -0.4]}],
 		[0.45, {}]]},
-	# ---------------------------------------------------------------- Dancer (thief)
+	# ---------------------------------------------------------------- Sable (thief)
 	# Arc Bolts, one per hand (footage 0028-0039: 2-3 frames a shot, one arm whipped forward from a wide
 	# low stance, the torso turned about 30 degrees into it, the legs keeping their stance): the throwing
 	# arm cocked back past the shoulder at 0.03, whipped to full reach at 0.08 with the torso twisting
@@ -323,13 +323,13 @@ const MOVES := {
 				"blade": Vector3(-1.2, -0.4, 1.4), "bw": 0.8, "rad": 0.35}],
 		[0.5, {}]]},
 	# ---------------------------------------------------------------- payoffs and passive procs
-	# Dancer, VAULT RESET: a spin on the heel with the arms flung wide, then a snap back to aim
+	# Sable, VAULT RESET: a spin on the heel with the arms flung wide, then a snap back to aim
 	"thf_reset": {"keys": [
 		[0.0, {"sq": 0.15, "lift": -0.05}],
 		[0.08, {"fy": -3.14, "sq": -0.15, "lift": 0.08, "fl": Vector3(-0.45, 0.25, 0.0), "hw": 1.0}],
 		[0.18, {"fy": -6.283, "sq": 0.1, "fl": Vector3(-0.45, 0.2, 0.0), "hw": 0.8}],
 		[0.4, {"fy": -6.283}]]},
-	# Dancer, a knock: a flourish, chin up, one blade raised, the heal rising through her
+	# Sable, a knock: a flourish, chin up, one blade raised, the heal rising through her
 	"thf_flourish": {"keys": [
 		[0.0, {}],
 		[0.1, {"p": 0.25, "lift": 0.1, "sq": -0.2, "fl": Vector3(-0.1, 0.55, -0.05), "hw": 1.0}],

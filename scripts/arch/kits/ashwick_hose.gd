@@ -1,6 +1,6 @@
 class_name AshwickHose
 extends RefCounted
-## Linwick's Torch Lance stream as a hose, not a rigid cone (sheet gap 1): puffs of fire leave the nozzle
+## Cinder's Torch Lance stream as a hose, not a rigid cone (sheet gap 1): puffs of fire leave the nozzle
 ## every EMIT_DT along the aim and keep their own velocity, so sweeping the nozzle bends the stream behind
 ## it. Each puff widens from the narrow nozzle (w0) to a billowing end (w1) over its life (range / speed).
 ## Walls stop a puff where it meets them. The fire only hurts while the key is held; letting go snuffs
@@ -8,7 +8,7 @@ extends RefCounted
 
 const EMIT_DT := 0.033          # s between puffs (about 30 a second)
 const SNUFF := 0.08             # s the stream lingers after the key is let go
-const INHERIT := 0.5            # share of Linwick's own velocity a puff carries
+const INHERIT := 0.5            # share of Cinder's own velocity a puff carries
 
 var puffs: Array = []           # {p, v, age, life, fy, seed}
 var acc := 0.0

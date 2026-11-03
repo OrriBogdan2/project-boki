@@ -1,6 +1,6 @@
 class_name GunslingerKit
 extends ArchKit
-## Venator (archetype id "gunslinger", medium): the ember-rifle skirmisher. docs/heroes/gunslinger.md
+## Vex (archetype id "gunslinger", medium): the ember-rifle skirmisher. docs/heroes/gunslinger.md
 ## has the per-slot table, the assumptions and the research notes (briefs/hero-ref/venator.md, owner notes).
 ##
 ## Loop: hold RMB for the Burr Charge's lane, let go to throw. A direct hit on a foe damages and Dazes

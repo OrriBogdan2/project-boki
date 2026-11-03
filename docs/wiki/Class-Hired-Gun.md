@@ -9,7 +9,7 @@ foe and Dazes them, and the rifle and one long needle of light do the rest.
 |  |  |
 |---|---|
 | Class title | Hired Gun |
-| Base character | Venator, female |
+| Base character | Vex, female |
 | Personality | A sharp, professional soldier in marine-style gear. She takes the contract and finishes the job. Calm under fire, and always has a plan for the way out. |
 
 <!-- /gen:profile -->

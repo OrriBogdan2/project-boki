@@ -165,7 +165,7 @@ func _burst_ok(ult_name: String, res: Dictionary) -> void:
 	ok("burst: %s then the merge never one-shots a full-health light hunter" % ult_name,
 			bool(res["merged"]) and bool(res["alive"]) and float(res["ult"]) > 1.0, info)
 
-# ------------------------------------------------------------------ Venator: Cinderfall
+# ------------------------------------------------------------------ Vex: Cinderfall
 func gunslinger() -> void:
 	var r: Array = ac.setup("gunslinger", 6.0, KIN, true)
 	var m: Match = r[0]
@@ -202,7 +202,7 @@ func gunslinger() -> void:
 	var p0 := P.pos
 	ac.step(m, 0.4, func(): P.inp["move"] = Vector2(-1, 0))
 	P.inp["move"] = Vector2.ZERO
-	ok("Cinderfall: Venator moves and can shoot while it falls",
+	ok("Cinderfall: Vex moves and can shoot while it falls",
 			hc._flat(P.pos, p0) > 1.0 and not K.busy() and K.can_shoot())
 	ok("Cinderfall: nothing lands before 1.6s", ac.dmg(T) == 0.0 and ac.dmg(T2) == 0.0)
 	ac.step(m, float(xd["delay"]) - 0.9 + 0.05)

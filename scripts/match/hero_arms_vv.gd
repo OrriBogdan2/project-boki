@@ -1,7 +1,7 @@
 class_name HeroArmsVV
 extends RefCounted
 ## The signature weapons of Vireo (Coilcaster: no gun, a copper wrist coil and a pointed, lit finger)
-## and Venator (Quill Rifle: a long-shrouded auto rifle with a drum), built on the gun node (HeroArms
+## and Vex (Quill Rifle: a long-shrouded auto rifle with a drum), built on the gun node (HeroArms
 ## asks first). The barrel runs along -Z, the hand holds near the origin.
 
 const X_AXIS := Vector3(PI / 2, 0, 0)
@@ -31,7 +31,7 @@ static func _coilcaster(gun: Node3D, m_dark: Material) -> void:
 	Models.part(gun, Models.sphere(0.03, 8), tip, Vector3(0, 0.01, -0.13))
 	Models.part(gun, Models.crystal(0.014, 0.08, 4), tip, Vector3(0, 0.01, -0.17), Vector3.ONE, -X_AXIS)
 
-## Venator's rifle: a squat receiver, a vented barrel shroud running long, a bronze drum under the grip,
+## Vex's rifle: a squat receiver, a vented barrel shroud running long, a bronze drum under the grip,
 ## a top rail with a short scope, an ember strip down the side, a slotted brake.
 static func _quill_rifle(gun: Node3D, m_gun: Material, m_dark: Material, m_acc: Material) -> void:
 	var bronze := Models.shiny(Color("b9732f"), 0.6)

@@ -69,11 +69,11 @@ on the ground under its anchor and follows terraces and stairs, but never climbs
 
 ### Lane: fixed, growing, narrowing
 ```gdscript
-# Venator RMB: a fixed lane with an arrow tip, out past the cursor
+# Vex RMB: a fixed lane with an arrow tip, out past the cursor
 AimKit.lane(h, "rmb", {"len": 10.0, "width": 0.72, "tip": true})
 # Juggernaut RMB charge: grows 1.2 -> 5.4 m with the charge, filling, magenta at full
 AimKit.lane(h, "rmb", {"len": 5.4, "len0": 1.2, "k": k, "fill": k, "width": 1.3, "col_full": Color("ff3df0")})
-# Venator E: a long lane that narrows over the cast
+# Vex E: a long lane that narrows over the cast
 AimKit.lane(h, "e", {"len": 16.0, "width": 1.0, "width_to": 0.12, "k": cast_k})
 # Vireo Surge: rails with chevrons (pair it with a circle for the end marker)
 AimKit.lane(h, "dash", {"len": 13.0, "width": 0.35, "rails": true, "chevrons": 5})
@@ -98,7 +98,7 @@ Params: `from`, `dir`, `len` (to the cursor, clamped 1.5-20), `k`, `open` (degre
 
 ### Cone
 ```gdscript
-# Venator wall cone: from the stuck point back out, everyone sees it for the fuse
+# Vex wall cone: from the stuck point back out, everyone sees it for the fuse
 AimKit.cone(h, "wallcone", {"from": stick, "dir": back, "len": 6.0, "deg": 100.0, "fill": fuse_k, "all": true, "dur": 0.8})
 # Dredge Buckshot: just the two edge lines
 AimKit.cone(h, "spread", {"len": 6.3, "deg": 30.0 + h.wbloom, "edges": true})
@@ -107,8 +107,8 @@ Params: `from`, `dir`, `len` (4), `deg` (60), `inner` (0.3 m), `edges`, `fill`.
 
 ### Landing circle
 ```gdscript
-AimKit.circle(h, "r", {"r": 2.9, "ticks": true})                     # Venator Mini Nuke at the cursor
-AimKit.circle(h, "e", {"self": true, "r": 4.5, "all": true, "dur": 0.2})   # Linwick's 0.2 s edge ring
+AimKit.circle(h, "r", {"r": 2.9, "ticks": true})                     # Vex Mini Nuke at the cursor
+AimKit.circle(h, "e", {"self": true, "r": 4.5, "all": true, "dur": 0.2})   # Cinder's 0.2 s edge ring
 AimKit.circle(h, "end", {"at": end_p, "r": 2.25, "ticks": true, "star": true})   # Vireo Surge end marker
 ```
 Params: `at` (the cursor point, clamped to `range`), `range`, `self` (centred on the hunter), `r`
@@ -117,7 +117,7 @@ the rim pointing that way, as on Vireo's E drag disc).
 
 ### Circle with a growing sweet spot
 ```gdscript
-# Breah RMB: a 2.5 bh circle a hop ahead; the inner ring grows 0.5 -> 1 bh with the charge
+# Tarek RMB: a 2.5 bh circle a hop ahead; the inner ring grows 0.5 -> 1 bh with the charge
 AimKit.sweet(h, "rmb", {"at": h.pos + Vector3(d.x, 0, d.y) * 2.6, "k": k, "fill": k, "all": true})
 ```
 Params: as for the circle (`r` defaults to 4.5 m), plus `k`, `core0` (0.9) and `core1` (1.8).
@@ -139,9 +139,9 @@ Params: `a` (the hunter), `b` (the cursor point, clamped to `range`), `r` (1.35)
 ### Extras the sheets need
 ```gdscript
 AimKit.line(h, "aim")                                        # the thin aim line to the cursor (Ostra, Claire)
-AimKit.line(h, "aim", {"col": Color("ffd25a"), "hot": 0.6})   # Dancer's gold empowered line
+AimKit.line(h, "aim", {"col": Color("ffd25a"), "hot": 0.6})   # Sable's gold empowered line
 AimKit.line(h, "aim", {"len": 20.0})                          # past the cursor to max range (Pin stage 2)
-AimKit.span(h, "r", {"len": 21.6, "chevrons": 4})             # Breah Tetraform: a long line, inward chevrons, centre ring
+AimKit.span(h, "r", {"len": 21.6, "chevrons": 4})             # Tarek Tetraform: a long line, inward chevrons, centre ring
 AimKit.star(h, "lock", {"at": foe.pos, "size": 0.5})          # a glint on the ground
 ```
 The two parallel lines (Ostra RMB) are `lane` with `"rails": true` and no chevrons. The Bjorn R

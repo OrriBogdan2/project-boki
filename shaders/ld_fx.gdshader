@@ -1,5 +1,5 @@
 shader_type spatial;
-// The body pass of Linwick's and Dredge's effect looks (the looks are in ld_fx.gdshaderinc). Alpha-blended,
+// The body pass of Cinder's and Dredge's effect looks (the looks are in ld_fx.gdshaderinc). Alpha-blended,
 // so colour, dark rims and smoke hold on bright ground; LDFx chains ld_fx_glow.gdshader on as next_pass.
 render_mode unshaded, shadows_disabled, depth_draw_never, blend_mix, cull_disabled, fog_disabled;
 #include "res://shaders/ld_fx.gdshaderinc"

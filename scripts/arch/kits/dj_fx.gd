@@ -1,6 +1,6 @@
 class_name DJFx
 extends Node3D
-## Dancer's and Juggernaut's own effects, pooled (one node per match, DJFx.of(m)): projectile looks that
+## Sable's and Juggernaut's own effects, pooled (one node per match, DJFx.of(m)): projectile looks that
 ## ride on a shot (or on a kit-run projectile), four-point stars, fizzle puffs, heal pillars, two-tone
 ## crescents, afterimage chains, and per-frame chains (the Warchain, the Bola cord). Every node is made
 ## once and reused; nothing is created per frame. One set of looks (shaders/dj_fx.gdshaderinc, a mode per
@@ -223,13 +223,13 @@ func _play(n: MeshInstance3D, kind: String, col: Color, col2: Color, dur: float,
 	n.scale = s0
 	live.append({"node": n, "t": 0.0, "dur": maxf(0.05, dur), "kind": kind, "s0": s0, "mat": mt})
 
-## A camera-facing four-point star (Dancer's knock, a tip hit, the bolt's impact).
+## A camera-facing four-point star (Sable's knock, a tip hit, the bolt's impact).
 func star(at: Vector3, col: Color, sz := 1.0, dur := 0.35, core := Color.WHITE) -> void:
 	var n := _fx("star", M_STAR, _quad_mesh(), true)
 	n.global_position = at
 	_play(n, "star", col, core, dur, Vector3.ONE * sz)
 
-## A streak lying along the ground behind `at` (pointing back from `dir`): a dash's own after-image (Dancer's
+## A streak lying along the ground behind `at` (pointing back from `dir`): a dash's own after-image (Sable's
 ## cyan, Zedran's orange flame). Hot `col2` at the head, `col` down the tail; it fades over `dur`.
 func streak(at: Vector3, dir: Vector2, length: float, width: float, col: Color, col2: Color, dur := 0.25) -> void:
 	var n := _fx("streak", M_COMET, _ribbon_mesh(), false)
@@ -264,7 +264,7 @@ func crescent(at: Vector3, dir: Vector2, arc_deg: float, reach: float, col: Colo
 	_play(n, key, col, col2, dur, Vector3.ONE * reach)
 	live[-1]["sweep"] = sweep
 
-## A chain of afterimages from `from` to `to` (Dancer's step to the dagger): `count` copies, the
+## A chain of afterimages from `from` to `to` (Sable's step to the dagger): `count` copies, the
 ## nearest to the start fading first.
 func ghosts(from: Vector3, to: Vector3, count: int, yaw: float, col: Color, scl := 1.0) -> void:
 	for i in count:
@@ -287,7 +287,7 @@ func _build_rider(kind: String, col: Color, col2: Color) -> Node3D:
 	n.add_child(head)
 	match kind:
 		"chakram":
-			# Dancer's bolt: a flared four-point gold chakram about 0.45 m across with a hot centre; the
+			# Sable's bolt: a flared four-point gold chakram about 0.45 m across with a hot centre; the
 			# orange flame tail is the trail (col: the tail, col2: the head)
 			head.add_child(_mi(star_mesh(4, 0.42), solid(col2)))
 			head.add_child(_mi(star_mesh(4, 0.3), solid(col2.lightened(0.45))))

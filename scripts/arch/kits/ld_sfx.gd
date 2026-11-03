@@ -1,6 +1,6 @@
 class_name LDSfx
 extends RefCounted
-## Linwick's and Dredge's per-ability sounds (made by tools/sfx_linwick_dredge.py). The kits register
+## Cinder's and Dredge's per-ability sounds (made by tools/sfx_linwick_dredge.py). The kits register
 ## them into the Sfx autoload's stream table on setup, so sfx.gd's shared name list stays untouched.
 
 const NAMES := [
