@@ -680,3 +680,7 @@ The owner saw an explosion on a dash and said "having explosions on dash is gene
 - Lore (owner): a Mantle (the class's power) is dormant until its wearer bonds with a Boki; the Boki awakens it. A Merge is the Mantle fully awake: **the merged form should look like the original Warden (the class's base character) blended with the Boki**, not a generic Boki-themed body. Example: a Dark Archer merged with a fire Boki = Pin's hooded, red-lined silhouette with the Boki's ears, markings, colours and flames worked in.
 - The base-character looks get designed in the concept pass (after the resets), so plan merge_look around per-class base looks + per-Boki traits then. No change needed for tonight's demo.
 - Prologue text for slides 3 and 4 changes slightly on S2's ext/prologue-polish (on top of prologue5) to explain this.
+
+## 2026-11-03 08:10 UTC: owner decision: Mantle look + character creator (OWNER_REVIEW item 45), built on S2's ext/mantle-look
+- In matches a Bearer looks like the class's original Warden (gender, silhouette, outfit, animations); the player's creator sliders (height, build, face, skin, hair, voice...) nudge that model within clamps (about +/-10-15%), so a big player is a slightly bigger version of the Warden. At home without a Mantle they look like their own created person. Hitboxes stay per class.
+- New logic goes in new files; it needs small wiring in models.gd (Models.hunter takes the blended params) and the new-game flow (creator step), plus a save migration. Flagging now so it doesn't surprise you when it's reported.

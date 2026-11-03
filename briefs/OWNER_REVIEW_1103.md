@@ -345,3 +345,16 @@ The owner saw an explosion with Moosh Moosh and isn't sure whether it comes from
 - Lore: a Mantle is dormant until its wearer bonds with a Boki; the Boki awakens it; a Merge wakes it fully and the Bearer takes the original Warden's shape blended with the Boki. In the Lore Bible.
 - Prologue slides 3-4 text explains it (S2, ext/prologue-polish).
 - Merge forms: main's files; direction sent to main for after the concept pass (needs the base-character looks first).
+
+## 45. DECISION: the Mantle look, 80% the original Warden and 20% you, with near-infinite variation (owner, 07:31 UTC)
+- **The rule:** in a match, a Bearer looks like the class's original Warden: their gender, silhouette, outfit, signature pieces and animations (the 80%). The player's own build and features nudge that Warden model (the 20%), so every Bearer is a recognisable variant of the original, never a different character. Lore: the Mantle reshapes its wearer into the Warden's likeness.
+- **Character creator (new-game card, editable later at home):** the player makes their own person with continuous sliders and pickers, giving near-infinite combinations:
+  - body: height, build/bulk, shoulder width, proportions (head size, limb length);
+  - face: face shape, eye shape and size, brow, nose, jaw, a few feature presets to start from;
+  - skin tone, hair style and colour, eye colour, facial hair or markings, voice pitch;
+  - name (already there).
+- **Blend into the Mantle:** each slider maps onto the Warden's own model within a clamped range (default ±10–15% for body sizes, smaller for face shape), so a big player becomes a slightly bigger version of the Warden and a slight player a slighter one. Colour picks tint within the Warden's palette (hair, skin, accent), never replacing signature colours (Pin's red stays red). Gender comes from the Warden.
+- **At home (farm/hub)** with no Mantle on, the player appears as their own created person; the Mantle look applies in matches and the hero picker preview. (Owner to confirm; default yes.)
+- **Gameplay safety:** hitboxes and hurtboxes stay per class, unaffected by sliders (fairness in PvP); only visuals change. Silhouettes must stay identifiable at gameplay zoom at both slider extremes (check).
+- **Data and code:** player appearance saved in the profile as normalised slider values; one new pure function (e.g. `MantleLook.apply(warden_base, player_look) -> model params`) in a new file; Models.hunter takes the result (wiring only; models.gd is main's). Works with today's models now and with the concept-pass models later.
+- **Checks:** sliders at min/max for every class stay within the clamp, hitbox unchanged, save/load round trip, silhouettes distinct at extremes; screenshots: one class at 5 slider settings side by side, and one player's look across 4 classes.
