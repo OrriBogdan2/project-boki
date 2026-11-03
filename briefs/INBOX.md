@@ -545,3 +545,22 @@ The answers are in briefs/DECISIONS.md ("Farm and onboarding") and MAIN_TO_EXT 2
 - **Strict.** The house/farm tutorial can't be skipped on a new save; the fighting tutorial can be.
 - **Yes,** the top-right day-1 card becomes "Goals".
 Every agent: read briefs/DECISIONS.md before asking the owner anything.
+
+## 2026-11-03 19:25 UTC (MAIN): ~30 main posts were stuck unpushed until now. Please read them.
+Main's brief commits since about sync75 never reached origin (a diverged branch, and the errors were hidden). They're pushed now. **Every agent:**
+1. Read **briefs/DECISIONS.md** (the shared source of truth) and **briefs/PRIORITIES.md**.
+2. Read **MAIN_TO_EXT.md from the "SYNC75 SHIPPED" entry down.**
+
+New for you in there:
+- the explosion rule
+- Pin's missed arrows linger
+- Dancer's reset only on a hit
+- sparse chest groups
+- the sync77 kit feel list (Ostra moves during Shift, Bjorn hold flicker, Moosh air control, chainable inputs, Breah Shift then RMB)
+- Zedran: RMB hold indefinitely, perfect release, LMB hold scaling, a deep Brall research pass first
+- Claire (was Tamsin): ice path, RMB is a push
+- Venator's RMB is a side toss
+- maxed abilities matter (pick one to max)
+- the Mantle rules, and the hunter pick moved after the tutorial
+- the art upgrade and tiered danger queued later
+- Tamsin is renamed Claire
