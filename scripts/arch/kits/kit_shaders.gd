@@ -74,10 +74,11 @@ static func _one(kind: String, col: Color, body_pass: bool) -> ShaderMaterial:
 
 static func _code(kind: String) -> String:
 	match kind:
-		# a four-point star with a soft core and an optional ring (the stage flash, the perfect star, the glint)
+		# a four-point star with a soft core and an optional ring (impact stars, Bjorn's glint and flare); it
+		# draws over everything, since an impact star sits inside the body it hit
 		"star":
 			return """shader_type spatial;
-render_mode unshaded, blend_add, depth_draw_never, cull_disabled, shadows_disabled;
+render_mode unshaded, blend_add, depth_draw_never, depth_test_disabled, cull_disabled, shadows_disabled;
 uniform vec4 color : source_color = vec4(1.0);
 // overall strength 0..
 uniform float power = 1.0;
@@ -109,7 +110,7 @@ void fragment() {
 		# feathers radiating from a small core, each with a bright quill down its middle, an optional ring
 		"rosette":
 			return """shader_type spatial;
-render_mode unshaded, blend_add, depth_draw_never, cull_disabled, shadows_disabled;
+render_mode unshaded, blend_add, depth_draw_never, depth_test_disabled, cull_disabled, shadows_disabled;
 uniform vec4 color : source_color = vec4(1.0);
 uniform float power = 1.0;
 // how many feathers

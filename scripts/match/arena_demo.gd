@@ -502,6 +502,11 @@ static func _anim_trigger(A: Arena, P: Hunter, D: Hunter, mv: String, t: float, 
 static func _anim_hero(A: Arena, P: Hunter, mv: String, t: float, dt: float) -> void:
 	var K: ArchKit = P.ak
 	var fire := false
+	if mv != "bul_slamshield":
+		K.res = 0.0            # no Focus or Guard tell in the strips (the Shield Slam needs its Guard)
+	# dashes go across the screen, clear of the dummy ahead (a strip used to end inside its model)
+	if mv in ["pin_roll", "pin_walk", "pin_flick", "bul_lumber", "bul_whirl", "bul_short"]:
+		P.inp["move"] = Vector2(0, 1)
 	match mv:
 		"arc_draw": fire = t > 0.4 and t < 1.7
 		"arc_loose": fire = t > 0.4 and t < 0.9
@@ -530,7 +535,6 @@ static func _anim_hero(A: Arena, P: Hunter, mv: String, t: float, dt: float) -> 
 		"pin_roll":
 			if _at(t, dt, 0.5):
 				P.dashes = P.max_dashes()
-				P.inp["aim"] = P.pos + Vector3(4, 0, 0)
 				P.do_dash()
 		"arc_super": fire = t > 0.4 and t < 1.6
 		"arc_plunge":
@@ -580,7 +584,6 @@ static func _anim_hero(A: Arena, P: Hunter, mv: String, t: float, dt: float) -> 
 		"pin_walk":
 			if _at(t, dt, 0.5):
 				P.dashes = P.max_dashes()
-				P.inp["aim"] = P.pos + Vector3(4, 0, 0)
 				P.do_dash()
 		"pin_flick", "bul_lumber":
 			if _at(t, dt, 0.5):

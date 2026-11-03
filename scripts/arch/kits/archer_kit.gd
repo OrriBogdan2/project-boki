@@ -235,16 +235,17 @@ func _high_ground() -> bool:
 		if g <= World.VOID + 1.0 or g < gy - 0.9: lower += 1
 	return lower >= 3
 
-## The Focus tell on the hunter (everyone sees it): a lens glint at the bow that brightens from 50,
-## and at 100 a bright star with a light and a thin aim line along the shot.
+## The Focus tell on the hunter (everyone sees it): a gold fletch glint at the bow that grows from 50,
+## and at 100 swells and pulses with a light and a thin aim line along the shot.
 func _tick_glint(_dt: float) -> void:
 	var f := res_frac()
 	if glint == null or not is_instance_valid(glint):
 		glint = own_node()
 		var star := MeshInstance3D.new()
 		star.name = "Star"
-		star.mesh = Models.sphere(0.16, 10)
-		star.material_override = Models.glow_mat(Color(res_col(), 1.0))
+		star.mesh = KitMeshes.quad(1.0, 1.0)
+		star.material_override = KitShaders.mat("rosette", Color("ffd84a"), true)
+		KitShaders.param(star, "leaves", 4.0)
 		star.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		glint.add_child(star)
 		var lt := OmniLight3D.new()
@@ -267,7 +268,7 @@ func _tick_glint(_dt: float) -> void:
 	var full := full_ready()
 	var star := glint.get_node("Star") as MeshInstance3D
 	var pulse := 0.5 + 0.5 * sin(m.time * 12.0)
-	star.scale = Vector3.ONE * ((1.4 + 0.5 * pulse) if full else lerpf(0.4, 0.9, (f - 0.5) * 2.0))
+	star.scale = Vector3.ONE * ((0.7 + 0.2 * pulse) if full else lerpf(0.25, 0.5, (f - 0.5) * 2.0))
 	(glint.get_node("Light") as OmniLight3D).light_energy = (1.8 + pulse) if full else 0.0
 	var line := glint.get_node("Line") as MeshInstance3D
 	line.visible = full
@@ -568,7 +569,10 @@ func cast_e() -> bool:
 	for i in 5:
 		var u := (float(i) - 2.0) / 2.0 * deg_to_rad(_arc_deg()) * 0.4
 		var dv := d.rotated(u)
-		m.spawn_shot(h, h.pos + Vector3(0, 1.4, 0), dv * maxf(4.0, radius / tell), 0.0, tell, 0.12, col_of(ed), {"lob": 3.5, "cos": true})
+		# (cosmetic: small and green so the five don't stack into one white blob at the bow; PinFx.lob draws
+		# the arrows going up)
+		var lob_v := dv * maxf(4.0, radius / tell)
+		m.spawn_shot(h, h.pos + Vector3(0, 1.4, 0), lob_v, 0.0, tell, 0.05, PinFx.GREEN, {"lob": 3.5, "cos": true})
 	fx.lob(h.pos + Vector3(0, 1.6, 0), d)
 	m.sfx("pin_hail", h.pos, -2.0)
 	net_ring(c, 1.6, col_of(ed))

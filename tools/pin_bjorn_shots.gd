@@ -402,6 +402,12 @@ func take(main_node: Node, out: String) -> void:
 	m.queue_free()
 	await main.get_tree().process_frame
 
+## Where a shot's close-up looks: an impact at the target, anything else between the hero and the lead.
+func _close_focus(stem: String, lead: float) -> Vector3:
+	if stem.ends_with("_hit") or stem.ends_with("_impact"):
+		return T.pos
+	return P.pos + Vector3(lead * 0.6, 0, 0)
+
 func _spot(start: Vector3) -> Vector3:
 	var W = m.world
 	for z in range(8, W.h - 8, 3):
@@ -683,7 +689,7 @@ func _shot(s: Array, pair: bool) -> void:
 	# the same moment again from close up (the effects run on one more frame)
 	m.cam.zoom = CLOSE_ZOOM
 	m.cam.zoom_to = CLOSE_ZOOM
-	m.cam.snap(P.pos + Vector3(lead * CLOSE_ZOOM, 0, 0))
+	m.cam.snap(_close_focus(stem, lead))
 	await main.get_tree().process_frame
 	await main.get_tree().process_frame
 	var close_file := prefix + stem + "_close.png"

@@ -832,8 +832,8 @@ func update(dt: float, s: Dictionary) -> void:
 		roll += still * 0.05         # a cocked hip at rest
 	elif arch == "bulwark":
 		yaw *= 0.5                   # the shoulders stay square, a moving wall...
-		pitch -= r1 * 0.32           # ...pitched far forward at a run, the shield shoulder leading
-		yaw += r1 * 0.3
+		pitch -= r1 * 0.32 * (1.0 - dash_k)      # ...pitched far forward at a run (a dash leans by itself),
+		yaw += r1 * 0.3 * (1.0 - dash_k)         # the shield shoulder leading
 	# dodge poses
 	if dash_k > 0.01:
 		match dash_kind:
