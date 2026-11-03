@@ -64,15 +64,39 @@ func _hook_hold() -> void:
 	ak.tap(m, P)
 	var y0 := P.pos.y
 	var drift := 0.0
+	P.inp["move"] = Vector2(1, 0)
+	ak.step(m, 0.1)
+	var a0 := P.pos
+	ak.step(m, 0.2)
+	var air_k := P.flat_dist(a0) / 0.2 / maxf(0.01, walk)
+	P.inp["move"] = Vector2.ZERO
 	while K.flying:
 		ak.step(m, ak.DT)
 		drift = maxf(drift, absf(P.pos.y - y0))
+	drift = maxf(drift, absf(P.pos.y - y0))
 	var y_end := P.pos.y
 	ak.step(m, 0.25)
 	ok(
-		"hook hold: mid-air his height holds while the hook flies, and he falls once it misses",
-		drift <= 0.05 and y_end - P.pos.y > 0.2, "drift %.3f, then fell %.2f m" % [drift, y_end - P.pos.y]
+		"hook hold: mid-air his height holds while the hook flies (a slow drift), and he falls once it misses",
+		drift <= 0.05 and y_end - P.pos.y > 0.2 and air_k >= 0.15 and air_k <= 0.25,
+		"drift %.3f, walk %.2f of his speed, then fell %.2f m" % [drift, air_k, y_end - P.pos.y]
 	)
+	# a knock during the hold still shoves him (only the height is held)
+	K.cd["rmb"] = 0.0
+	K.ch_rmb = 1.0
+	P.teleport(home + Vector3(0, 3.0, 0))
+	P.vel = Vector3.ZERO
+	P.grounded = false
+	ak.tap(m, P)
+	var k0 := P.pos
+	P.impulse(Vector2(0, 1) * 8.0 * P.mass())
+	ak.step(m, 0.2)
+	ok(
+		"hook hold: a knock during the hold still shoves him, height held",
+		K.flying and P.flat_dist(k0) > 0.6 and absf(P.pos.y - k0.y) <= 0.05,
+		"shoved %.2f m, height %+.3f" % [P.flat_dist(k0), P.pos.y - k0.y]
+	)
+	ak.step(m, 0.6)
 	# mid-air, a hook that catches: held from the throw to the end of the reel
 	P.teleport(home + Vector3(0, 1.0, 0))
 	P.vel = Vector3.ZERO
