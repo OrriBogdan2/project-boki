@@ -848,3 +848,10 @@ The owner wants a big art step up ("stylised, unique characters, toward AAA"). I
 3. AI 3D pipeline prototype: Venator plus one Boki. Our own concept sheets, then image-to-3D (owner runs Meshy/Tripo/Rodin), then auto-rig, then Blender clean-up (scripted), then glTF into Godot behind a per-hero swap. KMoves are retargeted to the skeleton; procedural rigs stay as the fallback.
 4. If it looks clearly better, roll it out hero by hero.
 No art-pipeline work before then, please.
+
+## 2026-11-03 03:25 ET: OWNER: danger scales by tier (add to the harder-maps spec, after the resets)
+The owner agreed. The Hollow Crown (beginner) stays as it is. Harder tiers add tension in the Arc Raiders style without burying the hero fights:
+- **Mid tiers:** a few roaming **apex threats**. These are huge creatures you avoid rather than fight. They hunt by **sound and sight**: sprinting, shooting and dashing are loud; sneaking and bushes are quiet; line of sight counts. Each has a readable alert state (idle, suspicious, hunting) and a way to lose it.
+- **Top tiers:** apex threats plus Boki loss, dark zones (fog of war or limited vision), and a **rare-Boki spawn** that draws apex threats and players.
+- **The top-down camera needs help:** fog or vision cones, noise pings on the map, and enemies that hear you, so sneaking stays tense.
+- This goes with the new harder-tier maps and enemies (the separate higher-tier map spec). Nothing changes on the beginner map.
