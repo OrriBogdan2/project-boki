@@ -2,13 +2,13 @@
 	"grammar": 1,
 	"id": "blaze_mantle",
 	"name": "Venom Mantle",
-	"flavor": "Vespyx fuses onto you as venomous armor for 7s: 30% more damage, and your shots poison and burst.",
+	"flavor": "Vespyx fuses onto you as venomous armor for 7s: 20% more damage, and your shots poison and burst.",
 	"theme": "venom",
 	"duration": 7,
 	"passives": [
 		{
 			"stat": "damage",
-			"amount": 0.3
+			"amount": 0.2
 		}
 	],
 	"on_shot": {

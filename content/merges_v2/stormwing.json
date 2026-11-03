@@ -2,7 +2,7 @@
 	"grammar": 1,
 	"id": "stormwing",
 	"name": "Stormwing",
-	"flavor": "Zephyrak wraps you in a living storm for 10s. Chaining bolts, a hover over any gap, a double storm blink, and R calls a thunderhead down on everyone near.",
+	"flavor": "Zephyrak wraps you in a living storm for 10s. Chaining bolts, a hover over any gap, a double storm blink, and Merge again calls a thunderhead down on everyone near.",
 	"theme": "tempest",
 	"duration": 10,
 	"passives": []
