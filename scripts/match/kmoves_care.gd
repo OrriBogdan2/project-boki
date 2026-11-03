@@ -151,7 +151,7 @@ const MOVES := {
 					"fl": Vector3(-0.3, 0.0, 0.25), "hw": 0.9, "lw": 0.6, "legs": [0.4, -0.6, -0.3, -0.2]}],
 		[0.26, {"y": 0.4, "p": -0.2, "fr": Vector3(-0.02, 0.3, -0.5), "rw": 0.8}],
 		[0.5, {}]]},
-	# Relay Step, the ground hop (0.18 s of dash): a quick squash, then a skip off one foot with the lead knee
+	# Relay Step, the ground hop (0.2 s of dash): a quick squash, then a skip off one foot with the lead knee
 	# up and both arms flung up behind like little wings, a tucked apex, a squash on touchdown and a happy
 	# bounce with a wiggle of the shoulders (0.24 s in all)
 	"mm_skip": {"keys": [
@@ -177,7 +177,7 @@ const MOVES := {
 					"sq": -0.12, "lift": 0.06, "y": 0.15, "lw": 0.8, "legs": [0.4, -0.7, 0.35, -0.6],
 					"fl": Vector3(-0.3, 0.3, -0.1), "hw": 0.7, "fr": Vector3(0.3, 0.3, -0.1), "rw": 0.7}],
 		[0.24, {}]]},
-	# the air dash, her long float (0.92 s of dash): tucked into a ball for one forward somersault, then
+	# the air dash, her long float (0.95 s of glide, Elluna's): tucked into a ball for one forward somersault, then
 	# unfurled into a seated float, leaning back with the knees tucked up and both arms up in a happy V like
 	# a drifting seed, a little sway, the legs reaching down, and a soft squash on touchdown (fx stays a full
 	# turn: no unwind)
@@ -206,12 +206,12 @@ const MOVES := {
 					"legs": [1.5, -2.0, 1.4, -1.9], "fl": Vector3(-0.5, 0.55, 0.0), "hw": 1.0,
 					"fr": Vector3(0.5, 0.55, 0.0), "rw": 1.0}],
 		[
-				0.8,
+				0.85,
 				{
 					"fx": -6.283, "sq": -0.05, "lw": 1.0, "legs": [0.4, -0.7, 0.3, -0.6],
 					"fl": Vector3(-0.45, 0.2, -0.05), "hw": 0.9, "fr": Vector3(0.45, 0.2, -0.05), "rw": 0.9}],
-		[0.88, {"fx": -6.283, "sq": 0.3, "lift": -0.08, "lw": 1.0, "legs": [0.9, -1.4, 0.8, -1.3]}],
-		[0.98, {"fx": -6.283}]]},
+		[0.95, {"fx": -6.283, "sq": 0.3, "lift": -0.08, "lw": 1.0, "legs": [0.9, -1.4, 0.8, -1.3]}],
+		[1.05, {"fx": -6.283}]]},
 	# Bearer: scooping a downed teammate up onto her back: a deep squat, then a heave with a lean back
 	"mm_pickup": {"keys": [
 		[0.0, {}],

@@ -558,8 +558,10 @@ func tender() -> void:
 	await _dashes_cute()
 	await _no_blasts()
 
-## Owner items 24 and 35: the air dash goes about 3x the ground hop (after the dash feel), each plays its own
-## move, sized to its dash, and no other kit plays those moves.
+## Elluna's dashes, copied (numbers in docs/heroes/tender.md): the ground hop is the source's 2 bh
+## in 0.2 s (after the dash feel), the air glide its measured 13.3 m over 0.95 s peaking about 18 m/s, 3-4x the
+## hop's distance and about 5x its time; each plays its own move (item 35), sized to its dash, and no other kit
+## plays those moves.
 func _dashes_cute() -> void:
 	var r: Array = sc.setup("tender", 20.0)
 	var m: Match = r[0]
@@ -574,8 +576,13 @@ func _dashes_cute() -> void:
 	P.inp["move"] = Vector2.ZERO
 	var ground_t := P.roll_t + 1.0 / 60.0
 	var ground_move := K.anim_id
-	step(m, 0.5)
+	step(m, P.roll_t)
 	var ground_d := P.pos.x - p0.x
+	ok(
+			"mm dashes: the ground hop is Elluna's: 2 bh (3.6 m) in 0.2 s after the dash feel",
+			absf(ground_d - 3.6) < 0.25 and absf(ground_t - 0.2) < 0.02,
+			"%.2f m in %.2f s" % [ground_d, ground_t])
+	step(m, 0.5)
 	P.teleport(P.pos + Vector3(0, 3.0, 0))
 	var a0 := P.pos
 	P.ex_cd = 0.0
@@ -584,12 +591,19 @@ func _dashes_cute() -> void:
 	P.inp["move"] = Vector2.ZERO
 	var air_t := P.roll_t
 	var air_move := K.anim_id
-	step(m, air_t + 0.05)
+	var peak := {"v": 0.0}
+	step(m, air_t + 0.05, func(): peak["v"] = maxf(float(peak["v"]), P.roll_speed))
 	var air_d := P.pos.x - a0.x
+	ok(
+			"mm dashes: the air glide is Elluna's: 13.3 m over 0.95 s, peaking 17-22 m/s",
+			absf(air_d - 13.3) < 0.7 and absf(air_t - 0.95) < 0.03 and float(peak["v"]) >= 17.0
+				and float(peak["v"]) <= 22.0,
+			"%.2f m in %.2f s, peak %.1f m/s" % [air_d, air_t, float(peak["v"])])
 	var ratio := air_d / maxf(0.01, ground_d)
 	ok(
-			"mm dashes: the air dash goes 2.7-3.3x the ground hop (after the dash feel)", ratio >= 2.7 and ratio <= 3.3,
-			"ground %.2f m, air %.2f m, x%.2f" % [ground_d, air_d, ratio])
+			"mm dashes: the glide goes 3-4x the hop's distance and about 5x its time (source)",
+			ratio >= 3.0 and ratio <= 4.0 and air_t / ground_t >= 4.0 and air_t / ground_t <= 6.0,
+			"x%.2f distance, x%.2f time" % [ratio, air_t / ground_t])
 	ok(
 			"mm dashes: each plays its own move, never the shared roll",
 			ground_move == "mm_skip" and air_move == "mm_float" and K.dodge_anim() == "kit",

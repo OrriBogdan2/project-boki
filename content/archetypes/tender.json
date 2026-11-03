@@ -56,15 +56,15 @@
 		"col": "#ffe2a8",
 		"cd": 7.5,
 		"dist": 4.2,
-		"time": 0.16,
+		"time": 0.174,
 		"invuln": 0.12,
-		"desc": "A quick skip about 3.6m where you move; in the air, a floaty dash about three times as far.",
+		"desc": "A quick skip about 3.6m where you move; in the air, a long floaty glide of about 13m.",
 		"air": {
-			"dist": 10.7,
-			"time": 0.8,
+			"dist": 13.3,
+			"time": 0.95,
 			"ramp": 0.1,
 			"burst": 0.4,
-			"out_k": 0.45,
+			"out_k": 0.25,
 			"float_fall": 1.2
 		}
 	},

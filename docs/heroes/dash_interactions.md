@@ -234,7 +234,7 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 | Linwick | hold RMB through a ground dash |  | the hold carries through and lets go there |
 | Linwick | hold RMB through an air dash |  | the hold carries through and lets go there |
 | Linwick | hold RMB through a jump |  | the hold carries through and lets go there |
-| Moosh Moosh | ground dash -> LMB | Data: Lunar Dash is a plain short dash. Footage: the ground dash is never shown cleanly. Ours: the ember goes the step the 0.18s skip ends. | buffered to the dash's end |
+| Moosh Moosh | ground dash -> LMB | Data: Lunar Dash is a plain short dash. Footage: the ground dash is never shown cleanly. Ours: the ember goes the step the 0.2s skip ends (held to the dash end, the default: nothing in the source shows otherwise). | buffered to the dash's end |
 | Moosh Moosh | ground dash -> RMB | Data: Darkside Binding has no dash rule. Footage: not cast from a dash. Ours: the seed is thrown from the skip (its own small hop and push). | fires mid-dash |
 | Moosh Moosh | ground dash -> E | Data: Moonlight Blessing is a zone on herself that follows her. Footage: not cast from a dash. Ours: the light goes up on her mid-skip and moves with her. | fires mid-dash |
 | Moosh Moosh | ground dash -> ult (X) | Data: the channel is cancelled only by stun, knock or range, not by moving. Footage (ult f41-f72): she walks while it runs. Ours: the tether starts mid-skip. | fires mid-dash |
