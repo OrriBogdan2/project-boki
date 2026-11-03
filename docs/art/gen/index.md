@@ -107,3 +107,26 @@ Portrait:
 
 Turnaround:
 > Character turnaround reference sheet for a 3D modeller: the same character shown three times side by side at the same scale on one sheet, left to right: FRONT view, SIDE view (profile), BACK view. Neutral relaxed A-pose standing straight, arms held slightly away from the body, full body head to toe in every view, all three figures exactly the same height and aligned on one ground line. Flat even studio lighting, no dramatic shadows, plain flat light grey background, no scenery. Any held weapon hangs down beside the leg in the same hand in every view and is visible in all three views. He floats with the same visible gap above the ground line in every view, the smoke tail curling below instead of legs, the lantern hanging from the threads of the same hand in every view. No text, no labels, no logos.
+
+### Pin (archer), Dark Archer
+Owner direction: half-wraith (smoky lower body, no shadow, keeps her red); lore: died guarding the thief and kept hunting.
+
+Warden block:
+> Redesign the character from the first two reference images at full production quality, keeping her design (peaked hood with a red lining, red face wrap so only her eyes show, one-shoulder cloak with ragged knife-point tips, black recurve longbow taller than she is with red grip wraps, back quiver of red-fletched arrows, fitted dark leather), and make her a half-wraith, more striking and epic than the reference: Pin, the Dark Archer, an assassin who died guarding the thief on the night the Wyrm woke and kept hunting anyway. About seven and a half heads tall, lean and long-limbed, an athletic archer's build with sharp shoulders. Her body is solid down to the knees; below the knees her legs fade into drifting dark grey smoke and tattered shadow, so she glides a little above the ground, and she casts no shadow at all. Pale ash-grey skin around the eyes, eyes glowing a cold heart-red, a single lock of dark violet hair escaping the hood. The red is her signature: hood lining, face wrap, waist sash, grip wraps and fletching are a deep heart-red; everything else is night-black, charcoal and dark steel. Wisps of smoke curl off the cloak tips. No body or head markings.
+
+| File | Size | Studio image | Notes |
+|---|---|---|---|
+| `wardens/pin_splash.png` | 2752x1536 | aecb7173 | |
+| `wardens/pin_portrait.png` | 2048x2048 | 91ab8785 | |
+| `wardens/pin_turnaround.png` | 3168x1344 | 413e8352 | |
+
+Splash is take 2: take 1 (f4f16500) read as an ordinary archer with boots, so the smoke legs were spelled out (NO feet, smoke from the knees). The literal 'target' became a small bullseye on the tower; harmless, can be painted out.
+
+Splash:
+> Splash art, 16:9 widescreen: a moonlit ruined bell tower on a floating isle above a sea of clouds, broken arches and a huge cracked bell; Pin floats in mid-air beside the broken tower at full draw, the black longbow bent hard with its string pulled straight back to her cheek, a red-fletched arrow trailing red smoke. She has NO feet and no boots: from the knees down her legs clearly dissolve into long streaming trails of dark grey smoke that drift behind her in the wind, and nothing touches the ground; she casts no shadow. Her ragged cloak flares, eyes burning red over the red face wrap, a target far below in the mist, dynamic diagonal composition, full figure. Cold silver moonlight with deep blue shadows and red accents. Palette: night cloak black, heart red, oiled leather, dark steel, bone white nocks, ash-grey skin, smoke grey. No text, no logos.
+
+Portrait:
+> Portrait bust, square 1:1, for a game hero picker: head and shoulders, three-quarter view, the peaked red-lined hood and red face wrap, only her glowing red eyes and the bridge of her pale ash-grey face showing, one dark violet lock escaping the hood, the top limb of the black longbow and red fletching over her shoulder, smoke wisps drifting off the cloak. Simple dark slate gradient background with a faint red glow, strong cool rim light. Palette: night black, heart red, dark steel, ash grey. No text, no logos.
+
+Turnaround:
+> Character turnaround reference sheet for a 3D modeller: the same character shown three times side by side at the same scale on one sheet, left to right: FRONT view, SIDE view (profile), BACK view. Neutral relaxed A-pose standing straight, arms held slightly away from the body, full body head to toe in every view, all three figures exactly the same height and aligned on one ground line. Flat even studio lighting, no dramatic shadows, plain flat light grey background, no scenery. Any held weapon hangs down beside the leg in the same hand in every view and is visible in all three views. Her legs end below the knee in the same drifting smoke in every view and she hovers slightly above the ground line with no shadow; the bow is held in the same hand in every view and the quiver sits on her back. No text, no labels, no logos.
