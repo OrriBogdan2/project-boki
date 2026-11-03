@@ -254,6 +254,14 @@ func use_e() -> void:
 	else:
 		h._ab_feedback("k1", "deny")
 
+## X: the hero's own ultimate. No hero has one yet; a kit that does overrides both. Returns true when it went off.
+func cast_ult() -> bool:
+	return false
+
+## Does this hero have an ultimate on X (the HUD shows the slot only then)?
+func has_ult() -> bool:
+	return false
+
 ## R: the archetype's ultimate. With the bond meter full the cast is Bonded (§5 option C): the ult's
 ## own tell, then 0.2s later the kin merges (its on_start), one T5 moment for the caster.
 func use_r() -> void:
@@ -427,7 +435,26 @@ func spend_dash(use_ex: bool) -> bool:
 
 ## A travelling dash of a given length and time (the Effects dash, so perfect dodges, riders and
 ## the dash buffer all work as before).
+## The way a plain dash goes: where you're moving (WASD), or the cursor when you stand still or turn on
+## Settings > "Dash toward the cursor". Aimed movement (a grapple, a blink to a spot) uses the cursor instead.
+func dash_dir() -> Vector2:
+	var move: Vector2 = h.inp.get("move", Vector2.ZERO)
+	if move.length() < 0.1 or (h.is_local() and Settings.get_v("dash_to_cursor")):
+		return h.aim_dir()
+	return move.normalized()
+
+static var _dash_feel := {}
+
+## The global dash feel for this hunter (content/rules/dash_feel.json): {dist, time} multipliers.
+func dash_feel() -> Dictionary:
+	if _dash_feel.is_empty():
+		_dash_feel = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/dash_feel.json"))
+	return _dash_feel.get(id, _dash_feel["default"])
+
 func travel(dist: float, t: float, extra := {}, use_ex := false) -> void:
+	var feel := dash_feel()
+	dist *= float(feel["dist"])
+	t *= float(feel["time"])
 	var e := {"type": "dash", "speed": dist / maxf(0.02, t), "time": t, "invuln": float(extra.get("invuln", 0.0))}
 	for k in extra:
 		e[k] = extra[k]

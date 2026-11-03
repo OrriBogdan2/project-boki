@@ -68,7 +68,7 @@ heartbeat and a warning near the end. There's room to recover:
 - **Stagger.** Big monsters open short purple-ring windows while winding up a slam. Hit one with an
   ability (not a plain shot) in that window: a big hit, a long stun, extra damage the whole time, and
   your Boki's abilities come straight back.
-- **Truces.** Hold T for the emote wheel; the white flag offers a truce to the nearest rival squad. A
+- **Truces.** Hold Y for the emote wheel; the white flag offers a truce to the nearest rival squad. A
   truce stops both squads' bots fighting and lets you share an uplink yard or a skiff. Attacking a
   partner breaks it, is announced, and marks you on everyone's map for a while.
 - **Basing (B).** In a squad, channel 3 seconds to teleport to a teammate. Moving, attacking or any

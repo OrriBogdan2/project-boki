@@ -54,7 +54,9 @@ The Boki command system (docs/decisions/0001, 0002): G sic / call back / wheel, 
 | Setting | Value |
 |---|---|
 | class_ults | False |
-| class_ults_doc | false: R is the Merge for every class. true: R runs the class's own ultimate again (ArchKit.use_r), kept for the hero-port work to fold into kits. |
+| class_ults_doc | false: the Merge key is the Merge for every class. true: it runs the class's own ultimate again (ArchKit.use_r), kept for the hero-port work to fold into kits. |
+| bond_from_ult | {"hit": 0.6, "knock": 0.7, "kill": 0.8} |
+| bond_from_ult_doc | Share of the bond bar a hero's own ultimate pays (KinBond.from_ult): the best event of one cast counts (a hit, a knock, a kill), never added per target. Fighting still fills the bar, so Merge is never locked behind the ult. |
 | g_hold_s | 0.35 |
 | throw_range | 9 |
 | throw_range_dive | 11 |
@@ -71,7 +73,7 @@ The Boki command system (docs/decisions/0001, 0002): G sic / call back / wheel, 
 
 ## Bond meter (`content/rules/bond.json`)
 
-How the bond meter fills (it gates R, the Merge). All values are fractions of a full meter. Your Boki's hits mark the foe for mark_s seconds, and your own hits on a marked foe fill the meter marked_factor times faster. (Every point of damage you or your Boki deal also adds 1/320, see Match.on_damage.)
+How the bond meter fills (it gates the Merge). All values are fractions of a full meter. Your Boki's hits mark the foe for mark_s seconds, and your own hits on a marked foe fill the meter marked_factor times faster. (Every point of damage you or your Boki deal also adds 1/320, see Match.on_damage.)
 
 | Setting | Value |
 |---|---|
@@ -119,6 +121,16 @@ Capture by scan (docs/decisions/0002). A wild Boki that is knocked out (dazed) c
 | crate | 0.04 |
 | barrel | 0.02 |
 | train_crate | 0.04 |
+
+## dash_feel (`content/rules/dash_feel.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| doc | Global feel for every hunter's dash (Shift), applied on top of each kit's own numbers in content/archetypes. dist: multiplier on distance. time: multiplier on duration (speed = dist / time). Owner, Nov 2: dashes were too fast and too far in general, Vireo's should go further: its lane is drawn from its own numbers, so its distance is raised in content/archetypes/mage.json (4-7m to 5-8.5m) and only its time is scaled here. |
+| default | {"dist": 0.85, "time": 1.15} |
+| mage | {"dist": 1.0, "time": 1.15} |
 
 ## farm_build (`content/rules/farm_build.json`)
 
@@ -212,9 +224,11 @@ How a merge looks and plays (docs/decisions/0003). Forms with a kit live in cont
 | xform_contact_s | 0.45 |
 | ult_lock_s | 1.5 |
 | warn_s | 3 |
-| rest_s | 12 |
-| window_note | warn_s: the last seconds of the window flash, tick and pulse; rest_s: how long the Boki is drained on you after the ultimate (no C, no orders, carried bonuses on) |
-| xform_note | seconds: the transformation lasts 0.7 and you are invulnerable for all of it; the Boki lands in you at 0.45 (flash, shockwave, the silhouette pops in); R again unlocks 1.5s after the form appears |
+| release_rest_s | 6 |
+| afterglow | {"secs": 3.0, "move_speed": 0.15, "shield_frac": 0.08} |
+| damage_cap | 0.2 |
+| window_note | warn_s: the last seconds of the window flash, tick and pulse; release_rest_s: how long the Boki rests beside you after you release with the ultimate (no C, no orders, carried bonuses on); a merge that times out has no rest. afterglow: after a release the hunter gets secs seconds of move_speed (x) and a shield of shield_frac of max health. damage_cap: the most the stat-based damage bonus can total while merged (x); gear and perks you already had are never cut. |
+| xform_note | seconds: the transformation lasts 0.7 and you are invulnerable for all of it; the Boki lands in you at 0.45 (flash, shockwave, the silhouette pops in); the Merge key again unlocks 1.5s after the form appears |
 | fallback | {"haste": 0.12, "size": 1.0, "ult_s": 0.5, "burst": {"radius": 4.0, "dmg": 24, "kb": 8.0}, "note": "haste = faster class-ability cooldowns (x); burst = the basic ultimate of a Boki without a form: m radius, hp damage, knockback; ult_s = its wind-up in seconds"} |
 | surge | {"name": "Surge", "duration": 3.0, "color": "#e8f4ff", "passives": [["damage", 0.1], ["move_speed", 0.1]], "haste": 0.12, "flavor": "No Boki at your side: a weak burst of resolve. 3s of 10% more damage, speed and faster abilities."} |
 | types | {"venom": {"style": "nova", "parts": ["fangs", "tail", "crest"], "word": "VENOM", "rider": {"burn": 5.0, "burn_for": 3.0}, "dash": {"burst": 8.0, "radius": 2.0, "burn": 4.0, "burn_for": 3.0}}, "spore": {"style": "bloom", "parts": ["crest", "plates", "halo"], "word": "SPORE", "rider": {"slow_k": 0.25, "slow_s": 1.6}, "dash": {"burst": 6.0, "radius": 2.4, "slow_k": 0.3, "slow_s": 1.4}}, "gravity": {"style": "quake", "parts": ["plates", "spikes", "halo"], "word": "GRAVITY", "rider": {"kb": -3.5}, "dash": {"burst": 10.0, "radius": 2.2, "kb": -4.0}}, "prism": {"style": "prism", "parts": ["crest", "halo", "wings"], "word": "PRISM", "rider": {"chain": 0.35}, "dash": {"burst": 8.0, "radius": 2.0, "chain": 0.35}}, "lunar": {"style": "spiral", "parts": ["halo", "wings", "crest"], "word": "LUNAR", "rider": {"leech": 0.06}, "dash": {"burst": 6.0, "radius": 2.2, "leech": 0.06}}, "echo": {"style": "storm", "parts": ["antennae", "crest", "wings"], "word": "ECHO", "rider": {"chain": 0.3}, "dash": {"burst": 8.0, "radius": 2.0, "chain": 0.3}}, "ember": {"style": "pillar", "parts": ["horns", "crest", "tail"], "word": "EMBER", "rider": {"burn": 7.0, "burn_for": 2.5}, "dash": {"burst": 10.0, "radius": 2.0, "burn": 6.0, "burn_for": 2.5}}, "frost": {"style": "bloom", "parts": ["spikes", "crest", "halo"], "word": "FROST", "rider": {"slow_k": 0.35, "slow_s": 1.8}, "dash": {"burst": 6.0, "radius": 2.4, "slow_k": 0.4, "slow_s": 1.6}}, "storm": {"style": "storm", "parts": ["wings", "crest", "antennae"], "word": "STORM", "rider": {"chain": 0.4}, "dash": {"burst": 9.0, "radius": 2.2, "chain": 0.4}}, "stone": {"style": "quake", "parts": ["plates", "horns", "spikes"], "word": "STONE", "rider": {"kb": 4.5}, "dash": {"burst": 12.0, "radius": 2.0, "kb": 5.0}}, "bloom": {"style": "bloom", "parts": ["crest", "wings", "halo"], "word": "BLOOM", "rider": {"leech": 0.07}, "dash": {"burst": 5.0, "radius": 2.4, "leech": 0.07}}, "shadow": {"style": "spiral", "parts": ["horns", "wings", "tail"], "word": "SHADOW", "rider": {"slow_k": 0.2, "slow_s": 1.2, "leech": 0.04}, "dash": {"burst": 8.0, "radius": 2.0, "slow_k": 0.25, "slow_s": 1.2}}, "titan": {"style": "quake", "parts": ["horns", "plates", "spikes"], "word": "TITAN", "rider": {"kb": 5.5}, "dash": {"burst": 14.0, "radius": 2.2, "kb": 6.0}}, "swarm": {"style": "storm", "parts": ["antennae", "wings", "spikes"], "word": "SWARM", "rider": {"burn": 3.5, "burn_for": 2.0, "chain": 0.25}, "dash": {"burst": 6.0, "radius": 2.6, "burn": 3.0, "burn_for": 2.0}}, "tempest": {"style": "storm", "parts": ["wings", "crest", "halo"], "word": "TEMPEST", "rider": {"chain": 0.45}, "dash": {"burst": 9.0, "radius": 2.2, "chain": 0.45}}, "none": {"style": "nova", "parts": ["crest", "halo", "plates"], "word": "MERGE", "rider": {"kb": 2.0}, "dash": {"burst": 6.0, "radius": 2.0, "kb": 2.0}}} |

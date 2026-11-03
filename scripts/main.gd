@@ -2015,7 +2015,7 @@ func _grammar_runtime_check() -> void:
 	var ok_cast := KinMerge.cast(P)
 	var dur := float(P.merge_st.get("T", 0.0))
 	var ms := KinMerge.def_for(k)
-	_grt("merge casts: fused, timed, passives on", ok_cast and k.state == "fused" and is_equal_approx(dur, ms.duration) and P.owner_stat("damage") > 0.29,
+	_grt("merge casts: fused, timed, passives on", ok_cast and k.state == "fused" and is_equal_approx(dur, ms.duration) and P.owner_stat("damage") > 0.19,
 		"%.1fs, damage +%.2f" % [dur, P.owner_stat("damage")])
 	_ac_run(m, dur + float(MergeForm.data()["xform_s"]) + 0.3)       # (the transformation comes first, then the timer; no tiers: the length is fixed)
 	_grt("merge ends on its timer, then cooldown", not KinMerge.active(P) and P.merge_cd > 0.0 and k.state == "shoulder" and not KinMerge.can_cast(P), "cd %.1f" % P.merge_cd)
