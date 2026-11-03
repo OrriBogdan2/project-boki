@@ -511,3 +511,12 @@ Turnaround:
 | `wardens/claire_turnaround.png` | bc61b7ff | Rework-2 face (young, warm), short-form prompt: "Turnaround reference sheet: the same character three times side by side at the same scale, FRONT, SIDE, BACK, neutral A-pose, full body, one ground line, flat even studio light, plain light grey background. Ice fan closed in the same hand in every view, skates on, ice patches only on shoulders and forearms, ponytail visible in side and back views. No text, no labels, no logos." |
 
 Studio note (owner): Anthum flagged "prompt too long" on some runs, and long 16:9/21:9 prompts stalled at "Finalizing details". Keep prompts under about 2,500 characters; a short style prefix ("Premium stylised fantasy hero art, hand-painted 3D look, rich painted textures, soft rim light, polished game-studio quality. Match the art style and rendering of the third reference image exactly, copying nothing else from it.") works as well as the long style line plus anchor line.
+
+### Vex v2 (owner: higher quality to match the others; a big SMG, not a sniper), 2026-11-03
+Back to the full style line + style-anchor line (the short prefix looked lower quality), with a compact Warden block (~2,200 characters total, under the studio's limit). Weapon: "a BIG, chunky, heavy SUBMACHINE GUN, almost assault-rifle sized (thick shrouded barrel, vertical foregrip, long curved magazine, folding stock), gunmetal with glowing orange heat vents; NOT a rifle, NOT a sniper."
+
+| File | Studio image | Notes |
+|---|---|---|
+| `wardens/vex_splash.png` | 73685a15 | Striding and firing from the hip in the chapel. Generated just before "big" was added, so the SMG is mid-sized; the portrait and turnaround show the big one. Take bc6e8c57 (big-SMG wording) came out with a smaller gun and drifted off her face, so it's not kept. |
+| `wardens/vex_portrait.png` | 86fc91ff | Big SMG held up beside her face. |
+| `wardens/vex_turnaround.png` | b0984b60 | Big SMG in the human hand in every view. |
