@@ -48,6 +48,7 @@ var shoved := {}               # foe id -> {foe, dir, left}: foes sliding back o
 var pushed_at := {}            # foe id -> when the aegis last pushed it (one push per "push_gap")
 var pushes := 0                # (checks) foes the raised aegis has pushed back
 var dash_after_plant := false  # Shift came in while planted for Faultline: the dash goes when the plant ends
+var glove_cd_seen := [0.0, 0.0] # each glove slot's cooldown last step: a jump means a glove just went off
 ## s after a slam or a spin hit before he can open the glider (wiki: wind-down frames keep the momentum)
 const WINDDOWN := 0.3
 
@@ -148,6 +149,7 @@ func _tick(dt: float) -> void:
 		if down_t >= _shield_stat("wait") and lock_t <= 0.0:
 			shield_hp = minf(shield_max(), shield_hp + _shield_stat("regen") * dt)
 	_tick_shoved(dt)
+	_tick_glove()
 	_tick_mace(dt)
 	ult.tick(dt)
 	if dash_after_plant and not ult.planted():
@@ -190,6 +192,15 @@ func _shield_push() -> void:
 	fx.push_hint(wall, n, push, flash)
 	if flash:
 		m.sfx("bjorn_bash", h.pos, -5.0, 1.4)
+
+## A Q glove going off is another ability starting: it ends a Crushing Blow being wound up.
+func _tick_glove() -> void:
+	var used := false
+	for gi in 2:
+		used = used or float(h.gear_cd[gi]) > float(glove_cd_seen[gi]) + 0.001
+		glove_cd_seen[gi] = float(h.gear_cd[gi])
+	if used and lmb_t >= 0.0:
+		cancel_hold()
 
 ## Slides the pushed foes back (a wall behind them stops the slide).
 func _tick_shoved(dt: float) -> void:
@@ -824,9 +835,10 @@ func _mend_burst() -> void:
 			if o == h and not wall.is_empty():
 				shield_hp = minf(shield_max(), shield_hp + float(ed["shield"]))
 				if m.verbs.walls.has(wall): wall["max_hp"] = shield_max(); wall["hp"] = minf(shield_max(), float(wall["hp"]) + float(ed["shield"]))
-	# the kin's typing rides the burst (a cleanse, a shield, a slow on foes...)
-	var stg := stage("e", {"delivery": {"type": "burst", "origin": "aim", "radius": r}, "effects": []})
-	run(stg, cx("e", "mending_ground", at, {"no_floor": true}))
+	# the kin's typing rides the burst (a cleanse, a shield, a slow on foes...); with no kin it has nothing to carry
+	if not infusion().is_empty():
+		var stg := stage("e", {"delivery": {"type": "burst", "origin": "aim", "radius": r}, "effects": []})
+		run(stg, cx("e", "mending_ground", at, {"no_floor": true}))
 	fx.purify_burst(at, r)
 	m.fx.ring(at, r, BjornFx.GREEN, 0.45)
 	m.fx.burst(at + Vector3(0, 0.3, 0), BjornFx.GREEN, 24, 4.0, 0.8, -4.0, 1.2, Vector3.UP, 25.0)

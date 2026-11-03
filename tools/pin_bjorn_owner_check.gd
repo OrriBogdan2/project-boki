@@ -406,12 +406,13 @@ func _bjorn_hold(m: Match, P: Hunter, T: Hunter, K: BulwarkKit, home: Vector3) -
 	m.step(DT)
 	step(m, 0.5, aim)
 	ok("bjorn hold: letting go and pressing again starts a fresh hold", K.lmb_t > 0.2, "lmb_t %.2f" % K.lmb_t)
-	# a glide, a dash, a knock, another ability each end it too
+	# a glide, a dash, a knock, another ability (E or a Q glove) each end it too
 	var cases := {
 		"glide": func(): P.gliding = true,
 		"dash": func(): P.do_dash(),
 		"knock": func(): P.impulse(Vector2(40.0, 0.0)),
 		"ability": cast_e_at.bind(P, K, home),
+		"a Q glove": _glove_q.bind(P),
 	}
 	for key in cases:
 		reset.call()
@@ -438,6 +439,12 @@ func _bjorn_hold(m: Match, P: Hunter, T: Hunter, K: BulwarkKit, home: Vector3) -
 	var knock := Vector2(T.pos.x - t0.x, T.pos.z - t0.z).dot(Vector2(1, 0))
 	ok("bjorn hold: the swing moves him forward at least 1.5 m", lunge >= 1.5, "lunge %.2f" % lunge)
 	ok("bjorn hold: the swing knocks the foe back along it, at least 2 m", knock >= 2.0, "knock %.2f" % knock)
+
+## Presses Q with a ready barrier glove on it.
+func _glove_q(P: Hunter) -> void:
+	P.gear[0] = {"id": "barrier", "rar": 1}
+	P.gear_cd[0] = 0.0
+	P.inp["gear1"] = true
 
 ## #29: the Faultline's trail keeps drawing over the abyss, at his height.
 func _bjorn_abyss() -> void:
