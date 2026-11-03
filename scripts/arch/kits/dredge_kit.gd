@@ -15,8 +15,8 @@ extends ArchKit
 ##   stun. In the air you smash straight down, the anchor lands with you, a ring at the landing, and the
 ##   height adds damage. Rank 3: double damage on a foe over the abyss and a longer stun. Just after it the
 ##   barge turns badly.
-## - Dash, Barge: a shoulder barge toward the cursor that shoves (no damage), with a burst where it sets off;
-##   further in the air. Rank 3: it resets the gun's bloom.
+## - Dash, Barge: a monster's low lunge toward the cursor, clawing the ground and hauling himself along, that
+##   shoves (no damage); a pounce in the air, further. Rank 3: it resets the gun's bloom.
 ## - X, Brass Broadside (level 6): a 1.1s charge at a slow walk behind a growing fan, then two waves of slugs with
 ##   Anti-Heal (DredgeBlast).
 
@@ -689,12 +689,12 @@ func on_dash(use_ex: bool) -> bool:
 		var shove := {"invuln": 0.06, "shove": true, "shove_kb": float(dd["hit_kb"]), "trail": "", "dir": dir}
 		travel(float(dd["dist"]), float(dd["time"]), shove)
 		st["last_dash"] = "barge"
-		play("dr_barge")
+		play("dr_lunge")
 		h.glide_cd = maxf(h.glide_cd, h.roll_t + 0.35)
 		m.sfx("dr_barge", h.pos, -2.0, 1.0)
 	if rank("dash") >= 3:
 		h.wbloom = 0.0                # rank 3: a dash resets the gun's bloom
-	_barge_burst(dir)
+	_clawed_turf(dir)
 	barge_t = h.roll_t
 	stop_t = h.roll_t + 0.02
 	next_barge = m.time + h.roll_t + float(dd["gap"])
@@ -709,7 +709,7 @@ func _air_barge(dd: Dictionary, dir: Vector2) -> void:
 	travel(air_dist, air_t, {"invuln": 0.08, "trail": "", "dir": dir}, true)
 	h.roll_t = air_t
 	h.roll_speed = air_dist / air_t
-	play("dr_hop")
+	play("dr_pounce")
 	m.sfx("dr_hop", h.pos, -3.0, 1.0)
 
 ## The barge's end: he arrives planted (the class carry would slide a heavy on after each quick shove).
@@ -733,12 +733,13 @@ func _barge_trail(dt: float) -> void:
 
 func own_dash_trail() -> bool: return true
 
-## A red spiky burst where the barge sets off, and an ember scorch left there for a second (sheet 0188).
-func _barge_burst(dir: Vector2) -> void:
-	var at := h.pos
-	fx.sunburst(at + Vector3(0, 0.9, 0), 1.9, Color("ff3a2a"), Color("ffb060"), 0.25, true)
-	fx.scorch(ground(at), 0.9, 1.0, Color("ff8a3a"), Color("3a2018"))
-	m.fx.burst(at + Vector3(0, 0.6, 0), Color("ff6a3a"), 12, 4.0, 0.3, 4.0, 1.0, Vector3(-dir.x, 0.3, -dir.y), 50.0)
+## Clods of turf his hands tear up as he hauls himself off, thrown back behind him (no burst: a dash never
+## explodes).
+func _clawed_turf(dir: Vector2) -> void:
+	if not h.grounded:
+		return
+	var at := h.pos + Vector3(dir.x * 0.6, 0.15, dir.y * 0.6)
+	m.fx.burst(at, Color("6a5236"), 10, 4.0, 0.35, 12.0, 1.0, Vector3(-dir.x, 0.5, -dir.y), 35.0)
 
 # ------------------------------------------------------------------ X: Brass Broadside
 ## Only from a free stance: not mid-reel, mid-Anchor or mid-dive.

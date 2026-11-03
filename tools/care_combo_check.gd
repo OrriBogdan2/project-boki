@@ -95,6 +95,20 @@ func _skate_only() -> void:
 		if P.roll_t > 0.0:
 			kinds[P.move_kind] = true
 		step(m, 1.0 / 60.0)
+	var others := {}
+	var viewer: Dictionary = Content.rules("hunter_viewer")["moves"]
+	for hero in viewer:
+		if hero != "rimewright":
+			for mv in (viewer[hero] as Dictionary).get("dash", []):
+				others[mv] = hero
+	var dd: Dictionary = K.dash_def()
+	ok(
+			"tm Shift: her dash moves are her own skate (push-off, stride), no other hero's, fitting the skate",
+			not others.has("tm_skate_go") and not others.has("tm_skate")
+				and KMovesCare.length("tm_skate_go") <= float(dd["min_t"])
+				and KMovesCare.length("tm_skate") <= float(dd["max_t"]),
+			"push-off %.2f s (shortest skate %.2f), stride %.2f s" % [
+				KMovesCare.length("tm_skate_go"), float(dd["min_t"]), KMovesCare.length("tm_skate")])
 	ok(
 			"tm Shift: a tap on the ground is a short skate, no dash, and no long-dash pip",
 			kinds.keys() == ["rinkrun"] and not K.rinkrunning() and not K.has_long_dash(), str(kinds.keys()))

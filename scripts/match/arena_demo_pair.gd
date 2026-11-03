@@ -7,7 +7,7 @@ extends RefCounted
 ##   --arena-demo=pr_f_<move>@<t>    the same scene, the whole view at <t> seconds at the default gameplay zoom
 ##                                   (telegraph, key frame, impact); pr_c_<move>@<t> the same as a close-up
 ##   --arena-demo=pr_payoff_dr / pr_payoff_as   the payoff moments
-##   moves: dr_shot dr_throw dr_reel dr_anchor dr_dive dr_barge dr_hop dr_flex
+##   moves: dr_shot dr_throw dr_reel dr_anchor dr_dive dr_lunge dr_pounce dr_flex
 ##          as_lance as_sweep as_shot as_leap lw_hop as_cloak lw_stoke lw_stoke_lance
 ##          lw_jet dr_blast (the X ultimates), dr_rock (the Grapnel hauling a foe over a rock)
 ## A move's optional fourth entry is its strip zoom (the hose and the rope need the wider gameplay view).
@@ -19,9 +19,9 @@ const MOVES := {
 	"dr_rock": ["dredge", "shotgun", [0.55, 0.75, 0.95, 1.15, 1.4, 1.7], 1.0],
 	"dr_anchor": ["dredge", "shotgun", [0.52, 0.66, 0.8, 0.885, 1.0], 1.0],
 	"dr_dive": ["dredge", "shotgun", [0.5, 0.56, 0.64, 0.72, 0.85, 1.2]],
-	"dr_barge": ["dredge", "shotgun", [0.5, 0.53, 0.58, 0.64, 0.72, 0.9]],
+	"dr_lunge": ["dredge", "shotgun", [0.5, 0.535, 0.58, 0.63, 0.75]],
 	"dr_barge_run": ["dredge", "shotgun", [0.53, 0.6, 0.98, 1.05, 1.43, 1.5], 1.0],
-	"dr_hop": ["dredge", "shotgun", [0.5, 0.53, 0.58, 0.66, 0.74, 0.92]],
+	"dr_pounce": ["dredge", "shotgun", [0.5, 0.54, 0.6, 0.66, 0.8]],
 	"dr_flex": ["dredge", "shotgun", [0.5, 0.6, 0.68, 0.8, 1.0]],
 	"as_lance": ["ashwick", "flamethrower", [0.5, 0.6, 0.7, 0.78, 0.9, 1.2], 1.0],
 	"as_sweep": ["ashwick", "flamethrower", [0.9, 1.0, 1.1, 1.2, 1.3, 1.45], 1.0],
@@ -142,12 +142,12 @@ static func _drive(A: Arena, P: Hunter, D: Hunter, mv: String, t: float, dt: flo
 			if ArenaDemo._at(t, dt, go): P.dashes = P.max_dashes()
 			for k in 3:
 				if ArenaDemo._at(t, dt, go + 0.45 * k): P.do_dash()
-		"dr_barge", "as_leap":
+		"dr_lunge", "as_leap":
 			if t < go: D.teleport(A.home + Vector3(3.6, 0, 0))
 			if ArenaDemo._at(t, dt, go):
 				P.dashes = P.max_dashes()
 				P.do_dash()
-		"dr_hop", "lw_hop":
+		"dr_pounce", "lw_hop":
 			# toward the middle of the island, so the hop never carries him off the edge into the void
 			if t < go: D.teleport(A.home + Vector3(12.0, 0, 0.5))
 			if ArenaDemo._at(t, dt, go - 0.15):

@@ -140,35 +140,45 @@ const MOVES := {
 		}],
 		[0.55, {"p": 0.12, "sq": -0.12, "lift": 0.06}],
 		[0.75, {}]]},
-	# Barge (Shift, one fast 0.18 s shove of a run of them): hunched forward, head down, shoulder first through the
-	# dash, a squash on arrival and a quick recovery so the next barge can follow a beat later
-	"dr_barge": {"keys": [
-		[0.0, {"p": 0.15, "y": -0.3, "sq": 0.35, "lift": -0.08, "lw": 1.0, "legs": [0.9, -1.4, 0.6, -1.2]}],
+	# Barge (Shift, one fast 0.18 s lunge of a run of them): a monster's lunge, low to the ground, both hands
+	# reaching far ahead and clawing at the turf, then hauling the bulk along after them; he lands on his
+	# knuckles in a squat (0.18, the dash's end) and is back up by 0.38 for the next one
+	"dr_lunge": {"keys": [
+		[0.0, {
+			"p": -0.5, "sq": 0.35, "lift": -0.15, "fl": Vector3(-0.25, -0.2, -0.5), "hw": 1.0,
+			"fr": Vector3(0.25, -0.2, -0.5), "rw": 0.9, "lw": 1.0, "legs": [1.1, -1.6, 0.9, -1.5]
+		}],
 		[0.04, {
-			"p": -0.7, "y": 0.6, "sq": -0.3, "fr": Vector3(0.25, 0.0, 0.45), "rw": 0.9, "fl": Vector3(0.1, 0.1, -0.15),
-			"hw": 0.9, "lw": 1.0, "legs": [1.15, -0.6, -0.85, -0.15]
+			"p": -1.05, "sq": -0.2, "lift": -0.06, "fl": Vector3(-0.3, -0.55, -1.15), "hw": 1.0,
+			"fr": Vector3(0.3, -0.45, -0.95), "rw": 0.9, "lw": 1.0, "legs": [-0.6, -0.3, 0.7, -1.3]
+		}],
+		[0.11, {
+			"p": -0.95, "sq": -0.05, "lift": -0.1, "fl": Vector3(-0.25, -0.75, -0.55), "hw": 1.0,
+			"fr": Vector3(0.3, -0.6, -1.05), "rw": 0.9, "lw": 1.0, "legs": [0.9, -1.5, -0.6, -0.4]
 		}],
 		[0.18, {
-			"p": -0.7, "y": 0.6, "sq": -0.25, "fr": Vector3(0.25, 0.0, 0.45), "rw": 0.9, "fl": Vector3(0.1, 0.1, -0.15),
-			"hw": 0.9, "lw": 1.0, "legs": [0.6, -1.0, -0.4, -0.6]
+			"p": -0.6, "sq": 0.45, "lift": -0.2, "fl": Vector3(-0.3, -0.75, -0.4), "hw": 1.0,
+			"fr": Vector3(0.3, -0.7, -0.4), "rw": 0.9, "lw": 1.0, "legs": [1.2, -1.8, 1.0, -1.7]
 		}],
-		[0.23, {"p": -0.15, "y": 0.15, "sq": 0.35, "lift": -0.1, "lw": 1.0, "legs": [1.1, -1.7, 0.9, -1.6]}],
-		[0.32, {"p": 0.08, "sq": -0.08, "lift": 0.03}],
-		[0.42, {}]]},
-	# Dredge's air barge (the same quick shove, 35% further in the air): arms flung wide, legs pumping, a heavy
-	# drop onto his feet
-	"dr_hop": {"keys": [
-		[0.0, {"sq": 0.3, "p": 0.1, "lw": 1.0, "legs": [1.0, -1.5, 0.9, -1.4]}],
-		[0.04, {
-			"sq": -0.3, "p": -0.55, "fl": Vector3(-0.5, 0.25, 0.25), "hw": 1.0, "fr": Vector3(0.5, 0.25, 0.25),
-			"rw": 0.6, "lw": 1.0, "legs": [-0.3, -0.3, 0.8, -1.2]
+		[0.3, {"p": -0.15, "sq": 0.1, "lift": -0.03}],
+		[0.38, {}]]},
+	# The air barge (the same quick 0.18 s lunge, 35% further): a beast's pounce, arms cocked up, then raked
+	# forward with the claws out and dragged down through the air, legs tucked, a heavy drop onto his feet
+	"dr_pounce": {"keys": [
+		[0.0, {
+			"p": -0.3, "sq": 0.3, "fl": Vector3(-0.3, 0.4, -0.2), "hw": 1.0, "fr": Vector3(0.3, 0.4, -0.2), "rw": 0.9,
+			"lw": 1.0, "legs": [1.2, -1.8, 1.1, -1.8]
 		}],
-		[0.18, {
-			"sq": -0.2, "p": -0.5, "fl": Vector3(-0.5, 0.25, 0.3), "hw": 1.0, "fr": Vector3(0.5, 0.25, 0.3), "rw": 0.6,
-			"lw": 1.0, "legs": [0.8, -1.2, -0.3, -0.3]
+		[0.05, {
+			"p": -0.9, "sq": -0.3, "fl": Vector3(-0.35, 0.0, -1.15), "hw": 1.0, "fr": Vector3(0.35, 0.05, -1.1),
+			"rw": 0.9, "lw": 1.0, "legs": [-0.5, -0.4, -0.7, -0.3]
 		}],
-		[0.26, {"sq": 0.3, "p": -0.05, "lift": -0.08, "lw": 1.0, "legs": [1.0, -1.5, 0.9, -1.4]}],
-		[0.45, {}]]},
+		[0.14, {
+			"p": -0.8, "sq": -0.1, "fl": Vector3(-0.3, -0.35, -0.9), "hw": 1.0, "fr": Vector3(0.3, -0.3, -0.9),
+			"rw": 0.9, "lw": 1.0, "legs": [1.0, -1.6, 0.9, -1.6]
+		}],
+		[0.24, {"p": -0.4, "sq": 0.3, "lift": -0.08, "lw": 1.0, "legs": [1.0, -1.5, 0.9, -1.4]}],
+		[0.38, {}]]},
 	# Salvage (passive): a stack gained - chest out, both fists flexed high above the shoulders, a stomp
 	"dr_flex": {"keys": [
 		[0.0, {}],

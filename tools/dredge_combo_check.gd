@@ -22,6 +22,7 @@ func run(main_node: Node) -> void:
 	await _all()
 	await _hook_hold()
 	await _slam_tell()
+	await _dash_moves()
 	await load("res://tools/dredge_ult_check.gd").new(ak, ok).run()
 	print("DREDGECHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
@@ -134,6 +135,50 @@ func _slam_tell() -> void:
 		"anchor tell: the slam hits inside the drawn cone and nothing outside it",
 		K.anchors == 1 and ak.dmg(T) > 10.0 and ak.dmg(T2) == 0.0 and not AimKit.shown(P, "e_tell"),
 		"inside %.0f, outside %.0f" % [ak.dmg(T), ak.dmg(T2)]
+	)
+	await ak.done(m)
+
+## Item 35: his own dash moves, a low clawing lunge on the ground and a pounce in the air, used by no other
+## hero; each lands by the end of its 0.18 s dash and is over before the next barge of a run may start.
+func _dash_moves() -> void:
+	var r: Array = ak.setup("dredge", 8.0, "", false)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var home: Vector3 = r[4]
+	var K: DredgeKit = P.ak
+	ak.aim_at(P, home + Vector3(0, 0, -6.0))
+	P.do_dash()
+	var ground_move := K.anim_id
+	var dash_t := P.roll_t
+	ak.step(m, 0.6)
+	P.teleport(home + Vector3(0, 3.0, 0))
+	P.grounded = false
+	P.ex_cd = 0.0
+	ak.step(m, ak.DT)
+	P.do_dash()
+	var air_move := K.anim_id
+	ak.step(m, 0.6)
+	var others := {}
+	var viewer: Dictionary = Content.rules("hunter_viewer")["moves"]
+	for hero in viewer:
+		if hero != "dredge":
+			for mv in (viewer[hero] as Dictionary).get("dash", []):
+				others[mv] = hero
+	var gap := float(K.dash_def()["gap"])
+	var fits := true
+	for mv in [ground_move, air_move]:
+		var keys: Array = KMovesPair.MOVES.get(mv, {"keys": [[99.0, {}]]})["keys"]
+		var lands := 0.0
+		for kf in keys:
+			if float((kf[1] as Dictionary).get("sq", 0.0)) >= 0.3 and float(kf[0]) > 0.0:
+				lands = float(kf[0])          # the squash he lands in
+				break
+		fits = fits and lands > 0.0 and lands <= dash_t + 0.07 and float(keys[-1][0]) <= dash_t + gap
+	ok(
+		"dash moves: his own low lunge and air pounce, no other hero's, each fitting the dash",
+		ground_move == "dr_lunge" and air_move == "dr_pounce" and not others.has(ground_move)
+			and not others.has(air_move) and fits,
+		"%s / %s, dash %.2f s" % [ground_move, air_move, dash_t]
 	)
 	await ak.done(m)
 

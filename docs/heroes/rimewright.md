@@ -71,6 +71,7 @@ Scaling: light, HP 124. Ratios kept from the footage: dart 35 -> 4, Shatter 529 
 | Burst: Rimelock straight into a merge and its ultimate does not knock a full-health hunter | "burst: Rimelock straight into a merge ..." |
 | Rimelock in the air: no glide; Shift out of it skates on at speed | "tm X: glide held while sealed ...", "tm X: Shift ends Rimelock and she skates straight out ..." |
 | Skate only: no charge, no dash; a tap is a short skate; an air press waits for the landing; plates form | the "tm Shift:" rows of `_skate_only` |
+| Her dash moves are her skate only (`tm_skate_go`, `tm_skate`), used by no other hero and fitting the skate's length (owner item 35) | "tm Shift: her dash moves are her own skate ..." |
 | Ice Spear throw: drawn back, leaves her hand at 18 m/s, lands on arrival, detonates 1.8s after landing; the wall's 16.2m travel | "tm RMB: let go, she draws back first ...", "tm RMB: the throw ...", "tm RMB: it travels to the target ...", "tm E: it travels 16.2 m at most ..." |
 | A merge start ends Rimelock with no crash (`rime`) | "tm merge: drop_holds ends Rimelock with no crash and frees her" |
 
