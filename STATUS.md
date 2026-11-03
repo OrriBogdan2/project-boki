@@ -1,5 +1,5 @@
 # S2 status (second server session)
-Updated: 2026-11-03 09:06 UTC (git/server clock). Last INBOX_S2 handled: 08:00 (git time) ownership.
+Updated: 2026-11-03 09:12 UTC (git/server clock). Last INBOX_S2 handled: 08:00 (git time) ownership.
 
 ## Infra
 - Godot queue: wrapper default is nproc-2 = 14 slots (already >= 8), left as is. S1: no change needed.
@@ -46,7 +46,8 @@ Updated: 2026-11-03 09:06 UTC (git/server clock). Last INBOX_S2 handled: 08:00 (
   **For main (DEBT entry):** reserved KinExec._burst (ring + burst + shake + boom) fires on every dash with Pebbit (Gravity Wake) and on Cindle attacks: the remaining "explosion" on Boki riders.
   Owner Qs (Linwick/Moosh): explosion sounds now -7 dB with a -6 dBFS ceiling (chosen, no agreed level): OK, and bring hero blast sounds (br_burst, dr_blast, pay_slam, os_pop) down too? Moosh glide shortened to 10.7 m for the 3x rule (source 11-15 m): or lengthen the ground skip to ~4 m and keep 12 m? Linwick air poof as a smoke cloud blown out behind him (no footage) OK? burst cap with longer Flue Flight 117 of 124 HP OK?
 
-## Dancer: items 8, 35, 32 DONE (Opus), branch `ext/review-dancer` = Dancer + Zedran superset (a0391db, merged ext/review-zedran-bjorn: one STRIP_SLOW, both heroes' moves in kmoves_dj.gd; dancer 92/0, juggernaut 135/0, hunter-unlock 137/0, weapon-clip PASS, health OK); full suite running
+## Dancer: **READY TO MERGE**, ext/review-dancer @ a0391db (pushed) = Dancer + Zedran superset. Full suite 94 checks: every failure also fails on main 801bfbf (pack-ui's 4 incl. Drop/Wear clicks seen on main runs too), plus the known --dash-flow-check bulwark failure (fixed on ext/review-bjorn). Logs /home/boki/suite-s2/boki-review-dancer.
+- Was: branch `ext/review-dancer` = Dancer + Zedran superset (a0391db, merged ext/review-zedran-bjorn: one STRIP_SLOW, both heroes' moves in kmoves_dj.gd; dancer 92/0, juggernaut 135/0, hunter-unlock 137/0, weapon-clip PASS, health OK)
 - Item 8: the six cartwheel effects removed (landing ring, air spark sprays + ring, armed_fx ring/burst, expiry burst, per-frame glint burst, the shared full_ready ring/sparks incl. the online ring pulse); the cue is a tight gold four-point star at the throwing hand that flares on landing (online: a small ping at the hand). Card/doc text names the empowered next bolt.
 - Item 35: thf_vault_r/l fit the 0.48 s dash (crouch, star push-off, full turn, landing crouch); air thf_exdash held to landing then a new thf_land.
 - Item 32: all 20 rows + into_dash with sources; dash->LMB 'fire' variant 'empowered' (footage 0193); a move started mid-cartwheel waits out the flip; dagger recast blink ends a cartwheel. dancer combo 92/0, juggernaut 91/0, dash-flow all thief rows OK, health OK.
