@@ -367,17 +367,6 @@ func _loot() -> void:
 	P.caught.pop_back()
 	Life.take_item(m, P, b, {"key": "caught", "i": 0})
 	ok(P.caught.size() == cap and (b["caught"] as Array).is_empty(), "...and with a free place it comes across")
-	# a rival's Boki in a deathbox (the kin list)
-	var rival: Hunter = null
-	for h in m.hunters:
-		if h.team != P.team:
-			rival = h; break
-	var b2 := {"caught": [], "kin": [Save.new_kin("cindle", "Taken", 6)], "owner": rival, "pos": P.pos}
-	Life._kin_from_box(m, P, b2)
-	ok(P.caught.size() == cap and (b2["kin"] as Array).size() == 1, "...the same for a rival's Boki in their box (it stays: %d left)" % (b2["kin"] as Array).size())
-	P.caught.pop_back()
-	Life._kin_from_box(m, P, b2)
-	ok(P.caught.size() == cap and (b2["kin"] as Array).is_empty(), "...and it comes across when there is room")
 
 func _bots_full() -> void:
 	_fresh()

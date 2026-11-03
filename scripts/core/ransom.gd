@@ -81,6 +81,7 @@ static func lose(k: Dictionary, fate: String, holder: String, tier: int) -> void
 static func restore(L: Dictionary, how: String) -> Dictionary:
 	(Save.d["lost_kin"] as Array).erase(L)
 	var k: Dictionary = L["rec"]
+	KinLoss.clear(k)
 	var held := int(Save.d.get("matches", 0)) - int(L.get("since", 0))
 	var where := ("held by %s" % L["holder"]) if String(L["where"]) == "rival" else "at the Ransom House"
 	Save.remember(k, "rescued", "was %s for %d expedition%s until you %s" % [where, held, "" if held == 1 else "s", how], 6.0)

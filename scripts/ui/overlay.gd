@@ -504,7 +504,7 @@ func _toggle(v: VBoxContainer, label_txt: String, key: String, hint := "") -> vo
 
 ## A quiet line of fine print under a group.
 func _note(v: VBoxContainer, txt: String) -> void:
-	v.add_child(UI.para(txt, UI.T_SMALL, UI.FAINT))
+	v.add_child(UI.para(txt, UI.T_SMALL, UI.MUTED))
 
 func _choice(v: VBoxContainer, label_txt: String, key: String, opts: Array, then := Callable(), hint := "") -> void:
 	var r := _row(v, label_txt, hint)
