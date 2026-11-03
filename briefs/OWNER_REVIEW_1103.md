@@ -34,3 +34,12 @@ The owner says "SUPERVIVE does this way better." Match the source's behaviour an
   Time it to the source's stage timings in pin.md and the data.
 - **Readout split to the side:** today the draw lines and charge readout sit offset to one side (the bow hand), which feels disconnected. Like the source, **centre the readout on the aim line**: the two lines converge from Pin toward the cursor symmetrically along the aim direction, merge on a ready stage, and extend past the cursor at full draw. Any stage or perfect cue sits at the cursor or on the aim line, not beside the character. Keep our feathered style and gold flash.
 - Screenshots: a strip of the draw from press to release, the readout at each stage, and the perfect release. A check covers no early release, the release only on button up, and the readout centred on the aim line.
+
+## 6. Pin's RMB Heavy Shot doesn't read as a big shot (same branch as item 5)
+- When it fires, nothing stands out. In the source, the heavy shot is a big, unmistakable projectile you can't miss. Ours needs the same **readability**, in **Pin's own look**: her palette (teal/gold, not the source's colours) and our own arrow or bolt shape. Don't recreate the source's projectile art.
+- Make it clear at gameplay zoom:
+  - a large projectile, about 3–4× a normal arrow, with a bright core and a long trail
+  - a release burst at the bow, a short screen kick, and a heavier sound than LMB
+  - a clear impact: the pin into a wall with a stake/pin visual that stays, and a hit flash on the target
+- The telegraph while holding is the RMB lane, already in aimkit; make sure it's clearly visible.
+- Screenshots: release, mid-flight and impact (wall pin and body hit), at gameplay zoom. The check asserts that the Heavy Shot spawns its own projectile type, distinct from LMB.
