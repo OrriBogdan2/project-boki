@@ -17,11 +17,8 @@ static func draw(H, sz: Vector2, p: Hunter) -> void:
 	var o: Vector2 = H._hud_origin(sz)
 	var pr := Rect2(o, H.HUD_PORTRAIT)
 	var hc: Color = p.accent()
-	# the portrait, framed in your class colour
-	H._rounded(pr.grow(4.0), Color(0.03, 0.03, 0.05, 0.92), 14, Color(hc, 0.85), 2)
+	# the portrait, framed in your class colour (its name and class are under it)
 	H._draw_portrait(pr, p, "down" if p.downed else "", hc)
-	c.draw_rect(Rect2(pr.position + Vector2(0, pr.size.y - 30), Vector2(pr.size.x, 30)), Color(0, 0, 0, 0.35))
-	HudStyle.text(c, pr.position + Vector2(40, pr.size.y - 9), String(p.cdat["name"]).to_upper(), 12, Color(hc, 0.95))
 	H.hover_spots.append([pr, "vitals"])
 	level_coin(H, pr, p)
 	ArmorHud.badge(H, pr, p)
@@ -112,6 +109,9 @@ static func level_coin(H, pr: Rect2, p: Hunter) -> void:
 		H._rounded(pr.grow(2.0 + k * 10.0), Color(gold, 0.18 * (1.0 - k)), 14)
 	var bc := pr.position + Vector2(6, pr.size.y - 6)
 	var r := 26.0 * sc
+	# the coin sits in a notch of the frame: ringed in the frame's colour, a dark gap between
+	c.draw_circle(bc, r + 4.0, Color(p.accent(), 0.9))
+	c.draw_circle(bc, r + 2.0, HudStyle.SHADE_EDGE)
 	c.draw_circle(bc, r, Color(0.03, 0.03, 0.05, 0.97))
 	c.draw_arc(bc, r - 3.0, 0, TAU, 48, Color(1, 1, 1, 0.12), 4.0, true)
 	var xf := p.xp_frac()

@@ -19,6 +19,7 @@ const SLOT_NAMES := {"dash": "Dash", "passive": "Passive", "lmb": "Attack", "rmb
 ## The input action behind each slot, so the key caps follow the player's bindings.
 const SLOT_ACTIONS := {"dash": "dash", "lmb": "fire", "rmb": "secondary", "e": "signature", "x": "hunter_ult",
 		"r": "ultimate"}
+const PORTRAIT_PX := 76.0     # px: the Warden's face beside its name
 static var _rules: Dictionary = {}
 
 var id := ""
@@ -216,8 +217,14 @@ func _info(col: Color) -> Control:
 	var v := UI.vbox(4)
 	v.custom_minimum_size.x = 400
 	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	v.add_child(UI.title(Arch.name_of(id), 30, col))
-	v.add_child(UI.label(stat_line(id), 13, UI.MUTED))
+	var head := UI.hbox(12)
+	head.add_child(ClassCard.portrait(id, PORTRAIT_PX))
+	var names := UI.vbox(2)
+	names.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	names.add_child(UI.title(Arch.name_of(id), 30, col))
+	names.add_child(UI.label(stat_line(id), 13, UI.MUTED))
+	head.add_child(names)
+	v.add_child(head)
 	var fan := UI.para(String(Arch.def(id).get("fantasy", "")), 13, UI.INK)
 	fan.custom_minimum_size.x = 390
 	v.add_child(fan)
