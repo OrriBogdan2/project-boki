@@ -101,7 +101,8 @@ func pin() -> void:
 func _pin_audit(m: Match, P: Hunter, T: Hunter, T2: Hunter, K: ArcherKit, home: Vector3) -> void:
 	var pd: Dictionary = K.rmb_def()["pin"]
 	ok("audit pin: cooldowns from the data (Phase Walk 9.5s, Rain of Arrows 15s, Virideth's Fury 60s)",
-		float(K.dash_def()["cd"]) == 9.5 and float(K.e_def()["cooldown"]) == 15.0 and float(K.x_def()["cooldown"]) == 60.0)
+		float(K.dash_def()["cd"]) == 9.5 and float(K.e_def()["cooldown"]) == 15.0
+		and float(K.x_def()["cooldown"]) == 60.0)
 	ok("audit pin: no knock heal and no instant Focus draw in the kit data",
 		not K.res_def().has("knock_heal") and not pd.has("pierce") and float(pd["wall_floor"]) > 0.0)
 	fresh(T)
@@ -117,7 +118,10 @@ func _pin_audit(m: Match, P: Hunter, T: Hunter, T2: Hunter, K: ArcherKit, home: 
 	aim_at(P, T.pos)
 	P.inp["sec_hold"] = true
 	K.press_rmb()
-	step(m, 1.2, func(): P.inp["sec_hold"] = true; aim_at(P, T.pos))
+	var hold := func():
+		P.inp["sec_hold"] = true
+		aim_at(P, T.pos)
+	step(m, 1.2, hold)
 	P.inp["sec_hold"] = false
 	step(m, 0.6)
 	ok("audit pin: the Heavy Shot stops on the first foe (data: one target, a knockback; no pierce)",
