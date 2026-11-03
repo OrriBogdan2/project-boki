@@ -207,3 +207,9 @@ The owner saw an explosion with Moosh Moosh and isn't sure whether it comes from
 - **Shift during the ult:** pressing Shift (her skate) while ulting is allowed. It ends or carries through the ult (follow `briefs/supervive-data/` for Celeste if it says which; default: ends the ult) and she keeps moving: the skate starts at her current ult velocity and holds that momentum for a short while (~0.4–0.6 s) before easing to normal skate speed, rather than snapping to a stop.
 - Assert: glide input during the ult does nothing; after Shift-out, her speed in the first 0.3 s is ≥ 80% of her speed just before the press.
 - Screenshots: a strip of the Shift-out showing her carrying speed.
+
+## 28. Tamsin's RMB is a throw, not a summon (kit fix, do together with item 13)
+- Today the spear reads as appearing/summoned at the target. It must be a **throw**: a wind-up with her arm drawn back holding the ice spear, a release on the throw beat, the spear visibly travelling from her hand to the target (an arc or a line, per the source data in `briefs/supervive-data/`), then item 13's heavy landing and big detonation.
+- Nothing spawns at the target before the spear arrives, except the gameplay telegraph (landing marker) if the source shows one.
+- Assert: the projectile starts at her hand position and its travel time > 0; the impact happens on arrival, not at cast.
+- Screenshots: a 5-frame strip from wind-up to impact.
