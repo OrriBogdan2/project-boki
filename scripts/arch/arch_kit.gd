@@ -118,6 +118,7 @@ func on_block(_dmg: float, _by) -> void: pass
 func outgoing(_t: Ent, dmg: float, _o: Dictionary) -> float: return dmg
 func incoming(_by: Ent, dmg: float, o: Dictionary) -> Array: return [dmg, o]
 func move_k() -> float: return 1.0
+func draw_rate() -> float: return 1.0               # a bow's draw speed (Pin's quick draw after a perfect release)
 func fire_ok() -> bool: return true
 ## The attack key, if this kit runs the weapon's attack itself (true = handled; Hunter.trigger stops).
 func lmb_override(_held: bool, _dt: float) -> bool: return false
@@ -755,6 +756,12 @@ func play(move: String) -> void:
 	anim_id = move
 	anim_at = m.time
 
+## True when the kit draws its own dash after-images; the hunter then skips the shared team-colour pill.
+func own_dash_trail() -> bool: return false
+
+## True when the kit draws its own aim line; the shared pale weapon line then stays hidden.
+func own_aim_line() -> bool: return false
+
 ## The Vault-style flip that matches a dash direction: forward, back, or a side flip.
 func flip_for(dir: Vector2, base: String) -> String:
 	var fwd := Vector2(-sin(h.face), -cos(h.face))
@@ -764,14 +771,16 @@ func flip_for(dir: Vector2, base: String) -> String:
 	if absf(r) > absf(f): return base + ("_r" if r > 0.0 else "_l")
 	return base + ("_f" if f >= 0.0 else "_b")
 
-## True when the kit draws its own dash after-images (its hero's silhouette and colour), not the shared ones.
-func own_dash_trail() -> bool: return false
 ## Whether the shared charge ball glows at the hand (false: the kit shows its own held prop or orb).
 func shows_charge_ball() -> bool: return true
 ## The rig's dodge pose for this kit's dash right now ("" = the class's own: phase, roll or charge).
 func dodge_anim() -> String: return ""
-## Dash charges the kit adds on top of the class's (the Juggernaut's Rampage at rank 3).
+## Dash charges the kit adds on top of the class's (the Juggernaut's Rampage at rank 2).
 func extra_dashes() -> float: return 0.0
+
+## A shot dodged through this hero's dash (kits that feed on it override).
+func on_perfect_dodge() -> void: pass
+
 ## The payoff lives on the dash (the Thief's Primed shot into 3 Marks): the dash slot gets the gold dot.
 func dash_payoff_ready() -> bool: return false
 
@@ -832,6 +841,17 @@ func teardown() -> void:
 		if is_instance_valid(n): (n as Node).queue_free()
 	self_nodes.clear()
 	spips = {}
+
+## Where the hunter's right (or left) hand is in the world (the model's hand bone; shoulder height ahead
+## of them when there is no model, as in headless checks).
+func hand_pos(right: bool) -> Vector3:
+	var hand: Node3D = null
+	if h.anim != null:
+		hand = h.anim.hand_r if right else h.anim.hand_l
+	if hand != null and is_instance_valid(hand) and hand.is_inside_tree():
+		return hand.global_position
+	var d := h.aim_dir()
+	return h.pos + Vector3(d.x * 0.4, 1.3 * float(h.cdat.get("scale", 1.0)), d.y * 0.4)
 
 ## A node that follows the hunter in world space (top_level child, so it dies with the hunter).
 func own_node() -> Node3D:
@@ -994,6 +1014,30 @@ func charge_now() -> Array:
 func charge_k() -> float:
 	return float(chg.get("k", -1.0)) if not chg.is_empty() else -1.0
 
+## The colour of the shared charge tell (the ring at the feet, the ticks, the full flash); kits with their
+## own palette override it.
+func charge_color() -> Color:
+	return Arch.color(id)
+
+## Called on each after-image tick of a dash: a kit with its own after-image draws it and returns true;
+## false leaves the shared one.
+func dash_afterimage() -> bool:
+	return false
+
+## Whether the shared charge tell shows its glowing orb at the hand; kits that draw their own hand tell
+## turn it off.
+func charge_orb() -> bool:
+	return true
+
+func _charge_ball(col: Color) -> Node3D:
+	var g := own_node()
+	var ball := MeshInstance3D.new()
+	ball.mesh = Models.sphere(0.2, 10)
+	ball.material_override = Models.glow_mat(Color(col.lightened(0.2), 1.0))
+	ball.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	g.add_child(ball)
+	return g
+
 func _tick_charge(dt: float) -> void:
 	var cn := charge_now()
 	var src := String(cn[0]); var k := float(cn[1])
@@ -1001,7 +1045,7 @@ func _tick_charge(dt: float) -> void:
 		if not chg.is_empty():
 			_charge_release()
 		return
-	var col := Arch.color(id)
+	var col := charge_color()
 	if chg.is_empty() or String(chg["src"]) != src:
 		if not chg.is_empty(): _charge_release()
 		chg = {"src": src, "k": k, "full": false, "tick": 0.0}
@@ -1010,13 +1054,8 @@ func _tick_charge(dt: float) -> void:
 		if p != null and int(p.team) != h.team: rc = col.lerp(Feel.RIM_ENEMY, 0.45)
 		var ring: Node3D = m.fx.telegraph_circle(h.pos, 1.15 * float(h.cdat.get("scale", 1.0)), Color(rc, 0.9))
 		chg["ring"] = ring
-		var g := own_node()
-		var ball := MeshInstance3D.new()
-		ball.mesh = Models.sphere(0.2, 10)
-		ball.material_override = Models.glow_mat(Color(col.lightened(0.2), 1.0))
-		ball.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		g.add_child(ball)
-		chg["glow"] = g
+		if charge_orb():
+			chg["glow"] = _charge_ball(col)
 		net_ring(h.pos, 0.8, rc)            # remote players: "they're winding something up"
 	chg["k"] = k
 	var ring2: Node3D = chg.get("ring")
@@ -1072,7 +1111,7 @@ func _charge_release() -> void:
 		Oomph.punch_dir(m, h.aim_dir(), 0.06 + 0.26 * k)
 		if full and m.cam: m.cam.add_trauma(0.12)
 	if k > 0.5:
-		m.fx.burst(h.pos + Vector3(h.aim_dir().x * 0.7, 1.0, h.aim_dir().y * 0.7), Arch.color(id), int(6 + 14 * k), 3.0 + 5.0 * k, 0.3, 0.0, 1.0, Vector3(h.aim_dir().x, 0.1, h.aim_dir().y), 35.0)
+		m.fx.burst(h.pos + Vector3(h.aim_dir().x * 0.7, 1.0, h.aim_dir().y * 0.7), charge_color(), int(6 + 14 * k), 3.0 + 5.0 * k, 0.3, 0.0, 1.0, Vector3(h.aim_dir().x, 0.1, h.aim_dir().y), 35.0)
 
 ## Terrain (a wall, a rock, a ledge face) within `reach` behind `t` along `dir`.
 func terrain_behind(t: Ent, dir: Vector2, reach: float) -> bool:

@@ -2,7 +2,7 @@
 	"id": "gunslinger",
 	"name": "Venator",
 	"weight": "medium",
-	"body": {"size": 1.0, "chest": 1.0, "nameplate": 2.35},
+	"body": {"size": 1.0, "chest": 1.0},
 	"color": "#ff9a5c",
 	"fantasy": "The ember-rifle skirmisher. Bounces a spiked charge off the wall so its blast throws a foe back into his rifle, slides around while still shooting, and finishes with one long needle of light.",
 	"silhouette": "the long scarf streaming behind, the bandolier of spiked charges across the chest and the long-shrouded rifle",

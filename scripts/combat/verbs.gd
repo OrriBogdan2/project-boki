@@ -93,10 +93,14 @@ static func wall_blocks(list: Array, x: float, z: float, r: float, y: float) -> 
 			continue
 		if absf(y - float(w["y"])) > 1.9:
 			continue
+		# a low wall you can stand on (a rock, "top" m tall): feet at its top walk over it (StoneStand)
+		var top := float(w.get("top", 3.0))
+		if y >= float(w["y"]) + top - World.STEP:
+			continue
 		var p := Vector2(x, z)
 		var c := Geometry2D.get_closest_point_to_segment(p, w["a"], w["b"])
 		if p.distance_to(c) < r * 0.8 + float(w["th"]):
-			return float(w["y"]) + 3.0
+			return float(w["y"]) + top
 	return 0.0
 
 # ------------------------------------------------------------------ reflect windows
@@ -299,7 +303,7 @@ func shot_check(s: Dictionary, p: Vector3) -> String:
 	for w in walls:
 		if w["block"] != "all" and int(w["team"]) == int(s["team"]):
 			continue
-		if p.y < float(w["y"]) - 0.3 or p.y > float(w["y"]) + WALL_H + 0.3:
+		if p.y < float(w["y"]) - 0.3 or p.y > float(w["y"]) + float(w.get("top", WALL_H)) + 0.3:
 			continue
 		var c := Geometry2D.get_closest_point_to_segment(p2, w["a"], w["b"])
 		if p2.distance_to(c) > float(w["th"]) + float(s["r"]):

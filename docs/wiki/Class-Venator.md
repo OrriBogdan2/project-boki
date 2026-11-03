@@ -35,7 +35,7 @@ foe and Dazes them, and the rifle and one long needle of light do the rest.
 
 |  |  |
 |---|---|
-| Weight class | Medium (145 health, 4.4 m/s, 1 dash charge) |
+| Body | 145 health, 4.4 m/s, 1 dash charge |
 | Signature weapon | Quill Rifle (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The ember-rifle skirmisher. Bounces a spiked charge off the wall so its blast throws a foe back into his rifle, slides around while still shooting, and finishes with one long needle of light. |
 | Silhouette | the long scarf streaming behind, the bandolier of spiked charges across the chest and the long-shrouded rifle |
@@ -52,7 +52,7 @@ What the in-game kit card (K) says.
 | Dash: Slipstep | Slipstep: tap to skid, hold to slide further; you can shoot the whole time and it goes where you move, not where you aim. |
 | RMB: Burr Charge | Burr Charge: hold to see its lane, let go to throw. It flies past people and blasts a cone back at you where it hits a wall or the ground, Dazing everyone in it. |
 | E: Longneedle | Longneedle: stand still 0.6s while the line narrows, then fire a long beam through walls and everything in it. |
-| X: Cinderfall | Cinderfall (ultimate, level 6): a shell lands at your cursor 1.6s after the tap, hardest in the centre, and leaves a burning, slowing patch. Everyone can see where it will fall. |
+| Hunter ultimate: Cinderfall | Cinderfall (ultimate, level 6): a shell lands at your cursor 1.6s after the tap, hardest in the centre, and leaves a burning, slowing patch. Everyone can see where it will fall. |
 | Weapon: Quill Rifle | Full-auto rifle out to full range. Long strings lose punch; Dazed foes take 90% more (big gold numbers). |
 
 ### Abilities in full
@@ -68,7 +68,7 @@ What the in-game kit card (K) says.
 
 **Longneedle (E, 11.5s cooldown).** Stand still and charge for 0.6s: a wide line out to 18m narrows to a thin core. Then the beam fires through cover and everything in its line: 36 damage, 20% more on a Dazed foe, and a Dazed hunter hit is Skewered. The recoil shoves you back a step. Hitting a hunter takes 20% off its cooldown (30% per hunter hit at rank 3).
 
-**Cinderfall (X, hero ultimate from level 6, 42s cooldown).** Tap: fire a shell straight up. It comes down 1.6s later exactly where your cursor was (up to 14m), and everyone sees its 3.4m disc fill until it lands. The impact deals 24 to everyone on the disc, 50% more in the hot centre. Then the patch burns for 3s: 3 every 0.5s and a 30% slow to anyone standing in it. You move and shoot freely the whole time. Landing the impact on an enemy hunter fills your Boki bond; the burn does not.
+**Cinderfall (hunter ultimate, from level 6, 42s cooldown).** Tap: fire a shell straight up. It comes down 1.6s later exactly where your cursor was (up to 14m), and everyone sees its 3.4m disc fill until it lands. The impact deals 24 to everyone on the disc, 50% more in the hot centre. Then the patch burns for 3s: 3 every 0.5s and a 30% slow to anyone standing in it. You move and shoot freely the whole time. Landing the impact on an enemy hunter fills your Boki bond; the burn does not.
 
 ### Ranks
 

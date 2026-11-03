@@ -100,12 +100,12 @@ const KEYS_V := 3
 ## Rebindable actions, in the order the controls list shows them.
 const ACTIONS := [
 	["up", "Move up"], ["down", "Move down"], ["left", "Move left"], ["right", "Move right"],
-	["fire", "Weapon attack"], ["secondary", "Archetype ability (right click)"], ["dash", "Archetype dash"], ["jump", "Jump (hold to glide)"], ["glide", "Glide (hold in the air)"], ["crouch", "Sneak"],
-	["gear1", "Glove active"], ["signature", "Archetype utility (E)"], ["kin_ability", "Boki ability (cast from where your Boki is)"], ["throw", "Boki orders: tap to Sic or Call back, hold for the order wheel"], ["ultimate", "Merge with your Boki (needs a full bond meter)"], ["reload", "Reload"], ["hunter_ult", "Hunter ultimate"], ["base", "Base to a teammate (squads)"],
+	["fire", "Weapon attack"], ["secondary", "Hunter ability (right click)"], ["dash", "Hunter dash"], ["jump", "Jump (hold to glide)"], ["glide", "Glide (hold in the air)"], ["crouch", "Sneak"],
+	["gear1", "Glove active"], ["signature", "Hunter utility (E)"], ["kin_ability", "Boki ability (cast from where your Boki is)"], ["throw", "Boki orders: tap to Sic or Call back, hold for the order wheel"], ["ultimate", "Merge with your Boki (needs a full bond meter)"], ["reload", "Reload"], ["hunter_ult", "Hunter ultimate"], ["base", "Base to a teammate (squads)"],
 	["interact", "Use, scan, revive, pet"], ["tonic", "Heal (tonic, or armor kit when health is full)"], ["armor_kit", "Repair armor (armor kit)"], ["scores", "Scoreboard"], ["emote", "Emote wheel (hold, in a match)"],
 	["map", "Full map (click to ping)"], ["pass_lead", "Pass the drop lead"], ["separate", "Separate from the drop"],
 	["play", "Play fetch with a Boki"], ["talk", "Talk to a Boki"], ["details", "A Boki's details"], ["inventory", "Inventory"],
-	["build", "Build mode at home / decorate indoors"], ["hero", "Change hero (at home and in practice areas)"], ["rotate", "Turn a piece (build mode)"],
+	["build", "Build mode at home / decorate indoors"], ["hero", "Hunters: change Hunter (at home and in practice areas)"], ["rotate", "Turn a piece (build mode)"],
 	["record", "Recording mode (again: hide the HUD)"], ["record_orbit", "Recording: slow camera orbit"],
 ]
 

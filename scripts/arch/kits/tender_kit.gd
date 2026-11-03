@@ -1,13 +1,20 @@
 class_name TenderKit
 extends ArchKit
-## Linnet, the Tender (medium support). docs/heroes/tender.md.
-## Passive Bearer: run into a downed teammate to carry them. LMB Lantern Crook embers Kindle foes.
+## Moosh Moosh, the Tender (a small support on medium stats). docs/heroes/tender.md. Looks are pooled in
+## CareLook; the moves are KMovesCare "mm_" entries.
+## Passive Bearer: run into a downed teammate to carry them. LMB Ember Cast: embers pushed from
+## alternating hands Kindle foes.
 ## RMB Burrseed sticks, then roots. Shift Relay Step. E Hearthlight heals; press again to toss it.
-## No R: the revive part of the old ultimate lives in Hearthlight's rank 3 flare.
+## X Hearth Call (level 6): a 5 s healing tether to a teammate; a downed one is pulled home and stood up.
+## R is the Boki Merge.
+
+const THRUST_T := 0.08         # s into mm_shot_r / _l when the arm is straight out (the hand flashes then)
 
 var kind := {}                 # target instance id -> {t: Ent, n: int, left: float}
-var burrs: Array = []          # seeds stuck to foes: {t: Ent, left: float, node: Node3D}
-var hearth := {}               # the light: {pos, mode: self|flying|latched|ground, to, who, left, tick, boost, node, revived}
+var burrs: Array = []          # seeds stuck to foes: {t: Ent, left, total: float, id: int}
+var burr_n := 0
+# the light: {pos, mode: self|flying|latched|ground, to, who, left, tick, boost, node, revived}
+var hearth := {}
 var emp_until := 0.0           # the ember in flight left an idle gun (long range, double refund)
 var lock_t := 0.0              # can't pick anyone up (after dropping them)
 var pick_blocked := 0.0
@@ -16,9 +23,27 @@ var safe_t := 0.0
 var setdown_was := false        # the set-down key (crouch, never F: F is the Boki system's) was down last tick
 const SETDOWN := "crouch"      # the one place to change the set-down key (a Hunter.inp key)
 var last_dash_pass := false    # the last Relay Step went through a teammate (tests)
+var look: CareLook             # pooled visuals (made on first use)
+var shot_seen := 0             # the hunter's shot counter at the last ember we dressed
+var seed_aim := false          # RMB held: the dotted lane and the coiled pose are up (a hold: dropped on merge)
+var aft_t := 0.0               # next dash ember mote
+var glide := {}                # the air dash's long glide: {t, top (m/s)} (a dash: dropped on merge)
+var stats := {"embers": 0, "emp": 0, "swirls": 0, "flares": 0, "calls": 0, "rescues": 0, "broken": 0}   # tests
+var hearth_call := {}          # Hearth Call running: {who: Hunter, left, tick, fx} (a channel: dropped on merge)
+var ult_look: UltLook          # the tether (pooled, made on first use)
 
 func _setup() -> void:
 	res = 0.0
+
+func lk() -> CareLook:
+	if look == null:
+		look = CareLook.new(m, h)
+	return look
+
+## A move that waits for the one playing to finish (passive procs never cut an ability's move).
+func play_soft(move: String) -> void:
+	if anim_id == "" or m.time - anim_at >= KMovesCare.length(anim_id):
+		play(move)
 
 # ------------------------------------------------------------------ Kindle
 func kindle_on(t: Ent) -> int:
@@ -39,8 +64,9 @@ func add_kindle(t: Ent, n := 1) -> void:
 	kind[key] = e
 	if int(e["n"]) >= int(res_def().get("max", 5)) and had < int(res_def().get("max", 5)):
 		m.fx.word(t.pos + Vector3(0, 2.5, 0), "KINDLED", res_col(), true)
-		m.fx.ring(t.pos, 1.2, res_col(), 0.3)
-		m.sfx("unlock", t.pos, -6.0, 1.6)
+		lk().burst("flare", t.pos, {"col": Color("b98aff"), "rim": res_col(), "r": 1.3, "dur": 0.35})
+		m.sfx("tend_kindled", t.pos, -4.0, 1.0)
+		play_soft("mm_kindled")
 
 func best_kindle() -> int:
 	var b := 0
@@ -89,11 +115,88 @@ func _tick(dt: float) -> void:
 	_tick_burrs(dt)
 	_tick_hearth(dt)
 	_tick_carry(dt)
+	_tick_call(dt)
+	_call_preview()
+	_tick_look(dt)
 	if h.ctrl == "bot":
 		_bot_idle(dt)
 
-## A Boki merge sets a carried teammate down (unbroken: no stun) and keeps the key from picking anyone up meanwhile.
+## Every ember she casts: the comet look leaving the casting hand (right, then left), the punch-push
+## move, and at the thrust a swirl, a flash and sparks at that hand.
+func _tick_look(dt: float) -> void:
+	if h.shot_n != shot_seen:
+		shot_seen = h.shot_n
+		var s := lk().last_shot()
+		if not s.is_empty() and String((s["x"] as Dictionary).get("src", "")) != "abil":
+			_dress_ember(s)
+	# Kindle reads on the foe: an ember-violet glow at the feet that grows per stack
+	for key in kind:
+		var e: Dictionary = kind[key]
+		var n := kindle_on(e["t"])
+		if n > 0:
+			var t: Ent = e["t"]
+			lk().keep(
+					"kin%d" % key, "kindle", t.pos,
+					{
+						"r": 0.55 + 0.12 * n, "col": Color("9a6aff").lerp(Color("ffb347"), float(n) / 5.0),
+						"a": 0.35 + 0.13 * n, "fill": 0.8, "pattern": 0.0})
+	_tick_dash_look(dt)
+	lk().tick(dt)
+	if ult_look != null:
+		ult_look.tick(dt)
+
+func _dress_ember(s: Dictionary) -> void:
+	var emp: bool = float(s["life0"]) * (s["vel"] as Vector2).length() > float(h.wpn["range"]) * 1.2
+	var right := h.shot_n % 2 == 1
+	var d2 := h.aim_dir()
+	# the ember leaves from the casting hand's side at hand height (the hit band is the same)
+	var side := Vector2(-d2.y, d2.x) * (0.18 if right else -0.18)
+	var from := Vector3(h.pos.x + d2.x * 0.5 + side.x, h.pos.y + 0.72, h.pos.z + d2.y * 0.5 + side.y)
+	s["pos"] = from
+	s["start"] = from
+	lk().skin(s, "ember")
+	stats["embers"] += 1
+	stats["swirls"] += 1
+	if emp:
+		stats["emp"] += 1
+		play("mm_shot_emp")
+		m.sfx("tend_ember_emp", h.pos, -3.0, 1.0)
+	elif not seed_aim:
+		play("mm_shot_r" if right else "mm_shot_l")
+	var big := 1.4 if emp else 1.0
+	m.later(THRUST_T, func():
+		if not is_instance_valid(h) or look == null:
+			return
+		var at := CareUtil.hand_at(h, right)
+		lk().burst("swirl", at, {"r": 0.5 * big, "dur": 0.14, "dir": d2})
+		m.fx.flash(at, Color("ffb347"), 0.35 * big, 0.06)
+		m.fx.spark(at, Vector3(d2.x, 0.2, d2.y), Color("ffd27a"), 6, 6.0, 40.0, 0.18, 2.0, 0.8))
+
+## Her dashes leave ember motes (not the shared after-image), and the air dash glides.
+func _tick_dash_look(dt: float) -> void:
+	_tick_glide(dt)
+	if h.roll_t <= 0.0 or h.move_kind != "dash":
+		return
+	h.ghost_t = 0.3          # her own trail instead of the shared after-image pill
+	aft_t -= dt
+	if aft_t > 0.0:
+		return
+	aft_t = 0.03
+	var dv := h.roll_dir if h.roll_dir.length() > 0.1 else h.aim_dir()
+	for i in 2:
+		var off := Vector3(randf_range(-0.25, 0.25), randf_range(0.25, 0.9), randf_range(-0.25, 0.25))
+		lk().burst("mote", h.position + off, {"r": randf_range(0.8, 1.3), "dur": 0.4, "dir": dv})
+
+## A Boki merge sets a carried teammate down (unbroken: no stun), ends the Burrseed aim (no throw),
+## and keeps the key from picking anyone up meanwhile.
 func _drop_holds() -> void:
+	glide = {}
+	if not hearth_call.is_empty():
+		_call_end(false)
+	if seed_aim or rmb_down:
+		seed_aim = false
+		rmb_down = false
+		if anim_id == "mm_seed_aim": anim_id = ""
 	if not carrying().is_empty():
 		drop_all(false)
 	carry_t = 0.0
@@ -152,7 +255,8 @@ func pick_up(o: Hunter) -> void:
 	h.shield_t = 999.0
 	m.fx.word(h.pos + Vector3(0, 2.4, 0), "CARRY", res_col(), false)
 	m.fx.ring(h.pos, 1.4, res_col(), 0.3)
-	m.sfx("pickup", h.pos, -2.0, 0.8)
+	m.sfx("tend_pickup", h.pos, -2.0, 1.0)
+	play("mm_pickup")
 	if rank("dash") >= 3:
 		h.ex_cd = 0.0
 	if h.is_local() and m.hud:
@@ -178,16 +282,30 @@ func on_dash(use_ex: bool) -> bool:
 	var dd := dash_def()
 	if not spend_dash(use_ex):
 		return true
-	var dist := float(h.cdat.get("ex_dist", 5.0)) if use_ex else float(dd.get("dist", 4.2))
-	var tt := float(h.cdat.get("ex_time", 0.2)) if use_ex else float(dd.get("time", 0.16))
+	var air: Dictionary = dd.get("air", {})
+	var dist := float(air.get("dist", 8.5)) if use_ex else float(dd.get("dist", 4.2))
+	var tt := float(air.get("time", 0.8)) if use_ex else float(dd.get("time", 0.16))
 	var from := h.pos
-	travel(dist, tt, {"invuln": float(dd.get("invuln", 0.12)), "trail": "ghost"}, use_ex)
+	travel(dist, tt, {"invuln": float(dd.get("invuln", 0.12)), "dir": dash_dir()}, use_ex)
+	h.ghost_t = 0.3          # her ember motes, not the shared after-image (from the first frame)
+	# travel applies the global dash feel; the glide and the relay line use the same scaled numbers, except
+	# the glide's length, which is the source's measured 11-15 m and so skips the global shortening
+	var feel := dash_feel()
+	if not use_ex:
+		dist *= float(feel["dist"])
+	tt *= float(feel["time"])
+	if use_ex:
+		_start_glide(dist, tt)
+	play("mm_dash_air" if use_ex else "mm_dash")
+	m.sfx("tend_hop", h.pos, -3.0, 0.9 if use_ex else 1.0)
+	aft_t = 0.0
 	var rd := h.roll_dir if h.roll_dir.length() > 0.1 else h.aim_dir()
 	var to := from + Vector3(rd.x, 0, rd.y).normalized() * dist
 	last_dash_pass = false
 	var ar := float(dd.get("ally_r", 1.1))
 	for o in CareUtil.mates(m, h, Vector3.INF, 1e9, false):
-		var c := Geometry2D.get_closest_point_to_segment(Vector2(o.pos.x, o.pos.z), Vector2(from.x, from.z), Vector2(to.x, to.z))
+		var c := Geometry2D.get_closest_point_to_segment(
+				Vector2(o.pos.x, o.pos.z), Vector2(from.x, from.z), Vector2(to.x, to.z))
 		if Vector2(o.pos.x, o.pos.z).distance_to(c) < ar + o.r and absf(o.pos.y - from.y) < 2.0:
 			last_dash_pass = true
 			if use_ex:
@@ -197,98 +315,168 @@ func on_dash(use_ex: bool) -> bool:
 			wind_back_hearth(float(dd.get("e_refund", 1.0)))
 			m.fx.ring(o.pos, 1.3, col_of(dd), 0.3)
 			m.fx.word(o.pos + Vector3(0, 2.2, 0), "RELAY", col_of(dd), false)
-			m.sfx("ab_ready", o.pos, -6.0, 1.5)
+			m.sfx("tend_relay", o.pos, -4.0, 1.0)
+			lk().burst("plus", o.pos + Vector3(0, 1.2, 0), {"r": 0.5, "dur": 0.3})
+			if not use_ex: play("mm_relay")
 			break
 	return true
 
+## The air dash is her long glide (dash.air): a quick ramp to a flat burst, then a float out at a share of
+## that speed while barely sinking, then down. The peak speed is set so the whole glide covers `dist`.
+func _start_glide(dist: float, tt: float) -> void:
+	var air: Dictionary = dash_def().get("air", {})
+	var ramp := float(air.get("ramp", 0.1))
+	var burst := float(air.get("burst", 0.4))
+	var out_k := float(air.get("out_k", 0.45))
+	var span := ramp * 0.5 + burst + maxf(0.0, tt - ramp - burst) * (1.0 + out_k) * 0.5
+	glide = {"t": 0.0, "top": dist / maxf(0.05, span), "time": tt}
+	h.roll_t = tt
+	h.roll_speed = float(glide["top"]) * 0.5
+	h.vel.y = maxf(h.vel.y, 0.0)
+
+func _tick_glide(dt: float) -> void:
+	if glide.is_empty():
+		return
+	var air: Dictionary = dash_def().get("air", {})
+	glide["t"] = float(glide["t"]) + dt
+	var t := float(glide["t"])
+	if h.roll_t <= 0.0 or h.move_kind != "dash" or h.downed or h.stun_t > 0.0:
+		glide = {}
+		return
+	var ramp := float(air.get("ramp", 0.1))
+	var burst := float(air.get("burst", 0.4))
+	var top := float(glide["top"])
+	var k := clampf((t - ramp - burst) / maxf(0.05, float(glide["time"]) - ramp - burst), 0.0, 1.0)
+	h.roll_speed = top * lerpf(0.5, 1.0, clampf(t / ramp, 0.0, 1.0)) * lerpf(1.0, float(air.get("out_k", 0.45)), k)
+	# held up while it floats; the last 0.15 s lets her come down
+	if float(glide["time"]) - t > 0.15:
+		h.vel.y = maxf(h.vel.y, -float(air.get("float_fall", 1.2)))
+
 # ------------------------------------------------------------------ RMB: Burrseed
+## Held: a faint dotted lane out to the seed's full range (it flies past the cursor) and the coiled
+## pose; let go (or tap) to throw. Not a charge: no charge ring.
+func rmb_charge_full() -> float: return 0.0
+
+func rmb_hold_tick(_t: float) -> void:
+	if not rmb_ready() or busy():
+		return
+	var sd: Dictionary = rmb_def()["seed"]
+	AimKit.dotted(h, "rmb", {"len": float(sd["range"]), "width": float(sd["hit_r"]) * 2.0, "col": Color("e8f6c8")})
+	if not seed_aim:
+		seed_aim = true
+		play("mm_seed_aim")
+		m.sfx("tend_seed_aim", h.pos, -6.0, 1.0)
+
 func fire_rmb(c: Dictionary) -> void:
 	last_variant = String(c["variant"])
+	seed_aim = false
+	AimKit.hide(h, "rmb")
 	if not spend_rmb():
+		if anim_id == "mm_seed_aim": anim_id = ""
 		return
-	play("tend_seed")
+	play("mm_seed")
 	var sd: Dictionary = rmb_def()["seed"]
 	var dir := h.aim_dir()
 	var start := Vector3(h.pos.x + dir.x * 0.6, h.pos.y + 0.95, h.pos.z + dir.y * 0.6)
-	var life := float(sd["range"]) / float(sd["speed"])
-	var extra := {"src": "abil", "ab": "utility", "tracer": 0.0, "kb": 0.0, "kx": func(s: Dictionary, at: Vector3, e: Ent, _why: String):
+	var life := AimMode.dist(h, float(sd["range"]), AimMode.MAX) / float(sd["speed"])
+	var on_hit := func(_s: Dictionary, _at: Vector3, e: Ent, _why: String):
 		if e != null and e.team != h.team and not e.dead:
-			_stick(e)}
-	m.spawn_shot(h, start, dir * float(sd["speed"]), float(sd["dmg"]) * power("sec"), life, float(sd["hit_r"]) * 0.5, col_of(rmb_def()), extra)
+			_stick(e)
+	var extra := {"src": "abil", "ab": "utility", "tracer": 0.0, "kb": 0.0, "kx": on_hit}
+	m.spawn_shot(
+			h, start, dir * float(sd["speed"]), float(sd["dmg"]) * power("sec"), life, float(sd["hit_r"]) * 0.5,
+			col_of(rmb_def()), extra)
+	lk().skin(lk().last_shot(), "burr")
+	# the cast flare round her (about 1.5 bh across)
+	lk().burst("flare", h.pos, {"col": Color("9a6aff"), "rim": Color("ffd27a"), "r": 1.4, "dur": 0.25, "pattern": 3.0})
+	m.fx.flash(start, Color("c8e07a"), 0.9, 0.08)
 	m.sfx("tend_seed", h.pos, -2.0, 1.0)
-	Feel.shake(m, "t1", h, h.pos)
+	Feel.shake(m, "cast", h, h.pos)
 
 func _stick(e: Ent) -> void:
 	var sd: Dictionary = rmb_def()["seed"]
-	var n := Node3D.new()
-	n.top_level = true
-	var col := col_of(rmb_def())
-	var core := MeshInstance3D.new()
-	core.mesh = Models.sphere(0.2, 10)
-	core.material_override = Models.glow_mat(Color(col, 0.95))
-	core.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	n.add_child(core)
-	m.add_child(n)
-	burrs.append({"t": e, "left": float(sd["delay"]), "node": n, "ring": 0.0})
-	m.fx.ring(e.pos, 1.0, col, 0.3)
+	burr_n += 1
+	burrs.append({"t": e, "left": float(sd["delay"]), "total": float(sd["delay"]), "id": burr_n})
+	# the area shows at once: a disc the size of the burst under them, and a light column falling
+	lk().burst("column", e.pos, {"col": Color("8a5cff"), "r": 1.0, "dur": float(sd["delay"]) + 0.1, "ent": e})
 	m.sfx("tend_stick", e.pos, -3.0, 1.0)
+	net_ring(e.pos, float(sd["burst_r"]), col_of(rmb_def()))
 
 func _tick_burrs(dt: float) -> void:
+	var sd: Dictionary = rmb_def()["seed"]
 	for b in burrs.duplicate():
-		var tv = b["t"]     # untyped first: a freed foe or node can't be assigned to a typed var
-		var nv = b["node"]
+		var tv = b["t"]     # untyped first: a freed foe can't be assigned to a typed var
 		var t: Ent = tv if is_instance_valid(tv) else null
-		var n: Node3D = nv if is_instance_valid(nv) else null
+		var key := "burr%d" % int(b["id"])
 		if t == null or t.dead:
-			if is_instance_valid(n): n.queue_free()
 			burrs.erase(b)
 			continue
 		b["left"] = float(b["left"]) - dt
-		b["ring"] = float(b["ring"]) - dt
-		if is_instance_valid(n):
-			n.global_position = t.position + Vector3(0, 1.6 if t is Hunter else 1.1, 0)
-			n.scale = Vector3.ONE * (1.0 + 0.25 * sin(m.time * 14.0))
-		if float(b["ring"]) <= 0.0:
-			b["ring"] = 0.5
-			net_ring(t.pos, 0.9, col_of(rmb_def()))     # everyone sees the burr pulse
+		var k := 1.0 - float(b["left"]) / maxf(0.01, float(b["total"]))
+		# the area rides on the foe (Assumption: it sticks to them), filling toward the root
+		lk().keep(
+				key, "disc", t.pos,
+				{
+					"r": float(sd["burst_r"]), "col": Color("7a4aff"), "rim": Color("c9a0ff"), "fill": 1.2,
+					"sweep": k, "pattern": 3.0, "spin": m.time * 0.8, "a": 0.9})
+		AimKit.circle(h, key, {"at": t.pos, "r": float(sd["burst_r"]), "fill": k, "all": true, "col": Color("b98aff")})
 		if float(b["left"]) <= 0.0:
-			if is_instance_valid(n): n.queue_free()
 			burrs.erase(b)
+			lk().drop(key)
+			AimKit.hide(h, key)
 			_burst(t)
 
 func _burst(t: Ent) -> void:
 	var sd: Dictionary = rmb_def()["seed"]
 	var at := t.pos
-	var rr := float(sd["burst_r"]) * (1.0 + (0.0))
+	var rr := float(sd["burst_r"])
 	var col := col_of(rmb_def())
-	m.fx.ring(at, rr, col, 0.45)
-	m.fx.burst(at + Vector3(0, 0.5, 0), col, 26, 5.0, 0.6, 3.0, 1.2)
+	# the flare: the disc snaps out bigger and brighter, then a root beam holds on each foe
+	lk().burst(
+			"flare", at,
+			{"col": Color("7a4aff"), "rim": Color("c9a0ff"), "r": rr * 1.5, "dur": 0.45, "pattern": 3.0})
+	m.fx.burst(at + Vector3(0, 0.5, 0), Color("c9a0ff"), 26, 5.0, 0.6, 3.0, 1.2)
+	m.fx.burst(at + Vector3(0, 0.2, 0), col, 14, 3.5, 0.5, 6.0, 1.0)
 	m.sfx("tend_root", at, 0.0, 1.0)
-	m.shake(0.25, at)
+	Feel.shake(m, "t3", h, at)
 	var root := float(sd["root"]) + (0.3 if rank("sec") >= 3 else 0.0)
 	for f in foes_in(at, rr):
-		f.hurt(float(sd["burst_dmg"]) * power("sec"), h, {"src": "abil", "ab": "utility", "root": root, "dr": true, "kindle": true, "tags": ["utility", "burrseed"]})
+		f.hurt(
+				float(sd["burst_dmg"]) * power("sec"), h,
+				{
+					"src": "abil", "ab": "utility", "root": root, "dr": true, "kindle": true,
+					"tags": ["utility", "burrseed"]})
+		lk().burst("beam_root", f.pos, {"col": Color("9a6aff"), "r": 1.0, "dur": root, "ent": f})
+		lk().burst(
+				"flare", f.pos,
+				{"col": Color("7a4aff"), "rim": Color("c9a0ff"), "r": 1.0, "dur": root, "pattern": 3.0})
 	m.fx.word(at + Vector3(0, 2.2, 0), "ROOTED", col, false)
+	stats["flares"] += 1
+	play_soft("mm_tug")
 
 # ------------------------------------------------------------------ E: Hearthlight
 func cast_e() -> bool:
 	var ed := e_def()
-	hearth = {"pos": h.pos, "mode": "self", "who": null, "left": float(ed["time"]), "tick": 0.0, "boost": 0.0, "node": _hearth_node(), "revived": false, "tossed": false}
+	hearth = {
+			"pos": h.pos, "mode": "self", "who": null, "left": float(ed["time"]), "tick": 0.0, "boost": 0.0,
+			"revived": false, "tossed": false}
 	e_t = float(ed["time"])
-	play("tend_hearth")
-	m.fx.ring(h.pos, float(ed["radius"]), col_of(ed), 0.5)
+	play("mm_hearth")
+	# the lantern plus over her hand and green light rising round her
+	lk().burst("plus", h.pos + Vector3(0, 1.9, 0), {"r": 0.9, "dur": 0.4})
+	lk().burst("rays", h.pos, {"col": Color("9cf07a"), "r": 1.0, "dur": 0.45})
 	m.sfx("tend_hearth", h.pos, -2.0, 1.0)
-	m.fx.word(h.pos + Vector3(0, 2.4, 0), "HEARTHLIGHT", col_of(ed), false)
 	return true
 
 func e_recastable() -> bool:
 	return not hearth.is_empty() and not bool(hearth.get("tossed", false))
 
+## E again: the light is thrown to the cursor (clamped to its reach) almost at once.
 func e_recast() -> bool:
 	if hearth.is_empty() or hearth.get("tossed", false):
 		return true
 	var ed := e_def()
-	var to := aim_at(float(ed["reach"]))
+	var to := AimMode.point(h, float(ed["reach"]), AimMode.CURSOR, 0.0)
 	# carrying someone: a toss aimed at yourself lands on them
 	var cs := carrying()
 	if not cs.is_empty() and Vector2(to.x - h.pos.x, to.z - h.pos.z).length() < 2.0:
@@ -299,6 +487,7 @@ func e_recast() -> bool:
 		hearth["pos"] = h.pos
 	hearth["tossed"] = true
 	hearth["boost"] = float(ed.get("boost_t", 1.0)) * (2.0 if rank("kin") >= 3 else 1.0)
+	play("mm_toss")
 	m.sfx("tend_toss", h.pos, -2.0, 1.2)
 	h._ab_feedback("k1", "cast")
 	return true
@@ -306,27 +495,8 @@ func e_recast() -> bool:
 func _latch(o: Hunter) -> void:
 	hearth["mode"] = "latched"
 	hearth["who"] = o
-	m.fx.ring(o.pos, 1.5, col_of(e_def()), 0.3)
-	m.sfx("ab_ready", o.pos, -4.0, 1.4)
-
-func _hearth_node() -> Node3D:
-	var n := Node3D.new()
-	n.top_level = true
-	var col := col_of(e_def())
-	var lamp := MeshInstance3D.new()
-	lamp.mesh = Models.sphere(0.22, 12)
-	lamp.material_override = Models.glow_mat(Color(col.lightened(0.3), 0.95))
-	lamp.position = Vector3(0, 1.3, 0)
-	lamp.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	n.add_child(lamp)
-	var halo := MeshInstance3D.new()
-	halo.mesh = Models.flat_quad(float(e_def()["radius"]) * 2.0)
-	halo.material_override = Models.ring_mat(Color(col, 0.8), 0.07)
-	halo.position = Vector3(0, 0.08, 0)
-	halo.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	n.add_child(halo)
-	m.add_child(n)
-	return n
+	lk().burst("plus", o.pos + Vector3(0, 1.6, 0), {"r": 0.6, "dur": 0.3})
+	m.sfx("tend_land", o.pos, -4.0, 1.2)
 
 func hearth_center() -> Vector3:
 	match String(hearth.get("mode", "self")):
@@ -336,33 +506,47 @@ func hearth_center() -> Vector3:
 			return (w as Hunter).pos if is_instance_valid(w) else hearth["pos"]
 	return hearth["pos"]
 
+## The ring's radius: on her (or a carried friend) the smaller ring, thrown the wider disc.
+func hearth_r() -> float:
+	var ed := e_def()
+	return float(ed.get("thrown_radius", ed["radius"])) if bool(hearth.get("tossed", false)) else float(ed["radius"])
+
 func _tick_hearth(dt: float) -> void:
 	if hearth.is_empty():
 		return
 	var ed := e_def()
 	# a stun on the bearer puts the light out
-	var on_me: bool = String(hearth["mode"]) == "self" or (String(hearth["mode"]) == "latched" and hearth.get("who") == h)
+	var on_me: bool = String(hearth["mode"]) == "self" or (
+			String(hearth["mode"]) == "latched" and hearth.get("who") == h)
 	if on_me and h.stun_t > 0.0:
 		_hearth_end(false, "OUT")
 		return
 	if String(hearth["mode"]) == "flying":
 		var p: Vector3 = hearth["pos"]
 		var to: Vector3 = hearth["to"]
-		var step := float(ed.get("toss_speed", 18.0)) * dt
+		var step := float(ed.get("toss_speed", 45.0)) * dt
 		var dv := to - p
 		p += dv.normalized() * minf(step, dv.length())
 		hearth["pos"] = p
 		for o in CareUtil.mates(m, h, p, float(ed.get("latch_r", 1.0)), true):
 			_latch(o)
 			break
-		if dv.length() <= step:
+		if String(hearth["mode"]) == "flying" and dv.length() <= step:
 			hearth["mode"] = "ground"
+			var land := {"col": Color("ffd27a"), "rim": Color("5fe0d8"), "r": hearth_r(), "dur": 0.3, "pattern": 5.0}
+			lk().burst("flare", to, land)
+			m.sfx("tend_land", to, -3.0, 1.0)
 	var c := hearth_center()
 	hearth["pos"] = c if String(hearth["mode"]) != "flying" else hearth["pos"]
-	var n: Node3D = hearth["node"]
-	if is_instance_valid(n):
-		n.global_position = c
-		n.rotation.y += dt * 1.5
+	var tossed := bool(hearth.get("tossed", false))
+	# on her: a soft warm ring with a faint inside; thrown: a filled disc, warm amber in the middle shading
+	# to teal, a bright rim, its lantern floating over the middle
+	var gk := float(hearth["left"]) / maxf(0.01, float(ed["time"]))
+	var look_p := {"r": hearth_r(), "col": Color("ffd27a"), "rim": Color("ffb347"), "fill": 0.45, "pattern": 5.0,
+		"a": 0.85 * (0.6 + 0.4 * gk), "spin": m.time * 0.5, "lamp": tossed}
+	if tossed:
+		look_p.merge({"col": Color("ffd27a"), "rim": Color("3fd8d0"), "fill": 1.8, "a": 1.1 * (0.6 + 0.4 * gk)}, true)
+	lk().keep("hearth", "hearth", c, look_p)
 	hearth["left"] = float(hearth["left"]) - dt
 	e_t = float(hearth["left"])
 	hearth["tick"] = float(hearth["tick"]) + dt
@@ -371,13 +555,14 @@ func _tick_hearth(dt: float) -> void:
 		hearth["tick"] = float(hearth["tick"]) - every
 		var per := float(ed["over"]) / (float(ed["time"]) / every)
 		_pulse(c, per)
-		m.fx.ring(c, float(ed["radius"]), col_of(ed), 0.35)
+		var motes := 10 if tossed else 6
+		m.fx.burst(c + Vector3(0, 0.3, 0), Color("ffc46a"), motes, hearth_r() * 0.5, 0.9, -2.0, 0.8, Vector3.UP, 30.0)
 	hearth["boost"] = maxf(0.0, float(hearth["boost"]) - dt)
 	if float(hearth["left"]) <= 0.0:
 		_hearth_end(true, "FLARE")
 
 func heal_k() -> float:
-	return 1.0 + 0.15 * float(maxi(0, rank("kin") - 1)) + (0.0)
+	return 1.0 + 0.15 * float(maxi(0, rank("kin") - 1))
 
 func _pulse(c: Vector3, per: float) -> void:
 	var ed := e_def()
@@ -385,7 +570,7 @@ func _pulse(c: Vector3, per: float) -> void:
 	for o in m.hunters:
 		if o.team != h.team or o.out or o.extracted:
 			continue
-		if Vector2(o.pos.x - c.x, o.pos.z - c.z).length() > float(ed["radius"]) + o.r:
+		if Vector2(o.pos.x - c.x, o.pos.z - c.z).length() > hearth_r() + o.r:
 			continue
 		var amt := per * heal_k() * boost * (float(ed.get("self_k", 0.33)) if o == h else 1.0)
 		CareUtil.heal(m, o, amt, float(ed.get("wisp_k", 5.0)))
@@ -393,28 +578,29 @@ func _pulse(c: Vector3, per: float) -> void:
 func _hearth_end(flare: bool, word: String) -> void:
 	var ed := e_def()
 	var c := hearth_center()
+	var rr := hearth_r()
 	if flare:
 		var amt := float(ed["burst"]) * heal_k()
 		var col := col_of(ed)
 		CareUtil.payoff(m, h, c, "HEARTH", col, "tend_flare")
+		lk().burst(
+				"flare", c,
+				{"col": Color("ffd27a"), "rim": Color("3fd8d0"), "r": rr * 1.15, "dur": 0.4, "pattern": 5.0})
+		lk().burst("rays", c, {"col": Color("ffe6a0"), "r": rr * 0.6, "dur": 0.4})
+		play_soft("mm_flare")
 		for o in m.hunters:
 			if o.team != h.team or o.out or o.extracted:
 				continue
-			if Vector2(o.pos.x - c.x, o.pos.z - c.z).length() > float(ed["radius"]) + o.r:
+			if Vector2(o.pos.x - c.x, o.pos.z - c.z).length() > rr + o.r:
 				continue
 			if o.downed:
-				if rank("kin") >= 3:
-					if CareUtil.revive(m, o, h):
-						CareUtil.payoff(m, h, o.pos, "UP", col, "revive")
-				else:
-					CareUtil.heal(m, o, amt, float(ed.get("wisp_k", 5.0)))
+				CareUtil.heal(m, o, amt, float(ed.get("wisp_k", 5.0)))
 			else:
 				CareUtil.heal(m, o, amt * (float(ed.get("self_k", 0.33)) if o == h else 1.0))
 	else:
 		m.fx.word(c + Vector3(0, 2.0, 0), word, Color("ff8a6a"), false)
 		m.sfx("knock", c, -6.0, 1.4)
-	if is_instance_valid(hearth.get("node")):
-		(hearth["node"] as Node3D).queue_free()
+	lk().drop("hearth")
 	hearth = {}
 	e_t = 0.0
 
@@ -426,11 +612,199 @@ func in_e() -> bool: return not hearth.is_empty()
 
 func teardown() -> void:
 	super.teardown()
-	if not hearth.is_empty() and is_instance_valid(hearth.get("node")):
-		(hearth["node"] as Node3D).queue_free()
-	for b in burrs:
-		if is_instance_valid(b["node"]): (b["node"] as Node3D).queue_free()
+	hearth = {}
+	hearth_call = {}
 	burrs.clear()
+	if look != null:
+		look.teardown()
+		look = null
+	if ult_look != null:
+		ult_look.teardown()
+		ult_look = null
+
+# ------------------------------------------------------------------ X: Hearth Call
+func ulk() -> UltLook:
+	if ult_look == null:
+		ult_look = UltLook.new(m, h)
+	return ult_look
+
+
+func ult_running() -> bool:
+	return not hearth_call.is_empty()
+
+
+## X again while it runs does nothing (the source has no early end); the press is swallowed.
+func ult_recast() -> bool:
+	return true
+
+
+## The aim telegraph (local only): while Hearth Call is ready and the cursor rests on a teammate in
+## reach, the gold reach ring round her, a line onto them and a pick ring under them. X casts on it.
+func _call_preview() -> void:
+	if not hearth_call.is_empty() or not h.is_local() or not _x_ready():
+		return
+	var who := call_target()
+	if who == null or who == h:
+		return
+	var xd := x_def()
+	AimKit.circle(h, "x", {"self": true, "r": float(xd["range"]), "col": Color("ffd27a"), "dashed": true, "alpha": 1.2})
+	AimKit.line(h, "x_line", {"from": h.pos, "to": who.pos, "col": Color("ffb347"), "lw": 0.1, "alpha": 1.8})
+	AimKit.circle(h, "x_pick", {"at": who.pos, "r": 0.8, "col": Color("9cf07a"), "ticks": true, "alpha": 1.6})
+	# a faint tether already strung from her raised hand onto them: this is who X will reach
+	ulk().keep("tether_aim", "tether", h.pos + Vector3(0, 1.3, 0), {"b": who.pos + Vector3(0, 1.0, 0), "a": 0.45})
+
+
+## X is open (level) and off cooldown, and she is free to cast.
+func _x_ready() -> bool:
+	return HeroUlt.ready(self) and not busy()
+
+
+## The teammate under the cursor within reach (standing or downed); with no teammate in the match at
+## all, herself (so the key is never dead in solo play).
+func call_target() -> Hunter:
+	var xd := x_def()
+	var aim_p: Vector3 = h.inp.get("aim", h.pos)
+	var best: Hunter = null
+	var best_d := float(xd["pick_r"])
+	var any_mate := false
+	for o in CareUtil.mates(m, h):
+		any_mate = true
+		if h.flat_dist(o) > float(xd["range"]):
+			continue
+		var dc := Vector2(o.pos.x - aim_p.x, o.pos.z - aim_p.z).length()
+		if dc < best_d:
+			best_d = dc
+			best = o
+	if best == null and not any_mate and bool(xd.get("self_when_solo", true)):
+		return h
+	return best
+
+
+func cast_ult() -> bool: return HeroUlt.press(self, _start_call)
+func has_ult() -> bool: return true
+
+
+func _start_call() -> bool:
+	AimKit.hide(h, "x_line")
+	AimKit.hide(h, "x_pick")
+	if ult_look != null:
+		ult_look.drop("tether_aim")
+	var who := call_target()
+	if who == null:
+		if h.is_local() and m.hud:
+			m.hud.toast_small("No teammate there", Color("a2a8bb"))
+		return false
+	hearth_call = {"who": who, "left": float(x_def()["time"]), "tick": 0.0, "fx": 0.0}
+	stats["calls"] += 1
+	play("mm_call")
+	m.sfx("tend_call", h.pos, -1.0, 1.0)
+	lk().burst("plus", who.pos + Vector3(0, 1.3, 0), {"r": 1.1, "dur": 0.45})
+	var cast_flare := {"col": Color("9cf07a"), "rim": Color("ffd27a"), "r": 1.4, "dur": 0.35, "pattern": 1.0}
+	lk().burst("flare", who.pos, cast_flare)
+	m.fx.word(h.pos + Vector3(0, 2.8, 0), "HEARTH CALL", col_of(x_def()), true)
+	net_ring(h.pos, float(x_def()["range"]), Color("ffd27a"))
+	net_bolt(h.pos + Vector3(0, 1.3, 0), who.pos + Vector3(0, 1.1, 0), Color("ffd27a"))
+	return true
+
+
+func _tick_call(dt: float) -> void:
+	if hearth_call.is_empty():
+		return
+	var xd := x_def()
+	var who: Hunter = hearth_call["who"] if is_instance_valid(hearth_call["who"]) else null
+	if who == null or who.out or who.extracted:
+		_call_end(false)
+		return
+	if h.downed or h.out or h.stun_t > 0.0 or h.flat_dist(who) > float(xd["range"]) + who.r:
+		_call_end(false)
+		return
+	hearth_call["left"] = float(hearth_call["left"]) - dt
+	hearth_call["tick"] = float(hearth_call["tick"]) + dt
+	var every := float(xd["every"])
+	if float(hearth_call["tick"]) >= every:
+		hearth_call["tick"] = float(hearth_call["tick"]) - every
+		_call_heal(who, float(xd["heal_ps"]) * every)
+	_call_look(who, dt)
+	if anim_id == "" or (anim_id != "mm_call_hold" and m.time - anim_at >= KMovesCare.length(anim_id)):
+		play("mm_call_hold")
+	if float(hearth_call["left"]) <= 0.0:
+		_call_end(true)
+
+
+## A tick of the tether's heal: on a standing teammate (or herself in solo); while they are down the
+## healing goes to her instead (the source's rule for a channel on a downed ally).
+func _call_heal(who: Hunter, amount: float) -> void:
+	var amt := amount * LevelGrowth.ap(h)
+	if who.downed or who == h:
+		CareUtil.heal(m, h, amt * (float(e_def().get("self_k", 0.33)) if who == h else 1.0))
+	else:
+		CareUtil.heal(m, who, amt)
+
+
+func _call_look(who: Hunter, dt: float) -> void:
+	var xd := x_def()
+	var gold := Color("ffd27a")
+	AimKit.circle(h, "x", {"self": true, "r": float(xd["range"]), "col": gold, "all": true, "dashed": true})
+	AimKit.circle(h, "x_me", {"self": true, "r": 0.7, "col": Color("ffc46a"), "all": true})
+	if who != h:
+		AimKit.circle(h, "x_pick", {"at": who.pos, "r": 0.7, "col": Color("9cf07a"), "all": true})
+		var hand := CareUtil.hand_at(h, false)
+		ulk().keep("tether", "tether", hand, {"b": who.pos + Vector3(0, 1.1, 0)})
+	hearth_call["fx"] = float(hearth_call["fx"]) - dt
+	if float(hearth_call["fx"]) <= 0.0:
+		hearth_call["fx"] = 0.22
+		var up := who.pos + Vector3(randf_range(-0.4, 0.4), 0.6 + randf() * 0.8, randf_range(-0.4, 0.4))
+		lk().burst("plus", up, {"r": 0.28, "dur": 0.5})
+		m.fx.burst(who.pos + Vector3(0, 0.5, 0), Color("9cf07a"), 4, 1.4, 0.7, -3.0, 0.7, Vector3.UP, 25.0)
+		m.sfx("tend_call_hum", h.pos, -12.0, 1.0)
+
+
+## The end: on time, a downed teammate is pulled to her side and stood up (a rescue), and the bond pays;
+## broken early, nothing pays.
+func _call_end(done: bool) -> void:
+	var who: Hunter = hearth_call["who"] if is_instance_valid(hearth_call.get("who")) else null
+	hearth_call = {}
+	for id_ in ["x", "x_me", "x_pick", "x_line"]:
+		AimKit.hide(h, id_)
+	if ult_look != null:
+		ult_look.drop("tether")
+	if not done or who == null:
+		stats["broken"] += 1
+		m.fx.word(h.pos + Vector3(0, 2.4, 0), "BROKEN", Color("ff8a6a"), false)
+		m.sfx("knock", h.pos, -8.0, 1.5)
+		if anim_id == "mm_call_hold":
+			anim_id = ""
+		return
+	var rescue := who != h and who.downed
+	if rescue:
+		_call_home(who)
+	# a support ult lands on a teammate: a completed tether counts as a hit, a rescue as the top event
+	KinBond.from_ult(h, "kill" if rescue else "hit", HeroUlt.cast_id(self))
+	var at := who.pos if not rescue else h.pos
+	# a rescue has its own revive banner, and the bond word lands on her now: no third word there
+	CareUtil.payoff(m, h, at, "" if rescue else "MENDED", Color("9cf07a"), "tend_arrive")
+	lk().burst("flare", at, {"col": Color("9cf07a"), "rim": Color("ffd27a"), "r": 1.8, "dur": 0.4, "pattern": 1.0})
+	lk().burst("rays", at, {"col": Color("b8ff9a"), "r": 0.9, "dur": 0.45})
+	play("mm_call_end")
+
+
+## Pulls a downed teammate to her side and stands them up. An online teammate rides there on the
+## existing "carry" event, then the "rev" event stands them up a beat later.
+func _call_home(who: Hunter) -> void:
+	stats["rescues"] += 1
+	var side := Vector2(cos(h.face), -sin(h.face)) * float(x_def().get("land_r", 0.9))
+	var to := Vector3(h.pos.x + side.x, h.pos.y, h.pos.z + side.y)
+	lk().burst("plus", who.pos + Vector3(0, 1.2, 0), {"r": 0.8, "dur": 0.3})
+	if who.remote:
+		CareUtil.set_carry(m, who, h.nid)
+		m.later(0.15, func():
+			CareUtil.revive(m, who, h)
+			CareUtil.set_carry(m, who, ""))
+		return
+	who.teleport(to)
+	who.vel = Vector3.ZERO
+	CareUtil.revive(m, who, h)
+
 
 # ------------------------------------------------------------------ bots
 func _bot_idle(dt: float) -> void:
@@ -451,7 +825,8 @@ func _bot_idle(dt: float) -> void:
 	var wd := 1e9
 	for f in m.foes_of(h.team):
 		if f is Hunter and h.flat_dist(f) < wd:
-			wd = h.flat_dist(f); worst = f
+			wd = h.flat_dist(f)
+			worst = f
 	if carry_t > 4.0:
 		drop_all(false)
 		lock_t = 8.0          # a bot carries for a few seconds at most, then revives them
@@ -467,13 +842,31 @@ func _bot_idle(dt: float) -> void:
 			lock_t = 6.0          # now revive them on the spot
 
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
+	_bot_call()
 	if tgt == null or not carrying().is_empty():
 		return
 	# a seed on the nearest rival from mid range
-	if int(h.slot_lv["sec"]) > 0 and rmb_ready() and los and dist < 10.0 and dist > 2.5 and tgt is Hunter and randf() < 0.7:
+	if (int(h.slot_lv["sec"]) > 0
+			and rmb_ready()
+			and los
+			and dist < 10.0
+			and dist > 2.5
+			and tgt is Hunter
+			and randf() < 0.7):
 		h.inp["aim"] = tgt.pos + Vector3(0, 0.9, 0)
 		h.inp["sec"] = true
 	# a hop through a teammate when one is close and we're being pressed
 	if dist < 3.5 and h.dashes >= 1.0 and randf() < 0.2:
 		h.inp["aim"] = h.pos - Vector3(h.dir_to(tgt).x, 0, h.dir_to(tgt).y) * 4.0
 		h.inp["dash"] = true
+
+
+## A bot calls a downed or badly hurt teammate home when it can.
+func _bot_call() -> void:
+	if not hearth_call.is_empty() or not _x_ready():
+		return
+	for o in CareUtil.mates(m, h, h.pos, float(x_def()["range"]) - 1.0):
+		if o.downed or o.hp < o.max_hp * 0.35:
+			h.inp["aim"] = o.pos + Vector3(0, 0.9, 0)
+			HunterKeys.ult_pressed(h)
+			return

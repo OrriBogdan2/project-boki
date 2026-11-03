@@ -641,7 +641,8 @@ func _draw_duel(sz: Vector2) -> void:
 		var y := box.position.y + 50 + i * 24
 		_text(Vector2(box.position.x + 14, y), String(rows[i][0]), 13, MUTED)
 		_text(Vector2(box.position.x + 140, y), String(rows[i][1]), 14, rows[i][2], big)
-	_text(Vector2(box.position.x + 14, box.end.y - 12), "B bot setup  ·  X reset  ·  G hide", 11, Color(MUTED, 0.85))
+	var keys_at := Vector2(box.position.x + 14, box.end.y - 12)
+	_text(keys_at, "B bot setup  ·  Backspace reset  ·  G hide", 11, Color(MUTED, 0.85))
 
 var feed_top := 18.0
 ## The kill feed under the counters: each line a banner plate, red when it's about an enemy squad's
@@ -2175,7 +2176,7 @@ func _draw_scores(sz: Vector2) -> void:
 	for h in hs:
 		var tc: Color = Data.TEAM_COLORS[h.team % Data.TEAM_COLORS.size()]
 		c.draw_rect(Rect2(Vector2(r.position.x + 12, y - 14), Vector2(4, 18)), tc)
-		_text(Vector2(r.position.x + 22, y), "%s (%s)" % [h.pname, Data.CLASSES[h.cls]["name"]], 15, INK if h != m.player else GOLD)
+		_text(Vector2(r.position.x + 22, y), "%s (%s)" % [h.pname, Arch.label(h.arch)], 15, INK if h != m.player else GOLD)
 		if h.kin: _text(Vector2(r.position.x + 260, y), Data.KIN[h.kin.species]["name"], 14, Data.KIN[h.kin.species]["color"])
 		_text(Vector2(r.position.x + 392, y), str(h.knocks), 15)
 		_text(Vector2(r.position.x + 456, y), str(int(h.dmg_done)), 15)
@@ -2418,7 +2419,7 @@ func _tip_lines(id: String, p: Hunter) -> Array:
 		"dash":
 			var dd: AbilityDef = p.dodge_def
 			out.append([dd.display_name if dd else "Dash", dd.color if dd else Color("bfe6ff")])
-			out.append(["%s class dodge  ·  %s" % [String(p.cls).capitalize(), Settings.key_cap("dash")], MUTED, 12])
+			out.append(["Dodge  ·  %s" % Settings.key_cap("dash"), MUTED, 12])
 			out.append([dd.desc if dd else "A quick burst the way you're moving.", INK, 14])
 			var rd := p.dash_rider()
 			if not rd.is_empty():
@@ -2453,7 +2454,7 @@ func _tip_lines(id: String, p: Hunter) -> Array:
 			out.append(["Magazine %d  ·  reload %s  ·  range %d tiles" % [int(wp["mag"]), _secs(float(wp["reload"])), int(float(wp.get("range", 10.0)))], MUTED, 13])
 			out.append(["It's the one weapon you carry; level-ups, chests and tunings on the ground make it stronger.", MUTED, 12])
 		"vitals":
-			out.append(["%s class" % String(p.cls).capitalize(), hc])
+			out.append([Arch.label(p.arch), hc])
 			out.append(["Speed %.1f  ·  %s" % [p.base_speed, String(p.cdat.get("desc", ""))], MUTED, 12])
 			out.append(["Health %d / %d   ·   Armor %d / %d" % [int(ceil(p.hp)), int(p.max_hp), int(ceil(p.armor)), int(p.max_armor)], INK, 14])
 			out.append(["Level %d  ·  %s" % [p.lvl, LevelGrowth.tip(p)], GOLD, 13])
@@ -2569,7 +2570,7 @@ func _draw_world_hover(sz: Vector2, p: Hunter) -> void:
 		var h: Hunter = best
 		var ally: bool = h.team == p.team
 		lines.append([h.pname, GOOD if ally else Data.TEAM_COLORS[h.team % Data.TEAM_COLORS.size()]])
-		lines.append(["%s class  ·  %s  ·  %s" % [String(h.cls).capitalize(), String(h.wpn.get("name", "")), "teammate" if ally else "rival"], MUTED])
+		lines.append(["%s  ·  %s  ·  %s" % [Arch.label(h.arch), String(h.wpn.get("name", "")), "teammate" if ally else "rival"], MUTED])
 		lines.append(["Health %d / %d   ·   Armor %d / %d (%s)" % [int(ceil(h.hp)), int(h.max_hp), int(ceil(h.armor)), int(h.max_armor), String(Hunter.ARMOR_TIERS[h.armor_tier][0])], INK])
 		if not ally:
 			# know your opponent: their right click, dodge, glove and kin, so you can play around them

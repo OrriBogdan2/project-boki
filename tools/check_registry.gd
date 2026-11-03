@@ -11,13 +11,15 @@ const CHECKS := {
 	"--tender-combo-check": ["res://tools/support_check.gd", "support_check", "tender"],
 	"--rimewright-combo-check": ["res://tools/support_check.gd", "support_check", "rimewright"],
 	"--zone-check": ["res://tools/hero_pair_check.gd", "hero_pair_check", null],
-	"--dolm-combo-check": ["res://tools/hero_pair_check.gd", "hero_pair_check", null],
-	"--ostra-combo-check": ["res://tools/hero_pair_check.gd", "hero_pair_check", null],
+	"--dolm-combo-check": ["res://tools/breah_combo_check.gd", "hero_pair_check", null],
+	"--ostra-combo-check": ["res://tools/ostra_combo_check.gd", "hero_pair_check", null],
 	"--dredge-combo-check": ["res://tools/dredge_combo_check.gd", "hero_check", null],
 	"--ashwick-combo-check": ["res://tools/ashwick_combo_check.gd", "hero_check", null],
 	"--archer-combo-check": ["res://tools/archer_bulwark_combo_check.gd", "hero_check", null],
 	"--bulwark-combo-check": ["res://tools/archer_bulwark_combo_check.gd", "hero_check", null],
 	"--music-leave-check": ["res://tools/music_leave_check.gd", "music_leave_check", null],
+	"--hunter-unlock-check": ["res://tools/class_unlock_check.gd", "class_unlock_check", null],
+	"--class-unlock-check": ["res://tools/class_unlock_check.gd", "class_unlock_check", null],      # (the old name)
 	"--shot-vertical-check": ["res://tools/shot_vertical_check.gd", "shot_vertical_check", null],
 	"--kin-regen-check": ["res://tools/kin_regen_check.gd", "kin_regen_check", null],
 	"--kin-loss-check": ["res://tools/kin_loss_check.gd", "kin_loss_check", null],
@@ -28,6 +30,9 @@ const CHECKS := {
 	"--keys-check": ["res://tools/keys_check.gd", "keys_check", null],
 	"--cover-check": ["res://tools/cover_check.gd", "cover_check", null],
 	"--aimkit-check": ["res://tools/aimkit_check.gd", "aimkit_check", null],
+	"--pin-bjorn-shots": ["res://tools/pin_bjorn_shots.gd", "pin_bjorn_shots", null],
+	"--dancer-combo-check": ["res://tools/dancer_jug_check.gd", "dancer_jug_check", "thief"],
+	"--juggernaut-combo-check": ["res://tools/dancer_jug_check.gd", "dancer_jug_check", "juggernaut"],
 	"--vv-shots": ["res://tools/vv_shots.gd", "vv_shots", null],          # Vireo / Venator screenshots
 	"--ultbond-check": ["res://tools/ultbond_check.gd", "ultbond_check", null],      # keys, bond hook, release
 	"--wallmove-check": ["res://tools/wallmove_check.gd", "wallmove_check", null],

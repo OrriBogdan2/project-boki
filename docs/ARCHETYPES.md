@@ -1,5 +1,7 @@
 # Archetypes
 
+Naming: players see these as **classes** ("archetype" is the internal word: ids, files and save keys keep it, and the weight (Light, Medium, Heavy) is what used to be called the class).
+
 Status: **built** (branch `archetypes`; see "Implementation status" at the end for what's in, what's
 a subset and the gaps). It describes six archetypes, two per weight class. Each one is a
 whole character: a dash, a passive, LMB, RMB with contextual variants, E (usually utility) and R
@@ -1219,9 +1221,9 @@ games' heroes). Mechanics only: every name, number, text, look and sound in the 
 | `bulwark` | Bulwark | [Oath](https://supervive.wiki.gg/wiki/Oath) | Accuracy pass: `docs/heroes/bulwark.md` |
 | `mage` | Vireo | [Joule](https://supervive.wiki.gg/wiki/Joule) | `docs/heroes/mage.md` |
 | `gunslinger` | Venator | [Ghost](https://supervive.wiki.gg/wiki/Ghost) | `docs/heroes/gunslinger.md` |
-| `ashwick` | Ashwick | [Felix](https://supervive.wiki.gg/wiki/Felix) | `docs/heroes/ashwick.md` |
+| `ashwick` | Linwick (was Ashwick) | [Felix](https://supervive.wiki.gg/wiki/Felix) | `docs/heroes/ashwick.md` |
 | `dredge` | Dredge | [Kingpin](https://supervive.wiki.gg/wiki/Kingpin) | `docs/heroes/dredge.md` |
-| `tender` | Linnet, the Tender | [Elluna](https://supervive.wiki.gg/wiki/Elluna) | `docs/heroes/tender.md` |
+| `tender` | Moosh Moosh, the Tender | [Elluna](https://supervive.wiki.gg/wiki/Elluna) | `docs/heroes/tender.md` |
 | `rimewright` | Tamsin, the Rimewright | [Celeste](https://supervive.wiki.gg/wiki/Celeste) | `docs/heroes/rimewright.md` |
-| `dolm` | Dolm | [Tetra](https://supervive.wiki.gg/wiki/Tetra) | `docs/heroes/dolm.md` |
+| `dolm` | Breah | [Tetra](https://supervive.wiki.gg/wiki/Tetra) | `docs/heroes/dolm.md` |
 | `ostra` | Ostra | [Void](https://supervive.wiki.gg/wiki/Void) | `docs/heroes/ostra.md` |

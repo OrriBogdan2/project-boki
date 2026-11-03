@@ -2,15 +2,15 @@ class_name KitStatus
 extends RefCounted
 ## Statuses the archetype kits put on a body that a plain hit can't carry over the network (kits2):
 ##   gnd  Grounded (the Thief's Bola): no dash, jump or glide; the hunter's legs show the tangled cords
-##   blt  Blight (the Juggernaut's Warchain, the Thief's Jackpot rim): healing on the body is cut
+##   blt  Blight (the Juggernaut's Warchain, Dancer's Encore rim): healing on the body is cut
 ##   vul  Shred (the Thief's Primed shot): the body takes `k` more damage
 ##   rat  Dazed (Venator's Burr Charge; "Rattled" in code): slowed, and his rifle and Longneedle hit
 ##        harder; stars over the head
-##   dsr  Disoriented (Ostra's Trade): slowed by `k`; a DIZZY word and a teal ring
+##   dsr  Disoriented (Ostra's Trade): slowed by `k`; a SLOWED word and a teal ring
 ## The game that owns the body runs the rules; the caster's game sends the Net event
 ## ["kst", nid, kind, seconds, k] for a remote body (Net.VERSION 0.7.0), every game shows it.
 
-const GROUND_COL := Color("d8b878")
+const GROUND_COL := Color("e0a03a")
 const RATTLE_COL := Color("ffb36a")
 const RATTLE_SLOW := 0.35        # how much speed Rattled takes away
 
@@ -28,8 +28,9 @@ static func grounded(e: Ent) -> bool:
 	return e != null and is_instance_valid(e) and e.has_meta("gnd_until") and e.m != null and float(e.m.time) < float(e.get_meta("gnd_until"))
 
 ## Puts `kind` on `e` for `secs` (refreshes a running one). `send`: tell the other games when the
-## body belongs to one of them.
-static func apply(e: Ent, kind: String, secs: float, k := 0.0, send := true) -> void:
+## body belongs to one of them. `toast`: the caster shows its own tell, so no overhead word, and the
+## player's toast reads this instead (what Grounded takes away from a Dredge reeling, say).
+static func apply(e: Ent, kind: String, secs: float, k := 0.0, send := true, toast := "") -> void:
 	if e == null or not is_instance_valid(e) or e.dead or secs <= 0.0:
 		return
 	var m: Node = e.m
@@ -46,7 +47,7 @@ static func apply(e: Ent, kind: String, secs: float, k := 0.0, send := true) -> 
 			e.set_meta("gnd_until", maxf(float(e.get_meta("gnd_until", 0.0)), float(m.time) + secs))
 			if e is Hunter:
 				(e as Hunter).gliding = false
-			if not was: _show(e, kind, secs)
+			if not was: _show(e, kind, secs, toast)
 		"blt":
 			e.blight_t = maxf(e.blight_t, secs)
 			e.blight_k = maxf(0.6, k) if k > 0.0 else 0.6
@@ -68,7 +69,7 @@ static func apply(e: Ent, kind: String, secs: float, k := 0.0, send := true) -> 
 			_show(e, kind, secs)
 
 ## What everyone sees: Grounded wraps cords round the legs for its length; Shred cracks a red ring.
-static func _show(e: Ent, kind: String, secs: float) -> void:
+static func _show(e: Ent, kind: String, secs: float, toast := "") -> void:
 	var m: Node = e.m
 	match kind:
 		"gnd":
@@ -76,7 +77,7 @@ static func _show(e: Ent, kind: String, secs: float) -> void:
 			if old: old.queue_free(); old.name = "GroundedGone"
 			var n := Node3D.new()
 			n.name = "Grounded"
-			var mat := Models.glow_mat(Color(GROUND_COL, 0.95))
+			var mat := DJFx.solid(GROUND_COL)          # solid: an additive glow washes out to white on grass
 			for i in 3:
 				var c := MeshInstance3D.new()
 				c.mesh = Models.cyl(0.42 - 0.05 * i, 0.42 - 0.05 * i, 0.06, 16)
@@ -87,9 +88,11 @@ static func _show(e: Ent, kind: String, secs: float) -> void:
 				n.add_child(c)
 			e.add_child(n)
 			m.later(secs, func(): if is_instance_valid(n): n.queue_free())
-			m.fx.word(e.pos + Vector3(0, 2.0, 0), "GROUNDED", GROUND_COL, false)
+			if toast == "":
+				m.fx.word(e.pos + Vector3(0, 2.0, 0), "GROUNDED", GROUND_COL, false)
 			m.fx.ring(e.pos, 1.1, GROUND_COL, 0.3)
-			if e == m.get("player") and m.hud: m.hud.toast_small("GROUNDED  ·  no dash, jump or glide", GROUND_COL)
+			var line := toast if toast != "" else "no dash, jump or glide"
+			if e == m.get("player") and m.hud: m.hud.toast_small("GROUNDED  ·  " + line, GROUND_COL)
 		"rat":
 			var old2 := e.get_node_or_null("Rattled")
 			if old2: old2.queue_free(); old2.name = "RattledGone"
@@ -110,7 +113,7 @@ static func _show(e: Ent, kind: String, secs: float) -> void:
 			m.fx.word(e.pos + Vector3(0, 3.3, 0), "DAZED", RATTLE_COL, false)     # clear above a STUNNED (2.2)
 			m.fx.ring(e.pos, 1.1, RATTLE_COL, 0.25)
 		"dsr":
-			m.fx.word(e.pos + Vector3(0, 2.1, 0), "DIZZY", Color("7fe0d0"), false)
+			m.fx.word(e.pos + Vector3(0, 2.1, 0), "SLOWED", Color("b8a8ff"), false)
 			m.fx.ring(e.pos, 1.0, Color("7fe0d0"), 0.3)
 		"vul":
 			m.fx.word(e.pos + Vector3(0, 2.0, 0), "SHRED", Color("ff7a5a"), false)

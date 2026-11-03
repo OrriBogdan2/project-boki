@@ -1,9 +1,20 @@
 class_name CareUtil
 extends RefCounted
-## Support helpers shared by the two support heroes (Linnet the Tender, Tamsin the Rimewright):
+## Support helpers shared by the two support heroes (Moosh Moosh the Tender, Tamsin the Rimewright):
 ## squadmate lookups, healing that reaches bots, online squadmates and downed teammates, the
 ## revive hook, and carrying a downed teammate. Net: heals and revives use the existing "heal" and
 ## "rev" events; carrying adds one "carry" event (Net 0.14.0).
+
+## Where a hunter's hand is now (the animated hand), else a point beside the chest: casts and held props
+## start there.
+static func hand_at(h: Hunter, right: bool) -> Vector3:
+	var a := h.anim
+	if a != null:
+		var hand: Node3D = a.hand_r if right else a.hand_l
+		if hand != null and is_instance_valid(hand):
+			return hand.global_position
+	var side := Vector2(cos(h.face), -sin(h.face)) * (0.22 if right else -0.22)
+	return h.pos + Vector3(side.x, 0.75, side.y)
 
 ## Living teammates of `h` (never `h`), standing or downed, optionally within r of `at`.
 static func mates(m: Node, h: Hunter, at := Vector3.INF, r := 1e9, include_downed := true) -> Array:
@@ -84,7 +95,8 @@ static func carried_tick(m: Node, o: Hunter) -> bool:
 
 ## The support pair's payoff moment: a big word, rings, a flash, hitstop-grade shake and its own sound.
 static func payoff(m: Node, h: Hunter, at: Vector3, word: String, col: Color, snd: String) -> void:
-	m.fx.word(at + Vector3(0, 2.7, 0), word, col, true)
+	if word != "":
+		m.fx.word(at + Vector3(0, 2.7, 0), word, col, true)
 	m.fx.ring(at, 2.4, col, 0.38)
 	m.fx.ring(at, 1.0, Color(1, 1, 1, 0.9), 0.2)
 	m.fx.burst(at + Vector3(0, 1.1, 0), col, 36, 7.5, 0.65, 8.0, 1.3)

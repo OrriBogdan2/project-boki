@@ -217,7 +217,7 @@ func open_pause(where: String) -> void:
 	var psc = Game.main.screen_node() if where == "match" and Game.main else null
 	var practice: Practice = Practice.of(psc) if psc is Match else null
 	if practice:
-		item.call("Change hero", "swap", func(): close(); PracticeHero.open(practice), Settings.key_cap("hero"))
+		item.call("Change Hunter", "swap", func(): close(); PracticeHero.open(practice), Settings.key_cap("hero"))
 	if where != "match":
 		item.call("Inventory", "bag", open_inventory, Settings.key_cap("inventory"))
 	item.call("Settings", "gear", func():

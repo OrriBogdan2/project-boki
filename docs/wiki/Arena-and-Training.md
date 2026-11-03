@@ -10,9 +10,9 @@ four pillars to slam people into, a raised dais on the north side and two patche
 - **Dummies** that are real hunters, so Marks, wall slams and every ability work on them: one stands
   and watches you, one strafes, a heavy one waits by a pillar. Each shows damage per second, last hit
   and total over its head, and heals up when left alone.
-- **A sparring bot** you switch between Off, Idle, Moving and Fighting (**N**), with any class.
+- **A sparring bot** you switch between Off, Idle, Moving and Fighting (**N**), with any Hunter.
 - **X** resets. **O** turns cooldowns off (dash, RMB, E, R and the glove). **U** unlocks the ultimate.
-- **2-7** swap class on the spot. **L** opens the loadout (class, weapon, Boki, glove, toggles). **K** shows the kit card.
+- **2-7** swap Hunter on the spot. **L** opens the loadout (Hunter, weapon, Boki, glove, toggles). **K** shows the kit card.
 - A downed player or bot is back up after a beat.
 
 ## The training area
@@ -30,7 +30,7 @@ against dummies (one still, one strafing, one that lobs slow orbs to dodge) and 
 targets, with a climbing wall, a gap to glide across and a pad that resets your cooldowns.
 
 A pad on it takes you to the **duel room**: you against one sparring bot on an empty island. Pick its
-class, weapon, glove, difficulty and behaviour (fight, dodge only, stand still), reset whenever you
+Hunter, weapon, glove, difficulty and behaviour (fight, dodge only, stand still), reset whenever you
 like, and watch your numbers: damage dealt and taken, how many of your shots land, how many of its
 shots you dodge, and knocks. A knock resets the round.
 
