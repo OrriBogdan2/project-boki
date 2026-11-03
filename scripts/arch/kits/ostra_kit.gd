@@ -15,6 +15,7 @@ const PAY := "COLLAPSE"
 const TEAL := Color("7fe0d0")
 const VOID_COL := Color("b06bff")
 const PINK := Color("ff4fd8")
+const GROUND_HAZARDS := ["hazard", "lava", "spore", "toxic", "molten"]
 
 var swollen_t := 0.0
 var last_shot_t := -99.0
@@ -41,6 +42,9 @@ var collapses := 0
 var seed_denied := 0
 var early_pops := 0            # recasts refused inside the 0.3s minimum
 var denied_swaps := 0
+var hazards_dodged := 0        # ground-hazard hits her float turned away
+var boost_t := 0.0             # Snap rank 3: the speed burst left
+var boost_k := 0.0
 var swap_peak := 0.0           # how high the last Trade's lantern flew above its start (checks)
 
 func is_swollen() -> bool: return swollen_t > 0.0
@@ -83,10 +87,13 @@ func on_deal(t: Ent, dmg: float, _o: Dictionary) -> void:
 	var rd := res_def()
 	add_swell(dmg * float(rd["per_dmg"]) * (float(rd["hunter_k"]) if t is Hunter else 1.0))
 
-func on_knock(_t: Hunter, mine: bool) -> void:
-	if mine and not h.downed:
-		h.heal(h.max_hp * 0.2)
-		m.fx.word(h.pos + Vector3(0, 2.2, 0), "+20%", TEAL, false)
+## She floats: the ground hazards (lava vents and their pools, spore pods, puddles, the pit's pull) never
+## touch her. A sky strike (the lightning rod) still does.
+func incoming(_by: Ent, dmg: float, o: Dictionary) -> Array:
+	if not o.get("sky", false) and (o.get("tags", []) as Array).any(func(t): return t in GROUND_HAZARDS):
+		hazards_dodged += 1
+		return [0.0, o]
+	return [dmg, o]
 
 func outgoing(t: Ent, dmg: float, o: Dictionary) -> float:
 	# a Settled orb slows what it hits
@@ -102,10 +109,19 @@ func outgoing(t: Ent, dmg: float, o: Dictionary) -> float:
 func move_k() -> float:
 	if not swap.is_empty():
 		return 0.0
-	return 1.0 - float(rmb_def()["snap"]["cast_slow"]) if not snap.is_empty() else 1.0
+	var k := 1.0 - float(rmb_def()["snap"]["cast_slow"]) if not snap.is_empty() else 1.0
+	return k * (1.0 + boost_k if boost_t > 0.0 else 1.0)
+
+## Snap rank 3: a burst of speed on the cast, a bigger one when it hits (the later one replaces it).
+func _boost(k: float) -> void:
+	if rank("sec") < 3: return
+	var b: Dictionary = rmb_def()["snap"]["boost"]
+	boost_k = k
+	boost_t = float(b["t"])
 
 # ------------------------------------------------------------------ per step
 func _tick(dt: float) -> void:
+	boost_t = maxf(0.0, boost_t - dt)
 	if is_swollen():
 		swollen_t = maxf(0.0, swollen_t - dt)
 		res = res_max() * swollen_t / float(res_def()["swollen_t"])
@@ -404,6 +420,7 @@ func _snap_release() -> void:
 	)
 	KitLooks.of(m).skin(m.shots[-1], "spear")
 	m.sfx("os_snap", h.pos, -2.0, 1.0)
+	_boost(float(sn["boost"]["cast"]))
 	m.fx.flash(start, Color("b06bff"), 0.7, 0.07)
 	m.fx.burst(start, Color(0.45, 0.15, 0.7, 0.9), 10, 4.0, 0.25, 0.0, 1.1, Vector3(dir.x, 0, dir.y), 40.0)
 	AimKit.hide(h, "snap")
@@ -421,6 +438,7 @@ func _snap_hit(s: Dictionary, at: Vector3, e: Ent) -> void:
 	var stun := lerpf(float(sn["stun"][0]), float(sn["stun"][1]), kd)
 	s["x"]["stun"] = stun
 	s["x"]["dr"] = true
+	_boost(float(sn["boost"]["hit"]))
 	KitLooks.of(m).crown(e, stun)
 	m.sfx("os_snap_hit", at, -2.0, 1.0)
 
@@ -481,9 +499,9 @@ func _tick_seed(dt: float) -> void:
 	if rank("kin") >= 3:
 		seed["burn"] = float(seed["burn"]) - dt
 		if float(seed["burn"]) <= 0.0:
-			seed["burn"] = 0.5
+			seed["burn"] = float(ed["burn_every"])
 			for f in foes_in(seed["pos"], seed_radius()):
-				f.hurt(2.5 * power("kin"), h, {"src": "abil", "ab": "e"})
+				f.hurt(float(ed["burn"]) * float(ed["burn_every"]) * power("kin"), h, {"src": "abil", "ab": "e"})
 	if h.downed:
 		_pop(false)
 
@@ -543,7 +561,6 @@ func _pop(hit: bool) -> void:
 	var caught_hunter: Ent = null
 	for f in foes_in(p, rad):
 		f.hurt(dmg, h, {"src": "abil", "ab": "e", "payoff": k >= 0.99 and f is Hunter})
-		KitStatus.apply(f, "gnd", float(ed["ground"]))
 		if f is Hunter: caught_hunter = f
 	if caught_hunter != null and k >= 0.99:
 		collapses += 1
