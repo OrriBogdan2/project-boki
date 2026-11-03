@@ -53,6 +53,7 @@ func _good_card(key: String, payload: Dictionary, sub: String, right: Control, w
 	top.add_child(UI.tag(Goods.rarity_name(key, payload), Goods.rarity_col(key, payload)))
 	nv.add_child(top)
 	var sl := UI.label(sub, 12, UI.MUTED)
+	sl.autowrap_mode = TextServer.AUTOWRAP_OFF
 	sl.clip_text = true
 	sl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	nv.add_child(sl)
@@ -128,11 +129,16 @@ func _shelter_card(c: Dictionary) -> Control:
 	row.add_child(pv)
 	var info := UI.vbox(2)
 	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	info.add_child(UI.label("%s  ·  %s" % [rec["name"], sp["name"]], UI.T_BODY, UI.INK, UI.semi))
+	var title := String(sp["name"])
+	if String(rec["name"]) != title: title = "%s  ·  %s" % [rec["name"], title]
+	info.add_child(UI.label(title, UI.T_BODY, UI.INK, UI.semi))
 	var kind := String(sp.get("type", "")).capitalize()
 	info.add_child(UI.label("Level %d  ·  %s" % [int(rec.get("level", 1)), kind], 12, UI.MUTED))
 	var giver := String(c.get("from", ""))
-	info.add_child(UI.label("Raised by %s" % giver if giver != "" else "A stray", 12, UI.FAINT))
+	var story := "A stray"
+	if Shelter.gave(String(rec.get("uid", ""))): story = "You gave it up: someone else will adopt it"
+	elif giver != "": story = "Raised by %s" % giver
+	info.add_child(UI.label(story, 12, UI.FAINT))
 	row.add_child(info)
 	var cid := String(c["id"])
 	var b := UI.button("Adopt  ·  %d" % int(c["price"]), func():
@@ -229,12 +235,12 @@ func search(v: VBoxContainer) -> void:
 	box.text_submitted.connect(_search_for)
 	var row := UI.hbox(8)
 	row.add_child(box)
-	row.add_child(UI.button("Search", func(): _search_for(box.text), 100, "search"))
+	row.add_child(UI.button("Search", func(): _search_for(box.text), 100))
 	v.add_child(row)
 	m.show_note(v)
 	var found := Stalls.search(query)
 	if found.is_empty():
-		v.add_child(UI.empty_state("search", "Nobody is selling that", "Try another name, or check again tomorrow."))
+		v.add_child(UI.empty_state("shop", "Nobody is selling that", "Try another name, or check again tomorrow."))
 	var g := _grid()
 	for f in found.slice(0, 12):
 		g.add_child(_found_card(f))

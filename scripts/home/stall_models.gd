@@ -20,7 +20,7 @@ static func build(level: int) -> Node3D:
 	_hut(n, Vector3(-1.02, 0, 0.05))
 	_sign(n, Vector3(0.38, 1.62, -0.52), level)
 	if level >= 3:
-		_bell(n, Vector3(0.38, 0, 0.62))
+		_bell(n, Vector3(1.22, 0, 0.62))
 		_bunting(n)
 	return n
 
@@ -64,24 +64,24 @@ static func _sign(n: Node3D, at: Vector3, level: int) -> void:
 static func _bell(n: Node3D, at: Vector3) -> void:
 	var wood := Models.toon(Color("5a3a24"))
 	var gold := Models.toon(Color("f2c84a"), true, 0.5)
-	Models.part(n, Models.cyl(0.06, 0.07, 3.0, 8), wood, at + Vector3(0, 1.5, 0))
-	Models.part(n, Models.box(0.62, 0.06, 0.06), wood, at + Vector3(0, 2.85, 0))
-	Models.part(n, Models.cyl(0.08, 0.2, 0.3, 14), gold, at + Vector3(0, 2.62, 0))
-	Models.part(n, Models.sphere(0.05, 8), gold, at + Vector3(0, 2.44, 0))
+	Models.part(n, Models.cyl(0.06, 0.07, 2.7, 8), wood, at + Vector3(0, 1.35, 0))
+	Models.part(n, Models.box(0.62, 0.06, 0.06), wood, at + Vector3(0, 2.55, 0))
+	Models.part(n, Models.cyl(0.08, 0.2, 0.3, 14), gold, at + Vector3(0, 2.32, 0))
+	Models.part(n, Models.sphere(0.05, 8), gold, at + Vector3(0, 2.14, 0))
 	var cap := Models.toon(Color("b03a4a"))
-	Models.part(n, Models.cyl(0.0, 0.4, 0.26, 4), cap, at + Vector3(0, 3.06, 0), Vector3.ONE, Vector3(0, PI / 4, 0))
+	Models.part(n, Models.cyl(0.0, 0.4, 0.26, 4), cap, at + Vector3(0, 2.76, 0), Vector3.ONE, Vector3(0, PI / 4, 0))
 	var lt := OmniLight3D.new()
 	lt.light_color = Color("ffe0a0")
 	lt.light_energy = 0.5
 	lt.omni_range = 2.6
-	lt.position = at + Vector3(0, 2.5, -0.3)
+	lt.position = at + Vector3(0, 2.2, -0.3)
 	n.add_child(lt)
 
 ## Bunting from the bell post to the hut's roof and to the stall's far post.
 static func _bunting(n: Node3D) -> void:
 	var cols := [Color("e0607e"), Color("f2c84a"), Color("5ab0f0"), Color("8fd16a")]
-	var top := Vector3(0.38, 2.82, 0.62)
-	var ends := [[top, Vector3(-1.02, 1.12, 0.05)], [top, Vector3(1.12, 2.1, -0.35)]]
+	var top := Vector3(1.22, 2.52, 0.62)
+	var ends := [[top, Vector3(-1.02, 1.12, 0.05)], [top, Vector3(-0.2, 2.1, -0.35)]]
 	for pair in ends:
 		var a: Vector3 = pair[0]
 		var b: Vector3 = pair[1]
