@@ -193,8 +193,8 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 | Dredge | air dash -> Q glove | No source glove; it goes off from the pounce. | fires mid-dash |
 | Dredge | LMB -> dash | Footage: he walks and dashes between shots (0.5 s apart). Ours: the barge goes between shots. | the dash goes, the ability keeps running |
 | Dredge | RMB -> dash | Wiki fine print: only the dash and the air dash can be used while Abyssal Grasp pulls; data: the arm pierces terrain. Ours: the barge goes during the hook's flight and the reel, and the reel continues. | the dash goes, the ability keeps running |
-| Dredge | E -> dash | Footage (0221-0236): the slam is one committed 0.4 s beat, no dash out of it. Ours: Shift in the planted wind-up (or the air smash) is held and the barge goes the step the slam lands. | **exception:** the dash waits for the ability (today's behaviour, to review) |
-| Dredge | ult (X) -> dash | Footage (ult f22-f43): he stands through the charge and both waves, no dash out of it. Ours: Shift is held and the barge goes when the Broadside ends. | **exception:** the dash waits for the ability (today's behaviour, to review) |
+| Dredge | E -> dash | Data: Primal Slam has no dash lock, and the dash-into-slam close-in is the hero's engage; footage (0221-0236) shows one 0.4s beat but no rule against a dash in it. Ours: Shift in the planted wind-up barges at once and the slam runs on, the fist still raised, landing where the barge arrives; in the air smash the pounce goes and the smash drops again from where it ends. | the dash goes, the ability keeps running |
+| Dredge | ult (X) -> dash | Data: Slugwave has no dash lock; footage (ult f22-f43) shows him standing through it but no rule against a dash. Ours: he already walks slowly through the charge and the waves, so Shift barges at once and the Broadside runs on, the fan and the waves following him. | the dash goes, the ability keeps running |
 | Dredge | Q glove -> dash | No source glove; the barge goes and the glove's effect stays. | the dash goes, the ability keeps running |
 | Dredge | jump -> LMB |  | fires mid-jump (default) |
 | Dredge | jump -> RMB |  | fires mid-jump (default) |
@@ -202,7 +202,7 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 | Dredge | jump -> ult (X) |  | fires mid-jump (default) |
 | Dredge | jump -> Q glove |  | fires mid-jump (default) |
 | Dredge | LMB -> jump |  | the move goes at once, the ability keeps running (default) |
-| Dredge | RMB -> jump | Wiki fine print: only the dash and the air dash can be used while Abyssal Grasp pulls. Ours today (measured by --dash-flow-check): no jump while the hook reels (KitStatus grounded: 'reeling: no jump or glide'). | **exception:** the move is refused while it runs (today's behaviour, to review) |
+| Dredge | RMB -> jump | Owner note (item 31): 'from the hook's cast until it finishes, Dredge holds his current height'. Footage card (0127): 'you GROUNDED while reeling'; wiki fine print: only the dash and the air dash can be used while Abyssal Grasp pulls. Ours: no jump from the throw to the miss or the end of the reel (CastHold, KitStatus grounded); the barge works throughout. | **exception:** the move is refused while it runs (Owner item 31 and the source: he holds his height from the throw to the end of the reel, and the source grounds him while he reels (only the dash works).) |
 | Dredge | E -> jump |  | the move goes at once, the ability keeps running (default) |
 | Dredge | ult (X) -> jump |  | the move goes at once, the ability keeps running (default) |
 | Dredge | Q glove -> jump |  | the move goes at once, the ability keeps running (default) |

@@ -50,7 +50,6 @@ var barge_t := 0.0              # the barge's trail is showing
 var trail_t := 0.0              # the next barge after-image
 var stop_t := 0.0               # the barge under way; when it ends he stops, keeping almost none of its speed
 var next_barge := -9.0          # the short gap between barges in a run
-var dash_held := false          # Shift pressed in the slam or the Broadside, waiting for its end
 var shot_seen := 0              # the last weapon volley the kit dressed
 var shot_at := -9.0
 var stunned: Array = []         # foes the Anchor stunned: {e, until} (the spiral over them)
@@ -169,7 +168,6 @@ func _tick(dt: float) -> void:
 	if not pull.is_empty(): _tick_pull(dt)
 	_tick_hook_hold()
 	broadside.tick(dt)
-	_tick_held_dash()
 	_tick_gun()
 	_tick_looks(dt)
 	KMovesPair.air_moves(self, "dr_jump", "dr_land")
@@ -179,7 +177,6 @@ func _tick(dt: float) -> void:
 ## hook in the air (it grabs nothing).
 func _drop_holds() -> void:
 	wind = 0.0
-	dash_held = false
 	AimKit.hide(h, "e_tell")
 	dive = {}
 	flying = false
@@ -621,9 +618,10 @@ func _tick_dive(dt: float) -> void:
 		AimKit.hide(h, "e_land")
 		play("")
 		return
-	h.vel.x = 0.0
-	h.vel.z = 0.0
-	h.vel.y = minf(h.vel.y, -float(ed["dive"]))
+	if h.roll_t <= 0.0:
+		h.vel.x = 0.0             # (a pounce in it carries him on; the smash drops again from where it ends)
+		h.vel.z = 0.0
+		h.vel.y = minf(h.vel.y, -float(ed["dive"]))
 	var gy: float = m.world.ground_at(h.pos.x, h.pos.z)
 	if gy <= World.VOID + 1.0:
 		dive = {}                 # drifted over the abyss: no smash, no push
@@ -680,12 +678,10 @@ func _quake(at: Vector3, fell: float) -> void:
 	net_ring(at, r, col_of(ed))
 
 # ------------------------------------------------------------------ dash: Barge
+## Shift barges at once, whatever he is doing (the barge works even while he reels). Out of the Anchor's wind-up,
+## its air smash or the Broadside that move runs on and keeps its pose: the fist stays raised and slams where the
+## barge arrives, the smash rides the pounce and drops from where it ends, the fan follows him.
 func on_dash(use_ex: bool) -> bool:
-	var busy_slot := _committed_slot()
-	if busy_slot != "":
-		# Shift in the slam or the Broadside: held for its end when its into_dash row says buffer
-		dash_held = String(DashFlow.into_dash_of(id, busy_slot).get("mode", "")) == "buffer"
-		return true
 	if m.time < next_barge:
 		return true
 	var dd := dash_def()
@@ -699,14 +695,14 @@ func on_dash(use_ex: bool) -> bool:
 			dir = fwd.rotated(clampf(ang, -lim, lim))
 	if use_ex and not h.grounded:
 		if not spend_dash(true): return true
-		_air_barge(dd, dir)
+		_air_barge(dd, dir, _move_runs())
 	else:
 		if not spend_dash(false):
 			return true
 		var shove := {"invuln": 0.06, "shove": true, "shove_kb": float(dd["hit_kb"]), "trail": "", "dir": dir}
 		travel(float(dd["dist"]), float(dd["time"]), shove)
 		st["last_dash"] = "barge"
-		play("dr_lunge")
+		if not _move_runs(): play("dr_lunge")
 		h.glide_cd = maxf(h.glide_cd, h.roll_t + 0.35)
 		m.sfx("dr_barge", h.pos, -2.0, 1.0)
 	if rank("dash") >= 3:
@@ -717,28 +713,20 @@ func on_dash(use_ex: bool) -> bool:
 	next_barge = m.time + h.roll_t + float(dd["gap"])
 	return true
 
-## The ability he is committed to now ("e": the slam's wind-up or the air smash, "x": the Broadside), else "".
-func _committed_slot() -> String:
-	if wind > 0.0 or not dive.is_empty():
-		return "e"
-	return "x" if broadside.running() else ""
-
-## A Shift held through the slam or the Broadside barges the step it ends (its into_dash row: buffer).
-func _tick_held_dash() -> void:
-	if dash_held and _committed_slot() == "":
-		dash_held = false
-		h.do_dash()
+## A move that runs on through a barge, keeping its own pose: the Anchor's wind-up or air smash, the Broadside.
+func _move_runs() -> bool:
+	return wind > 0.0 or not dive.is_empty() or broadside.running()
 
 ## In the air (the class air dash slot): the same quick shove 35% further, so it is faster, not longer (the
 ## class long dash would otherwise take over its distance and time).
-func _air_barge(dd: Dictionary, dir: Vector2) -> void:
+func _air_barge(dd: Dictionary, dir: Vector2, keep_pose: bool) -> void:
 	var feel := dash_feel()
 	var air_t := float(dd["time"]) * float(feel["time"])
 	var air_dist := float(dd["dist"]) * float(dd["air_k"]) * float(feel["dist"])
 	travel(air_dist, air_t, {"invuln": 0.08, "trail": "", "dir": dir}, true)
 	h.roll_t = air_t
 	h.roll_speed = air_dist / air_t
-	play("dr_pounce")
+	if not keep_pose: play("dr_pounce")
 	m.sfx("dr_hop", h.pos, -3.0, 1.0)
 
 ## The barge's end: he arrives planted (the class carry would slide a heavy on after each quick shove).

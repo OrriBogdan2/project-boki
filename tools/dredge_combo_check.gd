@@ -25,6 +25,9 @@ func run(main_node: Node) -> void:
 	await _dash_moves()
 	await _glide_wins()
 	await load("res://tools/dredge_ult_check.gd").new(ak, ok).run()
+	var rows_bad: int = await load("res://tools/dash_flow_check.gd").new().check_hero(main, "dredge")
+	ok("item 51: every slot casts mid-jump and a jump or Shift moves him out of it in 0.1s (or its row's exception)",
+			rows_bad == 0, "%d failures" % rows_bad)
 	print("DREDGECHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
@@ -205,23 +208,48 @@ func _dash_moves() -> void:
 			and not others.has(air_move) and fits,
 		"%s / %s, dash %.2f s" % [ground_move, air_move, dash_t]
 	)
-	# into_dash e: buffer: Shift in the slam's wind-up is held and the barge goes the step the slam lands
+	# into_dash e: fire. Shift in the slam's wind-up barges at once, the fist still raised; the slam lands where
+	# the barge arrives
 	P.teleport(home)
 	P.vel = Vector3.ZERO
 	ak.step(m, 0.3)
 	P.dashes = P.max_dashes()
 	K.cd["e"] = 0.0
+	var anchors0 := K.anchors
 	P.ak.use_e()
 	ak.step(m, 0.1)
+	var from := P.pos
 	P.do_dash()
-	var held_now := K.dash_held and P.roll_t <= 0.0
-	var waited := 0.0
-	while P.roll_t <= 0.0 and waited < 1.0:
-		ak.step(m, ak.DT)
-		waited += ak.DT
+	ak.step(m, 0.05)
+	var barged := P.roll_t > 0.0 and K.wind > 0.0 and K.anim_id == "dr_anchor"
+	ak.step(m, 0.5)
 	ok(
-		"into dash: Shift in the slam is held, and he barges the step it lands",
-		held_now and K.anchors >= 1 and P.roll_t > 0.0 and waited < 0.35, "barged %.2f s after the press" % waited
+		"into dash: Shift in the slam's wind-up barges at once, the slam lands where it arrives (item 51)",
+		barged and K.anchors == anchors0 + 1 and Vector2(P.pos.x - from.x, P.pos.z - from.z).length() > 2.0,
+		"barged %s anchors +%d moved %.1f m" % [barged, K.anchors - anchors0, P.pos.distance_to(from)]
+	)
+	# ... and in the air smash: the pounce goes, then the smash drops from where it ends
+	ak.step(m, 1.0)
+	P.teleport(home + Vector3(0, 6.0, 0))
+	P.vel = Vector3.ZERO
+	P.grounded = false
+	K.cd["e"] = 0.0
+	P.ex_cd = 0.0
+	P.dashes = P.max_dashes()
+	var quakes0 := K.quakes
+	P.ak.use_e()
+	ak.step(m, 0.05)
+	from = P.pos
+	P.inp["move"] = Vector2(1, 0)
+	P.do_dash()
+	ak.step(m, 0.05)
+	var pounced := P.roll_t > 0.0 and not K.dive.is_empty()
+	P.inp["move"] = Vector2.ZERO
+	ak.step(m, 1.0)
+	ok(
+		"into dash: Shift in the air smash pounces at once and the smash still lands, from where it took him",
+		pounced and K.quakes == quakes0 + 1 and Vector2(P.pos.x - from.x, P.pos.z - from.z).length() > 2.0,
+		"pounced %s quakes +%d" % [pounced, K.quakes - quakes0]
 	)
 	await ak.done(m)
 
