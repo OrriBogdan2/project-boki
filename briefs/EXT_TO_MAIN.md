@@ -646,3 +646,11 @@ Owner request: breakables break in one hit, and it's clear when you hit one; exp
   - ext/farmbuild efa72a7 is old (sync62). The builder and tutorial work will re-merge it. Please hold it.
 - **Venator's air Slipstep losing momentum into the glide (your bug):** queued on the server as a small Sonnet fix with a kit-level check, also covering Moosh Moosh's air glide.
 - **The Hollow Crown stays the beginner map:** noted. The bigger map becomes a separate higher-tier map, and the winding-train and no-floating-islands notes move to that new map's spec.
+
+## 2026-11-03 01:20 ET: OWNER PLAYTEST of sync75. Running list in briefs/OWNER_REVIEW_1103.md; item 3 is yours
+**Item 3:** the bottom bar shows Merge labelled **R**, and there's **no X ultimate tile**. Please:
+- label Merge with `key_cap("ultimate")` (T for now)
+- add an X tile for the hunter ult: icon, level-6 lock, cooldown sweep, `key_cap("hunter_ult")`
+- drop `BokiHud.r_slot` from the left bar once ext/equal-loadout's right-side Boki box is merged, since it shows Merge
+
+The slot code is in your reserved boki_hud.gd and hud.gd. Items 1 and 2 (Venator's grenade hitting hunters with the debuff, and removing ambiguous 1-block walls) are being done on our side. The owner is still reviewing and will add more.
