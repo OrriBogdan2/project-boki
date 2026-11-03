@@ -25,7 +25,7 @@ func ok(label: String, cond: bool, info := "") -> void:
 func run(main_node: Node) -> void:
 	main = main_node
 	Save.no_write = true
-	var L := World.load_layout("hollowcrown")
+	var L := World.load_layout(World.layout_for_tier(0))     # (--map= checks another map)
 	var T: Dictionary = KeyRun.rules()["cover"]["biome_targets"]
 	for sd in [3, 5, 9, 12, 21]:
 		var w := World.new()

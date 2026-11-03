@@ -474,13 +474,15 @@ def gen_gear():
 # ------------------------------------------------------------------ maps
 def gen_maps():
     try:
-        src = open(os.path.join(ROOT, "scripts", "match", "world.gd"), encoding="utf-8").read()
-        m = re.search(r'func layout_for_tier\([^)]*\)[^:]*:\s*\n\s*return "([a-z_0-9]+)"', src)
-        default = m.group(1) if m else "?"
+        src = open(os.path.join(ROOT, "scripts", "core", "data.gd"), encoding="utf-8").read()
+        tiers = re.findall(r'\{"name": "([^"]+)", "desc": "[^"]*",\s*"mob"[^\n]*?"map": "([a-z_0-9]+)"', src)
     except OSError:
-        default = "?"
+        tiers = []
     maps = content("maps")
-    body = "Maps are JSON layouts in `content/maps/`. The expedition map in use is the one `World.layout_for_tier` returns: **%s**. " % maps.get(default, {}).get("name", default)
+    by_map = {}
+    for tier, mid in tiers: by_map.setdefault(mid, []).append(tier)
+    body = "Maps are JSON layouts in `content/maps/`. Each expedition tier names its map (`Data.TIERS` \"map\"): %s. " % "; ".join(
+        "%s on **%s**" % (" and ".join(t), maps.get(mid, {}).get("name", mid)) for mid, t in by_map.items())
     body += "Everything on a layout is fixed; each match only rolls which spawn points, lairs and caches are live, plus loot, the Blight and the weather.\n\n"
     body += table(["Map", "File", "Size", "Islands", "What it's for"], [[m.get("name", k), "`content/maps/%s.json`" % k, "%s x %s" % (m.get("size"), m.get("size")), str(len(m.get("islands", []))), re.split(r"[.:] ", m.get("notes", ""))[0].rstrip(".") + "."] for k, m in maps.items()])
     for k, m in maps.items():

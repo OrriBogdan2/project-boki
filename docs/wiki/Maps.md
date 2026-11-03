@@ -3,12 +3,13 @@
 
 _Generated from `content/maps`, `content/biomes`, `scripts/match/world.gd`._
 
-Maps are JSON layouts in `content/maps/`. The expedition map in use is the one `World.layout_for_tier` returns: **?**. Everything on a layout is fixed; each match only rolls which spawn points, lairs and caches are live, plus loot, the Blight and the weather.
+Maps are JSON layouts in `content/maps/`. Each expedition tier names its map (`Data.TIERS` "map"): The Meadow and Dusk Isles on **The Hollow Crown**; The Hollow on **The Riven Wilds**. Everything on a layout is fixed; each match only rolls which spawn points, lairs and caches are live, plus loot, the Blight and the weather.
 
 | Map | File | Size | Islands | What it's for |
 |---|---|---|---|---|
 | The Arena | `content/maps/arena.json` | 52 x 52 | 2 | The practice arena. |
 | The Hollow Crown | `content/maps/hollowcrown.json` | 216 x 216 | 12 | Hand-made expedition map (tools/make_hollowcrown.py; the format is described there). |
+| The Riven Wilds | `content/maps/riven.json` | 336 x 336 | 17 | Hand-made expedition map for the top tier (tools/make_riven.py; format in tools/make_hollowcrown.py). |
 | Skyreach | `content/maps/skyreach.json` | 216 x 216 | 17 | Hand-made expedition map. |
 | First Flight | `content/maps/tutorial.json` | 80 x 80 | 3 | The tutorial island group. |
 
@@ -82,6 +83,74 @@ Hand-made expedition map (tools/make_hollowcrown.py; the format is described the
 | Vaults | 2 | Frostgate Keep, The Kilns, Shrine Table, Thornwood, The Crown |
 | Item caches | 4 | Larkhollow, Highwatch, Duskmoor, Saltmere, Frostgate, Cinder Steps, Stormbreak, Thornwood, The Crown, Stormcrown Gaol |
 | Live boss lairs | 2 | Stormcrown Eyrie, The Sunken Forge, The Thornhive |
+
+
+## The Riven Wilds
+
+Hand-made expedition map for the top tier (tools/make_riven.py; format in tools/make_hollowcrown.py). A raised core (the Rift and its Sanctum), a ring of six regions each with one plateau up its stairs and most with a boss lair, six outer isles with the landings and exits, four corner rocks, and a winding sky train between the ring and the outer isles. Every height is walked up: no perches or jump pads.
+
+### Regions
+
+| Region | Biome | Purpose |
+|---|---|---|
+| The Rift | Gloom | Contested core: the vault on the Sanctum, the richest loot and the most Blight. Two land bridges (north and south); glide in from the four diagonal regions. |
+| Rimeholt | Frost | Northern frost ridge: the Keep's plateau looks down the Rime Span into the Rift; no lair, the vault's favourite. |
+| Galewrack | Storm | Storm-lashed tableland with the Thunderwell (the Sky Serpent) and the longest glide into the Rift. |
+| Slagmarch | Ember | Ember country: the Kilnworks plateau over the Slag Forge (the Colossus); the train's Rift run starts at its feet. |
+| Briarmaw | Bloom | Thick bramble wood, ambush country: a Boki nest, the Briar Hive (the Brood Mother) and the Briar Span to the Rift. |
+| Fallowmere | Meadow | Long-grass meadow with a Boki nest, Haystack Rise and the Barrowdeep (the Colossus). |
+| Gloamwood | Gloom | Dim wood round the shrine on Shrine Hill, with the Gloam Nest (the Brood Mother). |
+| Windward Shoal | Storm | Quiet outer landing with a sky-train stop and a way out. |
+| Ashfall Ledge | Ember | Quiet outer landing with a sky-train stop and a way out. |
+| Thistlewick | Bloom | Quiet outer landing with a sky-train stop and a way out. |
+| Larkspur Rest | Meadow | Quiet outer landing with a sky-train stop and a way out. |
+| Hoarfrost Isle | Frost | Quiet outer landing with a sky-train stop and a way out. |
+| Duskcairn | Gloom | Quiet outer landing with a sky-train stop and a way out. |
+
+### Islands
+
+| Island | Role | Biome | Danger | Tall grass clumps | Named spots |
+|---|---|---|---|---|---|
+| The Rift | heart | Gloom | dangerous | 44 | The Sanctum, The Fallen Arches |
+| Rimeholt | camp | Frost | contested | 6 | Rimeholt Keep, Hoarwind Field |
+| Galewrack | camp | Storm | contested | 30 | Thunder Table, Rattling Stones |
+| Slagmarch | camp | Ember | contested | 24 | The Kilnworks, Cinder Pits |
+| Briarmaw | nest | Bloom | contested | 43 | Bramble Crown, Thornglade |
+| Fallowmere | nest | Meadow | contested | 56 | Haystack Rise, Sheaf Commons |
+| Gloamwood | shrine | Gloom | contested | 45 | Shrine Hill, Lantern Mire |
+| Windward Shoal | landing | Storm | quiet | 13 | Gull Rocks |
+| Ashfall Ledge | landing | Ember | quiet | 9 | Smoking Steps |
+| Thistlewick | landing | Bloom | quiet | 22 | Downy Hollow |
+| Larkspur Rest | landing | Meadow | quiet | 31 | Larkspur Green |
+| Hoarfrost Isle | landing | Frost | quiet | 3 | Rime Pools |
+| Duskcairn | landing | Gloom | quiet | 18 | Standing Cairns |
+| Mossreach | landing | Bloom | quiet | 7 |  |
+| Cloverend | landing | Meadow | quiet | 12 |  |
+| Frostfang Rock | landing | Frost | quiet | 3 |  |
+| Cinderhook | landing | Ember | quiet | 6 |  |
+
+### Boss lairs
+
+| Lair | Boss | Island | Ways in |
+|---|---|---|---|
+| The Thunderwell | Stormcoil | Galewrack | lock dial, three rune pylons |
+| The Slag Forge | Stone Colossus | Slagmarch | lock dial |
+| The Briar Hive | Brood Mother | Briarmaw | lock dial, three ward stones |
+| The Barrowdeep | Stone Colossus | Fallowmere | lock dial, three rune pylons |
+| The Gloam Nest | Brood Mother | Gloamwood | lock dial, three ward stones |
+
+**Exits:** 4 skiff docks, 6 uplink outposts, 10 rift hatches.
+
+**Getting around:** 18 bridges, 20 glide routes, a sky train with 0 stops (Windward Shoal Stop, Ashfall Ledge Stop, Thistlewick Stop, Larkspur Rest Stop, Hoarfrost Isle Stop, Duskcairn Stop).
+
+### Rolled each match
+
+| What | Live per match | Candidate spots |
+|---|---|---|
+| Rare Boki | 4 | Windward Shoal, Ashfall Ledge, Thistlewick, Larkspur Rest, Hoarfrost Isle, Duskcairn, Briarmaw, Fallowmere, Rimeholt, Galewrack |
+| Vaults | 3 | Rimeholt Keep, Thunder Table, The Kilnworks, Bramble Crown, Haystack Rise, Shrine Hill, The Sanctum |
+| Item caches | 6 | Windward Shoal, Ashfall Ledge, Thistlewick, Larkspur Rest, Hoarfrost Isle, Duskcairn, Rimeholt, Galewrack, Slagmarch, Briarmaw, Fallowmere, Gloamwood, The Rift, The Rift |
+| Live boss lairs | 3 | The Thunderwell, The Slag Forge, The Briar Hive, The Barrowdeep, The Gloam Nest |
 
 
 ## Skyreach
