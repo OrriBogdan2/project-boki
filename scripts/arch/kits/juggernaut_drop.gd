@@ -115,7 +115,8 @@ func tick(dt: float) -> void:
 		"hang": _tick_hang(dt)
 		"dive": _tick_dive()
 		"recover":
-			if t >= float(data()["recover"]):
+			# done, or cut short: dashed out of (once Shift is free) or knocked off his feet
+			if t >= float(data()["recover"]) or h.roll_t > 0.0 or not h.grounded:
 				last_recover = t
 				phase = ""
 

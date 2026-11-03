@@ -47,7 +47,7 @@ var lunge := {}                # the running Lunge: {end, dir, k, hit}
 var warchain: JuggernautChain  # E (its state machine)
 var meteor: JuggernautDrop     # the airborne Smash
 var rmb_queued_at := -9.0      # a Smash pressed while a heavy move ran (BUFFER)
-var dash_queued_at := -9.0     # a Shift pressed while the Meteor Drop held it off
+var dash_held := false         # Shift pressed during a move whose into_dash row holds it to the move's end
 var sweet_hit := {}            # foe id -> when the Slam's sweet spot hit them (a knock within 2s resets X)
 var riposte: JuggernautUlt     # X, the ultimate
 var sweet_spots := 0           # (tests, demo)
@@ -61,7 +61,6 @@ var haul := {}                 # a Haul Slam armed for the end of the pull: {k}
 var lunge_full := false        # the Lunge charge reached full (its flash played)
 var knock_healed := 0.0        # (tests) health the knock heals gave back
 var rampage_wind := 0.0        # the Rampage's crouch still to go before the drive
-var rampage_n := 0             # Rampage presses (a merge starting mid-crouch cancels the drive)
 var rampage_dir := Vector2.ZERO  # the way the Rampage will drive once its crouch ends
 var trail_t := 0.0
 
@@ -182,7 +181,7 @@ func _tick_look(dt: float) -> void:
 func _tick(dt: float) -> void:
 	_tick_look(dt)
 	_tick_trail(dt)
-	rampage_wind = maxf(0.0, rampage_wind - dt)
+	if rampage_wind > 0.0: _tick_crouch(dt)
 	var rd := res_def()
 	if enraged_t > 0.0:
 		enraged_t -= dt
@@ -230,7 +229,6 @@ func outgoing(_t: Ent, dmg: float, _o: Dictionary) -> float:
 
 func move_k() -> float:
 	if riposte.running(): return riposte.move_k()
-	if rampage_wind > 0.0: return 0.0           # crouched for the Rampage
 	if meteor.running(): return meteor.move_k()
 	if not slam_w.is_empty(): return 0.6
 	return 0.55 if lmb_t > float(lmb_def().get("tap", 0.22)) else 1.0
@@ -274,6 +272,7 @@ func has_ult() -> bool:
 	return true
 
 func _start_riposte() -> bool:
+	rampage_wind = 0.0                 # X in the Rampage's crouch (its dash row: cancel): no drive after the guard
 	riposte.start()
 	return true
 
@@ -300,7 +299,6 @@ func _wk() -> float:
 func _drop_holds() -> void:
 	riposte.drop()
 	rampage_wind = 0.0
-	rampage_n += 1
 	lmb_t = -1.0
 	lmb_buf = 0.0
 	h.mel_hold = 0.0
@@ -309,7 +307,7 @@ func _drop_holds() -> void:
 	meteor.cancel()
 	warchain.snap("")
 	rmb_queued_at = -9.0
-	dash_queued_at = -9.0
+	dash_held = false
 	lunge_full = false
 
 func fx() -> DJFx:
@@ -335,7 +333,8 @@ func lmb_override(held: bool, dt: float) -> bool:
 		if lmb_t >= 0.0:
 			lmb_t = -1.0
 			h.mel_hold = 0.0
-		if pressed and not KinMerge.transforming(h): lmb_buf = BUFFER
+		# (a press in a dash is DashFlow's to hold)
+		if pressed and not KinMerge.transforming(h) and not in_dash(): lmb_buf = BUFFER
 		return true
 	if h.ctrl != "local":
 		# a bot: slashes up close, sometimes a Searing Wave from mid range
@@ -459,14 +458,18 @@ func _wave() -> void:
 	net_bolt(h.pos + Vector3(0, 0.6, 0), h.pos + Vector3(dv.x * rng, 0.6, dv.y * rng), Color("ff8a4a"))
 
 # ------------------------------------------------------------------ dash: Rampage
+## Shift during one of his moves does what its into_dash row in content/dash_flow/juggernaut.json says: held to
+## the move's end ("buffer"), or the move is dropped and the dash goes ("cancel"; out of the Warchain's pull the
+## drive goes at once, the pull's speed running into it).
 func on_dash(use_ex: bool) -> bool:
-	if not lunge.is_empty() or riposte.move_k() <= 0.0:
+	var slot := _move_slot()
+	var mode := String(DashFlow.into_dash_of(id, slot).get("mode", "fire")) if slot != "" else "fire"
+	if mode == "buffer":
+		dash_held = true
 		return true
-	if not meteor.dash_free():
-		dash_queued_at = m.time        # held off by the slam: goes when the recovery lets it (BUFFER)
-		return true
-	var from_pull := warchain.pulling()
-	if from_pull: warchain.dash_out()
+	var from_pull := slot == "e" and mode == "cancel"
+	if mode == "cancel":
+		_cancel_for_dash(slot)
 	if use_ex and not h.grounded:
 		if not spend_dash(true): return true
 		travel(float(h.cdat.get("ex_dist", 4.2)), float(h.cdat.get("ex_time", 0.21)),
@@ -476,22 +479,32 @@ func on_dash(use_ex: bool) -> bool:
 	if not spend_dash(false):
 		return true
 	var dd := dash_def()
-	# out of the Warchain's pull the drive goes at once: the pull's speed runs straight into it
 	var wind := 0.0 if from_pull else float(dd.get("windup", 0.15))
 	var dir := dash_dir()
 	rampage_dir = dir
 	st["last_dash"] = "rampage"
-	rampage_wind = wind
-	rampage_n += 1
-	var mine := rampage_n
 	play("jug_dash")                 # the crouch with the blade cocked high behind, then the drive
-	if from_pull: anim_at -= float(dd.get("windup", 0.15))       # (straight into the drive's keys)
-	m.sfx("jug_charge", h.pos, -8.0 if h.is_local() else -12.0, 1.4)
 	h.glide_cd = maxf(h.glide_cd, wind + float(dd["time"]) + 0.35)    # its wind-down: no glider straight out
-	m.later(wind, func():
-		if is_instance_valid(h) and mine == rampage_n and not h.downed and h.stun_t <= 0.0:
-			_rampage(dir))
+	if from_pull:
+		anim_at -= float(dd.get("windup", 0.15))       # (straight into the drive's keys)
+		_rampage(dir)
+		return true
+	m.sfx("jug_charge", h.pos, -8.0 if h.is_local() else -12.0, 1.4)
+	# the crouch is the dash's start standing still (planted; DashFlow and the dash rules see the dash from here)
+	rampage_wind = wind
+	h.dash_with({"type": "dash", "speed": 0.0, "time": wind, "dir": dir, "invuln": 0.0})
 	return true
+
+## The crouch before the drive: the drive goes when it's done, unless something ended the dash first (a stun,
+## a dash row's cancel such as X, a merge).
+func _tick_crouch(dt: float) -> void:
+	if h.roll_t <= 0.0 or h.downed or h.stun_t > 0.0:
+		rampage_wind = 0.0
+		return
+	rampage_wind -= dt
+	if rampage_wind <= 0.0:
+		rampage_wind = 0.0
+		_rampage(rampage_dir)
 
 ## Rampage's drive after the crouch: the dash attack along `dir`, the tip at its end.
 func _rampage(dir: Vector2) -> void:
@@ -511,7 +524,7 @@ func own_dash_trail() -> bool:
 	return true
 
 func _tick_trail(dt: float) -> void:
-	if h.roll_t <= 0.0 or not tells_visible():
+	if h.roll_t <= 0.0 or h.roll_speed < 1.0 or not tells_visible():
 		return
 	trail_t -= dt
 	if trail_t > 0.0:
@@ -635,10 +648,35 @@ func _flush_buffer() -> void:
 		var fresh: bool = m.time - rmb_queued_at <= BUFFER
 		rmb_queued_at = -9.0
 		if fresh and not rmb_down: press_rmb()
-	if dash_queued_at > -9.0 and meteor.dash_free():
-		var fresh_dash: bool = m.time - dash_queued_at <= BUFFER
-		dash_queued_at = -9.0
-		if fresh_dash: h.do_dash()
+	if dash_held and _move_slot() == "":
+		dash_held = false
+		h.do_dash()
+
+## Which of his moves owns the body now, by slot ("" for none): the Gilded Riposte, a Smash (the Slam's wind-up,
+## a Lunge, a Meteor Drop until it lets Shift go), the Warchain's pull, a Searing Wave charge.
+func _move_slot() -> String:
+	if riposte.running():
+		return "x"
+	if not slam_w.is_empty() or not lunge.is_empty() or not meteor.dash_free():
+		return "rmb"
+	if warchain.pulling():
+		return "e"
+	if lmb_t > float(lmb_def()["tap"]):
+		return "lmb"
+	return ""
+
+## Shift drops the move (its into_dash row: cancel).
+func _cancel_for_dash(slot: String) -> void:
+	match slot:
+		"e": warchain.dash_out()
+		"lmb":
+			lmb_t = -1.0
+			h.mel_hold = 0.0
+
+## In the Rampage as DashFlow sees it (its crouch is the dash standing still); a Lunge, also a travelled dash, is
+## not: the RMB rules own it.
+func in_dash() -> bool:
+	return super.in_dash() and lunge.is_empty()
 
 ## A held pose ends with its hold (a charge dropped without a release must not freeze the body).
 func _end_held_poses() -> void:

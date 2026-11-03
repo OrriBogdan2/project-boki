@@ -121,7 +121,8 @@ is held for 0.12 s before it ends and goes off when it does; earlier presses are
 | Arrived, window over | tap / hold | Finishing Slam / Lunge from where you stand, with the carried speed | |
 | Arrived beside a foe | tap | the Slam hits as a body hit (you're 1.2 m off, inside the 2.4 to 4.2 m sweet spot); a wall pull or a steered pull that leaves them 2.4 to 4.2 m ahead gets the sweet spot | no special rule (source: edge hits) |
 | Jumped out of a pull | press | Meteor Drop | ours |
-| Rampage | any | (cross-hero dash rules, item 32) | |
+| Rampage (its crouch counts) | any | ground: fires mid-dash, the drive carrying him into it; air dash: ends the dash and the Meteor Drop begins | content/dash_flow/juggernaut.json (docs/heroes/dash_interactions.md) |
+| Slam wind-up, Lunge, Meteor Drop | Shift | held, goes when it's over (the Meteor Drop: 0.25s into its recovery) | dash_flow `into_dash.rmb` |
 
 Differences from the source, and why:
 - **The Haul Slam and the Chain Lunge** are ours (the source has only the spin in the pull); they give the hold

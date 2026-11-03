@@ -75,11 +75,7 @@ func meteor() -> void:
 			"ring %.2f T stun %.2f T2 stun %.2f slow %.2f" % [D.last_shock_r, T.stun_t, T2.stun_t, T2.slow_t])
 	A.step(m, 0.1)
 	var planted := K.move_k()
-	P.dashes = 3.0
-	var dashes0 := P.dashes
-	P.do_dash()
-	A.ok("jug meteor: planted at the start of the recovery, Shift held off", planted <= 0.0 and P.dashes == dashes0,
-			"move_k %.2f" % planted)
+	A.ok("jug meteor: planted at the start of the recovery", planted <= 0.0, "move_k %.2f" % planted)
 	K.ch_rmb = 1.0
 	K.cd["rmb"] = 0.0
 	A.tap(m, P)                   # 0.1s into the recovery: too early for the buffer
@@ -116,12 +112,15 @@ func meteor() -> void:
 	while D.phase != "recover" and t < 1.0:
 		m.step(A.DT)
 		t += A.DT
-	A.step(m, float(dd["dash_free"]) + 0.02)
+	A.step(m, 0.1)
 	P.dashes = 3.0
 	P.do_dash()
-	A.step(m, 0.25)
-	A.ok("jug meteor: Shift breaks out of the recovery once he's up off the knees (0.25s)",
-			P.dashes < 2.5 and D.phase == "", "dashes %.1f phase %s" % [P.dashes, D.phase])
+	A.step(m, 0.08)
+	var held_off := P.dashes == 3.0 and D.phase == "recover"
+	A.step(m, float(dd["dash_free"]) - 0.08)
+	A.ok("jug meteor: Shift pressed early in the recovery is held (into_dash rmb: buffer) and breaks out at 0.25s",
+			held_off and P.dashes < 2.5 and D.phase == "",
+			"held %s dashes %.1f phase %s" % [held_off, P.dashes, D.phase])
 	await A.done(m)
 
 # ------------------------------------------------------------------ item 22: the Warchain's states
@@ -494,7 +493,49 @@ func dash_moves() -> void:
 	A.ok("jug dash moves: each fits its dash (keys cover the move, recovery at most 0.45s past it)",
 			g_len >= g_dash and g_len <= g_dash + 0.45 and a_len >= a_dash and a_len <= a_dash + 0.45,
 			"ground %.2f for %.2f, air %.2f for %.2f" % [g_len, g_dash, a_len, a_dash])
+	await _into_dash(m, P, K, r[4])
 	await A.done(m)
+
+## Shift during his moves, by the into_dash rows of content/dash_flow/juggernaut.json.
+func _into_dash(m: Match, P: Hunter, K: JuggernautKit, home: Vector3) -> void:
+	A.step(m, 1.0)
+	P.teleport(home)
+	P.vel = Vector3.ZERO
+	m.step(A.DT)
+	# rmb: buffer. Shift in the Slam's wind-up waits; the strike lands, then the dash goes
+	K.ch_rmb = 1.0
+	K.cd["rmb"] = 0.0
+	A.tap(m, P)
+	P.dashes = 3.0
+	P.do_dash()
+	m.step(A.DT)
+	var waited := P.dashes == 3.0 and not K.slam_w.is_empty()
+	A.step(m, 0.7)
+	A.ok("jug into_dash rmb (buffer): Shift in the Slam's wind-up goes once the strike has landed",
+			waited and K.slam_w.is_empty() and P.dashes < 2.5, "waited %s dashes %.1f" % [waited, P.dashes])
+	A.step(m, 1.0)
+	# x: buffer. Shift in the guard waits for the cleave
+	K.cd["x"] = 0.0
+	P.dashes = 3.0
+	HunterKeys.ult_pressed(P)
+	m.step(A.DT)
+	P.do_dash()
+	A.step(m, 0.3)
+	var guarded := P.dashes == 3.0 and K.riposte.running()
+	A.step(m, 1.3)
+	A.ok("jug into_dash x (buffer): Shift in the guard waits, then goes when the Riposte is over",
+			guarded and not K.riposte.running() and P.dashes < 2.5, "guarded %s dashes %.1f" % [guarded, P.dashes])
+	A.step(m, 1.0)
+	# lmb: cancel. Shift drops a Searing Wave charge, the dash goes at once
+	var waves0 := K.waves
+	P.dashes = 3.0
+	A.step(m, 0.5, func(): P.inp["fire"] = true)
+	P.do_dash()
+	A.step(m, 0.05, func(): P.inp["fire"] = true)
+	P.inp["fire"] = false
+	A.step(m, 0.6)
+	A.ok("jug into_dash lmb (cancel): Shift drops the Searing Wave charge and dashes at once",
+			K.waves == waves0 and P.dashes < 2.5, "waves %d dashes %.1f" % [K.waves - waves0, P.dashes])
 
 func _last_key(id: String) -> float:
 	var keys: Array = HunterAnim.km_def(id).get("keys", [])
