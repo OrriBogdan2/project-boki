@@ -12,6 +12,7 @@ func run(a) -> void:
 	await meteor()
 	await chain_states()
 	await chain_pull()
+	await chain_steer()
 	await rmb_rows()
 	await dash_moves()
 	await parity_lmb()
@@ -235,17 +236,28 @@ func chain_states() -> void:
 	A.step(m, 0.6, func(): P.inp["move"] = Vector2.ZERO)
 	A.ok("jug chain: Hooked holds 5s while you walk, then breaks and the cooldown starts",
 			held and W.state == "ready" and float(K.cd["e"]) > 5.0, "held %s state %s" % [held, W.state])
-	# stretched: taut and hot near the leash, snapped past it
+	# stretched: it pays out as he backs away, taut and hot near its full length, and holds there (no break)
 	_settle(m, P, K, home)
+	T.teleport(home + Vector3(-7.0, 0, 0))
 	_hook(m, P, K, T.pos, 0.3)
 	var slack := W.strained
-	T.teleport(home + Vector3(17.5, 0, 0))
+	var most := float(ed["tether_max"])
+	var far := 0.0
+	var tb := 0.0
+	while tb < 4.2:
+		P.inp["move"] = Vector2(1, 0)
+		m.step(A.DT)
+		tb += A.DT
+		far = maxf(far, P.flat_dist(T))
+	P.inp["move"] = Vector2.ZERO
+	A.ok("jug chain: backing away it pays out to its full %.0fm, pulls taut (glow, creak) and holds there" % most,
+			not slack and W.hooked() and W.strained and W.holds >= 1 and far <= most + 0.1 and far > most - 0.5,
+			"slack %s hooked %s farthest %.2f holds %d" % [slack, W.hooked(), far, W.holds])
+	# ... and a hooked foe walking off at its full length is held at the end of it
+	T.teleport(P.pos + Vector3(most + 0.8, 0, 0))
 	m.step(A.DT)
-	var taut := W.strained and W.hooked()
-	T.teleport(home + Vector3(float(ed["range"]) * float(ed["leash_k"]) + 1.0, 0, 0))
-	m.step(A.DT)
-	A.ok("jug chain: the chain pulls taut near its leash (glow, creak), snaps past 1.5x range",
-			not slack and taut and W.state == "ready" and float(K.cd["e"]) > 5.0, "slack %s taut %s" % [slack, taut])
+	A.ok("jug chain: a hooked foe pulling past the full length is held at the end of it",
+			W.hooked() and absf(P.flat_dist(T) - most) < 0.1, "dist %.2f" % P.flat_dist(T))
 	# Hooked + a merge-style break: drop_holds breaks it
 	_settle(m, P, K, home)
 	T.teleport(home + Vector3(6.0, 0, 0))
@@ -741,4 +753,71 @@ func parity_rmb() -> void:
 			on_flash["perfect"] and not off_flash["perfect"]
 					and float(on_flash["dist"]) > float(off_flash["dist"]) * 1.12,
 			"on %.1f m, off %.1f m" % [float(on_flash["dist"]), float(off_flash["dist"])])
+	await A.done(m)
+
+# ------------------------------------------------------------------ the pull model (steer, curve, slingshot)
+## The pull is an impulse toward the anchor that his movement input and facing curve, and backing away first
+## slingshots (docs/heroes/juggernaut.md "Warchain: the state machine"). Pulled to a wall 9 m east each time.
+func chain_steer() -> void:
+	var r := A.setup("juggernaut", 8.0)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var T: Hunter = r[2]
+	var home: Vector3 = r[4]
+	var lv: int = r[5]
+	var K: JuggernautKit = P.ak
+	var W := K.warchain
+	var ed := K.e_def()
+	var Wd = m.world
+	for dz in range(-4, 5):
+		for dx in range(9, 11):
+			Wd.level[Wd.idx(int(home.x) + dx, int(home.z) + dz)] = lv + 3
+	T.teleport(home + Vector3(-6.0, 0, 8.0))
+	var runs := {}
+	for how in ["straight", "strafe", "face", "sling"]:
+		_settle(m, P, K, home)
+		if how == "sling":
+			P.teleport(home + Vector3(3.0, 0, 0))
+		_hook(m, P, K, home + Vector3(9.0, 0, 0), 0.35)
+		var hooked := W.hooked() and W.target == null
+		if how == "sling":
+			A.step(m, 0.35, func(): P.inp["move"] = Vector2(-1, 0))      # backing away, then pulled while still going
+		if how == "face":
+			A.aim_at(P, home + Vector3(9.0, 0, 8.0))
+		var from := P.pos
+		K.use_e()
+		var t := 0.0
+		var wide := 0.0
+		var start_z := W.pull_dir.y
+		while W.state == "pulling" and t < 1.5:
+			P.inp["move"] = Vector2(0, 1) if how == "strafe" else Vector2.ZERO
+			m.step(A.DT)
+			t += A.DT
+			wide = maxf(wide, absf(P.pos.z - home.z))
+		P.inp["move"] = Vector2.ZERO
+		runs[how] = {"hooked": hooked, "exit": W.exits, "wide": wide, "end_z": P.pos.z - home.z, "t": t,
+				"speed": W.pull_speed, "sling": W.sling, "avg": P.flat_dist(from) / maxf(t, 0.01), "start_z": start_z}
+		A.aim_at(P, home + Vector3(9.0, 0, 0))
+	var st: Dictionary = runs["straight"]
+	A.ok("jug chain pull: no input, it flies straight in to the wall", st["hooked"] and st["exit"] == "arrived"
+			and float(st["wide"]) < 0.3, str(st))
+	var sf: Dictionary = runs["strafe"]
+	A.ok("jug chain pull: holding a strafe curves it, arriving well beside the anchor (>= 1.5 m)",
+			sf["exit"] == "arrived" and float(sf["end_z"]) >= 1.5, str(sf))
+	var fc: Dictionary = runs["face"]
+	A.ok("jug chain pull: looking aside bends it that way too, less than a strafe",
+			float(fc["end_z"]) > 0.5 and float(fc["end_z"]) < float(sf["end_z"]), str(fc))
+	var sl: Dictionary = runs["sling"]
+	A.ok("jug chain pull: pulled while backing away it slingshots in faster",
+			float(sl["sling"]) > 2.5 and float(sl["speed"]) > float(ed["reel_speed"]) + 2.5
+					and float(sl["avg"]) > float(st["avg"]) + 1.5, "sling %.1f, avg %.1f against %.1f m/s" % [
+					float(sl["sling"]), float(sl["avg"]), float(st["avg"])])
+	# strafing at the press: the pull starts swung wide that way (the sideways speed carries in)
+	_settle(m, P, K, home)
+	_hook(m, P, K, home + Vector3(9.0, 0, 0), 0.35)
+	A.step(m, 0.3, func(): P.inp["move"] = Vector2(0, 1))
+	K.use_e()
+	A.ok("jug chain pull: strafing when it starts swings it out that way from the start",
+			W.pulling() and W.pull_dir.y > 0.04, "start heading %s" % W.pull_dir)
+	P.inp["move"] = Vector2.ZERO
 	await A.done(m)
