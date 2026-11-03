@@ -43,7 +43,7 @@ What the in-game kit card (K) says.
 
 **Shard Snap (RMB, 10s cooldown).**
 
-- *Tap:* A 0.2s wind-up, then one tight bundle of shards to 13m. It stuns the first foe it hits, from 0.8s up to 1.8s the further it flew. Swollen: +44% damage. Rank 3: you speed up 11% on the cast and 22% on a hit, for 2s.
+- *Tap:* A 0.32s wind-up, then one tight bundle of shards to 13m. It stuns the first foe it hits, from 0.8s up to 1.8s the further it flew. Swollen: +44% damage. Rank 3: you speed up 11% on the cast and 22% on a hit, for 2s.
 
 **Brimseed (E, 10s cooldown).** Drop a seed up to 9m away at the cursor (on ground, short of walls). It swells for 6.5s up to 3.2m wide, a light column rising when it is nearly full, then pops by itself; press E again (from 0.3s) to pop it sooner. Damage 12.5 up to 3.5 times that by how long it grew. Swollen: larger and quicker.
 
