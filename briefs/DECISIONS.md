@@ -76,6 +76,7 @@ Main keeps this file current; anyone can propose a line in EXT_TO_MAIN tagged "D
 ## Hosting and distribution (owner, Nov 3)
 - Stage 1 (testers and early players): our own authoritative headless Godot servers on small VPS **in EU and NA from day one** (Hetzner EU and US: Ashburn/Hillsboro; Edgegap only if more regions are needed), plus a small matchmaker (self-hosted Nakama or a custom one). **Distribution: the itch.io desktop app** installs the native Windows/Mac build and auto-patches via butler. NOT a browser game.
 - Stage 2 (public launch): Steam (GodotSteam) as the launcher; servers stay authoritative.
+- itch.io page: https://projectboki.itch.io/project-boki (butler target `projectboki/project-boki:windows`). Our cloud and VM shells can't reach itch.io (network allowlist), so uploads run from the owner's PC: `Downloads\Kinfall\Upload_to_itch.bat` (butler login in the browser; main updates version.txt each sync). Game servers go on the **existing Hetzner account** (new small EU and US servers, separate from the agent box).
 - The owner is creating the accounts (itch.io, Hetzner, later Steamworks). Agents never sign up or pay.
 
 ## Practice and Arena
