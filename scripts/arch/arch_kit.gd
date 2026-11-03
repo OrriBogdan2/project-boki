@@ -722,6 +722,8 @@ func slot_info(slot: String) -> Dictionary:
 	return out
 
 func e_recastable() -> bool: return false
+## E fires on the key's press (a self-centred blast, e.on_press in data), never through the hold-to-aim preview.
+func e_on_press() -> bool: return bool(e_def().get("on_press", false))
 var anim_id := ""              # the kit move playing on the hunter (HunterAnim.KMOVES), its start
 var anim_at := -9.0
 

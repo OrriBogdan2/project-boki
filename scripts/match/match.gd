@@ -3924,6 +3924,8 @@ func _gather_input() -> void:
 			aimable = false       # a charge-up starts on the press and fires on the release
 		if a[0] == "gear1" and (player.gear[0] as Dictionary).is_empty():
 			aimable = false
+		if a[0] == "signature" and player.ak != null and player.ak.e_on_press():
+			aimable = false       # a self-centred E goes off on the press (no cursor preview)
 		if aimable:
 			# hold to see where it will land, let go to cast it
 			if Input.is_action_just_pressed(a[0]) and not paused:

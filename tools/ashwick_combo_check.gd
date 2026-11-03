@@ -5,7 +5,7 @@ extends RefCounted
 ## stops at once,
 ## the 0.35s relight gap), the burn stages and their pips, the Cinder Shot lane and its fixed full range, the
 ## Soot Ram stopping on the first foe, two quick charges and a knock's single charge back, the rank-3 speed and shield,
-## the Furnace Cloak's 0.2s ring before the blast and its swirling shield, walls, Char rules, the merge drops,
+## the Furnace Cloak on the press round him (no cursor) and its swirling shield, walls, Char rules, the merge drops,
 ## and the X ult, Flue Flight (tools/ashwick_ult_check.gd).
 
 var main: Node
@@ -97,7 +97,6 @@ func _all() -> void:
 		K.drags = []
 		K.hose.clear()
 		K.relight_t = 0.0
-		K.cloak_t = 0.0
 		K.bash = {}
 		K.cd["rmb"] = 0.0
 		K.ch_rmb = 1.0
@@ -429,16 +428,31 @@ func _all() -> void:
 	ak.step(m, 2.5)
 	ok("ram rank 3: the boost ends after 2s", absf(K.move_k() - 1.0) < 0.02, "move_k %.2f" % K.move_k())
 	P.slot_lv["dash"] = 1
-	# --- Furnace Cloak: a 0.2s ring first, then the blast
+	# --- Furnace Cloak: fires on the press frame, centred on Linwick whatever the cursor
 	reset.call()
 	T.teleport(home + Vector3(3.8, 0, 0))
+	ak.aim_at(P, home + Vector3(-12.0, 0, 9.0))      # the cursor far off to the other side
 	var bl0: int = K.blasts
-	P.ak.use_e()
-	ak.step(m, 0.1)
+	P.inp["sig"] = true
+	ak.step(m, 1.0 / 60.0)
+	P.inp["sig"] = false
+	var ring: Dictionary = AimKit.entry(P, "e_ring")
+	var ring_at: Vector2 = ring.get("at", Vector2(INF, INF))
 	ok(
-		"cloak: the edge ring shows for 0.2s before the blast",
-		AimKit.shown(P, "e_ring") and K.blasts == bl0 and ak.dmg(T) == 0.0 and float(AimKit.entry(P, "e_ring").get("r", 0.0)) > 4.0,
-		"blasts %d" % K.blasts
+		"cloak: fires on the press frame (no hold-to-aim, no delay)",
+		K.e_on_press() and K.blasts == bl0 + 1 and ak.dmg(T) >= 6.0,
+		"blasts +%d dmg %.1f" % [K.blasts - bl0, ak.dmg(T)]
+	)
+	ok(
+		"cloak: the ring is centred on him at the blast's exact radius (cursor ignored)",
+		AimKit.shown(P, "e_ring") and ring_at.distance_to(Vector2(home.x, home.z)) < 0.05
+			and absf(float(ring.get("r", 0.0)) - float(K.e_def()["radius"])) < 0.001,
+		"at %.2f m off, r %.2f" % [ring_at.distance_to(Vector2(home.x, home.z)), float(ring.get("r", 0.0))]
+	)
+	var flare_t := float((KMovesPair.MOVES["as_cloak"]["keys"] as Array)[-1][0])
+	ok(
+		"cloak: a quick arms-out flare (0.15-0.25 s)", K.anim_id == "as_cloak" and flare_t >= 0.15 and flare_t <= 0.25,
+		"%s %.2f s" % [K.anim_id, flare_t]
 	)
 	ak.step(m, 0.7)
 	ok(
@@ -451,6 +465,16 @@ func _all() -> void:
 		"dist %.1f" % P.flat_dist(T)
 	)
 	ok("cloak: the swirling fire shield shows while it holds", K.fx.shown("swirl%d" % P.get_instance_id()))
+	var pulled_far: float = P.flat_dist(T)
+	reset.call()
+	T.teleport(home + Vector3(3.8, 0, 0))
+	ak.aim_at(P, T.pos)
+	K._cloak_blast()
+	ak.step(m, 0.7)
+	ok(
+		"cloak: no cursor dependence (cursor far away or on the foe: the same pull)",
+		absf(P.flat_dist(T) - pulled_far) < 0.1, "%.2f vs %.2f m" % [pulled_far, P.flat_dist(T)]
+	)
 	K.cd["e"] = 8.0
 	P.hp = P.max_hp * 0.5
 	K.on_knock(T, true)
@@ -510,17 +534,5 @@ func _all() -> void:
 	)
 	KinMerge.end(P, "test")
 	P.merge_cd = 0.0
-	reset.call()
-	T.teleport(home + Vector3(3.0, 0, 0))
-	P.ak.use_e()
-	ak.step(m, 0.05)
-	var b0: int = K.blasts
-	ok("merge hold: the cloak's ring is up before the merge", K.cloak_t > 0.0)
-	ok("merge hold: a merge is under way", ak.merge_now(P))
-	ak.step(m, 0.5)
-	ok(
-		"merge hold: linwick's cloak never goes off mid-merge", K.cloak_t <= 0.0 and K.blasts == b0,
-		"blasts +%d" % (K.blasts - b0)
-	)
 	m.queue_free()
 	await main.get_tree().process_frame

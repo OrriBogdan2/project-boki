@@ -131,13 +131,13 @@ Where the footage and the wiki are silent, we picked the most likely behaviour (
 | X over a gap | he flies across, no carpet over the void | "ult abyss: the carpet never forms over the void, he flies across" |
 | A knockback or a stun mid-flight | faster / the flight ends | "ult: a knockback mid-flight speeds it up"; "ult: a stun ends the flight" |
 | X, then the merge and its ultimate | a full-health light hunter survives | "burst: Flue Flight then the merge never one-shots a full-health light hunter" |
-| Furnace Cloak | a 0.2s ring, then damage, Char, Anti-Heal, drag, swirling shield | "cloak: the edge ring shows for 0.2s before the blast"; "cloak: damage, Char, Anti-Heal and a shield"; "cloak: foes in sight are dragged toward you"; "cloak: the swirling fire shield shows while it holds" |
+| Furnace Cloak | on the press, round him whatever the cursor: damage, Char, Anti-Heal, drag, swirling shield | "cloak: fires on the press frame (no hold-to-aim, no delay)"; "cloak: the ring is centred on him at the blast's exact radius (cursor ignored)"; "cloak: a quick arms-out flare (0.15-0.25 s)"; "cloak: no cursor dependence (cursor far away or on the foe: the same pull)"; "cloak: damage, Char, Anti-Heal and a shield"; "cloak: foes in sight are dragged toward you"; "cloak: the swirling fire shield shows while it holds" |
 | Lance or cloak behind a wall | nothing | "wall: the lance does not burn through a wall"; "wall: the cloak does not reach behind a wall" |
 | Knock | heal and the cloak resets | "passive: a knock resets the cloak and heals" |
 | Furnace Cloak rank 3 | shield 30% bigger, no refund | "cloak rank 3: shield +30%"; "cloak: rank 3 no longer refunds on a stoke" |
 | Char past 31; Char left alone | discarded; falls off after 5s | "passive: Char past 31 is discarded (burn, then 0)"; "passive: Char falls off all at once after 5s" |
 | Carpet over the abyss | never forms | "abyss: the carpet never forms over the void" |
-| A Boki merge mid-lance, mid-cloak or mid-flight | the hose, the cloak's ring and the flight drop, nothing fires or is laid | "merge hold: linwick's lance is dropped, no fire mid-merge"; "merge hold: linwick's cloak never goes off mid-merge"; "merge hold: linwick's flight is dropped, nothing more is laid" |
+| A Boki merge mid-lance or mid-flight | the hose and the flight drop, nothing fires or is laid | "merge hold: linwick's lance is dropped, no fire mid-merge"; "merge hold: linwick's flight is dropped, nothing more is laid" |
 
 ## Animation moves
 Keyed full-body moves live in `scripts/match/kmoves_pair.gd` (`KMovesPair.MOVES`, sampled through `HunterAnim.km_sample`), timed
@@ -148,7 +148,7 @@ to the sheet's beats: anticipation, release (with an overshoot key), follow-thro
 | Cinder Shot (RMB) | `as_aim` (hold), `as_shot` | gun hand cocked at the shoulder sighting down the lane; release: the arm thrusts out (overshoot), the body kicked back by the shot |
 | Soot Ram (Shift) | `as_leap` | a coil, then head first like a battering ram, arms swept back, legs trailing; squashes on impact, springs upright |
 | Air poof (the air dash) | `lw_hop` | balled up in the smoke-and-flame burst, one fast roll forward, then sailing out spread-eagled while the speed bleeds off |
-| Furnace Cloak (E) | `as_cloak` | 0.2s curled in, arms crossed (the ring shows), the flamer swung up on its strap and the arms flung wide with the blast up on his toes, held, settle |
+| Furnace Cloak (E) | `as_cloak` | 0.24s on the press: a quick tuck, then chest out and the arms flung wide with the blast (up on his toes, the flamer swung up on its strap), held a beat, settle |
 | Flashover payoff, a knock | `lw_stoke`, `lw_stoke_lance` (mid-roar) | the off fist punches up over his head, a lean back, a bounce; mid-roar the nozzle stays on the foe and the hold goes on |
 | Plain jump / landing | `lw_jump`, `lw_land` | a quick crouch and a springy tuck; a light squash |
 | Flue Flight (X) | `lw_jet` (held), `lw_land` | a crouch as the ember ring bursts (0.08s), then he springs up and leans into the jet, the free arm swept back to the bellows strap, the nozzle held low (the gun hand stays on it), legs trailing; on landing a squash onto his feet |
@@ -174,5 +174,7 @@ a hit with a burn option. The cloak's drag moves foes in steps against the world
 Flue Flight rides the hunter's own dash movement (`Hunter.dash_with`, kind "jet"), re-aimed every step, so walls stop it as they
 stop a dash; the kit holds him a little off the ground. Other players see the ember ring and carpet as Net fx rings and the moves
 through the kit move id; no new sync shape.
-Holds dropped on a merge (`_drop_holds`): `hose` (the stream), `spool`, `was_held`, `after_t`, `flame_acc`, `cloak_t`, `bash`, `aiming`,
+The Furnace Cloak fires on the key's press: `e.on_press` in the data, read through `ArchKit.e_on_press` by Match's input loop,
+so E skips the hold-to-aim preview (there is nothing to aim).
+Holds dropped on a merge (`_drop_holds`): `hose` (the stream), `spool`, `was_held`, `after_t`, `flame_acc`, `bash`, `aiming`,
 and `jet.flight` (Flue Flight).
