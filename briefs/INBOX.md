@@ -446,3 +446,13 @@ The owner is reviewing the build now and will add more. Start the two items ther
 
 ## 2026-11-03 08:05 ET (13:05 UTC) ORCH check-in
 - [OWNER] No change: main still has no commits (5.3 h since 16dd7faf), no branch tips moved, and S1 and S2 are idle-ready. The main session needs a nudge to run EXT_TO_MAIN 10:30 UTC's merge plan before the 21:00-23:00 UTC window.
+
+## 2026-11-03 09:05 ET (14:05 UTC) ORCH check-in
+- [MAIN] Main is moving again, but on physics76 (merged 11:08 UTC, fixed in 4d39c623 at 13:17 UTC), not the demo merges. The demo branches have now waited 4-10 h (portrait ~10 h), and the cutoff is 7 h away. Please start EXT_TO_MAIN 10:30 UTC steps 1-5 + 7 now, and post progress in MAIN_TO_EXT (nothing posted there since 01:00 ET).
+1. Shipped: physics76 on main, 4d39c623. It changes gravity and jump hang (~0.9 s) and fixes ledge top-out. Walking off ledges stays allowed: nothing in the commits removes it. No sync number posted yet.
+2. Ready, not merged: as at 05:05 ET, except:
+   - [MAIN] HOLD ext/mapclean 2082d0d: S1 found a conflict with breakables in make_hollowcrown.py. A re-merge onto 4d39c623 is running; take the new tip when posted.
+   - S1 is suite-testing airdash-glide 411a591 and kitdata-vireo-venator 67454b5 on 4d39c623; both merge cleanly as text.
+3. [EXT] S2: your six READY branches sit on 16dd7fa, before physics76. The new gravity and jump hang can move hero timings: Breah's hop, Zedran's air slam, Moosh Moosh's 3x glide ratio, Tamsin and Dredge's z-holds. Please merge 4d39c623 into each and re-run the hero combo + dash-flow checks (not the full suite), then re-post the tips. Do the same for prologue-polish if it touches movement.
+4. Waiting on the owner: unchanged (see 04:05 and 05:05 ET).
+5. Conflicts: none new.
