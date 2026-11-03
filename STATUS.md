@@ -1,5 +1,5 @@
 # S2 status (second server session)
-Updated: 2026-11-03 09:40 UTC (git/server clock). Last INBOX_S2 handled: 08:00 (git time) ownership.
+Updated: 2026-11-03 09:50 UTC (git/server clock). Last INBOX_S2 handled: 08:00 (git time) ownership.
 
 
 ## FOR MAIN: S2 merge plan (all READY and ALL NOW ON CURRENT MAIN 16dd7fa / integ77; demo cutoff 21:00 UTC; every S2 pair made it)
@@ -11,7 +11,7 @@ Each branch below already contains origin/main 16dd7fa (merged via ext/dash-flow
 5. `ext/review-bjorn` @ 4a985a1 (Bjorn AND Pin: S1's kitdata-pin-bjorn + the shared DashFlow replacing S1's duplicate; merge this instead of kitdata-pin-bjorn). With this in, --dash-flow-check is 0 failures (alone, branches 1-4 show 1 known failure: Bjorn air dash -> LMB, fixed here).
 6. `ext/prologue-polish` @ 2a03634 (contains ext/prologue5 and main 16dd7fa; merge this instead of prologue5).
 Full suites were run on each branch's pre-main-merge head (results below); after the main merge each got targeted re-checks, all green.
-Not for tonight: `ext/concepts` 87c121b (concept sheets, for ext/owner review), `ext/mantle-look` (save v8; suite found a hair-check parse break + 3 checks to compare with main; being fixed).
+Not for tonight: `ext/concepts` 87c121b (concept sheets, for ext/owner review), `ext/mantle-look` @ d6558b6 READY (post-demo; save v8).
 Shots: `ext/hero-shots-s2` (README with captions).
 
 ## Infra
@@ -79,7 +79,8 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Honest quality read: a clear step up and consistent (line weight, gradient shading, rim light, cast shadows), but clean vector concept art, not painted hero-shooter splash art; good for approving silhouettes/costumes/palettes/relics. Weakest: Sable, Venator, Zedran front poses (static; Zedran's arms thin), simple 3/4 noses.
 - Owner Qs (concepts): item 39 says 6F/5M/1 robot but Cinder as a woman gives 7F/4M/1 robot: confirm or who changes? Moosh Moosh drawn as full fox-folk (CONCEPT_PASS "small fire fox"): OK? Relic names are ours (Drowned Bell, Last Pin, Champion's Torc, Ember Phial, Hollow Bell, Split Geode, Moonsilver Key, Stormglass, Paid-Up Tags, Leaking Heart, Hearth Acorn, Rink Blade): OK / fit the Lore Bible? If approved, archetype JSON silhouette notes change later (Cinder no top hat/bellows, Sable no hood/cape, Ostra no hem, Dredge blunderbuss arm).
 
-## Mantle look + creator (item 45): built, full suite running, ext/mantle-look @ fcc0f1d (on main 16dd7fa; not for tonight)
+## Mantle look + creator (item 45): **READY TO MERGE (after the demo)**, ext/mantle-look @ d6558b6 (pushed; on main 16dd7fa)
+- Full suite (fcc0f1d) found 6 failures beyond the 801bfbf baseline; compared against plain main 16dd7fa: 3 were this branch's and are fixed (hair-check: test galleries still called the moved Models look helpers; rolling-check: bot slider rolls drew from the global RNG and shifted seeded sessions, now a private stream; move-feel-check: Venator's Warden ponytail poked through her hat, model 1.99 m -> 1.90 m, hitbox unchanged), 2 fail identically on main 16dd7fa (kin-regen 'a downed Boki does not regen', abyss 'climbed 4 of 10'). Reruns 0 failures, mantle-look PASS, health OK.
 - MantleLook.apply (scripts/match/mantle_look.gd, pure) + content/rules/mantle_look.json (per-Warden gender/folk/palette, clamps 7-14% body / 5% face, HSV tints with locks: signature colours stay); bots/remotes = Warden + random 20%; hitbox unchanged (asserted at every extreme); at home you are your own person (1.8x range, own colours). Creator: its own step right after the Boki naming card (name stays there), also from the farm's "Change your look"; Body/Face/Colours tabs, Randomise, Yourself/In a Mantle preview; old hatch.gd arrow creator deleted. models.gd shrinks (look helpers to scripts/core/player_look.gd), hunter_anim.gd +3.
 - **Save v7 -> v8** (PlayerLook.migrate: 11 neutral sliders + eye colour, old 'body' pick dropped; old and look-less saves load). Integrator: renumber if another branch bumps the save. Decision doc renumbered to 0011 (0010 = dash flow). No Net change (local-only; design for sharing nudges in 0011).
 - --mantle-look-check 27/27; hunter-unlock 137/0, title, hatch, equal-migrate, unique, capture, gear 87/0, economy-floor, weapon-clip PASS, health OK. Shots: /home/boki/shots-s2/mantle/ (to ext/hero-shots-s2).
