@@ -2,9 +2,9 @@ class_name GearModels
 extends RefCounted
 ## What gear and weapon tunings look like lying on the ground: the usual rarity beam and ring
 ## (Models.gear_drop), with a small shape of the piece spinning above it so you can tell armor from
-## boots from a kit from across a room. Gloves keep the old gem token.
+## boots from across a room. Gloves keep the old gem token.
 
-## slot: Gear slot index (0/1 gloves, 2 armor, 3 boots, 4 kit).
+## slot: Gear slot index (0/1 gloves, 2 armor, 3 boots).
 static func drop(slot: int, col: Color, rar: int) -> Node3D:
 	var root := Models.gear_drop(col, rar)
 	if slot < 2:
@@ -25,10 +25,6 @@ static func drop(slot: int, col: Color, rar: int) -> Node3D:
 			Models.part(spin, Models.box(0.2, 0.42, 0.22), body, Vector3(-0.04, 0.08, 0))
 			Models.part(spin, Models.box(0.36, 0.14, 0.22), body, Vector3(0.08, -0.16, 0))
 			Models.part(spin, Models.box(0.22, 0.06, 0.24), trim, Vector3(-0.04, 0.3, 0))
-		4:   # a roll or satchel: a rounded bag with a strap and a clasp
-			Models.part(spin, Models.sphere(0.27, 10), body, Vector3(0, 0, 0), Vector3(1.0, 0.85, 0.8))
-			Models.part(spin, Models.box(0.5, 0.06, 0.1), trim, Vector3(0, 0.1, 0.2))
-			Models.part(spin, Models.box(0.1, 0.1, 0.08), trim, Vector3(0, 0.0, 0.24))
 	return root
 
 ## A weapon tuning: a small bright core in a spinning ring, bigger and tinted for a Brand.

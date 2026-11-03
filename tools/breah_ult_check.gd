@@ -14,6 +14,7 @@ func ult(main_node: Node) -> void:
 	await _drag_slow_shove()
 	await _punch_and_bond()
 	await _guards()
+	await _no_ground()
 	await _burst()
 
 ## The pair check's strip and dummy, with a Boki ready at her side (the bond only fills with one).
@@ -152,6 +153,21 @@ func _punch_and_bond() -> void:
 	ok("ult beats: the rocks rise from the centre outward over 0.4s", absf(spread - 0.4) < 0.05, "%.2f" % spread)
 	var n_up := rocks(m).filter(func(w): return w.has("ult")).size()
 	ok("ult: 13 rocks over 19.8m on open ground", n_up == 13, "rocks %d" % n_up)
+	var rd := K.rock_def()
+	var shape_ok := true
+	for w in rocks(m).filter(func(w): return w.has("ult")):
+		var mid := K.rock_mid(w)
+		var span: Vector2 = (w["b"] as Vector2) - (w["a"] as Vector2)
+		var off_line := absf(mid.z - K.spine.center.z)
+		shape_ok = shape_ok and bool(w["rock"]) and String(w["rid"]).begins_with(K.rid_owner()) and absf(
+			float(w["len"]) - float(rd["len"])
+		) < 0.01 and float(w["th"]) == HeroZones.ROCK_TH and float(w["top"]) == HeroZones.ROCK_TOP and absf(
+			span.normalized().dot(K.spine.axis)
+		) > 0.99 and off_line < 0.05
+	ok(
+		"spine (item 15): real rocks, Stone Row's own (length, top, thickness), lying along the line, one rock deep",
+		shape_ok and HeroZones.ROCK_TH * 2.0 < 1.0
+	)
 	var paid0 := paid(P)
 	var l0 := K.launches
 	_punch(m, P, T)
@@ -232,6 +248,31 @@ func _guards() -> void:
 	var reach := Vector2(K.spine.center.x - home.x, K.spine.center.z - home.z).length()
 	var still_across := absf(K.spine.axis.dot(Vector2(1, 0))) < 0.05
 	ok("ult aim: past 11m the centre is clamped and a held still cursor stays across", reach <= 11.05 and still_across)
+	await done(m)
+
+## A line with no solid ground under it (cast over open abyss) is refused: no rocks, no walkway, the ult
+## stays ready, and the "no ground" cue's puff shows.
+func _no_ground() -> void:
+	var r := setup_ult("dolm", 6.0)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var home: Vector3 = r[3]
+	var K: DolmKit = P.ak
+	var W: World = m.world
+	var before := void_tiles(m)
+	for z in range(int(home.z) - 14, int(home.z) + 15):
+		for x in range(int(home.x) + 3, int(home.x) + 30):
+			if W.inb(x, z):
+				W.kind[W.idx(x, z)] = World.T_VOID
+	var carved := void_tiles(m)
+	_press(m, P, home + Vector3(10, 0, 0), false)
+	step(m, 1.0)
+	ok(
+		"spine (item 15): a cast fully over the abyss is refused, unspent, with the no-ground cue; nothing raised",
+		K.spine.refused == 1 and K.spine.casts == 0 and float(K.cd["x"]) == 0.0 and rocks(m).is_empty()
+			and void_tiles(m) == carved and carved > before,
+		"refused %d casts %d cd %.1f rocks %d" % [K.spine.refused, K.spine.casts, float(K.cd["x"]), rocks(m).size()]
+	)
 	await done(m)
 
 ## Burst cap: the ridge, a full punch launching it into a light hunter, then straight into the merge and the

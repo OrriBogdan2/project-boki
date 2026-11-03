@@ -14,19 +14,19 @@ The owner read these straight from the installed game (config files, curve table
 
 | Setting | Game value | In metres | Used here? |
 |---|---|---|---|
-| Gravity | -1470 uu/s² | -14.7 m/s² | Not yet: physics pass pending |
-| Jump velocity | 750 uu/s | 7.5 m/s (~1.9 m jump, apex ~0.51 s) | Not yet |
-| Air control | 0.015 | almost no steering mid-jump | Not yet (ours steers freely; interacts with wall moves) |
-| Falling lateral friction | 0.375 | | Not yet |
+| Gravity | -1470 uu/s² | -14.7 m/s² | **Yes**: `Hunter.H_GRAV`, one gravity up and down (match and home) |
+| Jump velocity | 750 uu/s | 7.5 m/s (~1.9 m jump, apex ~0.51 s) | Partly: 6.8 m/s (1.5 m, 0.9 s in the air), so jump + mantle stays under our 4-terrace walls (the wall kick tops those) |
+| Air control | 0.015 | almost no steering mid-jump | Translated: keys steer at 0.3x ground accel (`physics.air_control`), a reverse takes ~0.5 s; ledge rises still steer crisply |
+| Falling lateral friction | 0.375 | | **Yes**: `physics.air_friction`, a jump keeps its run-up |
 | Run speed per hunter | 445-485 uu/s | 4.45-4.85 m/s | **Yes**: `content/rules/hunter_move.json` |
 | Acceleration per hunter | 4700-5400 uu/s² | 47-54 m/s² | **Yes**: `HunterMove` (Oath, Kingpin 47; Tetra 50; others 54) |
 | Braking (no input) | 2220 uu/s² | 22.2 m/s² | Not yet |
 | Walkable floor | 50° | | n/a (heightmap) |
-| Walk off ledges | off | you need a jump or dash to leave a platform | Not yet |
-| Mantle | pulls up ledges within 150 uu; Z speed cap 250 uu/s; mini-mantle launch 0.75 s at 0.6x forward speed, min 350 uu/s | 1.5 m, 2.5 m/s, min 3.5 m/s | Partly (our reach is 1.5 m) |
+| Walk off ledges | off | you need a jump or dash to leave a platform | No, on purpose: the owner wants walking off ledges allowed everywhere |
+| Mantle | pulls up ledges within 150 uu; Z speed cap 250 uu/s; mini-mantle launch 0.75 s at 0.6x forward speed, min 350 uu/s | 1.5 m, 2.5 m/s, min 3.5 m/s | Reach 1.5 m; topping out sends you onto the ledge at max(0.6x run speed, 3.5 m/s) (`physics.mantle_launch_*`) |
 | Tall-ledge climb | Myth and Brall only | | **Yes**: Archer and Juggernaut (+0.9 m reach) |
-| Abyss | death 1750 uu below; fall speed capped 1200 easing to 1000 uu/s between 100 and 1650 uu down; mantling out of the abyss allowed | 17.5 m; 12 to 10 m/s between 1 and 16.5 m | Not yet |
-| Glide | height hold toward 850 uu; min Z -350 uu/s; start fall -85; swoop converts 2.5x falling speed to forward speed over 1.5 s | 8.5 m; -3.5 m/s | Not yet (our feathering is an approximation) |
+| Abyss | death 1750 uu below; fall speed capped 1200 easing to 1000 uu/s between 100 and 1650 uu down; mantling out of the abyss allowed | 17.5 m; 12 to 10 m/s between 1 and 16.5 m | **Yes**: `Hunter.ABYSS_EXTRA` (17.5 m), `HunterMove.fall_cap` (12 m/s anywhere, easing to 10 in the abyss): ~1.9 s from the lip to the point of no return |
+| Glide | height hold toward 850 uu; min Z -350 uu/s; start fall -85; swoop converts 2.5x falling speed to forward speed over 1.5 s | 8.5 m; -3.5 m/s | **Yes**: above 8.5 m the glider sinks at 3.5 m/s and the drop past its usual sink becomes speed (2.5x, fading over 1.5 s; `GlideLift.sink`) |
 | Dive | -3250 uu/s | -32.5 m/s | Not yet |
 
 Still unknown (encrypted C++ defaults): base glide speeds and gravity factor, glide braking, hoop boost, jump hold time, air-dash multipliers. Keep current tuning for those (TODO).

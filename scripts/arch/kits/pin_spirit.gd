@@ -9,6 +9,7 @@ extends RefCounted
 var k: ArcherKit
 var h: Hunter
 var t := 0.0                   # s of Spirit Walk left (0: not walking)
+var total := 0.0               # the length of this walk (the inside boost fades over it)
 var entry := Vector3.ZERO      # the last spot she stood clear of everything
 var inside := false
 var walks := 0                 # (checks)
@@ -33,16 +34,43 @@ func start(use_ex: bool) -> void:
 	var rt := float(dd.get("roll_t", 0.16))
 	k.travel(roll, rt, {"invuln": rt, "dir": dir, "trail": "roll"}, use_ex)
 	k.play("pin_roll")
-	t = float(dd.get("time", 2.8)) + (0.6 if k.rank("dash") >= 3 else 0.0) + rt
+	t = walk_time() + rt
+	total = t
 	entry = h.pos
 	inside = false
 	h.spirit_t = t
 	walks += 1
 	k.st["last_dash"] = "spirit"
+	if k.rank("dash") >= 3:
+		_share_with_allies()
 	k.m.fx.burst(h.pos + Vector3(0, 0.6, 0), PinFx.GREEN, 18, 4.5, 0.35, 2.0, 1.0)
 	k.m.fx.ring(h.pos, 1.2, PinFx.GREEN, 0.25)
 	k.net_ring(h.pos, 1.2, PinFx.GREEN)
 	k.m.sfx("pin_spirit", h.pos, -3.0 if h.is_local() else -7.0)
+
+## Seconds of Spirit Walk after the roll: rank 3 adds "time_rank3".
+func walk_time() -> float:
+	var dd := k.dash_def()
+	return float(dd.get("time", 2.8)) + (float(dd.get("time_rank3", 0.5)) if k.rank("dash") >= 3 else 0.0)
+
+## Rank 3: allies near her when she starts walk as spirits for the same time, with no roll.
+func _share_with_allies() -> void:
+	var reach := float(k.dash_def().get("ally_r", 6.0))
+	for x in k.m.hunters:
+		var already := granted.any(func(g): return g[0] == x)
+		if x == h or x.team != h.team or x.downed or x.out or already or h.flat_dist(x) > reach:
+			continue
+		var walk := walk_time()
+		x.spirit_t = walk
+		granted.append([x, walk])
+		k.m.fx.burst(x.pos + Vector3(0, 0.8, 0), PinFx.GREEN, 12, 3.0, 0.3)
+
+## Rank 3: extra move speed while inside something that fades to nothing as the walk runs out (the physics
+## data's +150 on a 455 base speed is the 0.33 in "inside_boost").
+func inside_boost() -> float:
+	if not inside or k.rank("dash") < 3 or total <= 0.0:
+		return 0.0
+	return float(k.dash_def().get("inside_boost", 0.33)) * clampf(t / total, 0.0, 1.0)
 
 ## Walking into something leaves a spirit orb at the entry: anyone else who touches it (ally or foe) walks
 ## as a spirit too, for the same time (wiki: Phase Walk's phase orb).
@@ -66,7 +94,7 @@ func tick_orbs(dt: float) -> void:
 		for x in k.m.hunters:
 			if x == h or x.downed or x.out or granted.any(func(g): return g[0] == x): continue
 			if Vector2(x.pos.x - op.x, x.pos.z - op.z).length() < ORB_R + x.r and absf(x.pos.y - op.y) < 1.5:
-				var walk := float(k.dash_def().get("time", 2.8))
+				var walk := walk_time()
 				x.spirit_t = walk
 				granted.append([x, walk])
 				k.m.fx.burst(x.pos + Vector3(0, 0.8, 0), PinFx.GREEN, 12, 3.0, 0.3)

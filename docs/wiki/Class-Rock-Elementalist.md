@@ -38,19 +38,19 @@ What the in-game kit card (K) says.
 | Slot | Card text |
 |---|---|
 | Loop | Brawler and builder: raises rocks to climb and hide behind, then punches them into the enemy. |
-| Passive: Tremor Sense | Tremor Sense: sneak to see enemies in a cone ahead through walls; it widens as you sneak. |
+| Passive: Molten Guard | Molten Guard: punching your own rocks gives you a shield. Tremor Sense: sneak to see enemies in a cone ahead through walls; it widens as you sneak. |
 | Dash: Rubble Leap | Rubble Leap: leap to the cursor and land with a crash; the rock you leapt from follows, then rolls on and slows. |
 | LMB | Rubble Fists: tap to throw a boulder; hold and let go to punch everything in the lane, and every rock in it flies. |
 | RMB: Quakefall | Quakefall: hold to gather, let go to hop and slam; the centre stuns. Jump while holding to leap forward. |
 | E: Stone Row | Stone Row: raise three rocks ahead. Stand on them, climb them, or punch them into foes. |
-| Hunter ultimate: Basalt Spine | Basalt Spine: from level 6, raise a long ridge of rocks at the cursor; hold and drag to turn it. Over the abyss it is a walkway. |
+| Hunter ultimate: Basalt Spine | Basalt Spine: from level 6, raise a long ridge of rocks at the cursor; hold and drag to turn it. Rocks only rise on solid ground. |
 | Weapon: Rubble Fists | Tap to throw a boulder; hold and let go to punch everything in the lane, and every rock in it flies. |
 
 ### Abilities in full
 
-**Tremor Sense (passive).** While sneaking, a narrow cone ahead (25 degrees, widening to 40 over 2s of sneaking, 16m long) shows every enemy in it through walls and fog as a molten ring, refreshed every half second.
+**Molten Guard (passive).** Molten Guard: a punch that sends any of your rocks flying gives you a shield of 18, up to 4 stacks for 6s (one stack per punch, however many rocks it throws). Tremor Sense: while sneaking, a narrow cone ahead (25 degrees, widening to 40 over 2s of sneaking, 16m long) shows every enemy in it through walls and fog as a molten ring, refreshed every half second.
 
-**Rubble Leap (dash, Shift, 9s cooldown).** A rock bursts up under you and you leap to the cursor (up to about 4m). You land with a crash that shoves everyone beside you, and the rock comes down right after you and rolls on 6m: 12 damage, a shove, Shred (+15% damage taken for 3s) and a 1.5s slow. In the air: your long dash.
+**Rubble Leap (dash, Shift, 12s cooldown).** A rock bursts up under you and you leap to the cursor (up to about 4m). You land with a crash that shoves everyone beside you, and the rock comes down right after you and rolls on 6m: 12 damage, a shove, Shred (+15% damage taken for 3s) and a 1.5s slow. In the air: your long dash.
 
 **Quakefall (RMB, 9s cooldown).**
 
@@ -60,7 +60,7 @@ What the in-game kit card (K) says.
 
 **Stone Row (E, 13s cooldown).** A red flash on the ground, then three rocks rise in a slight curve 3.4m ahead, spanning 5m (on solid ground only, never into bodies). They stop foes and shots, hold 9s, you can stand on and climb them, and any punch, slam or dash-launch sends them flying.
 
-**Basalt Spine (hunter ultimate, from level 6, 45s cooldown).** Tap: a ridge of 13 rocks, 19.8m long, centred at the cursor (up to 11m away) and across your aim. Hold the key and drag the cursor to swing it round its centre; let go to cast. Molten cracks show along the line for 0.2s, then the rocks erupt from the centre outward over 0.4s, slowing foes beside them by 35% for 1s and shoving anyone on the line aside. They are your rocks for 7s: they stop foes and their shots, you stand on them and climb them, and a punch along the ridge launches the whole line (its rocks deal at most 40 to any one hunter). Over the abyss the line becomes a 2m walkway for 7s. 45s.
+**Basalt Spine (hunter ultimate, from level 6, 45s cooldown).** Tap: a ridge of 13 rocks, 19.8m long, centred at the cursor (up to 11m away) and across your aim. Hold the key and drag the cursor to swing it round its centre; let go to cast. Molten cracks show along the line for 0.2s, then the rocks erupt from the centre outward over 0.4s, slowing foes beside them by 35% for 1s and shoving anyone on the line aside. They are your rocks for 7s: they stop foes and their shots, you stand on them and climb them, and a punch along the ridge launches the whole line (its rocks deal at most 40 to any one hunter). Rocks only rise on solid ground: the ridge stops at the abyss, and with no ground under it the cast is refused. 45s.
 
 ### Ranks
 
@@ -69,7 +69,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | Slot | Rank 2 | Rank 3 |
 |---|---|---|
 | RMB | cooldown 9s -> 8.1s, damage +15%. | cooldown 9s -> 7.2s, damage +30%; slamming a foe or a rock gives a shield of 18, up to 4 stacks. |
-| Dash (Shift) | recharge 9s -> 7.6s per charge. | recharge 9s -> 6.3s; the leap goes a third further. |
+| Dash (Shift) | recharge 12s -> 10.2s per charge. | recharge 12s -> 8.4s; a second charge, and the leap goes a third further. |
 | E | cooldown 13s -> 11.7s, rocks hit +15%. | cooldown 13s -> 10.4s; an extra row of rocks behind the first. |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > RMB > E > Dash (Shift) > Glove (Q).

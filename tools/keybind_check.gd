@@ -1,8 +1,8 @@
 extends RefCounted
 ## --keybind-check: two keys per action (Settings > Controls). Merge ships on T, reload on R, the hunter ultimate on X; a
 ## second key can be set, cleared and saved; a key already in use is caught and can be swapped;
-## nothing else is on X in a match (the
-## arena/duel reset is Backspace, separating from the drop is Z). With --shots-dir=<dir>, screenshots of
+## nothing else is on X in a match (the arena/duel reset is Backspace, separating from the drop is
+## Z); glove 2 and play share V on purpose (a match key and a home key). With --shots-dir=<dir>, screenshots of
 ## the Controls page and of the clash warning.
 
 var bad := 0
@@ -24,17 +24,28 @@ func run(main: Node) -> void:
 	var xs: Array = S.conflicts(_key(KEY_X), "hunter_ult")
 	ok(xs.is_empty(), "nothing else rebindable is on X (%s)" % str(xs))
 	# a second key: set, saved, cleared
-	S.rebind("tonic", _key(KEY_KP_1), 1)
-	ok(S.slots("tonic") == ["key:%d" % KEY_1, "key:%d" % KEY_KP_1] and InputMap.action_get_events("tonic").size() == 2, "a second key for Heal works (%s)" % S.binding_text("tonic"))
-	ok((S.v["keys"]["tonic"] as Array).size() == 2, "and is saved")
-	S.clear_bind("tonic", 1)
-	ok(S.slots("tonic") == ["key:%d" % KEY_1, ""], "and clears")
-	S.clear_bind("tonic", 0)
-	ok(S.slots("tonic") == ["", ""] and S.binding_text("tonic") == "unbound", "clearing the main key leaves it unbound")
+	S.rebind("util1", _key(KEY_KP_1), 1)
+	ok(S.slots("util1") == ["key:%d" % KEY_1, "key:%d" % KEY_KP_1] and InputMap.action_get_events("util1").size() == 2,
+			"a second key for utility slot 1 works (%s)" % S.binding_text("util1"))
+	ok((S.v["keys"]["util1"] as Array).size() == 2, "and is saved")
+	S.clear_bind("util1", 1)
+	ok(S.slots("util1") == ["key:%d" % KEY_1, ""], "and clears")
+	S.clear_bind("util1", 0)
+	ok(S.slots("util1") == ["", ""] and S.binding_text("util1") == "unbound", "clearing the main key leaves it unbound")
 	var mb := InputEventMouseButton.new(); mb.button_index = MOUSE_BUTTON_XBUTTON1; mb.pressed = true
-	S.rebind("tonic", mb, 1)
-	ok(S.slots("tonic") == ["", "mouse:%d" % MOUSE_BUTTON_XBUTTON1], "a mouse button works as a second key (%s)" % S.binding_text("tonic"))
+	S.rebind("util1", mb, 1)
+	ok(S.slots("util1") == ["", "mouse:%d" % MOUSE_BUTTON_XBUTTON1],
+			"a mouse button works as a second key (%s)" % S.binding_text("util1"))
 	S.reset_all()
+	# V: glove 2 in a match, play fetch at home. Different places, so they share it on purpose
+	ok(S.slots("gear2")[0] == "key:%d" % KEY_V and S.slots("play")[0] == "key:%d" % KEY_V,
+			"glove 2 ships on V, and V still plays fetch at home")
+	var vg: Array = S.conflicts(_key(KEY_V), "gear2")
+	var vp: Array = S.conflicts(_key(KEY_V), "play")
+	ok(vg.is_empty() and vp.is_empty(),
+			"glove 2 (match) and play (home) are separate contexts: no clash between them (%s %s)" % [str(vg), str(vp)])
+	var vd: Array = S.conflicts(_key(KEY_V), "dash")
+	ok(vd.any(func(x): return x[0] == "gear2") and vd.any(func(x): return x[0] == "play"), "giving another action V still warns about both (%s)" % str(vd))
 	# clashes: F is interact's
 	var cf: Array = S.conflicts(_key(KEY_F), "ultimate")
 	ok(cf.size() == 1 and cf[0][0] == "interact", "giving the ultimate F is caught: it's Interact's (%s)" % str(cf))

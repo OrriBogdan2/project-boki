@@ -455,6 +455,7 @@ func generate(seed_val: int, size := 64, n_islands := 7) -> void:
 	if bigmap:
 		_place_compounds()
 	_place_stairs()
+	BlockPrune.prune(self, BlockPrune.MIN_TILES)      # no lone posts a shot could clip
 
 ## On the big islands the point of interest sits inside a walled compound: a square of stone walls
 ## with a gate in each side and a squat tower at each corner, so each island reads as one place
@@ -1080,7 +1081,7 @@ func _place_spots() -> void:
 			if p == Vector3.INF:
 				continue
 			var roll := rng.randf()
-			var bk := "crate" if roll < 0.45 else ("pot" if roll < 0.75 else "barrel")
+			var bk := Breakables.kind_for(roll)
 			break_spots.append({"pos": p, "kind": bk})
 			if rng.randf() < 0.55:
 				var q := _near(p, 1.0, rng.randf() * TAU, ii, taken)

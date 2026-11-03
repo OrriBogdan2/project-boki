@@ -29,6 +29,8 @@ static func _channeling(h: Hunter) -> bool:
 static func ult_pressed(h: Hunter) -> bool:
 	if h == null or h.downed or h.out:
 		return false
+	if h.ak != null and h.ak.flow.take_x():
+		return true          # pressed mid-dash: DashFlow plays it when the dash ends
 	if h.lvl < int(Hunter.ULT_AT[0]):
 		_deny(h)
 		if h.is_local() and h.m.hud and _toast_due(h):
@@ -46,7 +48,6 @@ static func _toast_due(h: Hunter) -> bool:
 	h.set_meta("ult_toast_at", h.m.time)
 	return true
 
-## A press that did nothing: the soft warning sound (the hunter ultimate has no slot to shake).
+## A press that did nothing: the X tile shakes red with the soft warning sound (HunterUltTile).
 static func _deny(h: Hunter) -> void:
-	if h.is_local():
-		h.m.sfx("warn", null, -16.0, 1.6)
+	h._ab_feedback("x", "deny")

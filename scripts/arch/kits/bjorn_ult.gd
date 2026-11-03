@@ -4,7 +4,7 @@ extends Node3D
 ## him and raises the hammer for "windup" s while a lane of "cells" square cells ("cell_len" by "width")
 ## shows toward the cursor for everyone. Then the slam: the near cell is struck (a small hit and a brief
 ## stun) and the ground erupts cell by cell to the far end ("cell_t" apart), throwing each foe on it up
-## once (damage, a stun and a heavy slow). A wall, a raised ledge or a drop stops the fissure. Where it
+## once (damage, a stun and a heavy slow). A wall or a raised ledge stops the fissure; it runs on over a drop. Where it
 ## ran, a glowing scar stays "scar_t" s and slows foes standing on it. A stun during the wind-up
 ## interrupts it (the cooldown comes back to "refund" s); a merge drops the wind-up with no slam.
 ##
@@ -88,8 +88,8 @@ func cast() -> bool:
 func cell_len() -> float:
 	return float(xd().get("cell_len", 4.0))
 
-## The cells' near-edge points out to the full lane, stopping before a wall, a raised ledge or a drop.
-## The near cell is always struck.
+## The cells' near-edge points out to the full lane, stopping before a wall or a raised ledge; it runs on out
+## over a drop or the abyss (those cells float at his height). The near cell is always struck.
 func _reach() -> Array:
 	var out: Array = []
 	var cl := cell_len()
@@ -98,11 +98,20 @@ func _reach() -> Array:
 		var a := origin + Vector3(dir.x, 0, dir.y) * cl * i
 		var c := a + Vector3(dir.x, 0, dir.y) * cl * 0.5
 		var g: float = k.m.world.ground_at(c.x, c.z)
-		var blocked: bool = k.m.world.is_block(c.x, c.z) or g > y0 + 1.2 or g < y0 - 2.5 or k.m.world.is_void(c.x, c.z)
-		if blocked and i > 0:
+		if (k.m.world.is_block(c.x, c.z) or g > y0 + 1.2) and i > 0:
 			break
 		out.append(Vector3(a.x, y0, a.z))
 	return out
+
+## The height the lane's visuals sit at over `p`: the ground, or his own height where there is none (the
+## abyss, or a drop far below), so the trail never cuts off at an edge.
+func _trail_y(p: Vector3) -> float:
+	var g: float = k.m.world.ground_at(p.x, p.z)
+	return origin.y if g <= World.VOID + 1.0 or g < origin.y - 2.5 else g
+
+## How far the trail is drawn (m): the whole reached lane, over the abyss too.
+func trail_len() -> float:
+	return cell_len() * cells.size()
 
 ## Every step: the phases, the telegraph and the scar.
 func tick(dt: float) -> void:
@@ -138,6 +147,7 @@ func _telegraph() -> void:
 		var done := 1.0 if i < erupted else 0.0
 		AimKit.lane(h, "x%d" % i, {"from": a, "dir": dir, "len": cell_len(), "width": float(x.get("width", 4.0)),
 			"all": true, "col": EMBER, "col2": GOLD, "fill": done, "hot": done * 0.6, "dur": 0.15})
+		AimKit.entry(h, "x%d" % i)["y"] = _trail_y(a + Vector3(dir.x, 0, dir.y) * cell_len() * 0.5)
 
 func _interrupt() -> void:
 	phase = ""
@@ -211,7 +221,7 @@ func _erupt(i: int) -> void:
 func _cell_mid(i: int) -> Vector3:
 	var a: Vector3 = cells[i]
 	var c := a + Vector3(dir.x, 0, dir.y) * cell_len() * 0.5
-	return AimMode.ground(k.m, c)
+	return Vector3(c.x, _trail_y(c), c.z)
 
 func _foes_in(i: int) -> Array:
 	var a: Vector3 = cells[i]
@@ -247,8 +257,8 @@ func _tick_scar(dt: float) -> void:
 		k.m.sfx("bjorn_ult_crackle", mid, -16.0, randf_range(0.9, 1.1))
 
 func _scar_show(length: float) -> void:
-	_place_flat(_scar, AimMode.ground(k.m, origin + Vector3(dir.x, 0, dir.y) * length * 0.5) + Vector3(0, 0.06, 0),
-		Vector2(length, 0.5))
+	var mid := origin + Vector3(dir.x, 0, dir.y) * length * 0.5
+	_place_flat(_scar, Vector3(mid.x, _trail_y(mid) + 0.06, mid.z), Vector2(length, 0.5))
 	_scar.visible = true
 
 ## Lays a quad flat on the ground along the lane's direction, `size` = (along, across).
@@ -273,7 +283,7 @@ func _process(delta_in: float) -> void:
 		var u := 1.0 - clampf(_streak_t / total, 0.0, 1.0)
 		var length := cell_len() * cells.size()
 		var head := origin + Vector3(dir.x, 0, dir.y) * length * u
-		_place_flat(_streak, AimMode.ground(k.m, head) + Vector3(0, 0.25, 0), Vector2(2.4, 0.9))
+		_place_flat(_streak, Vector3(head.x, _trail_y(head) + 0.25, head.z), Vector2(2.4, 0.9))
 		_streak.visible = _streak_t > 0.0
 	if _scar.visible and not scar.is_empty():
 		var fade := clampf(float(scar["t"]), 0.0, 1.0)

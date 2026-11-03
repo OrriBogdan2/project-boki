@@ -42,7 +42,7 @@ const UPPER := 0.21
 const FORE := 0.235
 const REACH := UPPER + FORE
 const BODY_C := Vector3(0, 0.62, 0)      # whole-body turns (flips, rolls) go about the hips
-const G_UP := 30.0                        # Hunter.H_GRAV, for guessing how long a jump stays up
+const G_UP := Hunter.H_GRAV                # for guessing how long a jump stays up
 const FLIP_MIN := 0.8                     # total airtime that earns a trick
 const AIM_Y := 0.5                        # Aim sits this high on the torso
 const GROUND_CLEAR := 0.05                # no part of a weapon ever goes nearer the ground than this (m)
@@ -529,8 +529,7 @@ func update(dt: float, s: Dictionary) -> void:
 	stepped = false
 	slammed = false
 	_check_weapon(s)
-	km_id = String(s.get("kmove", ""))
-	km = km_sample(km_id, float(s.get("kmove_t", 99.0))) if km_id != "" else {}
+	_update_km(String(s.get("kmove", "")), float(s.get("kmove_t", 99.0)), dt)
 	var vel: Vector3 = s.get("vel", Vector3.ZERO)
 	var face: float = s.get("face", model.rotation.y)
 	var grounded: bool = s.get("grounded", true)
@@ -1091,6 +1090,42 @@ const KM_CH := ["p", "y", "r", "lift", "fx", "fz", "fy", "sq", "lw", "hw", "rw",
 var km := {}                   # the kit move's channels this frame (empty: none)
 var km_id := ""
 var km_prev_t := 99.0
+var km_from := {}              # the pose the last kit move left the body in, eased out over KM_BLEND
+var km_blend := KM_BLEND
+const KM_BLEND := 0.08         # s: one kit move eases into the next (or back to none), so no pose pops
+
+## The kit move's channels this frame; a new move (or the same one restarted) blends in from the last pose.
+func _update_km(id: String, tt: float, dt: float) -> void:
+	if id != km_id or tt < km_prev_t - 0.001:
+		km_from = km
+		km_blend = 0.0
+	km_id = id
+	km_prev_t = tt
+	var now := km_sample(id, tt) if id != "" else {}
+	km_blend += dt
+	km = now if km_blend >= KM_BLEND or km_from.is_empty() else km_mix(km_from, now, km_blend / KM_BLEND)
+
+## Two kit-move poses mixed (u = 0: `a`, 1: `b`); a side without a channel counts as the rest pose, and the
+## whole-body turns take the short way round.
+static func km_mix(a: Dictionary, b: Dictionary, u: float) -> Dictionary:
+	if a.is_empty() and b.is_empty():
+		return {}
+	u = u * u * (3.0 - 2.0 * u)
+	var out := {}
+	for c in KM_CH:
+		var va := float(a.get(c, 0.0))
+		var vb := float(b.get(c, 0.0))
+		out[c] = lerp_angle(va, vb, u) if c in ["fx", "fy", "fz"] else lerpf(va, vb, u)
+	var la: Array = a.get("legs", b.get("legs", []))
+	var lb: Array = b.get("legs", la)
+	if not la.is_empty():
+		out["legs"] = [lerpf(la[0], lb[0], u), lerpf(la[1], lb[1], u), lerpf(la[2], lb[2], u), lerpf(la[3], lb[3], u)]
+	for c in ["fl", "fr", "blade", "wa", "wo"]:
+		if a.has(c) or b.has(c):
+			var va2: Vector3 = a.get(c, b.get(c))
+			var vb2: Vector3 = b.get(c, a.get(c))
+			out[c] = va2.lerp(vb2, u)
+	return out
 
 ## A kit move's keys, from whichever pair's table has it (scripts/match/kmoves_*.gd); empty if none.
 static func km_def(id: String) -> Dictionary:
@@ -1610,7 +1645,8 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 ##   key      crouched at the hatch, turning a key
 ##   loot     crouched over a deathbox, rummaging
 ##   rune     both palms on the stone
-const ACT_KNEEL := ["scan", "revive", "key", "loot"]
+##   offer    down on one knee, both hands held out together at the chest (the prologue's relic)
+const ACT_KNEEL := ["scan", "revive", "key", "loot", "offer"]
 func _act_tick(dt: float, s: Dictionary, grounded: bool, spd: float) -> void:
 	var want := String(s.get("act", ""))
 	if not grounded or spd > 2.2 or s.get("downed", false) or float(s.get("stomp", -1.0)) >= 0.0:
@@ -1627,7 +1663,7 @@ func _act_tick(dt: float, s: Dictionary, grounded: bool, spd: float) -> void:
 func _act_legs() -> Vector4:
 	var w := sin(act_t * 3.0)
 	match act_kind:
-		"scan", "revive", "key", "loot":
+		"scan", "revive", "key", "loot", "offer":
 			return Vector4(1.35, -1.45, -0.15, -1.9)
 		"chest":
 			var heave := 0.5 + 0.5 * sin(act_t * 3.4)
@@ -1695,6 +1731,8 @@ func _act_hands(sh_l: Vector3, sh_r: Vector3) -> Array:
 			return [sh_l + Vector3(0.08, -0.46 + maxf(0.0, r1), -0.34), sh_r + Vector3(-0.08, -0.46 + maxf(0.0, -r1), -0.34), 1.0]
 		"rune":
 			return [sh_l + Vector3(0.12, -0.06, -0.42), sh_r + Vector3(-0.12, -0.06, -0.42), 1.0]
+		"offer":
+			return [sh_l + Vector3(0.1, -0.1, -0.36), sh_r + Vector3(-0.1, -0.1, -0.36), 1.0]
 	return [sh_l, sh_r, 0.0]
 
 ## A support hand that can't reach its grip slides back along the weapon toward the trigger hand.

@@ -25,8 +25,8 @@ var spawn := ""             # set when coming back out of a building: start at i
 var py := 0.0               # height of a jump
 var farm_t := 0.0
 var pvy := 0.0
-const JUMP_V := 8.5
-const GRAV := 26.0
+const JUMP_V := Hunter.JUMP_V
+const GRAV := Hunter.H_GRAV
 var pface := 0.0
 var walk_ph := 0.0
 var house_node: Node3D
@@ -1313,7 +1313,7 @@ func _move_player(d: float) -> void:
 		elif gliding and pvy <= 0.0:
 			pvy = move_toward(pvy, -Hunter.GLIDE_SINK, Hunter.GLIDE_CATCH * d)
 		else:
-			pvy -= GRAV * d
+			pvy = maxf(pvy - GRAV * d, -HunterMove.fall_max)
 		py += pvy * d
 		if gh > World.VOID + 1.0 and py <= gh:
 			lfl = {}
@@ -2845,9 +2845,9 @@ func _open_shop() -> void:
 				var fd: Dictionary = Care.FOODS[f]
 				var fk: String = f
 				goods.append(["food:" + f, fd["name"], fd["desc"], int(fd["price"]), Color("ffb36a"), func(): Save.add_item(fk, 1), "have %d" % int(Save.d["items"].get(f, 0))])
-			goods.append(["tonic", "Tonic", "Heals 45 in a match (%s)." % Settings.key_cap("tonic"), 30, Color("8fe0a0"), func(): Save.add_item("tonic", 1), "have %d" % int(Save.d["items"].get("tonic", 0))])
-			var kl := Exits.keys_left_today()
-			goods.append(["rift_key", "Rift Key", "Opens any rift hatch on an expedition: a quiet way out, any time. Lost if you go down. %d a day." % Exits.KEYS_PER_DAY, Exits.KEY_PRICE if kl > 0 else -1, ExitModels.HATCH, func(): Exits.buy_key(), "have %d%s" % [int(Save.d["items"].get("rift_key", 0)), "" if kl > 0 else "  ·  sold out today"]])
+			goods.append(["tonic", "Tonic", "Heals 40%% in a match (belt key %s)." % Settings.key_cap("util1"), 30, Color("8fe0a0"), func(): Save.add_item("tonic", 1), "have %d" % int(Save.d["items"].get("tonic", 0))])
+			for uid in UtilityBelt.stock_ids():      # the rest of the utility belt (HomeBelt picks what to take)
+				if uid != "tonic": goods.append([uid, UtilityBelt.name_of(uid), UtilityBelt.def(uid)["desc"], UtilityBelt.price_of(uid), UtilityBelt.col_of(uid), func(): Save.add_item(uid, 1), "have %d" % Equal.stash_of(uid)])
 		"Wear":
 			var owned: Array = Save.d.get("accs", [])
 			for a in Data.ACCS:
@@ -3622,7 +3622,6 @@ func _open_expedition() -> void:
 		elif exp_tier == i:
 			tv.add_child(UI.para(String(td["desc"]), UI.T_SMALL, Color("ffb3a8") if KinLoss.at_risk(i) else UI.MUTED))
 		right.add_child(tc)
-	HomeFreeKit.card(right)      # the free-kit run (home_freekit.gd)
 	right.add_child(UI.spacer(2))
 	right.add_child(UI.section("Match"))
 	var mode_names := {"solo": "Solo", "duo": "Duos", "trio": "Trios"}
@@ -3656,7 +3655,6 @@ func _open_expedition() -> void:
 	fl.add_child(UI.ghost("Duel room", _start_duel, 0, "knock"))
 	if Net.available():
 		fl.add_child(UI.ghost("Play online", func(): Game.goto("lobby", {"cls": Data.class_of_save(), "tier": exp_tier}), 0, "bond"))
-	if HomeFreeKit.buttons(fl, v, self, ak.is_empty()): return      # (no Boki of your own: only the free-kit run)
 	var start_b := UI.footer_primary(v, "Start expedition", _confirm_start, 250, "portal")
 	start_b.grab_focus.call_deferred()
 
@@ -3907,7 +3905,9 @@ func _start_match() -> void:
 	if Save.d.get("exp_rolling", false):
 		o["rolling"] = true      # the session sizes its own waves (Rolling.plan)
 	o["tier"] = exp_tier
-	o["kit_items"] = Econ.begin_raid()      # the armory loadout rides with you
+	o["kit_items"] = Equal.take_loadout(exp_tier)      # gloves and boots from the armory ride with you (capped by tier)
+	o["belt_items"] = Equal.take_belt(exp_tier)         # and the utility you picked
+	o["backpack"] = Backpacks.take_home(exp_tier)       # and your backpack
 	if exp_seed != 0: o["seed"] = exp_seed  # the conditions the panel showed
 	exp_seed = 0
 	Save.save_game()
@@ -4255,14 +4255,14 @@ func _open_gift_panel(owner_name: String) -> void:
 		v.add_child(UI.label("You have nothing to give yet. Seeds and crops make good gifts.", 15))
 
 ## The "while you were away" note waits until nothing else is on screen.
-func _show_when_free(lines: Array) -> void:
+func _show_when_free(lines: Array, title := "While you were away") -> void:
 	if not is_inside_tree():
 		return
 	if panel_open != "" or building_now or not Save.d["tutorial"].get("home", false):
-		get_tree().create_timer(1.0).timeout.connect(_show_when_free.bind(lines))
+		get_tree().create_timer(1.0).timeout.connect(_show_when_free.bind(lines, title))
 		return
-	var v := _new_panel("While you were away", 520)
-	for l in lines: v.add_child(UI.label(l, 15))
+	var v := _new_panel(title, 520)
+	for l in lines: v.add_child(UI.label(HomeNotices.bullet(String(l)), 15))
 	_refresh_top()
 
 func _open_ferry() -> void:
@@ -4402,11 +4402,12 @@ func _setup_care() -> void:
 		return
 	# the time you were away: needs drift, kin eat from the feeders, and hungry ones may starve
 	hecon.away = Econ.catch_up_all()
-	# nobody is left with no Boki: a stray turns up (Lifeline; the toast is in home_freekit.gd)
+	# nobody is left with no Boki: a stray turns up (Lifeline; the toast is in home_notices.gd)
 	var floor_ev := Lifeline.check()
 	if hecon.away.any(func(e): return e["kind"] == "died") or not floor_ev.is_empty():
 		_spawn_kin()
-	HomeFreeKit.toast_stray(self, floor_ev)
+	HomeNotices.toast_stray(self, floor_ev)
+	HomeNotices.show_migration(self)       # the one-time list of what the equal-footing save update converted
 	# what Boki assigned to stations made while you were away (Work.catch_up)
 	away_work = Work.catch_up()
 	if not away_work.is_empty():
@@ -5709,18 +5710,13 @@ func _econ_tests(dbg) -> void:
 	var rng := RandomNumberGenerator.new(); rng.seed = 5
 	if "--armory-test" in dbg:
 		if not Save.d["buildings"].has("armory"): Save.d["buildings"].append("armory")
-		Save.d["armory"] = []
-		for t in [["vest", 2], ["quilted_coat", 3], ["bastion_plate", 4], ["boots", 1], ["windstep_boots", 3], ["quickstep_boots", 2],
-				["tinker_roll", 2], ["satchel", 4], ["field_kit", 1], ["magpie", 3]]:
-			Save.d["armory"].append(Loot.gear(String(t[0]), int(t[1])))
-		var gk: Array = Gear.ids_for(0) + Gear.ids_for(1)
-		for i in mini(4, gk.size()):
-			Save.d["armory"].append(Loot.gear(String(gk[i]), 1 + i % 4))
-		Save.d["valuables"] = {"old_coin": 3, "sky_pearl": 1, "kin_idol": 1, "soul_ember": 1}
-		Save.d["scrap"] = 9
-		Save.d["loadout"] = {"gear2": Save.d["armory"][2]["uid"], "gear3": Save.d["armory"][4]["uid"]}
+		EqualMigrate.demo()      # an old armory, after the equal-footing migration
+		var gl: Array = (Save.d["armory"] as Array).filter(func(it): return Equal.may_bring(it, 2))
+		if not gl.is_empty(): Save.d["loadout"] = {"gear0": gl[0]["uid"]}
+		HomeNotices.show_migration(self)
 		get_tree().create_timer(0.4).timeout.connect(func():
-			hecon.arm_pick = String(Save.d["armory"][2]["uid"])
+			hecon.arm_pick = String(Save.d["armory"][0]["uid"])
+			hecon.arm_tab = "Backpacks" if "--armory-backpacks" in dbg else hecon.arm_tab
 			hecon.open_armory())
 	if "--feeder-test" in dbg or "--starve-test" in dbg:
 		# a clean roster of six, so nothing else from the machine's save (an evolution, a nap) gets in the way

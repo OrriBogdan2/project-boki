@@ -128,7 +128,6 @@ const SHOTS := [
 		5.0,
 		"Heavy Shot impact: a red star and red-white burst, dust as the dummy is driven back, the white ring"
 	],
-	["pin_snare", "archer", "snare", 0.62, 4.0, "Snare tap: the snare arrow flying"],
 	["pin_spirit_roll", "archer", "spirit", 0.6, 2.0, "Spirit Walk: the dodge roll and its green burst"],
 	[
 		"pin_spirit_inside",
@@ -262,7 +261,6 @@ const SHOTS := [
 		"Mending Ground with the hammer in hand: the green column coming down on him, the ring filling"
 	],
 	["bjorn_purify_burst", "bulwark", "purify", 1.62, 1.0, "Mending Ground lands: the green ring bloom"],
-	["bjorn_bash", "bulwark", "bash", 0.58, 2.0, "Bash: the shield shove and its gold fan of force"],
 	[
 		"bjorn_crushed",
 		"bulwark",
@@ -330,6 +328,281 @@ const SHOTS := [
 		"After: the ember scar along the lane (10 s, slows foes on it)"
 	],
 ]
+## The owner playtest items of 2026-11-03 (--owner1103): captions open with the item number.
+const OWNER := [
+	[
+		"o1103_pin_draw_a",
+		"archer",
+		"draw_tgt",
+		0.07,
+		3.0,
+		"owner1103 #5: draw strip 1/5, the arrow nocked 0.07 s after the press"
+	],
+	[
+		"o1103_pin_draw_b",
+		"archer",
+		"draw_tgt",
+		0.3,
+		3.0,
+		"owner1103 #5: draw strip 2/5, the steady pull, the V closing on the aim line"
+	],
+	[
+		"o1103_pin_draw_c",
+		"archer",
+		"draw_tgt",
+		0.64,
+		3.0,
+		"owner1103 #5: draw strip 3/5, Empowered ready, one line and the glint on the aim line"
+	],
+	[
+		"o1103_pin_draw_d",
+		"archer",
+		"draw_tgt",
+		0.95,
+		4.0,
+		"owner1103 #5: draw strip 4/5, the V re-opening toward Supercharged"
+	],
+	[
+		"o1103_pin_draw_e",
+		"archer",
+		"draw_tgt",
+		1.3,
+		4.0,
+		"owner1103 #5: draw strip 5/5, Supercharged, the thick line from Pin past the cursor"
+	],
+	[
+		"o1103_pin_perfect",
+		"archer",
+		"perfect",
+		0.7,
+		2.5,
+		"owner1103 #5: the perfect release, the gold flash on the aim line"
+	],
+	[
+		"o1103_pin_heavy_hold",
+		"archer",
+		"heavy_pin",
+		1.0,
+		3.0,
+		"owner1103 #6: the Heavy Shot held, the thick gold lane and V from the bow"
+	],
+	[
+		"o1103_pin_heavy_release",
+		"archer",
+		"heavy_pin",
+		1.29,
+		3.0,
+		"owner1103 #6: the Heavy Shot's release burst on the aim line and the big arrow"
+	],
+	[
+		"o1103_pin_heavy_flight",
+		"archer",
+		"heavy_pin",
+		1.33,
+		4.0,
+		"owner1103 #6: the Heavy Shot mid-flight, about 3.5 times a normal arrow with a long trail"
+	],
+	[
+		"o1103_pin_heavy_impact",
+		"archer",
+		"heavy_pin",
+		1.5,
+		5.0,
+		"owner1103 #6: the Heavy Shot on the body: hit flash, pinned against the wall, the stake in it"
+	],
+	[
+		"o1103_pin_heavy_stake",
+		"archer",
+		"heavy_pin",
+		2.6,
+		5.0,
+		"owner1103 #6: the stake still standing in the wall after the pin"
+	],
+	[
+		"o1103_pin_dash",
+		"archer",
+		"spirit",
+		0.54,
+		2.0,
+		"owner1103 #35: Pin's own dash, the Spirit Walk roll (strip frame 1/3)"
+	],
+	[
+		"o1103_pin_dash_b",
+		"archer",
+		"spirit",
+		0.6,
+		2.0,
+		"owner1103 #35: Pin's own dash (strip frame 2/3)"
+	],
+	[
+		"o1103_pin_dash_c",
+		"archer",
+		"spirit",
+		0.7,
+		2.0,
+		"owner1103 #35: Pin's own dash, out of the roll walking as a spirit (frame 3/3)"
+	],
+	[
+		"o1103_bjorn_aegis_idle",
+		"bulwark",
+		"aegis",
+		1.0,
+		3.0,
+		"owner1103 #29: the raised aegis, plated and bigger, the double chevron pulsing in front"
+	],
+	[
+		"o1103_bjorn_aegis_push",
+		"bulwark",
+		"aegis_push",
+		0.77,
+		3.0,
+		"owner1103 #29: a foe meets the aegis: the chevron flashes and the foe is pushed back"
+	],
+	[
+		"o1103_bjorn_aegis_push_b",
+		"bulwark",
+		"aegis_push",
+		1.05,
+		3.0,
+		"owner1103 #29: the foe has slid back 2 m off the aegis"
+	],
+	[
+		"o1103_bjorn_aegis_break",
+		"bulwark",
+		"aegis_break",
+		1.1,
+		3.0,
+		"owner1103 #29: the aegis breaking into chunks and dust"
+	],
+	[
+		"o1103_bjorn_swing_a",
+		"bulwark",
+		"slam_dummy",
+		1.78,
+		2.5,
+		"owner1103 #30: the held swing, strip 1/5, the wind-up"
+	],
+	[
+		"o1103_bjorn_swing_b",
+		"bulwark",
+		"slam_dummy",
+		1.86,
+		2.5,
+		"owner1103 #30: the held swing, strip 2/5, the hammer comes round, he steps in"
+	],
+	[
+		"o1103_bjorn_swing_c",
+		"bulwark",
+		"slam_dummy",
+		1.94,
+		2.5,
+		"owner1103 #30: the held swing, strip 3/5, the hit"
+	],
+	[
+		"o1103_bjorn_swing_d",
+		"bulwark",
+		"slam_dummy",
+		2.04,
+		2.5,
+		"owner1103 #30: the held swing, strip 4/5, the dummy knocked back, Bjorn carried forward"
+	],
+	[
+		"o1103_bjorn_swing_e",
+		"bulwark",
+		"slam_dummy",
+		2.25,
+		2.5,
+		"owner1103 #30: the held swing, strip 5/5, the dummy 2 m or more away"
+	],
+	[
+		"o1103_bjorn_dash_a",
+		"bulwark",
+		"smash",
+		0.53,
+		2.5,
+		"owner1103 #35: Bjorn's ground dash (360 Smash), strip 1/5, the push-off"
+	],
+	[
+		"o1103_bjorn_dash_b",
+		"bulwark",
+		"smash",
+		0.6,
+		2.5,
+		"owner1103 #35: Bjorn's ground dash (360 Smash), strip 2/5, the stretched run-up behind the hammer"
+	],
+	[
+		"o1103_bjorn_dash_c",
+		"bulwark",
+		"smash",
+		0.72,
+		2.5,
+		"owner1103 #35: Bjorn's ground dash (360 Smash), strip 3/5, the spin on arrival"
+	],
+	[
+		"o1103_bjorn_dash_d",
+		"bulwark",
+		"smash",
+		0.86,
+		2.5,
+		"owner1103 #35: Bjorn's ground dash (360 Smash), strip 4/5, the low crouched recovery"
+	],
+	[
+		"o1103_bjorn_dash_e",
+		"bulwark",
+		"smash",
+		1.05,
+		2.5,
+		"owner1103 #35: Bjorn's ground dash (360 Smash), strip 5/5, settled"
+	],
+	[
+		"o1103_bjorn_air_dash_a",
+		"bulwark",
+		"lumber",
+		0.52,
+		2.5,
+		"owner1103 #35: Bjorn's air dash (the lumbering shove), strip 1/5, the shove off"
+	],
+	[
+		"o1103_bjorn_air_dash_b",
+		"bulwark",
+		"lumber",
+		0.58,
+		2.5,
+		"owner1103 #35: Bjorn's air dash (the lumbering shove), strip 2/5, shoulder first"
+	],
+	[
+		"o1103_bjorn_air_dash_c",
+		"bulwark",
+		"lumber",
+		0.66,
+		2.5,
+		"owner1103 #35: Bjorn's air dash (the lumbering shove), strip 3/5, the lumber through the air"
+	],
+	[
+		"o1103_bjorn_air_dash_d",
+		"bulwark",
+		"lumber",
+		0.76,
+		2.5,
+		"owner1103 #35: Bjorn's air dash (the lumbering shove), strip 4/5, the end of the shove"
+	],
+	[
+		"o1103_bjorn_air_dash_e",
+		"bulwark",
+		"lumber",
+		0.9,
+		2.5,
+		"owner1103 #35: Bjorn's air dash (the lumbering shove), strip 5/5, falling out of it"
+	],
+	[
+		"o1103_bjorn_abyss",
+		"bulwark",
+		"bjorn_abyss",
+		1.2,
+		-6.0,
+		"owner1103 #29: the Faultline's trail running on out over the abyss at his height"
+	],
+]
 ## The before/after pairs (top 3 gaps per hero), run on this build and, with --before, on an older one.
 const PAIRS := [
 	[
@@ -389,6 +662,8 @@ func take(main_node: Node, out: String) -> void:
 		if x != P and x != T: x.teleport(home + Vector3(-30, 0, 30))
 	if m.hud: m.hud.visible = false
 	var list: Array = PAIRS if before else SHOTS + PAIRS
+	if "--owner1103" in OS.get_cmdline_user_args():
+		list = OWNER
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--only="):
 			var want := String(a).substr(7).split(",")
@@ -520,9 +795,6 @@ func _input(what: String, t: float) -> void:
 			K.res = 0.0
 			P.inp["sec_hold"] = t < 1.25
 			if at.call(0.05): K.press_rmb()
-		"snare":
-			K.res = 0.0
-			if at.call(0.55): K.press_rmb()
 		"spirit":
 			P.inp["move"] = Vector2(1, 0) if t > 0.45 else Vector2.ZERO
 			if at.call(0.5): P.do_dash()
@@ -580,9 +852,44 @@ func _input(what: String, t: float) -> void:
 					Color("ff6a4a"),
 					{"kb": 0.0}
 				)
+		"heavy_pin":
+			if t < DT:
+				crush_rock = _rock_near(home)
+				P.teleport(crush_rock - Vector3(8.0, 0, 0))
+				T.teleport(crush_rock - Vector3(1.2, 0, 0))
+			if t < 1.25:
+				T.teleport(crush_rock - Vector3(1.2, 0, 0))
+			_aim(crush_rock - Vector3(1.2, 0, 0))
+			K.res = 0.0
+			P.inp["sec_hold"] = t < 1.25
+			if at.call(0.05): K.press_rmb()
+		"aegis_push":
+			if t < 0.69: T.teleport(home + Vector3(1.9, 0, 0))
+			_aim(home + Vector3(6.0, 0, 0))
+			P.inp["sec_hold"] = t > 0.45
+			if at.call(0.5):
+				K.set("lock_t", 0.0)
+				K.press_rmb()
+		"slam_dummy":
+			if t < 1.8: T.teleport(home + Vector3(2.9, 0, 0))
+			_aim(home + Vector3(2.9, 0, 0))
+			P.inp["fire"] = t > 0.4 and t < 1.82
+		"bjorn_abyss":
+			T.teleport(home + Vector3(0, 0, 14.0))
+			_aim(home + Vector3(-9.0, 0, 0))
+			if at.call(0.3):
+				K.cd["x"] = 0.0
+				HunterKeys.ult_pressed(P)
 		"smash":
 			T.teleport(home + Vector3(5.6, 0, 0))
 			_aim(T.pos)
+			P.inp["move"] = Vector2(1, 0) if t > 0.45 and t < 0.7 else Vector2.ZERO
+			if at.call(0.5): P.do_dash()
+		"lumber":
+			_aim(home + Vector3(6.0, 0, 0))
+			if at.call(0.4):
+				P.pos += Vector3(0, 5.0, 0)
+				P.grounded = false
 			P.inp["move"] = Vector2(1, 0) if t > 0.45 and t < 0.7 else Vector2.ZERO
 			if at.call(0.5): P.do_dash()
 		"purify":
@@ -613,12 +920,6 @@ func _input(what: String, t: float) -> void:
 				T.teleport(crush_rock - Vector3(1.4, 0, 0))
 			_aim(crush_rock - Vector3(1.4, 0, 0))
 			P.inp["fire"] = t > 0.3 and t < 1.72
-		"bash":
-			T.teleport(home + Vector3(2.0, 0, 0))
-			_aim(T.pos)
-			if at.call(0.5):
-				P.inp["sec_hold"] = false
-				K.press_rmb()
 
 func _shot(s: Array, pair: bool) -> void:
 	var stem := String(s[0])

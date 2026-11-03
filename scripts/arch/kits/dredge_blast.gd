@@ -1,14 +1,15 @@
 class_name DredgeBlast
 extends RefCounted
-## Dredge's ultimate on X, Brass Broadside (docs/heroes/dredge.md): one press plants him for a 1.1s charge
-## while a 105 degree fan grows on the ground in front (everyone sees it; it is the exact area, locked at the
-## press), then two waves 0.6s apart of six heavy brass slugs each (real shots, Match.spawn_shot) with
-## Anti-Heal. Up close every slug lands; further out only the middle ones do. A stun during the charge stops
-## it; a stun after the first wave stops the second. A slug that hits, knocks or kills an enemy hunter fills
+## Dredge's ultimate on X, Brass Broadside (docs/heroes/dredge.md): one press starts a 1.1s charge while a 105
+## degree fan grows on the ground in front (everyone sees it; it is the exact area, turning with his aim), then
+## two waves 0.6s apart of six heavy brass slugs each (real shots, Match.spawn_shot) with Anti-Heal. He can walk
+## slowly throughout (x.charge_move, then x.fire_move of his speed; CastHold) and keeps turning to the cursor.
+## Up close every slug lands; further out only the middle ones do. A stun during the charge stops it; a stun
+## after the first wave stops the second. A slug that hits, knocks or kills an enemy hunter fills
 ## the Boki bond (HeroUlt.landed: the best event of the cast counts, not each slug).
 
 const MUZZLE := 0.9                 # m in front of his chest where the slugs leave his hands
-const RECOVER := 0.3                # s he stays planted after the last wave
+const RECOVER := 0.3                # s the slowed walk lasts after the last wave
 const WAVE_COL := [Color("ff9a14"), Color("8a4dff")]     # wave 1 saturated brass, wave 2 violet
 const WAVE_CORE := [Color("fff0c0"), Color("ffe0a0")]
 const WAVE_DARK := [Color("5a2e04"), Color("2a1260")]    # each slug's dark core
@@ -25,6 +26,7 @@ var k: DredgeKit
 var h: Hunter
 var m: Node
 var blast := {}                     # hold: the charge and its waves {t, dir, fired}
+var hold: CastHold                  # his slowed walk while it charges and fires
 var casts := 0                      # (tests)
 var waves := 0
 var slug_hits := 0
@@ -50,11 +52,16 @@ func start() -> bool:
 	if running():
 		return false
 	blast = {"t": 0.0, "dir": h.aim_dir(), "fired": 0}
+	hold = CastHold.hover_slow(h, float(xd()["charge_move"]))
 	last_wave_hits = []
 	casts += 1
 	k.play("dr_blast")
 	m.sfx("dr_blast_charge", h.pos, -2.0, 1.0)
 	return true
+
+## His share of run speed while it runs: slow through the charge, slower while the waves go.
+func move_k() -> float:
+	return hold.slow_k if running() else 1.0
 
 ## A Boki merge: the charge or the waves left never fire.
 func drop() -> void:
@@ -72,6 +79,7 @@ func tick(dt: float) -> void:
 		return
 	var x := xd()
 	blast["t"] = float(blast["t"]) + dt
+	blast["dir"] = h.aim_dir()          # the fan and the waves follow the cursor
 	var t := float(blast["t"])
 	var charge := float(x["charge"])
 	if t < charge:
@@ -80,6 +88,7 @@ func tick(dt: float) -> void:
 	var fired := int(blast["fired"])
 	if fired < n and t >= charge + float(x["gap"]) * fired:
 		blast["fired"] = fired + 1
+		hold.slow_k = float(x["fire_move"])
 		_wave(fired)
 	if int(blast["fired"]) >= n and t >= charge + float(x["gap"]) * (n - 1) + RECOVER:
 		blast = {}

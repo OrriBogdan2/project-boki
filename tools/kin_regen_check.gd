@@ -68,7 +68,9 @@ func run(main: Node) -> void:
 	_run_for(m, 8.0)
 	KinDowned.begin(k, false)
 	k.down_t = 1e6; k.down_total = 1e6
-	P.teleport(P.pos)       # (the owner stays away: no rescue)
+	var away := m.world.random_ground()
+	while away.distance_to(k.pos) < 15.0: away = m.world.random_ground()
+	P.teleport(away)        # (the owner stays away: walking into a downed Boki rescues it)
 	_run_for(m, 10.0)
 	ok(k.state == "downed" and k.hp == 0.0, "(c) a downed Boki does not regen (%.2f hp after 10s)" % k.hp)
 	# and a Boki that comes round starts its wait again

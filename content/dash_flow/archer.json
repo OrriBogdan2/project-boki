@@ -1,0 +1,22 @@
+{
+	"doc": "Dash -> ability rows (DashFlow, docs/decisions/0010-dash-ability-flow.md). dash.<ground|air>.<lmb|rmb|e|x|q>: {mode: fire (mid-dash) | buffer (to the dash's end; the default for a missing row) | cancel (ends the dash), carry: dash momentum kept into it, variant: a dash-variant name the kit reads, source: what the source hero does}. into_dash.<slot>: the same for Shift pressed during that ability's wind-up or recovery. kit_owns: the dashes (ground, air) the kit runs in its own state, out of DashFlow's sight until it overrides ArchKit.in_dash().",
+	"dash": {
+		"ground": {
+			"lmb": {"mode": "buffer", "source": "an arrow cannot be drawn in Spirit Walk's dodge roll; the press waits and the draw starts when the roll ends"},
+			"rmb": {"mode": "fire", "source": "Impaling Shot can be started in the walk"},
+			"e": {"mode": "fire", "source": "Rain of Arrows can be cast in the walk"},
+			"x": {"mode": "fire", "source": "Primal Forces can be cast in the walk"},
+			"q": {"mode": "fire"}
+		},
+		"air": {
+			"lmb": {"mode": "buffer", "source": "as the ground roll: the draw starts when the flick ends"},
+			"rmb": {"mode": "fire"},
+			"e": {"mode": "fire"},
+			"x": {"mode": "fire"},
+			"q": {"mode": "fire"}
+		}
+	},
+	"into_dash": {
+		"lmb": {"mode": "cancel", "source": "the dodge roll interrupts a draw: it ends with no arrow"}
+	}
+}

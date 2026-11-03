@@ -474,7 +474,9 @@ func _path_cost() -> void:
 		KinFollow.steer(k, g, Match.DT, 5.0, false)
 	ok(k.path_searches <= 10, "a goal sliding 12 tiles in 2s costs %d searches (about one per 0.2s at most, not one per tile)" % k.path_searches)
 	# the heap returns the same path length as before for an open trip
-	var path := KinPath.find(W, P.pos, P.pos + Vector3(-12.0, 0, 5.0))
+	# (west unless the spawn is near the west edge: the cleared strip runs 30 tiles west, 40 east)
+	var across := -12.0 if P.pos.x > 14.0 else 12.0
+	var path := KinPath.find(W, P.pos, P.pos + Vector3(across, 0, 5.0))
 	ok(path.size() == 12, "the heap-based A* still finds the shortest path (%d tiles)" % path.size())
 
 # ------------------------------------------------------------------ 12. Follow sticks in a fight

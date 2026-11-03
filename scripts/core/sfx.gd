@@ -13,17 +13,26 @@ const NAMES := ["splash", "swim", "drip", "smg", "rifle", "thump", "boom", "hit"
 	"ab_plant", "ab_tether", "ab_blink", "ab_whirr", "ab_stun", "ab_slow", "ab_hit", "ab_ready",
 	"pay_deadeye", "pay_flashpoint", "pay_called", "pay_slam", "pay_cashin", "pay_rage", "level_up",
 	"hero_blowout", "hero_skewer", "pay_salvage", "dr_haul", "dr_anchor", "as_flame", "as_ignite", "as_cloak", "pay_rockfall", "pay_collapse",
-	"rustle", "squeak", "key_get", "lock_rattle", "reset_a", "reset_b", "reset_c"]
+	"rustle", "squeak", "key_get", "lock_rattle", "reset_a", "reset_b", "reset_c",
+	"break_wood", "break_clay", "break_metal", "fuse_hiss"]
 const POOL := 24
 ## Sounds that only exist as several takes (monster voices, little pops); one is picked at random.
 const VOICES := ["v_skitter", "v_spitter", "v_brute", "v_bomber", "v_sentinel", "v_glimmer", "v_warden", "die_small", "die_big",
 	"step_grass", "step_stone", "step_snow", "step_wood"]
 ## The shortest gap before the same sound can play again, so a crowd doesn't machine-gun it.
-const MIN_GAP := {"reset_a": 120, "reset_b": 120, "reset_c": 120, "pay_deadeye": 120, "pay_flashpoint": 150, "pay_called": 120, "pay_slam": 150, "pay_cashin": 120, "pay_rage": 150, "pay_rockfall": 150, "pay_collapse": 150, "ab_hit": 60, "squeak": 80, "rustle": 120, "ab_shield_hit": 70, "ab_stun": 150, "ab_slow": 120, "hit": 45, "crit": 60, "hit_heavy": 70, "slash_hit": 60, "armor_hit": 70, "armor_break": 200, "hurt": 120, "kinhit": 60, "die_small": 90, "die_big": 150, "land": 80, "step0": 60, "step1": 60, "step2": 60}
+const MIN_GAP := {"break_wood": 40, "break_clay": 40, "break_metal": 40, "fuse_hiss": 80,
+	"reset_a": 120, "reset_b": 120, "reset_c": 120, "pay_deadeye": 120, "pay_flashpoint": 150, "pay_called": 120, "pay_slam": 150, "pay_cashin": 120, "pay_rage": 150, "pay_rockfall": 150, "pay_collapse": 150, "ab_hit": 60, "squeak": 80, "rustle": 120, "ab_shield_hit": 70, "ab_stun": 150, "ab_slow": 120, "hit": 45, "crit": 60, "hit_heavy": 70, "slash_hit": 60, "armor_hit": 70, "armor_break": 200, "hurt": 120, "kinhit": 60, "die_small": 90, "die_big": 150, "land": 80, "step0": 60, "step1": 60, "step2": 60}
 ## On top of that, at most STACK_MAX of one sound start within STACK_MS, each extra one a little quieter.
 const STACK_MAX := 3
 const STACK_MS := 90
 const STACK_DB := 3.5
+## The explosion category: the generic blast sounds (a Boki's burst or rider, an area hit, an ability blast) sit
+## this far under every call's own level, so a blast reads as a thump in the mix rather than the loudest thing
+## on screen. BLAST_PEAK_DB is the agreed ceiling for a blast's file peak plus this gain (checked in
+## --tender-combo-check).
+const BLAST := ["boom", "ab_blast", "ab_slam"]
+const BLAST_DB := -7.0
+const BLAST_PEAK_DB := -6.0
 ## Distance falloff: full volume within NEAR metres, then a gentle roll-off; muffled beyond FAR.
 const NEAR := 3.5
 const FAR := 9.0
@@ -354,7 +363,7 @@ func play(sname: String, pos = null, vol_db := 0.0, pitch_var := 0.07, pitch := 
 	if sname.begins_with("step_"): gap = 25      # footsteps: several people can walk at once
 	if now - int(last_played.get(sname, -1000)) < gap:
 		return
-	var v := vol_db + _distance_db(pos)
+	var v := vol_db + _distance_db(pos) + (BLAST_DB if sname in BLAST else 0.0)
 	if is_nan(v):
 		return
 	var times: Array = recent.get(sname, [])

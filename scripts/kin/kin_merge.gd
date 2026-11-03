@@ -12,7 +12,7 @@ extends RefCounted
 ##   - phase "live": for the form's duration you keep your own hero's abilities and the form augments them
 ##     (MergeAugment), C is off, and R again (after a short lock) fires the form's ultimate, which ends the merge.
 ##     The shell (MergeShell) takes the damage first; when it breaks the merge ends without the ultimate. A Boki
-##     without a form file keeps the stat merge (passives, pulses), the type's LMB rider and dash burst, and a basic burst as its ultimate.
+##     without a form file keeps the stat merge (passives, pulses), the type's LMB rider and dash trail, and a basic burst as its ultimate.
 ##   - it ends when time runs out, with the ultimate, early if you're knocked or the Boki is lost. Time out or
 ##     a broken shell: the Boki pops out beside you in Follow (not downed), no burst, no afterglow, a spent window of
 ##     KinParts.MERGE_SPENT_TIME. The ultimate (a release): the hunter gets the afterglow and the Boki lands beside you

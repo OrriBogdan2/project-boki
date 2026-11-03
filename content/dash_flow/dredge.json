@@ -1,0 +1,26 @@
+{
+	"doc": "Dash -> ability rows (DashFlow, docs/decisions/0010-dash-ability-flow.md). dash.<ground|air>.<lmb|rmb|e|x|q>: {mode: fire (mid-dash) | buffer (to the dash's end; the default for a missing row) | cancel (ends the dash), carry: dash momentum kept into it, variant: a dash-variant name the kit reads, source: what the source hero does}. into_dash.<slot>: the same for Shift pressed during that ability's wind-up or recovery. kit_owns: the dashes (ground, air) the kit runs in its own state, out of DashFlow's sight until it overrides ArchKit.in_dash(). Dredge's into_dash buffer rows are held by DredgeKit (dash_held) and barge the step the slam or the Broadside ends.",
+	"dash": {
+		"ground": {
+			"lmb": {"mode": "buffer", "source": "Data: Brute Dash is a plain dash. Footage (493.2-493.6 s): a near-blink of about 0.12 s; he lands, turns back to the aim within 1 frame and fires and walks by 493.6 s. Ours: the shot goes the step the 0.18 s lunge ends."},
+			"rmb": {"mode": "fire", "source": "Data: Abyssal Grasp has no dash lock. Footage: not shown from a dash. Ours: the arm is thrown from the lunge (its range counts from where he is)."},
+			"e": {"mode": "fire", "source": "Data: Primal Slam has no dash lock; the dash-into-slam close-in is the hero's engage. Footage: not shown from a dash. Ours: the planted wind-up starts at once and the lunge finishes under it."},
+			"x": {"mode": "fire", "source": "Data: Slugwave has no dash lock. Footage: not shown from a dash. Ours: the charge starts at once (he walks slowly through it)."},
+			"q": {"mode": "fire", "source": "No source glove; it goes off from the lunge like his abilities."}
+		},
+		"air": {
+			"lmb": {"mode": "buffer", "source": "Data: Brute Dash (Air) is its own slot, further. Footage: not shown. Ours: as on the ground, the shot goes as the pounce ends."},
+			"rmb": {"mode": "fire", "source": "Data: no dash lock. Footage: not shown. Ours: the arm is thrown from the pounce, his height held while it is out (item 31)."},
+			"e": {"mode": "fire", "source": "Data: Primal Slam slams down (it pushes you down, never over the abyss). Owner note: in the air E is a straight-down smash; from the pounce it drops at once."},
+			"x": {"mode": "fire", "source": "Data: no dash lock. Footage: not shown. Ours: the charge starts at once."},
+			"q": {"mode": "fire", "source": "No source glove; it goes off from the pounce."}
+		}
+	},
+	"into_dash": {
+		"lmb": {"mode": "fire", "source": "Footage: he walks and dashes between shots (0.5 s apart). Ours: the barge goes between shots."},
+		"rmb": {"mode": "fire", "source": "Wiki fine print: only the dash and the air dash can be used while Abyssal Grasp pulls; data: the arm pierces terrain. Ours: the barge goes during the hook's flight and the reel, and the reel continues."},
+		"e": {"mode": "buffer", "source": "Footage (0221-0236): the slam is one committed 0.4 s beat, no dash out of it. Ours: Shift in the planted wind-up (or the air smash) is held and the barge goes the step the slam lands."},
+		"x": {"mode": "buffer", "source": "Footage (ult f22-f43): he stands through the charge and both waves, no dash out of it. Ours: Shift is held and the barge goes when the Broadside ends."},
+		"q": {"mode": "fire", "source": "No source glove; the barge goes and the glove's effect stays."}
+	}
+}

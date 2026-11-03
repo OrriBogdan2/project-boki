@@ -16,6 +16,7 @@ var main: Node
 var m: Match
 var P: Hunter
 var T: Hunter
+var T2: Hunter                 # a second dummy for the wall-cone shot
 var dir := ""
 var tag := "v2/polish"
 var who := "mage"
@@ -156,7 +157,7 @@ func _go(secs: float, each := Callable(), marks: Array = [], lead := 3.5) -> voi
 ## between the camera and the hero (that was the pink blob filling the last strip frames).
 func _park_others() -> void:
 	for x in m.hunters:
-		if x != P and x != T and x.flat_dist(P) < 26.0:
+		if x != P and x != T and x != T2 and x.flat_dist(P) < 26.0:
 			x.teleport(home + Vector3(-30, 0, 30))
 			x.vel = Vector3.ZERO
 
@@ -401,6 +402,23 @@ func _vireo_e() -> void:
 			_on_target])
 	await _go(1.6, flick, marks)
 
+func _vireo_owner1103() -> void:
+	var K = P.ak
+	await _reset(7.0)
+	K.use_e()
+	var flick := func(tt: float):
+		if tt > 0.05:
+			_aim(home + Vector3(4.0, 0, 0))
+	var marks := []
+	var count_cap := "owner1103 #9: Skycall circle, radius 1.5 m (15-20% smaller), before the strike"
+	marks.append([0.7, "full", "owner1103_e_count", count_cap, _on_target])
+	var a_cap := "owner1103 #9b: struck, the target starts a slow slide toward her"
+	marks.append([1.2, "full", "owner1103_e_slide_a", a_cap, _on_target])
+	marks.append([1.75, "full", "owner1103_e_slide_b", "owner1103 #9b: mid-slide, easing out", _on_target])
+	var c_cap := "owner1103 #9b: the slide ends about 3.4 m from where it was hit"
+	marks.append([2.4, "full", "owner1103_e_slide_c", c_cap, _on_target])
+	await _go(2.6, flick, marks)
+
 # ------------------------------------------------------------------ Venator
 func _venator() -> void:
 	await _venator_lmb()
@@ -538,6 +556,43 @@ func _venator_dash() -> void:
 			[0.02, 0.07, 0.14, 0.22, 0.36, 0.5])
 	ex.append([0.15, "full", "dash_ex", "Air dash: his own ember after-images (his silhouette, not a shared pill)"])
 	await _go(0.6, Callable(), ex)
+
+## Owner playtest 1103 retakes: the direct hit, the wall cone on two dummies, the slide start without rings.
+func _venator_owner1103() -> void:
+	var K = P.ak
+	await _reset(6.0)
+	_aim(home + Vector3(6.0, 0, 0))
+	K.press_rmb()
+	await _go(0.6, func(_t: float): P.inp["sec_hold"] = true)
+	P.inp["sec_hold"] = false
+	var direct_cap := "owner1103: Burr Charge direct hit: damage and DAZED, no cone"
+	var direct := [[0.22, "full", "owner1103_direct_a", direct_cap, _on_target]]
+	direct.append([0.26, "full", "owner1103_direct_b", "owner1103: direct hit, a beat later: DAZED", _on_target])
+	await _go(0.7, Callable(), direct, 5.0)
+	await _reset(7.0, 1.5)
+	T2 = m.make_hunter("T2", 5, "medium", "Target2", "idle", {}, home + Vector3(7.0, 0, -1.5), {"arch": "none"})
+	T2.teleport(home + Vector3(7.0, 0, -1.5))
+	_wall(World.T_BLOCK)
+	_aim(home + Vector3(9.5, 0, 0))
+	K.press_rmb()
+	await _go(0.05)
+	var between := func() -> Vector3: return (T.position + T2.position) * 0.5 + Vector3(0, 1.0, 0)
+	var wall := [[1.25, "full", "owner1103_wall_cone_a", "owner1103: wall cone hits two dummies, both DAZED", between]]
+	wall.append([1.32, "full", "owner1103_wall_cone_b", "owner1103: wall cone, a beat later: both DAZED", between])
+	await _go(1.8, Callable(), wall, 5.0)
+	_wall(World.T_GROUND)
+	T2.teleport(home + Vector3(-30, 0, 30))
+	T2 = null
+	await _reset(7.0)
+	P.inp["move"] = Vector2(0, -1)
+	P.inp["dash_down"] = true
+	P.do_dash()
+	var start_cap := "owner1103: Slipstep start, no rings or disc: ember after-image, dust, faint skid streaks"
+	var start := [[0.03, "full", "owner1103_slide_start", start_cap]]
+	start.append([0.15, "full", "owner1103_slide_mid", "owner1103: Slipstep a moment in, no rings"])
+	await _go(0.4, func(_t: float): P.inp["move"] = Vector2(0, -1), start)
+	P.inp["dash_down"] = false
+	P.inp["move"] = Vector2.ZERO
 
 func _venator_e() -> void:
 	var K = P.ak

@@ -1,20 +1,35 @@
 class_name HunterMove
 extends RefCounted
-## Per-hunter run speed, ground acceleration and tall-ledge climbing, from content/rules/hunter_move.json
-## ([game data]: SUPERVIVE's character attributes, uu converted to metres).
+## Per-hunter run speed, ground acceleration and tall-ledge climbing, plus the air, fall, glide and
+## mantle tunables every hunter shares, from content/rules/hunter_move.json ([game data]: SUPERVIVE's
+## movement settings, uu converted to metres).
 
-static var _rules: Dictionary = {}
+static var _rules: Dictionary = _load()
+static var _phys: Dictionary = _rules["physics"]
+static var air_control: float = _phys["air_control"]
+static var air_friction: float = _phys["air_friction"]
+static var fall_max: float = _phys["fall_cap"]
+static var abyss_fall_max: float = _phys["abyss_fall_cap"]
+static var abyss_slow_from: float = _phys["abyss_slow_from"]
+static var abyss_slow_to: float = _phys["abyss_slow_to"]
+static var glide_height: float = _phys["glide_height"]
+static var glide_pull_vy: float = _phys["glide_pull_vy"]
+static var swoop_ratio: float = _phys["swoop_ratio"]
+static var swoop_fade: float = _phys["swoop_fade"]
+static var mantle_launch_keep: float = _phys["mantle_launch_keep"]
+static var mantle_launch_min: float = _phys["mantle_launch_min"]
+
+static func _load() -> Dictionary:
+	var parsed = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/hunter_move.json"))
+	assert(parsed is Dictionary, "content/rules/hunter_move.json did not parse")
+	return parsed
 
 static func rules() -> Dictionary:
-	if _rules.is_empty():
-		var parsed = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/hunter_move.json"))
-		_rules = parsed if parsed is Dictionary else {"default": {"speed": 4.55, "accel": 54.0}}
 	return _rules
 
 ## This archetype's movement row (the default row for none or an unknown id).
 static func of(arch: String) -> Dictionary:
-	var all := rules()
-	return all.get(arch, all["default"])
+	return _rules.get(arch, _rules["default"])
 
 ## Sets the hunter's run speed and acceleration for its archetype.
 static func apply(h: Hunter) -> void:
@@ -25,3 +40,27 @@ static func apply(h: Hunter) -> void:
 ## True when this hunter can mantle a double-high ledge (Archer and Juggernaut).
 static func climbs_tall(h: Hunter) -> bool:
 	return bool(of(h.arch).get("climb_tall", false))
+
+## Horizontal speed after a step in the air: your keys steer at air_control of your ground
+## acceleration and what you carry bleeds off at air_friction, so a jump keeps its run-up. Above
+## run speed (a dash, a pad, a knock) the keys turn the momentum without topping it up.
+static func air_steer(h: Hunter, hv: Vector2, wish: Vector2, dt: float) -> Vector2:
+	var kept := hv * maxf(0.0, 1.0 - air_friction * dt)
+	if wish.length() < 0.01:
+		return kept
+	var steer := h.ground_accel * air_control * dt
+	if kept.length() > wish.length():
+		return kept.move_toward(wish.normalized() * kept.length(), steer)
+	return kept.move_toward(wish, steer)
+
+## The fastest this hunter falls (m/s): fall_max, easing to abyss_fall_max as it sinks from
+## abyss_slow_from to abyss_slow_to metres under an island's lip over the abyss (time to recover).
+static func fall_cap(h: Hunter) -> float:
+	if not h.below_lip:
+		return fall_max
+	var k := clampf((h.lip_y - h.pos.y - abyss_slow_from) / (abyss_slow_to - abyss_slow_from), 0.0, 1.0)
+	return lerpf(fall_max, abyss_fall_max, k)
+
+## Speed onto a ledge you climb (m/s), from a hunter's run speed.
+static func mantle_launch(run_speed: float) -> float:
+	return maxf(run_speed * mantle_launch_keep, mantle_launch_min)

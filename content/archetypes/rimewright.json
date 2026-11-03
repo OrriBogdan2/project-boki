@@ -19,7 +19,7 @@
 		"lmb": "Ice Dart: hold for a stream of slow darts that curve onto the foe at your cursor.",
 		"rmb": "Ice Spear: lands at the cursor, slows there, and bursts and freezes 1.8s later.",
 		"e": "Rink Wall: an ice wall slides toward the cursor, widening and shoving foes; E again freezes it.",
-		"dash": "Skate: hold the dash key to skate where you move; your darts fly straight and hit 1.6x harder.",
+		"dash": "Skate: hold the dash key to skate where you move; your darts fly straight and thick.",
 		"passive": "Hoarfrost: hits Chill; 8 darts on one foe, or knocking a Chilled foe, Shatters them.",
 		"weapons": {
 			"hoar_fan": "Hold for a stream of slow darts that curve onto the foe at your cursor."
@@ -57,9 +57,14 @@
 		"refund": 0.6,
 		"min_t": 0.2,
 		"rink_t": 0.0,
-		"desc": "Hold the dash key to skate at 11.5 m/s where you move, for up to 1.6s, carving curves with the move keys; you carry on over ledges. Let go and you stop; stopping early gives back a share of the cooldown. While skating your darts fly straight and thick and hit 1.6x. In the air this is your usual long dash.",
+		"desc": "Hold the dash key to skate at 11.5 m/s where you move, for up to 1.6s, carving curves with the move keys; you carry on over ledges. Let go and you stop; stopping early gives back a share of the cooldown. While skating your darts fly straight and thick. In the air, press it to buffer the skate: it starts the moment you land.",
 		"steer": 3.6,
-		"dart_k": 1.6,
+		"ice_gap": 0.2,
+		"ice_look": 2.0,
+		"ice_len": 3.6,
+		"ice_width": 1.6,
+		"ice_time": 5.0,
+		"ice_col": "#bff0ff",
 		"ramp": 0.2,
 		"stop": 0.15
 	},
@@ -69,11 +74,11 @@
 		"short": "Spear",
 		"icon": "binding",
 		"col": "#8fe8d8",
-		"cooldown": 7.0,
+		"cooldown": 10.2,
 		"charges": 2,
 		"hold": 0.2,
 		"lance": {
-			"speed": 45.0,
+			"speed": 18.0,
 			"range": 12.0,
 			"hit_r": 0.5,
 			"dmg": 4.0,
@@ -82,11 +87,12 @@
 			"delay": 1.8,
 			"burst_r": 2.7,
 			"burst_dmg": 60.0,
+			"r3_dmg_k": 1.45,
 			"freeze": 0.5,
 			"encase_t": 1.5
 		},
 		"variants": {
-			"tap": "Hold to see the landing ring at the cursor (up to 12m); let go to throw. The spear lands at the cursor (4 damage to a foe in the way, where it then lands) and leaves a 2.2m slow zone (35% slower, Chill) for 1.8s, then detonates: 60 damage in 2.7m and a 0.5s freeze. 2 charges."
+			"tap": "Hold to see the landing ring at the cursor (up to 12m); let go and she draws back and throws it from her hand. The spear flies to the cursor and lands there (4 damage to a foe in the way, where it then lands) and leaves a 2.2m slow zone (35% slower, Chill) for 1.8s, then detonates: 60 damage in 2.7m and a 0.5s freeze. 2 charges."
 		},
 		"sockets": {
 			"hit": "add",
@@ -104,9 +110,9 @@
 		"cooldown": 17.0,
 		"hp": 70.0,
 		"slide": 4.5,
-		"time": 3.0,
+		"time": 4.5,
 		"push": 5.0,
-		"desc": "A 0.2s sparkle at your feet, then a narrow block of ice erupts just ahead and slides toward the cursor (3 to 10.8m), widening from 1.8m to 4.5m, stopping enemy shots and shoving foes it touches. It stands 3s. Press E again while it slides to freeze it in place for 6s.",
+		"desc": "A 0.2s sparkle at your feet, then a narrow block of ice erupts just ahead and slides toward the cursor (4.5 to 16.2m), widening from 1.8m to 4.5m, stopping enemy shots and shoving foes it touches. It stands 4.5s in all. Press E again while it slides to freeze it in place for 6s.",
 		"sockets": {
 			"guard": "add",
 			"util": "add"
@@ -115,9 +121,9 @@
 		"reach": 1.8,
 		"length": 1.8,
 		"length_max": 4.5,
-		"travel": 10.8,
-		"travel_min": 3.0,
-		"grow_t": 2.4,
+		"travel": 16.2,
+		"travel_min": 4.5,
+		"grow_t": 3.6,
 		"frozen_t": 6.0
 	},
 	"order": [
@@ -133,18 +139,18 @@
 		"gear"
 	],
 	"rank3": {
-		"sec": "the spear's detonation is 30% larger",
-		"dash": "a Skate over open sky lays a short ice bridge (a visual for now)",
+		"sec": "the spear's detonation hits 45% harder",
+		"dash": "a Skate over the Abyss lays ice underfoot that holds for 5s",
 		"kin": "the wall is 40 points tougher"
 	},
 	"rank2": {
-		"sec": "Rank 2: cooldown 7s -> 6.3s, damage +15%.",
+		"sec": "Rank 2: cooldown 10.2s -> 9.2s, damage +15%.",
 		"dash": "Rank 2: recharge 8.5s -> 7.7s.",
 		"kin": "Rank 2: cooldown 17s -> 15.3s, wall strength +15%."
 	},
 	"rank_next": {
-		"sec": "Rank 3: cooldown 7s -> 5.6s, damage +30%; the detonation is 30% larger.",
-		"dash": "Rank 3: recharge 8.5s -> 6.8s; a Skate over open sky lays a short ice bridge.",
+		"sec": "Rank 3: cooldown 10.2s -> 8.2s, damage +30%; the detonation hits 45% harder.",
+		"dash": "Rank 3: recharge 8.5s -> 6.8s; a Skate over the Abyss lays ice underfoot that holds for 5s.",
 		"kin": "Rank 3: cooldown 17s -> 13.6s, wall strength +30%; +40 wall strength."
 	},
 	"tells": {

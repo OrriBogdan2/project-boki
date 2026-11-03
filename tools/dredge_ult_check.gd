@@ -1,9 +1,9 @@
 extends RefCounted
 ## Dredge's ultimate on X, Brass Broadside, for --dredge-combo-check (docs/heroes/dredge.md): the level gate,
-## the planted 1.1s charge behind a growing fan everyone sees, two waves 0.6s apart of six slugs each (shots
-## through Match.spawn_shot), Anti-Heal, every slug landing up close and fewer further out, bond once per cast and
-## only on a land, the stun that stops it, the other buttons locked while planted, no back bonus, the merge
-## drop, the cooldown, the reel combo and the burst cap.
+## the 1.1s charge behind a growing fan everyone sees (a slow walk, the fan turning with the aim), two waves 0.6s
+## apart of six slugs each (shots through Match.spawn_shot), Anti-Heal, every slug landing up close and fewer
+## further out, bond once per cast and only on a land, the stun that stops it, the other buttons locked while
+## it runs, no back bonus, the merge drop, the cooldown, the reel combo and the burst cap.
 
 const BURST := preload("res://tools/ult_burst.gd")
 const FACE_AWAY := PI / 2.0         # a target east of Dredge facing this way shows him its back
@@ -50,10 +50,18 @@ func _charge_and_waves() -> void:
 	_cast(P, home + Vector3(4, 0, 0))
 	ok("ult: no cast below level 6", not B.running() and float(K.cd["x"]) == 0.0 and B.casts == 0, "level %d" % P.lvl)
 	P.lvl = 6
+	# his walk first, to compare the slowed walk against
+	ak.step(m, 0.2, func(): P.inp["move"] = Vector2(0, 1))
+	var w0 := P.pos
+	ak.step(m, 0.3, func(): P.inp["move"] = Vector2(0, 1))
+	var run_v := P.flat_dist(w0) / 0.3
+	P.inp["move"] = Vector2.ZERO
+	ak.step(m, 0.2)
+	P.teleport(home)
 	var shots0: int = m.shot_n
 	_cast(P, home + Vector3(4, 0, 0))
 	ok(
-		"ult cast: planted, the charge move plays, its own cooldown starts (21s)",
+		"ult cast: the charge move plays, its own cooldown starts (21s)",
 		B.charging() and K.anim_id == "dr_blast" and absf(float(K.cd["x"]) - 21.0) < 0.2, "cd %.1f" % float(K.cd["x"])
 	)
 	ak.step(m, 0.3, func(): P.inp["move"] = Vector2(0, 1))
@@ -67,12 +75,26 @@ func _charge_and_waves() -> void:
 		bool(fan.get("all", false)) and absf(float(fan.get("deg", 0.0)) - 105.0) < 0.5 and len_b > len_a + 0.5,
 		"len %.1f -> %.1f" % [len_a, len_b]
 	)
+	var charge_k := P.flat_dist(p0) / 0.6 / maxf(0.01, run_v)
 	ok(
-		"ult: planted through the charge (walking does nothing)", P.pos.distance_to(p0) < 0.05 and B.waves == 0,
-		"moved %.2f" % P.pos.distance_to(p0)
+		"ult: he walks slowly through the charge (about 30% of his speed)",
+		B.waves == 0 and charge_k > 0.2 and charge_k < 0.4, "%.2f of %.1f m/s" % [charge_k, run_v]
+	)
+	# the cursor swings round to the south: the fan turns with it, and the waves go that way
+	ak.aim_at(P, P.pos + Vector3(0, 0, 4.0))
+	ak.step(m, 0.25, func(): P.inp["move"] = Vector2(0, 1))
+	var p1 := P.pos
+	ak.step(m, 0.4, func(): P.inp["move"] = Vector2(0, 1))
+	var fire_k := P.flat_dist(p1) / 0.4 / maxf(0.01, run_v)
+	var fdir: Vector2 = B.blast.get("dir", Vector2.ZERO)
+	ok(
+		"ult: he walks slower still while the waves go (about 20%), and keeps turning to the cursor",
+		B.waves >= 1 and fire_k > 0.1 and fire_k < 0.3 and fdir.distance_to(Vector2(0, 1)) < 0.15,
+		"%.2f, fan toward (%.2f, %.2f)" % [fire_k, fdir.x, fdir.y]
 	)
 	P.inp["move"] = Vector2.ZERO
-	ak.step(m, 1.3)
+	ak.aim_at(P, P.pos + Vector3(4, 0, 0))
+	ak.step(m, 0.65)
 	ok(
 		"ult: one press, two waves of six slugs through spawn_shot",
 		B.waves == 2 and m.shot_n - shots0 >= 12 and not B.running(),
@@ -85,6 +107,7 @@ func _charge_and_waves() -> void:
 	HunterKeys.ult_pressed(P)
 	ok("ult: the cooldown denies a new cast", not B.running() and B.casts == 1, "cd %.1f" % float(K.cd["x"]))
 	# point blank: every slug of both waves lands, with Anti-Heal; the waves 0.6s apart
+	P.teleport(home)
 	ak.fresh(T)
 	T.teleport(home + Vector3(1.6, 0, 0))
 	T.face = FACE_AWAY
@@ -151,7 +174,7 @@ func _reel_combo(m: Match, P: Hunter, T: Hunter, home: Vector3) -> void:
 	var n := int(hits[0]) + int(hits[1]) if hits.size() == 2 else 0
 	ok("ult combo: reel the foe in, then the Broadside lands (10+ slugs)", K.arrivals >= 1 and n >= 10, "slugs %d" % n)
 
-## A stun in the charge stops it (back in 8s); RMB, E and the barge are locked while planted; a merge drops it.
+## A stun in the charge stops it (back in 8s); RMB, E and the barge are locked while it runs; a merge drops it.
 func _guards() -> void:
 	var r: Array = ak.setup("dredge", 1.6, "", true)
 	var m: Match = r[0]
@@ -170,7 +193,7 @@ func _guards() -> void:
 	P.ak.on_dash(false)
 	ak.step(m, 0.1)
 	ok(
-		"ult: RMB, E and the barge are locked while planted",
+		"ult: RMB, E and the barge are locked while it runs",
 		K.ch_rmb == ch0 and K.grapples == g0 and K.wind <= 0.0 and absf(P.pos.x - x0) < 0.05
 	)
 	P.stun_t = 0.5

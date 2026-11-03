@@ -8,7 +8,7 @@ extends Node3D
 ##   green Empowered, mint-teal Supercharged, gold for a full Heavy Shot)
 ## - stars: the teal X-star on a Supercharged hit, the red-white Heavy Shot impact
 ## - arrows: the look of each of her shots (Empowered green bolt, Supercharged white-teal beam, a dull
-##   overdrawn shaft, the gold Impaling arrow with violet fins, the snare), each with its own trail, drawn
+##   overdrawn shaft, the gold Impaling arrow with violet fins), each with its own trail, drawn
 ##   over the shot the match moves (the round's own sphere is shrunk away)
 ## - spent arrows: one that lands with no hit stays stuck in the ground glowing teal for 4 s
 ## - the Rain of Arrows: the curved panels with fletch posts, a ground glow, arrows streaking down, blue
@@ -27,6 +27,9 @@ const WISP_T := 0.26
 const WISPS := 12
 const WISP_EVERY := 0.05
 const SPENT_T := 4.0           # s a spent arrow stays in the ground
+const STAKE_T := 7.0           # s the stake a wall pin leaves in the wall stays
+## the Heavy Shot's arrow is this many times a normal arrow (the Empowered bolt is 1.0): unmistakable
+const HEAVY_SCALE := 3.5
 const GREEN := Color("8dffa8")
 const TEAL := Color("5ff2d8")
 const GOLD := Color("ffc02a")
@@ -53,6 +56,7 @@ var tint: ColorRect = null
 var tint_k := 0.0
 var tint_want := 0.0
 var planted := 0               # spent arrows planted (checks)
+var staked := 0                # Heavy Shot stakes left in walls (checks)
 var fx_clock := 0.0            # the match time effects last advanced to
 
 func _init(hunter: Hunter) -> void:
@@ -120,6 +124,11 @@ func _arrow_node() -> Node3D:
 	var head := Models.part(n, Models.prism_tip(), Models.toon(TEAL, true, 0.8), Vector3(0, 0, -0.1),
 		Vector3(0.12, 0.2, 0.05), Vector3(-PI * 0.5, 0, 0), "Head")
 	head.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	# a bright core riding the head (the Heavy Shot's alone)
+	var core := KitMeshes.inst(n, KitMeshes.quad(1.0, 1.0), KitShaders.mat("star", GOLD, true))
+	core.name = "Core"
+	core.visible = false
+	core.position = Vector3(0, 0, 0.1)
 	for sx in [-1.0, 1.0]:
 		var f := Models.part(n, Models.box(0.16, 0.012, 0.2), Models.toon(GREEN, false, 0.6),
 			Vector3(sx * 0.07, 0, 0.62), Vector3.ONE, Vector3(0, sx * 0.35, 0), "Fin%d" % int(sx + 1.0))
@@ -132,8 +141,7 @@ const LOOK := {
 	"arrow": [GREEN, TEAL, GREEN, Color(0.45, 1.0, 0.6, 0.85), 2.4, 0.12, 1.0],
 	"super": [Color("c8fff0"), Color("e8fffa"), TEAL, Color(0.45, 1.0, 0.88, 1.0), 5.0, 0.5, 1.35],
 	"over": [Color("9fb8a0"), Color("c8d8c0"), Color("7a9a80"), Color(0.6, 0.75, 0.62, 0.35), 1.0, 0.06, 0.9],
-	"heavy": [GOLD, Color("fff0b0"), VIOLET, Color(1.0, 0.72, 0.2, 0.95), 3.0, 0.42, 2.25],
-	"snare": [Color("b8f06a"), Color("e8ffb0"), Color("d8ff8a"), Color(0.75, 1.0, 0.4, 0.6), 1.4, 0.08, 0.9],
+	"heavy": [GOLD, Color("fff0b0"), VIOLET, Color(1.0, 0.72, 0.2, 0.95), 6.0, 0.8, HEAVY_SCALE],
 }
 
 func _dress(n: Node3D, kind: String) -> void:
@@ -149,6 +157,11 @@ func _dress(n: Node3D, kind: String) -> void:
 	KitShaders.param(tr, "power", 2.2 if kind in ["super", "heavy"] else 1.4)
 	tr.visible = true
 	var s := float(lk[6])
+	var core := n.get_node("Core") as MeshInstance3D
+	core.visible = kind == "heavy"
+	core.scale = Vector3.ONE * s * 0.5
+	KitShaders.param(core, "color", Color("fff0b0"))
+	KitShaders.param(core, "power", 2.4)
 	var thick := s * (2.2 if kind == "super" else 1.0)
 	(n.get_node("Shaft") as Node3D).scale = Vector3(thick, thick, s)
 	(n.get_node("Head") as Node3D).scale = Vector3(0.12, 0.2, 0.05) * s * (1.6 if kind == "heavy" else 1.0)
@@ -275,6 +288,25 @@ func _plant(at: Vector3, v: Vector2, kind: String) -> void:
 	best["t"] = SPENT_T
 	planted += 1
 	star(g + Vector3(0, 0.15, 0), 0.5, TEAL, 0.1)
+
+## The Heavy Shot's stake: a wall pin leaves its big arrow standing in the wall at `at`, pointing along `dir`
+## (into the wall), for STAKE_T s.
+func stake(at: Vector3, dir: Vector2) -> void:
+	var best: Dictionary = spent[0]
+	for c in spent:
+		if float(c["t"]) <= 0.0:
+			best = c
+			break
+		if float(c["t"]) < float(best["t"]): best = c
+	var n: Node3D = best["node"]
+	_dress(n, "heavy")
+	(n.get_node("Trail") as Node3D).visible = false
+	n.global_position = at
+	n.rotation = Vector3(0, atan2(-dir.x, -dir.y), 0)
+	n.visible = true
+	best["t"] = STAKE_T
+	staked += 1
+	star(at, 1.6, GOLD, 0.2, 0.0, PI * 0.25, 2.2)
 
 ## Her dash after-image: three green fletch streaks at hip, chest and shoulder height, lying along the way
 ## she faces and fading behind her (pooled, a set every WISP_EVERY s).

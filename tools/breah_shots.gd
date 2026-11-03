@@ -1,0 +1,157 @@
+extends "res://tools/vv_shots.gd"
+## --breah-shots --shots-dir=<dir> [--breah-only=<part>]: Breah's review screenshots in a live Arena match
+## (xvfb with a renderer), reusing the Vireo/Venator shot rig (tools/vv_shots.gd). Strips are a 3-wide grid
+## of crops round her at gameplay zoom; <dir>/captions.txt gets "file: caption" per file.
+
+const GRID_CROP := Vector2i(280, 200)    # px round the hero per strip frame (scaled 1.5x)
+const GRID_COLS := 3
+const PARTS := ["rmb", "dash", "spine", "climb"]
+
+func run(main_node: Node) -> void:
+	main = main_node
+	who = "dolm"
+	hero_name = "breah"
+	var parts: Array = PARTS
+	for a in OS.get_cmdline_user_args():
+		var arg := String(a)
+		if arg.begins_with("--shots-dir="):
+			dir = arg.substr(12)
+		if arg.begins_with("--breah-only="):
+			parts = [arg.substr(13)]
+	DirAccess.make_dir_recursive_absolute(dir)
+	await _setup()
+	for part in parts:
+		await Callable(self, "_breah_%s" % part).call()
+	_write_captions()
+	print("BREAHSHOTS %d in %s" % [lines.size(), dir])
+	main.get_tree().quit(0)
+
+## captions.txt keeps the other parts' lines and replaces the lines of the files just taken.
+func _write_captions() -> void:
+	var path := dir.path_join("captions.txt")
+	var fresh := {}
+	for l in lines:
+		var cols := String(l).split("|")
+		fresh[cols[1]] = cols[2]
+	var keep: Array = []
+	if FileAccess.file_exists(path):
+		for old in FileAccess.get_file_as_string(path).split("\n", false):
+			if not fresh.has(String(old).get_slice(":", 0)):
+				keep.append(old)
+	var f := FileAccess.open(path, FileAccess.WRITE)
+	for l in keep:
+		f.store_line(l)
+	for file in fresh:
+		f.store_line("%s: %s" % [file, fresh[file]])
+	f.close()
+
+func _take(kind: String, file: String, caption: String, focus: Callable) -> void:
+	if kind == "full":
+		super._take(kind, file, caption, focus)
+		return
+	var img := main.get_viewport().get_texture().get_image()
+	var crop := _crop(img, P.position + Vector3(0, 0.9, 0), GRID_CROP, 1.5)
+	var strip_file := "%s_%s.png" % [hero_name, kind]
+	if not strips.has(strip_file):
+		strips[strip_file] = []
+		lines.append("%s|%s|%s" % [hero_name, strip_file, caption])
+	(strips[strip_file] as Array).append(crop)
+	_save_strip(strip_file)
+
+func _save_strip(file: String) -> void:
+	var frames: Array = strips[file]
+	var w: int = (frames[0] as Image).get_width()
+	var hh: int = (frames[0] as Image).get_height()
+	var cols := mini(GRID_COLS, frames.size())
+	var rows := ceili(frames.size() / float(GRID_COLS))
+	var out_size := Vector2i(w * cols + 4 * (cols - 1), hh * rows + 4 * (rows - 1))
+	var out := Image.create(out_size.x, out_size.y, false, (frames[0] as Image).get_format())
+	out.fill(Color(0.05, 0.05, 0.07))
+	for i in frames.size():
+		var fr: Image = frames[i]
+		var at := Vector2i((i % GRID_COLS) * (w + 4), (i / GRID_COLS) * (hh + 4))
+		out.blit_rect(fr, Rect2i(Vector2i.ZERO, fr.get_size()), at)
+	out.save_png(dir.path_join(file))
+
+## Quakefall: the charge, then the hop and the two-fist smash on landing.
+func _breah_rmb() -> void:
+	await _reset(6.0)
+	_aim(home + Vector3(6.0, 0, 0))
+	P.inp["sec_hold"] = true
+	P.ak.press_rmb()
+	var hold_rmb := func(t: float): P.inp["sec_hold"] = t < 1.2
+	var marks := _strip(
+		"rmb_strip",
+		"Quakefall (RMB), gameplay zoom: the gathered crouch with the circle and its sweet spot; the push-off;"
+			+ " fists high at the top of the short hop; swung down as she drops; the smash on landing;"
+			+ " low in the crater",
+		[1.15, 1.25, 1.37, 1.49, 1.56, 1.9]
+	)
+	marks.append([1.0, "full", "rmb_charge", "Quakefall charging: the red circle a hop ahead, the sweet spot grown"])
+	marks.append([1.58, "full", "rmb_slam", "Quakefall landing: the starburst, chips and crater where she lands"])
+	await _go(2.1, hold_rmb, marks)
+
+## Her two dash moves: Rubble Leap on the ground, the long dash in the air (5 frames each).
+func _breah_dash() -> void:
+	await _reset(9.0)
+	_aim(home + Vector3(4.0, 0, 0))
+	P.ak.on_dash(false)
+	var ground := _strip(
+		"dash_ground_strip",
+		"Rubble Leap (ground dash), gameplay zoom: crouched on the rock as it heaves up; kicked off it, fists swept"
+			+ " back; tucked at the top, fists overhead; legs reaching down; the two-fist landing (dust, no ring)."
+			+ " Reference: footage 0516-0518, the rock bursting up in front and a low shove behind it (ours is the"
+			+ " owner's leap over that rock)",
+		[0.04, 0.13, 0.31, 0.47, 0.64]
+	)
+	await _go(0.9, Callable(), ground)
+	await _reset(9.0)
+	_aim(home + Vector3(4.0, 0, 0))
+	P.pos.y += 2.2
+	P.grounded = false
+	P.do_dash()
+	var air := _strip(
+		"dash_air_strip",
+		"Air dash, gameplay zoom: the gather (fists in at the chest); the shoulder-first barge, lead fist low,"
+			+ " legs trailing; held through the push; braced, knees up, as it ends (0.23s). Reference: the source's"
+			+ " ground shove (footage 128.8-129.4 s, shoulder down behind the rock, fists forward), taken into the air",
+		[0.02, 0.07, 0.13, 0.19, 0.24]
+	)
+	await _go(0.4, Callable(), air)
+
+## Basalt Spine: the ridge of real rocks, one rock deep, centre-out (tap across the aim).
+func _breah_spine() -> void:
+	await _reset(14.0)
+	P.lvl = 6
+	P.ak.cd["x"] = 0.0
+	_aim(home + Vector3(5.0, 0, 0))
+	P.inp["x_down"] = false
+	HunterKeys.ult_pressed(P)
+	var at_ridge := func(): return (P.ak as DolmKit).spine.center + Vector3(0, 0.6, 0)
+	var marks := [
+		[0.12, "full", "spine_cracks", "Basalt Spine released: the molten cracks along the line everyone sees for 0.2s",
+			at_ridge],
+		[0.42, "full", "spine_rising", "Basalt Spine rising centre-out: real rocks (Stone Row's own), one rock deep",
+			at_ridge],
+		[0.9, "full", "spine_up", "Basalt Spine up: a ridge of punchable rocks across the aim, one rock deep, no land;"
+			+ " it stops at the island's edge (lower right)", at_ridge],
+	]
+	await _go(1.0, Callable(), marks)
+
+## Item 25: she walks into her own rock and rises over it, no jump.
+func _breah_climb() -> void:
+	await _reset(14.0)
+	_aim(home + Vector3(6.0, 0, 0))
+	P.ak.cd["e"] = 0.0
+	P.ak.use_e()
+	await _go(0.4)
+	var walk := func(_t: float): P.inp["move"] = Vector2(1, 0)
+	var marks := _strip(
+		"climb_strip",
+		"Her own rock (item 25), gameplay zoom: she walks into it with no jump, rises up its face with her walk"
+			+ " carried on, stands on its top (the rock slides under her, her foot ring on its top) and walks on over"
+			+ " (about 0.5s to cross; the top-down camera hides most of the 1.25m rise)",
+		[0.3, 0.42, 0.5, 0.6, 0.72, 0.9]
+	)
+	await _go(1.1, walk, marks)
+	P.inp["move"] = Vector2.ZERO

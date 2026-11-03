@@ -56,7 +56,8 @@
 		"auto": 0.9,
 		"full_mult": 2.0,
 		"end_r": 2.25,
-		"drift_k": 1.0
+		"drift_k": 1.0,
+		"rank3_mult": 2.0
 	},
 	"rmb": {
 		"delivery": "projectile",
@@ -98,7 +99,8 @@
 			"ctrl_cap": "soft",
 			"mod": "add"
 		},
-		"auto": 1.2
+		"auto": 1.2,
+		"rank3_mult": 1.5
 	},
 	"e": {
 		"delivery": "burst",
@@ -109,12 +111,12 @@
 		"cooldown": 10.5,
 		"reach": 11.0,
 		"delay": 0.8,
-		"radius": 1.8,
+		"radius": 1.5,
 		"dmg": 20.0,
-		"push": 16.0,
-		"lift": 0.5,
+		"slide_dist": 3.4,
+		"slide_t": 1.1,
 		"grounded": 1.5,
-		"desc": "Press to drop a circle at your cursor (up to 11m), then flick the mouse within 0.3s to set the drag: toward you pulls them in, away throws them out (no flick: away from you). A pillar of light narrows over it for 0.8s, then lightning strikes: 20 damage, 2 Static, and everyone inside is dragged along the ground about 7m that way and Grounded for 1.5s (no dashing). Charge orbs it catches are flung the same way and become yours.",
+		"desc": "Press to drop a circle at your cursor (up to 11m), then flick the mouse within 0.3s to set the drag: toward you pulls them in, away throws them out (no flick: away from you). A pillar of light narrows over it for 0.8s, then lightning strikes: 20 damage, 2 Static, and everyone inside is slid along the ground about 3.4m that way (slow, easing out over about 1s) and Grounded for 1.5s (no dashing). Charge orbs it catches are flung the same way and become yours.",
 		"sockets": {
 			"hit": "add",
 			"ctrl": "add",
@@ -157,9 +159,9 @@
 		"kin"
 	],
 	"rank3": {
-		"sec": "+20% damage",
+		"sec": "+50% damage",
 		"kin": "cooldown 3s shorter",
-		"dash": "the run's own hit deals +50%"
+		"dash": "the run's own hit deals double"
 	},
 	"rank2": {
 		"sec": "Rank 2: cooldown 8s -> 7.2s, damage +15%.",
@@ -167,9 +169,9 @@
 		"kin": "Rank 2: cooldown 10.5s -> 9.5s, damage +15%."
 	},
 	"rank_next": {
-		"sec": "Rank 3: cooldown 8s -> 6.4s, damage +30%; +20% damage on top.",
+		"sec": "Rank 3: cooldown 8s -> 6.4s, damage +30%; +50% damage on top.",
 		"kin": "Rank 3: cooldown 10.5s -> 5.4s (3s off), damage +30%.",
-		"dash": "Rank 3: recharge 8s -> 6.4s; the run's own hit deals +50%."
+		"dash": "Rank 3: recharge 8s -> 6.4s; the run's own hit deals double."
 	},
 	"tells": {
 		"half": "a marker over every foe with Static: one pip per stack and the count, sparks on them that grow",

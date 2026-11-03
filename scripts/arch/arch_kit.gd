@@ -33,6 +33,7 @@ var tell := ""                 # "" | "half" | "full": the resource tell enemies
 var bonded_glow := false
 var fuse := {}                 # the R's fuse (wind-up) running: {t, T, bond, guard}
 var cd_off := false            # practice toggle (Arena): cooldowns don't run down, they're skipped
+var flow: DashFlow             # what ability presses do during this hero's dash
 
 static func make(hunter: Hunter, arch_id: String) -> ArchKit:
 	var k: ArchKit
@@ -55,6 +56,7 @@ static func make(hunter: Hunter, arch_id: String) -> ArchKit:
 	k.id = arch_id
 	k.d = Arch.def(arch_id)
 	k.ch_rmb = float(k.rmb_def().get("charges", 1))
+	k.flow = DashFlow.new(k)
 	k._setup()
 	return k
 
@@ -112,6 +114,8 @@ func ult_recast() -> bool: return false
 ## Is the hero ultimate under way (HeroUlt.press turns a press into ult_recast then)?
 func ult_running() -> bool: return false
 func on_dash(_ex: bool) -> bool: return false        # true = the archetype handled the dash
+## Does this kit have the class long dash (Shift in the air)? The HUD shows its segment only then.
+func has_long_dash() -> bool: return true
 func on_deal(_t: Ent, _dmg: float, _o: Dictionary) -> void: pass
 func on_take(_by: Ent, _dmg: float, _o: Dictionary) -> void: pass
 func on_block(_dmg: float, _by) -> void: pass
@@ -190,6 +194,10 @@ func held(which: String) -> bool:
 
 func _e_end() -> void: pass
 func _r_end() -> void: pass
+
+## A cast holds the caster still (no walking or jumping); aim_lock() is the facing it keeps (ZERO: free to turn).
+func cast_locked() -> bool: return false
+func aim_lock() -> Vector2: return Vector2.ZERO
 
 func busy() -> bool:
 	return h.downed or h.out or h.dropping or h.riding or h.stun_t > 0.0 or Hex.active(h)
@@ -717,11 +725,14 @@ func slot_info(slot: String) -> Dictionary:
 		"dash", "dodge":
 			var sd := dash_def()
 			var dmax := h.max_dashes()
+			var owed := floorf(maxf(h.dashes, 0.0)) + 1.0 - h.dashes        # charges owed: over 1 after a long slide
 			out.merge({"name": String(sd.get("name", "")), "short": String(sd.get("name", "")).split(" ")[0], "icon": String(sd.get("icon", "dash")), "col": col_of(sd), "desc": String(sd.get("desc", "")),
-				"cd": (1.0 - fposmod(h.dashes, 1.0)) * h.dash_regen() if h.dashes < dmax - 0.001 else 0.0, "cd_max": h.dash_regen(), "charges": int(floor(h.dashes)), "max_charges": int(dmax), "verb": "dash", "ready": h.dashes >= 1.0, "full": dash_payoff_ready()}, true)
+				"cd": owed * h.dash_regen() if h.dashes < dmax - 0.001 else 0.0, "cd_max": h.dash_regen(), "charges": maxi(0, int(floor(h.dashes))), "max_charges": int(dmax), "verb": "dash", "ready": h.dashes >= 1.0, "full": dash_payoff_ready()}, true)
 	return out
 
 func e_recastable() -> bool: return false
+## E fires on the key's press (a self-centred blast, e.on_press in data), never through the hold-to-aim preview.
+func e_on_press() -> bool: return bool(e_def().get("on_press", false))
 var anim_id := ""              # the kit move playing on the hunter (HunterAnim.KMOVES), its start
 var anim_at := -9.0
 
@@ -814,6 +825,10 @@ func _tick_knocks() -> void:
 ## A rival we hit in the last 5s was knocked (mine: our blow did it; else an assist).
 func on_knock(_t: Hunter, _mine: bool) -> void: pass
 func fires_in_dash() -> bool: return false
+## In this hero's dash right now, as DashFlow sees it (a kit with its own dash state overrides this).
+func in_dash() -> bool: return h.roll_t > 0.0 and h.move_kind == "dash"
+## s left in that dash (0 when not in one); a kit that overrides in_dash() overrides this too.
+func dash_left() -> float: return h.roll_t if in_dash() else 0.0
 func fire_ok_rmb() -> bool: return true
 
 # ------------------------------------------------------------------ payoffs and state tells (shared)

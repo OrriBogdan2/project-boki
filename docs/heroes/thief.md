@@ -39,8 +39,14 @@ Dagger 15), Encore 24s (Death Blossom 23.1, about 3.5 Trickshots).
 - Nameplate height 2.15 m (`body.plate`; read by the HUD through `Arch.plate_y`).
 - Runs pitched far forward (about 0.57 rad at a run).
 - Ground Cartwheel: 4.5 m with the measured speed curve; the long (air) dash is the same sideways cartwheel
-  carried flat on its speed for 8 m over 0.95 s (x the dash feel), ending where she lands.
-- Her dashes leave her own cyan streaks and stars, not the shared after-image.
+  carried flat on its speed for 8 m over 0.95 s (x the dash feel), ending where she lands. From a jump it
+  empowers the next bolt too (the source's Quickflip does; its dash -> LMB row in content/dash_flow/thief.json).
+- Her dashes leave her own cyan streaks and stars, not the shared after-image. No ring or burst on a dash or a
+  landing: the empowered bolt shows as a tight gold glint (a hot core and a turning four-point star) in the hand
+  it will leave from, flaring as she lands; online viewers get a small ping at that hand.
+- Presses during the Cartwheel (content/dash_flow/thief.json, docs/heroes/dash_interactions.md): every slot
+  fires mid-flip (a bolt held through it goes at once, empowered); a move it starts waits out the flip, so the
+  cartwheel is never cut short; the dagger's recast blink ends the cartwheel.
 
 ## Assumptions (where the footage is silent; easy to change in content/archetypes/thief.json)
 
@@ -112,7 +118,10 @@ All are scripted in `--kit-combo-check` (also inside `--archetype-check`) and `-
 
 `KMovesDJ` (scripts/match/kmoves_dj.gd): `thf_lmb_r` / `thf_lmb_l` (the body for each throw: release at
 0.08s, follow-through to 0.22, back by 0.42; the arm is the twin-hold swing), `thf_primed`, `thf_vault_r` /
-`thf_vault_l` (a cartwheel, legs split, 0.55s), `thf_bola` (whirl overhead through the 0.4s lane, sling at
+`thf_vault_l` (the ground Cartwheel inside the 0.48s dash: a 0.05s crouch with the arms swung up, a push-off
+into a star, one turn over the top by 0.30, a landing crouch at 0.36, up by 0.48), `thf_exdash` (the air
+Cartwheel: a tucked flick, the star turned over by 0.34, then carried flat and stretched until she lands),
+`thf_land` (touching down from it: a low crouch for 0.1s), `thf_bola` (whirl overhead through the 0.4s lane, sling at
 0.42), `thf_knife` (a spin into a side-arm throw, released at 0.12), `thf_arrive`, `thf_encore` (X: blades raised as the
 ring grows, then a full spin as it opens), `thf_encore_throw_r` / `_l` (each volley: the torso snaps round
 as one arm flings a blade out; no leg keys, so she walks).

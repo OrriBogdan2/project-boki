@@ -36,7 +36,7 @@ func _cast(P: Hunter, at: Vector3) -> AshwickJet:
 	return K.jet
 
 func _flight() -> void:
-	var r: Array = ak.setup("ashwick", 12.0, "", true)
+	var r: Array = ak.setup("ashwick", 16.0, "", true)
 	var m: Match = r[0]
 	var P: Hunter = r[1]
 	var T: Hunter = r[2]
@@ -88,14 +88,20 @@ func _flight() -> void:
 		"ult recast: he stops soon after the early landing", P.pos.distance_to(start) < 1.6,
 		"slid %.1f" % P.pos.distance_to(start)
 	)
-	# a full flight: about 9-10 bh in 1.4s
+	# a full flight: 1.8s (about 30% past the source's 1.4s), about 22.7m
+	var xd := K.x_def()
+	var fly_t := float(xd["time"])
+	var want := float(xd["speed"]) * fly_t
 	P.teleport(home)
-	_cast(P, home + Vector3(14, 0, 0))
-	ak.step(m, 1.5, func(): ak.aim_at(P, home + Vector3(14, 0, 0)))
+	_cast(P, home + Vector3(20, 0, 0))
+	ak.step(m, fly_t - 0.1, func(): ak.aim_at(P, home + Vector3(20, 0, 0)))
+	var still_up := J.running()
+	ak.step(m, 0.2, func(): ak.aim_at(P, home + Vector3(20, 0, 0)))
 	var flown := Vector2(P.pos.x - home.x, P.pos.z - home.z).length()
 	ok(
-		"ult: a full flight covers about 9-10 body heights in 1.4s", not J.running() and flown > 15.0 and flown < 20.0,
-		"%.1fm" % flown
+		"ult: the flight lasts 1.8s (+25-35% on 1.4s) and covers about 22.7m",
+		absf(fly_t - 1.8) < 0.01 and still_up and not J.running() and absf(flown - want) < want * 0.1,
+		"%.1fm of %.1f, up at %.1fs %s" % [flown, want, fly_t - 0.1, still_up]
 	)
 	ok("ult: the flight ends on its own with the landing move", J.landings >= 2 and K.anim_id == "lw_land")
 	ok("ult bond: nothing for a cast that lands on nobody", _owed(P) == 0.0, "owed %.2f" % _owed(P))
@@ -125,7 +131,7 @@ func _steer(m: Match, P: Hunter, K: AshwickKit, home: Vector3) -> void:
 	)
 
 func _carpet() -> void:
-	var r: Array = ak.setup("ashwick", 12.0, "", true)
+	var r: Array = ak.setup("ashwick", 16.0, "", true)
 	var m: Match = r[0]
 	var P: Hunter = r[1]
 	var T: Hunter = r[2]
@@ -136,15 +142,17 @@ func _carpet() -> void:
 	T.teleport(home + Vector3(5.0, 0, 0))
 	T2.teleport(home + Vector3(9.0, 0, 0.4))
 	_cast(P, home + Vector3(16, 0, 0))
-	ak.step(m, 1.6, func(): ak.aim_at(P, home + Vector3(16, 0, 0)))
-	ak.step(m, 0.7)
+	ak.step(m, 2.0, func(): ak.aim_at(P, home + Vector3(16, 0, 0)))
 	var left := 0.0
 	if not J.trail.is_empty():
 		left = float(J.trail[-1]["until"]) - m.time
+	var linger := float(K.x_def()["trail_t"])
 	ok(
-		"ult payoff: a molten carpet along the flight that lasts about 4s",
-		J.trail.size() >= 10 and left > 2.4 and left < 4.0, "pieces %d left %.1f" % [J.trail.size(), left]
+		"ult payoff: a molten carpet along the flight that lingers 5.2s (the flight's +30%)",
+		J.trail.size() >= 14 and absf(linger - 5.2) < 0.01 and left > linger - 0.5 and left <= linger,
+		"pieces %d left %.1f" % [J.trail.size(), left]
 	)
+	ak.step(m, 0.7)
 	var char_t := K.char_of(T) + 31.0 * float(K.burning(T))
 	ok(
 		"ult payoff: the carpet burns, slows and builds Char", ak.dmg(T) > 0.5 and T.slow_t > 0.0 and char_t > 0.0,
@@ -156,15 +164,15 @@ func _carpet() -> void:
 		"ult bond: burning a hunter pays once per cast through KinBond.from_ult (a hit: 0.6, two hunters still 0.6)",
 		absf(sent - 0.6) < 0.001 and HeroUlt.cast_id(K).begins_with("ashwick_"), "owed %.2f" % sent
 	)
-	# a knock with it tops the cast up to the knock's share
-	ak.step(m, 4.0)
+	# a knock with it tops the cast up to the knock's share (once the last carpet has burnt out)
+	ak.step(m, 6.0)
 	ak.fresh(T)
 	T.hp = 0.5
 	T.teleport(home + Vector3(6.0, 0, 0))
 	T2.teleport(home + Vector3(0, 0, -6.0))
 	P.teleport(home)
 	_cast(P, home + Vector3(16, 0, 0))
-	ak.step(m, 1.6, func(): ak.aim_at(P, home + Vector3(16, 0, 0)))
+	ak.step(m, 2.0, func(): ak.aim_at(P, home + Vector3(16, 0, 0)))
 	sent = _owed(P)
 	ok(
 		"ult bond: a knock with the carpet counts as the cast's best event (0.7)",
@@ -187,7 +195,7 @@ func _carpet() -> void:
 	P.ak.press_rmb()
 	ak.step(m, 0.02)
 	ok("ult: no Cinder Shot mid-flight", K.ch_rmb == ch0 and J.running())
-	ak.step(m, 1.2, func(): ak.aim_at(P, home + Vector3(16, 0, 0)))
+	ak.step(m, 1.6, func(): ak.aim_at(P, home + Vector3(16, 0, 0)))
 	# Ablaze in about 2.4s of standing in it (4 Char every 0.3s)
 	ak.fresh(T)
 	K.chars = {}
@@ -216,7 +224,7 @@ func _abyss(m: Match, P: Hunter, K: AshwickKit, home: Vector3, W) -> void:
 	P.teleport(home)
 	var skips := J.void_skips
 	_cast(P, home + Vector3(16, 0, 0))
-	ak.step(m, 1.5, func(): ak.aim_at(P, home + Vector3(16, 0, 0)))
+	ak.step(m, 1.9, func(): ak.aim_at(P, home + Vector3(16, 0, 0)))
 	var over := false
 	for t in J.trail:
 		for p in [t["a"], t["b"]]:
@@ -244,7 +252,7 @@ func _knock_stun_merge(m: Match, P: Hunter, K: AshwickKit, home: Vector3) -> voi
 		"ult: a knockback mid-flight speeds it up", J.boosts >= 1 and float(J.flight.get("speed", 0.0)) > sp0 + 3.0,
 		"speed %.1f -> %.1f" % [sp0, float(J.flight.get("speed", 0.0))]
 	)
-	ak.step(m, 1.4)
+	ak.step(m, 1.8)
 	P.teleport(home)
 	_cast(P, home + Vector3(16, 0, 0))
 	ak.step(m, 0.3)
@@ -270,7 +278,7 @@ func _burst() -> void:
 		var home := P.pos
 		T.teleport(home + Vector3(5.0, 0, 0))
 		_cast(P, home + Vector3(16, 0, 0))
-		ak.step(m, 1.5, func(): ak.aim_at(P, home + Vector3(16, 0, 0)))
+		ak.step(m, 1.9, func(): ak.aim_at(P, home + Vector3(16, 0, 0)))
 		var end_p: Vector3 = P.ak.jet.trail[-1]["b"] if not P.ak.jet.trail.is_empty() else P.pos
 		ak.step(m, 2.4, func(): T.teleport(end_p))
 		P.teleport(T.pos + Vector3(-2.0, 0, 0))

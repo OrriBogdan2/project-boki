@@ -48,7 +48,7 @@ static func on_owner_out(m, h: Hunter, k: Kin, box_pos: Vector3) -> void:
 	if guarding(k):
 		return                       # still guarding from an earlier death: nothing new is lost
 	m.giant_free(k)
-	if Loaner.is_loaner(k.rec) or not risky_match(m):
+	if not risky_match(m):
 		k.state = "away"            # never lost: it keeps out of sight and comes back if you are revived
 		k.rescue_on = false
 		k.rescue_t = 0.0

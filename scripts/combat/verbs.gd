@@ -5,6 +5,8 @@ extends RefCounted
 ## create them (see Effects), the match ticks them, checks every shot against them and draws them.
 ## Each one is plain data plus one scene node, so new abilities are new JSON, not new code.
 
+const DECOY_A := 0.28      # the decoy ghost's opacity (brighter blooms into a flash at every dash start)
+
 var m: Node = null
 var walls: Array = []     # {a, b: Vector2, y, hp, max_hp, t, team, by, block: "enemy"|"all", move, reflect, node, col, touch, follow, th}
 var _mirror_pool: Dictionary = {}   # key -> free reflect-window nodes (hidden), reused so a held prism does not rebuild its panels each press
@@ -94,7 +96,7 @@ static func wall_blocks(list: Array, x: float, z: float, r: float, y: float) -> 
 		if absf(y - float(w["y"])) > 1.9:
 			continue
 		# a low wall you can stand on (a rock, "top" m tall): feet at its top walk over it (StoneStand)
-		var top := float(w.get("top", 3.0))
+		var top := StoneStand.top_for(w) if w.has("top") else 3.0
 		if y >= float(w["y"]) + top - World.STEP:
 			continue
 		var p := Vector2(x, z)
@@ -277,9 +279,11 @@ func yank(ent: Ent, to: Vector3, dur: float, hop := 1.2) -> void:
 # ------------------------------------------------------------------ decoys
 func add_decoy(owner: Hunter, at: Vector3, time: float, col: Color) -> void:
 	var n := Node3D.new()
-	var body := Models.part(n, Models.capsule(0.32, 1.5), Models.glow_mat(Color(col, 0.55)), Vector3(0, 0.8, 0))
+	# soft and see-through: a hunter-shaped ghost left behind, not a flash where the dash set off
+	var body := Models.part(n, Models.capsule(0.32, 1.5), Models.glow_mat(Color(col, DECOY_A)), Vector3(0, 0.8, 0))
 	body.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	var head := Models.part(n, Models.sphere(0.24, 10), Models.glow_mat(Color(col.lightened(0.3), 0.7)), Vector3(0, 1.75, 0))
+	var head_mat := Models.glow_mat(Color(col.lightened(0.3), DECOY_A + 0.1))
+	var head := Models.part(n, Models.sphere(0.24, 10), head_mat, Vector3(0, 1.75, 0))
 	head.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	m.add_child(n)
 	n.global_position = at
@@ -518,7 +522,6 @@ func tick(dt: float) -> void:
 		dc["t"] = float(dc["t"]) - dt
 		if float(dc["t"]) <= 0.0:
 			if is_instance_valid(dc["node"]):
-				m.fx.burst((dc["pos"] as Vector3) + Vector3(0, 1.0, 0), Color("ffffff"), 10, 3.0, 0.3)
 				dc["node"].queue_free()
 			decoys.erase(dc)
 

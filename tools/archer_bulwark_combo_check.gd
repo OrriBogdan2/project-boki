@@ -11,15 +11,19 @@ func run(main_node: Node) -> void:
 	var both := "--hero-combo-check" in args
 	var ult = load("res://tools/pin_bjorn_ult_check.gd").new()
 	ult.main = main_node
+	var own = load("res://tools/pin_bjorn_owner_check.gd").new()
+	own.main = main_node
 	if both or "--archer-combo-check" in args:
 		await _archer_combos()
 		await ult.pin()
+		await own.pin()
 	if both or "--bulwark-combo-check" in args:
 		await _bulwark_combos()
 		await _growth()
 		await ult.bjorn()
-	n += ult.n
-	fails += ult.fails
+		await own.bjorn()
+	n += ult.n + own.n
+	fails += ult.fails + own.fails
 	print("AKCHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
@@ -210,6 +214,7 @@ func _archer_combos() -> void:
 	K.ch_rmb = 2.0
 	K.cd["rmb"] = 0.0
 	K.res = 0.0
+	var wall_pos := T.pos
 	_wall_at(m, T.pos, lv, 2)
 	aim_at(P, T.pos)
 	var pn0 := K.pins
@@ -258,6 +263,19 @@ func _archer_combos() -> void:
 		"deadeyes %d dealt %.0f" % [K.deadeyes - de0, dmg(T) - dd0]
 	)
 	ok("pin anim: the Deadeye payoff plays pin_deadeye", K.anim_id == "pin_deadeye", K.anim_id)
+	# rank 3 (data: Heartpiercer IV): a wall stun gives a dash charge
+	P.slot_lv["sec"] = 3
+	fresh(T)
+	T.teleport(wall_pos)
+	K.ch_rmb = 1.0
+	K.cd["rmb"] = 0.0
+	K.res = 0.0
+	P.dashes = 0.0
+	aim_at(P, T.pos)
+	hold(m, P, 1.2)
+	step(m, 0.3)
+	ok("pin rank 3: a Heavy Shot wall stun gives a dash charge", T.stun_t > 0.0 and P.dashes >= 0.95, "stun %.2f dashes %.2f" % [T.stun_t, P.dashes])
+	P.slot_lv["sec"] = 1
 	_clear_wall(m, T.pos, lv, 2)
 	# Hail Wall: a curved arc at the cursor distance (5m), 120 degrees; a foe on the arc off to the side
 	# burns, one between you and the arc does not
@@ -301,26 +319,47 @@ func _archer_combos() -> void:
 		"cremations %d" % (K.cremations - cr0)
 	)
 	step(m, 3.5)
-	# Hail Wall, then a snare tap: roots 1.0 (the longer root), and the move plays
+	# the Heavy Shot is hold only (data: Heartpiercer): one charge, 16 s, a tap looses nothing and costs nothing
 	fresh(T)
-	K.cd["e"] = 0.0
 	K.res = 0.0
-	K.ch_rmb = 2.0
+	K.ch_rmb = 1.0
 	K.cd["rmb"] = 0.0
 	P.teleport(home)
 	T.teleport(home + Vector3(7, 0, 0))
 	T2.teleport(home + Vector3(9, 0, 0))
 	aim_at(P, T.pos)
-	P.ak.use_e()
-	step(m, 0.5, func(): K.res = 0.0)
 	tap(m, P)
-	step(m, 0.15)
+	step(m, 0.3)
 	ok(
-		"combo archer: Hail Wall > snare tap roots 1.0",
-		T.root_t > 0.6 or K.last_variant == "during_e",
-		"root %.2f variant %s" % [T.root_t, K.last_variant]
+		"combo archer: RMB tap looses nothing and costs no charge (no snare, no Tripwire)",
+		dmg(T) <= 0.0 and T.root_t <= 0.0 and K.ch_rmb >= 1.0 and K.last_variant == "tap" and not K.d["rmb"].has("snare"),
+		"took %.0f root %.2f charges %.1f variant %s" % [dmg(T), T.root_t, K.ch_rmb, K.last_variant]
 	)
-	ok("archer anim: snare plays arc_snare", K.anim_id == "arc_snare", K.anim_id)
+	hold(m, P, 1.2)
+	step(m, 0.3)
+	ok(
+		"combo archer: RMB hold looses the Heavy Shot on one charge and a 16 s cooldown",
+		dmg(T) >= 14.0 and K.rmb_charges() == 1 and K.ch_rmb < 1.0 and absf(float(K.cd["rmb"]) - 16.0) < 0.6,
+		"took %.0f max charges %d charges %.1f cd %.1f" % [dmg(T), K.rmb_charges(), K.ch_rmb, float(K.cd["rmb"])]
+	)
+	ok("archer anim: the Heavy Shot plays arc_heavy", K.anim_id == "arc_heavy", K.anim_id)
+	# ranks: the cooldown drops 3 s a rank (16 -> 13 -> 10) and rank 3 adds 3 m of range
+	var cds: Array = []
+	var reaches: Array = []
+	for rk in [1, 2, 3]:
+		P.slot_lv["sec"] = rk
+		cds.append(K.rmb_def()["cooldown"] * K.cd_k("sec"))
+		reaches.append(K.heavy_reach())
+	ok(
+		"combo archer: Heavy Shot ranks cut 3 s each (16, 13, 10) and rank 3 flies 3 m farther",
+		absf(cds[0] - 16.0) < 0.01 and absf(cds[1] - 13.0) < 0.01 and absf(cds[2] - 10.0) < 0.01 and absf(
+			reaches[2] - reaches[0] - 3.0
+		) < 0.01,
+		"cds %s reaches %s" % [str(cds), str(reaches)]
+	)
+	P.slot_lv["sec"] = 1
+	# Hail Wall, then a hold-only RMB: the old tap-snare root is gone
+	K.cd["e"] = 0.0
 	step(m, 5.0)
 		# a knock: heal + a dash charge back
 	fresh(T)
@@ -371,8 +410,8 @@ func _archer_combos() -> void:
 		if K.spirit.inside: mk[0] = maxf(mk[0], K.move_k()))
 	var mk_in: float = mk[0]
 	ok(
-		"pin small: faster inside something during Spirit Walk (x1.35, wiki +50 move speed in terrain)",
-		absf(mk_in - 1.35) < 0.01,
+		"pin small: no extra speed inside something below rank 3 (x1.1 like outside)",
+		absf(mk_in - 1.1) < 0.01,
 		"move_k inside %.2f" % mk_in
 	)
 	ok(
@@ -427,6 +466,46 @@ func _archer_combos() -> void:
 	P.hurt(5.0, T2, {"src": "shot"})
 	step(m, 0.05)
 	ok("pin: damage ends Spirit Walk", not K.spirit.active() and P.spirit_t <= 0.0)
+	# rank 3 (data: Phase Walk IV): 0.5 s longer, +33% inside something that fades over the walk, allies near her walk too
+	P.slot_lv["dash"] = 3
+	step(m, 0.5)
+	var ally_team := T2.team
+	T2.team = P.team
+	T2.downed = false
+	fresh(T2)
+	T2.teleport(home + Vector3(0, 0, 2.5))
+	T2.spirit_t = 0.0
+	K.spirit.granted.clear()
+	P.teleport(home)
+	P.vel = Vector3.ZERO
+	P.dashes = P.max_dashes()
+	aim_at(P, home + Vector3(6, 0, 0))
+	P.inp["move"] = Vector2(1, 0)
+	P.do_dash()
+	ok(
+		"pin rank 3: Spirit Walk lasts 0.5 s longer (3.3 s) and an ally within 6 m walks too",
+		absf(K.spirit.walk_time() - 3.3) < 0.01 and K.spirit.t > 3.3 and T2.spirit_t > 3.0,
+		"walk %.2f ally ghost %.2f" % [K.spirit.walk_time(), T2.spirit_t]
+	)
+	var boosts: Array = []
+	step(m, 1.4, func():
+		P.inp["move"] = Vector2(1, 0)
+		if K.spirit.inside: boosts.append(K.spirit.inside_boost()))
+	boosts.append(0.0)
+	boosts.push_front(0.0)
+	var first_boost: float = boosts[1]
+	var last_boost: float = boosts[boosts.size() - 2]
+	ok(
+		"pin rank 3: +33% inside something, fading as the walk runs out",
+		boosts.size() >= 4 and first_boost > last_boost and first_boost > 0.2 and first_boost <= 0.33,
+		"samples %d first %.3f last %.3f" % [boosts.size() - 2, first_boost, last_boost]
+	)
+	K.spirit.end("time")
+	P.slot_lv["dash"] = 1
+	T2.team = ally_team
+	T2.spirit_t = 0.0
+	K.spirit.granted.clear()
+	P.inp["move"] = Vector2.ZERO
 	# the long dash (no charges left): Pin's own flick
 	step(m, 0.5)
 	P.dashes = 0.0
@@ -443,11 +522,12 @@ func _archer_combos() -> void:
 	P.teleport(home + Vector3(0, 3.0, 0))
 	P.grounded = false
 	P.vel = Vector3(0, -2, 0)
-	K.ch_rmb = 2.0
+	K.ch_rmb = 1.0
 	K.cd["rmb"] = 0.0
 	K.res = 0.0
 	P.ak.press_rmb()
-	ok("archer anim: plunge plays arc_plunge", K.anim_id == "arc_plunge", K.anim_id)
+	ok("archer RMB air: the press starts a draw, no Plunge", K.rmb_down and P.vel.y < 5.0, "vy %.1f" % P.vel.y)
+	K.rmb_down = false
 	ok("archer: no class R", not K.d.has("r") and K.r_def().is_empty())
 	# a Boki merge that starts mid-hold ends the hold: no arrow, no Heavy Shot, no lane telegraph left behind
 	step(m, 5.0)
@@ -629,7 +709,8 @@ func _bulwark_combos() -> void:
 		"bjorn E: the landing circle shows for everyone while it comes down",
 		AimKit.shown(P, "e") and bool(AimKit.entry(P, "e").get("all", false))
 	)
-	step(m, 1.2)
+	step(m, 5.0)
+	ok("bjorn E: the zone ends after the column (1s) and 4s of ticks", K.mend.is_empty())
 	P.fire_cd = 0.0
 	_clear_wall(m, home, lv, 3)
 	T.teleport(home + Vector3(0, 0, 6.0))
@@ -753,33 +834,85 @@ func _bulwark_combos() -> void:
 		"%s %s" % [str(K.st.get("last_dash")), K.anim_id]
 	)
 	step(m, 0.6)
-	# Bash into the wall: Crushed with the 0.5s stun
+	# the RMB has no Bash any more (data: the Bash is Shift behind the shield): a tap pushes nothing
 	reset.call()
 	var c0 := K.crushes
+	var x0 := T.pos.x
 	tap(m, P)
 	step(m, 0.3)
 	ok(
-		"combo bulwark: Bash > wall = Crushed 0.5",
-		K.crushes == c0 + 1 and T.stun_t > 0.2 and T.stun_t <= 0.9 and K.anim_id in ["bul_bash", "bul_crush"],
-		"crushes %d stun %.2f anim %s" % [K.crushes - c0, T.stun_t, K.anim_id]
+		"combo bulwark: RMB tap no longer bashes (no push, no Crush, no charge spent)",
+		absf(T.pos.x - x0) < 0.2 and dmg(T) <= 0.0 and K.crushes == c0 and K.ch_rmb >= 1.0 and not K.d["rmb"].has("bash"),
+		"moved %.2f took %.0f crushes %d charges %.1f" % [T.pos.x - x0, dmg(T), K.crushes - c0, K.ch_rmb]
 	)
-	# Shield Charge into the wall: Crushed too
+	# Shield Charge into the wall: Crushed (a stun, no heal), on the RMB slot's own 6 s cooldown, no dash charge spent
 	step(m, 1.0)
 	reset.call()
 	c0 = K.crushes
+	P.hp = P.max_hp - 40.0
+	var hp_before := P.hp
+	var dashes_before := P.dashes
 	P.inp["sec_hold"] = true
 	P.ak.press_rmb()
 	step(m, 0.3, func(): P.inp["sec_hold"] = true)
 	P.do_dash()
+	var dashes_spent := dashes_before - P.dashes
+	var charge_cd := float(K.cd["rmb"])
 	step(m, 0.35, func(): P.inp["sec_hold"] = true)
 	P.inp["sec_hold"] = false
 	step(m, 0.2)
 	ok(
 		"combo bulwark: shield up > Shift = Shield Charge, Crushed on the wall",
-		K.st.get("last_dash") == "charge" and K.crushes == c0 + 1,
-		"dash %s crushes %d" % [str(K.st.get("last_dash")), K.crushes - c0]
+		K.st.get("last_dash") == "charge" and K.crushes == c0 + 1 and T.stun_t > 0.0,
+		"dash %s crushes %d stun %.2f" % [str(K.st.get("last_dash")), K.crushes - c0, T.stun_t]
 	)
-	# Whirl (no shield) knocks but never Crushes
+	ok(
+		"combo bulwark: the Shield Charge spends no dash charge and has its own 6 s cooldown",
+		dashes_spent < 0.2 and absf(charge_cd - 6.0) < 0.4 and K.ch_rmb < 1.0,
+		"dashes spent %.2f cd %.1f charges %.1f" % [dashes_spent, charge_cd, K.ch_rmb]
+	)
+	ok("combo bulwark: a Crush no longer heals him", P.hp <= hp_before + 1.0, "hp %.0f -> %.0f" % [hp_before, P.hp])
+	# on cooldown the Shift behind the shield does nothing
+	P.dashes = P.max_dashes()
+	P.inp["sec_hold"] = true
+	P.ak.press_rmb()
+	step(m, 0.3, func(): P.inp["sec_hold"] = true)
+	var spins_before := K.spins
+	var dashes_held := P.dashes
+	P.do_dash()
+	step(m, 0.2, func(): P.inp["sec_hold"] = true)
+	P.inp["sec_hold"] = false
+	ok(
+		"combo bulwark: the Shield Charge on cooldown denies the dash (no charge spent, no spin)",
+		P.dashes >= dashes_held - 0.01 and K.spins == spins_before,
+		"dashes %.2f -> %.2f" % [dashes_held, P.dashes]
+	)
+	# ranks (data: Shield Bash and Spin Dash -1.5 s a rank; the shield +25% HP, then faster repair): cooldown 6, 4.5, 3
+	var cds: Array = []
+	var shields: Array = []
+	for rk in [1, 2, 3]:
+		P.slot_lv["dash"] = rk
+		P.slot_lv["sec"] = rk
+		cds.append(K.rmb_def()["cooldown"] * K.cd_k("sec"))
+		shields.append(K.shield_max())
+	ok(
+		"combo bulwark: Shield Charge cooldown 6 / 4.5 / 3 s by dash rank, aegis 160 / 200 / 240",
+		absf(cds[0] - 6.0) < 0.01 and absf(cds[1] - 4.5) < 0.01 and absf(cds[2] - 3.0) < 0.01 and absf(
+			shields[1] - 200.0
+		) < 0.01 and absf(shields[2] - 240.0) < 0.01,
+		"cds %s shields %s" % [str(cds), str(shields)]
+	)
+	P.slot_lv["sec"] = 3
+	ok(
+		"combo bulwark: rank 3 repairs faster (regen 30/s, back in 2 s when broken, 1.4 s wait)",
+		absf(K._shield_stat("regen") - 30.0) < 0.01 and absf(K._shield_stat("lock") - 2.0) < 0.01 and absf(
+			K._shield_stat("wait") - 1.4
+		) < 0.01,
+		"regen %.0f lock %.1f wait %.1f" % [K._shield_stat("regen"), K._shield_stat("lock"), K._shield_stat("wait")]
+	)
+	P.slot_lv["sec"] = 1
+	P.slot_lv["dash"] = 1
+	# Whirl (no shield) is a knock like any other: into the wall it Crushes now (data: any knock into a wall stuns)
 	step(m, 1.0)
 	reset.call()
 	c0 = K.crushes
@@ -788,11 +921,46 @@ func _bulwark_combos() -> void:
 	step(m, 0.4)
 	P.inp["move"] = Vector2.ZERO
 	ok(
-		"combo bulwark: Whirl into the wall is not a Crush",
-		K.st.get("last_dash") == "whirl" and K.crushes == c0 and dmg(T) > 0.0 and K.anim_id == "bul_whirl",
-		"crushes %d took %.0f" % [K.crushes - c0, dmg(T)]
+		"combo bulwark: the 360 Smash into the wall Crushes (stun, 8 damage on top)",
+		K.st.get("last_dash") == "whirl" and K.crushes == c0 + 1 and dmg(T) > 0.0 and T.stun_t > 0.0,
+		"crushes %d took %.0f stun %.2f" % [K.crushes - c0, dmg(T), T.stun_t]
 	)
-	# a part-charged blow into the wall does not Crush; a full one does
+	# rank 3: a 360 Smash that hits refunds the Shield Charge
+	step(m, 1.0)
+	reset.call()
+	P.slot_lv["dash"] = 3
+	K.ch_rmb = 0.0
+	K.cd["rmb"] = 4.0
+	P.inp["move"] = Vector2(1, 0)
+	P.do_dash()
+	step(m, 0.4)
+	P.inp["move"] = Vector2.ZERO
+	ok(
+		"combo bulwark: rank 3, a 360 Smash that hits refunds the Shield Charge",
+		K.ch_rmb >= 1.0 and float(K.cd["rmb"]) <= 0.0,
+		"charges %.1f cd %.1f" % [K.ch_rmb, float(K.cd["rmb"])]
+	)
+	P.slot_lv["dash"] = 1
+	# Guard at 50: the Shield Charge ends in a Shield Slam (stun 0.6, spends the Guard)
+	step(m, 1.0)
+	reset.call()
+	K.res = 80.0
+	var guard_before := K.res
+	var slams_before := K.shield_slams
+	P.inp["sec_hold"] = true
+	P.ak.press_rmb()
+	step(m, 0.3, func(): P.inp["sec_hold"] = true; K.res = maxf(K.res, 80.0))
+	guard_before = K.res
+	P.do_dash()
+	step(m, 0.5, func(): P.inp["sec_hold"] = true)
+	P.inp["sec_hold"] = false
+	step(m, 0.2)
+	ok(
+		"combo bulwark: Guard 50 + Shift behind the shield = Shield Slam, Guard spent",
+		K.shield_slams == slams_before + 1 and K.res <= guard_before - 49.0,
+		"slams %d guard %.0f -> %.0f stun %.2f" % [K.shield_slams - slams_before, guard_before, K.res, T.stun_t]
+	)
+	# a part-charged blow into the wall Crushes too (any knock)
 	step(m, 1.0)
 	reset.call()
 	c0 = K.crushes
@@ -800,7 +968,7 @@ func _bulwark_combos() -> void:
 	ok("anim bulwark: charging holds bul_smash_wind", K.anim_id == "bul_smash_wind", K.anim_id)
 	P.inp["fire"] = false
 	step(m, 0.4)
-	ok("combo bulwark: half-charged blow is no Crush", K.crushes == c0, "crushes %d" % (K.crushes - c0))
+	ok("combo bulwark: a half-charged blow into the wall Crushes", K.crushes == c0 + 1, "crushes %d" % (K.crushes - c0))
 	step(m, 1.0)
 	reset.call()
 	c0 = K.crushes
@@ -812,7 +980,7 @@ func _bulwark_combos() -> void:
 		K.crushes == c0 + 1 and K.anim_id == "bul_smash",
 		"crushes %d anim %s" % [K.crushes - c0, K.anim_id]
 	)
-	# Shift while winding up the blow: a short plain dash for half a charge, the wind-up goes on
+	# Shift while winding up the blow: it ends the wind-up, with a short plain dash for half a charge
 	step(m, 1.5)
 	reset.call()
 	_clear_wall(m, home, lv, 3)
@@ -824,10 +992,10 @@ func _bulwark_combos() -> void:
 	P.do_dash()
 	step(m, 0.15, func(): P.inp["fire"] = true)
 	ok(
-		"combo bulwark: hold LMB > Shift = short dash, half a charge, still winding",
+		"combo bulwark: hold LMB > Shift = short dash, half a charge, the wind-up ends",
 		K.st.get(
 			"last_dash"
-		) == "short" and K.lmb_t > 0.2 and d0 - P.dashes < 0.8 and P.flat_dist(p0) > 0.8 and K.anim_id == "bul_short",
+		) == "short" and K.lmb_t < 0.0 and d0 - P.dashes < 0.8 and P.flat_dist(p0) > 0.8 and K.anim_id == "bul_short",
 		"dash %s lmb %.2f spent %.2f moved %.1f" % [str(K.st.get("last_dash")), K.lmb_t, d0 - P.dashes, P.flat_dist(p0)]
 	)
 	P.inp["fire"] = false
@@ -837,20 +1005,43 @@ func _bulwark_combos() -> void:
 	K.shield_hp = 40.0
 	K.down_t = -20.0
 	K.cd["e"] = 0.0
-	P.hp = P.max_hp - 30.0
+	P.hp = P.max_hp - 100.0
+	var hp_start := P.hp
 	P.inp["aim"] = home
 	P.ak.use_e()
 	ok("anim bulwark: Mending Ground plays bul_mend", K.anim_id == "bul_mend", K.anim_id)
+	var tk0 := K.ticks_healed
 	step(m, 1.3)
 	ok(
-		"combo bulwark: E with the shield down heals but does not mend it",
-		P.hp >= P.max_hp - 8.0 and K.shield_hp < 55.0,
-		"hp %.0f shield %.0f" % [P.hp, K.shield_hp]
+		"combo bulwark: Mending Ground is a zone: the column (1 s), then ticks of 2 every 0.5 s",
+		not K.mend.is_empty() and float(K.mend["zone"]) > 0.0 and K.ticks_healed > tk0 - 1,
+		"zone %.2f ticks %d" % [float(K.mend.get("zone", -9.0)), K.ticks_healed - tk0]
 	)
+	step(m, 4.0)
+	step(m, 0.1)
+	ok(
+		"combo bulwark: E with the shield down heals but does not mend it, and foes inside are not slowed",
+		P.hp >= hp_start + 33.0 and K.shield_hp < 55.0 and K.mend.is_empty() and K.ticks_healed - tk0 >= 7 and T.slow_t <= 0.0,
+		"hp %.0f -> %.0f shield %.0f ticks %d" % [hp_start, P.hp, K.shield_hp, K.ticks_healed - tk0]
+	)
+	var ecds: Array = []
+	var heals: Array = []
+	for rk in [1, 2, 3]:
+		P.slot_lv["kin"] = rk
+		ecds.append(K.e_def()["cooldown"] * K.cd_k("kin"))
+		heals.append(K.heal_k())
+	ok(
+		"combo bulwark: E cooldown 12 / 12 / 8 s and healing x1 / 1.25 / 1.5 by rank",
+		absf(ecds[0] - 12.0) < 0.01 and absf(ecds[1] - 12.0) < 0.01 and absf(ecds[2] - 8.0) < 0.01 and absf(
+			heals[1] - 1.25
+		) < 0.01 and absf(heals[2] - 1.5) < 0.01,
+		"cds %s heals %s" % [str(ecds), str(heals)]
+	)
+	P.slot_lv["kin"] = 1
 	# small mechanics (wiki): a broken aegis isn't repaired by it; a downed teammate inside starts coming back
 	K.cd["e"] = 0.0
 	K.shield_hp = 0.0
-	K.lock_t = 3.0
+	K.lock_t = 30.0
 	K.down_t = 0.0
 	var A: Hunter = m.make_hunter(
 		"A",
@@ -869,7 +1060,7 @@ func _bulwark_combos() -> void:
 	A.down_hp = 1000.0
 	var ks0 := K.kickstarts
 	P.ak.use_e()
-	step(m, 1.2)
+	step(m, 5.2)
 	ok("bjorn small: Mending Ground doesn't repair a broken aegis", K.shield_hp < 1.0, "shield %.0f" % K.shield_hp)
 	ok(
 		"bjorn small: a downed teammate inside Mending Ground starts reviving",
@@ -887,10 +1078,10 @@ func _bulwark_combos() -> void:
 	P.ak.press_rmb()
 	step(m, 0.4, func(): P.inp["sec_hold"] = true)
 	P.ak.use_e()
-	step(m, 1.3, func(): P.inp["sec_hold"] = true)
+	step(m, 5.3, func(): P.inp["sec_hold"] = true)
 	P.inp["sec_hold"] = false
 	ok(
-		"combo bulwark: E with the shield raised mends it",
+		"combo bulwark: E with the shield raised mends it (at the burst)",
 		float(K.wall.get("hp", K.shield_hp)) >= 95.0 or K.shield_hp >= 95.0,
 		"shield %.0f" % K.shield_hp
 	)
@@ -916,6 +1107,21 @@ func _bulwark_combos() -> void:
 		).length() < 1.5,
 		"mend %s mace %s" % [str(K.mend.get("pos")), str(lie)]
 	)
+	# the zone follows the hammer: recalled while the zone stands, it moves back to him
+	step(m, 1.6)
+	var far := Vector2(K.mend["pos"].x - P.pos.x, K.mend["pos"].z - P.pos.z).length()
+	P.fire_cd = 0.0
+	P.inp["fire"] = true
+	m.step(DT)
+	P.inp["fire"] = false
+	step(m, 1.2)
+	var near := Vector2(K.mend["pos"].x - P.pos.x, K.mend["pos"].z - P.pos.z).length() if not K.mend.is_empty() else -1.0
+	ok(
+		"combo bulwark: the zone follows the hammer back to him when it is recalled",
+		far > 3.0 and near >= 0.0 and near < 1.5 and K.mace.is_empty(),
+		"far %.1f near %.1f" % [far, near]
+	)
+	step(m, 4.0)
 	ok("bulwark: no class R", not K.d.has("r") and K.r_def().is_empty())
 	# a Boki merge that starts mid-hold ends the holds: no Crushing Blow when LMB is let go, the raised shield comes down
 	

@@ -4,9 +4,9 @@ A class is a whole character: its own dash, a passive with a resource it builds,
 click), a right-click ability with several variants, a utility on E and an ultimate on R. There are
 twelve, four in each weight class:
 
-- **Light:** [Silver Thief](Class-Silver-Thief.md) (stay on one target from range, cartwheel and reset), [Dark Archer](Class-Dark-Archer.md) (pin people, then the big shot), [Storm Slayer](Class-Storm-Slayer.md) (load Sparks, then Wirerun through them) and [Icy Dancer](Class-Icy-Dancer.md) (chill foes, shelter the squad behind ice).
-- **Medium:** [Hired Gun](Class-Hired-Gun.md) (burr charges and one long needle), [Fox Cub](Class-Fox-Cub.md) (heal, carry the downed), [Rock Elementalist](Class-Rock-Elementalist.md) (raise rocks, punch them into the fight) and [Void Jester](Class-Void-Jester.md) (swell, plant a seed, trade places).
-- **Heavy:** [Arena King](Class-Arena-King.md) (rage, chain in, crush), [Frozen Bulwark](Class-Frozen-Bulwark.md) (block, then smash them into walls), [Broken Abomination](Class-Broken-Abomination.md) (haul a foe in, drop the anchor) and [Mad Pyromancer](Class-Mad-Pyromancer.md) (build Char, flash foes over).
+- **Light:** [Dancer](Class-Dancer.md) (stay on one target from range, cartwheel and reset), [Archer](Class-Archer.md) (pin people, then the big shot), [Vireo](Class-Vireo.md) (load Sparks, then Wirerun through them) and [Tamsin](Class-Tamsin.md) (chill foes, shelter the squad behind ice).
+- **Medium:** [Marlowe](Class-Marlowe.md) (burr charges and one long needle), [Linnet](Class-Linnet.md) (heal, carry the downed), [Dolm](Class-Dolm.md) (raise rocks, punch them into the fight) and [Ostra](Class-Ostra.md) (swell, plant a seed, trade places).
+- **Heavy:** [Zedran](Class-Zedran.md) (rage, chain in, crush), [Bulwark](Class-Bulwark.md) (block, then smash them into walls), [Dredge](Class-Dredge.md) (haul a foe in, drop the anchor) and [Ashwick](Class-Ashwick.md) (build Char, flash foes over).
 
 The weight class sets health, speed, mass (how far hits push you) and how many dash charges you get.
 Everything else comes from the class kit.
@@ -38,7 +38,7 @@ form, see [Boki species](Boki-Species.md)). The class's own ultimate is held bac
 
 ## Choosing
 
-Each weight class has a default: Silver Thief (light), Hired Gun (medium) and Arena King (heavy). You pick
+Each weight class has a default: Dancer (light), Marlowe (medium) and Zedran (heavy). You pick
 your class in the Expedition menu, and you can try every class against dummies in the
 [Arena](Arena-and-Training.md) at any time.
 
@@ -52,7 +52,7 @@ your class in the Expedition menu, and you can try every class against dummies i
 | Hunter | Health / dashes | Weapons | Passive | Dash | RMB | E | R |
 |---|---|---|---|---|---|---|---|
 | [Silver Thief](Class-Silver-Thief.md) | 124 / 1 | Arc Bolts | Marks | Vault | Bola | Shadow Knife | none (Boki Merge) |
-| [Dark Archer](Class-Dark-Archer.md) | 124 / 1 | Longbow | Focus | Spirit Walk | Snare | Hail Wall | none (Boki Merge) |
+| [Dark Archer](Class-Dark-Archer.md) | 124 / 1 | Longbow | Focus | Spirit Walk | Heavy Shot | Hail Wall | none (Boki Merge) |
 | [Storm Slayer](Class-Storm-Slayer.md) | 124 / 1 | Coilcaster | Static | Wirerun | Storm Rod | Skycall | none (Boki Merge) |
 | [Hired Gun](Class-Hired-Gun.md) | 145 / 1 | Quill Rifle | Hot Streak | Slipstep | Burr Charge | Longneedle | none (Boki Merge) |
 | [Arena King](Class-Arena-King.md) | 193 / 2 | Greatsword | Rage | Rampage | Smash | Warchain | none (Boki Merge) |
@@ -61,7 +61,7 @@ your class in the Expedition menu, and you can try every class against dummies i
 | [Mad Pyromancer](Class-Mad-Pyromancer.md) | 193 / 2 | Torch Lance | Flashover | Soot Ram | Cinder Shot | Furnace Cloak | none (Boki Merge) |
 | [Fox Cub](Class-Fox-Cub.md) | 145 / 1 | Ember Cast | Bearer | Relay Step | Burrseed | Hearthlight | none (Boki Merge) |
 | [Icy Dancer](Class-Icy-Dancer.md) | 124 / 1 | Hoar Fan | Hoarfrost | Skate | Ice Spear | Rink Wall | none (Boki Merge) |
-| [Rock Elementalist](Class-Rock-Elementalist.md) | 145 / 1 | Rubble Fists | Tremor Sense | Rubble Leap | Quakefall | Stone Row | none (Boki Merge) |
+| [Rock Elementalist](Class-Rock-Elementalist.md) | 145 / 1 | Rubble Fists | Molten Guard | Rubble Leap | Quakefall | Stone Row | none (Boki Merge) |
 | [Void Jester](Class-Void-Jester.md) | 145 / 1 | Tether Lantern | Swell | Lantern Trade | Shard Snap | Brimseed | none (Boki Merge) |
 
 ### How Hunters unlock
@@ -142,7 +142,7 @@ Each Hunter has its own mastery goals, counted only in expeditions played as tha
 
 ### Run levels
 
-Every expedition starts at level 1 with one skill point and every ability locked. Each level gives a point. Ranks per slot: RMB 3, Glove (Q) 3, Dash (Shift) 3, E 3, R (ultimate) 2. The ultimate opens at level 6 (rank 2 at 9).
+Every expedition starts at level 1 with one skill point and every ability locked. Each level gives a point. Ranks per slot: RMB 3, Dash (Shift) 3, E 3, R (ultimate) 2. The ultimate opens at level 6 (rank 2 at 9).
 
 | Level | Total XP |  |
 |---|---|---|
