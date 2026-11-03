@@ -1,0 +1,2 @@
+dr_throw.png: Dredge audit: the Abyssal Hand (was the Grapnel), frames top to bottom: the throw; the thick twisting violet arm reaching out with the open hand at its end; reaching on; grabbing the dummy; reeling in, the arm swelling taut on each haul; the dummy hauled in
+dr_reel.png: Dredge audit: the Abyssal Hand reeling: braced side-on, hand over hand, the arm taut to the grabbed dummy

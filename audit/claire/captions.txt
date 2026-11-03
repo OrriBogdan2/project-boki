@@ -1,0 +1,3 @@
+claire_lmb_late_homing_strip.png: Ice Dart barrage at gameplay zoom (fire held from 0.3 s): the darts leave close to the aim line and fly out straight, then curve in on the dummy over the last part of their flight (owner 23:55: home toward the END, as Celeste's).
+claire_lmb_late_homing.png: full frame mid-barrage: the darts in flight toward the dummy, hitting it (SLOWED, the frost glow).
+claire_skate_beams_homing_strip.png: skating right along her ice plates while holding LMB: the beams leave at the cursor on the dummy (up), not along the skate, and home in late the same way.

@@ -1,0 +1,2 @@
+enraged.png: Zedran audit: Enraged after a run of slashes: the word, the body flaring and the HUD tint, no ground rings any more
+jug_riposte.png: Zedran audit: the Gilded Riposte (now 36 s, 43 damage): the guard goes up with its gold glow and strip, no ring at his feet; the cleave

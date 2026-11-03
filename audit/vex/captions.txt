@@ -1,0 +1,8 @@
+venator_dash.png / venator_dash_close.png: Audit, the slide. Vex slides one way and shoots another. Only her see-through ember after-images trail behind her: no chain of scrape discs, and no start ring. The thin pale arcs either side of her are the rifle's firing brackets (your screen only).
+venator_anim_dash.png / venator_anim_slide_tap.png: The slide and the tap skid. The poses are unchanged.
+venator_dash_ex.png / venator_dash_ex_close.png / venator_anim_dash_ex.png: The air roll, with her after-images. The rifle keeps firing through it (its dash row says fire).
+venator_knock.png / venator_knock_close.png: Audit, the knock. +KNOCK, the sound and the rifle flourish only. No ember ring or column on the ground.
+venator_anim_knock.png: The knock flourish (the rifle spun up onto her shoulder).
+venator_e_fire.png / venator_e_fire_close.png: Audit, the Longneedle fire. The recoil smoke now puffs up round her as a short smoke column, not a flat ring on the ground. The beam and the muzzle orb are unchanged.
+venator_e_aim_start(_close).png, venator_e_aim_end(_close).png, venator_anim_e.png, venator_skewer(_close).png: The Longneedle cast and its payoff. Unchanged; here for context.
+Note: these shots are named venator_* because the shot tool keeps its file prefix. Some captions in the MANIFEST_*.txt files are the tool's old ones ("start ring", "the ember column and ring"); this file is the right description.

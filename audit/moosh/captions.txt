@@ -1,0 +1,4 @@
+moosh_glide_steer_strip.png: the air glide with steering (owner: air control), 0.33-1.3 s: she glides out to the right, then the move key turns to forward at 0.55 s and the glide bends round (3 rad/s cap) instead of flying a fixed line.
+moosh_glide_steer_1_start.png: full frame at 0.3 s, just before the glide (the gold ring at her feet is the Arena demo's level-up pulse, not the dash).
+moosh_glide_steer_2_mid.png: full frame at 0.85 s, mid-glide, already turning toward the forward key.
+moosh_glide_steer_3_end.png: full frame at 1.3 s: landed well up the screen from a glide that set off to the right.

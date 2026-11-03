@@ -1,0 +1,4 @@
+strip_thf_loop_game.png: Audit, the reset loop at gameplay zoom (12 frames). Vault, then the empowered bolt once she is up. It lands and the Vault comes back. She Vaults again, and the next empowered bolt leaves mid-flip (footage 0193): the cartwheel plays on while both blades whip out in a V (swing step 2), with the blue chakram in its gold streak. No rings on the dash or the reset.
+strip_thf_primed_close.png: The empowered bolt, close: both blades driven out together, with the lunge and the recoil.
+strip_thf_blink_close.png: Audit, the Shadow Knife blink. The cyan afterimage chain and the arrival puff only: no ground ring where she lands.
+strip_thf_vault_close.png: The ground Cartwheel. The pose is unchanged; it carries "swing": 2 for a bolt thrown mid-flip.

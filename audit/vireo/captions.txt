@@ -1,0 +1,6 @@
+vireo_audit_skycall_held.png: Vireo Skycall held (audit: the data's hold, drag, release): the drag arrow follows the cursor back toward her, the rim chevron points it; nothing commits while E is held
+vireo_audit_skycall_held_close.png: Vireo Skycall held (audit: the data's hold, drag, release): the drag arrow follows the cursor back toward her, the rim chevron points it; nothing commits while E is held (close-up)
+vireo_audit_skycall_count.png: Released at 0.6s: committed, the pillar narrows over the 0.8s countdown
+vireo_audit_skycall_count_close.png: Released at 0.6s: committed, the pillar narrows over the 0.8s countdown (close-up)
+vireo_audit_skycall_strike.png: The strike: its ring drawn at the 1.5m hit radius (was 2.3m), the target slid toward her with 1 Static
+vireo_audit_skycall_strike_close.png: The strike: its ring drawn at the 1.5m hit radius (was 2.3m), the target slid toward her with 1 Static (close-up)
