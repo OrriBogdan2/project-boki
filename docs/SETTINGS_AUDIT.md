@@ -1,0 +1,57 @@
+# Settings audit (November 2026)
+
+Every key in `Settings.DEFAULTS` (`scripts/core/settings.gd`), what still reads it, and what we did
+with it. Removed keys are listed in `Settings.REMOVED`: they are dropped from `user://settings.cfg`
+the next time the game starts, and `--uipolish-check` asserts that.
+
+## Removed
+
+| Key | Was | Why |
+|---|---|---|
+| `dash_hold` | Gameplay: "Hold Shift for the long dash" | Hold-dashes are per hunter now (`inp["dash_down"]`, Slide, Rampage). The option only stretched the old non-hero dash into an "ex" dash. Its read in `match.gd` and the stretch in `hunter.gd` are gone. |
+| `kin_auto` | Gameplay: "Boki also use your E ability on their own" | E is the hunter's utility now. The Boki's own active is on C (cast from where the Boki stands), you send and call it with G, and the Merge is on R. A switch that lets the Boki spend your C cooldown fights all of that, so it is off for everyone. One read is left in `kin_tactics.gd` (reserved; see the note below). |
+| `hud_opacity` | (no row in the menu) | Nothing has read it since the HUD rework. |
+
+**Note for the main session (`scripts/combat/kin_tactics.gd`, reserved):** line ~106 still reads
+`Settings.get_v("kin_auto")`. With the key gone `get_v` returns null, so the guard behaves like the old
+default (your own Boki never auto-casts k1) and nothing changes in play. Please replace the line with
+`if slot == "k1" and k.owner_h.is_local(): continue` and fix the comments at lines ~89 and in
+`docs/KIN_GRAMMAR.md` (lines ~248 and ~289) that mention "kin_auto".
+
+## Kept, with where they now live
+
+| Key | Section | Read by | Note |
+|---|---|---|---|
+| `name` (save, not settings) | Gameplay > You | `Save.d["name"]` | |
+| `damage_numbers` | Gameplay > Combat | `fx.gd` | |
+| `tips` | Gameplay > Combat | `hud.gd` | renamed "Tips during expeditions" |
+| `kin_chatter` | Gameplay > Boki | `kin_companion.gd` | renamed "How much your Boki talks" |
+| `mod_mode` | Gameplay > Admin (admin only) | `game.gd` | |
+| `bot_diff` | Admin tools page | `match.gd`, `duel.gd` | the duplicate row in Gameplay is gone: the Admin tools page already sets it |
+| `cast_on_press` | Controls > How keys behave | `match.gd` | moved from Gameplay: it's about how a key press acts |
+| `dash_to_cursor` | Controls > How keys behave | `hunter.gd` | moved from Gameplay |
+| `crouch_toggle` | Controls > How keys behave | `match.gd`, `home.gd` | moved from Gameplay, renamed "Tap to sneak" (the action is Sneak) |
+| `keys`, `keys_v`, `keys2_v` | Controls (bindings) | `settings.gd` | internal version markers stay |
+| `cam_style` | Camera | `cam.gd`, `match.gd` | new Camera tab (was a Gameplay group) |
+| `cam_follow` | Camera | `cam.gd`, `match.gd` | |
+| `cam_lead` | Camera | `match.gd` -> `cam.gd` | |
+| `master`, `music`, `sfx`, `ambience` | Audio > Volume | `settings.gd` (buses) | |
+| `reset_cue` | Audio > Sounds | `sfx.gd` | moved from Gameplay, renamed "Ability ready again" |
+| `mute_unfocused` | Audio > Window | `settings.gd` | |
+| `fullscreen`, `vsync`, `max_fps` | Video > Display | `settings.gd` | |
+| `quality`, `msaa`, `shadows` | Video > Quality | `settings.gd` | `quality_found`, `video_v` stay internal |
+| `show_fps` | Video > Quality | `overlay.gd` | |
+| `ui_scale` | Accessibility > Readability | `settings.gd` | |
+| `shake`, `reduce_flashes` | Accessibility > Comfort | `cam.gd`; `hud.gd`, `reset_pop.gd` | |
+| `rec_level`, `demo_weather`, `demo_blight`, `demo_fresh` | Demo | `settings.gd` (`demo_opts`, `Record`) | |
+
+## Looked for and not found
+
+No settings remain for taming, the shoulder-start Boki, the old kit or loaner, the 1/2/3 perk prompt
+or class ultimates. The key bindings for the Boki (C ability, G orders, R Merge) were already current;
+the X ultimate is the main session's (ultbond).
+
+## Tab order
+
+Gameplay, Controls, Camera, Audio, Video, Accessibility, Demo. The Esc menu's Settings entry opens
+Gameplay (or the last tab you used); its Controls entry opens Controls.

@@ -27,6 +27,7 @@ const CHECKS := {
 	"--vv-shots": ["res://tools/vv_shots.gd", "vv_shots", null],          # Vireo / Venator screenshots
 	"--ultbond-check": ["res://tools/ultbond_check.gd", "ultbond_check", null],      # keys, bond hook, release
 	"--wallmove-check": ["res://tools/wallmove_check.gd", "wallmove_check", null],
+	"--uipolish-check": ["res://tools/uipolish_check.gd", "uipolish_check", null],     # settings, menu look
 	"--perkorb-check": ["res://tools/perkorb_check.gd", "perkorb_check", null],      # perk orbs, the boss fan, the fixed weapon path
 }
 
