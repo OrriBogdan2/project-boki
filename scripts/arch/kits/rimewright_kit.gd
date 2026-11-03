@@ -270,6 +270,15 @@ func _tick_darts(dt: float) -> void:
 func in_dash() -> bool:
 	return not rinkrun.is_empty()
 
+## Seconds left in the skate (the timer in_dash reads): to its full length while Shift is held, else to its
+## shortest run.
+func dash_left() -> float:
+	if not in_dash():
+		return super.dash_left()
+	var dd := dash_def()
+	var end := float(dd.get("max_t", 1.6)) if held("dash") else float(dd.get("min_t", 0.2))
+	return maxf(0.0, end - float(rinkrun["t"]))
+
 ## LMB from the skate: her row says fire, with the "beam" variant (straight thick darts).
 func fires_in_dash() -> bool:
 	return in_dash() and String(flow.row("lmb")["mode"]) == "fire"
