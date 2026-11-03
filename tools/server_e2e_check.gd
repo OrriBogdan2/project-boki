@@ -39,7 +39,9 @@ func run(m: Node) -> void:
 	ok(await _health_up(), "the matchmaker is up on %d and serves version %s" % [HTTP_PORT, Net.VERSION])
 	_spawn("a", "--join-queue=%s --join-mode=duel --join-name=Ada --join-leave-after=%d" % [base, int(LEAVE_AFTER_S)])
 	_spawn("b", "--join-queue=%s --join-mode=duel --join-name=Bo" % base)
-	ok(await _wait("a", "state=queue", UP_S) and await _wait("b", "state=queue", UP_S), "both players get a ticket")
+	var queued := await _wait("a", "state=queue", START_S)      # (a player process can wait in the Godot queue first)
+	queued = await _wait("b", "state=queue", START_S) and queued
+	ok(queued, "both players get a ticket")
 	var playing := await _wait("a", "BOKI_CLIENT playing team=0", START_S)
 	playing = await _wait("b", "BOKI_CLIENT playing team=1", START_S) and playing
 	ok(playing, "the matchmaker started a match server and both players are in the duel with their tokens")
