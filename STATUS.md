@@ -1,5 +1,5 @@
 # S2 status (second server session)
-Updated: 2026-11-03 08:49 UTC (git/server clock). Last INBOX_S2 handled: 08:00 (git time) ownership.
+Updated: 2026-11-03 08:51 UTC (git/server clock). Last INBOX_S2 handled: 08:00 (git time) ownership.
 
 ## Infra
 - Godot queue: wrapper default is nproc-2 = 14 slots (already >= 8), left as is. S1: no change needed.
@@ -38,8 +38,9 @@ Updated: 2026-11-03 08:49 UTC (git/server clock). Last INBOX_S2 handled: 08:00 (
   **Shared change, S1 please note:** Hunter.dash_with (2-line wiring) skips the shared team-colour dash puff and ring for any kit with own_dash_trail(); that also removes the ring for Thief (Dancer), Gunslinger (Venator) and Mage (Vireo), in line with item 8.
   Owner Qs (Tamsin/Dredge): Rimelock roots her (source), so "speed just before Shift" is 0; Shift-out starts at full skate speed instead: or should she slide on the ice while sealed? Rink Wall still stops when its middle reaches the cursor (range +50%): always slide full distance unless frozen with E? Dredge E: footage forward hop dropped so the telegraph is exact; want the hop back (telegraph moves with him)? Dredge's clawing hands partly hidden by gun/helmet top-down.
 
-## Pair 4: Linwick + Moosh Moosh
-- Branch `ext/review-linwick-moosh` (same base as pair 3), now ALSO CONTAINS ext/review-tamsin-dredge (merged d7f6d75, so main can take this one branch for pairs 3+4; both pairs had the identical Hunter.dash_with change).
+## Pair 4: Linwick + Moosh Moosh: **READY TO MERGE**, ext/review-linwick-moosh @ 6634dbb (pushed; CONTAINS pair 3 too, so this one branch covers Tamsin, Dredge, Linwick, Moosh Moosh)
+- Full suite 94 checks: every failure also fails on main 801bfbf, plus --dash-flow-check's 1 known failure (Bjorn air dash -> LMB, fixed on ext/review-bjorn); farm-start walkability failed once, passed on 2 reruns (flaky). Logs /home/boki/suite-s2/boki-review-linwick-moosh.
+- Branch `ext/review-linwick-moosh` (same base as pair 3) ALSO CONTAINS ext/review-tamsin-dredge (merged d7f6d75, so main can take this one branch for pairs 3+4; both pairs had the identical Hunter.dash_with change).
 - DONE (Opus): Linwick 11 (Furnace Cloak fires on press, centred, 0.24 s flare; new data key e.on_press via ArchKit.e_on_press(), match.gd +2 wiring), 19 (Cinder Shot always full 14 m, AimMode.MAX), 20 (Flue Flight 1.8 s, carpet 5.2 s); Moosh Moosh 23 (Hearthlight heal no longer uses the shared payoff blast; Prism Decoy ghost in verbs.gd; Sfx explosion category -7 dB), 24 (mm_skip / mm_float, air/ground 3.07x by shortening the glide to 10.7 m), 35 both. ashwick 86/0, tender 72/0, class-unlock 137/0, keys 83/0, health OK. Item 32 rows DONE (aa7fa26; Linwick's ram holds LMB/RMB/E to its end per footage 0159-0161, so ram-then-pull combos; X cancels with carry; Moosh LMB waits for her dashes). Latest dash-flow-base merged. **Pairs 3+4 complete; full suite running on ext/review-linwick-moosh (6634dbb).**
   **For main (DEBT entry):** reserved KinExec._burst (ring + burst + shake + boom) fires on every dash with Pebbit (Gravity Wake) and on Cindle attacks: the remaining "explosion" on Boki riders.
   Owner Qs (Linwick/Moosh): explosion sounds now -7 dB with a -6 dBFS ceiling (chosen, no agreed level): OK, and bring hero blast sounds (br_burst, dr_blast, pay_slam, os_pop) down too? Moosh glide shortened to 10.7 m for the 3x rule (source 11-15 m): or lengthen the ground skip to ~4 m and keep 12 m? Linwick air poof as a smoke cloud blown out behind him (no footage) OK? burst cap with longer Flue Flight 117 of 124 HP OK?
