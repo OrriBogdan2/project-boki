@@ -1,6 +1,6 @@
 # S2 review screenshots
 
-Branches: ext/review-breah-ostra (breah, ostra), ext/review-zedran-bjorn (zedran), ext/review-tamsin-dredge + ext/review-linwick-moosh (tamsin, dredge, linwick, mooshmoosh), ext/prologue-polish (prologue). Captions per folder in captions.txt.
+Branches: ext/review-breah-ostra (breah, ostra), ext/review-dancer (dancer + zedran), ext/review-linwick-moosh (tamsin, dredge, linwick, mooshmoosh), ext/review-bjorn (bjorn), ext/prologue-polish (prologue). Captions per folder in captions.txt.
 
 ## breah/review
 
@@ -60,6 +60,24 @@ Branches: ext/review-breah-ostra (breah, ostra), ext/review-zedran-bjorn (zedran
 
 ![breah_climb_strip.png](breah/review/breah_climb_strip.png)
 
+## dancer/review
+
+**Item 35, ground Cartwheel (thf_vault_l), 5 frames 0.05/0.12/0.19/0.36/0.48 s into the 0.48 s dash: crouch with the arms swung up, push-off into a star, over the top, landing crouch, up. Reference: sheet 0176-0178 (0.05 s crouch, sideways over the top with the legs split, low landing crouch, upright by ~0.5 s). The gold four-point glint at her throwing hand flares as she lands (item 8). The large faint orange ring round her in frames 1-2 is the shared team-colour dash ring from hunter.gd (another branch removes it for own_dash_trail kits).**
+
+![strip_thf_vault.png](dancer/review/strip_thf_vault.png)
+
+**Item 35, air Cartwheel (thf_exdash then thf_land), 5 frames 0.05/0.2/0.45/0.9/1.2 s after the press: tucked flick, inverted star, turned over and carried flat (legs swept up behind), still carried, touched down in the low crouch. Reference: sheet 0129-0134 (jump, sideways cartwheel with the body horizontal, legs split, low landing crouch). The glint shows the air cartwheel now empowers the next bolt.**
+
+![strip_thf_exdash.png](dancer/review/strip_thf_exdash.png)
+
+**Item 8, close-up: the empowered-bolt cue, a tight gold four-point star with a dark violet edge and a hot core in the throwing hand, flaring as she lands from the Cartwheel. No ring on the ground, no burst on her body. The gold aim line is the empowered line.**
+
+![glint_close.png](dancer/review/glint_close.png)
+
+**Item 8, the same moment at gameplay zoom: the glint is small (tight) at this distance; the gold aim line and the EMPOWERED label carry the cue from range.**
+
+![glint_game.png](dancer/review/glint_game.png)
+
 ## dredge/review
 
 **Item 33 Anchor Drop, 5 frames: the exact hit cone appears on the ground at the press, fills under the raised fist, the slam at 0.38s (crescent, damage on this frame), recoil with cracks and dust in that area**
@@ -83,6 +101,36 @@ Branches: ext/review-breah-ostra (breah, ostra), ext/review-zedran-bjorn (zedran
 **Item 35, Linwick's air dash (the poof, lw_hop: 0.28 s poof, 0.7 s move, then the kept speed) at the gameplay camera, 5 frames: the bellows blow a cloud of smoke and flame out behind him (no sunburst, no ring), balled up for one roll forward, then sailing spread-eagled while the speed bleeds off, landing. Reference: no air dash in the footage (hero-ref linwick.md section 5); built from the owner's 23:40 note (a long, fast poof, balled up for one roll, then sailing spread-eagled).**
 
 ![lw_hop_strip.png](linwick/review/lw_hop_strip.png)
+
+## mantle
+
+**The Dark Archer's Warden (Pin) at 5 slider settings (all 0, 0.25, neutral, 0.75, all 1, with different skin/hair/eye picks): every one is recognisably Pin; size, build, head and face move within the clamp, outfit stays her palette.**
+
+![settings_archer.png](mantle/settings_archer.png)
+
+**One player's look (tall, broad, dark skin, red curly hair, green eyes, purple outfit) as their own person at home, then as Bearers of the Silver Thief, Juggernaut, Storm Mage and Fox Tender Mantles: gender, folk and gear are each Warden's; skin, hair and eyes are only tinted.**
+
+![one_player_4_hunters.png](mantle/one_player_4_hunters.png)
+
+**The creator step (new game, right after the Boki naming card): Body tab, the player as themselves on the dais.**
+
+![creator_body.png](mantle/creator_body.png)
+
+**Face tab: Start-from presets, expression, face shape, jaw, eyes, brow, nose sliders, markings (after a Randomise).**
+
+![creator_face.png](mantle/creator_face.png)
+
+**Colours tab: skin, hair style, hair colour, eyes and outfit swatches.**
+
+![creator_colours.png](mantle/creator_colours.png)
+
+**See: In a Mantle shows the same person as the Venator (Hired Gun) Warden, tinted by their picks.**
+
+![creator_mantle.png](mantle/creator_mantle.png)
+
+**In a match at the default camera: the local Venator and squad portraits as Wardens.**
+
+![match_zoom.png](mantle/match_zoom.png)
 
 ## mooshmoosh/review
 
