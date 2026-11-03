@@ -354,3 +354,8 @@ The owner is reviewing the build now and will add more. Start the two items ther
 - **Model rule update (owner):** default stays Sonnet, but if a hero's items are complex or a Sonnet agent shows it doesn't understand the source mechanic (Zedran's Warchain is the example), switch that hero's work to Opus 5.5 medium. Say in STATUS.md which heroes went to Opus and why.
 - **Order:** (1) bugs first: item 26 (Breah RMB->glide drop), item 42 (Ostra Shift range), the airdash-glide fix. (2) Then per hero pair, each hero's items together with its rows of items 32 (dash->ability flow) and 35 (own dash animation). Suggested pairs: Zedran+Bjorn (Opus for Zedran), Breah+Ostra, Tamsin+Dredge, Linwick+Moosh Moosh, Pin+Venator, Vireo+Dancer. (3) Item 2 map clean-up whenever a slot is free.
 - Item 43's prologue and item 39's rename are ext's (local). Don't start them.
+
+## 2026-11-03 07:15 UTC: a second server session (S2, new account) is joining; work split
+- S2 takes these hero pairs with all their OWNER_REVIEW items (incl. their rows of 32/35): Breah + Ostra (incl. bugs 26 and 42), Zedran + Bjorn, Tamsin + Dredge, Linwick + Moosh Moosh. See briefs/SERVER2_START.md.
+- S1 (you) keeps: the airdash-glide fix, item 2 mapclean, Pin + Venator, Vireo + Dancer, the farm tutorial. If you already started any of S2's items, finish and push that branch, note it in STATUS.md, and S2 will build on it.
+- The godot queue is shared; S2 may raise it to 8 slots on this 16-CPU box.
