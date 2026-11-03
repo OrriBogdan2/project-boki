@@ -1,6 +1,6 @@
 class_name KinMerge
 extends RefCounted
-## The merge: R for every class (docs/decisions/0001, 0003), run from the Boki's MergeSpec (content/merges_v2)
+## The merge: one key (Merge, T) for every class (docs/decisions/0001, 0003), run from the Boki's MergeSpec (content/merges_v2)
 ## and the form it gives you (MergeForm). Core rules, not data (docs/KIN_GRAMMAR.md):
 ##   - R needs the bond meter full (fighting together fills it, Bond) and the ult slot, which opens at
 ##     run level Hunter.ULT_AT[0] (6); the first unlock fills the meter once, free
@@ -14,8 +14,10 @@ extends RefCounted
 ##     The shell (MergeShell) takes the damage first; when it breaks the merge ends without the ultimate. A Boki
 ##     without a form file keeps the stat merge (passives, pulses), the type's LMB rider and dash burst, and a basic burst as its ultimate.
 ##   - it ends when time runs out, with the ultimate, early if you're knocked or the Boki is lost. Time out or
-##     a broken shell: the Boki pops out beside you in Follow (not downed). The ultimate: the Boki is drained and rests on you
-##     (Kin.drain, docs/decisions/0004). Then a spent window (KinParts.MERGE_SPENT_TIME, or the rest if longer).
+##     a broken shell: the Boki pops out beside you in Follow (not downed), no burst, no afterglow, a spent window of
+##     KinParts.MERGE_SPENT_TIME. The ultimate (a release): the hunter gets the afterglow and the Boki lands beside you
+##     pumped and rests release_rest_s (MergeRelease, docs/decisions/0004). Then the spent window, or the rest if longer.
+##   - while merged the total damage bonus from stats is at most merge_forms.json damage_cap (cap_damage).
 ## No tiers: a form is identical for everyone (only its shield and speed baseline follow your weight class).
 ## State lives on the hunter: Hunter.merge_st {def, t, T, k, giant, pulse, form, surge, phase, xt, kit, contact, from, shell, shell_max} and merge_cd.
 
@@ -193,6 +195,7 @@ static func passives(h: Hunter) -> Array:
 static func tick(h: Hunter, dt: float) -> void:
 	if not active(h):
 		h.merge_cd = maxf(0.0, h.merge_cd - dt)
+		MergeRelease.tick(h, dt)
 		return
 	var k: Kin = h.kin
 	var surge_on: bool = h.merge_st.get("surge", false)
@@ -233,8 +236,8 @@ static func tick(h: Hunter, dt: float) -> void:
 	if float(st["t"]) <= 0.0:
 		end(h, "time")
 
-## The merge is over (time, the ultimate, a knock-out, the Boki lost): you separate. With the ultimate the Boki is DRAINED
-## (it rests on you for rest_s, Kin.drain); otherwise it pops out beside you in Follow.
+## The merge is over (time, the ultimate, a knock-out, the Boki lost): you separate. With the ultimate (a release) you
+## get the afterglow and the Boki lands beside you pumped and rests (MergeRelease); otherwise it pops out in Follow.
 static func end(h: Hunter, why := "time") -> void:
 	if not active(h):
 		return
@@ -244,11 +247,11 @@ static func end(h: Hunter, why := "time") -> void:
 	var k: Kin = h.kin
 	var kit: MergeKit = st["kit"]
 	MergeAugment.drop(h)
-	var drained: bool = why == "ult" and not st.get("surge", false)
-	var rest := float(MergeForm.data()["rest_s"])
+	var released: bool = why == "ult" and not st.get("surge", false)
+	var rest := MergeRelease.rest_s()
 	h.merge_st = {}
-	h.merge_cd = maxf(KinParts.MERGE_SPENT_TIME, rest if drained else 0.0)
-	if drained:
+	h.merge_cd = maxf(KinParts.MERGE_SPENT_TIME, rest if released else 0.0)
+	if released:
 		h.ult = 0.0          # (the bond restarts from nothing)
 	if kit != null:
 		kit.stop()
@@ -257,8 +260,9 @@ static func end(h: Hunter, why := "time") -> void:
 	if k and is_instance_valid(k) and not k.dead and not st.get("surge", false):
 		if not h.downed and not h.out:
 			KinExec.run_stages(ms.on_end, _cx(h, k, ms))
-		if drained and not h.out and not h.extracted and not h.downed:
-			k.drain(rest)
+		if released and not h.out and not h.extracted and not h.downed:
+			k.land_pumped(rest)
+			MergeRelease.afterglow(h)
 		elif k.state == "fused" and MergeForm.has_kit(form) and not h.out and not h.extracted:
 			k.merge_pop()
 		else:
@@ -280,3 +284,11 @@ static func on_shot(h: Hunter) -> Dictionary:
 	if ms.on_shot.is_empty() or not (MergeForm.aug_of(MergeForm.of(h)).get("lmb", {}) as Dictionary).is_empty():
 		return {}          # (a form's LMB rider, fallback forms included, is its augment, MergeAugment.lmb: never both)
 	return ms.on_shot.duplicate()
+
+## The hunter's damage bonus from stats: `base` (gear and perks) plus `extra` (the Boki's passives and buffs).
+## While merged the total is at most damage_cap, so an ultimate into a merge cannot one-shot; the cap never
+## takes away what gear and perks gave you on their own.
+static func cap_damage(h: Hunter, base: float, extra: float) -> float:
+	if not active(h):
+		return base + extra
+	return minf(base + extra, maxf(float(MergeForm.data().get("damage_cap", 0.2)), base))

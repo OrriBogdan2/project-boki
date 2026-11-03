@@ -1729,8 +1729,7 @@ func _build_bar() -> void:
 			var ci := i
 			var sw := Button.new()
 			sw.custom_minimum_size = Vector2(26, 26)
-			var sb := StyleBoxFlat.new(); sb.bg_color = Color(String(HomeLayout.COLOURS[i])); sb.set_corner_radius_all(13)
-			if i == colour: sb.border_width_bottom = 3; sb.border_width_top = 3; sb.border_width_left = 3; sb.border_width_right = 3; sb.border_color = UI.INK
+			var sb := UI.frame(Color(String(HomeLayout.COLOURS[i])), 13, UI.INK if i == colour else Color(0, 0, 0, 0), 3)
 			for st in ["normal", "hover", "pressed"]: sw.add_theme_stylebox_override(st, sb)
 			sw.pressed.connect(func(): Sfx.play("click"); set_colour(ci))
 			sw.tooltip_text = "Colour for banners, rugs and Boki beds"

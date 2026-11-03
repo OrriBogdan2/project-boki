@@ -12,14 +12,24 @@ const DEFAULTS := {
 	"fullscreen": false, "vsync": true, "max_fps": 0, "msaa": 4, "video_v": 2, "shadows": true, "ui_scale": 1.0, "show_fps": false,
 	"quality": "auto", "quality_found": "",
 	# gameplay
-	"shake": 1.0, "cam_lead": 1.0, "cam_style": "supervive", "cam_follow": "supervive", "dash_hold": false, "dash_to_cursor": false, "damage_numbers": true, "reset_cue": "a", "tips": true, "cast_on_press": true, "crouch_toggle": false, "mod_mode": false, "kin_auto": false, "kin_chatter": "normal", "bot_diff": "auto",
+	"damage_numbers": true, "tips": true, "kin_chatter": "normal", "mod_mode": false, "bot_diff": "auto",
+	# how keys behave (Controls)
+	"cast_on_press": true, "dash_to_cursor": false, "crouch_toggle": false,
+	# camera
+	"cam_style": "supervive", "cam_follow": "supervive", "cam_lead": 1.0,
+	# sounds
+	"reset_cue": "a",
 	# accessibility
-	"reduce_flashes": false, "hud_opacity": 1.0,
+	"shake": 1.0, "reduce_flashes": false,
 	# demo / recording (Settings > Demo): for filming a match, offline only (online matches use the host's rules)
 	"demo_weather": "random", "demo_blight": true, "demo_fresh": "normal", "rec_level": 0,
 	# controls: action -> list of "key:<physical keycode>" / "mouse:<button>"
-	"keys": {}, "keys_v": 2, "keys2_v": 0,
+	"keys": {}, "keys_v": 2, "keys2_v": 0, "keys3_v": 0,
 }
+## Settings that no longer exist (docs/SETTINGS_AUDIT.md). They are dropped from the settings file
+## the first time it's written after they went.
+const REMOVED := ["dash_hold", "kin_auto", "hud_opacity"]
+
 ## Graphics presets (Video → Quality). High is the game's full look; Low and Medium trade detail for
 ## speed, Ultra pushes draw distance, shadows and level of detail further. A preset sets the plain
 ## settings (msaa, shadows) and these knobs, which the renderer and the world builder read through q():
@@ -91,7 +101,7 @@ const KEYS_V := 3
 const ACTIONS := [
 	["up", "Move up"], ["down", "Move down"], ["left", "Move left"], ["right", "Move right"],
 	["fire", "Weapon attack"], ["secondary", "Archetype ability (right click)"], ["dash", "Archetype dash"], ["jump", "Jump (hold to glide)"], ["glide", "Glide (hold in the air)"], ["crouch", "Sneak"],
-	["gear1", "Glove active"], ["signature", "Archetype utility (E)"], ["kin_ability", "Boki ability (cast from where your Boki is)"], ["throw", "Boki orders: tap to Sic or Call back, hold for the order wheel"], ["ultimate", "Merge with your Boki (needs a full bond meter)"], ["hunter_ult", "Hero ultimate (unlocks at level 6)"], ["base", "Base to a teammate (squads)"],
+	["gear1", "Glove active"], ["signature", "Archetype utility (E)"], ["kin_ability", "Boki ability (cast from where your Boki is)"], ["throw", "Boki orders: tap to Sic or Call back, hold for the order wheel"], ["ultimate", "Merge with your Boki (needs a full bond meter)"], ["reload", "Reload"], ["hunter_ult", "Hunter ultimate"], ["base", "Base to a teammate (squads)"],
 	["interact", "Use, scan, revive, pet"], ["tonic", "Heal (tonic, or armor kit when health is full)"], ["armor_kit", "Repair armor (armor kit)"], ["scores", "Scoreboard"], ["emote", "Emote wheel (hold, in a match)"],
 	["map", "Full map (click to ping)"], ["pass_lead", "Pass the drop lead"], ["separate", "Separate from the drop"],
 	["play", "Play fetch with a Boki"], ["talk", "Talk to a Boki"], ["details", "A Boki's details"], ["inventory", "Inventory"],
@@ -123,7 +133,7 @@ func _ready() -> void:
 	if int(v.get("keys_v", 1)) < KEYS_V or not cf.has_section_key("s", "keys_v"):
 		v["keys"] = {}          # the kit changed (archetypes: E utility, C kin ability, G send/recall): start from the new defaults
 		v["keys_v"] = KEYS_V
-	_migrate_keys2()
+	KeyMigrate.run(v)
 	if int(v.get("video_v", 1)) < 2 or not cf.has_section_key("s", "video_v"):
 		# crisper by default: 4x MSAA on desktop (the browser build stays on 2x)
 		if int(v.get("msaa", 2)) == 2 or not cf.has_section_key("s", "msaa"): v["msaa"] = 2 if OS.has_feature("web") else 4
@@ -133,26 +143,12 @@ func _ready() -> void:
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--quality="):
 			v["quality"] = a.substr(10); _quality_basics = true      # tooling: try a preset without saving it
+	if REMOVED.any(func(k): return cf.has_section_key("s", k)):
+		save.call_deferred()
 	if not cf.has_section_key("s", "crouch_toggle") and OS.has_feature("web"):
 		v["crouch_toggle"] = true      # browsers close the tab on Ctrl+W, so don't make people hold Ctrl
 	get_tree().node_added.connect(_on_node_added)
 	get_tree().root.size_changed.connect(_apply_ui_scale)
-
-## Custom bindings from before X became the hero ultimate ("hunter_ult"): "separate from the drop" moves
-## off X to Z, and the Merge ("ultimate") keeps only its own keys, so X never fires both. Once (keys2_v 2).
-func _migrate_keys2() -> void:
-	if int(v.get("keys2_v", 0)) >= 2:
-		return
-	var ks: Dictionary = v["keys"]
-	var x_key := "key:%d" % KEY_X
-	if ks.has("separate") and (ks["separate"] as Array).has(x_key):
-		ks["separate"] = ["key:%d" % KEY_Z]
-	if ks.has("ultimate"):
-		var ul: Array = ks["ultimate"]
-		ul.erase(x_key)
-		if ul.is_empty():
-			ul.append("key:%d" % KEY_R)
-	v["keys2_v"] = 2
 
 ## Called by Game once the input actions exist, so saved key bindings can replace them.
 func apply_all() -> void:
@@ -199,6 +195,9 @@ func set_v(k: String, val, write := true) -> void:
 func save() -> void:
 	var cf := ConfigFile.new()
 	cf.load(PATH)          # keeps the other sections (the last save slot)
+	for k in REMOVED:
+		if cf.has_section_key("s", k):
+			cf.erase_section_key("s", k)
 	for k in v:
 		cf.set_value("s", k, v[k])
 	cf.save(PATH)
@@ -413,7 +412,7 @@ func conflicts(ev: InputEvent, except := "") -> Array:
 	return out
 
 ## Pairs of actions that share keys on purpose (they never apply in the same place: at home vs in a match).
-const SHARED_OK := [["talk", "emote"], ["details", "kin_ability"], ["build", "base"], ["rotate", "ultimate"]]
+const SHARED_OK := [["talk", "emote"], ["details", "kin_ability"], ["build", "base"], ["rotate", "reload"], ["talk", "ultimate"]]
 func _shared_ok(a: String, b: String) -> bool:
 	for p in SHARED_OK:
 		if (p[0] == a and p[1] == b) or (p[0] == b and p[1] == a): return true

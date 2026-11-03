@@ -433,7 +433,8 @@ func _launch_glider() -> void:
 # ---------------------------------------------------------------- the menu
 func _build_ui() -> void:
 	var ui := CanvasLayer.new(); add_child(ui)
-	var root := Control.new(); root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT); root.theme = UI.theme()
+	var root := Control.new()
+	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.name = "TitleUI"
 	ui.add_child(root)

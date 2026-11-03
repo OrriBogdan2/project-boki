@@ -1644,6 +1644,7 @@ func _draw_weapon(sz: Vector2, p: Hunter) -> void:
 	var rc: Color = Loot.ELEMENTS[p.welem]["col"] if p.welem != "" else Color("e6dccb")
 	_rounded(r, Color(0.04, 0.05, 0.08, 0.88), 12, Color(rc, 0.45), 1)
 	hover_spots.append([r, "weapon"])
+	AmmoDeny.draw(self, r, p)
 	BokiHud.aug_mark(self, p, Rect2(r.position + Vector2(6, 4), Vector2(18, 18)), "lmb")
 	c.draw_rect(Rect2(r.position + Vector2(0, 10), Vector2(3, r.size.y - 20)), rc)
 	Icons.draw(c, p.wid, r.position + Vector2(40, 34), 26.0, Color(rc, 0.9))
@@ -2648,7 +2649,9 @@ func _arch_tip(id: String, p: Hunter) -> Array:
 			out.append(["%s  ·  tap: Sic %s at the cursor, or Call it back when it is away (it hits what it passes). Hold: Chase, Guard, Return or Follow. A downed Boki stays where it fell: run into it to bring it back." % [Settings.key_cap("throw"), k.rec.get("name", "your Boki")], INK, 13])
 			return out
 	var si := p.slot_info(id)
-	var slot_name: String = {"sec": "Right click", "k1": "Utility (E)", "r": "Ultimate (R)", "dash": "Dash"}[id]
+	var r_name := "Ultimate (%s)" % Settings.key_cap("ultimate")
+	var slot_names := {"sec": "Right click", "k1": "Utility (E)", "r": r_name, "dash": "Dash"}
+	var slot_name: String = slot_names[id]
 	var key: String = {"sec": "secondary", "k1": "signature", "r": "ultimate", "dash": "dash"}[id]
 	out.append([String(si["name"]), si["col"]])
 	out.append(["%s %s  ·  %s  ·  %s" % [Arch.name_of(p.arch), slot_name, Settings.key_cap(key), p.rank_text({"sec": "sec", "k1": "k1", "r": "r", "dash": "dash"}[id])], MUTED, 12])
@@ -2814,7 +2817,8 @@ func _kit_lines(lines: Array, k: Kin) -> void:
 	var ms := KinMerge.def_for(k)
 	if ms:
 		var ml: Array = KinText.merge(ms, k.carry_style() == "mount")
-		lines.append(["R  %s: %s" % [ms.display_name, String(ml[0]) if not ml.is_empty() else ""], Color(GOLD, 0.95)])
+		var first := String(ml[0]) if not ml.is_empty() else ""
+		lines.append(["%s  %s: %s" % [Settings.key_cap("ultimate"), ms.display_name, first], Color(GOLD, 0.95)])
 	if k.ks:
 		lines.append([KinText.carry(k.ks), Color(KinRules.cat_color("sustain"), 0.9)])
 

@@ -2,7 +2,7 @@
 	"grammar": 1,
 	"id": "tidal_shell",
 	"name": "Prism Shell",
-	"flavor": "Prismander grows a crystal shell around you for 10s. Piercing shards, a prism that throws shots back, a healing crystal wall, and R shatters the shell outward.",
+	"flavor": "Prismander grows a crystal shell around you for 10s. Piercing shards, a prism that throws shots back, a healing crystal wall, and Merge again shatters the shell outward.",
 	"theme": "prism",
 	"duration": 10,
 	"passives": []

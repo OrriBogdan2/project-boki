@@ -261,7 +261,6 @@ func open_menu() -> void:
 	m.add_child(menu_layer)
 	var root := Control.new()
 	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	root.theme = UI.theme()
 	menu_layer.add_child(root)
 	var shade := ColorRect.new(); shade.color = Color(0, 0, 0, 0.4)
 	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)

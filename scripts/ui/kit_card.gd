@@ -10,10 +10,16 @@ extends PanelContainer
 const SIZE := Vector2(890, 600)
 const BODY_H := 372.0
 const TILE := Vector2(431, 116)
-const SLOTS := ["dash", "passive", "lmb", "rmb", "e", "r", "x"]
-const KEYS := {"dash": "Shift", "passive": "", "lmb": "LMB", "rmb": "RMB", "e": "E", "r": "R", "x": "X"}
-const LABEL := {"dash": "Dash", "passive": "Passive", "lmb": "Attack", "rmb": "Right click", "e": "Utility", "r": "Ultimate",
-	"x": "Ultimate"}
+const SLOTS := ["dash", "passive", "lmb", "rmb", "e", "r"]
+## (The ultimate tile has no fixed key: _cap reads it from Settings.)
+const KEYS := {"dash": "Shift", "passive": "", "lmb": "LMB", "rmb": "RMB", "e": "E", "r": ""} 
+## The key cap on a slot's tile. The last tile is the Merge unless the class ultimates are on.
+static func _cap(slot: String) -> String:
+	if slot == "r":
+		return Settings.key_cap("hunter_ult" if KinCommand.class_ults() else "ultimate")
+	return String(KEYS[slot])
+
+const LABEL := {"dash": "Dash", "passive": "Passive", "lmb": "Attack", "rmb": "Right click", "e": "Utility", "r": "Ultimate"}
 ## Which looping preview each archetype's abilities get (KitPreview kinds).
 const PREVIEW := {
 	"thief": {"dash": "dash", "passive": "marks", "rmb": "projectile", "e": "knife", "r": "lines"},
@@ -22,8 +28,8 @@ const PREVIEW := {
 	"gunslinger": {"dash": "dash", "passive": "pips", "rmb": "projectile", "e": "lines"},
 	"juggernaut": {"dash": "dash2", "passive": "meter", "rmb": "charge", "e": "grapple", "r": "leap"},
 	"bulwark": {"dash": "charge", "passive": "meter", "rmb": "shield", "e": "zone", "r": "fissure"},
-	"dredge": {"dash": "dash2", "passive": "meter", "rmb": "grapple", "e": "charge", "x": "shots"},
-	"ashwick": {"dash": "dash", "passive": "meter", "rmb": "projectile", "e": "zone", "x": "steer"},
+	"dredge": {"dash": "dash2", "passive": "meter", "rmb": "grapple", "e": "charge"},
+	"ashwick": {"dash": "dash", "passive": "meter", "rmb": "projectile", "e": "zone"},
 	"tender": {"dash": "dash", "passive": "marks", "rmb": "projectile", "e": "zone"},
 	"rimewright": {"dash": "charge", "passive": "marks", "rmb": "projectile", "e": "shield"},
 	"dolm": {"dash": "dash2", "passive": "meter", "rmb": "heavy", "e": "zone"},
@@ -47,10 +53,12 @@ static func make(arch_id: String, kin_species := "", close_cb := Callable()) -> 
 	return c
 
 func _build() -> void:
-	theme = UI.theme()
 	custom_minimum_size = SIZE
 	size = SIZE
-	add_theme_stylebox_override("panel", _box(Color(0.055, 0.06, 0.09, 0.96), 16, Color(Arch.color(arch), 0.55), 2))
+	var frame := UiFrame.raised(UI.SURFACE, UI.R_PANEL, 30, UI.RIM)
+	frame.edge = Color(Arch.color(arch), 0.55)
+	frame.edge_w = 2
+	add_theme_stylebox_override("panel", frame.padded(14, 12))
 	var d := Arch.def(arch)
 	var cd: Dictionary = d.get("card", {})
 	var col := Arch.color(arch)
@@ -72,7 +80,7 @@ func _build() -> void:
 		hd.add_child(UI.ghost("Close  (K)", on_close, 120))
 	# how the kit fits together: one line
 	var lp := PanelContainer.new()
-	lp.add_theme_stylebox_override("panel", _box(Color(col, 0.14), 10, Color(0, 0, 0, 0), 0, 12, 8))
+	lp.add_theme_stylebox_override("panel", UI.frame(Color(col, 0.14), UI.R_CTRL, Color(0, 0, 0, 0), 0, 12, 8))
 	var ll := UI.label(String(cd.get("loop", d.get("fantasy", ""))), 17, UI.INK, UI.big)
 	ll.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	lp.add_child(ll)
@@ -106,8 +114,8 @@ func _tile(slot: String) -> Control:
 	t.custom_minimum_size = TILE
 	t.focus_mode = Control.FOCUS_NONE
 	t.flat = true
-	var n := _box(Color(1, 1, 1, 0.045), 12, Color(col, 0.35), 1)
-	var hv := _box(Color(1, 1, 1, 0.085), 12, Color(col, 0.8), 2)
+	var n := UI.frame(Color(1, 1, 1, 0.045), UI.R_CARD, Color(col, 0.35), 1, 14, 12)
+	var hv := UI.frame(Color(1, 1, 1, 0.085), UI.R_CARD, Color(col, 0.8), 2, 14, 12)
 	t.add_theme_stylebox_override("normal", n)
 	t.add_theme_stylebox_override("hover", hv)
 	t.add_theme_stylebox_override("pressed", hv)
@@ -127,8 +135,8 @@ func _tile(slot: String) -> Control:
 	var dot := UI.IconDot.new(String(info["icon"]), col, 38.0)
 	dot.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	ic.add_child(dot)
-	if String(KEYS[slot]) != "":
-		var kc := UI.keycap(String(KEYS[slot]), 11)
+	if _cap(slot) != "":
+		var kc := UI.keycap(_cap(slot), 11)
 		kc.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		kc.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		ic.add_child(kc)
@@ -187,8 +195,8 @@ func _show_detail(slot: String) -> void:
 	top.add_theme_constant_override("separation", 10)
 	top.add_child(UI.IconDot.new(String(info["icon"]), col, 30.0))
 	top.add_child(UI.label(String(info["name"]), 24, UI.INK, UI.big))
-	if String(KEYS[slot]) != "":
-		var kc := UI.keycap(String(KEYS[slot]), 13)
+	if _cap(slot) != "":
+		var kc := UI.keycap(_cap(slot), 13)
 		kc.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		top.add_child(kc)
 	v.add_child(top)
@@ -202,7 +210,7 @@ func _show_detail(slot: String) -> void:
 ## The Boki strip: its own C ability and how its type changes this kit.
 func _kin_strip() -> Control:
 	var p := PanelContainer.new()
-	p.add_theme_stylebox_override("panel", _box(Color(1, 1, 1, 0.04), 10, Color(1, 1, 1, 0.08), 1, 12, 8))
+	p.add_theme_stylebox_override("panel", UI.frame(Color(1, 1, 1, 0.04), UI.R_CTRL, Color(1, 1, 1, 0.08), 1, 12, 8))
 	p.custom_minimum_size = Vector2(0, 92)
 	var ks: KinSpec = KinLib.kin(kin_sp) if kin_sp != "" else null
 	var v := VBoxContainer.new()
@@ -236,9 +244,9 @@ func _kin_strip() -> Control:
 
 # ------------------------------------------------------------------ data → text
 ## Name, icon, colour, a short tag, the one line, and the detail page's paragraphs for one slot.
-## The slots an archetype has (no R tile for the heroes whose R is the Boki Merge; an X tile for a hero ultimate).
+## The slots an archetype has (no Ultimate tile for the heroes whose R is the Boki Merge).
 static func slots_of(a: String) -> Array:
-	return SLOTS.filter(func(s): return not s in ["r", "x"] or Arch.def(a).has(s))
+	return SLOTS.filter(func(s): return s != "r" or Arch.def(a).has("r"))
 
 static func slot_text(a: String, slot: String) -> Dictionary:
 	var d := Arch.def(a)
@@ -287,18 +295,10 @@ static func slot_text(a: String, slot: String) -> Dictionary:
 			out.merge({"name": String(sd["name"]), "icon": String(sd.get("icon", "")), "col": Color(String(sd.get("col", "#ffffff"))),
 				"tag": "%ss" % KinText.n(float(sd.get("cooldown", 14.0))), "line": String(cd.get("e", ""))}, true)
 			out["detail"] = [["", String(sd.get("desc", ""))]] + _ranks(a, "kin")
-		"x":
-			var xd: Dictionary = d["x"]
-			var tag := "level %d · %ss" % [int(xd.get("unlock", 6)), KinText.n(float(xd.get("cooldown", 30.0)))]
-			var xcol := Color(String(xd.get("col", "#ffffff")))
-			out.merge({"name": String(xd["name"]), "icon": String(xd.get("icon", "")), "col": xcol,
-				"tag": tag, "line": String(cd.get("x", ""))}, true)
-			out["detail"] = [["", String(xd.get("desc", ""))],
-				["Bond", "Landing it on a hunter fills your Boki bond a long way, ready for the Merge on R."]]
 		"r" when not d.has("r"):
 			# no hero ultimate: R is the Boki's Merge (the Boki system owns it)
 			out.merge({"name": "Boki Merge", "icon": "bond", "col": Color("ffd27a"), "tag": "Boki system", "line": "Your Boki fuses with you; its kind decides the form."}, true)
-			out["detail"] = [["", "R is not a hero ability here: it is the Boki Merge. Your Boki fuses with you and its kind sets the merged form."]]
+			out["detail"] = [["", "%s is not a hero ability here: it is the Boki Merge. Your Boki fuses with you and its kind sets the merged form." % Settings.key_cap("ultimate")]]
 		"r":
 			# R is the Merge for every class (docs/decisions/0001); the class's own ultimate is held back behind
 			# boki_system.json class_ults until the hero-port work folds it into the kits
@@ -306,10 +306,10 @@ static func slot_text(a: String, slot: String) -> Dictionary:
 			var on := KinCommand.class_ults() and not sd.is_empty()
 			out.merge({"name": String(sd["name"]) if on else "Merge", "icon": String(sd.get("icon", "")) if on else "bond", "col": Color(String(sd.get("col", "#ffffff"))) if on else Color("ffd27a"),
 				"tag": ("level 6 · %ss · %ss fuse" % [KinText.n(float(sd.get("cooldown", 100.0))), KinText.n(float(sd.get("fuse", 0.45)))]) if on else "level 6 · full bond meter", "line": String(cd.get("r", "")) if on else "You and your Boki become one: its colour, its type, your abilities changed."}, true)
-			out["detail"] = [["Merge", "Press R with a full bond meter (it fills as your Boki lands hits, as you hit what it marked, and on combos). You take the Boki's colour and silhouette, and every ability of yours changes for the merge by its type and power."],
+			out["detail"] = [["Merge", "Press %s with a full bond meter (it fills as your Boki lands hits, as you hit what it marked, and on combos). You take the Boki's colour and silhouette, and every ability of yours changes for the merge by its type and power." % Settings.key_cap("ultimate")],
 				["Boki out?", "It leaps back through anything in its way and merges you in mid-air."],
 				["No Boki", "A downed or lost Boki: only a weak 3 second surge."],
-				] + ([["Held back", "%s: %s (the class ultimate, off while R is the Merge)" % [String(sd["name"]), String(sd.get("desc", ""))]]] + _ranks(a, "ult") if not sd.is_empty() else [])
+				] + ([["Held back", "%s: %s (the class ultimate, off while the Merge is on %s)" % [String(sd["name"]), String(sd.get("desc", "")), Settings.key_cap("ultimate")]]] + _ranks(a, "ult") if not sd.is_empty() else [])
 	return out
 
 ## The ranks to come, in order (rank 2's concrete change first, then rank 3's special), as one row
@@ -359,16 +359,6 @@ static func _first(t: String, n: int) -> String:
 	var s := t.split(". ")[0]
 	return s if s.length() <= n else s.substr(0, n - 1) + "…"
 
-static func _box(bg: Color, rad := 10, border := Color(0, 0, 0, 0), bw := 0, ph := 14, pv := 12) -> StyleBoxFlat:
-	var b := StyleBoxFlat.new()
-	b.bg_color = bg
-	b.set_corner_radius_all(rad)
-	b.border_color = border
-	b.set_border_width_all(bw)
-	b.content_margin_left = ph; b.content_margin_right = ph
-	b.content_margin_top = pv; b.content_margin_bottom = pv
-	return b
-
 # ------------------------------------------------------------------ the compact row (loadout)
 ## A one-row summary for the expedition loadout: six small tiles (icon, key, name) and the kit's
 ## one-line loop; clicking anywhere calls open_cb (which shows the full card).
@@ -384,9 +374,11 @@ static func strip(a: String, open_cb: Callable) -> Control:
 		b.custom_minimum_size = Vector2(64, 70)
 		b.focus_mode = Control.FOCUS_NONE
 		b.tooltip_text = "%s: %s" % [String(info["name"]), String(info["line"])]
-		b.add_theme_stylebox_override("normal", _box(Color(1, 1, 1, 0.05), 10, Color(info["col"], 0.35), 1, 4, 4))
-		b.add_theme_stylebox_override("hover", _box(Color(1, 1, 1, 0.1), 10, Color(info["col"], 0.85), 2, 4, 4))
-		b.add_theme_stylebox_override("pressed", _box(Color(1, 1, 1, 0.1), 10, Color(info["col"], 0.85), 2, 4, 4))
+		var lit_box := UI.frame(Color(1, 1, 1, 0.1), UI.R_CTRL, Color(info["col"], 0.85), 2, 4, 4)
+		var rest_box := UI.frame(Color(1, 1, 1, 0.05), UI.R_CTRL, Color(info["col"], 0.35), 1, 4, 4)
+		b.add_theme_stylebox_override("normal", rest_box)
+		b.add_theme_stylebox_override("hover", lit_box)
+		b.add_theme_stylebox_override("pressed", lit_box)
 		b.pressed.connect(open_cb)
 		b.set_meta("slot", s)
 		var bv := VBoxContainer.new()
@@ -397,7 +389,7 @@ static func strip(a: String, open_cb: Callable) -> Control:
 		var dot := UI.IconDot.new(String(info["icon"]), info["col"], 26.0)
 		dot.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		bv.add_child(dot)
-		var k := String(KEYS[s]) if String(KEYS[s]) != "" else "passive"
+		var k := _cap(s) if _cap(s) != "" else "passive"
 		var kl := UI.label(k, 10, UI.MUTED, UI.big)
 		kl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		kl.mouse_filter = Control.MOUSE_FILTER_IGNORE

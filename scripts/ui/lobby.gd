@@ -16,7 +16,6 @@ func setup(o: Dictionary) -> void:
 func _ready() -> void:
 	Sfx.play_music("title")
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	theme = UI.theme()
 	var bg := ColorRect.new(); bg.color = UI.BG; bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT); add_child(bg)
 	var center := CenterContainer.new(); center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT); add_child(center)
 	var pb := UI.scroll_panel("Play online", 640, func(): Game.goto("home"), "Back")
@@ -34,8 +33,7 @@ func _ready() -> void:
 	v.add_child(UI.section("Teams"))
 	var modes := UI.hbox(2)
 	var track := PanelContainer.new()
-	var tsb := UI._box(UI.WELL, 11, Color(1, 1, 1, 0.05), 1); UI._pad(tsb, 3, 3)
-	track.add_theme_stylebox_override("panel", tsb)
+	track.add_theme_stylebox_override("panel", UiFrame.sunk(UI.WELL, UI.R_SMALL + 5).padded(3, 3))
 	track.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	track.add_child(modes)
 	for m in [["ffa", "Everyone for themselves"], ["duo", "Teams of 2"], ["trio", "Teams of 3"]]:
