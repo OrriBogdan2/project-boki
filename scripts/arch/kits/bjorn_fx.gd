@@ -6,7 +6,8 @@ extends Node3D
 ## - the thrown hammer (tumbling, a gold-orange glow and trail), planted head-down in the ground under an
 ##   upright gold beacon with rising chevrons
 ## - the held swing: the hammer whirled round over his shoulder in a wide circle with a gold-orange trail,
-##   a gold glint on its head from 0.6 s that grows, a big gold star flare at full charge
+##   a gold glint on its head from 0.6 s that grows; at full charge it is hauled back low behind him with a
+##   short ring-free flash on its head, the glint burning white-hot while the perfect window is open
 ## - the slam's flaming 180 degree crescent in front, the 360 Smash's red-orange-gold spiral ring
 ## - the Bash's gold fan of force, the dash's gold chevron wake (his own after-image)
 ## - his aegis: a wall of forged plates (two rows, riveted, ribbed, a rim and a hammer boss) leaning out
@@ -21,7 +22,11 @@ const AEGIS := Color("ffcb4f")
 const GREEN := Color("7dffb0")
 const STAR_GOLD := Color("ffd25a")
 ## s the full-charge flare shows (the sheet: one bright frame)
-const FLARE_T := 0.15
+const FLARE_T := 0.12
+## The hammer hauled back at full charge (its pivot in the hand's space): the head behind him and low.
+const COCK_BASIS := Vector3(-2.35, 0.35, 0.0)
+const COCK_AT := Vector3(0.05, 0.05, 0.12)
+const COCK_IN := 0.08          # s to haul it back from the whirl
 ## s the slam's crescent stays at full strength, then s it burns away over
 const CRES_HOLD := 0.1
 const CRES_FADE := 0.2
@@ -101,6 +106,8 @@ var disc_r := 1.0
 var spin := 0.0               # the whirled hammer's angle (rad) and its turn rate
 var spin_v := 0.0
 var spin_on := false
+var cock_k := 0.0              # 0..1 how far the hammer is hauled back (full charge)
+var hot := false               # the perfect window is open: the glint burns white-hot
 var glint_k := -1.0            # the glint's size 0..1 while it shows (-1: not yet)
 var fx_clock := 0.0            # the match time effects last advanced to
 
@@ -227,13 +234,16 @@ func hammer_hide() -> void:
 	beacon.visible = false
 
 # ------------------------------------------------------------------ the held swing
-## While LMB is held (k = the charge 0..1): the hammer whirls round faster as it charges; the glint on its
-## head shows from 0.6 s and grows.
-func hold(held_t: float, k: float) -> void:
+## While LMB is held (k = the charge 0..1): the hammer whirls round faster as it charges, then at full it is
+## hauled back; the glint on its head shows from 0.6 s and grows, white-hot while `window` (perfect) is open.
+func hold(held_t: float, k: float, window: bool) -> void:
 	spin_on = true
 	spin_v = lerpf(SPIN_SLOW, SPIN_FAST, k)
 	glint_k = k if held_t >= 0.6 else -1.0
 	glint.visible = glint_k >= 0.0
+	hot = window
+	if k < 0.99:
+		cock_k = 0.0
 
 ## Full charge: the big gold star on the hammer head.
 func full_flare() -> void:
@@ -241,6 +251,8 @@ func full_flare() -> void:
 
 func hold_end() -> void:
 	spin_on = false
+	cock_k = 0.0
+	hot = false
 	glint_k = -1.0
 	glint.visible = false
 	orbit_trail.visible = false
@@ -282,11 +294,26 @@ func _whirl(pv: Node3D) -> void:
 	orbit_trail.rotation = Vector3(0, spin, 0)
 	orbit_trail.scale = Vector3.ONE * orbit_size / ORBIT_SCALE
 	KitShaders.param(orbit_trail, "power", ORBIT_POWER * clampf(spin_v / SPIN_SLOW, 1.0, 1.4))
-	if glint.visible:
-		glint.global_position = pv.to_global(Vector3(0, 0, -0.62))
-		var pulse := 0.85 + 0.15 * sin(Time.get_ticks_msec() * 0.025)
-		glint.scale = Vector3.ONE * lerpf(0.55, 1.2, glint_k) * pulse
-		KitShaders.param(glint, "power", lerpf(0.8, 1.5, glint_k))
+	_place_glint(pv)
+
+## Full charge: the hammer hauled back from the whirl to low behind him (COCK_IN s), the trail gone.
+func _cock(pv: Node3D, delta: float) -> void:
+	cock_k = minf(1.0, cock_k + delta / COCK_IN)
+	var cocked := Transform3D(Basis.from_euler(COCK_BASIS), COCK_AT)
+	pv.transform = pv.transform.interpolate_with(cocked, cock_k)
+	orbit_trail.visible = false
+	_place_glint(pv)
+
+## The glint on the hammer head: it grows with the charge, and in the perfect window it burns bigger,
+## whiter and pulses fast.
+func _place_glint(pv: Node3D) -> void:
+	if not glint.visible:
+		return
+	glint.global_position = pv.to_global(Vector3(0, 0, -0.62))
+	var pulse := 0.85 + 0.15 * sin(Time.get_ticks_msec() * (0.06 if hot else 0.025))
+	glint.scale = Vector3.ONE * lerpf(0.55, 1.2, glint_k) * pulse * (1.35 if hot else 1.0)
+	KitShaders.param(glint, "power", lerpf(0.8, 1.5, glint_k) * (1.4 if hot else 1.0))
+	KitShaders.param(glint, "white", 0.7 if hot else 0.25)
 
 # ------------------------------------------------------------------ slam crescent and smash swirl
 ## The Crushing Blow's crescent: 180 degrees in front of him toward `dir` (the blow's hit area), bigger with the
@@ -472,7 +499,9 @@ func _tick_spin(delta: float) -> void:
 	var pv := _pivot()
 	if pv == null:
 		return
-	if spin_on:
+	if spin_on and glint_k >= 0.99:
+		_cock(pv, delta)
+	elif spin_on:
 		spin += spin_v * delta
 		_whirl(pv)
 	elif pv.transform != Transform3D.IDENTITY:
@@ -490,7 +519,6 @@ func _tick_flare(delta: float) -> void:
 		var u := 1.0 - flare_t / FLARE_T
 		flare.global_position = head + Vector3(0, 0.15, 0)
 		flare.scale = Vector3.ONE * lerpf(1.6, 2.3, sqrt(u))
-		KitShaders.param(flare, "ring", 1.0)
 		KitShaders.param(flare, "power", 1.8 * (1.0 - u * 0.6))
 
 func _tick_slam(delta: float) -> void:

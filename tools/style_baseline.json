@@ -40,9 +40,9 @@
 "shadow": 1
 },
 "scripts/arch/kits/bulwark_kit.gd": {
-"long_line": 13,
+"long_line": 11,
 "nested_ternary": 1,
-"semicolon": 10
+"semicolon": 8
 },
 "scripts/arch/kits/dolm_kit.gd": {
 "long_line": 9,

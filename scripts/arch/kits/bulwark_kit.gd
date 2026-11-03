@@ -5,8 +5,9 @@ extends ArchKit
 ## - LMB (War Hammer): tap throws the hammer to the cursor (clamped to its range; it passes through foes
 ##   and stays planted under a gold beacon, showing foes near it to your team, until you tap again to
 ##   call it back, hitting on the way). Hold spins the hammer in his hand (faster as it charges, a glint
-##   on its head from 0.6 s, a flare at full, 1.25 s); let go and it's a Crushing Blow: a flaming 180
-##   degree crescent in front that carries him forward with it.
+##   on its head from 0.6 s); at full (1.25 s) he hauls it back, a flash on its head and a click open the
+##   perfect window. Let go and it's a Crushing Blow: a flaming 180 degree crescent in front that steps him
+##   forward with it; let go in the window and it's the perfect swing, a leaping launch (BjornLaunch).
 ## - RMB: hold to raise his aegis (its own HP, regenerates); letting go only lowers it.
 ## - Dash: 360 Smash, a short dash that ends in one full spin hit around him; with the aegis raised it's
 ##   the Shield Charge (the Bash: invulnerable for its length, a heavier knock) on the RMB slot's own cooldown.
@@ -33,6 +34,7 @@ var crushes := 0               # Crushes landed (tests, demo)
 var crest: Node3D = null       # the gold crest light while a Shield Slam is armed
 var fx: BjornFx                # Bjorn's pooled effects
 var ult: BjornUlt              # X: Faultline
+var launch: BjornLaunch        # the perfect swing's launch
 var flared := false            # this hold's full-charge flare has gone off
 var throws := 0                # (checks) hammers thrown, and the last throw's landing distance
 var throw_d := 0.0
@@ -60,6 +62,7 @@ func _setup() -> void:
 	ult = BjornUlt.new(self)
 	h.add_child(ult)
 	self_nodes.append(ult)
+	launch = BjornLaunch.new(self)
 
 ## The aegis grows by "hp_rank" of its base HP for every rank past the first (rank 2: +25%, rank 3: +50%).
 func shield_max() -> float:
@@ -152,6 +155,7 @@ func _tick(dt: float) -> void:
 	_tick_glove()
 	_tick_mace(dt)
 	ult.tick(dt)
+	launch.tick(dt)
 	if dash_after_plant and not ult.planted():
 		dash_after_plant = false
 		h.dash_buf = Hunter.DASH_BUFFER
@@ -414,13 +418,14 @@ func cancel_hold() -> void:
 			anim_id = ""
 	hold_blocked = bool(h.inp.get("fire", false))
 
-## The swing held: the hammer spins in his hand (a whoosh each turn), the glint from 0.6 s, the flare and
-## the cursor ring's flare at full; the body keeps facing the cursor (Hunter faces its aim).
+## The swing held: the hammer spins in his hand (a whoosh each turn), the glint from 0.6 s; at full he hauls
+## it back and the perfect window opens with a flash on its head, a click and the cursor ring's flare (the
+## glint burns hot until the window shuts); the body keeps facing the cursor (Hunter faces its aim).
 func _hold_tell() -> void:
 	if lmb_t < float(lmb_def()["tap"]):
 		return
 	var k := smash_k()
-	fx.hold(lmb_t, k)
+	fx.hold(lmb_t, k, launch.in_window(lmb_t))
 	AimKit.charge(h, k, {"col": Color("ffc94a"), "col2": Color("fff1c0"), "flare": false})
 	var turn := fmod(lmb_t * lerpf(1.4, 3.5, k), 1.0)
 	if turn < fmod((lmb_t - Match.DT) * lerpf(1.4, 3.5, k), 1.0):
@@ -430,20 +435,22 @@ func _hold_tell() -> void:
 		fx.full_flare()
 		AimKit.flare(h, {"col2": Color("fff1c0")})
 		m.sfx("bjorn_glint", h.pos, -3.0 if h.is_local() else -8.0)
+		m.sfx("click", h.pos, -2.0 if h.is_local() else -9.0, 1.6)
 
 ## Charge 0..1 of the Crushing Blow being held.
 func smash_k() -> float:
 	var md := lmb_def()
 	return clampf((lmb_t - float(md["tap"])) / maxf(0.05, float(md["full"]) - float(md["tap"])), 0.0, 1.0)
 
-const CARRY_T := 0.24          # s the slam's forward carry lasts
+const CARRY_T := 0.24          # s the slam's forward step lasts
 
 ## The Crushing Blow let go: the hammer sweeps round from behind into a 180 degree flaming crescent in
-## front, and the slam carries him forward (a strong slam with forward momentum).
+## front and the slam steps him forward ("carry" m); let go in the perfect window it launches him instead
+## (BjornLaunch), knocks harder ("perfect.kb_k") and lands with a heavier hit-stop and shake.
 func _smash() -> void:
-	play("bul_smash")
 	var md := lmb_def()
 	var k := smash_k()
+	var perfect := launch.in_window(lmb_t)
 	lmb_t = -1.0
 	h.mel_hold = 0.0
 	fx.hold_end()
@@ -451,29 +458,45 @@ func _smash() -> void:
 	var full := k >= 0.99
 	var dmg := lerpf(float(md["smash_dmg"][0]), float(md["smash_dmg"][1]), k) * _wk()
 	var kb := lerpf(float(md["smash_kb"][0]), float(md["smash_kb"][1]), k)
+	if perfect:
+		kb *= float(launch.pd().get("kb_k", 1.4))
 	h.fire_cd = float(md["smash_rate"])
 	slams += 1
 	slam_k = k
-	h.glide_cd = maxf(h.glide_cd, WINDDOWN)
 	knock_until = m.time + 0.25
-	h._strike(dmg / m.dmg_mult(h), float(md["smash_reach"]), float(md["smash_arc"]), kb, {"heavy": true, "charged": true, "stun": float(md["smash_stun"]) if full else 0.0})
+	h._strike(dmg / m.dmg_mult(h), float(md["smash_reach"]), float(md["smash_arc"]), kb,
+		{"heavy": true, "charged": true, "stun": float(md["smash_stun"]) if full else 0.0})
 	var dv := h.aim_dir()
-	# the slam carries him forward (a jump out of it still glides)
-	var cr: Array = md.get("carry", [1.6, 3.4])
-	if h.grounded:
-		var carry := lerpf(float(cr[0]), float(cr[1]), k)          # m carried over CARRY_T
-		h.dash_with({"type": "dash", "speed": carry / CARRY_T, "time": CARRY_T, "invuln": 0.0, "dir": dv, "trail": "dust"})
-	var front := h.pos + Vector3(dv.x, 0, dv.y) * 1.6
+	if perfect:
+		launch.start(dv)
+	else:
+		_carry(dv, k)
 	fx.slam(dv, k)
-	m.fx.dust(front, 8 + int(10 * k))
+	m.fx.dust(h.pos + Vector3(dv.x, 0, dv.y) * 1.6, 8 + int(10 * k))
 	for f in foes_in(h.pos + Vector3(dv.x, 0, dv.y) * 1.2, float(md["smash_reach"]), 2.2):
 		_impact_trail(f, dv, k)
-	Feel.shake(m, "t3" if full else "t2", h, h.pos)
-	if h.is_local(): Oomph.punch_dir(m, dv, 0.15 + 0.25 * k)
-	m.sfx("bjorn_slam", h.pos, lerpf(-4.0, 0.0, k), lerpf(1.1, 0.85, k))
-	if full:
-		m.fx.ring(front, 2.2, Color("ffb04a"), 0.3)
-		net_ring(front, 2.2, res_col())
+		if perfect:
+			Feel.hitstop(m, h, f, dmg, {"melee": true, "heavy": true, "payoff": true})
+	var tier := "t2"
+	if perfect:
+		tier = "t4"
+	elif full:
+		tier = "t3"
+	Feel.shake(m, tier, h, h.pos)
+	var heavier := 1.0 if perfect else 0.0
+	if h.is_local(): Oomph.punch_dir(m, dv, 0.15 + 0.25 * k + 0.15 * heavier)
+	m.sfx("bjorn_slam", h.pos, lerpf(-4.0, 0.0, k) + 2.0 * heavier, lerpf(1.1, 0.85, k) - 0.1 * heavier)
+
+## The normal swing's step: "carry" m (more with the charge) over CARRY_T, on the ground only, then a short
+## wind-down before the glider can open.
+func _carry(dv: Vector2, k: float) -> void:
+	play("bul_smash")
+	h.glide_cd = maxf(h.glide_cd, WINDDOWN)
+	if not h.grounded:
+		return
+	var cr: Array = lmb_def().get("carry", [1.5, 1.8])
+	var carry := lerpf(float(cr[0]), float(cr[1]), k)
+	h.dash_with({"type": "dash", "speed": carry / CARRY_T, "time": CARRY_T, "invuln": 0.0, "dir": dv, "trail": "dust"})
 
 ## A foe the slam caught: a white dust puff on them, then a debris trail as they fly back.
 func _impact_trail(f: Ent, dv: Vector2, k: float) -> void:
