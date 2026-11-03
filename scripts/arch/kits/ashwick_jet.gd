@@ -168,8 +168,7 @@ func _leap() -> void:
 	h.vel.z = keep.y
 	h.glide_handoff(dir, speed)
 	AimKit.hide(h, "x_steer")
-	k.play("lw_hop")                 # tucked for the leap off, the jet's last puff under him
-	k.fx.puff(h.pos + Vector3(0, 0.6, 0), LDFx.M_FLAME, Color("ff7a2a"), Color("ffc040"), 0.8, 0.35)
+	k.play("lw_hop")                 # tucked for the leap off (no burst: the jet's own flame just stops)
 
 func _land() -> void:
 	flight = {}
