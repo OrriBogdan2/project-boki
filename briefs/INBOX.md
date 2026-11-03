@@ -359,3 +359,9 @@ The owner is reviewing the build now and will add more. Start the two items ther
 - S2 takes these hero pairs with all their OWNER_REVIEW items (incl. their rows of 32/35): Breah + Ostra (incl. bugs 26 and 42), Zedran + Bjorn, Tamsin + Dredge, Linwick + Moosh Moosh. See briefs/SERVER2_START.md.
 - S1 (you) keeps: the airdash-glide fix, item 2 mapclean, Pin + Venator, Vireo + Dancer, the farm tutorial. If you already started any of S2's items, finish and push that branch, note it in STATUS.md, and S2 will build on it.
 - The godot queue is shared; S2 may raise it to 8 slots on this 16-CPU box.
+
+## 2026-11-03 07:20 UTC: owner demo tomorrow, quality first
+- The owner is showing the game to someone tomorrow. Goal: speed AND quality. Finish fewer things completely rather than many halfway.
+- Each branch must land whole: every item on it done, asserted, screenshots viewed, full suite green, then reported ready in STATUS. No half-done branches at the cutoff.
+- Within your share, do bugs first, then the items a player notices in the first minutes of play: the look and feel of RMB/E/ult, the dashes, and obvious glitches. Leave subtle tuning for later.
+- A delivery cutoff time will follow once the owner gives the demo time.
