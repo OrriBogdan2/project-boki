@@ -265,13 +265,9 @@ static func _job_row(h: Node, el: String, waiting: int, who: Array) -> Control:
 		b.custom_minimum_size = Vector2(52, 26)
 		# a compact segmented control: the chosen one filled, the rest faint
 		var on := cur == i
-		var sbn := StyleBoxFlat.new()
-		sbn.set_corner_radius_all(8)
-		sbn.content_margin_top = 3; sbn.content_margin_bottom = 3; sbn.content_margin_left = 6; sbn.content_margin_right = 6
-		sbn.bg_color = Color(UI.ACCENT, 0.24) if on else Color(1, 1, 1, 0.05)
-		if on: sbn.border_color = Color(UI.ACCENT, 0.8); sbn.set_border_width_all(1)
-		var sbh := sbn.duplicate() as StyleBoxFlat
-		sbh.bg_color = Color(UI.ACCENT, 0.32) if on else Color(1, 1, 1, 0.12)
+		var edge := Color(UI.ACCENT, 0.8) if on else Color(0, 0, 0, 0)
+		var sbn := UI.frame(Color(UI.ACCENT, 0.24) if on else Color(1, 1, 1, 0.05), 8, edge, 1, 6, 3)
+		var sbh := UI.frame(Color(UI.ACCENT, 0.32) if on else Color(1, 1, 1, 0.12), 8, edge, 1, 6, 3)
 		for stn in ["normal", "focus"]: b.add_theme_stylebox_override(stn, sbn)
 		for stn in ["hover", "pressed"]: b.add_theme_stylebox_override(stn, sbh)
 		b.add_theme_color_override("font_color", UI.ACCENT_HI if on else UI.MUTED)

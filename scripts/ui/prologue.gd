@@ -319,7 +319,8 @@ func _build_ui() -> void:
 	lr.material = look_mat
 	sl.add_child(lr)
 	ui = CanvasLayer.new(); ui.layer = 5; add_child(ui)
-	var root := Control.new(); root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT); root.theme = UI.theme()
+	var root := Control.new()
+	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	ui.add_child(root)
 	# letterbox bars that slide in
