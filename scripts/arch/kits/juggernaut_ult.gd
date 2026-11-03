@@ -35,7 +35,8 @@ func running() -> bool:
 func guarding() -> bool:
 	return String(st.get("phase", "")) == "guard"
 
-## Planted from the press until the cleave has landed (the recovery lets him walk again, slowly).
+## Planted from the press until the cleave has landed (the recovery lets him walk again, slowly, and a jump or
+## Shift moves him straight out of it).
 func move_k() -> float:
 	match String(st.get("phase", "")):
 		"guard", "strike": return 0.0
@@ -78,6 +79,9 @@ func tick(dt: float) -> void:
 		"recover":
 			if float(st["t"]) >= float(d["recover"]):
 				drop()
+			elif not h.grounded:
+				drop()               # a jump moves him out of it (Shift drops it in JuggernautKit.on_dash)
+				k.play("")           # the jump's own pose eases in over the follow-through
 
 ## The guard: planted (no jumping off either), the strip ahead follows the aim, gold sparks rise off him.
 func _tick_guard(d: Dictionary) -> void:

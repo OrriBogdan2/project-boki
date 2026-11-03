@@ -14,6 +14,10 @@ func run(a) -> void:
 	await chain_pull()
 	await rmb_rows()
 	await dash_moves()
+	var rows_bad: int = await load("res://tools/dash_flow_check.gd").new().check_hero(A.main, "juggernaut")
+	A.ok("jug item 51: every slot casts mid-jump, holds through a jump and a dash and lets go in the air, and a "
+			+ "jump or Shift moves him out of it in 0.1s (or its row's exception)",
+			rows_bad == 0, "%d failures" % rows_bad)
 
 # ------------------------------------------------------------------ item 21: the Meteor Drop
 func meteor() -> void:
@@ -112,15 +116,36 @@ func meteor() -> void:
 	while D.phase != "recover" and t < 1.0:
 		m.step(A.DT)
 		t += A.DT
-	A.step(m, 0.1)
+	A.step(m, 0.05)
 	P.dashes = 3.0
 	P.do_dash()
-	A.step(m, 0.08)
-	var held_off := P.dashes == 3.0 and D.phase == "recover"
-	A.step(m, float(dd["dash_free"]) - 0.08)
-	A.ok("jug meteor: Shift pressed early in the recovery is held (into_dash rmb: buffer) and breaks out at 0.25s",
-			held_off and P.dashes < 2.5 and D.phase == "",
-			"held %s dashes %.1f phase %s" % [held_off, P.dashes, D.phase])
+	A.step(m, 0.1)
+	A.ok("jug meteor: Shift early in the recovery goes within 0.1s and ends it (item 51)",
+			P.dashes < 2.5 and D.phase == "", "dashes %.1f phase %s" % [P.dashes, D.phase])
+	# Shift in the hang: the air dash goes at once, then the dive comes down onto the marker from where it took him
+	A.step(m, 1.0)
+	K.cd["air"] = 0.0
+	P.teleport(home + Vector3(0, 1.8, 0))
+	P.grounded = false
+	P.vel = Vector3.ZERO
+	A.aim_at(P, home + Vector3(3.0, 0, 0))
+	P.ak.press_rmb()
+	m.step(A.DT)
+	var marker := D.land
+	P.ex_cd = 0.0
+	P.dashes = 3.0
+	P.inp["move"] = Vector2(0, 1)
+	P.do_dash()
+	A.step(m, 0.1)
+	var went := P.roll_t > 0.0 and D.phase == "hang" and K.anim_id == "jug_meteor"
+	P.inp["move"] = Vector2.ZERO
+	t = 0.0
+	while D.phase != "recover" and t < 2.0:
+		m.step(A.DT)
+		t += A.DT
+	var off := Vector2(D.last_drop.x - marker.x, D.last_drop.z - marker.z).length()
+	A.ok("jug meteor: Shift in the hang air-dashes at once (the gather pose kept), then it dives onto the marker",
+			went and D.phase == "recover" and off < 0.3, "went %s phase %s %.2fm off the marker" % [went, D.phase, off])
 	await A.done(m)
 
 # ------------------------------------------------------------------ item 22: the Warchain's states
@@ -502,40 +527,90 @@ func _into_dash(m: Match, P: Hunter, K: JuggernautKit, home: Vector3) -> void:
 	P.teleport(home)
 	P.vel = Vector3.ZERO
 	m.step(A.DT)
-	# rmb: buffer. Shift in the Slam's wind-up waits; the strike lands, then the dash goes
+	# rmb: fire. Shift in the Slam's wind-up is a Slam Drive: the drive at once along the strike's aim, the Slam's
+	# own pose kept, and the Slam lands where it arrives
 	K.ch_rmb = 1.0
 	K.cd["rmb"] = 0.0
+	A.aim_at(P, home + Vector3(6.0, 0, 0))
+	P.inp["move"] = Vector2(0, 1)          # (moving the other way: the drive still follows the strike's aim)
 	A.tap(m, P)
+	var from := P.pos
 	P.dashes = 3.0
 	P.do_dash()
-	m.step(A.DT)
-	var waited := P.dashes == 3.0 and not K.slam_w.is_empty()
+	A.step(m, 0.1)
+	var drove := P.dashes < 2.5 and P.roll_t > 0.0 and not K.slam_w.is_empty() and K.anim_id == "jug_slam"
+	P.inp["move"] = Vector2.ZERO
 	A.step(m, 0.7)
-	A.ok("jug into_dash rmb (buffer): Shift in the Slam's wind-up goes once the strike has landed",
-			waited and K.slam_w.is_empty() and P.dashes < 2.5, "waited %s dashes %.1f" % [waited, P.dashes])
+	var ran := P.pos.x - from.x
+	A.ok("jug into_dash rmb (fire): Shift in the Slam's wind-up drives at once along its aim, the Slam lands after",
+			drove and K.slam_w.is_empty() and ran > 3.0 and absf(P.pos.z - from.z) < 0.8,
+			"drove %s, %.1fm along the aim, %.1fm across" % [drove, ran, P.pos.z - from.z])
 	A.step(m, 1.0)
-	# x: buffer. Shift in the guard waits for the cleave
+	# x: buffer in the guard and the cleave (the source plants him), then free: Shift goes the step the cleave lands
 	K.cd["x"] = 0.0
 	P.dashes = 3.0
 	HunterKeys.ult_pressed(P)
 	m.step(A.DT)
 	P.do_dash()
 	A.step(m, 0.3)
-	var guarded := P.dashes == 3.0 and K.riposte.running()
-	A.step(m, 1.3)
-	A.ok("jug into_dash x (buffer): Shift in the guard waits, then goes when the Riposte is over",
-			guarded and not K.riposte.running() and P.dashes < 2.5, "guarded %s dashes %.1f" % [guarded, P.dashes])
+	var guarded := P.dashes == 3.0 and K.riposte.guarding()
+	var t := 0.0
+	while P.dashes == 3.0 and t < 1.5:
+		m.step(A.DT)
+		t += A.DT
+	var guard_t := float(K.x_def()["guard"]) + float(K.x_def()["strike_t"])
+	A.ok("jug into_dash x (buffer): Shift in the guard waits, then goes the step the cleave lands",
+			guarded and not K.riposte.running() and t <= guard_t - 0.3 + 0.05,
+			"guarded %s, went %.2fs after the wait" % [guarded, t])
+	for move in ["dash", "jump"]:
+		A.step(m, 1.0)
+		K.cd["x"] = 0.0
+		P.dashes = 3.0
+		HunterKeys.ult_pressed(P)
+		t = 0.0
+		while String(K.riposte.st.get("phase", "")) != "recover" and t < 1.5:
+			m.step(A.DT)
+			t += A.DT
+		var y0 := P.pos.y
+		P.inp[move] = true
+		A.step(m, 0.1)
+		P.inp[move] = false
+		var moved := P.dashes < 2.5 if move == "dash" else P.pos.y > y0 + 0.1
+		A.ok("jug x recovery: a %s goes within 0.1s and ends it (item 51)" % move,
+				moved and not K.riposte.running(), "moved %s running %s" % [moved, K.riposte.running()])
 	A.step(m, 1.0)
-	# lmb: cancel. Shift drops a Searing Wave charge, the dash goes at once
-	var waves0 := K.waves
-	P.dashes = 3.0
-	A.step(m, 0.5, func(): P.inp["fire"] = true)
-	P.do_dash()
-	A.step(m, 0.05, func(): P.inp["fire"] = true)
-	P.inp["fire"] = false
-	A.step(m, 0.6)
-	A.ok("jug into_dash lmb (cancel): Shift drops the Searing Wave charge and dashes at once",
-			K.waves == waves0 and P.dashes < 2.5, "waves %d dashes %.1f" % [K.waves - waves0, P.dashes])
+	# lmb: the Searing Wave charge carries through the Rampage (hold.lmb.ground: keep) and goes when let go
+	for in_air in [false, true]:
+		A.step(m, 0.5)
+		P.teleport(home)
+		P.vel = Vector3.ZERO
+		m.step(A.DT)
+		var waves0 := K.waves
+		P.dashes = 3.0
+		P.ex_cd = 0.0
+		A.step(m, 0.5, func(): P.inp["fire"] = true)
+		if in_air:
+			P.do_jump()
+			A.step(m, 0.15, func(): P.inp["fire"] = true)
+		P.do_dash()
+		A.step(m, 0.1, func(): P.inp["fire"] = true)
+		var charging := K.lmb_t > 0.0 and K.waves == waves0
+		var moved := P.dashes < 2.5 or P.ex_cd > 0.0
+		var end := 0.0
+		while (P.roll_t > 0.0 or K.rampage_wind > 0.0) and end < 1.0:
+			P.inp["fire"] = true
+			m.step(A.DT)
+			end += A.DT
+		P.inp["fire"] = false
+		var aloft := not P.grounded
+		var fired := false
+		for i in 6:
+			m.step(A.DT)
+			fired = fired or K.waves > waves0
+		var which := "air dash, let go in the air" if in_air else "ground dash"
+		A.ok("jug hold lmb through the %s (keep): the charge waits, the wave goes on the release" % which,
+				charging and moved and fired and (aloft or not in_air),
+				"charging %s moved %s fired %s aloft %s" % [charging, moved, fired, aloft])
 
 func _last_key(id: String) -> float:
 	var keys: Array = HunterAnim.km_def(id).get("keys", [])

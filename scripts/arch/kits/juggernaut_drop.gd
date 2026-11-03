@@ -48,10 +48,6 @@ func running() -> bool:
 func airborne() -> bool:
 	return phase == "hang" or phase == "dive"
 
-## Shift is held off through the hang, the dive and the first part of the recovery.
-func dash_free() -> bool:
-	return phase == "" or (phase == "recover" and t >= float(data()["dash_free"]))
-
 ## Planted through the drop and the start of the recovery, then rising back to a walk.
 func move_k() -> float:
 	if airborne():
@@ -115,17 +111,20 @@ func tick(dt: float) -> void:
 		"hang": _tick_hang(dt)
 		"dive": _tick_dive()
 		"recover":
-			# done, or cut short: dashed out of (once Shift is free) or knocked off his feet
+			# done, or cut short: dashed or jumped out of, or knocked off his feet
 			if t >= float(data()["recover"]) or h.roll_t > 0.0 or not h.grounded:
 				last_recover = t
 				phase = ""
 
-## The gather at the top: held in the air (a touch of lift), the marker filling.
+## The gather at the top: held in the air (a touch of lift), the marker filling. An air dash in it carries him
+## on (the gather keeps its time), and the dive comes down onto the marker from wherever it took him.
 func _tick_hang(dt: float) -> void:
 	var h := k.h
 	var hang := float(data()["hang"])
+	_marker(0.5 * minf(t / hang, 1.0))
+	if h.roll_t > 0.0:
+		return
 	h.vel = Vector3(0.0, 0.6 * (1.0 - t / hang) + Hunter.H_GRAV * dt, 0.0)
-	_marker(0.5 * t / hang)
 	if t >= hang:
 		var dd := data()
 		phase = "dive"

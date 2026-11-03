@@ -465,32 +465,39 @@ func _wave() -> void:
 
 # ------------------------------------------------------------------ dash: Rampage
 ## Shift during one of his moves does what its into_dash row in content/dash_flow/juggernaut.json says: held to
-## the move's end ("buffer"), or the move is dropped and the dash goes ("cancel"; out of the Warchain's pull the
-## drive goes at once, the pull's speed running into it).
+## the move's end ("buffer"), the move dropped and the dash at once ("cancel"; out of the Warchain's pull the drive
+## goes at once, the pull's speed running into it), or the dash at once with the move running on ("fire"). Out of
+## the Slam's wind-up that is a Slam Drive: the drive goes at once along the strike's aim, the overhead pose kept,
+## and the Slam lands where it arrives. A Lunge or a Meteor Drop's dive is a dash of its own: Shift goes as it ends.
 func on_dash(use_ex: bool) -> bool:
-	var slot := _move_slot()
-	var mode := String(DashFlow.into_dash_of(id, slot).get("mode", "fire")) if slot != "" else "fire"
-	if mode == "buffer":
+	if _dash_waits():
 		dash_held = true
 		return true
-	var from_pull := slot == "e" and mode == "cancel"
-	if mode == "cancel":
-		_cancel_for_dash(slot)
+	var slot := _move_slot()
+	var from_pull := slot == "e" and _into_mode(slot) == "cancel"
+	var from_slam := not slam_w.is_empty() and h.grounded
+	if from_pull:
+		warchain.dash_out()
+	if riposte.running():
+		riposte.drop()               # (only its recovery is left by now: Shift moves him out of it)
 	if use_ex and not h.grounded:
 		if not spend_dash(true): return true
 		travel(float(h.cdat.get("ex_dist", 4.2)), float(h.cdat.get("ex_time", 0.21)),
 				{"invuln": 0.08, "trail": "dust", "shove": true, "shove_kb": 4.0, "shove_dmg": 0.0}, true)
-		play("jug_exdash")         # his air dash: a hurled shoulder charge, knees tucked, the blade trailing
+		if not meteor.running(): play("jug_exdash")     # an air dash: a hurled shoulder charge, knees tucked
 		return true
 	if not spend_dash(false):
 		return true
 	var dd := dash_def()
-	var wind := 0.0 if from_pull else float(dd.get("windup", 0.15))
-	var dir := dash_dir()
+	var wind := 0.0 if from_pull or from_slam else float(dd.get("windup", 0.15))
+	var dir := h.aim_dir() if from_slam else dash_dir()
 	rampage_dir = dir
 	st["last_dash"] = "rampage"
-	play("jug_dash")                 # the crouch with the blade cocked high behind, then the drive
 	h.glide_cd = maxf(h.glide_cd, wind + float(dd["time"]) + 0.35)    # its wind-down: no glider straight out
+	if from_slam:
+		_rampage(dir)                # the Slam's own keys run on: the overhead blade rides the drive in
+		return true
+	play("jug_dash")                 # the crouch with the blade cocked high behind, then the drive
 	if from_pull:
 		anim_at -= float(dd.get("windup", 0.15))       # (straight into the drive's keys)
 		_rampage(dir)
@@ -654,30 +661,31 @@ func _flush_buffer() -> void:
 		var fresh: bool = m.time - rmb_queued_at <= BUFFER
 		rmb_queued_at = -9.0
 		if fresh and not rmb_down: press_rmb()
-	if dash_held and _move_slot() == "":
+	if dash_held and not _dash_waits():
 		dash_held = false
 		h.do_dash()
 
-## Which of his moves owns the body now, by slot ("" for none): the Gilded Riposte, a Smash (the Slam's wind-up,
-## a Lunge, a Meteor Drop until it lets Shift go), the Warchain's pull, a Searing Wave charge a dash would end.
+## Which of his moves owns the body now, by slot ("" for none): the Gilded Riposte's guard and cleave, a Smash
+## (the Slam's wind-up, a Lunge, a Meteor Drop in the air), the Warchain's pull.
 func _move_slot() -> String:
-	if riposte.running():
+	if riposte.move_k() <= 0.0:
 		return "x"
-	if not slam_w.is_empty() or not lunge.is_empty() or not meteor.dash_free():
+	if not slam_w.is_empty() or not lunge.is_empty() or meteor.airborne():
 		return "rmb"
 	if warchain.pulling():
 		return "e"
-	if lmb_t > float(lmb_def()["tap"]) and flow.ends_hold("lmb", flow.dash_move()):
-		return "lmb"            # (a charge the dash's hold row keeps isn't in the way: it carries through)
 	return ""
 
-## Shift drops the move (its into_dash row: cancel).
-func _cancel_for_dash(slot: String) -> void:
-	match slot:
-		"e": warchain.dash_out()
-		"lmb":
-			lmb_t = -1.0
-			h.mel_hold = 0.0
+func _into_mode(slot: String) -> String:
+	return String(DashFlow.into_row_of(id, slot, flow.dash_move())["mode"])
+
+## Shift is held now (it goes the step this turns false): a move whose into_dash row buffers it (the guard and
+## the cleave), or a Lunge or a Meteor Drop's dive, each a dash of its own.
+func _dash_waits() -> bool:
+	var slot := _move_slot()
+	if slot != "" and _into_mode(slot) == "buffer":
+		return true
+	return not lunge.is_empty() or meteor.phase == "dive"
 
 ## In the Rampage as DashFlow sees it (its crouch is the dash standing still); a Lunge, also a travelled dash, is
 ## not: the RMB rules own it.
