@@ -2,7 +2,7 @@
 
 Review shots for each hero: kit card, each ability, the payoff, animation frame strips and a neutral full-body portrait. PNGs are downscaled to at most 1280 px wide. Captions come from the shot manifests.
 
-Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-tender), [Tamsin](#tamsin-rimewright), [Dredge](#dredge-dredge), [Ashwick](#ashwick-ashwick), [Dolm](#dolm-dolm), [Ostra](#ostra-ostra), [Archer](#archer-archer), [Bulwark](#bulwark-bulwark), [Thief](#thief-thief), [Juggernaut](#juggernaut-juggernaut), [Farm building](#farm-building-farmbuild), [classes](#classes-classes), [aimkit](#aimkit-aimkit), [moosh-moosh/v2](#moosh-moosh/v2-moosh-moosh/v2), [moosh-moosh/v2/anim](#moosh-moosh/v2/anim-moosh-moosh/v2/anim), [tamsin/v2](#tamsin/v2-tamsin/v2), [tamsin/v2/anim](#tamsin/v2/anim-tamsin/v2/anim), [dancer/v2](#dancer/v2-dancer/v2), [dancer/v2/before](#dancer/v2/before-dancer/v2/before), [zedran/v2](#zedran/v2-zedran/v2), [zedran/v2/before](#zedran/v2/before-zedran/v2/before), [dancer/v2/anim](#dancer/v2/anim-dancer/v2/anim), [zedran/v2/anim](#zedran/v2/anim-zedran/v2/anim), [linwick/v2](#linwick/v2-linwick/v2), [linwick/v2/anim](#linwick/v2/anim-linwick/v2/anim), [linwick/v2/before](#linwick/v2/before-linwick/v2/before), [linwick/v2/after](#linwick/v2/after-linwick/v2/after), [dredge/v2](#dredge/v2-dredge/v2), [dredge/v2/anim](#dredge/v2/anim-dredge/v2/anim), [dredge/v2/before](#dredge/v2/before-dredge/v2/before), [dredge/v2/after](#dredge/v2/after-dredge/v2/after), [pin/v2](#pin/v2-pin/v2), [bjorn/v2](#bjorn/v2-bjorn/v2), [pin/v2/anim](#pin/v2/anim-pin/v2/anim), [bjorn/v2/anim](#bjorn/v2/anim-bjorn/v2/anim), [vireo/v2](#vireo/v2-vireo/v2), [vireo/v2/anim](#vireo/v2/anim-vireo/v2/anim), [venator/v2/anim](#venator/v2/anim-venator/v2/anim), [venator/v2](#venator/v2-venator/v2), [breah/v2](#breah/v2-breah/v2), [ostra/v2](#ostra/v2-ostra/v2), [breah/v2/anim](#breah/v2/anim-breah/v2/anim), [ostra/v2/anim](#ostra/v2/anim-ostra/v2/anim), [linwick/v2/ult](#linwick/v2/ult-linwick/v2/ult), [dredge/v2/ult](#dredge/v2/ult-dredge/v2/ult), [hunters](#hunters-hunters), [pin/v2/ult](#pin/v2/ult-pin/v2/ult), [bjorn/v2/ult](#bjorn/v2/ult-bjorn/v2/ult), [mooshmoosh/v2/ult](#mooshmoosh/v2/ult-mooshmoosh/v2/ult), [tamsin/v2/ult](#tamsin/v2/ult-tamsin/v2/ult), [dancer/v2/ult](#dancer/v2/ult-dancer/v2/ult), [zedran/v2/ult](#zedran/v2/ult-zedran/v2/ult), [tamsin/v2/polish](#tamsin/v2/polish-tamsin/v2/polish), [moosh-moosh/v2/polish](#moosh-moosh/v2/polish-moosh-moosh/v2/polish), [vireo/v2/polish](#vireo/v2/polish-vireo/v2/polish), [venator/v2/polish](#venator/v2/polish-venator/v2/polish), [pin/v2/polish](#pin/v2/polish-pin/v2/polish), [bjorn/v2/polish](#bjorn/v2/polish-bjorn/v2/polish), [linwick/v2/polish](#linwick/v2/polish-linwick/v2/polish), [dredge/v2/polish](#dredge/v2/polish-dredge/v2/polish), [breah/v2/ult](#breah/v2/ult-breah/v2/ult), [ostra/v2/ult](#ostra/v2/ult-ostra/v2/ult), [vireo/v2/ult](#vireo/v2/ult-vireo/v2/ult), [venator/v2/ult](#venator/v2/ult-venator/v2/ult), [dancer/v2/polish](#dancer/v2/polish-dancer/v2/polish), [zedran/v2/polish](#zedran/v2/polish-zedran/v2/polish)
+Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-tender), [Tamsin](#tamsin-rimewright), [Dredge](#dredge-dredge), [Ashwick](#ashwick-ashwick), [Dolm](#dolm-dolm), [Ostra](#ostra-ostra), [Archer](#archer-archer), [Bulwark](#bulwark-bulwark), [Thief](#thief-thief), [Juggernaut](#juggernaut-juggernaut), [Farm building](#farm-building-farmbuild), [classes](#classes-classes), [aimkit](#aimkit-aimkit), [moosh-moosh/v2](#moosh-moosh/v2-moosh-moosh/v2), [moosh-moosh/v2/anim](#moosh-moosh/v2/anim-moosh-moosh/v2/anim), [tamsin/v2](#tamsin/v2-tamsin/v2), [tamsin/v2/anim](#tamsin/v2/anim-tamsin/v2/anim), [dancer/v2](#dancer/v2-dancer/v2), [dancer/v2/before](#dancer/v2/before-dancer/v2/before), [zedran/v2](#zedran/v2-zedran/v2), [zedran/v2/before](#zedran/v2/before-zedran/v2/before), [dancer/v2/anim](#dancer/v2/anim-dancer/v2/anim), [zedran/v2/anim](#zedran/v2/anim-zedran/v2/anim), [linwick/v2](#linwick/v2-linwick/v2), [linwick/v2/anim](#linwick/v2/anim-linwick/v2/anim), [linwick/v2/before](#linwick/v2/before-linwick/v2/before), [linwick/v2/after](#linwick/v2/after-linwick/v2/after), [dredge/v2](#dredge/v2-dredge/v2), [dredge/v2/anim](#dredge/v2/anim-dredge/v2/anim), [dredge/v2/before](#dredge/v2/before-dredge/v2/before), [dredge/v2/after](#dredge/v2/after-dredge/v2/after), [pin/v2](#pin/v2-pin/v2), [bjorn/v2](#bjorn/v2-bjorn/v2), [pin/v2/anim](#pin/v2/anim-pin/v2/anim), [bjorn/v2/anim](#bjorn/v2/anim-bjorn/v2/anim), [vireo/v2](#vireo/v2-vireo/v2), [vireo/v2/anim](#vireo/v2/anim-vireo/v2/anim), [venator/v2/anim](#venator/v2/anim-venator/v2/anim), [venator/v2](#venator/v2-venator/v2), [breah/v2](#breah/v2-breah/v2), [ostra/v2](#ostra/v2-ostra/v2), [breah/v2/anim](#breah/v2/anim-breah/v2/anim), [ostra/v2/anim](#ostra/v2/anim-ostra/v2/anim), [linwick/v2/ult](#linwick/v2/ult-linwick/v2/ult), [dredge/v2/ult](#dredge/v2/ult-dredge/v2/ult), [hunters](#hunters-hunters), [pin/v2/ult](#pin/v2/ult-pin/v2/ult), [bjorn/v2/ult](#bjorn/v2/ult-bjorn/v2/ult), [mooshmoosh/v2/ult](#mooshmoosh/v2/ult-mooshmoosh/v2/ult), [tamsin/v2/ult](#tamsin/v2/ult-tamsin/v2/ult), [dancer/v2/ult](#dancer/v2/ult-dancer/v2/ult), [zedran/v2/ult](#zedran/v2/ult-zedran/v2/ult), [tamsin/v2/polish](#tamsin/v2/polish-tamsin/v2/polish), [moosh-moosh/v2/polish](#moosh-moosh/v2/polish-moosh-moosh/v2/polish), [vireo/v2/polish](#vireo/v2/polish-vireo/v2/polish), [venator/v2/polish](#venator/v2/polish-venator/v2/polish), [pin/v2/polish](#pin/v2/polish-pin/v2/polish), [bjorn/v2/polish](#bjorn/v2/polish-bjorn/v2/polish), [linwick/v2/polish](#linwick/v2/polish-linwick/v2/polish), [dredge/v2/polish](#dredge/v2/polish-dredge/v2/polish), [breah/v2/ult](#breah/v2/ult-breah/v2/ult), [ostra/v2/ult](#ostra/v2/ult-ostra/v2/ult), [vireo/v2/ult](#vireo/v2/ult-vireo/v2/ult), [venator/v2/ult](#venator/v2/ult-venator/v2/ult), [dancer/v2/polish](#dancer/v2/polish-dancer/v2/polish), [zedran/v2/polish](#zedran/v2/polish-zedran/v2/polish), [breah/v2/polish](#breah/v2/polish-breah/v2/polish), [ostra/v2/polish](#ostra/v2/polish-ostra/v2/polish)
 
 ## Vireo (mage)
 
@@ -4659,3 +4659,551 @@ Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-t
 **Riposte impact: the cleave landing (close-up)**
 
 ![Riposte impact: the cleave landing (close-up)](zedran/v2/polish/ripostehit_close.png)
+
+## breah/v2/polish (breah/v2/polish)
+
+**Rubble Leap strip: rock bursts up, take-off, apex tuck, drop, landing crash, rock rolls on (close-up)**
+
+![Rubble Leap strip: rock bursts up, take-off, apex tuck, drop, landing crash, rock rolls on (close-up)](breah/v2/polish/anim_br_dash.png)
+
+**Rubble Leap strip: rock bursts up, take-off, apex tuck, drop, landing crash, rock rolls on (gameplay zoom)**
+
+![Rubble Leap strip: rock bursts up, take-off, apex tuck, drop, landing crash, rock rolls on (gameplay zoom)](breah/v2/polish/anim_br_dash_z1.png)
+
+**Air Quakefall dive strip (close-up)**
+
+![Air Quakefall dive strip (close-up)](breah/v2/polish/anim_br_dive.png)
+
+**Air Quakefall dive strip (gameplay zoom)**
+
+![Air Quakefall dive strip (gameplay zoom)](breah/v2/polish/anim_br_dive_z1.png)
+
+**Air dash strip: her heavy shove with a dust and ember after-image (no shared pill, aimed clear of the dummy) (close-up)**
+
+![Air dash strip: her heavy shove with a dust and ember after-image (no shared pill, aimed clear of the dummy) (close-up)](breah/v2/polish/anim_br_exdash.png)
+
+**Air dash strip: her heavy shove with a dust and ember after-image (no shared pill, aimed clear of the dummy) (gameplay zoom)**
+
+![Air dash strip: her heavy shove with a dust and ember after-image (no shared pill, aimed clear of the dummy) (gameplay zoom)](breah/v2/polish/anim_br_exdash_z1.png)
+
+**Quakefall jump-leap strip (close-up)**
+
+![Quakefall jump-leap strip (close-up)](breah/v2/polish/anim_br_leap.png)
+
+**Quakefall jump-leap strip (gameplay zoom)**
+
+![Quakefall jump-leap strip (gameplay zoom)](breah/v2/polish/anim_br_leap_z1.png)
+
+**Quakefall punch-lunge strip: body drive (close-up)**
+
+![Quakefall punch-lunge strip: body drive (close-up)](breah/v2/polish/anim_br_lunge.png)
+
+**Quakefall punch-lunge strip: body drive (gameplay zoom)**
+
+![Quakefall punch-lunge strip: body drive (gameplay zoom)](breah/v2/polish/anim_br_lunge_z1.png)
+
+**Punch strip: wind (lane, molten fist), drive, overshoot, recover (close-up)**
+
+![Punch strip: wind (lane, molten fist), drive, overshoot, recover (close-up)](breah/v2/polish/anim_br_punch.png)
+
+**Punch strip: wind (lane, molten fist), drive, overshoot, recover (gameplay zoom)**
+
+![Punch strip: wind (lane, molten fist), drive, overshoot, recover (gameplay zoom)](breah/v2/polish/anim_br_punch_z1.png)
+
+**Stone Row strip: rear up, slam down, heave (close-up)**
+
+![Stone Row strip: rear up, slam down, heave (close-up)](breah/v2/polish/anim_br_raise.png)
+
+**Stone Row strip: rear up, slam down, heave (gameplay zoom)**
+
+![Stone Row strip: rear up, slam down, heave (gameplay zoom)](breah/v2/polish/anim_br_raise_z1.png)
+
+**Tremor Sense strip: crouch, palm to the ground (close-up)**
+
+![Tremor Sense strip: crouch, palm to the ground (close-up)](breah/v2/polish/anim_br_sense.png)
+
+**Tremor Sense strip: crouch, palm to the ground (gameplay zoom)**
+
+![Tremor Sense strip: crouch, palm to the ground (gameplay zoom)](breah/v2/polish/anim_br_sense_z1.png)
+
+**Quakefall strip: crouch, hop, smash, crater (close-up)**
+
+![Quakefall strip: crouch, hop, smash, crater (close-up)](breah/v2/polish/anim_br_slam.png)
+
+**Quakefall strip: crouch, hop, smash, crater (gameplay zoom)**
+
+![Quakefall strip: crouch, hop, smash, crater (gameplay zoom)](breah/v2/polish/anim_br_slam_z1.png)
+
+**Basalt Spine strip (close-up)**
+
+![Basalt Spine strip (close-up)](breah/v2/polish/anim_br_spine.png)
+
+**Basalt Spine strip (gameplay zoom)**
+
+![Basalt Spine strip (gameplay zoom)](breah/v2/polish/anim_br_spine_z1.png)
+
+**Boulder throw strip: cock, hurl, follow-through, settle (close-up)**
+
+![Boulder throw strip: cock, hurl, follow-through, settle (close-up)](breah/v2/polish/anim_br_throw.png)
+
+**Boulder throw strip: cock, hurl, follow-through, settle (gameplay zoom)**
+
+![Boulder throw strip: cock, hurl, follow-through, settle (gameplay zoom)](breah/v2/polish/anim_br_throw_z1.png)
+
+**Rubble Leap landing crash: starburst and crater, the foe beside the spot hit (8) (close-up)**
+
+![Rubble Leap landing crash: starburst and crater, the foe beside the spot hit (8) (close-up)](breah/v2/polish/pair_breah_dash_hit.png)
+
+**Rubble Leap landing crash: starburst and crater, the foe beside the spot hit (8) (gameplay zoom)**
+
+![Rubble Leap landing crash: starburst and crater, the foe beside the spot hit (8) (gameplay zoom)](breah/v2/polish/pair_breah_dash_hit_z1.png)
+
+**Rubble Leap mid-air: tucked, fists overhead, the rock arcing after her (close-up)**
+
+![Rubble Leap mid-air: tucked, fists overhead, the rock arcing after her (close-up)](breah/v2/polish/pair_breah_dash_key.png)
+
+**Rubble Leap mid-air: tucked, fists overhead, the rock arcing after her (gameplay zoom)**
+
+![Rubble Leap mid-air: tucked, fists overhead, the rock arcing after her (gameplay zoom)](breah/v2/polish/pair_breah_dash_key_z1.png)
+
+**Rubble Leap second hit: the rock comes down after her and rolls into the foe (ROCKFALL, SHRED) (close-up)**
+
+![Rubble Leap second hit: the rock comes down after her and rolls into the foe (ROCKFALL, SHRED) (close-up)](breah/v2/polish/pair_breah_dash_rock.png)
+
+**Rubble Leap second hit: the rock comes down after her and rolls into the foe (ROCKFALL, SHRED) (gameplay zoom)**
+
+![Rubble Leap second hit: the rock comes down after her and rolls into the foe (ROCKFALL, SHRED) (gameplay zoom)](breah/v2/polish/pair_breah_dash_rock_z1.png)
+
+**Rubble Leap take-off: the rock bursts up under her, landing circle at the cursor (everyone sees it) (close-up)**
+
+![Rubble Leap take-off: the rock bursts up under her, landing circle at the cursor (everyone sees it) (close-up)](breah/v2/polish/pair_breah_dash_tele.png)
+
+**Rubble Leap take-off: the rock bursts up under her, landing circle at the cursor (everyone sees it) (gameplay zoom)**
+
+![Rubble Leap take-off: the rock bursts up under her, landing circle at the cursor (everyone sees it) (gameplay zoom)](breah/v2/polish/pair_breah_dash_tele_z1.png)
+
+**Quakefall jump-leap: the circle comes with her (close-up)**
+
+![Quakefall jump-leap: the circle comes with her (close-up)](breah/v2/polish/pair_breah_leap_key.png)
+
+**Quakefall jump-leap: the circle comes with her (gameplay zoom)**
+
+![Quakefall jump-leap: the circle comes with her (gameplay zoom)](breah/v2/polish/pair_breah_leap_key_z1.png)
+
+**Quakefall punch-lunge: body drive, both fists thrown out (close-up)**
+
+![Quakefall punch-lunge: body drive, both fists thrown out (close-up)](breah/v2/polish/pair_breah_lunge_key.png)
+
+**Quakefall punch-lunge: body drive, both fists thrown out (gameplay zoom)**
+
+![Quakefall punch-lunge: body drive, both fists thrown out (gameplay zoom)](breah/v2/polish/pair_breah_lunge_key_z1.png)
+
+**Punch impact on the foe: dust ring, molten spray, chip burst (close-up)**
+
+![Punch impact on the foe: dust ring, molten spray, chip burst (close-up)](breah/v2/polish/pair_breah_punch_hit.png)
+
+**Punch impact on the foe: dust ring, molten spray, chip burst (gameplay zoom)**
+
+![Punch impact on the foe: dust ring, molten spray, chip burst (gameplay zoom)](breah/v2/polish/pair_breah_punch_hit_z1.png)
+
+**Punch release: the straight drive, fist forward (close-up)**
+
+![Punch release: the straight drive, fist forward (close-up)](breah/v2/polish/pair_breah_punch_key.png)
+
+**Punch release: the straight drive, fist forward (gameplay zoom)**
+
+![Punch release: the straight drive, fist forward (gameplay zoom)](breah/v2/polish/pair_breah_punch_key_z1.png)
+
+**Punch hold: 4.2 x 1.8m lane with chevrons, molten fist glow (no white orb) (close-up)**
+
+![Punch hold: 4.2 x 1.8m lane with chevrons, molten fist glow (no white orb) (close-up)](breah/v2/polish/pair_breah_punch_tele.png)
+
+**Punch hold: 4.2 x 1.8m lane with chevrons, molten fist glow (no white orb) (gameplay zoom)**
+
+![Punch hold: 4.2 x 1.8m lane with chevrons, molten fist glow (no white orb) (gameplay zoom)](breah/v2/polish/pair_breah_punch_tele_z1.png)
+
+**Stone Row after the rise: Breah among the jagged columns, cracks cooled off (close-up)**
+
+![Stone Row after the rise: Breah among the jagged columns, cracks cooled off (close-up)](breah/v2/polish/pair_breah_row_hit.png)
+
+**Stone Row after the rise: Breah among the jagged columns, cracks cooled off (gameplay zoom)**
+
+![Stone Row after the rise: Breah among the jagged columns, cracks cooled off (gameplay zoom)](breah/v2/polish/pair_breah_row_hit_z1.png)
+
+**Stone Row rising: jagged leaning basalt columns 3.4m ahead, thin molten ground cracks (close-up)**
+
+![Stone Row rising: jagged leaning basalt columns 3.4m ahead, thin molten ground cracks (close-up)](breah/v2/polish/pair_breah_row_key.png)
+
+**Stone Row rising: jagged leaning basalt columns 3.4m ahead, thin molten ground cracks (gameplay zoom)**
+
+![Stone Row rising: jagged leaning basalt columns 3.4m ahead, thin molten ground cracks (gameplay zoom)](breah/v2/polish/pair_breah_row_key_z1.png)
+
+**Stone Row tell: the 0.2s red-orange ground flash at each spot before the rise (close-up)**
+
+![Stone Row tell: the 0.2s red-orange ground flash at each spot before the rise (close-up)](breah/v2/polish/pair_breah_row_tele.png)
+
+**Stone Row tell: the 0.2s red-orange ground flash at each spot before the rise (gameplay zoom)**
+
+![Stone Row tell: the 0.2s red-orange ground flash at each spot before the rise (gameplay zoom)](breah/v2/polish/pair_breah_row_tele_z1.png)
+
+**Tremor Sense: the deep sneaking crouch, palm toward the ground (close-up)**
+
+![Tremor Sense: the deep sneaking crouch, palm toward the ground (close-up)](breah/v2/polish/pair_breah_sense_hit.png)
+
+**Tremor Sense: the deep sneaking crouch, palm toward the ground (gameplay zoom)**
+
+![Tremor Sense: the deep sneaking crouch, palm toward the ground (gameplay zoom)](breah/v2/polish/pair_breah_sense_hit_z1.png)
+
+**Tremor Sense: sneaking cone toward the cursor (close-up)**
+
+![Tremor Sense: sneaking cone toward the cursor (close-up)](breah/v2/polish/pair_breah_sense_tele.png)
+
+**Tremor Sense: sneaking cone toward the cursor (gameplay zoom)**
+
+![Tremor Sense: sneaking cone toward the cursor (gameplay zoom)](breah/v2/polish/pair_breah_sense_tele_z1.png)
+
+**Quakefall impact: molten starburst, rock chips, dust ring, dark red cracked crater, STUNNED (close-up)**
+
+![Quakefall impact: molten starburst, rock chips, dust ring, dark red cracked crater, STUNNED (close-up)](breah/v2/polish/pair_breah_slam_hit.png)
+
+**Quakefall impact: molten starburst, rock chips, dust ring, dark red cracked crater, STUNNED (gameplay zoom)**
+
+![Quakefall impact: molten starburst, rock chips, dust ring, dark red cracked crater, STUNNED (gameplay zoom)](breah/v2/polish/pair_breah_slam_hit_z1.png)
+
+**Quakefall: the hop into the centre, fists overhead (close-up)**
+
+![Quakefall: the hop into the centre, fists overhead (close-up)](breah/v2/polish/pair_breah_slam_key.png)
+
+**Quakefall: the hop into the centre, fists overhead (gameplay zoom)**
+
+![Quakefall: the hop into the centre, fists overhead (gameplay zoom)](breah/v2/polish/pair_breah_slam_key_z1.png)
+
+**Quakefall charge: 3.6-4.5m circle a 2m hop ahead, sweet spot, both fists molten (close-up)**
+
+![Quakefall charge: 3.6-4.5m circle a 2m hop ahead, sweet spot, both fists molten (close-up)](breah/v2/polish/pair_breah_slam_tele.png)
+
+**Quakefall charge: 3.6-4.5m circle a 2m hop ahead, sweet spot, both fists molten (gameplay zoom)**
+
+![Quakefall charge: 3.6-4.5m circle a 2m hop ahead, sweet spot, both fists molten (gameplay zoom)](breah/v2/polish/pair_breah_slam_tele_z1.png)
+
+**Basalt Spine risen: the ridge of jagged columns (close-up)**
+
+![Basalt Spine risen: the ridge of jagged columns (close-up)](breah/v2/polish/pair_breah_spine_hit.png)
+
+**Basalt Spine risen: the ridge of jagged columns (gameplay zoom)**
+
+![Basalt Spine risen: the ridge of jagged columns (gameplay zoom)](breah/v2/polish/pair_breah_spine_hit_z1.png)
+
+**Basalt Spine: molten cracks along the line (close-up)**
+
+![Basalt Spine: molten cracks along the line (close-up)](breah/v2/polish/pair_breah_spine_key.png)
+
+**Basalt Spine: molten cracks along the line (gameplay zoom)**
+
+![Basalt Spine: molten cracks along the line (gameplay zoom)](breah/v2/polish/pair_breah_spine_key_z1.png)
+
+**Basalt Spine aim (ult): the ridge preview being dragged (close-up)**
+
+![Basalt Spine aim (ult): the ridge preview being dragged (close-up)](breah/v2/polish/pair_breah_spine_tele.png)
+
+**Basalt Spine aim (ult): the ridge preview being dragged (gameplay zoom)**
+
+![Basalt Spine aim (ult): the ridge preview being dragged (gameplay zoom)](breah/v2/polish/pair_breah_spine_tele_z1.png)
+
+**Boulder burst: red splash ring, orange burst (no white puff) (close-up)**
+
+![Boulder burst: red splash ring, orange burst (no white puff) (close-up)](breah/v2/polish/pair_breah_throw_hit.png)
+
+**Boulder burst: red splash ring, orange burst (no white puff) (gameplay zoom)**
+
+![Boulder burst: red splash ring, orange burst (no white puff) (gameplay zoom)](breah/v2/polish/pair_breah_throw_hit_z1.png)
+
+**Boulder tap: side hurl, the molten boulder (0.6m, opaque basalt, ember trail) leaving (close-up)**
+
+![Boulder tap: side hurl, the molten boulder (0.6m, opaque basalt, ember trail) leaving (close-up)](breah/v2/polish/pair_breah_throw_key.png)
+
+**Boulder tap: side hurl, the molten boulder (0.6m, opaque basalt, ember trail) leaving (gameplay zoom)**
+
+![Boulder tap: side hurl, the molten boulder (0.6m, opaque basalt, ember trail) leaving (gameplay zoom)](breah/v2/polish/pair_breah_throw_key_z1.png)
+
+**Punch into the row: a rock launched as a flaming boulder, ROCKFALL (close-up)**
+
+![Punch into the row: a rock launched as a flaming boulder, ROCKFALL (close-up)](breah/v2/polish/pair_dolm_pay.png)
+
+**Punch into the row: a rock launched as a flaming boulder, ROCKFALL (gameplay zoom)**
+
+![Punch into the row: a rock launched as a flaming boulder, ROCKFALL (gameplay zoom)](breah/v2/polish/pair_dolm_pay_z1.png)
+
+**Stone Row from above: three jagged basalt rocks spanning about 5m (close-up)**
+
+![Stone Row from above: three jagged basalt rocks spanning about 5m (close-up)](breah/v2/polish/pair_dolm_rocks.png)
+
+**Stone Row from above: three jagged basalt rocks spanning about 5m (gameplay zoom)**
+
+![Stone Row from above: three jagged basalt rocks spanning about 5m (gameplay zoom)](breah/v2/polish/pair_dolm_rocks_z1.png)
+
+**Quakefall charge from the side: circle and sweet spot (close-up)**
+
+![Quakefall charge from the side: circle and sweet spot (close-up)](breah/v2/polish/pair_dolm_slam.png)
+
+**Quakefall charge from the side: circle and sweet spot (gameplay zoom)**
+
+![Quakefall charge from the side: circle and sweet spot (gameplay zoom)](breah/v2/polish/pair_dolm_slam_z1.png)
+
+## ostra/v2/polish (ostra/v2/polish)
+
+**Trade arrival strip: implode-in, stretch, squash, pop, settle (close-up)**
+
+![Trade arrival strip: implode-in, stretch, squash, pop, settle (close-up)](ostra/v2/polish/anim_os_arrive.png)
+
+**Trade arrival strip: implode-in, stretch, squash, pop, settle (gameplay zoom)**
+
+![Trade arrival strip: implode-in, stretch, squash, pop, settle (gameplay zoom)](ostra/v2/polish/anim_os_arrive_z1.png)
+
+**Swollen strip: the turn in the air, magenta sphere (close-up)**
+
+![Swollen strip: the turn in the air, magenta sphere (close-up)](ostra/v2/polish/anim_os_empower.png)
+
+**Swollen strip: the turn in the air, magenta sphere (gameplay zoom)**
+
+![Swollen strip: the turn in the air, magenta sphere (gameplay zoom)](ostra/v2/polish/anim_os_empower_z1.png)
+
+**Orb strip: hand flick (close-up)**
+
+![Orb strip: hand flick (close-up)](ostra/v2/polish/anim_os_orb.png)
+
+**Settled bolt strip: charge mote, fling, recoil (close-up)**
+
+![Settled bolt strip: charge mote, fling, recoil (close-up)](ostra/v2/polish/anim_os_orb_hot.png)
+
+**Settled bolt strip: charge mote, fling, recoil (gameplay zoom)**
+
+![Settled bolt strip: charge mote, fling, recoil (gameplay zoom)](ostra/v2/polish/anim_os_orb_hot_z1.png)
+
+**Orb strip: hand flick (gameplay zoom)**
+
+![Orb strip: hand flick (gameplay zoom)](ostra/v2/polish/anim_os_orb_z1.png)
+
+**Brimseed pop strip (close-up)**
+
+![Brimseed pop strip (close-up)](ostra/v2/polish/anim_os_pop.png)
+
+**Brimseed pop strip (gameplay zoom)**
+
+![Brimseed pop strip (gameplay zoom)](ostra/v2/polish/anim_os_pop_z1.png)
+
+**Brimseed strip: raise, palm down, mote drops (close-up)**
+
+![Brimseed strip: raise, palm down, mote drops (close-up)](ostra/v2/polish/anim_os_seed.png)
+
+**Brimseed strip: raise, palm down, mote drops (gameplay zoom)**
+
+![Brimseed strip: raise, palm down, mote drops (gameplay zoom)](ostra/v2/polish/anim_os_seed_z1.png)
+
+**Shard Snap strip: black wind-up orb, push, bundle (close-up)**
+
+![Shard Snap strip: black wind-up orb, push, bundle (close-up)](ostra/v2/polish/anim_os_snap.png)
+
+**Shard Snap strip: black wind-up orb, push, bundle (gameplay zoom)**
+
+![Shard Snap strip: black wind-up orb, push, bundle (gameplay zoom)](ostra/v2/polish/anim_os_snap_z1.png)
+
+**Trade lob strip: underhand lob of the star-orb, origin sigil (close-up)**
+
+![Trade lob strip: underhand lob of the star-orb, origin sigil (close-up)](ostra/v2/polish/anim_os_swap.png)
+
+**Trade lob strip: underhand lob of the star-orb, origin sigil (gameplay zoom)**
+
+![Trade lob strip: underhand lob of the star-orb, origin sigil (gameplay zoom)](ostra/v2/polish/anim_os_swap_z1.png)
+
+**Nightwell strip (close-up)**
+
+![Nightwell strip (close-up)](ostra/v2/polish/anim_os_well.png)
+
+**Nightwell strip (gameplay zoom)**
+
+![Nightwell strip (gameplay zoom)](ostra/v2/polish/anim_os_well_z1.png)
+
+**Ostra's permanent aim line (an orb just leaving the lantern) (close-up)**
+
+![Ostra's permanent aim line (an orb just leaving the lantern) (close-up)](ostra/v2/polish/pair_ostra_aim_tele.png)
+
+**Ostra's permanent aim line (an orb just leaving the lantern) (gameplay zoom)**
+
+![Ostra's permanent aim line (an orb just leaving the lantern) (gameplay zoom)](ostra/v2/polish/pair_ostra_aim_tele_z1.png)
+
+**Snap wind-up rails (close-up)**
+
+![Snap wind-up rails (close-up)](ostra/v2/polish/pair_ostra_fan.png)
+
+**Snap wind-up rails (gameplay zoom)**
+
+![Snap wind-up rails (gameplay zoom)](ostra/v2/polish/pair_ostra_fan_z1.png)
+
+**Settled bolt hit: blue-violet ring and burst on the target (close-up)**
+
+![Settled bolt hit: blue-violet ring and burst on the target (close-up)](ostra/v2/polish/pair_ostra_hot_hit.png)
+
+**Settled bolt hit: blue-violet ring and burst on the target (gameplay zoom)**
+
+![Settled bolt hit: blue-violet ring and burst on the target (gameplay zoom)](ostra/v2/polish/pair_ostra_hot_hit_z1.png)
+
+**Settled bolt fired: blue-violet ring at her hand (the bolt crosses the frame in under 0.15s; see the strip) (close-up)**
+
+![Settled bolt fired: blue-violet ring at her hand (the bolt crosses the frame in under 0.15s; see the strip) (close-up)](ostra/v2/polish/pair_ostra_hot_key.png)
+
+**Settled bolt fired: blue-violet ring at her hand (the bolt crosses the frame in under 0.15s; see the strip) (gameplay zoom)**
+
+![Settled bolt fired: blue-violet ring at her hand (the bolt crosses the frame in under 0.15s; see the strip) (gameplay zoom)](ostra/v2/polish/pair_ostra_hot_key_z1.png)
+
+**Orbs to full range past the cursor (close-up)**
+
+![Orbs to full range past the cursor (close-up)](ostra/v2/polish/pair_ostra_orb.png)
+
+**Orb impact on the dummy: violet burst (close-up)**
+
+![Orb impact on the dummy: violet burst (close-up)](ostra/v2/polish/pair_ostra_orb_hit.png)
+
+**Orb impact on the dummy: violet burst (gameplay zoom)**
+
+![Orb impact on the dummy: violet burst (gameplay zoom)](ostra/v2/polish/pair_ostra_orb_hit_z1.png)
+
+**Gravity orb in flight: violet glass teardrop (0.28m) with a 1.2m magenta tail (close-up)**
+
+![Gravity orb in flight: violet glass teardrop (0.28m) with a 1.2m magenta tail (close-up)](ostra/v2/polish/pair_ostra_orb_key.png)
+
+**Gravity orb in flight: violet glass teardrop (0.28m) with a 1.2m magenta tail (gameplay zoom)**
+
+![Gravity orb in flight: violet glass teardrop (0.28m) with a 1.2m magenta tail (gameplay zoom)](ostra/v2/polish/pair_ostra_orb_key_z1.png)
+
+**Orbs to full range past the cursor (gameplay zoom)**
+
+![Orbs to full range past the cursor (gameplay zoom)](ostra/v2/polish/pair_ostra_orb_z1.png)
+
+**Brimseed full pop by itself: COLLAPSE on the dummy, GROUNDED (close-up)**
+
+![Brimseed full pop by itself: COLLAPSE on the dummy, GROUNDED (close-up)](ostra/v2/polish/pair_ostra_seed_collapse.png)
+
+**Brimseed full pop by itself: COLLAPSE on the dummy, GROUNDED (gameplay zoom)**
+
+![Brimseed full pop by itself: COLLAPSE on the dummy, GROUNDED (gameplay zoom)](ostra/v2/polish/pair_ostra_seed_collapse_z1.png)
+
+**Brimseed near full growth (5.2s): indigo swirl drum at full width, light column (close-up)**
+
+![Brimseed near full growth (5.2s): indigo swirl drum at full width, light column (close-up)](ostra/v2/polish/pair_ostra_seed_full.png)
+
+**Brimseed near full growth (5.2s): indigo swirl drum at full width, light column (gameplay zoom)**
+
+![Brimseed near full growth (5.2s): indigo swirl drum at full width, light column (gameplay zoom)](ostra/v2/polish/pair_ostra_seed_full_z1.png)
+
+**Brimseed pop: implosion, GROUNDED (close-up)**
+
+![Brimseed pop: implosion, GROUNDED (close-up)](ostra/v2/polish/pair_ostra_seed_hit.png)
+
+**Brimseed pop: implosion, GROUNDED (gameplay zoom)**
+
+![Brimseed pop: implosion, GROUNDED (gameplay zoom)](ostra/v2/polish/pair_ostra_seed_hit_z1.png)
+
+**Brimseed recast moment: the grown drum (close-up)**
+
+![Brimseed recast moment: the grown drum (close-up)](ostra/v2/polish/pair_ostra_seed_key.png)
+
+**Brimseed recast moment: the grown drum (gameplay zoom)**
+
+![Brimseed recast moment: the grown drum (gameplay zoom)](ostra/v2/polish/pair_ostra_seed_key_z1.png)
+
+**Brimseed planted: dark indigo glass drum, teal rim (close-up)**
+
+![Brimseed planted: dark indigo glass drum, teal rim (close-up)](ostra/v2/polish/pair_ostra_seed_tele.png)
+
+**Brimseed planted: dark indigo glass drum, teal rim (gameplay zoom)**
+
+![Brimseed planted: dark indigo glass drum, teal rim (gameplay zoom)](ostra/v2/polish/pair_ostra_seed_tele_z1.png)
+
+**Shard Snap hit: STUNNED (one word) and stars on the training dummy (close-up)**
+
+![Shard Snap hit: STUNNED (one word) and stars on the training dummy (close-up)](ostra/v2/polish/pair_ostra_snap_hit.png)
+
+**Shard Snap hit: STUNNED (one word) and stars on the training dummy (gameplay zoom)**
+
+![Shard Snap hit: STUNNED (one word) and stars on the training dummy (gameplay zoom)](ostra/v2/polish/pair_ostra_snap_hit_z1.png)
+
+**Shard Snap release: the 2.7m dark violet crystal bundle (close-up)**
+
+![Shard Snap release: the 2.7m dark violet crystal bundle (close-up)](ostra/v2/polish/pair_ostra_snap_key.png)
+
+**Shard Snap release: the 2.7m dark violet crystal bundle (gameplay zoom)**
+
+![Shard Snap release: the 2.7m dark violet crystal bundle (gameplay zoom)](ostra/v2/polish/pair_ostra_snap_key_z1.png)
+
+**Shard Snap wind-up: rails and the opaque black orb with a pale rim, before release (close-up)**
+
+![Shard Snap wind-up: rails and the opaque black orb with a pale rim, before release (close-up)](ostra/v2/polish/pair_ostra_snap_tele.png)
+
+**Shard Snap wind-up: rails and the opaque black orb with a pale rim, before release (gameplay zoom)**
+
+![Shard Snap wind-up: rails and the opaque black orb with a pale rim, before release (gameplay zoom)](ostra/v2/polish/pair_ostra_snap_tele_z1.png)
+
+**Lantern Trade arrival: she is at the circle, the dummy at her origin reading SLOWED (not DIZZY) (close-up)**
+
+![Lantern Trade arrival: she is at the circle, the dummy at her origin reading SLOWED (not DIZZY) (close-up)](ostra/v2/polish/pair_ostra_swap_hit.png)
+
+**Lantern Trade arrival: she is at the circle, the dummy at her origin reading SLOWED (not DIZZY) (gameplay zoom)**
+
+![Lantern Trade arrival: she is at the circle, the dummy at her origin reading SLOWED (not DIZZY) (gameplay zoom)](ostra/v2/polish/pair_ostra_swap_hit_z1.png)
+
+**Lantern Trade in flight: she hovers in place, dark indigo star-orb lobbed high, both sigils filling (close-up)**
+
+![Lantern Trade in flight: she hovers in place, dark indigo star-orb lobbed high, both sigils filling (close-up)](ostra/v2/polish/pair_ostra_swap_key.png)
+
+**Lantern Trade in flight: she hovers in place, dark indigo star-orb lobbed high, both sigils filling (gameplay zoom)**
+
+![Lantern Trade in flight: she hovers in place, dark indigo star-orb lobbed high, both sigils filling (gameplay zoom)](ostra/v2/polish/pair_ostra_swap_key_z1.png)
+
+**Lantern Trade aim: both ends, teal origin sigil and violet target sigil (close-up)**
+
+![Lantern Trade aim: both ends, teal origin sigil and violet target sigil (close-up)](ostra/v2/polish/pair_ostra_swap_tele.png)
+
+**Lantern Trade aim: both ends, teal origin sigil and violet target sigil (gameplay zoom)**
+
+![Lantern Trade aim: both ends, teal origin sigil and violet target sigil (gameplay zoom)](ostra/v2/polish/pair_ostra_swap_tele_z1.png)
+
+**Swollen: magenta sphere that reads on bright grass (close-up)**
+
+![Swollen: magenta sphere that reads on bright grass (close-up)](ostra/v2/polish/pair_ostra_swollen_key.png)
+
+**Swollen: magenta sphere that reads on bright grass (gameplay zoom)**
+
+![Swollen: magenta sphere that reads on bright grass (gameplay zoom)](ostra/v2/polish/pair_ostra_swollen_key_z1.png)
+
+**Trade in flight from the side: both ends marked (close-up)**
+
+![Trade in flight from the side: both ends marked (close-up)](ostra/v2/polish/pair_ostra_trade.png)
+
+**Trade in flight from the side: both ends marked (gameplay zoom)**
+
+![Trade in flight from the side: both ends marked (gameplay zoom)](ostra/v2/polish/pair_ostra_trade_z1.png)
+
+**Nightwell drawing in (close-up)**
+
+![Nightwell drawing in (close-up)](ostra/v2/polish/pair_ostra_well_hit.png)
+
+**Nightwell drawing in (gameplay zoom)**
+
+![Nightwell drawing in (gameplay zoom)](ostra/v2/polish/pair_ostra_well_hit_z1.png)
+
+**Nightwell open: dark violet disc with alpha-blended arms, the foe stunned (close-up)**
+
+![Nightwell open: dark violet disc with alpha-blended arms, the foe stunned (close-up)](ostra/v2/polish/pair_ostra_well_key.png)
+
+**Nightwell open: dark violet disc with alpha-blended arms, the foe stunned (gameplay zoom)**
+
+![Nightwell open: dark violet disc with alpha-blended arms, the foe stunned (gameplay zoom)](ostra/v2/polish/pair_ostra_well_key_z1.png)
+
+**Nightwell (ult) tell: the pale dome everyone sees (close-up)**
+
+![Nightwell (ult) tell: the pale dome everyone sees (close-up)](ostra/v2/polish/pair_ostra_well_tele.png)
+
+**Nightwell (ult) tell: the pale dome everyone sees (gameplay zoom)**
+
+![Nightwell (ult) tell: the pale dome everyone sees (gameplay zoom)](ostra/v2/polish/pair_ostra_well_tele_z1.png)
