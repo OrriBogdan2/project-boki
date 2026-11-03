@@ -207,6 +207,10 @@ func swap_time() -> float:
 func in_dash() -> bool:
 	return super.in_dash() or not swap.is_empty()
 
+## s left in her dash: the Trade's flight, else the shared dash's.
+func dash_left() -> float:
+	return float(swap["t"]) if not swap.is_empty() else super.dash_left()
+
 ## Shift: hold to see both ends (where you are, where the lantern lands at the cursor), let go to lob.
 ## A tap lobs at once. It never travels by itself, so a press in the air or with no charge never sends
 ## her off in some other direction: it waits for the next charge.
