@@ -584,3 +584,12 @@ DECISIONS.md wins over every brief. Every agent should re-read it before buildin
 
 ## 2026-11-03 15:05 ET (20:05 UTC) ORCH check-in
 - Nothing new since the 15:05 ET routing entries. Main is at 3569310c (mapclean-fix c36f6ea merged, overheated glider lifts at half strength). [MAIN] Post the sync number when the owner's PC has it, and fold the DECISION?/PRIORITIES? lines (EXT_TO_MAIN 19:35-20:15 UTC) into DECISIONS.md and PRIORITIES.md.
+
+## 2026-11-03 20:30 UTC (MAIN): owner-approved new queue items, for the whole system (see DECISIONS.md)
+The owner agreed to all of these. Owners are tagged:
+1. **[IMAGE-GEN] Boki concept art:** the Boki are the star but have no art pipeline. Make turnarounds, splashes and texture sheets for the starter and common Boki species first (to the same STYLE.md), on ext/imagegen. Then S2 models them after the Wardens.
+2. **[ORCH research, then OWNER decision] Online hosting:** the launcher opens into online modes (Duel online, Arena 4v4, squads of 3), which need match hosting and matchmaking. Research the options with rough monthly cost at small scale: Steam networking/relay, a Godot dedicated server on a cheap VPS, a relay service (e.g. W4/Nakama/Photon-like), and listen-server plus NAT punch-through. Recommend one in a short page for the owner. No build yet.
+3. **[MAIN + S2] Outside playtesters:** main builds the playtest tools (F8 feedback with a note, screenshot and state; session stats; a tester guide). S2 adds a "send to tester" package of the build (Windows zip plus README). The owner recruits 2–3 testers.
+4. **[MAIN, done] Fusion naming:** merge forms are Fusions. Main renamed the content (f048214b).
+5. **[MAIN] The Boki box:** the right-side box for your Boki, plus Boki icons on the teammate rows on the left (DECISIONS). Main builds it with the readability UI (PRIORITIES 3).
+6. **[ALL] Models:** move most work onto the owner's new low-usage model (DECISIONS: Agents and art).

@@ -15,7 +15,7 @@ Main keeps this file current; anyone can propose a line in EXT_TO_MAIN tagged "D
   - Layers: Locked, then Personal, then Cosmetic (skins keep the silhouette).
 - Character creation is just you. The new-game flow is: intro, make yourself, egg, farm. Venator's Mantle is taken up at the first portal (the tutorial). The second Mantle is 1 of Zedran, Pin or Linwick, picked after the tutorial. Others unlock through challenges.
 - Explain the Mantle in the prologue (one line) and at the first portal (one sentence).
-- Merge forms must NOT be called "Mantle". New word pending (Fusion / Bond Form).
+- A merged hunter+Boki form is a **Fusion** (owner, Nov 3). Never "Mantle". Venom Mantle is now Venom Fusion; the Gale Mantle glove is now the Gale Cloak (main f048214b).
 
 ## Controls (final; key text always via Settings.key_cap)
 - R reload, X hunter ultimate, Q/V gloves, 1-4 belt, F interact, Y emote, Shift dash, E utility.
@@ -47,7 +47,7 @@ Main keeps this file current; anyone can propose a line in EXT_TO_MAIN tagged "D
 - Regen: 6%/s while carried, 1.5%/s out after 6 s without damage, none while downed.
 - Merge timeout gives a 10 s rest; a release gives a 6 s rest plus afterglow. Every merge should feel like an event, with a per-type form ability, dash and passive (spec pending owner approval).
 - Boki loss (higher tiers): the Boki guards the deathbox, bond-pull tracking, then the Ransom tab in the Black Market or captured_by plus an offer or message. Carry your Boki at 90% speed while rescuing it.
-- Boki HUD: one box on the right (health, bond ring with %, MERGE and status tags). Teammates' Boki show as small icons by teammates on the left.
+- Boki HUD (main decided at the owner's request, Nov 3): **your Boki lives in the right-side box** beside your own kit (portrait, health bar, bond ring with %, MERGE and short status tags: TOO FAR, RESCUE, RESTING). It's yours, like your abilities. **The left side stays teammates**, as in SUPERVIVE; each teammate row gets a small Boki icon with its health, so squads see whose Boki is down. Revisit after a playtest if it reads badly.
 
 ## Loadout, loot, world
 - 2 gloves, 2 charms, boots, 4 utility slots, 5 perk orbs. No upgrading. Every item exists once in a deathbox. Backpacks come from enemy deathboxes, home and shops, not random drops. Keys sit in utility slots.
@@ -77,7 +77,8 @@ Main keeps this file current; anyone can propose a line in EXT_TO_MAIN tagged "D
 - Arena mode: 4v4 rounds like the source's, each round a little different.
 
 ## Agents and art
-- Agent models: Opus for feel-critical, parity, cross-hero and design work. Sonnet only for small, clear fixes.
+- Agent models: the owner says the new model costs only about 15% of the usage, so **push most work onto the new low-usage model**. Use Opus only where the owner or DECISIONS asks for it (feel-critical parity, e.g. Zedran item 22). Sonnet for small, clear fixes.
+- Art pipeline: the image-gen session makes concept sheets on ext/imagegen. S2 builds the 3D models from them (Vex first, for the owner's review). 2D portraits go into the menus early (ext/portraits-2d).
 - Portraits come from the art pass; ext/portrait keeps only its frame and HUD side.
 
 ## Process (all agents)
