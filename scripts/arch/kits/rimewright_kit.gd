@@ -409,7 +409,7 @@ func _hold_spear() -> void:
 	var dir := h.aim_dir()
 	var ahead := Vector3(dir.x, 0.55, dir.y).normalized()
 	var at := CareUtil.hand_at(h, false) + Vector3(0, 0.1, 0)
-	var xf := Transform3D(Basis.looking_at(ahead, Vector3.UP), at)
+	var xf := Transform3D(Basis.looking_at(ahead, Vector3.UP).scaled(Vector3.ONE * 1.4), at)
 	lk().keep("spear_prop", "spear", at, {"xf": xf})
 
 func fire_rmb(c: Dictionary) -> void:

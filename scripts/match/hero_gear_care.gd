@@ -168,21 +168,21 @@ static func _rime(c: Dictionary) -> void:
 	# two long scarf tails streaming behind
 	var scarf := Models._pivot(t, "Scarf", Vector3(0, 0.6, 0.18 * bw))
 	for sx in [-1.0, 1.0]:
-		var ln := 0.9 if sx < 0.0 else 0.7
+		var ln := 0.55 if sx < 0.0 else 0.42      # short: on her long frame longer tails read as a spike
 		_p(
 				scarf,
 				HeroKit.lock_mesh(
-					"rime_scarf%d" % int(sx),
+					"rime_scarf_s%d" % int(sx),
 					[
 						Vector3(0.06 * sx, 0.0, 0.0), Vector3(0.12 * sx, -0.1, 0.22),
-						Vector3(0.2 * sx, -0.18, 0.42 * ln + 0.2), Vector3(0.26 * sx, -0.32, 0.7 * ln + 0.3)],
+						Vector3(0.18 * sx, -0.32, 0.3 * ln + 0.1), Vector3(0.22 * sx, -0.6, 0.45 * ln + 0.12)],
 					0.12, 0.4, Vector3.BACK, 0.8, 0.5),
 				teal)
 		_p(
 				scarf,
 				HeroKit.lock_mesh(
-					"rime_scarfh%d" % int(sx),
-					[Vector3(0.2 * sx, -0.18, 0.42 * ln + 0.2), Vector3(0.26 * sx, -0.32, 0.7 * ln + 0.3)], 0.12,
+					"rime_scarfh_s%d" % int(sx),
+					[Vector3(0.18 * sx, -0.32, 0.3 * ln + 0.1), Vector3(0.22 * sx, -0.6, 0.45 * ln + 0.12)], 0.12,
 					0.4, Vector3.BACK, 0.9, 0.4),
 				fur, Vector3(0, 0.003, 0))
 	# ice shards cluster on the left shoulder

@@ -15,7 +15,7 @@ const SPEC := {
 	"tender_rmb": {
 		"strip": [0.6, 0.84, 0.9, 0.98, 1.4, 1.86],
 		"keys": {"rmb_aim": 0.7, "rmb_disc": 1.4, "rmb_root": 1.86}},
-	"tender_e": {"strip": [0.34, 0.38, 0.48, 0.62, 1.06, 1.14], "keys": {"e": 0.5, "e_thrown": 1.3}},
+	"tender_e": {"strip": [0.36, 0.4, 0.48, 0.6, 1.06, 1.14], "keys": {"e": 0.5, "e_thrown": 1.3}},
 	"tender_dash": {"strip": [0.3, 0.33, 0.36, 0.42, 0.5, 0.62], "keys": {"dash": 0.36}},
 	"tender_air": {"strip": [0.33, 0.42, 0.55, 0.75, 0.95, 1.2], "keys": {"air": 0.42, "air_float": 0.8}},
 	"tender_carry": {"strip": [0.3, 0.45, 0.6, 1.0, 1.5, 2.0], "keys": {"carry": 1.5}},
@@ -25,7 +25,7 @@ const SPEC := {
 	"tender_ultaim": {"strip": [0.28, 0.34, 0.4, 0.46, 0.6], "keys": {"ultaim": 0.45}},
 	"tender_ultkey": {"strip": [0.5, 0.56, 0.62, 0.7, 0.9, 1.5], "keys": {"ultkey": 1.5}},
 	"tender_ult": {"strip": [1.5, 5.4, 5.56, 5.62, 5.72, 5.9], "keys": {"ult_end": 5.62}},
-	"rimewright_lmb": {"strip": [0.31, 0.34, 0.4, 0.48, 0.56, 0.7], "keys": {"lmb": 0.34, "lmb_fly": 0.75}},
+	"rimewright_lmb": {"strip": [0.42, 0.45, 0.5, 0.56, 0.62, 0.7], "keys": {"lmb": 0.45, "lmb_fly": 0.8}},
 	"rimewright_shatter": {
 		"strip": [1.0, 1.6, 2.02, 2.12, 2.24, 2.4], "keys": {"stacks": 1.6, "shell": 2.12, "shatter": 2.26}},
 	"rimewright_payoff": {"strip": [0.5, 0.7, 0.9, 1.1, 1.3, 1.5], "keys": {"payoff": 1.3}},
@@ -66,7 +66,8 @@ static func tick(A: Arena, dt: float, w: String) -> void:
 		for l in m.find_children("*", "Label3D", true, false):
 			if String((l as Label3D).text).contains("KIT CARD"): (l as Label3D).visible = false
 	P.hp = P.max_hp
-	P.ult = 0.0          # no BOND READY word over the frames (the meter is the main session's)
+	# far below full, so a payoff this step can't fill it: no BOND READY word or toast over the frames
+	P.ult = -100.0
 	for k in m.kins:
 		if is_instance_valid(k): (k as Node3D).visible = false
 	var Al: Hunter = (A.get_meta("care_ally") if A.has_meta("care_ally") else null)
@@ -116,8 +117,10 @@ static func _place_ally(A: Arena, P: Hunter, Al: Hunter, what: String) -> void:
 		Al.teleport(P.pos + right * 3.0 + fwd * 0.8)
 	elif what == "dash":
 		Al.teleport(P.pos + right * 2.0 + fwd * 0.6)
-	else:
+	elif close():
 		Al.teleport(P.pos + fwd * 2.6 - right * 1.6)
+	else:
+		Al.teleport(P.pos - fwd * 1.8 - right * 2.2)      # below and left of her on screen, off the aim
 
 ## The hero 7.5 m from the first dummy, and a teammate behind her (away from the close-up camera).
 static func _setup(A: Arena, arch: String, what: String) -> Hunter:
@@ -126,7 +129,7 @@ static func _setup(A: Arena, arch: String, what: String) -> Hunter:
 	var D: Hunter = A.dummies[0]["h"]
 	A.set_arch(arch, "lantern_crook" if arch == "tender" else "hoar_fan")
 	A.set_kin("puddlet")
-	P.teleport(D.pos + Vector3(-1.0, 0, 7.5))
+	P.teleport(D.pos + Vector3(-1.0, 0, 6.0))
 	A.home = P.pos
 	var at := P.pos + Vector3(-2.3, 0, 1.2)
 	var Al := m.make_hunter("Ally", P.team, "medium", "Ally", "idle", {}, at, {"arch": "none"})

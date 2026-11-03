@@ -239,7 +239,7 @@ func _build(kind: String) -> Node3D:
 						Vector3(cos(a6) * 0.32, 0.6 + 0.12 * (i % 2), sin(a6) * 0.32)))
 				s2.basis = Basis(Quaternion(Vector3.UP, Vector3(cos(a6) * 0.35, 1.0, sin(a6) * 0.35).normalized()))
 		"frost":
-			_off(Models.part(n, Models.capsule(0.42, 1.5), orb_mat(Color("6fd8f0", 0.45)), Vector3(0, 0.8, 0)))
+			_off(Models.part(n, Models.capsule(0.42, 1.5), orb_mat(Color("2fb0e0", 0.55)), Vector3(0, 0.8, 0)))
 		"chip":
 			# one ice chip of the skate trail
 			_off(Models.part(
@@ -316,6 +316,8 @@ func skin(s: Dictionary, kind: String) -> void:
 	var n := _take(kind)
 	n.scale = Vector3.ONE
 	n.global_position = s["pos"]
+	var tail := n.get_node_or_null("Tail") as Node3D
+	if tail: tail.visible = true
 	skins.append({"s": s, "n": n, "kind": kind, "last": s["pos"]})
 
 ## The shot dictionary spawned last by this hunter (spawn_shot appends it).
@@ -518,6 +520,7 @@ func keep(key: String, kind: String, at: Vector3, p := {}) -> void:
 			_tint(n, Color.WHITE, float(p.get("a", 1.0)))
 		"spear":
 			n.global_transform = p["xf"]          # the held spear, placed by the kit in her raised hand
+			(n.get_node("Tail") as Node3D).visible = false
 		_:
 			var r := float(p.get("r", 1.0))
 			n.scale = Vector3(r, 1.0, r)
