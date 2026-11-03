@@ -30,6 +30,18 @@ static func guarding(k: Kin) -> bool:
 static func scannable_by(h: Hunter, k: Kin) -> bool:
 	return k.state == "dazed" and not k.dead and (k.owner_h == null or k.owner_h.team != h.team)
 
+const STALE_S := 2.0     # s: a proxy's cradle progress older than this (its owner's game went quiet) no longer counts
+
+## Is its owner carrying it (or just starting to)? A proxy copy counts only while its owner is in the match and the
+## snapshots are fresh, so a disconnect mid-carry cannot leave a Boki unscannable.
+static func cradled(k: Kin) -> bool:
+	if not (k.rescue_on or k.rescue_t > 0.0):
+		return false
+	var h := k.owner_h
+	if h == null or h.out or h.extracted:
+		return false
+	return not k.remote or k.m.time - k.net_t < STALE_S
+
 ## The hunter died: safe tiers send the Boki home with them, the others drop it to guard. box_pos is
 ## where the deathbox went (Vector3.INF when there is none).
 static func on_owner_out(m, h: Hunter, k: Kin, box_pos: Vector3) -> void:
@@ -38,6 +50,8 @@ static func on_owner_out(m, h: Hunter, k: Kin, box_pos: Vector3) -> void:
 	m.giant_free(k)
 	if Loaner.is_loaner(k.rec) or not risky_match(m):
 		k.state = "away"            # never lost: it keeps out of sight and comes back if you are revived
+		k.rescue_on = false
+		k.rescue_t = 0.0
 		return
 	if h.remote:
 		return                       # (their own game drops it and the snapshot tells us)
@@ -128,6 +142,8 @@ static func spawn_guard(m, owner_hunter: Hunter, rec: Dictionary, at: Vector3) -
 	m.ents_by_id[k.nid] = k
 	k.teleport(at)
 	_stand_guard(m, owner_hunter, k)
+	if owner_hunter.kin == null or (owner_hunter.kin as Kin).dead:
+		owner_hunter.kin = k
 	return k
 
 static func _stand_guard(m, owner_hunter: Hunter, k: Kin) -> void:
@@ -145,6 +161,7 @@ static func _stand_guard(m, owner_hunter: Hunter, k: Kin) -> void:
 	k.rescue_t = 0.0
 	k.rescue_on = false
 	k.rescue_block = 0.0
+	k.catch_prog = 0.0
 	k.down_t = 0.0
 	k.down_void = false
 	k.dead = false
@@ -153,6 +170,41 @@ static func _stand_guard(m, owner_hunter: Hunter, k: Kin) -> void:
 	k.lost_uid = String(k.rec.get("uid", ""))
 	k.lost_owner = owner_hunter
 	m.fx.burst(k.pos + Vector3(0, 0.6, 0), Color("fff2a0"), 10, 2.0)
+	if m.net_on:
+		m.net_event(["guard", k.nid, owner_hunter.nid, k.rec])
+
+## The "guard" event (a client's Boki now guards): the other games' copy of it learns whose it is and its real record,
+## so a scan by the host takes the right Boki and starts the bond. A copy that does not exist yet is filled in when it
+## is made (apply_pending).
+static func on_guard_net(m, x: Array) -> void:
+	if x.size() < 4 or typeof(x[3]) != TYPE_DICTIONARY:
+		return
+	var nid := String(x[1])
+	var k = m.ents_by_id.get(nid, null)
+	if k is Kin:
+		_adopt(k, m.ents_by_id.get(String(x[2]), null), x[3])
+	else:
+		var pending: Dictionary = m.get_meta("guards", {})
+		pending[nid] = x
+		m.set_meta("guards", pending)
+
+## A copy made after its guard event arrived.
+static func apply_pending(m, k: Kin) -> void:
+	var pending: Dictionary = m.get_meta("guards", {})
+	if pending.has(k.nid):
+		var x: Array = pending[k.nid]
+		pending.erase(k.nid)
+		_adopt(k, m.ents_by_id.get(String(x[2]), null), x[3])
+
+static func _adopt(k: Kin, owner_hunter, rec: Dictionary) -> void:
+	if not (owner_hunter is Hunter):
+		return
+	k.rec = rec.duplicate(true)
+	k.owner_h = owner_hunter
+	k.catch_prog = 0.0
+	k.lost_from = (owner_hunter as Hunter).pname
+	k.lost_uid = String(rec.get("uid", ""))
+	k.lost_owner = owner_hunter
 
 static func ground(m, at: Vector3) -> Vector3:
 	if m.world.is_void(at.x, at.z):

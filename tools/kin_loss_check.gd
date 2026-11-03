@@ -9,6 +9,8 @@ extends RefCounted
 ##   5. the match ends with nobody having taken it: "ransom" in the save
 ##   6. captured and the captor extracted: "captured_by:<name>" in the save, and it cannot be picked for a match
 ##   7. Net.VERSION is 0.18.0
+##  10. second review: a host scan of a client's guard (proxy) takes the real Boki and starts the bond; Shift or F
+##      puts the carry down (no dash), no auto pick-up with a foe near or mid-channel; stale/proxy cradle state
 ##   9. carry while rescuing: the cradle runs while you carry it at 0.9x speed, dash/jump/fire are blocked, shots do not
 ##      drop it, a stun or a launch does (back down guarding, progress lost), other games get the progress and the pose
 ##   8. review fixes: a second death before the cradle keeps one lost entry; cradle and scan cannot both win (block
@@ -291,6 +293,7 @@ func run(main_node: Node) -> void:
 	ok(KinLoss.selectable(rec6), "6. cleared once resolved")
 	_review_fixes()
 	_client_captor()
+	_review2()
 	print("KINLOSS DONE, failures: ", bad)
 	main.get_tree().quit()
 
@@ -309,10 +312,14 @@ func _walk_speed() -> float:
 	var p0 := P.pos
 	for i in int(round(0.3 / Match.DT)):
 		walk.call()
-		var xb := P.pos.x
 		_run_for(Match.DT)
-		if absf(P.pos.x - xb) > 0.2: 	P.inp["move"] = Vector2.ZERO
+	P.inp["move"] = Vector2.ZERO
 	return Vector2(P.pos.x - p0.x, P.pos.z - p0.z).length() / 0.3
+
+## P to `at`, standing still.
+func _put(at: Vector3) -> void:
+	P.teleport(at)
+	P.vel = Vector3.ZERO
 
 ## Carrying the guarding Boki: 0.9x speed, the Boki rides with you, dash/jump/fire are off, shots do not drop it, hard
 ## crowd control and a launch do (it falls back down still guarding, the progress lost), other players see it.
@@ -345,13 +352,13 @@ func _carry_checks() -> void:
 	for i in int(round(0.3 / Match.DT)):
 		P.inp["fire"] = true
 		P.inp["jump"] = true
-		P.inp["dash"] = true
+		P.inp["sec_hold"] = true
 		_run_for(Match.DT)
-	for key in ["fire", "jump", "dash"]:
+	for key in ["fire", "jump", "sec_hold"]:
 		P.inp[key] = false
 	ok(
 		P.grounded and P.roll_t <= 0.0 and not P.used.has("fire") and g.rescue_on,
-		"carry: dash, jump and firing are blocked, not cancelling"
+		"carry: jump and firing are blocked, not cancelling"
 	)
 	ok(g.rescue_t > held, "carry: the progress keeps filling (%.2f -> %.2f)" % [held, g.rescue_t])
 	var snap := KinNet.kin_extra(g)
@@ -379,6 +386,51 @@ func _carry_checks() -> void:
 	P.vel = Vector3.ZERO
 	_run_for(1.0)
 	ok(g.rescue_on, "carry: running into it again picks it up")
+	# Shift puts it down on purpose: no dash, progress lost, and no automatic pick-up until you step away
+	P.inp["dash"] = true
+	_run_for(0.05)
+	P.inp["dash"] = false
+	_run_for(0.1)
+	ok(
+		not g.rescue_on and g.rescue_t == 0.0 and P.roll_t <= 0.0 and KinLoss.guarding(g),
+		"carry: Shift puts it down and is spent on that (no dash)"
+	)
+	_run_for(1.5)
+	ok(not g.rescue_on, "carry: standing on a Boki you put down does not pick it up again")
+	_put(g.pos + Vector3(4.0, 0, 0))
+	_run_for(0.3)
+	_put(g.pos + Vector3(0.5, 0, 0))
+	_run_for(0.5)
+	ok(g.rescue_on, "carry: stepping away and back picks it up again")
+	P.inp["interact"] = true
+	_run_for(0.1)
+	P.inp["interact"] = false
+	_run_for(0.1)
+	ok(not g.rescue_on and g.rescue_t == 0.0, "carry: a fresh interact press puts it down too")
+	_run_for(1.0)
+	P.inp["interact"] = true
+	_run_for(0.1)
+	P.inp["interact"] = false
+	_run_for(0.2)
+	ok(g.rescue_on, "carry: interact picks it up even right where you put it down")
+	# a foe within 6m: walking into it does not pick it up, interact does
+	P.inp["interact"] = true
+	_run_for(0.1)
+	P.inp["interact"] = false
+	_run_for(0.1)
+	_put(g.pos + Vector3(4.0, 0, 0))
+	_run_for(0.3)
+	F.out = false
+	F.teleport(g.pos + Vector3(4.0, 0, 3.0))
+	_put(g.pos + Vector3(0.5, 0, 0))
+	_run_for(0.8)
+	ok(not g.rescue_on, "carry: with a foe within 6m, walking into it does not pick it up")
+	P.inp["interact"] = true
+	_run_for(0.1)
+	P.inp["interact"] = false
+	_run_for(0.2)
+	ok(g.rescue_on, "carry: pressing interact picks it up with a foe near")
+	F.teleport(P.pos + Vector3(40.0, 0, 0))
 	P.impulse(Vector2(14.0, 0.0), 6.0)
 	_run_for(0.1)
 	ok(not g.rescue_on and g.rescue_t == 0.0 and KinLoss.guarding(g), "carry: a launch drops it too")
@@ -387,6 +439,104 @@ func _carry_checks() -> void:
 	P.vel = Vector3.ZERO
 	_run_for(float(KinDowned.rules()["rescue_s"]) + 1.5)
 	ok(not KinLoss.guarding(g) and P.kin == g, "carry: carried the full 3.5s it is theirs again (%s)" % g.state)
+
+## Second review: the host's proxy copy of a client's guard, stale cradle state, channels that block a pick-up.
+func _review2() -> void:
+	var g := _loot_guard()
+	var owner_h := G
+	owner_h.remote = true
+	var real: Dictionary = g.rec.duplicate(true)
+	# a proxy of a client-owned guard: fabricated record, no identity
+	var k := m.give_kin(owner_h, real)
+	k.remote = true
+	k.rec = {"species": k.species, "level": 1, "name": "x", "traits": {}, "trust": 50.0}
+	k.state = "dazed"
+	k.dazed_t = 1e9
+	k.lost_from = ""
+	k.lost_owner = null
+	k.teleport(F.pos + Vector3(2.0, 0, 0))
+	KinLoss.on_guard_net(m, ["guard", k.nid, owner_h.nid, real])
+	ok(
+		k.lost_owner == owner_h and k.lost_uid == String(real["uid"])
+			and String(k.rec.get("uid", "")) == String(real["uid"]),
+		"B1. the guard event gives the host's copy its real identity"
+	)
+	F.teleport(k.pos + Vector3(1.0, 0, 0))
+	m._catch(F, k)
+	var got: Dictionary = F.caught[0] if not F.caught.is_empty() else {}
+	ok(
+		String(got.get("uid", "")) == String(real["uid"]) and got.get("lost_from", "") == owner_h.pname
+			and float(got.get("prev_trust", 0.0)) == float(real.get("trust", 50.0)),
+		"B1. the host's scan takes the real record as someone's lost Boki (not a wild copy)"
+	)
+	ok(KinTrack.tracked(F) and KinTrack.captor_for(m, owner_h.team) == F, "B1. and the bond starts for the owner")
+	# an event ahead of the copy: kept until the copy is made
+	var x := ["guard", "zz9", owner_h.nid, real]
+	KinLoss.on_guard_net(m, x)
+	var late := m.give_kin(owner_h, real)
+	late.nid = "zz9"
+	late.rec = {"species": late.species, "level": 1, "name": "x", "traits": {}}
+	KinLoss.apply_pending(m, late)
+	ok(
+		late.lost_owner == owner_h and String(late.rec.get("uid", "")) == String(real["uid"]),
+		"B1. an early guard event waits for the copy"
+	)
+	# M1: a cradle left on the copy by an owner who went away does not block scans for ever
+	var pk := m.give_kin(owner_h, real)
+	pk.remote = true
+	pk.rescue_t = 1.0
+	pk.net_t = m.time
+	ok(KinLoss.cradled(pk), "M1. a fresh cradle on the copy counts")
+	owner_h.out = true
+	ok(not KinLoss.cradled(pk), "M1. ...not once its owner is out of the match")
+	owner_h.out = false
+	pk.net_t = m.time - 5.0
+	ok(not KinLoss.cradled(pk), "M1. ...nor when the snapshots stopped")
+	# M2: a copy that stands up again can be scanned again
+	pk.net_t = m.time
+	var it: Array = m._ser(pk)
+	it[13] = 0.0
+	pk.dead = true
+	pk.catch_prog = 5.0
+	m._net_apply(pk, it)
+	ok(not pk.dead and pk.catch_prog == 0.0, "M2. a copy that comes back to life asks for a fresh scan")
+	pk.catch_prog = 5.0
+	KinLoss._stand_guard(m, owner_h, pk)
+	ok(pk.catch_prog == 0.0, "M2. a new guard starts with no scan asked for")
+	# M4: a copy being carried is not pushed round by body separation
+	pk.rescue_t = 1.0
+	pk.net_t = m.time
+	pk.state = "dazed"
+	pk.teleport(P.pos + Vector3(0.2, 0, 0))
+	var before := pk.pos
+	m._separate()
+	ok(pk.pos.distance_to(before) < 0.001, "M4. a copy with cradle progress (a carried Boki) is left out of separation")
+	pk.rescue_t = 0.0
+	owner_h.remote = false
+	# M3: no pick-up in the middle of another channel
+	var g2 := _loot_guard()
+	var bx := Life.box_of(m, P)
+	Life.bring_back(m, P, bx["pos"], 0.5, false)
+	P.hp = P.max_hp
+	P.teleport(g2.pos + Vector3(0.5, 0, 0))
+	P.vel = Vector3.ZERO
+	for i in int(round(0.5 / Match.DT)):
+		P.drink_t = 1.0
+		_run_for(Match.DT)
+	ok(not g2.rescue_on, "M3. no pick-up while drinking a tonic")
+	P.drink_t = 0.0
+	for i in int(round(0.5 / Match.DT)):
+		P.box_rev_at = m.time
+		_run_for(Match.DT)
+	ok(not g2.rescue_on, "M3. no pick-up while reviving at a box")
+	_run_for(0.5)
+	ok(g2.rescue_on, "M3. and it picks up once the channel is over")
+	# safe tier: a cradle in progress is cleared when the owner dies
+	_fresh(1)
+	P.kin.rescue_t = 2.0
+	P.kin.rescue_on = true
+	_die()
+	ok(not P.kin.rescue_on and P.kin.rescue_t == 0.0, "minor. a safe-tier death clears a cradle in progress")
 
 ## An online client is the captor: the host's "caught" event gives them the Boki and the bond, and dying hands it back.
 func _client_captor() -> void:

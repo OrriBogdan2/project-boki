@@ -2096,10 +2096,10 @@ func sim(dt: float) -> void:
 			inp[kk] = false
 		inp["move"] = Vector2.ZERO
 	# inputs
+	KinDowned.commit(self)           # carrying your Boki: Shift or interact puts it down; no jump, glide or firing
 	MergeAugment.route(self)         # merging: nothing fires mid-transformation; merged in a form, C is off
 	for gk in [["dash", "dash", "dash"], ["sec", "sec", "sec"], ["gear1", "gear", "gear0"], ["sig", "kin", "k1"], ["ult", "ult", "r"]]:
 		_gate(gk[0], gk[1], gk[2])
-	KinDowned.commit(self)           # carrying your Boki: no dash, jump, glide or firing
 	if dropping and not grounded and ctrl != "bot":
 		for bk in ["sec", "sig", "ult", "tonic", "kit", "gear1", "gear2"]:
 			if inp.get(bk, false):

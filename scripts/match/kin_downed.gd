@@ -5,7 +5,10 @@ extends RefCounted
 ##   - its owner rescues it by running into it (no key): a 3.5s rescue (rescue_s). The hunter picks it up into their
 ##     arms and carries it while the progress fills, walking at carry_speed_k of normal speed (as a support picks up a
 ##     fallen ally's wisp), with a rising sound and a progress ring over it. While carrying, dash, jump, glide, firing
-##     and every ability are off (blocked, not cancelling). Hard crowd control (stun, root, Grounded, a launch or a real
+##     and every ability are off (blocked, not cancelling). Dash (Shift) or interact (F) puts it down on purpose where
+##     you stand (the press is spent on the drop: no dash happens), and it will not be picked up again until you step
+##     away or press interact. Running into it picks it up only with no foe within ENEMY_NEAR (else press interact),
+##     and not in the middle of a scan, a box revive, a drink/kit/base channel or while carrying a teammate. Hard crowd control (stun, root, Grounded, a launch or a real
 ##     knock: Capture.controlled, the same rule as the capture scan) drops it: it falls back down, still downed, and the
 ##     progress is lost. Damage and the small shove of most hits do not. An enemy hunter within contest_r of the Boki
 ##     blocks the pick-up and pauses the progress ("Contested"). At the end it is back on the shoulder
@@ -18,8 +21,11 @@ extends RefCounted
 
 const ARMS_FWD := 0.42    # m: how far in front of the carrier the Boki rides
 const ARMS_UP := 0.9      # m: the height of the arms above the carrier's feet
-const BLOCKED_INPUTS := ["dash", "jump", "glide", "fire", "sig", "sec", "skill", "ult", "kin_ab", "gear1", "gear2",
-	"throw", "reload", "tonic", "kit", "swap"]    # off while carrying (movement and aim stay)
+const LEAVE_META := "leave"   # on a Boki put down on purpose: no automatic pick-up until the owner steps away
+const ENEMY_NEAR := 6.0   # m: with a foe this close, running into the Boki does not pick it up (press interact)
+const F_EDGE_S := 0.1     # s: an interact press this recent counts as a fresh press
+const BLOCKED_INPUTS := ["jump", "glide", "fire", "sig", "sec", "sec_hold", "skill", "ult", "kin_ab", "gear1", "gear2",
+	"throw", "reload", "tonic", "kit", "swap", "dash_down", "dash_hold"]    # off while carrying (movement and aim stay)
 
 static func rules() -> Dictionary:
 	return KinCommand.rules()["down"]
@@ -56,6 +62,8 @@ static func tick(k: Kin, dt: float) -> void:
 		k.body_vertical(dt)
 	var h := k.owner_h
 	if h == null or h.out or h.extracted:
+		k.rescue_on = false
+		k.rescue_t = 0.0
 		return
 	_rescue(k, h, r, dt)
 	if k.state != "downed":
@@ -107,23 +115,51 @@ static func _rescue(k: Kin, h: Hunter, r: Dictionary, dt: float) -> void:
 			rescue(k)
 		return
 	k.rescue_block = maxf(0.0, k.rescue_block - dt)
-	var can_start := k.rescue_block <= 0.0 and rescuable(k) and h.grounded
-	if can_start and _near(k, h, float(r["rescue_r"])) and stop_reason(k, h) == "" and not contested(k):
+	if k.has_meta(LEAVE_META) and not _near(k, h, float(r["rescue_r"]) * 1.5):
+		k.remove_meta(LEAVE_META)
+	if _can_start(k, h, r):
 		k.rescue_on = true
 		h.set_meta("carry", k)
 		h.set_meta("rescue_at", k.m.time)
+		h.set_meta("f_edge_t", -9.0)
+		if h.ak != null:
+			h.ak.drop_holds()
 		k.m.sfx("revive_hum", k.pos, -8.0, 1.0)
 
-## The Boki rides in the owner's arms (its spot follows them; the render lifts it, scoop_pose).
+## Can the owner pick it up right now? Walking into it does it when no foe is close and it was not just put down;
+## a fresh interact press does it either way.
+static func _can_start(k: Kin, h: Hunter, r: Dictionary) -> bool:
+	if k.rescue_block > 0.0 or not rescuable(k) or not h.grounded or not _near(k, h, float(r["rescue_r"])):
+		return false
+	if Capture.active(h) or h.box_reviving() or h.kit_t > 0.0 or h.drink_t > 0.0 or h.base_t > 0.0:
+		return false
+	if not CareUtil.carried_of(k.m, h).is_empty() or stop_reason(k, h) != "" or contested(k):
+		return false
+	if k.m.time - float(h.get_meta("f_edge_t", -9.0)) < F_EDGE_S:
+		return true
+	return not k.has_meta(LEAVE_META) and not _foe_near(h)
+
+static func _foe_near(h: Hunter) -> bool:
+	for e in h.m.hunters:
+		if e.team != h.team and not e.out and not e.downed and not e.extracted and h.flat_dist(e) < ENEMY_NEAR:
+			return true
+	return false
+
+## The Boki rides in the owner's arms (its spot follows them, on the ground; the render lifts it, scoop_pose).
 static func _carry(k: Kin, h: Hunter) -> void:
-	k.teleport(h.pos + Vector3(-sin(h.face), 0.0, -cos(h.face)) * ARMS_FWD)
+	var at := KinLoss.ground(k.m, h.pos + Vector3(-sin(h.face), 0.0, -cos(h.face)) * ARMS_FWD)
+	k.teleport(at if at != Vector3.INF else h.pos)
 
 ## The carry ends: the Boki falls back down where the owner is (still downed or guarding), the progress is lost and it
-## cannot be picked up again for a moment.
+## cannot be picked up again for a moment. "drop" is the owner's choice (Shift or interact); it also stays down until
+## they step away.
 static func stop(k: Kin, h: Hunter, why: String) -> void:
 	k.rescue_on = false
 	k.rescue_t = 0.0
 	k.rescue_block = float(rules()["rescue_block_s"])
+	h.set_meta("f_edge_t", -9.0)
+	if why == "drop":
+		k.set_meta(LEAVE_META, true)
 	var at := KinLoss.ground(k.m, h.pos)
 	if at != Vector3.INF:
 		k.teleport(at)
@@ -136,10 +172,20 @@ static func stop(k: Kin, h: Hunter, why: String) -> void:
 static func carry_speed(h: Hunter) -> float:
 	return float(rules()["carry_speed_k"]) if KinLoss.rescuing(h) != null else 1.0
 
-## Hunter._tick: while you carry your Boki, nothing fires and you cannot dash, jump or glide (you can still walk and aim).
+## Hunter._tick: tracks fresh interact presses; while you carry your Boki nothing fires, you cannot jump or glide, and
+## Shift or interact puts it down (that press is spent on the drop).
 static func commit(h: Hunter) -> void:
-	if KinLoss.rescuing(h) == null:
+	var f := bool(h.inp.get("interact", false))
+	if f != bool(h.get_meta("f_prev", false)):
+		h.set_meta("f_prev", f)
+		if f:
+			h.set_meta("f_edge_t", h.m.time)
+	var k := KinLoss.rescuing(h)
+	if k == null:
 		return
+	if h.inp.get("dash", false) or h.m.time - float(h.get_meta("f_edge_t", -9.0)) < F_EDGE_S:
+		stop(k, h, "drop")
+	h.inp["dash"] = false
 	for key in BLOCKED_INPUTS:
 		h.inp[key] = false
 	h.dash_buf = 0.0

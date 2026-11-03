@@ -4496,7 +4496,7 @@ func _separate() -> void:
 	for mb in mobs:
 		if not mb.dead: bodies.append(mb)
 	for k in kins:
-		if k.state in ["active", "wild", "dazed", "returning"] and not k.dead and not k.rescue_on: bodies.append(k)
+		if k.state in ["active", "wild", "dazed", "returning"] and not k.dead and not KinLoss.cradled(k): bodies.append(k)
 	# only bodies in the same or a neighbouring 4m cell can touch (radii are well under 2m): a grid
 	# instead of every pair, in the same pair order as before
 	var grid := {}
@@ -4887,8 +4887,6 @@ func _catch(h: Hunter, k: Kin) -> void:
 			k.catch_prog = 5.0
 			net_event(["catch", k.nid, h.nid])
 		return
-	if net_on:
-		net_event(["caught", k.nid, h.nid, k.rec, (k.lost_owner as Hunter).nid if k.lost_owner is Hunter else ""])
 	k.dead = true
 	k.visible = false
 	var rec: Dictionary = k.rec.duplicate(true)
@@ -4909,6 +4907,8 @@ func _catch(h: Hunter, k: Kin) -> void:
 		rec["trust"] = 20.0
 		rec["memory"] = []
 	h.caught.append(rec)
+	if net_on:
+		net_event(["caught", k.nid, h.nid, rec, (k.lost_owner as Hunter).nid if k.lost_owner is Hunter else ""])
 	KinTrack.on_caught(self, h, k, rec)
 	if h == player:
 		add_feed("%s is in your box (%d/%d). Extract to bring it home." % [Data.KIN[k.species]["name"], h.caught.size(), Capture.box_cap()])
@@ -6161,6 +6161,7 @@ func _net_make(it: Array) -> Ent:
 			if owner and owner.kin == null:
 				owner.kin = k
 			_net_seen_rec[nid] = rec
+			KinLoss.apply_pending(self, k)
 			return k
 		"m":
 			var mk := String(it[9])
@@ -6221,6 +6222,8 @@ func _net_apply(e: Ent, it: Array) -> void:
 			var st: int = int(it[8])
 			if st >= 0 and st < KIN_STATES.size():
 				k.state = KIN_STATES[st]
+			if k.dead:
+				k.catch_prog = 0.0       # (it stood up again: a new scan may be asked for)
 			k.catch_prog = maxf(k.catch_prog, float(it[13])) if k.catch_prog >= 5.0 else float(it[13])
 			k.net_vel = Vector3(it[14], 0, it[15])
 			k.dead = false
@@ -6458,7 +6461,7 @@ func _net_ev(x, from: String) -> void:
 			if is_host:
 				var k: Kin = ents_by_id.get(String(x[1]), null)
 				var h: Hunter = ents_by_id.get(String(x[2]), null)
-				if k and h and not k.dead and KinLoss.scannable_by(h, k) and not (k.rescue_on or k.rescue_t > 0.0):     # (not while its owner is cradling it)
+				if k and h and not k.dead and KinLoss.scannable_by(h, k) and not KinLoss.cradled(k):
 					_catch(h, k)
 		"caught":
 			var k: Kin = ents_by_id.get(String(x[1]), null)
@@ -6474,6 +6477,8 @@ func _net_ev(x, from: String) -> void:
 			var own = ents_by_id.get(String(x[4]), null) if x.size() > 4 else null
 			if cap is Hunter and own is Hunter and typeof(x[3]) == TYPE_DICTIONARY:
 				KinTrack.on_caught_net(self, cap, x[3], own)      # the captor and the owner learn of the bond
+		"guard":
+			KinLoss.on_guard_net(self, x)
 		"gdrop":
 			KinLoss.on_gdrop(self, String(x[1]), x[5], Vector3(x[2], x[3], x[4]))      # a captor fell: its Boki stands up again (owner's game)
 

@@ -23,7 +23,7 @@ static func class_ults() -> bool:
 ## else "". A press held past g_hold_s opens the wheel (KinWheel), and letting go picks. `blocked`: a menu
 ## or map is up (the press is ignored).
 static func poll(h: Hunter, dt: float, blocked: bool) -> String:
-	if blocked:
+	if blocked or KinLoss.rescuing(h) != null:
 		h.inp["g_t"] = 0.0; h.inp["g_fired"] = true      # swallow the rest of this press: no tap on release
 		h.inp.erase("wheel")
 		return ""
