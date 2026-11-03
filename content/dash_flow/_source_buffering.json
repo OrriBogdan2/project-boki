@@ -1,0 +1,1464 @@
+{
+	"doc": "What SUPERVIVE does with an ability pressed during a dash, per hero, dash and slot, and the row we recommend for content/dash_flow/<hero>.json (docs/decisions/0010-dash-ability-flow.md, 'Dash buffering in the source'). Not read by the game. evidence: footage | data | owner | none. confidence: high | medium | low | owner | none. change: none | carry (flip the carry flag) | source (keep the mode, correct the source text) | add (write the row explicitly; today it is the missing-row default). rec is the row to copy (mode, carry, variant, source).",
+	"rule": "Data: no input-buffer, queue or cancel-window field in any dump (the ability system and C++ defaults are not dumped: supervive_physics.md:94-96). Footage: every press during a dash that the 5 fps studies show fires mid-dash (Shiv 0193, Ghost 0149-0151, Celeste 0239-0245 and 0285-0290); none shows a press held to the dash's end, none shows a lost press, so no window length or expiry can be read. Everything else is not determinable and keeps today's row (owner 18:20 UTC: source where known, else held to the dash end).",
+	"window_s": null,
+	"heroes": {
+		"thief": {
+			"name": "Dancer",
+			"source_hero": "Shiv",
+			"dash": {
+				"ground": {
+					"lmb": {
+						"source_does": "fires mid-dash",
+						"evidence": "footage",
+						"confidence": "medium",
+						"ours": "fire (empowered)",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"variant": "empowered",
+							"source": "Footage briefs/hero-ref/dancer.md:131-134: the empowered hit lands at 0187, the Cartwheel is used again at 0193 and the empowered shot is already out at 0193; the Cartwheel runs 0.45-0.5 s start to upright (dancer.md:420-425), so the shot went inside the flip. Data briefs/supervive-data/supervive_kits.md:99: Quickflip empowers the next Arcslinger."
+						}
+					},
+					"rmb": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"source": "Not determinable. Data (briefs/supervive-data/supervive_kits.md:99) gives no rule for other casts in Quickflip; the footage never shows one inside a Cartwheel (briefs/hero-ref/dancer.md:110-134, 420-440). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					},
+					"e": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"source": "Not determinable. Data (briefs/supervive-data/supervive_kits.md:99) gives no rule for other casts in Quickflip; the footage never shows one inside a Cartwheel (briefs/hero-ref/dancer.md:110-134, 420-440). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					},
+					"x": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"source": "Not determinable. Data (briefs/supervive-data/supervive_kits.md:99) gives no rule for other casts in Quickflip; the footage never shows one inside a Cartwheel (briefs/hero-ref/dancer.md:110-134, 420-440). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					},
+					"q": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"source": "Gloves are ours; no source. Keep the row. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					}
+				},
+				"air": {
+					"lmb": {
+						"source_does": "fires mid-dash (inferred)",
+						"evidence": "data",
+						"confidence": "low",
+						"ours": "fire (empowered)",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"variant": "empowered",
+							"source": "Data briefs/supervive-data/supervive_kits.md:99: the same Quickflip from a jump. Footage 0129-0134 air Cartwheel, gold aim line 0139-0142, shot 0143 (briefs/hero-ref/dancer.md:125-127, 431-438): the shot is after the landing, so no press inside the air flip is shown; follows the ground case."
+						}
+					},
+					"rmb": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"source": "Not determinable. Data (briefs/supervive-data/supervive_kits.md:99) gives no rule for other casts in Quickflip; the footage never shows one inside a Cartwheel (briefs/hero-ref/dancer.md:110-134, 420-440). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					},
+					"e": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"source": "Not determinable. Data (briefs/supervive-data/supervive_kits.md:99) gives no rule for other casts in Quickflip; the footage never shows one inside a Cartwheel (briefs/hero-ref/dancer.md:110-134, 420-440). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					},
+					"x": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"source": "Not determinable. Data (briefs/supervive-data/supervive_kits.md:99) gives no rule for other casts in Quickflip; the footage never shows one inside a Cartwheel (briefs/hero-ref/dancer.md:110-134, 420-440). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					},
+					"q": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"source": "Gloves are ours; no source. Keep the row. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					}
+				}
+			}
+		},
+		"juggernaut": {
+			"name": "Zedran",
+			"source_hero": "Brall",
+			"dash": {
+				"ground": {
+					"lmb": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "buffer",
+						"change": "none",
+						"rec": {
+							"mode": "buffer",
+							"source": "Not determinable. Data (briefs/supervive-data/supervive_kits.md:26) and the card ('Dash while attacking in your facing direction', briefs/hero-ref/juggernaut.md:20) make the dash itself an attack; no other press inside a Quick Dash is shown (briefs/hero-ref/juggernaut.md:260-270, frames 0372-0377). Air: not shown (juggernaut.md:273-274; open question at :315). Kept: held to the dash's end (owner 18:20 UTC fallback)."
+						}
+					},
+					"rmb": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire +carry",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"carry": true,
+							"source": "Not determinable. Data (briefs/supervive-data/supervive_kits.md:26) and the card ('Dash while attacking in your facing direction', briefs/hero-ref/juggernaut.md:20) make the dash itself an attack; no other press inside a Quick Dash is shown (briefs/hero-ref/juggernaut.md:260-270, frames 0372-0377). Air: not shown (juggernaut.md:273-274; open question at :315). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					},
+					"e": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"source": "Not determinable. Data (briefs/supervive-data/supervive_kits.md:26) and the card ('Dash while attacking in your facing direction', briefs/hero-ref/juggernaut.md:20) make the dash itself an attack; no other press inside a Quick Dash is shown (briefs/hero-ref/juggernaut.md:260-270, frames 0372-0377). Air: not shown (juggernaut.md:273-274; open question at :315). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					},
+					"x": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "cancel",
+						"change": "none",
+						"rec": {
+							"mode": "cancel",
+							"source": "Not determinable. Data (briefs/supervive-data/supervive_kits.md:26) and the card ('Dash while attacking in your facing direction', briefs/hero-ref/juggernaut.md:20) make the dash itself an attack; no other press inside a Quick Dash is shown (briefs/hero-ref/juggernaut.md:260-270, frames 0372-0377). Air: not shown (juggernaut.md:273-274; open question at :315). Kept: it ends the dash (today's row; the source is silent)."
+						}
+					},
+					"q": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"source": "Gloves are ours; no source. Keep the row. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					}
+				},
+				"air": {
+					"lmb": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "buffer",
+						"change": "none",
+						"rec": {
+							"mode": "buffer",
+							"source": "Not determinable. Data (briefs/supervive-data/supervive_kits.md:26) and the card ('Dash while attacking in your facing direction', briefs/hero-ref/juggernaut.md:20) make the dash itself an attack; no other press inside a Quick Dash is shown (briefs/hero-ref/juggernaut.md:260-270, frames 0372-0377). Air: not shown (juggernaut.md:273-274; open question at :315). Kept: held to the dash's end (owner 18:20 UTC fallback)."
+						}
+					},
+					"rmb": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "cancel",
+						"change": "none",
+						"rec": {
+							"mode": "cancel",
+							"source": "Not determinable. Data (briefs/supervive-data/supervive_kits.md:26) and the card ('Dash while attacking in your facing direction', briefs/hero-ref/juggernaut.md:20) make the dash itself an attack; no other press inside a Quick Dash is shown (briefs/hero-ref/juggernaut.md:260-270, frames 0372-0377). Air: not shown (juggernaut.md:273-274; open question at :315). Kept: it ends the dash (today's row; the source is silent)."
+						}
+					},
+					"e": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"source": "Not determinable. Data (briefs/supervive-data/supervive_kits.md:26) and the card ('Dash while attacking in your facing direction', briefs/hero-ref/juggernaut.md:20) make the dash itself an attack; no other press inside a Quick Dash is shown (briefs/hero-ref/juggernaut.md:260-270, frames 0372-0377). Air: not shown (juggernaut.md:273-274; open question at :315). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					},
+					"x": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "cancel",
+						"change": "none",
+						"rec": {
+							"mode": "cancel",
+							"source": "Not determinable. Data (briefs/supervive-data/supervive_kits.md:26) and the card ('Dash while attacking in your facing direction', briefs/hero-ref/juggernaut.md:20) make the dash itself an attack; no other press inside a Quick Dash is shown (briefs/hero-ref/juggernaut.md:260-270, frames 0372-0377). Air: not shown (juggernaut.md:273-274; open question at :315). Kept: it ends the dash (today's row; the source is silent)."
+						}
+					},
+					"q": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"source": "Gloves are ours; no source. Keep the row. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					}
+				}
+			}
+		},
+		"archer": {
+			"name": "Pin",
+			"source_hero": "Myth",
+			"dash": {
+				"ground": {
+					"lmb": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "buffer",
+						"change": "source",
+						"why": "today's source text says 'an arrow cannot be drawn in the dodge roll' as a source rule; pin.md:247 lists it as an open question",
+						"rec": {
+							"mode": "buffer",
+							"source": "Not determinable. The footage study lists 'whether you can shoot during it [Spirit Walk]' as an open question (briefs/hero-ref/pin.md:247); the roll itself is 0.1-0.15 s (pin.md:322-327); air: not shown (pin.md:330-331). Data (briefs/supervive-data/supervive_kits.md:78) says nothing on casts during the roll. Kept: held to the dash's end (owner 18:20 UTC fallback)."
+						}
+					},
+					"rmb": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"source": "Not determinable. The footage study lists 'whether you can shoot during it [Spirit Walk]' as an open question (briefs/hero-ref/pin.md:247); the roll itself is 0.1-0.15 s (pin.md:322-327); air: not shown (pin.md:330-331). Data (briefs/supervive-data/supervive_kits.md:78) says nothing on casts during the roll. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					},
+					"e": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"source": "Not determinable. The footage study lists 'whether you can shoot during it [Spirit Walk]' as an open question (briefs/hero-ref/pin.md:247); the roll itself is 0.1-0.15 s (pin.md:322-327); air: not shown (pin.md:330-331). Data (briefs/supervive-data/supervive_kits.md:78) says nothing on casts during the roll. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					},
+					"x": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"source": "Not determinable. The footage study lists 'whether you can shoot during it [Spirit Walk]' as an open question (briefs/hero-ref/pin.md:247); the roll itself is 0.1-0.15 s (pin.md:322-327); air: not shown (pin.md:330-331). Data (briefs/supervive-data/supervive_kits.md:78) says nothing on casts during the roll. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					},
+					"q": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"source": "Gloves are ours; no source. Keep the row. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					}
+				},
+				"air": {
+					"lmb": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "buffer",
+						"change": "source",
+						"why": "today's source text as ground: not a source rule",
+						"rec": {
+							"mode": "buffer",
+							"source": "Not determinable. The footage study lists 'whether you can shoot during it [Spirit Walk]' as an open question (briefs/hero-ref/pin.md:247); the roll itself is 0.1-0.15 s (pin.md:322-327); air: not shown (pin.md:330-331). Data (briefs/supervive-data/supervive_kits.md:78) says nothing on casts during the roll. Kept: held to the dash's end (owner 18:20 UTC fallback)."
+						}
+					},
+					"rmb": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "source",
+						"rec": {
+							"mode": "fire",
+							"source": "Not determinable. The footage study lists 'whether you can shoot during it [Spirit Walk]' as an open question (briefs/hero-ref/pin.md:247); the roll itself is 0.1-0.15 s (pin.md:322-327); air: not shown (pin.md:330-331). Data (briefs/supervive-data/supervive_kits.md:78) says nothing on casts during the roll. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					},
+					"e": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "source",
+						"rec": {
+							"mode": "fire",
+							"source": "Not determinable. The footage study lists 'whether you can shoot during it [Spirit Walk]' as an open question (briefs/hero-ref/pin.md:247); the roll itself is 0.1-0.15 s (pin.md:322-327); air: not shown (pin.md:330-331). Data (briefs/supervive-data/supervive_kits.md:78) says nothing on casts during the roll. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					},
+					"x": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "source",
+						"rec": {
+							"mode": "fire",
+							"source": "Not determinable. The footage study lists 'whether you can shoot during it [Spirit Walk]' as an open question (briefs/hero-ref/pin.md:247); the roll itself is 0.1-0.15 s (pin.md:322-327); air: not shown (pin.md:330-331). Data (briefs/supervive-data/supervive_kits.md:78) says nothing on casts during the roll. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					},
+					"q": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"source": "Gloves are ours; no source. Keep the row. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					}
+				}
+			}
+		},
+		"bulwark": {
+			"name": "Bjorn",
+			"source_hero": "Oath",
+			"dash": {
+				"ground": {
+					"lmb": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "buffer",
+						"change": "none",
+						"rec": {
+							"mode": "buffer",
+							"source": "Not determinable. No press during 360 Smash is shown (briefs/hero-ref/bjorn.md:127-145, 347-360; frames 0369-0382); air dash not shown (bjorn.md:362-363). Data (briefs/supervive-data/supervive_kits.md:89-91): Brightshield + Shift is the Shield Bash, which is the reverse pair (RMB held, then Shift), not a press inside the dash. Kept: held to the dash's end (owner 18:20 UTC fallback)."
+						}
+					},
+					"rmb": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"source": "Not determinable. No press during 360 Smash is shown (briefs/hero-ref/bjorn.md:127-145, 347-360; frames 0369-0382); air dash not shown (bjorn.md:362-363). Data (briefs/supervive-data/supervive_kits.md:89-91): Brightshield + Shift is the Shield Bash, which is the reverse pair (RMB held, then Shift), not a press inside the dash. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					},
+					"e": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"source": "Not determinable. No press during 360 Smash is shown (briefs/hero-ref/bjorn.md:127-145, 347-360; frames 0369-0382); air dash not shown (bjorn.md:362-363). Data (briefs/supervive-data/supervive_kits.md:89-91): Brightshield + Shift is the Shield Bash, which is the reverse pair (RMB held, then Shift), not a press inside the dash. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					},
+					"x": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "cancel",
+						"change": "none",
+						"rec": {
+							"mode": "cancel",
+							"source": "Not determinable. No press during 360 Smash is shown (briefs/hero-ref/bjorn.md:127-145, 347-360; frames 0369-0382); air dash not shown (bjorn.md:362-363). Data (briefs/supervive-data/supervive_kits.md:89-91): Brightshield + Shift is the Shield Bash, which is the reverse pair (RMB held, then Shift), not a press inside the dash. Kept: it ends the dash (today's row; the source is silent)."
+						}
+					},
+					"q": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"source": "Gloves are ours; no source. Keep the row. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					}
+				},
+				"air": {
+					"lmb": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "buffer",
+						"change": "none",
+						"rec": {
+							"mode": "buffer",
+							"source": "Not determinable. No press during 360 Smash is shown (briefs/hero-ref/bjorn.md:127-145, 347-360; frames 0369-0382); air dash not shown (bjorn.md:362-363). Data (briefs/supervive-data/supervive_kits.md:89-91): Brightshield + Shift is the Shield Bash, which is the reverse pair (RMB held, then Shift), not a press inside the dash. Kept: held to the dash's end (owner 18:20 UTC fallback)."
+						}
+					},
+					"rmb": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"source": "Not determinable. No press during 360 Smash is shown (briefs/hero-ref/bjorn.md:127-145, 347-360; frames 0369-0382); air dash not shown (bjorn.md:362-363). Data (briefs/supervive-data/supervive_kits.md:89-91): Brightshield + Shift is the Shield Bash, which is the reverse pair (RMB held, then Shift), not a press inside the dash. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					},
+					"e": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"source": "Not determinable. No press during 360 Smash is shown (briefs/hero-ref/bjorn.md:127-145, 347-360; frames 0369-0382); air dash not shown (bjorn.md:362-363). Data (briefs/supervive-data/supervive_kits.md:89-91): Brightshield + Shift is the Shield Bash, which is the reverse pair (RMB held, then Shift), not a press inside the dash. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					},
+					"x": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "cancel",
+						"change": "none",
+						"rec": {
+							"mode": "cancel",
+							"source": "Not determinable. No press during 360 Smash is shown (briefs/hero-ref/bjorn.md:127-145, 347-360; frames 0369-0382); air dash not shown (bjorn.md:362-363). Data (briefs/supervive-data/supervive_kits.md:89-91): Brightshield + Shift is the Shield Bash, which is the reverse pair (RMB held, then Shift), not a press inside the dash. Kept: it ends the dash (today's row; the source is silent)."
+						}
+					},
+					"q": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"source": "Gloves are ours; no source. Keep the row. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					}
+				}
+			}
+		},
+		"mage": {
+			"name": "Vireo",
+			"source_hero": "Joule",
+			"dash": {
+				"ground": {
+					"lmb": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "buffer (missing row)",
+						"change": "add",
+						"rec": {
+							"mode": "buffer",
+							"source": "Not determinable. No press inside Surge is shown (briefs/hero-ref/vireo.md:124-160, 460-470; she is a lightning silhouette for 0.2-0.6 s); air Surge not shown (vireo.md:472-473). Data (briefs/supervive-data/supervive_kits.md:67) silent. Kept: held to the dash's end (owner 18:20 UTC fallback)."
+						}
+					},
+					"rmb": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "source",
+						"rec": {
+							"mode": "fire",
+							"source": "Not determinable. No press inside Surge is shown (briefs/hero-ref/vireo.md:124-160, 460-470; she is a lightning silhouette for 0.2-0.6 s); air Surge not shown (vireo.md:472-473). Data (briefs/supervive-data/supervive_kits.md:67) silent. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					},
+					"e": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "source",
+						"rec": {
+							"mode": "fire",
+							"source": "Not determinable. No press inside Surge is shown (briefs/hero-ref/vireo.md:124-160, 460-470; she is a lightning silhouette for 0.2-0.6 s); air Surge not shown (vireo.md:472-473). Data (briefs/supervive-data/supervive_kits.md:67) silent. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					},
+					"x": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "buffer (missing row)",
+						"change": "add",
+						"rec": {
+							"mode": "buffer",
+							"source": "Not determinable. No press inside Surge is shown (briefs/hero-ref/vireo.md:124-160, 460-470; she is a lightning silhouette for 0.2-0.6 s); air Surge not shown (vireo.md:472-473). Data (briefs/supervive-data/supervive_kits.md:67) silent. Kept: held to the dash's end (owner 18:20 UTC fallback)."
+						}
+					},
+					"q": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"source": "Gloves are ours; no source. Keep the row. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					}
+				},
+				"air": {
+					"lmb": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "buffer (missing row)",
+						"change": "add",
+						"rec": {
+							"mode": "buffer",
+							"source": "Not determinable. No press inside Surge is shown (briefs/hero-ref/vireo.md:124-160, 460-470; she is a lightning silhouette for 0.2-0.6 s); air Surge not shown (vireo.md:472-473). Data (briefs/supervive-data/supervive_kits.md:67) silent. Kept: held to the dash's end (owner 18:20 UTC fallback)."
+						}
+					},
+					"rmb": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "source",
+						"rec": {
+							"mode": "fire",
+							"source": "Not determinable. No press inside Surge is shown (briefs/hero-ref/vireo.md:124-160, 460-470; she is a lightning silhouette for 0.2-0.6 s); air Surge not shown (vireo.md:472-473). Data (briefs/supervive-data/supervive_kits.md:67) silent. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					},
+					"e": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "source",
+						"rec": {
+							"mode": "fire",
+							"source": "Not determinable. No press inside Surge is shown (briefs/hero-ref/vireo.md:124-160, 460-470; she is a lightning silhouette for 0.2-0.6 s); air Surge not shown (vireo.md:472-473). Data (briefs/supervive-data/supervive_kits.md:67) silent. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					},
+					"x": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "buffer (missing row)",
+						"change": "add",
+						"rec": {
+							"mode": "buffer",
+							"source": "Not determinable. No press inside Surge is shown (briefs/hero-ref/vireo.md:124-160, 460-470; she is a lightning silhouette for 0.2-0.6 s); air Surge not shown (vireo.md:472-473). Data (briefs/supervive-data/supervive_kits.md:67) silent. Kept: held to the dash's end (owner 18:20 UTC fallback)."
+						}
+					},
+					"q": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"source": "Gloves are ours; no source. Keep the row. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					}
+				}
+			}
+		},
+		"gunslinger": {
+			"name": "Venator",
+			"source_hero": "Ghost",
+			"dash": {
+				"ground": {
+					"lmb": {
+						"source_does": "fires mid-dash",
+						"evidence": "footage",
+						"confidence": "high",
+						"ours": "fire",
+						"change": "source",
+						"rec": {
+							"mode": "fire",
+							"source": "Footage briefs/hero-ref/venator.md:88 ('fires the rifle during the slide', 0149-0151), :90 and :308 (slides up-left while firing up-right; 'he can fire throughout'), :189 ('fires during any slide')."
+						}
+					},
+					"rmb": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "source",
+						"rec": {
+							"mode": "fire",
+							"source": "Not determinable. Data (briefs/supervive-data/supervive_kits.md:50) silent; the footage shows only the rifle during the slide; air not shown (briefs/hero-ref/venator.md:311-312). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					},
+					"e": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "source",
+						"rec": {
+							"mode": "fire",
+							"source": "Not determinable. Data (briefs/supervive-data/supervive_kits.md:50) silent; the footage shows only the rifle during the slide; air not shown (briefs/hero-ref/venator.md:311-312). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					},
+					"x": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "source",
+						"rec": {
+							"mode": "fire",
+							"source": "Not determinable. Data (briefs/supervive-data/supervive_kits.md:50) silent; the footage shows only the rifle during the slide; air not shown (briefs/hero-ref/venator.md:311-312). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					},
+					"q": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"source": "Gloves are ours; no source. Keep the row. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					}
+				},
+				"air": {
+					"lmb": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "source",
+						"rec": {
+							"mode": "fire",
+							"source": "Not determinable. Data (briefs/supervive-data/supervive_kits.md:50) silent; the footage shows only the rifle during the slide; air not shown (briefs/hero-ref/venator.md:311-312). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					},
+					"rmb": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "source",
+						"rec": {
+							"mode": "fire",
+							"source": "Not determinable. Data (briefs/supervive-data/supervive_kits.md:50) silent; the footage shows only the rifle during the slide; air not shown (briefs/hero-ref/venator.md:311-312). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					},
+					"e": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "source",
+						"rec": {
+							"mode": "fire",
+							"source": "Not determinable. Data (briefs/supervive-data/supervive_kits.md:50) silent; the footage shows only the rifle during the slide; air not shown (briefs/hero-ref/venator.md:311-312). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					},
+					"x": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "source",
+						"rec": {
+							"mode": "fire",
+							"source": "Not determinable. Data (briefs/supervive-data/supervive_kits.md:50) silent; the footage shows only the rifle during the slide; air not shown (briefs/hero-ref/venator.md:311-312). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					},
+					"q": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"source": "Gloves are ours; no source. Keep the row. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					}
+				}
+			}
+		},
+		"ashwick": {
+			"name": "Linwick",
+			"source_hero": "Felix",
+			"dash": {
+				"ground": {
+					"lmb": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "buffer",
+						"change": "source",
+						"why": "today's source text says 'Data: ... no fire during it'; the data (supervive_kits.md:42) has no such rule (only 'stops on impact', from the card at linwick.md:17)",
+						"rec": {
+							"mode": "buffer",
+							"source": "Not determinable. Data (briefs/supervive-data/supervive_kits.md:42) silent on presses in Pyro Pounce; the footage shows no press inside the bash (briefs/hero-ref/linwick.md:267-276, frames 0143-0144, 0159-0161); air not shown (linwick.md:278-279). Kept: held to the dash's end (owner 18:20 UTC fallback)."
+						}
+					},
+					"rmb": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "buffer",
+						"change": "none",
+						"rec": {
+							"mode": "buffer",
+							"source": "Not determinable. Data (briefs/supervive-data/supervive_kits.md:42) silent on presses in Pyro Pounce; the footage shows no press inside the bash (briefs/hero-ref/linwick.md:267-276, frames 0143-0144, 0159-0161); air not shown (linwick.md:278-279). Kept: held to the dash's end (owner 18:20 UTC fallback)."
+						}
+					},
+					"e": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "buffer",
+						"change": "none",
+						"rec": {
+							"mode": "buffer",
+							"source": "Not determinable. Data (briefs/supervive-data/supervive_kits.md:42) silent on presses in Pyro Pounce; the footage shows no press inside the bash (briefs/hero-ref/linwick.md:267-276, frames 0143-0144, 0159-0161); air not shown (linwick.md:278-279). Kept: held to the dash's end (owner 18:20 UTC fallback)."
+						}
+					},
+					"x": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "cancel +carry",
+						"change": "none",
+						"rec": {
+							"mode": "cancel",
+							"carry": true,
+							"source": "Not determinable. Data (briefs/supervive-data/supervive_kits.md:42) silent on presses in Pyro Pounce; the footage shows no press inside the bash (briefs/hero-ref/linwick.md:267-276, frames 0143-0144, 0159-0161); air not shown (linwick.md:278-279). Kept: it ends the dash (today's row; the source is silent)."
+						}
+					},
+					"q": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"source": "Gloves are ours; no source. Keep the row. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					}
+				},
+				"air": {
+					"lmb": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "buffer",
+						"change": "none",
+						"rec": {
+							"mode": "buffer",
+							"source": "Not determinable. Data (briefs/supervive-data/supervive_kits.md:42) silent on presses in Pyro Pounce; the footage shows no press inside the bash (briefs/hero-ref/linwick.md:267-276, frames 0143-0144, 0159-0161); air not shown (linwick.md:278-279). Kept: held to the dash's end (owner 18:20 UTC fallback)."
+						}
+					},
+					"rmb": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"source": "Not determinable. Data (briefs/supervive-data/supervive_kits.md:42) silent on presses in Pyro Pounce; the footage shows no press inside the bash (briefs/hero-ref/linwick.md:267-276, frames 0143-0144, 0159-0161); air not shown (linwick.md:278-279). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					},
+					"e": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"source": "Not determinable. Data (briefs/supervive-data/supervive_kits.md:42) silent on presses in Pyro Pounce; the footage shows no press inside the bash (briefs/hero-ref/linwick.md:267-276, frames 0143-0144, 0159-0161); air not shown (linwick.md:278-279). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					},
+					"x": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "cancel +carry",
+						"change": "none",
+						"rec": {
+							"mode": "cancel",
+							"carry": true,
+							"source": "Not determinable. Data (briefs/supervive-data/supervive_kits.md:42) silent on presses in Pyro Pounce; the footage shows no press inside the bash (briefs/hero-ref/linwick.md:267-276, frames 0143-0144, 0159-0161); air not shown (linwick.md:278-279). Kept: it ends the dash (today's row; the source is silent)."
+						}
+					},
+					"q": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"source": "Gloves are ours; no source. Keep the row. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					}
+				}
+			}
+		},
+		"dredge": {
+			"name": "Dredge",
+			"source_hero": "Kingpin",
+			"dash": {
+				"ground": {
+					"lmb": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "buffer",
+						"change": "source",
+						"why": "today's source text says he 'fires' by 493.6 s; dredge.md:306 says turning, then aiming and walking (no shot named), and nothing shows a press inside the 0.12 s dash",
+						"rec": {
+							"mode": "buffer",
+							"source": "Not determinable. Brute Dash is a ~0.12 s near-blink (briefs/hero-ref/dredge.md:303); by 493.45-493.6 s he is turning, then aiming and walking (dredge.md:296, 306): no press inside it is visible. Air: not shown (dredge.md:310-312). Data (briefs/supervive-data/supervive_kits.md:58-59) silent. Kept: held to the dash's end (owner 18:20 UTC fallback)."
+						}
+					},
+					"rmb": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"source": "Not determinable. Brute Dash is a ~0.12 s near-blink (briefs/hero-ref/dredge.md:303); by 493.45-493.6 s he is turning, then aiming and walking (dredge.md:296, 306): no press inside it is visible. Air: not shown (dredge.md:310-312). Data (briefs/supervive-data/supervive_kits.md:58-59) silent. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					},
+					"e": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"source": "Not determinable. Brute Dash is a ~0.12 s near-blink (briefs/hero-ref/dredge.md:303); by 493.45-493.6 s he is turning, then aiming and walking (dredge.md:296, 306): no press inside it is visible. Air: not shown (dredge.md:310-312). Data (briefs/supervive-data/supervive_kits.md:58-59) silent. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					},
+					"x": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"source": "Not determinable. Brute Dash is a ~0.12 s near-blink (briefs/hero-ref/dredge.md:303); by 493.45-493.6 s he is turning, then aiming and walking (dredge.md:296, 306): no press inside it is visible. Air: not shown (dredge.md:310-312). Data (briefs/supervive-data/supervive_kits.md:58-59) silent. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					},
+					"q": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"source": "Gloves are ours; no source. Keep the row. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					}
+				},
+				"air": {
+					"lmb": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "buffer",
+						"change": "none",
+						"rec": {
+							"mode": "buffer",
+							"source": "Not determinable. Brute Dash is a ~0.12 s near-blink (briefs/hero-ref/dredge.md:303); by 493.45-493.6 s he is turning, then aiming and walking (dredge.md:296, 306): no press inside it is visible. Air: not shown (dredge.md:310-312). Data (briefs/supervive-data/supervive_kits.md:58-59) silent. Kept: held to the dash's end (owner 18:20 UTC fallback)."
+						}
+					},
+					"rmb": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"source": "Not determinable. Brute Dash is a ~0.12 s near-blink (briefs/hero-ref/dredge.md:303); by 493.45-493.6 s he is turning, then aiming and walking (dredge.md:296, 306): no press inside it is visible. Air: not shown (dredge.md:310-312). Data (briefs/supervive-data/supervive_kits.md:58-59) silent. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					},
+					"e": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"source": "Not determinable. Brute Dash is a ~0.12 s near-blink (briefs/hero-ref/dredge.md:303); by 493.45-493.6 s he is turning, then aiming and walking (dredge.md:296, 306): no press inside it is visible. Air: not shown (dredge.md:310-312). Data (briefs/supervive-data/supervive_kits.md:58-59) silent. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					},
+					"x": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"source": "Not determinable. Brute Dash is a ~0.12 s near-blink (briefs/hero-ref/dredge.md:303); by 493.45-493.6 s he is turning, then aiming and walking (dredge.md:296, 306): no press inside it is visible. Air: not shown (dredge.md:310-312). Data (briefs/supervive-data/supervive_kits.md:58-59) silent. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					},
+					"q": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"source": "Gloves are ours; no source. Keep the row. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					}
+				}
+			}
+		},
+		"tender": {
+			"name": "Moosh Moosh",
+			"source_hero": "Elluna",
+			"dash": {
+				"ground": {
+					"lmb": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "buffer",
+						"change": "none",
+						"rec": {
+							"mode": "buffer",
+							"source": "Not determinable. The ground dash is never shown cleanly (briefs/hero-ref/mooshmoosh.md:340); the air dash (730.7-732.4 s, mooshmoosh.md:321, 343-363) shows no shot during it, but no press either, so nothing says what a press would do. Data (briefs/supervive-data/supervive_kits.md:10-11) silent. Kept: held to the dash's end (owner 18:20 UTC fallback)."
+						}
+					},
+					"rmb": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"source": "Not determinable. The ground dash is never shown cleanly (briefs/hero-ref/mooshmoosh.md:340); the air dash (730.7-732.4 s, mooshmoosh.md:321, 343-363) shows no shot during it, but no press either, so nothing says what a press would do. Data (briefs/supervive-data/supervive_kits.md:10-11) silent. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					},
+					"e": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"source": "Not determinable. The ground dash is never shown cleanly (briefs/hero-ref/mooshmoosh.md:340); the air dash (730.7-732.4 s, mooshmoosh.md:321, 343-363) shows no shot during it, but no press either, so nothing says what a press would do. Data (briefs/supervive-data/supervive_kits.md:10-11) silent. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					},
+					"x": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"source": "Not determinable. The ground dash is never shown cleanly (briefs/hero-ref/mooshmoosh.md:340); the air dash (730.7-732.4 s, mooshmoosh.md:321, 343-363) shows no shot during it, but no press either, so nothing says what a press would do. Data (briefs/supervive-data/supervive_kits.md:10-11) silent. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					},
+					"q": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"source": "Gloves are ours; no source. Keep the row. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					}
+				},
+				"air": {
+					"lmb": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "buffer",
+						"change": "none",
+						"rec": {
+							"mode": "buffer",
+							"source": "Not determinable. The ground dash is never shown cleanly (briefs/hero-ref/mooshmoosh.md:340); the air dash (730.7-732.4 s, mooshmoosh.md:321, 343-363) shows no shot during it, but no press either, so nothing says what a press would do. Data (briefs/supervive-data/supervive_kits.md:10-11) silent. Kept: held to the dash's end (owner 18:20 UTC fallback)."
+						}
+					},
+					"rmb": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"source": "Not determinable. The ground dash is never shown cleanly (briefs/hero-ref/mooshmoosh.md:340); the air dash (730.7-732.4 s, mooshmoosh.md:321, 343-363) shows no shot during it, but no press either, so nothing says what a press would do. Data (briefs/supervive-data/supervive_kits.md:10-11) silent. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					},
+					"e": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"source": "Not determinable. The ground dash is never shown cleanly (briefs/hero-ref/mooshmoosh.md:340); the air dash (730.7-732.4 s, mooshmoosh.md:321, 343-363) shows no shot during it, but no press either, so nothing says what a press would do. Data (briefs/supervive-data/supervive_kits.md:10-11) silent. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					},
+					"x": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"source": "Not determinable. The ground dash is never shown cleanly (briefs/hero-ref/mooshmoosh.md:340); the air dash (730.7-732.4 s, mooshmoosh.md:321, 343-363) shows no shot during it, but no press either, so nothing says what a press would do. Data (briefs/supervive-data/supervive_kits.md:10-11) silent. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					},
+					"q": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"source": "Gloves are ours; no source. Keep the row. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					}
+				}
+			}
+		},
+		"rimewright": {
+			"name": "Tamsin",
+			"source_hero": "Celeste",
+			"dash": {
+				"ground": {
+					"lmb": {
+						"source_does": "fires mid-dash",
+						"evidence": "footage",
+						"confidence": "high",
+						"ours": "fire +carry (beam)",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"carry": true,
+							"variant": "beam",
+							"source": "Footage briefs/hero-ref/tamsin.md:78-79 and :286: she fires the whole skate (0239-0245, 0285-0290) and the darts become straight thick beams (56 vs 35)."
+						}
+					},
+					"rmb": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire +carry",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"carry": true,
+							"source": "Not determinable. Data (briefs/supervive-data/supervive_kits.md:34) silent on casts during Skate; RMB/E during a skate are not shown (briefs/hero-ref/tamsin.md:66-80, 280-292). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					},
+					"e": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire +carry",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"carry": true,
+							"source": "Not determinable. Data (briefs/supervive-data/supervive_kits.md:34) silent on casts during Skate; RMB/E during a skate are not shown (briefs/hero-ref/tamsin.md:66-80, 280-292). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					},
+					"x": {
+						"source_does": "owner rule",
+						"evidence": "owner",
+						"confidence": "owner",
+						"ours": "cancel",
+						"change": "carry",
+						"rec": {
+							"mode": "cancel",
+							"carry": true,
+							"source": "Source: X during Skate not shown. Owner (INBOX.md 13:20 ET / INBOX_S2 18:20 UTC, refines item 27): 'shift -> ult should send her forward a decent amount', then she is encased and rooted. Today's row ends the skate with no carry."
+						}
+					},
+					"q": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire +carry",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"carry": true,
+							"source": "Gloves are ours; no source. Keep the row. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					}
+				},
+				"air": {
+					"lmb": {
+						"source_does": "owner rule",
+						"evidence": "owner",
+						"confidence": "owner",
+						"ours": "buffer",
+						"change": "none",
+						"rec": {
+							"mode": "buffer",
+							"source": "No air dash in the source: Shift in the air buffers the Skate to the landing (owner item 12, OWNER_REVIEW_1103.md:73; briefs/hero-ref/tamsin.md:294)."
+						}
+					},
+					"rmb": {
+						"source_does": "owner rule",
+						"evidence": "owner",
+						"confidence": "owner",
+						"ours": "buffer",
+						"change": "none",
+						"rec": {
+							"mode": "buffer",
+							"source": "No air dash (see lmb)."
+						}
+					},
+					"e": {
+						"source_does": "owner rule",
+						"evidence": "owner",
+						"confidence": "owner",
+						"ours": "buffer",
+						"change": "none",
+						"rec": {
+							"mode": "buffer",
+							"source": "No air dash (see lmb)."
+						}
+					},
+					"x": {
+						"source_does": "owner rule",
+						"evidence": "owner",
+						"confidence": "owner",
+						"ours": "buffer",
+						"change": "none",
+						"rec": {
+							"mode": "buffer",
+							"source": "No air dash (see lmb)."
+						}
+					},
+					"q": {
+						"source_does": "owner rule",
+						"evidence": "owner",
+						"confidence": "owner",
+						"ours": "buffer",
+						"change": "none",
+						"rec": {
+							"mode": "buffer",
+							"source": "No air dash (see lmb)."
+						}
+					}
+				}
+			}
+		},
+		"dolm": {
+			"name": "Breah",
+			"source_hero": "Tetra",
+			"dash": {
+				"ground": {
+					"lmb": {
+						"source_does": "fires mid-dash",
+						"evidence": "footage",
+						"confidence": "low",
+						"ours": "fire +carry",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"carry": true,
+							"source": "The guide's on-screen tip title 'Punch to Extend Dash/RMB' (briefs/hero-ref/breah.md:8-9) says a punch extends the dash; only the RMB half was resolved in frames (breah.md:114-115, 0938-0958), so the timing inside Landslide isn't measured."
+						}
+					},
+					"rmb": {
+						"source_does": "unknown",
+						"evidence": "footage",
+						"confidence": "none",
+						"ours": "fire +carry",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"carry": true,
+							"source": "Guide tip 'Dash -> RMB Dunk Combo' (briefs/hero-ref/breah.md:140-143, 0965-1010) shows the sequence; the frames are too small to tell whether RMB was pressed inside the dash or after it (breah.md:445). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					},
+					"e": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "buffer",
+						"change": "none",
+						"rec": {
+							"mode": "buffer",
+							"source": "Not determinable. Data (briefs/supervive-data/supervive_kits.md:107) silent; casts inside Landslide other than the punch tip are not shown (briefs/hero-ref/breah.md:145-158, 433-441); air dash not shown (breah.md:443-445). Kept: held to the dash's end (owner 18:20 UTC fallback)."
+						}
+					},
+					"x": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"source": "Not determinable. Data (briefs/supervive-data/supervive_kits.md:107) silent; casts inside Landslide other than the punch tip are not shown (briefs/hero-ref/breah.md:145-158, 433-441); air dash not shown (breah.md:443-445). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					},
+					"q": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"source": "Gloves are ours; no source. Keep the row. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					}
+				},
+				"air": {
+					"lmb": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "buffer",
+						"change": "none",
+						"rec": {
+							"mode": "buffer",
+							"source": "Not determinable. Data (briefs/supervive-data/supervive_kits.md:107) silent; casts inside Landslide other than the punch tip are not shown (briefs/hero-ref/breah.md:145-158, 433-441); air dash not shown (breah.md:443-445). Kept: held to the dash's end (owner 18:20 UTC fallback)."
+						}
+					},
+					"rmb": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"source": "Not determinable. Data (briefs/supervive-data/supervive_kits.md:107) silent; casts inside Landslide other than the punch tip are not shown (briefs/hero-ref/breah.md:145-158, 433-441); air dash not shown (breah.md:443-445). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					},
+					"e": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "buffer",
+						"change": "none",
+						"rec": {
+							"mode": "buffer",
+							"source": "Not determinable. Data (briefs/supervive-data/supervive_kits.md:107) silent; casts inside Landslide other than the punch tip are not shown (briefs/hero-ref/breah.md:145-158, 433-441); air dash not shown (breah.md:443-445). Kept: held to the dash's end (owner 18:20 UTC fallback)."
+						}
+					},
+					"x": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"source": "Not determinable. Data (briefs/supervive-data/supervive_kits.md:107) silent; casts inside Landslide other than the punch tip are not shown (briefs/hero-ref/breah.md:145-158, 433-441); air dash not shown (breah.md:443-445). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					},
+					"q": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"source": "Gloves are ours; no source. Keep the row. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					}
+				}
+			}
+		},
+		"ostra": {
+			"name": "Ostra",
+			"source_hero": "Void",
+			"dash": {
+				"ground": {
+					"lmb": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"source": "Not determinable. Swap is a lob, not a body dash (briefs/supervive-data/supervive_kits.md:115; briefs/hero-ref/ostra.md:272-279): she stays roughly in place for the ~1.8 s flight (frames 0158-0167). Nothing in the data locks her; no cast during the flight is shown. 'fire' is inferred from it not being a movement. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					},
+					"rmb": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"source": "Not determinable. Swap is a lob, not a body dash (briefs/supervive-data/supervive_kits.md:115; briefs/hero-ref/ostra.md:272-279): she stays roughly in place for the ~1.8 s flight (frames 0158-0167). Nothing in the data locks her; no cast during the flight is shown. 'fire' is inferred from it not being a movement. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					},
+					"e": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"source": "Not determinable. Swap is a lob, not a body dash (briefs/supervive-data/supervive_kits.md:115; briefs/hero-ref/ostra.md:272-279): she stays roughly in place for the ~1.8 s flight (frames 0158-0167). Nothing in the data locks her; no cast during the flight is shown. 'fire' is inferred from it not being a movement. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					},
+					"x": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"source": "Not determinable. Swap is a lob, not a body dash (briefs/supervive-data/supervive_kits.md:115; briefs/hero-ref/ostra.md:272-279): she stays roughly in place for the ~1.8 s flight (frames 0158-0167). Nothing in the data locks her; no cast during the flight is shown. 'fire' is inferred from it not being a movement. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					},
+					"q": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"source": "Gloves are ours; no source. Keep the row. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					}
+				},
+				"air": {
+					"lmb": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"source": "Not determinable. Swap is a lob, not a body dash (briefs/supervive-data/supervive_kits.md:115; briefs/hero-ref/ostra.md:272-279): she stays roughly in place for the ~1.8 s flight (frames 0158-0167). Nothing in the data locks her; no cast during the flight is shown. 'fire' is inferred from it not being a movement. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					},
+					"rmb": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"source": "Not determinable. Swap is a lob, not a body dash (briefs/supervive-data/supervive_kits.md:115; briefs/hero-ref/ostra.md:272-279): she stays roughly in place for the ~1.8 s flight (frames 0158-0167). Nothing in the data locks her; no cast during the flight is shown. 'fire' is inferred from it not being a movement. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					},
+					"e": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"source": "Not determinable. Swap is a lob, not a body dash (briefs/supervive-data/supervive_kits.md:115; briefs/hero-ref/ostra.md:272-279): she stays roughly in place for the ~1.8 s flight (frames 0158-0167). Nothing in the data locks her; no cast during the flight is shown. 'fire' is inferred from it not being a movement. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					},
+					"x": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"source": "Not determinable. Swap is a lob, not a body dash (briefs/supervive-data/supervive_kits.md:115; briefs/hero-ref/ostra.md:272-279): she stays roughly in place for the ~1.8 s flight (frames 0158-0167). Nothing in the data locks her; no cast during the flight is shown. 'fire' is inferred from it not being a movement. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					},
+					"q": {
+						"source_does": "unknown",
+						"evidence": "none",
+						"confidence": "none",
+						"ours": "fire",
+						"change": "none",
+						"rec": {
+							"mode": "fire",
+							"source": "Gloves are ours; no source. Keep the row. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."
+						}
+					}
+				}
+			}
+		}
+	}
+}
