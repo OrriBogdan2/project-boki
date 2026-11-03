@@ -30,8 +30,8 @@ func active() -> bool:
 func start(use_ex: bool) -> void:
 	var dd := k.dash_def()
 	var dir := k.dash_dir()
-	var roll := float(dd.get("roll", 2.6))
-	var rt := float(dd.get("roll_t", 0.16))
+	var roll := float(dd.get("roll", 3.5))
+	var rt := float(dd.get("roll_t", 0.24))
 	k.travel(roll, rt, {"invuln": rt, "dir": dir, "trail": "roll"}, use_ex)
 	k.play("pin_roll")
 	t = walk_time() + rt
@@ -43,9 +43,7 @@ func start(use_ex: bool) -> void:
 	k.st["last_dash"] = "spirit"
 	if k.rank("dash") >= 3:
 		_share_with_allies()
-	k.m.fx.burst(h.pos + Vector3(0, 0.6, 0), PinFx.GREEN, 18, 4.5, 0.35, 2.0, 1.0)
-	k.m.fx.ring(h.pos, 1.2, PinFx.GREEN, 0.25)
-	k.net_ring(h.pos, 1.2, PinFx.GREEN)
+	k.m.fx.dust(h.pos, 6)           # a quiet cue, no ring or burst on a dash; the green shell shows the walk
 	k.m.sfx("pin_spirit", h.pos, -3.0 if h.is_local() else -7.0)
 
 ## Seconds of Spirit Walk after the roll: rank 3 adds "time_rank3".

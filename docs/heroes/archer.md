@@ -11,6 +11,21 @@ What the newer source does: a two-stage bow draw (Empowered at about 0.6-0.8 s, 
 
 Where the footage and our older doc disagree, the footage (the newer version) wins, except where the owner notes override it.
 
+## Parity pass (owner 18:45: animation and ability parity, LMB first)
+Source vs ours per slot; [data] = the game data (supervive-data), [footage] = hero-ref/pin.md at 5 fps. Asserted in
+`--archer-combo-check` (`parity pin: ...`, tools/parity_pvb.gd) unless noted.
+
+| Slot | Source | Ours | Status |
+|---|---|---|---|
+| LMB beats | hold: side-on draw pose held; release a 1-frame snap, little recoil; Supercharged flashes the body and kicks harder [footage 0102-0124, 0167-0169] | `arc_draw` (held), `arc_loose` out at 0.05 s and settled by 0.42 s; `arc_super` with the body flash at the stage | matches; asserted |
+| LMB tracking | turns to the cursor throughout, walks slowly while drawing [footage f111-116] | the body faces a moved cursor within 0.1 s mid-draw; the arrow leaves along the new aim while walking; drawing walks at 0.7 of the run | matches; asserted |
+| LMB cadence | 0.5 s cooldown [data card] | **was 0.35 s**: the next draw now starts 0.5 s after the release (`longbow.json` rate 0.5) | fixed; asserted |
+| LMB stages and range | Empowered 0.6-0.8 s, lands at the cursor; Supercharged 1.2-1.4 s, past the cursor; overdraw halves [footage] | 0.6 s / 1.15 s (the low end, kept for ranged TTK), cursor / 16 m, overdraw x0.5 | matches (Supercharged 0.05 s early, deliberate) |
+| RMB Heartpiercer | hold to charge, release; 16 s, 1 charge [data]; the newer footage also fires a tap uncharged | hold only, 16 s, 1 charge, gold V and bar | data wins over footage |
+| E Rain of Arrows | an arc at the cursor distance, about 120 degrees, 4.4 s [footage] | the same | matches |
+| X Primal Forces | 3 empowered no-draw shots, the 3rd executes [data] | Starpiercer: the same rules | matches |
+| Shift Spirit Walk | a dodge roll of about 3 m in 0.27 s (peak 17 m/s at 0.13 s), straight into the crouched walk [footage 655.55-655.65] | **was 2.55 m in 0.18 s** (the owner found Pin's Shift fast): now 3.0 m in 0.28 s (`roll` 3.5, `roll_t` 0.24, with the dash feel); `pin_roll` retimed to match; the start burst and ring are gone (owner: no rings or bursts on dashes), a dust puff instead | fixed |
+
 ## Per-slot table (slot, input, our behaviour, source behaviour, difference and why)
 | Slot | Input | What it does now (our words) | Source behaviour | Difference and why |
 |---|---|---|---|---|
@@ -21,7 +36,7 @@ Where the footage and our older doc disagree, the footage (the newer version) wi
 | LMB | overdraw | Held 0.5 s past Supercharged: the line and the bow glint dim, the arm shakes (`arc_over`); the arrow does half | About 50% (263 vs 505) | Matches the ratio |
 | RMB | tap | Nothing: a tap before the draw starts looses no arrow and costs nothing (no snare, no Tripwire, no air Plunge) | Heartpiercer is hold only | Data: hold only |
 | RMB | hold | Heavy Shot (one charge, 16 s cooldown): the V tinted gold plus a gold bar from the bow that grows to 2 body heights with the charge; full at 1.1 s; pierces, knocks back; into a wall within 3 m: a wall hit and a 1.2 s stun (PINNED). An arrow 3.5 times a normal one (a bright core, a 6 m trail, violet fins); a release burst on the aim line at the bow, a screen kick and a deeper thump; a hit flash, a red-white burst, dust and a white ring on impact, and a wall pin leaves a stake in the wall for 7 s; a pink crescent at the feet on release | Same telegraph, arrow and impact | The 1.2 s wall stun stays from the earlier pass. Data: 16 s, 1 charge |
-| Shift | tap | Spirit Walk: a 3 m dodge roll (0.16 s, invulnerable) that flows straight into the crouched spirit run, then 2.8 s walking 10% faster through rocks, trees, pillars and ability barriers (not cliffs); rank 3: 0.5 s longer, 33% faster inside something (fading over the walk), allies within 6 m walk too. Damage ends it; ending inside something costs 30 Focus and puts her back where she went in. Her screen tints dark blue while inside; a green shell over her | Spirit Walk: dodge roll, 2.8 s through walls and objects; damage ends it; ending inside a wall costs 30 mana and teleports back | Mana is Focus here. Cooldown 6 s on our charge system instead of the source's mana gate |
+| Shift | tap | Spirit Walk: a 3 m dodge roll (0.28 s, invulnerable; the footage's 0.27 s) that flows straight into the crouched spirit run, then 2.8 s walking 10% faster through rocks, trees, pillars and ability barriers (not cliffs); rank 3: 0.5 s longer, 33% faster inside something (fading over the walk), allies within 6 m walk too. Damage ends it; ending inside something costs 30 Focus and puts her back where she went in. Her screen tints dark blue while inside; a green shell over her | Spirit Walk: dodge roll, 2.8 s through walls and objects; damage ends it; ending inside a wall costs 30 mana and teleports back | Mana is Focus here. Cooldown 6 s on our charge system instead of the source's mana gate |
 | Shift | long dash | In the air or out of charges: a 4.2 m flick with a sideways tumble (`pin_flick`) and a green streak | (base dash) | Our per-hero base dash variant |
 | E | tap | Hail Wall: lobbed up (0.35 s, everyone sees the arc), then 4.4 s of rain on an arc round her, 120 degrees, at the cursor distance (2-9 m), 1.8 m deep: 5 per 0.5 s, slow 35%, blight (healing barely takes) with blue burn flames. Seven translucent green panels with fletch posts, a ground glow, arrows streaking down | Rain of Arrows: an arc concentric to the hunter, about 120 degrees, at the cursor distance, about 4.4 s | Cooldown 9 s (source 8.3 s with RMB 9 s: the same ratio to our RMB) |
 | X | tap (level 6) | Starpiercer: no cast lock; the next 3 bow shots within 6 s need no draw. Each LMB press nocks 0.3 s, then looses a beam that pierces every foe to 18 m (1.5x Empowered), knocks back 4 and strips 10 armor: 18, 18, then 25 on the last, which finishes a hunter it leaves under 12%. Cooldown 36 s. Telegraph: the beam's lane and a ticked ring at her feet; three pips and a glowing bow everyone sees | Primal Forces: next 3 shots empowered (no charge, 6 s, piercing, longer range, knockback, armor shred, the final shot executes) | Damage scaled down from the source's ratio (a beam is about a Supercharged arrow there; here 0.3x, final 1.39x the beam as the source's 1.41x) so the ult then a merge never takes a full-health light hunter down. Deadeye stays: it is the Focus payoff on a rooted foe, not a three-shot window, so nothing is unfolded |
@@ -112,6 +127,7 @@ Light class, 124 HP: tap 15, Empowered 30, Supercharged 60, overdrawn 30, full H
 | Starpiercer's last beam on a hurt hunter | EXECUTED under 12% (a knock: the cast's best bond event) | same |
 | A Boki merge mid nock | No beam; the empowered window ends | same |
 | Starpiercer then a merge on a full-health light hunter | Standing (burst cap) | same |
+| Draw, then Shift (the roll or the air flick) or a jump (item 51) | The draw carries through and charges on; let go mid-roll and it looses as the roll ends, let go in the air and she keeps her speed. The source shows nothing ending a draw on the roll, so it combines (content/dash_flow/archer.json) | `--archer-combo-check` (`pin early release: a dash keeps the draw...`, `pin item 51: ...`), `--dash-flow-check` |
 
 ## Animations (KMovesPinBjorn ids per ability; timed to 5 fps footage frames)
 | Ability | Move id(s) | Notes |
@@ -121,7 +137,7 @@ Light class, 124 HP: tap 15, Empowered 30, Supercharged 60, overdrawn 30, full H
 | LMB perfect | `arc_perfect` | a flourish of the string hand, overshoot and settle |
 | LMB overdraw | `arc_over` (held), `arc_over_loose` | the draw arm shakes and sags; a drooping release |
 | RMB hold (Heavy Shot) | `arc_heavy_wind` (held), `arc_heavy` | sunk low; thrown back by the shot |
-| Shift (Spirit Walk) | `pin_roll`, then `pin_walk` (held) | one forward roll in 0.16 s, then light-footed, arms trailing |
+| Shift (Spirit Walk) | `pin_roll`, then `pin_walk` (held) | one forward roll in 0.28 s (footage 655.55-655.65), then light-footed, arms trailing |
 | Long dash | `pin_flick` | a sideways tumble |
 | E (Hail Wall) | `arc_hail` | bow raised high, the volley lobbed up |
 | Payoffs / procs | `pin_deadeye`, `pin_rundown` | locked low with the bow thrust out; a pumped fist and skip |

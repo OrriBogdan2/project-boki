@@ -2,11 +2,12 @@ class_name MageUlt
 extends RefCounted
 ## Vireo's ultimate, Kitefall (X). docs/heroes/mage.md has the numbers and the research notes.
 ##
-## Press: a short crouch, then she launches straight up and hangs there invulnerable while a gold range ring
-## and its dark interior show round the take-off spot and the camera pulls back. Press again (X or the attack
-## key) to come down as a bolt at the cursor, clamped inside the ring; with no second press she comes down
-## there by herself when the hover runs out. The strike hurts, knocks back and adds Static to everyone round
-## the landing spot, and gold lightning crackles at her feet for a moment after.
+## Press: a short crouch (a Shift or a jump in it combines: she launches from where it takes her), then she
+## launches straight up and hangs there invulnerable while a gold range ring and its dark interior show round
+## the take-off spot and the camera pulls back. Press again (X or the attack key) to come down as a bolt at the
+## cursor, clamped inside the ring; with no second press she comes down there by herself when the hover runs
+## out. The strike hurts, knocks back and adds Static to everyone round the landing spot, and gold lightning
+## crackles at her feet for a moment after.
 
 const CROUCH := "crouch"
 const RISE := "rise"
@@ -19,7 +20,7 @@ const CAM_PULL := 0.45           # how far the camera eases back while she hangs
 const DUST := Color("c9b48a")
 
 var kit: MageKit
-var leap := {}                 # the running cast: {phase, t, from, top, land, high, queued, fire_free, disc}
+var leap := {}                 # the running cast: {phase, t, from, base, top, land, high, queued, fire_free, disc}
 var casts := 0                 # (tests)
 var hits := 0                  # foes the strikes hit (tests)
 var last := {}                 # (tests) the last strike: {at, hits, bond}
@@ -57,7 +58,7 @@ func cast() -> bool:
 	if kit.m.world.is_void(h.pos.x, h.pos.z):
 		return false
 	var from := kit.ground(h.pos)
-	leap = {"phase": CROUCH, "t": 0.0, "from": from, "top": from.y + float(data()["height"]), "land": from}
+	leap = {"phase": CROUCH, "t": 0.0, "from": from, "land": from}
 	leap["queued"] = false
 	leap["fire_free"] = not bool(h.inp.get("fire", false))
 	casts += 1
@@ -89,9 +90,16 @@ func tick(dt: float) -> void:
 	var xd := data()
 	match phase():
 		CROUCH:
-			_hold_still()
-			if t >= float(xd["windup"]):
-				_take_off()
+			if _moving():
+				leap["t"] = 0.0             # a Shift in the crouch: the crouch waits for it, then starts over
+				leap["moved"] = true
+			elif bool(leap.get("moved", false)):
+				leap["moved"] = false
+				kit.play("mage_x")
+			else:
+				_hold_still()
+				if t >= float(xd["windup"]):
+					_take_off()
 		RISE:
 			_hold_air(smoothstep(0.0, 1.0, t / float(xd["rise"])))
 			_aim_tick()
@@ -128,11 +136,14 @@ func _wants_down(t: float, xd: Dictionary) -> bool:
 		return true
 	return t >= float(xd["hover"])
 
+## The crouch: no steering, but a jump still goes (she takes off from up there) and any speed she had runs out
+## under her the way it would (item 51: an ability combines with Shift and a jump).
 func _hold_still() -> void:
-	var h := kit.h
-	h.inp["move"] = Vector2.ZERO
-	h.inp["jump"] = false
-	h.vel = Vector3(0, minf(h.vel.y, 0.0), 0)
+	kit.h.inp["move"] = Vector2.ZERO
+
+## A Wirerun charging or streaking, or her air dash: Shift pressed in the crouch.
+func _moving() -> bool:
+	return not kit.wire.is_empty() or kit.run_t > 0.0 or kit.h.roll_t > 0.0
 
 ## Up at the take-off spot, `k` of the way to the top: no keys, no gravity, nothing touches her.
 func _hold_air(k: float) -> void:
@@ -142,7 +153,8 @@ func _hold_air(k: float) -> void:
 	h.inp["jump"] = false
 	h.gliding = false
 	h.vel = Vector3.ZERO
-	h.pos = Vector3(from.x, lerpf(from.y, float(leap["top"]), k) + 0.12 * sin(kit.m.time * 3.0) * k, from.z)
+	var y := lerpf(float(leap["base"]), float(leap["top"]), k) + 0.12 * sin(kit.m.time * 3.0) * k
+	h.pos = Vector3(from.x, y, from.z)
 	_untouchable(0.1)
 	if h.is_local() and kit.m.cam:
 		kit.m.cam.pull = maxf(kit.m.cam.pull, CAM_PULL * k)
@@ -152,10 +164,19 @@ func _untouchable(secs: float) -> void:
 	h.inv_t = maxf(h.inv_t, secs)
 	h.phase_t = maxf(h.phase_t, secs)
 
+## She launches from where she is: a jump or a dash in the crouch moves the ring there (unless that is over the
+## abyss), and the climb starts at her height, so nothing snaps.
 func _take_off() -> void:
 	var h := kit.h
-	var from: Vector3 = leap["from"]
 	var r := float(data()["range"])
+	var was: Vector3 = leap["from"]
+	if Vector2(h.pos.x - was.x, h.pos.z - was.z).length() > 0.5 and not kit.m.world.is_void(h.pos.x, h.pos.z):
+		leap["from"] = kit.ground(h.pos)
+		kit.fx().ring(leap["from"], r, MageKit.GOLD, MageKit.TEAL, 0.3)
+		kit.net_ring(leap["from"], r, MageKit.GOLD)
+	var from: Vector3 = leap["from"]
+	leap["base"] = h.pos.y
+	leap["top"] = maxf(from.y + float(data()["height"]), h.pos.y)
 	_next(RISE)
 	kit.play("mage_x_air")
 	kit.m.fx.burst(from + Vector3(0, 0.2, 0), DUST, 18, 3.5, 0.5, 2.0, 1.4)

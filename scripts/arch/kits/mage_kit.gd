@@ -73,7 +73,8 @@ func ult_running() -> bool:
 func ult_recast() -> bool:
 	return ult.recast()
 
-## Kitefall holds her from the crouch to the strike: no other key works until she lands.
+## Kitefall holds her from the crouch to the strike: no other key works until she lands (in the crouch Shift and
+## a jump still do).
 func busy() -> bool:
 	return super.busy() or ult.busy()
 
@@ -311,8 +312,8 @@ func run_time(L: float) -> float:
 	return maxf(0.1, L / float(dd["speed"])) * float(dash_feel()["time"])
 
 func on_dash(use_ex: bool) -> bool:
-	if ult.busy():
-		return true
+	if ult.airborne():
+		return true         # Kitefall's flight is its own move (content/dash_flow/mage.json); its crouch combines
 	if use_ex and (h.dashes < 1.0 or wire.size() > 0 or run_t > 0.0):
 		# no charge left: the long air dash / extra dash, her base dash's own look (a tumble, a teal streak)
 		if not wire.is_empty() or run_t > 0.0 or not spend_dash(true):
@@ -335,7 +336,6 @@ func on_dash(use_ex: bool) -> bool:
 	play("mage_dash")
 	# a bolt slams down onto her: the charging tell
 	fx().arc(h.position + Vector3(0, 8.0, 0), h.position + Vector3(0, 0.3, 0), col_of(dash_def()), GOLD, 0.8, 0.22)
-	m.fx.flash(h.position + Vector3(0, 1.0, 0), GOLD, 0.9, 0.08)
 	m.sfx("vv_surge_charge", h.pos, -3.0)
 	return true
 
@@ -440,9 +440,9 @@ func _arrive() -> void:
 	if not is_instance_valid(h): return
 	run_t = 0.0
 	if h.model: h.model.visible = true
-	fx().ring(ground(h.pos), 2.7, col_of(dash_def()), GOLD, 0.4)
-	m.fx.spark(h.position + Vector3(0, 0.5, 0), Vector3.UP, GOLD, 10, 8.0, 90.0, 0.25, 4.0, 1.1)
-	play("mage_dash_land")
+	m.fx.dust(h.pos, 5)           # a quiet arrival: no ring or burst on a dash, the hits are on the way
+	if ult.phase() != MageUlt.CROUCH:
+		play("mage_dash_land")      # (a run out of Kitefall's crouch lands in the crouch: it plays that instead)
 
 func _wire_hit(f: Ent, dmg: float) -> void:
 	if not is_instance_valid(f) or f.dead: return

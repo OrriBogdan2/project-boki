@@ -1408,11 +1408,15 @@ func trigger(dt: float) -> void:
 		fire()
 
 ## A bow: hold to draw, let go to loose. Only the button coming up looses a player's arrow: a full Focus
-## is drawn at once but still waits for the release, a cooldown never looses it, and a stun, dash or glide
-## cancels the draw with no shot. A bot has no button, so it lets go by itself.
+## is drawn at once but still waits for the release, a cooldown never looses it, and a stun or glide
+## cancels the draw with no shot (a dash too, unless its DashFlow hold row keeps it). A bot lets go by itself.
 func _trigger_bow(held: bool, dt: float) -> void:
 	if draw_t < 0.0:
 		focus_draw = false
+	if draw_t >= 0.0 and not can_fire() and ak and ak.flow.pauses_hold("lmb"):
+		if held and not focus_draw:
+			draw_t += dt * ak.draw_rate()      # a dash whose row keeps the draw: it charges on through it,
+		return          # and a release in it looses when it ends
 	var can_draw: bool = can_fire() and ammo > 0
 	if draw_t >= 0.0 and not held:
 		_loose()
