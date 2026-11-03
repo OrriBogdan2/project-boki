@@ -5,7 +5,7 @@ extends "res://tools/vv_shots.gd"
 
 const GRID_CROP := Vector2i(280, 200)    # px round the hero per strip frame (scaled 1.5x)
 const GRID_COLS := 3
-const PARTS := ["rmb", "dash"]
+const PARTS := ["rmb", "dash", "spine", "climb"]
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -118,3 +118,40 @@ func _breah_dash() -> void:
 		[0.02, 0.07, 0.13, 0.19, 0.24]
 	)
 	await _go(0.4, Callable(), air)
+
+## Basalt Spine: the ridge of real rocks, one rock deep, centre-out (tap across the aim).
+func _breah_spine() -> void:
+	await _reset(14.0)
+	P.lvl = 6
+	P.ak.cd["x"] = 0.0
+	_aim(home + Vector3(5.0, 0, 0))
+	P.inp["x_down"] = false
+	HunterKeys.ult_pressed(P)
+	var at_ridge := func(): return (P.ak as DolmKit).spine.center + Vector3(0, 0.6, 0)
+	var marks := [
+		[0.12, "full", "spine_cracks", "Basalt Spine released: the molten cracks along the line everyone sees for 0.2s",
+			at_ridge],
+		[0.42, "full", "spine_rising", "Basalt Spine rising centre-out: real rocks (Stone Row's own), one rock deep",
+			at_ridge],
+		[0.9, "full", "spine_up", "Basalt Spine up: a ridge of punchable rocks across the aim, one rock deep, no land;"
+			+ " it stops at the island's edge (lower right)", at_ridge],
+	]
+	await _go(1.0, Callable(), marks)
+
+## Item 25: she walks into her own rock and rises over it, no jump.
+func _breah_climb() -> void:
+	await _reset(14.0)
+	_aim(home + Vector3(6.0, 0, 0))
+	P.ak.cd["e"] = 0.0
+	P.ak.use_e()
+	await _go(0.4)
+	var walk := func(_t: float): P.inp["move"] = Vector2(1, 0)
+	var marks := _strip(
+		"climb_strip",
+		"Her own rock (item 25), gameplay zoom: she walks into it with no jump, rises up its face with her walk"
+			+ " carried on, stands on its top (the rock slides under her, her foot ring on its top) and walks on over"
+			+ " (about 0.5s to cross; the top-down camera hides most of the 1.25m rise)",
+		[0.3, 0.42, 0.5, 0.6, 0.72, 0.9]
+	)
+	await _go(1.1, walk, marks)
+	P.inp["move"] = Vector2.ZERO
