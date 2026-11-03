@@ -273,3 +273,6 @@ Body, scale and movement sections are now in for **all 12** hunters (bjorn, pin,
    - **Every goal measurable** from events we already track, or add the event.
    - **Readable in one line,** with a progress counter.
    - **Post the proposed list in STATUS.md** (per hunter: unlock challenge, then 3-5 mastery goals with their cosmetic rewards) for the owner, and build with those values.
+
+## 2026-11-03 02:05 UTC
+Owner: **Merge moves to C** (it was T). Final layout: R reload, X hunter ult, C Merge, G Boki button, T free. The main session changes the default. Kits and UI keep using `Settings.key_cap("ultimate")`; never hard-code C or T. Relay this to the running agents.

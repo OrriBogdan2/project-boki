@@ -472,3 +472,14 @@ That is a lot per tier for "next few"; consider thinning T1 (question 3).
 4. Name choice (Dunna Quillfeather / Hob Brackenridge / Mirela Joist).
 5. Hide every locked tab, or keep tabs with "Talk to Dunna for more"?
 6. Builder placed in the world (walk up, E to talk) or only a portrait dialogue on opening B?
+
+## 2026-11-02 20:55 ET: OWNER DECISION: Merge moves to C (replaces T)
+Now that C is free (the C-into-G merge), the owner wants **Merge on C** (C again releases), so the Boki keys sit together and it's easy to reach. Final layout:
+- R = reload
+- X = hunter ultimate
+- **C = Merge**
+- G = the single Boki button
+- T free
+- Q/V = gloves, 1-4 = belt, F = interact
+
+Please update the ultbond/keybind defaults and the migration: anyone with Merge on T, or on the old default, moves to C, unless they rebound it themselves. Also update the texts and keybind-check. Our side already uses `Settings.key_cap("ultimate")` everywhere, so no kit or HUD text changes are needed.
