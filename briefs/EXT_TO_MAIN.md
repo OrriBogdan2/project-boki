@@ -438,3 +438,37 @@ Your four perkorbs follow-ups from 16:15 ET:
 4. **Late joiners get the live orbs.** There's no join snapshot in the code, so when Net.peers grows, the host re-sends every live orb as `odrop` (receivers skip ids they already have). This avoids resurrecting an orb a client just took. A fan the joiner missed starts fresh for them.
 
 Checks: perkorb 139, farmbuild (through the registry), --check, archetype 192, level-hud, arena 86 and bot-sanity all pass. health --strict and gen_wiki pass. +67/−16 across 12 files, with no new files.
+
+## 2026-11-03 00:53 UTC: from the server coordinator. Farm builder NPC plan (INBOX 00:15 item 3), for the owner to confirm before building
+Base: ext/farmbuild is MERGED into origin/main; plan against main. Gating = FarmUnlocks (content/rules/farm_build.json), levels [0,6,16,30,48,70]; milestones first_extract, first_boss, scan3.
+
+**Builder:** Dunna Quillfeather (alts: Hob Brackenridge; Mirela Joist). Note: avoids hunter names (Tamsin, Linwick). Personality: gruff, dry, proud of straight beams; talks in short sentences, never says no, only "not yet". Sample: "Boards don't hammer themselves. Tell me what you need and I'll draw it up."
+
+**Starter set (today's `starter`, plus feeder):** house, crop_patch, cook_pot placed at once; feeder from Econ.FEEDER_ORDER (feeder_inv, not gated). Pen = ranch_pen is level 4 today. To match "feeder, pen, crop patch" the pen must move earlier (open question 1). Decor/paths/fences: fence, path_dirt, flowers, path_clear have no unlock entry, so they are open now; shrink to a handful (question 2).
+
+**Unlock order (existing table; ids real):**
+- T0 new save: house, crop_patch, cook_pot, feeder, fence, path_dirt, flowers. "Start with the basics. Rome wasn't built in a day, but it had a decent crew."
+- T1 farm level 2 (6 pts): job_board, lumber_camp, quarry, storage_chest, market_stall, boki_burrow, training_post, workshop, bush, tree, lantern, bench, kin_bed, picket, path_stone. "You've got a crew now. Let's give them something to swing at."
+- T2 farm level 3 (16): hearth_oven, workbench, seed_garden, nesting_nook, graveyard, cottage, stone_wall, hedge, path_wood, pine, lamp_post, rug, banner. "Real work needs a real bench."
+- T3 farm level 4 (30): kiln, spark_mill, ranch_pen, infirmary, water, rug_long, pillar. "Pens, kilns, a proper hospital. Now we're talking."
+- T4 farm level 5 (48): cold_store. "Cold store. Mind the draught."
+- Milestones: first_extract -> armory; first_boss -> shrine, fountain; scan3 -> blossom_tree, kin_statue. "You came back alive. Take this blueprint." / "Bring me a trophy and I'll carve it in stone."
+- Level 6 has no items yet (cradles 6-8 open at 4/5/6): optional line only.
+That is a lot per tier for "next few"; consider thinning T1 (question 3).
+
+**Hidden sections:** in home_build._tab_items, drop `FarmBuildUi.locked_entry` branches (3 call sites: fs() catalog loop, lots loop, default tab loop) when gated; items placed or owned stay (FarmUnlocks.open already covers). In _build_bar skip tabs whose _tab_items is empty (Upgrades, Island, Buildings always shown). Optional: a tab with items hidden shows "Talk to Dunna for more" instead of vanishing; recommend hiding all tabs except Buildings plus a single footer line "Talk to Dunna for more" when anything is still locked. Ungated (old) farms unchanged.
+
+**Opening:** B opens on Buildings: set `cat = "Buildings"` when build mode toggles on (var cat defaults "Garden", line ~15; line ~1328 already does it in one path).
+
+**New vs wiring:**
+- New: scripts/home/farm_builder.gd (NPC placement near the house, dialogue pick by tier, "new blueprints" toast hooking FarmUnlocks.announce); content/rules/farm_builder.json (name, tier lines, tier->unlock grouping, optional); an interact prompt.
+- Wiring: farm_build.json (move ranch_pen earlier, thin T0/T1 per answers; maybe add "tier" field); farm_unlocks.gd (tier_of(id), builder_line()); farm_build_ui.gd (hide instead of locked_entry); home_build.gd (hide branches, empty-tab skip, default cat); home.gd (spawn NPC, E interaction); --farmbuild-check updated (locked entries now absent).
+- Reserved Boki files: none touched. Save: no new fields needed (fbs already tracks announced). Net.VERSION unchanged.
+
+**Open questions for owner:**
+1. Pen in starter set: make ranch_pen level 1 (it is level 4 now), or just unlock it first at level 2?
+2. Which decor ids stay open at start (fence/path_dirt/flowers/path_clear are ungated today)?
+3. Fewer items per tier (T1 has 15)? Spread over levels 2-5, or keep?
+4. Name choice (Dunna Quillfeather / Hob Brackenridge / Mirela Joist).
+5. Hide every locked tab, or keep tabs with "Talk to Dunna for more"?
+6. Builder placed in the world (walk up, E to talk) or only a portrait dialogue on opening B?
