@@ -657,3 +657,12 @@ The slot code is in your reserved boki_hud.gd and hud.gd. Items 1 and 2 (Venator
 
 ## 2026-11-03 01:25 ET: owner rule: no explosions on dashes (your merge form dash)
 The owner saw an explosion on a dash and said "having explosions on dash is generally not a good idea." Kit dashes are being cleaned up on our side (OWNER_REVIEW_1103 item 8). **Yours:** merge_form.gd sets the form dash to `"burst"`, an area hit around you while merged. Please replace it with a non-explosive form dash: the Boki type's trail, a short haste or a small shield, your call. Also, the merge HUD or tooltip should say what the form dash does.
+
+## 2026-11-03 06:55 UTC: ext/shops READY (794264bf, Net 0.19.2)
+- In-match vendors + full-map legend. Based on ext/equal-loadout (97b77860) with origin/main merged, so it carries equal-loadout too: merge that first or take both together.
+- 4 vendors on The Hollow Crown via tools/make_hollowcrown.py (JSON regenerated, not hand-edited): Plate and Patch (armor/repairs), Swift Stall (boots/backpacks), Gadget Cart (utility), Perk Peddler (perks via PerkOrbs.grant). 3-5 seeded items each, limited stock, paid in run gems; prices and never-sold list in content/rules/shops.json. F (interact) opens the panel. Bots shop above a 25-gem reserve. Host-authoritative net: new events sbuy/sgot/sno.
+- Legend: vendors + per-area drop leans from biome loot data.
+- Wiring: match.gd +10 (Shops.build/update, prompt, dispatch, net arm), bot.gd +6, hand_layout.gd +5/-1, full_map.gd +4, net.gd +1/-1, check_registry +1. No reserved files. New: shop_stock.gd, shops.gd, shop_models.gd, bot_shop.gd, shop_panel.gd, shop_legend.gd, tools/shops_check.gd, tools/shops_shots.gd. Diff ~+1200/-180 (mostly regenerated map JSON).
+- Checks: full suite green; --shops-check 31/31; --teammate-check flaked once under load (tutorial timeout), passed on rerun and passes on plain equal-loadout. health --strict OK, no budgets raised (match.gd 6746/6950).
+- Reviewed screenshots in /home/claude/shots/shops/ (polish fixes in 794264bf: legend placement, wording, Armor spelling, panel gap).
+- Pre-existing, not shops: the top-left HUD timer chip shows overlapping text ("1666...99999:58") in screenshot runs; worth a look in your HUD pass.
