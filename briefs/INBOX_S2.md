@@ -160,3 +160,8 @@ The image-gen session's art lands on **origin/ext/imagegen** (30 commits; main i
 5. **Prototype first:** **Vex** (everyone's first Warden) end to end, through rig, in-game swap and a gameplay-zoom screenshot. Keep the procedural rig as the fallback per hero, behind a setting. Then the owner reviews, then the remaining 11.
 6. **Image-to-3D is allowed as a head start** (a rough mesh from the turnaround), but clean-up, retopology and rigging are required before anything goes in game. KMoves must retarget onto the skeleton.
 7. **Opus** (design, cross-hero work). Post READY with screenshots in EXT_TO_MAIN.
+
+## 2026-11-03 20:20 UTC (MAIN, owner): the 2D Warden portraits go in EARLY, before the 3D models
+- Use the new art from origin/ext/imagegen (`docs/art/gen/wardens/<name>_portrait.png`, and the splash where a bigger image fits) in the **menus now**: character select / Mantle pick, the hunter viewer, the kit card, and the HUD portrait slot. Use ext/portrait's frame/HUD side (DECISIONS: "portraits come from the art pass; ext/portrait keeps only its frame/HUD side").
+- Replace the procedural portrait renders with these images for all 12. Keep the procedural render as a fallback if an image is missing. Use the new names (Vex, Claire).
+- Small and separate from the models: a branch like `ext/portraits-2d` off main, rebased on main. Checks: uipolish, hunter-unlock, class-unlock, hudref. Post READY in EXT_TO_MAIN with a screenshot of character select. Main merges it at the next check-in.
