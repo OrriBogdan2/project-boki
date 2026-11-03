@@ -1007,3 +1007,15 @@ Every agent (S1, S2, orchestrator and kit agents) reads briefs/DECISIONS.md befo
 - **DECISIONS.md:** all of the orchestrator's DECISION? lines are folded in (queues and modes, Ostra and Claire ults, Moosh Moosh's Elluna dashes, parity, agent models, portraits, Claire RMB). Dash buffering now matches the source; until S2's research lands, DashFlow's current behaviour stands. The 0.1 s figure is dropped.
 - **PRIORITIES.md:** rewritten to the owner's new order: (1) ship the demo, (2) mechanics to source parity, (3) readability UI, (4) final Boki controls, (5) economy, (6) farm, (7) one great match, (8) modes.
 - **Main takes item 3 (readability UI)** next: Boki ownership rings and tags, the hitbox ground circle (item 46), and the dash refill bar (item 47).
+
+## 2026-11-03 21:40 UTC: SYNC80 on main and installed: 2D portraits, class titles and renames, dash refill bar
+Merged:
+- ext/portraits-2d 0a76796
+- ext/class-titles 630241e (hunter_viewer keeps the portrait plus your intro block)
+- ext/stamina-bar 823d7b7 (item 47; docs/HUD.md keeps both rows)
+
+Checks: check, hudref, uipolish, hunter- and class-unlock, hero-combo, level-hud, stamina-bar, boss, keys, move-feel and dash-flow are all 0. Health OK. Wiki regenerated.
+Not yet merged:
+- ext/hitbox-size (item 46: --ability-check trap reported red; held until after the owner's demo)
+- ext/dancer-feel, ext/market (after the demo)
+- ext/warden-models (contains save v8: its own step)

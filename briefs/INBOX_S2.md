@@ -190,3 +190,8 @@ How to speed it up:
 4. **After the owner OKs Vex, fan out:** 3–4 model agents in parallel, about 3 Wardens each (the complex ones, Zedran, Tarek and Bjorn, spread across agents).
 5. **Swap in per hero behind a setting**, procedural rig as the fallback, so each model ships the moment it passes its size check and screenshot. No big-bang release.
 Animations hook to each model as that hero's mechanics pass finalises its moves.
+
+## 2026-11-03 21:40 UTC (MAIN, owner): skeleton = shared BONES, not shared MOTION. And Vex is a woman
+- The owner worries that every Warden will move the same. **Rule:** the shared skeleton is only common bone *names* and a common rig layout, so tools, retargeting and the loader work for all 12. **Each Warden keeps fully their own animation set**: their own idle, run cycle, stance, dash and every ability move (the per-hero KMoves and ARCH_STANCE stay per hero, as today). Proportions differ per hero, and per-hero extra bones for unique parts (fists, tails, shields, coats and hair) are encouraged. If two Wardens' runs or idles look alike in the review screenshots, that's a fail.
+- **Vex is female** (class-titles data: gender female). Model and animate her as a woman, per the art (`vex_*`). Fix any he/him text.
+- The owner is waiting on the **Vex screenshot**: please post a gameplay-zoom shot and a close-up in EXT_TO_MAIN as soon as there's anything in game, even rough.
