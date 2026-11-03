@@ -6,7 +6,7 @@ The lamplighter who floats. Stuns from range, drops a growing bomb on the stunne
 
 1. A thin line always runs to your cursor. Orbs fly their full range; pause and the next is a fast bright bolt that slows.
 2. **Shard Snap** (RMB): a short wind-up (the line becomes two rails), then a bundle of shards that stuns, longer the further it flew.
-3. **Brimseed** (E) drops at the cursor and grows for 6.5s; E again pops it. **Lantern Trade** (Shift): hold to see both ends, let go to lob; you swap with whoever stands where it lands.
+3. **Brimseed** (E) drops at the cursor and grows for 6.5s; E again pops it. **Lantern Trade** (Shift): hold to see both ends, let go to lob; you hover until it lands, then everyone in its circle swaps to your spot and you go to theirs.
 4. Hits fill **Swell**, ten times faster on hunters. Swollen, everything is bigger and quicker.
 
 <!-- gen:kit -->
@@ -28,7 +28,7 @@ What the in-game kit card (K) says.
 |---|---|
 | Loop | Controller: stuns from range, drops a growing bomb on the stunned, and trades places to set it up. |
 | Passive: Swell | Swell: your hits fill Swell (much faster on hunters); full, you are Swollen for 9s and everything grows. |
-| Dash: Lantern Trade | Lantern Trade: lob a lantern to the cursor; when it lands you swap places with whoever stands there. |
+| Dash: Lantern Trade | Lantern Trade: lob a lantern to the cursor and hover where you are; when it lands, everyone in its circle goes to your spot and you go to theirs. |
 | LMB | Tether Lantern: quick orbs to full range; pause and the next one is a fast bright bolt that slows. |
 | RMB: Shard Snap | Shard Snap: a short wind-up, then a bundle of shards that stuns the first foe, longer the further it flew. |
 | E: Brimseed | Brimseed: drop a bomb at the cursor that grows for 6.5s; press again to pop it, harder the bigger it grew. |
@@ -39,7 +39,7 @@ What the in-game kit card (K) says.
 
 **Swell (passive).** Damage you deal fills Swell (ten times as fast against hunters). Full Swell makes you Swollen for 9s, wrapped in a pink sphere: your seed grows larger and faster, Trade lands sooner, your Snap hits 40% harder. A knock heals you 20% of your health.
 
-**Lantern Trade (dash, Shift, 9s cooldown).** Hold Shift to see both ends, let go (or tap) to lob a lantern up to 12m to the cursor. 1.7s later you are there, keeping your height and momentum, and anyone standing in the spot is sent to where you were (foes slowed 40% for 3s). Over the abyss you land on the last solid ground. Swollen: 1.25s.
+**Lantern Trade (dash, Shift, 9s cooldown).** Hold Shift to see both ends, let go (or tap) to lob a lantern up to 12m to the cursor. You hover where you stand until it lands, even over the abyss, with a sigil marking each end. 1.8s later you are there, keeping your height, and everyone in its 1.5m circle (foes, allies and Boki) is sent to where you were, each keeping its place in the circle (foes slowed 40% for 3s). Over the abyss the lantern lands on the last solid ground. Swollen: 1.25s.
 
 **Shard Snap (RMB, 9s cooldown).**
 
