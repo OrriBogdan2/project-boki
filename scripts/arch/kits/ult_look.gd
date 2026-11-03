@@ -2,7 +2,7 @@ class_name UltLook
 extends CareLook
 ## Pooled looks of the support pair's ultimates on X, on top of CareLook's (same pool, burst and keep):
 ##   Moosh Moosh, Hearth Call: the lantern tether, a braid of warm lantern-gold light with two twisting strands.
-##   Tamsin, Rimelock: the rink (a ragged sheet of ice whose cracks glow as it builds, a fringe of
+##   Claire, Rimelock: the rink (a ragged sheet of ice whose cracks glow as it builds, a fringe of
 ##   crystals on its edge), her frost bud (six curved ice petals closing over her, not a star), the
 ##   light pillar of the crash and the ice block on each stunned foe.
 ## keep(key, "tether", from, {b, k}), keep(key, "rink", at, {r, crack, a}), keep(key, "frostbud", at, {k}),
