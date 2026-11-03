@@ -98,12 +98,13 @@ func _build(kind: String) -> Node3D:
 	n.name = kind
 	match kind:
 		"ember":
-			# the ember: a 0.44 m teardrop comet head with a hot core, an orange halo and a 1.6 m warm tail
-			var head := Models.sphere(0.22, 12)
+			# the ember: a 0.52 m teardrop comet head with a hot core, a strong orange halo and a wide 2 m amber
+			# tail, so it reads in flight at gameplay zoom and not only on impact
+			var head := Models.sphere(0.26, 12)
 			_off(Models.part(n, head, orb_mat(Color("ff8a1c", 1.0)), Vector3.ZERO, Vector3(1, 1, 1.7)))
-			_off(Models.part(n, Models.sphere(0.09, 8), orb_mat(Color("ffe08a", 1.0)), Vector3(0, 0, -0.08)))
-			_off(Models.part(n, Models.sphere(0.34, 10), orb_mat(Color("ff6a1c", 0.3)), Vector3.ZERO))
-			_tail(n, 0.32, 1.6, Color("ff7a1c", 0.95))
+			_off(Models.part(n, Models.sphere(0.12, 8), orb_mat(Color("ffe08a", 1.0)), Vector3(0, 0, -0.08)))
+			_off(Models.part(n, Models.sphere(0.46, 10), orb_mat(Color("ff6a1c", 0.5)), Vector3.ZERO))
+			_tail(n, 0.5, 2.0, Color("ff9a2a", 1.0))
 		"burr":
 			# a spiky green burr that tumbles, a fluff halo and a pale seed-down tail
 			var sp := Node3D.new()
@@ -135,9 +136,10 @@ func _build(kind: String) -> Node3D:
 			_off(Models.part(n, Models.sphere(0.12, 8), orb_mat(Color("30d8ff", 0.95)), Vector3.ZERO, Vector3(1, 1, 4)))
 			_tail(n, 0.3, 2.8, Color("4fd0f0", 0.85))
 		"spear":
-			# the Ice Spear: a long shaft with a four-point star at the head and a long white trail
-			var sh := _off(Models.part(
-					n, Models.crystal(0.05, 1.1, 4), ice_mat(Color("e8ffff"), 0.85, 0.4), Vector3(0, 0, 0.2)))
+			# the Ice Spear: an ice-blue shaft and four-point star head with dark teal edges, so it reads blue
+			# on grass at gameplay zoom; white is kept to the tip glint and a short frost streak
+			var spear_ice := ice_mat(Color("9af0ff"), 0.95, 0.2, Color("1f8a96"))
+			var sh := _off(Models.part(n, Models.crystal(0.07, 1.1, 4), spear_ice, Vector3(0, 0, 0.2)))
 			sh.rotation = Vector3(-PI * 0.5, 0, 0)
 			var st := Node3D.new()
 			st.name = "Spin"
@@ -145,12 +147,14 @@ func _build(kind: String) -> Node3D:
 			n.add_child(st)
 			for i in 4:
 				var a2 := TAU * i / 4.0
-				var pt := _off(Models.part(
-						st, Models.crystal(0.05, 0.36, 4), ice_mat(Color("ffffff"), 0.9, 0.7),
-						Vector3(cos(a2), sin(a2), 0) * 0.16))
+				var point_at := Vector3(cos(a2), sin(a2), 0) * 0.16
+				var pt := _off(Models.part(st, Models.crystal(0.06, 0.36, 4), spear_ice, point_at))
 				pt.rotation = Vector3(0, 0, a2 - PI * 0.5)
-			_off(Models.part(n, Models.sphere(0.14, 8), orb_mat(Color("bff7ff", 0.85)), Vector3(0, 0, -0.35)))
-			_tail(n, 0.16, 3.2, Color("9fe8ff", 0.8))
+			_off(Models.part(n, Models.sphere(0.07, 8), orb_mat(Color("f2ffff", 0.95)), Vector3(0, 0, -0.42)))
+			var spear_tail := _tail(n, 0.2, 3.2, Color("4fc8ec", 0.85))
+			# the short white frost streak rides on the tail, so it is hidden with it while the spear is held
+			var streak_mat := orb_mat(Color("e8ffff", 0.8))
+			_off(Models.part(spear_tail, Models.box(0.04, 0.04, 0.5), streak_mat, Vector3(0, 0, 0.6)))
 		"swirl":
 			# the thin warm ring that whips round the casting hand for a beat
 			var pm := PlaneMesh.new()
@@ -372,7 +376,7 @@ func impact(kind: String, at: Vector3, s: Dictionary) -> void:
 			m.fx.flash(at, Color("7fe6ff"), 0.8, 0.08)
 			m.fx.spark(at, back, Color("dffcff"), 10, 9.0, 60.0, 0.25, 10.0, 1.1)
 		"spear":
-			m.fx.flash(at, Color("bff7ff"), 0.6, 0.06)
+			m.fx.flash(at, Color("9af0ff"), 0.6, 0.06)
 		"burr":
 			m.fx.flash(at, Color("c8e07a"), 0.6, 0.06)
 

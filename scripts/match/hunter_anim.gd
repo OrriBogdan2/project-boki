@@ -25,7 +25,7 @@ extends RefCounted
 ##
 ## update() takes a state dictionary; every key is optional:
 ##   vel (Vector3) face (yaw) grounded gliding diving rolling dash_dir (Vector2, world) dash_kind
-##   ("phase" "roll" "charge" "lunge"; from the class when left out) crouch (0..1) downed ledge
+##   ("phase" "roll" "charge" "lunge" "skate"; from the class when left out) crouch (0..1) downed ledge
 ##   mantle (0..1, -1 when not) reload (0..1, -1) drink (0..1, -1) stomp (0..1, -1) recoil (0..1)
 ##   flash (0..1) fired (seconds since the last shot) wid (weapon id) swing_n (counts swings)
 ##   combo (combo step of that swing, -1 for a charged attack) charge (0..1 holding a charge)
@@ -245,6 +245,7 @@ var slam_k := 0.0
 var was_rolling := false
 var dash_t := 9.0
 var dash_kind := ""
+const SKATE_LEAN_MAX := 0.4    # radians: the most Tamsin's skate leans forward, all leans together
 var dash_loc := Vector2(0, -1) # dash direction in the model's own frame (x right, y back)
 var dash_k := 0.0
 
@@ -941,6 +942,9 @@ func update(dt: float, s: Dictionary) -> void:
 	# fidgets that move the whole upper body
 	var fid := _fidget_body()
 	pitch += fid.x; yaw += fid.y; roll += fid.z
+	# skating: the skate move owns the lean, capped so she stays up on her blades (about 23 degrees)
+	if dash_k > 0.01 and dash_kind == "skate":
+		pitch = maxf(pitch, -SKATE_LEAN_MAX)
 	# base channel: upright and still, a slow breath
 	pitch = lerpf(pitch, 0.05, base_k * 0.8)
 	# ---- rig: whole-body turns (tricks, rolls, the skydive, lying downed) and squash

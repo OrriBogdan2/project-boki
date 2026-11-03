@@ -250,9 +250,10 @@ func tender() -> void:
 	P.inp["move"] = Vector2.ZERO
 	var glide_d := P.pos.x - g0.x
 	var air: Dictionary = K.dash_def()["air"]
+	var glide_want := float(air["dist"])
 	ok(
-			"mm air dash: a long glide of about dash.air.dist, held up while it floats (her own move)",
-			absf(glide_d - float(air["dist"]) * float(K.dash_feel()["dist"])) < 2.0 and sink < 1.0
+			"mm air dash: a long glide of the source's 11-15 m (dash.air.dist), held up while it floats",
+			glide_d >= 11.0 and glide_d <= 15.0 and absf(glide_d - glide_want) < 2.0 and sink < 1.0
 				and K.anim_id == "mm_dash_air",
 			"%.1f m, sank %.2f m in 0.5 s" % [glide_d, sink])
 	ok(

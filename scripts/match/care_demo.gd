@@ -10,7 +10,7 @@ extends RefCounted
 
 ## Per demo: strip times (s, at least 0.06 apart), key moments {name: s}, and the close-up camera yaw.
 const SPEC := {
-	"tender_lmb": {"strip": [0.34, 0.38, 0.42, 0.52, 0.66, 0.82], "keys": {"lmb": 0.42, "lmb_fly": 0.46}},
+	"tender_lmb": {"strip": [0.34, 0.38, 0.42, 0.52, 0.66, 0.82], "keys": {"lmb": 0.42, "lmb_fly": 0.39}},
 	"tender_emp": {"strip": [1.3, 1.36, 1.42, 1.5, 1.6, 1.8], "keys": {"emp": 1.42, "emp_fly": 1.56}},
 	"tender_rmb": {
 		"strip": [0.6, 0.84, 0.9, 0.98, 1.4, 1.86],

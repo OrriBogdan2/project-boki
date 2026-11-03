@@ -3196,6 +3196,18 @@ var anim_s := {}
 var _anim_dt := 0.0
 var _anim_n := 0
 const DODGE_ANIM := {"light": "phase", "medium": "roll", "heavy": "charge"}
+
+## The dodge pose HunterAnim plays. Tamsin's skate has its own, so the light-dash lean does not stack
+## on the skate move's lean and tip her over.
+func _dash_anim_kind() -> String:
+	if not strike_at_end.is_empty():
+		return "lunge"
+	if move_kind == "rinkrun":
+		return "skate"
+	if move_kind == "rush":
+		return "rush"
+	return String(DODGE_ANIM.get(cls, "roll"))
+
 func _anim_state(stretch: float) -> void:
 	var s := anim_s
 	s["vel"] = vel; s["face"] = face
@@ -3204,7 +3216,7 @@ func _anim_state(stretch: float) -> void:
 	s["diving"] = diving
 	s["rolling"] = roll_t > 0.0
 	s["dash_dir"] = roll_dir
-	s["dash_kind"] = "lunge" if not strike_at_end.is_empty() else ("rush" if move_kind in ["rush", "rinkrun"] else String(DODGE_ANIM.get(cls, "roll")))
+	s["dash_kind"] = _dash_anim_kind()
 	s["crouch"] = crouch_k
 	s["downed"] = downed
 	s["ledge"] = grap.size() > 0

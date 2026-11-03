@@ -305,7 +305,8 @@ static func slot_text(a: String, slot: String) -> Dictionary:
 			out.merge({"name": String(xd["name"]), "icon": String(xd.get("icon", "")), "col": xcol,
 				"tag": tag, "line": String(cd.get("x", ""))}, true)
 			out["detail"] = [["", String(xd.get("desc", ""))],
-				["Bond", "Landing it on a hunter fills your Boki bond a long way, ready for the Merge on R."]]
+				["Bond", "Landing it on a hunter fills your Boki bond a long way, ready for the Merge on %s."
+					% Settings.key_cap("ultimate")]]
 		"r" when not d.has("r"):
 			# no hero ultimate: R is the Boki's Merge (the Boki system owns it)
 			out.merge({"name": "Boki Merge", "icon": "bond", "col": Color("ffd27a"), "tag": "Boki system", "line": "Your Boki fuses with you; its kind decides the form."}, true)

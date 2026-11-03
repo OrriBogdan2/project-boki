@@ -288,9 +288,11 @@ func on_dash(use_ex: bool) -> bool:
 	var from := h.pos
 	travel(dist, tt, {"invuln": float(dd.get("invuln", 0.12)), "dir": dash_dir()}, use_ex)
 	h.ghost_t = 0.3          # her ember motes, not the shared after-image (from the first frame)
-	# travel applies the global dash feel; the glide and the relay line use the same scaled numbers
+	# travel applies the global dash feel; the glide and the relay line use the same scaled numbers, except
+	# the glide's length, which is the source's measured 11-15 m and so skips the global shortening
 	var feel := dash_feel()
-	dist *= float(feel["dist"])
+	if not use_ex:
+		dist *= float(feel["dist"])
 	tt *= float(feel["time"])
 	if use_ex:
 		_start_glide(dist, tt)
