@@ -2927,7 +2927,7 @@ func _boss_check() -> void:
 			L["victory_at"] = m.time      # (a fresh clock: this part is about the bot, not the timer)
 			C.ctrl = "bot"
 			var tb2 := 0.0
-			while tb2 < 11.0 and (m.lairs.inside(L, C.pos, 0.5) or not C.grounded):
+			while tb2 < 16.0 and (m.lairs.inside(L, C.pos, 0.5) or not C.grounded):
 				m.step(Match.DT); tb2 += Match.DT; god.call()
 				Q.hp = Q.max_hp
 			ok.call((L["flown"] as Array).has(C) and not m.lairs.inside(L, C.pos, 0.5) and not C.out and L.get("locked", false),
