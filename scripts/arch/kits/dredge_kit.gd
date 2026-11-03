@@ -17,7 +17,7 @@ extends ArchKit
 ##   barge turns badly.
 ## - Dash, Barge: a shoulder barge toward the cursor that shoves (no damage), with a burst where it sets off;
 ##   further in the air. Rank 3: it resets the gun's bloom.
-## - X, Brass Broadside (level 6): a planted 1.1s charge behind a growing fan, then two waves of slugs with
+## - X, Brass Broadside (level 6): a 1.1s charge at a slow walk behind a growing fan, then two waves of slugs with
 ##   Anti-Heal (DredgeBlast).
 
 const ROPE_COL := Color("f0d070")
@@ -140,7 +140,7 @@ func can_shoot() -> bool:
 
 func move_k() -> float:
 	if broadside.running():
-		return 0.0               # planted for the charge and the waves
+		return broadside.move_k()           # a slow walk through the charge and the waves
 	if flying and hook_hold != null:
 		return hook_hold.slow_k           # a slow walk while the hook flies out
 	return 0.7 if wind > 0.0 else 1.0
