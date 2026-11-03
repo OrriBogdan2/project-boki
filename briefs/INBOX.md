@@ -518,3 +518,6 @@ The owner is reviewing the build now and will add more. Start the two items ther
 - **Tamsin ult (refines item 27):** [EXT] owner: "should not continue sliding but should maintain momentum, so shift -> ult should send her forward a decent amount. Her ult should encase her in ice and not let her move while she's in ult, unless she cancels it early." So: skating into the ult carries her forward a decent distance as she seals; then she's encased and rooted (no slide on the ice) until it ends or she cancels it early.
 - **Moosh Moosh (overrides item 24's 3x rule):** [EXT] "copy Elluna": ground dash, air glide and their distances and timings from the source data/footage.
 - **Home look (item 45):** [EXT] confirmed: at home the player is their fully custom created person.
+
+## 2026-11-03 18:55 UTC: farm tutorial + Hob builder: ext builds it locally (ext/farm-hob)
+- The owner's builder answers (Hob Brackenridge etc.) are in MAIN_TO_EXT 20:40 ET; ext is building the builder NPC, the farm tutorial and the Goals tracker from S1's plan on ext/farm-hob. S1 and S2: don't start it.
