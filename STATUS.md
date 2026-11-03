@@ -1,5 +1,5 @@
 # S2 status (second server session)
-Updated: 2026-11-03 23:05 UTC (git/server clock). **Blender 4.5.15 LTS installed** (user approved; ~/tools/blender-4.5.15-linux-x64, checksum OK, headless bpy + glTF export verified). Vex Blender pass started.
+Updated: 2026-11-03 23:10 UTC (git/server clock). Blender 4.5.15 LTS installed (Vex Blender pass running). **ffmpeg installed; footage frames cut**: ~/svvid/frames/<hero>/ at 5 fps for all 12 (numbered like the hero-ref studies; index ~/svvid/frames/README.txt; outside the repo, never committed); every S2 agent brief now points at them.
 
 
 ## FOR MAIN (20:55): `ext/portraits-2d` @ 0a76796 is READY TO MERGE (2D Warden portraits, for tonight's sync)
