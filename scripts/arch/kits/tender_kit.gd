@@ -9,6 +9,8 @@ extends ArchKit
 ## R is the Boki Merge.
 
 const THRUST_T := 0.08         # s into mm_shot_r / _l when the arm is straight out (the hand flashes then)
+const MOTE_EVERY := 0.05       # s between the soft ember motes her dashes leave
+const PUFF_N := 4              # dust grains in the tiny puff at a ground hop's take-off and landing
 const BLOOM_DB := -8.0         # dB: the Hearthlight's closing chime sits well under the fight
 
 var kind := {}                 # target instance id -> {t: Ent, n: int, left: float}
@@ -172,7 +174,7 @@ func _dress_ember(s: Dictionary) -> void:
 		m.fx.flash(at, Color("ffb347"), 0.35 * big, 0.06)
 		m.fx.spark(at, Vector3(d2.x, 0.2, d2.y), Color("ffd27a"), 6, 6.0, 40.0, 0.18, 2.0, 0.8))
 
-## Her dashes leave ember motes (not the shared after-image), and the air dash glides.
+## Her dashes leave a few soft ember motes (not the shared after-image), and the air dash glides.
 func _tick_dash_look(dt: float) -> void:
 	_tick_glide(dt)
 	if h.roll_t <= 0.0 or h.move_kind != "dash":
@@ -180,14 +182,16 @@ func _tick_dash_look(dt: float) -> void:
 	aft_t -= dt
 	if aft_t > 0.0:
 		return
-	aft_t = 0.03
+	aft_t = MOTE_EVERY
 	var dv := h.roll_dir if h.roll_dir.length() > 0.1 else h.aim_dir()
-	for i in 2:
-		var off := Vector3(randf_range(-0.25, 0.25), randf_range(0.25, 0.9), randf_range(-0.25, 0.25))
-		lk().burst("mote", h.position + off, {"r": randf_range(0.8, 1.3), "dur": 0.4, "dir": dv})
+	var off := Vector3(randf_range(-0.2, 0.2), randf_range(0.3, 0.8), randf_range(-0.2, 0.2))
+	lk().burst("mote", h.position + off, {"r": randf_range(0.6, 0.9), "dur": 0.35, "dir": dv})
 
-## Her own dash look (the motes): no shared after-image pill, burst or ring.
+## Her own dash look (motes, puffs and the moves): no shared after-image pill, burst or ring.
 func own_dash_trail() -> bool: return true
+
+## The kit's moves are the whole dash pose (mm_skip, mm_float): no shared roll under them.
+func dodge_anim() -> String: return "kit"
 
 ## A Boki merge sets a carried teammate down (unbroken: no stun), ends the Burrseed aim (no throw),
 ## and keeps the key from picking anyone up meanwhile.
@@ -283,13 +287,18 @@ func on_dash(use_ex: bool) -> bool:
 	var dist := float(air.get("dist", 8.5)) if use_ex else float(dd.get("dist", 4.2))
 	var tt := float(air.get("time", 0.8)) if use_ex else float(dd.get("time", 0.16))
 	travel(dist, tt, {"invuln": float(dd.get("invuln", 0.12)), "dir": dash_dir()}, use_ex)
-	# travel applies the global dash feel to the time; the glide's length is the source's measured 11-15 m
-	# and so skips the global shortening
+	# travel applies the global dash feel to the time; the glide's length is set in data at about 3x the
+	# ground hop after its dash feel, and so skips the global shortening
 	if use_ex:
 		_start_glide(dist, tt * float(dash_feel()["time"]))
-	play("mm_dash_air" if use_ex else "mm_dash")
-	m.sfx("tend_hop", h.pos, -3.0, 0.9 if use_ex else 1.0)
+	play("mm_float" if use_ex else "mm_skip")
+	m.sfx("tend_hop", h.pos, -3.0, 1.05 if use_ex else 1.2)
 	aft_t = 0.0
+	if h.grounded and not use_ex:
+		# a tiny puff of dust off her heels, and another where she lands
+		m.fx.dust(h.pos, PUFF_N)
+		m.later(h.roll_t, func():
+			if is_instance_valid(h) and h.grounded: m.fx.dust(h.pos, PUFF_N))
 	return true
 
 ## The air dash is her long glide (dash.air): a quick ramp to a flat burst, then a float out at a share of

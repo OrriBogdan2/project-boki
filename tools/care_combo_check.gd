@@ -4,6 +4,8 @@ extends RefCounted
 ## rimewright.md: where shots land, the telegraph shown while holding, the timings, the payoffs, the
 ## moves and sounds, merge-start hold drops. Runs on tools/support_check.gd's setup and report.
 
+const MOVE_TAIL_MAX := 0.45    # s a dash move may run past its dash (the landing and settle)
+
 var sc        # the SupportCheck running us (setup, step, ok, aim_at)
 
 func ok(what: String, cond: bool, info := "") -> void:
@@ -303,7 +305,9 @@ func tender() -> void:
 			"mm Shift: Relay Step goes where you move (cursor elsewhere), its own hop and after-images",
 			P.pos.x - p0.x > 2.5 and absf(P.pos.z - p0.z) < 1.0 and aft >= 1,
 			"dx %.1f dz %.1f aft %d" % [P.pos.x - p0.x, P.pos.z - p0.z, aft])
-	ok("mm Shift: the hop is its own move", K.anim_id in ["mm_dash", "mm_relay"])
+	ok(
+			"mm Shift: the hop is its own move (no shared roll under it)",
+			K.anim_id == "mm_skip" and K.dodge_anim() == "kit")
 	# --- the air dash is her long floaty glide (dash.air), not the class long dash
 	step(m, 0.4)
 	var g0 := P.pos
@@ -320,10 +324,9 @@ func tender() -> void:
 	var air: Dictionary = K.dash_def()["air"]
 	var glide_want := float(air["dist"])
 	ok(
-			"mm air dash: a long glide of the source's 11-15 m (dash.air.dist), held up while it floats",
-			glide_d >= 11.0 and glide_d <= 15.0 and absf(glide_d - glide_want) < 2.0 and sink < 1.0
-				and K.anim_id == "mm_dash_air",
-			"%.1f m, sank %.2f m in 0.5 s" % [glide_d, sink])
+			"mm air dash: a floaty glide of dash.air.dist, held up while it floats, its own move",
+			absf(glide_d - glide_want) < 1.0 and sink < 1.0 and K.anim_id == "mm_float",
+			"%.1f m of %.1f, sank %.2f m in 0.5 s" % [glide_d, glide_want, sink])
 	ok(
 			"mm body: small (a 0.74 model) with the 0.34 m hitbox",
 			absf(P.r - 0.34) < 0.001 and P.model.scale.y < 0.9,
@@ -378,7 +381,66 @@ func tender() -> void:
 	await _free(m)
 	await growth()
 	await burr_ranks()
+	await _dashes_cute()
 	await _no_blasts()
+
+## Owner items 24 and 35: the air dash goes about 3x the ground hop (after the dash feel), each plays its own
+## move, sized to its dash, and no other kit plays those moves.
+func _dashes_cute() -> void:
+	var r: Array = sc.setup("tender", 20.0)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var K: TenderKit = P.ak
+	var p0 := P.pos
+	P.inp["move"] = Vector2(1, 0)
+	P.dashes = P.max_dashes()
+	P.inp["dash"] = true
+	step(m, 1.0 / 60.0)
+	P.inp["dash"] = false
+	P.inp["move"] = Vector2.ZERO
+	var ground_t := P.roll_t + 1.0 / 60.0
+	var ground_move := K.anim_id
+	step(m, 0.5)
+	var ground_d := P.pos.x - p0.x
+	P.teleport(P.pos + Vector3(0, 3.0, 0))
+	var a0 := P.pos
+	P.ex_cd = 0.0
+	P.inp["move"] = Vector2(1, 0)
+	K.on_dash(true)
+	P.inp["move"] = Vector2.ZERO
+	var air_t := P.roll_t
+	var air_move := K.anim_id
+	step(m, air_t + 0.05)
+	var air_d := P.pos.x - a0.x
+	var ratio := air_d / maxf(0.01, ground_d)
+	ok(
+			"mm dashes: the air dash goes 2.7-3.3x the ground hop (after the dash feel)", ratio >= 2.7 and ratio <= 3.3,
+			"ground %.2f m, air %.2f m, x%.2f" % [ground_d, air_d, ratio])
+	ok(
+			"mm dashes: each plays its own move, never the shared roll",
+			ground_move == "mm_skip" and air_move == "mm_float" and K.dodge_anim() == "kit",
+			"%s / %s" % [ground_move, air_move])
+	var fits := func(id: String, t: float) -> bool:
+		var n := KMovesCare.length(id)
+		return n >= t and n <= t + MOVE_TAIL_MAX
+	ok(
+			"mm dashes: each move covers its dash and settles soon after (ground 0.16-0.25 s)",
+			fits.call("mm_skip", ground_t) and fits.call("mm_float", air_t) and KMovesCare.length("mm_skip") <= 0.25,
+			"skip %.2f/%.2f float %.2f/%.2f" % [
+				KMovesCare.length("mm_skip"), ground_t, KMovesCare.length("mm_float"), air_t])
+	ok("mm dashes: no other kit plays her dash moves", own_moves_only("tender_kit.gd", ["mm_skip", "mm_float"]))
+	await _free(m)
+
+## True when no kit file other than `own` names any of `ids` (a dash move is one hero's own).
+static func own_moves_only(own: String, ids: Array) -> bool:
+	for f in DirAccess.get_files_at("res://scripts/arch/kits"):
+		if not f.ends_with(".gd") or f == own:
+			continue
+		var src := FileAccess.get_file_as_string("res://scripts/arch/kits/" + f)
+		for id in ids:
+			if src.contains('"%s"' % id):
+				return false
+	return true
 
 ## Owner item 23: no cosmetic burst or ring on her hop or glide, her Hearthlight's last heal blooms without a
 ## ring, blast or shake, and the explosion sounds sit under the agreed peak.

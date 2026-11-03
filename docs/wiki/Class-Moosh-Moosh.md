@@ -66,13 +66,13 @@ What the in-game kit card (K) says.
 
 **Bearer (passive).** Run into a downed teammate to shoulder them (up to 2; never one an enemy is standing on). You carry a Bearer shield (40, +6 a level) that refills each time you pick someone up. While you carry them they don't bleed out and can't be stomped. Press crouch to set them down. If the shield breaks or you're stunned, rooted or hexed, you drop them and can't pick anyone up for 4s. Your embers Kindle foes (up to 5, 4s): each stack adds 0.7 damage to your embers, and an ember into a Kindled foe winds Hearthlight back 0.2s (0.4s for a long-range ember).
 
-**Relay Step (dash, Shift, 7.5s cooldown).** A quick 4.2m hop (in the air: your long dash).
+**Relay Step (dash, Shift, 7.5s cooldown).** A quick skip about 3.6m where you move; in the air, a floaty dash about three times as far.
 
 **Burrseed (RMB, 8s cooldown).**
 
 - *Tap:* Hold to show a faint dotted lane to the seed's full 14m (it flies past the cursor); let go to throw. A fast seed (30 m/s) sticks to the first foe it hits (9 damage) and a violet disc the size of the burst shows under them at once, filling. 0.7s later it bursts: 32 damage and root 1.1s to them and every foe within 2.2m (4.4m at rank 3), and each is Kindled.
 
-**Hearthlight (E, 11s cooldown).** A 2.6m ring of lantern light round you for 2.5s: it heals teammates inside 10 over its life, then flares for 22. Press E again to throw it to the cursor (up to 9m, it lands almost at once and widens to 2.9m): for 1s its healing is 50% stronger, and it latches onto the first teammate it passes. It heals you at a third, and a downed teammate five times over.
+**Hearthlight (E, 11s cooldown).** A 2.6m ring of lantern light round you for 2.5s: it heals teammates inside 10 over its life, then blooms to heal them 22 more (a soft glow, not a blast). Press E again to throw it to the cursor (up to 9m, it lands almost at once and widens to 2.9m): for 1s its healing is 50% stronger, and it latches onto the first teammate it passes. It heals you at a third, and a downed teammate five times over.
 
 **Hearth Call (hunter ultimate, from level 6, 46s cooldown).** Cast it with the cursor on a teammate within 12.6m (7 body heights; the ring and a line show when it is ready): a lantern tether heals them 7 a second for 5s while you keep walking (and casting). A gold ring round you shows the tether's reach. At the end a downed teammate is pulled to your side and stood back up; while they are down the tether's healing goes to you instead. It breaks if you are knocked or stunned, or the teammate leaves the ring. With no teammate in the match it lights on you.
 
