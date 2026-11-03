@@ -1488,57 +1488,15 @@ func _mate_state(h: Hunter) -> Array:
 		return ["WISP", Color("ffb36a"), h.pos, ""]
 	return ["ALIVE", GOOD, h.pos, ""]
 
-## Portraits, one per hunter, rendered once (and a greyed copy for the fallen).
-var portraits := {}       # nid -> SubViewport
-var portraits_grey := {}  # nid -> ImageTexture
-
-func portrait(h: Hunter) -> Texture2D:
-	var pkey := "%s|%s|%s" % [h.arch, h.cls, h.wid]
-	if portraits.has(h.nid) and String((portraits[h.nid] as Node).get_meta("pkey", pkey)) != pkey:
-		# a new archetype or weapon (the Arena's 2-7 swap): the portrait follows
-		(portraits[h.nid] as Node).queue_free()
-		portraits.erase(h.nid); portraits_grey.erase(h.nid)
-	if not portraits.has(h.nid):
-		var look: Dictionary = Save.d.get("look", {}) if h.ctrl == "local" else h.bot_look
-		var vp := Portraits.make(h.cls, Data.TEAM_COLORS[h.team % Data.TEAM_COLORS.size()], h.wid, look, h.arch)
-		vp.set_meta("pkey", pkey)
-		add_child(vp)
-		portraits[h.nid] = vp
-	return (portraits[h.nid] as SubViewport).get_texture()
-
-func portrait_grey(h: Hunter) -> Texture2D:
-	if not portraits_grey.has(h.nid):
-		var g := Portraits.grey(portrait(h))
-		if g == null:
-			return portrait(h)
-		portraits_grey[h.nid] = g
-	return portraits_grey[h.nid]
-
-## A portrait in a rounded frame. state: "" alive, "down" (red pulse), "dead" (grey + X), "out" (check).
+## A hunter's framed portrait (Portraits). state: "" alive, "down", "dead", "out". Alive, a hit flashes
+## it and low health drains it like the health bar.
 func _draw_portrait(r: Rect2, h: Hunter, state: String, border: Color) -> void:
-	_rounded(r.grow(2.0), Color(0.02, 0.02, 0.04, 0.95), 8)
-	var col: Color = Data.TEAM_COLORS[h.team % Data.TEAM_COLORS.size()]
-	c.draw_rect(r, Color(col.darkened(0.55), 0.9))
-	if state == "dead":
-		c.draw_texture_rect(portrait_grey(h), r, false, Color(0.8, 0.8, 0.85, 0.85))
-		var k := r.size.x * 0.2
-		for pair in [[r.position + Vector2(k, k), r.end - Vector2(k, k)], [Vector2(r.end.x - k, r.position.y + k), Vector2(r.position.x + k, r.end.y - k)]]:
-			c.draw_line(pair[0], pair[1], Color(0, 0, 0, 0.7), 9.0, true)
-			c.draw_line(pair[0], pair[1], Color("ff5a4a"), 5.0, true)
-	else:
-		c.draw_texture_rect(portrait(h), r, false)
-	if state == "down":
-		var pulse := 0.5 + 0.5 * sin(m.time * 8.0)
-		c.draw_rect(r, Color(0.9, 0.1, 0.05, 0.15 + 0.2 * pulse))
-		c.draw_rect(r.grow(1.0), Color(1.0, 0.25, 0.15, 0.55 + 0.45 * pulse), false, 2.5)
-	elif state == "out":
-		c.draw_rect(r, Color(0.05, 0.15, 0.12, 0.45))
-		var a := r.position + r.size * Vector2(0.25, 0.52)
-		var b := r.position + r.size * Vector2(0.43, 0.7)
-		var d := r.position + r.size * Vector2(0.76, 0.3)
-		c.draw_polyline(PackedVector2Array([a, b, d]), Color("8fe3c8"), 5.0, true)
-	else:
-		c.draw_rect(r.grow(1.0), Color(border, 0.8), false, 1.5)
+	var hurt := 0.0
+	var low := 0.0
+	if state == "":
+		hurt = plates.flash_of(h)
+		low = clampf((0.3 - h.hp / maxf(1.0, h.max_hp)) / 0.3, 0.0, 1.0)
+	Portraits.draw(c, r, Portraits.spec_of(h), border, state, hurt, low, m.time)
 
 ## Seconds a wisp has left at the normal bleed rate.
 func _bleed_left(h: Hunter) -> float:

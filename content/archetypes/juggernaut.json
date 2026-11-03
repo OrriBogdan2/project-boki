@@ -3,6 +3,7 @@
 	"name": "Juggernaut",
 	"weight": "heavy",
 	"color": "#ff8a6a",
+	"portrait": {"zoom": 0.8, "lift": -0.04},
 	"fantasy": "The wrecking ball. Burns hotter with every hit, chains you in, and finishes it.",
 	"silhouette": "the horned pauldrons",
 	"card": {"loop": "Deal damage to fill Rage; full, you're Enraged: more damage, faster dashes and cooldowns.", "dash": "Two charges of a dash attack the way you face; its tip hits twice as hard.", "passive": "Damage fills Rage; full = Enraged (damage, dash and ability haste). Knocks heal you.", "rmb": "Tap: a wound-up slam (+50% to the wounded; rank 3: its sweet spot crashes and heals). Hold: a lunge. Air: a slam down.", "e": "Chain a foe (blighted) or a wall; press E again to pull yourself to it. Smash during the pull to spin.", "weapons": {"greatsword": "Quick slashes, double at the tip; hold to charge a Searing Wave."}},

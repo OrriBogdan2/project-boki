@@ -162,8 +162,7 @@
 "semicolon": 5
 },
 "scripts/core/game.gd": {
-"history_comment": 1,
-"long_line": 13,
+"long_line": 10,
 "nested_ternary": 1,
 "semicolon": 5
 },
@@ -711,9 +710,6 @@
 "nested_ternary": 1,
 "semicolon": 25
 },
-"scripts/match/level_growth.gd": {
-"long_line": 1
-},
 "scripts/match/life.gd": {
 "long_line": 22,
 "nested_ternary": 1,
@@ -917,9 +913,9 @@
 },
 "scripts/ui/hud.gd": {
 "history_comment": 2,
-"long_line": 218,
+"long_line": 217,
 "nested_ternary": 42,
-"semicolon": 56,
+"semicolon": 55,
 "shadow": 2
 },
 "scripts/ui/hud_tip.gd": {
@@ -981,9 +977,6 @@
 "long_line": 32,
 "semicolon": 24,
 "shadow": 1
-},
-"scripts/ui/portraits.gd": {
-"long_line": 1
 },
 "scripts/ui/prologue.gd": {
 "long_line": 39,
@@ -1161,7 +1154,7 @@
 "semicolon": 11
 },
 "tools/keybind_check.gd": {
-"long_line": 8,
+"long_line": 7,
 "semicolon": 3
 },
 "tools/kill_reset_check.gd": {
@@ -1202,7 +1195,7 @@
 "shadow": 1
 },
 "tools/merge_form_check.gd": {
-"long_line": 89,
+"long_line": 87,
 "semicolon": 20
 },
 "tools/move_feel_check.gd": {
@@ -1275,7 +1268,7 @@
 "semicolon": 11
 },
 "tools/teammate_check.gd": {
-"long_line": 31,
+"long_line": 30,
 "semicolon": 26
 },
 "tools/title_check.gd": {

@@ -32,16 +32,9 @@ static func _card(ak: String, cls: String, cur: String, on_pick: Callable, on_ki
 	card.custom_minimum_size = Vector2(CARD_W, 0)
 	var row := UI.hbox(10)
 	card.add_child(row)
-	var vp := Portraits.make(cls, Data.TEAM_COLORS[0], Arch.signature(ak), Save.d.get("look", {}), ak)
-	card.add_child(vp)
-	var tex := TextureRect.new()
-	tex.texture = vp.get_texture()
-	tex.custom_minimum_size = Vector2(84, 84)
-	tex.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
-	tex.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	tex.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
-	tex.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	row.add_child(tex)
+	var pic := Portraits.Pic.new(Portraits.spec_for(ak), Vector2(84, 98), Arch.color(ak))
+	pic.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	row.add_child(pic)
 	var col := UI.vbox(2); col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	col.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.add_child(col)

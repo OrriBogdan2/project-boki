@@ -69,6 +69,7 @@ func _build() -> void:
 	var hd := HBoxContainer.new()
 	hd.add_theme_constant_override("separation", 12)
 	v.add_child(hd)
+	hd.add_child(Portraits.Pic.new(Portraits.spec_for(arch), Vector2(46, 54), col))
 	var nm := UI.label(Arch.name_of(arch).to_upper(), 30, col, UI.big)
 	hd.add_child(nm)
 	var wn: Array = Arch.weapons(arch).map(func(w): return String(Data.weapon_stats(w).get("name", w)))

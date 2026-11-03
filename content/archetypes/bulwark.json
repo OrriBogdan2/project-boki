@@ -3,6 +3,7 @@
 	"name": "Bulwark",
 	"weight": "heavy",
 	"color": "#8fd0ff",
+	"portrait": {"zoom": 0.82, "lift": -0.03},
 	"fantasy": "The squad's shield. Holds the line, plants a banner, leaps in to save an ally at the edge.",
 	"silhouette": "the shield shape and the banner",
 	"card": {"loop": "Block to build Guard, then bash, charge or smash foes into walls or each other: Crushed stuns them and heals you.", "dash": "A spinning dash that knocks foes aside. Shield up: a Shield Charge. Mid-smash: a short hop.", "passive": "Guard from blocking (50 = Shield Slam); knock a foe into a wall or a foe: Crushed (stun, heal).", "lmb": "Tap: throw the mace (passes through, recall it); hold: a Crushing Blow that carries you on.", "rmb": "Hold to raise the shield and block; let go (or tap) to Bash.", "e": "A healing burst at the lying mace (or your aim) after 1s; mends the shield only while raised.", "weapons": {"tower_shield": "Throw the mace and call it back; hold for a Crushing Blow."}},

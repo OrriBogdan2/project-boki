@@ -3,6 +3,7 @@
 	"name": "Ostra",
 	"weight": "medium",
 	"color": "#7fe0d0",
+	"portrait": {"zoom": 0.9, "lift": -0.05},
 	"fantasy": "The lamplighter who floats. Pulls the fight to her, then lets it fall in.",
 	"silhouette": "the hovering lantern and the long trailing hem",
 	"card": {"loop": "Damage fills Swell. Swollen, everything you cast is bigger and quicker. Seed, Fan, Trade, then pop it.", "dash": "Lob a lantern and trade places with whatever stands where it lands.", "passive": "Hits fill Swell, ten times faster on hunters. A knock heals you.", "rmb": "Fire a cluster of shards: the first foe is stunned, longer the further it flew.", "e": "Plant a seed that swells for up to 5s. Press again to pop it: bigger and harder the longer it grew.", "weapons": {"tether_lantern": "Slow drifting orbs. Pause 1.4s and the next one is Settled: harder, faster, and it slows."}},
