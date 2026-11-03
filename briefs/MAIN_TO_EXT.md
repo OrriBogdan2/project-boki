@@ -968,3 +968,18 @@ Update both KMoves and their animation strips, and put each in that hero's curre
 - **Easy reset:** one button or key puts ranks back to level 1 (and resets cooldowns).
 - This goes with main's level-up choice system and the planned connected Training Room. Ext: no action, just awareness. Kit max-rank bonuses must work when set this way, not only through levelling.
 - **Owner follow-up:** in SUPERVIVE these practice options (ranks, max, reset, cooldowns and so on) live in the **Esc menu → a Training/Practice settings page**, not on an on-screen bar. Copy that: move our arena key hints and toggles (K, L, the 2-9 hunter picks, Backspace reset, N bot, O cooldowns, U ultimate) into an Esc-menu Practice page. The world view stays clean.
+
+## 2026-11-03 17:35 UTC: OWNER DECISION: the Mantle look by distance, and no Mantle on the farm (refines OWNER_REVIEW item 45)
+The rule: the look depends on where you're seen, not one flat percentage.
+- **In a match (top-down camera): about 90–100% Mantle.** Locked layer: silhouette (head shape, hat or helmet), weapon and how it's held, signature colour, animations and VFX. Any two players on the same Mantle must read identically at gameplay zoom.
+- **Up close (portraits, lobby, character select): about 60–70% Mantle.** The personal layer shows: face, skin, hair (where not covered), build within limits, a personal accent colour, small trinkets.
+- **On the farm: no Mantle, you're yourself.** The owner says there's no base class at home. You're fully your own customisable character (the creator's look plus outfits), not a hunter. You take on the Mantle when you go into a match or the Training Room.
+- **Three layers:**
+  1. Locked (Mantle silhouette, weapon, colour).
+  2. Personal (your creator choices).
+  3. Cosmetic (skins and trinkets, which must keep layer 1's silhouette).
+- **Lore check:** the Mantle is something you take on for the hunt, so wearing it on the hunt and not at home fits. The transition is a short "taking up the Mantle" moment at match start or the portal (a visual only).
+- **Impacts:**
+  - The home and farm character uses the player's own body and outfit, with no class gear (this also solves the earlier "creator preview without class gear" item).
+  - Character creation is about *you*.
+  - The hunter pick is about the Mantle.
