@@ -2,7 +2,7 @@
 
 Review shots for each hero: kit card, each ability, the payoff, animation frame strips and a neutral full-body portrait. PNGs are downscaled to at most 1280 px wide. Captions come from the shot manifests.
 
-Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-tender), [Tamsin](#tamsin-rimewright), [Dredge](#dredge-dredge), [Ashwick](#ashwick-ashwick), [Dolm](#dolm-dolm), [Ostra](#ostra-ostra), [Archer](#archer-archer), [Bulwark](#bulwark-bulwark), [Thief](#thief-thief), [Juggernaut](#juggernaut-juggernaut), [Farm building](#farm-building-farmbuild), [classes](#classes-classes), [aimkit](#aimkit-aimkit), [moosh-moosh/v2](#moosh-moosh/v2-moosh-moosh/v2), [moosh-moosh/v2/anim](#moosh-moosh/v2/anim-moosh-moosh/v2/anim), [tamsin/v2](#tamsin/v2-tamsin/v2), [tamsin/v2/anim](#tamsin/v2/anim-tamsin/v2/anim), [dancer/v2](#dancer/v2-dancer/v2), [dancer/v2/before](#dancer/v2/before-dancer/v2/before), [zedran/v2](#zedran/v2-zedran/v2), [zedran/v2/before](#zedran/v2/before-zedran/v2/before), [dancer/v2/anim](#dancer/v2/anim-dancer/v2/anim), [zedran/v2/anim](#zedran/v2/anim-zedran/v2/anim), [linwick/v2](#linwick/v2-linwick/v2), [linwick/v2/anim](#linwick/v2/anim-linwick/v2/anim), [linwick/v2/before](#linwick/v2/before-linwick/v2/before), [linwick/v2/after](#linwick/v2/after-linwick/v2/after), [dredge/v2](#dredge/v2-dredge/v2), [dredge/v2/anim](#dredge/v2/anim-dredge/v2/anim), [dredge/v2/before](#dredge/v2/before-dredge/v2/before), [dredge/v2/after](#dredge/v2/after-dredge/v2/after), [pin/v2](#pin/v2-pin/v2), [bjorn/v2](#bjorn/v2-bjorn/v2), [pin/v2/anim](#pin/v2/anim-pin/v2/anim), [bjorn/v2/anim](#bjorn/v2/anim-bjorn/v2/anim), [vireo/v2](#vireo/v2-vireo/v2), [vireo/v2/anim](#vireo/v2/anim-vireo/v2/anim), [venator/v2/anim](#venator/v2/anim-venator/v2/anim), [venator/v2](#venator/v2-venator/v2), [breah/v2](#breah/v2-breah/v2), [ostra/v2](#ostra/v2-ostra/v2), [breah/v2/anim](#breah/v2/anim-breah/v2/anim), [ostra/v2/anim](#ostra/v2/anim-ostra/v2/anim), [linwick/v2/ult](#linwick/v2/ult-linwick/v2/ult), [dredge/v2/ult](#dredge/v2/ult-dredge/v2/ult), [hunters](#hunters-hunters), [pin/v2/ult](#pin/v2/ult-pin/v2/ult), [bjorn/v2/ult](#bjorn/v2/ult-bjorn/v2/ult), [mooshmoosh/v2/ult](#mooshmoosh/v2/ult-mooshmoosh/v2/ult), [tamsin/v2/ult](#tamsin/v2/ult-tamsin/v2/ult), [dancer/v2/ult](#dancer/v2/ult-dancer/v2/ult), [zedran/v2/ult](#zedran/v2/ult-zedran/v2/ult), [tamsin/v2/polish](#tamsin/v2/polish-tamsin/v2/polish), [moosh-moosh/v2/polish](#moosh-moosh/v2/polish-moosh-moosh/v2/polish), [vireo/v2/polish](#vireo/v2/polish-vireo/v2/polish), [venator/v2/polish](#venator/v2/polish-venator/v2/polish), [pin/v2/polish](#pin/v2/polish-pin/v2/polish), [bjorn/v2/polish](#bjorn/v2/polish-bjorn/v2/polish), [linwick/v2/polish](#linwick/v2/polish-linwick/v2/polish), [dredge/v2/polish](#dredge/v2/polish-dredge/v2/polish), [breah/v2/ult](#breah/v2/ult-breah/v2/ult), [ostra/v2/ult](#ostra/v2/ult-ostra/v2/ult)
+Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-tender), [Tamsin](#tamsin-rimewright), [Dredge](#dredge-dredge), [Ashwick](#ashwick-ashwick), [Dolm](#dolm-dolm), [Ostra](#ostra-ostra), [Archer](#archer-archer), [Bulwark](#bulwark-bulwark), [Thief](#thief-thief), [Juggernaut](#juggernaut-juggernaut), [Farm building](#farm-building-farmbuild), [classes](#classes-classes), [aimkit](#aimkit-aimkit), [moosh-moosh/v2](#moosh-moosh/v2-moosh-moosh/v2), [moosh-moosh/v2/anim](#moosh-moosh/v2/anim-moosh-moosh/v2/anim), [tamsin/v2](#tamsin/v2-tamsin/v2), [tamsin/v2/anim](#tamsin/v2/anim-tamsin/v2/anim), [dancer/v2](#dancer/v2-dancer/v2), [dancer/v2/before](#dancer/v2/before-dancer/v2/before), [zedran/v2](#zedran/v2-zedran/v2), [zedran/v2/before](#zedran/v2/before-zedran/v2/before), [dancer/v2/anim](#dancer/v2/anim-dancer/v2/anim), [zedran/v2/anim](#zedran/v2/anim-zedran/v2/anim), [linwick/v2](#linwick/v2-linwick/v2), [linwick/v2/anim](#linwick/v2/anim-linwick/v2/anim), [linwick/v2/before](#linwick/v2/before-linwick/v2/before), [linwick/v2/after](#linwick/v2/after-linwick/v2/after), [dredge/v2](#dredge/v2-dredge/v2), [dredge/v2/anim](#dredge/v2/anim-dredge/v2/anim), [dredge/v2/before](#dredge/v2/before-dredge/v2/before), [dredge/v2/after](#dredge/v2/after-dredge/v2/after), [pin/v2](#pin/v2-pin/v2), [bjorn/v2](#bjorn/v2-bjorn/v2), [pin/v2/anim](#pin/v2/anim-pin/v2/anim), [bjorn/v2/anim](#bjorn/v2/anim-bjorn/v2/anim), [vireo/v2](#vireo/v2-vireo/v2), [vireo/v2/anim](#vireo/v2/anim-vireo/v2/anim), [venator/v2/anim](#venator/v2/anim-venator/v2/anim), [venator/v2](#venator/v2-venator/v2), [breah/v2](#breah/v2-breah/v2), [ostra/v2](#ostra/v2-ostra/v2), [breah/v2/anim](#breah/v2/anim-breah/v2/anim), [ostra/v2/anim](#ostra/v2/anim-ostra/v2/anim), [linwick/v2/ult](#linwick/v2/ult-linwick/v2/ult), [dredge/v2/ult](#dredge/v2/ult-dredge/v2/ult), [hunters](#hunters-hunters), [pin/v2/ult](#pin/v2/ult-pin/v2/ult), [bjorn/v2/ult](#bjorn/v2/ult-bjorn/v2/ult), [mooshmoosh/v2/ult](#mooshmoosh/v2/ult-mooshmoosh/v2/ult), [tamsin/v2/ult](#tamsin/v2/ult-tamsin/v2/ult), [dancer/v2/ult](#dancer/v2/ult-dancer/v2/ult), [zedran/v2/ult](#zedran/v2/ult-zedran/v2/ult), [tamsin/v2/polish](#tamsin/v2/polish-tamsin/v2/polish), [moosh-moosh/v2/polish](#moosh-moosh/v2/polish-moosh-moosh/v2/polish), [vireo/v2/polish](#vireo/v2/polish-vireo/v2/polish), [venator/v2/polish](#venator/v2/polish-venator/v2/polish), [pin/v2/polish](#pin/v2/polish-pin/v2/polish), [bjorn/v2/polish](#bjorn/v2/polish-bjorn/v2/polish), [linwick/v2/polish](#linwick/v2/polish-linwick/v2/polish), [dredge/v2/polish](#dredge/v2/polish-dredge/v2/polish), [breah/v2/ult](#breah/v2/ult-breah/v2/ult), [ostra/v2/ult](#ostra/v2/ult-ostra/v2/ult), [vireo/v2/ult](#vireo/v2/ult-vireo/v2/ult), [venator/v2/ult](#venator/v2/ult-venator/v2/ult)
 
 ## Vireo (mage)
 
@@ -4207,3 +4207,71 @@ Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-t
 **Nightwell animation strip (ostra_well, ostra_well_snap): rest, the lantern hand thrust up and out at the spot, held while the dome shows, the hand clenching down as the well opens, settle**
 
 ![Nightwell animation strip (ostra_well, ostra_well_snap): rest, the lantern hand thrust up and out at the spot, held while the dome shows, the hand clenching down as the well opens, settle](ostra/v2/ult/ostra_ult_strip.png)
+
+## vireo/v2/ult (vireo/v2/ult)
+
+**Kitefall: the crouch, the launch, hanging arms wide, the dive, the one-knee landing, up into the stance**
+
+![Kitefall: the crouch, the launch, hanging arms wide, the dive, the one-knee landing, up into the stance](vireo/v2/ult/vireo_ult_anim.png)
+
+**Kitefall aiming: she hangs up high; the gold range ring over the dark disc, the gold crown at the cursor**
+
+![Kitefall aiming: she hangs up high; the gold range ring over the dark disc, the gold crown at the cursor](vireo/v2/ult/vireo_ult_aim.png)
+
+**Kitefall aiming: she hangs up high; the gold range ring over the dark disc, the gold crown at the cursor (close-up)**
+
+![Kitefall aiming: she hangs up high; the gold range ring over the dark disc, the gold crown at the cursor (close-up)](vireo/v2/ult/vireo_ult_aim_close.png)
+
+**Kitefall key frame: the gold landing circle flashes as she streaks down onto it**
+
+![Kitefall key frame: the gold landing circle flashes as she streaks down onto it](vireo/v2/ult/vireo_ult_key.png)
+
+**Kitefall key frame: the gold landing circle flashes as she streaks down onto it (close-up)**
+
+![Kitefall key frame: the gold landing circle flashes as she streaks down onto it (close-up)](vireo/v2/ult/vireo_ult_key_close.png)
+
+**Kitefall impact: a gold pillar out of the sky, shock rings, sparks; the target knocked back with Static**
+
+![Kitefall impact: a gold pillar out of the sky, shock rings, sparks; the target knocked back with Static](vireo/v2/ult/vireo_ult_impact.png)
+
+**Kitefall impact: a gold pillar out of the sky, shock rings, sparks; the target knocked back with Static (close-up)**
+
+![Kitefall impact: a gold pillar out of the sky, shock rings, sparks; the target knocked back with Static (close-up)](vireo/v2/ult/vireo_ult_impact_close.png)
+
+## venator/v2/ult (venator/v2/ult)
+
+**Cinderfall: the rifle snapped straight up, the shot's kick, held, back down into his aim**
+
+![Cinderfall: the rifle snapped straight up, the shot's kick, held, back down into his aim](venator/v2/ult/venator_ult_anim.png)
+
+**Cinderfall telegraph: the ember disc fills with its hot red centre and the bronze rivet ring; the column**
+
+![Cinderfall telegraph: the ember disc fills with its hot red centre and the bronze rivet ring; the column](venator/v2/ult/venator_ult_aim.png)
+
+**Cinderfall telegraph: the ember disc fills with its hot red centre and the bronze rivet ring; the column (close-up)**
+
+![Cinderfall telegraph: the ember disc fills with its hot red centre and the bronze rivet ring; the column (close-up)](venator/v2/ult/venator_ult_aim_close.png)
+
+**Cinderfall key frame: the spiked shell drops through the column onto the nearly full disc**
+
+![Cinderfall key frame: the spiked shell drops through the column onto the nearly full disc](venator/v2/ult/venator_ult_key.png)
+
+**Cinderfall key frame: the spiked shell drops through the column onto the nearly full disc (close-up)**
+
+![Cinderfall key frame: the spiked shell drops through the column onto the nearly full disc (close-up)](venator/v2/ult/venator_ult_key_close.png)
+
+**Cinderfall impact: the white-hot column, ember shock rings and spray, DEAD CENTRE on the target**
+
+![Cinderfall impact: the white-hot column, ember shock rings and spray, DEAD CENTRE on the target](venator/v2/ult/venator_ult_impact.png)
+
+**Cinderfall impact: the white-hot column, ember shock rings and spray, DEAD CENTRE on the target (close-up)**
+
+![Cinderfall impact: the white-hot column, ember shock rings and spray, DEAD CENTRE on the target (close-up)](venator/v2/ult/venator_ult_impact_close.png)
+
+**Cinderfall patch: the scorched disc burns with a lit ember rim and flames; the target slowed**
+
+![Cinderfall patch: the scorched disc burns with a lit ember rim and flames; the target slowed](venator/v2/ult/venator_ult_zone.png)
+
+**Cinderfall patch: the scorched disc burns with a lit ember rim and flames; the target slowed (close-up)**
+
+![Cinderfall patch: the scorched disc burns with a lit ember rim and flames; the target slowed (close-up)](venator/v2/ult/venator_ult_zone_close.png)
