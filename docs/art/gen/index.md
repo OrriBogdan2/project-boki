@@ -314,3 +314,26 @@ Portrait:
 
 Turnaround:
 > Character turnaround reference sheet for a 3D modeller: the same character shown three times side by side at the same scale on one sheet, left to right: FRONT view, SIDE view (profile), BACK view. Neutral relaxed A-pose standing straight, arms held slightly away from the body, full body head to toe in every view, all three figures exactly the same height and aligned on one ground line. Flat even studio lighting, no dramatic shadows, plain flat light grey background, no scenery. Any held weapon hangs down beside the leg in the same hand in every view and is visible in all three views. Her cropped black leather jacket has ONE sleeve completely torn off at the shoulder; that bare arm, and only that arm, carries the glowing lightning scars, in every view; the other arm stays in its black leather sleeve. The banner on the copper mast is RED with a white lightning bolt, in every view; the copper mast and banner on her back in every view. No text, no labels, no logos.
+
+### Bjorn (bulwark), Frozen Bulwark
+Owner direction: approved look locked (sleeveless, very muscular, enormous prow-shield); lore: went down with his ship in the ice and came back (undead hints).
+
+Warden block:
+> The third reference image is this character's approved final look: keep his face, body, outfit, shield and oar exactly as in the third reference image, only changing the shot. Bjorn, the Frozen Bulwark, a towering northern ferryman and shield-bearer who went down with his ship in the ice and came back, warm and laughing, with small hints that he is no longer alive (frost that never melts on him, no breath in the cold, a faint cold-green glow in his eyes and the shield's cracks). A true giant about eight heads tall, the tallest and widest Warden: massive shoulders, a deep chest, thick bare muscular arms, long powerful legs. Bald; thick dark forked beard bound with iron rings; heavy brows; pale cold grey skin. Sleeveless dark navy sailor's coat open at the chest, frost-crusted hem; big tan seal-fur mantle; wide leather belt with an iron buckle; fur-wrapped boots; rime-crusted iron gauntlets. His enormous shield is the whole frozen, iron-banded wooden prow of his old ship: its top edge higher than his head, the curled stem post rising another head-height above, about twice as wide as his torso, with heavy icicles and a long mint-green glowing crack. A long wooden boat oar with a flat paddle blade encased in clear ice.
+
+| File | Size | Studio image | Notes |
+|---|---|---|---|
+| `wardens/bjorn_splash.png` | 2752x1536 | b9f570d5 | |
+| `wardens/bjorn_portrait.png` | 2048x2048 | 5d388b6d | |
+| `wardens/bjorn_turnaround.png` | 3168x1344 | 767a4b87 | |
+
+All take 1. For Bjorn the third reference is his own approved frame, so the prompt uses 'match the art style of the third reference' plus 'keep his face, body, outfit, shield and oar exactly as in the third reference' instead of the copy-nothing anchor line.
+
+Splash:
+> Splash art, 16:9 widescreen: the frozen wreck of his old ship locked in sea ice on a floating isle in a howling blizzard, the hull broken open, ghostly green light in the fog; Bjorn plants the colossal prow-shield in the ice with a thunderous impact, ice cracking outward in a shockwave, the ice oar raised high in his other hand, laughing into the storm, snow streaming, full figure, heroic low angle. Cold blue-grey storm light with mint-green glow accents and a warm rim on his face. Palette: dark navy, seal brown, oak brown, iron grey, icy pale blue, mint-green accent. No text, no logos.
+
+Portrait:
+> Portrait bust, square 1:1, for a game hero picker: head and shoulders, three-quarter view, a big warm laugh, bald head, heavy brows, thick dark forked beard with iron rings, a faint cold-green glint in his eyes, frost on his brows and beard, the seal-fur mantle, the curled top of the prow-shield's stem post rising behind his shoulder. Simple dark blue-grey gradient background, strong cold rim light. Palette: dark navy, seal brown, iron grey, icy pale blue, mint green. No text, no logos.
+
+Turnaround:
+> Character turnaround reference sheet for a 3D modeller: the same character shown three times side by side at the same scale on one sheet, left to right: FRONT view, SIDE view (profile), BACK view. Neutral relaxed A-pose standing straight, arms held slightly away from the body, full body head to toe in every view, all three figures exactly the same height and aligned on one ground line. Flat even studio lighting, no dramatic shadows, plain flat light grey background, no scenery. Any held weapon hangs down beside the leg in the same hand in every view and is visible in all three views. The prow-shield stands on the ground beside him in every view on the same side, the oar held hanging down in the other hand in every view. No text, no labels, no logos.
