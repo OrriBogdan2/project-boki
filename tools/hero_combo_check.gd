@@ -263,6 +263,15 @@ func _mage() -> void:
 	ok("Storm Rod: knocked about 1 body height on open ground", kb > 0.8 and kb < 3.0, "%.2f m" % kb)
 	ok("Storm Rod: an orb at the impact the moment it hits",
 			orb_fast and _flat(K.motes[0]["pos"], home + Vector3(5, 0, 0)) < 2.5)
+	var rod_k1 := K.rod_rank_k()
+	var run_k1 := K.run_rank_k()
+	P.slot_lv["sec"] = 3
+	P.slot_lv["dash"] = 3
+	ok("Rank 3: the Storm Rod throw hits +50% and Wirerun's own hit doubles (rank 1: both 1.0)",
+			rod_k1 == 1.0 and run_k1 == 1.0 and is_equal_approx(K.rod_rank_k(), 1.5) and is_equal_approx(K.run_rank_k(), 2.0),
+			"%.2f %.2f" % [K.rod_rank_k(), K.run_rank_k()])
+	P.slot_lv["sec"] = 1
+	P.slot_lv["dash"] = 1
 	# 7. the orb zaps a foe beside it with Static; a Wirerun through it bursts it (2 Static) and does NOT reset
 	ac.fresh(T)
 	K.sparks.clear()
@@ -553,7 +562,7 @@ func _gunslinger() -> void:
 			ac.dmg(T) >= 12.0 and KitStatus.rattled(T) and T.pos.x < tx - 1.5,
 			"took %.0f moved %.1f" % [ac.dmg(T), T.pos.x - tx])
 	ok("RMB: 0.9s fuse", is_equal_approx(float(bd["fuse"]), 0.9))
-	# 4. on a wall: sticks, the cone back out, a hunter shoved into more terrain is stunned + cooldown shave
+	# 4. on a wall: sticks, the cone back out, a hunter shoved into more terrain is stunned (no cooldown shave)
 	ac.fresh(T)
 	KitStatus.clear_rattled(T)
 	P.teleport(home)
@@ -573,8 +582,8 @@ func _gunslinger() -> void:
 	var bw: Dictionary = K.burrs[0] if not K.burrs.is_empty() else {}
 	ok("RMB on a wall: sticks to the wall", not bw.is_empty() and bool(bw["wall"]), str(bw.get("pos", "")))
 	ac.step(m, 1.1)
-	ok("RMB wall cone: hits, Dazes, shoves into terrain = stun + cooldown shave",
-			ac.dmg(T) >= 12.0 and KitStatus.rattled(T) and K.wall_slams == ws0 + 1 and float(K.cd["rmb"]) < 6.5 * 0.7,
+	ok("RMB wall cone: hits, Dazes, shoves into terrain = stun, the cooldown is not shaved",
+			ac.dmg(T) >= 12.0 and KitStatus.rattled(T) and K.wall_slams == ws0 + 1 and float(K.cd["rmb"]) > 6.5 * 0.7,
 			"took %.0f slams %d cd %.1f" % [ac.dmg(T), K.wall_slams - ws0, float(K.cd["rmb"])])
 	for z in range(-3, 4):
 		_unwall(m, home + Vector3(9.5, 0, z))
@@ -602,7 +611,8 @@ func _gunslinger() -> void:
 	ac.step(m, 0.4)
 	ok("Longneedle: fires at 0.6s", ac.dmg(T) >= 30.0, "took %.0f" % ac.dmg(T))
 	ok("Longneedle: the recoil shoves you back", P.pos.x < px - 0.4, "%.2f" % (P.pos.x - px))
-	ok("Longneedle hit takes 30% off its cooldown", float(K.cd["e"]) <= 11.5 * 0.72)
+	ok("Longneedle hit takes 20% off its cooldown (not 30% before rank 3)",
+			float(K.cd["e"]) < 8.9 and float(K.cd["e"]) > 7.7, "%.2f" % float(K.cd["e"]))
 	ac.fresh(T)
 	KitStatus.apply(T, "rat", 4.0)
 	K.cd["e"] = 0.0
@@ -667,7 +677,9 @@ func _gunslinger() -> void:
 	P.inp["move"] = Vector2(0, 1)
 	_dash(m, P, 0.3)
 	ac.step(m, 0.2)
-	ok("Slipstep: let go early, part of it comes back", K.last_dash_kind == "slide" and P.dashes > 0.2)
+	ok("Slipstep: a held slide is owed a longer cooldown and letting go early refunds nothing",
+			K.last_dash_kind == "slide" and P.dashes < -0.2 and absf(float(K.dash_def()["hold_cost"]) - 0.4) < 0.001,
+			"dashes %.2f" % P.dashes)
 	P.inp["move"] = Vector2.ZERO
 	# small mechanics (the wiki's fine print, docs/heroes/gunslinger.md "Small mechanics")
 	P.teleport(home)
@@ -692,6 +704,16 @@ func _gunslinger() -> void:
 	K.res_wait = 0.0
 	ac.step(m, 0.05)
 	ok("small: Fever wears off all at once", K.res == 0.0)
+	K.add_fever(1)
+	K.add_fever(1)
+	ok("small: Fever is one flat level of 6% (a second ability hit adds nothing)",
+			K.res == 1.0 and is_equal_approx(K.fever_k(), 0.06) and K.res_wait > 3.0, "%.2f %.2f" % [K.res, K.fever_k()])
+	var hp_before := P.hp
+	P.hp = 50.0
+	K.on_deal(T, 100.0, {"src": "shot"})
+	ok("small: Fever heals 6% of the damage dealt", absf(P.hp - 56.0) < 0.5, "hp %.1f" % P.hp)
+	P.hp = hp_before
+	K.res = 0.0
 	ac.fresh(T)
 	ac.fresh(T2)
 	P.teleport(home)
@@ -705,8 +727,26 @@ func _gunslinger() -> void:
 	P.ak.use_e()
 	ac.step(m, 0.9)
 	ok("small: Longneedle hits everyone in its line (two)", ac.dmg(T) >= 30.0 and ac.dmg(T2) >= 30.0)
+	var cd_two := float(K.cd["e"])
+	ok("small: Longneedle at rank 1 cuts its cooldown once however many it hits (20%)", cd_two > 7.7, "%.2f" % cd_two)
+	P.slot_lv["kin"] = 3
+	ac.fresh(T)
+	ac.fresh(T2)
+	P.teleport(home)
+	T.teleport(home + Vector3(5, 0, 0))
+	T2.teleport(home + Vector3(9, 0, 0))
+	ac.step(m, 0.2)
+	T.inv_t = 0.0
+	T2.inv_t = 0.0
+	K.cd["e"] = 0.0
+	ac.aim_at(P, T.pos)
+	P.ak.use_e()
+	ac.step(m, 0.9)
+	ok("small: Longneedle at rank 3 takes 30% per hunter hit (two hits: 60% off a 9.2s cooldown)",
+			float(K.cd["e"]) < 9.2 * 0.5, "%.2f" % float(K.cd["e"]))
+	P.slot_lv["kin"] = 1
 	T2.teleport(home + Vector3(30, 0, 0))
-	# 7. Hot Streak: a knock gives Slipstep back and heals; rank 3 resets the Burr Charge
+	# 7. Hot Streak: a knock gives Slipstep back; rank 3 resets the Burr Charge
 	P.slot_lv["sec"] = 3
 	P.dashes = 0.0
 	K.cd["rmb"] = 5.0
@@ -715,7 +755,8 @@ func _gunslinger() -> void:
 	T.hp = 0.0
 	T.downed = true
 	K.on_deal(T, 5.0, {"src": "abil", "ab": "k1"})
-	ok("Knock: heals a quarter, Slipstep back", P.hp >= 40.0 + 30.0 and P.dashes >= 1.0)
+	ok("Knock: Slipstep back, no heal from the kit (the takedown heal is DashReset's)",
+			P.hp < 41.0 and P.dashes >= 1.0, "hp %.1f" % P.hp)
 	ok("Knock at rank 3: Burr Charge resets", K.ch_rmb >= 1.0 and float(K.cd["rmb"]) == 0.0)
 	T.downed = false
 	T.hp = T.max_hp

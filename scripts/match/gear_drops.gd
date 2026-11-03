@@ -1,7 +1,8 @@
 class_name GearDrops
 extends RefCounted
-## What falls out of chests, crates, guards, the Blight and bosses: gear for the five slots (Gear)
-## and weapon tunings (WeaponUps), rolled from the tables in content/rules/gear.json. There are no
+## What falls out of chests, crates, guards, the Blight and bosses: gear for the four slots (Gear),
+## utility items for the belt (UtilityBelt, odds in content/rules/equal.json) and weapon tunings (WeaponUps), rolled from
+## the tables in content/rules/gear.json. There are no
 ## weapon drops any more (every hunter carries one fixed signature weapon), so this replaces them
 ## and the archetype-family weapon logic (DropFamily) with gear and upgrades.
 
@@ -81,27 +82,35 @@ static func run_table(m, name: String, at: Vector3, rng: RandomNumberGenerator, 
 				g["rar"] = Data.RARITY.size() - 1
 			m.spawn_gear(String(g["id"]), int(g["rar"]), p, "", bool(ctx.get("net", true)))
 			made.append({"kind": "gear", "id": g["id"], "rar": g["rar"]})
+	var ut := UtilityDrops.roll(m, name, at, rng, ctx)
+	if not ut.is_empty():
+		made.append(ut)
 	return made
 
-## What a bot starts with: a few slots filled, by its difficulty (the gear a player would bring).
+## What a bot starts with: a few slots filled, by its difficulty (what a player may bring: boots and
+## gloves, never armor; Equal) and a spare utility item.
 static func bot_start(h, rng: RandomNumberGenerator, diff: String) -> void:
 	var cfg: Dictionary = (rules().get("bot_start", {}) as Dictionary).get(diff, {})
-	var order: Array = [2, 3, 4, 0, 1]      # armor, boots, kit, then gloves
-	for i in mini(int(cfg.get("slots", 0)), order.size()):
-		var g := roll_gear(rng, int(cfg.get("bonus", 0)), 0, int(order[i]))
-		h.gear[int(order[i])] = {"id": g["id"], "rar": g["rar"]}
+	UtilityDrops.bot_start(h, rng, diff)
+	Backpacks.bot_start(h, rng, diff)
+	var n := int(cfg.get("slots", 0))  # boots first, then up to two different active gloves (bots use both: Gloves)
+	if n > 0:
+		var b := roll_gear(rng, int(cfg.get("bonus", 0)), 0, 3)
+		h.gear[3] = {"id": b["id"], "rar": b["rar"]}
+	Gloves.bot_fill(h, rng, n - 1, int(cfg.get("bonus", 0)))
 	h.refresh_gear()
 
 ## Should a bot walking past this piece take it? An empty slot, or a rarer piece than the worn one.
 static func bot_wants(h, gid: String, rar: int) -> bool:
-	var cur: Dictionary = h.gear[Gear.slot_of(gid)]
+	var cur: Dictionary = h.gear[Gear.slot_on(h, gid)]
 	return cur.is_empty() or rar > int(cur.get("rar", 0))
 
 ## Test hook (--gear-demo): a hunter dressed in one piece per slot at mixed rarities, with a few weapon
 ## upgrades taken, and a boss's drop plus a chest's lying around their feet.
 static func demo(m) -> void:
 	var P = m.player
-	P.gear = [{"id": "blink", "rar": 3}, {"id": "focus", "rar": 1}, {"id": "bastion_plate", "rar": 2}, {"id": "skylark_boots", "rar": 4}, {"id": "satchel", "rar": 0}]
+	P.gear = [{"id": "blink", "rar": 3}, {"id": "focus", "rar": 1}, {"id": "bastion_plate", "rar": 2},
+			{"id": "skylark_boots", "rar": 4}]
 	P.refresh_gear()
 	for pk in ["hotload", "hotload", "quickfeed", "longreach", "brand_fire"]:
 		P.add_perk(pk)

@@ -1,7 +1,7 @@
 extends RefCounted
 ## --dredge-combo-check: Dredge's abilities and their interactions, scripted one by one in the
 ## archetype check's flat training strip (docs/heroes/dredge.md, combinations table): the Grapnel
-## reel, only the barge during it, reel into the Anchor Drop, walls and the abyss, the Salvage
+## reel, only the barge during it, reel into the Anchor Drop, terrain the hook pierces, the abyss, the Salvage
 ## passive, the back hit, the barge's turn lock after the Anchor, the rank-3 specials, and the X ult,
 ## Brass Broadside (tools/dredge_ult_check.gd).
 
@@ -95,7 +95,7 @@ func _all() -> void:
 	ok("gun: idle, the cone folds into one aim line", AimKit.shown(P, "spread_idle") and not AimKit.shown(P, "spread"))
 	P.ammo = int(P.wpn["mag"])
 	P.reload_t = 0.0
-	# --- Grapnel reels a foe in; they land Grounded
+	# --- Grapnel reels a foe in
 	reset.call()
 	ak.tap(m, P)
 	ak.step(m, 0.3)
@@ -135,8 +135,8 @@ func _all() -> void:
 		ak.step(m, 0.05)
 		tw += 0.05
 	ok(
-		"grapnel: foe arrives and lands Grounded",
-		K.arrivals == 1 and K.pull.is_empty() and KitStatus.grounded(T) and P.flat_dist(T) < 3.6,
+		"grapnel: foe arrives at your feet and does not land Grounded",
+		K.arrivals == 1 and K.pull.is_empty() and not KitStatus.grounded(T) and P.flat_dist(T) < 3.6,
 		"arrivals %d dist %.1f (was %.1f)" % [K.arrivals, P.flat_dist(T), d0]
 	)
 	ok("reel: Dredge's own Grounded ends with the reel", not KitStatus.grounded(P))
@@ -178,7 +178,7 @@ func _all() -> void:
 		mv.length() > 1.0 and absf(rad_to_deg(fwd.angle_to(mv))) <= 40.0,
 		"moved %.1f angle %.0f" % [mv.length(), rad_to_deg(fwd.angle_to(mv))]
 	)
-	# --- walls: the hook stops at a wall, a reel can't pass one
+	# --- terrain: the hook pierces a cliff face and the reel hauls the foe up and over it
 	reset.call()
 	var W = m.world
 	var hx := int(floor(home.x))
@@ -189,23 +189,22 @@ func _all() -> void:
 	ak.tap(m, P)
 	ak.step(m, 0.5)
 	ok(
-		"cliff: a cliff face stops the hook, nobody is pulled",
-		K.grapples == g0 and K.pull.is_empty() and P.flat_dist(T) > 7.5 and ak.dmg(T) < 1.0,
-		"grapples +%d dist %.1f" % [K.grapples - g0, P.flat_dist(T)]
+		"cliff: the hook pierces a cliff face and hooks the foe behind it",
+		K.grapples == g0 + 1 and ak.dmg(T) >= 5.0 and P.flat_dist(T) < 7.5,
+		"grapples +%d dist %.1f took %.1f" % [K.grapples - g0, P.flat_dist(T), ak.dmg(T)]
 	)
 	for dz in range(-6, 7):
 		W.level[W.idx(hx + 4, hz + dz)] = lv
-	# hook first, then a wall rises in the reel's path
+	# a cliff face in the reel's path: the foe is hauled over it
 	reset.call()
-	ak.tap(m, P)
-	ak.step(m, 0.12)
 	for dz in range(-6, 7):
 		W.level[W.idx(hx + 4, hz + dz)] = lv + 4
+	ak.tap(m, P)
 	ak.step(m, 3.4)
 	ok(
-		"cliff: a reel is stopped by a cliff face, the foe stays behind it",
-		T.pos.x > home.x + 4.4 and K.pull.is_empty(),
-		"foe x %.1f wall x %.1f snags %d" % [T.pos.x - home.x, 4.0, K.snags]
+		"cliff: a reel hauls the foe up and over a cliff face to your feet",
+		T.pos.x < home.x + 3.6 and P.flat_dist(T) < 3.6 and K.pull.is_empty() and K.arrivals >= 1,
+		"foe x %.1f dist %.1f arrivals %d" % [T.pos.x - home.x, P.flat_dist(T), K.arrivals]
 	)
 	for dz in range(-6, 7):
 		W.level[W.idx(hx + 4, hz + dz)] = lv
@@ -345,7 +344,14 @@ func _all() -> void:
 	while te < 1.2 and K.quakes == q0:
 		ak.step(m, ak.DT)
 		te += ak.DT
-	ok("air smash rank 3: up to +75% by height", K.last_quake_k > 1.6, "k %.2f" % K.last_quake_k)
+	ok(
+		"air smash rank 3: the height bonus stays at +50% (the abyss is the rank's bonus)",
+		K.last_quake_k > 1.4 and K.last_quake_k < 1.55, "k %.2f" % K.last_quake_k
+	)
+	ok(
+		"anchor rank 3: stun 1.5s (+0.1 a rank, and the rank's own +0.2)", absf(K._stun_t() - 1.5) < 0.01,
+		"stun %.2f" % K._stun_t()
+	)
 	P.slot_lv["kin"] = 1
 	for dz in range(-3, 4):
 		for dx in range(-2, 3):
@@ -360,6 +366,37 @@ func _all() -> void:
 	for dz in range(-3, 4):
 		for dx in range(-2, 3):
 			W.kind[W.idx(hx + dx, hz + dz)] = World.T_GROUND
+	# --- rank 3 Anchor: double damage on a foe over the abyss
+	var over_dmg := 0.0
+	var off_dmg := 0.0
+	for dz in range(-2, 3):
+		for dx in range(1, 4):
+			W.kind[W.idx(hx + dx, hz + dz)] = World.T_VOID
+	for over in [false, true]:
+		reset.call()
+		P.slot_lv["kin"] = 3
+		T.teleport(home + Vector3(2.0 if over else 8.0, 0, 0))
+		T2.teleport(home + Vector3(-9.0, 0, 6.0))
+		ak.aim_at(P, home + Vector3(2.0, 0, 0))
+		P.ak.use_e()
+		ak.step(m, 0.5)
+		if over: over_dmg = ak.dmg(T)
+	reset.call()
+	T.teleport(home + Vector3(8.0, 0, 0))
+	for dz in range(-2, 3):
+		for dx in range(1, 4):
+			W.kind[W.idx(hx + dx, hz + dz)] = World.T_GROUND
+	T.teleport(home + Vector3(2.0, 0, 0))
+	ak.aim_at(P, home + Vector3(2.0, 0, 0))
+	P.ak.use_e()
+	ak.step(m, 0.5)
+	off_dmg = ak.dmg(T)
+	ok(
+		"anchor rank 3: a foe over the abyss takes double damage",
+		K.abyss_dunks == 1 and off_dmg > 10.0 and over_dmg > off_dmg * 1.8,
+		"over %.1f on ground %.1f dunks %d" % [over_dmg, off_dmg, K.abyss_dunks]
+	)
+	P.slot_lv["kin"] = 1
 	# --- the barge goes further in the air
 	reset.call()
 	T.teleport(home + Vector3(0, 0, 9.0))
@@ -396,6 +433,28 @@ func _all() -> void:
 		absf(in_gap - 1.0) < 0.01 and P.dashes < 0.5 and P.pos.x - home.x > one * 2.6,
 		"used in gap %.1f left %.2f went %.1f" % [in_gap, P.dashes, P.pos.x - home.x]
 	)
+	# no damage from the shove; the gun's bloom resets only from rank 3
+	reset.call()
+	T.teleport(home + Vector3(1.8, 0, 0))
+	ak.aim_at(P, T.pos)
+	P.wbloom = 10.0
+	P.idle_fire = 0.0
+	P.ak.on_dash(false)
+	ak.step(m, 0.1)
+	ok(
+		"barge: the shove does no damage, and rank 1 keeps the gun's spread",
+		ak.dmg(T) < 0.5 and P.wbloom > 5.0, "dmg %.2f bloom %.1f" % [ak.dmg(T), P.wbloom]
+	)
+	reset.call()
+	K.next_barge = -9.0
+	P.slot_lv["dash"] = 3
+	P.wbloom = 10.0
+	ak.aim_at(P, home + Vector3(9.0, 0, 0))
+	P.ak.on_dash(false)
+	ak.step(m, 0.1)
+	ok("barge rank 3: a dash resets the gun's spread", P.wbloom < 0.01, "bloom %.1f" % P.wbloom)
+	P.slot_lv["dash"] = 1
+	ak.step(m, 0.6)
 	reset.call()
 	T.teleport(home + Vector3(0, 0, 9.0))
 	P.teleport(home + Vector3(0, 3.0, 0))
@@ -457,8 +516,8 @@ func _all() -> void:
 	ak.tap(m, P)
 	ak.step(m, 0.3)
 	ok(
-		"grapnel rank 3: a hit refunds a third of the cooldown",
-		float(K.cd["rmb"]) < 11.0 * 0.7 + 0.5 and K.grapples >= 1, "cd %.1f" % float(K.cd["rmb"])
+		"grapnel rank 3: a hit takes half the cooldown off (12s -> 9.6s -> 4.8s)",
+		float(K.cd["rmb"]) < 9.6 * 0.5 + 0.5 and K.grapples >= 1, "cd %.1f" % float(K.cd["rmb"])
 	)
 	P.dashes = 0.0
 	K.on_deal(T, 3.0, {"src": "shot"})
@@ -466,7 +525,7 @@ func _all() -> void:
 	# --- the abyss: a foe reeled over a gap falls
 	reset.call()
 	for dz in range(-6, 7):
-		for dx in range(3, 6):
+		for dx in range(3, 8):
 			W.kind[W.idx(hx + dx, hz + dz)] = World.T_VOID
 	var a0 := K.arrivals
 	ak.tap(m, P)
@@ -477,7 +536,7 @@ func _all() -> void:
 		"out %s y %.1f x %.1f" % [str(T.out), T.pos.y - home.y, T.pos.x - home.x]
 	)
 	for dz in range(-6, 7):
-		for dx in range(3, 6):
+		for dx in range(3, 8):
 			W.kind[W.idx(hx + dx, hz + dz)] = World.T_GROUND
 	# --- a Boki merge that starts mid-reel / mid-wind-up ends them: the rope goes, no Anchor slam, no landing hit
 	reset.call()

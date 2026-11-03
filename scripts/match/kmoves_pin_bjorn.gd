@@ -202,24 +202,6 @@ const MOVES := {
 		],
 		[0.28, {"p": 0.25, "lift": -0.05, "lw": 0.8, "legs": [0.6, -0.8, -0.3, -0.4]}],
 		[0.6, {}]]},
-	# the snare: a quick flick of the bow hand, a half-step forward
-	"arc_snare": {"keys": [
-		[0.0, {"p": 0.2, "y": 0.45, "sq": -0.08, "hw": 1.0, "fl": Vector3(0.15, 0.2, 0.25)}],
-		[
-			0.07,
-			{
-				"p": -0.6,
-				"y": -0.4,
-				"sq": 0.2,
-				"lw": 1.0,
-				"legs": [1.1, -0.9, -0.7, -0.3],
-				"rw": 1.0,
-				"fr": Vector3(0.0, 0.1, -0.6)
-			}
-		],
-		[0.14, {"p": -0.7, "y": -0.5, "sq": 0.25, "lw": 1.0, "legs": [1.15, -1.0, -0.75, -0.3]}],
-		[0.24, {"p": -0.2, "y": -0.1, "lw": 0.6}],
-		[0.36, {}]]},
 	# Hail Wall: the bow raised high, the body arching back, the volley lobbed up in an arc, then down
 	"arc_hail": {"keys": [
 		[0.0, {"p": 0.1}],
@@ -279,11 +261,6 @@ const MOVES := {
 				"fr": Vector3(0.15, -0.1, 0.35)
 			}
 		]]},
-	# the plunge: shooting straight down, folded over the bow
-	"arc_plunge": {"keys": [
-		[0.0, {"p": -0.5, "sq": 0.2, "lw": 1.0, "legs": [1.0, -1.4, 1.0, -1.4]}],
-		[0.12, {"p": -0.9, "sq": 0.4, "lw": 1.0, "legs": [1.2, -1.7, 1.2, -1.7]}],
-		[0.45, {}]]},
 	# ---------------------------------------------------------------- Bjorn (bulwark; hero sheet bjorn.md)
 	# the hammer thrown: cocked far back and low for one frame, leaning away, then an overhand throw that
 	# overshoots past the front before it settles
@@ -399,23 +376,6 @@ const MOVES := {
 				"fl": Vector3(0.0, 0.15, -0.48)
 			}
 		]]},
-	# the Bash: a short-stepped shoulder shove behind the shield
-	"bul_bash": {"keys": [
-		[0.0, {"p": 0.15, "y": 0.3, "lw": 1.0, "legs": [0.2, -0.4, -0.1, -0.2]}],
-		[
-			0.07,
-			{
-				"p": -0.45,
-				"y": -0.2,
-				"sq": 0.3,
-				"lw": 1.0,
-				"legs": [0.9, -0.9, -0.5, -0.4],
-				"hw": 1.0,
-				"fl": Vector3(0.0, 0.1, -0.6)
-			}
-		],
-		[0.28, {"p": -0.2, "lw": 0.7}],
-		[0.5, {}]]},
 	# 360 Smash: a hard 0.17 s run-up (the dash's own lean tips him forward, so the move adds none), ONE full
 	# turn in 0.16 s with the hammer held out at arm's length while he slides on, then a low crouched
 	# recovery to 0.58 s

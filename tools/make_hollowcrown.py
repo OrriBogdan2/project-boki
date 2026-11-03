@@ -43,7 +43,7 @@ FORMAT (what World.generate_authored reads; keys beyond Skyreach's are marked +)
     bush              [[x,z,r]] tall grass to hide in: computed by place_cover() below, not listed by hand
     landings (+)      [[x,z]] where squads come down (World.spawns)
     camps (+)         [[x,z,"light|normal|heavy"]] monster camps (which monsters: rolled)
-    chests            [[x,z]] (one locked chest type);  breakables (+) [[x,z,"crate|pot|barrel"]];  weapons (+) [[x,z]]
+    chests            [[x,z]] (one locked chest type);  breakables (+) [[x,z,"crate|pot|barrel|keg"]];  weapons (+) [[x,z]]
     wild (+)          [[x,z]] wild Boki;  shrine (+) [x,z]
     wardens (+)       [[x,z]] Blight Warden posts (how many stand: rolled by danger)
     traps (+)         [[x,z]] where the region's traps go (which trap: the biome's list)
@@ -109,7 +109,7 @@ islands = [
          shapes=[poly([(48, 138), (62, 133), (74, 139), (77, 156), (68, 166), (52, 164), (44, 152)], 4)],
          sheer=[[20, 80]],
          rocks=rocks((72, 158, 72, 160)),
-         chests=[[62, 161]], camps=[], breakables=[[51, 140, "barrel"], [52, 140, "crate"]],
+         chests=[[62, 161]], camps=[], breakables=[[51, 140, "keg"], [52, 140, "crate"]],
          wardens=[[74, 146]], traps=[]),
     # ---- FROSTGATE (north): a long frozen ridge. The Keep (lv 6, walled) on its east end looks straight
     # down the Gate Span into the Crown; reach it by the West Stair or the narrow South Stair. The open
@@ -141,7 +141,7 @@ islands = [
          landings=[[38, 120], [58, 66]],
          chests=[[46, 70], [52, 118]],
          camps=[[46, 76, "normal"], [42, 100, "light"]],
-         breakables=[[60, 68, "barrel"], [33, 90, "crate"], [34, 90, "crate"], [52, 124, "pot"]],
+         breakables=[[60, 68, "keg"], [33, 90, "crate"], [34, 90, "crate"], [52, 124, "pot"]],
          weapons=[[38, 108]],
          wardens=[[56, 92], [40, 66]],
          traps=[[48, 110]],
@@ -184,7 +184,7 @@ islands = [
          sheer=[[90, 150]],
          landings=[[34, 30], [46, 36], [20, 38]],
          chests=[[26, 24], [42, 28]],
-         camps=[], breakables=[[30, 40, "crate"], [31, 40, "barrel"]],
+         camps=[], breakables=[[30, 40, "crate"], [31, 40, "keg"]],
          wardens=[],
          areas=[[26, 22, "Lark Stones"]]),
     dict(id="highwatch", name="Highwatch", role="landing", region=6, biome="frost", danger=0, poi=[184, 22], noise=0.08,
@@ -201,7 +201,7 @@ islands = [
          rocks=rocks((188, 184, 189, 185)),
          landings=[[180, 182], [196, 188], [186, 200]],
          chests=[[192, 172]],
-         camps=[[178, 194, "light"]], breakables=[[200, 184, "barrel"], [200, 185, "crate"]],
+         camps=[[178, 194, "light"]], breakables=[[200, 184, "keg"], [200, 185, "crate"]],
          wardens=[[188, 176]]),
     dict(id="saltmere", name="Saltmere", role="landing", region=8, biome="bloom", danger=0, poi=[24, 184], noise=0.08,
          shapes=[poly([(14, 170), (30, 164), (44, 172), (46, 190), (34, 204), (16, 202), (8, 186)], 0)],

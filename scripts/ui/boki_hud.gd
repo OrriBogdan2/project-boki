@@ -25,27 +25,23 @@ static func squad_downed(m) -> Array:
 			out.append(k)
 	return out
 
-## The R slot: the bond meter / Merge. `ur` is its rect, `us` its size. Every element has its own place so
-## nothing overlaps (checked at 1280x720 and 1920x1080):
-##   inside the square   the icon and, on a cooldown, its seconds (the shared slot art); the bond fill behind them;
-##                       the rank badge in the top-right corner
-##   round the square    one ring along the outline: bond while filling, time left while merged (it pulses when R is ready)
-##   under the square    the key cap (shared slot art)
-##   above the square    one chip: the bond %, "MERGE" when ready, then while merged the ultimate's unlock seconds / its name / the form
-## The slot is always the Merge. A Boki that is out leaps back first; that is in the tooltip, not on the slot.
-const BOND_FLASH_S := 0.8    # s: how long the slot glows after the bond meter gains from an ultimate
+## The Merge box (GripHud.boki) while the Merge is still locked or you are merged; GripHud draws the bond meter
+## the rest of the time. `ur` is its rect. Every element has its own place so nothing overlaps:
+##   inside the square   the icon (the shared slot art); the rank badge in the top-right corner
+##   round the square    while merged, one ring along the outline: the time left (it pulses when R is ready)
+##   under the square    the key cap of the Merge action (shared slot art)
+##   above the square    the lock tag, or while merged one chip: the ultimate's unlock seconds / its name / the form
 const RING_GROW := 4.0       # px: the ring sits this far outside the slot's edge
 const CHIP_LIFT := 22.0      # px: the chip's top edge above the slot (clear of the rank pips at 7px and the "UNLOCK" tag)
 
-static func r_slot(H, p: Hunter, ur: Rect2, us: float) -> void:
+static func r_slot(H, p: Hunter, ur: Rect2) -> void:
 	var ri := p.slot_info("r")
 	var ulv := int(p.slot_lv["ult"])
 	var col: Color = ri["col"]
 	var merged := KinMerge.active(p)
 	var cd_left := float(ri["cd"])
-	# (while merged the unlock seconds go in the chip, not as a second number over the icon)
-	var sweep := 0.0 if merged else (cd_left / maxf(0.01, float(ri["cd_max"])) if cd_left > 0.0 else 0.0)
-	H._skill_slot("ult", "r", ur, "bond", Settings.key_cap("ultimate"), col, sweep, 0.0 if merged else cd_left, bool(ri["ready"]))
+	# (while merged the unlock seconds go in the chip, not as a number over the icon)
+	H._skill_slot("ult", "r", ur, "bond", Settings.key_cap("ultimate"), col, 0.0, 0.0, bool(ri["ready"]))
 	var ult_at := int(Hunter.ULT_AT[0])
 	if ulv <= 0:
 		if p.lvl < ult_at:
@@ -60,45 +56,26 @@ static func r_slot(H, p: Hunter, ur: Rect2, us: float) -> void:
 		var tr := Rect2(Vector2(ur.end.x - 16, ur.position.y + 2), Vector2(14, 14))
 		H._rounded(tr, Color(0.03, 0.03, 0.05, 0.9), 5, Color(H.MUTED, 0.6), 1)
 		H._ctext(tr.get_center() + Vector2(0, 4), str(int(Hunter.ULT_AT[1])), 10, H.MUTED, H.big)
-	if merged:
-		var ml: Dictionary = p.merge_st
-		var left := clampf(float(ml["t"]) / maxf(0.1, float(ml["T"])), 0.0, 1.0)
-		var ready_ult := bool(ri.get("ready", false)) and String(ri.get("plan", "")) == "ult"
-		var pl := 0.5 + 0.5 * sin(H.m.time * 8.0)
-		_ring(H, ur.grow(RING_GROW), left, Color("fff4c0").lerp(col, pl * 0.6) if ready_ult else Color("fff4c0"), 4.0 if ready_ult else 3.0)
-		var form_name := String((ml.get("form", {}) as Dictionary).get("name", "MERGED")).to_upper()
-		var chip := form_name
-		if ready_ult:
-			chip = String(ri.get("name", "ULT")).to_upper()
-		elif String(ri.get("plan", "")) == "ult" and not bool(ri.get("ulting", false)):
-			chip = "ULT %.1fs" % cd_left
-		var wl := MergeAugment.warn_left(p)
-		if wl > 0.0:
-			# the last seconds of the window: the slot flashes and the chip counts down
-			var fl := 0.5 + 0.5 * sin(H.m.time * (10.0 + (3.0 - minf(wl, 3.0)) * 4.0))
-			H._rounded(ur.grow(RING_GROW + 2.0 + fl * 3.0), Color(col, 0.18 * fl), 14, Color(1.0, 0.4, 0.3, 0.5 + 0.5 * fl), 3)
-			chip = "ENDS %.1fs" % wl
-		_chip(H, ur, chip, Color(1.0, 0.5, 0.4) if wl > 0.0 else col)
+	if not merged:
 		return
-	# the meter: a fill from the bottom and a ring along the outline, in the Boki's colour
-	var bond := clampf(p.ult, 0.0, 1.0)
-	var fh2: float = (ur.size.y - 6.0) * bond
-	if fh2 > 0.0:
-		H._rounded(Rect2(Vector2(ur.position.x + 3, ur.end.y - 3 - fh2), Vector2(ur.size.x - 6, fh2)), Color(col, 0.30 if bond < 1.0 else 0.45), 9)
-	var plan := String(ri.get("plan", ""))
-	var flash_age: float = H.m.time - float(p.get_meta("bond_flash_at", -9.0))
-	var gl := 1.0 - flash_age / BOND_FLASH_S
-	if gl > 0.0:
-		H._rounded(ur.grow(RING_GROW + 3.0), Color(1.0, 0.85, 0.3, 0.25 * gl), 14, Color(1.0, 0.85, 0.3, 0.9 * gl), 3)
-	if bond < 1.0:
-		_ring(H, ur.grow(RING_GROW), bond, col, 3.0)
-		if cd_left <= 0.0:
-			_chip(H, ur, "%d%%" % int(bond * 100.0), Color(col, 0.95))
-	else:
-		var pulse2 := 0.5 + 0.5 * sin(H.m.time * 6.0)
-		_ring(H, ur.grow(RING_GROW), 1.0, Color(col, 0.55 + 0.45 * pulse2), 3.0 + pulse2)
-		if cd_left <= 0.0:
-			_chip(H, ur, {"merge": "MERGE", "leap": "MERGE", "surge": "SURGE", "far": "TOO FAR", "rescue": "RESCUE"}.get(plan, "MERGE"), col if plan not in ["far", "rescue"] else DOWN_COL)
+	var ml: Dictionary = p.merge_st
+	var left := clampf(float(ml["t"]) / maxf(0.1, float(ml["T"])), 0.0, 1.0)
+	var ready_ult := bool(ri.get("ready", false)) and String(ri.get("plan", "")) == "ult"
+	var pl := 0.5 + 0.5 * sin(H.m.time * 8.0)
+	_ring(H, ur.grow(RING_GROW), left, Color("fff4c0").lerp(col, pl * 0.6) if ready_ult else Color("fff4c0"), 4.0 if ready_ult else 3.0)
+	var form_name := String((ml.get("form", {}) as Dictionary).get("name", "MERGED")).to_upper()
+	var chip := form_name
+	if ready_ult:
+		chip = String(ri.get("name", "ULT")).to_upper()
+	elif String(ri.get("plan", "")) == "ult" and not bool(ri.get("ulting", false)):
+		chip = "ULT %.1fs" % cd_left
+	var wl := MergeAugment.warn_left(p)
+	if wl > 0.0:
+		# the last seconds of the window: the slot flashes and the chip counts down
+		var fl := 0.5 + 0.5 * sin(H.m.time * (10.0 + (3.0 - minf(wl, 3.0)) * 4.0))
+		H._rounded(ur.grow(RING_GROW + 2.0 + fl * 3.0), Color(col, 0.18 * fl), 14, Color(1.0, 0.4, 0.3, 0.5 + 0.5 * fl), 3)
+		chip = "ENDS %.1fs" % wl
+	_chip(H, ur, chip, Color(1.0, 0.5, 0.4) if wl > 0.0 else col)
 
 ## A slot the Merge makes stronger: a ring and a small badge (the Boki's first letter) in the form's colour.
 ## slot: "lmb" | "rmb" | "e" | "dash". Nothing outside a live Merge.
@@ -155,7 +132,7 @@ static func _ring(H, r: Rect2, frac: float, col: Color, width: float) -> void:
 	if out.size() >= 2:
 		H.c.draw_polyline(out, col, width, true)
 
-## The one line of text over the R slot (bond %, MERGE, the ultimate's name, the form), centred above it.
+## The one line of text over the Merge box while merged (the ultimate's name, its unlock seconds, the form), centred above it.
 static func _chip(H, ur: Rect2, text: String, col: Color) -> void:
 	var tw: float = H.big.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x + 12.0
 	var btr := Rect2(Vector2(ur.get_center().x - tw * 0.5, ur.position.y - CHIP_LIFT), Vector2(tw, 14))

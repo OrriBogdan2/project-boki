@@ -25,11 +25,15 @@ const T := {
 	"speed_medium":            ["~", [4.4, 4.9], "m/s", "[game data] per hunter"],
 	"speed_heavy":             ["~", [4.4, 4.9], "m/s", "[game data] per hunter"],
 	"jump_input_frames":       ["<=", 1.0, "frames", "press to lift-off, same sim step"],
-	"jump_apex":               ["~", [1.2, 1.6], "m", "[est] one terrace (World.LEVEL) + mantle reach"],
-	"jump_airtime":            ["<=", 0.60, "s", "[est] tight arc (FeelConfig jump ~0.6s)"],
+	"jump_apex":               ["~", [1.2, 1.6], "m", "[game data] 1.9m; under 1.6 so jump + mantle stays below 4 terraces"],
+	"jump_airtime":            ["~", [0.85, 1.05], "s", "[game data] JumpZVelocity 750 at gravity 1470 uu/s2: 1.02s"],
+	"air_carry_m":             [">=", 3.0, "m", "[game data] FallingLateralFriction 0.375: the run-up carries"],
+	"air_reverse_t":           ["~", [0.4, 0.75], "s", "[game data] AirControl 0.015, translated: steerable in one jump"],
 	"coyote_frames":           [">=", 6.0, "frames", "FeelConfig coyote_time 0.1s (walked off a rim over the void)"],
 	"jump_buffer_frames":      [">=", 7.0, "frames", "FeelConfig jump_buffer 0.12s (7 steps)"],
-	"freefall_1s_depth":       ["~", [7.5, 9.0], "m", "[footage] 1s off an edge is ~8m deep (SUPERVIVE_FEEL)"],
+	"freefall_1s_depth":       ["~", [6.8, 8.0], "m", "[game data] gravity 1470 uu/s2, cap 1200 uu/s: 7.1m"],
+	"abyss_fall_vy_deep":      ["~", [10.0, 10.8], "m/s", "[game data] AbyssFallSlowSpeedLimit 12 to 10 m/s"],
+	"abyss_fall_t":            [">=", 1.8, "s", "[game data] off the lip to AbyssHeight (17.5m) in ~2s"],
 	"glide_open_press_frames": ["<=", 1.0, "frames", "[wiki/guide] hold jump in the air to glide; a second press opens at once"],
 	"glide_open_hold_s":       ["<=", 0.12, "s", "tap/hold split for Space; a tap is ~0.1s"],
 	"glide_open_button_frames": ["<=", 1.0, "frames", "dedicated glide button: no tap/hold ambiguity"],
@@ -39,14 +43,18 @@ const T := {
 	"glide_turn90_t":          ["<=", 0.30, "s", "responsive steering [est]"],
 	"glide_reverse_t":         ["<=", 0.45, "s", "brake by steering against heading [est]"],
 	"glide_brake_ratio":       ["<=", 0.80, "x", "steering against heading brakes momentum (speed vs letting go)"],
+	"glide_high_sink":         ["~", [3.3, 3.6], "m/s", "[game data] GlideDownwardForce: above 8.5m"],
+	"glide_swoop_speed":       [">=", 10.5, "m/s", "[game data] SwoopSpeedTransferRatio 2.5"],
+	"glide_swoop_faded":       ["<=", 10.0, "m/s", "[game data] SwoopSpeedFadeTime 1.5s, then the usual bleed"],
 	"dashglide_open_speed":    [">=", 12.0, "m/s", "[wiki] gliding right after a lateral impulse keeps momentum and increases glide speed"],
 	"dashglide_1s_speed":      [">=", 10.5, "m/s", "[wiki] momentum preserved while gliding"],
 	"dashglide_2s_speed":      [">=", 9.0, "m/s", "[wiki] momentum preserved while gliding"],
 	"dashglide_reopen_frames": ["<=", 1.0, "frames", "glider is back the step the dash ends while glide is held"],
 	"reglide_frames":          ["<=", 1.0, "frames", "glide-cancel then re-hold reopens at once"],
 	"abyss_lift_t":            ["<=", 1.0, "s", "[footage] back at island level (balloon line, 0.5m under the lip) ~1s after opening 4m deep"],
-	"abyss_kill_depth":        [">=", 12.0, "m", "[footage] ~1.5s of free fall before it's fatal (FeelConfig abyss_death_depth note); owner: 'needs to be a bit lower'"],
-	"abyss_recover_depth":     [">=", 11.0, "m", "deepest a terminal fall can open the glider and still lift back to the lip"],
+	"abyss_bounce_m":          [">=", 1.5, "m", "[est] a bouncy lift from 6m deep"],
+	"abyss_kill_depth":        ["~", [17.0, 18.0], "m", "[game data] AbyssHeight -1750 uu: 17.5m under ground level"],
+	"abyss_recover_depth":     [">=", 15.0, "m", "deepest a terminal fall can still glide out"],
 	"abyss_tint_lip":          ["<=", 0.02, "", "no tint gliding at island level"],
 	"abyss_tint_half":         [">=", 0.6, "", "[footage] tint deepens as you sink; owner: unmistakable early"],
 	"abyss_tint_end":          [">=", 0.95, "", "full dark/red right before the point of no return"],
@@ -110,7 +118,7 @@ func _hv(h: Hunter) -> Vector2:
 	return Vector2(h.vel.x, h.vel.z)
 
 func _clear_inp() -> void:
-	for k in ["sec", "sig", "ult", "tonic", "kit", "gear1", "gear2", "glide", "glide_btn", "jump", "dash", "fire", "crouch", "throw", "reload", "skill", "swap"]:
+	for k in ["sec", "sig", "ult", "util1", "util2", "util3", "util4", "gear1", "gear2", "glide", "glide_btn", "jump", "dash", "fire", "crouch", "throw", "reload", "skill", "swap"]:
 		P.inp[k] = false
 	P.inp["move"] = Vector2.ZERO
 
@@ -170,6 +178,7 @@ func run(main: Node) -> void:
 	_jump()
 	_glide()
 	_dash_glide()
+	_plain_dash()
 	_abyss_updraft()
 	_feather()
 	_ledge()
@@ -246,6 +255,7 @@ func _jump() -> void:
 	rec("jump_input_frames", first)
 	rec("jump_apex", apex)
 	rec("jump_airtime", air)
+	_air_control()
 	# coyote time: step off over open air (the walk-off path sets coyote), press jump k frames later
 	var best := 0
 	var rim := _find_rim()
@@ -286,9 +296,28 @@ func _jump() -> void:
 	_steps(60)
 	rec("freefall_1s_depth", y0 - P.pos.y)
 
+## A running jump: let go at take-off (how far the run-up carries), or reverse the keys (how long the
+## turn takes in the air).
+func _air_control() -> void:
+	for mode in ["let_go", "reverse"]:
+		_reset(flat + Vector3(-3.0, 0, 0))
+		P.inp["move"] = Vector2(1, 0)
+		_steps(20)
+		var x0 := P.pos.x
+		P.inp["jump"] = true
+		P.inp["move"] = Vector2.ZERO if mode == "let_go" else Vector2(-1, 0)
+		var top := _hv(P).length()
+		var t_rev := 9.0
+		for i in 90:
+			m.step(DT)
+			if t_rev > 8.0 and P.vel.x <= -0.9 * top: t_rev = (i + 1) * DT
+			if P.grounded and i > 2: break
+		if mode == "let_go": rec("air_carry_m", P.pos.x - x0)
+		else: rec("air_reverse_t", t_rev)
+
 # ---------------------------------------------------------------- glide
 func _glide_at(h: float) -> void:
-	_reset(flat + Vector3(0, h, 0), false)
+	_reset(flat + Vector3(0, minf(h, HunterMove.glide_height - 0.3), 0), false)
 
 func _glide() -> void:
 	# a second press in the air opens the glider
@@ -321,7 +350,7 @@ func _glide() -> void:
 		if fb < 0 and P.gliding: fb = i + 1
 	rec("glide_open_button_frames", fb)
 	# open at terminal fall speed: how fast the canopy catches you
-	_reset(flat + Vector3(0, 40.0, 0), false)
+	_reset(flat + Vector3(0, 16.0, 0), false)
 	_steps(60)
 	P.inp["jump"] = true
 	var tc := -1.0
@@ -368,6 +397,7 @@ func _glide() -> void:
 			m.step(DT)
 		sp.append(maxf(0.0, P.vel.x))
 	rec("glide_brake_ratio", float(sp[1]) / maxf(0.01, float(sp[0])))
+	_glide_high()
 	# cancel and re-glide by holding again
 	_glide_at(25.0)
 	P.inp["jump"] = true
@@ -381,6 +411,29 @@ func _glide() -> void:
 		m.step(DT)
 		if fr < 0 and P.gliding: fr = i + 1
 	rec("reglide_frames", fr)
+
+## Gliding high over flat ground: pulled down to the height target, and the swoop becomes speed.
+func _glide_high() -> void:
+	_reset(flat + Vector3(0, HunterMove.glide_height + 8.0, 0), false)
+	P.inp["jump"] = true
+	var sink := 0.0
+	var swoop := 0.0
+	var t_low := -1.0
+	var faded := 0.0
+	for i in 600:
+		P.inp["glide"] = true
+		P.inp["move"] = Vector2(1, 0)
+		m.step(DT)
+		if i == 60: sink = -P.vel.y
+		if t_low < 0.0 and P.pos.y - flat.y <= HunterMove.glide_height:
+			t_low = i * DT
+			swoop = _hv(P).length()
+		if t_low > 0.0 and absf(i * DT - t_low - 2.0) < DT * 0.5:
+			faded = _hv(P).length()
+			break
+	rec("glide_high_sink", sink)
+	rec("glide_swoop_speed", swoop)
+	rec("glide_swoop_faded", faded)
 
 # ---------------------------------------------------------------- dash into glide
 func _dash_glide() -> void:
@@ -415,6 +468,26 @@ func _dash_glide() -> void:
 # ---------------------------------------------------------------- abyss lift, updrafts
 var _rim := {}
 ## A rim tile with open sky beyond it: {at: ground point, dir: outward}.
+## Owner rule: explosions are for blasts that do something. A plain dash on the ground and one in the air spawn
+## no particle burst and no ring (Fx.radial), only a dust puff and after-images.
+func _plain_dash() -> void:
+	var biomes := m.biomes
+	m.biomes = null          # (the map's own hazards spark and ring on their own clock)
+	for airborne in [false, true]:
+		_reset(flat + Vector3(0, 2.0 if airborne else 0.0, 0), not airborne)
+		var radial0: int = m.fx.radial
+		P.inp["move"] = Vector2(1, 0)
+		P.inp["dash"] = true
+		var dashed := false
+		for i in 30:
+			m.step(DT)
+			P.inp["dash"] = false
+			dashed = dashed or P.roll_t > 0.0
+		var spawned: int = m.fx.radial - radial0
+		var where := "air" if airborne else "ground"
+		ok(dashed and spawned == 0, "a plain %s dash spawns no burst or ring (%d)" % [where, spawned])
+	m.biomes = biomes
+
 func _find_rim() -> Dictionary:
 	if not _rim.is_empty(): return _rim
 	var edge := {}
@@ -451,6 +524,15 @@ func _abyss_updraft() -> void:
 			if tl < 0.0 and P.pos.y >= lip - 0.6: tl = (i + 1) * DT
 			if P.out: break
 		rec("abyss_lift_t", tl if tl > 0.0 else 9.0)
+		_reset(Vector3(g.x + d.x * 4.0, g.y - 6.0, g.z + d.y * 4.0), false)
+		P.last_gy = g.y
+		P.vel.y = -8.0
+		var bounce := -9.0
+		for i in 100:
+			P.inp["glide"] = true
+			m.step(DT)
+			bounce = maxf(bounce, P.pos.y - lip)
+		rec("abyss_bounce_m", bounce)
 		_abyss_depths(g, d)
 	if w.updrafts.is_empty():
 		print("MFEEL (no updrafts on this map, skipped)")
@@ -485,7 +567,7 @@ func _abyss_depths(g: Vector3, d: Vector2) -> void:
 	var dd := 3.0
 	while dd <= 20.0:
 		_reset(Vector3(out.x, lip - dd, out.z), false); P.last_gy = g.y
-		P.vel.y = -Hunter.TERMINAL
+		P.vel.y = -HunterMove.fall_max
 		P.inp["jump"] = true
 		var okk := false
 		var y0 := P.pos.y
@@ -499,6 +581,20 @@ func _abyss_depths(g: Vector3, d: Vector2) -> void:
 		best = dd
 		dd += 0.5
 	rec("abyss_recover_depth", best)
+	# step off the lip and fall: the slow-fall band, and how long until the point of no return
+	_reset(Vector3(out.x, lip - 0.6, out.z), false)
+	P.last_gy = g.y
+	var kill_y := _kill_y()
+	var t_fall := 0.0
+	var vy_deep := 0.0
+	for i in 300:
+		var yb := P.pos.y
+		m.step(DT)
+		if P.out or P.pos.y - yb > 2.0 or P.pos.y < kill_y: break
+		t_fall += DT
+		if lip - P.pos.y <= HunterMove.abyss_slow_to: vy_deep = -P.vel.y
+	rec("abyss_fall_vy_deep", vy_deep)
+	rec("abyss_fall_t", t_fall)
 	var fx_path := "res://scripts/match/abyss_fx.gd"
 	if not ResourceLoader.exists(fx_path):
 		print("MFEEL (no AbyssFx on this build: danger tint not measured)")

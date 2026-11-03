@@ -15,6 +15,8 @@ const READY_FLASH := 0.35      # s: the ring when a slot comes back
 const DENY_T := 0.35           # s: the red shake when a press can't go
 const POP_T := 0.3             # s: the pop when a press lands
 
+static var shown_keys := {}    # slot id -> the key cap last drawn under it (checks read it)
+
 ## The countdown as shown: whole seconds from 1s up, tenths under it.
 static func cd_text(secs: float) -> String:
 	return str(int(ceil(secs))) if secs >= 1.0 else "%.1f" % secs
@@ -66,6 +68,7 @@ static func ab_slot(H, id: String, rect: Rect2, icon: String, key: String, col: 
 			c.draw_rect(pr, col if i < charges else Color(1, 1, 1, 0.18))
 	if label != "":
 		HudStyle.ctext(c, Vector2(ctr.x, rect.position.y - 6), label, 11, Color(HudStyle.INK, 0.85), 3, HudStyle.BODY)
+	shown_keys[id] = key
 	if key != "": HudStyle.key_pill(c, Vector2(ctr.x, rect.end.y), key, col if ready else HudStyle.MUTED)
 	if deny > 0.0:
 		H._rounded(rect, Color(0.9, 0.15, 0.1, 0.22 * deny), HudStyle.SLOT_RAD, Color(1.0, 0.35, 0.3, deny), 3)
@@ -78,6 +81,31 @@ static func ab_slot(H, id: String, rect: Rect2, icon: String, key: String, col: 
 		H._rounded(rect.grow(2.0 + k * 8.0), Color(0, 0, 0, 0), HudStyle.SLOT_RAD + 2, Color(col, 1.0 - k), 3)
 	if sfx_d.get("kind", "") == "reset":
 		ResetPop.draw(c, rect, col, float(sfx_d["t"]))
+
+## A locked slot: the dimmed icon under a padlock and the key cap; "UNLOCK" in gold when a point can open it
+## (`can`), else `tag` (when it opens, "" for none) on a pill over the slot. `id` names it in shown_keys.
+static func locked(H, id: String, r: Rect2, icon: String, col: Color, key: String, can: bool, tag: String) -> void:
+	var c: CanvasItem = H.c
+	var pulse := 0.5 + 0.5 * sin(float(H.m.time) * 5.0)
+	HudStyle.slot_frame(c, r, HudStyle.GOLD, "ready" if can else "off")
+	if can:
+		var glow := Color(1.0, 0.82, 0.48, 0.25 + 0.4 * pulse)
+		H._rounded(r.grow(2.0 + pulse * 2.0), Color(0, 0, 0, 0), HudStyle.SLOT_RAD + 2, glow, 2)
+	var icol := Color(col.lerp(HudStyle.MUTED, 0.5), 0.45 if can else 0.22)
+	Icons.draw(c, icon, r.get_center() + Vector2(0, -2), r.size.x * 0.25, icol)
+	var lc := r.get_center() + Vector2(0, 4)
+	var lcol := HudStyle.GOLD if can else Color(HudStyle.MUTED, 0.85)
+	c.draw_arc(lc + Vector2(0, -6), 5.0, PI, TAU, 12, lcol, 2.0, true)
+	H._rounded(Rect2(lc + Vector2(-7, -6), Vector2(14, 11)), lcol, 3)
+	if can:
+		HudStyle.ctext(c, Vector2(r.get_center().x, r.position.y - 7), "UNLOCK", 10, HudStyle.GOLD, 3)
+	elif tag != "":
+		var tw := HudStyle.BIG.get_string_size(tag, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x + 12.0
+		var tr := Rect2(Vector2(r.get_center().x - tw * 0.5, r.position.y - 17), Vector2(tw, 14))
+		H._rounded(tr, HudStyle.KEY_BG, 5, Color(HudStyle.MUTED, 0.7), 1)
+		HudStyle.ctext(c, Vector2(r.get_center().x, tr.end.y - 3), tag, 10, Color(HudStyle.INK, 0.9), 0)
+	shown_keys[id] = key
+	HudStyle.key_pill(c, Vector2(r.get_center().x, r.end.y), key, lcol if can else Color(HudStyle.MUTED, 0.6))
 
 ## The part of a slot still cooling: a slice from 12 o'clock, clockwise, cut to the slot's square so
 ## it never spills past the frame.
@@ -109,28 +137,8 @@ static func skill_slot(H, slot: String, id: String, r: Rect2, icon: String, key:
 		var sfx_d: Dictionary = H.slot_fx.get(id, {})
 		if not sfx_d.is_empty() and sfx_d["kind"] == "deny":
 			r.position.x += sin(float(sfx_d["t"]) * 70.0) * 5.0 * clampf(1.0 - float(sfx_d["t"]) / DENY_T, 0.0, 1.0)
-		var pulse := 0.5 + 0.5 * sin(t * 5.0)
-		HudStyle.slot_frame(c, r, HudStyle.GOLD, "ready" if can else "off")
-		if can:
-			var glow := Color(1.0, 0.82, 0.48, 0.25 + 0.4 * pulse)
-			H._rounded(r.grow(2.0 + pulse * 2.0), Color(0, 0, 0, 0), HudStyle.SLOT_RAD + 2, glow, 2)
-		var icol := Color(col.lerp(HudStyle.MUTED, 0.5), 0.45 if can else 0.22)
-		Icons.draw(c, icon, r.get_center() + Vector2(0, -2), r.size.x * 0.25, icol)
-		# a small padlock
-		var lc := r.get_center() + Vector2(0, 4)
-		var lcol := HudStyle.GOLD if can else Color(HudStyle.MUTED, 0.85)
-		c.draw_arc(lc + Vector2(0, -6), 5.0, PI, TAU, 12, lcol, 2.0, true)
-		H._rounded(Rect2(lc + Vector2(-7, -6), Vector2(14, 11)), lcol, 3)
-		if can:
-			HudStyle.ctext(c, Vector2(r.get_center().x, r.position.y - 7), "UNLOCK", 10, HudStyle.GOLD, 3)
-		elif slot == "ult":
-			# R: a tag over the slot saying when it opens, so it never reads as just on cooldown
-			var lt: String = H.r_lock_text(p)
-			var tw := HudStyle.BIG.get_string_size(lt, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x + 12.0
-			var tr := Rect2(Vector2(r.get_center().x - tw * 0.5, r.position.y - 17), Vector2(tw, 14))
-			H._rounded(tr, HudStyle.KEY_BG, 5, Color(HudStyle.MUTED, 0.7), 1)
-			HudStyle.ctext(c, Vector2(r.get_center().x, tr.end.y - 3), lt, 10, Color(HudStyle.INK, 0.9), 0)
-		HudStyle.key_pill(c, Vector2(r.get_center().x, r.end.y), key, lcol if can else Color(HudStyle.MUTED, 0.6))
+		# R: a tag over the slot saying when it opens, so it never reads as just on cooldown
+		locked(H, id, r, icon, col, key, can, H.r_lock_text(p) if slot == "ult" else "")
 		return
 	ab_slot(H, id, r, icon, key, col, cdf, cds, ready, ch, mx)
 	# rank pips above the slot

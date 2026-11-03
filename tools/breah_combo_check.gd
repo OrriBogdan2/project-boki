@@ -232,6 +232,24 @@ func _breah() -> void:
 	P.inp["jump"] = false
 	P.inp["move"] = Vector2.ZERO
 	ok("rock: jump into a rock and you climb onto it", climbed[0], "y %.2f top %.2f" % [P.pos.y, top])
+	# data pass: an ally can hop onto your rocks too (the rock is a low wall for everyone)
+	var A: Hunter = m.make_hunter(
+		"Ally", P.team, "medium", "Ally", "idle", {}, Vector3(home.x, home.y, home.z + 2.0), {"arch": "none"}
+	)
+	A.max_hp = 10000.0
+	A.hp = A.max_hp
+	P.teleport(home + Vector3(0, 0, -6.0))
+	var a_climbed := [false]
+	step(m, 0.8, func(): A.inp["move"] = Vector2(tgt.x - A.pos.x, tgt.z - A.pos.z).normalized())
+	A.inp["jump"] = true
+	step(m, 0.9, func():
+		A.inp["move"] = Vector2(tgt.x - A.pos.x, tgt.z - A.pos.z).normalized()
+		if A.grounded and A.pos.y > top - 0.05: a_climbed[0] = true)
+	A.inp["jump"] = false
+	A.inp["move"] = Vector2.ZERO
+	ok("data: an ally jumping into your rock climbs onto it", a_climbed[0], "y %.2f top %.2f" % [A.pos.y, top])
+	A.queue_free()
+	m.hunters.erase(A)
 	# ---- punch along the row: every rock flies, one after another (Rocksweeping)
 	reset.call()
 	K.use_e()
@@ -413,7 +431,7 @@ func _breah() -> void:
 		apk > apk1 and absf(d_l10 / maxf(0.01, d_l1) - apk / apk1) < 0.02,
 		"lvl1 %.2f lvl10 %.2f ap %.2f/%.2f" % [d_l1, d_l10, apk1, apk]
 	)
-	# a knock resets it
+	# data pass: a knock does not reset it (Volcano Crusher has no reset)
 	reset.call()
 	T.teleport(home + Vector3(2.4, 0, 0))
 	aim_at(P, T.pos)
@@ -421,8 +439,9 @@ func _breah() -> void:
 	tap(m, P)
 	step(m, 0.5)
 	ok(
-		"combo: a slam that knocks resets Quakefall",
-		K.qf_resets >= 1 and float(K.cd["rmb"]) <= 0.0 and K.ch_rmb >= 1.0, "resets %d" % K.qf_resets
+		"data: a slam that knocks does not reset Quakefall",
+		T.hp < 10.0 and float(K.cd["rmb"]) > 1.0 and K.ch_rmb < 1.0,
+		"cd %.2f charges %.2f" % [float(K.cd["rmb"]), K.ch_rmb]
 	)
 	# the dunk
 	reset.call()
@@ -434,6 +453,50 @@ func _breah() -> void:
 	ok(
 		"rmb: a foe in the air is dunked", K.dunks == dn0 + 1 and T.vel.y < -10.0,
 		"dunks %d vy %.1f" % [K.dunks, T.vel.y]
+	)
+	# ---- data pass: Landslide is 12s with one charge; Molten Guard is the base passive
+	ok(
+		"data: the leap rests 12s per charge and starts with one charge (a second at rank 3)",
+		absf(float(K.dash_def()["cd"]) - 12.0) < 0.01 and P.max_dashes() == 1.0 and absf(P.dash_regen() - 12.0) < 0.01,
+		"cd %.1f charges %.0f regen %.1f" % [float(K.dash_def()["cd"]), P.max_dashes(), P.dash_regen()]
+	)
+	reset.call()
+	K.use_e()
+	step(m, 0.3)
+	var rsg := rocks(m)
+	var gx := K.rock_mid(rsg[1]).x if rsg.size() > 1 else home.x + 3.4
+	var gz := K.rock_mid(rsg[0]).z if not rsg.is_empty() else home.z
+	P.teleport(Vector3(gx - 0.25, home.y, gz - 1.6))
+	P.vel = Vector3.ZERO
+	T.teleport(Vector3(gx, home.y, gz + 14.0))
+	aim_at(P, Vector3(gx - 0.25, home.y, gz + 10.0))
+	P.fire_cd = 0.0
+	P.shield = 0.0
+	K.shield_stacks = 0
+	var gp0 := K.guard_punches
+	P.inp["fire"] = true
+	step(m, 0.95, func(): P.inp["fire"] = true)
+	P.inp["fire"] = false
+	step(m, 0.3)
+	ok(
+		"data: punching your own rocks gives a Molten Guard shield (one stack of 18 per punch, rank 1)",
+		K.guard_punches == gp0 + 1 and K.shield_stacks == 1 and absf(P.shield - 18.0) < 0.5 and K.last_sweep >= 2,
+		"punches %d stacks %d shield %.1f swept %d" % [K.guard_punches - gp0, K.shield_stacks, P.shield, K.last_sweep]
+	)
+	reset.call()
+	P.shield = 0.0
+	K.shield_stacks = 0
+	T.teleport(home + Vector3(2.4, 0, 0))
+	aim_at(P, T.pos)
+	P.fire_cd = 0.0
+	gp0 = K.guard_punches
+	P.inp["fire"] = true
+	step(m, 0.95, func(): P.inp["fire"] = true)
+	P.inp["fire"] = false
+	step(m, 0.3)
+	ok(
+		"data: a punch with no rock of yours in the lane gives no shield",
+		K.guard_punches == gp0 and K.shield_stacks == 0 and P.shield < 0.5, "shield %.1f" % P.shield
 	)
 	# ---- Rubble Leap: the rock bursts up, she leaps to the cursor, lands with a crash, the rock follows
 	await _leap(m, P, T, home, K, reset)
@@ -457,6 +520,20 @@ func _breah() -> void:
 	ok(
 		"rank 3: slamming a foe gives a Molten Guard shield", P.shield >= 17.0 and K.shield_stacks >= 1,
 		"shield %.0f" % P.shield
+	)
+	ok(
+		"data rank 3: a second leap charge, recharging in 8.4s (12s x 0.7 on the shared rank step)",
+		P.max_dashes() == 2.0 and absf(P.dash_regen() - 8.4) < 0.05,
+		"charges %.0f regen %.2f" % [P.max_dashes(), P.dash_regen()]
+	)
+	reset.call()
+	aim_at(P, home + Vector3(30.0, 0, 0))
+	P.ak.on_dash(false)
+	step(m, 0.9)
+	var far3 := float(K.dash_def()["dist"]) * float(K.dash_feel()["dist"]) * float(K.dash_def()["speed_k"])
+	ok(
+		"data rank 3: the leap goes a third further", absf(P.pos.x - home.x - far3) < 0.4,
+		"%.2f want %.2f" % [P.pos.x - home.x, far3]
 	)
 	reset.call()
 	T.teleport(home + Vector3(5.0, 0, 2.7))

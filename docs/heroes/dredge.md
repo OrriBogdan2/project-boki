@@ -11,7 +11,9 @@ Sources (gameplay facts only, written in our own words):
 - Owner notes: E in the air smashes straight down with the anchor (sync61 playtest); the grab goes through rocks (Nov 2 relay).
 
 ## Scaling
-Source hero 1531 HP against our heavy 193 HP: damage about x0.13. Numbers follow the source's ratios, not its raw values:
+Source hero 1531 HP against our heavy 193 HP: damage about x0.13. The data pass (SERVER_UPDATE7, owner's tooltip data) copies
+durations and counts as they are (the 0.2s stun step, the 50% cooldown cut, the +100% over the abyss) and leaves the damage
+and cooldown numbers that already follow the ratios below. Numbers follow the source's ratios, not its raw values:
 - the gun fires every 0.5s (the footage and card), with each slug's damage halved so the damage per second holds;
 - the Anchor hits about 1.8x a point-blank volley (25 vs 7 x 2 = 14), stuns about 1.1s (the footage shows 1.2-1.4s);
 - cooldowns keep the source's order and ratios: Grapnel 12s : Anchor 7s : Barge 5s per charge (3 charges at 10s, chained a beat apart).
@@ -20,15 +22,18 @@ Source hero 1531 HP against our heavy 193 HP: damage about x0.13. Numbers follow
 | Slot | Input | What it does (ours) | Source behaviour | Difference and why |
 |---|---|---|---|---|
 | Passive, Salvage | none | Knocks and assists stack Salvage (+2.5% health each, max 10); being downed costs one; hits on a hunter's back +50%; a knock heals 16% | stacks of max health per knock/assist, lose one on death, +50% backstab, heal on knock | heal as a share of health |
-| LMB, scattergun | hold/tap | 7 slugs in a 30 degree fan (bloom to +15) that stop at 6.3m and hang there as violet dots for 0.3s; a shot every 0.5s; while firing the spread's two edge lines lie on the ground, idle one aim line to the cursor; the body rocks back each shot; the barge resets the bloom | 7 slugs, sharp bloom, a fixed stop range, cone edge lines and an idle aim line (footage), 0.5s | the no-spread armour bonus is not reproduced |
-| RMB, Grapnel | tap | a braided rope-hook 11.5m to the first foe: it flies over rocks and props and drags the foe over them (a cliff face or a placed wall still stops it); the foe is stunned and reeled to your feet (11 m/s, up to 3s) with weight, so strafing swings them round you; you are Grounded while you reel (no jump or glide, the barge still works); they land Grounded 1s. It also catches an ally (reeled in to safety) and scoops up wisps on the way. 12s | the arm pierces terrain, grabs the first target (enemy or ally), physics pull that swings, grounds on arrival, scoops wisps, only dash castable | heavy bodies (wardens) can't be pulled; cliffs stop it (see Assumptions) |
-| Shift, Barge | tap | a quick, short shoulder barge toward the cursor (3.2m in 0.16s before the global dash feel, about 2.7m in 0.18s after it; 3 charges at 10s that chain 0.22s apart): a red spiky burst and an ember scorch where it sets off, shoves for 5; in the air (the class air dash) it goes 35% further; turn limited to 35 degrees for 0.8s after the Anchor | ground and air dash with separate cooldowns, further in the air, turn limit after the slam | one pool of ground charges plus the class air dash |
-| E, Anchor Drop | tap | on the ground: the fist hauled back, a hop a body length forward, the slam at 0.38s: a giant ghost anchor drops on the 3m cone in front, a crescent sweep, dust: 25 damage, stun 1.1s, slammed down and Grounded. In the air: you smash straight down at once with the anchor falling beside you, a landing ring shows, and the 3.2m ring hits at the landing with up to +50% damage by the height fallen (+75% at rank 3). 7s | fist slam: damage, stun, ground slam, pushes you down (not over the abyss), rank 4 height damage | owner note: the air cast is a straight-down smash |
+| LMB, scattergun | hold/tap | 7 slugs in a 30 degree fan (bloom to +15) that stop at 6.3m and hang there as violet dots for 0.3s; a shot every 0.5s; while firing the spread's two edge lines lie on the ground, idle one aim line to the cursor; the body rocks back each shot; the barge resets the bloom only at dash rank 3 | 7 slugs, sharp bloom, a fixed stop range, cone edge lines and an idle aim line (footage), 0.5s | the no-spread armour bonus is not reproduced |
+| RMB, Grapnel | tap | a braided rope-hook 11.5m to the first foe: it pierces terrain (rocks, props and cliff faces) and drags the foe over it (only a placed wall stops it); the foe is stunned and reeled to your feet (11 m/s, up to 3s) with weight, so strafing swings them round you; you are Grounded while you reel (no jump or glide, the barge still works). Rank 3: a foe it hits takes half the cooldown off. It also catches an ally (reeled in to safety) and scoops up wisps on the way. 12s | the arm pierces terrain, grabs the first target (enemy or ally), physics pull that swings, scoops wisps, only dash castable; rank 4: -50% cooldown on an enemy hit | heavy bodies (wardens) can't be pulled; a placed wall stops it |
+| Shift, Barge | tap | a quick, short shoulder barge toward the cursor (3.2m in 0.16s before the global dash feel, about 2.7m in 0.18s after it; 3 charges at 10s that chain 0.22s apart): a red spiky burst and an ember scorch where it sets off, shoves foes without damage; in the air (the class air dash) it goes 35% further; turn limited to 35 degrees for 0.8s after the Anchor | ground and air dash with separate cooldowns, further in the air, turn limit after the slam | one pool of ground charges plus the class air dash |
+| E, Anchor Drop | tap | on the ground: the fist hauled back, a hop a body length forward, the slam at 0.38s: a giant ghost anchor drops on the 3m cone in front, a crescent sweep, dust: 25 damage, stun 1.1s, slammed down and Grounded. In the air: you smash straight down at once with the anchor falling beside you, a landing ring shows, and the 3.2m ring hits at the landing with up to +50% damage by the height fallen (owner note). Rank 3: double damage on a foe over the abyss and +0.2s stun more. 7s | fist slam: damage, stun, ground slam, pushes you down (not over the abyss), dunks foes over the abyss; rank 4: +100% damage vs foes over the abyss and +0.2s stun | owner note: the air cast is a straight-down smash with a height bonus (the source's rank 4 height bonus stays base) |
 | X, Brass Broadside (ult, level 6) | tap | planted for a 1.1s charge while a 105 degree, 5.9m fan grows on the ground in front (everyone sees it; it is the exact area, locked at the press), then two waves 0.6s apart of six heavy brass slugs each (real shots): 4 a slug and Anti-Heal 3s. Point blank all twelve land, at 4.6m two a wave. A stun in the charge stops it (back in 8s). 21s | one press, two waves 0.6s apart, 6 slugs each with Anti-Heal, a fan telegraph, planted | 4 a slug, no back bonus: the burst cap (see Ult) |
 | R | | the Boki Merge (not a hero ability) | | |
 
-Rank 2 / 3: -10% cooldown steps (barge -15%); Grapnel rank 3 refunds 33% on a foe hit; barge rank 3: pellet hits trim 0.25s off
-the recharge; Anchor +15% damage and +0.1s stun per rank, rank 3 raises the air smash's height bonus to +75%.
+Rank 2 / 3: -10% cooldown steps (barge -15%). Rank 3 specials follow the source's last tier: the Grapnel takes half its
+cooldown off when it hits a foe; the barge's pellet hits trim 0.25s off the recharge and a dash resets the gun's spread; the
+Anchor does double damage on a foe over the abyss and adds 0.2s of stun (on top of its +15% damage and +0.1s stun a rank).
+Mismatch: the source's tiers 2 and 3 are each -2.5s on the Grapnel (-1.25s on the barge, -2.5s +20% damage +0.1s stun on the
+Anchor), and ours has one shared step, so rank 3 stands for the source's tiers 3 and 4 together.
 
 ## Ultimate on X: Brass Broadside
 Built as its own ultimate on X (owner decision, SERVER_UPDATE6). It was never folded into another slot, so nothing is unfolded.
@@ -43,20 +48,20 @@ Built as its own ultimate on X (owner decision, SERVER_UPDATE6). It was never fo
 ## Small mechanics
 | Mechanic | Ours | Source | Footage |
 |---|---|---|---|
-| The grab pierces terrain and drags the target over it | built for rocks and props; cliff faces stop it | [wiki](https://supervive.wiki.gg/wiki/Kingpin), owner | yes (0141, 0147) |
+| The grab pierces terrain and drags the target over it | built for rocks, props and cliff faces (a placed wall still stops it) | owner data, [wiki](https://supervive.wiki.gg/wiki/Kingpin), owner | yes (0141, 0147) |
 | The grab takes the first target, enemy or ally; an ally is pulled to safety | built | [wiki](https://supervive.wiki.gg/wiki/Kingpin), [guide](https://deltiasgaming.com/?p=298298) | no |
 | The pull follows physics: a target you don't let reach you swings round you | built (weighted reel; strafing shifts the arrival 1.5m+) | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | partly (0147: the pull follows the hunter) |
 | The pull lasts until arrival or 3s | built | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | yes |
 | It scoops up wisps along its path | built (downed hunters it passes are reeled in too) | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | no |
 | Only the dash and the air dash can be used while pulling | built | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | no |
 | The caster is Grounded while reeling; the target is stunned for the pull | built | footage | yes (0127) |
-| Enemies are briefly Grounded on arrival | built | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | yes |
+| Enemies are briefly Grounded on arrival | not built (the owner's tooltip data has no such rule; the Anchor still grounds) | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | yes |
 | The dash goes further in the air and has its own cooldown there | built (class air dash x1.35) | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | no |
 | The slam then a dash limits the dash's turn | built (35 degrees for 0.8s) | [wiki](https://supervive.wiki.gg/wiki/Kingpin), patch 05.02.25 | no |
 | The slam pushes you down, never over the abyss | built (owner: the air cast smashes straight down) | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | no |
-| Height adds slam damage (rank 4 in the source) | built for every rank (+50%), +75% at rank 3 (owner note) | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | no |
-| The scattergun's accuracy drops sharply with each shot; the dash resets it | built | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | yes (0040 vs 0112) |
-| Rank 4 dash: pellet hits cut the dash recharge | built at rank 3 | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | no |
+| Height adds slam damage (rank 4 in the source) | built for every rank (+50%) (owner note); the rank-3 bonus is the abyss damage | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | no |
+| The scattergun's accuracy drops sharply with each shot; a dash resets it only at rank 4 | built (a dash resets it at rank 3) | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | yes (0040 vs 0112) |
+| Rank 4 dash: pellet hits cut the dash recharge, a dash resets the bloom | built at rank 3 | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | no |
 | Backstab +50% | built | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | no |
 | Bonus armour damage when fired without spread | not built (our armour rules differ) | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | no |
 | The ult is one press that fires two waves 0.6s apart, 6 slugs a wave | built | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | yes (ult 0034, 0040) |
@@ -69,9 +74,9 @@ Built as its own ultimate on X (owner decision, SERVER_UPDATE6). It was never fo
 
 ## Assumptions
 Where the footage and the wiki are silent, we picked the most likely behaviour (the owner can correct these):
-- "Through terrain" means rocks, trees and props: the hook flies over them and the body is hauled up and over to the first clear spot
-  beyond. A cliff face (a rise past 1.2m) and a placed ability wall stop the hook and the reel ("SNAGGED" / "WALLED"), because a body
-  can't be dragged up a cliff in our world. The abyss is not special: a body dragged over it falls (the knock rules).
+- "Through terrain" means rocks, trees, props and cliff faces: the hook flies through them and the body is hauled up and over
+  (lifted onto a cliff face, carried to the first clear spot past a rock). A placed ability wall still stops the hook and the reel
+  ("SNAGGED" / "WALLED"). The abyss is not special: a body dragged over it falls (the knock rules).
 - The reel can't be cancelled by the caster; he can walk and barge during it (walking is what swings the body).
 - The grab's hitbox is the hook's own size; with no target it flies its full 11.5m.
 - An ally caught by the hook is neither damaged, stunned nor Grounded; a wisp is pulled like an ally.
@@ -95,25 +100,27 @@ Where the footage and the wiki are silent, we picked the most likely behaviour (
 |---|---|---|
 | Hold the gun | a shot every 0.5s, the spread's edge lines out to 6.3m, the body rocks back; idle, one aim line | "gun: a shot every half second"; "gun: the spread's edge lines lie on the ground out to the slug range"; "gun: each shot rocks the body back (dr_shot)"; "gun: idle, the cone folds into one aim line" |
 | Grapnel hit | reel begins; you are Grounded, they are stunned; the braided rope shows | "grapnel: hooks the first foe, reel begins"; "reel: Dredge is Grounded while he reels, the foe is stunned"; "reel: the braided rope is drawn (through rocks)" |
-| Wait for the arrival | foe lands Grounded at your feet, "HAULED"; your Grounded ends | "grapnel: foe arrives and lands Grounded"; "reel: Dredge's own Grounded ends with the reel" |
+| Wait for the arrival | foe lands at your feet (not Grounded), "HAULED"; your Grounded ends | "grapnel: foe arrives at your feet and does not land Grounded"; "reel: Dredge's own Grounded ends with the reel" |
 | During the reel: RMB, E, the gun | denied (only the barge works) | "reel: a second Grapnel is denied"; "reel: E is denied while reeling"; "reel: the gun is locked" |
 | During the reel: barge | works; the reel continues | "reel: the barge still works" |
 | Reel, then Anchor Drop | the hop, the slam at ~0.38s: damage, a long stun with a spiral, Grounded | "anchor: hop about a body length forward, the slam lands at ~0.38s"; "combo: reel > Anchor Drop = damage, stun, Grounded"; "anchor: the stunned foe shows a stun spiral"; "anchor: E cooldown set" |
 | Anchor Drop, then barge within 0.8s | barge turns at most 35 degrees | "combo: Anchor > barge turns at most 35 degrees" |
-| Grapnel at a cliff face | the hook stops there, nobody is pulled | "cliff: a cliff face stops the hook, nobody is pulled"; "cliff: a reel is stopped by a cliff face, the foe stays behind it" |
+| Grapnel at a cliff face | the hook pierces it and the foe is hauled up and over it | "cliff: the hook pierces a cliff face and hooks the foe behind it"; "cliff: a reel hauls the foe up and over a cliff face to your feet" |
 | Grapnel past a rock | the foe is dragged over it | "rocks: the hook goes over a rock and drags the foe over it" |
 | Strafe while reeling | the body swings round; the arrival point shifts 1.5m+ | "reel: strafing sideways shifts the arrival point by 1.5m or more"; "reel: the body swings on an arc, not a straight line" |
 | Hook an ally | reeled to safety, no damage, no stun, no Grounded | "ally: the hook catches an ally in its path and reels them in"; "ally: they arrive safe (not Grounded)" |
 | Hook a wisp | it is scooped up and reeled in | "wisp: a downed hunter the hook passes is scooped up with the catch" |
-| Anchor Drop in the air | straight down, the landing ring and the falling anchor, a ring of damage and stun, height adds damage | "air smash: straight down at once"; "air smash: the landing ring shows while you fall, the anchor falls with you"; "air smash: it lands where you land, a ring of damage and stun"; "air smash: height adds damage (6m: about +50%)"; "air smash rank 3: up to +75% by height" |
+| Anchor Drop in the air | straight down, the landing ring and the falling anchor, a ring of damage and stun, height adds damage | "air smash: straight down at once"; "air smash: the landing ring shows while you fall, the anchor falls with you"; "air smash: it lands where you land, a ring of damage and stun"; "air smash: height adds damage (6m: about +50%)"; "air smash rank 3: the height bonus stays at +50% (the abyss is the rank's bonus)" |
+| Anchor Drop rank 3 | stun 1.5s; double damage on a foe over the abyss | "anchor rank 3: stun 1.5s (+0.1 a rank, and the rank's own +0.2)"; "anchor rank 3: a foe over the abyss takes double damage" |
 | Anchor over the abyss | no downward push, no smash | "abyss: the Anchor never pushes you down over the void" |
 | Barge timing | short and fast, seen travelling, then he stops | "barge: a short, fast shove you see travel (about half way at half its time), then he stops" |
 | A run of barges | three, a short gap between | "barge: three in a row, a short gap between (a press inside the gap does nothing)" |
+| Barge into a foe; barge at rank 3 with spread built up | no damage; the spread resets (rank 3 only) | "barge: the shove does no damage, and rank 1 keeps the gun's spread"; "barge rank 3: a dash resets the gun's spread" |
 | Barge in the air | the same quick time, 35% further | "barge: in the air the same quick time, 35% further" |
 | A hit from behind | +50% | "passive: from behind +50%, from the front none" |
 | Knock or assist | +1 Salvage (+2.5% health); a knock also heals | "passive: a knock = 1 stack, +2.5% health, a heal"; "passive: an assist stacks but does not heal"; "passive: capped at 10 stacks (+25%)" |
 | Downed | -1 Salvage | "passive: being downed costs a stack" |
-| Rank 3 Grapnel hit / pellet hit | 33% refund / barge recharge trimmed | "grapnel rank 3: a hit refunds a third of the cooldown"; "barge rank 3: a pellet hit trims the recharge" |
+| Rank 3 Grapnel hit / pellet hit | half the cooldown off / barge recharge trimmed | "grapnel rank 3: a hit takes half the cooldown off (12s -> 9.6s -> 4.8s)"; "barge rank 3: a pellet hit trims the recharge" |
 | Reel over a gap in the island | the body is carried over the void and falls | "abyss: a foe reeled over the void falls (knock rules)" |
 | A Boki merge mid-reel, mid-wind-up or mid-charge | the rope goes, no landing; no slam; no wave | "merge hold: dredge's reel ends with the merge, the rope is freed, nobody lands Grounded"; "merge hold: dredge's Anchor wind-up is dropped, no slam mid-merge"; "merge hold: dredge's Broadside is dropped, no wave mid-merge" |
 | X below level 6 | nothing | "ult: no cast below level 6" |
