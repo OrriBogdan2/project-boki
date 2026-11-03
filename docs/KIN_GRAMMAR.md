@@ -35,7 +35,7 @@ The rules that keep it safe:
   `.tscn` `.tres` `.res` `.scn` `.dll` `.so` `.exe` is rejected. Nothing is loaded either way; the scan
   is a second line of defence that tells the author why the file was rejected.
 - **Versioned.** Every file has `"grammar": 1` so the format can change later without guessing.
-- **Bounded.** Every number has a min and max in core code; the runtime clamps to the same bounds.
+- **Bounded.** Every number has a min and max in core code; the runtime clamps to the same bounds. A number outside them is an error in a file and is clamped, never swapped for the default (a 0.9 m shot is 0.6, not 0.2); a stage a kit builds in code gets the same clamp, and a debug build warns once per field (`--projectile-size-check`).
 
 ## Files
 

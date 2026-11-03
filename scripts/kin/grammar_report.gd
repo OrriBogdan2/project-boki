@@ -6,6 +6,7 @@ extends RefCounted
 var errors: Array[String] = []
 var warnings: Array[String] = []
 var file := ""
+static var _warned := {}     # runtime clamps already printed (_warn_runtime)
 
 func err(path: String, msg: String) -> void:
 	var line := "%s: %s%s" % [file, (path + ": ") if path != "" else "", msg]
@@ -58,17 +59,31 @@ func text(d: Dictionary, key: String, path: String, dflt := "", nonempty := fals
 	return d[key]
 
 ## A value checked against a KinParts parameter definition [type, min, max, default, unit, doc].
-## Returns the value, or the default when it's missing or bad.
+## Returns the value; a number outside its bounds is reported and clamped to them (never swapped for
+## the default: a 0.9 m shot asked for is 0.6, not 0.2); the default when it's missing or the wrong type.
 func param(d: Dictionary, key: String, pd: Array, path: String) -> Variant:
 	if not d.has(key):
 		if pd[3] == null:
 			err(join(path, key), "missing (required)")
 		return pd[3]
-	var msg := KinParts.value_error(pd, d[key])
-	if msg != "":
-		err(join(path, key), msg)
+	var v: Variant = d[key]
+	var msg := KinParts.value_error(pd, v)
+	if msg == "":
+		return int(v) if String(pd[0]) == "int" else (float(v) if String(pd[0]) == "float" else v)
+	err(join(path, key), msg)
+	if not String(pd[0]) in ["int", "float"] or not typeof(v) in [TYPE_INT, TYPE_FLOAT]:
 		return pd[3]
-	return int(d[key]) if String(pd[0]) == "int" else (float(d[key]) if String(pd[0]) == "float" else d[key])
+	var out := clampf(float(v), float(pd[1]), float(pd[2]))
+	_warn_runtime(join(path, key), msg)
+	return int(roundf(out)) if String(pd[0]) == "int" else out
+
+## Stages a kit builds in code parse into a report nobody reads (file ""), so in a debug build their
+## first clamp of each field is printed once.
+func _warn_runtime(at: String, msg: String) -> void:
+	if file != "" or not OS.is_debug_build() or _warned.has(at + msg):
+		return
+	_warned[at + msg] = true
+	push_warning("GrammarReport: a stage built in code: %s: %s (clamped)" % [at, msg])
 
 ## One of `values` as text ("" when it's missing or wrong, after an error). Required unless dflt is given.
 func choice(d: Dictionary, key: String, values: Array, path: String, dflt: Variant = null) -> String:
