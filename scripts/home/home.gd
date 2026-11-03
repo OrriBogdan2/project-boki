@@ -57,7 +57,8 @@ var hb: HomeBuild = null         # build mode and the island's layout (home_buil
 var training: HomeTraining = null  # the Training Grounds isle, where your combat kit works (home_training.gd)
 var hw: HomeWork = null            # kin at work: jobs, stations and the Job Board (home_work.gd, Work)
 var hinc: HomeIncubator = null     # the Incubator by the Nesting Nook, where Rare Eggs hatch (home_incubator.gd, Incubator)
-var hmk: HomeMarket = null         # the Drift Pens (Boki market) and the Tradewind Exchange (home_market.gd)
+var hmk: HomeMarket = null         # the market stall's panel (home_market.gd)
+var hbm: HomeBlackMarket = null    # Old Pell's Black Market (home_black_market.gd)
 ## A farm-start island (HomeLayout.fs): the house, crop patches, pot, stall, Nook, Burrow, training
 ## post and graveyard are things you place in build mode, so where they are comes from the layout
 ## (_sync_fixtures); one you haven't placed is FAR away (nothing finds it, nothing walks to it).
@@ -130,7 +131,7 @@ func _ready() -> void:
 	# the Challenge House comes with the farm
 	if visit.is_empty() and not Save.d.get("buildings", []).has("board"):
 		Save.d["buildings"].append("board")
-	# so does Old Pell's Ransom House
+	# so does Old Pell's Black Market
 	if visit.is_empty() and not Save.d.get("buildings", []).has("ransom"):
 		Save.d["buildings"].append("ransom")
 	# in real play the farm builds under the ink wipe in slices (no 3D drawn meanwhile), so the wipe's
@@ -143,6 +144,7 @@ func _ready() -> void:
 		PerfLog.frame_drawn()
 	hecon = HomeEcon.new(self)
 	hmk = HomeMarket.new(self, _spawn_kin)
+	hbm = HomeBlackMarket.new(self)
 	if visit.is_empty():
 		HomeLayout.ensure(Save.d)     # first: a brand new farm-start island keeps its first trough in storage
 		Econ.ensure()
@@ -288,7 +290,7 @@ func _sync_fixtures() -> void:
 	if str(_plot_spots(cap)) != _fx_sig:
 		_build_plots()
 
-## A farm-start island after your first expedition: Old Pell sets up the Ransom House and the
+## A farm-start island after your first expedition: Old Pell sets up the Black Market and the
 ## Challenge House goes up, each on open ground near the portal (move them wherever you like).
 ## Returns true if any went up.
 func _fs_arrivals() -> bool:
@@ -313,7 +315,7 @@ func _fs_arrivals() -> bool:
 			hb._reach_cache.clear()
 			any = true
 	if any:
-		HomeBuild.pending_toast = "Old Pell set up the Ransom House and the Challenge House near the portal (move them in build mode)"
+		HomeBuild.pending_toast = "Old Pell set up the Black Market and the Challenge House near the portal (move them in build mode)"
 	return any
 
 ## The rest of setting the island up (after the classic farm's fixed parts, or none on a farm-start island).
@@ -346,6 +348,7 @@ func _ready_rest() -> void:
 		HomeLayout.rescue_feeders(world)
 	# the layout's buildings, decorations, paths, ponds and colour theme
 	hb.prepare_world()
+	if fs and visit.is_empty(): HomeStall.ensure(self)       # every save has a market stall
 	if fs and visit.is_empty() and _fs_arrivals():
 		hb._apply_blockers()
 	if visit.is_empty() and not fs:
@@ -372,7 +375,7 @@ func _ready_rest() -> void:
 		var house := Models.house(); house.position = spots["house"]; add_child(house)
 		house_node = house
 		var pot := Models.cauldron(); pot.position = spots["pot"]; add_child(pot)
-		var stall := Models.stall(); stall.position = spots["stall"]; stall.rotation.y = PI * 0.5; add_child(stall)
+		var stall := StallModels.build(Stalls.level()); stall.position = spots["stall"]; stall.rotation.y = PI * 0.5; add_child(stall)
 	var portal := Models.portal(UI.TEAL); portal.position = spots["portal"]; add_child(portal)
 	if visit.is_empty():
 		rack_node = _glider_rack()
@@ -586,12 +589,11 @@ func _ready_rest() -> void:
 					if which.begins_with("kin:"): kin_tab = which.substr(4)      # --open=kin:About opens that tab
 					_open_kin(Save.active_kin())
 				elif which == "burrow" or which == "kinbox": _open_burrow()
-				elif which == "shop": _open_shop()
-				elif hmk.open_named(which): pass      # "pens", "exchange[:item]"
+				elif which == "shop": hmk.open()
+				elif hmk.open_named(which): pass      # a market tab: "exchange[:item]", "shelter", "auctions"...
 				elif which == "challenges": _open_challenges()
-				elif which.begins_with("ransom"):
-					if ":" in which: ransom_tab = which.split(":")[1]
-					_open_ransom()
+				elif which.begins_with("ransom") or which.begins_with("blackmarket"):
+					hbm.open(which.get_slice(":", 1) if ":" in which else "")
 				elif which == "kitchen": _open_kitchen()
 				elif which == "plot": _open_plot("plots", 0)
 				elif which == "chat":
@@ -2222,7 +2224,7 @@ func _use(it: Dictionary) -> void:
 		"bridge": _open_bridge(it["isle"])
 		"pot": _open_kitchen()
 		"rack": _open_rack()
-		"stall": _open_shop()
+		"stall": hmk.open()
 		"portal": _open_expedition()
 		"house": Game.goto("interior", {"room": "house"})
 		"kin": _pet_kin(it["k"])
@@ -2391,7 +2393,7 @@ func hub_items() -> Array:
 	items.append(["expedition", "Expedition", "portal", _open_expedition])
 	items.append(["kin", "Kin", "paw", open_kin])
 	items.append(["bag", "Bag", "bag", func(): Overlay.open_inventory()])
-	items.append(["shop", "Market", "shop", _open_shop])
+	items.append(["shop", "Market", "shop", func(): hmk.open()])
 	if has_method("open_build"):
 		items.append(["build", "Build", "hammer", func(): call("open_build")])
 	items.append(["settings", "Settings", "gear", func(): Overlay.ctx = "home"; Overlay.open_settings()])
@@ -2813,133 +2815,6 @@ func _open_kitchen() -> void:
 	if Save.d.get("treat", "") != "":
 		UI.head_extra(v).add_child(UI.chip("heart", "Treat: " + _treat_name(Save.d["treat"]), Color("ffb0d0"), "Ready for the next match"))
 
-var shop_tab := "Seeds"
-
-var shop_page := 0
-const SHOP_H := 404.0
-
-## The market: goods in tabs, shown as cards a page at a time. Some only go on sale once you've
-## made it out of enough expeditions or finished a challenge at the Challenge House.
-func _open_shop() -> void:
-	var v := _new_panel("Market stall", 800)
-	UI.hold(v, SHOP_H)          # every tab the same size
-	UI.subtitle(v, "Seeds, food, things to wear and things for the farm")
-	UI.head_extra(v).add_child(UI.chip("gem", str(int(Save.d["gems"])), UI.GOLD, "Your gems"))
-	UI.shell_tabs(v, ["Seeds", "Kin food", "Wear", "Home", "Farm", "Sell", "Boki", "Exchange"], shop_tab, func(t):
-		if t == "Boki": hmk.open_pens(); return
-		if t == "Exchange": hmk.open_exchange(); return
-		shop_tab = t; shop_page = 0; UI._page_of.erase("Market stall"); _open_shop())
-	if shop_tab == "Sell":
-		_shop_sell(v)
-		return
-	# [key, name, description, price, colour, on_buy, owned_text]
-	var goods: Array = []
-	match shop_tab:
-		"Seeds":
-			for c in Data.CROPS:
-				var cd: Dictionary = Data.CROPS[c]
-				var ck: String = c
-				goods.append(["seed:" + c, "%s seeds" % cd["name"], cd["desc"], int(cd["price"]), cd["color"], func(): Save.add_seed(ck, 1), "have %d" % int(Save.d.get("seeds", {}).get(c, 0))])
-		"Kin food":
-			for f in Care.FOODS:
-				var fd: Dictionary = Care.FOODS[f]
-				var fk: String = f
-				goods.append(["food:" + f, fd["name"], fd["desc"], int(fd["price"]), Color("ffb36a"), func(): Save.add_item(fk, 1), "have %d" % int(Save.d["items"].get(f, 0))])
-			goods.append(["tonic", "Tonic", "Heals 40%% in a match (belt key %s)." % Settings.key_cap("util1"), 30, Color("8fe0a0"), func(): Save.add_item("tonic", 1), "have %d" % int(Save.d["items"].get("tonic", 0))])
-			for uid in UtilityBelt.stock_ids():      # the rest of the utility belt (HomeBelt picks what to take)
-				if uid != "tonic": goods.append([uid, UtilityBelt.name_of(uid), UtilityBelt.def(uid)["desc"], UtilityBelt.price_of(uid), UtilityBelt.col_of(uid), func(): Save.add_item(uid, 1), "have %d" % Equal.stash_of(uid)])
-		"Wear":
-			var owned: Array = Save.d.get("accs", [])
-			for a in Data.ACCS:
-				var ad: Dictionary = Data.ACCS[a]
-				var ak: String = a
-				goods.append(["acc:" + a, ad["name"], "Put it on from a Boki's card (Dress). Worn on expeditions too.", -1 if owned.has(a) else int(ad["price"]), ad["col"], func():
-					if not Save.d.has("accs"): Save.d["accs"] = []
-					Save.d["accs"].append(ak), "yours" if owned.has(a) else ""])
-		"Home":
-			for f in Data.FURN:
-				var fd: Dictionary = Data.FURN[f]
-				var fk: String = f
-				goods.append(["furn:" + f, fd["name"], "For your house or a cottage. It waits in your inventory until you place it.", int(fd["price"]), Color("c8a07a"), func():
-					if not Save.d.has("furniture"): Save.d["furniture"] = {}
-					Save.d["furniture"][fk] = int(Save.d["furniture"].get(fk, 0)) + 1, "have %d" % int(Save.d.get("furniture", {}).get(f, 0))])
-		"Farm":
-			goods += HomeGather.shop_goods()
-			goods += hecon.shop_goods()
-			# the Incubator by the Nook: coals to warm Rare Eggs faster, and more cradles
-			goods.append(["coals", "Ember Coals", "Stoke them into the Incubator's brazier: every Rare Egg warms twice as fast for %d minutes." % int(Incubator.COAL_SECS / 60.0), Incubator.COAL_PRICE, Color("ff9a4a"), func(): Save.add_item("coals", 1), "have %d" % int(Save.d["items"].get("coals", 0))])
-			var icost := Incubator.slot_cost()
-			goods.append(["incub_slot", "Incubator cradle", "One more cradle by the Nesting Nook: warm another Rare Egg at the same time (up to %d)." % Incubator.MAX_SLOTS, icost, Color("ffd36a"), func():
-				Save.d["gems"] = int(Save.d["gems"]) + maxi(0, icost)      # Incubator.expand charges it
-				Incubator.expand()
-				if hinc: hinc.refresh(), "%d cradles" % Incubator.slots()])
-			if int(Save.d["plot_cap"]) < 8:
-				goods.append(["plots", "Two more plots", "Grow more at once.", 120 + 80 * (int(Save.d["plot_cap"]) - 4), Color("9c7a52"), func():
-					Save.d["plot_cap"] = int(Save.d["plot_cap"]) + 2
-					_build_plots()
-					if fs and plots.size() < int(Save.d["plot_cap"]):
-						_toast("Put down another crop patch for them (Build, Buildings)"), "%d plots" % int(Save.d["plot_cap"])])
-	# open goods first, then the ones still locked
-	goods.sort_custom(func(a, b): return int(Progress.unlocked(a[0])) > int(Progress.unlocked(b[0])))
-	# every good on one page: two columns of one-line rows (the full description on hover)
-	var grid := GridContainer.new(); grid.columns = 2
-	grid.add_theme_constant_override("h_separation", 10); grid.add_theme_constant_override("v_separation", 8)
-	for g in goods:
-		grid.add_child(_shop_card(g))
-	if goods.is_empty():
-		v.add_child(UI.empty_state("shop", "Nothing for sale", "Come back after your next expedition."))
-	v.add_child(grid)
-
-## One good as a compact row: its icon, name (and what you own), one line of description (all of
-## it on hover), and its price to press.
-func _shop_card(g: Array) -> Control:
-	var key: String = g[0]
-	var open := Progress.unlocked(key)
-	var price: int = g[3]
-	var col: Color = Color(g[4])
-	var card := UI.card(UI.CARD if open else Color(0.1, 0.11, 0.15, 0.9), 10, 12)
-	card.custom_minimum_size = Vector2(364, 0)
-	card.tooltip_text = String(g[2]) + ("" if open else "\n" + Progress.req_text(key))
-	var hr := UI.hbox(10); card.add_child(hr)
-	var icon: String = {"seed": "seed", "food": "heart", "tonic": "tonic", "rift_key": "portal", "acc": "paw", "furn": "home", "plots": "seed", "coals": "dash", "incub_slot": "egg", "tool": "hammer"}.get(key.split(":")[0], "gem")
-	var sw := UI.badge(icon if open else "lock", col if open else UI.FAINT, 32.0, UI.R_CTRL)
-	sw.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	hr.add_child(sw)
-	var nv := UI.vbox(0); nv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	var top := UI.hbox(6)
-	var nm := UI.label(String(g[1]), UI.T_BODY, UI.INK if open else UI.MUTED, UI.semi)
-	nm.clip_text = true; nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	top.add_child(nm)
-	if open and String(g[6]) != "":
-		top.add_child(UI.label(String(g[6]), 12, UI.GOOD if String(g[6]) == "yours" else UI.MUTED))
-	nv.add_child(top)
-	var d := UI.label(String(g[2]) if open else Progress.req_text(key), 12, UI.MUTED if open else Color("ffb3a8"))
-	d.autowrap_mode = TextServer.AUTOWRAP_OFF
-	d.clip_text = true
-	d.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-	nv.add_child(d)
-	hr.add_child(nv)
-	if open and price >= 0:
-		var on_buy: Callable = g[5]
-		var can := int(Save.d["gems"]) >= price
-		# a price tag you press: gold on an outline, so a page of goods isn't a wall of orange
-		var b := UI.button(str(price), func():
-			if int(Save.d["gems"]) < price: return
-			Save.d["gems"] = int(Save.d["gems"]) - price
-			on_buy.call()
-			Sfx.play("pickup")
-			Save.save_game()
-			_open_shop(), 76, "gem")
-		b.add_theme_color_override("font_color", UI.GOLD)
-		b.add_theme_color_override("font_hover_color", Color("ffe08a"))
-		b.tooltip_text = "Buy for %d gems" % price
-		if not can:
-			b.disabled = true
-			b.tooltip_text = "You need %d more gems" % (price - int(Save.d["gems"]))
-		b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		hr.add_child(b)
-	return card
-
 ## The Challenge House: goals with rewards. Finished ones are claimed here for gems, and some open
 ## up new goods at the market.
 var chal_page := 0
@@ -3004,48 +2879,6 @@ func _challenge_card(c: Array, ready: bool) -> Control:
 	else:
 		hr.add_child(UI.chip("gem", "+%d" % int(c[5]), UI.GOLD, "Reward", 13))
 	return card
-
-func _shop_sell(v: VBoxContainer) -> void:
-	var sell_any := false
-	for s in Data.CROPS:
-		var n := int(Save.d["crops"].get(s, 0))
-		if n <= 0: continue
-		sell_any = true
-		var sk: String = s
-		var gain := maxi(1, int(round(int(Data.CROPS[s]["price"]) * 0.4)))
-		var rc := UI.card(UI.CARD, 10, 12)
-		var row := UI.hbox(12); rc.add_child(row)
-		row.add_child(UI.IconDot.new("seed", Data.CROPS[s]["color"], 22.0))
-		var l := UI.label("%s  ×%d" % [Data.CROPS[s]["name"], n], UI.T_BODY, UI.INK, UI.semi); l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		row.add_child(l)
-		row.add_child(UI.button("Sell 1  ·  %d" % gain, func():
-			if int(Save.d["crops"].get(sk, 0)) <= 0: return
-			Save.d["crops"][sk] = int(Save.d["crops"][sk]) - 1
-			Save.d["gems"] = int(Save.d["gems"]) + gain
-			Sfx.play("pickup")
-			Save.save_game()
-			_refresh_top()
-			_open_shop(), 140, "gem"))
-		v.add_child(rc)
-	if not sell_any:
-		v.add_child(UI.empty_state("seed", "Nothing to sell", "Harvest your plots first, then sell spare crops here."))
-
-func _shop_row(v: VBoxContainer, name_txt: String, desc: String, price: int, on_buy: Callable) -> void:
-	var row := UI.hbox(10)
-	var info := UI.vbox(2); info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	info.add_child(UI.label(name_txt, 16))
-	info.add_child(UI.label(desc, 13, UI.MUTED))
-	row.add_child(info)
-	var b := UI.button("%d gems" % price, func():
-		if int(Save.d["gems"]) < price: return
-		Save.d["gems"] = int(Save.d["gems"]) - price
-		on_buy.call()
-		Sfx.play("pickup")
-		Save.save_game()
-		_open_shop())
-	b.disabled = int(Save.d["gems"]) < price
-	row.add_child(b)
-	v.add_child(row)
 
 # ---- kin
 # ---- kin: petting, playing and talking happen out in the world; only the details card is a menu
@@ -3647,7 +3480,7 @@ func _open_expedition() -> void:
 	right.add_child(UI.chip("clock", String(RaidLook.NAMES.get(rc, rc)), RaidLook.COLORS.get(rc, UI.INK), String(RaidLook.BLURBS.get(rc, ""))))
 	right.add_child(UI.para(String(RaidLook.BLURBS.get(rc, "")), 12, UI.MUTED))
 	if not ak.is_empty():
-		right.add_child(UI.para("Go down for good and the Boki you bring are left behind (the Ransom House holds the unclaimed ones).", 12, UI.FAINT))
+		right.add_child(UI.para("Go down for good and the Boki you bring are left behind (the Black Market holds the unclaimed ones).", 12, UI.FAINT))
 	# the way out: practice on the left, go on the right
 	var fl := UI.footer_left(v)
 	fl.add_child(UI.ghost("Arena", func(): Save.save_game(); Game.start_match(Match.arena_opts(Arch.of_save())), 0, "knock"))
@@ -3726,125 +3559,6 @@ func _kin_pick_row(label_t: String, rec: Dictionary, key: String) -> Control:
 	row.add_child(next_b)
 	return card
 
-# ---- the Ransom House
-var ransom_tab := "house"
-var ransom_say := {}      # uid -> the last thing the seller said
-var ransom_bid := {}      # uid -> the offer you're typing
-
-func _open_ransom() -> void:
-	var v := _new_panel("Ransom House", 820)
-	var lost: Array = Save.d.get("lost_kin", [])
-	var at_house: Array = lost.filter(func(L): return String(L["where"]) == "ransom")
-	var held: Array = lost.filter(func(L): return String(L["where"]) == "rival")
-	var offers: Array = Save.d.get("offers", [])
-	UI.subtitle(v, "%s keeps the Boki nobody came back for, for %d expeditions. Rivals who took yours will listen to an offer." % [Ransom.BROKER, Ransom.SELL_AFTER])
-	UI.head_extra(v).add_child(UI.chip("gem", str(int(Save.d["gems"])), UI.GOLD, "Your gems"))
-	var tab_ids := {"At the house": "house", "Held by rivals": "rivals", "Offers": "offers", "What happened": "log"}
-	var tab_names := {"house": "At the house", "rivals": "Held by rivals", "offers": "Offers", "log": "What happened"}
-	UI.shell_tabs(v, ["At the house", "Held by rivals", "Offers", "What happened"], String(tab_names.get(ransom_tab, "At the house")), func(t): ransom_tab = tab_ids[t]; _open_ransom(),
-		{"At the house": at_house.size(), "Held by rivals": held.size(), "Offers": offers.size()})
-	match ransom_tab:
-		"house", "rivals":
-			var list: Array = at_house if ransom_tab == "house" else held
-			if list.is_empty():
-				v.add_child(UI.empty_state("paw", "Nobody here", "Every Boki you've lost is home or with a rival." if ransom_tab == "house" else "No rival is holding any of your Boki."))
-			for L in list:
-				v.add_child(_ransom_card(L))
-		"offers":
-			if offers.is_empty():
-				v.add_child(UI.empty_state("gem", "No offers", "When you take home a Boki a rival left behind, they may ask to buy it back. Their offers show up here."))
-			for o in offers.duplicate():
-				var k := Save.kin(String(o["uid"]))
-				if k.is_empty():
-					(Save.d["offers"] as Array).erase(o)
-					continue
-				var card := UI.card(UI.CARD, 12, 12)
-				var row := UI.hbox(10); card.add_child(row)
-				var info := UI.vbox(3); info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-				info.add_child(UI.label("%s wants %s back" % [o["from"], k["name"]], 17, Data.KIN[k["species"]]["color"], UI.big))
-				info.add_child(UI.label("They're offering %d gems. It's level %d and its trust in you is %d." % [int(o["gems"]), int(k.get("level", 1)), int(k["trust"])], 13, UI.MUTED))
-				row.add_child(info)
-				var oo: Dictionary = o
-				row.add_child(UI.primary("Sell for %d" % int(o["gems"]), func():
-					Ransom.sell_back(oo)
-					Sfx.play("pickup")
-					_toast("%s goes back to %s. +%d gems" % [k["name"], oo["from"], int(oo["gems"])])
-					_refresh_top()
-					_open_ransom(), 150))
-				row.add_child(UI.button("Keep it", func():
-					Ransom.decline(oo)
-					_open_ransom(), 100))
-				v.add_child(card)
-		"log":
-			var lg: Array = Save.d.get("ransom_log", [])
-			if lg.is_empty():
-				v.add_child(UI.label("Nothing yet.", 15, UI.MUTED))
-			for i in range(lg.size() - 1, maxi(-1, lg.size() - 13), -1):
-				v.add_child(UI.label("Expedition %d: %s" % [int(lg[i]["m"]), lg[i]["text"]], 13, UI.INK))
-
-func _ransom_card(L: Dictionary) -> Control:
-	var rec: Dictionary = L["rec"]
-	var uid := String(rec["uid"])
-	var sp: Dictionary = Data.KIN[rec["species"]]
-	var rival_side := String(L["where"]) == "rival"
-	var card := UI.card(UI.CARD, 12, 12)
-	UI.set_card_border(card, sp["color"])
-	var v := UI.vbox(6); card.add_child(v)
-	var top := UI.hbox(10)
-	var nm := UI.label("%s  ·  level %d" % [Data.kin_title(String(rec["name"]), String(sp["name"])), int(rec.get("level", 1))], 18, sp["color"], UI.big)
-	nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	top.add_child(nm)
-	top.add_child(UI.label("Asking %d" % int(L["ask"]), 16, UI.GOLD, UI.big))
-	v.add_child(top)
-	var waited := int(L.get("waited", 0))
-	var where := ("Held by %s for %d expedition%s. You may meet them out there: your bond lets you sense it nearby." % [L["holder"], waited, "" if waited == 1 else "s"]) if rival_side else ("Waiting here for %d expedition%s. %s" % [waited, "" if waited == 1 else "s", ("Sold on after %d more." % (Ransom.SELL_AFTER - waited)) if waited < Ransom.SELL_AFTER else "Sold on after your next expedition!"])
-	var wl := UI.label(where, 13, UI.BAD if not rival_side and waited >= Ransom.SELL_AFTER - 1 else UI.MUTED)
-	wl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	v.add_child(wl)
-	if ransom_say.has(uid):
-		var said := UI.label("%s: \"%s\"" % [L["holder"] if rival_side else Ransom.BROKER, ransom_say[uid]], 14, UI.INK)
-		said.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		v.add_child(said)
-	var row := UI.hbox(10)
-	var bid := int(ransom_bid.get(uid, int(round(float(L["ask"]) * 0.75))))
-	var sl := HSlider.new()
-	sl.min_value = 0; sl.max_value = maxi(int(L["ask"]), 1); sl.step = 5; sl.value = clampi(bid, 0, int(L["ask"]))
-	sl.custom_minimum_size = Vector2(240, 24)
-	sl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	var bl := UI.label("Offer %d" % int(sl.value), 15, UI.INK)
-	bl.custom_minimum_size.x = 96
-	sl.value_changed.connect(func(val): ransom_bid[uid] = int(val); bl.text = "Offer %d" % int(val))
-	row.add_child(sl)
-	row.add_child(bl)
-	var patience := int(L.get("patience", 0))
-	var ob := UI.button("Make offer", func():
-		var res := Ransom.offer(L, int(ransom_bid.get(uid, int(sl.value))))
-		ransom_say[uid] = String(res["line"])
-		if res["result"] == "accept":
-			Sfx.play("unlock")
-			_toast("%s is coming home!" % rec["name"])
-			ransom_say.erase(uid)
-		elif res["result"] == "counter":
-			ransom_bid[uid] = int(res["ask"])
-		_refresh_top()
-		_open_ransom(), 130)
-	ob.disabled = patience <= 0
-	ob.tooltip_text = "They've stopped haggling until after your next expedition." if patience <= 0 else "%d more tries before they stop haggling" % patience
-	row.add_child(ob)
-	var pay := UI.primary("Pay %d" % int(L["ask"]), func():
-		if Ransom.pay(L):
-			Sfx.play("unlock")
-			_toast("%s is coming home!" % rec["name"])
-			ransom_say.erase(uid)
-			_refresh_top()
-			_open_ransom()
-		else:
-			_toast("You need %d gems" % int(L["ask"])), 130)
-	pay.disabled = int(Save.d["gems"]) < int(L["ask"])
-	row.add_child(pay)
-	v.add_child(row)
-	return card
-
 ## A safe island to learn every button: nothing can hurt you and nothing you do there counts.
 func _start_training() -> void:
 	Save.d["cls"] = Data.class_of_save()
@@ -3880,7 +3594,7 @@ func _confirm_start() -> void:
 			names.append(String(rec.get("name", "your Boki")))
 	var who := " and ".join(names) if not names.is_empty() else "the Boki you bring"
 	var lines := ["In %s, if you die, %s drops dazed beside your deathbox and guards it. Get revived and run into it to pick it up. A rival can scan it and take it." % [td["name"], who]]
-	lines.append("If a rival takes your Boki you feel its pull: an arrow points at them and their spot pings on your map. Knock them out and it drops, and you can pick it up. If they get out with it, or nobody picks it up, it is lost to the Ransom House.")
+	lines.append("If a rival takes your Boki you feel its pull: an arrow points at them and their spot pings on your map. Knock them out and it drops, and you can pick it up. If they get out with it, or nobody picks it up, it ends up at the Black Market.")
 	for ln in lines:
 		var l := UI.label(ln, 15, UI.INK)
 		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -4001,7 +3715,7 @@ func _open_lot(b: String) -> void:
 			_open_challenges()
 			return
 		if b == "ransom":
-			_open_ransom()
+			hbm.open()
 			return
 		if b == "armory":
 			hecon.open_armory()
@@ -5448,6 +5162,8 @@ func _open_wear(rec: Dictionary) -> void:
 		for o in Save.d["roster"]:
 			if o != rec and String(o.get("acc", "")) == ak: worn_by = o["name"]
 		grid.add_child(UI.choice(Data.ACCS[ak]["name"] + ("  (on %s)" % worn_by if worn_by != "" else ""), cur == ak, func(): _set_acc(rec, ak), 220))
+	var dyes := HomeTrade.dye_row(rec, func(): _set_acc(rec, String(rec.get("acc", ""))))
+	if dyes: v.add_child(dyes)
 
 func _set_acc(rec: Dictionary, a: String) -> void:
 	for o in Save.d["roster"]:

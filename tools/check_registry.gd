@@ -57,6 +57,9 @@ const CHECKS := {
 	"--hitbox-size-shots": ["res://tools/hitbox_size_shots.gd", "hitbox_size_shots", null],
 	"--farmbuild": ["res://tools/farmbuild_check.gd", "farmbuild_check", null],      # also --farmbuild-shots=<dir>
 	"--prologue-check": ["res://tools/prologue_check.gd", "prologue_check", null],      # also --shots-dir=<dir>
+	"--economy-floor-check": ["res://tools/economy_floor_check.gd", "economy_floor_check", null],      # never stuck
+	"--market-check": ["res://tools/market_check.gd", "market_check", null],      # docs/decisions/0013-market.md
+	"--market-shots": ["res://tools/market_shots.gd", "market_shots", null],      # --market-shots=<dir>
 }
 
 ## Runs the registered check named in args, if any (a flag also matches --flag=value).

@@ -170,6 +170,8 @@ const ACCS := {
 	"goggles": {"name": "Flight goggles", "price": 55, "col": Color("8b6d52")},
 	"cape": {"name": "Hero cape", "price": 70, "col": Color("5a7ae0")},
 	"tophat": {"name": "Tiny top hat", "price": 80, "col": Color("2b2a33")},
+	"collar": {"name": "Studded collar", "price": 50, "col": Color("8a4a5a")},
+	"charm": {"name": "Star charm", "price": 150, "col": Color("ffe27a")},
 }
 
 func _init() -> void:
@@ -380,8 +382,8 @@ const BUILDINGS := {
 		"desc": "If you go down, you still keep a third of the gems you were carrying."},
 	"board": {"name": "Challenge House", "isle": "main", "cost": 0, "rect": [31, 22, 33, 23], "free": true,
 		"desc": "Challenges to take on, their rewards, and what they unlock at the market."},
-	"ransom": {"name": "Ransom House", "isle": "main", "cost": 0, "rect": [42, 39, 44, 40], "free": true,
-		"desc": "Old Pell's place. Boki left behind on expeditions end up here, and it's where you deal with rivals who took yours."},
+	"ransom": {"name": "Black Market", "isle": "main", "cost": 0, "rect": [42, 39, 44, 40], "free": true,
+		"desc": "Old Pell's place. Boki left behind on expeditions end up here (Ransom), you deal with rivals who took yours, and he sells rare pieces at a steep price."},
 	"hall": {"name": "Trophy Hall", "isle": "summit", "cost": 120, "rect": [47, 6, 49, 8],
 		"desc": "Keeps your records and every Boki you've brought home."},
 	"armory": {"name": "Armory", "isle": "main", "cost": 40, "rect": [45, 25, 47, 26],

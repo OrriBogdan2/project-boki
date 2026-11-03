@@ -3,7 +3,7 @@ class_name Exchange
 ## Players post buy and sell offers at a price per unit; offers match price-time (the best price
 ## first, then the oldest), with partial fills, and a small tax on each fill is a gem sink. Every
 ## fill goes into a price history, which the screen draws as a graph. Boki are never on the book:
-## each is unique, so they trade at the Drift Pens (BokiPens).
+## each is unique, and they are never sold for gems (the Shelter and transfers, docs/decisions/0013-market.md).
 ##
 ## What trades (COMMODITIES): wood, stone, scrap, crops, Boki food, tonics. Each has a home in the
 ## save (Save.d mats / crops / items / scrap); take() and give() are the only places that touch it.
