@@ -49,6 +49,10 @@ at home; the two never apply in the same place (`Settings.SHARED_OK`).
 badge, C cooldown, a bond ring, a down mark) in `GripHud`. Over every other hunter's nameplate, three
 small icons: two gloves (rarity frame, dim on cooldown) and the Boki type (soft glow on a full bond),
 in `GripOverhead`; remote hunters' gloves, cooldowns and bond ride in the snapshot (`GripNet`).
+The overhead row sits under each plate in the row `HudStyle.PLATE_ICON_ROW` leaves free. Every
+loadout widget draws with ext/hudref's `HudStyle` (slot frames, key pills, count badges, colour
+roles), merged in here because hudref isn't on main yet; the armory's backpack tiers use
+ext/uipolish's `UI.card` (UiFrame). No second palette: backpacks are `UI.ACCENT_HI`.
 
 **Utility belt on 1-4.** Replaces the "kit" gear slot and the heal / armour-kit keys. Each slot
 holds one item with charges: tonic, armour kit, and smoke, jump pad, scanner and medkit (moved from
@@ -103,8 +107,8 @@ old minor glove-like items map to charms then).
   and reads `Equal.rules()`.
 
 ## Consequences
-- Save version 6. Net.VERSION 0.16.1 (the hunter snapshot gains GripNet's five fields after ArchKit's
-  move id). Deathboxes are local, so backpacks need no sync.
+- Save version 6. Net.VERSION 0.17.5 (the hunter snapshot gains GripNet's five fields after ArchKit's
+  move id, then hudref's run level). Deathboxes are local, so backpacks need no sync.
 - New: `Equal`, `UtilityBelt`, `UtilityUse`, `UtilityDrops`, `BotBelt`, `Gloves`, `GripHud`,
   `GripOverhead`, `GripNet`, `BeltHud`, `ArmorHud`, `HomeBelt`, `HomeNotices`, `EqualMigrate`,
   `Backpacks`, `HomeBackpacks`, `--equal-check`, `--equal-migrate-check`, `--backpack-check`.

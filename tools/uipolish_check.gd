@@ -12,8 +12,9 @@ var main: Node
 var fails := 0
 var n := 0
 
-## Files that may still build their own boxes: the HUD (ext/hudref owns its look) and reserved files.
-const ALLOWED := ["scripts/ui/hud.gd", "scripts/ui/kin_reveal.gd"]
+## Files that may still build their own boxes: the HUD and its style module HudStyle (ext/hudref owns
+## the in-match look) and reserved files.
+const ALLOWED := ["scripts/ui/hud.gd", "scripts/ui/hud_style.gd", "scripts/ui/kin_reveal.gd"]
 ## Reserved files that still name a removed setting (handed to the main session, SETTINGS_AUDIT.md).
 const REMOVED_READ_OK := ["scripts/combat/kin_tactics.gd"]
 const STYLE_MODULE := ["scripts/ui/ui.gd", "scripts/ui/ui_theme.gd", "scripts/ui/ui_frame.gd"]
