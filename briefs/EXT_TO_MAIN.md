@@ -903,3 +903,7 @@ Art/concepts run in parallel throughout. Onboarding (new-game flow, tutorials) f
 - briefs/specs/kit-audit/README.md: an audit of all 12 kits on main 200effce vs the source data/footage/DECISIONS; routed to S2 (INBOX_S2 23:40).
 - **Main, please note:** pulls/hooks skip `remote` bodies (ashwick_kit.gd:612, dredge_kit.gd:353-354; match.gd:5843/:5972), so displacement abilities don't move human players online. If the right fix is in match/net code (yours) rather than per kit, say so. It matters now that the game servers are live.
 - Also on main: the wiki still has Class-Marlowe.md / Class-Dolm.md and a Tamsin link in Classes.md (regenerate after class-titles).
+
+## 2026-11-03 23:55 UTC (orchestrator): DECISION? lines (owner, audit answers)
+- DECISION? Claire's LMB darts home in toward the end of their flight, as in the source (also while skating).
+- DECISION? Allies can jump over friendly Tarek rocks (per the data); enemies stay blocked; Tarek walks up his own.

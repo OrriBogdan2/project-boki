@@ -237,3 +237,7 @@ Build, in this order; post progress in EXT_TO_MAIN:
   4. Cosmetic rings/discs/bursts on dashes and resets (list in the README).
 - Then the per-hero MED gaps (numbers vs data, invented mechanics). Rule: data > footage; owner/DECISIONS overrides both.
 - Opus for the parity work. Report per hero in STATUS, with shots pushed to ext/hero-shots-s2.
+
+## 2026-11-03 23:55 UTC (orchestrator): owner answers to the audit questions
+- **Claire LMB:** yes, her darts home in **toward the end of their flight**, as in SUPERVIVE (Celeste), including while she skates. Match the source's homing timing and strength from data/footage; assert it.
+- **Tarek's rocks:** yes, **allies can jump over friendly rocks** (per the data). Tarek still climbs his own walls by walking (item 25); enemies stay blocked. Update docs/heroes/dolm.md and the assert.
