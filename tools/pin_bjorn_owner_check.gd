@@ -502,15 +502,22 @@ func _dash_moves(ids: Array, dash_t: Dictionary) -> void:
 	ok("dash moves %s: each move's length fits its dash plus a short settle" % str(ids), worst <= 0.62,
 		"worst +%.2f s" % worst)
 
+## The attack key let go before a step: DashFlow plays a press made in a dash as a one-step tap, which a check
+## driving the keys by hand has to release, as a player's lifted button would.
+func _let_go(P: Hunter) -> void:
+	P.inp["fire"] = false
+
+## The DashFlow mode of a `slot` press during the hero's ground or air dash.
+func _mode(hero: String, slot: String, in_air: bool) -> String:
+	return String(DashFlow.row_of(hero, slot, in_air)["mode"])
+
 ## #32 / #35 for Pin: a press during the roll is carried, RMB / E / X work at once, a draw ends on a dash.
 func _pin_dash(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 	ok("pin dash table: LMB buffers, RMB / E / X fire, a draw is cancelled by a dash",
-		DashFlow.rule("archer", "dash_ground", "lmb") == "buffer" and DashFlow.rule("archer", "dash_air",
-			"lmb") == "buffer"
-		and DashFlow.rule("archer", "dash_ground", "rmb") == "fire" and DashFlow.rule("archer", "dash_ground",
-			"e") == "fire"
-		and DashFlow.rule("archer", "dash_ground", "x") == "fire" and DashFlow.rule("archer", "lmb",
-			"dash_ground") == "cancel")
+		_mode("archer", "lmb", false) == "buffer" and _mode("archer", "lmb", true) == "buffer"
+		and _mode("archer", "rmb", false) == "fire" and _mode("archer", "e", false) == "fire"
+		and _mode("archer", "x", false) == "fire"
+		and DashFlow.into_dash_of("archer", "lmb").get("mode") == "cancel")
 	step(m, 1.5)
 	ready_bow(P)
 	K.res = 0.0
@@ -522,8 +529,7 @@ func _pin_dash(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 	for i in 3:
 		P.inp["fire"] = true
 		m.step(DT)
-	P.inp["fire"] = false
-	step(m, 0.8)
+	step(m, 0.8, _let_go.bind(P))
 	ok("pin dash > LMB: a tap during the roll is not lost, the arrow goes when the roll ends",
 		rolling and K.draw.loosed_at > loosed0, "rolling %s loosed %.2f -> %.2f" % [rolling, loosed0, K.draw.loosed_at])
 	step(m, 1.0)
@@ -545,11 +551,9 @@ func _pin_dash(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 ## #32 / #35 for Bjorn.
 func _bjorn_dash(m: Match, P: Hunter, T: Hunter, K: BulwarkKit, home: Vector3) -> void:
 	ok("bjorn dash table: LMB buffers, RMB / E fire, a held swing is cancelled by a dash",
-		DashFlow.rule("bulwark", "dash_ground", "lmb") == "buffer" and DashFlow.rule("bulwark", "dash_air",
-			"lmb") == "buffer"
-		and DashFlow.rule("bulwark", "dash_ground", "rmb") == "fire" and DashFlow.rule("bulwark", "dash_ground",
-			"e") == "fire"
-		and DashFlow.rule("bulwark", "lmb", "dash_ground") == "cancel")
+		_mode("bulwark", "lmb", false) == "buffer" and _mode("bulwark", "lmb", true) == "buffer"
+		and _mode("bulwark", "rmb", false) == "fire" and _mode("bulwark", "e", false) == "fire"
+		and DashFlow.into_dash_of("bulwark", "lmb").get("mode") == "cancel")
 	step(m, 1.5)
 	P.teleport(home)
 	T.teleport(home + Vector3(30.0, 0, 6.0))
@@ -565,9 +569,8 @@ func _bjorn_dash(m: Match, P: Hunter, T: Hunter, K: BulwarkKit, home: Vector3) -
 	for i in 3:
 		P.inp["fire"] = true
 		m.step(DT)
-	P.inp["fire"] = false
 	P.inp["move"] = Vector2.ZERO
-	step(m, 0.8)
+	step(m, 0.8, _let_go.bind(P))
 	ok("bjorn dash > LMB: a tap during the dash is not lost, the hammer goes when it ends",
 		rolling and K.throws == t0 + 1, "rolling %s throws %d" % [rolling, K.throws - t0])
 	step(m, 1.0)
