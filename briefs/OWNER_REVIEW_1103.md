@@ -89,3 +89,13 @@ The owner saw an explosion when Dancer dashed, **while not merged**. His rule: "
 - **The wall doesn't go out far enough.** Increase how far Rink Wall travels or slides out (distance and time). Match the source data if it exists; otherwise about +40–60%. It should still start close and widen as it slides, as specced.
 - **Assert:** spear speed, wall travel distance, and the detonation timing.
 - **Screenshots:** the spear in flight, the landing, the detonation, and the wall at full extension.
+
+## 14. Breah's RMB (Quakefall): review it against the source (owner: "you should review this")
+The owner sees Breah move forward in an animation on RMB, and thinks it creates a rock.
+- **Intended (source):** hold RMB to charge a slam; on release she does a **short hop forward** (~1–1.5 body heights) into a circular slam. The centre stuns, and a sweet-spot ring grows while charging. Jumping while charging is a longer forward leap. A short hop is correct; a long lunge is not.
+- **Not in the source RMB:** spawning a rock. Find out whether the slam creates or raises a rock. If it does, remove it; rocks come from E (Stone Row) and the dash (the leap with a rock). If what the owner saw was the dash's rock, make the RMB look clearly different from the dash: a hop and slam, not a leap with a rock.
+- **Also from the game data** (kit_comparison.md, Dolm section; check whether ext/kitdata-breah-ostra d0d045e already covers it):
+  - make "punching your rocks grants a shield" (Molten Guard) the base passive
+  - remove the invented slam reset on knock or kill
+  - jumping while charging leaps forward, as in the source
+- **Deliver:** a short written verdict in this file under item 14 (what RMB does now vs the source, and what changed), plus a 4–6 frame strip of the RMB at gameplay zoom. Assert in the combo check: hop distance, no rock spawned by RMB, and the sweet-spot stun.
