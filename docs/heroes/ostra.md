@@ -39,7 +39,7 @@ Our own design, written before modelling; nothing below is modelled yet. He is m
 ## Scaling used (ratios from the source)
 - Orb 9 dmg / 0.6s, 30 m/s, full 14m range; Settled +34% (owner's data 353 vs 263; was +30%), x1.4 speed, 10% slow 1.5s (wiki).
 - Snap 9.5, about 1.05x an orb (data pass: owner's data 277 vs the orb's 263), stun 0.8-1.8s by distance (card), one charge, 10s.
-- Trade 1.8s (the owner's "about 1.8-2s per the sheet"; wiki 1.7), 1.25s Swollen, 12m, slow 40% for 3s (wiki).
+- Trade 1.8s (the owner's "about 1.8-2s per the sheet"; wiki 1.7), 1.25s Swollen, 12m (the wiki's 40% slow on swapped foes is not built: the game data has none).
 - Seed grows 6.5s (card) to 3.2m (4.2m Swollen, +30% as the wiki's Empowered size), damage 12.5 up to 3.5x (wiki; data pass: 365 vs the orb's 263 is 1.39x of 9), no Ground on the pop.
 - Swollen 9s (the footage showed about 9s).
 
@@ -50,8 +50,8 @@ Our own design, written before modelling; nothing below is modelled yet. He is m
 | Passive Swell | builds | the pink sphere round him while Swollen | hits fill Swell (x10 on hunters); full = Swollen 9s: seed larger and quicker, Trade 1.25s, Snap +44% (data 399 vs 277); no knock heal (data pass); he floats, so ground hazards (lava, spore pods, puddles) do nothing to him, but a sky strike does | `ostra_empower` (a full turn in the air) | `os_empower` |
 | LMB Tether Lantern | tap or hold | the aim line; orbs fly their full range (`"aim": "max"`) | 9 dmg violet glass teardrop orbs (0.28m, 0.8m long, a 1.2m magenta tail) every 0.6s; after a 1.4s pause the next is Settled: a 1.6m blue-violet bolt with a white core, +30%, x1.4 speed, slows 10% for 1.5s; the charge shows as a blue-violet mote at his hand | `ostra_orb`, `ostra_orb_hot` | `os_orb`, `os_orb_hot`, `os_prime` |
 | RMB Shard Snap | tap (1 charge) | holding RMB, or during the wind-up, the line becomes two rails the bundle's width (0.7m) | a 0.32s wind-up (an opaque black orb with a thin pale rim swelling at his hand as he coils back; he slows 25%), then on the release beat (both palms shoved out) one 2.7m bundle of dark violet crystal prisms with bright rims flies 29.5 m/s to 13m (0.44s at full range) and the damage lands on its impact: 9.5 dmg, stuns the first foe 0.8s up close to 1.8s at range, stars over its head and STUNNED, on anyone including the training dummy; a 0.15s recovery keeps him slowed (item 40: the data has no timing, so the whole cast is +40%, 0.54s -> 0.76s at full range, all in the wind-up and the flight; the footage's bundle crosses about 30 m/s) | `ostra_snap_wind` (hold), `ostra_snap` | `os_snap_wind`, `os_snap`, `os_snap_hit` |
-| Shift Lantern Trade | hold to aim, release (a tap casts at once) | while held: both ends (his ring, the landing ring at the cursor and the link); in flight: both ends for everyone, each with a rune sigil (teal at him, violet at the circle) whose ring lights segment by segment and whose hexagram brightens | a dark indigo star-orb lobbed high (over 4m up) to the cursor, or 12m along it if the cursor is further, with no ground, wall or abyss check on the target, with a violet trail, 1.8s; meanwhile he drifts at 20% of run speed (`dash.fly_slow`, CastHold) at the height he cast at, even over the abyss (no fall); then he is there (both ends fold in on themselves, motes drawn inward with no ring or blast, and his appear-pop), keeping his height, and everyone in the 1.5m circle (foes, allies, Boki off the shoulder) goes to where he is when it lands, each keeping its place in the circle; foes are slowed 40% 3s (SLOWED). A knock while it flies still shoves him (only his height is held). It never travels by itself: a press in flight is ignored, a press with no charge is refused | `ostra_swap_aim` (hold), `ostra_swap` (ground), `ostra_swap_air` (air), `ostra_arrive` | `os_swap_lob`, `os_swap` |
-| E Brimseed | tap, recast | at the cursor (9m), a ring everyone sees growing, dashed until full | a small violet mote drops onto the spot; a dark indigo glass drum with a violet swirl and a teal rim grows 6.5s to 3.2m; a light column rises from 68%; E again (from 0.3s) pops it: an implosion, 12.5 dmg up to 3.5x; left alone it pops 0.5s after full (COLLAPSE on a hunter at full) | `ostra_seed`, `ostra_pop` | `os_seed`, `os_full`, `os_pop` |
+| Shift Lantern Trade | hold to aim, release (a tap casts at once) | while held: both ends (his ring, the landing ring at the cursor and the link); in flight: both ends for everyone, each with a rune sigil (teal at him, violet at the circle) whose ring lights segment by segment and whose hexagram brightens | a dark indigo star-orb lobbed high (over 4m up) to the cursor, or 12m along it if the cursor is further, with no ground, wall or abyss check on the target, with a violet trail, 1.8s; meanwhile he drifts at 20% of run speed (`dash.fly_slow`, CastHold) at the height he cast at, even over the abyss (no fall); then he is there (both ends fold in on themselves, motes drawn inward with no ring or blast, and his appear-pop), keeping his height, and everyone in the 1.5m circle (foes, allies, Boki off the shoulder) goes to where he is when it lands, each keeping its place in the circle (nobody is slowed: the data's Swap only swaps). A knock while it flies still shoves him (only his height is held). It never travels by itself: a press in flight is ignored, a press with no charge is refused | `ostra_swap_aim` (hold), `ostra_swap` (ground), `ostra_swap_air` (air), `ostra_arrive` | `os_swap_lob`, `os_swap` |
+| E Brimseed | tap, recast | at the cursor (9m), a ring everyone sees growing, dashed until full | a small violet mote drops onto the spot; a dark indigo glass drum with a violet swirl and a teal rim grows 6.5s to 3.2m; a light column rises from 68%; E again (from 0.3s) pops it: an implosion, 12.5 dmg up to 3.5x (COLLAPSE on a hunter at full); left alone it waits at full size for the recast, and fizzles harmlessly after 10s unpopped | `ostra_seed`, `ostra_pop` | `os_seed`, `os_full`, `os_pop` |
 | X Nightwell (level 6, 64s) | tap | at the cursor, clamped to 10m (on ground short of walls, like the seed): a pale dome of the well's exact size that everyone sees, filling over 1.0s (with a pink core when Swollen) | it opens into a turning violet disc for 3.5s, 3.6m wide (5.1m Swollen): every foe inside in sight of its centre, or who walks in, is stunned until it closes and drawn to the middle (12 m/s), taking 0.16 every 0.1s. Allies are untouched. Ostra is locked in the cast for the 1.0s dome (Void's telegraph, footage f23-f33; owner 18:20): no moving, jumping, dashing, other abilities, the glove or the Boki's C, or attacks, no turning after the 0.25s wind-up; he sinks, then rises with his arms flung wide and the crook raised under a swelling black orb while the dome fills. When it opens he hauls his fists in to his chest, hunches over the pull, flings the hands away and is free: he can walk out at full speed, fight or Trade away while it keeps going (Void acts freely while it holds, f50). A stun or knock, or a merge, frees him early (the placed well goes on). It closes with no blast | `ostra_well` (held for the dome), `ostra_well_snap` (the release, 0.55s), `ostra_well_end` (knocked out of the cast) | `os_well`, `os_well_hum` |
 | Merge (the `ultimate` action; its key from Settings.key_cap) | (Boki Merge) | | | | |
 
@@ -74,8 +74,28 @@ Source vs ours per slot. [data] = briefs/supervive-data (supervive_kits.md, Void
 | LMB spam penalty | "firing faster lowers projectile speed and damage" (card, footage) | none: the fixed 0.6s cadence can't be beaten, so there is nothing to penalise | (not built) |
 | RMB | a 0.2s black-orb wind-up, one crystal-spear cluster, stun 0.8-1.8s by distance [footage] | 0.32s wind-up (owner item 40: slower), one bundle, 0.8-1.8s | `item 40: ...`, `rmb: ...` |
 | Shift | a lob, about 1.8s, rings at both ends [footage] | 1.8s, both ends marked; he drifts at 20% (owner) | `item 17: ...`, `owner: ...` |
-| E | grows 6.5s, recast from 0.3s, an implosion pop [footage, data] | as the source (it also pops by itself 0.5s after full) | `combo: ...`, seed rows |
+| E | grows 6.5s, recast from 0.3s, an implosion pop [footage, data] | as the source: it waits for the recast (a 10s fizzle cap at full) | `combo: ...`, seed rows |
 | X | a 1.0s dome telegraph with his cast held, then a 3.5s pull while he acts freely [footage f23-f50] | locked for the 1.0s dome only, then free (owner 18:20) | `lock: ...`, `release: ...` (ult check) |
+
+## Audit (Nov 3 23:40)
+Every row of briefs/specs/kit-audit/tarek_ostra_claire.md section 2 (audited on main 200effce) against this branch.
+
+| Row | Sev | Verdict | Where / why |
+|---|---|---|---|
+| Nightwell locks him 4.5 s (owner: about 1 s, then free) | HIGH | (a) | 59010b31, e62732d6; `lock: ...`, `release: ...` (ult check) |
+| Nightwell text and DashFlow rows describe the old lock | HIGH | (a) | 59010b31, e62732d6 |
+| X cd 64 s vs 70 s | LOW | (b) | 8e5c6340: 70 s; `ult cast: ... (70s, data)` |
+| The seed pops by itself (data: reactivate to detonate) | MED | (b) | 8e5c6340: it waits at full size for the recast; left 10 s at full it fizzles with no damage (our cap, so it can't be parked forever); `e: a full seed waits for the recast ...`, `e: left unpopped ... fizzles out harmlessly` |
+| The Settled orb doesn't go through terrain (data) | MED | (b) | 8e5c6340: `pierce_terrain` on the Settled bolt; `lmb data: the Settled bolt goes through terrain ...` |
+| Orb magazine 12 / 1.5 s reload (not in the source) | MED | (b) | 8e5c6340: mag 99 (no reload in play) |
+| Spam penalty (footage card only) | LOW | (c) | not built: the fixed 0.6 s cadence can't be beaten, so there is nothing to penalise (parity table) |
+| Trade slows swapped foes 40% for 3 s (invented) | MED | (b) | 8e5c6340: removed; `dash: Trade trades places; the foe is only moved, not slowed ...` |
+| Shift hold-to-aim | LOW | (c) | kept: a tap behaves like the source; the hold shows both ends (owner Nov 2) |
+| Shift radius 1.5 m | LOW | (c) | kept: the data has no number and the footage scale is about 2x uncertain |
+| Pronouns and the old lamplighter concept in his text | MED | (b) | 8e5c6340: fantasy, silhouette and tells rewritten for the Void Jester; he/him in this doc, the DashFlow rows, kit comments and check names |
+| Settled-orb ground ring (cosmetic) | LOW | (b) | 8e5c6340: removed (the hand flash stays) |
+| Self screen shake | MED | (c) | ext/no-shake owns it |
+| RMB, passive, items 17 and 42 | n/a | (a) | matched in the audit |
 
 ## Combinations (`--ostra-combo-check`, tools/ostra_combo_check.gd; placement in `--zone-check`)
 | Combo | Result | Asserted by |
@@ -104,8 +124,7 @@ Conversions: damage by the ratio to the orb (9 for the data's 263): Snap 277 -> 
 - Done: the pop no longer Grounds; the knock heal is gone; ground hazards pass him by (`incoming`; the lightning rod's sky
   strike still hits); Snap's speed bursts at rank 3 (the data's rank IV); the seed's burn at rank 3 is 8.2 a second and its
   cooldown is 10s -> 8s at rank 3 through the shared rank step (the data's -2s at rank IV).
-- Kept, not in the data: the seed still pops by itself at full growth (the data only says "reactivate to detonate"; one of the
-  open questions); the Snap's distance-scaled stun (the owner's note: RMB visibly stuns); the Trade's 1.8s (no number in the
+- Kept, not in the data: the Snap's distance-scaled stun (the owner's note: RMB visibly stuns); the Trade's 1.8s (no number in the
   data).
 - Not done: the Settled orb passing through terrain (our shots stop on terrain); items in the swap circle (the data says "all
   units"; pickups are each game's own copies); an ice patch's slide still takes him (ground grip is not his to change).
@@ -140,7 +159,7 @@ Conversions: damage by the ratio to the orb (9 for the data's 263): Snap 277 -> 
   is the only way a keyboard player sees it; it also removes any chance of a stray dash.
 - With no dash charge, or pressed in the air, Shift never falls back to the long base dash (owner note). So he has no base dash
   variant; his Trade's lob and arrival are his dash moves.
-- Brimseed pops by itself 0.5s after full growth (the source does not say).
+- Brimseed waits at full size for the recast (the data: "reactivate to detonate"); 10s unpopped at full it fizzles with no damage (ours, so it can't be parked forever).
 - Trade: loose items on the ground are not traded. Pickups are each game's own copies; moving them on one game would leave
   the others disagreeing. Boki riding a shoulder (or benched) stay with their hunter.
 - Trade: the bodies keep their offset from the circle's centre at his origin; one that would land on the abyss or a step
