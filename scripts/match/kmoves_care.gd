@@ -286,39 +286,45 @@ const MOVES := {
 					"wo": Vector3(-0.04, 0.04, -0.26), "p": -0.35, "sq": -0.15}],
 		[0.14, {"fl": Vector3(0.18, 0.05, -0.58), "hw": 1.0, "wo": Vector3(0, 0.03, -0.22), "p": -0.3}],
 		[0.22, {}]]},
-	# Ice Spear held: the spear raised high behind her head in the free hand, the body turned away and
-	# leaning well back, the fan hand pointing the way
+	# Ice Spear held: she gathers it, both palms drawn in to her chest round the forming spear, elbows back,
+	# the weight settling onto the back foot and the body squared to the cursor, a slight crouch
 	"tm_spear_aim": {"hold": true, "keys": [
 		[0.0, {}],
 		[
 				0.12,
 				{
-					"y": -0.75, "p": 0.35, "r": -0.12, "fl": Vector3(0.05, 0.6, 0.3), "hw": 1.0,
-					"wa": Vector3(-0.3, 0.5, 0), "wf": 0.5, "lw": 0.9, "legs": [-0.4, -0.3, 0.55, -0.8]}]]},
-	# ... let go: the arm draws back deeper (0.1), then the whip through to the cursor, the spear leaving
-	# the hand at 0.16 (RimewrightKit.THROW_T), and a long lunge after it, the arm across the body, then up
+					"p": 0.18, "sq": 0.14, "lift": -0.05, "fl": Vector3(0.14, 0.12, -0.2), "hw": 1.0,
+					"fr": Vector3(-0.14, 0.12, -0.2), "rw": 1.0, "wf": 1.0, "lw": 0.9,
+					"legs": [-0.35, -0.4, 0.5, -0.75]}]]},
+	# ... let go: a push, not a throw. A quick load deeper into the back foot (0.05), then both palms drive
+	# straight out at the cursor and the spear leaves them at full extension (0.1, RimewrightKit.PUSH_T), the
+	# body lunging after it; the arms hold out through the recoil, then settle
 	"tm_spear": {"keys": [
 		[
 				0.0,
 				{
-					"y": -0.75, "p": 0.35, "r": -0.12, "fl": Vector3(0.05, 0.6, 0.3), "hw": 1.0,
-					"wa": Vector3(-0.3, 0.5, 0), "wf": 0.5, "lw": 0.9, "legs": [-0.4, -0.3, 0.55, -0.8]}],
+					"p": 0.18, "sq": 0.14, "lift": -0.05, "fl": Vector3(0.14, 0.12, -0.2), "hw": 1.0,
+					"fr": Vector3(-0.14, 0.12, -0.2), "rw": 1.0, "wf": 1.0, "lw": 0.9,
+					"legs": [-0.35, -0.4, 0.5, -0.75]}],
+		[
+				0.05,
+				{
+					"p": 0.26, "sq": 0.24, "lift": -0.09, "fl": Vector3(0.12, 0.1, -0.14), "hw": 1.0,
+					"fr": Vector3(-0.12, 0.1, -0.14), "rw": 1.0, "wf": 1.0, "lw": 1.0,
+					"legs": [-0.45, -0.45, 0.6, -0.85]}],
 		[
 				0.1,
 				{
-					"y": -0.95, "p": 0.42, "r": -0.16, "fl": Vector3(0.08, 0.62, 0.38), "hw": 1.0, "sq": -0.18,
-					"lw": 0.9, "legs": [-0.45, -0.3, 0.6, -0.85]}],
+					"p": -0.42, "sq": -0.22, "lift": 0.02, "fl": Vector3(0.1, 0.06, -0.7), "hw": 1.0,
+					"fr": Vector3(-0.1, 0.06, -0.7), "rw": 1.0, "wf": 1.0, "lw": 1.0,
+					"legs": [1.05, -1.25, -0.6, -0.2]}],
 		[
-				0.16,
+				0.28,
 				{
-					"y": 0.85, "p": -0.5, "r": 0.14, "fl": Vector3(0.05, 0.08, -0.64), "hw": 1.0, "sq": 0.28,
-					"lift": -0.08, "lw": 1.0, "legs": [1.05, -1.25, -0.6, -0.2]}],
-		[
-				0.34,
-				{
-					"y": 0.6, "p": -0.4, "fl": Vector3(-0.1, -0.08, -0.5), "hw": 0.9, "sq": 0.08, "lift": -0.06,
-					"lw": 0.9, "legs": [0.95, -1.15, -0.55, -0.2]}],
-		[0.65, {}]]},
+					"p": -0.3, "sq": 0.06, "lift": -0.04, "fl": Vector3(0.14, 0.02, -0.6), "hw": 0.9,
+					"fr": Vector3(-0.14, 0.02, -0.6), "rw": 0.9, "wf": 0.8, "lw": 0.9,
+					"legs": [0.95, -1.15, -0.55, -0.2]}],
+		[0.55, {}]]},
 	# Rink Wall: the 0.2 s tell (a deep crouch over the feet, the sparkle), then both arms flung up and
 	# out as the ice erupts ahead, an overshoot up on the toes, a settle
 	"tm_wall": {"keys": [

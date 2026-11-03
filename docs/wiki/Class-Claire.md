@@ -70,7 +70,7 @@ What the in-game kit card (K) says.
 
 **Ice Spear (RMB, 10.2s cooldown, 2 charges).**
 
-- *Tap:* Hold to see the landing ring at the cursor (up to 12m); let go and she draws back and throws it from her hand. The spear flies to the cursor and lands there (4 damage to a foe in the way, where it then lands) and leaves a 2.2m slow zone (35% slower, Chill) for 1.8s, then detonates: 60 damage in 2.7m and a 0.5s freeze. 2 charges.
+- *Tap:* Hold to see the landing ring at the cursor (up to 12m) as the spear forms between your palms; let go and you push it out. The spear drives out to the cursor (the further, the longer it takes) and lands there (4 damage to a foe in the way, where it then lands) and leaves a 2.2m slow zone (35% slower, Chill) for 1.8s, then detonates: 60 damage in 2.7m and a 0.5s freeze. 2 charges.
 
 **Rink Wall (E, 17s cooldown).** A 0.2s sparkle at your feet, then a narrow block of ice erupts just ahead and slides toward the cursor (4.5 to 16.2m), widening from 1.8m to 4.5m, stopping enemy shots and shoving foes it touches. It stands 4.5s in all. Press E again while it slides to freeze it in place for 6s.
 

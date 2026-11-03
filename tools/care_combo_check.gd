@@ -281,6 +281,42 @@ func _skate_ice() -> void:
 			int(laid[1][0]) == 0 and int(laid[3][0]) >= 6 and int(laid[3][1]) == 0,
 			"rank 1 %s, rank 3 %s (tiles now, after)" % [str(laid[1]), str(laid[3])])
 
+## Owner 19:50: the further the spear goes, the longer it travels; it always starts at her, never at the target.
+func _spear_travel() -> void:
+	var flights := []
+	for reach in [4.0, 10.0]:
+		var r: Array = sc.setup("rimewright", 30.0)
+		var m: Match = r[0]
+		var P: Hunter = r[1]
+		var K: RimewrightKit = P.ak
+		var cur := P.pos + Vector3(reach, 0, 0)
+		step(m, 0.05)
+		sc.aim_at(P, cur)
+		K.ch_rmb = 2.0
+		P.inp["sec"] = true
+		P.inp["sec_hold"] = true
+		step(m, 0.3)
+		P.inp["sec"] = false
+		P.inp["sec_hold"] = false
+		var t := 0.0
+		var start := Vector3.INF
+		while K.zones.is_empty() and t < 2.0:
+			step(m, 1.0 / 60.0)
+			t += 1.0 / 60.0
+			var mine := _mine(m, P)
+			if start == Vector3.INF and not mine.is_empty():
+				start = mine[0]["start"]
+		flights.append({"t": t, "near": Vector2(start.x - P.pos.x, start.z - P.pos.z).length()})
+		await _free(m)
+	var near: Dictionary = flights[0]
+	var far: Dictionary = flights[1]
+	var per_m := (float(far["t"]) - float(near["t"])) / 6.0
+	ok(
+			"tm RMB: travel time grows with distance (4 m vs 10 m: about 1/speed s per metre), from her each time",
+			float(far["t"]) > float(near["t"]) + 0.2 and absf(per_m - 1.0 / 18.0) < 0.01
+				and float(near["near"]) < 1.0 and float(far["near"]) < 1.0,
+			"%.2f s vs %.2f s" % [float(near["t"]), float(far["t"])])
+
 ## Rank 3 Spear: the detonation hits 45% harder (on top of the rank's own +30%) and is no wider.
 func _spear_rank3() -> void:
 	var hits := {}
@@ -897,6 +933,7 @@ func rimewright() -> void:
 	await _rime_skate_in()
 	await _skate_ice()
 	await _spear_rank3()
+	await _spear_travel()
 	# --- Ice Spear: hold shows the ring at the cursor; it lands there, slows, detonates 1.8 s later
 	r = sc.setup("rimewright", 30.0)
 	m = r[0]
@@ -914,21 +951,21 @@ func rimewright() -> void:
 	step(m, 0.3)
 	var ring: Dictionary = AimKit.entry(P, "rmb")
 	var ra: Vector2 = ring.get("at", Vector2.ZERO)
+	var chest := P.position + Vector3(P.aim_dir().x * RimewrightKit.SPEAR_AHEAD, RimewrightKit.SPEAR_Y,
+			P.aim_dir().y * RimewrightKit.SPEAR_AHEAD)
 	ok(
-			"tm RMB: held, the landing ring sits on the cursor with the raised-spear pose and the spear in hand",
+			"tm RMB: held, the landing ring sits on the cursor; she gathers the spear between her palms at her chest",
 			AimKit.shown(P, "rmb") and ra.distance_to(Vector2(cur.x, cur.z)) < 0.2 and K.anim_id == "tm_spear_aim"
-				and K.lk().showing("spear_prop"))
+				and K.lk().showing("spear_prop") and K._spear_at(0.0).distance_to(chest) < 0.01)
 	P.inp["sec"] = false
 	P.inp["sec_hold"] = false
-	step(m, 0.05)
+	step(m, 1.0 / 60.0)
 	ok(
-			"tm RMB: let go, she draws back first: the spear is still in her hand, nothing at the target",
+			"tm RMB: let go, the push starts (no throw wind-up): the spear on her palms, nothing at the target",
 			K.lk().showing("spear_prop") and _mine(m, P).is_empty() and K.zones.is_empty() and K.anim_id == "tm_spear")
 	var thrown := {}
-	var hand := Vector3.ZERO
-	var waited := 0.05
+	var waited := 1.0 / 60.0
 	while thrown.is_empty() and waited < 0.5:
-		hand = CareUtil.hand_at(P, false)
 		step(m, 1.0 / 60.0)
 		waited += 1.0 / 60.0
 		var mine := _mine(m, P)
@@ -937,19 +974,20 @@ func rimewright() -> void:
 	var ld: Dictionary = K.rmb_def()["lance"]
 	var from: Vector3 = thrown.get("start", Vector3.INF)
 	var spd := (thrown.get("vel", Vector2.ZERO) as Vector2).length()
+	var off_her := Vector2(from.x - P.pos.x, from.z - P.pos.z).length()
 	ok(
-			"tm RMB: the throw: it leaves her hand on the whip, slower and heavier (18 m/s)",
-			not thrown.is_empty() and absf(waited - RimewrightKit.THROW_T) < 0.04 and from.distance_to(hand) < 0.35
-				and absf(spd - float(ld["speed"])) < 0.01 and float(ld["speed"]) <= 20.0
+			"tm RMB: the push: the spear emerges from her (within 1 m, chest height) as the palms extend (0.1 s)",
+			not thrown.is_empty() and absf(waited - RimewrightKit.PUSH_T) < 0.04 and off_her < 1.0
+				and from.y - P.pos.y > 0.8 and absf(spd - float(ld["speed"])) < 0.01
 				and not K.lk().showing("spear_prop"),
-			"after %.2f s, %.2f m from the hand, %.1f m/s" % [waited, from.distance_to(hand), spd])
+			"after %.2f s, %.2f m out at %.2f m up, %.1f m/s" % [waited, off_her, from.y - P.pos.y, spd])
 	var flight := 0.0
 	while K.zones.is_empty() and flight < 1.5:
 		step(m, 1.0 / 60.0)
 		flight += 1.0 / 60.0
 	var want_flight := Vector2(cur.x - from.x, cur.z - from.z).length() / float(ld["speed"])
 	ok(
-			"tm RMB: it travels to the target, landing on arrival (not at the cast)",
+			"tm RMB: it travels out to the target, landing on arrival (not at the cast)",
 			flight > 0.25 and absf(flight - want_flight) < 0.06, "flight %.2f s, want %.2f" % [flight, want_flight])
 	var zat: Vector3 = K.zones[0]["at"] if not K.zones.is_empty() else Vector3.INF
 	ok(

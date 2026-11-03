@@ -22,7 +22,7 @@ var ice_t := 0.0               # s until the rank-3 Skate may lay its next span 
 var wall := {}                 # the Rink Wall: {w, dir, sliding, t, slide_t, hp0, hit}
 var wall_cast := {}            # the wall's 0.2 s tell before it erupts: {t, dir, travel}
 var spear_aim := false         # RMB held: the landing ring and the raised spear are up
-var throw_t := -1.0            # s left of the throw's wind-up before the spear leaves her hand (-1: none)
+var throw_t := -1.0            # s left of the push before the spear leaves her palms (-1: none)
 var zones: Array = []          # landed spears: {at, left, total, id}
 var zone_n := 0
 var splinter_log := 0          # Shatters fired (tests)
@@ -38,8 +38,11 @@ const SLAB_GAP := 0.06         # s between ice plates under the skate
 const SLAB_LEAD := 0.5         # m ahead of her middle a plate forms (under the leading blade)
 const SLAB_LIFE := 1.2         # s a plate stays before it fades
 const SHATTER_R := 2.7         # m, the Shatter's spike starburst (about 1.5 body heights)
-const THROW_T := 0.16          # s from letting go of RMB to the release: the arm draws back, then whips (tm_spear)
-const SPEAR_ARC := 0.9         # m the thrown spear's flight bows above the straight line from hand to ground
+const PUSH_T := 0.1           # s from letting go of RMB to the release: both palms drive forward (tm_spear)
+const SPEAR_ARC := 0.25        # m the driven spear's low flight bows above the line from her palms to the ground
+const SPEAR_AHEAD := 0.55      # m in front of her chest where the spear forms between her palms
+const SPEAR_Y := 1.05          # m: the height of her palms at the chest
+const SPEAR_FORM_T := 0.3      # s of holding RMB for the spear to grow to full size between her palms
 const LAND_KICK_R := 7.0       # m: a landing this close to her gives her camera a small kick
 const BUD_CLOSE_T := 0.15     # s the frost bud takes to close over her when cast standing
 const CARRY_T := 0.5           # s a skate out of Rimelock holds its push-off speed before easing to the skate's
@@ -464,8 +467,9 @@ func _lay_slabs(dt: float) -> void:
 # ------------------------------------------------------------------ RMB: Ice Spear
 func rmb_charge_full() -> float: return 0.0
 
-## Held: the landing ring at the cursor (clamped to range) and the spear raised behind her head.
-func rmb_hold_tick(_t: float) -> void:
+## Held: the landing ring at the cursor (clamped to range); she draws both palms in to her chest and the
+## spear forms between them, pointing at the cursor.
+func rmb_hold_tick(t: float) -> void:
 	if not rmb_ready() or busy():
 		return
 	var ld: Dictionary = rmb_def()["lance"]
@@ -478,17 +482,24 @@ func rmb_hold_tick(_t: float) -> void:
 		spear_aim = true
 		play("tm_spear_aim")
 		m.sfx("rime_spear_aim", h.pos, -6.0, 1.0)
-	_hold_spear()
+	_hold_spear(lerpf(0.45, 1.0, clampf(t / SPEAR_FORM_T, 0.0, 1.0)), 0.0)
 
-## The ice spear in her raised free hand while she aims, head tipped up and on toward the cursor.
-func _hold_spear() -> void:
+## The ice spear between her palms at `grown` of its size, `ahead` m further out than her chest (the push
+## drives it out), along the aim.
+func _hold_spear(grown: float, ahead: float) -> void:
 	var dir := h.aim_dir()
-	var ahead := Vector3(dir.x, 0.55, dir.y).normalized()
-	var at := CareUtil.hand_at(h, false) + Vector3(0, 0.1, 0)
-	var xf := Transform3D(Basis.looking_at(ahead, Vector3.UP).scaled(Vector3.ONE * 1.4), at)
+	var at := _spear_at(ahead)
+	var facing := Basis.looking_at(Vector3(dir.x, 0.0, dir.y), Vector3.UP)
+	var xf := Transform3D(facing.scaled(Vector3.ONE * 1.4 * grown), at)
 	lk().keep("spear_prop", "spear", at, {"xf": xf})
 
-## RMB let go: the arm draws the spear back and whips it (THROW_T later it leaves her hand).
+## Where the spear sits in front of her chest, `ahead` m further along the aim.
+func _spear_at(ahead: float) -> Vector3:
+	var dir := h.aim_dir() * (SPEAR_AHEAD + ahead)
+	return h.position + Vector3(dir.x, SPEAR_Y, dir.y)
+
+## RMB let go: both palms drive forward (PUSH_T later the spear leaves them). A push, not a throw: no arm
+## drawn back, no release flick.
 func fire_rmb(c: Dictionary) -> void:
 	last_variant = String(c["variant"])
 	spear_aim = false
@@ -497,11 +508,11 @@ func fire_rmb(c: Dictionary) -> void:
 		lk().drop("spear_prop")
 		if anim_id == "tm_spear_aim": anim_id = ""
 		return
-	throw_t = THROW_T
+	throw_t = PUSH_T
 	play("tm_spear")
 	m.sfx("rime_spear_aim", h.pos, -4.0, 0.8)
 
-## The wind-up: the spear stays in her drawn-back hand until the whip lets it go. A stun or the seal drops it.
+## The push: the spear rides out on her palms until they are fully extended. A stun or the seal drops it.
 func _tick_throw(dt: float) -> void:
 	if throw_t < 0.0:
 		return
@@ -509,7 +520,7 @@ func _tick_throw(dt: float) -> void:
 		_drop_throw()
 		return
 	throw_t -= dt
-	_hold_spear()
+	_hold_spear(1.0, 0.25 * (1.0 - throw_t / PUSH_T))
 	if throw_t <= 0.0:
 		throw_t = -1.0
 		_release_spear()
@@ -518,13 +529,14 @@ func _drop_throw() -> void:
 	throw_t = -1.0
 	lk().drop("spear_prop")
 
-## The spear leaves her hand and flies a shallow arc down onto the cursor (clamped to its range): it lands
-## only when it gets there; a foe in the way takes the small hit and it lands there.
+## The spear leaves her palms and drives out low and fast to the cursor (clamped to its range): the further
+## the target, the longer it travels (distance / speed). It lands only when it gets there; a foe in the way
+## takes the small hit and it lands there.
 func _release_spear() -> void:
 	lk().drop("spear_prop")
 	var ld: Dictionary = rmb_def()["lance"]
 	var dir := h.aim_dir()
-	var start := CareUtil.hand_at(h, false)
+	var start := _spear_at(0.25)
 	var spd := float(ld["speed"])
 	var dist := AimMode.dist(h, float(ld["range"]))
 	var on_land := func(_s: Dictionary, at: Vector3, _e: Ent, _why: String): _spear_land(at)
@@ -539,7 +551,6 @@ func _release_spear() -> void:
 	m.sfx("rime_lance", h.pos, 0.0, 0.7)          # pitched down: a heavy shaft, not a dart
 	m.sfx("rime_wall_tell", h.pos, -6.0, 0.6)
 	m.fx.burst(start, Color("dffcff"), 8, 3.0, 0.25, 2.0, 0.8, Vector3(dir.x, 0.2, dir.y), 25.0)
-	Feel.shake(m, "cast", h, h.pos)
 
 ## The spear lands: shards burst up, the slow zone (its real radius) spreads with a spinning crystal and a
 ## chill puff, a small kick if it is near her; 1.8 s later it detonates.
