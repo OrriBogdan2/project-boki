@@ -213,7 +213,7 @@ func _tick_brackets() -> void:
 	var d := h.aim_dir()
 	for side in [-1.0, 1.0]:
 		AimKit.arc_wall(h, "lmb_bracket%d" % int(side), {"dir": Vector2(-d.y, d.x) * side, "radius": BRACKET_R,
-				"deg": BRACKET_DEG, "thick": 0.05, "panels": 1, "alpha": 0.8})
+				"deg": BRACKET_DEG, "thick": 0.05, "panels": 1})
 
 func _rifle_in_hand() -> bool:
 	return h.wid == String(d.get("signature", ""))

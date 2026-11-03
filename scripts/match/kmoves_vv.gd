@@ -159,18 +159,18 @@ const MOVES := {
 		[0.3, SHOULDER],
 		[0.55, {}]]},
 	# Burr Charge held, the owner's side toss rather than an overhead throw: the charge drawn low beside the
-	# left hip, the torso turned a little away from the aim, a slight crouch; little wind-up, and walking the
-	# legs keep walking
+	# left hip and out wide (clear of his body from above), the torso turned a little away, a slight crouch;
+	# little wind-up, and walking the legs keep walking
 	"gunslinger_rmb_hold": {"hold": true, "stance": true, "keys": [
 		[0.00, {}],
-		[0.08, {"p": -0.05, "y": -0.4, "lift": -0.04, "sq": 0.1, "fl": Vector3(-0.46, -0.12, 0.16), "hw": 1.0,
+		[0.08, {"p": -0.05, "y": -0.25, "lift": -0.04, "sq": 0.1, "fl": Vector3(-0.58, -0.04, 0.04), "hw": 1.0,
 			"legs": TOSS_SET, "lw": 0.8}],
-		[0.6, {"p": -0.06, "y": -0.48, "lift": -0.05, "sq": 0.12, "fl": Vector3(-0.48, -0.14, 0.2), "hw": 1.0,
+		[0.6, {"p": -0.06, "y": -0.3, "lift": -0.05, "sq": 0.12, "fl": Vector3(-0.6, -0.06, 0.08), "hw": 1.0,
 			"legs": TOSS_SET, "lw": 0.8}]]},
 	# ... let go: a quick sidearm flick, the hand swept low and forward from the hip (the release at 0.05),
 	# across the body on the follow-through as the torso unwinds and he steps into it, back on the rifle by 0.5
 	"gunslinger_rmb": {"stance": true, "keys": [
-		[0.00, {"p": -0.06, "y": -0.48, "lift": -0.05, "sq": 0.12, "fl": Vector3(-0.48, -0.14, 0.2), "hw": 1.0,
+		[0.00, {"p": -0.06, "y": -0.3, "lift": -0.05, "sq": 0.12, "fl": Vector3(-0.6, -0.06, 0.08), "hw": 1.0,
 			"legs": TOSS_SET, "lw": 0.8}],
 		[0.05, {"p": -0.18, "y": 0.35, "lift": -0.06, "sq": -0.15, "fl": Vector3(-0.12, -0.02, -0.62), "hw": 1.0,
 			"legs": TOSS_STEP, "lw": 1.0}],
