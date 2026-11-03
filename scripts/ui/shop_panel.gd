@@ -4,7 +4,8 @@ extends RefCounted
 ## a Buy button), under a header with the vendor's name and your run gems. Click Buy to purchase;
 ## the row flashes green on a sale and the button says why when you can't. The use key closes it.
 
-const WIDTH := 480.0
+const WIDTH := 520.0
+const BELT_CLEAR := 170.0      # px kept free at the bottom for the belt and weapon slots
 const FLASH_S := 0.5      # seconds a bought row glows
 
 ## Builds the panel on the HUD, beside the screen centre, and returns it.
@@ -21,7 +22,8 @@ static func open(m, v: Dictionary) -> PanelContainer:
 	m.hud.ui_extra.append(pc)
 	_fill(m, pc, v, -1)
 	var vs := pc.get_viewport_rect().size
-	pc.position = Vector2(vs.x * 0.5 + 90.0, maxf(70.0, vs.y * 0.5 - 170.0))
+	var top := minf(vs.y * 0.5 - 170.0, vs.y - BELT_CLEAR - pc.get_combined_minimum_size().y)
+	pc.position = Vector2(vs.x * 0.5 + 90.0, maxf(60.0, top))
 	UI.pop_in(pc)
 	return pc
 
@@ -66,7 +68,7 @@ static func _row(m, pc: PanelContainer, v: Dictionary, i: int, flash: bool) -> C
 	text.add_child(UI.label(ShopStock.name_of(row), 15, HudStyle.INK, UI.semi))
 	var info := UI.label(ShopStock.desc_of(row), 12, HudStyle.MUTED)
 	info.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	info.custom_minimum_size.x = 210.0
+	info.custom_minimum_size.x = 300.0
 	text.add_child(info)
 	var count := "%s  ·  %d left" % [ShopStock.owned_text(h, row), int(row["left"])]
 	text.add_child(UI.label(count, 12, col.lightened(0.2)))

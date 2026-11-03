@@ -1,7 +1,7 @@
 class_name BotShop
 extends RefCounted
 ## What a bot does about shops: with gems to spare and a vendor close, walk there and buy a belt
-## item it is short of, or a repair when its armour is worn. It keeps a reserve of gems to take home.
+## item it is short of, or a repair when its armor is worn. It keeps a reserve of gems to take home.
 
 const BUY_REACH := 1.8      # m: a bot buys from a little further out than a player uses the stall
 

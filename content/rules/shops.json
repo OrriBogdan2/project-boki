@@ -15,7 +15,7 @@
  "bot": {"reserve": 25, "range": 48.0, "wants": ["tonic", "armor_kit", "medkit", "shield_cell"], "repair_below": 0.5, "belt_below": 2},
  "themes": {
   "armor": {
-   "name": "Plate and Patch", "tag": "Armour and repairs", "icon": "anvil", "col": "dfe9f7",
+   "name": "Plate and Patch", "tag": "Armor and repairs", "icon": "anvil", "col": "dfe9f7",
    "always": ["armor_up", "armor_kit"],
    "pool": ["repair", "shield_cell", "tonic", "medkit"]
   },

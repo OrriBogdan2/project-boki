@@ -133,7 +133,7 @@ func _buying(m: Match) -> void:
 	var armor_v := _vendor_of(m, "armor")
 	var up := _row(armor_v, "armor_up")
 	var tier: int = h.armor_tier
-	ok("an armour upgrade raises the armour tier", Shops.buy(m, h, armor_v, up) == "" and h.armor_tier == tier + 1)
+	ok("an armor upgrade raises the armor tier", Shops.buy(m, h, armor_v, up) == "" and h.armor_tier == tier + 1)
 	var pv := _vendor_of(m, "perks")
 	var perk := String(pv["rows"][0]["id"]).get_slice(":", 1)
 	ok("a perk sale grants the perk", Shops.buy(m, h, pv, 0) == "" and h.perk_n(perk) == 1)

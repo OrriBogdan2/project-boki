@@ -74,7 +74,7 @@ static func name_of(row: Dictionary) -> String:
 	match kind_of(String(row["id"])):
 		"util": return UtilityBelt.name_of(r)
 		"repair": return "Field repair"
-		"armor_up": return "Armour upgrade"
+		"armor_up": return "Armor upgrade"
 		"backpack": return "Backpack upgrade"
 		"boots": return "%s  (%s)" % [String(Gear.ALL[r]["name"]), String(Data.RARITY[int(row["rar"])]["name"])]
 		_: return String(Data.PERKS[r]["name"])
@@ -83,8 +83,8 @@ static func desc_of(row: Dictionary) -> String:
 	var r := ref(String(row["id"]))
 	match kind_of(String(row["id"])):
 		"util": return String(UtilityBelt.def(r).get("desc", ""))
-		"repair": return "Armour back to full, on the spot."
-		"armor_up": return "Raises your armour to its next tier (more plates)."
+		"repair": return "Armor back to full, on the spot."
+		"armor_up": return "Raises your armor to its next tier (more plates)."
 		"backpack": return "A bigger pack: more room for what you carry home."
 		"boots": return Gear.desc_of(r, int(row["rar"]))
 		_: return String(Data.PERKS[r]["desc"])
@@ -143,7 +143,7 @@ static func owned(h, row: Dictionary) -> int:
 static func owned_text(h, row: Dictionary) -> String:
 	var n := owned(h, row)
 	match kind_of(String(row["id"])):
-		"repair": return "Armour %d/%d" % [int(h.armor), int(h.max_armor)]
+		"repair": return "Armor %d/%d" % [int(h.armor), int(h.max_armor)]
 		"armor_up": return "Tier: %s" % String(Hunter.ARMOR_TIERS[n][0])
 		"backpack": return "Pack: %s" % Backpacks.name_of(n)
 		"boots": return "Worn" if n > 0 else "Owned 0"
@@ -163,7 +163,7 @@ static func can_buy(h, row: Dictionary) -> String:
 		return "Not enough gems"
 	match kind_of(String(row["id"])):
 		"util": return "" if UtilityBelt.has_room(h, r) else "Belt full"
-		"repair": return "" if h.armor < h.max_armor else "Armour is full"
+		"repair": return "" if h.armor < h.max_armor else "Armor is full"
 		"boots": return "Already worn" if _worn_boots(h, r, int(row["rar"])) else ""
 		"perk": return "" if h.perk_open(r) else "Maxed"
 	return ""
