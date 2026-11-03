@@ -1219,20 +1219,15 @@ func _draw_abilities(sz: Vector2, p: Hunter) -> void:
 				_rounded(er, Color(0, 0, 0, 0.45), 10)
 	BokiHud.aug_mark(self, p, er, "e")
 	x += s + gap
-	# R: the Merge (the bond meter), a little bigger; then C and G
-	var us := 58.0
-	var ur := Rect2(Vector2(x, y - (us - s)), Vector2(us, us))
-	BokiHud.r_slot(self, p, ur, us)
-	x += us + gap + 4.0
+	# C and G (the Merge sits on the right: GripHud)
 	x = BokiHud.cg_slots(self, p, x, y, s)
 	# B (base to a teammate) as a small badge at the end of the row (the gloves sit on the right: GripHud)
 	if m.hunters.any(func(oh): return oh != p and oh.team == p.team):
 		var brr := Rect2(Vector2(x, y + s - 34.0), Vector2(34, 34))
 		_ab_slot("base", brr, "swap", Settings.key_cap("base"), Color("8fe3c8"), p.base_cd / Hunter.BASE_CD if p.base_cd > 0.0 else 0.0, p.base_cd, p.base_cd <= 0.0 and p.base_t <= 0.0)
 
-## The archetype row: RMB, Q glove, Shift dash, E utility, R ultimate (a big "6" until level 6,
-## filling at level 5, "UNLOCK" at 6, BONDED in the kin's colour when the bond is full), then the
-## kin's own ability (C) and send/recall (G) as small badges.
+## The archetype row: RMB, Shift dash, E utility, X the hero's ultimate (locked until level 6), then the
+## kin's own ability (C) and send/recall (G) as small badges. The Merge is the Boki box on the right (GripHud).
 func _draw_arch_abilities(sz: Vector2, p: Hunter) -> void:
 	var o := _hud_origin(sz)
 	var s := 50.0
@@ -1272,11 +1267,8 @@ func _draw_arch_abilities(sz: Vector2, p: Hunter) -> void:
 	if float(ei.get("up", 0.0)) > 0.0:
 		c.draw_arc(er.get_center(), s * 0.5 + 4.0, -PI / 2, -PI / 2 + TAU * clampf(float(ei["up"]) / maxf(0.1, float(p.ak.e_def().get("time", 5.0))), 0.0, 1.0), 32, Color(ei["col"], 0.9), 3.0, true)
 	x += s + gap
-	# R: the Merge (the bond meter), a little bigger
-	var us := 58.0
-	var ur := Rect2(Vector2(x, y - (us - s)), Vector2(us, us))
-	BokiHud.r_slot(self, p, ur, us)
-	x += us + gap + 4.0
+	# X: the hero's own ultimate (the Merge sits on the right: GripHud)
+	x = HunterUltTile.draw(self, p, x, y, s, gap)
 	# C: the Boki's own ability, G: throw / recall (hold: hold the spot or follow)
 	x = BokiHud.cg_slots(self, p, x, y, s)
 	if m.hunters.any(func(oh): return oh != p and oh.team == p.team):
@@ -1346,7 +1338,7 @@ func _draw_weapon(sz: Vector2, p: Hunter) -> void:
 	var rc: Color = Loot.ELEMENTS[p.welem]["col"] if p.welem != "" else Color("e6dccb")
 	_rounded(r, Color(0.04, 0.05, 0.08, 0.88), 12, Color(rc, 0.45), 1)
 	hover_spots.append([r, "weapon"])
-	AmmoDeny.draw(self, r, p)
+	AmmoDeny.draw(self, r)
 	BokiHud.aug_mark(self, p, Rect2(r.position + Vector2(6, 4), Vector2(18, 18)), "lmb")
 	c.draw_rect(Rect2(r.position + Vector2(0, 10), Vector2(3, r.size.y - 20)), rc)
 	Icons.draw(c, p.wid, r.position + Vector2(40, 34), 26.0, Color(rc, 0.9))
@@ -2361,6 +2353,7 @@ func _tip_lines(id: String, p: Hunter) -> Array:
 				if ob != "":
 					out.append(["Owner bonus for the run: " + ob, GOLD, 13])
 		"gear0", "gear1": out = GripHud.tip(p, int(id.substr(4)))
+		"x": out = HunterUltTile.tip(p)
 		"throw": return BokiHud.order_tip(self, p)
 		"dash":
 			var dd: AbilityDef = p.dodge_def

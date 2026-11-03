@@ -5,8 +5,9 @@ extends RefCounted
 ##   Q   glove 1: its icon, a frame in its rarity colour, the cooldown sweep, the key cap
 ##   V   glove 2: the same
 ##   Merge  your Boki: its type badge in the type colour and a ring for the bond meter (full = the
-##          Merge is ready), grey with a "down" mark while it's knocked out. Its key is the Merge
-##          action's ("ultimate"); the Boki's own ability and orders sit on the Boki button.
+##          Merge is ready; it brightens a moment when an ultimate fills it), grey with a "down" mark while it's
+##          knocked out. Until the Merge unlocks and while merged it is BokiHud.r_slot (the lock, the time left).
+##          Its key is the Merge action's ("ultimate"); the Boki's own ability and orders sit on the Boki button.
 ## Gloves never rank, so there are no pips. Reads the hunter and Boki through their own getters
 ## (Hunter.gear / gear_cd, Kin.runner, Kin.state, KinMerge.ready); draws on the HUD's canvas.
 ## Look: HudStyle (the same slot frames and key pills as the ability row).
@@ -14,6 +15,7 @@ extends RefCounted
 const BOX := 54.0             # px, each box
 const GAP := 8.0              # px between boxes
 const EDGE := 12.0            # px between the last box and the weapon card
+const BOND_FLASH_S := 0.8     # s: how long the bond ring brightens after an ultimate fills it (KinBond)
 
 ## Draws the three boxes left of the weapon card `wr`, bottom-aligned with it. Returns their rect.
 static func draw(hud, p: Hunter, wr: Rect2) -> Rect2:
@@ -52,9 +54,14 @@ static func _glove(hud, p: Hunter, i: int, r: Rect2) -> void:
 ## The Merge box: your Boki. Also used by nothing else; the overhead row has its own small version.
 static func boki(hud, p: Hunter, r: Rect2) -> void:
 	var k: Kin = p.kin
+	var has_boki := k != null and is_instance_valid(k)
+	if has_boki and (int(p.slot_lv["ult"]) <= 0 or KinMerge.active(p)):
+		BokiHud.r_slot(hud, p, r)
+		return
 	var key := Settings.key_cap("ultimate")
+	HudSlot.shown_keys["r"] = key
 	hud.hover_spots.append([r, "r"])
-	if k == null or not is_instance_valid(k):
+	if not has_boki:
 		HudStyle.slot_frame(hud.c, r, HudStyle.MUTED, "off")
 		HudStyle.key_pill(hud.c, Vector2(r.get_center().x, r.end.y), key, HudStyle.MUTED)
 		return
@@ -72,6 +79,9 @@ static func boki(hud, p: Hunter, r: Rect2) -> void:
 		var a := 0.7 + 0.3 * sin(float(hud.m.time) * 6.0) if full else 0.85
 		hud.c.draw_arc(ctr, BOX * 0.5 + 3.0, -PI / 2, -PI / 2 + TAU * bond, 36, Color(HudStyle.GOLD, a),
 				3.0 if full else 2.0, true)
+	var flash := 1.0 - (float(hud.m.time) - float(p.get_meta("bond_flash_at", -9.0))) / BOND_FLASH_S
+	if flash > 0.0:
+		hud.c.draw_arc(ctr, BOX * 0.5 + 5.0, 0, TAU, 36, Color(1.0, 0.85, 0.3, 0.9 * flash), 3.0, true)
 	if down:
 		hud.c.draw_style_box(HudStyle.box(Color(0.2, 0.2, 0.22, 0.55), HudStyle.SLOT_RAD, Color(0, 0, 0, 0), 0), r)
 		HudStyle.ctext(hud.c, ctr + Vector2(0, 5), "DOWN", 12, HudStyle.HURT)

@@ -6,12 +6,13 @@ extends RefCounted
 ##   LMB    a rider on every attack: chain, pierce, slow, burn, leech, an effect list on every Nth attack (lmb)
 ##   RMB, E an effect list the form adds when the hero casts one, and a faster recharge of that slot (on_used)
 ##   Shift  a form dash on top of the hero's own: sweep (damage along the path), charge (armoured shove),
-##          reflect (a short mirror window), burst (the old type burst) (on_used "dodge", tick)
+##          reflect (a short mirror window), trail (the fallback: the type's rider on what you pass, then haste)
+##          (on_used "dodge", tick)
 ##   stats  a modest passive (KinMerge.passives)
 ## It also owns the end of the window: the warning in the last warn_s seconds (tick) and the input gate of the
 ## transformation (route). State is in Hunter.merge_st["aug"].
 
-const BURST_RANGE := 5.0       # m: how far an arc jumps from the foe a type burst hit
+const CHAIN_RANGE := 5.0       # m: how far an arc jumps from the foe it starts on
 const HOLD_REFRESH := 0.1      # s: what a dash's armour is refreshed with every step
 
 static func aug(h: Hunter) -> Dictionary:
@@ -72,7 +73,7 @@ static func lmb(h: Hunter, extra: Dictionary) -> void:
 		extra["hitset"] = {}
 	var fx: Array = (extra.get("fx_hit", []) as Array).duplicate()
 	if a.has("chain"):
-		fx.append({"type": "chain", "count": int(a["chain"]), "first": float(a.get("chain_reach", BURST_RANGE)), "dmg": float(h.wpn["dmg"]) * float(a.get("chain_dmg", 0.5)), "color": col, "skip_here": true})
+		fx.append({"type": "chain", "count": int(a["chain"]), "first": float(a.get("chain_reach", CHAIN_RANGE)), "dmg": float(h.wpn["dmg"]) * float(a.get("chain_dmg", 0.5)), "color": col, "skip_here": true})
 	if a.has("every") and a.has("slam"):
 		var st := _state(h)
 		st["n"] = int(st["n"]) + 1
@@ -128,13 +129,12 @@ static func _dash(h: Hunter) -> void:
 	var form := MergeForm.of(h)
 	var col: Color = form["glow"]
 	var st := _state(h)
-	var kind := String(d.get("kind", "burst"))
-	if kind == "burst":
-		_burst(h, h.pos, form, d)
-		var tt := maxf(0.05, h.roll_t)
-		h.m.later(tt, func(): if is_instance_valid(h) and not h.dead and not h.out and live(h): _burst(h, h.pos, form, d))
-		return
+	var kind := String(d["kind"])
 	st["dash"] = {"kind": kind, "t": float(d["window"]), "last": h.pos, "hit": {}, "mirror": {}}
+	if kind == "trail":
+		h.haste_t = maxf(h.haste_t, float(d["haste_s"]))
+		h.m.sfx("whoosh", h.pos, -4.0, 1.3)
+		return
 	h.m.fx.ring(h.pos, 1.6, Color(col, 0.8), 0.25)
 	h.m.fx.word(h.pos + Vector3(0, 2.6, 0), String(d.get("name", "")).to_upper(), col)
 	match kind:
@@ -148,28 +148,6 @@ static func _dash(h: Hunter) -> void:
 			st["dash"]["mirror"] = h.m.verbs.add_mirror(h, {"arc": float(d["arc"]), "radius": float(d["radius"]), "time": float(d["window"]), "dmg_k": float(d["dmg_k"]), "color": col.to_html(false)})
 	_announce(h, "e", 1.6)
 
-## A type burst where the dodge starts and where it ends (the fallback forms' dash).
-static func _burst(h: Hunter, at: Vector3, form: Dictionary, dd: Dictionary) -> void:
-	var rad := float(dd.get("radius", 2.0))
-	h.m.fx.ring(at, rad, Color(form["glow"], 0.8), 0.3)
-	h.m.fx.burst(at + Vector3(0, 0.3, 0), form["glow"], 8, 2.5, 0.35)
-	match String(dd.get("visual", "")):
-		"spark":
-			for i in 3:
-				var a := TAU * (float(i) + randf()) / 3.0
-				h.m.fx.bolt(at + Vector3(0, 0.6, 0), at + Vector3(cos(a) * rad, 0.3, sin(a) * rad), Color(form["glow"]))
-		"rock":
-			h.m.fx.dust(at, 10)
-		"prism":
-			for i in 4:
-				h.m.fx.burst(at + Vector3(0, 0.8, 0), Color.from_hsv(randf(), 0.45, 1.0), 3, 3.0, 0.4)
-	for t in h.m.foes_of(h.team):
-		if t.dead or not t.hittable() or Vector2(t.pos.x - at.x, t.pos.z - at.z).length() > rad + t.r:
-			continue
-		var dmg: float = float(dd.get("burst", 6.0)) * h.m.dmg_mult(h)
-		t.hurt(dmg, h, {"src": "abil", "ab": "form", "tags": ["dodge", "form"], "form": true})
-		_apply(h, t, dmg, dd)
-
 static func _apply(h: Hunter, t: Ent, dmg: float, r: Dictionary) -> void:
 	if r.has("burn"):
 		t.burn_t = maxf(t.burn_t, float(r.get("burn_for", 3.0))); t.burn_dps = maxf(t.burn_dps, float(r["burn"])); t.burn_by = h
@@ -182,7 +160,7 @@ static func _apply(h: Hunter, t: Ent, dmg: float, r: Dictionary) -> void:
 		h.heal(dmg * float(r["leech"]))
 	if r.has("chain"):
 		var best: Ent = null
-		var bd := BURST_RANGE
+		var bd := CHAIN_RANGE
 		for o in h.m.foes_of(h.team):
 			if o == t or o.dead or not o.hittable():
 				continue
@@ -257,6 +235,8 @@ static func _tick_dash(h: Hunter, dsh: Dictionary, dt: float) -> void:
 	var b2 := Vector2(h.pos.x, h.pos.z)
 	var hit: Dictionary = dsh["hit"]
 	var col: Color = MergeForm.of(h)["glow"]
+	if kind == "trail" and seg.length() > 0.01:
+		h.m.fx.spark(h.pos + Vector3(0, 0.4, 0), Vector3(-seg.x, 0.0, -seg.y).normalized(), col, 2, 3.0)
 	for f in h.m.foes_of(h.team):
 		if hit.has(f) or f.dead or not f.hittable():
 			continue
@@ -265,6 +245,11 @@ static func _tick_dash(h: Hunter, dsh: Dictionary, dt: float) -> void:
 			continue
 		hit[f] = true
 		var o := {"src": "abil", "ab": "form_dash", "tags": ["form", "dash"], "dr": true}
+		var dmg: float = float(d["dmg"]) * h.m.dmg_mult(h)
+		if kind == "trail":
+			f.hurt(dmg, h, o)
+			_apply(h, f, dmg, d)
+			continue
 		if kind == "sweep":
 			o["stun"] = float(d["stun"])
 			h.m.fx.bolt(f.pos + Vector3(0, 2.5, 0), f.pos + Vector3(0, 0.8, 0), col)
@@ -272,7 +257,7 @@ static func _tick_dash(h: Hunter, dsh: Dictionary, dt: float) -> void:
 			var dir := seg.normalized() if seg.length() > 0.01 else h.aim_dir()
 			f.impulse(dir * float(d["shove"]) * f.mass())
 			h.m.fx.dust(f.pos, 3)
-		f.hurt(float(d["dmg"]) * h.m.dmg_mult(h), h, o)
+		f.hurt(dmg, h, o)
 
 # ------------------------------------------------------------------ the HUD's views
 ## What a slot of the hero shows while merged: {} or {name, desc, col, badge} ("lmb" | "rmb" | "e" | "dash").
