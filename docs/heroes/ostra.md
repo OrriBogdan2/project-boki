@@ -64,6 +64,20 @@ on 145); the growing seed burns foes inside for 8.2 a second (the data's 250 aga
 to the middle). Now that Black Hole is Nightwell on X, the pull is gone from the pop; the burn stays, as it is the source's own
 level-4 bonus.
 
+## Parity pass (owner 18:45: LMB first, then the rest by distance from the source)
+Source vs ours per slot. [data] = briefs/supervive-data (supervive_kits.md, Void), [footage] = briefs/hero-ref/ostra.md (5 fps; the ult at 10 fps).
+
+| Slot | Source | Ours | Asserted (`--ostra-combo-check`) |
+|---|---|---|---|
+| LMB cadence and reach | an orb about every 0.6s (0031 -> 0034), flying past the cursor to max range [footage] | 0.6s, the full 14m | `lmb parity: held, an orb every 0.6 s ...`, `lmb: a plain orb flies past the cursor ...` |
+| LMB tracking and animation | she turns to the aim; one-hand flicks, the body barely moves [footage] | `ostra_orb` (0.04 cock, 0.09 flick, 0.3), every orb along the current aim, also while drifting with the cursor swinging round her | `lmb parity: every orb leaves at the cursor ...` |
+| LMB charge | after not firing, the next orb is stronger (353 vs 263) [data]; binary since a patch (wiki) | one Settled bolt after 1.4s idle, +34%, x1.4 speed, slows | `lmb: the Settled orb ...`, `small: the charge is stepped ...` |
+| LMB spam penalty | "firing faster lowers projectile speed and damage" (card, footage) | none: the fixed 0.6s cadence can't be beaten, so there is nothing to penalise | (not built) |
+| RMB | a 0.2s black-orb wind-up, one crystal-spear cluster, stun 0.8-1.8s by distance [footage] | 0.32s wind-up (owner item 40: slower), one bundle, 0.8-1.8s | `item 40: ...`, `rmb: ...` |
+| Shift | a lob, about 1.8s, rings at both ends [footage] | 1.8s, both ends marked; she drifts at 20% (owner) | `item 17: ...`, `owner: ...` |
+| E | grows 6.5s, recast from 0.3s, an implosion pop [footage, data] | as the source (it also pops by itself 0.5s after full) | `combo: ...`, seed rows |
+| X | a 1.0s dome telegraph with her cast held, then a 3.5s pull while she acts freely [footage f23-f50] | locked for the 1.0s dome only, then free (owner 18:20) | `lock: ...`, `release: ...` (ult check) |
+
 ## Combinations (`--ostra-combo-check`, tools/ostra_combo_check.gd; placement in `--zone-check`)
 | Combo | Result | Asserted by |
 |---|---|---|

@@ -118,6 +118,7 @@ func _ostra() -> void:
 		"small: the charge is stepped, not gradual (one Settled orb, then plain)",
 		not K.primed and float(P.wpn["speed"]) < 35.0, "speed %.0f" % float(P.wpn["speed"])
 	)
+	_orb_parity(m, P, home, K)
 	# ---- RMB: one charge, a visible wind-up with the two rails, one bundle, a stun that reads
 	reset.call()
 	ok("rmb: Shard Snap has one charge", K.rmb_charges() == 1)
@@ -538,6 +539,45 @@ func _ostra() -> void:
 	await done(m)
 
 ## Item 35: her own ground and air dash moves (the Trade's lob), ids no other hero's table has, and each one's
+## Void's Gravity Orb (parity pass): held, an orb every 0.6 s (footage 0031 -> 0034), each a one-hand flick
+## (ostra_orb) that leaves along the aim; she turns to the cursor, so while she drifts sideways every orb
+## leaves at it as it swings round her.
+func _orb_parity(m: Match, P: Hunter, home: Vector3, K: OstraKit) -> void:
+	var seen := {}
+	for s0 in m.shots.filter(func(s): return s["by"] == P):
+		seen[s0["sid"]] = true
+	var times: Array = []
+	var worst := 0.0
+	var flicks := 0
+	P.inp["move"] = Vector2(0, 1)
+	var t := 0.0
+	while t < 2.0:
+		var swing := Vector3(cos(t * 1.5), 0, sin(t * 1.5)) * 6.0
+		aim_at(P, P.pos + swing)
+		P.inp["fire"] = true
+		m.step(DT)
+		t += DT
+		for s1 in m.shots.filter(func(s): return s["by"] == P):
+			if seen.has(s1["sid"]):
+				continue
+			seen[s1["sid"]] = true
+			times.append(t)
+			flicks += 1 if K.anim_id in ["ostra_orb", "ostra_orb_hot"] else 0
+			worst = maxf(worst, rad_to_deg(absf((s1["vel"] as Vector2).angle_to(Vector2(swing.x, swing.z)))))
+	P.inp["fire"] = false
+	P.inp["move"] = Vector2.ZERO
+	var span := float(times[-1]) - float(times[0]) if times.size() > 1 else 0.0
+	var cadence := span / maxf(1.0, times.size() - 1)
+	ok(
+		"lmb parity: held, an orb every 0.6 s, each with its flick, while she drifts",
+		absf(cadence - 0.6) < 0.03 and flicks == times.size() and times.size() >= 3,
+		"%d orbs, %.2f s apart" % [times.size(), cadence]
+	)
+	ok("lmb parity: every orb leaves at the cursor as it swings round her (within 8 deg)", worst < 8.0, "%.1f" % worst)
+	K.res = 0.0
+	step(m, 0.3)
+	aim_at(P, home + Vector3(3.0, 0, 0))
+
 ## keyed length inside the quickest Trade (Swollen); the arrival's pop starts once it lands.
 func _dash_moves(K: OstraKit) -> void:
 	var ids := ["ostra_swap", "ostra_swap_air"]
