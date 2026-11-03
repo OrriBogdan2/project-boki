@@ -40,6 +40,20 @@ func run(main: Node) -> void:
 	print("DASHFLOW DONE, failures: %d, skipped: %d" % [bad, skipped])
 	main.get_tree().quit()
 
+## One hero's combo trials (item 51) run from inside its own combo check: every slot cast mid-jump, the move
+## out of its recovery, and its holds carried through each move. Returns the failures (its DASHFLOW lines say
+## which); the hero check asserts none.
+func combos_of(main: Node, hero: String) -> int:
+	Save.no_write = true
+	CombatBus.ability_used.connect(_on_used)
+	for slot in DashFlow.SLOTS:
+		var m := _match(main, hero)
+		_combos(m, hero, slot)
+		m.queue_free()
+		await main.get_tree().process_frame
+	CombatBus.ability_used.disconnect(_on_used)
+	return bad
+
 ## Every hero, or the ones named in --dash-flow-check=<id>,<id>.
 func _heroes() -> Array:
 	for arg in OS.get_cmdline_user_args():
