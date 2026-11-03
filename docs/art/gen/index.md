@@ -459,3 +459,16 @@ Turnaround:
 | `wardens/zedran_portrait.png` | 4f65b176 | Owner: the lean portrait looked skinny. Re-shot with "extremely JACKED: thick muscular neck, big rounded shoulders and traps, huge striated pecs and deltoids ... never skinny" and the block's body line changed to "shredded and heavily muscled, jacked rather than bulky-wide". |
 | `wardens/moosh_portrait.png` | d7bd1abc | Owner: Moosh Moosh looked out of place. New direction: about four heads tall instead of three and a half, a brave determined look, worn adventurer gear (moss-green travelling cloak, bracers, belt pouches), and the same rich detail and dramatic lighting as the rest. Splash and turnaround redo queued. |
 | `wardens/vex_portrait.png` | d4ae5c7c | Venatrix replaced by **Vex** (owner: East Asian, assertive, more aura, a grizzled super-confident veteran who's a bit crazy). Splash and turnaround queued; the studio stalled on wide images. |
+
+
+## Texture references (deliverable 3), 2026-11-03
+One 2048x2048 sheet per Warden in `textures/<name>_materials.png`: a 2x2 grid of flat, evenly lit material close-ups for S2. Same model and settings; references are the Warden's two concept crops plus the Bjorn style anchor. Prompt template (no style line, which is about splash framing):
+> Texture and material reference sheet for a 3D artist, in the same hand-painted stylised art style as the third reference image: a 2 by 2 grid of four square close-up material swatches on a dark neutral background, each swatch a flat, evenly lit, front-on close-up filling its square, showing only the material surface with no character, no face and no objects: swatch 1: <A>; swatch 2: <B>; swatch 3: <C>; swatch 4: <D>. Colours taken from the character in the first two reference images. Thin dark gutters between the swatches. No text, no labels, no numbers, no logos.
+
+| File | Swatches (top-left, top-right, bottom-left, bottom-right) | Studio image |
+|---|---|---|
+| `textures/bjorn_materials.png` | frozen iron-banded oak ship planks with rime and icicles and a glowing mint-green crack; tan seal fur; rime-crusted riveted iron gauntlet plate; clear ice encasing old wood | 313b967e |
+| `textures/zedran_materials.png` | very dark scarred skin with pale raised scars; cracked charred lava skin with glowing ember-orange veins; polished hammered arena bronze with dents; steel cleaver blade with a glowing white-hot fuller | 081b7c55 |
+| `textures/dredge_materials.png` | dented tarnished brass hull with rivets, rust streaks and barnacles; thick black tar ooze glowing crimson from inside; torn steel plate edges with snapped cables; old hauling rope | c97f9b53 |
+| `textures/ostra_materials.png` | old cracked off-white porcelain with violet light leaking from the cracks; deep violet and black harlequin diamond cloth; tarnished silver bell metal; dark violet smoke wisps with motes | 1f4fe3c4 |
+| `textures/pin_materials.png` | oiled dark leather with stitching; deep heart-red wool hood lining; black lacquered bow wood with red grip wrap; dark grey smoke dissolving into tatters | a2530970 |
