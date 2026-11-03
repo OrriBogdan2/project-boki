@@ -176,3 +176,26 @@ Portrait:
 
 Turnaround:
 > Character turnaround reference sheet for a 3D modeller: the same character shown three times side by side at the same scale on one sheet, left to right: FRONT view, SIDE view (profile), BACK view. Neutral relaxed A-pose standing straight, arms held slightly away from the body, full body head to toe in every view, all three figures exactly the same height and aligned on one ground line. Flat even studio lighting, no dramatic shadows, plain flat light grey background, no scenery. Any held weapon hangs down beside the leg in the same hand in every view and is visible in all three views. The ice fan closed in the same hand in every view, the ice patches in the same places, skates on in every view, ponytail visible in the side and back views. No text, no labels, no logos.
+
+### Vireo (mage), Storm Slayer
+Owner direction: storm-touched (glowing lightning scars, static-floating hair); lore: struck by a bolt the Wyrm called down and got up laughing.
+
+Warden block:
+> Redesign the character from the first two reference images at full production quality, keeping her design (cropped black leather jacket with one sleeve torn off, undercut with a long storm-blue fringe, hoops, chains and copper rings, red crop top, cargo trousers, a copper lightning-rod mast on her back flying a hand-painted rebel banner), and make her storm-touched, more striking and epic than the reference: Vireo, the Storm Slayer, a rebel who was struck by a bolt the Wyrm called down and got up laughing. About seven and a half heads tall, athletic and confident, hip cocked. Her bare arm (the torn-sleeve side) is covered from fingertips to shoulder and up the side of her neck in branching, fern-like lightning scars that glow electric white-blue from inside, like lightning frozen in her skin; these glowing scars replace any tattoos. Her storm-blue hair floats up and outward with static, strands lifting, tiny sparks snapping at the tips. Bright electric-blue eyes with a faint glow. Copper rings and hoops crackle with small arcs. A fierce grin. No face tattoos, no head markings, hair blue never green.
+
+| File | Size | Studio image | Notes |
+|---|---|---|---|
+| `wardens/vireo_splash.png` | 2752x1536 | 122cda8c | |
+| `wardens/vireo_portrait.png` | 2048x2048 | 183a92f4 | |
+| `wardens/vireo_turnaround.png` | 3168x1344 | e388925a | |
+
+All take 1 (turnaround retry queued: take 1 has scars on both arms, both sleeves on, and a cream banner). Twist choice (owner: 'whatever is cooler'): her storm-tattoo sleeve became glowing branching lightning scars, one read instead of two.
+
+Splash:
+> Splash art, 16:9 widescreen: the rooftop of a ruined watchtower on a floating isle in the middle of a violent thunderstorm, black clouds, rain sheeting; Vireo stands on the parapet with her scarred arm thrown up to the sky, a massive lightning bolt striking down into her open hand and branching through her glowing scars, her rebel banner snapping on the copper mast behind her, static hair blazing, sparks raining off her rings, defiant shout, full figure, low dramatic angle. Dark storm blues lit by brilliant white-blue lightning with a warm red accent from her top and banner. Palette: black leather, storm blue hair, copper, rebel red, cargo khaki, skin, electric white-blue. No text, no logos.
+
+Portrait:
+> Portrait bust, square 1:1, for a game hero picker: head and shoulders, three-quarter view, a fierce grin, storm-blue undercut and fringe floating up with static and tiny sparks, glowing branching lightning scars running up her bare shoulder and the side of her neck, hoops and chains, the black leather jacket collar, the copper mast and a corner of the red banner behind her shoulder. Simple dark storm-blue gradient background with a faint lightning flicker, strong rim light. Palette: black leather, storm blue, copper, rebel red, electric white-blue. No text, no logos.
+
+Turnaround:
+> Character turnaround reference sheet for a 3D modeller: the same character shown three times side by side at the same scale on one sheet, left to right: FRONT view, SIDE view (profile), BACK view. Neutral relaxed A-pose standing straight, arms held slightly away from the body, full body head to toe in every view, all three figures exactly the same height and aligned on one ground line. Flat even studio lighting, no dramatic shadows, plain flat light grey background, no scenery. Any held weapon hangs down beside the leg in the same hand in every view and is visible in all three views. The torn sleeve and the glowing lightning scars are on the same arm in every view; the copper mast and banner on her back in every view. No text, no labels, no logos.
