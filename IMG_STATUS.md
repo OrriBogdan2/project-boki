@@ -7,6 +7,9 @@
 - Owner notes on the proposals: Dredge must look noticeably broken and oozing (torn plates, black ooze dripping, red rot-light). Vireo: whichever twist is cooler; IMG pick: her storm tattoo sleeve becomes glowing branching lightning scars (one read, not two). Venator: religious in behaviour and going insane, a battle between conservative morals and slipping sanity (prayer beads, scripture strips, a devout soldier's bearing with a cracked, too-wide stare). Gender to confirm: the item 39 table has Venator as F, the owner wrote "him". Rest of the proposals approved as written (Sable as the thief who reached the Wyrmheart, Pin's legs fading to smoke below the knee, Zedran's horns on his head).
 - Generation switches to the owner's Chrome (Claude in Chrome). Owner asked to talk through each Warden's look and lore before generating; per-Warden proposals are with the owner now.
 
+## 2026-11-03 18:10 UTC: Zedran redone leaner (owner: "leaner, jacked more than wide")
+- All three Zedran files replaced with the lean takes. Credits so far this session: about 30.
+
 ## 2026-11-03 17:55 UTC: Zedran done (splash, portrait, turnaround)
 - `docs/art/gen/wardens/zedran_{splash,portrait,turnaround}.png`, 2K originals. Prompts in index.md.
 - Owner notes applied: very dark skin, many scars, high-ego showman, ram horns (half-giant), demon in the cleaver with lava possession up the sword arm. Style anchor added (Bjorn frame as 3rd reference) so all Wardens match.
