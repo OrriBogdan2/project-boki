@@ -14,7 +14,9 @@ const EPS := 0.0005
 const WARDENS := {
 	"bulwark": {"hit_r": 0.5, "height": 1.15, "width": [1.3, 2.2], "moves": "bul_"},
 	"archer": {"hit_r": 0.37, "height": 0.98, "width": [0.7, 1.15], "moves": "arc_"},
+	"gunslinger": {"hit_r": 0.4, "height": 1.04, "width": [0.85, 1.3], "moves": "arc_"},
 }
+const REF_WEAPON := "gunslinger"   # the reference medium hunter carries the class's default weapon
 const ANIM_SEED := 1          # one rest pose for every model measured
 const HEIGHT_TOL := 0.04       # the true height within 4% of the sheet's
 const ANCHORS := ["Rig/Legs/LegL/Knee", "Rig/Legs/LegR/Knee", "Rig/Torso/HeadPivot/Head", "Rig/Torso/Aim/Gun/Muzzle",
@@ -36,7 +38,7 @@ func ok(cond: bool, what: String) -> void:
 func run(main: Node) -> void:
 	holder = Node3D.new()
 	main.add_child(holder)
-	var ref := _model("gunslinger", PlayerLook.neutral())
+	var ref := _model("", MantleLook.at_home(PlayerLook.neutral()))
 	var ref_h := _head_top(ref)
 	var ref_w := _body_box(ref).size.x
 	print("WARDEN medium reference: head top %.3f m, body %.3f m wide" % [ref_h, ref_w])
@@ -51,8 +53,11 @@ func run(main: Node) -> void:
 	print("WARDEN_DONE %s" % ("PASS" if bad == 0 else "FAIL"))
 	main.get_tree().quit()
 
+## A Warden's model; id "" with an at-home look is the plain medium hunter (no Warden's shape or class
+## size) every height is measured against.
 func _model(id: String, look: Dictionary) -> Node3D:
-	var m := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", look, id)
+	var cls := Arch.weight(id) if id != "" else "medium"
+	var m := Models.hunter(cls, Data.TEAM_COLORS[0], Arch.signature(id if id != "" else REF_WEAPON), "", look, id)
 	# the rest pose's stance (which leg takes the weight) is seeded per node: fix the seed so every model
 	# is measured in the same pose and the size comparisons don't drift from build to build
 	m.set_meta("anim_seed", ANIM_SEED)
@@ -130,6 +135,10 @@ func _scale(id: String, ref_h: float, ref_w: float) -> void:
 	var w := _body_box(m).size.x / ref_w
 	var want := float(WARDENS[id]["height"])
 	ok(absf(h - want) <= HEIGHT_TOL, "%s stands %.3fx a medium hunter (sheet %.2fx)" % [id, h, want])
+	if m.has_node("Warden"):
+		var hg := _glb_top(m) / ref_h
+		ok(absf(hg - want) <= HEIGHT_TOL, "%s's 3D model stands %.3fx a medium hunter, headwear and all (sheet %.2fx)"
+				% [id, hg, want])
 	var span: Array = WARDENS[id]["width"]
 	ok(
 		w >= float(span[0]) and w <= float(span[1]),
@@ -173,6 +182,31 @@ func _portrait(id: String) -> void:
 func _head_top(m: Node3D) -> float:
 	var head := m.get_node("Rig/Torso/HeadPivot/Head") as MeshInstance3D
 	return (head.global_transform * head.mesh.get_aabb()).end.y - m.global_position.y
+
+## The top of a .glb Warden as skinned in its current pose (every vertex through its bones), above its feet.
+func _glb_top(m: Node3D) -> float:
+	var top := -INF
+	for nd in m.get_node("Warden").find_children("*", "MeshInstance3D", true, false):
+		var mi := nd as MeshInstance3D
+		var sk := mi.get_node(mi.skeleton) as Skeleton3D
+		(m.get_node("Warden/Sync") as WardenGlb.Sync).apply()
+		var to_bone: Array = []
+		for bi in mi.skin.get_bind_count():
+			var bone := mi.skin.get_bind_bone(bi)
+			if bone < 0:
+				bone = sk.find_bone(mi.skin.get_bind_name(bi))
+			to_bone.append(sk.global_transform * sk.get_bone_global_pose(bone) * mi.skin.get_bind_pose(bi))
+		for si in mi.mesh.get_surface_count():
+			var arr := mi.mesh.surface_get_arrays(si)
+			var pos: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+			var bones: PackedInt32Array = arr[Mesh.ARRAY_BONES]
+			var ws: PackedFloat32Array = arr[Mesh.ARRAY_WEIGHTS]
+			for vi in pos.size():
+				var p := Vector3.ZERO
+				for k in 4:
+					p += ((to_bone[bones[vi * 4 + k]] as Transform3D) * pos[vi]) * ws[vi * 4 + k]
+				top = maxf(top, p.y)
+	return top - m.global_position.y
 
 ## The body's bounds in world space, leaving out the weapon, the shield, the glider and the ring.
 func _body_box(m: Node3D) -> AABB:
