@@ -58,10 +58,11 @@
 		"slow_t": 3.0,
 		"ally_shield": 26.0,
 		"ally_r": 3.0,
-		"desc": "Hold Shift to see both ends, let go (or tap) to lob a lantern up to 12m to the cursor. You hover where you stand until it lands, even over the abyss, with a sigil marking each end. 1.8s later you are there, keeping your height, and everyone in its 1.5m circle (foes, allies and Boki) is sent to where you were, each keeping its place in the circle (foes slowed 40% for 3s). Over the abyss the lantern lands on the last solid ground. Swollen: 1.25s.",
+		"desc": "Hold Shift to see both ends, let go (or tap) to lob a lantern to the cursor, up to 12m (past that, at 12m toward it), over ground, walls or the abyss. You hover at your height until it lands, even over the abyss, drifting at 20% speed, with a sigil marking each end. 1.8s later you are there, keeping your height, and everyone in its 1.5m circle (foes, allies and Boki) is sent to where you are when it lands, each keeping its place in the circle (foes slowed 40% for 3s). Swollen: 1.25s.",
 		"lob": 4.5,
 		"aim_max": 1.5,
-		"keep_h": 3.0
+		"keep_h": 3.0,
+		"fly_slow": 0.2
 	},
 	"rmb": {
 		"delivery": "projectile",
@@ -74,11 +75,12 @@
 		"hold": 0.0,
 		"snap": {
 			"range": 13.0,
-			"speed": 38.0,
+			"speed": 29.5,
 			"dmg": 9.5,
 			"size": 0.35,
 			"width": 0.7,
-			"wind": 0.2,
+			"wind": 0.32,
+			"recover": 0.15,
 			"cast_slow": 0.25,
 			"stun": [
 				0.8,
@@ -92,7 +94,7 @@
 			}
 		},
 		"variants": {
-			"tap": "A 0.2s wind-up, then one tight bundle of shards to 13m. It stuns the first foe it hits, from 0.8s up to 1.8s the further it flew. Swollen: +44% damage. Rank 3: you speed up 11% on the cast and 22% on a hit, for 2s."
+			"tap": "A 0.32s wind-up, then one tight bundle of shards to 13m. It stuns the first foe it hits, from 0.8s up to 1.8s the further it flew. Swollen: +44% damage. Rank 3: you speed up 11% on the cast and 22% on a hit, for 2s."
 		},
 		"sockets": {
 			"hit": "add",
@@ -138,11 +140,12 @@
 		"range": 10.0,
 		"tell": 1.0,
 		"time": 3.5,
+		"wind": 0.25,
 		"r": 3.6,
 		"r_swollen": 5.1,
 		"tick_dmg": 0.16,
 		"pull": 12.0,
-		"desc": "Tap: a pale dome of the well's exact size appears at the cursor (up to 10m away, on ground short of walls) and everyone sees it for 1.0s. Then the well opens for 3.5s, 3.6m wide: every foe inside, or who walks in, is stunned until it closes and drawn to its middle, taking a small hit every 0.1s. Allies are untouched, and you are free to act. Swollen: 5.1m wide. 64s."
+		"desc": "Tap: a pale dome of the well's exact size appears at the cursor (up to 10m away, on ground short of walls) and everyone sees it for 1.0s. Then the well opens for 3.5s, 3.6m wide: every foe inside, or who walks in, is stunned until it closes and drawn to its middle, taking a small hit every 0.1s. Allies are untouched. You are locked in the cast pose, unable to move, turn after the first 0.25s, or use anything else, from the press until it closes (a stun or knock frees you). Swollen: 5.1m wide. 64s."
 	},
 	"order": [
 		"sec",
