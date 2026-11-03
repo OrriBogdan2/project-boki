@@ -309,8 +309,8 @@ func _word_stack(at: Vector3) -> float:
 		if not n.get("word", false) or float(n["t"]) > 0.5:
 			continue
 		var p: Vector3 = (n["node"] as Label3D).global_position
-		if Vector2(p.x - at.x, p.z - at.z).length() < 1.2 and p.y + 0.55 > at.y + lift:
-			lift = p.y + 0.55 - at.y
+		if Vector2(p.x - at.x, p.z - at.z).length() < 1.6 and p.y + 0.6 > at.y + lift:
+			lift = p.y + 0.6 - at.y
 	return lift
 
 func ring(at: Vector3, radius: float, col: Color, dur := 0.35) -> void:

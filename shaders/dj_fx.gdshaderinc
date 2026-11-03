@@ -51,9 +51,10 @@ vec4 dj_look(vec2 uv0) {
 		float head = progress * 1.3;
 		float behind = head - uv0.x;
 		if (behind < 0.0) { discard; }
-		float trail = 1.0 - smoothstep(0.0, 0.8, behind);
+		// the swept part stays solid (at least 60%) so the whole arc reads, brightest at the leading edge
+		float trail = mix(0.6, 1.0, 1.0 - smoothstep(0.0, 0.6, behind));
 		float lead = 1.0 - smoothstep(0.0, 0.07, behind);
-		float edge = 1.0 - smoothstep(0.0, 0.16, uv0.y);
+		float edge = 1.0 - smoothstep(0.0, 0.3, uv0.y);
 		float inner = (1.0 - smoothstep(0.1, 1.0, uv0.y)) * (1.0 - edge);
 		float flame = 0.6 + 0.4 * vnoise(vec2(uv0.x * 5.0 - progress * 6.0, uv0.y * 7.0 + seed));
 		c = (color.rgb * edge * 1.5 + color2.rgb * inner * flame * 1.1) * trail + mix(color.rgb, vec3(1.0), 0.45) * lead * edge * 0.8;

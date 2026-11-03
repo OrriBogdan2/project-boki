@@ -269,9 +269,9 @@ func crescent(at: Vector3, dir: Vector2, arc_deg: float, reach: float, col: Colo
 func ghosts(from: Vector3, to: Vector3, count: int, yaw: float, col: Color, scl := 1.0) -> void:
 	for i in count:
 		var k := float(i + 1) / float(count + 1)
-		var build := func(): return _mi(Models.capsule(0.3, 1.25), solid(Color(col, 0.55)))
+		var build := func(): return _mi(Models.capsule(0.3, 1.25), solid(Color(col, 0.75)))
 		var n := _take("ghost", build) as MeshInstance3D
-		(n.material_override as StandardMaterial3D).albedo_color = Color(col, 0.55)
+		(n.material_override as StandardMaterial3D).albedo_color = Color(col, 0.75)
 		n.global_position = from.lerp(to, k) + Vector3(0, 0.7 * scl, 0)
 		n.rotation = Vector3(0, yaw, 0)
 		n.scale = Vector3(1.0, 1.0, 1.25) * scl
@@ -486,7 +486,7 @@ func _process(delta: float) -> void:
 		n.visible = true
 		match String(e["kind"]):
 			"ghost":
-				(n as MeshInstance3D).material_override.albedo_color = Color(e["col"], 0.55 * (1.0 - u))
+				(n as MeshInstance3D).material_override.albedo_color = Color(e["col"], 0.75 * (1.0 - u * u))
 			"pillar":
 				mt.set_shader_parameter("life", u)
 			_:

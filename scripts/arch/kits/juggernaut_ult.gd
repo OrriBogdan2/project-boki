@@ -49,7 +49,7 @@ func start() -> void:
 	st = {"phase": "guard", "t": 0.0, "dir": h.aim_dir(), "blocks": 0, "last_block": -9.0}
 	k.play("jug_guard")
 	_show_glow(true)
-	k.m.fx.word(h.pos + Vector3(0, 3.6, 0), String(data()["name"]).to_upper(), GOLD, true)
+	k.m.fx.word(h.pos + Vector3(0, 2.7, 0), String(data()["name"]).to_upper(), GOLD, false)      # low and small: it stays over him in view
 	k.m.sfx("jug_guard", h.pos, -2.0 if h.is_local() else -5.0, 1.0)
 	k.m.fx.ring(h.pos, 1.3, Color(GOLD, 0.9), 0.3)
 	k.net_ring(h.pos, 1.3, GOLD)
@@ -191,18 +191,14 @@ func _show_glow(on: bool) -> void:
 func _make_glow() -> Node3D:
 	var n := Node3D.new()
 	var shell := MeshInstance3D.new()
-	shell.mesh = Models.sphere(0.9, 16)
-	shell.material_override = Models.glow_mat(Color(GOLD, 0.22))
-	shell.scale = Vector3(1.0, 1.35, 1.0)
+	# a gold shell hugging the body, alpha blended so it stays gold on grass; no light (it pooled into a pale
+	# disc on the ground round his feet)
+	shell.mesh = Models.sphere(0.7, 16)
+	shell.material_override = DJFx.solid(Color(GOLD, 0.3))
+	shell.scale = Vector3(1.0, 1.5, 1.0)
 	shell.position.y = 1.05
 	shell.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	n.add_child(shell)
-	var lt := OmniLight3D.new()
-	lt.light_color = GOLD
-	lt.light_energy = 2.0
-	lt.omni_range = 3.2
-	lt.position.y = 1.2
-	n.add_child(lt)
 	k.h.add_child(n)
 	k.self_nodes.append(n)
 	return n

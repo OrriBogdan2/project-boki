@@ -260,8 +260,8 @@ func _tick_aim_line() -> void:
 		return
 	var to := AimMode.point(h, float(h.wpn.get("range", 12.0)) * (EMP_RANGE_K if primed_t > 0.0 else 1.0))
 	if primed_t > 0.0:
-		AimKit.line(h, "aim", {"to": to, "col": EMP_LINE, "alpha": 1.6, "lw": 0.11})
-		AimKit.line(h, "aim_glow", {"to": to, "col": EMP_LINE, "alpha": 0.5, "lw": 0.3, "arrow": false})
+		AimKit.line(h, "aim", {"to": to, "col": EMP_LINE, "alpha": 1.6, "lw": 0.13})
+		AimKit.line(h, "aim_glow", {"to": to, "col": EMP_LINE, "alpha": 0.35, "lw": 0.34, "arrow": false})
 	else:
 		AimKit.hide(h, "aim_glow")
 		AimKit.line(h, "aim", {"to": to, "col": AIM_LILAC, "alpha": 0.6})
@@ -375,7 +375,10 @@ func on_dash(use_ex: bool) -> bool:
 	if use_ex:
 		# the long (air) dash is the Cartwheel from a jump: a crouched flick into a sideways cartwheel that
 		# carries its speed on (the sheet's ~8m over ~0.95s) and ends where she lands, with a cyan streak
+		h.ex_next = false            # her own distance and time, not the class's long dash
 		travel(float(dd["air_dist"]), float(dd["air_time"]), {"invuln": 0.1}, true)
+		h.dash_is_ex = true
+		h.vel.y = maxf(h.vel.y, 0.0)
 		vault = {"t": 0.0, "dur": h.roll_t, "speed": h.roll_speed, "air": true}
 		play("thf_exdash")
 		for i in 3:
@@ -529,10 +532,10 @@ func _tick_bola_cast(dt: float) -> void:
 		return
 	bola_cast["t"] = float(bola_cast["t"]) - dt
 	var k := 1.0 - clampf(float(bola_cast["t"]) / float(bd["cast"]), 0.0, 1.0)
-	# a strip with chevrons in the Bola's gold (the source's is white); the fill front runs toward the throw
+	# a strip with chevrons in the Bola's violet (the source's is white); the gold fill front runs to the throw
 	AimKit.lane(h, "rmb",
 			{"len": lane_len(), "width": float(bd["lane_w"]), "chevrons": 4, "tip": true, "fill": k,
-					"col": col_of(rmb_def()), "col2": BOLA_HOT, "alpha": 1.35})
+					"col": BOLA_CORD, "col2": BOLA_HOT, "alpha": 1.6})
 	_whirl_bola()
 	if float(bola_cast["t"]) <= 0.0:
 		bola_cast = {}
@@ -542,7 +545,9 @@ func _tick_bola_cast(dt: float) -> void:
 
 ## The two weights whirling round the raised hand through the wind-up (everyone sees them).
 func _whirl_bola() -> void:
-	var at := hand_pos(true) + Vector3(0, 0.15, 0)
+	# over her head, where the raised hand circles (from above the hand itself hides under the hood)
+	var top := h.pos + Vector3(0, 2.0 * float(h.cdat.get("scale", 1.0)), 0)
+	var at := hand_pos(true).lerp(top, 0.6)
 	var spin: float = m.time * 24.0
 	fx().place("bolaw%d" % h.get_instance_id(), "bola", at, Vector2(cos(spin), sin(spin)), col_of(rmb_def()),
 			BOLA_CORD, 0.0, 0.0)

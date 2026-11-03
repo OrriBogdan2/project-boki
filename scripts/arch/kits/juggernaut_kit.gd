@@ -21,7 +21,7 @@ extends ArchKit
 ## Matched to the footage in briefs/hero-ref/juggernaut.md; docs/heroes/juggernaut.md.
 
 const SLASH_OUT := Color("ff3df0")     # the slash crescent's magenta edge
-const SLASH_IN := Color("ffe9a0")      # ... and its flame-yellow fill
+const SLASH_IN := Color("ffc83a")      # ... and its flame-yellow fill
 const LUNGE_RED := Color("ff4a3a")     # the Lunge lane while charging
 const LUNGE_FULL := Color("ff3df0")    # ... at full
 const DROP_PURPLE := Color("b06aff")   # the Meteor Drop's landing disc
@@ -127,17 +127,8 @@ func _make_aura() -> void:
 	if aura and is_instance_valid(aura):
 		return
 	aura = Node3D.new()
-	var rc := res_col()
-	# a red heat shell on the body (alpha blended, so it stays red on grass); no ground disc and no light
-	# pooling on the ground under him: the embers and drips carry the rest
-	var sh := MeshInstance3D.new()
-	sh.mesh = Models.sphere(0.95, 16)
-	sh.material_override = DJFx.solid(Color(rc.darkened(0.15), 0.2))
-	sh.scale = Vector3(1.0, 1.35, 1.0)
-	sh.position.y = 1.05
-	sh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	sh.name = "Shell"
-	aura.add_child(sh)
+	# the Enraged look is on the body: embers streaming off him and dark red drips (_tick_look), no shell
+	# or ground disc and no light (from above those read as a pale disc that hid his feet)
 	h.add_child(aura)
 
 func _drop_aura() -> void:
@@ -161,11 +152,11 @@ func _tick_look(dt: float) -> void:
 			h.model.set_meta("base_scale", h.model.scale)
 		h.model.scale = (h.model.get_meta("base_scale") as Vector3) * (1.0 + 0.16 * grow)
 	if aura and is_instance_valid(aura):
-		var sh := aura.get_node_or_null("Shell") as MeshInstance3D
-		if sh: sh.scale = Vector3(1.0, 1.35, 1.0) * (1.0 + 0.06 * sin(m.time * 10.0))
-		if randf() < dt * 14.0:
+		if randf() < dt * 18.0:
 			for sx in [-0.45, 0.45]:
 				m.fx.burst(h.pos + Vector3(sx, 1.75, 0), res_col(), 2, 1.6, 0.5, -3.0, 0.9)
+			var on_body := Vector3(randf_range(-0.35, 0.35), randf_range(0.5, 1.6), randf_range(-0.35, 0.35))
+			m.fx.burst(h.pos + on_body, Color("ff5a1a"), 1, 0.9, 0.45, -4.0, 0.8)
 			# dark red drips running off him
 			m.fx.burst(h.pos + Vector3(randf_range(-0.4, 0.4), 1.2, randf_range(-0.4, 0.4)), Color("8a1010"), 1, 0.4,
 					0.5, 6.0, 0.8)
@@ -447,7 +438,7 @@ func _wave() -> void:
 		m.later(1.2 * s / float(ld["wave_speed"]), func():
 			m.fx.burst(p + Vector3(0, 0.5, 0), res_col() if full else Color("ffb070"), 6 + int(6 * k), 2.5 + 2.0 * k,
 					0.4, -4.0, 0.9 + 0.6 * k, Vector3.UP, 50.0))
-	m.fx.slash(h.pos + Vector3(0, 0.6, 0), atan2(dv.y, dv.x), deg_to_rad(70.0), 2.6, Color("ffb070"), true)
+	fx().crescent(h.pos + Vector3(0, 0.6, 0), dv, 70.0, 2.6, WAVE_RED, WAVE_EDGE, 0.25, 0.0, 3.0)
 	m.sfx("cleave", h.pos, -1.0, 0.7)
 	m.sfx("ab_blast", h.pos, -5.0 if not full else -2.0, 1.2 - 0.3 * k)
 	h.swing_t = 0.18
@@ -527,7 +518,7 @@ func _tip() -> void:
 				{"src": "abil", "ab": "dodge", "tags": ["dodge", "tip"], "kb": dv * float(dd["tip_kb"]),
 						"wallstun": float(dd["tip_stun"]), "melee": true, "crit": true})
 		m.fx.word(f.pos + Vector3(0, 2.2, 0), "TIP", res_col(), false)
-	m.fx.slash(h.pos + Vector3(0, 0.9, 0), atan2(dv.y, dv.x), deg_to_rad(100.0), 2.2, col_of(dd), true)
+	fx().crescent(h.pos + Vector3(0, 0.9, 0), dv, 100.0, 2.2, FLAME_ORANGE, FLAME_HOT, 0.25, 0.0, 3.0)
 	if hit:
 		tips += 1
 		m.sfx("cleave", at, -2.0, 0.9)
@@ -657,12 +648,12 @@ func _slam() -> void:
 
 ## The sweet spot's own mark on the ground: a 3m red-orange shock ring with dark cracks running out of it.
 func _shock_ring(at: Vector3) -> void:
-	m.fx.ring(at, 1.5, SWEET_RING, 0.4)
-	fx().crescent(at + Vector3(0, 0.1, 0), h.aim_dir(), 340.0, 1.6, SWEET_RING, Color("6a1a0a"), 0.45, 0.0, 4.0)
-	for i in 6:
-		var a := TAU * float(i) / 6.0 + randf_range(-0.3, 0.3)
-		fx().streak(at + Vector3(0, 0.06, 0), Vector2(-cos(a), -sin(a)), randf_range(1.4, 2.0), 0.16, Color("3a1208"),
-				SWEET_RING, 0.6)
+	m.fx.ring(at, 1.5, SWEET_RING, 0.6)
+	fx().crescent(at + Vector3(0, 0.1, 0), h.aim_dir(), 355.0, 1.6, SWEET_RING, Color("6a1a0a"), 0.8, 0.0, 6.0)
+	for i in 7:
+		var a := TAU * float(i) / 7.0 + randf_range(-0.3, 0.3)
+		fx().streak(at + Vector3(0, 0.06, 0), Vector2(-cos(a), -sin(a)), randf_range(1.5, 2.1), 0.28, Color("2a0c04"),
+				SWEET_RING, 0.9)
 
 ## The hold: a charged dash attack into the first foe in its path; a miss doubles the cooldown.
 func _lunge(k: float) -> void:
@@ -859,7 +850,8 @@ func _tick_tells() -> void:
 			if f.max_hp > 0.0 and f.hp / f.max_hp < float(sl["low"]):
 				AimKit.circle(h, "exec%d" % f.get_instance_id(),
 						{"at": f.pos, "r": f.r + 0.4, "col": EXEC_RED, "hot": 0.5, "lw": 0.1})
-		if not h.grounded and drop.is_empty() and not h.gliding:
+		# (not while a Lunge charges through a jump: that release is the Lunge, not a Meteor Drop)
+		if not h.grounded and drop.is_empty() and not h.gliding and not rmb_down:
 			AimKit.circle(h, "drop_aim",
 					{"at": _drop_point(), "r": float(rmb_def()["drop"]["radius"]), "col": DROP_PURPLE, "alpha": 0.7,
 							"ticks": true})

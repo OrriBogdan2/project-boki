@@ -2,7 +2,8 @@ class_name DJDemo
 extends RefCounted
 ## Animation strips of Dancer (thief) and Juggernaut for the owner's review (used by ArenaDemo):
 ## --arena-demo=anim_<move> --arena-shot=<png>. Each is 6 frames: anticipation, release, follow-through,
-## recovery. The move is triggered at 0.5s unless noted.
+## recovery. The move is triggered at 0.5s unless noted. --arena-demo=dj_<moment> is one frame at the
+## moment itself (STILLS); add --demo-zoom=1.0 for the gameplay zoom.
 
 const ANIM := {
 	"thf_lmb": ["thief", "arc_bolts", [0.5, 0.53, 0.58, 0.64, 0.74, 0.95]],
@@ -28,6 +29,21 @@ const ANIM := {
 	"jug_haul": ["juggernaut", "greatsword", [1.0, 1.24, 1.32, 1.42, 1.52, 1.9]],
 	"jug_spin": ["juggernaut", "greatsword", [0.88, 0.92, 0.98, 1.04, 1.12, 1.35]],
 	"jug_roar": ["juggernaut", "greatsword", [0.5, 0.56, 0.64, 0.8, 1.1, 1.5]],
+	"jug_lunge_air": ["juggernaut", "greatsword", [0.55, 0.75, 0.95, 1.3, 1.42, 1.65]],
+}
+
+## The stills: hero, weapon, where the hunter starts from the dummy.
+const STILLS := {
+	"lmb": ["thief", Vector3(-6.0, 0, 0)], "fizzle": ["thief", Vector3(-6.0, 0, 0)],
+	"primed": ["thief", Vector3(-6.0, 0, 0)], "bola_whirl": ["thief", Vector3(-4.5, 0, 0)],
+	"bola": ["thief", Vector3(-3.4, 0, 0.2)], "knife": ["thief", Vector3(-6.0, 0, 0)],
+	"blink": ["thief", Vector3(-6.0, 0, 0)], "knock": ["thief", Vector3(-3.0, 0, 0)],
+	"exdash": ["thief", Vector3(-10.0, 0, 3.0)], "vault": ["thief", Vector3(-5.0, 0, 0)],
+	"slash": ["juggernaut", Vector3(-2.6, 0, 0)], "wave": ["juggernaut", Vector3(-8.0, 0, 0)],
+	"chain_fly": ["juggernaut", Vector3(-7.0, 0, 0)], "chain": ["juggernaut", Vector3(-7.0, 0, 0)],
+	"rampage": ["juggernaut", Vector3(-6.5, 0, 0)], "enraged": ["juggernaut", Vector3(-3.0, 0, 1.5)],
+	"sweet": ["juggernaut", Vector3(-3.3, 0, 0)], "lunge_air": ["juggernaut", Vector3(-7.5, 0, 0)],
+	"exec": ["juggernaut", Vector3(-3.0, 0, 0)],
 }
 
 static func at(t: float, dt: float, when: float) -> bool:
@@ -53,9 +69,12 @@ static func trigger(P: Hunter, D: Hunter, mv: String, t: float, dt: float) -> vo
 				P.do_dash()
 			if t > 0.5 and t < 0.8: P.inp["move"] = Vector2(0, 1)
 		"thf_exdash":
+			# sideways, away from the dummy (toward it the hunter ends up inside its model, which filled
+			# the old strips' last frames with a big pink blur)
+			if at(t, dt, 0.38): P.do_jump()
 			if at(t, dt, 0.5):
 				P.ex_cd = 0.0
-				P.roll_dir = Vector2(0, 1)
+				P.inp["move"] = Vector2(0, 1)
 				K.on_dash(true)
 		"thf_bola":
 			if at(t, dt, 0.5):
@@ -76,8 +95,12 @@ static func trigger(P: Hunter, D: Hunter, mv: String, t: float, dt: float) -> vo
 		"thf_encore":
 			if at(t, dt, 0.5): cast_ult(P)
 			P.inp["fire"] = t > 0.9 and t < 1.0
-		"thf_reset", "thf_flourish", "jug_roar":
+		"thf_reset", "jug_roar":
 			if at(t, dt, 0.5): K.play(mv)
+		"thf_flourish":
+			if at(t, dt, 0.5): (K as ThiefKit).on_knock(D, true)      # the payoff: the star, the pillar, the flourish
+		"jug_lunge_air":
+			lunge_air(P, K, t, dt, 0.5)
 		"jug_slash":
 			if t < 0.45: P.teleport(Vector3(D.pos.x - 2.4, P.pos.y, D.pos.z))
 			P.inp["fire"] = t > 0.49 and t < 0.51
@@ -113,9 +136,10 @@ static func trigger(P: Hunter, D: Hunter, mv: String, t: float, dt: float) -> vo
 				P.dashes = P.max_dashes()
 				P.do_dash()
 		"jug_exdash":
+			if at(t, dt, 0.38): P.do_jump()
 			if at(t, dt, 0.5):
 				P.ex_cd = 0.0
-				P.grounded = false
+				P.inp["move"] = Vector2(0, 1)
 				K.on_dash(true)
 		"jug_chain":
 			if at(t, dt, 0.5):
@@ -157,3 +181,116 @@ static func cast_ult(P: Hunter) -> void:
 	P.lvl = maxi(P.lvl, int(Hunter.ULT_AT[0]))
 	P.ak.cd["x"] = 0.0
 	HunterKeys.ult_pressed(P)
+
+## The Lunge charged from a jump: jump, hold through the rise and fall with the lane up, let go.
+static func lunge_air(P: Hunter, K: ArchKit, t: float, dt: float, go: float) -> void:
+	if at(t, dt, go):
+		K.ch_rmb = 1.0
+		K.cd["rmb"] = 0.0
+		K.bot_hold["rmb"] = 0.85
+		K.press_rmb()
+	if at(t, dt, go + 0.32): P.do_jump()
+
+## One still of a moment (--arena-demo=dj_<what>): sets the hero up, plays it, returns when to shoot.
+static func still(A: Arena, P: Hunter, D: Hunter, w: String, t: float, dt: float) -> float:
+	var spec: Array = STILLS.get(w, ["thief", Vector3(-4.0, 0, 0)])
+	var K: ArchKit = P.ak
+	if t < 0.05:
+		var hero := String(spec[0])
+		if P.arch != hero: A.set_arch(hero, "arc_bolts" if hero == "thief" else "greatsword")
+		A.set_kin("")
+		P.teleport(D.pos + (spec[1] as Vector3))
+		A.home = P.pos
+		K = P.ak
+	P.inp["aim"] = D.pos + Vector3(0, 0.9, 0)
+	P.inp["aim_y"] = D.pos.y
+	P.inp["move"] = Vector2.ZERO
+	P.hp = P.max_hp * (0.55 if w == "knock" else 1.0)      # (knock: so the heal has room to show)
+	if P.ammo < 3: P.ammo = int(P.wpn["mag"])
+	if P.arch == "thief":
+		return _still_dancer(A, P, D, K as ThiefKit, w, t, dt)
+	return _still_zedran(A, P, D, K as JuggernautKit, w, t, dt)
+
+static func _still_dancer(A: Arena, P: Hunter, D: Hunter, K: ThiefKit, w: String, t: float, dt: float) -> float:
+	match w:
+		"lmb":
+			P.inp["fire"] = t > 0.4 and t < 0.43
+			return 0.445
+		"fizzle":
+			P.inp["aim"] = P.pos + Vector3(3.5, 0.9, -1.5)
+			P.inp["fire"] = t > 0.4 and t < 0.43
+			return 0.4 + 3.8 / 45.0 + 0.1
+		"primed", "vault":
+			if at(t, dt, 0.4):
+				P.dashes = P.max_dashes()
+				P.inp["move"] = Vector2(0, 1)
+				P.do_dash()
+			return 0.62 if w == "vault" else 1.05
+		"bola_whirl", "bola":
+			if w == "bola" and t < 0.6:
+				var H: Hunter = A.dummies[2]["h"]
+				H.teleport(D.pos + (D.pos - P.pos).normalized() * 2.6)
+				H.vel = Vector3.ZERO
+			if at(t, dt, 0.4):
+				K.ch_rmb = 1.0
+				K.cd["rmb"] = 0.0
+				K.press_rmb()
+			if K.bola_pairs > 0 and not A.has_meta("bp_at"): A.set_meta("bp_at", t)
+			return 0.68 if w == "bola_whirl" else float(A.get_meta("bp_at", 9.0)) + 0.1
+		"knife", "blink":
+			if at(t, dt, 0.4):
+				K.cd["e"] = 0.0
+				K.use_e()
+			if w == "blink" and at(t, dt, 1.0): K.use_e()
+			return 0.95 if w == "knife" else 1.0 + 0.04
+		"knock":
+			if at(t, dt, 0.4): K.on_knock(D, true)
+			return 0.52
+		"exdash":
+			if at(t, dt, 0.35): P.do_jump()
+			if at(t, dt, 0.45):
+				P.ex_cd = 0.0
+				P.roll_dir = Vector2(1, 0)
+				K.on_dash(true)
+			return 0.85
+	return 1.0
+
+static func _still_zedran(A: Arena, P: Hunter, D: Hunter, K: JuggernautKit, w: String, t: float, dt: float) -> float:
+	match w:
+		"slash":
+			P.inp["fire"] = t > 0.4 and t < 0.42
+			return 0.5
+		"wave":
+			P.inp["fire"] = t > 0.3 and t < 1.35
+			if (P.ak as JuggernautKit).waves > 0 and not A.has_meta("wv_at"): A.set_meta("wv_at", t)
+			return float(A.get_meta("wv_at", 9.0)) + 0.02
+		"chain_fly", "chain":
+			if at(t, dt, 0.4):
+				K.cd["e"] = 0.0
+				K.use_e()
+			return 0.44 if w == "chain_fly" else 1.1
+		"rampage":
+			if at(t, dt, 0.4):
+				P.dashes = P.max_dashes()
+				P.do_dash()
+			return 0.4 + 0.15 + 0.2
+		"enraged":
+			if at(t, dt, 0.3): K.gain_rage(200.0)
+			return 1.4
+		"sweet":
+			if at(t, dt, 0.3):
+				K.ch_rmb = 1.0
+				K.cd["rmb"] = 0.0
+				P.inp["sec_hold"] = false
+				K.press_rmb()
+			if K.sweet_spots > 0 and not A.has_meta("ss_at"): A.set_meta("ss_at", t)
+			return float(A.get_meta("ss_at", 9.0)) + 0.12
+		"lunge_air":
+			lunge_air(P, K, t, dt, 0.3)
+			return 0.3 + 0.32 + 0.22
+		"exec":
+			D.hp = D.max_hp * 0.25
+			K.ch_rmb = 1.0
+			K.cd["rmb"] = 0.0
+			return 0.8
+	return 1.0

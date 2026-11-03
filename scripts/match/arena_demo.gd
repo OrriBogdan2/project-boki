@@ -257,6 +257,8 @@ static func tick(A: Arena, dt: float) -> void:
 					P.ak.bot_hold["rmb"] = 0.9
 					P.ak.press_rmb()
 				at_t = go + 0.7 if "--hold-shot" in OS.get_cmdline_user_args() else go + 1.05
+		_ when w.begins_with("dj_"):
+			at_t = DJDemo.still(A, P, D, w.substr(3), t, dt)      # Dancer and Zedran stills (scripts/arch/dj_demo.gd)
 		_ when w.begins_with("pair_"):
 			at_t = PairDemo.tick(A, P, D, t, dt, w)          # Dolm and Ostra (scripts/arch/pair_demo.gd)
 		_ when w.begins_with("anim_"):
@@ -271,6 +273,7 @@ static func tick(A: Arena, dt: float) -> void:
 				if m.cam: m.cam.zoom = zoom_or(0.42)
 				m.set_meta("zoom_hold", zoom_or(0.42))
 				m.get_viewport().warp_mouse(Vector2(4, 4))      # the cursor's crosshair off the hunter
+				if m.cam: m.cam.lead = 0.0                       # ... without the camera leaning toward it
 			_aim(P, D)
 			P.inp["move"] = Vector2.ZERO
 			P.hp = P.max_hp

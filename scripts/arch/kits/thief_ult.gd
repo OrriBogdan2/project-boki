@@ -45,7 +45,7 @@ func start() -> void:
 	st = {"t": 0.0, "next": float(d["grow"]), "n": int(d["shots"]), "hits": {}}
 	var h := k.h
 	k.play("thf_encore")
-	k.m.fx.word(h.pos + Vector3(0, 3.6, 0), String(d["name"]).to_upper(), RING_COL, true)
+	k.m.fx.word(h.pos + Vector3(0, 2.7, 0), String(d["name"]).to_upper(), RING_COL, false)      # low and small: it stays over him in view
 	k.m.sfx("dj_encore", h.pos, -2.0 if h.is_local() else -5.0, 1.0)
 	k.m.later(float(d["grow"]), func(): if running(): k.m.sfx("dj_encore_whirr", h.pos, -6.0, 1.0))
 	k.net_ring(h.pos, float(d["reach"]), RING_COL)
