@@ -109,7 +109,7 @@ func _ready_up(m: Match) -> void:
 	var k := hunter.ak
 	for i in QUIET_MAX:
 		var busy := k.e_t > 0.0 or k.r_t > 0.0 or not k.fuse.is_empty() or k.rmb_down or k.ult_running()
-		if not busy and hunter.roll_t <= 0.0 and hunter.grounded and i > 30:
+		if not busy and hunter.roll_t <= 0.0 and k.dash_left() <= 0.0 and hunter.grounded and i > 30:
 			break
 		m.step(Match.DT)
 	hunter.teleport(get_meta("home"))
@@ -160,16 +160,16 @@ func _trial(m: Match, slot: String, in_air: bool, late: bool) -> String:
 		n += 1
 	if not hunter.ak.in_dash():
 		return "n/a"
-	while late and hunter.ak.in_dash() and hunter.roll_t > Match.DT * 1.5 and n < 300:
+	while late and hunter.ak.dash_left() > Match.DT * 1.5 and n < 300:
 		m.step(Match.DT)
 		n += 1
-	var roll_left := hunter.roll_t
+	var dash_left := hunter.ak.dash_left()
 	var before := _snap()
 	_press(slot)
 	m.step(Match.DT)
 	hunter.inp["fire"] = false
 	if _went_off(before, slot):
-		var stopped := not hunter.ak.in_dash() and roll_left > Match.DT * 2.5
+		var stopped := not hunter.ak.in_dash() and dash_left > Match.DT * 2.5
 		return "cancel" if stopped else "fire"
 	var ended := -1
 	for i in WATCH:
