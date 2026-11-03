@@ -3252,6 +3252,8 @@ func _update_pickups(dt: float) -> void:
 					continue
 				if net_on and not is_host and h != player:
 					continue
+				if p["kind"] == "ckey" and not KeyChest.has_room(h):
+					continue      # a full key stack leaves the key on the ground, glinting
 				var d: float = Vector2(h.pos.x - pos.x, h.pos.z - pos.z).length()
 				if d < 2.2 and absf(h.pos.y - pos.y) < 2.0:
 					var dir: Vector3 = (h.pos + Vector3(0, 0.6, 0) - pos)

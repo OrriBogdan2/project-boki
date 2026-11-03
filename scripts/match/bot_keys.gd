@@ -21,9 +21,9 @@ static func _chests_left(m: Match) -> int:
 		if not c["open"] and not c.get("free", false): n += 1
 	return n
 
-## [goal, kind] for a bot that wants a key, or [] (it has enough for the chests that are left).
+## [goal, kind] for a bot that wants a key, or [] (it has enough for the chests that are left, or a full stack).
 static func goal(m: Match, h: Hunter, cur: Vector3) -> Array:
-	if h.chest_keys >= _chests_left(m):
+	if h.chest_keys >= _chests_left(m) or not KeyChest.has_room(h):
 		return []
 	var best := Vector3.INF
 	var bd := SEE_KEY

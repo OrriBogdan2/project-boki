@@ -37,10 +37,34 @@ static func prompt(h: Hunter, c: Dictionary) -> Dictionary:
 static func spend(h: Hunter, c: Dictionary) -> bool:
 	if bool(c.get("free", false)):
 		return true
-	if h == null or h.chest_keys <= 0:
-		return false
-	h.chest_keys -= 1
-	return true
+	return h != null and take(h, "chest", 1) == 1
+
+## The most chest keys a hunter can hold (content/rules/keys.json "keys" cap).
+static func cap() -> int:
+	return int(KeyRun.rules()["keys"]["cap"])
+
+## Keys of `kind` ("chest" or "rift") that `h` holds: what the utility belt shows.
+static func count(h: Hunter, kind: String) -> int:
+	return h.chest_keys if kind == "chest" else h.rift_keys
+
+## Removes up to `n` keys of `kind` from `h` and returns how many it took (the belt spends through this).
+static func take(h: Hunter, kind: String, n: int) -> int:
+	var taken := mini(n, count(h, kind))
+	if kind == "chest":
+		h.chest_keys -= taken
+	else:
+		h.rift_keys -= taken
+	return taken
+
+## Adds up to `n` chest keys, never past the cap, and returns how many fit. The rest stay where they were.
+static func give(h: Hunter, n: int) -> int:
+	var fits := clampi(cap() - h.chest_keys, 0, n)
+	h.chest_keys += fits
+	return fits
+
+## True when `h` has room for one more chest key (a full hunter walks past a key on the ground).
+static func has_room(h: Hunter) -> bool:
+	return h.chest_keys < cap()
 
 ## Pressing interact at a locked chest with no key: a rattle, at most twice a second.
 static func deny(m: Match, h: Hunter, c: Dictionary) -> void:

@@ -150,6 +150,7 @@ func _chest_and_keys() -> void:
 	ok("a dropped key lies on the ground", m.pickups.size() == np + 1 and String(m.pickups[-1]["kind"]) == "ckey")
 	step(m, 1.5)
 	ok("walking into it picks it up", R.chest_keys == 1, "keys %d" % R.chest_keys)
+	await _cap_and_belt(m, P, R)
 	# a carrier dies
 	var K: KeyRun = m.keys
 	var car: Mob = K.carriers.filter(func(mb): return not (mb is Shrubling) and not mb.dead)[0]
@@ -161,6 +162,30 @@ func _chest_and_keys() -> void:
 			"%d -> %d" % [before, after])
 	m.queue_free()
 	await main.get_tree().process_frame
+
+## The belt stack: at most 3 chest keys; past that a key stays on the ground and a box keeps the rest.
+## KeyChest.count / take are what the utility belt shows and spends.
+func _cap_and_belt(m: Match, P: Hunter, R: Hunter) -> void:
+	var cap := KeyChest.cap()
+	R.chest_keys = cap
+	var np := m.pickups.size()
+	m.drop("ckey", R.pos + Vector3(0.2, 0.6, 0), 1)
+	step(m, 1.5)
+	var still_there := m.pickups.size() == np + 1
+	var held := R.chest_keys
+	ok("a full stack (%d) leaves the key on the ground" % cap, still_there and held == cap, "keys %d" % held)
+	ok("belt adapter: count", KeyChest.count(R, "chest") == cap and KeyChest.count(R, "rift") == R.rift_keys)
+	ok("belt adapter: take spends keys", KeyChest.take(R, "chest", 2) == 2 and R.chest_keys == cap - 2)
+	ok("belt adapter: take never goes below zero", KeyChest.take(R, "chest", 9) == cap - 2 and R.chest_keys == 0)
+	step(m, 1.5)
+	ok("with room again it picks the key up", R.chest_keys == 1 and m.pickups.size() == np, "keys %d" % R.chest_keys)
+	P.chest_keys = 0
+	var box := Life.drop_box(m, P, "test")
+	box["chest_keys"] = cap + 2
+	R.chest_keys = 0
+	Life.smart_loot(m, R, box)
+	var kept := int(box["chest_keys"])
+	ok("looting a box past the cap leaves the rest in it", R.chest_keys == cap and kept == 2, "kept %d" % kept)
 
 # ------------------------------------------------------------------ 5. the Shrubling
 ## Gets S running: a light hit, then the hunter on its heels (3.5 m) for `secs`.

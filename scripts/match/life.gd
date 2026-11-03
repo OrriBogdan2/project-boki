@@ -312,8 +312,7 @@ static func take_item(m: Match, h: Hunter, b: Dictionary, it: Dictionary) -> voi
 		"keys":
 			h.rift_keys += int(b.get("keys", 0)); b["keys"] = 0
 		"chest_keys":
-			h.chest_keys += int(b.get("chest_keys", 0))
-			b["chest_keys"] = 0
+			b["chest_keys"] = int(b.get("chest_keys", 0)) - KeyChest.give(h, int(b.get("chest_keys", 0)))
 		"gear":
 			var gi := int(it["i"])
 			if gi < (b["gear"] as Array).size():
@@ -400,7 +399,8 @@ static func loot_box(m: Match, h: Hunter, b: Dictionary) -> void:
 	h.tonics += int(b["tonics"])
 	h.armor_kits += int(b["kits"])
 	h.rift_keys += int(b.get("keys", 0))
-	h.chest_keys += int(b.get("chest_keys", 0))
+	var box_keys := int(b.get("chest_keys", 0))
+	var keys_left := box_keys - KeyChest.give(h, box_keys)
 	_kin_from_box(m, h, b)
 	var got := int(b["gems"])
 	b["gems"] = 0
@@ -408,7 +408,7 @@ static func loot_box(m: Match, h: Hunter, b: Dictionary) -> void:
 	b["tonics"] = 0
 	b["kits"] = 0
 	b["keys"] = 0
-	b["chest_keys"] = 0
+	b["chest_keys"] = keys_left
 	_settle_box(b)
 	m.sfx("pickup", b["pos"], -2.0, 0.9)
 	m.fx.burst(b["pos"] + Vector3(0, 0.6, 0), Color("ffd36a"), 14, 3.0, 0.4)
