@@ -9,6 +9,9 @@ shader_type spatial;
 // terminator and a band of warm "subsurface" glow where light turns to shadow, a crisp rim that
 // catches the key and fill lights, and an optional glossy highlight. Plus the hit flash.
 uniform vec4 albedo : source_color = vec4(1.0);
+// a Warden's 3D model (WardenGlb): its painted atlas, multiplied by albedo (the player's colour pick)
+uniform bool use_tex = false;
+uniform sampler2D albedo_tex : source_color, filter_linear_mipmap, repeat_disable;
 uniform bool use_vertex_color = false;
 uniform bool vertex_ao = false;    // characters: the vertex colour holds baked ambient occlusion (HeroKit)
 uniform float flash : hint_range(0.0, 1.0) = 0.0;
@@ -59,6 +62,7 @@ void vertex() {
 
 void fragment() {
 	vec3 c = albedo.rgb;
+	if (use_tex) { c *= texture(albedo_tex, UV).rgb; }
 	if (use_vertex_color || vertex_ao) { c *= COLOR.rgb; }
 	// hand-painted variation: soft blotches of slightly lighter and darker paint
 	float n = vnoise(lpos.xz * 7.0 + lpos.y * 4.0) * 0.6 + vnoise(lpos.xy * 15.0 + 3.1) * 0.4;

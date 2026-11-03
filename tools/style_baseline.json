@@ -401,7 +401,7 @@
 "long_line": 7
 },
 "scripts/main.gd": {
-"long_line": 400,
+"long_line": 401,
 "nested_ternary": 7,
 "semicolon": 420,
 "shadow": 3
@@ -476,7 +476,7 @@
 "semicolon": 64
 },
 "scripts/match/bot.gd": {
-"long_line": 25,
+"long_line": 26,
 "nested_ternary": 1,
 "semicolon": 49
 },

@@ -1,11 +1,16 @@
 class_name WardenGlb
 extends RefCounted
-## A Warden built in Blender (docs/art/wardens/RIG_CONTRACT.md): when art/wardens/<id>/<id>.glb exists, the
-## procedural hunter Models.hunter built keeps its rig, weapon, glider and hit ring but hides its body, and the
-## .glb's armature follows the rig nodes HunterAnim poses (each bone mapped to one node in BONES). With no file
-## the procedural model stays as it is: the fallback.
+## A Warden's 3D model (docs/art/wardens/RIG_CONTRACT.md): when art/wardens/<name>/<name>.glb exists and the
+## player hasn't set that Warden to procedural (Settings > Video > Warden models), the procedural hunter
+## Models.hunter built keeps its rig, weapon, glider and hit ring but hides its body, and the .glb's armature
+## (WardenSkeleton) follows the rig nodes HunterAnim poses, one bone per node (BONES), so every kit move
+## plays on it. Otherwise the procedural model stays as it is: the fallback.
 
 const DIR := "res://art/wardens"
+## Each Warden's art name, as in docs/art/gen/wardens/<name>_turnaround.png: the folder and file its .glb has.
+const ART := {"bulwark": "bjorn", "archer": "pin", "juggernaut": "zedran", "gunslinger": "vex", "ostra": "ostra",
+	"mage": "vireo", "dolm": "tarek", "thief": "sable", "rimewright": "claire", "ashwick": "cinder",
+	"tender": "moosh", "dredge": "dredge"}
 ## Armature bone -> the rig node it follows (paths under the model root).
 const BONES := {
 	"root": "Rig",
@@ -34,33 +39,72 @@ const OPTIONAL := ["cape", "scarf", "tail", "wings"]
 const KEEP := ["Gun", "Glider", "TeamRing", "Shield", "Shoulder", "Halo", "Focus"]
 ## glTF material name -> the toon shader's painted surface (RIG_CONTRACT "Materials").
 const SLOTS := {"skin": 4, "hair": 5, "cloth": 1, "leather": 2, "metal": 3, "fur": 5, "eyes": 0, "team": 1, "glow": 0}
+## Slots a MantleLook colour pick tints: slot -> [the pick in Models.hunter's look, the Warden's own colour].
+const TINTS := {"skin": ["skin_col", "skin"], "hair": ["hair_col", "hair_col"], "eyes": ["eye_col", "eyes"]}
+const TINT_MAX := 0.35         # a pick moves a painted slot's colour at most this much (x, per channel)
+const GLOW := 1.6              # emission of the glow slot (mechanical eyes, cracks), x its painted colour
+## Empties every .glb exports on its bones (RIG_CONTRACT "Anchor empties"); kits find them with anchor().
+const ANCHORS := ["anchor_head_top", "anchor_chest"]
+## Settings key: Warden id -> "procedural" for a Warden the player keeps on its procedural model.
+const SETTING := "warden_models"
 
 static func path(arch: String) -> String:
-	return "%s/%s/%s.glb" % [DIR, arch, arch]
+	var nm := String(ART.get(arch, arch))
+	return "%s/%s/%s.glb" % [DIR, nm, nm]
 
 static func has_model(arch: String) -> bool:
 	return arch != "" and ResourceLoader.exists(path(arch))
 
-## Dresses the procedural hunter `root` in its Warden's .glb when there is one (meta "glb" says which).
-static func dress(root: Node3D, arch: String) -> void:
+## A Warden is drawn from its .glb when it has one, unless the player set it to procedural.
+static func uses_model(arch: String) -> bool:
+	return has_model(arch) and String((Settings.get_v(SETTING) as Dictionary).get(arch, "3d")) != "procedural"
+
+## The player's pick for one Warden: true for its 3D model, false for the procedural one.
+static func set_model(arch: String, on: bool) -> void:
+	var picks: Dictionary = (Settings.get_v(SETTING) as Dictionary).duplicate()
+	if on:
+		picks.erase(arch)
+	else:
+		picks[arch] = "procedural"
+	Settings.set_v(SETTING, picks)
+
+## The .glb's armature, or null.
+static func skeleton(glb: Node) -> Skeleton3D:
+	var skels: Array = glb.find_children("*", "Skeleton3D", true, false) if glb else []
+	return skels[0] if not skels.is_empty() else null
+
+## One of the model's anchor empties (ANCHORS, or a hero's own), riding its bone; null on a procedural model.
+static func anchor(root: Node3D, anchor_name: String) -> Node3D:
+	var w := root.get_node_or_null("Warden")
+	return w.find_child(anchor_name, true, false) as Node3D if w else null
+
+## Dresses the procedural hunter `root` in its Warden's .glb when it uses one (meta "glb" says which). lk is
+## the look Models.hunter built from (MantleLook params): its colour picks tint the painted slots.
+## The rig's rest, which a .glb's armature must match, is kept in meta "rig_rest" (tools/warden_build.gd reads it).
+static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	root.set_meta("glb", false)
-	if not has_model(arch):
+	var rest := WardenSkeleton.rig_rest(root)
+	root.set_meta("rig_rest", rest)
+	if not uses_model(arch):
 		return
 	var scene := load(path(arch)) as PackedScene
 	var glb: Node3D = scene.instantiate() as Node3D if scene else null
-	var skels: Array = glb.find_children("*", "Skeleton3D", true, false) if glb else []
-	var skel: Skeleton3D = skels[0] if not skels.is_empty() else null
-	if skel == null:
-		push_warning("WardenGlb: %s has no armature; keeping the procedural model" % path(arch))
+	var skel := skeleton(glb)
+	var bad: Array = WardenSkeleton.mismatches(skel, rest) if skel else ["no armature"]
+	if not bad.is_empty():
+		push_warning("WardenGlb: %s does not fit the rig (%s); keeping the procedural model" % [path(arch), str(bad)])
+		if glb:
+			glb.free()
 		return
 	_hide_body(root)
 	glb.name = "Warden"
 	root.add_child(glb)
 	var sync := Sync.new()
-	sync.setup(root, skel)
+	sync.name = "Sync"
+	sync.setup(root, skel, rest)
 	glb.add_child(sync)
 	var mats: Array = root.get_meta("mats", [])
-	mats.append_array(_toon(glb))
+	mats.append_array(_toon(glb, lk, MantleLook.warden(arch)))
 	root.set_meta("mats", mats)
 	root.set_meta("glb", true)
 
@@ -73,21 +117,37 @@ static func _hide_body(n: Node) -> void:
 			(ch as MeshInstance3D).visible = false
 		_hide_body(ch)
 
-## Every surface onto a hero-toon material for its slot (base colour only until the shader takes the atlas).
-static func _toon(glb: Node) -> Array:
+## Every surface onto a hero-toon material for its slot: the baked atlas as its albedo, the baked AO in the
+## vertex colour, tinted by the player's pick where the slot takes one.
+static func _toon(glb: Node, lk: Dictionary, warden: Dictionary) -> Array:
 	var out: Array = []
 	for mi in glb.find_children("*", "MeshInstance3D", true, false):
 		var mesh := (mi as MeshInstance3D).mesh
 		for si in mesh.get_surface_count():
-			var src := mesh.surface_get_material(si)
-			var col := (src as BaseMaterial3D).albedo_color if src is BaseMaterial3D else Color.WHITE
-			var m := Models.toon(col)
+			var src := mesh.surface_get_material(si) as BaseMaterial3D
+			var slot := String(src.resource_name) if src else ""
+			var m := Models.toon(src.albedo_color if src else Color.WHITE)
 			m.set_shader_parameter("vertex_ao", true)
-			m.set_shader_parameter("surface", int(SLOTS.get(String(src.resource_name) if src else "", 1)))
+			m.set_shader_parameter("surface", int(SLOTS.get(slot, 1)))
 			Models.hero_look(m)
+			if src and src.albedo_texture:
+				m.set_shader_parameter("albedo_tex", src.albedo_texture)
+				m.set_shader_parameter("use_tex", true)
+				m.set_shader_parameter("albedo", _tint(slot, lk, warden))
+			if slot == "glow":
+				m.set_shader_parameter("glow", GLOW)
 			(mi as MeshInstance3D).set_surface_override_material(si, m)
 			out.append(m)
 	return out
+
+## How far the player's colour pick moves a painted slot from the Warden's own colour (white: not at all).
+static func _tint(slot: String, lk: Dictionary, warden: Dictionary) -> Color:
+	if not TINTS.has(slot) or not lk.has(TINTS[slot][0]):
+		return Color.WHITE
+	var pick: Color = lk[TINTS[slot][0]]
+	var own: Color = warden[TINTS[slot][1]]
+	var k := func(a: float, b: float) -> float: return clampf(a / maxf(b, 0.05), 1.0 - TINT_MAX, 1.0 + TINT_MAX)
+	return Color(k.call(pick.r, own.r), k.call(pick.g, own.g), k.call(pick.b, own.b))
 
 ## The model-space transform of a rig node (chained up to the model root, so it works out of the tree too).
 static func model_xf(root: Node3D, nd: Node3D) -> Transform3D:
@@ -98,27 +158,32 @@ static func model_xf(root: Node3D, nd: Node3D) -> Transform3D:
 		cur = cur.get_parent()
 	return xf
 
-## Each frame, puts every mapped bone where its rig node has moved it: the node's move since its rest
-## applied to the bone's rest (all in model space).
+## The pose a bone takes for its rig node's pose `now` (model space): the node's move since its rest, applied
+## to the bone's rest. `link` is one of Sync.links.
+static func retarget(now: Transform3D, link: Array) -> Transform3D:
+	return now * (link[2] as Transform3D) * (link[3] as Transform3D)
+
+## Each frame, after the hunter's animation, puts every mapped bone where its rig node has moved it.
 class Sync extends Node:
 	var root: Node3D
 	var skel: Skeleton3D
 	var links: Array = []       # [bone index, rig node, node rest (model space) inverse, bone rest (skeleton space)]
 
-	func setup(model: Node3D, skeleton: Skeleton3D) -> void:
+	func setup(model: Node3D, skeleton: Skeleton3D, rest: Dictionary) -> void:
 		root = model
 		skel = skeleton
+		process_priority = 10       # after Match renders the hunters (HunterAnim.update)
 		for b in BONES:
-			var bi := skel.find_bone(b)
+			var bi := WardenSkeleton.find(skel, b)
 			var nd := root.get_node_or_null(String(BONES[b])) as Node3D
 			if bi < 0 or nd == null:
-				if not b in OPTIONAL:
-					push_warning("WardenGlb: no bone or rig node for %s" % b)
 				continue
-			links.append([bi, nd, WardenGlb.model_xf(root, nd).affine_inverse(), skel.get_bone_global_rest(bi)])
+			links.append([bi, nd, (rest[b] as Transform3D).affine_inverse(), skel.get_bone_global_rest(bi)])
 		links.sort_custom(func(a, c): return int(a[0]) < int(c[0]))     # parents before children
 
 	func _process(_dt: float) -> void:
+		apply()
+
+	func apply() -> void:
 		for l in links:
-			var now := WardenGlb.model_xf(root, l[1])
-			skel.set_bone_global_pose(int(l[0]), now * (l[2] as Transform3D) * (l[3] as Transform3D))
+			skel.set_bone_global_pose(int(l[0]), WardenGlb.retarget(WardenGlb.model_xf(root, l[1]), l))

@@ -845,7 +845,7 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 		sm.set_shader_parameter("shadow_tint", Color(0.6, 0.6, 0.86))
 		sm.set_shader_parameter("light_tint", Color(1.08, 1.0, 0.9))
 		hero_look(sm)
-	WardenGlb.dress(root, arch)      # a Blender-built Warden, when its .glb exists (else this procedural one)
+	WardenGlb.dress(root, arch, lk)      # its 3D model, when it has one and uses it (else this procedural one)
 	root.set_meta("race", rid)
 	root.set_meta("cls", cls)
 	root.set_meta("arch", arch)
