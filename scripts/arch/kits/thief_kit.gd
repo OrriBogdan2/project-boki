@@ -655,7 +655,7 @@ func _tick_wrapped(dt: float) -> void:
 		var e := f as Ent
 		var r := e.r + 0.35 + 0.08 * sin(m.time * 10.0)
 		AimKit.circle(h, "gnd%d" % key,
-				{"at": e.pos, "r": r, "col": col_of(rmb_def()), "all": true, "hot": 0.4, "lw": 0.09})
+				{"at": e.pos, "r": r, "col": BOLA_HOT, "all": true, "lw": 0.1, "alpha": 1.4})
 		AimKit.circle(h, "gnd2%d" % key,
 				{"at": e.pos, "r": r * 0.7, "col": BOLA_HOT, "all": true, "dashed": true})
 

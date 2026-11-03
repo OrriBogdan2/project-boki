@@ -42,7 +42,7 @@ Updated by ext/kitfix-dancer-juggernaut (server update 5) against the footage re
 | RMB hold, Lunge | hold, release | A crouched, coiled wind-up; a lane grows ahead (4.5 to 7.5m) with a fill and turns magenta with a flash and a ping at full (0.8s); a rising whine; the cursor ring fills; you can jump while charging; release flings you forward into the first foe: 14 to 20, a huge white burst and a red slash across them; striking nothing doubles the cooldown | Charge Dash: red lane growing, magenta at full, about 5m, 559 to 771 | Owner: fling far, so the length grows with the charge |
 | RMB air, Meteor Drop | in the air | A purple disc under the cursor (5m at most) shows while it's ready; press to dive onto it: 2.6m, 18, slow 40%; the centre 1.2m +50% and stunned 0.8s | Air Slam: a disc at the cursor, slam lands there | As the source |
 | RMB in the pull | during E | Cinder Spin, Haul Slam, Chain Lunge (below) | Anti-Heal Spin | As before |
-| Dash, Rampage | Shift | 3 charges from rank 1, 3.6m in 0.3s: 7 along it, the tip 14 and a big knock, orange flame streaks; rank 3: the tip +25% | Quick Dash: 3 charges, about 2 bh | As the source; sync62's slower heavy dash kept (0.3s) |
+| Dash, Rampage | Shift | 3 charges from rank 1: a 0.15s crouch with the blade cocked high behind, then 4.5m in 0.3s (x the global dash feel), flat and stretched, and a low recovery with the blade dragging: 7 along it, the tip 14 and a big knock, orange flame streaks; rank 3: the tip +25% | Quick Dash: 3 charges, about 2 bh | As the source; sync62's slower heavy dash kept (0.3s) |
 | E, Warchain | tap, recast | 10m (9.5s cooldown): a barbed hook on a wavy orange chain; hooked (foe, blighted) or a wall: a straight striped link chain that stays on as you walk, 4s; recast pulls you | Tether Chain: wavy in flight, striped links attached, 9.4s | As the source |
 | X, Gilded Riposte | tap (level 6) | A 0.65s guard: planted (no walk, jump or other button), blade upright, a gold glow and sparks; no damage and no crowd control get through, and each hit blocked (two at most, a metallic ting each) makes the answer 20% harder. A 1.8m x 3.6m strip ahead (it follows the aim) shows to everyone through the guard. Then he lunges 1.8m and cleaves up through it (an upward crescent in his gold, run hot at the edge, and a gold cloud): 34, he heals 80% of what it deals (less while blighted); a knock with it makes it ready at once. About 1.1s in all; 22s cooldown. Landing it on a rival hunter fills the bond | Retaliation: 0.65s invulnerable, then a heavy strike in a rectangle ahead (about 1 x 2 bh), heals 80%, reusable on a kill | As the source; our look (gold guard, upward gold cleave) replaces its red crescent |
 | R | tap | The Boki Merge | (n/a) | R is the Merge for every hero |
@@ -54,6 +54,15 @@ kits2-nor had folded the old Doomfall (crash, heal, reset on a knock) into the F
 Gilded Riposte on X that fold duplicated the ultimate (a big hit that heals you, re-armed by a knock), so it is
 unfolded: the crash is gone and the Slam is back to the source's Execution Slam, whose sweet-spot knock resets the
 ultimate (now the X cooldown).
+
+## Body and movement (hero sheet "Body, scale and movement feel")
+
+- Model about 1.12 of a medium (`body.size` 0.95 on the heavy build), hunched: about 0.35 rad run lean;
+  hit radius unchanged (0.50).
+- Nameplate height 2.75 m (`body.plate`, `Arch.plate_y`).
+- Rampage: a 0.15 s crouch (planted), then 4.5 m in 0.3 s, then a low recovery with the blade dragging
+  (keys end at 0.9 s). Its after-images are his own orange flame streaks.
+- The Enraged look is embers and dark drips on his body; no ground disc or light under him.
 
 ## Assumptions (where the footage is silent; easy to change in content/archetypes/juggernaut.json)
 

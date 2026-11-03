@@ -69,7 +69,7 @@ What the in-game kit card (K) says.
 
 **Marks (passive).** Every bolt that hits puts a Mark on the target (up to 8, each lasting 4s and refreshed by the next): your bolts on them deal +12% per Mark. The empowered shot adds 2, the Bola 1. A knock heals you 15% of your health on top of the usual knock heal (25% in all) and bursts a crimson star on them; an assist heals 25%.
 
-**Vault (dash, Shift, 4.5s cooldown).** A 2.4m cartwheel the way you move (shots pass through it) and +30% speed until your next hit (2s at most). Your next bolt within 3s is empowered: it flies 12% further for 3.5 times the damage, 2 Marks and Shred; firing it ends the speed (+15% damage taken for 3s). Landing it gives the Vault back.
+**Vault (dash, Shift, 4.5s cooldown).** A sideways cartwheel of about 4m the way you move (about 7m from a jump, its speed carried to the landing; shots pass through it) and +18% speed until your next hit (2s at most). Your next bolt within 3s is empowered: it flies 12% further for 3.5 times the damage, 2 Marks and Shred; firing it ends the speed (+15% damage taken for 3s). Landing it gives the Vault back.
 
 **Bola (RMB, 7s cooldown).**
 

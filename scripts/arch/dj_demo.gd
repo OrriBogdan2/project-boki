@@ -6,12 +6,12 @@ extends RefCounted
 ## moment itself (STILLS); add --demo-zoom=1.0 for the gameplay zoom.
 
 const ANIM := {
-	"thf_lmb": ["thief", "arc_bolts", [0.5, 0.53, 0.58, 0.64, 0.74, 0.95]],
+	"thf_lmb": ["thief", "arc_bolts", [0.48, 0.52, 0.57, 0.62, 0.68, 0.85]],
 	"thf_primed": ["thief", "arc_bolts", [0.86, 0.89, 0.93, 1.0, 1.12, 1.35]],
 	"thf_vault": ["thief", "arc_bolts", [0.5, 0.55, 0.6, 0.66, 0.76, 1.0]],
-	"thf_exdash": ["thief", "arc_bolts", [0.5, 0.54, 0.6, 0.68, 0.78, 0.95]],
-	"thf_bola": ["thief", "arc_bolts", [0.5, 0.6, 0.76, 0.92, 0.98, 1.2]],
-	"thf_knife": ["thief", "arc_bolts", [0.5, 0.56, 0.62, 0.7, 0.85, 1.0]],
+	"thf_exdash": ["thief", "arc_bolts", [0.5, 0.56, 0.7, 0.9, 1.45, 1.75]],
+	"thf_bola": ["thief", "arc_bolts", [0.5, 0.6, 0.7, 0.8, 0.92, 1.05]],
+	"thf_knife": ["thief", "arc_bolts", [0.5, 0.54, 0.58, 0.62, 0.72, 0.92]],
 	"thf_blink": ["thief", "arc_bolts", [0.99, 1.01, 1.04, 1.1, 1.25, 1.5]],
 	"thf_encore": ["thief", "arc_bolts", [0.5, 0.58, 0.7, 0.8, 0.88, 0.97]],
 	"thf_reset": ["thief", "arc_bolts", [0.5, 0.54, 0.58, 0.64, 0.74, 0.95]],
@@ -22,7 +22,7 @@ const ANIM := {
 	"jug_riposte": ["juggernaut", "greatsword", [0.6, 1.0, 1.16, 1.22, 1.32, 1.55]],
 	"jug_lunge": ["juggernaut", "greatsword", [0.6, 0.95, 1.3, 1.43, 1.5, 1.8]],
 	"jug_meteor": ["juggernaut", "greatsword", [0.5, 0.55, 0.62, 0.7, 0.85, 1.1]],
-	"jug_dash": ["juggernaut", "greatsword", [0.5, 0.56, 0.62, 0.7, 0.8, 1.0]],
+	"jug_dash": ["juggernaut", "greatsword", [0.5, 0.58, 0.66, 0.76, 0.98, 1.32]],
 	"jug_exdash": ["juggernaut", "greatsword", [0.5, 0.56, 0.62, 0.7, 0.8, 1.0]],
 	"jug_chain": ["juggernaut", "greatsword", [0.52, 0.58, 0.66, 0.92, 0.98, 1.2]],
 	"jug_chainlunge": ["juggernaut", "greatsword", [1.0, 1.4, 1.62, 1.68, 1.78, 2.1]],

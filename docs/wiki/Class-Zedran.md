@@ -71,7 +71,7 @@ What the in-game kit card (K) says.
 
 **Rage (passive).** Damage you deal fills Rage (a Searing Wave fills it three times as fast); it cools after 3s out of a fight. Full, you're Enraged for 6s: +15% damage, +12% dash recharge and +20% cooldown speed, with the red shell and the hunter swelling. Knocking a hunter heals you 20% of their health (killing a monster, 20% of its).
 
-**Rampage (dash, Shift, 9s cooldown).** A 3.6m dash attack the way you face (3 charges): 7 to foes along it; the tip at its end hits twice as hard, 14 and a big knock (stun 0.8 into a wall). A knock gives a charge back.
+**Rampage (dash, Shift, 9s cooldown).** A short crouch, then a dash attack of about 4m the way you face (3 charges): 7 to foes along it; the tip at its end hits twice as hard, 14 and a big knock (stun 0.8 into a wall). A knock gives a charge back.
 
 **Smash (RMB, 2s cooldown).**
 

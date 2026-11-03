@@ -310,14 +310,14 @@ const MOVES := {
 	# Juggernaut slashes: the body for each swing (the blade is the greatsword swing): a step into it,
 	# the hips turning through, the follow-through dragging the weight round
 	"jug_slash_r": {"keys": [
-		[0.0, {"y": 0.35, "sq": 0.1, "lw": 0.8, "legs": [0.7, -1.0, -0.4, -0.5], "lift": -0.05}],
-		[0.1, {"y": -0.6, "p": -0.25, "sq": -0.12, "lw": 0.9, "legs": [0.95, -0.7, -0.6, -0.3]}],
-		[0.24, {"y": -0.5, "p": -0.15, "lw": 0.7, "legs": [0.85, -0.8, -0.5, -0.35]}],
+		[0.0, {"y": 0.60, "p": 0.08, "sq": 0.16, "lw": 1.0, "legs": [0.8, -1.2, -0.5, -0.7], "lift": -0.08}],
+		[0.1, {"y": -0.95, "p": -0.35, "sq": -0.18, "lw": 1.0, "legs": [1.1, -0.65, -0.75, -0.25]}],
+		[0.24, {"y": -0.80, "p": -0.22, "sq": 0.05, "lw": 0.9, "legs": [1.0, -0.8, -0.6, -0.35], "lift": -0.04}],
 		[0.45, {}]]},
 	"jug_slash_l": {"keys": [
-		[0.0, {"y": -0.35, "sq": 0.1, "lw": 0.8, "legs": [0.7, -1.0, -0.4, -0.5], "lift": -0.05}],
-		[0.1, {"y": 0.6, "p": -0.25, "sq": -0.12, "lw": 0.9, "legs": [0.95, -0.7, -0.6, -0.3]}],
-		[0.24, {"y": 0.5, "p": -0.15, "lw": 0.7, "legs": [0.85, -0.8, -0.5, -0.35]}],
+		[0.0, {"y": -0.60, "p": 0.08, "sq": 0.16, "lw": 1.0, "legs": [0.8, -1.2, -0.5, -0.7], "lift": -0.08}],
+		[0.1, {"y": 0.95, "p": -0.35, "sq": -0.18, "lw": 1.0, "legs": [1.1, -0.65, -0.75, -0.25]}],
+		[0.24, {"y": 0.80, "p": -0.22, "sq": 0.05, "lw": 0.9, "legs": [1.0, -0.8, -0.6, -0.35], "lift": -0.04}],
 		[0.45, {}]]},
 	# the Searing Wave held: the blade dragged up behind the head, the body leaning back, coiling
 	"jug_wave_wind": {"hold": true, "keys": [

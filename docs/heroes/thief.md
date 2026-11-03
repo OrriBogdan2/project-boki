@@ -27,11 +27,20 @@ Dagger 15), Encore 24s (Death Blossom 23.1, about 3.5 Trickshots).
 |---|---|---|---|---|
 | LMB, Arc Bolts | hold | A spinning gold chakram from alternating hands every 0.45s, 34 m/s; it flies to the cursor (12m at most) and fizzles there in a blue-violet puff. A thin white aim line to the cursor with an arrow tick, gold while the next bolt is empowered | Arcslinger: the same, cursor-placed, 0.45s | Range 12m (the footage shows at least 7 bh); no magazine |
 | Passive, Marks | none | Every bolt that hits adds a Mark (up to 8, 4s, refreshed): +12% bolt damage per Mark. A knock heals 15% on top of the shared 10% (25% in all) with a crimson star on the knocked and a green pillar on her | Malice: about +12% of a shot per consecutive hit, still climbing at 8; knock heal with a green pillar | Gold diamonds over the target keep the stack readable (ours) |
-| Dash, Vault | Shift | A 2.4m cartwheel (0.25s) the way you move, a white arc traced by hands and feet; +30% speed until the next hit; the next bolt within 3s is empowered: a big blue chakram in a gold lightning streak, 3.5x, 2 Marks, Shred; landing it gives the Vault back | Cartwheel: a short sideways cartwheel, the next LMB empowered, a hit resets it | As the source |
+| Dash, Vault | Shift | A 4.5m sideways cartwheel (0.42s; both x the global dash feel, so about 3.8m in 0.48s) the way you move: a burst that peaks near 0.15s and runs down into the hasted run, a cyan and lilac arc traced by hands and feet, cyan streaks behind; +18% speed until the next hit (2s at most); the next bolt within 3s is empowered: a big blue chakram in a gold lightning streak, 3.5x, 2 Marks, Shred; landing it gives the Vault back | Cartwheel: a short sideways cartwheel, the next LMB empowered, a hit resets it | As the source |
 | RMB, Bola | tap | A 0.4s wind-up (whirled overhead) with a chevron lane showing (1.4m wide, 10.8m long) that follows your aim, then the Bola flies 7m: 5 and a Mark, the first foe Grounded 1.5s with yellow binding rings, and it flies on 3.8m; it bounces once off a wall; a second foe: both stunned 0.9 and +13 | Trickshot: the lane for 0.4-0.6s, Grounded on the first, Stunned on two, bounces off terrain | As the source |
 | E, Shadow Knife | tap, recast | A dagger to the cursor (14m at most): it sticks in the first foe on the way (8, slowed 50% for 2.5s) or lands where you aimed; a white circle marks it; recast blinks you there through 5 cyan afterimages; after 6s you step anyway | Phantom Dagger: sticks or lands, recast teleports with a ghost chain | As the source |
 | X, Encore | tap (level 6) | A violet ring grows round her from 2.3m to 5.4m (3 bh) over 0.4s, everyone sees it, then rides with her for 2s: every 0.4s a blade flies at each foe inside (5 at most each): 8, and 12 from the outer band (past 75% of the radius), which also blights 6s. She keeps walking, shooting and dashing; casting it gives the Vault back; every blade refreshes her Marks; three blades circle her while it runs; a plain fade at the end. 24s cooldown. A blade landing on a rival hunter fills the bond (the best event of the cast counts) | Death Blossom: the ring grows 1.3 to 3 bh in 0.4s, up to 5 shots at each enemy over 2s, the outer band hits harder and Anti-Heals 6s | As the source; the look (her violet ring with a gold outer band, violet blades) is ours |
 | R | tap | The Boki Merge | (n/a) | R is the Merge for every hero |
+
+## Body and movement (hero sheet "Body, scale and movement feel")
+
+- Model about 0.95 of a medium (`body.size` 1.11 on the light build); hit radius unchanged (0.35).
+- Nameplate height 2.15 m (`body.plate`; read by the HUD through `Arch.plate_y`).
+- Runs pitched far forward (about 0.57 rad at a run).
+- Ground Cartwheel: 4.5 m with the measured speed curve; the long (air) dash is the same sideways cartwheel
+  carried flat on its speed for 8 m over 0.95 s (x the dash feel), ending where she lands.
+- Her dashes leave her own cyan streaks and stars, not the shared after-image.
 
 ## Assumptions (where the footage is silent; easy to change in content/archetypes/thief.json)
 
