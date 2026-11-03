@@ -305,9 +305,11 @@ var tl_yv := 0.0
 var tl_x := 0.0
 var tl_xv := 0.0
 var torso_yaw_prev := 0.0
+var hip_y := 0.42              # the torso's rest height on the legs (longer legs set it higher: Models.hunter)
 
 func _init(m: Node3D) -> void:
 	model = m
+	hip_y = float(m.get_meta("hip_y", hip_y))
 	rig = m.get_node("Rig")
 	torso = rig.get_node("Torso")
 	legs = rig.get_node("Legs")
@@ -1038,7 +1040,7 @@ func update(dt: float, s: Dictionary) -> void:
 	if knee_r: knee_r.rotation.x = kr
 	# torso: bobs with the stride, breathes
 	var tb := breath * still * (1.0 - emote_k * 0.5)
-	torso.position.y = 0.42 + tb * 0.006 + glide_k * 0.02
+	torso.position.y = hip_y + tb * 0.006 + glide_k * 0.02
 	torso.scale = Vector3(1.0 - tb * 0.006, 1.0 + tb * 0.012, 1.0 - tb * 0.006)
 	torso.rotation = Vector3(pitch + dz, yaw, roll)
 	# ================================================================ WEAPON AND ARMS

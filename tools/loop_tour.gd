@@ -149,7 +149,7 @@ func _process(_d: float) -> void:
 			get_viewport().warp_mouse(c3.unproject_position(p + Vector3(0, 0.6, 0)))
 
 func _fake_save() -> void:
-	Save.d["look"] = Models.default_look()
+	Save.d["look"] = PlayerLook.neutral()
 	Save.d["arch"] = arch; Save.d["cls"] = Arch.weight(arch); Save.d["weapon"] = Arch.signature(arch)
 	var rec := Save.new_kin("cindle", "Ember")
 	rec["trust"] = 55.0; rec["starter"] = true
@@ -207,6 +207,10 @@ func _front() -> void:
 	await wait(1.0)
 	await shot("name_boki")
 	press("Skip the tutorial")
+	await until(func(): return String(hx.stage) == "create", 10.0, "the creator")
+	await wait(1.5)
+	await shot("creator")
+	press("Looks good")
 	await _wait_home()
 
 func _find_class(nd: Node, cname: String) -> Node:

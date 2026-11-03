@@ -476,7 +476,6 @@ const LOOK_SKIN := [Color("f6d3b0"), Color("f1c9a0"), Color("e0ac7e"), Color("c6
 const LOOK_HAIR := [Color("2b2124"), Color("5a3a26"), Color("9a6a3a"), Color("e8c87a"), Color("d8d2c8"), Color("c4462e"), Color("6a8aff"), Color("ff8ac8"),
 	Color("f6efd8"), Color("8a2e2a"), Color("3ac8c0"), Color("8a4ad8"), Color("5ac85a"), Color("ff8a2a"), Color("c8a8ff"), Color("9af0c8"),
 	Color("d81e3c"), Color("2a3a7a"), Color("fbfbfb"), Color("ffd84a")]
-const LOOK_BODIES := ["Slim", "Average", "Sturdy"]
 const LOOK_GENDERS := ["Female", "Male"]
 const LOOK_FACES := ["Bright eyes", "Calm", "Sleepy", "Cheerful", "Fierce", "Wink", "Starry", "Determined", "Smug"]
 const LOOK_HAIRS := ["Short", "Long", "Ponytail", "Bun", "Spiky", "Buzzed", "Bob", "Pigtails", "Braid", "Mohawk", "Afro", "Curly", "Swoop", "Bald"]
@@ -504,9 +503,9 @@ const HAIR_FROM_OLD := {
 ## The head styles a race can pick from (by race index).
 static func hair_styles(race: int) -> Array:
 	return HAIR_STYLES[String(RACES[clampi(race, 0, RACES.size() - 1)]["id"])]
-## Outfits: the colourway of the archetype's gear (coat, robe, trim, tabard). Purely cosmetic; the
-## archetype owns the silhouette (hood, hat, helm), so it reads the same whatever the outfit. The
-## keys stay as they were so saved looks keep their colours.
+## Outfits: a player's own colourway (their clothes at home; in a match it only tints the Warden's
+## palette, MantleLook). A caller can name one by key to dress any hunter in it (galleries). The keys
+## stay as they were so saved looks keep their colours.
 const LOOK_OUTFITS := ["Lilac", "Nightshade", "Glacier", "Sage", "Saddle", "Ember", "Ivory", "Tusk", "Gilded"]
 const OUTFIT_KEYS := ["veil", "nyx", "kestrel", "sage", "marlow", "pyra", "bastion", "tusk", "halo"]
 const OUTFIT_COLS := [Color("c9bcff"), Color("b06ae0"), Color("6ad0e0"), Color("9ee2a0"), Color("e0b05a"), Color("ff7a5a"), Color("e6dbc4"), Color("c08a5a"), Color("f2d47a")]
@@ -530,35 +529,6 @@ const RACES := [
 		"desc": "Wide-eyed bird folk with ear tufts and a feather tail."},
 ]
 const LOOK_RACES := ["Human", "Vulpin", "Stoneborn", "Sprig", "Scalefolk", "Owlet"]
-
-static func default_look() -> Dictionary:
-	return {"race": 0, "body": 1, "gender": 1, "face": 0, "skin": 1, "hair": 0, "hair_v": 2, "hair_col": 0, "detail": 0, "outfit": 3}
-
-## A random look for bots and background hunters: any race, any style, the race's own colouring
-## most of the time.
-static func random_look(rng: RandomNumberGenerator = null) -> Dictionary:
-	var R := func(n: int) -> int: return (rng.randi() if rng else randi()) % n
-	var race := int(R.call(RACES.size()))
-	var skin: int = int(RACES[race]["skin"]) if int(R.call(3)) > 0 else int(R.call(LOOK_SKIN.size()))
-	if race == 0: skin = int(R.call(8))
-	var gl := "classic" if int(R.call(5)) < 3 else String(Gliders.LIST[int(R.call(Gliders.LIST.size()))]["id"])
-	return {"glider": gl, "race": race, "body": R.call(3), "gender": R.call(2), "face": R.call(LOOK_FACES.size()), "skin": skin,
-		"hair": R.call(hair_styles(race).size()), "hair_v": 2, "hair_col": R.call(LOOK_HAIR.size()), "detail": R.call(LOOK_DETAILS.size()),
-		"outfit": R.call(LOOK_OUTFITS.size())}
-
-## A saved look with every value inside its list (older saves had a third gender option).
-static func clean_look(lk: Dictionary) -> Dictionary:
-	var out := default_look()
-	out.merge(lk, true)
-	var lists := {"race": LOOK_RACES, "body": LOOK_BODIES, "gender": LOOK_GENDERS, "face": LOOK_FACES, "skin": LOOK_SKIN, "hair_col": LOOK_HAIR, "detail": LOOK_DETAILS, "outfit": LOOK_OUTFITS}
-	for k in lists:
-		out[k] = clampi(int(out[k]), 0, (lists[k] as Array).size() - 1)
-	var rid := String(RACES[int(out["race"])]["id"])
-	if not lk.has("hair_v") and HAIR_FROM_OLD.has(rid):
-		out["hair"] = HAIR_FROM_OLD[rid][clampi(int(out["hair"]), 0, LOOK_HAIRS.size() - 1)]
-	out["hair_v"] = 2
-	out["hair"] = clampi(int(out["hair"]), 0, hair_styles(int(out["race"])).size() - 1)
-	return out
 
 ## How each class reads at a glance from the match camera, whatever the race or outfit (purely
 ## visual): overall size on top of the class scale (about 0.88 / 1.0 / 1.18 in all), build, boots,
@@ -616,19 +586,22 @@ static func torso_mesh() -> ArrayMesh:
 	return am
 
 ## A hunter: the class sets the size and hit radius, the archetype (HeroKit.ARCHES; by default the
-## class's own) the silhouette and gear, the look (race, gender, build, face, hair, skin) the person
-## inside it, and the outfit the colourway of the gear. arch "" takes the look's "arch", else the
-## class default. outfit "bare" leaves the head uncovered (galleries).
+## class's own) the silhouette and gear, and the look the person inside it: a player's look
+## (PlayerLook) becomes the Warden's likeness nudged by the player (MantleLook), or the player's own
+## person for a look from MantleLook.at_home(). outfit names a colourway that replaces the palette
+## (galleries); "bare" leaves the head uncovered. arch "" takes the look's "arch", else the class default.
 static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", appearance := {}, arch := "") -> Node3D:
-	var lk: Dictionary = clean_look(appearance)
+	arch = HeroKit.arch_for(cls, arch, appearance)
+	var lk: Dictionary = MantleLook.params(arch, appearance)
+	if lk["own"]:
+		arch = ""            # your own person at home: no Warden's gear, shape or class size
+		cls = "medium"
 	var race: Dictionary = RACES[int(lk["race"])]
 	var rid: String = race["id"]
-	arch = HeroKit.arch_for(cls, arch, appearance)
 	var root := Node3D.new()
 	var bare := outfit == "bare"
-	var oi: int = OUTFIT_KEYS.find(outfit) if not outfit in ["", "bare", "plain"] else int(lk["outfit"])
-	if oi < 0: oi = 3
-	var hero_col: Color = OUTFIT_COLS[oi]
+	var oi: int = OUTFIT_KEYS.find(outfit)
+	var hero_col: Color = OUTFIT_COLS[oi] if oi >= 0 else lk["outfit_col"]
 	# the outfit is the gear's colourway: a saturated coat, a pale shirt, dark trousers, team colour
 	# on the strongest shapes (hood, cape, crest, pauldron tops, shield), gold on the edges
 	# a clean value structure (dark trousers and leather, a mid-dark coat, light shirt and trim), each
@@ -641,8 +614,8 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 	var m_shirt := toon(shirt_col)
 	var m_pants := toon(pants_col)
 	var m_leather := toon(Color("6b4330").lerp(hero_col, 0.06))
-	var skin_c: Color = LOOK_SKIN[clampi(int(lk["skin"]), 0, LOOK_SKIN.size() - 1)]
-	var hair_c: Color = LOOK_HAIR[clampi(int(lk["hair_col"]), 0, LOOK_HAIR.size() - 1)]
+	var skin_c: Color = lk["skin_col"]
+	var hair_c: Color = lk["hair_col"]
 	var m_skin := toon(skin_c)
 	var m_hair := toon(hair_c)
 	var m_dark := toon(Color("2b2a33"))
@@ -680,11 +653,10 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 	m_acc.set_shader_parameter("gloss", 0.12)
 	var rig := Node3D.new(); rig.name = "Rig"; root.add_child(rig)
 	var legs := Node3D.new(); legs.name = "Legs"; rig.add_child(legs)
-	var bw: float = [0.88, 1.0, 1.15][clampi(int(lk["body"]), 0, 2)]
+	var bw: float = lk["build"]
 	bw *= float(CLASS_LOOK.get(cls, {}).get("build", 1.0)) * float(Arch.body(arch).get("build", 1.0))
 	var boot_k := float(CLASS_LOOK.get(cls, {}).get("boots", 1.0))
-	var gender := int(lk["gender"])
-	var fem := gender == 0
+	var fem := int(lk["gender"]) == 0
 	var heavy_gear := arch in ["juggernaut", "bulwark", "dredge", "ashwick"]
 	# legs swing from the hip: a tapered thigh, a knee guard, and a boot in one piece hanging from
 	# the knee (so the leg can bend), with a cuff that overlaps the trousers
@@ -703,8 +675,10 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 		part(knee, HeroKit.boot(boot_k), m_leather, Vector3.ZERO)
 		part(knee, HeroKit.sole(boot_k), m_dark, Vector3.ZERO)
 		part(knee, HeroKit.cuff(0.074, 0.088, 0.06), m_steel if heavy_gear else (m_trim if arch != "thief" else m_leather), Vector3(0, -0.06, 0.005))
-	var torso := Node3D.new(); torso.name = "Torso"; torso.position = Vector3(0, 0.42, 0); rig.add_child(torso)
-	var chest_w := bw * (0.92 if fem else 1.12)
+	legs.scale.y = lk["limbs"]
+	var torso := Node3D.new(); torso.name = "Torso"; torso.position = Vector3(0, 0.42 * legs.scale.y, 0); rig.add_child(torso)
+	root.set_meta("hip_y", torso.position.y)      # HunterAnim keeps the torso on the legs at this height
+	var chest_w := bw * (0.92 if fem else 1.12) * float(lk["shoulders"])
 	# hips, then the sculpted torso (waist, ribcage, chest or bust, shoulder blades), then the neck
 	# flaring into the shoulders so the head sits on the body, not on a peg
 	part(torso, lathe(smooth_curve(PackedVector2Array([Vector2(0, -0.08), Vector2(0.18, -0.07), Vector2(0.225, -0.02), Vector2(0.22, 0.06), Vector2(0.2, 0.1), Vector2(0, 0.1)]), 3), 40, "hips"),
@@ -726,7 +700,7 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 		for sx in [-1.0, 1.0]:
 			var ear := HeroKit.loft("ear", [Vector3(0, -0.035, 0), Vector3(0, 0.0, 0.008), Vector3(0, 0.035, 0.02)], [Vector2(0.03, 0.012), Vector2(0.04, 0.014), Vector2(0.022, 0.01)], 10, Vector3.RIGHT, 0.75)
 			part(torso, ear, m_skin, Vector3(0.226 * sx * (1.03 if not fem else 0.98), 0.85, 0.012), Vector3.ONE, Vector3(0, 0.25 * sx, 0))
-	_face(torso, int(lk["face"]), gender, m_dark, m_skin, skin_c, int(lk["detail"]), hair_c, team_col)
+	_face(torso, lk, m_dark, m_skin, team_col)
 	# what the archetype wears on its head decides how much hair shows (a hat: all but the crown; a
 	# hood or helm: only what spills out below)
 	var cov := HeroGear.cover(arch, bare)
@@ -789,7 +763,7 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 	var glider := Node3D.new(); glider.name = "Glider"; glider.position = Vector3(0, 0.62, 0.12); glider.visible = false
 	torso.add_child(glider)
 	var canopy := MeshInstance3D.new()
-	var gskin := String(appearance.get("glider", "classic"))
+	var gskin := String(lk["glider"])
 	canopy.mesh = Gliders.mesh(gskin, team_col, hero_col)
 	canopy.material_override = vtoon_outlined()
 	canopy.position = Vector3(0, 1.05, 0.02)
@@ -833,8 +807,9 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 		merge_static(gun)      # (the twin blades' second dagger is handed to the left hand by HunterAnim)
 	# the race's proportions: head size, how broad the body is, overall height
 	var hkk := float(race["head"]) * (1.06 if arch == "thief" else 1.12)    # big-headed like a hero brawler (faces read from the match camera), heroic not chibi; the thief leaner
+	hkk *= float(lk["head"])
 	var bk := float(race["bulk"]) * float(HeroGearPair.body(arch)["bulk"])
-	head.scale = Vector3.ONE * hkk
+	head.scale = Vector3(hkk * float(lk["face_w"]), hkk * float(lk["jaw"]), hkk)
 	head.position.y += (hkk - 1.0) * 0.05
 	if bk != 1.0:
 		for ch in torso.get_children():
@@ -880,10 +855,11 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 	var body := Arch.body(arch)
 	var size_k := float(body.get("size", 1.0)) * float(HeroGearPair.body(arch)["size"])
 	var bulk := float(body.get("bulk", 1.0))
-	root.scale = Vector3(bulk, 1.0, bulk) * float(Data.CLASSES[cls]["scale"]) * rs * ck * size_k
+	var look_k := rs * ck * size_k * float(lk["height"])
+	root.scale = Vector3(bulk, 1.0, bulk) * float(Data.CLASSES[cls]["scale"]) * look_k
 	# the ring under your feet shows the real hitbox, whatever your size
 	var hit_k := Arch.hit_r(arch, Data.CLASSES[cls]) / float(Data.CLASSES[cls]["hit_r"])
-	ring.scale = Vector3(1.0 / bulk, 1.0, 1.0 / bulk) * hit_k / (rs * ck * size_k)
+	ring.scale = Vector3(1.0 / bulk, 1.0, 1.0 / bulk) * hit_k / look_k
 	var torso_node := root.find_child("Torso", true, false) as Node3D
 	if torso_node != null:
 		torso_node.scale.x *= float(body.get("chest", 1.0))
@@ -1327,14 +1303,23 @@ static func m_trim0(c: Color) -> ShaderMaterial:
 	return toon(c.darkened(0.55).lerp(Color("3a2f2a"), 0.5))
 
 ## Eyes, brows and a mouth: small shapes, but they carry a lot of character.
-static func _face(torso: Node3D, face: int, gender: int, m_dark: Material, m_skin: Material, skin: Color, detail: int, hair_c: Color, paint: Color) -> void:
-	var fem := gender == 0
+## The face on the head: eyes, brows, nose and mouth for the look's expression and gender, sized and
+## placed by its face factors (MantleLook params: eye_size, eye_shape, brow, nose), and its markings.
+static func _face(torso: Node3D, lk: Dictionary, m_dark: Material, m_skin: Material, paint: Color) -> void:
+	var face := int(lk["face"])
+	var detail := int(lk["detail"])
+	var skin: Color = lk["skin_col"]
+	var hair_c: Color = lk["hair_col"]
+	var fem := int(lk["gender"]) == 0
 	var shine := toon(Color.WHITE, false, 1.0)
 	var white := toon(Color("fbf8f2"), false, 0.1)
-	var iris := toon([Color("4a3a6a"), Color("3a5a8a"), Color("2a6a4a"), Color("6a3a2a"), Color("7a2a4a")][face % 5], false)
-	iris.set_shader_parameter("gloss", 0.85); iris.set_shader_parameter("sss", 0.0)
+	var iris := toon(lk["eye_col"], false)
+	iris.set_shader_parameter("gloss", 0.85)
+	iris.set_shader_parameter("sss", 0.0)
 	var y := 0.868
-	var es := 1.3 if fem else 1.1           # big readable eyes; rounder for her, narrower for him
+	var es: float = (1.3 if fem else 1.1) * float(lk["eye_size"])     # big readable eyes; rounder for her, narrower for him
+	var eh := float(lk["eye_shape"])        # taller (rounder) or flatter (narrower) eyes
+	var brow_up := float(lk["brow"])        # how high the brows sit over the eyes
 	var m_hairf := toon(hair_c.darkened(0.15), false)
 	for sx in [-1.0, 1.0]:
 		var ex: float = (0.093 if fem else 0.095) * sx
@@ -1344,8 +1329,8 @@ static func _face(torso: Node3D, face: int, gender: int, m_dark: Material, m_ski
 		var open := kind in [0, 1, 4, 6, 7, 8]
 		match kind:
 			0, 4, 6, 7:   # bright eyes, fierce, starry, determined: white, iris, pupil and a shine
-				part(torso, sphere(0.05 * es, 12), white, Vector3(ex, y, -0.2), Vector3(0.85, 1.12 if kind in [0, 6] else 0.88, 0.45))
-				part(torso, sphere(0.036 * es, 10), iris, Vector3(ex + 0.004 * sx, y - 0.006, -0.219), Vector3(0.9, 1.12, 0.4))
+				part(torso, sphere(0.05 * es, 12), white, Vector3(ex, y, -0.2), Vector3(0.85, (1.12 if kind in [0, 6] else 0.88) * eh, 0.45))
+				part(torso, sphere(0.036 * es, 10), iris, Vector3(ex + 0.004 * sx, y - 0.006, -0.219), Vector3(0.9, 1.12 * eh, 0.4))
 				part(torso, sphere(0.018 * es, 8), m_dark, Vector3(ex + 0.004 * sx, y - 0.008, -0.229), Vector3(1.0, 1.15, 0.4))
 				part(torso, sphere(0.014 * es, 6), shine, Vector3(ex + 0.016, y + 0.018, -0.237))
 				part(torso, sphere(0.007 * es, 6), shine, Vector3(ex - 0.012, y - 0.022, -0.236))
@@ -1355,7 +1340,7 @@ static func _face(torso: Node3D, face: int, gender: int, m_dark: Material, m_ski
 				if kind == 7:
 					part(torso, box(0.085 * es, 0.022, 0.02), m_skin, Vector3(ex, y + 0.034 * es, -0.228))   # heavy lid
 			1:   # calm: soft dark eyes with a shine
-				part(torso, sphere(0.034 * es, 10), m_dark, Vector3(ex, y, -0.215), Vector3(0.9, 1.1, 0.5))
+				part(torso, sphere(0.034 * es, 10), m_dark, Vector3(ex, y, -0.215), Vector3(0.9, 1.1 * eh, 0.5))
 				part(torso, sphere(0.01, 6), shine, Vector3(ex + 0.012, y + 0.014, -0.232))
 			2:   # sleepy: half-closed lids
 				part(torso, box(0.065 * es, 0.016, 0.02), m_dark, Vector3(ex, y - 0.006, -0.222), Vector3.ONE, Vector3(0, 0, 0.12 * sx))
@@ -1370,9 +1355,9 @@ static func _face(torso: Node3D, face: int, gender: int, m_dark: Material, m_ski
 		# brows: thin and arched for her, thick and straight for him; angled in when fierce
 		var tilt: float = (-0.4 if kind == 4 else (-0.2 if kind == 7 else 0.15)) * sx
 		if fem:
-			part(torso, box(0.066, 0.016, 0.016), m_hairf, Vector3(ex + 0.006 * sx, y + 0.08, -0.208), Vector3.ONE, Vector3(0, 0, tilt + 0.18 * sx))
+			part(torso, box(0.066, 0.016, 0.016), m_hairf, Vector3(ex + 0.006 * sx, y + 0.08 * brow_up, -0.208), Vector3.ONE, Vector3(0, 0, tilt + 0.18 * sx))
 		else:
-			part(torso, box(0.088, 0.03, 0.022), m_hairf, Vector3(ex, y + 0.072, -0.208), Vector3.ONE, Vector3(0, 0, tilt * 0.9))
+			part(torso, box(0.088, 0.03, 0.022), m_hairf, Vector3(ex, y + 0.072 * brow_up, -0.208), Vector3.ONE, Vector3(0, 0, tilt * 0.9))
 		# lashes on her open eyes: two flicks at the outer corner
 		if fem and open:
 			part(torso, box(0.036, 0.013, 0.012), m_dark, Vector3(ex + 0.056 * sx, y + 0.036, -0.206), Vector3.ONE, Vector3(0, 0, 0.55 * sx))
@@ -1381,7 +1366,7 @@ static func _face(torso: Node3D, face: int, gender: int, m_dark: Material, m_ski
 	# his jaw: wider and squarer at the bottom of the face, with a hint of a chin
 	# (the jaw and chin are sculpted into the head itself: HeroKit.head)
 	# a small stylized nose: a soft wedge with a lit bridge
-	part(torso, HeroKit.loft("nose|%s" % fem, [Vector3(0, 0.04, 0.0), Vector3(0, 0.0, -0.012), Vector3(0, -0.02, -0.018)], [Vector2(0.01, 0.008), Vector2(0.016 if fem else 0.02, 0.012), Vector2(0.012 if fem else 0.016, 0.01)], 10, Vector3.FORWARD, 0.95), m_skin, Vector3(0, 0.825, -0.226))
+	part(torso, HeroKit.loft("nose|%s" % fem, [Vector3(0, 0.04, 0.0), Vector3(0, 0.0, -0.012), Vector3(0, -0.02, -0.018)], [Vector2(0.01, 0.008), Vector2(0.016 if fem else 0.02, 0.012), Vector2(0.012 if fem else 0.016, 0.01)], 10, Vector3.FORWARD, 0.95), m_skin, Vector3(0, 0.825, -0.226), Vector3.ONE * float(lk["nose"]))
 	# mouth: rosy lips for her, a plain line or grin for him
 	var mz := -0.236
 	var smile := face in [0, 3, 5, 6]

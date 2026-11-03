@@ -555,7 +555,8 @@ func _migration() -> void:
 	d["loadout"] = {"gear2": "u1", "gear3": "u6", "gear4": "u2", "gear0": "u5", "gear1": "u9"}
 	d["items"]["tonic"] = 4
 	var before_n := (d["armory"] as Array).size() + (d["raid_out"] as Array).size()
-	ok(Save.VERSION == 7, "the save version is 7 (Hunter unlocks are v6)")
+	ok(Save.VERSION >= 7 and Save.MIGRATIONS[6] == "_migrate_6_to_7",
+			"equal footing is the v6 -> v7 step (Hunter unlocks are v6)")
 	ok(Save.migrate(d) and int(d["v"]) == Save.VERSION, "a v5 save upgrades to v%d" % Save.VERSION)
 	var ids: Array = (d["armory"] as Array).map(func(it): return String(it.get("id", "")))
 	ok(ids.has("blink") and ids.has("skylark_boots") and ids.has("old_coin"),

@@ -1,7 +1,8 @@
 extends RefCounted
-## --weapon-clip-check: no held weapon ever goes into the ground. Every weapon on every class and
-## race is stepped through HunterAnim's poses (idle and each fidget, walk, run, sprint, strafe,
-## backpedal, crouch, firing, reloads, melee combos, charged attacks, charging, hops, long falls
+## --weapon-clip-check: no held weapon ever goes into the ground. Every weapon on every class (its
+## Warden at both slider ends) and on a player's own person of every folk is stepped through
+## HunterAnim's poses (idle and each fidget, walk, run, sprint, strafe, backpedal, crouch, firing,
+## reloads, melee combos, charged attacks, charging, hops, long falls
 ## with their flips and landing squash, each dodge, stomps, casts, drinks, hits, stuns, revives,
 ## the base channel, emotes), and the lowest point of the weapon's bounds is measured against the
 ## ground under the feet every frame. Prints the worst clearance and PASS/FAIL.
@@ -25,6 +26,25 @@ func _scen() -> Array:
 	for k in ["phase", "roll", "charge", "lunge", "rush"]:
 		out.append("dash:" + k)
 	return out
+
+## The bodies each weapon is tried on: the class's Warden with every slider at either end (the most a
+## player can change it, MantleLook), and a player's own person of every folk (at home).
+func _looks() -> Array:
+	var out: Array = []
+	for v in [0.0, 1.0]:
+		var lk := PlayerLook.neutral()
+		for k in lk["sliders"]:
+			lk["sliders"][k] = v
+		out.append(lk)
+	for ri in Models.RACES.size():
+		out.append(MantleLook.at_home({"race": ri, "gender": ri % 2, "skin": int(Models.RACES[ri]["skin"]), "hair": 1,
+			"hair_col": 2, "outfit": ri % 5}))
+	return out
+
+func _look_tag(i: int) -> String:
+	if i < 2:
+		return "mantle-%s" % ("min" if i == 0 else "max")
+	return String(Models.RACES[i - 2]["id"])
 
 ## The state for scenario sc at time t (and the air height, when airborne).
 func _state(sc: String, t: float, f: int, a: HunterAnim) -> Dictionary:
@@ -93,9 +113,8 @@ func run(main: Node) -> void:
 	var models := 0
 	for cls in ["light", "medium", "heavy"]:
 		for wid in wids:
-			for ri in Models.RACES.size():
-				var look := {"race": ri, "body": 1, "gender": ri % 2, "face": 0, "skin": int(Models.RACES[ri]["skin"]), "hair": 1, "hair_col": 2, "outfit": ri % 5}
-				var m := Models.hunter(cls, Data.TEAM_COLORS[0], String(wid), "", look)
+			for vi in _looks().size():
+				var m := Models.hunter(cls, Data.TEAM_COLORS[0], String(wid), "", _looks()[vi])
 				main.add_child(m)
 				models += 1
 				for sc in scen:
@@ -107,7 +126,7 @@ func run(main: Node) -> void:
 						m.rotation.y = float(s["face"])
 						a.update(DT, s)
 						updates += 1
-					var tag := "%s %s %s %s" % [cls, wid, Models.RACES[ri]["id"], sc]
+					var tag := "%s %s %s %s" % [cls, wid, _look_tag(vi), sc]
 					if a.clear_min < worst:
 						worst = a.clear_min; worst_at = tag
 					if a.clear_raw < worst_raw:

@@ -400,7 +400,7 @@ func _particles(n: int, c0: Color, c1: Color, s0: float, s1: float, life: float,
 
 ## A hunter glides past on the wind every few seconds (one, re-launched: no hitches).
 func _glider() -> void:
-	var lk := Models.random_look(rng)
+	var lk := PlayerLook.random(rng)
 	var h := Models.hunter("light", Data.TEAM_COLORS[2], "smg", "", lk, "archer")
 	var ring := h.get_node_or_null("TeamRing") as Node3D
 	if ring: ring.visible = false
