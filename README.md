@@ -2,7 +2,7 @@
 
 Review shots for each hero: kit card, each ability, the payoff, animation frame strips and a neutral full-body portrait. PNGs are downscaled to at most 1280 px wide. Captions come from the shot manifests.
 
-Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-tender), [Tamsin](#tamsin-rimewright), [Dredge](#dredge-dredge), [Ashwick](#ashwick-ashwick), [Dolm](#dolm-dolm), [Ostra](#ostra-ostra), [Archer](#archer-archer), [Bulwark](#bulwark-bulwark), [Thief](#thief-thief), [Juggernaut](#juggernaut-juggernaut), [Farm building](#farm-building-farmbuild), [classes](#classes-classes), [aimkit](#aimkit-aimkit), [moosh-moosh/v2](#moosh-moosh/v2-moosh-moosh/v2), [moosh-moosh/v2/anim](#moosh-moosh/v2/anim-moosh-moosh/v2/anim), [tamsin/v2](#tamsin/v2-tamsin/v2), [tamsin/v2/anim](#tamsin/v2/anim-tamsin/v2/anim), [dancer/v2](#dancer/v2-dancer/v2), [dancer/v2/before](#dancer/v2/before-dancer/v2/before), [zedran/v2](#zedran/v2-zedran/v2), [zedran/v2/before](#zedran/v2/before-zedran/v2/before), [dancer/v2/anim](#dancer/v2/anim-dancer/v2/anim), [zedran/v2/anim](#zedran/v2/anim-zedran/v2/anim), [linwick/v2](#linwick/v2-linwick/v2), [linwick/v2/anim](#linwick/v2/anim-linwick/v2/anim), [linwick/v2/before](#linwick/v2/before-linwick/v2/before), [linwick/v2/after](#linwick/v2/after-linwick/v2/after), [dredge/v2](#dredge/v2-dredge/v2), [dredge/v2/anim](#dredge/v2/anim-dredge/v2/anim), [dredge/v2/before](#dredge/v2/before-dredge/v2/before), [dredge/v2/after](#dredge/v2/after-dredge/v2/after), [pin/v2](#pin/v2-pin/v2), [bjorn/v2](#bjorn/v2-bjorn/v2), [pin/v2/anim](#pin/v2/anim-pin/v2/anim), [bjorn/v2/anim](#bjorn/v2/anim-bjorn/v2/anim), [vireo/v2](#vireo/v2-vireo/v2), [vireo/v2/anim](#vireo/v2/anim-vireo/v2/anim), [venator/v2/anim](#venator/v2/anim-venator/v2/anim), [venator/v2](#venator/v2-venator/v2), [breah/v2](#breah/v2-breah/v2), [ostra/v2](#ostra/v2-ostra/v2), [breah/v2/anim](#breah/v2/anim-breah/v2/anim), [ostra/v2/anim](#ostra/v2/anim-ostra/v2/anim), [linwick/v2/ult](#linwick/v2/ult-linwick/v2/ult), [dredge/v2/ult](#dredge/v2/ult-dredge/v2/ult), [hunters](#hunters-hunters), [pin/v2/ult](#pin/v2/ult-pin/v2/ult), [bjorn/v2/ult](#bjorn/v2/ult-bjorn/v2/ult), [mooshmoosh/v2/ult](#mooshmoosh/v2/ult-mooshmoosh/v2/ult), [tamsin/v2/ult](#tamsin/v2/ult-tamsin/v2/ult), [dancer/v2/ult](#dancer/v2/ult-dancer/v2/ult), [zedran/v2/ult](#zedran/v2/ult-zedran/v2/ult), [tamsin/v2/polish](#tamsin/v2/polish-tamsin/v2/polish), [moosh-moosh/v2/polish](#moosh-moosh/v2/polish-moosh-moosh/v2/polish), [vireo/v2/polish](#vireo/v2/polish-vireo/v2/polish), [venator/v2/polish](#venator/v2/polish-venator/v2/polish), [pin/v2/polish](#pin/v2/polish-pin/v2/polish), [bjorn/v2/polish](#bjorn/v2/polish-bjorn/v2/polish)
+Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-tender), [Tamsin](#tamsin-rimewright), [Dredge](#dredge-dredge), [Ashwick](#ashwick-ashwick), [Dolm](#dolm-dolm), [Ostra](#ostra-ostra), [Archer](#archer-archer), [Bulwark](#bulwark-bulwark), [Thief](#thief-thief), [Juggernaut](#juggernaut-juggernaut), [Farm building](#farm-building-farmbuild), [classes](#classes-classes), [aimkit](#aimkit-aimkit), [moosh-moosh/v2](#moosh-moosh/v2-moosh-moosh/v2), [moosh-moosh/v2/anim](#moosh-moosh/v2/anim-moosh-moosh/v2/anim), [tamsin/v2](#tamsin/v2-tamsin/v2), [tamsin/v2/anim](#tamsin/v2/anim-tamsin/v2/anim), [dancer/v2](#dancer/v2-dancer/v2), [dancer/v2/before](#dancer/v2/before-dancer/v2/before), [zedran/v2](#zedran/v2-zedran/v2), [zedran/v2/before](#zedran/v2/before-zedran/v2/before), [dancer/v2/anim](#dancer/v2/anim-dancer/v2/anim), [zedran/v2/anim](#zedran/v2/anim-zedran/v2/anim), [linwick/v2](#linwick/v2-linwick/v2), [linwick/v2/anim](#linwick/v2/anim-linwick/v2/anim), [linwick/v2/before](#linwick/v2/before-linwick/v2/before), [linwick/v2/after](#linwick/v2/after-linwick/v2/after), [dredge/v2](#dredge/v2-dredge/v2), [dredge/v2/anim](#dredge/v2/anim-dredge/v2/anim), [dredge/v2/before](#dredge/v2/before-dredge/v2/before), [dredge/v2/after](#dredge/v2/after-dredge/v2/after), [pin/v2](#pin/v2-pin/v2), [bjorn/v2](#bjorn/v2-bjorn/v2), [pin/v2/anim](#pin/v2/anim-pin/v2/anim), [bjorn/v2/anim](#bjorn/v2/anim-bjorn/v2/anim), [vireo/v2](#vireo/v2-vireo/v2), [vireo/v2/anim](#vireo/v2/anim-vireo/v2/anim), [venator/v2/anim](#venator/v2/anim-venator/v2/anim), [venator/v2](#venator/v2-venator/v2), [breah/v2](#breah/v2-breah/v2), [ostra/v2](#ostra/v2-ostra/v2), [breah/v2/anim](#breah/v2/anim-breah/v2/anim), [ostra/v2/anim](#ostra/v2/anim-ostra/v2/anim), [linwick/v2/ult](#linwick/v2/ult-linwick/v2/ult), [dredge/v2/ult](#dredge/v2/ult-dredge/v2/ult), [hunters](#hunters-hunters), [pin/v2/ult](#pin/v2/ult-pin/v2/ult), [bjorn/v2/ult](#bjorn/v2/ult-bjorn/v2/ult), [mooshmoosh/v2/ult](#mooshmoosh/v2/ult-mooshmoosh/v2/ult), [tamsin/v2/ult](#tamsin/v2/ult-tamsin/v2/ult), [dancer/v2/ult](#dancer/v2/ult-dancer/v2/ult), [zedran/v2/ult](#zedran/v2/ult-zedran/v2/ult), [tamsin/v2/polish](#tamsin/v2/polish-tamsin/v2/polish), [moosh-moosh/v2/polish](#moosh-moosh/v2/polish-moosh-moosh/v2/polish), [vireo/v2/polish](#vireo/v2/polish-vireo/v2/polish), [venator/v2/polish](#venator/v2/polish-venator/v2/polish), [pin/v2/polish](#pin/v2/polish-pin/v2/polish), [bjorn/v2/polish](#bjorn/v2/polish-bjorn/v2/polish), [linwick/v2/polish](#linwick/v2/polish-linwick/v2/polish), [dredge/v2/polish](#dredge/v2/polish-dredge/v2/polish)
 
 ## Vireo (mage)
 
@@ -3939,3 +3939,235 @@ Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-t
 **Faultline: the slam down through the lane (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)**
 
 ![Faultline: the slam down through the lane (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)](bjorn/v2/polish/anim_bul_ult_slam_game.png)
+
+## linwick/v2/polish (linwick/v2/polish)
+
+**Torch Lance at gameplay zoom: orange body with a deep red band and soot rim, white-hot only at the nozzle, cyan pilot 2x bigger; no beige wash on the grass**
+
+![Torch Lance at gameplay zoom: orange body with a deep red band and soot rim, white-hot only at the nozzle, cyan pilot 2x bigger; no beige wash on the grass](linwick/v2/polish/lw_lance_stream_game.png)
+
+**Torch Lance close-up: the billowing far end (2.2 m wide) on the dummy**
+
+![Torch Lance close-up: the billowing far end (2.2 m wide) on the dummy](linwick/v2/polish/lw_lance_stream_close.png)
+
+**Torch Lance sweep at gameplay zoom: the stream lags and bends behind the swung nozzle**
+
+![Torch Lance sweep at gameplay zoom: the stream lags and bends behind the swung nozzle](linwick/v2/polish/lw_lance_sweep_game.png)
+
+**Torch Lance strip (fire on in every frame after the pilot): set feet, pilot, hard roar kick, braced hold with the looping 8 Hz hose buck**
+
+![Torch Lance strip (fire on in every frame after the pilot): set feet, pilot, hard roar kick, braced hold with the looping 8 Hz hose buck](linwick/v2/polish/lw_anim_lance.png)
+
+**Torch Lance sweep strip: the body and nozzle track the swing, the stream trails**
+
+![Torch Lance sweep strip: the body and nozzle track the swing, the stream trails](linwick/v2/polish/lw_anim_lance_sweep.png)
+
+**Cinder Shot telegraph: held RMB, the lane to the cursor and its end ring, gun hand cocked**
+
+![Cinder Shot telegraph: held RMB, the lane to the cursor and its end ring, gun hand cocked](linwick/v2/polish/lw_cinder_lane_game.png)
+
+**Cinder Shot key frame at gameplay zoom: a red-pink fireball with a yellow core in a violet halo, dark smoke tail (not white)**
+
+![Cinder Shot key frame at gameplay zoom: a red-pink fireball with a yellow core in a violet halo, dark smoke tail (not white)](linwick/v2/polish/lw_cinder_flight_game.png)
+
+**Cinder Shot close-up in flight just after release, the arm thrust out**
+
+![Cinder Shot close-up in flight just after release, the arm thrust out](linwick/v2/polish/lw_cinder_flight_close.png)
+
+**Cinder Shot impact at gameplay zoom: a red jagged flash, red orb and rising embers on the dummy, ABLAZE**
+
+![Cinder Shot impact at gameplay zoom: a red jagged flash, red orb and rising embers on the dummy, ABLAZE](linwick/v2/polish/lw_cinder_impact_game.png)
+
+**Cinder Shot impact close-up**
+
+![Cinder Shot impact close-up](linwick/v2/polish/lw_cinder_impact_close.png)
+
+**Cinder Shot strip: cocked with the lane, release thrust (overshoot), recoil, settle**
+
+![Cinder Shot strip: cocked with the lane, release thrust (overshoot), recoil, settle](linwick/v2/polish/lw_anim_cinder.png)
+
+**Soot Ram mid-flight, before contact, gameplay zoom: the flat flame skull crescent round his front, long ember tails, ember-puff after-images**
+
+![Soot Ram mid-flight, before contact, gameplay zoom: the flat flame skull crescent round his front, long ember tails, ember-puff after-images](linwick/v2/polish/lw_ram_skull_game.png)
+
+**Soot Ram mid-flight close-up: head first inside the skull, just before the dummy**
+
+![Soot Ram mid-flight close-up: head first inside the skull, just before the dummy](linwick/v2/polish/lw_ram_skull_close.png)
+
+**Soot Ram impact: the jagged sunburst where he stops on the dummy**
+
+![Soot Ram impact: the jagged sunburst where he stops on the dummy](linwick/v2/polish/lw_ram_impact_close.png)
+
+**Soot Ram strip (quick, short, front-loaded): head-first lunge in the skull, impact burst, bounce back, upright recovery**
+
+![Soot Ram strip (quick, short, front-loaded): head-first lunge in the skull, impact burst, bounce back, upright recovery](linwick/v2/polish/lw_anim_ram.png)
+
+**Air poof (owner 23:40) at gameplay zoom: the ring of smoke and flame where it goes off, balled up as he launches**
+
+![Air poof (owner 23:40) at gameplay zoom: the ring of smoke and flame where it goes off, balled up as he launches](linwick/v2/polish/lw_air_poof_launch_game.png)
+
+**Air poof close-up: the smoke ring and the tucked roll**
+
+![Air poof close-up: the smoke ring and the tucked roll](linwick/v2/polish/lw_air_poof_launch_close.png)
+
+**Air poof a beat later: launched far, sailing spread-eagled on the kept speed, the ember-puff trail behind (camera on the island, no pink sphere)**
+
+![Air poof a beat later: launched far, sailing spread-eagled on the kept speed, the ember-puff trail behind (camera on the island, no pink sphere)](linwick/v2/polish/lw_air_poof_sail_game.png)
+
+**Air poof strip: the burst, the roll, the spread-eagle sail, speed bleeding off; no dummy hover card, camera stays on the island**
+
+![Air poof strip: the burst, the roll, the spread-eagle sail, speed bleeding off; no dummy hover card, camera stays on the island](linwick/v2/polish/lw_anim_air_poof.png)
+
+**Furnace Cloak telegraph, the 0.2 s ring-only frame at gameplay zoom: the thin edge ring at 4.5 m before any blast**
+
+![Furnace Cloak telegraph, the 0.2 s ring-only frame at gameplay zoom: the thin edge ring at 4.5 m before any blast](linwick/v2/polish/lw_cloak_ring_game.png)
+
+**Furnace Cloak telegraph close-up: curled in, arms crossed, ring only**
+
+![Furnace Cloak telegraph close-up: curled in, arms crossed, ring only](linwick/v2/polish/lw_cloak_ring_close.png)
+
+**Furnace Cloak blast at gameplay zoom: the jagged 14-ray sunburst in deep orange with dark tips, arms flung wide**
+
+![Furnace Cloak blast at gameplay zoom: the jagged 14-ray sunburst in deep orange with dark tips, arms flung wide](linwick/v2/polish/lw_cloak_blast_game.png)
+
+**Furnace Cloak blast close-up: the flamer swung up on its strap, both arms out wide**
+
+![Furnace Cloak blast close-up: the flamer swung up on its strap, both arms out wide](linwick/v2/polish/lw_cloak_blast_close.png)
+
+**Furnace Cloak shield: the deep orange two-ring fire swirl on Linwick, the dummy dragged in**
+
+![Furnace Cloak shield: the deep orange two-ring fire swirl on Linwick, the dummy dragged in](linwick/v2/polish/lw_cloak_shield_close.png)
+
+**Furnace Cloak strip: curl in, ring, the flamer up and the arms flung wide with the blast, hold, settle**
+
+![Furnace Cloak strip: curl in, ring, the flamer up and the arms flung wide with the blast, hold, settle](linwick/v2/polish/lw_anim_cloak.png)
+
+**Flashover payoff strip: fist punched up over his head with the flamer lifted, lean back, bounce**
+
+![Flashover payoff strip: fist punched up over his head with the flamer lifted, lean back, bounce](linwick/v2/polish/lw_anim_flashover.png)
+
+**Flashover mid-roar strip (was 5 identical frames): the payoff plays over the lance, the nozzle bucks up and the fire keeps going**
+
+![Flashover mid-roar strip (was 5 identical frames): the payoff plays over the lance, the nozzle bucks up and the fire keeps going](linwick/v2/polish/lw_anim_flashover_lance.png)
+
+**Flashover passive: FLASHOVER on the dummy, three pips and a glow over it, the lance still on**
+
+![Flashover passive: FLASHOVER on the dummy, three pips and a glow over it, the lance still on](linwick/v2/polish/lw_flashover_pips.png)
+
+**Flue Flight lift-off at gameplay zoom: the ember ring is now a ring of flame puffs over a deep red wave (it was faint on bright grass)**
+
+![Flue Flight lift-off at gameplay zoom: the ember ring is now a ring of flame puffs over a deep red wave (it was faint on bright grass)](linwick/v2/polish/lw_ult_liftoff_game.png)
+
+**Flue Flight lift-off close-up**
+
+![Flue Flight lift-off close-up](linwick/v2/polish/lw_ult_liftoff_close.png)
+
+## dredge/v2/polish (dredge/v2/polish)
+
+**Scattergun idle (before any shot): the single thin aim line to the cursor**
+
+![Scattergun idle (before any shot): the single thin aim line to the cursor](dredge/v2/polish/dr_gun_idle_line_game.png)
+
+**Scattergun slugs mid-flight at gameplay zoom: hot pink streaks, the two cone-edge lines, brass muzzle flash**
+
+![Scattergun slugs mid-flight at gameplay zoom: hot pink streaks, the two cone-edge lines, brass muzzle flash](dredge/v2/polish/dr_gun_slugs_flight_game.png)
+
+**Scattergun slugs mid-flight close-up**
+
+![Scattergun slugs mid-flight close-up](dredge/v2/polish/dr_gun_slugs_flight_close.png)
+
+**Scattergun slugs hanging at 6.3 m: solid violet dots with dark cores (not white)**
+
+![Scattergun slugs hanging at 6.3 m: solid violet dots with dark cores (not white)](dredge/v2/polish/dr_gun_slugs_hang_close.png)
+
+**Scattergun strip: barrel kick, the side-on torso turn (twist 0.8), swing back to the aim**
+
+![Scattergun strip: barrel kick, the side-on torso turn (twist 0.8), swing back to the aim](dredge/v2/polish/dr_anim_gun.png)
+
+**Grapnel throw strip: coil back, forward lean and punch out, the thick braided rope leaving**
+
+![Grapnel throw strip: coil back, forward lean and punch out, the thick braided rope leaving](dredge/v2/polish/dr_anim_grapnel_throw.png)
+
+**Grapnel reel strip: hand over hand (looped hauls), the rope swelling taut, no GROUNDED word over him (the chain ring is the tell; the toast says the barge still works)**
+
+![Grapnel reel strip: hand over hand (looped hauls), the rope swelling taut, no GROUNDED word over him (the chain ring is the tell; the toast says the barge still works)](dredge/v2/polish/dr_anim_grapnel_reel.png)
+
+**Grapnel reel at gameplay zoom: thick two-tone rope, big brass claw on the target**
+
+![Grapnel reel at gameplay zoom: thick two-tone rope, big brass claw on the target](dredge/v2/polish/dr_grapnel_reel_game.png)
+
+**Grapnel reel close-up**
+
+![Grapnel reel close-up](dredge/v2/polish/dr_grapnel_reel_close.png)
+
+**Grapnel over a rock (owner): the hook and rope drawn over the pillar, the target behind it**
+
+![Grapnel over a rock (owner): the hook and rope drawn over the pillar, the target behind it](dredge/v2/polish/dr_grapnel_over_rock_game.png)
+
+**Grapnel over a rock strip: thrown over the pillar, the target dragged back across it, HAULED**
+
+![Grapnel over a rock strip: thrown over the pillar, the target dragged back across it, HAULED](dredge/v2/polish/dr_anim_grapnel_over_rock.png)
+
+**Anchor Drop wind-up at gameplay zoom: the giant solid iron anchor with a seafoam rim falling onto the slam spot**
+
+![Anchor Drop wind-up at gameplay zoom: the giant solid iron anchor with a seafoam rim falling onto the slam spot](dredge/v2/polish/dr_anchor_falling_game.png)
+
+**Anchor Drop wind-up close-up: the hop, the anchor coming down**
+
+![Anchor Drop wind-up close-up: the hop, the anchor coming down](dredge/v2/polish/dr_anchor_falling_close.png)
+
+**Anchor Drop slam at gameplay zoom: the anchor planted over the dummy, ANCHORED and STUNNED stacked, not overprinted**
+
+![Anchor Drop slam at gameplay zoom: the anchor planted over the dummy, ANCHORED and STUNNED stacked, not overprinted](dredge/v2/polish/dr_anchor_slam_game.png)
+
+**Anchor Drop slam close-up**
+
+![Anchor Drop slam close-up](dredge/v2/polish/dr_anchor_slam_close.png)
+
+**Anchor Drop strip: fist hauled back, hop, the anchor lands, crouched follow-through, recovery**
+
+![Anchor Drop strip: fist hauled back, hop, the anchor lands, crouched follow-through, recovery](dredge/v2/polish/dr_anim_anchor.png)
+
+**Air Anchor at gameplay zoom: he rides the full-size anchor down, the seafoam landing ring with ticks**
+
+![Air Anchor at gameplay zoom: he rides the full-size anchor down, the seafoam landing ring with ticks](dredge/v2/polish/dr_air_anchor_ride_game.png)
+
+**Air Anchor close-up**
+
+![Air Anchor close-up](dredge/v2/polish/dr_air_anchor_ride_close.png)
+
+**Air Anchor strip: dropping on the anchor, the landing ring, the impact**
+
+![Air Anchor strip: dropping on the anchor, the landing ring, the impact](dredge/v2/polish/dr_anim_air_anchor.png)
+
+**Barge key frame at gameplay zoom: the red spiky burst where it sets off, shoulder first**
+
+![Barge key frame at gameplay zoom: the red spiky burst where it sets off, shoulder first](dredge/v2/polish/dr_barge_burst_game.png)
+
+**Barge close-up: the red burst, iron and brass after-images**
+
+![Barge close-up: the red burst, iron and brass after-images](dredge/v2/polish/dr_barge_burst_close.png)
+
+**Barge strip: one quick shove seen travelling (owner 23:40), squash on arrival, recovery**
+
+![Barge strip: one quick shove seen travelling (owner 23:40), squash on arrival, recovery](dredge/v2/polish/dr_anim_barge.png)
+
+**Barge run strip (owner 23:40): three short fast barges a beat apart, a red burst at each start**
+
+![Barge run strip (owner 23:40): three short fast barges a beat apart, a red burst at each start](dredge/v2/polish/dr_anim_barge_run.png)
+
+**Barge run at gameplay zoom: the second barge of the three going off**
+
+![Barge run at gameplay zoom: the second barge of the three going off](dredge/v2/polish/dr_barge_run_game.png)
+
+**Air barge strip: the same quick burst 35% further, arms flung wide, heavy settle; camera on the island (no pink sphere)**
+
+![Air barge strip: the same quick burst 35% further, arms flung wide, heavy settle; camera on the island (no pink sphere)](dredge/v2/polish/dr_anim_air_barge.png)
+
+**Salvage strip: chest out, both fists and the gun high over the shoulders, stomp**
+
+![Salvage strip: chest out, both fists and the gun high over the shoulders, stomp](dredge/v2/polish/dr_anim_salvage.png)
+
+**Brass Broadside wave at gameplay zoom: the brass fan and burst after the blend change**
+
+![Brass Broadside wave at gameplay zoom: the brass fan and burst after the blend change](dredge/v2/polish/dr_ult_wave_game.png)
