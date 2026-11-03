@@ -359,7 +359,7 @@ func _trade_bodies(land: Vector3, from: Vector3, r: float) -> void:
 			to = from
 		else:
 			to.y = maxf(g, from.y)
-		HeroZones.move_body(m, body, to)
+		m.displace.teleport(body, to)
 		if body.team != h.team:
 			swapped_foes += 1
 			KitStatus.apply(body, "dsr", float(dd["slow_t"]), float(dd["slow"]))

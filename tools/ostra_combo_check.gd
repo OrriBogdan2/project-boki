@@ -633,13 +633,13 @@ func _multi(m: Match, P: Hunter, T: Hunter, home: Vector3, K: OstraKit) -> void:
 	var r_at := R.pos
 	aim_at(P, land)
 	ok("small: the Trade's circle holds all three", K.trade_bodies(land, float(K.dash_def()["radius"])).size() == 3)
-	HeroZones.capture = true
-	HeroZones.sent.clear()
+	Displace.capture = true
+	Displace.sent.clear()
 	var foes0 := K.swapped_foes
 	var allies0 := K.swapped_allies
 	P.ak.on_dash(false)
 	step(m, 2.1)
-	HeroZones.capture = false
+	Displace.capture = false
 	var t_off := Vector2(T.pos.x - home.x, T.pos.z - home.z).length()
 	var a_off := Vector2(A.pos.x - home.x, A.pos.z - home.z).length()
 	ok(
@@ -653,7 +653,7 @@ func _multi(m: Match, P: Hunter, T: Hunter, home: Vector3, K: OstraKit) -> void:
 	)
 	ok(
 		"net: a body another game owns is sent its move to her origin, not moved here",
-		HeroZones.sent.any(func(e): return e[1] == "tp" and e[2] == "r1" and absf(float(e[3]) - home.x - 0.9) < 0.3)
+		Displace.sent.any(func(e): return e[1] == "tp" and e[2] == "r1" and absf(float(e[3]) - home.x - 0.9) < 0.3)
 		and R.pos.distance_to(r_at) < 0.05
 	)
 	for x in [A, R]:

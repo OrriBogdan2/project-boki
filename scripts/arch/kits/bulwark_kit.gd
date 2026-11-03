@@ -44,7 +44,6 @@ var ticks_healed := 0           # (checks) heals the zone's ticks gave
 var shield_slams := 0           # (checks) Shield Slams the Shield Charge ended in
 var throw_at := -9.0           # when the hammer last left his hand (the recall lockout)
 var hold_blocked := false      # the Crushing Blow was cut short: the button must come up before it can start again
-var shoved := {}               # foe id -> {foe, dir, left}: foes sliding back off the raised aegis
 var pushed_at := {}            # foe id -> when the aegis last pushed it (one push per "push_gap")
 var pushes := 0                # (checks) foes the raised aegis has pushed back
 var dash_after_plant := false  # Shift came in while planted for Faultline: the dash goes when the plant ends
@@ -148,7 +147,6 @@ func _tick(dt: float) -> void:
 		down_t += dt
 		if down_t >= _shield_stat("wait") and lock_t <= 0.0:
 			shield_hp = minf(shield_max(), shield_hp + _shield_stat("regen") * dt)
-	_tick_shoved(dt)
 	_tick_glove()
 	_tick_mace(dt)
 	ult.tick(dt)
@@ -186,7 +184,7 @@ func _shield_push() -> void:
 		var gap_ok: bool = m.time - float(pushed_at.get(key, -9.0)) >= float(sd.get("push_gap", 0.6))
 		if in_front and p.distance_to(q) < reach and gap_ok:
 			pushed_at[key] = m.time
-			shoved[key] = {"foe": f, "dir": n, "left": push}
+			_shove(f, n, push, float(sd.get("push_speed", 14.0)))
 			if "roll_t" in f: f.set("roll_t", 0.0)
 			pushes += 1
 			flash = true
@@ -203,23 +201,11 @@ func _tick_glove() -> void:
 	if used and lmb_t >= 0.0:
 		cancel_hold()
 
-## Slides the pushed foes back (a wall behind them stops the slide).
-func _tick_shoved(dt: float) -> void:
-	var speed := float(rmb_def()["shield"].get("push_speed", 14.0))
-	for key in shoved.keys():
-		var e: Dictionary = shoved[key]
-		var f: Ent = e["foe"]
-		if not is_instance_valid(f) or f.dead or float(e["left"]) <= 0.0:
-			shoved.erase(key)
-			continue
-		var step := minf(float(e["left"]), speed * dt)
-		var dir: Vector2 = e["dir"]
-		var np := f.pos + Vector3(dir.x, 0, dir.y) * step
-		if m.world.is_block(np.x, np.z) or m.world.ground_at(np.x, np.z) > f.pos.y + 0.8:
-			shoved.erase(key)
-			continue
-		f.pos = np
-		e["left"] = float(e["left"]) - step
+## Slides a pushed foe back along the aegis's facing (a wall behind it stops the slide; Displace: a player
+## online slides on their own game).
+func _shove(f: Ent, dir: Vector2, dist: float, speed: float) -> void:
+	var push := {"mode": "push", "dir": [dir.x, dir.y], "dist": dist, "spd": speed, "dur": dist / speed + 0.1}
+	m.displace.tow(f, null, push)
 
 func _tick_crest() -> void:
 	if crest == null or not is_instance_valid(crest):

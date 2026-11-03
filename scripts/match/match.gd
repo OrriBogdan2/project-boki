@@ -89,6 +89,7 @@ var pending_input := {"base": false, "dash": false, "jump": false, "sig": false,
 var zones: Array = []      # hero areas: dome, sanctuary, well
 var fields: Fields = null  # patches made by kin abilities (Thorn Patch)
 var verbs: Verbs = null    # walls, reflect windows, tethers, traps, bridges and yanks left by abilities
+var displace: Displace = null     # abilities moving someone else's body (online too: its owner's game moves it)
 var _later: Array = []     # [due time, Callable]: delayed ability steps, on match time (not wall-clock timers)
 
 ## Run cb after `delay` seconds of match time: delayed effects, echoes, landing blasts. Unlike a
@@ -704,6 +705,7 @@ func _start(o: Dictionary) -> void:
 	brk = Breakables.new(self)
 	fields = Fields.new(self)
 	verbs = Verbs.new(self)
+	displace = Displace.new(self)
 	if world.layout_id != "" and not o.get("tutorial", false):
 		biomes = BiomeRun.new(self)
 		if biomes.active():
@@ -4341,6 +4343,7 @@ func step(dt: float) -> void:
 	_update_zones(dt)
 	fields.tick(dt)
 	verbs.tick(dt)
+	displace.tick(dt)
 	_run_later()
 	if biomes: biomes.tick(dt)
 	_update_tracking(dt)
@@ -6109,6 +6112,8 @@ func _net_ev(x, from: String) -> void:
 	match String(x[0]):
 		"zone":
 			HeroZones.net_in(self, x)
+		"disp":
+			displace.net_in(x)
 		"kcmd":
 			KinNet.on_event(self, x)       # a Boki command or a merge going off in another game
 		"kst":
