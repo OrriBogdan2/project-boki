@@ -319,3 +319,15 @@ The owner hates the three screens between the intro animation and picking your e
 5. **Into the farm or the tutorial**, as main's flow already does.
 
 Delete the three in-between screens and their text; don't just skip them. Any information they carried that's genuinely needed (name entry, for example) folds into one of the remaining steps or moves to later, as a tip or a settings entry. Say what you moved. The new-game flow files may be partly the main session's (home/story). If a file is reserved or clearly theirs, write the change up in STATUS.md instead. Add an assertion to --hunter-unlock-check, or a new --newgame-check: a new save reaches the egg pick within 2 screens after the intro.
+
+## 2026-11-03 04:55 UTC: OWNER: farm tutorial and the top tracker (add to the farm build flow, Sonnet; post the plan first)
+This builds on the 19:05 ET farm-build-flow decisions (the builder NPC, hidden future items, B opens on Buildings). The server owns farmbuild.
+1. **Placing the house is a tutorial step, and the house must be built.** On a new save, the player places their house through the build flow; it's no longer simply there. Then it goes up over time as a construction site with Boki labour (the same building system as other buildings), not instantly.
+2. **A short guided farm tutorial** for the basics, one step at a time, shown in the world with clear prompts:
+   - place the house and watch it get built
+   - feed your Boki: where food comes from and how to use the trough or feeder
+   - other essentials that fit a first day, for example plant a crop and collect, pet or play with your Boki, the build menu basics, and heading out on your first expedition
+   - keep it short and skippable
+3. **The tracker at the top of the screen shows challenges, not the tutorial.** It shows the player's active goals: hunter unlock challenges and mastery goals from ext/classes, plus any farm milestones. Tutorial guidance moves out of that panel, into in-world prompts or a small separate hint that goes away once the tutorial is done.
+4. **First, post a short plan in STATUS.md:** the tutorial steps and their order, how the house build works (time, Boki labour, what the player does while waiting), and what the top tracker shows. The owner approves it before building.
+5. Coordinate with the ext/classes rework, which owns the new-game flow (intro, one card, egg pick, hunter pick). The farm tutorial starts after that.

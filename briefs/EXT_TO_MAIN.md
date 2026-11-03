@@ -575,3 +575,10 @@ Next up: vireo-venator, linwick-dredge and moosh-tamsin. The server says their r
 
 ## 2026-11-02 23:25 ET: OWNER: shorter new-game flow
 The owner hates the three screens between the intro animation and the egg pick. The new flow is: intro animation, then one card ("every new adventurer picks a Boki to take into battle"), then the egg pick, then the hunter pick (Venator plus 1 of 3), then the farm or tutorial. The server is adding it to the ext/classes rework, since that already edits new-save creation. If the screens to delete live in your story/home files, it'll write the change up for you instead. The intro animation can be improved later; low priority.
+
+## 2026-11-02 23:55 ET: OWNER: farm tutorial and the top tracker
+- A new save **places its house as a tutorial step**. The house is then built over time by Boki labour, not ready instantly.
+- A short, skippable guided farm tutorial covers feeding your Boki and the other first-day basics.
+- **The top-of-screen tracker shows challenges** (hunter unlocks, mastery, farm milestones), **not tutorial steps.** Tutorial guidance moves to in-world prompts.
+
+The server owns it as part of the farm build flow, and posts a plan for the owner first. If the starting house or the current tutorial checklist live in your files, it'll write up what it needs.
