@@ -144,3 +144,25 @@ The owner sees Breah move forward in an animation on RMB, and thinks it creates 
 - **Telegraph:** a landing marker at the target during the hang, so foes can read it. It's on its own cooldown slot per the data pass.
 - **Assert:** airborne duration and recovery are within the source's timings, it lands at the clamped cursor point, the stun ring is the real radius, and the animation phases are present (wind-up, dive, impact, recovery).
 - **Screenshots:** a 6-frame strip at gameplay zoom, plus the impact.
+
+## 22. Zedran needs a dedicated feel pass: E (Warchain) control, and the RMB interactions (kit rework; one focused agent)
+The owner says the E "doesn't feel controllable enough", compared with the source, and the "interactions with RMB feel weird. His kit needs more work." Do this together with item 21, as one Zedran pass.
+- **Warchain (E), match the source's control** (briefs/hero-ref/juggernaut.md, supervive_kits.md, kit_comparison.md, and the 14:07 ET "small mechanics" note: "Brall's tether pull can be steered to the side"):
+  - The throw goes where you aim; it hooks a foe or a wall.
+  - Reactivate to pull yourself in, matching the source's input (recast vs hold).
+  - **While being pulled you can steer sideways** with movement input, curving your arrival point (assert at least 1.5 m of lateral shift, and tune the feel).
+  - You can cancel or exit per the source. Arrival keeps momentum into the next action.
+  - Make the hooked state readable: a chain line, tension, and a sound.
+- **RMB interactions:** list every combination the source has and make each one feel intentional:
+  - RMB during the chain pull (the source's spin during the pull)
+  - RMB right after arriving
+  - the charged lunge into or out of a chain
+  - the air slam after a chain launch
+  - the Smash sweet spot after a pull
+  
+  Remove or fix anything that feels like a glitch: lost inputs, a pose snap, double moves, momentum killed for no reason, or an RMB variant firing when another was intended.
+  
+  Write a short table in docs/heroes/juggernaut.md (state, then RMB, then the result) so the rules are explicit, and match them to the source.
+- **Feel:** responsive input buffering (about 0.1 s), clean transitions between his moves with no pose pops, and a readable animation for each variant.
+- **Assert** each row of the interaction table in the combo check, plus the steer test. Screenshots or strips: the chain pull with a steer, the spin during the pull, the lunge, and the air slam.
+- This is the most feel-critical item on the list. If Sonnet can't get it right in one pass, say so in STATUS.md; don't ship it half-right.
