@@ -452,3 +452,10 @@ Portrait:
 
 Turnaround:
 > Character turnaround reference sheet for a 3D modeller: the same character shown three times side by side at the same scale on one sheet, left to right: FRONT view, SIDE view (profile), BACK view. Neutral relaxed A-pose standing straight, arms held slightly away from the body, full body head to toe in every view, all three figures exactly the same height and aligned on one ground line. Flat even studio lighting, no dramatic shadows, plain flat light grey background, no scenery. Any held weapon hangs down beside the leg in the same hand in every view and is visible in all three views. The ice fan closed in the same hand in every view, the ice patches only on her shoulders and forearms, skates on in every view, ponytail visible in the side and back views. No text, no labels, no logos.
+
+### Portrait updates (owner notes), 2026-11-03
+| File | Studio image | Change |
+|---|---|---|
+| `wardens/zedran_portrait.png` | 4f65b176 | Owner: the lean portrait looked skinny. Re-shot with "extremely JACKED: thick muscular neck, big rounded shoulders and traps, huge striated pecs and deltoids ... never skinny" and the block's body line changed to "shredded and heavily muscled, jacked rather than bulky-wide". |
+| `wardens/moosh_portrait.png` | d7bd1abc | Owner: Moosh Moosh looked out of place. New direction: about four heads tall instead of three and a half, a brave determined look, worn adventurer gear (moss-green travelling cloak, bracers, belt pouches), and the same rich detail and dramatic lighting as the rest. Splash and turnaround redo queued. |
+| `wardens/vex_portrait.png` | d4ae5c7c | Venatrix replaced by **Vex** (owner: East Asian, assertive, more aura, a grizzled super-confident veteran who's a bit crazy). Splash and turnaround queued; the studio stalled on wide images. |
