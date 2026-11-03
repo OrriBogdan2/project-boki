@@ -31,6 +31,7 @@ var chip_t := 0.0
 var stats := {"darts": 0, "beams": 0, "spears": 0, "detonations": 0, "rimes": 0, "crashes": 0, "cancels": 0}   # tests
 var rime := {}                 # Rimelock running: {t, at, slow: {instance id: seconds in the rink}, creak}
 var last_stunned := 0          # foes the last Rimelock crash stunned (tests)
+var glide_held := false        # the glide key was down last step (Rimelock refuses each new press once)
 var ult_look: UltLook
 const SHELL_T := 0.15          # s the icy shell shows on a foe before the 8-dart Shatter bursts
 const SLAB_GAP := 0.06         # s between ice plates under the skate
@@ -40,6 +41,7 @@ const SHATTER_R := 2.7         # m, the Shatter's spike starburst (about 1.5 bod
 const THROW_T := 0.16          # s from letting go of RMB to the release: the arm draws back, then whips (tm_spear)
 const SPEAR_ARC := 0.9         # m the thrown spear's flight bows above the straight line from hand to ground
 const LAND_KICK_R := 7.0       # m: a landing this close to her gives her camera a small kick
+const CARRY_T := 0.5           # s a skate out of Rimelock holds its push-off speed before easing to the skate's
 
 func _setup() -> void:
 	res = 0.0
@@ -330,8 +332,13 @@ func _tick_rinkrun(dt: float) -> void:
 	rinkrun["dir"] = cur
 	_edge_spray(cur, turn / maxf(dt, 0.001), dt)
 	h.roll_dir = cur
-	# full speed within `ramp` s of the push-off
-	h.roll_speed = float(dd.get("speed", 11.5)) * lerpf(0.45, 1.0, clampf(t / float(dd.get("ramp", 0.2)), 0.0, 1.0))
+	# full speed within `ramp` s of the push-off; out of Rimelock it starts at full speed (or the speed she
+	# had) and holds it CARRY_T before easing to the skate's own
+	var spd := float(dd.get("speed", 11.5)) * lerpf(0.45, 1.0, clampf(t / float(dd.get("ramp", 0.2)), 0.0, 1.0))
+	var carry := float(rinkrun.get("carry", 0.0))
+	if carry > 0.0 and t < CARRY_T * 2.0:
+		spd = maxf(spd, lerpf(carry, float(dd.get("speed", 11.5)), smoothstep(CARRY_T, CARRY_T * 2.0, t)))
+	h.roll_speed = spd
 	h.roll_t = 0.1
 	h.move_kind = "rinkrun"
 	# the stride move, replayed every 0.56 s
@@ -801,10 +808,14 @@ func _tick_rime(dt: float) -> void:
 	if h.out or h.downed:
 		_rime_clear()
 		return
+	if bool(h.inp.get("dash", false)):
+		_rime_skate_out()
+		return
 	rime["t"] = float(rime["t"]) + dt
 	var t := float(rime["t"])
 	var hold := float(xd["hold"])
 	_rime_hold_body()
+	_rime_no_glide()
 	var at: Vector3 = rime["at"]
 	var radius := float(xd["radius"])
 	_rime_slow(at, radius, dt)
@@ -813,6 +824,34 @@ func _tick_rime(dt: float) -> void:
 		play("tm_rime_hold")
 	if t >= hold:
 		_rime_crash(1.0)
+
+
+## No glide while sealed: over the abyss she falls, and only ending Rimelock (X or Shift) frees the glider.
+## Each glide press is refused out loud.
+func _rime_no_glide() -> void:
+	h.glide_cd = maxf(h.glide_cd, 0.1)
+	h.gliding = false
+	var glide_now := bool(h.inp.get("glide", false))
+	if glide_now and not glide_held and not h.grounded:
+		h._ab_feedback("x", "deny")
+		m.fx.word(h.pos + Vector3(0, 2.6, 0), "NO GLIDE", Color("bff7ef"), false)
+	glide_held = glide_now
+
+
+## Shift while sealed: Rimelock ends as X again would (a late press still cracks it open) and she skates
+## straight out at full speed, keeping any speed she had for CARRY_T; in the air the skate waits for the
+## landing, as any air press does.
+func _rime_skate_out() -> void:
+	var had := Vector2(h.vel.x, h.vel.z).length()
+	ult_recast()
+	if h.dashes < 1.0:
+		h._ab_feedback("dash", "deny")
+		return
+	if not h.grounded:
+		air_skate = true
+		return
+	_begin_skate()
+	rinkrun["carry"] = maxf(had, float(dash_def().get("speed", 11.5)))
 
 
 ## Foes in the rink are Chilled and slowed more the longer they stay (a stacking slow up to slow_max).

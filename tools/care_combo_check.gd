@@ -121,6 +121,60 @@ func _skate_only() -> void:
 	P.inp["dash_down"] = false
 	await _free(m)
 
+## Item 27: no glide while sealed in Rimelock (she falls; each press is refused), and Shift ends it and
+## skates straight out at speed instead of stopping.
+func _rime_glide_skate() -> void:
+	var r: Array = sc.setup("rimewright", 30.0)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var K: RimewrightKit = P.ak
+	K.cd["x"] = 0.0
+	P.teleport(P.pos + Vector3(0, 5.0, 0))
+	P.grounded = false
+	step(m, 0.05)
+	HunterKeys.ult_pressed(P)
+	var y0 := P.pos.y
+	var opened := false
+	for i in 30:
+		P.inp["glide"] = true
+		step(m, 1.0 / 60.0)
+		opened = opened or P.gliding
+	P.inp["glide"] = false
+	ok(
+			"tm X: glide held while sealed in the air does nothing; she keeps falling",
+			K.ult_running() and not opened and P.pos.y < y0 - 0.3 and K.glide_held,
+			"fell %.2f m" % (y0 - P.pos.y))
+	await _free(m)
+	r = sc.setup("rimewright", 30.0)
+	m = r[0]
+	P = r[1]
+	K = P.ak
+	K.cd["x"] = 0.0
+	P.dashes = P.max_dashes()
+	HunterKeys.ult_pressed(P)
+	step(m, 1.0)
+	var before := Vector2(P.vel.x, P.vel.z).length()
+	P.inp["move"] = Vector2(1, 0)
+	P.inp["dash"] = true
+	P.inp["dash_down"] = true
+	var slowest := 99.0
+	var prev := P.pos
+	step(m, 1.0 / 60.0)
+	P.inp["dash"] = false
+	var out_of_ult := not K.ult_running() and K.rinkrunning()
+	prev = P.pos
+	for i in 18:
+		step(m, 1.0 / 60.0)
+		slowest = minf(slowest, Vector2(P.pos.x - prev.x, P.pos.z - prev.z).length() * 60.0)
+		prev = P.pos
+	var skate_v := float(K.dash_def()["speed"])
+	ok(
+			"tm X: Shift ends Rimelock and she skates straight out at speed (first 0.3 s >= 80%)",
+			out_of_ult and slowest >= 0.8 * maxf(before, skate_v),
+			"slowest %.1f m/s (before %.1f, skate %.1f)" % [slowest, before, skate_v])
+	P.inp["dash_down"] = false
+	await _free(m)
+
 ## Rank 3 Skate over the Abyss lays ice underfoot that holds a while and then goes; below rank 3 she gets none.
 func _skate_ice() -> void:
 	var laid := {}
@@ -626,6 +680,7 @@ func rimewright() -> void:
 	await _free(m)
 	await _skate_feel()
 	await _skate_only()
+	await _rime_glide_skate()
 	await _skate_ice()
 	await _spear_rank3()
 	# --- Ice Spear: hold shows the ring at the cursor; it lands there, slows, detonates 1.8 s later

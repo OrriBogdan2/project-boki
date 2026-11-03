@@ -41,6 +41,7 @@ const SPEC := {
 	"rimewright_pose": {"strip": [0.5, 0.56, 0.62, 0.68], "keys": {"pose": 0.6}, "yaw": 3.3},
 	"rimewright_ultaim": {"strip": [0.32, 0.36, 0.42, 0.5, 1.5], "keys": {"ultaim": 0.36}},
 	"rimewright_ultkey": {"strip": [0.33, 0.37, 0.42, 0.5, 2.0, 3.0], "keys": {"ultkey": 2.0}},
+	"rimewright_ultskate": {"strip": [1.1, 1.22, 1.3, 1.4, 1.55], "keys": {"ultskate": 1.3}},
 	"rimewright_ult": {"strip": [3.6, 3.81, 3.85, 3.91, 4.0, 4.25], "keys": {"ult_crash": 3.85}},
 }
 
@@ -204,7 +205,7 @@ static func _script(
 			P.inp["move"] = (A.get_meta("care_right", Vector2(1, 0)) as Vector2) if t > 0.3 else Vector2.ZERO
 		"payoff":
 			_payoff(P, D, Al, K, arch, t, dt)
-		"ultaim", "ultkey", "ult":
+		"ultaim", "ultkey", "ult", "ultskate":
 			_ult(A, Al, arch, what, t, dt)
 
 static func _dash(A: Arena, P: Hunter, arch: String, t: float, dt: float) -> void:
@@ -254,6 +255,13 @@ static func _ult(A: Arena, ally: Hunter, arch: String, what: String, t: float, d
 		P.teleport(D.pos + Vector3(-1.0, 0, 3.5))
 	if _at(t, dt, 0.3):
 		HunterKeys.ult_pressed(P)
+	if what == "ultskate":
+		# sealed a beat, then Shift: she skates straight out of the bud at speed
+		P.inp["move"] = (A.get_meta("care_right", Vector2(1, 0)) as Vector2) if t > 1.1 else Vector2.ZERO
+		P.inp["dash_down"] = t >= 1.2 and t < 1.9
+		if _at(t, dt, 1.2):
+			P.dashes = P.max_dashes()
+			P.inp["dash"] = true
 
 ## Grabs the strip frames and the key frames at their moments; quits after the last one.
 static func _capture(A: Arena, spec: Dictionary, arch: String, what: String, t: float, dt: float) -> void:
