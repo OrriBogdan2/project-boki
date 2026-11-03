@@ -226,25 +226,26 @@ def sheet(meta, g):
 
 
 def lineup(items):
+    """All Wardens at one scale, then the same row as black silhouettes (the gameplay-read test)."""
     T = Text()
-    n, w, sc = len(items), 1600, 0.40
-    step = (w - 80) / n
-    p, defs = ['<rect width="1600" height="900" fill="url(#paper)"/>',
+    n, sc, g1, g2 = len(items), 0.27, 300, 610
+    step = (1600 - 40) / n
+    p, defs = ['<rect width="1600" height="680" fill="url(#paper)"/>',
                '<rect width="1600" height="56" fill="%s"/>' % INK], [COMMON_DEFS]
     p.append(T.run("THE TWELVE WARDENS", 30, 40, 30, "L", "#f4efe6", spacing=0.04))
-    p.append(T.run("same scale; bottom row: black silhouettes at gameplay read", 1570, 38, 15, "R", "#b9b0c2", "end"))
+    p.append(T.run("one scale  ·  bottom row: filled black, the gameplay-zoom read", 1570, 38, 15, "R", "#b9b0c2", "end"))
     for i, (meta, g) in enumerate(items):
-        x = 40 + step * (i + 0.5)
+        x = 20 + step * (i + 0.5)
         defs.append(materials(meta) + expand(g["defs"], meta))
-        p.append(ground(x, 440, meta.get("shadow", 120) * sc, meta.get("float", 0)))
-        p.append('<g transform="translate(%.1f 440) scale(%g)">%s</g>' % (x, sc, expand(g["front"], meta)))
-        p.append(T.run(meta["name"], x, 476, 17, "L", INK, "middle"))
-        p.append(T.run(meta["title"], x, 495, 11.5, "R", "#6d6377", "middle"))
-        p.append('<g transform="translate(%.1f 830) scale(%g)">%s</g>'
-                 % (x, sc, expand(g["front"], meta, silhouette=True)))
-        p.append(T.run(meta["name"], x, 864, 14, "L", "#6d6377", "middle"))
-    p.append('<rect x="0" y="512" width="1600" height="2" fill="#bdb3a6"/>')
-    return ('<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">'
+        p.append(ground(x, g1, meta.get("shadow", 120) * sc, meta.get("float", 0)))
+        p.append('<g transform="translate(%.1f %d) scale(%g)">%s</g>' % (x, g1, sc, expand(g["front"], meta)))
+        p.append(T.run(meta["name"], x, g1 + 30, 15, "L", INK, "middle"))
+        p.append(T.run(meta["title"], x, g1 + 46, 10.5, "R", "#6d6377", "middle"))
+        p.append('<g transform="translate(%.1f %d) scale(%g)">%s</g>'
+                 % (x, g2, sc, expand(g["front"], meta, silhouette=True)))
+        p.append(T.run(meta["name"], x, g2 + 30, 13, "L", "#6d6377", "middle"))
+    p.append('<rect x="0" y="372" width="1600" height="2" fill="#bdb3a6"/>')
+    return ('<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="680" viewBox="0 0 1600 680">'
             '<defs>%s%s</defs>%s</svg>\n' % ("".join(defs), T.defs(), "\n".join(p)))
 
 
