@@ -371,14 +371,22 @@ func _breah() -> void:
 	m.step(DT)
 	step(m, 0.35, func(): P.inp["sec_hold"] = true)
 	var e3 := AimKit.entry(P, "rmb")
-	ok(
-		"rmb: jump while charging leaps her forward", K.slam.leaps == 1 and P.pos.x - lx0 > 2.0,
-		"leaps %d moved %.2f" % [K.slam.leaps, P.pos.x - lx0]
-	)
+	var ly_mid := P.pos.y - home.y
 	ok("rmb: the circle comes with her", (e3.get("at", Vector2.ZERO) as Vector2).x - lx0 > 2.5, str(e3.get("at")))
 	P.inp["sec_hold"] = false
-	step(m, 1.2)
-	ok("rmb: let go mid-leap = slam where she lands", K.slams >= 1 and P.grounded, "slams %d" % K.slams)
+	var sl0 := K.slams
+	step(m, 0.05)
+	var leap_dive_vy := P.vel.y
+	step(m, 1.15)
+	ok(
+		"rmb: jump while charging is a real leap, longer than the hop (up off the ground, about 3m forward)",
+		K.slam.leaps == 1 and ly_mid > 0.6 and P.pos.x - lx0 > 2.8,
+		"leaps %d up %.2f moved %.2f" % [K.slam.leaps, ly_mid, P.pos.x - lx0]
+	)
+	ok(
+		"rmb: let go mid-leap = the leap's arc carries on (no plunge), slam where she lands",
+		K.slams == sl0 + 1 and P.grounded and leap_dive_vy > -12.0, "slams %d vy %.1f" % [K.slams - sl0, leap_dive_vy]
+	)
 	# punch during the charge: a lunge
 	reset.call()
 	aim_at(P, home + Vector3(10, 0, 0))
@@ -454,6 +462,7 @@ func _breah() -> void:
 		"rmb: a foe in the air is dunked", K.dunks == dn0 + 1 and T.vel.y < -10.0,
 		"dunks %d vy %.1f" % [K.dunks, T.vel.y]
 	)
+	await _hop_glide(m, P, home, K, reset)
 	# ---- data pass: Landslide is 12s with one charge; Molten Guard is the base passive
 	ok(
 		"data: the leap rests 12s per charge and starts with one charge (a second at rank 3)",
@@ -610,6 +619,49 @@ func _breah() -> void:
 		str(snd.filter(func(s): return not Sfx.has(s)))
 	)
 	await done(m)
+
+## Item 26: Quakefall then the glider. Glide held from the hop, or pressed after a charge leap or an air
+## press: the glider opens, she never drops below where she took off (for the first 0.3s), and it sinks
+## like a normal glide.
+func _hop_glide(m: Match, P: Hunter, home: Vector3, K: DolmKit, reset: Callable) -> void:
+	for mode in ["hop", "leap", "air"]:
+		reset.call()
+		aim_at(P, home + Vector3(8, 0, 0))
+		var z0 := P.pos.y
+		if mode == "hop":
+			tap(m, P)
+		elif mode == "leap":
+			P.inp["sec_hold"] = true
+			P.ak.press_rmb()
+			step(m, 0.4, func(): P.inp["sec_hold"] = true)
+			P.inp["jump"] = true
+			step(m, 0.15, func(): P.inp["sec_hold"] = true)
+			P.inp["sec_hold"] = false
+			m.step(DT)
+		else:
+			P.inp["jump"] = true
+			step(m, 0.2)
+			tap(m, P)
+			z0 = P.pos.y
+		var dove := K.dive
+		var floor_z := -Hunter.GLIDE_SINK * 0.3 - 0.02 if mode == "air" else -0.01     # (in the air: a glide's sink)
+		var low := 99.0
+		var sink := 0.0
+		var t := 0.0
+		P.inp["jump"] = true
+		while t < 0.3:
+			P.inp["glide"] = true
+			m.step(DT)
+			t += DT
+			low = minf(low, P.pos.y - z0)
+			if P.gliding: sink = minf(sink, P.vel.y)
+		ok(
+			"glide (item 26, %s): Quakefall, then glide opens the glider; height kept, a normal glide" % mode,
+			dove and P.gliding and not K.dive and low >= floor_z and sink >= -Hunter.GLIDE_SINK - 0.05,
+			"gliding %s dive %s low %.2f sink %.2f" % [P.gliding, K.dive, low, sink]
+		)
+		P.inp["glide"] = false
+		step(m, 0.8)
 
 ## Rubble Leap (owner's dash note: a leap, not the source's odd dash): the rock first, an arc to the cursor
 ## clamped by the dash feel, the landing marker for everyone, the landing crash, then the rock's roll-on hit.

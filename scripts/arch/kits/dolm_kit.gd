@@ -22,8 +22,9 @@ var lmb_was := false
 # the hold punched by itself: keep holding and the next wind-up starts, a release throws nothing
 var lmb_auto := false
 var rid_n := 0
-var dive := false              # the air Quakefall: slam on landing
+var dive := false              # a Quakefall in the air (the hop, a leap, an air press): slam on landing
 var dive_k := 0.0              # ...with this much charge
+var dive_fall := false         # ...plunging straight down (pressed in the air), not riding an arc
 var sight_t := 0.0
 var sneak_t := 0.0             # how long she has been sneaking (the cone widens)
 var shield_stacks := 0         # Molten Guard stacks
@@ -201,17 +202,28 @@ func _tick(dt: float) -> void:
 	if shield_stacks > 0 and h.shield > 0.0 and fmod(m.time, 0.3) < dt:
 		m.fx.ring(h.pos + Vector3(0, 0.1, 0), 1.0, Color("ffd24a"), 0.28)      # the Molten Guard ring
 	if dive:
-		if h.grounded or h.downed:
-			dive = false
-			if h.grounded and not h.downed:
-				slam.land(dive_k)
-		else:
-			h.vel.y = minf(h.vel.y, -float(slam_def()["dive_speed"]))
+		_tick_dive()
 	if not leap.is_empty():
 		_tick_leap(dt)
 	slam.tick(dt)
 	spine.tick(dt)
 	_tick_sight(dt)
+
+## The pending air slam: it lands with her, or plunges if pressed in the air. The glider always wins:
+## holding glide (or the glider opening) drops the slam and hands the arc over, never dragging her down.
+func _tick_dive() -> void:
+	if h.downed:
+		dive = false
+	elif h.gliding or bool(h.inp.get("glide", false)):
+		dive = false
+		h.fly_t = 0.0
+		if dive_fall:
+			h.vel.y = maxf(h.vel.y, 0.0)      # the canopy takes the plunge's speed at once
+	elif h.grounded:
+		dive = false
+		slam.land(dive_k)
+	elif dive_fall:
+		h.vel.y = minf(h.vel.y, -float(slam_def()["dive_speed"]))
 
 ## Tremor Sense: sneaking shows a narrow cone ahead that widens the longer you sneak, and the foes in
 ## it through walls and fog.
@@ -241,6 +253,7 @@ func sight_deg() -> float:
 func _drop_holds() -> void:
 	dive = false
 	dive_k = 0.0
+	dive_fall = false
 	leap = {}
 	if slam: slam.drop()
 	if spine: spine.drop()
