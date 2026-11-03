@@ -10,11 +10,12 @@ extends RefCounted
 const MANTLE_CHECK := preload("res://tools/mantle_look_check.gd")
 const EPS := 0.0005
 ## Per Warden: the hit radius it must keep (m), its height against a medium hunter (hero sheets, "Body,
-## scale and movement feel"), its width against a medium (from, to), and the prefix of its keyed moves.
+## scale and movement feel"), its width against a medium (from, to), and the prefix of its keyed moves ("": it
+## has none of its own; a Warden's 3D model plays every table's in --warden-glb-check).
 const WARDENS := {
 	"bulwark": {"hit_r": 0.5, "height": 1.15, "width": [1.3, 2.2], "moves": "bul_"},
 	"archer": {"hit_r": 0.37, "height": 0.98, "width": [0.7, 1.15], "moves": "arc_"},
-	"gunslinger": {"hit_r": 0.4, "height": 1.04, "width": [0.85, 1.3], "moves": "arc_"},
+	"gunslinger": {"hit_r": 0.4, "height": 1.04, "width": [0.85, 1.3], "moves": ""},
 }
 const REF_WEAPON := "gunslinger"   # the reference medium hunter carries the class's default weapon
 const ANIM_SEED := 1          # one rest pose for every model measured
@@ -87,6 +88,9 @@ func _anim(id: String) -> void:
 		"pad_l": an.pad_l, "pad_r": an.pad_r, "skirt": an.skirt}
 	var unbound := parts.keys().filter(func(k): return parts[k] == null)
 	ok(unbound.is_empty(), "%s: HunterAnim binds every part (unbound %s)" % [id, str(unbound)])
+	if String(WARDENS[id]["moves"]) == "":
+		m.free()
+		return
 	var rest := _pose(an, m, "", 0.0)
 	var still: Array = []
 	var moves: Array = []
@@ -156,12 +160,19 @@ func _sliders(id: String) -> void:
 	var leg_share := ((m0.get_node("Rig/Torso") as Node3D).global_position.y - m0.global_position.y) / h0
 	var head := m0.get_node("Rig/Torso/HeadPivot/Head") as MeshInstance3D
 	var head_share := (head.global_transform * head.mesh.get_aabb()).size.y / h0
-	m0.free()
 	var c: Dictionary = w["clamp"]
 	var grow := 1.0 + float(c["limbs"]) * leg_share + (float(c["head"]) + float(c["jaw"])) * head_share
 	var reach := (1.0 + float(c["height"])) * grow - 1.0 + 0.012
+	var g0 := _glb_top(m0) if m0.has_node("Warden") else 0.0
+	m0.free()
 	for v in [0.0, 1.0]:
 		var m := _model(id, MANTLE_CHECK.flat(v))
+		if m.has_node("Warden"):
+			var hg := _glb_top(m) / g0
+			# the sliders reshape the 3D model too (its bones follow the rig's move from the neutral look)
+			ok(absf(hg - 1.0) <= reach and absf(hg - 1.0) > 0.02,
+					"%s's 3D model: sliders at %d change its height within the clamps (%.3fx, at most ±%.3f)"
+					% [id, int(v), hg, reach])
 		var h := _head_top(m) / h0
 		var ring := (m.get_node("TeamRing") as Node3D).global_transform.basis.get_scale().x
 		var missing := ANCHORS.filter(func(p): return not m.has_node(p))

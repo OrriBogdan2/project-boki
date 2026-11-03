@@ -48,6 +48,9 @@ const ANCHORS := ["anchor_head_top", "anchor_chest"]
 ## Settings key: Warden id -> "procedural" for a Warden the player keeps on its procedural model.
 const SETTING := "warden_models"
 
+static var _neutral := {}       # Warden id -> the rig rest of its model in the neutral look (what a .glb is built on)
+static var _measuring := false  # building that neutral model: no .glb on it
+
 static func path(arch: String) -> String:
 	var nm := String(ART.get(arch, arch))
 	return "%s/%s/%s.glb" % [DIR, nm, nm]
@@ -80,13 +83,15 @@ static func anchor(root: Node3D, anchor_name: String) -> Node3D:
 
 ## Dresses the procedural hunter `root` in its Warden's .glb when it uses one (meta "glb" says which). lk is
 ## the look Models.hunter built from (MantleLook params): its colour picks tint the painted slots.
-## The rig's rest, which a .glb's armature must match, is kept in meta "rig_rest" (tools/warden_build.gd reads it).
+## The rig's rest is kept in meta "rig_rest" (tools/warden_build.gd builds the armature on it). The bones follow
+## each rig node's move from its rest in the Warden's neutral look, so the player's MantleLook sliders (head,
+## legs, build) reshape the 3D model as they do the procedural one.
 static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	root.set_meta("glb", false)
-	var rest := WardenSkeleton.rig_rest(root)
-	root.set_meta("rig_rest", rest)
-	if not uses_model(arch):
+	root.set_meta("rig_rest", WardenSkeleton.rig_rest(root))
+	if _measuring or not uses_model(arch):
 		return
+	var rest := neutral_rest(arch)
 	var scene := load(path(arch)) as PackedScene
 	var glb: Node3D = scene.instantiate() as Node3D if scene else null
 	var skel := skeleton(glb)
@@ -107,6 +112,16 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	mats.append_array(_toon(glb, lk, MantleLook.warden(arch)))
 	root.set_meta("mats", mats)
 	root.set_meta("glb", true)
+
+## The rig rest of the Warden's model in the neutral look (built once a session).
+static func neutral_rest(arch: String) -> Dictionary:
+	if not _neutral.has(arch):
+		_measuring = true
+		var m := Models.hunter(Arch.weight(arch), Data.TEAM_COLORS[0], Arch.signature(arch), "", PlayerLook.neutral(), arch)
+		_measuring = false
+		_neutral[arch] = m.get_meta("rig_rest")
+		m.free()
+	return _neutral[arch]
 
 ## Hides the procedural body's meshes, leaving the KEEP pieces.
 static func _hide_body(n: Node) -> void:
