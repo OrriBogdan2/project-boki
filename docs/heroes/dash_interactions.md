@@ -44,7 +44,7 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 | Pin | air dash -> E |  | fires mid-dash |
 | Pin | air dash -> ult (X) |  | fires mid-dash |
 | Pin | air dash -> Q glove |  | fires mid-dash |
-| Pin | LMB -> dash | the dodge roll interrupts a draw: it ends with no arrow | the dash cancels its wind-up or recovery |
+| Pin | LMB -> dash | Owner item 51 names Pin's draw: it carries through a dash. Neither the data (Myth: Greenwood Bow, Phase Walk) nor the footage (pin.md: Spirit Walk) shows the roll ending a draw, so Shift mid-draw rolls at once and the draw carries on. | the dash goes, the ability keeps running |
 | Pin | RMB -> dash |  | the kit's own handling (no row yet) |
 | Pin | E -> dash |  | the kit's own handling (no row yet) |
 | Pin | ult (X) -> dash |  | the kit's own handling (no row yet) |
@@ -59,8 +59,8 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 | Pin | E -> jump |  | the move goes at once, the ability keeps running (default) |
 | Pin | ult (X) -> jump |  | the move goes at once, the ability keeps running (default) |
 | Pin | Q glove -> jump |  | the move goes at once, the ability keeps running (default) |
-| Pin | hold LMB through a ground dash | The source's dodge roll interrupts a draw: it ends with no arrow (into_dash.lmb). Ours today (measured by --dash-flow-check): Spirit Walk ends the bow draw with no arrow (Hunter.can_fire is false while it runs). | **exception:** the move ends the hold (today's behaviour, to review) |
-| Pin | hold LMB through an air dash | The source's dodge roll interrupts a draw: it ends with no arrow (into_dash.lmb). Ours today (measured by --dash-flow-check): the air flick ends the bow draw with no arrow. | **exception:** the move ends the hold (today's behaviour, to review) |
+| Pin | hold LMB through a ground dash |  | the hold carries through and lets go there |
+| Pin | hold LMB through an air dash |  | the hold carries through and lets go there |
 | Pin | hold LMB through a jump |  | the hold carries through and lets go there |
 | Pin | hold RMB through a ground dash |  | the hold carries through and lets go there |
 | Pin | hold RMB through an air dash |  | the hold carries through and lets go there |
@@ -78,7 +78,7 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 | Vireo | LMB -> dash |  | the kit's own handling (no row yet) |
 | Vireo | RMB -> dash |  | the kit's own handling (no row yet) |
 | Vireo | E -> dash |  | the kit's own handling (no row yet) |
-| Vireo | ult (X) -> dash | Not checked against the source yet. Ours today (measured by --dash-flow-check): Shift during Kitefall does nothing (it holds her; MageKit.on_dash refuses while ult.busy()). | **exception:** the dash is refused while it runs (today's behaviour, to review) |
+| Vireo | ult (X) -> dash | Not in the data or footage for the crouch: Shift in Kitefall's 0.3s crouch goes at once (the Wirerun charges, or the air dash goes), the crouch waits and starts over where it took her, and she launches from there. The flight (rise, hang, drop) is the ult's own move: the source launches her up and she comes down at a spot she picks (card: 'launch into the air, then pick a location on the ground to forcefully land'; footage vireo.md 0353-0383: she hangs, then streaks down, no other move). Ours holds her over the ring's centre, invulnerable, so a dash there would carry her out of the ring. | **exception:** the dash goes, the ability keeps running (Only in the flight: once she is up, Shift is refused.) |
 | Vireo | Q glove -> dash |  | the kit's own handling (no row yet) |
 | Vireo | jump -> LMB |  | fires mid-jump (default) |
 | Vireo | jump -> RMB |  | fires mid-jump (default) |
@@ -88,7 +88,7 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 | Vireo | LMB -> jump |  | the move goes at once, the ability keeps running (default) |
 | Vireo | RMB -> jump |  | the move goes at once, the ability keeps running (default) |
 | Vireo | E -> jump |  | the move goes at once, the ability keeps running (default) |
-| Vireo | ult (X) -> jump | Not checked against the source yet. Ours today (measured by --dash-flow-check): no jump during Kitefall (MageUlt clears the jump key while it holds her). | **exception:** the move is refused while it runs (today's behaviour, to review) |
+| Vireo | ult (X) -> jump | Not in the data or footage for the crouch: a jump in Kitefall's 0.3s crouch goes, and she launches from up there (the climb starts at her height). The flight is the ult's own move (as into_dash.x): she is already in the air, held over the ring's centre. | **exception:** the move goes at once, the ability keeps running (Only in the flight: once she is up, a jump does nothing.) |
 | Vireo | Q glove -> jump |  | the move goes at once, the ability keeps running (default) |
 | Vireo | hold RMB through a ground dash |  | the hold carries through and lets go there |
 | Vireo | hold RMB through an air dash |  | the hold carries through and lets go there |
@@ -321,7 +321,7 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 | Breah | ult (X) -> jump |  | the move goes at once, the ability keeps running (default) |
 | Breah | Q glove -> jump |  | the move goes at once, the ability keeps running (default) |
 | Breah | hold LMB through a ground dash |  | the hold carries through and lets go there |
-| Breah | hold LMB through an air dash | Not in the data or footage (the source shows no air dash). Ours today (measured by --dash-flow-check): the air dash ends the Quake Fist charge with no punch. | **exception:** the move ends the hold (today's behaviour, to review) |
+| Breah | hold LMB through an air dash |  | the hold carries through and lets go there |
 | Breah | hold LMB through a jump |  | the hold carries through and lets go there |
 | Breah | hold RMB through a ground dash |  | the hold carries through and lets go there |
 | Breah | hold RMB through an air dash |  | the hold carries through and lets go there |
