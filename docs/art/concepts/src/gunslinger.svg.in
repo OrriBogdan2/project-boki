@@ -1,7 +1,7 @@
 <!--META {
  "name": "Venator", "title": "Hired Gun", "tag": "id gunslinger  ·  female  ·  marksman",
  "accent": "#ff8a4c", "rim": "#ffe0c8", "shadow": 110, "bust_bg": "#1c2430",
- "stage": ["#5c6670", "#12161b"], "height_cm": 182, "sheet_scale": 0.86, "pos": [250, 640],
+ "stage": ["#5c6670", "#12161b"], "height_cm": 182, "sheet_scale": 0.86, "pos": [240, 680],
  "relic": "the Paid-Up Tags",
  "mat": {
   "armor": ["#8ea2b4", "#4a5e72", "#1c2836"],
@@ -19,8 +19,8 @@
  "palette": [["#4a5e72", "plate slate"], ["#8a7a58", "fatigues"], ["#f0642a", "signal scarf"],
              ["#2a3460", "beret navy"], ["#3c4048", "gunmetal"], ["#c89a40", "brass charges"], ["#a46a48", "skin"]],
  "notes": [
-  ["Shape language", "1.82 m, athletic and squared-off on one side: a heavy slate pauldron and plate vest over a lean, strong body, so she leans asymmetric. One long straight line (the shrouded rifle) and one long wavy line (the scarf) cross her silhouette; the beret is a small tilted cap on top."],
-  ["Signature features", "A tilted navy beret with a brass badge, an orange signal scarf that streams out behind, a slate plate vest with one oversized shoulder plate, a bandolier of spiked brass charges, rolled sleeves and fingerless gloves, a short tied braid, a nicked eyebrow and a half-smile, and a long ember rifle whose shroud vents glow when it charges. Dog tags she was paid in."],
+  ["Shape language", "1.82 m and broad, built like a door, squared-off on one side: a heavy slate pauldron and plate vest over a lean, strong body, so she leans asymmetric. One long straight line (the shrouded rifle) and one long wavy line (the scarf) cross her silhouette; the beret is a small tilted cap on top."],
+  ["Signature features", "A tilted navy beret with a brass badge, an orange signal scarf that streams out behind, a waist-length slate plate carrier with pouches and one oversized shoulder plate, a bandolier of spiked brass charges, rolled sleeves and fingerless gloves, a short tied braid, a nicked eyebrow and a half-smile, and a long ember rifle whose shroud vents glow when it charges. Dog tags she was paid in."],
   ["Reads in-engine", "From above: the longest gun in the roster and an orange streak, on a slate-and-sand body. The vents' glow is her shot-charge tell; the scarf colour is the same orange so the eye links the two."]
  ]
 } -->
@@ -66,8 +66,8 @@
  <limb m="scarf" lw="2.2" pts="18 -626 9; 60 -624 10; 100 -634 9; 140 -622 8; 176 -636 5; 196 -626 1"/>
  <path sg="40" d="M60 -616 C100 -626 140 -614 176 -628 L196 -626 C160 -616 120 -610 60 -614Z"/>
  <!-- fatigues, knee pads, boots -->
- <limb m="fatigue" pts="-18 -372 23; -30 -280 19; -36 -200 15; -36 -120 13"/>
- <limb m="fatigue" pts="18 -372 23; 36 -280 19; 44 -200 15; 48 -120 13"/>
+ <limb m="fatigue" pts="-18 -372 26; -30 -280 20; -36 -200 15; -36 -120 13"/>
+ <limb m="fatigue" pts="18 -372 26; 36 -280 20; 44 -200 15; 48 -120 13"/>
  <path sg="45" d="M-4 -372 L6 -372 C-6 -280 -20 -200 -22 -120 L-30 -120Z M34 -372 L42 -372 C52 -280 58 -200 62 -120 L54 -120Z"/>
  <path m="fatigue" lw="2" d="M-56 -300 L-34 -302 L-32 -262 L-54 -260Z M56 -298 L78 -292 L74 -254 L54 -258Z"/>
  <path m="armor" lw="2.2" d="M-50 -224 C-50 -240 -22 -240 -22 -224 L-22 -192 C-30 -184 -42 -184 -50 -192Z M32 -224 C32 -240 60 -240 60 -224 L60 -192 C52 -184 40 -184 32 -192Z"/>
@@ -78,14 +78,19 @@
  <path m="leather" lw="2.2" d="M-40 -394 C-14 -384 14 -384 40 -394 L42 -376 C14 -366 -14 -366 -42 -376Z"/>
  <path m="fatigue" lw="2" d="M-46 -384 L-30 -382 L-30 -356 L-46 -358Z M30 -382 L46 -384 L46 -358 L30 -356Z"/>
  <path m="brass" lw="1.6" d="M-6 -392 h12 v14 h-12Z"/>
+ <g transform="scale(1.16 1)">
  <!-- body under the plate vest -->
  <path m="fatigue" d="M-44 -616 C-50 -580 -42 -540 -30 -500 C-34 -470 -40 -430 -40 -392 L40 -392 C40 -430 34 -470 30 -500 C42 -540 50 -580 44 -616 C20 -630 -20 -630 -44 -616Z"/>
- <path m="armor" d="M-38 -604 C-42 -570 -36 -536 -28 -506 C-32 -480 -34 -450 -32 -420 L32 -420 C34 -450 32 -480 28 -506 C36 -536 42 -570 38 -604 C20 -592 -20 -592 -38 -604Z"/>
- <path sg="55" d="M4 -596 C20 -596 30 -598 38 -604 C42 -570 36 -536 28 -506 C32 -480 34 -450 32 -420 L4 -420Z"/>
- <path ln="1.6" d="M-30 -540 C-14 -532 14 -532 30 -540 M-30 -480 C-14 -472 14 -472 30 -480"/>
+ <path m="armor" d="M-40 -606 C-44 -570 -40 -530 -34 -498 L-34 -468 C-12 -460 12 -460 34 -468 L34 -498 C40 -530 44 -570 40 -606 C20 -594 -20 -594 -40 -606Z"/>
+ <path m="fatigue" lw="1.8" d="M-32 -500 h18 v24 h-18Z M-9 -502 h18 v26 h-18Z M14 -500 h18 v24 h-18Z"/>
+ <path ln="1.2" d="M-32 -492 h18 M-9 -494 h18 M14 -492 h18"/>
+ <path m="leather" lw="1.6" d="M-40 -560 L-30 -560 L-30 -520 L-40 -522Z M30 -560 L40 -560 L40 -522 L30 -520Z"/>
+ <path sg="55" d="M4 -596 C20 -596 30 -598 40 -606 C44 -570 40 -530 34 -498 L34 -468 C24 -464 14 -462 4 -462Z"/>
+ <brush c="#3e3422" pts="-24 -450 0; -10 -440 1.4; 6 -444 0"/><brush c="#3e3422" pts="10 -436 0; 20 -426 1.2; 28 -410 0"/>
+ <path ln="1.6" d="M-30 -540 C-14 -532 14 -532 30 -540"/>
  <path hl="30" d="M-32 -594 C-36 -570 -32 -548 -26 -530 L-18 -534 C-22 -552 -24 -572 -22 -592Z"/>
  <!-- bandolier of brass charges -->
- <limb m="leather" lw="2" pts="34 -606 5.5; 0 -540 5.5; -30 -430 5.5"/>
+ <limb m="leather" lw="2" pts="34 -606 5.5; 0 -540 5.5; -28 -470 5.5"/>
  <g><path m="brass" lw="1.4" d="M24 -598 l8 4 l-4 12 l-8 -4Z"/><path m="brass" lw="1.4" d="M14 -576 l8 4 l-4 12 l-8 -4Z"/><path m="brass" lw="1.4" d="M4 -554 l8 4 l-4 12 l-8 -4Z"/><path m="brass" lw="1.4" d="M-6 -530 l8 3 l-3 12 l-8 -3Z"/><path m="brass" lw="1.4" d="M-14 -504 l8 3 l-3 12 l-8 -3Z"/></g>
  <!-- arm down, thumb in the belt -->
  <limb m="fatigue" pts="44 -606 12; 58 -560 10; 60 -530 9"/>
@@ -105,33 +110,38 @@
  <g fill="#c89a40" stroke="#1d1724" stroke-width="1"><circle cx="-60" cy="-630" r="2.6"/><circle cx="-84" cy="-612" r="2.6"/></g>
  <path m="scarf" lw="2.2" d="M-22 -636 C-10 -646 12 -646 24 -636 C26 -624 18 -616 0 -614 C-18 -616 -26 -624 -22 -636Z"/>
  <limb m="scarf" lw="2" pts="-4 -620 7; -10 -596 6; -4 -576 1"/>
+ </g>
  <use href="#L-head"/>
 </g><!--/front-->
 <g id="tq">
  <!-- aiming: cheek to the stock, the scarf streaming back -->
  <limb m="scarf" lw="2.2" pts="18 -626 9; 60 -640 10; 100 -632 9; 140 -646 8; 176 -636 5; 200 -646 1"/>
- <limb m="fatigue" pts="18 -372 23; 56 -290 19; 80 -210 15; 96 -130 13"/>
+ <limb m="fatigue" pts="18 -372 26; 56 -290 20; 80 -210 15; 96 -130 13"/>
  <path m="boot" lw="2.2" d="M80 -22 C78 -60 80 -100 84 -140 L114 -136 C116 -100 118 -60 120 -40 C134 -36 142 -28 142 -14 L142 -4 L78 -4Z"/>
  <path m="armor" lw="2.2" d="M66 -230 C66 -246 94 -246 94 -230 L94 -198 C86 -190 74 -190 66 -198Z"/>
- <limb m="fatigue" pts="-18 -372 23; -50 -290 19; -76 -210 15; -90 -130 13"/>
+ <limb m="fatigue" pts="-18 -372 26; -50 -290 20; -76 -210 15; -90 -130 13"/>
  <path m="boot" lw="2.2" d="M-112 -22 C-114 -60 -110 -100 -106 -140 L-76 -136 C-74 -100 -72 -60 -70 -40 C-56 -36 -48 -28 -48 -14 L-48 -4 L-114 -4Z"/>
  <path m="armor" lw="2.2" d="M-96 -236 C-96 -252 -68 -252 -68 -236 L-68 -204 C-76 -196 -88 -196 -96 -204Z"/>
  <path sg="45" d="M-76 -210 L-62 -210 C-64 -170 -68 -150 -70 -130 L-84 -130Z"/>
- <g transform="rotate(-6 0 -380)">
+ <g transform="rotate(-6 0 -380) scale(1.16 1)">
   <path m="leather" lw="2.2" d="M-40 -394 C-14 -384 14 -384 40 -394 L42 -376 C14 -366 -14 -366 -42 -376Z"/>
   <path m="fatigue" d="M-44 -616 C-50 -580 -42 -540 -30 -500 C-34 -470 -40 -430 -40 -392 L40 -392 C40 -430 34 -470 30 -500 C42 -540 50 -580 44 -616 C20 -630 -20 -630 -44 -616Z"/>
-  <path m="armor" d="M-38 -604 C-42 -570 -36 -536 -28 -506 C-32 -480 -34 -450 -32 -420 L32 -420 C34 -450 32 -480 28 -506 C36 -536 42 -570 38 -604 C20 -592 -20 -592 -38 -604Z"/>
-  <path sg="55" d="M-10 -596 C20 -596 30 -598 38 -604 C42 -570 36 -536 28 -506 C32 -480 34 -450 32 -420 L-10 -420Z"/>
-  <limb m="leather" lw="2" pts="34 -606 5.5; 0 -540 5.5; -30 -430 5.5"/>
-  <!-- far arm on the trigger grip -->
-  <limb m="fatigue" pts="40 -606 12; 50 -570 10; 30 -560 9"/>
-  <limb m="skin" pts="30 -560 8.5; 8 -606 7"/>
-  <g transform="translate(40 -614) rotate(180) scale(1 -1)"><use href="#L-rifle"/></g>
-  <use href="#L-head"/>
-  <!-- near arm out along the shroud -->
-  <limb m="fatigue" pts="-44 -606 12; -70 -580 10; -90 -566 9"/>
-  <limb m="skin" pts="-90 -566 8.5; -126 -590 7.5; -150 -606 6.5"/>
-  <path m="gun" lw="1.8" d="M-160 -620 C-154 -626 -140 -624 -138 -612 L-142 -600 C-150 -596 -160 -600 -162 -608Z"/>
+  <path m="armor" d="M-40 -606 C-44 -570 -40 -530 -34 -498 L-34 -468 C-12 -460 12 -460 34 -468 L34 -498 C40 -530 44 -570 40 -606 C20 -594 -20 -594 -40 -606Z"/>
+ <path m="fatigue" lw="1.8" d="M-32 -500 h18 v24 h-18Z M-9 -502 h18 v26 h-18Z M14 -500 h18 v24 h-18Z"/>
+ <path ln="1.2" d="M-32 -492 h18 M-9 -494 h18 M14 -492 h18"/>
+ <path m="leather" lw="1.6" d="M-40 -560 L-30 -560 L-30 -520 L-40 -522Z M30 -560 L40 -560 L40 -522 L30 -520Z"/>
+  <path sg="55" d="M-10 -596 C20 -596 30 -598 40 -606 C44 -570 40 -530 34 -498 L34 -468 C20 -462 6 -461 -10 -462Z"/>
+  <limb m="leather" lw="2" pts="34 -606 5.5; 0 -540 5.5; -28 -470 5.5"/>
+  <!-- far arm: elbow down, hand on the trigger grip -->
+  <limb m="fatigue" pts="40 -606 12; 46 -574 10; 22 -572 9"/>
+  <limb m="skin" pts="22 -572 8.5; -14 -598 7.5; -42 -622 6.5"/>
+  <g transform="translate(40 -648) rotate(180) scale(1 -1)"><use href="#L-rifle"/></g>
+  <path m="gun" lw="1.8" d="M-56 -634 C-52 -642 -38 -640 -36 -630 L-40 -616 C-48 -612 -56 -618 -58 -626Z"/>
+  <g transform="scale(0.862 1) rotate(9 0 -640)"><use href="#L-head"/></g>
+  <!-- near arm under the shroud -->
+  <limb m="fatigue" pts="-44 -606 12; -76 -598 10; -96 -600 9"/>
+  <limb m="skin" pts="-96 -600 8.5; -124 -620 7.5; -142 -636 6.5"/>
+  <path m="gun" lw="1.8" d="M-156 -640 C-150 -648 -136 -646 -134 -636 L-138 -624 C-146 -620 -156 -624 -158 -632Z"/>
   <path m="armor" lw="2.8" d="M-24 -632 C-50 -650 -86 -644 -98 -616 C-104 -600 -100 -582 -88 -572 C-74 -594 -52 -606 -24 -610Z"/>
   <path m="scarf" lw="2.2" d="M-22 -636 C-10 -646 12 -646 24 -636 C26 -624 18 -616 0 -614 C-18 -616 -26 -624 -22 -636Z"/>
  </g>
