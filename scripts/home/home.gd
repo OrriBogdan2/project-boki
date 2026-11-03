@@ -25,8 +25,8 @@ var spawn := ""             # set when coming back out of a building: start at i
 var py := 0.0               # height of a jump
 var farm_t := 0.0
 var pvy := 0.0
-const JUMP_V := 8.5
-const GRAV := 26.0
+const JUMP_V := Hunter.JUMP_V
+const GRAV := Hunter.H_GRAV
 var pface := 0.0
 var walk_ph := 0.0
 var house_node: Node3D
@@ -1312,7 +1312,7 @@ func _move_player(d: float) -> void:
 		elif gliding and pvy <= 0.0:
 			pvy = move_toward(pvy, -Hunter.GLIDE_SINK, Hunter.GLIDE_CATCH * d)
 		else:
-			pvy -= GRAV * d
+			pvy = maxf(pvy - GRAV * d, -HunterMove.fall_max)
 		py += pvy * d
 		if gh > World.VOID + 1.0 and py <= gh:
 			lfl = {}

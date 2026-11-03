@@ -35,8 +35,8 @@
 "semicolon": 2
 },
 "scripts/arch/kits/archer_kit.gd": {
-"long_line": 18,
-"semicolon": 5,
+"long_line": 17,
+"semicolon": 3,
 "shadow": 1
 },
 "scripts/arch/kits/ashwick_kit.gd": {
@@ -45,8 +45,8 @@
 "semicolon": 7
 },
 "scripts/arch/kits/bulwark_kit.gd": {
-"long_line": 20,
-"nested_ternary": 4,
+"long_line": 18,
+"nested_ternary": 2,
 "semicolon": 11
 },
 "scripts/arch/kits/dolm_kit.gd": {
@@ -64,9 +64,9 @@
 "semicolon": 4
 },
 "scripts/arch/kits/juggernaut_kit.gd": {
-"long_line": 25,
-"semicolon": 12,
-"shadow": 2
+"long_line": 6,
+"semicolon": 1,
+"shadow": 1
 },
 "scripts/arch/kits/mage_kit.gd": {
 "long_line": 4,
@@ -86,8 +86,7 @@
 "semicolon": 1
 },
 "scripts/arch/kits/thief_kit.gd": {
-"long_line": 14,
-"nested_ternary": 1
+"long_line": 3
 },
 "scripts/arch/oomph.gd": {
 "long_line": 1,
@@ -490,8 +489,7 @@
 "semicolon": 37
 },
 "scripts/match/arena_demo.gd": {
-"long_line": 20,
-"semicolon": 39
+"long_line": 2
 },
 "scripts/match/arena_demo_pair.gd": {
 "semicolon": 4
@@ -628,14 +626,14 @@
 "shadow": 1
 },
 "scripts/match/hunter.gd": {
-"history_comment": 44,
-"long_line": 100,
-"nested_ternary": 21,
+"history_comment": 38,
+"long_line": 99,
+"nested_ternary": 20,
 "semicolon": 56,
 "shadow": 4
 },
 "scripts/match/hunter_anim.gd": {
-"long_line": 128,
+"long_line": 78,
 "nested_ternary": 6,
 "semicolon": 102
 },
@@ -745,9 +743,9 @@
 "shadow": 1
 },
 "scripts/match/models.gd": {
-"long_line": 292,
+"long_line": 289,
 "nested_ternary": 12,
-"semicolon": 283,
+"semicolon": 282,
 "shadow": 3
 },
 "scripts/match/music_dir.gd": {
@@ -921,10 +919,6 @@
 "scripts/ui/hud_tip.gd": {
 "shadow": 1
 },
-"scripts/ui/icons.gd": {
-"long_line": 25,
-"semicolon": 34
-},
 "scripts/ui/incubator_view.gd": {
 "long_line": 15,
 "nested_ternary": 1,
@@ -1048,12 +1042,12 @@
 "semicolon": 2
 },
 "tools/archer_bulwark_combo_check.gd": {
-"long_line": 24,
-"semicolon": 47
+"long_line": 2,
+"semicolon": 19
 },
 "tools/archetype_check.gd": {
-"long_line": 140,
-"semicolon": 136,
+"long_line": 68,
+"semicolon": 72,
 "shadow": 1
 },
 "tools/arena_check.gd": {
@@ -1202,7 +1196,7 @@
 "semicolon": 20
 },
 "tools/move_feel_check.gd": {
-"history_comment": 2,
+"history_comment": 1,
 "long_line": 32,
 "semicolon": 67
 },

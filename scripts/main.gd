@@ -3989,7 +3989,7 @@ func _home_build_check() -> void:
 	var wbase: float = mv._ground_h(36.7, 56.9)
 	mv.ppos = Vector3(36.7, 0, 56.9); mv.py = wbase; mv.pvy = 0.0; mv.pvel = Vector3.ZERO; mv.gliding = false; mv.dash_t = 0.0
 	Input.action_press("left")
-	mv.pvy = 8.5        # a running jump at it (JUMP_V)
+	mv.pvy = Hunter.JUMP_V        # a running jump at it
 	var on_top := false
 	for i in 90:
 		mv._move_player(1.0 / 60.0)
