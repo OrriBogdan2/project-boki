@@ -111,8 +111,8 @@ One box per region (owner-created in the Hetzner console: Ubuntu 24.04, firewall
 UDP 7777-7799, S2's deploy key). From your machine, with `~/.ssh/boki_s2_deploy`:
 
 ```sh
-# 1. export the server build outside the repo (the CI release workflow also uploads it as the
-#    "ProjectBoki-linux-server" artifact: unzip that instead)
+# 1. export the server build outside the repo (or download the release workflow's
+#    "ProjectBoki-linux-server-<tag>" artifact: its build/ folder is this, next to a copy of server/)
 godot --headless --path . --export-release "Linux Server" ../build/server/ProjectBoki.x86_64
 # 2. push: rsync matchmaker + build + install.sh, run install.sh on the box, curl /health
 server/deploy/push.sh <host> eu ../build/server
