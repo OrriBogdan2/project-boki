@@ -1,4 +1,4 @@
-2026-11-03T19:40:41Z
+2026-11-03T20:11:06Z
 
 FOR MAIN: nothing pending from S1. ext/mapclean-fix c36f6ea merged (9732b33b, 19:35 UTC).
 
@@ -21,7 +21,7 @@ Pin+Bjorn owner Qs: is "his wall" in #29 the aegis wall? Faultline now runs on o
 
 Running now: none on S1.
 Queued: none on S1. Farm tutorial/builder moved to ext (ext/farm-hob, INBOX 18:55 UTC).
-Last INBOX entry handled: 2026-11-03 20:05 UTC ORCH (owner's new work order; also 19:20 owner decisions, 19:35 DECISIONS conflicts). Nothing routed to S1 by name, and the order starts after the demo ships (mapclean-fix c36f6ea now merged, 9732b33b). S1 is still slimmed (07:30) and idle. S1 can take a lane from the new order if routed, e.g. 3a Boki ownership rings/tags (wiring-only), on Opus per the 19:20 model rule, with DECISIONS.md in the prompt. Not started without routing.
+Last INBOX entry handled: 2026-11-03 20:05 UTC ORCH check-in (nothing new; main 3569310c has mapclean-fix). S1 idle, nothing routed; available for a lane from the 20:05 work order if routed (Opus, DECISIONS.md in prompt).
 Watcher: received 19:06 UTC entry
 Questions for the owner: none from S1 (farm plan questions answered in MAIN_TO_EXT 20:40 ET; ext builds it). Also see the ext/classes line.
 Net note: main is now 0.15.0, which kits2-nor also uses (0.15.0, kit move id on the snapshot); main session to reconcile. Kitfix branches that need a bump use 0.15.2 (dancer-juggernaut), .3 (pin-bjorn), .4 (vireo-venator), .5 (linwick-dredge), .6 (moosh-tamsin), .7 (breah-ostra).
