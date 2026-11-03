@@ -7,21 +7,21 @@ One row per hero and pair, read from `content/dash_flow/<hero>.json` by `DashFlo
 
 | Hero | Pair | Source | Ours |
 |---|---|---|---|
-| Dancer | ground dash -> LMB |  | buffered to the dash's end |
-| Dancer | ground dash -> RMB |  | fires mid-dash |
-| Dancer | ground dash -> E |  | fires mid-dash |
-| Dancer | ground dash -> ult (X) |  | fires mid-dash |
-| Dancer | ground dash -> Q glove |  | fires mid-dash |
-| Dancer | air dash -> LMB |  | buffered to the dash's end |
-| Dancer | air dash -> RMB |  | fires mid-dash |
-| Dancer | air dash -> E |  | fires mid-dash |
-| Dancer | air dash -> ult (X) |  | fires mid-dash |
-| Dancer | air dash -> Q glove |  | fires mid-dash |
-| Dancer | LMB -> dash |  | the kit's own handling (no row yet) |
-| Dancer | RMB -> dash |  | the kit's own handling (no row yet) |
-| Dancer | E -> dash |  | the kit's own handling (no row yet) |
-| Dancer | ult (X) -> dash |  | the kit's own handling (no row yet) |
-| Dancer | Q glove -> dash |  | the kit's own handling (no row yet) |
+| Dancer | ground dash -> LMB | Data: Quickflip dashes and empowers the next Arcslinger (+214 damage); landing it resets Quickflip. Footage 0193: the Cartwheel and the empowered shot leave on the same frame, so the bolt goes mid-flip. | fires mid-dash; variant: empowered |
+| Dancer | ground dash -> RMB | Data says nothing on casting during Quickflip. Footage never shows Trickshot mid-flip; kept firing: the 0.4s lane starts mid-flip and the throw lands after it. | fires mid-dash |
+| Dancer | ground dash -> E | Data: Farstep Dagger has no dash rule. Footage never shows it mid-flip. Ours: the throw goes mid-flip; the recast blink ends the cartwheel (she arrives standing). | fires mid-dash |
+| Dancer | ground dash -> ult (X) | Data: Fusillade resets Quickflip; footage (0296-0303): she walks and fires freely through it; nothing shows it locked out by a dash. | fires mid-dash |
+| Dancer | ground dash -> Q glove | Not in the data or footage (gloves are ours); fires like her other actives. | fires mid-dash |
+| Dancer | air dash -> LMB | Data: Quickflip is the same from a jump (empowers the next Arcslinger). Footage 0129-0134 air Cartwheel, then the gold empowered aim line at 0139-0142 and the big shot at 0143. | fires mid-dash; variant: empowered |
+| Dancer | air dash -> RMB | Not shown in the data or footage; same as on the ground. | fires mid-dash |
+| Dancer | air dash -> E | Not shown in the data or footage; same as on the ground (the recast blink ends the cartwheel). | fires mid-dash |
+| Dancer | air dash -> ult (X) | Not shown from the air; same as on the ground. | fires mid-dash |
+| Dancer | air dash -> Q glove | Not in the source; same as her other actives. | fires mid-dash |
+| Dancer | LMB -> dash | Footage 0187 -> 0193: the empowered hit lands and the next Cartwheel follows at once; a bolt in flight keeps going. | the dash goes, the ability keeps running |
+| Dancer | RMB -> dash | Not shown in the data or footage. Ours: Shift in the Bola's 0.4s wind-up cartwheels and the Bola still goes at the end of the wind-up. | the dash goes, the ability keeps running |
+| Dancer | E -> dash | Not shown. Ours: the dagger thrown 0.12s into the throw still flies if she cartwheels; a stuck dagger stays to blink to. | the dash goes, the ability keeps running |
+| Dancer | ult (X) -> dash | Footage (0296-0350): she moves and acts freely through Fusillade, which also gives Quickflip back. | the dash goes, the ability keeps running |
+| Dancer | Q glove -> dash | Not in the source; the glove keeps running. | the dash goes, the ability keeps running |
 | Pin | ground dash -> LMB |  | buffered to the dash's end |
 | Pin | ground dash -> RMB |  | fires mid-dash |
 | Pin | ground dash -> E |  | fires mid-dash |
@@ -67,20 +67,20 @@ One row per hero and pair, read from `content/dash_flow/<hero>.json` by `DashFlo
 | Venator | E -> dash |  | the kit's own handling (no row yet) |
 | Venator | ult (X) -> dash |  | the kit's own handling (no row yet) |
 | Venator | Q glove -> dash |  | the kit's own handling (no row yet) |
-| Zedran | ground dash -> LMB |  | buffered to the dash's end |
-| Zedran | ground dash -> RMB |  | fires mid-dash |
-| Zedran | ground dash -> E |  | fires mid-dash |
-| Zedran | ground dash -> ult (X) |  | fires mid-dash |
-| Zedran | ground dash -> Q glove |  | fires mid-dash |
-| Zedran | air dash -> LMB |  | buffered to the dash's end |
-| Zedran | air dash -> RMB |  | buffered to the dash's end |
-| Zedran | air dash -> E |  | fires mid-dash |
-| Zedran | air dash -> ult (X) |  | fires mid-dash |
-| Zedran | air dash -> Q glove |  | fires mid-dash |
-| Zedran | LMB -> dash |  | the kit's own handling (no row yet) |
-| Zedran | RMB -> dash |  | the kit's own handling (no row yet) |
-| Zedran | E -> dash |  | the kit's own handling (no row yet) |
-| Zedran | ult (X) -> dash |  | the kit's own handling (no row yet) |
+| Zedran | ground dash -> LMB | Data: Flame Step is itself the attack ('dash attack in facing direction'); footage 0372-0377: crouch, ~0.3s drive, ~0.35s low recovery, no slash inside it. Ours: a slash pressed in the crouch or the drive swings as the drive ends. | buffered to the dash's end |
+| Zedran | ground dash -> RMB | Data: no rule for RMB inside Flame Step (the patch only restricts turning after RMB into Shift); footage: no RMB inside a dash. Ours: the Smash starts mid-dash (the Slam's wind-up, the Lunge's charge) and the drive carries him into it. | fires mid-dash; dash momentum carries |
+| Zedran | ground dash -> E | Data: the chain is a thrown hook with no movement lock; footage 0301-0366 shows no dash with it. Ours: the throw goes mid-dash, the drive goes on. | fires mid-dash |
+| Zedran | ground dash -> ult (X) | Data: Volcanic Rebuke makes him Invulnerable, then he strikes back; footage ult f33-f38: planted through the guard; the sheet's combo is 'dive with Quick Dash, then the guard'. Ours: X ends the dash (or its crouch) and he plants into the guard. | cancels the dash |
+| Zedran | ground dash -> Q glove | No source (the glove is ours). Ours: as every hero's default, it goes mid-dash. | fires mid-dash |
+| Zedran | air dash -> LMB | No source: the footage shows no air dash (he uses the Air Slam in the air). Ours: as on the ground, the slash swings at the end. | buffered to the dash's end |
+| Zedran | air dash -> RMB | Data: Obsidian Slam is the RMB 'while airborne', with its own slot; footage 0251-0300: the slam from the air onto a cursor disc. Ours: RMB in the air dash ends it and the Meteor Drop's hang begins at once. | cancels the dash |
+| Zedran | air dash -> E | No source for the air dash. Ours: the throw goes mid-dash. | fires mid-dash |
+| Zedran | air dash -> ult (X) | Data and footage: the guard is planted (ult f33-f38). Ours: X ends the air dash and the guard goes up. | cancels the dash |
+| Zedran | air dash -> Q glove | No source (the glove is ours). | fires mid-dash |
+| Zedran | LMB -> dash | No source. Ours: Shift drops a Searing Wave charge (a slash's swing is too short to matter). | the dash cancels its wind-up or recovery |
+| Zedran | RMB -> dash | Data: 'turning restricted after RMB into Shift' (patch 05.02.25): the dash comes after the strike, facing its way. Ours: Shift during the Slam's wind-up, a Lunge or a Meteor Drop is held and goes the moment it's over (the Meteor Drop lets it go 0.25s into its recovery); the turn lock is not built. | the dash waits for the ability |
+| Zedran | E -> dash | Owner: 'you can cancel or exit per the source'; the source's exit is not shown in the data or footage. Ours: Shift in the Warchain's pull ends it and the Rampage drives at once (no crouch), the pull's speed running into it; while the chain only flies or holds, the dash just goes. | the dash cancels its wind-up or recovery; dash momentum carries |
+| Zedran | ult (X) -> dash | Data: invulnerable, then the strike; footage ult f33-f44: planted ~1.1s, the cleave, the recovery. Ours: the guard and cleave are committed; Shift is held and goes when it's over. | the dash waits for the ability |
 | Zedran | Q glove -> dash |  | the kit's own handling (no row yet) |
 | Bjorn | ground dash -> LMB |  | buffered to the dash's end |
 | Bjorn | ground dash -> RMB |  | fires mid-dash |

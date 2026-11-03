@@ -53,11 +53,6 @@
 "long_line": 8,
 "semicolon": 4
 },
-"scripts/arch/kits/juggernaut_kit.gd": {
-"long_line": 25,
-"semicolon": 12,
-"shadow": 2
-},
 "scripts/arch/kits/mage_kit.gd": {
 "long_line": 4,
 "semicolon": 1
@@ -76,8 +71,7 @@
 "semicolon": 1
 },
 "scripts/arch/kits/thief_kit.gd": {
-"long_line": 14,
-"nested_ternary": 1
+"long_line": 3
 },
 "scripts/arch/oomph.gd": {
 "long_line": 1,
