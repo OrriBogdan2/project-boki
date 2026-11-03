@@ -817,7 +817,7 @@ func do_jump() -> void:
 		# a merge's double jump
 		air_jumps += 1
 		vel.y = JUMP_V
-		m.fx.burst(pos + Vector3(0, 0.2, 0), Color("f3eee2"), 10, 3.0, 0.3, 0.0)
+		m.fx.dust(pos, 4)
 		m.sfx("jump", pos, -4.0, 1.2)
 		return
 	if wall_moves.try_kick(self):
@@ -926,7 +926,6 @@ func _open_glider() -> void:
 		hv = hv.lerp(dirv * GLIDE_SPEED, 0.5)
 		vel.x = hv.x; vel.z = hv.y
 	_glider_sfx("open")
-	m.fx.burst(pos + Vector3(0, 1.7, 0), Color("f3eee2"), 8, 2.0, 0.35, 0.0)
 	_take_glide_handoff()
 	glide_lift.open_kick(self)
 
@@ -972,15 +971,13 @@ func _take_glide_handoff() -> void:
 	# the burst's own line, bent a little toward where you're steering
 	var bd := dir.lerp(heading, 0.35).normalized()
 	vel.x = bd.x * boost; vel.z = bd.y * boost
-	_glide_boost_fx(bd)
+	_glide_boost_fx()
 
-## Reads as a boost: a loud whoosh, a burst of air off the glider, a trail that stays while you're
-## fast (see render), and for you a brief camera pull-back.
-func _glide_boost_fx(d: Vector2) -> void:
+## Reads as a boost: a loud whoosh, a trail that stays while you're fast (see render), and for you a brief
+## camera pull-back.
+func _glide_boost_fx() -> void:
 	m.sfx("whoosh", pos, -1.0 if is_local() else -9.0, 1.2)
 	m.sfx("glide", pos, -6.0 if is_local() else -14.0, 1.6)
-	m.fx.burst(pos + Vector3(0, 1.6, 0), Color("dff3ff"), 22, 6.0, 0.45, 0.0, 1.0, Vector3(-d.x, 0.1, -d.y), 28.0)
-	m.fx.ring(pos + Vector3(0, 1.2, 0), 1.8, Color(0.85, 0.95, 1.0, 0.75), 0.28)
 	boost_fx_t = 1.6
 	if is_local() and m.cam:
 		m.cam.pull_back(0.12)
@@ -1175,9 +1172,8 @@ func _dash_rider(ex: bool) -> void:
 			if not m.world.is_void(q.x, q.z) and not m.world.is_block(q.x, q.z):
 				best = Vector3(q.x, m.world.ground_at(q.x, q.z), q.z); break
 			kk -= 0.5
-		m.fx.burst(pos + Vector3(0, 0.8, 0), col, 14, 3.0, 0.3)
+		m.fx.ghost(position, face, col, float(cdat["scale"]))
 		teleport(best)
-		m.fx.burst(best + Vector3(0, 0.8, 0), col, 14, 3.0, 0.3)
 		vel.x = roll_dir.x * 3.0; vel.z = roll_dir.y * 3.0
 		phase_t = maxf(phase_t, 0.15)
 	if not (rd.get("on_start", []) as Array).is_empty():
@@ -1208,7 +1204,6 @@ func _dash_rider(ex: bool) -> void:
 					roll_t = t0 * float(pr["falloff"])
 					move_kind = "dash"
 					inv_t = maxf(inv_t, roll_t)
-					m.fx.ring(pos, 0.9, col, 0.25)
 					m.fx.dash_trail(self)
 					m.sfx("dash", pos, -6.0, 1.4))
 
@@ -1283,7 +1278,6 @@ func dash_with(e: Dictionary) -> void:
 			m.fx.dust(pos, 6)
 		"dust":
 			m.fx.dust(pos, 10)
-			m.fx.burst(pos + Vector3(0, 0.5, 0), Color("ffd8a8"), 10, 3.0, 0.3, 4.0, 1.0, Vector3(roll_dir.x, 0.2, roll_dir.y), 30.0)
 	if not shove.is_empty():
 		fortify_t = maxf(fortify_t, roll_t + 0.1)     # nothing knocks you back mid-charge
 	dash_at = m.time
@@ -2464,9 +2458,8 @@ func _physics(dt: float) -> void:
 				m.fx.dust(pos, 2 if fv > -8.0 else 4)
 				m.sfx("land", pos, (-16.0 if fv > -8.0 else -12.0) + (0.0 if is_local() else -6.0))
 			if fv < -17.0:
-				# a long drop lands hard: a thud, a ring of dust and a short stagger
+				# a long drop lands hard: a thud, a puff of dust and a short stagger
 				m.fx.dust(pos, 12)
-				m.fx.ring(pos + Vector3(0, 0.05, 0), 1.4, Color(1, 1, 1, 0.5), 0.3)
 				squash = 0.25
 				land_t = 0.32
 				if is_local(): m.shake(0.18, pos)
@@ -2544,8 +2537,6 @@ func _deploy() -> void:
 	vel.y = maxf(vel.y, DEPLOY_POP)
 	m.sfx("glide", pos, -2.0)
 	_glider_sfx("open")
-	m.fx.burst(pos + Vector3(0, 1.7, 0), Color("f3eee2"), 14, 3.5, 0.4, 0.0)
-	m.fx.ring(pos + Vector3(0, 1.4, 0), 1.6, Color(1, 1, 1, 0.55), 0.25)
 	if is_local() and m.cam:
 		m.cam.punch(0.05)
 
@@ -2561,7 +2552,6 @@ func _break_drop() -> void:
 	glide_fuel = 1.0
 	glide_cd = 0.25
 	_glider_sfx("close")
-	m.fx.burst(pos + Vector3(0, 1.7, 0), Color("f3eee2"), 10, 2.5, 0.35, 0.0)
 
 ## Using a heal in the air: out of the drop if you were in it, and the glider folds (it can't be
 ## held while you drink; holding glide again opens it after a beat and spills what's left).
@@ -2650,11 +2640,9 @@ func _update_glide(dt: float) -> void:
 		gliding = true
 		_take_glide_handoff()
 		if below_lip:
-			m.fx.burst(pos + Vector3(0, 1.2, 0), Color("cfeaff"), 12, 3.5, 0.4, -2.0, 0.8)
 			m.sfx("glide", pos, -2.0, 1.4)
 			add_stat("feathers")
 		_glider_sfx("open")
-		m.fx.burst(pos + Vector3(0, 1.7, 0), Color("f3eee2"), 8, 2.0, 0.35, 0.0)
 		glide_lift.open_kick(self)
 
 # Ledge float: touch the side of any ground above you while you're still alive and you float
@@ -2770,7 +2758,6 @@ func _try_ledge_grab(dt: float) -> void:
 	gliding = false
 	roll_t = 0.0
 	m.sfx("grab", pos, -8.0, 1.2)
-	m.fx.burst(pos + Vector3(0, 0.6, 0), Color("cfeaff"), 6, 2.0, 0.3, 0.0)
 	m.on_ledge_grab(self)
 
 ## (ledge rise) One step of rising up a ledge: sets vel.y and returns true while it lasts. Your
@@ -2870,7 +2857,7 @@ func _ledge_fling() -> void:
 	m.sfx("jump", pos, -6.0)
 	if timed:
 		m.sfx("whoosh", pos, -6.0 if is_local() else -12.0, 1.3)
-		m.fx.burst(pos + Vector3(0, 0.8, 0), Color("e6f6ff"), 10, 3.5, 0.35, 0.0, 0.8, Vector3(-d.x, 0.2, -d.y), 30.0)
+		m.fx.ghost(position, face, Color("e6f6ff"), float(cdat["scale"]))
 
 ## Floating up the side: rise to the lip, drift onto it, then a small hop onto the top.
 func _grapple(dt: float) -> void:
