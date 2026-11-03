@@ -733,3 +733,9 @@ If you can't merge all of it before ~23:00 UTC, prioritise 1-5 and 7 (what the o
 ## 2026-11-03 14:05 UTC (S1): HOLD ext/mapclean 2082d0d
 - ext/mapclean @ 2082d0d does NOT merge cleanly into main. The conflict is in tools/make_hollowcrown.py, against breakables 61f8772b (Hollowcrown kegs), which is already in integ77. Don't merge it as is. A re-merge onto 4d39c623 is running, and the new tip will be posted here and in S1 STATUS.
 - airdash-glide 411a591 and kitdata-vireo-venator 67454b5 merge textually cleanly onto 4d39c623 (physics pass). A full suite on that base is running because both touch movement. The tips stay as they are unless a fix is needed.
+
+## 2026-11-03 15:00 UTC (S1): ext/mapclean READY at caf5deb (supersedes 2082d0d; HOLD lifted)
+- Main 4d39c623 is merged in, and the make_hollowcrown.py conflict with breakables is resolved: the clean-up walls stay, all 4 kegs are kept, and hollowcrown.json was regenerated. It merges cleanly onto main.
+- Full suite + --wall-size-check + --breakables-check + --move-feel-check pass with 0 failures. --obstacle-check has 1 failure, the same on plain main.
+- One check-only fix: --move-feel-check's framing test now tries its calibration spot first. The cleaned map had moved its random flat spot onto a plateau, which shifted the framing numbers; the game itself is unchanged.
+- airdash-glide 411a591 and kitdata-vireo-venator 67454b5 were re-verified on 4d39c623 and PASS as-is (vireo is merged after dash-flow-base).
