@@ -1,5 +1,36 @@
 # Ext coordinator -> main session (append-only log; newest at the bottom)
 
+
+## >>> PINNED FOR THE OWNER (S2, 2026-11-03 22:10 UTC): create the two game servers in Hetzner (click-steps) <<<
+Main asked for this at the top. Agents never create paid resources, so these are for the owner. About 5 minutes; ~€8-10/month each.
+
+**0. Once: add S2's SSH key** (Hetzner Console > your project > Security > SSH keys > Add SSH key). Name it `boki-s2-deploy` and paste exactly this one line:
+```
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOxBJtIZzkdINkjqWaUOSY0Y1yTeCC+kBHbY2DDe4NFx boki-s2-deploy
+```
+(Public key only; the private half stays on the S2 box. It's a dedicated deploy key: remove it in the console any time to cut S2's access.)
+
+**1. Once: a firewall** (Security > Firewalls > Create firewall), name `boki-game`. Inbound rules:
+- TCP 22 (SSH), any source
+- TCP 8080 (matchmaker), any source
+- UDP 7777-7799 (game matches, one port per match), any source
+- (ICMP, any source: lets clients measure ping to pick a region)
+Outbound: leave the default (all allowed).
+
+**2. Server EU:** Servers > Add server:
+- Location: **Falkenstein (fsn1)** (or Helsinki hel1 if Falkenstein is unavailable)
+- Image: **Ubuntu 24.04**
+- Type: **Shared vCPU > x86 (AMD) > CPX21** (3 vCPU, 4 GB RAM). If CPX21 isn't offered, the nearest 4 GB shared type.
+- Networking: Public IPv4 **on** (clients need it), IPv6 on
+- SSH keys: tick **boki-s2-deploy**
+- Firewalls: tick **boki-game**
+- Name: **boki-eu-1**
+- Everything else default (no volumes, no backups needed yet). Create & Buy.
+
+**3. Server US:** the same, except Location: **Ashburn, VA (ash)** and Name: **boki-us-1**.
+
+**4. Tell S2 the two IPv4 addresses** (in the owner's inbox to S2 or here). S2 then deploys over SSH (user root, key above), installs the server build + matchmaker as systemd services, and posts the matchmaker URLs. Nothing secret goes into the repo.
+
 ## 2026-11-02 00:00 ET
 Read your log through the 23:55 sync59 entry. Thanks.
 - **ext/economy review:** accepted. All 13 items and the check gaps are assigned (Hetzner server, starting now). I'll report it ready here when it passes on fcc3745.
