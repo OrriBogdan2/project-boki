@@ -1,10 +1,11 @@
 <!--META {
  "name": "Pin", "title": "Dark Archer", "tag": "id archer  ·  female  ·  marksman",
  "accent": "#d83a4e", "rim": "#ffc2c8", "shadow": 95, "bust_bg": "#2a1a20",
- "stage": ["#86717c", "#1e171c"],
+ "stage": ["#86717c", "#1e171c"], "height_cm": 172, "sheet_scale": 0.9, "pos": [240, 640],
  "relic": "the Last Pin",
  "mat": {
   "cloak": ["#6e6878", "#34303b", "#141218"],
+  "cloth": ["#6a6070", "#383240", "#141018"],
   "red": ["#f0606f", "#b0233a", "#560b18"],
   "leather": ["#93766d", "#523f3e", "#211819"],
   "skin": ["#f3d8c6", "#cfa08b", "#8e6153"],
@@ -18,171 +19,150 @@
  "palette": [["#34303b", "night cloak"], ["#b0233a", "heart red"], ["#523f3e", "oiled leather"],
              ["#636a76", "dark steel"], ["#cfc0a2", "bone nock"], ["#cfa08b", "skin"], ["#2b233a", "hair"]],
  "notes": [
-  ["Shape language", "Long and narrow: a tall, lean body made of thin verticals and sharp points (the hood's peak, the ragged cloak tips, the knee plates), crossed by one long curve, the bow. Dark big shapes with small red accents that pull the eye to the face and the hands."],
-  ["Signature features", "A peaked hood with a red lining and a red face wrap, so only her eyes show; a one-shoulder cloak with ragged knife-point tips; a black recurve longbow taller than she is, carried across her back; red-fletched arrows. No body or head markings."],
+  ["Shape language", "Long and narrow, 1.72 m and all edges: a lean body in fitted leather, sharp points everywhere (the hood's hooked peak, the ragged cloak tips, the knee plates, the fletching over her shoulder), crossed by one long curve, the bow. Dark big shapes; red only where the eye should land: the hood lining, the wrap, the sash, the fletching."],
+  ["Signature features", "A peaked hood with a red lining and a red face wrap, so only her eyes show; a one-shoulder cloak with ragged knife-point tips; a black recurve longbow taller than she is with red grip wraps; a back quiver of red-fletched arrows; a lock of hair escaping the hood. No body or head markings."],
   ["Reads in-engine", "From above, a thin dark figure with a long diagonal line (the bow) and a red dot for a face: unlike anyone else's shape. Red sits only on the hood rim, the wrap, the sash and the fletching, so it reads as her team-neutral signature against any ground."]
  ]
 } -->
-<g id="defs"></g><!--/defs-->
+<g id="defs">
+ <radialGradient id="L-eyeg"><stop offset="0" stop-color="#ffd0d4"/><stop offset="0.4" stop-color="#ff5a6c" stop-opacity="0.7"/><stop offset="1" stop-color="#ff5a6c" stop-opacity="0"/></radialGradient>
+ <g id="L-head">
+  <!-- hood back and its hooked peak -->
+  <path m="cloak" d="M-40 -584 C-50 -620 -44 -664 -20 -690 C-6 -704 14 -716 34 -724 C26 -706 24 -692 30 -676 C46 -650 48 -612 40 -584 Z"/>
+  <path m="red" lw="2.2" d="M-30 -592 C-36 -620 -30 -652 -12 -666 C4 -676 22 -672 30 -656 C38 -636 36 -610 30 -592Z"/>
+  <!-- face, wrapped to the eyes -->
+  <path m="skin:r" lw="2.2" d="M-20 -636 C-20 -656 20 -656 20 -636 L20 -616 C20 -600 10 -590 0 -588 C-10 -590 -20 -600 -20 -616Z"/>
+  <path sg="40" d="M2 -652 C14 -652 20 -646 20 -636 L20 -616 C20 -600 10 -590 2 -588Z"/>
+  <path m="red" lw="2.2" d="M-24 -622 C-10 -614 10 -614 24 -622 L24 -604 C20 -590 10 -580 0 -578 C-10 -580 -20 -590 -24 -604Z"/>
+  <brush c="#560b18" pts="-20 -610 0; -8 -606 1.2; 6 -606 0"/><brush c="#560b18" pts="-16 -598 0; -4 -594 1; 10 -596 0"/>
+  <path rg="70" d="M-24 -622 C-10 -614 10 -614 24 -622 L24 -604 C20 -590 10 -580 0 -578Z"/>
+  <!-- eyes: narrowed, a red glint -->
+  <path fill="#fff4f0" stroke="#1d1724" stroke-width="1" d="M-16 -632 C-12 -637 -5 -637 -3 -632 C-6 -629 -13 -629 -16 -632Z M16 -632 C12 -637 5 -637 3 -632 C6 -629 13 -629 16 -632Z"/>
+  <circle fill="#8a1a28" cx="-9" cy="-632.5" r="2.4"/><circle fill="#8a1a28" cx="9" cy="-632.5" r="2.4"/>
+  <circle fill="#fff" cx="-10" cy="-633.5" r="0.8"/><circle fill="#fff" cx="8" cy="-633.5" r="0.8"/>
+  <brush pts="-18 -632 0; -11 -638 1.4; -2 -634 0"/><brush pts="18 -632 0; 11 -638 1.4; 2 -634 0"/>
+  <brush pts="-18 -641 0; -10 -642 1.6; -2 -638 0"/><brush pts="18 -643 0; 10 -643 1.6; 2 -638 0"/>
+  <!-- a lock of hair escaping, and the hood rim -->
+  <limb m="hair" lw="1.8" pts="-6 -656 5; -12 -644 4; -10 -630 2; -14 -620 0.5"/>
+  <path m="hair" lw="1.8" d="M-20 -640 C-20 -656 -4 -664 14 -656 C18 -654 20 -648 20 -640 C10 -650 -6 -652 -20 -640Z"/>
+  <path m="cloak" lw="2.2" d="M-32 -590 C-40 -626 -32 -664 -10 -676 C8 -684 26 -678 34 -662 C40 -644 40 -612 34 -590 L28 -592 C32 -612 32 -640 26 -654 C18 -668 2 -670 -10 -664 C-26 -652 -30 -620 -26 -592Z"/>
+  <path rim="2.4" d="M38 -650 C42 -630 40 -606 34 -590"/>
+  <path rim="2" d="M30 -676 C28 -694 30 -708 34 -722"/>
+ </g>
+ <g id="L-quiver">
+  <path m="leather" d="M-14 0 L14 0 L22 -180 L-6 -186Z"/>
+  <path sg="45" d="M4 0 L14 0 L22 -180 L8 -184Z"/>
+  <path m="red" lw="1.6" d="M-12 -20 L14 -20 L15 -30 L-12 -30Z M-8 -150 L20 -148 L21 -158 L-7 -160Z"/>
+  <g transform="translate(6 -186)">
+   <path ln="1.6" d="M-6 0 L-14 -40 M0 0 L-2 -46 M6 0 L10 -42"/>
+   <path m="red" lw="1.4" d="M-14 -40 L-22 -60 L-12 -52 L-10 -66 L-8 -46Z M-2 -46 L-8 -70 L0 -60 L4 -72 L2 -50Z M10 -42 L8 -64 L14 -56 L20 -66 L14 -44Z"/>
+  </g>
+ </g>
+</g><!--/defs-->
 <g id="front">
- <!-- longbow across her back -->
- <g transform="translate(6 -430) rotate(-28)">
-  <path fill="none" stroke="#1d1724" stroke-width="2" d="M-6 -326 L-6 326"/>
-  <path fill="none" stroke="#1d1724" stroke-width="13" stroke-linecap="round" d="M4 -330 C-8 -316 -12 -298 -8 -288 C22 -200 30 -90 2 0 C30 90 22 200 -8 288 C-12 298 -8 316 4 330"/>
-  <path fill="none" stroke="#3a2a2e" stroke-width="7.5" stroke-linecap="round" d="M4 -330 C-8 -316 -12 -298 -8 -288 C22 -200 30 -90 2 0 C30 90 22 200 -8 288 C-12 298 -8 316 4 330"/>
-  <path fill="none" stroke="#8a6a70" stroke-width="2" opacity="0.7" d="M-2 -290 C26 -200 32 -90 6 -10"/>
-  <path m="bone" lw="2" d="M-2 -336 l12 -8 l-2 18Z M-2 336 l12 8 l-2 -18Z"/>
- </g>
- <!-- cloak, back panel -->
- <path m="cloak" d="M30 -486 C80 -486 120 -456 128 -400 C138 -320 140 -230 132 -132 L116 -150 L104 -110 L92 -150 L74 -118 L66 -166 L52 -140 L48 -200 C60 -300 60 -400 30 -486Z"/>
- <path f="red" d="M48 -200 C60 -300 60 -400 34 -478 C70 -400 72 -300 62 -190 L52 -140Z"/>
- <!-- legs and boots -->
- <path m="leather" d="M-62 -300 C-66 -240 -60 -190 -56 -160 L-54 -40 L-22 -40 L-22 -160 C-16 -200 -10 -250 -6 -300 Z"/>
- <path m="leather" d="M6 -300 C12 -250 18 -200 24 -160 L28 -40 L60 -40 L58 -160 C64 -200 66 -250 62 -300 Z"/>
- <path sh="25" d="M-28 -300 L-6 -300 C-10 -250 -16 -200 -22 -160 L-22 -40 L-34 -40 Z M40 -300 L62 -300 C66 -250 64 -200 58 -160 L60 -40 L48 -40Z"/>
- <path m="cloak" d="M-60 -184 C-62 -120 -58 -60 -60 -16 C-72 -8 -74 0 -66 0 L-12 0 C-10 -8 -14 -14 -20 -18 C-20 -60 -18 -120 -16 -184 Z"/>
- <path m="cloak" d="M20 -184 C22 -120 26 -60 28 -16 C24 -8 24 0 30 0 L84 0 C86 -8 78 -14 66 -18 C64 -60 62 -120 60 -184 Z"/>
- <path sh="30" d="M-36 -184 L-16 -184 C-18 -120 -20 -60 -20 -18 C-14 -14 -10 -8 -12 0 L-36 0Z M42 -184 L60 -184 C62 -120 64 -60 66 -18 C78 -14 86 -8 84 0 L44 0Z"/>
- <path m="steel" lw="2.4" d="M-60 -198 L-38 -222 L-14 -198 L-18 -158 L-38 -146 L-58 -158Z M18 -198 L40 -222 L62 -198 L58 -158 L40 -146 L22 -158Z"/>
- <path hl="40" d="M-54 -196 L-38 -214 L-38 -152 L-54 -160Z M24 -196 L40 -214 L40 -152 L24 -160Z"/>
- <!-- tail skirt -->
- <path m="leather" d="M-64 -352 L64 -352 L72 -246 L44 -228 L24 -268 L0 -236 L-24 -268 L-44 -228 L-72 -246 Z"/>
- <path sh="25" d="M10 -352 L64 -352 L72 -246 L44 -228 L24 -268 L0 -236 Z"/>
- <!-- torso -->
- <path m="leather" d="M-24 -492 C-50 -490 -72 -482 -78 -464 C-74 -430 -64 -400 -56 -370 L-54 -336 L54 -336 L56 -370 C64 -400 74 -430 78 -464 C72 -482 50 -490 24 -492 Z"/>
- <path sh="28" d="M14 -490 C50 -488 72 -482 78 -464 C74 -430 64 -400 56 -370 L54 -336 L18 -336 C30 -380 30 -440 14 -490Z"/>
- <path hl="16" d="M-60 -460 C-50 -474 -36 -478 -26 -476 C-40 -440 -46 -400 -48 -360 L-54 -372 C-60 -400 -66 -440 -60 -460Z"/>
- <path ln="2" d="M-22 -486 L0 -450 L22 -486"/>
- <path m="leather" lw="2.4" d="M48 -486 L66 -474 L-44 -334 L-62 -344 Z"/>
- <path m="steel" lw="2" d="M0 -412 l8 8 l-8 8 l-8 -8Z"/>
- <!-- red sash -->
- <path m="red" d="M-58 -364 Q0 -352 58 -364 L60 -332 Q0 -320 -60 -332 Z"/>
- <path m="red" d="M38 -340 C50 -300 58 -258 48 -214 L64 -222 C72 -266 68 -306 58 -342Z"/>
- <path m="red" lw="2.4" d="M52 -342 C66 -310 80 -280 78 -244 L88 -252 C92 -290 78 -320 64 -346Z"/>
- <path sh="30" d="M-58 -340 Q0 -328 60 -340 L60 -332 Q0 -320 -60 -332Z"/>
- <!-- quiver at her left hip -->
- <g transform="translate(96 -330) rotate(-14)">
-  <path m="red" lw="2" d="M-8 -36 l-10 -34 l14 18Z M2 -36 l4 -40 l8 22Z M10 -36 l16 -30 l-4 24Z"/>
-  <path ln="2" d="M-4 -36 v-14 M4 -36 v-16 M12 -36 v-12"/>
-  <rect m="leather" x="-15" y="-40" width="30" height="132" rx="10"/>
-  <rect m="steel" lw="2" x="-16" y="-42" width="32" height="12" rx="4"/>
-  <rect m="steel" lw="2" x="-15" y="70" width="30" height="10" rx="4"/>
-  <path rim="2.6" d="M14 -30 L14 84"/>
- </g>
- <!-- right arm (image left), arrow held low -->
- <path m="leather" d="M-60 -478 C-86 -478 -98 -458 -98 -430 L-102 -370 L-106 -302 L-80 -298 L-74 -366 L-70 -420 Z"/>
- <path sh="25" d="M-80 -470 C-78 -440 -74 -400 -76 -366 L-80 -298 L-90 -298 L-86 -370 C-86 -410 -86 -450 -80 -470Z"/>
- <path m="red" lw="2.4" d="M-106 -356 L-74 -360 L-76 -308 L-104 -304 Z"/>
- <path ln="1.5" d="M-104 -340 l28 -4 M-104 -324 l28 -4"/>
- <path fill="none" stroke="#1d1724" stroke-width="5" stroke-linecap="round" d="M-100 -350 L-84 -150"/>
- <path fill="none" stroke="#8a6e58" stroke-width="2.4" stroke-linecap="round" d="M-100 -350 L-84 -150"/>
- <path m="red" lw="1.8" d="M-100 -352 l-8 -26 l10 6Z M-100 -352 l6 -28 l2 14Z"/>
- <path m="steel" lw="2" d="M-86 -156 l-6 4 l8 22 l6 -24Z"/>
- <path m="leather" lw="2.4" d="M-108 -302 C-112 -284 -104 -266 -92 -266 C-78 -266 -74 -284 -78 -302Z"/>
- <!-- cloak over her left shoulder -->
- <path m="cloak" d="M-14 -500 C30 -506 84 -498 100 -470 C114 -420 118 -340 114 -262 L100 -234 L94 -264 L80 -224 L72 -272 L62 -300 C72 -360 66 -420 40 -470 C20 -480 0 -486 -14 -490 Z"/>
- <path f="red" d="M62 -300 C72 -360 66 -420 40 -470 C52 -462 60 -456 66 -448 C80 -400 80 -340 72 -290 Z"/>
- <path sh="30" d="M70 -476 C96 -470 108 -440 112 -400 C114 -350 114 -300 114 -262 L100 -234 L98 -290 C102 -350 96 -420 70 -476Z"/>
- <path hl="18" d="M-6 -494 C24 -498 56 -494 74 -484 C50 -486 20 -486 -6 -484Z"/>
- <path rim="3" d="M104 -460 C114 -410 118 -340 114 -270"/>
- <path m="steel" lw="2" d="M30 -478 a9 9 0 1 0 18 0 a9 9 0 1 0 -18 0Z"/>
- <!-- left hand at the knife -->
- <path m="leather" lw="2.4" d="M-6 -350 l10 -10 l10 10 l-2 28 l-16 0Z"/>
- <path m="leather" lw="2.4" d="M46 -330 C40 -320 42 -304 54 -302 C66 -300 70 -314 66 -326Z"/>
- <!-- head -->
- <path m="skin" d="M-12 -504 L12 -504 L14 -484 L-14 -484Z"/>
- <path m="cloak" d="M-48 -498 C-58 -540 -54 -592 -22 -612 L8 -640 L16 -608 C46 -598 58 -560 52 -498 C40 -488 20 -486 0 -486 C-20 -486 -40 -488 -48 -498 Z"/>
- <path sh="30" d="M14 -606 C44 -596 58 -560 52 -498 C44 -492 36 -490 28 -490 C40 -540 36 -580 14 -606Z"/>
- <path rim="3" d="M20 -604 C46 -592 58 -556 52 -504"/>
- <path m="skin" d="M-30 -548 C-30 -582 30 -582 30 -548 L28 -520 C24 -500 10 -494 0 -494 C-10 -494 -24 -500 -28 -520 Z"/>
- <path sh="50" d="M-31 -578 C-10 -590 20 -588 32 -574 L30 -550 C10 -558 -12 -558 -31 -550 Z"/>
- <path m="hair" lw="1.8" d="M-24 -586 C-14 -574 -16 -560 -26 -550 C-8 -560 -2 -576 -4 -590Z M10 -588 C18 -578 22 -566 18 -556 C28 -566 28 -580 22 -588Z"/>
- <path fill="#f4f0e8" stroke="#1d1724" stroke-width="1.6" d="M-24 -546 Q-15 -553 -5 -546 Q-15 -541 -24 -546Z M24 -546 Q15 -553 5 -546 Q15 -541 24 -546Z"/>
- <circle f="eye:r" cx="-13" cy="-546.5" r="3"/><circle f="eye:r" cx="13" cy="-546.5" r="3"/>
- <path ln="2.6" d="M-26 -556 L-6 -552 M26 -556 L6 -552"/>
- <path m="red" lw="2.4" d="M-31 -536 C-10 -530 10 -530 31 -536 L29 -514 C25 -496 10 -486 0 -486 C-10 -486 -25 -496 -29 -514 Z"/>
- <path ln="1.4" d="M-24 -522 Q0 -514 24 -522 M-18 -506 Q0 -500 18 -506"/>
- <path sh="25" d="M10 -532 C20 -532 26 -534 31 -536 L29 -514 C25 -496 14 -488 6 -486 C16 -500 16 -520 10 -532Z"/>
- <path f="red" d="M-36 -506 C-42 -560 -28 -594 4 -598 C32 -594 44 -560 38 -506 L32 -506 C36 -556 26 -586 4 -588 C-22 -586 -32 -556 -30 -506Z"/>
- <path ln="2" d="M-36 -506 C-42 -560 -28 -594 4 -598 C32 -594 44 -560 38 -506"/>
+ <!-- quiver on her back, fletching over the shoulder -->
+ <g transform="translate(-24 -420) rotate(16)"><use href="#L-quiver"/></g>
+ <!-- cloak back panel -->
+ <path m="cloak" d="M30 -560 C70 -520 92 -420 96 -300 L84 -312 L80 -260 L66 -300 L58 -236 L46 -292 L34 -250 L28 -320Z"/>
+ <path f="red" d="M34 -540 C66 -500 82 -420 86 -320 L76 -330 L72 -290 L62 -320 L56 -272 L46 -312 C44 -400 40 -480 34 -540Z"/>
+ <!-- legs: leggings into tall boots, plated knees -->
+ <limb m="cloth" pts="-14 -400 18; -24 -300 14; -26 -214 11; -24 -140 9.5"/>
+ <limb m="cloth" pts="16 -400 18; 30 -300 14; 36 -214 11; 40 -140 9.5"/>
+ <path m="leather" d="M-38 -200 C-40 -150 -38 -80 -36 -16 L-40 -4 L-6 -4 L-10 -16 C-10 -80 -10 -150 -12 -200Z"/>
+ <path m="leather" d="M24 -200 C26 -150 32 -80 36 -16 L32 -4 L66 -4 L60 -16 C56 -80 52 -150 50 -200Z"/>
+ <path sg="45" d="M-24 -200 L-12 -200 C-10 -150 -10 -80 -10 -16 L-6 -4 L-20 -4Z M38 -200 L50 -200 C52 -150 56 -80 60 -16 L66 -4 L50 -4Z"/>
+ <path m="steel" lw="2" d="M-26 -246 L-12 -226 L-16 -194 L-26 -186 L-36 -194 L-40 -226Z M38 -246 L52 -226 L50 -194 L40 -186 L30 -194 L26 -226Z"/>
+ <path hl="45" d="M-34 -224 L-26 -240 L-26 -196 L-32 -198Z M32 -224 L38 -240 L40 -196 L34 -198Z"/>
+ <path ln="1.4" d="M-36 -170 l22 4 M-36 -150 l22 4 M28 -170 l24 4 M30 -150 l24 4"/>
+ <!-- torso: fitted leather, crossed straps -->
+ <path m="cloth" d="M-36 -566 C-42 -530 -34 -500 -24 -470 C-28 -450 -36 -430 -36 -404 L36 -404 C36 -430 28 -450 24 -470 C34 -500 42 -530 36 -566 C20 -576 -20 -576 -36 -566Z"/>
+ <path m="leather" d="M-30 -540 C-32 -516 -26 -494 -20 -472 C-24 -452 -30 -432 -30 -410 L30 -410 C30 -432 24 -452 20 -472 C26 -494 32 -516 30 -540 C14 -530 -14 -530 -30 -540Z"/>
+ <path sg="55" d="M2 -536 C14 -532 24 -534 30 -540 C32 -516 26 -494 20 -472 C24 -452 30 -432 30 -410 L2 -410Z"/>
+ <path ln="1.4" d="M-20 -520 C-10 -508 10 -508 20 -520 M-22 -490 C-10 -480 10 -480 22 -490"/>
+ <limb m="leather" lw="2" pts="-34 -566 4.5; 0 -500 4.5; 30 -450 4.5"/>
+ <circle m="steel" lw="1.6" cx="0" cy="-500" r="5"/>
+ <!-- the red sash, tails hanging -->
+ <path m="red" lw="2.4" d="M-36 -428 C-12 -418 12 -418 36 -428 L36 -404 C12 -394 -12 -394 -36 -404Z"/>
+ <limb m="red" lw="2" pts="20 -404 7; 26 -360 6; 22 -320 5; 28 -290 1"/>
+ <limb m="red" lw="2" pts="12 -404 6; 12 -370 5; 6 -340 1"/>
+ <path m="leather" d="M-36 -404 C-40 -380 -42 -360 -40 -340 L-28 -352 L-20 -336 L-10 -356 L0 -340 L10 -356 L18 -340 L26 -356 L36 -340 C40 -360 40 -384 36 -404Z"/>
+ <path sg="50" d="M2 -404 L36 -404 C40 -384 40 -360 36 -340 L26 -356 L18 -340 L10 -356 L2 -344Z"/>
+ <!-- bow arm, the recurve held low -->
+ <limb m="cloth" pts="-36 -556 11; -50 -500 8.5; -58 -446 7; -62 -404 6"/>
+ <path m="leather" lw="2" d="M-70 -450 L-52 -446 L-54 -410 L-68 -412Z"/>
+ <path fill="none" stroke="#1d1724" stroke-width="1.4" d="M-14 -760 L-62 -60"/>
+ <limb m="bow" lw="2.4" pts="-8 -768 2; -6 -756 3.5; -26 -700 4.8; -48 -560 5.5; -60 -420 6.5; -60 -300 5.5; -54 -160 4.8; -60 -70 3.5; -68 -56 2"/>
+ <path m="red" lw="1.6" d="M-68 -436 L-52 -434 L-52 -400 L-68 -402Z"/>
+ <brush c="rim" opacity="0.7" pts="-40 -600 0; -56 -480 1.6; -58 -360 0"/>
+ <limb m="skin" lw="2" pts="-62 -404 6; -64 -390 7"/>
+ <!-- cloak over the left shoulder, ragged knife-point hem -->
+ <path m="cloak" d="M-4 -572 C26 -584 50 -570 58 -546 C72 -500 80 -440 82 -380 L72 -392 L70 -340 L58 -380 L52 -320 L44 -372 L36 -330 C30 -420 22 -500 -4 -572Z"/>
+ <path sg="55" d="M20 -580 C40 -578 52 -566 58 -546 C72 -500 80 -440 82 -380 L72 -392 L70 -340 L58 -380 L52 -320 L44 -372Z"/>
+ <brush c="#141218" pts="20 -540 0; 40 -460 1.6; 50 -380 0"/><brush c="#141218" pts="36 -556 0; 60 -480 1.4; 66 -400 0"/>
+ <path rim="2.6" d="M60 -540 C72 -490 80 -430 80 -384"/>
+ <circle m="steel:r" lw="1.6" cx="-2" cy="-566" r="6.5"/>
+ <!-- arrow hand, low -->
+ <limb m="cloth" pts="40 -548 10; 58 -496 8; 66 -446 7; 70 -410 6"/>
+ <limb m="skin" lw="2" pts="70 -410 6; 72 -396 7"/>
+ <path fill="none" stroke="#1d1724" stroke-width="3.2" d="M74 -470 L80 -270"/>
+ <path fill="none" stroke="#cfc0a2" stroke-width="1.4" d="M74 -470 L80 -270"/>
+ <path m="red" lw="1.4" d="M73 -470 L66 -494 L74 -486 L76 -500 L78 -484 L84 -492 L76 -468Z"/>
+ <path m="steel" lw="1.6" d="M76 -276 L84 -276 L80 -252Z"/>
+ <use href="#L-head"/>
 </g><!--/front-->
 <g id="tq">
- <!-- cloak streaming back -->
- <path m="cloak" d="M-6 -494 C60 -500 130 -470 170 -400 C196 -350 200 -290 196 -220 L178 -238 L172 -196 L154 -228 L140 -176 L126 -222 L106 -172 L98 -226 L74 -196 C80 -300 60 -400 -6 -494Z"/>
- <path f="red" d="M74 -196 C80 -300 60 -400 0 -488 C70 -440 110 -360 120 -280 L126 -222 L106 -172 L98 -226Z"/>
- <path sh="22" d="M120 -470 C160 -440 190 -380 196 -320 C200 -290 198 -250 196 -220 L178 -238 C186 -300 170 -400 120 -470Z"/>
- <path rim="3" d="M150 -440 C184 -400 198 -330 196 -232"/>
- <g id="L-tqbody">
- <!-- back leg (her right) -->
- <path m="leather" d="M-4 -300 C2 -250 14 -200 22 -160 L30 -40 L60 -40 L56 -160 C60 -200 56 -250 46 -300 Z"/>
- <path sh="28" d="M30 -300 L46 -300 C56 -250 60 -200 56 -160 L60 -40 L44 -40Z"/>
- <path m="cloak" d="M20 -184 C22 -120 26 -60 28 -16 C22 -8 20 0 26 0 L70 0 C72 -8 66 -14 60 -18 C60 -60 60 -120 58 -184 Z"/>
- <path sh="30" d="M40 -184 L58 -184 C60 -120 60 -60 60 -18 C66 -14 72 -8 70 0 L42 0Z"/>
- <path m="steel" lw="2.4" d="M22 -198 L42 -220 L60 -198 L56 -158 L40 -146 L26 -158Z"/>
- <!-- front leg (her left), stepping out -->
- <path m="leather" d="M-60 -300 C-66 -240 -66 -190 -66 -160 L-74 -40 L-42 -40 L-34 -160 C-26 -200 -14 -250 -6 -300 Z"/>
- <path m="cloak" d="M-70 -184 C-72 -120 -72 -60 -76 -16 C-96 -10 -102 0 -94 0 L-36 0 C-34 -8 -36 -14 -40 -18 C-38 -60 -34 -120 -32 -184 Z"/>
- <path sh="30" d="M-50 -184 L-32 -184 C-34 -120 -38 -60 -40 -18 C-36 -14 -34 -8 -36 0 L-52 0Z"/>
- <path m="steel" lw="2.4" d="M-72 -198 L-54 -222 L-32 -198 L-36 -158 L-52 -146 L-70 -158Z"/>
- <path hl="40" d="M-68 -196 L-54 -214 L-54 -152 L-66 -160Z"/>
- <!-- skirt and torso, turned to her right -->
- <path m="leather" d="M-70 -352 L50 -352 L58 -250 L34 -232 L18 -268 L-4 -238 L-26 -268 L-48 -230 L-78 -248 Z"/>
- <path sh="25" d="M0 -352 L50 -352 L58 -250 L34 -232 L18 -268 L-4 -238Z"/>
- <path m="leather" d="M-36 -494 C-62 -490 -80 -478 -82 -458 C-78 -428 -70 -398 -64 -368 L-62 -336 L46 -336 L48 -370 C54 -400 62 -432 64 -462 C58 -482 30 -494 4 -494 Z"/>
- <path sh="30" d="M0 -492 C30 -492 58 -482 64 -462 C62 -432 54 -400 48 -370 L46 -336 L6 -336 C18 -380 18 -440 0 -492Z"/>
- <path ln="2" d="M-42 -488 L-24 -452 L-4 -490"/>
- <path m="leather" lw="2.4" d="M30 -486 L46 -472 L-56 -334 L-72 -346 Z"/>
- <path m="red" d="M-66 -364 Q-10 -352 48 -364 L50 -332 Q-10 -320 -68 -332 Z"/>
- <path m="red" d="M30 -340 C46 -300 60 -262 56 -220 L70 -228 C76 -270 66 -310 50 -342Z"/>
- <path sh="30" d="M-66 -340 Q-10 -328 50 -340 L50 -332 Q-10 -320 -68 -332Z"/>
- <path rim="3" d="M60 -456 C58 -420 50 -390 46 -350"/>
- <!-- far arm (her right) with the arrow -->
- <path m="leather" d="M36 -480 C58 -478 70 -458 70 -432 L72 -372 L74 -306 L50 -302 L46 -370 L40 -420 Z"/>
- <path m="red" lw="2.4" d="M46 -356 L74 -358 L76 -310 L50 -306 Z"/>
- <path fill="none" stroke="#1d1724" stroke-width="5" stroke-linecap="round" d="M56 -346 L92 -150"/>
- <path fill="none" stroke="#8a6e58" stroke-width="2.4" stroke-linecap="round" d="M56 -346 L92 -150"/>
- <path m="red" lw="1.8" d="M56 -348 l-12 -24 l12 6Z M56 -348 l2 -28 l6 14Z"/>
- <path m="steel" lw="2" d="M90 -156 l-6 6 l14 18 l2 -24Z"/>
- <path m="leather" lw="2.4" d="M48 -306 C44 -288 52 -270 64 -270 C78 -270 80 -288 76 -306Z"/>
- <!-- head, turned to her right -->
- <path m="skin" d="M-26 -504 L0 -504 L2 -484 L-26 -484Z"/>
- <path m="cloak" d="M-58 -498 C-70 -540 -64 -592 -30 -612 L-2 -642 L8 -610 C40 -600 52 -560 44 -498 C30 -488 10 -486 -10 -486 C-30 -486 -50 -490 -58 -498 Z"/>
- <path sh="30" d="M6 -608 C38 -598 52 -560 44 -498 C36 -492 28 -490 18 -490 C32 -540 30 -580 6 -608Z"/>
- <path rim="3" d="M12 -604 C40 -592 52 -556 44 -504"/>
- <path m="skin" d="M-50 -548 C-48 -582 4 -584 8 -552 L8 -520 C4 -500 -10 -494 -24 -494 C-36 -494 -46 -502 -50 -520 Z"/>
- <path sh="50" d="M-52 -576 C-30 -590 0 -588 10 -574 L8 -552 C-10 -558 -32 -558 -52 -550 Z"/>
- <path m="hair" lw="1.8" d="M-44 -586 C-34 -574 -36 -560 -46 -550 C-28 -560 -22 -576 -24 -590Z"/>
- <path fill="#f4f0e8" stroke="#1d1724" stroke-width="1.6" d="M-48 -546 Q-41 -552 -33 -546 Q-41 -542 -48 -546Z M-4 -546 Q-13 -553 -22 -546 Q-13 -541 -4 -546Z"/>
- <circle f="eye:r" cx="-42" cy="-546.5" r="2.6"/><circle f="eye:r" cx="-15" cy="-546.5" r="3"/>
- <path ln="2.6" d="M-50 -556 L-34 -552 M-2 -556 L-22 -552"/>
- <path m="red" lw="2.4" d="M-58 -536 C-40 -528 -10 -528 8 -536 L8 -514 C4 -496 -10 -486 -24 -486 C-36 -486 -50 -496 -54 -514 L-60 -526 Z"/>
- <path ln="1.4" d="M-50 -520 Q-24 -512 2 -520 M-44 -504 Q-24 -498 -4 -504"/>
- <path f="red" d="M-50 -506 C-56 -560 -46 -594 -16 -598 C12 -594 22 -560 16 -506 L10 -506 C14 -556 6 -586 -16 -588 C-38 -586 -46 -556 -44 -506Z"/>
- <path ln="2" d="M-50 -506 C-56 -560 -46 -594 -16 -598 C12 -594 22 -560 16 -506"/>
- <!-- near shoulder, cloak clasp -->
- <path m="cloak" d="M-30 -500 C-60 -502 -90 -488 -96 -458 C-90 -440 -70 -436 -50 -446 C-40 -470 -30 -486 -30 -500Z"/>
- <path m="steel" lw="2" d="M-46 -480 a8 8 0 1 0 16 0 a8 8 0 1 0 -16 0Z"/>
+ <!-- full draw, aiming left; the cloak lifts behind -->
+ <path m="cloak" d="M20 -560 C70 -540 120 -480 150 -400 L132 -404 L136 -360 L116 -384 L112 -330 L96 -370 L86 -320 L72 -366 C60 -440 44 -500 20 -560Z"/>
+ <path f="red" d="M28 -548 C70 -524 110 -470 136 -404 L120 -408 L118 -372 L104 -394 L98 -350 C84 -420 60 -490 28 -548Z"/>
+ <g transform="translate(20 -430) rotate(34) scale(0.9)"><use href="#L-quiver"/></g>
+ <limb m="cloth" pts="10 -400 18; 40 -300 14; 60 -214 11; 70 -140 9.5"/>
+ <path m="leather" d="M52 -200 C56 -150 66 -80 74 -16 L70 -4 L104 -4 L96 -16 C88 -80 82 -150 78 -200Z"/>
+ <path m="steel" lw="2" d="M62 -246 L78 -228 L76 -194 L66 -186 L54 -194 L50 -226Z"/>
+ <limb m="cloth" pts="-10 -400 18; -40 -300 14; -60 -214 11; -72 -140 9.5"/>
+ <path m="leather" d="M-86 -200 C-88 -150 -90 -80 -90 -16 L-96 -4 L-62 -4 L-64 -16 C-62 -80 -60 -150 -60 -200Z"/>
+ <path m="steel" lw="2" d="M-74 -246 L-60 -226 L-62 -194 L-72 -186 L-82 -194 L-86 -226Z"/>
+ <path sg="45" d="M-72 -200 L-60 -200 C-60 -150 -62 -80 -64 -16 L-62 -4 L-76 -4Z"/>
+ <g transform="rotate(-6 0 -400)">
+  <path m="cloth" d="M-32 -566 C-38 -530 -30 -500 -20 -470 C-24 -450 -32 -430 -32 -404 L32 -404 C32 -430 24 -450 20 -470 C30 -500 38 -530 32 -566 C16 -576 -16 -576 -32 -566Z"/>
+  <path m="leather" d="M-26 -540 C-28 -516 -22 -494 -16 -472 C-20 -452 -26 -432 -26 -410 L28 -410 C28 -432 22 -452 18 -472 C24 -494 30 -516 28 -540 C12 -530 -12 -530 -26 -540Z"/>
+  <path sg="55" d="M0 -536 C12 -532 22 -534 28 -540 C30 -516 24 -494 18 -472 C22 -452 28 -432 28 -410 L0 -410Z"/>
+  <limb m="leather" lw="2" pts="-30 -566 4.5; 0 -500 4.5; 28 -450 4.5"/>
+  <path m="red" lw="2.4" d="M-32 -428 C-10 -418 12 -418 32 -428 L32 -404 C12 -394 -10 -394 -32 -404Z"/>
+  <limb m="red" lw="2" pts="24 -404 7; 44 -370 6; 56 -340 5; 70 -324 1"/>
+  <path m="leather" d="M-32 -404 C-36 -380 -38 -360 -36 -340 L-24 -352 L-16 -336 L-6 -356 L4 -340 L14 -356 L22 -340 L30 -356 L38 -340 C40 -360 38 -384 32 -404Z"/>
+  <!-- draw arm: hand at the cheek -->
+  <limb m="cloth" pts="30 -556 11; 60 -560 8.5; 48 -594 7.5; 24 -616 6.5"/>
+  <use href="#L-head"/>
+  <limb m="skin" lw="2" pts="22 -616 6.5; 12 -620 7.5"/>
+  <limb m="skin" lw="1.6" pts="10 -626 2.4; 2 -628 2; -2 -624 1.6"/><limb m="skin" lw="1.6" pts="10 -620 2.4; 2 -620 2; -2 -616 1.6"/>
+  <!-- the bow drawn: limbs bent back, string to her cheek -->
+  <path fill="none" stroke="#1d1724" stroke-width="1.4" d="M-150 -860 L4 -620 L-150 -200"/>
+  <path fill="none" stroke="#1d1724" stroke-width="2.4" d="M-196 -560 L8 -620"/>
+  <path fill="none" stroke="#cfc0a2" stroke-width="1.2" d="M-196 -560 L8 -620"/>
+  <path m="red" lw="1.4" d="M2 -618 L20 -630 L14 -620 L24 -614 L10 -614Z"/>
+  <path m="steel" lw="1.6" d="M-196 -566 L-212 -558 L-196 -552Z"/>
+  <limb m="bow" lw="2.4" pts="-146 -868 2; -140 -858 3.5; -160 -800 4.6; -188 -680 5.4; -200 -560 6.5; -192 -440 5.4; -168 -300 4.6; -150 -208 3.5; -146 -196 2"/>
+  <brush c="rim" opacity="0.7" pts="-170 -780 0; -192 -660 1.6; -198 -560 0"/>
+  <!-- bow arm, straight out -->
+  <limb m="cloth" pts="-30 -556 11; -90 -560 8.5; -150 -562 7; -186 -562 6"/>
+  <path m="leather" lw="2" d="M-150 -572 L-114 -572 L-114 -552 L-150 -552Z"/>
+  <path m="red" lw="1.6" d="M-206 -578 L-190 -578 L-190 -544 L-206 -544Z"/>
+  <limb m="skin" lw="2" pts="-186 -562 6.5; -198 -562 8"/>
+  <path m="cloak" d="M-6 -572 C24 -584 48 -570 56 -546 C60 -526 56 -510 46 -500 C34 -520 18 -548 -6 -572Z"/>
+  <circle m="steel:r" lw="1.6" cx="-4" cy="-566" r="6.5"/>
  </g>
- <!-- near arm (her left) holding the bow out -->
- <path m="leather" d="M-60 -470 C-84 -462 -104 -440 -116 -420 L-140 -404 L-130 -384 L-100 -400 C-84 -414 -70 -430 -56 -446 Z"/>
- <path m="red" lw="2.4" d="M-112 -424 L-136 -408 L-126 -390 L-100 -404Z"/>
- <g transform="translate(-148 -400) rotate(4)">
-  <path fill="none" stroke="#1d1724" stroke-width="2" d="M28 -306 L28 306"/>
-  <path fill="none" stroke="#1d1724" stroke-width="13" stroke-linecap="round" d="M30 -310 C18 -300 12 -284 16 -272 C-14 -190 -22 -80 0 0 C-22 80 -14 190 16 272 C12 284 18 300 30 310"/>
-  <path fill="none" stroke="#3a2a2e" stroke-width="7.5" stroke-linecap="round" d="M30 -310 C18 -300 12 -284 16 -272 C-14 -190 -22 -80 0 0 C-22 80 -14 190 16 272 C12 284 18 300 30 310"/>
-  <path fill="none" stroke="#8a6a70" stroke-width="2" opacity="0.7" d="M12 -270 C-16 -190 -22 -80 -4 -10"/>
-  <path m="red" lw="2.4" d="M-12 -22 h22 v44 h-22Z"/>
-  <path m="bone" lw="2" d="M24 -316 l14 -6 l-4 16Z M24 316 l14 6 l-4 -16Z"/>
- </g>
- <path m="leather" lw="2.4" d="M-150 -414 C-160 -410 -162 -394 -154 -386 C-144 -380 -132 -386 -132 -398Z"/>
 </g><!--/tq-->
 <g id="bust">
- <defs><radialGradient id="L-bustbg" cx="0.3" cy="0.3" r="0.9"><stop offset="0" stop-color="#7a4652"/><stop offset="0.55" stop-color="#3a222b"/><stop offset="1" stop-color="#140b10"/></radialGradient></defs>
+ <defs><radialGradient id="L-bustbg" cx="0.5" cy="0.4" r="0.8"><stop offset="0" stop-color="#8a5a64"/><stop offset="0.55" stop-color="#3a2228"/><stop offset="1" stop-color="#140c10"/></radialGradient></defs>
  <rect width="320" height="320" fill="url(#L-bustbg)"/>
- <path fill="none" stroke="#1d1724" stroke-width="14" stroke-linecap="round" d="M300 -10 C330 120 330 220 296 340"/>
- <path fill="none" stroke="#3a2a2e" stroke-width="8" stroke-linecap="round" d="M300 -10 C330 120 330 220 296 340"/>
- <use href="#L-tqbody" transform="translate(190 1200) scale(1.95)"/>
- <g class="fx"><circle cx="108" cy="135" r="12" fill="url(#L-red-g)" opacity="0.5"/><circle cx="161" cy="135" r="12" fill="url(#L-red-g)" opacity="0.5"/></g>
+ <g transform="translate(150 1880) scale(2.75)">
+  <g transform="translate(-24 -420) rotate(16)"><use href="#L-quiver"/></g>
+  <path m="cloth" d="M-50 -566 C-40 -580 40 -580 50 -566 L60 -480 L-60 -480Z"/>
+  <path m="leather" d="M-30 -540 C-14 -530 14 -530 30 -540 L36 -480 L-36 -480Z"/>
+  <path m="cloak" d="M-4 -572 C26 -584 50 -570 58 -546 L66 -480 L30 -480 C24 -520 10 -550 -4 -572Z"/>
+  <circle m="steel:r" lw="1.6" cx="-2" cy="-566" r="6.5"/>
+  <use href="#L-head"/>
+ </g>
 </g><!--/bust-->
 <g id="relic">
  <ellipse cx="150" cy="292" rx="70" ry="12" fill="url(#gshadow)"/>
