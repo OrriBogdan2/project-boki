@@ -511,6 +511,50 @@ const MOVES := {
 		],
 		[0.40, {"gp": 0.8, "p": 0.2, "lift": 0.14, "fr": Vector3(0.1, 0.6, -0.45), "rw": 0.7}],
 		[0.85, {}]]},
+	# the lob from the air (her air dash): the crook hand swung across her body low (0.08), then slung up and over
+	# in a wide arc as she stretches (0.18, it leaves); she settles into a drift, leaning into it with the hands
+	# and legs trailing back under the streaming hem, swaying gently side to side (a loop from 0.45) until she
+	# arrives (no tumble)
+	"ostra_swap_air": {"hold": true, "loop": 0.45, "keys": [
+		[0.00, {}],
+		[
+			0.08,
+			{
+				"gp": -0.5, "y": 0.45, "lift": 0.04, "sq": 0.12, "fr": Vector3(-0.25, -0.1, -0.2), "rw": 1.0,
+				"fl": Vector3(-0.3, 0.1, 0.2), "hw": 0.8
+			}
+		],
+		[
+			0.18,
+			{
+				"gp": 1.2, "y": -0.35, "lift": 0.16, "sq": -0.2, "fr": Vector3(0.2, 0.9, -0.35), "rw": 1.0,
+				"fl": Vector3(-0.45, 0.2, 0.25), "hw": 0.9
+			}
+		],
+		[
+			0.45,
+			{
+				"gp": 0.2, "p": -0.3, "fx": 0.22, "r": 0.08, "lift": 0.1, "sq": -0.08,
+				"legs": [-0.45, 0.3, -0.38, 0.25], "lw": 1.0, "fl": Vector3(-0.45, -0.1, 0.35), "hw": 0.9,
+				"fr": Vector3(0.45, -0.1, 0.35), "rw": 0.9
+			}
+		],
+		[
+			0.85,
+			{
+				"gp": 0.25, "p": -0.26, "fx": 0.2, "r": -0.08, "lift": 0.14, "sq": -0.06,
+				"legs": [-0.4, 0.26, -0.44, 0.3], "lw": 1.0, "fl": Vector3(-0.42, -0.06, 0.38), "hw": 0.9,
+				"fr": Vector3(0.48, -0.12, 0.32), "rw": 0.9
+			}
+		],
+		[
+			1.25,
+			{
+				"gp": 0.2, "p": -0.3, "fx": 0.22, "r": 0.08, "lift": 0.1, "sq": -0.08,
+				"legs": [-0.45, 0.3, -0.38, 0.25], "lw": 1.0, "fl": Vector3(-0.45, -0.1, 0.35), "hw": 0.9,
+				"fr": Vector3(0.45, -0.1, 0.35), "rw": 0.9
+			}
+		]]},
 	# arriving: she pops into being stretched tall with her arms up (0.0), squashes hard as she settles into
 	# the spot with the arms and hem flung wide (0.08), overshoots tall again (0.15, the pop) and floats down
 	"ostra_arrive": {"keys": [

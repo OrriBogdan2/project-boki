@@ -237,6 +237,7 @@ func _ostra() -> void:
 		"dash: let go = the lantern is lobbed (in flight, both ends shown to all)",
 		not K.swap.is_empty() and AimKit.shown(P, "swap_fly") and bool(AimKit.entry(P, "swap_fly").get("all", false))
 	)
+	ok("item 35: a ground Trade plays her underhand lob, ostra_swap", K.anim_id == "ostra_swap")
 	var t_cast := m.time
 	var done_at := [0.0]
 	step(m, 2.0, func(): if K.swaps == 1 and done_at[0] == 0.0: done_at[0] = m.time)
@@ -518,10 +519,11 @@ func _ostra() -> void:
 		not K.primed and K.prime_until < 0.0 and K.swap_aim < 0.0 and K.snap.is_empty() and K.snaps == 0,
 		"primed %s" % K.primed
 	)
+	_dash_moves(K)
 	# ---- every move, sound and look exists
 	var moves := [
-		"ostra_orb", "ostra_orb_hot", "ostra_snap_wind", "ostra_snap", "ostra_swap_aim", "ostra_swap", "ostra_arrive",
-		"ostra_seed", "ostra_pop", "ostra_empower", "ostra_well", "ostra_well_snap", "ostra_well_end"
+		"ostra_orb", "ostra_orb_hot", "ostra_snap_wind", "ostra_snap", "ostra_swap_aim", "ostra_swap", "ostra_swap_air",
+		"ostra_arrive", "ostra_seed", "ostra_pop", "ostra_empower", "ostra_well", "ostra_well_snap", "ostra_well_end"
 	]
 	ok(
 		"anim: every Ostra move is keyed (KMovesStone)",
@@ -534,6 +536,24 @@ func _ostra() -> void:
 		str(snd.filter(func(s): return not Sfx.has(s)))
 	)
 	await done(m)
+
+## Item 35: her own ground and air dash moves (the Trade's lob), ids no other hero's table has, and each one's
+## keyed length inside the quickest Trade (Swollen); the arrival's pop starts once it lands.
+func _dash_moves(K: OstraKit) -> void:
+	var ids := ["ostra_swap", "ostra_swap_air"]
+	var others := [HunterAnim.KMOVES, KMovesPair.MOVES, KMovesVV.MOVES, MergeMoves.MOVES, KMovesCare.MOVES,
+		KMovesPinBjorn.MOVES, KMovesDJ.MOVES]
+	ok(
+		"item 35: her ground and air dash moves are two distinct ids, hers alone (KMovesStone, no other table)",
+		ids[0] != ids[1] and ids.all(func(id): return KMovesStone.MOVES.has(id) and String(id).begins_with("ostra_"))
+			and not others.any(func(t): return ids.any(func(id): return (t as Dictionary).has(id)))
+	)
+	var quickest := float(K.dash_def()["time_swollen"])
+	var lengths := ids.map(func(id): return float((KMovesStone.MOVES[id]["keys"] as Array)[-1][0]))
+	ok(
+		"item 35: each dash move's keyed length fits inside the quickest Trade (%.2fs)" % quickest,
+		lengths.all(func(l): return l > 0.2 and l <= quickest), str(lengths)
+	)
 
 ## Item 17: while the lantern flies she drifts slowly (15-25% of run speed), holds her height even over the abyss,
 ## and the Trade sends everyone to where she is when it lands.
@@ -556,6 +576,7 @@ func _hover(m: Match, P: Hunter, T: Hunter, home: Vector3, K: OstraKit) -> void:
 	P.ak.on_dash(false)
 	m.step(DT)
 	m.step(DT)
+	ok("item 35: a Trade in the air plays her air sling and drift, ostra_swap_air", K.anim_id == "ostra_swap_air")
 	var y0 := P.pos.y
 	var at_start := P.pos
 	var low := [y0, y0]

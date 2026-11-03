@@ -241,12 +241,16 @@ func _swap_cast() -> void:
 		"hold": CastHold.hover_slow(h, float(dd["fly_slow"])),
 	}
 	swap_peak = 0.0
-	play("ostra_swap")
+	play(swap_move())
 	m.fx.ring(h.pos, float(dd["radius"]), TEAL, 0.35)
 	m.fx.ring(land, float(dd["radius"]), VOID_COL, 0.35)
 	m.sfx("os_swap_lob", h.pos, -3.0, 1.0)
 	net_bolt(h.pos + Vector3(0, 1.2, 0), land + Vector3(0, 0.6, 0), Color("b8f5ea"))
 	CombatBus.ability_used.emit(h, String(dd.get("id", "swap")), "dodge")
+
+## Her dash moves: the underhand lob from the ground, the overhead sling and streaming drift in the air.
+func swap_move() -> String:
+	return "ostra_swap" if h.grounded else "ostra_swap_air"
 
 ## Where the lantern lands: the cursor if it is within reach, else the point at full reach along the cursor
 ## direction. No ground, wall or abyss check limits it; over the abyss it keeps her current height.
@@ -322,8 +326,7 @@ func _swap_end(go: bool) -> void:
 	if not go:
 		return
 	swaps += 1
-	m.fx.ring(from, 1.4, TEAL, 0.3)
-	m.fx.burst(from + Vector3(0, 1.0, 0), Color(0.5, 0.88, 0.82, 0.85), 16, 4.0, 0.4, -2.0, 1.1)
+	_fold_in(from, TEAL)
 	_trade_bodies(land, from, float(dd["radius"]))
 	_arrive(land, from, from_void)
 	if rank("dash") >= 3:
@@ -380,12 +383,15 @@ func _arrive(land: Vector3, from: Vector3, from_void: bool) -> void:
 	h.vel.y = 0.0
 	if arrive_y - gy > 0.05: h.grounded = false
 	play("ostra_arrive")
-	KitLooks.of(m).implode(land, VOID_COL)
-	m.fx.ring(land, 1.6, VOID_COL, 0.3)
-	m.fx.ring(land, 0.8, TEAL, 0.25)
+	_fold_in(land, VOID_COL)
 	m.fx.flash(land + Vector3(0, 1.0, 0), Color("b06bff"), 0.9, 0.08)
 	m.sfx("os_swap", land, -2.0, 1.0)
 	net_ring(land, 1.6, TEAL)
+
+## Both ends of a Trade fold in on themselves (motes drawn inward, no ring or blast: the dash rule).
+func _fold_in(at: Vector3, col: Color) -> void:
+	m.fx.burst(at + Vector3(0, 1.0, 0), Color(col, 0.9), 20, -6.0, 0.3, 0.0, 1.3)
+	m.fx.burst(at + Vector3(0, 1.0, 0), Color(0.08, 0.02, 0.14, 0.9), 8, -3.0, 0.25, 0.0, 1.8)
 
 # ------------------------------------------------------------------ RMB: Shard Snap
 func fire_rmb(c: Dictionary) -> void:

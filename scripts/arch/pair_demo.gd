@@ -19,14 +19,15 @@ const ANIM := {
 	"br_sense": ["dolm", "rubble_fists", [0.45, 0.62, 0.72, 0.85, 1.05]],
 	"os_orb": ["ostra", "tether_lantern", [0.5, 0.54, 0.58, 0.64, 0.8]],
 	"os_orb_hot": ["ostra", "tether_lantern", [1.56, 1.62, 1.67, 1.73, 1.85, 2.1]],
-	"os_snap": ["ostra", "tether_lantern", [0.5, 0.6, 0.7, 0.75, 0.82, 1.05]],
-	"os_swap": ["ostra", "tether_lantern", [0.7, 0.9, 0.97, 1.05, 1.25, 1.5]],
-	"os_arrive": ["ostra", "tether_lantern", [2.6, 2.73, 2.77, 2.82, 2.9, 3.2]],
+	"os_snap": ["ostra", "tether_lantern", [0.64, 0.8, 0.835, 0.86, 0.91]],
+	"os_swap": ["ostra", "tether_lantern", [0.8, 0.96, 1.04, 1.25, 2.0]],
+	"os_swap_air": ["ostra", "tether_lantern", [0.47, 0.58, 0.68, 0.95, 1.6]],
+	"os_arrive": ["ostra", "tether_lantern", [2.68, 2.74, 2.78, 2.84, 3.1]],
 	"os_seed": ["ostra", "tether_lantern", [0.5, 0.56, 0.62, 0.72, 0.9, 1.2]],
 	"os_pop": ["ostra", "tether_lantern", [2.0, 2.06, 2.12, 2.2, 2.4, 2.65]],
 	"os_empower": ["ostra", "tether_lantern", [0.5, 0.6, 0.75, 0.9, 1.05, 1.35]],
 	"br_spine": ["dolm", "rubble_fists", [0.6, 0.78, 0.83, 1.1, 1.43, 1.8]],
-	"os_well": ["ostra", "tether_lantern", [0.5, 0.56, 0.62, 0.95, 1.53, 1.62]],
+	"os_well": ["ostra", "tether_lantern", [0.5, 0.6, 0.8, 1.3, 1.6, 3.0]],
 }
 
 static func at(t: float, dt: float, when: float) -> bool:
@@ -117,6 +118,16 @@ static func trigger(P: Hunter, D: Hunter, mv: String, t: float, dt: float) -> vo
 		"os_swap", "os_arrive":
 			if at(t, dt, 0.5):
 				K.bot_hold["dash"] = 0.42      # Shift held to aim, let go at 0.92 (the local keys would read up)
+				P.dashes = P.max_dashes()
+				P.do_dash()
+		"os_swap_air":
+			# lifted off the ground, then a tap: the Trade cast in the air
+			if at(t, dt, 0.45):
+				P.teleport(P.pos + Vector3(0, 1.6, 0))
+				P.grounded = false
+				P.vel = Vector3.ZERO
+			if at(t, dt, 0.5):
+				K.bot_hold["dash"] = 0.0
 				P.dashes = P.max_dashes()
 				P.do_dash()
 		"os_seed":
