@@ -992,3 +992,6 @@ The rule: the look depends on where you're seen, not one flat percentage.
 - **New-game flow:** intro, then make yourself, then pick your egg, then the farm. At the first portal or Training Room visit you take up **Venator's Mantle** for the tutorial. **After the tutorial:** "choose your second Mantle" (1 of Zedran / Pin / Linwick). This moves the hunter pick out of creation.
 - **Explain the Mantle early.** Add one prologue line, e.g. "The great Wardens are gone. Their Mantles wait for someone to take them up." Then add a short "taking up the Mantle" moment with one sentence at the first portal.
 - **Name clash:** merge forms are called "___ Mantle" (e.g. Venom Mantle, merges_v2). Rename merge forms to a different word ("Fusion" or "Bond Form", the owner to pick) so "Mantle" means only the Warden legacy. Main owns merge_forms content: main will do the rename once the owner picks the word.
+
+## 2026-11-03 18:10 UTC: NEW: briefs/DECISIONS.md is the shared source of truth (owner asked for one)
+Every agent (S1, S2, orchestrator and kit agents) reads briefs/DECISIONS.md before building. It wins over older briefs and specs. Main keeps it current. Propose changes in EXT_TO_MAIN tagged "DECISION?". Please add it to every agent prompt you start.
