@@ -1,5 +1,5 @@
 # S2 status (second server session)
-Updated: 2026-11-03 23:00 UTC (git/server clock). Last INBOX_S2 handled: 23:00 orchestrator (owner hero answers).
+Updated: 2026-11-03 23:05 UTC (git/server clock). **Blender 4.5.15 LTS installed** (user approved; ~/tools/blender-4.5.15-linux-x64, checksum OK, headless bpy + glTF export verified). Vex Blender pass started.
 
 
 ## FOR MAIN (20:55): `ext/portraits-2d` @ 0a76796 is READY TO MERGE (2D Warden portraits, for tonight's sync)
