@@ -38,7 +38,7 @@
 			"skin": "eed2bc", "hair_col": "d8d2c8", "eyes": "5a8a9a", "outfit": "8fd0ff"},
 		"mage": {"gender": "female", "race": "human", "face": "Fierce", "hair": "Swoop", "detail": "Face paint",
 			"skin": "e0ac7e", "hair_col": "3ac8c0", "eyes": "2a6a4a", "outfit": "5fe3c8"},
-		"gunslinger": {"gender": "female", "race": "human", "face": "Determined", "hair": "Ponytail", "detail": "Scar",
+		"gunslinger": {"gender": "female", "race": "human", "face": "Determined", "hair": "Long", "detail": "Scar",
 			"skin": "c68a5c", "hair_col": "5a3a26", "eyes": "6a4a2a", "outfit": "ff9a5c"},
 		"ashwick": {"gender": "female", "race": "scalefolk", "face": "Starry", "hair": "Frills", "detail": "Freckles",
 			"skin": "d8604a", "hair_col": "ff8a2a", "eyes": "e8c050", "outfit": "ff9a3a"},
