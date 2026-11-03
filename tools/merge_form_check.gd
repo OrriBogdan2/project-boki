@@ -380,14 +380,14 @@ func _ult() -> void:
 	run_for(rest + 0.5)
 	ok(not k.resting() and k.ready_to_fight(), "after the rest the Boki is ready again")
 	ok(KinCommand.order(P, "follow") or true, "...and orders work")
-	# timeout: no ultimate, no drain
+	# timeout: no ultimate, and the Boki rests longer than after a release (owner, Nov 2)
 	ults = {}
 	P = merged("pebbit")
 	k = P.kin
 	var merge_len := float(P.merge_st["T"])
 	run_for(merge_len + 0.3)
 	ok(not KinMerge.active(P) and int(ults.get("titan_r", 0)) == 0, "unused, the timeout separates you without the ultimate")
-	ok(k.state not in ["fused", "downed"] and k.cmd == "follow" and not k.resting(), "...the Boki is out beside you, following, NOT drained (state %s)" % k.state)
+	ok(k.state not in ["fused", "downed"] and k.cmd == "follow" and k.resting(), "...the Boki is out beside you, following, and resting (state %s)" % k.state)
 	ok(absf(merge_len - 10.0) <= 0.5, "the merge lasts about 10s (%.1fs)" % merge_len)
 	# the fallback: another Boki's merge has the basic burst as its ultimate and also drains
 	ults = {}
