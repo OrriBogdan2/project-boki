@@ -146,7 +146,8 @@ func _chest_and_keys() -> void:
 	# on the ground
 	R.chest_keys = 0
 	BeltKeys.sync(R)
-	R.ctrl = "idle"; R.inp["move"] = Vector2.ZERO      # (it waits by the key, not wandering off an edge)
+	R.ctrl = "idle"      # it waits by the key, not wandering off an edge
+	R.inp["move"] = Vector2.ZERO
 	var np := m.pickups.size()
 	m.drop("ckey", R.pos + Vector3(0.2, 0.6, 0), 1, "", "", Vector3.ZERO)
 	ok("a dropped key lies on the ground", m.pickups.size() == np + 1 and String(m.pickups[-1]["kind"]) == "ckey")
