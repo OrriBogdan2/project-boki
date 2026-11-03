@@ -87,9 +87,11 @@ flying at 32 m/s (7 bh / 0.4 s = 31.5 m/s). The pull: [W] 1900 uu/s = 19 m/s at 
 
 **Tether length and the pull model (owner 23:00 UTC: "stays attached while he moves back, extending to a max
 length; the pull depends on his facing and movement input: steer, curve, slingshot").** Neither [D] nor [W] gives a
-maximum tether length. [F] 0305-0317: still attached after ~2.5 s of walking (~10 m at his 3.9 m/s) from a ~12.6 m
-bite, so at least ~22 m. Ours: the chain pays out to **24 m** and holds there (no break: [W] breaks it only on a
-stun or the 5 s). [W] makes the pull an impulse (1900 uu/s), not a winch, so his own motion and input shape it:
+maximum tether length, and the footage never shows one: in the frames (0306-0316) the chain stays on for ~2.5 s
+while he moves about, but only ~5-6 bh (~10 m) long, and it is let go by 0320 without reaching a limit (the big
+ring on screen there is centred on him: the throw's range, ~6.8 bh). Ours: the chain pays out to **24 m** (about
+1.8x the 13 m throw, so backing off is a real choice) and holds there (no break: [W] breaks it only on a stun or
+the 5 s). The 24 m is our pick; the owner can set it. [W] makes the pull an impulse (1900 uu/s), not a winch, so his own motion and input shape it:
 the pull starts at the reel speed plus a slingshot from his speed away from the anchor (0.8 of it, up to +10 m/s),
 his sideways speed carries in, and the heading turns (6 rad/s) toward a point his movement input slides beside
 the anchor (7 m/s, up to 3 m; where he faces adds 0.4 of that).
@@ -110,7 +112,7 @@ The numbers live in `e` in content/archetypes/juggernaut.json; the code is `Jugg
 | Throwing | stunned | Missed (the chain breaks), the cooldown starts | [W] 05.02.25 |
 | Hooked (foe or wall) | time | the link chain stays on while you walk, jump, glide or dash, 5 s, then breaks; the cooldown starts | [W] 5 s; [F] 0305-0317 |
 | Hooked | he backs away (or the foe walks off) | the chain pays out; the links pull straight and glow hotter past 85% of its length, a creak as it tightens | [F] 0305-0317 tension |
-| Hooked | at its full length (24 m) | it holds: whoever is moving away (him, or a hooked foe) is stopped at the end of it, with a hard creak; it never breaks for length | [O] 23:00; [F] attached at ~22 m; [W] breaks only on a stun or the time |
+| Hooked | at its full length (24 m) | it holds: whoever is moving away (him, or a hooked foe) is stopped at the end of it, with a hard creak; it never breaks for length | [O] 23:00; [W] breaks only on a stun or the time; the length is ours (no data, no footage) |
 | Hooked | E | Pulling (the cooldown starts): an impulse toward the anchor at 22 m/s | [D] [W] impulse |
 | Hooked | E while moving away from the anchor | Pulling, slingshot: +0.8 of his speed away (up to +10 m/s) | [O] 23:00; [W] an impulse adds to his motion |
 | Hooked | E while strafing | Pulling, swung out that way: his sideways speed carries into the start | [O] 23:00 |
@@ -167,7 +169,7 @@ Differences from the source, and why:
   hold; a held Smash only becomes a Haul Slam when it was already charging before the pull.
 - **Exits:** the footage never shows a dash or a jump in the pull; we let Shift cancel it and a jump launch out of
   it, so it never locks you in.
-- **The tether length** (24 m, held taut there) is read from the footage (still attached at ~22 m); the data has none.
+- **The tether length** (24 m, held taut there) is ours: neither the data nor the footage shows one.
 
 ## Ult choice
 
