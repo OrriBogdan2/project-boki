@@ -797,3 +797,6 @@ The owner agreed this order today. It replaces the old P1-P4 for work after the 
 7. **One great match:** the core-loop playtest and the Boki-as-the-star work.
 8. **Modes:** Duel online, Arena 4v4, then the tier maps.
 Art/concepts run in parallel throughout. Onboarding (new-game flow, tutorials) follows once 4 is final.
+
+## 2026-11-03 20:15 UTC (orchestrator): addition to the work order, step 8 (modes)
+- DECISION? Modes ship with an **online launcher and an easy install**: one download that installs the game, keeps it updated (patches without reinstalling), and opens straight into the online modes (Duel matchmaking, Arena 4v4, extraction trios). Spec it alongside Duel/Arena (owner OK first).
