@@ -93,7 +93,7 @@ row again. The bridge is gone altogether (owner review item 15: no terrain over 
 | Basalt Spine across a fleeing foe | the foe is shoved to its side of the line and slowed; the ridge walls it off | `ult: a body on the line is shoved off it...`, `ult: the rise slows a foe beside it` |
 | Basalt Spine over the abyss | rocks on the banks only, clipped at the edges; no walkway; a line fully over the abyss is refused | `spine (item 15): over the abyss no walkway...`, `spine (item 15): the line is clipped...` (`--zone-check`), `spine (item 15): a cast fully over the abyss is refused...` |
 | Basalt Spine, punch, then the merge | the target lives (burst cap) | `ult burst: ridge, punch, merge and its ultimate leave a full-health light hunter standing` |
-| Quake Fist charge, then her air dash (item 51) | the charge carries through and charges on (short of the auto punch); let go in it and she punches as it ends, in the air, the step bending the speed she carries instead of replacing it | `item 51: the Quake Fist charge carries through her air dash...`, `item 51: let go in the air dash...` |
+| Quake Fist charge, then her air dash (item 51) | the charge carries through and charges on (short of the auto punch); let go in it and she punches as it ends, in the air, carried on at about the dash's end speed (the punch step, 7 m/s in the air, along her aim) | `item 51: the Quake Fist charge carries through her air dash...`, `item 51: let go in the air dash...` |
 
 ## Small mechanics
 | Mechanic | Source | Footage | Ours |

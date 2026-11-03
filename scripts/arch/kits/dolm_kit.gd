@@ -415,13 +415,8 @@ func _punch(k: float) -> void:
 	var dir := h.aim_dir()
 	# the step: an impulse, not a roll (a punch is not a dash: it never blocks fire or reads as one)
 	var stepv := float(pd["step_v"]) * (float(pd["air_k"]) if not h.grounded else 1.0)
-	var v := dir * stepv
-	if not h.grounded:
-		# in the air the step bends the speed she carries (a dash, a jump: item 51) instead of replacing it
-		var carry := Vector2(h.vel.x, h.vel.z)
-		v = (carry + v).limit_length(maxf(carry.length(), stepv))
-	h.vel.x = v.x
-	h.vel.z = v.y
+	h.vel.x = dir.x * stepv
+	h.vel.z = dir.y * stepv
 	var dmg: float = lerpf(float(pd["dmg"][0]), float(pd["dmg"][1]), k) * m.dmg_mult(h)
 	var kb := lerpf(float(pd["kb"][0]), float(pd["kb"][1]), k)
 	var fp := h.pos + Vector3(dir.x * 1.3, 1.0, dir.y * 1.3)
