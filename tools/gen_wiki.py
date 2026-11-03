@@ -7,7 +7,7 @@ so the wiki stays in step with the game.
 
 Plain Python 3, no Godot needed. Idempotent: running it twice changes nothing the second time.
 
-Sources: content/ (archetypes, classes, kin_v2, kin, abilities_v2, merges_v2, evolution_v2,
+Sources: content/ (archetypes, dash_flow, classes, kin_v2, kin, abilities_v2, merges_v2, evolution_v2,
 mutations, gloves, weapons, abilities, maps, biomes, combos, rules) and a few constant tables read
 straight out of the GDScript (Data.CLASSES, Data.TIERS, Life.R, Care.BONDS, HomeLayout.CATALOG...).
 Those are parsed as literals; if one stops parsing, the script says which and carries on.
@@ -157,15 +157,15 @@ def slug(s):
 WRITTEN, SAME = [], []
 CHECK = "--check" in sys.argv
 
-def write(name, text):
-    path = os.path.join(WIKI, name)
+def write(name, text, folder=WIKI):
+    path = os.path.join(folder, name)
     text = text.rstrip() + "\n"
     old = open(path, encoding="utf-8").read() if os.path.exists(path) else None
     if old == text:
         SAME.append(name); return
-    WRITTEN.append(name)
+    WRITTEN.append(rel(path))
     if not CHECK:
-        os.makedirs(WIKI, exist_ok=True)
+        os.makedirs(folder, exist_ok=True)
         with open(path, "w", encoding="utf-8", newline="\n") as f:
             f.write(text)
 
@@ -187,7 +187,7 @@ def block(name, key, body):
     new = pre + a + "\n" + NOTE + "\n\n" + body.strip() + "\n\n" + b + post
     if new == old:
         SAME.append("%s#%s" % (name, key)); return
-    WRITTEN.append("%s#%s" % (name, key))
+    WRITTEN.append("%s#%s" % (rel(path), key))
     if not CHECK:
         with open(path, "w", encoding="utf-8", newline="\n") as f:
             f.write(new)
@@ -619,16 +619,56 @@ def gen_controls():
     body += "\"Rebindable\" means it's listed in Settings > Controls.\n\n" + table(["Key", "Action", "Id", "Rebindable"], rows)
     block("Controls.md", "keys", body)
 
+# ------------------------------------------------------------------ dash -> ability rows
+DASH_SLOTS = [("lmb", "LMB"), ("rmb", "RMB"), ("e", "E"), ("x", "ult (X)"), ("q", "Q glove")]
+DASH_MODE = {"fire": "fires mid-dash", "buffer": "buffered to the dash's end", "cancel": "cancels the dash"}
+INTO_DASH_MODE = {"fire": "the dash goes, the ability keeps running", "buffer": "the dash waits for the ability",
+                  "cancel": "the dash cancels its wind-up or recovery"}
+
+def _dash_ours(row, modes):
+    out = modes[row.get("mode", "buffer")]
+    if row.get("carry"):
+        out += "; dash momentum carries"
+    if row.get("variant"):
+        out += "; variant: %s" % row["variant"]
+    return out
+
+def gen_dash_flow():
+    """docs/heroes/dash_interactions.md: every hero x dash pair from content/dash_flow (DashFlow)."""
+    flows = content("dash_flow")
+    rows = []
+    for aid in ARCH_ORDER:
+        f = flows.get(aid, {})
+        hero = ARCH.get(aid, {}).get("name", aid)
+        for kind in ("ground", "air"):
+            given = f.get("dash", {}).get(kind, {})
+            for slot, label in DASH_SLOTS:
+                row = given.get(slot, {})
+                ours = _dash_ours(row, DASH_MODE)
+                if kind in f.get("kit_owns", []):
+                    ours = "the kit's own dash state: not routed yet"
+                rows.append([hero, "%s dash -> %s" % (kind, label), row.get("source", ""), ours])
+        for slot, label in DASH_SLOTS:
+            row = f.get("into_dash", {}).get(slot)
+            ours = _dash_ours(row, INTO_DASH_MODE) if row else "the kit's own handling (no row yet)"
+            rows.append([hero, "%s -> dash" % label, (row or {}).get("source", ""), ours])
+    body = ("One row per hero and pair, read from `content/dash_flow/<hero>.json` by `DashFlow` "
+            "(`scripts/arch/dash_flow.gd`, docs/decisions/0010-dash-ability-flow.md). A dash pair with no row buffers the "
+            "press to the dash's end. \"Source\" is what the source hero does; \"Ours\" is what the game does now.\n\n")
+    body += table(["Hero", "Pair", "Source", "Ours"], rows)
+    write("dash_interactions.md", "%s\n# Dash and ability interactions\n\n_Generated from `content/dash_flow`._\n\n%s"
+          % (NOTE, body), os.path.join(ROOT, "docs", "heroes"))
+
 # ------------------------------------------------------------------ main
 def main():
-    for f in (gen_classes, gen_boki, gen_gear, gen_maps, gen_rules, gen_farm, gen_controls):
+    for f in (gen_classes, gen_boki, gen_gear, gen_maps, gen_rules, gen_farm, gen_controls, gen_dash_flow):
         try:
             f()
         except Exception as e:  # report and keep going: one broken table shouldn't hide the rest
             WARN.append("%s failed: %s: %s" % (f.__name__, e.__class__.__name__, e))
     verb = "out of date" if CHECK else "wrote"
     for w in WRITTEN:
-        print("%s docs/wiki/%s" % (verb, w))
+        print("%s %s" % (verb, w))
     print("%d unchanged" % len(SAME))
     for w in WARN:
         print("WARNING " + w)
