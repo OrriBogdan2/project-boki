@@ -879,7 +879,7 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 	var ck := float(CLASS_LOOK.get(cls, {}).get("size", 1.0))
 	var body := Arch.body(arch)
 	var size_k := float(body.get("size", 1.0)) * float(HeroGearPair.body(arch)["size"])
-	var bulk := float(body.get("bulk", 1.0)) * float(HeroGearPair.body(arch)["bulk"])
+	var bulk := float(body.get("bulk", 1.0))
 	root.scale = Vector3(bulk, 1.0, bulk) * float(Data.CLASSES[cls]["scale"]) * rs * ck * size_k
 	# the ring under your feet shows the real hitbox, whatever your size
 	var hit_k := Arch.hit_r(arch, Data.CLASSES[cls]) / float(Data.CLASSES[cls]["hit_r"])
@@ -889,8 +889,6 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 		torso_node.scale.x *= float(body.get("chest", 1.0))
 	return root
 
-## A hero's own body against its class (content/archetypes/<id>.json "body"): size (model scale),
-## chest (upper-body width), hit_r (hitbox radius, m), nameplate (m above the soles).
 ## Moves a hunter's toon material onto the hero shader (hero_toon.gdshader) with the same settings,
 ## plus the hero tuning: a crisper light/shadow split, shadows that keep their colour, a coloured
 ## fresnel rim (cool on metal, the surface's own colour elsewhere) and a little top light.

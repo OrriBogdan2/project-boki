@@ -3,11 +3,10 @@
 	"name": "Moosh Moosh",
 	"role": "Tender",
 	"weight": "medium",
+	"plate_offset": 2.05,
 	"body": {
 		"size": 0.74,
-		"hit_r": 0.34,
-		"plate": 2.05,
-		"overhead": 2.35
+		"hit_r": 0.34
 	},
 	"color": "#ffc46a",
 	"fantasy": "The squad's courier and field medic. Shoulders the fallen and runs them out, keeps the squad on its feet with lantern light, pins chasers with burr-seeds.",

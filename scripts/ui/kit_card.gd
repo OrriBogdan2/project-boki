@@ -20,20 +20,18 @@ static func _cap(slot: String) -> String:
 		return Settings.key_cap("hunter_ult")
 	if slot == "r":
 		return Settings.key_cap("hunter_ult" if KinCommand.class_ults() else "ultimate")
-	if slot == "x":
-		return Settings.key_cap("hunter_ult")
 	return String(KEYS[slot])
 
 const LABEL := {"dash": "Dash", "passive": "Passive", "lmb": "Attack", "rmb": "Right click", "e": "Utility", "r": "Ultimate",
 	"x": "Ultimate"}
 ## Which looping preview each archetype's abilities get (KitPreview kinds).
 const PREVIEW := {
-	"thief": {"dash": "dash", "passive": "marks", "rmb": "projectile", "e": "knife", "r": "lines"},
-	"archer": {"dash": "grapple", "passive": "meter", "rmb": "heavy", "e": "rainwall", "r": "arrows3"},
-	"mage": {"dash": "dash2", "passive": "marks", "rmb": "heavy", "e": "zone", "r": "leap"},
-	"gunslinger": {"dash": "dash", "passive": "pips", "rmb": "projectile", "e": "lines", "r": "zone"},
-	"juggernaut": {"dash": "dash2", "passive": "meter", "rmb": "charge", "e": "grapple", "r": "leap"},
-	"bulwark": {"dash": "charge", "passive": "meter", "rmb": "shield", "e": "zone", "r": "fissure"},
+	"thief": {"dash": "dash", "passive": "marks", "rmb": "projectile", "e": "knife", "x": "lines"},
+	"archer": {"dash": "grapple", "passive": "meter", "rmb": "heavy", "e": "rainwall", "x": "arrows3"},
+	"mage": {"dash": "dash2", "passive": "marks", "rmb": "heavy", "e": "zone", "x": "leap"},
+	"gunslinger": {"dash": "dash", "passive": "pips", "rmb": "projectile", "e": "lines", "x": "zone"},
+	"juggernaut": {"dash": "dash2", "passive": "meter", "rmb": "charge", "e": "grapple", "x": "leap"},
+	"bulwark": {"dash": "charge", "passive": "meter", "rmb": "shield", "e": "zone", "x": "fissure"},
 	"dredge": {"dash": "dash2", "passive": "meter", "rmb": "grapple", "e": "charge", "x": "shots"},
 	"ashwick": {"dash": "dash", "passive": "meter", "rmb": "projectile", "e": "zone", "x": "steer"},
 	"tender": {"dash": "dash", "passive": "marks", "rmb": "projectile", "e": "zone"},

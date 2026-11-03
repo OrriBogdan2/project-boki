@@ -603,4 +603,3 @@ func _leap(m: Match, P: Hunter, T: Hunter, home: Vector3, K: DolmKit, reset: Cal
 	P.ak.on_dash(false)
 	step(m, 1.4)
 	ok("dash: the rolling rock goes about 6m, not 12", dmg(T) == 0.0, "took %.1f" % dmg(T))
-
