@@ -217,3 +217,9 @@ Build, in this order; post progress in EXT_TO_MAIN:
 - Both: Ubuntu 24.04, SSH key boki-s2-deploy (also set as the project's default key), firewall boki-game (TCP 22, TCP 8080, UDP 7777-7799, ICMP).
 - Deploy the server build + matchmaker as systemd services, size the match count per box to its RAM (the US box has 2 GB), and post the matchmaker URLs and health status in EXT_TO_MAIN. Nothing secret in the repo.
 - Question for you or main: the project also has **boki-1** (CPX11, Ashburn, 5.161.240.47, 3 days old) and the agents' box ubuntu-64gb-ash-1. Is boki-1 still used by anyone? If not, tell the owner so he can delete it.
+
+## 2026-11-03 23:00 UTC (orchestrator): owner answers to your hero questions (STATUS owner Qs)
+- **Zedran Warchain:** keep the base range modest, but once hooked the chain **stays attached while he moves back, extending** to a max length (find it in the data/footage). The pull must **depend on his facing and his movement input** (steer, curve, slingshot), like the source's Brall (Juggernaut) chain: match its pull model state by state. Opus. Assert the extend-while-retreating behaviour and the facing/movement-dependent pull.
+- **Tarek (was Breah):** RMB slam out of a glide is allowed, per the source (glider no longer wins); follow the source's timing.
+- Rule for the rest of your open owner questions: **follow the source** (data > footage) unless DECISIONS or the owner says otherwise. Ask only where the source is silent and it changes feel a lot.
+- Black Market is unfrozen (ext/market can proceed); shops move to the map/expedition work (low).

@@ -874,3 +874,10 @@ Art/concepts run in parallel throughout. Onboarding (new-game flow, tutorials) f
 - SSH with boki-s2-deploy works on both: boki-eu-1 2.31.98.197 (hostname ubuntu-4gb-fsn1-1, 2 vCPU, 3.8 GB) and boki-us-1 5.161.241.179 (2 vCPU, 1.9 GB). Note: both run **Ubuntu 26.04.1 LTS** (not 24.04); install.sh only needs apt/systemd/ufw/python3, so that's fine.
 - Matchmaker is done (origin/ext/matchmaker 0acd83a, 40 unit tests + selftest pass). The game-server side (origin/ext/servers: --server mode, "Linux Server" preset, client UI, --server-check) is finishing; S2 deploys both boxes the moment its server check passes, sizes the match count per box from a measured server process (the 2 GB US box gets fewer slots), and posts the matchmaker URLs + /health here.
 - **boki-1 (5.161.240.47) is still in use: main's `launcher/launcher_config.json` has `"server": "5.161.240.47:7777"`** (the launcher/relay path). Don't delete it until the client and launcher point at the new matchmakers (ext/servers adds content/rules/servers.json with the region URLs); S2 will say here when it's safe.
+
+## 2026-11-03 23:00 UTC (orchestrator): owner answers, DECISION? lines for DECISIONS.md / PRIORITIES.md
+- DECISION? Steam: not now. The owner is far from a public launch; itch.io stays the launcher.
+- DECISION? **Black Market extras are UNFROZEN** (remove them from PRIORITIES "Frozen"). ext/market 2b93dad can merge in the economy step.
+- DECISION? **Shops (ext/shops 794264bf, in-match vendors) count as map work, not economy:** queue them low, to be done with the expedition/map work, not before.
+- DECISION? **Zedran's Warchain:** not super long, but the tether **stays attached as he moves back, letting it extend** (up to a max). The key is **how it pulls him: the pull depends on where he's facing and how he's moving**. Take inspiration from the source's Brall (Juggernaut) chain in data + footage, which is the reference for every state.
+- DECISION? **Tarek (Breah) can use RMB/slam out of a glide**, as the source does; the glider no longer blocks it. General rule: the source decides these interactions.
