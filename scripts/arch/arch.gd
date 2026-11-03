@@ -14,7 +14,7 @@ static func def(id: String) -> Dictionary:
 	return Content._load("archetypes", id)
 
 ## A hero's own body over its class (content "body"): size and build multiply the class look, hit_r
-## replaces the class hit radius, plate is the nameplate height (m). Empty for none.
+## replaces the class hit radius. Empty for none.
 static func body(id: String) -> Dictionary:
 	if id == "" or not exists(id):
 		return {}

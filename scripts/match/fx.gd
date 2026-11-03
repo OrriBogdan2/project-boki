@@ -316,7 +316,7 @@ func word(at: Vector3, txt: String, col: Color, big := false) -> void:
 	l.global_position = _clear_spot(at)
 	l.visible = true
 	l.scale = Vector3.ONE * (1.5 if big else 1.1)
-	nums.append({"node": l, "t": 0.0, "vel": Vector3(0, 2.4, 0), "word": true})
+	nums.append({"node": l, "t": 0.0, "vel": Vector3(0, 2.4, 0)})
 
 ## Where a new word goes so it doesn't print over a word or number still rising near `at`: stepped up
 ## the screen (along the camera's up) above whatever is there.

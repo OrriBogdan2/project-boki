@@ -29,12 +29,10 @@ var _prune_at := 0.0
 ## downed, word, chip}
 var shown := {}
 
-## How high over this hunter's feet their plate sits: the archetype's optional `plate_offset` or its
-## body's `plate` (content/archetypes JSON, so taller and shorter heroes clear their own heads), else
-## PLATE_OFFSET.
+## How high over this hunter's feet their plate sits: the archetype's optional `plate_offset` (in its
+## content/archetypes JSON, so taller and shorter heroes clear their own heads), else PLATE_OFFSET.
 static func plate_offset(h: Hunter) -> float:
-	var fallback: float = Arch.body(h.arch).get("plate", PLATE_OFFSET)
-	return float(Arch.def(h.arch).get("plate_offset", fallback))
+	return float(Arch.def(h.arch).get("plate_offset", PLATE_OFFSET))
 
 ## Advances the clock (Hud._process) and forgets hunters not drawn for a while.
 func tick(dt: float) -> void:

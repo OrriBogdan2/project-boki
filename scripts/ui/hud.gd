@@ -641,8 +641,7 @@ func _draw_duel(sz: Vector2) -> void:
 		var y := box.position.y + 50 + i * 24
 		_text(Vector2(box.position.x + 14, y), String(rows[i][0]), 13, MUTED)
 		_text(Vector2(box.position.x + 140, y), String(rows[i][1]), 14, rows[i][2], big)
-	var keys_at := Vector2(box.position.x + 14, box.end.y - 12)
-	_text(keys_at, "B bot setup  ·  Backspace reset  ·  G hide", 11, Color(MUTED, 0.85))
+	_text(Vector2(box.position.x + 14, box.end.y - 12), "B bot setup  ·  Backspace reset  ·  G hide", 11, Color(MUTED, 0.85))
 
 var feed_top := 18.0
 ## The kill feed under the counters: each line a banner plate, red when it's about an enemy squad's
