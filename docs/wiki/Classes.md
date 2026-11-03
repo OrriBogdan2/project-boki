@@ -54,32 +54,32 @@ your class in the Expedition menu, and you can try every class against dummies i
 | [Dancer](Class-Dancer.md) | 124 / 1 | Arc Bolts | Marks | Vault | Bola | Shadow Knife | none (Boki Merge) |
 | [Pin](Class-Pin.md) | 124 / 1 | Longbow | Focus | Spirit Walk | Heavy Shot | Hail Wall | none (Boki Merge) |
 | [Vireo](Class-Vireo.md) | 124 / 1 | Coilcaster | Static | Wirerun | Storm Rod | Skycall | none (Boki Merge) |
-| [Venator](Class-Venator.md) | 145 / 1 | Quill Rifle | Hot Streak | Slipstep | Burr Charge | Longneedle | none (Boki Merge) |
+| [Vex](Class-Vex.md) | 145 / 1 | Quill Rifle | Hot Streak | Slipstep | Burr Charge | Longneedle | none (Boki Merge) |
 | [Zedran](Class-Zedran.md) | 193 / 2 | Greatsword | Rage | Rampage | Smash | Warchain | none (Boki Merge) |
 | [Bjorn](Class-Bjorn.md) | 193 / 2 | War Hammer & Aegis | Guard | 360 Smash | Aegis | Mending Ground | none (Boki Merge) |
 | [Dredge](Class-Dredge.md) | 193 / 2 | Shotgun | Salvage | Barge | Grapnel | Anchor Drop | none (Boki Merge) |
 | [Linwick](Class-Linwick.md) | 193 / 2 | Torch Lance | Flashover | Soot Ram | Cinder Shot | Furnace Cloak | none (Boki Merge) |
 | [Moosh Moosh](Class-Moosh-Moosh.md) | 145 / 1 | Ember Cast | Bearer | Relay Step | Burrseed | Hearthlight | none (Boki Merge) |
-| [Tamsin](Class-Tamsin.md) | 124 / 1 | Hoar Fan | Hoarfrost | Skate | Ice Spear | Rink Wall | none (Boki Merge) |
+| [Claire](Class-Claire.md) | 124 / 1 | Hoar Fan | Hoarfrost | Skate | Ice Spear | Rink Wall | none (Boki Merge) |
 | [Breah](Class-Breah.md) | 145 / 1 | Rubble Fists | Molten Guard | Rubble Leap | Quakefall | Stone Row | none (Boki Merge) |
 | [Ostra](Class-Ostra.md) | 145 / 1 | Tether Lantern | Swell | Lantern Trade | Shard Snap | Brimseed | none (Boki Merge) |
 
 ### How Hunters unlock
 
-Every save starts with Venator. In the new-game flow you pick 1 of 3 more (Zedran, Pin, Linwick). Every other Hunter opens through its own challenge, counted across all your expeditions whoever you play. A done challenge never opens a Hunter by itself: you hold the button on the Hunters screen for 1.6s, and letting go early cancels it. Tiers: easy is about 1-2 expeditions, medium a handful of expeditions, hard real effort, once other Hunters are open. Locked Hunters stay playable in the Arena and the Training Grounds, and saves from before Hunter unlocks keep every Hunter they had.
+Every save starts with Vex. In the new-game flow you pick 1 of 3 more (Zedran, Pin, Linwick). Every other Hunter opens through its own challenge, counted across all your expeditions whoever you play. A done challenge never opens a Hunter by itself: you hold the button on the Hunters screen for 1.6s, and letting go early cancels it. Tiers: easy is about 1-2 expeditions, medium a handful of expeditions, hard real effort, once other Hunters are open. Locked Hunters stay playable in the Arena and the Training Grounds, and saves from before Hunter unlocks keep every Hunter they had.
 
 | Hunter | Tier | Challenge | Target |
 |---|---|---|---|
 | [Dancer](Class-Dancer.md) | medium | Land 12 hits while in the air | 12 |
 | [Pin](Class-Pin.md) | pick at the start, else easy | Stun 4 enemies | 4 |
 | [Vireo](Class-Vireo.md) | medium | Stagger 6 monsters with abilities | 6 |
-| [Venator](Class-Venator.md) | yours from the start | none | - |
+| [Vex](Class-Vex.md) | yours from the start | none | - |
 | [Zedran](Class-Zedran.md) | pick at the start, else easy | Knock 3 enemies into walls | 3 |
 | [Bjorn](Class-Bjorn.md) | medium | Knock down 2 hunters while under half health | 2 |
 | [Dredge](Class-Dredge.md) | medium | Make it out carrying 8 items | 8 |
 | [Linwick](Class-Linwick.md) | pick at the start, else easy | Hit 3 enemies at once with one ability | 1 |
 | [Moosh Moosh](Class-Moosh-Moosh.md) | hard | Revive 4 teammates, once 6 Hunters are open | 4 |
-| [Tamsin](Class-Tamsin.md) | medium | Slow 20 enemies | 20 |
+| [Claire](Class-Claire.md) | medium | Slow 20 enemies | 20 |
 | [Breah](Class-Breah.md) | hard | Hit 3 enemies at once with one ability, 5 times, once 6 Hunters are open | 5 |
 | [Ostra](Class-Ostra.md) | hard | Knock down 3 hunters while merged with your Boki, once 8 Hunters are open | 3 |
 
@@ -101,10 +101,10 @@ Each Hunter has its own mastery goals, counted only in expeditions played as tha
 | Vireo | Land 15 hits while in the air | 15 | Trail: Static |
 | Vireo | Fly through 12 air rings | 12 | Banner: Thunderhead |
 | Vireo | Your Boki lands 50 hits | 50 | Title: Live Wire |
-| Venator | Land 30 hits from 12 m or more | 30 | Colourway: Dust Rider |
-| Venator | Revive 2 teammates | 2 | Emote: Hat Tip |
-| Venator | Fly through 10 air rings | 10 | Trail: Spent Brass |
-| Venator | Make it out of 3 expeditions | 3 | Title: Long Shot |
+| Vex | Land 30 hits from 12 m or more | 30 | Colourway: Dust Rider |
+| Vex | Revive 2 teammates | 2 | Emote: Hat Tip |
+| Vex | Fly through 10 air rings | 10 | Trail: Spent Brass |
+| Vex | Make it out of 3 expeditions | 3 | Title: Long Shot |
 | Zedran | Knock 10 enemies into walls | 10 | Colourway: Forge Red |
 | Zedran | Knock down 2 hunters while merged | 2 | Emote: Chest Thump |
 | Zedran | Open 8 chests | 8 | Banner: Broken Chain |
@@ -126,10 +126,10 @@ Each Hunter has its own mastery goals, counted only in expeditions played as tha
 | Moosh Moosh | Bring 3 wild Boki home | 3 | Glider: Puffball Wings |
 | Moosh Moosh | Make it out of 5 expeditions | 5 | Title: Wisp Keeper |
 | Moosh Moosh | Open 8 chests | 8 | Banner: Moon Lantern |
-| Tamsin | Slow 40 enemies | 40 | Colourway: Hoarfrost |
-| Tamsin | Fly through 10 air rings | 10 | Glider: Frost Kite |
-| Tamsin | Revive 2 teammates | 2 | Emote: Snow Angel |
-| Tamsin | Make it out of 3 expeditions | 3 | Title: Rinkmaster |
+| Claire | Slow 40 enemies | 40 | Colourway: Hoarfrost |
+| Claire | Fly through 10 air rings | 10 | Glider: Frost Kite |
+| Claire | Revive 2 teammates | 2 | Emote: Snow Angel |
+| Claire | Make it out of 3 expeditions | 3 | Title: Rinkmaster |
 | Breah | Hit 3 enemies at once with one ability, 5 times | 5 | Skin: Slate and Moss |
 | Breah | Knock 12 enemies into walls | 12 | Emote: Ground Pound |
 | Breah | Open 10 chests | 10 | Glider: Slate Kite |

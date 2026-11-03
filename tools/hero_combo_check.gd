@@ -545,7 +545,7 @@ func _gunslinger() -> void:
 	var K: GunslingerKit = P.ak
 	var bd: Dictionary = K.rmb_def()["burr"]
 	T2.teleport(home + Vector3(30, 0, 0))
-	ok("Venator: the display name", Arch.name_of("gunslinger") == "Venator")
+	ok("Vex: the display name", Arch.name_of("gunslinger") == "Vex")
 	# 1. LMB: to full range past the cursor, an ember tracer; Dazed = +90%, a gold crit number, no decay
 	P.teleport(home)
 	T.teleport(home + Vector3(30, 0, 8))

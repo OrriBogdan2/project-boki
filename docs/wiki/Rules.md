@@ -333,6 +333,16 @@ How a merge looks and plays (docs/decisions/0003). Forms with a kit live in cont
 | weights | {"brand_fire": 0.7, "brand_frost": 0.7, "brand_storm": 0.7, "brand_venom": 0.7, "brand_void": 0.7, "overcharge": 0.6, "remedy": 0.8} |
 | bot_want | {"default": 1.5, "brand_fire": 3.0, "brand_frost": 2.8, "brand_storm": 3.0, "brand_venom": 2.8, "brand_void": 2.6, "hotload": 2.6, "keen": 2.5, "quickfeed": 2.2, "toughskin": 2.4, "plating": 2.2, "secondwind": 2.0, "longreach": 1.8, "deepmag": 1.6, "quickhands": 1.7, "tinker_roll": 1.5, "magpie": 1.0, "scavenger": 1.0, "satchel": 0.8, "spyglass": 0.9, "overcharge": 1.2} |
 
+## portraits (`content/rules/portraits.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| doc | Framing for the Wardens' painted portraits and splashes (Portraits, art/portraits). face: where the face's centre sits in the portrait, as fractions of its width and height; a small frame crops in on it. splash: the point a splash is cropped around (the Warden's head and shoulders), same units. |
+| face | {"bulwark": [0.37, 0.27], "archer": [0.32, 0.3], "juggernaut": [0.42, 0.3], "thief": [0.4, 0.31], "mage": [0.42, 0.32], "dolm": [0.47, 0.27], "ostra": [0.46, 0.33], "ashwick": [0.36, 0.3], "gunslinger": [0.42, 0.34], "tender": [0.4, 0.32], "rimewright": [0.43, 0.32], "dredge": [0.5, 0.28]} |
+| splash | {"bulwark": [0.46, 0.25], "archer": [0.26, 0.2], "juggernaut": [0.6, 0.16], "thief": [0.42, 0.2], "mage": [0.35, 0.22], "dolm": [0.6, 0.18], "ostra": [0.54, 0.34], "ashwick": [0.55, 0.2], "rimewright": [0.52, 0.18], "dredge": [0.45, 0.38]} |
+
 ## weapon_path (`content/rules/weapon_path.json`)
 
 

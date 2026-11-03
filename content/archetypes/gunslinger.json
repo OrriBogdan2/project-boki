@@ -1,6 +1,6 @@
 {
 	"id": "gunslinger",
-	"name": "Venator",
+	"name": "Vex",
 	"weight": "medium",
 	"body": {"size": 1.0, "chest": 1.0},
 	"color": "#ff9a5c",

@@ -52,21 +52,21 @@ One row per hero and pair, read from `content/dash_flow/<hero>.json` by `DashFlo
 | Vireo | E -> dash |  | the kit's own handling (no row yet) |
 | Vireo | ult (X) -> dash |  | the kit's own handling (no row yet) |
 | Vireo | Q glove -> dash |  | the kit's own handling (no row yet) |
-| Venator | ground dash -> LMB |  | fires mid-dash |
-| Venator | ground dash -> RMB |  | fires mid-dash |
-| Venator | ground dash -> E |  | fires mid-dash |
-| Venator | ground dash -> ult (X) |  | fires mid-dash |
-| Venator | ground dash -> Q glove |  | fires mid-dash |
-| Venator | air dash -> LMB |  | fires mid-dash |
-| Venator | air dash -> RMB |  | fires mid-dash |
-| Venator | air dash -> E |  | fires mid-dash |
-| Venator | air dash -> ult (X) |  | fires mid-dash |
-| Venator | air dash -> Q glove |  | fires mid-dash |
-| Venator | LMB -> dash |  | the kit's own handling (no row yet) |
-| Venator | RMB -> dash |  | the kit's own handling (no row yet) |
-| Venator | E -> dash |  | the kit's own handling (no row yet) |
-| Venator | ult (X) -> dash |  | the kit's own handling (no row yet) |
-| Venator | Q glove -> dash |  | the kit's own handling (no row yet) |
+| Vex | ground dash -> LMB |  | fires mid-dash |
+| Vex | ground dash -> RMB |  | fires mid-dash |
+| Vex | ground dash -> E |  | fires mid-dash |
+| Vex | ground dash -> ult (X) |  | fires mid-dash |
+| Vex | ground dash -> Q glove |  | fires mid-dash |
+| Vex | air dash -> LMB |  | fires mid-dash |
+| Vex | air dash -> RMB |  | fires mid-dash |
+| Vex | air dash -> E |  | fires mid-dash |
+| Vex | air dash -> ult (X) |  | fires mid-dash |
+| Vex | air dash -> Q glove |  | fires mid-dash |
+| Vex | LMB -> dash |  | the kit's own handling (no row yet) |
+| Vex | RMB -> dash |  | the kit's own handling (no row yet) |
+| Vex | E -> dash |  | the kit's own handling (no row yet) |
+| Vex | ult (X) -> dash |  | the kit's own handling (no row yet) |
+| Vex | Q glove -> dash |  | the kit's own handling (no row yet) |
 | Zedran | ground dash -> LMB | Data: Flame Step is itself the attack ('dash attack in facing direction'); footage 0372-0377: crouch, ~0.3s drive, ~0.35s low recovery, no slash inside it. Ours: a slash pressed in the crouch or the drive swings as the drive ends. | buffered to the dash's end |
 | Zedran | ground dash -> RMB | Data: no rule for RMB inside Flame Step (the patch only restricts turning after RMB into Shift); footage: no RMB inside a dash. Ours: the Smash starts mid-dash (the Slam's wind-up, the Lunge's charge) and the drive carries him into it. | fires mid-dash; dash momentum carries |
 | Zedran | ground dash -> E | Data: the chain is a thrown hook with no movement lock; footage 0301-0366 shows no dash with it. Ours: the throw goes mid-dash, the drive goes on. | fires mid-dash |
@@ -142,21 +142,21 @@ One row per hero and pair, read from `content/dash_flow/<hero>.json` by `DashFlo
 | Moosh Moosh | E -> dash | Data: the zone follows her (recast throws it). Ours: Shift goes at once, the light moves with her. | the dash goes, the ability keeps running |
 | Moosh Moosh | ult (X) -> dash | Data: cancelled only by stun, knock or moving too far. Footage: she walks through the channel. Ours: Shift goes at once and the tether holds while she stays in the ring. | the dash goes, the ability keeps running |
 | Moosh Moosh | Q glove -> dash | No source glove. | the dash goes, the ability keeps running |
-| Tamsin | ground dash -> LMB | Data: Skate is a held mode, released to stop. Footage (0239-0245, 0285-0290): she fires the whole skate and the darts become straight thick beams. Ours: darts fly as beams at normal damage (data pass); the skate goes on. | fires mid-dash; dash momentum carries; variant: beam |
-| Tamsin | ground dash -> RMB | Data: nothing stops a cast during the held Skate. Footage: not shown. Ours: the spear aim and throw go on while she keeps skating. | fires mid-dash; dash momentum carries |
-| Tamsin | ground dash -> E | Data: nothing stops a cast during the held Skate. Footage: not shown. Ours: the Rink Wall's tell and slide start while she keeps skating. | fires mid-dash; dash momentum carries |
-| Tamsin | ground dash -> ult (X) | Data: the ult makes her invulnerable inside a slowing zone; footage (ult f25-f55): she is rooted in the crystal. Ours: Rimelock ends the skate and roots her at once. | cancels the dash |
-| Tamsin | ground dash -> Q glove | No source glove; the skate is a held move, so a glove goes off from it like her abilities. | fires mid-dash; dash momentum carries |
-| Tamsin | air dash -> LMB | No air dash: Shift in the air buffers the Skate to the landing (owner item 12; the footage never starts a skate in the air). | the kit's own dash state: not routed yet |
-| Tamsin | air dash -> RMB | No air dash (see lmb). | the kit's own dash state: not routed yet |
-| Tamsin | air dash -> E | No air dash (see lmb). | the kit's own dash state: not routed yet |
-| Tamsin | air dash -> ult (X) | No air dash (see lmb). | the kit's own dash state: not routed yet |
-| Tamsin | air dash -> Q glove | No air dash (see lmb). | the kit's own dash state: not routed yet |
-| Tamsin | LMB -> dash | Footage: she starts skating while firing and keeps firing; the darts turn to beams. Ours: the same. | the dash goes, the ability keeps running; dash momentum carries; variant: beam |
-| Tamsin | RMB -> dash | Data: Skate can be held at any time. Ours: Shift during the spear aim or the throw's wind-up starts the skate and the throw still goes. | the dash goes, the ability keeps running; dash momentum carries |
-| Tamsin | E -> dash | Data: Skate can be held at any time. Ours: Shift during the wall's 0.2s tell starts the skate and the wall still erupts. | the dash goes, the ability keeps running; dash momentum carries |
-| Tamsin | ult (X) -> dash | Data: reactivating ends Chilling Finale early. Owner item 27: Shift ends Rimelock (as X again would; a late press still cracks it open) and she skates straight out at full speed. | the dash cancels its wind-up or recovery; dash momentum carries |
-| Tamsin | Q glove -> dash | No source glove; the skate starts and the glove's effect stays. | the dash goes, the ability keeps running; dash momentum carries |
+| Claire | ground dash -> LMB | Data: Skate is a held mode, released to stop. Footage (0239-0245, 0285-0290): she fires the whole skate and the darts become straight thick beams. Ours: darts fly as beams at normal damage (data pass); the skate goes on. | fires mid-dash; dash momentum carries; variant: beam |
+| Claire | ground dash -> RMB | Data: nothing stops a cast during the held Skate. Footage: not shown. Ours: the spear aim and throw go on while she keeps skating. | fires mid-dash; dash momentum carries |
+| Claire | ground dash -> E | Data: nothing stops a cast during the held Skate. Footage: not shown. Ours: the Rink Wall's tell and slide start while she keeps skating. | fires mid-dash; dash momentum carries |
+| Claire | ground dash -> ult (X) | Data: the ult makes her invulnerable inside a slowing zone; footage (ult f25-f55): she is rooted in the crystal. Ours: Rimelock ends the skate and roots her at once. | cancels the dash |
+| Claire | ground dash -> Q glove | No source glove; the skate is a held move, so a glove goes off from it like her abilities. | fires mid-dash; dash momentum carries |
+| Claire | air dash -> LMB | No air dash: Shift in the air buffers the Skate to the landing (owner item 12; the footage never starts a skate in the air). | the kit's own dash state: not routed yet |
+| Claire | air dash -> RMB | No air dash (see lmb). | the kit's own dash state: not routed yet |
+| Claire | air dash -> E | No air dash (see lmb). | the kit's own dash state: not routed yet |
+| Claire | air dash -> ult (X) | No air dash (see lmb). | the kit's own dash state: not routed yet |
+| Claire | air dash -> Q glove | No air dash (see lmb). | the kit's own dash state: not routed yet |
+| Claire | LMB -> dash | Footage: she starts skating while firing and keeps firing; the darts turn to beams. Ours: the same. | the dash goes, the ability keeps running; dash momentum carries; variant: beam |
+| Claire | RMB -> dash | Data: Skate can be held at any time. Ours: Shift during the spear aim or the throw's wind-up starts the skate and the throw still goes. | the dash goes, the ability keeps running; dash momentum carries |
+| Claire | E -> dash | Data: Skate can be held at any time. Ours: Shift during the wall's 0.2s tell starts the skate and the wall still erupts. | the dash goes, the ability keeps running; dash momentum carries |
+| Claire | ult (X) -> dash | Data: reactivating ends Chilling Finale early. Owner item 27: Shift ends Rimelock (as X again would; a late press still cracks it open) and she skates straight out at full speed. | the dash cancels its wind-up or recovery; dash momentum carries |
+| Claire | Q glove -> dash | No source glove; the skate starts and the glove's effect stays. | the dash goes, the ability keeps running; dash momentum carries |
 | Breah | ground dash -> LMB | Footage tip 'Punch to Extend Dash/RMB': a punch during Landslide goes off and carries her on. Ours: the boulder or punch goes off mid-leap and the leap's arc carries on (a punch's step pushes her a little further). | fires mid-dash; dash momentum carries |
 | Breah | ground dash -> RMB | Footage tip 'Dash -> RMB Dunk Combo' (0965-1010): Landslide shoves the foe out, then she leap-slams onto it. Ours: the charge starts mid-leap; let go in the air and the slam lands where the leap does. | fires mid-dash; dash momentum carries |
 | Breah | ground dash -> E | Card: Rockwave is only castable over ground; nothing on casting it mid-Landslide. Ours: held to the landing, then raised from there. | buffered to the dash's end |
