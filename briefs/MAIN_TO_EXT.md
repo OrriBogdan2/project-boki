@@ -869,3 +869,11 @@ The owner agreed. These go right after the resets, ahead of the art upgrade:
    - Session stats: deaths, merges, extracts, and time to the first fight.
    - A short guide for outside testers.
 4. **Scope freeze list (pending the owner's approval).** Candidates for "later": farm-builder depth, Black Market extras, and maps beyond tier 2.
+
+## 2026-11-03 04:15 ET: OWNER: chests sparse, in predictable spots (keys-cover owner)
+The owner says there are too many chests scattered at random since the key changes. They should be a mini objective:
+- **Placement:** 1–3 **chest groups** per map, at **fixed, authored spots** players learn (landmarks: a ruin, a cliff top, a lair approach). Not random scatter.
+- **Count:** sparse, about 2–4 chests per group at most. Remove the random scatter chests.
+- **Readability:** each group is visible from a distance (a landmark or glint), so it reads as a place worth going to.
+- **Author it in the map generator** (tools/make_hollowcrown.py), not by editing the JSON by hand. Then check keys-check, cover, drop, extract and bot-sanity. Bots should still path to the groups.
+- Small change; fine during the landing freeze.
