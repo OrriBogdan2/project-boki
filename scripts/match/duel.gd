@@ -1,17 +1,16 @@
 class_name Duel
 extends RefCounted
 ## The duel room, next to the Training Grounds: you against one sparring bot hunter on an empty
-## island. Pick its class, glove, difficulty and behaviour (fight / dodge only / stand
+## island. Pick its Hunter, glove, difficulty and behaviour (fight / dodge only / stand
 ## still), reset whenever you like, and watch your numbers: damage dealt and taken, how many of your
 ## shots land, how many of its shots you dodge, and knocks. Nobody dies here: a knock resets the round.
 
-const CLASSES := ["light", "medium", "heavy"]
 const MODES := ["fight", "dodge", "still"]
 const MODE_NAMES := {"fight": "Fights back", "dodge": "Only dodges", "still": "Stands still"}
 
 var m: Match
 var bot: Hunter = null
-var cls := "medium"
+var arch := "gunslinger"       # the bot's Hunter (its weight follows)
 var weapon := ""
 var glove := ""
 var diff := "medium"
@@ -29,7 +28,7 @@ var _test_cast := -1.0
 func setup(match_node: Match) -> void:
 	m = match_node
 	diff = String(Settings.get_v("bot_diff")) if Data.BOT_DIFF.has(String(Settings.get_v("bot_diff"))) else "medium"
-	cls = CLASSES[randi() % 3]
+	arch = String(Arch.ids()[randi() % Arch.ids().size()])
 	weapon = ""
 	_clear_stats()
 	if m.player:
@@ -75,8 +74,8 @@ func _spot_for_bot(from: Vector3) -> Vector3:
 func spawn_bot() -> void:
 	if bot and is_instance_valid(bot):
 		_remove_bot()
-	var kit := {"weapon": "", "perk": ""}
-	bot = m.make_hunter(m.next_id("duel"), 1, cls, "Sparring %s" % String(Data.CLASSES[cls].get("name", cls.capitalize())), "bot", m.bot_kin_record(), bot_at, kit, {})
+	var kit := {"arch": arch, "weapon": Arch.signature(arch), "perk": ""}
+	bot = m.make_hunter(m.next_id("duel"), 1, Arch.weight(arch), "Sparring %s" % Arch.name_of(arch), "bot", m.bot_kin_record(), bot_at, kit, {})
 	bot.ai = m.bot_brain.new_mind(m.rng, float(Data.BOT_DIFF[diff]["skill"]), Data.BOT_DIFF[diff])
 	weapon = bot.wid          # (its archetype's signature weapon: nobody swaps)
 	bot.lives = 99
@@ -201,7 +200,8 @@ func _on_hit(by, t, d, tags) -> void:
 func cycle(what: String, step := 1) -> void:
 	match what:
 		"cls":
-			cls = CLASSES[(CLASSES.find(cls) + step + 3) % 3]
+			var ids := Arch.ids()      # ("cls" is the Hunter row: the key the duel check steps)
+			arch = String(ids[(ids.find(arch) + step + ids.size()) % ids.size()])
 			weapon = ""
 		"glove":
 			var keys: Array = [""] + Gear.ALL.keys().filter(func(g): return Gear.active(String(g)))
@@ -217,7 +217,7 @@ func cycle(what: String, step := 1) -> void:
 
 func pick_text(what: String) -> String:
 	match what:
-		"cls": return String(Data.CLASSES[cls].get("name", cls.capitalize()))
+		"cls": return Arch.name_of(arch)
 		"weapon": return String(Data.weapon_stats(weapon).get("name", weapon)) if weapon != "" else "-"
 		"glove": return String(Gear.ALL[glove]["name"]) if glove != "" and Gear.ALL.has(glove) else "None"
 		"diff": return String(Data.BOT_DIFF[diff]["name"])
@@ -228,7 +228,7 @@ func pick_text(what: String) -> String:
 var keys_node: Node = null
 var menu_layer: CanvasLayer = null
 
-## B opens the setup menu, X resets the round. A little node so keys work even while paused.
+## B opens the setup menu, Backspace resets the round. A little node so keys work even while paused.
 class DuelKeys extends Node:
 	var d: Duel
 	func _init(owner_duel: Duel) -> void:
@@ -275,8 +275,8 @@ func open_menu() -> void:
 func _fill_menu(v: VBoxContainer) -> void:
 	for ch in v.get_children():
 		ch.queue_free()
-	v.add_child(UI.label("Changing the class, glove or difficulty brings in a fresh bot. The behaviour switches on the spot.", 14, UI.MUTED))
-	for row in [["cls", "Class"], ["glove", "Glove (Q)"], ["diff", "Difficulty"], ["mode", "Behaviour"]]:
+	v.add_child(UI.label("Changing the Hunter, glove or difficulty brings in a fresh bot. The behaviour switches on the spot.", 14, UI.MUTED))
+	for row in [["cls", "Hunter"], ["glove", "Glove (Q)"], ["diff", "Difficulty"], ["mode", "Behaviour"]]:
 		var what: String = row[0]
 		var h := UI.hbox(8)
 		var l := UI.label(row[1], 15, UI.MUTED); l.custom_minimum_size.x = 120
@@ -294,7 +294,7 @@ func _fill_menu(v: VBoxContainer) -> void:
 	acts.add_child(UI.button("Heal both", func(): heal_both(), 130))
 	acts.add_child(UI.button("Clear stats", func(): _clear_stats(); round_n = 1, 130))
 	v.add_child(acts)
-	v.add_child(UI.label("B opens this menu  ·  X resets the round  ·  Esc leaves the room", 13, UI.MUTED))
+	v.add_child(UI.label("B opens this menu  ·  Backspace resets the round  ·  Esc leaves the room", 13, UI.MUTED))
 
 ## Pick the Boki you duel with: the same list as the Arena menu (yours, or a loaner of any species
 ## that never reaches your roster; the training area has no way out).

@@ -150,10 +150,11 @@ func run(main_node: Node) -> void:
 	await frames_until(m, m.time + HudPlate.LVL_POP_T + 0.2)
 	ok(float(_shown(hud, R).get("lvl_pop", 1.0)) == 0.0, "... and the pulse settles")
 	# ---------------------------------------------------------------- 4c. plate height per hunter
+	var arch_was := P.arch
+	P.arch = "gunslinger"
 	var no_offset := not Arch.def(P.arch).has("plate_offset")
 	ok(no_offset and HudPlate.plate_offset(P) == HudPlate.PLATE_OFFSET and HudPlate.PLATE_OFFSET == 2.35,
 		"an archetype without plate_offset puts the plate at the 2.35 m fallback (%.2f)" % HudPlate.plate_offset(P))
-	var arch_was := P.arch
 	P.arch = ""
 	ok(HudPlate.plate_offset(P) == HudPlate.PLATE_OFFSET, "a hunter with no archetype falls back too")
 	P.arch = arch_was

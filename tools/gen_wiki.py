@@ -223,20 +223,36 @@ def gen_classes():
     for aid in ARCH_ORDER:
         d = ARCH.get(aid)
         if not d: continue
-        rows.append([link(class_page_name(aid), d["name"]), d["weight"].title(), wname(d["signature"] if "signature" in d else d["weapons"][0]),
+        cs = CLASSES.get(d["weight"], {})
+        rows.append([link(class_page_name(aid), d["name"]), "%s / %s" % (num(cs.get("hp", "?")), num(cs.get("dashes", "?"))), wname(d["signature"] if "signature" in d else d["weapons"][0]),
                      d["passive"]["name"], d["dash"]["name"], d["rmb"]["name"], d["e"]["name"], d["r"]["name"] if "r" in d else "none (Boki Merge)"])
-    wc = []
-    for cid in ("light", "medium", "heavy"):
-        c = CLASSES.get(cid)
-        if not c: continue
-        wc.append([c["name"], num(c["hp"]), num(c["speed"]), num(c["dashes"]), num(c["mass"]), num(c.get("glide_cap", "")),
-                   ", ".join(ARCH[a]["name"] for a in ARCH_ORDER if a in ARCH and ARCH[a]["weight"] == cid), c.get("desc", "")])
+    cu = json.load(open(os.path.join(ROOT, "content", "rules", "class_unlock.json"), encoding="utf-8"))
+    kinds = cu["reward_kinds"]
+    cu_rows = []
+    m_rows = []
+    for aid in ARCH_ORDER:
+        if aid not in ARCH: continue
+        ch = cu["unlock"].get(aid, {})
+        when = "pick at the start, else " if aid in cu["starters"] else ""
+        after = ", once %d Hunters are open" % ch["after"] if ch.get("after") else ""
+        if aid == cu["first"]:
+            cu_rows.append([link(class_page_name(aid), ARCH[aid]["name"]), "yours from the start", "none", "-"])
+        else:
+            cu_rows.append([link(class_page_name(aid), ARCH[aid]["name"]), when + ch.get("tier", "?"), ch.get("text", "") + after, num(ch.get("target", "?"))])
+        for g in cu["mastery"].get(aid, []):
+            m_rows.append([ARCH[aid]["name"], g["text"], num(g["target"]), "%s: %s" % (kinds.get(g["reward"]["kind"], g["reward"]["kind"]), g["reward"]["name"])])
+    starters = ", ".join(ARCH[a]["name"] for a in cu["starters"] if a in ARCH)
+    unlock = "### How Hunters unlock\n\nEvery save starts with %s. In the new-game flow you pick %d of %d more (%s). " % (ARCH[cu["first"]]["name"], cu["starter_picks"], len(cu["starters"]), starters)
+    unlock += "Every other Hunter opens through its own challenge, counted across all your expeditions whoever you play. A done challenge never opens a Hunter by itself: you hold the button on the Hunters screen for %s, and letting go early cancels it. " % secs(cu.get("hold_s", 1.6))
+    unlock += "Tiers: easy is %s, medium %s, hard %s. Locked Hunters stay playable in the Arena and the Training Grounds, and saves from before Hunter unlocks keep every Hunter they had.\n\n" % (cu["tiers"]["easy"], cu["tiers"]["medium"], cu["tiers"]["hard"])
+    unlock += table(["Hunter", "Tier", "Challenge", "Target"], cu_rows)
+    unlock += "\n\n### Mastery\n\nEach Hunter has its own mastery goals, counted only in expeditions played as that Hunter. Each one done is a mastery level and a cosmetic reward; playing a Hunter longer never gives power.\n\n"
+    unlock += table(["Hunter", "Goal", "Target", "Reward"], m_rows)
     lv = []
     for i, t in enumerate(xp):
         lv.append([str(i + 1), num(t), "R unlocks" if (i + 1) in ult_at[:1] else ("R rank 2" if (i + 1) in ult_at[1:] else "")])
-    body = "### All %d classes\n\n" % len(rows) + table(["Class", "Weight", "Weapons", "Passive", "Dash", "RMB", "E", "R"], rows)
-    body += "\n\n### Weight classes\n\nThe weight class sets health, speed, mass and dash charges; the class kit sits on top.\n\n"
-    body += table(["Weight", "Health", "Speed (m/s)", "Dash charges", "Mass", "Glide cap", "Classes", "In short"], wc)
+    body = "### All %d Hunters\n\n" % len(rows) + table(["Hunter", "Health / dashes", "Weapons", "Passive", "Dash", "RMB", "E", "R"], rows)
+    body += "\n\n" + unlock
     body += "\n\n### Run levels\n\nEvery expedition starts at level 1 with one skill point and every ability locked. "
     body += "Each level gives a point. Ranks per slot: %s. The ultimate opens at level %s (rank 2 at %s).\n\n" % (
         ", ".join("%s %s" % (SLOT_NAMES.get(k, k), v) for k, v in slot_max.items()), num(ult_at[0]) if ult_at else "?", num(ult_at[1]) if len(ult_at) > 1 else "?")
@@ -250,7 +266,7 @@ def gen_classes():
         cs = CLASSES.get(d["weight"], {})
         b = []
         b.append(table(["", ""], [
-            ["Weight class", "%s (%s health, %s m/s, %s dash charge%s)" % (d["weight"].title(), num(cs.get("hp", "?")), num(cs.get("speed", "?")), num(cs.get("dashes", "?")), "" if cs.get("dashes") == 1 else "s")],
+            ["Body", "%s health, %s m/s, %s dash charge%s" % (num(cs.get("hp", "?")), num(cs.get("speed", "?")), num(cs.get("dashes", "?")), "" if cs.get("dashes") == 1 else "s")],
             ["Signature weapon", wname(d["signature"] if "signature" in d else d["weapons"][0]) + " (the only weapon this hunter carries; it grows through upgrades, never swaps)"],
             ["Fantasy", d.get("fantasy", "")],
             ["Silhouette", d.get("silhouette", "")],
@@ -261,7 +277,7 @@ def gen_classes():
         if c.get("lmb"): rows.append(["LMB", c["lmb"]])
         rows += [["RMB: " + d["rmb"]["name"], c.get("rmb", "")], ["E: " + d["e"]["name"], c.get("e", "")]] + ([["R: " + d["r"]["name"], c.get("r", "")]] if "r" in d else [])
         if "x" in d:
-            rows.append(["X: " + d["x"]["name"], c.get("x", "")])
+            rows.append(["Hunter ultimate: " + d["x"]["name"], c.get("x", "")])
         for w, t in c.get("weapons", {}).items():
             rows.append(["Weapon: " + wname(w), t])
         b.append(table(["Slot", "Card text"], rows))
@@ -285,7 +301,7 @@ def gen_classes():
             b.append("**%s (%s, %s cooldown).** %s\n" % (x["name"], label, secs(x.get("cooldown")), x.get("desc", "")))
         if "x" in d:
             xu = d["x"]
-            b.append("**%s (X, hero ultimate from level %s, %s cooldown).** %s\n" % (
+            b.append("**%s (hunter ultimate, from level %s, %s cooldown).** %s\n" % (
                 xu["name"], num(xu.get("unlock", 6)), secs(xu.get("cooldown")), xu.get("desc", "")))
         b.append("### Ranks\n\nRank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the special.\n")
         rk = []
@@ -429,7 +445,7 @@ def gen_gear():
         p = w.get("primary", {})
         users = [ARCH[a]["name"] for a in ARCH_ORDER if a in ARCH and wid == ARCH[a].get("signature")]
         rows.append([w.get("name", wid), ", ".join(users) or "none", ", ".join(w.get("classes", [])), num(p.get("dmg", "")), secs(p.get("rate", "")), num(p.get("mag", "")), secs(p.get("reload", "")), "%sm" % num(p.get("range", "")), p.get("desc", "")])
-    body = "## Weapons\n\nNumbers are per shot or swing before any upgrades. Class kits that run their own weapon (the Juggernaut's greatsword, the Bulwark's shield and mace) take their numbers from the class file instead.\n\n"
+    body = "## Weapons\n\nNumbers are per shot or swing before any upgrades. Class kits that run their own weapon (Zedran's greatsword, the Bulwark's shield and mace) take their numbers from the class file instead.\n\n"
     body += table(["Weapon", "Carried by", "Weight", "Damage", "Fire interval", "Magazine", "Reload", "Range", "Notes"], rows)
     body += "\n\n## Weapon upgrades\n\nNo weapon is ever found or swapped: every hunter carries one signature weapon. It grows through upgrade perks (each hero's fixed weapon path on even levels, perk orbs from chests, shrines and bosses, and tuning pickups on the ground). They last the expedition.\n\n"
     pk0 = gd_const("core/data.gd", "PERKS") or {}
@@ -451,7 +467,7 @@ def gen_gear():
         row = [a.get("name", aid), secs(a.get("cooldown", "")), a.get("desc", "")]
         if dodge: dg.append([", ".join(x.title() for x in dodge)] + row)
         elif users: ut.append([", ".join(users)] + row)
-    body += "\n\n## Without a class kit\n\nEvery player and bot now plays a class, whose kit owns Shift and right click. A hunter without one falls back to these: the weight class's dodge and the weapon's own right-click utility.\n\n"
+    body += "\n\n## Without a class kit\n\nEvery player and bot now plays a class, whose kit owns Shift and right click. A hunter without one falls back to these: the weight's dodge and the weapon's own right-click utility.\n\n"
     body += table(["Weight", "Dodge", "Cooldown", "What it does"], dg) + "\n\n" + table(["Weapon", "Right click", "Cooldown", "What it does"], ut)
     page("Weapons.md", "Weapons, upgrades and run perks", body, ["content/weapons", "content/abilities", "content/classes", "scripts/core/data.gd", "scripts/core/loot.gd", "scripts/match/weapon_ups.gd"])
 

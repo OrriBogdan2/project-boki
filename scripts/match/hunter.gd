@@ -44,6 +44,7 @@ const ABYSS_BRAKE := 60.0
 const ABYSS_LIP_VY := 3.5        # [est] m/s still rising as the lift reaches the lip: it floats up past it
 const ABYSS_BRAKE_GAIN := 3.5    # (movefeel) rise speed per metre left in the brake zone (was 2: the last metre crawled)
 const MANTLE_REACH := 1.5        # near a jump's apex, ledges this far above you pop you up
+const TALL_CLIMB_EXTRA := 0.9     # m: Archer and Juggernaut also climb double-high ledges ([game data] bCanWallJump)
 const MANTLE_REACH_ABYSS := 4.5  # below an island's lip over the abyss, its side catches you this far down (movefeel: was 3.5)
                                  # (a bit past the normal ledge reach); deeper you slide down the face
 const WALL_CATCH_REACH := 0.75   # (movefeel) over the abyss below a lip, a wall this far from your side catches you (elsewhere 0.4)
@@ -97,6 +98,7 @@ var inp := {"move": Vector2.ZERO, "aim": Vector3.ZERO, "fire": false, "dash": fa
 	"throw": false, "skill": false, "sig": false, "interact": false, "reload": false, "tonic": false, "kit": false, "glide": false, "ult": false,
 	"sec": false, "sec_hold": false, "crouch": false, "gear1": false, "gear2": false, "swap": false}
 var base_speed := 5.4
+var ground_accel := GROUND_ACCEL     # per hunter (HunterMove)
 var ammo := 12
 var reload_t := 0.0
 var fire_cd := 0.0
@@ -279,6 +281,7 @@ func init_hunter(match_node: Node, id: String, team_id: int, class_id: String, n
 	base_speed = cdat["speed"]
 	runner = AbilityRunner.new(self)
 	ak = ArchKit.make(self, arch) if arch != "" else null
+	HunterMove.apply(self)
 	if not CombatBus.ability_used.is_connected(_on_ability_used):
 		CombatBus.ability_used.connect(_on_ability_used)
 		CombatBus.kin_thrown.connect(_on_kin_thrown)
@@ -286,18 +289,20 @@ func init_hunter(match_node: Node, id: String, team_id: int, class_id: String, n
 	_kit_from_weapon()
 	dashes = max_dashes()
 	ammo = wpn["mag"]
-	r = float(Arch.body(arch).get("hit_r", cdat.get("hit_r", 0.38 * float(cdat["scale"]))))
+	r = Arch.hit_r(arch, cdat)
 	set_model(Models.hunter(cls, Data.TEAM_COLORS[team % Data.TEAM_COLORS.size()], wid, "", Save.d.get("look", {}) if ctrl == "local" else bot_look, arch))
 
 ## Switches the archetype mid-match (tests, practice). "" puts back the old class kit: the weapon's
 ## right click and the class dodge.
 func set_arch(a: String) -> void:
 	arch = "" if a == "" or a == "none" else Arch.fix(a, cls)
+	r = Arch.hit_r(arch, cdat)
 	if ak: ak.teardown()
 	ak = ArchKit.make(self, arch) if arch != "" else null
+	HunterMove.apply(self)
 	if arch != "" and not Arch.weapon_ok(arch, wid):
 		equip(Arch.signature(arch))
-	r = float(Arch.body(arch).get("hit_r", cdat.get("hit_r", 0.38 * float(cdat["scale"]))))
+	r = Arch.hit_r(arch, cdat)
 	_kit_from_weapon()
 
 ## Practice (the Arena and training): become another class and archetype on the spot. Health,
@@ -314,9 +319,10 @@ func reclass(c: String, a: String, w := "") -> void:
 	base_speed = cdat["speed"]
 	dodge_def = Content.class_dodge(cls)
 	arch = Arch.fix(a, cls)
-	r = float(Arch.body(arch).get("hit_r", cdat.get("hit_r", 0.38 * float(cdat["scale"]))))
+	r = Arch.hit_r(arch, cdat)
 	if ak: ak.teardown()
 	ak = ArchKit.make(self, arch)
+	HunterMove.apply(self)
 	wid = Arch.weapon_for(arch, cls, w)
 	set_model(Models.hunter(cls, Data.TEAM_COLORS[team % Data.TEAM_COLORS.size()], wid, "", Save.d.get("look", {}) if ctrl == "local" else bot_look, arch))
 	anim = null
@@ -467,6 +473,7 @@ func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
 			dashes = minf(max_dashes(), dashes + 0.6)
 			crit_t = maxf(crit_t, 1.5)
 			m.on_perfect_dodge(self)
+			if ak: ak.on_perfect_dodge()
 		return 0.0
 	if ctrl == "local" and Game.god:
 		return 0.0
@@ -1082,8 +1089,9 @@ const DASH_JUMP_CARRY := 0.55
 func do_dash() -> void:
 	if downed or stun_t > 0.0 or root_t > 0.0 or out or Hex.active(self):
 		return
-	if KitStatus.grounded(self):
-		_ab_feedback("dash", "deny")      # Grounded (a Thief's Bola): no dash, jump or glide
+	if KitStatus.grounded(self) and not DredgeKit.reeling(self):
+		# Grounded (a Thief's Bola): no dash, jump or glide (a reeling Dredge still barges)
+		_ab_feedback("dash", "deny")
 		return
 	if roll_t > 0.0 and move_kind == "rush":
 		roll_t = 0.0            # a glove/ability rush cancels straight into the dash
@@ -1651,6 +1659,9 @@ func _emit_shot() -> void:
 		extra["farf"] = [rng * float(wpn.get("far_start", 0.6)), float(wpn["far_mult"]), rng]
 	if AimMode.take(self) == AimMode.CURSOR:
 		life = AimMode.dist(self, rng) / spd      # lands at the cursor, clamped to range (scripts/match/aim/aim_mode.gd)
+	if wpn.get("pierce", false):      # through everyone in line (Vireo's bolts)
+		extra["pierce"] = true
+		extra["hitset"] = {}
 	if wpn.has("boom"):
 		extra["boom"] = wpn["boom"]; extra["boom_kb"] = wpn["boom_kb"]
 	if crit_t > 0.0:
@@ -2307,7 +2318,7 @@ func _physics(dt: float) -> void:
 		# near-instant on the ground; in the air you steer well but momentum carries
 		if grounded:
 			var grip: float = m.ground_grip(pos)     # ice in a frost region: you skid instead of stopping
-			hv = accel2(hv, mv * spd, GROUND_ACCEL * grip, GROUND_DECEL * grip, GROUND_OVERSPEED * grip, dt)
+			hv = accel2(hv, mv * spd, ground_accel * grip, GROUND_DECEL * grip, GROUND_OVERSPEED * grip, dt)
 		elif glide_off_t < FEATHER_KEEP and not dropping:
 			# (feathering) just after letting go of the glider you keep its speed and steering
 			var gsf := GLIDE_SPEED * (1.0 + gear_stat("glide_speed"))
@@ -2467,6 +2478,7 @@ func _physics(dt: float) -> void:
 			and rock_b - pos.y < World.BLOCK_H - 0.1 and m.time - kb_t > 0.4:
 		vel.y = sqrt(2.0 * H_GRAV * (rock_b - pos.y + 0.3))
 		mantle_cd = 0.45
+	StoneStand.climb(self, maxf(b1, b2))      # a jump into a standable rock carries you onto it
 	var g := ground()
 	if grounded and g < pos.y - 0.05:
 		grounded = false
@@ -2715,7 +2727,7 @@ func _try_ledge_grab(dt: float) -> void:
 	var w: World = m.world
 	var mv: Vector2 = inp["move"]
 	var reach := 0.0
-	var max_rise := MANTLE_REACH
+	var max_rise := MANTLE_REACH + (TALL_CLIMB_EXTRA if HunterMove.climbs_tall(self) else 0.0)
 	if grounded:
 		# as in Supervive, walking into a wall doesn't climb it: jump, and you mantle at the top.
 		# Bots still lean their way up so their paths work.
@@ -3199,6 +3211,19 @@ var anim_s := {}
 var _anim_dt := 0.0
 var _anim_n := 0
 const DODGE_ANIM := {"light": "phase", "medium": "roll", "heavy": "charge"}
+
+## The dodge pose HunterAnim plays. Tamsin's skate has its own, so the light-dash lean does not stack
+## on the skate move's lean and tip her over.
+func _dash_anim_kind() -> String:
+	if not strike_at_end.is_empty():
+		return "lunge"
+	if move_kind == "rinkrun":
+		return "skate"
+	if move_kind == "rush":
+		return "rush"
+	var own := ak.dodge_anim() if ak else ""      # the kit's own (Slipstep's slide)
+	return own if own != "" else String(DODGE_ANIM.get(cls, "roll"))
+
 func _anim_state(stretch: float) -> void:
 	var s := anim_s
 	s["vel"] = vel; s["face"] = face
@@ -3207,7 +3232,7 @@ func _anim_state(stretch: float) -> void:
 	s["diving"] = diving
 	s["rolling"] = roll_t > 0.0
 	s["dash_dir"] = roll_dir
-	s["dash_kind"] = "lunge" if not strike_at_end.is_empty() else ("rush" if move_kind in ["rush", "rinkrun"] else String(DODGE_ANIM.get(cls, "roll")))
+	s["dash_kind"] = _dash_anim_kind()
 	s["crouch"] = crouch_k
 	s["downed"] = downed
 	s["ledge"] = grap.size() > 0
@@ -3357,7 +3382,7 @@ func render(delta: float, alpha: float) -> void:
 	var tc: Color = Data.TEAM_COLORS[team % Data.TEAM_COLORS.size()]
 	if roll_t > 0.0:
 		ghost_t -= delta
-		if ghost_t <= 0.0 and model.visible:
+		if ghost_t <= 0.0 and model.visible and not (ak and ak.own_dash_trail()):
 			ghost_t = 0.028
 			if ak == null or not ak.dash_afterimage():
 				m.fx.ghost(position, face, tc, float(cdat["scale"]))

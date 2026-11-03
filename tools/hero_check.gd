@@ -1,8 +1,9 @@
 extends RefCounted
-## --hero-check: changing hero on the farm (HomeHero, J or the Hero button). Six heroes, two
-## per weight class; picking one swaps the farm hunter's model in place and saves it as the expedition
-## pick (class, archetype, weapon family), so the expedition panel and the Training Grounds start on
-## it; locked heroes would grey out (all open for now). With --shots-dir=<dir>: the panel and the result.
+## --hero-check: changing Hunter on the farm (J or the Hunters button opens the Hunters screen,
+## HomeClasses). Every Hunter has a tile; picking one swaps the farm hunter's model in place and saves
+## it as the expedition pick (weight, id, weapon family), so the expedition panel and the Training
+## Grounds start on it. An old save has every Hunter open (the locks: --hunter-unlock-check).
+## With --shots-dir=<dir>: the screen and the result.
 
 var bad := 0
 
@@ -17,6 +18,7 @@ func run(main: Node) -> void:
 	var k := Save.new_kin("zapple", "Pip"); d["roster"].append(k); d["active"] = k["uid"]
 	d["tutorial"] = {"hatched": true, "intro": true, "home": true, "day1_done": true}
 	d["cls"] = "medium"; d["arch"] = "gunslinger"
+	d["classes"] = ClassUnlock.legacy()      # an old save, every Hunter open (the locks: --hunter-unlock-check)
 	Save.d = d
 	var hm = await main._hb_home()
 	for i in 30: await tree.process_frame
@@ -24,18 +26,20 @@ func run(main: Node) -> void:
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--shots-dir="): shot = a.substr(12)
 	var items: Array = hm.hub_items().map(func(it): return String(it[0]))
-	ok(items.has("hero"), "the farm's bottom bar has a Hero button (%s)" % str(items))
+	ok(items.has("hero"), "the farm's bottom bar has a Hunters button (%s)" % str(items))
 	ok(InputMap.has_action("hero") and Settings.key_cap("hero") == "J", "and a key (%s), rebindable in Settings" % Settings.key_cap("hero"))
 	var ev := InputEventAction.new(); ev.action = "hero"; ev.pressed = true
 	hm._unhandled_input(ev)
 	await tree.process_frame
-	ok(hm.panel_open == "Hero", "J opens the hero panel on the farm")
+	ok(hm.panel_open == "Hunters", "J opens the Hunters screen on the farm")
 	var grid: GridContainer = hm.get_meta("hero_grid")
 	var cards: Array = grid.get_children()
 	var archs: Array = cards.map(func(c): return String(c.get_meta("arch", "")))
-	ok(cards.size() == Arch.ids().size() and archs.has("thief") and archs.has("bulwark") and archs.has("dolm") and archs.has("tender"), "every hero has a card: %s" % str(archs))
-	ok(cards.all(func(c): return String(c.tooltip_text).contains("Dash:") and String(c.tooltip_text).contains("class")), "each shows its weight class and kit on hover")
-	ok(Arch.ids().all(func(a): return HeroGrid.unlocked(a)), "everything is unlocked for now (HeroGrid.unlocked is the hook for the unlock system)")
+	var named := ["thief", "bulwark", "dolm", "tender"].all(func(a): return archs.has(a))
+	ok(cards.size() == Arch.ids().size() and named, "every Hunter has a tile: %s" % str(archs))
+	var tips_ok := cards.all(func(c): return c.tooltip_text.contains("Dash:") and not c.tooltip_text.contains("weight"))
+	ok(tips_ok, "each shows its kit on hover, with no weight label")
+	ok(Arch.ids().all(func(a): return HeroGrid.unlocked(a)), "an old save has every Hunter open")
 	for i in 20: await tree.process_frame
 	if shot != "": tree.root.get_texture().get_image().save_png(shot + "/hero_panel.png")
 	if shot != "":      # the rest of the grid, scrolled into view

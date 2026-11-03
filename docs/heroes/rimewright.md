@@ -1,54 +1,109 @@
-# Tamsin, the Rimewright (`rimewright`, light skirmisher with a shelter)
+# Tamsin, the Rimewright (`rimewright`, light ice controller)
 
-Internal design doc. Source behaviour reference: the hero named in the Inspired-by table in docs/ARCHETYPES.md (gameplay only).
+Internal design doc. Source behaviour reference: the hero named in the Inspired-by table in docs/ARCHETYPES.md (gameplay only). The fidelity pass (ext/kitfix-moosh-tamsin) worked from the footage reference sheet (`briefs/hero-ref/tamsin.md`), the public wiki page and the owner's notes. Scale: 1 bh = 1.8 m.
 
-## Research summary
-Sources:
-- The reference hero's public kit page and guides (see the Inspired-by table in docs/ARCHETYPES.md)
-
-Version chosen: the wiki's current kit as it stood when the branch was built (late Oct 2026).
-Important finding: in the source the hero is an ice damage and control hero, not a healer, although the task brief calls both heroes healers. We kept the source behaviour and gave her the squad-facing part through the Rink Wall (a frost shield for teammates who touch it, once per wall). Flagged as an open question.
-Where the wiki has no E (Q is the wall): we map the wall to E (Q is the glove slot).
+**Owner decision (confirmed): she copies her source exactly, ice control and walls, with no added healing.** The earlier squad extra (an 18-point frost shield for teammates touching the Rink Wall) is removed. `--support-check` asserts the wall gives teammates no shield and no heal.
 
 ## Our kit
 | Slot | Input | What it does (ours) | Source behaviour | Difference and why |
 |---|---|---|---|---|
-| Passive Hoarfrost | | Damaging abilities Chill for 4s (slightly slower, frost mist). Knocking a Chilled hunter, or felling a Chilled monster, makes them Splinter 0.4s later: 30 damage within 3m and more Chill | Shatter (Chill) | Chill carries a 15% slow so the state is readable and useful |
-| LMB Hoar Fan | hold | Flurry: 4 light homing shards (3.4 each, 0.1s apart) then 3 heavy ones (x2 damage, faster, 1.4x range), 0.5s pause. 8 shards on one foe Splinter them (20, 2.4m). Double damage during a Rinkrun | Ice Darts | Homing is a soft turn rate (2.4 rad/s inside a 40 degree cone) |
-| RMB Sleet Lance | tap, 2 charges | Lance 22 m/s, 12m: 12 damage (x0.8 close to x1.25 far), slow 55% close to 20% far, Chills; goes off again 0.7s later for 15 in 1.8m (rank 3: 45% bigger) | Cryo Spear | Same shape; near/far tradeoff kept |
-| Shift Rinkrun | hold | Rinkrun at 11.5 m/s up to 1.6s, steering gently; release stops; stopping early refunds up to 60% of a charge. Fan keeps firing and does double damage. In the air: the usual long dash | Skate | Rank 3 ice-bridge-over-abyss left as a visual puff only (no terrain editing yet; open question) |
-| E Rink Wall | tap, tap again | 4.2m wall (70 HP) slides 3.2 m/s for up to 4s, stops enemy shots, shoves foes; press again to freeze it (lasts 8s). Teammates touching it get an 18 frost shield (6s), once per wall; online squadmates receive it as a heal | Frozen Barricade | Uses the shared wall system (`Verbs.add_wall`) |
-| R | none | Removed per owner update | Chilling Finale | Flavour: a panic button; does not feed the Chill and Splinter loop |
+| Passive Hoarfrost | | Damaging abilities Chill for 4s (15% slow, a frost burst). 8 darts on one foe Shatter them: an icy shell closes over them for 0.15s, then a 2.7m starburst of opaque ice-cyan spikes, 60 (15x a dart) in 2.4m. Knocking a Chilled hunter or felling a Chilled monster Shatters them 0.4s later: 30 in 3m, plus Chill. A frost glow on the foe grows with each dart | Shatter | Same |
+| LMB Ice Dart | hold | A steady stream, one dart every 0.18s with no heavy phase or pause. Darts are slow (16 m/s) ice-blue shards with dark teal edges (0.26 m), leave bowed 32 degrees to alternating sides and home hard (7 rad/s) onto the foe nearest the cursor (else the nearest ahead within 75 degrees, else the cursor point), 4 damage, 10m. While skating they fly straight as thick beams (30 m/s) for 1.6x | Ice Darts | The footage stream over the wiki's older 4+3 heavy pattern |
+| RMB Ice Spear | hold to aim, release to throw; 2 charges, 7s | Held: the landing ring at the cursor (AimKit `circle`, clamped to 12m), the ice spear in her raised free hand and a lean-back pose. Released: it leaves her hand, a fast star-headed spear (45 m/s) that lands at the cursor (4 to a foe in the way, where it then lands), leaving a 2.2m slow zone (35%, Chill) with a spinning crystal that everyone sees filling; 1.8s later it detonates: 60 in 2.7m, a 0.5s freeze and an ice shell | Cryo Spear | Lands at the cursor and detonates late (footage) |
+| Shift Skate | hold | Skate at 11.5 m/s (full speed within 0.2s) where you move, up to 1.6s; she carves curves with the move keys (3.6 rad/s), throwing ice off the outside edge on a hard turn, and leaves a ribbon of ice chips. LMB keeps firing the whole way: darts become 1.6x straight beams. It carries on over ledges. Release stops it with a hockey stop; the shorter the skate, the more of the charge comes back (up to 60%). In the air: the class long dash as a stretched skater's glide with frost streaks. 8.5s | Skate | Main's speed and length (owner 23:20); steering, firing and the refund by shortness are the owner's favourites (23:40). Rank 3's ice bridge over the abyss is still a visual only |
+| E Rink Wall | tap, tap again | A 0.2s tell (a sparkle at her feet, the path shown to everyone), then a narrow 1.8m block of ice erupts 1 bh ahead and slides at 4.5 m/s toward the cursor (it stops there, 3 to 10.8m of travel), widening to 4.5m, stopping enemy shots and carrying foes it meets. It stands 3s; E again while it slides freezes it in place for 6s. 70 HP. 17s | Frozen Barricade | Her own look: a row of leaning ice pillars on a frosted footing |
+| X Rimelock (level 6) | tap; X again to end or set it off | Sealed in her frost bud (six curved ice petals closing over her), invulnerable and rooted; a 7.2m (4 bh) rink snaps out round her in 0.2s, shown to everyone with a fill and cracks that brighten as it builds. Foes in it are Chilled and slowed 15%, rising 12% a second they stay, up to 55%. At 3.5s it cracks open: a light pillar on her, her shell bursts into shards, and every foe in the rink she can see takes 40 and a 0.75s ice-block stun. X in the last 0.75s sets it off early at two thirds (damage and stun); X earlier just breaks the shell (no damage, no stun). Nothing else fires while sealed. 47s cooldown | Ice Crash (newer source of Chilling Finale) | Her own frost bud, not the source's eight-point star; damage set by the burst rule (see Scaling) |
+| R | none | The Boki Merge | (Merge) | Merge stays on R; the source ult was never folded into another slot |
 
-## Scaling
-Light HP 124. Fan 3.4 per shard against 12 lance and 30 Splinter keeps the source ratio (about 1 : 4.6 : 10). Ranks follow the per-slot steps in `rank2` / `rank_next` of the JSON (about 10% shorter cooldown and +15% power at rank 2, about 20 to 25% shorter and +30% at rank 3), with the rank-3 effects: (second lance burst 45% bigger, a Rinkrun over open sky lays a short ice bridge as a visual only, the wall +40 HP and a doubled frost shield).
+Body (`body` in rimewright.json): tall and thin, the model 1.3x a light hunter in height (about 1.11 of a medium) at 0.78 width (about 0.75 of a medium's bulk). The hitbox stays the light 0.35 (her height adds nothing to the top-down target). Long skater's strides (1.4x step cadence), arms held out.
 
-## Ult choice
-No R. The source's finale is a panic button that does not feed the Chill and Splinter loop, and R is now the Boki Merge. Nothing was folded in; the squad value comes from the Rink Wall instead.
+Scaling: light, HP 124. Ratios kept from the footage: dart 35 -> 4, Shatter 529 (15x) -> 60, skating darts x1.6 (56/35), spear detonation 584 (about 1.1x a Shatter) -> 60. Cooldown ratio Skate : Wall kept at 1 : 2 (8.3 : 16.7) -> 8.5 : 17. Rimelock: cooldown 47s against the Wall's 17 (source card 45.8 : 16.7). Its crash is 40 (10 darts, two thirds of a Shatter) instead of the footage's 17 darts (607 / 35): with 68 the crash straight into a merge and the Titan form's ultimate knocked a full-health medium hunter, which the owner's burst rule forbids. `--rimewright-combo-check` "burst:" asserts it (50 + 82 = 132 of 145 at level 6, no armor).
+
+## Small mechanics
+| Mechanic | Source | Footage confirms | Built | Check |
+|---|---|---|---|---|
+| Damaging abilities Chill for 4s; a Chilled foe knocked or a Chilled creep killed Shatters after a short delay | [wiki](https://supervive.wiki.gg/wiki/Celeste) | yes (Shatter) | yes | "knocking a Chilled foe Shatters them after a beat" |
+| 8 dart hits on one target trigger Shatter | [wiki](https://supervive.wiki.gg/wiki/Celeste) | yes (0068) | yes | "8 darts on one foe Shatter them" |
+| Darts are semi-homing, curving toward the cursor side | [wiki](https://supervive.wiki.gg/wiki/Celeste), footage | yes | yes | "darts come out slowly ... bowed", "the bowed darts curve back onto the foe" |
+| Darts hit harder while skating | [wiki](https://supervive.wiki.gg/wiki/Celeste) (2x), footage (1.6x) | yes | yes, 1.6x | "darts while skating are straight beams at 1.6x" |
+| Hold to skate in your direction, release to stop, early release refunds part of the cooldown | [wiki](https://supervive.wiki.gg/wiki/Celeste) | yes | yes | "Shift held starts a skate", "letting go stops ... refunds" |
+| Skating carries on over a ledge | footage (0199) | yes | yes | "she skates on over a ledge" |
+| The spear: closer hits slow more, far hits deal more | [wiki](https://supervive.wiki.gg/wiki/Celeste) | no | replaced by the slow zone (footage) | (see Assumptions) |
+| The spear detonates again after a delay | [wiki](https://supervive.wiki.gg/wiki/Celeste) | yes (1.8-2s) | yes | "it detonates about 1.8 s after landing" |
+| The wall moves, blocks projectiles, pushes what it hits | [wiki](https://supervive.wiki.gg/wiki/Celeste) | yes | yes | "it slides toward the cursor, widening, and shoves the foe ahead"; "the wall stops a foe's shot" |
+| Recast freezes the wall in place; a frozen wall lasts 6s | [wiki](https://supervive.wiki.gg/wiki/Celeste) (patch 22.01.25) | no | yes | "E again freezes it where it stands, for 6 s" |
+| A thin aim line to the cursor | footage | yes | yes | "the thin aim line to the cursor is always up" |
+| X: invulnerable and rooted inside the shell | card, footage | yes | yes | "tm X: inside the shell she is invulnerable and rooted, and nothing fires" |
+| X: the zone's slow stacks for up to 3.5s | [wiki](https://supervive.wiki.gg/wiki/Celeste) | no | yes (15% + 12%/s, cap 55%) | "tm X: the slow on a foe in the rink stacks the longer they stay" |
+| X: it goes off by itself at the end (about 3.5s) | footage (f25 -> f57) | yes | yes | "tm X: it cracks open by itself at 3.5 s" |
+| X: reactivating in the final 0.75s gives 67% of the effects (damage and stun) | [wiki](https://supervive.wiki.gg/wiki/Celeste) (patch 05.03.25) | no | yes | "tm X: X in the last 0.75 s cracks it open early at two thirds" |
+| X: reactivating earlier cancels it, no stun | [wiki](https://supervive.wiki.gg/wiki/Celeste), sheet correction | no | yes | "tm X: X early ends it with no damage, no stun and no bond" |
+| X: the crash is blocked by line of sight | [wiki](https://supervive.wiki.gg/wiki/Celeste) | no | yes (from the rink's centre) | "tm X: a foe behind a rock is not hit (line of sight)" |
+| X: the floor indicator always shows and the crash hits where it shows (height doesn't matter) | [wiki](https://supervive.wiki.gg/wiki/Celeste) (patch 05.03.25) | no | yes (the rink is fixed where she cast it, drawn for everyone) | "tm X: sealed in, the 4 bh rink shown to everyone" |
+| X: allies are unaffected | footage, card | yes | yes (foes only) | (by construction: `foes_in`) |
+
+## Assumptions
+- **Dart range:** the darts curve to the cursor and fly on to 10m when nothing is there to home on.
+- **Dart pattern:** the footage's uniform stream wins over the wiki's older "ends with 3 larger darts" (the sheet ranks it gap 1; the footage is newer).
+- **Ice Spear:** 2 charges with a 7s recharge (the card's 0.3s is read as the cast time). Its direct hit is small; the detonation is the big hit. The ice-encased look after it is a 0.5s freeze plus a 1.5s ice shell. The wiki's near/far slow-versus-damage split is dropped in favour of the footage's slow zone.
+- **Rink Wall:** it slides until its middle reaches the cursor (3 to 10.8m of travel) and stands 3s in all; the freeze recast is the wiki's (6s).
+- **Body and movement (not in the footage):** her **air dash** is the class long dash held as a stretched skater's glide (one leg trailing, arms out like wings) with frost streaks, not a tumble; her **plain jump** is the shared one; her **idle** is the shared idle with her skater's stance (one leg back, arms out, a slight lean). The sheet asks for a ~0.15s stop on release: the stop keeps the shared 30% carry (about 0.1-0.2s to rest).
+- **Skate:** 1.6s at most; it goes on over a ledge (and over the abyss it falls once it ends); rank 3's ice bridge stays a visual (no terrain editing).
+- **No squad shield or heal** (owner).
+- **Rimelock:** the stun is 0.75s (the dummy stayed encased about 0.5s; the wiki gives no number). The slow ramp (15% + 12% a second, cap 55%) is ours; the wiki only says it stacks for 3.5s. Line of sight is checked from the rink's centre at chest height. The cooldown starts on the cast. Merging while sealed ends it with no crash.
+- **Rimelock and the bond:** `HeroUlt.landed` for each hunter the crash stuns; the cast pays once, for its best event ("hit", "knock" if a hunter went down, "kill" if one was eliminated), through `KinBond.from_ult` with one cast id per cast. Monsters pay nothing (the shared base counts hunters only). The sheet's 0.4 per hunter up to 0.8 is replaced by the main session's per-cast amounts (boki_system.json). An early break pays nothing.
 
 ## Combinations
-| Interaction | Check |
+| Interaction | Check (`--rimewright-combo-check` unless noted) |
 |---|---|
-| Fan darts Chill; Chill slows | `--rimewright-combo-check` ("fan darts Chill") |
-| Rinkrun doubles the fan; Shift held starts a Rinkrun; early release refunds | same |
-| 8 shards on one foe Splinter them | same |
-| Lance: Chills, slow stronger up close, second burst | same |
-| Knock a Chilled foe: Splinter after a beat hits neighbours | same |
-| Rink Wall slides, E again freezes it | same |
-| Wall touch shields teammates | `--support-check` |
+| A steady stream of equal darts, slow and bowed, curving onto the foe at the cursor | "a steady stream ...", "every dart the same", "darts come out slowly ...", "the bowed darts curve back ..." |
+| Darts Chill; the frost glow grows; 8 Shatter | "the frost glow on the foe shows the stacks", "8 darts on one foe Shatter them" |
+| A knock on a Chilled foe Shatters them | "knocking a Chilled foe Shatters them after a beat" |
+| Skate: the push-off, straight 1.6x beams, the stride loop, over a ledge, the hockey stop and refund | the five "tm Shift" rows |
+| Ice Spear: ring at the cursor while held, lands there, slows and Chills in the zone, detonates at 1.8s with a freeze | the four "tm RMB" rows |
+| Rink Wall: the tell, erupts narrow ahead in her look, widens while sliding, shoves, stops at the cursor, freezes on E, stops shots | the six "tm E" rows |
+| The wall gives teammates nothing | `--support-check` "Rink Wall: no squad shield or heal" |
+| A merge start ends the skate, the spear aim and a wall still in its tell | "drop_holds ends the skate, the spear aim and the wall's tell" |
+| Rimelock: sealed, rink for everyone, stacking slow, countdown, crash with the ice-block stun, late and early recasts, line of sight | the "tm X" rows |
+| Rink Wall shoves foes into the rink, then the crash stuns them (the sheet's combo) | the wall's carry plus `foes_in` at the crash (the two run independently) |
+| Rimelock pays the bond only when the crash stuns someone | "tm X: ... no bond for the cast", "the crash pays the bond as a hit", "three hunters stunned pay one event for the cast" |
+| Burst: Rimelock straight into a merge and its ultimate does not knock a full-health hunter | "burst: Rimelock straight into a merge ..." |
+| A merge start ends Rimelock with no crash (`rime`) | "tm merge: drop_holds ends Rimelock with no crash and frees her" |
 
 ## Animation moves
-Full-body cast moves are `HunterAnim.KMOVES` entries, played by the kit with `play()`.
+In `scripts/match/kmoves_care.gd` ("tm_"), played with `play()` / `play_soft()`.
 
-| Ability | KMOVES id | Shape |
-|---|---|---|
-| RMB Sleet Lance | `rime_javelin` | shoulders wound back, whipped through into a throw (0.19s) |
-| E Rink Wall | `rime_slam` | hands together low, then pushed out and down onto the ice (0.22s) |
-| LMB, Rinkrun | none | shared weapon-hold and rush poses |
+| Ability | Move | Beats (s) | Shape |
+|---|---|---|---|
+| LMB dart | `tm_dart_r`, `tm_dart_l` (alternating) | 0.03 cock, 0.07 flick, 0.16 | the fan whipped across the body and out at the cursor with the torso (`wf`), then the free hand flicking a dart, a sharp twist each |
+| LMB while skating | `tm_beam` | 0.04 / 0.08 thrust / 0.14 / 0.22 | both hands driven straight out ahead, a stiff lean |
+| RMB held | `tm_spear_aim` (hold) | 0.12 | the ice spear raised high behind the head in the free hand, turned away, leaning well back |
+| RMB release | `tm_spear` | 0.05 deeper, 0.11 whip, 0.28 overshoot, 0.6 | a whip through into a long low lunge |
+| RMB detonation | `tm_clench` | 0.05 / 0.1 / 0.34 | a sharp clench of the free hand |
+| E | `tm_wall` | 0.1-0.2 the tell (a deep crouch over the feet), 0.27 erupt (both arms flung up and out, the fan raised), 0.42 overshoot, 0.7 | |
+| E again | `tm_freeze` | 0.07 knee up, 0.13 stamp, 0.42 | a stamp of the blade, a fist pulled down |
+| Shift start | `tm_skate_go` | 0.08 push, 0.16 into the stride | a crouch and a hard push off the back blade |
+| Shift held | `tm_skate` (looped by the kit every 0.56s) | 0 / 0.28 / 0.56 | low and leaning hard, knees deep, long pushes one leg then the other, the arms and fan swinging against them, the body rocking |
+| Shift release | `tm_skate_stop` | 0.07 / 0.22 / 0.5 | a hockey stop: turned side-on, leaning back hard over braced blades, ice spraying ahead |
+| Air dash | `tm_dash_air` | 0.06 stretch, 0.24 hold, 0.32 landing, 0.5 | a stretched skater's glide, one leg trailing, arms out wide |
+| Shatter (payoff) | `tm_shatter` | 0.06 / 0.13 / 0.24 / 0.45 | a big flourish snapping the fan shut, the free fist clenched and pulled in, a lean into it |
+| X sealed (f25-f27) | `tm_rime` | 0.06 crouch, 0.12 arms out as the rink snaps, 0.2 down into the seal | |
+| X held (f27-f55) | `tm_rime_hold` (hold) | 0 / 0.4 | hunched, arms crossed on the chest, the fan folded in, knees bent |
+| X crash (f57-f61) | `tm_rime_crash` | 0.04 deeper, 0.1 flung wide, 0.2 overshoot, 0.4 recovery | everything flung out as the shell bursts |
+| X early break | `tm_rime_break` | 0.08 / 0.3 | a shrug that pushes the shell off |
+
+The skate leaves a ribbon of ice chips (and spray off the edge on a carve); the air dash leaves frost streaks (CareLook "streak"), not the shared after-image pill.
+
+Strips: `--arena=thief --arena-demo=care_rimewright_<lmb|shatter|payoff|skatefire|rmb|e|dash|air|walk|pose|ultaim|ultkey|ult> --arena-shot=<dir>/x.png [--care-close]`.
+
+## Look and sound
+- Pooled looks (`care_look.gd`, shaders `care_ice`, `care_disc`, `care_glow`, all mixed rather than additive so they keep their colour on bright ground): the ice dart (an ice-blue four-sided crystal with dark teal edges, tip first, with a frost streak), the 0.3 m skating beam with its cyan core, the star-headed spear (held in her hand while aiming, then thrown) with its long pale-cyan trail, the slow-zone flake disc with its spinning crystal, the detonation dome, the Shatter spikes, the ice shell, the frost glow, the skate's ice chips, and the Rink Wall's ice pillars (the shared wall node is hidden). Rimelock (`UltLook`, `ult_look.gd`): the rink (care_disc pattern 4: a ragged ice edge and a crack network whose glow is the countdown, a fringe of crystals), her frost bud, the light pillar and the ice block on each stunned foe; the shard burst reuses the Shatter spikes.
+- The Hoar Fan model: nine bone slats with long ice-crystal tips, a frosted web and a teal tassel.
+- Sounds (`tools/gen_care_sfx.py`): `rime_shard`, `rime_beam`, `rime_spear_aim`, `rime_lance`, `rime_zone`, `rime_burst`, `rime_splinter`, `rime_run`, `rime_stop`, `rime_wall_tell`, `rime_wall`, `rime_freeze`, `rime_flip`, and for Rimelock `rime_lock` (a crackling freeze), `rime_creak` (the hold, quickening), `rime_crash` (a deep boom and a glassy shatter) and `rime_crack` (the early break), loaded through `SfxKits.NAMES`.
 
 ## Engine notes
-- Kit: `scripts/arch/kits/rimewright_kit.gd` plus `care_util.gd`; look in `scripts/match/hero_gear_care.gd`; data in `content/archetypes/rimewright.json` and `content/weapons/hoar_fan.json`; sounds `audio/rime_*.wav` (`tools/gen_care_sfx.py`).
-- The wall is the shared `Verbs.add_wall` system; the frost shield for teammates goes through `CareUtil` (a "heal" event for online squadmates).
-- The Rinkrun sets `move_kind = "rinkrun"`, which `hunter.gd` maps to the rush dash animation.
-- No R in the data (see tender.md engine notes). Net is 0.14.0 because of the carry event of the pair.
-- Open: the rank-3 ice bridge is a puff only (no terrain editing). Checks: `--support-check`, `--rimewright-combo-check`.
+- Kit: `scripts/arch/kits/rimewright_kit.gd`; data: `content/archetypes/rimewright.json`, `content/weapons/hoar_fan.json`.
+- Merge-start hold fields: `rinkrun` (the skate), `spear_aim` and `rmb_down` (the spear aim), `wall_cast` (the wall's tell) and `rime` (the X seal).
+- X: main's `HunterKeys.ult_pressed` takes the `hunter_ult` key (the level gate) and calls the kit's `cast_ult`, which returns `HeroUlt.press(self, _start_rime)` (the ult's own cooldown in `cd["x"]`, the recast, a cast id); the kit also overrides `has_ult`, `ult_running`, `ult_recast`. Numbers are under `"x"` in `content/archetypes/rimewright.json`. Invulnerability is the hunter's `inv_t`, the root its `root_t`.
+- The wall is the shared `Verbs.add_wall` (blocking, the touch shove); the kit grows it, slides it, carries foes on its face and draws it.
+- Net: unchanged (0.16.0, main's); the ult adds no sync shape. Checks: `--support-check`, `--rimewright-combo-check`.

@@ -1,4 +1,4 @@
-"""Sounds for Dredge and Ashwick, pure Python (no numpy). Run: python3 tools/sfx_heroes_pair.py
+"""Sounds for Dredge and Linwick (id ashwick), pure Python (no numpy). Run: python3 tools/sfx_heroes_pair.py
 then: godot --headless --import. 44.1 kHz mono 16-bit, original synthesis."""
 import math, os, random, struct, wave
 
@@ -55,7 +55,7 @@ gong = mix((env(sine(1.4, 196), 0.004, 0.5), 0.5), (env(sine(1.4, 313), 0.004, 0
 save('dr_anchor', mix((thud, 1.0), (gong, 0.6), (env(lp(noise(0.25), 900), 0.001, 0.06), 0.7)))
 # stack gained: a bright brass bell
 save('pay_salvage', mix((env(sine(1.1, 880), 0.002, 0.35), 0.6), (env(sine(1.1, 1318), 0.002, 0.25), 0.4), (env(sine(1.1, 2217), 0.002, 0.15), 0.25), (env(sine(1.1, 440), 0.002, 0.5), 0.4)))
-# Ashwick: the torch roar, a looping-friendly hiss with crackle
+# Linwick: the torch roar, a looping-friendly hiss with crackle
 base = env(lp(noise(0.45), 2200), 0.06, 0.3)
 crk = [0.0] * n(0.45)
 for _ in range(14):

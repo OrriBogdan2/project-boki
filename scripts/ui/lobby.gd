@@ -105,7 +105,7 @@ func _refresh() -> void:
 		nm.autowrap_mode = TextServer.AUTOWRAP_OFF
 		h.add_child(nm)
 		var kin: Dictionary = p.get("kin", {})
-		var info := UI.label("%s · %s" % [Data.CLASSES.get(p.get("cls", "medium"), Data.CLASSES["medium"])["name"], Data.KIN.get(kin.get("species", "cindle"), Data.KIN["cindle"])["name"]], 14, UI.MUTED)
+		var info := UI.label("%s · %s" % [Arch.label(String(p.get("arch", ""))), Data.KIN.get(kin.get("species", "cindle"), Data.KIN["cindle"])["name"]], 14, UI.MUTED)
 		info.autowrap_mode = TextServer.AUTOWRAP_OFF
 		h.add_child(info)
 		h.add_child(UI.tag("Ready" if p.get("ready", false) else "Not ready", UI.GOOD if p.get("ready", false) else UI.MUTED))

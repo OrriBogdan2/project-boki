@@ -329,6 +329,10 @@ func _downed() -> void:
 	P.teleport(Vector3(k.pos.x + 0.4, k.pos.y, k.pos.z))
 	run_for(0.8, func(): foe.teleport(Vector3(k.pos.x + 3.0, k.pos.y, k.pos.z)))
 	ok(not k.rescue_on, "...and with a foe within 6m running into it does not pick it up")
+	# a rival Boki's stray Puffcap mine can root you here (it depends on the match's random rolls); this step
+	# is about interact, so start it free of crowd control
+	P.root_t = 0.0
+	P.stun_t = 0.0
 	P.inp["interact"] = true
 	run_for(0.1, func(): foe.teleport(Vector3(k.pos.x + 3.0, k.pos.y, k.pos.z)))
 	P.inp["interact"] = false

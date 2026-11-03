@@ -8,12 +8,13 @@ extends Node
 ## lineage, edition). A small append-only event log (d["log"], LOG_CAP) keeps what happened to whom.
 ## See docs/BOKI_IDENTITY.md.
 
-const VERSION := 5
+const VERSION := 6
 const MAX_MEMORY := 40
 const SLOTS := 6
 const LOG_CAP := 200
 ## Upgrades, oldest first: MIGRATIONS[n] turns a version-n save into version n + 1.
-const MIGRATIONS := {1: "_migrate_1_to_2", 2: "_migrate_2_to_3", 3: "_migrate_3_to_4", 4: "_migrate_4_to_5"}
+const MIGRATIONS := {1: "_migrate_1_to_2", 2: "_migrate_2_to_3", 3: "_migrate_3_to_4", 4: "_migrate_4_to_5",
+		5: "_migrate_5_to_6"}
 
 var d: Dictionary = {}
 var slot := 1                 # which save file is in play
@@ -68,6 +69,7 @@ func fresh() -> Dictionary:
 		"name": "Hunter",
 		"gems": 60,
 		"cls": "medium",
+		"classes": ClassUnlock.fresh(),   # which Hunters are open, the creation pick, challenges and mastery
 		"active": "",
 		"roster": [],
 		"seeds": {"tidebloom": 2, "emberberry": 1},
@@ -263,6 +265,10 @@ func migrate(data: Dictionary) -> bool:
 		v += 1
 		data["v"] = v
 	return true
+
+## v5 -> v6: Hunter unlocks. A save that predates them had every Hunter, so it keeps them all (ClassUnlock).
+func _migrate_5_to_6(data: Dictionary) -> void:
+	ClassUnlock.migrate(data)
 
 ## v4 -> v5: the gear model. Stored weapons become scrap, gloves become gear items, the loadout
 ## moves to five gear slots (GearSave).

@@ -44,7 +44,7 @@ const CAM_LOOK := Vector3(1.25, 1.95, -9.4)
 const WIND := Vector3(2.2, 0.15, 0.35)            # the storm blows left to right
 ## Each archetype's weapon on the title (the arch_gallery set).
 const DISCORD := "https://discord.gg/nbeBaU7xt"        # the playtest server (never expires)
-const WEAPONS := {"thief": "twin_blades", "archer": "longbow", "mage": "coilcaster", "gunslinger": "quill_rifle", "juggernaut": "greatsword", "bulwark": "tower_shield", "dredge": "shotgun", "ashwick": "flamethrower", "tender": "lantern_crook", "rimewright": "hoar_fan", "dolm": "rubble_fists", "ostra": "tether_lantern"}
+const WEAPONS := {"thief": "arc_bolts", "archer": "longbow", "mage": "coilcaster", "gunslinger": "quill_rifle", "juggernaut": "greatsword", "bulwark": "tower_shield", "dredge": "shotgun", "ashwick": "flamethrower", "tender": "lantern_crook", "rimewright": "hoar_fan", "dolm": "rubble_fists", "ostra": "tether_lantern"}
 
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
@@ -525,7 +525,7 @@ func _build_ui() -> void:
 	news.offset_right = -28; news.offset_top = 28
 	var nv := UI.vbox(4); news.add_child(nv)
 	nv.add_child(UI.label("PLAYTEST  ·  BUILD %s" % Net.VERSION, 11, Color("e9b48a"), UI.caps))
-	nv.add_child(UI.label("Six archetypes, one Boki each", UI.T_HEAD, UI.INK, UI.big))
+	nv.add_child(UI.label("Twelve Hunters, one Boki each", UI.T_HEAD, UI.INK, UI.big))
 	var nl := UI.label("Bring your Boki on a run, bring it home. Tell us what broke.", 13, UI.MUTED)
 	nl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART; nl.custom_minimum_size.x = 280
 	nv.add_child(nl)

@@ -1,18 +1,21 @@
 class_name PracticeHero
 extends RefCounted
-## The hero picker in the practice areas (J or the bar's Hero button, or Change hero in the Esc menu):
-## the same cards as the farm's Hero panel (HeroGrid) in a panel over the paused game. Picking swaps your
-## hunter in place (Hunter.reclass; the Arena's own swap when it has one), keeps your Boki, opens every
-## rank, and saves the pick as your expedition hero like the farm does.
+## The Hunter picker in the practice areas (J or the bar's Hunters button, or Change Hunter in the Esc
+## menu): Hunter cards (HeroGrid) in a panel over the paused game. Every Hunter can be picked here,
+## locked ones included. Picking swaps your hunter in place (Hunter.reclass; the Arena's own
+## swap when it has one), keeps your Boki, opens every rank, and saves the pick as your expedition class
+## like the farm does (unless that Hunter is still locked).
 
 static func toggle(p: Practice) -> void:
 	if p.picker != null: close(p)
 	else: open(p)
 
 static func open(p: Practice) -> void:
-	var body := _show(p, "Hero", 860, func(): close(p), "Done", "heroes")
-	UI.subtitle(body, "Who you play here and on expeditions. Your Boki stays. Hover a hero for its kit, K for the full kit card.")
-	var grid := HeroGrid.build(body, func(ak: String): pick(p, ak), func(ak: String): kit(p, ak), func(ak: String): p.hover_arch = ak)
+	var body := _show(p, "Hunters", 860, func(): close(p), "Done", "heroes")
+	UI.subtitle(body, "Who you play here and on expeditions. Your Boki stays. "
+			+ "Hover a Hunter for its kit, K for the full kit card.")
+	var grid := HeroGrid.build(body, func(ak: String): pick(p, ak), func(ak: String): kit(p, ak),
+			func(ak: String): p.hover_arch = ak, false)
 	p.picker.set_meta("grid", grid)
 
 static func kit(p: Practice, ak: String) -> void:
@@ -34,9 +37,9 @@ static func close(p: Practice) -> void:
 
 ## Plays `ak`: saved as your expedition pick, and your hunter here turns into it.
 static func pick(p: Practice, ak: String) -> void:
-	if not Arch.exists(ak) or not HeroGrid.unlocked(ak):
+	if not Arch.exists(ak):
 		return
-	HeroGrid.save_pick(ak)
+	var saved := HeroGrid.save_pick(ak)      # a locked Hunter is only tried here, never saved
 	var P: Hunter = p.m.player
 	if P != null and ak != P.arch:
 		if p.m.arena:
@@ -44,6 +47,9 @@ static func pick(p: Practice, ak: String) -> void:
 		else:
 			_swap(p.m, P, ak)
 	close(p)
+	if not saved and p.m.hud:
+		var why := "%s is still locked for expeditions: %s" % [Arch.name_of(ak), ClassUnlock.requirement(ak)]
+		p.m.hud.toast(why, Arch.color(ak))
 
 ## The swap where there is no Arena (the Duel room, the tutorial): the same steps as Arena.set_arch.
 static func _swap(m: Match, P: Hunter, ak: String) -> void:

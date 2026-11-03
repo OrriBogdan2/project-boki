@@ -1,9 +1,9 @@
 extends RefCounted
-## --zone-check, --dolm-combo-check, --ostra-combo-check: Dolm and Ostra (docs/heroes/dolm.md, ostra.md).
+## --zone-check: Breah (dolm) and Ostra placement (docs/heroes/dolm.md, ostra.md). The combo checks extend
+## this file: tools/breah_combo_check.gd (--dolm-combo-check), tools/ostra_combo_check.gd (--ostra-combo-check).
 ##   zone: where rocks, rock bridges, the seed and Trade may land: collision, walls, bodies, abyss edges,
 ##         the bridge only replacing abyss tiles and giving them back, and the Net placement events
 ##         (what one game sends, a second game rebuilds identically).
-##   combos: every interaction of each kit, scripted one by one.
 
 var main: Node
 var fails := 0
@@ -88,6 +88,19 @@ func hold(m: Match, P: Hunter, t: float) -> void:
 func rocks(m: Match) -> Array:
 	return m.verbs.walls.filter(func(w): return w.get("rock", false))
 
+## Breah's Basalt Spine laid along the aim across the abyss strip: X held at a centre over the gap, the
+## cursor dragged on along the aim, let go; returns once the cracks are done and the walkway is down.
+func spine_across(m: Match, P: Hunter, home: Vector3) -> void:
+	P.ak.cd["x"] = 0.0
+	P.inp["aim"] = home + Vector3(6.5, 0.9, 0)
+	step(m, 0.1)
+	P.inp["x_down"] = true
+	HunterKeys.ult_pressed(P)
+	P.inp["aim"] = home + Vector3(12.0, 0.9, 0)
+	step(m, 0.2)
+	P.inp["x_down"] = false
+	step(m, float(P.ak.x_def()["tell"]) + 0.05)
+
 func void_tiles(m: Match) -> int:
 	var c := 0
 	for i in m.world.kind.size():
@@ -100,12 +113,6 @@ func run(main_node: Node) -> void:
 	if "--zone-check" in args:
 		await _zones()
 		print("PAIRCHECK zone DONE, %d checks, failures: %d" % [n, fails])
-	if "--dolm-combo-check" in args:
-		await _dolm()
-		print("PAIRCHECK dolm DONE, %d checks, failures: %d" % [n, fails])
-	if "--ostra-combo-check" in args:
-		await _ostra()
-		print("PAIRCHECK ostra DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
 ## Starts a Boki merge on `h` the way R does (the full merge when it has a Boki to merge with, else the surge).
@@ -142,8 +149,8 @@ func _zones() -> void:
 	step(m, 0.5)
 	ok("stone row: a rock stops a walking body", true)
 	await done(m)
-	# ---- never over the abyss
-	r = setup("dolm", 9.0, 3)
+	# ---- never over the abyss (the row stands 2.2m ahead; the abyss starts 1.5m ahead)
+	r = setup("dolm", 9.0, 2)
 	m = r[0]; P = r[1]; home = r[3]
 	P.inp["aim"] = home + Vector3(6, 0.9, 0)
 	P.ak.cd["e"] = 0.0
@@ -156,29 +163,27 @@ func _zones() -> void:
 	P.inp["aim"] = home + Vector3(6, 0.9, 0)
 	P.ak.cd["e"] = 0.0
 	P.ak.cast_e()
+	step(m, 0.25)      # (the row rises after its 0.2s ground flash)
 	var all_ok := true
 	for w in rocks(m):
 		var mid2: Vector3 = (P.ak as DolmKit).rock_mid(w)
 		all_ok = all_ok and not m.world.is_void(mid2.x, mid2.z)
 	ok("stone row: rocks near the edge stay on ground", rocks(m).size() > 0 and all_ok, "rocks %d" % rocks(m).size())
-	# ---- bridge only turns abyss tiles to ground, and gives them back
-	P.slot_lv["kin"] = 3
+	# ---- the Basalt Spine's walkway only turns abyss tiles to ground, and gives them back
 	var before := void_tiles(m)
 	var ground_before: Array = []
 	for i in m.world.kind.size():
 		if m.world.kind[i] != World.T_VOID: ground_before.append(i)
-	P.ak.cd["e"] = 0.0
-	P.inp["aim"] = home + Vector3(8, 0.9, 0)
-	step(m, 1.0)
 	for w in m.verbs.walls.duplicate(): m.verbs._break_wall(w)
-	P.ak.cast_e()
+	spine_across(m, P, home)
 	var after := void_tiles(m)
-	ok("bridge (rank 3): abyss tiles become ground", (P.ak as DolmKit).bridges == 1 and after < before, "void %d -> %d" % [before, after])
+	var spine := (P.ak as DolmKit).spine
+	ok("bridge (Basalt Spine): abyss tiles become ground", spine.bridges == 1 and after < before, "void %d -> %d" % [before, after])
 	var untouched := true
 	for i in ground_before:
 		untouched = untouched and m.world.kind[i] != World.T_VOID
 	ok("bridge: solid ground is never changed", untouched)
-	step(m, float((P.ak as DolmKit).e_def()["bridge_t"]) + 1.0)
+	step(m, float(P.ak.x_def()["time"]) + 1.0)
 	ok("bridge: the abyss comes back when it ends", void_tiles(m) == before, "void %d vs %d" % [void_tiles(m), before])
 	await done(m)
 	# ---- a block tile and a body in the way
@@ -190,12 +195,14 @@ func _zones() -> void:
 	P.inp["aim"] = home + Vector3(6, 0.9, 0)
 	P.ak.cd["e"] = 0.0
 	var c2: bool = P.ak.cast_e()
+	step(m, 0.25)
 	ok("stone row: not built through a rock or wall", rocks(m).size() == 0 and not c2, "rocks %d" % rocks(m).size())
 	W2.kind[W2.idx(bx, bz)] = World.T_GROUND
 	T.teleport(home + Vector3(3.0, 0, 0))
 	step(m, 0.1)
 	P.ak.cd["e"] = 0.0
 	P.ak.cast_e()
+	step(m, 0.25)      # (the row rises after its 0.2s ground flash)
 	var mids_ok := true
 	for w in rocks(m):
 		var mid3: Vector3 = (P.ak as DolmKit).rock_mid(w)
@@ -210,6 +217,7 @@ func _zones() -> void:
 	step(m, 0.1)
 	P.ak.cd["e"] = 0.0
 	P.ak.cast_e()
+	step(m, 0.25)      # (the row rises after its 0.2s ground flash)
 	var evs: Array = HeroZones.sent.duplicate(true)
 	var a_rocks := rocks(m)
 	var rk: Array = evs.filter(func(e): return e[1] == "rock")
@@ -244,11 +252,9 @@ func _zones() -> void:
 	await done(m)
 	r = setup("dolm", 9.0, 3, 3)
 	m = r[0]; P = r[1]; home = r[3]
-	P.inp["aim"] = home + Vector3(8, 0.9, 0)
-	step(m, 0.5)
 	var v_before := void_tiles(m)
 	HeroZones.sent.clear()
-	P.ak.cast_e()
+	spine_across(m, P, home)
 	var bev: Array = HeroZones.sent.filter(func(e): return e[1] == "bridge")
 	r2 = setup("dolm", 9.0, 3, 3)
 	m2 = r2[0]
@@ -280,7 +286,7 @@ func _zones() -> void:
 	P.dashes = P.max_dashes()
 	P.inp["aim"] = home + Vector3(9, 0.9, 0)
 	P.ak.on_dash(false)
-	step(m, 1.2)
+	step(m, 1.9)
 	ok("swap: lands on solid ground when aimed over the abyss", not m.world.is_void(P.pos.x, P.pos.z) and P.pos.x < home.x + 5.0, "x %.1f" % (P.pos.x - home.x))
 	await done(m)
 	r = setup("ostra", 9.0)
@@ -289,7 +295,7 @@ func _zones() -> void:
 	W3.kind[W3.idx(int(floor(home.x)) + 4, int(floor(home.z)))] = World.T_BLOCK
 	P.inp["aim"] = home + Vector3(10, 0.9, 0)
 	P.ak.on_dash(false)
-	step(m, 1.2)
+	step(m, 1.9)
 	ok("swap: stops before a rock in the way", P.pos.x < home.x + 4.0, "x %.1f" % (P.pos.x - home.x))
 	await done(m)
 	# ---- Net: a Trade on a body another game owns is sent, and that body's own game moves it
@@ -302,7 +308,7 @@ func _zones() -> void:
 	T.teleport(home + Vector3(8.0, 0, 0)); aim_at(P, T.pos)
 	HeroZones.sent.clear()
 	P.ak.on_dash(false)
-	step(m, 1.2)
+	step(m, 1.9)
 	var tev: Array = HeroZones.sent.filter(func(e): return e[1] == "tp")
 	ok("net: Trade tells the game that owns the foe to move it", tev.size() == 1 and String(tev[0][2]) == "t1" and float(tev[0][3]) < home.x + 2.0 and T.pos.x - home.x > 6.0, str(tev))
 	r2 = setup("ostra", 6.0)
@@ -316,286 +322,3 @@ func _zones() -> void:
 	await done(m2)
 	await done(m)
 	HeroZones.capture = false
-
-# ------------------------------------------------------------------ Dolm
-func _dolm() -> void:
-	var r := setup("dolm", 5.0)
-	var m: Match = r[0]; var P: Hunter = r[1]; var T: Hunter = r[2]; var home: Vector3 = r[3]
-	var K: DolmKit = P.ak
-	var reset := func():
-		P.teleport(home); fresh(T); T.teleport(home + Vector3(5.0, 0, 0)); aim_at(P, T.pos)
-		K.cd["e"] = 0.0; K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; P.fire_cd = 0.0; P.dashes = P.max_dashes()
-		for w in m.verbs.walls.duplicate(): m.verbs._break_wall(w)
-		step(m, 0.2)
-	# LMB: a tap throws a boulder
-	reset.call()
-	P.inp["fire"] = true
-	step(m, 0.08, func(): P.inp["fire"] = true)
-	P.inp["fire"] = false
-	step(m, 0.5)
-	ok("lmb: tap = boulder", K.boulders == 1 and dmg(T) >= 8.0 and dmg(T) < 12.0, "boulders %d took %.1f" % [K.boulders, dmg(T)])
-	# LMB hold: punch
-	reset.call()
-	T.teleport(home + Vector3(1.8, 0, 0)); aim_at(P, T.pos)
-	P.inp["fire"] = true
-	step(m, 0.95, func(): P.inp["fire"] = true)
-	ok("lmb: hold shows a charge", P.charge_k() > 0.4, "charge %.2f" % P.charge_k())
-	P.inp["fire"] = false
-	step(m, 0.4)
-	ok("lmb: hold + release = punch, knocks back", K.punches == 1 and dmg(T) >= 20.0 and T.pos.x - home.x > 2.2, "punches %d took %.1f dx %.1f" % [K.punches, dmg(T), T.pos.x - home.x])
-	# a merge in the middle of the hold ends it: letting go must not throw a punch mid-transformation
-	reset.call()
-	P.inp["fire"] = true
-	step(m, 0.95, func(): P.inp["fire"] = true)
-	var punches0 := K.punches
-	P.merge_st = {"phase": "xform"}
-	K.lmb_override(false, DT)
-	P.merge_st = {}
-	P.inp["fire"] = false
-	ok("lmb: a merge ends the hold with no punch", K.punches == punches0 and K.lmb_t < 0.0 and P.mel_hold == 0.0, "punches %d -> %d lmb_t %.2f mel_hold %.2f" % [punches0, K.punches, K.lmb_t, P.mel_hold])
-	# punch into a wall: stunned
-	reset.call()
-	var W: World = m.world
-	var bx := int(floor(home.x)) + 4; var bz := int(floor(home.z))
-	W.kind[W.idx(bx, bz)] = World.T_BLOCK
-	T.teleport(home + Vector3(2.4, 0, 0)); aim_at(P, T.pos)
-	P.inp["fire"] = true
-	step(m, 0.95, func(): P.inp["fire"] = true)
-	P.inp["fire"] = false
-	step(m, 0.7)
-	ok("combo: punch into a wall = stun", K.wall_stuns >= 1 and T.stun_t > 0.0, "wall stuns %d stun %.2f" % [K.wall_stuns, T.stun_t])
-	W.kind[W.idx(bx, bz)] = World.T_GROUND
-	# Stone Row > punch: the rocks fly and shred
-	reset.call()
-	P.ak.use_e()
-	step(m, 0.3)
-	ok("e: Stone Row raises three rocks", rocks(m).size() == 3, "rocks %d" % rocks(m).size())
-	T.teleport(home + Vector3(8.0, 0, 0)); aim_at(P, T.pos)
-	P.fire_cd = 0.0
-	P.inp["fire"] = true
-	step(m, 0.95, func(): P.inp["fire"] = true)
-	P.inp["fire"] = false
-	step(m, 0.8)
-	ok("combo: Stone Row > punch launches the rocks", K.launches >= 1 and dmg(T) >= 10.0 and T.vuln_t > 0.0 and K.launch_pay >= 1, "launches %d took %.1f vuln %.1f pay %d" % [K.launches, dmg(T), T.vuln_t, K.launch_pay])
-	# Stone Row > slam: rocks fly outward
-	reset.call()
-	P.ak.use_e()
-	step(m, 0.3)
-	var l0 := K.launches
-	K.ch_rmb = 1.0; K.cd["rmb"] = 0.0
-	hold(m, P, 0.4)
-	step(m, 0.6)
-	ok("combo: Stone Row > slam launches the rocks", K.launches > l0, "launches %d -> %d" % [l0, K.launches])
-	# slam: centre stuns, damage scales with charge
-	reset.call()
-	T.teleport(home + Vector3(2.4, 0, 0)); aim_at(P, T.pos)
-	tap(m, P)
-	step(m, 0.5)
-	var d_tap := dmg(T)
-	ok("rmb: tap slam hits the centre and stuns", d_tap >= 13.0 and T.stun_t > 0.0, "took %.1f stun %.2f" % [d_tap, T.stun_t])
-	reset.call()
-	T.teleport(home + Vector3(2.4, 0, 0)); aim_at(P, T.pos)
-	hold(m, P, 1.0)
-	step(m, 0.5)
-	ok("rmb: a full charge hits harder", dmg(T) > d_tap + 8.0, "tap %.1f full %.1f" % [d_tap, dmg(T)])
-	# a knock resets the slam
-	reset.call()
-	T.teleport(home + Vector3(2.4, 0, 0)); aim_at(P, T.pos)
-	T.hp = 10.0
-	tap(m, P)
-	step(m, 0.5)
-	ok("combo: a slam that knocks resets Quakefall", K.qf_resets >= 1 and float(K.cd["rmb"]) <= 0.0 and K.ch_rmb >= 1.0, "resets %d cd %.1f downed %s" % [K.qf_resets, float(K.cd["rmb"]), T.downed])
-	# the dunk: a foe caught in the air
-	reset.call()
-	T.teleport(home + Vector3(2.4, 0, 0)); T.pos.y += 2.0; T.grounded = false; aim_at(P, T.pos)
-	var dn0 := K.dunks
-	K._slam(0.5, false)
-	ok("rmb: a foe in the air is dunked", K.dunks == dn0 + 1 and T.vel.y < -10.0, "dunks %d vy %.1f" % [K.dunks, T.vel.y])
-	# Rubble Rush: the boulder leaves as you land
-	reset.call()
-	T.teleport(home + Vector3(8.0, 0, 0)); aim_at(P, T.pos)
-	P.ak.on_dash(false)
-	step(m, 0.9)
-	ok("dash: Rubble Rush shoves a boulder as it ends", K.landslides == 1 and dmg(T) >= 10.0 and T.vuln_t > 0.0 and P.pos.x - home.x > 3.0, "landslides %d took %.1f dx %.1f" % [K.landslides, dmg(T), P.pos.x - home.x])
-	# rank 3: the slam shields, Stone Row doubles and bridges, Rubble Rush goes further
-	P.slot_lv["sec"] = 3; P.slot_lv["kin"] = 3; P.slot_lv["dash"] = 3
-	reset.call()
-	T.teleport(home + Vector3(2.4, 0, 0)); aim_at(P, T.pos)
-	P.shield = 0.0
-	tap(m, P)
-	step(m, 0.5)
-	ok("rank 3: slamming a foe gives a shield", P.shield >= 17.0, "shield %.0f" % P.shield)
-	reset.call()
-	T.teleport(home + Vector3(12.0, 0, 0))
-	P.ak.use_e()
-	step(m, 0.3)
-	ok("rank 3: Stone Row raises a second row", rocks(m).size() == 6, "rocks %d" % rocks(m).size())
-	# Tremor Sense
-	reset.call()
-	T.teleport(home + Vector3(8.0, 0, 0)); aim_at(P, T.pos)
-	var s_front := K.stonesight()
-	T.teleport(home + Vector3(-8.0, 0, 0))
-	var s_back := K.stonesight()
-	ok("passive: Tremor Sense shows foes in front only", s_front == 1 and s_back == 0, "front %d back %d" % [s_front, s_back])
-	await done(m)
-
-# ------------------------------------------------------------------ Ostra
-func _ostra() -> void:
-	var r := setup("ostra", 6.0)
-	var m: Match = r[0]; var P: Hunter = r[1]; var T: Hunter = r[2]; var home: Vector3 = r[3]
-	var K: OstraKit = P.ak
-	var reset := func():
-		if not K.seed.is_empty(): K._pop(false)
-		K.swap = {}
-		K.swollen_t = 0.0; K.res = 0.0
-		P.teleport(home); fresh(T); T.teleport(home + Vector3(6.0, 0, 0)); aim_at(P, T.pos)
-		K.cd["e"] = 0.0; K.e_t = 0.0; K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; P.fire_cd = 0.0; P.dashes = P.max_dashes()
-		step(m, 0.2)
-	# Swell: ten times as fast on hunters
-	reset.call()
-	K.on_deal(T, 10.0, {})
-	var on_h := K.res
-	K.res = 0.0
-	var mob := Mob.new()
-	K.on_deal(mob, 10.0, {})
-	var on_m := K.res
-	mob.free()
-	ok("passive: Swell fills ten times faster on hunters", on_h > 9.0 * on_m and on_h > 3.0, "hunter %.2f mob %.2f" % [on_h, on_m])
-	K.res = 0.0
-	for i in 40: K.on_deal(T, 10.0, {})
-	ok("passive: full Swell = Swollen", K.is_swollen() and K.swells == 1, "swollen %.1f" % K.swollen_t)
-	reset.call()
-	# Settled orb
-	P.fire_cd = 0.0
-	step(m, 1.6)
-	ok("lmb: a pause primes the next orb", K.primed, "primed %s" % K.primed)
-	P.inp["fire"] = true
-	step(m, 0.1, func(): P.inp["fire"] = true)
-	P.inp["fire"] = false
-	step(m, 1.0)
-	var d1 := dmg(T)
-	ok("lmb: the Settled orb hits harder and slows", K.settled_shots == 1 and d1 >= 11.0 and T.slow_t > 0.0, "took %.1f slow %.1f settled %d" % [d1, T.slow_t, K.settled_shots])
-	fresh(T)
-	P.fire_cd = 0.0
-	P.inp["fire"] = true
-	step(m, 0.1, func(): P.inp["fire"] = true)
-	P.inp["fire"] = false
-	step(m, 1.0)
-	ok("lmb: the next orb is plain again", not K.primed or K.settled_shots == 1, "settled %d" % K.settled_shots)
-	# Fan: stun grows with distance, Swollen hits harder
-	reset.call()
-	T.teleport(home + Vector3(2.5, 0, 0)); aim_at(P, T.pos)
-	var sn := [0.0]
-	tap(m, P)
-	step(m, 0.3, func(): sn[0] = maxf(sn[0], T.stun_t))
-	var s_near: float = sn[0]
-	var d_near := dmg(T)
-	reset.call()
-	T.teleport(home + Vector3(10.0, 0, 0)); aim_at(P, T.pos)
-	var sf := [0.0]
-	tap(m, P)
-	step(m, 0.5, func(): sf[0] = maxf(sf[0], T.stun_t))
-	var s_far: float = sf[0]
-	ok("rmb: Shard Fan stuns longer the further it flew", s_far > s_near + 0.2 and s_near > 0.1, "near %.2f far %.2f" % [s_near, s_far])
-	reset.call()
-	K.swollen_t = 5.0
-	T.teleport(home + Vector3(2.5, 0, 0)); aim_at(P, T.pos)
-	tap(m, P)
-	step(m, 0.3)
-	ok("combo: Swollen Fan hits 40% harder", dmg(T) > d_near * 1.25, "plain %.1f swollen %.1f" % [d_near, dmg(T)])
-	# Trade: the foe goes to where you were
-	reset.call()
-	T.teleport(home + Vector3(8.0, 0, 0)); aim_at(P, T.pos)
-	P.ak.on_dash(false)
-	step(m, 1.2)
-	ok("dash: Trade trades places and slows the foe", K.swaps == 1 and P.pos.x - home.x > 6.0 and T.pos.x - home.x < 2.0 and T.slow_t > 0.0, "me %.1f foe %.1f slow %.1f" % [P.pos.x - home.x, T.pos.x - home.x, T.slow_t])
-	reset.call()
-	K.swollen_t = 5.0
-	ok("combo: Swollen Trade is quicker", K.swap_time() < float(K.dash_def()["time"]), "%.2f" % K.swap_time())
-	# Brimseed: pop for more the longer it grew
-	reset.call()
-	T.teleport(home + Vector3(6.0, 0, 0)); aim_at(P, T.pos)
-	K.cast_e()
-	step(m, 0.5)
-	K.e_recast()
-	step(m, 0.2)
-	var early := dmg(T)
-	reset.call()
-	T.teleport(home + Vector3(6.0, 0, 0)); aim_at(P, T.pos)
-	K.cast_e()
-	step(m, 2.5)
-	K.e_recast()
-	step(m, 0.2)
-	var late := dmg(T)
-	ok("e: the longer the seed grows, the harder the pop", late > early * 1.6 and K.pops >= 2, "early %.1f late %.1f" % [early, late])
-	ok("e: the pop grounds what it catches", KitStatus.grounded(T))
-	# full growth: it pops by itself, the Collapse payoff
-	reset.call()
-	T.teleport(home + Vector3(6.0, 0, 0)); aim_at(P, T.pos)
-	var c0 := K.collapses
-	K.cast_e()
-	step(m, 6.6)
-	ok("e: a seed left alone pops at full growth (Collapse)", K.collapses == c0 + 1 and K.seed.is_empty(), "collapses %d" % K.collapses)
-	# Fan then pop: the stunned foe stays in the seed
-	reset.call()
-	T.teleport(home + Vector3(6.0, 0, 0)); aim_at(P, T.pos)
-	K.cast_e()
-	step(m, 1.5)
-	tap(m, P)
-	step(m, 0.3)
-	var stun_in := T.stun_t
-	K.e_recast()
-	step(m, 0.2)
-	ok("combo: Seed > Fan > pop catches the stunned foe", stun_in > 0.1 and dmg(T) >= 20.0, "stun %.2f took %.1f" % [stun_in, dmg(T)])
-	# Seed under you, Trade away through the foe: it lands in the seed
-	reset.call()
-	T.teleport(home + Vector3(8.0, 0, 0)); aim_at(P, P.pos + Vector3(0.5, 0, 0))
-	K.cast_e()
-	step(m, 1.0)
-	aim_at(P, T.pos)
-	P.ak.on_dash(false)
-	step(m, 1.2)
-	var inside := Vector2(T.pos.x - float(K.seed["pos"].x), T.pos.z - float(K.seed["pos"].z)).length() < K.seed_radius() + 0.6 if not K.seed.is_empty() else false
-	K.e_recast()
-	step(m, 0.2)
-	ok("combo: Seed > Trade puts the foe inside it", inside and dmg(T) > 10.0, "inside %s took %.1f" % [inside, dmg(T)])
-	# knocks heal
-	reset.call()
-	P.hp = P.max_hp * 0.4
-	var h0 := P.hp
-	K.on_knock(T, true)
-	ok("passive: a knock heals 20%", P.hp - h0 >= P.max_hp * 0.19, "healed %.1f" % (P.hp - h0))
-	# rank 3: the pop drags foes in first
-	P.slot_lv["kin"] = 3
-	reset.call()
-	T.teleport(home + Vector3(6.0, 0, 0)); aim_at(P, T.pos)
-	K.cast_e()
-	step(m, 5.0)
-	var sp: Vector3 = K.seed["pos"] if not K.seed.is_empty() else T.pos
-	T.teleport(sp + Vector3(K.seed_radius() * 1.15, 0, 0))
-	K.e_recast()
-	step(m, 0.2)
-	ok("rank 3: the pop pulls foes at the rim to the middle", Vector2(T.pos.x - sp.x, T.pos.z - sp.z).length() < 1.5 and dmg(T) > 0.0, "off %.1f" % Vector2(T.pos.x - sp.x, T.pos.z - sp.z).length())
-	# a Boki merge that starts mid-Trade ends it: nobody moves, no slow; and it unprimes the Settled orb
-	P.slot_lv["kin"] = 1
-	reset.call()
-	T.teleport(home + Vector3(8.0, 0, 0)); aim_at(P, T.pos)
-	P.ak.on_dash(false)
-	step(m, 0.2)
-	var trading: bool = not K.swap.is_empty()
-	var swaps0 := K.swaps
-	ok("merge hold: the Trade is in flight before the merge", trading, "swap %s" % trading)
-	ok("merge hold: a merge is under way", _merge(P))
-	step(m, 1.5)
-	ok("merge hold: ostra's Trade is dropped, nobody moves mid-merge", K.swap.is_empty() and K.swaps == swaps0 and absf(P.pos.x - home.x) < 1.5 and T.pos.x - home.x > 6.0 and T.slow_t <= 0.0, "me %.1f foe %.1f swaps %d" % [P.pos.x - home.x, T.pos.x - home.x, K.swaps - swaps0])
-	await done(m)
-	r = setup("ostra", 6.0)
-	m = r[0]; P = r[1]; T = r[2]; home = r[3]
-	K = P.ak
-	step(m, 1.6)
-	var was_primed: bool = K.primed
-	ok("merge hold: the orb is Settled before the merge", was_primed)
-	ok("merge hold: a merge is under way", _merge(P))
-	step(m, 0.2)
-	ok("merge hold: ostra's prime is dropped with the merge", not K.primed and K.prime_until < 0.0, "primed %s" % K.primed)
-	await done(m)

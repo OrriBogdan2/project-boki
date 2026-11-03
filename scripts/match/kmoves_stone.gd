@@ -1,0 +1,649 @@
+class_name KMovesStone
+extends RefCounted
+## Keyed full-body moves of Breah (dolm) and Ostra (same format and channels as HunterAnim.KMOVES; looked
+## up by HunterAnim.km_sample after its own table). Timed to the reference sheets' beats: anticipation,
+## the release key on the kit's hit frame, an overshoot, then the settle. Breah is heavy and grounded
+## (deep knees, squash on every impact, the huge fists leading); Ostra floats (lifts, stretches and a
+## spin on her Swell, light hands).
+
+const MOVES := {
+	# ---------------------------------------------------------------- Breah
+	# Basalt Spine held: sunk wide and low, both fists spread out to the sides at the ground, the body
+	# turned along the ridge being dragged (it holds while X is down)
+	"breah_spine_aim": {"hold": true, "keys": [
+		[0.00, {}],
+		[
+			0.12,
+			{
+				"p": -0.3, "sq": 0.2, "lift": -0.1, "legs": [0.7, -1.3, 0.65, -1.2], "lw": 1.0,
+				"fl": Vector3(-0.7, -0.3, 0.05), "hw": 1.0, "fr": Vector3(0.7, -0.3, 0.05), "rw": 1.0
+			}
+		]]},
+	# Basalt Spine let go: the fists swing up (0.05) and are driven into the ground (0.1, the cracks), she
+	# stays down through the 0.2s cracks and the 0.4s rise, then heaves up as the ridge stands (0.7)
+	"breah_spine": {"keys": [
+		[
+			0.00,
+			{
+				"p": -0.3, "sq": 0.2, "lift": -0.1, "legs": [0.7, -1.3, 0.65, -1.2], "lw": 1.0,
+				"fl": Vector3(-0.7, -0.3, 0.05), "hw": 1.0, "fr": Vector3(0.7, -0.3, 0.05), "rw": 1.0
+			}
+		],
+		[
+			0.05,
+			{
+				"p": 0.3, "lift": 0.18, "sq": -0.2, "legs": [0.5, -1.0, 0.45, -0.9], "lw": 1.0,
+				"fl": Vector3(-0.2, 1.0, 0.0), "hw": 1.0, "fr": Vector3(0.2, 1.0, 0.0), "rw": 1.0
+			}
+		],
+		[
+			0.10,
+			{
+				"p": -0.85, "lift": -0.14, "sq": 0.5, "legs": [0.9, -1.5, 0.8, -1.4], "lw": 1.0,
+				"fl": Vector3(-0.3, -0.72, -0.45), "hw": 1.0, "fr": Vector3(0.3, -0.72, -0.45), "rw": 1.0
+			}
+		],
+		[
+			0.55,
+			{
+				"p": -0.75, "lift": -0.12, "sq": 0.36, "legs": [0.85, -1.45, 0.75, -1.35], "lw": 1.0,
+				"fl": Vector3(-0.32, -0.66, -0.42), "hw": 1.0, "fr": Vector3(0.32, -0.66, -0.42), "rw": 1.0
+			}
+		],
+		[
+			0.70,
+			{
+				"p": 0.25, "lift": 0.1, "sq": -0.18, "legs": [0.3, -0.6, 0.25, -0.5], "lw": 1.0,
+				"fl": Vector3(-0.5, 0.7, -0.1), "hw": 1.0, "fr": Vector3(0.5, 0.7, -0.1), "rw": 1.0
+			}
+		],
+		[1.00, {}]]},
+	# Boulder (tap): a side hurl. Twisted far away with the right fist cocked back and out (0.07), the hips
+	# whip round and the arm flings it out long (0.13), the fist follows through across her body (0.24)
+	"breah_throw": {"keys": [
+		[0.00, {}],
+		[
+			0.07,
+			{
+				"p": 0.15, "y": 0.65, "sq": 0.22, "lift": -0.06, "legs": [0.45, -0.8, 0.3, -0.6], "lw": 1.0,
+				"fr": Vector3(0.5, 0.05, 0.38), "rw": 1.0, "fl": Vector3(-0.3, 0.2, -0.38), "hw": 1.0
+			}
+		],
+		[
+			0.13,
+			{
+				"p": -0.38, "y": -0.6, "sq": -0.16, "lift": 0.04, "legs": [0.7, -1.0, 0.1, -0.3], "lw": 1.0,
+				"fr": Vector3(0.05, 0.25, -0.88), "rw": 1.0, "fl": Vector3(-0.4, -0.05, 0.28), "hw": 1.0
+			}
+		],
+		[
+			0.24,
+			{
+				"p": -0.3, "y": -0.75, "sq": 0.06, "legs": [0.7, -1.0, 0.15, -0.35], "lw": 1.0,
+				"fr": Vector3(-0.28, 0.0, -0.66), "rw": 1.0, "fl": Vector3(-0.4, -0.1, 0.2), "hw": 0.8
+			}
+		],
+		[0.55, {}]]},
+	# Punch held: sunk low and twisted away, the right fist cocked far behind the hip, the left
+	# forearm up as a guard; the body squashes into the ground (it holds while you charge)
+	"breah_wind": {"hold": true, "keys": [
+		[0.00, {}],
+		[
+			0.10,
+			{
+				"p": 0.12, "y": 0.4, "sq": 0.08, "legs": [0.3, -0.6, 0.25, -0.55], "lw": 1.0,
+				"fr": Vector3(0.3, 0.1, 0.3), "rw": 1.0, "fl": Vector3(-0.05, 0.25, -0.3), "hw": 1.0
+			}
+		],
+		[
+			0.24,
+			{
+				"p": 0.26, "y": 0.78, "sq": 0.22, "lift": -0.1, "legs": [0.62, -1.15, 0.5, -1.0], "lw": 1.0,
+				"fl": Vector3(-0.05, 0.36, -0.42), "hw": 1.0, "fr": Vector3(0.38, 0.12, 0.62), "rw": 1.0
+			}
+		]]},
+	# Punch let go: the hips unwind into a straight drive, stretched long on the hit (0.05), an
+	# overshoot past the line (0.12), then the heavy fist pulls back in
+	"breah_punch": {"keys": [
+		[
+			0.00,
+			{
+				"p": 0.26, "y": 0.78, "sq": 0.22, "lift": -0.1, "legs": [0.62, -1.15, 0.5, -1.0], "lw": 1.0,
+				"fl": Vector3(-0.05, 0.36, -0.42), "hw": 1.0, "fr": Vector3(0.38, 0.12, 0.62), "rw": 1.0
+			}
+		],
+		[
+			0.05,
+			{
+				"p": -0.7, "y": -0.62, "sq": -0.16, "legs": [0.75, -1.25, 0.1, -0.3], "lw": 1.0,
+				"fl": Vector3(-0.25, 0.1, 0.2), "hw": 1.0, "fr": Vector3(0.0, 0.1, -0.98), "rw": 1.0
+			}
+		],
+		[
+			0.12,
+			{
+				"p": -0.78, "y": -0.72, "sq": 0.08, "legs": [0.8, -1.3, 0.12, -0.32], "lw": 1.0,
+				"fl": Vector3(-0.25, 0.1, 0.25), "hw": 1.0, "fr": Vector3(0.0, 0.05, -1.02), "rw": 1.0
+			}
+		],
+		[
+			0.30,
+			{
+				"p": -0.32, "y": -0.25, "sq": 0.04, "fr": Vector3(0.0, 0.02, -0.55), "rw": 0.7,
+				"fl": Vector3(-0.2, 0.1, -0.15), "hw": 0.5
+			}
+		],
+		[0.60, {}]]},
+	# Quakefall held: a low crouch, the fists drawn in at the hips and glowing (it holds)
+	"breah_crouch": {"hold": true, "keys": [
+		[0.00, {}],
+		[
+			0.08,
+			{
+				"p": -0.15, "sq": 0.12, "legs": [0.4, -0.8, 0.36, -0.72], "lw": 1.0, "fl": Vector3(-0.3, -0.1, 0.0),
+				"hw": 1.0, "fr": Vector3(0.3, -0.1, 0.0), "rw": 1.0
+			}
+		],
+		[
+			0.22,
+			{
+				"p": -0.38, "sq": 0.28, "lift": -0.16, "legs": [0.95, -1.6, 0.85, -1.5], "lw": 1.0,
+				"fl": Vector3(-0.34, -0.26, 0.08), "hw": 1.0, "fr": Vector3(0.34, -0.26, 0.08), "rw": 1.0
+			}
+		]]},
+	# jump while charging: tucked, the fists coming up overhead, leaning into the leap
+	"breah_leap": {"hold": true, "keys": [
+		[
+			0.00,
+			{
+				"p": -0.38, "sq": 0.28, "lift": -0.16, "legs": [0.95, -1.6, 0.85, -1.5], "lw": 1.0,
+				"fl": Vector3(-0.34, -0.26, 0.08), "hw": 1.0, "fr": Vector3(0.34, -0.26, 0.08), "rw": 1.0
+			}
+		],
+		[
+			0.10,
+			{
+				"p": -0.2, "sq": -0.18, "legs": [0.9, -1.7, 0.7, -1.5], "lw": 1.0, "fl": Vector3(-0.2, 0.75, 0.05),
+				"hw": 1.0, "fr": Vector3(0.2, 0.75, 0.05), "rw": 1.0
+			}
+		],
+		[
+			0.30,
+			{
+				"p": 0.3, "sq": -0.1, "legs": [1.0, -1.8, 0.8, -1.6], "lw": 1.0, "fl": Vector3(-0.16, 1.0, 0.12),
+				"hw": 1.0, "fr": Vector3(0.16, 1.0, 0.12), "rw": 1.0
+			}
+		]]},
+	# Quakefall let go: a hop up, the fists swung overhead (stretched, 0.08), then both driven into the
+	# ground on the hit (0.16): squashed flat, knees wide, a long heavy settle
+	"breah_slam": {"keys": [
+		[
+			0.00,
+			{
+				"p": -0.38, "sq": 0.28, "lift": -0.16, "legs": [0.95, -1.6, 0.85, -1.5], "lw": 1.0,
+				"fl": Vector3(-0.34, -0.26, 0.08), "hw": 1.0, "fr": Vector3(0.34, -0.26, 0.08), "rw": 1.0
+			}
+		],
+		[
+			0.08,
+			{
+				"p": 0.38, "lift": 0.36, "sq": -0.22, "legs": [0.5, -1.0, 0.45, -0.9], "lw": 1.0,
+				"fl": Vector3(-0.16, 1.02, 0.12), "hw": 1.0, "fr": Vector3(0.16, 1.02, 0.12), "rw": 1.0
+			}
+		],
+		[
+			0.16,
+			{
+				"p": -0.8, "lift": -0.12, "sq": 0.46, "legs": [0.85, -1.45, 0.75, -1.35], "lw": 1.0,
+				"fl": Vector3(-0.16, -0.68, -0.5), "hw": 1.0, "fr": Vector3(0.16, -0.68, -0.5), "rw": 1.0
+			}
+		],
+		[
+			0.40,
+			{
+				"p": -0.7, "lift": -0.1, "sq": 0.3, "legs": [0.8, -1.4, 0.7, -1.3], "lw": 1.0,
+				"fl": Vector3(-0.16, -0.62, -0.48), "hw": 1.0, "fr": Vector3(0.16, -0.62, -0.48), "rw": 1.0
+			}
+		],
+		[
+			0.62,
+			{
+				"p": -0.25, "sq": 0.08, "fl": Vector3(-0.2, -0.2, -0.3), "hw": 0.6, "fr": Vector3(0.2, -0.2, -0.3),
+				"rw": 0.6
+			}
+		],
+		[0.95, {}]]},
+	# the air Quakefall: fists high, pitched down over them as she falls
+	"breah_dive": {"hold": true, "keys": [
+		[0.00, {}],
+		[
+			0.12,
+			{
+				"p": 0.3, "sq": -0.2, "legs": [0.6, -1.2, 0.5, -1.1], "lw": 1.0, "fl": Vector3(-0.16, 1.0, 0.1),
+				"hw": 1.0, "fr": Vector3(0.16, 1.0, 0.1), "rw": 1.0
+			}
+		],
+		[
+			0.30,
+			{
+				"p": -0.35, "fx": -0.25, "sq": -0.25, "legs": [0.3, -0.5, 0.3, -0.5], "lw": 1.0,
+				"fl": Vector3(-0.16, 0.2, -0.6), "hw": 1.0, "fr": Vector3(0.16, 0.2, -0.6), "rw": 1.0
+			}
+		]]},
+	# ... and its landing: the same crash as the slam's hit
+	"breah_slam_land": {"keys": [
+		[
+			0.00,
+			{
+				"p": -0.8, "lift": -0.14, "sq": 0.5, "legs": [0.9, -1.5, 0.8, -1.4], "lw": 1.0,
+				"fl": Vector3(-0.16, -0.68, -0.5), "hw": 1.0, "fr": Vector3(0.16, -0.68, -0.5), "rw": 1.0
+			}
+		],
+		[
+			0.28,
+			{
+				"p": -0.65, "sq": 0.28, "legs": [0.8, -1.4, 0.7, -1.3], "lw": 1.0, "fl": Vector3(-0.16, -0.6, -0.45),
+				"hw": 1.0, "fr": Vector3(0.16, -0.6, -0.45), "rw": 1.0
+			}
+		],
+		[0.75, {}]]},
+	# the punch during a charge: the whole body drives forward off the back foot, both fists thrown out long
+	# (0.05), the follow-through stretched past the line (0.16), then back down into the gathered crouch
+	"breah_lunge": {"keys": [
+		[0.00, {"p": -0.38, "sq": 0.2, "legs": [0.9, -1.5, 0.8, -1.4], "lw": 1.0}],
+		[
+			0.05,
+			{
+				"p": -0.85, "y": -0.3, "sq": -0.24, "lift": 0.05, "legs": [1.1, -0.5, -0.6, -0.2], "lw": 1.0,
+				"fl": Vector3(-0.12, 0.1, -0.95), "hw": 1.0, "fr": Vector3(0.12, 0.1, -0.95), "rw": 1.0
+			}
+		],
+		[
+			0.16,
+			{
+				"p": -0.72, "y": -0.2, "sq": 0.12, "legs": [1.0, -0.9, -0.3, -0.5], "lw": 1.0,
+				"fl": Vector3(-0.16, 0.0, -0.85), "hw": 1.0, "fr": Vector3(0.16, 0.0, -0.85), "rw": 1.0
+			}
+		],
+		[
+			0.36,
+			{
+				"p": -0.38, "sq": 0.24, "lift": -0.12, "legs": [0.9, -1.5, 0.8, -1.4], "lw": 1.0,
+				"fl": Vector3(-0.34, -0.26, 0.08), "hw": 1.0, "fr": Vector3(0.34, -0.26, 0.08), "rw": 1.0
+			}
+		]]},
+	# Rubble Leap: crouched on the rock as it bursts up (0.06), kicked off it stretched long with the fists
+	# swept back (0.14), tucked at the top with both fists raised overhead (0.34), the legs reaching down
+	# and the fists still high as she drops onto the spot (0.55); breah_leap_land takes the landing
+	"breah_dash": {"keys": [
+		[0.00, {}],
+		[
+			0.06,
+			{
+				"p": -0.3, "sq": 0.42, "lift": -0.16, "legs": [1.0, -1.6, 0.9, -1.5], "lw": 1.0,
+				"fl": Vector3(-0.22, -0.6, -0.3), "hw": 1.0, "fr": Vector3(0.22, -0.6, -0.3), "rw": 1.0
+			}
+		],
+		[
+			0.14,
+			{
+				"p": -0.4, "sq": -0.35, "lift": 0.1, "legs": [-0.5, -0.2, 0.4, -0.6], "lw": 1.0,
+				"fl": Vector3(-0.38, 0.3, 0.42), "hw": 1.0, "fr": Vector3(0.38, 0.3, 0.42), "rw": 1.0
+			}
+		],
+		[
+			0.34,
+			{
+				"p": 0.15, "sq": 0.1, "legs": [1.25, -1.9, 1.05, -1.75], "lw": 1.0,
+				"fl": Vector3(-0.26, 0.82, 0.0), "hw": 1.0, "fr": Vector3(0.26, 0.82, 0.0), "rw": 1.0
+			}
+		],
+		[
+			0.55,
+			{
+				"p": -0.25, "sq": -0.1, "legs": [0.4, -0.5, 0.3, -0.45], "lw": 1.0,
+				"fl": Vector3(-0.26, 0.75, -0.2), "hw": 1.0, "fr": Vector3(0.26, 0.75, -0.2), "rw": 1.0
+			}
+		],
+		[0.80, {}]]},
+	# the leap's landing: both fists smashed into the ground with a deep squash (0.05), held down through
+	# the crash (0.25), then she heaves upright
+	"breah_leap_land": {"keys": [
+		[
+			0.00,
+			{
+				"p": -0.25, "legs": [0.4, -0.5, 0.3, -0.45], "lw": 1.0, "fl": Vector3(-0.26, 0.75, -0.2), "hw": 1.0,
+				"fr": Vector3(0.26, 0.75, -0.2), "rw": 1.0
+			}
+		],
+		[
+			0.05,
+			{
+				"p": -0.85, "sq": 0.55, "lift": -0.24, "legs": [1.0, -1.6, 0.9, -1.5], "lw": 1.0,
+				"fl": Vector3(-0.3, -0.85, -0.45), "hw": 1.0, "fr": Vector3(0.3, -0.85, -0.45), "rw": 1.0
+			}
+		],
+		[
+			0.25,
+			{
+				"p": -0.7, "sq": 0.35, "lift": -0.16, "legs": [0.95, -1.5, 0.85, -1.4], "lw": 1.0,
+				"fl": Vector3(-0.3, -0.75, -0.42), "hw": 1.0, "fr": Vector3(0.3, -0.75, -0.42), "rw": 1.0
+			}
+		],
+		[
+			0.50,
+			{
+				"p": -0.15, "sq": 0.08, "fl": Vector3(-0.3, -0.3, -0.3), "hw": 0.5, "fr": Vector3(0.3, -0.3, -0.3),
+				"rw": 0.5
+			}
+		],
+		[0.75, {}]]},
+	# her base dash (the long one): a heavy lumbering shove, palms out, weight thrown into it, and a
+	# squashing two-footed landing
+	"breah_exdash": {"keys": [
+		[0.00, {"sq": 0.18, "lift": -0.06, "p": 0.1}],
+		[
+			0.07,
+			{
+				"p": -0.6, "y": -0.3, "sq": -0.1, "legs": [0.7, -1.1, 0.2, -0.4], "lw": 1.0,
+				"fl": Vector3(-0.2, 0.25, -0.7), "hw": 1.0, "fr": Vector3(0.2, 0.25, -0.7), "rw": 1.0
+			}
+		],
+		[
+			0.22,
+			{
+				"p": -0.5, "y": -0.2, "legs": [0.3, -0.5, 0.7, -1.1], "lw": 1.0, "fl": Vector3(-0.2, 0.2, -0.6),
+				"hw": 0.8, "fr": Vector3(0.2, 0.2, -0.6), "rw": 0.8
+			}
+		],
+		[0.30, {"p": -0.2, "sq": 0.3, "lift": -0.1, "legs": [0.8, -1.3, 0.7, -1.2], "lw": 1.0}],
+		[0.60, {}]]},
+	# Stone Row: reared back with both fists high overhead (0.06), slammed down into the ground on the tell
+	# with a deep squash (0.18, the fists travel 1.6m), held down through it, then heaved up and out as the
+	# rocks rise (0.36), a proud settle
+	"breah_raise": {"keys": [
+		[0.00, {}],
+		[
+			0.06,
+			{
+				"p": 0.35, "sq": -0.16, "lift": 0.12, "legs": [-0.9, 1.0, 0.25, -0.35], "lw": 1.0,
+				"fl": Vector3(-0.25, 0.78, 0.05), "hw": 1.0, "fr": Vector3(0.25, 0.78, 0.05), "rw": 1.0
+			}
+		],
+		[
+			0.18,
+			{
+				"p": -0.8, "sq": 0.48, "lift": -0.22, "legs": [0.95, -1.55, 0.85, -1.45], "lw": 1.0,
+				"fl": Vector3(-0.26, -0.86, -0.5), "hw": 1.0, "fr": Vector3(0.26, -0.86, -0.5), "rw": 1.0
+			}
+		],
+		[
+			0.26,
+			{
+				"p": -0.7, "sq": 0.4, "lift": -0.18, "legs": [0.9, -1.5, 0.8, -1.4], "lw": 1.0,
+				"fl": Vector3(-0.28, -0.8, -0.48), "hw": 1.0, "fr": Vector3(0.28, -0.8, -0.48), "rw": 1.0
+			}
+		],
+		[
+			0.38,
+			{
+				"p": 0.3, "sq": -0.2, "lift": 0.15, "legs": [0.3, -0.5, 0.25, -0.45], "lw": 1.0,
+				"fl": Vector3(-0.45, 0.82, -0.3), "hw": 1.0, "fr": Vector3(0.45, 0.82, -0.3), "rw": 1.0
+			}
+		],
+		[
+			0.60,
+			{
+				"p": 0.1, "sq": 0.05, "fl": Vector3(-0.35, 0.45, -0.3), "hw": 0.6, "fr": Vector3(0.35, 0.45, -0.3),
+				"rw": 0.6
+			}
+		],
+		[0.95, {}]]},
+	# Tremor Sense finding someone: sunk into a deep crouch, one palm flat on the ground, the head and
+	# shoulders cocked toward the feeling, the other fist up on guard
+	"breah_sense": {"keys": [
+		[0.00, {}],
+		[
+			0.12,
+			{
+				"r": 0.18, "p": -0.38, "y": 0.25, "sq": 0.35, "lift": -0.2, "legs": [0.95, -1.6, 0.7, -1.3],
+				"lw": 1.0, "fr": Vector3(0.22, -0.8, -0.32), "rw": 1.0, "fl": Vector3(-0.3, 0.15, -0.35), "hw": 0.8
+			}
+		],
+		[
+			0.45,
+			{
+				"r": 0.15, "p": -0.34, "y": 0.3, "sq": 0.32, "lift": -0.18, "legs": [0.9, -1.5, 0.7, -1.3],
+				"lw": 1.0, "fr": Vector3(0.22, -0.78, -0.3), "rw": 1.0, "fl": Vector3(-0.3, 0.15, -0.35), "hw": 0.8
+			}
+		],
+		[0.75, {}]]},
+	# ---------------------------------------------------------------- Ostra
+	# an orb: a flick of the casting hand from the shoulder
+	"ostra_orb": {"keys": [
+		[0.00, {}],
+		[0.04, {"gp": 0.25, "y": -0.2, "fr": Vector3(0.2, 0.25, 0.15), "rw": 1.0}],
+		[0.09, {"gp": -0.15, "y": 0.25, "p": -0.12, "fr": Vector3(0.05, 0.22, -0.62), "rw": 1.0}],
+		[0.30, {}]]},
+	# the Settled bolt: drawn back, then the arm flung out straight and the body kicked back by it
+	"ostra_orb_hot": {"keys": [
+		[0.00, {}],
+		[
+			0.06,
+			{
+				"gp": -0.35, "p": 0.2, "y": -0.4, "lift": 0.06, "sq": 0.1, "fr": Vector3(0.3, 0.3, 0.35), "rw": 1.0,
+				"fl": Vector3(-0.2, 0.1, -0.2), "hw": 0.6
+			}
+		],
+		[
+			0.11,
+			{
+				"gp": 0.15, "p": -0.3, "y": 0.45, "sq": -0.14, "fr": Vector3(0.0, 0.3, -0.85), "rw": 1.0,
+				"fl": Vector3(-0.3, 0.0, 0.2), "hw": 0.6
+			}
+		],
+		[0.22, {"gp": 0.7, "p": 0.18, "y": 0.3, "lift": 0.1, "fr": Vector3(0.0, 0.35, -0.7), "rw": 1.0}],
+		[0.50, {}]]},
+	# the Snap's wind-up: both hands drawn in to the chest round the dark orb, leaning back (it holds)
+	"ostra_snap_wind": {"hold": true, "keys": [
+		[0.00, {}],
+		[
+			0.18,
+			{
+				"gp": -0.5, "p": 0.34, "y": -0.3, "lift": 0.08, "sq": 0.12, "legs": [0.16, -0.3, 0.14, -0.28],
+				"lw": 1.0, "fl": Vector3(-0.04, 0.22, -0.12), "hw": 1.0, "fr": Vector3(0.06, 0.24, -0.1), "rw": 1.0
+			}
+		]]},
+	# ... released: the right palm thrust out flat, stretched on the release (0.05), then the recoil
+	# throws her back and up (0.15) and she drifts down to her hover
+	"ostra_snap": {"keys": [
+		[
+			0.00,
+			{
+				"gp": -0.5, "p": 0.34, "y": -0.3, "lift": 0.08, "sq": 0.12, "fl": Vector3(-0.04, 0.22, -0.12),
+				"hw": 1.0, "fr": Vector3(0.06, 0.24, -0.1), "rw": 1.0
+			}
+		],
+		[
+			0.05,
+			{
+				"gp": 0.1, "p": -0.5, "y": 0.4, "sq": -0.16, "fr": Vector3(0.0, 0.18, -0.95), "rw": 1.0,
+				"fl": Vector3(-0.35, 0.05, 0.25), "hw": 1.0
+			}
+		],
+		[
+			0.15,
+			{
+				"gp": 0.8, "p": 0.28, "y": 0.25, "lift": 0.16, "sq": 0.06, "fr": Vector3(0.0, 0.3, -0.7), "rw": 1.0,
+				"fl": Vector3(-0.35, 0.1, 0.25), "hw": 0.8
+			}
+		],
+		[0.50, {}]]},
+	# holding Shift: the lantern hand down and back, ready to lob underhand (it holds)
+	"ostra_swap_aim": {"hold": true, "keys": [
+		[0.00, {}],
+		[
+			0.16,
+			{
+				"gp": -0.7, "p": 0.12, "y": -0.25, "sq": 0.1, "legs": [0.2, -0.4, 0.15, -0.3], "lw": 1.0,
+				"fr": Vector3(0.28, -0.42, 0.28), "rw": 1.0, "fl": Vector3(-0.25, 0.15, -0.2), "hw": 0.7
+			}
+		]]},
+	# the lob: from low behind, the hand sweeps up and out high (0.14, it leaves), the body rising with
+	# it on its toes, a floaty follow-through
+	"ostra_swap": {"keys": [
+		[0.00, {"gp": -0.7, "p": 0.12, "y": -0.25, "sq": 0.1, "fr": Vector3(0.28, -0.42, 0.28), "rw": 1.0}],
+		[0.06, {"gp": -0.9, "p": -0.18, "sq": 0.18, "lift": -0.04, "fr": Vector3(0.24, -0.5, 0.12), "rw": 1.0}],
+		[
+			0.14,
+			{
+				"gp": 1.3, "p": 0.35, "sq": -0.2, "lift": 0.22, "fr": Vector3(0.1, 0.95, -0.55), "rw": 1.0,
+				"fl": Vector3(-0.35, 0.1, -0.05), "hw": 0.9
+			}
+		],
+		[0.40, {"gp": 0.8, "p": 0.2, "lift": 0.14, "fr": Vector3(0.1, 0.6, -0.45), "rw": 0.7}],
+		[0.85, {}]]},
+	# arriving: she pops into being stretched tall with her arms up (0.0), squashes hard as she settles into
+	# the spot with the arms and hem flung wide (0.08), overshoots tall again (0.15, the pop) and floats down
+	"ostra_arrive": {"keys": [
+		[
+			0.00,
+			{
+				"gp": 0.6, "lift": 0.35, "sq": -0.4, "fl": Vector3(-0.12, 0.62, 0.0), "hw": 1.0,
+				"fr": Vector3(0.12, 0.62, 0.0), "rw": 1.0
+			}
+		],
+		[
+			0.08,
+			{
+				"gp": -0.5, "lift": -0.1, "sq": 0.32, "p": -0.25, "legs": [0.5, -0.9, 0.45, -0.85], "lw": 1.0,
+				"fl": Vector3(-0.66, 0.08, 0.05), "hw": 1.0, "fr": Vector3(0.66, 0.08, 0.05), "rw": 1.0
+			}
+		],
+		[
+			0.15,
+			{
+				"gp": 0.3, "lift": 0.14, "sq": -0.16, "p": 0.1, "fl": Vector3(-0.5, 0.3, 0.0), "hw": 0.9,
+				"fr": Vector3(0.5, 0.3, 0.0), "rw": 0.9
+			}
+		],
+		[
+			0.30,
+			{
+				"lift": 0.02, "sq": 0.06, "fl": Vector3(-0.4, 0.12, 0.0), "hw": 0.6, "fr": Vector3(0.4, 0.12, 0.0),
+				"rw": 0.6
+			}
+		],
+		[0.60, {}]]},
+	# Brimseed: the hand raised with the seed (0.08), then the palm turned down and opened over the spot
+	"ostra_seed": {"keys": [
+		[0.00, {}],
+		[0.08, {"gp": 0.9, "p": 0.15, "lift": 0.08, "fr": Vector3(0.12, 0.55, -0.2), "rw": 1.0}],
+		[
+			0.20,
+			{
+				"gp": -0.7, "p": -0.35, "sq": 0.14, "fr": Vector3(0.1, -0.1, -0.7), "rw": 1.0,
+				"fl": Vector3(-0.3, 0.1, 0.1), "hw": 0.6
+			}
+		],
+		[0.50, {"gp": -0.3, "p": -0.1, "fr": Vector3(0.1, 0.0, -0.45), "rw": 0.6}],
+		[0.80, {}]]},
+	# the pop: both fists clenched in to the chest (the implosion, 0.08), then flung open wide (0.2)
+	"ostra_pop": {"keys": [
+		[0.00, {}],
+		[
+			0.08,
+			{
+				"gp": -0.5, "p": 0.25, "sq": 0.22, "lift": -0.04, "fl": Vector3(-0.05, 0.2, -0.12), "hw": 1.0,
+				"fr": Vector3(0.05, 0.2, -0.12), "rw": 1.0
+			}
+		],
+		[
+			0.20,
+			{
+				"gp": 0.9, "p": -0.2, "sq": -0.15, "lift": 0.12, "fl": Vector3(-0.7, 0.35, -0.1), "hw": 1.0,
+				"fr": Vector3(0.7, 0.35, -0.1), "rw": 1.0
+			}
+		],
+		[0.60, {}]]},
+	# Nightwell: the lantern hand thrust up and out at the spot (0.1), held while the dome shows, then down
+	"ostra_well": {"keys": [
+		[0.00, {}],
+		[
+			0.05,
+			{
+				"gp": -0.5, "p": 0.25, "y": -0.35, "sq": 0.14, "fr": Vector3(0.25, -0.1, 0.3), "rw": 1.0,
+				"fl": Vector3(-0.2, 0.2, -0.1), "hw": 0.8
+			}
+		],
+		[
+			0.10,
+			{
+				"gp": 0.9, "p": -0.45, "y": 0.3, "sq": -0.2, "lift": 0.2, "fr": Vector3(0.05, 0.85, -0.8),
+				"rw": 1.0, "fl": Vector3(-0.4, 0.0, 0.3), "hw": 1.0
+			}
+		],
+		[
+			0.40,
+			{
+				"gp": 0.7, "p": -0.35, "y": 0.25, "lift": 0.16, "fr": Vector3(0.05, 0.8, -0.72), "rw": 1.0,
+				"fl": Vector3(-0.38, 0.0, 0.28), "hw": 0.9
+			}
+		],
+		[0.80, {}]]},
+	# the well opens: the raised hand clenches shut and pulls down to the chest, a quarter turn with it
+	"ostra_well_snap": {"keys": [
+		[0.00, {}],
+		[
+			0.06,
+			{
+				"gp": -0.6, "p": 0.3, "y": 0.5, "sq": 0.2, "fr": Vector3(0.05, 0.2, -0.15), "rw": 1.0,
+				"fl": Vector3(-0.05, 0.2, -0.15), "hw": 1.0
+			}
+		],
+		[0.18, {"gp": 0.3, "p": 0.1, "y": 0.2, "sq": 0.05, "fr": Vector3(0.1, 0.1, -0.25), "rw": 0.7}],
+		[0.40, {}]]},
+	# Swollen: lifted off the ground, arms flung up and wide, one full turn in the air, then down
+	"ostra_empower": {"keys": [
+		[0.00, {}],
+		[
+			0.10,
+			{
+				"gp": -0.4, "sq": 0.2, "lift": -0.05, "fl": Vector3(-0.2, -0.2, 0.0), "hw": 1.0,
+				"fr": Vector3(0.2, -0.2, 0.0), "rw": 1.0
+			}
+		],
+		[
+			0.30,
+			{
+				"gp": 1.2, "sq": -0.22, "lift": 0.45, "fy": 3.14, "fl": Vector3(-0.55, 0.85, 0.0), "hw": 1.0,
+				"fr": Vector3(0.55, 0.85, 0.0), "rw": 1.0
+			}
+		],
+		[
+			0.55,
+			{
+				"gp": 1.0, "sq": -0.1, "lift": 0.35, "fy": 6.28, "fl": Vector3(-0.5, 0.7, 0.0), "hw": 1.0,
+				"fr": Vector3(0.5, 0.7, 0.0), "rw": 1.0
+			}
+		],
+		[0.65, {"gp": 0.4, "lift": 0.2, "fy": 6.28}],
+		[0.90, {"fy": 6.28}]]},
+}
+
+# ---------------------------------------------------------------- locomotion (HunterAnim asks per frame)
+## m: Ostra floats this high over her ground point (visual only: her hitbox and ring stay on the ground)
+const HOVER_H := 0.3
+const HOVER_BOB := 0.03                # m, up and down
+const HOVER_HZ := 0.6                  # bobs a second
+const HOVER_GAIT := 0.1                # her legs barely walk; the hem trails instead
+
+## How much a hero's legs walk (1: a full step cycle).
+static func gait(arch: String) -> float:
+	return HOVER_GAIT if arch == "ostra" else 1.0
+
+## How high a hero's body floats over its feet at time `t` (s), with a slow bob.
+static func hover(arch: String, t: float) -> float:
+	if arch != "ostra":
+		return 0.0
+	return HOVER_H + sin(t * TAU * HOVER_HZ) * HOVER_BOB

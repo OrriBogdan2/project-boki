@@ -2,7 +2,7 @@ class_name KitCard
 extends PanelContainer
 ## One archetype's whole kit on one page (docs/ARCHETYPES.md): dash, passive and its resource, LMB,
 ## RMB (with its variants), E and R, each with an icon, its key, a one-line description and a tiny
-## looping preview; a one-line "how the kit fits together"; and the Boki's own C ability and what its
+## looping preview; a one-line "how the kit fits together"; and the Boki's own ability (its key) and what its
 ## type does to the kit (infusion). Clicking a tile opens that ability's detail page in the same
 ## frame (no pagination, no resizing: the card is always SIZE). Used in the Arena / training (K) and
 ## on the expedition loadout (KitCard.strip, a compact row that opens the full card).
@@ -16,28 +16,28 @@ const KEYS := {"dash": "Shift", "passive": "", "lmb": "LMB", "rmb": "RMB", "e": 
 ## The key cap on a slot's tile: the Merge tile unless the class ultimates are on, the hunter's own
 ## ultimate on its X tile.
 static func _cap(slot: String) -> String:
-	if slot == "r":
-		return Settings.key_cap("hunter_ult" if KinCommand.class_ults() else "ultimate")
 	if slot == "x":
 		return Settings.key_cap("hunter_ult")
+	if slot == "r":
+		return Settings.key_cap("hunter_ult" if KinCommand.class_ults() else "ultimate")
 	return String(KEYS[slot])
 
 const LABEL := {"dash": "Dash", "passive": "Passive", "lmb": "Attack", "rmb": "Right click", "e": "Utility", "r": "Ultimate",
 	"x": "Ultimate"}
 ## Which looping preview each archetype's abilities get (KitPreview kinds).
 const PREVIEW := {
-	"thief": {"dash": "dash", "passive": "marks", "rmb": "projectile", "e": "knife", "r": "lines"},
-	"archer": {"dash": "grapple", "passive": "meter", "rmb": "heavy", "e": "rainwall", "r": "arrows3"},
-	"mage": {"dash": "dash2", "passive": "marks", "rmb": "heavy", "e": "zone"},
-	"gunslinger": {"dash": "dash", "passive": "pips", "rmb": "projectile", "e": "lines"},
-	"juggernaut": {"dash": "dash2", "passive": "meter", "rmb": "charge", "e": "grapple", "r": "leap"},
-	"bulwark": {"dash": "charge", "passive": "meter", "rmb": "shield", "e": "zone", "r": "fissure"},
+	"thief": {"dash": "dash", "passive": "marks", "rmb": "projectile", "e": "knife", "x": "lines"},
+	"archer": {"dash": "grapple", "passive": "meter", "rmb": "heavy", "e": "rainwall", "x": "arrows3"},
+	"mage": {"dash": "dash2", "passive": "marks", "rmb": "heavy", "e": "zone", "x": "leap"},
+	"gunslinger": {"dash": "dash", "passive": "pips", "rmb": "projectile", "e": "lines", "x": "zone"},
+	"juggernaut": {"dash": "dash2", "passive": "meter", "rmb": "charge", "e": "grapple", "x": "leap"},
+	"bulwark": {"dash": "charge", "passive": "meter", "rmb": "shield", "e": "zone", "x": "fissure"},
 	"dredge": {"dash": "dash2", "passive": "meter", "rmb": "grapple", "e": "charge", "x": "shots"},
 	"ashwick": {"dash": "dash", "passive": "meter", "rmb": "projectile", "e": "zone", "x": "steer"},
 	"tender": {"dash": "dash", "passive": "marks", "rmb": "projectile", "e": "zone"},
 	"rimewright": {"dash": "charge", "passive": "marks", "rmb": "projectile", "e": "shield"},
-	"dolm": {"dash": "dash2", "passive": "meter", "rmb": "heavy", "e": "zone"},
-	"ostra": {"dash": "blink", "passive": "meter", "rmb": "projectile", "e": "zone"},
+	"dolm": {"dash": "dash2", "passive": "meter", "rmb": "heavy", "e": "zone", "x": "fissure"},
+	"ostra": {"dash": "blink", "passive": "meter", "rmb": "projectile", "e": "zone", "x": "zone"},
 }
 
 var arch := ""
@@ -76,7 +76,7 @@ func _build() -> void:
 	var nm := UI.label(Arch.name_of(arch).to_upper(), 30, col, UI.big)
 	hd.add_child(nm)
 	var wn: Array = Arch.weapons(arch).map(func(w): return String(Data.weapon_stats(w).get("name", w)))
-	var sub := UI.label("%s  ·  %s" % [String(d.get("weight", "")).to_upper(), "  /  ".join(wn)], 14, UI.MUTED, UI.big)
+	var sub := UI.label("  /  ".join(wn), 14, UI.MUTED, UI.big)
 	sub.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	hd.add_child(sub)
 	hd.add_child(UI.fill())
@@ -211,7 +211,7 @@ func _show_detail(slot: String) -> void:
 		p.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		v.add_child(p)
 
-## The Boki strip: its own C ability and how its type changes this kit.
+## The Boki strip: its own ability and how its type changes this kit.
 func _kin_strip() -> Control:
 	var p := PanelContainer.new()
 	p.add_theme_stylebox_override("panel", UI.frame(Color(1, 1, 1, 0.04), UI.R_CTRL, Color(1, 1, 1, 0.08), 1, 12, 8))
@@ -221,7 +221,8 @@ func _kin_strip() -> Control:
 	v.add_theme_constant_override("separation", 4)
 	p.add_child(v)
 	if ks == null:
-		v.add_child(UI.label("No Boki: bring one and its type infuses this kit (and gives you its own C ability).", 14, UI.MUTED))
+		var no_boki := "No Boki: bring one and its type infuses this kit (and gives you its own %s ability)."
+		v.add_child(UI.label(no_boki % Settings.key_cap("kin_ability"), 14, UI.MUTED))
 		return p
 	var kc: Color = Data.KIN.get(kin_sp, {}).get("color", Color.WHITE)
 	var top := HBoxContainer.new()
@@ -311,7 +312,7 @@ static func slot_text(a: String, slot: String) -> Dictionary:
 		"r" when not d.has("r"):
 			# no hero ultimate: R is the Boki's Merge (the Boki system owns it)
 			out.merge({"name": "Boki Merge", "icon": "bond", "col": Color("ffd27a"), "tag": "Boki system", "line": "Your Boki fuses with you; its kind decides the form."}, true)
-			out["detail"] = [["", "%s is not a hero ability here: it is the Boki Merge. Your Boki fuses with you and its kind sets the merged form." % Settings.key_cap("ultimate")]]
+			out["detail"] = [["", "%s is not a Hunter ability here: it is the Boki Merge. Your Boki fuses with you and its kind sets the merged form." % Settings.key_cap("ultimate")]]
 		"r":
 			# R is the Merge for every class (docs/decisions/0001); the class's own ultimate is held back behind
 			# boki_system.json class_ults until the hero-port work folds it into the kits
@@ -322,7 +323,7 @@ static func slot_text(a: String, slot: String) -> Dictionary:
 			out["detail"] = [["Merge", "Press %s with a full bond meter (it fills as your Boki lands hits, as you hit what it marked, and on combos). You take the Boki's colour and silhouette, and every ability of yours changes for the merge by its type and power." % Settings.key_cap("ultimate")],
 				["Boki out?", "It leaps back through anything in its way and merges you in mid-air."],
 				["No Boki", "A downed or lost Boki: only a weak 3 second surge."],
-				] + ([["Held back", "%s: %s (the class ultimate, off while the Merge is on %s)" % [String(sd["name"]), String(sd.get("desc", "")), Settings.key_cap("ultimate")]]] + _ranks(a, "ult") if not sd.is_empty() else [])
+				] + ([["Held back", "%s: %s (the Hunter's own ultimate, off while the Merge is on %s)" % [String(sd["name"]), String(sd.get("desc", "")), Settings.key_cap("ultimate")]]] + _ranks(a, "ult") if not sd.is_empty() else [])
 	return out
 
 ## The ranks to come, in order (rank 2's concrete change first, then rank 3's special), as one row

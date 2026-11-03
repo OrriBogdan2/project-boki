@@ -829,11 +829,11 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 	for sd in ["L", "R"]:
 		for nd in arms[sd]:
 			merge_static(nd)
-	if weapon != "twin_blades":
+	if weapon not in ["twin_blades", "arc_bolts"]:
 		merge_static(gun)      # (the twin blades' second dagger is handed to the left hand by HunterAnim)
 	# the race's proportions: head size, how broad the body is, overall height
 	var hkk := float(race["head"]) * (1.06 if arch == "thief" else 1.12)    # big-headed like a hero brawler (faces read from the match camera), heroic not chibi; the thief leaner
-	var bk := float(race["bulk"])
+	var bk := float(race["bulk"]) * float(HeroGearPair.body(arch)["bulk"])
 	head.scale = Vector3.ONE * hkk
 	head.position.y += (hkk - 1.0) * 0.05
 	if bk != 1.0:
@@ -876,9 +876,17 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 	root.set_meta("wid", weapon)
 	HunterAnim.rest_pose(root)       # hands on the weapon even where nothing animates it (portraits, galleries)
 	var rs := float(race["scale"])
-	var ck := float(CLASS_LOOK.get(cls, {}).get("size", 1.0)) * float(Arch.body(arch).get("size", 1.0))
-	root.scale = Vector3.ONE * float(Data.CLASSES[cls]["scale"]) * rs * ck
-	ring.scale = Vector3.ONE / (rs * ck)       # the ring under your feet shows the real hitbox, whatever your size
+	var ck := float(CLASS_LOOK.get(cls, {}).get("size", 1.0))
+	var body := Arch.body(arch)
+	var size_k := float(body.get("size", 1.0)) * float(HeroGearPair.body(arch)["size"])
+	var bulk := float(body.get("bulk", 1.0))
+	root.scale = Vector3(bulk, 1.0, bulk) * float(Data.CLASSES[cls]["scale"]) * rs * ck * size_k
+	# the ring under your feet shows the real hitbox, whatever your size
+	var hit_k := Arch.hit_r(arch, Data.CLASSES[cls]) / float(Data.CLASSES[cls]["hit_r"])
+	ring.scale = Vector3(1.0 / bulk, 1.0, 1.0 / bulk) * hit_k / (rs * ck * size_k)
+	var torso_node := root.find_child("Torso", true, false) as Node3D
+	if torso_node != null:
+		torso_node.scale.x *= float(body.get("chest", 1.0))
 	return root
 
 ## Moves a hunter's toon material onto the hero shader (hero_toon.gdshader) with the same settings,
@@ -1584,15 +1592,7 @@ static func gun_parts(gun: Node3D, weapon: String, m_gun: Material, m_dark: Mate
 			part(gun, cyl(0.04, 0.036, 0.04, 10), glow.call(Color("d6a8ff")), Vector3(0, 0.02, -0.49), Vector3.ONE, Vector3(PI / 2, 0, 0))
 			grip.call(-0.02, 0.14)
 			stock.call(0.09, 0.18, 0.1, 0.05)
-		"shotgun":
-			part(gun, box(0.13, 0.14, 0.4), m_gun, Vector3(0, 0, -0.12))
-			for sx in [-0.038, 0.038]:
-				part(gun, cyl(0.04, 0.042, 0.36, 12), m_dark, Vector3(sx, 0.03, -0.5), Vector3.ONE, Vector3(PI / 2, 0, 0))
-				part(gun, cyl(0.05, 0.046, 0.05, 12), m_gun, Vector3(sx, 0.03, -0.68), Vector3.ONE, Vector3(PI / 2, 0, 0))
-			part(gun, HeroKit.loft("pump", [Vector3(0, 0, -0.3), Vector3(0, 0, -0.38), Vector3(0, 0, -0.46)], [Vector2(0.075, 0.05), Vector2(0.08, 0.055), Vector2(0.075, 0.05)], 14, Vector3.UP, 0.9), m_acc, Vector3(0, -0.06, 0))
-			part(gun, box(0.02, 0.03, 0.22), glow.call(Color("ffb070")), Vector3(0.068, 0.03, -0.14))
-			grip.call(0.0, 0.16)
-			stock.call(0.08, 0.28, 0.14, 0.07)
+		"shotgun": HeroGearPair.scattergun(gun, m_gun, m_dark, m_acc)      # Dredge's harbour scattergun
 		"slugger":
 			part(gun, cyl(0.1, 0.12, 0.78, 14), m_gun, Vector3(0, 0, -0.26), Vector3.ONE, Vector3(PI / 2, 0, 0))
 			part(gun, cyl(0.15, 0.15, 0.1, 14), m_acc, Vector3(0, 0, -0.64), Vector3.ONE, Vector3(PI / 2, 0, 0))
@@ -1663,7 +1663,7 @@ static func gun_parts(gun: Node3D, weapon: String, m_gun: Material, m_dark: Mate
 			part(gun, box(0.09, 0.05, 0.16), m_acc, Vector3(0, 0.05, 0.06))
 			grip.call(-0.02, 0.15)
 		"quill_rifle":
-			# Marlowe's drum rifle: a squat receiver, a drum of burr charges under it, a long needle barrel
+			# Venator's drum rifle: a squat receiver, a drum of burr charges under it, a long needle barrel
 			var bronze := shiny(Color("b9732f"), 0.6)
 			part(gun, box(0.1, 0.12, 0.42), m_gun, Vector3(0, 0, -0.12))
 			part(gun, cyl(0.1, 0.1, 0.1, 14), bronze, Vector3(0, -0.12, -0.14), Vector3.ONE, Vector3(0, 0, PI / 2))

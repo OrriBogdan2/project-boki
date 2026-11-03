@@ -1,10 +1,10 @@
 extends RefCounted
 ## --dash-dir-check: a plain dash follows the "Dash toward the cursor" setting for every hunter. With it off
 ## (the default) you dash the way you're moving even while aiming the other way; with it on you dash at the
-## cursor. Hunters whose Shift is aimed movement by design (Archer's grapple, Mage's blink, Ostra's swap
-## and Bulwark's shield charge) are left out. Never touches the save.
+## cursor. Hunters whose Shift is aimed movement by design (Archer's grapple, Mage's blink, Ostra's swap,
+## Breah's leap to a target area and Bulwark's shield charge) are left out. Never touches the save.
 
-const AIMED := ["archer", "mage", "ostra"]
+const AIMED := ["archer", "mage", "ostra", "dolm"]
 
 var bad := 0
 
@@ -64,6 +64,8 @@ func _dash_back(m: Match) -> float:
 	hunter.do_dash()
 	if hunter.ak is RimewrightKit:
 		return ((hunter.ak as RimewrightKit).rinkrun["dir"] as Vector2).y * 3.0     # (its Rink Run steers along this)
+	if hunter.ak is JuggernautKit:
+		return (hunter.ak as JuggernautKit).rampage_dir.y * 3.0     # (it drives this way after its crouch)
 	return hunter.roll_dir.y * hunter.roll_speed * hunter.roll_t
 
 func run(main: Node) -> void:

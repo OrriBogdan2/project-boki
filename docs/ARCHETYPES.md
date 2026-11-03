@@ -1,5 +1,7 @@
 # Archetypes
 
+Naming: players see these as **classes** ("archetype" is the internal word: ids, files and save keys keep it, and the weight (Light, Medium, Heavy) is what used to be called the class).
+
 Status: **built** (branch `archetypes`; see "Implementation status" at the end for what's in, what's
 a subset and the gaps). It describes six archetypes, two per weight class. Each one is a
 whole character: a dash, a passive, LMB, RMB with contextual variants, E (usually utility) and R
@@ -1197,10 +1199,10 @@ theirs. Rather than drop the wiki's ultimates, each is folded into the kit where
 assert each combination. The class-ultimate framework (`ArchKit.use_r`, `class_ults`) stays for the
 other four kits; a kit with no `"r"` in its JSON refuses the press.
 
-## Hero rebuild: Vireo (mage) and Marlowe (gunslinger), Nov 1
+## Hero rebuild: Vireo (mage) and Venator (gunslinger), Nov 1
 
 The Mage (medium, Hex/Runes) and the Gunslinger (Chambers/Called Shot) kits are replaced by two new
-heroes under the same ids: **Vireo** (id `mage`, now Light: Sparks, Wirerun, Coilshot, Skycall) and **Marlowe**
+heroes under the same ids: **Vireo** (id `mage`, now Light: Sparks, Wirerun, Coilshot, Skycall) and **Venator**
 (id `gunslinger`, Medium: Fever, Slipstep, Burr Charge, Longneedle). Neither has an R (the Boki Merge owns it).
 The old Mage and Gunslinger sections above are history. Per-slot tables, research notes and combinations:
 `docs/heroes/mage.md` and `docs/heroes/gunslinger.md`; combos are checked by `--mage-combo-check` and
@@ -1218,10 +1220,10 @@ games' heroes). Mechanics only: every name, number, text, look and sound in the 
 | `archer` | Archer | [Myth](https://supervive.wiki.gg/wiki/Myth) | Accuracy pass: `docs/heroes/archer.md` |
 | `bulwark` | Bulwark | [Oath](https://supervive.wiki.gg/wiki/Oath) | Accuracy pass: `docs/heroes/bulwark.md` |
 | `mage` | Vireo | [Joule](https://supervive.wiki.gg/wiki/Joule) | `docs/heroes/mage.md` |
-| `gunslinger` | Marlowe | [Ghost](https://supervive.wiki.gg/wiki/Ghost) | `docs/heroes/gunslinger.md` |
-| `ashwick` | Ashwick | [Felix](https://supervive.wiki.gg/wiki/Felix) | `docs/heroes/ashwick.md` |
+| `gunslinger` | Venator | [Ghost](https://supervive.wiki.gg/wiki/Ghost) | `docs/heroes/gunslinger.md` |
+| `ashwick` | Linwick (was Ashwick) | [Felix](https://supervive.wiki.gg/wiki/Felix) | `docs/heroes/ashwick.md` |
 | `dredge` | Dredge | [Kingpin](https://supervive.wiki.gg/wiki/Kingpin) | `docs/heroes/dredge.md` |
-| `tender` | Linnet, the Tender | [Elluna](https://supervive.wiki.gg/wiki/Elluna) | `docs/heroes/tender.md` |
+| `tender` | Moosh Moosh, the Tender | [Elluna](https://supervive.wiki.gg/wiki/Elluna) | `docs/heroes/tender.md` |
 | `rimewright` | Tamsin, the Rimewright | [Celeste](https://supervive.wiki.gg/wiki/Celeste) | `docs/heroes/rimewright.md` |
-| `dolm` | Dolm | [Tetra](https://supervive.wiki.gg/wiki/Tetra) | `docs/heroes/dolm.md` |
+| `dolm` | Breah | [Tetra](https://supervive.wiki.gg/wiki/Tetra) | `docs/heroes/dolm.md` |
 | `ostra` | Ostra | [Void](https://supervive.wiki.gg/wiki/Void) | `docs/heroes/ostra.md` |

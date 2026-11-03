@@ -1,4 +1,4 @@
-"""Synthesizes the payoff sounds of Dolm and Ostra into audio/*.wav (mono, 22.05kHz, 16-bit).
+"""Synthesizes the payoff sounds of Breah (dolm) and Ostra into audio/*.wav (mono, 22.05kHz, 16-bit).
 
     python3 tools/gen_pair_sfx.py           (then: godot --headless --import)
 

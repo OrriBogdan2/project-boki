@@ -714,6 +714,7 @@ func _start(o: Dictionary) -> void:
 	_combo_cb = func(t, st, by, dur): Combos.record(t, st, by, dur)
 	CombatBus.hit_landed.connect(_bond_cb)
 	CombatBus.status_applied.connect(_combo_cb)
+	add_child(HunterFeats.new(self))      # the feats Hunter challenges count
 	cam = CamRig.new(); cam.name = "Cam"; add_child(cam)
 	cam.lead = float(Settings.get_v("cam_lead"))
 	cam_style = String(Settings.get_v("cam_style"))
@@ -821,7 +822,7 @@ func _start(o: Dictionary) -> void:
 		duel = Duel.new()
 		duel.setup(self)
 		duel.attach_keys()
-		hud.toast("Duel room  ·  B sets up the bot  ·  X resets", Color("f3eee2"))
+		hud.toast("Duel room  ·  B sets up the bot  ·  Backspace resets", Color("f3eee2"))
 	if player and duel == null and not opts.get("tutorial", false) and (opts.get("arena", false) or opts.get("practice", false)):
 		# the Arena, and the same practice tools on the training island (dummies, swaps, kit card)
 		arena = Arena.new()
@@ -3307,7 +3308,9 @@ func _update_shots(dt: float) -> void:
 			# terrain and rocks
 			var gp := world.ground_at(p.x, p.z)
 			var over_ok: bool = sx.has("dy") and gp <= float(sx["gmax"]) + 0.05
-			if world.is_block(p.x, p.z) and gp + World.BLOCK_H > p.y or (gp > p.y and not over_ok):
+			# rocks: a Grapnel flies over rocks and props
+			var rock_hit: bool = world.is_block(p.x, p.z) and gp + World.BLOCK_H > p.y and not sx.get("rocks", false)
+			if rock_hit or (gp > p.y and not over_ok):
 				if int(sx.get("bounce", 0)) > 0:
 					# ricochet: flip whichever way took it into the wall and keep going
 					var back := p - step / n
@@ -4930,6 +4933,7 @@ func _open_chest(h: Hunter, c: Dictionary, from_net := false) -> void:
 		return      # (opening costs exactly one key; another game's open already paid in that game)
 	c["open"] = true
 	if blight: blight.noise(c["pos"], "chest", h)      # a chest lid is loud
+	if h: h.add_stat("chests")
 	if net_on and not from_net:
 		net_event(["chest", chests.find(c), h.nid if h else ""])
 	if h == player:
@@ -5893,6 +5897,7 @@ func _finish() -> void:
 		if not opts.get("tutorial", false) and not opts.get("loaner", false):
 			r["rift_keys"] = player.rift_keys if result.get("extracted", false) else 0
 		r["stats"] = player.stats.duplicate()
+		r["lvl"] = player.lvl      # (class unlock goals: best level in a match)
 		# weapons, gloves and treasure: home to the armory if you made it out, else what stayed behind
 		if result.get("extracted", false):
 			r["haul"] = Pack.haul(player)
@@ -6740,6 +6745,8 @@ func _update_aim(alpha: float) -> void:
 		return
 	var p := player
 	var show := p != null and not p.out and not p.extracted and not p.downed and not paused
+	if show and p.ak != null and p.ak.own_aim_line():
+		show = false          # the kit draws its own (two lines read as two aims)
 	aim_line.visible = show
 	aim_ring.visible = false
 	muzzle_light.light_energy = 0.0
@@ -6748,7 +6755,9 @@ func _update_aim(alpha: float) -> void:
 	var at := p.prev.lerp(p.pos, alpha)
 	var aim: Vector3 = p.inp["aim"]
 	var d := Vector2(aim.x - at.x, aim.z - at.z)
-	var dist := minf(d.length(), float(p.wpn["range"]))
+	# max-range weapons: the line runs past the cursor
+	var to_max := String(p.wpn.get("aim", "")) == "max"
+	var dist := float(p.wpn["range"]) if to_max else minf(d.length(), float(p.wpn["range"]))
 	if dist > 0.6:
 		var dir := d.normalized()
 		var y := at.y + 0.95 * float(p.cdat["scale"])
