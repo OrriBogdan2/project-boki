@@ -282,7 +282,7 @@ func _combos(m: Match, hero: String, slot: String) -> void:
 	for move in DashFlow.MOVES:
 		var kept := _hold(m, slot, move)
 		var hrow := _mode(hero, "hold", slot, move)
-		_judge(kept.begins_with(hrow), kept, "%s hold %s through %s: %s (row: %s)" % [hero, slot, move, kept, hrow])
+		_judge(kept == hrow, kept, "%s hold %s through %s: %s (row: %s)" % [hero, slot, move, kept, hrow])
 
 ## A trial that couldn't be set up here ("n/a ...") is skipped, not judged.
 func _judge(right: bool, got: String, what: String) -> void:
