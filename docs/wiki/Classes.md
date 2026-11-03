@@ -52,7 +52,7 @@ your class in the Expedition menu, and you can try every class against dummies i
 | Hunter | Health / dashes | Weapons | Passive | Dash | RMB | E | R |
 |---|---|---|---|---|---|---|---|
 | [Dancer](Class-Dancer.md) | 124 / 1 | Arc Bolts | Marks | Vault | Bola | Shadow Knife | none (Boki Merge) |
-| [Pin](Class-Pin.md) | 124 / 1 | Longbow | Focus | Spirit Walk | Snare | Hail Wall | none (Boki Merge) |
+| [Pin](Class-Pin.md) | 124 / 1 | Longbow | Focus | Spirit Walk | Heavy Shot | Hail Wall | none (Boki Merge) |
 | [Vireo](Class-Vireo.md) | 124 / 1 | Coilcaster | Static | Wirerun | Storm Rod | Skycall | none (Boki Merge) |
 | [Venator](Class-Venator.md) | 145 / 1 | Quill Rifle | Hot Streak | Slipstep | Burr Charge | Longneedle | none (Boki Merge) |
 | [Zedran](Class-Zedran.md) | 193 / 2 | Greatsword | Rage | Rampage | Smash | Warchain | none (Boki Merge) |
@@ -61,7 +61,7 @@ your class in the Expedition menu, and you can try every class against dummies i
 | [Linwick](Class-Linwick.md) | 193 / 2 | Torch Lance | Flashover | Soot Ram | Cinder Shot | Furnace Cloak | none (Boki Merge) |
 | [Moosh Moosh](Class-Moosh-Moosh.md) | 145 / 1 | Ember Cast | Bearer | Relay Step | Burrseed | Hearthlight | none (Boki Merge) |
 | [Tamsin](Class-Tamsin.md) | 124 / 1 | Hoar Fan | Hoarfrost | Skate | Ice Spear | Rink Wall | none (Boki Merge) |
-| [Breah](Class-Breah.md) | 145 / 1 | Rubble Fists | Tremor Sense | Rubble Leap | Quakefall | Stone Row | none (Boki Merge) |
+| [Breah](Class-Breah.md) | 145 / 1 | Rubble Fists | Molten Guard | Rubble Leap | Quakefall | Stone Row | none (Boki Merge) |
 | [Ostra](Class-Ostra.md) | 145 / 1 | Tether Lantern | Swell | Lantern Trade | Shard Snap | Brimseed | none (Boki Merge) |
 
 ### How Hunters unlock
@@ -142,7 +142,7 @@ Each Hunter has its own mastery goals, counted only in expeditions played as tha
 
 ### Run levels
 
-Every expedition starts at level 1 with one skill point and every ability locked. Each level gives a point. Ranks per slot: RMB 3, Glove (Q) 3, Dash (Shift) 3, E 3, R (ultimate) 2. The ultimate opens at level 6 (rank 2 at 9).
+Every expedition starts at level 1 with one skill point and every ability locked. Each level gives a point. Ranks per slot: RMB 3, Dash (Shift) 3, E 3, R (ultimate) 2. The ultimate opens at level 6 (rank 2 at 9).
 
 | Level | Total XP |  |
 |---|---|---|

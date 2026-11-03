@@ -5,7 +5,7 @@ extends RefCounted
 ##     its augments (`aug`: LMB rider, RMB and E add-ons, the form dash, a passive), run by MergeAugment. You keep
 ##     your own hero's abilities (docs/decisions/0004).
 ##   - the fallback every other Boki gets until its form is written (docs/DEBT.md): the Boki's own merge
-##     (content/merges_v2) plus a look, the type's rider on LMB and its dodge burst as the form dash
+##     (content/merges_v2) plus a look, the type's rider on LMB and its trail as the form dash
 ##     (content/rules/merge_forms.json). No tiers, no scaling by level or trust.
 ## The form is a plain Dictionary kept in Hunter.merge_st["form"]:
 ##   {id, kit, name, type, color, glow, accent, parts, style, word, haste, aug, size, ring, dur, surge, def}
@@ -79,7 +79,8 @@ static func of(h: Hunter) -> Dictionary:
 static func aug_of(f: Dictionary) -> Dictionary:
 	return f.get("aug", {})
 
-## A fallback form's augments, from its Boki type: the type's rider on every attack, its dodge burst as the form dash.
+## A fallback form's augments, from its Boki type: the type's rider on every attack, and as the form dash a rush
+## that leaves the type's trail.
 static func _fallback_aug(td: Dictionary) -> Dictionary:
 	var r: Dictionary = td["rider"]
 	var lmb := {"name": String(td["word"]).capitalize(), "icon": "bolt", "desc": "Every hit carries the %s rider." % String(td["word"]).to_lower()}
@@ -91,6 +92,9 @@ static func _fallback_aug(td: Dictionary) -> Dictionary:
 	if r.has("chain"):
 		lmb["chain"] = 1
 		lmb["chain_dmg"] = float(r["chain"])
-	var dash: Dictionary = (td["dash"] as Dictionary).duplicate()
-	dash["kind"] = "burst"
+	var dash: Dictionary = (data()["fallback"]["dash"] as Dictionary).duplicate()
+	dash.merge(td["dash"])
+	var word := String(td["word"]).to_lower()
+	var said := "Your dash leaves a %s trail: what you pass through takes %s damage and the rider, then %ss of haste."
+	dash["desc"] = said % [word, KinText.n(float(dash["dmg"])), KinText.n(float(dash["haste_s"]))]
 	return {"lmb": lmb, "dash": dash, "stats": {}}

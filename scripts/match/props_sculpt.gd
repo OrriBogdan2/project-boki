@@ -183,6 +183,17 @@ static func _crack(root: Node3D, m: Material, at: Vector3, n: Vector3, t: Vector
 		b.basis = Basis(d2, n.cross(d2).normalized(), n).orthonormalized()
 		p += d2 * l
 
+## The powder keg's own warning mark: a dark disc on the band's yellow with an eight-ray burst.
+static func _burst_mark(root: Node3D, a: float, disc_m: Material, ray_m: Material) -> void:
+	var out := Vector3(cos(a), 0, sin(a))
+	var at := out * 0.3 + Vector3(0, 0.34, 0)
+	var d := Models.cyl(0.085, 0.085, 0.02, 14)
+	var disc := Models.part(root, d, disc_m, at)
+	disc.rotation = Vector3(0, -a, PI / 2)
+	for k in 4:
+		var ray := Models.part(root, bx(0.14, 0.018, 0.012), ray_m, at + out * 0.014)
+		ray.rotation = Vector3(0, -a + PI / 2, PI * k / 4.0)
+
 ## Things you smash: smaller, dusty and matte, with cracks and splinters, never glowing (the powder
 ## keg keeps its hazard band and a tiny ember on the fuse, as a warning, not as loot).
 static func breakable(kind_s: String) -> Node3D:
@@ -246,8 +257,8 @@ static func breakable(kind_s: String) -> Node3D:
 				var a := TAU * k / 3.0 + 0.4
 				var n := Vector3(cos(a), 0, sin(a))
 				_crack(root, crk, n * 0.272 + Vector3(0, 0.42, 0), n, Vector3(0, -1, 0) + n.cross(Vector3.UP) * 0.3, 0.2, rr)
-		"barrel", "cask":
-			var cask := kind_s == "cask"
+		"barrel", "cask", "keg":
+			var cask := kind_s != "keg"
 			var red := _matte(Color("8a7058") if cask else Color("a8473c"), 2)
 			var dkred := _matte(Color("4e3a2a") if cask else Color("622a24"), 2)
 			var iron := _matte(Color("44404a"), 3); var hz := _matte(Color("d8b44a"), 1)
@@ -266,12 +277,14 @@ static func breakable(kind_s: String) -> Node3D:
 				_finish(root)
 				root.set_meta("mats", mats)
 				return root
-			# a hazard band, a skull-ish warning patch and a fuse stub with a small ember on top
-			Models.part(root, Models.cyl(0.29, 0.29, 0.07, 18), hz, Vector3(0, 0.34, 0))
-			for i in 6:
-				var a := TAU * i / 6.0
-				var st := Models.part(root, bx(0.04, 0.075, 0.012), dkred, Vector3(cos(a) * 0.293, 0.34, sin(a) * 0.293))
+			# a wide yellow band slashed with black, a burst mark on two sides, and a fuse stub with an ember
+			Models.part(root, Models.cyl(0.29, 0.29, 0.14, 18), hz, Vector3(0, 0.34, 0))
+			for i in 10:
+				var a := TAU * i / 10.0
+				var st := Models.part(root, bx(0.045, 0.15, 0.012), dkred, Vector3(cos(a) * 0.296, 0.34, sin(a) * 0.296))
 				st.rotation = Vector3(0, -a + PI / 2, 0.6)
+			for a in [0.0, PI]:
+				_burst_mark(root, a, dkred, iron)
 			Models.part(root, Models.cyl(0.05, 0.06, 0.06, 10), iron, Vector3(0.09, 0.7, 0))
 			var fuse_m := Models.toon(Color("ffb04a"), false, 0.5)
 			Models.part(root, Models.sphere(0.055, 8), fuse_m, Vector3(0.09, 0.76, 0), Vector3.ONE, Vector3.ZERO, "Fuse")

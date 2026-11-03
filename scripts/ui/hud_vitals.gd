@@ -24,6 +24,7 @@ static func draw(H, sz: Vector2, p: Hunter) -> void:
 	HudStyle.text(c, pr.position + Vector2(40, pr.size.y - 9), String(p.cdat["name"]).to_upper(), 12, Color(hc, 0.95))
 	H.hover_spots.append([pr, "vitals"])
 	level_coin(H, pr, p)
+	ArmorHud.badge(H, pr, p)
 	if p.lives < 50 and p.lives > 1:
 		for i in p.lives:
 			c.draw_circle(pr.position + Vector2(pr.size.x - 10 - i * 11.0, 10), 4.0, Color("ff7a8a"))

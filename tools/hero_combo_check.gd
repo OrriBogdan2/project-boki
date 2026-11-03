@@ -381,7 +381,7 @@ func _mage() -> void:
 	ok("Skycall without a flick: thrown away from you, within 3.9 m",
 			T.pos.x > tx0 + 2.5 and T.pos.x < tx0 + 3.9, "%.1f" % (T.pos.x - tx0))
 	ok("Skycall: flings a rival's orb, now yours", K.motes.size() >= 1 and K.motes[0]["owner"] == P)
-	# 9c. dash -> ability (content/rules/dash_interactions.json): a bolt tapped inside Wirerun
+	# 9c. dash -> ability (content/dash_flow/mage.json): a bolt tapped inside Wirerun
 	# is buffered and goes off at its end, E starts mid-dash, nothing is dropped
 	ac.fresh(T)
 	K.strikes.clear()
@@ -396,9 +396,9 @@ func _mage() -> void:
 	var n_di := P.shot_n
 	P.do_dash()
 	m.step(DT)
-	ok("dash table: Wirerun is rolling and the table says LMB buffers, E fires",
-			P.roll_t > 0.0 and DashRules.rule("mage", "ground", "lmb") == "buffers" and DashRules.rule("mage", "ground", "e") == "fires"
-			and absf(DashRules.buffer_time() - 0.15) < 0.001)
+	ok("dash table: Wirerun is rolling and DashFlow says LMB buffers, E fires",
+			P.roll_t > 0.0 and String(DashFlow.row_of("mage", "lmb", false)["mode"]) == "buffer" and String(DashFlow.row_of("mage", "e", false)["mode"]) == "fire"
+			and absf(DashFlow.BUFFER_S - 0.15) < 0.001)
 	P.inp["fire"] = true
 	m.step(DT)
 	P.inp["fire"] = false
@@ -760,7 +760,7 @@ func _gunslinger() -> void:
 	P.do_dash()
 	m.step(DT)
 	ok("dash table: the ground slide fires, the table says so",
-			DashRules.rule("gunslinger", "ground", "lmb") == "fires" and DashRules.rule("gunslinger", "air", "lmb") == "buffers" and K.fires_in_dash())
+			String(DashFlow.row_of("gunslinger", "lmb", false)["mode"]) == "fire" and String(DashFlow.row_of("gunslinger", "lmb", true)["mode"]) == "buffer" and K.fires_in_dash())
 	P.inp["fire"] = true
 	m.step(DT)
 	P.inp["fire"] = false

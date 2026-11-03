@@ -43,7 +43,7 @@ static func box_value(b: Dictionary) -> int:
 	var v := int(b["gems"])
 	for s in b["seeds"]: v += int(b["seeds"][s]) * 3
 	v += (b["caught"] as Array).size() * 15
-	v += int(b["tonics"]) * 4 + int(b["kits"]) * 4
+	for st in (b.get("belt", []) as Array): v += int(st["n"]) * 4
 	for c in Pack._box_things(b):
 		v += Loot.value(c["it"]) / 2
 	return v
@@ -206,13 +206,12 @@ static func drop_box(m: Match, h: Hunter, why: String) -> Dictionary:
 	var at := box_spot(m, h, why)
 	KinTrack.drop_carried(m, h, at)       # a Boki you were carrying home drops for its owner
 	var b := {"owner": h, "team": h.team, "pos": at, "gems": h.gems, "seeds": h.seeds.duplicate(), "caught": h.caught.duplicate(true),
-		"tonics": maxi(0, h.tonics - h.free_tonics), "kits": h.armor_kits, "soul_until": m.time + R["soul_time"], "prog": {}, "node": null, "empty": false,
+		"belt": UtilityBelt.clear(h), "soul_until": m.time + R["soul_time"], "prog": {}, "node": null, "empty": false,
 		"gear": [], "pack": h.pack.duplicate(true), "keys": h.rift_keys, "chest_keys": h.chest_keys}
 	h.pack = []
 	h.rift_keys = 0
 	h.chest_keys = 0
-	h.tonics = mini(h.tonics, h.free_tonics)
-	h.armor_kits = 0
+	Backpacks.into_box(h, b)
 	# the gear you wear goes in the box too (Supervive: the box holds everything); your weapon stays with you
 	for g in h.gear:
 		if not (g as Dictionary).is_empty():
@@ -254,8 +253,9 @@ static func box_items(m: Match, h: Hunter, b: Dictionary) -> Array:
 		var rec: Dictionary = b["caught"][i]
 		var sp: Dictionary = Data.KIN.get(String(rec.get("species", "")), {})
 		out.append({"key": "caught", "i": i, "name": Data.kin_title(String(rec.get("name", "")), String(sp.get("name", "Boki"))), "sub": "Kin", "icon": "paw", "col": sp.get("color", Color("ffb0d0")), "upgrade": true})
-	if int(b["tonics"]) > 0:
-		out.append({"key": "tonics", "name": "%d tonic%s" % [int(b["tonics"]), "" if int(b["tonics"]) == 1 else "s"], "sub": "Heals", "icon": "tonic", "col": Color("ff8a9a"), "upgrade": true})
+	for i in (b.get("belt", []) as Array).size():
+		var st: Dictionary = b["belt"][i]
+		out.append({"key": "belt", "i": i, "id": String(st["id"]), "name": "%d %s" % [int(st["n"]), UtilityBelt.name_of(String(st["id"])).to_lower()], "sub": "Utility", "icon": UtilityBelt.icon_of(String(st["id"])), "col": UtilityBelt.col_of(String(st["id"])), "upgrade": UtilityBelt.has_room(h, String(st["id"]))})
 	if int(b.get("keys", 0)) > 0:
 		out.append({"key": "keys", "name": "%d Rift Key%s" % [int(b["keys"]), "" if int(b["keys"]) == 1 else "s"], "sub": "Opens a rift hatch", "icon": "gem", "col": ExitModels.HATCH, "upgrade": true})
 	if int(b.get("chest_keys", 0)) > 0:
@@ -263,18 +263,19 @@ static func box_items(m: Match, h: Hunter, b: Dictionary) -> Array:
 		var key_label := "%d key%s" % [n_keys, "" if n_keys == 1 else "s"]
 		out.append({"key": "chest_keys", "name": key_label, "sub": "Opens one chest each", "icon": "key",
 			"col": KeyModels.BRASS, "upgrade": true})
-	if int(b["kits"]) > 0:
-		out.append({"key": "kits", "name": "%d armor kit%s" % [int(b["kits"]), "" if int(b["kits"]) == 1 else "s"], "sub": "Repairs armor", "icon": "medkit", "col": Color("9ad0ff"), "upgrade": true})
 	for i in (b.get("gear", []) as Array).size():
 		var g: Dictionary = b["gear"][i]
 		var gd: Dictionary = Gear.ALL.get(String(g["id"]), {})
 		var r: Dictionary = Data.RARITY[clampi(int(g["rar"]), 0, Data.RARITY.size() - 1)]
-		var slot := Gear.slot_of(String(g["id"]))
+		var slot := Gear.slot_on(h, String(g["id"]))
 		var cur: Dictionary = h.gear[slot]
 		var up := cur.is_empty() or Loot.value(Loot.gear(String(g["id"]), int(g["rar"]))) > Loot.value(Loot.gear(String(cur["id"]), int(cur["rar"])))
 		out.append({"key": "gear", "i": i, "name": "%s%s" % [(String(r["name"]) + " ") if int(g["rar"]) > 1 else "", gd.get("name", g["id"])],
-			"sub": ("%s (%s)  ·  " % [Gear.SLOT_NAMES[slot], Settings.key_cap("gear1")] if slot == 0 else Gear.SLOT_NAMES[slot] + "  ·  ") + Gear.stat_text(String(g["id"]), int(g["rar"])),
+			"sub": Gear.WORN_NAMES[slot] + "  ·  " + Gear.stat_text(String(g["id"]), int(g["rar"])),
 			"icon": Gear.icon_of(String(g["id"])), "col": r["color"], "upgrade": up})
+	var pack_row := Backpacks.box_row(h, b)
+	if not pack_row.is_empty():
+		out.append(pack_row)
 	# gear and treasure for the backpack (worth taking if there's room, or it beats the worst thing in it)
 	for i in (b.get("pack", []) as Array).size():
 		var it: Dictionary = b["pack"][i]
@@ -306,20 +307,27 @@ static func take_item(m: Match, h: Hunter, b: Dictionary, it: Dictionary) -> voi
 					h.caught.append(rec)
 					if String(rec.get("lost_from", "")) != "" and String(rec.get("lost_from", "")) != h.pname:
 						h.stolen_carry = true
-		"tonics":
-			h.tonics += int(b["tonics"]); b["tonics"] = 0
-		"kits":
-			h.armor_kits += int(b["kits"]); b["kits"] = 0
+		"belt":
+			for bi in (b["belt"] as Array).size():
+				var st: Dictionary = b["belt"][bi]
+				if String(st["id"]) != String(it.get("id", "")):
+					continue
+				st["n"] = int(st["n"]) - UtilityBelt.grant(h, String(st["id"]), int(st["n"]))
+				if int(st["n"]) <= 0:
+					(b["belt"] as Array).remove_at(bi)
+				break
 		"keys":
-			h.rift_keys += int(b.get("keys", 0)); b["keys"] = 0
+			b["keys"] = int(b.get("keys", 0)) - BeltKeys.give(h, "rift_key", int(b.get("keys", 0)))
+		"backpack":
+			Backpacks.take_from_box(m, h, b)
 		"chest_keys":
-			b["chest_keys"] = int(b.get("chest_keys", 0)) - KeyChest.give(h, int(b.get("chest_keys", 0)))
+			b["chest_keys"] = int(b.get("chest_keys", 0)) - BeltKeys.give(h, "chest_key", int(b.get("chest_keys", 0)))
 		"gear":
 			var gi := int(it["i"])
 			if gi < (b["gear"] as Array).size():
 				var g: Dictionary = b["gear"][gi]
 				(b["gear"] as Array).remove_at(gi)
-				var slot := Gear.slot_of(String(g["id"]))
+				var slot := Gear.slot_on(h, String(g["id"]))
 				var old: Dictionary = h.gear[slot]
 				h.gear[slot] = g.duplicate()
 				h.gear_cd[slot] = 0.0
@@ -352,13 +360,14 @@ static func smart_loot(m: Match, h: Hunter, b: Dictionary) -> int:
 
 static func _settle_box(b: Dictionary) -> void:
 	b["empty"] = int(b["gems"]) <= 0 and (b["seeds"] as Dictionary).is_empty() and (b["caught"] as Array).is_empty() \
-		and int(b["tonics"]) <= 0 and int(b["kits"]) <= 0 \
-		and int(b.get("keys", 0)) <= 0 and int(b.get("chest_keys", 0)) <= 0 and (b.get("gear", []) as Array).is_empty() \
-		and (b.get("pack", []) as Array).is_empty()
+		and (b.get("belt", []) as Array).is_empty() and int(b.get("keys", 0)) <= 0 and int(b.get("chest_keys", 0)) <= 0 and (b.get("gear", []) as Array).is_empty() \
+		and (b.get("pack", []) as Array).is_empty() \
+		and int(b.get("backpack", Backpacks.POUCH)) <= Backpacks.POUCH
 	_refresh_box(b)
 
 ## Takes everything in a box.
 static func loot_box(m: Match, h: Hunter, b: Dictionary) -> void:
+	Backpacks.take_from_box(m, h, b)       # first: a bigger backpack makes room for the rest
 	# worn gear: the owner gets theirs back; anyone else only takes upgrades
 	if (b["owner"] as Hunter) == h:
 		for g in (b.get("gear", []) as Array).duplicate():
@@ -397,17 +406,18 @@ static func loot_box(m: Match, h: Hunter, b: Dictionary) -> void:
 	if not left.is_empty():
 		Capture.full_note(m, h)
 	b["caught"] = left
-	h.tonics += int(b["tonics"])
-	h.armor_kits += int(b["kits"])
-	h.rift_keys += int(b.get("keys", 0))
+	var belt_left: Array = []
+	for st in (b.get("belt", []) as Array):
+		st["n"] = int(st["n"]) - UtilityBelt.grant(h, String(st["id"]), int(st["n"]))
+		if int(st["n"]) > 0: belt_left.append(st)
+	b["belt"] = belt_left
+	var rift_left := int(b.get("keys", 0)) - BeltKeys.give(h, "rift_key", int(b.get("keys", 0)))
 	var box_keys := int(b.get("chest_keys", 0))
-	var keys_left := box_keys - KeyChest.give(h, box_keys)
+	var keys_left := box_keys - BeltKeys.give(h, "chest_key", box_keys)
 	var got := int(b["gems"])
 	b["gems"] = 0
 	b["seeds"] = {}
-	b["tonics"] = 0
-	b["kits"] = 0
-	b["keys"] = 0
+	b["keys"] = rift_left
 	b["chest_keys"] = keys_left
 	_settle_box(b)
 	m.sfx("pickup", b["pos"], -2.0, 0.9)
