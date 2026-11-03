@@ -654,6 +654,7 @@ func tender() -> void:
 	step(m, 0.4)
 	var g0 := P.pos
 	P.teleport(P.pos + Vector3(0, 3.0, 0))
+	P.grounded = false
 	P.ex_cd = 0.0
 	P.inp["move"] = Vector2(1, 0)
 	K.on_dash(true)
@@ -752,6 +753,7 @@ func _dashes_cute() -> void:
 			"%.2f m in %.2f s" % [ground_d, ground_t])
 	step(m, 0.5)
 	P.teleport(P.pos + Vector3(0, 3.0, 0))
+	P.grounded = false
 	var a0 := P.pos
 	P.ex_cd = 0.0
 	P.inp["move"] = Vector2(1, 0)
@@ -791,6 +793,52 @@ func _dashes_cute() -> void:
 				KMovesCare.length("mm_skip"), ground_t, KMovesCare.length("mm_float"), air_t])
 	ok("mm dashes: no other kit plays her dash moves", own_moves_only("tender_kit.gd", ["mm_skip", "mm_float"]))
 	await _free(m)
+	await _moosh_audit()
+
+## Audit: the glide is airborne only (on the ground with the hop spent, Shift is refused, never a glide
+## along the ground); the move keys steer the glide (air control); Burrseed 10.5 s (the data's ratio to E);
+## her Ember Cast has no magazine and no slow while firing (the source has neither).
+func _moosh_audit() -> void:
+	var r: Array = sc.setup("tender", 20.0)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var K: TenderKit = P.ak
+	step(m, 0.1)
+	P.dashes = 0.0
+	P.ex_cd = 0.0
+	var p0 := P.pos
+	P.inp["move"] = Vector2(1, 0)
+	P.inp["dash"] = true
+	step(m, 1.0 / 60.0)
+	P.inp["dash"] = false
+	P.inp["move"] = Vector2.ZERO
+	step(m, 0.3)
+	ok(
+			"mm dashes: on the ground with the hop spent, Shift is refused (no glide along the ground)",
+			P.grounded and K.glide.is_empty() and P.ex_cd <= 0.0
+				and Vector2(P.pos.x - p0.x, P.pos.z - p0.z).length() < 1.5,
+			"moved %.2f, ex_cd %.1f" % [Vector2(P.pos.x - p0.x, P.pos.z - p0.z).length(), P.ex_cd])
+	P.teleport(P.pos + Vector3(0, 3.0, 0))
+	P.grounded = false
+	P.inp["move"] = Vector2(1, 0)
+	K.on_dash(true)
+	step(m, 0.15)
+	var heading0: Vector2 = P.roll_dir
+	P.inp["move"] = Vector2(0, 1)
+	step(m, 0.4)
+	var turned := rad_to_deg(absf(heading0.angle_to(P.roll_dir)))
+	P.inp["move"] = Vector2.ZERO
+	ok(
+			"mm air dash: the move keys steer the glide (air control), at a capped rate",
+			turned > 40.0 and turned < 90.0, "turned %.0f deg in 0.4 s" % turned)
+	step(m, 1.0)
+	ok(
+			"mm RMB: Burrseed 10.5 s (the data's 11.5 : 12 against Hearthlight's 11 s)",
+			absf(float(K.rmb_def()["cooldown"]) - 10.5) < 0.01)
+	ok(
+			"mm LMB: Ember Cast has no magazine to reload and no slow while firing (the source has neither)",
+			int(P.wpn["mag"]) >= 99 and float(P.wpn["fire_slow"]) >= 1.0)
+	await _free(m)
 
 ## True when no hero kit (a *_kit.gd) other than `own` names any of `ids` (a dash move is one hero's own).
 static func own_moves_only(own: String, ids: Array) -> bool:
@@ -823,6 +871,7 @@ func _no_blasts() -> void:
 	P.inp["dash"] = false
 	step(m, 0.5, each)
 	P.teleport(P.pos + Vector3(0, 3.0, 0))
+	P.grounded = false
 	P.ex_cd = 0.0
 	K.on_dash(true)
 	step(m, 1.1, each)

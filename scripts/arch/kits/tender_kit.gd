@@ -257,7 +257,6 @@ func pick_up(o: Hunter) -> void:
 	h.shield = float(pd.get("shield", 40.0)) + float(pd.get("shield_lv", 6.0)) * float(maxi(0, h.lvl - 1))
 	h.shield_t = 999.0
 	m.fx.word(h.pos + Vector3(0, 2.4, 0), "CARRY", res_col(), false)
-	m.fx.ring(h.pos, 1.4, res_col(), 0.3)
 	m.sfx("tend_pickup", h.pos, -2.0, 1.0)
 	play("mm_pickup")
 	if rank("dash") >= 3:
@@ -281,6 +280,8 @@ func drop_all(broken: bool) -> void:
 # ------------------------------------------------------------------ dash: Relay Step
 func on_dash(use_ex: bool) -> bool:
 	var dd := dash_def()
+	# the glide is Elluna's Lunar Air Dash: airborne only. On the ground with the hop spent, Shift is refused
+	use_ex = use_ex and not h.grounded
 	if not spend_dash(use_ex):
 		return true
 	var air: Dictionary = dd.get("air", {})
@@ -326,6 +327,11 @@ func _tick_glide(dt: float) -> void:
 	var ramp := float(air.get("ramp", 0.1))
 	var burst := float(air.get("burst", 0.4))
 	var top := float(glide["top"])
+	# air control (owner): the move keys bend the glide's heading at a capped rate (dash.air.steer rad/s)
+	var mv: Vector2 = h.inp.get("move", Vector2.ZERO)
+	if mv.length() > 0.1:
+		var steer := float(air.get("steer", 3.0)) * dt
+		h.roll_dir = h.roll_dir.rotated(clampf(h.roll_dir.angle_to(mv.normalized()), -steer, steer))
 	var k := clampf((t - ramp - burst) / maxf(0.05, float(glide["time"]) - ramp - burst), 0.0, 1.0)
 	h.roll_speed = top * lerpf(0.5, 1.0, clampf(t / ramp, 0.0, 1.0)) * lerpf(1.0, float(air.get("out_k", 0.45)), k)
 	# held up while it floats; the last 0.15 s lets her come down
@@ -722,14 +728,14 @@ func _tick_call(dt: float) -> void:
 		_call_end(true)
 
 
-## A tick of the tether's heal: on a standing teammate (or herself in solo); while they are down the
-## healing goes to her instead (the source's rule for a channel on a downed ally).
+## A tick of the tether's heal on the teammate (or herself in solo, at self_k). A downed teammate is healed
+## too, as the source's channel heals an ally or a Wisp: it tops up what keeps them from bleeding out.
 func _call_heal(who: Hunter, amount: float) -> void:
 	var amt := amount * LevelGrowth.ap(h)
-	if who.downed or who == h:
-		CareUtil.heal(m, h, amt * (float(e_def().get("self_k", 0.33)) if who == h else 1.0))
+	if who == h:
+		CareUtil.heal(m, h, amt * float(e_def().get("self_k", 0.33)))
 	else:
-		CareUtil.heal(m, who, amt)
+		CareUtil.heal(m, who, amt, float(e_def().get("wisp_k", 5.0)))
 
 
 func _call_look(who: Hunter, dt: float) -> void:
