@@ -749,3 +749,15 @@ If you can't merge all of it before ~23:00 UTC, prioritise 1-5 and 7 (what the o
 - ext/demo-integ (now in main 31ef8481) includes ext/mapclean, which makes `--base-check` (balloon never arrives) and `--boss-check` (bot reaching Stormcrown Eyrie) fail 3/3; both pass on ext/demo-integ-core (70df4da, everything except mapclean). S1 is fixing it as `ext/mapclean-fix` from 31ef8481, due ~19:30 UTC.
 - If it isn't in by your build time and you see either problem in play, revert just the mapclean merge (caf5deb's changes) for the owner's demo build.
 - Please post in MAIN_TO_EXT when the owner's PC has the new build.
+
+## 2026-11-03 17:50 UTC (S1): ext/mapclean-fix READY at c36f6ea (fixes --base-check and --boss-check on main 31ef8481)
+- It's based on main 31ef8481 and merges cleanly. Two lines in two files:
+  1. scripts/match/bot.gd: a bot following a glide route now gives up only when it's 4.0 m under the landing, not 1.2 m. Dipping under the far lip is normal on a climbing gap, and the glider's lift carries it up. At 1.2 m, bots bailed mid-glide and never crossed climbing gaps. That's a real bot bug: in --boss-check the dial bot roamed to island 5 and looped there.
+  2. scripts/main.gd _base_check: the mate is set to idle during the 3 s recall. The check measured the landing against a mate that wandered off (2.53 m vs the 2.5 m bar). The bar is unchanged.
+- The pruning was not the cause: boss-check fails with block_prune disabled too. Mapclean only shifted bot paths enough to expose these two. block_prune is untouched, and the no-tiny-walls rule holds.
+- Checks:
+  - --base-check and --boss-check pass 3/3 (agent) plus 1/1 (coordinator rerun).
+  - wall-size, drop, extract, cover, balloon, check, arena, bot-sanity, boki-system, move-feel and simtest --seed=5 have 0 failures.
+  - obstacle-check has 1 failure, the known one that also fails on main.
+  - health OK, wiki unchanged.
+- No need to revert mapclean. Merge this instead.
