@@ -33,6 +33,7 @@ var tell := ""                 # "" | "half" | "full": the resource tell enemies
 var bonded_glow := false
 var fuse := {}                 # the R's fuse (wind-up) running: {t, T, bond, guard}
 var cd_off := false            # practice toggle (Arena): cooldowns don't run down, they're skipped
+var flow: DashFlow             # what ability presses do during this hero's dash
 
 static func make(hunter: Hunter, arch_id: String) -> ArchKit:
 	var k: ArchKit
@@ -55,6 +56,7 @@ static func make(hunter: Hunter, arch_id: String) -> ArchKit:
 	k.id = arch_id
 	k.d = Arch.def(arch_id)
 	k.ch_rmb = float(k.rmb_def().get("charges", 1))
+	k.flow = DashFlow.new(k)
 	k._setup()
 	return k
 
@@ -814,6 +816,8 @@ func _tick_knocks() -> void:
 ## A rival we hit in the last 5s was knocked (mine: our blow did it; else an assist).
 func on_knock(_t: Hunter, _mine: bool) -> void: pass
 func fires_in_dash() -> bool: return false
+## In this hero's dash right now, as DashFlow sees it (a kit with its own dash state overrides this).
+func in_dash() -> bool: return h.roll_t > 0.0 and h.move_kind == "dash"
 func fire_ok_rmb() -> bool: return true
 
 # ------------------------------------------------------------------ payoffs and state tells (shared)
