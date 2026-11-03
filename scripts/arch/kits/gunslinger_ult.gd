@@ -35,7 +35,7 @@ func running() -> bool:
 	return not shells.is_empty()
 
 # ------------------------------------------------------------------ the tap
-## The cast (HeroUlt.press has checked the cooldown and that nothing holds him).
+## The cast (HeroUlt.press has checked the cooldown and that nothing holds her).
 func cast() -> bool:
 	var h := kit.h
 	if not kit.needle.is_empty():

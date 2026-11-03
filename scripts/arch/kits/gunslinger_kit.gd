@@ -16,18 +16,18 @@ const HOT := Color("fff1c8")
 const DEEP := Color("c43a2a")
 const BRONZE := Color("b9732f")
 const SMOKE := Color("d9c2a8")       # the Longneedle's recoil smoke ring: warm, not white
-const SCRAPE := Color("6b4a2e")      # the slide's dust scrape under him
+const SCRAPE := Color("6b4a2e")      # the slide's dust scrape under her
 const BURR_HIT_HEIGHT := 2.6         # m above a foe's feet the charge can still strike
 const SKID_LEN := 2.2                # m, the faint streaks at a slide's start
 const SKID_SPREAD := 0.28            # m off the path's centre line
 const SKID_WIDTH := 0.1
 const SKID_SECONDS := 0.45
-const ECHO_GAP := 0.05               # s between his after-images on a slide or the air dash
-const ECHO_ALPHA := 0.35             # see-through, so the trail never covers his live body
-const ECHO_BACK := 0.35              # m behind him along his travel: the echoes trail, not overlap
-const PIP_LIFT := 0.9                # m up the screen the Fever pips sit, clear of his cap and face
+const ECHO_GAP := 0.05               # s between her after-images on a slide or the air dash
+const ECHO_ALPHA := 0.35             # see-through, so the trail never covers her live body
+const ECHO_BACK := 0.35              # m behind her along her travel: the echoes trail, not overlap
+const PIP_LIFT := 0.9                # m up the screen the Fever pips sit, clear of her cap and face
 const TOSS_Y := 1.05                 # m: the Burr Charge leaves from the hip (a side toss, not overhead)
-const BRACKET_R := 1.25              # m: the firing brackets either side of him (footage: about 0.7 bh)
+const BRACKET_R := 1.25              # m: the firing brackets either side of her (footage: about 0.7 bh)
 const BRACKET_DEG := 56.0            # each bracket's arc
 
 var slide := {}                # {t, held, dir} while a Slipstep runs
@@ -47,9 +47,9 @@ var last_shot := 0
 var aim_marks := 0             # tests: foes marked inside the held lane
 var echo_t := 0.0
 var refill_part := 0.0         # rounds the resting drum has part-refilled
-var round_at := -9.0           # match time of his last rifle round (the firing brackets)
-var grenade: Node3D = null     # the Burr Charge held low in his left hand while RMB is held
-var ult: GunslingerUlt         # Cinderfall, his ultimate on X
+var round_at := -9.0           # match time of her last rifle round (the firing brackets)
+var grenade: Node3D = null     # the Burr Charge held low in her left hand while RMB is held
+var ult: GunslingerUlt         # Cinderfall, her ultimate on X
 
 func _setup() -> void:
 	ult = GunslingerUlt.new(self)
@@ -118,11 +118,11 @@ func _tick_trail() -> void:
 	if hand != null:
 		fx().trail("vn%d" % h.get_instance_id(), hand.global_position, EMBER, HOT, 0.24)
 
-## His after-image colour: a deeper ember, so the trail reads apart from his warm live body.
+## Her after-image colour: a deeper ember, so the trail reads apart from her warm live body.
 static func echo_col() -> Color:
 	return EMBER.lerp(DEEP, 0.5)
 
-## His own after-images on Slipstep and the air dash: his silhouette in ember, cooling to deep red.
+## Her own after-images on Slipstep and the air dash: her silhouette in ember, cooling to deep red.
 func _tick_echo(dt: float) -> void:
 	if h.roll_t <= 0.0 and slide.is_empty():
 		echo_t = 0.0
@@ -132,8 +132,6 @@ func _tick_echo(dt: float) -> void:
 		return
 	echo_t = ECHO_GAP
 	fx().echo(h, echo_col(), 0.4, ECHO_ALPHA, ECHO_BACK)
-	if h.grounded:
-		fx().disc(ground(h.pos), 0.7, SCRAPE, Color.BLACK, 0.35, SCRAPE.lightened(0.25))
 
 func teardown() -> void:
 	super.teardown()
@@ -143,8 +141,9 @@ func teardown() -> void:
 	ult.clear()
 	_end_needle()
 
+## Her dashes (a slide, tap or held, and the air roll): the rifle keeps going when the dash's LMB row says so.
 func fires_in_dash() -> bool:
-	return not slide.is_empty()            # any slide, tap or held: the rifle keeps going
+	return String(flow.row("lmb")["mode"]) == "fire"
 
 func move_k() -> float:
 	return 1.0 - float(e_def()["self_slow"]) if not needle.is_empty() else 1.0
@@ -183,8 +182,6 @@ func _on_knock(t: Ent) -> void:
 	if rank("sec") >= 3:
 		ch_rmb = float(rmb_charges())
 		cd["rmb"] = 0.0
-	fx().ring(h.pos, 1.6, EMBER, HOT, 0.35)
-	fx().pillar(ground(h.pos), EMBER, HOT, 2.4, 0.6, 0.5)
 	m.fx.word(h.pos + Vector3(0, 2.4, 0), "+KNOCK", Color("8ff0a0"), false)
 	m.sfx("vn_stim", h.pos, -3.0)
 	play("gunslinger_knock")
@@ -207,7 +204,7 @@ func _tick_lmb() -> void:
 	if anim_id == "" or anim_id == "gunslinger_lmb" or m.time - anim_at > 1.2:
 		play("gunslinger_lmb")
 
-## While the rifle fires, two thin arcs bracket him left and right (your screen only; the footage's firing
+## While the rifle fires, two thin arcs bracket her left and right (your screen only; the footage's firing
 ## brackets), gone a beat after the trigger rests.
 func _tick_brackets() -> void:
 	if not _rifle_in_hand() or m.time - round_at > float(h.wpn["rate"]) + 0.1 or busy():
@@ -265,7 +262,7 @@ func on_dash(use_ex: bool) -> bool:
 	travel(float(dd["roll"]), float(dd["roll_t"]), {"invuln": float(dd["invuln"])})
 	slide = {"t": 0.0, "held": false, "dir": h.roll_dir, "fx": 0.0}
 	play("gunslinger_dash")
-	# where it began: his ember after-image standing there (0.6 s), dust, and two faint skid streaks.
+	# where it began: her ember after-image standing there (0.6 s), dust, and two faint skid streaks.
 	# No rings or discs: those mean damage or an area in this game
 	fx().echo(h, echo_col(), 0.6, ECHO_ALPHA, ECHO_BACK)
 	_skid_streaks(start, h.roll_dir)
@@ -283,11 +280,9 @@ func _skid_streaks(from: Vector3, dir: Vector2) -> void:
 		fx().smear(begin, begin + along * SKID_LEN, SCRAPE, SCRAPE.lightened(0.2), SKID_WIDTH, SKID_SECONDS)
 
 func _slide_end() -> void:
-	var dd := dash_def()
 	h.roll_t = 0.0
 	if rank("dash") >= 3:
 		h.add_buff("move_speed", 0.25, 2.0)
-		fx().ring(h.pos, 1.0, col_of(dd), HOT, 0.25)
 	var air := bool(slide.get("air", false))
 	if air:
 		h.vel.x *= 0.25          # an air slide stops short instead of carrying on
@@ -370,7 +365,7 @@ func _tick_aim() -> void:
 			var mark := {"at": f.pos, "r": 0.75, "col": Color("ff4fb0"), "col2": HOT, "alpha": 1.2}
 			AimKit.circle(h, "mark%d" % f.get_instance_id(), mark)
 
-## The charge held low at his left hip while RMB is held (gone the moment it's thrown).
+## The charge held low at her left hip while RMB is held (gone the moment it's thrown).
 func _tick_grenade() -> void:
 	var cocked := rmb_down and h.anim != null and h.anim.hand_l != null and not h.downed
 	if not cocked:
@@ -581,6 +576,7 @@ func _cone(at: Vector3, out: Vector2, bd: Dictionary, wall: bool) -> void:
 			var slam := {"src": "abil", "ab": "utility", "tags": ["utility", "burr"], "stun": float(bd["wall_stun"])}
 			slam["dr"] = true
 			f.hurt(0.1, h, slam)
+			daze(f, float(bd["cone_rattle"]) + float(bd["wall_daze"]))     # the data: walled, "Dazed longer"
 			m.fx.word(f.pos + Vector3(0, 2.2, 0) + fx().screen_up() * 2.0, "WALLED", EMBER, false)   # over DAZED
 
 # ------------------------------------------------------------------ E: Longneedle
@@ -590,7 +586,6 @@ func cast_e() -> bool:
 	needle = {"t": 0.0}
 	e_t = float(ed["charge"]) + 0.1
 	m.sfx("vn_ion_charge", h.pos, -3.0)
-	net_ring(h.pos, 1.2, EMBER)
 	play("gunslinger_e")
 	return true
 
@@ -630,7 +625,7 @@ func _tick_needle(dt: float) -> void:
 		_end_needle()
 		_fire_needle()
 
-## Where the Longneedle leaves the rifle: ahead of him at the barrel's height.
+## Where the Longneedle leaves the rifle: ahead of her at the barrel's height.
 func _muzzle(d: Vector2) -> Vector3:
 	return h.pos + Vector3(d.x * 0.9, 1.1, d.y * 0.9)
 
@@ -652,13 +647,13 @@ func _fire_needle() -> void:
 	fx().beam(a, b, EMBER, HOT, 1.0, float(ed["linger"]), BRONZE)
 	fx().star(a, EMBER, HOT, 1.3, 0.16)
 	m.fx.flash(a, EMBER, 1.2, 0.08)
-	fx().ring(ground(h.pos), 1.6, SMOKE, EMBER, 0.4)              # the smoke ring round him
+	fx().pillar(ground(h.pos), SMOKE, EMBER, 1.6, 0.45, 0.4)       # the recoil smoke puffs up round her, not a ground ring
 	net_bolt(a, b, EMBER)
 	m.sfx("vn_ion_fire", h.pos, 1.0)
 	Feel.shake(m, "t3", h, h.pos)
 	if h.is_local():
 		Oomph.punch_dir(m, -d, 0.22)
-	h.impulse(-d * float(ed.get("recoil", 6.0)))                  # the recoil shoves him back a step
+	h.impulse(-d * float(ed.get("recoil", 6.0)))                  # the recoil shoves her back a step
 	var hits := 0
 	var dmg0: float = float(ed["dmg"]) * power("kin")
 	for f in m.foes_of(h.team):

@@ -7,7 +7,7 @@
 	"weight": "medium",
 	"body": {"size": 1.0, "chest": 1.0},
 	"color": "#ff9a5c",
-	"fantasy": "The ember-rifle skirmisher. Bounces a spiked charge off the wall so its blast throws a foe back into his rifle, slides around while still shooting, and finishes with one long needle of light.",
+	"fantasy": "The ember-rifle skirmisher. Bounces a spiked charge off the wall so its blast throws a foe back into her rifle, slides around while still shooting, and finishes with one long needle of light.",
 	"silhouette": "the long scarf streaming behind, the bandolier of spiked charges across the chest and the long-shrouded rifle",
 	"card": {
 		"loop": "Mid-range rifleman: Daze a foe with the grenade's cone, then shred them while it lasts.",
@@ -71,11 +71,12 @@
 			"cone_dmg": 16.0,
 			"cone_rattle": 1.4,
 			"push": 11.0,
-			"wall_stun": 0.7
+			"wall_stun": 0.7,
+			"wall_daze": 0.6
 		},
 		"variants": {
 			"tap": "Hold RMB: a 10.5m lane with an arrow tip shows (foes in it are marked); let go to throw. The charge flies the lane, past the cursor, and goes off on the first foe it strikes: 22 damage and Dazed 1.4s.",
-			"full": "Where it hits a wall, or the ground at the end of the lane, it sticks and a 6m, 100° cone shows back toward you for 0.9s. Then it blasts: 16 damage, a big shove along the cone, Dazed 1.4s. A hunter shoved into more terrain is stunned 0.7s."
+			"full": "Where it hits a wall, or the ground at the end of the lane, it sticks and a 6m, 100° cone shows back toward you for 0.9s. Then it blasts: 16 damage, a big shove along the cone, Dazed 1.4s. A hunter shoved into more terrain is stunned 0.7s and Dazed 0.6s longer."
 		},
 		"sockets": {
 			"hit": "add",
@@ -158,6 +159,6 @@
 	"tells": {
 		"half": "a lit Fever pip over the bar while the lifesteal runs",
 		"full": "the same lit pip and a heat shimmer",
-		"dash_spent": "an ember afterimage and a ring where the slide began"
+		"dash_spent": "an ember afterimage and faint skid streaks"
 	}
 }

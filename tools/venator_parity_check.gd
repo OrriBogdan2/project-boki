@@ -1,15 +1,15 @@
 extends RefCounted
-## Venator's parity pass (docs/heroes/gunslinger.md, "Parity pass"), run inside --gunslinger-combo-check
-## (tools/hero_combo_check.gd): the rifle's cadence, how its rounds track the cursor while he walks, the 30-round
+## Vex's parity pass and audit fixes (docs/heroes/gunslinger.md, "Parity pass"), run inside --gunslinger-combo-check
+## (tools/hero_combo_check.gd): the rifle's cadence, how its rounds track the cursor while she walks, the 30-round
 ## drum that refills whenever the trigger rests, the firing brackets, the shouldered recoil pose, and the Burr
-## Charge's side toss (the owner's call over the footage's overhand) with him walking through the hold.
+## Charge's side toss (the owner's call over the footage's overhand) with her walking through the hold.
 
 const ROUND_GAP := 0.12      # s between rounds held
 const MAG := 30              # rounds in the drum (game data: a 30-round magazine)
 const REFILL_BY := 1.2       # s of rest that brings a drum back from 18 to full ("rapidly reloads when not firing")
 const TURN_180 := 0.2        # s: the body turns 180 degrees to a new cursor (the source's 1280 deg/s: 0.14s)
-const WALK_KEEP := 0.85      # share of his walk he keeps while firing or holding the grenade
-const SWEEP := 6.0           # rad/s the cursor swings round him (a round a step late would be 5.7 degrees off)
+const WALK_KEEP := 0.85      # share of her walk she keeps while firing or holding the grenade
+const SWEEP := 6.0           # rad/s the cursor swings round her (a round a step late would be 5.7 degrees off)
 var C                        # the combo check (ok, ac, helpers)
 
 func _init(check) -> void:
@@ -22,6 +22,7 @@ func run(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) -> voi
 	_brackets(m, P, home)
 	_rifle_pose()
 	_side_toss(m, P, K, T, home)
+	_audit(m, P, K, T, home)
 	P.inp["fire"] = false
 	P.inp["move"] = Vector2.ZERO
 	C.ac.step(m, 0.5)
@@ -44,10 +45,10 @@ func _rounds(m: Match, P: Hunter, home: Vector3) -> void:
 	var even := at.size() >= 7
 	for i in range(1, at.size()):
 		even = even and absf(float(at[i]) - float(at[i - 1]) - ROUND_GAP) <= C.DT * 1.5
-	C.ok("Venator parity LMB: held, a round every 0.12s", even, "%d rounds" % at.size())
+	C.ok("Vex parity LMB: held, a round every 0.12s", even, "%d rounds" % at.size())
 
-## Walking while the cursor sweeps round him: every round leaves along the aim of its own step, and a cursor
-## swung behind him turns his body round at the source's rate.
+## Walking while the cursor sweeps round her: every round leaves along the aim of its own step, and a cursor
+## swung behind her turns her body round at the source's rate.
 func _tracking(m: Match, P: Hunter, home: Vector3) -> void:
 	C.ac.step(m, 0.5)
 	P.teleport(home)
@@ -69,10 +70,10 @@ func _tracking(m: Match, P: Hunter, home: Vector3) -> void:
 	var walked := P.flat_dist(p0) / 0.9
 	P.inp["fire"] = false
 	var plain := _walk_speed(m, P)
-	C.ok("Venator parity LMB: walking with the cursor sweeping round, every round leaves on the aim",
+	C.ok("Vex parity LMB: walking with the cursor sweeping round, every round leaves on the aim",
 			int(sweep["rounds"]) >= 6 and float(sweep["worst"]) < rad_to_deg(float(P.wpn["spread"])) + 2.0,
 			"%d rounds, worst %.1f degrees, walked %.2f m/s" % [sweep["rounds"], sweep["worst"], walked])
-	C.ok("Venator parity LMB: he keeps walking while he fires (85% of his walk or more)",
+	C.ok("Vex parity LMB: she keeps walking while she fires (85% of her walk or more)",
 			walked >= plain * WALK_KEEP, "%.2f of %.2f m/s" % [walked, plain])
 	P.inp["move"] = Vector2.ZERO
 	C.ac.step(m, 0.3)
@@ -84,7 +85,7 @@ func _tracking(m: Match, P: Hunter, home: Vector3) -> void:
 		if float(turn["done"]) < 0.0 and absf(wrapf(P.face - PI * 0.5, -PI, PI)) < deg_to_rad(10.0):
 			turn["done"] = turn["t"]
 		turn["t"] = float(turn["t"]) + C.DT)
-	C.ok("Venator parity LMB: the body turns 180 degrees to the cursor inside 0.2s (source 1280 deg/s)",
+	C.ok("Vex parity LMB: the body turns 180 degrees to the cursor inside 0.2s (source 1280 deg/s)",
 			float(turn["done"]) > 0.0 and float(turn["done"]) <= TURN_180, "%.2f s" % turn["done"])
 
 ## The drum: 30 rounds; resting refills it fast (none in the first beat of a pause), running it dry is the normal
@@ -111,7 +112,7 @@ func _drum(m: Match, P: Hunter, K: GunslingerKit, home: Vector3) -> void:
 		if float(t_full["at"]) < 0.0 and P.ammo >= MAG:
 			t_full["at"] = t_full["t"]
 		t_full["t"] = float(t_full["t"]) + C.DT)
-	C.ok("Venator parity LMB: a 30-round drum that refills fast once the trigger rests (none in the first beat)",
+	C.ok("Vex parity LMB: a 30-round drum that refills fast once the trigger rests (none in the first beat)",
 			int(P.wpn["mag"]) == MAG and after12 == MAG - 12 and int(t_full["early"]) == MAG - 12
 			and float(t_full["at"]) > 0.0 and float(t_full["at"]) <= REFILL_BY,
 			"after 12: %d, after 0.25s rest: %d, full at %.2f s" % [after12, t_full["early"], t_full["at"]])
@@ -122,11 +123,11 @@ func _drum(m: Match, P: Hunter, K: GunslingerKit, home: Vector3) -> void:
 	P.ammo = 0
 	P.start_reload()
 	C.ac.step(m, 0.8)
-	C.ok("Venator parity LMB: run dry, it's the normal reload, and the rest doesn't refill it early",
+	C.ok("Vex parity LMB: run dry, it's the normal reload, and the rest doesn't refill it early",
 			P.reload_t > 0.0 and P.ammo == 0 and K.refill_part == 0.0, "reload %.2f ammo %d" % [P.reload_t, P.ammo])
 	C.ac.step(m, 1.5)
 
-## The firing brackets: two arcs either side of him while he fires (your screen only), gone soon after.
+## The firing brackets: two arcs either side of her while she fires (your screen only), gone soon after.
 func _brackets(m: Match, P: Hunter, home: Vector3) -> void:
 	P.teleport(home)
 	P.reload_t = 0.0
@@ -138,7 +139,7 @@ func _brackets(m: Match, P: Hunter, home: Vector3) -> void:
 	var on := AimKit.shown(P, "lmb_bracket1") and AimKit.shown(P, "lmb_bracket-1") and not bool(e.get("all", true))
 	P.inp["fire"] = false
 	C.ac.step(m, 0.4)
-	C.ok("Venator parity LMB: firing brackets either side of him while he fires (yours only), gone after",
+	C.ok("Vex parity LMB: firing brackets either side of her while she fires (yours only), gone after",
 			on and absf(float(e.get("radius", 0.0)) - GunslingerKit.BRACKET_R) < 0.01
 			and not AimKit.shown(P, "lmb_bracket1"))
 
@@ -151,12 +152,12 @@ func _rifle_pose() -> void:
 	var kick := HunterAnim.km_sample("gunslinger_lmb", 0.025)
 	var same := is_equal_approx(a["p"], b["p"]) and is_equal_approx(a["gp"], b["gp"]) \
 			and (a["wo"] as Vector3).is_equal_approx(b["wo"])
-	C.ok("Venator parity LMB: each round kicks the gun by 0.025s, back on the shoulder by 0.09 (rounds 0.12 apart)",
+	C.ok("Vex parity LMB: each round kicks the gun by 0.025s, back on the shoulder by 0.09 (rounds 0.12 apart)",
 			same and float(kick["gp"]) > 0.15 and absf(float(kick["p"]) - float(a["p"])) < 0.15
 			and bool(mv.get("stance", false)),
 			"gp %.2f, torso %.2f -> %.2f" % [kick["gp"], a["p"], kick["p"]])
 
-## The Burr Charge, the owner's side toss rather than overhead: held low at the hip with little wind-up while he
+## The Burr Charge, the owner's side toss rather than overhead: held low at the hip with little wind-up while she
 ## walks, flicked sidearm on release, leaving from the hip.
 func _side_toss(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) -> void:
 	var hold := HunterAnim.km_sample("gunslinger_rmb_hold", 0.6)
@@ -182,17 +183,113 @@ func _side_toss(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3)
 	var b: Dictionary = K.burrs[-1] if K.burrs.size() > n0 else {}
 	P.inp["move"] = Vector2.ZERO
 	var y := float(b.get("y0", 9.0)) - float(b.get("g0", 0.0))
-	C.ok("Venator parity RMB: a side toss, held low at the hip, flicked sidearm at 0.05s, leaving from the hip",
+	C.ok("Vex parity RMB: a side toss, held low at the hip, flicked sidearm at 0.05s, leaving from the hip",
 			low and flick and stance and absf(y - GunslingerKit.TOSS_Y) < 0.2,
 			"hand %s -> %s, leaves %.2f m up" % [hold["fl"], release["fl"], y])
-	C.ok("Venator parity RMB: he keeps walking through the hold (85% of his walk or more)",
+	C.ok("Vex parity RMB: she keeps walking through the hold (85% of her walk or more)",
 			walked >= plain * WALK_KEEP, "%.2f of %.2f m/s" % [walked, plain])
 	C.ac.step(m, 1.5)
 
-## His plain walk (move held down the screen, not firing), in m/s; he is still walking when it returns.
+## Her plain walk (move held down the screen, not firing), in m/s; she is still walking when it returns.
 func _walk_speed(m: Match, P: Hunter) -> float:
 	P.inp["move"] = Vector2(0, 1)
 	C.ac.step(m, 0.3)
 	var p0 := P.pos
 	C.ac.step(m, 0.6)
 	return P.flat_dist(p0) / 0.6
+
+## The audit (Nov 3): no cosmetic ground rings, discs or columns on her slide, its rank-3 end, a knock or the
+## Longneedle's recoil (a ground shape means gameplay); Dazed is only a damage window (no slow, the data); her
+## air roll fires the rifle as its dash row says.
+func _audit(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) -> void:
+	var fx := VVFx.of(m)
+	var seen := {"ring": 0, "disc": 0, "pillar": 0}
+	var before := fx.live.map(func(e: Dictionary) -> Node3D: return e["node"])
+	var counted := {}
+	var watch := func():
+		for e in fx.live:
+			var kind := String(e["kind"])
+			if seen.has(kind) and not e["node"] in before and not counted.has(e["node"]):
+				counted[e["node"]] = true
+				seen[kind] = int(seen[kind]) + 1
+	P.teleport(home)
+	P.slot_lv["dash"] = 3
+	P.dashes = P.max_dashes()
+	P.inp["move"] = Vector2(0, 1)
+	P.do_dash()
+	C.ac.step(m, 1.0, watch)
+	var slid := K.last_dash_kind
+	P.inp["move"] = Vector2.ZERO
+	P.slot_lv["dash"] = 1
+	K.knocked.clear()
+	P.dashes = 0.0
+	T.hp = 0.0
+	T.downed = true
+	K.on_deal(T, 5.0, {"src": "abil", "ab": "k1"})
+	var knocked := P.dashes >= 1.0
+	C.ac.step(m, 0.5, watch)
+	T.downed = false
+	T.hp = T.max_hp
+	C.ok("Vex audit: no ground ring, disc or column on a slide, its rank-3 end or a knock",
+			slid != "" and knocked and int(seen["ring"]) + int(seen["disc"]) + int(seen["pillar"]) == 0,
+			"%s, knock %s, %s" % [slid, knocked, str(seen)])
+	C.ac.fresh(T)
+	KitStatus.apply(T, "rat", 1.4)
+	C.ok("Vex audit: Dazed is a damage window only, no slow (the data)",
+			KitStatus.rattled(T) and T.slow_t <= 0.0, "slow %.2f for %.2f s" % [T.slow_k, T.slow_t])
+	KitStatus.clear_rattled(T)
+	P.teleport(home)
+	P.do_jump()
+	C.ac.step(m, 0.15)
+	P.dashes = 0.0
+	P.ex_cd = 0.0
+	K.on_dash(true)
+	var rolled := K.last_dash_kind == "air" and P.roll_t > 0.0
+	C.ok("Vex audit: the rifle fires through her air roll (its dash row: fire)", rolled and K.fires_in_dash(),
+			"kind %s roll %.2f" % [K.last_dash_kind, P.roll_t])
+	C.ac.step(m, 1.0)
+	_into_dash(m, P, K, T, home)
+
+## Shift during her moves (the into_dash rows, all "fire": owner item 51, every move combos with Shift): pressed in
+## the Longneedle's charge she slides and the beam still fires; pressed with the Burr Charge's lane held she
+## slides and the charge still throws on release.
+func _into_dash(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) -> void:
+	C.ac.fresh(T)
+	P.teleport(home)
+	T.teleport(home + Vector3(6.0, 0, 0))
+	C.ac.step(m, 0.2)
+	T.inv_t = 0.0
+	C.ac.aim_at(P, T.pos)
+	K.cd["e"] = 0.0
+	var hits0 := K.needle_hits
+	K.use_e()
+	C.ac.step(m, 0.2)
+	P.dashes = P.max_dashes()
+	P.inp["move"] = Vector2(0, 1)
+	P.do_dash()
+	var p0 := P.pos
+	C.ac.step(m, 0.9)
+	P.inp["move"] = Vector2.ZERO
+	var e_ok := K.needle_hits > hits0 and P.flat_dist(p0) > 1.0
+	C.ac.fresh(T)
+	C.ac.step(m, 0.5)
+	K.cd["rmb"] = 0.0
+	K.ch_rmb = 1.0
+	var n0 := K.burrs.size()
+	P.inp["sec_hold"] = true
+	K.press_rmb()
+	C.ac.step(m, 0.2, func(): P.inp["sec_hold"] = true)
+	P.dashes = P.max_dashes()
+	P.inp["move"] = Vector2(0, -1)
+	P.do_dash()
+	C.ac.step(m, 0.3, func(): P.inp["sec_hold"] = true)
+	P.inp["move"] = Vector2.ZERO
+	P.inp["sec_hold"] = false
+	C.ac.step(m, 0.1)
+	var rmb_ok := K.burrs.size() > n0 or K.direct_hits > 0
+	var rows := ["lmb", "rmb", "e", "x", "q"].all(func(sl: String) -> bool:
+		var r := DashFlow.into_dash_of("gunslinger", sl)
+		return String(r.get("mode", "")) == "fire" and String(r.get("source", "")) != "")
+	C.ok("Vex audit: Shift in the Longneedle charge slides and the beam fires; in the held lane, the charge throws",
+			e_ok and rmb_ok and rows, "E %s RMB %s rows %s" % [e_ok, rmb_ok, rows])
+	C.ac.step(m, 1.5)

@@ -16,5 +16,11 @@
 			"q": {"mode": "fire", "source": "Gloves are ours; no source. Keep the row. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."}
 		}
 	},
-	"into_dash": {}
+	"into_dash": {
+		"lmb": {"mode": "fire", "source": "Footage 0149-0151: the rifle keeps firing as the slide starts and through it (briefs/hero-ref/venator.md:88)."},
+		"rmb": {"mode": "fire", "source": "Not shown in the data or footage. Ours: Shift with the Burr Charge's lane held slides, the lane rides along and the charge still throws on release."},
+		"e": {"mode": "fire", "source": "Not shown (the footage casts the Ion Cannon braced and still, 0.6s). Ours (owner item 51, no cancels): Shift in the 0.6s charge slides and the beam still fires at its end, from where she is."},
+		"x": {"mode": "fire", "source": "Not shown. Ours: Cinderfall is a tap; the shell is already out, so Shift slides at once."},
+		"q": {"mode": "fire", "source": "Not in the source; the glove keeps running."}
+	}
 }

@@ -178,7 +178,7 @@ const MOVES := {
 			"legs": TOSS_STEP, "lw": 1.0}],
 		[0.32, {"p": -0.06, "y": 0.12, "fl": Vector3(-0.1, 0.0, -0.15), "hw": 0.4, "legs": TOSS_STEP, "lw": 0.4}],
 		[0.5, {}]]},
-	# Combat Slide: dropped feet-first, leaning back (no further than 0.45, so he stays upright enough to
+	# Combat Slide: dropped feet-first, leaning back (no further than 0.45, so she stays upright enough to
 	# aim), both hands left on the rifle so it stays up and aimed; a scrape squash, then the stand-up
 	"gunslinger_dash": {"keys": [
 		[0.00, {"lift": 0.04, "sq": -0.2}],
@@ -186,7 +186,7 @@ const MOVES := {
 		[0.45, {"p": 0.4, "lift": -0.28, "sq": 0.25, "legs": SLIDE, "lw": 1.0}],
 		[0.62, {"p": -0.15, "lift": 0.05, "sq": -0.15, "legs": [0.5, -0.9, 0.2, -0.5], "lw": 0.8}],
 		[0.85, {}]]},
-	# the air dash (his base dash variant): a shoulder-led barrel roll, rifle tucked
+	# the air dash (her base dash variant): a shoulder-led barrel roll, rifle tucked
 	"gunslinger_dash_ex": {"keys": [
 		[0.00, {"sq": 0.15}],
 		[0.05, {"fz": 1.2, "p": -0.3, "legs": [1.1, -1.6, 1.0, -1.5], "lw": 1.0}],
@@ -194,7 +194,7 @@ const MOVES := {
 		[0.36, {"fz": 6.283, "sq": 0.3, "lift": -0.08}],
 		[0.5, {"fz": 6.283}]]},
 	# Ion Cannon: braced low behind the barrel through the 0.6 s cast, the beam goes, the recoil throws
-	# the chest back (overshoot) and he settles over ~0.4 s
+	# the chest back (overshoot) and she settles over ~0.4 s
 	"gunslinger_e": {"keys": [
 		[0.00, {"sq": -0.1}],
 		[0.15, {"p": -0.2, "y": 0.35, "lift": -0.1, "legs": BRACE, "lw": 1.0, "sq": 0.2}],
@@ -204,8 +204,8 @@ const MOVES := {
 			"legs": [0.1, -0.25, 0.3, -0.5], "lw": 1.0, "sq": -0.3}],
 		[0.8, {"p": 0.35, "gp": 0.25, "sq": 0.1, "legs": [0.15, -0.3, 0.2, -0.4], "lw": 0.8}],
 		[1.05, {}]]},
-	# Cinderfall (X, f29 on the sheet): the rifle snapped straight up over his head in 0.1 s, the shot kicks it
-	# and squashes him a little, held up a beat, then back down into his aim by 0.6 s
+	# Cinderfall (X, f29 on the sheet): the rifle snapped straight up over her head in 0.1 s, the shot kicks it
+	# and squashes her a little, held up a beat, then back down into her aim by 0.6 s
 	"gunslinger_x": {"keys": [
 		[0.00, {"sq": -0.1}],
 		[0.1, {"p": 0.3, "gp": 1.5, "wo": Vector3(0.0, 0.45, 0.1), "lift": 0.05, "sq": -0.25,
