@@ -1,4 +1,4 @@
-2026-11-03T14:01:37Z
+2026-11-03T14:10:10Z
 
 == S1 BRANCH TABLE (current; older detail further down) ==
 branch | commit | state | Net | checks
@@ -18,7 +18,7 @@ Pin+Bjorn owner Qs: is "his wall" in #29 the aegis wall? Faultline now runs on o
 
 Running now: 2 Sonnet agents (since 14:05 UTC): mapclean re-merge onto main 4d39c623; suite verify of airdash-glide and kitdata-vireo-venator on 4d39c623 (physics pass touched hunter movement).
 Queued: none on S1 (Dancer handed to S2). Farm tutorial build waits for owner answers.
-Last INBOX entry handled: 2026-11-03 13:05 UTC ORCH check-in. Main moved since (physics pass 4d39c623, 14:00 UTC check).
+Last INBOX entry handled: 2026-11-03 14:05 UTC ORCH check-in (matches S1 actions: mapclean HOLD + re-merge running; airdash-glide and kitdata-vireo-venator suite on 4d39c623 running)
 Watcher: received 19:06 UTC entry
 Questions for the owner: see ext/classes line.
 Net note: main is now 0.15.0, which kits2-nor also uses (0.15.0, kit move id on the snapshot); main session to reconcile. Kitfix branches that need a bump use 0.15.2 (dancer-juggernaut), .3 (pin-bjorn), .4 (vireo-venator), .5 (linwick-dredge), .6 (moosh-tamsin), .7 (breah-ostra).
