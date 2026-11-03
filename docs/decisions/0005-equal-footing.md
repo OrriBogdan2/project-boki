@@ -45,8 +45,10 @@ never two of the same (`Gloves.slot_for`). Gloves never rank: "gear" is gone fro
 rarity. Gloves chain with each other and with hero kits (a hook into a fissure). V also plays fetch
 at home; the two never apply in the same place (`Settings.SHARED_OK`).
 
-**HUD and overhead.** The right of the bottom HUD has three boxes: Q glove, V glove, C Boki (type
-badge, C cooldown, a bond ring, a down mark) in `GripHud`. Over every other hunter's nameplate, three
+**HUD and overhead.** The right of the bottom HUD has three boxes: glove 1, glove 2 and the Boki
+on the Merge key (type badge, a bond ring that pulses when the Merge is ready, a down mark) in
+`GripHud`. Every key shown comes from `Settings.key_cap` (gloves "gear1"/"gear2", Merge "ultimate"),
+so the owner's later move of Merge to C needs no change here. Over every other hunter's nameplate, three
 small icons: two gloves (rarity frame, dim on cooldown) and the Boki type (soft glow on a full bond),
 in `GripOverhead`; remote hunters' gloves, cooldowns and bond ride in the snapshot (`GripNet`).
 The overhead row sits under each plate in the row `HudStyle.PLATE_ICON_ROW` leaves free. Every
@@ -114,5 +116,6 @@ old minor glove-like items map to charms then).
   `Backpacks`, `HomeBackpacks`, `--equal-check`, `--equal-migrate-check`, `--backpack-check`.
 - Removed: `Loaner`, `HomeFreeKit`, the "kit" gear slot and its five pieces, the four utility gloves'
   gear files, the permanent `Econ` pack levels (now backpacks), the workshop/forge/lighthouse match perks, glove ranks.
-- Reserved-file hook for the main session: the left bar still draws C through
-  `BokiHud.cg_slots` (C and G together); split it so the left bar draws G only.
+- Reserved-file hook for the main session: the left bar still draws the Boki ability and orders
+  through `BokiHud.cg_slots`, and the Merge through `BokiHud.r_slot`; once the Boki ability joins G
+  and Merge moves to C, the left bar can drop its Merge slot (the right side's Boki box shows it).

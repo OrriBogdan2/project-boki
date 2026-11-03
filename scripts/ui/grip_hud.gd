@@ -4,8 +4,9 @@ extends RefCounted
 ## way the grips sit in the game we take after.
 ##   Q   glove 1: its icon, a frame in its rarity colour, the cooldown sweep, the key cap
 ##   V   glove 2: the same
-##   C   your Boki: its type badge in the type colour, the C ability's cooldown sweep, a thin ring
-##       for the bond meter (full = Merge ready, Settings "ultimate"), grey with a "down" mark while it's knocked out
+##   Merge  your Boki: its type badge in the type colour and a ring for the bond meter (full = the
+##          Merge is ready), grey with a "down" mark while it's knocked out. Its key is the Merge
+##          action's ("ultimate"); the Boki's own ability and orders sit on the Boki button.
 ## Gloves never rank, so there are no pips. Reads the hunter and Boki through their own getters
 ## (Hunter.gear / gear_cd, Kin.runner, Kin.state, KinMerge.ready); draws on the HUD's canvas.
 ## Look: HudStyle (the same slot frames and key pills as the ability row).
@@ -48,11 +49,11 @@ static func _glove(hud, p: Hunter, i: int, r: Rect2) -> void:
 	if not active:
 		HudStyle.ctext(hud.c, Vector2(r.get_center().x, r.end.y + 4), "PASSIVE", 8, Color(HudStyle.INK, 0.6))
 
-## The C box: your Boki. Also used by nothing else; the overhead row has its own small version.
+## The Merge box: your Boki. Also used by nothing else; the overhead row has its own small version.
 static func boki(hud, p: Hunter, r: Rect2) -> void:
 	var k: Kin = p.kin
-	var key := Settings.key_cap("kin_ability")
-	hud.hover_spots.append([r, "kin_ab"])
+	var key := Settings.key_cap("ultimate")
+	hud.hover_spots.append([r, "r"])
 	if k == null or not is_instance_valid(k):
 		HudStyle.slot_frame(hud.c, r, HudStyle.MUTED, "off")
 		HudStyle.key_pill(hud.c, Vector2(r.get_center().x, r.end.y), key, HudStyle.MUTED)
@@ -61,17 +62,8 @@ static func boki(hud, p: Hunter, r: Rect2) -> void:
 	var tc := DexView.type_col(t)
 	var down := k.state == "downed"
 	var ctr := r.get_center()
-	var cooling := k.runner != null and k.runner.def_of("k1") != null and not k.runner.is_ready("k1") and not down
-	var state := "ready"
-	if down:
-		state = "off"
-	elif cooling:
-		state = "cooling"
-	HudStyle.slot_frame(hud.c, r, tc, state)
+	HudStyle.slot_frame(hud.c, r, tc, "off" if down else "ready")
 	DexView.draw_type(hud.c, t, ctr + Vector2(0, -2), BOX * 0.3, 0.35 if down else 1.0)
-	if cooling:
-		HudSlot.sweep(hud.c, r.grow(-3.0), k.runner.cd_frac("k1"), Color(0, 0, 0, 0.55))
-		HudStyle.ctext(hud.c, ctr + Vector2(0, 6), HudSlot.cd_text(k.runner.cd_left("k1")), 16, HudStyle.INK)
 	# the bond meter as a thin ring; bright and pulsing once the Merge is ready
 	var bond := clampf(p.ult, 0.0, 1.0)
 	hud.c.draw_arc(ctr, BOX * 0.5 + 3.0, 0, TAU, 36, Color(1, 1, 1, 0.08), 2.0, true)

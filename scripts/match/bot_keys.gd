@@ -7,6 +7,7 @@ extends RefCounted
 const SEE_CARRIER := 34.0      # m: a key carrier in this range is worth walking to
 const SEE_KEY := 30.0          # m: a dropped key
 const CHEST_WITH_KEY := 45.0   # m: how far a bot with a key will walk to a chest
+const CLIMB := 2.5             # m: a carrier this far above the bot is out of reach (it hops at the lip)
 
 static func chest_open_for(h: Hunter, c: Dictionary) -> bool:
 	return not c["open"] and (bool(c.get("free", false)) or h.chest_keys > 0)
@@ -41,6 +42,8 @@ static func goal(m: Match, h: Hunter, cur: Vector3) -> Array:
 		if mb.dead or not KeyCarry.carries(mb) or (mb is Shrubling and (mb as Shrubling).ss == "disguised"):
 			continue
 		if m.lairs and m.lairs.walled_off(h, mb.pos):
+			continue
+		if mb.pos.y - h.pos.y > CLIMB:
 			continue
 		var d2 := h.flat_dist(mb) - (4.0 if mb.pos.distance_to(cur) < 3.0 else 0.0)
 		if d2 < minf(bd, SEE_CARRIER):

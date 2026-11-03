@@ -446,7 +446,7 @@ func _gloves() -> void:
 	B._bot_spend()
 	ok(B.skill_pts < 8 and not B.slot_lv.has("gear"),
 			"a bot spends its points on its hero's abilities (%s)" % str(B.slot_lv))
-	# the HUD: Q, V and C sit on the right (GripHud), not on the left bar
+	# the HUD: both gloves and the Boki's Merge box sit on the right (GripHud), not on the left bar
 	m.hud.c.queue_redraw()
 	for i in 3: await main.get_tree().process_frame
 	var sz: Vector2 = m.hud.c.size
@@ -454,6 +454,9 @@ func _gloves() -> void:
 	var spot_at: Array = spots.map(func(hs): return (hs[0] as Rect2).position)
 	var right := spots.all(func(hs): return (hs[0] as Rect2).position.x > sz.x * 0.5)
 	ok(spots.size() == 2 and right, "the HUD's two glove boxes sit on the right (%s)" % str(spot_at))
+	var merge_right: bool = m.hud.hover_spots.any(func(hs): return String(hs[1]) == "r"
+			and (hs[0] as Rect2).position.x > sz.x * 0.5)
+	ok(P.kin == null or merge_right, "the Boki box beside them is the Merge's (its key and tip: \"ultimate\")")
 	ok(not P.slot_info("gear1").is_empty()
 			and String(P.slot_info("gear1")["name"]) == String(Gear.ALL["quake"]["name"]),
 			"the V glove has its own slot info")
