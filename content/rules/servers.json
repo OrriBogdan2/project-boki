@@ -1,0 +1,7 @@
+{
+  "_doc": "Matchmaker regions for online play (OnlineSession). Placeholder hosts until the boxes exist; the client picks the one whose /health answers fastest, or the Settings override.",
+  "regions": [
+    {"id": "eu", "name": "Europe", "url": "http://eu.boki.invalid:8080"},
+    {"id": "us", "name": "North America", "url": "http://us.boki.invalid:8080"}
+  ]
+}

@@ -13,6 +13,7 @@ const DEFAULTS := {
 	"quality": "auto", "quality_found": "",
 	# gameplay
 	"damage_numbers": true, "tips": true, "kin_chatter": "normal", "mod_mode": false, "bot_diff": "auto",
+	"region": "auto",      # online: the matchmaker region, "auto" = whichever answers fastest (content/rules/servers.json)
 	# how keys behave (Controls)
 	"cast_on_press": true, "dash_to_cursor": false, "crouch_toggle": false,
 	# camera
