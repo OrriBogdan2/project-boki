@@ -1,5 +1,5 @@
 # S2 status (second server session)
-Updated: 2026-11-03 08:00 UTC (git/server clock). Last INBOX_S2 handled: 08:00 (git time) ownership.
+Updated: 2026-11-03 08:02 UTC (git/server clock). Last INBOX_S2 handled: 08:00 (git time) ownership.
 
 ## Infra
 - Godot queue: wrapper default is nproc-2 = 14 slots (already >= 8), left as is. S1: no change needed.
@@ -16,11 +16,15 @@ Updated: 2026-11-03 08:00 UTC (git/server clock). Last INBOX_S2 handled: 08:00 (
 
 ## Pair 1: Breah + Ostra
 - Branch `ext/review-breah-ostra` = origin/main 801bfbf + ext/kitdata-breah-ostra d0d045e (merged first, since item 14 asks to build on it; style baseline + wiki from main, regenerated). Ostra work on a local sub-branch, merged back before push.
-- In progress: Breah 26 (first), 14, 15, 25, 35; Ostra 42 (first), 17, 16, 40, 18 (concept note only), 35. Item 32 rows after the base lands.
+- Ostra: DONE 42, 17, 16, 40, 18 (concept note), 35 (local sub-branch ext/review-breah-ostra-o; ostra combo 126/0, archetype 251/0, dash-dir OK, health OK). Item 32 rows in progress (dash-flow-base merged in). Shared-code notes: CastHold (scripts, new helper; also used by Dredge 31) holds only vel.y so knocks land; hunter.gd 2 existing lines now ask ak.cast_locked() (no growth); arena_demo.gd --strip-w and 1280 px cap.
+  Owner Qs (Ostra): Nightwell locks her the full 4.5 s as asked, but footage shows Void free during the pull (f50): keep the lock? Item 39 lists the Void Jester as male, repo uses "she": which? Trade arrival still sends net_ring to remote players (their only arrival cue): keep? Trade end ring/sigil kept as gameplay markers (from footage).
+- Breah: in progress (26 first, 14, 15, 25, 35).
 - Screenshots: /home/boki/shots-s2/{breah,ostra}/review/ (to be pushed to ext/hero-shots-s2).
 
 ## Pair 2: Zedran + Bjorn
-- Branch `ext/review-zedran-bjorn` from origin/main 801bfbf. Zedran 21, 22, 35 in progress (Opus).
+- Branch `ext/review-zedran-bjorn` from origin/main 801bfbf. Zedran DONE 21, 22, 35 (juggernaut combo 132/0 was 91, dancer combo 86/0, hunter-unlock 137/0, weapon-clip PASS, health OK; kit split into juggernaut_chain.gd + juggernaut_drop.gd, kit 1129 -> 989 lines; Warchain state machine + RMB table in docs/heroes/juggernaut.md; new zedran_feel_check runs inside --juggernaut-combo-check; shared: HunterAnim.km_mix 0.08 s blend between kit moves). Item 32 rows in progress (dash-flow-base merged).
+  Fixed on the way: Chain Lunge x1.25 damage never applied; Chain Lunge to a wall counted as a miss (double cooldown).
+  Owner Qs (Zedran): Warchain 13 m (footage floor 12.6 m, no data range) enough? Shift/jump may break off the pull (not in footage): OK? keep our Haul Slam and Chain Lunge, or only the source's spin while chained?
 - Bjorn (INBOX_S2 08:00): S1 finishes what it began (c550b21a local on ext/kitdata-pin-bjorn); S2 owns the rest of Bjorn (incl. 32/35 rows) on top of S1's push when it lands.
 
 ## Pair 3: Tamsin + Dredge
