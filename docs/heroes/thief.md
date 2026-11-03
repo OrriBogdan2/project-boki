@@ -16,7 +16,7 @@ section, in docs/ARCHETYPES.md and in docs/wiki/Inspirations.md. Ids and file na
 ## Scaling
 
 Ratios, not raw numbers: a bolt is 9 (the source basic attack, 137), the empowered bolt is 3.5x (474),
-a Mark is +12% of a bolt (the +17 steps on 137), the Bola is 5 (74) and +13 for a pair (199), an Encore blade
+a Mark is +10% of a bolt (the data's +16 on its 160 bolt), the Bola is 5 (74) and +13 for a pair (199), an Encore blade
 is 8 (about 0.9 of a bolt: 114-127 against 137) and +4 from the outer band (the card's +50%: 36 + 19% against
 +18 + 9.5%). Cooldown ratios: Vault 4.5s (Cartwheel 4.2), Bola 7s (Trickshot 6.7), Shadow Knife 15s (Phantom
 Dagger 15), Encore 24s (Death Blossom 23.1, about 3.5 Trickshots).
@@ -26,10 +26,10 @@ Dagger 15), Encore 24s (Death Blossom 23.1, about 3.5 Trickshots).
 | Slot | Input | What it does (ours) | Source behaviour | Difference and why |
 |---|---|---|---|---|
 | LMB, Arc Bolts | hold | A spinning gold chakram from alternating hands every 0.45s, 34 m/s; it flies to the cursor (12m at most) and fizzles there in a blue-violet puff. A thin white aim line to the cursor with an arrow tick, gold while the next bolt is empowered | Arcslinger: the same, cursor-placed, 0.45s | Range 12m (the footage shows at least 7 bh); no magazine |
-| Passive, Marks | none | Every bolt that hits adds a Mark (up to 8, 4s, refreshed): +12% bolt damage per Mark. A knock heals 15% on top of the shared 10% (25% in all) with a crimson star on the knocked and a green pillar on her | Malice: about +12% of a shot per consecutive hit, still climbing at 8; knock heal with a green pillar | Gold diamonds over the target keep the stack readable (ours) |
-| Dash, Vault | Shift | A 4.5m sideways cartwheel (0.42s; both x the global dash feel, so about 3.8m in 0.48s) the way you move: a burst that peaks near 0.15s and runs down into the hasted run, a cyan and lilac arc traced by hands and feet, cyan streaks behind; +18% speed until the next hit (2s at most); the next bolt within 3s is empowered: a big blue chakram in a gold lightning streak, 3.5x, 2 Marks, Shred; landing it gives the Vault back | Cartwheel: a short sideways cartwheel, the next LMB empowered, a hit resets it | As the source |
+| Passive, Marks | none | Every bolt that hits adds a Mark (no cap, 4s, refreshed; eight diamonds show): +10% bolt damage per Mark. A knock heals 15% on top of the shared 10% (25% in all) with a crimson star on the knocked and a green pillar on her | Malice: about +12% of a shot per consecutive hit, still climbing at 8; knock heal with a green pillar | Gold diamonds over the target keep the stack readable (ours) |
+| Dash, Vault | Shift | A 4.5m sideways cartwheel (0.42s; both x the global dash feel, so about 3.8m in 0.48s) the way you move: a burst that peaks near 0.15s and runs down into the hasted run, a cyan and lilac arc traced by hands and feet, cyan streaks behind; +18% speed until the next hit (2s at most); the next bolt within 3s is empowered: a big blue chakram in a gold lightning streak, 3.5x, 2 Marks, Shred; landing it gives the Vault back; rank 2: empowered +20%, rank 3: +40% in all and the speed boost half again as big | Cartwheel: a short sideways cartwheel, the next LMB empowered, a hit resets it | As the source |
 | RMB, Bola | tap | A 0.4s wind-up (whirled overhead) with a chevron lane showing (1.4m wide, 10.8m long) that follows your aim, then the Bola flies 7m: 5 and a Mark, the first foe Grounded 1.5s with yellow binding rings, and it flies on 3.8m; it bounces once off a wall; a second foe: both stunned 0.9 and +13 | Trickshot: the lane for 0.4-0.6s, Grounded on the first, Stunned on two, bounces off terrain | As the source |
-| E, Shadow Knife | tap, recast | A dagger to the cursor (14m at most): it sticks in the first foe on the way (8, slowed 50% for 2.5s) or lands where you aimed; a white circle marks it; recast blinks you there through 5 cyan afterimages; after 6s you step anyway | Phantom Dagger: sticks or lands, recast teleports with a ghost chain | As the source |
+| E, Shadow Knife | tap, recast | A dagger to the cursor (14m at most): it sticks in the first foe on the way (8, slowed 50% for 2.5s) or lands where you aimed; a white circle marks it; recast blinks you there through 5 cyan afterimages; after 6s you step anyway; rank 3: sticking in a foe gives the Vault back | Phantom Dagger: sticks or lands, recast teleports with a ghost chain | As the source |
 | X, Encore | tap (level 6) | A violet ring grows round her from 2.3m to 5.4m (3 bh) over 0.4s, everyone sees it, then rides with her for 2s: every 0.4s a blade flies at each foe inside (5 at most each): 8, and 12 from the outer band (past 75% of the radius), which also blights 6s. She keeps walking, shooting and dashing; casting it gives the Vault back; every blade refreshes her Marks; three blades circle her while it runs; a plain fade at the end. 24s cooldown. A blade landing on a rival hunter fills the bond (the best event of the cast counts) | Death Blossom: the ring grows 1.3 to 3 bh in 0.4s, up to 5 shots at each enemy over 2s, the outer band hits harder and Anti-Heals 6s | As the source; the look (her violet ring with a gold outer band, violet blades) is ours |
 | Merge (its own key, `ultimate`) | tap | The Boki Merge | (n/a) | The Merge is the same for every hero |
 
@@ -47,7 +47,7 @@ Dagger 15), Encore 24s (Death Blossom 23.1, about 3.5 Trickshots).
 1. **Trickshot input:** a fixed 0.4s cast with the lane, not a hold-and-release. The lane follows the aim during the cast.
 2. **Trickshot stun:** only a second foe stuns; a wall bounce does not count as a second target.
 3. **Arcslinger range:** 12m (about 6.7 bh), clamped; the cursor point is the landing point.
-4. **Mark cap and time:** 8 Marks, 4s each, refreshed by every hit (the footage still climbed at 8).
+4. **Mark cap and time:** no cap (the data's rule), 4s each, refreshed by every hit; the readout shows eight diamonds and a count.
 5. **Cartwheel direction:** the movement direction (WASD), the aim when standing still; the cartwheel turns in the plane of travel.
 6. **Phantom Dagger timer:** 6s, then you step to it anyway (the wiki's rule); no target: it lands at the cursor.
 7. **Encore and Marks:** its blades refresh Marks but do not add them, and do not count as bolt hits (the Mark bonus does not apply to them).
@@ -77,7 +77,8 @@ and asserted in `--dancer-combo-check` / `--kit-combo-check`.
 | The dagger sticks to any surface or character, and to shields and barricades | wiki patch 20.11.2024 | yes | Built for hunters, monsters and the ground; shields: not yet (our walls are terrain) |
 | After 6s she teleports to the dagger anyway; recast to go early | wiki Q | yes (0237) | Built; asserted |
 | A dagger in an enemy slows them 50% | wiki Q | yes (0258) | Built (2.5s, our TTK) |
-| A dagger in an enemy at the top rank resets Quickflip; terrain refunds 25%, characters 50% | wiki Q levels 3-4 | n/a | Built at rank 3; asserted |
+| A dagger in an enemy at the top rank resets Quickflip; terrain refunds 25%, characters 50% | owner's game data (Farstep rank IV) | n/a | Built on the Knife's rank 3 (it was on Vault's); asserted |
+| Quickflip: +20% empowered damage twice, then +50% speed boost | owner's game data | n/a | Built: +20% at rank 2, +40% in all at rank 3 with the speed boost half again as big |
 | The ult fires after a short delay (the ring growing) | wiki R | yes (ult f27-f31) | Built: 0.4s, no blade before it; asserted |
 | Up to 5 shots at each nearby enemy over 2s | wiki R | yes | Built; asserted (10 blades on two foes) |
 | The ult's outer ring deals bonus damage and anti-heals 6s | wiki R | yes (ult f121, f127) | Built on the outer 25% (blight 6s); asserted |

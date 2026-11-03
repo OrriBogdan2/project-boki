@@ -61,7 +61,7 @@ What the in-game kit card (K) says.
 |---|---|
 | Loop | Melee bruiser: get in, chain them close, and finish the wounded. |
 | Passive: Rage | Damage fills Rage. Full, you're Enraged: more damage, faster dashes and cooldowns. Knocks heal you. |
-| Dash: Rampage | Three charges of a short dash attack the way you face. Its tip hits twice as hard. |
+| Dash: Rampage | Two charges (a third at rank 2) of a short dash attack the way you face. Its tip hits twice as hard. |
 | RMB: Smash | Tap: a heavy slam, harder on the wounded; a knock after its sweet spot resets your ultimate. Hold: charge, then fling yourself forward. In the air: slam down at your cursor. |
 | E: Warchain | Throw a chain at a foe or a wall. Press E again to pull yourself to it. |
 | X: Gilded Riposte | Guard for 0.65s, taking nothing, then lunge into a cleave that heals you; a knock with it resets it. |
@@ -71,13 +71,13 @@ What the in-game kit card (K) says.
 
 **Rage (passive).** Damage you deal fills Rage (a Searing Wave fills it three times as fast); it cools after 3s out of a fight. Full, you're Enraged for 6s: +15% damage, +12% dash recharge and +20% cooldown speed, with the red shell and the hunter swelling. Knocking a hunter heals you 20% of their health (killing a monster, 20% of its).
 
-**Rampage (dash, Shift, 9s cooldown).** A short crouch, then a dash attack of about 4m the way you face (3 charges): 7 to foes along it; the tip at its end hits twice as hard, 14 and a big knock (stun 0.8 into a wall). A knock gives a charge back.
+**Rampage (dash, Shift, 9s cooldown).** A short crouch, then a dash attack of about 4m the way you face (2 charges, a third at rank 2): 7 to foes along it; the tip at its end hits twice as hard, 14 and a big knock. A knock gives a charge back. At rank 3 a shot dodged through it feeds your Rage.
 
 **Smash (RMB, 2s cooldown).**
 
 - *Tap:* Finishing Slam: a 0.6s wind-up you aim freely (everyone sees the strike lane), then a 4m strike ahead: 26 and push 6; foes under 35% (outlined in red while the Smash is ready) take +50%. Its sweet spot is the far tip, dead ahead: knock a hunter within 2s of hitting them there and the Gilded Riposte is ready again.
 - *Hold:* Lunge: a crouched wind-up (the lane grows ahead of you, magenta and flashing at full, 0.8s), then release to fling yourself 4.5 -> 7.5m forward into the first foe: 14 -> 20. You can jump while you charge. Strike nothing and the cooldown doubles.
-- *In the air:* Meteor Drop: a disc shows under your cursor (5m at most); you dive onto it, a 2.6m burst: 18 and slow 40% for 1.5s; the centre (1.2m) takes +50% and is stunned 0.8.
+- *In the air:* Meteor Drop: a disc shows under your cursor (5m at most); you dive onto it, a 2.6m burst: 18 and slow 40% for 1.5s; the centre (1.2m) takes +50% and is stunned 0.8. It has its own cooldown, 7.2s, so a Smash right before it does not hold it back.
 - *During E:* With the Warchain: tap while it pulls you for a Cinder Spin (2.6m, 18, blights 4s); hold while it pulls you, or hold and then pull, for a Haul Slam where you arrive (2.8m, 16 -> 30, stun 0.25 -> 0.6); hold while it's attached and let go for a Chain Lunge along it (x1.25 and a short stun).
 
 **Warchain (E, 9.5s cooldown).** Throw a chain 10m: it hooks the first foe (8 damage, blighted while tethered: healing barely takes) or bites a wall, for 4s. Press E again to pull yourself to it. The cooldown starts when you pull or the chain breaks (a stun breaks it); you can't throw it while rooted or grounded.
@@ -90,9 +90,9 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 
 | Slot | Rank 2 | Rank 3 |
 |---|---|---|
-| RMB | cooldown 2s -> 1.8s, damage +15%. | cooldown 2s -> 1.6s, damage +30%; +20% damage on every Smash. |
-| Dash (Shift) | recharge 9s -> 7.6s per charge. | recharge 9s -> 6.3s; the tip hits +25% harder. |
-| E | cooldown 9.5s -> 8.6s, damage +15%. | cooldown 9.5s -> 7.6s, damage +30%; hooking a foe refunds 33% of the cooldown. |
+| RMB | cooldown 2s -> 1.8s, damage +15%; +20% damage on every Smash. | cooldown 2s -> 1.6s, damage +30%; +40% damage on every Smash in all, and the Meteor Drop rests 2.4s less. |
+| Dash (Shift) | recharge 9s -> 7.6s per charge; a third charge. | recharge 9s -> 6.3s; a shot dodged through the Rampage feeds your Rage. |
+| E | cooldown 9.5s -> 8.3s, damage +15%. | cooldown 9.5s -> 5.9s, damage +30%. |
 
 **Suggested level-up order** (what bots follow): Dash (Shift) > RMB > E > RMB > Dash (Shift) > RMB > E > Glove (Q).
 

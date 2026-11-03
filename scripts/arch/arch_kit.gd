@@ -769,8 +769,12 @@ func flip_for(dir: Vector2, base: String) -> String:
 	if absf(r) > absf(f): return base + ("_r" if r > 0.0 else "_l")
 	return base + ("_f" if f >= 0.0 else "_b")
 
-## Dash charges the kit adds on top of the class's (the Juggernaut's Rampage at rank 3).
+## Dash charges the kit adds on top of the class's (the Juggernaut's Rampage at rank 2).
 func extra_dashes() -> float: return 0.0
+
+## A shot dodged through this hero's dash (kits that feed on it override).
+func on_perfect_dodge() -> void: pass
+
 ## The payoff lives on the dash (the Thief's Primed shot into 3 Marks): the dash slot gets the gold dot.
 func dash_payoff_ready() -> bool: return false
 

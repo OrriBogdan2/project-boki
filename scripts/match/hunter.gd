@@ -465,6 +465,7 @@ func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
 			dashes = minf(max_dashes(), dashes + 0.6)
 			crit_t = maxf(crit_t, 1.5)
 			m.on_perfect_dodge(self)
+			if ak: ak.on_perfect_dodge()
 		return 0.0
 	if ctrl == "local" and Game.god:
 		return 0.0
