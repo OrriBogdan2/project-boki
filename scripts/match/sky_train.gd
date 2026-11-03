@@ -463,13 +463,10 @@ func eta(e) -> float:
 		return INF
 	if e is Hunter and float(m.time) - float(ride_t.get(e, -9.0)) < 1.5:
 		return INF
-	var R: Dictionary = world.train_route
-	var c: Vector2 = R["center"]
-	var rad := float(R["r"])
-	var d2 := Vector2(e.pos.x, e.pos.z) - c
-	if absf(d2.length() - rad) > HALF_W + 1.5:
+	var near := TrainRoute.nearest(world, Vector2(e.pos.x, e.pos.z))
+	if near.y > HALF_W + 1.5:
 		return INF
-	var s := fposmod(d2.angle(), TAU) * rad
+	var s := near.x
 	var ahead := fposmod(s - head_s, loop_len) - CAR_LEN * 0.5
 	if ahead < -1.0:
 		return INF
@@ -480,9 +477,13 @@ func eta(e) -> float:
 
 ## Which way to step to get off the rails (away from the loop's centre line), for bots.
 func step_off_dir(e) -> Vector2:
-	var c: Vector2 = world.train_route["center"]
-	var d2 := Vector2(e.pos.x, e.pos.z) - c
-	var out := d2.normalized() * (1.0 if d2.length() >= float(world.train_route["r"]) else -1.0)
+	var p := Vector2(e.pos.x, e.pos.z)
+	var near := TrainRoute.nearest(world, p)
+	var on: Vector3 = world.train_at(near.x)
+	var out := (p - Vector2(on.x, on.z)).normalized()
+	if out == Vector2.ZERO:
+		var ahead: Vector3 = world.train_at(near.x + 1.0) - on
+		out = Vector2(-ahead.z, ahead.x).normalized()
 	# the side with ground to stand on, if only one has it
 	var a: Vector2 = Vector2(e.pos.x, e.pos.z) + out * 2.2
 	var b: Vector2 = Vector2(e.pos.x, e.pos.z) - out * 2.2

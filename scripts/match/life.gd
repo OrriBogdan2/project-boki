@@ -188,7 +188,8 @@ static func box_spot(m: Match, h: Hunter, why: String) -> Vector3:
 	var at := h.pos
 	if why == "train" and m.world.is_void(at.x, at.z):
 		# hit by the sky train over the abyss: the box lands on the nearest ground to where they were hit
-		var near: Vector3 = m.world.free_spot_near(at, [], 1.0, 0.4, 14.0)
+		# (a winding loop swings up to ~25 m out from the islands)
+		var near: Vector3 = m.world.free_spot_near(at, [], 1.0, 0.4, 30.0)
 		if not m.world.is_void(near.x, near.z):
 			at = near
 	if why == "abyss" or m.world.is_void(at.x, at.z) or at.y < m.world.ground_at(at.x, at.z) - 1.0:

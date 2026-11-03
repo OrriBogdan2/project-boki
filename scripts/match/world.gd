@@ -1808,9 +1808,6 @@ func _undergrowth(groups: Dictionary, x: int, z: int, r: RandomNumberGenerator) 
 ## clean cut. Purely visual: they sit in the air beside the edge, below the ground you stand on, and
 ## stay clear of bridges, stairs, pads, updrafts and the sky train's loop.
 func _cliff_rocks(groups: Dictionary, r: RandomNumberGenerator) -> void:
-	var tc := Vector2.INF; var tr := 0.0
-	if not train_route.is_empty():
-		tc = train_route["center"]; tr = float(train_route["r"])
 	for z in h:
 		await _slice()
 		for x in w:
@@ -1818,7 +1815,7 @@ func _cliff_rocks(groups: Dictionary, r: RandomNumberGenerator) -> void:
 			if kind[i] == T_VOID or bridge.has(i) or stairs.has(i) or edge_dist(x, z, 1) != 1 or r.randf() > 0.16:
 				continue
 			var cp := Vector2(x + 0.5, z + 0.5)
-			if tc != Vector2.INF and absf(cp.distance_to(tc) - tr) < 4.5:
+			if TrainRoute.nearest(self, cp).y < 4.5:
 				continue
 			var clear := true
 			for pd in pads:
@@ -2096,12 +2093,12 @@ static func load_layout(id: String) -> Dictionary:
 	var d = JSON.parse_string(FileAccess.get_file_as_string(path))
 	return d if typeof(d) == TYPE_DICTIONARY else {}
 
-## Which authored map an expedition of this tier uses (all tiers share the Hollow Crown for now, each
-## with its own palette and monsters; Skyreach is kept as content and loads with opts.map = "skyreach").
-static func layout_for_tier(_tier: int) -> String:
+## Which authored map an expedition of this tier uses (Data.TIERS "map"; Skyreach is kept as content
+## and loads with opts.map = "skyreach").
+static func layout_for_tier(tier: int) -> String:
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--map="): return String(a).substr(6)     # tooling: every expedition on another map
-	return "hollowcrown"
+	return String(Data.TIERS[clampi(tier, 0, Data.TIERS.size() - 1)].get("map", "hollowcrown"))
 
 ## A biome's data (content/biomes/<id>.json), cached.
 static var _biomes := {}
