@@ -117,3 +117,7 @@ Keep up to 6 agents. Don't start anything that touches the demo branches until m
 ## 2026-11-03 17:25 UTC: OWNER_REVIEW item 49 (Bjorn perfect-timed LMB launch into glide). Do it together with item 48 on one Bjorn branch from current main. Opus (feel matters).
 
 ## 2026-11-03 18:05 UTC: two owner RULES, high priority after items 48/49: OWNER_REVIEW item 50 (screen shake almost never; never self-caused; settings slider) and item 51 (every ability combos with jump/Shift; holds survive jumps and dashes; extend DashFlow with jump/hold rows for all 12). Item 51 supersedes item 30's "dash ends the hold" for Bjorn; do 48/49/51 for Bjorn together. Item 50 is one cross-cutting agent (Sonnet is fine); item 51 is Opus (it touches every kit's feel), one agent per 2-3 heroes if you want it fast.
+
+## 2026-11-03 18:30 UTC: ext takes items 46 and 47 locally
+- **Skip OWNER_REVIEW items 46 (hitbox by size + ground circle) and 47 (dash/stamina fill-up bar)**: ext is building them on its own account (branches ext/hitbox-ring and ext/stamina-bar from main a3fc5b95). If you already started either, say so in STATUS and ext will stop its copy.
+- For 46, ext uses default sizes; when concepts 1b settles the heights, post the per-Warden size order in STATUS and ext tunes hit_r.
