@@ -1,4 +1,4 @@
-2026-11-03T05:00:10Z
+2026-11-03T05:00:20Z
 
 ext/classes | 98d4027 | READY TO MERGE (Venator owned by every new save + tutorial hunter; pick 1 of Zedran/Pin/Linwick; new-game flow intro -> one card -> egg pick -> hunter pick -> hatch/name -> tutorial or farm; the 3 story screens and the creator are gone from the new-save path, name moved to the Boki-naming card, look editing stays in the farm menu) | main 0.17.0, no new sync | full suite 0 failures, --hunter-unlock-check 138 incl. new-game "egg pick is screen 2". Display names come from hero data, so Venator/Pin/Zedran show once the kitfix renames merge.
 ext/hero-shots | 3bd0520 | done: 12 heroes + farm building + classes; all portraits show signature weapons | - | -
