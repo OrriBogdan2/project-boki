@@ -46,8 +46,8 @@ func _breah() -> void:
 		for w in m.verbs.walls.duplicate(): m.verbs._break_wall(w)
 		step(m, 0.25)
 	ok(
-		"name: the display name is Breah",
-		Arch.name_of("dolm") == "Breah" and HeroKit.ARCHES["dolm"]["name"] == "Breah", Arch.name_of("dolm")
+		"name: the display name is the class title",
+		Arch.name_of("dolm") == "Rock Elementalist", Arch.name_of("dolm")
 	)
 	var card: Dictionary = K.d["card"]
 	ok(

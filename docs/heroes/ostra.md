@@ -1,4 +1,4 @@
-# Ostra (archetype id `ostra`, Medium)
+# Void Jester (base character Ostra; archetype id `ostra`, Medium)
 
 Internal note: the behaviour reference is the hero named in the Inspired-by table in docs/ARCHETYPES.md. Nothing below is
 player-facing; every name, number and word in the shipped game is our own (renames: Swap -> Lantern Trade, Void Snap -> Shard

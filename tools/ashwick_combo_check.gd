@@ -109,7 +109,8 @@ func _all() -> void:
 		m.step(ak.DT)
 	ok(
 		"linwick: heavy, Torch Lance, 2 ram charges",
-		P.wid == "flamethrower" and P.cls == "heavy" and P.max_dashes() >= 2.0 and Arch.name_of("ashwick") == "Linwick",
+		P.wid == "flamethrower" and P.cls == "heavy" and P.max_dashes() >= 2.0
+			and Arch.name_of("ashwick") == "Mad Pyromancer",
 		"%s %s %s" % [P.wid, P.cls, Arch.name_of("ashwick")]
 	)
 	# --- the hose: the pilot first, then a stream that reaches its full length past a close cursor

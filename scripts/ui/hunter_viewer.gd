@@ -217,6 +217,7 @@ func _info(col: Color) -> Control:
 	v.custom_minimum_size.x = 400
 	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	v.add_child(UI.title(Arch.name_of(id), 30, col))
+	v.add_child(HeroTitle.intro_block(id, 390.0))
 	v.add_child(UI.label(stat_line(id), 13, UI.MUTED))
 	var fan := UI.para(String(Arch.def(id).get("fantasy", "")), 13, UI.INK)
 	fan.custom_minimum_size.x = 390

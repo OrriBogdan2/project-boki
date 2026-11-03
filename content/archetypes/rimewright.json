@@ -1,6 +1,9 @@
 {
 	"id": "rimewright",
-	"name": "Tamsin",
+	"title": "Icy Dancer",
+	"base_name": "Tamsin",
+	"gender": "female",
+	"personality": "A graceful ice skater who glides where others walk and leaves frost behind her.\nElegant and playful, with a cold edge when crossed.",
 	"role": "Rimewright",
 	"weight": "light",
 	"body": {

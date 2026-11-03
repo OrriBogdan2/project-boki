@@ -38,6 +38,7 @@ const CHECKS := {
 	"--wallmove-check": ["res://tools/wallmove_check.gd", "wallmove_check", null],
 	"--uipolish-check": ["res://tools/uipolish_check.gd", "uipolish_check", null],     # settings, menu look
 	"--perkorb-check": ["res://tools/perkorb_check.gd", "perkorb_check", null],      # perk orbs, the boss fan, the fixed weapon path
+	"--hero-title-check": ["res://tools/hero_title_check.gd", "hero_title_check", null],
 	"--farmbuild": ["res://tools/farmbuild_check.gd", "farmbuild_check", null],      # also --farmbuild-shots=<dir>
 }
 
