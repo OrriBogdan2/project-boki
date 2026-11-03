@@ -3822,6 +3822,118 @@ Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-t
 
 ![Starpiercer: the last beam, the hard kick (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)](pin/v2/polish/anim_pin_ult_final_game.png)
 
+**owner1103 #5: draw strip 1/5, the arrow nocked 0.07 s after the press (gameplay zoom)**
+
+![owner1103 #5: draw strip 1/5, the arrow nocked 0.07 s after the press (gameplay zoom)](pin/v2/polish/o1103_pin_draw_a.png)
+
+**owner1103 #5: draw strip 1/5, the arrow nocked 0.07 s after the press (close-up)**
+
+![owner1103 #5: draw strip 1/5, the arrow nocked 0.07 s after the press (close-up)](pin/v2/polish/o1103_pin_draw_a_close.png)
+
+**owner1103 #5: draw strip 2/5, the steady pull, the V closing on the aim line (gameplay zoom)**
+
+![owner1103 #5: draw strip 2/5, the steady pull, the V closing on the aim line (gameplay zoom)](pin/v2/polish/o1103_pin_draw_b.png)
+
+**owner1103 #5: draw strip 2/5, the steady pull, the V closing on the aim line (close-up)**
+
+![owner1103 #5: draw strip 2/5, the steady pull, the V closing on the aim line (close-up)](pin/v2/polish/o1103_pin_draw_b_close.png)
+
+**owner1103 #5: draw strip 3/5, Empowered ready, one line and the glint on the aim line (gameplay zoom)**
+
+![owner1103 #5: draw strip 3/5, Empowered ready, one line and the glint on the aim line (gameplay zoom)](pin/v2/polish/o1103_pin_draw_c.png)
+
+**owner1103 #5: draw strip 3/5, Empowered ready, one line and the glint on the aim line (close-up)**
+
+![owner1103 #5: draw strip 3/5, Empowered ready, one line and the glint on the aim line (close-up)](pin/v2/polish/o1103_pin_draw_c_close.png)
+
+**owner1103 #5: draw strip 4/5, the V re-opening toward Supercharged (gameplay zoom)**
+
+![owner1103 #5: draw strip 4/5, the V re-opening toward Supercharged (gameplay zoom)](pin/v2/polish/o1103_pin_draw_d.png)
+
+**owner1103 #5: draw strip 4/5, the V re-opening toward Supercharged (close-up)**
+
+![owner1103 #5: draw strip 4/5, the V re-opening toward Supercharged (close-up)](pin/v2/polish/o1103_pin_draw_d_close.png)
+
+**owner1103 #5: draw strip 5/5, Supercharged, the thick line from Pin past the cursor (gameplay zoom)**
+
+![owner1103 #5: draw strip 5/5, Supercharged, the thick line from Pin past the cursor (gameplay zoom)](pin/v2/polish/o1103_pin_draw_e.png)
+
+**owner1103 #5: draw strip 5/5, Supercharged, the thick line from Pin past the cursor (close-up)**
+
+![owner1103 #5: draw strip 5/5, Supercharged, the thick line from Pin past the cursor (close-up)](pin/v2/polish/o1103_pin_draw_e_close.png)
+
+**owner1103 #5: the perfect release, the gold flash on the aim line (gameplay zoom)**
+
+![owner1103 #5: the perfect release, the gold flash on the aim line (gameplay zoom)](pin/v2/polish/o1103_pin_perfect.png)
+
+**owner1103 #5: the perfect release, the gold flash on the aim line (close-up)**
+
+![owner1103 #5: the perfect release, the gold flash on the aim line (close-up)](pin/v2/polish/o1103_pin_perfect_close.png)
+
+**owner1103 #6: the Heavy Shot held, the thick gold lane and V from the bow (gameplay zoom)**
+
+![owner1103 #6: the Heavy Shot held, the thick gold lane and V from the bow (gameplay zoom)](pin/v2/polish/o1103_pin_heavy_hold.png)
+
+**owner1103 #6: the Heavy Shot held, the thick gold lane and V from the bow (close-up)**
+
+![owner1103 #6: the Heavy Shot held, the thick gold lane and V from the bow (close-up)](pin/v2/polish/o1103_pin_heavy_hold_close.png)
+
+**owner1103 #6: the Heavy Shot's release burst on the aim line and the big arrow (gameplay zoom)**
+
+![owner1103 #6: the Heavy Shot's release burst on the aim line and the big arrow (gameplay zoom)](pin/v2/polish/o1103_pin_heavy_release.png)
+
+**owner1103 #6: the Heavy Shot's release burst on the aim line and the big arrow (close-up)**
+
+![owner1103 #6: the Heavy Shot's release burst on the aim line and the big arrow (close-up)](pin/v2/polish/o1103_pin_heavy_release_close.png)
+
+**owner1103 #6: the Heavy Shot mid-flight, about 3.5 times a normal arrow with a long trail (gameplay zoom)**
+
+![owner1103 #6: the Heavy Shot mid-flight, about 3.5 times a normal arrow with a long trail (gameplay zoom)](pin/v2/polish/o1103_pin_heavy_flight.png)
+
+**owner1103 #6: the Heavy Shot mid-flight, about 3.5 times a normal arrow with a long trail (close-up)**
+
+![owner1103 #6: the Heavy Shot mid-flight, about 3.5 times a normal arrow with a long trail (close-up)](pin/v2/polish/o1103_pin_heavy_flight_close.png)
+
+**owner1103 #6: the Heavy Shot on the body: hit flash, pinned against the wall, the stake in it (gameplay zoom)**
+
+![owner1103 #6: the Heavy Shot on the body: hit flash, pinned against the wall, the stake in it (gameplay zoom)](pin/v2/polish/o1103_pin_heavy_impact.png)
+
+**owner1103 #6: the Heavy Shot on the body: hit flash, pinned against the wall, the stake in it (close-up)**
+
+![owner1103 #6: the Heavy Shot on the body: hit flash, pinned against the wall, the stake in it (close-up)](pin/v2/polish/o1103_pin_heavy_impact_close.png)
+
+**owner1103 #6: the stake still standing in the wall after the pin (gameplay zoom)**
+
+![owner1103 #6: the stake still standing in the wall after the pin (gameplay zoom)](pin/v2/polish/o1103_pin_heavy_stake.png)
+
+**owner1103 #6: the stake still standing in the wall after the pin (close-up)**
+
+![owner1103 #6: the stake still standing in the wall after the pin (close-up)](pin/v2/polish/o1103_pin_heavy_stake_close.png)
+
+**owner1103 #35: Pin's own dash, the Spirit Walk roll (strip frame 1/3) (gameplay zoom)**
+
+![owner1103 #35: Pin's own dash, the Spirit Walk roll (strip frame 1/3) (gameplay zoom)](pin/v2/polish/o1103_pin_dash.png)
+
+**owner1103 #35: Pin's own dash, the Spirit Walk roll (strip frame 1/3) (close-up)**
+
+![owner1103 #35: Pin's own dash, the Spirit Walk roll (strip frame 1/3) (close-up)](pin/v2/polish/o1103_pin_dash_close.png)
+
+**owner1103 #35: Pin's own dash (strip frame 2/3) (gameplay zoom)**
+
+![owner1103 #35: Pin's own dash (strip frame 2/3) (gameplay zoom)](pin/v2/polish/o1103_pin_dash_b.png)
+
+**owner1103 #35: Pin's own dash (strip frame 2/3) (close-up)**
+
+![owner1103 #35: Pin's own dash (strip frame 2/3) (close-up)](pin/v2/polish/o1103_pin_dash_b_close.png)
+
+**owner1103 #35: Pin's own dash, out of the roll walking as a spirit (frame 3/3) (gameplay zoom)**
+
+![owner1103 #35: Pin's own dash, out of the roll walking as a spirit (frame 3/3) (gameplay zoom)](pin/v2/polish/o1103_pin_dash_c.png)
+
+**owner1103 #35: Pin's own dash, out of the roll walking as a spirit (frame 3/3) (close-up)**
+
+![owner1103 #35: Pin's own dash, out of the roll walking as a spirit (frame 3/3) (close-up)](pin/v2/polish/o1103_pin_dash_c_close.png)
+
 ## bjorn/v2/polish (bjorn/v2/polish)
 
 **Hammer thrown: tumbling, gold-orange glow and trail, flying to the cursor (gameplay zoom)**
@@ -4175,6 +4287,110 @@ Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-t
 **round2: Faultline slam strip, pitch capped at 0.4 (was 0.75), no longer folded head-down (close-up, 0.42 zoom; before: anim_bul_ult_slam_close.png)**
 
 ![round2: Faultline slam strip, pitch capped at 0.4 (was 0.75), no longer folded head-down (close-up, 0.42 zoom; before: anim_bul_ult_slam_close.png)](bjorn/v2/polish/r2_anim_bul_ult_slam_close.png)
+
+**owner1103 #29: the raised aegis, plated and bigger, the double chevron pulsing in front (gameplay zoom)**
+
+![owner1103 #29: the raised aegis, plated and bigger, the double chevron pulsing in front (gameplay zoom)](bjorn/v2/polish/o1103_bjorn_aegis_idle.png)
+
+**owner1103 #29: the raised aegis, plated and bigger, the double chevron pulsing in front (close-up)**
+
+![owner1103 #29: the raised aegis, plated and bigger, the double chevron pulsing in front (close-up)](bjorn/v2/polish/o1103_bjorn_aegis_idle_close.png)
+
+**owner1103 #29: a foe meets the aegis: the chevron flashes and the foe is pushed back (gameplay zoom)**
+
+![owner1103 #29: a foe meets the aegis: the chevron flashes and the foe is pushed back (gameplay zoom)](bjorn/v2/polish/o1103_bjorn_aegis_push.png)
+
+**owner1103 #29: a foe meets the aegis: the chevron flashes and the foe is pushed back (close-up)**
+
+![owner1103 #29: a foe meets the aegis: the chevron flashes and the foe is pushed back (close-up)](bjorn/v2/polish/o1103_bjorn_aegis_push_close.png)
+
+**owner1103 #30: the held swing, strip 1/5, the wind-up (gameplay zoom)**
+
+![owner1103 #30: the held swing, strip 1/5, the wind-up (gameplay zoom)](bjorn/v2/polish/o1103_bjorn_swing_a.png)
+
+**owner1103 #30: the held swing, strip 1/5, the wind-up (close-up)**
+
+![owner1103 #30: the held swing, strip 1/5, the wind-up (close-up)](bjorn/v2/polish/o1103_bjorn_swing_a_close.png)
+
+**owner1103 #30: the held swing, strip 2/5, the hammer comes round, he steps in (gameplay zoom)**
+
+![owner1103 #30: the held swing, strip 2/5, the hammer comes round, he steps in (gameplay zoom)](bjorn/v2/polish/o1103_bjorn_swing_b.png)
+
+**owner1103 #30: the held swing, strip 2/5, the hammer comes round, he steps in (close-up)**
+
+![owner1103 #30: the held swing, strip 2/5, the hammer comes round, he steps in (close-up)](bjorn/v2/polish/o1103_bjorn_swing_b_close.png)
+
+**owner1103 #30: the held swing, strip 3/5, the hit (gameplay zoom)**
+
+![owner1103 #30: the held swing, strip 3/5, the hit (gameplay zoom)](bjorn/v2/polish/o1103_bjorn_swing_c.png)
+
+**owner1103 #30: the held swing, strip 3/5, the hit (close-up)**
+
+![owner1103 #30: the held swing, strip 3/5, the hit (close-up)](bjorn/v2/polish/o1103_bjorn_swing_c_close.png)
+
+**owner1103 #30: the held swing, strip 4/5, the dummy knocked back, Bjorn carried forward (gameplay zoom)**
+
+![owner1103 #30: the held swing, strip 4/5, the dummy knocked back, Bjorn carried forward (gameplay zoom)](bjorn/v2/polish/o1103_bjorn_swing_d.png)
+
+**owner1103 #30: the held swing, strip 4/5, the dummy knocked back, Bjorn carried forward (close-up)**
+
+![owner1103 #30: the held swing, strip 4/5, the dummy knocked back, Bjorn carried forward (close-up)](bjorn/v2/polish/o1103_bjorn_swing_d_close.png)
+
+**owner1103 #30: the held swing, strip 5/5, the dummy 2 m or more away (gameplay zoom)**
+
+![owner1103 #30: the held swing, strip 5/5, the dummy 2 m or more away (gameplay zoom)](bjorn/v2/polish/o1103_bjorn_swing_e.png)
+
+**owner1103 #30: the held swing, strip 5/5, the dummy 2 m or more away (close-up)**
+
+![owner1103 #30: the held swing, strip 5/5, the dummy 2 m or more away (close-up)](bjorn/v2/polish/o1103_bjorn_swing_e_close.png)
+
+**owner1103 #35: Bjorn's own dash, the 360 Smash run-up (strip frame 1/3) (gameplay zoom)**
+
+![owner1103 #35: Bjorn's own dash, the 360 Smash run-up (strip frame 1/3) (gameplay zoom)](bjorn/v2/polish/o1103_bjorn_dash.png)
+
+**owner1103 #35: Bjorn's own dash, the 360 Smash run-up (strip frame 1/3) (close-up)**
+
+![owner1103 #35: Bjorn's own dash, the 360 Smash run-up (strip frame 1/3) (close-up)](bjorn/v2/polish/o1103_bjorn_dash_close.png)
+
+**owner1103 #35: Bjorn's own dash, the spin (frame 2/3) (gameplay zoom)**
+
+![owner1103 #35: Bjorn's own dash, the spin (frame 2/3) (gameplay zoom)](bjorn/v2/polish/o1103_bjorn_dash_b.png)
+
+**owner1103 #35: Bjorn's own dash, the spin (frame 2/3) (close-up)**
+
+![owner1103 #35: Bjorn's own dash, the spin (frame 2/3) (close-up)](bjorn/v2/polish/o1103_bjorn_dash_b_close.png)
+
+**owner1103 #35: Bjorn's own dash, the low recovery (frame 3/3) (gameplay zoom)**
+
+![owner1103 #35: Bjorn's own dash, the low recovery (frame 3/3) (gameplay zoom)](bjorn/v2/polish/o1103_bjorn_dash_c.png)
+
+**owner1103 #35: Bjorn's own dash, the low recovery (frame 3/3) (close-up)**
+
+![owner1103 #35: Bjorn's own dash, the low recovery (frame 3/3) (close-up)](bjorn/v2/polish/o1103_bjorn_dash_c_close.png)
+
+**owner1103 #29: the Faultline's trail running on out over the abyss at his height (gameplay zoom)**
+
+![owner1103 #29: the Faultline's trail running on out over the abyss at his height (gameplay zoom)](bjorn/v2/polish/o1103_bjorn_abyss.png)
+
+**owner1103 #29: the Faultline's trail running on out over the abyss at his height (close-up)**
+
+![owner1103 #29: the Faultline's trail running on out over the abyss at his height (close-up)](bjorn/v2/polish/o1103_bjorn_abyss_close.png)
+
+**owner1103 #29: the foe has slid back 2 m off the aegis (gameplay zoom)**
+
+![owner1103 #29: the foe has slid back 2 m off the aegis (gameplay zoom)](bjorn/v2/polish/o1103_bjorn_aegis_push_b.png)
+
+**owner1103 #29: the foe has slid back 2 m off the aegis (close-up)**
+
+![owner1103 #29: the foe has slid back 2 m off the aegis (close-up)](bjorn/v2/polish/o1103_bjorn_aegis_push_b_close.png)
+
+**owner1103 #29: the aegis breaking into chunks and dust (gameplay zoom)**
+
+![owner1103 #29: the aegis breaking into chunks and dust (gameplay zoom)](bjorn/v2/polish/o1103_bjorn_aegis_break.png)
+
+**owner1103 #29: the aegis breaking into chunks and dust (close-up)**
+
+![owner1103 #29: the aegis breaking into chunks and dust (close-up)](bjorn/v2/polish/o1103_bjorn_aegis_break_close.png)
 
 ## linwick/v2/polish (linwick/v2/polish)
 
