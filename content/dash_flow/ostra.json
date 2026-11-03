@@ -16,7 +16,7 @@
 			},
 			"x": {
 				"mode": "fire",
-				"source": "Swap is a lobbed projectile, not a movement (data: 'lob a projectile that swaps you'); while it flies (~1.8 s, footage 0158-0167) Void stays roughly in place and nothing in the data or footage locks her, so Black Hole casts during the flight (ours then locks her in its pose, owner item 16, while the Trade still resolves)."
+				"source": "Swap is a lobbed projectile, not a movement (data: 'lob a projectile that swaps you'); while it flies (~1.8 s, footage 0158-0167) Void stays roughly in place and nothing in the data or footage locks her, so Black Hole casts during the flight (ours then holds her in its cast for the 1.0 s dome while the Trade still resolves)."
 			},
 			"q": {
 				"mode": "fire",
@@ -38,7 +38,7 @@
 			},
 			"x": {
 				"mode": "fire",
-				"source": "Swap is a lobbed projectile, not a movement (data: 'lob a projectile that swaps you'); while it flies (~1.8 s, footage 0158-0167) Void stays roughly in place and nothing in the data or footage locks her, so Black Hole casts during the flight (ours then locks her in its pose, owner item 16, while the Trade still resolves). Not shown from the air in the footage; the same rule."
+				"source": "Swap is a lobbed projectile, not a movement (data: 'lob a projectile that swaps you'); while it flies (~1.8 s, footage 0158-0167) Void stays roughly in place and nothing in the data or footage locks her, so Black Hole casts during the flight (ours then holds her in its cast for the 1.0 s dome while the Trade still resolves). Not shown from the air in the footage; the same rule."
 			},
 			"q": {
 				"mode": "fire",
@@ -61,7 +61,7 @@
 		},
 		"x": {
 			"mode": "buffer",
-			"source": "Void acts freely while Black Hole holds (footage f50), but the owner (item 16) locks Ostra in the cast pose until it closes: Shift is refused with the deny cue, and one pressed in the lock's last 0.15 s goes the step she is freed."
+			"source": "Void is held in the cast for Black Hole's 1.0 s telegraph (footage f23-f33) and acts freely once it opens (f50, shooting); the owner (18:20) keeps that ~1 s lock. Shift during the dome is refused with the deny cue, and one pressed in its last 0.15 s goes the step the well opens and frees her; after that Swap goes at once."
 		},
 		"q": {
 			"mode": "fire",

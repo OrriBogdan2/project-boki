@@ -145,7 +145,7 @@
 		"r_swollen": 5.1,
 		"tick_dmg": 0.16,
 		"pull": 12.0,
-		"desc": "Tap: a pale dome of the well's exact size appears at the cursor (up to 10m away, on ground short of walls) and everyone sees it for 1.0s. Then the well opens for 3.5s, 3.6m wide: every foe inside, or who walks in, is stunned until it closes and drawn to its middle, taking a small hit every 0.1s. Allies are untouched. You are locked in the cast pose, unable to move, turn after the first 0.25s, or use anything else, from the press until it closes (a stun or knock frees you). Swollen: 5.1m wide. 64s."
+		"desc": "Tap: a pale dome of the well's exact size appears at the cursor (up to 10m away, on ground short of walls) and everyone sees it for 1.0s. Then the well opens for 3.5s, 3.6m wide: every foe inside, or who walks in, is stunned until it closes and drawn to its middle, taking a small hit every 0.1s. Allies are untouched. You are locked in the cast while the dome fills (no moving, no turning after the first 0.25s, nothing else); when it opens you are free to move, fight or leave while it keeps pulling (a stun or knock frees you early). Swollen: 5.1m wide. 64s."
 	},
 	"order": [
 		"sec",
