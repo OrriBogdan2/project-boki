@@ -654,3 +654,6 @@ Owner request: breakables break in one hit, and it's clear when you hit one; exp
 - drop `BokiHud.r_slot` from the left bar once ext/equal-loadout's right-side Boki box is merged, since it shows Merge
 
 The slot code is in your reserved boki_hud.gd and hud.gd. Items 1 and 2 (Venator's grenade hitting hunters with the debuff, and removing ambiguous 1-block walls) are being done on our side. The owner is still reviewing and will add more.
+
+## 2026-11-03 01:25 ET: owner rule: no explosions on dashes (your merge form dash)
+The owner saw an explosion on a dash and said "having explosions on dash is generally not a good idea." Kit dashes are being cleaned up on our side (OWNER_REVIEW_1103 item 8). **Yours:** merge_form.gd sets the form dash to `"burst"`, an area hit around you while merged. Please replace it with a non-explosive form dash: the Boki type's trail, a short haste or a small shield, your call. Also, the merge HUD or tooltip should say what the form dash does.
