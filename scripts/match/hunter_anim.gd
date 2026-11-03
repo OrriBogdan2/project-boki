@@ -197,6 +197,7 @@ var run_k := 0.0
 var air_k := 0.0
 var glide_k := 0.0
 var dive_k := 0.0
+var stoop_k := 0.0            # the freefall's dive: head down, arms swept back, legs together (dive_k is the spread float)
 var crouch_k := 0.0
 var down_k := 0.0
 var ledge_k := 0.0
@@ -556,6 +557,7 @@ func update(dt: float, s: Dictionary) -> void:
 	air_k = _ease(air_k, 0.0 if grounded or gliding or diving else 1.0, 14.0, dt)
 	glide_k = _ease(glide_k, 1.0 if gliding and not diving else 0.0, 7.0, dt)
 	dive_k = _ease(dive_k, 1.0 if diving else 0.0, 6.0, dt)
+	stoop_k = _ease(stoop_k, 1.0 if diving and s.get("stoop", false) else 0.0, 5.0, dt)
 	crouch_k = _ease(crouch_k, float(s.get("crouch", 0.0)), 12.0, dt)
 	down_k = _ease(down_k, 1.0 if downed else 0.0, 6.0 if downed else 4.0, dt)
 	var ledge: bool = s.get("ledge", false)
@@ -787,6 +789,13 @@ func update(dt: float, s: Dictionary) -> void:
 	# skydiving: legs bent back and spread
 	hl = lerpf(hl, -0.15, dive_k); kl = lerpf(kl, -1.1, dive_k); wl = lerpf(wl, -0.3, dive_k)
 	hr = lerpf(hr, -0.15, dive_k); kr = lerpf(kr, -1.1, dive_k); wr = lerpf(wr, 0.3, dive_k)
+	# diving: legs straight and together, toes pointed
+	hl = lerpf(hl, 0.05, stoop_k)
+	kl = lerpf(kl, -0.12, stoop_k)
+	wl = lerpf(wl, -0.04, stoop_k)
+	hr = lerpf(hr, 0.05, stoop_k)
+	kr = lerpf(kr, -0.12, stoop_k)
+	wr = lerpf(wr, 0.04, stoop_k)
 	# dodges
 	if dash_k > 0.01:
 		var dhl := 0.0; var dkl := 0.0; var dhr := 0.0; var dkr := 0.0
@@ -987,7 +996,7 @@ func update(dt: float, s: Dictionary) -> void:
 		rb = Basis(roll_ax, roll_ang) * rb
 		rpivot = Vector3(0, 0.4, 0)
 	if dive_k > 0.01:
-		rb = Basis(Vector3.RIGHT, -1.15 * dive_k) * rb
+		rb = Basis(Vector3.RIGHT, (-1.15 - 0.6 * stoop_k) * dive_k) * rb
 	if down_k > 0.01:
 		# going down: a stagger and a fall forward (or back, if the hit came from behind)
 		rb = Basis(Vector3.RIGHT, -1.38 * down_k) * Basis(Vector3.FORWARD, 0.12 * down_k * sin(crawl_ph * 0.5)) * rb
@@ -1508,6 +1517,9 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 	if dive_k > 0.01:
 		fl = fl.lerp(sh_l + Vector3(-0.32, 0.12, -0.22), dive_k)
 		fr = fr.lerp(sh_r + Vector3(0.32, 0.12, -0.22), dive_k)
+		# diving: arms swept back along the body
+		fl = fl.lerp(sh_l + Vector3(-0.1, -0.42, 0.22), stoop_k)
+		fr = fr.lerp(sh_r + Vector3(0.1, -0.42, 0.22), stoop_k)
 	# ledge and mantle: reaching up, then pushing down on the lip
 	if ledge_k > 0.01:
 		var mk := float(s.get("mantle", -1.0))

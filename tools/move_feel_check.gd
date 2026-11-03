@@ -74,8 +74,7 @@ const T := {
 	"drop_dive_vy_t":          ["<=", 0.40, "s", "[est] punchy skydive: 90% of dive speed"],
 	"drop_dive_steer_t":       ["<=", 0.30, "s", "[est] responsive steering in the dive: 90% of commanded speed"],
 	"drop_deploy_frames":      ["<=", 1.0, "frames", "press jump: glider opens the same step"],
-	"drop_deploy_settle_t":    ["<=", 0.30, "s", "[est] canopy catch to drop sink rate"],
-	"drop_glide_steer_t":      ["<=", 0.30, "s", "[est] responsive steering under the canopy"],
+	"drop_deploy_settle_t":    ["<=", 0.30, "s", "[est] canopy catch to the glide's sink rate"],
 	"drop_land_dead_frames":   ["<=", 1.0, "frames", "no input dead time on landing"],
 	"land_dead_frames":        ["<=", 1.0, "frames", "no input dead time on landing"],
 	"land_squash":             [">=", 0.05, "", "brief squash on a landing that reads"],
@@ -134,7 +133,8 @@ func _reset(p: Vector3, grounded := true) -> void:
 	P.coyote = 0.0; P.jump_buf = 0.0; P.reload_t = 0.0; P.ammo = int(P.wpn["mag"]); P.idle_fire = 0.0
 	P.dashes = P.max_dashes(); P.ex_cd = 0.0; P.dash_buf = 0.0; P.drink_t = 0.0; P.kit_t = 0.0
 	P.squash = 0.0; P.hp = P.max_hp
-	P.drop_follow = null
+	P.drop_glide = false
+	P.auto_glide = false
 	if "lfloat" in P: P.set("lfloat", {})
 	if "glide_off_t" in P: P.set("glide_off_t", 9.0)
 	_clear_inp()
@@ -746,42 +746,42 @@ func _ledge() -> void:
 # ---------------------------------------------------------------- the opening drop
 func _drop() -> void:
 	_reset(flat + Vector3(0, 40.0, 0), false)
-	P.dropping = true; P.diving = true; P.gliding = true; P.glide_k = 1.0
+	SkyFall.start(P, Vector2.ZERO)
 	P.vel = Vector3.ZERO
 	var tvy := -1.0; var tst := -1.0
 	for i in 60:
 		P.inp["move"] = Vector2(1, 0)
 		m.step(DT)
-		if tvy < 0.0 and -P.vel.y >= 0.9 * Hunter.DIVE_FALL: tvy = (i + 1) * DT
-		if tst < 0.0 and P.vel.x >= 0.9 * Hunter.DIVE_SPEED: tst = (i + 1) * DT
-		if not P.diving: break
+		if tvy < 0.0 and -P.vel.y >= 0.9 * SkyFall.DIVE_FALL: tvy = (i + 1) * DT
+		if tst < 0.0 and P.vel.x >= 0.9 * SkyFall.DIVE_SPEED: tst = (i + 1) * DT
+		if not P.dropping: break
 	rec("drop_dive_vy_t", tvy if tvy > 0.0 else 9.0)
 	rec("drop_dive_steer_t", tst if tst > 0.0 else 9.0)
-	# deploy on a press (well above the auto height)
+	# deploy on a press (well above the auto height): the glide's sink, steady to 0.2 m/s
 	_reset(flat + Vector3(0, 40.0, 0), false)
-	P.dropping = true; P.diving = true; P.gliding = true; P.glide_k = 1.0
-	P.vel = Vector3(0, -Hunter.DIVE_FALL, 0)
+	SkyFall.start(P, Vector2.ZERO)
+	P.vel = Vector3(0, -SkyFall.DIVE_FALL, 0)
 	_steps(5)
 	P.inp["jump"] = true
-	var fd := -1; var ts := -1.0
+	var fd := -1
+	var vys: Array = []
 	for i in 60:
 		m.step(DT)
-		if fd < 0 and not P.diving: fd = i + 1
-		if ts < 0.0 and not P.diving and absf(-P.vel.y - Hunter.DROP_FALL) <= 0.1 * Hunter.DROP_FALL: ts = (i + 1) * DT
+		P.inp["jump"] = false
+		if fd < 0 and not P.dropping: fd = i + 1
+		if fd > 0: vys.append(P.vel.y)
+	var ts := -1.0
+	for i in vys.size():
+		if absf(float(vys[i]) - float(vys[-1])) <= 0.2:
+			ts = i * DT
+			break
 	rec("drop_deploy_frames", fd)
-	rec("drop_deploy_settle_t", ts if ts > 0.0 else 9.0)
-	# steer under the canopy
-	P.vel.x = 0.0; P.vel.z = 0.0
-	var tg := -1.0
-	for i in 60:
-		P.inp["move"] = Vector2(0, 1)
-		m.step(DT)
-		if tg < 0.0 and P.vel.z >= 0.9 * Hunter.DROP_SPEED: tg = (i + 1) * DT
-	rec("drop_glide_steer_t", tg if tg > 0.0 else 9.0)
-	# land and move off straight away
+	rec("drop_deploy_settle_t", ts if ts >= 0.0 else 9.0)
+	# land off the drop's glide and move off straight away
 	_reset(flat + Vector3(0, 3.0, 0), false)
-	P.dropping = true; P.diving = false; P.gliding = true
-	P.vel = Vector3(0, -Hunter.DROP_FALL, 0)
+	P.drop_glide = true
+	P.gliding = true
+	P.vel = Vector3(0, -4.0, 0)
 	var landed := false
 	for i in 120:
 		m.step(DT)

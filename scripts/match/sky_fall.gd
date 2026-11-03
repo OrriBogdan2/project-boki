@@ -1,0 +1,182 @@
+class_name SkyFall
+extends RefCounted
+## The opening drop's freefall (docs/decisions/0012), for solo divers and the squad comet alike.
+##
+## You fall along a heading. The side keys turn it; forward (along your heading) dives: a fast,
+## steep fall. Letting go floats: a slower fall that reaches further. Back brakes to a near-vertical
+## float. The glider opens by itself DEPLOY_H over the ground below you (or on Space), and from then
+## on it's the normal glide until you land (Hunter.deploy). The landing has its own kick (land).
+
+const SKY_Y := 122.0          # m: the skyship's height. Leaving it to landing takes ~20 s untouched (--drop-check)
+const FLOAT_FALL := 8.0       # m/s down while floating (no keys)
+const FLOAT_SPEED := 8.5      # m/s across while floating: ~1.06 m of reach per metre of height
+const DIVE_FALL := 17.0       # m/s down while diving (forward held)
+const DIVE_SPEED := 10.0      # m/s across while diving: steep, ~0.6 m per metre
+const BRAKE_SPEED := 2.0      # m/s across while holding back: nearly straight down
+const TURN_RATE := 2.4        # rad/s: how fast the side keys turn your heading
+const STEER_RATE := 10.0      # 1/s: the speed across reaches 90% of a new target in ~0.23 s
+const VY_RATE := 7.0          # 1/s: the fall reaches 90% of a new speed in ~0.33 s
+const FORWARD_DOT := 0.5      # keys at least this far along your heading count as forward (dive)
+const BACK_DOT := -0.5        # ... and this far against it as back (a full brake; less brakes less)
+const DEPLOY_H := 12.0        # m over the ground below you: the glider opens by itself
+const VOID_DEPLOY_Y := 16.0   # m (world height): over the abyss it opens here, high enough to glide to land
+const DEPLOY_POP := -1.6      # m/s: the canopy catching checks your fall to this
+const JUMP_LEAD := 6.0        # s: bots leave the ship this long before it passes nearest their spot
+const ASSIST_LOOK_S := 8.0    # s: letting go, the drop looks this far ahead for where you'd come down
+const ASSIST_GLIDE_S := 1.5   # s: how far the glide carries on after it opens, in that look ahead
+
+## Off the skyship (or into the sky over a small map): freefall along `dir`.
+static func start(h: Hunter, dir: Vector2) -> void:
+	h.dropping = true
+	h.diving = false
+	h.drop_glide = false
+	h.gliding = true
+	h.glide_k = 1.0
+	h.grounded = false
+	h.fall_dir = dir.normalized() if dir.length() > 0.01 else Vector2(0, -1)
+	h.vel = Vector3(h.fall_dir.x, 0.0, h.fall_dir.y) * 3.0
+	var k: Kin = h.kin
+	if k != null and not k.dead and k.state == "active":
+		KinFollow.hop_on(k)         # your Boki comes down on your back
+
+## The freefall's velocity across for this step: the keys turn the heading, then dive, float or brake along it.
+static func steer(h: Hunter, mv: Vector2, dt: float) -> Vector2:
+	var D: DropSquad = (h.m as Match).skydrop
+	if D:
+		mv = D.comet.steer_off_abyss(h, mv)
+	var hv := Vector2(h.vel.x, h.vel.z)
+	if mv.length() > 0.1:
+		if hv.length() < 1.0:
+			h.fall_dir = mv.normalized()       # (barely moving across: the keys set the heading outright)
+		else:
+			var ang := h.fall_dir.angle_to(mv)
+			if absf(ang) < deg_to_rad(150.0):
+				h.fall_dir = h.fall_dir.rotated(clampf(ang, -TURN_RATE * dt, TURN_RATE * dt))
+	var along := mv.dot(h.fall_dir)
+	h.diving = along > FORWARD_DOT
+	var speed := DIVE_SPEED if h.diving else lerpf(FLOAT_SPEED, BRAKE_SPEED, clampf(along / BACK_DOT, 0.0, 1.0))
+	return hv.lerp(h.fall_dir * speed, 1.0 - exp(-STEER_RATE * dt))
+
+## The freefall's vertical speed for this step.
+static func fall_vy(h: Hunter, dt: float) -> float:
+	var sink := DIVE_FALL if h.diving else FLOAT_FALL
+	return lerpf(h.vel.y, -sink, 1.0 - exp(-VY_RATE * dt))
+
+## How high you are over what's below: the ground, or (over the abyss) the opening height there.
+static func height_over(w: World, at: Vector3) -> float:
+	if w.is_void(at.x, at.z):
+		return at.y - (VOID_DEPLOY_Y - DEPLOY_H)
+	return at.y - w.ground_at(at.x, at.z)
+
+## Every step of a freefall: the glider opens by itself low down (a comet bursts instead).
+static func tick(h: Hunter) -> void:
+	var m: Match = h.m
+	if not (m.skydrop and m.skydrop.comet.has(h)) and height_over(m.world, h.pos) < DEPLOY_H:
+		h.deploy()
+
+## Space in the freefall: a comet's rider breaks away; anyone else opens the glider.
+static func space(h: Hunter) -> void:
+	var D: DropSquad = (h.m as Match).skydrop
+	if D and D.comet.has(h):
+		D.separate(h)
+	else:
+		h.deploy()
+
+## The landing at the end of a drop: a dust ring, a squash and a thud, a moment to get your bearings,
+## and your Boki leaps off your back beside you.
+static func land(h: Hunter) -> void:
+	var m: Match = h.m
+	h.dropping = false
+	h.diving = false
+	h.drop_glide = false
+	if h.downed or h.out:
+		return
+	h.inv_t = maxf(h.inv_t, 2.0)
+	h.set_meta("landed_t", m.time)     # bots leave a fresh lander be for a while (Bot.fresh)
+	if m.world.is_block(h.pos.x, h.pos.z):
+		var spot := m.world.free_spot_near(h.pos, [], 1.0, 0.45, 2.5)
+		h.teleport(Vector3(spot.x, m.world.ground_at(spot.x, spot.z), spot.z))
+	m.fx.dust(h.pos, 16)
+	m.fx.ring(h.pos + Vector3(0, 0.05, 0), 2.6, Color(1, 1, 1, 0.85), 0.35)
+	m.fx.ring(h.pos + Vector3(0, 0.05, 0), 1.3, Color(1.0, 0.92, 0.75, 0.7), 0.22)
+	m.sfx("land", h.pos, -2.0 if h.is_local() else -8.0, 0.8)
+	m.sfx("thump", h.pos, -8.0 if h.is_local() else -14.0, 0.9)
+	h.squash = 0.45
+	if h.is_local():
+		m.shake(0.3, h.pos)
+	var k: Kin = h.kin
+	if k != null and not k.dead and k.state == "shoulder" and k.cmd != "return":
+		KinFollow.hop_off(k)
+	if m.blight: m.blight.on_landed(h)
+	if m.rolling: m.rolling.on_landed(h)
+
+## The local player's keys on the way down when they let go: if the drop would come down over the
+## abyss, it steers for the nearest island instead (as a bot would), so letting go never drops you
+## into the void. Over solid ground it leaves you be: the float carries on.
+static func assist(m: Match, h: Hunter) -> void:
+	if (h.inp["move"] as Vector2).length() > 0.1:
+		return
+	var hv := Vector2(h.vel.x, h.vel.z)
+	var lands_at := h.pos
+	if h.dropping:
+		var secs := maxf(0.0, height_over(m.world, h.pos) - DEPLOY_H) / maxf(1.0, -h.vel.y) + ASSIST_GLIDE_S
+		if secs > ASSIST_LOOK_S:
+			return
+		lands_at += Vector3(hv.x, 0.0, hv.y) * secs
+	if not m.world.is_void(lands_at.x, lands_at.z):
+		return
+	var land := nearest_land(m, lands_at)
+	if land == Vector3.INF:
+		return
+	h.ai["land"] = land
+	h.ai["retarget"] = true      # (no looking for somewhere else: this is the nearest)
+	bot_steer(m, h)
+
+## The nearest island spot (the spawn and portal spots at island edges) to `at`, or INF.
+static func nearest_land(m: Match, at: Vector3) -> Vector3:
+	var best := Vector3.INF
+	var best_d := 1e9
+	for sp in m.world.spawns + m.world.portal_spots:
+		var d := Vector2(sp.x - at.x, sp.z - at.z).length()
+		if d < best_d:
+			best_d = d
+			best = sp
+	return best
+
+# ------------------------------------------------------------------ bots
+## A bot's keys on the way down: toward its spot, floating when it's far, diving when it's in reach,
+## braking when it's nearly overhead; under the glider, straight for the spot.
+static func bot_steer(m: Match, h: Hunter) -> void:
+	var land: Vector3 = h.ai.get("land", h.pos)
+	var to := Vector2(land.x - h.pos.x, land.z - h.pos.z)
+	if not h.dropping:
+		h.inp["move"] = to.normalized() if to.length() > 0.6 else Vector2.ZERO
+		return
+	var drop := maxf(1.0, h.pos.y - maxf(land.y, 0.0) - DEPLOY_H)
+	var reach := to.length() / drop      # metres across per metre of fall needed
+	if reach > FLOAT_SPEED / FLOAT_FALL and not h.ai.get("retarget", false):
+		h.ai["retarget"] = true
+		h.ai["land"] = _bot_spot_in_reach(m, h, drop * FLOAT_SPEED / FLOAT_FALL * 0.85)
+		return
+	var dir := to.normalized()
+	var ahead := h.fall_dir.dot(dir)
+	if reach < 0.35 or to.length() < 3.0:
+		h.inp["move"] = dir if ahead < 0.0 else -h.fall_dir     # nearly overhead: brake (turning back if it's behind)
+	elif ahead < 0.7:
+		h.inp["move"] = dir * 0.45          # turn first, floating
+	elif reach > 0.85:
+		h.inp["move"] = dir * 0.45          # far: float for the reach
+	else:
+		h.inp["move"] = dir                 # in reach: dive
+
+## The closest landing spot within `reach`, away from squads already heading somewhere close.
+static func _bot_spot_in_reach(m: Match, h: Hunter, reach: float) -> Vector3:
+	var best: Vector3 = h.ai.get("land", h.pos)
+	var best_score := 1e9
+	for sp in m.world.spawns + m.world.portal_spots:
+		var d := Vector2(sp.x - h.pos.x, sp.z - h.pos.z).length()
+		var score := (d if d < reach else d + 1000.0) + Bot.crowd_at(m, h, sp, Bot.LAND_SPREAD) * 30.0
+		if score < best_score:
+			best_score = score
+			best = sp
+	return best

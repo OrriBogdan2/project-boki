@@ -1,29 +1,26 @@
 class_name DropSquad
 extends RefCounted
-## How a squad comes down together, after SUPERVIVE's drop.
+## How a squad comes down together (docs/decisions/0012).
 ##
 ## A match on the big map opens with a short planning phase (PLAN_T seconds) while the skyship waits at
 ## the edge of the map: the full map is up, and everyone can ping where they want to land. Bots ping
 ## too. Then the ship sets off.
 ##
-## Each squad has a drop leader (the person in it, else its first member). The leader decides when to
-## jump; the rest of the squad jumps with them and glides down in formation behind the leader (their
-## gliders track the leader's with a fixed offset, so they keep control of nothing but "separate").
-## The leader can pass the lead to a squadmate (P, or click a name on the map). Anyone who isn't the
-## leader can separate (Z) to jump or steer on their own. Bots follow the leader by default and some
-## break off near the ground to land a little apart.
+## Each squad has a drop leader, its jumpmaster (the person in it, else its first member). The leader
+## decides when to jump; the rest of the squad jumps with them inside one burning comet that the
+## jumpmaster steers with the freefall's keys (SkyFall). The lead can be passed (P, or a name on the
+## map). Anyone can break away (Space in the comet, or Z) into a solo freefall, and never rejoin. Near
+## the ground the comet bursts and everyone still in it comes down together, each on their own spot
+## round its landing point, on solid ground. Bots pick their own break-off heights.
 
 const PLAN_T := 8.0
-const FOLLOW_GAIN := 5.0      # 1/s: how hard a follower closes the gap to its slot
-## Formation slots behind the leader: (to the side, behind), in metres, turned with the leader's heading.
-const SLOTS := [Vector2(-2.6, 2.2), Vector2(2.6, 2.2), Vector2(0.0, 4.6), Vector2(-5.0, 4.4), Vector2(5.0, 4.4)]
 
 var m: Match
 var planning := false
 var plan_t := 0.0
 var plan_len := PLAN_T
 var leads := {}               # team -> Hunter
-var heading := {}             # team -> Vector2, the leader's smoothed heading on the drop
+var comet: DropComet          # the squads' comets on the way down
 var _bot_ping := {}           # hunter nid -> plan time left when it pings
 var _ack := []                # bot acknowledgements due {h, at, id}
 var clock := 0.0              # runs through the planning phase too (the match clock waits)
@@ -31,6 +28,7 @@ var events: Array = []        # what happened, for tests
 
 func _init(match_node: Match) -> void:
 	m = match_node
+	comet = DropComet.new(self)
 
 ## Called once everyone is aboard.
 func setup() -> void:
@@ -181,12 +179,12 @@ func _human_ping(team: int) -> Vector3:
 	return best
 
 # ------------------------------------------------------------------ lead and separate
-## Pass the lead to a squadmate (the next one in the squad, or the one asked for).
+## Pass the lead to a squadmate (the next one in the squad, or the one asked for): aboard, they jump
+## for the squad; in the comet, they steer it.
 func pass_lead(h: Hunter, to: Hunter = null, from_net := false) -> bool:
 	if not is_lead(h) or not (h.riding or h.dropping):
 		return false
-	# aboard: anyone still aboard; in the air: anyone gliding in your formation
-	var pool: Array = m.hunters.filter(func(x): return x.team == h.team and not x.out and not x.extracted and x != h and ((h.riding and x.riding) or (h.dropping and x.dropping and x.drop_follow == h)))
+	var pool: Array = m.hunters.filter(func(x): return x.team == h.team and x != h and not x.out and not x.extracted and ((h.riding and x.riding) or (h.dropping and x.comet_lead == h)))
 	if pool.is_empty():
 		if h == m.player and m.hud: m.hud.toast_small("Nobody left to pass the lead to", Color("a9b0bf"))
 		return false
@@ -199,15 +197,8 @@ func pass_lead(h: Hunter, to: Hunter = null, from_net := false) -> bool:
 			if pool.has(cand): to = cand; break
 	leads[h.team] = to
 	to.drop_solo = false
-	to.drop_follow = null
-	for x in m.hunters:
-		if x.team == h.team and x.drop_follow == h:
-			x.drop_follow = to
 	if h.dropping:
-		h.drop_follow = to
-		h.drop_slot = _free_slot(to)
-	if to.dropping:
-		heading[h.team] = Vector2(to.vel.x, to.vel.z).normalized() if Vector2(to.vel.x, to.vel.z).length() > 0.5 else heading.get(h.team, Vector2.UP)
+		comet.hand_over(h, to)
 	events.append("lead %s->%s" % [h.pname, to.pname])
 	if m.net_on and not from_net:
 		m.net_event(["lead", h.nid, to.nid])
@@ -223,12 +214,14 @@ func pass_lead(h: Hunter, to: Hunter = null, from_net := false) -> bool:
 			m.plan_jump(to, to.ai.get("land", to.pos))
 	return true
 
-## Break away from the squad's drop: you jump and steer on your own.
+## Break away from the squad's drop: aboard, you'll jump on your own; in the comet, you leave it for a
+## solo freefall (the jumpmaster too: the next rider takes the comet). Never back in.
 func separate(h: Hunter, from_net := false) -> bool:
-	if is_lead(h) or h.drop_solo or not (h.riding or h.dropping):
+	if h.drop_solo or not (h.riding or h.dropping) or (h.riding and is_lead(h)) or (h.dropping and not comet.has(h)):
 		return false
 	h.drop_solo = true
-	h.drop_follow = null
+	if h.dropping:
+		comet.leave(h)
 	events.append("separate %s" % h.pname)
 	if m.net_on and not from_net:
 		m.net_event(["dsep", h.nid])
@@ -238,91 +231,19 @@ func separate(h: Hunter, from_net := false) -> bool:
 		m.plan_jump(h, h.ai.get("land", h.pos))
 	return true
 
-## The leader just jumped: everyone still following jumps with them and takes a slot behind.
+## The leader just jumped: everyone still with them jumps too, into the comet.
 func on_lead_jump(l: Hunter) -> void:
-	var hd := Vector2(l.vel.x, l.vel.z)
-	var sd: Vector3 = m.ship_of(l).get("dir", Vector3.FORWARD)
-	heading[l.team] = hd.normalized() if hd.length() > 0.1 else Vector2(sd.x, sd.z)
 	var n := 0
 	for f in m.hunters:
 		if f == l or f.team != l.team or not f.riding or f.drop_solo or f.out or f.remote:
 			continue
 		m.ship_jump(f, true)
-		f.drop_follow = l
-		f.drop_slot = n
+		comet.board(l, f)
 		n += 1
-		var tg := target_of(f)
-		f.teleport(Vector3(tg.x, l.pos.y, tg.y))
-		f.vel = l.vel
-		f.drop_from = Vector2(f.pos.x, f.pos.z)
-		# some bots break off low down to land a little apart from the squad
-		if f.ctrl == "bot":
-			f.ai["sep_h"] = randf_range(6.0, 13.0) if randf() < 0.45 else -1.0
 	events.append("jump %s +%d" % [l.pname, n])
 
-func _free_slot(l: Hunter) -> int:
-	var used := {}
-	for x in m.hunters:
-		if x.drop_follow == l: used[x.drop_slot] = true
-	for i in SLOTS.size():
-		if not used.has(i): return i
-	return 0
-
-## Where a follower's slot is right now (flat map coordinates).
-func target_of(f: Hunter) -> Vector2:
-	var l: Hunter = f.drop_follow
-	if l == null:
-		return Vector2(f.pos.x, f.pos.z)
-	var fwd: Vector2 = heading.get(l.team, Vector2.UP)
-	var side := Vector2(-fwd.y, fwd.x)
-	var s: Vector2 = SLOTS[clampi(f.drop_slot, 0, SLOTS.size() - 1)]
-	return Vector2(l.pos.x, l.pos.z) + side * s.x - fwd * s.y
-
-## The glider's horizontal velocity for a follower: the leader's, plus whatever closes the gap to its slot.
-func follow_hv(f: Hunter, gs: float) -> Vector2:
-	var l: Hunter = f.drop_follow
-	var err := target_of(f) - Vector2(f.pos.x, f.pos.z)
-	# (movefeel) the leader now steers ~3x snappier, so followers close the gap harder (was 3.0)
-	return (Vector2(l.vel.x, l.vel.z) + err * FOLLOW_GAIN).limit_length(gs * 1.6 + 3.0)
-
-func follow_vy(f: Hunter) -> float:
-	var l: Hunter = f.drop_follow
-	return l.vel.y + clampf((l.pos.y - f.pos.y) * 2.5, -6.0, 6.0)
-
-## Every step of the match: keep the formation's heading, let followers go once the leader is down.
+## Every step of the match: the comets, and the landing kick for anyone down off a burst.
 func tick(dt: float) -> void:
 	clock += dt
 	_tick_acks()
-	for t in leads:
-		var l := leader(int(t))
-		if l == null or not l.dropping:
-			continue
-		var v := Vector2(l.vel.x, l.vel.z)
-		if v.length() > 1.5:
-			var cur: Vector2 = heading.get(int(t), v.normalized())
-			heading[int(t)] = cur.slerp(v.normalized(), 1.0 - exp(-2.5 * dt)).normalized()
-	for f in m.hunters:
-		if f.drop_follow == null:
-			continue
-		var l: Hunter = f.drop_follow
-		if not f.dropping or not is_instance_valid(l) or l.out or not l.dropping or l.team != f.team:
-			# the leader is down (or gone): everyone glides the last bit on their own
-			if f.dropping and f.ctrl == "bot" and is_instance_valid(l):
-				f.ai["land"] = _near_land(l.pos, f)
-				f.ai["retarget"] = true
-			f.drop_follow = null
-			continue
-		if f.ctrl == "bot" and not f.remote and float(f.ai.get("sep_h", -1.0)) > 0.0:
-			var gy: float = m.world.ground_at(f.pos.x, f.pos.z) if not m.world.is_void(f.pos.x, f.pos.z) else -99.0
-			if gy > -50.0 and f.pos.y - gy < float(f.ai["sep_h"]):
-				f.ai["land"] = _near_land(f.pos, f)
-				f.ai["retarget"] = true
-				separate(f)
-
-func _near_land(around: Vector3, f: Hunter) -> Vector3:
-	var a := randf() * TAU
-	var q := around + Vector3(cos(a), 0, sin(a)) * randf_range(5.0, 9.0)
-	if m.world.is_void(q.x, q.z):
-		q = around
-	var p := m.world.free_spot_near(q, [], 1.0, 0.5, 10.0)
-	return Vector3(p.x, m.world.ground_at(p.x, p.z), p.z) if not m.world.is_void(p.x, p.z) else f.ai.get("land", around)
+	comet.tick()

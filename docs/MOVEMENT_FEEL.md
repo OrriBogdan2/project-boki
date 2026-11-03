@@ -94,7 +94,6 @@ Nothing here comes from SUPERVIVE's files.
 | drop_dive_steer_t (90% of commanded) | 0.783s | 0.233s | <= 0.3s | [est] responsive |
 | drop_deploy_frames | 1 | 1 | <= 1 | |
 | drop_deploy_settle_t | 0.267s | 0.217s | <= 0.3s | [est] |
-| drop_glide_steer_t | 0.583s | 0.217s | <= 0.3s | [est] |
 | drop_land_dead_frames / land_dead_frames | 1 / 1 | 1 / 1 | <= 1 | no dead time |
 | land_squash | 0.00 | 0.16 | >= 0.05 | landing reads |
 | e2e_input_frames (key to sim, via Match._process) | 1 | 1 | <= 1 | |
@@ -160,10 +159,9 @@ Other checks:
 - **Abyss:**
   - Hunters' point of no return is `World.ABYSS_DEPTH` + 7m: about 13m under the lip (was 6m). Monsters and the home keep the old depth.
   - As you sink, the local player's screen drains of colour, darkens, goes deep crimson and closes in with a vignette that beats with a heartbeat (`scripts/match/abyss_fx.gd`, a screen shader under the HUD). The HUD adds a heartbeat and a low rumble, and near the end a pulsing "HOLD GLIDE TO LIFT" / "CLIMB OUT".
-- **Drop:**
-  - Dive fall 11 → 13 m/s, reached in about 0.3s.
-  - Steering 3/4 → 10/11 per second.
-  - Deploying checks your fall to -1.6 m/s, then settles to 4.2 m/s in about 0.2s. It comes with the glider sound, a ring and a small camera punch.
+- **Drop** (docs/decisions/0012, `SkyFall`):
+  - A freefall along a heading: forward dives (17 m/s down, 10 across), letting go floats (8 down, 8.5 across), back brakes. Both reached in about 0.3s.
+  - The glider opens itself 12m over the ground (or on Space): your fall checks to -1.6 m/s and the normal glide takes over, with the freefall's speed as a glide handoff. It comes with the glider sound and a small camera punch.
 - **Landing:** every landing faster than 4 m/s gets a brief squash, a puff and a soft thud, with no lockout. Jump buffering is time-based (0.12s from the ground at your fall speed).
 - **Trees and rocks (`stuckfix`):**
   - Bodies collide with blocker tiles as true circles (`World.occupy`, `World.push_out_blocks`).

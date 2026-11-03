@@ -1806,7 +1806,7 @@ func _draw_ship_prompt(sz: Vector2) -> void:
 		_ctext(Vector2(sz.x * 0.5, rr.position.y + 36), "Press %s to jump" % Settings.key_cap("jump"), 26, GOLD, big)
 	var sub := "Pick your spot on the map. Everyone left aboard drops in %ds" % int(ceil(left))
 	if dr and dr.planning: sub = "The ship sets off in %ds  ·  %s opens the map to ping a spot" % [int(ceil(dr.plan_t)), Settings.key_cap("map")]
-	elif waits: sub = "You'll jump together and glide in behind them. %ds left aboard" % int(ceil(left))
+	elif waits: sub = "You'll jump together in their comet. %ds left aboard" % int(ceil(left))
 	elif i_lead and squad: sub = "Your squad jumps with you. %ds left aboard" % int(ceil(left))
 	_ctext(Vector2(sz.x * 0.5, rr.position.y + 62), sub, 14, INK)
 	_bar(Rect2(Vector2(rr.position.x + 20, rr.position.y + 76), Vector2(w - 40, 4)), clampf(m.time / maxf(1.0, float(m.ship.get("ride", 1.0))), 0.0, 1.0), GOLD)
@@ -1842,13 +1842,13 @@ func _draw_drop_prompt(sz: Vector2, p: Hunter) -> void:
 	if dr == null or m.hunters.filter(func(x): return x.team == p.team).size() < 2:
 		return
 	var y := 96.0
-	if dr.is_lead(p):
-		var n := m.hunters.filter(func(x): return x.drop_follow == p).size()
-		_ctext(Vector2(sz.x * 0.5, y), "Leading the drop" + ("  ·  %d following" % n if n > 0 else ""), 18, GOLD, big)
-		if n > 0: _key_row(Vector2(sz.x * 0.5, y + 24), [["pass_lead", "Pass lead"]])
-	elif p.drop_follow != null:
-		_ctext(Vector2(sz.x * 0.5, y), "Following %s" % p.drop_follow.pname, 18, GOLD, big)
-		_key_row(Vector2(sz.x * 0.5, y + 24), [["separate", "Separate"]])
+	var n := dr.comet.riders(p.team).size() if dr.comet.leads(p) else 0
+	if n > 0:
+		_ctext(Vector2(sz.x * 0.5, y), "Jumpmaster  ·  %d in your comet" % n, 18, GOLD, big)
+		_key_row(Vector2(sz.x * 0.5, y + 24), [["jump", "Break away"], ["pass_lead", "Pass lead"]])
+	elif p.comet_lead != null:
+		_ctext(Vector2(sz.x * 0.5, y), "In %s's comet" % p.comet_lead.pname, 18, GOLD, big)
+		_key_row(Vector2(sz.x * 0.5, y + 24), [["jump", "Break away"]])
 	elif p.drop_solo:
 		_ctext(Vector2(sz.x * 0.5, y), "Dropping solo", 16, Color("8fd8ff"), big)
 
