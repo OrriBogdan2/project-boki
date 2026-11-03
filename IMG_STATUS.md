@@ -1,5 +1,11 @@
 # IMG status (image-gen agent)
 
+## 2026-11-03 (new session): deliverable 2 starting
+- Owner decisions: Q2 yes, download the 2K originals of kept images into the repo; Q3 OK, Anthum's display/training licence is accepted.
+- Bjorn's look approved: `docs/art/gen/style/bjorn_optA_epic_bigshield.png` (sleeveless, very muscular, enormous prow-shield).
+- Approved twists for the human-based Wardens: Sable moth-folk (silver wing-like cloak scales, large dark eyes); Pin half-wraith (smoky lower body, no shadow, keeps her red); Zedran half-giant (curled ram horns, bronze skin); Vireo storm-touched (glowing lightning-scar tattoos, static-floating hair); Venator part-machine marine (mechanical arm and eye); Tamsin frost-sprite (crystalline ice skin patches, frost-feather hair); Tarek part stone (basalt-cracked skin with glowing seams, keeps the eye bandana). Cinder, Dredge, Moosh Moosh, Ostra and Bjorn already follow items 39/41.
+- Generation switches to the owner's Chrome (Claude in Chrome). Owner asked to talk through each Warden's look and lore before generating; per-Warden proposals are with the owner now.
+
 ## 2026-11-03 17:25 UTC: owner direction, fewer regular humans
 - Wardens should feel interesting, not ordinary people: each human-based Warden gets a visible non-human or otherworldly twist, proposed to the owner before generating (rule in STYLE.md). Per-Warden work moves to a fresher session from here.
 
