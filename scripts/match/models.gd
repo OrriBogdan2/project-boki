@@ -2000,7 +2000,7 @@ static func kin(species: String, rec := {}) -> Node3D:
 			part(body, sphere(0.035, 6), toon(Color("fff6c0"), false, 1.6), Vector3(cos(a) * 0.42, 0.62 + i * 0.08, sin(a) * 0.42), Vector3.ONE, Vector3.ZERO, "Spark%d" % i)
 	var acc: String = rec.get("acc", "")
 	if acc != "" and Data.ACCS.has(acc):
-		accessory(body, acc)
+		accessory(body, acc, Goods.wear_col(rec))
 	var pup: Node = KinPuppet.new(); pup.set("species", species)
 	root.add_child(pup)
 	if int(rec.get("level", 1)) < 4 and (rec.get("forms", []) as Array).is_empty() and not rec.is_empty():
@@ -2017,9 +2017,8 @@ static func _repivot(n: Node3D, at: Vector3) -> void:
 	for ch in n.get_children():
 		(ch as Node3D).position -= at
 
-## Something a kin wears, on its body at head height.
-static func accessory(body: Node3D, id: String) -> void:
-	var c: Color = Data.ACCS[id]["col"]
+## Something a kin wears, on its body at head height, in colour c (its own, or a dye's).
+static func accessory(body: Node3D, id: String, c: Color) -> void:
 	var m := toon(c)
 	match id:
 		"bell":
@@ -2050,6 +2049,8 @@ static func accessory(body: Node3D, id: String) -> void:
 			part(body, cyl(0.17, 0.17, 0.03, 14), m, Vector3(0, 0.68, 0))
 			part(body, cyl(0.11, 0.11, 0.2, 14), m, Vector3(0, 0.79, 0))
 			part(body, cyl(0.113, 0.113, 0.04, 14), toon(Color("d9604a")), Vector3(0, 0.72, 0))
+		_:
+			BokiWear.build(body, id, c)
 
 ## An air ring: fly through it for a burst of speed.
 static func air_ring() -> Node3D:

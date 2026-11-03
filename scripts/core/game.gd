@@ -210,8 +210,8 @@ func apply_result(r: Dictionary) -> Dictionary:
 			out["caught"].erase(back)
 	# time passes for kin already lost: prices drift, unclaimed ones get sold, rivals ask for theirs back
 	out["ransom_news"] = Ransom.tick(r.get("rivals", []))
-	# Boki you listed at the Drift Pens may have sold, and Exchange offers fill (offline turnover)
-	out["pens_sold"] = BokiPens.tick()
+	# the market turns over while you're out (offline), and what you found comes home
+	out["market_news"] = MarketSave.tick(won, int(ms.get("bosses", 0)))
 	out["exchange_fills"] = Exchange.tick()
 	# going down leaves your kin behind; where they end up was settled in the match
 	var lost_news: Array = []

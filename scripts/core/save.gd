@@ -8,13 +8,13 @@ extends Node
 ## lineage, edition). A small append-only event log (d["log"], LOG_CAP) keeps what happened to whom.
 ## See docs/BOKI_IDENTITY.md.
 
-const VERSION := 7
+const VERSION := 8
 const MAX_MEMORY := 40
 const SLOTS := 6
 const LOG_CAP := 200
 ## Upgrades, oldest first: MIGRATIONS[n] turns a version-n save into version n + 1.
 const MIGRATIONS := {1: "_migrate_1_to_2", 2: "_migrate_2_to_3", 3: "_migrate_3_to_4", 4: "_migrate_4_to_5",
-		5: "_migrate_5_to_6", 6: "_migrate_6_to_7"}
+		5: "_migrate_5_to_6", 6: "_migrate_6_to_7", 7: "_migrate_7_to_8"}
 
 var d: Dictionary = {}
 var slot := 1                 # which save file is in play
@@ -107,6 +107,8 @@ func fresh() -> Dictionary:
 		"profile": {"id": new_id("p"), "name": "Hunter"},   # this save's trainer: original trainer on every kin it registers
 		"serials": {},        # species -> the last serial handed out on this save (global once there's a server)
 		"log": [],            # append-only event log, newest last, at most LOG_CAP
+		"market": MarketSave.fresh(),   # your stall, auctions, the shelter, transfers, the Black Market's stock
+		"goods": {},          # market goods: rare materials, trophies, dyes (Goods)
 	}
 
 func _empty_plots(n: int) -> Array:
@@ -204,7 +206,7 @@ func log_trade(rec: Dictionary, from_name: String) -> void:
 	log_event("traded", rec, {"from": from_name})
 
 const HOW_EVENT := {"wild": "caught", "taken": "caught", "egg": "hatched", "boss_egg": "hatched", "starter": "hatched",
-	"event": "caught", "market": "traded", "unknown": "registered"}
+	"event": "caught", "market": "traded", "shelter": "adopted", "transfer": "received", "unknown": "registered"}
 
 ## Gives a kin joining this collection its provenance, once: where it came from (rec["origin"],
 ## set where it was made, or `how` / `where` here), when, its original trainer, its serial within
@@ -277,6 +279,11 @@ func _migrate_5_to_6(data: Dictionary) -> void:
 ## and a one-time notice lists it all (EqualMigrate).
 func _migrate_6_to_7(data: Dictionary) -> void:
 	EqualMigrate.migrate(data)
+
+## v7 -> v8: the market. Boki are never sold for gems: open Drift Pens and web market Boki listings
+## go back to their owners' rosters, and the market's fields get their defaults (MarketSave).
+func _migrate_7_to_8(data: Dictionary) -> void:
+	MarketSave.migrate(data)
 
 ## v4 -> v5: the gear model. Stored weapons become scrap, gloves become gear items, the loadout
 ## moves to five gear slots (GearSave).
