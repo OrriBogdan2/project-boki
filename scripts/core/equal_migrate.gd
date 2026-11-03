@@ -132,8 +132,8 @@ static func migrate(data: Dictionary) -> Array:
 	# the notice
 	var lines: Array = []
 	if n_armor + n_kit + moved.size() + plvl + old_keys > 0 or had_g1:
-		lines.append("Matches changed: everyone drops on equal footing now.")
-		lines.append("You keep your gloves and boots. Nothing was deleted:")
+		lines.append("Everyone now drops into matches with the same gear. You keep your gloves and boots, "
+				+ "and nothing was deleted.")
 		if n_armor + n_kit > 0:
 			lines.append("%d armor and %d kit piece%s became %d gems, %d wood, %d stone, %d scrap." % [n_armor, n_kit,
 					"" if n_armor + n_kit == 1 else "s", tot["gems"], tot["wood"], tot["stone"], tot["scrap"]])
