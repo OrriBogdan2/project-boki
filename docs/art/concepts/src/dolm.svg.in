@@ -1,163 +1,147 @@
 <!--META {
  "name": "Tarek", "title": "Rock Elementalist", "tag": "id dolm  ·  male  ·  bruiser",
  "accent": "#e0923a", "rim": "#ffd6a0", "shadow": 125, "bust_bg": "#2a2220",
- "stage": ["#6c6458", "#191613"],
+ "stage": ["#6c6458", "#191613"], "height_cm": 170, "sheet_scale": 0.9, "pos": [225, 660],
  "relic": "the Split Geode",
  "mat": {
   "skin": ["#c89070", "#7c4c32", "#30190d"],
   "rock": ["#b8aa98", "#776a5c", "#342c26"],
   "basalt": ["#6e6a70", "#3c3a40", "#18171b"],
-  "sand": ["#f0d6a6", "#c49a62", "#6e4e28"],
+  "sand": ["#c88a62", "#8a4e2e", "#3a1c0e"],
   "teal": ["#6ed6c8", "#1f8f86", "#0a3d3a"],
   "cloth": ["#6a6460", "#3c3836", "#1a1817"],
   "hair": ["#4a3a34", "#241a16", "#0c0807"],
   "magma": ["#fff4c0", "#ffa040", "#c2400e"]
  },
  "glow": {"magma": "#ff9a3a"},
- "palette": [["#7c4c32", "deep brown skin"], ["#776a5c", "quarry stone"], ["#c49a62", "sandstone vest"],
+ "palette": [["#7c4c32", "deep brown skin"], ["#776a5c", "quarry stone"], ["#8a4e2e", "rust leather vest"],
              ["#1f8f86", "teal bandana"], ["#3c3836", "dust trousers"], ["#ffa040", "molten seam"], ["#241a16", "locs"]],
  "notes": [
-  ["Shape language", "A slim, springy body hung between two huge blocks: the stone fists are the biggest shapes on him, the stone shoulder a third, so he reads top- and hand-heavy. Low crouch, knees bent, weight forward. Angular rock against loose, flowing cloth (bandana tails, trouser legs)."],
-  ["Signature features", "A teal bandana tied over his eyes with long tails streaming behind; locs tied up in a crown; one quarried slab for a pauldron; stone fists split by molten seams that glow brighter as he channels; a sandstone vest, wrapped shins, bare feet that feel the ground. No head or body markings, no monk robes."],
+  ["Shape language", "1.70 m, young, slim and springy, hung between two huge blocks: the stone fists are the biggest shapes on him, the slab shoulder a third, so he reads hand-heavy. Knees always bent, weight on the balls of his bare feet. Chipped, faceted rock against loose flowing cloth (bandana tails, trouser legs) and pebbles that float when he is ready."],
+  ["Signature features", "A teal bandana tied over his eyes with long tails streaming behind; locs tied up in a crown; one quarried slab for a pauldron; stone fists split by molten seams that glow brighter as he channels; an open rust-leather vest, wrapped shins, bare feet that feel the ground. No head or body markings, no monk robes."],
   ["Reads in-engine", "From above: two big grey blocks either side of a small dark body, plus a teal flick of bandana: easy to tell from the round bulk of Bjorn or Zedran's bare shoulders. The molten seams carry his charge state; the teal is the one cool colour on an earth palette."]
  ]
 } -->
-<g id="defs"></g><!--/defs-->
+<g id="defs">
+ <g id="L-fist">
+  <!-- a stone gauntlet: chipped facets, magma seams -->
+  <path m="rock" lw="2.8" d="M-30 -60 L4 -70 L30 -54 L40 -14 L34 30 L8 50 L-26 44 L-42 12 L-40 -30Z"/>
+  <path f="rock" opacity="0.6" d="M4 -70 L30 -54 L14 -30 L-8 -40Z"/>
+  <path sh="30" d="M30 -54 L40 -14 L34 30 L8 50 L14 -30Z"/>
+  <path ln="1.6" d="M-8 -40 L14 -30 L8 50 M14 -30 L40 -14 M-8 -40 L-40 -30 M-8 -40 L-26 44"/>
+  <path m="magma" lw="1.4" d="M-18 -46 L-10 -26 L-20 -8 L-8 10 L-14 30 L-4 12 L-14 -6 L-4 -26Z"/>
+  <path m="magma" lw="1.2" d="M20 -4 L28 10 L22 24 L30 20 L26 6Z"/>
+  <g class="fx"><ellipse cx="-10" cy="-6" rx="22" ry="40" fill="url(#L-magma-g)" opacity="0.6"/></g>
+  <path rim="2.6" d="M34 -50 L42 -14 L36 28"/>
+ </g>
+ <g id="L-head">
+  <limb m="skin" lw="2.2" pts="0 -592 9; 0 -566 10.5"/>
+  <!-- locs tied up in a crown -->
+  <limb m="hair" lw="2" pts="-6 -646 5; -16 -672 5; -26 -690 3.6; -34 -698 1"/>
+  <limb m="hair" lw="2" pts="0 -648 5; 0 -676 5; 4 -696 3.6; 10 -704 1"/>
+  <limb m="hair" lw="2" pts="6 -646 5; 18 -670 5; 30 -684 3.6; 40 -688 1"/>
+  <limb m="hair" lw="2" pts="-2 -646 5; -8 -674 4.6; -6 -694 3.4; -2 -702 1"/>
+  <path m="teal" lw="1.6" d="M-10 -650 h20 v8 h-20Z"/>
+  <path m="hair" lw="2.2" d="M-24 -620 C-26 -646 -12 -656 0 -656 C12 -656 26 -646 24 -620 C14 -636 -14 -636 -24 -620Z"/>
+  <path m="skin:r" lw="2.4" d="M0 -646 C18 -646 24 -632 24 -614 C24 -600 19 -590 11 -584 C6 -581 -6 -581 -11 -584 C-19 -590 -24 -600 -24 -614 C-24 -632 -18 -646 0 -646Z"/>
+  <path sg="45" d="M4 -646 C18 -646 24 -632 24 -614 C24 -600 19 -590 11 -584 C8 -582 6 -581 4 -581Z"/>
+  <ellipse m="skin" lw="2" cx="-24" cy="-612" rx="4" ry="7"/><ellipse m="skin" lw="2" cx="24" cy="-612" rx="4" ry="7"/>
+  <!-- the bandana over his eyes, tails streaming -->
+  <limb m="teal" lw="2" pts="20 -624 5; 48 -628 5.5; 76 -620 5; 100 -630 3.6; 116 -626 1"/>
+  <limb m="teal" lw="2" pts="20 -618 4.4; 44 -610 5; 70 -600 4.4; 90 -604 3; 104 -596 1"/>
+  <path m="teal" lw="2.2" d="M-26 -630 C-12 -634 12 -634 26 -630 L26 -612 C12 -608 -12 -608 -26 -612Z"/>
+  <path sg="40" d="M4 -634 C14 -634 20 -632 26 -630 L26 -612 C20 -610 12 -609 4 -609Z"/>
+  <brush c="#0a3d3a" pts="-20 -622 0; -4 -620 1; 12 -622 0"/>
+  <path hl="40" d="M-22 -630 C-10 -632 4 -632 14 -630 L14 -627 C4 -629 -10 -629 -22 -627Z"/>
+  <!-- a calm, easy smile -->
+  <brush c="#30190d" pts="0 -606 0; -2 -598 1; 2 -596 0"/>
+  <path fill="none" stroke="#1d1724" stroke-width="1.8" stroke-linecap="round" d="M-8 -590 C-3 -586 4 -586 9 -591"/>
+  <path rim="2.2" d="M22 -634 C25 -620 23 -602 16 -590"/>
+ </g>
+ <g id="L-pebbles" class="fx">
+  <path m="rock" lw="1.6" d="M-100 -500 l10 -6 l8 6 l-2 10 l-12 2Z M110 -560 l8 -4 l6 6 l-4 8 l-10 0Z M-80 -700 l6 -4 l6 4 l-2 8 l-8 0Z M90 -380 l8 -2 l4 6 l-6 6 l-8 -2Z M-120 -300 l6 -6 l8 2 l0 8 l-10 2Z"/>
+  <g fill="#ffa040" opacity="0.7"><circle cx="-60" cy="-200" r="2"/><circle cx="70" cy="-250" r="1.8"/><circle cx="-30" cy="-720" r="1.6"/></g>
+ </g>
+</g><!--/defs-->
 <g id="front">
- <!-- bandana tails behind -->
- <path m="teal" d="M30 -540 C70 -540 110 -520 140 -490 C130 -500 120 -496 112 -486 C100 -500 70 -512 30 -520Z"/>
- <path m="teal" d="M30 -530 C60 -520 96 -490 112 -456 C100 -462 92 -456 88 -446 C80 -472 56 -496 26 -510Z"/>
- <!-- legs: bent, wide -->
- <path m="cloth" d="M-60 -290 C-90 -250 -104 -190 -96 -140 L-90 -96 L-52 -96 L-56 -140 C-52 -190 -36 -240 -10 -290Z"/>
- <path m="cloth" d="M60 -290 C90 -250 104 -190 96 -140 L90 -96 L52 -96 L56 -140 C52 -190 36 -240 10 -290Z"/>
- <path sh="28" d="M-34 -290 L-10 -290 C-36 -240 -52 -190 -56 -140 L-52 -96 L-66 -96 C-70 -160 -60 -230 -34 -290Z M40 -290 L60 -290 C90 -250 104 -190 96 -140 L90 -96 L76 -96 C84 -160 70 -230 40 -290Z"/>
- <path m="sand" lw="2" d="M-94 -110 L-50 -104 L-52 -60 L-90 -64Z M94 -110 L50 -104 L52 -60 L90 -64Z"/>
- <path ln="1.4" d="M-92 -96 l40 6 M-90 -80 l38 6 M92 -96 l-40 6 M90 -80 l-38 6"/>
- <path m="skin" d="M-90 -64 L-52 -60 C-50 -40 -48 -20 -44 -8 C-44 2 -50 4 -58 4 L-100 4 C-108 2 -108 -6 -100 -12 C-92 -24 -90 -44 -90 -64Z"/>
- <path m="skin" d="M90 -64 L52 -60 C50 -40 48 -20 44 -8 C44 2 50 4 58 4 L100 4 C108 2 108 -6 100 -12 C92 -24 90 -44 90 -64Z"/>
- <!-- torso -->
- <path m="skin" d="M-22 -476 C-50 -474 -70 -464 -74 -446 C-70 -410 -60 -370 -52 -340 L-50 -300 L50 -300 L52 -340 C60 -370 70 -410 74 -446 C70 -464 50 -474 22 -476Z"/>
- <path sh="32" d="M14 -474 C50 -472 70 -464 74 -446 C70 -410 60 -370 52 -340 L50 -300 L20 -300 C34 -360 34 -430 14 -474Z"/>
- <path ln="1.8" d="M0 -440 L0 -330 M-40 -410 C-26 -398 -10 -400 -4 -410 M40 -410 C26 -398 10 -400 4 -410"/>
- <path m="sand" d="M-72 -450 C-60 -470 -34 -476 -20 -472 C-28 -420 -34 -360 -40 -300 L-54 -300 C-58 -340 -68 -380 -72 -420Z"/>
- <path m="sand" d="M72 -450 C60 -470 34 -476 20 -472 C28 -420 34 -360 40 -300 L54 -300 C58 -340 68 -380 72 -420Z"/>
- <path sh="25" d="M72 -450 C60 -470 40 -474 30 -472 C38 -420 44 -360 48 -300 L54 -300 C58 -340 68 -380 72 -420Z"/>
- <path m="teal" d="M-56 -318 Q0 -306 56 -318 L58 -284 Q0 -272 -58 -284Z"/>
- <path m="teal" lw="2.4" d="M-30 -290 C-34 -260 -40 -230 -50 -206 L-36 -204 C-28 -228 -22 -256 -18 -288Z"/>
- <path sh="28" d="M-56 -296 Q0 -284 58 -296 L58 -284 Q0 -272 -58 -284Z"/>
- <!-- right arm (image left) and its stone fist -->
- <path m="skin" d="M-60 -468 C-84 -462 -96 -444 -100 -420 L-110 -350 L-84 -344 L-74 -414Z"/>
- <path sh="25" d="M-84 -456 C-80 -420 -80 -380 -84 -344 L-92 -346 C-90 -380 -90 -420 -96 -444Z"/>
- <g>
-  <path m="rock" lw="3.2" d="M-120 -360 L-76 -366 L-58 -330 L-50 -270 L-62 -214 L-96 -196 L-142 -204 L-160 -248 L-154 -312Z"/>
-  <path sh="30" d="M-76 -366 L-58 -330 L-50 -270 L-62 -214 L-96 -196 L-100 -240 L-84 -300Z"/>
-  <path hl="22" d="M-120 -360 L-154 -312 L-150 -270 L-120 -320Z"/>
-  <path ln="2" d="M-154 -270 L-120 -260 L-100 -240 M-142 -204 L-120 -224 L-96 -196 M-76 -366 L-90 -320 L-84 -300 M-58 -330 L-84 -300"/>
-  <path f="magma" stroke="#1d1724" stroke-width="1.6" d="M-140 -300 L-124 -284 L-118 -262 L-106 -250 L-110 -244 L-122 -256 L-130 -278 L-144 -292Z M-96 -334 L-90 -318 L-96 -300 L-92 -298 L-86 -316 L-90 -334Z"/>
-  <g class="fx"><circle cx="-118" cy="-270" r="30" fill="url(#L-magma-g)" opacity="0.5"/></g>
-  <path rim="3" d="M-56 -320 L-50 -270 L-62 -216"/>
- </g>
- <!-- left arm (image right), fist, and the stone shoulder -->
- <path m="skin" d="M60 -468 C84 -462 96 -444 100 -420 L110 -350 L84 -344 L74 -414Z"/>
- <path sh="32" d="M84 -456 C96 -430 104 -390 110 -350 L96 -346 C94 -390 92 -430 84 -456Z"/>
- <g>
-  <path m="rock" lw="3.2" d="M120 -360 L76 -366 L58 -330 L50 -270 L62 -214 L96 -196 L142 -204 L160 -248 L154 -312Z"/>
-  <path sh="34" d="M120 -360 L154 -312 L160 -248 L142 -204 L110 -206 L118 -260 L120 -320Z"/>
-  <path hl="22" d="M76 -366 L58 -330 L60 -290 L80 -330Z"/>
-  <path ln="2" d="M58 -300 L90 -290 L118 -260 M62 -214 L90 -236 L110 -206 M120 -360 L112 -320 L118 -260"/>
-  <path f="magma" stroke="#1d1724" stroke-width="1.6" d="M70 -320 L86 -306 L92 -286 L104 -276 L100 -270 L88 -280 L80 -300 L66 -314Z M130 -240 L140 -228 L136 -214 L132 -216 L134 -228 L126 -238Z"/>
-  <g class="fx"><circle cx="90" cy="-290" r="30" fill="url(#L-magma-g)" opacity="0.5"/></g>
-  <path rim="3.2" d="M154 -310 L160 -248 L142 -206"/>
- </g>
- <path m="basalt" lw="3.2" d="M40 -490 L90 -506 L136 -486 L150 -446 L124 -424 L86 -432 L60 -452Z"/>
- <path sh="32" d="M136 -486 L150 -446 L124 -424 L104 -428 L118 -470Z"/>
- <path hl="25" d="M44 -488 L90 -504 L120 -492 L80 -486Z"/>
- <path ln="1.8" d="M66 -478 L100 -470 L118 -446 M90 -506 L96 -486"/>
- <path m="teal" lw="2.2" d="M52 -470 L112 -440 L108 -430 L48 -460Z"/>
- <!-- head -->
- <path m="skin" d="M-14 -486 L14 -486 L16 -464 L-16 -464Z"/>
- <path m="skin" d="M-30 -526 C-32 -566 32 -566 30 -526 L28 -500 C24 -480 10 -472 0 -472 C-10 -472 -24 -480 -28 -500Z"/>
- <path sh="30" d="M12 -560 C26 -554 30 -540 30 -526 L28 -500 C24 -484 16 -476 8 -474 C20 -500 22 -540 12 -560Z"/>
- <path m="skin" lw="2" d="M-32 -530 c-10 -2 -12 16 -2 18Z M32 -530 c10 -2 12 16 2 18Z"/>
- <path m="skin" lw="2" d="M-4 -526 Q-7 -512 -8 -506 Q0 -502 8 -506 Q7 -512 4 -526Z"/>
- <path fill="#4a2018" stroke="#1d1724" stroke-width="1.8" d="M-13 -494 Q0 -482 13 -494 Q0 -488 -13 -494Z"/>
- <path hl="22" d="M-24 -516 C-20 -506 -16 -500 -10 -496 C-18 -500 -24 -506 -24 -516Z"/>
- <!-- locs tied up in a crown -->
- <path m="hair" d="M-30 -544 C-34 -574 -10 -584 0 -584 C10 -584 34 -574 30 -544 C20 -552 -20 -552 -30 -544Z"/>
- <path m="hair" lw="2.4" d="M-16 -576 C-30 -600 -24 -624 -10 -630 C-12 -610 -6 -592 0 -582Z M-2 -582 C-6 -612 2 -636 16 -640 C12 -616 12 -596 10 -580Z M10 -578 C14 -604 30 -620 42 -618 C34 -600 26 -586 18 -574Z M-24 -568 C-44 -584 -46 -606 -36 -616 C-32 -596 -24 -584 -16 -576Z"/>
- <path m="teal" lw="2" d="M-12 -582 h22 v10 h-22Z"/>
- <!-- bandana over the eyes -->
- <path m="teal" d="M-34 -548 Q0 -558 34 -548 L34 -526 Q0 -534 -34 -526Z"/>
- <path sh="25" d="M10 -553 Q22 -552 34 -548 L34 -526 Q22 -530 10 -531Z"/>
- <path hl="30" d="M-30 -546 Q-10 -552 6 -552 Q-10 -548 -30 -542Z"/>
- <path m="teal" lw="2.4" d="M28 -546 C40 -552 46 -544 42 -534 C38 -526 30 -528 28 -534Z"/>
+ <use href="#L-pebbles"/>
+<g transform="scale(1 0.86)">
+ <!-- trousers, wrapped shins, bare feet: knees bent, ready -->
+ <limb m="cloth" pts="-16 -390 25; -36 -300 19; -44 -210 15; -40 -140 13"/>
+ <limb m="cloth" pts="16 -390 25; 38 -300 19; 50 -210 15; 50 -140 13"/>
+ <path sg="45" d="M-2 -390 L6 -390 C-6 -300 -26 -210 -26 -140 L-36 -140Z M34 -390 L40 -390 C56 -300 66 -210 66 -140 L56 -140Z"/>
+ <path m="sand" lw="1.8" d="M-58 -150 C-58 -110 -54 -80 -50 -54 L-28 -54 C-26 -80 -24 -110 -24 -150Z M34 -150 C34 -110 38 -80 42 -54 L64 -54 C66 -80 66 -110 64 -150Z"/>
+ <path ln="1.2" d="M-56 -130 l30 4 M-55 -110 l30 4 M-54 -90 l28 4 M-52 -70 l26 4 M36 -130 l28 4 M37 -110 l28 4 M38 -90 l27 4 M40 -70 l25 4"/>
+ <path m="skin" lw="2.2" d="M-56 -6 C-62 -30 -54 -56 -40 -56 C-28 -56 -24 -40 -20 -26 C-12 -22 -2 -18 0 -8 L-2 -2 C-20 2 -40 2 -56 -6Z"/>
+ <path m="skin" lw="2.2" d="M36 -6 C32 -30 40 -56 54 -56 C66 -56 70 -40 74 -26 C82 -22 92 -18 94 -8 L92 -2 C74 2 54 2 36 -6Z"/>
+ <path ln="1" d="M-14 -10 l2 -6 M-6 -8 l2 -6 M80 -10 l2 -6 M88 -8 l2 -6"/>
+</g>
+<g transform="translate(0 -335) scale(1.1) translate(0 335) translate(0 55)">
+ <!-- the sash -->
+ <path m="teal" lw="2.2" d="M-30 -412 C-10 -404 10 -404 30 -412 L32 -388 C10 -380 -10 -380 -32 -388Z"/>
+ <limb m="teal" lw="1.8" pts="-18 -392 6; -24 -350 5; -18 -310 4; -24 -280 1"/>
+ <!-- body: lean, bare chest under an open vest -->
+ <path m="skin" d="M-36 -566 C-42 -530 -34 -490 -26 -462 C-28 -444 -30 -426 -30 -408 L30 -408 C30 -426 28 -444 26 -462 C34 -490 42 -530 36 -566 C20 -576 -20 -576 -36 -566Z"/>
+ <path sg="55" d="M4 -574 C20 -574 30 -570 36 -566 C42 -530 34 -490 26 -462 C28 -444 30 -426 30 -408 L4 -408Z"/>
+ <brush c="#30190d" pts="-30 -520 0; -16 -510 2; -2 -514 0"/><brush c="#30190d" pts="30 -520 0; 16 -510 2; 2 -514 0"/>
+ <brush c="#30190d" pts="0 -548 0; 0 -500 1.2; 0 -440 0"/>
+ <brush c="#30190d" pts="-16 -480 0; -8 -476 1.2; -2 -478 0"/><brush c="#30190d" pts="16 -480 0; 8 -476 1.2; 2 -478 0"/><brush c="#30190d" pts="-14 -454 0; -8 -450 1.1; -2 -452 0"/><brush c="#30190d" pts="14 -454 0; 8 -450 1.1; 2 -452 0"/>
+ <brush c="#d8a080" opacity="0.6" pts="-30 -550 0; -18 -540 2; -6 -540 0"/>
+ <path m="sand" d="M-38 -566 C-44 -530 -38 -490 -30 -460 L-28 -410 L-18 -412 C-20 -460 -20 -520 -14 -570 C-22 -572 -32 -570 -38 -566Z"/>
+ <path m="sand" d="M38 -566 C44 -530 38 -490 30 -460 L28 -410 L18 -412 C20 -460 20 -520 14 -570 C22 -572 32 -570 38 -566Z"/>
+ <path sg="40" d="M22 -568 C32 -570 38 -566 38 -566 C44 -530 38 -490 30 -460 L28 -410 L22 -411Z"/>
+ <!-- the guard: one fist up, one low -->
+ <limb m="skin" pts="-36 -556 11; -64 -508 9; -84 -470 8"/>
+ <g transform="translate(-92 -440) rotate(-10) scale(0.95)"><use href="#L-fist"/></g>
+ <limb m="skin" pts="36 -556 11; 70 -540 9; 92 -580 8"/>
+ <g transform="translate(100 -610) rotate(14) scale(0.95)"><use href="#L-fist"/></g>
+ <!-- the slab pauldron -->
+ <path m="basalt" lw="2.6" d="M14 -584 L48 -600 L76 -586 L74 -556 L46 -548 L24 -556Z"/>
+ <path sh="30" d="M48 -600 L76 -586 L74 -556 L54 -560Z"/>
+ <path ln="1.4" d="M24 -572 L52 -578 L60 -560"/>
+ <use href="#L-head"/>
+</g>
 </g><!--/front-->
 <g id="tq">
- <!-- bandana tails streaming -->
- <path m="teal" d="M4 -540 C60 -548 120 -540 170 -506 C156 -510 146 -504 140 -494 C110 -516 60 -526 4 -522Z"/>
- <path m="teal" d="M4 -530 C50 -524 100 -500 130 -464 C118 -468 108 -462 106 -452 C86 -480 46 -500 0 -512Z"/>
- <g id="L-tqbody">
- <!-- back leg -->
- <path m="cloth" d="M10 -290 C40 -250 64 -200 70 -150 L74 -96 L40 -96 L36 -146 C30 -190 10 -240 -10 -290Z"/>
- <path m="sand" lw="2" d="M38 -110 L76 -104 L74 -60 L40 -64Z"/>
- <path m="skin" d="M40 -64 L74 -60 C76 -40 80 -20 86 -8 C88 2 82 4 74 4 L40 4 C32 2 32 -6 36 -12 C40 -24 40 -44 40 -64Z"/>
- <!-- front leg, lunging -->
- <path m="cloth" d="M-50 -290 C-90 -260 -120 -210 -126 -160 L-128 -100 L-90 -98 L-86 -150 C-76 -196 -50 -240 -14 -290Z"/>
- <path sh="28" d="M-30 -290 L-14 -290 C-50 -240 -76 -196 -86 -150 L-90 -98 L-102 -98 C-104 -170 -80 -240 -30 -290Z"/>
- <path m="sand" lw="2" d="M-130 -112 L-88 -106 L-90 -62 L-126 -66Z"/>
- <path ln="1.4" d="M-128 -96 l38 6 M-126 -80 l36 6"/>
- <path m="skin" d="M-126 -66 L-90 -62 C-90 -40 -90 -20 -88 -8 C-88 2 -94 4 -102 4 L-150 4 C-158 2 -156 -6 -148 -12 C-132 -24 -128 -44 -126 -66Z"/>
- <!-- torso, turned and leaning in -->
- <path m="skin" d="M-40 -476 C-68 -472 -86 -458 -88 -440 C-82 -404 -70 -366 -60 -338 L-56 -300 L40 -300 L44 -340 C50 -372 58 -410 60 -444 C54 -466 30 -476 6 -476Z"/>
- <path sh="32" d="M0 -474 C30 -474 54 -466 60 -444 C58 -410 50 -372 44 -340 L40 -300 L10 -300 C22 -360 22 -430 0 -474Z"/>
- <path m="sand" d="M-86 -446 C-74 -466 -50 -474 -36 -472 C-44 -420 -50 -360 -54 -300 L-66 -300 C-70 -340 -82 -380 -86 -420Z"/>
- <path m="sand" d="M58 -446 C48 -466 26 -474 12 -472 C20 -420 26 -360 30 -300 L42 -300 C46 -340 54 -380 58 -420Z"/>
- <path m="teal" d="M-64 -318 Q-10 -306 44 -318 L46 -284 Q-10 -272 -66 -284Z"/>
- <path rim="3" d="M58 -440 C56 -410 48 -372 42 -330"/>
- <!-- far arm and fist, cocked back -->
- <path m="skin" d="M34 -468 C58 -466 74 -452 80 -430 L96 -372 L72 -362 L56 -414Z"/>
- <path m="rock" lw="3.2" d="M86 -390 L120 -376 L142 -340 L140 -290 L114 -262 L76 -266 L56 -292 L54 -342Z"/>
- <path sh="34" d="M120 -376 L142 -340 L140 -290 L114 -262 L100 -264 L110 -310 L106 -350Z"/>
- <path ln="2" d="M56 -320 L84 -316 L106 -350 M76 -266 L92 -290 L114 -262"/>
- <path f="magma" stroke="#1d1724" stroke-width="1.6" d="M66 -340 L80 -326 L84 -308 L94 -298 L90 -294 L80 -302 L74 -320 L62 -334Z"/>
- <path rim="3" d="M140 -336 L140 -290 L116 -264"/>
- <!-- head turned to his right -->
- <path m="skin" d="M-34 -486 L-6 -486 L-4 -464 L-36 -464Z"/>
- <path m="skin" d="M-56 -526 C-56 -566 6 -566 6 -528 L6 -500 C2 -480 -12 -472 -24 -472 C-38 -472 -52 -480 -56 -498 C-62 -504 -64 -512 -58 -516Z"/>
- <path sh="30" d="M-10 -560 C2 -552 6 -540 6 -528 L6 -500 C2 -484 -6 -476 -14 -474 C-2 -500 0 -540 -10 -560Z"/>
- <path m="skin" lw="2" d="M2 -530 c10 -2 12 16 2 18Z"/>
- <path fill="#4a2018" stroke="#1d1724" stroke-width="1.8" d="M-52 -496 Q-38 -482 -24 -498 Q-38 -490 -52 -496Z"/>
- <path hl="35" d="M-52 -520 C-50 -504 -42 -494 -32 -488 C-46 -494 -54 -506 -52 -520Z M-30 -522 C-24 -516 -20 -508 -20 -500 C-26 -506 -30 -514 -30 -522Z"/>
- <path m="skin" lw="2" d="M-46 -526 C-54 -516 -60 -508 -58 -504 Q-52 -500 -44 -504"/>
- <path m="hair" d="M-56 -544 C-60 -574 -36 -584 -24 -584 C-12 -584 10 -574 6 -544 C-4 -552 -46 -552 -56 -544Z"/>
- <path m="hair" lw="2.4" d="M-40 -576 C-54 -600 -48 -624 -34 -630 C-36 -610 -30 -592 -24 -582Z M-26 -582 C-30 -612 -22 -636 -8 -640 C-12 -616 -12 -596 -14 -580Z M-14 -578 C-10 -604 6 -620 18 -618 C10 -600 2 -586 -6 -574Z M-48 -568 C-68 -584 -70 -606 -60 -616 C-56 -596 -48 -584 -40 -576Z"/>
- <path m="teal" lw="2" d="M-36 -582 h22 v10 h-22Z"/>
- <path m="teal" d="M-60 -546 Q-26 -558 8 -548 L8 -526 Q-26 -534 -62 -524Z"/>
- <path hl="30" d="M-56 -544 Q-36 -550 -20 -551 Q-36 -546 -56 -540Z"/>
- <path m="teal" lw="2.4" d="M2 -546 C14 -552 20 -544 16 -534 C12 -526 4 -528 2 -534Z"/>
- <!-- stone shoulder, near side -->
- <g transform="translate(-26 30)">
- <path m="basalt" lw="3.2" d="M-30 -492 L-80 -508 L-126 -488 L-140 -448 L-114 -426 L-76 -434 L-50 -454Z"/>
- <path hl="25" d="M-34 -490 L-80 -506 L-110 -494 L-70 -488Z"/>
- <path ln="1.8" d="M-56 -480 L-90 -472 L-108 -448 M-80 -508 L-86 -488"/>
+ <!-- driving a stone fist forward, off the back foot -->
+ <g transform="translate(20 40)"><use href="#L-pebbles"/></g>
+<g transform="scale(1 0.86)">
+ <limb m="cloth" pts="16 -380 25; 60 -300 19; 100 -230 15; 140 -160 13"/>
+ <path m="sand" lw="1.8" d="M124 -170 C134 -130 144 -100 152 -74 L174 -80 C168 -106 160 -136 150 -176Z"/>
+ <path m="skin" lw="2.2" d="M140 -40 C140 -64 152 -84 166 -80 C178 -76 180 -60 180 -44 C190 -36 198 -28 198 -16 L196 -10 C176 -6 154 -16 140 -40Z"/>
+ <limb m="cloth" pts="-16 -380 25; -60 -290 19; -70 -200 15; -66 -130 13"/>
+ <path m="sand" lw="1.8" d="M-84 -140 C-84 -100 -80 -70 -76 -48 L-54 -48 C-52 -70 -50 -100 -50 -140Z"/>
+ <path m="skin" lw="2.2" d="M-82 -6 C-88 -30 -80 -52 -66 -52 C-54 -52 -50 -36 -46 -22 C-38 -18 -28 -14 -26 -6 L-28 0 C-46 4 -66 2 -82 -6Z"/>
+ <path sg="45" d="M-70 -200 L-54 -200 C-52 -170 -50 -150 -50 -140 L-66 -140Z"/>
+</g>
+<g transform="translate(0 -335) scale(1.1) translate(0 335) translate(0 55)">
+ <g transform="rotate(-14 0 -400)">
+  <path m="teal" lw="2.2" d="M-30 -412 C-10 -404 10 -404 30 -412 L32 -388 C10 -380 -10 -380 -32 -388Z"/>
+  <limb m="teal" lw="1.8" pts="20 -392 6; 50 -370 5; 80 -360 4; 100 -350 1"/>
+  <!-- far arm drawn back -->
+  <limb m="skin" pts="36 -556 11; 70 -520 9; 92 -490 8"/>
+  <g transform="translate(104 -470) rotate(30) scale(0.9)"><use href="#L-fist"/></g>
+  <path m="skin" d="M-36 -566 C-42 -530 -34 -490 -26 -462 C-28 -444 -30 -426 -30 -408 L30 -408 C30 -426 28 -444 26 -462 C34 -490 42 -530 36 -566 C20 -576 -20 -576 -36 -566Z"/>
+  <path sg="55" d="M-6 -574 C20 -574 30 -570 36 -566 C42 -530 34 -490 26 -462 C28 -444 30 -426 30 -408 L-6 -408Z"/>
+  <brush c="#30190d" pts="-30 -520 0; -16 -510 2; -2 -514 0"/><brush c="#30190d" pts="-6 -548 0; -6 -500 1.2; -6 -440 0"/>
+  <path m="sand" d="M38 -566 C44 -530 38 -490 30 -460 L28 -410 L14 -412 C16 -460 16 -520 10 -570 C22 -572 32 -570 38 -566Z"/>
+  <path m="basalt" lw="2.6" d="M14 -584 L48 -600 L76 -586 L74 -556 L46 -548 L24 -556Z"/>
+  <g transform="translate(-6 0)"><use href="#L-head"/></g>
+  <!-- near arm: the punch -->
+  <limb m="skin" pts="-36 -556 11; -80 -560 9; -120 -566 8"/>
+  <g transform="translate(-150 -570) rotate(-90)"><use href="#L-fist"/></g>
  </g>
- </g>
- <!-- near arm, punching forward -->
- <path m="skin" d="M-80 -452 C-100 -440 -112 -424 -122 -404 L-150 -380 L-134 -360 L-106 -384Z"/>
- <g>
-  <path m="rock" lw="3.2" d="M-150 -420 L-196 -414 L-230 -380 L-236 -330 L-210 -300 L-166 -300 L-138 -326 L-128 -380Z"/>
-  <path sh="32" d="M-128 -380 L-138 -326 L-166 -300 L-180 -302 L-170 -344 L-150 -380Z"/>
-  <path hl="25" d="M-196 -414 L-230 -380 L-232 -350 L-200 -386Z"/>
-  <path ln="2" d="M-232 -350 L-200 -346 L-170 -344 M-210 -300 L-196 -320 L-166 -300"/>
-  <path f="magma" stroke="#1d1724" stroke-width="1.6" d="M-220 -386 L-206 -372 L-200 -350 L-188 -340 L-192 -334 L-204 -344 L-210 -366 L-224 -380Z M-160 -396 L-152 -380 L-156 -364 L-152 -362 L-146 -380 L-152 -398Z"/>
-  <g class="fx"><circle cx="-200" cy="-354" r="38" fill="url(#L-magma-g)" opacity="0.55"/></g>
- </g>
+</g>
 </g><!--/tq-->
 <g id="bust">
- <defs><radialGradient id="L-bustbg" cx="0.35" cy="0.3" r="0.9"><stop offset="0" stop-color="#8a7a66"/><stop offset="0.55" stop-color="#3a3029"/><stop offset="1" stop-color="#120e0c"/></radialGradient></defs>
+ <defs><radialGradient id="L-bustbg" cx="0.45" cy="0.35" r="0.85"><stop offset="0" stop-color="#9a7a5a"/><stop offset="0.55" stop-color="#3a2a1e"/><stop offset="1" stop-color="#120c08"/></radialGradient></defs>
  <rect width="320" height="320" fill="url(#L-bustbg)"/>
- <use href="#L-tqbody" transform="translate(214 1060) scale(1.72)"/>
- <g class="fx"><circle cx="300" cy="300" r="70" fill="url(#L-magma-g)" opacity="0.35"/></g>
+ <g transform="translate(150 1750) scale(2.6)">
+  <path m="skin" d="M-44 -566 C-30 -580 30 -580 44 -566 L50 -520 L-50 -520Z"/>
+  <path m="sand" d="M-48 -566 L-14 -570 L-22 -520 L-54 -520Z M48 -566 L14 -570 L22 -520 L54 -520Z"/>
+  <path m="basalt" lw="2.6" d="M14 -584 L48 -600 L76 -586 L74 -556 L46 -548 L24 -556Z"/>
+  <use href="#L-head"/>
+ </g>
 </g><!--/bust-->
 <g id="relic">
  <ellipse cx="150" cy="270" rx="96" ry="14" fill="url(#gshadow)"/>
