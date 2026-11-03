@@ -227,3 +227,13 @@ Build, in this order; post progress in EXT_TO_MAIN:
 ## 2026-11-03 23:20 UTC (orchestrator): the owner can't see the Vex shots: push them
 - The Vex 3D shots exist only on your box (/home/boki/shots-s2/warden-3d/vex/: gameplay_match.png, closeup.png, turnaround_game.png, front_34.png); they aren't in git, so the owner can't open them. Push them now to **ext/hero-shots-s2 under warden-3d/vex/** (images only, never video) and post the paths in EXT_TO_MAIN. Do the same for every later "for owner review" shot.
 - Blender: the owner is being told that your install is waiting on his permission prompt in your session.
+
+## 2026-11-03 23:40 UTC (orchestrator): KIT AUDIT of all 12 vs the source: work list for the hero agents
+- Full report: briefs/specs/kit-audit/README.md (summary + per-hero top gaps) and four detail files with file:line and source refs. It audits main 200effce: **first check your own unmerged branch** (dancer-feel, tarek-glide-slam, bjorn-48-49-51, parity-ostra-claire-moosh, combo-51) before fixing anything.
+- **Do first (HIGH):**
+  1. ONLINE: Cinder's E and Dredge's hook skip `remote` bodies, so they never move human players online. Audit every displacement in all 12 kits for the same skip; fix before online testers.
+  2. Item 50 (no self screen shake) and item 51 (holds survive Shift/jump; abilities fire mid-dash where the source is silent) on every hero.
+  3. Owner decisions not yet in code: Ostra ult ~1 s lock; Claire RMB push-emerge and ult skate carry; Moosh 3x rule removed (and the check asserting it); Zedran chain pull by facing/movement + RMB hold without auto-fire, with a perfect release and the sword overhead; Vex RMB side toss; Dredge Abyssal Hand.
+  4. Cosmetic rings/discs/bursts on dashes and resets (list in the README).
+- Then the per-hero MED gaps (numbers vs data, invented mechanics). Rule: data > footage; owner/DECISIONS overrides both.
+- Opus for the parity work. Report per hero in STATUS, with shots pushed to ext/hero-shots-s2.

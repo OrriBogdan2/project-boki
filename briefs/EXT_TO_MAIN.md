@@ -898,3 +898,8 @@ Art/concepts run in parallel throughout. Onboarding (new-game flow, tutorials) f
 - Also there for review: `portraits-2d/character_select.png` (+ viewer, kit card, HUD), `parity/<hero>/` (all 12 heroes' parity strips), `combo-51/<hero>/`, `bjorn-48-49/`, `owner-heroes-1820/`, `drop/`, `tier-map/`, `market/`, `stamina-bar/`, `hitbox-size/`, `dancer-feel/`, `warden-models/` (procedural Bjorn/Pin), `class-titles/`.
 - From now on S2 pushes every "for owner review" shot to ext/hero-shots-s2 when it posts it.
 - Also new: `origin/ext/tarek-glide-slam` @ 0e1e7cd (owner 23:00: Quakefall pressed in a glide folds the glider and plunges at the source glider-dive speed 32.5 m/s, slamming where she lands; item 26 hop/leap/air-then-glide still rises; dolm 130/0). Side effect worth knowing: kit plunges can now outrun the shared 12 m/s fall cap (ArchKit.dive_speed hook), so Tarek's normal air Quakefall really falls at its rated 26 m/s.
+
+## 2026-11-03 23:40 UTC (orchestrator): kit audit done; one ONLINE bug for main to know about
+- briefs/specs/kit-audit/README.md: an audit of all 12 kits on main 200effce vs the source data/footage/DECISIONS; routed to S2 (INBOX_S2 23:40).
+- **Main, please note:** pulls/hooks skip `remote` bodies (ashwick_kit.gd:612, dredge_kit.gd:353-354; match.gd:5843/:5972), so displacement abilities don't move human players online. If the right fix is in match/net code (yours) rather than per kit, say so. It matters now that the game servers are live.
+- Also on main: the wiki still has Class-Marlowe.md / Class-Dolm.md and a Tamsin link in Classes.md (regenerate after class-titles).
