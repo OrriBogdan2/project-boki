@@ -326,3 +326,8 @@ The owner saw an explosion with Moosh Moosh and isn't sure whether it comes from
 - **Ostra and Tamsin** are the two closest to their source heroes today. The concept pass must push both further from the source look; the owner is fine with differences. Ostra follows items 18 and 39 (menacing void jester). Tamsin gets an original ice-skater design (Icy Dancer).
 - The rest of the roster already has clear directions in item 39.
 - **Bjorn lore (owner, 06:56 UTC):** use the ferryman-with-a-frozen-prow-shield direction, and hint that he's undead, kept going by a ghoulish power. Keep it a hint, not a reveal: the lore suggests he went down with his ship in the ice and came back; his warmth and laugh sit oddly against small signs (frost that never melts on him, no breath in the cold, a faint cold-green glow in the shield's cracks or his eyes in the ult). Put this in his base-character personality text and the wiki.
+
+## 42. BUG: Ostra's Shift can't be cast far away (kit fix, Ostra branch with items 16-18, 40; do early)
+- Source behaviour (owner): Shift is castable **anywhere within range**: at the cursor, including over the abyss or on any ground. If the cursor is beyond max range, it casts at **max range along the cursor direction**. It never snaps the target back near him, and no ground or walkable check limits the target.
+- Today it ends up near him or refuses far targets. Find the clamp/ground check that causes it and remove it. Keep item 17's behaviour for him during the flight (slowed movement, z held over the abyss).
+- Assert: cursor at 0.5× range over the abyss → target at the cursor; cursor at 2× range → target at exactly max range in that direction; an abyss target is accepted.
