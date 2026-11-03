@@ -67,6 +67,74 @@ func _skate_feel() -> void:
 	step(m, 0.2)
 	await _free(m)
 
+## Rank 3 Skate over the Abyss lays ice underfoot that holds a while and then goes; below rank 3 she gets none.
+func _skate_ice() -> void:
+	var laid := {}
+	for rank_n in [1, 3]:
+		var r: Array = sc.setup("rimewright", 30.0)
+		var m: Match = r[0]
+		var P: Hunter = r[1]
+		var K: RimewrightKit = P.ak
+		P.slot_lv["dash"] = rank_n
+		var W = m.world
+		var hx := int(floor(P.pos.x))
+		var hz := int(floor(P.pos.z))
+		var gap: Array = []
+		for dx in range(-24, -2):
+			for dz in range(-4, 5):
+				if W.inb(hx + dx, hz + dz):
+					var i: int = W.idx(hx + dx, hz + dz)
+					W.kind[i] = World.T_VOID
+					gap.append(i)
+		step(m, 0.1)
+		P.dashes = P.max_dashes()
+		P.inp["move"] = Vector2(-1, 0)
+		P.inp["dash"] = true
+		P.inp["dash_down"] = true
+		step(m, 0.05)
+		P.inp["dash"] = false
+		step(m, 1.2)
+		var now := gap.filter(func(i): return W.kind[i] != World.T_VOID).size()
+		P.inp["dash_down"] = false
+		step(m, float(K.dash_def()["ice_time"]) + 1.5)
+		var later := gap.filter(func(i): return W.kind[i] != World.T_VOID).size()
+		laid[rank_n] = [now, later]
+		await _free(m)
+	ok(
+			"tm Shift rank 3: skating over the Abyss lays ice that goes again; none below rank 3",
+			int(laid[1][0]) == 0 and int(laid[3][0]) >= 6 and int(laid[3][1]) == 0,
+			"rank 1 %s, rank 3 %s (tiles now, after)" % [str(laid[1]), str(laid[3])])
+
+## Rank 3 Spear: the detonation hits 45% harder (on top of the rank's own +30%) and is no wider.
+func _spear_rank3() -> void:
+	var hits := {}
+	var rim := {}
+	for rank_n in [1, 3]:
+		var r: Array = sc.setup("rimewright", 30.0)
+		var m: Match = r[0]
+		var P: Hunter = r[1]
+		var T: Hunter = r[3]
+		var K: RimewrightKit = P.ak
+		P.slot_lv["sec"] = rank_n
+		var edge: Hunter = m.make_hunter(
+				"T2", T.team, "medium", "Edge", "idle", {}, P.pos + Vector3(8.4, 0, 0), {"arch": "none"})
+		edge.max_hp = 10000.0
+		edge.hp = 10000.0
+		edge.armor = 0.0
+		T.teleport(P.pos + Vector3(5.0, 0, 0))
+		step(m, 0.05)
+		var t0 := T.hp
+		K._detonate(P.pos + Vector3(5.0, 0, 0))
+		hits[rank_n] = t0 - T.hp
+		rim[rank_n] = 10000.0 - edge.hp
+		await _free(m)
+	var want: float = Effects.level_k({"level": 3}) * 1.45
+	var got: float = float(hits[3]) / maxf(0.01, float(hits[1]))
+	ok(
+			"tm RMB rank 3: the detonation is 45% harder and no wider",
+			absf(got - want) < 0.1 and float(rim[1]) == 0.0 and float(rim[3]) == 0.0,
+			"x%.2f want x%.2f, edge foe %.0f/%.0f" % [got, want, float(rim[1]), float(rim[3])])
+
 func _free(m: Match) -> void:
 	m.queue_free()
 	await sc.main.get_tree().process_frame
@@ -309,6 +377,7 @@ func tender() -> void:
 			and K.ch_rmb >= 1.0)
 	await _free(m)
 	await growth()
+	await burr_ranks()
 
 ## Burrseed's burst damage on the first foe, with the hunter at level `lvl`.
 func _seed_burst(lvl: int) -> float:
@@ -340,6 +409,19 @@ func growth() -> void:
 	ok(
 			"mm RMB: Burrseed's burst grows with level (LevelGrowth.ap 1.0 -> %.2f)" % (1.0 + LevelGrowth.ap_pct(10)),
 			d1 > 25.0 and d10 > d1 * 1.15, "L1 %.1f L10 %.1f" % [d1, d10])
+
+## Rank 3 doubles the Burrseed's burst width (the source's detonation-radius upgrade) and adds 0.3 s of root.
+func burr_ranks() -> void:
+	var r: Array = sc.setup("tender", 6.0)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var K: TenderKit = P.ak
+	var wide1 := K.burst_radius()
+	P.slot_lv["sec"] = 3
+	var wide3 := K.burst_radius()
+	ok("mm RMB: the burst is 2.2 m wide, 4.4 m at rank 3", absf(wide1 - 2.2) < 0.01 and absf(wide3 - 4.4) < 0.01,
+			"r1 %.2f r3 %.2f" % [wide1, wide3])
+	await _free(m)
 
 # ================================================================== Tamsin
 func rimewright() -> void:
@@ -432,7 +514,7 @@ func rimewright() -> void:
 			"tm passive: knocking a Chilled foe Shatters them after a beat",
 			T.downed and K.splinter_log > s1 and T2.hp < hh, "downed %s" % str(T.downed))
 	await _free(m)
-	# --- Skate: darts fly straight, thick and 1.6x; she carries on over a ledge; the stride move loops
+	# --- Skate: darts fly straight and thick at normal damage; she carries on over a ledge; the stride move loops
 	r = sc.setup("rimewright", 6.0)
 	m = r[0]
 	P = r[1]
@@ -466,8 +548,8 @@ func rimewright() -> void:
 	var bs: Array = _mine(m, P)
 	var bd := float(bs[-1]["dmg"]) if bs.size() > nb else 0.0
 	ok(
-			"tm Shift: darts while skating are straight beams at 1.6x",
-			bs.size() > nb and absf(bd - float(P.wpn["dmg"]) * 1.6) < 0.05 and K.stats["beams"] >= 1,
+			"tm Shift: darts while skating are straight beams at normal damage",
+			bs.size() > nb and absf(bd - float(P.wpn["dmg"])) < 0.05 and K.stats["beams"] >= 1,
 			"dmg %.2f" % bd)
 	step(m, 0.15)
 	var skate_v := Vector2(P.vel.x, P.vel.z).length()
@@ -489,6 +571,8 @@ func rimewright() -> void:
 			not K.rinkrunning() and P.dashes > 0.05 and K.anim_id == "tm_skate_stop", "dashes %.2f" % P.dashes)
 	await _free(m)
 	await _skate_feel()
+	await _skate_ice()
+	await _spear_rank3()
 	# --- Ice Spear: hold shows the ring at the cursor; it lands there, slows, detonates 1.8 s later
 	r = sc.setup("rimewright", 30.0)
 	m = r[0]
@@ -521,6 +605,9 @@ func rimewright() -> void:
 			not K.zones.is_empty() and Vector2(zat.x - cur.x, zat.z - cur.z).length() < 1.0 and K.anim_id == "tm_spear",
 			"off %.2f" % Vector2(zat.x - cur.x, zat.z - cur.z).length())
 	step(m, 0.2)
+	ok(
+			"tm RMB: two charges on a 10.2 s cooldown",
+			K.rmb_charges() == 2 and K.cd["rmb"] > 9.4 and K.cd["rmb"] <= 10.2, "cd %.2f" % K.cd["rmb"])
 	ok(
 			"tm RMB: a foe in the zone is slowed and Chilled", T.slow_t > 0.0 and T.slow_k >= 0.34 and K.chilled(T),
 			"slow %.2f" % T.slow_k)

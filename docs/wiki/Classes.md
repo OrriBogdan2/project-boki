@@ -59,8 +59,8 @@ your class in the Expedition menu, and you can try every class against dummies i
 | [Bulwark](Class-Bulwark.md) | Heavy | Tower Shield & Mace | Guard | Whirl | Shield | Mending Ground | none (Boki Merge) |
 | [Dredge](Class-Dredge.md) | Heavy | Shotgun | Salvage | Barge | Grapnel | Anchor Drop | none (Boki Merge) |
 | [Ashwick](Class-Ashwick.md) | Heavy | Torch Lance | Flashover | Spark Leap | Cinder Shot | Furnace Cloak | none (Boki Merge) |
-| [Linnet](Class-Linnet.md) | Medium | Lantern Crook | Bearer | Relay Step | Burrseed | Hearthlight | none (Boki Merge) |
-| [Tamsin](Class-Tamsin.md) | Light | Hoar Fan | Hoarfrost | Rinkrun | Sleet Lance | Rink Wall | none (Boki Merge) |
+| [Moosh Moosh](Class-Moosh-Moosh.md) | Medium | Ember Cast | Bearer | Relay Step | Burrseed | Hearthlight | none (Boki Merge) |
+| [Tamsin](Class-Tamsin.md) | Light | Hoar Fan | Hoarfrost | Skate | Ice Spear | Rink Wall | none (Boki Merge) |
 | [Dolm](Class-Dolm.md) | Medium | Rubble Fists | Tremor Sense | Rubble Rush | Quakefall | Stone Row | none (Boki Merge) |
 | [Ostra](Class-Ostra.md) | Medium | Tether Lantern | Swell | Lantern Trade | Shard Fan | Brimseed | none (Boki Merge) |
 
@@ -71,7 +71,7 @@ The weight class sets health, speed, mass and dash charges; the class kit sits o
 | Weight | Health | Speed (m/s) | Dash charges | Mass | Glide cap | Classes | In short |
 |---|---|---|---|---|---|---|---|
 | Light | 124 | 4.4 | 1 | 0.85 | 1.2 | Thief, Archer, Vireo, Tamsin | Fast and fragile. The fastest dash, the longest glide, and hits throw you furthest. |
-| Medium | 145 | 4.4 | 1 | 1 | 1 | Marlowe, Linnet, Dolm, Ostra | The all-rounder: middle health, speed, dash and glide. |
+| Medium | 145 | 4.4 | 1 | 1 | 1 | Marlowe, Moosh Moosh, Dolm, Ostra | The all-rounder: middle health, speed, dash and glide. |
 | Heavy | 193 | 4.4 | 2 | 1.35 | 0.85 | Juggernaut, Bulwark, Dredge, Ashwick | Slow and tough. Two short dashes, the most health, and very hard to push off a ledge. |
 
 ### Run levels
