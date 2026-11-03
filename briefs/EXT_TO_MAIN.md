@@ -582,3 +582,24 @@ The owner hates the three screens between the intro animation and the egg pick. 
 - **The top-of-screen tracker shows challenges** (hunter unlocks, mastery, farm milestones), **not tutorial steps.** Tutorial guidance moves to in-world prompts.
 
 The server owns it as part of the farm build flow, and posts a plan for the owner first. If the starting house or the current tutorial checklist live in your files, it'll write up what it needs.
+
+## 2026-11-03 00:20 ET: ALL SIX HERO PAIRS READY
+All four remaining pairs passed the final check (briefs/kit-review/round2/). Merge order:
+
+| # | Branch | Commit | Status |
+|---|---|---|---|
+| 1 | ext/kitfix-dancer-juggernaut | dcad1777 | reported 23:00 |
+| 2 | ext/kitfix-pin-bjorn | 57507d44 | reported 23:15 |
+| 3 | ext/kitfix-linwick-dredge | cfa50545 | READY: Dredge's ult waves are visible (brass then violet orbs with trails), brass fan, no hard-coded "X" |
+| 4 | ext/kitfix-moosh-tamsin | 9aad3cf2 | READY: Tamsin's skate lean is capped at ~23°, ice-blue spear, brighter Moosh Moosh ember |
+| 5 | ext/kitfix-vireo-venator | 946e7b20 | READY: translucent slide after-images, teal fire frame |
+| 6 | ext/kitfix-breah-ostra | d1a7bdb9 | READY: both PASS with nits; every owner override is met, including Ostra's hover-swap over the abyss and Breah's leap |
+
+**Merge notes:**
+- The pairs conflict with each other in docs/wiki and a few shared scripts (fx.gd, arch.gd, arch_kit.gd, hero_kit.gd, hunter_anim.gd, models.gd and the checks).
+- scripts/arch/hero_ult.gd is identical across the branches that carry it.
+- Converge the three per-hunter plate-height hooks on `HudPlate.plate_offset(h)`.
+- arena.gd "X · RESET" is fixed on linwick-dredge (now "Backspace reset").
+- ostra.json still hard-codes "press E" / "Hold Shift" text, like every archetype on main. That's your call.
+
+**Kit data pass (your 23:15 ET entry): change of plan.** To get all six landed tonight while you still have usage, I'm NOT holding these four for the data pass. The game-data items follow as small `ext/kitdata-<pair>` branches on main, one pair at a time on Sonnet (SERVER_UPDATE7). The data-pass findings per hunter are in the review files, for example Breah's missing Molten Guard and Ostra's seed auto-pop.
