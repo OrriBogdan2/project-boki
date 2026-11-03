@@ -515,28 +515,84 @@ const OWNER := [
 		"owner1103 #30: the held swing, strip 5/5, the dummy 2 m or more away"
 	],
 	[
-		"o1103_bjorn_dash",
+		"o1103_bjorn_dash_a",
 		"bulwark",
 		"smash",
-		0.58,
+		0.53,
 		2.5,
-		"owner1103 #35: Bjorn's own dash, the 360 Smash run-up (strip frame 1/3)"
+		"owner1103 #35: Bjorn's ground dash (360 Smash), strip 1/5, the push-off"
 	],
 	[
 		"o1103_bjorn_dash_b",
 		"bulwark",
 		"smash",
-		0.68,
+		0.6,
 		2.5,
-		"owner1103 #35: Bjorn's own dash, the spin (frame 2/3)"
+		"owner1103 #35: Bjorn's ground dash (360 Smash), strip 2/5, the stretched run-up behind the hammer"
 	],
 	[
 		"o1103_bjorn_dash_c",
 		"bulwark",
 		"smash",
-		0.8,
+		0.72,
 		2.5,
-		"owner1103 #35: Bjorn's own dash, the low recovery (frame 3/3)"
+		"owner1103 #35: Bjorn's ground dash (360 Smash), strip 3/5, the spin on arrival"
+	],
+	[
+		"o1103_bjorn_dash_d",
+		"bulwark",
+		"smash",
+		0.86,
+		2.5,
+		"owner1103 #35: Bjorn's ground dash (360 Smash), strip 4/5, the low crouched recovery"
+	],
+	[
+		"o1103_bjorn_dash_e",
+		"bulwark",
+		"smash",
+		1.05,
+		2.5,
+		"owner1103 #35: Bjorn's ground dash (360 Smash), strip 5/5, settled"
+	],
+	[
+		"o1103_bjorn_air_dash_a",
+		"bulwark",
+		"lumber",
+		0.52,
+		2.5,
+		"owner1103 #35: Bjorn's air dash (the lumbering shove), strip 1/5, the shove off"
+	],
+	[
+		"o1103_bjorn_air_dash_b",
+		"bulwark",
+		"lumber",
+		0.58,
+		2.5,
+		"owner1103 #35: Bjorn's air dash (the lumbering shove), strip 2/5, shoulder first"
+	],
+	[
+		"o1103_bjorn_air_dash_c",
+		"bulwark",
+		"lumber",
+		0.66,
+		2.5,
+		"owner1103 #35: Bjorn's air dash (the lumbering shove), strip 3/5, the lumber through the air"
+	],
+	[
+		"o1103_bjorn_air_dash_d",
+		"bulwark",
+		"lumber",
+		0.76,
+		2.5,
+		"owner1103 #35: Bjorn's air dash (the lumbering shove), strip 4/5, the end of the shove"
+	],
+	[
+		"o1103_bjorn_air_dash_e",
+		"bulwark",
+		"lumber",
+		0.9,
+		2.5,
+		"owner1103 #35: Bjorn's air dash (the lumbering shove), strip 5/5, falling out of it"
 	],
 	[
 		"o1103_bjorn_abyss",
@@ -827,6 +883,13 @@ func _input(what: String, t: float) -> void:
 		"smash":
 			T.teleport(home + Vector3(5.6, 0, 0))
 			_aim(T.pos)
+			P.inp["move"] = Vector2(1, 0) if t > 0.45 and t < 0.7 else Vector2.ZERO
+			if at.call(0.5): P.do_dash()
+		"lumber":
+			_aim(home + Vector3(6.0, 0, 0))
+			if at.call(0.4):
+				P.pos += Vector3(0, 5.0, 0)
+				P.grounded = false
 			P.inp["move"] = Vector2(1, 0) if t > 0.45 and t < 0.7 else Vector2.ZERO
 			if at.call(0.5): P.do_dash()
 		"purify":
