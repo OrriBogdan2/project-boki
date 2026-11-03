@@ -328,18 +328,13 @@ func _archer() -> void:
 	P.inp["fire"] = false
 	step(m, 0.5)
 	ok("archer weapon: Longbow full draw", dmg(T) >= 50.0, "took %.0f" % dmg(T))
-	# Snare tap: a foe hit is rooted; a miss plants a Tripwire
-	fresh(T); K.ch_rmb = 2.0
+	# the Heavy Shot is hold only: a tap looses nothing and spends no charge
+	fresh(T); K.ch_rmb = 1.0
 	tap(m, P)
 	step(m, 0.3)
-	ok("archer RMB tap: snare roots", T.root_t > 0.0 and dmg(T) >= 7.0, "root %.2f" % T.root_t)
-	var nt: int = m.verbs.traps.size()
-	P.inp["aim"] = P.pos + Vector3(0, 0, 5.0)
-	tap(m, P)
-	step(m, 0.5)
-	ok("archer RMB tap: Tripwire on the ground", m.verbs.traps.size() > nt and K.trips.size() >= 1, "%d traps" % m.verbs.traps.size())
+	ok("archer RMB tap: nothing fires and the charge stays", dmg(T) <= 0.0 and T.root_t <= 0.0 and K.ch_rmb >= 1.0, "took %.0f charges %.1f" % [dmg(T), K.ch_rmb])
 	# Pinning Shot: pushed into a wall within 3m, pinned
-	fresh(T); K.ch_rmb = 2.0; K.cd["rmb"] = 0.0
+	fresh(T); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0
 	if "--ak-debug" in OS.get_cmdline_user_args(): print("PIN build: T at %s P at %s vel %s" % [str(T.pos), str(P.pos), str(T.vel)])
 	var W: World = m.world
 	# (packed arrays are copied on write: edit a copy and put it back, so the wall really stands)
@@ -387,11 +382,11 @@ func _archer() -> void:
 	step(m, 3.0)
 	P.inp["move"] = Vector2.ZERO
 	ok("archer dash: Spirit Walk ends after 2.8s", not K.spirit.active() and P.spirit_t <= 0.0)
-	# Plunge from the air
-	P.teleport(home + Vector3(0, 3.0, 0)); P.grounded = false; P.vel = Vector3(0, -2, 0); K.ch_rmb = 2.0; K.cd["rmb"] = 0.0
-	K.res = 0.0     # (Focus filled while standing on the ledge after the zip: a full Focus shot outranks the air variant)
+	# in the air the press still starts a draw: the Heavy Shot has no air variant
+	P.teleport(home + Vector3(0, 3.0, 0)); P.grounded = false; P.vel = Vector3(0, -2, 0); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0
 	P.ak.press_rmb()
-	ok("archer RMB air: Plunge lifts you", K.last_variant == "air" and P.vel.y > 5.0, "vy %.1f" % P.vel.y)
+	ok("archer RMB air: the press starts a draw, no Plunge", K.rmb_down and not bool(K.rmb_ctx["air"]) and P.vel.y < 5.0, "vy %.1f" % P.vel.y)
+	K.rmb_down = false
 	step(m, 1.2)
 	# the bow's perfect window: let go right as Supercharged comes up: no extra damage, the next draw is faster
 	P.teleport(home); P.vel = Vector3.ZERO; fresh(T); T.teleport(home + Vector3(-6.5, 0, 0)); aim_at(P, T.pos)    # (clear of the test walls east)

@@ -12,7 +12,7 @@ extends RefCounted
 ##   jackpot     the Thief's fifth Mark releases the knife burst (the knives in flight)
 ##   jackpotpay  the same, on the last knife: the JACKPOT payoff and the free Vault
 ##   wave        the greatsword held into a Searing Wave (--hold-shot: at full charge)
-##   archer      a snare roots the dummy, full Focus: the lens glint, the aim line, crosshairs over it
+##   archer      a rooted dummy, full Focus: the lens glint, the aim line, crosshairs over it
 ##   deadeye     the same, ending on the Deadeye payoff
 ##   hero_<id>_<move>   Vireo (mage) and Marlowe (gunslinger) moments, see scripts/arch/hero_demo.gd
 ##   bulwark     the shield raised and burning gold, Guard pips full (Shield Slam armed)
@@ -61,7 +61,6 @@ const ANIM_DEMO := {
 	"arc_loose": ["archer", "longbow", [0.8, 0.88, 0.94, 1.0, 1.12, 1.3]],
 	"arc_heavy_wind": ["archer", "longbow", [0.55, 0.7, 0.9, 1.1, 1.3, 1.6]],
 	"arc_heavy": ["archer", "longbow", [1.2, 1.35, 1.42, 1.48, 1.58, 1.8]],
-	"arc_snare": ["archer", "longbow", [0.5, 0.54, 0.58, 0.64, 0.74, 0.9]],
 	"arc_hail": ["archer", "longbow", [0.5, 0.56, 0.64, 0.74, 0.95, 1.2]],
 	"pin_roll": ["archer", "longbow", [0.5, 0.54, 0.58, 0.63, 0.7, 0.8]],
 	"arc_super": ["archer", "longbow", [1.6, 1.66, 1.7, 1.75, 1.85, 2.1]],
@@ -73,7 +72,6 @@ const ANIM_DEMO := {
 	"pin_flick": ["archer", "longbow", [0.5, 0.54, 0.58, 0.63, 0.7, 0.85]],
 	"pin_deadeye": ["archer", "longbow", [0.5, 0.56, 0.7, 0.9, 1.1, 1.3]],
 	"pin_rundown": ["archer", "longbow", [0.5, 0.58, 0.64, 0.72, 0.85, 1.0]],
-	"arc_plunge": ["archer", "longbow", [0.5, 0.56, 0.62, 0.68, 0.8, 1.0]],
 	"bul_throw": ["bulwark", "tower_shield", [0.5, 0.6, 0.7, 0.78, 0.92, 1.12]],
 	"bul_recall": ["bulwark", "tower_shield", [0.98, 1.05, 1.12, 1.2, 1.3, 1.5]],
 	"bul_smash_wind": ["bulwark", "tower_shield", [0.5, 0.7, 0.9, 1.1, 1.4, 1.7]],
@@ -238,10 +236,6 @@ static func tick(A: Arena, dt: float) -> void:
 				A.home = P.pos
 			_aim(P, D)
 			P.inp["move"] = Vector2.ZERO
-			if _at(t, dt, 0.3): # the snare roots it
-				P.inp["sec_hold"] = false
-				P.ak.ch_rmb = 2.0
-				P.ak.press_rmb()
 			# (keep it pinned for the frame)
 			if t > 0.35 and t < 2.0: D.root_t = maxf(D.root_t, 0.8)
 			if w == "archer":
@@ -493,7 +487,7 @@ static func _anim_trigger(A: Arena, P: Hunter, D: Hunter, mv: String, t: float, 
 				K.cd["rmb"] = 0.0
 				P.inp["sec_hold"] = false
 				K.press_rmb()
-		"arc_draw", "arc_loose", "arc_heavy_wind", "arc_heavy", "arc_snare", "arc_hail", "pin_roll", "arc_super", "arc_plunge", "arc_tap", "arc_perfect", "arc_over", "arc_over_loose", "pin_walk", "pin_flick", "pin_deadeye", "pin_rundown", "bul_guard", "bul_crush", "bul_slamshield", "bul_break", "bul_armed", "bul_lumber", "bul_throw", "bul_recall", "bul_smash_wind", "bul_smash", "bul_bash", "bul_whirl", "bul_charge", "bul_short", "bul_mend":
+		"arc_draw", "arc_loose", "arc_heavy_wind", "arc_heavy", "arc_hail", "pin_roll", "arc_super", "arc_tap", "arc_perfect", "arc_over", "arc_over_loose", "pin_walk", "pin_flick", "pin_deadeye", "pin_rundown", "bul_guard", "bul_crush", "bul_slamshield", "bul_break", "bul_armed", "bul_lumber", "bul_throw", "bul_recall", "bul_smash_wind", "bul_smash", "bul_bash", "bul_whirl", "bul_charge", "bul_short", "bul_mend":
 			_anim_hero(A, P, mv, t, dt)
 		"pin_ult_cast", "pin_ult_nock", "pin_ult_loose", "pin_ult_final", "bul_ult_wind", "bul_ult_slam":
 			_anim_ult(P, mv, t, dt)
@@ -522,12 +516,6 @@ static func _anim_hero(A: Arena, P: Hunter, mv: String, t: float, dt: float) -> 
 				K.cd["rmb"] = 0.0
 				K.bot_hold["rmb"] = 0.9
 				K.press_rmb()
-		"arc_snare":
-			if _at(t, dt, 0.5):
-				K.ch_rmb = 2.0
-				K.cd["rmb"] = 0.0
-				P.inp["sec_hold"] = false
-				K.press_rmb()
 		"arc_hail":
 			if _at(t, dt, 0.5):
 				K.cd["e"] = 0.0
@@ -537,15 +525,6 @@ static func _anim_hero(A: Arena, P: Hunter, mv: String, t: float, dt: float) -> 
 				P.dashes = P.max_dashes()
 				P.do_dash()
 		"arc_super": fire = t > 0.4 and t < 1.6
-		"arc_plunge":
-			if _at(t, dt, 0.4):
-				P.teleport(P.pos + Vector3(0, 3.0, 0))
-				P.grounded = false
-				P.vel = Vector3.ZERO
-			if _at(t, dt, 0.5):
-				K.ch_rmb = 2.0
-				K.cd["rmb"] = 0.0
-				K.press_rmb()
 		"bul_throw": fire = t > 0.5 and t < 0.53
 		"bul_recall": fire = (t > 0.4 and t < 0.43) or (t > 1.0 and t < 1.03)
 		"bul_smash_wind": fire = t > 0.4 and t < 2.0

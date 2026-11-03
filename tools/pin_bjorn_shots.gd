@@ -128,7 +128,6 @@ const SHOTS := [
 		5.0,
 		"Heavy Shot impact: a red star and red-white burst, dust as the dummy is driven back, the white ring"
 	],
-	["pin_snare", "archer", "snare", 0.62, 4.0, "Snare tap: the snare arrow flying"],
 	["pin_spirit_roll", "archer", "spirit", 0.6, 2.0, "Spirit Walk: the dodge roll and its green burst"],
 	[
 		"pin_spirit_inside",
@@ -520,9 +519,6 @@ func _input(what: String, t: float) -> void:
 			K.res = 0.0
 			P.inp["sec_hold"] = t < 1.25
 			if at.call(0.05): K.press_rmb()
-		"snare":
-			K.res = 0.0
-			if at.call(0.55): K.press_rmb()
 		"spirit":
 			P.inp["move"] = Vector2(1, 0) if t > 0.45 else Vector2.ZERO
 			if at.call(0.5): P.do_dash()

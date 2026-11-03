@@ -210,6 +210,7 @@ func _archer_combos() -> void:
 	K.ch_rmb = 2.0
 	K.cd["rmb"] = 0.0
 	K.res = 0.0
+	var wall_pos := T.pos
 	_wall_at(m, T.pos, lv, 2)
 	aim_at(P, T.pos)
 	var pn0 := K.pins
@@ -258,6 +259,19 @@ func _archer_combos() -> void:
 		"deadeyes %d dealt %.0f" % [K.deadeyes - de0, dmg(T) - dd0]
 	)
 	ok("pin anim: the Deadeye payoff plays pin_deadeye", K.anim_id == "pin_deadeye", K.anim_id)
+	# rank 3 (data: Heartpiercer IV): a wall stun gives a dash charge
+	P.slot_lv["sec"] = 3
+	fresh(T)
+	T.teleport(wall_pos)
+	K.ch_rmb = 1.0
+	K.cd["rmb"] = 0.0
+	K.res = 0.0
+	P.dashes = 0.0
+	aim_at(P, T.pos)
+	hold(m, P, 1.2)
+	step(m, 0.3)
+	ok("pin rank 3: a Heavy Shot wall stun gives a dash charge", T.stun_t > 0.0 and P.dashes >= 0.95, "stun %.2f dashes %.2f" % [T.stun_t, P.dashes])
+	P.slot_lv["sec"] = 1
 	_clear_wall(m, T.pos, lv, 2)
 	# Hail Wall: a curved arc at the cursor distance (5m), 120 degrees; a foe on the arc off to the side
 	# burns, one between you and the arc does not
@@ -301,26 +315,47 @@ func _archer_combos() -> void:
 		"cremations %d" % (K.cremations - cr0)
 	)
 	step(m, 3.5)
-	# Hail Wall, then a snare tap: roots 1.0 (the longer root), and the move plays
+	# the Heavy Shot is hold only (data: Heartpiercer): one charge, 16 s, a tap looses nothing and costs nothing
 	fresh(T)
-	K.cd["e"] = 0.0
 	K.res = 0.0
-	K.ch_rmb = 2.0
+	K.ch_rmb = 1.0
 	K.cd["rmb"] = 0.0
 	P.teleport(home)
 	T.teleport(home + Vector3(7, 0, 0))
 	T2.teleport(home + Vector3(9, 0, 0))
 	aim_at(P, T.pos)
-	P.ak.use_e()
-	step(m, 0.5, func(): K.res = 0.0)
 	tap(m, P)
-	step(m, 0.15)
+	step(m, 0.3)
 	ok(
-		"combo archer: Hail Wall > snare tap roots 1.0",
-		T.root_t > 0.6 or K.last_variant == "during_e",
-		"root %.2f variant %s" % [T.root_t, K.last_variant]
+		"combo archer: RMB tap looses nothing and costs no charge (no snare, no Tripwire)",
+		dmg(T) <= 0.0 and T.root_t <= 0.0 and K.ch_rmb >= 1.0 and K.last_variant == "tap" and not K.d["rmb"].has("snare"),
+		"took %.0f root %.2f charges %.1f variant %s" % [dmg(T), T.root_t, K.ch_rmb, K.last_variant]
 	)
-	ok("archer anim: snare plays arc_snare", K.anim_id == "arc_snare", K.anim_id)
+	hold(m, P, 1.2)
+	step(m, 0.3)
+	ok(
+		"combo archer: RMB hold looses the Heavy Shot on one charge and a 16 s cooldown",
+		dmg(T) >= 14.0 and K.rmb_charges() == 1 and K.ch_rmb < 1.0 and absf(float(K.cd["rmb"]) - 16.0) < 0.6,
+		"took %.0f max charges %d charges %.1f cd %.1f" % [dmg(T), K.rmb_charges(), K.ch_rmb, float(K.cd["rmb"])]
+	)
+	ok("archer anim: the Heavy Shot plays arc_heavy", K.anim_id == "arc_heavy", K.anim_id)
+	# ranks: the cooldown drops 3 s a rank (16 -> 13 -> 10) and rank 3 adds 3 m of range
+	var cds: Array = []
+	var reaches: Array = []
+	for rk in [1, 2, 3]:
+		P.slot_lv["sec"] = rk
+		cds.append(K.rmb_def()["cooldown"] * K.cd_k("sec"))
+		reaches.append(K.heavy_reach())
+	ok(
+		"combo archer: Heavy Shot ranks cut 3 s each (16, 13, 10) and rank 3 flies 3 m farther",
+		absf(cds[0] - 16.0) < 0.01 and absf(cds[1] - 13.0) < 0.01 and absf(cds[2] - 10.0) < 0.01 and absf(
+			reaches[2] - reaches[0] - 3.0
+		) < 0.01,
+		"cds %s reaches %s" % [str(cds), str(reaches)]
+	)
+	P.slot_lv["sec"] = 1
+	# Hail Wall, then a hold-only RMB: the old tap-snare root is gone
+	K.cd["e"] = 0.0
 	step(m, 5.0)
 		# a knock: heal + a dash charge back
 	fresh(T)
@@ -371,8 +406,8 @@ func _archer_combos() -> void:
 		if K.spirit.inside: mk[0] = maxf(mk[0], K.move_k()))
 	var mk_in: float = mk[0]
 	ok(
-		"pin small: faster inside something during Spirit Walk (x1.35, wiki +50 move speed in terrain)",
-		absf(mk_in - 1.35) < 0.01,
+		"pin small: no extra speed inside something below rank 3 (x1.1 like outside)",
+		absf(mk_in - 1.1) < 0.01,
 		"move_k inside %.2f" % mk_in
 	)
 	ok(
@@ -427,6 +462,42 @@ func _archer_combos() -> void:
 	P.hurt(5.0, T2, {"src": "shot"})
 	step(m, 0.05)
 	ok("pin: damage ends Spirit Walk", not K.spirit.active() and P.spirit_t <= 0.0)
+	# rank 3 (data: Phase Walk IV): 0.5 s longer, +33% inside something that fades over the walk, allies near her walk too
+	P.slot_lv["dash"] = 3
+	step(m, 0.5)
+	var ally_team := T2.team
+	T2.team = P.team
+	T2.downed = false
+	fresh(T2)
+	T2.teleport(home + Vector3(0, 0, 2.5))
+	T2.spirit_t = 0.0
+	K.spirit.granted.clear()
+	P.teleport(home)
+	P.vel = Vector3.ZERO
+	P.dashes = P.max_dashes()
+	aim_at(P, home + Vector3(6, 0, 0))
+	P.inp["move"] = Vector2(1, 0)
+	P.do_dash()
+	ok(
+		"pin rank 3: Spirit Walk lasts 0.5 s longer (3.3 s) and an ally within 6 m walks too",
+		absf(K.spirit.walk_time() - 3.3) < 0.01 and K.spirit.t > 3.3 and T2.spirit_t > 3.0,
+		"walk %.2f ally ghost %.2f" % [K.spirit.walk_time(), T2.spirit_t]
+	)
+	var boosts: Array = []
+	step(m, 1.4, func():
+		P.inp["move"] = Vector2(1, 0)
+		if K.spirit.inside: boosts.append(K.spirit.inside_boost()))
+	ok(
+		"pin rank 3: +33% inside something, fading as the walk runs out",
+		boosts.size() >= 2 and boosts[0] > boosts[-1] and boosts[0] > 0.2 and boosts[0] <= 0.33,
+		"boosts %d first %.3f last %.3f" % [boosts.size(), boosts[0] if boosts.size() else 0.0, boosts[-1] if boosts.size() else 0.0]
+	)
+	K.spirit.end("time")
+	P.slot_lv["dash"] = 1
+	T2.team = ally_team
+	T2.spirit_t = 0.0
+	K.spirit.granted.clear()
+	P.inp["move"] = Vector2.ZERO
 	# the long dash (no charges left): Pin's own flick
 	step(m, 0.5)
 	P.dashes = 0.0
@@ -443,11 +514,12 @@ func _archer_combos() -> void:
 	P.teleport(home + Vector3(0, 3.0, 0))
 	P.grounded = false
 	P.vel = Vector3(0, -2, 0)
-	K.ch_rmb = 2.0
+	K.ch_rmb = 1.0
 	K.cd["rmb"] = 0.0
 	K.res = 0.0
 	P.ak.press_rmb()
-	ok("archer anim: plunge plays arc_plunge", K.anim_id == "arc_plunge", K.anim_id)
+	ok("archer RMB air: the press starts a draw, no Plunge", K.rmb_down and P.vel.y < 5.0, "vy %.1f" % P.vel.y)
+	K.rmb_down = false
 	ok("archer: no class R", not K.d.has("r") and K.r_def().is_empty())
 	# a Boki merge that starts mid-hold ends the hold: no arrow, no Heavy Shot, no lane telegraph left behind
 	step(m, 5.0)
