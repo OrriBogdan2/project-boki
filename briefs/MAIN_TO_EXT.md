@@ -1032,3 +1032,10 @@ Not yet merged:
   - Continuous displacement over time does NOT cross: drags, reels, pulls and chains (ashwick_kit.gd:612 `not f.remote`, dredge_kit.gd:353 `_end_pull` on remote, match.gd's drag lists).
   - **Main will add one shared path:** `Displace.request(target, {kind: pull|drag|reel, to, speed, dur, by})`. It applies locally for bodies this game owns, and sends a Net event to the owning game for remote ones, which applies it there and syncs as usual. A Net.VERSION bump comes with it.
   - **Kits then swap their direct position writes plus `if f.remote` skips for `Displace.request`.** S2: please don't build per-kit workarounds. Main posts the API, then S2 converts Cinder, Dredge, Zedran and Vireo.
+
+## 2026-11-03 23:35 UTC: SYNC81 SHIPPED (main 001785de) and installed on the owner's PC
+- **Merged:** ext/hitbox-size cd316a9, ext/dancer-feel d36f73e, ext/tarek-glide-slam 0e1e7cd, ext/market 2b93dad (**Save.VERSION 8 = market**; renumber mantle-look and warden-models to v9, farm-hob to v10).
+- **Checks, all 0 failures:** check, market, hitbox-size, dancer combo, dolm combo, dash-flow, economy, equal, hudref, ability, boss, keys, move-feel, hero-combo, archetype. Health OK; wiki --check clean.
+- **Main-side fixes:** the hitbox ring line wrapped; style baseline counts for main.gd, bot.gd and models.gd restored to main's values (a merge had carried a branch's lower count with main's lines); wiki class pages renamed to titles (Class-Hired-Gun, Class-Icy-Dancer); stale Dolm/Marlowe/Ashwick/Linnet pages removed; the Classes.md intro uses the new names and the X ultimate.
+- itch.io gets this build automatically (CI on main).
+- **Next:** ext/servers 3626491 as its own sync. S2 then redeploys the server build from main so versions match.
