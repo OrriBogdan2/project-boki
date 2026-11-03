@@ -1,12 +1,14 @@
 <!--META {
  "name": "Bjorn", "title": "Frozen Bulwark", "tag": "id bulwark  ·  male  ·  tank",
- "accent": "#7cc7e8", "rim": "#d6f6ff", "shadow": 165, "bust_bg": "#1f3142", "stage": ["#59626f", "#181b22"],
+ "accent": "#7cc7e8", "rim": "#d6f6ff", "shadow": 190, "bust_bg": "#1f3142", "stage": ["#5e6876", "#181b22"],
+ "height_cm": 228, "sheet_scale": 0.76, "pos": [225, 655],
  "relic": "the Drowned Bell",
  "mat": {
   "coat": ["#6f93ad", "#3a5874", "#1c2c40"],
   "fur": ["#dcc7a8", "#94795f", "#54402f"],
   "skin": ["#ecdcd4", "#bdaaa6", "#7d6d72"],
-  "beard": ["#8794a1", "#4b5662", "#232a33"],
+  "beard": ["#a9b4c0", "#5d6874", "#262d36"],
+  "barn": ["#e8e2d0", "#a8a08a", "#4a463a"],
   "iron": ["#b2bcc6", "#66717d", "#2f3741"],
   "ice": ["#ffffff", "#c4ecff", "#6cb4da"],
   "wood": ["#b08660", "#74513a", "#3d2a1d"],
@@ -18,233 +20,183 @@
  "palette": [["#3a5874", "drowned coat"], ["#94795f", "seal fur"], ["#74513a", "prow oak"],
              ["#66717d", "ship iron"], ["#c4ecff", "rime"], ["#bdaaa6", "cold skin"], ["#8dffc9", "the glow (hint)"]],
  "notes": [
-  ["Shape language", "One huge shape and a small head: a barrel body under a fur collar, short planted legs, and the ship's prow as a wall at his side. Square and round everywhere (warm, safe), with one sharp point: the prow's stem, up high where the eye lands."],
-  ["Signature features", "The frozen prow of his old ship as a shield (iron bands, rime, icicles, the stem post curling over the top), a boat oar cased in ice for a maul, a forked beard with iron rings, and a big laugh. The undead hint stays small: frost that never melts, a cold green glow in the prow's cracks and, faintly, his eyes."],
+  ["Shape language", "The biggest Warden at 2.28 m, and one huge rounded mass: a barrel body under a heaped seal-fur mantle, arms like mooring posts, short planted legs in fur boots, a small laughing head. Round and warm everywhere, with one sharp point: the prow's stem curling up into its little carved sea-serpent, high where the eye lands."],
+  ["Signature features", "The frozen prow of his old ship as a shield (iron bands, rime, icicles, the stem post curling over the top), a boat oar cased in ice for a maul, a forked beard with iron rings, frost in his brows, and a big head-back laugh. The undead hint stays small: frost that never melts, a cold green glow in the prow's cracks and, faintly, his eyes."],
   ["Reads in-engine", "From the top-down camera: the tallest, widest hunter, a light pointed wedge on one side and a long diagonal oar on the other. Icy blue against dark navy holds on grass, sand and snow; the green glow is kept for the ult so it reads as an event."]
  ]
 } -->
 <g id="defs">
  <linearGradient id="L-icefade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff" stop-opacity="0.95"/><stop offset="1" stop-color="#9fd8f2" stop-opacity="0.55"/></linearGradient>
+ <clipPath id="L-prowc"><path d="M0 -10 C-40 -120 -86 -380 -92 -620 C-92 -690 -86 -740 -80 -764 C-30 -744 30 -744 80 -764 C86 -740 92 -690 92 -620 C86 -380 40 -120 0 -10Z"/></clipPath>
+ <g id="L-head">
+  <!-- hood, fur-lined, pushed back -->
+  <path m="coat" d="M-64 -760 C-70 -830 -40 -872 0 -874 C40 -872 70 -830 64 -760 C40 -780 -40 -780 -64 -760Z"/>
+  <limb f="fur" fluff="0.22" per="3" pts="-60 -770 12; -44 -836 12; 0 -858 12; 44 -836 12; 60 -770 12"/>
+  <!-- head, tipped back mid-laugh -->
+  <path m="skin:r" d="M0 -836 C30 -836 44 -812 44 -784 C44 -762 40 -744 30 -734 L-30 -734 C-40 -744 -44 -762 -44 -784 C-44 -812 -30 -836 0 -836Z"/>
+  <path sg="45" d="M6 -836 C30 -836 44 -812 44 -784 C44 -762 40 -744 30 -734 L6 -734Z"/>
+  <ellipse fill="#c88a8a" opacity="0.35" cx="-24" cy="-772" rx="9" ry="6"/><ellipse fill="#c88a8a" opacity="0.35" cx="24" cy="-772" rx="9" ry="6"/>
+  <ellipse m="skin" lw="2.2" cx="-45" cy="-786" rx="6" ry="10"/><ellipse m="skin" lw="2.2" cx="45" cy="-786" rx="6" ry="10"/>
+  <!-- frost-crusted brows, eyes squeezed with laughing, a faint cold glint -->
+  <limb f="ice" pts="-34 -804 3; -22 -812 5.5; -8 -808 3"/><limb f="ice" pts="34 -804 3; 22 -812 5.5; 8 -808 3"/>
+  <brush pts="-32 -804 0; -22 -810 2.6; -8 -806 0"/><brush pts="32 -804 0; 22 -810 2.6; 8 -806 0"/>
+  <brush pts="-30 -790 0; -21 -796 2; -11 -791 0"/><brush pts="30 -790 0; 21 -796 2; 11 -791 0"/>
+  <circle fill="#8dffc9" opacity="0.8" cx="-20" cy="-792" r="1.6"/><circle fill="#8dffc9" opacity="0.8" cx="20" cy="-792" r="1.6"/>
+  <brush c="#7d6d72" pts="-30 -786 0; -24 -782 1.2; -16 -784 0"/><brush c="#7d6d72" pts="30 -786 0; 24 -782 1.2; 16 -784 0"/>
+  <path m="skin" lw="2.2" d="M-3 -792 C-5 -784 -11 -778 -11 -772 C-11 -765 -4 -763 0 -765 C4 -763 11 -765 11 -772 C11 -778 5 -784 3 -792Z"/>
+  <!-- beard: broad, forked into two ringed braids; short moustache -->
+  <path m="beard" d="M-44 -780 C-46 -740 -40 -712 -28 -694 L-22 -668 L-8 -690 L0 -684 L8 -690 L22 -668 L28 -694 C40 -712 46 -740 44 -780 C34 -756 20 -746 0 -746 C-20 -746 -34 -756 -44 -780Z"/>
+  <limb m="beard" lw="2.4" pts="-20 -690 9; -22 -660 7; -20 -632 5; -16 -616 2"/>
+  <limb m="beard" lw="2.4" pts="20 -690 9; 22 -660 7; 20 -632 5; 16 -616 2"/>
+  <path m="iron" lw="1.6" d="M-28 -662 C-28 -666 -16 -666 -16 -662 L-16 -656 C-16 -652 -28 -652 -28 -656Z M16 -662 C16 -666 28 -666 28 -662 L28 -656 C28 -652 16 -652 16 -656Z M-25 -638 C-25 -641 -15 -641 -15 -638 L-15 -633 C-15 -630 -25 -630 -25 -633Z M15 -638 C15 -641 25 -641 25 -638 L25 -633 C25 -630 15 -630 15 -633Z"/>
+  <path sg="40" d="M6 -746 C24 -746 36 -756 44 -780 C46 -740 40 -712 28 -694 L22 -668 L8 -690Z"/>
+  <brush c="#262d36" pts="-34 -740 0; -30 -716 1.4; -24 -700 0"/><brush c="#262d36" pts="-12 -736 0; -10 -716 1.2; -8 -700 0"/><brush c="#262d36" pts="12 -736 0; 10 -716 1.2; 8 -700 0"/><brush c="#262d36" pts="34 -740 0; 30 -716 1.4; 24 -700 0"/>
+  <brush c="#e6f6ff" opacity="0.8" pts="-38 -760 0; -36 -740 1.4; -32 -724 0"/>
+  <path m="beard" lw="2.2" d="M-26 -758 C-16 -768 -6 -764 0 -758 C6 -764 16 -768 26 -758 C20 -752 8 -752 0 -754 C-8 -752 -20 -752 -26 -758Z"/>
+  <!-- the laugh -->
+  <path fill="#5a1e24" stroke="#1d1724" stroke-width="2.2" stroke-linejoin="round" d="M-18 -752 C-8 -746 8 -746 18 -752 C16 -734 8 -724 0 -724 C-8 -724 -16 -734 -18 -752Z"/>
+  <path fill="#f4efe6" d="M-15 -750 C-6 -746 6 -746 15 -750 L14 -745 C6 -742 -6 -742 -14 -745Z"/>
+  <path fill="#e07a80" d="M-9 -730 C-4 -736 4 -736 9 -730 C4 -726 -4 -726 -9 -730Z"/>
+  <path rim="2.4" d="M40 -812 C46 -796 46 -770 40 -750"/>
+ </g>
+ <g id="L-prow"><g transform="scale(1.28 0.9)">
+  <!-- the prow, bow-on: strakes curving back from the stem -->
+  <path m="wood" lw="3.4" d="M0 -10 C-40 -120 -86 -380 -92 -620 C-92 -690 -86 -740 -80 -764 C-30 -744 30 -744 80 -764 C86 -740 92 -690 92 -620 C86 -380 40 -120 0 -10Z"/>
+  <g clip-path="url(#L-prowc)">
+   <path fill="none" stroke="#3d2a1d" stroke-width="2.2" d="M-6 -60 C-40 -200 -70 -420 -96 -700 M-8 -120 C-50 -300 -76 -520 -100 -720 M6 -60 C40 -200 70 -420 96 -700 M8 -120 C50 -300 76 -520 100 -720 M-4 -30 C-24 -150 -40 -400 -60 -760 M4 -30 C24 -150 40 -400 60 -760"/>
+   <rect sg="60" x="-100" y="-780" width="200" height="780"/>
+   <rect hg="30" x="-100" y="-780" width="110" height="400"/>
+   <!-- iron bands -->
+   <path m="iron" lw="2.4" d="M-110 -560 C-60 -520 60 -520 110 -560 L110 -536 C60 -496 -60 -496 -110 -536Z"/>
+   <path m="iron" lw="2.4" d="M-110 -300 C-60 -266 60 -266 110 -300 L110 -278 C60 -244 -60 -244 -110 -278Z"/>
+   <g fill="#2f3741"><circle cx="-60" cy="-528" r="3"/><circle cx="0" cy="-516" r="3"/><circle cx="60" cy="-528" r="3"/><circle cx="-50" cy="-272" r="3"/><circle cx="50" cy="-272" r="3"/></g>
+   <!-- barnacles low on the hull -->
+   <g><circle m="barn" lw="1.4" cx="-30" cy="-120" r="7"/><circle m="barn" lw="1.4" cx="-18" cy="-104" r="5"/><circle m="barn" lw="1.4" cx="24" cy="-150" r="6"/><circle m="barn" lw="1.4" cx="-44" cy="-190" r="5"/><circle m="barn" lw="1.4" cx="34" cy="-96" r="4"/></g>
+   <g fill="#4a463a"><circle cx="-30" cy="-120" r="2.4"/><circle cx="-18" cy="-104" r="1.6"/><circle cx="24" cy="-150" r="2"/><circle cx="-44" cy="-190" r="1.6"/></g>
+  </g>
+  <!-- rime on the gunwales -->
+  <path f="ice" stroke="#1d1724" stroke-width="2" d="M-84 -770 C-30 -748 30 -748 84 -770 L88 -742 L76 -736 L72 -712 L62 -730 L48 -722 L42 -700 L32 -722 L16 -716 L8 -694 L0 -716 L-12 -716 L-18 -690 L-28 -720 L-42 -722 L-48 -700 L-58 -728 L-70 -716 L-74 -738 L-88 -742Z"/>
+  <!-- frozen rope, slung over the gunwale -->
+  <limb m="leather" lw="2" pts="-90 -700 5; -60 -660 5; -20 -640 5; 20 -650 5; 50 -680 5"/>
+  <brush c="#30231a" pts="-80 -690 0; -40 -652 1; 0 -642 0"/>
+  <!-- the cold-green crack (the hint) -->
+  <g class="fx"><ellipse cx="44" cy="-410" rx="40" ry="70" fill="url(#L-soul-g)" opacity="0.6"/></g>
+  <path fill="#22a874" stroke="#8dffc9" stroke-width="2" d="M40 -480 L50 -444 L38 -420 L54 -386 L42 -346 L46 -384 L32 -416 L44 -446Z"/>
+  <!-- the stem post down the middle, curling up into a carved sea-serpent -->
+  <limb m="wood" lw="3" pts="0 -14 9; 0 -300 11; 0 -600 12; 0 -770 12; 2 -840 11; 24 -880 10; 50 -872 9; 54 -846 7"/>
+  <path m="iron" lw="2.2" d="M-12 -40 h24 v26 h-24Z M-13 -420 h26 v22 h-26Z M-13 -700 h26 v22 h-26Z"/>
+  <path m="wood" lw="2.4" d="M50 -878 C68 -884 84 -872 82 -856 C80 -846 70 -842 60 -846 L50 -840 C46 -852 44 -870 50 -878Z"/>
+  <circle fill="#8dffc9" cx="68" cy="-864" r="2.4"/>
+  <path ln="1.6" d="M64 -850 l14 2"/>
+  <path f="ice" stroke="#1d1724" stroke-width="1.6" d="M-10 -836 C-4 -850 12 -858 22 -862 C10 -852 4 -840 4 -830Z"/>
+  <path rim="3" d="M90 -700 C88 -500 64 -260 14 -40"/>
+  <!-- icicles off the forefoot -->
+  <path f="ice" stroke="#1d1724" stroke-width="1.6" d="M-14 -24 L-10 8 L-6 -20 L-2 18 L4 -20 L8 6 L12 -24Z"/>
+ </g></g>
+ <g id="L-maul">
+  <!-- the oar, its blade cased in a block of ice -->
+  <limb m="wood" lw="2.6" pts="0 0 6; 0 -400 7; 0 -720 8"/>
+  <path m="leather" lw="2" d="M-9 -60 h18 v40 h-18Z"/>
+  <path m="wood" lw="2.4" d="M-16 -716 C-20 -760 -20 -800 -14 -840 L14 -840 C20 -800 20 -760 16 -716Z"/>
+  <g class="fx"><circle cx="0" cy="-790" r="76" fill="url(#L-frost-g)" opacity="0.7"/></g>
+  <path f="ice" stroke="#1d1724" stroke-width="2.6" opacity="0.9" d="M-40 -720 L-50 -770 L-44 -830 L-24 -860 L20 -868 L46 -840 L52 -780 L42 -724 L10 -706 L-20 -708Z"/>
+  <path fill="#fff" opacity="0.7" d="M-36 -760 L-30 -824 L-14 -848 L-20 -800Z"/>
+  <path ln="1.4" d="M-44 -770 L-10 -790 L20 -768 M-10 -790 L-2 -850 M20 -768 L46 -790"/>
+  <path m="iron" lw="2.2" d="M-46 -744 L48 -746 L50 -728 L-44 -726Z"/>
+  <path f="ice" stroke="#1d1724" stroke-width="1.4" d="M-30 -706 L-26 -680 L-20 -704 L-12 -672 L-6 -702 L4 -686 L8 -704Z"/>
+ </g>
 </g><!--/defs-->
 <g id="front">
- <!-- hood, back of the coat -->
- <path m="coat" d="M-74 -496 C-96 -556 -74 -626 0 -632 C74 -626 96 -556 74 -496 Z"/>
- <path sh="35" d="M-50 -500 C-62 -560 -40 -606 0 -608 C40 -606 62 -560 50 -500 Z"/>
- <!-- boots and legs -->
- <path m="cloth" d="M-104 -104 L-112 -190 Q-108 -250 -76 -276 L-8 -276 L-26 -104 Z"/>
- <path m="cloth" d="M104 -104 L112 -190 Q108 -250 76 -276 L8 -276 L26 -104 Z"/>
- <path m="leather" d="M-118 0 C-122 -34 -112 -76 -94 -94 L-32 -94 C-22 -70 -20 -34 -12 0 Z"/>
- <path m="leather" d="M118 0 C122 -34 112 -76 94 -94 L32 -94 C22 -70 20 -34 12 0 Z"/>
- <path sh="30" d="M-60 -94 L-32 -94 C-22 -70 -20 -34 -12 0 L-50 0 C-48 -40 -52 -70 -60 -94Z"/>
- <path sh="30" d="M60 -94 L94 -94 C112 -76 122 -34 118 0 L80 0 C84 -40 76 -70 60 -94Z"/>
- <path m="fur" d="M-104 -92 C-118 -108 -104 -130 -86 -124 C-72 -136 -52 -134 -42 -124 C-26 -130 -14 -110 -26 -92 C-50 -84 -80 -84 -104 -92Z"/>
- <path m="fur" d="M104 -92 C118 -108 104 -130 86 -124 C72 -136 52 -134 42 -124 C26 -130 14 -110 26 -92 C50 -84 80 -84 104 -92Z"/>
- <path m="ice" lw="2" d="M-116 -6 L-108 -30 L-96 -14 L-84 -36 L-74 -10 L-60 -24 L-54 0 Z"/>
- <!-- coat -->
- <path m="coat" d="M-62 -506 C-112 -506 -152 -494 -164 -458 L-152 -332 Q-164 -240 -172 -150 Q-128 -138 -88 -152 Q-54 -140 -16 -162 L0 -284 L16 -162 Q54 -140 88 -152 Q128 -138 172 -150 Q164 -240 152 -332 L164 -458 C152 -494 112 -506 62 -506 Z"/>
- <path sh="28" d="M-16 -162 L0 -284 L16 -162 Q54 -140 88 -152 Q128 -138 172 -150 Q164 -240 152 -332 L164 -458 C150 -470 120 -470 96 -460 Q120 -300 60 -240 Q40 -200 16 -162Z"/>
- <path hl="16" d="M-150 -452 C-130 -480 -90 -488 -60 -480 Q-100 -400 -128 -300 L-142 -320Z"/>
- <path ln="2" d="M0 -440 L0 -300"/>
- <path m="iron" lw="2" d="M-14 -424 h28 v10 h-28Z M-14 -386 h28 v10 h-28Z M-14 -348 h28 v10 h-28Z"/>
- <!-- rime on the hem -->
- <path m="ice" lw="2" d="M-172 -150 Q-128 -138 -88 -152 Q-60 -142 -36 -154 L-40 -168 L-56 -160 L-64 -178 L-80 -164 L-96 -182 L-110 -164 L-128 -184 L-140 -164 L-160 -180 L-168 -164Z"/>
- <path m="ice" lw="1.5" d="M-150 -144 l6 26 l6 -28Z M-112 -148 l5 34 l6 -36Z M-74 -152 l4 22 l5 -24Z"/>
- <!-- belt -->
- <path m="leather" d="M-154 -318 Q0 -300 154 -318 L156 -280 Q0 -264 -156 -280 Z"/>
- <path m="iron" d="M-22 -318 h44 v42 h-44Z"/>
- <path sh="40" d="M-12 -308 h24 v22 h-24Z"/>
- <!-- fur collar -->
- <path m="fur" d="M-150 -452 C-172 -492 -128 -528 -84 -518 C-62 -542 -20 -538 0 -526 C20 -538 62 -542 84 -518 C128 -528 172 -492 150 -452 C118 -428 74 -440 42 -450 C20 -436 -20 -436 -42 -450 C-74 -440 -118 -428 -150 -452 Z"/>
- <path sh="22" d="M150 -452 C118 -428 74 -440 42 -450 C60 -470 110 -470 140 -486 C160 -478 160 -462 150 -452Z"/>
- <path ln="1.6" d="M-120 -474 q8 -10 18 -4 M-70 -488 q10 -12 22 -2 M-130 -500 q10 -8 20 -2 M80 -490 q10 -10 22 0 M112 -470 q10 -8 18 0"/>
- <!-- right arm (his right, image left) -->
- <path m="coat" d="M-118 -496 C-176 -500 -214 -466 -218 -420 L-226 -340 L-166 -326 L-154 -404 Z"/>
- <path sh="28" d="M-190 -470 C-170 -440 -170 -380 -170 -330 L-166 -326 L-154 -404 L-130 -470Z"/>
- <path m="fur" d="M-232 -338 C-240 -354 -224 -366 -210 -358 C-198 -368 -178 -364 -170 -352 C-156 -350 -152 -330 -164 -322 C-186 -314 -214 -318 -232 -338Z"/>
- <!-- iron pauldron with rime -->
- <path m="iron" d="M-92 -506 C-128 -526 -196 -512 -222 -458 C-196 -440 -150 -446 -116 -470 Z"/>
- <path m="ice" lw="2" d="M-100 -508 C-130 -522 -180 -512 -206 -478 L-196 -476 L-188 -490 L-176 -478 L-164 -500 L-148 -486 L-134 -506 L-120 -494Z"/>
- <path hl="45" d="M-110 -500 C-140 -510 -170 -502 -186 -490 C-160 -496 -130 -498 -110 -500Z"/>
- <!-- the oar-maul over the shoulder -->
- <g transform="translate(-236 -146) rotate(16)">
-  <rect m="wood" x="-9" y="-470" width="18" height="470" rx="6"/>
-  <rect hl="22" x="-6" y="-466" width="4" height="460"/>
-  <rect m="iron" x="-11" y="-24" width="22" height="24" rx="4"/>
-  <path m="wood" d="M-11 -470 C-34 -500 -38 -566 -28 -604 Q0 -622 28 -604 C38 -566 34 -500 11 -470 Z"/>
-  <path m="ice" opacity="0.88" d="M-42 -478 L-56 -536 L-42 -598 L-14 -630 L22 -622 L48 -592 L56 -530 L40 -476 L0 -464 Z"/>
-  <path fill="url(#L-icefade)" opacity="0.6" d="M-38 -490 L-48 -540 L-36 -592 L-14 -618 L-6 -560 L-20 -500Z"/>
-  <path m="iron" lw="2.4" d="M-54 -506 L54 -506 L54 -490 L-54 -490Z M-50 -570 L52 -570 L52 -554 L-50 -554Z"/>
-  <path rim="3" d="M50 -590 L56 -530 L42 -478"/>
-  <path ln="1.4" d="M-30 -600 l14 30 l-6 18 M20 -610 l-8 24 l10 20 M30 -520 l-12 -10"/>
- </g>
- <!-- right hand (rime-crusted gauntlet) -->
- <g transform="translate(-195 -298) rotate(16)">
-  <rect m="iron" x="-30" y="-26" width="60" height="50" rx="16"/>
-  <path ln="1.8" d="M-14 -24 v46 M2 -24 v46 M16 -22 v42"/>
-  <path m="ice" lw="1.8" d="M-30 -10 L-22 -30 L-8 -22 L4 -34 L14 -20 L-6 -6 L-20 -2Z"/>
- </g>
- <!-- head -->
- <path m="skin" d="M-44 -560 C-46 -606 46 -606 44 -560 L46 -512 C42 -480 -42 -480 -46 -512 Z"/>
- <path m="skin" d="M-46 -540 c-14 -4 -16 22 -2 26 Z M46 -540 c14 -4 16 22 2 26 Z" lw="2.2"/>
- <path sh="30" d="M20 -598 C40 -590 46 -570 44 -560 L46 -512 C44 -500 30 -490 18 -488 C30 -520 32 -570 20 -598Z"/>
- <path hl="40" d="M-30 -592 C-20 -600 0 -600 8 -596 C-6 -594 -20 -588 -30 -580Z"/>
- <path rim="2.6" d="M30 -594 C44 -584 46 -566 45 -552"/>
- <!-- brows, eyes, nose -->
- <path m="beard" lw="2" d="M-36 -556 Q-18 -568 -4 -556 L-6 -548 Q-20 -556 -34 -548Z M36 -556 Q18 -568 4 -556 L6 -548 Q20 -556 34 -548Z"/>
- <path sh="45" d="M-30 -548 q12 -4 22 0 q-2 8 -11 8 q-9 0 -11 -8Z M30 -548 q-12 -4 -22 0 q2 8 11 8 q9 0 11 -8Z"/>
- <circle cx="-19" cy="-544" r="2.6" fill="#c9ffe6"/><circle cx="19" cy="-544" r="2.6" fill="#c9ffe6"/>
- <path m="skin" lw="2" d="M-6 -548 Q-12 -526 -14 -520 Q0 -512 14 -520 Q12 -526 6 -548Z"/>
- <!-- beard: wide and boxy, two forked braids with iron rings -->
- <path m="beard" d="M-48 -530 C-52 -500 -48 -470 -30 -452 L-26 -414 L-8 -414 L-4 -446 L4 -446 L8 -414 L26 -414 L30 -452 C48 -470 52 -500 48 -530 C40 -506 24 -500 0 -502 C-24 -500 -40 -506 -48 -530Z"/>
- <path sh="25" d="M24 -500 C40 -506 48 -520 48 -530 C52 -500 48 -470 30 -452 L26 -414 L14 -414 C20 -450 26 -480 24 -500Z"/>
- <path m="beard" lw="2.2" d="M-30 -514 Q-16 -526 0 -518 Q16 -526 30 -514 Q30 -500 18 -504 Q8 -508 0 -506 Q-8 -508 -18 -504 Q-30 -500 -30 -514Z"/>
- <path fill="#3a1f26" stroke="#1d1724" stroke-width="2" d="M-16 -500 Q0 -494 16 -500 Q12 -482 0 -480 Q-12 -482 -16 -500Z"/>
- <path fill="#efe6dc" d="M-13 -498 Q0 -494 13 -498 L12 -493 Q0 -490 -12 -493Z"/>
- <rect m="iron" lw="2" x="-30" y="-432" width="24" height="12" rx="4"/>
- <rect m="iron" lw="2" x="6" y="-432" width="24" height="12" rx="4"/>
- <path hl="70" d="M-40 -472 l3 -4 l3 4 l-3 3Z M36 -480 l3 -4 l3 4 l-3 3Z M-22 -460 l2 -3 l2 3 l-2 2Z M14 -468 l2 -3 l2 3 l-2 2Z"/>
- <!-- the prow shield, bow-on: the stem post down the middle, both flanks sweeping back -->
- <g id="prow">
-  <path m="wood" lw="3.4" d="M185 -660 L72 -566 C62 -500 62 -380 72 -290 C84 -190 120 -100 185 -34 C250 -100 286 -190 298 -290 C308 -380 308 -500 298 -566 Z"/>
-  <path sh="36" d="M185 -660 L298 -566 C308 -500 308 -380 298 -290 C286 -190 250 -100 185 -34Z"/>
-  <path hl="14" d="M185 -660 L72 -566 C62 -500 62 -380 72 -290 C84 -190 120 -100 185 -34 L185 -60 C130 -130 100 -220 92 -300 C84 -390 84 -490 96 -556Z"/>
-  <!-- strakes: lines run from the stem back and up along each flank -->
-  <g fill="none" stroke-linecap="round">
-   <path stroke="#1d1724" stroke-width="2" d="M185 -560 Q120 -556 66 -520 M185 -560 Q250 -556 304 -520 M185 -480 Q120 -470 64 -436 M185 -480 Q250 -470 306 -436 M185 -400 Q120 -388 66 -352 M185 -400 Q250 -388 304 -352 M185 -320 Q124 -304 76 -268 M185 -320 Q246 -304 294 -268 M185 -240 Q132 -222 96 -190 M185 -240 Q238 -222 274 -190 M185 -160 Q146 -144 124 -124 M185 -160 Q224 -144 246 -124"/>
-   <path stroke="#ffe2c4" stroke-width="2" opacity="0.3" d="M180 -554 Q120 -550 68 -514 M180 -474 Q120 -464 66 -430 M180 -394 Q120 -382 68 -346 M180 -314 Q124 -298 78 -262 M180 -234 Q132 -216 98 -184"/>
-  </g>
-  <!-- iron breasthook straps -->
-  <path m="iron" d="M66 -300 Q130 -320 185 -360 Q240 -320 304 -300 L300 -272 Q240 -292 185 -330 Q130 -292 70 -272Z"/>
-  <path fill="#2f3741" d="M92 -296 m-4 0 a4 4 0 1 0 8 0 a4 4 0 1 0 -8 0 M136 -318 m-4 0 a4 4 0 1 0 8 0 a4 4 0 1 0 -8 0 M234 -318 m-4 0 a4 4 0 1 0 8 0 a4 4 0 1 0 -8 0 M278 -296 m-4 0 a4 4 0 1 0 8 0 a4 4 0 1 0 -8 0"/>
-  <!-- rime on the gunwales -->
-  <path fill="url(#L-icefade)" stroke="#1d1724" stroke-width="2" d="M185 -664 L70 -570 L74 -548 L86 -560 L92 -540 L104 -566 L116 -548 L124 -584 L138 -572 L146 -604 L160 -594 L166 -626 L178 -616Z"/>
-  <path fill="url(#L-icefade)" stroke="#1d1724" stroke-width="2" d="M185 -664 L300 -570 L296 -548 L284 -560 L278 -540 L266 -566 L254 -548 L246 -584 L232 -572 L224 -604 L210 -594 L204 -626 L192 -616Z"/>
-  <!-- the stem post, iron-capped, rising into a curl -->
-  <path m="wood" lw="3.2" d="M172 -36 C168 -200 166 -480 172 -650 C160 -682 162 -716 190 -726 C218 -734 236 -712 226 -690 C218 -676 200 -680 202 -692 L198 -660 C204 -480 202 -200 198 -36 Q185 -26 172 -36Z"/>
-  <path hl="32" d="M176 -640 C174 -480 174 -200 178 -44 L184 -44 C182 -200 182 -480 182 -640Z"/>
-  <path m="iron" lw="2.4" d="M166 -520 h38 v36 h-38Z M166 -250 h38 v36 h-38Z M168 -110 h34 v30 h-34Z"/>
-  <!-- icicles off the forefoot -->
-  <path fill="url(#L-icefade)" stroke="#1d1724" stroke-width="2" d="M118 -96 C140 -70 160 -50 185 -30 C210 -50 230 -70 252 -96 L240 -96 L234 -80 L222 -94 L212 -72 L198 -88 L186 -62 L172 -86 L160 -72 L148 -92 L136 -80 L130 -96Z"/>
-  <path m="ice" lw="1.6" d="M150 -62 l4 26 l6 -28Z M176 -36 l6 46 l6 -46Z M210 -54 l4 30 l6 -32Z"/>
-  <!-- a crack with the cold glow (the hint) -->
-  <g class="fx"><ellipse cx="248" cy="-440" rx="40" ry="62" fill="url(#L-soul-g)" opacity="0.6"/></g>
-  <path fill="#c8ffe6" stroke="#1d1724" stroke-width="1.6" d="M236 -500 L254 -470 L242 -446 L262 -420 L250 -390 L258 -372 L244 -390 L252 -420 L234 -446 L246 -470Z"/>
-  <path rim="3.6" d="M300 -560 C310 -500 310 -380 300 -290 C290 -200 258 -110 200 -46"/>
-  <!-- his left gauntlet round the flank -->
-  <path m="iron" lw="2.4" d="M68 -380 C56 -380 50 -364 52 -350 C50 -334 56 -324 68 -324 L82 -328 L80 -376Z"/>
-  <path ln="1.5" d="M54 -360 h18 M54 -344 h18"/>
- </g>
+ <!-- the oar-maul, planted at his right -->
+ <g transform="translate(-196 -10) rotate(4)"><use href="#L-maul"/></g>
+ <!-- coat skirt and legs -->
+ <limb m="cloth" pts="-56 -420 40; -66 -300 34; -70 -200 30"/>
+ <limb m="cloth" pts="56 -420 40; 66 -300 34; 70 -200 30"/>
+ <limb m="fur" fluff="0.16" per="3" pts="-74 -170 38; -76 -110 40; -76 -40 42"/>
+ <limb m="fur" fluff="0.16" per="3" pts="74 -170 38; 76 -110 40; 76 -40 42"/>
+ <path m="leather" d="M-122 -6 C-124 -34 -100 -44 -76 -44 C-50 -44 -30 -34 -30 -6 C-60 4 -96 4 -122 -6Z"/>
+ <path m="leather" d="M122 -6 C124 -34 100 -44 76 -44 C50 -44 30 -34 30 -6 C60 4 96 4 122 -6Z"/>
+ <path f="ice" opacity="0.85" d="M-118 -8 C-96 -16 -60 -16 -34 -8 L-40 -2 L-50 8 L-56 -2 L-70 6 L-80 -4 L-96 4 L-104 -4Z"/>
+ <path m="coat" d="M-118 -470 C-128 -420 -136 -360 -140 -300 Q-120 -284 -100 -296 Q-80 -280 -60 -294 L-40 -300 C-30 -360 -26 -420 -24 -460Z"/>
+ <path m="coat" d="M118 -470 C128 -420 136 -360 140 -300 Q120 -284 100 -296 Q80 -280 60 -294 L40 -300 C30 -360 26 -420 24 -460Z"/>
+ <path f="ice" stroke="#1d1724" stroke-width="1.6" d="M-140 -304 Q-120 -288 -100 -300 Q-80 -284 -60 -298 L-40 -304 L-44 -290 L-50 -266 L-56 -290 L-66 -272 L-74 -290 L-86 -262 L-94 -292 L-106 -276 L-114 -296 L-126 -268 L-132 -296Z"/>
+ <path sg="50" d="M60 -470 L118 -470 C128 -420 136 -360 140 -300 Q120 -284 100 -296 Q80 -280 60 -294Z"/>
+ <!-- the barrel body -->
+ <path m="coat" d="M-110 -690 C-136 -650 -140 -560 -126 -480 C-118 -450 -100 -432 -80 -428 L80 -428 C100 -432 118 -450 126 -480 C140 -560 136 -650 110 -690 C60 -712 -60 -712 -110 -690Z"/>
+ <path sg="60" d="M10 -706 C60 -706 96 -700 110 -690 C136 -650 140 -560 126 -480 C118 -450 100 -432 80 -428 L10 -428Z"/>
+ <path hg="35" d="M-110 -680 C-120 -640 -124 -580 -116 -520 L-60 -520 L-60 -680Z"/>
+ <path m="cloth" lw="2.4" d="M-16 -700 L16 -700 L14 -440 L-14 -440Z"/>
+ <g fill="#66717d" stroke="#1d1724" stroke-width="1.6"><rect x="-8" y="-640" width="16" height="10" rx="3"/><rect x="-8" y="-590" width="16" height="10" rx="3"/><rect x="-8" y="-540" width="16" height="10" rx="3"/></g>
+ <brush c="#1c2c40" pts="-90 -640 0; -100 -560 2; -94 -480 0"/><brush c="#1c2c40" pts="60 -660 0; 76 -580 2; 70 -500 0"/>
+ <path m="leather" lw="2.6" d="M-130 -476 C-60 -456 60 -456 130 -476 L132 -446 C60 -426 -60 -426 -132 -446Z"/>
+ <path m="iron" lw="2.4" d="M-18 -470 h36 v34 h-36Z"/>
+ <rect fill="#2f3741" x="-8" y="-462" width="16" height="18" rx="2"/>
+ <path rim="3" d="M126 -650 C138 -590 134 -520 120 -470"/>
+ <!-- right arm down to the oar -->
+ <limb m="coat" pts="-118 -660 40; -150 -600 32; -168 -530 28; -176 -470 24"/>
+ <path sg="40" d="M-150 -620 C-140 -580 -150 -520 -156 -470 L-176 -470 C-170 -540 -160 -590 -150 -620Z"/>
+ <path m="iron" lw="2.4" d="M-196 -490 C-200 -470 -196 -446 -186 -436 L-158 -436 C-150 -450 -150 -476 -156 -490Z"/>
+ <path f="ice" opacity="0.85" d="M-198 -480 L-188 -472 L-180 -480 L-170 -470 L-160 -478 L-156 -490 L-196 -490Z"/>
+ <path m="leather" d="M-196 -440 C-206 -420 -204 -394 -190 -384 C-174 -378 -158 -386 -156 -404 C-154 -420 -160 -436 -170 -440Z"/>
+ <brush c="#30231a" pts="-196 -420 0; -178 -414 1.4; -160 -416 0"/><brush c="#30231a" pts="-196 -404 0; -178 -398 1.4; -160 -402 0"/>
+ <!-- left arm round to the prow -->
+ <limb m="coat" pts="118 -660 40; 146 -600 32; 152 -540 28; 140 -500 24"/>
+ <path sg="50" d="M146 -620 C162 -580 160 -530 150 -500 L130 -500 C140 -540 142 -590 146 -620Z"/>
+ <!-- the seal-fur mantle, heaped over the shoulders -->
+ <limb m="fur" fluff="0.34" per="4" pts="-150 -620 38; -120 -690 46; -60 -720 44; 0 -716 42; 60 -720 44; 120 -690 46; 150 -620 38"/>
+ <path sg="45" d="M0 -760 C60 -770 130 -740 164 -680 C176 -650 180 -620 168 -590 C120 -640 60 -680 0 -680Z"/>
+ <brush c="#54402f" pts="-130 -660 0; -100 -690 2; -70 -700 0"/><brush c="#54402f" pts="70 -700 0; 100 -690 2; 130 -660 0"/><brush c="#dcc7a8" pts="-60 -740 0; -20 -752 2.2; 20 -752 0"/><brush c="#54402f" pts="-150 -630 0; -140 -600 1.6; -126 -590 0"/><brush c="#54402f" pts="150 -630 0; 140 -600 1.6; 126 -590 0"/><brush c="#dcc7a8" pts="-120 -716 0; -96 -730 1.8; -76 -734 0"/><brush c="#dcc7a8" pts="76 -734 0; 96 -730 1.8; 120 -716 0"/><brush c="#54402f" pts="-40 -690 0; -10 -684 1.6; 20 -690 0"/>
+ <path f="ice" opacity="0.8" d="M-160 -626 L-150 -600 L-142 -620 L-132 -592 L-126 -616 L-160 -640Z M160 -626 L150 -600 L142 -620 L132 -592 L126 -616 L160 -640Z"/>
+ <g transform="rotate(-5 0 -720)"><use href="#L-head"/></g>
+ <!-- the prow at his left -->
+ <g transform="translate(176 0)"><use href="#L-prow"/></g>
+ <!-- his gauntlet round the prow's flank -->
+ <path m="iron" lw="2.4" d="M84 -520 C76 -500 78 -470 92 -460 L118 -462 C126 -480 124 -506 114 -520Z"/>
+ <path f="ice" opacity="0.85" d="M84 -520 L94 -508 L100 -518 L108 -506 L114 -520Z"/>
+ <g class="fx" fill="#e6f8ff"><circle cx="-60" cy="-820" r="2.4"/><circle cx="80" cy="-800" r="2"/><circle cx="-130" cy="-760" r="1.8"/><circle cx="260" cy="-640" r="2.2"/></g>
 </g><!--/front-->
-<g id="tq">
- <!-- 3/4, turned to his right, the prow braced in front -->
- <!-- oar-maul trailing behind him, ice head low -->
- <g transform="translate(10 -590) rotate(-24)">
-  <rect m="wood" x="-9" y="0" width="18" height="470" rx="6"/>
-  <rect hl="22" x="-6" y="6" width="4" height="460"/>
-  <rect m="iron" x="-11" y="-6" width="22" height="22" rx="4"/>
-  <path m="wood" d="M-11 470 C-34 500 -38 566 -28 604 Q0 622 28 604 C38 566 34 500 11 470 Z"/>
-  <path m="ice" opacity="0.9" d="M-42 478 L-56 536 L-42 598 L-14 630 L22 622 L48 592 L56 530 L40 476 L0 464 Z"/>
-  <path fill="url(#L-icefade)" opacity="0.6" d="M-38 490 L-48 540 L-36 592 L-14 618 L-6 560 L-20 500Z"/>
-  <path m="iron" lw="2.4" d="M-54 506 L54 506 L54 490 L-54 490Z M-50 570 L52 570 L52 554 L-50 554Z"/>
-  <path rim="3" d="M48 592 L56 530 L40 476"/>
-  <path ln="1.4" d="M-30 600 l14 -30 l-6 -18 M20 610 l-8 -24 l10 -20"/>
+<g id="tq"><g transform="scale(-1 1)">
+ <!-- braced behind the prow, stepping in, the oar-maul cocked back -->
+ <g transform="translate(176 -30) rotate(6)"><use href="#L-maul"/></g>
+ <limb m="cloth" pts="40 -420 40; 70 -310 34; 90 -200 30"/>
+ <limb m="fur" fluff="0.16" per="3" pts="92 -170 38; 98 -110 40; 102 -40 42"/>
+ <path m="leather" d="M56 -6 C54 -34 76 -44 100 -44 C126 -44 146 -34 146 -6 C116 4 80 4 56 -6Z"/>
+ <limb m="cloth" pts="-40 -420 40; -76 -310 34; -110 -210 30"/>
+ <limb m="fur" fluff="0.16" per="3" pts="-114 -180 38; -124 -110 40; -130 -40 42"/>
+ <path m="leather" d="M-176 -6 C-178 -34 -156 -44 -132 -44 C-106 -44 -86 -34 -86 -6 C-116 4 -150 4 -176 -6Z"/>
+ <path m="coat" d="M-110 -470 C-124 -420 -140 -360 -154 -300 Q-130 -284 -110 -296 Q-90 -280 -70 -294 L-50 -300 C-36 -360 -26 -420 -20 -460Z"/>
+ <path m="coat" d="M110 -470 C120 -420 130 -360 136 -300 Q116 -284 96 -296 Q76 -280 56 -294 L36 -300 C28 -360 24 -420 22 -460Z"/>
+ <path sg="50" d="M60 -470 L110 -470 C120 -420 130 -360 136 -300 Q116 -284 96 -296 Q76 -280 56 -294Z"/>
+ <g transform="rotate(-6 0 -430)">
+  <path m="coat" d="M-110 -690 C-136 -650 -140 -560 -126 -480 C-118 -450 -100 -432 -80 -428 L80 -428 C100 -432 118 -450 126 -480 C140 -560 136 -650 110 -690 C60 -712 -60 -712 -110 -690Z"/>
+  <path sg="60" d="M-20 -706 C60 -706 96 -700 110 -690 C136 -650 140 -560 126 -480 C118 -450 100 -432 80 -428 L-20 -428Z"/>
+  <path m="cloth" lw="2.4" d="M-46 -700 L-14 -700 L-16 -440 L-44 -440Z"/>
+  <path m="leather" lw="2.6" d="M-130 -476 C-60 -456 60 -456 130 -476 L132 -446 C60 -426 -60 -426 -132 -446Z"/>
+  <path m="iron" lw="2.4" d="M-48 -470 h36 v34 h-36Z"/>
+  <!-- far arm back on the oar -->
+  <limb m="coat" pts="110 -660 38; 150 -630 30; 180 -600 26; 200 -580 22"/>
+  <path m="iron" lw="2.4" d="M190 -606 C204 -612 222 -602 224 -586 L216 -562 C200 -556 186 -566 184 -582Z"/>
+  <limb m="fur" fluff="0.34" per="4" pts="-150 -620 38; -120 -690 46; -60 -720 44; 0 -716 42; 60 -720 44; 120 -690 46; 150 -620 38"/>
+  <path sg="45" d="M0 -760 C60 -770 130 -740 164 -680 C176 -650 180 -620 168 -590 C120 -640 60 -680 0 -680Z"/>
+  <brush c="#54402f" pts="-130 -660 0; -100 -690 2; -70 -700 0"/><brush c="#dcc7a8" pts="-60 -740 0; -20 -752 2.2; 20 -752 0"/>
+  <g transform="translate(-26 4) rotate(-4 0 -720)"><use href="#L-head"/></g>
+  <!-- near arm braced into the prow -->
+  <limb m="coat" pts="-118 -660 40; -150 -610 32; -170 -560 28"/>
  </g>
- <g id="L-tqbody">
- <!-- hood behind -->
- <path m="coat" d="M-60 -500 C-80 -560 -50 -628 10 -626 C64 -620 78 -556 54 -492 Z"/>
- <path rim="3" d="M28 -622 C62 -612 78 -560 62 -506"/>
- <!-- back leg (his right) -->
- <path m="cloth" d="M30 -110 L22 -200 Q28 -250 50 -276 L104 -270 L96 -110 Z"/>
- <path m="leather" d="M12 0 C10 -36 20 -76 34 -94 L96 -94 C104 -66 108 -30 110 0 Z"/>
- <path sh="30" d="M70 -94 L96 -94 C104 -66 108 -30 110 0 L80 0 C80 -40 78 -70 70 -94Z"/>
- <path m="fur" d="M28 -92 C16 -108 30 -130 46 -122 C60 -134 82 -132 90 -122 C106 -128 114 -108 102 -92 C80 -84 50 -84 28 -92Z"/>
- <!-- front leg (his left), stepped out -->
- <path m="cloth" d="M-120 -108 L-118 -200 Q-110 -256 -76 -278 L-20 -270 L-48 -108 Z"/>
- <path m="leather" d="M-164 0 C-168 -30 -150 -70 -126 -90 L-60 -92 C-50 -66 -46 -30 -40 0 Z"/>
- <path sh="30" d="M-80 -92 L-60 -92 C-50 -66 -46 -30 -40 0 L-66 0 C-68 -40 -72 -70 -80 -92Z"/>
- <path m="fur" d="M-134 -90 C-148 -106 -132 -128 -116 -120 C-100 -132 -78 -130 -70 -120 C-54 -126 -46 -106 -58 -90 C-82 -82 -112 -82 -134 -90Z"/>
- <!-- coat -->
- <path m="coat" d="M-70 -508 C-120 -504 -150 -486 -160 -452 L-150 -330 Q-170 -240 -180 -152 Q-136 -138 -96 -150 Q-64 -140 -34 -160 L-20 -284 L-4 -162 Q40 -144 80 -156 Q110 -146 136 -158 Q134 -244 124 -330 L132 -456 C120 -494 80 -510 30 -510 Z"/>
- <path sh="30" d="M60 -470 C100 -470 120 -464 132 -456 L124 -330 Q134 -244 136 -158 Q110 -146 80 -156 Q40 -144 -4 -162 L-12 -230 Q60 -260 60 -470Z"/>
- <path hl="15" d="M-150 -448 C-130 -478 -100 -486 -76 -480 Q-110 -400 -136 -300 L-146 -320Z"/>
- <path ln="2" d="M-36 -440 L-28 -300"/>
- <path m="iron" lw="2" d="M-50 -424 h24 v10 h-24Z M-46 -386 h24 v10 h-24Z M-42 -348 h24 v10 h-24Z"/>
- <path m="leather" d="M-160 -320 Q-20 -296 128 -320 L130 -282 Q-20 -262 -162 -282 Z"/>
- <path m="iron" d="M-56 -316 h40 v40 h-40Z"/>
- <path sh="40" d="M-46 -306 h20 v20 h-20Z"/>
- <path m="ice" lw="2" d="M136 -158 Q110 -146 80 -156 Q40 -144 -4 -162 L-2 -176 L14 -170 L22 -188 L40 -172 L52 -192 L66 -170 L82 -188 L96 -168 L112 -186 L124 -168 L134 -180Z"/>
- <path m="ice" lw="1.5" d="M20 -150 l5 30 l6 -32Z M66 -150 l4 22 l5 -24Z M112 -152 l4 26 l5 -28Z"/>
- <path rim="3" d="M132 -452 L124 -330 Q134 -244 136 -170"/>
- <!-- far arm (his right) down to the oar -->
- <path m="coat" d="M70 -500 C120 -506 150 -474 150 -430 L150 -350 L98 -344 L92 -420 Z"/>
- <path sh="30" d="M126 -470 C140 -440 146 -400 150 -350 L120 -347 C122 -390 126 -440 110 -480Z"/>
- <path m="fur" d="M88 -350 C80 -366 96 -378 110 -370 C122 -380 142 -376 150 -364 C162 -360 164 -342 152 -334 C130 -326 104 -330 88 -350Z"/>
- <g transform="translate(124 -312) rotate(-30)">
-  <rect m="iron" x="-30" y="-26" width="60" height="50" rx="16"/>
-  <path ln="1.8" d="M-14 -24 v46 M2 -24 v46 M16 -22 v42"/>
-  <path m="ice" lw="1.8" d="M30 -10 L22 -30 L8 -22 L-4 -34 L-14 -20 L6 -6 L20 -2Z"/>
- </g>
- <path m="iron" d="M40 -510 C80 -530 140 -516 160 -462 C134 -446 96 -452 66 -474 Z"/>
- <path m="ice" lw="2" d="M50 -512 C80 -524 126 -516 148 -480 L138 -478 L130 -492 L118 -480 L106 -502 L92 -488 L78 -508 L64 -496Z"/>
- <!-- fur collar -->
- <path m="fur" d="M-150 -458 C-170 -496 -124 -530 -84 -520 C-60 -544 -14 -540 6 -528 C30 -540 72 -540 90 -514 C120 -514 140 -488 124 -458 C96 -436 60 -444 30 -452 C6 -438 -32 -440 -52 -452 C-84 -440 -124 -434 -150 -458 Z"/>
- <path sh="22" d="M124 -458 C96 -436 60 -444 30 -452 C50 -470 96 -474 116 -490 C132 -480 132 -466 124 -458Z"/>
- <path ln="1.6" d="M-120 -478 q8 -10 18 -4 M-74 -492 q10 -12 22 -2 M60 -496 q10 -10 22 0 M90 -476 q10 -8 18 0"/>
- <path rim="3" d="M110 -512 C136 -506 142 -480 126 -458"/>
- <!-- head, turned left -->
- <path m="skin" d="M-74 -558 C-74 -606 18 -612 22 -566 L22 -514 C18 -484 -60 -480 -72 -510 Z"/>
- <path m="skin" lw="2.2" d="M8 -546 c14 -4 18 22 4 28 Z"/>
- <path sh="30" d="M-4 -600 C14 -594 22 -580 22 -566 L22 -514 C18 -500 6 -490 -6 -488 C4 -520 8 -570 -4 -600Z"/>
- <path hl="40" d="M-56 -594 C-44 -602 -24 -604 -16 -600 C-30 -596 -44 -590 -56 -582Z"/>
- <path rim="2.6" d="M6 -598 C20 -588 22 -570 22 -556"/>
- <path m="beard" lw="2" d="M-70 -556 Q-56 -568 -44 -558 L-46 -550 Q-58 -556 -68 -550Z M-34 -558 Q-16 -568 -2 -556 L-4 -548 Q-18 -556 -32 -550Z"/>
- <path sh="45" d="M-66 -550 q8 -3 16 0 q-2 7 -8 7 q-6 0 -8 -7Z M-30 -550 q10 -3 20 0 q-2 8 -10 8 q-8 0 -10 -8Z"/>
- <circle cx="-58" cy="-545" r="2.2" fill="#c9ffe6"/><circle cx="-20" cy="-545" r="2.6" fill="#c9ffe6"/>
- <path m="skin" lw="2" d="M-46 -540 C-56 -530 -66 -524 -64 -516 C-60 -510 -50 -511 -42 -516"/>
- <path sh="30" d="M-44 -536 C-46 -528 -46 -520 -42 -516 C-48 -514 -52 -516 -52 -520Z"/>
- <path m="beard" d="M-82 -530 C-86 -500 -78 -470 -64 -452 L-62 -414 L-44 -414 L-40 -446 L-32 -446 L-26 -416 L-8 -418 L-6 -454 C14 -472 20 -500 18 -526 C10 -506 -6 -500 -30 -502 C-56 -500 -74 -506 -82 -530Z"/>
- <path sh="25" d="M-10 -502 C6 -508 16 -516 18 -526 C20 -500 14 -472 -6 -454 L-8 -418 L-20 -418 C-14 -450 -8 -480 -10 -502Z"/>
- <path m="beard" lw="2.2" d="M-70 -514 Q-56 -526 -40 -518 Q-24 -526 -6 -514 Q-8 -500 -20 -504 Q-30 -508 -40 -506 Q-48 -508 -58 -504 Q-70 -500 -70 -514Z"/>
- <path fill="#3a1f26" stroke="#1d1724" stroke-width="2" d="M-56 -500 Q-40 -494 -24 -500 Q-28 -482 -40 -480 Q-52 -482 -56 -500Z"/>
- <path fill="#efe6dc" d="M-53 -498 Q-40 -494 -27 -498 L-28 -493 Q-40 -490 -52 -493Z"/>
- <rect m="iron" lw="2" x="-64" y="-432" width="24" height="12" rx="4"/>
- <rect m="iron" lw="2" x="-30" y="-434" width="24" height="12" rx="4"/>
- <path hl="70" d="M-76 -472 l3 -4 l3 4 l-3 3Z M4 -480 l3 -4 l3 4 l-3 3Z M-54 -460 l2 -3 l2 3 l-2 2Z"/>
- </g>
- <!-- the prow, side-on (foreshortened): bow profile with the stem leading -->
- <g transform="translate(-76 -6) scale(0.72 0.82)">
-  <path m="wood" lw="3.4" d="M-214 -36 C-262 -110 -284 -280 -276 -420 C-270 -520 -256 -600 -240 -650 L-36 -566 L-48 -520 L-30 -480 L-46 -430 L-26 -380 L-44 -330 L-24 -270 L-42 -220 L-28 -160 L-50 -110 L-40 -66 Q-120 -26 -214 -36 Z"/>
-  <path sh="30" d="M-120 -40 C-110 -200 -110 -400 -130 -606 L-36 -566 L-48 -520 L-30 -480 L-46 -430 L-26 -380 L-44 -330 L-24 -270 L-42 -220 L-28 -160 L-50 -110 L-40 -66 Q-80 -44 -120 -40Z"/>
-  <g fill="none" stroke-linecap="round">
-   <path stroke="#1d1724" stroke-width="2" d="M-262 -570 Q-150 -560 -42 -512 M-272 -486 Q-150 -470 -30 -438 M-278 -402 Q-150 -390 -28 -364 M-278 -320 Q-150 -310 -26 -292 M-272 -240 Q-150 -232 -34 -218 M-262 -160 Q-150 -152 -30 -144 M-240 -90 Q-150 -82 -44 -84"/>
-   <path stroke="#ffe2c4" stroke-width="2" opacity="0.28" d="M-260 -564 Q-150 -554 -44 -506 M-270 -480 Q-150 -464 -32 -432 M-276 -396 Q-150 -384 -30 -358 M-276 -314 Q-150 -304 -28 -286 M-270 -234 Q-150 -226 -36 -212"/>
-  </g>
-  <path m="wood" d="M-252 -660 L-36 -570 L-42 -550 L-250 -632Z"/>
-  <path fill="url(#L-icefade)" stroke="#1d1724" stroke-width="2" d="M-254 -664 L-36 -574 L-40 -556 L-56 -552 L-64 -534 L-78 -552 L-92 -530 L-104 -558 L-122 -540 L-134 -570 L-150 -552 L-160 -590 L-176 -578 L-186 -608 L-202 -602 L-212 -630 L-228 -626 L-236 -650Z"/>
-  <path m="iron" d="M-280 -300 Q-150 -286 -26 -270 L-26 -242 Q-150 -258 -282 -272Z"/>
-  <path fill="#2f3741" d="M-250 -287 m-4 0 a4 4 0 1 0 8 0 a4 4 0 1 0 -8 0 M-180 -280 m-4 0 a4 4 0 1 0 8 0 a4 4 0 1 0 -8 0 M-110 -272 m-4 0 a4 4 0 1 0 8 0 a4 4 0 1 0 -8 0 M-50 -264 m-4 0 a4 4 0 1 0 8 0 a4 4 0 1 0 -8 0"/>
-  <!-- the stem post leads -->
-  <path m="wood" lw="3.2" d="M-214 -36 C-262 -110 -284 -280 -276 -420 C-270 -520 -256 -600 -236 -662 C-232 -700 -246 -730 -268 -738 C-290 -744 -306 -724 -296 -706 C-290 -696 -276 -700 -278 -710 L-252 -716 C-232 -704 -222 -676 -230 -648 C-246 -590 -258 -520 -262 -420 C-268 -300 -252 -150 -198 -38 Q-206 -34 -214 -36Z"/>
-  <path hl="30" d="M-272 -420 C-266 -520 -254 -600 -240 -650 C-250 -600 -262 -520 -266 -420 C-270 -300 -258 -170 -224 -50 C-256 -140 -276 -300 -272 -420Z"/>
-  <path m="iron" lw="2.4" d="M-280 -470 L-252 -468 L-254 -432 L-280 -434Z M-276 -190 L-246 -186 L-236 -150 L-264 -152Z"/>
-  <path fill="url(#L-icefade)" stroke="#1d1724" stroke-width="2" d="M-214 -36 Q-120 -26 -40 -66 L-46 -82 L-62 -72 L-68 -92 L-84 -74 L-96 -94 L-110 -72 L-126 -88 L-138 -66 L-154 -80 L-168 -60 L-186 -70 L-198 -52Z"/>
-  <path m="ice" lw="1.6" d="M-194 -42 l5 30 l6 -32Z M-160 -34 l4 22 l5 -24Z M-124 -34 l6 40 l6 -42Z M-84 -46 l4 26 l5 -30Z"/>
-  <g class="fx"><ellipse cx="-150" cy="-390" rx="50" ry="70" fill="url(#L-soul-g)" opacity="0.55"/></g>
-  <path fill="#c8ffe6" stroke="#1d1724" stroke-width="1.6" d="M-166 -460 L-146 -432 L-158 -406 L-138 -380 L-150 -346 L-140 -324 L-156 -346 L-146 -380 L-166 -406 L-154 -432Z"/>
-  <path rim="3.6" d="M-38 -560 L-48 -520 L-30 -480 L-46 -430 L-26 -380 L-44 -330 L-24 -270 L-42 -220 L-28 -160 L-50 -110 L-40 -68"/>
- </g>
- <path m="iron" lw="2.4" d="M-96 -360 C-84 -362 -76 -348 -78 -334 C-76 -318 -84 -308 -96 -308 L-110 -312 L-108 -358Z"/>
- <path ln="1.5" d="M-94 -342 h-14 M-94 -326 h-14"/>
-</g><!--/tq-->
+ <g transform="translate(-170 0) rotate(-8 0 -400) scale(0.84 1)"><use href="#L-prow"/></g>
+ <path m="iron" lw="2.4" d="M-196 -560 C-204 -540 -200 -512 -186 -504 L-160 -506 C-152 -524 -154 -550 -164 -562Z"/>
+ <g class="fx" fill="#e6f8ff"><circle cx="40" cy="-820" r="2.4"/><circle cx="160" cy="-760" r="2"/><circle cx="-60" cy="-860" r="1.8"/></g>
+</g></g><!--/tq-->
 <g id="bust">
  <defs><radialGradient id="L-bustbg" cx="0.35" cy="0.3" r="0.9"><stop offset="0" stop-color="#4f7088"/><stop offset="0.6" stop-color="#22374a"/><stop offset="1" stop-color="#101a26"/></radialGradient></defs>
  <rect width="320" height="320" fill="url(#L-bustbg)"/>
- <g class="fx"><circle cx="262" cy="70" r="70" fill="url(#L-frost-g)" opacity="0.35"/></g>
- <!-- the prow's stem curl peeking in -->
- <g transform="translate(22 820) scale(1.2)"><path m="wood" lw="3" d="M-12 -36 C-16 -200 -18 -480 -12 -640 C-24 -672 -22 -706 6 -716 C34 -724 52 -702 42 -680 C34 -666 16 -670 18 -682 L14 -650 C20 -480 18 -200 14 -36Z"/></g>
- <use href="#L-tqbody" transform="translate(196 744) scale(1.16)"/>
- <g class="fx"><circle cx="123" cy="111" r="7" fill="url(#L-soul-g)" opacity="0.6"/><circle cx="167" cy="111" r="8" fill="url(#L-soul-g)" opacity="0.6"/></g>
- <path hl="80" d="M40 60 l3 -5 l3 5 l-3 4Z M280 250 l3 -5 l3 5 l-3 4Z M70 210 l2 -4 l2 4 l-2 3Z M240 40 l2 -4 l2 4 l-2 3Z M300 120 l2 -4 l2 4 l-2 3Z"/>
+ <g transform="translate(150 1330) scale(1.55)">
+  <path m="coat" d="M-150 -560 C-150 -660 -110 -700 -60 -712 L60 -712 C110 -700 150 -660 150 -560Z"/>
+  <limb m="fur" fluff="0.34" per="4" pts="-150 -620 38; -120 -690 46; -60 -720 44; 0 -716 42; 60 -720 44; 120 -690 46; 150 -620 38"/>
+  <path sg="45" d="M0 -760 C60 -770 130 -740 164 -680 C176 -650 180 -620 168 -590 C120 -640 60 -680 0 -680Z"/>
+  <use href="#L-head"/>
+ </g>
+ <g transform="translate(250 1480) scale(1.5)"><use href="#L-prow"/></g>
 </g><!--/bust-->
 <g id="relic">
  <defs><linearGradient id="L-bronze" x1="0" y1="0" x2="1" y2="0.3"><stop offset="0" stop-color="#7a5a2c"/><stop offset="0.28" stop-color="#f0d29a"/><stop offset="0.5" stop-color="#b48a46"/><stop offset="0.85" stop-color="#4c3618"/><stop offset="1" stop-color="#7cc7e8"/></linearGradient></defs>
