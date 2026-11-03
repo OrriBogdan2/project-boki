@@ -183,8 +183,8 @@ func _priority() -> void:
 	P.inp["aim"] = P.pos + Vector3(5, 0.9, 0)
 	# a chest just ahead, a rival behind
 	var cat := P.pos + Vector3(4, 0, 1)
-	var n := Models.chest(1); n.position = cat; m.add_child(n)
-	m.chests.append({"pos": cat, "open": false, "prog": 0.0, "node": n, "tier": 1})
+	var n := Models.chest(); n.position = cat; m.add_child(n)
+	m.chests.append({"pos": cat, "open": false, "prog": 0.0, "node": n, "free": true})
 	var T: Hunter = m.make_hunter("T", 5, "medium", "Rival", "idle", {}, P.pos + Vector3(-8, 0, 0.5))
 	T.max_hp = 1e5; T.hp = 1e5
 	k.comp.history.clear()
@@ -226,8 +226,8 @@ func _count_with(setting: String) -> Array:
 	for i in 8:
 		var a := TAU * i / 8.0
 		var at := c0 + Vector3(cos(a) * 6.0, 0, sin(a) * 6.0)
-		var n := Models.chest(1); n.position = at; m.add_child(n)
-		m.chests.append({"pos": at, "open": false, "prog": 0.0, "node": n, "tier": 1})
+		var n := Models.chest(); n.position = at; m.add_child(n)
+		m.chests.append({"pos": at, "open": false, "prog": 0.0, "node": n, "free": true})
 	for i in 3:
 		m.spawn_wild(Save.new_kin("puddlet", "", 900 + i), c0 + Vector3(-5 + i * 3, 0, 7))
 	var foes: Array = []

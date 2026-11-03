@@ -276,10 +276,9 @@ func after_setup() -> void:
 	var frac := clampf(t0 / 1300.0, 0.0, 0.6)
 	var opened := 0
 	for c in m.chests:
-		var tier := int(c.get("tier", 0))
 		if c.has("ride"):
 			continue
-		if rng.randf() < frac * (0.45 if tier >= 2 else 1.0):
+		if rng.randf() < frac:
 			_empty_chest(c); opened += 1
 	var cleared := 0
 	for cp in camps:

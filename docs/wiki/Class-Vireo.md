@@ -36,7 +36,7 @@ straight through them is a Blowout that gives your dash back at once.
 
 |  |  |
 |---|---|
-| Weight class | Light (124 health, 5 m/s, 1 dash charge) |
+| Weight class | Light (124 health, 4.4 m/s, 1 dash charge) |
 | Signature weapon | Coilcaster (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The storm-kite runner. Points and crackles bolts from her fingertip until a foe is fully charged, then runs straight through them as a streak of lightning and comes out with the dash back. |
 | Silhouette | the copper rod mast and kite pennant on the back |

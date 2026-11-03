@@ -241,10 +241,10 @@ func _release() -> void:
 	_run_for(0.3)
 	ok(not KinMerge.active(P) and not _glowing(P) and P.buff("move_speed") == 0.0,
 		"a timeout ends without the afterglow")
-	ok(not k.resting() and k.cmd == "follow",
-		"...and the Boki is out beside you, not pumped or resting (state %s)" % k.state)
-	ok(P.merge_cd > 0.0 and P.merge_cd <= KinParts.MERGE_SPENT_TIME,
-		"...with the plain spent window (%.1fs)" % P.merge_cd)
+	ok(k.resting() and k.rest_t > MergeRelease.rest_s() and k.cmd == "follow",
+		"...and the Boki rests longer than after a release (%.1fs, state %s)" % [k.rest_t, k.state])
+	ok(absf(P.merge_cd - MergeRelease.timeout_rest_s()) < 0.5,
+		"...with the timeout rest as the spent window (%.1fs)" % P.merge_cd)
 
 # ------------------------------------------------------------------ the damage cap
 func _cap() -> void:

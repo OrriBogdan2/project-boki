@@ -40,19 +40,18 @@ func run(main: Node) -> void:
 		if (f["tiles"] as Array).size() < 2: thin += 1
 	ok(n == W.stairs.size(), "all %d stair tiles sit in a flight (%d flights, %d thin)" % [W.stairs.size(), fl.size(), thin])
 	# 2. chest vs breakables
-	var ch := Models.chest(0)
+	var ch := Models.chest()
 	var cr := Models.breakable("crate")
 	main.add_child(ch); main.add_child(cr)
 	var cs := _size(ch); var rs := _size(cr)
 	ok(cs.x * cs.z >= rs.x * rs.z * 0.95, "a chest's footprint (%.2f x %.2f) is no smaller than a crate's (%.2f x %.2f)" % [cs.x, cs.z, rs.x, rs.z])
-	var c0: Color = Models.CHEST_COLS[0][0]; var c1: Color = Models.CHEST_COLS[1][0]; var c2: Color = Models.CHEST_COLS[2][0]
-	ok(c0 != c1 and c1 != c2 and c0 != c2, "the three chest tiers have their own colours")
+	ok(ch.get_node_or_null("Body/Lid") != null and ch.get_meta("mats", []).size() > 1, "there is one chest type, with a lid on a hinge")
 	ch.queue_free(); cr.queue_free()
 	# 4. a CPUParticles3D (or GPUParticles3D) draws a seed from the global stream when it is made: a few
 	# chests in a match then moved every later roll (where the squad's bots land), failing --drop-check
 	seed(31337); var r0 := randi()
 	seed(31337)
-	for t in 3: Models.chest(t).free()
+	for t in 3: Models.chest().free()
 	ok(randi() == r0, "building chests leaves the seeded global random stream alone")
 	m.queue_free()
 	print("POLISH DONE, failures: ", bad)
