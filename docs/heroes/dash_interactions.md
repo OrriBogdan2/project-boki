@@ -90,6 +90,9 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 | Vireo | E -> jump |  | the move goes at once, the ability keeps running (default) |
 | Vireo | ult (X) -> jump | Not checked against the source yet. Ours today (measured by --dash-flow-check): no jump during Kitefall (MageUlt clears the jump key while it holds her). | **exception:** the move is refused while it runs (today's behaviour, to review) |
 | Vireo | Q glove -> jump |  | the move goes at once, the ability keeps running (default) |
+| Vireo | hold RMB through a ground dash |  | the hold carries through and lets go there |
+| Vireo | hold RMB through an air dash |  | the hold carries through and lets go there |
+| Vireo | hold RMB through a jump |  | the hold carries through and lets go there |
 | Venator | ground dash -> LMB |  | fires mid-dash |
 | Venator | ground dash -> RMB |  | fires mid-dash |
 | Venator | ground dash -> E |  | fires mid-dash |

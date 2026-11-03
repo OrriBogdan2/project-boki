@@ -17,5 +17,12 @@
 	},
 	"into_jump": {
 		"x": {"mode": "lock", "reason": "today's behaviour, to review", "source": "Not checked against the source yet. Ours today (measured by --dash-flow-check): no jump during Kitefall (MageUlt clears the jump key while it holds her)."}
+	},
+	"hold": {
+		"rmb": {
+			"ground": {"mode": "keep"},
+			"air": {"mode": "keep"},
+			"jump": {"mode": "keep"}
+		}
 	}
 }

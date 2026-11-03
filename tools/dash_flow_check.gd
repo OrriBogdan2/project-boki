@@ -258,6 +258,7 @@ const ACT_S := 0.1              # s: owner rule, a jump or Shift out of an abili
 const HOLD_PAST := 0.1          # s: a hold charges this long past the kit's tap/hold threshold before the move
 const JUMP_RELEASE := 0.2       # s after take-off a hold is let go (still rising: in the air, short of auto-releases)
 const KEEP_SPEED := 0.5         # share of the planar speed a release in the air keeps ("keeps your momentum")
+const RMB_HELD := 0.2           # s: at most this long an RMB is held before the move
 const HOLD_KEYS := {"lmb": "fire", "rmb": "sec_hold", "x": "x_down"}
 const INTO_ACTS := ["fire", "cancel"]       # into rows whose move goes at once
 const COMBINES := {"jump": ["fire"], "into": INTO_ACTS, "hold": ["keep"]}      # every other mode is an exception
@@ -430,13 +431,14 @@ func _make(m: Match, move: String) -> void:
 			hunter.inp["jump"] = true
 			_steps(m, int(JUMP_RELEASE / Match.DT))
 
-## How long `slot` must be held before it counts as a hold, not a tap (the kit's data).
+## How long `slot` is held before the move: an LMB past its tap (the kit's data), an RMB briefly.
 func _threshold(slot: String) -> float:
 	match slot:
 		"lmb":
 			return float(hunter.ak.lmb_def().get("tap", 0.0))
 		"rmb":
-			return float(hunter.ak.rmb_def().get("hold", 0.0))
+			# (any held RMB fires on its release; a long hold threshold would run into its auto-release mid-move)
+			return minf(float(hunter.ak.rmb_def().get("hold", 0.0)), RMB_HELD)
 	return 0.0
 
 func _hold_key(slot: String, down: bool) -> void:
