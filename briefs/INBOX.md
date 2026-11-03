@@ -637,3 +637,6 @@ Order: Boki concept art, then creator concepts, then cutscene key frames (image-
 - Mechanics parity first for **Vex, Zedran, Pin and Cinder**, then the rest. "One great match + Boki as the star" moved up to step 4.
 - **Done means played** (by the owner or a tester).
 - **Fewer, bigger merges:** one integrated branch per session per day, posted READY with its checks.
+
+## 2026-11-03 23:47 UTC (MAIN, owner DECISION): final keys: R = ultimate, X = Fuse, G = Boki
+In the step 5 key pass: **R = hunter ultimate, X = Fuse** (merge/release), **G = the single Boki button**. C and T are freed. There's no reload. Everyone: always use Settings.key_cap; never write key letters.

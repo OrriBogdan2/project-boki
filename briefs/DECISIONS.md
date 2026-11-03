@@ -18,8 +18,8 @@ Main keeps this file current; anyone can propose a line in EXT_TO_MAIN tagged "D
 - A merged hunter+Boki form is a **Fusion** (owner, Nov 3). Never "Mantle". Venom Mantle is now Venom Fusion; the Gale Mantle glove is now the Gale Cloak (main f048214b).
 
 ## Controls (final; key text always via Settings.key_cap)
-- **R = hunter ultimate** (owner, Nov 3, replaces 'X ultimate'). **No reload key and no manual reloading in the game.** Gun kits (e.g. Vex) handle ammo the way the source does, without a reload (S2: research Ghost's ammo in supervive-data and the footage; e.g. ammo that refills on its own or through the kit's own actions). X is freed. Q/V gloves, 1-4 belt, F interact, Y emote, Shift dash, E utility.
-- G is the single Boki button (tap: send or recall; hold: order wheel). **C becomes Merge** (C again releases) once C folds into G; Merge is on T until then.
+- **R = hunter ultimate** (owner, Nov 3, replaces 'X ultimate'). **No reload key and no manual reloading in the game.** Gun kits (e.g. Vex) handle ammo the way the source does, without a reload (S2: research Ghost's ammo in supervive-data and the footage; e.g. ammo that refills on its own or through the kit's own actions). **X = Fuse** (merge with your Boki into its Fusion; X again releases), owner Nov 3. Q/V gloves, 1-4 belt, F interact, Y emote, Shift dash, E utility.
+- G is the single Boki button (tap: send or recall; hold: order wheel). Merge/Fuse moves to **X** (not C) in the step 5 key pass; C is freed once it folds into G. Until then Merge stays on T.
 - The Boki uses its own abilities when it judges best (it may have several). A manual option, if any, is on G's wheel.
 - Secondary key binds exist (Settings > Controls).
 
