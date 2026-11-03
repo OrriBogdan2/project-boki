@@ -35,9 +35,10 @@ FORMAT (what World.generate_authored reads; keys beyond Skyreach's are marked +)
     ramps (+)         [{at:[x,z], dir:"n|s|e|w", w, from, to, run}] a flight of stairs: its bottom
                       row starts at `at` (centre of its width) and rises toward dir, one terrace
                       per `run` tiles (run 2 puts a landing between steps)
-    walls             line / ring / box, as before; pillars [[x,z]] (ruins)
+    walls             line / ring / box, as before; pillars [[x,z]] (ruins; none here, a lone post is a
+                      throw-clipping trap, so tools/wall_size_check.gd wants every block piece 3+ tiles)
     rocks (+)         [[x0,z0,x1,z1]] boulder blocks (inclusive tile rects)
-    trees (+)         [[x,z]] single trees (they block like rocks)
+    trees (+)         [[x,z]] trees (they block like rocks; keep them in groves of 3+, see thickets())
     crates (+)        [[x,z]] camp supply piles (block)
     bush              [[x,z,r]] tall grass to hide in: computed by place_cover() below, not listed by hand
     landings (+)      [[x,z]] where squads come down (World.spawns)
@@ -68,6 +69,10 @@ def ramp(x, z, d, w, lv0, lv1, run=1):
 def rocks(*rects):
     return [list(r) for r in rects]
 
+def thickets(*at):
+    """Trees come in groves of three, never alone: a lone tree is a post a throw can clip."""
+    return [[x + dx, z + dz] for x, z in at for dx, dz in ((0, 0), (1, 0), (0, 1))]
+
 # ------------------------------------------------------------------ the islands
 islands = [
     # ---- THE CROWN (contested core): a broken stone crown. A wide lower terrace (lv 4) rings the
@@ -81,9 +86,12 @@ islands = [
          walls=[dict(line=[99, 90, 103, 90]), dict(line=[113, 90, 117, 90]),
                 dict(line=[99, 126, 103, 126]), dict(line=[113, 126, 117, 126]),
                 dict(line=[104, 101, 106, 101]), dict(line=[110, 101, 112, 101]),
-                dict(line=[104, 115, 106, 115]), dict(line=[110, 115, 112, 115])],
-         pillars=[[100, 104], [116, 104], [100, 112], [116, 112], [86, 102], [86, 114], [130, 102], [130, 114]],
-         rocks=rocks((84, 88, 85, 89), (130, 88, 131, 89), (84, 126, 85, 127), (130, 126, 131, 127)),
+                dict(line=[104, 115, 106, 115]), dict(line=[110, 115, 112, 115]),
+                dict(line=[99, 104, 101, 104]), dict(line=[115, 104, 117, 104]),
+                dict(line=[99, 112, 101, 112]), dict(line=[115, 112, 117, 112]),
+                dict(line=[86, 101, 86, 103]), dict(line=[86, 113, 86, 115]),
+                dict(line=[130, 101, 130, 103]), dict(line=[130, 113, 130, 115])],
+         rocks=rocks((84, 88, 85, 89), (130, 88, 131, 89), (85, 126, 86, 127), (129, 126, 130, 127)),
          landings=[],
          chests=[[108, 108], [84, 108], [132, 108]],
          camps=[[94, 88, "heavy"], [122, 128, "heavy"]],
@@ -94,13 +102,13 @@ islands = [
     dict(id="gaol_ne", name="Stormcrown Gaol", role="camp", region=0, biome="storm", danger=2, poi=[157, 79], noise=0.05,
          shapes=[poly([(146, 56), (164, 52), (172, 60), (170, 78), (158, 85), (146, 79), (142, 66)], 4)],
          sheer=[[200, 260]],
-         rocks=rocks((147, 81, 148, 81)),
+         rocks=rocks((147, 81, 149, 81)),
          chests=[[164, 79]], camps=[], breakables=[[150, 78, "pot"], [151, 79, "pot"]],
          wardens=[[160, 81]], traps=[]),
     dict(id="gaol_sw", name="Ashen Gaol", role="camp", region=0, biome="ember", danger=2, poi=[56, 162], noise=0.05,
          shapes=[poly([(48, 138), (62, 133), (74, 139), (77, 156), (68, 166), (52, 164), (44, 152)], 4)],
          sheer=[[20, 80]],
-         rocks=rocks((72, 158, 72, 159)),
+         rocks=rocks((72, 158, 72, 160)),
          chests=[[62, 161]], camps=[], breakables=[[51, 140, "keg"], [52, 140, "crate"]],
          wardens=[[74, 146]], traps=[]),
     # ---- FROSTGATE (north): a long frozen ridge. The Keep (lv 6, walled) on its east end looks straight
@@ -112,8 +120,7 @@ islands = [
          sheer=[[20, 70]],
          ramps=[ramp(112, 42, "e", 5, 2, 6), ramp(127, 57, "n", 3, 2, 6)],
          walls=[dict(box=[120, 33, 136, 50], gates=["w", "s"], gate_w=3)],
-         rocks=rocks((84, 38, 85, 39), (96, 50, 98, 50), (102, 32, 103, 32), (102, 33, 102, 34), (88, 56, 89, 56)),
-         trees=[[78, 46], [80, 49], [92, 29], [95, 28], [112, 60], [117, 61]],
+         rocks=rocks((84, 38, 85, 39), (96, 50, 98, 50), (102, 32, 103, 32), (102, 33, 102, 34), (88, 56, 90, 56)),
          landings=[[84, 32]],
          chests=[[128, 41], [76, 44]],
          camps=[[92, 44, "light"], [131, 44, "normal"]],
@@ -130,8 +137,7 @@ islands = [
          sheer=[[150, 210]],
          ramps=[ramp(46, 87, "n", 5, 2, 6)],
          rocks=rocks((34, 96, 35, 97), (55, 96, 55, 99), (39, 116, 41, 116), (39, 117, 39, 117), (58, 112, 59, 113)),
-         crates=[[50, 104], [51, 104]],
-         trees=[[30, 88], [28, 104], [62, 90]],
+         crates=[[50, 104], [51, 104], [50, 105]],
          landings=[[38, 120], [58, 66]],
          chests=[[46, 70], [52, 118]],
          camps=[[46, 76, "normal"], [42, 100, "light"]],
@@ -148,7 +154,6 @@ islands = [
          sheer=[[340, 20]],
          ramps=[ramp(174, 135, "n", 5, 2, 6, run=2)],
          rocks=rocks((160, 100, 161, 101), (186, 130, 187, 131), (168, 136, 170, 136)),
-         trees=[[176, 94], [190, 104], [158, 132]],
          landings=[[186, 100], [176, 140]],
          chests=[[172, 108], [184, 132]],
          camps=[[180, 112, "normal"], [162, 104, "light"]],
@@ -162,7 +167,7 @@ islands = [
     dict(id="thorn", name="Thornwood", role="nest", region=4, biome="bloom", danger=1, poi=[96, 170], noise=0.06,
          shapes=[poly([(84, 154), (104, 150), (126, 152), (142, 158), (147, 172), (137, 186), (112, 192), (90, 188), (78, 174)], 2)],
          sheer=[[60, 110]],
-         trees=[[90, 158], [93, 157], [104, 156], [110, 186], [113, 187], [86, 180], [100, 182], [116, 162], [118, 182]],
+         trees=thickets((104, 156), (86, 180), (118, 182)),
          rocks=rocks((108, 172, 109, 173)),
          landings=[[86, 168]],
          chests=[[100, 166], [114, 176]],
@@ -177,7 +182,6 @@ islands = [
          shapes=[poly([(16, 16), (36, 10), (52, 18), (55, 34), (44, 46), (22, 44), (12, 30)], 0),
                  circle(26, 24, 5.5, 2)],
          sheer=[[90, 150]],
-         trees=[[40, 16], [44, 20], [18, 34]],
          landings=[[34, 30], [46, 36], [20, 38]],
          chests=[[26, 24], [42, 28]],
          camps=[], breakables=[[30, 40, "crate"], [31, 40, "keg"]],
@@ -186,7 +190,7 @@ islands = [
     dict(id="highwatch", name="Highwatch", role="landing", region=6, biome="frost", danger=0, poi=[184, 22], noise=0.08,
          shapes=[poly([(170, 12), (192, 10), (204, 22), (202, 40), (186, 46), (172, 38), (166, 24)], 0)],
          sheer=[[0, 60]],
-         rocks=rocks((178, 18, 179, 18)), trees=[[196, 34], [174, 30]],
+         rocks=rocks((178, 18, 180, 18)),
          landings=[[180, 36], [196, 28], [174, 20]],
          chests=[[198, 24]],
          camps=[], breakables=[[184, 40, "crate"], [185, 40, "pot"]],
@@ -194,7 +198,6 @@ islands = [
     dict(id="duskmoor", name="Duskmoor", role="landing", region=7, biome="storm", danger=0, poi=[186, 184], noise=0.08,
          shapes=[poly([(176, 168), (196, 164), (206, 178), (202, 198), (184, 206), (170, 196), (168, 180)], 0)],
          sheer=[[150, 210]],
-         trees=[[180, 172], [194, 196], [174, 190]],
          rocks=rocks((188, 184, 189, 185)),
          landings=[[180, 182], [196, 188], [186, 200]],
          chests=[[192, 172]],
@@ -203,7 +206,6 @@ islands = [
     dict(id="saltmere", name="Saltmere", role="landing", region=8, biome="bloom", danger=0, poi=[24, 184], noise=0.08,
          shapes=[poly([(14, 170), (30, 164), (44, 172), (46, 190), (34, 204), (16, 202), (8, 186)], 0)],
          sheer=[[150, 210]],
-         trees=[[14, 180], [36, 198], [40, 178]],
          landings=[[16, 190], [34, 176], [28, 198]],
          chests=[[38, 186]],
          camps=[], breakables=[[18, 176, "pot"], [19, 176, "pot"]],

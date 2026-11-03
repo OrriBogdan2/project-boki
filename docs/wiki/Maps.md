@@ -14,7 +14,7 @@ Maps are JSON layouts in `content/maps/`. The expedition map in use is the one `
 
 ## The Arena
 
-The practice arena: one round floor ringed by low ruin walls with four gates, four pillars to slam people into, a raised dais on the north side for high ground, two patches of tall grass, and a small bench islet to the south across a short bridge (where the generator puts spawn points; the arena itself teleports you to the floor). No monsters, chests or breakables are spawned on it.
+The practice arena: one round floor ringed by low ruin walls with four gates, four 2x2 stone blocks to slam people into, a raised dais on the north side for high ground, two patches of tall grass, and a small bench islet to the south across a short bridge (where the generator puts spawn points; the arena itself teleports you to the floor). No monsters, chests or breakables are spawned on it.
 
 ### Islands
 
@@ -49,17 +49,17 @@ Hand-made expedition map (tools/make_hollowcrown.py; the format is described the
 
 | Island | Role | Biome | Danger | Tall grass clumps | Named spots |
 |---|---|---|---|---|---|
-| The Crown | heart | Gloom | dangerous | 29 |  |
+| The Crown | heart | Gloom | dangerous | 27 |  |
 | Stormcrown Gaol | camp | Storm | dangerous | 4 |  |
 | Ashen Gaol | camp | Ember | dangerous | 6 |  |
 | Frostgate | camp | Frost | contested | 6 | Frostgate Keep, Rimefield |
 | Cinder Steps | camp | Ember | contested | 15 | The Kilns, Forge Yard |
-| Stormbreak | shrine | Storm | contested | 13 |  |
+| Stormbreak | shrine | Storm | contested | 11 |  |
 | Thornwood | nest | Bloom | contested | 30 |  |
 | Larkhollow | landing | Meadow | quiet | 20 | Lark Stones |
 | Highwatch | landing | Frost | quiet | 3 |  |
 | Duskmoor | landing | Storm | quiet | 11 |  |
-| Saltmere | landing | Bloom | quiet | 9 |  |
+| Saltmere | landing | Bloom | quiet | 16 |  |
 | Shardfall | perch | Gloom | dangerous | 0 |  |
 
 ### Boss lairs
