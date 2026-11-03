@@ -823,3 +823,11 @@ On main and installed on the owner's PC.
   - Viewer bulwark RMB uses `bul_slamshield` (bul_bash is gone).
 - **HUD trade-off flagged to the owner:** the Boki box now shows only the bond ring. The bond %, MERGE, TOO FAR and RESCUE chips are gone, pending his call.
 - The owner added a third orchestrator agent. It reads these briefs and posts "ORCH check-in" entries to INBOX.md.
+
+## 2026-11-03 03:15 ET: OWNER: Pin's missed arrows land and linger (add to the Pin fix branch, OWNER_REVIEW item 5/6)
+- Owner: "pin's arrows should land where missed and linger for a bit."
+- **Missed arrows:** an LMB arrow that hits nothing sticks where it ends: in the ground at its landing spot (it lands at the cursor or at range), or in a wall it hits. Point it along its flight with a slight tilt, keep its fletching, and fade it out after about 3–4 s.
+- **Heavy Shot:** gets the same treatment, with a bigger stake (item 6 already asks for the wall pin).
+- **Limits:** pooled, with a cap of about 12 per Pin (oldest first). Cosmetic only, so no collision, and no rings or bursts on landing.
+- **Network:** show it for remote Pins too, from the shot's existing end event if there is one. Don't add a Net event just for this unless needed.
+- **Check:** a missed arrow leaves one stuck arrow at its end point, and it's gone after the linger time.
