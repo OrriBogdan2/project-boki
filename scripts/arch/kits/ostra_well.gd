@@ -3,7 +3,9 @@ extends RefCounted
 ## Ostra's ultimate on X, Nightwell (HeroUlt): tap X to set a well at the cursor (clamped, on ground short of
 ## walls). A pale dome of its exact size shows to everyone for 1.0s, then it opens into a turning violet
 ## disc for 3.5s: every foe inside (or who walks in) is stunned until it closes and drawn to its centre,
-## taking a small tick every 0.1s. Allies pass through untouched, and Ostra is free to act the whole time.
+## taking a small tick every 0.1s. Allies pass through untouched. Ostra is locked in the cast pose from the press
+## until it closes: no moving, no other abilities or attacks, and no turning once the short wind-up (data x.wind)
+## is over. A hard CC or a merge frees her.
 ## Swollen, it is larger. It closes quietly, with no blast. Bond: each hunter it catches counts as a land
 ## (HeroUlt.landed), paid on the catch, never per tick. Its looks hang on the match, not on Ostra, so a
 ## merge or a knock on her doesn't take the placed well down.
@@ -22,6 +24,9 @@ var radius := 0.0
 var swollen := false
 var tick_left := 0.0
 var caught := {}                        # instance id -> the body, for this cast
+var locked := false                     # Ostra is held in the cast pose
+var aim_lock := Vector2.ZERO            # the facing kept after the wind-up (ZERO until then)
+var lock_t := 0.0                       # s since the press
 # counters for the checks
 var casts := 0
 var opens := 0
@@ -53,6 +58,9 @@ func start() -> bool:
 	caught = {}
 	phase = "tell"
 	phase_t = 0.0
+	locked = true
+	aim_lock = Vector2.ZERO
+	lock_t = 0.0
 	casts += 1
 	k.play("ostra_well")
 	k.m.sfx("os_well", center, -2.0, 1.0)
@@ -60,11 +68,31 @@ func start() -> bool:
 	return true
 
 func tick(dt: float) -> void:
+	_tick_lock(dt)
 	match phase:
 		"tell":
 			_tick_tell(dt)
 		"open":
 			_tick_open(dt)
+
+## The lock: facing is kept once the wind-up is over; a stun or a knock frees her (the well itself goes on).
+func _tick_lock(dt: float) -> void:
+	if not locked:
+		return
+	if k.h.downed or k.h.out or k.h.stun_t > 0.0:
+		unlock()
+		return
+	lock_t += dt
+	if aim_lock == Vector2.ZERO and lock_t >= float(xd()["wind"]):
+		aim_lock = k.h.aim_dir()
+
+## Frees Ostra from the cast pose (the well stays); a merge, a CC or the close ends it.
+func unlock() -> void:
+	if not locked:
+		return
+	locked = false
+	aim_lock = Vector2.ZERO
+	k.play("ostra_well_end")
 
 ## The dome: everyone sees the well's exact size filling over the 1.0s before it opens.
 func _tick_tell(dt: float) -> void:
@@ -151,5 +179,6 @@ func _floor(p: Vector3) -> Vector3:
 ## It just stops: the disc folds in on itself, nothing bursts.
 func _close() -> void:
 	phase = ""
+	unlock()
 	k.m.fx.ring(center, radius * 0.4, DISC_COL, 0.2)
 	k.m.fx.burst(center + Vector3(0, 0.3, 0), Color("2a0a3a"), 10, -3.0, 0.3, 0.0, 0.9)

@@ -36,7 +36,7 @@ pearl and sea teal `#7fe0d0`, with void violet `#b06bff` for what she throws and
 | RMB Shard Snap | tap (1 charge) | holding RMB, or during the wind-up, the line becomes two rails the bundle's width (0.7m) | a 0.2s wind-up (an opaque black orb with a thin pale rim at her hand; she slows 25%), then one 2.7m bundle of dark violet crystal prisms with bright rims to 13m: 9.5 dmg, stuns the first foe 0.8s up close to 1.8s at range, stars over its head and STUNNED, on anyone including the training dummy | `ostra_snap_wind` (hold), `ostra_snap` | `os_snap_wind`, `os_snap`, `os_snap_hit` |
 | Shift Lantern Trade | hold to aim, release (a tap casts at once) | while held: both ends (her ring, the landing ring at the cursor and the link); in flight: both ends for everyone, each with a rune sigil (teal at her, violet at the circle) whose ring lights segment by segment and whose hexagram brightens | a dark indigo star-orb lobbed high (over 4m up) to the cursor, or 12m along it if the cursor is further, with no ground, wall or abyss check on the target, with a violet trail, 1.8s; meanwhile she drifts at 20% of run speed (`dash.fly_slow`, CastHold) at the height she cast at, even over the abyss (no fall); then she is there (an implosion and her appear-pop), keeping her height, and everyone in the 1.5m circle (foes, allies, Boki off the shoulder) goes to where she is when it lands, each keeping its place in the circle; foes are slowed 40% 3s (SLOWED). It never travels by itself: a press in flight is ignored, a press with no charge is refused | `ostra_swap_aim` (hold), `ostra_swap`, `ostra_arrive` | `os_swap_lob`, `os_swap` |
 | E Brimseed | tap, recast | at the cursor (9m), a ring everyone sees growing, dashed until full | a small violet mote drops onto the spot; a dark indigo glass drum with a violet swirl and a teal rim grows 6.5s to 3.2m; a light column rises from 68%; E again (from 0.3s) pops it: an implosion, 12.5 dmg up to 3.5x; left alone it pops 0.5s after full (COLLAPSE on a hunter at full) | `ostra_seed`, `ostra_pop` | `os_seed`, `os_full`, `os_pop` |
-| X Nightwell (level 6, 64s) | tap | at the cursor, clamped to 10m (on ground short of walls, like the seed): a pale dome of the well's exact size that everyone sees, filling over 1.0s (with a pink core when Swollen) | it opens into a turning violet disc for 3.5s, 3.6m wide (5.1m Swollen): every foe inside in sight of its centre, or who walks in, is stunned until it closes and drawn to the middle (12 m/s), taking 0.16 every 0.1s. Allies are untouched; Ostra acts freely; it closes with no blast. A merge or a knock on her doesn't end the placed well | `ostra_well`, `ostra_well_snap` (on opening) | `os_well`, `os_well_hum` |
+| X Nightwell (level 6, 64s) | tap | at the cursor, clamped to 10m (on ground short of walls, like the seed): a pale dome of the well's exact size that everyone sees, filling over 1.0s (with a pink core when Swollen) | it opens into a turning violet disc for 3.5s, 3.6m wide (5.1m Swollen): every foe inside in sight of its centre, or who walks in, is stunned until it closes and drawn to the middle (12 m/s), taking 0.16 every 0.1s. Allies are untouched. Ostra is locked in the cast pose from the press until it closes (item 16): no moving, jumping, dashing, other abilities or attacks, no turning after the 0.25s wind-up; a stun or knock, or a merge, frees her. It closes with no blast. A merge or a knock on her doesn't end the placed well | `ostra_well`, `ostra_well_snap` (on opening) | `os_well`, `os_well_hum` |
 | Merge (the `ultimate` action; its key from Settings.key_cap) | (Boki Merge) | | | | |
 
 Rank 3: Snap +30% and a burst of speed (+11% on the cast, +22% on a hit, 2s: the data's +50 and +100 of 465); Trade shields
@@ -59,7 +59,7 @@ level-4 bonus.
 | Trade into a crowd | a foe and an ally in the circle both end up at her origin, apart; a remote body is moved by its own game | `owner: two units in the circle ...`, `small: each keeps its place ...`, `net: a body another game owns ...` |
 | Merge start | Trade, its aim, the Snap wind-up and the prime drop; a placed Nightwell keeps going | `merge hold: ...`, `merge: a merge doesn't take the placed well down` |
 | Nightwell, then Seed on the middle, then pop | everyone caught sits stunned at the centre for the seed to grow on them | `ult open: ...`, `ult: the caught foe is drawn to the middle` |
-| Nightwell, then Snap | she acts freely while it holds | `ult: Ostra is free to act while it holds (a Snap)` |
+| Nightwell, then anything | she is locked in the cast pose until it closes, then free | `lock: ...` (ult check) |
 | Swollen, then Nightwell | the bigger 5.1m well | `ult Swollen: ...` |
 | Nightwell, then the merge | the target lives (burst cap) | `ult burst: the well, merge and its ultimate leave a full-health light hunter standing` |
 
@@ -97,7 +97,7 @@ Conversions: damage by the ratio to the orb (9 for the data's 263): Snap 277 -> 
 | A dome telegraph of the final size before it opens | footage | yes (f23-f32, 1.0s) | built, everyone sees it; asserted |
 | Enemies who enter during the 3.5s are caught too ("for 3.5s") | card | no | built; asserted `a foe who walks in later is caught too` |
 | Empowered: radius 350 -> 500 (and a June patch made Empowered really enlarge it) | card, patch notes (June 25) | yes (f89-f101) | built: 3.6m -> 5.1m when cast Swollen; asserted |
-| Void acts freely while it holds | footage | yes (f50, shooting) | built; asserted with a Snap |
+| Void acts freely while it holds | footage | yes (f50, shooting) | overridden by the owner (item 16): she is locked in the cast pose for the dome and the pull; asserted `lock: ...` |
 | Allies unaffected; it never breaks allied destructibles (patch) | sheet, patch notes (June 25) | | built: foes only; it hurts no walls at all |
 | Empowered damage is Explosive (175 a tick to destructibles) | wiki | no | not built: our destructibles are walls that take shot damage; a well tick is not a shot (owner question) |
 | It closes with no explosion | footage | yes (f66) | built |
@@ -133,7 +133,7 @@ Conversions: damage by the ratio to the orb (9 for the data's 263): Snap 277 -> 
 | Shift | `ostra_swap_aim` (hold), `ostra_swap`, `ostra_arrive` | `anim_os_swap`, `anim_os_arrive` |
 | E | `ostra_seed`, `ostra_pop` | `anim_os_seed`, `anim_os_pop` |
 | Passive proc | `ostra_empower` | `anim_os_empower` |
-| X | `ostra_well`, `ostra_well_snap` | `anim_os_well` |
+| X | `ostra_well` (wind-up, held), `ostra_well_snap` (held while it pulls), `ostra_well_end` | `anim_os_well` |
 
 ## Engine notes
 - Kit `scripts/arch/kits/ostra_kit.gd`; looks `kit_looks.gd` (pooled skins, aura, stun crown, column); the seed's drum in

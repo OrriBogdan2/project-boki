@@ -493,7 +493,7 @@ func _ostra() -> void:
 	# ---- every move, sound and look exists
 	var moves := [
 		"ostra_orb", "ostra_orb_hot", "ostra_snap_wind", "ostra_snap", "ostra_swap_aim", "ostra_swap", "ostra_arrive",
-		"ostra_seed", "ostra_pop", "ostra_empower"
+		"ostra_seed", "ostra_pop", "ostra_empower", "ostra_well", "ostra_well_snap", "ostra_well_end"
 	]
 	ok(
 		"anim: every Ostra move is keyed (KMovesStone)",

@@ -461,6 +461,8 @@ func is_local() -> bool:
 	return ctrl == "local"
 
 func aim_dir() -> Vector2:
+	if ak and ak.aim_lock() != Vector2.ZERO:
+		return ak.aim_lock()
 	var d := Vector2(inp["aim"].x - pos.x, inp["aim"].z - pos.z)
 	return d.normalized() if d.length() > 0.05 else Vector2(sin(face), cos(face)) * -1.0
 
@@ -775,7 +777,7 @@ func _on_zero(by: Ent, opts: Dictionary) -> void:
 
 # ------------------------------------------------------------------ actions
 func do_jump() -> void:
-	if downed or stun_t > 0.0 or grap.size() > 0 or out or KitStatus.grounded(self):
+	if downed or stun_t > 0.0 or grap.size() > 0 or out or KitStatus.grounded(self) or (ak and ak.cast_locked()):
 		return
 	KinFollow.on_jump(self)         # riding a mount: you come off it into the jump
 	if not lfloat.is_empty():

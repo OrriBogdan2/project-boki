@@ -1,9 +1,9 @@
 extends "res://tools/hero_pair_check.gd"
 ## Ostra's ultimate on X, Nightwell, for --ostra-combo-check (docs/heroes/ostra.md): the level gate, the well at
 ## the cursor clamped to 10m, the 1.0s dome everyone sees, the opening, the catch (stunned until it closes and
-## drawn to the middle), a foe walking in later, a foe behind a wall, allies untouched, Ostra free to act, the
-## small ticks, the quiet close, the Swollen size, the bond once per cast and only on a catch, the cooldown, the
-## merge (the placed well stays) and the burst cap.
+## drawn to the middle), a foe walking in later, a foe behind a wall, allies untouched, Ostra locked in the
+## cast pose (item 16), the small ticks, the quiet close, the Swollen size, the bond once per cast and only on a
+## catch, the cooldown, the merge (the placed well stays) and the burst cap.
 
 const BURST := preload("res://tools/ult_burst.gd")
 
@@ -134,12 +134,7 @@ func _catch_and_hold() -> void:
 	late.teleport(c + Vector3(0, 0, 3.0))
 	step(m, 0.3)
 	ok("ult: a foe who walks in later is caught too", late.stun_t > 1.0, "stun %.2f" % late.stun_t)
-	K.ch_rmb = 1.0
-	K.cd["rmb"] = 0.0
-	aim_at(P, home + Vector3(0, 0, -6))
-	tap(m, P)
-	step(m, 0.4)
-	ok("ult: Ostra is free to act while it holds (a Snap)", K.snaps == 1, "snaps %d" % K.snaps)
+	_lock_asserts(m, P, K, W, home)
 	paid0 = paid(P)
 	step(m, 2.0)
 	ok("ult bond: paid once per cast, never per tick", paid(P) == paid0)
@@ -196,3 +191,38 @@ func _burst() -> void:
 		standing,
 		"ult %.1f total %.1f of %.0f" % [float(out["ult"]), float(out["total"]), float(Data.CLASSES["light"]["hp"])]
 	)
+
+## Item 16: from the press until the well closes Ostra can't walk, jump, dash, use another ability or attack, or
+## turn once the wind-up is over; she is free right after, and a stun frees her early.
+func _lock_asserts(m: Match, P: Hunter, K: OstraKit, W: OstraWell, home: Vector3) -> void:
+	K.ch_rmb = 1.0
+	K.cd["rmb"] = 0.0
+	P.fire_cd = 0.0
+	var at := P.pos
+	var snaps0 := K.snaps
+	aim_at(P, home + Vector3(0, 0, -6))
+	var face0 := P.aim_dir()
+	P.inp["move"] = Vector2(1, 0)
+	tap(m, P)
+	P.inp["fire"] = true
+	P.dashes = P.max_dashes()
+	K.on_dash(false)
+	step(m, 0.4)
+	aim_at(P, home + Vector3(6, 0, 0))
+	step(m, 0.1)
+	P.inp["fire"] = false
+	P.inp["move"] = Vector2.ZERO
+	ok("lock: movement input doesn't move her", Vector2(P.pos.x - at.x, P.pos.z - at.z).length() < 0.05)
+	ok("lock: an RMB press and an attack are ignored", K.snaps == snaps0 and K.snap.is_empty() and P.shot_n == 0)
+	ok("lock: a Shift press is ignored (no Trade)", K.swap.is_empty() and K.swap_aim < 0.0)
+	ok("lock: she cannot turn once committed", P.aim_dir().distance_to(face0) < 0.01 and W.locked)
+	ok("lock: the cast pose is held (ostra_well_snap while it pulls)", K.anim_id == "ostra_well_snap")
+	P.inp["move"] = Vector2.ZERO
+	var left := float(W.xd()["time"]) - W.phase_t
+	step(m, maxf(left, 0.0) + 0.02)
+	ok("lock: free again when the well closes", not W.running() and not W.locked and not K.busy())
+	step(m, 0.3)
+	aim_at(P, home + Vector3(0, 0, -6))
+	tap(m, P)
+	step(m, 0.4)
+	ok("lock: she can act right after (a Snap)", K.snaps == snaps0 + 1, "snaps %d" % K.snaps)

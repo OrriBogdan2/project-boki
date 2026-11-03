@@ -57,6 +57,12 @@ func cast_ult() -> bool: return HeroUlt.press(self, well.start)
 func has_ult() -> bool: return true
 func ult_running() -> bool: return well.running()
 
+## Nightwell holds her in the cast pose: no walking, jumping, dashing, other abilities or attacks, no turning.
+func cast_locked() -> bool: return well.locked
+func aim_lock() -> Vector2: return well.aim_lock
+func busy() -> bool: return super.busy() or well.locked
+func can_shoot() -> bool: return not well.locked and super.can_shoot()
+
 func res_text() -> String: return "SWOLLEN" if is_swollen() else "%d" % int(res)
 func ready_label() -> String: return "SWOLLEN" if is_swollen() else ""
 func e_recastable() -> bool: return not seed.is_empty()
@@ -107,6 +113,8 @@ func outgoing(t: Ent, dmg: float, o: Dictionary) -> float:
 
 ## She drifts slowly (dash.fly_slow of run speed) while the Trade is in flight; the Snap's wind-up slows her.
 func move_k() -> float:
+	if well.locked:
+		return 0.0
 	if not swap.is_empty():
 		return (swap["hold"] as CastHold).slow_k
 	var k := 1.0 - float(rmb_def()["snap"]["cast_slow"]) if not snap.is_empty() else 1.0
@@ -196,6 +204,8 @@ func swap_time() -> float:
 ## A tap lobs at once. It never travels by itself, so a press in the air or with no charge never sends
 ## her off in some other direction: it waits for the next charge.
 func on_dash(_use_ex: bool) -> bool:
+	if well.locked:
+		return true
 	if not swap.is_empty() or swap_aim >= 0.0:
 		return true
 	if h.dashes < 1.0:
@@ -285,6 +295,7 @@ func dash_afterimage() -> bool:
 ## A Boki merge ends the Trade in flight (nobody is sent), its aim, the Snap's wind-up and the Settled
 ## orb's prime.
 func _drop_holds() -> void:
+	well.unlock()
 	swap_aim = -1.0
 	snap = {}
 	if not swap.is_empty():

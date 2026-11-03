@@ -566,43 +566,57 @@ const MOVES := {
 			}
 		],
 		[0.60, {}]]},
-	# Nightwell: the lantern hand thrust up and out at the spot (0.1), held while the dome shows, then down
-	"ostra_well": {"keys": [
+	# Nightwell: a committed cast. She gathers low (0.08), then both hands rise wide and high (0.25, the wind-up)
+	# and she holds that pose while the dome shows
+	"ostra_well": {"hold": true, "keys": [
 		[0.00, {}],
 		[
-			0.05,
+			0.08,
 			{
-				"gp": -0.5, "p": 0.25, "y": -0.35, "sq": 0.14, "fr": Vector3(0.25, -0.1, 0.3), "rw": 1.0,
-				"fl": Vector3(-0.2, 0.2, -0.1), "hw": 0.8
+				"gp": -0.5, "p": 0.2, "sq": 0.16, "fl": Vector3(-0.45, -0.1, -0.1), "hw": 1.0,
+				"fr": Vector3(0.45, -0.1, -0.1), "rw": 1.0
 			}
 		],
 		[
-			0.10,
+			0.25,
 			{
-				"gp": 0.9, "p": -0.45, "y": 0.3, "sq": -0.2, "lift": 0.2, "fr": Vector3(0.05, 0.85, -0.8),
-				"rw": 1.0, "fl": Vector3(-0.4, 0.0, 0.3), "hw": 1.0
+				"gp": 0.9, "p": -0.3, "sq": -0.18, "lift": 0.2, "fl": Vector3(-0.6, 0.9, -0.2), "hw": 1.0,
+				"fr": Vector3(0.6, 0.9, -0.2), "rw": 1.0
 			}
-		],
+		]]},
+	# the well opens: both fists clench in (0.06) and then draw inward at the chest, held while it pulls
+	"ostra_well_snap": {"hold": true, "keys": [
 		[
-			0.40,
+			0.00,
 			{
-				"gp": 0.7, "p": -0.35, "y": 0.25, "lift": 0.16, "fr": Vector3(0.05, 0.8, -0.72), "rw": 1.0,
-				"fl": Vector3(-0.38, 0.0, 0.28), "hw": 0.9
+				"gp": 0.9, "p": -0.3, "sq": -0.18, "lift": 0.2, "fl": Vector3(-0.6, 0.9, -0.2), "hw": 1.0,
+				"fr": Vector3(0.6, 0.9, -0.2), "rw": 1.0
 			}
 		],
-		[0.80, {}]]},
-	# the well opens: the raised hand clenches shut and pulls down to the chest, a quarter turn with it
-	"ostra_well_snap": {"keys": [
-		[0.00, {}],
 		[
 			0.06,
 			{
-				"gp": -0.6, "p": 0.3, "y": 0.5, "sq": 0.2, "fr": Vector3(0.05, 0.2, -0.15), "rw": 1.0,
-				"fl": Vector3(-0.05, 0.2, -0.15), "hw": 1.0
+				"gp": -0.2, "p": 0.2, "sq": 0.1, "lift": 0.08, "fl": Vector3(-0.1, 0.4, -0.5), "hw": 1.0,
+				"fr": Vector3(0.1, 0.4, -0.5), "rw": 1.0
 			}
 		],
-		[0.18, {"gp": 0.3, "p": 0.1, "y": 0.2, "sq": 0.05, "fr": Vector3(0.1, 0.1, -0.25), "rw": 0.7}],
-		[0.40, {}]]},
+		[
+			0.20,
+			{
+				"gp": 0.3, "p": 0.1, "lift": 0.12, "fl": Vector3(-0.2, 0.6, -0.55), "hw": 1.0,
+				"fr": Vector3(0.2, 0.6, -0.55), "rw": 1.0
+			}
+		]]},
+	# the well closes: the hands let go and drop
+	"ostra_well_end": {"keys": [
+		[
+			0.00,
+			{
+				"gp": 0.3, "p": 0.1, "lift": 0.12, "fl": Vector3(-0.2, 0.6, -0.55), "hw": 1.0,
+				"fr": Vector3(0.2, 0.6, -0.55), "rw": 1.0
+			}
+		],
+		[0.30, {}]]},
 	# Swollen: lifted off the ground, arms flung up and wide, one full turn in the air, then down
 	"ostra_empower": {"keys": [
 		[0.00, {}],
