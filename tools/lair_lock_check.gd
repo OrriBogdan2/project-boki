@@ -90,7 +90,7 @@ func run(main: Node) -> void:
 	var w0 := m.wpicks.size()
 	var kill_t := _kill(F, P, C)
 	var gems_new: Array = dropped.filter(func(p): return String(p["kind"]) == "gem")
-	# (a utility item from the boss table is loot now, on the 1/2/3 belt: ext/equal, UtilityDrops)
+	# (utility items and keys from the boss table are loot now: UtilityDrops, decision 0007)
 	var other_new: Array = dropped.filter(func(p): return not _is_loot_kind(String(p["kind"])))
 	var gem_total := 0
 	for p in gems_new: gem_total += int(p["v"])
@@ -200,4 +200,4 @@ func run(main: Node) -> void:
 
 ## Gems, keys and utility items are loot from a boss table, not stray junk.
 func _is_loot_kind(kind: String) -> bool:
-	return kind in ["gem", "key"] or UtilityBelt.is_item(kind)
+	return kind in ["gem", "key", "ckey"] or UtilityBelt.is_item(kind)

@@ -2196,16 +2196,16 @@ func _extract_check() -> void:
 	# a key in a deathbox: the teammate dies carrying one, the player loots it
 	mate.rift_keys = 1
 	mate.lives = 1
-	mate.teleport(hp + Vector3(3.0, 0, 0))
+	# its box lands clear of the hatch: a revive prompt there would beat the hatch's
+	mate.teleport(m.world.free_spot_near(hp + Vector3(6.0, 0, 0), [], 0.5, 0.4, 6.0))
 	m.eliminate(mate, R, "knocked out", true)
 	var bx := Life.box_of(m, mate)
-	var box_keys := (bx.get("belt", []) as Array).filter(func(st): return st["id"] == "rift_key").size()      # keys ride the belt
-	print("EXCHECK hatch: teammate died with a key: their keys=%d box keys=%d" % [mate.rift_keys, box_keys])
-	if mate.rift_keys != 0 or box_keys != 1: ok = false; print("EXCHECK FAIL key not in the box")
+	print("EXCHECK hatch: teammate died with a key: their keys=%d box keys=%d" % [mate.rift_keys, int(bx.get("keys", -1))])
+	if mate.rift_keys != 0 or int(bx.get("keys", 0)) != 1: ok = false; print("EXCHECK FAIL key not in the box")
 	P.rift_keys = 0
 	var got_key := false
 	for it in Life.box_items(m, P, bx):
-		if it.get("id", "") == "rift_key": Life.take_item(m, P, bx, it); got_key = true
+		if it["key"] == "keys": Life.take_item(m, P, bx, it); got_key = true
 	print("EXCHECK hatch: looted the box: player keys=%d" % P.rift_keys)
 	if not got_key or P.rift_keys != 1: ok = false; print("EXCHECK FAIL couldn't loot the key")
 	var pings0 := m.pings.size()
@@ -2230,6 +2230,7 @@ func _extract_check() -> void:
 	print("EXCHECK hatch: opened after %.1fs, %d uses" % [m.time - t0, int(hx.get("uses", 0))])
 	if hx["state"] != "open" or absf(m.time - t0 - 10.0) > 0.6 or int(hx.get("uses", 0)) != 3: ok = false; print("EXCHECK FAIL hatch didn't open after 10s with 3 uses")
 	# three drop through: the player by pressing, a rival and his teammate by walking in
+	P.teleport(hp + Vector3(1.0, 0, 0.0))      # (back at the hatch: something may have nudged you while it opened)
 	press.call(P, 0.2)
 	var u1 := int(hx["uses"])
 	var R2: Hunter = rivals[1]

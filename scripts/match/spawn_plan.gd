@@ -193,9 +193,9 @@ func spawn_all() -> void:
 		var p: Vector3 = c["pos"]
 		match String(c["cat"]):
 			"vault":
-				c["ref"] = m.add_chest(p, 2)
+				c["ref"] = m.add_chest(p)
 			"cache":
-				c["ref"] = m.add_chest(p, 1)
+				c["ref"] = m.add_chest(p)
 				# and a good piece of gear beside it, the same for everyone online
 				var gg := GearDrops.roll_gear(wr, 1, 2, -1, m.biomes.slot_lean_at(p) if m.biomes else {})
 				var wp := m.world.free_spot_near(p + Vector3(1.4, 0, 0.4), [p], 0.6)

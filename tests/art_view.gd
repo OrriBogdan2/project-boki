@@ -87,8 +87,8 @@ func _stage(id: String) -> void:
 		things.append(n)
 	things.append(Models.hunter("medium", Data.TEAM_COLORS[0], "rifle"))
 	things.append(Models.hunter("heavy", Data.TEAM_COLORS[1], "shotgun"))
-	things.append(Models.chest(1))
-	things.append(Models.chest(0))
+	things.append(Models.chest())
+	things.append(Models.chest())
 	things.append(Models.breakable("crate"))
 	things.append(Models.breakable("barrel"))
 	var rr := RandomNumberGenerator.new(); rr.seed = 5

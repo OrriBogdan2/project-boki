@@ -33,32 +33,39 @@ func _match() -> void:
 	eq._farm(false)
 	var m: Match = eq._start(1, 7070)
 	var P := m.player
-	# picked up: a slot with a count
+	# picked up: the count is the truth, the belt shows it in a slot
 	P.belt = UtilityBelt.empty()
 	P.belt_free = {}
 	m.drop("key", P.pos + Vector3(0, 0.5, 0), 1)
 	m._collect(P, m.pickups[m.pickups.size() - 1])
+	BeltKeys.sync(P)
 	ok(P.rift_keys == 1 and UtilityBelt.slot_of(P, "rift_key") >= 0, "a picked-up Rift Key sits in a belt slot")
 	ok(not UtilityBelt.can_take(P, "key"), "a second Rift Key doesn't fit its stack of 1")
-	P.chest_keys = 2
-	ok(P.chest_keys == 2 and UtilityBelt.count(P, "chest_key") == 2, "chest keys stack in one slot (2)")
+	m.drop("ckey", P.pos + Vector3(0, 0.5, 0), 1)
+	m._collect(P, m.pickups[m.pickups.size() - 1])
+	KeyChest.give(P, 1)
+	BeltKeys.sync(P)
+	var ck := UtilityBelt.slot_of(P, "chest_key")
+	ok(P.chest_keys == 2 and ck >= 0 and int(P.belt[ck]["n"]) == 2, "chest keys stack in one slot with the count (2)")
+	ok(UtilityBelt.max_of("chest_key") == KeyChest.cap(), "the chest key cap is KeyChest.cap() (%d)" % KeyChest.cap())
 	# a full belt: the key stays on the ground and a slot press swaps
 	UtilityBelt.grant(P, "tonic", 2)
 	UtilityBelt.grant(P, "smoke", 1)
-	P.chest_keys = 3
+	P.rift_keys = 0
+	BeltKeys.sync(P)
+	UtilityBelt.grant(P, "scanner", 1)
 	m.drop("key", P.pos + Vector3(0, 0.3, 0), 1, "", "", Vector3.ZERO)
 	var key_p: Dictionary = m.pickups[m.pickups.size() - 1]
 	key_p["t"] = 1.0
-	P.rift_keys = 0
-	UtilityBelt.grant(P, "scanner", 1)
 	ok(not UtilityBelt.can_take(P, "key") and BeltKeys.blocked_pickup(P) == key_p,
 			"belt full: the key can't be picked up and waits on the ground")
 	var smoke_slot := UtilityBelt.slot_of(P, "smoke")
 	var n_pick := m.pickups.size()
 	UtilityBelt.press(P, smoke_slot)
+	BeltKeys.sync(P)
 	var dropped: Dictionary = m.pickups[m.pickups.size() - 1]
 	ok(P.rift_keys == 1 and UtilityBelt.count(P, "smoke") == 0 and String(dropped["kind"]) == "smoke"
-			and int(dropped["v"]) == 1 and m.pickups.size() == n_pick,
+			and int(dropped["v"]) == 1 and m.pickups.size() == n_pick and UtilityBelt.slot_of(P, "rift_key") >= 0,
 			"pressing a slot swaps it: the smoke bomb is on the ground, the key on the belt")
 	# use: beside a sealed hatch it unlocks; elsewhere it pings the nearest one
 	var hatches: Array = m.exits.of_kind("hatch").filter(func(x): return x["state"] == "sealed")
@@ -73,36 +80,40 @@ func _match() -> void:
 				"far from a hatch: its slot pings the nearest one, the key stays")
 		P.teleport(hx["pos"] + Vector3(0.6, 0, 0))
 		UtilityBelt.press(P, UtilityBelt.slot_of(P, "rift_key"))
-		ok(String(hx["state"]) == "unlocking" and P.rift_keys == 0,
-				"beside a hatch: its slot unlocks it and spends the key")
-	# a lock registered by the chest code
-	var opened := [false]
-	BeltKeys.register_lock("chest_key", func(h): return "chest" if h.has_meta("by_chest") else null,
-			func(h, _lock): opened[0] = true, func(_h): return [P.pos + Vector3(20, 0, 0)], Color.GOLD)
-	var pings1 := m.pings.size()
-	UtilityBelt.press(P, UtilityBelt.slot_of(P, "chest_key"))
-	P.set_meta("by_chest", true)
-	UtilityBelt.press(P, UtilityBelt.slot_of(P, "chest_key"))
-	ok(m.pings.size() == pings1 + 1 and opened[0], "a registered chest lock: ping when far, open when beside it")
-	P.remove_meta("by_chest")
+		ok(String(hx["state"]) == "unlocking" and P.rift_keys == 0 and UtilityBelt.slot_of(P, "rift_key") < 0,
+				"beside a hatch: its slot unlocks it, spends the key and frees the slot")
+	# a locked chest: far, a ping; beside it, it opens and costs one key
+	var chests: Array = m.chests.filter(func(c): return not c["open"] and not bool(c.get("free", false)))
+	if chests.is_empty():
+		ok(false, "the test map has a locked chest")
+	else:
+		var c: Dictionary = chests[0]
+		P.teleport(c["pos"] + Vector3(15, 0, 0))
+		var pings1 := m.pings.size()
+		UtilityBelt.press(P, UtilityBelt.slot_of(P, "chest_key"))
+		P.teleport(c["pos"] + Vector3(0.8, 0, 0))
+		UtilityBelt.press(P, UtilityBelt.slot_of(P, "chest_key"))
+		ok(m.pings.size() == pings1 + 1 and bool(c["open"]) and P.chest_keys == 1,
+				"chest key: ping when far, open when beside it (one key spent)")
 	# never taken home, always in the deathbox
 	ok(not UtilityBelt.keepers(P).has("chest_key"), "keys never come home with you")
 	P.lives = 1
 	m.eliminate(P, null, "knocked out", true)
 	var bx := Life.box_of(m, P)
-	ok((bx["belt"] as Array).any(func(st): return st["id"] == "chest_key" and int(st["n"]) == 3) and P.chest_keys == 0,
-			"die and the keys are in your deathbox")
+	ok(int(bx.get("chest_keys", 0)) == 1 and P.chest_keys == 0, "die and the keys are in your deathbox")
 	# a bot with a full belt makes room for a key (its cheapest stack, never a key)
 	var bot: Hunter = m.hunters.filter(func(x): return x != P and x.ctrl == "bot")[0]
 	bot.belt = UtilityBelt.empty()
 	bot.belt_free = {}
-	for id in ["tonic", "armor_kit", "smoke", "chest_key"]:
+	bot.rift_keys = 0
+	bot.chest_keys = 1
+	for id in ["tonic", "armor_kit", "smoke"]:
 		UtilityBelt.grant(bot, id, 1)
+	BeltKeys.sync(bot)
 	m.drop("key", bot.pos + Vector3(0, 0.3, 0), 1, "", "", Vector3.ZERO)
 	m.pickups[m.pickups.size() - 1]["t"] = 1.0
 	BeltKeys.tick(m)
 	ok(bot.rift_keys == 1 and bot.chest_keys == 1, "a bot with a full belt drops its cheapest stack for a key")
-	BeltKeys._locks.erase("chest_key")
 	await eq._drop(m)
 
 func _migration() -> void:

@@ -19,6 +19,10 @@ Full numbers: [Weapons](Weapons.md) and [Gloves](Gloves.md).
 - **Elements.** Some found weapons carry an element whose hits burn, chill, arc or poison.
 - **Named weapons.** Always Legendary and elemental, with a perk of their own. Wardens and vaults drop them, rarely.
 - **Gloves**, **tonics**, **armor kits** and **armor shards**.
+- **Chest keys.** One opens one chest. Carried by monsters and Shrublings; they drop with them, lie on the
+  ground and go into your deathbox if you fall. Sometimes a spare drops from an elite, a boss, any
+  monster, a pot, a barrel or a crate. Never sold in shops. They sit in your utility belt, up to 3; with
+  a full stack a key stays on the ground for later.
 - **Rift Keys.** Rare, found in matches only. Open a rift hatch (see [Expeditions](Expeditions.md#getting-out)). One sits on your utility belt; lost to your deathbox if you die.
 - **Valuables** to sell at home: Old Coin, Sky Pearl, Boki Idol, Crown Shard, and the **Soul Ember**
   the Soul Shrine needs.
@@ -40,7 +44,7 @@ counted, not packed, and scanned Boki (capsules in your box, 3 at most) ride alo
 - Extract and it all goes to the Armory. Die and it goes into your deathbox.
 
 **Keys on the belt.** Rift Keys and chest keys take a utility slot each (keys 1-4) and stack in it
-(1 Rift Key, 3 chest keys), so you always see what you carry. With a full belt a key stays on the
+(1 Rift Key, up to 3 chest keys), so you always see what you carry. With a full belt a key stays on the
 ground: press a slot's key to swap that slot for it. Press the key's slot beside a hatch or chest to
 open it, or anywhere else to ping the nearest one on your map (F still works too). Keys are found in
 matches only, and go in your deathbox if you die.

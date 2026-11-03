@@ -56,7 +56,7 @@ static func is_item(id: String) -> bool:
 static func item_of(kind: String) -> String:
 	return String(OLD_KINDS.get(kind, kind))
 
-const OLD_KINDS := {"armor": "armor_kit", "key": "rift_key"}
+const OLD_KINDS := {"armor": "armor_kit", "key": "rift_key", "ckey": "chest_key"}
 
 ## Keys sit on the belt but are never brought in, bought or taken home.
 static func is_key(id: String) -> bool:
@@ -80,6 +80,8 @@ static func icon_of(id: String) -> String:
 
 ## Most charges one slot holds (found and bought ones can fill it).
 static func max_of(id: String) -> int:
+	if BeltKeys.is_key(id):
+		return BeltKeys.cap(id)
 	return int(def(id).get("max", 3))
 
 ## Most you can bring from home at a difficulty tier (Data.TIERS index), the stack cap by tier.
@@ -106,6 +108,8 @@ static func slot_of(h, id: String) -> int:
 	return -1
 
 static func count(h, id: String) -> int:
+	if BeltKeys.is_key(id):
+		return BeltKeys.held(h, id)
 	var i := slot_of(h, id)
 	return int(h.belt[i]["n"]) if i >= 0 else 0
 
@@ -113,12 +117,26 @@ static func count(h, id: String) -> int:
 static func room_for(h, id: String) -> int:
 	if not is_item(id):
 		return 0
+	if BeltKeys.is_key(id):
+		return _key_room(h, id)
 	var i := slot_of(h, id)
 	if i >= 0:
 		return max_of(id) - int(h.belt[i]["n"])
 	for s in h.belt:
 		if (s as Dictionary).is_empty():
 			return max_of(id)
+	return 0
+
+## A key: room up to its cap while it has a slot (or a slot is free); none past the cap.
+static func _key_room(h, id: String) -> int:
+	var left := BeltKeys.cap(id) - BeltKeys.held(h, id)
+	if left <= 0:
+		return 0
+	if BeltKeys.held(h, id) > 0 and slot_of(h, id) >= 0:
+		return left
+	for s in h.belt:
+		if (s as Dictionary).is_empty():
+			return left
 	return 0
 
 static func has_room(h, id: String) -> bool:
@@ -132,6 +150,8 @@ static func can_take(h, kind: String) -> bool:
 ## Puts charges on the belt: onto the same item's slot, else the first empty one. `issued` marks them as
 ## issued (used first, never taken home). Returns how many went on (0 when the belt is full).
 static func grant(h, id: String, n := 1, issued := false) -> int:
+	if BeltKeys.is_key(id):
+		return BeltKeys.give(h, id, n)
 	var put := mini(n, room_for(h, id))
 	if put <= 0:
 		return 0
@@ -160,6 +180,8 @@ static func pickup(h, id: String, n := 1) -> void:
 
 ## Removes charges (issued ones go first). Returns how many were taken.
 static func take(h, id: String, n := 1) -> int:
+	if BeltKeys.is_key(id):
+		return BeltKeys.take(h, id, n)
 	var i := slot_of(h, id)
 	if i < 0:
 		return 0
@@ -190,11 +212,12 @@ static func keepers(h) -> Dictionary:
 			out[id] = n
 	return out
 
-## Empties the belt and returns what was on it as [{id, n}] (for the deathbox).
+## Empties the belt and returns what was on it as [{id, n}] (for the deathbox; keys go in the box
+## through their own counts).
 static func clear(h) -> Array:
 	var out: Array = []
 	for s in h.belt:
-		if not (s as Dictionary).is_empty():
+		if not (s as Dictionary).is_empty() and not BeltKeys.is_key(String(s["id"])):
 			out.append({"id": String(s["id"]), "n": int(s["n"])})
 	h.belt = empty()
 	h.belt_free = {}
@@ -237,6 +260,7 @@ static func _feedback(h, key: String, kind: String) -> void:
 
 ## Every step: the channelled drinks and repairs finish, slot cooldowns run.
 static func tick(h, dt: float) -> void:
+	BeltKeys.sync(h)
 	for s in h.belt:
 		if not (s as Dictionary).is_empty() and float(s.get("cd", 0.0)) > 0.0:
 			s["cd"] = maxf(0.0, float(s["cd"]) - dt)

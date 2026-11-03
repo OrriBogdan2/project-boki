@@ -84,7 +84,21 @@ The layout of a map never changes. What's live is rolled each match:
 - **Events:** a meteor shower about a quarter of the way in (the stars leave gems), the Warden waking
   in the middle, and halfway through a Glimmerkin that runs: bring it down before it gets away.
 - **Loot:** crates, pots and red barrels break when you shoot or dash through them (barrels explode).
-  Chests take a moment to open. See [Gear and items](Gear-and-Items.md).
+  See [Gear and items](Gear-and-Items.md).
+- **Chests and keys.** There is one kind of chest and it is locked: holding F opens it for one key.
+  Keys are carried by monsters (glinting gold), as many as there are chests in each region; kill one and
+  the key drops. Now and then a spare one turns up: elites and bosses sometimes drop one (or two), any
+  monster rarely, and pots, barrels and crates very rarely. Keys are never for sale. Keys sit in your utility belt (up to 3), go into your deathbox and
+  can be picked up off the ground; with a full stack you leave the key lying there. Bots fight for keys before chests. What a chest holds follows its area and the
+  expedition tier.
+- **Shrublings.** A bush that is not a bush. While it hides it is real cover: you can walk into it and
+  hide in it, and standing next to it gives nothing away. Every 5 to 10 seconds its blades wobble and
+  shimmer for a moment. Hit it and it bolts (anyone hiding in it is suddenly in the open), faster than
+  you walk but slower than a dash, weaving, and dives into other tall grass to hide again. It never
+  attacks, always carries a key, and a slow, a root or a grab stops it. They live only in the
+  tall-grass biomes (bloom, meadow, gloom, storm), one to three per match.
+- **Tall grass** hides you. It varies by biome: a lot in bloom thickets, some in meadow bands, little in
+  gloom, storm and ember, and almost none on frost ice.
 
 Each map and what it rolls is on [Maps and biomes](Maps.md).
 

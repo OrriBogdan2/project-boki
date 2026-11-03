@@ -1,5 +1,5 @@
 {
- "_doc": "bot_start.slots: boots first, then up to two different active gloves (Gloves.bot_fill). Drop tables for gear and weapon tunings (scripts/match/gear_drops.gd). Each table is a list of rolls: kind gear (a piece for one of the five slots) or tune (a weapon upgrade pickup, brand = an element one). chance = odds the roll happens; bonus = rarity steps up; min_rar = the lowest rarity it can be (0 Common .. 4 Legendary); slot = force a slot (glove, passive, armor, boots). Bosses drop fewer, higher-value items. extract_mats: farm materials an extracted piece of gear also gives, by rarity (Common..Legendary).",
+ "_doc": "bot_start.slots: boots first, then up to two different active gloves (Gloves.bot_fill). Drop tables for gear and weapon tunings (scripts/match/gear_drops.gd). Each table is a list of rolls: kind gear (a piece for one of the five slots) or tune (a weapon upgrade pickup, brand = an element one). chance = odds the roll happens; bonus = rarity steps up; min_rar = the lowest rarity it can be (0 Common .. 4 Legendary); slot = force a slot (glove, passive, armor, boots). Bosses drop fewer, higher-value items. extract_mats: farm materials an extracted piece of gear also gives, by rarity (Common..Legendary). The chest table is the one chest type (all chests are locked, see content/rules/keys.json).",
  "rarity_weights": [
   30,
   36,
@@ -37,53 +37,6 @@
    {
     "kind": "tune",
     "chance": 0.08
-   }
-  ],
-  "chest0": [
-   {
-    "kind": "gear",
-    "chance": 0.55
-   },
-   {
-    "kind": "tune",
-    "chance": 0.3
-   }
-  ],
-  "chest1": [
-   {
-    "kind": "gear",
-    "chance": 0.9,
-    "bonus": 1
-   },
-   {
-    "kind": "gear",
-    "chance": 0.3
-   },
-   {
-    "kind": "tune",
-    "chance": 0.55
-   }
-  ],
-  "chest2": [
-   {
-    "kind": "gear",
-    "chance": 1.0,
-    "bonus": 1,
-    "min_rar": 2
-   },
-   {
-    "kind": "gear",
-    "chance": 0.5,
-    "bonus": 1
-   },
-   {
-    "kind": "tune",
-    "chance": 0.9
-   },
-   {
-    "kind": "tune",
-    "chance": 0.35,
-    "brand": true
    }
   ],
   "brute": [
@@ -163,6 +116,21 @@
     "kind": "tune",
     "chance": 1.0,
     "brand": true
+   }
+  ],
+  "chest": [
+   {
+    "kind": "gear",
+    "chance": 0.9,
+    "bonus": 1
+   },
+   {
+    "kind": "gear",
+    "chance": 0.3
+   },
+   {
+    "kind": "tune",
+    "chance": 0.55
    }
   ]
  },
