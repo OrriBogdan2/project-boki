@@ -249,3 +249,12 @@ The owner saw an explosion with Moosh Moosh and isn't sure whether it comes from
 
 ## 34. NOTE: every hero portrait looks bad (already covered by briefs/specs/CONCEPT_PASS.md)
 - Owner: all the portraits look horrible. This is in scope for the character concept pass (after the resets), which includes the portraits. No separate work now. When that pass starts, the portraits are a top deliverable for all 12, not an afterthought: one consistent painted style, readable at HUD size, each matching that hero's new concept. Owner review before merge.
+
+## 35. Dash animations: each hero needs their own, closer to the source (cross-hero pass; pairs with item 32)
+- Owner: most dashes look the same (Vireo and Venator are the exceptions). In general, the dash animations need to look more like the source.
+- For each hero except Vireo and Venator, study the source's ground and air dash in the footage (`/home/claude/hero-ref/<hero>.md` body studies, frames in /home/claude/svvid) and build a distinct dash move in `HunterAnim` KMOVES that matches its silhouette, posture, timing and weight. Our own art; same motion feel.
+- **Dredge example (owner):** a monstrous dash where he lunges forward low, almost clawing or grabbing the ground ahead and hauling himself along: heavy, bestial, knuckles or hands reaching forward. Not exactly that, but very monster-like.
+- No shared roll or slide for anyone. Keep the gameplay timing from dash_feel; the animation fits inside it. No explosions or ground rings (item 8 rule).
+- Do it per hero together with item 32's dash → ability rows, and item 24 for Moosh Moosh.
+- Assert: no two heroes use the same dash move id; each dash's move length fits the dash duration.
+- Screenshots: a 5-frame strip per hero, ground and air, next to one matching reference frame description (never copy the frames into the repo).
