@@ -162,6 +162,24 @@ def _element(src, eid):
     return src[i:j]
 
 
+def _drop_fx_groups(svg):
+    """Remove every <g ... class="fx" ...> group, nested groups and all (balanced)."""
+    while True:
+        mo = re.search(r'<g\b[^>]*\bclass="fx"[^>]*>', svg)
+        if not mo:
+            return svg
+        depth, end = 0, len(svg)
+        for t in re.finditer(r"<g\b[^>]*?(/?)>|</g>", svg[mo.start():]):
+            if t.group(0) == "</g>":
+                depth -= 1
+            elif not t.group(1):
+                depth += 1
+            if depth == 0:
+                end = mo.start() + t.end()
+                break
+        svg = svg[:mo.start()] + svg[end:]
+
+
 def inline_uses(svg, lib):
     """Replace <use href="#L-x"> with a copy of L-x from lib (for the silhouette pass)."""
     def sub(mo):
@@ -239,7 +257,7 @@ def expand(svg, meta, silhouette=False):
     svg = re.sub(r'id="L-', 'id="%s-' % cid, svg)
     svg = shapes(svg, meta)
     if silhouette:
-        svg = re.sub(r'<g class="fx"[^>]*>.*?</g>', "", svg, flags=re.S)
+        svg = _drop_fx_groups(svg)
         svg = re.sub(r'<[a-z]+[^<>]*?(class="fx"|\b(sh|hl|rim|ln|ink|sg|sgl|sgv|sgu|sgr|hg|rg)="[^"]*")[^<>]*/>', "", svg)
         svg = re.sub(r'\b(fill|stroke|stop-color)="(?!none)[^"]*"', r'\1="#111"', svg)
         svg = re.sub(r'\b(opacity|fill-opacity|stroke-opacity)="[^"]*"', "", svg)
