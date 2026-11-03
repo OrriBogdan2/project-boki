@@ -1,0 +1,163 @@
+<!--META {
+ "name": "Moosh Moosh", "title": "Fox Cub", "tag": "id tender  ·  female  ·  fox-folk  ·  support",
+ "accent": "#ffb040", "rim": "#fff0c8", "shadow": 80, "bust_bg": "#2a2016",
+ "stage": ["#6a6050", "#16120c"],
+ "relic": "the Hearth Acorn",
+ "mat": {
+  "fur": ["#ffc080", "#f06a24", "#7a2a08"],
+  "cream": ["#ffffff", "#f6e6cc", "#b49a78"],
+  "dark": ["#5a4a44", "#2a2020", "#0e0a0a"],
+  "tunic": ["#fff4dc", "#e8d2a8", "#9a8058"],
+  "moss": ["#8ad8b0", "#2e8a6a", "#0e3a2c"],
+  "leather": ["#b88a5a", "#7a5232", "#33200f"],
+  "wood": ["#c8925a", "#8a5a30", "#3a2410"],
+  "brass": ["#ffe6a0", "#d0a048", "#5a3e10"],
+  "flame": ["#fffbe0", "#ffb03a", "#e0400e"],
+  "eye": ["#fff0a0", "#e8a020", "#7a4a08"]
+ },
+ "glow": {"flame": "#ffb040"},
+ "palette": [["#f06a24", "fox fur"], ["#f6e6cc", "cream"], ["#2a2020", "ear tips, boots"],
+             ["#e8d2a8", "tunic"], ["#2e8a6a", "moss scarf"], ["#7a5232", "satchel"], ["#ffb03a", "hearth light"]],
+ "notes": [
+  ["Shape language", "Small and round: a big head, a short body, and the biggest tail in the roster, curling up behind her like a flame. Soft round shapes with two sharp triangles on top (the ears) and one tall line beside her, the lantern crook, which is twice her height."],
+  ["Signature features", "Fox-folk: tall black-tipped ears, a fluffy flame-shaped tail with a glowing tip, red-orange fur with a cream muzzle, three small red cheek stripes, amber eyes. A courier's cream tunic, a moss scarf, a satchel stamped with a hearth symbol (no cross), a crook with a hanging lantern, and light cupped in her hands."],
+  ["Reads in-engine", "The smallest hunter, so the tail and ears do the work: from above, a bright orange swirl with a lantern bobbing on a stick. Her glow is warm gold, kept off everyone else, so heals and light read as hers at once."]
+ ]
+} -->
+<g id="defs"></g><!--/defs-->
+<g id="front">
+ <!-- the tail, curling up like a flame -->
+ <path m="fur" d="M14 -120 C90 -110 150 -160 160 -240 C168 -310 132 -370 92 -386 C108 -340 100 -290 70 -258 C50 -236 30 -210 6 -180Z"/>
+ <path m="cream" d="M92 -386 C132 -370 168 -310 160 -240 C154 -270 140 -300 120 -312 C122 -340 110 -366 92 -386Z"/>
+ <g class="fx"><circle cx="110" cy="-370" r="38" fill="url(#L-flame-g)"/></g>
+ <path m="flame" lw="2" d="M96 -384 C104 -410 124 -420 120 -440 C140 -420 140 -392 126 -376Z"/>
+ <path sh="28" d="M40 -130 C100 -130 150 -170 160 -240 C150 -200 120 -170 80 -160 C60 -150 40 -146 20 -150Z"/>
+ <path ln="1.6" d="M120 -230 q10 -10 6 -24 M100 -200 q14 -6 14 -20"/>
+ <!-- the crook, planted -->
+ <rect m="wood" x="-122" y="-470" width="11" height="470" rx="4"/>
+ <path m="wood" d="M-122 -466 C-124 -500 -96 -520 -74 -506 C-60 -496 -62 -474 -76 -470 L-80 -480 C-74 -486 -78 -496 -88 -496 C-104 -494 -112 -484 -111 -466Z"/>
+ <path fill="none" stroke="#1d1724" stroke-width="2" d="M-78 -478 L-78 -444"/>
+ <g transform="translate(-78 -420)">
+  <g class="fx"><circle r="42" fill="url(#L-flame-g)"/></g>
+  <path m="brass" lw="2.4" d="M-14 -24 h28 l-4 -8 h-20Z M-16 24 h32 v6 h-32Z"/>
+  <path f="flame:r" stroke="#1d1724" stroke-width="2.4" d="M-12 -24 h24 C18 -8 18 10 14 24 h-28 C-18 10 -18 -8 -12 -24Z"/>
+  <path ln="2" d="M0 -24 v48"/>
+ </g>
+ <!-- legs and boots -->
+ <path m="fur" d="M-34 -110 L-12 -110 L-14 -50 L-34 -50Z M12 -110 L34 -110 L34 -50 L14 -50Z"/>
+ <path m="dark" d="M-40 -58 L-10 -58 C-8 -30 -6 -10 -2 -4 C0 2 -4 4 -12 4 L-46 4 C-54 2 -54 -6 -46 -12 C-42 -24 -40 -40 -40 -58Z"/>
+ <path m="dark" d="M40 -58 L10 -58 C8 -30 6 -10 2 -4 C0 2 4 4 12 4 L46 4 C54 2 54 -6 46 -12 C42 -24 40 -40 40 -58Z"/>
+ <path m="cream" lw="2" d="M-42 -62 C-30 -70 -18 -70 -8 -62 L-10 -52 C-20 -58 -30 -58 -42 -52Z M42 -62 C30 -70 18 -70 8 -62 L10 -52 C20 -58 30 -58 42 -52Z"/>
+ <!-- tunic -->
+ <path m="tunic" d="M-30 -232 C-44 -228 -50 -216 -50 -200 C-54 -170 -60 -140 -66 -104 L66 -104 C60 -140 54 -170 50 -200 C50 -216 44 -228 30 -232Z"/>
+ <path sh="25" d="M14 -232 C34 -230 44 -224 50 -200 C54 -170 60 -140 66 -104 L26 -104 C34 -150 30 -200 14 -232Z"/>
+ <path m="leather" d="M-50 -150 Q0 -140 50 -150 L52 -134 Q0 -124 -52 -134Z"/>
+ <path m="leather" lw="2.4" d="M-44 -224 L-30 -232 L46 -150 L34 -140Z"/>
+ <!-- satchel with a hearth stamp -->
+ <path m="leather" d="M30 -156 h48 c4 0 6 2 6 6 v40 c0 6 -4 8 -8 8 h-42 c-6 0 -8 -4 -8 -8 v-40 c0 -4 2 -6 4 -6Z"/>
+ <path m="leather" lw="2.4" d="M28 -154 h56 l-6 22 h-44Z"/>
+ <path f="flame" stroke="#1d1724" stroke-width="1.6" d="M56 -126 C48 -118 48 -108 56 -104 C64 -108 64 -118 56 -126Z M48 -104 h16 v4 h-16Z"/>
+ <!-- arms -->
+ <path m="tunic" d="M-30 -226 C-48 -222 -58 -210 -64 -194 L-78 -168 L-62 -158 L-48 -182Z"/>
+ <path m="fur" d="M-80 -172 C-92 -166 -92 -150 -82 -146 C-72 -142 -64 -150 -64 -160Z"/>
+ <path m="tunic" d="M30 -226 C48 -224 58 -214 60 -200 L66 -176 L50 -170 L44 -196Z"/>
+ <path m="fur" d="M52 -176 C44 -170 46 -156 56 -154 C66 -152 72 -160 68 -170Z"/>
+ <!-- moss scarf -->
+ <path m="moss" d="M-34 -236 C-20 -224 20 -224 34 -236 L36 -218 C20 -206 -20 -206 -36 -218Z"/>
+ <path m="moss" lw="2.4" d="M18 -214 C24 -196 22 -180 30 -166 L18 -162 C12 -176 12 -194 8 -210Z"/>
+ <!-- light cupped in her raised hand -->
+ <g class="fx"><circle cx="-84" cy="-150" r="28" fill="url(#L-flame-g)"/></g>
+ <!-- head: big and round, tall ears -->
+ <path m="fur" d="M-56 -320 L-70 -410 L-20 -356Z"/>
+ <path m="fur" d="M56 -320 L70 -410 L20 -356Z"/>
+ <path m="cream" lw="2" d="M-52 -334 L-62 -394 L-30 -358Z M52 -334 L62 -394 L30 -358Z"/>
+ <path m="dark" lw="2.4" d="M-64 -380 L-70 -410 L-52 -394Z M64 -380 L70 -410 L52 -394Z"/>
+ <path m="fur:r" d="M-62 -296 C-66 -350 -30 -370 0 -370 C30 -370 66 -350 62 -296 C60 -262 34 -238 0 -238 C-34 -238 -60 -262 -62 -296Z"/>
+ <path m="cream" lw="2.4" d="M-50 -270 C-40 -290 -16 -290 0 -276 C16 -290 40 -290 50 -270 C40 -246 20 -238 0 -238 C-20 -238 -40 -246 -50 -270Z"/>
+ <path m="fur" lw="2.4" d="M-44 -346 C-30 -364 0 -366 20 -360 C10 -350 0 -338 -4 -326 C-10 -338 -24 -342 -44 -346Z M40 -344 C30 -354 16 -358 6 -356 C16 -348 22 -338 22 -328 C28 -336 34 -340 40 -344Z"/>
+ <path sh="22" d="M30 -362 C54 -350 64 -326 62 -296 C60 -270 48 -252 30 -244 C50 -280 48 -330 30 -362Z"/>
+ <path rim="3" d="M40 -362 C58 -348 64 -326 62 -300"/>
+ <path fill="#fff" stroke="#1d1724" stroke-width="2" d="M-38 -306 C-38 -322 -14 -322 -14 -306 C-14 -292 -38 -292 -38 -306Z M38 -306 C38 -322 14 -322 14 -306 C14 -292 38 -292 38 -306Z"/>
+ <circle f="eye:r" cx="-24" cy="-305" r="8"/><circle f="eye:r" cx="24" cy="-305" r="8"/>
+ <circle fill="#1d1724" cx="-24" cy="-305" r="4"/><circle fill="#1d1724" cx="24" cy="-305" r="4"/>
+ <circle fill="#fff" cx="-21" cy="-309" r="2.4"/><circle fill="#fff" cx="27" cy="-309" r="2.4"/>
+ <path fill="#d8282a" d="M-56 -292 l12 2 l-12 3Z M-56 -282 l12 1 l-12 3Z M-54 -272 l10 0 l-10 3Z M56 -292 l-12 2 l12 3Z M56 -282 l-12 1 l12 3Z M54 -272 l-10 0 l10 3Z"/>
+ <path fill="#2a1a1a" stroke="#1d1724" stroke-width="1.4" d="M-6 -280 Q0 -284 6 -280 Q4 -274 0 -273 Q-4 -274 -6 -280Z"/>
+ <path ln="1.8" d="M0 -273 L0 -266 M-8 -262 Q-4 -258 0 -264 Q4 -258 8 -262"/>
+</g><!--/front-->
+<g id="tq">
+ <!-- tail swishing up -->
+ <path m="fur" d="M0 -130 C80 -140 150 -200 160 -280 C168 -340 140 -390 100 -404 C116 -356 104 -306 74 -270 C50 -244 26 -220 -4 -190Z"/>
+ <path m="cream" d="M100 -404 C140 -390 168 -340 160 -280 C154 -310 140 -330 120 -340 C122 -364 116 -386 100 -404Z"/>
+ <g class="fx"><circle cx="118" cy="-390" r="38" fill="url(#L-flame-g)"/></g>
+ <path m="flame" lw="2" d="M104 -402 C112 -428 132 -438 128 -458 C148 -438 148 -410 134 -394Z"/>
+ <g id="L-tqbody">
+ <!-- legs: a skip, one foot up -->
+ <path m="fur" d="M4 -110 L26 -110 L36 -60 L16 -54Z"/>
+ <path m="dark" d="M14 -64 L42 -70 C46 -44 50 -24 54 -12 C56 -4 52 0 44 0 L18 2 C10 0 10 -8 16 -14 C16 -30 14 -46 14 -64Z"/>
+ <path m="fur" d="M-34 -110 L-12 -110 L-26 -80 L-48 -86Z"/>
+ <path m="dark" d="M-50 -92 L-24 -78 C-30 -64 -40 -50 -52 -44 C-60 -40 -70 -44 -68 -54 L-60 -76Z"/>
+ <path m="cream" lw="2" d="M16 -68 C26 -76 36 -76 44 -72 L44 -60 C34 -64 24 -64 16 -58Z"/>
+ <!-- tunic -->
+ <path m="tunic" d="M-40 -232 C-54 -228 -60 -216 -60 -200 C-64 -170 -70 -140 -76 -104 L52 -104 C48 -140 44 -170 40 -200 C40 -216 34 -228 20 -232Z"/>
+ <path sh="25" d="M4 -232 C24 -230 34 -224 40 -200 C44 -170 48 -140 52 -104 L16 -104 C24 -150 20 -200 4 -232Z"/>
+ <path m="leather" d="M-60 -150 Q-10 -140 40 -150 L42 -134 Q-10 -124 -62 -134Z"/>
+ <path m="leather" d="M18 -156 h44 c4 0 6 2 6 6 v40 c0 6 -4 8 -8 8 h-38 c-6 0 -8 -4 -8 -8 v-40 c0 -4 2 -6 4 -6Z"/>
+ <path f="flame" stroke="#1d1724" stroke-width="1.6" d="M42 -126 C34 -118 34 -108 42 -104 C50 -108 50 -118 42 -126Z"/>
+ <path m="moss" d="M-46 -236 C-32 -224 8 -224 22 -236 L24 -218 C8 -206 -32 -206 -48 -218Z"/>
+ <path m="moss" lw="2.4" d="M10 -222 C40 -226 64 -240 80 -232 C72 -220 60 -214 48 -212 C36 -210 22 -210 10 -210Z"/>
+ <!-- far arm -->
+ <path m="tunic" d="M18 -226 C36 -224 46 -214 48 -200 L54 -176 L38 -170 L32 -196Z"/>
+ <path m="fur" d="M40 -176 C32 -170 34 -156 44 -154 C54 -152 60 -160 56 -170Z"/>
+ <!-- head turned to her right, ears perked -->
+ <path m="fur" d="M-70 -322 L-96 -404 L-38 -362Z"/>
+ <path m="fur" d="M34 -326 L50 -414 L4 -360Z"/>
+ <path m="cream" lw="2" d="M-66 -336 L-84 -390 L-48 -362Z M32 -338 L42 -396 L14 -362Z"/>
+ <path m="dark" lw="2.4" d="M-86 -376 L-96 -404 L-74 -390Z M44 -384 L50 -414 L34 -398Z"/>
+ <path m="fur:r" d="M-74 -296 C-78 -350 -40 -370 -10 -370 C20 -370 52 -350 48 -296 C46 -262 20 -238 -14 -238 C-34 -238 -54 -246 -66 -262 C-82 -266 -86 -278 -80 -284Z"/>
+ <path m="cream" lw="2.4" d="M-82 -280 C-74 -296 -48 -294 -34 -282 C-20 -294 4 -290 12 -272 C2 -248 -16 -240 -36 -240 C-56 -240 -76 -250 -82 -280Z"/>
+ <path m="fur" lw="2.4" d="M-60 -346 C-46 -364 -16 -366 4 -360 C-6 -350 -16 -338 -20 -326 C-26 -338 -40 -342 -60 -346Z"/>
+ <path sh="22" d="M18 -362 C40 -350 50 -326 48 -296 C46 -270 34 -252 16 -244 C36 -280 34 -330 18 -362Z"/>
+ <path rim="3" d="M28 -362 C44 -348 50 -326 48 -300"/>
+ <path fill="#fff" stroke="#1d1724" stroke-width="2" d="M-64 -306 C-64 -320 -44 -320 -44 -306 C-44 -294 -64 -294 -64 -306Z M2 -306 C2 -322 -22 -322 -22 -306 C-22 -292 2 -292 2 -306Z"/>
+ <circle f="eye:r" cx="-56" cy="-305" r="6.6"/><circle f="eye:r" cx="-12" cy="-305" r="8"/>
+ <circle fill="#1d1724" cx="-56" cy="-305" r="3.4"/><circle fill="#1d1724" cx="-12" cy="-305" r="4"/>
+ <circle fill="#fff" cx="-53" cy="-309" r="2"/><circle fill="#fff" cx="-9" cy="-309" r="2.4"/>
+ <path fill="#d8282a" d="M28 -292 l-12 2 l12 3Z M28 -282 l-12 1 l12 3Z M26 -272 l-10 0 l10 3Z"/>
+ <path fill="#2a1a1a" stroke="#1d1724" stroke-width="1.4" d="M-90 -282 Q-84 -286 -78 -282 Q-80 -276 -84 -275 Q-88 -276 -90 -282Z"/>
+ <path fill="#5a1a1a" stroke="#1d1724" stroke-width="1.6" d="M-70 -266 Q-60 -254 -46 -264 Q-58 -258 -70 -266Z"/>
+ </g>
+ <!-- near arm holding the crook out, the lantern swinging -->
+ <rect m="wood" x="-130" y="-470" width="11" height="460" rx="4" transform="rotate(-8 -124 -240)"/>
+ <path m="tunic" d="M-44 -224 C-62 -218 -76 -206 -86 -190 L-104 -170 L-90 -158 L-72 -176Z"/>
+ <path m="fur" d="M-106 -176 C-118 -170 -118 -154 -106 -150 C-96 -146 -88 -154 -90 -164Z"/>
+ <g transform="translate(-60 -466) rotate(-8)">
+  <path m="wood" d="M-64 0 C-66 -34 -38 -54 -16 -40 C-2 -30 -4 -8 -18 -4 L-22 -14 C-16 -20 -20 -30 -30 -30 C-46 -28 -54 -18 -53 0Z"/>
+  <path fill="none" stroke="#1d1724" stroke-width="2" d="M-20 -12 L-10 24"/>
+  <g transform="translate(-6 48) rotate(14)">
+   <g class="fx"><circle r="42" fill="url(#L-flame-g)"/></g>
+   <path m="brass" lw="2.4" d="M-14 -24 h28 l-4 -8 h-20Z M-16 24 h32 v6 h-32Z"/>
+   <path f="flame:r" stroke="#1d1724" stroke-width="2.4" d="M-12 -24 h24 C18 -8 18 10 14 24 h-28 C-18 10 -18 -8 -12 -24Z"/>
+   <path ln="2" d="M0 -24 v48"/>
+  </g>
+ </g>
+</g><!--/tq-->
+<g id="bust">
+ <defs><radialGradient id="L-bustbg" cx="0.35" cy="0.35" r="0.9"><stop offset="0" stop-color="#b08a50"/><stop offset="0.55" stop-color="#3e2e1c"/><stop offset="1" stop-color="#120c08"/></radialGradient></defs>
+ <rect width="320" height="320" fill="url(#L-bustbg)"/>
+ <use href="#L-tqbody" transform="translate(185 732) scale(1.8)"/>
+ <g class="fx"><circle cx="290" cy="60" r="60" fill="url(#L-flame-g)" opacity="0.5"/></g>
+</g><!--/bust-->
+<g id="relic">
+ <ellipse cx="150" cy="272" rx="72" ry="12" fill="url(#gshadow)"/>
+ <g class="fx"><circle cx="150" cy="190" r="96" fill="url(#L-flame-g)" opacity="0.5"/></g>
+ <!-- an acorn-shaped hand lantern, warm light through a split cap -->
+ <path m="leather" lw="3.4" d="M84 140 C84 96 216 96 216 140 C216 152 84 152 84 140Z"/>
+ <path ln="1.6" d="M96 128 l10 -10 M120 120 l10 -12 M146 116 l8 -12 M170 120 l10 -12 M194 126 l8 -10"/>
+ <path m="wood" lw="2.6" d="M146 100 C146 80 160 66 176 64 C168 76 160 86 156 100Z"/>
+ <path f="flame:r" stroke="#1d1724" stroke-width="3.4" d="M92 146 C92 200 120 250 150 262 C180 250 208 200 208 146Z"/>
+ <path m="flame" lw="2" d="M150 236 C126 222 124 192 142 174 C142 192 150 194 156 182 C176 200 176 226 150 236Z"/>
+ <path hl="45" d="M106 160 C110 196 124 226 140 244 C124 222 114 196 112 160Z"/>
+ <path m="brass" lw="2.4" d="M88 140 Q150 156 212 140 L210 152 Q150 168 90 152Z"/>
+ <path rim="3.2" d="M204 160 C200 200 182 236 160 254"/>
+</g><!--/relic-->
