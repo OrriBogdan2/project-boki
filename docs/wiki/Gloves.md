@@ -37,7 +37,7 @@ Gear is found on expeditions: in chests, on the ground, from the Blight and from
 | Piece | What it does | Stats |
 |---|---|---|
 | Bastion Plate | Heavy plate: lots of armor, a little slower on foot. | armor +40, speed +-0.04 |
-| Gale Mantle | A light cloak that catches the wind: some armor and a faster glide. | armor +14, glide_speed +0.08 |
+| Gale Cloak | A light cloak that catches the wind: some armor and a faster glide. | armor +14, glide_speed +0.08 |
 | Quilted Coat | Padded and warm: more health and some armor. | armor +12, hp +22 |
 | Brace Plate | A bolted breastplate: extra armor. | armor +25 |
 
