@@ -1,5 +1,5 @@
 extends RefCounted
-## Linwick's ultimate on X, Flue Flight, for --ashwick-combo-check (docs/heroes/ashwick.md): the level gate,
+## Cinder's ultimate on X, Flue Flight, for --ashwick-combo-check (docs/heroes/ashwick.md): the level gate,
 ## the lift-off telegraph and move, the steering lane, the capped turn, the early landing, the carpet's burn,
 ## slow and Char, bond only on a land (the best of hit or knock per cast), the cloak mid-flight, no Cinder
 ## mid-flight, a knockback speeding it up, a stun ending it, never over the abyss, the merge drop, the

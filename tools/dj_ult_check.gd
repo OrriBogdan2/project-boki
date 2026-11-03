@@ -1,5 +1,5 @@
 extends RefCounted
-## The ultimates on X of Dancer (Encore, ThiefUlt) and Zedran (Gilded Riposte, JuggernautUlt), run inside
+## The ultimates on X of Sable (Encore, ThiefUlt) and Zedran (Gilded Riposte, JuggernautUlt), run inside
 ## --dancer-combo-check / --juggernaut-combo-check / --kit-combo-check (tools/dancer_jug_check.gd) with the
 ## helpers of tools/archetype_check.gd passed in as A. Each asserts the cast, the telegraph, the payoff, the
 ## cooldown, the level gate (no cast below 6), the bond paid only on a land, the small mechanics, the merge
@@ -30,7 +30,7 @@ func _gate(P: Hunter, who: String) -> void:
 			locked and float(P.ak.cd["x"]) <= 0.0 and not P.ak.ult_running() and not P.ak.slot_info("x")["ready"])
 	_open(P)
 
-# ------------------------------------------------------------------ Dancer: Encore
+# ------------------------------------------------------------------ Sable: Encore
 func dancer(a) -> void:
 	A = a
 	var r = A.setup("thief", 4.6, "", true)

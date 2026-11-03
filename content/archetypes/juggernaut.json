@@ -1,6 +1,9 @@
 {
 	"id": "juggernaut",
-	"name": "Zedran",
+	"title": "Arena King",
+	"base_name": "Zedran",
+	"gender": "male",
+	"personality": "A proud champion in a spartan kit, mostly bare skin and gilded armour. He fights like the crowd is watching.\nHe loves a duel and never backs down from one.",
 	"weight": "heavy",
 	"color": "#ff8a6a",
 	"plate_offset": 2.75,

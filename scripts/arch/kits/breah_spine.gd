@@ -1,6 +1,6 @@
 class_name BreahSpine
 extends RefCounted
-## Breah's ultimate on X, Basalt Spine (HeroUlt): a long ridge of rocks across the fight. Tap X for a ridge
+## Tarek's ultimate on X, Basalt Spine (HeroUlt): a long ridge of rocks across the fight. Tap X for a ridge
 ## centred at the cursor, across her aim; hold X and drag the cursor to swing it round that centre, let go
 ## to cast. Everyone then sees a 0.2s line of molten cracks, and the rocks erupt from the centre outward
 ## over 0.4s, slowing whoever stands beside them and shoving anyone on the line aside. They are ordinary

@@ -1649,7 +1649,7 @@ static func gun_parts(gun: Node3D, weapon: String, m_gun: Material, m_dark: Mate
 			part(gun, box(0.09, 0.05, 0.16), m_acc, Vector3(0, 0.05, 0.06))
 			grip.call(-0.02, 0.15)
 		"quill_rifle":
-			# Venator's drum rifle: a squat receiver, a drum of burr charges under it, a long needle barrel
+			# Vex's drum rifle: a squat receiver, a drum of burr charges under it, a long needle barrel
 			var bronze := shiny(Color("b9732f"), 0.6)
 			part(gun, box(0.1, 0.12, 0.42), m_gun, Vector3(0, 0, -0.12))
 			part(gun, cyl(0.1, 0.1, 0.1, 14), bronze, Vector3(0, -0.12, -0.14), Vector3.ONE, Vector3(0, 0, PI / 2))

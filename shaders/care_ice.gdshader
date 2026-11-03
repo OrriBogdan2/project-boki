@@ -1,5 +1,5 @@
 shader_type spatial;
-// Tamsin's ice (CareLook): faceted, see-through crystal with a bright cold rim, a pale core and a
+// Claire's ice (CareLook): faceted, see-through crystal with a bright cold rim, a pale core and a
 // slow glint that sweeps across the screen-space facets. Used by the shards, the spear, the Rink
 // Wall, Shatter spikes and the frost shell. glow lifts it toward white (a fresh or hit crystal).
 render_mode unshaded, cull_disabled, depth_draw_opaque, shadows_disabled, blend_mix;

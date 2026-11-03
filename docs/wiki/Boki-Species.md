@@ -93,7 +93,7 @@ _Fox + Scorpion_ (`cindle`). A sly fox with a scorpion's curled tail. Its sting 
 - E ability: **Stinger Hook** (8s cooldown, range 8m). Vespyx lashes its tail 8m: the first foe it stings is dragged back to it, poisoned, blighted (healing halved) and stunned 0.3s.
 - Auto ability (it casts this on its own): **Stinger Dash** (9s cooldown, range 7m). On its own, Vespyx lunges 7m tail first, poisoning everything it passes through.
 - On your dash: **Venom Trail**
-- Bond ultimate (merge): **Venom Mantle** (7s). Vespyx fuses onto you as venomous armor for 7s: 20% more damage, and your shots poison and burst.
+- Bond ultimate (merge): **Venom Fusion** (7s). Vespyx fuses onto you as venomous armor for 7s: 20% more damage, and your shots poison and burst.
 - Evolution paths: Fierce: Fierce > Barbed Tail; Steadfast: Steadfast; Curious: Curious; Swift: Swift
 
 ## Hivara

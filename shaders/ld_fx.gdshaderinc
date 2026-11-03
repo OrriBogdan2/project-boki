@@ -1,4 +1,4 @@
-// Linwick's and Dredge's effect looks (scripts/arch/kits/ld_fx.gd), a mode each. Every look has two parts:
+// Cinder's and Dredge's effect looks (scripts/arch/kits/ld_fx.gd), a mode each. Every look has two parts:
 // a body drawn alpha-blended (ld_fx.gdshader), so its colour and its dark rims and smoke read on bright
 // grass instead of washing out to beige, and a glow drawn additively on top (ld_fx_glow.gdshader) for the
 // hot cores only. life runs 0 -> 1 over an effect. Flat looks lie on a PlaneMesh (XZ, UV 0..1);
@@ -10,7 +10,7 @@
 //   3 crescent a blade arc swept by `progress`: UV.x along the sweep, UV.y from the edge inward
 //   4 sunburst a jagged burst of sharp rays thrown out over life (the Furnace Cloak, the barge, impacts)
 //   6 scorch   a cracked, glowing scorch disc that cools from orange to soot
-//   7 swirl    a ring of flame streaks rotating round the centre (Linwick's shield)
+//   7 swirl    a ring of flame streaks rotating round the centre (Cinder's shield)
 //   8 links    a ring of chain links (Dredge Grounded while he reels)
 //   9 flame icon  a small teardrop flame (the burn pips over a foe)
 //  10 spiral   a stun spiral (Anchor Drop victims)

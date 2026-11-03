@@ -1,21 +1,21 @@
 class_name KitLooks
 extends Node3D
-## Pooled looks of Breah's and Ostra's projectiles and lingering effects (one node per match, made on
+## Pooled looks of Tarek's and Ostra's projectiles and lingering effects (one node per match, made on
 ## first use, like AimKit's layer). Nothing here is gameplay: the shots stay ordinary Match shots
 ## (spawn_shot, so the height rules and Net behave as for every shot); a skin only replaces the shared
 ## shot sphere with a mesh of the hero's own and leaves a trail. Every mesh comes from a pool and goes
 ## back to it, so a burst of rocks or a stream of orbs never creates nodes per frame.
 ##
 ## Skins (shape, colour, trail, impact):
-##   boulder    Breah's tap throw: a lumpy molten rock tumbling end over end, ember trail
+##   boulder    Tarek's tap throw: a lumpy molten rock tumbling end over end, ember trail
 ##   rock       a launched rock: bigger, hotter, flaming trail
 ##   dashrock   Rubble Leap's rock: rolls along the ground, dust and embers
 ##   orb        Ostra's Gravity Orb: a violet glass teardrop with a magenta tail
 ##   orb_hot    the Settled bolt: a long blue-violet bolt with a white core
 ##   spear      Shard Snap: a long bundle of dark violet crystal prisms with bright rims
-## Lingering: aura (Ostra's Swollen sphere), crown (stun stars over a head), burst and crater (Breah's slam:
+## Lingering: aura (Ostra's Swollen sphere), crown (stun stars over a head), burst and crater (Tarek's slam:
 ## a molten starburst, then a dark red cracked crater), shard (a rock chip flying off an impact), column (the
-## grown seed's light), mote (a coloured glow at a hand: Breah's fists, Ostra's charge), dark (the Snap's
+## grown seed's light), mote (a coloured glow at a hand: Tarek's fists, Ostra's charge), dark (the Snap's
 ## black wind-up orb), star (the Trade's lobbed star-orb).
 ## Colour and darkness are alpha-blended (shade_mat, the void glass); only small hot cores add light, so
 ## nothing washes out to white on bright grass.
@@ -128,7 +128,7 @@ func _build(kind: String) -> Node3D:
 	add_child(n)
 	return n
 
-## Breah's rocks in flight: opaque molten basalt lumps with a warm (alpha-blended) heat haze.
+## Tarek's rocks in flight: opaque molten basalt lumps with a warm (alpha-blended) heat haze.
 func _build_rock(n: Node3D, kind: String) -> void:
 	var r := {"boulder": 0.3, "rock": 0.45, "dashrock": 0.5}[kind] as float
 	var heat := {"boulder": 0.8, "rock": 0.95, "dashrock": 0.75}[kind] as float
@@ -191,7 +191,7 @@ func _build_crown(n: Node3D) -> void:
 		)
 	Models.part(n, Models.cyl(0.42, 0.42, 0.02, 20), shade_mat(Color(1.0, 0.85, 0.2, 0.4)), Vector3.ZERO)
 
-## Breah's slam, radius 1: a molten starburst of rays (burst), or the dark red crater it leaves with radial
+## Tarek's slam, radius 1: a molten starburst of rays (burst), or the dark red crater it leaves with radial
 ## cracks and ember flecks (crater). Both alpha-blended, in her molten colours.
 func _build_impact(n: Node3D, kind: String) -> void:
 	if kind == "burst":
@@ -513,7 +513,7 @@ func crown(e: Ent, secs: float) -> void:
 func crowned(e: Ent) -> bool:
 	return timed.any(func(t): return t["kind"] == "crown" and is_instance_valid(t["ent"]) and t["ent"] == e)
 
-## Breah's heavy impacts (the slam, the leap's landing) at `at`, radius `r`, strength k 0..1: a molten
+## Tarek's heavy impacts (the slam, the leap's landing) at `at`, radius `r`, strength k 0..1: a molten
 ## starburst, rock chips flying out, a dust ring at the edge, and a dark red cracked crater left `secs`.
 func impact(at: Vector3, r: float, k: float, secs := 1.0) -> void:
 	_timed("burst", at, r * 0.7, 0.32)

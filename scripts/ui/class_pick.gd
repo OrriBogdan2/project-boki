@@ -8,6 +8,7 @@ extends RefCounted
 ## reads over the bright set behind it.
 
 const STAGE := Vector2(300, 300)
+const CHIP_FACE := 40         # px: the Warden's face on each starter's chip
 const HINT := "%s is yours already. Pick one more to start with. The other two open with an easy challenge, " \
 		+ "and the rest of the Hunters with their own."
 
@@ -31,6 +32,7 @@ static func row(on: String, picked: Array, cb: Callable) -> Control:
 		var id: String = a
 		var b := UI.choice(Arch.name_of(id), picked.has(id), func(): cb.call(id), 132)
 		b.add_theme_color_override("font_color", Arch.color(id))
+		Portraits.set_icon(b, id, CHIP_FACE)
 		b.set_meta("arch", id)
 		b.set_meta("starter_chip", id)
 		chips.add_child(b)

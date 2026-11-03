@@ -1,6 +1,9 @@
 {
 	"id": "gunslinger",
-	"name": "Venator",
+	"title": "Hired Gun",
+	"base_name": "Vex",
+	"gender": "female",
+	"personality": "A sharp, professional soldier in marine-style gear. She takes the contract and finishes the job.\nCalm under fire, and always has a plan for the way out.",
 	"weight": "medium",
 	"body": {"size": 0.965, "chest": 1.0, "head": 0.8, "legs": 1.55},
 	"color": "#ff9a5c",

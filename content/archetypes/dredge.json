@@ -1,6 +1,9 @@
 {
 	"id": "dredge",
-	"name": "Dredge",
+	"title": "Broken Abomination",
+	"base_name": "Dredge",
+	"gender": "robot",
+	"personality": "A broken machine that leaks dark, corrupt energy. Its joints creak and its eyes flicker.\nHaunted and creepy, it drags a hook and keeps coming.",
 	"weight": "heavy",
 	"color": "#e0b040",
 	"fantasy": "The harbour hauler. Reels you in on a rope, drops an anchor on you, and grows with every knock.",

@@ -40,6 +40,7 @@ static func _card(ak: String, cur: String, on_pick: Callable, on_kit: Callable, 
 	col.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.add_child(col)
 	col.add_child(UI.label(Arch.name_of(ak), 18, Arch.color(ak) if can else UI.FAINT, UI.big))
+	col.add_child(UI.label(HeroTitle.origin_line(ak), 12, UI.MUTED))
 	col.add_child(UI.label(HunterViewer.stat_line(ak), 12, UI.MUTED))
 	var adf := Arch.def(ak)
 	var fan := UI.para(String(adf.get("fantasy", "")), 12, UI.INK if can else UI.FAINT)

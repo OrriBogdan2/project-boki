@@ -28,6 +28,7 @@ const CHECKS := {
 	"--kin-loss-check": ["res://tools/kin_loss_check.gd", "kin_loss_check", null],
 	"--kill-reset-check": ["res://tools/kill_reset_check.gd", "kill_reset_check", null],
 	"--dash-dir-check": ["res://tools/dash_dir_check.gd", "dash_dir_check", null],
+	"--stamina-bar-check": ["res://tools/stamina_bar_check.gd", "stamina_bar_check", null],
 	"--dash-flow-check": ["res://tools/dash_flow_check.gd", "dash_flow_check", null],      # dash -> ability rows
 	"--airdash-glide-check": ["res://tools/airdash_glide_check.gd", "airdash_glide_check", null],
 	"--hero-combo-check": ["res://tools/archer_bulwark_combo_check.gd", "hero_check", null],
@@ -43,14 +44,17 @@ const CHECKS := {
 	"--warden-shots": ["res://tools/warden_shots.gd", "warden_shots", null],      # models beside sheets
 	"--dancer-combo-check": ["res://tools/dancer_jug_check.gd", "dancer_jug_check", "thief"],
 	"--juggernaut-combo-check": ["res://tools/dancer_jug_check.gd", "dancer_jug_check", "juggernaut"],
-	"--vv-shots": ["res://tools/vv_shots.gd", "vv_shots", null],          # Vireo / Venator screenshots
-	"--breah-shots": ["res://tools/breah_shots.gd", "breah_shots", null],          # Breah review screenshots
+	"--vv-shots": ["res://tools/vv_shots.gd", "vv_shots", null],          # Vireo / Vex screenshots
+	"--breah-shots": ["res://tools/breah_shots.gd", "breah_shots", null],          # Tarek review screenshots
+	"--stamina-bar-shots": ["res://tools/stamina_bar_shots.gd", "stamina_bar_shots", null],
 	"--title-check": ["res://tools/title_check.gd", "title_check", null],      # the title: menu, key art, frame budget
 	"--hatch-check": ["res://tools/hatch_check.gd", "hatch_check", null],      # the hatch: a quiet, personal moment
 	"--ultbond-check": ["res://tools/ultbond_check.gd", "ultbond_check", null],      # keys, bond hook, release
 	"--wallmove-check": ["res://tools/wallmove_check.gd", "wallmove_check", null],
 	"--uipolish-check": ["res://tools/uipolish_check.gd", "uipolish_check", null],     # settings, menu look
+	"--portrait-check": ["res://tools/portrait_check.gd", "portrait_check", null],     # the Wardens' painted faces
 	"--perkorb-check": ["res://tools/perkorb_check.gd", "perkorb_check", null],      # perk orbs, the boss fan, the fixed weapon path
+	"--hero-title-check": ["res://tools/hero_title_check.gd", "hero_title_check", null],
 	"--wall-size-check": ["res://tools/wall_size_check.gd", "wall_size_check", null],  # no lone posts
 	"--farmbuild": ["res://tools/farmbuild_check.gd", "farmbuild_check", null],      # also --farmbuild-shots=<dir>
 	"--prologue-check": ["res://tools/prologue_check.gd", "prologue_check", null],      # also --shots-dir=<dir>

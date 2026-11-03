@@ -1,6 +1,6 @@
 extends Node3D
 ## The first thing a new player sees after the prologue: one short card, then three eggs on a little
-## island. Pick one, pick your second Hunter (Venator is already yours), knock on the shell until it
+## island. Pick one, pick your second Hunter (Vex is already yours), knock on the shell until it
 ## hatches, name what comes out and yourself, make yourself (CreatorPanel), then head into the
 ## tutorial match together.
 
@@ -396,7 +396,7 @@ func _start_text() -> String:
 		return "Pick one of the three"
 	return "Take %s" % Arch.name_of(String(starter_picks[0]))
 
-## Venator is the Hunter of the tutorial; the pick opens on the farm.
+## Vex is the Hunter of the tutorial; the pick opens on the farm.
 func _confirm_starters() -> void:
 	if not ClassUnlock.choose_starters(starter_picks):
 		return

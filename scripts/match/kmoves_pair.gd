@@ -1,6 +1,6 @@
 class_name KMovesPair
 extends RefCounted
-## Keyed full-body moves of Dredge and Linwick (id ashwick), in the same format and channels as
+## Keyed full-body moves of Dredge and Cinder (id ashwick), in the same format and channels as
 ## HunterAnim.KMOVES (looked up by HunterAnim.km_sample). Timed to the reference sheets' beats:
 ## anticipation, release (with an overshoot key), follow-through, recovery (settle). fl / fr place a
 ## free hand from its shoulder (hw / rw their weight; -z is forward, +x the hunter's right), p is the
@@ -191,7 +191,7 @@ const MOVES := {
 			"fr": Vector3(0.42, 0.65, -0.05), "rw": 0.8, "gp": 0.9, "lw": 1.0, "legs": [0.7, -1.1, 0.6, -1.0]
 		}],
 		[0.55, {}]]},
-	# ================================================================= Linwick
+	# ================================================================= Cinder
 	# Torch Lance (LMB, held): the pilot flickers for 0.2 s while he sets his feet and drops the nozzle to the
 	# right hip, then the roar kicks him back hard (overshoot) and he settles braced, leaning into it, the hose
 	# bucking in his hands (an 8 Hz wobble, looped while he holds)
@@ -312,7 +312,7 @@ const MOVES := {
 			"fl": Vector3(-0.75, 0.45, 0.05), "hw": 1.0, "gp": 1.35
 		}],
 		[0.24, {}]]},
-	# Linwick's air poof (the air dash): balled up in the burst, one fast roll forward, then he sails out
+	# Cinder's air poof (the air dash): balled up in the burst, one fast roll forward, then he sails out
 	# spread-eagled on the launch, arms and legs wide and the nozzle held out, until the speed bleeds off
 	"lw_hop": {"keys": [
 		[0.0, {"sq": 0.35, "lift": -0.06, "lw": 1.0, "legs": [1.4, -2.1, 1.3, -2.1]}],
@@ -390,7 +390,7 @@ const MOVES := {
 			"rw": 0.8
 		}],
 		[2.1, {}]]},
-	# Linwick's plain jump: a quick crouch and a springy tuck, the pack bouncing, the nozzle kept up
+	# Cinder's plain jump: a quick crouch and a springy tuck, the pack bouncing, the nozzle kept up
 	"lw_jump": {"keys": [
 		[0.0, {"sq": 0.3, "lift": -0.06, "p": 0.1, "lw": 1.0, "legs": [0.8, -1.2, 0.7, -1.1]}],
 		[0.07, {"sq": -0.3, "p": -0.15, "lw": 1.0, "legs": [1.1, -1.8, 0.9, -1.6], "fl": Vector3(-0.3, 0.1, 0.1),

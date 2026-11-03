@@ -10,6 +10,7 @@ extends PanelContainer
 const SIZE := Vector2(890, 600)
 const BODY_H := 372.0
 const TILE := Vector2(431, 116)
+const SPLASH := Vector2(128, 72)     # px: the Warden's splash by its name
 const SLOTS := ["dash", "passive", "lmb", "rmb", "e", "r", "x"]
 ## (The ultimate tiles have no fixed key: _cap reads them from Settings.)
 const KEYS := {"dash": "Shift", "passive": "", "lmb": "LMB", "rmb": "RMB", "e": "E", "r": "", "x": ""}
@@ -73,7 +74,9 @@ func _build() -> void:
 	var hd := HBoxContainer.new()
 	hd.add_theme_constant_override("separation", 12)
 	v.add_child(hd)
+	hd.add_child(Portraits.Pic.new(arch, SPLASH, col, true))
 	var nm := UI.label(Arch.name_of(arch).to_upper(), 30, col, UI.big)
+	nm.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	hd.add_child(nm)
 	var wn: Array = Arch.weapons(arch).map(func(w): return String(Data.weapon_stats(w).get("name", w)))
 	var sub := UI.label("  /  ".join(wn), 14, UI.MUTED, UI.big)

@@ -1,4 +1,4 @@
-"""Synthesizes Vireo's and Venator's ability sounds into audio/vv_*.wav and audio/vn_*.wav (pure Python,
+"""Synthesizes Vireo's and Vex's ability sounds into audio/vv_*.wav and audio/vn_*.wav (pure Python,
 its own random stream, so the other generators' output is untouched). No samples from anywhere.
 
     python3 tools/gen_vv_sfx.py      (then: godot --headless --import)
@@ -18,7 +18,7 @@ Vireo (electric, dry, crackling):
   vv_ult_rise      Kitefall launch: a rising whoosh with a crackle
   vv_ult_hum       Kitefall hanging in the air: an electric hum that swells and fades
   vv_ult_slam      Kitefall strike: a sharp crack into a deep thunder boom
-Venator (mechanical, punchy, ember-hot):
+Vex (mechanical, punchy, ember-hot):
   vn_rifle   an auto-rifle round: a tight crack, a mid thump, a metallic ring
   vn_cock    the grenade pin pulled: two metal clicks
   vn_throw   the overhand throw: a cloth whoosh
@@ -130,7 +130,7 @@ save('vv_sky_strike', mix(scale(mul(hp(noise(0.12), 1500), env(N(0.12), 0.0005, 
     scale(mul(tone(110, 45, 0.6), env(N(0.6), 0.003, 0.2)), 0.8),
     scale(mul(hp(crackle(0.5, 250, 0.002), 2000), env(N(0.5), 0.002, 0.15)), 0.5)), -14)
 
-# ------------------------------------------------------------ Venator
+# ------------------------------------------------------------ Vex
 save('vn_rifle', mix(scale(mul(bp(noise(0.06), 1200, 7000), env(N(0.06), 0.0005, 0.012)), 1.3),
     scale(mul(tone(160, 70, 0.09), env(N(0.09), 0.001, 0.03)), 0.9),
     scale(at(bell(3100, 0.12, 0.03), 0.005), 0.18)), -17)
