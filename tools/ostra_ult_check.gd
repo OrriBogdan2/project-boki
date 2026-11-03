@@ -242,15 +242,12 @@ func _lock_and_release() -> void:
 	P.inp["move"] = Vector2(-1, 0)
 	tap(m, P)
 	P.inp["fire"] = true
-	P.dashes = P.max_dashes()
-	K.on_dash(false)
 	var seeds0 := K.seed.size()
 	K.use_e()
 	step(m, 0.3)
 	P.inp["fire"] = false
 	ok("lock: movement input doesn't move her", Vector2(P.pos.x - at.x, P.pos.z - at.z).length() < 0.05)
 	ok("lock: an RMB press and an attack are ignored", K.snaps == snaps0 and K.snap.is_empty() and P.shot_n == 0)
-	ok("lock: a Shift press is ignored (no Trade)", K.swap.is_empty() and K.swap_aim < 0.0)
 	ok("lock: an E press is ignored (no seed)", K.seed.size() == seeds0 and K.seed.is_empty())
 	ok("lock: the glove and the Boki's C are held too (the cast_locked hook)", K.cast_locked())
 	ok("lock: she cannot turn once committed", P.aim_dir().distance_to(face0) < 0.01 and W.locked)
@@ -278,14 +275,23 @@ func _lock_and_release() -> void:
 	tap(m, P)
 	step(m, 0.4)
 	ok("release: she can act while it holds (a Snap)", K.snaps == snaps0 + 1 and W.is_open(), "snaps %d" % K.snaps)
+	var y0 := P.pos.y
+	P.inp["jump"] = true
+	step(m, 0.1)
+	P.inp["jump"] = false
+	ok("release: a jump while it holds goes at once (into_jump.x locks only the cast)", P.pos.y > y0 + 0.05 and W.is_open())
 	step(m, 3.0)
 	K.cd["x"] = 0.0
 	_press(m, P, home + Vector3(6, 0, 0))
-	step(m, float(W.xd()["tell"]) - 0.08)
+	step(m, 0.3)
 	P.dashes = P.max_dashes()
 	K.on_dash(false)
-	ok("dash flow: Shift in the lock's last 0.15s is held (no Trade yet)", W.locked and K.swap_aim < 0.0)
-	step(m, 0.1)
+	step(m, 0.3)
+	ok(
+		"dash flow: Shift during the lock is held, not lost (no Trade yet)",
+		W.locked and K.swap.is_empty() and K.swap_aim < 0.0
+	)
+	step(m, 0.45)
 	ok(
 		"dash flow: ... and goes the step the well opens and frees her (into_dash.x buffer)",
 		not W.locked and W.is_open() and (K.swap_aim >= 0.0 or not K.swap.is_empty())
