@@ -15,8 +15,10 @@ and every frame puts each bone where its rig node has moved from its rest in the
 sliders reshape the 3D model too. The .glb never needs to know about the animation code: it needs the bones
 below, in this rest pose, at this scale. A .glb whose armature doesn't match (`WardenSkeleton.mismatches`: names,
 parents, each bone within 1 cm of its rig node) is refused and the procedural model stays: the fallback.
-`WardenSkeleton.build` makes this armature from any Warden's rig (one shared skeleton; per-hero proportions are
-the archetype's `body` scales, so the bones sit where that Warden's rig puts them).
+`WardenSkeleton.build` makes this armature from any Warden's rig. Shared are the bone names and layout only
+(owner, 21:40): the bones sit where that Warden's own rig puts them, and every Warden keeps its own motion
+(idle, run, stance, dash and kit moves come from HunterAnim and its own KMoves; the loader only copies them).
+`--warden-glb-check` asserts that two Wardens' idle and run joint angles differ.
 
 ## Scale, orientation, rest pose
 - Units are metres at **class-neutral size**: build the Warden as a medium hunter whose head top is ~1.55 m

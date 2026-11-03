@@ -5,8 +5,8 @@ extends RefCounted
 ## each bone on its rig node), every kit move in every table retargets onto it (the bones sit exactly where
 ## their rig nodes put them, and each keyed channel moves the bones it drives), the anchor empties ride
 ## their bones, every surface is on the hero toon shader with the atlas, the hit radius and ring are the
-## same as the procedural model's, it stays in the triangle and slot budget, and the player's setting
-## turns it back into the procedural model and on again.
+## same as the procedural model's, it stays in the triangle and slot budget, the player's setting turns it
+## back into the procedural model and on again, and its idle and run stay its own (not another Warden's).
 
 ## Every node HunterAnim binds (HunterAnim._init) that a body mesh can hang on.
 const ANIM_PARTS := ["Rig", "Rig/Torso", "Rig/Torso/HeadPivot", "Rig/Torso/ArmLPivot", "Rig/Torso/ArmLPivot/Elbow",
@@ -31,6 +31,9 @@ const KEYED := 0.04            # a channel value this big counts as keyed (rad, 
 const MOVED := 0.004           # a bone moved: this many m, or rad of turn, from its pose with no move
 const EXACT := 0.0005          # m: a bone sits on its rig node's retargeted pose
 const SLOT_MAX := 8
+const MOTION_BONES := ["hips", "thigh.L", "shin.L", "thigh.R", "shin.R", "upper_arm.L", "forearm.L", "upper_arm.R",
+	"forearm.R", "head"]
+const OWN_MOTION := 0.05       # rad: two Wardens' idle or run joint angles differ by more than this on average
 const TRIS_MAX := 15000
 
 var bad := 0
@@ -83,6 +86,7 @@ func run(main: Node) -> void:
 		_shading(a)
 		_hitbox(a)
 		_setting(a)
+		_own_motion(a, "bulwark" if a != "bulwark" else "gunslinger")
 	print("WARDENGLB %d checks, %d failed" % [n, bad])
 	print("WARDENGLB_DONE %s" % ("PASS" if bad == 0 else "FAIL"))
 	main.get_tree().quit()
@@ -263,6 +267,41 @@ func _hitbox(a: String) -> void:
 	ok(absf(ring_w - ring_p) < 0.0001 and shapes == 0,
 			"%s: hit ring %.3f with the .glb, %.3f without (hit radius %.2f m), no collision in the .glb"
 			% [a, ring_w, ring_p, Arch.hit_r(a, Data.CLASSES[Arch.weight(a)])])
+
+## The skeleton is shared names and layout only: each Warden keeps its own motion. Over an idle and a run
+## cycle, this Warden's bones and another Warden's (its rig driving the same contract skeleton) take
+## clearly different joint angles.
+func _own_motion(a: String, other: String) -> void:
+	var m := _model(a)
+	var mine := _skel(m)
+	var o := _model(other)
+	var theirs := WardenSkeleton.build(WardenGlb.neutral_rest(other))
+	o.add_child(theirs)
+	var o_sync := WardenGlb.Sync.new()
+	o_sync.setup(o, theirs, WardenGlb.neutral_rest(other))
+	var pairs := [[HunterAnim.new(m), m.get_node("Warden/Sync"), mine], [HunterAnim.new(o), o_sync, theirs]]
+	for gait in ["idle", "run"]:
+		var diff := 0.0
+		var samples := 0
+		for f in 90:
+			for pr in pairs:
+				var st := {"fired": 99.0, "face": 0.0, "grounded": true}
+				if gait == "run":
+					st["vel"] = Vector3(0, 0, -4.6)
+				(pr[0] as HunterAnim).update(1.0 / 60.0, st)
+				(pr[1] as WardenGlb.Sync).apply()
+			if f % 6 == 0:
+				for b in MOTION_BONES:
+					var qa := mine.get_bone_pose_rotation(WardenSkeleton.find(mine, b))
+					var qb := theirs.get_bone_pose_rotation(WardenSkeleton.find(theirs, b))
+					diff += qa.angle_to(qb)
+					samples += 1
+		var mean := diff / maxf(1.0, samples)
+		ok(mean > OWN_MOTION, "%s keeps its own %s: its joint angles differ from %s's by %.2f rad on average"
+				% [a, gait, other, mean])
+	o_sync.free()
+	m.free()
+	o.free()
 
 ## Settings > Video > Warden models: off builds the procedural model, on the .glb again.
 func _setting(a: String) -> void:
