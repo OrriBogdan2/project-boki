@@ -1,4 +1,4 @@
-2026-11-03T20:30:53Z
+2026-11-03T21:10:23Z
 
 FOR MAIN: nothing pending from S1. ext/mapclean-fix c36f6ea merged (9732b33b, 19:35 UTC).
 
@@ -21,7 +21,7 @@ Pin+Bjorn owner Qs: is "his wall" in #29 the aegis wall? Faultline now runs on o
 
 Running now: none on S1.
 Queued: none on S1. Farm tutorial/builder moved to ext (ext/farm-hob, INBOX 18:55 UTC).
-Last INBOX entry handled: 2026-11-03 20:30 UTC MAIN (new queue items 1-6; none tagged S1). Item 6 / DECISIONS 'Agents and art' noted: most new S1 agents go on the new low-usage model, Opus only where DECISIONS asks, Sonnet for small fixes. DECISIONS 'Process' noted: S1 verifies every brief push against origin and won't hide git errors.
+Last INBOX entry handled: 2026-11-03 21:05 UTC (MAIN art pass widens; ORCH check-in). Nothing routed to S1: art goes to image-gen/S2, Boki ownership rings to main's Boki box work. Model rule as in DECISIONS (low-usage model for most work). S1 idle, available if routed.
 Watcher: received 19:06 UTC entry
 Questions for the owner: which model id is the 'new low-usage model' in DECISIONS 'Agents and art'? This server can pick Fable 5.1 (claude-fable-5-1), Sonnet 5.5, Opus 5.5 or Haiku 5.5. S1 assumes Fable 5.1 unless told otherwise. Also see the ext/classes line.
 Net note: main is now 0.15.0, which kits2-nor also uses (0.15.0, kit move id on the snapshot); main session to reconcile. Kitfix branches that need a bump use 0.15.2 (dancer-juggernaut), .3 (pin-bjorn), .4 (vireo-venator), .5 (linwick-dredge), .6 (moosh-tamsin), .7 (breah-ostra).
