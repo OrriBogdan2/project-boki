@@ -246,3 +246,6 @@ The owner saw an explosion with Moosh Moosh and isn't sure whether it comes from
 - **Indicator:** during the wind-up, show where it'll hit: the impact area on the ground in front of him, filling as the slam comes down. That's a gameplay telegraph, so it fits the ground-shape rule. On impact: cracks, dust and a short screen shake in that exact area.
 - Assert: the hit area matches the drawn indicator; damage lands on the slam frame, not at the cast.
 - Screenshots: a 5-frame strip, wind-up to impact.
+
+## 34. NOTE: every hero portrait looks bad (already covered by briefs/specs/CONCEPT_PASS.md)
+- Owner: all the portraits look horrible. This is in scope for the character concept pass (after the resets), which includes the portraits. No separate work now. When that pass starts, the portraits are a top deliverable for all 12, not an afterthought: one consistent painted style, readable at HUD size, each matching that hero's new concept. Owner review before merge.
