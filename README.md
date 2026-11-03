@@ -4060,6 +4060,30 @@ Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-t
 
 ![Faultline: the slam down through the lane (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)](bjorn/v2/polish/anim_bul_ult_slam_game.png)
 
+**round2: LMB held, the thicker, longer, deeper-orange trail ribbon riding the whirling hammer head (gameplay zoom; before: bjorn_spin.png)**
+
+![round2: LMB held, the thicker, longer, deeper-orange trail ribbon riding the whirling hammer head (gameplay zoom; before: bjorn_spin.png)](bjorn/v2/polish/r2_bjorn_spin.png)
+
+**round2: LMB held, the thicker, longer, deeper-orange trail ribbon riding the whirling hammer head (close-up; before: bjorn_spin_close.png)**
+
+![round2: LMB held, the thicker, longer, deeper-orange trail ribbon riding the whirling hammer head (close-up; before: bjorn_spin_close.png)](bjorn/v2/polish/r2_bjorn_spin_close.png)
+
+**round2: Faultline slam key frame with the pitch capped at 0.4, body upright over the near cell (gameplay zoom)**
+
+![round2: Faultline slam key frame with the pitch capped at 0.4, body upright over the near cell (gameplay zoom)](bjorn/v2/polish/r2_ult_bjorn_slam.png)
+
+**round2: Faultline slam key frame with the pitch capped at 0.4, body upright over the near cell (close-up)**
+
+![round2: Faultline slam key frame with the pitch capped at 0.4, body upright over the near cell (close-up)](bjorn/v2/polish/r2_ult_bjorn_slam_close.png)
+
+**round2: Faultline slam strip, pitch capped at 0.4 (was 0.75), no longer folded head-down (default gameplay zoom; before: anim_bul_ult_slam_game.png)**
+
+![round2: Faultline slam strip, pitch capped at 0.4 (was 0.75), no longer folded head-down (default gameplay zoom; before: anim_bul_ult_slam_game.png)](bjorn/v2/polish/r2_anim_bul_ult_slam_game.png)
+
+**round2: Faultline slam strip, pitch capped at 0.4 (was 0.75), no longer folded head-down (close-up, 0.42 zoom; before: anim_bul_ult_slam_close.png)**
+
+![round2: Faultline slam strip, pitch capped at 0.4 (was 0.75), no longer folded head-down (close-up, 0.42 zoom; before: anim_bul_ult_slam_close.png)](bjorn/v2/polish/r2_anim_bul_ult_slam_close.png)
+
 ## linwick/v2/polish (linwick/v2/polish)
 
 **Torch Lance at gameplay zoom: orange body with a deep red band and soot rim, white-hot only at the nozzle, cyan pilot 2x bigger; no beige wash on the grass**
@@ -4291,6 +4315,42 @@ Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-t
 **Brass Broadside wave at gameplay zoom: the brass fan and burst after the blend change**
 
 ![Brass Broadside wave at gameplay zoom: the brass fan and burst after the blend change](dredge/v2/polish/dr_ult_wave_game.png)
+
+**round2 BEFORE (branch head 7d96b6df): Broadside wave 1 at gameplay zoom, only two faint edge lines and a small flash, no slugs readable**
+
+![round2 BEFORE (branch head 7d96b6df): Broadside wave 1 at gameplay zoom, only two faint edge lines and a small flash, no slugs readable](dredge/v2/polish/r2_before_dr_ult_wave1_game.png)
+
+**round2: Broadside charge telegraph at gameplay zoom, the 105 degree fan in saturated brass (was near-white cream)**
+
+![round2: Broadside charge telegraph at gameplay zoom, the 105 degree fan in saturated brass (was near-white cream)](dredge/v2/polish/r2_dr_ult_fan_game.png)
+
+**round2: Broadside charge telegraph close-up, the saturated brass fan growing from his fists**
+
+![round2: Broadside charge telegraph close-up, the saturated brass fan growing from his fists](dredge/v2/polish/r2_dr_ult_fan_close.png)
+
+**round2: Broadside wave 1 at gameplay zoom, six big brass orbs with dark cores and smears across the whole fan, the brass crescent sweep and the fist sunburst**
+
+![round2: Broadside wave 1 at gameplay zoom, six big brass orbs with dark cores and smears across the whole fan, the brass crescent sweep and the fist sunburst](dredge/v2/polish/r2_dr_ult_wave1_game.png)
+
+**round2: Broadside wave 1 close-up at the release, the brass sunburst at the fists and the six orbs flying out to the fan edge**
+
+![round2: Broadside wave 1 close-up at the release, the brass sunburst at the fists and the six orbs flying out to the fan edge](dredge/v2/polish/r2_dr_ult_wave1_close.png)
+
+**round2: Broadside wave 2 at gameplay zoom, six violet orbs with dark cores hanging at the fan edge, the violet sunburst**
+
+![round2: Broadside wave 2 at gameplay zoom, six violet orbs with dark cores hanging at the fan edge, the violet sunburst](dredge/v2/polish/r2_dr_ult_wave2_game.png)
+
+**round2: Broadside wave 2 close-up at the release, violet sunburst and orbs**
+
+![round2: Broadside wave 2 close-up at the release, violet sunburst and orbs](dredge/v2/polish/r2_dr_ult_wave2_close.png)
+
+**round2: Broadside strip: press, charge over the brass fan, wave 1 brass burst, wave 1 follow-through, wave 2 violet burst, recovery**
+
+![round2: Broadside strip: press, charge over the brass fan, wave 1 brass burst, wave 1 follow-through, wave 2 violet burst, recovery](dredge/v2/polish/r2_dr_anim_blast.png)
+
+**round2: Grapnel reel strip with the rope swelling harder on each haul (1.8x) and a wider hand-over-hand swing (top-down the hands stay mostly under the helmet)**
+
+![round2: Grapnel reel strip with the rope swelling harder on each haul (1.8x) and a wider hand-over-hand swing (top-down the hands stay mostly under the helmet)](dredge/v2/polish/r2_dr_anim_grapnel_reel.png)
 
 ## breah/v2/ult (breah/v2/ult)
 
