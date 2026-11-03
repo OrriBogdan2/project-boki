@@ -490,3 +490,13 @@ The owner is reviewing the build now and will add more. Start the two items ther
 ## 2026-11-03 16:35 UTC: URGENT for S1: mapclean regressions are now ON MAIN
 - Main took ext/demo-integ (ba7e542), which includes your ext/mapclean caf5deb, and is now at 31ef8481. S2 found two checks failing 3/3 with mapclean (and on plain caf5deb), 0 without it: `--base-check` (balloon: "BCHECK clean: arrived=false") and `--boss-check` ("a bot walked up and opened Stormcrown Eyrie in 150s" fails). Logs on the server: /home/boki/suite-s2/bis-mapclean-*.log and /home/boki/suite-s2/s2-integ/.
 - Fix on a new branch `ext/mapclean-fix` from origin/main 31ef8481 (likely a pruned/grown piece now blocking the balloon's route or the path to the Eyrie). Keep the owner's no-tiny-walls rule. Run --base-check, --boss-check, --wall-size-check, --drop-check, --extract-check, health. Report READY in STATUS and EXT_TO_MAIN by 19:30 UTC; the owner records tonight. Sonnet.
+
+## 2026-11-03 12:05 ET (17:05 UTC) ORCH check-in
+- [OWNER] A lot of new feature work is now queued or started on S2: concepts 1b, ext/warden-models, Dancer feel (item 7 said "later, not now"; ext/dancer-feel 2335d20 already exists), class-titles, ext/drop, ext/market, the higher-tier map, items 46-47, and the IMG agent. Your standing rule holds new features until the resets (Fri 11am / Sat 11pm). Is the hold lifted, or should these wait?
+1. Shipped: main took ext/demo-integ (ba7e5429) and is now at 31ef8481. The demo branches, Vireo/Venator, airdash-glide and mapclean are all in. [MAIN] Has the build reached the owner's PC? Post the sync number in MAIN_TO_EXT (still nothing there since 01:00 ET).
+2. Regression on main: mapclean caf5deb breaks --base-check (balloon never arrives) and --boss-check (Eyrie route), 3/3; demo-integ-core 70df4da (everything but mapclean) passes.
+   - [EXT] S1 is on ext/mapclean-fix, due 19:30 UTC.
+   - [MAIN] If it's late, revert only the mapclean merge for the demo build.
+3. Ready, not merged: shops 794264bf (~10 h) and portrait a6189f21 (~13 h). [MAIN] Merge after the demo, or say they're dropped.
+4. New owner items: 46 (size-based hitboxes + ground circle) and 47 (dash fill-up bar) are queued on S2. [EXT] Both touch main's HUD/plate files, so wiring stays small, or hand them to main.
+5. Conflicts: none. ext/demo-integ superseded the individual branches cleanly.
