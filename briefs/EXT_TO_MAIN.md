@@ -713,3 +713,19 @@ The owner saw an explosion on a dash and said "having explosions on dash is gene
   - Owner items #1, #4, #9 and #9b are included.
 - **Checks:** the full suite has 0 failures, with one exception. `--dash-flow-check` fails "bulwark air dash -> lmb, pressed early: lost", and plain dash-flow-base fails the same way. That's S2's to fix in the Bulwark mace's lmb_override path.
 - **Merge order:** take dash-flow-base first, then this branch.
+
+## 2026-11-03 10:30 UTC: URGENT, DEMO MERGE PLAN: every owner-review hero branch is READY (main has had no merges since 07:48 UTC)
+The owner records a demo tonight (Toronto evening) and wants to play the build first. All server work landed early; ext light-reviewed the screenshot strips (ext/hero-shots-s2: prologue, Zedran air slam, Tamsin thrown spear, Breah climb all look right). Please merge in this order (S2's own notes are in origin/ext/server-status2:STATUS.md, "FOR MAIN"):
+1. `ext/dash-flow-base` @ bf711e9: shared dash -> ability rules (item 32) + --dash-flow-check; already contains main 16dd7fa.
+2. `ext/review-breah-ostra` @ 3d581a4: Breah + Ostra (contains kitdata-breah-ostra; fixes the flaky --work-check).
+3. `ext/review-linwick-moosh` @ a633725: Linwick, Moosh Moosh, Tamsin, Dredge (supersedes review-tamsin-dredge; contains kitdata-linwick-dredge + kitdata-moosh-tamsin).
+4. `ext/review-dancer` @ a39df9a: Dancer + Zedran (supersedes review-zedran-bjorn).
+5. `ext/review-bjorn` @ 4a985a1: Bjorn + Pin (S1's kitdata-pin-bjorn with the duplicate dash rules folded into DashFlow). Merge this INSTEAD of kitdata-pin-bjorn. With it in, --dash-flow-check is 0 failures.
+6. `ext/kitdata-vireo-venator` @ 67454b5: Vireo + Venator, now READY AT THE TIP on dash-flow-base (this replaces my 08:00 note to stop at 3c1c79a).
+7. `ext/prologue-polish` @ 2a03634: the 5-slide prologue with the quality pass (contains prologue5; merge this instead of prologue5).
+8. `ext/airdash-glide` @ 411a591 and `ext/mapclean` @ 2082d0d (S1).
+9. Older ready branches if time allows: equal-loadout 97b77860 then shops 794264bf, breakables 61f8772b, portrait a6189f21.
+10. `ext/class-titles` is coming from ext later today (the new hunter titles); optional for tonight.
+Generated files will collide between these (docs/heroes/dash_interactions.md, docs/wiki/*, tools/style_baseline.json, content/rules/hunter_viewer.json): regenerate with tools/gen_wiki.py and keep each hero's row from its own branch.
+NOT for tonight: ext/mantle-look (save v8) and ext/concepts (art for owner review).
+If you can't merge all of it before ~23:00 UTC, prioritise 1-5 and 7 (what the owner sees first). Please post progress in MAIN_TO_EXT.
