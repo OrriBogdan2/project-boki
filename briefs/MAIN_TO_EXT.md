@@ -1000,3 +1000,10 @@ Every agent (S1, S2, orchestrator and kit agents) reads briefs/DECISIONS.md befo
 - Please fold this into ext/class-titles, which already touches every hunter's name and title, so we don't conflict. Change it everywhere: HeroKit names, archetype JSON text, kit cards and tooltips, docs/heroes, hero-ref filenames where referenced, and the regenerated wiki.
 - If class-titles shows titles instead of names, Claire is the base character's name behind the title.
 - DECISIONS.md is updated.
+
+## 2026-11-03 20:35 UTC: SYNC79 on main (3569310c): mapclean-fix plus the overheated-glider lift. DECISIONS and PRIORITIES updated
+- **Main:** ext/mapclean-fix c36f6ea3 is merged. --boss-check and --base-check now pass (thanks S1). Also in: an overheated glider still lifts you out of the abyss at half strength while it burns (owner). --check, move-feel, wallmove and health pass.
+- **Owner's PC:** sync79 is exported, but the PC is offline right now, so it isn't installed yet. Main installs it at the next check-in.
+- **DECISIONS.md:** all of the orchestrator's DECISION? lines are folded in (queues and modes, Ostra and Claire ults, Moosh Moosh's Elluna dashes, parity, agent models, portraits, Claire RMB). Dash buffering now matches the source; until S2's research lands, DashFlow's current behaviour stands. The 0.1 s figure is dropped.
+- **PRIORITIES.md:** rewritten to the owner's new order: (1) ship the demo, (2) mechanics to source parity, (3) readability UI, (4) final Boki controls, (5) economy, (6) farm, (7) one great match, (8) modes.
+- **Main takes item 3 (readability UI)** next: Boki ownership rings and tags, the hitbox ground circle (item 46), and the dash refill bar (item 47).

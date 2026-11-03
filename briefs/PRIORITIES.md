@@ -1,27 +1,14 @@
-# Project Boki: priority order (owner-approved direction, 2026-11-03)
-Work top-down. Nothing from a lower tier starts while a higher tier has open items, except work that is genuinely parallel (another session's own lane).
+# Project Boki: priority order (owner-approved, 2026-11-03 20:05 UTC; replaces the earlier P0-P4)
+Work top-down. Art and concepts run in parallel throughout. Frozen until the owner unfreezes: farm-builder depth, Black Market extras, maps beyond tier 2.
 
-## P0: land and stabilise (now, until the usage resets)
-1. Land finished branches: physics pass, the sync75 playtest fixes (OWNER_REVIEW_1103), airdash-glide, Pin's lingering arrows, Dancer's dash loop, portrait rebase, uipolish2.
-2. No new features.
+1. **Now:** land and ship the demo build (done as sync78/79, including mapclean-fix c36f6ea).
+2. **Character mechanics to source parity (Opus):** every hero's abilities, cancels, dash buffering (as the source does it) and animations, LMB first. This includes today's decisions on Ostra, Claire, Moosh Moosh and Zedran.
+3. **Readability UI, alongside 2 (clarity, not polish):** Boki ownership rings and tags (own, ally, enemy, wild); the hitbox ground circle under every hunter (item 46); the dash refill bar (item 47); a general HUD clarity pass. Main owns the HUD files; ext components wire in only.
+4. **Final Boki controls:** fold C into G, then Merge on C (before any tutorial records keys).
+5. **Economy:** shops, loot and gem flow, then the Black Market.
+6. **Farm:** the Hob builder and tutorial (ext/farm-hob), then islands and bridges.
+7. **One great match:** the core-loop playtest; the Boki as the star (merge spec, merge moments, the Boki box, personality, loss and recovery); playtest tools.
+8. **Modes:** Duel online, Arena 4v4, then the tier maps (apex threats, stealth).
 
-## P1: onboarding (first hour after the resets; the score is lowest here)
-3. New-game flow, then the tutorial pass: accurate text, pulsing prompts, Venator taught ability by ability, merge, bond, capture, the final keys.
-4. Boki controls: fold C into G, then Merge on C. These keys must be final before the tutorial records them.
-
-## P2: one great match (the core loop)
-5. The 10-minute playtest script on the Hollow Crown, solo and squad. Fix the feel problems in order.
-6. Boki as the star: per-type merge spec (owner approves), merge moments, the Boki box (health, bond, status), ownership rings and tags, wild Boki read as enemies, Boki personality, Boki loss that hurts and can be recovered.
-7. Playtest tooling: F8 feedback, session stats, a guide for testers. Then outside playtesters.
-
-## P3: cohesion and look
-8. Art bible, then the style pass (shader, lighting, post, VFX rules: explosions are rare and big).
-9. AI 3D prototype (Venator and one Boki), then the roll-out.
-10. Audio pass (richer sounds, a music identity).
-
-## P4: breadth (only after P2 feels great)
-11. Tiered danger maps (apex threats, stealth by sound and sight), Black Market and Ransom, Challenge Sign, the farm tutorial and island bridges, the Hob builder.
-12. Code cleanup runs alongside any tier, in small, safe passes.
-
-## Frozen until the owner unfreezes
-Farm-builder depth, Black Market extras, maps beyond tier 2.
+Onboarding (new-game flow, tutorials, Mantle intro) follows once 4 is final.
+After all of that: the art upgrade (art bible, style pass, AI 3D prototype), with concepts running in parallel already.

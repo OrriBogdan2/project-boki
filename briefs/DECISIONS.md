@@ -28,7 +28,7 @@ Main keeps this file current; anyone can propose a line in EXT_TO_MAIN tagged "D
 - Explosions only for things that truly explode (kegs, big ultimates, bosses). No bursts, rings or discs on dashes, landings or resets. A ground ring means gameplay.
 - Dashes follow WASD by default, slower and shorter (Vireo further). Wall kick and wall bounce for everyone. Ledges always responsive.
 - An overheated glider still lifts you out of the abyss, at half strength, while it burns.
-- Every interaction is chainable (input buffering about 0.1 s). A hold animation never shows without the hold input.
+- Every interaction is chainable. Dash buffering: match SUPERVIVE (S2 researching); until then DashFlow's current hold-until-dash-ends behaviour stands. A hold animation never shows without the hold input.
 - Per-hunter run speeds come from the game data.
 
 ## Kits
@@ -36,7 +36,10 @@ Main keeps this file current; anyone can propose a line in EXT_TO_MAIN tagged "D
 - Hero specifics live in OWNER_REVIEW_1103.md and the MAIN_TO_EXT entries. Examples:
   - Zedran: RMB held indefinitely, with a perfect release; LMB hold scales.
   - Dancer: reset only on an empowered hit.
-  - Claire: skate with an ice path; RMB is a push.
+  - Claire: skate with an ice path; her LMB tracks while she skates. RMB: the ice spear emerges from her and travels to the target point (travel time grows with distance), with a push-like animation, not a throw. Ult: skating into it carries her forward a decent distance, then she's encased in ice and rooted until it ends or she cancels.
+  - Ostra ult: about a 1 s cast lock (like the source), then he moves freely while Nightwell runs.
+  - Moosh Moosh's dashes copy the source's Elluna (ground dash and air glide distance and timing). The 3x rule is dropped.
+  - Animation and ability parity with the source for all 12 hunters, LMB first. Our own art, same motion.
   - Venator: RMB is a side toss.
   - Pin: missed arrows linger.
 
@@ -65,9 +68,17 @@ Main keeps this file current; anyone can propose a line in EXT_TO_MAIN tagged "D
 - Farm islands are nearly unreachable without a bridge. The bridge pulls the island closer.
 - Notices are bullet points in plain words.
 
+## Modes and queues
+- Extraction: one queue, squads of 3, auto-filled (solos are filled in, bots backfill early). No solo or duo queue.
+- Duel: 1v1, online search or against a bot. Arena: 4v4 across several arena maps.
+
 ## Practice and Arena
 - One connected space: the Training Room (left, practice stations) and a duel ring (right, spawn a bot or fight a player).
 - Arena mode: 4v4 rounds like the source's, each round a little different.
+
+## Agents and art
+- Agent models: Opus for feel-critical, parity, cross-hero and design work. Sonnet only for small, clear fixes.
+- Portraits come from the art pass; ext/portrait keeps only its frame and HUD side.
 
 ## Process (all agents)
 - The briefs branch is the only channel between sessions. **After every brief push, verify that it landed:** `git fetch origin` and confirm your HEAD equals origin/ext/agent-briefs. Never hide git errors (no `2>/dev/null`, no `-q` without checking the exit code).
