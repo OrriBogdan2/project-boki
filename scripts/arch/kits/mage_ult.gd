@@ -180,7 +180,6 @@ func _take_off() -> void:
 	_next(RISE)
 	kit.play("mage_x_air")
 	kit.m.fx.burst(from + Vector3(0, 0.2, 0), DUST, 18, 3.5, 0.5, 2.0, 1.4)
-	kit.fx().ring(from, 1.6, DUST, MageKit.GOLD, 0.3)
 	var top := from + Vector3(0, float(data()["height"]), 0)
 	kit.fx().arc(from + Vector3(0, 0.2, 0), top, MageKit.TEAL, MageKit.GOLD, 0.9, 0.25)
 	var hover := float(data()["rise"]) + float(data()["hover"]) + float(data()["drop"])
@@ -243,7 +242,7 @@ func _slam() -> void:
 	var mark := {"at": land, "r": float(data()["radius"]), "all": true, "dur": float(data()["drop"]), "fill": 1.0}
 	mark.merge({"col": MageKit.GOLD, "col2": MageKit.GOLD, "hot": 0.6})
 	AimKit.circle(kit.h, "x_land", mark)
-	kit.fx().ring(land, 2.3, MageKit.GOLD, MageKit.TEAL, 0.15)
+	kit.fx().ring(land, float(data()["radius"]), MageKit.GOLD, MageKit.TEAL, 0.15)
 	kit.net_ring(land, float(data()["radius"]), MageKit.GOLD)
 
 ## Coming down: a streak of lightning from where she hung onto the marker (the body hides in it).
@@ -275,7 +274,8 @@ func _strike() -> void:
 	_strike_fx(at, r)
 	var n := 0
 	var dmg := float(xd["dmg"]) * power()
-	for f in kit.foes_in(at, r):
+	var struck := kit.foes_in(at, r)
+	for f in struck:
 		var away := Vector2(f.pos.x - at.x, f.pos.z - at.z)
 		away = away.normalized() if away.length() > 0.1 else h.aim_dir()
 		var o := {"src": "abil", "ab": "ult", "tags": ["ult", "kitefall"], "kb": away * float(xd["push"])}
@@ -284,8 +284,21 @@ func _strike() -> void:
 		kit.add_spark(f, int(xd["stacks"]))
 		HeroUlt.landed(kit, f)
 		n += 1
+	_spread_static(struck)
 	hits += n
 	last = {"at": at, "hits": n}
+
+## The data's Thunderstorm rule: striking a target spreads its Static to the foes near it (each takes the
+## struck one's count if it had less), with an arc from one to the other.
+func _spread_static(struck: Array) -> void:
+	var r := float(data()["spread_r"])
+	for f in struck:
+		var n := kit.spark_n(f)
+		for o in kit.foes_in(f.pos, r):
+			if o != f and kit.spark_n(o) < n:
+				kit.add_spark(o, n - kit.spark_n(o))
+				kit.fx().arc(f.position + Vector3(0, 1.0, 0), o.position + Vector3(0, 1.0, 0), MageKit.TEAL,
+						MageKit.GOLD, 0.6, 0.2)
 
 ## A pillar of gold light slams onto the spot out of the sky, a shock ring and a spray of sparks.
 func _strike_fx(at: Vector3, r: float) -> void:
@@ -295,7 +308,6 @@ func _strike_fx(at: Vector3, r: float) -> void:
 		var sky := at + Vector3(0, 12.0, 0) + kit._jitter(0.8, 0.0, 0.0)
 		fx.arc(sky, at + kit._jitter(0.5, 0.1, 0.1), MageKit.TEAL, MageKit.GOLD, 1.3 - 0.3 * i, 0.25)
 	fx.ring(at, r, MageKit.GOLD, MageKit.TEAL, 0.35)
-	fx.ring(at, r * 1.45, MageKit.COPPER, MageKit.GOLD, 0.5)
 	fx.disc(at, r * 0.8, Color("1a1420"), MageKit.GOLD, 0.4, MageKit.COPPER)
 	kit.m.fx.spark(at + Vector3(0, 0.3, 0), Vector3.UP, MageKit.GOLD, 26, 11.0, 75.0, 0.4, 8.0, 1.3)
 	kit.m.fx.flash(at + Vector3(0, 1.2, 0), MageKit.GOLD, 2.4, 0.12)

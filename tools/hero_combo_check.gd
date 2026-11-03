@@ -329,7 +329,8 @@ func _mage() -> void:
 	ok("Storm Rod into another foe: both stunned",
 			T.stun_t > 0.0 and T2.stun_t > 0.0,
 			"%.2f / %.2f" % [T.stun_t, T2.stun_t])
-	# 9. Skycall: placed at the cursor, the flick sets the drag (toward you pulls in), 0.8s countdown, 2 Static, Grounded
+	# 9. Skycall: placed at the cursor, held and dragged (toward you pulls in), committed on release, 0.8s
+	# countdown, 1 Static, Grounded
 	ac.fresh(T)
 	ac.fresh(T2)
 	T2.teleport(home + Vector3(30, 0, 0))
@@ -340,21 +341,25 @@ func _mage() -> void:
 	ac.step(m, 0.2)
 	K.cd["e"] = 0.0
 	ac.aim_at(P, T.pos)
+	P.inp["e_down"] = true
 	P.ak.use_e()
 	ok("Skycall: the circle drops at the cursor", not K.strikes.is_empty() and _flat(K.strikes[0]["at"], T.pos) < 0.3)
 	ac.step(m, 0.05)
-	ac.aim_at(P, T.pos + Vector3(-3.0, 0, 0))           # the flick: back toward Vireo
-	ac.step(m, 0.1)
+	ac.aim_at(P, T.pos + Vector3(-3.0, 0, 0))           # the drag: back toward Vireo
+	ac.step(m, 0.55)
 	var ce := AimKit.entry(P, "e0")
-	ok("Skycall flick: the drag arrow + a rim chevron on the circle",
-			AimKit.shown(P, "e_drag") and not ce.is_empty() and (ce["pointer"] as Vector2).x < -0.9,
-			str(ce.get("pointer", "")))
+	ok("Skycall held 0.6s (data: hold and drag, release): still dragging, the arrow + a rim chevron on the circle",
+			AimKit.shown(P, "e_drag") and not ce.is_empty() and (ce["pointer"] as Vector2).x < -0.9
+			and String(K.strikes[0]["phase"]) == "flick", str(ce.get("pointer", "")))
+	P.inp["e_down"] = false
+	m.step(ac.DT)
+	ok("Skycall: the release commits the drag and starts the countdown", String(K.strikes[0]["phase"]) == "count")
 	ac.step(m, 0.75)
 	ok("Skycall: nothing lands before the 0.8s countdown", ac.dmg(T) < 0.5)
 	var tx0 := T.pos.x
 	ac.step(m, 0.3)
-	ok("Skycall: 2 Static, Grounded, dragged toward you",
-			K.spark_n(T) >= 2 and KitStatus.grounded(T) and ac.dmg(T) >= 15.0 and T.pos.x < tx0 - 0.5,
+	ok("Skycall: 1 Static (data), Grounded, dragged toward you",
+			K.spark_n(T) == 1 and KitStatus.grounded(T) and ac.dmg(T) >= 15.0 and T.pos.x < tx0 - 0.5,
 			"sparks %d moved %.1f" % [K.spark_n(T), T.pos.x - tx0])
 	ac.step(m, 0.9)
 	ok("Skycall: the drag is a modest slide (about 3.4 m)",
@@ -440,8 +445,8 @@ func _mage() -> void:
 	ac.step(m, 0.1)
 	ok("small: Wirerun ignores projectiles while it runs (phase)", P.phase_t > 0.0 or K.last_dash_kind == "wire")
 	ac.step(m, 0.6)
-	ok("small: Wirerun hits every foe it passes (two in a line)",
-			ac.dmg(T) >= 9.0 and ac.dmg(T2) >= 9.0,
+	ok("small: Wirerun hits every foe it passes (two in a line), about 1.7 bolts each (data: Surge 153 / Jolt 90)",
+			ac.dmg(T) >= 18.0 and ac.dmg(T2) >= 18.0,
 			"%.0f / %.0f" % [ac.dmg(T), ac.dmg(T2)])
 	ac.fresh(T)
 	ac.fresh(T2)
@@ -454,8 +459,8 @@ func _mage() -> void:
 	ac.aim_at(P, T.pos)
 	_fire(m, P)
 	ac.step(m, 0.6)
-	ok("small: a finger bolt passes through everyone in line",
-			ac.dmg(T) > 0.0 and ac.dmg(T2) > 0.0,
+	ok("small: a finger bolt stops on the first foe in line (data: one bolt, no pierce)",
+			ac.dmg(T) > 0.0 and ac.dmg(T2) == 0.0,
 			"%.0f / %.0f sparks %d %d" % [ac.dmg(T), ac.dmg(T2), K.spark_n(T), K.spark_n(T2)])
 	P.dashes = 0.0
 	T2.hp = 0.0

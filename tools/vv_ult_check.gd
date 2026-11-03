@@ -113,6 +113,7 @@ func mage() -> void:
 	await _mage_merge(m, P, K, home)
 	_mage_shift(m, P, K, home)
 	_mage_jump(m, P, K, home)
+	_mage_spread(m, P, T, T2, K, home)
 	await ac.done(m)
 	await _mage_burst()
 	var flow = load("res://tools/dash_flow_check.gd").new()
@@ -155,6 +156,30 @@ func _mage_merge(m: Match, P: Hunter, K: MageKit, home: Vector3) -> void:
 			not U.running() and U.hits == hits and P.pos.y < home.y + 0.6 and float(K.cd["x"]) > 0.0,
 			"y +%.1f" % (P.pos.y - home.y))
 	KinMerge.end(P, "test")
+
+## The data's Thunderstorm: a struck foe spreads its Static to the foes near it (one outside the strike
+## picks up the struck one's count).
+func _mage_spread(m: Match, P: Hunter, T: Hunter, T2: Hunter, K: MageKit, home: Vector3) -> void:
+	var U := K.ult
+	var xd := K.x_def()
+	K.cd["x"] = 0.0
+	P.teleport(home)
+	var spot := home + Vector3(5, 0, 0)
+	ac.fresh(T)
+	ac.fresh(T2)
+	T.teleport(spot + Vector3(0.8, 0, 0))
+	T2.teleport(spot + Vector3(3.5, 0, 0))
+	K.sparks.clear()
+	K.add_spark(T, 2)
+	ac.aim_at(P, spot)
+	HunterKeys.ult_pressed(P)
+	ac.step(m, float(xd["windup"]) + float(xd["rise"]) + float(xd["min_air"]) + 0.05, func(): ac.aim_at(P, spot))
+	HunterKeys.ult_pressed(P)
+	ac.step(m, float(xd["drop"]) + 0.1)
+	ok("Kitefall (data): the struck foe's Static spreads to a foe 2.7m from it, outside the strike",
+			U.last.get("hits", 0) == 1 and K.spark_n(T) == 3 and K.spark_n(T2) == 3,
+			"hits %d static %d -> %d" % [int(U.last.get("hits", 0)), K.spark_n(T), K.spark_n(T2)])
+	ac.step(m, 0.6)
 
 ## Item 51: Shift in Kitefall's crouch charges the Wirerun at once; the crouch waits for the run, starts over
 ## where it ended, and she launches from there (the ring moves with her) and still comes down.
