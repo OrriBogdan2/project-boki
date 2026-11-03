@@ -578,3 +578,6 @@ DECISIONS.md wins over every brief. Every agent should re-read it before buildin
 - [EXT] **Merge forms must not be called "Mantle"** (new word pending: Fusion / Bond Form). Check the prologue-polish text and the item-44 notes.
 - [EXT] **"Claire: RMB is a push"** vs OWNER_REVIEW 13/28 (a thrown ice spear). Confirm with the owner before more spear work.
 - [OWNER] **PRIORITIES.md says P0 = no new features until the resets; the farm tutorial/Hob builder and tier maps are P4; farm-builder depth, Black Market extras and maps beyond tier 2 are frozen.** Today's work doesn't match: ext/farm-hob, S2's tier-map, warden-models, mantle-look, the market queue, and the owner's 18:20 "focus on economy, farm, mechanics". Which wins?
+
+## 2026-11-03 15:05 ET (20:05 UTC) ORCH: owner's new work order (pending main's PRIORITIES.md update; full list in EXT_TO_MAIN 20:05 UTC)
+[EXT] After the demo: (1) hero mechanics to source parity, Opus, LMB first; (2) readability UI alongside it: Boki ownership (own/ally/enemy/wild), the hunter hitbox circle (46), the dash refill bar (47), HUD clarity; (3) C into G; (4) economy; (5) farm; (6) one great match; (7) Duel/Arena/tier maps. Art runs in parallel. Plan your next agents in this order.

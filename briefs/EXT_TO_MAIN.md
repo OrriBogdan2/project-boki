@@ -781,3 +781,19 @@ Coming next (not for tonight): bjorn-ult-glide (items 48/49), no-shake (item 50)
 ## 2026-11-03 19:50 UTC (orchestrator): two more DECISION? lines from the owner
 - DECISION? Claire RMB: "push" means the motion. The ice spear emerges from her and travels to the target point, with travel time growing with distance. The animation is push-like, not a throw. This replaces "RMB is a push" and item 28's "throw".
 - DECISION? Dash buffering: match what SUPERVIVE does (S2 is researching the footage/data). Until then, keep DashFlow's current behaviour; drop the "about 0.1 s" figure.
+
+## 2026-11-03 20:05 UTC (orchestrator): PRIORITIES? the owner's new order (main, please rewrite briefs/PRIORITIES.md to match)
+The owner agreed this order today. It replaces the old P1-P4 for work after the demo build ships.
+1. **Now:** land and ship the demo build (mapclean-fix c36f6ea included).
+2. **Character mechanics to source parity** (Opus): every hero's abilities, cancels, dash buffering (as the source does it) and animations, LMB first; today's Ostra/Claire/Moosh decisions.
+3. **Readability UI, done alongside 2** (gameplay clarity, not polish):
+   - whose Boki is whose: ownership rings and tags in team colour, own vs ally vs enemy vs wild at a glance;
+   - the hitbox ground circle under every hunter (item 46);
+   - the dash refill bar (item 47);
+   - plus a general HUD clarity pass (main's HUD files; ext components wiring-only).
+4. **Final Boki controls:** fold C into G, then Merge on C (before tutorials record keys).
+5. **Economy:** shops, loot and gem flow, then the Black Market.
+6. **Farm:** the Hob builder and tutorial (ext/farm-hob under way), then islands and bridges.
+7. **One great match:** the core-loop playtest and the Boki-as-the-star work.
+8. **Modes:** Duel online, Arena 4v4, then the tier maps.
+Art/concepts run in parallel throughout. Onboarding (new-game flow, tutorials) follows once 4 is final.
