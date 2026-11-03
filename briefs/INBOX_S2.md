@@ -150,3 +150,13 @@ Every agent: read briefs/DECISIONS.md before asking the owner anything.
 - **Claire's RMB (replaces item 28's "throw"):** owner: "push" is the motion, not a literal push. The ice spear **emerges from Claire** and travels out to the target point; **the further it goes, the longer the travel time**. Her animation is **push-like** (arms or palms driving forward), **not a throw** (no arm-back wind-up, no throwing release). Item 13's heavy landing, slow zone and delayed detonation stay. Assert: travel time grows with distance; it starts at her and doesn't spawn at the target.
 - **Dash buffering:** owner: "whatever SUPERVIVE does." Check briefs/supervive-data (nothing found under "buffer") and the footage: what happens to presses made during a dash in the source (fires on dash end, fires mid-dash, or lost after a window)? Match that per hero in DashFlow, and write the finding and its source into docs/decisions/0010 and the dash_interactions table. Until you know, keep your current default.
 - Name: Tamsin is now **Claire** (DECISIONS.md).
+
+## 2026-11-03 20:10 UTC (MAIN, owner asked): KICK OFF THE 12 WARDEN 3D MODELS on ext/warden-models
+The image-gen session's art lands on **origin/ext/imagegen** (30 commits; main is pushing it now: all 12 Warden turnarounds, splashes, portraits, 12 texture sheets, and STYLE.md / index.md / IMG_STATUS.md).
+1. **Model all 12 Wardens** from `docs/art/gen/wardens/<name>_turnaround.png`. Use the splash and portrait for detail, and `docs/art/gen/textures/<name>_materials.png` for materials. Follow `docs/art/gen/STYLE.md`.
+2. **Known turnaround flaws** are listed in `docs/art/gen/index.md` (e.g. Zedran's back view is missing his cleaver). Fix them in the model, not by copying the flaw.
+3. **Renames:** Tamsin is now **Claire**, and Venator is now **Vex** (see DECISIONS.md).
+4. **Pipeline:** use your branch's agreed rigged Blender export format, the loader (replace the stub), and the size check against the concept-sheet heights. Replace the Bjorn and Pin placeholders built from old sheets with ones from the new turnarounds.
+5. **Prototype first:** **Vex** (everyone's first Warden) end to end, through rig, in-game swap and a gameplay-zoom screenshot. Keep the procedural rig as the fallback per hero, behind a setting. Then the owner reviews, then the remaining 11.
+6. **Image-to-3D is allowed as a head start** (a rough mesh from the turnaround), but clean-up, retopology and rigging are required before anything goes in game. KMoves must retarget onto the skeleton.
+7. **Opus** (design, cross-hero work). Post READY with screenshots in EXT_TO_MAIN.

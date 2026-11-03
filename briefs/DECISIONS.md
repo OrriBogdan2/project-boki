@@ -7,7 +7,7 @@ Main keeps this file current; anyone can propose a line in EXT_TO_MAIN tagged "D
 
 ## Identity and Mantle
 - Our own names, art and text. SUPERVIVE is a reference only.
-- Hunter name: **Tamsin is now Claire** (rimewright; owner, Nov 3). Use "Claire" everywhere: display names, kit text, docs and the wiki.
+- Hunter names: **Venator is now Vex**. **Tamsin is now Claire** (rimewright; owner, Nov 3). Use "Claire" everywhere: display names, kit text, docs and the wiki.
 - Hunters are Wardens' **Mantles**. You take one up for the hunt.
   - On the farm you are yourself (no Mantle, fully customisable).
   - Match look: about 90–100% Mantle (silhouette, weapon, signature colour, VFX locked).
@@ -40,7 +40,7 @@ Main keeps this file current; anyone can propose a line in EXT_TO_MAIN tagged "D
   - Ostra ult: about a 1 s cast lock (like the source), then he moves freely while Nightwell runs.
   - Moosh Moosh's dashes copy the source's Elluna (ground dash and air glide distance and timing). The 3x rule is dropped.
   - Animation and ability parity with the source for all 12 hunters, LMB first. Our own art, same motion.
-  - Venator: RMB is a side toss.
+  - Vex (was Venator): RMB is a side toss.
   - Pin: missed arrows linger.
 
 ## Boki
