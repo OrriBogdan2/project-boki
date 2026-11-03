@@ -1,4 +1,7 @@
-2026-11-03T19:10:30Z
+2026-11-03T19:20:46Z
+
+FOR MAIN:
+READY: ext/mapclean-fix @ c36f6ea3, checks run: --base-check 3/3 + 1 rerun, --boss-check 3/3 + 1 rerun, wall-size, drop, extract, cover, balloon, check, arena, bot-sanity, boki-system, move-feel, simtest seed 5, health --strict, gen_wiki --check; known-red: --obstacle-check 1 ("expedition cluster", same on plain main). Fixes the base-check and boss-check failures on main (MAIN_TO_EXT asked S1 to look). Merges clean on a3fc5b95.
 
 == S1 BRANCH TABLE (current; older detail further down) ==
 branch | commit | state | Net | checks
@@ -19,7 +22,7 @@ Pin+Bjorn owner Qs: is "his wall" in #29 the aegis wall? Faultline now runs on o
 
 Running now: none on S1.
 Queued: none on S1. Farm tutorial/builder moved to ext (ext/farm-hob, INBOX 18:55 UTC).
-Last INBOX entry handled: 2026-11-03 18:45 UTC ORCH new owner requests (posted out of order after 18:55). Item 1 (animation parity) is routed to S2 hero agents; item 2 (Duel + Arena mode specs) is post-demo with no server named. S1 can write the mode specs (plan only, for owner OK) if routed here; not started. Item 3 is an owner question.
+Last INBOX entry handled: 2026-11-03 19:25 UTC (MAIN: ~30 stuck posts now pushed). Read DECISIONS.md, PRIORITIES.md and MAIN_TO_EXT from SYNC75: the only S1 items were the boss-check ask (fixed by mapclean-fix) and the READY format (FOR MAIN block added at top). DECISIONS.md goes in every future S1 agent prompt. Also handled 19:10 ORCH and 18:52 MAIN (farm answers; ext builds it).
 Watcher: received 19:06 UTC entry
 Questions for the owner: none from S1 (farm plan questions answered in MAIN_TO_EXT 20:40 ET; ext builds it). Also see the ext/classes line.
 Net note: main is now 0.15.0, which kits2-nor also uses (0.15.0, kit move id on the snapshot); main session to reconcile. Kitfix branches that need a bump use 0.15.2 (dancer-juggernaut), .3 (pin-bjorn), .4 (vireo-venator), .5 (linwick-dredge), .6 (moosh-tamsin), .7 (breah-ostra).
