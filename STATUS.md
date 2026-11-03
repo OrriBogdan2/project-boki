@@ -1,12 +1,14 @@
 # S2 status (second server session)
-Updated: 2026-11-03 16:10 UTC (git/server clock). Last INBOX_S2 handled: 16:05 (ext/demo-integ with mapclean caf5deb).
+Updated: 2026-11-03 16:30 UTC (git/server clock). Last INBOX_S2 handled: 16:20 (concepts 1b notes; queue starts now).
 
 
-## FOR MAIN: ONE BRANCH: `ext/demo-integ` @ ba7e542 (pushed 16:10 UTC)
-= origin/main 4d39c623 + in plan order: ext/dash-flow-base aa37aaf, ext/review-breah-ostra e20c738, ext/review-linwick-moosh e718d87, ext/review-dancer 7ae07b9, ext/review-bjorn c31d4db, ext/prologue-polish a1eecbe, S1's ext/airdash-glide 411a591, ext/kitdata-vireo-venator 67454b5, ext/mapclean caf5deb. Generated files regenerated (gen_wiki --check clean), health --strict OK.
-- Targeted (before mapclean): every check 0 failures (list below). With mapclean: --wall-size-check 0 failures.
-- Full suite: RUNNING since 16:10 UTC (all registry + inline checks, --check, simtest seed 5); results will replace this line.
-Merging this one branch replaces merging the nine branches listed in it.
+## FOR MAIN: ONE BRANCH. Recommended: `ext/demo-integ-core` @ 70df4da (everything except mapclean). `ext/demo-integ` @ ba7e542 adds mapclean, which breaks 2 checks.
+- `ext/demo-integ-core` @ 70df4da = origin/main 4d39c623 + in plan order: ext/dash-flow-base aa37aaf, ext/review-breah-ostra e20c738, ext/review-linwick-moosh e718d87, ext/review-dancer 7ae07b9, ext/review-bjorn c31d4db, ext/prologue-polish a1eecbe, S1's ext/airdash-glide 411a591, ext/kitdata-vireo-venator 67454b5. Generated files regenerated, health --strict OK. Targeted: every check 0 failures (airdash-glide, dash-flow, move-feel, dash-dir, zone, keys, archetype, class-unlock, hero-combo, all 12 hero combo checks, prologue, title). --base-check and --boss-check 0 failures. Its own full suite: RUNNING (16:30 UTC).
+- `ext/demo-integ` @ ba7e542 = demo-integ-core + S1's ext/mapclean caf5deb (merges clean, --wall-size-check 0 failures). **Full suite done: every failure also fails on main 4d39c623 (abyss 1, blight 1, grammar-runtime 5 (same 5 on main), hitch/load timing, obstacle 1 (same on main), pack-ui 4, perch 4, train 1; farm-start 2 was a flake: 0 on 2 reruns) EXCEPT two caused by mapclean:**
+  - `--base-check` FAIL (balloon check: "BCHECK clean: arrived=false" then BCHECK FAIL), 3 of 3 runs; 0 on main, 0 on demo-integ-core.
+  - `--boss-check` FAIL "a bot walked up and opened Stormcrown Eyrie in 150s (0 misses)", 3 of 3 runs; 0 on main, 0 on demo-integ-core.
+  - Both also fail on **plain ext/mapclean caf5deb alone** (fresh import, fresh XDG). S1's STATUS says caf5deb's full suite was 0 failures: **S1 please re-run --base-check and --boss-check on caf5deb.** Logs /home/boki/suite-s2/bis-mapclean-*.log, /home/boki/suite-s2/s2-integ/.
+- Main can merge demo-integ-core now; mapclean can follow on its own once fixed (it merged clean on top here).
 
 ## FOR MAIN: S2 merge plan (all READY, ALL NOW CONTAIN MAIN 4d39c623 / physics76; demo cutoff 21:00 UTC; every S2 pair made it)
 Re-verified at 14:36 UTC on physics76. Each branch below has origin/main 4d39c623 merged in, conflicts resolved, and was re-checked (that hero's combo checks, --dash-flow-check, --move-feel-check, --dash-dir-check, --hero-combo-check, --zone-check, --class-unlock-check, --archetype-check, --keys-check, health --strict): all 0 failures except the known Bjorn row of --dash-flow-check on branches 1-4 (fixed by branch 5).
