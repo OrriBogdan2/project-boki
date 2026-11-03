@@ -51,11 +51,13 @@ Nothing here comes from SUPERVIVE's files.
 | ground_turn90_t | 0.100s | 0.083s | <= 0.09s | [spec] crisp |
 | speed light / medium / heavy | 5.2 / 5.0 / 4.73 | same | class data | KINFALL_CLASSES |
 | jump_input_frames | 1 | 1 | <= 1 | |
-| jump_apex | 1.28m | 1.28m | 1.2–1.6m | [est] one terrace + mantle |
-| jump_airtime | 0.633s | 0.550s | <= 0.6s | [est] tight arc |
+| jump_apex | 1.28m | 1.52m | 1.2–1.6m | [game data] 1.9m, held under 1.6 for the terrace grammar |
+| jump_airtime | 0.633s | 0.900s | 0.85–1.05s | [game data] 1.02s |
+| air_carry_m (let go at take-off) | n/a | 3.4m | >= 3.0m | [game data] FallingLateralFriction 0.375 |
+| air_reverse_t | n/a | 0.52s | 0.4–0.75s | [game data] AirControl 0.015, translated |
 | coyote_frames | 7 | 7 | >= 6 | FeelConfig 0.1s |
 | jump_buffer_frames | 6 | 7 | >= 7 | FeelConfig 0.12s |
-| freefall_1s_depth | 6.37m | 8.69m | 7.5–9m | [footage] ~8m |
+| freefall_1s_depth | 6.37m | 7.20m | 6.8–8m | [game data] 14.7 m/s² capped at 12 m/s ([footage] ~8m) |
 | glide_open_press_frames (second press) | 1 | 1 | <= 1 | [guide] |
 | glide_open_hold_s (Space held from the jump) | 0.150s | 0.117s | <= 0.12s | tap/hold split |
 | glide_open_button_frames (glide button) | 6 | 1 | <= 1 | no tap ambiguity |
@@ -81,8 +83,11 @@ Nothing here comes from SUPERVIVE's files.
 | ledge_fling_gain (timed vs no jump, distance) | n/a | 3.4x (1.8x from a 1.35m rise) | >= 1.5x | [est] rewarding |
 | ledge_window_s | n/a | 0.117s (7 steps) | >= 0.08s | [est] readable |
 | abyss_lift_t (4m deep to balloon line) | 1.05s | 0.82s | <= 1.0s | [footage] ~1s |
-| abyss_kill_depth (point of no return under the lip) | 6.0m | 13.0m | >= 12m | owner: "needs to be a bit lower"; [footage] ~1.5s of free fall |
-| abyss_recover_depth (deepest a terminal fall can still glide out) | ~6m | 13.0m | >= 11m | |
+| abyss_kill_depth (point of no return under the lip) | 6.0m | 17.5m | 17–18m | [game data] AbyssHeight |
+| abyss_recover_depth (deepest a terminal fall can still glide out) | ~6m | 18.5m | >= 15m | |
+| abyss_fall_t / abyss_fall_vy_deep (step off the lip) | n/a | 1.93s / 10.0 m/s | >= 1.8s / 10–10.8 | [game data] AbyssFallSlow 12 to 10 m/s |
+| abyss_bounce_m (lift from 6m deep, over the lip) | ~0.8m | 1.58m | >= 1.5m | owner: bouncy |
+| glide_high_sink / glide_swoop_speed (gliding above 8.5m) | 1.4 / 6.5 m/s | 3.5 / 11.75 m/s | 3.3–3.6 / >= 10.5 | [game data] GlideDownwardForce, swoop 2.5x |
 | abyss_tint_lip / half / end (screen danger 0..1) | (old HUD rings only) | 0.00 / 0.67 / 0.99 | <= 0.02 / >= 0.6 / >= 0.95 | owner: "really dark/red when going low" |
 | updraft_rise_t (to 8 m/s climb) | 0.333s | 0.233s | <= 0.3s | [est] powerful |
 | drop_dive_vy_t (90% of dive fall) | 0.583s | 0.333s | <= 0.4s | [est] punchy |
@@ -197,6 +202,18 @@ Other checks:
 
   Measured opening 6m deep at -8 m/s: peak over the lip -0.39m before, +0.77m after; time near the top (above the lip, under 1 m/s vertical) 0.00s before, 0.38s after. Heat rules are unchanged.
 - The `--mantle-check` steering-away window is 24 steps (was 12): a ledge now catches you earlier in the jump, so reversing out takes longer to show as distance.
+
+## Physics pass: SUPERVIVE's game data (`physics76`)
+
+Tunables are in `content/rules/hunter_move.json` (`physics`), read by `HunterMove`; values and sources are in SUPERVIVE_DATA.md.
+
+- **Gravity** 30 (x1.2 falling) → 14.7 m/s², one gravity. **Jump** 9 → 6.8 m/s (the data's 7.5 would let jump + mantle top four terraces). **Wall kick** rise 0.9 → 0.8m, so jump + kick + mantle still tops 4 terraces and not 5.
+- **Fall cap** 10 → 12 m/s, easing to 10 m/s from 1m to 16.5m under the lip. **Point of no return** 13 → 17.5m under the lip: about 1.9s of falling to save yourself (was ~1.4s).
+- **Air control** (`HunterMove.air_steer`): keys steer at 0.3x your ground acceleration and carried speed bleeds at 0.375/s. The data's 0.015 felt like dropped input top-down. A ledge rise keeps the old crisp air steering.
+- **Glide height hold** (`GlideLift.sink`): more than 8.5m over the ground (or the lip) the glider sinks at 3.5 m/s, and 2.5x the drop past its usual sink becomes glide speed, fading over 1.5s.
+- **Mantle**: topping out sends you onto the ledge at max(0.6x run speed, 3.5 m/s). The no-jump pop is 2.6 m/s (was 3.2; lower gravity floated it twice as long).
+- **Abyss bounce** [est]: the lift reaches the lip at 4.5 m/s (was 3.5), floating ~1.6m over it.
+- **Feathering**: the glider no longer cools in the air, and a lift's first 0.3s heats like a level glide (was 0.4x). The slower gravity had made coasting between taps so cheap that feathering went 4.8x as far as holding; it is 2.0x now.
 
 ## Not touched
 

@@ -525,7 +525,7 @@ func _all() -> void:
 	# --- the abyss: a foe reeled over a gap falls
 	reset.call()
 	for dz in range(-6, 7):
-		for dx in range(3, 6):
+		for dx in range(3, 8):
 			W.kind[W.idx(hx + dx, hz + dz)] = World.T_VOID
 	var a0 := K.arrivals
 	ak.tap(m, P)
@@ -536,7 +536,7 @@ func _all() -> void:
 		"out %s y %.1f x %.1f" % [str(T.out), T.pos.y - home.y, T.pos.x - home.x]
 	)
 	for dz in range(-6, 7):
-		for dx in range(3, 6):
+		for dx in range(3, 8):
 			W.kind[W.idx(hx + dx, hz + dz)] = World.T_GROUND
 	# --- a Boki merge that starts mid-reel / mid-wind-up ends them: the rope goes, no Anchor slam, no landing hit
 	reset.call()
