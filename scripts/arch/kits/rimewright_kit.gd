@@ -206,7 +206,7 @@ func _throw_dart() -> void:
 	burst_i += 1
 	dart_n += 1
 	var side := 1.0 if dart_n % 2 == 0 else -1.0
-	# a dart leaves bowed out to one side and curves back in; a skating dart flies straight
+	# a dart leaves a little to one side of the aim and curves in late; a skating beam leaves straight on the aim
 	var bow := 0.0 if skating else deg_to_rad(float(wd.get("bow_deg", 18.0))) * side
 	var v := dir.rotated(bow)
 	var start := Vector3(h.pos.x + v.x * 0.6, h.pos.y + 0.95 * float(h.cdat["scale"]), h.pos.z + v.y * 0.6)
@@ -221,8 +221,7 @@ func _throw_dart() -> void:
 	var s := lk().last_shot()
 	if not s.is_empty():
 		lk().skin(s, "beam" if skating else "shard", {}, _heavy_k("size_k", heavy))
-		if not skating:
-			darts.append({"s": s, "side": side, "passed": false})
+		darts.append({"s": s, "side": side, "passed": false})
 	m.fx.flash(start, Color("9af0ff"), (0.3 if not skating else 0.5) * _heavy_k("size_k", heavy), 0.05)
 	var pitch := (1.0 + 0.06 * side) * (0.8 if heavy else 1.0)
 	var loud := 0.0 if heavy else -2.0
@@ -254,8 +253,8 @@ func _play_dart(heavy: bool, side: float) -> void:
 	else:
 		play("tm_dart_r" if side > 0.0 else "tm_dart_l")
 
-## Homing: each dart turns hard toward the foe nearest the cursor (or, with none there, the nearest
-## one ahead of it, or else the cursor point itself), so the bowed darts curve in.
+## Homing: late in its flight each dart (and each skating beam) turns toward the foe nearest the cursor (or,
+## with none there, the nearest one ahead of it, or else the cursor point itself).
 func _tick_darts(dt: float) -> void:
 	var wd: Dictionary = h.wpn
 	var turn := float(wd.get("turn", 7.0))
@@ -296,9 +295,21 @@ func _tick_darts(dt: float) -> void:
 				if want.length() < 0.8 or v.dot(want) < 0.0:
 					dd["passed"] = true          # past the cursor: it flies on straight
 					want = Vector2.ZERO
-		if want.length() > 0.05:
-			var ang := clampf(v.angle_to(want), -turn * dt, turn * dt)
-			s["vel"] = v.rotated(ang)
+		if want.length() < 0.05 or absf(v.angle_to(want)) > PI * 0.6:
+			continue             # nothing to chase, or it is already past it: it flies on
+		var rate := turn * _homing_k(s, want.length())
+		var ang := clampf(v.angle_to(want), -rate * dt, rate * dt)
+		s["vel"] = v.rotated(ang)
+
+## How hard a dart (or a skating beam) homes now, 0..1: it flies out along the aim, then curves in toward the end
+## of its flight to what it chases, as Celeste's do (from wpn.home_from to wpn.home_full of the way there).
+func _homing_k(s: Dictionary, left: float) -> float:
+	var wd: Dictionary = h.wpn
+	var from: Vector3 = s["start"]
+	var p: Vector3 = s["pos"]
+	var flown := Vector2(p.x - from.x, p.z - from.z).length()
+	var way := flown / maxf(0.01, flown + left)
+	return smoothstep(float(wd.get("home_from", 0.35)), float(wd.get("home_full", 0.7)), way)
 
 # ------------------------------------------------------------------ Shift: Skate
 ## The skate is her dash (DashFlow sees it); its rows (content/dash_flow/rimewright.json) say what fires from it.

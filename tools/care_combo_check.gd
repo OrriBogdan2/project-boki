@@ -301,6 +301,73 @@ func _skate_ice() -> void:
 			int(laid[1][0]) == 0 and int(laid[3][0]) >= 6 and int(laid[3][1]) == 0,
 			"rank 1 %s, rank 3 %s (tiles now, after)" % [str(laid[1]), str(laid[3])])
 
+## Owner 23:55: Celeste's darts home in toward the END of their flight, also while she skates. A dart keeps its
+## launch heading through its first third, then turns in (wpn.home_from 0.35 to home_full 0.7 of its flight);
+## a skating beam aimed 1.5 m off a foe still curves onto it late.
+func _late_homing() -> void:
+	var r: Array = sc.setup("rimewright", 30.0)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var T: Hunter = r[3]
+	var K: RimewrightKit = P.ak
+	T.teleport(P.pos + Vector3(7.0, 0, 2.5))
+	sc.aim_at(P, T.pos)
+	step(m, 0.05)
+	P.inp["fire"] = true
+	step(m, 1.0 / 60.0)
+	P.inp["fire"] = false
+	var mine := _mine(m, P)
+	var dart: Dictionary = mine[0] if not mine.is_empty() else {}
+	var v0: Vector2 = dart.get("vel", Vector2.RIGHT)
+	var turned_early := 0.0
+	var turned_late := 0.0
+	var t := 0.0
+	var from: Vector3 = dart.get("start", P.pos)
+	var reach := Vector2(T.pos.x - from.x, T.pos.z - from.z).length()
+	while m.shots.has(dart) and t < 1.0:
+		step(m, 1.0 / 60.0)
+		t += 1.0 / 60.0
+		var turned := rad_to_deg(absf(v0.angle_to(dart["vel"])))
+		var p: Vector3 = dart["pos"]
+		if Vector2(p.x - from.x, p.z - from.z).length() < reach * 0.33:
+			turned_early = turned
+		else:
+			turned_late = maxf(turned_late, turned)
+	ok(
+			"tm LMB: a dart flies out straight (the first third of the way under 1 deg of turn), then curves in late",
+			turned_early < 1.0 and turned_late > 5.0,
+			"early %.1f deg, late %.1f deg" % [turned_early, turned_late])
+	await _free(m)
+	r = sc.setup("rimewright", 30.0)
+	m = r[0]
+	P = r[1]
+	T = r[3]
+	K = P.ak
+	T.teleport(P.pos + Vector3(4.0, 0, -7.0))
+	step(m, 0.05)
+	var hp0 := T.hp
+	P.dashes = 1.0
+	P.inp["move"] = Vector2(1, 0)
+	P.inp["dash"] = true
+	P.inp["dash_down"] = true
+	step(m, 1.0 / 60.0)
+	P.inp["dash"] = false
+	var beams0: int = K.stats["beams"]
+	for i in 36:
+		sc.aim_at(P, T.pos + Vector3(1.5, 0, 0))
+		P.inp["fire"] = true
+		step(m, 1.0 / 60.0)
+	P.inp["fire"] = false
+	P.inp["dash_down"] = false
+	step(m, 0.4)
+	var shot := int(K.stats["beams"]) - beams0
+	ok(
+			"tm Shift: skating, beams aimed 1.5 m off a foe still home in late and hit it",
+			shot >= 3 and hp0 - T.hp >= float(P.wpn["dmg"]) * float(shot) * 0.6,
+			"%d beams, %.0f damage" % [shot, hp0 - T.hp])
+	P.inp["move"] = Vector2.ZERO
+	await _free(m)
+
 ## Owner 19:50: the further the spear goes, the longer it travels; it always starts at her, never at the target.
 func _spear_travel() -> void:
 	var flights := []
@@ -889,8 +956,8 @@ func rimewright() -> void:
 				and K.stats["heavies"] >= 3,
 			"".join(pattern))
 	ok(
-			"tm LMB: darts come out slowly (16 m/s) and bowed out to the side",
-			float(P.wpn["speed"]) <= 18.0 and not bows.is_empty() and float(bows[0]) > 12.0,
+			"tm LMB: darts come out slowly (16 m/s), a little off the aim to alternating sides",
+			float(P.wpn["speed"]) <= 18.0 and not bows.is_empty() and float(bows[0]) > 5.0 and float(bows[0]) < 15.0,
 			"first bow %.0f deg" % (float(bows[0]) if not bows.is_empty() else 0.0))
 	step(m, 0.8)
 	var thrown_dmg: float = dmgs.reduce(func(a, d): return a + float(d), 0.0)
@@ -903,6 +970,7 @@ func rimewright() -> void:
 			"tm passive: the frost glow on the foe shows the stacks",
 			K.lk().showing("frost%d" % T.get_instance_id()) or K.splinter_log > 0)
 	await _free(m)
+	await _late_homing()
 	# --- 8 darts on one foe Shatter them for about 15 darts' worth, with the spikes
 	r = sc.setup("rimewright", 5.0)
 	m = r[0]
