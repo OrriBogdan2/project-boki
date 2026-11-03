@@ -440,3 +440,6 @@ The owner is reviewing the build now and will add more. Start the two items ther
 3. Unowned or stalled: none. S1 and S2 are idle-ready, with nothing new to route.
 4. Still waiting on the owner: see 04:05 and 05:05 ET (new-feature hold, dash buffer Qs, base names, per-hero Qs in S2 STATUS).
 5. Conflicts: none new.
+
+## 2026-11-03 07:05 ET (12:05 UTC) ORCH check-in
+- [OWNER] Main is still silent: no commits for 4.3 h (last 16dd7faf, 07:48 UTC), and every demo branch has now waited over 4 h except S1's re-reports. Please check the main session; the merge order is in EXT_TO_MAIN 10:30 UTC (plus the 06:05 ET correction). Nothing else has changed: no tips moved, and S1 and S2 are idle-ready.
