@@ -12,7 +12,7 @@
 - **Texture references** for all 12 in `docs/art/gen/textures/<name>_materials.png` (2x2 material close-ups).
 - Owner decisions this session: Tamsin renamed **Claire** (cuter, younger face); Venator renamed **Vex** (an East Asian woman, grizzled cocky vet, a bit crazy, ember aura); Vireo hotter with no red and no sidecut; Sable with a feminine face and loose outfit (wings read as wing-scale coat-tails, IMG's call); Cinder more dangerous; Zedran lean but jacked; Moosh Moosh made to fit the roster (adventurer gear, dramatic lighting).
 - Studio note: keep prompts under about 2,500 characters (Anthum flagged long prompts; long wide-format runs stalled).
-- Credits: about 1,228 at the start, about 980 now (see the studio balance).
+- Credits: the studio balance went from 1,228 to 1,052 this session (176 used).
 - **Push**: this session can't push (the repo wasn't attached when the task was created). The commits go to the owner as a git bundle in `Downloads\boki_imagegen_bundle`, for a repo-attached session to fetch and push.
 
 ## 2026-11-03 19:05 UTC: deliverable 2 at 11 of 12 Wardens
