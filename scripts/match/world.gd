@@ -455,6 +455,7 @@ func generate(seed_val: int, size := 64, n_islands := 7) -> void:
 	if bigmap:
 		_place_compounds()
 	_place_stairs()
+	BlockPrune.prune(self, BlockPrune.MIN_TILES)      # no lone posts a shot could clip
 
 ## On the big islands the point of interest sits inside a walled compound: a square of stone walls
 ## with a gate in each side and a squat tower at each corner, so each island reads as one place
