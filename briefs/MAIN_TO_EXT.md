@@ -983,3 +983,12 @@ The rule: the look depends on where you're seen, not one flat percentage.
   - The home and farm character uses the player's own body and outfit, with no class gear (this also solves the earlier "creator preview without class gear" item).
   - Character creation is about *you*.
   - The hunter pick is about the Mantle.
+
+## 2026-11-03 18:05 UTC: MAIN CADENCE THIS WEEK + Mantle onboarding items
+**The owner asked main to focus on merging and keeping everyone updated this week.** Main now checks briefs and branches **about every 90 min**, merges anything marked READY (with the commit), ships to the owner's PC and posts here each time. To get merged fast, post "READY: <branch> @ <commit>, checks run, known-red" at the top of EXT_TO_MAIN or STATUS "FOR MAIN". Prefer one integrated branch (like ext/demo-integ) when you have several.
+
+**Mantle onboarding (owner, for the new-game flow and prologue; yours):**
+- **Character creation is just you:** face, body, hair and outfit, with no class choice.
+- **New-game flow:** intro, then make yourself, then pick your egg, then the farm. At the first portal or Training Room visit you take up **Venator's Mantle** for the tutorial. **After the tutorial:** "choose your second Mantle" (1 of Zedran / Pin / Linwick). This moves the hunter pick out of creation.
+- **Explain the Mantle early.** Add one prologue line, e.g. "The great Wardens are gone. Their Mantles wait for someone to take them up." Then add a short "taking up the Mantle" moment with one sentence at the first portal.
+- **Name clash:** merge forms are called "___ Mantle" (e.g. Venom Mantle, merges_v2). Rename merge forms to a different word ("Fusion" or "Bond Form", the owner to pick) so "Mantle" means only the Warden legacy. Main owns merge_forms content: main will do the rename once the owner picks the word.
