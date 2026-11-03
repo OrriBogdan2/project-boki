@@ -28,7 +28,7 @@ func setup(arch: String, dist: float, kin_sp := "", second := false) -> Array:
 	var hx := int(floor(P.pos.x)); var hz := int(floor(P.pos.z))
 	var hi: int = W.idx(hx, hz)
 	var lv: int = int(W.level[hi]) if W.kind[hi] != World.T_VOID else 0
-	for dz in range(-6, 7):
+	for dz in range(-10, 11):      # (targets are parked 9m to either side)
 		for dx in range(-8, int(dist) + 12):
 			if not W.inb(hx + dx, hz + dz): continue
 			var i: int = W.idx(hx + dx, hz + dz)
@@ -36,6 +36,7 @@ func setup(arch: String, dist: float, kin_sp := "", second := false) -> Array:
 			W.level[i] = lv
 			W.island[i] = W.island[hi]
 			W.stairs.erase(i); W.walls.erase(i); W.props.erase(i); W.bush.erase(i)
+	for b in m.breaks: b["dead"] = true      # crates and kegs off the strip too: shots here are about the kit
 	var home := Vector3(hx + 0.5, lv * World.LEVEL, hz + 0.5)
 	P.teleport(home); P.vel = Vector3.ZERO
 	P.set_arch(arch)

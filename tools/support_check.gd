@@ -40,6 +40,7 @@ func setup(arch: String, dist := 6.0, kin_species := "") -> Array:
 			var i: int = W.idx(hx + dx, hz + dz)
 			W.kind[i] = World.T_GROUND; W.level[i] = lv; W.island[i] = W.island[hi]
 			W.stairs.erase(i); W.walls.erase(i); W.props.erase(i); W.bush.erase(i)
+	for b in m.breaks: b["dead"] = true      # crates and kegs off the strip too: shots here are about the kit
 	var home := Vector3(hx + 0.5, lv * World.LEVEL, hz + 0.5)
 	P.teleport(home); P.vel = Vector3.ZERO
 	P.set_arch(arch)
