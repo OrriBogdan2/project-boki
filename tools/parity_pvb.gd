@@ -47,7 +47,7 @@ func _speed(m: Match, P: Hunter, secs: float, each: Callable) -> float:
 
 # ------------------------------------------------------------------ Pin: the bow
 func pin() -> void:
-	var r := setup("archer", 7.0)
+	var r := setup("archer", 7.0, "", true)
 	var m: Match = r[0]
 	var P: Hunter = r[1]
 	var home: Vector3 = r[4]
@@ -93,7 +93,35 @@ func pin() -> void:
 		"%.2f s" % t)
 	P.inp["fire"] = false
 	P.inp["move"] = Vector2.ZERO
+	_pin_audit(m, P, r[2], r[3], K, home)
 	await done(m)
+
+## The audit (Nov 3 23:40): cooldowns from the data, the Heavy Shot stops on the first foe, and an early-release
+## wall pin pays a share of the wall hit.
+func _pin_audit(m: Match, P: Hunter, T: Hunter, T2: Hunter, K: ArcherKit, home: Vector3) -> void:
+	var pd: Dictionary = K.rmb_def()["pin"]
+	ok("audit pin: cooldowns from the data (Phase Walk 9.5s, Rain of Arrows 15s, Virideth's Fury 60s)",
+		float(K.dash_def()["cd"]) == 9.5 and float(K.e_def()["cooldown"]) == 15.0 and float(K.x_def()["cooldown"]) == 60.0)
+	ok("audit pin: no knock heal and no instant Focus draw in the kit data",
+		not K.res_def().has("knock_heal") and not pd.has("pierce") and float(pd["wall_floor"]) > 0.0)
+	fresh(T)
+	fresh(T2)
+	P.teleport(home)
+	T.teleport(home + Vector3(5, 0, 0))
+	T2.teleport(home + Vector3(7, 0, 0))
+	T.inv_t = 0.0
+	T2.inv_t = 0.0
+	step(m, 0.2)
+	K.cd["rmb"] = 0.0
+	K.ch_rmb = 1.0
+	aim_at(P, T.pos)
+	P.inp["sec_hold"] = true
+	K.press_rmb()
+	step(m, 1.2, func(): P.inp["sec_hold"] = true; aim_at(P, T.pos))
+	P.inp["sec_hold"] = false
+	step(m, 0.6)
+	ok("audit pin: the Heavy Shot stops on the first foe (data: one target, a knockback; no pierce)",
+		dmg(T) > 10.0 and dmg(T2) == 0.0, "%.0f / %.0f" % [dmg(T), dmg(T2)])
 
 # ------------------------------------------------------------------ Vireo: the finger bolts
 func vireo() -> void:

@@ -16,8 +16,6 @@ extends RefCounted
 ##   until its stage 1 (no extra damage), a brief gold fletch burst with a ring at the bow hand.
 ## - Overdraw: held overdraw_t past the last stage, the arrow does overdraw_k of its damage.
 
-## the draw time Hunter._loose reports for a full-Focus shot (it is drawn at once, so no stage clock applies)
-const FOCUS_T := 9.0
 const LINE_A := 0.35           # the faint resting aim line's strength
 const MERGE_T := 0.12          # s the merged bright line holds at stage 1 before the V re-opens
 const SUPER_COL := Color("a8ffe0")
@@ -75,13 +73,6 @@ func bonus(t: float) -> float:
 	quick = false
 	quick_used = false
 	perfect_now = false
-	if t >= FOCUS_T:
-		# a full Focus shot: drawn at once, the Supercharged line
-		h.shot_aim = AimMode.MAX
-		pending = "super"
-		last_kind = "super"
-		supers += 1
-		return 1.0
 	var kind := "tap"
 	if t >= s.y: kind = "super"
 	elif t >= s.x: kind = "arrow"

@@ -94,24 +94,25 @@ func _pin_no_early_release(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void
 	ok("pin early release: letting go looses exactly one arrow (an overdrawn one)",
 		arrows(m, P) == 1 and K.draw.last_kind == "over", "arrows %d kind %s" % [arrows(m, P), K.draw.last_kind])
 	step(m, 1.0)
-	# a full Focus is drawn at once but waits for the button to come up (it used to loose on the press)
+	# audit (Nov 3): a full Focus no longer skips the draw: the stages run as always and it is spent on the arrow
 	ready_bow(P)
 	K.res = K.res_max()
 	early = 0
 	t = 0.0
-	while t < 2.0:
+	while t < 0.8:
 		aim.call()
 		m.step(DT)
 		t += DT
 		early += arrows(m, P)
-	ok("pin early release: a full Focus held 2 s waits for the release (drawn at the top stage)",
-		early == 0 and P.focus_draw and P.draw_t > 0.0,
-		"arrows %d focus_draw %s draw_t %.2f" % [early, P.focus_draw, P.draw_t])
+	ok("pin early release: with full Focus the draw still runs its stages (no instant Supercharged)",
+		early == 0 and P.draw_t > 0.6 and P.draw_t < 1.0 and K.full_ready(),
+		"arrows %d draw_t %.2f" % [early, P.draw_t])
 	P.inp["fire"] = false
 	m.step(DT)
 	m.step(DT)
-	ok("pin early release: the Focus shot goes on release, Supercharged and aimed at once",
-		arrows(m, P) == 1 and K.draw.last_kind == "super", "arrows %d kind %s" % [arrows(m, P), K.draw.last_kind])
+	ok("pin early release: the arrow spends the Focus (an Empowered one, armed for a Deadeye)",
+		arrows(m, P) == 1 and K.draw.last_kind == "arrow" and K.res < 10.0 and K.loosed > 0.0,
+		"arrows %d kind %s focus %.0f" % [arrows(m, P), K.draw.last_kind, K.res])
 	step(m, 1.0)
 	# a cooldown running mid-draw never looses it
 	ready_bow(P)

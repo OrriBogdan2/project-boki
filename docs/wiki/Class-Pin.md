@@ -69,17 +69,17 @@ What the in-game kit card (K) says.
 
 ### Abilities in full
 
-**Focus (passive).** Builds while you stand still (full in 1.4s), sneak (2.8s), 50% faster on high ground; a Heavy Shot that hits adds 40 (a wall pin fills it). Drains while running and drops 40 when hit. At 100 your next shot is Supercharged or aimed at once, with +20% range, and if it hits a rooted or stunned foe it is a Deadeye: +18 damage, a crit. Hawk Sense: rivals under half health are seen through cover within 22m. A knock heals 18.
+**Focus (passive).** Builds while you stand still (full in 1.4s), sneak (2.8s), 50% faster on high ground; a Heavy Shot that hits adds 40 (a wall pin fills it). Drains while running and drops 40 when hit. At 100 your next arrow (drawn through its stages as always) flies 20% further, and if it hits a rooted or stunned foe it is a Deadeye: +18 damage, a crit. Hawk Sense: rivals under half health are seen through cover within 22m.
 
-**Spirit Walk (dash, Shift, 6s cooldown).** A quick dodge roll in the direction you move (or aim), then 2.8s as a spirit: rocks, trees, pillars and ability barriers don't stop you (cliffs and ledges still do); you move 10% faster. Walking into something leaves a spirit orb there for 4s: anyone who touches it walks as a spirit too. Taking damage ends it. If it ends while you're inside something you lose 30 Focus and are put back where you went in.
+**Spirit Walk (dash, Shift, 9.5s cooldown).** A quick dodge roll in the direction you move (or aim), then 2.8s as a spirit: rocks, trees, pillars and ability barriers don't stop you (cliffs and ledges still do); you move 10% faster. Walking into something leaves a spirit orb there for 4s: anyone who touches it walks as a spirit too. Taking damage ends it. If it ends while you're inside something you lose 30 Focus and are put back where you went in.
 
 **Heavy Shot (RMB, 16s cooldown).**
 
-- *Hold:* Heavy Shot: hold to draw (0.5s to start, full at 1.1s, a rising creak, a ring, a ping at full) and let go to loose it: 16 -> 30 damage, push 6 -> 12, pierces 2; driven into a wall within 3m it hits again (up to 12) and stuns 1.2 (PINNED). A quick tap does nothing and costs nothing.
+- *Hold:* Heavy Shot: hold to draw (0.5s to start, full at 1.1s, a rising creak, a ring, a ping at full) and let go to loose it: 16 -> 30 damage, push 6 -> 12, stops on the first foe; driven into a wall within 3m it hits again (5 -> 12 with the charge) and stuns 1.2 (PINNED). A quick tap does nothing and costs nothing.
 
-**Hail Wall (E, 9s cooldown).** Lob a volley: 0.35s later arrows rain for 4.4s on a curved wall 120 degrees wide round you, at the cursor distance (2-9m). Foes inside take 5 every 0.5s, are slowed 35% and burn blue (healing barely takes). A Heavy Shot that knocks a burning foe Cremates them: +10 and a longer burn.
+**Hail Wall (E, 15s cooldown).** Lob a volley: 0.35s later arrows rain for 4.4s on a curved wall 120 degrees wide round you, at the cursor distance (2-9m). Foes inside take 5 every 0.5s, are slowed 35% and burn blue (healing barely takes). A Heavy Shot that knocks a burning foe Cremates them: +10 and a longer burn.
 
-**Starpiercer (hunter ultimate, from level 6, 36s cooldown).** Tap: your next 3 bow shots within 6s need no draw. Each press nocks for 0.3s and looses a beam to 18m that pierces every foe, knocks back and strips 10 armor; the third hits harder and finishes a hunter it leaves under 12% health.
+**Starpiercer (hunter ultimate, from level 6, 60s cooldown).** Tap: your next 3 bow shots within 6s need no draw. Each press nocks for 0.3s and looses a beam to 18m that pierces every foe, knocks back and strips 10 armor; the third hits harder and finishes a hunter it leaves under 12% health.
 
 ### Ranks
 
@@ -88,8 +88,8 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | Slot | Rank 2 | Rank 3 |
 |---|---|---|
 | RMB | cooldown 16s -> 13s, damage +15%. | cooldown 16s -> 10s, damage +30%; flies 3m farther and a wall stun gives a dash charge. |
-| Dash (Shift) | recharge 6s -> 5.1s per charge. | recharge 6s -> 4.2s; Spirit Walk lasts 0.5s longer, is 33% faster inside something (fading), allies within 6m walk too. |
-| E | cooldown 9s -> 8.1s, damage +15%. | cooldown 9s -> 7.2s, damage +30%; the Hail Wall is 30% wider. |
+| Dash (Shift) | recharge 9.5s -> 8.1s per charge. | recharge 6s -> 4.2s; Spirit Walk lasts 0.5s longer, is 33% faster inside something (fading), allies within 6m walk too. |
+| E | cooldown 15s -> 12.8s, damage +15%. | cooldown 9s -> 7.2s, damage +30%; the Hail Wall is 30% wider. |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > E > RMB > Dash (Shift) > E.
 

@@ -361,20 +361,14 @@ func _archer_combos() -> void:
 	# Hail Wall, then a hold-only RMB: the old tap-snare root is gone
 	K.cd["e"] = 0.0
 	step(m, 5.0)
-		# a knock: heal + a dash charge back
+	# a knock: a dash charge back (DashReset); no kit heal (the source's passive has none)
 	fresh(T)
-	P.hp = P.max_hp - 40.0
 	P.dashes = 0.0
-	var hp0 := P.hp
 	T2.hp = 4.0
 	T2.hurt(10.0, P, {"src": "shot"})
 	step(m, 0.1)
-	ok(
-		"combo archer: knock > heal + dash charge",
-		T2.downed and P.hp >= hp0 + 17.0 and P.dashes >= 0.99,
-		"hp %.0f -> %.0f dashes %.2f" % [hp0, P.hp, P.dashes]
-	)
-	ok("pin anim: a knock run down plays pin_rundown", K.anim_id == "pin_rundown", K.anim_id)
+	ok("combo archer: knock > a dash charge back, no kit heal", T2.downed and P.dashes >= 0.99
+		and not K.res_def().has("knock_heal"), "dashes %.2f" % P.dashes)
 	# Hawk Sense: a rival under half health is seen through cover
 	fresh(T)
 	T.hp = T.max_hp
