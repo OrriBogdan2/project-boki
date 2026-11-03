@@ -1,16 +1,13 @@
 extends Node3D
 ## The prologue: a short animated telling of how the Skylands came to be, before your first egg.
-## Seven shots, each a little set far apart from the others, with the camera gliding through them
+## Five shots, each a little set far apart from the others, with the camera gliding through them
 ## and a line of story under letterbox bars:
-##   1. the world whole  2. the Wyrm wakes and burns it  3. the Sundering breaks it apart
-##   4. survivors flee into the sky  5. the kin choose hunters  6. the Skylands rebuilt
-##   7. hunters dropping into the wild isles, while the Wyrm sleeps below
+##   1. the land whole  2. the Wyrm wakes  3. the Sundering  4. the Boki  5. hunters race for the Wyrmheart
 ## then the KINFALL title card. Click, Space or Esc skips ahead; "Skip" ends it.
 
 signal finished
 
-const SETS := {"whole": Vector3(0, 0, 0), "ships": Vector3(600, 0, 0), "kin": Vector3(1200, 0, 0),
-	"home": Vector3(1800, 0, 0), "drop": Vector3(2400, 0, 0)}
+const SETS := {"whole": Vector3(0, 0, 0), "kin": Vector3(1200, 0, 0), "drop": Vector3(2400, 0, 0)}
 
 var cam: Camera3D
 var env: Environment
@@ -20,7 +17,7 @@ var shot_t := 0.0
 var shots: Array = []
 var rng := RandomNumberGenerator.new()
 var pieces: Array = []          # the broken continent: {node, dir, fall, spin}
-var ships: Array = []
+var ships: Array = []          # the drop skyship
 var gliders: Array = []
 var kin_nodes: Array = []
 var kin_hunter: Node3D
@@ -75,32 +72,33 @@ func _ready() -> void:
 	add_child(cam)
 	cam.make_current()
 	_set_whole()
-	_set_ships()
 	_set_kin()
-	_set_home()
 	_set_drop()
 	_set_wyrm()
 	_sky_burn(0.0)            # remember the calm sky before anything tints it
 	Look.night(env, 0.0)
 	_build_ui()
 	# each shot: camera path (from, look, to, look), how long, and its line of story
-	var W: Vector3 = SETS["whole"]; var S: Vector3 = SETS["ships"]; var K: Vector3 = SETS["kin"]
-	var H: Vector3 = SETS["home"]; var D: Vector3 = SETS["drop"]
+	var W: Vector3 = SETS["whole"]; var K: Vector3 = SETS["kin"]; var D: Vector3 = SETS["drop"]
 	shots = [
-		{"a": W + Vector3(-46, 30, 62), "la": W + Vector3(0, 0, 0), "b": W + Vector3(-30, 22, 46), "lb": W + Vector3(0, 2, 0), "dur": 6.0,
-			"chapter": "BEFORE THE FALL", "tint": Color("ffd27a"), "grade": 0.22, "text": "Once, the sky held a single great land,\nand everyone who lived there shared it."},
-		{"a": W + Vector3(-24, 5, 40), "la": W + Vector3(14, 6, -30), "b": W + Vector3(-30, 8, 44), "lb": W + Vector3(2, 12, 0), "dur": 8.0,
-			"chapter": "THE WAKING", "tint": Color("ff5a3a"), "grade": 0.38, "text": "But something was asleep in the clouds beneath it.\nOne night, the Wyrm woke.", "event": "wyrm"},
-		{"a": W + Vector3(-30, 22, 46), "la": W + Vector3(0, 0, 0), "b": W + Vector3(-34, 34, 70), "lb": W + Vector3(0, -22, 0), "dur": 9.0,
-			"chapter": "THE SUNDERING", "tint": Color("d0406a"), "grade": 0.42, "text": "It broke the land into a thousand pieces.\nThe towns burned, and fell into the clouds.", "event": "break"},
-		{"a": S + Vector3(-34, 6, 26), "la": S + Vector3(0, 2, -10), "b": S + Vector3(-8, 9, 30), "lb": S + Vector3(10, 4, -14), "dur": 8.0,
-			"chapter": "THE FLIGHT", "tint": Color("ffa04a"), "grade": 0.3, "text": "The survivors fled on anything that could still fly,\nwith the Wyrm's fire at their backs.", "event": "flee"},
-		{"a": K + Vector3(0, 3.2, 9.5), "la": K + Vector3(0, 0.8, 0), "b": K + Vector3(-4.5, 2.4, 6.0), "lb": K + Vector3(0, 0.9, 0), "dur": 8.0,
-			"chapter": "THE BOKI", "tint": Color("7ae8ff"), "grade": 0.22, "text": "On the broken isles, they found they weren't alone.\nSmall bright creatures, the Boki, came out to meet them.", "event": "kin"},
-		{"a": H + Vector3(18, 16, 26), "la": H + Vector3(0, 0, 0), "b": H + Vector3(-10, 12, 24), "lb": H + Vector3(2, 0, -2), "dur": 7.0,
-			"chapter": "THE REBUILDING", "tint": Color("ffd88a"), "grade": 0.2, "text": "Side by side with the Boki, they started over:\nfarms, bridges and homes, one island at a time."},
+		{"a": W + Vector3(-46, 30, 62), "la": W + Vector3(0, 0, 0), "b": W + Vector3(-30, 22, 46), "lb": W + Vector3(0, 2, 0), "dur": 6.5,
+			"chapter": "BEFORE THE FALL", "tint": Color("ffd27a"), "grade": 0.22,
+			"text": "Once, the sky held one great land,\nruled from the Crown by a sovereign who never aged."},
+		{"a": W + Vector3(-24, 5, 40), "la": W + Vector3(14, 6, -30), "b": W + Vector3(-30, 8, 44), "lb": W + Vector3(2, 12, 0), "dur": 7.0,
+			"chapter": "THE WAKING", "tint": Color("ff5a3a"), "grade": 0.38,
+			"text": "The sovereign was the Wyrm in human shape, asleep on its hoard.\nThe night a thief reached its heart, it woke.",
+			"event": "wyrm"},
+		{"a": W + Vector3(-30, 22, 46), "la": W + Vector3(0, 0, 0), "b": W + Vector3(-34, 34, 70), "lb": W + Vector3(0, -22, 0), "dur": 7.5,
+			"chapter": "THE SUNDERING", "tint": Color("d0406a"), "grade": 0.42,
+			"text": "It broke the land into a thousand isles.\nThe Wardens who stood against it fell, and their power scattered.",
+			"event": "break"},
+		{"a": K + Vector3(0, 3.2, 9.5), "la": K + Vector3(0, 0.8, 0), "b": K + Vector3(-4.5, 2.4, 6.0), "lb": K + Vector3(0, 0.9, 0), "dur": 6.5,
+			"chapter": "THE BOKI", "tint": Color("7ae8ff"), "grade": 0.22,
+			"text": "On the broken isles, survivors found the Boki,\nand started over.", "event": "kin"},
 		{"a": D + Vector3(-6, 30, 26), "la": D + Vector3(4, 8, -30), "b": D + Vector3(-2, 22, 10), "lb": D + Vector3(8, -6, -46), "dur": 8.0,
-			"chapter": "THE WILD ISLES", "tint": Color("b08aff"), "grade": 0.28, "text": "Now hunters fly out to the wild isles to bring back what the fall left behind.\nAnd far below the clouds, something is stirring again.", "event": "drop"},
+			"chapter": "THE RACE", "tint": Color("b08aff"), "grade": 0.28,
+			"text": "Somewhere in the ruins lies the Wyrmheart: one wish to remake the world, or rule it.\nEvery hunter wants it. So does the Wyrm.",
+			"event": "drop"},
 	]
 	_next_shot()
 
@@ -130,23 +128,6 @@ func _set_whole() -> void:
 		pieces.append({"node": isl, "base": at, "dir": dir, "fall": rng.randf_range(4.0, 30.0) * (0.3 if i == 0 else 1.0),
 			"spin": rng.randf_range(-0.25, 0.25), "drift": rng.randf_range(6.0, 16.0)})
 
-## Skyships at dawn, sailing between drifting islands.
-func _set_ships() -> void:
-	var o: Vector3 = SETS["ships"]
-	for i in 4:
-		var sh := Models.skyship()
-		sh.position = o + Vector3(-14 + i * 7, 3 + i * 1.2, -4 - i * 8)
-		sh.rotation.y = -PI / 2
-		sh.scale = Vector3.ONE * (1.4 if i == 0 else 1.0)
-		add_child(sh)
-		ships.append({"node": sh, "speed": rng.randf_range(2.0, 3.5), "base": sh.position})
-		if i in [1, 3]:
-			_fire(sh, Vector3(0.6, 1.2, 0.8), 0.7)       # damaged in the escape, trailing smoke
-	for i in 8:
-		var isl := Scenery.island(rng, rng.randf_range(3.0, 7.0), true, rng.randf() < 0.5)
-		isl.position = o + Vector3(rng.randf_range(-60, 60), rng.randf_range(-22, -6), rng.randf_range(-90, -15))
-		add_child(isl)
-
 ## A hunter alone on an island, and the kin who come to them.
 func _set_kin() -> void:
 	var o: Vector3 = SETS["kin"]
@@ -171,30 +152,6 @@ func _set_kin() -> void:
 		k.rotation.y = PI
 		add_child(k)
 		kin_nodes.append(k)
-
-## A rebuilt home: house, farm, fence, lamps, a bridge to the next island over.
-func _set_home() -> void:
-	var o: Vector3 = SETS["home"]
-	var isl := Scenery.island(rng, 9.0, false, true)
-	isl.position = o
-	add_child(isl)
-	var hs := Models.house(); hs.position = o + Vector3(-2.5, 0, -3.0); add_child(hs)
-	for i in 4:
-		var pl := Models.plot(); pl.position = o + Vector3(2.0 + (i % 2) * 1.6, 0, 0.5 + (i / 2) * 1.6); add_child(pl)
-	var fn := Models.fence(4.0); fn.position = o + Vector3(2.8, 0, 3.4); add_child(fn)
-	for p in [Vector3(-0.5, 0, 1.5), Vector3(4.8, 0, -1.8)]:
-		var lp := Models.lamp(); lp.position = o + p; add_child(lp)
-	var bn := Models.banner(UI.ACCENT); bn.position = o + Vector3(-5.0, 0, 1.0); add_child(bn)
-	var isl2 := Scenery.island(rng, 5.0, true, false)
-	isl2.position = o + Vector3(17, 0, -2)
-	add_child(isl2)
-	# bridge planks between them
-	var wood := Models.toon(Color("9a7a52"))
-	for k in 14:
-		Models.part(self, Models.box(0.42, 0.12, 1.6), wood, o + Vector3(8.6 + k * 0.5, 0.02, -1.2 + k * -0.06))
-	var k := Models.kin("puddlet", {"level": 5}); k.position = o + Vector3(0.5, 0, 2.6); add_child(k)
-	k.set_meta("happy", true)
-	kin_nodes.append(k)
 
 ## The drop: a skyship over the wild isles, hunters gliding toward the Heart.
 func _set_drop() -> void:
@@ -228,13 +185,10 @@ func _set_wyrm() -> void:
 	add_child(wyrm)
 	wyrm.set_size(1.8)
 	wyrm.visible = false
-	var W: Vector3 = SETS["whole"]; var S: Vector3 = SETS["ships"]
+	var W: Vector3 = SETS["whole"]
 	# rises out of the clouds beyond the world, sweeps low over the towns breathing fire, climbs away
 	wyrm_paths["wyrm"] = _curve([W + Vector3(70, -90, -90), W + Vector3(55, -20, -60), W + Vector3(32, 12, -30), W + Vector3(10, 10, -6),
 		W + Vector3(-10, 9, 10), W + Vector3(-34, 22, 22), W + Vector3(-70, 40, 30)])
-	# far off behind the fleeing ships, a dark shape moving through the clouds
-	# chasing the fleeing ships, close behind them, fire raking across the last one
-	wyrm_paths["flee"] = _curve([S + Vector3(-90, 4, -60), S + Vector3(-40, 10, -30), S + Vector3(-6, 12, -22), S + Vector3(40, 16, -40), S + Vector3(120, 20, -90)])
 	# a pair of embers far down in the clouds, for the last shot
 	var D: Vector3 = SETS["drop"]
 	deep_eyes = Node3D.new()
@@ -407,13 +361,6 @@ func _next_shot() -> void:
 		var c: Curve3D = wyrm_paths["wyrm"]
 		wyrm.teleport(c.sample_baked(0.0), c.sample_baked(1.0) - c.sample_baked(0.0))
 		wyrm.visible = true
-	elif ev0 == "flee":
-		wyrm.set_size(1.4)
-		var c2: Curve3D = wyrm_paths["flee"]
-		wyrm.teleport(c2.sample_baked(0.0), c2.sample_baked(1.0) - c2.sample_baked(0.0))
-		wyrm.breath.emitting = false
-		wyrm.visible = true
-		wyrm.flap_rate = 0.8
 	elif ev0 != "break":
 		wyrm.visible = false
 		Look.night(env, 0.0)
@@ -609,10 +556,6 @@ func _events(ev: String, st: float, delta: float) -> void:
 					k.rotation.y = lerp_angle(k.rotation.y, atan2(-(kin_hunter.position.x - k.position.x), -(kin_hunter.position.z - k.position.z)), delta * 4.0)
 					k.get_node("Body").position.y = absf(sin(st * 4.0 + i)) * 0.12
 					k.set_meta("happy", true)
-		"flee":
-			_wyrm_along("flee", st / 8.0)
-			wyrm.breath.emitting = st > 2.6 and st < 4.4
-			_sky_burn(maxf(0.0, 0.55 - st * 0.12))     # the fires fall behind them
 		"drop":
 			# the last thing you see: two embers opening far down in the clouds
 			deep_eyes.scale.y = lerpf(deep_eyes.scale.y, 1.0 if st > 4.8 else 0.01, minf(1.0, delta * 3.0))
