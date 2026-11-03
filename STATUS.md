@@ -1,20 +1,22 @@
-2026-11-03T08:00:39Z
+2026-11-03T08:02:04Z
 
 == S1 BRANCH TABLE (current; older detail further down) ==
 branch | commit | state | Net | checks
 ext/airdash-glide | 411a591 | READY TO MERGE | main's (no sync change) | full suite 0 failures + --airdash-glide-check (new) + --move-feel-check + --wallmove-check 0 failures
 ext/mapclean | 2082d0d | READY TO MERGE (OWNER_REVIEW #2) | main's | full suite + --wall-size-check (new) + drop/extract/cover 0 failures
 ext/kitdata-vireo-venator | ab5fd36 | READY TO MERGE AT THE TIP (kit data + owner #1 #4 #9 #9b + #32/#35 rows for Vireo/Venator, all landed whole; supersedes 3c1c79a) | main's | full suite 0 failures, gen_wiki --check clean
-ext/kitdata-pin-bjorn | 93e9640 = kit data pass, READY. Tip is IN PROGRESS (Pin #5 #6 + #32/#35 Pin rows, and Bjorn #10 #29 #30): merge 93e9640 only until S1 reports the new tip ready | main's | 93e9640: full suite 0 failures
+ext/kitdata-pin-bjorn | 7dede8e | READY TO MERGE AT THE TIP (kit data + OWNER_REVIEW Pin #5 #6, Bjorn #10 #29 #30, #32/#35 rows for Pin and Bjorn; supersedes 93e9640) | main's (no sync change) | full suite 0 failures (hero combo 217, archer 119, bulwark 98), health + gen_wiki clean
 ext/kitdata-linwick-dredge | 90c7138 | READY (kit data) | main's | full suite 0 failures
 ext/kitdata-moosh-tamsin | c6932ae | READY (kit data); NET NOTE: zone bridge event gained an optional colour field, no bump | 0.17.0 | full suite 0 failures
 ext/kitdata-breah-ostra | d0d045e | READY (kit data) | main's | full suite 0 failures
 ext/classes | 98d4027 | merged into main (sync75) | - | -
 ext/kitdata-dancer-juggernaut | 1b41236 | merged into main | - | -
 Farm tutorial + builder | plans only (posted below and in EXT_TO_MAIN) | waiting on owner answers; not building | - | -
-BJORN #10 #29 #30 OWNER: S1 finishes them on ext/kitdata-pin-bjorn (the agent is already mid-way). S2: skip Bjorn #10 #29 #30.
+BJORN #10 #29 #30: DONE by S1 on ext/kitdata-pin-bjorn @ 7dede8e. S2: skip them.
+MERGE NOTE (dash interactions, item 32): S1 branches grew TWO parallel tables for the same idea. ext/kitdata-vireo-venator added content/rules/dash_interactions.json + scripts/arch/dash_rules.gd (DashRules); ext/kitdata-pin-bjorn added content/dash_interactions/<id>.json + scripts/arch/dash_flow.gd. Both hook Hunter.trigger. Whoever merges second (or S2, which also does #32 rows) should converge on ONE: suggest keeping DashRules + content/rules/dash_interactions.json and moving the archer/bulwark rows into it.
+Pin+Bjorn owner Qs: is "his wall" in #29 the aegis wall? Faultline now runs on over drops and the abyss (gameplay change) OK? 2 m shield push and 4.2 m wall OK (no source numbers)? The aegis plates read like planks from top-down.
 
-Running now (Sonnet): Pin owner fixes on ext/kitdata-pin-bjorn (Bjorn items in progress wrapping up for S2). Last S1 agent.
+Running now: none on S1. All S1 branches are READY (see table). Farm tutorial and builder plans wait for owner answers.
 Queued: none on S1 (Dancer handed to S2). Farm tutorial build waits for owner answers.
 Last INBOX entry handled: 2026-11-03 07:50 UTC ORCH check-in (S1 READY branches restated in the table above and in EXT_TO_MAIN; Bjorn #10 #29 #30 owned by S1; kitdata-vireo-venator tip ab5fd36 is now whole and ready)
 Watcher: received 19:06 UTC entry
