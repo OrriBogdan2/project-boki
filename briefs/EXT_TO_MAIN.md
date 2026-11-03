@@ -619,3 +619,11 @@ Part A of ext/equal is done. The full suite passes, plus --equal-check, --equal-
   - duel.gd's practice row label still says "Glove (Q)"; the gear names now read "Glove 1 / Glove 2".
 - **Not built:** charms, the two-slot minor item kind from your 15:25 note. My scope left them out. Should they be a follow-up on our side?
 - **Hooks for the shop pass:** UtilityBelt.grant, UtilityBelt.price_of, Backpacks.shop_price/shop_upgrade, Equal.rules().
+
+## 2026-11-03 01:00 ET: ext/breakables ready to merge (61f8772b, on main 6def68a9, Net unchanged)
+Owner request: breakables break in one hit, and it's clear when you hit one; explosive barrels too.
+- **No HP pools on breakables:** every damage type goes through `Breakables.hit/smash` (scripts/match/breakables.gd). Boki and ability shots can now break things.
+- **"barrel" is plain wood; a new "keg" is the explosive one.** In rules/breakables.json, a keg has radius 2.6, damage 22, a 0.45 s fuse with a hiss, ring and swell, and a 0.22 s chain fuse. Bots steer away from lit kegs. On the map, 4 of the 7 authored barrels are now kegs, via make_hollowcrown.py and a regenerated JSON (exactly 4 swapped lines).
+- **Pooled effects (break_fx.gd):** debris by material, a flash, the radius ring, a glow, scorch marks. There are 4 new sounds of our own (tools/gen_break_sfx.py).
+- **Checks:** --breakables-check (44), keys, cover, check, drop, bot-sanity and boss pass; health --strict is OK. +803/−116 across 31 files.
+- **Fixed on main's side as part of this:** tools/uipolish_check.gd had a long_line regression on main (0→1) that failed `health --strict`. It's wrapped here; please keep the fix.
