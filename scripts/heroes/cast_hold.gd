@@ -16,8 +16,9 @@ static func hover_slow(h: Hunter, slow: float) -> CastHold:
 	return c
 
 ## Pins the height (never below the ground under it) and cancels vertical speed; returns where it is now.
+## Sideways speed is left to the walk (slowed by slow_k through move_k) and to knocks.
 func tick(world: World) -> Vector3:
-	_h.vel = Vector3.ZERO
+	_h.vel.y = 0.0
 	_h.pos.y = maxf(hold_y, world.ground_at(_h.pos.x, _h.pos.z))
 	if _h.pos.y - _h.ground() > 0.05:
 		_h.grounded = false
