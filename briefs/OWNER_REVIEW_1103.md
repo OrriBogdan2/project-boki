@@ -60,3 +60,9 @@ The owner saw an explosion when Dancer dashed, **while not merged**. His rule: "
 
 ## 10. Bjorn: the auto attack should reset slightly faster (kit tuning)
 - The basic hammer attack (the LMB tap/throw, recall and swing cadence) recovers a bit slowly. Shorten the time between attacks slightly, about 10–15%: recovery frames plus the cooldown or recall time, whichever gates the next auto. Check against the source data in briefs/supervive-data/ and use the data number if it exists. Keep it in data, keep the animation timings consistent (no pose pops), and update the combo check's timing assert.
+
+## 11. Linwick's E (Furnace Cloak): instant, centred on himself, with a small animation (kit fix)
+- Today it seems to have a delay and to land where the cursor is. It should **fire instantly on press**, **centred on Linwick** (a self-centred area that pulls in nearby foes and gives him a shield), not at the cursor.
+- A **small, quick animation**: a short arms-out or chest-out flare pose (about 0.15–0.25 s) as it fires, plus the shield swirl on him. Any short ring at cast is the real area, so it must match the actual radius exactly.
+- Remove any cursor-placed telegraph or aim for E. Check against briefs/hero-ref/linwick.md and the game data for radius, pull and shield numbers.
+- Assert: E fires on the press frame, the area is centred on the caster, the pull and shield apply, and there's no cursor dependence.
