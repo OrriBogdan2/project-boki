@@ -4255,14 +4255,14 @@ func _open_gift_panel(owner_name: String) -> void:
 		v.add_child(UI.label("You have nothing to give yet. Seeds and crops make good gifts.", 15))
 
 ## The "while you were away" note waits until nothing else is on screen.
-func _show_when_free(lines: Array) -> void:
+func _show_when_free(lines: Array, title := "While you were away") -> void:
 	if not is_inside_tree():
 		return
 	if panel_open != "" or building_now or not Save.d["tutorial"].get("home", false):
-		get_tree().create_timer(1.0).timeout.connect(_show_when_free.bind(lines))
+		get_tree().create_timer(1.0).timeout.connect(_show_when_free.bind(lines, title))
 		return
-	var v := _new_panel("While you were away", 520)
-	for l in lines: v.add_child(UI.label(l, 15))
+	var v := _new_panel(title, 520)
+	for l in lines: v.add_child(UI.label(HomeNotices.bullet(String(l)), 15))
 	_refresh_top()
 
 func _open_ferry() -> void:
