@@ -64,7 +64,7 @@
 			"time": 0.95,
 			"ramp": 0.1,
 			"burst": 0.4,
-			"out_k": 0.25,
+			"out_k": 0.45,
 			"float_fall": 1.2
 		}
 	},

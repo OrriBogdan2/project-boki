@@ -101,7 +101,7 @@ In `scripts/match/kmoves_care.gd` ("tm_"), played with `play()` / `play_soft()`.
 
 The skate leaves a ribbon of ice chips, ice plates under her blades (CareLook "slab") that fade behind her, and spray off the outside edge on a carve; not the shared after-image pill. No ring or burst on the push-off.
 
-Strips: `--arena=thief --arena-demo=care_rimewright_<lmb|shatter|payoff|skatefire|rmb|e|dash|air|walk|pose|ultaim|ultkey|ult> --arena-shot=<dir>/x.png [--care-close]`.
+Strips: `--arena=thief --arena-demo=care_rimewright_<lmb|shatter|payoff|skatefire|rmb|e|dash|air|walk|pose|ultaim|ultkey|ult|ultskate|skateult> --arena-shot=<dir>/x.png [--care-close]`.
 
 ## Look and sound
 - Pooled looks (`care_look.gd`, shaders `care_ice`, `care_disc`, `care_glow`, all mixed rather than additive so they keep their colour on bright ground): the ice dart (an ice-blue four-sided crystal with dark teal edges, tip first, with a frost streak), the 0.3 m skating beam with its cyan core, the star-headed spear (held in her hand while aiming, then thrown) with its long pale-cyan trail, the slow-zone flake disc with its spinning crystal, the detonation dome, the Shatter spikes, the ice shell, the frost glow, the skate's ice chips, and the Rink Wall's ice pillars (the shared wall node is hidden). Rimelock (`UltLook`, `ult_look.gd`): the rink (care_disc pattern 4: a ragged ice edge and a crack network whose glow is the countdown, a fringe of crystals), her frost bud, the light pillar and the ice block on each stunned foe; the shard burst reuses the Shatter spikes.

@@ -27,7 +27,7 @@ const ANIM := {
 	"os_pop": ["ostra", "tether_lantern", [2.0, 2.06, 2.12, 2.2, 2.4, 2.65]],
 	"os_empower": ["ostra", "tether_lantern", [0.5, 0.6, 0.75, 0.9, 1.05, 1.35]],
 	"br_spine": ["dolm", "rubble_fists", [0.6, 0.78, 0.83, 1.1, 1.43, 1.8]],
-	"os_well": ["ostra", "tether_lantern", [0.5, 0.6, 0.8, 1.3, 1.6, 3.0]],
+	"os_well": ["ostra", "tether_lantern", [0.6, 0.8, 1.3, 1.56, 1.9, 2.5]],
 }
 
 static func at(t: float, dt: float, when: float) -> bool:
@@ -149,6 +149,8 @@ static func trigger(P: Hunter, D: Hunter, mv: String, t: float, dt: float) -> vo
 			if at(t, dt, 0.5):
 				K.cd["x"] = 0.0
 				HunterKeys.ult_pressed(P)
+			# freed when it opens (1.5s): she walks out west, away from the well
+			P.inp["move"] = Vector2(-1, 0) if t > 1.6 and t < 2.6 else Vector2.ZERO
 	if P.ammo < 3: P.ammo = int(P.wpn["mag"])
 
 ## Basalt Spine: X held from 0.4s at the dummy, the cursor dragged to swing the ridge, let go at 0.72s.

@@ -17,7 +17,7 @@ const SPEC := {
 		"keys": {"rmb_aim": 0.7, "rmb_disc": 1.4, "rmb_root": 1.86}},
 	"tender_e": {"strip": [0.36, 0.4, 0.48, 0.6, 1.06, 1.14], "keys": {"e": 0.5, "e_thrown": 1.3}},
 	"tender_dash": {"strip": [0.31, 0.35, 0.41, 0.47, 0.53], "keys": {"dash": 0.41}},
-	"tender_air": {"strip": [0.33, 0.46, 0.75, 1.05, 1.2], "keys": {"air": 0.46, "air_float": 0.8}},
+	"tender_air": {"strip": [0.33, 0.5, 0.8, 1.1, 1.3], "keys": {"air": 0.46, "air_float": 0.8}},
 	"tender_carry": {"strip": [0.3, 0.45, 0.6, 1.0, 1.5, 2.0], "keys": {"carry": 1.5}},
 	"tender_payoff": {"strip": [2.6, 2.75, 2.82, 2.9, 3.0, 3.2], "keys": {"payoff": 2.82}},
 	"tender_walk": {"strip": [0.6, 0.68, 0.76, 0.84, 0.92, 1.0], "keys": {"walk": 0.8}},
@@ -42,6 +42,7 @@ const SPEC := {
 	"rimewright_ultaim": {"strip": [0.32, 0.36, 0.42, 0.5, 1.5], "keys": {"ultaim": 0.36}},
 	"rimewright_ultkey": {"strip": [0.33, 0.37, 0.42, 0.5, 2.0, 3.0], "keys": {"ultkey": 2.0}},
 	"rimewright_ultskate": {"strip": [1.1, 1.22, 1.3, 1.4, 1.55], "keys": {"ultskate": 1.3}},
+	"rimewright_skateult": {"strip": [0.7, 0.8, 0.9, 1.05, 1.3, 2.2], "keys": {"skateult": 0.88, "encased": 2.0}},
 	"rimewright_ult": {"strip": [3.6, 3.81, 3.85, 3.91, 4.0, 4.25], "keys": {"ult_crash": 3.85}},
 }
 
@@ -210,6 +211,8 @@ static func _script(
 			_payoff(P, D, Al, K, arch, t, dt)
 		"ultaim", "ultkey", "ult", "ultskate":
 			_ult(A, Al, arch, what, t, dt)
+		"skateult":
+			_skate_ult(A, P, t, dt)
 
 static func _dash(A: Arena, P: Hunter, arch: String, t: float, dt: float) -> void:
 	var side: Vector2 = A.get_meta("care_right", Vector2(1, 0))
@@ -265,6 +268,19 @@ static func _ult(A: Arena, ally: Hunter, arch: String, what: String, t: float, d
 		if _at(t, dt, 1.2):
 			P.dashes = P.max_dashes()
 			P.inp["dash"] = true
+
+## Tamsin skates (Shift held from 0.3s), presses X at 0.75s: carried on as the bud seals, then rooted.
+static func _skate_ult(A: Arena, P: Hunter, t: float, dt: float) -> void:
+	P.lvl = maxi(P.lvl, 6)
+	if t < 0.3:
+		P.ak.cd["x"] = 0.0
+	P.inp["move"] = (A.get_meta("care_right", Vector2(1, 0)) as Vector2) if t < 2.5 else Vector2.ZERO
+	P.inp["dash_down"] = t >= 0.3 and t < 0.75
+	if _at(t, dt, 0.3):
+		P.dashes = P.max_dashes()
+		P.do_dash()
+	if _at(t, dt, 0.75):
+		HunterKeys.ult_pressed(P)
 
 ## Grabs the strip frames and the key frames at their moments; quits after the last one.
 static func _capture(A: Arena, spec: Dictionary, arch: String, what: String, t: float, dt: float) -> void:
