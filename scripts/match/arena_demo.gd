@@ -59,6 +59,12 @@ static func shot_path() -> String:
 		if String(a).begins_with("--arena-shot="): return String(a).substr(13)
 	return ""
 
+## The demo's camera zoom: --demo-zoom=<z> (1.0 is the gameplay default) or the close-up `close`.
+static func zoom_or(close: float) -> float:
+	for a in OS.get_cmdline_user_args():
+		if String(a).begins_with("--demo-zoom="): return float(String(a).substr(12))
+	return close
+
 static func tick(A: Arena, dt: float) -> void:
 	var w := what()
 	if w == "":
@@ -73,8 +79,8 @@ static func tick(A: Arena, dt: float) -> void:
 	Oomph.legacy = legacy
 	if m.hud: m.hud.guide_hidden = true
 	if m.cam and not w.begins_with("card") and w != "menu" and not m.has_meta("zoom_hold"):
-		m.set_meta("zoom_hold", 0.6)      # close enough to read the hits
-		m.cam.zoom = 0.6
+		m.set_meta("zoom_hold", zoom_or(0.6))      # close enough to read the hits
+		m.cam.zoom = zoom_or(0.6)
 	if w.begins_with("care_"):
 		CareDemo.tick(A, dt, w)          # the support pair (care_demo.gd)
 		return
@@ -262,8 +268,9 @@ static func tick(A: Arena, dt: float) -> void:
 				A.set_kin("")
 				P.teleport(D.pos + Vector3(-4.0, 0, 0))
 				A.home = P.pos
-				if m.cam: m.cam.zoom = 0.42
-				m.set_meta("zoom_hold", 0.42)
+				if m.cam: m.cam.zoom = zoom_or(0.42)
+				m.set_meta("zoom_hold", zoom_or(0.42))
+				m.get_viewport().warp_mouse(Vector2(4, 4))      # the cursor's crosshair off the hunter
 			_aim(P, D)
 			P.inp["move"] = Vector2.ZERO
 			P.hp = P.max_hp

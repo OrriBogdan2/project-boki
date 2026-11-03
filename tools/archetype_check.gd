@@ -548,7 +548,7 @@ func _levels_and_bond() -> void:
 	P.ult = 1.0
 	P.merge_cd = 0.0
 	P.ak.cd["x"] = 0.0
-	P.ak.use_x()
+	HunterKeys.ult_pressed(P)
 	step(m, 0.5)
 	ok("X: the hero ultimate casts and never merges (R is the Merge)",
 			float(P.ak.cd["x"]) > 10.0 and not P.ak.bonded and not KinMerge.active(P))

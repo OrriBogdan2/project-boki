@@ -154,6 +154,6 @@ static func trigger(P: Hunter, D: Hunter, mv: String, t: float, dt: float) -> vo
 
 ## X with the ultimate open (level 6) and off cooldown.
 static func cast_ult(P: Hunter) -> void:
-	P.lvl = maxi(P.lvl, HeroUlt.unlock_level(P.ak))
+	P.lvl = maxi(P.lvl, int(Hunter.ULT_AT[0]))
 	P.ak.cd["x"] = 0.0
-	P.ak.use_x()
+	HunterKeys.ult_pressed(P)

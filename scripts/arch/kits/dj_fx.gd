@@ -3,9 +3,12 @@ extends Node3D
 ## Dancer's and Juggernaut's own effects, pooled (one node per match, DJFx.of(m)): projectile looks that
 ## ride on a shot (or on a kit-run projectile), four-point stars, fizzle puffs, heal pillars, two-tone
 ## crescents, afterimage chains, and per-frame chains (the Warchain, the Bola cord). Every node is made
-## once and reused; nothing is created per frame. One shader, shaders/dj_fx.gdshader, a mode per look.
+## once and reused; nothing is created per frame. One set of looks (shaders/dj_fx.gdshaderinc, a mode per
+## look) drawn alpha blended (dj_fx_mix.gdshader) so colour and darkness hold on bright ground; only glows
+## (cores, the lightning) are additive (dj_fx.gdshader).
 
 const SHADER: Shader = preload("res://shaders/dj_fx.gdshader")
+const SHADER_MIX: Shader = preload("res://shaders/dj_fx_mix.gdshader")
 const M_STAR := 0
 const M_PILLAR := 1
 const M_COMET := 2
@@ -40,13 +43,24 @@ static func of(match_node: Node) -> DJFx:
 	match_node.set_meta("dj_fx", n)
 	return n
 
-func _mat(mode: int, col: Color, col2: Color, bb := false) -> ShaderMaterial:
+func _mat(mode: int, col: Color, col2: Color, bb := false, glow := false) -> ShaderMaterial:
 	var mt := ShaderMaterial.new()
-	mt.shader = SHADER
+	mt.shader = SHADER if glow else SHADER_MIX
 	mt.set_shader_parameter("mode", mode)
 	mt.set_shader_parameter("color", col)
 	mt.set_shader_parameter("color2", col2)
 	mt.set_shader_parameter("billboard", bb)
+	return mt
+
+## A flat colour that keeps its hue on grass and sand (projectile heads, afterimages).
+static func solid(col: Color) -> StandardMaterial3D:
+	var mt := StandardMaterial3D.new()
+	mt.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mt.albedo_color = col
+	mt.cull_mode = BaseMaterial3D.CULL_DISABLED
+	if col.a < 0.999:
+		mt.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		mt.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_DISABLED
 	return mt
 
 func _mi(mesh: Mesh, mat: Material) -> MeshInstance3D:
@@ -245,8 +259,9 @@ func crescent(at: Vector3, dir: Vector2, arc_deg: float, reach: float, col: Colo
 func ghosts(from: Vector3, to: Vector3, count: int, yaw: float, col: Color, scl := 1.0) -> void:
 	for i in count:
 		var k := float(i + 1) / float(count + 1)
-		var n := _take("ghost", func(): return _mi(Models.capsule(0.3, 1.25), Models.glow_mat(col))) as MeshInstance3D
-		(n.material_override as ShaderMaterial).set_shader_parameter("color", Color(col, 0.55))
+		var build := func(): return _mi(Models.capsule(0.3, 1.25), solid(Color(col, 0.55)))
+		var n := _take("ghost", build) as MeshInstance3D
+		(n.material_override as StandardMaterial3D).albedo_color = Color(col, 0.55)
 		n.global_position = from.lerp(to, k) + Vector3(0, 0.7 * scl, 0)
 		n.rotation = Vector3(0, yaw, 0)
 		n.scale = Vector3(1.0, 1.0, 1.25) * scl
@@ -262,61 +277,69 @@ func _build_rider(kind: String, col: Color, col2: Color) -> Node3D:
 	n.add_child(head)
 	match kind:
 		"chakram":
-			# Dancer's bolt: a flared four-point chakram, hot white centre, a gold comet behind
-			head.add_child(_mi(star_mesh(4, 0.38), Models.glow_mat(Color(col, 1.0))))
-			var c := _mi(Models.sphere(0.32, 8), Models.glow_mat(Color(col2, 1.0)))
+			# Dancer's bolt: a flared four-point gold chakram about 0.45 m across with a hot centre; the
+			# orange flame tail is the trail (col: the tail, col2: the head)
+			head.add_child(_mi(star_mesh(4, 0.42), solid(col2)))
+			head.add_child(_mi(star_mesh(4, 0.3), solid(col2.lightened(0.45))))
+			var c := _mi(Models.sphere(0.3, 8), Models.glow_mat(Color(col2, 0.9)))
 			head.add_child(c)
-			head.scale = Vector3.ONE * 0.34
+			head.scale = Vector3.ONE * 0.24
 		"chakram_big":
 			# the empowered shot: a big blue chakram inside a crackling gold streak
-			head.add_child(_mi(star_mesh(6, 0.45), Models.glow_mat(Color(col2, 1.0))))
-			head.add_child(_mi(Models.sphere(0.35, 8), Models.glow_mat(Color(1, 1, 1, 1))))
+			head.add_child(_mi(star_mesh(6, 0.45), solid(col2)))
+			head.add_child(_mi(Models.sphere(0.35, 8), Models.glow_mat(Color(col, 1.0))))
 			head.scale = Vector3.ONE * 0.6
-			var bolt := _mi(_ribbon_mesh(), _mat(M_BOLT, col, Color(1, 1, 0.85, 1)))
+			var bolt := _mi(_ribbon_mesh(), _mat(M_BOLT, col, Color(1, 0.95, 0.6, 1), false, true))
 			bolt.name = "Bolt"
 			n.add_child(bolt)
 		"bola":
 			# the Bola: two glowing weights on a short crackling cord, whirling
 			for sx in [-1.0, 1.0]:
-				var w := _mi(Models.sphere(0.16, 8), Models.glow_mat(Color(col, 1.0)))
+				var w := _mi(Models.sphere(0.16, 8), solid(col))
 				w.position = Vector3(sx * 0.42, 0, 0)
 				head.add_child(w)
 				var g := _mi(Models.sphere(0.08, 6), Models.glow_mat(Color(col2, 1.0)))
 				g.position = Vector3(sx * 0.42, 0.0, 0)
 				head.add_child(g)
-			var cord := _mi(Models.box(0.84, 0.03, 0.03), Models.glow_mat(Color(col2, 0.9)))
+			var cord := _mi(Models.box(0.84, 0.04, 0.04), solid(col2))
 			head.add_child(cord)
 		"dagger":
 			# the Phantom Dagger: a long dark blade with a violet edge, point first
-			var bl := _mi(Models.box(0.07, 0.035, 0.62), Models.glow_mat(Color(Color("2a1f3a"), 1.0)))
+			var bl := _mi(Models.box(0.09, 0.04, 0.66), solid(Color("2a1f3a")))
 			bl.position.z = -0.12
 			head.add_child(bl)
-			var ed := _mi(Models.box(0.025, 0.05, 0.6), Models.glow_mat(Color(col, 1.0)))
+			var ed := _mi(Models.box(0.03, 0.05, 0.62), solid(col))
 			ed.position = Vector3(0.04, 0, -0.12)
 			head.add_child(ed)
-			var gd := _mi(Models.box(0.2, 0.05, 0.05), Models.glow_mat(Color(col2, 1.0)))
+			var gd := _mi(Models.box(0.22, 0.06, 0.06), solid(col2))
 			gd.position.z = 0.2
 			head.add_child(gd)
 		"blade":
 			# an Encore blade: a small spinning star in its two colours
-			head.add_child(_mi(star_mesh(3, 0.3), Models.glow_mat(Color(col, 1.0))))
-			head.add_child(_mi(Models.sphere(0.25, 6), Models.glow_mat(Color(col2, 1.0))))
+			head.add_child(_mi(star_mesh(3, 0.3), solid(col)))
+			head.add_child(_mi(Models.sphere(0.25, 6), solid(col2)))
 			head.scale = Vector3.ONE * 0.3
 		"crescent_bolt":
-			# Juggernaut's Searing Wave: a red standing crescent of flame, pushed blade first
-			var cr := _mi(_crescent_mesh(120.0), _mat(M_CRESCENT, col, col2))
+			# Zedran's Searing Wave: a flat 140-degree crescent of flame (1.4 m chord), red with an orange
+			# inner edge, pushed bulge first; a red glow trail behind it
+			var cr := _mi(_crescent_mesh(140.0), _mat(M_CRESCENT, col, col2))
 			cr.name = "Cres"
 			(cr.material_override as ShaderMaterial).set_shader_parameter("progress", 1.0)
-			cr.position.z = 0.8
-			cr.scale = Vector3.ONE * 1.3
+			cr.position.z = 0.6
+			cr.scale = Vector3.ONE * 0.75
 			head.add_child(cr)
+			var glow := _mi(_crescent_mesh(140.0), _mat(M_CRESCENT, col, col, false, true))
+			(glow.material_override as ShaderMaterial).set_shader_parameter("progress", 1.0)
+			glow.position = Vector3(0, -0.02, 0.62)
+			glow.scale = Vector3.ONE * 0.86
+			head.add_child(glow)
 		"hook":
-			# the Warchain's head: a barbed iron hook
-			head.add_child(_mi(Models.box(0.12, 0.12, 0.4), Models.toon(Color("4a3a30"), false, 0.2)))
+			# the Warchain's head: a barbed iron hook, its barbs glowing orange
+			head.add_child(_mi(Models.box(0.14, 0.14, 0.46), solid(Color("3a2a22"))))
 			for sx in [-1.0, 1.0]:
-				var b := _mi(Models.box(0.06, 0.06, 0.26), Models.glow_mat(Color(col, 1.0)))
-				b.position = Vector3(sx * 0.1, 0, -0.18)
-				b.rotation.y = sx * 0.7
+				var b := _mi(Models.box(0.08, 0.08, 0.32), solid(col))
+				b.position = Vector3(sx * 0.13, 0, -0.2)
+				b.rotation.y = sx * 0.75
 				head.add_child(b)
 	var tr := _mi(_ribbon_mesh(), _mat(M_COMET, col, col2))
 	tr.name = "Trail"
@@ -396,6 +419,8 @@ func chain(id: String, a: Vector3, b: Vector3, wavy: float, col: Color, col2: Co
 	mt.set_shader_parameter("color2", col2)
 	var length := a.distance_to(b)
 	mt.set_shader_parameter("stripes", 1.0)
+	if wavy > 0.5:
+		mt.set_shader_parameter("color2", col)      # in flight: one orange ribbon, no links yet
 	var im2: ImmediateMesh = e["mesh"]
 	im2.clear_surfaces()
 	if length < 0.05:
@@ -404,19 +429,21 @@ func chain(id: String, a: Vector3, b: Vector3, wavy: float, col: Color, col2: Co
 	var side := fwd.cross(Vector3.UP)
 	if side.length() < 0.01: side = Vector3.RIGHT
 	side = side.normalized()
-	var n := maxi(2, int(length / 0.18))
-	var links := length / 0.22       # one link per 22 cm
+	var n := maxi(8, int(length / 0.08))
+	var links := length / 0.2        # a bright and a dark link every 20 cm
 	im2.surface_begin(Mesh.PRIMITIVE_TRIANGLE_STRIP)
 	for i in n + 1:
 		var k := float(i) / n
 		var p := a.lerp(b, k)
-		var wv := sin(k * length * 5.0 + m.time * 18.0) * 0.22 * wavy * sin(k * PI)
-		p += side * wv + Vector3.UP * wv * 0.4
-		var up := Vector3.UP * width * 0.5
+		# in flight: a zig-zag of about four waves over its length, still at both ends
+		var wv := sin(k * TAU * 4.0 + m.time * 14.0) * 0.28 * wavy * sin(k * PI)
+		p += side * wv
+		# flat to the camera above, with a little height so it reads side on too
+		var across := side * width * 0.5 + Vector3.UP * width * 0.12
 		im2.surface_set_uv(Vector2(k * links, 0))
-		im2.surface_add_vertex(p - up - side * width * 0.3)
+		im2.surface_add_vertex(p - across)
 		im2.surface_set_uv(Vector2(k * links, 1))
-		im2.surface_add_vertex(p + up + side * width * 0.3)
+		im2.surface_add_vertex(p + across)
 	im2.surface_end()
 
 func unchain(id: String) -> void:
@@ -439,14 +466,14 @@ func _process(delta: float) -> void:
 			continue
 		e["t"] = float(e["t"]) + delta
 		var u := clampf(float(e["t"]) / float(e["dur"]), 0.0, 1.0)
-		var mt: ShaderMaterial = e["mat"]
+		var mt = e["mat"]
 		if float(e["t"]) < 0.0:
 			n.visible = false
 			continue
 		n.visible = true
 		match String(e["kind"]):
 			"ghost":
-				mt.set_shader_parameter("color", Color(e["col"], 0.55 * (1.0 - u)))
+				(n as MeshInstance3D).material_override.albedo_color = Color(e["col"], 0.55 * (1.0 - u))
 			"pillar":
 				mt.set_shader_parameter("life", u)
 			_:

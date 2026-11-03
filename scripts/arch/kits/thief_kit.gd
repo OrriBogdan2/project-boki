@@ -23,6 +23,11 @@ const FIZZLE := Color("8a7aff")    # a bolt running out at the cursor: a blue-vi
 const EMP_BLUE := Color("4ab8ff")  # the empowered shot's chakram
 const GHOST := Color("7af0ff")     # the blink's afterimages
 const KNOCK_STAR := Color("ff2a48")
+const EMP_LINE := Color("ffc23a")      # the aim line while the next bolt is empowered
+const AIM_LILAC := Color("d8c8ff")     # ... and otherwise
+const BOLT_TAIL := Color("ff8a2a")     # the bolt's short orange flame tail
+const BOLA_HOT := Color("ffb02a")      # the Bola's lane front and inner binding ring
+const BOLA_CORD := Color("b06aff")     # its violet lightning cord
 const EMP_RANGE_K := 1.12          # the empowered bolt flies 12% further (the source: 850 -> 950 units)
 
 var primed_t := 0.0            # Vault empowered the next bolt
@@ -61,8 +66,14 @@ func _drop_holds() -> void:
 	encore.drop()
 
 # ------------------------------------------------------------------ X: Encore (ThiefUlt)
-## X (HeroUlt gates it: level 6, its own cooldown in cd["x"]).
+## X (main's HunterKeys gate: level 6; HeroUlt.press: its own cooldown in cd["x"], the cast id).
 func cast_ult() -> bool:
+	return HeroUlt.press(self, _start_encore)
+
+func has_ult() -> bool:
+	return true
+
+func _start_encore() -> bool:
 	encore.start()
 	return true
 
@@ -231,16 +242,19 @@ func _tick(dt: float) -> void:
 	_tick_aim_line()
 	net_pulse(dt, full_ready())
 
-## The aim line (your screen only): thin and white to the cursor, clamped to the bolt's range, with an
-## arrow tick; gold and brighter while the next bolt is empowered.
+## The aim line (your screen only): thin and pale lilac to the cursor, clamped to the bolt's range, with an
+## arrow tick; a thick, solid gold line with a soft gold glow while the next bolt is empowered.
 func _tick_aim_line() -> void:
 	if not h.is_local() or h.wid != "arc_bolts" or busy() or KinMerge.active(h):
+		AimKit.hide(h, "aim_glow")
 		return
 	var to := AimMode.point(h, float(h.wpn.get("range", 12.0)) * (EMP_RANGE_K if primed_t > 0.0 else 1.0))
 	if primed_t > 0.0:
-		AimKit.line(h, "aim", {"to": to, "col": Color("ffd25a"), "hot": 0.6, "alpha": 1.3, "lw": 0.06})
+		AimKit.line(h, "aim", {"to": to, "col": EMP_LINE, "alpha": 1.6, "lw": 0.11})
+		AimKit.line(h, "aim_glow", {"to": to, "col": EMP_LINE, "alpha": 0.5, "lw": 0.3, "arrow": false})
 	else:
-		AimKit.line(h, "aim", {"to": to, "col": Color(1, 1, 1), "alpha": 0.55})
+		AimKit.hide(h, "aim_glow")
+		AimKit.line(h, "aim", {"to": to, "col": AIM_LILAC, "alpha": 0.6})
 
 ## The empowered tell: a gold glint and a light at the weapon hand (everyone sees it).
 func _tick_glint() -> void:
@@ -327,8 +341,8 @@ func _bolt() -> void:
 		play("thf_primed")
 		if h.is_local() and m.cam: m.cam.add_trauma(0.12)
 	else:
-		fx().ride(sd, "chakram", BOLT_GOLD, BOLT_CORE, 1.1, 0.28)
-		fx().star(muzzle, BOLT_GOLD, 0.35, 0.08)
+		fx().ride(sd, "chakram", BOLT_TAIL, BOLT_GOLD, 0.9, 0.3)
+		fx().star(muzzle, BOLT_GOLD, 0.6, 0.1, BOLT_CORE)        # the gold muzzle star at the throwing hand
 	last_bolt_emp = emp
 
 ## Where a bolt ends: a starburst on a hit, a blue-violet puff at the cursor, sparks on a wall.
@@ -343,7 +357,7 @@ func _bolt_end(s: Dictionary, at: Vector3, e: Ent, why: String, emp: bool) -> vo
 		if emp: m.fx.spark(at, Vector3.UP, EMP_BLUE, 14, 11.0, 70.0)
 	elif why == "expire":
 		fizzles += 1
-		fx().puff(at, FIZZLE, 0.5 if not emp else 0.9, 0.3, Color("d8d0ff"))
+		fx().puff(at, FIZZLE, 0.75 if not emp else 1.1, 0.34, Color("c8b8ff"))
 		m.sfx("dj_fizzle", at, -10.0 if h.is_local() else -14.0, 1.0)
 	else:
 		m.fx.spark(at, Vector3.UP, BOLT_GOLD, 6, 6.0, 80.0)
@@ -465,14 +479,23 @@ func _tick_bola_cast(dt: float) -> void:
 		return
 	bola_cast["t"] = float(bola_cast["t"]) - dt
 	var k := 1.0 - clampf(float(bola_cast["t"]) / float(bd["cast"]), 0.0, 1.0)
-	# the source's lane is a translucent white strip with chevrons; the fill front runs gold toward the throw
+	# a strip with chevrons in the Bola's gold (the source's is white); the fill front runs toward the throw
 	AimKit.lane(h, "rmb",
 			{"len": lane_len(), "width": float(bd["lane_w"]), "chevrons": 4, "tip": true, "fill": k,
-					"col": Color(1, 1, 1), "col2": col_of(rmb_def()), "alpha": 1.35})
+					"col": col_of(rmb_def()), "col2": BOLA_HOT, "alpha": 1.35})
+	_whirl_bola()
 	if float(bola_cast["t"]) <= 0.0:
 		bola_cast = {}
 		AimKit.hide(h, "rmb")
+		fx().unplace("bolaw%d" % h.get_instance_id())
 		_throw_bola()
+
+## The two weights whirling round the raised hand through the wind-up (everyone sees them).
+func _whirl_bola() -> void:
+	var at := hand_pos(true) + Vector3(0, 0.15, 0)
+	var spin: float = m.time * 24.0
+	fx().place("bolaw%d" % h.get_instance_id(), "bola", at, Vector2(cos(spin), sin(spin)), col_of(rmb_def()),
+			BOLA_CORD, 0.0, 0.0)
 
 func _throw_bola() -> void:
 	var bd: Dictionary = rmb_def()["bola"]
@@ -545,7 +568,7 @@ func _tick_bola(dt: float) -> void:
 			return
 	bola["pos"] = p
 	bola["dir"] = dir
-	fx().place("bola%d" % h.get_instance_id(), "bola", p, dir * spd, col_of(rmb_def()), Color("c9a0ff"), 1.0, 0.25)
+	fx().place("bola%d" % h.get_instance_id(), "bola", p, dir * spd, col_of(rmb_def()), BOLA_CORD, 1.0, 0.25)
 
 func _walled(q: Vector3) -> bool:
 	return m.world.is_block(q.x, q.z) or m.world.ground_at(q.x, q.z) > q.y - 0.4
@@ -563,7 +586,6 @@ func _wrap(f: Ent) -> void:
 	KitStatus.apply(f, "gnd", _ground_t())
 	add_mark(f, 1, true)
 	wrapped[f.get_instance_id()] = [f, _ground_t()]
-	m.fx.word(f.pos + Vector3(0, 2.4, 0), "GROUNDED", col_of(rmb_def()), false)
 	m.sfx("dj_bola_wrap", f.pos, -3.0, 1.0)
 
 ## Yellow rings bind the Grounded (everyone sees them), two of them winding round their legs.
@@ -580,7 +602,7 @@ func _tick_wrapped(dt: float) -> void:
 		AimKit.circle(h, "gnd%d" % key,
 				{"at": e.pos, "r": r, "col": col_of(rmb_def()), "all": true, "hot": 0.4, "lw": 0.09})
 		AimKit.circle(h, "gnd2%d" % key,
-				{"at": e.pos, "r": r * 0.7, "col": Color("fff0a0"), "all": true, "dashed": true})
+				{"at": e.pos, "r": r * 0.7, "col": BOLA_HOT, "all": true, "dashed": true})
 
 ## Two foes in one Bola: both Grounded, stunned and hurt; at rank 3 they pool their Marks.
 func _tangle(f, other: Ent) -> void:
@@ -737,8 +759,8 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null:
 		return
 	# Encore once a foe is well inside the ring's reach (it rides with her, so she can chase them)
-	if HeroUlt.unlocked(self) and float(cd["x"]) <= 0.0 and los and dist < float(x_def()["reach"]) * 0.7:
-		h.inp["xult"] = true
+	if HeroUlt.ready(self) and los and dist < float(x_def()["reach"]) * 0.7:
+		HunterKeys.ult_pressed(h)
 	# the dagger is stuck in them: step to them
 	if not knife.is_empty() and knife.get("target") != null and randf() < 0.6:
 		h.inp["sig"] = true

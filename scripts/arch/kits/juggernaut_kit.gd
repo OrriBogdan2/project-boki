@@ -257,7 +257,7 @@ func on_knock(t: Hunter, mine: bool) -> void:
 
 ## The Slam's sweet spot then a knock: the Gilded Riposte (X) is ready again (once it is unlocked).
 func _reset_riposte() -> void:
-	if float(cd["x"]) <= 0.0 or not HeroUlt.unlocked(self):
+	if float(cd["x"]) <= 0.0 or h.lvl < int(Hunter.ULT_AT[0]):
 		return
 	cd["x"] = 0.0
 	slam_resets += 1
@@ -268,8 +268,14 @@ func _reset_riposte() -> void:
 	net_ring(h.pos, 2.0, col_of(x_def()))
 
 # ------------------------------------------------------------------ X: Gilded Riposte (JuggernautUlt)
-## X (HeroUlt gates it: level 6, its own cooldown in cd["x"]).
+## X (main's HunterKeys gate: level 6; HeroUlt.press: its own cooldown in cd["x"], the cast id).
 func cast_ult() -> bool:
+	return HeroUlt.press(self, _start_riposte)
+
+func has_ult() -> bool:
+	return true
+
+func _start_riposte() -> bool:
 	riposte.start()
 	return true
 
@@ -513,8 +519,9 @@ func rmb_hold_tick(t: float) -> void:
 		# cursor ring fills; a rising whine on the way in, a ping at full
 		var k := lunge_k(t)
 		var ld: Dictionary = sd["lunge"]
+		var feel := float(dash_feel()["dist"])        # the lane shows the fling travel() really makes
 		AimKit.lane(h, "rmb",
-				{"len": float(ld["dist"][1]), "len0": float(ld["dist"][0]), "k": k, "fill": k, "width": 1.3,
+				{"len": float(ld["dist"][1]) * feel, "len0": float(ld["dist"][0]) * feel, "k": k, "fill": k, "width": 1.3,
 						"col": LUNGE_RED, "col_full": LUNGE_FULL, "tip": true})
 		AimKit.charge(h, k, {"col": LUNGE_RED, "col2": LUNGE_FULL})
 		if anim_id != "jug_lunge_wind" and chain.is_empty():
@@ -992,9 +999,9 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null:
 		return
 	# the Gilded Riposte up close: the guard eats what they throw, then the cleave answers
-	if HeroUlt.unlocked(self) and float(cd["x"]) <= 0.0 and los and dist < float(x_def()["len"]):
+	if HeroUlt.ready(self) and los and dist < float(x_def()["len"]):
 		h.inp["aim"] = tgt.pos + Vector3(0, 0.9, 0)
-		h.inp["xult"] = true
+		HunterKeys.ult_pressed(h)
 		return
 	# pulled along the chain: spin as you arrive
 	if reel_t > 0.0 and rmb_ready() and int(h.slot_lv["sec"]) > 0:

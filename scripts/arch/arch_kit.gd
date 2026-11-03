@@ -107,14 +107,10 @@ func cast_e() -> bool: return false
 func e_recast() -> bool: return false                # E pressed while it's up (Sigil detonation)
 func cast_r() -> bool: return false
 func r_recast() -> bool: return false                # R pressed while it runs (Last Round release)
-## X, the hero ultimate (HeroUlt): start it (true = it went off and the cooldown starts).
-func cast_ult() -> bool: return false
-## X pressed while the ult runs (true = handled, e.g. an early landing).
+## X pressed while the hero ultimate runs (HeroUlt.press; true = handled, e.g. an early landing).
 func ult_recast() -> bool: return false
+## Is the hero ultimate under way (HeroUlt.press turns a press into ult_recast then)?
 func ult_running() -> bool: return false
-## The X press (Hunter.tick, "hunter_ult"): the level gate, the cooldown and the kit's cast.
-func use_x() -> void:
-	HeroUlt.use(self)
 func on_dash(_ex: bool) -> bool: return false        # true = the archetype handled the dash
 func on_deal(_t: Ent, _dmg: float, _o: Dictionary) -> void: pass
 func on_take(_by: Ent, _dmg: float, _o: Dictionary) -> void: pass
@@ -262,6 +258,10 @@ func use_e() -> void:
 		last_e = String(e_def().get("name", ""))
 	else:
 		h._ab_feedback("k1", "deny")
+
+## X: the hero's own ultimate. No hero has one yet; a kit that does overrides both. Returns true when it went off.
+func cast_ult() -> bool:
+	return false
 
 ## Does this hero have an ultimate on X (the HUD shows the slot only then)?
 func has_ult() -> bool:
@@ -825,6 +825,17 @@ func teardown() -> void:
 		if is_instance_valid(n): (n as Node).queue_free()
 	self_nodes.clear()
 	spips = {}
+
+## Where the hunter's right (or left) hand is in the world (the model's hand bone; shoulder height ahead
+## of them when there is no model, as in headless checks).
+func hand_pos(right: bool) -> Vector3:
+	var hand: Node3D = null
+	if h.anim != null:
+		hand = h.anim.hand_r if right else h.anim.hand_l
+	if hand != null and is_instance_valid(hand) and hand.is_inside_tree():
+		return hand.global_position
+	var d := h.aim_dir()
+	return h.pos + Vector3(d.x * 0.4, 1.3 * float(h.cdat.get("scale", 1.0)), d.y * 0.4)
 
 ## A node that follows the hunter in world space (top_level child, so it dies with the hunter).
 func own_node() -> Node3D:

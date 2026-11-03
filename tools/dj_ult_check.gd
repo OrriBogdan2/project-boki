@@ -7,9 +7,14 @@ extends RefCounted
 
 var A
 
-## Opens the ultimate the way a run does: level 6 (HeroUlt's gate, "unlock" in the hero's data).
+## What the bond meter owes the current ult cast (KinBond.from_ult keeps the best event per cast id).
+func _owed(P: Hunter) -> float:
+	var c: Dictionary = P.get_meta("bond_cast", {})
+	return float(c.get("got", 0.0)) if String(c.get("id", "")) == HeroUlt.cast_id(P.ak) else 0.0
+
+## Opens the ultimate the way a run does: level 6 (main's gate in HunterKeys.ult_pressed, Hunter.ULT_AT).
 func _open(P: Hunter) -> void:
-	P.lvl = maxi(P.lvl, HeroUlt.unlock_level(P.ak))
+	P.lvl = maxi(P.lvl, int(Hunter.ULT_AT[0]))
 	P.ak.cd["x"] = 0.0
 
 ## The level gate: below 6 nothing casts, a forced point does not open it either, and X stays locked.
@@ -17,10 +22,10 @@ func _gate(P: Hunter, who: String) -> void:
 	P.lvl = 5
 	P.slot_lv["ult"] = 0
 	P.ak.cd["x"] = 0.0
-	P.ak.use_x()
+	HunterKeys.ult_pressed(P)
 	var locked := float(P.ak.cd["x"]) <= 0.0 and not P.ak.ult_running() and not P.can_level("ult")
 	P.slot_lv["ult"] = 1
-	P.ak.use_x()
+	HunterKeys.ult_pressed(P)
 	A.ok("%s X: no cast below level 6 (even with a point forced in)" % who,
 			locked and float(P.ak.cd["x"]) <= 0.0 and not P.ak.ult_running() and not P.ak.slot_info("x")["ready"])
 	_open(P)
@@ -45,9 +50,11 @@ func dancer(a) -> void:
 	P.ult = 0.0
 	P.dashes = 0.0
 	K.add_mark(T, 2, true)
-	var paid0 := HeroUlt.paid_total
-	K.use_x()
+	var used0 := int(P.used.get("x", 0))
+	HunterKeys.ult_pressed(P)
 	m.step(A.DT)
+	A.ok("dancer X: one press, one cast (main's X path only)", U.casts == 1 and int(P.used.get("x", 0)) == used0 + 1,
+			"casts %d used +%d" % [U.casts, int(P.used.get("x", 0)) - used0])
 	var ring: Dictionary = AimKit.entry(P, "ult")
 	A.ok("dancer X: Encore casts; the ring everyone sees starts small and grows; the Vault comes back",
 			U.running() and AimKit.shown(P, "ult") and bool(ring.get("all", false))
@@ -58,7 +65,7 @@ func dancer(a) -> void:
 	A.step(m, 0.36)
 	A.ok("dancer X: the ring reaches 3 bh at 0.4s, with the outer band dashed; no blade before it",
 			absf(float(AimKit.entry(P, "ult")["r"]) - float(d["reach"])) < 0.15 and AimKit.shown(P, "ult_rim")
-			and U.blades == 0 and HeroUlt.paid_total == paid0, "r %.2f" % float(AimKit.entry(P, "ult")["r"]))
+			and U.blades == 0 and _owed(P) == 0.0, "r %.2f" % float(AimKit.entry(P, "ult")["r"]))
 	A.step(m, 1.9)
 	A.ok("dancer X: still running at 2.3s", U.running())
 	A.step(m, 0.25)
@@ -69,15 +76,15 @@ func dancer(a) -> void:
 			"rim %.0f inner %.0f blight %.1f" % [A.dmg(T), A.dmg(T2), T.blight_t])
 	A.ok("dancer X small mechanic: every blade refreshes her Marks", K.marks_on(T) >= 2
 			and float(T.get_meta("marks")[P.nid][1]) > 3.0)
-	A.ok("dancer X: blades landing on a hunter fill the bond once a cast (a hit: 60% of the bar, HeroUlt stub)",
-			absf(HeroUlt.paid_total - paid0 - 0.6) < 0.001, "paid %.2f" % (HeroUlt.paid_total - paid0))
-	K.use_x()
+	A.ok("dancer X: blades landing on a hunter fill the bond once a cast (a hit: 60% of the bar, KinBond.from_ult)",
+			absf(_owed(P) - 0.6) < 0.001, "owed %.2f" % _owed(P))
+	HunterKeys.ult_pressed(P)
 	A.ok("dancer X: on cooldown it doesn't cast again", not U.running())
 	# a cast with nobody in reach: no bond (never on the cast alone); she walks and shoots through it
 	T.teleport(home + Vector3(12.0, 0, 0))
 	T2.teleport(home + Vector3(12.0, 0, 3.0))
 	K.cd["x"] = 0.0
-	K.use_x()
+	HunterKeys.ult_pressed(P)
 	A.step(m, 0.4)
 	var p0 := P.pos
 	var b0 := K.bolts
@@ -92,7 +99,7 @@ func dancer(a) -> void:
 			and K.move_k() >= 1.0, "moved %.2f bolts +%d" % [P.pos.distance_to(p0), K.bolts - b0])
 	A.step(m, 1.6)
 	A.ok("dancer X: no foe in the ring, no bond (never on the cast alone)", U.casts == 2 and not U.running()
-			and absf(HeroUlt.paid_total - paid0 - 0.6) < 0.001, "paid %.2f" % (HeroUlt.paid_total - paid0))
+			and _owed(P) == 0.0, "owed %.2f" % _owed(P))
 	A.ok("dancer X: its moves are keyed (cast, throws)", ["thf_encore", "thf_encore_throw_r", "thf_encore_throw_l"]
 			.all(func(mv): return not HunterAnim.km_sample(mv, 0.05).is_empty()))
 	await A.done(m)
@@ -115,8 +122,7 @@ func zedran(a) -> void:
 	A.aim_at(P, T.pos)
 	P.hp = P.max_hp * 0.5
 	K.res = 0.0
-	var paid0 := HeroUlt.paid_total
-	K.use_x()
+	HunterKeys.ult_pressed(P)
 	m.step(A.DT)
 	var lane: Dictionary = AimKit.entry(P, "ult")
 	A.ok("juggernaut X: the guard goes up: gold glow, the strip ahead everyone sees (1 x 2 bh), planted",
@@ -142,7 +148,7 @@ func zedran(a) -> void:
 	A.ok("juggernaut X small mechanic: the guard blocks every hit and its stun; blocks count (two at most)",
 			P.hp == hp0 and P.stun_t <= 0.0 and U.blocked == 3 and int(U.st["blocks"]) == 2,
 			"hp %.0f -> %.0f blocked %d" % [hp0, P.hp, U.blocked])
-	A.ok("juggernaut X: no bond before the strike lands (blocking pays nothing)", HeroUlt.paid_total == paid0)
+	A.ok("juggernaut X: no bond before the strike lands (blocking pays nothing)", _owed(P) == 0.0)
 	A.step(m, 0.5)
 	var dealt_blocked := U.last_dealt
 	A.ok("juggernaut X: the cleave lands after 0.65s, he lunges about 1 bh into it",
@@ -150,8 +156,8 @@ func zedran(a) -> void:
 					P.pos.distance_to(p0)])
 	A.ok("juggernaut X: he heals 80% of what it deals",
 			absf(U.last_healed - 0.8 * U.last_dealt) < 1.0, "dealt %.0f healed %.0f" % [U.last_dealt, U.last_healed])
-	A.ok("juggernaut X: landing it on a hunter fills the bond (a hit: 60% of the bar, HeroUlt stub)",
-			absf(HeroUlt.paid_total - paid0 - 0.6) < 0.001, "paid %.2f" % (HeroUlt.paid_total - paid0))
+	A.ok("juggernaut X: landing it on a hunter fills the bond (a hit: 60% of the bar, KinBond.from_ult)",
+			absf(_owed(P) - 0.6) < 0.001, "owed %.2f" % _owed(P))
 	A.step(m, 0.5)
 	A.ok("juggernaut X: about 1.1s in all, then he walks again", not U.running() and K.move_k() >= 1.0)
 	# the same cleave with nothing blocked: two blocks made it 40% harder
@@ -161,7 +167,7 @@ func zedran(a) -> void:
 	A.aim_at(P, T.pos)
 	K.res = 0.0
 	K.cd["x"] = 0.0
-	K.use_x()
+	HunterKeys.ult_pressed(P)
 	A.step(m, 0.9)
 	A.ok("juggernaut X small mechanic: two hits blocked make the answer 40% harder",
 			absf(dealt_blocked / maxf(0.01, U.last_dealt) - 1.4) < 0.03, "%.1f vs %.1f" % [dealt_blocked, U.last_dealt])
@@ -173,7 +179,7 @@ func zedran(a) -> void:
 	P.hp = P.max_hp * 0.5
 	P.blight_t = 3.0
 	K.cd["x"] = 0.0
-	K.use_x()
+	HunterKeys.ult_pressed(P)
 	A.step(m, 0.9)
 	A.ok("juggernaut X small mechanic: blighted, the heal barely takes",
 			U.last_healed < 0.5 * 0.8 * U.last_dealt, "healed %.0f of %.0f" % [U.last_healed, U.last_dealt])
@@ -182,11 +188,10 @@ func zedran(a) -> void:
 	# a miss: nothing hit, no heal and no bond
 	T.teleport(home + Vector3(0, 0, 6.0))
 	P.teleport(home)
-	var paid_miss := HeroUlt.paid_total
 	K.cd["x"] = 0.0
-	K.use_x()
+	HunterKeys.ult_pressed(P)
 	A.step(m, 1.3)
-	A.ok("juggernaut X: a miss pays no bond and heals nothing", HeroUlt.paid_total == paid_miss
+	A.ok("juggernaut X: a miss pays no bond and heals nothing", _owed(P) == 0.0
 			and U.last_dealt == 0.0)
 	# a knock with it makes it ready again at once
 	A.fresh(T)
@@ -195,10 +200,9 @@ func zedran(a) -> void:
 	A.aim_at(P, T.pos)
 	T.hp = 10.0
 	K.cd["x"] = 0.0
-	var paid_knock := HeroUlt.paid_total
-	K.use_x()
+	HunterKeys.ult_pressed(P)
 	A.step(m, 0.9)
-	var knock_paid := HeroUlt.paid_total - paid_knock
+	var knock_paid := _owed(P)
 	A.ok("juggernaut X small mechanic: knocking a hunter with it resets it; the bond counts the knock (0.7)",
 			T.downed and U.resets == 1 and float(K.cd["x"]) <= 0.0 and absf(knock_paid - 0.7) < 0.001,
 			"cd %.1f bond %.2f" % [float(K.cd["x"]), knock_paid])
@@ -228,7 +232,7 @@ func _bola_encore() -> void:
 	A.tap(m, P)
 	A.step(m, 0.7)
 	var grounded := KitStatus.grounded(T)
-	K.use_x()
+	HunterKeys.ult_pressed(P)
 	A.step(m, 2.5)
 	A.ok("combo dancer: Bola > X = the Grounded foe takes every blade", grounded and K.encore.blades == 5,
 			"grounded %s blades %d" % [grounded, K.encore.blades])
@@ -249,7 +253,7 @@ func _chain_riposte() -> void:
 	K.use_e()
 	A.step(m, 0.5)
 	A.aim_at(P, T.pos)
-	K.use_x()
+	HunterKeys.ult_pressed(P)
 	P.hurt(25.0, T, {"src": "shot"})
 	A.step(m, 0.9)
 	A.ok("combo jug: E > E > X = pulled in, a hit blocked, the cleave lands",
@@ -264,7 +268,7 @@ func _merge_holds() -> void:
 	var P: Hunter = r[1]
 	var TK: ThiefKit = P.ak
 	_open(P)
-	TK.use_x()
+	HunterKeys.ult_pressed(P)
 	A.step(m, 0.5)
 	P.ult = 1.0
 	P.merge_cd = 0.0
@@ -282,7 +286,7 @@ func _merge_holds() -> void:
 	var JK: JuggernautKit = P.ak
 	_open(P)
 	A.aim_at(P, T.pos)
-	JK.use_x()
+	HunterKeys.ult_pressed(P)
 	A.step(m, 0.2)
 	P.ult = 1.0
 	P.merge_cd = 0.0
@@ -317,7 +321,7 @@ func _burst(hero: String, sp: String) -> float:
 	P.lvl = 10
 	A.fresh(T)
 	A.aim_at(P, T.pos)
-	P.ak.use_x()
+	HunterKeys.ult_pressed(P)
 	if hero == "juggernaut":
 		P.hurt(10.0, T, {"src": "shot"})
 		A.step(m, 0.1)

@@ -296,10 +296,22 @@ func word(at: Vector3, txt: String, col: Color, big := false) -> void:
 	l.text = txt
 	l.modulate = col
 	l.font_size = 58 if big else 40
-	l.global_position = at
+	l.global_position = at + Vector3(0, _word_stack(at), 0)
 	l.visible = true
 	l.scale = Vector3.ONE * (1.5 if big else 1.1)
-	nums.append({"node": l, "t": 0.0, "vel": Vector3(0, 2.4, 0)})
+	nums.append({"node": l, "t": 0.0, "vel": Vector3(0, 2.4, 0), "word": true})
+
+## How far to raise a new word so it stacks over the words already rising on the same spot
+## (GROUNDED then STUNNED on one foe) instead of printing over them.
+func _word_stack(at: Vector3) -> float:
+	var lift := 0.0
+	for n in nums:
+		if not n.get("word", false) or float(n["t"]) > 0.5:
+			continue
+		var p: Vector3 = (n["node"] as Label3D).global_position
+		if Vector2(p.x - at.x, p.z - at.z).length() < 1.2 and p.y + 0.55 > at.y + lift:
+			lift = p.y + 0.55 - at.y
+	return lift
 
 func ring(at: Vector3, radius: float, col: Color, dur := 0.35) -> void:
 	var mi := MeshInstance3D.new()

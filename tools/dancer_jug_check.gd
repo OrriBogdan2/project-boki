@@ -52,8 +52,8 @@ func thief(a) -> void:
 			K.bolts == 3 and hands.size() >= 3, "bolts %d hands %s" % [K.bolts, str(hands)])
 	A.ok("dancer LMB: bolts hit and stack Marks (one per hit)",
 			A.dmg(T) >= 20.0 and K.marks_on(T) == 3, "took %.0f marks %d" % [A.dmg(T), K.marks_on(T)])
-	A.ok("dancer LMB: the aim line ends at the cursor, white",
-			AimKit.shown(P, "aim") and (AimKit.entry(P, "aim")["col"] as Color).is_equal_approx(Color(1, 1, 1)))
+	A.ok("dancer LMB: the aim line ends at the cursor, pale lilac",
+			AimKit.shown(P, "aim") and (AimKit.entry(P, "aim")["col"] as Color).is_equal_approx(ThiefKit.AIM_LILAC))
 	# a bolt with nothing in its way stops at the cursor and fizzles there; past range it stops at 12m
 	var spot := home + Vector3(-4.0, 0, -3.0)
 	A.aim_at(P, spot)
@@ -80,6 +80,8 @@ func thief(a) -> void:
 	P.do_dash()
 	A.step(m, 0.3)
 	P.inp["move"] = Vector2.ZERO
+	for b in m.breaks:
+		b["dead"] = true        # a crate in the long bolt's path would stop it short of 13.4 m
 	A.aim_at(P, P.pos + Vector3(-30.0, 0, 0))
 	P.fire_cd = 0.0
 	P.inp["fire"] = true
@@ -119,8 +121,11 @@ func thief(a) -> void:
 			P.flat_dist(home) > 1.8 and P.flat_dist(home) < 3.2 and K.primed_t > 0.0 and K.move_k() > 1.2
 			and P.dashes < d0 - 0.5 and wheel in ["thf_vault_l", "thf_vault_r"],
 		"moved %.1f primed %.2f anim %s" % [P.flat_dist(home), K.primed_t, wheel])
-	A.ok("dancer dash: the aim line turns gold while empowered",
-			(AimKit.entry(P, "aim").get("col", Color.WHITE) as Color).is_equal_approx(Color("ffd25a")))
+	var gold: Dictionary = AimKit.entry(P, "aim")
+	A.ok("dancer dash: the aim line turns solid gold, thick, with a glow while empowered",
+			(gold.get("col", Color.WHITE) as Color).is_equal_approx(ThiefKit.EMP_LINE)
+			and float(gold.get("lw", 0.0)) >= 0.09
+			and float(gold.get("hot", 1.0)) == 0.0 and AimKit.shown(P, "aim_glow"))
 	A.ok("dancer HUD: EMPOWERED label + dash dot",
 			K.ready_label().begins_with("EMPOWERED") and P.slot_info("dash").get("full", false)
 			and not P.slot_info("sec").get("full", false),
@@ -269,6 +274,7 @@ func _blade(lvl: int) -> float:
 	var T: Hunter = r[2]
 	var K: ThiefKit = P.ak
 	P.lvl = lvl
+	P.set_meta("growth_lvl", lvl)       # growth follows levels gained; a level set straight grows nothing
 	A.fresh(T)
 	K.encore._hit(T, false)
 	var d: float = A.dmg(T)
@@ -425,8 +431,9 @@ func juggernaut(a) -> void:
 	K.cd["rmb"] = 0.0
 	A.hold(m, P, 0.95)
 	A.step(m, 0.5)
+	var far := 7.5 * float(K.dash_feel()["dist"])       # the full fling, after the global dash feel
 	A.ok("juggernaut RMB hold: a miss doubles the cooldown, the fling goes far",
-			float(K.cd["rmb"]) > 3.0 and P.flat_dist(home) > 6.5,
+			float(K.cd["rmb"]) > 3.0 and P.flat_dist(home) > far - 0.4,
 			"cd %.1f moved %.1f" % [float(K.cd["rmb"]), P.flat_dist(home)])
 	# air: the downward slam slows, the centre takes more and is stunned
 	K.ch_rmb = 1.0
