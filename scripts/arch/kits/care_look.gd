@@ -209,12 +209,6 @@ func _build(kind: String) -> Node3D:
 			_off(Models.part(n, Models.sphere(0.07, 8), orb_mat(Color("ffd27a", 1.0)), Vector3.ZERO))
 			_off(Models.part(n, Models.sphere(0.14, 8), orb_mat(Color("ff8a3c", 0.4)), Vector3.ZERO))
 			_tail(n, 0.08, 0.7, Color("ffb347", 0.8))
-		"streak":
-			# Tamsin's air dash: a long thin frost streak with a crystal riding its head
-			_tail(n, 0.12, 1.4, Color("4fd0e0", 0.85))
-			var tip_ice := ice_mat(Color("9af0ff"), 0.9, 0.2, Color("1f8a96"))
-			var tip := _off(Models.part(n, Models.crystal(0.05, 0.3, 4), tip_ice, Vector3.ZERO))
-			tip.rotation = Vector3(-PI * 0.5, 0, 0)
 		"dome":
 			_off(Models.part(
 					n, Models.sphere(1.0, 16), Models.glow_mat(Color("dffcff", 0.5)), Vector3.ZERO,
@@ -244,6 +238,11 @@ func _build(kind: String) -> Node3D:
 				s2.basis = Basis(Quaternion(Vector3.UP, Vector3(cos(a6) * 0.35, 1.0, sin(a6) * 0.35).normalized()))
 		"frost":
 			_off(Models.part(n, Models.capsule(0.42, 1.5), orb_mat(Color("2fb0e0", 0.55)), Vector3(0, 0.8, 0)))
+		"slab":
+			# a plate of ice laid under her blades
+			_off(Models.part(
+					n, Models.box(1.0, 0.05, 0.7), ice_mat(Color("bff7ef"), 0.7, 0.35, Color("e8ffff")),
+					Vector3(0, 0.04, 0)))
 		"chip":
 			# one ice chip of the skate trail
 			_off(Models.part(
@@ -459,12 +458,17 @@ func _style(e: Dictionary, k: float) -> void:
 			_tint(n, col, 1.0 - smoothstep(0.8, 1.0, k))
 		"chip":
 			n.scale = Vector3.ONE * (1.0 - k)
-		"mote", "streak":
+		"slab":
+			var dv4: Vector2 = p.get("dir", Vector2(0, -1))
+			n.rotation = Vector3(0, atan2(-dv4.x, -dv4.y), 0)
+			var forms := lerpf(0.6, 1.0, clampf(k * 15.0, 0.0, 1.0))          # frozen in under the blade at once
+			n.scale = Vector3(r * forms, 1.0, r * forms)
+			_tint(n, Color.WHITE, 1.0 - smoothstep(0.3, 1.0, k))
+		"mote":
 			# lies back along the dash (a mote drifts up a little), shrinking as it fades
 			var dv2: Vector2 = p.get("dir", Vector2(0, -1))
 			n.rotation = Vector3(0, atan2(-dv2.x, -dv2.y), 0)
-			var drift := Vector3(0, 0.8 * k, 0) if String(e["fx"]) == "mote" else Vector3.ZERO
-			n.global_position = (e["at"] as Vector3) + drift
+			n.global_position = (e["at"] as Vector3) + Vector3(0, 0.8 * k, 0)
 			n.scale = Vector3.ONE * r * (1.0 - 0.6 * k)
 			_tint(n, Color.WHITE, 1.0 - k)
 		_:

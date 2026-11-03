@@ -67,6 +67,60 @@ func _skate_feel() -> void:
 	step(m, 0.2)
 	await _free(m)
 
+## Item 12: the skate is her only dash. No charge refuses it, an air press buffers the skate to the
+## landing (no air dash), and ice plates form under her while it runs.
+func _skate_only() -> void:
+	var r: Array = sc.setup("rimewright", 30.0)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var K: RimewrightKit = P.ak
+	step(m, 0.1)
+	P.dashes = 0.0
+	P.inp["move"] = Vector2(1, 0)
+	P.inp["dash"] = true
+	P.inp["dash_down"] = true
+	step(m, 0.05)
+	P.inp["dash"] = false
+	ok(
+			"tm Shift: with no charge nothing happens (no spare dash)",
+			not K.rinkrunning() and P.roll_t <= 0.0 and P.ex_cd <= 0.0)
+	P.inp["dash_down"] = false
+	P.dashes = P.max_dashes()
+	# a tap on the ground is the skate's shortest run, never a travel() dash
+	P.inp["dash"] = true
+	step(m, 0.05)
+	P.inp["dash"] = false
+	var kinds := {}
+	for i in 30:
+		if P.roll_t > 0.0:
+			kinds[P.move_kind] = true
+		step(m, 1.0 / 60.0)
+	ok(
+			"tm Shift: a tap on the ground is a short skate, no dash, and no long-dash pip",
+			kinds.keys() == ["rinkrun"] and not K.rinkrunning() and not K.has_long_dash(), str(kinds.keys()))
+	P.dashes = P.max_dashes()
+	P.teleport(P.pos + Vector3(0, 4.0, 0))
+	step(m, 0.1)
+	P.inp["dash"] = true
+	P.inp["dash_down"] = true
+	step(m, 0.05)
+	P.inp["dash"] = false
+	ok(
+			"tm Shift: pressed in the air she does not dash; the skate waits for the landing",
+			not P.grounded and K.air_skate and not K.rinkrunning() and P.roll_t <= 0.0 and P.ex_cd <= 0.0)
+	var t := 0.0
+	while not K.rinkrunning() and t < 3.0:
+		step(m, 0.05)
+		t += 0.05
+	ok(
+			"tm Shift: on landing the buffered skate starts",
+			K.rinkrunning() and P.grounded and not K.air_skate, "after %.2f s" % t)
+	step(m, 0.7)
+	var slabs := K.lk().live.filter(func(e): return String(e["kind"]) == "slab").size()
+	ok("tm Shift: ice plates form under her while she skates", slabs >= 5, "%d plates" % slabs)
+	P.inp["dash_down"] = false
+	await _free(m)
+
 ## Rank 3 Skate over the Abyss lays ice underfoot that holds a while and then goes; below rank 3 she gets none.
 func _skate_ice() -> void:
 	var laid := {}
@@ -571,6 +625,7 @@ func rimewright() -> void:
 			not K.rinkrunning() and P.dashes > 0.05 and K.anim_id == "tm_skate_stop", "dashes %.2f" % P.dashes)
 	await _free(m)
 	await _skate_feel()
+	await _skate_only()
 	await _skate_ice()
 	await _spear_rank3()
 	# --- Ice Spear: hold shows the ring at the cursor; it lands there, slows, detonates 1.8 s later

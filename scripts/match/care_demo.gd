@@ -32,9 +32,9 @@ const SPEC := {
 	"rimewright_rmb": {
 		"strip": [0.5, 0.7, 0.82, 0.86, 0.92, 1.1],
 		"keys": {"rmb_aim": 0.7, "rmb_fly": 0.84, "rmb_zone": 1.5, "rmb_boom": 2.8}},
-	"rimewright_dash": {"strip": [0.32, 0.4, 0.55, 0.72, 1.04, 1.12], "keys": {"dash": 0.7, "dash_stop": 1.06}},
+	"rimewright_dash": {"strip": [0.32, 0.45, 0.62, 0.8, 1.06], "keys": {"dash": 0.7, "dash_stop": 1.06}},
 	"rimewright_skatefire": {"strip": [0.5, 0.58, 0.64, 0.7, 0.8, 0.9], "keys": {"skatefire": 0.66}},
-	"rimewright_air": {"strip": [0.33, 0.38, 0.45, 0.55, 0.65, 0.8], "keys": {"air": 0.45}},
+	"rimewright_air": {"strip": [0.3, 0.5, 0.7, 0.9, 1.1], "keys": {"air": 0.5, "air_land": 0.9}},
 	"rimewright_e": {"strip": [0.34, 0.42, 0.5, 0.55, 0.62, 0.9], "keys": {"e": 0.56, "e_slide": 1.3}},
 	"rimewright_walk": {"strip": [0.6, 0.68, 0.76, 0.84, 0.92, 1.0], "keys": {"walk": 0.8}},
 	"rimewright_pose": {"strip": [0.5, 0.56, 0.62, 0.68], "keys": {"pose": 0.6}, "yaw": 3.3},
@@ -169,9 +169,16 @@ static func _script(
 			_dash(A, P, arch, t, dt)
 		"air":
 			P.inp["move"] = A.get_meta("care_right", Vector2(1, 0))
-			if _at(t, dt, 0.2): P.vel.y = 6.0
+			if _at(t, dt, 0.2):
+				P.vel.y = 6.0
+				if arch == "rimewright":
+					P.pos.y += 2.0          # a clear drop, so the press lands well before she does
+					P.grounded = false
+			# Tamsin has no air dash: Shift held in the air starts the skate as she lands
+			P.inp["dash_down"] = arch == "rimewright" and t >= go and t < 1.3
 			if _at(t, dt, go):
 				P.ex_cd = 0.0
+				P.dashes = P.max_dashes()
 				K.on_dash(true)
 		"lmb":
 			P.inp["fire"] = t > 0.3 and t < 1.5

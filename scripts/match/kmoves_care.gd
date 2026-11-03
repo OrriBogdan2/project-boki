@@ -409,26 +409,6 @@ const MOVES := {
 					"y": 1.0, "r": 0.3, "p": 0.12, "sq": 0.15, "lift": -0.08, "lw": 1.0, "legs": [0.7, -1.1, 0.2, -0.6],
 					"fl": Vector3(-0.35, 0.2, 0.0), "hw": 0.8, "wf": 0.8}],
 		[0.5, {}]]},
-	# the air dash: a stretched skater's glide (she never tumbles in the source): pitched forward, one
-	# leg trailing long, arms out wide like wings, held, then a light landing
-	"tm_dash_air": {"keys": [
-		[0.0, {"sq": 0.2, "p": -0.1}],
-		[
-				0.06,
-				{
-					"p": -0.7, "sq": -0.3, "r": 0.15, "lw": 1.0, "legs": [0.35, -0.3, -0.95, -0.15],
-					"fl": Vector3(-0.5, 0.12, 0.08), "hw": 1.0, "wa": Vector3(0.2, 0, 1.2),
-						"wo": Vector3(0.25, 0.1, 0.1),
-					"wf": 1.0}],
-		[
-				0.24,
-				{
-					"p": -0.65, "sq": -0.25, "r": 0.1, "lw": 1.0, "legs": [0.3, -0.3, -0.9, -0.15],
-					"fl": Vector3(-0.5, 0.15, 0.1), "hw": 1.0, "wa": Vector3(0.2, 0, 1.2),
-						"wo": Vector3(0.25, 0.1, 0.1),
-					"wf": 1.0}],
-		[0.32, {"p": -0.2, "sq": 0.2, "lift": -0.06, "lw": 1.0, "legs": [0.6, -1.0, 0.5, -0.9]}],
-		[0.5, {}]]},
 	# Shatter (payoff): the fan snapped shut in a big flourish, the free fist clenched and pulled in, a
 	# lean into it
 	"tm_shatter": {"keys": [

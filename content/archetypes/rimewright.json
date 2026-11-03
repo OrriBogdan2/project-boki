@@ -54,7 +54,7 @@
 		"refund": 0.6,
 		"min_t": 0.2,
 		"rink_t": 0.0,
-		"desc": "Hold the dash key to skate at 11.5 m/s where you move, for up to 1.6s, carving curves with the move keys; you carry on over ledges. Let go and you stop; stopping early gives back a share of the cooldown. While skating your darts fly straight and thick. In the air this is your usual long dash.",
+		"desc": "Hold the dash key to skate at 11.5 m/s where you move, for up to 1.6s, carving curves with the move keys; you carry on over ledges. Let go and you stop; stopping early gives back a share of the cooldown. While skating your darts fly straight and thick. In the air, press it to buffer the skate: it starts the moment you land.",
 		"steer": 3.6,
 		"ice_gap": 0.2,
 		"ice_look": 2.0,

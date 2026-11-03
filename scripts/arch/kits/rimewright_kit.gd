@@ -16,7 +16,8 @@ var fan_hits := {}             # target instance id -> {n: int, left: float, t: 
 var darts: Array = []          # homing shards in flight: {s: Dictionary, side: float, passed}
 var dart_n := 0                # darts thrown (alternates the bow side and the hand)
 var seq_next := 0.0            # when the next dart may leave
-var rinkrun := {}              # the running Skate: {t, dir, loop}
+var rinkrun := {}              # the running Skate: {t, dir, loop, slab}
+var air_skate := false         # Shift pressed in the air: the skate starts on landing
 var ice_t := 0.0               # s until the rank-3 Skate may lay its next span of ice
 var wall := {}                 # the Rink Wall: {w, dir, sliding, t, slide_t, hp0, hit}
 var wall_cast := {}            # the wall's 0.2 s tell before it erupts: {t, dir, travel}
@@ -26,12 +27,13 @@ var zone_n := 0
 var splinter_log := 0          # Shatters fired (tests)
 var look: CareLook
 var chip_t := 0.0
-var aft_t := 0.0
 var stats := {"darts": 0, "beams": 0, "spears": 0, "detonations": 0, "rimes": 0, "crashes": 0, "cancels": 0}   # tests
 var rime := {}                 # Rimelock running: {t, at, slow: {instance id: seconds in the rink}, creak}
 var last_stunned := 0          # foes the last Rimelock crash stunned (tests)
 var ult_look: UltLook
 const SHELL_T := 0.15          # s the icy shell shows on a foe before the 8-dart Shatter bursts
+const SLAB_GAP := 0.08         # s between ice plates under the skate
+const SLAB_LIFE := 1.2         # s a plate stays before it fades
 const SHATTER_R := 2.7         # m, the Shatter's spike starburst (about 1.5 body heights)
 
 func _setup() -> void:
@@ -149,6 +151,7 @@ func _tick(dt: float) -> void:
 				"frost%d" % key, "frost", (tv2 as Node3D).global_position,
 				{"r": 0.7 + 0.08 * n, "a": 0.15 + 0.75 * float(n) / 8.0})
 	_tick_darts(dt)
+	_tick_air_skate()
 	_tick_rinkrun(dt)
 	_tick_wall_cast(dt)
 	_tick_wall(dt)
@@ -258,25 +261,43 @@ func _tick_darts(dt: float) -> void:
 func fires_in_dash() -> bool:
 	return not rinkrun.is_empty()
 
-func on_dash(use_ex: bool) -> bool:
+## No class long dash: Shift is only ever the skate (the HUD shows no long-dash segment for her).
+func has_long_dash() -> bool: return false
+
+## Shift is the skate and nothing else: in the air the press waits for the landing, and with no charge
+## it is refused.
+func on_dash(_use_ex: bool) -> bool:
 	if not rinkrun.is_empty() or not rime.is_empty():
 		return true
-	var dd := dash_def()
-	if use_ex:
-		if not spend_dash(true): return true
-		travel(float(h.cdat.get("ex_dist", 5.0)), float(h.cdat.get("ex_time", 0.2)), {"invuln": 0.1}, true)
-		h.ghost_t = 0.3          # her frost streaks, not the shared after-image (from the first frame)
-		play("tm_dash_air")
-		m.sfx("rime_flip", h.pos, -3.0, 1.0)
-		aft_t = 0.0
+	if h.dashes < 1.0:
+		h._ab_feedback("dash", "deny")
 		return true
-	if not spend_dash(false): return true
+	if h.grounded:
+		_begin_skate()
+	else:
+		air_skate = true
+	return true
+
+## The push-off: spends the charge and starts the skate along the move keys.
+func _begin_skate() -> void:
+	h.dashes -= 1.0
 	var dir := dash_dir()
-	rinkrun = {"t": 0.0, "dir": dir.normalized(), "loop": 0.16}
+	rinkrun = {"t": 0.0, "dir": dir.normalized(), "loop": 0.16, "slab": 0.0}
 	play("tm_skate_go")
 	m.sfx("rime_run", h.pos, -3.0, 1.0)
-	lk().burst("flare", h.pos, {"col": Color("bff7ef"), "rim": Color(1, 1, 1), "r": 1.1, "dur": 0.25, "pattern": 2.0})
-	return true
+	# ice kicked back off the pushing blade (no ring: a dash never bursts)
+	m.fx.burst(
+			h.pos + Vector3(0, 0.12, 0), Color("bff7ef"), 10, 3.0, 0.3, 6.0, 0.8, Vector3(-dir.x, 0.5, -dir.y), 30.0)
+
+## A Shift pressed in the air starts the skate on landing, while the key is still down.
+func _tick_air_skate() -> void:
+	if not air_skate:
+		return
+	if h.downed or not held("dash") or not rime.is_empty():
+		air_skate = false
+	elif h.grounded and h.dashes >= 1.0:
+		air_skate = false
+		_begin_skate()
 
 func _tick_rinkrun(dt: float) -> void:
 	if rinkrun.is_empty():
@@ -395,13 +416,18 @@ func _tick_trails(dt: float) -> void:
 			chip_t = 0.035
 			var side := Vector2(-h.roll_dir.y, h.roll_dir.x) * (0.2 if int(m.time * 28.0) % 2 == 0 else -0.2)
 			lk().burst("chip", h.position + Vector3(side.x, 0.0, side.y), {"dur": 0.8})
-	elif h.roll_t > 0.0 and h.move_kind == "dash":
-		aft_t -= dt
-		if aft_t <= 0.0:
-			aft_t = 0.03
-			for i in 2:
-				var off := Vector3(randf_range(-0.3, 0.3), randf_range(0.4, 1.4), randf_range(-0.3, 0.3))
-				lk().burst("streak", h.position + off, {"r": randf_range(0.8, 1.2), "dur": 0.35, "dir": h.roll_dir})
+		_lay_slabs(dt)
+
+## Plates of ice that form under her blades as she skates and fade behind her, each with a frost sheen
+## where the blade bites.
+func _lay_slabs(dt: float) -> void:
+	rinkrun["slab"] = float(rinkrun.get("slab", 0.0)) - dt
+	if float(rinkrun["slab"]) > 0.0:
+		return
+	rinkrun["slab"] = SLAB_GAP
+	var span := randf_range(0.9, 1.3)
+	lk().burst("slab", h.position, {"r": span, "dur": SLAB_LIFE, "dir": h.roll_dir.rotated(randf_range(-0.25, 0.25))})
+	m.fx.flash(h.position + Vector3(0, 0.08, 0), Color("e8ffff"), 0.35, 0.1)
 
 # ------------------------------------------------------------------ RMB: Ice Spear
 func rmb_charge_full() -> float: return 0.0
@@ -656,6 +682,7 @@ func _e_end() -> void:
 func teardown() -> void:
 	super.teardown()
 	rinkrun = {}
+	air_skate = false
 	rime = {}
 	zones.clear()
 	if look != null:

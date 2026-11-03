@@ -112,6 +112,8 @@ func ult_recast() -> bool: return false
 ## Is the hero ultimate under way (HeroUlt.press turns a press into ult_recast then)?
 func ult_running() -> bool: return false
 func on_dash(_ex: bool) -> bool: return false        # true = the archetype handled the dash
+## Does this kit have the class long dash (Shift in the air)? The HUD shows its segment only then.
+func has_long_dash() -> bool: return true
 func on_deal(_t: Ent, _dmg: float, _o: Dictionary) -> void: pass
 func on_take(_by: Ent, _dmg: float, _o: Dictionary) -> void: pass
 func on_block(_dmg: float, _by) -> void: pass
