@@ -220,3 +220,9 @@ The owner saw an explosion with Moosh Moosh and isn't sure whether it comes from
 - **Ult trail over the abyss:** the ult's trail/path visual must keep drawing as it extends out over the abyss, not cut off at the ground edge. Draw it at the travel height (floating) where there's no ground.
 - Assert: an enemy walking into the raised shield is pushed ≥ the push distance away; the ult trail's drawn length equals its travel length even over abyss cells.
 - Screenshots: the shield indicator idle and on a push; the old vs new wall; the ult trail over the abyss.
+
+## 30. Bjorn's held LMB: stops on mantle and other actions; the swing lunges him forward and knocks back (kit fix, Bjorn branch)
+- **Cancel rules:** the held LMB (the charged spin/swing) must end the moment he mantles, glides, dashes, gets displaced, or starts another ability. It doesn't keep running through the mantle or after it. Follow the source's cancel list in `briefs/supervive-data/` for Oath where it has one.
+- **The swing moves him:** when the held attack swings, Bjorn steps/lunges forward in his facing (the source distance; default ~1.5–2 m over the swing) and the hit **knocks enemies back** along the swing direction (source value; default ~2 m). Don't add a ground ring or burst for it; the body motion plus hit sparks carry it.
+- Assert: starting a mantle mid-hold ends the hold within one frame; the swing moves Bjorn ≥1.5 m forward; a dummy hit by it is pushed back.
+- Screenshots: a 5-frame strip of the forward swing hitting a dummy.
