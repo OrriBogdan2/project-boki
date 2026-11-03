@@ -226,9 +226,10 @@ How a merge looks and plays (docs/decisions/0003). Forms with a kit live in cont
 | ult_lock_s | 1.5 |
 | warn_s | 3 |
 | release_rest_s | 6 |
+| timeout_rest_s | 10 |
 | afterglow | {"secs": 3.0, "move_speed": 0.15, "shield_frac": 0.08} |
 | damage_cap | 0.2 |
-| window_note | warn_s: the last seconds of the window flash, tick and pulse; release_rest_s: how long the Boki rests beside you after you release with the ultimate (no C, no orders, carried bonuses on); a merge that times out has no rest. afterglow: after a release the hunter gets secs seconds of move_speed (x) and a shield of shield_frac of max health. damage_cap: the most the stat-based damage bonus can total while merged (x); gear and perks you already had are never cut. |
+| window_note | warn_s: the last seconds of the window flash, tick and pulse; release_rest_s: how long the Boki rests beside you after you release with the ultimate (no C, no orders, carried bonuses on); timeout_rest_s: a merge that runs out of time instead (no release) leaves the Boki resting this long, so releasing is always the better play. afterglow: after a release the hunter gets secs seconds of move_speed (x) and a shield of shield_frac of max health. damage_cap: the most the stat-based damage bonus can total while merged (x); gear and perks you already had are never cut. |
 | xform_note | seconds: the transformation lasts 0.7 and you are invulnerable for all of it; the Boki lands in you at 0.45 (flash, shockwave, the silhouette pops in); the Merge key again unlocks 1.5s after the form appears |
 | fallback | {"haste": 0.12, "size": 1.0, "ult_s": 0.5, "burst": {"radius": 4.0, "dmg": 24, "kb": 8.0}, "note": "haste = faster class-ability cooldowns (x); burst = the basic ultimate of a Boki without a form: m radius, hp damage, knockback; ult_s = its wind-up in seconds"} |
 | surge | {"name": "Surge", "duration": 3.0, "color": "#e8f4ff", "passives": [["damage", 0.1], ["move_speed", 0.1]], "haste": 0.12, "flavor": "No Boki at your side: a weak burst of resolve. 3s of 10% more damage, speed and faster abilities."} |
