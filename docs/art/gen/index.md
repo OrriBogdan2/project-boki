@@ -16,3 +16,15 @@ Shared character text (after the style line):
 | `style/bjorn_optC_inked_cel.png` | C. Inked cel-shaded | "Premium stylised fantasy character illustration with clean confident ink outlines..." |
 | `style/bjorn_optD_semireal.png` | D. Semi-realistic | "Premium semi-realistic fantasy character splash painting..." |
 | `style/bjorn_style_options.jpg` | Side-by-side of all five | (composited locally) |
+
+## Epic revision (Bjorn, option A), 2026-11-03
+Same model, settings and references. The Warden block was rewritten for the owner's "taller, muscular, epic" note; full prompts below.
+
+| File | Prompt | Studio |
+|---|---|---|
+| `style/bjorn_optA_epic_t1.png` | Epic prompt v1 (below) | "Premium stylised fantasy hero key art..." run 3 |
+| `style/bjorn_optA_epic_t2.png` | Epic prompt v2 (below): adds "about eight heads tall", "long powerful legs", and the explicit oar shape | run 4 |
+| `style/bjorn_epic_revision.jpg` | Before/after side-by-side | (composited locally) |
+
+Epic prompt v2 (v1 is the same without "about eight heads tall", "long powerful legs, ... a narrow-ish waist under the belt", "as tall as his shoulders", and with "a long boat oar with its blade encased in a block of ice" for the weapon):
+> Premium stylised fantasy hero key art, hand-painted 3D look: chunky readable shapes, exaggerated heroic proportions, rich painted textures, soft rim light, polished game-studio splash quality. Redesign the character from the reference images at full production quality, keeping his outfit, face, shield and weapon design exactly, but make his body much taller, more muscular and more epic than the reference: Bjorn, a towering northern ferryman and shield-bearer, a true giant about eight heads tall. Heroic proportions: long powerful legs, massive shoulders, a deep powerful chest, thick muscular arms and forearms, a narrow-ish waist under the belt, a small head on a huge frame. Bald; thick dark forked beard bound with iron rings; heavy brows; pale cold grey skin; a faint cold-green glint in his eyes. Dark navy sailor's coat, open at the collar to show part of a muscular chest, crusted with frost at the hem; a big tan seal-fur mantle over the shoulders; wide leather belt with an iron buckle; fur-wrapped boots; rime-crusted iron gauntlets. His shield is the frozen, iron-banded wooden prow of his old ship, as tall as his shoulders, the curled stem post rising above his head, icicles hanging from its edge, a thin mint-green glowing crack in the wood. His weapon is a long wooden boat oar, clearly an oar with a long shaft and a flat paddle blade, the blade encased in a block of clear ice, used as a maul and resting on his shoulder. Confident, warm grin, the look of an unstoppable protector. Full body, slightly low-angle three-quarter view, standing tall in a powerful heroic stance, shield planted beside him, plain dark blue-grey gradient background. Palette: dark navy, seal brown, oak brown, iron grey, icy pale blue, small mint-green accent. No text, no logos.

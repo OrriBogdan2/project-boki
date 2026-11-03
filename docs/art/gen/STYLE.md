@@ -1,6 +1,6 @@
-# Warden art style: proposed recipe (awaiting owner/ext approval)
+# Warden art style: recipe
 
-Status: **proposal**. Nothing beyond the Bjorn style frames gets generated until this is approved.
+Status: **option A approved by the owner (2026-11-03 17:10 UTC)**, with a body direction: Wardens should look **epic** — Bjorn taller, muscular, heroic (see "Owner body direction" below). Final pick between the two epic Bjorn takes is pending.
 
 Target: high-end MOBA hero art. Big readable shapes, a strong silhouette, rich painted materials, polished splash finish. Prompts describe that in plain words; they never name another game, studio, artist or character.
 
@@ -26,9 +26,11 @@ Same model, settings, references and character text for every option; only the s
   5. "Palette: <the concept sheet's swatches in words>."
   6. "No text, no logos."
 - **Negative prompt:** none (Nano Banana takes no negative field). Unwanted things go in the positive prompt as short "no ..." clauses.
+- **Owner body direction (17:10 UTC):** the first option-A Bjorn felt too short. The concept sheets' squat, small-head proportions are a guide for the design, not the body. In the Warden block, ask for the body you want explicitly and say it overrides the reference: e.g. "keeping his outfit, face, shield and weapon design exactly, but make his body much taller, more muscular and more epic than the reference ... a true giant about eight heads tall. Heroic proportions: long powerful legs, massive shoulders, a deep powerful chest, thick muscular arms ...". Without the explicit override and head-count, the reference pulls the figure back to short legs. Apply the same idea per Warden to their own build (item 37: distinct heights and builds; Moosh Moosh stays small and cute).
+- **Name each signature prop's shape plainly** ("clearly an oar with a long shaft and a flat paddle blade"), or the model drifts toward a generic weapon (the ice oar became a hammer when only "oar encased in ice, used as a maul" was given).
 - **Originality checks per image:** reject anything that resembles an existing character (owner's list in item 39 and Bjorn's mood-reference note in item 41).
 
 ## Open questions for the owner
-1. Approve option A (or pick B/C/D)?
+1. Epic Bjorn: take 2 (tallest, clear oar, but his coat became sleeveless) or take 1 (keeps the full coat)? See `style/bjorn_epic_revision.jpg`.
 2. For the files we keep, download the full-resolution 2K originals from the studio into this branch? The previews committed now are captures from the studio's viewer (772x959).
 3. Anthum's terms (s. 10.4, 8A) give Anthum a licence to show uploads and outputs as platform examples and to train its internal systems on Platform activity. That covers the concept sheets we upload as references and the art we generate. OK for unreleased game art?

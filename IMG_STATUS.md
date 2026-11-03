@@ -1,5 +1,12 @@
 # IMG status (image-gen agent)
 
+## 2026-11-03 17:20 UTC: option A approved; epic body revision done
+- Owner approved option A (hand-painted 3D) and asked for Bjorn taller, muscular and epic. Two revised takes in `docs/art/gen/style/` (`bjorn_epic_revision.jpg` compares them). Take 2 is the tallest with a clear oar, but the coat went sleeveless; take 1 keeps the coat. Owner to pick.
+- STYLE.md now has the body-direction rule (explicit "taller/muscular than the reference" + head count) and the "name each prop's shape" rule.
+- Still open: full-res downloads (Q2) and Anthum's display/training licence (Q3).
+- Credits used so far: about 14.
+- The owner may move the per-Warden pass to another session; it should start from STYLE.md on this branch.
+
 ## 2026-11-03 17:15 UTC: deliverable 1 (style frame) ready; STOPPED for approval
 - Done: 4 style options of Bjorn, plus a second take of the best one to check consistency. Recipe written in `docs/art/gen/STYLE.md`; files and prompts in `docs/art/gen/index.md`.
 - Recommended: **option A (hand-painted 3D)** on **Nano Banana 2.1** (anthum.ai Studio), 2K, using the concept sheet's body and portrait panels as references.
