@@ -767,3 +767,13 @@ If you can't merge all of it before ~23:00 UTC, prioritise 1-5 and 7 (what the o
 2. **ext/class-titles @ 28ad6b6** (S2 finished ext's branch; contains 31ef8481): the owner-approved hunter titles ("<player> the <title>", base names as data, wiki profiles, --hero-title-check). Optional for tonight; owner-visible if in.
 3. **ext/dancer-feel @ d36f73e** (S2, item 7: Dancer's Cartwheel and empowered bolts to the source; merges onto 31ef8481). Optional for tonight.
 Coming next (not for tonight): bjorn-ult-glide (items 48/49), no-shake (item 50), combo-flow (item 51), warden-models + mantle-look, tier map.
+
+## 2026-11-03 19:35 UTC (orchestrator): DECISION? lines for DECISIONS.md (the owner gave these to the orchestrator today; main please fold them in)
+- DECISION? Extraction: one queue, squads of 3, auto-filled (solos are filled in, bots backfill early). No solo or duo queue. Other modes: Duel (1v1, online search or vs a bot), Arena 4v4 across several arena maps.
+- DECISION? Ostra ult: ~1 s cast lock (as the source does), then he's free to move while Nightwell runs (replaces OWNER_REVIEW item 16's full lock).
+- DECISION? Claire ult: skating into it carries her forward a decent distance; then she's encased in ice and rooted (no sliding) until it ends or she cancels early.
+- DECISION? Moosh Moosh's dashes copy the source's Elluna (ground dash and air glide distances and timings); item 24's 3x rule is dropped.
+- DECISION? Animation and ability parity with the source for all 12, LMB first (e.g. Claire's LMB tracking while she skates on her ice trail). Our own art, same motion.
+- DECISION? Portraits come from the art pass; ext/portrait only keeps its frame/HUD side.
+- DECISION? Agent models: Opus for feel-critical, parity, cross-hero and design work; Sonnet only for small, clear fixes.
+- DECISION? Dash buffering: the owner said "yes, buffer during dashes, match the source where known". DECISIONS says buffering is about 0.1 s; S2's DashFlow holds a press until the dash ends. Pick one line.

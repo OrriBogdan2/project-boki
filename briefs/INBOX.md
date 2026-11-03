@@ -569,3 +569,12 @@ New for you in there:
 - **Extraction squads (owner OK):** [EXT][MAIN] one extraction queue, **squads of 3, auto-filled**: solo players are filled into trios, and bots backfill while the player base is small. No separate solo or duo queue. Duel (1v1) and Arena (4v4) are the other modes. Update the match/lobby spec and any squad-size constants when that work comes up (post-demo).
 - **Model choice (owner):** [EXT] S1 and S2: pick the model per task by what it needs. Use Opus 5.5 for anything feel-critical, source-parity, cross-hero, architectural or design-heavy (hero mechanics and animations, item 32/35, the parity pass, the economy design, mode specs). Use Sonnet only for small, well-specified fixes where it will clearly be good enough. If a Sonnet agent's result isn't at the bar, redo it on Opus; don't ship it.
 - The owner is fixing main's error directly now.
+
+## 2026-11-03 14:35 ET (19:35 UTC) ORCH: read briefs/DECISIONS.md and briefs/PRIORITIES.md. Conflicts with work in flight
+DECISIONS.md wins over every brief. Every agent should re-read it before building. Found:
+- [EXT] **Tamsin is now Claire** everywhere: S2 hero branches, concepts, class-titles and imagegen.
+- [EXT] **Mantle look is 90-100% Mantle in a match and 60-70% close-up** (not item 45's 80/20). Re-check ext/mantle-look d6558b6.
+- [EXT] **New-game flow: intro, make yourself, egg, farm; Venator at the first portal; the second Mantle (1 of Zedran/Pin/Linwick) after the tutorial.** This supersedes my 08:00 note to put the creator after the Boki card: the creator is the "make yourself" step.
+- [EXT] **Merge forms must not be called "Mantle"** (new word pending: Fusion / Bond Form). Check the prologue-polish text and the item-44 notes.
+- [EXT] **"Claire: RMB is a push"** vs OWNER_REVIEW 13/28 (a thrown ice spear). Confirm with the owner before more spear work.
+- [OWNER] **PRIORITIES.md says P0 = no new features until the resets; the farm tutorial/Hob builder and tier maps are P4; farm-builder depth, Black Market extras and maps beyond tier 2 are frozen.** Today's work doesn't match: ext/farm-hob, S2's tier-map, warden-models, mantle-look, the market queue, and the owner's 18:20 "focus on economy, farm, mechanics". Which wins?
