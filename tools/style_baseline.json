@@ -32,46 +32,28 @@
 "semicolon": 2
 },
 "scripts/arch/kits/archer_kit.gd": {
-"long_line": 18,
-"semicolon": 5,
+"long_line": 17,
+"semicolon": 3,
 "shadow": 1
 },
 "scripts/arch/kits/bulwark_kit.gd": {
-"long_line": 20,
-"nested_ternary": 4,
+"long_line": 18,
+"nested_ternary": 2,
 "semicolon": 11
 },
 "scripts/arch/kits/dolm_kit.gd": {
 "nested_ternary": 1
 },
-"scripts/arch/kits/gunslinger_kit.gd": {
-"long_line": 8,
-"semicolon": 4
-},
 "scripts/arch/kits/juggernaut_kit.gd": {
-"long_line": 25,
-"semicolon": 12,
-"shadow": 2
-},
-"scripts/arch/kits/mage_kit.gd": {
-"long_line": 4,
-"semicolon": 1
+"long_line": 6,
+"semicolon": 1,
+"shadow": 1
 },
 "scripts/arch/kits/ostra_kit.gd": {
 "nested_ternary": 1
 },
-"scripts/arch/kits/rimewright_kit.gd": {
-"long_line": 9,
-"nested_ternary": 1,
-"semicolon": 2
-},
-"scripts/arch/kits/tender_kit.gd": {
-"long_line": 8,
-"semicolon": 1
-},
 "scripts/arch/kits/thief_kit.gd": {
-"long_line": 14,
-"nested_ternary": 1
+"long_line": 3
 },
 "scripts/arch/oomph.gd": {
 "long_line": 1,
@@ -471,8 +453,7 @@
 "semicolon": 37
 },
 "scripts/match/arena_demo.gd": {
-"long_line": 20,
-"semicolon": 39
+"long_line": 2
 },
 "scripts/match/biome_run.gd": {
 "long_line": 25,
@@ -521,10 +502,6 @@
 "scripts/match/capture.gd": {
 "long_line": 11,
 "semicolon": 1
-},
-"scripts/match/care_demo.gd": {
-"long_line": 2,
-"semicolon": 10
 },
 "scripts/match/drop_squad.gd": {
 "history_comment": 1,
@@ -586,8 +563,7 @@
 "semicolon": 15
 },
 "scripts/match/hero_gear_care.gd": {
-"long_line": 20,
-"semicolon": 5
+"long_line": 1
 },
 "scripts/match/hero_gear_pair.gd": {
 "long_line": 2
@@ -603,13 +579,13 @@
 },
 "scripts/match/hunter.gd": {
 "history_comment": 44,
-"long_line": 100,
-"nested_ternary": 21,
+"long_line": 99,
+"nested_ternary": 20,
 "semicolon": 56,
 "shadow": 4
 },
 "scripts/match/hunter_anim.gd": {
-"long_line": 128,
+"long_line": 41,
 "nested_ternary": 6,
 "semicolon": 102
 },
@@ -716,9 +692,9 @@
 "shadow": 1
 },
 "scripts/match/models.gd": {
-"long_line": 292,
+"long_line": 286,
 "nested_ternary": 12,
-"semicolon": 283,
+"semicolon": 282,
 "shadow": 3
 },
 "scripts/match/music_dir.gd": {
@@ -843,10 +819,6 @@
 "scripts/ui/capture_hud.gd": {
 "long_line": 5
 },
-"scripts/ui/dash_strip.gd": {
-"long_line": 2,
-"semicolon": 2
-},
 "scripts/ui/dex_view.gd": {
 "long_line": 11,
 "nested_ternary": 2,
@@ -866,9 +838,9 @@
 "long_line": 3
 },
 "scripts/ui/hatch.gd": {
-"long_line": 34,
+"long_line": 33,
 "nested_ternary": 2,
-"semicolon": 71
+"semicolon": 70
 },
 "scripts/ui/hero_grid.gd": {
 "long_line": 2,
@@ -891,10 +863,6 @@
 },
 "scripts/ui/hud_tip.gd": {
 "shadow": 1
-},
-"scripts/ui/icons.gd": {
-"long_line": 25,
-"semicolon": 34
 },
 "scripts/ui/incubator_view.gd": {
 "long_line": 15,
@@ -923,7 +891,7 @@
 "shadow": 1
 },
 "scripts/ui/kit_card.gd": {
-"long_line": 32,
+"long_line": 31,
 "nested_ternary": 5,
 "semicolon": 5
 },
@@ -1016,12 +984,12 @@
 "semicolon": 2
 },
 "tools/archer_bulwark_combo_check.gd": {
-"long_line": 24,
-"semicolon": 47
+"long_line": 2,
+"semicolon": 19
 },
 "tools/archetype_check.gd": {
-"long_line": 140,
-"semicolon": 136,
+"long_line": 68,
+"semicolon": 71,
 "shadow": 1
 },
 "tools/arena_check.gd": {
@@ -1100,8 +1068,8 @@
 "semicolon": 3
 },
 "tools/hero_combo_check.gd": {
-"long_line": 17,
-"semicolon": 49
+"long_line": 6,
+"semicolon": 7
 },
 "tools/hero_pair_check.gd": {
 "long_line": 15,
@@ -1150,7 +1118,7 @@
 "tools/loop_tour.gd": {
 "long_line": 23,
 "nested_ternary": 1,
-"semicolon": 41
+"semicolon": 40
 },
 "tools/mantle_check.gd": {
 "long_line": 18,
@@ -1167,7 +1135,7 @@
 "semicolon": 20
 },
 "tools/move_feel_check.gd": {
-"history_comment": 2,
+"history_comment": 1,
 "long_line": 32,
 "semicolon": 67
 },
@@ -1227,8 +1195,8 @@
 "semicolon": 1
 },
 "tools/support_check.gd": {
-"long_line": 21,
-"semicolon": 60,
+"long_line": 14,
+"semicolon": 39,
 "shadow": 1
 },
 "tools/swim_check.gd": {

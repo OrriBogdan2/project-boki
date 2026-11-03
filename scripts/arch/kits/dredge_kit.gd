@@ -15,9 +15,9 @@ extends ArchKit
 ##   stun. In the air you smash straight down, the anchor lands with you, a ring at the landing, and the
 ##   height adds damage. Rank 3: double damage on a foe over the abyss and a longer stun. Just after it the
 ##   barge turns badly.
-## - Dash, Barge: a shoulder barge toward the cursor that shoves (no damage), with a burst where it sets off;
-##   further in the air. Rank 3: it resets the gun's bloom.
-## - X, Brass Broadside (level 6): a planted 1.1s charge behind a growing fan, then two waves of slugs with
+## - Dash, Barge: a monster's low lunge toward the cursor, clawing the ground and hauling himself along, that
+##   shoves (no damage); a pounce in the air, further. Rank 3: it resets the gun's bloom.
+## - X, Brass Broadside (level 6): a 1.1s charge at a slow walk behind a growing fan, then two waves of slugs with
 ##   Anti-Heal (DredgeBlast).
 
 const ROPE_COL := Color("f0d070")
@@ -37,19 +37,20 @@ const SWING := 6.0                     # 1/s: how fast a reeled body turns onto 
 const CLIFF := 1.2
 
 var pull := {}                  # hold: the reel {t (the foe), left}
+var hook_hold: CastHold         # throw to the end of the reel or the miss: height held, a slow walk in flight
 var flying := false             # hold: the hook is in the air
 var hook_sd := {}               # the hook's shot while it flies
 var hauled := 0                 # (tests) times a reeled body was hauled over a rock
 var scoop: Array = []           # wisps (downed hunters) the hook scooped up on its way, reeled in with the catch
 var wind := 0.0                 # hold: the Anchor's wind-up left
-var hop_dir := Vector2.ZERO     # the wind-up's forward hop
+var slam_dir := Vector2.ZERO    # where the slam lands, locked at the press (the telegraph is that exact cone)
 var dive := {}                  # hold: the air smash falling {h0, t}
 var lock_until := -9.0          # the barge can't turn much until then (just after the Anchor)
 var barge_t := 0.0              # the barge's trail is showing
 var trail_t := 0.0              # the next barge after-image
 var stop_t := 0.0               # the barge under way; when it ends he stops, keeping almost none of its speed
 var next_barge := -9.0          # the short gap between barges in a run
-var drop_fx := {}               # the anchor falling through the wind-up (LDFx.anchor_drop's entry)
+var dash_held := false          # Shift pressed in the slam or the Broadside, waiting for its end
 var shot_seen := 0              # the last weapon volley the kit dressed
 var shot_at := -9.0
 var stunned: Array = []         # foes the Anchor stunned: {e, until} (the spiral over them)
@@ -64,7 +65,6 @@ var snags := 0                  # reels ended by a wall
 var arrivals := 0
 var stacks_lost := 0
 var volleys := 0
-var hops := 0
 var last_quake_k := 0.0         # (tests) the height bonus of the last air smash
 var _down_seen := false
 var _stab_at := -9.0
@@ -141,7 +141,9 @@ func can_shoot() -> bool:
 
 func move_k() -> float:
 	if broadside.running():
-		return 0.0               # planted for the charge and the waves
+		return broadside.move_k()           # a slow walk through the charge and the waves
+	if flying and hook_hold != null:
+		return hook_hold.slow_k           # a slow walk while the hook flies out
 	return 0.7 if wind > 0.0 else 1.0
 
 # ------------------------------------------------------------------ tick
@@ -165,7 +167,9 @@ func _tick(dt: float) -> void:
 	if not dive.is_empty(): _tick_dive(dt)
 	if flying: _tick_hook()
 	if not pull.is_empty(): _tick_pull(dt)
+	_tick_hook_hold()
 	broadside.tick(dt)
+	_tick_held_dash()
 	_tick_gun()
 	_tick_looks(dt)
 	KMovesPair.air_moves(self, "dr_jump", "dr_land")
@@ -175,10 +179,13 @@ func _tick(dt: float) -> void:
 ## hook in the air (it grabs nothing).
 func _drop_holds() -> void:
 	wind = 0.0
+	dash_held = false
+	AimKit.hide(h, "e_tell")
 	dive = {}
 	flying = false
 	hook_sd = {}
 	scoop = []
+	hook_hold = null
 	if not pull.is_empty():
 		_end_pull(false)
 	broadside.drop()
@@ -261,6 +268,7 @@ func fire_rmb(c: Dictionary) -> void:
 	var rdf := rmb_def()
 	flying = true
 	scoop = []
+	hook_hold = CastHold.hover_slow(h, float(rdf["fly_slow"]))
 	play("dr_throw")
 	var hook := {"type": "projectile", "speed": float(rdf["speed"]), "range": float(rdf["range"]), "size": 0.24}
 	var stg := stage("rmb", {"delivery": hook,
@@ -272,6 +280,8 @@ func fire_rmb(c: Dictionary) -> void:
 		"on_shot_end": func(at: Vector3, why: String, e: Ent):
 			flying = false
 			hook_sd = {}
+			if pull.is_empty():
+				hook_hold = null          # a miss: gravity is back the moment it ends
 			if e == null and pull.is_empty():
 				fx.orb(at, ROPE_COL, BRASS_HOT, 0.6, 0.15)
 				m.fx.word(at + Vector3(0, 1.2, 0), "SNAGGED" if why == "wall" else "MISS", Color("c0b0a0"), false)}))
@@ -315,9 +325,11 @@ func _grab(f: Ent, ally := false) -> void:
 	flying = false
 	hook_sd = {}
 	if KinMerge.transforming(h) or KinMerge.active(h):
+		hook_hold = null
 		return
 	var rdf := rmb_def()
 	if f.mass() >= 6.0:
+		hook_hold = null
 		m.fx.word(f.pos + Vector3(0, 2.4, 0), "TOO HEAVY", Color("c0b0a0"), false)
 		return
 	grapples += 1
@@ -392,6 +404,12 @@ func _tick_pull(dt: float) -> void:
 		var tw := Vector2(h.pos.x - w.pos.x, h.pos.z - w.pos.z)
 		if tw.length() > gap: _drag(w, tw.normalized(), minf(float(rdf["pull_speed"]) * dt, tw.length() - gap))
 
+## Off the ground, from the throw until the miss or the end of the reel, he keeps his height (no fall, even
+## over the abyss); on the ground there is nothing to hold.
+func _tick_hook_hold() -> void:
+	if hook_hold != null and not h.grounded:
+		hook_hold.tick(m.world)
+
 ## The rope's thickness while reeling: it swells taut on each hand-over-hand haul.
 func _rope_thick() -> float:
 	var since := fposmod(m.time - anim_at - 0.18, HAUL_T)
@@ -449,6 +467,7 @@ func _end_pull(arrived: bool) -> void:
 	var wisp: bool = pull.get("wisp", false)
 	pull = {}
 	scoop = []
+	hook_hold = null
 	if st.get("self_gnd", false):
 		st["self_gnd"] = false
 		h.set_meta("gnd_until", minf(float(h.get_meta("gnd_until", 0.0)), m.time))
@@ -474,9 +493,7 @@ func cast_e() -> bool:
 		_start_dive(height)
 		return true
 	wind = float(ed["windup"])
-	hop_dir = h.aim_dir()
-	hops += 1
-	drop_fx = fx.anchor_drop(_slam_spot(float(ed["hop"])), wind)
+	slam_dir = h.aim_dir()
 	play("dr_anchor")
 	m.sfx("dr_anchor_wind", h.pos, -3.0, 1.0)
 	return true
@@ -487,38 +504,38 @@ func use_e() -> void:
 		return
 	super.use_e()
 
-## Where the anchor will land: in front of where he'll be after `hop_left` more metres of the hop.
-func _slam_spot(hop_left: float) -> Vector3:
-	var dd := h.aim_dir()
-	return ground(h.pos + Vector3(hop_dir.x, 0, hop_dir.y) * hop_left + Vector3(dd.x, 0, dd.y) * 1.7)
-
-## The wind-up: the fist hauled back, then a hop up and about a body height forward (0.14-0.32s), then the slam.
+## The wind-up: the fist raised high while the slam's exact area fills on the ground in front of him (everyone
+## sees it), then the slam on the last frame.
 func _tick_wind(dt: float) -> void:
 	var ed := e_def()
-	var t0 := float(ed["windup"]) - wind
 	wind -= dt
 	if h.stun_t > 0.0 or h.downed:
 		wind = 0.0
-		fx.stop(drop_fx)
+		AimKit.hide(h, "e_tell")
 		return
-	if not drop_fx.is_empty():
-		drop_fx["at"] = _slam_spot(float(ed["hop"]) * clampf((0.32 - t0) / 0.18, 0.0, 1.0))
-	if t0 >= 0.14 and t0 < 0.32:
-		var step := float(ed["hop"]) / 0.18 * dt
-		var nx := h.pos.x + hop_dir.x * step
-		var nz := h.pos.z + hop_dir.y * step
-		var gy: float = m.world.ground_at(nx, nz)
-		if gy > World.VOID + 1.0 and m.world.occupy(nx, nz, h.r, h.pos.y, false) == 0.0:
-			# never hops off into the abyss or into a wall
-			h.pos.x = nx
-			h.pos.z = nz
+	h.face = atan2(-slam_dir.x, -slam_dir.y)
+	var k := 1.0 - wind / float(ed["windup"])
+	AimKit.cone(h, "e_tell", slam_tell(k))
+	if tells_visible():
+		fx.orb(CareUtil.hand_at(h, false), BRASS, BRASS_HOT, 0.6 + 0.6 * k, 0.05)     # the raised fist, glowing hotter
 	if wind <= 0.0:
 		wind = 0.0
+		AimKit.hide(h, "e_tell")
 		_anchor()
 
+## The slam's telegraph at fill `k`: the same cone (radius, angle, locked direction) the slam hits.
+func slam_tell(k: float) -> Dictionary:
+	var ed := e_def()
+	return {
+		"dir": slam_dir, "len": float(ed["radius"]), "deg": float(ed["angle"]), "fill": clampf(k, 0.0, 1.0),
+		"all": true, "col": ANCHOR_COL, "alpha": 1.8, "hot": 0.5 * k
+	}
+
+## The slam: his fist into the ground in front, on this frame: the cone's damage and stun, cracks, dust and a
+## shake right where the telegraph was.
 func _anchor() -> void:
 	var ed := e_def()
-	var dd := h.aim_dir()
+	var dd := slam_dir
 	anchors += 1
 	var gy: float = m.world.ground_at(h.pos.x, h.pos.z)
 	var over_void := gy <= World.VOID + 1.0
@@ -527,30 +544,27 @@ func _anchor() -> void:
 	var stg := stage("e", {"delivery": {"type": "cone", "radius": float(ed["radius"]), "angle": float(ed["angle"])},
 		"effects": [{"type": "damage", "amount": amt}, {"type": "stun", "duration": stun}]})
 	var on_foe := func(f: Ent, _c: Dictionary): _slammed(f, stun, amt)
-	run(stg, cx("e", "anchor_drop", aim(), {"no_floor": true, "on_foe": on_foe}))
-	var at := h.pos + Vector3(dd.x, 0, dd.y) * 1.7
-	if not drop_fx.is_empty(): drop_fx["at"] = ground(at)
-	drop_fx = {}
+	var aim_pt := h.pos + Vector3(dd.x, 0, dd.y) * float(ed["radius"])
+	run(stg, cx("e", "anchor_drop", aim_pt, {"no_floor": true, "on_foe": on_foe}))
+	var at := ground(h.pos + Vector3(dd.x, 0, dd.y) * float(ed["radius"]) * 0.5)
+	var fist := ground(h.pos + Vector3(dd.x, 0, dd.y) * 1.1)
 	fx.crescent(h.pos + Vector3(0, 0.25, 0), dd, float(ed["angle"]), float(ed["radius"]), ANCHOR_COL, IRON, 0.25)
-	AimKit.cone(
-		h, "e_hit",
-		{
-			"len": float(ed["radius"]), "deg": float(ed["angle"]), "edges": true, "all": true, "dur": 0.2,
-			"col": ANCHOR_COL, "alpha": 0.7
-		}
-	)
-	m.later(0.08, _anchor_dust.bind(at))
+	fx.scorch(fist, 1.6, 1.4, Color("8a7a66"), Color("2a241e"))          # cracked ground under the fist
+	fx.scorch(at, float(ed["radius"]) * 0.7, 1.2, Color("6a5e50"), Color("2a241e"))
+	fx.orb(fist + Vector3(0, 0.3, 0), BRASS, BRASS_HOT, 1.2, 0.08)
+	m.fx.burst(fist + Vector3(0, 0.2, 0), Color("c8b8a0"), 18, 5.0, 0.45, 10.0, 1.3, Vector3(dd.x, 0.8, dd.y), 70.0)
+	AimKit.cone(h, "e_hit", slam_tell(1.0).merged({"dur": 0.2, "alpha": 0.7}, true))
+	m.later(0.06, _anchor_dust.bind(at))
 	m.sfx("dr_anchor", h.pos, -1.0, 1.0)
-	Feel.shake(m, "t3", h, h.pos)
+	Feel.shake(m, "t3", h, at)
 	if h.is_local(): Oomph.punch_dir(m, dd, 0.25)
-	if not h.grounded and not over_void:
-		h.gliding = false
-		h.vel.y = -float(ed["dive"])          # a low air cast still drives you down (never over the abyss)
+	if not h.grounded and not over_void and not h.gliding:
+		h.vel.y = -float(ed["dive"])          # a low air cast still drives you down (never over the abyss or a glider)
 	st["dive_vy"] = h.vel.y               # (tests) what the Anchor left your fall speed at
 	lock_until = m.time + float(dash_def()["lock_t"])
-	net_ring(h.pos, float(ed["radius"]), col_of(ed))
+	net_ring(at, float(ed["radius"]) * 0.6, col_of(ed))
 
-## The dust cloud and ring a beat after the anchor lands.
+## The dust cloud a beat after the slam, over the area it hit.
 func _anchor_dust(at: Vector3) -> void:
 	if not is_instance_valid(h):
 		return
@@ -583,7 +597,8 @@ func _slammed(f: Ent, stun: float, amt: float) -> void:
 ## In the air: smash straight down, the anchor falling with you; the landing ring shows where you'll hit.
 func _start_dive(height: float) -> void:
 	var ed := e_def()
-	dive = {"h0": height, "y0": h.pos.y, "t": 0.0}
+	# a glide key already held when he smashes doesn't reopen the glider; a fresh press does (and wins)
+	dive = {"h0": height, "y0": h.pos.y, "t": 0.0, "held": bool(h.inp.get("glide", false))}
 	h.gliding = false
 	h.vel = Vector3(0, -float(ed["dive"]), 0)
 	st["dive_vy"] = h.vel.y
@@ -596,10 +611,19 @@ func _tick_dive(dt: float) -> void:
 	if h.stun_t > 0.0 or h.downed:
 		dive = {}
 		return
+	if bool(dive["held"]):
+		dive["held"] = bool(h.inp.get("glide", false))
+		h.glide_cd = maxf(h.glide_cd, 0.05)
+	if h.gliding:
+		# the glider wins: opening it ends the smash (no landing hit) and he glides on, never dragged down
+		dive = {}
+		h.vel.y = maxf(h.vel.y, -Hunter.GLIDE_SINK)       # a normal glide from here, none of the smash's speed
+		AimKit.hide(h, "e_land")
+		play("")
+		return
 	h.vel.x = 0.0
 	h.vel.z = 0.0
 	h.vel.y = minf(h.vel.y, -float(ed["dive"]))
-	h.gliding = false
 	var gy: float = m.world.ground_at(h.pos.x, h.pos.z)
 	if gy <= World.VOID + 1.0:
 		dive = {}                 # drifted over the abyss: no smash, no push
@@ -657,7 +681,12 @@ func _quake(at: Vector3, fell: float) -> void:
 
 # ------------------------------------------------------------------ dash: Barge
 func on_dash(use_ex: bool) -> bool:
-	if wind > 0.0 or not dive.is_empty() or broadside.running() or m.time < next_barge:
+	var busy_slot := _committed_slot()
+	if busy_slot != "":
+		# Shift in the slam or the Broadside: held for its end when its into_dash row says buffer
+		dash_held = String(DashFlow.into_dash_of(id, busy_slot).get("mode", "")) == "buffer"
+		return true
+	if m.time < next_barge:
 		return true
 	var dd := dash_def()
 	var dir := dash_dir()
@@ -677,16 +706,28 @@ func on_dash(use_ex: bool) -> bool:
 		var shove := {"invuln": 0.06, "shove": true, "shove_kb": float(dd["hit_kb"]), "trail": "", "dir": dir}
 		travel(float(dd["dist"]), float(dd["time"]), shove)
 		st["last_dash"] = "barge"
-		play("dr_barge")
+		play("dr_lunge")
 		h.glide_cd = maxf(h.glide_cd, h.roll_t + 0.35)
 		m.sfx("dr_barge", h.pos, -2.0, 1.0)
 	if rank("dash") >= 3:
 		h.wbloom = 0.0                # rank 3: a dash resets the gun's bloom
-	_barge_burst(dir)
+	_clawed_turf(dir)
 	barge_t = h.roll_t
 	stop_t = h.roll_t + 0.02
 	next_barge = m.time + h.roll_t + float(dd["gap"])
 	return true
+
+## The ability he is committed to now ("e": the slam's wind-up or the air smash, "x": the Broadside), else "".
+func _committed_slot() -> String:
+	if wind > 0.0 or not dive.is_empty():
+		return "e"
+	return "x" if broadside.running() else ""
+
+## A Shift held through the slam or the Broadside barges the step it ends (its into_dash row: buffer).
+func _tick_held_dash() -> void:
+	if dash_held and _committed_slot() == "":
+		dash_held = false
+		h.do_dash()
 
 ## In the air (the class air dash slot): the same quick shove 35% further, so it is faster, not longer (the
 ## class long dash would otherwise take over its distance and time).
@@ -697,7 +738,7 @@ func _air_barge(dd: Dictionary, dir: Vector2) -> void:
 	travel(air_dist, air_t, {"invuln": 0.08, "trail": "", "dir": dir}, true)
 	h.roll_t = air_t
 	h.roll_speed = air_dist / air_t
-	play("dr_hop")
+	play("dr_pounce")
 	m.sfx("dr_hop", h.pos, -3.0, 1.0)
 
 ## The barge's end: he arrives planted (the class carry would slide a heavy on after each quick shove).
@@ -721,12 +762,13 @@ func _barge_trail(dt: float) -> void:
 
 func own_dash_trail() -> bool: return true
 
-## A red spiky burst where the barge sets off, and an ember scorch left there for a second (sheet 0188).
-func _barge_burst(dir: Vector2) -> void:
-	var at := h.pos
-	fx.sunburst(at + Vector3(0, 0.9, 0), 1.9, Color("ff3a2a"), Color("ffb060"), 0.25, true)
-	fx.scorch(ground(at), 0.9, 1.0, Color("ff8a3a"), Color("3a2018"))
-	m.fx.burst(at + Vector3(0, 0.6, 0), Color("ff6a3a"), 12, 4.0, 0.3, 4.0, 1.0, Vector3(-dir.x, 0.3, -dir.y), 50.0)
+## Clods of turf his hands tear up as he hauls himself off, thrown back behind him (no burst: a dash never
+## explodes).
+func _clawed_turf(dir: Vector2) -> void:
+	if not h.grounded:
+		return
+	var at := h.pos + Vector3(dir.x * 0.6, 0.15, dir.y * 0.6)
+	m.fx.burst(at, Color("6a5236"), 10, 4.0, 0.35, 12.0, 1.0, Vector3(-dir.x, 0.5, -dir.y), 35.0)
 
 # ------------------------------------------------------------------ X: Brass Broadside
 ## Only from a free stance: not mid-reel, mid-Anchor or mid-dive.

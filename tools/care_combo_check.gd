@@ -69,6 +69,128 @@ func _skate_feel() -> void:
 	step(m, 0.2)
 	await _free(m)
 
+## Item 12: the skate is her only dash. No charge refuses it, an air press buffers the skate to the
+## landing (no air dash), and ice plates form under her while it runs.
+func _skate_only() -> void:
+	var r: Array = sc.setup("rimewright", 30.0)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var K: RimewrightKit = P.ak
+	step(m, 0.1)
+	P.dashes = 0.0
+	P.inp["move"] = Vector2(1, 0)
+	P.inp["dash"] = true
+	P.inp["dash_down"] = true
+	step(m, 0.05)
+	P.inp["dash"] = false
+	ok(
+			"tm Shift: with no charge nothing happens (no spare dash)",
+			not K.rinkrunning() and P.roll_t <= 0.0 and P.ex_cd <= 0.0)
+	P.inp["dash_down"] = false
+	P.dashes = P.max_dashes()
+	# a tap on the ground is the skate's shortest run, never a travel() dash
+	P.inp["dash"] = true
+	step(m, 0.05)
+	P.inp["dash"] = false
+	var kinds := {}
+	for i in 30:
+		if P.roll_t > 0.0:
+			kinds[P.move_kind] = true
+		step(m, 1.0 / 60.0)
+	var others := {}
+	var viewer: Dictionary = Content.rules("hunter_viewer")["moves"]
+	for hero in viewer:
+		if hero != "rimewright":
+			for mv in (viewer[hero] as Dictionary).get("dash", []):
+				others[mv] = hero
+	var dd: Dictionary = K.dash_def()
+	ok(
+			"tm Shift: her dash moves are her own skate (push-off, stride), no other hero's, fitting the skate",
+			not others.has("tm_skate_go") and not others.has("tm_skate")
+				and KMovesCare.length("tm_skate_go") <= float(dd["min_t"])
+				and KMovesCare.length("tm_skate") <= float(dd["max_t"]),
+			"push-off %.2f s (shortest skate %.2f), stride %.2f s" % [
+				KMovesCare.length("tm_skate_go"), float(dd["min_t"]), KMovesCare.length("tm_skate")])
+	ok(
+			"tm Shift: a tap on the ground is a short skate, no dash, and no long-dash pip",
+			kinds.keys() == ["rinkrun"] and not K.rinkrunning() and not K.has_long_dash(), str(kinds.keys()))
+	P.dashes = P.max_dashes()
+	P.teleport(P.pos + Vector3(0, 4.0, 0))
+	step(m, 0.1)
+	P.inp["dash"] = true
+	P.inp["dash_down"] = true
+	step(m, 0.05)
+	P.inp["dash"] = false
+	ok(
+			"tm Shift: pressed in the air she does not dash; the skate waits for the landing",
+			not P.grounded and K.air_skate and not K.rinkrunning() and P.roll_t <= 0.0 and P.ex_cd <= 0.0)
+	var t := 0.0
+	while not K.rinkrunning() and t < 3.0:
+		step(m, 0.05)
+		t += 0.05
+	ok(
+			"tm Shift: on landing the buffered skate starts",
+			K.rinkrunning() and P.grounded and not K.air_skate, "after %.2f s" % t)
+	step(m, 0.7)
+	var slabs := K.lk().live.filter(func(e): return String(e["kind"]) == "slab").size()
+	ok("tm Shift: ice plates form under her while she skates", slabs >= 5, "%d plates" % slabs)
+	P.inp["dash_down"] = false
+	await _free(m)
+
+## Item 27: no glide while sealed in Rimelock (she falls; each press is refused), and Shift ends it and
+## skates straight out at speed instead of stopping.
+func _rime_glide_skate() -> void:
+	var r: Array = sc.setup("rimewright", 30.0)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var K: RimewrightKit = P.ak
+	K.cd["x"] = 0.0
+	P.teleport(P.pos + Vector3(0, 5.0, 0))
+	P.grounded = false
+	step(m, 0.05)
+	HunterKeys.ult_pressed(P)
+	var y0 := P.pos.y
+	var opened := false
+	for i in 30:
+		P.inp["glide"] = true
+		step(m, 1.0 / 60.0)
+		opened = opened or P.gliding
+	P.inp["glide"] = false
+	ok(
+			"tm X: glide held while sealed in the air does nothing; she keeps falling",
+			K.ult_running() and not opened and P.pos.y < y0 - 0.3 and K.glide_held,
+			"fell %.2f m" % (y0 - P.pos.y))
+	await _free(m)
+	r = sc.setup("rimewright", 30.0)
+	m = r[0]
+	P = r[1]
+	K = P.ak
+	K.cd["x"] = 0.0
+	P.dashes = P.max_dashes()
+	HunterKeys.ult_pressed(P)
+	step(m, 1.0)
+	var before := Vector2(P.vel.x, P.vel.z).length()
+	P.inp["move"] = Vector2(1, 0)
+	P.inp["dash"] = true
+	P.inp["dash_down"] = true
+	var slowest := 99.0
+	var prev := P.pos
+	step(m, 1.0 / 60.0)
+	P.inp["dash"] = false
+	var out_of_ult := not K.ult_running() and K.rinkrunning()
+	prev = P.pos
+	for i in 18:
+		step(m, 1.0 / 60.0)
+		slowest = minf(slowest, Vector2(P.pos.x - prev.x, P.pos.z - prev.z).length() * 60.0)
+		prev = P.pos
+	var skate_v := float(K.dash_def()["speed"])
+	ok(
+			"tm X: Shift ends Rimelock and she skates straight out at speed (first 0.3 s >= 80%)",
+			out_of_ult and slowest >= 0.8 * maxf(before, skate_v),
+			"slowest %.1f m/s (before %.1f, skate %.1f)" % [slowest, before, skate_v])
+	P.inp["dash_down"] = false
+	await _free(m)
+
 ## Rank 3 Skate over the Abyss lays ice underfoot that holds a while and then goes; below rank 3 she gets none.
 func _skate_ice() -> void:
 	var laid := {}
@@ -704,6 +826,8 @@ func rimewright() -> void:
 			not K.rinkrunning() and P.dashes > 0.05 and K.anim_id == "tm_skate_stop", "dashes %.2f" % P.dashes)
 	await _free(m)
 	await _skate_feel()
+	await _skate_only()
+	await _rime_glide_skate()
 	await _skate_ice()
 	await _spear_rank3()
 	# --- Ice Spear: hold shows the ring at the cursor; it lands there, slows, detonates 1.8 s later
@@ -729,29 +853,58 @@ func rimewright() -> void:
 				and K.lk().showing("spear_prop"))
 	P.inp["sec"] = false
 	P.inp["sec_hold"] = false
-	step(m, 0.02)
-	ok("tm RMB: the held spear leaves her hand on release", not K.lk().showing("spear_prop"))
-	step(m, 0.33)
+	step(m, 0.05)
+	ok(
+			"tm RMB: let go, she draws back first: the spear is still in her hand, nothing at the target",
+			K.lk().showing("spear_prop") and _mine(m, P).is_empty() and K.zones.is_empty() and K.anim_id == "tm_spear")
+	var thrown := {}
+	var hand := Vector3.ZERO
+	var waited := 0.05
+	while thrown.is_empty() and waited < 0.5:
+		hand = CareUtil.hand_at(P, false)
+		step(m, 1.0 / 60.0)
+		waited += 1.0 / 60.0
+		var mine := _mine(m, P)
+		if not mine.is_empty():
+			thrown = mine[0]
+	var ld: Dictionary = K.rmb_def()["lance"]
+	var from: Vector3 = thrown.get("start", Vector3.INF)
+	var spd := (thrown.get("vel", Vector2.ZERO) as Vector2).length()
+	ok(
+			"tm RMB: the throw: it leaves her hand on the whip, slower and heavier (18 m/s)",
+			not thrown.is_empty() and absf(waited - RimewrightKit.THROW_T) < 0.04 and from.distance_to(hand) < 0.35
+				and absf(spd - float(ld["speed"])) < 0.01 and float(ld["speed"]) <= 20.0
+				and not K.lk().showing("spear_prop"),
+			"after %.2f s, %.2f m from the hand, %.1f m/s" % [waited, from.distance_to(hand), spd])
+	var flight := 0.0
+	while K.zones.is_empty() and flight < 1.5:
+		step(m, 1.0 / 60.0)
+		flight += 1.0 / 60.0
+	var want_flight := Vector2(cur.x - from.x, cur.z - from.z).length() / float(ld["speed"])
+	ok(
+			"tm RMB: it travels to the target, landing on arrival (not at the cast)",
+			flight > 0.25 and absf(flight - want_flight) < 0.06, "flight %.2f s, want %.2f" % [flight, want_flight])
 	var zat: Vector3 = K.zones[0]["at"] if not K.zones.is_empty() else Vector3.INF
 	ok(
 			"tm RMB: the spear lands at the cursor and leaves a slow zone",
-			not K.zones.is_empty() and Vector2(zat.x - cur.x, zat.z - cur.z).length() < 1.0 and K.anim_id == "tm_spear",
+			not K.zones.is_empty() and Vector2(zat.x - cur.x, zat.z - cur.z).length() < 1.0,
 			"off %.2f" % Vector2(zat.x - cur.x, zat.z - cur.z).length())
 	step(m, 0.2)
 	ok(
 			"tm RMB: two charges on a 10.2 s cooldown",
-			K.rmb_charges() == 2 and K.cd["rmb"] > 9.4 and K.cd["rmb"] <= 10.2, "cd %.2f" % K.cd["rmb"])
+			K.rmb_charges() == 2 and K.cd["rmb"] > 9.0 and K.cd["rmb"] <= 10.2, "cd %.2f" % K.cd["rmb"])
 	ok(
 			"tm RMB: a foe in the zone is slowed and Chilled", T.slow_t > 0.0 and T.slow_k >= 0.34 and K.chilled(T),
 			"slow %.2f" % T.slow_k)
 	var hb := T.hp
-	step(m, 1.0)
-	var early := hb - T.hp
-	step(m, 0.6)
+	var since := 0.2
+	while int(K.stats["detonations"]) == 0 and since < 3.0:
+		step(m, 1.0 / 60.0)
+		since += 1.0 / 60.0
 	ok(
-			"tm RMB: it detonates about 1.8 s after landing: the big hit and a freeze",
-			early < 10.0 and hb - T.hp > 50.0 and T.root_t > 0.0 and K.stats["detonations"] >= 1,
-			"early %.0f total %.0f root %.2f" % [early, hb - T.hp, T.root_t])
+			"tm RMB: it detonates 1.8 s after landing: the big hit and a freeze",
+			absf(since - float(ld["delay"])) < 0.05 and hb - T.hp > 50.0 and T.root_t > 0.0,
+			"at %.2f s, %.0f damage, root %.2f" % [since, hb - T.hp, T.root_t])
 	await _free(m)
 	# --- Rink Wall: a 0.2 s tell, narrow just ahead, widening as it slides, stops at the cursor
 	r = sc.setup("rimewright", 30.0)
@@ -797,6 +950,30 @@ func rimewright() -> void:
 	ok(
 			"tm E: it stops at the cursor", not bool(K.wall["sliding"]) and absf(mid1.x - cur.x) < 0.8,
 			"mid at %.1f, cursor %.1f" % [mid1.x - P.pos.x, cur.x - P.pos.x])
+	await _free(m)
+	# aimed far past its reach, it slides its full travel (4.5 m/s, 16.2 m) and still stands after
+	r = sc.setup("rimewright", 30.0)
+	m = r[0]
+	P = r[1]
+	K = P.ak
+	sc.aim_at(P, P.pos + Vector3(24.0, 0, 0))
+	P.inp["sig"] = true
+	step(m, 0.05)
+	P.inp["sig"] = false
+	step(m, 0.3)
+	var wf: Dictionary = K.wall["w"]
+	var start_x: float = P.pos.x + float(K.e_def()["reach"])
+	var slid := 0.3
+	while bool(K.wall.get("sliding", false)) and slid < 6.0:
+		step(m, 0.05)
+		slid += 0.05
+	var end_x := ((wf["a"] as Vector2) + (wf["b"] as Vector2)).x * 0.5
+	var ed: Dictionary = K.e_def()
+	ok(
+			"tm E: it travels 16.2 m at most (+50%), about 3.6 s, and still stands at the end",
+			absf(end_x - start_x - float(ed["travel"])) < 0.6 and float(ed["travel"]) >= 16.0 and slid > 3.3
+				and not K.wall.is_empty() and float(wf["len"]) > 4.4,
+			"travelled %.1f m in %.2f s" % [end_x - start_x, slid])
 	await _free(m)
 	r = sc.setup("rimewright", 30.0)
 	m = r[0]

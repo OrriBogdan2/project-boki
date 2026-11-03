@@ -295,8 +295,8 @@ const MOVES := {
 				{
 					"y": -0.75, "p": 0.35, "r": -0.12, "fl": Vector3(0.05, 0.6, 0.3), "hw": 1.0,
 					"wa": Vector3(-0.3, 0.5, 0), "wf": 0.5, "lw": 0.9, "legs": [-0.4, -0.3, 0.55, -0.8]}]]},
-	# ... let go: the coil deepens, then the whip through to the cursor and a long lunge after the spear
-	# at 0.11, the arm across the body, then up
+	# ... let go: the arm draws back deeper (0.1), then the whip through to the cursor, the spear leaving
+	# the hand at 0.16 (RimewrightKit.THROW_T), and a long lunge after it, the arm across the body, then up
 	"tm_spear": {"keys": [
 		[
 				0.0,
@@ -304,21 +304,21 @@ const MOVES := {
 					"y": -0.75, "p": 0.35, "r": -0.12, "fl": Vector3(0.05, 0.6, 0.3), "hw": 1.0,
 					"wa": Vector3(-0.3, 0.5, 0), "wf": 0.5, "lw": 0.9, "legs": [-0.4, -0.3, 0.55, -0.8]}],
 		[
-				0.05,
+				0.1,
 				{
-					"y": -0.9, "p": 0.42, "r": -0.16, "fl": Vector3(0.08, 0.62, 0.38), "hw": 1.0, "sq": -0.18,
+					"y": -0.95, "p": 0.42, "r": -0.16, "fl": Vector3(0.08, 0.62, 0.38), "hw": 1.0, "sq": -0.18,
 					"lw": 0.9, "legs": [-0.45, -0.3, 0.6, -0.85]}],
 		[
-				0.11,
+				0.16,
 				{
 					"y": 0.85, "p": -0.5, "r": 0.14, "fl": Vector3(0.05, 0.08, -0.64), "hw": 1.0, "sq": 0.28,
 					"lift": -0.08, "lw": 1.0, "legs": [1.05, -1.25, -0.6, -0.2]}],
 		[
-				0.28,
+				0.34,
 				{
 					"y": 0.6, "p": -0.4, "fl": Vector3(-0.1, -0.08, -0.5), "hw": 0.9, "sq": 0.08, "lift": -0.06,
 					"lw": 0.9, "legs": [0.95, -1.15, -0.55, -0.2]}],
-		[0.6, {}]]},
+		[0.65, {}]]},
 	# Rink Wall: the 0.2 s tell (a deep crouch over the feet, the sparkle), then both arms flung up and
 	# out as the ice erupts ahead, an overshoot up on the toes, a settle
 	"tm_wall": {"keys": [
@@ -408,26 +408,6 @@ const MOVES := {
 				{
 					"y": 1.0, "r": 0.3, "p": 0.12, "sq": 0.15, "lift": -0.08, "lw": 1.0, "legs": [0.7, -1.1, 0.2, -0.6],
 					"fl": Vector3(-0.35, 0.2, 0.0), "hw": 0.8, "wf": 0.8}],
-		[0.5, {}]]},
-	# the air dash: a stretched skater's glide (she never tumbles in the source): pitched forward, one
-	# leg trailing long, arms out wide like wings, held, then a light landing
-	"tm_dash_air": {"keys": [
-		[0.0, {"sq": 0.2, "p": -0.1}],
-		[
-				0.06,
-				{
-					"p": -0.7, "sq": -0.3, "r": 0.15, "lw": 1.0, "legs": [0.35, -0.3, -0.95, -0.15],
-					"fl": Vector3(-0.5, 0.12, 0.08), "hw": 1.0, "wa": Vector3(0.2, 0, 1.2),
-						"wo": Vector3(0.25, 0.1, 0.1),
-					"wf": 1.0}],
-		[
-				0.24,
-				{
-					"p": -0.65, "sq": -0.25, "r": 0.1, "lw": 1.0, "legs": [0.3, -0.3, -0.9, -0.15],
-					"fl": Vector3(-0.5, 0.15, 0.1), "hw": 1.0, "wa": Vector3(0.2, 0, 1.2),
-						"wo": Vector3(0.25, 0.1, 0.1),
-					"wf": 1.0}],
-		[0.32, {"p": -0.2, "sq": 0.2, "lift": -0.06, "lw": 1.0, "legs": [0.6, -1.0, 0.5, -0.9]}],
 		[0.5, {}]]},
 	# Shatter (payoff): the fan snapped shut in a big flourish, the free fist clenched and pulled in, a
 	# lean into it
