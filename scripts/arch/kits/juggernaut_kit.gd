@@ -421,14 +421,14 @@ func _wave() -> void:
 	play("jug_wave")
 	var full := k >= 0.99
 	var rng := lerpf(float(ld["wave_range"][0]), float(ld["wave_range"][1]), k)
-	var size := lerpf(float(ld["wave_size"][0]), float(ld["wave_size"][1]), k)
+	var wave_size := lerpf(float(ld["wave_size"][0]), float(ld["wave_size"][1]), k)
 	var effs: Array = [{"type": "damage", "amount": lerpf(float(ld["wave_dmg"][0]), float(ld["wave_dmg"][1]), k)},
 			{"type": "push", "strength": lerpf(3.0, 6.0, k), "from": "caster"}]
 	if full:
 		effs.append({"type": "damage", "amount": float(ld["wave_burn"]) * 2.0, "over": 2.0})
 		effs.append({"type": "slow", "duration": 1.0, "strength": float(ld["wave_slow"])})
 	var stg := StageSpec.parse(
-			{"delivery": {"type": "projectile", "speed": float(ld["wave_speed"]), "range": rng, "size": size},
+			{"delivery": {"type": "projectile", "speed": float(ld["wave_speed"]), "range": rng, "size": wave_size},
 					"effects": effs, "modifiers": [{"type": "pierce", "count": 6}]},
 			"", GrammarReport.new())
 	var c := KinExec.make_cx(m, h, h.kin, h, aim(), _wk(), "primary", "searing_wave")
@@ -441,7 +441,7 @@ func _wave() -> void:
 	var sd: Variant = _my_last_shot()
 	if sd != null:
 		sd["col"] = WAVE_RED              # its sparks along the way are red too
-		fx().ride(sd, "crescent_bolt", WAVE_RED, WAVE_EDGE if not full else WAVE_FULL, 1.6, size * 2.2)
+		fx().ride(sd, "crescent_bolt", WAVE_RED, WAVE_EDGE if not full else WAVE_FULL, 1.6, wave_size * 2.2)
 	m.sfx("jug_wave", h.pos, -2.0, 1.0 - 0.15 * k)
 	var steps := int(rng / 1.2)
 	for s in steps:
@@ -708,7 +708,8 @@ func _slam() -> void:
 			m.fx.word(f.pos + Vector3(0, 2.4, 0), "EXECUTE", Color("ffd0a0"), true)
 		var to := Vector2(f.pos.x - from.x, f.pos.z - from.z)
 		var sw: Array = sl["sweet"]
-		var sweet := to.length() >= float(sw[0]) and to.length() <= float(sw[1]) + f.r and absf(rad_to_deg(dd.angle_to(to.normalized()))) <= float(sl["sweet_deg"])
+		var in_band := to.length() >= float(sw[0]) and to.length() <= float(sw[1]) + f.r
+		var sweet := in_band and absf(rad_to_deg(dd.angle_to(to.normalized()))) <= float(sl["sweet_deg"])
 		Feel.hitstop(m, h, f, 30.0, {"melee": true, "payoff": sweet, "heavy": true})
 		if sweet and not paid.has("x"):
 			paid["x"] = true
@@ -812,7 +813,8 @@ func _chain_lunge(k: float) -> void:
 	warchain.spend()
 	# the whole way down the chain (travel() scales by the global dash feel; the chain sets the length)
 	var feel := dash_feel()
-	travel(dist / float(feel["dist"]), t / float(feel["time"]), {"invuln": 0.0, "trail": "dust", "dir": dv.normalized()})
+	travel(dist / float(feel["dist"]), t / float(feel["time"]),
+			{"invuln": 0.0, "trail": "dust", "dir": dv.normalized()})
 	h.fortify_t = maxf(h.fortify_t, t + 0.05)
 	lunge = {"end": m.time + t + 0.02, "dir": dv.normalized(), "k": k, "chain": true}
 	play("jug_chainlunge")
@@ -963,7 +965,9 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 		if roll < 0.8:
 			h.inp["sig"] = true
 			return
-	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and warchain.state == "ready" and los and (dist > 3.0 or (not rmb_ready() and dist > 1.2)) and dist < float(e_def()["range"]) - 0.5 and randf() < 0.4:
+	var worth_chain := dist > 3.0 or (not rmb_ready() and dist > 1.2)
+	var chain_up := int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and warchain.state == "ready"
+	if chain_up and los and worth_chain and dist < float(e_def()["range"]) - 0.5 and randf() < 0.4:
 		h.inp["aim"] = tgt.pos + Vector3(0, 0.9, 0)
 		h.inp["sig"] = true
 		return
@@ -977,12 +981,15 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 		elif dist < 7.0 and randf() < 0.45:
 			h.inp["aim"] = tgt.pos
 			h.inp["sec"] = true
-			bot_hold["rmb"] = float(rmb_def()["hold"]) + (float(rmb_def()["full_t"]) - float(rmb_def()["hold"])) * clampf((dist - 3.0) / 4.0, 0.0, 1.0) + 0.05
+			var hold_t := float(rmb_def()["hold"])
+			var far_k := clampf((dist - 3.0) / 4.0, 0.0, 1.0)
+			bot_hold["rmb"] = hold_t + (float(rmb_def()["full_t"]) - hold_t) * far_k + 0.05
 	# keep the wound-up slam on them while it winds up
 	if not slam_w.is_empty():
 		h.inp["aim"] = tgt.pos
 	# Rampage in: the tip is the sweet spot, so dash from about a dash length out, facing them
-	if int(h.slot_lv["dash"]) > 0 and h.dashes >= 1.0 and los and lunge.is_empty() and dist > 2.5 and dist < 6.0 and randf() < 0.25:
+	var dash_up := int(h.slot_lv["dash"]) > 0 and h.dashes >= 1.0 and lunge.is_empty()
+	if dash_up and los and dist > 2.5 and dist < 6.0 and randf() < 0.25:
 		h.inp["aim"] = tgt.pos
 		h.ai["dash_dir"] = h.dir_to(tgt)
 		h.inp["move"] = h.dir_to(tgt)

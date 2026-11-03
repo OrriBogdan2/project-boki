@@ -77,8 +77,8 @@ func _throw() -> void:
 	state = "throwing"
 	e_pressed_at = -9.0
 	k.play("jug_chain")
-	var stg := k.stage("e", {"delivery": {"type": "projectile", "speed": float(ed["speed"]), "range": float(ed["range"]),
-			"size": 0.22, "rope": true},
+	var stg := k.stage("e", {"delivery": {"type": "projectile", "speed": float(ed["speed"]),
+			"range": float(ed["range"]), "size": 0.22, "rope": true},
 		"effects": [{"type": "damage", "amount": float(ed["dmg"])}]})
 	var shots0: int = k.m.shots.size()
 	k.run(stg, k.cx("e", "warchain", k.aim(), {
@@ -200,7 +200,10 @@ func tick(dt: float) -> void:
 			if arrive_t <= 0.0:
 				state = "ready"
 	if state == "throwing":
-		_draw_flight()
+		if k.h.stun_t > 0.0:
+			snap()                  # a stun breaks the throw too
+		else:
+			_draw_flight()
 
 func _tick_hooked(dt: float) -> void:
 	var h := k.h

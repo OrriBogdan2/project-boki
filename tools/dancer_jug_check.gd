@@ -6,6 +6,7 @@ extends RefCounted
 
 const AKCheck := preload("res://tools/archetype_check.gd")
 const ULT := preload("res://tools/dj_ult_check.gd")      # both heroes' ultimates on X, and the burst cap
+const ZFEEL := preload("res://tools/zedran_feel_check.gd")   # Zedran's chain, RMB rows, Meteor Drop and dashes
 var A: AKCheck
 
 ## Standalone: one hero's sections (both for "all"). Prints AKCHECK lines like --archetype-check.
@@ -659,6 +660,7 @@ func juggernaut(a) -> void:
 	A.ok("juggernaut passive: a knock heals 20% of their health",
 			K.knock_healed >= minf(0.19 * T.max_hp, 0.9 * P.max_hp), "healed %.0f of %.0f" % [K.knock_healed, T.max_hp])
 	await A.done(m)
+	await ZFEEL.new().run(A)
 	await ULT.new().zedran(A)
 
 
@@ -731,7 +733,8 @@ func combos(a) -> void:
 	P.inp["sec_hold"] = false
 	A.step(m, 0.3)
 	A.ok("combo jug: E > E > hold RMB = Cinder Spin on the press (no Haul Slam, no second move)",
-			spun_on_press and K.spins == spins0 + 1 and K.haul_slams == 1, "spins %d slams %d" % [K.spins, K.haul_slams])
+			spun_on_press and K.spins == spins0 + 1 and K.haul_slams == 1,
+			"spins %d slams %d" % [K.spins, K.haul_slams])
 	# E attached, RMB tapped (not pulling): a normal Finishing Slam
 	A.step(m, 1.0)
 	hook.call()
