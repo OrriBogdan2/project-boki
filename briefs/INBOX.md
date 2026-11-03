@@ -622,3 +622,12 @@ Order: Boki concept art, then creator concepts, then cutscene key frames (image-
 2. Ready, not merged: [MAIN] hitbox-size cd316a9 (item 46, ~1.5 h); dancer-feel d36f73e; market 2b93dad (Black Market extras still frozen in PRIORITIES.md, owner call pending); shops 794264bf (~15 h).
 3. Waiting on the owner: Steam at launch?; hosting regions (default EU); Black Market unfreeze; shops merge or drop.
 4. Conflicts: none.
+
+## 2026-11-03 18:05 ET (23:05 UTC) ORCH check-in
+- [OWNER] The Vex 3D shots are viewable now: https://github.com/OrriBogdan2/project-boki/tree/ext/hero-shots-s2/warden-3d/vex (interim mesh; the Blender version is in progress).
+1. Shipped: nothing on main since 200effce (21:54 UTC).
+2. Ready, not merged: [MAIN] hitbox-size cd316a9 (~2.5 h), dancer-feel d36f73e (owner item 7; the audit confirms main still has the old 3.5x Sable empowered shot), market 2b93dad (Black Market now unfrozen; save v8 clashes with mantle-look and farm-hob, renumber), tarek-glide-slam 0e1e7cd (new).
+   - Not yet: bjorn-48-49-51 (in progress); drop c50a071 (2 regressions being fixed).
+3. [EXT] Tarek is a man (DECISIONS): S2's 23:25 note says "slamming where she lands"; check the kit text and docs on tarek-glide-slam.
+4. ORCH kit audit: 1 of 4 reports in (Vex/Vireo/Sable). The compiled report and routing follow when all 4 are done.
+5. Conflicts: none new.
