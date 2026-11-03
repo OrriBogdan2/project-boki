@@ -244,8 +244,8 @@ exist and stay within bounds.
   perch or mount) or merged, it lends you the ability and you perform it (85% power carried, full
   power merged). `from: owner` always happens on its hunter. A carried kin never acts on its own.
 - **Who decides.** `KinTactics.cue_aim` reads an ability's `cue`. The auto active is the kin's own and
-  it uses it whenever its cue fits (for every hunter). The E is auto-cast only for bots, or for you if
-  you turn on "kin_auto" in Settings. Bots press E from the cue too (`Bot._use_sig`). Event triggers
+  it uses it whenever its cue fits (for every hunter). The ordered ability is auto-cast only for bots;
+  yours fires when you order it. Bots press E from the cue too (`Bot._use_sig`). Event triggers
   fire from the match: `on_hit` (every n-th melee hit), `on_throw`, `on_recall`, `on_bond_full`,
   `on_low_hp` (once per dip).
 
@@ -286,7 +286,7 @@ Throws (`throw.effects` ride on the core throw hit), dodge riders (`on_pass`, `o
 
 Settled defaults: diminishing returns cover hunter-ability and glove crowd control too, not just
 kin; you can merge with a mount while gliding (it curls up on your back until you land);
-`kin_auto` is off by default, so your kin only casts its auto ability on its own.
+Your kin only casts its auto ability on its own; its ordered ability waits for you.
 
 IVs (`Care.iv_mult`) multiply a kin's final hp, damage and speed after its budget points, level
 growth, mutation and care (`Kin.init_kin`), and the Bond IV speeds every fill of the merge meter

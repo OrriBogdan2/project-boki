@@ -102,15 +102,14 @@ static func iv_bar(v: int, col: Color, w := 120.0, h := 8.0, flip := false) -> C
 	c.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	c.draw.connect(func():
 		var r := int(minf(c.size.y * 0.5, 4.0))
-		var bg := StyleBoxFlat.new(); bg.bg_color = TRACK; bg.set_corner_radius_all(r)
-		c.draw_style_box(bg, Rect2(Vector2.ZERO, c.size))
+		c.draw_style_box(UI.bar_box(TRACK, r), Rect2(Vector2.ZERO, c.size))
 		var fw := c.size.x * clampf(float(v) / 31.0, 0.0, 1.0)
 		if fw > 1.0:
-			var fg := StyleBoxFlat.new(); fg.bg_color = col; fg.set_corner_radius_all(r)
-			if v >= 31:
-				fg.border_color = UI.GOLD; fg.set_border_width_all(1)
 			var bw := maxf(fw, r * 2.0)
-			c.draw_style_box(fg, Rect2(Vector2(c.size.x - bw if flip else 0.0, 0), Vector2(bw, c.size.y)))
+			var fill := Rect2(Vector2(c.size.x - bw if flip else 0.0, 0), Vector2(bw, c.size.y))
+			c.draw_style_box(UI.bar_box(col, r), fill)
+			if v >= 31:
+				c.draw_rect(fill.grow(-0.5), UI.GOLD, false, 1.0)
 		# faint marks at the judge's steps (16 pretty good, 26 very good)
 		for m in [16, 26]:
 			var x := c.size.x * float(m) / 31.0
