@@ -253,7 +253,7 @@ static func downed_label(H, k: Kin, sp: Vector2) -> void:
 	H.c.draw_colored_polygon(PackedVector2Array([sp + Vector2(-7, -14 + bob), sp + Vector2(7, -14 + bob), sp + Vector2(0, -4 + bob)]), col)
 	H._bar(Rect2(sp + Vector2(-30, 2), Vector2(60, 5)), clampf(k.down_t / maxf(0.1, k.down_total), 0.0, 1.0), Color(col, 0.7))
 	if k.rescue_t > 0.0:
-		# the rescue: a ring closing round the Boki (it drains back if you are interrupted)
+		# the rescue: a ring closing round the Boki (a drop resets it)
 		var rc := sp + Vector2(0, 22)
 		H.c.draw_arc(rc, 20.0, 0.0, TAU, 40, Color(0, 0, 0, 0.45), 5.0, true)
 		H.c.draw_arc(rc, 20.0, -PI / 2, -PI / 2 + TAU * KinDowned.scoop_k(k), 40, H.GOOD if k.rescue_on else H.GOOD.darkened(0.3), 4.0, true)

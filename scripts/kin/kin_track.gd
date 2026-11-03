@@ -1,12 +1,13 @@
 class_name KinTrack
 extends RefCounted
 ## The bond pull (docs/decisions/0008). While an enemy hunter carries your captured Boki in their box:
-##   - you and your squad, once up (alive, not downed), see an edge-of-screen arrow "<Boki> is this way" at the captor (BondHud)
+##   - you and your squad, once up (alive, not downed), see an edge arrow "<Boki> is this way" at the captor (BondHud)
 ##   - the captor's exact spot pings on your squad's map every bond_ping_s (content/rules/boki_system.json "loss")
 ##   - the captor sees a "Tracked" chip on their HUD
 ##   - knocked or killed, the captor drops it: it stands dazed where they fell and its owner can cradle it
 ##   - the pull ends when the captor extracts
-## State: hunter meta "bond" = [{uid, name, owner (nid), team}], on every game (the "bond"/"unbond" kcmd events carry it online).
+## State: hunter meta "bond" = [{uid, name, owner (nid), team}], on every game. Online the "caught" event starts it
+## and the "unbond" kcmd event ends it.
 
 const META := "bond"
 
@@ -30,7 +31,9 @@ static func on_caught(m, h: Hunter, k: Kin, rec: Dictionary) -> void:
 static func register(h: Hunter, rec: Dictionary, o: Hunter) -> void:
 	if o.team == h.team:
 		return
-	_add(h, {"uid": String(rec.get("uid", "")), "name": String(rec.get("name", "Boki")), "owner": o.nid, "team": o.team})
+	var entry := {"uid": String(rec.get("uid", "")), "name": String(rec.get("name", "Boki")), "owner": o.nid}
+	entry["team"] = o.team
+	_add(h, entry)
 	h.set_meta("bond_t", 0.0)             # (the first ping goes out at once)
 
 ## The "caught" event, in every game but the one that ran the scan: the captor's game and the owner's game learn of it.
@@ -113,7 +116,7 @@ static func tick(m, dt: float) -> void:
 		c.set_meta("bond_t", t)
 
 ## The captor is knocked or killed (in the game that owns them): what they carried drops dazed at `at`, guarding for its
-## owner. Every game hears it through the "gdrop" event; the owner's game puts the Boki back in the world (KinLoss.on_gdrop).
+## owner. Every game hears it through the "gdrop" event; the owner's game puts the Boki back (KinLoss.on_gdrop).
 static func drop_carried(m, h: Hunter, at: Vector3) -> void:
 	if h.remote or at == Vector3.INF or m.opts.get("training", false):
 		return
@@ -123,9 +126,10 @@ static func drop_carried(m, h: Hunter, at: Vector3) -> void:
 		for i in h.caught.size():
 			if String(h.caught[i].get("uid", "")) == uid:
 				idx = i
-		var owner = m.ents_by_id.get(String(e["owner"]), null)
+		var owner_hunter = m.ents_by_id.get(String(e["owner"]), null)
 		var spot := at + Vector3(0.9, 0, 0.5)
-		if idx < 0 or not (owner is Hunter) or (owner as Hunter).extracted or KinLoss.ground(m, spot) == Vector3.INF:
+		var can_drop: bool = idx >= 0 and owner_hunter is Hunter and not (owner_hunter as Hunter).extracted
+		if not can_drop or KinLoss.ground(m, spot) == Vector3.INF:
 			_remove(h, uid)               # (it stays in their box)
 			continue
 		var rec: Dictionary = (h.caught[idx] as Dictionary).duplicate(true)

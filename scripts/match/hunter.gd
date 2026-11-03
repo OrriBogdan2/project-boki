@@ -2106,7 +2106,7 @@ func sim(dt: float) -> void:
 	MergeAugment.route(self)         # merging: nothing fires mid-transformation; merged in a form, C is off
 	for gk in [["dash", "dash", "dash"], ["sec", "sec", "sec"], ["gear1", "gear", "gear0"], ["sig", "kin", "k1"], ["ult", "ult", "r"]]:
 		_gate(gk[0], gk[1], gk[2])
-	KinDowned.commit(self)           # rescuing your Boki: rooted, nothing fires (a dash still cancels it)
+	KinDowned.commit(self)           # carrying your Boki: no dash, jump, glide or firing
 	if dropping and not grounded and ctrl != "bot":
 		for bk in ["sec", "sig", "ult", "tonic", "kit", "gear1", "gear2"]:
 			if inp.get(bk, false):
@@ -2261,6 +2261,7 @@ func _physics(dt: float) -> void:
 		return
 	var mv: Vector2 = inp["move"] if stun_t <= 0.0 and root_t <= 0.0 else Vector2.ZERO
 	var spd := base_speed * (1.35 if haste_t > 0.0 else 1.0) * (0.4 * (Life.R["stomp_slow"] if get_meta("stomped", false) else 1.0) if downed else 1.0) * slow_mult(0.65) * (0.88 if reload_t > 0.0 else 1.0) * _fire_slow() * (0.45 if drink_t > 0.0 or kit_t > 0.0 else 1.0) * (0.55 if crouch else 1.0) * (1.0 + gear_stat("speed")) * (_mount_speed() if mounted() and grounded else 1.0) * _chase_mod(mv)
+	spd *= KinDowned.carry_speed(self)
 	var hv := Vector2(vel.x, vel.z)
 	var cur := hv.length()
 	if roll_t > 0.0:

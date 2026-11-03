@@ -38,11 +38,10 @@
 		"rescue_hp": 0.6,
 		"rescue_s": 3.5,
 		"rescue_r": 1.5,
-		"rescue_drain_s": 2.0,
 		"rescue_block_s": 0.6,
-		"rescue_slack": 0.7,
 		"contest_r": 1.2,
-		"rescue_kneel_frac": 0.12,
+		"carry_speed_k": 0.9,
+		"carry_lift_s": 0.3,
 		"rescue_done_s": 0.45
 	},
 	"follow": {

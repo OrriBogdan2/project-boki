@@ -1,7 +1,7 @@
 class_name BondHud
 extends RefCounted
 ## The bond pull on the HUD (docs/decisions/0008, KinTrack), drawn through the in-match HUD `H`:
-##   - the squad of a captured Boki, once up: "<Boki> is this way" over the captor, or an arrow at the screen edge pointing at them
+##   - the squad of a captured Boki, once up: "<Boki> is this way" over the captor, or an arrow at the screen edge
 ##   - the captor: a "Tracked" chip while they carry one
 ## Kept out of hud.gd (a god file): hud.gd makes one call.
 
@@ -27,13 +27,15 @@ static func draw(H) -> void:
 	var behind := cam.is_position_behind(th.position)
 	if not behind and Rect2(Vector2(30, 30), sz - Vector2(60, 60)).has_point(tp):
 		H._ctext(tp, label, 15, COL, H.big)
-		H.c.draw_colored_polygon(PackedVector2Array([tp + Vector2(-8, 6), tp + Vector2(8, 6), tp + Vector2(0, 16)]), COL)
+		var chevron := PackedVector2Array([tp + Vector2(-8, 6), tp + Vector2(8, 6), tp + Vector2(0, 16)])
+		H.c.draw_colored_polygon(chevron, COL)
 		return
 	var ctr := sz * 0.5
 	var d := (ctr - tp).normalized() if behind else (tp - ctr).normalized()
 	var edge := ctr + d * minf(sz.x, sz.y) * EDGE
 	var perp := Vector2(-d.y, d.x)
-	H.c.draw_colored_polygon(PackedVector2Array([edge + d * 18.0, edge - d * 6.0 + perp * 11.0, edge - d * 6.0 - perp * 11.0]), COL)
+	var tip := PackedVector2Array([edge + d * 18.0, edge - d * 6.0 + perp * 11.0, edge - d * 6.0 - perp * 11.0])
+	H.c.draw_colored_polygon(tip, COL)
 	H._ctext(edge - d * 30.0, label, 13, COL, H.big)
 	H._ctext(edge - d * 46.0, "%dm" % int(p.flat_dist(th)), 12, Color(H.INK, 0.9), H.big)
 

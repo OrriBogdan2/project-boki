@@ -2,18 +2,24 @@ class_name KinDowned
 extends RefCounted
 ## A downed Boki (docs/decisions/0001), replacing the old 8s faint and teleport:
 ##   - it stays where it fell, marked on screen and the minimap (BokiHud) and glowing in your team colour
-##   - its owner rescues it by running into it (no key): a 3.5s rescue (rescue_s). The hunter kneels, picks it up and
-##     cradles it, rooted and unable to attack, with a rising sound and a progress ring over it, like a support
-##     picking up a fallen ally's wisp. A dash cancels it; hard crowd control interrupts it (stun, root, Grounded, a launch or
-##     a real knock: Capture.controlled, the same rule as the capture scan; damage and the small shove of most hits do not);
-##     the progress then drains back over rescue_drain_s instead of resetting. An enemy hunter standing on the Boki
-##     (within contest_r) blocks the pick-up and pauses the progress ("Contested"). At the end it is back on the shoulder
+##   - its owner rescues it by running into it (no key): a 3.5s rescue (rescue_s). The hunter picks it up into their
+##     arms and carries it while the progress fills, walking at carry_speed_k of normal speed (as a support picks up a
+##     fallen ally's wisp), with a rising sound and a progress ring over it. While carrying, dash, jump, glide, firing
+##     and every ability are off (blocked, not cancelling). Hard crowd control (stun, root, Grounded, a launch or a real
+##     knock: Capture.controlled, the same rule as the capture scan) drops it: it falls back down, still downed, and the
+##     progress is lost. Damage and the small shove of most hits do not. An enemy hunter within contest_r of the Boki
+##     blocks the pick-up and pauses the progress ("Contested"). At the end it is back on the shoulder
 ##     with rescue_hp of its health. Nobody else can rescue it: it can't be hurt, scanned or taken
 ##     while the owner is still in the map (a hunter who goes out leaves it guarding where it stands, KinLoss)
 ##   - otherwise it comes round on its own after 15-20s (trusting Boki sooner) at low health (recover_hp)
 ##   - a Boki that fell into the abyss can only come round on the timer
 ##   - while down: no C, no Merge, no carry passives (Kin.ready_to_fight, KinMerge.boki_with_you)
 ## Numbers: content/rules/boki_system.json "down". State lives on the Kin: down_t, down_total, rescue_t, down_void.
+
+const ARMS_FWD := 0.42    # m: how far in front of the carrier the Boki rides
+const ARMS_UP := 0.9      # m: the height of the arms above the carrier's feet
+const BLOCKED_INPUTS := ["dash", "jump", "glide", "fire", "sig", "sec", "skill", "ult", "kin_ab", "gear1", "gear2",
+	"throw", "reload", "tonic", "kit", "swap"]    # off while carrying (movement and aim stay)
 
 static func rules() -> Dictionary:
 	return KinCommand.rules()["down"]
@@ -62,14 +68,11 @@ static func tick(k: Kin, dt: float) -> void:
 static func _near(k: Kin, h: Hunter, reach: float) -> bool:
 	return k.flat_dist(h) < reach and absf(h.pos.y - k.pos.y) < 2.2
 
-## Why a running rescue stops ("" = it goes on): "dash" (your choice), "cc" (crowd control, or knocked away), "gone".
-static func stop_reason(k: Kin, h: Hunter, r: Dictionary) -> String:
+## Why a running rescue stops ("" = it goes on): "cc" (crowd control or a launch drops it), "gone" (the Boki or its owner can't).
+static func stop_reason(k: Kin, h: Hunter) -> String:
 	if not rescuable(k):
 		return "gone"
-	var own := Capture.hunter_stop(h)
-	if own == "dash":
-		return "dash"
-	if own != "" or not h.grounded or h.gliding or not _near(k, h, float(r["rescue_r"]) + float(r["rescue_slack"])):
+	if Capture.controlled(h) or h.roll_t > 0.0 or h.gliding:
 		return "cc"
 	return ""
 
@@ -88,50 +91,62 @@ static func step_rescue(k: Kin, h: Hunter, dt: float) -> void:
 	_rescue(k, h, rules(), dt)
 
 static func _rescue(k: Kin, h: Hunter, r: Dictionary, dt: float) -> void:
-	var need := float(r["rescue_s"])
 	if k.rescue_on:
-		var why := stop_reason(k, h, r)
+		var why := stop_reason(k, h)
 		if why != "":
 			stop(k, h, why)
 			return
+		_carry(k, h)
 		if contested(k):
-			return                       # (they stand on it: the progress waits, nothing drains)
+			return                       # (they are on you: the progress waits)
 		k.rescue_t += dt
-		_rescue_fx(k, h, r, dt)
-		if k.rescue_t >= need:
+		_rescue_fx(k, h, dt)
+		if k.rescue_t >= float(r["rescue_s"]):
 			k.rescue_on = false
 			h.set_meta("rescue_done_at", k.m.time)
 			rescue(k)
 		return
-	# not rescuing: the progress drains back, and running into it (again) starts it
 	k.rescue_block = maxf(0.0, k.rescue_block - dt)
-	if k.rescue_t > 0.0:
-		k.rescue_t = maxf(0.0, k.rescue_t - dt * need / float(r["rescue_drain_s"]))
-	if k.rescue_block <= 0.0 and rescuable(k) and _near(k, h, float(r["rescue_r"])) and stop_reason(k, h, r) == "" and not contested(k):
+	var can_start := k.rescue_block <= 0.0 and rescuable(k) and h.grounded
+	if can_start and _near(k, h, float(r["rescue_r"])) and stop_reason(k, h) == "" and not contested(k):
 		k.rescue_on = true
+		h.set_meta("carry", k)
 		h.set_meta("rescue_at", k.m.time)
 		k.m.sfx("revive_hum", k.pos, -8.0, 1.0)
 
+## The Boki rides in the owner's arms (its spot follows them; the render lifts it, scoop_pose).
+static func _carry(k: Kin, h: Hunter) -> void:
+	k.teleport(h.pos + Vector3(-sin(h.face), 0.0, -cos(h.face)) * ARMS_FWD)
+
+## The carry ends: the Boki falls back down where the owner is (still downed or guarding), the progress is lost and it
+## cannot be picked up again for a moment.
 static func stop(k: Kin, h: Hunter, why: String) -> void:
 	k.rescue_on = false
-	if why == "dash":
-		k.rescue_block = float(rules()["rescue_block_s"])
-	if why in ["dash", "cc"]:
+	k.rescue_t = 0.0
+	k.rescue_block = float(rules()["rescue_block_s"])
+	var at := KinLoss.ground(k.m, h.pos)
+	if at != Vector3.INF:
+		k.teleport(at)
+	if why == "cc":
 		k.m.sfx("kin_unsure", k.pos, -6.0)
 		if h.is_local() and k.m.hud:
-			k.m.hud.toast_small("Rescue cancelled: run into it to try again" if why == "dash" else "Rescue interrupted: run into it to try again", Color("ffd89a"))
+			k.m.hud.toast_small("Dropped it: run into it to try again", Color("ffd89a"))
 
-## Hunter._tick: while you rescue you are rooted and can't attack (a dash still cancels it).
+## Speed factor while carrying a Boki (Hunter._physics).
+static func carry_speed(h: Hunter) -> float:
+	return float(rules()["carry_speed_k"]) if KinLoss.rescuing(h) != null else 1.0
+
+## Hunter._tick: while you carry your Boki, nothing fires and you cannot dash, jump or glide (you can still walk and aim).
 static func commit(h: Hunter) -> void:
-	var k := KinLoss.rescuing(h)
-	if k == null:
+	if KinLoss.rescuing(h) == null:
 		return
-	h.inp["move"] = Vector2.ZERO
-	for key in ["fire", "jump", "glide", "sig", "sec", "skill", "ult", "kin_ab", "gear1", "gear2", "throw", "reload", "tonic", "kit", "swap"]:
+	for key in BLOCKED_INPUTS:
 		h.inp[key] = false
+	h.dash_buf = 0.0
+	h.jump_buf = 0.0
 
 ## A rising tick while it fills, and a ring that closes round the Boki (the HUD draws the ring from rescue_t).
-static func _rescue_fx(k: Kin, h: Hunter, r: Dictionary, dt: float) -> void:
+static func _rescue_fx(k: Kin, h: Hunter, dt: float) -> void:
 	var f := scoop_k(k)
 	var t := float(h.get_meta("rescue_tick", 0.0)) - dt
 	if t <= 0.0:
@@ -140,11 +155,10 @@ static func _rescue_fx(k: Kin, h: Hunter, r: Dictionary, dt: float) -> void:
 		k.m.fx.burst(k.pos + Vector3(0, 0.5 + 0.6 * f, 0), Color(k.sp.get("glow", k.sp["color"])), 3, 1.5, 0.4, -1.0, 0.7)
 	h.set_meta("rescue_tick", t)
 
-## "rs_kneel" / "rs_cradle" while rescuing, "rs_done" for a moment after: the pose id for HunterAnim (and the net snapshot).
+## "rs_carry" while carrying, "rs_done" for a moment after: the pose id for HunterAnim (and the net snapshot).
 static func rescue_pose(h: Hunter) -> String:
-	var k := KinLoss.rescuing(h)
-	if k != null:
-		return "rs_kneel" if scoop_k(k) < float(rules()["rescue_kneel_frac"]) else "rs_cradle"
+	if KinLoss.rescuing(h) != null:
+		return "rs_carry"
 	if h.m.time - float(h.get_meta("rescue_done_at", -9.0)) < float(rules()["rescue_done_s"]):
 		return "rs_done"
 	return ""
@@ -159,10 +173,8 @@ static func anim_state(h: Hunter, s: Dictionary) -> void:
 	else:
 		id = rescue_pose(h)
 		var k := KinLoss.rescuing(h)
-		if id == "rs_kneel" and k != null:
+		if id == "rs_carry" and k != null:
 			t = h.m.time - float(h.get_meta("rescue_at", h.m.time))
-		elif id == "rs_cradle" and k != null:
-			t = k.rescue_t - float(rules()["rescue_kneel_frac"]) * float(rules()["rescue_s"])
 		elif id == "rs_done":
 			t = h.m.time - float(h.get_meta("rescue_done_at", h.m.time))
 	if id.begins_with("rs_"):
@@ -226,13 +238,13 @@ static func render(k: Kin, _delta: float) -> void:
 			k.beacon.global_position = Vector3(k.pos.x, (g if g > World.VOID + 1.0 else k.pos.y) + BEACON_H * 0.5, k.pos.z)
 			k.beacon.scale = Vector3(1.0 + 0.12 * sin(k.m.time * 5.0), 1.0, 1.0 + 0.12 * sin(k.m.time * 5.0))
 
-## The rescue: it stays low while the hunter kneels, then is lifted into their arms and cradled there.
+## The rescue: the Boki is lifted into the carrier's arms and stays there (render only; its spot already follows them).
 static func scoop_pose(k: Kin) -> void:
-	if k.state != "downed" or k.rescue_t <= 0.0 or k.owner_h == null or k.model == null:
+	if not (k.state == "downed" or KinLoss.guarding(k)) or k.rescue_t <= 0.0 or k.owner_h == null or k.model == null:
 		return
 	var h := k.owner_h
-	var f := scoop_k(k)
-	var e := smoothstep(float(rules()["rescue_kneel_frac"]), 0.6, f)
-	var arms := h.global_position + Vector3(-sin(h.face) * 0.42, 0.9 + 0.04 * sin(k.m.time * 4.0), -cos(h.face) * 0.42)
-	k.global_position = k.global_position.lerp(arms, e)
-	k.model.scale *= lerpf(1.0, 0.7, e)
+	var lift := smoothstep(0.0, float(rules()["carry_lift_s"]), k.rescue_t)
+	var bob := 0.04 * sin(k.m.time * 4.0)
+	var arms := h.global_position + Vector3(-sin(h.face) * ARMS_FWD, ARMS_UP + bob, -cos(h.face) * ARMS_FWD)
+	k.global_position = k.global_position.lerp(arms, lift)
+	k.model.scale *= lerpf(1.0, 0.7, lift)

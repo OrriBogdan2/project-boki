@@ -152,8 +152,10 @@ func _loaner_match() -> void:
 	# die in the Hollow: the loaner never drops into the box or is left behind
 	P.lives = 1
 	m.eliminate(P, null, "knocked out", true)
-	ok(k != null and k.state == "away" and not KinLoss.guarding(k) and m.player_lost.is_empty(), "dying in the Hollow, the loaner doesn't drop to guard or get left behind")
-	ok(not m.kins.any(func(w): return w.state == "dazed" and not w.dead and Loaner.is_loaner(w.rec)), "and nobody can scan it")
+	ok(k != null and k.state == "away" and not KinLoss.guarding(k) and m.player_lost.is_empty(),
+		"dying in the Hollow, the loaner doesn't drop to guard or get left behind")
+	ok(not m.kins.any(func(w): return w.state == "dazed" and not w.dead and Loaner.is_loaner(w.rec)),
+		"and nobody can scan it")
 	m.result = {"extracted": false, "why": "knocked out"}
 	P.tonics += 3      # three tonics found on the run
 	var r := _result_of(m)

@@ -217,8 +217,9 @@ func apply_result(r: Dictionary) -> Dictionary:
 	out["exchange_fills"] = Exchange.tick()
 	# going down leaves your kin behind; where they end up was settled in the match
 	var lost_news: Array = []
-	if (not won or not (r.get("lost_kin", []) as Array).is_empty()) :     # (leaving the match counts: quitting after your Boki dropped does not save it)
-		for lk in r.get("lost_kin", []):
+	var lost_list: Array = r.get("lost_kin", [])
+	if not won or not lost_list.is_empty():
+		for lk in lost_list:
 			var kk := Save.kin(String(lk.get("uid", "")))
 			if kk.is_empty():
 				continue

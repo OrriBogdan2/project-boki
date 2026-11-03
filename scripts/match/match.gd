@@ -4494,7 +4494,7 @@ func _separate() -> void:
 	for mb in mobs:
 		if not mb.dead: bodies.append(mb)
 	for k in kins:
-		if k.state in ["active", "wild", "dazed", "returning"] and not k.dead: bodies.append(k)
+		if k.state in ["active", "wild", "dazed", "returning"] and not k.dead and not k.rescue_on: bodies.append(k)
 	# only bodies in the same or a neighbouring 4m cell can touch (radii are well under 2m): a grid
 	# instead of every pair, in the same pair order as before
 	var grid := {}

@@ -59,7 +59,7 @@ Risk scales with the tier you queue into (`data/tiers/*.tres`, script `run_tier.
 |---|---|---|---|
 | **Shallows** (1) | Stay with you, never lost | Follow a living teammate, or flee home | ×1 |
 | **Deeps** (2) | **Never lost (docs/decisions/0008)** | Follow a teammate, or flee home | ×1.75 |
-| **Abyss** (3) | **Drop dazed and guard the spot; revive and cradle to take back** | **Enemies can scan them** | ×2.75 |
+| **Abyss** (3) | **Drop dazed and guard the spot; revive, then pick it up and carry it for 3.5s to take it back** | **Enemies can scan them** | ×2.75 |
 
 All names and multipliers are placeholders.
 

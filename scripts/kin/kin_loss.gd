@@ -65,19 +65,20 @@ static func on_owner_out(m, h: Hunter, k: Kin, box_pos: Vector3) -> void:
 			if String(L["uid"]) == String(rec.get("uid", "")):
 				m.player_lost.erase(L)
 		m.player_lost.append({"uid": String(rec.get("uid", "")), "kin": k, "holder": null, "rec": rec})
-		m.add_feed("%s is guarding your box: get revived and run into it, or a rival can scan it" % rec.get("name", "Your Boki"))
+		var shown := String(rec.get("name", "Your Boki"))
+		m.add_feed("%s is guarding your box: get revived and run into it, or a rival can scan it" % shown)
 
-## A free Boki id for this hunter: their own slot ids first ("<nid>k", "<nid>k2"), because online only ids shaped like
-## that are simulated and snapshotted by the hunter's own game (Net.owner_of).
+## A free Boki id for this hunter: their own slot id ("<nid>k") when it is free, because online only ids shaped like
+## that are simulated and snapshotted by the hunter's own game (Net.owner_of). Only a hunter whose slot still holds a
+## living Boki gets another id, and then the Boki is simulated by the host.
 static func kin_id(m, h: Hunter) -> String:
-	for id in [h.nid + "k", h.nid + "k2"]:
-		var e = m.ents_by_id.get(id, null)
-		if not (e is Kin) or not is_instance_valid(e) or (e as Kin).dead:
-			return id
+	var e = m.ents_by_id.get(h.nid + "k", null)
+	if not (e is Kin) or not is_instance_valid(e) or (e as Kin).dead:
+		return h.nid + "k"
 	return m.next_id(h.nid + "k")
 
 ## A captor was knocked or killed (the "gdrop" event, every game): the Boki leaves their box everywhere, and the owner's
-## own game stands it up again, dazed, on `at`. It reuses the Kin the scan took when it still exists (same id, same slot).
+## own game stands it up again, dazed, on `at`. It reuses the Kin the scan took when it still exists (same id and slot).
 static func on_gdrop(m, owner_nid: String, rec: Dictionary, at: Vector3) -> void:
 	var uid := String(rec.get("uid", ""))
 	for c in m.hunters:
@@ -85,48 +86,51 @@ static func on_gdrop(m, owner_nid: String, rec: Dictionary, at: Vector3) -> void
 		for i in range(c.caught.size() - 1, -1, -1):
 			if String(c.caught[i].get("uid", "")) == uid:
 				c.caught.remove_at(i)
-	var owner = m.ents_by_id.get(owner_nid, null)
-	if not (owner is Hunter) or (owner as Hunter).remote or (owner as Hunter).extracted:
+	var found = m.ents_by_id.get(owner_nid, null)
+	if not (found is Hunter) or (found as Hunter).remote or (found as Hunter).extracted:
 		return                       # (a remote owner's game does it; we see it in the kin snapshot)
+	var owner_hunter: Hunter = found
 	var g: Kin = null
 	for k in m.kins:
-		if k.dead and k.owner_h == owner and String(k.rec.get("uid", "")) == uid and is_instance_valid(k):
+		if k.dead and k.owner_h == owner_hunter and String(k.rec.get("uid", "")) == uid and is_instance_valid(k):
 			g = k
 	if g == null:
-		g = spawn_guard(m, owner, rec, at)
+		g = spawn_guard(m, owner_hunter, rec, at)
 	else:
 		var gp := ground(m, at)
 		if gp == Vector3.INF:
-			return
-		g.teleport(gp)
-		_stand_guard(m, owner, g)
-	if g == null:
+			g = null
+		else:
+			g.teleport(gp)
+			_stand_guard(m, owner_hunter, g)
+	_note_dropped(m, owner_hunter, uid, g, rec)
+
+## The owner's list of lost Boki after a drop: on the ground again (g), or gone for good (null); held by nobody.
+static func _note_dropped(m, owner_hunter: Hunter, uid: String, g: Kin, rec: Dictionary) -> void:
+	if owner_hunter != m.player:
 		return
-	if owner == m.player:
-		var found := false
-		for L in m.player_lost:
-			if String(L["uid"]) == uid:
-				L["kin"] = g
-				L["holder"] = null
-				found = true
-		if not found:
-			m.player_lost.append({"uid": uid, "kin": g, "holder": null, "rec": rec})
+	for L in m.player_lost:
+		if String(L["uid"]) == uid:
+			L["kin"] = g
+			L["holder"] = null
+			return
+	m.player_lost.append({"uid": uid, "kin": g, "holder": null, "rec": rec})
 
 ## A Boki a captor had in their box drops where they fell, dazed, guarding for its owner.
-static func spawn_guard(m, owner: Hunter, rec: Dictionary, at: Vector3) -> Kin:
+static func spawn_guard(m, owner_hunter: Hunter, rec: Dictionary, at: Vector3) -> Kin:
 	at = ground(m, at)
 	if at == Vector3.INF:
 		return null
 	var k := Kin.new()
-	k.init_kin(m, kin_id(m, owner), rec["species"], rec, owner)
+	k.init_kin(m, kin_id(m, owner_hunter), rec["species"], rec, owner_hunter)
 	m.add_child(k)
 	m.kins.append(k)
 	m.ents_by_id[k.nid] = k
 	k.teleport(at)
-	_stand_guard(m, owner, k)
+	_stand_guard(m, owner_hunter, k)
 	return k
 
-static func _stand_guard(m, owner: Hunter, k: Kin) -> void:
+static func _stand_guard(m, owner_hunter: Hunter, k: Kin) -> void:
 	k.state = "dazed"
 	k.hp = 1.0
 	k.dazed_t = 1e9                      # it waits as long as it takes
@@ -145,9 +149,9 @@ static func _stand_guard(m, owner: Hunter, k: Kin) -> void:
 	k.down_void = false
 	k.dead = false
 	k.visible = true
-	k.lost_from = "you" if (owner == m.player or k.lost_from == "you") else owner.pname
+	k.lost_from = "you" if (owner_hunter == m.player or k.lost_from == "you") else owner_hunter.pname
 	k.lost_uid = String(k.rec.get("uid", ""))
-	k.lost_owner = owner
+	k.lost_owner = owner_hunter
 	m.fx.burst(k.pos + Vector3(0, 0.6, 0), Color("fff2a0"), 10, 2.0)
 
 static func ground(m, at: Vector3) -> Vector3:
@@ -164,16 +168,19 @@ static func tick_guard(k: Kin, dt: float) -> void:
 	if h == null:
 		return
 	if h.out or h.extracted or k.scan_by != null:       # (an enemy is scanning it: no cradle starts)
+		if k.rescue_on:
+			KinDowned.stop(k, h, "gone")
 		k.rescue_t = 0.0
-		k.rescue_on = false
 		return
 	KinDowned.step_rescue(k, h, dt)
 
-## The Boki a hunter is cradling right now, if any (a guard may sit outside their kin slots).
+## The Boki a hunter is carrying right now, if any (a guard may sit outside their kin slots).
 static func rescuing(h: Hunter) -> Kin:
-	for k in h.m.kins:
-		if k.rescue_on and k.owner_h == h and (k.state == "downed" or guarding(k)):
-			return k
+	if not h.has_meta("carry"):       # (set when the carry starts: no scan of every Boki each step)
+		return null
+	var k = h.get_meta("carry")
+	if is_instance_valid(k) and k.rescue_on and k.owner_h == h and (k.state == "downed" or guarding(k)):
+		return k
 	return null
 
 ## The cradle finished (KinDowned.come_round): it is the owner's again, in a slot.
@@ -199,8 +206,8 @@ static func reclaimed(k: Kin) -> void:
 	if h.kin2 == k:
 		k.bench()
 
-## Where each of your lost Boki ends up when the match is over: [{uid, fate, holder, rec}]. fate is "ransom" (nobody took
-## it, or its taker is out), "rival" (a rival who is still in has it), "squad" or "self".
+## Where each of your lost Boki ends up when the match is over: [{uid, fate, holder, rec}]. fate is "ransom" (nobody
+## took it, or its taker is out), "rival" (a rival who is still in has it), "squad" or "self".
 static func resolve(m) -> Array:
 	var out: Array = []
 	for L in m.player_lost:

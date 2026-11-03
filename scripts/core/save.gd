@@ -436,7 +436,7 @@ func kin(uid: String) -> Dictionary:
 
 func active_kin() -> Dictionary:
 	var k := kin(str(d.get("active", "")))
-	if k.is_empty() or not KinLoss.selectable(k):     # (a Boki at the Ransom House or lost to a player stays home: KinLoss)
+	if k.is_empty() or not KinLoss.selectable(k):     # (a held Boki stays home: KinLoss)
 		k = {}
 		for r in d["roster"]:
 			if KinLoss.selectable(r):
