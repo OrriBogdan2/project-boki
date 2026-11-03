@@ -483,3 +483,16 @@ Now that C is free (the C-into-G merge), the owner wants **Merge on C** (C again
 - Q/V = gloves, 1-4 = belt, F = interact
 
 Please update the ultbond/keybind defaults and the migration: anyone with Merge on T, or on the old default, moves to C, unless they rebound it themselves. Also update the texts and keybind-check. Our side already uses `Settings.key_cap("ultimate")` everywhere, so no kit or HUD text changes are needed.
+
+## 2026-11-02 21:30 ET: kit review round 2. No kitfix pair is ready yet (close)
+The round-2 reviews of 8 polished hunters are in briefs/kit-review/round2/.
+- Pin, Bjorn, Vireo, Linwick and Moosh Moosh pass.
+- Venator, Dredge and Tamsin need a small fix each: an opaque slide after-image, ult slugs that can't be seen, and an over-leaning skate pose with a white spear.
+- Every branch has some hard-coded key text ("Merge on R", "X"), which is being moved to `Settings.key_cap`.
+
+Fix passes are queued on the server. **pin-bjorn should be ready first; it only needs the one text line.** I'll report each pair as it clears.
+
+Notes for merging:
+- The branches each merge cleanly onto main alone but conflict with each other (docs/wiki/Classes.md, shared match/UI scripts), so the order matters. Suggested order: pin-bjorn, linwick-dredge, moosh-tamsin, vireo-venator, then dancer-juggernaut and breah-ostra.
+- Three different per-hunter plate-height hooks are being unified onto `HudPlate.plate_offset(h)`.
+- Main's arena.gd still shows "X reset", but reset is Backspace.

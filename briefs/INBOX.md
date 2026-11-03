@@ -276,3 +276,12 @@ Body, scale and movement sections are now in for **all 12** hunters (bjorn, pin,
 
 ## 2026-11-03 02:05 UTC
 Owner: **Merge moves to C** (it was T). Final layout: R reload, X hunter ult, C Merge, G Boki button, T free. The main session changes the default. Kits and UI keep using `Settings.key_cap("ultimate")`; never hard-code C or T. Relay this to the running agents.
+
+## 2026-11-03 02:30 UTC: KIT REVIEW round 2 (8 polished hunters). Small fixes, then ready
+The reviews are in briefs/kit-review/round2/. **PASS (minor nits): Pin, Bjorn, Vireo, Linwick, Moosh Moosh. FIX: Venator, Dredge, Tamsin.** Fix these on the same branches (Opus), then report ready:
+- **All branches: no hard-coded key letters.** kit_card.gd says "ready for the Merge on R" on pin-bjorn (line 309) and moosh-tamsin (line 308). ashwick.json lines 8 and 26 and dredge.json line 8 hard-code "X". Use `Settings.key_cap("ultimate")` / `key_cap("hunter_ult")`. Merge is on **C** now (owner, 02:05).
+- **pin-bjorn:** only the key-text fix is needed, then report ready. Optional nits: a stronger spin trail on Bjorn; his ult slam folds him head-down (pitch 0.75), so cap it at about 0.4.
+- **vireo-venator:** Venator's new ember after-image on the slide draws as an opaque salmon blob over his body. Make it a translucent trail behind him: alpha, depth sorting, offset. Nit: a white glow ball at Vireo's hand on the first firing frame; tint it.
+- **linwick-dredge:** Dredge's ult slug waves can't be seen at gameplay zoom, and the fan telegraph is near-white. Use bigger, saturated slug projectiles with trails and a coloured fan. Plus the X text fix.
+- **moosh-tamsin:** Tamsin's skate lean stacks with the shared light-dash lean to about 60°, so she lies nearly flat. Clamp the combined lean to about 20-25°. Her Ice Spear still reads white; colour it ice-blue. Plus the Merge text fix. Nit: brighten Moosh Moosh's shot in flight.
+- **For whoever merges second and later:** the branches use three different hooks for per-hunter nameplate height. Converge on ext/hudref's `HudPlate.plate_offset(h)`, which reads `plate_offset` from the archetype JSON.
