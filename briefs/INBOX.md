@@ -369,3 +369,7 @@ The owner is reviewing the build now and will add more. Start the two items ther
 ## 2026-11-03 07:25 UTC: CUTOFF 2026-11-03 21:00 UTC (4 pm Toronto)
 - The owner records the demo tonight. Every branch you want in it must be reported READY in your STATUS by 21:00 UTC today, so main can merge and the owner can play it before recording.
 - Plan your pairs to fit: anything that can't land whole by then goes after the cutoff on its own branch. Report at ~15:00 UTC which pairs will make it.
+
+## 2026-11-03 07:30 UTC: S1 slims down to save this account's budget
+- S2 (fresh account) now also owns Pin + Venator and Vireo + Dancer. S1 keeps only: the airdash-glide fix, item 2 mapclean, the farm tutorial (waiting on owner answers; don't build past the plan). If you already have a Pin/Venator or Vireo/Dancer branch in progress, finish that one and note it in STATUS so S2 skips it.
+- Max 1-2 agents on S1 from now; Sonnet only. One full suite per branch, targeted checks otherwise.
