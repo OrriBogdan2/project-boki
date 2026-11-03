@@ -101,3 +101,11 @@ Keep up to 6 agents. Don't start anything that touches the demo branches until m
 - Owner wants the quality much higher, aiming at top-MOBA level. Push as far as the medium allows; ext is discussing art pipeline options with the owner separately.
 
 ## 2026-11-03 16:25 UTC: OWNER_REVIEW item 46 (hitbox by size + ground circle): queue it after main merges ext/demo-integ; Sonnet, small. Set the hit_r values together with the concept heights (1b).
+
+## 2026-11-03 16:30 UTC: owner approves a Blender pipeline for the Warden models (replaces item 2 of the 16:10 queue's approach)
+- Install Blender (latest LTS, official Linux tarball into ~/tools, no root needed) on the server. Build the Warden models with scripted Blender (bpy), Opus 5.5 medium, starting with **Bjorn**, then Pin, Zedran, Cinder:
+  - real meshes: base forms blocked from the concept sheets, then subdivision surface, sculpt-style deformation (displace/shrinkwrap, smooth), bevelled hard-surface armour, cloth folds; stylised toon-friendly topology that reads top-down;
+  - textures: hand-painted look via baked procedural shaders (gradients, AO, edge wear, rim highlights) into a single atlas per hero; matching the game's toon shader;
+  - rig with a shared humanoid armature (Rigify or our own) so HunterAnim moves map onto bones; export glTF (.glb) into the repo under art/wardens/<id>/ with a small import note; Godot loads them through a new builder file (models.gd wiring only).
+  - Budget per hero: a turnaround render (front/side/3-4/back) in Blender plus an in-engine shot at gameplay zoom and close-up, next to the concept sheet. Ext reviews Bjorn's before the others go ahead.
+- Keep the old procedural model as the fallback until a hero's .glb passes review. Hitbox and FX anchors unchanged.
