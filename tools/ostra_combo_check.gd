@@ -262,8 +262,8 @@ func _ostra() -> void:
 		).length() < 0.6,
 		"moved %.2f" % Vector2(P.pos.x - home.x, P.pos.z - home.z).length()
 	)
-	# owner: while the lantern flies she hovers where she cast it, even over the abyss, and keeps that height
-	await _hover(m, P, home, K)
+	# item 17: she drifts slowly while the lantern flies, keeps her height over the abyss
+	await _hover(m, P, T, home, K)
 	_far_cast(m, P, home, K)
 	reset.call()
 	K.swollen_t = 5.0
@@ -507,45 +507,59 @@ func _ostra() -> void:
 	)
 	await done(m)
 
-## The owner's swap note: she hovers in place in the air while the lantern flies, over the abyss too, and
-## arrives keeping that height.
-func _hover(m: Match, P: Hunter, home: Vector3, K: OstraKit) -> void:
+## Item 17: while the lantern flies she drifts slowly (15-25% of run speed), holds her height even over the abyss,
+## and the Trade sends everyone to where she is when it lands.
+func _hover(m: Match, P: Hunter, T: Hunter, home: Vector3, K: OstraKit) -> void:
 	var W = m.world
 	var gap := home + Vector3(-3.0, 0, 0)
 	for dx in range(-1, 2):
 		for dz in range(-1, 2):
 			W.kind[W.idx(int(floor(gap.x)) + dx, int(floor(gap.z)) + dz)] = World.T_VOID
 	K._drop_holds()
+	var run_from := P.pos
+	P.inp["move"] = Vector2(0, 1)
+	step(m, 0.5)
+	var run_speed := Vector2(P.pos.x - run_from.x, P.pos.z - run_from.z).length() / 0.5
+	P.inp["move"] = Vector2.ZERO
 	P.teleport(gap + Vector3(0, 1.5, 0))
 	P.grounded = false
 	P.vel = Vector3.ZERO
 	P.dashes = P.max_dashes()
-	aim_at(P, home + Vector3(5.0, 0, 0))
+	fresh(T)
+	T.teleport(home + Vector3(5.0, 0, 3.0))
+	aim_at(P, home + Vector3(5.0, 0, 3.0))
 	P.ak.on_dash(false)
 	m.step(DT)
 	m.step(DT)
 	var y0 := P.pos.y
-	var low := [y0]
-	var drift := [0.0]
-	var arrived := [Vector3.INF]
-	var swaps0 := K.swaps
+	var at_start := P.pos
+	var low := [y0, y0]
+	var last := [P.pos]
 	var flying := not K.swap.is_empty()
+	P.inp["move"] = Vector2(0, -1)
+	var ticks := [0]
 	step(m, 1.5, func():
 		if not K.swap.is_empty():
 			low[0] = minf(low[0], P.pos.y)
-			drift[0] = maxf(drift[0], Vector2(P.pos.x - gap.x, P.pos.z - gap.z).length()))
+			low[1] = maxf(low[1], P.pos.y)
+			last[0] = P.pos
+			ticks[0] += 1)
+	P.inp["move"] = Vector2.ZERO
+	var drift := Vector2(last[0].x - at_start.x, last[0].z - at_start.z).length()
+	var speed := drift / (float(ticks[0]) * DT)
 	ok(
-		"owner: over the abyss she hovers in place while the lantern flies (no fall, no drift)",
-		flying and y0 - low[0] < 0.1 and drift[0] < 0.1 and not P.out,
-		"fell %.2f drifted %.2f" % [y0 - low[0], drift[0]]
+		"item 17: in flight she drifts at 15-25% of run speed",
+		flying and run_speed > 1.0 and speed / run_speed > 0.15 and speed / run_speed < 0.25,
+		"%.2f of %.2f" % [speed, run_speed]
 	)
-	step(m, 0.6, func(): if K.swaps > swaps0 and arrived[0] == Vector3.INF: arrived[0] = P.pos)
-	var got: Vector3 = arrived[0]
 	ok(
-		"owner: she arrives at the landing keeping the height she hovered at",
-		got != Vector3.INF and absf(got.x - home.x - 5.0) < 0.6 and got.y >= y0 - 0.15,
-		"at %s (hovered %.2f)" % [str(got - home), y0]
+		"item 17: her height is constant over the abyss (no fall)",
+		low[0] > y0 - 0.02 and low[1] < y0 + 0.02 and not P.out, "%.3f..%.3f of %.3f" % [low[0], low[1], y0]
 	)
+	var swaps0 := K.swaps
+	step(m, 0.6, func(): if K.swaps > swaps0 and last[0] == Vector3.INF: last[0] = P.pos)
+	var landed := Vector2(T.pos.x - last[0].x, T.pos.z - last[0].z).length()
+	ok("item 17: the foe in the circle is sent to where she was when it resolved", landed < 1.6 and K.swaps > swaps0)
 	ok("anim: arriving plays ostra_arrive", K.anim_id == "ostra_arrive")
 	for dx in range(-1, 2):
 		for dz in range(-1, 2):

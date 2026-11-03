@@ -25,7 +25,7 @@ var base_wpn: Dictionary = {}
 var prime_until := -9.0
 var seed: Dictionary = {}      # {pos, t, grow, rmax, sid, vis, burn, col}
 var sid_n := 0
-var swap: Dictionary = {}      # in flight: {t, T, land, from (where she hovers until it lands)}
+var swap: Dictionary = {}      # in flight: {t, T, land, cast, from (where she is now), hold (CastHold)}
 var swap_aim := -1.0           # Shift held to aim the Trade (-1: not aiming)
 var snap: Dictionary = {}      # the Snap's wind-up: {t, k}
 var well: OstraWell            # X: Nightwell
@@ -105,10 +105,10 @@ func outgoing(t: Ent, dmg: float, o: Dictionary) -> float:
 		o["slow_k"] = float(lmb_def()["prime_slow"])
 	return dmg
 
-## She hovers in place while the Trade is in flight; the Snap's wind-up slows her.
+## She drifts slowly (dash.fly_slow of run speed) while the Trade is in flight; the Snap's wind-up slows her.
 func move_k() -> float:
 	if not swap.is_empty():
-		return 0.0
+		return (swap["hold"] as CastHold).slow_k
 	var k := 1.0 - float(rmb_def()["snap"]["cast_slow"]) if not snap.is_empty() else 1.0
 	return k * (1.0 + boost_k if boost_t > 0.0 else 1.0)
 
@@ -223,7 +223,10 @@ func _swap_cast() -> void:
 	var land := swap_spot()
 	if not spend_dash(false):
 		return
-	swap = {"t": swap_time(), "T": swap_time(), "land": land, "from": h.pos, "over_void": h.over_void()}
+	swap = {
+		"t": swap_time(), "T": swap_time(), "land": land, "cast": h.pos, "from": h.pos,
+		"hold": CastHold.hover_slow(h, float(dd["fly_slow"])),
+	}
 	swap_peak = 0.0
 	play("ostra_swap")
 	m.fx.ring(h.pos, float(dd["radius"]), TEAL, 0.35)
@@ -250,13 +253,14 @@ func _tick_swap(dt: float) -> void:
 	var dd := dash_def()
 	swap["t"] = float(swap["t"]) - dt
 	var land: Vector3 = swap["land"]
-	var from: Vector3 = swap["from"]
-	_hover_at(from)
+	var cast_at: Vector3 = swap["cast"]
+	var from: Vector3 = (swap["hold"] as CastHold).tick(m.world)
+	swap["from"] = from
 	var u := 1.0 - clampf(float(swap["t"]) / float(swap["T"]), 0.0, 1.0)
 	# a high lob: up well above the field, then down onto the spot
 	var lift := sin(u * PI) * float(dd["lob"])
 	swap_peak = maxf(swap_peak, lift)
-	var p := from.lerp(land, u) + Vector3(0, 1.2 + lift, 0)
+	var p := cast_at.lerp(land, u) + Vector3(0, 1.2 + lift, 0)
 	KitLooks.of(m).hold_on("os_star", "star", h, p, 1.0)
 	m.fx.burst(p, Color(0.5, 0.3, 1.0, 0.75), 1, 0.8, 0.35, 0.0, 1.1)
 	var r := float(dd["radius"])
@@ -269,12 +273,6 @@ func _tick_swap(dt: float) -> void:
 	if float(swap["t"]) <= 0.0:
 		_swap_end(true)
 
-## While the lantern flies she floats where she cast it, at that height, even over the abyss.
-func _hover_at(at: Vector3) -> void:
-	h.vel = Vector3.ZERO
-	if not h.grounded:
-		h.pos.y = at.y
-
 ## Her after-image on any dash (a merge's dodge): a streak of violet motes off the hem, not the shared pill.
 ## Her own hand tell (the charge mote) replaces the shared white charge orb.
 func charge_orb() -> bool:
@@ -284,7 +282,7 @@ func dash_afterimage() -> bool:
 	m.fx.burst(h.pos + Vector3(0, 0.6, 0), Color(0.55, 0.3, 0.95, 0.75), 3, 0.8, 0.4, -0.5, 1.2)
 	return true
 
-## A Boki merge ends the Trade in flight (nobody moves), its aim, the Snap's wind-up and the Settled
+## A Boki merge ends the Trade in flight (nobody is sent), its aim, the Snap's wind-up and the Settled
 ## orb's prime.
 func _drop_holds() -> void:
 	swap_aim = -1.0
@@ -301,7 +299,7 @@ func _swap_end(go: bool) -> void:
 	var dd := dash_def()
 	var land: Vector3 = swap.get("land", h.pos)
 	var from: Vector3 = swap.get("from", h.pos)
-	var from_void := bool(swap.get("over_void", false))
+	var from_void := h.over_void()
 	swap = {}
 	AimKit.hide(h, "swap_fly")
 	for key in ["os_star", "os_sigil_from", "os_sigil_to"]:
