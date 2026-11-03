@@ -2050,7 +2050,7 @@ func sim(dt: float) -> void:
 		_gate(gk[0], gk[1], gk[2])
 	KinDowned.commit(self)           # rescuing your Boki: rooted, nothing fires (a dash still cancels it)
 	if dropping and not grounded and ctrl != "bot":
-		for bk in ["sec", "sig", "ult", "util1", "util2", "util3", "util4", "gear2"]:
+		for bk in ["sec", "sig", "ult", "util1", "util2", "util3", "util4", "gear1", "gear2"]:
 			if inp.get(bk, false):
 				_break_drop()
 				break

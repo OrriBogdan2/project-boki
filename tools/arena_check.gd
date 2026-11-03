@@ -178,6 +178,9 @@ func _arena() -> void:
 			B.hp = B.max_hp
 			if int(tb / DT) % int(3.0 / DT) == 1:
 				B.hp = B.max_hp - 20.0     # a hit every 3s: the bot only dashes when it has just been hurt, and the Bokis no longer happen to land one
+			# step back every 5s: with no glove ranks its RMB is ready so often that it never leaves melee for an E
+			if int(tb / DT) % int(5.0 / DT) == 2:
+				B.teleport(P.pos + Vector3(6.0, 0, 0))
 			m.step(DT); tb += DT
 			if B.ak is ThiefKit and float((B.ak as ThiefKit).primed_t) > 0.0: seen["dash"] = true
 			if B.ak is JuggernautKit and String(B.ak.st.get("last_dash", "")) == "rampage": seen["dash"] = true
