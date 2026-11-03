@@ -43,14 +43,21 @@ static func random(rng: RandomNumberGenerator = null) -> Dictionary:
 	var glider := "classic"
 	if int(roll.call(5)) >= 3:
 		glider = String(Gliders.LIST[int(roll.call(Gliders.LIST.size()))]["id"])
-	var sliders := {}
-	for k in slider_keys():
-		sliders[k] = rng.randf() if rng else randf()
-	return {"glider": glider, "race": race, "gender": roll.call(2), "face": roll.call(Models.LOOK_FACES.size()),
+	var out := {"glider": glider, "race": race, "gender": roll.call(2), "face": roll.call(Models.LOOK_FACES.size()),
 		"skin": skin, "hair": roll.call(Models.hair_styles(race).size()), "hair_v": 2,
 		"hair_col": roll.call(Models.LOOK_HAIR.size()), "eyes": roll.call(EYES.size()),
-		"detail": roll.call(Models.LOOK_DETAILS.size()), "outfit": roll.call(Models.LOOK_OUTFITS.size()),
-		"sliders": sliders}
+		"detail": roll.call(Models.LOOK_DETAILS.size()), "outfit": roll.call(Models.LOOK_OUTFITS.size())}
+	# the sliders never draw on the global random stream: a seeded match must play out the same
+	# whatever its bots look like (the picks above take as many draws as the looks before sliders)
+	var slider_rng := rng
+	if slider_rng == null:
+		slider_rng = RandomNumberGenerator.new()
+		slider_rng.seed = hash(out)
+	var sliders := {}
+	for k in slider_keys():
+		sliders[k] = slider_rng.randf()
+	out["sliders"] = sliders
+	return out
 
 ## A saved look with every pick inside its list and every slider in 0..1 (missing ones neutral).
 ## Older looks: a third gender option, hair indexed into the shared list (no "hair_v"), the Slim /
