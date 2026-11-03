@@ -1,12 +1,13 @@
 extends "res://tools/hero_pair_check.gd"
-## --ostra-combo-check: Ostra, docs/heroes/ostra.md. Her reticle (the aim line, the Snap's rails, the
+## --ostra-combo-check: Ostra, docs/heroes/ostra.md. His reticle (the aim line, the Snap's rails, the
 ## Trade's two ends), charge and wind-up timings, where each thing lands, the payoffs, the owner's notes
-## (Shift never travels on its own, keeps her height, one Snap charge that visibly stuns the training
+## (Shift never travels on its own, keeps his height, one Snap charge that visibly stuns the training
 ## dummy), the small mechanics, the merge-start drops, and that every move, sound and look exists.
 
 func run(main_node: Node) -> void:
 	main = main_node
 	await _ostra()
+	await _bolt_through_terrain()
 	var ult_check = load("res://tools/ostra_ult_check.gd").new()
 	await ult_check.ult(main)
 	n += ult_check.n
@@ -91,13 +92,13 @@ func _ostra() -> void:
 	var orb: Array = m.shots.filter(func(s): return s["by"] == P)
 	var olen := float(orb[0]["life0"]) * (orb[0]["vel"] as Vector2).length() if not orb.is_empty() else 0.0
 	ok("lmb: a plain orb flies past the cursor to full range (14m)", olen > 12.0, "%.1f m" % olen)
-	ok("lmb: the orb is her own violet teardrop (skin)", KitLooks.of(m).skins_live("orb") >= 1)
+	ok("lmb: the orb is his own violet teardrop (skin)", KitLooks.of(m).skins_live("orb") >= 1)
 	step(m, 1.0)
 	ok("lmb: ...and hits a foe well past the cursor", dmg(T) > 5.0, "took %.1f" % dmg(T))
 	reset.call()
 	step(m, 1.6)
 	ok(
-		"lmb: a pause primes the next orb (a charge held at her hand)",
+		"lmb: a pause primes the next orb (a charge held at his hand)",
 		K.primed and KitLooks.of(m).holding("os_charge"), "primed %s" % K.primed
 	)
 	var spd_hot := float(P.wpn["speed"])
@@ -136,7 +137,7 @@ func _ostra() -> void:
 		"rmb: a wind-up first (dark orb at the hand, nothing fired yet)",
 		K.snaps == 0 and not K.snap.is_empty() and KitLooks.of(m).holding("os_snaporb"), "snaps %d" % K.snaps
 	)
-	ok("small: she slows 25% while casting the Snap", absf(K.move_k() - 0.75) < 0.01, "%.2f" % K.move_k())
+	ok("small: he slows 25% while casting the Snap", absf(K.move_k() - 0.75) < 0.01, "%.2f" % K.move_k())
 	ok("anim: the wind-up plays ostra_snap_wind", K.anim_id == "ostra_snap_wind")
 	P.inp["sec_hold"] = false
 	var wind := float(sn["wind"])
@@ -170,7 +171,7 @@ func _ostra() -> void:
 	)
 	var total := wind + 13.0 / float(sn["speed"])
 	ok("item 40: total cast time is about 40% over the old 0.54s", absf(total / 0.54 - 1.4) < 0.1, "%.2f" % total)
-	ok("item 40: a short recovery keeps her slowed after the release", float(sn["recover"]) > 0.0)
+	ok("item 40: a short recovery keeps him slowed after the release", float(sn["recover"]) > 0.0)
 	ok(
 		"rmb: then one tight bundle (a single projectile, crystal-spear skin)",
 		K.snaps == 1 and seen[0] == 1 and seen[1] == 1, "bundles %d" % seen[0]
@@ -215,7 +216,7 @@ func _ostra() -> void:
 		absf(float(K.lmb_def()["prime_dmg"]) - (353.0 / 263.0 - 1.0)) < 0.01
 	)
 	ok("data: no speed burst before rank 3", K.boost_t <= 0.0 and absf(K.move_k() - 1.0) < 0.01)
-	# ---- Shift: hold to see both ends, let go to lob; the foe at the landing goes to where she was
+	# ---- Shift: hold to see both ends, let go to lob; the foe at the landing goes to where he was
 	reset.call()
 	T.teleport(home + Vector3(8.0, 0, 0))
 	aim_at(P, T.pos)
@@ -238,7 +239,7 @@ func _ostra() -> void:
 		"dash: let go = the lantern is lobbed (in flight, both ends shown to all)",
 		not K.swap.is_empty() and AimKit.shown(P, "swap_fly") and bool(AimKit.entry(P, "swap_fly").get("all", false))
 	)
-	ok("item 35: a ground Trade plays her underhand lob, ostra_swap", K.anim_id == "ostra_swap")
+	ok("item 35: a ground Trade plays his underhand lob, ostra_swap", K.anim_id == "ostra_swap")
 	var t_cast := m.time
 	var done_at := [0.0]
 	step(m, 2.0, func(): if K.swaps == 1 and done_at[0] == 0.0: done_at[0] = m.time)
@@ -249,15 +250,11 @@ func _ostra() -> void:
 	)
 	ok("dash: a high lob (the lantern climbs 4m and more)", K.swap_peak >= 4.0, "peak %.1f" % K.swap_peak)
 	ok(
-		"dash: Trade trades places and slows the foe",
-		K.swaps == 1 and P.pos.x - home.x > 6.0 and T.pos.x - home.x < 2.0 and T.slow_t > 0.0,
+		"dash: Trade trades places; the foe is only moved, not slowed (the data's Swap has no slow)",
+		K.swaps == 1 and P.pos.x - home.x > 6.0 and T.pos.x - home.x < 2.0 and T.slow_t <= 0.0,
 		"me %.1f foe %.1f" % [P.pos.x - home.x, T.pos.x - home.x]
 	)
-	ok(
-		"status: the traded foe reads SLOWED (the Trade's effect), not DIZZY",
-		m.fx.nums.any(func(e): return (e["node"] as Label3D).text == "SLOWED" and (e["node"] as Label3D).visible)
-	)
-	# owner: spamming Shift never sends her off in another direction
+	# owner: spamming Shift never sends him off in another direction
 	reset.call()
 	aim_at(P, home + Vector3(8.0, 0, 0))
 	var sw0 := K.swaps
@@ -292,13 +289,13 @@ func _ostra() -> void:
 		).length() < 0.6,
 		"moved %.2f" % Vector2(P.pos.x - home.x, P.pos.z - home.z).length()
 	)
-	# item 17: she drifts slowly while the lantern flies, keeps her height over the abyss
+	# item 17: he drifts slowly while the lantern flies, keeps his height over the abyss
 	await _hover(m, P, T, home, K)
 	_far_cast(m, P, home, K)
 	reset.call()
 	K.swollen_t = 5.0
 	ok("combo: Swollen Trade is quicker", absf(K.swap_time() - 1.25) < 0.01, "%.2f" % K.swap_time())
-	# owner: everyone in the landing circle goes to where she stood (two units both end up at the origin)
+	# owner: everyone in the landing circle goes to where he stood (two units both end up at the origin)
 	await _multi(m, P, T, home, K)
 	# ---- E: the seed drops at the cursor, grows 6.5s, light column near full, the 0.3s recast floor
 	reset.call()
@@ -312,7 +309,7 @@ func _ostra() -> void:
 			K.seed["pos"].x - T.pos.x, K.seed["pos"].z - T.pos.z
 		).length() < 0.5 and bool(AimKit.entry(P, "seed").get("all", false))
 	)
-	ok("e: a small orb drops from her hand onto the spot", KitLooks.of(m).holding("os_drop"))
+	ok("e: a small orb drops from his hand onto the spot", KitLooks.of(m).holding("os_drop"))
 	ok("anim: the plant plays ostra_seed", K.anim_id == "ostra_seed")
 	var e0 := K.early_pops
 	K.use_e()
@@ -343,17 +340,26 @@ func _ostra() -> void:
 	)
 	ok("data: the pop does not ground what it catches", not KitStatus.grounded(T))
 	ok("anim: the pop plays ostra_pop", K.anim_id == "ostra_pop")
-	# left alone it pops by itself: the Collapse
+	# the data: "reactivate to detonate": left alone at full size it waits for the recast, then the Collapse
 	reset.call()
 	T.teleport(home + Vector3(6.0, 0, 0))
 	aim_at(P, T.pos)
 	var c0 := K.collapses
 	K.cast_e()
 	step(m, 7.2)
+	var waiting := not K.seed.is_empty() and K.collapses == c0
+	K.e_recast()
+	step(m, 0.1)
 	ok(
-		"e: a seed left alone pops at full growth (Collapse)", K.collapses == c0 + 1 and K.seed.is_empty(),
-		"collapses %d" % K.collapses
+		"e: a full seed waits for the recast (no auto-pop), which Collapses it",
+		waiting and K.collapses == c0 + 1 and K.seed.is_empty(), "collapses %d" % K.collapses
 	)
+	reset.call()
+	K.cd["e"] = 0.0
+	var hp_fizz := T.hp
+	K.cast_e()
+	step(m, float(K.e_def()["grow"]) + float(K.e_def()["hold_full"]) + 0.2)
+	ok("e: left unpopped at full size for 10s it fizzles out harmlessly", K.seed.is_empty() and T.hp >= hp_fizz)
 	# Snap > seed > pop: the combo the kit is built around
 	reset.call()
 	T.teleport(home + Vector3(6.0, 0, 0))
@@ -408,19 +414,19 @@ func _ostra() -> void:
 		apk > apk1 and absf(float(dl[1]) / maxf(0.01, float(dl[0])) - apk / apk1) < 0.03,
 		"lvl1 %.2f lvl10 %.2f ap %.2f/%.2f" % [float(dl[0]), float(dl[1]), apk1, apk]
 	)
-	# data: a knock no longer heals; she floats clear of ground hazards (but not a sky strike)
+	# data: a knock no longer heals; he floats clear of ground hazards (but not a sky strike)
 	reset.call()
 	P.hp = P.max_hp * 0.4
 	var h0 := P.hp
 	K.on_knock(T, true)
-	ok("data: a knock does not heal her", absf(P.hp - h0) < 0.01, "healed %.1f" % (P.hp - h0))
+	ok("data: a knock does not heal him", absf(P.hp - h0) < 0.01, "healed %.1f" % (P.hp - h0))
 	for tag in ["hazard", "lava", "spore", "toxic", "molten"]:
 		var hz0 := P.hp
 		P.hurt(10.0, null, {"src": "hazard", "tags": ["zone", tag], "burn": 2.0, "slow": 1.0})
-		ok("data: a %s hit passes her by" % tag, absf(P.hp - hz0) < 0.01 and P.slow_t <= 0.0 and P.burn_t <= 0.0)
+		ok("data: a %s hit passes him by" % tag, absf(P.hp - hz0) < 0.01 and P.slow_t <= 0.0 and P.burn_t <= 0.0)
 	var sky0 := P.hp
 	P.hurt(10.0, null, {"src": "hazard", "tags": ["mut", "hazard"], "sky": true})
-	ok("data: a sky strike still hits her", P.hp < sky0 - 5.0, "took %.1f" % (sky0 - P.hp))
+	ok("data: a sky strike still hits him", P.hp < sky0 - 5.0, "took %.1f" % (sky0 - P.hp))
 	var plain0 := P.hp
 	P.hurt(5.0, null, {"src": "mob"})
 	ok("data: a plain hit still lands", P.hp < plain0 - 1.0)
@@ -458,14 +464,14 @@ func _ostra() -> void:
 			if T.stun_t > 0.0: hit_k[0] = maxf(hit_k[0], K.boost_k)
 			elif K.snaps > 0: cast_k[0] = maxf(cast_k[0], K.boost_k))
 	ok(
-		"data rank 3: Snap speeds her up 11% on the cast and 22% on a hit",
+		"data rank 3: Snap speeds him up 11% on the cast and 22% on a hit",
 		absf(cast_k[0] - 0.108) < 0.01 and absf(hit_k[0] - 0.215) < 0.01 and absf(K.move_k() - 1.215) < 0.01,
 		"cast %.3f hit %.3f now %.3f" % [cast_k[0], hit_k[0], K.move_k()]
 	)
 	step(m, 2.2)
 	ok("data rank 3: the burst ends after 2s", K.boost_t <= 0.0 and absf(K.move_k() - 1.0) < 0.01)
 	P.slot_lv["sec"] = 1
-	# ---- data pass, Trade rank 3: allies beside her get a 26 shield (375 of a 2074-hp hunter, on 145 hp)
+	# ---- data pass, Trade rank 3: allies beside him get a 26 shield (375 of a 2074-hp hunter, on 145 hp)
 	P.slot_lv["dash"] = 3
 	reset.call()
 	var A: Hunter = m.make_hunter(
@@ -478,7 +484,7 @@ func _ostra() -> void:
 	P.ak.on_dash(false)
 	step(m, 2.2)
 	ok(
-		"data rank 3: an ally beside her gets a 26 shield for 3s", A.shield >= 25.5 and A.shield < 27.0,
+		"data rank 3: an ally beside him gets a 26 shield for 3s", A.shield >= 25.5 and A.shield < 27.0,
 		"shield %.1f" % A.shield
 	)
 	A.queue_free()
@@ -538,10 +544,40 @@ func _ostra() -> void:
 	)
 	await done(m)
 
-## Item 35: her own ground and air dash moves (the Trade's lob), ids no other hero's table has, and each one's
+## Item 35: his own ground and air dash moves (the Trade's lob), ids no other hero's table has, and each one's
+## The data: the Settled orb "goes through terrain"; a plain orb is stopped by it.
+func _bolt_through_terrain() -> void:
+	var r := setup("ostra", 6.0)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var T: Hunter = r[2]
+	var home: Vector3 = r[3]
+	var K: OstraKit = P.ak
+	var W = m.world
+	var wx := int(floor(home.x)) + 3
+	var wz := int(floor(home.z))
+	for dz in range(-2, 3):
+		W.kind[W.idx(wx, wz + dz)] = World.T_BLOCK
+	aim_at(P, T.pos)
+	step(m, float(K.lmb_def()["idle"]) + 0.3)
+	var shots0 := P.shot_n
+	var hot_n := K.settled_shots
+	P.fire_cd = 0.0
+	# held: the first orb is the Settled bolt (primed by the pause), the next a plain orb 0.6 s later
+	step(m, 0.7, func(): P.inp["fire"] = true)
+	P.inp["fire"] = false
+	step(m, 0.6)
+	var settled_dmg := float(P.wpn["dmg"]) * (1.0 + float(K.lmb_def()["prime_dmg"]))
+	ok(
+		"lmb data: the Settled bolt goes through terrain; the plain orb after it is stopped by the same rock",
+		P.shot_n >= shots0 + 2 and K.settled_shots == hot_n + 1 and absf(dmg(T) - settled_dmg) < 0.5,
+		"took %.1f (the Settled bolt alone is %.1f), %d shots" % [dmg(T), settled_dmg, P.shot_n - shots0]
+	)
+	await done(m)
+
 ## Void's Gravity Orb (parity pass): held, an orb every 0.6 s (footage 0031 -> 0034), each a one-hand flick
-## (ostra_orb) that leaves along the aim; she turns to the cursor, so while she drifts sideways every orb
-## leaves at it as it swings round her.
+## (ostra_orb) that leaves along the aim; he turns to the cursor, so while he drifts sideways every orb
+## leaves at it as it swings round him.
 func _orb_parity(m: Match, P: Hunter, home: Vector3, K: OstraKit) -> void:
 	var seen := {}
 	for s0 in m.shots.filter(func(s): return s["by"] == P):
@@ -569,11 +605,11 @@ func _orb_parity(m: Match, P: Hunter, home: Vector3, K: OstraKit) -> void:
 	var span := float(times[-1]) - float(times[0]) if times.size() > 1 else 0.0
 	var cadence := span / maxf(1.0, times.size() - 1)
 	ok(
-		"lmb parity: held, an orb every 0.6 s, each with its flick, while she drifts",
+		"lmb parity: held, an orb every 0.6 s, each with its flick, while he drifts",
 		absf(cadence - 0.6) < 0.03 and flicks == times.size() and times.size() >= 3,
 		"%d orbs, %.2f s apart" % [times.size(), cadence]
 	)
-	ok("lmb parity: every orb leaves at the cursor as it swings round her (within 8 deg)", worst < 8.0, "%.1f" % worst)
+	ok("lmb parity: every orb leaves at the cursor as it swings round him (within 8 deg)", worst < 8.0, "%.1f" % worst)
 	K.res = 0.0
 	step(m, 0.3)
 	aim_at(P, home + Vector3(3.0, 0, 0))
@@ -584,7 +620,7 @@ func _dash_moves(K: OstraKit) -> void:
 	var others := [HunterAnim.KMOVES, KMovesPair.MOVES, KMovesVV.MOVES, MergeMoves.MOVES, KMovesCare.MOVES,
 		KMovesPinBjorn.MOVES, KMovesDJ.MOVES]
 	ok(
-		"item 35: her ground and air dash moves are two distinct ids, hers alone (KMovesStone, no other table)",
+		"item 35: his ground and air dash moves are two distinct ids, his alone (KMovesStone, no other table)",
 		ids[0] != ids[1] and ids.all(func(id): return KMovesStone.MOVES.has(id) and String(id).begins_with("ostra_"))
 			and not others.any(func(t): return ids.any(func(id): return (t as Dictionary).has(id)))
 	)
@@ -595,8 +631,8 @@ func _dash_moves(K: OstraKit) -> void:
 		lengths.all(func(l): return l > 0.2 and l <= quickest), str(lengths)
 	)
 
-## Item 17: while the lantern flies she drifts slowly (15-25% of run speed), holds her height even over the abyss,
-## and the Trade sends everyone to where she is when it lands.
+## Item 17: while the lantern flies he drifts slowly (15-25% of run speed), holds his height even over the abyss,
+## and the Trade sends everyone to where he is when it lands.
 func _hover(m: Match, P: Hunter, T: Hunter, home: Vector3, K: OstraKit) -> void:
 	var W = m.world
 	var gap := home + Vector3(-3.0, 0, 0)
@@ -616,7 +652,7 @@ func _hover(m: Match, P: Hunter, T: Hunter, home: Vector3, K: OstraKit) -> void:
 	P.ak.on_dash(false)
 	m.step(DT)
 	m.step(DT)
-	ok("item 35: a Trade in the air plays her air sling and drift, ostra_swap_air", K.anim_id == "ostra_swap_air")
+	ok("item 35: a Trade in the air plays his air sling and drift, ostra_swap_air", K.anim_id == "ostra_swap_air")
 	var y0 := P.pos.y
 	var at_start := P.pos
 	var low := [y0, y0]
@@ -635,26 +671,26 @@ func _hover(m: Match, P: Hunter, T: Hunter, home: Vector3, K: OstraKit) -> void:
 	var speed := drift / (float(ticks[0]) * DT)
 	var fly_slow := float(K.dash_def()["fly_slow"])
 	ok(
-		"item 17: in flight she drifts at dash.fly_slow (in the 15-25% band) of her run speed",
+		"item 17: in flight he drifts at dash.fly_slow (in the 15-25% band) of his run speed",
 		flying and run_speed > 1.0 and fly_slow >= 0.15 and fly_slow <= 0.25
 			and absf(speed / run_speed - fly_slow) < 0.03,
 		"%.2f of %.2f (data %.2f)" % [speed, run_speed, fly_slow]
 	)
 	ok(
-		"item 17: her height is constant over the abyss (no fall)",
+		"item 17: his height is constant over the abyss (no fall)",
 		low[0] > y0 - 0.02 and low[1] < y0 + 0.02 and not P.out, "%.3f..%.3f of %.3f" % [low[0], low[1], y0]
 	)
 	var swaps0 := K.swaps
 	step(m, 0.6, func(): if K.swaps > swaps0 and last[0] == Vector3.INF: last[0] = P.pos)
 	var landed := Vector2(T.pos.x - last[0].x, T.pos.z - last[0].z).length()
-	ok("item 17: the foe in the circle is sent to where she was when it resolved", landed < 1.6 and K.swaps > swaps0)
+	ok("item 17: the foe in the circle is sent to where he was when it resolved", landed < 1.6 and K.swaps > swaps0)
 	ok("anim: arriving plays ostra_arrive", K.anim_id == "ostra_arrive")
 	for dx in range(-1, 2):
 		for dz in range(-1, 2):
 			W.kind[W.idx(int(floor(gap.x)) + dx, int(floor(gap.z)) + dz)] = World.T_GROUND
 	step(m, 1.0)
 
-## Everyone in the landing circle goes back to where she stood, each keeping its place in the circle; a body
+## Everyone in the landing circle goes back to where he stood, each keeping its place in the circle; a body
 ## another game owns is sent its move over Net (bots and online use the same path).
 func _multi(m: Match, P: Hunter, T: Hunter, home: Vector3, K: OstraKit) -> void:
 	var land := home + Vector3(7.0, 0, 0)
@@ -683,7 +719,7 @@ func _multi(m: Match, P: Hunter, T: Hunter, home: Vector3, K: OstraKit) -> void:
 	var t_off := Vector2(T.pos.x - home.x, T.pos.z - home.z).length()
 	var a_off := Vector2(A.pos.x - home.x, A.pos.z - home.z).length()
 	ok(
-		"owner: two units in the circle (a foe and an ally) both end up at her origin",
+		"owner: two units in the circle (a foe and an ally) both end up at his origin",
 		t_off < 1.3 and a_off < 1.3 and K.swapped_foes == foes0 + 2 and K.swapped_allies == allies0 + 1,
 		"foe %.2f ally %.2f" % [t_off, a_off]
 	)
@@ -692,7 +728,7 @@ func _multi(m: Match, P: Hunter, T: Hunter, home: Vector3, K: OstraKit) -> void:
 		Vector2(T.pos.x - A.pos.x, T.pos.z - A.pos.z).length() > 1.0
 	)
 	ok(
-		"net: a body another game owns is sent its move to her origin, not moved here",
+		"net: a body another game owns is sent its move to his origin, not moved here",
 		HeroZones.sent.any(func(e): return e[1] == "tp" and e[2] == "r1" and absf(float(e[3]) - home.x - 0.9) < 0.3)
 		and R.pos.distance_to(r_at) < 0.05
 	)
@@ -750,7 +786,7 @@ func _far_cast(m: Match, P: Hunter, home: Vector3, K: OstraKit) -> void:
 	step(m, 0.5)
 	_knock_in_flight(m, P, home, K)
 
-## The hover holds her height, not her place: a knock while the lantern flies still shoves her.
+## The hover holds his height, not his place: a knock while the lantern flies still shoves him.
 func _knock_in_flight(m: Match, P: Hunter, home: Vector3, K: OstraKit) -> void:
 	K._drop_holds()
 	P.teleport(home + Vector3(0, 1.0, 0))
@@ -765,7 +801,7 @@ func _knock_in_flight(m: Match, P: Hunter, home: Vector3, K: OstraKit) -> void:
 	step(m, 0.3)
 	var moved := Vector2(P.pos.x - at.x, P.pos.z - at.z).length()
 	ok(
-		"item 17: a knock while the lantern flies still shoves her, at the held height",
+		"item 17: a knock while the lantern flies still shoves him, at the held height",
 		not K.swap.is_empty() and moved > 1.0 and absf(P.pos.y - at.y) < 0.02, "moved %.2f" % moved
 	)
 	K._drop_holds()

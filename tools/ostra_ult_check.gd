@@ -17,7 +17,7 @@ func ult(main_node: Node) -> void:
 	await _lock_breaks()
 	await _burst()
 
-## The pair check's strip and dummy, with a Boki ready at her side (the bond only fills with one).
+## The pair check's strip and dummy, with a Boki ready at his side (the bond only fills with one).
 func setup_ult(arch: String, dist: float) -> Array:
 	var r := setup(arch, dist)
 	var m: Match = r[0]
@@ -60,8 +60,8 @@ func _cast_and_dome() -> void:
 	ok("ult: one X press is one cast", int(P.used.get("x", 0)) == 1 and W.casts == 1, "used %s" % str(P.used.get("x")))
 	var cd_now := float(K.cd["x"])
 	ok(
-		"ult cast: a tap sets the well at the cursor, the thrust move plays, its own cooldown starts (64s)",
-		W.phase == "tell" and K.anim_id == "ostra_well" and absf(cd_now - 64.0) < 0.2
+		"ult cast: a tap sets the well at the cursor, the thrust move plays, its own cooldown starts (70s, data)",
+		W.phase == "tell" and K.anim_id == "ostra_well" and absf(cd_now - 70.0) < 0.2
 			and W.center.distance_to(home + Vector3(6, 0, 0)) < 0.3,
 		"cd %.1f at %s" % [cd_now, str(W.center - home)]
 	)
@@ -174,7 +174,7 @@ func _swollen_and_merge() -> void:
 	)
 	await done(m)
 
-## A hard CC frees her early from the cast (a stun, then a knock); the placed well goes on either way.
+## A hard CC frees him early from the cast (a stun, then a knock); the placed well goes on either way.
 func _lock_breaks() -> void:
 	var r := setup_ult("ostra", 7.0)
 	var m: Match = r[0]
@@ -186,7 +186,7 @@ func _lock_breaks() -> void:
 	step(m, 0.5)
 	P.stun_t = 0.4
 	m.step(DT)
-	ok("lock: a stun frees her early, the well goes on", not W.locked and W.running(), "phase '%s'" % W.phase)
+	ok("lock: a stun frees him early, the well goes on", not W.locked and W.running(), "phase '%s'" % W.phase)
 	step(m, 5.0)
 	K.cd["x"] = 0.0
 	_press(m, P, home + Vector3(6, 0, 0))
@@ -195,7 +195,7 @@ func _lock_breaks() -> void:
 	P.impulse(Vector2(8.0, 0) * P.mass())
 	step(m, 0.3)
 	ok(
-		"lock: a knock frees her (and moves her), the well goes on",
+		"lock: a knock frees him (and moves him), the well goes on",
 		not W.locked and W.running() and P.pos.distance_to(at) > 0.8,
 		"moved %.2f" % P.pos.distance_to(at)
 	)
@@ -222,7 +222,7 @@ func _burst() -> void:
 
 ## The lock (Void's footage holds the cast for the 1.0s telegraph, f23-f33, and acts freely
 ## once it opens, f50): from the press until the well opens Ostra can't walk, use another ability or attack, or
-## turn once the wind-up is over; when it opens she is free to walk out at full speed and fight while it holds.
+## turn once the wind-up is over; when it opens he is free to walk out at full speed and fight while it holds.
 func _lock_and_release() -> void:
 	var r := setup_ult("ostra", 7.0)
 	var m: Match = r[0]
@@ -246,18 +246,18 @@ func _lock_and_release() -> void:
 	K.use_e()
 	step(m, 0.3)
 	P.inp["fire"] = false
-	ok("lock: movement input doesn't move her", Vector2(P.pos.x - at.x, P.pos.z - at.z).length() < 0.05)
+	ok("lock: movement input doesn't move him", Vector2(P.pos.x - at.x, P.pos.z - at.z).length() < 0.05)
 	ok("lock: an RMB press and an attack are ignored", K.snaps == snaps0 and K.snap.is_empty() and P.shot_n == 0)
 	ok("lock: an E press is ignored (no seed)", K.seed.size() == seeds0 and K.seed.is_empty())
 	ok("lock: the glove and the Boki's C are held too (the cast_locked hook)", K.cast_locked())
-	ok("lock: she cannot turn once committed", P.aim_dir().distance_to(face0) < 0.01 and W.locked)
+	ok("lock: he cannot turn once committed", P.aim_dir().distance_to(face0) < 0.01 and W.locked)
 	ok("lock: the cast pose is held while the dome fills (ostra_well)", K.anim_id == "ostra_well")
 	var t := 0.6 + DT * 2.0
 	while not W.is_open() and t < 2.0:
 		m.step(DT)
 		t += DT
 	ok(
-		"lock: it lasts the 1.0s cast (Void's telegraph), then she is free and the well runs on",
+		"lock: it lasts the 1.0s cast (Void's telegraph), then he is free and the well runs on",
 		absf(t - 1.0) < 0.05 and not W.locked and not K.busy() and W.is_open() and K.anim_id == "ostra_well_snap",
 		"freed at %.2fs" % t
 	)
@@ -266,7 +266,7 @@ func _lock_and_release() -> void:
 	step(m, 0.5)
 	var speed := Vector2(P.pos.x - from.x, P.pos.z - from.z).length() / 0.5
 	ok(
-		"release: shortly after she walks out at >= 90% run speed while the well holds",
+		"release: shortly after he walks out at >= 90% run speed while the well holds",
 		speed >= 0.9 * P.base_speed and W.is_open(),
 		"%.2f of %.2f m/s, well %s" % [speed, P.base_speed, W.phase]
 	)
@@ -274,7 +274,7 @@ func _lock_and_release() -> void:
 	aim_at(P, home + Vector3(0, 0, -6))
 	tap(m, P)
 	step(m, 0.4)
-	ok("release: she can act while it holds (a Snap)", K.snaps == snaps0 + 1 and W.is_open(), "snaps %d" % K.snaps)
+	ok("release: he can act while it holds (a Snap)", K.snaps == snaps0 + 1 and W.is_open(), "snaps %d" % K.snaps)
 	var y0 := P.pos.y
 	P.inp["jump"] = true
 	step(m, 0.1)
@@ -296,7 +296,7 @@ func _lock_and_release() -> void:
 	)
 	step(m, 0.45)
 	ok(
-		"dash flow: ... and goes the step the well opens and frees her (into_dash.x buffer)",
+		"dash flow: ... and goes the step the well opens and frees him (into_dash.x buffer)",
 		not W.locked and W.is_open() and (K.swap_aim >= 0.0 or not K.swap.is_empty())
 	)
 	await done(m)
