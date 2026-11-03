@@ -936,9 +936,9 @@
 "shadow": 1
 },
 "scripts/ui/prologue.gd": {
-"long_line": 32,
+"long_line": 24,
 "nested_ternary": 1,
-"semicolon": 52,
+"semicolon": 40,
 "shadow": 1
 },
 "scripts/ui/reset_pop.gd": {
