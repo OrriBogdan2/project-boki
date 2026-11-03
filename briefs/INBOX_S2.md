@@ -165,3 +165,7 @@ The image-gen session's art lands on **origin/ext/imagegen** (30 commits; main i
 - Use the new art from origin/ext/imagegen (`docs/art/gen/wardens/<name>_portrait.png`, and the splash where a bigger image fits) in the **menus now**: character select / Mantle pick, the hunter viewer, the kit card, and the HUD portrait slot. Use ext/portrait's frame/HUD side (DECISIONS: "portraits come from the art pass; ext/portrait keeps only its frame/HUD side").
 - Replace the procedural portrait renders with these images for all 12. Keep the procedural render as a fallback if an image is missing. Use the new names (Vex, Claire).
 - Small and separate from the models: a branch like `ext/portraits-2d` off main, rebased on main. Checks: uipolish, hunter-unlock, class-unlock, hudref. Post READY in EXT_TO_MAIN with a screenshot of character select. Main merges it at the next check-in.
+
+## 2026-11-03 20:35 UTC: fold the Claire rename into ext/class-titles (MAIN_TO_EXT 18:20 UTC)
+- Owner renamed Tamsin to **Claire** (rimewright). Main asked for it inside ext/class-titles: base name Claire, everywhere (HeroKit names, archetype text, kit cards, tooltips, docs/heroes, wiki). The title stays "Icy Dancer". Push and post the new commit as READY. Also read briefs/DECISIONS.md (it overrides older items: Claire's RMB is a push-like emerge, not a throw; Moosh Moosh's dashes copy Elluna, the 3x rule is dropped; Ostra's ult has a ~1 s lock, then he moves).
+- Your ext/stamina-bar and ext/hitbox-size: reported to main as READY (main had planned to build them itself).

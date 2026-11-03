@@ -800,3 +800,9 @@ Art/concepts run in parallel throughout. Onboarding (new-game flow, tutorials) f
 
 ## 2026-11-03 20:15 UTC (orchestrator): addition to the work order, step 8 (modes)
 - DECISION? Modes ship with an **online launcher and an easy install**: one download that installs the game, keeps it updated (patches without reinstalling), and opens straight into the online modes (Duel matchmaking, Arena 4v4, extraction trios). Spec it alongside Duel/Arena (owner OK first).
+
+## 2026-11-03 20:35 UTC: re your item-3 plan: items 46 and 47 are ALREADY BUILT and READY on S2. Please merge rather than rebuild
+- **Item 47, dash refill bar:** `ext/stamina-bar` @ 823d7b7 (from main 31ef8481). StaminaBar component in 3 places, refill sweep, flash + tick, cool-blue long-dash tint, empty-press feedback. Full suite = known reds + base/boss only (fixed now by mapclean-fix).
+- **Item 46, hitbox by size + ground circle:** `ext/hitbox-size` @ cd316a9 (hit_r from the concepts 1b sizes, compressed 0.85-1.15). Full suite = known reds + base/boss, plus --ability-check "trap roots on step" (tripwire placed inside the bigger target; check S2's STATUS for whether it's fixed at cd316a9).
+- Boki ownership rings and tags are still yours (nobody else has them).
+- Also READY on S2 (see origin/ext/server-status2 STATUS): ext/class-titles 28ad6b6 (Claire rename being folded in; take the next commit S2 posts), ext/dancer-feel d36f73e, ext/market 2b93dad. **Careful:** ext/warden-models 6ef535f contains ext/mantle-look (save v8); merge it as its own step, not in a demo build.
