@@ -49,6 +49,29 @@ Source vs ours per slot; [data] = the game data, [footage] = hero-ref/breah.md a
 | X Tetraform | tap or hold-drag, rocks centre-out, slow [data, footage] | Basalt Spine: the same, rocks only (owner item 15) | owner rule over data |
 | Shift Landslide | a rock ahead, a shove dash, the rock launched [footage] | Rubble Leap (owner's leap), dust only (no ring or blast) | owner design |
 
+## Audit (Nov 3 23:40)
+Rows of briefs/specs/kit-audit/tarek_ostra_claire.md. (a) done on this branch, (b) fixed now, (c) not applied, with
+the reason. Asserts: `--dolm-combo-check` (`audit tarek: ...`, `rock ...`, `glide slam: ...`, `small: ...`).
+
+| Row (sev) | Verdict | Where / why |
+|---|---|---|
+| RMB out of a glide (HIGH) | (a) | 5e00729a: folds the glider, plunges at the glider's dive speed, slams where he lands |
+| RMB cooldown 9 vs 11 (LOW) | (b) | 11 s (data) |
+| RMB reset on knock (LOW) | (c) | the owner removed it (item 14); the in-game card (frame 0240) does show it, if he wants it back |
+| RMB air press (LOW) | (a) | kept and reused for the glide slam |
+| Molten Guard from any team rock (LOW) | (b) | only his own rocks give a stack (ally rocks still fly); asserted |
+| E: allies hop the rocks (MED) | (b) | owner 23:55 (the data): an ally jumping against his rock is lifted onto it and over; walking, allies are stopped; foes are stopped either way; he still climbs his own by walking (item 25). Asserted |
+| E cooldown 13 vs 12.5 (LOW) | (b) | 12.5 s |
+| Shift ground (n/a), Shift air shove (LOW) | (c) | the owner's leap stays; the air dash has no source (owner question if wanted) |
+| Dash -> LMB air buffer (LOW) | (c) | the source-buffering finding keeps modes (coordinator) |
+| LMB punch auto-release (LOW) | (b) | held as long as you like, full stays full, one punch on release; asserted |
+| LMB damage ratios (LOW) | (c) | the charge scaling is ours (noted) |
+| X Basalt Spine, X auto-cast after 3 s (LOW) | (c) | documented; the 3 s cap keeps a forgotten hold from blocking the ult |
+| Hunter viewer moves (MED) | (b) | RMB `breah_crouch`, `breah_slam`; X `breah_spine_aim`, `breah_spine`; asserted |
+| Player-facing wiki name (MED) | (c) | the Tarek rename is main's (done there) |
+| Self-shake (MED) | (c) | ext/no-shake |
+| Explosion/ring rule (n/a) | (a) | complies |
+
 ## Per-slot table
 | Slot | Input | Aim and telegraph | What it does (ours) | Anim (KMovesStone) | Sound |
 |---|---|---|---|---|---|

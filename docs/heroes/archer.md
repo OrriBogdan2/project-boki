@@ -26,10 +26,30 @@ Source vs ours per slot; [data] = the game data (supervive-data), [footage] = he
 | X Primal Forces | 3 empowered no-draw shots, the 3rd executes [data] | Starpiercer: the same rules | matches |
 | Shift Spirit Walk | a dodge roll of about 3 m in 0.27 s (peak 17 m/s at 0.13 s), straight into the crouched walk [footage 655.55-655.65] | **was 2.55 m in 0.18 s** (the owner found Pin's Shift fast): now 3.0 m in 0.28 s (`roll` 3.5, `roll_t` 0.24, with the dash feel); `pin_roll` retimed to match; the start burst and ring are gone (owner: no rings or bursts on dashes), a dust puff instead | fixed |
 
+## Audit (Nov 3 23:40)
+Rows of briefs/specs/kit-audit/zedran_bjorn_pin.md (it audited main 200effce). (a) done on this branch, (b) fixed now,
+(c) not applied, with the reason. Asserts: `--archer-combo-check` (`audit pin: ...`, `pin early release: ...`, `combo archer: ...`).
+
+| Row (sev) | Verdict | Where / why |
+|---|---|---|
+| LMB draw through Shift / jump (HIGH) | (a) | fb92ee1c: the draw carries and charges on through the roll, the flick and a jump. `dash.*.lmb` stays buffer (coordinator: the source-buffering finding keeps modes, a10d678a) |
+| Spirit Walk roll feel (HIGH) | (a) | 24a34e21: 3 m in 0.27 s (footage), `pin_roll` retimed |
+| Spirit Walk cooldown 6 vs 9.5 (MED) | (b) | 9.5 s (data) |
+| Shift fx: roll ring and bursts, flick bursts (MED) | (a)+(b) | 24a34e21 (roll); the air flick's four bursts removed now |
+| Shift through raised walls (MED) | (c) | the heightmap has no passable ledge faces; recorded as an Assumption (the walk passes rocks, trees, pillars and barriers) |
+| Passive: Focus/Deadeye invented; instant full draw; knock heal (MED) | (b) partly, (c) | the knock heal (and its RUN DOWN ring and move) is gone; a full Focus no longer skips the draw stages (it is spent on the arrow loosed, `Hunter.focus_draw` removed). Removing Focus/Deadeye entirely is an owner call (owner question) |
+| LMB (-) | (a) | parity 24a34e21: cooldown 0.5 s (card) |
+| Heavy Shot wall payoff ~5x, pierce invented (MED) | (b) pierce, (c) the ratio | it now stops on the first foe (asserted). An early wall pin pays 40% of the wall hit (was 0). The 5x ratio is not applied: our base is already a far bigger share of a hunter (full Heavy 30 + wall 12 = 34% of a light's 124 HP, against the source's 208 of Myth's 1100 = 19%), so 5x would one-shot |
+| RMB hold 0.5 s dead zone, auto-release (LOW) | (c) | kept: the 0.5 s guard keeps a tap from costing the 16 s cooldown |
+| RMB self-recoil (LOW) | (b) | removed |
+| E cooldown 9 vs 15, DPS (MED) | (b) cd, (c) DPS | 15 s (data). DPS kept: 10/s is 8% of a light's HP a second, the source's 61/s is 5.5% of Myth's |
+| X cooldown 36 vs 60, beam damage (MED) | (b) cd, (c) damage | 60 s (data). Beams stay 18/25: the burst cap (the ult then the merge never one-shots a full-health light) |
+| Self-shake (MED) | (c) | ext/no-shake owns item 50 |
+
 ## Per-slot table (slot, input, our behaviour, source behaviour, difference and why)
 | Slot | Input | What it does now (our words) | Source behaviour | Difference and why |
 |---|---|---|---|---|
-| Passive | always | Focus (fills standing still or sneaking, from pins) + Hawk Sense (foes under half health show through cover within 22 m) + a knock heals 18 (and, as for every hero, the takedown reset returns a dash charge) | Soul Hunter: injured hunters seen through fog; tall-ledge climb | Focus/Deadeye stays as our own loop. The ledge climb has no heightmap equivalent and is left out |
+| Passive | always | Focus (fills standing still or sneaking, from pins) + Hawk Sense (foes under half health show through cover within 22 m) (as for every hero, the takedown reset returns a dash charge; no kit knock heal) | Soul Hunter: injured hunters seen through fog; tall-ledge climb | Focus/Deadeye stays as our own loop for now (audit: an owner call); a full Focus no longer skips the draw. The ledge climb has no heightmap equivalent and is left out |
 | LMB | tap | Released before Empowered: 15 damage, lands at the cursor | Weak tap shot (not isolated) | Assumed to land at the cursor too |
 | LMB | hold | Empowered at 0.6 s (30, lands at the cursor up to 12 m); Supercharged at 1.15 s (60, flies past the cursor to 16 m). Feathered V reticle (barbs swept back to the bow) closing on the cursor, a leaf glint and a green fletch burst when a stage comes up, a body flash, a thick mint line past the cursor to 16 m and a target ring at Supercharged; the fletch glint at the bow hand only while a stage is ready | Same stages and reticle | Timings at the low end of the footage's ranges (ratio 1 : 1.9) |
 | LMB | perfect | Let go within 0.15 s of a stage coming up: no extra damage, the next draw runs 1.6x until Empowered; a brief gold fletch burst (her own motif: feathers radiating from a core, 1.1 m, 0.13 s) with a ring at the bow hand, a higher-pitched shing, the cursor star, `arc_perfect` | The next Empowered charge is faster; a gold star by the bow hand | The 1.6x is our pick (not measurable at 5 fps) |
@@ -119,7 +139,7 @@ Light class, 124 HP: tap 15, Empowered 30, Supercharged 60, overdrawn 30, full H
 | Wall pin, then a shot | Deadeye (gold second hit, hitstop, `pin_deadeye`) | same |
 | Hail Wall arc | A foe on the arc burns; one inside the arc's radius does not | same |
 | Spirit Walk into a rock column | Passes through; ending inside puts her back, 30 Focus | same |
-| Knock | Heal 18, +1 dash charge, RUN DOWN, `pin_rundown` | same |
+| Knock | +1 dash charge (DashReset); no kit heal (audit: the source has none) | same |
 | Rival under half health | Shown through cover (Hawk Sense) | same |
 | A Boki merge mid draw / Heavy Shot / Spirit Walk | Each dropped with no shot; Spirit Walk ends | same |
 | Starpiercer, then a wall pin, then three beams | The pinned foe eats every beam; lined-up foes behind it are pierced too | `--archer-combo-check` |
