@@ -132,7 +132,7 @@ func _shots() -> Array:
 			"text": "On the broken isles, survivors found the Boki.\n"
 				+ "A hunter bonded to one could wake a fallen Warden's Mantle.",
 			"cam": [[K + Vector3(0.2, 2.0, 7.6), K + Vector3(0.2, 0.9, -1.2), K + Vector3(0.25, 1.7, 6.4), K + Vector3(0.3, 0.85, -1.0), 3.1],
-				[K + Vector3(0.3, 1.15, 3.7), K + Vector3(0.5, 0.6, -0.2), K + Vector3(0.35, 1.05, 3.2), K + Vector3(0.5, 0.65, -0.2), 4.4]]},
+				[K + Vector3(0.4, 0.95, 3.8), K + Vector3(0.4, 0.75, -0.3), K + Vector3(0.4, 0.9, 3.35), K + Vector3(0.4, 0.78, -0.3), 4.4]]},
 		{"chapter": "THE RACE", "mood": "deep", "tint": Color("b08aff"), "grade": 0.24, "event": "drop",
 			"text": "Somewhere in the ruins lies the Wyrmheart: one wish to remake the world, or rule it.\n"
 				+ "Every hunter wants it. So does the Wyrm.",
