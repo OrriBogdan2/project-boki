@@ -190,3 +190,14 @@ The owner saw an explosion with Moosh Moosh and isn't sure whether it comes from
 - **Distance ratio:** the air dash should be **roughly 3× the ground dash.** Today the ground dash is ~4.2 m (before dash_feel), and the air glide was set to the source's ~12 m (owner, 02:20 UTC). Keep the ground dash short, and set the air dash so `air ≈ 3 × ground` after the dash_feel multiplier. Keep both values in data, and say in docs/heroes/tender.md which one moved.
 - **Assert:** air distance / ground distance is between 2.7 and 3.3; both dashes play their own move (not the shared roll).
 - **Screenshots:** a 5-frame strip of each dash at gameplay zoom, plus a close-up.
+
+## 25. Breah's walls: she can nearly hover over and climb them easily; nobody else can (kit fix, Breah branch with items 14/15)
+- Breah (only Breah) treats her own raised walls/rocks as climbable: walking into one carries her up and over smoothly, with a light "almost hovering" step-up (no hard stop, no jump needed), and she can stand on top.
+- Every other hunter, bot and Boki is still blocked by them exactly as now (walls stay real cover for everyone else). Ownership by caster, so an enemy Breah's walls block an allied Breah? Default: only the wall's own caster climbs it; note it in docs/heroes/dolm.md.
+- Check the source data in `briefs/supervive-data/` for Tetra's interaction with her own terrain and follow it if it's there.
+- Assert: Breah crosses her own wall in ≤0.6 s without input other than moving; another hunter walking into it is stopped.
+
+## 26. BUG: Breah RMB then glide sends her straight down instead of up (kit fix, same branch; do first)
+- Repro from the owner: use RMB (the hop), then press glide/jump during or right after it; she drops straight down instead of rising/gliding.
+- Likely the RMB hop's vertical velocity or z state isn't cleared/handed off when the glide starts (compare with ext/airdash-glide's handoff fix). Find the cause, fix it, and add a check: RMB → glide keeps z ≥ the hop's z for the first 0.3 s and enters normal glide.
+- Check the same RMB-then-glide sequence on every hero with a hop/leap move (Zedran's air slam, Linwick, Moosh Moosh) and report any that drop.
