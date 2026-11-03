@@ -263,7 +263,7 @@ func _pick_hide() -> void:
 		var tile := Vector3(bt.x + 0.5, m.world.ground_at(bt.x + 0.5, bt.y + 0.5), bt.y + 0.5)
 		var away := (c - from).normalized().dot((from - tp).normalized())
 		var hidden_from_threat: bool = threat != null and not m.world.los(threat.pos, tile, tile.y + 0.8)
-		var s := bd - dme * 0.45
+		var s := bd - dme * 0.45 if threat != null else -dme     # (nobody near: the nearest grass will do)
 		if hidden_from_threat:
 			s += 6.0
 		if away < -0.2:
