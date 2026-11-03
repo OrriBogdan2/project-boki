@@ -967,3 +967,4 @@ Update both KMoves and their animation strips, and put each in that hero's curre
   - Or **choose which ability to fully max**, exactly as the real game allows (one max plus the normal ranks), so you can practise your real build.
 - **Easy reset:** one button or key puts ranks back to level 1 (and resets cooldowns).
 - This goes with main's level-up choice system and the planned connected Training Room. Ext: no action, just awareness. Kit max-rank bonuses must work when set this way, not only through levelling.
+- **Owner follow-up:** in SUPERVIVE these practice options (ranks, max, reset, cooldowns and so on) live in the **Esc menu → a Training/Practice settings page**, not on an on-screen bar. Copy that: move our arena key hints and toggles (K, L, the 2-9 hunter picks, Backspace reset, N bot, O cooldowns, U ultimate) into an Esc-menu Practice page. The world view stays clean.
