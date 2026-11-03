@@ -11,6 +11,10 @@ func run(main_node: Node) -> void:
 	await ult_check.ult(main)
 	n += ult_check.n
 	fails += ult_check.fails
+	var flow = load("res://tools/dash_flow_check.gd").new()
+	var bad: int = await flow.combos_of(main, "dolm")
+	ok("item 51: each slot casts mid-jump; Shift / jump out of it act in 0.1 s; holds go through every move",
+		bad == 0, "%d failing (the DASHFLOW lines)" % bad)
 	print("PAIRCHECK dolm DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
@@ -545,6 +549,7 @@ func _breah() -> void:
 	ok("anim: her long air dash plays breah_exdash", K.anim_id == "breah_exdash")
 	step(m, 0.8)
 	await _dash_moves(m, P, T, home, K, reset)
+	_air_dash_hold(m, P, K, reset)
 	# ---- rank 3
 	P.slot_lv["sec"] = 3
 	P.slot_lv["kin"] = 3
@@ -730,6 +735,37 @@ func _hop_glide(m: Match, P: Hunter, home: Vector3, K: DolmKit, reset: Callable)
 		)
 		P.inp["glide"] = false
 		step(m, 0.8)
+
+## Item 51: the Quake Fist charge carries through her air dash (it charges on, short of the auto punch) and a
+## release in it punches as the dash ends, in the air, keeping most of her speed.
+func _air_dash_hold(m: Match, P: Hunter, K: DolmKit, reset: Callable) -> void:
+	reset.call()
+	P.inp["fire"] = true
+	step(m, float(K.lmb_def()["tap"]) + 0.15)
+	var k0 := K.lmb_t
+	var n0 := K.punches
+	P.pos.y += 4.0
+	P.grounded = false
+	P.inp["move"] = Vector2(1, 0)
+	P.ex_cd = 0.0
+	P.do_dash()
+	var dashing := K.flow.move_now() == "air"
+	step(m, 0.08)
+	ok("item 51: the Quake Fist charge carries through her air dash, charging on",
+		dashing and K.lmb_t > k0 + 0.05 and K.punches == n0, "charge %.2f -> %.2f dash %s punches +%d" % [k0, K.lmb_t,
+		dashing, K.punches - n0])
+	var speed := 0.0
+	P.inp["fire"] = false
+	var t := 0.0
+	while K.punches == n0 and t < 0.5:
+		speed = Vector2(P.vel.x, P.vel.z).length()       # (the last step before the punch: the dash's end)
+		m.step(DT)
+		t += DT
+	var kept := Vector2(P.vel.x, P.vel.z).length()
+	ok("item 51: let go in the air dash, she punches as it ends, still in the air and moving",
+		K.punches == n0 + 1 and not P.grounded and kept >= speed * 0.5, "%.2fs speed %.1f -> %.1f" % [t, speed, kept])
+	P.inp["move"] = Vector2.ZERO
+	step(m, 0.8)
 
 ## Item 35: her own ground (Rubble Leap) and air (the long dash) moves, ids no other hero's table has, each one
 ## keyed to end with its dash (the leap's crouch and flight; the air dash's time with the dash feel), and

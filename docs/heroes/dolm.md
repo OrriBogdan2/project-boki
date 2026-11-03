@@ -93,6 +93,7 @@ row again. The bridge is gone altogether (owner review item 15: no terrain over 
 | Basalt Spine across a fleeing foe | the foe is shoved to its side of the line and slowed; the ridge walls it off | `ult: a body on the line is shoved off it...`, `ult: the rise slows a foe beside it` |
 | Basalt Spine over the abyss | rocks on the banks only, clipped at the edges; no walkway; a line fully over the abyss is refused | `spine (item 15): over the abyss no walkway...`, `spine (item 15): the line is clipped...` (`--zone-check`), `spine (item 15): a cast fully over the abyss is refused...` |
 | Basalt Spine, punch, then the merge | the target lives (burst cap) | `ult burst: ridge, punch, merge and its ultimate leave a full-health light hunter standing` |
+| Quake Fist charge, then her air dash (item 51) | the charge carries through and charges on (short of the auto punch); let go in it and she punches as it ends, in the air, the step bending the speed she carries instead of replacing it | `item 51: the Quake Fist charge carries through her air dash...`, `item 51: let go in the air dash...` |
 
 ## Small mechanics
 | Mechanic | Source | Footage | Ours |
@@ -169,7 +170,7 @@ row again. The bridge is gone altogether (owner review item 15: no terrain over 
 - Ground (the leap): LMB fires mid-leap, the arc carries on (the guide's "Punch to Extend Dash"); RMB starts the charge
   mid-leap, let go in the air and the slam lands with her (the guide's "Dash -> RMB Dunk Combo"); E waits for the
   landing (Rockwave is ground-only); X and Q go mid-leap. Air (the long dash): LMB waits for its end (the shared dash
-  can't fire the weapon), RMB, X and Q go mid-dash, E never goes off in the air (ground-only, source-correct).
+  can't fire the weapon; a Quake Fist charge held into it charges on, item 51), RMB, X and Q go mid-dash, E never goes off in the air (ground-only, source-correct).
 - Shift during the punch's wind-up, the charge, Stone Row's flash or the Spine's aim leaps at once and the ability carries
   on (into_dash rows). A second leap while the first one's rock is still coming down sends that rock on at once.
 - Stone Row from on top of one of her rocks measures from the ground just past it (it used to find no room).

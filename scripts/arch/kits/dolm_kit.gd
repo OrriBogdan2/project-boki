@@ -300,7 +300,10 @@ func lmb_override(held: bool, dt: float) -> bool:
 	# (a merge ends the hold: letting go of it must not throw a punch mid-transformation)
 	if not h.can_fire() or KinMerge.transforming(h):
 		if lmb_t >= 0.0 and flow.pauses_hold("lmb") and not KinMerge.transforming(h):
-			return true         # a dash whose hold row keeps the Quake Fist charge: it waits for the dash's end
+			# a dash whose hold row keeps the Quake Fist charge: it charges on (short of the auto punch) and a
+			# release in it punches at the dash's end
+			if held: lmb_t = minf(lmb_t + dt, float(ld["full"]))
+			return true
 		if lmb_t >= 0.0:
 			lmb_t = -1.0
 			h.mel_hold = 0.0
@@ -410,8 +413,13 @@ func _punch(k: float) -> void:
 	var dir := h.aim_dir()
 	# the step: an impulse, not a roll (a punch is not a dash: it never blocks fire or reads as one)
 	var stepv := float(pd["step_v"]) * (float(pd["air_k"]) if not h.grounded else 1.0)
-	h.vel.x = dir.x * stepv
-	h.vel.z = dir.y * stepv
+	var v := dir * stepv
+	if not h.grounded:
+		# in the air the step bends the speed she carries (a dash, a jump: item 51) instead of replacing it
+		var carry := Vector2(h.vel.x, h.vel.z)
+		v = (carry + v).limit_length(maxf(carry.length(), stepv))
+	h.vel.x = v.x
+	h.vel.z = v.y
 	var dmg: float = lerpf(float(pd["dmg"][0]), float(pd["dmg"][1]), k) * m.dmg_mult(h)
 	var kb := lerpf(float(pd["kb"][0]), float(pd["kb"][1]), k)
 	var fp := h.pos + Vector3(dir.x * 1.3, 1.0, dir.y * 1.3)

@@ -26,7 +26,7 @@
 	"hold": {
 		"lmb": {
 			"ground": {"mode": "keep"},
-			"air": {"mode": "cancel", "reason": "today's behaviour, to review", "source": "Not in the data or footage (the source shows no air dash). Ours today (measured by --dash-flow-check): the air dash ends the Quake Fist charge with no punch."},
+			"air": {"mode": "keep"},
 			"jump": {"mode": "keep"}
 		},
 		"rmb": {
