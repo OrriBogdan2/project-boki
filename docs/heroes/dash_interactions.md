@@ -67,20 +67,20 @@ One row per hero and pair, read from `content/dash_flow/<hero>.json` by `DashFlo
 | Venator | E -> dash |  | the kit's own handling (no row yet) |
 | Venator | ult (X) -> dash |  | the kit's own handling (no row yet) |
 | Venator | Q glove -> dash |  | the kit's own handling (no row yet) |
-| Zedran | ground dash -> LMB |  | buffered to the dash's end |
-| Zedran | ground dash -> RMB |  | fires mid-dash |
-| Zedran | ground dash -> E |  | fires mid-dash |
-| Zedran | ground dash -> ult (X) |  | fires mid-dash |
-| Zedran | ground dash -> Q glove |  | fires mid-dash |
-| Zedran | air dash -> LMB |  | buffered to the dash's end |
-| Zedran | air dash -> RMB |  | buffered to the dash's end |
-| Zedran | air dash -> E |  | fires mid-dash |
-| Zedran | air dash -> ult (X) |  | fires mid-dash |
-| Zedran | air dash -> Q glove |  | fires mid-dash |
-| Zedran | LMB -> dash |  | the kit's own handling (no row yet) |
-| Zedran | RMB -> dash |  | the kit's own handling (no row yet) |
-| Zedran | E -> dash |  | the kit's own handling (no row yet) |
-| Zedran | ult (X) -> dash |  | the kit's own handling (no row yet) |
+| Zedran | ground dash -> LMB | Data: Flame Step is itself the attack ('dash attack in facing direction'); footage 0372-0377: crouch, ~0.3s drive, ~0.35s low recovery, no slash inside it. Ours: a slash pressed in the crouch or the drive swings as the drive ends. | buffered to the dash's end |
+| Zedran | ground dash -> RMB | Data: no rule for RMB inside Flame Step (the patch only restricts turning after RMB into Shift); footage: no RMB inside a dash. Ours: the Smash starts mid-dash (the Slam's wind-up, the Lunge's charge) and the drive carries him into it. | fires mid-dash; dash momentum carries |
+| Zedran | ground dash -> E | Data: the chain is a thrown hook with no movement lock; footage 0301-0366 shows no dash with it. Ours: the throw goes mid-dash, the drive goes on. | fires mid-dash |
+| Zedran | ground dash -> ult (X) | Data: Volcanic Rebuke makes him Invulnerable, then he strikes back; footage ult f33-f38: planted through the guard; the sheet's combo is 'dive with Quick Dash, then the guard'. Ours: X ends the dash (or its crouch) and he plants into the guard. | cancels the dash |
+| Zedran | ground dash -> Q glove | No source (the glove is ours). Ours: as every hero's default, it goes mid-dash. | fires mid-dash |
+| Zedran | air dash -> LMB | No source: the footage shows no air dash (he uses the Air Slam in the air). Ours: as on the ground, the slash swings at the end. | buffered to the dash's end |
+| Zedran | air dash -> RMB | Data: Obsidian Slam is the RMB 'while airborne', with its own slot; footage 0251-0300: the slam from the air onto a cursor disc. Ours: RMB in the air dash ends it and the Meteor Drop's hang begins at once. | cancels the dash |
+| Zedran | air dash -> E | No source for the air dash. Ours: the throw goes mid-dash. | fires mid-dash |
+| Zedran | air dash -> ult (X) | Data and footage: the guard is planted (ult f33-f38). Ours: X ends the air dash and the guard goes up. | cancels the dash |
+| Zedran | air dash -> Q glove | No source (the glove is ours). | fires mid-dash |
+| Zedran | LMB -> dash | No source. Ours: Shift drops a Searing Wave charge (a slash's swing is too short to matter). | the dash cancels its wind-up or recovery |
+| Zedran | RMB -> dash | Data: 'turning restricted after RMB into Shift' (patch 05.02.25): the dash comes after the strike, facing its way. Ours: Shift during the Slam's wind-up, a Lunge or a Meteor Drop is held and goes the moment it's over (the Meteor Drop lets it go 0.25s into its recovery); the turn lock is not built. | the dash waits for the ability |
+| Zedran | E -> dash | Owner: 'you can cancel or exit per the source'; the source's exit is not shown in the data or footage. Ours: Shift in the Warchain's pull ends it and the Rampage drives at once (no crouch), the pull's speed running into it; while the chain only flies or holds, the dash just goes. | the dash cancels its wind-up or recovery; dash momentum carries |
+| Zedran | ult (X) -> dash | Data: invulnerable, then the strike; footage ult f33-f44: planted ~1.1s, the cleave, the recovery. Ours: the guard and cleave are committed; Shift is held and goes when it's over. | the dash waits for the ability |
 | Zedran | Q glove -> dash |  | the kit's own handling (no row yet) |
 | Bjorn | ground dash -> LMB |  | buffered to the dash's end |
 | Bjorn | ground dash -> RMB |  | fires mid-dash |

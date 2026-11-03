@@ -6,6 +6,7 @@ extends RefCounted
 
 const AKCheck := preload("res://tools/archetype_check.gd")
 const ULT := preload("res://tools/dj_ult_check.gd")      # both heroes' ultimates on X, and the burst cap
+const ZFEEL := preload("res://tools/zedran_feel_check.gd")   # Zedran's chain, RMB rows, Meteor Drop and dashes
 var A: AKCheck
 
 ## Standalone: one hero's sections (both for "all"). Prints AKCHECK lines like --archetype-check.
@@ -606,10 +607,10 @@ func juggernaut(a) -> void:
 					float(AimKit.entry(P, "drop_aim")["at"].y) - T.pos.z).length() < 0.6)
 	P.ak.press_rmb()
 	var disc := AimKit.shown(P, "drop") and bool(AimKit.entry(P, "drop").get("all", false))
-	A.step(m, 0.5)
+	A.step(m, 1.1)
+	var off := Vector2(K.meteor.last_drop.x - T.pos.x, K.meteor.last_drop.z - T.pos.z).length()
 	A.ok("juggernaut RMB air: Meteor Drop lands at the cursor (disc everyone sees)",
-			disc and K.drops == 1 and Vector2(K.last_drop.x - T.pos.x, K.last_drop.z - T.pos.z).length() < 1.0,
-			"landed %.1f from the cursor" % Vector2(K.last_drop.x - T.pos.x, K.last_drop.z - T.pos.z).length())
+			disc and K.meteor.drops == 1 and off < 1.0, "landed %.1f from the cursor" % off)
 	A.ok("juggernaut RMB air: Meteor Drop slows, centre stunned",
 			K.last_variant == "air" and A.dmg(T) >= 24.0 and T.slow_t > 0.0 and T.stun_t > 0.0,
 			"took %.0f slow %.2f stun %.2f" % [A.dmg(T), T.slow_t, T.stun_t])
@@ -621,7 +622,8 @@ func juggernaut(a) -> void:
 	A.aim_at(P, T.pos)
 	P.ak.press_rmb()
 	A.step(m, 0.2)
-	A.ok("juggernaut Meteor Drop: a second one is denied while its slot rests", K.drops == 1, "drops %d" % K.drops)
+	A.ok("juggernaut Meteor Drop: a second one is denied while its slot rests", K.meteor.drops == 1,
+			"drops %d" % K.meteor.drops)
 	K.cd["air"] = 0.0
 	K.ch_rmb = 0.0
 	K.cd["rmb"] = 2.0
@@ -629,10 +631,10 @@ func juggernaut(a) -> void:
 	P.grounded = false
 	A.aim_at(P, T.pos)
 	P.ak.press_rmb()
-	A.step(m, 0.5)
+	A.step(m, 1.1)
 	A.ok("juggernaut Meteor Drop: it fires with the Smash resting (usable right after a ground Smash)",
-			K.drops == 2 and K.ch_rmb < 1.0 and float(K.cd["air"]) > 6.0,
-			"drops %d air cd %.2f" % [K.drops, float(K.cd["air"])])
+			K.meteor.drops == 2 and K.ch_rmb < 1.0 and float(K.cd["air"]) > 6.0,
+			"drops %d air cd %.2f" % [K.meteor.drops, float(K.cd["air"])])
 	K.ch_rmb = 1.0
 	K.cd["rmb"] = 0.0
 	K.cd["air"] = 0.0
@@ -675,13 +677,13 @@ func juggernaut(a) -> void:
 	P.ak.use_e()
 	A.step(m, 0.3)
 	A.ok("juggernaut E: Warchain hooks + blights, cooldown waits",
-			not K.chain.is_empty() and K.chain.get("target") == T and T.blight_t > 0.0 and A.dmg(T) >= 7.0
+			K.warchain.hooked() and K.warchain.target == T and T.blight_t > 0.0 and A.dmg(T) >= 7.0
 			and float(K.cd["e"]) <= 0.0,
 			"blight %.1f cd %.1f" % [T.blight_t, float(K.cd["e"])])
 	P.ak.use_e()
 	A.step(m, 0.08)
 	A.ok("juggernaut E recast: the pull starts the cooldown",
-			K.reels == 1 and float(K.cd["e"]) > 5.0 and K.in_e(), "cd %.1f" % float(K.cd["e"]))
+			K.warchain.reels == 1 and float(K.cd["e"]) > 5.0 and K.in_e(), "cd %.1f" % float(K.cd["e"]))
 	A.step(m, 0.12)
 	K.ch_rmb = 1.0
 	K.cd["rmb"] = 0.0
@@ -696,7 +698,7 @@ func juggernaut(a) -> void:
 	K.cd["e"] = 0.0
 	P.root_t = 1.0
 	P.ak.use_e()
-	A.ok("juggernaut E: can't throw it rooted", K.chain.is_empty() and not K.chain_flying)
+	A.ok("juggernaut E: can't throw it rooted", K.warchain.state == "ready")
 	P.root_t = 0.0
 	P.teleport(home)
 	A.fresh(T)
@@ -706,7 +708,7 @@ func juggernaut(a) -> void:
 	A.step(m, 0.3)
 	P.stun_t = 0.3
 	A.step(m, 0.05)
-	A.ok("juggernaut E: a stun breaks the chain", K.chain.is_empty() and float(K.cd["e"]) > 5.0)
+	A.ok("juggernaut E: a stun breaks the chain", K.warchain.state != "hooked" and float(K.cd["e"]) > 5.0)
 	A.step(m, 0.4)
 	# ... or bites a wall and pulls you to it
 	var W = m.world
@@ -719,7 +721,7 @@ func juggernaut(a) -> void:
 	A.aim_at(P, home + Vector3(8.0, 0, 0))
 	P.ak.use_e()
 	A.step(m, 0.35)
-	var anchored: bool = not K.chain.is_empty() and K.chain.get("target") == null
+	var anchored: bool = K.warchain.hooked() and K.warchain.target == null
 	P.ak.use_e()
 	A.step(m, 0.45)
 	A.ok("juggernaut E: chain a wall, pull yourself to it",
@@ -761,6 +763,7 @@ func juggernaut(a) -> void:
 	A.ok("juggernaut passive: a knock heals 20% of their health",
 			K.knock_healed >= minf(0.19 * T.max_hp, 0.9 * P.max_hp), "healed %.0f of %.0f" % [K.knock_healed, T.max_hp])
 	await A.done(m)
+	await ZFEEL.new().run(A)
 	await ULT.new().zedran(A)
 
 
@@ -804,7 +807,7 @@ func combos(a) -> void:
 	A.hold(m, P, 0.95)
 	A.step(m, 0.4)
 	A.ok("combo jug: E > hold RMB = Chain Lunge",
-			K.chain_lunges == 1 and K.chain.is_empty() and A.dmg(T) - hp0 >= 18.0 and T.stun_t > 0.0
+			K.chain_lunges == 1 and K.warchain.state != "hooked" and A.dmg(T) - hp0 >= 18.0 and T.stun_t > 0.0
 			and P.flat_dist(T) < 3.4,
 			"lunges %d dist %.1f took %.0f" % [K.chain_lunges, P.flat_dist(T), A.dmg(T) - hp0])
 	# E, hold RMB, then E while still holding: pulled in, Haul Slam on arrival
@@ -820,17 +823,21 @@ func combos(a) -> void:
 	A.ok("combo jug: E > hold RMB > E = Haul Slam on arrival",
 			K.haul_slams == 1 and A.dmg(T) - hp0 >= 16.0 and T.stun_t > 0.0 and K.chain_lunges == 1,
 			"slams %d took %.0f stun %.2f" % [K.haul_slams, A.dmg(T) - hp0, T.stun_t])
-	# E, E, then RMB held through the pull: Haul Slam where you land
+	# E, E, then RMB pressed (and held) in the pull: the Cinder Spin goes on the press, no Haul Slam
 	A.step(m, 1.0)
 	hook.call()
 	P.ak.use_e()
 	A.step(m, 0.04)
+	var spins0 := K.spins
 	P.inp["sec_hold"] = true
 	P.ak.press_rmb()
+	var spun_on_press := K.spins == spins0 + 1
 	A.step(m, 0.4, func(): P.inp["sec_hold"] = true)
 	P.inp["sec_hold"] = false
 	A.step(m, 0.3)
-	A.ok("combo jug: E > E > hold RMB = Haul Slam", K.haul_slams == 2, "slams %d" % K.haul_slams)
+	A.ok("combo jug: E > E > hold RMB = Cinder Spin on the press (no Haul Slam, no second move)",
+			spun_on_press and K.spins == spins0 + 1 and K.haul_slams == 1,
+			"spins %d slams %d" % [K.spins, K.haul_slams])
 	# E attached, RMB tapped (not pulling): a normal Finishing Slam
 	A.step(m, 1.0)
 	hook.call()
@@ -886,11 +893,11 @@ func combos(a) -> void:
 	K.cd["e"] = 0.0
 	P.root_t = 1.0
 	P.ak.use_e()
-	A.ok("combo jug: rooted = no Warchain", K.chain.is_empty() and not K.chain_flying)
+	A.ok("combo jug: rooted = no Warchain", K.warchain.state == "ready")
 	P.root_t = 0.0
 	KitStatus.apply(P, "gnd", 1.0)
 	P.ak.use_e()
-	A.ok("combo jug: Grounded = no Warchain", K.chain.is_empty() and not K.chain_flying)
+	A.ok("combo jug: Grounded = no Warchain", K.warchain.state == "ready")
 	A.step(m, 1.1)
 	P.teleport(home)
 	A.fresh(T)
@@ -900,7 +907,7 @@ func combos(a) -> void:
 	A.step(m, 0.3)
 	P.stun_t = 0.3
 	A.step(m, 0.05)
-	A.ok("combo jug: stun breaks the Warchain", K.chain.is_empty() and float(K.cd["e"]) > 5.0)
+	A.ok("combo jug: stun breaks the Warchain", K.warchain.state != "hooked" and float(K.cd["e"]) > 5.0)
 	A.step(m, 0.4)
 	K.gain_rage(100.0)
 	K.cd["rmb"] = 3.0
@@ -1118,8 +1125,8 @@ func merge_holds() -> void:
 	JK.ch_rmb = 1.0
 	JK.cd["rmb"] = 0.0
 	P.ak.press_rmb()
-	A.ok("merge hold jug: the Meteor Drop is diving", not JK.drop.is_empty())
+	A.ok("merge hold jug: the Meteor Drop is diving", JK.meteor.running())
 	KinMerge.cast(P)
 	A.step(m, 0.8)
-	A.ok("merge hold jug: the dive is dropped, no slam lands", JK.drop.is_empty() and JK.drops == 0)
+	A.ok("merge hold jug: the dive is dropped, no slam lands", not JK.meteor.running() and JK.meteor.drops == 0)
 	await A.done(m)

@@ -44,14 +44,30 @@ const MOVES := {
 		[0.3, {"blade": Vector3(0.0, -0.1, 0.0), "bw": 1.0, "rad": 0.7, "p": -0.45, "y": -0.3, "lw": 1.0,
 				"legs": [1.0, -0.8, -0.6, -0.3]}],
 		[0.6, {}]]},
-	# Meteor Drop: the blade swung up overhead as you tip forward, then driven down into the ground
-	"jug_meteor": {"keys": [
-		[0.0, {"blade": Vector3(0.0, 2.8, 0.0), "bw": 1.0, "p": 0.3, "lw": 1.0, "legs": [1.3, -1.8, 1.2, -1.7]}],
-		[0.12, {"blade": Vector3(0.0, -1.35, 0.0), "bw": 1.0, "rad": 0.5, "p": -0.6, "fx": -0.35, "lw": 1.0,
-				"legs": [1.2, -1.6, 0.4, -0.9]}],
-		[0.2, {"blade": Vector3(0.0, -1.35, 0.0), "bw": 1.0, "rad": 0.5, "p": -0.7, "sq": 0.5, "lift": -0.15, "lw": 1.0,
-				"legs": [1.2, -1.7, -0.5, -1.2]}],
-		[0.55, {}]]},
+	# Meteor Drop, the hang and the dive (footage 0261-0288: the rise, a slash at the top, a steep drive): he
+	# rocks back and hauls the blade up overhead with the knees tucked, turning once as he gathers (0.2s hang),
+	# then pitches over head-first, the blade driven down ahead of him and the legs stretched out behind; that
+	# dive pose holds until he hits the ground
+	"jug_meteor": {"hold": true, "keys": [
+		[0.0, {"p": 0.1, "sq": 0.1, "lw": 1.0, "legs": [0.9, -1.3, 0.7, -1.1]}],
+		[0.08, {"blade": Vector3(0.0, 2.9, 0.0), "bw": 1.0, "rad": 0.4, "p": 0.4, "fx": 0.35, "fy": -3.14, "sq": -0.15,
+				"lift": 0.12, "lw": 1.0, "legs": [1.3, -1.9, 1.2, -1.8]}],
+		[0.2, {"blade": Vector3(0.0, 3.0, 0.0), "bw": 1.0, "rad": 0.45, "p": 0.45, "fx": 0.5, "fy": -6.283, "sq": 0.2,
+				"lift": 0.08, "lw": 1.0, "legs": [1.35, -2.0, 1.25, -1.9]}],
+		[0.3, {"blade": Vector3(0.0, -1.3, 0.0), "bw": 1.0, "rad": 0.7, "p": -0.7, "fx": -0.75, "fy": -6.283,
+				"sq": -0.35, "lift": 0.05, "lw": 1.0, "legs": [-0.3, -0.2, -0.8, -0.2]}]]},
+	# ... the landing (0288-0300): slammed down onto the knees, the blade buried ahead, the deepest squash of
+	# the six; a bounce as the weight settles, then 0.5s rising from the crouch with the blade dragged low
+	"jug_meteor_land": {"keys": [
+		[0.0, {"blade": Vector3(0.0, -1.45, 0.0), "bw": 1.0, "rad": 0.6, "p": -0.6, "sq": 0.75, "lift": -0.36,
+				"lw": 1.0, "legs": [1.35, -2.1, -0.6, -1.6]}],
+		[0.07, {"blade": Vector3(0.0, -1.4, 0.0), "bw": 1.0, "rad": 0.6, "p": -0.5, "sq": 0.6, "lift": -0.3,
+				"lw": 1.0, "legs": [1.3, -2.0, -0.55, -1.5]}],
+		[0.25, {"blade": Vector3(-1.2, -0.4, 1.4), "bw": 1.0, "rad": 0.45, "p": -0.4, "sq": 0.45, "lift": -0.22,
+				"lw": 1.0, "legs": [1.1, -1.7, -0.45, -1.2]}],
+		[0.42, {"blade": Vector3(-1.1, -0.4, 1.3), "bw": 0.8, "rad": 0.35, "p": -0.15, "sq": 0.12, "lift": -0.06,
+				"lw": 0.7, "legs": [0.7, -1.0, -0.3, -0.6]}],
+		[0.5, {}]]},
 	# Rampage (Quick Dash, 0372-0377): a 0.15s crouch with the blade cocked high behind, the drive flat and
 	# stretched along the ground with the blade levelled, the tip thrust out at its end, then a long low
 	# recovery with the blade dragging behind him (up by 0.9)
@@ -292,14 +308,19 @@ const MOVES := {
 		[0.1, {"sq": 0.3, "lift": -0.1, "p": 0.16, "lw": 1.0, "legs": [0.9, -1.4, 0.5, -1.15],
 				"fl": Vector3(-0.5, 0.0, 0.15), "hw": 0.8, "fr": Vector3(0.5, 0.0, 0.15), "rw": 0.8}],
 		[0.18, {}]]},
-	# Juggernaut lumbers: head down, shoulder driven forward, a heavy stamp and settle at the end
+	# his air dash (the shared long dash, ~0.24s): a hurled shoulder charge. Knees snap up and the shoulder
+	# turns in, then the body goes flat behind the leading shoulder with the blade trailing low behind, legs
+	# streaming back; at the end the knees come up under him to take the weight (no stamp, no ground mark)
 	"jug_exdash": {"keys": [
-		[0.0, {"p": -0.2, "sq": 0.2, "lw": 0.8, "legs": [0.6, -1.0, -0.4, -0.6], "lift": -0.06}],
-		[0.06, {"p": -0.55, "y": 0.55, "sq": -0.15, "lw": 1.0, "legs": [1.1, -0.6, -0.8, -0.2],
-				"blade": Vector3(-0.6, -0.3, 1.2), "bw": 0.8}],
-		[0.2, {"p": -0.5, "y": 0.5, "lw": 1.0, "legs": [1.0, -0.7, -0.7, -0.3], "blade": Vector3(-0.6, -0.3, 1.2),
-				"bw": 0.8}],
-		[0.26, {"p": -0.15, "sq": 0.35, "lift": -0.12, "lw": 1.0, "legs": [0.9, -1.4, -0.4, -0.9]}],
+		[0.0, {"p": 0.1, "y": 0.6, "sq": 0.25, "lift": 0.04, "lw": 1.0, "legs": [1.2, -1.6, 1.0, -1.5],
+				"blade": Vector3(-1.3, -0.3, 1.5), "bw": 0.9, "rad": 0.35}],
+		[0.05, {"p": -0.75, "y": 0.75, "r": 0.1, "sq": -0.3, "lift": 0.06, "lw": 1.0, "legs": [-0.4, -0.3, -0.9, -0.2],
+				"blade": Vector3(-1.4, -0.2, 1.6), "bw": 1.0, "rad": 0.4}],
+		[0.22, {"p": -0.7, "y": 0.7, "r": 0.15, "sq": -0.25, "lift": 0.05, "lw": 1.0,
+				"legs": [-0.3, -0.35, -0.85, -0.25],
+				"blade": Vector3(-1.4, -0.2, 1.6), "bw": 1.0, "rad": 0.4}],
+		[0.32, {"p": -0.2, "y": 0.3, "sq": 0.15, "lw": 1.0, "legs": [1.0, -1.4, 0.6, -1.2],
+				"blade": Vector3(-1.2, -0.4, 1.4), "bw": 0.8, "rad": 0.35}],
 		[0.5, {}]]},
 	# ---------------------------------------------------------------- payoffs and passive procs
 	# Dancer, VAULT RESET: a spin on the heel with the arms flung wide, then a snap back to aim

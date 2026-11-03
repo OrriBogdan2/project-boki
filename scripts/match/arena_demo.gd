@@ -34,6 +34,8 @@ const OLD_SMG := {
 }
 
 
+const STRIP_MAX_W := 1280      # px: the widest a saved strip may be
+
 ## --arena-demo=anim_<move>: a strip of frames of one kit move, cropped round the hunter, side by side
 ## (the frame times are in seconds of the demo; the move is triggered at 0.5 unless noted).
 const ANIM_DEMO := {
@@ -548,6 +550,8 @@ static func _grab(A: Arena, P: Hunter, last: bool) -> void:
 		var f: Image = frames[i]
 		f.convert(Image.FORMAT_RGBA8)
 		out.blit_rect(f, Rect2i(Vector2i.ZERO, Vector2i(S, S)), Vector2i(i * (S + 4), 0))
+	if out.get_width() > STRIP_MAX_W:          # review shots stay within 1280px wide
+		out.resize(STRIP_MAX_W, int(S * float(STRIP_MAX_W) / out.get_width()), Image.INTERPOLATE_LANCZOS)
 	var path := shot_path()
 	if path != "":
 		out.save_png(path)

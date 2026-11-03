@@ -63,7 +63,7 @@ What the in-game kit card (K) says.
 | Passive: Rage | Damage fills Rage. Full, you're Enraged: more damage, faster dashes and cooldowns. Knocks heal you. |
 | Dash: Rampage | Two charges (a third at rank 2) of a short dash attack the way you face. Its tip hits twice as hard. |
 | RMB: Smash | Tap: a heavy slam, harder on the wounded; a knock after its sweet spot resets your ultimate. Hold: charge, then fling yourself forward. In the air: slam down at your cursor. |
-| E: Warchain | Throw a chain at a foe or a wall. Press E again to pull yourself to it. |
+| E: Warchain | Throw a chain at a foe or a wall. Press E again to be hauled to it; steer as you go. |
 | Hunter ultimate: Gilded Riposte | Guard for 0.65s, taking nothing, then lunge into a cleave that heals you; a knock with it resets it. |
 | Weapon: Greatsword | Wide slashes, double at the tip. Hold to throw a Searing Wave. |
 
@@ -77,10 +77,10 @@ What the in-game kit card (K) says.
 
 - *Tap:* Finishing Slam: a 0.6s wind-up you aim freely (everyone sees the strike lane), then a 4m strike ahead: 26 and push 6; foes under 35% (outlined in red while the Smash is ready) take +50%. Its sweet spot is the far tip, dead ahead: knock a hunter within 2s of hitting them there and the Gilded Riposte is ready again.
 - *Hold:* Lunge: a crouched wind-up (the lane grows ahead of you, magenta and flashing at full, 0.8s), then release to fling yourself 4.5 -> 7.5m forward into the first foe: 14 -> 20. You can jump while you charge. Strike nothing and the cooldown doubles.
-- *In the air:* Meteor Drop: a disc shows under your cursor (5m at most); you dive onto it, a 2.6m burst: 18 and slow 40% for 1.5s; the centre (1.2m) takes +50% and is stunned 0.8. It has its own cooldown, 7.2s, so a Smash right before it does not hold it back.
-- *During E:* With the Warchain: tap while it pulls you for a Cinder Spin (2.6m, 18, blights 4s); hold while it pulls you, or hold and then pull, for a Haul Slam where you arrive (2.8m, 16 -> 30, stun 0.25 -> 0.6); hold while it's attached and let go for a Chain Lunge along it (x1.25 and a short stun).
+- *In the air:* Meteor Drop: a disc shows under your cursor (5m at most). Press and you hang over it for a beat, the blade raised (everyone sees where you'll land), then dive onto it: a 2.6m burst, 18 and slow 40% for 1.5s; the inner ring (1.2m) takes +50% and is stunned 0.8s. You rise from the crouch over half a second. It has its own cooldown, 7.2s, so a Smash right before it does not hold it back.
+- *During E:* With the Warchain: press while it pulls you, or as you arrive, for a Cinder Spin at once (2.6m, 18, blights 4s); charge and then pull for a Haul Slam where you arrive (2.8m, 16 -> 30, stun 0.25 -> 0.6); charge while it's attached and let go for a Chain Lunge along it (x1.25 and a short stun).
 
-**Warchain (E, 9.5s cooldown).** Throw a chain 10m: it hooks the first foe (8 damage, blighted while tethered: healing barely takes) or bites a wall, for 4s. Press E again to pull yourself to it. The cooldown starts when you pull or the chain breaks (a stun breaks it); you can't throw it while rooted or grounded.
+**Warchain (E, 9.5s cooldown).** Throw a chain 13m: it hooks the first foe (8 damage, blighted while tethered: healing barely takes) or bites a wall, and holds for 5s while you move (stretched past 19m it snaps). Press E again to be hauled to it: steer sideways to come in beside it, Shift or jump to break off (a jump keeps the speed), and you arrive still moving. The cooldown starts when you pull or the chain breaks (a stun breaks it); you can't throw it while rooted or grounded.
 
 **Gilded Riposte (hunter ultimate, from level 6, 22s cooldown).** Plant in a gold guard for 0.65s: nothing hurts or stuns you, and each hit you block (two at most) makes the answer 20% harder. Then you lunge 1.8m and cleave up through the 1.8m x 3.6m strip ahead (everyone sees it through the guard): 34, and you heal 80% of what it deals (less while blighted). Knock a hunter with it and it is ready again at once.
 
