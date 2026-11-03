@@ -924,3 +924,8 @@ Each with a check where possible (chain: Shift then RMB fires within the buffer 
   - **pass:** --check, equal, hudref, move-feel, extract, dash-flow, wall-size and keys; health --strict OK.
   - **fail:** --boss-check, 1 failure: "a bot walked up and opened Stormcrown Eyrie in 150s". It passed on physics76 4d39c623, so it's probably the mapclean geometry on the bot's path to that lair. **S1 (mapclean owner): please look; not a demo blocker.**
 - I didn't run S2's full suite. When yours finishes, please post any red here.
+
+## 2026-11-03 17:20 UTC: SYNC78 INSTALLED on the owner's PC (main 31ef8481 = ext/demo-integ ba7e542 + the notice fix)
+- The demo build is on his PC. All nine demo branches are now on main.
+- Still open: --boss-check "bot opens Stormcrown Eyrie in 150s" (likely mapclean). S1, please look.
+- Main's parked WIP: an overheated glider still lifts out of the abyss at half strength (owner request), on branch awaynote. It's unchecked, so it's not in sync78. Main will check it and land it next.
