@@ -516,10 +516,7 @@ func _hover(m: Match, P: Hunter, T: Hunter, home: Vector3, K: OstraKit) -> void:
 		for dz in range(-1, 2):
 			W.kind[W.idx(int(floor(gap.x)) + dx, int(floor(gap.z)) + dz)] = World.T_VOID
 	K._drop_holds()
-	var run_from := P.pos
-	P.inp["move"] = Vector2(0, 1)
-	step(m, 0.5)
-	var run_speed := Vector2(P.pos.x - run_from.x, P.pos.z - run_from.z).length() / 0.5
+	var run_speed := P.base_speed
 	P.inp["move"] = Vector2.ZERO
 	P.teleport(gap + Vector3(0, 1.5, 0))
 	P.grounded = false
@@ -547,10 +544,12 @@ func _hover(m: Match, P: Hunter, T: Hunter, home: Vector3, K: OstraKit) -> void:
 	P.inp["move"] = Vector2.ZERO
 	var drift := Vector2(last[0].x - at_start.x, last[0].z - at_start.z).length()
 	var speed := drift / (float(ticks[0]) * DT)
+	var fly_slow := float(K.dash_def()["fly_slow"])
 	ok(
-		"item 17: in flight she drifts at 15-25% of run speed",
-		flying and run_speed > 1.0 and speed / run_speed > 0.15 and speed / run_speed < 0.25,
-		"%.2f of %.2f" % [speed, run_speed]
+		"item 17: in flight she drifts at dash.fly_slow (in the 15-25% band) of her run speed",
+		flying and run_speed > 1.0 and fly_slow >= 0.15 and fly_slow <= 0.25
+			and absf(speed / run_speed - fly_slow) < 0.03,
+		"%.2f of %.2f (data %.2f)" % [speed, run_speed, fly_slow]
 	)
 	ok(
 		"item 17: her height is constant over the abyss (no fall)",
@@ -635,7 +634,11 @@ func _far_cast(m: Match, P: Hunter, home: Vector3, K: OstraKit) -> void:
 	)
 	K.on_dash(false)
 	step(m, 0.3)
-	ok("far cast: an abyss target is accepted (the lantern flies)", not K.swap.is_empty() or K.swaps > 0)
+	var landing: Vector3 = K.swap.get("land", Vector3.INF)
+	ok(
+		"far cast: an abyss target is accepted (the lantern flies to the cursor)",
+		not K.swap.is_empty() and Vector2(landing.x - near.x, landing.z - near.z).length() < 0.01
+	)
 	K._drop_holds()
 	P.teleport(home)
 	P.grounded = true
@@ -656,3 +659,27 @@ func _far_cast(m: Match, P: Hunter, home: Vector3, K: OstraKit) -> void:
 	P.teleport(home)
 	P.dashes = P.max_dashes()
 	step(m, 0.5)
+	_knock_in_flight(m, P, home, K)
+
+## The hover holds her height, not her place: a knock while the lantern flies still shoves her.
+func _knock_in_flight(m: Match, P: Hunter, home: Vector3, K: OstraKit) -> void:
+	K._drop_holds()
+	P.teleport(home + Vector3(0, 1.0, 0))
+	P.grounded = false
+	P.vel = Vector3.ZERO
+	P.dashes = P.max_dashes()
+	aim_at(P, home + Vector3(6.0, 0, 0))
+	K.on_dash(false)
+	step(m, 0.1)
+	var at := P.pos
+	P.impulse(Vector2(0, 8.0) * P.mass())
+	step(m, 0.3)
+	var moved := Vector2(P.pos.x - at.x, P.pos.z - at.z).length()
+	ok(
+		"item 17: a knock while the lantern flies still shoves her, at the held height",
+		not K.swap.is_empty() and moved > 1.0 and absf(P.pos.y - at.y) < 0.02, "moved %.2f" % moved
+	)
+	K._drop_holds()
+	P.teleport(home)
+	P.grounded = true
+	step(m, 0.3)
