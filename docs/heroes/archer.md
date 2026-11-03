@@ -63,6 +63,7 @@ Rows of briefs/specs/kit-audit/zedran_bjorn_pin.md (it audited main 200effce). (
 | R | - | the Boki Merge | - | R is the Merge for every hero |
 
 ## Assumptions (the footage is silent; the owner can correct these)
+- Spirit Walk passes rocks, trees, pillars and ability barriers but not terrain ledges: the data lets Phase Walk cross a raised-platform wall, which our heightmap has no way to do (audit, Nov 3).
 - A Supercharged shot with no target flies its full 16 m (not a longer clamp past the cursor).
 - The quick draw after a perfect release is 1.6x until Empowered, then normal speed; the next release consumes it, perfect or not.
 - The perfect window is 0.15 s from each stage coming up (about one footage frame).

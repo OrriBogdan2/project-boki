@@ -3,6 +3,8 @@ extends "res://tools/breah_shots.gd"
 ## Vireo and Breah as strips (the Breah rig's 3-wide grid of crops round the hero, tools/breah_shots.gd) in a
 ## live Arena match, under xvfb with a renderer. <dir>/captions.txt gets "file: caption" per file.
 
+var part := ""                 # --combo51-part=<name>: another set of strips for the hero (the audit's)
+
 func run(main_node: Node) -> void:
 	main = main_node
 	for a in OS.get_cmdline_user_args():
@@ -11,10 +13,12 @@ func run(main_node: Node) -> void:
 			dir = arg.substr(12)
 		if arg.begins_with("--combo51-hero="):
 			who = arg.substr(15)
+		if arg.begins_with("--combo51-part="):
+			part = arg.substr(15)
 	hero_name = Arch.name_of(who).to_lower()
 	DirAccess.make_dir_recursive_absolute(dir)
 	await _setup()
-	await Callable(self, "_%s" % who).call()
+	await Callable(self, "_%s" % (part if part != "" else who)).call()
 	_write_captions()
 	print("COMBO51SHOTS %d in %s" % [lines.size(), dir])
 	main.get_tree().quit(0)
@@ -98,3 +102,50 @@ func _dolm() -> void:
 		[0.3, 0.42, 0.58, 0.72, 0.8, 1.1]
 	)
 	await _go(1.3, hold, marks)
+
+## The audit (Nov 3): Skycall held and dragged, then released; the strike ring at its true radius.
+func _mage_audit() -> void:
+	await _reset(7.0)
+	P.ak.cd["e"] = 0.0
+	_aim(T.pos)
+	P.inp["e_down"] = true
+	P.ak.use_e()
+	var drag := func(t: float):
+		_aim(T.pos + Vector3(-3.0 * minf(1.0, t / 0.4), 0, 0))
+		P.inp["e_down"] = t < 0.6
+	var at_t := func(): return T.position + Vector3(0, 0.9, 0)
+	var marks := [
+		[0.45, "full", "audit_skycall_held", "Vireo Skycall held (audit: the data's hold, drag, release): the drag"
+			+ " arrow follows the cursor back toward her, the rim chevron points it; nothing commits while E is held",
+			at_t],
+		[0.9, "full", "audit_skycall_count", "Released at 0.6s: committed, the pillar narrows over the 0.8s countdown",
+			at_t],
+		[1.42, "full", "audit_skycall_strike", "The strike: its ring drawn at the 1.5m hit radius, no longer 2.3m;"
+			+ " the target slid toward her with 1 Static", at_t],
+	]
+	await _go(2.2, drag, marks)
+	P.inp["e_down"] = false
+
+## The audit (Nov 3; the owner's 23:55 answer): an ally jumps against Tarek's rock and is lifted onto it.
+func _dolm_audit() -> void:
+	await _reset(9.0)
+	_aim(home + Vector3(5.0, 0, 0))
+	P.ak.cd["e"] = 0.0
+	P.ak.use_e()
+	await _go(0.5)
+	var ally: Hunter = m.make_hunter("A", P.team, "medium", "Ally", "idle", {}, home, {"arch": "none"})
+	T2 = ally                      # (the rig parks every other hunter far off)
+	P.teleport(home + Vector3(-2.0, 0, -3.0))
+	var hop := func(t: float):
+		ally.inp["move"] = Vector2(1, 0)
+		ally.inp["jump"] = t >= 0.45 and t < 0.45 + DT
+	var marks: Array = []
+	for tt in [0.3, 0.5, 0.62, 0.75, 0.9, 1.2]:
+		var cap := "Tarek's rock (per the data and the owner): an ally walks into it and is stopped; jumps against"
+		cap += " it; is lifted onto the top; walks over and drops off"
+		var on_ally := func(): return ally.pos + Vector3(0, 0.9, 0)
+		marks.append([tt, "audit_ally_hop_strip", "audit_ally_hop_strip", cap, on_ally])
+	await _go(1.4, hop, marks)
+	T2 = null
+	ally.queue_free()
+	m.hunters.erase(ally)
