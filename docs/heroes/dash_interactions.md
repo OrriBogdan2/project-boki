@@ -34,15 +34,15 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 | Dancer | E -> jump |  | the move goes at once, the ability keeps running (default) |
 | Dancer | ult (X) -> jump |  | the move goes at once, the ability keeps running (default) |
 | Dancer | Q glove -> jump |  | the move goes at once, the ability keeps running (default) |
-| Pin | ground dash -> LMB | an arrow cannot be drawn in Spirit Walk's dodge roll; the press waits and the draw starts when the roll ends | buffered to the dash's end |
+| Pin | ground dash -> LMB | Not determinable. The footage study lists 'whether you can shoot during it [Spirit Walk]' as an open question (briefs/hero-ref/pin.md:247); the roll itself is 0.1-0.15 s (pin.md:322-327); air: not shown (pin.md:330-331). Data (briefs/supervive-data/supervive_kits.md:78) says nothing on casts during the roll. Kept: held to the dash's end (owner 18:20 UTC fallback). | buffered to the dash's end |
 | Pin | ground dash -> RMB | Impaling Shot can be started in the walk | fires mid-dash |
 | Pin | ground dash -> E | Rain of Arrows can be cast in the walk | fires mid-dash |
 | Pin | ground dash -> ult (X) | Primal Forces can be cast in the walk | fires mid-dash |
 | Pin | ground dash -> Q glove |  | fires mid-dash |
-| Pin | air dash -> LMB | as the ground roll: the draw starts when the flick ends | buffered to the dash's end |
-| Pin | air dash -> RMB |  | fires mid-dash |
-| Pin | air dash -> E |  | fires mid-dash |
-| Pin | air dash -> ult (X) |  | fires mid-dash |
+| Pin | air dash -> LMB | Not determinable. The footage study lists 'whether you can shoot during it [Spirit Walk]' as an open question (briefs/hero-ref/pin.md:247); the roll itself is 0.1-0.15 s (pin.md:322-327); air: not shown (pin.md:330-331). Data (briefs/supervive-data/supervive_kits.md:78) says nothing on casts during the roll. Kept: held to the dash's end (owner 18:20 UTC fallback). | buffered to the dash's end |
+| Pin | air dash -> RMB | Not determinable. The footage study lists 'whether you can shoot during it [Spirit Walk]' as an open question (briefs/hero-ref/pin.md:247); the roll itself is 0.1-0.15 s (pin.md:322-327); air: not shown (pin.md:330-331). Data (briefs/supervive-data/supervive_kits.md:78) says nothing on casts during the roll. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
+| Pin | air dash -> E | Not determinable. The footage study lists 'whether you can shoot during it [Spirit Walk]' as an open question (briefs/hero-ref/pin.md:247); the roll itself is 0.1-0.15 s (pin.md:322-327); air: not shown (pin.md:330-331). Data (briefs/supervive-data/supervive_kits.md:78) says nothing on casts during the roll. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
+| Pin | air dash -> ult (X) | Not determinable. The footage study lists 'whether you can shoot during it [Spirit Walk]' as an open question (briefs/hero-ref/pin.md:247); the roll itself is 0.1-0.15 s (pin.md:322-327); air: not shown (pin.md:330-331). Data (briefs/supervive-data/supervive_kits.md:78) says nothing on casts during the roll. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
 | Pin | air dash -> Q glove |  | fires mid-dash |
 | Pin | LMB -> dash | Owner item 51 names Pin's draw: it carries through a dash. Neither the data (Myth: Greenwood Bow, Phase Walk) nor the footage (pin.md: Spirit Walk) shows the roll ending a draw, so Shift mid-draw rolls at once and the draw carries on. | the dash goes, the ability keeps running |
 | Pin | RMB -> dash |  | the kit's own handling (no row yet) |
@@ -65,15 +65,15 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 | Pin | hold RMB through a ground dash |  | the hold carries through and lets go there |
 | Pin | hold RMB through an air dash |  | the hold carries through and lets go there |
 | Pin | hold RMB through a jump |  | the hold carries through and lets go there |
-| Vireo | ground dash -> LMB |  | buffered to the dash's end |
-| Vireo | ground dash -> RMB |  | fires mid-dash |
-| Vireo | ground dash -> E |  | fires mid-dash |
-| Vireo | ground dash -> ult (X) |  | buffered to the dash's end |
+| Vireo | ground dash -> LMB | Not determinable. No press inside Surge is shown (briefs/hero-ref/vireo.md:124-160, 460-470; she is a lightning silhouette for 0.2-0.6 s); air Surge not shown (vireo.md:472-473). Data (briefs/supervive-data/supervive_kits.md:67) silent. Kept: held to the dash's end (owner 18:20 UTC fallback). | buffered to the dash's end |
+| Vireo | ground dash -> RMB | Not determinable. No press inside Surge is shown (briefs/hero-ref/vireo.md:124-160, 460-470; she is a lightning silhouette for 0.2-0.6 s); air Surge not shown (vireo.md:472-473). Data (briefs/supervive-data/supervive_kits.md:67) silent. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
+| Vireo | ground dash -> E | Not determinable. No press inside Surge is shown (briefs/hero-ref/vireo.md:124-160, 460-470; she is a lightning silhouette for 0.2-0.6 s); air Surge not shown (vireo.md:472-473). Data (briefs/supervive-data/supervive_kits.md:67) silent. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
+| Vireo | ground dash -> ult (X) | Not determinable. No press inside Surge is shown (briefs/hero-ref/vireo.md:124-160, 460-470; she is a lightning silhouette for 0.2-0.6 s); air Surge not shown (vireo.md:472-473). Data (briefs/supervive-data/supervive_kits.md:67) silent. Kept: held to the dash's end (owner 18:20 UTC fallback). | buffered to the dash's end |
 | Vireo | ground dash -> Q glove |  | fires mid-dash |
-| Vireo | air dash -> LMB |  | buffered to the dash's end |
-| Vireo | air dash -> RMB |  | fires mid-dash |
-| Vireo | air dash -> E |  | fires mid-dash |
-| Vireo | air dash -> ult (X) |  | buffered to the dash's end |
+| Vireo | air dash -> LMB | Not determinable. No press inside Surge is shown (briefs/hero-ref/vireo.md:124-160, 460-470; she is a lightning silhouette for 0.2-0.6 s); air Surge not shown (vireo.md:472-473). Data (briefs/supervive-data/supervive_kits.md:67) silent. Kept: held to the dash's end (owner 18:20 UTC fallback). | buffered to the dash's end |
+| Vireo | air dash -> RMB | Not determinable. No press inside Surge is shown (briefs/hero-ref/vireo.md:124-160, 460-470; she is a lightning silhouette for 0.2-0.6 s); air Surge not shown (vireo.md:472-473). Data (briefs/supervive-data/supervive_kits.md:67) silent. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
+| Vireo | air dash -> E | Not determinable. No press inside Surge is shown (briefs/hero-ref/vireo.md:124-160, 460-470; she is a lightning silhouette for 0.2-0.6 s); air Surge not shown (vireo.md:472-473). Data (briefs/supervive-data/supervive_kits.md:67) silent. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
+| Vireo | air dash -> ult (X) | Not determinable. No press inside Surge is shown (briefs/hero-ref/vireo.md:124-160, 460-470; she is a lightning silhouette for 0.2-0.6 s); air Surge not shown (vireo.md:472-473). Data (briefs/supervive-data/supervive_kits.md:67) silent. Kept: held to the dash's end (owner 18:20 UTC fallback). | buffered to the dash's end |
 | Vireo | air dash -> Q glove |  | fires mid-dash |
 | Vireo | LMB -> dash |  | the kit's own handling (no row yet) |
 | Vireo | RMB -> dash |  | the kit's own handling (no row yet) |
