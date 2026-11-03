@@ -543,7 +543,7 @@ func _spin(lvl: int) -> float:
 	fresh(T)
 	T.teleport(P.pos + Vector3(1.4, 0, 0))
 	aim_at(P, T.pos)
-	K._spin_hit()
+	K._spin_hit(P.aim_dir())
 	step(m, 0.3)
 	var d := dmg(T)
 	await done(m)

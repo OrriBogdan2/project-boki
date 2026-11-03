@@ -134,8 +134,7 @@ void fragment() {
 	float core = exp(-r * 10.0);
 	float rg = ring * exp(-pow((r - ring_r) * 16.0, 2.0));
 	float a = (leaf * 0.85 + quill * 0.5 + core + rg) * power * (1.0 - smoothstep(0.92, 1.0, r));
-	vec3 col = mix(color.rgb * 0.82, color.rgb, quill);
-	col = mix(col, vec3(1.0, 0.98, 0.85), quill * 0.35);
+	vec3 col = mix(color.rgb, vec3(1.0, 0.97, 0.8), quill * 0.3 + core * 0.3);
 """ + _TAIL
 		# a streak or ribbon: bright along its centre line (uv.y = 0.5), fading to its tail (uv.x = 0)
 		"streak":

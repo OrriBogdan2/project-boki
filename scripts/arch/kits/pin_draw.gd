@@ -187,7 +187,7 @@ func _reticle(t: float, s: Vector2, col: Color) -> void:
 			"len": rng,
 			"col": SUPER_COL if not over else Color("9fb8a0"),
 			"lw": 0.03 if over else 0.09,
-			"hot": 0.0 if over else 0.6,
+			"hot": 0.0 if over else 0.25,
 			"alpha": 0.45 if over else 1.3,
 			"fletch": FLETCH * (0.5 if over else 1.3)
 		}

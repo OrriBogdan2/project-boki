@@ -129,7 +129,7 @@
 		"name": "Hail Wall",
 		"short": "Hail",
 		"icon": "barrage",
-		"col": "#cfe8a0",
+		"col": "#6ee08a",
 		"cooldown": 9.0,
 		"reach": 9.0,
 		"width": 1.8,

@@ -332,6 +332,8 @@ func _arrow_hit(t: Ent) -> void:
 	for sid in fx.live:
 		var e: Dictionary = fx.live[sid]
 		if (e["pos"] as Vector3).distance_to(t.pos) < 2.8: kind = String(e["kind"])
+	if kind == "":
+		kind = draw.last_kind          # a fast arrow can be gone from the pool on the step it lands
 	var at := t.pos + Vector3(0, 1.0, 0)
 	if kind == "super":
 		fx.star(at, 1.6, PinFx.TEAL, 0.22, 0.8, PI * 0.25, 2.0)
@@ -516,7 +518,7 @@ func _pin(a: Vector3, k: float) -> void:
 	var d := h.aim_dir()
 	# a small pink crescent swipe at the feet on the release
 	m.fx.slash(h.pos + Vector3(0, 0.15, 0), atan2(d.y, d.x), PI * 0.6, 1.1, Color("ff9ad8"), false)
-	m.fx.flash(h.pos + Vector3(d.x * 0.7, 1.1, d.y * 0.7), Color("ffe0a0"), 0.5 + 0.6 * k, 0.07)
+	fx.fletch_burst(h.pos + Vector3(d.x * 0.7, 1.1, d.y * 0.7), 0.6 + 0.5 * k, HEAVY_GOLD, 0.05, 0.1, 0.0, 5.0)
 	if k >= 0.99: Feel.shake(m, "t2", h, h.pos)
 	h.vel.x -= d.x * (1.5 + 3.0 * k); h.vel.z -= d.y * (1.5 + 3.0 * k)
 

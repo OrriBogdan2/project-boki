@@ -29,7 +29,7 @@ const WISP_EVERY := 0.05
 const SPENT_T := 4.0           # s a spent arrow stays in the ground
 const GREEN := Color("8dffa8")
 const TEAL := Color("5ff2d8")
-const GOLD := Color("ffd25a")
+const GOLD := Color("ffc02a")
 const VIOLET := Color("b884ff")
 
 var h: Hunter
@@ -146,6 +146,7 @@ func _dress(n: Node3D, kind: String) -> void:
 	KitShaders.param(tr, "color", lk[3])
 	tr.scale = Vector3(float(lk[4]), float(lk[5]), 1.0)
 	tr.position = Vector3(0, 0, float(lk[4]) * 0.5 + 0.2)
+	KitShaders.param(tr, "power", 2.2 if kind in ["super", "heavy"] else 1.4)
 	tr.visible = true
 	var s := float(lk[6])
 	var thick := s * (2.2 if kind == "super" else 1.0)
