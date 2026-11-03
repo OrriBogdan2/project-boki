@@ -213,3 +213,10 @@ The owner saw an explosion with Moosh Moosh and isn't sure whether it comes from
 - Nothing spawns at the target before the spear arrives, except the gameplay telegraph (landing marker) if the source shows one.
 - Assert: the projectile starts at her hand position and its travel time > 0; the impact happens on arrival, not at cast.
 - Screenshots: a 5-frame strip from wind-up to impact.
+
+## 29. Bjorn's shield, wall and ult (kit fix, Bjorn branch with item 10)
+- **Shield pushes back, and shows it.** Enemies (and their projectiles/dashes, per source data in `briefs/supervive-data/` for Oath) that meet the raised shield are knocked back. While the shield is up, show a forward "bounce" indicator in front of it: a double chevron (>>) or two stacked arcs pointing outward, pulsing outward, in Bjorn's colours. On a push, flash it and play a short thud. This is a gameplay indicator, so it's allowed under the ground-shape rule. Use the source push distance; if none, ~2 m.
+- **His wall: bigger and more real.** Scale it up (source size if the data has it; otherwise roughly +40% length and +30% height) and give it a solid, physical look in our own style: stacked stone/timber or forged plates with depth, edges and shading, a dust puff when it rises and crumble chunks when it breaks. No flat translucent slab.
+- **Ult trail over the abyss:** the ult's trail/path visual must keep drawing as it extends out over the abyss, not cut off at the ground edge. Draw it at the travel height (floating) where there's no ground.
+- Assert: an enemy walking into the raised shield is pushed ≥ the push distance away; the ult trail's drawn length equals its travel length even over abyss cells.
+- Screenshots: the shield indicator idle and on a push; the old vs new wall; the ult trail over the abyss.
