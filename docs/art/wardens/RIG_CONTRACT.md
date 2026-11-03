@@ -1,16 +1,22 @@
 # Warden .glb rig contract
 
-What a Blender-built Warden (`art/wardens/<id>/<id>.glb`, OWNER INBOX 2026-11-03 16:30) must carry so the
+What a Blender-built Warden (`art/wardens/<name>/<name>.glb`, named as its art: `vex`, `bjorn`, `pin`...;
+`WardenGlb.ART`; OWNER INBOX 2026-11-03 16:30) must carry so the
 game can drive it with the existing animation (HunterAnim and the kit moves in `scripts/match/kmoves_*.gd`),
 the kits' effects can find their anchors, and gameplay stays per class. The loader is `scripts/heroes/warden_glb.gd`
 (`WardenGlb`); `--warden-glb-check` asserts the contract's tables and the fallback.
 
 ## How the game uses it
 Models.hunter still builds the procedural hunter: the node rig HunterAnim poses, the weapon, the glider, the hit
-ring and the MantleLook sizes. When `art/wardens/<id>/<id>.glb` exists, `WardenGlb.dress` hides that hunter's
-body meshes, adds the .glb under `Rig` and every frame copies each rig node's pose onto the bone mapped to it
-(`WardenGlb.BONES`). So the .glb never needs to know about the animation code: it needs the bones below, in this
-rest pose, at this scale. With no file the procedural model is used unchanged (the fallback).
+ring and the MantleLook sizes. When the Warden's .glb exists and the player hasn't set it to procedural
+(Settings > Video > Warden models, per Warden), `WardenGlb.dress` hides that hunter's body meshes, adds the .glb
+and every frame puts each bone where its rig node has moved from its rest in the Warden's neutral look
+(`WardenGlb.BONES`, `WardenGlb.retarget`), so the kit moves retarget once for every Warden and MantleLook's
+sliders reshape the 3D model too. The .glb never needs to know about the animation code: it needs the bones
+below, in this rest pose, at this scale. A .glb whose armature doesn't match (`WardenSkeleton.mismatches`: names,
+parents, each bone within 1 cm of its rig node) is refused and the procedural model stays: the fallback.
+`WardenSkeleton.build` makes this armature from any Warden's rig (one shared skeleton; per-hero proportions are
+the archetype's `body` scales, so the bones sit where that Warden's rig puts them).
 
 ## Scale, orientation, rest pose
 - Units are metres at **class-neutral size**: build the Warden as a medium hunter whose head top is ~1.55 m
@@ -97,14 +103,20 @@ the vertex colour (`vertex_ao`):
 | `glow` | emissive | — (Bjorn's crack, Zedran's fuller) |
 
 Every material must end up in the root's `mats` meta (the loader does it) so hit flashes and mutations reach it.
-The toon shader has no albedo texture input yet: the loader stub shades each slot with the glTF material's base
-colour. Adding the atlas (a `albedo_tex` uniform on `hero_toon.gdshader`, sampled into `albedo`) comes with the
-first real .glb.
+The loader puts each material's base-colour texture (the atlas) on `hero_toon.gdshader`'s `albedo_tex`
+(`use_tex`), with `albedo` as a tint: the player's skin, hair and eye picks move the `skin`, `hair` and `eyes`
+slots at most ±35% per channel from the Warden's own colours. Bone names may come through as `upper_arm_L`
+(glTF tools swap the dot); the loader takes either.
 The armature and its meshes sit at the .glb's origin (no offset on the scene root), so skeleton space is model space.
 
 ## Budget and checks
 - About 8–15k triangles per Warden, one 1024² atlas; no more than 8 material slots.
 - `--warden-glb-check`: the bone table covers every part HunterAnim binds; a Warden without a .glb builds the
-  procedural model (the fallback); a .glb present is loaded, its bones all found, and the body meshes hidden.
+  procedural model (the fallback); a .glb present loads with the contract armature, every kit move of every
+  table retargets exactly and each keyed channel moves its bones, the anchors ride bone attachments, every
+  surface is on the hero toon shader with the atlas, the hit ring is unchanged, the budget holds, and the
+  setting turns it procedural and back.
+- `--warden-build --warden=<id>`: until Blender is on the box, builds an INTERIM .glb from the turnaround sheet in
+  Godot (tools/warden_build.gd; Vex first, see art/wardens/vex/IMPORT.md). The Blender export replaces the file.
 - `--warden-model-check` then applies as for the procedural Wardens: anchors, every keyed move, hitbox, height
   on the sheet's scale, MantleLook extremes, the portrait.
