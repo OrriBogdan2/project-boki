@@ -1,4 +1,4 @@
-2026-11-03T04:56:57Z
+2026-11-03T04:58:29Z
 
 ext/classes | 98d4027 | READY TO MERGE (Venator owned by every new save + tutorial hunter; pick 1 of Zedran/Pin/Linwick; new-game flow intro -> one card -> egg pick -> hunter pick -> hatch/name -> tutorial or farm; the 3 story screens and the creator are gone from the new-save path, name moved to the Boki-naming card, look editing stays in the farm menu) | main 0.17.0, no new sync | full suite 0 failures, --hunter-unlock-check 138 incl. new-game "egg pick is screen 2". Display names come from hero data, so Venator/Pin/Zedran show once the kitfix renames merge.
 ext/hero-shots | 3bd0520 | done: 12 heroes + farm building + classes; all portraits show signature weapons | - | -
@@ -12,7 +12,7 @@ ext/kitfix-linwick-dredge | cfa5054 (round-2 fixes on main b28c593; READY TO MER
 ext/kitfix-moosh-tamsin | 9aad3cf (round-2 fixes on main 5c2a630; READY TO MERGE) | READY FOR LOCAL SCREENSHOT REVIEW (aimkit 577412e + main 9700dec) | 0.15.0 (no new sync) | full suite 0 failures; tender combo 37, rimewright combo 29, support 66, aimkit 55; simtest ran to end. Shots: ext/hero-shots moosh-moosh/v2, tamsin/v2 (+anim, before/after). Gaps left: Kindle damage-number tint (shared code), Tamsin rank-3 ice bridge (no terrain editing). Tamsin squad shield removed per owner. Owner Qs: Burrseed area sticks to foe or ground? footage 0.7s/1.6x vs wiki 2s/2x OK? Spear 2 charges/7s + 0.5s freeze? Rink Wall stop at cursor or fixed distance?
 ext/kitfix-breah-ostra | d1a7bdb (polish pass on main 5c2a630, ult base v2; ult was d49543e) | READY FOR LOCAL SCREENSHOT REVIEW (main a7ed228 sync66 incl. LevelGrowth + aimkit 6bc1c25) | 0.16.0 (no new sync) | full suite 0 failures; dolm combo 65, ostra combo 60, zone 24, aimkit 55, shot-vertical OK; simtest extracted. Breah (renamed from Dolm): standable/climbable 1.25 m rocks, punch launches lined-up rocks, hold LMB, slam hop with sweet-spot telegraph. Ostra: Shift hold-to-aim/release (never random dash, keeps height), RMB 1 charge with visible STUNNED. power() applied. Shared-file changes: verbs.gd standable walls, ent.gd ground() reads StoneStand, hunter.gd 1 line, arena_check seed(2024) before sparring-bot test. Shots: ext/hero-shots breah/v2, ostra/v2. Owner Qs: Ostra Shift hold-to-aim OK? enemies can stand on Breah rocks? tap boulder stop at cursor? charged orb pierce terrain like source? Trade swaps allies too?
 
-Running now (Sonnet): kit data pass on kitfix-pin-bjorn and kitfix-linwick-dredge; farm tutorial + top tracker plan (read-only, plan goes here for owner approval before building)
+Running now (Sonnet): kit data pass on kitfix-pin-bjorn and kitfix-linwick-dredge. Farm tutorial plan posted below, waiting for owner approval.
 Queued: kit data pass on moosh-tamsin, vireo-venator, breah-ostra (2 at a time)
 Last INBOX entry handled: 2026-11-03 04:55 UTC (farm tutorial + top tracker: plan being drafted, will be posted here first)
 Watcher: received 19:06 UTC entry
@@ -69,3 +69,45 @@ CHALLENGE LIST (final for this round; placeholders for the owner to tune; full l
 - Moosh Moosh (hard, after 6 open): revive 4 teammates
 - Breah (hard, after 6 open): hit 3 at once with one ability, 5 times
 - Ostra (hard, after 8 open): knock down 3 hunters while merged
+
+FARM TUTORIAL + TOP TRACKER PLAN (INBOX 04:55; for owner approval before building; main-owned wiring listed under Files):
+
+## 1. Tutorial steps (start when the new-game flow lands on the farm; state in Save.d.tutorial.ft = {step, done, skipped})
+1. House: prompt "Press B and put your house down on the glowing lot." Done = house site exists. Then "Your Boki are building it. Watch." Done = site finished (this step does not block step 2).
+2. Feed: "Your Boki gets hungry. Fill the trough with food from your pantry (E at the trough)." Done = Econ food count in a feeder > 0 (Econ.feeders / feeder_inv; feeder is a starter item placed by Dunna's T0 set).
+3. Crop: "Plant a seed in the crop patch, water it, then pick it when ready." Done = harvest from patch (home.gd _harvest; Progress.add("harvested")). Plant tick is a sub-prompt.
+4. Pet: "Pet or play with your Boki (E, or throw something to play fetch)." Done = _pet_kin or fetch (home.gd 3062 / 3135).
+5. Dunna: "Dunna Quillfeather can draw up more buildings. Walk up and press E." Done = talk once and open B (Buildings tab); she names what is unlocked and why.
+6. Expedition: "Ready? Step into the portal to head out on your first expedition." Done = portal used (existing _day1("portal") hook, home.gd 3569). Tutorial ends; one-time bonus gems (replace the +5/+30 of day1).
+Skip: Tab/Esc on the prompt shows "Skip tutorial? (Y/N)"; skipped = ft.done, all prompts and hint vanish, nothing is granted or taken, house still auto-placed as a site if not yet down (cheap starter cost). Also --skip-tutorial arg.
+Steps 2-5 run while step 1's house is under construction (order is a suggestion, not a lock; the active prompt is the first undone step that is available).
+
+## 2. The house build
+- Place: new save has house in no "starter" list; B opens on Buildings with only house shown (Dunna's T0 set revealed after the house exists; hidden items per the 00:53 plan). Placement uses the normal build mode and pays no or a small starter cost (open q2). The house takes FarmSites.begin like any building: need = labour 8 swings (new house_new labour entry in farm_build.json; farmbuild files are owned by this server).
+- Time: 8 swings x 6 s = ~48 s with one Boki working, ~25 s with 2 (two crew slots), plus walking. Short enough to watch.
+- 1 Boki only: it builds alone, slower; it does not eat or wander meanwhile. Player can also help (open q3: player swing on E, one swing per press, 2 s cooldown) so a one-Boki start is never idle. Without help it still always finishes.
+- Waiting: steps 2-4 and Dunna (5) run in parallel; the hint "Your house goes up in ~30s" with a progress ring over the site.
+- Sleep/save: no need before it is done. Autosave on site placement and on finish (FarmSites.swing already calls Save.save_game). Quit mid-build resumes, because got/need are in the save. The Boki bed/burrow keep working; the house interior is locked ("not finished") until done, and Progress.day1 "inside" step is dropped.
+
+## 3. Top tracker (rename card: "Goals"; replaces day1_box in the same slot)
+- Shows ACTIVE goals only, never tutorial text, never done/locked ones.
+- Sources: (a) Hunter unlock challenges: ClassUnlock.challenge_progress(id) / challenge_text(id) for hunters where status(id) is not open (ext/classes class_unlock.gd + content/rules/class_unlock.json); (b) mastery goals: ClassUnlock.mastery(id) / mastery_progress(id,i) for the hunter you play, not-done ones; (c) farm milestones: FarmUnlocks milestones (first_extract, first_boss, scan3; farm_build.json "milestones", text + stat n) not yet reached; (d) next farm level (FarmUnlocks.level / points) as the last line.
+- Max 5 lines, each "text  have/need" with a thin bar. Order: closest to done first (frac desc) within source rank unlock challenge > mastery > milestone > farm level; ready-to-claim (can_unlock) first of all with a gold dot. Hidden when empty.
+- Tutorial guidance: in-world prompt (floating label + arrow over the target, in the 3D scene) plus one small bottom-centre hint line with the key cap (Settings.key_cap). Hint gone once ft.done or skipped. Day1 gem rewards fold into step 6.
+
+## 4. Files
+New: scripts/home/farm_tutorial.gd (steps, state, prompt/hint, skip, checks API); content/rules/farm_tutorial.json (texts, steps, labour for house); scripts/ui/goal_tracker.gd (the panel + collect() from the 3 sources); tools/farm_tutorial_check.gd; scripts/home/farm_builder.gd (Dunna, already planned).
+Wiring (main-owned, not on the reserved list unless noted): home.gd (remove day1_box use, spawn tutorial/tracker, hooks _pet_kin/_harvest/portal), progress.gd (retire DAY1 lists, keep save keys), home_build.gd (house as placed building, B opens on Buildings), home_econ.gd (trough-fed hook), main.gd (--farm-tutorial-check arg, --skip-tutorial), save.gd (tutorial.ft default).
+Farmbuild files (server-owned, edited by this work): farm_build.json, farm_sites.gd, farm_unlocks.gd, farm_build_ui.gd, farm_models.gd, tools/farmbuild_check.gd (house off "starter", house labour entry, milestone list API). ext/classes owns class_unlock.gd, new-game flow; read only. Not touched: kin_*/merge_*/capture*/boki_hud/boki_system.json/capture.json.
+
+## 5. --farm-tutorial-check
+Headless: fresh save + hatched Boki. Asserts: (1) steps advance in order 1..6 and only the first undone is the prompt; (2) house absent at start, placed -> site, labour: tick HomeWork with 1 Boki, got rises per swing and site finishes at need, with 2 Boki in about half the ticks; (3) skip sets done, no prompt/hint, nothing granted, house still placed as a site; (4) save/load mid-build keeps got; (5) GoalTracker.lines() has <=5 rows, none containing tutorial strings, sorted per rule, empty tracker hidden. Also rerun --farmbuild-check and --hunter-unlock-check.
+
+## 6. Open questions for owner
+1. Is the top-right day1 card the "top tracker" you mean (or is there another HUD tracker)?
+2. Does the house cost anything on a new save (free, or a few starter wood/gems)?
+3. Should the player be able to swing a hammer to help when they have only 1 Boki?
+4. Is the first-day gem bonus kept (as a single reward at the end)?
+5. Tutorial order: strict, or free order with house done first?
+6. Builder name is still unconfirmed (Dunna Quillfeather assumed).
+
